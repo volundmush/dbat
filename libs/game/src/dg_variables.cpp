@@ -1486,8 +1486,8 @@ in the vault (vnum: 453) now and then. you can just use
           *str = '\0';
       }
       else if (!strcasecmp(field, "fishing")) {
-       room_rnum thisroom = real_room(r->number);
-       if (ROOM_FLAGGED(thisroom, ROOM_FISHING))
+       struct room_data* thisroom = room_by_id(r->number);
+       if (room_flagged(thisroom, ROOM_FISHING))
          snprintf(str, slen, "1");
        else
          snprintf(str, slen, "0");  

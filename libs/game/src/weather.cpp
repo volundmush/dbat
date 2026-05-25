@@ -23,40 +23,52 @@ static void weather_change(void);
 static void phase_powerup(struct char_data *ch, int phase);
 static void grow_plants(void);
 
-
 static void grow_plants(void)
 {
   struct obj_data *k;
 
- for (k = object_list; k; k = k->next) {
-  if (IN_ROOM(k) == NOWHERE) {
-   continue;
-  } else if (k->carried_by || k->in_obj) {
-   continue;
-  } else if (ROOM_FLAGGED(IN_ROOM(k), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(k), ROOM_GARDEN2)) {
-   if (GET_OBJ_VAL(k, VAL_WATERLEVEL) < 0 && GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {
-    GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
-    if (GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {
-     send_to_room(IN_ROOM(k), "%s@y withers a bit.\r\n", k->short_description);
-    } else {
-     send_to_room(IN_ROOM(k), "%s@y has withered to a dried up dead husk.\r\n", k->short_description);
-    }    
-   } else if (GET_OBJ_VAL(k, VAL_WATERLEVEL) >= 0) {
-    GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
-    if (GET_OBJ_VAL(k, VAL_GROWTH) < GET_OBJ_VAL(k, VAL_MATGOAL) && GET_OBJ_VAL(k, VAL_MATURITY) < GET_OBJ_VAL(k, VAL_MAXMATURE)) {
-      GET_OBJ_VAL(k, VAL_GROWTH) += 1;
-     if (GET_OBJ_VAL(k, VAL_GROWTH) >= GET_OBJ_VAL(k, VAL_MATGOAL)) {
-      GET_OBJ_VAL(k, VAL_GROWTH) = 0;
-      GET_OBJ_VAL(k, VAL_MATURITY) += 1;
-     }
-     if (GET_OBJ_VAL(k, VAL_MATURITY) >= GET_OBJ_VAL(k, VAL_MAXMATURE)) {
-      send_to_room(IN_ROOM(k), "%s@G is now fully grown!@n\r\n", k->short_description);
-     }
-    }
-   }
-  }
- }
+  for (k = object_list; k; k = k->next)
+  {
+    struct room_data* room = obj_room_get(k);
+    if(!room) continue;
 
+    if (k->carried_by || k->in_obj)
+    {
+      continue;
+    }
+    else if (room_flagged(room, ROOM_GARDEN1) || room_flagged(room, ROOM_GARDEN2))
+    {
+      if (GET_OBJ_VAL(k, VAL_WATERLEVEL) < 0 && GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10)
+      {
+        GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
+        if (GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10)
+        {
+          send_to_room(IN_ROOM(k), "%s@y withers a bit.\r\n", k->short_description);
+        }
+        else
+        {
+          send_to_room(IN_ROOM(k), "%s@y has withered to a dried up dead husk.\r\n", k->short_description);
+        }
+      }
+      else if (GET_OBJ_VAL(k, VAL_WATERLEVEL) >= 0)
+      {
+        GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
+        if (GET_OBJ_VAL(k, VAL_GROWTH) < GET_OBJ_VAL(k, VAL_MATGOAL) && GET_OBJ_VAL(k, VAL_MATURITY) < GET_OBJ_VAL(k, VAL_MAXMATURE))
+        {
+          GET_OBJ_VAL(k, VAL_GROWTH) += 1;
+          if (GET_OBJ_VAL(k, VAL_GROWTH) >= GET_OBJ_VAL(k, VAL_MATGOAL))
+          {
+            GET_OBJ_VAL(k, VAL_GROWTH) = 0;
+            GET_OBJ_VAL(k, VAL_MATURITY) += 1;
+          }
+          if (GET_OBJ_VAL(k, VAL_MATURITY) >= GET_OBJ_VAL(k, VAL_MAXMATURE))
+          {
+            send_to_room(IN_ROOM(k), "%s@G is now fully grown!@n\r\n", k->short_description);
+          }
+        }
+      }
+    }
+  }
 }
 
 void weather_and_time(int mode)

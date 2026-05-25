@@ -434,7 +434,7 @@ ACMD(do_house)
 
   one_argument(argument, arg);
 
-  if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_HOUSE))
+  if (!room_flagged(char_room_get(ch), ROOM_HOUSE))
     send_to_char(ch, "You must be in your house to set guests.\r\n");
   else if ((i = find_house(GET_ROOM_VNUM(IN_ROOM(ch)))) == NOWHERE)
     send_to_char(ch, "Um.. this house seems to be screwed up.\r\n");

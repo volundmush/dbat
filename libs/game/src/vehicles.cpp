@@ -557,7 +557,7 @@ ACMD(do_warp)
  } else if (strcasecmp(arg, "earth") && strcasecmp(arg, "vegeta") && strcasecmp(arg, "namek") && strcasecmp(arg, "konack") && strcasecmp(arg, "frigid") && strcasecmp(arg, "aether") && strcasecmp(arg, "buoy1") && strcasecmp(arg, "buoy2") && strcasecmp(arg, "buoy3")) {
   send_to_char(ch, "Syntax: shipwarp [ earth | vegeta | namek | konack | aether | frigid | buoy1 | buoy2 | buoy3 ]\r\n");
   return;
- } else if (ROOM_FLAGGED(!IN_ROOM(vehicle), ROOM_SPACE)) {
+ } else if (!room_flagged(obj_room_get(vehicle), ROOM_SPACE)) {
   send_to_char(ch, "Your ship needs to be in space to utilize its Instant Travel Warp Accelerator.\r\n");
   return;
  } else if (GET_OBJ_VNUM(vehicle) != 18400) {
@@ -1253,9 +1253,10 @@ ACMD(do_drive)
            send_to_room(IN_ROOM(vehicle), buf3);
           } else {
            sprintf(buf3, "%s @wcomes in from above and slams into the ground!@n\r\n", vehicle->short_description);
-           ROOM_DAMAGE(IN_ROOM(vehicle)) += 1;
-           if (ROOM_DAMAGE(IN_ROOM(vehicle)) >= 10) {
-            ROOM_DAMAGE(IN_ROOM(vehicle)) = 10;
+           struct room_data *room = obj_room_get(vehicle);
+           room_dmg_mod(room, 1);
+           if (room_dmg_get(room) >= 10) {
+            room_dmg_set(room, 10);
            }
            look_at_room(IN_ROOM(vehicle), ch, 0);
            send_to_room(IN_ROOM(vehicle), buf3);
@@ -1264,37 +1265,38 @@ ACMD(do_drive)
      else if (!strcasecmp(arg, "launch")) {
        int lnum = 0;
        int rnum = 0;
-       if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_EARTH)) {
+       struct room_data* room = obj_room_get(vehicle);
+       if (room_flagged(room, ROOM_EARTH)) {
         lnum = 1;
        }
-       else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_FRIGID)) {
+       else if (room_flagged(room, ROOM_FRIGID)) {
         lnum = 2;
        }
-       else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_KONACK)) {
+       else if (room_flagged(room, ROOM_KONACK)) {
         lnum = 3;
        }
-       else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_VEGETA)) {
+       else if (room_flagged(room, ROOM_VEGETA)) {
         lnum = 4;
        }
-       else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_NAMEK)) {
+       else if (room_flagged(room, ROOM_NAMEK)) {
         lnum = 5;
        }
-       else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_AETHER)) {
+       else if (room_flagged(room, ROOM_AETHER)) {
         lnum = 6;
        }
-       else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_YARDRAT)) {
+       else if (room_flagged(room, ROOM_YARDRAT)) {
         lnum = 7;
        }
        else if (PLANET_ZENITH(IN_ROOM(vehicle))) {
         lnum = 8;
        }
-       else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_CERRIA)) {
+       else if (room_flagged(room, ROOM_CERRIA)) {
         lnum = 11;
        }
-       else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_KANASSA)) {
+       else if (room_flagged(room, ROOM_KANASSA)) {
         lnum = 9;
        }
-       else if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_ARLIA)) {
+       else if (room_flagged(room, ROOM_ARLIA)) {
         lnum = 10;
        }
        else {
@@ -1366,7 +1368,7 @@ ACMD(do_drive)
         return;
        }
   
-       if (!ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_SPACE)) {
+       if (!room_flagged(obj_room_get(vehicle), ROOM_SPACE)) {
         send_to_char(ch, "@wYou need to be in space to launch a marker buoy.\r\n");
         return;
        }

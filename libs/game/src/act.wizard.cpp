@@ -1017,7 +1017,7 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr)
        return (NOWHERE);
       }
 
-  if (ROOM_FLAGGED(location, ROOM_GODROOM))
+  if (room_flagged(rm, ROOM_GODROOM))
     send_to_char(ch, "You are not godly enough to use that room!\r\n");
   else
     return (location);
@@ -2129,7 +2129,7 @@ ACMD(do_switch)
     send_to_char(ch, "You can't do that, the body is already in use!\r\n");
   else if (!(IS_NPC(victim) || ADM_FLAGGED(ch, ADM_SWITCHMORTAL)))
     send_to_char(ch, "You aren't holy enough to use a mortal's body.\r\n");
-  else if (GET_ADMLEVEL(ch) < ADMLVL_VICE && ROOM_FLAGGED(IN_ROOM(victim), ROOM_GODROOM))
+  else if (GET_ADMLEVEL(ch) < ADMLVL_VICE && room_flagged(char_room_get(victim), ROOM_GODROOM))
     send_to_char(ch, "You are not godly enough to use that room!\r\n");
   else {
     send_to_char(ch, "%s", CONFIG_OK);

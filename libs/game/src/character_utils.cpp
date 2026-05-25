@@ -176,7 +176,7 @@ bool in_room_range(char_data *ch, IDXTYPE low_rnum, IDXTYPE high_rnum) {
 }
 
 bool in_past(char_data *ch) {
-    return ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST);
+    return room_flagged(char_room_get(ch), ROOM_PAST);
 }
 
 bool is_newbie(char_data *ch) {
@@ -284,8 +284,9 @@ int wearing_android_canister(char_data *ch) {
 
 int calcGravCost(char_data *ch, int64_t num) {
     int cost = 0;
-    if(!can_tolerate_gravity(ch, ROOM_GRAVITY(IN_ROOM(ch))))
-        cost = ROOM_GRAVITY(IN_ROOM(ch)) ^ 2;
+    int gravity = room_gravity_get(char_room_get(ch));
+    if(!can_tolerate_gravity(ch, gravity))
+        cost = gravity ^ 2;
 
     if (!num) {
         if(cost) {
@@ -3622,44 +3623,26 @@ int planet_check(struct char_data *ch, struct char_data *vict)
  if (ch == NULL) {
   log("ERROR: planet_check called without ch!");
   return 0;
- } else if (vict == NULL) {
+ }
+ if (vict == NULL) {
   log("ERROR: planet_check called without vict!");
   return 0;
- } else {
+ }
   int success = 0;
+  struct room_data* room = char_room_get(ch);
+  struct room_data* vict_room = char_room_get(vict);
   if (GET_ADMLEVEL(vict) <= 0) {
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_EARTH)) {
-    success = 1;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_FRIGID)) {
-    success = 1;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_NAMEK)) {
-    success = 1;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_VEGETA)) {
-    success = 1;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_AETHER)) {
-    success = 1;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_KONACK)) {
-    success = 1;
-   } else if (PLANET_ZENITH(IN_ROOM(ch)) && PLANET_ZENITH(IN_ROOM(vict))) {
-    success = 1;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_KANASSA)) {
-    success = 1;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_YARDRAT) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_YARDRAT)) {
-    success = 1;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_AL)) {
-    success = 1;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_HELL)) {
-    success = 1;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_ARLIA)) {
-    success = 1;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NEO) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_NEO)) {
-    success = 1;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_CERRIA) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_CERRIA)) {
-    success = 1;
-   }
+    for(auto flag : {ROOM_FRIGID, ROOM_EARTH, ROOM_NAMEK, ROOM_VEGETA, ROOM_AETHER, ROOM_KONACK, ROOM_KANASSA, ROOM_YARDRAT, ROOM_AL, ROOM_HELL, ROOM_ARLIA, ROOM_NEO, ROOM_CERRIA}) {
+      if (room_flagged(room, flag) && room_flagged(vict_room, flag)) {
+        success = 1;
+        break;
+      }
+    }
+     if (!success) {
+      success = PLANET_ZENITH(IN_ROOM(ch)) && PLANET_ZENITH(IN_ROOM(vict));
+     }
   }
   return (success);
- }
 }
 
 void purge_homing(struct char_data *ch)
@@ -4148,55 +4131,56 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict) {
 int can_grav(struct char_data *ch)
 {
    /* Gravity Related */
-   if (ROOM_GRAVITY(IN_ROOM(ch)) == 10 && GET_MAX_HIT(ch) < 5000 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
+   int gravity = room_gravity_get(char_room_get(ch));
+   if (gravity == 10 && GET_MAX_HIT(ch) < 5000 && !IS_BARDOCK(ch) && !IS_NPC(ch)) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 20 && GET_MAX_HIT(ch) < 20000) {
+   else if (gravity == 20 && GET_MAX_HIT(ch) < 20000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }   
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 30 && GET_MAX_HIT(ch) < 50000) {
+   else if (gravity == 30 && GET_MAX_HIT(ch) < 50000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 40 && GET_MAX_HIT(ch) < 100000) {
+   else if (gravity == 40 && GET_MAX_HIT(ch) < 100000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 50 && GET_MAX_HIT(ch) < 200000) {
+   else if (gravity == 50 && GET_MAX_HIT(ch) < 200000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 100 && GET_MAX_HIT(ch) < 400000) {
+   else if (gravity == 100 && GET_MAX_HIT(ch) < 400000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 200 && GET_MAX_HIT(ch) < 1000000) {
+   else if (gravity == 200 && GET_MAX_HIT(ch) < 1000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 300 && GET_MAX_HIT(ch) < 5000000) {
+   else if (gravity == 300 && GET_MAX_HIT(ch) < 5000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 400 && GET_MAX_HIT(ch) < 8000000) {
+   else if (gravity == 400 && GET_MAX_HIT(ch) < 8000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 500 && GET_MAX_HIT(ch) < 15000000) {
+   else if (gravity == 500 && GET_MAX_HIT(ch) < 15000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 1000 && GET_MAX_HIT(ch) < 25000000) {
+   else if (gravity == 1000 && GET_MAX_HIT(ch) < 25000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 5000 && GET_MAX_HIT(ch) < 100000000) {
+   else if (gravity == 5000 && GET_MAX_HIT(ch) < 100000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10000 && GET_MAX_HIT(ch) < 200000000) {
+   else if (gravity == 10000 && GET_MAX_HIT(ch) < 200000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
@@ -4222,7 +4206,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
    if (GET_HIT(vict) <= 0 && FIGHTING(vict)) {
     return 0;
    }
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+   if (room_flagged(char_room_get(ch), ROOM_PEACEFUL)) {
     send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
     return 0;
    } else if (vict == ch) {
@@ -4311,7 +4295,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
    }   
   }
   if (obj) {
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+   if (room_flagged(char_room_get(ch), ROOM_PEACEFUL)) {
     send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
     return 0;
    } else if (OBJ_FLAGGED(obj, ITEM_UNBREAKABLE) && GET_OBJ_VNUM(obj) != 87 && GET_OBJ_VNUM(obj) != 80 && GET_OBJ_VNUM(obj) != 81 && GET_OBJ_VNUM(obj) != 82 && GET_OBJ_VNUM(obj) != 83) {

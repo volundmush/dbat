@@ -256,7 +256,7 @@ void send_to_sense(int type, char *messg, struct char_data *ch)
     if (((char_room_get(ch)->zone != char_room_get(tch)->zone && type == 0) || !AWAKE(tch))) {
       continue;
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SHIP)) {
+    if (room_flagged(char_room_get(ch), ROOM_SHIP)) {
       continue;
     }
     if (obj && type == 0) {
@@ -366,31 +366,33 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type)
     if (GET_INVIS_LEV(ch) > GET_ADMLEVEL(tch)) {
      continue;
     }
+    struct room_data *room = char_room_get(ch);
+    struct room_data *tch_room = char_room_get(tch);
     if (IS_ANDROID(ch)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_EARTH)) {
+    } else if (room_flagged(room, ROOM_EARTH) && !room_flagged(tch_room, ROOM_EARTH)) {
      continue;
     } else if (PLANET_ZENITH(IN_ROOM(ch)) && !PLANET_ZENITH(IN_ROOM(tch))) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_FRIGID)) {
+    } else if (room_flagged(room, ROOM_FRIGID) && !room_flagged(tch_room, ROOM_FRIGID)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_NAMEK)) {
+    } else if (room_flagged(room, ROOM_NAMEK) && !room_flagged(tch_room, ROOM_NAMEK)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_AL)) {
+    } else if (room_flagged(room, ROOM_AL) && !room_flagged(tch_room, ROOM_AL)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_VEGETA)) {
+    } else if (room_flagged(room, ROOM_VEGETA) && !room_flagged(tch_room, ROOM_VEGETA)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_KONACK)) {
+    } else if (room_flagged(room, ROOM_KONACK) && !room_flagged(tch_room, ROOM_KONACK)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NEO) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_NEO)) {
+    } else if (room_flagged(room, ROOM_NEO) && !room_flagged(tch_room, ROOM_NEO)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_YARDRAT) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_YARDRAT)) {
+    } else if (room_flagged(room, ROOM_YARDRAT) && !room_flagged(tch_room, ROOM_YARDRAT)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_KANASSA)) {
+    } else if (room_flagged(room, ROOM_KANASSA) && !room_flagged(tch_room, ROOM_KANASSA)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_ARLIA)) {
+    } else if (room_flagged(room, ROOM_ARLIA) && !room_flagged(tch_room, ROOM_ARLIA)) {
      continue;
-    }  else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_AETHER)) {
+    }  else if (room_flagged(room, ROOM_AETHER) && !room_flagged(tch_room, ROOM_AETHER)) {
      continue;
     }
     if (!obj) {
@@ -475,25 +477,27 @@ void send_to_worlds(struct char_data *ch)
     if (STATE(i) != CON_PLAYING) {
      continue;
     }
-    if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_EARTH) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {   
+    struct room_data *room = char_room_get(ch);
+    struct room_data* iroom = char_room_get(i->character);
+    if (room_flagged(iroom, ROOM_EARTH) && room_flagged(room, ROOM_EARTH)) {   
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_VEGETA) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA)) {
+    } else if (room_flagged(iroom, ROOM_VEGETA) && room_flagged(room, ROOM_VEGETA)) {
      send_to_char(i->character, "%s", message);
     } else if (PLANET_ZENITH(IN_ROOM(i->character)) && PLANET_ZENITH(IN_ROOM(ch))) {
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_NAMEK) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) {
+    } else if (room_flagged(iroom, ROOM_NAMEK) && room_flagged(room, ROOM_NAMEK)) {
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_KONACK) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK)) {
+    } else if (room_flagged(iroom, ROOM_KONACK) && room_flagged(room, ROOM_KONACK)) {
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_YARDRAT) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_YARDRAT)) {
+    } else if (room_flagged(iroom, ROOM_YARDRAT) && room_flagged(room, ROOM_YARDRAT)) {
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_FRIGID) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID)) {
+    } else if (room_flagged(iroom, ROOM_FRIGID) && room_flagged(room, ROOM_FRIGID)) {
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_KANASSA) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) {
+    } else if (room_flagged(iroom, ROOM_KANASSA) && room_flagged(room, ROOM_KANASSA)) {
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_ARLIA) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA)) {
+    } else if (room_flagged(iroom, ROOM_ARLIA) && room_flagged(room, ROOM_ARLIA)) {
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_AETHER) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) {
+    } else if (room_flagged(iroom, ROOM_AETHER) && room_flagged(room, ROOM_AETHER)) {
      send_to_char(i->character, "%s", message);
     }
   }

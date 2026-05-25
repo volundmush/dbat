@@ -8,8 +8,10 @@ extern "C" {
 #endif
 
 int num_pc_in_room(struct room_data *room);
-int cook_element(room_rnum room);
+bool cook_element(struct room_data* room);
 int room_is_dark(room_rnum room);
+
+bool room_is_sunken(struct room_data* room);
 
 #ifdef __cplusplus
 }

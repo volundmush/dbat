@@ -247,6 +247,8 @@ static int64_t mana_gain(struct char_data *ch)
 {
   int64_t gain = 0;
 
+  struct room_data *room = char_room_get(ch);
+
   if (IS_NPC(ch))
   {
     /* Neat and fast */
@@ -254,7 +256,8 @@ static int64_t mana_gain(struct char_data *ch)
   }
   else
   {
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75))
+    
+    if (room_flagged(room, ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && room_dmg_get(room) >= 75))
     {
       if (IS_KONATSU(ch))
       {
@@ -273,7 +276,7 @@ static int64_t mana_gain(struct char_data *ch)
         gain = GET_MAX_MANA(ch) / 10;
       }
     }
-    else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN))
+    else if (!room_flagged(room, ROOM_REGEN))
     {
       if (IS_KONATSU(ch))
       {
@@ -287,7 +290,7 @@ static int64_t mana_gain(struct char_data *ch)
       {
         gain = GET_MAX_MANA(ch) / 12;
       }
-      if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_BEDROOM))
+      if (room_flagged(room, ROOM_BEDROOM))
       {
         gain += gain * 0.25;
       }
@@ -373,9 +376,9 @@ static int64_t mana_gain(struct char_data *ch)
     }
   }
 
-  if (IN_ROOM(ch) != NOWHERE)
+  if (room)
   {
-    if (cook_element(IN_ROOM(ch)) == 1)
+    if (cook_element(room) == 1)
     {
       gain += (gain * 0.2);
     }
@@ -390,7 +393,7 @@ static int64_t mana_gain(struct char_data *ch)
   {
     gain += gain * 0.1;
   }
-  if (IS_KANASSAN(ch) && SUNKEN(IN_ROOM(ch)))
+  if (IS_KANASSAN(ch) && room_is_sunken(room))
   {
     gain *= 16;
   }
@@ -459,7 +462,7 @@ static int64_t mana_gain(struct char_data *ch)
   if (AFF_FLAGGED(ch, AFF_POISON))
     gain /= 4;
 
-  if (cook_element(IN_ROOM(ch)) == 1)
+  if (cook_element(room) == 1)
     gain *= 2;
 
   return (gain);
@@ -469,6 +472,7 @@ static int64_t mana_gain(struct char_data *ch)
 int64_t hit_gain(struct char_data *ch)
 {
   int64_t gain = 0;
+  struct room_data *room = char_room_get(ch);
 
   if (IS_NPC(ch))
   {
@@ -477,7 +481,8 @@ int64_t hit_gain(struct char_data *ch)
   }
   else
   {
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75))
+    
+    if (room_flagged(room, ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && room_dmg_get(room) >= 75))
     {
       if (IS_HUMAN(ch))
       {
@@ -500,7 +505,7 @@ int64_t hit_gain(struct char_data *ch)
         gain = GET_MAX_HIT(ch) / 10;
       }
     }
-    else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN))
+    else if (!room_flagged(room, ROOM_REGEN))
     {
       if (IS_HUMAN(ch))
       {
@@ -522,7 +527,7 @@ int64_t hit_gain(struct char_data *ch)
       {
         gain = GET_MAX_HIT(ch) / 15;
       }
-      if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_BEDROOM))
+      if (room_flagged(room, ROOM_BEDROOM))
       {
         gain += gain * 0.25;
       }
@@ -615,7 +620,7 @@ int64_t hit_gain(struct char_data *ch)
   {
     gain += gain * 0.1;
   }
-  if (IS_KANASSAN(ch) && SUNKEN(IN_ROOM(ch)))
+  if (IS_KANASSAN(ch) && room_is_sunken(room))
   {
     gain *= 16;
   }
@@ -650,7 +655,7 @@ int64_t hit_gain(struct char_data *ch)
 
   if (AFF_FLAGGED(ch, AFF_POISON))
     gain /= 4;
-  if (cook_element(IN_ROOM(ch)) == 1)
+  if (cook_element(room) == 1)
     gain *= 2;
 
   if (!IS_NPC(ch))
@@ -673,7 +678,7 @@ int64_t hit_gain(struct char_data *ch)
 static int64_t move_gain(struct char_data *ch)
 {
   int64_t gain = 0;
-
+  struct room_data *room = char_room_get(ch);
   if (IS_NPC(ch))
   {
     /* Neat and fast */
@@ -681,7 +686,8 @@ static int64_t move_gain(struct char_data *ch)
   }
   else
   {
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75))
+    
+    if (room_flagged(room, ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && room_dmg_get(room) >= 75))
     {
       if (IS_MUTANT(ch))
       {
@@ -696,7 +702,7 @@ static int64_t move_gain(struct char_data *ch)
         gain = GET_MAX_MOVE(ch) / 6;
       }
     }
-    else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN))
+    else if (!room_flagged(room, ROOM_REGEN))
     {
       if (IS_MUTANT(ch))
       {
@@ -706,7 +712,7 @@ static int64_t move_gain(struct char_data *ch)
       {
         gain = GET_MAX_MOVE(ch) / 8;
       }
-      if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_BEDROOM))
+      if (room_flagged(room, ROOM_BEDROOM))
       {
         gain += gain * 0.25;
       }
@@ -800,7 +806,7 @@ static int64_t move_gain(struct char_data *ch)
   {
     gain += gain * 0.1;
   }
-  if (IS_KANASSAN(ch) && SUNKEN(IN_ROOM(ch)))
+  if (IS_KANASSAN(ch) && room_is_sunken(room))
   {
     gain *= 16;
   }
@@ -832,11 +838,11 @@ static int64_t move_gain(struct char_data *ch)
     gain /= 4;
   }
 
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA))
+  if (room_flagged(room, ROOM_AURA))
   {
     gain = GET_MAX_MOVE(ch) - (getCurST(ch));
   }
-  if (cook_element(IN_ROOM(ch)) == 1)
+  if (cook_element(room) == 1)
     gain *= 2;
 
   if (GET_REGEN(ch) > 0)
@@ -1428,6 +1434,9 @@ static void check_idling(struct char_data *ch)
   {
     return;
   }
+
+  struct room_data* room = char_room_get(ch);
+
   if (++(ch->timer) > CONFIG_IDLE_VOID)
   {
     if (GET_WAS_IN(ch) == NOWHERE && IN_ROOM(ch) != NOWHERE)
@@ -1442,11 +1451,11 @@ static void check_idling(struct char_data *ch)
       {
         GET_LOADROOM(ch) = GET_LOADROOM(ch);
       }
-      if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) && (GET_ROOM_VNUM(IN_ROOM(ch)) < 19800 || GET_ROOM_VNUM(IN_ROOM(ch)) > 19899))
+      if (!room_flagged(room, ROOM_PAST) && (GET_ROOM_VNUM(IN_ROOM(ch)) < 19800 || GET_ROOM_VNUM(IN_ROOM(ch)) > 19899))
       {
         GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
       }
-      if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST))
+      if (room_flagged(room, ROOM_PAST))
       {
         GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1561));
       }
@@ -1724,7 +1733,7 @@ static void point_update_characters(void)
 
     if (!IS_NPC(i) && IN_ROOM(i) != NOWHERE)
     {
-      if (ROOM_FLAGGED(IN_ROOM(i), ROOM_HOUSE))
+      if (room_flagged(char_room_get(i), ROOM_HOUSE))
       {
         GET_RELAXCOUNT(i) += 1;
       }
@@ -1840,7 +1849,7 @@ static void point_update_characters(void)
         heal_limb(i);
       }
 
-      if (SECT(IN_ROOM(i)) == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !IS_KANASSAN(i))
+      if (room_sector_type_get(char_room_get(i)) == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !IS_KANASSAN(i))
       {
         if ((getCurST(i)) >= (getCurCarriedWeight(i)))
         {
@@ -1865,7 +1874,7 @@ static void point_update_characters(void)
           }
         }
       }
-      if (!has_o2(i) && SUNKEN(IN_ROOM(i)) && !ROOM_FLAGGED(IN_ROOM(i), ROOM_SPACE))
+      if (!has_o2(i) && room_is_sunken(char_room_get(i)) && !room_flagged(char_room_get(i), ROOM_SPACE))
       {
         if (((getCurKI(i)) - mana_gain(i)) > GET_MAX_MANA(i) / 200)
         {
@@ -1887,7 +1896,7 @@ static void point_update_characters(void)
           }
         }
       }
-      if (!has_o2(i) && ROOM_FLAGGED(IN_ROOM(i), ROOM_SPACE))
+      if (!has_o2(i) && room_flagged(char_room_get(i), ROOM_SPACE))
       {
         if (((getCurKI(i)) - mana_gain(i)) > GET_MAX_MANA(i) * 0.005)
         {
@@ -1910,7 +1919,7 @@ static void point_update_characters(void)
           }
         }
       }
-      if (!AFF_FLAGGED(i, AFF_FLYING) && ROOM_EFFECT(IN_ROOM(i)) == 6 && !MOB_FLAGGED(i, MOB_NOKILL) && !IS_DEMON(i))
+      if (!AFF_FLAGGED(i, AFF_FLYING) && room_geffect_get(char_room_get(i)) == 6 && !MOB_FLAGGED(i, MOB_NOKILL) && !IS_DEMON(i))
       {
         act("@rYour legs are burned by the lava!@n", TRUE, i, 0, 0, TO_CHAR);
         act("@R$n@r's legs are burned by the lava!@n", TRUE, i, 0, 0, TO_ROOM);
@@ -2225,10 +2234,10 @@ static void point_update_objects(void)
     {
       if (GET_OBJ_VNUM(j) == 79 && rand_number(1, 2) == 2)
       {
-        if (ROOM_EFFECT(IN_ROOM(j)) >= 1 && ROOM_EFFECT(IN_ROOM(j)) <= 5)
+        if (room_geffect_get(obj_room_get(j)) >= 1 && room_geffect_get(obj_room_get(j)) <= 5)
         {
           send_to_room(IN_ROOM(j), "The heat from the lava melts a great deal of the glacial wall and the lava cools a bit in turn.\r\n");
-          ROOM_EFFECT(IN_ROOM(j)) -= 1;
+          room_geffect_mod(obj_room_get(j), -1);
           if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0)
           {
             GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.025);
@@ -2330,7 +2339,7 @@ void timed_dt(struct char_data *ch)
       if (IN_ROOM(vict) == NOWHERE)
         continue;
 
-      if (!ROOM_FLAGGED(IN_ROOM(vict), ROOM_TIMED_DT))
+      if (!room_flagged(char_room_get(vict), ROOM_TIMED_DT))
         continue;
 
       timed_dt(vict);

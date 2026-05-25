@@ -2120,7 +2120,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
       decCurHealthPercent(ch, 1);
     extract_char(ch);
   } else {
-    if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) && (GET_ROOM_VNUM(IN_ROOM(ch)) < 17900 || GET_ROOM_VNUM(IN_ROOM(ch)) > 17999)) {
+    if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !room_flagged(char_room_get(ch), ROOM_PAST) && (GET_ROOM_VNUM(IN_ROOM(ch)) < 17900 || GET_ROOM_VNUM(IN_ROOM(ch)) > 17999)) {
      if (!PLR_FLAGGED(ch, PLR_ABSORBED)) {
      make_pcorpse(ch);
      loadmap(ch);
@@ -2299,13 +2299,13 @@ void die(struct char_data *ch, struct char_data *killer)
   // For code below this, some kind of 'death' is performed.
   // it will leave a corpse.
 
-  if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) && GET_LEVEL(ch) > 8)
+  if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !room_flagged(char_room_get(ch), ROOM_PAST) && GET_LEVEL(ch) > 8)
   {
     if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 2002 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 2011)
     {
       GET_DTIME(ch) = time(0);
     }
-    else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL))
+    else if (room_flagged(char_room_get(ch), ROOM_AL) || room_flagged(char_room_get(ch), ROOM_HELL))
     {
       send_to_char(ch, "Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
     }

@@ -1247,8 +1247,10 @@ ACMD(do_train)
 */
 
  /* Figure up the weight bonus */
- total = weight * (ROOM_GRAVITY(IN_ROOM(ch)) + 1);
- total += (ROOM_GRAVITY(IN_ROOM(ch)) + 1) ^ 2;
+ struct room_data *room = char_room_get(ch);
+ int gravity = room_gravity_get(room);
+ total = weight * (gravity + 1);
+ total += (gravity + 1) ^ 2;
  if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 6100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 6135) {
   total += total * 0.15;
  }
@@ -1531,7 +1533,7 @@ ACMD(do_train)
     if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
         plus *= 4;
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+    if (room_flagged(room, ROOM_HBTC)) {
         plus *= 3;
     }
     if (GET_BONUS(ch, BONUS_HARDWORKER)) {
@@ -1776,12 +1778,14 @@ ACMD(do_taisha)
   return;
  }
 
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+ struct room_data *room = char_room_get(ch);
+
+ if (room_flagged(room, ROOM_AURA)) {
   send_to_char(ch, "This area already has an aura of regeneration around it.\r\n");
   return;
  }
 
- if (ROOM_GRAVITY(IN_ROOM(ch)) > 0) {
+ if (room_gravity_get(room) > 0) {
   send_to_char(ch, "This area's gravity is too hostile to an aura.\r\n");
   return;
  }
@@ -2093,7 +2097,10 @@ ACMD(do_drag)
   return;
  }
 
- if (SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM || SECT(IN_ROOM(ch)) == SECT_WATER_SWIM) {
+ struct room_data *room = char_room_get(ch);
+ int sect = room_sector_type_get(room);
+
+ if (sect == SECT_WATER_NOSWIM || sect == SECT_WATER_SWIM) {
   send_to_char(ch, "You decide to not be a tugboat instead.\r\n");
   return;
  }
@@ -6138,7 +6145,7 @@ ACMD(do_plant)
   char vict_name[100], obj_name[100];
   int roll = 0, detect = 0, fail = 0;
 
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+  if (room_flagged(char_room_get(ch), ROOM_PEACEFUL)) {
     send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
   }
@@ -7084,7 +7091,7 @@ ACMD(do_instant)
   } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
    send_to_char(ch, "@rYou are in a pocket dimension!@n\r\n");
    return;
-  } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
+  } else if (room_flagged(char_room_get(ch), ROOM_RHELL) || room_flagged(char_room_get(ch), ROOM_AL) || room_flagged(char_room_get(ch), ROOM_HELL)) {
    send_to_char(ch, "You can not leave where you are at!\r\n");
    return;
   } else if (!*arg) {
@@ -7170,13 +7177,13 @@ ACMD(do_instant)
   } else if (IS_ANDROID(tar) || GET_HIT(tar) < (GET_HIT(ch) * 0.001) + 1) {
    send_to_char(ch, "You can't sense them well enough.\r\n");
    return;
-  } else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) && ROOM_FLAGGED(IN_ROOM(tar), ROOM_AL)) {
+  } else if (!room_flagged(char_room_get(ch), ROOM_AL) && room_flagged(char_room_get(tar), ROOM_AL)) {
    send_to_char(ch, "They are dead and can't be reached.\r\n");
    return;
-  } else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) && ROOM_FLAGGED(IN_ROOM(tar), ROOM_RHELL)) {
+  } else if (!room_flagged(char_room_get(ch), ROOM_RHELL) && room_flagged(char_room_get(tar), ROOM_RHELL)) {
    send_to_char(ch, "They are dead and can't be reached.\r\n");
    return;
-  } else if (ROOM_FLAGGED(IN_ROOM(tar), ROOM_NOINSTANT)) {
+  } else if (room_flagged(char_room_get(tar), ROOM_NOINSTANT)) {
    send_to_char(ch, "You can not go there as it is a protected area!\r\n");
    return;
   }
@@ -7254,6 +7261,17 @@ void load_shadow_dragons()
  save_mud_time(&time_info);
 }
 
+static bool _db_planet(room_rnum room) {
+  struct room_data* rm = &world[room];
+
+  for(auto flag : { ROOM_EARTH, ROOM_VEGETA, ROOM_FRIGID, ROOM_AETHER, ROOM_NAMEK, ROOM_KONACK, ROOM_YARDRAT }) {
+    if (room_flagged(rm, flag)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void wishSYS(void)
 {
   if (SHENRON == TRUE) {
@@ -7326,7 +7344,7 @@ void wishSYS(void)
      switch (place) {
       case 1:
        if (real_room(num) != NOWHERE) {
-        if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+        if (_db_planet(real_room(num))) {
          SHADOW_DRAGON1 = num;
          place = 2;
          num = rand_number(200, 20000);
@@ -7339,7 +7357,7 @@ void wishSYS(void)
       break;
       case 2:
        if (real_room(num) != NOWHERE) {
-        if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) ||  ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+        if (_db_planet(real_room(num))) {
          SHADOW_DRAGON2 = num;
          place = 3;
          num = rand_number(200, 20000);
@@ -7352,7 +7370,7 @@ void wishSYS(void)
       break;
       case 3:
        if (real_room(num) != NOWHERE) {
-        if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+        if (_db_planet(real_room(num))) {
          SHADOW_DRAGON3 = num;
          place = 4;
          num = rand_number(200, 20000);
@@ -7365,7 +7383,7 @@ void wishSYS(void)
       break;
       case 4:
        if (real_room(num) != NOWHERE) {
-        if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+        if (_db_planet(real_room(num))) {
          SHADOW_DRAGON4 = num;
          place = 5;
          num = rand_number(200, 20000);
@@ -7378,7 +7396,7 @@ void wishSYS(void)
       break;
       case 5:
        if (real_room(num) != NOWHERE) {
-        if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) ||  ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+        if (_db_planet(real_room(num))) {
          SHADOW_DRAGON5 = num;
          place = 6;
          num = rand_number(200, 20000);
@@ -7391,7 +7409,7 @@ void wishSYS(void)
       break;
       case 6:
        if (real_room(num) != NOWHERE) {
-        if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+        if (_db_planet(real_room(num))) {
          SHADOW_DRAGON6 = num;
          place = 7;
          num = rand_number(200, 20000);
@@ -7404,7 +7422,7 @@ void wishSYS(void)
       break;
       case 7:
        if (real_room(num) != NOWHERE) {
-        if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+        if (_db_planet(real_room(num))) {
          SHADOW_DRAGON7 = num;
          done = TRUE;
          num = rand_number(200, 20000);
@@ -7473,17 +7491,19 @@ ACMD(do_summon)
    struct char_data *mob=NULL;
    mob_rnum r_num;
 
+   struct room_data* room = char_room_get(ch);
 
-    if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {
+
+    if (!room_flagged(room, ROOM_EARTH)) {
      send_to_char(ch, "@wYou can not summon Shenron when you are not on earth.@n\r\n");
      return;
     } // are they on earth?
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NOINSTANT) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+    if (room_flagged(room, ROOM_NOINSTANT) || room_flagged(room, ROOM_PEACEFUL)) {
      send_to_char(ch, "You can not summon shenron in this protected area!\r\n");
      return;
     }
-    if (SECT(IN_ROOM(ch)) == SECT_INSIDE) {
+    if (room_sector_type_get(room) == SECT_INSIDE) {
      send_to_char(ch, "Go outside to summon Shenron!\r\n");
      return;
     }
@@ -7750,7 +7770,10 @@ ACMD(do_situp)
    send_to_char(ch, "You are a mob fool!\r\n");
    return;
   }
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
+
+  struct room_data* room = char_room_get(ch);
+
+  if (room_flagged(room, ROOM_HELL)) {
     send_to_char(ch, "The fire makes it too hot!\r\n");
     return;
   }
@@ -7767,28 +7790,30 @@ ACMD(do_situp)
     return;
   }
 
- if ((ROOM_GRAVITY(IN_ROOM(ch)) != 10 && IS_BARDOCK(ch)) || !IS_BARDOCK(ch)) {
-  cost += ROOM_GRAVITY(IN_ROOM(ch)) * ((ROOM_GRAVITY(IN_ROOM(ch)) * 2) + GET_LEVEL(ch));
+  int gravity = room_gravity_get(room);
+
+ if ((gravity != 10 && IS_BARDOCK(ch)) || !IS_BARDOCK(ch)) {
+  cost += gravity * ((gravity * 2) + GET_LEVEL(ch));
  } else if (IS_BARDOCK(ch)) {
-  cost += ROOM_GRAVITY(IN_ROOM(ch)) * GET_LEVEL(ch);
+  cost += gravity * GET_LEVEL(ch);
  }
 
- if (ROOM_GRAVITY(IN_ROOM(ch)) == 300) {
+ if (gravity == 300) {
   cost += 1000000;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 400) {
+ else if (gravity == 400) {
   cost += 2000000;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 500) {
+ else if (gravity == 500) {
   cost += 7500000;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 1000) {
+ else if (gravity == 1000) {
   cost += 15000000;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 5000) {
+ else if (gravity == 5000) {
   cost += 25000000;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10000) {
+ else if (gravity == 10000) {
   cost += 50000000;
  }
 
@@ -7835,72 +7860,72 @@ ACMD(do_situp)
    return;
  }
  else {
-   if (ROOM_GRAVITY(IN_ROOM(ch)) == 0) {
+   if (gravity == 0) {
     bonus = 1;
     act("@gYou do a situp.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a situp.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10) {
+   else if (gravity == 10) {
     bonus = rand_number(3, 7);
     act("@gYou do a situp, feeling the strain of gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 20) {
+   else if (gravity == 20) {
     bonus = rand_number(8, 14);
     act("@gYou do a situp, and feel gravity's pull.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 30) {
+   else if (gravity == 30) {
     bonus = rand_number(14, 20);
     act("@gYou do a situp, and feel the burn.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 40) {
+   else if (gravity == 40) {
     bonus = rand_number(20, 35);
     act("@gYou do a situp, and feel the burn.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 50) {
+   else if (gravity == 50) {
     bonus = rand_number(40, 60);
     act("@gYou do a situp, and feel the burn.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 100) {
+   else if (gravity == 100) {
     bonus = rand_number(180, 250);
     act("@gYou do a situp, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 200) {
+   else if (gravity == 200) {
     bonus = rand_number(400, 600);
     act("@gYou do a situp, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 300) {
+   else if (gravity == 300) {
     bonus = rand_number(800, 1200);
     act("@gYou do a situp, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 400) {
+   else if (gravity == 400) {
     bonus = rand_number(2000, 3000);
     act("@gYou do a situp, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 500) {
+   else if (gravity == 500) {
     bonus = rand_number(4000, 6000);
     act("@gYou do a situp, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a situp, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 1000) {
+   else if (gravity == 1000) {
     bonus = rand_number(9000, 10000);
     act("@gYou do a situp, and it was a really hard one to finish.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a situp, while sweating profusely.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 5000) {
+   else if (gravity == 5000) {
     bonus = rand_number(15000, 20000);
     act("@gYou do a situp, and it was a really hard one to finish.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a situp, while sweating profusely.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10000) {
+   else if (gravity == 10000) {
     bonus = rand_number(25000, 30000);
     act("@gYou do a situp, and it was a really hard one to finish.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a situp, while sweating profusely.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -7944,10 +7969,10 @@ ACMD(do_situp)
    if (is_soft_cap(ch, 2)) {
     bonus = 0;
    }
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (room_flagged(room, ROOM_HBTC)) {
     send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
     bonus *= 10;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
+   } else if (room_flagged(room, ROOM_WORKOUT)) {
     if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
      bonus *= 10;
     } else {
@@ -7957,13 +7982,13 @@ ACMD(do_situp)
     send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
     bonus *= 20;
    }
-   if (bonus <= 0 && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (bonus <= 0 && !room_flagged(room, ROOM_HBTC)) {
     bonus = 1;
    }
-   if (bonus <= 0 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (bonus <= 0 && room_flagged(room, ROOM_HBTC)) {
     bonus = 15;
    }
-   if (bonus <= 0 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
+   if (bonus <= 0 && room_flagged(room, ROOM_WORKOUT)) {
     if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
      bonus = 12;
     } else {
@@ -7983,22 +8008,22 @@ ACMD(do_situp)
     }
     send_to_char(ch, "You feel slightly more vigorous @D[@G+%s@D]@n.\r\n", add_commas(bonus));
       gainBaseSTTransformed(ch, bonus, true);
-   if (ROOM_GRAVITY(IN_ROOM(ch)) <= 50) {
+   if (gravity <= 50) {
    WAIT_STATE(ch, PULSE_2SEC);  
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 200) {
+   else if (gravity <= 200) {
    WAIT_STATE(ch, PULSE_3SEC);  
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 500) {
+   else if (gravity <= 500) {
    WAIT_STATE(ch, PULSE_4SEC);  
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 1000) {
+   else if (gravity <= 1000) {
    WAIT_STATE(ch, PULSE_5SEC);  
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 5000) {
+   else if (gravity <= 5000) {
    WAIT_STATE(ch, PULSE_6SEC);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 10000) {
+   else if (gravity <= 10000) {
    WAIT_STATE(ch, PULSE_7SEC);
    }
    decCurST(ch, cost);
@@ -8019,7 +8044,10 @@ ACMD(do_meditate)
    send_to_char(ch, "You are a mob fool!\r\n");
    return;
   }
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
+
+  struct room_data *room = char_room_get(ch);
+
+  if (room_flagged(room, ROOM_HELL)) {
     send_to_char(ch, "The fire makes it too hot!\r\n");
     return;
   }
@@ -8063,6 +8091,8 @@ ACMD(do_meditate)
    send_to_char(ch, "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n");
    return;
  }
+
+ int gravity = room_gravity_get(room);
 
  if (!strcasecmp(arg, "expand")) {
   int cost = 3500;
@@ -8130,29 +8160,29 @@ ACMD(do_meditate)
   weight += GET_WEIGHT(SITTING(obj));
  }
 
- if ((ROOM_GRAVITY(IN_ROOM(ch)) != 10 && IS_BARDOCK(ch)) || !IS_BARDOCK(ch)) {
-  cost += ROOM_GRAVITY(IN_ROOM(ch)) * ((ROOM_GRAVITY(IN_ROOM(ch)) * 2) + GET_LEVEL(ch));
+ if ((gravity != 10 && IS_BARDOCK(ch)) || !IS_BARDOCK(ch)) {
+  cost += gravity * ((gravity * 2) + GET_LEVEL(ch));
  } else if (IS_BARDOCK(ch)) {
-  cost += ROOM_GRAVITY(IN_ROOM(ch)) * GET_LEVEL(ch);
+  cost += gravity * GET_LEVEL(ch);
  }
- cost += weight * ((ROOM_GRAVITY(IN_ROOM(ch)) + 1) / 5);
+ cost += weight * ((gravity + 1) / 5);
 
- if (ROOM_GRAVITY(IN_ROOM(ch)) == 300) {
+ if (gravity == 300) {
   cost += 1000000;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 400) {
+ else if (gravity == 400) {
   cost += 2000000;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 500) {
+ else if (gravity == 500) {
   cost += 7500000;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 1000) {
+ else if (gravity == 1000) {
   cost += 15000000;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 5000) {
+ else if (gravity == 5000) {
   cost += 25000000;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10000) {
+ else if (gravity == 10000) {
   cost += 50000000;
  }
 
@@ -8187,46 +8217,46 @@ ACMD(do_meditate)
  act("@cYou close your eyes and concentrate, lifting $p@c with your ki.@n", TRUE, ch, obj, 0, TO_CHAR);
  act("@c$n closes $s eyes and lifts $p@c with $s ki.@n", TRUE, ch, obj, 0, TO_ROOM);
 
- if (ROOM_GRAVITY(IN_ROOM(ch)) == 0) {
+ if (gravity == 0) {
     bonus = 1;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10) {
+ else if (gravity == 10) {
     bonus = rand_number(2, 4);
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 20) {
+ else if (gravity == 20) {
     bonus = rand_number(5, 10);
  } 
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 30) {
+ else if (gravity == 30) {
     bonus = rand_number(10, 15);
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 40) {
+ else if (gravity == 40) {
     bonus = rand_number(15, 20);
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 50) {
+ else if (gravity == 50) {
     bonus = rand_number(40, 60);
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 100) {
+ else if (gravity == 100) {
     bonus = rand_number(180, 250);
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 200) {
+ else if (gravity == 200) {
     bonus = rand_number(400, 600);
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 300) {
+ else if (gravity == 300) {
     bonus = rand_number(800, 1200);
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 400) {
+ else if (gravity == 400) {
     bonus = rand_number(2000, 3000);
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 500) {
+ else if (gravity == 500) {
     bonus = rand_number(4000, 6000);
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 1000) {
+ else if (gravity == 1000) {
     bonus = rand_number(9000, 10000);
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 5000) {
+ else if (gravity == 5000) {
     bonus = rand_number(15000, 20000);
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10000) {
+ else if (gravity == 10000) {
     bonus = rand_number(25000, 30000);
  }
 
@@ -8271,10 +8301,10 @@ ACMD(do_meditate)
     if (is_soft_cap(ch, 1)) {
      bonus = 0;
     }
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (room_flagged(room, ROOM_HBTC)) {
     send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
     bonus *= 10;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
+   } else if (room_flagged(room, ROOM_WORKOUT)) {
     if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
      bonus *= 10;
     } else {
@@ -8284,13 +8314,13 @@ ACMD(do_meditate)
     send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
     bonus *= 20;
    }
-   if (bonus <= 0 && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (bonus <= 0 && !room_flagged(room, ROOM_HBTC)) {
     bonus = 1;
    }
-   if (bonus <= 0 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (bonus <= 0 && room_flagged(room, ROOM_HBTC)) {
     bonus = 15;
    }
-   if (bonus <= 1 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
+   if (bonus <= 1 && room_flagged(room, ROOM_WORKOUT)) {
     if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
      bonus = 12;
     } else {
@@ -8312,22 +8342,22 @@ ACMD(do_meditate)
     /* Rillao: transloc, add new transes here */
     send_to_char(ch, "You feel your spirit grow stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus));
         gainBaseKITransformed(ch, bonus, true);
-   if (ROOM_GRAVITY(IN_ROOM(ch)) <= 50) {
+   if (gravity <= 50) {
    WAIT_STATE(ch, PULSE_2SEC);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 200) {
+   else if (gravity <= 200) {
    WAIT_STATE(ch, PULSE_3SEC);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 500) {
+   else if (gravity <= 500) {
    WAIT_STATE(ch, PULSE_4SEC);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 1000) {
+   else if (gravity <= 1000) {
    WAIT_STATE(ch, PULSE_5SEC);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 5000) {
+   else if (gravity <= 5000) {
    WAIT_STATE(ch, PULSE_6SEC);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 10000) {
+   else if (gravity <= 10000) {
    WAIT_STATE(ch, PULSE_7SEC);
    }
 
@@ -8358,28 +8388,31 @@ ACMD(do_pushup)
     return;
   }
 
- if ((ROOM_GRAVITY(IN_ROOM(ch)) != 10 && IS_BARDOCK(ch)) || !IS_BARDOCK(ch)) {
-  cost += ROOM_GRAVITY(IN_ROOM(ch)) * ((ROOM_GRAVITY(IN_ROOM(ch)) * 2) + GET_LEVEL(ch));
+  struct room_data *room = char_room_get(ch);
+  int gravity = room_gravity_get(room);
+
+ if ((gravity != 10 && IS_BARDOCK(ch)) || !IS_BARDOCK(ch)) {
+  cost += gravity * ((gravity * 2) + GET_LEVEL(ch));
  } else if (IS_BARDOCK(ch)) {
-  cost += ROOM_GRAVITY(IN_ROOM(ch)) * GET_LEVEL(ch);
+  cost += gravity * GET_LEVEL(ch);
  }
 
- if (ROOM_GRAVITY(IN_ROOM(ch)) == 300) {
+ if (gravity == 300) {
   cost += 1000000;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 400) {
+ else if (gravity == 400) {
   cost += 2000000;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 500) {
+ else if (gravity == 500) {
   cost += 7500000;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 1000) {
+ else if (gravity == 1000) {
   cost += 15000000;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 5000) {
+ else if (gravity == 5000) {
   cost += 25000000;
  }
- else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10000) {
+ else if (gravity == 10000) {
   cost += 50000000;
  }
 
@@ -8428,72 +8461,72 @@ ACMD(do_pushup)
  }
 
  else {
-   if (ROOM_GRAVITY(IN_ROOM(ch)) == 0) {
+   if (gravity == 0) {
     bonus = 1;
     act("@gYou do a pushup.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10) {
+   else if (gravity == 10) {
     bonus = rand_number(3, 7);
     act("@gYou do a pushup, feeling the strain of gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 20) {
+   else if (gravity == 20) {
     bonus = rand_number(8, 14);
     act("@gYou do a pushup, and feel gravity's pull.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 30) {
+   else if (gravity == 30) {
     bonus = rand_number(14, 20);
     act("@gYou do a pushup, and feel the burn.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 40) {
+   else if (gravity == 40) {
     bonus = rand_number(20, 35);
     act("@gYou do a pushup, and feel the burn.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 50) {
+   else if (gravity == 50) {
     bonus = rand_number(40, 60);
     act("@gYou do a pushup, and feel the burn.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 100) {
+   else if (gravity == 100) {
     bonus = rand_number(180, 250);
     act("@gYou do a pushup, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 200) {
+   else if (gravity == 200) {
     bonus = rand_number(400, 600);
     act("@gYou do a pushup, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 300) {
+   else if (gravity == 300) {
     bonus = rand_number(800, 1200);
     act("@gYou do a pushup, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 400) {
+   else if (gravity == 400) {
     bonus = rand_number(2000, 3000);
     act("@gYou do a pushup, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 500) {
+   else if (gravity == 500) {
     bonus = rand_number(4000, 6000);
     act("@gYou do a pushup, and really strain against the gravity.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup, while sweating.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 1000) {
+   else if (gravity == 1000) {
     bonus = rand_number(9000, 10000);
     act("@gYou do a pushup, and it was a really hard one to finish.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup, while sweating profusely.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 5000) {
+   else if (gravity == 5000) {
     bonus = rand_number(15000, 20000);
     act("@gYou do a pushup, and it was a really hard one to finish.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup, while sweating profusely.@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10000) {
+   else if (gravity == 10000) {
     bonus = rand_number(25000, 30000);
     act("@gYou do a pushup, and it was a really hard one to finish.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n does a pushup, while sweating profusely.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -8537,10 +8570,10 @@ ACMD(do_pushup)
    if (is_soft_cap(ch, 0)) {
     bonus = 0;
    }
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (room_flagged(room, ROOM_HBTC)) {
     send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
     bonus *= 10; 
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
+   } else if (room_flagged(room, ROOM_WORKOUT)) {
     if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
      bonus *= 10;
     } else {
@@ -8550,13 +8583,13 @@ ACMD(do_pushup)
     send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
     bonus *= 20;
    }
-   if (bonus <= 0 && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (bonus <= 0 && !room_flagged(room, ROOM_HBTC)) {
     bonus = 1;
    }
-   if (bonus <= 0 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (bonus <= 0 && room_flagged(room, ROOM_HBTC)) {
     bonus = 15;
    }
-   if (bonus <= 1 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
+   if (bonus <= 1 && room_flagged(room, ROOM_WORKOUT)) {
     if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
      bonus = 12;
     } else {
@@ -8580,22 +8613,22 @@ ACMD(do_pushup)
          bonus = bonus * 0.8;
      }
      gainBasePLTransformed(ch, bonus, true);
-   if (ROOM_GRAVITY(IN_ROOM(ch)) <= 50) {
+   if (gravity <= 50) {
    WAIT_STATE(ch, PULSE_2SEC);  
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 200) {
+   else if (gravity <= 200) {
    WAIT_STATE(ch, PULSE_3SEC);  
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 500) {
+   else if (gravity <= 500) {
    WAIT_STATE(ch, PULSE_4SEC);  
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 1000) {
+   else if (gravity <= 1000) {
    WAIT_STATE(ch, PULSE_5SEC);  
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 5000) {
+   else if (gravity <= 5000) {
    WAIT_STATE(ch, PULSE_6SEC);
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) <= 10000) {
+   else if (gravity <= 10000) {
    WAIT_STATE(ch, PULSE_7SEC);
    }
      decCurST(ch, cost);
@@ -8873,8 +8906,8 @@ void base_update(void)
 		if (!IS_NPC(d->character)) {
 			check_eq(d->character);
 		}
-		if (!IS_NPC(d->character) && ROOM_EFFECT(IN_ROOM(d->character)) >= 1 && rand_number(1, 100) >= 96) {
-			if (ROOM_EFFECT(IN_ROOM(d->character)) <= 4) {
+		if (!IS_NPC(d->character) && room_geffect_get(char_room_get(d->character)) >= 1 && rand_number(1, 100) >= 96) {
+			if (room_geffect_get(char_room_get(d->character)) <= 4) {
 				switch (rand_number(1, 4)) {
 				case 1:
 					act("@RLava spews up violently from the cracks in the ground!@n", FALSE, d->character, 0, 0, TO_ROOM);
@@ -8893,12 +8926,12 @@ void base_update(void)
 					act("@RSome of the lava cools as it spreads further from the source!@n", FALSE, d->character, 0, 0, TO_CHAR);
 					break;
 				}
-				ROOM_EFFECT(IN_ROOM(d->character)) += 1;
+				room_geffect_mod(char_room_get(d->character), 1);
 			}
-			else if (ROOM_EFFECT(IN_ROOM(d->character)) == 5) {
+			else if (room_geffect_get(char_room_get(d->character)) == 5) {
 				act("@RLava covers the entire area now!@n", FALSE, d->character, 0, 0, TO_ROOM);
 				act("@RLava covers the entire area now!@n", FALSE, d->character, 0, 0, TO_CHAR);
-				ROOM_EFFECT(IN_ROOM(d->character)) += 1;
+				room_geffect_mod(char_room_get(d->character), 1);
 			}
 		}
 		if (ABSORBING(d->character) && IN_ROOM(d->character) != IN_ROOM(ABSORBING(d->character))) {

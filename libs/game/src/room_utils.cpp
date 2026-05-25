@@ -15,11 +15,11 @@ int num_pc_in_room(struct room_data *room)
 }
 
 /* Is there a campfire in the room? */
-int cook_element(room_rnum room) {
+bool cook_element(struct room_data *room) {
  struct obj_data *obj, *next_obj;
  int found = FALSE;
 
- for (obj = world[room].contents; obj; obj = next_obj) {
+ for (obj = room->contents; obj; obj = next_obj) {
   next_obj = obj->next_content;
   if (GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE) {
    found = 1;
@@ -41,29 +41,33 @@ int room_is_dark(room_rnum room)
     return (FALSE);
   }
 
-  if (world[room].light)
+  struct room_data* rm = &world[room];
+
+  if (rm->light)
     return (FALSE);
 
-  if (cook_element(room))
+  if (cook_element(rm))
    return (FALSE);
 
-  if (ROOM_FLAGGED(room, ROOM_NOINSTANT) && ROOM_FLAGGED(room, ROOM_DARK)) {
+  if (room_flagged(rm, ROOM_NOINSTANT) && room_flagged(rm, ROOM_DARK)) {
    return (TRUE);
   }
-  if (ROOM_FLAGGED(room, ROOM_NOINSTANT) && !ROOM_FLAGGED(room, ROOM_DARK)) {
+  if (room_flagged(rm, ROOM_NOINSTANT) && !room_flagged(rm, ROOM_DARK)) {
 	return (FALSE);
  }
 
-  if (ROOM_FLAGGED(room, ROOM_DARK))
+  if (room_flagged(rm, ROOM_DARK))
     return (TRUE);
 
-  if (ROOM_FLAGGED(room, ROOM_INDOORS))
+  if (room_flagged(rm, ROOM_INDOORS))
+    return (FALSE);
+  
+  int sec = room_sector_type_get(rm);
+
+  if (sec == SECT_INSIDE || sec == SECT_CITY || sec == SECT_IMPORTANT || sec == SECT_SHOP)
     return (FALSE);
 
-  if (SECT(room) == SECT_INSIDE || SECT(room) == SECT_CITY || SECT(room) == SECT_IMPORTANT || SECT(room) == SECT_SHOP)
-    return (FALSE);
-
-  if (SECT(room) == SECT_SPACE)
+  if (sec == SECT_SPACE)
     return (FALSE);
 
   if (weather_info.sunlight == SUN_SET)
@@ -73,4 +77,10 @@ int room_is_dark(room_rnum room)
     return (TRUE);
 
   return (FALSE);
+}
+
+bool room_is_sunken(struct room_data* room) {
+ if(room_geffect_get(room) < 0) return true;
+ if(room_sector_type_get(room) == SECT_UNDERWATER) return true;
+ return false;
 }

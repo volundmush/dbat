@@ -374,6 +374,8 @@ ACMD(do_garden)
   return;
  }
 
+ struct room_data *room = char_room_get(ch);
+
  if (*arg) {
   if (!strcasecmp(arg, "collect")) {
    struct obj_data *shovel = NULL;
@@ -383,11 +385,13 @@ ACMD(do_garden)
        return;
    }
 
-   if (SECT(IN_ROOM(ch)) != SECT_FOREST && SECT(IN_ROOM(ch)) != SECT_FIELD && SECT(IN_ROOM(ch)) != SECT_MOUNTAIN && SECT(IN_ROOM(ch)) != SECT_HILLS) {
+   int sect = room_sector_type_get(room);
+
+   if (sect != SECT_FOREST && sect != SECT_FIELD && sect != SECT_MOUNTAIN && sect != SECT_HILLS) {
     send_to_char(ch, "You can not collect soil from this area.\r\n");
     return;
    }
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_FERTILE1)) {
+   if (room_flagged(room, ROOM_FERTILE1)) {
     struct obj_data *soil = read_object(255, VIRTUAL);
     obj_to_char(soil, ch);
     act("@yYou sink your shovel into the soft ground and manage to dig up a pile of fertile soil!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -395,7 +399,7 @@ ACMD(do_garden)
     GET_OBJ_VAL(soil, 0) = 8;
     WAIT_STATE(ch, PULSE_4SEC);
     return;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_FERTILE2)) {
+   } else if (room_flagged(room, ROOM_FERTILE2)) {
     struct obj_data *soil = read_object(255, VIRTUAL);
     obj_to_char(soil, ch);
     act("@yYou sink your shovel into the soft ground and manage to dig up a pile of good soil!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -421,7 +425,7 @@ ACMD(do_garden)
   return;
  }
 
- if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN1) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN2)) {
+ if (!room_flagged(room, ROOM_GARDEN1) && !room_flagged(room, ROOM_GARDEN2)) {
   send_to_char(ch, "You are not even in a garden!\r\n");
   return;
  }
@@ -433,7 +437,7 @@ ACMD(do_garden)
    return;
   }
  } else {
-  if (!(obj = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, NULL, room->contents))) {
    send_to_char(ch, "That plant doesn't seem to be here.\r\n");
    return;
   }
@@ -557,10 +561,10 @@ ACMD(do_garden)
        return;
    }
 
-   if (check_saveroom_count(ch, NULL) > 7 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN1)) {
+   if (check_saveroom_count(ch, NULL) > 7 && room_flagged(room, ROOM_GARDEN1)) {
     send_to_char(ch, "This room already has all its planters full. Try digging up some plants.\r\n");
     return;
-   } else if (check_saveroom_count(ch, NULL) > 19 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN2)) {
+   } else if (check_saveroom_count(ch, NULL) > 19 && room_flagged(room, ROOM_GARDEN2)) {
     send_to_char(ch, "This room already has all its planters full. Try digging up some plants.\r\n");
     return;
    } else if (skill < axion_dice(-5)) {
@@ -852,19 +856,22 @@ ACMD(do_deploy)
   }
  }
 
+ struct room_data *room = char_room_get(ch);
+ int sect = room_sector_type_get(room);
+
  if (capsule == FALSE) {
   send_to_char(ch, "You do not have any house type capsules to deploy.@n\r\n");
   return;
  } else if (GET_RP(ch) < 10 && furniture == FALSE) {
   send_to_char(ch, "You are required to have (not spend) 10 RPP in order to place a house.\r\n");
   return;
- } else if (furniture == TRUE && (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_HOUSE) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_SHIP))) {
+ } else if (furniture == TRUE && (!room_flagged(room, ROOM_HOUSE) || room_flagged(room, ROOM_SHIP))) {
   send_to_char(ch, "You can't deploy house furniture capsules here.\r\n");
   return;
- } else if (furniture == TRUE && (ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN2))) {
+ } else if (furniture == TRUE && (room_flagged(room, ROOM_GARDEN1) || room_flagged(room, ROOM_GARDEN2))) {
   send_to_char(ch, "You can't deploy house furniture capsules here.\r\n");
   return;
- } else if (furniture == FALSE && (SECT(IN_ROOM(ch)) == SECT_INSIDE || SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM || SECT(IN_ROOM(ch)) == SECT_WATER_SWIM || SECT(IN_ROOM(ch)) == SECT_SPACE)) {
+ } else if (furniture == FALSE && (sect == SECT_INSIDE || sect == SECT_WATER_NOSWIM || sect == SECT_WATER_SWIM || sect == SECT_SPACE)) {
   send_to_char(ch, "You can not deploy that in this kind of area. Try an area more suitable for a house.\r\n");
   return;
  }
@@ -1141,6 +1148,17 @@ void check_auction(void)
 	}
 }
 
+static bool _db_planet(room_rnum room) {
+  struct room_data* rm = &world[room];
+
+  for(auto flag : { ROOM_EARTH, ROOM_VEGETA, ROOM_FRIGID, ROOM_AETHER, ROOM_NAMEK, ROOM_KONACK, ROOM_YARDRAT }) {
+    if (room_flagged(rm, flag)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void dball_load()
 {
  int found1 = FALSE, found2 = FALSE, found3 = FALSE;
@@ -1183,7 +1201,7 @@ if (dballtime == 0) {
   else if (GET_OBJ_VNUM(k) == 26) {
    found7 = TRUE;
   }
-  else if (IN_ROOM(k) != NOWHERE && ROOM_EFFECT(IN_ROOM(k)) == 6 && !OBJ_FLAGGED(k, ITEM_UNBREAKABLE)) {
+  else if (IN_ROOM(k) != NOWHERE && room_geffect_get(obj_room_get(k)) == 6 && !OBJ_FLAGGED(k, ITEM_UNBREAKABLE)) {
    send_to_room(IN_ROOM(k), "@R%s@r melts in the lava!@n\r\n", k->short_description);
    extract_obj(k);
   }
@@ -1247,7 +1265,7 @@ if (dballtime == 0) {
    load = FALSE;
    while (load == FALSE) {
     if (real_room(num) != NOWHERE) {
-     if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+     if (_db_planet(real_room(num))) {
        room = num;
        load = TRUE;
        num = rand_number(200, 20000);
@@ -1295,7 +1313,7 @@ if (dballtime == 0) {
    load = FALSE;
    while (load == FALSE) {
     if (real_room(num) != NOWHERE) {
-     if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+     if (_db_planet(real_room(num))) {
        room = num;
        load = TRUE;
        num = rand_number(200, 20000);
@@ -1343,7 +1361,7 @@ if (dballtime == 0) {
    load = FALSE;
    while (load == FALSE) {
     if (real_room(num) != NOWHERE) {
-     if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+     if (_db_planet(real_room(num))) {
        room = num;
        load = TRUE;
        num = rand_number(200, 20000);
@@ -1391,7 +1409,7 @@ if (dballtime == 0) {
    load = FALSE;
    while (load == FALSE) {
     if (real_room(num) != NOWHERE) {
-     if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+     if (_db_planet(real_room(num))) {
        room = num;
        load = TRUE;
        num = rand_number(200, 20000);
@@ -1439,7 +1457,7 @@ if (dballtime == 0) {
    load = FALSE;
    while (load == FALSE) {
     if (real_room(num) != NOWHERE) {
-     if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+     if (_db_planet(real_room(num))) {
        room = num;
        load = TRUE;
        num = rand_number(200, 20000);
@@ -1487,7 +1505,7 @@ if (dballtime == 0) {
    load = FALSE;
    while (load == FALSE) {
     if (real_room(num) != NOWHERE) {
-     if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+     if (_db_planet(real_room(num))) {
        room = num;
        load = TRUE;
        num = rand_number(200, 20000);
@@ -1557,11 +1575,13 @@ ACMD(do_auction)
 	
 	two_arguments(argument, arg1, arg2);
 
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+  struct room_data *room = char_room_get(ch);
+
+  if (room_flagged(room, ROOM_HBTC)) {
     send_to_char(ch, "This is a different dimension!\r\n");
     return;
    }
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST)) {
+  if (room_flagged(room, ROOM_PAST)) {
     send_to_char(ch, "You are in the past!\r\n");
     return;
    }
@@ -1650,11 +1670,13 @@ ACMD(do_bid)
     return;
   }
 
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+  struct room_data* room = char_room_get(ch);
+
+  if (room_flagged(room, ROOM_HBTC)) {
     send_to_char(ch, "This is a different dimension!\r\n");
     return;
    }
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST)) {
+  if (room_flagged(room, ROOM_PAST)) {
     send_to_char(ch, "This is the past, nothing is being auctioned!\r\n");
     return;
    }
@@ -1986,9 +2008,10 @@ static void auc_send_to_all(char *messg, bool buyer)
   {
 	if (STATE(i) != CON_PLAYING)
 		continue;
-        if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_HBTC))
+    struct room_data* room = char_room_get(i->character);
+        if (room_flagged(room, ROOM_HBTC))
                 continue;
-        if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_PAST))
+        if (room_flagged(room, ROOM_PAST))
                 continue;
 	if (buyer)
 		act(messg, TRUE, ch_buying, obj_selling, i->character, TO_VICT | TO_SLEEP);
@@ -2020,6 +2043,9 @@ ACMD(do_assemble)
     }
   }
 
+  struct room_data *room = char_room_get(ch);
+
+
   if (*argument == '\0') {
     send_to_char(ch, "What would you like to %s?\r\n", CMD_NAME);
     return;
@@ -2032,7 +2058,7 @@ ACMD(do_assemble)
   } else if (!assemblyCheckComponents(lVnum, ch, FALSE)) {
     send_to_char(ch, "You haven't got all the things you need.\r\n");
     return;
-  } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
+  } else if (room_flagged(room, ROOM_SPACE)) {
     send_to_char(ch, "You can't do that in space.");
     return;
   } else if (!GET_SKILL(ch, SKILL_SURVIVAL) && !strcasecmp(argument, "campfire")) {
@@ -2052,8 +2078,10 @@ ACMD(do_assemble)
    roll = 20;
   }
 
+  int sect = room_sector_type_get(room);
+
   if (strcasecmp(argument, "campfire")) {
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE) || SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM || SUNKEN(IN_ROOM(ch))) {
+   if (room_flagged(room, ROOM_SPACE) || sect == SECT_WATER_NOSWIM || room_is_sunken(room)) {
     send_to_char(ch, "This area will not allow a fire to burn properly.\r\n");
     return;
    }
@@ -2401,7 +2429,7 @@ static int can_take_obj(struct char_data *ch, struct obj_data *obj)
   } else if (((getCurCarriedWeight(ch)) + GET_OBJ_WEIGHT(obj)) > CAN_CARRY_W(ch)) {
     act("$p: you can't carry that much weight.", FALSE, ch, obj, 0, TO_CHAR);
     return (0);
-  } else if ((GET_OBJ_WEIGHT(obj) + ROOM_GRAVITY(IN_ROOM(ch))) + (getCurCarriedWeight(ch)) > CAN_CARRY_W(ch)) {
+  } else if ((GET_OBJ_WEIGHT(obj) + room_gravity_get(char_room_get(ch))) + (getCurCarriedWeight(ch)) > CAN_CARRY_W(ch)) {
     act("$p: you can't carry that much weight because of the gravity.", FALSE, ch, obj, 0, TO_CHAR);
     return (0);
   }
@@ -2549,7 +2577,9 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj)
    return (0);
   }
 
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN2)) {
+  struct room_data* room = char_room_get(ch);
+
+   if (room_flagged(room, ROOM_GARDEN1) || room_flagged(room, ROOM_GARDEN2)) {
     send_to_char(ch, "You can't get things from a garden. Help garden.\r\n");
     return (0);
    }
@@ -2796,13 +2826,16 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
     act(buf, FALSE, ch, obj, 0, TO_CHAR);
     return (0);
   }
+
+  struct room_data* room = char_room_get(ch);
+
   if (GET_OBJ_VNUM(obj) == 20 || GET_OBJ_VNUM(obj) == 21 || GET_OBJ_VNUM(obj) == 22 || GET_OBJ_VNUM(obj) == 23 || GET_OBJ_VNUM(obj) == 24 || GET_OBJ_VNUM(obj) == 25 || GET_OBJ_VNUM(obj) == 26) {
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
+   if (room_flagged(room, ROOM_SPACE)) {
     snprintf(buf, sizeof(buf), "You can't %s $p in space!", sname);
     act(buf, FALSE, ch, obj, 0, TO_CHAR);
     return (0);
    }
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN2)) {
+   if (room_flagged(room, ROOM_GARDEN1) || room_flagged(room, ROOM_GARDEN2)) {
     snprintf(buf, sizeof(buf), "You can't %s $p in here. Read help garden.", sname);
     act(buf, FALSE, ch, obj, 0, TO_CHAR);
     return (0);
@@ -2814,17 +2847,17 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
     extract_obj(obj);
     return (0);
    }
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NOINSTANT)) {
+   if (room_flagged(room, ROOM_NOINSTANT)) {
     snprintf(buf, sizeof(buf), "You can't %s $p in this protected area!", sname);
     act(buf, FALSE, ch, obj, 0, TO_CHAR);
     return (0);
    }
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SHIP)) {
+   if (room_flagged(room, ROOM_SHIP)) {
     snprintf(buf, sizeof(buf), "You can't %s $p on a private ship!", sname);
     act(buf, FALSE, ch, obj, 0, TO_CHAR);
     return (0);
    }
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HOUSE)) {
+   if (room_flagged(room, ROOM_HOUSE)) {
     snprintf(buf, sizeof(buf), "You can't %s $p in a private house!", sname);
     act(buf, FALSE, ch, obj, 0, TO_CHAR);
     return (0);
@@ -2851,12 +2884,12 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
 
   switch (mode) {
   case SCMD_DROP:
-    if (!OBJ_FLAGGED(obj, ITEM_UNBREAKABLE) && ROOM_EFFECT(IN_ROOM(ch)) == 6) {
+    if (!OBJ_FLAGGED(obj, ITEM_UNBREAKABLE) && room_geffect_get(room) == 6) {
      act("$p melts in the lava!", FALSE, ch, obj, 0, TO_CHAR);
      act("$p melts in the lava!", FALSE, ch, obj, 0, TO_ROOM);
      extract_obj(obj);
     }
-    else if (ROOM_EFFECT(IN_ROOM(ch)) == 6) {
+    else if (room_geffect_get(room) == 6) {
      act("$p plops down on some cooled lava!", FALSE, ch, obj, 0, TO_CHAR);
      act("$p plops down on some cooled lava!", FALSE, ch, obj, 0, TO_ROOM);
      obj_to_room(obj, IN_ROOM(ch));
@@ -2907,7 +2940,9 @@ ACMD(do_drop)
    return;
   }
 
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN2)) {
+  struct room_data *room = char_room_get(ch);
+
+   if (room_flagged(room, ROOM_GARDEN1) || room_flagged(room, ROOM_GARDEN2)) {
     send_to_char(ch, "You can not do that in a garden.\r\n");
     return;
    }
@@ -3071,7 +3106,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
     }
     return;
   }
-  if ((GET_OBJ_WEIGHT(obj) + ROOM_GRAVITY(IN_ROOM(vict))) + (getCurCarriedWeight(vict)) > CAN_CARRY_W(vict)) {
+  if ((GET_OBJ_WEIGHT(obj) + room_gravity_get(char_room_get(vict))) + (getCurCarriedWeight(vict)) > CAN_CARRY_W(vict)) {
     act("$E can't carry that much weight because of the gravity.", FALSE, ch, 0, vict, TO_CHAR);
     if (IS_NPC(ch)) {
      act("$n@n drops $p because you can't carry anymore.", TRUE, ch, obj, vict, TO_VICT);
@@ -3363,7 +3398,7 @@ ACMD(do_drink)
   wasthirsty = GET_COND(ch, THIRST);
   if (!*arg && !IS_NPC(ch)) {
     char buf[MAX_STRING_LENGTH];
-    switch (SECT(IN_ROOM(ch))) {
+    switch (room_sector_type_get(char_room_get(ch))) {
       case SECT_WATER_SWIM:
       case SECT_WATER_NOSWIM:
       case SECT_UNDERWATER:
@@ -3381,7 +3416,7 @@ ACMD(do_drink)
           send_to_char(ch, "You don't feel thirsty anymore.\r\n");
         return;
       default:
-       if (!SUNKEN(IN_ROOM(ch))) {
+       if (!room_is_sunken(char_room_get(ch))) {
         send_to_char(ch, "Drink from what?\r\n");
         return;
        } else {

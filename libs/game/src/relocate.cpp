@@ -13,11 +13,14 @@ void obj_to_room(struct obj_data *object, room_rnum room)
 {
   struct obj_data *vehicle = NULL;
 
-  if (!object || room == NOWHERE || room > top_of_world)
+  if (!object || room == NOWHERE || room > top_of_world) {
     log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d/%d, obj %p)",
 	room, top_of_world, object);
-  else {
-    if (ROOM_FLAGGED(room, ROOM_GARDEN1) || ROOM_FLAGGED(room, ROOM_GARDEN2)) {
+  return;
+  }
+
+  struct room_data *rm = &world[room];
+  if (room_flagged(rm, ROOM_GARDEN1) || room_flagged(rm, ROOM_GARDEN2)) {
      if (GET_OBJ_TYPE(object) != ITEM_PLANT) {
       send_to_room(room, "%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n", object->short_description);
       extract_obj(object);
@@ -27,8 +30,8 @@ void obj_to_room(struct obj_data *object, room_rnum room)
     if (room == real_room(80)) {
      auc_load(object);
     }
-    object->next_content = world[room].contents;
-    world[room].contents = object;
+    object->next_content = rm->contents;
+    rm->contents = object;
     IN_ROOM(object) = room;
     object->carried_by = NULL;
     GET_LAST_LOAD(object) = time(0);
@@ -72,18 +75,20 @@ void obj_to_room(struct obj_data *object, room_rnum room)
      }
      }
     }
-    if (obj_exit_dir(object, 5) && (SECT(IN_ROOM(object)) == SECT_UNDERWATER || SECT(IN_ROOM(object)) == SECT_WATER_NOSWIM)) {
+    int osect = room_sector_type_get(obj_room_get(object));
+    if (obj_exit_dir(object, 5) && (osect == SECT_UNDERWATER || osect == SECT_WATER_NOSWIM)) {
      act("$p @Bsinks to deeper waters.@n", TRUE, 0, object, 0, TO_ROOM);
      int numb = GET_ROOM_VNUM(obj_exit_dir(object, 5)->to_room);
      obj_from_room(object);
      obj_to_room(object, real_room(numb));
     }
-    if (obj_exit_dir(object, 5) && SECT(IN_ROOM(object)) == SECT_FLYING && (GET_OBJ_VNUM(object) < 80 || GET_OBJ_VNUM(object) > 83)) {
+    osect = room_sector_type_get(obj_room_get(object));
+    if (obj_exit_dir(object, 5) && osect == SECT_FLYING && (GET_OBJ_VNUM(object) < 80 || GET_OBJ_VNUM(object) > 83)) {
      act("$p @Cfalls down.@n", TRUE, 0, object, 0, TO_ROOM);
      int numb = GET_ROOM_VNUM(obj_exit_dir(object, 5)->to_room);
      obj_from_room(object);
      obj_to_room(object, real_room(numb));
-     if (SECT(IN_ROOM(object)) != SECT_FLYING) {
+     if (osect != SECT_FLYING) {
       act("$p @Cfalls down and smacks the ground.@n", TRUE, 0, object, 0, TO_ROOM);
      }
     }
@@ -92,9 +97,8 @@ void obj_to_room(struct obj_data *object, room_rnum room)
       object->level = GET_OBJ_VAL(object, 0);
      }
     }
-    if (ROOM_FLAGGED(room, ROOM_HOUSE))
-      SET_BIT_AR(ROOM_FLAGS(room), ROOM_HOUSE_CRASH);
-  }
+    if (room_flagged(rm, ROOM_HOUSE))
+      room_flag_set(rm, ROOM_HOUSE_CRASH, TRUE);
 }
 
 
@@ -108,6 +112,8 @@ void obj_from_room(struct obj_data *object)
 	object, IN_ROOM(object));
     return;
   }
+
+  struct room_data *rm = obj_room_get(object);
 
   if (GET_OBJ_POSTED(object) && object->in_obj == NULL) {
    struct obj_data *obj = GET_OBJ_POSTED(object);
@@ -124,8 +130,8 @@ void obj_from_room(struct obj_data *object)
 
   REMOVE_FROM_LIST(object, obj_room_get(object)->contents, next_content, temp);
 
-  if (ROOM_FLAGGED(IN_ROOM(object), ROOM_HOUSE))
-    SET_BIT_AR(ROOM_FLAGS(IN_ROOM(object)), ROOM_HOUSE_CRASH);
+  if (room_flagged(rm, ROOM_HOUSE))
+    room_flag_set(rm, ROOM_HOUSE_CRASH, TRUE);
   IN_ROOM(object) = NOWHERE;
   object->next_content = NULL;
 }
@@ -159,8 +165,11 @@ void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to)
   if (tmp_obj->carried_by)
     IS_CARRYING_W(tmp_obj->carried_by) += GET_OBJ_WEIGHT(obj);
   }
-  if (IN_ROOM(obj_to) != NOWHERE && ROOM_FLAGGED(IN_ROOM(obj_to), ROOM_HOUSE)) {
-   SET_BIT_AR(ROOM_FLAGS(IN_ROOM(obj_to)), ROOM_HOUSE_CRASH);
+
+  struct room_data* rm = obj_room_get(obj_to);
+
+  if (rm && room_flagged(rm, ROOM_HOUSE)) {
+    room_flag_set(rm, ROOM_HOUSE_CRASH, TRUE);
   }
 }
 
@@ -192,8 +201,9 @@ void obj_from_obj(struct obj_data *obj)
     IS_CARRYING_W(temp->carried_by) -= GET_OBJ_WEIGHT(obj);
   }
 
-  if (IN_ROOM(obj_from) != NOWHERE && ROOM_FLAGGED(IN_ROOM(obj_from), ROOM_HOUSE)) {
-   SET_BIT_AR(ROOM_FLAGS(IN_ROOM(obj_from)), ROOM_HOUSE_CRASH);
+  struct room_data* rm = obj_room_get(obj_from);
+  if (rm && room_flagged(rm, ROOM_HOUSE)) {
+    room_flag_set(rm, ROOM_HOUSE_CRASH, TRUE);
   }
 
   obj->in_obj = NULL;

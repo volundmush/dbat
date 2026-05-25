@@ -111,31 +111,29 @@ WCMD(do_weffect)
   nr = num;
   target = real_room(nr);
 
+  struct room_data *rm = &world[target];
+
   if (!strcasecmp(arg, "gravity")) { /* Set gravity */
    if (num < 0 || num > 10000) {
     wld_log(room, "weffect setting out of bounds, 0 - 10000 only.");
     return;
    } else {
-    ROOM_GRAVITY(real_room(room->number)) = num;
+    room_gravity_set(rm, num);
    }
   } else if (!strcasecmp(arg, "light")) {
    if (target == NOWHERE) {
     wld_log(room, "weffect target is NOWHERE.");
     return;
    } else {
-    if (!ROOM_FLAGGED(target, ROOM_INDOORS)) {
-     SET_BIT_AR(ROOM_FLAGS(target), ROOM_INDOORS);
-    } else {
-     REMOVE_BIT_AR(ROOM_FLAGS(target), ROOM_INDOORS);
-    }
+    room_flag_toggle(rm, ROOM_INDOORS);
    }
   } else if (!strcasecmp(arg, "lava")) {
    if (target == NOWHERE) {
     wld_log(room, "weffect target is NOWHERE.");
     return;
    } else {
-    if (ROOM_EFFECT(target) != 0) {
-     ROOM_EFFECT(target) = 5;
+    if (room_geffect_get(rm) != 0) {
+     room_geffect_set(rm, 5);
     } else {
      wld_log(room, "weffect target already has lava.");
      return;

@@ -216,7 +216,9 @@ static double terrain_bonus(struct char_data *ch)
 
  double bonus = 0.0;
 
- switch (SECT(IN_ROOM(ch))) {
+ struct room_data* room = char_room_get(ch);
+
+ switch (room_sector_type_get(room)) {
   case SECT_FOREST:
    bonus += 0.5;
    break;
@@ -234,7 +236,7 @@ static double terrain_bonus(struct char_data *ch)
    break;
  }
 
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
+ if (room_flagged(room, ROOM_SPACE)) {
   bonus += -0.5;
  }
 
@@ -659,13 +661,17 @@ ACMD(do_post)
   return;
  }
 
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN2)) {
+ struct room_data* room = char_room_get(ch);
+
+ if (room_flagged(room, ROOM_GARDEN1) || room_flagged(room, ROOM_GARDEN2)) {
   send_to_char(ch, "You can not post on things in a garden.\r\n");
   return;
  }
 
+ int sect = room_sector_type_get(room);
+
  if (!*arg2) {
-  if (SECT(IN_ROOM(ch)) != SECT_INSIDE && SECT(IN_ROOM(ch)) != SECT_CITY) {
+  if (sect != SECT_INSIDE && sect != SECT_CITY) {
    send_to_char(ch, "You are not near any general structure you can post it on.\r\n");
    return;
   }
@@ -1444,7 +1450,13 @@ struct char_data *ch)
 
   for (door = 0; door < NUM_OF_DIRS; door++) {
     struct room_direction_data *exit = room->dir_option[door];
-    if (exit && exit->to_room != NOWHERE && (EXIT_FLAGGED(exit, EX_CLOSED) && !EXIT_FLAGGED(exit, EX_SECRET))) {
+    if(!exit) continue;
+    struct room_data *dest = exit_dest_get(exit);
+    if(!dest) continue;
+    int sect = room_sector_type_get(dest);
+    int geffect = room_geffect_get(dest);
+    bool sunken = room_is_sunken(dest);
+    if ((EXIT_FLAGGED(exit, EX_CLOSED) && !EXIT_FLAGGED(exit, EX_SECRET))) {
      switch (door) {
       case NORTH:
        map[y-1][x] = '8';
@@ -1471,74 +1483,74 @@ struct char_data *ch)
        map[y+1][x-1] = '8';
       break;
      }
-    } else if (exit && exit->to_room != NOWHERE && !EXIT_FLAGGED(exit, EX_CLOSED)) {
+    } else if (!EXIT_FLAGGED(exit, EX_CLOSED)) {
       switch (door) {
         case NORTH:
-          if (SUNKEN(exit->to_room)) {
+          if (sunken) {
            map[y-1][x] = '=';
           }
-          else if (SECT(exit->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_INSIDE) {
+           if (geffect >= 1) {
             map[y-1][x] = '2';
            } else {
             map[y-1][x] = 'i';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FIELD) {
+           if (geffect >= 1) {
             map[y-1][x] = '2';
            } else {
             map[y-1][x] = 'p';
            }
           }
-          else if (SECT(exit->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_DESERT) {
+           if (geffect >= 1) {
             map[y-1][x] = '7';
            } else {
             map[y-1][x] = '!';
            }
           }
-          else if (SECT(exit->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_CITY) {
+           if (geffect >= 1) {
             map[y-1][x] = '1';
            } else {
             map[y-1][x] = '(';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FOREST) {
+           if (geffect >= 1) {
             map[y-1][x] = '6';
            } else {
             map[y-1][x] = 'f';
            }
           }
-          else if (SECT(exit->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_MOUNTAIN) {
+           if (geffect >= 1) {
             map[y-1][x] = '5';
            } else {
             map[y-1][x] = '^';
            }
           }
-          else if (SECT(exit->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_HILLS) {
+           if (geffect >= 1) {
             map[y-1][x] = '3';
            } else {
             map[y-1][x] = 'h';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FLYING) {
+          else if (sect == SECT_FLYING) {
            map[y-1][x] = 's';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_NOSWIM) {
+          else if (sect == SECT_WATER_NOSWIM) {
            map[y-1][x] = '`';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_SWIM) {
+          else if (sect == SECT_WATER_SWIM) {
            map[y-1][x] = '+';
           }
-          else if (SECT(exit->to_room) == SECT_SHOP) {
+          else if (sect == SECT_SHOP) {
            map[y-1][x] = '&';
           }
-          else if (SECT(exit->to_room) == SECT_IMPORTANT) {
+          else if (sect == SECT_IMPORTANT) {
            map[y-1][x] = '*';
           }
           else {
@@ -1546,71 +1558,71 @@ struct char_data *ch)
           }
          break;
         case EAST:
-          if (SUNKEN(exit->to_room)) {
+          if (sunken) {
            map[y][x+1] = '=';
           }
-          else if (SECT(exit->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_INSIDE) {
+           if (geffect >= 1) {
             map[y][x+1] = '2';
            } else {
             map[y][x+1] = 'i';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FIELD) {
+           if (geffect >= 1) {
             map[y][x+1] = '2';
            } else {
             map[y][x+1] = 'p';
            }
           }
-          else if (SECT(exit->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_DESERT) {
+           if (geffect >= 1) {
             map[y][x+1] = '7';
            } else {
             map[y][x+1] = '!';
            }
           }
-          else if (SECT(exit->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_CITY) {
+           if (geffect >= 1) {
             map[y][x+1] = '1';
            } else {
             map[y][x+1] = '(';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FOREST) {
+           if (geffect >= 1) {
             map[y][x+1] = '6';
            } else {
             map[y][x+1] = 'f';
            }
           }
-          else if (SECT(exit->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_MOUNTAIN) {
+           if (geffect >= 1) {
             map[y][x+1] = '5';
            } else {
             map[y][x+1] = '^';
            }
           }
-          else if (SECT(exit->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_HILLS) {
+           if (geffect >= 1) {
             map[y][x+1] = '3';
            } else {
             map[y][x+1] = 'h';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FLYING) {
+          else if (sect == SECT_FLYING) {
            map[y][x+1] = 's';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_NOSWIM) {
+          else if (sect == SECT_WATER_NOSWIM) {
            map[y][x+1] = '`';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_SWIM) {
+          else if (sect == SECT_WATER_SWIM) {
            map[y][x+1] = '+';
           }
-          else if (SECT(exit->to_room) == SECT_SHOP) {
+          else if (sect == SECT_SHOP) {
            map[y][x+1] = '&';
           }
-          else if (SECT(exit->to_room) == SECT_IMPORTANT) {
+          else if (sect == SECT_IMPORTANT) {
            map[y][x+1] = '*';
           }
           else {
@@ -1618,71 +1630,71 @@ struct char_data *ch)
           }
          break;
         case SOUTH:
-          if (SUNKEN(exit->to_room)) {
+          if (sunken) {
            map[y+1][x] = '=';
           }
-          else if (SECT(exit->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_INSIDE) {
+           if (geffect >= 1) {
             map[y+1][x] = '2';
            } else {
             map[y+1][x] = 'i';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FIELD) {
+           if (geffect >= 1) {
             map[y+1][x] = '2';
            } else {
             map[y+1][x] = 'p';
            }
           }
-          else if (SECT(exit->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_DESERT) {
+           if (geffect >= 1) {
             map[y+1][x] = '7';
            } else {
             map[y+1][x] = '!';
            }
           }
-          else if (SECT(exit->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_CITY) {
+           if (geffect >= 1) {
             map[y+1][x] = '1';
            } else {
             map[y+1][x] = '(';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FOREST) {
+           if (geffect >= 1) {
             map[y+1][x] = '6';
            } else {
             map[y+1][x] = 'f';
            }
           }
-          else if (SECT(exit->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_MOUNTAIN) {
+           if (geffect >= 1) {
             map[y+1][x] = '5';
            } else {
             map[y+1][x] = '^';
            }
           }
-          else if (SECT(exit->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_HILLS) {
+           if (geffect >= 1) {
             map[y+1][x] = '3';
            } else {
             map[y+1][x] = 'h';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FLYING) {
+          else if (sect == SECT_FLYING) {
            map[y+1][x] = 's';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_NOSWIM) {
+          else if (sect == SECT_WATER_NOSWIM) {
            map[y+1][x] = '`';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_SWIM) {
+          else if (sect == SECT_WATER_SWIM) {
            map[y+1][x] = '+';
           }
-          else if (SECT(exit->to_room) == SECT_SHOP) {
+          else if (sect == SECT_SHOP) {
            map[y+1][x] = '&';
           }
-          else if (SECT(exit->to_room) == SECT_IMPORTANT) {
+          else if (sect == SECT_IMPORTANT) {
            map[y+1][x] = '*';
           }
           else {
@@ -1690,71 +1702,71 @@ struct char_data *ch)
           }
          break;
         case WEST:
-          if (SUNKEN(exit->to_room)) {
+          if (sunken) {
            map[y][x-1] = '=';
           }
-          else if (SECT(exit->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_INSIDE) {
+           if (geffect >= 1) {
             map[y][x-1] = '2';
            } else {
             map[y][x-1] = 'i';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FIELD) {
+           if (geffect >= 1) {
             map[y][x-1] = '2';
            } else {
             map[y][x-1] = 'p';
            }
           }
-          else if (SECT(exit->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_DESERT) {
+           if (geffect >= 1) {
             map[y][x-1] = '7';
            } else {
             map[y][x-1] = '!';
            }
           }
-          else if (SECT(exit->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_CITY) {
+           if (geffect >= 1) {
             map[y][x-1] = '1';
            } else {
             map[y][x-1] = '(';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FOREST) {
+           if (geffect >= 1) {
             map[y][x-1] = '6';
            } else {
             map[y][x-1] = 'f';
            }
           }
-          else if (SECT(exit->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_MOUNTAIN) {
+           if (geffect >= 1) {
             map[y][x-1] = '5';
            } else {
             map[y][x-1] = '^';
            }
           }
-          else if (SECT(exit->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_HILLS) {
+           if (geffect >= 1) {
             map[y][x-1] = '3';
            } else {
             map[y][x-1] = 'h';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FLYING) {
+          else if (sect == SECT_FLYING) {
            map[y][x-1] = 's';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_NOSWIM) {
+          else if (sect == SECT_WATER_NOSWIM) {
            map[y][x-1] = '`';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_SWIM) {
+          else if (sect == SECT_WATER_SWIM) {
            map[y][x-1] = '+';
           }
-          else if (SECT(exit->to_room) == SECT_SHOP) {
+          else if (sect == SECT_SHOP) {
            map[y][x-1] = '&';
           }
-          else if (SECT(exit->to_room) == SECT_IMPORTANT) {
+          else if (sect == SECT_IMPORTANT) {
            map[y][x-1] = '*';
           }
           else {
@@ -1762,71 +1774,71 @@ struct char_data *ch)
           }
          break;
         case NORTHEAST:
-          if (SUNKEN(exit->to_room)) {
+          if (sunken) {
            map[y-1][x+1] = '=';
           }
-          else if (SECT(exit->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_INSIDE) {
+           if (geffect >= 1) {
             map[y-1][x+1] = '2';
            } else {
             map[y-1][x+1] = 'i';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FIELD) {
+           if (geffect >= 1) {
             map[y-1][x+1] = '2';
            } else {
             map[y-1][x+1] = 'p';
            }
           }
-          else if (SECT(exit->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_DESERT) {
+           if (geffect >= 1) {
             map[y-1][x+1] = '7';
            } else {
             map[y-1][x+1] = '!';
            }
           }
-          else if (SECT(exit->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_CITY) {
+           if (geffect >= 1) {
             map[y-1][x+1] = '1';
            } else {
             map[y-1][x+1] = '(';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FOREST) {
+           if (geffect >= 1) {
             map[y-1][x+1] = '6';
            } else {
             map[y-1][x+1] = 'f';
            }
           }
-          else if (SECT(exit->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_MOUNTAIN) {
+           if (geffect >= 1) {
             map[y-1][x+1] = '5';
            } else {
             map[y-1][x+1] = '^';
            }
           }
-          else if (SECT(exit->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_HILLS) {
+           if (geffect >= 1) {
             map[y-1][x+1] = '3';
            } else {
             map[y-1][x+1] = 'h';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FLYING) {
+          else if (sect == SECT_FLYING) {
            map[y-1][x+1] = 's';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_NOSWIM) {
+          else if (sect == SECT_WATER_NOSWIM) {
            map[y-1][x+1] = '`';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_SWIM) {
+          else if (sect == SECT_WATER_SWIM) {
            map[y-1][x+1] = '+';
           }
-          else if (SECT(exit->to_room) == SECT_SHOP) {
+          else if (sect == SECT_SHOP) {
            map[y-1][x+1] = '&';
           }
-          else if (SECT(exit->to_room) == SECT_IMPORTANT) {
+          else if (sect == SECT_IMPORTANT) {
            map[y-1][x+1] = '*';
           }
           else {
@@ -1834,71 +1846,71 @@ struct char_data *ch)
           }
          break;
         case NORTHWEST:
-          if (SUNKEN(exit->to_room)) {
+          if (sunken) {
            map[y-1][x-1] = '=';
           }
-          else if (SECT(exit->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_INSIDE) {
+           if (geffect >= 1) {
             map[y-1][x-1] = '2';
            } else {
             map[y-1][x-1] = 'i';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FIELD) {
+           if (geffect >= 1) {
             map[y-1][x-1] = '2';
            } else {
             map[y-1][x-1] = 'p';
            }
           }
-          else if (SECT(exit->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_DESERT) {
+           if (geffect >= 1) {
             map[y-1][x-1] = '7';
            } else {
             map[y-1][x-1] = '!';
            }
           }
-          else if (SECT(exit->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_CITY) {
+           if (geffect >= 1) {
             map[y-1][x-1] = '1';
            } else {
             map[y-1][x-1] = '(';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FOREST) {
+           if (geffect >= 1) {
             map[y-1][x-1] = '6';
            } else {
             map[y-1][x-1] = 'f';
            }
           }
-          else if (SECT(exit->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_MOUNTAIN) {
+           if (geffect >= 1) {
             map[y-1][x-1] = '5';
            } else {
             map[y-1][x-1] = '^';
            }
           }
-          else if (SECT(exit->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_HILLS) {
+           if (geffect >= 1) {
             map[y-1][x-1] = '3';
            } else {
             map[y-1][x-1] = 'h';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FLYING) {
+          else if (sect == SECT_FLYING) {
            map[y-1][x-1] = 's';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_NOSWIM) {
+          else if (sect == SECT_WATER_NOSWIM) {
            map[y-1][x-1] = '`';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_SWIM) {
+          else if (sect == SECT_WATER_SWIM) {
            map[y-1][x-1] = '+';
           }
-          else if (SECT(exit->to_room) == SECT_SHOP) {
+          else if (sect == SECT_SHOP) {
            map[y-1][x-1] = '&';
           }
-          else if (SECT(exit->to_room) == SECT_IMPORTANT) {
+          else if (sect == SECT_IMPORTANT) {
            map[y-1][x-1] = '*';
           }
           else {
@@ -1906,71 +1918,71 @@ struct char_data *ch)
           }
          break;
         case SOUTHEAST:
-          if (SUNKEN(exit->to_room)) {
+          if (sunken) {
            map[y+1][x+1] = '=';
           }
-          else if (SECT(exit->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_INSIDE) {
+           if (geffect >= 1) {
             map[y+1][x+1] = '2';
            } else {
             map[y+1][x+1] = 'i';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FIELD) {
+           if (geffect >= 1) {
             map[y+1][x+1] = '2';
            } else {
             map[y+1][x+1] = 'p';
            }
           }
-          else if (SECT(exit->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_DESERT) {
+           if (geffect >= 1) {
             map[y+1][x+1] = '7';
            } else {
             map[y+1][x+1] = '!';
            }
           }
-          else if (SECT(exit->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_CITY) {
+           if (geffect >= 1) {
             map[y+1][x+1] = '1';
            } else {
             map[y+1][x+1] = '(';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FOREST) {
+           if (geffect >= 1) {
             map[y+1][x+1] = '6';
            } else {
             map[y+1][x+1] = 'f';
            }
           }
-          else if (SECT(exit->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_MOUNTAIN) {
+           if (geffect >= 1) {
             map[y+1][x+1] = '5';
            } else {
             map[y+1][x+1] = '^';
            }
           }
-          else if (SECT(exit->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_HILLS) {
+           if (geffect >= 1) {
             map[y+1][x+1] = '3';
            } else {
             map[y+1][x+1] = 'h';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FLYING) {
+          else if (sect == SECT_FLYING) {
            map[y+1][x+1] = 's';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_NOSWIM) {
+          else if (sect == SECT_WATER_NOSWIM) {
            map[y+1][x+1] = '`';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_SWIM) {
+          else if (sect == SECT_WATER_SWIM) {
            map[y+1][x+1] = '+';
           }
-          else if (SECT(exit->to_room) == SECT_SHOP) {
+          else if (sect == SECT_SHOP) {
            map[y+1][x+1] = '&';
           }
-          else if (SECT(exit->to_room) == SECT_IMPORTANT) {
+          else if (sect == SECT_IMPORTANT) {
            map[y+1][x+1] = '*';
           }
           else {
@@ -1978,71 +1990,71 @@ struct char_data *ch)
           }
          break;
         case SOUTHWEST:
-          if (SUNKEN(exit->to_room)) {
+          if (sunken) {
            map[y+1][x-1] = '=';
           }
-          else if (SECT(exit->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_INSIDE) {
+           if (geffect >= 1) {
             map[y+1][x-1] = '2';
            } else {
             map[y+1][x-1] = 'i';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FIELD) {
+           if (geffect >= 1) {
             map[y+1][x-1] = '2';
            } else {
             map[y+1][x-1] = 'p';
            }
           }
-          else if (SECT(exit->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_DESERT) {
+           if (geffect >= 1) {
             map[y+1][x-1] = '7';
            } else {
             map[y+1][x-1] = '!';
            }
           }
-          else if (SECT(exit->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_CITY) {
+           if (geffect >= 1) {
             map[y+1][x-1] = '1';
            } else {
             map[y+1][x-1] = '(';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_FOREST) {
+           if (geffect >= 1) {
             map[y+1][x-1] = '6';
            } else {
             map[y+1][x-1] = 'f';
            }
           }
-          else if (SECT(exit->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_MOUNTAIN) {
+           if (geffect >= 1) {
             map[y+1][x-1] = '5';
            } else {
             map[y+1][x-1] = '^';
            }
           }
-          else if (SECT(exit->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(exit->to_room) >= 1) {
+          else if (sect == SECT_HILLS) {
+           if (geffect >= 1) {
             map[y+1][x-1] = '3';
            } else {
             map[y+1][x-1] = 'h';
            }
           }
-          else if (SECT(exit->to_room) == SECT_FLYING) {
+          else if (sect == SECT_FLYING) {
            map[y+1][x-1] = 's';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_NOSWIM) {
+          else if (sect == SECT_WATER_NOSWIM) {
            map[y+1][x-1] = '`';
           }
-          else if (SECT(exit->to_room) == SECT_WATER_SWIM) {
+          else if (sect == SECT_WATER_SWIM) {
            map[y+1][x-1] = '+';
           }
-          else if (SECT(exit->to_room) == SECT_SHOP) {
+          else if (sect == SECT_SHOP) {
            map[y+1][x-1] = '&';
           }
-          else if (SECT(exit->to_room) == SECT_IMPORTANT) {
+          else if (sect == SECT_IMPORTANT) {
            map[y+1][x-1] = '*';
           }
           else {
@@ -2254,6 +2266,8 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
    spotted = TRUE;
   }
 
+  struct room_data* oroom = NULL;
+
   switch (mode) {
   case SHOW_OBJ_LONG:
     /*
@@ -2271,7 +2285,8 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
     if (SITTING(obj) && GET_ADMLEVEL(ch) >= 1) {
       send_to_char(ch, "@D(@YBeing Used@D)@w");
     }
-    if (GET_OBJ_TYPE(obj) == ITEM_PLANT && (ROOM_FLAGGED(IN_ROOM(obj), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(obj), ROOM_GARDEN2))) {
+    oroom = obj_room_get(obj);
+    if (GET_OBJ_TYPE(obj) == ITEM_PLANT && (room_flagged(oroom, ROOM_GARDEN1) || room_flagged(oroom, ROOM_GARDEN2))) {
       see_plant(obj, ch);
       return;
     }
@@ -2290,10 +2305,11 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      } else {
       sprintf(bury, "recent grave covered by");
      }
-     if (spotted == TRUE && SECT(IN_ROOM(obj)) != SECT_DESERT) {
+     int sect = room_sector_type_get(obj_room_get(obj));
+     if (spotted == TRUE && sect != SECT_DESERT) {
       send_to_char(ch, "@yA %s soft dirt is here.@n\r\n", bury);
       return;
-     } else if (spotted == TRUE && SECT(IN_ROOM(obj)) == SECT_DESERT) {
+     } else if (spotted == TRUE && sect == SECT_DESERT) {
       send_to_char(ch, "@YA %s soft sand is here.@n\r\n", bury);
       return;
      } else {
@@ -7663,10 +7679,10 @@ ACMD(do_scan)
 
         list_obj_to_char(nrm->contents,ch,SHOW_OBJ_LONG, FALSE); 
         list_char_to_char(nrm->people,ch); 
-         if (ROOM_EFFECT(newroom) >= 1 && ROOM_EFFECT(newroom) <= 5) {
+         if (room_geffect_get(nrm) >= 1 && room_geffect_get(nrm) <= 5) {
            send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
          }
-         if (ROOM_EFFECT(newroom) >= 6) {
+         if (room_geffect_get(nrm) >= 6) {
            send_to_char(ch, "@RLava@r covers pretty much the entire area!@n\r\n");
          }
         /* Check 2nd room away */ 
@@ -7681,10 +7697,10 @@ ACMD(do_scan)
 
              list_obj_to_char(nrm->contents,ch,SHOW_OBJ_LONG, FALSE); 
              list_char_to_char(nrm->people,ch); 
-             if (ROOM_EFFECT(newroom) >= 1 && ROOM_EFFECT(newroom) <= 5) {
+             if (room_geffect_get(nrm) >= 1 && room_geffect_get(nrm) <= 5) {
               send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
              }
-             if (ROOM_EFFECT(newroom) >= 6) {
+             if (room_geffect_get(nrm) >= 6) {
               send_to_char(ch, "@RLava@r covers pretty much the entire area!@n\r\n");
              }
             } 

@@ -160,8 +160,8 @@ ACMD(do_galikgun)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -372,12 +372,12 @@ ACMD(do_honoo)
           pcost(ch, attperc, 0);
       }
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-      if (ROOM_EFFECT(IN_ROOM(ch)) < -1) {
+      if (room_geffect_get(char_room_get(ch)) < -1) {
           send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
-          ROOM_EFFECT(IN_ROOM(ch)) += 1;
-      } else if (ROOM_EFFECT(IN_ROOM(ch)) == -1) {
+          room_geffect_mod(char_room_get(ch), 1);
+      } else if (room_geffect_get(char_room_get(ch)) == -1) {
           send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
-          ROOM_EFFECT(IN_ROOM(ch)) = 0;
+          room_geffect_set(char_room_get(ch), 0);
       }
       return;
   }
@@ -402,12 +402,12 @@ ACMD(do_honoo)
      dmg /= 4;
      hurt(0, 0, ch, vict, NULL, dmg, 1);
 
-     if (ROOM_EFFECT(IN_ROOM(ch)) < -1) {
+     if (room_geffect_get(char_room_get(ch)) < -1) {
       send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
-      ROOM_EFFECT(IN_ROOM(ch)) += 1;
-     } else if (ROOM_EFFECT(IN_ROOM(ch)) == -1) {
+      room_geffect_mod(char_room_get(ch), 1);
+     } else if (room_geffect_get(char_room_get(ch)) == -1) {
       send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
-      ROOM_EFFECT(IN_ROOM(ch)) = 0;
+      room_geffect_set(char_room_get(ch), 0);
      }
      return;
     }
@@ -421,8 +421,8 @@ ACMD(do_honoo)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -433,12 +433,12 @@ ACMD(do_honoo)
      }
      hurt(0, 0, ch, vict, NULL, 0, 1);
 
-     if (ROOM_EFFECT(IN_ROOM(ch)) < -1) {
+     if (room_geffect_get(char_room_get(ch)) < -1) {
       send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
-      ROOM_EFFECT(IN_ROOM(ch)) += 1;
-     } else if (ROOM_EFFECT(IN_ROOM(ch)) == -1) {
+      room_geffect_mod(char_room_get(ch), 1);
+     } else if (room_geffect_get(char_room_get(ch)) == -1) {
       send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
-      ROOM_EFFECT(IN_ROOM(ch)) = 0;
+      room_geffect_set(char_room_get(ch), 0);
      }
      
      return;
@@ -454,12 +454,12 @@ ACMD(do_honoo)
       pcost(ch, attperc, 0);
      }
      hurt(0, 0, ch, vict, NULL, 0, 1);
-     if (ROOM_EFFECT(IN_ROOM(ch)) < -1) {
+     if (room_geffect_get(char_room_get(ch)) < -1) {
       send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
-      ROOM_EFFECT(IN_ROOM(ch)) += 1;
-     } else if (ROOM_EFFECT(IN_ROOM(ch)) == -1) {
+      room_geffect_mod(char_room_get(ch), 1);
+     } else if (room_geffect_get(char_room_get(ch)) == -1) {
       send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
-      ROOM_EFFECT(IN_ROOM(ch)) = 0;
+      room_geffect_set(char_room_get(ch), 0);
      }
      
      return;
@@ -475,12 +475,12 @@ ACMD(do_honoo)
       pcost(ch, attperc, 0);
      }     
    }
-    if (ROOM_EFFECT(IN_ROOM(ch)) < -1) {
+    if (room_geffect_get(char_room_get(ch)) < -1) {
      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
-     ROOM_EFFECT(IN_ROOM(ch)) += 1;
-    } else if (ROOM_EFFECT(IN_ROOM(ch)) == -1) {
+     room_geffect_mod(char_room_get(ch), 1);
+    } else if (room_geffect_get(char_room_get(ch)) == -1) {
      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
-     ROOM_EFFECT(IN_ROOM(ch)) = 0;
+     room_geffect_set(char_room_get(ch), 0);
     }
      hurt(0, 0, ch, vict, NULL, 0, 1);
    return;
@@ -565,12 +565,12 @@ ACMD(do_honoo)
      } else {
       pcost(ch, attperc, 0);
      }
-    if (ROOM_EFFECT(IN_ROOM(ch)) < -1) {
+    if (room_geffect_get(char_room_get(ch)) < -1) {
      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
-     ROOM_EFFECT(IN_ROOM(ch)) += 1;
-    } else if (ROOM_EFFECT(IN_ROOM(ch)) == -1) {
+     room_geffect_mod(char_room_get(ch), 1);
+    } else if (room_geffect_get(char_room_get(ch)) == -1) {
      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
-     ROOM_EFFECT(IN_ROOM(ch)) = 0;
+     room_geffect_set(char_room_get(ch), 0);
     }
     REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ASHED);
     return;
@@ -726,8 +726,8 @@ ACMD(do_psyblast)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -1033,8 +1033,8 @@ ACMD(do_tslash)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -1381,8 +1381,8 @@ ACMD(do_eraser)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -1622,8 +1622,8 @@ ACMD(do_pbarrage)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -2274,8 +2274,8 @@ ACMD(do_deathball)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 80) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 20;
+     if (room_dmg_get(char_room_get(ch)) <= 80) {
+       room_dmg_mod(char_room_get(ch), 20);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -2744,8 +2744,8 @@ ACMD(do_bigbang)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 80) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 20;
+     if (room_dmg_get(char_room_get(ch)) <= 80) {
+       room_dmg_mod(char_room_get(ch), 20);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -2974,8 +2974,8 @@ ACMD(do_scatter)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 80) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 20;
+     if (room_dmg_get(char_room_get(ch)) <= 80) {
+       room_dmg_mod(char_room_get(ch), 20);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -3206,8 +3206,8 @@ ACMD(do_balefire)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 80) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 20;
+     if (room_dmg_get(char_room_get(ch)) <= 80) {
+       room_dmg_mod(char_room_get(ch), 20);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -3471,11 +3471,12 @@ ACMD(do_kakusanha)
       }
      } /* Hitting targets! */
 
-     if (count < 5 && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
+     if (count < 5 && !room_flagged(char_room_get(ch), ROOM_SPACE)) {
       send_to_room(IN_ROOM(ch), "The rest of the beams slam into the ground!@n\r\n");
       send_to_room(IN_ROOM(ch), "@wBright explosions erupt from the impacts!\r\n");
 
-      if (SECT(IN_ROOM(ch)) != SECT_INSIDE) {
+      int sect = room_sector_type_get(char_room_get(ch));
+      if (sect != SECT_INSIDE) {
          impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
        switch (rand_number(1, 8)) {
         case 1:
@@ -3483,8 +3484,8 @@ ACMD(do_kakusanha)
          act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, 0, TO_ROOM);
         break;
         case 2:
-         if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(ch)) == 0) {
-         ROOM_EFFECT(IN_ROOM(ch)) = 5;
+         if (rand_number(1, 4) == 4 && room_geffect_get(char_room_get(ch)) == 0) {
+         room_geffect_set(char_room_get(ch), 5);
          act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", TRUE, ch, 0, 0, TO_CHAR);
          act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", TRUE, ch, 0, 0, TO_ROOM);
          }
@@ -3510,7 +3511,7 @@ ACMD(do_kakusanha)
         break;
        }
       }
-      if (SECT(IN_ROOM(ch)) == SECT_UNDERWATER) {
+      if (sect == SECT_UNDERWATER) {
        switch (rand_number(1, 3)) {
         case 1:
          act("The water churns violently!", TRUE, ch, 0, 0, TO_CHAR);
@@ -3526,7 +3527,7 @@ ACMD(do_kakusanha)
          break;
        }
       }
-      if (SECT(IN_ROOM(ch)) == SECT_WATER_SWIM || SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM) {
+      if (sect == SECT_WATER_SWIM || sect == SECT_WATER_NOSWIM) {
        switch (rand_number(1, 3)) {
         case 1:
          act("A huge column of water erupts from the impact!", TRUE, ch, 0, 0, TO_CHAR);
@@ -3542,7 +3543,7 @@ ACMD(do_kakusanha)
          break;
        }
       }
-      if (SECT(IN_ROOM(ch)) == SECT_INSIDE) {
+      if (sect == SECT_INSIDE) {
          impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
        switch (rand_number(1, 8)) {
         case 1:
@@ -3575,8 +3576,8 @@ ACMD(do_kakusanha)
        }
       }
 
-      if (ROOM_DAMAGE(IN_ROOM(ch)) <= (100 - ((5 - count) * 5))) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += (5 - count) * 5;
+      if (room_dmg_get(char_room_get(ch)) <= (100 - ((5 - count) * 5))) {
+       room_dmg_mod(char_room_get(ch), (5 - count) * 5);
       }
      }
 
@@ -3623,7 +3624,7 @@ ACMD(do_hellspear)
    return;
   }
 
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+   if (room_flagged(char_room_get(ch), ROOM_PEACEFUL)) {
     send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
    }
@@ -3848,8 +3849,8 @@ ACMD(do_hellflash)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
      if (GET_SKILL_PERF(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
@@ -4353,8 +4354,8 @@ ACMD(do_crusher)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 90) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 10;
+     if (room_dmg_get(char_room_get(ch)) <= 90) {
+       room_dmg_mod(char_room_get(ch), 10);
      }
      improve_skill(vict, SKILL_DODGE, 0);
      if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
@@ -4586,8 +4587,8 @@ ACMD(do_final)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 90) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 10;
+     if (room_dmg_get(char_room_get(ch)) <= 90) {
+       room_dmg_mod(char_room_get(ch), 10);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -4793,8 +4794,8 @@ ACMD(do_sbc)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 90) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 10;
+     if (room_dmg_get(char_room_get(ch)) <= 90) {
+       room_dmg_mod(char_room_get(ch), 10);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -5008,8 +5009,8 @@ ACMD(do_tribeam)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 90) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 10;
+     if (room_dmg_get(char_room_get(ch)) <= 90) {
+       room_dmg_mod(char_room_get(ch), 10);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -5222,8 +5223,8 @@ ACMD(do_kienzan)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -5517,7 +5518,7 @@ ACMD(do_baku)
    return;
   }
 
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+   if (room_flagged(char_room_get(ch), ROOM_PEACEFUL)) {
     send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
    }
@@ -5982,8 +5983,8 @@ ACMD(do_dualbeam)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
      if (hits == 1) {
@@ -6223,8 +6224,8 @@ ACMD(do_blessedhammer)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -6455,8 +6456,8 @@ ACMD(do_kousengan)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -6711,8 +6712,8 @@ ACMD(do_deathbeam)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
      if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
@@ -6995,8 +6996,8 @@ ACMD(do_dodonpa)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
      if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
@@ -7255,8 +7256,8 @@ ACMD(do_masenko)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
      if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
@@ -7552,8 +7553,8 @@ ACMD(do_kamehameha)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
@@ -10649,8 +10650,8 @@ ACMD(do_kiball)
       /*      User/target/skill name/skill/hurt type */
      pcost(ch, attperc, 0);
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 98) {
-      ROOM_DAMAGE(IN_ROOM(ch)) += 2;
+     if (room_dmg_get(char_room_get(ch)) <= 98) {
+      room_dmg_mod(char_room_get(ch), 2);
      }
      
      return;
@@ -10677,8 +10678,8 @@ ACMD(do_kiball)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 98) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 2;
+     if (room_dmg_get(char_room_get(ch)) <= 98) {
+       room_dmg_mod(char_room_get(ch), 2);
      }
      improve_skill(vict, SKILL_DODGE, 0);
      pcost(ch, attperc, 0);
@@ -10890,8 +10891,8 @@ ACMD(do_beam)
       /*      User/target/skill name/skill/hurt type */
      pcost(ch, attperc, 0);
 
-      if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+      if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
       }
      
      return;
@@ -10918,8 +10919,8 @@ ACMD(do_beam)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
      pcost(ch, attperc, 0);
@@ -11177,8 +11178,8 @@ ACMD(do_kiblast)
       /*      User/target/skill name/skill/hurt type */
      pcost(ch, attperc, 0);
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-      ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+      room_dmg_mod(char_room_get(ch), 5);
      }
      
      return;
@@ -11205,8 +11206,8 @@ ACMD(do_kiblast)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (room_dmg_get(char_room_get(ch)) <= 95) {
+       room_dmg_mod(char_room_get(ch), 5);
      }
      improve_skill(vict, SKILL_DODGE, 0);
      pcost(ch, attperc, 0);
@@ -11505,11 +11506,12 @@ ACMD(do_slam)
        else if ((GET_POS(vict) == POS_STANDING || GET_POS(vict) == POS_FIGHTING) && !AFF_FLAGGED(vict, AFF_KNOCKED)) {
         GET_POS(vict) = POS_SITTING;
        }
-       if (ROOM_DAMAGE(IN_ROOM(vict)) <= 95 && !ROOM_FLAGGED(IN_ROOM(vict), ROOM_SPACE)) {
+       if (room_dmg_get(char_room_get(vict)) <= 95 && !room_flagged(char_room_get(vict), ROOM_SPACE)) {
          act("@W$N@W slams into the ground forming a large crater with $S body!@n", TRUE, ch, 0, vict, TO_CHAR);
          act("@WYou slam into the ground forming a large crater with your body!@n", TRUE, ch, 0, vict, TO_VICT);
          act("@W$N@W slams into the ground forming a large crater with $S body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (SECT(IN_ROOM(vict)) != SECT_INSIDE && SECT(IN_ROOM(vict)) != SECT_UNDERWATER && SECT(IN_ROOM(vict)) != SECT_WATER_SWIM && SECT(IN_ROOM(vict)) != SECT_WATER_NOSWIM) {
+         int vsect = room_sector_type_get(char_room_get(vict));
+      if (vsect != SECT_INSIDE && vsect != SECT_UNDERWATER && vsect != SECT_WATER_SWIM && vsect != SECT_WATER_NOSWIM) {
          impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
        switch (rand_number(1, 8)) {
         case 1:
@@ -11517,8 +11519,8 @@ ACMD(do_slam)
          act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, vict, TO_ROOM);
         break;
         case 2:
-         if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(vict)) == 0) {
-         ROOM_EFFECT(IN_ROOM(vict)) = 1;
+         if (rand_number(1, 4) == 4 && room_geffect_get(char_room_get(vict)) == 0) {
+         room_geffect_set(char_room_get(vict), 1);
          act("Lava leaks up through cracks in the crater!", TRUE, ch, 0, vict, TO_CHAR);
          act("Lava leaks up through cracks in the crater!", TRUE, ch, 0, vict, TO_ROOM);
          }
@@ -11543,7 +11545,7 @@ ACMD(do_slam)
 	break;
        }
       }
-      if (SECT(IN_ROOM(vict)) == SECT_UNDERWATER) {
+      if (vsect == SECT_UNDERWATER) {
        switch (rand_number(1, 3)) {
         case 1:
          act("The water churns violently!", TRUE, ch, 0, vict, TO_CHAR);
@@ -11559,7 +11561,7 @@ ACMD(do_slam)
          break;
        }
       }
-      if (SECT(IN_ROOM(vict)) == SECT_WATER_SWIM || SECT(IN_ROOM(vict)) == SECT_WATER_NOSWIM) {
+      if (vsect == SECT_WATER_SWIM || vsect == SECT_WATER_NOSWIM) {
        switch (rand_number(1, 3)) {
         case 1:
          act("A huge column of water erupts from the impact!", TRUE, ch, 0, vict, TO_CHAR);
@@ -11575,7 +11577,7 @@ ACMD(do_slam)
          break;
        }
       }
-      if (SECT(IN_ROOM(vict)) == SECT_INSIDE) {
+      if (vsect == SECT_INSIDE) {
          impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
        switch (rand_number(1, 8)) {
         case 1:
@@ -11607,7 +11609,7 @@ ACMD(do_slam)
 	break;
        }
       }
-         ROOM_DAMAGE(IN_ROOM(vict)) += 5;
+         room_dmg_mod(char_room_get(vict), 5);
 	}
       hurt(0, 0, ch, vict, NULL, dmg, 0);
       dam_eq_loc(vict, 3);
@@ -13676,9 +13678,9 @@ ACMD(do_flee)
     attempt = rand_number(0, NUM_OF_DIRS - 1);	/* Select a random direction */
    }
    if (CAN_GO(ch, attempt) &&
-	!ROOM_FLAGGED(EXIT(ch, attempt)->to_room, ROOM_DEATH)) {
+	!room_flagged(exit_dest_get(EXIT(ch, attempt)), ROOM_DEATH)) {
       act("$n panics, and attempts to flee!", TRUE, ch, 0, 0, TO_ROOM);
-     if (IS_NPC(ch) && ROOM_FLAGGED(EXIT(ch, attempt)->to_room, ROOM_NOMOB)) {
+     if (IS_NPC(ch) && room_flagged(exit_dest_get(EXIT(ch, attempt)), ROOM_NOMOB)) {
       return;
      }
       was_fighting = FIGHTING(ch);
