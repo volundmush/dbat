@@ -144,7 +144,7 @@ void update_space(void)
   for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
     for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
       fscanf(mapfile, "%d", &vnum_read);
-      mapnums[rowcounter][colcounter] = real_room(vnum_read);
+      mapnums[rowcounter][colcounter] = vnum_read;
     }
   }
 
@@ -794,7 +794,7 @@ ACMD(do_recall)
   if (real_room(2) != NOWHERE) {
   char_from_room(ch);
   char_to_room(ch, real_room(2));
-  look_at_room(IN_ROOM(ch), ch, 0);
+  look_at_room(char_room_get(ch), ch, 0);
   GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
   }
  }
@@ -1078,7 +1078,7 @@ ACMD(do_goto)
   snprintf(buf, sizeof(buf), "$n %s", POOFIN(ch) ? POOFIN(ch) : "appears with an ear-splitting bang.");
   act(buf, TRUE, ch, 0, 0, TO_ROOM);
 
-  look_at_room(IN_ROOM(ch), ch, 0);
+  look_at_room(char_room_get(ch), ch, 0);
   enter_wtrigger(char_room_get(ch), ch, -1);
 }
 
@@ -1110,7 +1110,7 @@ ACMD(do_trans)
       char_to_room(victim, IN_ROOM(ch));
       act("$n arrives from a puff of smoke.", FALSE, victim, 0, 0, TO_ROOM);
       act("$n has transferred you!", FALSE, ch, 0, victim, TO_VICT);
-      look_at_room(IN_ROOM(victim), victim, 0);
+      look_at_room(char_room_get(victim), victim, 0);
       enter_wtrigger(char_room_get(victim), victim, -1);
     }
   } else {			/* Trans All */
@@ -1129,7 +1129,7 @@ ACMD(do_trans)
 	char_to_room(victim, IN_ROOM(ch));
 	act("$n arrives from a puff of smoke.", FALSE, victim, 0, 0, TO_ROOM);
 	act("$n has transferred you!", FALSE, ch, 0, victim, TO_VICT);
-        look_at_room(IN_ROOM(victim), victim, 0);
+        look_at_room(char_room_get(victim), victim, 0);
         enter_wtrigger(char_room_get(victim), victim, -1);
       }
     send_to_char(ch, "%s", CONFIG_OK);
@@ -1165,7 +1165,7 @@ ACMD(do_teleport)
     char_to_room(victim, target);
     act("$n arrives from a puff of smoke.", FALSE, victim, 0, 0, TO_ROOM);
     act("$n has teleported you!", FALSE, ch, 0, (char *) victim, TO_VICT);
-    look_at_room(IN_ROOM(victim), victim, 0);
+    look_at_room(char_room_get(victim), victim, 0);
     enter_wtrigger(char_room_get(victim), victim, -1);
   }
 }
@@ -2331,7 +2331,7 @@ ACMD(do_purge)
 
     act("$n gestures... You are surrounded by scorching flames!",
 	FALSE, ch, 0, 0, TO_ROOM);
-    send_to_room(IN_ROOM(ch), "The world seems a little cleaner.\r\n");
+    send_to_room(char_room_get(ch), "The world seems a little cleaner.\r\n");
 
     for (vict = char_room_get(ch)->people; vict; vict = vict->next_in_room) {
       if (!IS_NPC(vict))
@@ -4561,7 +4561,7 @@ ACMD(do_plist)
 ACMD(do_peace)
 {
   struct char_data *vict, *next_v;
-  send_to_room(IN_ROOM(ch), "Everything is quite peaceful now.\r\n");
+  send_to_room(char_room_get(ch), "Everything is quite peaceful now.\r\n");
 
     for (vict = char_room_get(ch)->people; vict; vict = next_v) {
       next_v = vict->next_in_room;  

@@ -1240,7 +1240,7 @@ ACMD(do_zen)
      act("@C$N@W manages to dodge your Zen Blade Strike, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W Zen Blade Strike, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W Zen Blade Strike, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 19, skill, SKILL_ZEN); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -1569,7 +1569,7 @@ ACMD(do_malice)
      act("@C$N@W manages to dodge your Malice Breaker, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W Malice Breaker, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W Malice Breaker, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 36, skill, SKILL_MALICE); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -3401,7 +3401,7 @@ ACMD(do_spike)
      act("@C$N@W manages to dodge your water spikes, letting them slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W water spikes, letting them slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W water spikes, letting them slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
      dodge_ki(ch, vict, 0, 43, skill, SKILL_WSPIKE); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -4138,7 +4138,7 @@ ACMD(do_breaker)
      act("@C$N@W manages to dodge your Star Breaker, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W Star Breaker, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W Star Breaker, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_room_get(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 46, skill, SKILL_BREAKER); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]

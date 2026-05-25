@@ -32,7 +32,7 @@ int arena_watch(struct char_data *ch);
 void send_to_eaves(const char *messg, struct char_data *tch, ...);
 size_t	send_to_char(struct char_data *ch, const char *messg, ...) __attribute__ ((format (printf, 2, 3)));
 void	send_to_all(const char *messg, ...) __attribute__ ((format (printf, 1, 2)));
-void	send_to_room(room_rnum room, const char *messg, ...) __attribute__ ((format (printf, 2, 3)));
+void	send_to_room(struct room_data* room, const char *messg, ...) __attribute__ ((format (printf, 2, 3)));
 void	send_to_outdoor(const char *messg, ...) __attribute__ ((format (printf, 1, 2)));
 void    send_to_moon(const char *messg, ...) __attribute__ ((format (printf, 1, 2)));
 void    send_to_planet(int type, int planet, const char *messg, ...) __attribute__ ((format (printf, 3, 4)));

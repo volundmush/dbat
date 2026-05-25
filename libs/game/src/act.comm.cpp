@@ -225,6 +225,7 @@ ACMD(do_say)
   } else {
     char buf[MAX_INPUT_LENGTH + 70];
     char verb[10];
+    struct room_data *room = char_room_get(ch);
 
     if (argument[strlen(argument)-1] == '!') {
       strcpy(verb, "exclaim");
@@ -234,7 +235,7 @@ ACMD(do_say)
       strcpy(verb, "say");
     }
 
-    for (tch = char_room_get(ch)->people; tch; tch = tch->next_in_room) {
+    for (tch = room->people; tch; tch = tch->next_in_room) {
       if (tch != ch && tch->desc) {
        char sayto[100];
        sprintf(sayto, "to %s ", GET_NAME(tch));
@@ -285,6 +286,7 @@ ACMD(do_say)
         add_history(ch, buf, HIST_SAY);
        if (SHENRON == TRUE) {
        if (GET_ROOM_VNUM(IN_ROOM(ch)) == DRAGONR && GET_ROOM_VNUM(IN_ROOM(EDRAGON)) == DRAGONR) {
+        struct room_data *droom = room_by_id(DRAGONR);
         if (strstr(argument, "wish")) {
 
           for (d = descriptor_list; d; d = d->next) {
@@ -312,7 +314,7 @@ ACMD(do_say)
 
          if (granted == FALSE && strstr(argument, "knowledge")) {
           if (wch != NULL) {
-          send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now has more knowledge!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
+          send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s now has more knowledge!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            GET_PRACTICES(wch, GET_CLASS(wch)) += rand_number(2000, 5000);
            granted = TRUE;
            SELFISHMETER += 1;
@@ -323,7 +325,7 @@ ACMD(do_say)
 
          if (granted == FALSE && strstr(argument, "speed")) {
           if (wch != NULL) {
-          send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now faster!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
+          send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s is now faster!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            wch->real_abils.cha += 10;
            if (wch->real_abils.cha > 100) {
             wch->real_abils.cha = 100;
@@ -338,7 +340,7 @@ ACMD(do_say)
 
          if (granted == FALSE && strstr(argument, "tough")) {
           if (wch != NULL) {
-          send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now tougher!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
+          send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s is now tougher!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            GET_ARMOR(wch) += 5000;
            granted = TRUE;
            SELFISHMETER += 1;
@@ -349,7 +351,7 @@ ACMD(do_say)
 
          if (granted == FALSE && strstr(argument, "strength")) {
           if (wch != NULL) {
-          send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s has more strength!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
+          send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s has more strength!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            wch->real_abils.str += 10;
            if (wch->real_abils.str > 100) {
             wch->real_abils.str = 100;
@@ -364,7 +366,7 @@ ACMD(do_say)
 
          if (granted == FALSE && strstr(argument, "intelligence")) {
           if (wch != NULL) {
-          send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now smarter!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
+          send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s is now smarter!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            wch->real_abils.intel += 10;
            if (wch->real_abils.intel > 100) {
             wch->real_abils.intel = 100;
@@ -379,7 +381,7 @@ ACMD(do_say)
 
          if (granted == FALSE && strstr(argument, "wisdom")) {
           if (wch != NULL) {
-          send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now wiser!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
+          send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s is now wiser!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            wch->real_abils.wis += 10;
            if (wch->real_abils.wis > 100) {
             wch->real_abils.wis = 100;
@@ -393,7 +395,7 @@ ACMD(do_say)
 
          if (granted == FALSE && strstr(argument, "agility")) {
           if (wch != NULL) {
-          send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now more agile!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
+          send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s is now more agile!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
           wch->real_abils.dex += 10;
           if (wch->real_abils.dex > 100) {
            wch->real_abils.dex = 100;
@@ -408,7 +410,7 @@ ACMD(do_say)
 
          if (granted == FALSE && strstr(argument, "constitution")) {
           if (wch != NULL) {
-          send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s has more guts!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
+          send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s has more guts!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
           wch->real_abils.con += 10;
           if (wch->real_abils.con > 100) {
            wch->real_abils.con = 100;
@@ -423,7 +425,7 @@ ACMD(do_say)
 
          if (granted == FALSE && strstr(argument, "skill")) {
           if (wch != NULL) {
-          send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s has more skill!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
+          send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s has more skill!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
           int roll = rand_number(1, 3);
           send_to_char(wch, "@GYou suddenly feel like you could learn %d more skills!@n\r\n", roll);
           GET_SLOTS(wch) += roll;
@@ -437,7 +439,7 @@ ACMD(do_say)
 /* Rillao: transloc, add new transes here */
          if (granted == FALSE && strstr(argument, "power")) {
           if (wch != NULL) {
-           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish cannot be granted, You might want to try something else instead, mortal!@w'@n\r\n");
+           send_to_room(droom, "@wShenron says, '@CYour wish cannot be granted, You might want to try something else instead, mortal!@w'@n\r\n");
           /* send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now has grown stronger!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            double mult = 1;
            if (IS_TRUFFLE(ch) && PLR_FLAGGED(ch, PLR_TRANS1)) {
@@ -485,7 +487,7 @@ ACMD(do_say)
 
          if (granted == FALSE && strstr(argument, "money")) {
           if (wch != NULL) {
-           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now has become richer!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
+           send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s now has become richer!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            GET_BANK_GOLD(wch) += 1000000;
            granted = TRUE;
            SELFISHMETER += 1;
@@ -496,7 +498,7 @@ ACMD(do_say)
 
          if (granted == FALSE && strstr(argument, "immunity")) {
           if (wch != NULL) {
-           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now has immunity to Burn, Freezing, Mind Break, Poison, Blindness, Yoikominminken, and Paralysis!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
+           send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s now has immunity to Burn, Freezing, Mind Break, Poison, Blindness, Yoikominminken, and Paralysis!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            SET_BIT_AR(AFF_FLAGS(wch), AFF_IMMUNITY);
            granted = TRUE;
            SELFISHMETER += 1;
@@ -507,7 +509,7 @@ ACMD(do_say)
 
          if (granted == FALSE && strstr(argument, "vitality")) {
           if (wch != NULL) {
-           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish cannot be granted, You might want to try something else instead, mortal!%s@w'@n\r\n");
+           send_to_room(droom, "@wShenron says, '@CYour wish cannot be granted, You might want to try something else instead, mortal!%s@w'@n\r\n");
            /*send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now will never hunger or thirst again!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            GET_COND(ch, HUNGER) = -1;
            GET_COND(ch, THIRST) = -1;
@@ -531,10 +533,10 @@ ACMD(do_say)
           }
           if (count == 1) {
            if (!AFF_FLAGGED(wch, AFF_SPIRIT)) {
-            send_to_room(real_room(DRAGONR), "@wShenron says, '@C%s is not dead, and can not be revived.@w'@n\r\n", GET_NAME(wch));
+            send_to_room(droom, "@wShenron says, '@C%s is not dead, and can not be revived.@w'@n\r\n", GET_NAME(wch));
            }
            else {
-           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s has returned to life!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
+           send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s has returned to life!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            if (real_room(GET_DROOM(wch)) == NOWHERE) {
             GET_DROOM(wch) = 300;
            }
@@ -545,7 +547,7 @@ ACMD(do_say)
             } else {
              char_to_room(wch, real_room(300));
             }
-            look_at_room(IN_ROOM(wch), wch, 0);
+            look_at_room(char_room_get(wch), wch, 0);
             send_to_char(wch, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
             REMOVE_BIT_AR(AFF_FLAGS(wch), AFF_SPIRIT);
             REMOVE_BIT_AR(AFF_FLAGS(wch), AFF_ETHEREAL);
@@ -557,20 +559,20 @@ ACMD(do_say)
           } /* is there a target for the wish? */
           if (count == 2) {
            if (!AFF_FLAGGED(wch, AFF_SPIRIT)) {
-            send_to_room(real_room(DRAGONR), "@wShenron says, '@C%s is not dead, and can not be revived.@w'@n\r\n", GET_NAME(wch));
+            send_to_room(droom, "@wShenron says, '@C%s is not dead, and can not be revived.@w'@n\r\n", GET_NAME(wch));
            }
            if (!AFF_FLAGGED(wch2, AFF_SPIRIT)) {
-            send_to_room(real_room(DRAGONR), "@wShenron says, '@C%s is not dead, and can not be revived.@w'@n\r\n", GET_NAME(wch2));
+            send_to_room(droom, "@wShenron says, '@C%s is not dead, and can not be revived.@w'@n\r\n", GET_NAME(wch2));
            }
            else if (AFF_FLAGGED(wch, AFF_SPIRIT) && AFF_FLAGGED(wch2, AFF_SPIRIT)) {
-           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s and %s have returned to life!%s@w'@n\r\n", GET_NAME(wch), GET_NAME(wch2), WISH[0] ? "" : " Now make your second wish.");
+           send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s and %s have returned to life!%s@w'@n\r\n", GET_NAME(wch), GET_NAME(wch2), WISH[0] ? "" : " Now make your second wish.");
            if (real_room(GET_DROOM(wch)) == NOWHERE) {
             GET_DROOM(wch) = 300;
            }
            if (real_room(GET_DROOM(wch)) != NOWHERE) {
             char_from_room(wch);
             char_to_room(wch, real_room(GET_DROOM(wch)));
-            look_at_room(IN_ROOM(wch), wch, 0);
+            look_at_room(char_room_get(wch), wch, 0);
             send_to_char(wch, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
             REMOVE_BIT_AR(AFF_FLAGS(wch), AFF_SPIRIT);
             REMOVE_BIT_AR(AFF_FLAGS(wch), AFF_ETHEREAL);
@@ -581,7 +583,7 @@ ACMD(do_say)
            if (real_room(GET_DROOM(wch2)) != NOWHERE) {
             char_from_room(wch2);
             char_to_room(wch2, real_room(GET_DROOM(wch2)));
-            look_at_room(IN_ROOM(wch2), wch2, 0);
+            look_at_room(char_room_get(wch2), wch2, 0);
             send_to_char(wch2, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
             REMOVE_BIT_AR(AFF_FLAGS(wch2), AFF_SPIRIT);
             REMOVE_BIT_AR(AFF_FLAGS(wch2), AFF_ETHEREAL);
@@ -594,23 +596,23 @@ ACMD(do_say)
           } /* is there two targets for the wish? */
           if (count == 3) {
            if (!AFF_FLAGGED(wch, AFF_SPIRIT)) {
-            send_to_room(real_room(DRAGONR), "@wShenron says, '@C%s is not dead, and can not be revived.@w'@n\r\n", GET_NAME(wch));
+            send_to_room(droom, "@wShenron says, '@C%s is not dead, and can not be revived.@w'@n\r\n", GET_NAME(wch));
            }
            if (!AFF_FLAGGED(wch2, AFF_SPIRIT)) {
-            send_to_room(real_room(DRAGONR), "@wShenron says, '@C%s is not dead, and can not be revived.@w'@n\r\n", GET_NAME(wch2));
+            send_to_room(droom, "@wShenron says, '@C%s is not dead, and can not be revived.@w'@n\r\n", GET_NAME(wch2));
            }
            if (!AFF_FLAGGED(wch3, AFF_SPIRIT)) {
-            send_to_room(real_room(DRAGONR), "@wShenron says, '@C%s is not dead, and can not be revived.@w'@n\r\n", GET_NAME(wch3));
+            send_to_room(droom, "@wShenron says, '@C%s is not dead, and can not be revived.@w'@n\r\n", GET_NAME(wch3));
            }
            else if (AFF_FLAGGED(wch, AFF_SPIRIT) && AFF_FLAGGED(wch2, AFF_SPIRIT) && AFF_FLAGGED(wch3, AFF_SPIRIT)) {
-           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s, %s, and %s have returned to life!!%s@w'@n\r\n", GET_NAME(wch), GET_NAME(wch2), GET_NAME(wch3), WISH[0] ? "" : " Now make your second wish.");
+           send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s, %s, and %s have returned to life!!%s@w'@n\r\n", GET_NAME(wch), GET_NAME(wch2), GET_NAME(wch3), WISH[0] ? "" : " Now make your second wish.");
            if (real_room(GET_DROOM(wch)) == NOWHERE) {
             GET_DROOM(wch) = 300;
            }
            if (real_room(GET_DROOM(wch)) != NOWHERE) {
             char_from_room(wch);
             char_to_room(wch, real_room(GET_DROOM(wch)));
-            look_at_room(IN_ROOM(wch), wch, 0);
+            look_at_room(char_room_get(wch), wch, 0);
             send_to_char(wch, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
             REMOVE_BIT_AR(AFF_FLAGS(wch), AFF_SPIRIT);
             REMOVE_BIT_AR(AFF_FLAGS(wch), AFF_ETHEREAL);
@@ -621,7 +623,7 @@ ACMD(do_say)
            if (real_room(GET_DROOM(wch2)) != NOWHERE) {
             char_from_room(wch2);
             char_to_room(wch2, real_room(GET_DROOM(wch2)));
-            look_at_room(IN_ROOM(wch2), wch2, 0);
+            look_at_room(char_room_get(wch2), wch2, 0);
             send_to_char(wch2, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
             REMOVE_BIT_AR(AFF_FLAGS(wch2), AFF_SPIRIT);
             REMOVE_BIT_AR(AFF_FLAGS(wch2), AFF_ETHEREAL);
@@ -632,7 +634,7 @@ ACMD(do_say)
            if (real_room(GET_DROOM(wch3)) != NOWHERE) {
             char_from_room(wch3);
             char_to_room(wch3, real_room(GET_DROOM(wch3)));
-            look_at_room(IN_ROOM(wch3), wch3, 0);
+            look_at_room(char_room_get(wch3), wch3, 0);
             send_to_char(wch3, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
             REMOVE_BIT_AR(AFF_FLAGS(wch3), AFF_SPIRIT);
             REMOVE_BIT_AR(AFF_FLAGS(wch3), AFF_ETHEREAL);
@@ -647,7 +649,7 @@ ACMD(do_say)
 
          if (granted == FALSE && strstr(argument, "immortal") && WISH[0] == 0) {
           if (wch != NULL) {
-           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now immortal!@w'@n\r\n" , GET_NAME(wch));
+           send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s is now immortal!@w'@n\r\n" , GET_NAME(wch));
            SET_BIT_AR(PLR_FLAGS(wch), PLR_IMMORTAL);
            WISH[0] = 1;
            WISH[1] = 1;
@@ -660,13 +662,13 @@ ACMD(do_say)
 
          if (granted == FALSE && strstr(argument, "immortal") && WISH[0] == 1) {
           if (wch != NULL) {
-           send_to_room(real_room(DRAGONR), "@wShenron says, '@CI can not grant that wish, there is not enough remaining power in this summoning!@w'@n\r\n");
+           send_to_room(droom, "@wShenron says, '@CI can not grant that wish, there is not enough remaining power in this summoning!@w'@n\r\n");
           } /* is there a target for the wish? */
          }
 
          if (granted == FALSE && strstr(argument, " mortal")) {
           if (wch != NULL) {
-           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now mortal!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
+           send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s is now mortal!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            REMOVE_BIT_AR(PLR_FLAGS(wch), PLR_IMMORTAL);
            granted = TRUE;
            SELFISHMETER += 4;
@@ -697,7 +699,7 @@ ACMD(do_say)
            obj_to_char(obj, ch);
            obj = read_object(1, VIRTUAL);
            obj_to_char(obj, ch);
-           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now possesses 10 senzus!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
+           send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s now possesses 10 senzus!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            granted = TRUE;
            SELFISHMETER += 1;
 		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a senzu wish.", GET_NAME(ch));
@@ -706,7 +708,7 @@ ACMD(do_say)
 		 
 		 if (granted == FALSE && strstr(argument, "roleplay")) {
 		  if(wch != NULL) {
-			send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
+			send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
 			granted = TRUE;
 			mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a roleplay wish.", GET_NAME(ch));
 			WAIT_STATE(ch, PULSE_4SEC);
@@ -732,10 +734,10 @@ ACMD(do_say)
            save_mud_time(&time_info);
           }
           else if (wch == NULL) {
-          send_to_room(real_room(DRAGONR), "@wShenron says, '@CThat person does not exist, make another wish.'@n\r\n");
+          send_to_room(droom, "@wShenron says, '@CThat person does not exist, make another wish.'@n\r\n");
           }
           else {
-          send_to_room(real_room(DRAGONR), "@wShenron says, '@CDo not waste my time with wishes I can not grant...@w'@n\r\n");
+          send_to_room(droom, "@wShenron says, '@CDo not waste my time with wishes I can not grant...@w'@n\r\n");
           }
          } 
         } /* end DRAGONR if */

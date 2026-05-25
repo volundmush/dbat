@@ -195,7 +195,7 @@ bool check_mob_in_room(mob_vnum mob, room_vnum room)
 
   for (i = character_list; i; i = i->next) 
     if (GET_MOB_VNUM(i) == mob) 
-      if (world[i->in_room].number == room) found=TRUE; 
+      if (char_room_vnum_get(i) == room) found=TRUE; 
 
   return found; 
 } 
@@ -205,10 +205,9 @@ bool check_obj_in_room(obj_vnum obj, room_vnum room)
 
   struct obj_data *i, *list; 
   bool found=FALSE; 
-  room_rnum r_room; 
+  struct room_data *r_room = room_by_id(room);
 
-  r_room   = real_room(room); 
-  list = world[r_room].contents; 
+  list = r_room->contents; 
 
   for (i = list; i; i = i->next_content) 
   { 
@@ -316,7 +315,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
       /* Hit point penalty for surrendering */
       decCurHealth(ch, 2000);
 
-      look_at_room(IN_ROOM(ch), ch, 0); 
+      look_at_room(char_room_get(ch), ch, 0); 
       return TRUE; 
     } 
     else 
@@ -1349,7 +1348,7 @@ SPECIAL(gravity)
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (room_flagged(room, ROOM_AURA)) {
      room_flag_set(room, ROOM_AURA, FALSE);
-     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
+     send_to_room(room, "The increased gravity forces the aura to disappear.\r\n");
     }
     room_gravity_set(char_room_get(ch), 10);
     GET_OBJ_WEIGHT(obj) = 0;
@@ -1371,7 +1370,7 @@ SPECIAL(gravity)
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (room_flagged(room, ROOM_AURA)) {
      room_flag_set(room, ROOM_AURA, FALSE);
-     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
+     send_to_room(room, "The increased gravity forces the aura to disappear.\r\n");
     }
     room_gravity_set(room, 20);
      GET_OBJ_WEIGHT(obj) = 20;
@@ -1386,7 +1385,7 @@ SPECIAL(gravity)
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (room_flagged(room, ROOM_AURA)) {
      room_flag_set(room, ROOM_AURA, FALSE);
-     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
+     send_to_room(room, "The increased gravity forces the aura to disappear.\r\n");
     }
     room_gravity_set(room, 30);
      GET_OBJ_WEIGHT(obj) = 30;
@@ -1401,7 +1400,7 @@ SPECIAL(gravity)
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (room_flagged(room, ROOM_AURA)) {
      room_flag_set(room, ROOM_AURA, FALSE);
-     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
+     send_to_room(room, "The increased gravity forces the aura to disappear.\r\n");
     }
     room_gravity_set(room, 40);
      GET_OBJ_WEIGHT(obj) = 40;
@@ -1416,7 +1415,7 @@ SPECIAL(gravity)
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (room_flagged(room, ROOM_AURA)) {
      room_flag_set(room, ROOM_AURA, FALSE);
-     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
+     send_to_room(room, "The increased gravity forces the aura to disappear.\r\n");
     }
     room_gravity_set(room, 50);
      GET_OBJ_WEIGHT(obj) = 50;
@@ -1431,7 +1430,7 @@ SPECIAL(gravity)
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (room_flagged(room, ROOM_AURA)) {
      room_flag_set(room, ROOM_AURA, FALSE);
-     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
+     send_to_room(room, "The increased gravity forces the aura to disappear.\r\n");
     }
     room_gravity_set(room, 100);
      GET_OBJ_WEIGHT(obj) = 100;
@@ -1446,7 +1445,7 @@ SPECIAL(gravity)
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (room_flagged(room, ROOM_AURA)) {
      room_flag_set(room, ROOM_AURA, FALSE);
-     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
+     send_to_room(room, "The increased gravity forces the aura to disappear.\r\n");
     }
     room_gravity_set(room, 200);
      GET_OBJ_WEIGHT(obj) = 200;
@@ -1461,7 +1460,7 @@ SPECIAL(gravity)
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (room_flagged(room, ROOM_AURA)) {
      room_flag_set(room, ROOM_AURA, FALSE);
-     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
+     send_to_room(room, "The increased gravity forces the aura to disappear.\r\n");
     }
     room_gravity_set(room, 300);
      GET_OBJ_WEIGHT(obj) = 300;
@@ -1476,7 +1475,7 @@ SPECIAL(gravity)
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (room_flagged(room, ROOM_AURA)) {
      room_flag_set(room, ROOM_AURA, FALSE);
-     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
+     send_to_room(room, "The increased gravity forces the aura to disappear.\r\n");
     }
     room_gravity_set(room, 400);
      GET_OBJ_WEIGHT(obj) = 400;
@@ -1491,7 +1490,7 @@ SPECIAL(gravity)
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (room_flagged(room, ROOM_AURA)) {
      room_flag_set(room, ROOM_AURA, FALSE);
-     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
+     send_to_room(room, "The increased gravity forces the aura to disappear.\r\n");
     }
     room_gravity_set(room, 500);
      GET_OBJ_WEIGHT(obj) = 500;
@@ -1506,7 +1505,7 @@ SPECIAL(gravity)
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (room_flagged(room, ROOM_AURA)) {
      room_flag_set(room, ROOM_AURA, FALSE);
-     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
+     send_to_room(room, "The increased gravity forces the aura to disappear.\r\n");
     }
     room_gravity_set(room, 1000);
      GET_OBJ_WEIGHT(obj) = 1000;
@@ -1521,7 +1520,7 @@ SPECIAL(gravity)
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (room_flagged(room, ROOM_AURA)) {
      room_flag_set(room, ROOM_AURA, FALSE);
-     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
+     send_to_room(room, "The increased gravity forces the aura to disappear.\r\n");
     }
     room_gravity_set(room, 5000);
      GET_OBJ_WEIGHT(obj) = 5000;
@@ -1536,7 +1535,7 @@ SPECIAL(gravity)
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (room_flagged(room, ROOM_AURA)) {
      room_flag_set(room, ROOM_AURA, FALSE);
-     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
+     send_to_room(room, "The increased gravity forces the aura to disappear.\r\n");
     }
     room_gravity_set(room, 10000);
      GET_OBJ_WEIGHT(obj) = 10000;

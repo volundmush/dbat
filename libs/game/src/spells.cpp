@@ -69,7 +69,7 @@ ASPELL(spell_recall)
   char_from_room(victim);
   char_to_room(victim, real_room(CONFIG_MORTAL_START));
   act("$n appears in the middle of the room.", TRUE, victim, 0, 0, TO_ROOM);
-  look_at_room(IN_ROOM(victim), victim, 0);
+  look_at_room(char_room_get(victim), victim, 0);
   entry_memory_mtrigger(victim);
   greet_mtrigger(victim, -1);
   greet_memory_mtrigger(victim);
@@ -92,7 +92,7 @@ ASPELL(spell_teleport)
   char_from_room(victim);
   char_to_room(victim, to_room);
   act("$n slowly fades into existence.", FALSE, victim, 0, 0, TO_ROOM);
-  look_at_room(IN_ROOM(victim), victim, 0);
+  look_at_room(char_room_get(victim), victim, 0);
   entry_memory_mtrigger(victim);
   greet_mtrigger(victim, -1);
   greet_memory_mtrigger(victim);
@@ -146,7 +146,7 @@ ASPELL(spell_summon)
 
   act("$n arrives suddenly.", TRUE, victim, 0, 0, TO_ROOM);
   act("$n has summoned you!", FALSE, ch, 0, victim, TO_VICT);
-  look_at_room(IN_ROOM(victim), victim, 0);
+  look_at_room(char_room_get(victim), victim, 0);
   entry_memory_mtrigger(victim);
   greet_mtrigger(victim, -1);
   greet_memory_mtrigger(victim);
@@ -543,7 +543,7 @@ ASPELL(art_abundant_step)
 
   act("$n is suddenly present.", TRUE, ch, 0, 0, TO_ROOM);
 
-  look_at_room(IN_ROOM(ch), ch, 0);
+  look_at_room(char_room_get(ch), ch, 0);
 
   return;
 }

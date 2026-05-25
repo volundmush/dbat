@@ -2691,7 +2691,7 @@ ACMD(do_telepathy)
    send_to_char(ch, "Their eyes are closed!\r\n");
    return;
   } else {
-   look_at_room(IN_ROOM(vict), ch, 0);
+   look_at_room(char_room_get(vict), ch, 0);
    send_to_char(ch, "You see all this through their eyes!\r\n");
    if (GET_INT(vict) > GET_INT(ch)) {
     send_to_char(ch, "You feel like someone was using your mind for something...\r\n");
@@ -7274,21 +7274,23 @@ static bool _db_planet(room_rnum room) {
 
 void wishSYS(void)
 {
+  
   if (SHENRON == TRUE) {
+  struct room_data *room = room_by_id(DRAGONR);
    if (SELFISHMETER < 10) {
     switch (DRAGONC) {
      case 300:
-      send_to_room(real_room(DRAGONR), "@WThe dragon balls on the ground begin to glow yellow in slow pulses.@n\r\n");
+      send_to_room(room, "@WThe dragon balls on the ground begin to glow yellow in slow pulses.@n\r\n");
       send_to_planet(0, ROOM_EARTH, "@DThe sky begins to grow dark and cloudy suddenly.@n\r\n");
       DRAGONC -= 1;
       break;
      case 295:
-      send_to_room(real_room(DRAGONR), "@WSuddenly lightning shoots into the sky, twisting about as a roar can be heard for miles!@n\r\n");
+      send_to_room(room, "@WSuddenly lightning shoots into the sky, twisting about as a roar can be heard for miles!@n\r\n");
       send_to_planet(0, ROOM_EARTH, "@DThe sky flashes with lightning.@n\r\n");
       DRAGONC -= 1;
       break;
      case 290:
-      send_to_room(real_room(DRAGONR), "@WThe lightning takes shape and slowly the Eternal Dragon, Shenron, can be made out from the glow!@n\r\n");
+      send_to_room(room, "@WThe lightning takes shape and slowly the Eternal Dragon, Shenron, can be made out from the glow!@n\r\n");
       char_from_room(EDRAGON);
       char_to_room(EDRAGON, real_room(DRAGONR));
       DRAGONC -= 1;
@@ -7298,27 +7300,27 @@ void wishSYS(void)
       DRAGONC -= 1;
       break;
      case 280:
-      send_to_room(real_room(DRAGONR), "@WThe glow around Shenron becomes subdued as the Eternal Dragon coils so that his head is looking down on the dragon balls!@n\r\n");
+      send_to_room(room, "@WThe glow around Shenron becomes subdued as the Eternal Dragon coils so that his head is looking down on the dragon balls!@n\r\n");
       DRAGONC -= 1;
       break;
      case 275:
-      send_to_room(real_room(DRAGONR), "@wShenron says, '@CWho summoned me? I will grant you any two wishes that are within my power.@w'@n\r\n");
+      send_to_room(room, "@wShenron says, '@CWho summoned me? I will grant you any two wishes that are within my power.@w'@n\r\n");
       DRAGONC -= 1;
       break;
      case 180:
-      send_to_room(real_room(DRAGONR), "@wShenron says, '@CMake your wish already, you only have 3 minutes remaining.@w'@n\r\n");
+      send_to_room(room, "@wShenron says, '@CMake your wish already, you only have 3 minutes remaining.@w'@n\r\n");
       DRAGONC -= 1;
       break;
      case 120:
-      send_to_room(real_room(DRAGONR), "@wShenron says, '@CMake your wish. I am losing patience, you only have 2 minutes left.@w'@n\r\n");
+      send_to_room(room, "@wShenron says, '@CMake your wish. I am losing patience, you only have 2 minutes left.@w'@n\r\n");
       DRAGONC -= 1;
       break;
      case 60:
-      send_to_room(real_room(DRAGONR), "@wShenron says, '@CMake your wish now! You only have 1 minute left.@w'@n\r\n");
+      send_to_room(room, "@wShenron says, '@CMake your wish now! You only have 1 minute left.@w'@n\r\n");
       DRAGONC -= 1;
       break;
      case 0:
-      send_to_room(real_room(DRAGONR), "Shenron growls and disappears with a blinding flash that is absorbed into the dragon balls. The glowing dragon balls then float high into the sky, splitting into several directions and streaking across the sky!@n\r\n");
+      send_to_room(room, "Shenron growls and disappears with a blinding flash that is absorbed into the dragon balls. The glowing dragon balls then float high into the sky, splitting into several directions and streaking across the sky!@n\r\n");
       send_to_planet(0, ROOM_EARTH, "@DThe sky grows brighter again as the clouds disappear magicly.@n\r\n");
       extract_char(EDRAGON);
       SHENRON = FALSE;
@@ -7335,7 +7337,7 @@ void wishSYS(void)
      WISH[1] = 0;
     }
    } else {
-    send_to_room(real_room(DRAGONR), "@RThe dragon balls suddenly begin to crack and darkness begins to pour out through the cracks! Shenron begins to turn pitch black slowly as the darkness escapes. Suddenly Shenron explodes out into the distance in seven parts. Each part taking a dragon ball with it!@n\r\n");
+    send_to_room(room, "@RThe dragon balls suddenly begin to crack and darkness begins to pour out through the cracks! Shenron begins to turn pitch black slowly as the darkness escapes. Suddenly Shenron explodes out into the distance in seven parts. Each part taking a dragon ball with it!@n\r\n");
     int num = rand_number(200, 20000), done = FALSE, place = 1;
      DRAGONC = 0;
      WISH[0] = 0;
@@ -9709,7 +9711,7 @@ ACMD(do_quit)
     if (MINDLINK(ch) && LINKER(ch) == 0) {
      send_to_char(ch, "@RYou feel like the mind that is linked with yours is preventing you from quiting!@n\r\n");
      if (IN_ROOM(MINDLINK(ch)) != NOWHERE) {
-      look_at_room(IN_ROOM(MINDLINK(ch)), ch, 0);
+      look_at_room(char_room_get(MINDLINK(ch)), ch, 0);
       send_to_char(ch, "You get an impression of where this interference is originating from.\r\n");
      }
      return;
@@ -11690,7 +11692,7 @@ ACMD(do_resurrect)
   if (rm != NOWHERE) {
     char_from_room(ch);
     char_to_room(ch, rm);
-    look_at_room(IN_ROOM(ch), ch, 0);
+    look_at_room(char_room_get(ch), ch, 0);
   }
 
   act("$n's body forms in a pool of @Bblue light@n.", TRUE, ch, 0, 0, TO_ROOM);

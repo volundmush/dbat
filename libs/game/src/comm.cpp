@@ -178,7 +178,7 @@ void copyover_recover()
        enter_player_game(d);
        GET_LOADROOM(d->character) = set_loadroom;
        d->connected = CON_PLAYING;
-       look_at_room(IN_ROOM(d->character), d->character, 0);
+       look_at_room(char_room_get(d->character), d->character, 0);
        if (AFF_FLAGGED(d->character, AFF_HAYASA)) {
         GET_SPEEDBOOST(d->character) = GET_SPEEDCALC(d->character) * 0.5;
        }
@@ -226,7 +226,7 @@ void init_game(uint16_t cmport)
   for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
     for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
       fscanf(mapfile, "%d", &vnum_read);
-      mapnums[rowcounter][colcounter] = real_room(vnum_read);
+      mapnums[rowcounter][colcounter] = vnum_read;
     }
   }
   
@@ -2887,7 +2887,7 @@ void send_to_planet(int type, int planet, const char *messg, ...)
 }
 
 
-void send_to_room(room_rnum room, const char *messg, ...)
+void send_to_room(struct room_data *room, const char *messg, ...)
 {
   struct char_data *i;
   va_list args;
@@ -2895,7 +2895,7 @@ void send_to_room(room_rnum room, const char *messg, ...)
   if (messg == NULL)
     return;
 
-  for (i = world[room].people; i; i = i->next_in_room) {
+  for (i = room->people; i; i = i->next_in_room) {
     if (!i->desc)
       continue;
 
@@ -2911,7 +2911,7 @@ void send_to_room(room_rnum room, const char *messg, ...)
       continue;
 
      if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
-      if (arena_watch(d->character) == room) {
+      if (arena_watch(d->character) == room->number) {
        char buf[2000];
        *buf = '\0';
        sprintf(buf, "@c-----@CArena@c-----@n\r\n%s\r\n@c-----@CArena@c-----@n\r\n", messg);
@@ -2922,7 +2922,7 @@ void send_to_room(room_rnum room, const char *messg, ...)
      }
      if (GET_EAVESDROP(d->character) > 0) {
        int roll = rand_number(1, 101);
-       if (GET_EAVESDROP(d->character) == room && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
+       if (GET_EAVESDROP(d->character) == room->number && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
         char buf[1000];
         *buf = '\0';
         sprintf(buf, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", messg);

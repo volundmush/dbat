@@ -2184,7 +2184,9 @@ ACMD(do_ashcloud)
    }
  }
 
- for (obj = char_room_get(ch)->contents; obj; obj = next_obj) {
+ struct room_data *room = char_room_get(ch);
+
+ for (obj = room->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
   if (GET_OBJ_VNUM(obj) == 1306) {
    there = TRUE;
@@ -2249,7 +2251,7 @@ ACMD(do_ashcloud)
       decCurKI(ch, cost);
    act("@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_ROOM);
-   send_to_room(IN_ROOM(ch), "@WThe ashes ripple with an intense aftershock of power.@n\r\n");
+   send_to_room(room, "@WThe ashes ripple with an intense aftershock of power.@n\r\n");
    ashcloud = read_object(1306, VIRTUAL);
    obj_to_room(ashcloud, IN_ROOM(ch));
    extract_obj(ash);
@@ -2260,7 +2262,7 @@ ACMD(do_ashcloud)
       decCurKI(ch, cost);
    act("@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_ROOM);
-   send_to_room(IN_ROOM(ch), "@WThe ashes ripple with a strong aftershock of power.@n\r\n");
+   send_to_room(room, "@WThe ashes ripple with a strong aftershock of power.@n\r\n");
    ashcloud = read_object(1306, VIRTUAL);
    obj_to_room(ashcloud, IN_ROOM(ch));
    GET_OBJ_TIMER(ashcloud) = 2;
@@ -3282,7 +3284,7 @@ ACMD(do_arena)
    send_to_char(ch, "You are not even watching anyone in the arena.\r\n");
    return;
   } else if (arena_watch(ch) != NOWHERE) {
-   look_at_room(real_room(arena_watch(ch)), ch, 0);
+   look_at_room(room_by_id(arena_watch(ch)), ch, 0);
   }
  } else if (!strcasecmp(arg, "scan")) {
   if (GET_ROOM_VNUM(IN_ROOM(ch)) == 17875) {
@@ -5191,7 +5193,7 @@ ACMD(do_obstruct)
   GET_FELLOW_WALL(obj3) = obj2;
   act("@CYou concentrate and channel your ki. A wall of water starts to form in such a way to block off the direction of your choice. As the wall becomes complete it freezes solid by your will!@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@c$n@C concentrates and channels $s ki. A wall of water starts to form in such a way to block off one of the directions of this area. As the wall becomes complete it freezes solid by @c$n's@C will!@n", TRUE, ch, 0, 0, TO_ROOM);
-  send_to_room(newroom, "@cA wall of water forms slowly upward blocking off the %s direction. This wall of water then freezes instantly once it stops growing.@n\r\n", dirs[dir2]);
+  send_to_room(nrm, "@cA wall of water forms slowly upward blocking off the %s direction. This wall of water then freezes instantly once it stops growing.@n\r\n", dirs[dir2]);
   improve_skill(ch, SKILL_HYOGA_KABE, 0);
      decCurKI(ch, cost);
   return;

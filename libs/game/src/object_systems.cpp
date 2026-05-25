@@ -21,6 +21,7 @@ void broken_update()
   }
 
   health = GET_OBJ_VAL(k, VAL_ALL_HEALTH); // Indicated the health of the object in question
+  struct room_data *room = obj_room_get(k);
 
   if (GET_OBJ_VNUM(k) == 11) { /* Gravity Generator */
    grav_roll = rand_number(0, 13);
@@ -33,24 +34,25 @@ void broken_update()
    } else if (health <= 99 && dice <= 3) {
     grav_change = TRUE;
    }
+   
    if (grav_change == TRUE) {
-    room_gravity_set(obj_room_get(k), rand_gravity[grav_roll]);
+    room_gravity_set(room, rand_gravity[grav_roll]);
     GET_OBJ_WEIGHT(k) = rand_gravity[grav_roll];
-    send_to_room(IN_ROOM(k), "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
+    send_to_room(room, "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
    }
   } /* End Gravity Section */
 
   if (GET_OBJ_VNUM(k) == 3034) { /* ATM */
    if (health <= 10) {
-    send_to_room(IN_ROOM(k), "@RThe ATM machine shoots smoking bills from its money slot. The bills burn up as they float through the air!@n\r\n");
+    send_to_room(room, "@RThe ATM machine shoots smoking bills from its money slot. The bills burn up as they float through the air!@n\r\n");
    } else if (health <= 40 && dice <= 8) {
-    send_to_room(IN_ROOM(k), "@RGibberish flashes across the cracked ATM info screen.@n\r\n");
+    send_to_room(room, "@RGibberish flashes across the cracked ATM info screen.@n\r\n");
    } else if (health <= 80 && dice == 4) {
-    send_to_room(IN_ROOM(k), "@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
+    send_to_room(room, "@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
     money = create_money(rand_number(1, 30));
     obj_to_room(money, IN_ROOM(k));
    } else if (health <= 99 && dice < 4) {
-    send_to_room(IN_ROOM(k), "@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
+    send_to_room(room, "@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
    }
   } /* End ATM */
 

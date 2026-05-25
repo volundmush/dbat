@@ -782,27 +782,29 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     return (0);
   }
 
+  struct room_direction_data *ex = EXIT(ch, dir);
+
   /* Check if the character needs a skill check to go that way. */
-  if (EXIT(ch, dir)->dcskill != 0) {
-    if (EXIT(ch, dir)->dcmove > roll_skill(ch, EXIT(ch, dir)->dcskill)) {
-      send_to_char(ch, "Your skill in %s isn't enough to move that way!\r\n", spell_info[EXIT(ch, dir)->dcskill].name);
+  if (ex->dcskill != 0) {
+    if (ex->dcmove > roll_skill(ch, ex->dcskill)) {
+      send_to_char(ch, "Your skill in %s isn't enough to move that way!\r\n", spell_info[ex->dcskill].name);
       /* A failed skill check still spends the movement points! */
       if (!ADM_FLAGGED(ch, ADM_WALKANYWHERE) && !IS_NPC(ch) && !AFF_FLAGGED(ch, AFF_FLYING))
       decCurST(ch, need_movement);
       return (0);
     } else {
-      send_to_char(ch, "Your skill in %s aids in your movement.\r\n", spell_info[EXIT(ch, dir)->dcskill].name);
+      send_to_char(ch, "Your skill in %s aids in your movement.\r\n", spell_info[ex->dcskill].name);
     }
   }
 
   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_ATRIUM)) {
-    if (!House_can_enter(ch, GET_ROOM_VNUM(EXIT(ch, dir)->to_room))) {
+    if (!House_can_enter(ch, GET_ROOM_VNUM(ex->to_room))) {
       send_to_char(ch, "That's private property -- no trespassing!\r\n");
       return (0);
     }
   }
-  if (ROOM_FLAGGED(EXIT(ch, dir)->to_room, ROOM_TUNNEL) &&
-      (num_pc_in_room(&(world[EXIT(ch, dir)->to_room])) >= CONFIG_TUNNEL_SIZE)) {
+  if (ROOM_FLAGGED(ex->to_room, ROOM_TUNNEL) &&
+      (num_pc_in_room(exit_dest_get(ex)) >= CONFIG_TUNNEL_SIZE)) {
     if (CONFIG_TUNNEL_SIZE > 1)
       send_to_char(ch, "There isn't enough room for you to go there!\r\n");
     else
@@ -810,7 +812,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     return (0);
   }
   /* Mortals and low level gods cannot enter greater god rooms. */
-  if (ROOM_FLAGGED(EXIT(ch, dir)->to_room, ROOM_GODROOM) &&
+  if (ROOM_FLAGGED(ex->to_room, ROOM_GODROOM) &&
 	GET_ADMLEVEL(ch) < ADMLVL_GRGOD) {
     send_to_char(ch, "You aren't godly enough to use that room!\r\n");
     return (0);
@@ -818,7 +820,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
 
   /******* Zone flag checks *******/
 
-  rm = &world[EXIT(ch, dir)->to_room];
+  rm = exit_dest_get(ex);
 
   if (!IS_NPC(ch) && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) &&
     (GET_LEVEL(ch) < ZONE_MINLVL(rm->zone)) && (ZONE_MINLVL(rm->zone) > 0)) {
@@ -946,7 +948,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   }
 
   if (ch->desc != NULL) {
-    look_at_room(IN_ROOM(ch), ch, 0);
+    look_at_room(char_room_get(ch), ch, 0);
     if (AFF_FLAGGED(ch, AFF_SNEAK) && !IS_NPC(ch) && GET_SKILL(ch, SKILL_MOVE_SILENTLY) && GET_SKILL(ch, SKILL_MOVE_SILENTLY) < rand_number(1, 101)) {
      send_to_char(ch, "@wYou make a noise as you arrive and are no longer sneaking!@n\r\n");
      act("@c$n@w makes a noise revealing $s sneaking!@n", TRUE, ch, 0, 0, TO_ROOM | TO_SNEAKRESIST);
@@ -995,7 +997,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   if (!greet_mtrigger(ch, dir)) {
     char_from_room(ch);
     char_to_room(ch, was_in);
-    look_at_room(IN_ROOM(ch), ch, 0);
+    look_at_room(char_room_get(ch), ch, 0);
   } else greet_memory_mtrigger(ch);
   if (willfall == TRUE) {
    handle_fall(ch);
@@ -1521,15 +1523,15 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
     if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH && (vehicle)) {
      OPEN_DOOR(IN_ROOM(ch), vehicle, door);
      if (GET_OBJ_VNUM(obj) > 19199) {
-      send_to_room(IN_ROOM(ch), "@wThe ship hatch opens slowly and settles onto the ground outside.\r\n");
-      send_to_room(IN_ROOM(vehicle), "@wThe ship hatch opens slowly and settles onto the ground.\r\n");
-      if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_SPACE)) {
-       send_to_room(IN_ROOM(ch), "@wA great vortex forms as air begins to get sucked out into the void!\r\n");
+      send_to_room(char_room_get(ch), "@wThe ship hatch opens slowly and settles onto the ground outside.\r\n");
+      send_to_room(obj_room_get(vehicle), "@wThe ship hatch opens slowly and settles onto the ground.\r\n");
+      if (room_flagged(obj_room_get(vehicle), ROOM_SPACE)) {
+       send_to_room(char_room_get(ch), "@wA great vortex forms as air begins to get sucked out into the void!\r\n");
       }
      } else {
       act("@wYou open @c$p@w.", TRUE, ch, obj, 0, TO_CHAR);
       act("@C$n@w opens @c$p@w.", TRUE, ch, obj, 0, TO_ROOM);
-      send_to_room(IN_ROOM(vehicle), "@wThe door to %s@w is opened from the other side.\r\n", vehicle->short_description);
+      send_to_room(obj_room_get(vehicle), "@wThe door to %s@w is opened from the other side.\r\n", vehicle->short_description);
      }
      vehicle = NULL;
     }
@@ -1538,15 +1540,15 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
      char_from_room(ch);
      char_to_room(ch, num);
      if (GET_OBJ_VNUM(obj) > 19199) {
-      send_to_room(num, "@wThe ship hatch opens slowly and settles onto the ground.\r\n");
-      send_to_room(IN_ROOM(hatch), "@wThe ship hatch opens slowly.\r\n");
-      if (ROOM_FLAGGED(IN_ROOM(obj), ROOM_SPACE)) {
-       send_to_room(num, "@wThe air starts getting sucked out into space as the hatch opens!\r\n");
+      send_to_room(char_room_get(ch), "@wThe ship hatch opens slowly and settles onto the ground.\r\n");
+      send_to_room(obj_room_get(hatch), "@wThe ship hatch opens slowly.\r\n");
+      if (room_flagged(obj_room_get(obj), ROOM_SPACE)) {
+       send_to_room(char_room_get(ch), "@wThe air starts getting sucked out into space as the hatch opens!\r\n");
       }
      } else {
       act("@wYou open @c$p@w.", TRUE, ch, obj, 0, TO_CHAR);
       act("@C$n@w opens @c$p@w.", TRUE, ch, obj, 0, TO_ROOM);
-      send_to_room(IN_ROOM(hatch), "@wThe door is opened from the other side.\r\n");
+      send_to_room(obj_room_get(hatch), "@wThe door is opened from the other side.\r\n");
      }
      hatch = NULL;
       }
@@ -1568,15 +1570,15 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
     if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH && (vehicle)) {
      CLOSE_DOOR(IN_ROOM(ch), vehicle, door);
      if (GET_OBJ_VNUM(obj) > 19199) {
-      send_to_room(IN_ROOM(ch), "@wThe ship hatch slowly closes, sealing the ship from the outside.\r\n");
-      send_to_room(IN_ROOM(vehicle), "@wThe ship hatch slowly closes, sealing the ship.\r\n");
-      if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_SPACE)) {
-       send_to_room(IN_ROOM(ch), "@wThe air stops getting sucked out into space as the hatch seals!\r\n");
+      send_to_room(char_room_get(ch), "@wThe ship hatch slowly closes, sealing the ship from the outside.\r\n");
+      send_to_room(obj_room_get(vehicle), "@wThe ship hatch slowly closes, sealing the ship.\r\n");
+      if (room_flagged(obj_room_get(vehicle), ROOM_SPACE)) {
+       send_to_room(char_room_get(ch), "@wThe air stops getting sucked out into space as the hatch seals!\r\n");
       }
      } else {
       act("@wYou close @c$p@w.", TRUE, ch, obj, 0, TO_CHAR);
       act("@C$n@w closes @c$p@w.", TRUE, ch, obj, 0, TO_ROOM);
-      send_to_room(IN_ROOM(vehicle), "@wThe door to %s@w is closed from the other side.\r\n", vehicle->short_description);
+      send_to_room(obj_room_get(vehicle), "@wThe door to %s@w is closed from the other side.\r\n", vehicle->short_description);
      }
      vehicle = NULL;
     }
@@ -1585,15 +1587,15 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
      char_from_room(ch);
      char_to_room(ch, num);
      if (GET_OBJ_VNUM(obj) > 19199) {
-      send_to_room(num, "@wThe ship hatch slowly closes, sealing the ship.\r\n");
-      send_to_room(IN_ROOM(hatch), "@wThe ship hatch slowly closes, sealing the ship from the outside.\r\n");
-      if (ROOM_FLAGGED(IN_ROOM(obj), ROOM_SPACE)) {
-       send_to_room(num, "@wAir stops getting sucked out into space as the hatch seals!\r\n");
+      send_to_room(char_room_get(ch), "@wThe ship hatch slowly closes, sealing the ship.\r\n");
+      send_to_room(obj_room_get(hatch), "@wThe ship hatch slowly closes, sealing the ship from the outside.\r\n");
+      if (room_flagged(obj_room_get(obj), ROOM_SPACE)) {
+       send_to_room(char_room_get(ch), "@wAir stops getting sucked out into space as the hatch seals!\r\n");
       }
      } else {
       act("@wYou close @c$p@w.", TRUE, ch, obj, 0, TO_CHAR);
       act("@C$n@w closes @c$p@w.", TRUE, ch, obj, 0, TO_ROOM);
-      send_to_room(IN_ROOM(hatch), "@wThe door to %s@w is closed from the other side.\r\n", hatch->short_description);
+      send_to_room(obj_room_get(hatch), "@wThe door to %s@w is closed from the other side.\r\n", hatch->short_description);
      }
      hatch = NULL;
      }
@@ -1682,12 +1684,12 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
 
   /* Notify the other room */
   if (back && (scmd == SCMD_OPEN || scmd == SCMD_CLOSE)) {
-      send_to_room(EXIT(ch, door)->to_room, "The %s that leads %s is %s%s from the other side.\r\n",
+      send_to_room(exit_dest_get(EXIT(ch, door)), "The %s that leads %s is %s%s from the other side.\r\n",
 		back->keyword ? fname(back->keyword) : "door", dbuf, cmd_door[scmd],
 		scmd == SCMD_CLOSE ? "d" : "ed");
   }
   else if (back && (scmd == SCMD_LOCK || scmd == SCMD_UNLOCK)) {
-      send_to_room(EXIT(ch, door)->to_room, "The %s that leads %s is %sed from the other side.\r\n",
+      send_to_room(exit_dest_get(EXIT(ch, door)), "The %s that leads %s is %sed from the other side.\r\n",
                 back->keyword ? fname(back->keyword) : "door", dbuf, cmd_door[scmd]);
   }
   *dbuf = '\0';
@@ -1950,7 +1952,7 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
   }
 
   if (ch->desc != NULL)
-    look_at_room(IN_ROOM(ch), ch, 0);
+    look_at_room(char_room_get(ch), ch, 0);
 
   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_DEATH) && !ADM_FLAGGED(ch, ADM_WALKANYWHERE)) {
     log_death_trap(ch);
@@ -2204,7 +2206,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
 
   if (ch->desc != NULL) {
     act(obj->action_description, TRUE, ch, obj, 0, TO_CHAR);
-    look_at_room(IN_ROOM(ch), ch, 0);
+    look_at_room(char_room_get(ch), ch, 0);
   }
 
   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_DEATH) && !ADM_FLAGGED(ch, ADM_WALKANYWHERE)) {
@@ -2295,7 +2297,7 @@ static void handle_fall(struct char_data *ch)
         decCurHealthFloored(ch, getEffMaxPL(ch) / 20, 1);
 
    act("@rYou slam into the ground!@n", TRUE, ch, 0, 0, TO_CHAR);
-   look_at_room(IN_ROOM(ch), ch, 0);
+   look_at_room(char_room_get(ch), ch, 0);
   } else {
    act("@r$n pummets down toward the ground below!@n", TRUE, ch, 0, 0, TO_ROOM);
   }

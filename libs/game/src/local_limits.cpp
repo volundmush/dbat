@@ -2236,7 +2236,7 @@ static void point_update_objects(void)
       {
         if (room_geffect_get(obj_room_get(j)) >= 1 && room_geffect_get(obj_room_get(j)) <= 5)
         {
-          send_to_room(IN_ROOM(j), "The heat from the lava melts a great deal of the glacial wall and the lava cools a bit in turn.\r\n");
+          send_to_room(obj_room_get(j), "The heat from the lava melts a great deal of the glacial wall and the lava cools a bit in turn.\r\n");
           room_geffect_mod(obj_room_get(j), -1);
           if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0)
           {
@@ -2244,7 +2244,7 @@ static void point_update_objects(void)
           }
           else
           {
-            send_to_room(IN_ROOM(j), "The glacial wall blocking off the %s direction melts completely away.\r\n", dirs[GET_OBJ_COST(j)]);
+            send_to_room(obj_room_get(j), "The glacial wall blocking off the %s direction melts completely away.\r\n", dirs[GET_OBJ_COST(j)]);
             extract_obj(j);
             continue;
           }
@@ -2252,11 +2252,11 @@ static void point_update_objects(void)
         else if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0)
         {
           GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.025);
-          send_to_room(IN_ROOM(j), "The glacial wall blocking off the %s direction melts some what.\r\n", dirs[GET_OBJ_COST(j)]);
+          send_to_room(obj_room_get(j), "The glacial wall blocking off the %s direction melts some what.\r\n", dirs[GET_OBJ_COST(j)]);
         }
         else
         {
-          send_to_room(IN_ROOM(j), "The glacial wall blocking off the %s direction melts completely away.\r\n", dirs[GET_OBJ_COST(j)]);
+          send_to_room(obj_room_get(j), "The glacial wall blocking off the %s direction melts completely away.\r\n", dirs[GET_OBJ_COST(j)]);
           extract_obj(j);
           continue;
         }
@@ -2286,11 +2286,11 @@ static void point_update_objects(void)
           if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0)
           {
             GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.02);
-            send_to_room(IN_ROOM(j), "%s @wmelts a little.\r\n", j->short_description);
+            send_to_room(obj_room_get(j), "%s @wmelts a little.\r\n", j->short_description);
           }
           else
           {
-            send_to_room(IN_ROOM(j), "%s @wmelts completely away.\r\n", j->short_description);
+            send_to_room(obj_room_get(j), "%s @wmelts completely away.\r\n", j->short_description);
             extract_obj(j);
             continue;
           }

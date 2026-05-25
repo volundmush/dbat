@@ -34,14 +34,10 @@ bool cook_element(struct room_data *room) {
  *
  * Inside and City rooms are always lit.
  * Outside rooms are dark at sunset and night.  */
-int room_is_dark(room_rnum room)
+bool room_is_dark(struct room_data* room)
 {
-  if (!VALID_ROOM_RNUM(room)) {
-    log("room_is_dark: Invalid room rnum %d. (0-%d)", room, top_of_world);
-    return (FALSE);
-  }
 
-  struct room_data* rm = &world[room];
+  struct room_data* rm = room;
 
   if (rm->light)
     return (FALSE);

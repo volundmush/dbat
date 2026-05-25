@@ -22,7 +22,7 @@ void obj_to_room(struct obj_data *object, room_rnum room)
   struct room_data *rm = &world[room];
   if (room_flagged(rm, ROOM_GARDEN1) || room_flagged(rm, ROOM_GARDEN2)) {
      if (GET_OBJ_TYPE(object) != ITEM_PLANT) {
-      send_to_room(room, "%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n", object->short_description);
+      send_to_room(rm, "%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n", object->short_description);
       extract_obj(object);
       return;
      }
@@ -118,9 +118,9 @@ void obj_from_room(struct obj_data *object)
   if (GET_OBJ_POSTED(object) && object->in_obj == NULL) {
    struct obj_data *obj = GET_OBJ_POSTED(object);
    if (GET_OBJ_POSTTYPE(object) <= 0) {
-    send_to_room(IN_ROOM(obj), "%s@W shakes loose from %s@W.@n\r\n", obj->short_description, object->short_description);
+    send_to_room(rm, "%s@W shakes loose from %s@W.@n\r\n", obj->short_description, object->short_description);
    } else {
-    send_to_room(IN_ROOM(obj), "%s@W comes loose from %s@W.@n\r\n", object->short_description, obj->short_description);
+    send_to_room(rm, "%s@W comes loose from %s@W.@n\r\n", object->short_description, obj->short_description);
    }
    GET_OBJ_POSTED(obj) = NULL;
    GET_OBJ_POSTTYPE(obj) = 0;
@@ -249,33 +249,34 @@ void char_to_room(struct char_data *ch, room_rnum room)
 {
   int i;
 
-  if (ch == NULL || room == NOWHERE || room > top_of_world)
-    log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d/%d Ch: %p",
+  if (ch == NULL || room == NOWHERE || room > top_of_world) {
+        log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d/%d Ch: %p",
 		room, top_of_world, ch);
-  else {
-    ch->next_in_room = world[room].people;
-    world[room].people = ch;
-    IN_ROOM(ch) = room;
+    return;
+  }
+  struct room_data* rm = &world[room];
+  ch->next_in_room = rm->people;
+  rm->people = ch;
+  IN_ROOM(ch) = room;
 
-    for (i = 0; i < NUM_WEARS; i++)
-      if (GET_EQ(ch, i))
-        if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT)
-	  if (GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS))
-	    world[room].light++;
+  for (i = 0; i < NUM_WEARS; i++)
+    if (GET_EQ(ch, i))
+      if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT)
+  if (GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS))
+    rm->light++;
 
-	if (PLR_FLAGGED(ch, PLR_AURALIGHT))
-       world[room].light++;	
-	   
-    /* Stop fighting now, if we left. */
-    if (FIGHTING(ch) && IN_ROOM(ch) != IN_ROOM(FIGHTING(ch)) && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
-      stop_fighting(FIGHTING(ch));
-      stop_fighting(ch);
-    }
-    if (!IS_NPC(ch)) {
-     if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-      REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
-      ARENA_IDNUM(ch) = -1;
-     }
+if (PLR_FLAGGED(ch, PLR_AURALIGHT))
+    rm->light++;	
+    
+  /* Stop fighting now, if we left. */
+  if (FIGHTING(ch) && IN_ROOM(ch) != IN_ROOM(FIGHTING(ch)) && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
+    stop_fighting(FIGHTING(ch));
+    stop_fighting(ch);
+  }
+  if (!IS_NPC(ch)) {
+    if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
+    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
+    ARENA_IDNUM(ch) = -1;
     }
   }
 }

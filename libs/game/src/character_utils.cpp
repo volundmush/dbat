@@ -101,7 +101,7 @@ void resurrect(char_data *ch, int mode) {
     else {
         char_to_room(ch, real_room(sensei_start_room(ch->chclass)));
     }
-    look_at_room(IN_ROOM(ch), ch, 0);
+    look_at_room(char_room_get(ch), ch, 0);
 
     int dur = 100;
     switch(mode) {
@@ -167,7 +167,7 @@ void ghostify(char_data *ch) {
 void teleport_to(char_data *ch, IDXTYPE rnum) {
     char_from_room(ch);
     char_to_room(ch, real_room(rnum));
-    look_at_room(IN_ROOM(ch), ch, 0);
+    look_at_room(char_room_get(ch), ch, 0);
     update_pos(ch);
 }
 
@@ -3199,7 +3199,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
     if (ch != NULL && vict != NULL) {
      if (!IS_NPC(ch) && IS_NPC(vict)) {
        if ((strstr(speech, "hello") || strstr(speech, "greet") || strstr(speech, "Hello") || strstr(speech, "Greet")) && !FIGHTING(vict)) {
-        send_to_room(IN_ROOM(vict), "\r\n");
+        send_to_room(char_room_get(vict), "\r\n");
         if (IS_HUMAN(vict) || IS_HALFBREED(vict)) {
          switch (rand_number(1, 4)) {
            case 1:
@@ -3340,7 +3340,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
        } /* End Hello Section */
 
        if ((strstr(speech, "spar") || strstr(speech, "Spar")) && !FIGHTING(vict)) {
-        send_to_room(IN_ROOM(vict), "\r\n");
+        send_to_room(char_room_get(vict), "\r\n");
 
         if(vict->original == ch) {
             act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
@@ -3404,7 +3404,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
         }
        } /* End challenge section */
        if (strstr(speech, "goodbye") || strstr(speech, "Goodbye") || strstr(speech, "bye") || strstr(speech, "Bye")) {
-        send_to_room(IN_ROOM(vict), "\r\n");
+        send_to_room(char_room_get(vict), "\r\n");
           if (GET_ALIGNMENT(vict) >= 0) {
            if (GET_SEX(vict) == SEX_MALE) {
             if (GET_SEX(ch) == SEX_FEMALE) {
@@ -3449,7 +3449,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
          }
        } /* End goodbye If */
        if (strstr(speech, "train") || strstr(speech, "Train") || strstr(speech, "exercise") || strstr(speech, "Exercise")) {
-        send_to_room(IN_ROOM(vict), "\r\n");
+        send_to_room(char_room_get(vict), "\r\n");
         if (GET_ALIGNMENT(vict) >= 0 && !MOB_FLAGGED(vict, MOB_NOKILL)) {
          if (GET_LEVEL(vict) > 4 && GET_LEVEL(vict) < 10) {
           act("@w$n@W says, '@CTraining is good for the body. I think I may need to go workout myself.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
@@ -4903,7 +4903,7 @@ bool char_can_go_dir(struct char_data *ch, int dir) {
 #define SELF(sub, obj)  ((sub) == (obj))
 
 #define LIGHT_OK(sub)	(!AFF_FLAGGED(sub, AFF_BLIND) && !PLR_FLAGGED(sub, PLR_EYEC) && \
-   (IS_LIGHT(IN_ROOM(sub)) || AFF_FLAGGED((sub), AFF_INFRAVISION) || (IS_MUTANT(sub) && HAS_GENOME(sub, 4)) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
+   (IS_LIGHT(char_room_get(sub)) || AFF_FLAGGED((sub), AFF_INFRAVISION) || (IS_MUTANT(sub) && HAS_GENOME(sub, 4)) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
 
 #define INVIS_OK(sub, obj) \
  (!AFF_FLAGGED((obj),AFF_INVISIBLE) || AFF_FLAGGED(sub,AFF_DETECT_INVIS))

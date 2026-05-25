@@ -4255,46 +4255,46 @@ void reset_zone(zone_rnum zone)
      reset_wtrigger(&world[rrnum]);
      struct room_data *room = &world[rrnum];
      if (room_flagged(room, ROOM_AURA) && rand_number(1, 5) >= 4) {
-      send_to_room(rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
+      send_to_room(room, "The aura of regeneration covering the surrounding area disappears.\r\n");
       room_flag_set(room, ROOM_AURA, FALSE);
      }
      if (room_sector_type_get(room) == SECT_LAVA) {
       room_geffect_set(room, 5);
      }
      if (room_geffect_get(room) < -1) {
-      send_to_room(rrnum, "The area loses some of the water flooding it.\r\n");
+      send_to_room(room, "The area loses some of the water flooding it.\r\n");
       room_geffect_mod(room, 1);
      }
      else if (room_geffect_get(room) == -1) {
-      send_to_room(rrnum, "The area loses the last of the water flooding it in one large rush.\r\n");
+      send_to_room(room, "The area loses the last of the water flooding it in one large rush.\r\n");
       room_geffect_set(room, 0);
      }
      if (room_dmg_get(room) >= 100) {
-      send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
+      send_to_room(room, "The area gets rebuilt a little.\r\n");
       room_dmg_mod(room, -rand_number(5, 10));
      }
      else if (room_dmg_get(room) >= 50) {
-      send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
+      send_to_room(room, "The area gets rebuilt a little.\r\n");
       room_dmg_mod(room, -rand_number(1, 10));
      }
      else if (room_dmg_get(room) >= 10) {
-      send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
+      send_to_room(room, "The area gets rebuilt a little.\r\n");
       room_dmg_mod(room, -rand_number(1, 10));
      }
      else if (room_dmg_get(room) > 1) {
-      send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
+      send_to_room(room, "The area gets rebuilt a little.\r\n");
       room_dmg_mod(room, -rand_number(1, room_dmg_get(room)));
      }
      else if (room_dmg_get(room) > 0) {
-      send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
+      send_to_room(room, "The area gets rebuilt a little.\r\n");
       room_dmg_mod(room, -1);
      }
      int sect = room_sector_type_get(room);
      if (room_geffect_get(room) >= 1 && rand_number(1, 4) == 4 && !room_is_sunken(room) && sect != SECT_LAVA) {
-      send_to_room(rrnum, "The lava has cooled and become solid rock.\r\n");
+      send_to_room(room, "The lava has cooled and become solid rock.\r\n");
       room_geffect_set(room, 0);
      } else if (room_geffect_get(room) >= 1 && rand_number(1, 2) == 2 && room_is_sunken(room) && sect != SECT_LAVA) {
-      send_to_room(rrnum, "The water has cooled the lava and it has become solid rock.\r\n");
+      send_to_room(room, "The water has cooled the lava and it has become solid rock.\r\n");
       room_geffect_set(room, 0);
      }
     }

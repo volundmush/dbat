@@ -15,8 +15,8 @@ struct mapstruct {
 };
 typedef struct mapstruct MapStruct;  
 
-MapStruct findcoord(int rnum);
-void printmap(int rnum, struct char_data * ch, int type, int vnum);
+MapStruct findcoord(struct room_data *room);
+void printmap(struct room_data *room, struct char_data * ch, int type, int vnum);
 void ping_ship(int vnum, int vnum2);
 
 extern room_vnum mapnums[MAP_ROWS+1][MAP_COLS+1];
