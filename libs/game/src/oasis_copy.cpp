@@ -303,7 +303,7 @@ ACMD(do_dig)
   CREATE(rm->dir_option[dir], struct room_direction_data, 1);
   struct room_direction_data *new_exit = rm->dir_option[dir];
   new_exit->to_room = rrnum;
-  zone_vnum zvn = zone_table[rm->zone].number;
+  zone_vnum zvn = room_zone_vnum_get(rm);
   add_to_save_list(zvn, SL_WLD);
   save_rooms(zvn);
   send_to_char(ch, "You make an exit %s to room %d (%s).\r\n", 

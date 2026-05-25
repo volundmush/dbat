@@ -20,7 +20,7 @@ static int copy_object_main(struct obj_data *to, struct obj_data *from, int free
 obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum)
 {
   int found = NOTHING;
-  zone_rnum rznum = real_zone_by_thing(ovnum);
+  zone_vnum znum = virtual_zone_by_thing(ovnum);
 
   /*
    * Write object to internal tables.
@@ -29,13 +29,13 @@ obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum)
   {
     copy_object(&obj_proto[newobj->item_number], newobj);
     update_objects(&obj_proto[newobj->item_number]);
-    add_to_save_list(zone_table[rznum].number, SL_OBJ);
+    add_to_save_list(znum, SL_OBJ);
     return newobj->item_number;
   }
 
   found = insert_object(newobj, ovnum);
   adjust_objects(found);
-  add_to_save_list(zone_table[rznum].number, SL_OBJ);
+  add_to_save_list(znum, SL_OBJ);
   return found;
 }
 
@@ -405,14 +405,15 @@ void free_object_strings(struct obj_data *obj)
 void free_object_strings_proto(struct obj_data *obj)
 {
   int robj_num = GET_OBJ_RNUM(obj);
+  struct obj_data *proto = &obj_proto[robj_num];
 
-  if (obj->name && obj->name != obj_proto[robj_num].name)
+  if (obj->name && obj->name != proto->name)
     free(obj->name);
-  if (obj->description && obj->description != obj_proto[robj_num].description)
+  if (obj->description && obj->description != proto->description)
     free(obj->description);
-  if (obj->short_description && obj->short_description != obj_proto[robj_num].short_description)
+  if (obj->short_description && obj->short_description != proto->short_description)
     free(obj->short_description);
-  if (obj->action_description && obj->action_description != obj_proto[robj_num].action_description)
+  if (obj->action_description && obj->action_description != proto->action_description)
     free(obj->action_description);
   if (obj->ex_description)
   {
@@ -421,7 +422,7 @@ void free_object_strings_proto(struct obj_data *obj)
     for (thised = obj->ex_description; thised; thised = next_one)
     {
       next_one = thised->next;
-      for (ok_item = ok_key = ok_desc = 1, plist = obj_proto[robj_num].ex_description; plist; plist = plist->next)
+      for (ok_item = ok_key = ok_desc = 1, plist = proto->ex_description; plist; plist = plist->next)
       {
         if (plist->keyword == thised->keyword)
           ok_key = 0;

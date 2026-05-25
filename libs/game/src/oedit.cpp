@@ -134,12 +134,13 @@ ACMD(do_oasis_oedit)
     d->olc = NULL;
     return;
   }
+  struct zone_data *zone = &zone_table[OLC_ZNUM(d)];
   
   /****************************************************************************/
   /** Everyone but IMPLs can only edit zones they have been assigned.        **/
   /****************************************************************************/
   if (!can_edit_zone(ch, OLC_ZNUM(d))) {
-    send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
+    send_cannot_edit(ch, zone->number);
     
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                 **/
@@ -154,10 +155,10 @@ ACMD(do_oasis_oedit)
   /****************************************************************************/
   if (save) {
     send_to_char(ch, "Saving all objects in zone %d.\r\n",
-      zone_table[OLC_ZNUM(d)].number);
+      zone->number);
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE,
       "OLC: %s saves object info for zone %d.", GET_NAME(ch),
-      zone_table[OLC_ZNUM(d)].number);
+      zone->number);
     
     /**************************************************************************/
     /** Save the objects in this zone.                                       **/
@@ -196,7 +197,7 @@ ACMD(do_oasis_oedit)
   /** Log the OLC message.                                                   **/
   /****************************************************************************/
   mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
-    GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+    GET_NAME(ch), zone->number, GET_OLC_ZONE(ch));
 }
 
 void oedit_setup_new(struct descriptor_data *d)
@@ -263,13 +264,15 @@ void oedit_save_internally(struct descriptor_data *d)
     return;
   }
 
+  struct obj_data *proto = &obj_proto[robj_num];
+
   /* Update triggers : */
   /* Free old proto list  */
-  if (obj_proto[robj_num].proto_script &&
-      obj_proto[robj_num].proto_script != OLC_SCRIPT(d)) 
-    free_proto_script(&obj_proto[robj_num], OBJ_TRIGGER);   
+  if (proto->proto_script &&
+      proto->proto_script != OLC_SCRIPT(d)) 
+    free_proto_script(proto, OBJ_TRIGGER);   
   /* this will handle new instances of the object: */
-  obj_proto[robj_num].proto_script = OLC_SCRIPT(d);
+  proto->proto_script = OLC_SCRIPT(d);
 
   /* this takes care of the objects currently in-game */
   for (obj = object_list; obj; obj = obj->next) {
@@ -280,7 +283,7 @@ void oedit_save_internally(struct descriptor_data *d)
       extract_script(obj, OBJ_TRIGGER);
 
     free_proto_script(obj, OBJ_TRIGGER);
-    copy_proto_script(&obj_proto[robj_num], obj, OBJ_TRIGGER);
+    copy_proto_script(proto, obj, OBJ_TRIGGER);
     assign_triggers(obj, OBJ_TRIGGER);
   }
   /* end trigger update */

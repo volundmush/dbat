@@ -1497,38 +1497,42 @@ void boot_the_shops(FILE *shop_f, char *filename, int rec_count)
 
   snprintf(buf2, sizeof(buf2), "beginning of shop file %s", filename);
 
-  while (!done) {
+  while (!done)
+  {
     buf = fread_string(shop_f, buf2);
-    if (*buf == '#') {		/* New shop */
+    if (*buf == '#')
+    { /* New shop */
       sscanf(buf, "#%d\n", &temp);
       snprintf(buf2, sizeof(buf2), "shop #%d in shop file %s", temp, filename);
-      free(buf);		/* Plug memory leak! */
+      free(buf); /* Plug memory leak! */
       top_shop++;
       if (!top_shop)
-	CREATE(shop_index, struct shop_data, rec_count);
+        CREATE(shop_index, struct shop_data, rec_count);
+      struct shop_data *shop = &shop_index[top_shop];
       SHOP_NUM(top_shop) = temp;
       temp = read_list(shop_f, list, new_format, MAX_PROD, LIST_PRODUCE);
-      CREATE(shop_index[top_shop].producing, obj_vnum, temp);
+      CREATE(shop->producing, obj_vnum, temp);
       for (count = 0; count < temp; count++)
-	SHOP_PRODUCT(top_shop, count) = BUY_TYPE(list[count]);
+        SHOP_PRODUCT(top_shop, count) = BUY_TYPE(list[count]);
 
       read_line(shop_f, "%f", &SHOP_BUYPROFIT(top_shop));
       read_line(shop_f, "%f", &SHOP_SELLPROFIT(top_shop));
 
       temp = read_type_list(shop_f, list, new_format, MAX_TRADE);
-      CREATE(shop_index[top_shop].type, struct shop_buy_data, temp);
-      for (count = 0; count < temp; count++) {
-	SHOP_BUYTYPE(top_shop, count) = BUY_TYPE(list[count]);
-	SHOP_BUYWORD(top_shop, count) = BUY_WORD(list[count]);
+      CREATE(shop->type, struct shop_buy_data, temp);
+      for (count = 0; count < temp; count++)
+      {
+        SHOP_BUYTYPE(top_shop, count) = BUY_TYPE(list[count]);
+        SHOP_BUYWORD(top_shop, count) = BUY_WORD(list[count]);
       }
 
-      shop_index[top_shop].no_such_item1 = read_shop_message(0, SHOP_NUM(top_shop), shop_f, buf2);
-      shop_index[top_shop].no_such_item2 = read_shop_message(1, SHOP_NUM(top_shop), shop_f, buf2);
-      shop_index[top_shop].do_not_buy = read_shop_message(2, SHOP_NUM(top_shop), shop_f, buf2);
-      shop_index[top_shop].missing_cash1 = read_shop_message(3, SHOP_NUM(top_shop), shop_f, buf2);
-      shop_index[top_shop].missing_cash2 = read_shop_message(4, SHOP_NUM(top_shop), shop_f, buf2);
-      shop_index[top_shop].message_buy = read_shop_message(5, SHOP_NUM(top_shop), shop_f, buf2);
-      shop_index[top_shop].message_sell = read_shop_message(6, SHOP_NUM(top_shop), shop_f, buf2);
+      shop->no_such_item1 = read_shop_message(0, SHOP_NUM(top_shop), shop_f, buf2);
+      shop->no_such_item2 = read_shop_message(1, SHOP_NUM(top_shop), shop_f, buf2);
+      shop->do_not_buy = read_shop_message(2, SHOP_NUM(top_shop), shop_f, buf2);
+      shop->missing_cash1 = read_shop_message(3, SHOP_NUM(top_shop), shop_f, buf2);
+      shop->missing_cash2 = read_shop_message(4, SHOP_NUM(top_shop), shop_f, buf2);
+      shop->message_buy = read_shop_message(5, SHOP_NUM(top_shop), shop_f, buf2);
+      shop->message_sell = read_shop_message(6, SHOP_NUM(top_shop), shop_f, buf2);
       read_line(shop_f, "%d", &SHOP_BROKE_TEMPER(top_shop));
       read_line(shop_f, "%ld", &SHOP_BITVECTOR(top_shop));
       read_line(shop_f, "%hd", &SHOP_KEEPER(top_shop));
@@ -1537,29 +1541,35 @@ void boot_the_shops(FILE *shop_f, char *filename, int rec_count)
       CREATE(buf, char, READ_SIZE);
       get_line(shop_f, buf);
       p = buf;
-      for (temp = 0; temp < SW_ARRAY_MAX; temp++) {
+      for (temp = 0; temp < SW_ARRAY_MAX; temp++)
+      {
         if (!p || !*p)
           break;
-        if (sscanf(p, "%d", &count) != 1) {
+        if (sscanf(p, "%d", &count) != 1)
+        {
           log("SYSERR: Can't parse TRADE_WITH line in %s: '%s'", buf2, buf);
           break;
         }
-        SHOP_TRADE_WITH(top_shop)[temp] = count;
-        while (isdigit(*p) || *p == '-') {
+        SHOP_TRADE_WITH(top_shop)
+        [temp] = count;
+        while (isdigit(*p) || *p == '-')
+        {
           p++;
         }
-        while (*p && !(isdigit(*p) || *p == '-')) {
+        while (*p && !(isdigit(*p) || *p == '-'))
+        {
           p++;
         }
       }
       free(buf);
       while (temp < SW_ARRAY_MAX)
-        SHOP_TRADE_WITH(top_shop)[temp++] = 0;
+        SHOP_TRADE_WITH(top_shop)
+        [temp++] = 0;
 
       temp = read_list(shop_f, list, new_format, 1, LIST_ROOM);
-      CREATE(shop_index[top_shop].in_room, room_vnum, temp);
+      CREATE(shop->in_room, room_vnum, temp);
       for (count = 0; count < temp; count++)
-	SHOP_ROOM(top_shop, count) = BUY_TYPE(list[count]);
+        SHOP_ROOM(top_shop, count) = BUY_TYPE(list[count]);
 
       read_line(shop_f, "%d", &SHOP_OPEN1(top_shop));
       read_line(shop_f, "%d", &SHOP_CLOSE1(top_shop));
@@ -1569,12 +1579,14 @@ void boot_the_shops(FILE *shop_f, char *filename, int rec_count)
       SHOP_BANK(top_shop) = 0;
       SHOP_SORT(top_shop) = 0;
       SHOP_FUNC(top_shop) = NULL;
-    } else {
-      if (*buf == '$')		/* EOF */
-	done = TRUE;
-      else if (strstr(buf, VERSION3_TAG))	/* New format marker */
-	new_format = TRUE;
-      free(buf);		/* Plug memory leak! */
+    }
+    else
+    {
+      if (*buf == '$') /* EOF */
+        done = TRUE;
+      else if (strstr(buf, VERSION3_TAG)) /* New format marker */
+        new_format = TRUE;
+      free(buf); /* Plug memory leak! */
     }
   }
 }
@@ -1836,30 +1848,31 @@ void destroy_shops(void)
     return;
 
   for (cnt = 0; cnt <= top_shop; cnt++) {
-    if (shop_index[cnt].no_such_item1)
-      free(shop_index[cnt].no_such_item1);
-    if (shop_index[cnt].no_such_item2)
-      free(shop_index[cnt].no_such_item2);
-    if (shop_index[cnt].missing_cash1)
-      free(shop_index[cnt].missing_cash1);
-    if (shop_index[cnt].missing_cash2)
-      free(shop_index[cnt].missing_cash2);
-    if (shop_index[cnt].do_not_buy)
-      free(shop_index[cnt].do_not_buy);
-    if (shop_index[cnt].message_buy)
-      free(shop_index[cnt].message_buy);
-    if (shop_index[cnt].message_sell)
-      free(shop_index[cnt].message_sell);
-    if (shop_index[cnt].in_room)
-      free(shop_index[cnt].in_room);
-    if (shop_index[cnt].producing)
-      free(shop_index[cnt].producing);
+    struct shop_data* shop = &shop_index[cnt];
+    if (shop->no_such_item1)
+      free(shop->no_such_item1);
+    if (shop->no_such_item2)
+      free(shop->no_such_item2);
+    if (shop->missing_cash1)
+      free(shop->missing_cash1);
+    if (shop->missing_cash2)
+      free(shop->missing_cash2);
+    if (shop->do_not_buy)
+      free(shop->do_not_buy);
+    if (shop->message_buy)
+      free(shop->message_buy);
+    if (shop->message_sell)
+      free(shop->message_sell);
+    if (shop->in_room)
+      free(shop->in_room);
+    if (shop->producing)
+      free(shop->producing);
 
-    if (shop_index[cnt].type) {
-      for (itr = 0; BUY_TYPE(shop_index[cnt].type[itr]) != NOTHING; itr++)
-        if (BUY_WORD(shop_index[cnt].type[itr]))
-          free(BUY_WORD(shop_index[cnt].type[itr]));
-      free(shop_index[cnt].type);
+    if (shop->type) {
+      for (itr = 0; BUY_TYPE(shop->type[itr]) != NOTHING; itr++)
+        if (BUY_WORD(shop->type[itr]))
+          free(BUY_WORD(shop->type[itr]));
+      free(shop->type);
     }
   }
 

@@ -15,6 +15,7 @@ void remove_cmd_from_list(struct reset_com **list, int pos);
 int new_command(struct zone_data *zone, int pos);
 void delete_zone_command(struct zone_data *zone, int pos);
 zone_rnum real_zone_by_thing(room_vnum vznum);
+zone_vnum virtual_zone_by_thing(room_vnum vznum);
 
 /* Make delete_zone() */
 

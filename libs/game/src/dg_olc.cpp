@@ -82,12 +82,13 @@ ACMD(do_oasis_trigedit)
     d->olc = NULL;
     return;
   }
+  struct zone_data *zone = &zone_table[OLC_ZNUM(d)];
 
   /*
    * Everyone but IMPLs can only edit zones they have been assigned.
    */
   if (!can_edit_zone(ch, OLC_ZNUM(d))) {
-    send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
+    send_cannot_edit(ch, zone->number);
     free(d->olc);
     d->olc = NULL;
     return;
@@ -113,7 +114,7 @@ ACMD(do_oasis_trigedit)
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
 
   mudlog(CMP, ADMLVL_IMMORT, TRUE,"OLC: %s starts editing zone %d [trigger](allowed zone %d)",
-         GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+         GET_NAME(ch), zone->number, GET_OLC_ZONE(ch));
 }
 
 /* called when a mob or object is being saved to disk, so its script can */
@@ -430,15 +431,16 @@ void trigedit_save(struct descriptor_data *d)
   char bitBuf[MAX_INPUT_LENGTH];
   char fname[MAX_INPUT_LENGTH];
 
-  if ((rnum = real_trigger(OLC_NUM(d))) != NOTHING) {
+  if ((rnum = real_trigger(OLC_NUM(d))) != NOTHING)
+  {
     proto = trig_index[rnum]->proto;
-    for (cmd = proto->cmdlist; cmd; cmd = next_cmd) {
+    for (cmd = proto->cmdlist; cmd; cmd = next_cmd)
+    {
       next_cmd = cmd->next;
       if (cmd->cmd)
         free(cmd->cmd);
       free(cmd);
     }
-
 
     free(proto->arglist);
     free(proto->name);
@@ -447,7 +449,8 @@ void trigedit_save(struct descriptor_data *d)
     s = OLC_STORAGE(d);
 
     CREATE(trig->cmdlist, struct cmdlist_element, 1);
-    if (s) {
+    if (s)
+    {
       char *t = strtok(s, "\n\r"); /* strtok returns NULL if s is "\r\n" */
       if (t)
         trig->cmdlist->cmd = strdup(t);
@@ -455,12 +458,14 @@ void trigedit_save(struct descriptor_data *d)
         trig->cmdlist->cmd = strdup("* No script");
 
       cmd = trig->cmdlist;
-      while ((s = strtok(NULL, "\n\r"))) {
+      while ((s = strtok(NULL, "\n\r")))
+      {
         CREATE(cmd->next, struct cmdlist_element, 1);
         cmd = cmd->next;
         cmd->cmd = strdup(s);
       }
-    } else
+    }
+    else
       trig->cmdlist->cmd = strdup("* No Script");
 
     /* make the prorotype look like what we have */
@@ -470,12 +475,15 @@ void trigedit_save(struct descriptor_data *d)
     live_trig = trigger_list;
     while (live_trig)
     {
-      if (GET_TRIG_RNUM(live_trig) == rnum) {
-        if (live_trig->arglist) {
+      if (GET_TRIG_RNUM(live_trig) == rnum)
+      {
+        if (live_trig->arglist)
+        {
           free(live_trig->arglist);
           live_trig->arglist = NULL;
         }
-        if (live_trig->name) {
+        if (live_trig->name)
+        {
           free(live_trig->name);
           live_trig->name = NULL;
         }
@@ -486,13 +494,15 @@ void trigedit_save(struct descriptor_data *d)
           live_trig->name = strdup(proto->name);
 
         /* anything could have happened so we don't want to keep these */
-        if (GET_TRIG_WAIT(live_trig)) {
+        if (GET_TRIG_WAIT(live_trig))
+        {
           event_cancel(GET_TRIG_WAIT(live_trig));
-          GET_TRIG_WAIT(live_trig)=NULL;
+          GET_TRIG_WAIT(live_trig) = NULL;
         }
-        if (live_trig->var_list) {
+        if (live_trig->var_list)
+        {
           free_varlist(live_trig->var_list);
-          live_trig->var_list=NULL;
+          live_trig->var_list = NULL;
         }
 
         live_trig->cmdlist = proto->cmdlist;
@@ -506,7 +516,9 @@ void trigedit_save(struct descriptor_data *d)
 
       live_trig = live_trig->next_in_world;
     }
-  } else {
+  }
+  else
+  {
     /* this is a new trigger */
     CREATE(new_index, struct index_data *, top_of_trigt + 2);
 
@@ -515,23 +527,29 @@ void trigedit_save(struct descriptor_data *d)
     s = OLC_STORAGE(d);
 
     CREATE(trig->cmdlist, struct cmdlist_element, 1);
-    if (s) {
+    if (s)
+    {
       /* strtok returns NULL if s is "\r\n" */
       char *t = strtok(s, "\n\r");
       trig->cmdlist->cmd = strdup(t ? t : "* No script");
       cmd = trig->cmdlist;
 
-      while ((s = strtok(NULL, "\n\r"))) {
+      while ((s = strtok(NULL, "\n\r")))
+      {
         CREATE(cmd->next, struct cmdlist_element, 1);
         cmd = cmd->next;
         cmd->cmd = strdup(s);
       }
-    } else
+    }
+    else
       trig->cmdlist->cmd = strdup("* No Script");
 
-    for (i = 0; i < top_of_trigt; i++) {
-      if (!found) {
-        if (trig_index[i]->vnum > OLC_NUM(d)) {
+    for (i = 0; i < top_of_trigt; i++)
+    {
+      if (!found)
+      {
+        if (trig_index[i]->vnum > OLC_NUM(d))
+        {
           found = TRUE;
           rnum = i;
 
@@ -548,17 +566,22 @@ void trigedit_save(struct descriptor_data *d)
 
           proto = trig_index[rnum]->proto;
           proto->nr = rnum + 1;
-        } else {
+        }
+        else
+        {
           new_index[i] = trig_index[i];
         }
-      } else {
-         new_index[i + 1] = trig_index[i];
-         proto = trig_index[i]->proto;
-         proto->nr = i + 1;
+      }
+      else
+      {
+        new_index[i + 1] = trig_index[i];
+        proto = trig_index[i]->proto;
+        proto->nr = i + 1;
       }
     }
 
-    if (!found) {
+    if (!found)
+    {
       rnum = i;
       CREATE(new_index[rnum], struct index_data, 1);
       GET_TRIG_RNUM(OLC_TRIG(d)) = rnum;
@@ -583,11 +606,11 @@ void trigedit_save(struct descriptor_data *d)
     /*
      * Update other trigs being edited.
      */
-     for (dsc = descriptor_list; dsc; dsc = dsc->next)
-       if (STATE(dsc) == CON_TRIGEDIT)
-         if (GET_TRIG_RNUM(OLC_TRIG(dsc)) >= rnum)
-           GET_TRIG_RNUM(OLC_TRIG(dsc))++;
-
+    for (dsc = descriptor_list; dsc; dsc = dsc->next)
+      if (STATE(dsc) == CON_TRIGEDIT)
+        if (GET_TRIG_RNUM(OLC_TRIG(dsc)) >= rnum)
+          GET_TRIG_RNUM(OLC_TRIG(dsc))
+          ++;
   }
 
   /* now write the trigger out to disk, along with the rest of the  */
@@ -597,8 +620,10 @@ void trigedit_save(struct descriptor_data *d)
   /* new trigger to an item, we will get SYSERR's upton reboot that */
   /* could make things hard to debug.                               */
 
-  zone = zone_table[OLC_ZNUM(d)].number;
-  top = zone_table[OLC_ZNUM(d)].top;
+  struct zone_data *zn = &zone_table[OLC_ZNUM(d)];
+  zone = zn->number;
+  top = zn->top;
+  
 
 #ifdef CIRCLE_MAC
   snprintf(fname, sizeof(fname), "%s:%i.new", TRG_PREFIX, zone);
@@ -606,34 +631,39 @@ void trigedit_save(struct descriptor_data *d)
   snprintf(fname, sizeof(fname), "%s/%i.new", TRG_PREFIX, zone);
 #endif
 
-  if (!(trig_file = fopen(fname, "w"))) {
+  if (!(trig_file = fopen(fname, "w")))
+  {
     mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(d->character)), TRUE,
            "SYSERR: OLC: Can't open trig file \"%s\"", fname);
     return;
   }
 
-  for (i = zone_table[OLC_ZNUM(d)].bot; i <= top; i++) {
-    if ((rnum = real_trigger(i)) != NOTHING) {
+  for (i = zn->bot; i <= top; i++)
+  {
+    if ((rnum = real_trigger(i)) != NOTHING)
+    {
       trig = trig_index[rnum]->proto;
 
-      if (fprintf(trig_file, "#%d\n", i) < 0) {
+      if (fprintf(trig_file, "#%d\n", i) < 0)
+      {
         mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(d->character)), TRUE,
                "SYSERR: OLC: Can't write trig file!");
         fclose(trig_file);
         return;
       }
       sprintascii(bitBuf, GET_TRIG_TYPE(trig));
-      fprintf(trig_file,      "%s%c\n"
-                              "%d %s %d\n"
-                              "%s%c\n",
-           (GET_TRIG_NAME(trig)) ? (GET_TRIG_NAME(trig)) : "unknown trigger", STRING_TERMINATOR,
-           trig->attach_type,
-           *bitBuf ? bitBuf : "0", GET_TRIG_NARG(trig),
-           GET_TRIG_ARG(trig) ? GET_TRIG_ARG(trig) : "", STRING_TERMINATOR);
+      fprintf(trig_file, "%s%c\n"
+                         "%d %s %d\n"
+                         "%s%c\n",
+              (GET_TRIG_NAME(trig)) ? (GET_TRIG_NAME(trig)) : "unknown trigger", STRING_TERMINATOR,
+              trig->attach_type,
+              *bitBuf ? bitBuf : "0", GET_TRIG_NARG(trig),
+              GET_TRIG_ARG(trig) ? GET_TRIG_ARG(trig) : "", STRING_TERMINATOR);
 
       /* Build the text for the script */
-      strcpy(buf,""); /* strcpy OK for MAX_CMD_LENGTH > 0*/
-      for (cmd = trig->cmdlist; cmd; cmd = cmd->next) {
+      strcpy(buf, ""); /* strcpy OK for MAX_CMD_LENGTH > 0*/
+      for (cmd = trig->cmdlist; cmd; cmd = cmd->next)
+      {
         strcat(buf, cmd->cmd);
         strcat(buf, "\n");
       }

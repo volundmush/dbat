@@ -222,13 +222,14 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
     return;
   
   for (i = 0; i <= top_of_mobt; i++) {
+    struct char_data *mob = &mob_proto[i];
     if (mob_index[i].vnum >= bottom && mob_index[i].vnum <= top) {
       counter++;
 
-      admg = ((mob_proto[i].mob_specials.damsizedice + 1) / 2.0) * (mob_proto[i].mob_specials.damnodice);
+      admg = ((mob->mob_specials.damsizedice + 1) / 2.0) * (mob->mob_specials.damnodice);
       send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
-                   counter, mob_index[i].vnum, count_color_chars(mob_proto[i].short_descr)+30, mob_proto[i].short_descr, TRUE_RACE((&mob_proto[i])), SENSEI_NAME((&mob_proto[i])),
-                   mob_proto[i].level + mob_proto[i].level_adj + mob_proto[i].race_level, mob_proto[i].proto_script ? " [TRIG]" : "");
+                   counter, mob_index[i].vnum, count_color_chars(mob->short_descr)+30, mob->short_descr, TRUE_RACE((mob)), SENSEI_NAME((mob)),
+                   mob->level + mob->level_adj + mob->race_level, mob->proto_script ? " [TRIG]" : "");
     }
   }
   
@@ -260,13 +261,14 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
     return;
   
   for (i = 0; i <= top_of_objt; i++) {
+    struct obj_data *obj = &obj_proto[i];
     if (obj_index[i].vnum >= bottom && obj_index[i].vnum <= top) {
       counter++;
 
       send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
-                   counter, obj_index[i].vnum, count_color_chars(obj_proto[i].short_description)+44,
-                   obj_proto[i].short_description, item_types[obj_proto[i].type_flag],
-                   obj_proto[i].proto_script ? " [TRIG]" : "");
+                   counter, obj_index[i].vnum, count_color_chars(obj->short_description)+44,
+                   obj->short_description, item_types[obj->type_flag],
+                   obj->proto_script ? " [TRIG]" : "");
     }
   }
   
@@ -337,10 +339,12 @@ void list_zones(struct char_data *ch)
   if (!top_of_zone_table)
     return;
   
-  for (i = 0; i <= top_of_zone_table; i++)
+  for (i = 0; i <= top_of_zone_table; i++) {
+    struct zone_data *zone = &zone_table[i];
     send_to_char(ch, "[@g%3d@n] @c%-*s @y%-1s@n\r\n",
-                 zone_table[i].number, count_color_chars(zone_table[i].name)+30, zone_table[i].name,
-                 zone_table[i].builders ? zone_table[i].builders : "None.");
+              zone->number, count_color_chars(zone->name)+30, zone->name,
+              zone->builders ? zone->builders : "None.");
+  }
 }
 
 
@@ -362,7 +366,9 @@ void print_zone(struct char_data *ch, zone_vnum vnum)
     return;
   }
 
-  sprintbitarray(zone_table[rnum].zone_flags, zone_bits, ZF_ARRAY_MAX, bits, sizeof(bits));  
+  struct zone_data *zone = &zone_table[rnum];
+
+  sprintbitarray(zone->zone_flags, zone_bits, ZF_ARRAY_MAX, bits, sizeof(bits));  
   /****************************************************************************/
   /** Locate the largest of the three, top_of_world, top_of_mobt, or         **/
   /** top_of_objt.                                                           **/
@@ -380,8 +386,8 @@ void print_zone(struct char_data *ch, zone_vnum vnum)
   size_rooms   = 0;
   size_objects = 0;
   size_mobiles = 0;
-  top          = zone_table[rnum].top;
-  bottom       = zone_table[rnum].bot;
+  top          = zone->top;
+  bottom       = zone->bot;
   size_shops   = 0;
   size_triggers= 0;
   size_guilds  = 0;
@@ -431,12 +437,12 @@ void print_zone(struct char_data *ch, zone_vnum vnum)
     "@g   Shops       = @c%d\r\n"
     "@g   Triggers    = @c%d\r\n"
     "@g   Guilds      = @c%d@n\r\n",
-    zone_table[rnum].number, zone_table[rnum].name,
-    zone_table[rnum].builders, zone_table[rnum].lifespan,
-    zone_table[rnum].age, zone_table[rnum].bot, zone_table[rnum].top,
-    zone_table[rnum].reset_mode ? ((zone_table[rnum].reset_mode == 1) ?
+    zone->number, zone->name,
+    zone->builders, zone->lifespan,
+    zone->age, zone->bot, zone->top,
+    zone->reset_mode ? ((zone->reset_mode == 1) ?
     "Reset when no players are in zone." : "Normal reset.") : "Never reset",
-    zone_table[rnum].min_level, zone_table[rnum].max_level, bits,
+    zone->min_level, zone->max_level, bits,
     size_rooms, size_objects, size_mobiles, size_shops, size_triggers, size_guilds);
 }
 

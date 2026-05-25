@@ -670,19 +670,20 @@ void destroy_db(void)
 
   /* Objects */
   for (cnt = 0; cnt <= top_of_objt; cnt++) {
-    if (obj_proto[cnt].name)
-      free(obj_proto[cnt].name);
-    if (obj_proto[cnt].description)
-      free(obj_proto[cnt].description);
-    if (obj_proto[cnt].short_description)
-      free(obj_proto[cnt].short_description);
-    if (obj_proto[cnt].action_description)
-      free(obj_proto[cnt].action_description);
-    if (obj_proto[cnt].ex_description)
-    free_extra_descriptions(obj_proto[cnt].ex_description);
+    struct obj_data *obj = &obj_proto[cnt];
+    if (obj->name)
+      free(obj->name);
+    if (obj->description)
+      free(obj->description);
+    if (obj->short_description)
+      free(obj->short_description);
+    if (obj->action_description)
+      free(obj->action_description);
+    if (obj->ex_description)
+    free_extra_descriptions(obj->ex_description);
 
     /* free script proto list */
-    free_proto_script(&obj_proto[cnt], OBJ_TRIGGER);
+    free_proto_script(obj, OBJ_TRIGGER);
   }
   free(obj_proto);
   free(obj_index);
@@ -690,22 +691,23 @@ void destroy_db(void)
 
   /* Mobiles */
   for (cnt = 0; cnt <= top_of_mobt; cnt++) {
-    if (mob_proto[cnt].name)
-      free(mob_proto[cnt].name);
-    if (mob_proto[cnt].title)
-      free(mob_proto[cnt].title);
-    if (mob_proto[cnt].short_descr)
-      free(mob_proto[cnt].short_descr);
-    if (mob_proto[cnt].long_descr)
-      free(mob_proto[cnt].long_descr);
-    if (mob_proto[cnt].description)
-      free(mob_proto[cnt].description);
+    struct char_data *mob = &mob_proto[cnt];
+    if (mob->name)
+      free(mob->name);
+    if (mob->title)
+      free(mob->title);
+    if (mob->short_descr)
+      free(mob->short_descr);
+    if (mob->long_descr)
+      free(mob->long_descr);
+    if (mob->description)
+      free(mob->description);
 
     /* free script proto list */
-    free_proto_script(&mob_proto[cnt], MOB_TRIGGER);
+    free_proto_script(mob, MOB_TRIGGER);
 
-    while (mob_proto[cnt].affected)
-      affect_remove(&mob_proto[cnt], mob_proto[cnt].affected);
+    while (mob->affected)
+      affect_remove(mob, mob->affected);
   }
   free(mob_proto);
   free(mob_index);
@@ -731,11 +733,12 @@ void destroy_db(void)
 #define THIS_CMD zone_table[cnt].cmd[itr]
 
   for (cnt = 0; cnt <= top_of_zone_table; cnt++) {
-    if (zone_table[cnt].name)
-      free(zone_table[cnt].name);
-    if (zone_table[cnt].builders)
-      free(zone_table[cnt].builders);
-    if (zone_table[cnt].cmd) {
+    struct zone_data *zone = &zone_table[cnt];
+    if (zone->name)
+      free(zone->name);
+    if (zone->builders)
+      free(zone->builders);
+    if (zone->cmd) {
        /* first see if any vars were defined in this zone */
        for (itr = 0;THIS_CMD.command != 'S';itr++)
          if (THIS_CMD.command == 'V') {
@@ -745,7 +748,7 @@ void destroy_db(void)
              free(THIS_CMD.sarg2);
          }
        /* then free the command list */
-      free(zone_table[cnt].cmd);
+      free(zone->cmd);
     }
   }
   free(zone_table);
@@ -764,12 +767,14 @@ void destroy_db(void)
 
   /* Triggers */
   for (cnt=0; cnt < top_of_trigt; cnt++) {
-    if (trig_index[cnt]->proto) {
+    struct index_data *trigger = trig_index[cnt];
+    struct trig_data *proto = trig_index[cnt]->proto;
+    if (proto) {
       /* make sure to nuke the command list (memory leak) */
       /* free_trigger() doesn't free the command list */
-      if (trig_index[cnt]->proto->cmdlist) {
+      if (proto->cmdlist) {
         struct cmdlist_element *i, *j;
-        i = trig_index[cnt]->proto->cmdlist;
+        i = proto->cmdlist;
         while (i) {
           j = i->next;
           if (i->cmd)
@@ -778,9 +783,9 @@ void destroy_db(void)
           i = j;
         }
       }
-      free_trigger(trig_index[cnt]->proto);
+      free_trigger(proto);
     }
-    free(trig_index[cnt]);
+    free(trigger);
   }
   free(trig_index);
 
@@ -940,8 +945,9 @@ void boot_db(void)
   }
 
   for (i = 0; i <= top_of_zone_table; i++) {
-    log("Resetting #%d: %s (rooms %d-%d).", zone_table[i].number,
-	zone_table[i].name, zone_table[i].bot, zone_table[i].top);
+    struct zone_data *zone = &zone_table[i];
+    log("Resetting #%d: %s (rooms %d-%d).", zone->number,
+	    zone->name, zone->bot, zone->top);
     reset_zone(i);
   }
 
@@ -1507,7 +1513,7 @@ static void parse_room(FILE *fl, int virtual_nr)
     sprintf(flags, "room #%d", virtual_nr);	/* sprintf: OK (until 399-bit integers) */
     
     if(bitsavetodisk) { /* Maybe the implementor just wants to look at the 128bit files */
-      add_to_save_list(zone_table[real_zone_by_thing(virtual_nr)].number, 3);
+      add_to_save_list(virtual_zone_by_thing(virtual_nr), 3);
       converting = TRUE;
     }
 
@@ -1650,7 +1656,7 @@ static void setup_dir(FILE *fl, int room, int dir)
   ex->key = ((t[1] == -1 || t[1] == 65535) ? NOTHING : t[1]);
   ex->to_room = ((t[2] == -1  || t[2] == 65535) ? NOWHERE : t[2]);
 
-  zone_vnum zvn = zone_table[rm->zone].number;
+  zone_vnum zvn = room_zone_vnum_get(rm);
 
   if (retval == 3) {
     log("Converting world files to include DC add ons.");
@@ -2210,7 +2216,7 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
     letter = *f4;
 
     if(bitsavetodisk) {
-      add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 0);
+      add_to_save_list(virtual_zone_by_thing(nr), 0);
       converting =TRUE;
     }
 
@@ -2282,7 +2288,7 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
 
   /* Uncomment to force all mob files to be rewritten. Good for initial AUTOBALANCE setup.
    * if (bitsavetodisk) {
-   *   add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 0);
+   *   add_to_save_list(virtual_zone_by_thing(nr), 0);
    *   converting = TRUE;
    * } */
 
@@ -2337,25 +2343,26 @@ static char *parse_object(FILE *obj_f, int nr)
   htree_add(obj_htree, nr, i);
 
   clear_object(obj_proto + i);
-  obj_proto[i].item_number = i;
+  struct obj_data *proto = &obj_proto[i];
+  proto->item_number = i;
 
   sprintf(buf2, "object #%d", nr);	/* sprintf: OK (for 'buf2 >= 19') */
 
   /* *** string data *** */
-  if ((obj_proto[i].name = fread_string(obj_f, buf2)) == NULL) {
+  if ((proto->name = fread_string(obj_f, buf2)) == NULL) {
     log("SYSERR: Null obj name or format error at or near %s", buf2);
     exit(1);
   }
-  tmpptr = obj_proto[i].short_description = fread_string(obj_f, buf2);
+  tmpptr = proto->short_description = fread_string(obj_f, buf2);
   if (tmpptr && *tmpptr)
     if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
 	!strcasecmp(fname(tmpptr), "the"))
       *tmpptr = LOWER(*tmpptr);
 
-  tmpptr = obj_proto[i].description = fread_string(obj_f, buf2);
+  tmpptr = proto->description = fread_string(obj_f, buf2);
   if (tmpptr && *tmpptr)
     CAP(tmpptr);
-  obj_proto[i].action_description = fread_string(obj_f, buf2);
+  proto->action_description = fread_string(obj_f, buf2);
 
   /* *** numeric data *** */
   if (!get_line(obj_f, line)) {
@@ -2375,41 +2382,41 @@ static char *parse_object(FILE *obj_f, int nr)
           t[3] = asciiflag_conv_aff(f3);
 	    
 	log("Converting object #%d to 128bits..", nr);
-    GET_OBJ_EXTRA(obj_proto + i)[0] = asciiflag_conv(f1);
-    GET_OBJ_EXTRA(obj_proto + i)[1] = 0;
-    GET_OBJ_EXTRA(obj_proto + i)[2] = 0;
-    GET_OBJ_EXTRA(obj_proto + i)[3] = 0;
-    GET_OBJ_WEAR(obj_proto + i)[0] = asciiflag_conv(f2);
-    GET_OBJ_WEAR(obj_proto + i)[1] = 0;
-    GET_OBJ_WEAR(obj_proto + i)[2] = 0;
-    GET_OBJ_WEAR(obj_proto + i)[3] = 0;
-    GET_OBJ_PERM(obj_proto + i)[0] = asciiflag_conv_aff(f3);
-    GET_OBJ_PERM(obj_proto + i)[1] = 0;
-    GET_OBJ_PERM(obj_proto + i)[2] = 0;
-    GET_OBJ_PERM(obj_proto + i)[3] = 0;
+    GET_OBJ_EXTRA(proto)[0] = asciiflag_conv(f1);
+    GET_OBJ_EXTRA(proto)[1] = 0;
+    GET_OBJ_EXTRA(proto)[2] = 0;
+    GET_OBJ_EXTRA(proto)[3] = 0;
+    GET_OBJ_WEAR(proto)[0] = asciiflag_conv(f2);
+    GET_OBJ_WEAR(proto)[1] = 0;
+    GET_OBJ_WEAR(proto)[2] = 0;
+    GET_OBJ_WEAR(proto)[3] = 0;
+    GET_OBJ_PERM(proto)[0] = asciiflag_conv_aff(f3);
+    GET_OBJ_PERM(proto)[1] = 0;
+    GET_OBJ_PERM(proto)[2] = 0;
+    GET_OBJ_PERM(proto)[3] = 0;
     
     if(bitsavetodisk) { 
-      add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
+      add_to_save_list(virtual_zone_by_thing(nr), 1);
       converting = TRUE;
     }
 	
 	log("   done.");
   } else if (retval == 13) {
  
-    GET_OBJ_EXTRA(obj_proto + i)[0] = asciiflag_conv(f1);
-    GET_OBJ_EXTRA(obj_proto + i)[1] = asciiflag_conv(f2);
-    GET_OBJ_EXTRA(obj_proto + i)[2] = asciiflag_conv(f3);
-    GET_OBJ_EXTRA(obj_proto + i)[3] = asciiflag_conv(f4);
+    GET_OBJ_EXTRA(proto)[0] = asciiflag_conv(f1);
+    GET_OBJ_EXTRA(proto)[1] = asciiflag_conv(f2);
+    GET_OBJ_EXTRA(proto)[2] = asciiflag_conv(f3);
+    GET_OBJ_EXTRA(proto)[3] = asciiflag_conv(f4);
 
-    GET_OBJ_WEAR(obj_proto + i)[0] = asciiflag_conv(f5);
-    GET_OBJ_WEAR(obj_proto + i)[1] = asciiflag_conv(f6);
-    GET_OBJ_WEAR(obj_proto + i)[2] = asciiflag_conv(f7);
-    GET_OBJ_WEAR(obj_proto + i)[3] = asciiflag_conv(f8);
+    GET_OBJ_WEAR(proto)[0] = asciiflag_conv(f5);
+    GET_OBJ_WEAR(proto)[1] = asciiflag_conv(f6);
+    GET_OBJ_WEAR(proto)[2] = asciiflag_conv(f7);
+    GET_OBJ_WEAR(proto)[3] = asciiflag_conv(f8);
 
-    GET_OBJ_PERM(obj_proto + i)[0] = asciiflag_conv(f9);
-    GET_OBJ_PERM(obj_proto + i)[1] = asciiflag_conv(f10);
-    GET_OBJ_PERM(obj_proto + i)[2] = asciiflag_conv(f11);
-    GET_OBJ_PERM(obj_proto + i)[3] = asciiflag_conv(f12);
+    GET_OBJ_PERM(proto)[0] = asciiflag_conv(f9);
+    GET_OBJ_PERM(proto)[1] = asciiflag_conv(f10);
+    GET_OBJ_PERM(proto)[2] = asciiflag_conv(f11);
+    GET_OBJ_PERM(proto)[3] = asciiflag_conv(f12);
 
   } else {
     log("SYSERR: Format error in first numeric line (expecting 13 args, got %d), %s", retval, buf2);
@@ -2417,7 +2424,7 @@ static char *parse_object(FILE *obj_f, int nr)
   }
   
   /* Object flags checked in check_object(). */
-  GET_OBJ_TYPE(obj_proto + i) = t[0];
+  GET_OBJ_TYPE(proto) = t[0];
   
   if (!get_line(obj_f, line)) {
     log("SYSERR: Expecting second numeric line of %s, but file ended!", buf2);
@@ -2433,25 +2440,25 @@ static char *parse_object(FILE *obj_f, int nr)
   }
 
   for (j = 0; j < NUM_OBJ_VAL_POSITIONS; j++)
-    GET_OBJ_VAL(obj_proto + i, j) = t[j];
+    GET_OBJ_VAL(proto, j) = t[j];
 
-  if ((GET_OBJ_TYPE(obj_proto + i) == ITEM_PORTAL || \
-       GET_OBJ_TYPE(obj_proto + i) == ITEM_HATCH) && \
-       (!GET_OBJ_VAL(obj_proto + i, VAL_DOOR_DCLOCK) || \
-        !GET_OBJ_VAL(obj_proto + i, VAL_DOOR_DCHIDE))) {
-    GET_OBJ_VAL(obj_proto + i, VAL_DOOR_DCLOCK) = 20;
-    GET_OBJ_VAL(obj_proto + i, VAL_DOOR_DCHIDE) = 20;
+  if ((GET_OBJ_TYPE(proto) == ITEM_PORTAL || \
+       GET_OBJ_TYPE(proto) == ITEM_HATCH) && \
+       (!GET_OBJ_VAL(proto, VAL_DOOR_DCLOCK) || \
+        !GET_OBJ_VAL(proto, VAL_DOOR_DCHIDE))) {
+    GET_OBJ_VAL(proto, VAL_DOOR_DCLOCK) = 20;
+    GET_OBJ_VAL(proto, VAL_DOOR_DCHIDE) = 20;
     if(bitsavetodisk) {
-      add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
+      add_to_save_list(virtual_zone_by_thing(nr), 1);
       converting = TRUE;
     }
   }
 
-  if (GET_OBJ_TYPE(obj_proto + i) == ITEM_WEAPON && GET_OBJ_VAL(obj_proto + i, 0) > 169) {
-    GET_OBJ_VAL(obj_proto + i, 0) = suntzu_weapon_convert(t[0]);
+  if (GET_OBJ_TYPE(proto) == ITEM_WEAPON && GET_OBJ_VAL(proto, 0) > 169) {
+    GET_OBJ_VAL(proto, 0) = suntzu_weapon_convert(t[0]);
 
     if(bitsavetodisk) {
-      add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
+      add_to_save_list(virtual_zone_by_thing(nr), 1);
       converting = TRUE;
     }
   }
@@ -2460,7 +2467,7 @@ static char *parse_object(FILE *obj_f, int nr)
    * if (GET_OBJ_TYPE(obj_proto + i) == ITEM_ARMOR) {
    *   if (suntzu_armor_convert(obj_proto + i)) {
    *     if(bitsavetodisk) {
-   *       add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
+   *       add_to_save_list(virtual_zone_by_thing(nr), 1);
    *       converting = TRUE;
    *     }
    *   }
@@ -2478,29 +2485,29 @@ static char *parse_object(FILE *obj_f, int nr)
     exit(1);
   }
   }
-  GET_OBJ_WEIGHT(obj_proto + i) = t[0];
-  GET_OBJ_COST(obj_proto + i) = t[1];
-  GET_OBJ_RENT(obj_proto + i) = t[2];
-  GET_OBJ_LEVEL(obj_proto + i) = t[3];
-  GET_OBJ_SIZE(obj_proto + i) = SIZE_MEDIUM;
+  GET_OBJ_WEIGHT(proto) = t[0];
+  GET_OBJ_COST(proto) = t[1];
+  GET_OBJ_RENT(proto) = t[2];
+  GET_OBJ_LEVEL(proto) = t[3];
+  GET_OBJ_SIZE(proto) = SIZE_MEDIUM;
 
   /* check to make sure that weight of containers exceeds curr. quantity */
-  if (GET_OBJ_TYPE(obj_proto + i) == ITEM_DRINKCON ||
-      GET_OBJ_TYPE(obj_proto + i) == ITEM_FOUNTAIN) {
-    if (GET_OBJ_WEIGHT(obj_proto + i) < GET_OBJ_VAL(obj_proto + i, 1))
-      GET_OBJ_WEIGHT(obj_proto + i) = GET_OBJ_VAL(obj_proto + i, 1) + 5;
+  if (GET_OBJ_TYPE(proto) == ITEM_DRINKCON ||
+      GET_OBJ_TYPE(proto) == ITEM_FOUNTAIN) {
+    if (GET_OBJ_WEIGHT(proto) < GET_OBJ_VAL(proto, 1))
+      GET_OBJ_WEIGHT(proto) = GET_OBJ_VAL(proto, 1) + 5;
   }
   /* *** make sure portal objects have their timer set correctly *** */
-  if (GET_OBJ_TYPE(obj_proto + i) == ITEM_PORTAL) {
-    GET_OBJ_TIMER(obj_proto + i) =  -1;
+  if (GET_OBJ_TYPE(proto) == ITEM_PORTAL) {
+    GET_OBJ_TIMER(proto) =  -1;
   }
 
   /* *** extra descriptions and affect fields *** */
 
   for (j = 0; j < MAX_OBJ_AFFECT; j++) {
-    obj_proto[i].affected[j].location = APPLY_NONE;
-    obj_proto[i].affected[j].modifier = 0;
-    obj_proto[i].affected[j].specific = 0;
+    proto->affected[j].location = APPLY_NONE;
+    proto->affected[j].modifier = 0;
+    proto->affected[j].specific = 0;
   }
 
   strcat(buf2, ", after numeric constants\n"	/* strcat: OK (for 'buf2 >= 87') */
@@ -2517,8 +2524,8 @@ static char *parse_object(FILE *obj_f, int nr)
       CREATE(new_descr, struct extra_descr_data, 1);
       new_descr->keyword = fread_string(obj_f, buf2);
       new_descr->description = fread_string(obj_f, buf2);
-      new_descr->next = obj_proto[i].ex_description;
-      obj_proto[i].ex_description = new_descr;
+      new_descr->next = proto->ex_description;
+      proto->ex_description = new_descr;
       break;
     case 'A':
       if (j >= MAX_OBJ_AFFECT) {
@@ -2545,9 +2552,9 @@ static char *parse_object(FILE *obj_f, int nr)
         log("Warning: object #%d (%s) uses deprecated saving throw applies",
             nr, GET_OBJ_SHORT(obj_proto + i));
       }
-      obj_proto[i].affected[j].location = t[0];
-      obj_proto[i].affected[j].modifier = t[1];
-      obj_proto[i].affected[j].specific = t[2];
+      proto->affected[j].location = t[0];
+      proto->affected[j].modifier = t[1];
+      proto->affected[j].specific = t[2];
       j++;
       break;
     case 'S':  /* Spells for Spellbooks*/
@@ -2567,16 +2574,16 @@ static char *parse_object(FILE *obj_f, int nr)
 	    "...offending line: '%s'", buf2, retval, line);
 	exit(1);
       }
-      if (!obj_proto[i].sbinfo) {
-        CREATE(obj_proto[i].sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-        memset((char *) obj_proto[i].sbinfo, 0, SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
+      if (!proto->sbinfo) {
+        CREATE(proto->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
+        memset((char *) proto->sbinfo, 0, SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
       }
-      obj_proto[i].sbinfo[j].spellname = t[0];
-      obj_proto[i].sbinfo[j].pages = t[1];
+      proto->sbinfo[j].spellname = t[0];
+      proto->sbinfo[j].pages = t[1];
       j++;
       break;
     case 'T':  /* DG triggers */
-      dg_obj_trigger(line, &obj_proto[i]);
+      dg_obj_trigger(line, proto);
       break;
     case 'Z':
       if (!get_line(obj_f, line)) {
@@ -2590,17 +2597,17 @@ static char *parse_object(FILE *obj_f, int nr)
 	    "...offending line: '%s'", buf2, line);
 	exit(1);
       }
-      GET_OBJ_SIZE(obj_proto + i) = t[0];
+      GET_OBJ_SIZE(proto) = t[0];
       break;
     case '$':
     case '#':
       /* Objects that set CHARM on players are bad. */
-      if (OBJAFF_FLAGGED(obj_proto + i, AFF_CHARM)) {
+      if (OBJAFF_FLAGGED(proto, AFF_CHARM)) {
         log("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
-        REMOVE_BIT_AR(GET_OBJ_PERM(obj_proto + i), AFF_CHARM);
+        REMOVE_BIT_AR(GET_OBJ_PERM(proto), AFF_CHARM);
       }
       top_of_objt = i;
-      check_object(obj_proto + i);
+      check_object(proto);
       i++;
       return (line);
     default:
@@ -2897,11 +2904,13 @@ int vnum_mobile(char *searchname, struct char_data *ch)
 {
   int nr, found = 0;
 
-  for (nr = 0; nr <= top_of_mobt; nr++)
-    if (isname(searchname, mob_proto[nr].name))
+  for (nr = 0; nr <= top_of_mobt; nr++) {
+    struct char_data *mob = &mob_proto[nr];
+    if (isname(searchname, mob->name))
       send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                   ++found, mob_index[nr].vnum, mob_proto[nr].short_descr,
-                   mob_proto[nr].proto_script ? "[TRIG]" : "" );
+                   ++found, mob_index[nr].vnum, mob->short_descr,
+                   mob->proto_script ? "[TRIG]" : "" );
+  }
 
   return (found);
 }
@@ -2912,11 +2921,13 @@ int vnum_object(char *searchname, struct char_data *ch)
 {
   int nr, found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++)
-    if (isname(searchname, obj_proto[nr].name))
+  for (nr = 0; nr <= top_of_objt; nr++) {
+    struct obj_data *obj = &obj_proto[nr];
+    if (isname(searchname, obj->name))
       send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                    ++found, obj_index[nr].vnum, obj_proto[nr].short_description,
-                    obj_proto[nr].proto_script ? "[TRIG]" : "" );
+                    ++found, obj_index[nr].vnum, obj->short_description,
+                    obj->proto_script ? "[TRIG]" : "" );
+  }
 
   return (found);
 }
@@ -2927,12 +2938,14 @@ int vnum_material(char *searchname, struct char_data *ch)
 {
   int nr, found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++)
-    if (isname(searchname, material_names[obj_proto[nr].value[VAL_ALL_MATERIAL]])) {
+  for (nr = 0; nr <= top_of_objt; nr++) {
+    struct obj_data *obj = &obj_proto[nr];
+        if (isname(searchname, material_names[obj->value[VAL_ALL_MATERIAL]])) {
       send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                    ++found, obj_index[nr].vnum, obj_proto[nr].short_description,
-                    obj_proto[nr].proto_script ? "[TRIG]" : "" );
+                    ++found, obj_index[nr].vnum, obj->short_description,
+                    obj->proto_script ? "[TRIG]" : "" );
     }
+  }
 
   return (found);
 }
@@ -2943,32 +2956,35 @@ int vnum_weapontype(char *searchname, struct char_data *ch)
 {
   int nr, found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++)
-    if (obj_proto[nr].type_flag == ITEM_WEAPON) {
-      if (isname(searchname, weapon_type[obj_proto[nr].value[VAL_WEAPON_SKILL]])) {
+  for (nr = 0; nr <= top_of_objt; nr++) {
+    struct obj_data *obj = &obj_proto[nr];
+    if (obj->type_flag == ITEM_WEAPON) {
+      if (isname(searchname, weapon_type[obj->value[VAL_WEAPON_SKILL]])) {
         send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                    ++found, obj_index[nr].vnum, obj_proto[nr].short_description,
-                    obj_proto[nr].proto_script ? "[TRIG]" : "" );
+                    ++found, obj_index[nr].vnum, obj->short_description,
+                    obj->proto_script ? "[TRIG]" : "" );
       }
     }
+  }
 
   return (found);
 }
-
 
 
 int vnum_armortype(char *searchname, struct char_data *ch)
 {
   int nr, found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++)
-    if (obj_proto[nr].type_flag == ITEM_ARMOR) {
-      if (isname(searchname, armor_type[obj_proto[nr].value[VAL_ARMOR_SKILL]])) {
+  for (nr = 0; nr <= top_of_objt; nr++) {
+    struct obj_data *obj = &obj_proto[nr];
+    if (obj->type_flag == ITEM_ARMOR) {
+      if (isname(searchname, armor_type[obj->value[VAL_ARMOR_SKILL]])) {
         send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                    ++found, obj_index[nr].vnum, obj_proto[nr].short_description,
-                    obj_proto[nr].proto_script ? "[TRIG]" : "" );
+                    ++found, obj_index[nr].vnum, obj->short_description,
+                    obj->proto_script ? "[TRIG]" : "" );
       }
     }
+  }
 
   return (found);
 }
@@ -3793,10 +3809,11 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
     log("Object (%c) %d does not exist in database.", type == VIRTUAL ? 'V' : 'R', nr);
     return (NULL);
   }
+  struct obj_data *proto = &obj_proto[i];
 
   CREATE(obj, struct obj_data, 1);
   clear_object(obj);
-  *obj = obj_proto[i];
+  *obj = *proto;
   obj->next = object_list;
   object_list = obj;
   OBJ_LOADROOM(obj) = NOWHERE;
@@ -3811,14 +3828,14 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
   obj->generation = time(0);
   obj->unique_id = -1;
 
-  if (obj_proto[i].sbinfo) {
+  if (proto->sbinfo) {
     CREATE(obj->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
     for (j = 0; j < SPELLBOOK_SIZE; j++) {
-      obj->sbinfo[j].spellname = obj_proto[i].sbinfo[j].spellname;
-      obj->sbinfo[j].pages = obj_proto[i].sbinfo[j].pages;
+      obj->sbinfo[j].spellname = proto->sbinfo[j].spellname;
+      obj->sbinfo[j].pages = proto->sbinfo[j].pages;
     }
   }
-  copy_proto_script(&obj_proto[i], obj, OBJ_TRIGGER);
+  copy_proto_script(proto, obj, OBJ_TRIGGER);
   assign_triggers(obj, OBJ_TRIGGER);
   if (GET_OBJ_VNUM(obj) == 65) {
    HCHARGE(obj) = 20;
@@ -3844,7 +3861,8 @@ void zone_update(void)
   static int timer = 0;
 
   /* jelson 10/22/92 */
-  if (((++timer * PULSE_ZONE) / PASSES_PER_SEC) >= 60) {
+  if (((++timer * PULSE_ZONE) / PASSES_PER_SEC) >= 60)
+  {
     /* one minute has passed */
     /*
      * NOT accurate unless PULSE_ZONE is a multiple of PASSES_PER_SEC or a
@@ -3854,57 +3872,65 @@ void zone_update(void)
     timer = 0;
 
     /* since one minute has passed, increment zone ages */
-    for (i = 0; i <= top_of_zone_table; i++) {
-      if (zone_table[i].age < zone_table[i].lifespan &&
-	  zone_table[i].reset_mode)
-	(zone_table[i].age)++;
+    for (i = 0; i <= top_of_zone_table; i++)
+    {
+      struct zone_data* zone = &zone_table[i];
+      if (zone->age < zone->lifespan &&
+          zone->reset_mode)
+        (zone->age)++;
 
-      if (zone_table[i].age >= zone_table[i].lifespan &&
-	  zone_table[i].age < ZO_DEAD && zone_table[i].reset_mode) {
-	/* enqueue zone */
+      if (zone->age >= zone->lifespan &&
+          zone->age < ZO_DEAD && zone->reset_mode)
+      {
+        /* enqueue zone */
 
-	CREATE(update_u, struct reset_q_element, 1);
+        CREATE(update_u, struct reset_q_element, 1);
 
-	update_u->zone_to_reset = i;
-	update_u->next = 0;
+        update_u->zone_to_reset = i;
+        update_u->next = 0;
 
-	if (!reset_q.head)
-	  reset_q.head = reset_q.tail = update_u;
-	else {
-	  reset_q.tail->next = update_u;
-	  reset_q.tail = update_u;
-	}
+        if (!reset_q.head)
+          reset_q.head = reset_q.tail = update_u;
+        else
+        {
+          reset_q.tail->next = update_u;
+          reset_q.tail = update_u;
+        }
 
-	zone_table[i].age = ZO_DEAD;
+        zone->age = ZO_DEAD;
       }
     }
-  }	/* end - one minute has passed */
-
+  } /* end - one minute has passed */
 
   /* dequeue zones (if possible) and reset */
   /* this code is executed every 10 seconds (i.e. PULSE_ZONE) */
-  for (update_u = reset_q.head; update_u; update_u = update_u->next)
-    if (zone_table[update_u->zone_to_reset].reset_mode == 2 ||
-	is_empty(update_u->zone_to_reset)) {
+  for (update_u = reset_q.head; update_u; update_u = update_u->next) {
+    struct zone_data* zone = &zone_table[update_u->zone_to_reset];
+    if (zone->reset_mode == 2 ||
+        is_empty(update_u->zone_to_reset))
+    {
       reset_zone(update_u->zone_to_reset);
-      mudlog(CMP, ADMLVL_GOD, FALSE, "Auto zone reset: %s (Zone %d)", 
-          zone_table[update_u->zone_to_reset].name, zone_table[update_u->zone_to_reset].number);
+      mudlog(CMP, ADMLVL_GOD, FALSE, "Auto zone reset: %s (Zone %d)",
+             zone->name, zone->number);
       /* dequeue */
       if (update_u == reset_q.head)
-	reset_q.head = reset_q.head->next;
-      else {
-	for (temp = reset_q.head; temp->next != update_u;
-	     temp = temp->next);
+        reset_q.head = reset_q.head->next;
+      else
+      {
+        for (temp = reset_q.head; temp->next != update_u;
+             temp = temp->next)
+          ;
 
-	if (!update_u->next)
-	  reset_q.tail = temp;
+        if (!update_u->next)
+          reset_q.tail = temp;
 
-	temp->next = update_u->next;
+        temp->next = update_u->next;
       }
 
       free(update_u);
       break;
     }
+  }
 }
 
 static void log_zone_error(zone_rnum zone, int cmd_no, const char *message)
@@ -4425,19 +4451,20 @@ void free_char(struct char_data *ch)
     free_proto_script(ch, MOB_TRIGGER);
     
   } else if ((i = GET_MOB_RNUM(ch)) != NOBODY) {
+    struct char_data *proto = &mob_proto[i];
     /* otherwise, free strings only if the string is not pointing at proto */
-    if (ch->name && ch->name != mob_proto[i].name)
+    if (ch->name && ch->name != proto->name)
       free(ch->name);
-    if (ch->title && ch->title != mob_proto[i].title)
+    if (ch->title && ch->title != proto->title)
       free(ch->title);
-    if (ch->short_descr && ch->short_descr != mob_proto[i].short_descr)
+    if (ch->short_descr && ch->short_descr != proto->short_descr)
       free(ch->short_descr);
-    if (ch->long_descr && ch->long_descr != mob_proto[i].long_descr)
+    if (ch->long_descr && ch->long_descr != proto->long_descr)
       free(ch->long_descr);
-    if (ch->description && ch->description != mob_proto[i].description)
+    if (ch->description && ch->description != proto->description)
       free(ch->description);
     /* free script proto list if it's not the prototype */
-    if (ch->proto_script && ch->proto_script != mob_proto[i].proto_script)
+    if (ch->proto_script && ch->proto_script != proto->proto_script)
       free_proto_script(ch, MOB_TRIGGER);
   }
   while (ch->affected)

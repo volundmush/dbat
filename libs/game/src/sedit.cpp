@@ -123,12 +123,14 @@ ACMD(do_oasis_sedit)
     d->olc = NULL;
     return;
   }
+
+  struct zone_data *zone = &zone_table[OLC_ZNUM(d)];
   
   /****************************************************************************/
   /** Everyone but IMPLs can only edit zones they have been assigned.        **/
   /****************************************************************************/
   if (!can_edit_zone(ch, OLC_ZNUM(d))) {
-    send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
+    send_cannot_edit(ch, zone->number);
     
     /**************************************************************************/
     /** Free the OLC structure.                                              **/
@@ -140,10 +142,10 @@ ACMD(do_oasis_sedit)
   
   if (save) {
     send_to_char(ch, "Saving all shops in zone %d.\r\n",
-      zone_table[OLC_ZNUM(d)].number);
+      zone->number);
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE,
       "OLC: %s saves shop info for zone %d.",
-      GET_NAME(ch), zone_table[OLC_ZNUM(d)].number);
+      GET_NAME(ch), zone->number);
     
     /**************************************************************************/
     /** Save the shops to the shop file.                                     **/
@@ -172,7 +174,7 @@ ACMD(do_oasis_sedit)
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
-    GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+    GET_NAME(ch), zone->number, GET_OLC_ZONE(ch));
 }
 
 void sedit_setup_new(struct descriptor_data *d)

@@ -219,19 +219,20 @@ void zedit_setup(struct descriptor_data *d, int room_num)
   /*
    * Copy all the zone header information over.
    */
-  zone->name = strdup(zone_table[OLC_ZNUM(d)].name);
-  if (zone_table[OLC_ZNUM(d)].builders)
-    zone->builders = strdup(zone_table[OLC_ZNUM(d)].builders);
-  zone->lifespan = zone_table[OLC_ZNUM(d)].lifespan;
-  zone->bot = zone_table[OLC_ZNUM(d)].bot;
-  zone->top = zone_table[OLC_ZNUM(d)].top;
-  zone->reset_mode = zone_table[OLC_ZNUM(d)].reset_mode;
-  zone->zone_flags[0] = zone_table[OLC_ZNUM(d)].zone_flags[0];
-  zone->zone_flags[1] = zone_table[OLC_ZNUM(d)].zone_flags[1];
-  zone->zone_flags[2] = zone_table[OLC_ZNUM(d)].zone_flags[2];
-  zone->zone_flags[3] = zone_table[OLC_ZNUM(d)].zone_flags[3];
-  zone->min_level = zone_table[OLC_ZNUM(d)].min_level;
-  zone->max_level = zone_table[OLC_ZNUM(d)].max_level;
+  struct zone_data *zd = &zone_table[OLC_ZNUM(d)];
+  zone->name = strdup(zd->name);
+  if (zd->builders)
+    zone->builders = strdup(zd->builders);
+  zone->lifespan = zd->lifespan;
+  zone->bot = zd->bot;
+  zone->top = zd->top;
+  zone->reset_mode = zd->reset_mode;
+  zone->zone_flags[0] = zd->zone_flags[0];
+  zone->zone_flags[1] = zd->zone_flags[1];
+  zone->zone_flags[2] = zd->zone_flags[2];
+  zone->zone_flags[3] = zd->zone_flags[3];
+  zone->min_level = zd->min_level;
+  zone->max_level = zd->max_level;
   /*
    * The remaining fields are used as a 'has been modified' flag  
    */
@@ -396,24 +397,26 @@ void zedit_save_internally(struct descriptor_data *d)
   /*
    * Finally, if zone headers have been changed, copy over  
    */
+  struct zone_data *zt = &zone_table[OLC_ZNUM(d)];
   if (OLC_ZONE(d)->number) {
-    free(zone_table[OLC_ZNUM(d)].name);
-    free(zone_table[OLC_ZNUM(d)].builders);
+    struct zone_data *zd = OLC_ZONE(d);
+    free(zt->name);
+    free(zt->builders);
     
-    zone_table[OLC_ZNUM(d)].name = strdup(OLC_ZONE(d)->name);
-    zone_table[OLC_ZNUM(d)].builders = strdup(OLC_ZONE(d)->builders);
-    zone_table[OLC_ZNUM(d)].bot = OLC_ZONE(d)->bot;
-    zone_table[OLC_ZNUM(d)].top = OLC_ZONE(d)->top;
-    zone_table[OLC_ZNUM(d)].reset_mode = OLC_ZONE(d)->reset_mode;
-    zone_table[OLC_ZNUM(d)].lifespan = OLC_ZONE(d)->lifespan;
-    zone_table[OLC_ZNUM(d)].zone_flags[0] = OLC_ZONE(d)->zone_flags[0];
-    zone_table[OLC_ZNUM(d)].zone_flags[1] = OLC_ZONE(d)->zone_flags[1];
-    zone_table[OLC_ZNUM(d)].zone_flags[2] = OLC_ZONE(d)->zone_flags[2];
-    zone_table[OLC_ZNUM(d)].zone_flags[3] = OLC_ZONE(d)->zone_flags[3];
-    zone_table[OLC_ZNUM(d)].min_level = OLC_ZONE(d)->min_level;
-    zone_table[OLC_ZNUM(d)].max_level = OLC_ZONE(d)->max_level;
+    zt->name = strdup(zd->name);
+    zt->builders = strdup(zd->builders);
+    zt->bot = zd->bot;
+    zt->top = zd->top;
+    zt->reset_mode = zd->reset_mode;
+    zt->lifespan = zd->lifespan;
+    zt->zone_flags[0] = zd->zone_flags[0];
+    zt->zone_flags[1] = zd->zone_flags[1];
+    zt->zone_flags[2] = zd->zone_flags[2];
+    zt->zone_flags[3] = zd->zone_flags[3];
+    zt->min_level = zd->min_level;
+    zt->max_level = zd->max_level;
   }
-  add_to_save_list(zone_table[OLC_ZNUM(d)].number, SL_ZON);
+  add_to_save_list(zt->number, SL_ZON);
 }
 
 /*-------------------------------------------------------------------*/

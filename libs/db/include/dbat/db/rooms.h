@@ -93,7 +93,8 @@ void room_id_set(struct room_data *room, room_vnum id);
 room_vnum room_vnum_get(struct room_data *room);
 void room_vnum_set(struct room_data *room, room_vnum vnum);
 
-zone_vnum room_zone_get(struct room_data *room);
+zone_vnum room_zone_vnum_get(struct room_data *room);
+struct zone_data* room_zone_get(struct room_data *room);
 void room_zone_set(struct room_data *room, zone_vnum vnum);
 int room_sector_type_get(struct room_data *room);
 void room_sector_type_set(struct room_data *room, int sector_type);
