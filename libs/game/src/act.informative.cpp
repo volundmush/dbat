@@ -2088,34 +2088,36 @@ static void gen_map(struct char_data *ch, int num)
     strcpy(map[i], "         ");
   }
 
+  struct room_data* room = char_room_get(ch);
+
   /* print out exits */
   map_draw_room(map, 4, 4, ch->in_room, ch);
   for (door = 0; door < NUM_OF_DIRS; door++) {
-    if (EXIT(ch, door) && EXIT(ch, door)->to_room != NOWHERE && !EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED)) {
+    if (R_EXIT(room, door) && R_EXIT(room, door)->to_room != NOWHERE && !EXIT_FLAGGED(R_EXIT(room, door), EX_CLOSED)) {
       switch (door) {
         case NORTH:
-          map_draw_room(map, 4, 3,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 4, 3,R_EXIT(room, door)->to_room, ch);
          break;
         case EAST:
-          map_draw_room(map, 5, 4,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 5, 4,R_EXIT(room, door)->to_room, ch);
          break;
         case SOUTH:
-          map_draw_room(map, 4, 5,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 4, 5,R_EXIT(room, door)->to_room, ch);
          break;
         case WEST:
-          map_draw_room(map, 3, 4,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 3, 4,R_EXIT(room, door)->to_room, ch);
          break;
         case NORTHEAST:
-          map_draw_room(map, 5, 3,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 5, 3,R_EXIT(room, door)->to_room, ch);
          break;
         case NORTHWEST:
-          map_draw_room(map, 3, 3,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 3, 3,R_EXIT(room, door)->to_room, ch);
          break;
         case SOUTHEAST:
-          map_draw_room(map, 5, 5,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 5, 5,R_EXIT(room, door)->to_room, ch);
          break;
         case SOUTHWEST:
-          map_draw_room(map, 3, 5,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 3, 5,R_EXIT(room, door)->to_room, ch);
          break;
       }
     }
@@ -2136,19 +2138,19 @@ static void gen_map(struct char_data *ch, int num)
     }
     else {
      if (i == 2) {
-      sprintf(buf2, "@w       @w|%s@w|           %s", (EXIT(ch, 0) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 0), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 0), EX_CLOSED) ? " @rN " : " @CN ") : "   ", map[i]);
+      sprintf(buf2, "@w       @w|%s@w|           %s", (R_EXIT(room, 0) && !EXIT_FLAGGED(R_EXIT(room, 0), EX_SECRET)) ? (EXIT_FLAGGED(R_EXIT(room, 0), EX_CLOSED) ? " @rN " : " @CN ") : "   ", map[i]);
      }
      if (i == 3) {
-      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (EXIT(ch, 6) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 6), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 6), EX_CLOSED) ? " @rNW" : " @CNW") : "   ", (EXIT(ch, 4) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 4), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 4), EX_CLOSED) ? " @yU " : " @YU ") : "   ", (EXIT(ch, 7) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 7), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 7), EX_SECRET) ? "@rNE " : "@CNE ") : "   ", map[i]);
+      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (R_EXIT(room, 6) && !EXIT_FLAGGED(R_EXIT(room, 6), EX_SECRET)) ? (EXIT_FLAGGED(R_EXIT(room, 6), EX_CLOSED) ? " @rNW" : " @CNW") : "   ", (R_EXIT(room, 4) && !EXIT_FLAGGED(R_EXIT(room, 4), EX_SECRET)) ? (EXIT_FLAGGED(R_EXIT(room, 4), EX_CLOSED) ? " @yU " : " @YU ") : "   ", (R_EXIT(room, 7) && !EXIT_FLAGGED(R_EXIT(room, 7), EX_SECRET)) ? (EXIT_FLAGGED(R_EXIT(room, 7), EX_SECRET) ? "@rNE " : "@CNE ") : "   ", map[i]);
      }
      if (i == 4) {
-      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (EXIT(ch, 3) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 3), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 3), EX_CLOSED) ? "  @rW" : "  @CW") : "   ", (EXIT(ch, 10) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 10), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 10), EX_CLOSED) ? " @rI " : " @mI ") : ((EXIT(ch, 11) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 11), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 11), EX_CLOSED) ? "@rOUT" : "@mOUT") : "@r{ }"), (EXIT(ch, 1) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 1), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 1), EX_CLOSED) ? "@rE  " : "@CE  ") : "   ", map[i]);
+      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (R_EXIT(room, 3) && !EXIT_FLAGGED(R_EXIT(room, 3), EX_SECRET)) ? (EXIT_FLAGGED(R_EXIT(room, 3), EX_CLOSED) ? "  @rW" : "  @CW") : "   ", (R_EXIT(room, 10) && !EXIT_FLAGGED(R_EXIT(room, 10), EX_SECRET)) ? (EXIT_FLAGGED(R_EXIT(room, 10), EX_CLOSED) ? " @rI " : " @mI ") : ((R_EXIT(room, 11) && !EXIT_FLAGGED(R_EXIT(room, 11), EX_SECRET)) ? (EXIT_FLAGGED(R_EXIT(room, 11), EX_CLOSED) ? "@rOUT" : "@mOUT") : "@r{ }"), (R_EXIT(room, 1) && !EXIT_FLAGGED(R_EXIT(room, 1), EX_SECRET)) ? (EXIT_FLAGGED(R_EXIT(room, 1), EX_CLOSED) ? "@rE  " : "@CE  ") : "   ", map[i]);
      }
      if (i == 5) {
-      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (EXIT(ch, 9) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 9), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 9), EX_CLOSED) ? " @rSW" : " @CSW") : "   ", (EXIT(ch, 5) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 5), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 5), EX_CLOSED) ? " @yD " : " @YD ") : "   ", (EXIT(ch, 8) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 8), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 8), EX_SECRET) ? "@rSE " : "@CSE ") : "   ", map[i]);
+      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (R_EXIT(room, 9) && !EXIT_FLAGGED(R_EXIT(room, 9), EX_SECRET)) ? (EXIT_FLAGGED(R_EXIT(room, 9), EX_CLOSED) ? " @rSW" : " @CSW") : "   ", (R_EXIT(room, 5) && !EXIT_FLAGGED(R_EXIT(room, 5), EX_SECRET)) ? (EXIT_FLAGGED(R_EXIT(room, 5), EX_CLOSED) ? " @yD " : " @YD ") : "   ", (R_EXIT(room, 8) && !EXIT_FLAGGED(R_EXIT(room, 8), EX_SECRET)) ? (EXIT_FLAGGED(R_EXIT(room, 8), EX_SECRET) ? "@rSE " : "@CSE ") : "   ", map[i]);
      }
      if (i == 6) {
-      sprintf(buf2, "@w       @w|%s@w|           %s", (EXIT(ch, 2) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 2), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 2), EX_CLOSED) ? " @rS " : " @CS ") : "   ", map[i]);
+      sprintf(buf2, "@w       @w|%s@w|           %s", (R_EXIT(room, 2) && !EXIT_FLAGGED(R_EXIT(room, 2), EX_SECRET)) ? (EXIT_FLAGGED(R_EXIT(room, 2), EX_CLOSED) ? " @rS " : " @CS ") : "   ", map[i]);
      }
     }
      search_replace(buf2, "x", "@RX");

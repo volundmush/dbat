@@ -216,15 +216,17 @@ ACMD(do_dig)
    * target room == -1 removes the exit 
    */
   if (rvnum == NOTHING) {
-    if (W_EXIT(IN_ROOM(ch), dir)) {
+    struct room_data *rm = char_room_get(ch);
+    struct room_direction_data *exit = R_EXIT(rm, dir);
+    if (exit) {
       /* free the old pointers, if any */
-      if (W_EXIT(IN_ROOM(ch), dir)->general_description)
-        free(W_EXIT(IN_ROOM(ch), dir)->general_description);
-      if (W_EXIT(IN_ROOM(ch), dir)->keyword)
-        free(W_EXIT(IN_ROOM(ch), dir)->keyword);
-      free(W_EXIT(IN_ROOM(ch), dir));
-      W_EXIT(IN_ROOM(ch), dir) = NULL;
-      add_to_save_list(zone_table[char_room_get(ch)->zone].number, SL_WLD);
+      if (exit->general_description)
+        free(exit->general_description);
+      if (exit->keyword)
+        free(exit->keyword);
+      free(exit);
+      R_EXIT(rm, dir) = NULL;
+      add_to_save_list(room_zone_vnum_get(rm), SL_WLD);
       send_to_char(ch, "You remove the exit to the %s.\r\n", dirs[dir]);
       return;
     }
@@ -235,7 +237,7 @@ ACMD(do_dig)
   /*
    * Can't dig in a direction, if it's already a door. 
    */
-  if (W_EXIT(IN_ROOM(ch), dir)) {
+  if (EXIT(ch, dir)) {
       send_to_char(ch, "There already is an exit to the %s.\r\n", dirs[dir]);
       return;
   }
@@ -308,16 +310,18 @@ ACMD(do_dig)
   save_rooms(zvn);
   send_to_char(ch, "You make an exit %s to room %d (%s).\r\n", 
                    dirs[dir], rvnum, world[rrnum].name);
+  
+  struct room_data *dest = exit_dest_get(new_exit);
 
   /* 
    * check if we can dig from there to here. 
    */
-  if (W_EXIT(rrnum, rev_dir[dir])) 
+  if (R_EXIT(dest, rev_dir[dir])) 
     send_to_char(ch, "You cannot dig from %d to here. The target room already has an exit to the %s.\r\n",
                      rvnum, dirs[rev_dir[dir]]);
   else {
-    CREATE(W_EXIT(rrnum, rev_dir[dir]), struct room_direction_data, 1);
-    struct room_direction_data *rev_ex = W_EXIT(rrnum, rev_dir[dir]);
+    CREATE(R_EXIT(dest, rev_dir[dir]), struct room_direction_data, 1);
+    struct room_direction_data *rev_ex = R_EXIT(dest, rev_dir[dir]);
     rev_ex->to_room = IN_ROOM(ch);
     zvn = zone_table[world[rrnum].zone].number;
     add_to_save_list(zvn, SL_WLD);
@@ -480,8 +484,9 @@ int buildwalk(struct char_data *ch, int dir)
 
       /* Link rooms */
       rnum = real_room(vnum);
-      CREATE(EXIT(ch, dir), struct room_direction_data, 1);
-      EXIT(ch, dir)->to_room = rnum;
+      struct room_data *rm = char_room_get(ch);
+      CREATE(rm->dir_option[dir], struct room_direction_data, 1);
+      rm->dir_option[dir]->to_room = rnum;
       CREATE(world[rnum].dir_option[rev_dir[dir]], struct room_direction_data, 1);
       world[rnum].dir_option[rev_dir[dir]]->to_room = IN_ROOM(ch);
 

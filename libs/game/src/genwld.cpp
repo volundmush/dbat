@@ -120,9 +120,10 @@ room_rnum add_room(struct room_data *room)
   i = top_of_world + 1;
   do {
     i--;
+    struct room_data *room = &world[i];
     for (j = 0; j < NUM_OF_DIRS; j++)
-      if (W_EXIT(i, j) && W_EXIT(i, j)->to_room != NOWHERE)
-	W_EXIT(i, j)->to_room += (W_EXIT(i, j)->to_room >= found);
+      if (R_EXIT(room, j) && R_EXIT(room, j)->to_room != NOWHERE)
+	R_EXIT(room, j)->to_room += (R_EXIT(room, j)->to_room >= found);
   } while (i > 0);
 
   add_to_save_list(room_zone_vnum_get(room), SL_WLD);
@@ -196,24 +197,25 @@ int delete_room(room_rnum rnum)
   i = top_of_world + 1;
   do {
     i--;
+    struct room_data *room = &world[i];
     for (j = 0; j < NUM_OF_DIRS; j++)
-      if (W_EXIT(i, j) == NULL)
+      if (R_EXIT(room, j) == NULL)
         continue;
-      else if (W_EXIT(i, j)->to_room > rnum)
-        W_EXIT(i, j)->to_room -= (W_EXIT(i, j)->to_room != NOWHERE); /* with unsigned NOWHERE > any rnum */
-      else if (W_EXIT(i, j)->to_room == rnum) {
-      	if ((!W_EXIT(i, j)->keyword || !*W_EXIT(i, j)->keyword) &&
-      	    (!W_EXIT(i, j)->general_description || !*W_EXIT(i, j)->general_description)) {
+      else if (R_EXIT(room, j)->to_room > rnum)
+        R_EXIT(room, j)->to_room -= (R_EXIT(room, j)->to_room != NOWHERE); /* with unsigned NOWHERE > any rnum */
+      else if (R_EXIT(room, j)->to_room == rnum) {
+      	if ((!R_EXIT(room, j)->keyword || !*R_EXIT(room, j)->keyword) &&
+      	    (!R_EXIT(room, j)->general_description || !*R_EXIT(room, j)->general_description)) {
           /* no description, remove exit completely */
-          if (W_EXIT(i, j)->keyword)
-            free(W_EXIT(i, j)->keyword);
-          if (W_EXIT(i, j)->general_description)
-            free(W_EXIT(i, j)->general_description);
-          free(W_EXIT(i, j));
-          W_EXIT(i, j) = NULL;
+          if (R_EXIT(room, j)->keyword)
+            free(R_EXIT(room, j)->keyword);
+          if (R_EXIT(room, j)->general_description)
+            free(R_EXIT(room, j)->general_description);
+          free(R_EXIT(room, j));
+          R_EXIT(room, j) = NULL;
         } else { 
           /* description is set, just point to nowhere */
-          W_EXIT(i, j)->to_room = NOWHERE;
+          R_EXIT(room, j)->to_room = NOWHERE;
         }
       }
   } while (i > 0);

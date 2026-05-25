@@ -267,6 +267,24 @@ int race_get_size(int r_id);
 int race_is_playable(int r_id);
 int race_is_people(int r_id);
 
+bool char_can_see_in_dark(struct char_data *ch);
+bool char_can_see_char(struct char_data *ch, struct char_data *vict);
+bool char_can_see_obj(struct char_data *ch, struct obj_data *obj);
+
+struct room_direction_data* char_exit_dir(struct char_data *ch, int dir);
+struct room_direction_data* char_exit_dir_2nd(struct char_data *ch, int dir);
+struct room_direction_data* char_exit_dir_3rd(struct char_data *ch, int dir);
+
+bool char_can_go_dir(struct char_data *ch, int dir);
+
+bool char_has_arms(struct char_data *ch);
+bool char_has_legs(struct char_data *ch);
+
+bool char_outside_sector_type(struct char_data *ch);
+bool char_outside_roomflag(struct char_data *ch);
+
+bool char_ether_stream(struct char_data *ch);
+bool char_has_moon(struct char_data *ch);
 
 #ifdef __cplusplus
 }

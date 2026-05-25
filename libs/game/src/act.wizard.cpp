@@ -3527,15 +3527,15 @@ ACMD(do_show)
     for (i = 0, k = 0; i <= top_of_world; i++) {
       struct room_data *rm = &world[i];
       for (j = 0; j < NUM_OF_DIRS; j++) {
-      	if (!W_EXIT(i,j))
+      	if (!R_EXIT(rm, j))
       	  continue;
-        if (W_EXIT(i,j)->to_room == 0) {
+        if (R_EXIT(rm, j)->to_room == 0) {
             nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k, GET_ROOM_VNUM(i), count_color_chars(rm->name)+40, rm->name, QNRM, dirs[j]);
           if (len + nlen >= sizeof(buf) || nlen < 0)
             break;
           len += nlen;
         }
-        if (W_EXIT(i,j)->to_room == NOWHERE && !W_EXIT(i,j)->general_description) {
+        if (R_EXIT(rm, j)->to_room == NOWHERE && !R_EXIT(rm, j)->general_description) {
             nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k, GET_ROOM_VNUM(i), count_color_chars(rm->name)+ 40, rm->name, QNRM, dirs[j]);
           if (len + nlen >= sizeof(buf) || nlen < 0)
             break;

@@ -460,16 +460,16 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
 {
   char   buf[MAX_INPUT_LENGTH];
 
-     if (!EXIT(vehicle, dir) || EXIT(vehicle, dir)->to_room == NOWHERE) {
+     if (!obj_exit_dir(vehicle, dir) || obj_exit_dir(vehicle, dir)->to_room == NOWHERE) {
         send_to_char(ch, "@wApparently %s doesn't exist there.\r\n", dirs[dir]);
-      } else if (IS_SET(EXIT(vehicle, dir)->exit_info, EX_CLOSED)) {
+      } else if (IS_SET(obj_exit_dir(vehicle, dir)->exit_info, EX_CLOSED)) {
         /* But the door is closed */
-        if (EXIT(vehicle, dir)->keyword)
-          send_to_char(ch, "@wThe %s seems to be closed.\r\n", fname(EXIT(vehicle,           dir)->keyword));
+        if (obj_exit_dir(vehicle, dir)->keyword)
+          send_to_char(ch, "@wThe %s seems to be closed.\r\n", fname(obj_exit_dir(vehicle,           dir)->keyword));
         else
           send_to_char(ch, "@wIt seems to be closed.\r\n");
 
-      } else if (!IS_SET_AR(ROOM_FLAGS(EXIT(vehicle,dir)->to_room),ROOM_VEHICLE) && !IS_SET_AR(ROOM_FLAGS(EXIT(vehicle,dir)->to_room),ROOM_SPACE)) {
+      } else if (!IS_SET_AR(ROOM_FLAGS(obj_exit_dir(vehicle, dir)->to_room),ROOM_VEHICLE) && !IS_SET_AR(ROOM_FLAGS(obj_exit_dir(vehicle, dir)->to_room),ROOM_SPACE)) {
         /* But the vehicle can't go that way*/
         send_to_char(ch, "@wThe ship can't fit there!\r\n");
         } else {
@@ -791,7 +791,7 @@ ACMD(do_drive)
 	       is_abbrev(arg, "onto")    )  {
       /* Driving into another vehicle */
       drive_into_vehicle(ch, vehicle, arg2);
-    } else if (is_abbrev(arg, "out") && !EXIT(vehicle, OUTDIR)) {
+    } else if (is_abbrev(arg, "out") && !obj_exit_dir(vehicle, OUTDIR)) {
       drive_outof_vehicle(ch, vehicle);
     } else {
             if (!OBJVAL_FLAGGED(vehicle, CONT_CLOSED)) {

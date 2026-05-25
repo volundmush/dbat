@@ -436,3 +436,52 @@ int is_better(struct obj_data *object, struct obj_data *object2)
   else
     return 0;
 }
+
+struct room_direction_data* obj_exit_dir(struct obj_data *obj, int dir) {
+    struct room_data *room = obj_room_get(obj);
+    if (!room) {
+        return NULL;
+    }
+
+    if (dir < 0 || dir >= NUM_OF_DIRS) {
+        return NULL;
+    }
+
+    return room->dir_option[dir];
+}
+
+struct room_direction_data* obj_exit_dir_2nd(struct obj_data *obj, int dir) {
+    struct room_direction_data *exit = obj_exit_dir(obj, dir);
+    if (!exit) {
+        return NULL;
+    }
+
+    struct room_data* dest = exit_dest_get(exit);
+    if (!dest) {
+        return NULL;
+    }
+
+    if (dir < 0 || dir >= NUM_OF_DIRS) {
+        return NULL;
+    }
+
+    return dest->dir_option[dir];
+}
+
+struct room_direction_data* obj_exit_dir_3rd(struct obj_data *obj, int dir) {
+    struct room_direction_data *exit = obj_exit_dir_2nd(obj, dir);
+    if (!exit) {
+        return NULL;
+    }
+
+    struct room_data* dest = exit_dest_get(exit);
+    if (!dest) {
+        return NULL;
+    }
+
+    if (dir < 0 || dir >= NUM_OF_DIRS) {
+        return NULL;
+    }
+
+    return dest->dir_option[dir];
+}

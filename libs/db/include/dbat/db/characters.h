@@ -572,6 +572,8 @@ void char_proto_id_set(struct char_data *ch, mob_vnum vnum);
 mob_vnum char_vnum_get(struct char_data *ch);
 void char_vnum_set(struct char_data *ch, mob_vnum vnum);
 struct room_data* char_room_get(struct char_data *ch);
+struct zone_data* char_zone_get(struct char_data *ch);
+zone_vnum char_zone_vnum_get(struct char_data *ch);
 room_vnum char_room_vnum_get(struct char_data *ch);
 void char_room_vnum_set(struct char_data *ch, room_vnum vnum);
 const char* char_name_get(struct char_data *ch);

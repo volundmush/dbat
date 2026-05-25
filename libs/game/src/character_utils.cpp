@@ -4849,3 +4849,184 @@ int race_is_people(int r_id) {
             return true;
     }
 }
+
+struct room_direction_data* char_exit_dir(struct char_data *ch, int dir) {
+    struct room_data *room = char_room_get(ch);
+    if (!room) {
+        return NULL;
+    }
+
+    if (dir < 0 || dir >= NUM_OF_DIRS) {
+        return NULL;
+    }
+
+    return room->dir_option[dir];
+}
+
+struct room_direction_data* char_exit_dir_2nd(struct char_data *ch, int dir) {
+    struct room_direction_data *exit = char_exit_dir(ch, dir);
+    if (!exit) {
+        return NULL;
+    }
+
+    struct room_data* dest = exit_dest_get(exit);
+    if (!dest) {
+        return NULL;
+    }
+
+    if (dir < 0 || dir >= NUM_OF_DIRS) {
+        return NULL;
+    }
+
+    return dest->dir_option[dir];
+}
+
+struct room_direction_data* char_exit_dir_3rd(struct char_data *ch, int dir) {
+    struct room_direction_data *exit = char_exit_dir_2nd(ch, dir);
+    if (!exit) {
+        return NULL;
+    }
+
+    struct room_data* dest = exit_dest_get(exit);
+    if (!dest) {
+        return NULL;
+    }
+
+    if (dir < 0 || dir >= NUM_OF_DIRS) {
+        return NULL;
+    }
+
+    return dest->dir_option[dir];
+}
+
+bool char_can_go_dir(struct char_data *ch, int dir) {
+
+    struct room_direction_data *exit = char_exit_dir(ch, dir);
+    if(!exit) return false;
+
+    if(EXIT_FLAGGED(exit, EX_CLOSED)) {
+        return false;
+    }
+
+    struct room_data* dest = exit_dest_get(exit);
+    if(!dest) {
+        return false;
+    }
+    
+    return true;
+}
+
+#define SELF(sub, obj)  ((sub) == (obj))
+
+#define LIGHT_OK(sub)	(!AFF_FLAGGED(sub, AFF_BLIND) && !PLR_FLAGGED(sub, PLR_EYEC) && \
+   (IS_LIGHT(IN_ROOM(sub)) || AFF_FLAGGED((sub), AFF_INFRAVISION) || (IS_MUTANT(sub) && HAS_GENOME(sub, 4)) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
+
+#define INVIS_OK(sub, obj) \
+ (!AFF_FLAGGED((obj),AFF_INVISIBLE) || AFF_FLAGGED(sub,AFF_DETECT_INVIS))
+
+#define MORT_CAN_SEE(sub, obj) (LIGHT_OK(sub) && INVIS_OK(sub, obj))
+
+#define IMM_CAN_SEE(sub, obj) \
+   (MORT_CAN_SEE(sub, obj) || (!IS_NPC(sub) && PRF_FLAGGED(sub, PRF_HOLYLIGHT)))
+
+#define NOT_HIDDEN(ch) (!AFF_FLAGGED(ch, AFF_HIDE))
+/* End of CAN_SEE */
+
+#define INVIS_OK_OBJ(sub, obj) \
+  (!OBJ_FLAGGED((obj), ITEM_INVISIBLE) || AFF_FLAGGED((sub), AFF_DETECT_INVIS))
+
+/* Is anyone carrying this object and if so, are they visible? */
+#define CAN_SEE_OBJ_CARRIER(sub, obj) \
+  ((!obj->carried_by || CAN_SEE(sub, obj->carried_by)) &&	\
+   (!obj->worn_by || CAN_SEE(sub, obj->worn_by)))
+
+#define MORT_CAN_SEE_OBJ(sub, obj) \
+  ((LIGHT_OK(sub) || obj->carried_by == sub || obj->worn_by) && INVIS_OK_OBJ(sub, obj) && CAN_SEE_OBJ_CARRIER(sub, obj))
+
+bool char_can_see_in_dark(struct char_data *ch) {
+    return (AFF_FLAGGED(ch, AFF_INFRAVISION) || (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_HOLYLIGHT)) || (IS_MUTANT(ch) && HAS_GENOME(ch, 4)) || PLR_FLAGGED(ch, PLR_AURALIGHT));
+}
+
+bool char_can_see_char(struct char_data *ch, struct char_data *vict) {
+    return (SELF(ch, vict) || \
+   ((GET_ADMLEVEL(ch) >= (IS_NPC(vict) ? 0 : GET_INVIS_LEV(vict))) && \
+   IMM_CAN_SEE(ch, vict) && (NOT_HIDDEN(vict) || GET_ADMLEVEL(ch) > 0)));
+    
+}
+
+bool char_can_see_obj(struct char_data *ch, struct obj_data *obj) {
+    return (MORT_CAN_SEE_OBJ(ch, obj) || (!IS_NPC(ch) && PRF_FLAGGED((ch), PRF_HOLYLIGHT)));
+}
+
+bool char_has_arms(struct char_data *ch) {
+    return (((IS_NPC(ch) && (MOB_FLAGGED(ch, MOB_LARM) ||
+                                 MOB_FLAGGED(ch, MOB_RARM))) || GET_LIMBCOND(ch, 1) > 0 ||
+                                 GET_LIMBCOND(ch, 2) > 0 ||
+                                 PLR_FLAGGED(ch, PLR_CRARM) ||
+                                 PLR_FLAGGED(ch, PLR_CLARM)) &&
+                                 ((!GRAPPLING(ch) && !GRAPPLED(ch)) ||
+                                 (GRAPPLING(ch) && GRAPTYPE(ch) == 3) ||
+                                 (GRAPPLED(ch) && GRAPTYPE(ch) != 1 && GRAPTYPE(ch) != 4)));
+}
+
+bool char_has_legs(struct char_data *ch) {
+    return (((IS_NPC(ch) && (MOB_FLAGGED(ch, MOB_LLEG) ||
+                                 MOB_FLAGGED(ch, MOB_RLEG))) || GET_LIMBCOND(ch, 3) > 0 ||
+                                 GET_LIMBCOND(ch, 4) > 0 ||
+                                 PLR_FLAGGED(ch, PLR_CRLEG) ||
+                                 PLR_FLAGGED(ch, PLR_CLLEG)) &&
+                                 ((!GRAPPLING(ch) && !GRAPPLED(ch)) ||
+                                 (GRAPPLING(ch) && GRAPTYPE(ch) == 3) ||
+                                 (GRAPPLED(ch) && GRAPTYPE(ch) != 1)));
+}
+
+bool char_outside_sector_type(struct char_data *ch) {
+    struct room_data *room = char_room_get(ch);
+    if (!room) {
+        return false;
+    }
+    switch(room_sector_type_get(room)) {
+        case SECT_INSIDE:
+        case SECT_UNDERWATER:
+        case SECT_IMPORTANT:
+        case SECT_SHOP:
+        case SECT_SPACE:
+        return false;
+        default:
+        return true;
+    }
+}
+
+bool char_outside_roomflag(struct char_data *ch) {
+    struct room_data *room = char_room_get(ch);
+    if (!room) {
+        return false;
+    }
+    if(room_flagged(room, ROOM_INDOORS)) return false;
+    if(room_flagged(room, ROOM_UNDERGROUND)) return false;
+    if(room_flagged(room, ROOM_SPACE)) return false;
+    return true;
+}
+
+bool char_ether_stream(struct char_data *ch) {
+    struct room_data *room = char_room_get(ch);
+    if (!room) {
+        return false;
+    }
+    for(auto flag : {ROOM_EARTH, ROOM_AETHER, ROOM_NAMEK}) {
+        if(room_flagged(room, flag)) return true;
+    }
+    if(PLANET_ZENITH(IN_ROOM(ch))) return true;
+    return false;
+}
+
+bool char_has_moon(struct char_data *ch) {
+    struct room_data *room = char_room_get(ch);
+    if (!room) {
+        return false;
+    }
+    for(auto flag : {ROOM_VEGETA, ROOM_EARTH, ROOM_AETHER}) {
+        if(room_flagged(room, flag)) return true;
+    }
+    return false;
+}
