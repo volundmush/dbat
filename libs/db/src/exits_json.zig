@@ -26,19 +26,19 @@ pub fn serializeExit(allocator: std.mem.Allocator, exit: *cdb.room_direction_dat
 
 pub fn deserializeExit(exit: *cdb.room_direction_data, value: JsonValue) !void {
     if (value != .object) return error.ExpectedObject;
-    if (try jsonx.stringField(value, "description")) |v| cdb.exit_general_description_set(exit, try nul(v));
-    if (try jsonx.stringField(value, "keyword")) |v| cdb.exit_keyword_set(exit, try nul(v));
+    try setStringField(exit, value, "description", cdb.exit_general_description_set);
+    try setStringField(exit, value, "keyword", cdb.exit_keyword_set);
     if (try jsonx.intField(value, "flags", i16)) |v| cdb.exit_info_set(exit, v);
     if (try jsonx.intField(value, "key", cdb.obj_vnum)) |v| cdb.exit_key_set(exit, v);
-    if (try jsonx.intField(value, "to_room", cdb.room_vnum)) |v| cdb.exit_to_room_set(exit, v);
+    if (try jsonx.intField(value, "to_room", cdb.room_vnum)) |v| exit.to_room = v;
     if (try jsonx.intField(value, "dclock", c_int)) |v| cdb.exit_dclock_set(exit, v);
     if (try jsonx.intField(value, "dchide", c_int)) |v| cdb.exit_dchide_set(exit, v);
     if (try jsonx.intField(value, "dcskill", c_int)) |v| cdb.exit_dcskill_set(exit, v);
     if (try jsonx.intField(value, "dcmove", c_int)) |v| cdb.exit_dcmove_set(exit, v);
     if (try jsonx.intField(value, "failsavetype", c_int)) |v| cdb.exit_failsavetype_set(exit, v);
     if (try jsonx.intField(value, "dcfailsave", c_int)) |v| cdb.exit_dcfailsave_set(exit, v);
-    if (try jsonx.intField(value, "failroom", cdb.room_vnum)) |v| cdb.exit_failroom_set(exit, v);
-    if (try jsonx.intField(value, "totalfailroom", cdb.room_vnum)) |v| cdb.exit_totalfailroom_set(exit, v);
+    if (try jsonx.intField(value, "failroom", cdb.room_vnum)) |v| exit.failroom = v;
+    if (try jsonx.intField(value, "totalfailroom", cdb.room_vnum)) |v| exit.totalfailroom = v;
 }
 
 pub fn serializeRoomExits(allocator: std.mem.Allocator, room: *cdb.room_data) !JsonValue {
@@ -100,4 +100,10 @@ fn ensureRoomExit(room: *cdb.room_data, dir: usize) !*cdb.room_direction_data {
 
 fn nul(value: []const u8) ![*:0]const u8 {
     return try std.heap.c_allocator.dupeZ(u8, value);
+}
+
+fn setStringField(exit: *cdb.room_direction_data, object: JsonValue, key: []const u8, comptime setter: anytype) !void {
+    const value = try jsonx.stringFieldAlloc(std.heap.c_allocator, object, key) orelse return;
+    defer std.heap.c_allocator.free(value);
+    setter(exit, try nul(value));
 }

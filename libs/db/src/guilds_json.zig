@@ -26,8 +26,8 @@ pub fn deserializeGuild(guild: *cdb.guild_data, options: DeserializeOptions, val
     if (value != .object) return error.ExpectedObject;
     if (try jsonx.intField(value, "id", cdb.guild_vnum)) |v| cdb.guild_id_set(guild, v);
     if (try jsonx.floatField(value, "charge", f32)) |v| cdb.guild_charge_set(guild, v);
-    if (try jsonx.stringField(value, "no_such_skill")) |v| try setString(options.c_allocator, guild, v, cdb.guild_no_such_skill_set);
-    if (try jsonx.stringField(value, "not_enough_gold")) |v| try setString(options.c_allocator, guild, v, cdb.guild_not_enough_gold_set);
+    try setStringField(options.c_allocator, guild, value, "no_such_skill", cdb.guild_no_such_skill_set);
+    try setStringField(options.c_allocator, guild, value, "not_enough_gold", cdb.guild_not_enough_gold_set);
     if (try jsonx.intField(value, "min_level", c_int)) |v| cdb.guild_min_level_set(guild, v);
     if (try jsonx.intField(value, "guildmaster", cdb.mob_vnum)) |v| cdb.guild_master_set(guild, v);
     if (try jsonx.intField(value, "open", c_int)) |v| cdb.guild_open_set(guild, v);
@@ -60,6 +60,12 @@ fn setString(allocator: std.mem.Allocator, guild: *cdb.guild_data, value: []cons
     const z = try allocator.dupeZ(u8, value);
     defer allocator.free(z);
     setter(guild, z);
+}
+
+fn setStringField(allocator: std.mem.Allocator, guild: *cdb.guild_data, object: JsonValue, key: []const u8, comptime setter: anytype) !void {
+    const value = try jsonx.stringFieldAlloc(allocator, object, key) orelse return;
+    defer allocator.free(value);
+    try setString(allocator, guild, value, setter);
 }
 
 fn guildTradeFlagged(guild: *cdb.guild_data, pos: c_int) bool {

@@ -28,10 +28,11 @@ pub fn deserializeExtraDescriptions(target: *[*c]cdb.extra_descr_data, value: Js
     var tail: ?*cdb.extra_descr_data = null;
     for (value.array.items) |item| {
         if (item != .object) return error.ExpectedObject;
-        const node = try newExtraDescription(
-            try jsonx.stringField(item, "keyword") orelse "",
-            try jsonx.stringField(item, "description") orelse "",
-        );
+        const keyword = try jsonx.stringFieldAlloc(std.heap.c_allocator, item, "keyword") orelse try std.heap.c_allocator.dupe(u8, "");
+        defer std.heap.c_allocator.free(keyword);
+        const description = try jsonx.stringFieldAlloc(std.heap.c_allocator, item, "description") orelse try std.heap.c_allocator.dupe(u8, "");
+        defer std.heap.c_allocator.free(description);
+        const node = try newExtraDescription(keyword, description);
         if (tail) |last| {
             last.next = node;
         } else {

@@ -81,9 +81,9 @@ void init_boards(void)
   }
   
 #if defined(CIRCLE_WINDOWS)
-    strcpy(dir_name, "etc/boards/*");
+    strcpy(dir_name, "data/etc/boards/*");
 #else
-    strcpy(dir_name, "etc/boards");
+    strcpy(dir_name, "data/etc/boards");
 #endif
 
   if((i = xdir_scan(dir_name, &xd)) <= 0) {

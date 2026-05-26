@@ -11,7 +11,6 @@
 #include "dbat/db/consts/songs.h"
 #include "dbat/db/help.h"
 #include "dbat/db/bans.h"
-#include "dbat/db/json.h"
 
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
@@ -42,6 +41,7 @@
 #include "dbat/game/objsave.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/class.h"
+#include "dbat/game/sensei.h"
 #include "dbat/game/combat.h"
 #include "dbat/game/modify.h"
 #include "dbat/game/fight.h"
@@ -210,11 +210,14 @@ void init_game(uint16_t cmport)
   /* set up hash table for find_char() */
   init_lookup_table();
 
+  dbat::race::load_races();
+  dbat::sensei::load_sensei();
+
   boot_db();
 
-       FILE *mapfile;
-       int rowcounter, colcounter;
-       int vnum_read;
+  FILE *mapfile;
+  int rowcounter, colcounter;
+  int vnum_read;
 
     log("Signal trapping.");
     signal_setup();
@@ -235,9 +238,6 @@ void init_game(uint16_t cmport)
 
   /* Load the toplist */
   topLoad();
-
-  // handle JSON
-  json_export_all("data/assets");
 
   /* If we made it this far, we will be able to restart without problem. */
   remove(KILLSCRIPT_FILE);

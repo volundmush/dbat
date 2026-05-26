@@ -25,13 +25,12 @@ pub fn serializeRoom(allocator: std.mem.Allocator, room: *cdb.room_data) !JsonVa
 }
 
 pub fn deserializeRoom(room: *cdb.room_data, options: DeserializeOptions, value: JsonValue) !void {
-    _ = options.c_allocator;
     if (value != .object) return error.ExpectedObject;
 
     if (try jsonx.intField(value, "id", cdb.room_vnum)) |v| cdb.room_id_set(room, v);
     if (try jsonx.intField(value, "sector", c_int)) |v| cdb.room_sector_type_set(room, v);
-    if (try jsonx.stringField(value, "name")) |v| cdb.room_name_set(room, try nul(v));
-    if (try jsonx.stringField(value, "description")) |v| cdb.room_description_set(room, try nul(v));
+    try setStringField(options.c_allocator, room, value, "name", cdb.room_name_set);
+    try setStringField(options.c_allocator, room, value, "description", cdb.room_description_set);
     if (jsonx.field(value, "extra_descriptions")) |items| try extradesc_json.deserializeExtraDescriptions(&room.ex_description, items);
     if (jsonx.field(value, "proto_script")) |items| try dgscripts_json.deserializeProtoScript(&room.proto_script, items);
     if (jsonx.field(value, "flags")) |flags| try jsonx.deserializeFlags(room, flags, cdb.NUM_ROOM_FLAGS, roomFlagSet);
@@ -47,4 +46,10 @@ fn roomFlagSet(room: *cdb.room_data, pos: c_int, flag: bool) void {
 
 fn nul(value: []const u8) ![*:0]const u8 {
     return try std.heap.c_allocator.dupeZ(u8, value);
+}
+
+fn setStringField(allocator: std.mem.Allocator, room: *cdb.room_data, object: JsonValue, key: []const u8, comptime setter: anytype) !void {
+    const value = try jsonx.stringFieldAlloc(allocator, object, key) orelse return;
+    defer allocator.free(value);
+    setter(room, try nul(value));
 }

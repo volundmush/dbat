@@ -39,13 +39,13 @@ pub fn deserializeShop(shop: *cdb.shop_data, options: DeserializeOptions, value:
     if (try jsonx.intField(value, "id", cdb.shop_vnum)) |v| cdb.shop_id_set(shop, v);
     if (try jsonx.floatField(value, "profit_buy", f32)) |v| cdb.shop_profit_buy_set(shop, v);
     if (try jsonx.floatField(value, "profit_sell", f32)) |v| cdb.shop_profit_sell_set(shop, v);
-    if (try jsonx.stringField(value, "no_such_item1")) |v| try setString(options.c_allocator, shop, v, cdb.shop_no_such_item1_set);
-    if (try jsonx.stringField(value, "no_such_item2")) |v| try setString(options.c_allocator, shop, v, cdb.shop_no_such_item2_set);
-    if (try jsonx.stringField(value, "missing_cash1")) |v| try setString(options.c_allocator, shop, v, cdb.shop_missing_cash1_set);
-    if (try jsonx.stringField(value, "missing_cash2")) |v| try setString(options.c_allocator, shop, v, cdb.shop_missing_cash2_set);
-    if (try jsonx.stringField(value, "do_not_buy")) |v| try setString(options.c_allocator, shop, v, cdb.shop_do_not_buy_set);
-    if (try jsonx.stringField(value, "message_buy")) |v| try setString(options.c_allocator, shop, v, cdb.shop_message_buy_set);
-    if (try jsonx.stringField(value, "message_sell")) |v| try setString(options.c_allocator, shop, v, cdb.shop_message_sell_set);
+    try setStringField(options.c_allocator, shop, value, "no_such_item1", cdb.shop_no_such_item1_set);
+    try setStringField(options.c_allocator, shop, value, "no_such_item2", cdb.shop_no_such_item2_set);
+    try setStringField(options.c_allocator, shop, value, "missing_cash1", cdb.shop_missing_cash1_set);
+    try setStringField(options.c_allocator, shop, value, "missing_cash2", cdb.shop_missing_cash2_set);
+    try setStringField(options.c_allocator, shop, value, "do_not_buy", cdb.shop_do_not_buy_set);
+    try setStringField(options.c_allocator, shop, value, "message_buy", cdb.shop_message_buy_set);
+    try setStringField(options.c_allocator, shop, value, "message_sell", cdb.shop_message_sell_set);
     if (try jsonx.intField(value, "temper", c_int)) |v| cdb.shop_temper_set(shop, v);
     if (try jsonx.intField(value, "bitvector", cdb.bitvector_t)) |v| shop.bitvector = v;
     if (try jsonx.intField(value, "keeper", cdb.mob_vnum)) |v| cdb.shop_keeper_set(shop, v);
@@ -85,6 +85,12 @@ fn setString(allocator: std.mem.Allocator, shop: *cdb.shop_data, value: []const 
     const z = try allocator.dupeZ(u8, value);
     defer allocator.free(z);
     setter(shop, z);
+}
+
+fn setStringField(allocator: std.mem.Allocator, shop: *cdb.shop_data, object: JsonValue, key: []const u8, comptime setter: anytype) !void {
+    const value = try jsonx.stringFieldAlloc(allocator, object, key) orelse return;
+    defer allocator.free(value);
+    try setString(allocator, shop, value, setter);
 }
 
 fn shopTradeFlagged(shop: *cdb.shop_data, pos: c_int) bool {

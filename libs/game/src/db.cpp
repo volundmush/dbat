@@ -23,6 +23,7 @@
 #include "dbat/game/extract.h"
 #include "dbat/game/relocate.h"
 #include "dbat/db/players.h"
+#include "dbat/db/json.h"
 
 #include "dbat/game/feats.h"
 #include "dbat/game/config.h"
@@ -61,6 +62,7 @@
 
 #include <errno.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <linux/limits.h>
 
 /**************************************************************************
@@ -142,6 +144,8 @@ static int suntzu_armor_convert(struct obj_data *obj);
 static int suntzu_weapon_convert(int wp_type);
 static void free_obj_unique_hash();
 static void mob_autobalance(struct char_data *ch);
+static bool directory_exists(const char *path);
+static void json_import_or_die(const char *label, int result);
 
 /* external functions */
 
@@ -827,12 +831,90 @@ void init_obj_unique_hash()
   }
 }
 
+static bool directory_exists(const char *path)
+{
+  struct stat st;
+  return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
+}
+
+static void json_import_or_die(const char *label, int result)
+{
+  if (result == 0)
+    return;
+  log("SYSERR: Failed to import JSON assets: %s", label);
+  exit(1);
+}
+
+static void load_assets(void) {
+  constexpr bool use_json_assets = false;
+  constexpr const char *asset_root = "data/assets";
+
+  if (use_json_assets && directory_exists(asset_root)) {
+    log("Loading level tables.");
+    load_levels();
+
+    log("Loading JSON zone table.");
+    json_import_or_die("zones", json_import_zones("data/assets/zones"));
+
+    log("Loading JSON rooms.");
+    json_import_or_die("rooms", json_import_rooms("data/assets/rooms"));
+
+    log("Loading JSON exits.");
+    json_import_or_die("exits", json_import_room_exits("data/assets/exits"));
+
+    log("Renumbering rooms.");
+    renum_world();
+
+    log("Checking start rooms.");
+    check_start_rooms();
+
+    log("Loading JSON triggers and generating index.");
+    json_import_or_die("dgscripts", json_import_dgscripts("data/assets/dgscripts"));
+
+    log("Loading JSON mobs and generating index.");
+    json_import_or_die("npc_prototypes", json_import_npc_prototypes("data/assets/npc_prototypes"));
+
+    log("Loading JSON objs and generating index.");
+    json_import_or_die("obj_prototypes", json_import_obj_prototypes("data/assets/obj_prototypes"));
+
+    log("Renumbering zone table.");
+    renum_zone_table();
+
+    log("Loading disabled commands list...");
+    load_disabled();
+
+    if(converting) {
+      log("Saving converted worldfiles to disk.");
+      save_all();
+    }
+
+    if (!no_specials) {
+      log("Loading JSON shops.");
+      json_import_or_die("shops", json_import_shops("data/assets/shops"));
+
+      log("Loading JSON guild masters.");
+      json_import_or_die("guilds", json_import_guilds("data/assets/guilds"));
+    }
+
+    if (SELFISHMETER >= 10) {
+      log("Loading Shadow Dragons.");
+      load_shadow_dragons();
+    }
+  } else {
+    boot_world();
+    log("Exporting JSON assets.");
+    if (json_export_all(asset_root) != 0)
+      log("SYSERR: Failed to export JSON assets to %s.", asset_root);
+  }
+
+  log("Loading help entries.");
+  index_boot(DB_BOOT_HLP);
+}
+
 /* body of the booting system */
 void boot_db(void)
 {
   zone_rnum i;
-    dbat::race::load_races();
-    dbat::sensei::load_sensei();
 
   log("Boot db -- BEGIN.");
 
@@ -863,10 +945,7 @@ void boot_db(void)
   log("Loading feats.");
   assign_feats();
 
-  boot_world();
-
-  log("Loading help entries.");
-  index_boot(DB_BOOT_HLP);
+  load_assets();
 
   log("Setting up context sensitive help system for OLC");
   boot_context_help();

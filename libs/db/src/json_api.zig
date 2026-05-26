@@ -108,6 +108,46 @@ pub export fn json_import_all(folder: ?[*:0]const u8) void {
     importAll(cString(folder)) catch return;
 }
 
+pub export fn json_import_zones(folder: ?[*:0]const u8) c_int {
+    importZones(cString(folder)) catch return -1;
+    return 0;
+}
+
+pub export fn json_import_rooms(folder: ?[*:0]const u8) c_int {
+    importRooms(cString(folder)) catch return -1;
+    return 0;
+}
+
+pub export fn json_import_room_exits(folder: ?[*:0]const u8) c_int {
+    importRoomExits(cString(folder)) catch return -1;
+    return 0;
+}
+
+pub export fn json_import_dgscripts(folder: ?[*:0]const u8) c_int {
+    importDgScripts(cString(folder)) catch return -1;
+    return 0;
+}
+
+pub export fn json_import_npc_prototypes(folder: ?[*:0]const u8) c_int {
+    importNpcPrototypes(cString(folder)) catch return -1;
+    return 0;
+}
+
+pub export fn json_import_obj_prototypes(folder: ?[*:0]const u8) c_int {
+    importObjPrototypes(cString(folder)) catch return -1;
+    return 0;
+}
+
+pub export fn json_import_shops(folder: ?[*:0]const u8) c_int {
+    importShops(cString(folder)) catch return -1;
+    return 0;
+}
+
+pub export fn json_import_guilds(folder: ?[*:0]const u8) c_int {
+    importGuilds(cString(folder)) catch return -1;
+    return 0;
+}
+
 fn exportRoom(vnum: cdb.room_vnum, filename: []const u8) !void {
     const room = cdb.room_by_id(vnum);
     if (room == null) return error.NotFound;
@@ -309,11 +349,13 @@ fn importAll(folder: []const u8) !void {
     try importZones(zones);
     try importRooms(rooms);
     try importRoomExits(exits);
+    renumberRoomExits();
     try importDgScripts(dgscripts);
     try importNpcPrototypes(npc_prototypes);
     try importObjPrototypes(obj_prototypes);
     try importShops(shops);
     try importGuilds(guilds);
+    renumberZoneCommands();
 }
 
 const JsonFile = struct {
@@ -321,22 +363,56 @@ const JsonFile = struct {
     path: []const u8,
 };
 
+const Progress = struct {
+    label: []const u8,
+    total: usize,
+    next_percent: usize = 10,
+
+    fn init(label: []const u8, total: usize) Progress {
+        std.log.info("JSON import {s}: {d} files", .{ label, total });
+        if (total == 0) std.log.info("JSON import {s}: complete", .{label});
+        return .{ .label = label, .total = total };
+    }
+
+    fn tick(self: *Progress, index: usize) void {
+        if (self.total == 0) return;
+        const done = index + 1;
+        const percent = done * 100 / self.total;
+        while (percent >= self.next_percent and self.next_percent <= 100) : (self.next_percent += 10) {
+            std.log.info("JSON import {s}: {d}% ({d}/{d})", .{ self.label, self.next_percent, done, self.total });
+        }
+    }
+};
+
+fn logImportFileError(label: []const u8, file: JsonFile, err: anyerror) void {
+    std.log.err("JSON import {s} failed for {s} (vnum {d}): {s}", .{ label, file.path, file.vnum, @errorName(err) });
+}
+
 fn importZones(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
+    var progress = Progress.init("zones", files.len);
     cdb.zone_table = try allocCArray(cdb.zone_data, files.len);
     cdb.top_of_zone_table = if (files.len == 0) -1 else @intCast(files.len - 1);
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
         defer arena.deinit();
-        const value = try readJsonValue(arena.allocator(), file.path);
+        const value = readJsonValue(arena.allocator(), file.path) catch |err| {
+            logImportFileError("zones", file, err);
+            return err;
+        };
         const zone = ptrAt(cdb.zone_data, cdb.zone_table, index);
-        try zones_json.deserializeZone(zone, .{}, value);
+        zones_json.deserializeZone(zone, .{}, value) catch |err| {
+            logImportFileError("zones", file, err);
+            return err;
+        };
+        progress.tick(index);
     }
 }
 
 fn importRooms(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
+    var progress = Progress.init("rooms", files.len);
     cdb.world = try allocCArray(cdb.room_data, files.len);
     cdb.top_of_world = if (files.len == 0) -1 else @intCast(files.len - 1);
     resetHtree(&cdb.room_htree);
@@ -344,37 +420,56 @@ fn importRooms(folder: []const u8) !void {
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
         defer arena.deinit();
-        const value = try readJsonValue(arena.allocator(), file.path);
+        const value = readJsonValue(arena.allocator(), file.path) catch |err| {
+            logImportFileError("rooms", file, err);
+            return err;
+        };
         const room = ptrAt(cdb.room_data, cdb.world, index);
         room.number = @intCast(file.vnum);
         room.zone = zoneRnumForRoom(room.number);
-        try rooms_json.deserializeRoom(room, .{}, value);
+        rooms_json.deserializeRoom(room, .{}, value) catch |err| {
+            logImportFileError("rooms", file, err);
+            return err;
+        };
         room.zone = zoneRnumForRoom(room.number);
         cdb.htree_add(cdb.room_htree, room.number, @intCast(index));
+        progress.tick(index);
     }
 }
 
 fn importRoomExits(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
-    for (files) |file| {
+    var progress = Progress.init("exits", files.len);
+    for (files, 0..) |file, index| {
         const room = cdb.room_by_id(@intCast(file.vnum));
         if (room == null) continue;
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
         defer arena.deinit();
-        const value = try readJsonValue(arena.allocator(), file.path);
-        try exits_json.deserializeRoomExits(room, value);
+        const value = readJsonValue(arena.allocator(), file.path) catch |err| {
+            logImportFileError("exits", file, err);
+            return err;
+        };
+        exits_json.deserializeRoomExits(room, value) catch |err| {
+            logImportFileError("exits", file, err);
+            return err;
+        };
+        progress.tick(index);
     }
 }
 
 fn importDgScripts(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
+    var progress = Progress.init("dgscripts", files.len);
     cdb.trig_index = try allocCArray([*c]cdb.index_data, files.len);
     cdb.top_of_trigt = @intCast(files.len);
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
         defer arena.deinit();
-        const value = try readJsonValue(arena.allocator(), file.path);
+        const value = readJsonValue(arena.allocator(), file.path) catch |err| {
+            logImportFileError("dgscripts", file, err);
+            return err;
+        };
 
         const entry = try allocCOne(cdb.index_data);
         const trigger = try allocCOne(cdb.trig_data);
@@ -383,14 +478,19 @@ fn importDgScripts(folder: []const u8) !void {
         entry.func = null;
         entry.proto = trigger;
         trigger.nr = @intCast(index);
-        try dgscripts_json.deserializeTrigger(trigger, value);
+        dgscripts_json.deserializeTrigger(trigger, value) catch |err| {
+            logImportFileError("dgscripts", file, err);
+            return err;
+        };
         trigger.nr = @intCast(index);
         cdb.trig_index[index] = entry;
+        progress.tick(index);
     }
 }
 
 fn importNpcPrototypes(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
+    var progress = Progress.init("npc_prototypes", files.len);
     cdb.mob_proto = try allocCArray(cdb.char_data, files.len);
     cdb.mob_index = try allocCArray(cdb.index_data, files.len);
     cdb.top_of_mobt = if (files.len == 0) -1 else @intCast(files.len - 1);
@@ -406,18 +506,26 @@ fn importNpcPrototypes(folder: []const u8) !void {
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
         defer arena.deinit();
-        const value = try readJsonValue(arena.allocator(), file.path);
+        const value = readJsonValue(arena.allocator(), file.path) catch |err| {
+            logImportFileError("npc_prototypes", file, err);
+            return err;
+        };
         const mob = ptrAt(cdb.char_data, cdb.mob_proto, index);
         mob.nr = @intCast(index);
         mob.player_specials = &cdb.dummy_mob;
-        try characters_json.deserializeCharacter(mob, .{ .mode = .npc_prototype }, value);
+        characters_json.deserializeCharacter(mob, .{ .mode = .npc_prototype }, value) catch |err| {
+            logImportFileError("npc_prototypes", file, err);
+            return err;
+        };
         mob.nr = @intCast(index);
         mob.player_specials = &cdb.dummy_mob;
+        progress.tick(index);
     }
 }
 
 fn importObjPrototypes(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
+    var progress = Progress.init("obj_prototypes", files.len);
     cdb.obj_proto = try allocCArray(cdb.obj_data, files.len);
     cdb.obj_index = try allocCArray(cdb.index_data, files.len);
     cdb.top_of_objt = if (files.len == 0) -1 else @intCast(files.len - 1);
@@ -433,42 +541,127 @@ fn importObjPrototypes(folder: []const u8) !void {
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
         defer arena.deinit();
-        const value = try readJsonValue(arena.allocator(), file.path);
+        const value = readJsonValue(arena.allocator(), file.path) catch |err| {
+            logImportFileError("obj_prototypes", file, err);
+            return err;
+        };
         const obj = ptrAt(cdb.obj_data, cdb.obj_proto, index);
         obj.item_number = @intCast(index);
-        try objects_json.deserializeObject(obj, .{ .mode = .prototype }, value);
+        objects_json.deserializeObject(obj, .{ .mode = .prototype }, value) catch |err| {
+            logImportFileError("obj_prototypes", file, err);
+            return err;
+        };
         obj.item_number = @intCast(index);
+        progress.tick(index);
     }
 }
 
 fn importShops(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
+    var progress = Progress.init("shops", files.len);
     cdb.shop_index = try allocCArray(cdb.shop_data, files.len);
     cdb.top_shop = if (files.len == 0) -1 else @intCast(files.len - 1);
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
         defer arena.deinit();
-        const value = try readJsonValue(arena.allocator(), file.path);
+        const value = readJsonValue(arena.allocator(), file.path) catch |err| {
+            logImportFileError("shops", file, err);
+            return err;
+        };
         const shop = ptrAt(cdb.shop_data, cdb.shop_index, index);
         shop.vnum = @intCast(file.vnum);
-        try shops_json.deserializeShop(shop, .{}, value);
+        shops_json.deserializeShop(shop, .{}, value) catch |err| {
+            logImportFileError("shops", file, err);
+            return err;
+        };
+        progress.tick(index);
     }
 }
 
 fn importGuilds(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
+    var progress = Progress.init("guilds", files.len);
     cdb.guild_index = try allocCArray(cdb.guild_data, files.len);
     cdb.top_guild = if (files.len == 0) -1 else @intCast(files.len - 1);
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
         defer arena.deinit();
-        const value = try readJsonValue(arena.allocator(), file.path);
+        const value = readJsonValue(arena.allocator(), file.path) catch |err| {
+            logImportFileError("guilds", file, err);
+            return err;
+        };
         const guild = ptrAt(cdb.guild_data, cdb.guild_index, index);
         guild.vnum = @intCast(file.vnum);
-        try guilds_json.deserializeGuild(guild, .{}, value);
+        guilds_json.deserializeGuild(guild, .{}, value) catch |err| {
+            logImportFileError("guilds", file, err);
+            return err;
+        };
+        progress.tick(index);
     }
+}
+
+fn renumberRoomExits() void {
+    if (cdb.world == null or cdb.top_of_world < 0) return;
+    var room_index: usize = 0;
+    while (room_index <= @as(usize, @intCast(cdb.top_of_world))) : (room_index += 1) {
+        const room = ptrAt(cdb.room_data, cdb.world, room_index);
+        for (0..cdb.NUM_OF_DIRS) |dir| {
+            const exit = room.dir_option[dir];
+            if (exit == null) continue;
+            if (exit.*.to_room != cdb.NOWHERE) exit.*.to_room = cdb.real_room(exit.*.to_room);
+        }
+    }
+}
+
+fn renumberZoneCommands() void {
+    if (cdb.zone_table == null or cdb.top_of_zone_table < 0) return;
+    var zone_index: usize = 0;
+    while (zone_index <= @as(usize, @intCast(cdb.top_of_zone_table))) : (zone_index += 1) {
+        const zone = ptrAt(cdb.zone_data, cdb.zone_table, zone_index);
+        if (zone.cmd == null) continue;
+        var command_index: usize = 0;
+        while (zone.cmd[command_index].command != 'S') : (command_index += 1) {
+            const command: *cdb.reset_com = @ptrCast(&zone.cmd[command_index]);
+            switch (command.command) {
+                'M' => {
+                    command.arg1 = cdb.real_mobile(command.arg1);
+                    command.arg3 = cdb.real_room(command.arg3);
+                },
+                'O' => {
+                    command.arg1 = cdb.real_object(command.arg1);
+                    if (command.arg3 != cdb.NOWHERE) command.arg3 = cdb.real_room(command.arg3);
+                },
+                'G', 'E' => command.arg1 = cdb.real_object(command.arg1),
+                'P' => {
+                    command.arg1 = cdb.real_object(command.arg1);
+                    command.arg3 = cdb.real_object(command.arg3);
+                },
+                'D' => command.arg1 = cdb.real_room(command.arg1),
+                'R' => {
+                    command.arg1 = cdb.real_room(command.arg1);
+                    command.arg2 = cdb.real_object(command.arg2);
+                },
+                'T' => {
+                    command.arg2 = realTrigger(command.arg2);
+                    command.arg3 = cdb.real_room(command.arg3);
+                },
+                'V' => command.arg3 = cdb.real_room(command.arg3),
+                else => {},
+            }
+        }
+    }
+}
+
+fn realTrigger(vnum: cdb.trig_vnum) cdb.trig_rnum {
+    if (cdb.trig_index == null or cdb.top_of_trigt <= 0) return cdb.NOTHING;
+    var index: usize = 0;
+    while (index < @as(usize, @intCast(cdb.top_of_trigt))) : (index += 1) {
+        const entry = cdb.trig_index[index];
+        if (entry != null and entry.*.vnum == vnum) return @intCast(index);
+    }
+    return cdb.NOTHING;
 }
 
 fn writeJsonFile(filename: []const u8, comptime serializer: anytype, args: anytype) !void {

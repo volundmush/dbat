@@ -32,6 +32,14 @@ int json_export_dgscripts(const char* folder);
 int json_export_all(const char* folder);
 
 void json_import_all(const char* folder);
+int json_import_zones(const char* folder);
+int json_import_rooms(const char* folder);
+int json_import_room_exits(const char* folder);
+int json_import_dgscripts(const char* folder);
+int json_import_npc_prototypes(const char* folder);
+int json_import_obj_prototypes(const char* folder);
+int json_import_shops(const char* folder);
+int json_import_guilds(const char* folder);
 
 #ifdef __cplusplus
 }

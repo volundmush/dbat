@@ -66,11 +66,17 @@ pub fn serializeTrigger(allocator: std.mem.Allocator, trigger: *cdb.trig_data) !
 
 pub fn deserializeTrigger(trigger: *cdb.trig_data, value: JsonValue) !void {
     if (value != .object) return error.ExpectedObject;
-    if (try jsonx.stringField(value, "name")) |v| trigger.name = try duplicate(v);
+    if (try jsonx.stringFieldAlloc(std.heap.c_allocator, value, "name")) |v| {
+        defer std.heap.c_allocator.free(v);
+        trigger.name = try duplicate(v);
+    }
     if (try jsonx.intField(value, "attach_type", u8)) |v| trigger.attach_type = v;
     if (try jsonx.intField(value, "trigger_type", cdb.bitvector_t)) |v| trigger.trigger_type = v;
     if (try jsonx.intField(value, "narg", c_int)) |v| trigger.narg = v;
-    if (try jsonx.stringField(value, "arglist")) |v| trigger.arglist = try duplicate(v);
+    if (try jsonx.stringFieldAlloc(std.heap.c_allocator, value, "arglist")) |v| {
+        defer std.heap.c_allocator.free(v);
+        trigger.arglist = try duplicate(v);
+    }
     if (jsonx.field(value, "lines")) |lines| try deserializeCommandLines(&trigger.cmdlist, lines);
     trigger.curr_state = trigger.cmdlist;
 }
@@ -100,11 +106,8 @@ fn deserializeCommandLines(target: *[*c]cdb.cmdlist_element, value: JsonValue) !
 
     var tail: ?*cdb.cmdlist_element = null;
     for (value.array.items) |item| {
-        const text = switch (item) {
-            .string => |s| s,
-            .null => "",
-            else => return error.ExpectedString,
-        };
+        const text = try jsonx.stringValueAlloc(std.heap.c_allocator, item) orelse try std.heap.c_allocator.dupe(u8, "");
+        defer std.heap.c_allocator.free(text);
         const node = try newCommandLine(text);
         if (tail) |last| {
             last.next = node;

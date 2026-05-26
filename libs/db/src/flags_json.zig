@@ -83,6 +83,30 @@ pub fn stringField(value: JsonValue, key: []const u8) JsonError!?[]const u8 {
     };
 }
 
+pub fn stringFieldAlloc(allocator: std.mem.Allocator, value: JsonValue, key: []const u8) JsonError!?[]u8 {
+    const item = field(value, key) orelse return null;
+    return stringValueAlloc(allocator, item);
+}
+
+pub fn stringValueAlloc(allocator: std.mem.Allocator, value: JsonValue) JsonError!?[]u8 {
+    return switch (value) {
+        .string => |s| try allocator.dupe(u8, s),
+        .array => |array| try bytesFromArray(allocator, array.items),
+        .null => null,
+        else => error.ExpectedString,
+    };
+}
+
+fn bytesFromArray(allocator: std.mem.Allocator, items: []const JsonValue) JsonError![]u8 {
+    const bytes = try allocator.alloc(u8, items.len);
+    errdefer allocator.free(bytes);
+    for (items, 0..) |item, index| {
+        if (item != .integer) return error.ExpectedInteger;
+        bytes[index] = std.math.cast(u8, item.integer) orelse return error.IntegerOutOfRange;
+    }
+    return bytes;
+}
+
 pub fn intField(value: JsonValue, key: []const u8, comptime T: type) JsonError!?T {
     const item = field(value, key) orelse return null;
     const raw = switch (item) {

@@ -58,10 +58,10 @@ pub fn deserializeObject(obj: *cdb.obj_data, options: DeserializeOptions, value:
     if (try jsonx.intField(value, "cost", c_int)) |v| cdb.obj_cost_set(obj, v);
     if (try jsonx.intField(value, "timer", c_int)) |v| cdb.obj_timer_set(obj, v);
     if (try jsonx.intField(value, "size", c_int)) |v| cdb.obj_size_set(obj, v);
-    if (try jsonx.stringField(value, "name")) |v| try setString(options.c_allocator, obj, v, cdb.obj_name_set);
-    if (try jsonx.stringField(value, "description")) |v| try setString(options.c_allocator, obj, v, cdb.obj_description_set);
-    if (try jsonx.stringField(value, "short_description")) |v| try setString(options.c_allocator, obj, v, cdb.obj_short_description_set);
-    if (try jsonx.stringField(value, "action_description")) |v| try setString(options.c_allocator, obj, v, cdb.obj_action_description_set);
+    try setStringField(options.c_allocator, obj, value, "name", cdb.obj_name_set);
+    try setStringField(options.c_allocator, obj, value, "description", cdb.obj_description_set);
+    try setStringField(options.c_allocator, obj, value, "short_description", cdb.obj_short_description_set);
+    try setStringField(options.c_allocator, obj, value, "action_description", cdb.obj_action_description_set);
     if (jsonx.field(value, "extra_descriptions")) |items| try extradesc_json.deserializeExtraDescriptions(&obj.ex_description, items);
 
     if (options.mode == .prototype) {
@@ -93,6 +93,12 @@ fn setString(allocator: std.mem.Allocator, obj: *cdb.obj_data, value: []const u8
     const z = try allocator.dupeZ(u8, value);
     defer allocator.free(z);
     setter(obj, z);
+}
+
+fn setStringField(allocator: std.mem.Allocator, obj: *cdb.obj_data, object: JsonValue, key: []const u8, comptime setter: anytype) !void {
+    const value = try jsonx.stringFieldAlloc(allocator, object, key) orelse return;
+    defer allocator.free(value);
+    try setString(allocator, obj, value, setter);
 }
 
 fn wearFlagged(obj: *cdb.obj_data, pos: c_int) bool {

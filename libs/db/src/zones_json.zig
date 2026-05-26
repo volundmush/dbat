@@ -27,8 +27,8 @@ pub fn serializeZone(allocator: std.mem.Allocator, zone: *cdb.zone_data) !JsonVa
 pub fn deserializeZone(zone: *cdb.zone_data, options: DeserializeOptions, value: JsonValue) !void {
     if (value != .object) return error.ExpectedObject;
     if (try jsonx.intField(value, "id", cdb.zone_vnum)) |v| cdb.zone_id_set(zone, v);
-    if (try jsonx.stringField(value, "name")) |v| try setString(options.c_allocator, zone, v, cdb.zone_name_set);
-    if (try jsonx.stringField(value, "builders")) |v| try setString(options.c_allocator, zone, v, cdb.zone_builders_set);
+    try setStringField(options.c_allocator, zone, value, "name", cdb.zone_name_set);
+    try setStringField(options.c_allocator, zone, value, "builders", cdb.zone_builders_set);
     if (try jsonx.intField(value, "lifespan", c_int)) |v| cdb.zone_lifespan_set(zone, v);
     if (try jsonx.intField(value, "bottom", cdb.room_vnum)) |v| cdb.zone_bottom_set(zone, v);
     if (try jsonx.intField(value, "top", cdb.room_vnum)) |v| cdb.zone_top_set(zone, v);
@@ -36,7 +36,11 @@ pub fn deserializeZone(zone: *cdb.zone_data, options: DeserializeOptions, value:
     if (try jsonx.intField(value, "min_level", c_int)) |v| cdb.zone_min_level_set(zone, v);
     if (try jsonx.intField(value, "max_level", c_int)) |v| cdb.zone_max_level_set(zone, v);
     if (jsonx.field(value, "flags")) |flags| try jsonx.deserializeFlags(zone, flags, 128, zoneFlagSet);
-    if (jsonx.field(value, "reset_commands")) |commands| try deserializeResetCommands(zone, options, commands);
+    if (jsonx.field(value, "reset_commands")) |commands| {
+        try deserializeResetCommands(zone, options, commands);
+    } else {
+        try setEmptyResetCommands(zone);
+    }
 }
 
 pub fn serializeResetCommands(allocator: std.mem.Allocator, zone: *cdb.zone_data) !JsonValue {
@@ -66,6 +70,12 @@ pub fn deserializeResetCommands(zone: *cdb.zone_data, options: DeserializeOption
     zone.cmd[value.array.items.len].command = 'S';
 }
 
+fn setEmptyResetCommands(zone: *cdb.zone_data) !void {
+    freeResetCommands(zone.cmd);
+    zone.cmd = @ptrCast(@alignCast(calloc(1, @sizeOf(cdb.reset_com)) orelse return error.OutOfMemory));
+    zone.cmd[0].command = 'S';
+}
+
 pub fn serializeResetCommand(allocator: std.mem.Allocator, command: *cdb.reset_com) !JsonValue {
     var object = jsonx.newObject(allocator);
     const command_type = [_]u8{cdb.zone_command_type_get(command)};
@@ -80,20 +90,86 @@ pub fn serializeResetCommand(allocator: std.mem.Allocator, command: *cdb.reset_c
 pub fn deserializeResetCommand(command: *cdb.reset_com, options: DeserializeOptions, value: JsonValue) !void {
     if (value != .object) return error.ExpectedObject;
 
-    if (try jsonx.stringField(value, "command")) |v| {
+    if (try jsonx.stringFieldAlloc(options.c_allocator, value, "command")) |v| {
+        defer options.c_allocator.free(v);
         if (v.len == 0) return error.ExpectedString;
         cdb.zone_command_type_set(command, v[0]);
     }
     if (try jsonx.boolField(value, "if_flag")) |v| cdb.zone_command_if_flag_set(command, v);
     if (jsonx.field(value, "args")) |args| try deserializeResetCommandArgs(command, args);
-    if (try jsonx.stringField(value, "sarg1")) |v| try setCommandString(options.c_allocator, command, v, cdb.zone_command_sarg1_set);
-    if (try jsonx.stringField(value, "sarg2")) |v| try setCommandString(options.c_allocator, command, v, cdb.zone_command_sarg2_set);
+    try setCommandStringField(options.c_allocator, command, value, "sarg1", cdb.zone_command_sarg1_set);
+    try setCommandStringField(options.c_allocator, command, value, "sarg2", cdb.zone_command_sarg2_set);
 }
 
 fn serializeResetCommandArgs(allocator: std.mem.Allocator, command: *cdb.reset_com) !JsonValue {
     var array = jsonx.JsonArray.init(allocator);
-    for (0..5) |index| try array.append(.{ .integer = cdb.zone_command_arg_get(command, index) });
+    var args = [_]c_int{
+        cdb.zone_command_arg_get(command, 0),
+        cdb.zone_command_arg_get(command, 1),
+        cdb.zone_command_arg_get(command, 2),
+        cdb.zone_command_arg_get(command, 3),
+        cdb.zone_command_arg_get(command, 4),
+    };
+    denumberResetCommandArgs(cdb.zone_command_type_get(command), &args);
+    for (args) |arg| try array.append(.{ .integer = arg });
     return .{ .array = array };
+}
+
+fn denumberResetCommandArgs(command: u8, args: *[5]c_int) void {
+    switch (command) {
+        'M' => {
+            args[0] = mobVnumFromRnum(args[0]);
+            args[2] = roomVnumFromRnum(args[2]);
+        },
+        'O' => {
+            args[0] = objVnumFromRnum(args[0]);
+            if (args[2] != cdb.NOWHERE) args[2] = roomVnumFromRnum(args[2]);
+        },
+        'G', 'E' => {
+            args[0] = objVnumFromRnum(args[0]);
+        },
+        'P' => {
+            args[0] = objVnumFromRnum(args[0]);
+            args[2] = objVnumFromRnum(args[2]);
+        },
+        'D' => {
+            args[0] = roomVnumFromRnum(args[0]);
+        },
+        'R' => {
+            args[0] = roomVnumFromRnum(args[0]);
+            args[1] = objVnumFromRnum(args[1]);
+        },
+        'T' => {
+            args[1] = trigVnumFromRnum(args[1]);
+            args[2] = roomVnumFromRnum(args[2]);
+        },
+        'V' => {
+            args[2] = roomVnumFromRnum(args[2]);
+        },
+        else => {},
+    }
+}
+
+fn roomVnumFromRnum(rnum: c_int) c_int {
+    if (rnum == cdb.NOWHERE or rnum < 0 or rnum > cdb.top_of_world or cdb.world == null) return rnum;
+    return cdb.world[@intCast(rnum)].number;
+}
+
+fn mobVnumFromRnum(rnum: c_int) c_int {
+    if (rnum == cdb.NOBODY or rnum < 0 or rnum > cdb.top_of_mobt or cdb.mob_index == null) return rnum;
+    return cdb.mob_index[@intCast(rnum)].vnum;
+}
+
+fn objVnumFromRnum(rnum: c_int) c_int {
+    if (rnum == cdb.NOTHING or rnum < 0 or rnum > cdb.top_of_objt or cdb.obj_index == null) return rnum;
+    return cdb.obj_index[@intCast(rnum)].vnum;
+}
+
+fn trigVnumFromRnum(rnum: c_int) c_int {
+    if (rnum == cdb.NOTHING or rnum < 0 or rnum >= cdb.top_of_trigt or cdb.trig_index == null) return rnum;
+    const trigger = cdb.trig_index[@intCast(rnum)];
+    if (trigger == null) return rnum;
+    return trigger.*.vnum;
 }
 
 fn deserializeResetCommandArgs(command: *cdb.reset_com, value: JsonValue) !void {
@@ -121,10 +197,22 @@ fn setString(allocator: std.mem.Allocator, zone: *cdb.zone_data, value: []const 
     setter(zone, z);
 }
 
+fn setStringField(allocator: std.mem.Allocator, zone: *cdb.zone_data, object: JsonValue, key: []const u8, comptime setter: anytype) !void {
+    const value = try jsonx.stringFieldAlloc(allocator, object, key) orelse return;
+    defer allocator.free(value);
+    try setString(allocator, zone, value, setter);
+}
+
 fn setCommandString(allocator: std.mem.Allocator, command: *cdb.reset_com, value: []const u8, comptime setter: anytype) !void {
     const z = try allocator.dupeZ(u8, value);
     defer allocator.free(z);
     setter(command, z);
+}
+
+fn setCommandStringField(allocator: std.mem.Allocator, command: *cdb.reset_com, object: JsonValue, key: []const u8, comptime setter: anytype) !void {
+    const value = try jsonx.stringFieldAlloc(allocator, object, key) orelse return;
+    defer allocator.free(value);
+    try setCommandString(allocator, command, value, setter);
 }
 
 fn zoneFlagged(zone: *cdb.zone_data, pos: c_int) bool {

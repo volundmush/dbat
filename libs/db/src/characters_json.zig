@@ -167,11 +167,11 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
 
     // general shared fields go here.
     // These must precede the others because class must be set for other things to work right.
-    if (try jsonx.stringField(value, "name")) |v| try setString(options.c_allocator, ch, v, cdb.char_name_set);
-    if (try jsonx.stringField(value, "description")) |v| try setString(options.c_allocator, ch, v, cdb.char_description_set);
-    if (try jsonx.stringField(value, "short_description")) |v| try setString(options.c_allocator, ch, v, cdb.char_short_description_set);
-    if (try jsonx.stringField(value, "long_description")) |v| try setString(options.c_allocator, ch, v, cdb.char_long_description_set);
-    if (try jsonx.stringField(value, "title")) |v| try setString(options.c_allocator, ch, v, cdb.char_title_set);
+    try setStringField(options.c_allocator, value, "name", ch, cdb.char_name_set);
+    try setStringField(options.c_allocator, value, "description", ch, cdb.char_description_set);
+    try setStringField(options.c_allocator, value, "short_description", ch, cdb.char_short_description_set);
+    try setStringField(options.c_allocator, value, "long_description", ch, cdb.char_long_description_set);
+    try setStringField(options.c_allocator, value, "title", ch, cdb.char_title_set);
     if (try jsonx.intField(value, "class", c_int)) |v| cdb.char_class_set(ch, v);
     if (try jsonx.intField(value, "race", c_int)) |v| cdb.char_race_set(ch, v);
     if (try jsonx.intField(value, "size", c_int)) |v| cdb.char_size_set(ch, v);
@@ -230,8 +230,8 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
         if (try jsonx.intField(value, "wimp_level", c_int)) |v| ps.wimp_level = v;
         if (try jsonx.intField(value, "freeze_level", i8)) |v| ps.freeze_level = v;
         if (try jsonx.intField(value, "invis_level", i16)) |v| ps.invis_level = v;
-        if (try jsonx.stringField(value, "poofin")) |v| try setPlayerString(options.c_allocator, &ps.poofin, v);
-        if (try jsonx.stringField(value, "poofout")) |v| try setPlayerString(options.c_allocator, &ps.poofout, v);
+        try setPointerStringField(options.c_allocator, value, "poofin", &ps.poofin, setPlayerString);
+        try setPointerStringField(options.c_allocator, value, "poofout", &ps.poofout, setPlayerString);
         if (try jsonx.intField(value, "murder", c_int)) |v| ps.murder = v;
         if (try jsonx.intField(value, "racial_pref", c_int)) |v| ps.racial_pref = v;
         if (try jsonx.intField(value, "speaking", c_int)) |v| ps.speaking = v;
@@ -239,8 +239,8 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
         if (jsonx.field(value, "pref_flags")) |flags| try jsonx.deserializeFlags(ps, flags, 128, prefFlagSet);
         if (jsonx.field(value, "conditions")) |items| try deserializeIntArray(ps.conditions[0..], items);
         if (jsonx.field(value, "stats")) |stats| try deserializePlayerStats(ch, ps, stats);
-        if (try jsonx.stringField(value, "rdisplay")) |v| try setRawString(options.c_allocator, &ch.rdisplay, v);
-        if (try jsonx.stringField(value, "voice")) |v| try setRawString(options.c_allocator, &ch.voice, v);
+        try setPointerStringField(options.c_allocator, value, "rdisplay", &ch.rdisplay, setRawString);
+        try setPointerStringField(options.c_allocator, value, "voice", &ch.voice, setRawString);
         if (try jsonx.intField(value, "forgeting", c_int)) |v| ch.forgeting = v;
         if (try jsonx.intField(value, "forgetcount", c_int)) |v| ch.forgetcount = v;
         if (try jsonx.intField(value, "lastint", cdb.time_t)) |v| ch.lastint = v;
@@ -275,6 +275,18 @@ fn setString(allocator: std.mem.Allocator, ch: *cdb.char_data, value: []const u8
     const z = try allocator.dupeZ(u8, value);
     defer allocator.free(z);
     setter(ch, z);
+}
+
+fn setStringField(allocator: std.mem.Allocator, object: JsonValue, key: []const u8, ctx: anytype, comptime setter: anytype) !void {
+    const value = try jsonx.stringFieldAlloc(allocator, object, key) orelse return;
+    defer allocator.free(value);
+    try setString(allocator, ctx, value, setter);
+}
+
+fn setPointerStringField(allocator: std.mem.Allocator, object: JsonValue, key: []const u8, ptr: anytype, comptime setter: anytype) !void {
+    const value = try jsonx.stringFieldAlloc(allocator, object, key) orelse return;
+    defer allocator.free(value);
+    try setter(allocator, ptr, value);
 }
 
 fn putStat(object: *JsonValue, allocator: std.mem.Allocator, name: []const u8, value: anytype, omit_zero: bool) !void {
