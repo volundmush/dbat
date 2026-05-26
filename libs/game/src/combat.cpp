@@ -3534,17 +3534,6 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
   else if (dmg <= GET_MAX_HIT(vict) / 10) {
    chance = rand_number(1, 75);
   }
-
-  if (GET_RELAXCOUNT(ch) >= 464) {
-   chance = 0;
-  } else if (GET_RELAXCOUNT(ch) >= 232) {
-   chance -= chance * 0.5;
-  } else if (GET_RELAXCOUNT(ch) >= 116) {
-   chance -= chance * 0.2;
-  } 
-
-  gravity = room_gravity_get(char_room_get(ch));
-  gmult = GET_LEVEL(ch) * ((gravity / 10) + 6);
  
   if (GET_EQ(ch, WEAR_SH)) {
    struct obj_data *obj = GET_EQ(ch, WEAR_SH);
@@ -3602,56 +3591,19 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
    } else if (victimStrength >= 3) {
     num += GET_LEVEL(ch) * 50;
    } else if (victimStrength >= 2) {
-    num += GET_LEVEL(ch) * 15;
+    num += GET_LEVEL(ch) * 20;
    } else {
     num += GET_LEVEL(ch) * 5;
    }
    if (num > maxnum) {
     num = maxnum;
    }
-   if (vict != NULL && IS_NPC(vict)) {
-    num = num * 0.7;
-    gaincalc = num * 1.5;
-    type = 3;
-   } else if (vict != NULL && !IS_NPC(vict)) {
-    gaincalc = large_rand(num * .7, num);
-    if (GET_LEVEL(ch) > GET_LEVEL(vict))
-     difference = GET_LEVEL(ch) - GET_LEVEL(vict);
-    else if (GET_LEVEL(ch) < GET_LEVEL(vict))
-     difference = GET_LEVEL(vict) - GET_LEVEL(ch);
-   } else {
-    gaincalc = 0;
-   }
-   if (vict != NULL) {
-    if (difference >= 51) {
-     send_to_char(ch, "The difference in your levels is too great for you to gain anything.\r\n");
-     return;
-    } else if (difference >= 40) {
-     gaincalc = gaincalc * 0.1;
-    } else if (difference >= 30) {
-     gaincalc = gaincalc * 0.25;
-    } else if (difference >= 20) {
-     gaincalc = gaincalc * 0.5;
-    } else if (difference >= 10) {
-     gaincalc = gaincalc * 0.75;
-    }
 
-    if(is_sparring(ch) && is_sparring(vict))
-      gaincalc *= 0.8;
+   gaincalc = large_rand(num * 0.7, num * 1.2);
 
-      
-    /*if (!IS_NPC(vict)) {
-     if (PRF_FLAGGED(vict, PRF_INSTRUCT)) {
-      if (GET_PRACTICES(vict, GET_CLASS(vict)) > 10) {
-       send_to_char(vict, "You instruct them in proper fighting techniques and strategies.\r\n");
-       act("You take $N's instruction to heart and gain more experience.\r\n", FALSE, ch, 0, vict, TO_CHAR);
-       GET_PRACTICES(vict, GET_CLASS(vict)) -= 10;
-       bonus = 2;
-      }
-     }
-    } - Could possibly be replaced with some mentorship skill  */
-   }
-   
+   if (vict != NULL && (is_sparring(ch) && is_sparring(vict)) )
+    gaincalc *= 0.8;
+
    if (IS_SAIYAN(ch)) {
     gaincalc = gaincalc + (gaincalc * .50);
    }
