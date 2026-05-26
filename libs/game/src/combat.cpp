@@ -3522,8 +3522,8 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict)
 
 void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t dmg)
 {
- int chance = 0, gmult, gravity, bonus = 1, difference = 0;
- int64_t gain = 0, pl = 0, ki = 0, st = 0, gaincalc = 0;
+ int chance = 0, bonus = 1, difference = 0;
+ int64_t vitalgain = 0, gain = 0, pl = 0, ki = 0, st = 0, gaincalc = 0;
 
  if (ch == NULL) return;
  if (IS_NPC(ch)) return;
@@ -3534,33 +3534,8 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
   else if (dmg <= GET_MAX_HIT(vict) / 10) {
    chance = rand_number(1, 75);
   }
- 
-  if (GET_EQ(ch, WEAR_SH)) {
-   struct obj_data *obj = GET_EQ(ch, WEAR_SH);
-   if (GET_OBJ_VNUM(obj) == 1127) {
-    gmult *= 4;
-   }
-  }
-  
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
-     gmult *= 1.75;
-    } else {
-     gmult *= 1.25;
-    }
-    pl = large_rand(gmult * .8, gmult * 1.2);
-    ki = large_rand(gmult * .8, gmult * 1.2);
-   } else {
-    pl = large_rand(gmult * .4, gmult * .8);
-    ki = large_rand(gmult * .4, gmult * .8);
-   }
-  if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0 && GET_LEVEL(ch) < 100) {
-   pl = 0;
-  }
-  if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0 && GET_LEVEL(ch) < 100) {
-   ki = 0;
-  }
 
+  // Work out xp gained
   int64_t chavg = (ch->max_hit + ch->max_mana + ch->max_move) / 3;
   int64_t victavg = (vict->max_hit + vict->max_mana + vict->max_move) / 3;
   int characterStrength = get_digits(chavg);
@@ -3569,31 +3544,31 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
   if (chance >= rand_number(60, 75)) {
    int64_t num = 0,  maxnum = 500000;
    if (victimStrength >= 13) {
-    num += GET_LEVEL(ch) * 2500;
+    num += GET_LEVEL(ch) * 5000;
    } else if (victimStrength >= 12) {
-    num += GET_LEVEL(ch) * 2000;
+    num += GET_LEVEL(ch) * 4000;
    } else if (victimStrength >= 11) {
-    num += GET_LEVEL(ch) * 1500;
+    num += GET_LEVEL(ch) * 2500;
    } else if (victimStrength >= 10) {
-    num += GET_LEVEL(ch) * 1250;
+    num += GET_LEVEL(ch) * 2000;
    } else if (victimStrength >= 9) {
-    num += GET_LEVEL(ch) * 1000;
+    num += GET_LEVEL(ch) * 1500;
    } else if (victimStrength >= 8) {
-    num += GET_LEVEL(ch) * 750;
+    num += GET_LEVEL(ch) * 1000;
    } else if (victimStrength >= 7) {
-    num += GET_LEVEL(ch) * 500;
+    num += GET_LEVEL(ch) * 800;
    } else if (victimStrength >= 6) {
-    num += GET_LEVEL(ch) * 250;
+    num += GET_LEVEL(ch) * 600;
    } else if (victimStrength >= 5) {
-    num += GET_LEVEL(ch) * 200;
+    num += GET_LEVEL(ch) * 400;
    } else if (victimStrength >= 4) {
-    num += GET_LEVEL(ch) * 100;
+    num += GET_LEVEL(ch) * 200;
    } else if (victimStrength >= 3) {
-    num += GET_LEVEL(ch) * 50;
+    num += GET_LEVEL(ch) * 100;
    } else if (victimStrength >= 2) {
-    num += GET_LEVEL(ch) * 20;
+    num += GET_LEVEL(ch) * 50;
    } else {
-    num += GET_LEVEL(ch) * 5;
+    num += GET_LEVEL(ch) * 25;
    }
    if (num > maxnum) {
     num = maxnum;
@@ -3622,8 +3597,38 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
    }
    gain = gear_exp(ch, gaincalc);
    
-    gain = gain * bonus;
-    gain_exp(ch, gain);
+   gain = gain * bonus;
+   gain_exp(ch, gain);
+
+   // Work out Vitals gained based on damage dealt
+   vitalgain = dmg / 100;
+
+   if (GET_EQ(ch, WEAR_SH)) {
+    struct obj_data *obj = GET_EQ(ch, WEAR_SH);
+     if (GET_OBJ_VNUM(obj) == 1127) {
+      vitalgain *= 4;
+    }
+   }
+  
+   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
+    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+     vitalgain *= 1.75;
+    } else {
+     vitalgain *= 1.25;
+    }
+    pl = large_rand(vitalgain * .8, vitalgain * 1.2);
+    ki = large_rand(vitalgain * .8, vitalgain * 1.2);
+   } else {
+    pl = large_rand(vitalgain * .4, vitalgain * .8);
+    ki = large_rand(vitalgain * .4, vitalgain * .8);
+   }
+  if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0 && GET_LEVEL(ch) < 100) {
+   pl = 0;
+  }
+  if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0 && GET_LEVEL(ch) < 100) {
+   ki = 0;
+  }
+
     send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
     if (type == 0 && rand_number(1, 5) >= 4) {
       send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n ", pl > 0 ? add_commas(pl) : "SOFT-CAP");
