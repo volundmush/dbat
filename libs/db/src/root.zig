@@ -10,6 +10,7 @@ pub const exits_api = @import("exits_api.zig");
 pub const shops_api = @import("shops_api.zig");
 pub const guilds_api = @import("guilds_api.zig");
 pub const zones_api = @import("zones_api.zig");
+pub const lua_api = @import("lua_api.zig");
 
 // This stupid comptime and its function ensures that the C API functions aren't optimized out because Zig doesn't call them directly. They are called from C, so we have to force them to be included in the final binary.
 comptime {
@@ -28,12 +29,16 @@ fn forceApiExports(comptime module: type) void {
     }
 }
 
-pub fn init(allocator: std.mem.Allocator) void {
+pub fn init(allocator: std.mem.Allocator, io: std.Io) !void {
     characters.init(allocator);
     objects.init(allocator);
+    try lua_api.init(allocator, io);
+
+    try lua_api.load_lua();
 }
 
 pub fn deinit() void {
+    lua_api.deinit();
     objects.deinit();
     characters.deinit();
 }
