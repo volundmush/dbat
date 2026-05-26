@@ -3580,31 +3580,31 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
   if (chance >= rand_number(60, 75)) {
    int64_t num = 0,  maxnum = 500000;
    if (victimStrength >= 13) {
-    num += GET_LEVEL(ch) * 5000;
-   } else if (victimStrength >= 12) {
-    num += GET_LEVEL(ch) * 4000;
-   } else if (victimStrength >= 11) {
-    num += GET_LEVEL(ch) * 3000;
-   } else if (victimStrength >= 10) {
     num += GET_LEVEL(ch) * 2500;
-   } else if (victimStrength >= 9) {
+   } else if (victimStrength >= 12) {
     num += GET_LEVEL(ch) * 2000;
-   } else if (victimStrength >= 8) {
+   } else if (victimStrength >= 11) {
     num += GET_LEVEL(ch) * 1500;
-   } else if (victimStrength >= 7) {
+   } else if (victimStrength >= 10) {
+    num += GET_LEVEL(ch) * 1250;
+   } else if (victimStrength >= 9) {
     num += GET_LEVEL(ch) * 1000;
-   } else if (victimStrength >= 6) {
+   } else if (victimStrength >= 8) {
+    num += GET_LEVEL(ch) * 750;
+   } else if (victimStrength >= 7) {
     num += GET_LEVEL(ch) * 500;
+   } else if (victimStrength >= 6) {
+    num += GET_LEVEL(ch) * 250;
    } else if (victimStrength >= 5) {
-    num += GET_LEVEL(ch) * 400;
-   } else if (victimStrength >= 4) {
     num += GET_LEVEL(ch) * 200;
-   } else if (victimStrength >= 3) {
+   } else if (victimStrength >= 4) {
     num += GET_LEVEL(ch) * 100;
+   } else if (victimStrength >= 3) {
+    num += GET_LEVEL(ch) * 50;
    } else if (victimStrength >= 2) {
-    num += GET_LEVEL(ch) * 25;
-   } else {
     num += GET_LEVEL(ch) * 15;
+   } else {
+    num += GET_LEVEL(ch) * 5;
    }
    if (num > maxnum) {
     num = maxnum;
