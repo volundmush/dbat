@@ -12,16 +12,25 @@ const DerivedData = struct {
     // this is a placeholder for now.
 };
 
+const SkillData = struct {
+    base: i64,
+    perf: i64,
+};
+
 const CharacterData = struct {
     stats: std.StringHashMap(i64),
     deriveds: std.StringHashMap(DerivedData),
     transforms: std.StringHashMap(TransformData),
+    meters: std.StringHashMap(f64),
+    skills: std.StringHashMap(SkillData),
 
     pub fn init(alloc: std.mem.Allocator) CharacterData {
         return CharacterData{
             .stats = std.StringHashMap(i64).init(alloc),
             .deriveds = std.StringHashMap(DerivedData).init(alloc),
             .transforms = std.StringHashMap(TransformData).init(alloc),
+            .meters = std.StringHashMap(f64).init(alloc),
+            .skills = std.StringHashMap(SkillData).init(alloc),
         };
     }
 
@@ -31,6 +40,12 @@ const CharacterData = struct {
         self.stats.deinit();
         self.deriveds.deinit();
         self.transforms.deinit();
+        var meters = self.meters.keyIterator();
+        while (meters.next()) |key| std.heap.page_allocator.free(key.*);
+        self.meters.deinit();
+        var skills = self.skills.keyIterator();
+        while (skills.next()) |key| std.heap.page_allocator.free(key.*);
+        self.skills.deinit();
     }
 };
 
@@ -298,4 +313,33 @@ pub export fn char_stat_set(ch: *cdb.char_data, stat: ?[*:0]const u8, value: i64
 pub export fn char_stat_mod(ch: *cdb.char_data, stat: ?[*:0]const u8, mod: i64) i64 {
     const value = char_stat_get(ch, stat) + mod;
     return char_stat_set(ch, stat, value);
+}
+
+pub export fn char_meter_get(ch: *cdb.char_data, meter: ?[*:0]const u8) f64 {
+    if (meter == null) return 0;
+    const zigdata = char_ensure_zigdata(ch) orelse return 0;
+    return zigdata.meters.get(std.mem.span(meter.?)) orelse 0;
+}
+
+pub export fn char_meter_set(ch: *cdb.char_data, meter: ?[*:0]const u8, value: f64) f64 {
+    const name = if (meter) |ptr| std.mem.span(ptr) else return 0;
+    if (name.len == 0) return 0;
+
+    const zigdata = char_ensure_zigdata(ch) orelse return 0;
+    if (zigdata.meters.getPtr(name)) |existing| {
+        existing.* = value;
+        return value;
+    }
+
+    const owned_name = std.heap.page_allocator.dupe(u8, name) catch return 0;
+    zigdata.meters.put(owned_name, value) catch {
+        std.heap.page_allocator.free(owned_name);
+        return 0;
+    };
+    return value;
+}
+
+pub export fn char_meter_mod(ch: *cdb.char_data, meter: ?[*:0]const u8, mod: f64) f64 {
+    const value = char_meter_get(ch, meter) + mod;
+    return char_meter_set(ch, meter, value);
 }

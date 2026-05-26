@@ -17,10 +17,10 @@ pub fn serializeRoom(allocator: std.mem.Allocator, room: *cdb.room_data) !JsonVa
     try jsonx.putInt(&object, allocator, "sector", cdb.room_sector_type_get(room));
     try jsonx.putString(&object, allocator, "name", cdb.room_name_get(room));
     try jsonx.putString(&object, allocator, "description", cdb.room_description_get(room));
-    try jsonx.put(&object, allocator, "extra_descriptions", try extradesc_json.serializeExtraDescriptions(allocator, room.ex_description));
-    try jsonx.put(&object, allocator, "proto_script", try dgscripts_json.serializeProtoScript(allocator, room.proto_script));
-    try jsonx.put(&object, allocator, "exits", try exits_json.serializeRoomExits(allocator, room));
-    try jsonx.put(&object, allocator, "flags", try jsonx.serializeFlags(allocator, room, cdb.NUM_ROOM_FLAGS, roomFlagged));
+    try jsonx.putNonEmpty(&object, allocator, "extra_descriptions", try extradesc_json.serializeExtraDescriptions(allocator, room.ex_description));
+    try jsonx.putNonEmpty(&object, allocator, "proto_script", try dgscripts_json.serializeProtoScript(allocator, room.proto_script));
+    try jsonx.putNonEmpty(&object, allocator, "exits", try exits_json.serializeRoomExits(allocator, room));
+    try jsonx.putNonEmpty(&object, allocator, "flags", try jsonx.serializeFlags(allocator, room, cdb.NUM_ROOM_FLAGS, roomFlagged));
     return object;
 }
 
@@ -34,7 +34,6 @@ pub fn deserializeRoom(room: *cdb.room_data, options: DeserializeOptions, value:
     if (try jsonx.stringField(value, "description")) |v| cdb.room_description_set(room, try nul(v));
     if (jsonx.field(value, "extra_descriptions")) |items| try extradesc_json.deserializeExtraDescriptions(&room.ex_description, items);
     if (jsonx.field(value, "proto_script")) |items| try dgscripts_json.deserializeProtoScript(&room.proto_script, items);
-    if (jsonx.field(value, "exits")) |items| try exits_json.deserializeRoomExits(room, items);
     if (jsonx.field(value, "flags")) |flags| try jsonx.deserializeFlags(room, flags, cdb.NUM_ROOM_FLAGS, roomFlagSet);
 }
 

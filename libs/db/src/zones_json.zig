@@ -19,8 +19,8 @@ pub fn serializeZone(allocator: std.mem.Allocator, zone: *cdb.zone_data) !JsonVa
     try jsonx.putInt(&object, allocator, "reset_mode", cdb.zone_reset_mode_get(zone));
     try jsonx.putInt(&object, allocator, "min_level", cdb.zone_min_level_get(zone));
     try jsonx.putInt(&object, allocator, "max_level", cdb.zone_max_level_get(zone));
-    try jsonx.put(&object, allocator, "flags", try jsonx.serializeFlags(allocator, zone, 128, zoneFlagged));
-    try jsonx.put(&object, allocator, "reset_commands", try serializeResetCommands(allocator, zone));
+    try jsonx.putNonEmpty(&object, allocator, "flags", try jsonx.serializeFlags(allocator, zone, 128, zoneFlagged));
+    try jsonx.putNonEmpty(&object, allocator, "reset_commands", try serializeResetCommands(allocator, zone));
     return object;
 }
 
@@ -59,7 +59,9 @@ pub fn deserializeResetCommands(zone: *cdb.zone_data, options: DeserializeOption
     zone.cmd = @ptrCast(@alignCast(calloc(value.array.items.len + 1, @sizeOf(cdb.reset_com)) orelse return error.OutOfMemory));
 
     for (value.array.items, 0..) |item, index| {
-        try deserializeResetCommand(&zone.cmd[index], options, item);
+        const command: *cdb.reset_com = @ptrCast(&zone.cmd[index]);
+        try deserializeResetCommand(command, options, item);
+        cdb.zone_command_line_set(command, @intCast(index + 1));
     }
     zone.cmd[value.array.items.len].command = 'S';
 }
@@ -70,7 +72,6 @@ pub fn serializeResetCommand(allocator: std.mem.Allocator, command: *cdb.reset_c
     try jsonx.putSlice(&object, allocator, "command", &command_type);
     try jsonx.putBool(&object, allocator, "if_flag", cdb.zone_command_if_flag_get(command));
     try jsonx.put(&object, allocator, "args", try serializeResetCommandArgs(allocator, command));
-    try jsonx.putInt(&object, allocator, "line", cdb.zone_command_line_get(command));
     try jsonx.putString(&object, allocator, "sarg1", cdb.zone_command_sarg1_get(command));
     try jsonx.putString(&object, allocator, "sarg2", cdb.zone_command_sarg2_get(command));
     return object;
@@ -85,7 +86,6 @@ pub fn deserializeResetCommand(command: *cdb.reset_com, options: DeserializeOpti
     }
     if (try jsonx.boolField(value, "if_flag")) |v| cdb.zone_command_if_flag_set(command, v);
     if (jsonx.field(value, "args")) |args| try deserializeResetCommandArgs(command, args);
-    if (try jsonx.intField(value, "line", c_int)) |v| cdb.zone_command_line_set(command, v);
     if (try jsonx.stringField(value, "sarg1")) |v| try setCommandString(options.c_allocator, command, v, cdb.zone_command_sarg1_set);
     if (try jsonx.stringField(value, "sarg2")) |v| try setCommandString(options.c_allocator, command, v, cdb.zone_command_sarg2_set);
 }

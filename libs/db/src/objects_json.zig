@@ -32,14 +32,14 @@ pub fn serializeObject(allocator: std.mem.Allocator, obj: *cdb.obj_data, mode: O
     try jsonx.putString(&object, allocator, "description", cdb.obj_description_get(obj));
     try jsonx.putString(&object, allocator, "short_description", cdb.obj_short_description_get(obj));
     try jsonx.putString(&object, allocator, "action_description", cdb.obj_action_description_get(obj));
-    try jsonx.put(&object, allocator, "extra_descriptions", try extradesc_json.serializeExtraDescriptions(allocator, obj.ex_description));
+    try jsonx.putNonEmpty(&object, allocator, "extra_descriptions", try extradesc_json.serializeExtraDescriptions(allocator, obj.ex_description));
     if (mode == .prototype) {
-        try jsonx.put(&object, allocator, "proto_script", try dgscripts_json.serializeProtoScript(allocator, obj.proto_script));
+        try jsonx.putNonEmpty(&object, allocator, "proto_script", try dgscripts_json.serializeProtoScript(allocator, obj.proto_script));
     }
     try jsonx.put(&object, allocator, "values", try serializeValues(allocator, obj));
-    try jsonx.put(&object, allocator, "wear_flags", try jsonx.serializeFlags(allocator, obj, 128, wearFlagged));
-    try jsonx.put(&object, allocator, "extra_flags", try jsonx.serializeFlags(allocator, obj, 128, extraFlagged));
-    try jsonx.put(&object, allocator, "affect_flags", try jsonx.serializeFlags(allocator, obj, 128, affFlagged));
+    try jsonx.putNonEmpty(&object, allocator, "wear_flags", try jsonx.serializeFlags(allocator, obj, 128, wearFlagged));
+    try jsonx.putNonEmpty(&object, allocator, "extra_flags", try jsonx.serializeFlags(allocator, obj, 128, extraFlagged));
+    try jsonx.putNonEmpty(&object, allocator, "affect_flags", try jsonx.serializeFlags(allocator, obj, 128, affFlagged));
 
     return object;
 }

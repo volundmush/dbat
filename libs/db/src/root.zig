@@ -12,6 +12,7 @@ pub const shops_api = @import("shops_api.zig");
 pub const guilds_api = @import("guilds_api.zig");
 pub const zones_api = @import("zones_api.zig");
 pub const lua_api = @import("lua_api.zig");
+pub const json_api = @import("json_api.zig");
 pub const flags_json = @import("flags_json.zig");
 pub const extradesc_json = @import("extradesc_json.zig");
 pub const affected_json = @import("affected_json.zig");
@@ -34,6 +35,7 @@ comptime {
     forceApiExports(shops_api);
     forceApiExports(guilds_api);
     forceApiExports(zones_api);
+    forceApiExports(json_api);
     std.testing.refAllDecls(flags_json);
     std.testing.refAllDecls(extradesc_json);
     std.testing.refAllDecls(dgscripts_json);
@@ -41,6 +43,9 @@ comptime {
     std.testing.refAllDecls(rooms_json);
     std.testing.refAllDecls(objects_json);
     std.testing.refAllDecls(zones_json);
+    std.testing.refAllDecls(characters_json);
+    std.testing.refAllDecls(shops_json);
+    std.testing.refAllDecls(guilds_json);
 }
 
 fn forceApiExports(comptime module: type) void {
@@ -52,6 +57,7 @@ fn forceApiExports(comptime module: type) void {
 pub fn init(allocator: std.mem.Allocator, io: std.Io) !void {
     characters.init(allocator);
     objects.init(allocator);
+    json_api.init(io);
     try lua_api.init(allocator, io);
 
     try lua_api.load_lua();

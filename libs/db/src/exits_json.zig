@@ -42,26 +42,49 @@ pub fn deserializeExit(exit: *cdb.room_direction_data, value: JsonValue) !void {
 }
 
 pub fn serializeRoomExits(allocator: std.mem.Allocator, room: *cdb.room_data) !JsonValue {
-    var array = jsonx.JsonArray.init(allocator);
+    var object = jsonx.newObject(allocator);
     for (0..cdb.NUM_OF_DIRS) |dir| {
         const exit = cdb.room_dir_option_get(room, @intCast(dir));
-        if (exit == null) {
-            try array.append(.null);
-        } else {
-            try array.append(try serializeExit(allocator, exit));
-        }
+        if (exit == null) continue;
+        try jsonx.put(&object, allocator, directionName(dir), try serializeExit(allocator, exit));
     }
-    return .{ .array = array };
+    return object;
 }
 
 pub fn deserializeRoomExits(room: *cdb.room_data, value: JsonValue) !void {
-    if (value != .array) return error.ExpectedArray;
-    for (value.array.items, 0..) |item, dir| {
-        if (dir >= cdb.NUM_OF_DIRS) break;
-        if (item == .null) continue;
+    if (value != .object) return error.ExpectedObject;
+    var iter = value.object.iterator();
+    while (iter.next()) |entry| {
+        const dir = directionIndex(entry.key_ptr.*) orelse continue;
+        const item = entry.value_ptr.*;
         const exit = try ensureRoomExit(room, dir);
         try deserializeExit(exit, item);
     }
+}
+
+fn directionName(dir: usize) []const u8 {
+    return switch (dir) {
+        cdb.NORTH => "north",
+        cdb.EAST => "east",
+        cdb.SOUTH => "south",
+        cdb.WEST => "west",
+        cdb.UP => "up",
+        cdb.DOWN => "down",
+        cdb.NORTHWEST => "northwest",
+        cdb.NORTHEAST => "northeast",
+        cdb.SOUTHEAST => "southeast",
+        cdb.SOUTHWEST => "southwest",
+        cdb.INDIR => "in",
+        cdb.OUTDIR => "out",
+        else => "unknown",
+    };
+}
+
+fn directionIndex(name: []const u8) ?usize {
+    inline for (0..cdb.NUM_OF_DIRS) |dir| {
+        if (std.mem.eql(u8, name, directionName(dir))) return dir;
+    }
+    return null;
 }
 
 fn ensureRoomExit(room: *cdb.room_data, dir: usize) !*cdb.room_direction_data {

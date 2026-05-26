@@ -11,6 +11,7 @@
 #include "dbat/db/consts/songs.h"
 #include "dbat/db/help.h"
 #include "dbat/db/bans.h"
+#include "dbat/db/json.h"
 
 #include "dbat/game/utils.h"
 #include "dbat/game/comm.h"
@@ -234,6 +235,9 @@ void init_game(uint16_t cmport)
 
   /* Load the toplist */
   topLoad();
+
+  // handle JSON
+  json_export_all("data/assets");
 
   /* If we made it this far, we will be able to restart without problem. */
   remove(KILLSCRIPT_FILE);

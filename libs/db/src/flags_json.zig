@@ -14,7 +14,8 @@ pub const JsonError = error{
 } || std.mem.Allocator.Error;
 
 pub fn newObject(allocator: std.mem.Allocator) JsonValue {
-    return .{ .object = JsonObject.init(allocator) };
+    _ = allocator;
+    return .{ .object = JsonObject.empty };
 }
 
 pub fn newArray(allocator: std.mem.Allocator) JsonValue {
@@ -25,9 +26,21 @@ pub fn put(object: *JsonValue, allocator: std.mem.Allocator, key: []const u8, va
     try object.object.put(allocator, key, value);
 }
 
+pub fn putNonEmpty(object: *JsonValue, allocator: std.mem.Allocator, key: []const u8, value: JsonValue) !void {
+    if (isEmpty(value)) return;
+    try put(object, allocator, key, value);
+}
+
+pub fn isEmpty(value: JsonValue) bool {
+    return switch (value) {
+        .array => |array| array.items.len == 0,
+        .object => |object| object.count() == 0,
+        else => false,
+    };
+}
+
 pub fn putString(object: *JsonValue, allocator: std.mem.Allocator, key: []const u8, value: [*c]const u8) !void {
     if (value == null) {
-        try put(object, allocator, key, .null);
         return;
     }
     try put(object, allocator, key, .{ .string = try allocator.dupe(u8, std.mem.span(value)) });
