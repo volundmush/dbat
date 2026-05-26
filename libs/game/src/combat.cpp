@@ -3522,10 +3522,11 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict)
 
 void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t dmg)
 {
- int chance = 0, bonus = 1, difference = 0;
+ int chance = 0;
  int64_t vitalgain = 0, gain = 0, pl = 0, ki = 0, st = 0, gaincalc = 0;
 
  if (ch == NULL) return;
+ if (vict == NULL) return;
  if (IS_NPC(ch)) return;
 
   if (dmg > GET_MAX_HIT(vict) / 10) {
@@ -3536,9 +3537,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
   }
 
   // Work out xp gained
-  int64_t chavg = (ch->max_hit + ch->max_mana + ch->max_move) / 3;
-  int64_t victavg = (vict->max_hit + vict->max_mana + vict->max_move) / 3;
-  int characterStrength = get_digits(chavg);
+  int64_t victavg = (getMaxPL(vict) + getMaxKI(vict) + getMaxST(vict)) / 3;
   int victimStrength = get_digits(victavg);
 
   if (chance >= rand_number(60, 75)) {
@@ -3548,28 +3547,29 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
    } else if (victimStrength >= 12) {
     num += GET_LEVEL(ch) * 4000;
    } else if (victimStrength >= 11) {
-    num += GET_LEVEL(ch) * 2500;
+    num += GET_LEVEL(ch) * 3000;
    } else if (victimStrength >= 10) {
-    num += GET_LEVEL(ch) * 2000;
+    num += GET_LEVEL(ch) * 2500;
    } else if (victimStrength >= 9) {
-    num += GET_LEVEL(ch) * 1500;
+    num += GET_LEVEL(ch) * 2000;
    } else if (victimStrength >= 8) {
-    num += GET_LEVEL(ch) * 1000;
+    num += GET_LEVEL(ch) * 1800;
    } else if (victimStrength >= 7) {
-    num += GET_LEVEL(ch) * 800;
+    num += GET_LEVEL(ch) * 1600;
    } else if (victimStrength >= 6) {
-    num += GET_LEVEL(ch) * 600;
+    num += GET_LEVEL(ch) * 1400;
    } else if (victimStrength >= 5) {
-    num += GET_LEVEL(ch) * 400;
+    num += GET_LEVEL(ch) * 1000;
    } else if (victimStrength >= 4) {
-    num += GET_LEVEL(ch) * 200;
+    num += GET_LEVEL(ch) * 500;
    } else if (victimStrength >= 3) {
-    num += GET_LEVEL(ch) * 100;
+    num += GET_LEVEL(ch) * 200;
    } else if (victimStrength >= 2) {
-    num += GET_LEVEL(ch) * 50;
+    num += GET_LEVEL(ch) * 100;
    } else {
-    num += GET_LEVEL(ch) * 25;
+    num += GET_LEVEL(ch) * 50;
    }
+
    if (num > maxnum) {
     num = maxnum;
    }
@@ -3595,39 +3595,39 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
      gaincalc *= 1.25;
     }
    }
+
    gain = gear_exp(ch, gaincalc);
-   
-   gain = gain * bonus;
    gain_exp(ch, gain);
 
    // Work out Vitals gained based on damage dealt
-   vitalgain = dmg / 100;
+   if(GET_LEVEL(ch) >= 100) {
+    vitalgain = dmg / 10000;
 
    if (GET_EQ(ch, WEAR_SH)) {
     struct obj_data *obj = GET_EQ(ch, WEAR_SH);
-     if (GET_OBJ_VNUM(obj) == 1127) {
-      vitalgain *= 4;
+    if (GET_OBJ_VNUM(obj) == 1127) {
+     vitalgain *= 4;
     }
    }
-  
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
-     vitalgain *= 1.75;
+    
+    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
+      if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+      vitalgain *= 1.75;
+      } else {
+      vitalgain *= 1.25;
+      }
+      pl = large_rand(vitalgain * .8, vitalgain * 1.2);
+      ki = large_rand(vitalgain * .8, vitalgain * 1.2);
     } else {
-     vitalgain *= 1.25;
+      pl = large_rand(vitalgain * .4, vitalgain * .8);
+      ki = large_rand(vitalgain * .4, vitalgain * .8);
     }
-    pl = large_rand(vitalgain * .8, vitalgain * 1.2);
-    ki = large_rand(vitalgain * .8, vitalgain * 1.2);
-   } else {
-    pl = large_rand(vitalgain * .4, vitalgain * .8);
-    ki = large_rand(vitalgain * .4, vitalgain * .8);
-   }
-  if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0 && GET_LEVEL(ch) < 100) {
-   pl = 0;
-  }
-  if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0 && GET_LEVEL(ch) < 100) {
-   ki = 0;
-  }
+    if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0 && GET_LEVEL(ch) < 100) {
+    pl = 0;
+    }
+    if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0 && GET_LEVEL(ch) < 100) {
+    ki = 0;
+    }
 
     send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
     if (type == 0 && rand_number(1, 5) >= 4) {
@@ -3638,8 +3638,9 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
       send_to_char(ch, "@D[@Y+ @C%s @cKi@D]@n ", ki > 0 ? add_commas(ki) : "SOFT-CAP");
       gainBaseKI(ch, ki);
     }
-    send_to_char(ch, "\r\n");
   }
+   send_to_char(ch, "\r\n");
+ }
 }
 
 /*Get the amount of digits within a number*/
