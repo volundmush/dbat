@@ -3543,7 +3543,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
    chance -= chance * 0.2;
   } 
 
-  gravity = ROOM_GRAVITY(IN_ROOM(ch));
+  gravity = room_gravity_get(char_room_get(ch));
   gmult = GET_LEVEL(ch) * ((gravity / 10) + 6);
  
   if (GET_EQ(ch, WEAR_SH)) {
@@ -3553,7 +3553,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
    }
   }
   
-   if (room_flagged(room, ROOM_WORKOUT) || (room_flagged(room, ROOM_HBTC))) {
+   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
     if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
      gmult *= 1.75;
     } else {
@@ -3637,7 +3637,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
     }
 
     if(is_sparring(ch) && is_sparring(vict))
-      gaincalc *= 0.8
+      gaincalc *= 0.8;
 
       
     /*if (!IS_NPC(vict)) {
