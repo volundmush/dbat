@@ -522,6 +522,9 @@ struct char_data
 
    int relax_count;
 
+   // Zig Fields
+   void *zigdata;
+
    // UNUSED STUFF BELOW HERE
    int race_level;               /* PC / NPC's racial level / hit dice   */
    int level_adj;                /* PC level adjustment                  */
@@ -610,6 +613,29 @@ size_t char_inventory_count(struct char_data *ch, bool recursive);
 size_t char_equipment_count(struct char_data *ch, bool recursive);
 struct obj_data *char_inventory_get(struct char_data *ch, size_t pos);
 struct obj_data *char_equipment_get(struct char_data *ch, size_t pos);
+
+void char_send_text(struct char_data *ch, const char *text);
+void char_send_textf(struct char_data *ch, const char *format, ...);
+
+// Character API stuff that makes use of the new Lua API.
+void char_zig_free(struct char_data *ch);
+int64_t char_stat_get(struct char_data *ch, const char *stat);
+int64_t char_stat_set(struct char_data *ch, const char *stat, int64_t value);
+int64_t char_stat_mod(struct char_data *ch, const char *stat, int64_t mod);
+
+int64_t char_legacy_modifier(struct char_data *ch, int location, int specific);
+
+int64_t char_der_get_base(struct char_data *ch, const char *stat);
+int64_t char_der_get_total(struct char_data *ch, const char *stat);
+void char_der_invalidate(struct char_data *ch);
+
+double char_meter_get(struct char_data *ch, const char *meter);
+double char_meter_set(struct char_data *ch, const char *meter, double value);
+int64_t char_meter_set_int(struct char_data *ch, const char *meter, int64_t value);
+double char_meter_mod(struct char_data *ch, const char *meter, double mod);
+int64_t char_meter_mod_int(struct char_data *ch, const char *meter, int64_t mod);
+int64_t char_meter_current(struct char_data *ch, const char *meter);
+int64_t char_meter_max(struct char_data *ch, const char *meter);
 
 // Below this is globals and database functions
 extern struct char_data *character_list;

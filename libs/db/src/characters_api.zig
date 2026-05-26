@@ -1,9 +1,49 @@
 const cdb = @import("cdb");
 const std = @import("std");
+const characters = @import("characters.zig");
 const bitflags = @import("flags.zig");
 const obj_api = @import("objects_api.zig");
 
+const TransformData = struct {
+    // this is a placeholder for now.
+};
+
+const DerivedData = struct {
+    // this is a placeholder for now.
+};
+
+const CharacterData = struct {
+    stats: std.StringHashMap(i64),
+    deriveds: std.StringHashMap(DerivedData),
+    transforms: std.StringHashMap(TransformData),
+
+    pub fn init(alloc: std.mem.Allocator) CharacterData {
+        return CharacterData{
+            .stats = std.StringHashMap(i64).init(alloc),
+            .deriveds = std.StringHashMap(DerivedData).init(alloc),
+            .transforms = std.StringHashMap(TransformData).init(alloc),
+        };
+    }
+
+    pub fn deinit(self: *CharacterData) void {
+        var stats = self.stats.keyIterator();
+        while (stats.next()) |key| std.heap.page_allocator.free(key.*);
+        self.stats.deinit();
+        self.deriveds.deinit();
+        self.transforms.deinit();
+    }
+};
+
 extern fn strdup(s: [*:0]const u8) ?[*:0]u8;
+
+pub fn char_ensure_zigdata(ch: *cdb.char_data) ?*CharacterData {
+    if (ch.zigdata == null) {
+        const data = std.heap.page_allocator.create(CharacterData) catch return null;
+        data.* = CharacterData.init(std.heap.page_allocator);
+        ch.zigdata = data;
+    }
+    return @ptrCast(@alignCast(ch.zigdata.?));
+}
 
 pub export fn char_id_get(ch: *cdb.char_data) i64 {
     return ch.id;
@@ -229,4 +269,33 @@ fn replaceString(ch: *cdb.char_data, field: *[*c]u8, proto_value: [*c]u8, value:
     const new_value = if (value) |new_string| strdup(new_string) orelse return else null;
     if (field.* != null and field.* != proto_value) std.c.free(field.*);
     field.* = new_value;
+}
+
+pub export fn char_stat_get(ch: *cdb.char_data, stat: ?[*:0]const u8) i64 {
+    if (stat == null) return 0;
+    const zigdata = char_ensure_zigdata(ch) orelse return 0;
+    return zigdata.stats.get(std.mem.span(stat.?)) orelse 0;
+}
+
+pub export fn char_stat_set(ch: *cdb.char_data, stat: ?[*:0]const u8, value: i64) i64 {
+    const name = if (stat) |ptr| std.mem.span(ptr) else return 0;
+    if (name.len == 0) return 0;
+
+    const zigdata = char_ensure_zigdata(ch) orelse return 0;
+    if (zigdata.stats.getPtr(name)) |existing| {
+        existing.* = value;
+        return value;
+    }
+
+    const owned_name = std.heap.page_allocator.dupe(u8, name) catch return 0;
+    zigdata.stats.put(owned_name, value) catch {
+        std.heap.page_allocator.free(owned_name);
+        return 0;
+    };
+    return value;
+}
+
+pub export fn char_stat_mod(ch: *cdb.char_data, stat: ?[*:0]const u8, mod: i64) i64 {
+    const value = char_stat_get(ch, stat) + mod;
+    return char_stat_set(ch, stat, value);
 }

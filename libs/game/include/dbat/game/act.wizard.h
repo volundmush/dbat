@@ -76,6 +76,7 @@ ACMD(do_plist);
 ACMD(do_peace);
 ACMD(do_raise);
 ACMD(do_boom);
+ACMD(do_lua);
 
 
 #ifdef __cplusplus

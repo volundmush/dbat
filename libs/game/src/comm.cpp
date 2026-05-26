@@ -1591,6 +1591,20 @@ size_t write_to_output(struct descriptor_data *t, const char *txt, ...)
   return left;
 }
 
+extern "C" void desc_send_text(struct descriptor_data *d, const char *text)
+{
+  write_to_output(d, "%s", text ? text : "");
+}
+
+extern "C" void desc_send_textf(struct descriptor_data *d, const char *format, ...)
+{
+  va_list args;
+
+  va_start(args, format);
+  vwrite_to_output(d, format ? format : "", args);
+  va_end(args);
+}
+
 #define COLOR_ON(ch) (COLOR_LEV(ch) > 0)
 
 /* Color replacement arrays. Orig. Renx -- 011100, now modified */

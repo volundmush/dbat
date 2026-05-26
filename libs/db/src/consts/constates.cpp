@@ -76,5 +76,6 @@ const char *connected_types[NUM_CON_TYPES+1] = {
   "Skills Menu",
   "User Title",
   "Genome Selection",
+  "Lua REPL",
   "\n"
 };

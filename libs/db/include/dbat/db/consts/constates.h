@@ -78,8 +78,9 @@ extern "C" {
 #define CON_SKILLS       70
 #define CON_USER_TITLE   71
 #define CON_GENOME       72
+#define CON_LUA          73
 
-#define NUM_CON_TYPES 73
+#define NUM_CON_TYPES 74
 
 extern const char *connected_types[NUM_CON_TYPES+1];
 

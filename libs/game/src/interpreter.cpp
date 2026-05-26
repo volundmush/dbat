@@ -27,6 +27,7 @@
 #include "dbat/game/assedit.h"
 #include "dbat/game/guild.h"
 #include "dbat/db/bans.h"
+#include "dbat/db/lua.h"
 #include "dbat/game/ban.h"
 #include "dbat/db/players.h"
 #include "dbat/game/obj_edit.h"
@@ -4886,6 +4887,10 @@ void nanny(struct descriptor_data *d, char *arg)
     gedit_parse(d, arg);
     break;
 
+  case CON_LUA:
+    lua_repl_parse(d, arg);
+    break;
+
   default:
     log("SYSERR: Nanny: illegal state of con'ness (%d) for '%s'; closing connection.",
 	STATE(d), d->character ? GET_NAME(d->character) : "<unknown>");
@@ -4893,5 +4898,4 @@ void nanny(struct descriptor_data *d, char *arg)
     break;
   }
 }
-
 

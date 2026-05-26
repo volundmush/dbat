@@ -1,0 +1,506 @@
+const std = @import("std");
+const zlua = @import("zlua");
+const cdb = @import("cdb");
+const characters_lua = @import("characters_lua.zig");
+const objects_lua = @import("objects_lua.zig");
+const rooms_lua = @import("rooms_lua.zig");
+const zones_lua = @import("zones_lua.zig");
+const shops_lua = @import("shops_lua.zig");
+const guilds_lua = @import("guilds_lua.zig");
+
+const Lua = zlua.Lua;
+
+const LuaRepl = struct {
+    descriptor: *cdb.descriptor_data,
+    env_ref: i32,
+};
+
+const lua_root = "lua";
+const categories = [_][]const u8{
+    "commands",
+    "derived",
+    "modifiers",
+    "ocommands",
+    "races",
+    "senseis",
+    "skills",
+    "stats",
+    "transformations",
+};
+
+const bootstrap: [:0]const u8 =
+    \\local dbat = require("dbat")
+    \\dbat.registry = dbat.registry or {}
+    \\
+    \\function dbat._register(category, slug, path, value)
+    \\  if value == nil then
+    \\    error(path .. " returned nil")
+    \\  end
+    \\
+    \\  local bucket = dbat.registry[category]
+    \\  if bucket == nil then
+    \\    bucket = {}
+    \\    dbat.registry[category] = bucket
+    \\  end
+    \\
+    \\  if type(value) == "table" then
+    \\    value.id = value.id or slug
+    \\    value._path = value._path or path
+    \\    value._category = value._category or category
+    \\  end
+    \\
+    \\  if bucket[slug] ~= nil then
+    \\    error("duplicate lua entry: " .. category .. "/" .. slug)
+    \\  end
+    \\
+    \\  bucket[slug] = value
+    \\  return value
+    \\end
+    \\
+    \\function dbat.get(category, slug)
+    \\  local bucket = dbat.registry[category]
+    \\  if bucket == nil then return nil end
+    \\  return bucket[slug]
+    \\end
+    \\
+    \\function dbat.category(category)
+    \\  return dbat.registry[category] or {}
+    \\end
+    \\
+    \\function dbat._values(list)
+    \\  local index = 0
+    \\  return function()
+    \\    index = index + 1
+    \\    return list[index]
+    \\  end
+    \\end
+;
+
+var allocator: std.mem.Allocator = undefined;
+var io: std.Io = undefined;
+var lua_state: ?*Lua = null;
+var initialized = false;
+var loaded_entries: usize = 0;
+var active_repl: ?*LuaRepl = null;
+
+pub fn init(alloc: std.mem.Allocator, runtime_io: std.Io) !void {
+    allocator = alloc;
+    io = runtime_io;
+    lua_state = try Lua.init(alloc);
+    initialized = true;
+
+    const lua = lua_state.?;
+    configureStandardLibraries(lua);
+    registerReplPrint(lua);
+    registerDbatModule(lua);
+    try lua.doString(bootstrap);
+}
+
+pub fn deinit() void {
+    if (!initialized) return;
+    lua_state.?.deinit();
+    lua_state = null;
+    initialized = false;
+    loaded_entries = 0;
+}
+
+pub fn state() *Lua {
+    return lua_state.?;
+}
+
+pub fn load_lua() !void {
+    loaded_entries = 0;
+    inline for (categories) |category| {
+        try loadCategory(category);
+    }
+    std.log.info("loaded {} Lua entries", .{loaded_entries});
+}
+
+pub fn loadedCount() usize {
+    return loaded_entries;
+}
+
+pub fn pushThing(category: []const u8, slug: []const u8) !bool {
+    const lua = lua_state.?;
+    const top = lua.getTop();
+    errdefer lua.setTop(top);
+
+    const category_z = try allocator.dupeZ(u8, category);
+    defer allocator.free(category_z);
+    const slug_z = try allocator.dupeZ(u8, slug);
+    defer allocator.free(slug_z);
+
+    if (lua.getGlobal("dbat") != .table) {
+        lua.setTop(top);
+        return false;
+    }
+    if (lua.getField(-1, "registry") != .table) {
+        lua.setTop(top);
+        return false;
+    }
+    if (lua.getField(-1, category_z) != .table) {
+        lua.setTop(top);
+        return false;
+    }
+    if (lua.getField(-1, slug_z) == .nil) {
+        lua.setTop(top);
+        return false;
+    }
+
+    lua.remove(-2); // category table
+    lua.remove(-2); // registry table
+    lua.remove(-2); // dbat table
+    return true;
+}
+
+pub fn pop(count: i32) void {
+    lua_state.?.pop(count);
+}
+
+fn configureStandardLibraries(lua: *Lua) void {
+    lua.openLibs();
+
+    // Sandbox levers for later. Uncomment these to remove broad standard-library access.
+    // lua.pushNil(); lua.setGlobal("io");
+    // lua.pushNil(); lua.setGlobal("os");
+    // lua.pushNil(); lua.setGlobal("debug");
+    // lua.pushNil(); lua.setGlobal("package");
+    // lua.pushNil(); lua.setGlobal("load");
+    // lua.pushNil(); lua.setGlobal("dofile");
+    // lua.pushNil(); lua.setGlobal("require");
+}
+
+fn registerReplPrint(lua: *Lua) void {
+    lua.pushFunction(zlua.wrap(luaReplPrint));
+    lua.setGlobal("print");
+}
+
+fn registerDbatModule(lua: *Lua) void {
+    lua.requireF("dbat", zlua.wrap(openDbat), true);
+    lua.pop(1);
+}
+
+fn openDbat(lua: *Lua) i32 {
+    lua.newTable();
+
+    lua.newTable();
+    lua.setField(-2, "registry");
+
+    characters_lua.register(lua);
+    objects_lua.register(lua);
+    rooms_lua.register(lua);
+    zones_lua.register(lua);
+    shops_lua.register(lua);
+    guilds_lua.register(lua);
+
+    lua.pushFunction(zlua.wrap(luaLog));
+    lua.setField(-2, "log");
+
+    return 1;
+}
+
+fn luaLog(lua: *Lua) i32 {
+    const message = lua.toString(1) catch "";
+    std.log.info("lua: {s}", .{message});
+    return 0;
+}
+
+fn luaReplPrint(lua: *Lua) i32 {
+    const repl = active_repl orelse {
+        logPrintArguments(lua);
+        return 0;
+    };
+
+    const top = lua.getTop();
+    var i: i32 = 1;
+    while (i <= top) : (i += 1) {
+        if (i > 1) cdb.desc_send_text(repl.descriptor, "\t");
+        sendLuaValue(repl.descriptor, lua, i);
+    }
+    cdb.desc_send_text(repl.descriptor, "\r\n");
+    return 0;
+}
+
+fn logPrintArguments(lua: *Lua) void {
+    const top = lua.getTop();
+    var i: i32 = 1;
+    while (i <= top) : (i += 1) {
+        const text = lua.toStringEx(i);
+        std.log.info("lua: {s}", .{text});
+        lua.pop(1);
+    }
+}
+
+fn loadCategory(comptime category: []const u8) !void {
+    const dir_path = try std.fmt.allocPrint(allocator, "{s}/{s}", .{ lua_root, category });
+    defer allocator.free(dir_path);
+
+    var dir = std.Io.Dir.cwd().openDir(io, dir_path, .{ .iterate = true }) catch |err| switch (err) {
+        error.FileNotFound => return,
+        else => return err,
+    };
+    defer dir.close(io);
+
+    var iter = dir.iterate();
+    while (try iter.next(io)) |entry| {
+        if (entry.kind != .file) continue;
+        if (!std.mem.endsWith(u8, entry.name, ".lua")) continue;
+
+        const slug = entry.name[0 .. entry.name.len - ".lua".len];
+        const path = try std.fmt.allocPrint(allocator, "{s}/{s}", .{ dir_path, entry.name });
+        defer allocator.free(path);
+
+        try loadThing(category, slug, path);
+    }
+}
+
+fn loadThing(category: []const u8, slug: []const u8, path: []const u8) !void {
+    const lua = lua_state.?;
+    lua.setTop(0);
+    errdefer lua.setTop(0);
+
+    const path_z = try allocator.dupeZ(u8, path);
+    defer allocator.free(path_z);
+
+    switch (zlua.lang) {
+        .lua51, .luajit => try lua.loadFile(path_z),
+        else => try lua.loadFile(path_z, .text),
+    }
+
+    lua.protectedCall(.{ .results = 1 }) catch |err| {
+        reportLuaError(path, err);
+        return err;
+    };
+
+    try registerReturnedValue(category, slug, path);
+    loaded_entries += 1;
+    lua.setTop(0);
+}
+
+fn registerReturnedValue(category: []const u8, slug: []const u8, path: []const u8) !void {
+    const lua = lua_state.?;
+
+    const category_z = try allocator.dupeZ(u8, category);
+    defer allocator.free(category_z);
+    const slug_z = try allocator.dupeZ(u8, slug);
+    defer allocator.free(slug_z);
+    const path_z = try allocator.dupeZ(u8, path);
+    defer allocator.free(path_z);
+
+    _ = lua.getGlobal("dbat");
+    _ = lua.getField(-1, "_register");
+    lua.remove(-2);
+    _ = lua.pushString(category_z);
+    _ = lua.pushString(slug_z);
+    _ = lua.pushString(path_z);
+    lua.pushValue(1);
+
+    lua.protectedCall(.{ .args = 4, .results = 0 }) catch |err| {
+        reportLuaError(path, err);
+        return err;
+    };
+}
+
+fn reportLuaError(path: []const u8, err: anyerror) void {
+    const lua = lua_state.?;
+    const message = lua.toString(-1) catch @errorName(err);
+    std.log.err("Lua error in {s}: {s}", .{ path, message });
+}
+
+pub export fn lua_repl_launch(d: *cdb.descriptor_data) void {
+    if (d.lua_repl == null) {
+        d.lua_repl = createRepl(d) orelse return;
+    }
+
+    d.connected = cdb.CON_LUA;
+    cdb.desc_send_text(d, "@GLua REPL@n started. Type @Yexit@n, @Yquit@n, or @Yclose@n to return to normal play.\r\n");
+    cdb.desc_send_text(d, "@c> @n");
+}
+
+pub export fn lua_repl_close(d: *cdb.descriptor_data) void {
+    if (active_repl != null and active_repl.?.descriptor == d) active_repl = null;
+    if (d.lua_repl) |ptr| {
+        const repl: *LuaRepl = @ptrCast(@alignCast(ptr));
+        lua_state.?.unref(zlua.registry_index, repl.env_ref);
+        allocator.destroy(repl);
+        d.lua_repl = null;
+    }
+    d.connected = cdb.CON_PLAYING;
+    cdb.desc_send_text(d, "Lua REPL closed.\r\n");
+}
+
+pub export fn lua_repl_parse(d: *cdb.descriptor_data, arg: [*:0]const u8) void {
+    const line = std.mem.trim(u8, std.mem.span(arg), " \t\r\n");
+    if (line.len == 0) {
+        cdb.desc_send_text(d, "@c> @n");
+        return;
+    }
+
+    if (isReplExit(line)) {
+        lua_repl_close(d);
+        return;
+    }
+
+    const repl = ensureRepl(d) orelse return;
+    active_repl = repl;
+    defer active_repl = null;
+
+    cdb.desc_send_text(d, "< ");
+    cdb.desc_send_text(d, line.ptr);
+    cdb.desc_send_text(d, "\r\n");
+    evalReplLine(d, line);
+    cdb.desc_send_text(d, "@c> @n");
+}
+
+fn ensureRepl(d: *cdb.descriptor_data) ?*LuaRepl {
+    if (d.lua_repl) |ptr| return @ptrCast(@alignCast(ptr));
+
+    const repl = createRepl(d) orelse return null;
+    d.lua_repl = repl;
+    return repl;
+}
+
+fn createRepl(d: *cdb.descriptor_data) ?*LuaRepl {
+    const lua = lua_state orelse {
+        cdb.desc_send_text(d, "Lua is not initialized.\r\n");
+        return null;
+    };
+
+    const env_ref = createReplEnv(d, lua) orelse return null;
+    errdefer lua.unref(zlua.registry_index, env_ref);
+
+    const repl = allocator.create(LuaRepl) catch {
+        cdb.desc_send_text(d, "Unable to start Lua REPL.\r\n");
+        return null;
+    };
+    repl.* = .{ .descriptor = d, .env_ref = env_ref };
+    return repl;
+}
+
+fn createReplEnv(d: *cdb.descriptor_data, lua: *Lua) ?i32 {
+    const top = lua.getTop();
+    defer lua.setTop(top);
+
+    lua.newTable();
+    lua.newTable();
+    lua.pushGlobalTable();
+    lua.setField(-2, "__index");
+    lua.setMetatable(-2);
+
+    if (d.character != null) {
+        characters_lua.pushCharacter(lua, cdb.char_id_get(d.character));
+        lua.setField(-2, "me");
+    }
+
+    return lua.ref(zlua.registry_index);
+}
+
+fn isReplExit(line: []const u8) bool {
+    return std.ascii.eqlIgnoreCase(line, "exit") or
+        std.ascii.eqlIgnoreCase(line, "quit") or
+        std.ascii.eqlIgnoreCase(line, "close");
+}
+
+fn evalReplLine(d: *cdb.descriptor_data, line: []const u8) void {
+    const lua = lua_state orelse {
+        cdb.desc_send_text(d, "Lua is not initialized.\r\n");
+        return;
+    };
+    const repl = ensureRepl(d) orelse return;
+
+    const top = lua.getTop();
+    defer lua.setTop(top);
+
+    if (tryEvalExpression(d, lua, repl, line)) return;
+    evalStatement(d, lua, repl, line);
+}
+
+fn tryEvalExpression(d: *cdb.descriptor_data, lua: *Lua, repl: *LuaRepl, line: []const u8) bool {
+    const expr = std.fmt.allocPrint(allocator, "return {s}", .{line}) catch {
+        cdb.desc_send_text(d, "Out of memory.\r\n");
+        return true;
+    };
+    defer allocator.free(expr);
+    const expr_z = allocator.dupeZ(u8, expr) catch {
+        cdb.desc_send_text(d, "Out of memory.\r\n");
+        return true;
+    };
+    defer allocator.free(expr_z);
+
+    const top = lua.getTop();
+    lua.loadString(expr_z) catch {
+        lua.setTop(top);
+        return false;
+    };
+    setChunkEnv(lua, repl) catch {
+        cdb.desc_send_text(d, "Unable to bind REPL environment.\r\n");
+        lua.setTop(top);
+        return true;
+    };
+
+    lua.protectedCall(.{ .results = zlua.mult_return }) catch |err| {
+        sendLuaError(d, lua, err);
+        lua.setTop(top);
+        return true;
+    };
+
+    sendLuaResults(d, lua, top);
+    return true;
+}
+
+fn evalStatement(d: *cdb.descriptor_data, lua: *Lua, repl: *LuaRepl, line: []const u8) void {
+    const chunk = allocator.dupeZ(u8, line) catch {
+        cdb.desc_send_text(d, "Out of memory.\r\n");
+        return;
+    };
+    defer allocator.free(chunk);
+
+    const top = lua.getTop();
+    lua.loadString(chunk) catch |err| {
+        sendLuaError(d, lua, err);
+        lua.setTop(top);
+        return;
+    };
+    setChunkEnv(lua, repl) catch {
+        cdb.desc_send_text(d, "Unable to bind REPL environment.\r\n");
+        lua.setTop(top);
+        return;
+    };
+
+    lua.protectedCall(.{ .results = zlua.mult_return }) catch |err| {
+        sendLuaError(d, lua, err);
+        lua.setTop(top);
+        return;
+    };
+
+    sendLuaResults(d, lua, top);
+}
+
+fn setChunkEnv(lua: *Lua, repl: *LuaRepl) !void {
+    _ = lua.getIndexRaw(zlua.registry_index, repl.env_ref);
+    _ = try lua.setUpvalue(-2, 1);
+}
+
+fn sendLuaResults(d: *cdb.descriptor_data, lua: *Lua, previous_top: i32) void {
+    const result_count = lua.getTop() - previous_top;
+    if (result_count <= 0) return;
+
+    var i: i32 = previous_top + 1;
+    while (i <= lua.getTop()) : (i += 1) {
+        sendLuaValue(d, lua, i);
+        cdb.desc_send_text(d, "\r\n");
+    }
+}
+
+fn sendLuaValue(d: *cdb.descriptor_data, lua: *Lua, index: i32) void {
+    const text = lua.toStringEx(index);
+    cdb.desc_send_text(d, text.ptr);
+    lua.pop(1);
+}
+
+fn sendLuaError(d: *cdb.descriptor_data, lua: *Lua, err: anyerror) void {
+    cdb.desc_send_text(d, "@RLua error:@n ");
+    const message = lua.toString(-1) catch @errorName(err);
+    cdb.desc_send_text(d, message.ptr);
+    cdb.desc_send_text(d, "\r\n");
+}
