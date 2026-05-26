@@ -97,7 +97,7 @@ struct descriptor_data {
 };
 
 void desc_send_text(struct descriptor_data *d, const char *text);
-void desc_send_textf(struct descriptor_data *d, const char *format, ...);
+void desc_send_textf(struct descriptor_data *d, const char *format, ...) __attribute__((format(printf, 2, 3)));
 
 extern struct descriptor_data *descriptor_list;
 

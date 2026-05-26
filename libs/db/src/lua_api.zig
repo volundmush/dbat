@@ -10,6 +10,11 @@ const guilds_lua = @import("guilds_lua.zig");
 
 const Lua = zlua.Lua;
 
+const LuaRepl = struct {
+    descriptor: *cdb.descriptor_data,
+    env_ref: i32,
+};
+
 const lua_root = "lua";
 const categories = [_][]const u8{
     "commands",
@@ -76,6 +81,7 @@ var io: std.Io = undefined;
 var lua_state: ?*Lua = null;
 var initialized = false;
 var loaded_entries: usize = 0;
+var active_repl: ?*LuaRepl = null;
 
 pub fn init(alloc: std.mem.Allocator, runtime_io: std.Io) !void {
     allocator = alloc;
@@ -85,6 +91,7 @@ pub fn init(alloc: std.mem.Allocator, runtime_io: std.Io) !void {
 
     const lua = lua_state.?;
     configureStandardLibraries(lua);
+    registerReplPrint(lua);
     registerDbatModule(lua);
     try lua.doString(bootstrap);
 }
@@ -163,6 +170,11 @@ fn configureStandardLibraries(lua: *Lua) void {
     // lua.pushNil(); lua.setGlobal("require");
 }
 
+fn registerReplPrint(lua: *Lua) void {
+    lua.pushFunction(zlua.wrap(luaReplPrint));
+    lua.setGlobal("print");
+}
+
 fn registerDbatModule(lua: *Lua) void {
     lua.requireF("dbat", zlua.wrap(openDbat), true);
     lua.pop(1);
@@ -191,6 +203,32 @@ fn luaLog(lua: *Lua) i32 {
     const message = lua.toString(1) catch "";
     std.log.info("lua: {s}", .{message});
     return 0;
+}
+
+fn luaReplPrint(lua: *Lua) i32 {
+    const repl = active_repl orelse {
+        logPrintArguments(lua);
+        return 0;
+    };
+
+    const top = lua.getTop();
+    var i: i32 = 1;
+    while (i <= top) : (i += 1) {
+        if (i > 1) cdb.desc_send_text(repl.descriptor, "\t");
+        sendLuaValue(repl.descriptor, lua, i);
+    }
+    cdb.desc_send_text(repl.descriptor, "\r\n");
+    return 0;
+}
+
+fn logPrintArguments(lua: *Lua) void {
+    const top = lua.getTop();
+    var i: i32 = 1;
+    while (i <= top) : (i += 1) {
+        const text = lua.toStringEx(i);
+        std.log.info("lua: {s}", .{text});
+        lua.pop(1);
+    }
 }
 
 fn loadCategory(comptime category: []const u8) !void {
@@ -269,8 +307,200 @@ fn reportLuaError(path: []const u8, err: anyerror) void {
     std.log.err("Lua error in {s}: {s}", .{ path, message });
 }
 
-pub export fn lua_repl_launch(d: *cdb.descriptor_data) void {}
+pub export fn lua_repl_launch(d: *cdb.descriptor_data) void {
+    if (d.lua_repl == null) {
+        d.lua_repl = createRepl(d) orelse return;
+    }
 
-pub export fn lua_repl_close(d: *cdb.descriptor_data) void {}
+    d.connected = cdb.CON_LUA;
+    cdb.desc_send_text(d, "@GLua REPL@n started. Type @Yexit@n, @Yquit@n, or @Yclose@n to return to normal play.\r\n");
+    cdb.desc_send_text(d, "@c> @n");
+}
 
-pub export fn lua_repl_parse(d: *cdb.descriptor_data, arg: [*:0]const u8) void {}
+pub export fn lua_repl_close(d: *cdb.descriptor_data) void {
+    if (active_repl != null and active_repl.?.descriptor == d) active_repl = null;
+    if (d.lua_repl) |ptr| {
+        const repl: *LuaRepl = @ptrCast(@alignCast(ptr));
+        lua_state.?.unref(zlua.registry_index, repl.env_ref);
+        allocator.destroy(repl);
+        d.lua_repl = null;
+    }
+    d.connected = cdb.CON_PLAYING;
+    cdb.desc_send_text(d, "Lua REPL closed.\r\n");
+}
+
+pub export fn lua_repl_parse(d: *cdb.descriptor_data, arg: [*:0]const u8) void {
+    const line = std.mem.trim(u8, std.mem.span(arg), " \t\r\n");
+    if (line.len == 0) {
+        cdb.desc_send_text(d, "@c> @n");
+        return;
+    }
+
+    if (isReplExit(line)) {
+        lua_repl_close(d);
+        return;
+    }
+
+    const repl = ensureRepl(d) orelse return;
+    active_repl = repl;
+    defer active_repl = null;
+
+    cdb.desc_send_text(d, "< ");
+    cdb.desc_send_text(d, line.ptr);
+    cdb.desc_send_text(d, "\r\n");
+    evalReplLine(d, line);
+    cdb.desc_send_text(d, "@c> @n");
+}
+
+fn ensureRepl(d: *cdb.descriptor_data) ?*LuaRepl {
+    if (d.lua_repl) |ptr| return @ptrCast(@alignCast(ptr));
+
+    const repl = createRepl(d) orelse return null;
+    d.lua_repl = repl;
+    return repl;
+}
+
+fn createRepl(d: *cdb.descriptor_data) ?*LuaRepl {
+    const lua = lua_state orelse {
+        cdb.desc_send_text(d, "Lua is not initialized.\r\n");
+        return null;
+    };
+
+    const env_ref = createReplEnv(d, lua) orelse return null;
+    errdefer lua.unref(zlua.registry_index, env_ref);
+
+    const repl = allocator.create(LuaRepl) catch {
+        cdb.desc_send_text(d, "Unable to start Lua REPL.\r\n");
+        return null;
+    };
+    repl.* = .{ .descriptor = d, .env_ref = env_ref };
+    return repl;
+}
+
+fn createReplEnv(d: *cdb.descriptor_data, lua: *Lua) ?i32 {
+    const top = lua.getTop();
+    defer lua.setTop(top);
+
+    lua.newTable();
+    lua.newTable();
+    lua.pushGlobalTable();
+    lua.setField(-2, "__index");
+    lua.setMetatable(-2);
+
+    if (d.character != null) {
+        characters_lua.pushCharacter(lua, cdb.char_id_get(d.character));
+        lua.setField(-2, "me");
+    }
+
+    return lua.ref(zlua.registry_index);
+}
+
+fn isReplExit(line: []const u8) bool {
+    return std.ascii.eqlIgnoreCase(line, "exit") or
+        std.ascii.eqlIgnoreCase(line, "quit") or
+        std.ascii.eqlIgnoreCase(line, "close");
+}
+
+fn evalReplLine(d: *cdb.descriptor_data, line: []const u8) void {
+    const lua = lua_state orelse {
+        cdb.desc_send_text(d, "Lua is not initialized.\r\n");
+        return;
+    };
+    const repl = ensureRepl(d) orelse return;
+
+    const top = lua.getTop();
+    defer lua.setTop(top);
+
+    if (tryEvalExpression(d, lua, repl, line)) return;
+    evalStatement(d, lua, repl, line);
+}
+
+fn tryEvalExpression(d: *cdb.descriptor_data, lua: *Lua, repl: *LuaRepl, line: []const u8) bool {
+    const expr = std.fmt.allocPrint(allocator, "return {s}", .{line}) catch {
+        cdb.desc_send_text(d, "Out of memory.\r\n");
+        return true;
+    };
+    defer allocator.free(expr);
+    const expr_z = allocator.dupeZ(u8, expr) catch {
+        cdb.desc_send_text(d, "Out of memory.\r\n");
+        return true;
+    };
+    defer allocator.free(expr_z);
+
+    const top = lua.getTop();
+    lua.loadString(expr_z) catch {
+        lua.setTop(top);
+        return false;
+    };
+    setChunkEnv(lua, repl) catch {
+        cdb.desc_send_text(d, "Unable to bind REPL environment.\r\n");
+        lua.setTop(top);
+        return true;
+    };
+
+    lua.protectedCall(.{ .results = zlua.mult_return }) catch |err| {
+        sendLuaError(d, lua, err);
+        lua.setTop(top);
+        return true;
+    };
+
+    sendLuaResults(d, lua, top);
+    return true;
+}
+
+fn evalStatement(d: *cdb.descriptor_data, lua: *Lua, repl: *LuaRepl, line: []const u8) void {
+    const chunk = allocator.dupeZ(u8, line) catch {
+        cdb.desc_send_text(d, "Out of memory.\r\n");
+        return;
+    };
+    defer allocator.free(chunk);
+
+    const top = lua.getTop();
+    lua.loadString(chunk) catch |err| {
+        sendLuaError(d, lua, err);
+        lua.setTop(top);
+        return;
+    };
+    setChunkEnv(lua, repl) catch {
+        cdb.desc_send_text(d, "Unable to bind REPL environment.\r\n");
+        lua.setTop(top);
+        return;
+    };
+
+    lua.protectedCall(.{ .results = zlua.mult_return }) catch |err| {
+        sendLuaError(d, lua, err);
+        lua.setTop(top);
+        return;
+    };
+
+    sendLuaResults(d, lua, top);
+}
+
+fn setChunkEnv(lua: *Lua, repl: *LuaRepl) !void {
+    _ = lua.getIndexRaw(zlua.registry_index, repl.env_ref);
+    _ = try lua.setUpvalue(-2, 1);
+}
+
+fn sendLuaResults(d: *cdb.descriptor_data, lua: *Lua, previous_top: i32) void {
+    const result_count = lua.getTop() - previous_top;
+    if (result_count <= 0) return;
+
+    var i: i32 = previous_top + 1;
+    while (i <= lua.getTop()) : (i += 1) {
+        sendLuaValue(d, lua, i);
+        cdb.desc_send_text(d, "\r\n");
+    }
+}
+
+fn sendLuaValue(d: *cdb.descriptor_data, lua: *Lua, index: i32) void {
+    const text = lua.toStringEx(index);
+    cdb.desc_send_text(d, text.ptr);
+    lua.pop(1);
+}
+
+fn sendLuaError(d: *cdb.descriptor_data, lua: *Lua, err: anyerror) void {
+    cdb.desc_send_text(d, "@RLua error:@n ");
+    const message = lua.toString(-1) catch @errorName(err);
+    cdb.desc_send_text(d, message.ptr);
+    cdb.desc_send_text(d, "\r\n");
+}

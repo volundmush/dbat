@@ -27,6 +27,7 @@
 #include "dbat/game/assedit.h"
 #include "dbat/game/guild.h"
 #include "dbat/db/bans.h"
+#include "dbat/db/lua.h"
 #include "dbat/game/ban.h"
 #include "dbat/db/players.h"
 #include "dbat/game/obj_edit.h"
@@ -4897,5 +4898,4 @@ void nanny(struct descriptor_data *d, char *arg)
     break;
   }
 }
-
 
