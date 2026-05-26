@@ -123,6 +123,9 @@ int room_geffect_get(struct room_data *room);
 void room_geffect_mod(struct room_data *room, int delta);
 void room_geffect_set(struct room_data *room, int geffect);
 
+void room_send_text(struct room_data *room, const char *text);
+void room_send_textf(struct room_data *room, const char *format, ...);
+
 // Return true to continue iteration. Return false to stop.
 
 struct room_direction_data *room_dir_option_get(struct room_data *room, int dir);

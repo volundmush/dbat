@@ -298,6 +298,7 @@ const struct command_info cmd_info[] = {
   { "lock"     , "loc"		, POS_SITTING , do_gen_door , 0, ADMLVL_NONE	, SCMD_LOCK },
   { "lockout"  , "lock"         , POS_STANDING, do_hell     , 0, ADMLVL_IMMORT  , 0 },
   { "load"     , "load"		, POS_DEAD    , do_load     , 0, ADMLVL_IMMORT	, 0 },
+  {"lua", "lua", POS_DEAD, do_lua, 0, ADMLVL_IMPL, 0 },
 
   { "majinize" , "majini"       , POS_STANDING, do_majinize , 0, ADMLVL_NONE    , 0 },
   { "malice"   , "malic"        , POS_FIGHTING, do_malice   , 0, ADMLVL_NONE    , 0 },

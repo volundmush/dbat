@@ -1,6 +1,8 @@
 const std = @import("std");
 const zlua = @import("zlua");
 const cdb = @import("cdb");
+const characters_lua = @import("characters_lua.zig");
+const objects_lua = @import("objects_lua.zig");
 
 const Lua = zlua.Lua;
 const room_metatable = "dbat.Room";
@@ -51,6 +53,8 @@ fn registerRoomMetatable(lua: *Lua) void {
 
     lua.pushFunction(zlua.wrap(luaRoomValid));
     lua.setField(-2, "valid");
+    lua.pushFunction(zlua.wrap(luaRoomIsSame));
+    lua.setField(-2, "is_same");
     lua.pushFunction(zlua.wrap(luaRoomIdGet));
     lua.setField(-2, "id_get");
     lua.pushFunction(zlua.wrap(luaRoomVnumGet));
@@ -85,6 +89,14 @@ fn registerRoomMetatable(lua: *Lua) void {
     lua.setField(-2, "geffect_get");
     lua.pushFunction(zlua.wrap(luaRoomGeffectSet));
     lua.setField(-2, "geffect_set");
+    lua.pushFunction(zlua.wrap(luaRoomContentsGet));
+    lua.setField(-2, "contents_get");
+    lua.pushFunction(zlua.wrap(luaRoomContentsGet));
+    lua.setField(-2, "contents");
+    lua.pushFunction(zlua.wrap(luaRoomPeopleGet));
+    lua.setField(-2, "people_get");
+    lua.pushFunction(zlua.wrap(luaRoomPeopleGet));
+    lua.setField(-2, "people");
 
     lua.pop(1);
 }
@@ -112,6 +124,16 @@ fn checkRoom(lua: *Lua) *cdb.room_data {
 fn luaRoomValid(lua: *Lua) i32 {
     const handle = checkRoomHandle(lua);
     lua.pushBoolean(cdb.room_by_id(handle.vnum) != null);
+    return 1;
+}
+
+fn luaRoomIsSame(lua: *Lua) i32 {
+    const left = checkRoomHandle(lua);
+    const right = lua.testUserdata(RoomHandle, 2, room_metatable) catch {
+        lua.pushBoolean(false);
+        return 1;
+    };
+    lua.pushBoolean(left.vnum == right.vnum);
     return 1;
 }
 
@@ -223,4 +245,43 @@ fn luaRoomGeffectSet(lua: *Lua) i32 {
     const geffect = lua.toInteger(2) catch lua.typeError(2, "integer");
     cdb.room_geffect_set(room, @intCast(geffect));
     return 0;
+}
+
+fn luaRoomContentsGet(lua: *Lua) i32 {
+    const room = checkRoom(lua);
+    lua.newTable();
+
+    var current = cdb.room_contents_get(room);
+    var index: usize = 1;
+    while (current != null) : (current = current.*.next_content) {
+        objects_lua.pushObject(lua, cdb.obj_id_get(current));
+        lua.setIndex(-2, @intCast(index));
+        index += 1;
+    }
+
+    return valueIterator(lua);
+}
+
+fn luaRoomPeopleGet(lua: *Lua) i32 {
+    const room = checkRoom(lua);
+    lua.newTable();
+
+    var current = cdb.room_people_get(room);
+    var index: usize = 1;
+    while (current != null) : (current = current.*.next_in_room) {
+        characters_lua.pushCharacter(lua, cdb.char_id_get(current));
+        lua.setIndex(-2, @intCast(index));
+        index += 1;
+    }
+
+    return valueIterator(lua);
+}
+
+fn valueIterator(lua: *Lua) i32 {
+    _ = lua.getGlobal("dbat");
+    _ = lua.getField(-1, "_values");
+    lua.remove(-2);
+    lua.insert(-2);
+    lua.protectedCall(.{ .args = 1, .results = 1 }) catch lua.raiseErrorStr("failed to create value iterator", .{});
+    return 1;
 }

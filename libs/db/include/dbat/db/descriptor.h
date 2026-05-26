@@ -92,8 +92,12 @@ struct descriptor_data {
    int customfile;
    char *title;
    int rbank;
+   // Lua stuff
+   void *lua_repl;
 };
 
+void desc_send_text(struct descriptor_data *d, const char *text);
+void desc_send_textf(struct descriptor_data *d, const char *format, ...);
 
 extern struct descriptor_data *descriptor_list;
 
