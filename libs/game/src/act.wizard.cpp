@@ -10,6 +10,7 @@
 #include "dbat/game/act.wizard.h"
 #include "dbat/db/consts/maximums.h"
 #include "dbat/db/players.h"
+#include "dbat/db/lua.h"
 #include "dbat/game/utils.h"
 
 #include <unistd.h>
@@ -5503,4 +5504,9 @@ ACMD(do_boom)
   }
 
   send_to_outdoor("%s shakes the world with a mighty boom!\r\n", GET_NAME(ch));
+}
+
+
+ACMD(do_lua) {
+  lua_repl_launch(ch->desc);
 }

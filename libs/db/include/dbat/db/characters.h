@@ -614,6 +614,8 @@ size_t char_equipment_count(struct char_data *ch, bool recursive);
 struct obj_data *char_inventory_get(struct char_data *ch, size_t pos);
 struct obj_data *char_equipment_get(struct char_data *ch, size_t pos);
 
+void char_send_text(struct char_data *ch, const char *text);
+void char_send_textf(struct char_data *ch, const char *format, ...);
 
 // Character API stuff that makes use of the new Lua API.
 void char_zig_free(struct char_data *ch);

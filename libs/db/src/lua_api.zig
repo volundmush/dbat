@@ -1,5 +1,6 @@
 const std = @import("std");
 const zlua = @import("zlua");
+const cdb = @import("cdb");
 const characters_lua = @import("characters_lua.zig");
 const objects_lua = @import("objects_lua.zig");
 const rooms_lua = @import("rooms_lua.zig");
@@ -59,6 +60,14 @@ const bootstrap: [:0]const u8 =
     \\
     \\function dbat.category(category)
     \\  return dbat.registry[category] or {}
+    \\end
+    \\
+    \\function dbat._values(list)
+    \\  local index = 0
+    \\  return function()
+    \\    index = index + 1
+    \\    return list[index]
+    \\  end
     \\end
 ;
 
@@ -259,3 +268,9 @@ fn reportLuaError(path: []const u8, err: anyerror) void {
     const message = lua.toString(-1) catch @errorName(err);
     std.log.err("Lua error in {s}: {s}", .{ path, message });
 }
+
+pub export fn lua_repl_launch(d: *cdb.descriptor_data) void {}
+
+pub export fn lua_repl_close(d: *cdb.descriptor_data) void {}
+
+pub export fn lua_repl_parse(d: *cdb.descriptor_data, arg: [*:0]const u8) void {}
