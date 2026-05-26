@@ -2026,14 +2026,6 @@ static void point_update_characters(void)
           act("$n pukes up blood and falls down dead!", TRUE, i, 0, 0, TO_ROOM);
           if (i->poisonby)
           {
-            if (AFF_FLAGGED(i->poisonby, AFF_GROUP))
-            {
-              group_gain(i->poisonby, i);
-            }
-            else
-            {
-              solo_gain(i->poisonby, i);
-            }
             die(i, i->poisonby);
           }
           else

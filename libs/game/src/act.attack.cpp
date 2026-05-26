@@ -1322,12 +1322,6 @@ ACMD(do_zen)
        GET_DEATH_TYPE(vict) = DTYPE_HEAD;
        remove_limb(vict, 0);
        die(vict, ch);
-       if (AFF_FLAGGED(ch, AFF_GROUP)) {
-        group_gain(ch, vict);
-       }
-       else {
-        solo_gain(ch, vict);
-       }
        if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOGOLD)) {
         do_get(ch, "all.zenni corpse", 0, 0);
        }
@@ -1349,12 +1343,6 @@ ACMD(do_zen)
        act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
        GET_DEATH_TYPE(vict) = DTYPE_HEAD;
        die(vict, ch);
-       if (AFF_FLAGGED(ch, AFF_GROUP)) {
-        group_gain(ch, vict);
-       }
-       else {
-        solo_gain(ch, vict);
-       }
        if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOGOLD)) {
         do_get(ch, "all.zenni corpse", 0, 0);
        }
