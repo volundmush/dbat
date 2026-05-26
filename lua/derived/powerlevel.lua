@@ -1,5 +1,5 @@
 return {
     id = "powerlevel",
     name = "Power Level",
-    derived = "powerlevel",
+    min_value = 1,
 }
