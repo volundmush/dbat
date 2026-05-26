@@ -65,7 +65,10 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
         .link_libcpp = true,
         .root_source_file = b.path("libs/db/src/root.zig"),
-        .imports = &.{.{ .name = "cdb", .module = mod_cdb }},
+        .imports = &.{
+            .{ .name = "cdb", .module = mod_cdb },
+            .{ .name = "zlua", .module = zlua_module },
+        },
     });
 
     mod_dbat_db.addIncludePath(b.path("libs/db/include"));
@@ -78,7 +81,10 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
         .link_libcpp = true,
         .root_source_file = b.path("libs/db/src/root.zig"),
-        .imports = &.{.{ .name = "cdb", .module = mod_cdb }},
+        .imports = &.{
+            .{ .name = "cdb", .module = mod_cdb },
+            .{ .name = "zlua", .module = zlua_module },
+        },
     });
 
     const dbat_db = b.addLibrary(.{
