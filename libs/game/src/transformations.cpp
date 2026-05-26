@@ -349,7 +349,7 @@ static struct transform_bonus mutant_mutation_2 = {
 
 static struct transform_bonus mutant_mutation_3 = {
     .bonus=80000000,
-    .mult=4.0,
+    .mult=5.0,
     .drain=0.2,
     .flag=PLR_TRANS3,
     .rpp_cost=0,
@@ -398,22 +398,22 @@ static struct transform_bonus halfbreed_super_saiyan_2 = {
     .msg_transform_others="@C$n@W stands up straight with $s head back as $e releases an ear piercing scream! A blindingly bright golden aura bursts up around $s body, glowing as bright as the sun. As rushing winds begin to rocket out from $m in every direction, bolts of electricity flash and crackle in $s aura. As $s aura begins to dim $e is left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n"
 };
 
-static struct transform_bonus halfbreed_super_saiyan_3 = {
+static struct transform_bonus halfbreed_potential_unleashed = {
     .bonus=240000000,
     .mult=5.0,
     .drain=0.2,
     .flag=PLR_TRANS3,
     .rpp_cost=0,
     .requires_pl=1050000000,
-    .name="@YSuper @CSaiyan @WThird@n",
-    .msg_transform_self="@WElectricity begins to crackle around your body as your aura grows explosively! You yell as your powerlevel begins to skyrocket while your hair grows to multiple times the length it was previously. Your muscles become incredibly dense instead of growing in size, preserving your speed. Finally your irises appear just as your transformation becomes complete, having achieved @CSuper @YSaiyan @GThird@W!@n",
-    .msg_transform_others="@WElectricity begins to crackle around @C$n@W, as $s aura grows explosively! $e yells as the energy around $m skyrockets and $s hair grows to multiple times its previous length. $e smiles as $s irises appear and $s muscles tighten up. $s transformation complete, $e now stands confidently, having achieved @CSuper @YSaiyan @GThird@W!@n"
+    .name="@cPotential @CUnleashed@n",
+    .msg_transform_self="@WYou take in a deep breath, closing your eyes and going within yourself to reach into the very depths of your being.  Finding that hidden reservoir of both Saiyan and Human power within you, you roar out as a white aura erupts out from around you, causing your powerlevel to skyrocket!  Your muscles become sharply defined as you open your eyes and stand confidently, basking in the aura of your @cPotential @CUnleashed!@n",
+    .msg_transform_others="@W$n takes in a deep breath, closing $s eyes and going within $m to reach into the very depths of $s being.  Finding that hidden reservoir of both Saiyan and Human power within, $e roars out as a white aura erupts out from around themself, causing $s powerlevel to skyrocket! $s muscles become sharply defined as $e opens $s eyes and stands confidently, basking in the aura of $s @cPotential @CUnleashed!@n"
 };
 
 static struct transform_bonus halfbreed_transformations[] = {
     halfbreed_super_saiyan_1,
     halfbreed_super_saiyan_2,
-    halfbreed_super_saiyan_3
+    halfbreed_potential_unleashed
 };
 
 static struct transforms_available halfbreed_transforms_available = {
@@ -746,7 +746,7 @@ static struct transform_bonus legendary_super_saiyan_1 = {
 
 static struct transform_bonus legendary_super_saiyan_2 = {
     .bonus=185000000,
-    .mult=6.0,
+    .mult=5.25,
     .drain=0.2,
     .flag=PLR_TRANS2,
     .rpp_cost=0,
