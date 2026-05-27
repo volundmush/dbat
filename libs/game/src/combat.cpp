@@ -3541,25 +3541,25 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
   int victimStrength = get_digits(victavg);
 
   if (chance >= rand_number(60, 75)) {
-   int64_t num = 0,  maxnum = 500000;
+   int64_t num = 0,  maxnum = 1000000;
    if (victimStrength >= 13) {
-    num += GET_LEVEL(ch) * 5000;
+    num += GET_LEVEL(ch) * 7000;
    } else if (victimStrength >= 12) {
-    num += GET_LEVEL(ch) * 4000;
+    num += GET_LEVEL(ch) * 6500;
    } else if (victimStrength >= 11) {
-    num += GET_LEVEL(ch) * 3000;
+    num += GET_LEVEL(ch) * 6000;
    } else if (victimStrength >= 10) {
-    num += GET_LEVEL(ch) * 2500;
+    num += GET_LEVEL(ch) * 5500;
    } else if (victimStrength >= 9) {
-    num += GET_LEVEL(ch) * 2000;
+    num += GET_LEVEL(ch) * 5000;
    } else if (victimStrength >= 8) {
-    num += GET_LEVEL(ch) * 1800;
+    num += GET_LEVEL(ch) * 4500;
    } else if (victimStrength >= 7) {
-    num += GET_LEVEL(ch) * 1600;
+    num += GET_LEVEL(ch) * 4000;
    } else if (victimStrength >= 6) {
-    num += GET_LEVEL(ch) * 1400;
+    num += GET_LEVEL(ch) * 3000;
    } else if (victimStrength >= 5) {
-    num += GET_LEVEL(ch) * 1000;
+    num += GET_LEVEL(ch) * 1500;
    } else if (victimStrength >= 4) {
     num += GET_LEVEL(ch) * 500;
    } else if (victimStrength >= 3) {
@@ -3596,7 +3596,6 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
     }
    }
 
-   gain = gear_exp(ch, gaincalc);
    gain_exp(ch, gain);
 
    // Work out Vitals gained based on damage dealt
