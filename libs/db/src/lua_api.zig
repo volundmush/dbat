@@ -83,6 +83,12 @@ var initialized = false;
 var loaded_entries: usize = 0;
 var active_repl: ?*LuaRepl = null;
 
+pub const StatDefinition = struct {
+    default_value: i64 = 0,
+    min_value: ?i64 = null,
+    max_value: ?i64 = null,
+};
+
 pub fn init(alloc: std.mem.Allocator, runtime_io: std.Io) !void {
     allocator = alloc;
     io = runtime_io;
@@ -155,6 +161,26 @@ pub fn pushThing(category: []const u8, slug: []const u8) !bool {
 
 pub fn pop(count: i32) void {
     lua_state.?.pop(count);
+}
+
+pub fn statDefinition(name: []const u8) ?StatDefinition {
+    if (!initialized or name.len == 0) return null;
+    if (!(pushThing("stats", name) catch return null)) return null;
+    defer pop(1);
+
+    return .{
+        .default_value = optionalIntegerField(-1, "default_value") orelse 0,
+        .min_value = optionalIntegerField(-1, "min_value"),
+        .max_value = optionalIntegerField(-1, "max_value"),
+    };
+}
+
+fn optionalIntegerField(index: i32, comptime field_name: [:0]const u8) ?i64 {
+    const lua = lua_state.?;
+    const field_type = lua.getField(index, field_name);
+    defer lua.pop(1);
+    if (field_type == .nil) return null;
+    return lua.toInteger(-1) catch null;
 }
 
 fn configureStandardLibraries(lua: *Lua) void {
@@ -345,9 +371,6 @@ pub export fn lua_repl_parse(d: *cdb.descriptor_data, arg: [*:0]const u8) void {
     active_repl = repl;
     defer active_repl = null;
 
-    cdb.desc_send_text(d, "< ");
-    cdb.desc_send_text(d, line.ptr);
-    cdb.desc_send_text(d, "\r\n");
     evalReplLine(d, line);
     cdb.desc_send_text(d, "@c> @n");
 }

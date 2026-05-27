@@ -4586,6 +4586,8 @@ void free_char(struct char_data *ch)
     remove_from_lookup_table(GET_ID(ch));
   char_unregister_id(GET_ID(ch));
 
+  char_zig_free(ch);
+
   free(ch);
 }
 

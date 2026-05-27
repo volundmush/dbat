@@ -3,6 +3,7 @@ const std = @import("std");
 const characters = @import("characters.zig");
 const bitflags = @import("flags.zig");
 const obj_api = @import("objects_api.zig");
+const lua_api = @import("lua_api.zig");
 
 const TransformData = struct {
     // this is a placeholder for now.
@@ -58,6 +59,14 @@ pub fn char_ensure_zigdata(ch: *cdb.char_data) ?*CharacterData {
         ch.zigdata = data;
     }
     return @ptrCast(@alignCast(ch.zigdata.?));
+}
+
+pub export fn char_zig_free(ch: *cdb.char_data) void {
+    if (ch.zigdata == null) return;
+    const data: *CharacterData = @ptrCast(@alignCast(ch.zigdata.?));
+    data.deinit();
+    std.heap.page_allocator.destroy(data);
+    ch.zigdata = null;
 }
 
 pub export fn char_id_get(ch: *cdb.char_data) i64 {
@@ -287,32 +296,49 @@ fn replaceString(ch: *cdb.char_data, field: *[*c]u8, proto_value: [*c]u8, value:
 }
 
 pub export fn char_stat_get(ch: *cdb.char_data, stat: ?[*:0]const u8) i64 {
-    if (stat == null) return 0;
-    const zigdata = char_ensure_zigdata(ch) orelse return 0;
-    return zigdata.stats.get(std.mem.span(stat.?)) orelse 0;
+    const name = statName(stat) orelse return 0;
+    const definition = lua_api.statDefinition(name) orelse return 0;
+    if (ch.zigdata == null) return definition.default_value;
+    const zigdata: *CharacterData = @ptrCast(@alignCast(ch.zigdata.?));
+    return zigdata.stats.get(name) orelse definition.default_value;
 }
 
 pub export fn char_stat_set(ch: *cdb.char_data, stat: ?[*:0]const u8, value: i64) i64 {
-    const name = if (stat) |ptr| std.mem.span(ptr) else return 0;
-    if (name.len == 0) return 0;
+    const name = statName(stat) orelse return 0;
+    const definition = lua_api.statDefinition(name) orelse return 0;
+    const clamped = clampStat(value, definition);
 
     const zigdata = char_ensure_zigdata(ch) orelse return 0;
     if (zigdata.stats.getPtr(name)) |existing| {
-        existing.* = value;
-        return value;
+        existing.* = clamped;
+        return clamped;
     }
 
     const owned_name = std.heap.page_allocator.dupe(u8, name) catch return 0;
-    zigdata.stats.put(owned_name, value) catch {
+    zigdata.stats.put(owned_name, clamped) catch {
         std.heap.page_allocator.free(owned_name);
         return 0;
     };
-    return value;
+    return clamped;
 }
 
 pub export fn char_stat_mod(ch: *cdb.char_data, stat: ?[*:0]const u8, mod: i64) i64 {
     const value = char_stat_get(ch, stat) + mod;
     return char_stat_set(ch, stat, value);
+}
+
+fn statName(stat: ?[*:0]const u8) ?[]const u8 {
+    const ptr = stat orelse return null;
+    const name = std.mem.span(ptr);
+    if (name.len == 0) return null;
+    return name;
+}
+
+fn clampStat(value: i64, definition: lua_api.StatDefinition) i64 {
+    var result = value;
+    if (definition.min_value) |min| result = @max(result, min);
+    if (definition.max_value) |max| result = @min(result, max);
+    return result;
 }
 
 pub export fn char_meter_get(ch: *cdb.char_data, meter: ?[*:0]const u8) f64 {
