@@ -89,6 +89,18 @@ pub const StatDefinition = struct {
     max_value: ?i64 = null,
 };
 
+pub const DerivedDefinition = struct {
+    base_stat_storage: [64]u8 = undefined,
+    base_stat_len: usize = 0,
+    min_value: ?i64 = null,
+    max_value: ?i64 = null,
+
+    pub fn baseStat(self: *const DerivedDefinition, fallback: []const u8) []const u8 {
+        if (self.base_stat_len == 0) return fallback;
+        return self.base_stat_storage[0..self.base_stat_len];
+    }
+};
+
 pub fn init(alloc: std.mem.Allocator, runtime_io: std.Io) !void {
     allocator = alloc;
     io = runtime_io;
@@ -175,12 +187,39 @@ pub fn statDefinition(name: []const u8) ?StatDefinition {
     };
 }
 
+pub fn derivedDefinition(name: []const u8) ?DerivedDefinition {
+    if (!initialized or name.len == 0) return null;
+    if (!(pushThing("derived", name) catch return null)) return null;
+    defer pop(1);
+
+    var definition = DerivedDefinition{
+        .min_value = optionalIntegerField(-1, "min_value"),
+        .max_value = optionalIntegerField(-1, "max_value"),
+    };
+    if (optionalStringField(-1, "base_stat")) |base_stat| {
+        const len = @min(base_stat.len, definition.base_stat_storage.len);
+        @memcpy(definition.base_stat_storage[0..len], base_stat[0..len]);
+        definition.base_stat_len = len;
+    }
+    return definition;
+}
+
 fn optionalIntegerField(index: i32, comptime field_name: [:0]const u8) ?i64 {
     const lua = lua_state.?;
     const field_type = lua.getField(index, field_name);
     defer lua.pop(1);
     if (field_type == .nil) return null;
     return lua.toInteger(-1) catch null;
+}
+
+fn optionalStringField(index: i32, comptime field_name: [:0]const u8) ?[]const u8 {
+    const lua = lua_state.?;
+    const field_type = lua.getField(index, field_name);
+    defer lua.pop(1);
+    if (field_type == .nil) return null;
+    const value = lua.toString(-1) catch return null;
+    if (value.len == 0) return null;
+    return value;
 }
 
 fn configureStandardLibraries(lua: *Lua) void {

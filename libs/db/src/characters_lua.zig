@@ -84,6 +84,9 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "stat_get", luaCharacterStatGet);
     addMethod(lua, "stat_set", luaCharacterStatSet);
     addMethod(lua, "stat_mod", luaCharacterStatMod);
+    addMethod(lua, "der_base", luaCharacterDerivedBase);
+    addMethod(lua, "der_total", luaCharacterDerivedTotal);
+    addMethod(lua, "der_invalidate", luaCharacterDerivedInvalidate);
     addMethod(lua, "inventory_count", luaCharacterInventoryCount);
     addMethod(lua, "equipment_count", luaCharacterEquipmentCount);
     addMethod(lua, "inventory_get", luaCharacterInventoryGet);
@@ -370,6 +373,21 @@ fn luaCharacterStatSet(lua: *Lua) i32 {
 fn luaCharacterStatMod(lua: *Lua) i32 {
     lua.pushInteger(cdb.char_stat_mod(checkCharacter(lua), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "stat delta")));
     return 1;
+}
+
+fn luaCharacterDerivedBase(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_der_get_base(checkCharacter(lua), string(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterDerivedTotal(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_der_get_total(checkCharacter(lua), string(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterDerivedInvalidate(lua: *Lua) i32 {
+    cdb.char_der_invalidate(checkCharacter(lua));
+    return 0;
 }
 
 fn luaCharacterInventoryCount(lua: *Lua) i32 {

@@ -3,6 +3,7 @@ const std = @import("std");
 pub const cdb = @import("cdb");
 pub const characters = @import("characters.zig");
 pub const characters_api = @import("characters_api.zig");
+pub const modifiers_api = @import("modifiers_api.zig");
 pub const objects = @import("objects.zig");
 pub const objects_api = @import("objects_api.zig");
 pub const rooms_api = @import("rooms_api.zig");
@@ -29,6 +30,7 @@ pub const dgscripts_json = @import("dgscripts_json.zig");
 // This stupid comptime and its function ensures that the C API functions aren't optimized out because Zig doesn't call them directly. They are called from C, so we have to force them to be included in the final binary.
 comptime {
     forceApiExports(characters_api);
+    std.testing.refAllDecls(modifiers_api);
     forceApiExports(objects_api);
     forceApiExports(rooms_api);
     forceApiExports(exits_api);

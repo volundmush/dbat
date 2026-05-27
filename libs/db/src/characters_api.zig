@@ -4,13 +4,14 @@ const characters = @import("characters.zig");
 const bitflags = @import("flags.zig");
 const obj_api = @import("objects_api.zig");
 const lua_api = @import("lua_api.zig");
+const modifiers_api = @import("modifiers_api.zig");
 
 const TransformData = struct {
     // this is a placeholder for now.
 };
 
 const DerivedData = struct {
-    // this is a placeholder for now.
+    value: i64,
 };
 
 const SkillData = struct {
@@ -21,6 +22,8 @@ const SkillData = struct {
 const CharacterData = struct {
     stats: std.StringHashMap(i64),
     deriveds: std.StringHashMap(DerivedData),
+    modifiers: modifiers_api.ModifierCache,
+    deriveds_dirty: bool,
     transforms: std.StringHashMap(TransformData),
     meters: std.StringHashMap(f64),
     skills: std.StringHashMap(SkillData),
@@ -29,6 +32,8 @@ const CharacterData = struct {
         return CharacterData{
             .stats = std.StringHashMap(i64).init(alloc),
             .deriveds = std.StringHashMap(DerivedData).init(alloc),
+            .modifiers = modifiers_api.ModifierCache.init(alloc),
+            .deriveds_dirty = true,
             .transforms = std.StringHashMap(TransformData).init(alloc),
             .meters = std.StringHashMap(f64).init(alloc),
             .skills = std.StringHashMap(SkillData).init(alloc),
@@ -39,7 +44,10 @@ const CharacterData = struct {
         var stats = self.stats.keyIterator();
         while (stats.next()) |key| std.heap.page_allocator.free(key.*);
         self.stats.deinit();
+        var deriveds = self.deriveds.keyIterator();
+        while (deriveds.next()) |key| std.heap.page_allocator.free(key.*);
         self.deriveds.deinit();
+        self.modifiers.deinit();
         self.transforms.deinit();
         var meters = self.meters.keyIterator();
         while (meters.next()) |key| std.heap.page_allocator.free(key.*);
@@ -297,6 +305,10 @@ fn replaceString(ch: *cdb.char_data, field: *[*c]u8, proto_value: [*c]u8, value:
 
 pub export fn char_stat_get(ch: *cdb.char_data, stat: ?[*:0]const u8) i64 {
     const name = statName(stat) orelse return 0;
+    return charStatGetName(ch, name);
+}
+
+fn charStatGetName(ch: *cdb.char_data, name: []const u8) i64 {
     const definition = lua_api.statDefinition(name) orelse return 0;
     if (ch.zigdata == null) return definition.default_value;
     const zigdata: *CharacterData = @ptrCast(@alignCast(ch.zigdata.?));
@@ -311,6 +323,7 @@ pub export fn char_stat_set(ch: *cdb.char_data, stat: ?[*:0]const u8, value: i64
     const zigdata = char_ensure_zigdata(ch) orelse return 0;
     if (zigdata.stats.getPtr(name)) |existing| {
         existing.* = clamped;
+        invalidateDeriveds(zigdata);
         return clamped;
     }
 
@@ -319,6 +332,7 @@ pub export fn char_stat_set(ch: *cdb.char_data, stat: ?[*:0]const u8, value: i64
         std.heap.page_allocator.free(owned_name);
         return 0;
     };
+    invalidateDeriveds(zigdata);
     return clamped;
 }
 
@@ -339,6 +353,109 @@ fn clampStat(value: i64, definition: lua_api.StatDefinition) i64 {
     if (definition.min_value) |min| result = @max(result, min);
     if (definition.max_value) |max| result = @min(result, max);
     return result;
+}
+
+pub export fn char_legacy_modifier(ch: *cdb.char_data, location: c_int, specific: c_int) i64 {
+    _ = ch;
+    _ = location;
+    _ = specific;
+    return 0;
+}
+
+pub export fn char_der_get_base(ch: *cdb.char_data, stat: ?[*:0]const u8) i64 {
+    const name = statName(stat) orelse return 0;
+    return charDerGetBaseName(ch, name);
+}
+
+fn charDerGetBaseName(ch: *cdb.char_data, name: []const u8) i64 {
+    const definition = lua_api.derivedDefinition(name) orelse return 0;
+    return charStatGetName(ch, definition.baseStat(name));
+}
+
+pub export fn char_der_get_total(ch: *cdb.char_data, stat: ?[*:0]const u8) i64 {
+    const name = statName(stat) orelse return 0;
+    const definition = lua_api.derivedDefinition(name) orelse return 0;
+    const zigdata = char_ensure_zigdata(ch) orelse return 0;
+
+    if (!zigdata.deriveds_dirty) {
+        if (zigdata.deriveds.get(name)) |cached| return cached.value;
+    }
+
+    if (zigdata.modifiers.dirty) zigdata.modifiers.rebuild(ch);
+    const total = calculateDerivedTotal(ch, zigdata, name, definition);
+    cacheDerived(zigdata, name, total);
+    return total;
+}
+
+pub export fn char_der_invalidate(ch: *cdb.char_data) void {
+    const zigdata = char_ensure_zigdata(ch) orelse return;
+    invalidateDeriveds(zigdata);
+}
+
+fn calculateDerivedTotal(ch: *cdb.char_data, zigdata: *CharacterData, name: []const u8, definition: lua_api.DerivedDefinition) i64 {
+    var value = charDerGetBaseName(ch, name);
+    var flat: i64 = 0;
+    var percent: i64 = 0;
+    var min_override: ?i64 = null;
+    var max_override: ?i64 = null;
+    var set_override: ?i64 = null;
+
+    if (zigdata.modifiers.modifiersFor("derived", name)) |modifiers| {
+        for (modifiers) |modifier| {
+            switch (modifier.kind) {
+                .flat => flat += modifier.value,
+                .percent => percent += modifier.value,
+                .multiplier => {},
+                .override_min => min_override = if (min_override) |current| @max(current, modifier.value) else modifier.value,
+                .override_max => max_override = if (max_override) |current| @min(current, modifier.value) else modifier.value,
+                .set => set_override = modifier.value,
+            }
+        }
+
+        value += flat;
+        if (percent != 0) value += @divTrunc(value * percent, modifiers_api.scale);
+        for (modifiers) |modifier| {
+            if (modifier.kind == .multiplier) value = @divTrunc(value * modifier.value, modifiers_api.scale);
+        }
+    } else {
+        value += flat;
+        if (percent != 0) value += @divTrunc(value * percent, modifiers_api.scale);
+    }
+
+    if (definition.min_value) |min| value = @max(value, min);
+    if (definition.max_value) |max| value = @min(value, max);
+    if (min_override) |min| value = @max(value, min);
+    if (max_override) |max| value = @min(value, max);
+    if (set_override) |set| value = set;
+    return value;
+}
+
+fn cacheDerived(zigdata: *CharacterData, name: []const u8, value: i64) void {
+    if (zigdata.deriveds_dirty) {
+        clearDerivedCache(zigdata);
+        zigdata.deriveds_dirty = false;
+    }
+
+    if (zigdata.deriveds.getPtr(name)) |existing| {
+        existing.* = .{ .value = value };
+        return;
+    }
+
+    const owned_name = std.heap.page_allocator.dupe(u8, name) catch return;
+    zigdata.deriveds.put(owned_name, .{ .value = value }) catch {
+        std.heap.page_allocator.free(owned_name);
+    };
+}
+
+fn invalidateDeriveds(zigdata: *CharacterData) void {
+    zigdata.deriveds_dirty = true;
+    zigdata.modifiers.invalidate();
+}
+
+fn clearDerivedCache(zigdata: *CharacterData) void {
+    var keys = zigdata.deriveds.keyIterator();
+    while (keys.next()) |key| std.heap.page_allocator.free(key.*);
+    zigdata.deriveds.clearRetainingCapacity();
 }
 
 pub export fn char_meter_get(ch: *cdb.char_data, meter: ?[*:0]const u8) f64 {
