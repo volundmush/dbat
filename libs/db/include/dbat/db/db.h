@@ -3,6 +3,7 @@
 #include "consts/types.h"
 
 #include "characters.h"
+#include "skills.h"
 #include "objects.h"
 #include "players.h"
 #include "descriptor.h"
@@ -15,4 +16,3 @@
 #include "index.h"
 #include "config.h"
 #include "extradesc.h"
-

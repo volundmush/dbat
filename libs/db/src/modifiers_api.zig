@@ -21,6 +21,7 @@ pub const Modifier = struct {
     value: i64,
     priority: i32 = 0,
     label: []const u8,
+    owned_strings: bool = false,
 };
 
 pub const ModifierCache = struct {
@@ -76,6 +77,14 @@ pub const ModifierCache = struct {
         var it = self.by_target.iterator();
         while (it.next()) |entry| {
             self.allocator.free(entry.key_ptr.*);
+            for (entry.value_ptr.items) |modifier| {
+                if (!modifier.owned_strings) continue;
+                self.allocator.free(modifier.source_category);
+                self.allocator.free(modifier.source_id);
+                self.allocator.free(modifier.target_category);
+                self.allocator.free(modifier.target_id);
+                self.allocator.free(modifier.label);
+            }
             entry.value_ptr.deinit();
         }
         self.by_target.clearRetainingCapacity();

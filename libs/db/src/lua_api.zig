@@ -7,6 +7,7 @@ const rooms_lua = @import("rooms_lua.zig");
 const zones_lua = @import("zones_lua.zig");
 const shops_lua = @import("shops_lua.zig");
 const guilds_lua = @import("guilds_lua.zig");
+const modifiers_api = @import("modifiers_api.zig");
 
 const Lua = zlua.Lua;
 
@@ -18,6 +19,7 @@ const LuaRepl = struct {
 const lua_root = "lua";
 const categories = [_][]const u8{
     "commands",
+    "conditions",
     "derived",
     "modifiers",
     "meters",
@@ -120,6 +122,11 @@ pub const MeterDefinition = struct {
         if (self.derived_stat_len == 0) return fallback;
         return self.derived_stat_storage[0..self.derived_stat_len];
     }
+};
+
+pub const ConditionDefinition = struct {
+    persistent: bool = false,
+    stackable: bool = false,
 };
 
 pub fn init(alloc: std.mem.Allocator, runtime_io: std.Io) !void {
@@ -264,6 +271,64 @@ pub fn meterDefinition(name: []const u8) ?MeterDefinition {
     return definition;
 }
 
+pub fn conditionDefinition(name: []const u8) ?ConditionDefinition {
+    if (!initialized or name.len == 0) return null;
+    if (!(pushThing("conditions", name) catch return null)) return null;
+    defer pop(1);
+    return .{
+        .persistent = optionalBoolField(-1, "persistent") orelse false,
+        .stackable = optionalBoolField(-1, "stackable") orelse false,
+    };
+}
+
+pub fn callConditionHook(ch: *cdb.char_data, condition: []const u8, comptime hook_name: [:0]const u8) void {
+    if (!initialized or condition.len == 0) return;
+    if (!(pushThing("conditions", condition) catch return)) return;
+    defer pop(1);
+
+    const lua = lua_state.?;
+    if (lua.getField(-1, hook_name) != .function) {
+        lua.pop(1);
+        return;
+    }
+    characters_lua.pushCharacter(lua, ch.id);
+    characters_lua.pushCondition(lua, ch.id, condition);
+    lua.protectedCall(.{ .args = 2, .results = 0 }) catch |err| {
+        const message = lua.toString(-1) catch @errorName(err);
+        std.log.err("condition {s}.{s} failed: {s}", .{ condition, hook_name, message });
+        lua.pop(1);
+    };
+}
+
+pub fn emitConditionModifiers(ch: *cdb.char_data, cache: *modifiers_api.ModifierCache, condition: []const u8) void {
+    if (!initialized or condition.len == 0) return;
+    if (!(pushThing("conditions", condition) catch return)) return;
+    defer pop(1);
+
+    const lua = lua_state.?;
+    if (lua.getField(-1, "modifiers") != .function) {
+        lua.pop(1);
+        return;
+    }
+    characters_lua.pushCharacter(lua, ch.id);
+    characters_lua.pushCondition(lua, ch.id, condition);
+    lua.protectedCall(.{ .args = 2, .results = 1 }) catch |err| {
+        const message = lua.toString(-1) catch @errorName(err);
+        std.log.err("condition {s}.modifiers failed: {s}", .{ condition, message });
+        lua.pop(1);
+        return;
+    };
+    defer lua.pop(1);
+    if (!lua.isTable(-1)) return;
+
+    var pos: zlua.Integer = 1;
+    while (lua.getIndex(-1, pos) != .nil) : (pos += 1) {
+        defer lua.pop(1);
+        if (!lua.isTable(-1)) continue;
+        addModifierFromLua(cache, condition, -1);
+    }
+}
+
 fn optionalIntegerField(index: i32, comptime field_name: [:0]const u8) ?i64 {
     const lua = lua_state.?;
     const field_type = lua.getField(index, field_name);
@@ -280,6 +345,65 @@ fn optionalStringField(index: i32, comptime field_name: [:0]const u8) ?[]const u
     const value = lua.toString(-1) catch return null;
     if (value.len == 0) return null;
     return value;
+}
+
+fn optionalBoolField(index: i32, comptime field_name: [:0]const u8) ?bool {
+    const lua = lua_state.?;
+    const field_type = lua.getField(index, field_name);
+    defer lua.pop(1);
+    if (field_type == .nil) return null;
+    if (field_type != .boolean) return null;
+    return lua.toBoolean(-1);
+}
+
+fn addModifierFromLua(cache: *modifiers_api.ModifierCache, condition: []const u8, index: i32) void {
+    const lua = lua_state.?;
+    if (lua.getField(index, "target") != .table) {
+        lua.pop(1);
+        return;
+    }
+    const target_category = tableString(-1, 1) orelse {
+        lua.pop(1);
+        return;
+    };
+    const target_id = tableString(-1, 2) orelse {
+        lua.pop(1);
+        return;
+    };
+    lua.pop(1);
+    const kind_text = optionalStringField(index, "kind") orelse "flat";
+    const kind = parseModifierKind(kind_text) orelse return;
+    const value = optionalIntegerField(index, "value") orelse 0;
+    const label = optionalStringField(index, "label") orelse condition;
+
+    cache.add(.{
+        .source_category = allocator.dupe(u8, "condition") catch return,
+        .source_id = allocator.dupe(u8, condition) catch return,
+        .target_category = allocator.dupe(u8, target_category) catch return,
+        .target_id = allocator.dupe(u8, target_id) catch return,
+        .kind = kind,
+        .value = value,
+        .label = allocator.dupe(u8, label) catch return,
+        .owned_strings = true,
+    }) catch {};
+}
+
+fn parseModifierKind(text: []const u8) ?modifiers_api.ModifierKind {
+    if (std.mem.eql(u8, text, "flat")) return .flat;
+    if (std.mem.eql(u8, text, "percent")) return .percent;
+    if (std.mem.eql(u8, text, "multiplier")) return .multiplier;
+    if (std.mem.eql(u8, text, "override_min")) return .override_min;
+    if (std.mem.eql(u8, text, "override_max")) return .override_max;
+    if (std.mem.eql(u8, text, "set")) return .set;
+    return null;
+}
+
+fn tableString(index: i32, pos: zlua.Integer) ?[]const u8 {
+    const lua = lua_state.?;
+    const value_type = lua.getIndex(index, pos);
+    defer lua.pop(1);
+    if (value_type == .nil) return null;
+    return lua.toString(-1) catch null;
 }
 
 fn hasTag(index: i32, tag: []const u8) bool {
@@ -539,8 +663,19 @@ pub export fn lua_repl_parse(d: *cdb.descriptor_data, arg: [*:0]const u8) void {
     active_repl = repl;
     defer active_repl = null;
 
+    echoReplInput(d, line);
     evalReplLine(d, line);
     cdb.desc_send_text(d, "@c< @n");
+}
+
+fn echoReplInput(d: *cdb.descriptor_data, line: []const u8) void {
+    const line_z = allocator.dupeZ(u8, line) catch {
+        cdb.desc_send_text(d, "<out of memory>\r\n");
+        return;
+    };
+    defer allocator.free(line_z);
+    cdb.desc_send_text(d, line_z.ptr);
+    cdb.desc_send_text(d, "\r\n");
 }
 
 fn ensureRepl(d: *cdb.descriptor_data) ?*LuaRepl {

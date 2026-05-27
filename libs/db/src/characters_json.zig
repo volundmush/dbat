@@ -4,6 +4,7 @@ const jsonx = @import("flags_json.zig");
 const bitflags = @import("flags.zig");
 const dgscripts_json = @import("dgscripts_json.zig");
 const characters_api = @import("characters_api.zig");
+const lua_api = @import("lua_api.zig");
 
 pub const JsonValue = jsonx.JsonValue;
 
@@ -39,6 +40,7 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
     try putStat(&stats, allocator, "speed", ch.real_abils.cha, false);
     try putStat(&stats, allocator, "height", ch.height, false);
     try putStat(&stats, allocator, "weight", ch.weight, false);
+    try putStat(&stats, allocator, "alignment", ch.alignment, false);
 
     try jsonx.putString(&object, allocator, "name", cdb.char_name_get(ch));
     try jsonx.putString(&object, allocator, "description", cdb.char_description_get(ch));
@@ -53,7 +55,6 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
     try jsonx.putNonEmpty(&object, allocator, "admin_flags", try jsonx.serializeFlags(allocator, ch, 128, admFlagged));
     try jsonx.putInt(&object, allocator, "height", ch.height);
     try jsonx.putInt(&object, allocator, "weight", ch.weight);
-    try jsonx.putInt(&object, allocator, "alignment", ch.alignment);
 
     if (mode != .npc_prototype) {
         // fields common to all instances, including players.
@@ -73,7 +74,10 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
         try jsonx.putInt(&object, allocator, "distinguishing_feature", ch.distfea);
         try jsonx.putInt(&object, allocator, "aura", ch.aura);
         try jsonx.putInt(&object, allocator, "position", ch.position);
-        try jsonx.putInt(&object, allocator, "skill_slots", ch.skill_slots);
+        try putStat(&stats, allocator, "skill_slots", ch.skill_slots, true);
+        try putStat(&stats, allocator, "suppression", ch.suppression, true);
+        try putStat(&stats, allocator, "fury", ch.fury, true);
+        try putStat(&stats, allocator, "kaioken", ch.kaioken, true);
         try jsonx.putInt(&object, allocator, "suppression", ch.suppression);
         try jsonx.putInt(&object, allocator, "tail_growth", ch.tail_growth);
         try jsonx.putInt(&object, allocator, "rage_meter", ch.rage_meter);
@@ -157,7 +161,7 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
         try jsonx.putInt(&object, allocator, "sd_cooldown", ch.con_sdcooldown);
         try jsonx.putInt(&object, allocator, "gooptime", ch.gooptime);
         try jsonx.putInt(&object, allocator, "death_type", ch.death_type);
-        try jsonx.putInt(&object, allocator, "dcount", ch.dcount);
+        try putStat(&stats, allocator, "death_count", ch.dcount, true);
         try jsonx.putInt(&object, allocator, "droom", ch.droom);
         try jsonx.putInt(&object, allocator, "deathtime", ch.deathtime);
         try jsonx.putInt(&object, allocator, "reward_time", ch.rewtime);
@@ -177,10 +181,10 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
         try jsonx.putInt(&object, allocator, "boosts", ch.boosts);
         try jsonx.putInt(&object, allocator, "powerattack", ch.powerattack);
         try jsonx.putInt(&object, allocator, "group_kills", ch.combatexpertise);
+        try putStat(&stats, allocator, "life_percent", ch.lifeperc, true);
         try jsonx.putInt(&object, allocator, "life_percent", ch.lifeperc);
         try jsonx.putInt(&object, allocator, "stupid_kiss", ch.stupidkiss);
         try jsonx.putInt(&object, allocator, "damage_mod", ch.damage_mod);
-        try jsonx.putInt(&object, allocator, "armor", ch.armor);
         try jsonx.putInt(&object, allocator, "pole_bonus", ch.accuracy);
         try jsonx.putInt(&object, allocator, "fish_damage", ch.accuracy_mod);
         try jsonx.putInt(&object, allocator, "absorbs", ch.absorbs);
@@ -195,6 +199,7 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
         try putStat(&stats, allocator, "upgrades", ch.upgrade, true);
         try putStat(&stats, allocator, "molt_experience", ch.moltexp, true);
         try putStat(&stats, allocator, "molt_level", ch.moltlevel, true);
+        try putStat(&stats, allocator, "armor", ch.armor, true);
         try jsonx.putNonEmpty(&object, allocator, "skills", try serializeSkills(allocator, ch));
         try jsonx.put(&object, allocator, "lboard", try serializeIntArray(allocator, ch.lboard[0..]));
         try jsonx.put(&object, allocator, "limbs", try serializeIntArray(allocator, ch.limb_condition[0..]));
@@ -205,6 +210,7 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
 
     if (stats.object.count() > 0) try jsonx.put(&object, allocator, "stats", stats);
     if (meters.object.count() > 0) try jsonx.put(&object, allocator, "meters", meters);
+    try jsonx.putNonEmpty(&object, allocator, "conditions_v2", try serializeConditions(allocator, ch));
 
     return object;
 }
@@ -227,7 +233,10 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
     if (jsonx.field(value, "admin_flags")) |flags| try jsonx.deserializeFlags(ch, flags, 128, admFlagSet);
     if (try jsonx.intField(value, "height", u8)) |v| ch.height = v;
     if (try jsonx.intField(value, "weight", u8)) |v| ch.weight = v;
-    if (try jsonx.intField(value, "alignment", c_int)) |v| ch.alignment = v;
+    if (try jsonx.intField(value, "alignment", c_int)) |v| {
+        ch.alignment = v;
+        _ = cdb.char_stat_set(ch, "alignment", v);
+    }
     if (jsonx.field(value, "stats")) |stats| try deserializeSharedStats(ch, stats);
 
     if (options.mode != .npc_prototype) {
@@ -241,7 +250,10 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
         if (try jsonx.intField(value, "distinguishing_feature", i8)) |v| ch.distfea = v;
         if (try jsonx.intField(value, "aura", c_int)) |v| ch.aura = v;
         if (try jsonx.intField(value, "position", i8)) |v| ch.position = v;
-        if (try jsonx.intField(value, "skill_slots", c_int)) |v| ch.skill_slots = v;
+        if (try jsonx.intField(value, "skill_slots", c_int)) |v| {
+            ch.skill_slots = v;
+            _ = cdb.char_stat_set(ch, "skill_slots", v);
+        }
         if (try jsonx.intField(value, "suppression", i64)) |v| ch.suppression = v;
         if (try jsonx.intField(value, "tail_growth", c_int)) |v| ch.tail_growth = v;
         if (try jsonx.intField(value, "rage_meter", c_int)) |v| ch.rage_meter = v;
@@ -253,6 +265,7 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
         if (jsonx.field(value, "bodyparts")) |flags| try jsonx.deserializeFlags(ch, flags, cdb.NUM_AFF_FLAGS, bodypartFlagSet);
         if (jsonx.field(value, "affected_by")) |flags| try jsonx.deserializeFlags(ch, flags, cdb.NUM_AFF_FLAGS, affectedFlagSet);
         if (jsonx.field(value, "meters")) |meters| try deserializeMeters(ch, meters);
+        if (jsonx.field(value, "conditions_v2")) |conditions| try deserializeConditions(ch, conditions);
     }
 
     if (options.mode == .npc) {
@@ -316,7 +329,10 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
         if (try jsonx.intField(value, "sd_cooldown", c_int)) |v| ch.con_sdcooldown = v;
         if (try jsonx.intField(value, "gooptime", c_int)) |v| ch.gooptime = v;
         if (try jsonx.intField(value, "death_type", c_int)) |v| ch.death_type = v;
-        if (try jsonx.intField(value, "dcount", c_int)) |v| ch.dcount = v;
+        if (try jsonx.intField(value, "dcount", c_int)) |v| {
+            ch.dcount = v;
+            _ = cdb.char_stat_set(ch, "death_count", v);
+        }
         if (try jsonx.intField(value, "droom", cdb.room_vnum)) |v| ch.droom = v;
         if (try jsonx.intField(value, "deathtime", cdb.time_t)) |v| ch.deathtime = v;
         if (try jsonx.intField(value, "reward_time", cdb.time_t)) |v| ch.rewtime = v;
@@ -433,6 +449,10 @@ fn deserializeSharedStats(ch: *cdb.char_data, stats: JsonValue) !void {
         ch.weight = v;
         _ = cdb.char_stat_set(ch, "weight", v);
     }
+    if (try jsonx.intField(stats, "alignment", c_int)) |v| {
+        ch.alignment = v;
+        _ = cdb.char_stat_set(ch, "alignment", v);
+    }
     if (try jsonx.intField(stats, "money", c_int)) |v| {
         ch.gold = v;
         _ = cdb.char_stat_set(ch, "money", v);
@@ -444,6 +464,18 @@ fn deserializeSharedStats(ch: *cdb.char_data, stats: JsonValue) !void {
     if (try jsonx.intField(stats, "experience", i64)) |v| {
         ch.exp = v;
         _ = cdb.char_stat_set(ch, "experience", v);
+    }
+    if (try jsonx.intField(stats, "suppression", i64)) |v| {
+        ch.suppression = v;
+        _ = cdb.char_stat_set(ch, "suppression", v);
+    }
+    if (try jsonx.intField(stats, "fury", c_short)) |v| {
+        ch.fury = v;
+        _ = cdb.char_stat_set(ch, "fury", v);
+    }
+    if (try jsonx.intField(stats, "kaioken", c_int)) |v| {
+        ch.kaioken = v;
+        _ = cdb.char_stat_set(ch, "kaioken", v);
     }
 }
 
@@ -490,6 +522,22 @@ fn deserializePlayerStats(ch: *cdb.char_data, ps: *cdb.player_special_data, stat
         ch.moltlevel = v;
         _ = cdb.char_stat_set(ch, "molt_level", v);
     }
+    if (try jsonx.intField(stats, "armor", c_int)) |v| {
+        ch.armor = v;
+        _ = cdb.char_stat_set(ch, "armor", v);
+    }
+    if (try jsonx.intField(stats, "skill_slots", c_int)) |v| {
+        ch.skill_slots = v;
+        _ = cdb.char_stat_set(ch, "skill_slots", v);
+    }
+    if (try jsonx.intField(stats, "death_count", c_int)) |v| {
+        ch.dcount = v;
+        _ = cdb.char_stat_set(ch, "death_count", v);
+    }
+    if (try jsonx.intField(stats, "life_percent", c_int)) |v| {
+        ch.lifeperc = v;
+        _ = cdb.char_stat_set(ch, "life_percent", v);
+    }
 }
 
 fn deserializeMeters(ch: *cdb.char_data, meters: JsonValue) !void {
@@ -509,6 +557,114 @@ fn deserializeMeters(ch: *cdb.char_data, meters: JsonValue) !void {
     if (try jsonx.floatField(meters, "lifeforce", f64)) |v| {
         ch.life = v;
         _ = cdb.char_meter_set(ch, "lifeforce", characters_api.meterFloatToFixed(v));
+    }
+}
+
+fn serializeConditions(allocator: std.mem.Allocator, ch: *cdb.char_data) !JsonValue {
+    var object = jsonx.newObject(allocator);
+    if (ch.zigdata == null) return object;
+    const data: *characters_api.CharacterData = @ptrCast(@alignCast(ch.zigdata.?));
+    var it = data.conditions.iterator();
+    while (it.next()) |entry| {
+        const definition = lua_api.conditionDefinition(entry.key_ptr.*) orelse continue;
+        if (!definition.persistent) continue;
+        try jsonx.put(&object, allocator, entry.key_ptr.*, try serializeCondition(allocator, entry.value_ptr));
+    }
+    return object;
+}
+
+fn serializeCondition(allocator: std.mem.Allocator, condition: *characters_api.ConditionInstance) !JsonValue {
+    var object = jsonx.newObject(allocator);
+    try jsonx.putInt(&object, allocator, "stacks", condition.stacks);
+    try jsonx.putInt(&object, allocator, "duration", condition.duration);
+
+    var sources = jsonx.JsonArray.init(allocator);
+    for (condition.sources.items) |source| {
+        var source_object = jsonx.newObject(allocator);
+        try jsonx.putSlice(&source_object, allocator, "category", source.category);
+        try jsonx.putSlice(&source_object, allocator, "id", source.id);
+        try sources.append(source_object);
+    }
+    if (sources.items.len > 0) try jsonx.put(&object, allocator, "sources", .{ .array = sources });
+
+    var numbers = jsonx.newObject(allocator);
+    var number_it = condition.numbers.iterator();
+    while (number_it.next()) |entry| try jsonx.putInt(&numbers, allocator, entry.key_ptr.*, entry.value_ptr.*);
+    if (numbers.object.count() > 0) try jsonx.put(&object, allocator, "numbers", numbers);
+
+    var strings = jsonx.newObject(allocator);
+    var string_it = condition.strings.iterator();
+    while (string_it.next()) |entry| try jsonx.putSlice(&strings, allocator, entry.key_ptr.*, entry.value_ptr.*);
+    if (strings.object.count() > 0) try jsonx.put(&object, allocator, "strings", strings);
+    return object;
+}
+
+fn deserializeConditions(ch: *cdb.char_data, conditions: JsonValue) !void {
+    if (conditions != .object) return error.ExpectedObject;
+    var it = conditions.object.iterator();
+    while (it.next()) |entry| {
+        const id = entry.key_ptr.*;
+        const item = entry.value_ptr.*;
+        if (item != .object) return error.ExpectedObject;
+        const id_z = try std.heap.page_allocator.dupeZ(u8, id);
+        defer std.heap.page_allocator.free(id_z);
+        if (jsonx.field(item, "sources")) |sources| {
+            if (sources == .array and sources.array.items.len > 0) {
+                try deserializeConditionSources(ch, id_z.ptr, sources);
+            } else {
+                _ = cdb.char_condition_add(ch, id_z.ptr, "json", "conditions_v2");
+            }
+        } else {
+            _ = cdb.char_condition_add(ch, id_z.ptr, "json", "conditions_v2");
+        }
+        if (try jsonx.intField(item, "stacks", i64)) |v| _ = cdb.char_condition_stacks_set(ch, id_z.ptr, v);
+        if (try jsonx.intField(item, "duration", i64)) |v| _ = cdb.char_condition_duration_set(ch, id_z.ptr, v);
+        if (jsonx.field(item, "numbers")) |numbers| try deserializeConditionNumbers(ch, id, numbers);
+        if (jsonx.field(item, "strings")) |strings| try deserializeConditionStrings(ch, id, strings);
+    }
+}
+
+fn deserializeConditionSources(ch: *cdb.char_data, id_z: [*:0]const u8, sources: JsonValue) !void {
+    if (sources != .array) return error.ExpectedArray;
+    for (sources.array.items) |source| {
+        if (source != .object) return error.ExpectedObject;
+        const category = try jsonx.stringFieldAlloc(std.heap.page_allocator, source, "category") orelse continue;
+        defer std.heap.page_allocator.free(category);
+        const source_id = try jsonx.stringFieldAlloc(std.heap.page_allocator, source, "id") orelse continue;
+        defer std.heap.page_allocator.free(source_id);
+        const category_z = try std.heap.page_allocator.dupeZ(u8, category);
+        defer std.heap.page_allocator.free(category_z);
+        const source_z = try std.heap.page_allocator.dupeZ(u8, source_id);
+        defer std.heap.page_allocator.free(source_z);
+        _ = cdb.char_condition_add(ch, id_z, category_z.ptr, source_z.ptr);
+    }
+}
+
+fn deserializeConditionNumbers(ch: *cdb.char_data, id: []const u8, numbers: JsonValue) !void {
+    if (numbers != .object) return error.ExpectedObject;
+    const id_z = try std.heap.page_allocator.dupeZ(u8, id);
+    defer std.heap.page_allocator.free(id_z);
+    var it = numbers.object.iterator();
+    while (it.next()) |entry| {
+        if (entry.value_ptr.* != .integer) return error.ExpectedInteger;
+        const key_z = try std.heap.page_allocator.dupeZ(u8, entry.key_ptr.*);
+        defer std.heap.page_allocator.free(key_z);
+        _ = cdb.char_condition_number_set(ch, id_z.ptr, key_z.ptr, entry.value_ptr.integer);
+    }
+}
+
+fn deserializeConditionStrings(ch: *cdb.char_data, id: []const u8, strings: JsonValue) !void {
+    if (strings != .object) return error.ExpectedObject;
+    const id_z = try std.heap.page_allocator.dupeZ(u8, id);
+    defer std.heap.page_allocator.free(id_z);
+    var it = strings.object.iterator();
+    while (it.next()) |entry| {
+        if (entry.value_ptr.* != .string) return error.ExpectedString;
+        const key_z = try std.heap.page_allocator.dupeZ(u8, entry.key_ptr.*);
+        defer std.heap.page_allocator.free(key_z);
+        const value_z = try std.heap.page_allocator.dupeZ(u8, entry.value_ptr.string);
+        defer std.heap.page_allocator.free(value_z);
+        _ = cdb.char_condition_string_set(ch, id_z.ptr, key_z.ptr, value_z.ptr);
     }
 }
 
