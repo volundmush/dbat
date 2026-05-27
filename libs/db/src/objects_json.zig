@@ -10,6 +10,7 @@ pub const ObjectJsonMode = enum { prototype, instance };
 pub const DeserializeOptions = struct {
     c_allocator: std.mem.Allocator = std.heap.c_allocator,
     mode: ObjectJsonMode = .instance,
+    preserve_id: bool = true,
 };
 
 pub fn serializeObject(allocator: std.mem.Allocator, obj: *cdb.obj_data, mode: ObjectJsonMode) !JsonValue {
@@ -47,7 +48,7 @@ pub fn serializeObject(allocator: std.mem.Allocator, obj: *cdb.obj_data, mode: O
 pub fn deserializeObject(obj: *cdb.obj_data, options: DeserializeOptions, value: JsonValue) !void {
     if (value != .object) return error.ExpectedObject;
 
-    if (options.mode == .instance) {
+    if (options.mode == .instance and options.preserve_id) {
         if (try jsonx.intField(value, "id", i64)) |v| cdb.obj_id_set(obj, v);
     }
 

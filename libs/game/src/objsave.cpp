@@ -27,6 +27,7 @@
 
 #include <unistd.h>
 #include <errno.h>
+#include <cctype>
 
 /* local functions */
 
@@ -45,6 +46,38 @@ static void Crash_extract_expensive(struct obj_data *obj);
 static void Crash_calculate_rent(struct obj_data *obj, int *cost);
 static void Crash_cryosave(struct char_data *ch, int cost);
 static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename);
+
+void save_char(struct char_data *ch);
+extern "C" void json_save_char_for_objects(struct char_data *ch)
+{
+  save_char(ch);
+}
+
+extern "C" void json_obj_auto_equip(struct char_data *ch, struct obj_data *obj, int location)
+{
+  auto_equip(ch, obj, location);
+}
+
+static bool is_json_file(FILE *fl)
+{
+  if (!fl)
+    return false;
+
+  int ch = 0;
+  do {
+    ch = fgetc(fl);
+  } while (ch != EOF && isspace(static_cast<unsigned char>(ch)));
+
+  if (ch == EOF) {
+    clearerr(fl);
+    fseek(fl, 0, SEEK_SET);
+    return false;
+  }
+
+  const bool is_json = ch == '{' || ch == '[';
+  fseek(fl, 0, SEEK_SET);
+  return is_json;
+}
 
 static void Crash_log_file_error(const char *operation, const char *filename, const char *file, int line)
 {
@@ -105,6 +138,29 @@ static int Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, c
   if (!Crash_build_save_filename(tmpfile, sizeof(tmpfile), filename, ".tmp", __FILE__, __LINE__) ||
       !Crash_build_save_filename(bakfile, sizeof(bakfile), filename, ".bak", __FILE__, __LINE__))
     return FALSE;
+
+  if (json_player_objects_save(tmpfile, ch, rentcode, cost) == 0)
+  {
+    if (rename(filename, bakfile) == -1 && errno != ENOENT)
+    {
+      Crash_log_file_error("rename existing save to backup", filename, __FILE__, __LINE__);
+      remove(tmpfile);
+      return FALSE;
+    }
+
+    if (rename(tmpfile, filename) == -1)
+    {
+      Crash_log_file_error("rename temporary save", tmpfile, __FILE__, __LINE__);
+      if (rename(bakfile, filename) == -1)
+        Crash_log_file_error("restore backup save", bakfile, __FILE__, __LINE__);
+      return FALSE;
+    }
+
+    return TRUE;
+  }
+
+  basic_mud_log("SYSERR: %s:%d: JSON %s failed for %s; falling back to legacy object save", __FILE__, __LINE__, save_type, GET_NAME(ch));
+  remove(tmpfile);
 
   if (!(fp = fopen(tmpfile, "wb")))
   {
@@ -714,18 +770,10 @@ void Crash_crashsave(struct char_data *ch)
 
 void Crash_idlesave(struct char_data *ch)
 {
-  char buf[MAX_INPUT_LENGTH];
   int j;
   int cost, cost_eq;
-  FILE *fp;
 
   if (IS_NPC(ch))
-    return;
-
-  if (!get_filename(buf, sizeof(buf), NEW_OBJ_FILES, GET_NAME(ch)))
-    return;
-
-  if (!(fp = fopen(buf, "wb")))
     return;
 
   Crash_extract_norent_eq(ch);
@@ -762,34 +810,17 @@ void Crash_idlesave(struct char_data *ch)
       ;
     if (j == NUM_WEARS)
     { /* No equipment or inventory. */
-      fclose(fp);
       Crash_delete_file(GET_NAME(ch));
       return;
     }
   }
 
-  fprintf(fp, "%d %d %d %d %d %d\r\n", RENT_TIMEDOUT, (int)time(0), cost,
-          GET_GOLD(ch), GET_BANK_GOLD(ch), 0);
+  if (!Crash_write_safe_file(ch, RENT_TIMEDOUT, cost, "idlesave"))
+    return;
 
   for (j = 0; j < NUM_WEARS; j++)
-  {
     if (GET_EQ(ch, j))
-    {
-      if (!Crash_save(GET_EQ(ch, j), fp, j + 1))
-      {
-        fclose(fp);
-        return;
-      }
-      Crash_restore_weight(GET_EQ(ch, j));
       Crash_extract_objs(GET_EQ(ch, j));
-    }
-  }
-  if (!Crash_save(ch->carrying, fp, 0))
-  {
-    fclose(fp);
-    return;
-  }
-  fclose(fp);
 
   Crash_extract_objs(ch->carrying);
 }
@@ -816,16 +847,9 @@ void Crash_rentsave(struct char_data *ch, int cost)
 
 static void Crash_cryosave(struct char_data *ch, int cost)
 {
-  char buf[MAX_INPUT_LENGTH];
   int j;
-  FILE *fp;
 
   if (IS_NPC(ch))
-    return;
-
-  if (!get_filename(buf, sizeof(buf), CRASH_FILE, GET_NAME(ch)))
-    return;
-  if (!(fp = fopen(buf, "wb")))
     return;
 
   Crash_extract_norent_eq(ch);
@@ -833,26 +857,14 @@ static void Crash_cryosave(struct char_data *ch, int cost)
 
   GET_GOLD(ch) = MAX(0, GET_GOLD(ch) - cost);
 
-  fprintf(fp, "%d %d %d %d %d %d\r\n", RENT_CRYO, (int)time(0), 0, GET_GOLD(ch),
-          GET_BANK_GOLD(ch), 0);
+  if (!Crash_write_safe_file(ch, RENT_CRYO, 0, "cryosave"))
+    return;
 
   for (j = 0; j < NUM_WEARS; j++)
     if (GET_EQ(ch, j))
     {
-      if (!Crash_save(GET_EQ(ch, j), fp, j + 1))
-      {
-        fclose(fp);
-        return;
-      }
-      Crash_restore_weight(GET_EQ(ch, j));
       Crash_extract_objs(GET_EQ(ch, j));
     }
-  if (!Crash_save(ch->carrying, fp, 0))
-  {
-    fclose(fp);
-    return;
-  }
-  fclose(fp);
 
   Crash_extract_objs(ch->carrying);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_CRYO);
@@ -1142,6 +1154,12 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
   struct extra_descr_data *new_descr;
   int rentcode, timed, netcost, gold, account, nitems;
   char f1[READ_SIZE], f2[READ_SIZE], f3[READ_SIZE], f4[READ_SIZE];
+
+  if (is_json_file(fl))
+  {
+    fclose(fl);
+    return json_player_objects_load(filename, ch);
+  }
 
   if (!feof(fl))
     get_line(fl, line);

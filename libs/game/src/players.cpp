@@ -25,6 +25,7 @@
 #include "dbat/game/genolc.h"
 
 #include <unistd.h>
+#include <cctype>
 
 #define LOAD_HIT	0
 #define LOAD_MANA	1
@@ -250,12 +251,34 @@ void load_follower_from_file(FILE *fl, struct char_data *ch)
 
 #define NUM_OF_SAVE_THROWS	3
 
+static bool is_json_file(FILE *fl)
+{
+  if (!fl)
+    return false;
+
+  int ch = 0;
+  do {
+    ch = fgetc(fl);
+  } while (ch != EOF && isspace(static_cast<unsigned char>(ch)));
+
+  if (ch == EOF) {
+    clearerr(fl);
+    fseek(fl, 0, SEEK_SET);
+    return false;
+  }
+
+  const bool is_json = ch == '{' || ch == '[';
+  fseek(fl, 0, SEEK_SET);
+  return is_json;
+}
+
 /* new load_char reads ASCII Player Files */
 /* Load a char, TRUE if loaded, FALSE if not */
 int load_char(const char *name, struct char_data *ch)
 {
   int id, i, num = 0, num2 = 0, num3 = 0;
   FILE *fl;
+  bool loaded_json = false;
   char fname[READ_SIZE];
   char buf[128], buf2[128], line[MAX_INPUT_LENGTH + 1], tag[6];
   char f1[128], f2[128], f3[128], f4[128];
@@ -438,7 +461,17 @@ int load_char(const char *name, struct char_data *ch)
     for (i = 0; i < NUM_COLOR; i++)
       ch->player_specials->color_choices[i] = NULL;
 
-    while (get_line(fl, line)) {
+    if (is_json_file(fl)) {
+      fclose(fl);
+      fl = NULL;
+      if (json_player_load(fname, ch) < 0) {
+        mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: JSON player load failed for %s", fname);
+        return (-1);
+      }
+      loaded_json = true;
+    }
+
+    while (!loaded_json && get_line(fl, line)) {
       tag_argument(line, tag);
 
       switch (*tag) {
@@ -738,7 +771,8 @@ int load_char(const char *name, struct char_data *ch)
     GET_COND(ch, THIRST) = -1;
     GET_COND(ch, DRUNK) = -1;
   }
-  fclose(fl);
+  if (fl)
+    fclose(fl);
   return(id);
 }
 
@@ -830,13 +864,15 @@ void load_char_pets(struct char_data *ch)
 /* This is the ASCII Player Files save routine */
 void save_char(struct char_data * ch)
 {
-  FILE *fl;
+  FILE *fl = NULL;
   char fname[40], buf[MAX_STRING_LENGTH];
   int i, id, save_index = FALSE;
   struct affected_type *aff, tmp_aff[MAX_AFFECT], tmp_affv[MAX_AFFECT];
   struct obj_data *char_eq[NUM_WEARS];
   char fbuf1[MAX_STRING_LENGTH], fbuf2[MAX_STRING_LENGTH];
   char fbuf3[MAX_STRING_LENGTH], fbuf4[MAX_STRING_LENGTH];
+  bool save_ok = false;
+  bool wrote_json = false;
 
   if (IS_NPC(ch) || GET_PFILEPOS(ch) < 0)
     return;
@@ -855,6 +891,12 @@ void save_char(struct char_data * ch)
       }
     }
 
+    if (ch->desc->user && *ch->desc->user) {
+      if (GET_LOG_USER(ch))
+        free(GET_LOG_USER(ch));
+      GET_LOG_USER(ch) = strdup(ch->desc->user);
+    }
+
     /*
      * We only update the time.played and time.logon if the character
      * is playing.
@@ -867,10 +909,6 @@ void save_char(struct char_data * ch)
 
   if (!get_filename(fname, sizeof(fname), PLR_FILE, GET_NAME(ch)))
     return;
-  if (!(fl = fopen(fname, "w"))) {
-    mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: Couldn't open player file %s for write", fname);
-    return;
-  }
 
   /* remove affects from eq and spells (from char_to_store) */
   /* Unaffect everything a character can be affected by */
@@ -943,6 +981,20 @@ void save_char(struct char_data * ch)
   ch->aff_abils = ch->real_abils;
 
   /* end char_to_store code */
+
+  if (json_player_save(fname, ch) >= 0) {
+    wrote_json = true;
+    save_ok = true;
+  } else {
+    mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: JSON player save failed for %s", fname);
+    if (!(fl = fopen(fname, "w"))) {
+      mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: Couldn't open player file %s for write", fname);
+      goto restore_state;
+    }
+  }
+
+  if (wrote_json)
+    goto after_file_write;
 
   if (GET_NAME(ch))				fprintf(fl, "Name: %s\n", GET_NAME(ch));
   if (GET_USER(ch))                             fprintf(fl, "User: %s\n", GET_USER(ch));
@@ -1209,8 +1261,13 @@ void save_char(struct char_data * ch)
     }
 
   fclose(fl);
+  save_ok = true;
+
+after_file_write:
 
   /* more char_to_store code to restore affects */
+
+restore_state:
 
   /* add spell and eq affections back in now */
   for (i = 0; i < MAX_AFFECT; i++) {
@@ -1237,6 +1294,10 @@ void save_char(struct char_data * ch)
 
   /* end char_to_store code */
  
+  if (!save_ok)
+    return;
+
+save_index_update:
   if ((id = get_ptable_by_name(GET_NAME(ch))) < 0)
     return;
 

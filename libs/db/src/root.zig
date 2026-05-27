@@ -46,6 +46,7 @@ comptime {
     std.testing.refAllDecls(characters_json);
     std.testing.refAllDecls(shops_json);
     std.testing.refAllDecls(guilds_json);
+    std.testing.refAllDecls(players_json);
 }
 
 fn forceApiExports(comptime module: type) void {
@@ -58,6 +59,7 @@ pub fn init(allocator: std.mem.Allocator, io: std.Io) !void {
     characters.init(allocator);
     objects.init(allocator);
     json_api.init(io);
+    players_json.init(io);
     try lua_api.init(allocator, io);
 
     try lua_api.load_lua();

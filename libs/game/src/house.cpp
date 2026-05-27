@@ -15,8 +15,10 @@
 #include "dbat/game/utils.h"
 #include "dbat/game/objsave.h"
 #include "dbat/game/fileop.h"
+#include "dbat/db/players.h"
 
 #include <errno.h>
+#include <cctype>
 
 /* local globals */
 struct house_control_rec house_control[MAX_HOUSES];
@@ -30,6 +32,27 @@ void House_restore_weight(struct obj_data *obj);
 void House_delete_file(room_vnum vnum);
 int find_house(room_vnum vnum);
 void House_save_control(void);
+
+static bool is_json_file(FILE *fl)
+{
+  if (!fl)
+    return false;
+
+  int ch = 0;
+  do {
+    ch = fgetc(fl);
+  } while (ch != EOF && isspace(static_cast<unsigned char>(ch)));
+
+  if (ch == EOF) {
+    clearerr(fl);
+    fseek(fl, 0, SEEK_SET);
+    return false;
+  }
+
+  const bool is_json = ch == '{' || ch == '[';
+  fseek(fl, 0, SEEK_SET);
+  return is_json;
+}
 
 void hcontrol_build_house(struct char_data *ch, char *arg);
 void hcontrol_destroy_house(struct char_data *ch, char *arg);
@@ -92,13 +115,28 @@ void House_restore_weight(struct obj_data *obj)
 void House_crashsave(room_vnum vnum)
 {
   int rnum;
-  char buf[MAX_STRING_LENGTH];
+  char buf[MAX_STRING_LENGTH], tmpfile[MAX_STRING_LENGTH];
   FILE *fp;
 
   if ((rnum = real_room(vnum)) == NOWHERE)
     return;
   if (!House_get_filename(vnum, buf, sizeof(buf)))
     return;
+
+  snprintf(tmpfile, sizeof(tmpfile), "%s.tmp", buf);
+  if (json_house_objects_save(tmpfile, vnum) == 0) {
+    if (rename(tmpfile, buf) == -1) {
+      log("SYSERR: Error saving JSON house file #%d: %s", vnum, strerror(errno));
+      remove(tmpfile);
+      return;
+    }
+    REMOVE_BIT_AR(ROOM_FLAGS(rnum), ROOM_HOUSE_CRASH);
+    return;
+  }
+
+  log("SYSERR: JSON house save failed for #%d; falling back to legacy house save", vnum);
+  remove(tmpfile);
+
   if (!(fp = fopen(buf, "wb"))) {
     perror("SYSERR: Error saving house file");
     return;
@@ -565,6 +603,11 @@ int House_load(room_vnum rvnum)
     return 0;
   }
 
+  if (is_json_file(fl)) {
+    fclose(fl);
+    return json_house_objects_load(cmfname, rvnum) == 0 ? 1 : 0;
+  }
+
   for (j = 0;j < MAX_BAG_ROWS;j++)
     cont_row[j] = NULL; /* empty all cont lists (you never know ...) */
 
@@ -793,4 +836,3 @@ int House_load(room_vnum rvnum)
 
     return 1;
 }
-
