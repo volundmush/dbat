@@ -87,6 +87,13 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "der_base", luaCharacterDerivedBase);
     addMethod(lua, "der_total", luaCharacterDerivedTotal);
     addMethod(lua, "der_invalidate", luaCharacterDerivedInvalidate);
+    addMethod(lua, "meter_get", luaCharacterMeterGet);
+    addMethod(lua, "meter_set", luaCharacterMeterSet);
+    addMethod(lua, "meter_mod", luaCharacterMeterMod);
+    addMethod(lua, "meter_set_int", luaCharacterMeterSetInt);
+    addMethod(lua, "meter_mod_int", luaCharacterMeterModInt);
+    addMethod(lua, "meter_current", luaCharacterMeterCurrent);
+    addMethod(lua, "meter_max", luaCharacterMeterMax);
     addMethod(lua, "inventory_count", luaCharacterInventoryCount);
     addMethod(lua, "equipment_count", luaCharacterEquipmentCount);
     addMethod(lua, "inventory_get", luaCharacterInventoryGet);
@@ -388,6 +395,41 @@ fn luaCharacterDerivedTotal(lua: *Lua) i32 {
 fn luaCharacterDerivedInvalidate(lua: *Lua) i32 {
     cdb.char_der_invalidate(checkCharacter(lua));
     return 0;
+}
+
+fn luaCharacterMeterGet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_meter_get(checkCharacter(lua), string(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterMeterSet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_meter_set(checkCharacter(lua), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "meter value")));
+    return 1;
+}
+
+fn luaCharacterMeterMod(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_meter_mod(checkCharacter(lua), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "meter delta")));
+    return 1;
+}
+
+fn luaCharacterMeterSetInt(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_meter_set_int(checkCharacter(lua), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "meter current")));
+    return 1;
+}
+
+fn luaCharacterMeterModInt(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_meter_mod_int(checkCharacter(lua), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "meter current delta")));
+    return 1;
+}
+
+fn luaCharacterMeterCurrent(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_meter_current(checkCharacter(lua), string(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterMeterMax(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_meter_max(checkCharacter(lua), string(lua, 2)));
+    return 1;
 }
 
 fn luaCharacterInventoryCount(lua: *Lua) i32 {

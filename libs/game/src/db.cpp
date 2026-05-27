@@ -902,9 +902,12 @@ static void load_assets(void) {
     }
   } else {
     boot_world();
-    log("Exporting JSON assets.");
-    if (json_export_all(asset_root) != 0)
-      log("SYSERR: Failed to export JSON assets to %s.", asset_root);
+    if(!directory_exists(asset_root)) {
+      log("Exporting JSON assets.");
+      if (json_export_all(asset_root) != 0)
+        log("SYSERR: Failed to export JSON assets to %s.", asset_root);
+    }
+    
   }
 
   log("Loading help entries.");

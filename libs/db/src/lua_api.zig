@@ -20,6 +20,7 @@ const categories = [_][]const u8{
     "commands",
     "derived",
     "modifiers",
+    "meters",
     "ocommands",
     "races",
     "senseis",
@@ -90,14 +91,34 @@ pub const StatDefinition = struct {
 };
 
 pub const DerivedDefinition = struct {
+    pub const max_legacy_modifiers = 16;
+
+    pub const LegacyModifier = struct {
+        location: c_int,
+        specific: c_int,
+    };
+
     base_stat_storage: [64]u8 = undefined,
     base_stat_len: usize = 0,
+    legacy_modifiers: [max_legacy_modifiers]LegacyModifier = undefined,
+    legacy_modifier_count: usize = 0,
+    no_modifiers: bool = false,
     min_value: ?i64 = null,
     max_value: ?i64 = null,
 
     pub fn baseStat(self: *const DerivedDefinition, fallback: []const u8) []const u8 {
         if (self.base_stat_len == 0) return fallback;
         return self.base_stat_storage[0..self.base_stat_len];
+    }
+};
+
+pub const MeterDefinition = struct {
+    derived_stat_storage: [64]u8 = undefined,
+    derived_stat_len: usize = 0,
+
+    pub fn derivedStat(self: *const MeterDefinition, fallback: []const u8) []const u8 {
+        if (self.derived_stat_len == 0) return fallback;
+        return self.derived_stat_storage[0..self.derived_stat_len];
     }
 };
 
@@ -201,6 +222,45 @@ pub fn derivedDefinition(name: []const u8) ?DerivedDefinition {
         @memcpy(definition.base_stat_storage[0..len], base_stat[0..len]);
         definition.base_stat_len = len;
     }
+    definition.no_modifiers = hasTag(-1, "no_modifiers");
+    readLegacyModifiers(-1, &definition);
+    return definition;
+}
+
+pub fn calculateDerivedBase(ch: *cdb.char_data, name: []const u8) ?i64 {
+    if (!initialized or name.len == 0) return null;
+    if (!(pushThing("derived", name) catch return null)) return null;
+    defer pop(1);
+
+    const lua = lua_state.?;
+    if (lua.getField(-1, "calculate_base") != .function) {
+        lua.pop(1);
+        return null;
+    }
+
+    characters_lua.pushCharacter(lua, ch.id);
+    lua.protectedCall(.{ .args = 1, .results = 1 }) catch |err| {
+        const error_text = lua.toString(-1) catch @errorName(err);
+        std.log.err("derived {s} calculate_base failed: {s}", .{ name, error_text });
+        lua.pop(1);
+        return null;
+    };
+    defer lua.pop(1);
+    return lua.toInteger(-1) catch null;
+}
+
+pub fn meterDefinition(name: []const u8) ?MeterDefinition {
+    if (!initialized or name.len == 0) return null;
+    if (!(pushThing("meters", name) catch return null)) return null;
+    defer pop(1);
+
+    var definition = MeterDefinition{};
+    const derived_stat = optionalStringField(-1, "derived_stat") orelse optionalStringField(-1, "derived");
+    if (derived_stat) |value| {
+        const len = @min(value.len, definition.derived_stat_storage.len);
+        @memcpy(definition.derived_stat_storage[0..len], value[0..len]);
+        definition.derived_stat_len = len;
+    }
     return definition;
 }
 
@@ -220,6 +280,74 @@ fn optionalStringField(index: i32, comptime field_name: [:0]const u8) ?[]const u
     const value = lua.toString(-1) catch return null;
     if (value.len == 0) return null;
     return value;
+}
+
+fn hasTag(index: i32, tag: []const u8) bool {
+    const lua = lua_state.?;
+    if (lua.getField(index, "tags") != .table) {
+        lua.pop(1);
+        return false;
+    }
+    defer lua.pop(1);
+
+    var pos: zlua.Integer = 1;
+    while (lua.getIndex(-1, pos) != .nil) : (pos += 1) {
+        const value = lua.toString(-1) catch {
+            lua.pop(1);
+            continue;
+        };
+        const found = std.mem.eql(u8, value, tag);
+        lua.pop(1);
+        if (found) return true;
+    }
+    lua.pop(1);
+    return false;
+}
+
+fn readLegacyModifiers(index: i32, definition: *DerivedDefinition) void {
+    const lua = lua_state.?;
+    if (lua.getField(index, "legacy_modifiers") != .table) {
+        lua.pop(1);
+        return;
+    }
+    defer lua.pop(1);
+
+    var pos: zlua.Integer = 1;
+    while (definition.legacy_modifier_count < DerivedDefinition.max_legacy_modifiers) : (pos += 1) {
+        if (lua.getIndex(-1, pos) == .nil) {
+            lua.pop(1);
+            break;
+        }
+        if (!lua.isTable(-1)) {
+            lua.pop(1);
+            continue;
+        }
+
+        const location = tableInteger(-1, 1) orelse {
+            lua.pop(1);
+            continue;
+        };
+        const specific = tableInteger(-1, 2) orelse 0;
+        const location_int = std.math.cast(c_int, location) orelse {
+            lua.pop(1);
+            continue;
+        };
+        const specific_int = std.math.cast(c_int, specific) orelse {
+            lua.pop(1);
+            continue;
+        };
+        definition.legacy_modifiers[definition.legacy_modifier_count] = .{ .location = location_int, .specific = specific_int };
+        definition.legacy_modifier_count += 1;
+        lua.pop(1);
+    }
+}
+
+fn tableInteger(index: i32, pos: zlua.Integer) ?i64 {
+    const lua = lua_state.?;
+    const value_type = lua.getIndex(index, pos);
+    defer lua.pop(1);
+    if (value_type == .nil) return null;
+    return lua.toInteger(-1) catch null;
 }
 
 fn configureStandardLibraries(lua: *Lua) void {
@@ -277,6 +405,7 @@ fn luaReplPrint(lua: *Lua) i32 {
     };
 
     const top = lua.getTop();
+    cdb.desc_send_text(repl.descriptor, "@c> @n");
     var i: i32 = 1;
     while (i <= top) : (i += 1) {
         if (i > 1) cdb.desc_send_text(repl.descriptor, "\t");
@@ -379,7 +508,7 @@ pub export fn lua_repl_launch(d: *cdb.descriptor_data) void {
 
     d.connected = cdb.CON_LUA;
     cdb.desc_send_text(d, "@GLua REPL@n started. Type @Yexit@n, @Yquit@n, or @Yclose@n to return to normal play.\r\n");
-    cdb.desc_send_text(d, "@c> @n");
+    cdb.desc_send_text(d, "@c< @n");
 }
 
 pub export fn lua_repl_close(d: *cdb.descriptor_data) void {
@@ -397,7 +526,7 @@ pub export fn lua_repl_close(d: *cdb.descriptor_data) void {
 pub export fn lua_repl_parse(d: *cdb.descriptor_data, arg: [*:0]const u8) void {
     const line = std.mem.trim(u8, std.mem.span(arg), " \t\r\n");
     if (line.len == 0) {
-        cdb.desc_send_text(d, "@c> @n");
+        cdb.desc_send_text(d, "@c< @n");
         return;
     }
 
@@ -411,7 +540,7 @@ pub export fn lua_repl_parse(d: *cdb.descriptor_data, arg: [*:0]const u8) void {
     defer active_repl = null;
 
     evalReplLine(d, line);
-    cdb.desc_send_text(d, "@c> @n");
+    cdb.desc_send_text(d, "@c< @n");
 }
 
 fn ensureRepl(d: *cdb.descriptor_data) ?*LuaRepl {
@@ -549,6 +678,7 @@ fn sendLuaResults(d: *cdb.descriptor_data, lua: *Lua, previous_top: i32) void {
 
     var i: i32 = previous_top + 1;
     while (i <= lua.getTop()) : (i += 1) {
+        cdb.desc_send_text(d, "@c> @n");
         sendLuaValue(d, lua, i);
         cdb.desc_send_text(d, "\r\n");
     }
@@ -561,7 +691,7 @@ fn sendLuaValue(d: *cdb.descriptor_data, lua: *Lua, index: i32) void {
 }
 
 fn sendLuaError(d: *cdb.descriptor_data, lua: *Lua, err: anyerror) void {
-    cdb.desc_send_text(d, "@RLua error:@n ");
+    cdb.desc_send_text(d, "@c> @n@RLua error:@n ");
     const message = lua.toString(-1) catch @errorName(err);
     cdb.desc_send_text(d, message.ptr);
     cdb.desc_send_text(d, "\r\n");

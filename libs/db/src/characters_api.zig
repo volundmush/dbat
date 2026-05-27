@@ -19,13 +19,15 @@ const SkillData = struct {
     perf: i64,
 };
 
+const meter_scale: i64 = 1_000_000;
+
 const CharacterData = struct {
     stats: std.StringHashMap(i64),
     deriveds: std.StringHashMap(DerivedData),
     modifiers: modifiers_api.ModifierCache,
     deriveds_dirty: bool,
     transforms: std.StringHashMap(TransformData),
-    meters: std.StringHashMap(f64),
+    meters: std.StringHashMap(i64),
     skills: std.StringHashMap(SkillData),
 
     pub fn init(alloc: std.mem.Allocator) CharacterData {
@@ -35,7 +37,7 @@ const CharacterData = struct {
             .modifiers = modifiers_api.ModifierCache.init(alloc),
             .deriveds_dirty = true,
             .transforms = std.StringHashMap(TransformData).init(alloc),
-            .meters = std.StringHashMap(f64).init(alloc),
+            .meters = std.StringHashMap(i64).init(alloc),
             .skills = std.StringHashMap(SkillData).init(alloc),
         };
     }
@@ -369,11 +371,16 @@ pub export fn char_der_get_base(ch: *cdb.char_data, stat: ?[*:0]const u8) i64 {
 
 fn charDerGetBaseName(ch: *cdb.char_data, name: []const u8) i64 {
     const definition = lua_api.derivedDefinition(name) orelse return 0;
+    if (lua_api.calculateDerivedBase(ch, name)) |value| return value;
     return charStatGetName(ch, definition.baseStat(name));
 }
 
 pub export fn char_der_get_total(ch: *cdb.char_data, stat: ?[*:0]const u8) i64 {
     const name = statName(stat) orelse return 0;
+    return charDerGetTotalName(ch, name);
+}
+
+fn charDerGetTotalName(ch: *cdb.char_data, name: []const u8) i64 {
     const definition = lua_api.derivedDefinition(name) orelse return 0;
     const zigdata = char_ensure_zigdata(ch) orelse return 0;
 
@@ -382,6 +389,7 @@ pub export fn char_der_get_total(ch: *cdb.char_data, stat: ?[*:0]const u8) i64 {
     }
 
     if (zigdata.modifiers.dirty) zigdata.modifiers.rebuild(ch);
+    if (!definition.no_modifiers) addLegacyDerivedModifiers(ch, zigdata, name, definition);
     const total = calculateDerivedTotal(ch, zigdata, name, definition);
     cacheDerived(zigdata, name, total);
     return total;
@@ -400,26 +408,28 @@ fn calculateDerivedTotal(ch: *cdb.char_data, zigdata: *CharacterData, name: []co
     var max_override: ?i64 = null;
     var set_override: ?i64 = null;
 
-    if (zigdata.modifiers.modifiersFor("derived", name)) |modifiers| {
-        for (modifiers) |modifier| {
-            switch (modifier.kind) {
-                .flat => flat += modifier.value,
-                .percent => percent += modifier.value,
-                .multiplier => {},
-                .override_min => min_override = if (min_override) |current| @max(current, modifier.value) else modifier.value,
-                .override_max => max_override = if (max_override) |current| @min(current, modifier.value) else modifier.value,
-                .set => set_override = modifier.value,
+    if (!definition.no_modifiers) {
+        if (zigdata.modifiers.modifiersFor("derived", name)) |modifiers| {
+            for (modifiers) |modifier| {
+                switch (modifier.kind) {
+                    .flat => flat += modifier.value,
+                    .percent => percent += modifier.value,
+                    .multiplier => {},
+                    .override_min => min_override = if (min_override) |current| @max(current, modifier.value) else modifier.value,
+                    .override_max => max_override = if (max_override) |current| @min(current, modifier.value) else modifier.value,
+                    .set => set_override = modifier.value,
+                }
             }
-        }
 
-        value += flat;
-        if (percent != 0) value += @divTrunc(value * percent, modifiers_api.scale);
-        for (modifiers) |modifier| {
-            if (modifier.kind == .multiplier) value = @divTrunc(value * modifier.value, modifiers_api.scale);
+            value += flat;
+            if (percent != 0) value += @divTrunc(value * percent, modifiers_api.scale);
+            for (modifiers) |modifier| {
+                if (modifier.kind == .multiplier) value = @divTrunc(value * modifier.value, modifiers_api.scale);
+            }
+        } else {
+            value += flat;
+            if (percent != 0) value += @divTrunc(value * percent, modifiers_api.scale);
         }
-    } else {
-        value += flat;
-        if (percent != 0) value += @divTrunc(value * percent, modifiers_api.scale);
     }
 
     if (definition.min_value) |min| value = @max(value, min);
@@ -428,6 +438,12 @@ fn calculateDerivedTotal(ch: *cdb.char_data, zigdata: *CharacterData, name: []co
     if (max_override) |max| value = @min(value, max);
     if (set_override) |set| value = set;
     return value;
+}
+
+fn addLegacyDerivedModifiers(ch: *cdb.char_data, zigdata: *CharacterData, name: []const u8, definition: lua_api.DerivedDefinition) void {
+    for (definition.legacy_modifiers[0..definition.legacy_modifier_count]) |modifier| {
+        modifiers_api.addLegacyDerivedFlat(&zigdata.modifiers, ch, name, modifier.location, modifier.specific);
+    }
 }
 
 fn cacheDerived(zigdata: *CharacterData, name: []const u8, value: i64) void {
@@ -458,31 +474,90 @@ fn clearDerivedCache(zigdata: *CharacterData) void {
     zigdata.deriveds.clearRetainingCapacity();
 }
 
-pub export fn char_meter_get(ch: *cdb.char_data, meter: ?[*:0]const u8) f64 {
-    if (meter == null) return 0;
+pub export fn char_meter_get(ch: *cdb.char_data, meter: ?[*:0]const u8) i64 {
+    const name = statName(meter) orelse return 0;
     const zigdata = char_ensure_zigdata(ch) orelse return 0;
-    return zigdata.meters.get(std.mem.span(meter.?)) orelse 0;
+    return zigdata.meters.get(name) orelse meter_scale;
 }
 
-pub export fn char_meter_set(ch: *cdb.char_data, meter: ?[*:0]const u8, value: f64) f64 {
-    const name = if (meter) |ptr| std.mem.span(ptr) else return 0;
-    if (name.len == 0) return 0;
+pub export fn char_meter_set(ch: *cdb.char_data, meter: ?[*:0]const u8, value: i64) i64 {
+    const name = statName(meter) orelse return 0;
+    const clamped = clampMeter(value);
 
     const zigdata = char_ensure_zigdata(ch) orelse return 0;
     if (zigdata.meters.getPtr(name)) |existing| {
-        existing.* = value;
-        return value;
+        existing.* = clamped;
+        syncLegacyMeter(ch, name, clamped);
+        return clamped;
     }
 
     const owned_name = std.heap.page_allocator.dupe(u8, name) catch return 0;
-    zigdata.meters.put(owned_name, value) catch {
+    zigdata.meters.put(owned_name, clamped) catch {
         std.heap.page_allocator.free(owned_name);
         return 0;
     };
-    return value;
+    syncLegacyMeter(ch, name, clamped);
+    return clamped;
 }
 
-pub export fn char_meter_mod(ch: *cdb.char_data, meter: ?[*:0]const u8, mod: f64) f64 {
+pub export fn char_meter_mod(ch: *cdb.char_data, meter: ?[*:0]const u8, mod: i64) i64 {
     const value = char_meter_get(ch, meter) + mod;
     return char_meter_set(ch, meter, value);
+}
+
+pub export fn char_meter_set_int(ch: *cdb.char_data, meter: ?[*:0]const u8, value: i64) i64 {
+    const name = statName(meter) orelse return 0;
+    const max = charMeterMaxName(ch, name);
+    if (max <= 0) return char_meter_set(ch, meter, 0);
+    return char_meter_set(ch, meter, @divTrunc(value * meter_scale, max));
+}
+
+pub export fn char_meter_mod_int(ch: *cdb.char_data, meter: ?[*:0]const u8, mod: i64) i64 {
+    const name = statName(meter) orelse return 0;
+    return char_meter_set_int(ch, meter, charMeterCurrentName(ch, name) + mod);
+}
+
+pub export fn char_meter_current(ch: *cdb.char_data, meter: ?[*:0]const u8) i64 {
+    const name = statName(meter) orelse return 0;
+    return charMeterCurrentName(ch, name);
+}
+
+pub export fn char_meter_max(ch: *cdb.char_data, meter: ?[*:0]const u8) i64 {
+    const name = statName(meter) orelse return 0;
+    return charMeterMaxName(ch, name);
+}
+
+fn charMeterCurrentName(ch: *cdb.char_data, name: []const u8) i64 {
+    const max = charMeterMaxName(ch, name);
+    if (max <= 0) return 0;
+    const zigdata = char_ensure_zigdata(ch) orelse return 0;
+    const current = zigdata.meters.get(name) orelse meter_scale;
+    return @divTrunc(current * max, meter_scale);
+}
+
+fn charMeterMaxName(ch: *cdb.char_data, name: []const u8) i64 {
+    const definition = lua_api.meterDefinition(name) orelse return 0;
+    return charDerGetTotalName(ch, definition.derivedStat(name));
+}
+
+fn clampMeter(value: i64) i64 {
+    return @min(@max(value, 0), meter_scale);
+}
+
+fn syncLegacyMeter(ch: *cdb.char_data, name: []const u8, value: i64) void {
+    const as_float = meterFixedToFloat(value);
+    if (std.mem.eql(u8, name, "powerlevel")) ch.health = as_float;
+    if (std.mem.eql(u8, name, "ki")) ch.energy = as_float;
+    if (std.mem.eql(u8, name, "stamina")) ch.stamina = as_float;
+    if (std.mem.eql(u8, name, "lifeforce")) ch.life = as_float;
+}
+
+pub fn meterFloatToFixed(value: f64) i64 {
+    if (std.math.isNan(value)) return 0;
+    const clamped = @min(@max(value, 0.0), 1.0);
+    return @intFromFloat(clamped * @as(f64, @floatFromInt(meter_scale)));
+}
+
+pub fn meterFixedToFloat(value: i64) f64 {
+    return @as(f64, @floatFromInt(clampMeter(value))) / @as(f64, @floatFromInt(meter_scale));
 }

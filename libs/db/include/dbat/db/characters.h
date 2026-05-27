@@ -629,13 +629,22 @@ int64_t char_der_get_base(struct char_data *ch, const char *stat);
 int64_t char_der_get_total(struct char_data *ch, const char *stat);
 void char_der_invalidate(struct char_data *ch);
 
-double char_meter_get(struct char_data *ch, const char *meter);
-double char_meter_set(struct char_data *ch, const char *meter, double value);
+int64_t char_meter_get(struct char_data *ch, const char *meter);
+int64_t char_meter_set(struct char_data *ch, const char *meter, int64_t value);
 int64_t char_meter_set_int(struct char_data *ch, const char *meter, int64_t value);
-double char_meter_mod(struct char_data *ch, const char *meter, double mod);
+int64_t char_meter_mod(struct char_data *ch, const char *meter, int64_t mod);
 int64_t char_meter_mod_int(struct char_data *ch, const char *meter, int64_t mod);
 int64_t char_meter_current(struct char_data *ch, const char *meter);
 int64_t char_meter_max(struct char_data *ch, const char *meter);
+
+int64_t char_skill_base_get(struct char_data *ch, const char* skill);
+int64_t char_skill_base_set(struct char_data *ch, const char* skill, int64_t value);
+int64_t char_skill_base_mod(struct char_data *ch, const char* skill, int64_t mod);
+int64_t char_skill_bonus_get(struct char_data *ch, const char* skill);
+int64_t char_skill_total_get(struct char_data *ch, const char* skill);
+int64_t char_skill_perf_get(struct char_data *ch, const char* skill);
+int64_t char_skill_perf_set(struct char_data *ch, const char* skill, int64_t value);
+int64_t char_skill_perf_mod(struct char_data *ch, const char* skill, int64_t mod);
 
 // Below this is globals and database functions
 extern struct char_data *character_list;

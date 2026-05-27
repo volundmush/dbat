@@ -3,6 +3,7 @@ const cdb = @import("cdb");
 const jsonx = @import("flags_json.zig");
 const bitflags = @import("flags.zig");
 const dgscripts_json = @import("dgscripts_json.zig");
+const characters_api = @import("characters_api.zig");
 
 pub const JsonValue = jsonx.JsonValue;
 
@@ -36,6 +37,8 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
     try putStat(&stats, allocator, "agility", ch.real_abils.dex, false);
     try putStat(&stats, allocator, "constitution", ch.real_abils.con, false);
     try putStat(&stats, allocator, "speed", ch.real_abils.cha, false);
+    try putStat(&stats, allocator, "height", ch.height, false);
+    try putStat(&stats, allocator, "weight", ch.weight, false);
 
     try jsonx.putString(&object, allocator, "name", cdb.char_name_get(ch));
     try jsonx.putString(&object, allocator, "description", cdb.char_description_get(ch));
@@ -422,6 +425,14 @@ fn deserializeSharedStats(ch: *cdb.char_data, stats: JsonValue) !void {
         ch.real_abils.cha = v;
         _ = cdb.char_stat_set(ch, "speed", v);
     }
+    if (try jsonx.intField(stats, "height", u8)) |v| {
+        ch.height = v;
+        _ = cdb.char_stat_set(ch, "height", v);
+    }
+    if (try jsonx.intField(stats, "weight", u8)) |v| {
+        ch.weight = v;
+        _ = cdb.char_stat_set(ch, "weight", v);
+    }
     if (try jsonx.intField(stats, "money", c_int)) |v| {
         ch.gold = v;
         _ = cdb.char_stat_set(ch, "money", v);
@@ -485,19 +496,19 @@ fn deserializeMeters(ch: *cdb.char_data, meters: JsonValue) !void {
     if (meters != .object) return error.ExpectedObject;
     if (try jsonx.floatField(meters, "powerlevel", f64)) |v| {
         ch.health = v;
-        _ = cdb.char_meter_set(ch, "powerlevel", v);
+        _ = cdb.char_meter_set(ch, "powerlevel", characters_api.meterFloatToFixed(v));
     }
     if (try jsonx.floatField(meters, "ki", f64)) |v| {
         ch.energy = v;
-        _ = cdb.char_meter_set(ch, "ki", v);
+        _ = cdb.char_meter_set(ch, "ki", characters_api.meterFloatToFixed(v));
     }
     if (try jsonx.floatField(meters, "stamina", f64)) |v| {
         ch.stamina = v;
-        _ = cdb.char_meter_set(ch, "stamina", v);
+        _ = cdb.char_meter_set(ch, "stamina", characters_api.meterFloatToFixed(v));
     }
     if (try jsonx.floatField(meters, "lifeforce", f64)) |v| {
         ch.life = v;
-        _ = cdb.char_meter_set(ch, "lifeforce", v);
+        _ = cdb.char_meter_set(ch, "lifeforce", characters_api.meterFloatToFixed(v));
     }
 }
 
