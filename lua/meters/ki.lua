@@ -1,5 +1,5 @@
 return {
     id = "ki",
     name = "Ki",
-    derived = "ki",
+    derived_stat = "ki",
 }

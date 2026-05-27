@@ -122,7 +122,11 @@ long event_time(struct event *event)
 /* frees all events in the queue */
 void event_free_all(void)
 {
+  if (!event_q)
+    return;
+
   queue_free(event_q);
+  event_q = NULL;
 }
 
 /* boolean function to tell whether an event is queued or not */
@@ -282,4 +286,3 @@ void queue_free(struct queue *q)
 
   free(q);
 }
-

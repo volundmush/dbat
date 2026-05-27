@@ -5,13 +5,20 @@ const objects_lua = @import("objects_lua.zig");
 
 const Lua = zlua.Lua;
 const character_metatable = "dbat.Character";
+const condition_metatable = "dbat.Condition";
 
 const CharacterHandle = extern struct {
     id: i64,
 };
 
+const ConditionHandle = extern struct {
+    character_id: i64,
+    condition: [64:0]u8,
+};
+
 pub fn register(lua: *Lua) void {
     registerCharacterMetatable(lua);
+    registerConditionMetatable(lua);
 
     lua.newTable();
     lua.pushFunction(zlua.wrap(luaCharacterById));
@@ -84,6 +91,34 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "stat_get", luaCharacterStatGet);
     addMethod(lua, "stat_set", luaCharacterStatSet);
     addMethod(lua, "stat_mod", luaCharacterStatMod);
+    addMethod(lua, "der_base", luaCharacterDerivedBase);
+    addMethod(lua, "der_total", luaCharacterDerivedTotal);
+    addMethod(lua, "der_invalidate", luaCharacterDerivedInvalidate);
+    addMethod(lua, "meter_get", luaCharacterMeterGet);
+    addMethod(lua, "meter_set", luaCharacterMeterSet);
+    addMethod(lua, "meter_mod", luaCharacterMeterMod);
+    addMethod(lua, "meter_set_int", luaCharacterMeterSetInt);
+    addMethod(lua, "meter_mod_int", luaCharacterMeterModInt);
+    addMethod(lua, "meter_current", luaCharacterMeterCurrent);
+    addMethod(lua, "meter_max", luaCharacterMeterMax);
+    addMethod(lua, "skill_base_get", luaCharacterSkillBaseGet);
+    addMethod(lua, "skill_base_set", luaCharacterSkillBaseSet);
+    addMethod(lua, "skill_base_mod", luaCharacterSkillBaseMod);
+    addMethod(lua, "skill_modifier_get", luaCharacterSkillModifierGet);
+    addMethod(lua, "skill_total_get", luaCharacterSkillTotalGet);
+    addMethod(lua, "skill_get", luaCharacterSkillTotalGet);
+    addMethod(lua, "skill_perf_get", luaCharacterSkillPerfGet);
+    addMethod(lua, "skill_perf_set", luaCharacterSkillPerfSet);
+    addMethod(lua, "skill_perf_mod", luaCharacterSkillPerfMod);
+    addMethod(lua, "condition_has", luaCharacterConditionHas);
+    addMethod(lua, "condition_add", luaCharacterConditionAdd);
+    addMethod(lua, "condition_remove", luaCharacterConditionRemove);
+    addMethod(lua, "condition", luaCharacterCondition);
+    addMethod(lua, "condition_number_get", luaCharacterConditionNumberGet);
+    addMethod(lua, "condition_number_set", luaCharacterConditionNumberSet);
+    addMethod(lua, "condition_number_mod", luaCharacterConditionNumberMod);
+    addMethod(lua, "condition_string_get", luaCharacterConditionStringGet);
+    addMethod(lua, "condition_string_set", luaCharacterConditionStringSet);
     addMethod(lua, "inventory_count", luaCharacterInventoryCount);
     addMethod(lua, "equipment_count", luaCharacterEquipmentCount);
     addMethod(lua, "inventory_get", luaCharacterInventoryGet);
@@ -91,6 +126,26 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "inventory", luaCharacterInventoryGet);
     addMethod(lua, "equipment", luaCharacterEquipmentGet);
 
+    lua.pop(1);
+}
+
+fn registerConditionMetatable(lua: *Lua) void {
+    lua.newMetatable(condition_metatable) catch {
+        lua.pop(1);
+        return;
+    };
+    lua.pushValue(-1);
+    lua.setField(-2, "__index");
+    addMethod(lua, "id", luaConditionId);
+    addMethod(lua, "stacks", luaConditionStacks);
+    addMethod(lua, "stacks_set", luaConditionStacksSet);
+    addMethod(lua, "duration", luaConditionDuration);
+    addMethod(lua, "duration_set", luaConditionDurationSet);
+    addMethod(lua, "number_get", luaConditionNumberGet);
+    addMethod(lua, "number_set", luaConditionNumberSet);
+    addMethod(lua, "number_mod", luaConditionNumberMod);
+    addMethod(lua, "string_get", luaConditionStringGet);
+    addMethod(lua, "string_set", luaConditionStringSet);
     lua.pop(1);
 }
 
@@ -106,6 +161,16 @@ pub fn pushCharacter(lua: *Lua, id: i64) void {
     lua.setMetatable(-2);
 }
 
+pub fn pushCondition(lua: *Lua, character_id: i64, condition: []const u8) void {
+    const handle = lua.newUserdata(ConditionHandle, 0);
+    handle.character_id = character_id;
+    handle.condition = std.mem.zeroes([64:0]u8);
+    const len = @min(condition.len, handle.condition.len - 1);
+    @memcpy(handle.condition[0..len], condition[0..len]);
+    _ = lua.getMetatableRegistry(condition_metatable);
+    lua.setMetatable(-2);
+}
+
 fn checkCharacterHandle(lua: *Lua) *CharacterHandle {
     return lua.testUserdata(CharacterHandle, 1, character_metatable) catch {
         lua.raiseErrorStr("expected dbat.Character", .{});
@@ -117,6 +182,20 @@ fn checkCharacter(lua: *Lua) *cdb.char_data {
     return cdb.char_by_id(handle.id) orelse {
         lua.raiseErrorStr("stale dbat.Character handle for character %d", .{handle.id});
     };
+}
+
+fn checkConditionHandle(lua: *Lua) *ConditionHandle {
+    return lua.testUserdata(ConditionHandle, 1, condition_metatable) catch {
+        lua.raiseErrorStr("expected dbat.Condition", .{});
+    };
+}
+
+fn conditionCharacter(lua: *Lua, handle: *ConditionHandle) *cdb.char_data {
+    return cdb.char_by_id(handle.character_id) orelse lua.raiseErrorStr("stale dbat.Condition character", .{});
+}
+
+fn conditionName(handle: *ConditionHandle) [*:0]const u8 {
+    return @ptrCast(&handle.condition);
 }
 
 fn integer(lua: *Lua, index: i32) zlua.Integer {
@@ -369,6 +448,209 @@ fn luaCharacterStatSet(lua: *Lua) i32 {
 
 fn luaCharacterStatMod(lua: *Lua) i32 {
     lua.pushInteger(cdb.char_stat_mod(checkCharacter(lua), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "stat delta")));
+    return 1;
+}
+
+fn luaCharacterDerivedBase(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_der_get_base(checkCharacter(lua), string(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterDerivedTotal(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_der_get_total(checkCharacter(lua), string(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterDerivedInvalidate(lua: *Lua) i32 {
+    cdb.char_der_invalidate(checkCharacter(lua));
+    return 0;
+}
+
+fn luaCharacterMeterGet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_meter_get(checkCharacter(lua), string(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterMeterSet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_meter_set(checkCharacter(lua), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "meter value")));
+    return 1;
+}
+
+fn luaCharacterMeterMod(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_meter_mod(checkCharacter(lua), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "meter delta")));
+    return 1;
+}
+
+fn luaCharacterMeterSetInt(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_meter_set_int(checkCharacter(lua), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "meter current")));
+    return 1;
+}
+
+fn luaCharacterMeterModInt(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_meter_mod_int(checkCharacter(lua), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "meter current delta")));
+    return 1;
+}
+
+fn luaCharacterMeterCurrent(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_meter_current(checkCharacter(lua), string(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterMeterMax(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_meter_max(checkCharacter(lua), string(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterSkillBaseGet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_skill_base_get(checkCharacter(lua), string(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterSkillBaseSet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_skill_base_set(checkCharacter(lua), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "skill base")));
+    return 1;
+}
+
+fn luaCharacterSkillBaseMod(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_skill_base_mod(checkCharacter(lua), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "skill base delta")));
+    return 1;
+}
+
+fn luaCharacterSkillModifierGet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_skill_modifier_get(checkCharacter(lua), string(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterSkillTotalGet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_skill_total_get(checkCharacter(lua), string(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterSkillPerfGet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_skill_perf_get(checkCharacter(lua), string(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterSkillPerfSet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_skill_perf_set(checkCharacter(lua), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "skill performance")));
+    return 1;
+}
+
+fn luaCharacterSkillPerfMod(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_skill_perf_mod(checkCharacter(lua), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "skill performance delta")));
+    return 1;
+}
+
+fn luaCharacterConditionHas(lua: *Lua) i32 {
+    lua.pushBoolean(cdb.char_condition_has(checkCharacter(lua), string(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterConditionAdd(lua: *Lua) i32 {
+    const source_category = if (lua.isNoneOrNil(3)) "lua" else string(lua, 3);
+    const source_id = if (lua.isNoneOrNil(4)) "unknown" else string(lua, 4);
+    lua.pushBoolean(cdb.char_condition_add(checkCharacter(lua), string(lua, 2), source_category, source_id));
+    return 1;
+}
+
+fn luaCharacterConditionRemove(lua: *Lua) i32 {
+    const reason = if (lua.isNoneOrNil(3)) "removed" else string(lua, 3);
+    lua.pushBoolean(cdb.char_condition_remove(checkCharacter(lua), string(lua, 2), reason));
+    return 1;
+}
+
+fn luaCharacterCondition(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const condition = string(lua, 2);
+    if (!cdb.char_condition_has(ch, condition)) {
+        lua.pushNil();
+        return 1;
+    }
+    pushCondition(lua, cdb.char_id_get(ch), condition);
+    return 1;
+}
+
+fn luaCharacterConditionNumberGet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_condition_number_get(checkCharacter(lua), string(lua, 2), string(lua, 3)));
+    return 1;
+}
+
+fn luaCharacterConditionNumberSet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_condition_number_set(checkCharacter(lua), string(lua, 2), string(lua, 3), intCastOrError(lua, i64, integer(lua, 4), "condition number")));
+    return 1;
+}
+
+fn luaCharacterConditionNumberMod(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_condition_number_mod(checkCharacter(lua), string(lua, 2), string(lua, 3), intCastOrError(lua, i64, integer(lua, 4), "condition number delta")));
+    return 1;
+}
+
+fn luaCharacterConditionStringGet(lua: *Lua) i32 {
+    pushCString(lua, cdb.char_condition_string_get(checkCharacter(lua), string(lua, 2), string(lua, 3)));
+    return 1;
+}
+
+fn luaCharacterConditionStringSet(lua: *Lua) i32 {
+    lua.pushBoolean(cdb.char_condition_string_set(checkCharacter(lua), string(lua, 2), string(lua, 3), string(lua, 4)));
+    return 1;
+}
+
+fn luaConditionId(lua: *Lua) i32 {
+    _ = lua.pushString(std.mem.span(conditionName(checkConditionHandle(lua))));
+    return 1;
+}
+
+fn luaConditionStacks(lua: *Lua) i32 {
+    const handle = checkConditionHandle(lua);
+    lua.pushInteger(cdb.char_condition_stacks_get(conditionCharacter(lua, handle), conditionName(handle)));
+    return 1;
+}
+
+fn luaConditionStacksSet(lua: *Lua) i32 {
+    const handle = checkConditionHandle(lua);
+    lua.pushInteger(cdb.char_condition_stacks_set(conditionCharacter(lua, handle), conditionName(handle), intCastOrError(lua, i64, integer(lua, 2), "condition stacks")));
+    return 1;
+}
+
+fn luaConditionDuration(lua: *Lua) i32 {
+    const handle = checkConditionHandle(lua);
+    lua.pushInteger(cdb.char_condition_duration_get(conditionCharacter(lua, handle), conditionName(handle)));
+    return 1;
+}
+
+fn luaConditionDurationSet(lua: *Lua) i32 {
+    const handle = checkConditionHandle(lua);
+    lua.pushInteger(cdb.char_condition_duration_set(conditionCharacter(lua, handle), conditionName(handle), intCastOrError(lua, i64, integer(lua, 2), "condition duration")));
+    return 1;
+}
+
+fn luaConditionNumberGet(lua: *Lua) i32 {
+    const handle = checkConditionHandle(lua);
+    lua.pushInteger(cdb.char_condition_number_get(conditionCharacter(lua, handle), conditionName(handle), string(lua, 2)));
+    return 1;
+}
+
+fn luaConditionNumberSet(lua: *Lua) i32 {
+    const handle = checkConditionHandle(lua);
+    lua.pushInteger(cdb.char_condition_number_set(conditionCharacter(lua, handle), conditionName(handle), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "condition number")));
+    return 1;
+}
+
+fn luaConditionNumberMod(lua: *Lua) i32 {
+    const handle = checkConditionHandle(lua);
+    lua.pushInteger(cdb.char_condition_number_mod(conditionCharacter(lua, handle), conditionName(handle), string(lua, 2), intCastOrError(lua, i64, integer(lua, 3), "condition number delta")));
+    return 1;
+}
+
+fn luaConditionStringGet(lua: *Lua) i32 {
+    const handle = checkConditionHandle(lua);
+    pushCString(lua, cdb.char_condition_string_get(conditionCharacter(lua, handle), conditionName(handle), string(lua, 2)));
+    return 1;
+}
+
+fn luaConditionStringSet(lua: *Lua) i32 {
+    const handle = checkConditionHandle(lua);
+    lua.pushBoolean(cdb.char_condition_string_set(conditionCharacter(lua, handle), conditionName(handle), string(lua, 2), string(lua, 3)));
     return 1;
 }
 

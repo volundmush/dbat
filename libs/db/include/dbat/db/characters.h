@@ -629,13 +629,36 @@ int64_t char_der_get_base(struct char_data *ch, const char *stat);
 int64_t char_der_get_total(struct char_data *ch, const char *stat);
 void char_der_invalidate(struct char_data *ch);
 
-double char_meter_get(struct char_data *ch, const char *meter);
-double char_meter_set(struct char_data *ch, const char *meter, double value);
+int64_t char_meter_get(struct char_data *ch, const char *meter);
+int64_t char_meter_set(struct char_data *ch, const char *meter, int64_t value);
 int64_t char_meter_set_int(struct char_data *ch, const char *meter, int64_t value);
-double char_meter_mod(struct char_data *ch, const char *meter, double mod);
+int64_t char_meter_mod(struct char_data *ch, const char *meter, int64_t mod);
 int64_t char_meter_mod_int(struct char_data *ch, const char *meter, int64_t mod);
 int64_t char_meter_current(struct char_data *ch, const char *meter);
 int64_t char_meter_max(struct char_data *ch, const char *meter);
+
+int64_t char_skill_base_get(struct char_data *ch, const char* skill);
+int64_t char_skill_base_set(struct char_data *ch, const char* skill, int64_t value);
+int64_t char_skill_base_mod(struct char_data *ch, const char* skill, int64_t mod);
+int64_t char_skill_modifier_get(struct char_data *ch, const char* skill);
+int64_t char_skill_total_get(struct char_data *ch, const char* skill);
+int64_t char_skill_perf_get(struct char_data *ch, const char* skill);
+int64_t char_skill_perf_set(struct char_data *ch, const char* skill, int64_t value);
+int64_t char_skill_perf_mod(struct char_data *ch, const char* skill, int64_t mod);
+
+bool char_condition_has(struct char_data *ch, const char *condition);
+bool char_condition_add(struct char_data *ch, const char *condition, const char *source_category, const char *source_id);
+bool char_condition_remove(struct char_data *ch, const char *condition, const char *reason);
+void char_condition_update(struct char_data *ch);
+int64_t char_condition_stacks_get(struct char_data *ch, const char *condition);
+int64_t char_condition_stacks_set(struct char_data *ch, const char *condition, int64_t value);
+int64_t char_condition_duration_get(struct char_data *ch, const char *condition);
+int64_t char_condition_duration_set(struct char_data *ch, const char *condition, int64_t value);
+int64_t char_condition_number_get(struct char_data *ch, const char *condition, const char *key);
+int64_t char_condition_number_set(struct char_data *ch, const char *condition, const char *key, int64_t value);
+int64_t char_condition_number_mod(struct char_data *ch, const char *condition, const char *key, int64_t mod);
+const char *char_condition_string_get(struct char_data *ch, const char *condition, const char *key);
+bool char_condition_string_set(struct char_data *ch, const char *condition, const char *key, const char *value);
 
 // Below this is globals and database functions
 extern struct char_data *character_list;

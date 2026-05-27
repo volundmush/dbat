@@ -23,7 +23,6 @@
 /* extern globals */
 
 /* local globals */
-struct spell_info_type spell_info[SKILL_TABLE_SIZE];
 
 /* local functions */
 void say_spell(struct char_data *ch, int spellnum, struct char_data *tch, struct obj_data *tobj);

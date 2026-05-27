@@ -3,25 +3,87 @@ const std = @import("std");
 const characters = @import("characters.zig");
 const bitflags = @import("flags.zig");
 const obj_api = @import("objects_api.zig");
+const lua_api = @import("lua_api.zig");
+const modifiers_api = @import("modifiers_api.zig");
 
 const TransformData = struct {
     // this is a placeholder for now.
 };
 
 const DerivedData = struct {
-    // this is a placeholder for now.
+    value: i64,
 };
 
-const CharacterData = struct {
+const SkillData = struct {
+    base: i64,
+    perf: i64,
+};
+
+pub const ConditionSource = struct {
+    category: []const u8,
+    id: []const u8,
+
+    pub fn deinit(self: *ConditionSource, alloc: std.mem.Allocator) void {
+        alloc.free(self.category);
+        alloc.free(self.id);
+    }
+};
+
+pub const ConditionInstance = struct {
+    id: []const u8,
+    stacks: i64 = 1,
+    duration: i64 = -1,
+    sources: std.array_list.Managed(ConditionSource),
+    numbers: std.StringHashMap(i64),
+    strings: std.StringHashMap([]const u8),
+
+    pub fn init(alloc: std.mem.Allocator, id: []const u8) !ConditionInstance {
+        return .{
+            .id = try alloc.dupe(u8, id),
+            .sources = std.array_list.Managed(ConditionSource).init(alloc),
+            .numbers = std.StringHashMap(i64).init(alloc),
+            .strings = std.StringHashMap([]const u8).init(alloc),
+        };
+    }
+
+    pub fn deinit(self: *ConditionInstance, alloc: std.mem.Allocator) void {
+        alloc.free(self.id);
+        for (self.sources.items) |*source| source.deinit(alloc);
+        self.sources.deinit();
+        var number_keys = self.numbers.keyIterator();
+        while (number_keys.next()) |key| alloc.free(key.*);
+        self.numbers.deinit();
+        var string_it = self.strings.iterator();
+        while (string_it.next()) |entry| {
+            alloc.free(entry.key_ptr.*);
+            alloc.free(entry.value_ptr.*);
+        }
+        self.strings.deinit();
+    }
+};
+
+const meter_scale: i64 = 1_000_000;
+
+pub const CharacterData = struct {
     stats: std.StringHashMap(i64),
     deriveds: std.StringHashMap(DerivedData),
+    modifiers: modifiers_api.ModifierCache,
+    deriveds_dirty: bool,
     transforms: std.StringHashMap(TransformData),
+    meters: std.StringHashMap(i64),
+    skills: std.StringHashMap(SkillData),
+    conditions: std.StringHashMap(ConditionInstance),
 
     pub fn init(alloc: std.mem.Allocator) CharacterData {
         return CharacterData{
             .stats = std.StringHashMap(i64).init(alloc),
             .deriveds = std.StringHashMap(DerivedData).init(alloc),
+            .modifiers = modifiers_api.ModifierCache.init(alloc),
+            .deriveds_dirty = true,
             .transforms = std.StringHashMap(TransformData).init(alloc),
+            .meters = std.StringHashMap(i64).init(alloc),
+            .skills = std.StringHashMap(SkillData).init(alloc),
+            .conditions = std.StringHashMap(ConditionInstance).init(alloc),
         };
     }
 
@@ -29,8 +91,23 @@ const CharacterData = struct {
         var stats = self.stats.keyIterator();
         while (stats.next()) |key| std.heap.page_allocator.free(key.*);
         self.stats.deinit();
+        var deriveds = self.deriveds.keyIterator();
+        while (deriveds.next()) |key| std.heap.page_allocator.free(key.*);
         self.deriveds.deinit();
+        self.modifiers.deinit();
         self.transforms.deinit();
+        var meters = self.meters.keyIterator();
+        while (meters.next()) |key| std.heap.page_allocator.free(key.*);
+        self.meters.deinit();
+        var skills = self.skills.keyIterator();
+        while (skills.next()) |key| std.heap.page_allocator.free(key.*);
+        self.skills.deinit();
+        var conditions = self.conditions.iterator();
+        while (conditions.next()) |entry| {
+            std.heap.page_allocator.free(entry.key_ptr.*);
+            entry.value_ptr.deinit(std.heap.page_allocator);
+        }
+        self.conditions.deinit();
     }
 };
 
@@ -43,6 +120,14 @@ pub fn char_ensure_zigdata(ch: *cdb.char_data) ?*CharacterData {
         ch.zigdata = data;
     }
     return @ptrCast(@alignCast(ch.zigdata.?));
+}
+
+pub export fn char_zig_free(ch: *cdb.char_data) void {
+    if (ch.zigdata == null) return;
+    const data: *CharacterData = @ptrCast(@alignCast(ch.zigdata.?));
+    data.deinit();
+    std.heap.page_allocator.destroy(data);
+    ch.zigdata = null;
 }
 
 pub export fn char_id_get(ch: *cdb.char_data) i64 {
@@ -272,30 +357,475 @@ fn replaceString(ch: *cdb.char_data, field: *[*c]u8, proto_value: [*c]u8, value:
 }
 
 pub export fn char_stat_get(ch: *cdb.char_data, stat: ?[*:0]const u8) i64 {
-    if (stat == null) return 0;
-    const zigdata = char_ensure_zigdata(ch) orelse return 0;
-    return zigdata.stats.get(std.mem.span(stat.?)) orelse 0;
+    const name = statName(stat) orelse return 0;
+    return charStatGetName(ch, name);
+}
+
+fn charStatGetName(ch: *cdb.char_data, name: []const u8) i64 {
+    const definition = lua_api.statDefinition(name) orelse return 0;
+    if (ch.zigdata == null) return definition.default_value;
+    const zigdata: *CharacterData = @ptrCast(@alignCast(ch.zigdata.?));
+    return zigdata.stats.get(name) orelse definition.default_value;
 }
 
 pub export fn char_stat_set(ch: *cdb.char_data, stat: ?[*:0]const u8, value: i64) i64 {
-    const name = if (stat) |ptr| std.mem.span(ptr) else return 0;
-    if (name.len == 0) return 0;
+    const name = statName(stat) orelse return 0;
+    const definition = lua_api.statDefinition(name) orelse return 0;
+    const clamped = clampStat(value, definition);
 
     const zigdata = char_ensure_zigdata(ch) orelse return 0;
     if (zigdata.stats.getPtr(name)) |existing| {
-        existing.* = value;
-        return value;
+        existing.* = clamped;
+        invalidateDeriveds(zigdata);
+        return clamped;
     }
 
     const owned_name = std.heap.page_allocator.dupe(u8, name) catch return 0;
-    zigdata.stats.put(owned_name, value) catch {
+    zigdata.stats.put(owned_name, clamped) catch {
         std.heap.page_allocator.free(owned_name);
         return 0;
     };
-    return value;
+    invalidateDeriveds(zigdata);
+    return clamped;
 }
 
 pub export fn char_stat_mod(ch: *cdb.char_data, stat: ?[*:0]const u8, mod: i64) i64 {
     const value = char_stat_get(ch, stat) + mod;
     return char_stat_set(ch, stat, value);
+}
+
+fn statName(stat: ?[*:0]const u8) ?[]const u8 {
+    const ptr = stat orelse return null;
+    const name = std.mem.span(ptr);
+    if (name.len == 0) return null;
+    return name;
+}
+
+fn clampStat(value: i64, definition: lua_api.StatDefinition) i64 {
+    var result = value;
+    if (definition.min_value) |min| result = @max(result, min);
+    if (definition.max_value) |max| result = @min(result, max);
+    return result;
+}
+
+pub export fn char_legacy_modifier(ch: *cdb.char_data, location: c_int, specific: c_int) i64 {
+    _ = ch;
+    _ = location;
+    _ = specific;
+    return 0;
+}
+
+pub export fn char_der_get_base(ch: *cdb.char_data, stat: ?[*:0]const u8) i64 {
+    const name = statName(stat) orelse return 0;
+    return charDerGetBaseName(ch, name);
+}
+
+fn charDerGetBaseName(ch: *cdb.char_data, name: []const u8) i64 {
+    const definition = lua_api.derivedDefinition(name) orelse return 0;
+    if (lua_api.calculateDerivedBase(ch, name)) |value| return value;
+    return charStatGetName(ch, definition.baseStat(name));
+}
+
+pub export fn char_der_get_total(ch: *cdb.char_data, stat: ?[*:0]const u8) i64 {
+    const name = statName(stat) orelse return 0;
+    return charDerGetTotalName(ch, name);
+}
+
+fn charDerGetTotalName(ch: *cdb.char_data, name: []const u8) i64 {
+    const definition = lua_api.derivedDefinition(name) orelse return 0;
+    const zigdata = char_ensure_zigdata(ch) orelse return 0;
+
+    if (!zigdata.deriveds_dirty) {
+        if (zigdata.deriveds.get(name)) |cached| return cached.value;
+    }
+
+    if (zigdata.modifiers.dirty) {
+        zigdata.modifiers.rebuild(ch);
+        emitConditionModifiers(ch, zigdata);
+    }
+    if (!definition.no_modifiers) addLegacyDerivedModifiers(ch, zigdata, name, definition);
+    const total = calculateDerivedTotal(ch, zigdata, name, definition);
+    cacheDerived(zigdata, name, total);
+    return total;
+}
+
+pub export fn char_der_invalidate(ch: *cdb.char_data) void {
+    const zigdata = char_ensure_zigdata(ch) orelse return;
+    invalidateDeriveds(zigdata);
+}
+
+fn calculateDerivedTotal(ch: *cdb.char_data, zigdata: *CharacterData, name: []const u8, definition: lua_api.DerivedDefinition) i64 {
+    var value = charDerGetBaseName(ch, name);
+    var flat: i64 = 0;
+    var percent: i64 = 0;
+    var min_override: ?i64 = null;
+    var max_override: ?i64 = null;
+    var set_override: ?i64 = null;
+
+    if (!definition.no_modifiers) {
+        if (zigdata.modifiers.modifiersFor("derived", name)) |modifiers| {
+            for (modifiers) |modifier| {
+                switch (modifier.kind) {
+                    .flat => flat += modifier.value,
+                    .percent => percent += modifier.value,
+                    .multiplier => {},
+                    .override_min => min_override = if (min_override) |current| @max(current, modifier.value) else modifier.value,
+                    .override_max => max_override = if (max_override) |current| @min(current, modifier.value) else modifier.value,
+                    .set => set_override = modifier.value,
+                }
+            }
+
+            value += flat;
+            if (percent != 0) value += @divTrunc(value * percent, modifiers_api.scale);
+            for (modifiers) |modifier| {
+                if (modifier.kind == .multiplier) value = @divTrunc(value * modifier.value, modifiers_api.scale);
+            }
+        } else {
+            value += flat;
+            if (percent != 0) value += @divTrunc(value * percent, modifiers_api.scale);
+        }
+    }
+
+    if (definition.min_value) |min| value = @max(value, min);
+    if (definition.max_value) |max| value = @min(value, max);
+    if (min_override) |min| value = @max(value, min);
+    if (max_override) |max| value = @min(value, max);
+    if (set_override) |set| value = set;
+    return value;
+}
+
+fn addLegacyDerivedModifiers(ch: *cdb.char_data, zigdata: *CharacterData, name: []const u8, definition: lua_api.DerivedDefinition) void {
+    for (definition.legacy_modifiers[0..definition.legacy_modifier_count]) |modifier| {
+        modifiers_api.addLegacyDerivedFlat(&zigdata.modifiers, ch, name, modifier.location, modifier.specific);
+    }
+}
+
+fn cacheDerived(zigdata: *CharacterData, name: []const u8, value: i64) void {
+    if (zigdata.deriveds_dirty) {
+        clearDerivedCache(zigdata);
+        zigdata.deriveds_dirty = false;
+    }
+
+    if (zigdata.deriveds.getPtr(name)) |existing| {
+        existing.* = .{ .value = value };
+        return;
+    }
+
+    const owned_name = std.heap.page_allocator.dupe(u8, name) catch return;
+    zigdata.deriveds.put(owned_name, .{ .value = value }) catch {
+        std.heap.page_allocator.free(owned_name);
+    };
+}
+
+fn invalidateDeriveds(zigdata: *CharacterData) void {
+    zigdata.deriveds_dirty = true;
+    zigdata.modifiers.invalidate();
+}
+
+fn conditionChanged(zigdata: *CharacterData) void {
+    invalidateDeriveds(zigdata);
+}
+
+fn clearDerivedCache(zigdata: *CharacterData) void {
+    var keys = zigdata.deriveds.keyIterator();
+    while (keys.next()) |key| std.heap.page_allocator.free(key.*);
+    zigdata.deriveds.clearRetainingCapacity();
+}
+
+pub export fn char_meter_get(ch: *cdb.char_data, meter: ?[*:0]const u8) i64 {
+    const name = statName(meter) orelse return 0;
+    const zigdata = char_ensure_zigdata(ch) orelse return 0;
+    return zigdata.meters.get(name) orelse meter_scale;
+}
+
+pub export fn char_meter_set(ch: *cdb.char_data, meter: ?[*:0]const u8, value: i64) i64 {
+    const name = statName(meter) orelse return 0;
+    const clamped = clampMeter(value);
+
+    const zigdata = char_ensure_zigdata(ch) orelse return 0;
+    if (zigdata.meters.getPtr(name)) |existing| {
+        existing.* = clamped;
+        syncLegacyMeter(ch, name, clamped);
+        return clamped;
+    }
+
+    const owned_name = std.heap.page_allocator.dupe(u8, name) catch return 0;
+    zigdata.meters.put(owned_name, clamped) catch {
+        std.heap.page_allocator.free(owned_name);
+        return 0;
+    };
+    syncLegacyMeter(ch, name, clamped);
+    return clamped;
+}
+
+pub export fn char_meter_mod(ch: *cdb.char_data, meter: ?[*:0]const u8, mod: i64) i64 {
+    const value = char_meter_get(ch, meter) + mod;
+    return char_meter_set(ch, meter, value);
+}
+
+pub export fn char_meter_set_int(ch: *cdb.char_data, meter: ?[*:0]const u8, value: i64) i64 {
+    const name = statName(meter) orelse return 0;
+    const max = charMeterMaxName(ch, name);
+    if (max <= 0) return char_meter_set(ch, meter, 0);
+    return char_meter_set(ch, meter, @divTrunc(value * meter_scale, max));
+}
+
+pub export fn char_meter_mod_int(ch: *cdb.char_data, meter: ?[*:0]const u8, mod: i64) i64 {
+    const name = statName(meter) orelse return 0;
+    return char_meter_set_int(ch, meter, charMeterCurrentName(ch, name) + mod);
+}
+
+pub export fn char_meter_current(ch: *cdb.char_data, meter: ?[*:0]const u8) i64 {
+    const name = statName(meter) orelse return 0;
+    return charMeterCurrentName(ch, name);
+}
+
+pub export fn char_meter_max(ch: *cdb.char_data, meter: ?[*:0]const u8) i64 {
+    const name = statName(meter) orelse return 0;
+    return charMeterMaxName(ch, name);
+}
+
+fn charMeterCurrentName(ch: *cdb.char_data, name: []const u8) i64 {
+    const max = charMeterMaxName(ch, name);
+    if (max <= 0) return 0;
+    const zigdata = char_ensure_zigdata(ch) orelse return 0;
+    const current = zigdata.meters.get(name) orelse meter_scale;
+    return @divTrunc(current * max, meter_scale);
+}
+
+fn charMeterMaxName(ch: *cdb.char_data, name: []const u8) i64 {
+    const definition = lua_api.meterDefinition(name) orelse return 0;
+    return charDerGetTotalName(ch, definition.derivedStat(name));
+}
+
+fn clampMeter(value: i64) i64 {
+    return @min(@max(value, 0), meter_scale);
+}
+
+fn syncLegacyMeter(ch: *cdb.char_data, name: []const u8, value: i64) void {
+    const as_float = meterFixedToFloat(value);
+    if (std.mem.eql(u8, name, "powerlevel")) ch.health = as_float;
+    if (std.mem.eql(u8, name, "ki")) ch.energy = as_float;
+    if (std.mem.eql(u8, name, "stamina")) ch.stamina = as_float;
+    if (std.mem.eql(u8, name, "lifeforce")) ch.life = as_float;
+}
+
+pub fn meterFloatToFixed(value: f64) i64 {
+    if (std.math.isNan(value)) return 0;
+    const clamped = @min(@max(value, 0.0), 1.0);
+    return @intFromFloat(clamped * @as(f64, @floatFromInt(meter_scale)));
+}
+
+pub fn meterFixedToFloat(value: i64) f64 {
+    return @as(f64, @floatFromInt(clampMeter(value))) / @as(f64, @floatFromInt(meter_scale));
+}
+
+pub export fn char_skill_base_get(ch: *cdb.char_data, skill: ?[*:0]const u8) i64 {
+    const index = skillIndex(skill) orelse return 0;
+    return ch.skills[index].base;
+}
+
+pub export fn char_skill_base_set(ch: *cdb.char_data, skill: ?[*:0]const u8, value: i64) i64 {
+    const index = skillIndex(skill) orelse return 0;
+    const clamped = clampSkillByte(value);
+    ch.skills[index].base = clamped;
+    return clamped;
+}
+
+pub export fn char_skill_base_mod(ch: *cdb.char_data, skill: ?[*:0]const u8, mod: i64) i64 {
+    const value = char_skill_base_get(ch, skill) + mod;
+    return char_skill_base_set(ch, skill, value);
+}
+
+pub export fn char_skill_modifier_get(ch: *cdb.char_data, skill: ?[*:0]const u8) i64 {
+    const index = skillIndex(skill) orelse return 0;
+    return ch.skills[index].mod;
+}
+
+pub export fn char_skill_total_get(ch: *cdb.char_data, skill: ?[*:0]const u8) i64 {
+    const index = skillIndex(skill) orelse return 0;
+    return @as(i64, ch.skills[index].base) + ch.skills[index].mod;
+}
+
+pub export fn char_skill_perf_get(ch: *cdb.char_data, skill: ?[*:0]const u8) i64 {
+    const index = skillIndex(skill) orelse return 0;
+    return ch.skills[index].perf;
+}
+
+pub export fn char_skill_perf_set(ch: *cdb.char_data, skill: ?[*:0]const u8, value: i64) i64 {
+    const index = skillIndex(skill) orelse return 0;
+    const clamped = clampSkillByte(value);
+    ch.skills[index].perf = clamped;
+    return clamped;
+}
+
+pub export fn char_skill_perf_mod(ch: *cdb.char_data, skill: ?[*:0]const u8, mod: i64) i64 {
+    const value = char_skill_perf_get(ch, skill) + mod;
+    return char_skill_perf_set(ch, skill, value);
+}
+
+fn skillIndex(skill: ?[*:0]const u8) ?usize {
+    const name = statName(skill) orelse return null;
+    var index: usize = 0;
+    while (index < cdb.SKILL_TABLE_SIZE) : (index += 1) {
+        const skill_name = cdb.spell_info[index].name;
+        if (skill_name == null) continue;
+        if (std.ascii.eqlIgnoreCase(name, std.mem.span(skill_name))) return index;
+    }
+    return null;
+}
+
+fn clampSkillByte(value: i64) i8 {
+    return std.math.cast(i8, @min(@max(value, std.math.minInt(i8)), std.math.maxInt(i8))).?;
+}
+
+pub export fn char_condition_has(ch: *cdb.char_data, condition: ?[*:0]const u8) bool {
+    const name = statName(condition) orelse return false;
+    if (ch.zigdata == null) return false;
+    const zigdata: *CharacterData = @ptrCast(@alignCast(ch.zigdata.?));
+    return zigdata.conditions.contains(name);
+}
+
+pub export fn char_condition_add(ch: *cdb.char_data, condition: ?[*:0]const u8, source_category: ?[*:0]const u8, source_id: ?[*:0]const u8) bool {
+    const name = statName(condition) orelse return false;
+    const definition = lua_api.conditionDefinition(name) orelse return false;
+    const zigdata = char_ensure_zigdata(ch) orelse return false;
+    const is_new = !zigdata.conditions.contains(name);
+
+    if (is_new) {
+        const key = std.heap.page_allocator.dupe(u8, name) catch return false;
+        var instance = ConditionInstance.init(std.heap.page_allocator, name) catch {
+            std.heap.page_allocator.free(key);
+            return false;
+        };
+        zigdata.conditions.put(key, instance) catch {
+            instance.deinit(std.heap.page_allocator);
+            std.heap.page_allocator.free(key);
+            return false;
+        };
+    } else if (definition.stackable) {
+        zigdata.conditions.getPtr(name).?.stacks += 1;
+    }
+
+    if (zigdata.conditions.getPtr(name)) |instance| addConditionSource(instance, source_category, source_id) catch {};
+    conditionChanged(zigdata);
+    lua_api.callConditionHook(ch, name, "on_apply");
+    return true;
+}
+
+pub export fn char_condition_remove(ch: *cdb.char_data, condition: ?[*:0]const u8, reason: ?[*:0]const u8) bool {
+    _ = reason;
+    const name = statName(condition) orelse return false;
+    if (ch.zigdata == null) return false;
+    const zigdata: *CharacterData = @ptrCast(@alignCast(ch.zigdata.?));
+    var removed = zigdata.conditions.fetchRemove(name) orelse return false;
+    std.heap.page_allocator.free(removed.key);
+    removed.value.deinit(std.heap.page_allocator);
+    conditionChanged(zigdata);
+    lua_api.callConditionHook(ch, name, "on_remove");
+    return true;
+}
+
+pub export fn char_condition_update(ch: *cdb.char_data) void {
+    if (ch.zigdata == null) return;
+    const zigdata: *CharacterData = @ptrCast(@alignCast(ch.zigdata.?));
+    var it = zigdata.conditions.keyIterator();
+    while (it.next()) |key| lua_api.callConditionHook(ch, key.*, "on_update");
+}
+
+pub export fn char_condition_stacks_get(ch: *cdb.char_data, condition: ?[*:0]const u8) i64 {
+    const instance = conditionGet(ch, condition) orelse return 0;
+    return instance.stacks;
+}
+
+pub export fn char_condition_stacks_set(ch: *cdb.char_data, condition: ?[*:0]const u8, value: i64) i64 {
+    const instance = conditionGet(ch, condition) orelse return 0;
+    instance.stacks = @max(0, value);
+    conditionChanged(@ptrCast(@alignCast(ch.zigdata.?)));
+    return instance.stacks;
+}
+
+pub export fn char_condition_duration_get(ch: *cdb.char_data, condition: ?[*:0]const u8) i64 {
+    const instance = conditionGet(ch, condition) orelse return 0;
+    return instance.duration;
+}
+
+pub export fn char_condition_duration_set(ch: *cdb.char_data, condition: ?[*:0]const u8, value: i64) i64 {
+    const instance = conditionGet(ch, condition) orelse return 0;
+    instance.duration = value;
+    conditionChanged(@ptrCast(@alignCast(ch.zigdata.?)));
+    return value;
+}
+
+pub export fn char_condition_number_get(ch: *cdb.char_data, condition: ?[*:0]const u8, key: ?[*:0]const u8) i64 {
+    const instance = conditionGet(ch, condition) orelse return 0;
+    const name = statName(key) orelse return 0;
+    return instance.numbers.get(name) orelse 0;
+}
+
+pub export fn char_condition_number_set(ch: *cdb.char_data, condition: ?[*:0]const u8, key: ?[*:0]const u8, value: i64) i64 {
+    const instance = conditionGet(ch, condition) orelse return 0;
+    const name = statName(key) orelse return 0;
+    putOwnedNumber(instance, name, value) catch return 0;
+    conditionChanged(@ptrCast(@alignCast(ch.zigdata.?)));
+    return value;
+}
+
+pub export fn char_condition_number_mod(ch: *cdb.char_data, condition: ?[*:0]const u8, key: ?[*:0]const u8, mod: i64) i64 {
+    const value = char_condition_number_get(ch, condition, key) + mod;
+    return char_condition_number_set(ch, condition, key, value);
+}
+
+pub export fn char_condition_string_get(ch: *cdb.char_data, condition: ?[*:0]const u8, key: ?[*:0]const u8) [*c]const u8 {
+    const instance = conditionGet(ch, condition) orelse return null;
+    const name = statName(key) orelse return null;
+    const value = instance.strings.get(name) orelse return null;
+    return @ptrCast(value.ptr);
+}
+
+pub export fn char_condition_string_set(ch: *cdb.char_data, condition: ?[*:0]const u8, key: ?[*:0]const u8, value: ?[*:0]const u8) bool {
+    const instance = conditionGet(ch, condition) orelse return false;
+    const name = statName(key) orelse return false;
+    const text = statName(value) orelse return false;
+    putOwnedString(instance, name, text) catch return false;
+    conditionChanged(@ptrCast(@alignCast(ch.zigdata.?)));
+    return true;
+}
+
+fn conditionGet(ch: *cdb.char_data, condition: ?[*:0]const u8) ?*ConditionInstance {
+    const name = statName(condition) orelse return null;
+    if (ch.zigdata == null) return null;
+    const zigdata: *CharacterData = @ptrCast(@alignCast(ch.zigdata.?));
+    return zigdata.conditions.getPtr(name);
+}
+
+fn addConditionSource(instance: *ConditionInstance, source_category: ?[*:0]const u8, source_id: ?[*:0]const u8) !void {
+    const category = if (source_category) |ptr| std.mem.span(ptr) else "unknown";
+    const id = if (source_id) |ptr| std.mem.span(ptr) else "unknown";
+    try instance.sources.append(.{
+        .category = try std.heap.page_allocator.dupe(u8, category),
+        .id = try std.heap.page_allocator.dupe(u8, id),
+    });
+}
+
+fn putOwnedNumber(instance: *ConditionInstance, key: []const u8, value: i64) !void {
+    if (instance.numbers.getPtr(key)) |existing| {
+        existing.* = value;
+        return;
+    }
+    try instance.numbers.put(try std.heap.page_allocator.dupe(u8, key), value);
+}
+
+fn putOwnedString(instance: *ConditionInstance, key: []const u8, value: []const u8) !void {
+    if (instance.strings.getPtr(key)) |existing| {
+        std.heap.page_allocator.free(existing.*);
+        existing.* = try std.heap.page_allocator.dupeZ(u8, value);
+        return;
+    }
+    try instance.strings.put(try std.heap.page_allocator.dupe(u8, key), try std.heap.page_allocator.dupeZ(u8, value));
+}
+
+fn emitConditionModifiers(ch: *cdb.char_data, zigdata: *CharacterData) void {
+    var it = zigdata.conditions.iterator();
+    while (it.next()) |entry| lua_api.emitConditionModifiers(ch, &zigdata.modifiers, entry.key_ptr.*);
 }

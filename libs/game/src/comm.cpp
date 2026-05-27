@@ -41,6 +41,7 @@
 #include "dbat/game/objsave.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/class.h"
+#include "dbat/game/sensei.h"
 #include "dbat/game/combat.h"
 #include "dbat/game/modify.h"
 #include "dbat/game/fight.h"
@@ -209,11 +210,14 @@ void init_game(uint16_t cmport)
   /* set up hash table for find_char() */
   init_lookup_table();
 
+  dbat::race::load_races();
+  dbat::sensei::load_sensei();
+
   boot_db();
 
-       FILE *mapfile;
-       int rowcounter, colcounter;
-       int vnum_read;
+  FILE *mapfile;
+  int rowcounter, colcounter;
+  int vnum_read;
 
     log("Signal trapping.");
     signal_setup();
