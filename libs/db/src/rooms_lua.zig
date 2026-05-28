@@ -101,7 +101,7 @@ fn registerRoomMetatable(lua: *Lua) void {
     lua.pop(1);
 }
 
-fn pushRoom(lua: *Lua, vnum: cdb.room_vnum) void {
+pub fn pushRoom(lua: *Lua, vnum: cdb.room_vnum) void {
     const handle = lua.newUserdata(RoomHandle, 0);
     handle.* = .{ .vnum = vnum };
     _ = lua.getMetatableRegistry(room_metatable);
