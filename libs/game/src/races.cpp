@@ -1016,7 +1016,7 @@ namespace dbat::race {
                 send_to_char(ch, "@YSuper @CSaiyan @WSecond @R-@G %s BPL Req\r\n",
                              (getBasePL(ch)) >= (trans_req(ch, 2) * 0.75) ? add_commas(trans_req(ch, 2))
                                                                           : "??????????");
-                send_to_char(ch, "@YSuper @CSaiyan @WThird  @R-@G %s BPL Req\r\n",
+                send_to_char(ch, "@cPotential @CUnleashed  @R-@G %s BPL Req\r\n",
                              (getBasePL(ch)) >= (trans_req(ch, 3) * 0.75) ? add_commas(trans_req(ch, 3))
                                                                           : "??????????");
                 send_to_char(ch, "@b------------------------------------------------@n\r\n");
