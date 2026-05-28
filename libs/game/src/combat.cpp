@@ -3597,6 +3597,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
    }
 
    gain_exp(ch, gain);
+   send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
 
    // Work out Vitals gained based on damage dealt
    if(GET_LEVEL(ch) >= 100) {
@@ -3628,7 +3629,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
     ki = 0;
     }
 
-    send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
+    
     if (type == 0 && rand_number(1, 5) >= 4) {
       send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n ", pl > 0 ? add_commas(pl) : "SOFT-CAP");
       gainBasePL(ch, pl);
