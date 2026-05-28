@@ -3596,8 +3596,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
     }
    }
 
-   gain = gear_exp(ch, gaincalc);
-   gain_exp(ch, gain);
+   gain_exp(ch, gaincalc);
    send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
 
    // Work out Vitals gained based on damage dealt
