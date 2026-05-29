@@ -1252,6 +1252,34 @@ namespace dbat::race {
                         return;
                 }
             case halfbreed:
+                switch (tier) {
+                        case 1:
+                            act("@WSomething inside your mind snaps as your rage spills over! Lightning begins to strike the ground all around you as you feel torrents of power rushing through every fiber of your being. Your hair suddenly turns golden as your eyes change to the color of emeralds. In a final rush of power a golden aura rushes up around your body! You have become a @CSuper @YSaiyan@W!@n",
+                                TRUE, ch, 0, 0, TO_CHAR);
+                            act("@C$n@W screams in rage as lightning begins to crash all around! $s hair turns golden and $s eyes change to an emerald color as a bright golden aura bursts up around $s body! As $s energy stabilizes $e wears a fierce look upon $s face, having transformed into a @CSuper @YSaiyan@W!@n",
+                                TRUE, ch, 0, 0, TO_ROOM);
+                            return;
+                        case 2:
+                            if (PLR_FLAGGED(ch, PLR_LSSJ)) {
+                                act("@WYou roar and then stand at your full height. You flex every muscle in your body as you feel your strength grow! Your eyes begin to glow @wwhite@W with energy, your hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around your body! You release your @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n",
+                                    TRUE, ch, 0, 0, TO_CHAR);
+                                act("@C$n @Wroars and then stands at $s full height. Then $s muscles start to buldge and grow as $e flexes them! Suddenly $s eyes begin to glow @wwhite@W with energy, $s hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around $s body! @C$n@W releases $s @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n",
+                                    TRUE, ch, 0, 0, TO_ROOM);
+                                return;
+                            } else {
+                                act("@WBlinding rage burns through your mind as a sudden eruption of energy surges forth! A golden aura bursts up around your body, glowing as bright as the sun. Rushing winds rocket out from your body in every direction as bolts of electricity begin to crackle in your aura. As your aura dims you are left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n",
+                                    TRUE, ch, 0, 0, TO_CHAR);
+                                act("@C$n@W stands up straight with $s head back as $e releases an ear piercing scream! A blindingly bright golden aura bursts up around $s body, glowing as bright as the sun. As rushing winds begin to rocket out from $m in every direction, bolts of electricity flash and crackle in $s aura. As $s aura begins to dim $e is left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n",
+                                    TRUE, ch, 0, 0, TO_ROOM);
+                            }
+                            return;
+                        case 3:
+                            act("@WYou take in a deep breath, closing your eyes and going within yourself to reach into the very depths of your being.  Finding that hidden reservoir of both Saiyan and Human power within you, you roar out as a white aura erupts out from around you, causing your powerlevel to skyrocket!  Your muscles become sharply defined as you open your eyes and stand confidently, basking in the aura of your @cPotential @CUnleashed!@n",
+                                TRUE, ch, 0, 0, TO_CHAR);
+                            act("@W$n takes in a deep breath, closing $s eyes and going within $m to reach into the very depths of $s being.  Finding that hidden reservoir of both Saiyan and Human power within, $e roars out as a white aura erupts out from around themself, causing $s powerlevel to skyrocket! $s muscles become sharply defined as $e opens $s eyes and stands confidently, basking in the aura of $s @cPotential @CUnleashed!@n",
+                                TRUE, ch, 0, 0, TO_ROOM);
+                            return;
+                    }
             case saiyan:
                 switch (tier) {
                     case 1:
