@@ -306,9 +306,9 @@ ACMD(do_dig)
   CREATE(rm->dir_option[dir], struct room_direction_data, 1);
   struct room_direction_data *new_exit = rm->dir_option[dir];
   new_exit->to_room = rvnum;
-  auto zone = zone_by_id(room_zone_vnum_get(rm));
-  add_to_save_list(zone->number, SL_WLD);
-  save_rooms(zone);
+  auto room_zone = zone_by_id(room_zone_vnum_get(rm));
+  add_to_save_list(room_zone->number, SL_WLD);
+  save_rooms(room_zone);
   send_to_char(ch, "You make an exit %s to room %d (%s).\r\n", 
                    dirs[dir], rvnum, rrm->name);
   
@@ -324,9 +324,9 @@ ACMD(do_dig)
     CREATE(R_EXIT(dest, rev_dir[dir]), struct room_direction_data, 1);
     struct room_direction_data *rev_ex = R_EXIT(dest, rev_dir[dir]);
     rev_ex->to_room = char_room_vnum_get(ch);
-    auto zone = zone_by_id(rrm->zone);
-    add_to_save_list(zone->number, SL_WLD);
-    save_rooms(zone);
+    auto dest_zone = zone_by_id(rrm->zone);
+    add_to_save_list(dest_zone->number, SL_WLD);
+    save_rooms(dest_zone);
   }
 }
 
@@ -410,9 +410,9 @@ ACMD(do_rcopy)
    rrm->room_flags[i] = trm->room_flags[i]; 
   }
   send_to_imm("Log: %s has copied room [%d] to room [%d].", GET_NAME(ch), tvnum, rvnum);
-  auto zone = zone_by_id(rrm->zone);
-  add_to_save_list(zone->number, SL_WLD);
-  save_rooms(zone);
+  auto room_zone = zone_by_id(rrm->zone);
+  add_to_save_list(room_zone->number, SL_WLD);
+  save_rooms(room_zone);
   send_to_char(ch, "Room [%d] copied to room [%d].\r\n", tvnum, rvnum); 
 }
 
@@ -424,7 +424,7 @@ ACMD(do_rcopy)
 room_vnum redit_find_new_vnum(struct zone_data* zone) 
 {
 
-  for(room_vnum vnum = zone->bottom; vnum <= zone->top; vnum++)
+  for(room_vnum vnum = zone->bot; vnum <= zone->top; vnum++)
     if (!room_by_id(vnum))
       return vnum;
   
@@ -494,4 +494,3 @@ int buildwalk(struct char_data *ch, int dir)
 
   return(0);
 }
-

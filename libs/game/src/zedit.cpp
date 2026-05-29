@@ -174,7 +174,7 @@ ACMD(do_oasis_zedit)
     /**************************************************************************/
     /** Save the zone information to the zone file.                          **/
     /**************************************************************************/
-    save_zone(OLC_ZNUM(d));
+    save_zone(zone);
     
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                 **/
@@ -249,23 +249,24 @@ void zedit_setup(struct descriptor_data *d, int room_num)
   /*
    * Add all entries in zone_table that relate to this room.
    */
-  while (zone->cmd[subcmd].command != 'S') {
-    switch (zone->cmd[subcmd].command) {
+  auto room = room_by_id(room_num);
+  while (zd->cmd[subcmd].command != 'S') {
+    switch (zd->cmd[subcmd].command) {
     case 'M':
     case 'O':
     case 'T':
     case 'V':
-      cmd_room = zone->cmd[subcmd].arg3;
+      cmd_room = zd->cmd[subcmd].arg3;
       break;
     case 'D':
     case 'R':
-      cmd_room = zone->cmd[subcmd].arg1;
+      cmd_room = zd->cmd[subcmd].arg1;
       break;
     default:
       break;
     }
     if (cmd_room == room->number) {
-      add_cmd_to_list(&(zone->cmd), &zone->cmd[subcmd], count);
+      add_cmd_to_list(&(zone->cmd), &zd->cmd[subcmd], count);
       count++;
     }
     subcmd++;
@@ -408,7 +409,7 @@ void zedit_save_internally(struct descriptor_data *d)
 
 void zedit_save_to_disk(int zone)
 {
-  save_zone(zone);
+  save_zone(zone_by_id(zone));
 }
 
 /*-------------------------------------------------------------------*/
@@ -476,69 +477,70 @@ void zedit_disp_menu(struct descriptor_data *d)
   /*
    * Print the commands for this room into display buffer.
    */
-  while (MYCMD.command != 'S') {
+  while (z->cmd[subcmd].command != 'S') {
     /*
      * Translate what the command means.
      */
+    auto &cmd = z->cmd[subcmd];
     write_to_output(d, "@n%d - @y", counter++);
-    switch (MYCMD.command) {
+    switch (cmd.command) {
     case 'M': {
-      auto mob = mob_proto_by_id(MYCMD.arg1);
+      auto mob = mob_proto_by_id(cmd.arg1);
       write_to_output(d, "%sLoad %s@y [@c%d@y], Max : %d, MaxR %d, Chance %d",
-        MYCMD.if_flag ? " then " : "",
+        cmd.if_flag ? " then " : "",
         mob->short_descr,
-        mob->vnum, MYCMD.arg2, MYCMD.arg4, MYCMD.arg5
+        mob->vnum, cmd.arg2, cmd.arg4, cmd.arg5
         );
     }
       break;
     case 'G': {
-      auto obj = obj_proto_by_id(MYCMD.arg1);
+      auto obj = obj_proto_by_id(cmd.arg1);
         write_to_output(d, "%sGive it %s@y [@c%d@y], Max : %d, Chance %d",
-	      MYCMD.if_flag ? " then " : "",
+	      cmd.if_flag ? " then " : "",
 	      obj->short_description,
 	      obj->vnum,
-	      MYCMD.arg2, MYCMD.arg5
+	      cmd.arg2, cmd.arg5
 	      );
     }
       break;
     case 'O': {
-      auto obj = obj_proto_by_id(MYCMD.arg1);
+      auto obj = obj_proto_by_id(cmd.arg1);
       write_to_output(d, "%sLoad %s@y [@c%d@y], Max : %d, MaxR %d, Chance %d",
-	      MYCMD.if_flag ? " then " : "",
+	      cmd.if_flag ? " then " : "",
 	      obj->short_description,
 	      obj->vnum,
-	      MYCMD.arg2, MYCMD.arg4, MYCMD.arg5
+	      cmd.arg2, cmd.arg4, cmd.arg5
 	      );
     }
       break;
     case 'E': {
-      auto obj = obj_proto_by_id(MYCMD.arg1);
+      auto obj = obj_proto_by_id(cmd.arg1);
       write_to_output(d, "%sEquip with %s@y [@c%d@n], %s, Max : %d, Chance %d",
-	      MYCMD.if_flag ? " then " : "",
+	      cmd.if_flag ? " then " : "",
 	      obj->short_description,
 	      obj->vnum,
-	      equipment_types[MYCMD.arg3],
-	      MYCMD.arg2, MYCMD.arg5
+	      equipment_types[cmd.arg3],
+	      cmd.arg2, cmd.arg5
 	      );
     }
       break;
     case 'P': {
-      auto obj1 = obj_proto_by_id(MYCMD.arg1);
-      auto obj3 = obj_proto_by_id(MYCMD.arg3);
+      auto obj1 = obj_proto_by_id(cmd.arg1);
+      auto obj3 = obj_proto_by_id(cmd.arg3);
       write_to_output(d, "%sPut %s@y [@c%d@n] in %s [@c%d@n], Max : %d, %% Chance %d",
-	      MYCMD.if_flag ? " then " : "",
+	      cmd.if_flag ? " then " : "",
 	      obj1->short_description,
 	      obj1->vnum,
 	      obj3->short_description,
 	      obj3->vnum,
-	      MYCMD.arg2, MYCMD.arg5
+	      cmd.arg2, cmd.arg5
 	      );
     }
       break;
     case 'R': {
-        auto obj = obj_proto_by_id(MYCMD.arg2);
+        auto obj = obj_proto_by_id(cmd.arg2);
             write_to_output(d, "%sRemove %s@y [@c%d@n] from room.",
-	      MYCMD.if_flag ? " then " : "",
+	      cmd.if_flag ? " then " : "",
 	      obj->short_description,
 	      obj->vnum
 	      );
@@ -546,28 +548,30 @@ void zedit_disp_menu(struct descriptor_data *d)
       break;
     case 'D':
       write_to_output(d, "%sSet door %s@y as %s.",
-	      MYCMD.if_flag ? " then " : "",
-	      dirs[MYCMD.arg2],
-	      MYCMD.arg3 ? ((MYCMD.arg3 == 1) ? "closed" : "locked") : "open"
+	      cmd.if_flag ? " then " : "",
+	      dirs[cmd.arg2],
+	      cmd.arg3 ? ((cmd.arg3 == 1) ? "closed" : "locked") : "open"
 	      );
       break;
-    case 'T':
-      write_to_output(d, "%sAttach trigger @c%s@y [@c%d@y] to %s, %% Chance %d",
-        MYCMD.if_flag ? " then " : "",
-        trig_index[MYCMD.arg2]->proto->name,
-        trig_index[MYCMD.arg2]->vnum,
-        ((MYCMD.arg1 == MOB_TRIGGER) ? "mobile" :
-          ((MYCMD.arg1 == OBJ_TRIGGER) ? "object" :
-            ((MYCMD.arg1 == WLD_TRIGGER)? "room" : "????"))), MYCMD.arg5);
+    case 'T': {
+      auto trig = trig_proto_by_id(cmd.arg2);
+        write_to_output(d, "%sAttach trigger @c%s@y [@c%d@y] to %s, %% Chance %d",
+        cmd.if_flag ? " then " : "",
+        trig->name,
+        trig->vnum,
+        ((cmd.arg1 == MOB_TRIGGER) ? "mobile" :
+          ((cmd.arg1 == OBJ_TRIGGER) ? "object" :
+            ((cmd.arg1 == WLD_TRIGGER)? "room" : "????"))), cmd.arg5);
+    }
       break;
     case 'V':
       write_to_output(d, "%sAssign global %s:%d to %s = %s, %% Chance %d",
-        MYCMD.if_flag ? " then " : "",
-        MYCMD.sarg1, MYCMD.arg2,
-        ((MYCMD.arg1 == MOB_TRIGGER) ? "mobile" :
-          ((MYCMD.arg1 == OBJ_TRIGGER) ? "object" :
-            ((MYCMD.arg1 == WLD_TRIGGER)? "room" : "????"))),
-        MYCMD.sarg2, MYCMD.arg5);
+        cmd.if_flag ? " then " : "",
+        cmd.sarg1, cmd.arg2,
+        ((cmd.arg1 == MOB_TRIGGER) ? "mobile" :
+          ((cmd.arg1 == OBJ_TRIGGER) ? "object" :
+            ((cmd.arg1 == WLD_TRIGGER)? "room" : "????"))),
+        cmd.sarg2, cmd.arg5);
       break;
     default:
       write_to_output(d, "<Unknown Command>");
@@ -620,7 +624,9 @@ void zedit_disp_arg1(struct descriptor_data *d)
 {
   write_to_output(d, "\r\n");
 
-  switch (OLC_CMD(d).command) {
+  auto &cmd = OLC_CMD(d);
+
+  switch (cmd.command) {
   case 'M':
     write_to_output(d, "Input mob's vnum : ");
     OLC_MODE(d) = ZEDIT_ARG1;
@@ -637,7 +643,7 @@ void zedit_disp_arg1(struct descriptor_data *d)
     /*
      * Arg1 for these is the room number, skip to arg2  
      */
-    OLC_CMD(d).arg1 = OLC_NUM(d);
+    cmd.arg1 = OLC_NUM(d);
     zedit_disp_arg2(d);
     break;
   case 'T':

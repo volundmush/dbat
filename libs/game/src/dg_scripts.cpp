@@ -677,8 +677,8 @@ void do_stat_trigger(struct char_data *ch, trig_data *trig)
         return;
     }
 
-    len += snprintf(sb, sizeof(sb), "Name: '@y%s@n',  VNum: [@g%5d@n], RNum: [%5d]\r\n",
-              GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), GET_TRIG_RNUM(trig));
+    len += snprintf(sb, sizeof(sb), "Name: '@y%s@n',  VNum: [@g%5d@n]\r\n",
+              GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig));
 
     if (trig->attach_type==OBJ_TRIGGER) {
       len += snprintf(sb + len, sizeof(sb)-len, "Trigger Intended Assignment: Objects\r\n");
@@ -751,8 +751,8 @@ void script_stat (char_data *ch, struct script_data *sc)
   }
 
   for (t = TRIGGERS(sc); t; t = t->next) {
-    send_to_char(ch, "\r\n  Trigger: @y%s@n, VNum: [@y%5d@n], RNum: [%5d]\r\n",
-            GET_TRIG_NAME(t), GET_TRIG_VNUM(t), GET_TRIG_RNUM(t));
+    send_to_char(ch, "\r\n  Trigger: @y%s@n, VNum: [@y%5d@n]\r\n",
+            GET_TRIG_NAME(t), GET_TRIG_VNUM(t));
 
     if (t->attach_type==OBJ_TRIGGER) {
       send_to_char(ch, "  Trigger Intended Assignment: Objects\r\n");
@@ -1027,7 +1027,7 @@ int remove_trigger(struct script_data *sc, char *name)
     /* is found. originally the number was position-only */
     else if (++n >= num)
       break;
-    else if (trig_index[i->nr]->vnum == num)
+    else if (i->vnum == num)
       break;
   }
 
@@ -2705,42 +2705,22 @@ int script_driver(void *go_adress, trig_data *trig, int type, int mode)
 /* returns the real number of the trigger with given virtual number */
 trig_rnum real_trigger(trig_vnum vnum)
 {
-  trig_rnum bot, top, mid;
-
-  bot = 0;
-  top = top_of_trigt - 1;
-
-  if (!top_of_trigt || trig_index[bot]->vnum > vnum || trig_index[top]->vnum < vnum)
-    return (NOTHING);
-
-  /* perform binary search on trigger-table */
-  while (bot <= top) {
-    mid = (bot + top) / 2;
-
-    if (trig_index[mid]->vnum == vnum)
-      return (mid);
-    if (trig_index[mid]->vnum > vnum)
-      top = mid - 1;
-    else
-      bot = mid + 1;
-  }
-  return (NOTHING);
+  return trig_proto_by_id(vnum) ? vnum : NOTHING;
 }
 
 ACMD(do_tstat)
 {
-  int rnum;
   char str[MAX_INPUT_LENGTH];
 
   half_chop(argument, str, argument);
   if (*str) {
-    rnum = real_trigger(atoi(str));
-    if (rnum == NOTHING) {
+    auto trig = trig_proto_by_id(atoi(str));
+    if (!trig) {
       send_to_char(ch, "That vnum does not exist.\r\n");
       return;
     }
 
-    do_stat_trigger(ch, trig_index[rnum]->proto);
+    do_stat_trigger(ch, trig);
   } else
     send_to_char(ch, "Usage: tstat <vnum>\r\n");
 }

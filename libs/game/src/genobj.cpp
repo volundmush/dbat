@@ -356,7 +356,7 @@ int delete_object(obj_vnum vnum)
 {
   zone_rnum zrnum;
   struct obj_data *tmp;
-  int shop, j, zone, cmd_no;
+  int shop, j, cmd_no;
 
   auto obj = obj_proto_by_id(vnum);
 

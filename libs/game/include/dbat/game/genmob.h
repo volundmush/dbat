@@ -12,7 +12,7 @@ int add_mobile(struct char_data *, mob_vnum);
 int copy_mob_strings(struct char_data *to, struct char_data *from);
 int free_mobile_strings(struct char_data *mob);
 int free_mobile(struct char_data *mob);
-int save_mobiles(zone_rnum rznum);
+int save_mobiles(struct zone_data *zone);
 int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd);
 
 /* Handy macros. */

@@ -148,7 +148,7 @@ ACMD(do_oasis_medit)
     /**************************************************************************/
     /** Save the mobiles.                                                    **/
     /**************************************************************************/
-    save_mobiles(OLC_ZNUM(d));
+    save_mobiles(zone);
     
     /**************************************************************************/
     /** Free the olc structure stored in the descriptor.                     **/
@@ -185,7 +185,7 @@ ACMD(do_oasis_medit)
 
 void medit_save_to_disk(zone_vnum foo)
 {
-  save_mobiles(real_zone(foo));
+  save_mobiles(zone_by_id(foo));
 }
 
 void medit_setup_new(struct descriptor_data *d)
@@ -984,4 +984,3 @@ void medit_string_cleanup(struct descriptor_data *d, int terminator)
      break;
   }
 }
-

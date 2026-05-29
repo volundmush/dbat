@@ -103,58 +103,8 @@ pub fn deserializeResetCommand(command: *cdb.reset_com, options: DeserializeOpti
 
 fn serializeResetCommandArgs(allocator: std.mem.Allocator, command: *cdb.reset_com) !JsonValue {
     var array = jsonx.JsonArray.init(allocator);
-    var args = [_]c_int{
-        cdb.zone_command_arg_get(command, 0),
-        cdb.zone_command_arg_get(command, 1),
-        cdb.zone_command_arg_get(command, 2),
-        cdb.zone_command_arg_get(command, 3),
-        cdb.zone_command_arg_get(command, 4),
-    };
-    denumberResetCommandArgs(cdb.zone_command_type_get(command), &args);
-    for (args) |arg| try array.append(.{ .integer = arg });
+    for (0..5) |index| try array.append(.{ .integer = cdb.zone_command_arg_get(command, index) });
     return .{ .array = array };
-}
-
-fn denumberResetCommandArgs(command: u8, args: *[5]c_int) void {
-    switch (command) {
-        'M' => {
-            args[0] = args[0];
-            args[2] = args[2];
-        },
-        'O' => {
-            args[0] = args[0];
-            if (args[2] != cdb.NOWHERE) args[2] = args[2];
-        },
-        'G', 'E' => {
-            args[0] = args[0];
-        },
-        'P' => {
-            args[0] = args[0];
-            args[2] = args[2];
-        },
-        'D' => {
-            args[0] = args[0];
-        },
-        'R' => {
-            args[0] = args[0];
-            args[1] = args[1];
-        },
-        'T' => {
-            args[1] = trigVnumFromRnum(args[1]);
-            args[2] = args[2];
-        },
-        'V' => {
-            args[2] = args[2];
-        },
-        else => {},
-    }
-}
-
-fn trigVnumFromRnum(rnum: c_int) c_int {
-    if (rnum == cdb.NOTHING or rnum < 0 or rnum >= cdb.top_of_trigt or cdb.trig_index == null) return rnum;
-    const trigger = cdb.trig_index[@intCast(rnum)];
-    if (trigger == null) return rnum;
-    return trigger.*.vnum;
 }
 
 fn deserializeResetCommandArgs(command: *cdb.reset_com, value: JsonValue) !void {

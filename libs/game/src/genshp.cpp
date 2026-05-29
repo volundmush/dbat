@@ -416,7 +416,7 @@ if(!zone) {
   /*
    * Search database for shops in this zone.
    */
-  for (i = zone->bottom; i <= zone->top; i++) {
+  for (i = zone->bot; i <= zone->top; i++) {
     if ((rshop = real_shop(i)) != NOWHERE) {
       fprintf(shop_file, "#%d~\n", i);
       shop = shop_index + rshop;

@@ -53,6 +53,15 @@ pub export fn trig_proto_by_id(vnum: cdb.trig_vnum) ?*cdb.trig_data {
     return trig_proto_get(vnum);
 }
 
+pub export fn trig_proto_vnum_get(trig: ?*cdb.trig_data) cdb.trig_vnum {
+    const ptr = trig orelse return cdb.NOTHING;
+    var it = trig_proto_map.iterator();
+    while (it.next()) |entry| {
+        if (entry.value_ptr.*.proto == ptr) return entry.key_ptr.*;
+    }
+    return cdb.NOTHING;
+}
+
 pub export fn trig_proto_count() usize {
     var total: usize = 0;
     var it = trig_proto_map.valueIterator();

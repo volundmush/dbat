@@ -36,17 +36,11 @@ void parse_trigger(FILE *trig_f, int nr)
     struct trig_data *trig;
 
     CREATE(trig, struct trig_data, 1);
-    CREATE(t_index, struct index_data, 1);
-
-    t_index->vnum = nr;
-    t_index->number = 0;
-    t_index->func = NULL;
-    t_index->proto = trig;
-
     snprintf(errors, sizeof(errors), "trig vnum %d", nr);
 
-    trig->nr = top_of_trigt;
     trig->name = fread_string(trig_f, errors);
+
+    trig_proto_put(nr, trig);
 
     get_line(trig_f, line);
     k = sscanf(line, "%d %s %d", &attach_type, flags, t);
@@ -69,8 +63,6 @@ void parse_trigger(FILE *trig_f, int nr)
     }
 
     free(cmds);
-
-    trig_index[top_of_trigt++] = t_index;
 }
 
 
@@ -78,19 +70,17 @@ void parse_trigger(FILE *trig_f, int nr)
  * create a new trigger from a prototype.
  * nr is the real number of the trigger.
  */
-trig_data *read_trigger(int nr)
+trig_data *read_trigger(trig_vnum nr)
 {
-    index_data *t_index;
+
+  auto proto = trig_proto_by_id(nr);
+  if (!proto)    return NULL;
+
     trig_data *trig;
-
-    if (nr >= top_of_trigt) return NULL;
-    if ((t_index = trig_index[nr]) == NULL)
-	return NULL;
-
     CREATE(trig, trig_data, 1);
-    trig_data_copy(trig, t_index->proto);
+    trig_data_copy(trig, proto);
 
-    t_index->number++;
+    trig_proto_count_increment(nr);
 
     return trig;
 }
@@ -99,7 +89,7 @@ trig_data *read_trigger(int nr)
 
 void trig_data_init(trig_data *this_data)
 {
-    this_data->nr = NOTHING;
+    this_data->vnum = NOTHING;
     this_data->data_type = 0;
     this_data->name = NULL;
     this_data->trigger_type = 0;
@@ -120,14 +110,14 @@ void trig_data_copy(trig_data *this_data, const trig_data *trg)
 {
     trig_data_init(this_data);
 
-    this_data->nr = trg->nr;
+    this_data->vnum = trg->vnum;
     this_data->attach_type = trg->attach_type;
     this_data->data_type = trg->data_type;
     if (trg->name)
       this_data->name = strdup(trg->name);
     else {
       this_data->name = strdup("unnamed trigger");
-      log("Trigger with no name! (%d)", trg->nr);
+      log("Trigger with no name! (%d)", trg->vnum);
     }
     this_data->trigger_type = trg->trigger_type;
     this_data->cmdlist = trg->cmdlist;

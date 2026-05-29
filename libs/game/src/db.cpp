@@ -759,28 +759,25 @@ void destroy_db(void)
   }
 
   /* Triggers */
-  for (cnt=0; cnt < top_of_trigt; cnt++) {
-    struct index_data *trigger = trig_index[cnt];
-    struct trig_data *proto = trig_index[cnt]->proto;
-    if (proto) {
-      /* make sure to nuke the command list (memory leak) */
-      /* free_trigger() doesn't free the command list */
-      if (proto->cmdlist) {
-        struct cmdlist_element *i, *j;
-        i = proto->cmdlist;
-        while (i) {
-          j = i->next;
-          if (i->cmd)
-            free(i->cmd);
-          free(i);
-          i = j;
-        }
+  trig_proto_iterate ([&](auto trig) {
+    trig_vnum vnum = trig->vnum;
+    /* make sure to nuke the command list (memory leak) */
+    /* free_trigger() doesn't free the command list */
+    if (trig->cmdlist) {
+      struct cmdlist_element *i, *j;
+      i = trig->cmdlist;
+      while (i) {
+        j = i->next;
+        if (i->cmd)
+          free(i->cmd);
+        free(i);
+        i = j;
       }
-      free_trigger(proto);
     }
-    free(trigger);
-  }
-  free(trig_index);
+    trig_proto_delete(vnum);
+    free_trigger(trig);
+    return true;
+  });
 
   /* Events */
   event_free_all();
@@ -1335,7 +1332,6 @@ void index_boot(int mode)
    */
   switch (mode) {
   case DB_BOOT_TRG:
-    CREATE(trig_index, struct index_data *, rec_count);
     break;
   case DB_BOOT_WLD:
     size[0] = sizeof(struct room_data) * rec_count;
@@ -3860,7 +3856,7 @@ void zone_update(void)
 
         CREATE(update_u, struct reset_q_element, 1);
 
-        update_u->zone_to_reset = i;
+        update_u->zone_to_reset = zone->number;
         update_u->next = 0;
 
         if (!reset_q.head)
@@ -3906,6 +3902,8 @@ void zone_update(void)
     }
   }
 }
+}
+
 
 static void log_zone_error(struct zone_data* zone, int cmd_no, const char *message)
 {

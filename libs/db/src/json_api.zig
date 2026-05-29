@@ -281,22 +281,21 @@ fn exportGuilds(folder: []const u8) !void {
 }
 
 fn exportDgScript(vnum: cdb.trig_vnum, filename: []const u8) !void {
-    const trigger = triggerByVnum(vnum) orelse return error.NotFound;
+    const trigger = cdb.trig_proto_by_id(vnum) orelse return error.NotFound;
     try writeJsonFile(filename, dgscripts_json.serializeTrigger, .{trigger});
 }
 
 fn exportDgScripts(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.trig_index == null) return;
-    if (cdb.top_of_trigt <= 0) return;
-    var index: usize = 0;
-    while (index < @as(usize, @intCast(cdb.top_of_trigt))) : (index += 1) {
-        const entry = cdb.trig_index[index];
-        if (entry != null and entry.*.proto != null) {
-            const path = try assetPath(folder, entry.*.vnum);
-            defer std.heap.page_allocator.free(path);
-            try exportDgScript(entry.*.vnum, path);
-        }
+    const iterator = cdb.trig_proto_iterator_create() orelse return;
+    defer cdb.trig_proto_iterator_free(iterator);
+
+    while (cdb.trig_proto_next(iterator)) |trigger| {
+        const vnum = trigger.*.vnum;
+        if (vnum == cdb.NOTHING) continue;
+        const path = try assetPath(folder, vnum);
+        defer std.heap.page_allocator.free(path);
+        try exportDgScript(vnum, path);
     }
 }
 
@@ -455,8 +454,6 @@ fn importRoomExits(folder: []const u8) !void {
 fn importDgScripts(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
     var progress = Progress.init("dgscripts", files.len);
-    cdb.trig_index = try allocCArray([*c]cdb.index_data, files.len);
-    cdb.top_of_trigt = @intCast(files.len);
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -466,19 +463,12 @@ fn importDgScripts(folder: []const u8) !void {
             return err;
         };
 
-        const entry = try allocCOne(cdb.index_data);
         const trigger = try allocCOne(cdb.trig_data);
-        entry.vnum = @intCast(file.vnum);
-        entry.number = 0;
-        entry.func = null;
-        entry.proto = trigger;
-        trigger.nr = @intCast(index);
         dgscripts_json.deserializeTrigger(trigger, value) catch |err| {
             logImportFileError("dgscripts", file, err);
             return err;
         };
-        trigger.nr = @intCast(index);
-        cdb.trig_index[index] = entry;
+        cdb.trig_proto_put(@intCast(file.vnum), trigger);
         progress.tick(index);
     }
 }
@@ -577,16 +567,6 @@ fn importGuilds(folder: []const u8) !void {
     }
 }
 
-fn realTrigger(vnum: cdb.trig_vnum) cdb.trig_rnum {
-    if (cdb.trig_index == null or cdb.top_of_trigt <= 0) return cdb.NOTHING;
-    var index: usize = 0;
-    while (index < @as(usize, @intCast(cdb.top_of_trigt))) : (index += 1) {
-        const entry = cdb.trig_index[index];
-        if (entry != null and entry.*.vnum == vnum) return @intCast(index);
-    }
-    return cdb.NOTHING;
-}
-
 fn writeJsonFile(filename: []const u8, comptime serializer: anytype, args: anytype) !void {
     if (!has_io) return error.NotInitialized;
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -658,17 +638,6 @@ fn assetPath(folder: []const u8, vnum: anytype) ![]const u8 {
 
 fn childPath(folder: []const u8, child: []const u8) ![]const u8 {
     return try std.fmt.allocPrint(std.heap.page_allocator, "{s}/{s}", .{ folder, child });
-}
-
-fn triggerByVnum(vnum: cdb.trig_vnum) ?*cdb.trig_data {
-    if (cdb.trig_index == null) return null;
-    if (cdb.top_of_trigt <= 0) return null;
-    var index: usize = 0;
-    while (index < @as(usize, @intCast(cdb.top_of_trigt))) : (index += 1) {
-        const entry = cdb.trig_index[index];
-        if (entry != null and entry.*.vnum == vnum) return entry.*.proto;
-    }
-    return null;
 }
 
 fn cString(value: ?[*:0]const u8) []const u8 {

@@ -30,7 +30,7 @@ pub export fn room_zone_get(room: *cdb.room_data) [*c]cdb.zone_data {
 pub export fn room_zone_vnum_get(room: *cdb.room_data) cdb.zone_vnum {
     const zone = cdb.zone_by_id(room.zone);
     if (zone == null) return cdb.NOWHERE;
-    return zone.number;
+    return zone.*.number;
 }
 
 pub export fn room_zone_set(room: *cdb.room_data, vnum: cdb.zone_vnum) void {

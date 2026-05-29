@@ -444,26 +444,24 @@ void list_triggers(struct char_data *ch, struct zone_data *zone, trig_vnum vmin,
 
 
   /** Loop through the world and find each room. **/
-  for (i = 0; i < top_of_trigt; i++) {
-    /** Check to see if this room is one of the ones needed to be listed.    **/
-    if ((trig_index[i]->vnum >= bottom) && (trig_index[i]->vnum <= top)) {
-      counter++;
+  for (i = bottom; i <= top; i++) {
+    auto trig = trig_proto_by_id(i);
+    if(!trig) continue;
+    counter++;
 
       send_to_char(ch, "%4d) [@g%5d@n] @[1]%-45.45s ",
-        counter, trig_index[i]->vnum, trig_index[i]->proto->name);
+        counter, trig->vnum, trig->name);
 
-      if (trig_index[i]->proto->attach_type == OBJ_TRIGGER) {
-        sprintbit(GET_TRIG_TYPE(trig_index[i]->proto), otrig_types, trgtypes, sizeof(trgtypes));
+      if (trig->attach_type == OBJ_TRIGGER) {
+        sprintbit(GET_TRIG_TYPE(trig), otrig_types, trgtypes, sizeof(trgtypes));
         send_to_char(ch, "obj @y%s@n\r\n", trgtypes);
-      } else if (trig_index[i]->proto->attach_type==WLD_TRIGGER) {
-        sprintbit(GET_TRIG_TYPE(trig_index[i]->proto), wtrig_types, trgtypes, sizeof(trgtypes));
+      } else if (trig->attach_type==WLD_TRIGGER) {
+        sprintbit(GET_TRIG_TYPE(trig), wtrig_types, trgtypes, sizeof(trgtypes));
         send_to_char(ch, "wld @y%s@n\r\n", trgtypes);
       } else {
-        sprintbit(GET_TRIG_TYPE(trig_index[i]->proto), trig_types, trgtypes, sizeof(trgtypes));
+        sprintbit(GET_TRIG_TYPE(trig), trig_types, trgtypes, sizeof(trgtypes));
         send_to_char(ch, "mob @y%s@n\r\n", trgtypes);
       }
-
-    }
   }
 
   if (counter == 0) {

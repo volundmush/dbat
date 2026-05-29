@@ -1312,14 +1312,16 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum)
     	      cmd->arg3 ? ((cmd->arg3 == 1) ? "closed" : "locked") : "open"
     	      );
           break;
-        case 'T':
-          send_to_char(ch, "%sAttach trigger @c%s@y [@c%d@y] to %s\r\n",
+        case 'T': {
+          auto trig = trig_proto_by_id(cmd->arg2);
+            send_to_char(ch, "%sAttach trigger @c%s@y [@c%d@y] to %s\r\n",
             cmd->if_flag ? " then " : "",
-            trig_index[cmd->arg2]->proto->name,
-            trig_index[cmd->arg2]->vnum,
+            trig->name,
+            trig->vnum,
             ((cmd->arg1 == MOB_TRIGGER) ? "mobile" :
               ((cmd->arg1 == OBJ_TRIGGER) ? "object" :
                 ((cmd->arg1 == WLD_TRIGGER)? "room" : "????"))));
+        }
           break;
         case 'V':
           send_to_char(ch, "%sAssign global %s:%d to %s = %s\r\n",
@@ -3147,6 +3149,7 @@ ACMD(do_zreset)
     {
       zone_iterate([&](auto zone){
         reset_zone(zone);
+        return true;
       });
       send_to_char(ch, "Reset world.\r\n");
       mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s reset all MUD zones.", GET_NAME(ch));
@@ -3304,8 +3307,6 @@ static size_t print_zone_to_buf(char *bufptr, size_t left, struct zone_data *zon
   if (listall)
   {
     int i, j, k, l, m, n, o;
-    extern int top_of_trigt;
-    extern struct index_data **trig_index;
     int count_shops(shop_vnum low, shop_vnum high);
     int count_guilds(guild_vnum low, guild_vnum high);
 
@@ -3333,8 +3334,8 @@ static size_t print_zone_to_buf(char *bufptr, size_t left, struct zone_data *zon
 
     m = count_shops(zn->bot, zn->top);
 
-    for (i = 0; i < top_of_trigt; i++)
-      if (trig_index[i]->vnum >= zn->bot && trig_index[i]->vnum <= zn->top)
+    for (i = zn->bot; i < zn->top; i++)
+      if (trig_proto_by_id(i))
         n++;
 
     o = count_guilds(zn->bot, zn->top);
@@ -3373,7 +3374,6 @@ ACMD(do_show)
   struct affected_type *aff;
   char field[MAX_INPUT_LENGTH], value[MAX_INPUT_LENGTH], *strp,
       arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH];
-  extern int top_of_trigt;
 
   struct show_struct
   {
@@ -3449,7 +3449,7 @@ ACMD(do_show)
       zone_iterate ([&](auto zone) {
         nlen = print_zone_to_buf(buf + len, sizeof(buf) - len, zone, 0);
         if (len + nlen >= sizeof(buf) || nlen < 0)
-          break;
+          return false;
         len += nlen;
         return true;
       });
@@ -3538,7 +3538,7 @@ ACMD(do_show)
                  j, mob_proto_count(),
                  k, obj_proto_count(),
                  room_count(), zone_count(),
-                 top_of_trigt + 1,
+                 trig_proto_count(),
                  buf_largecount,
                  buf_switches, buf_overflows,
                  add_commas(mob_specials_used),
@@ -5353,6 +5353,7 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum)
 {
   int cmd_no, found = 0;
   zone_rnum zone;
+  struct trig_data *trg = trig_proto_by_id(tvnum);
   trig_rnum trnum = real_trigger(tvnum);
   room_vnum lastroom_v = 0;
   room_rnum lastroom_r = 0, k;
@@ -5360,13 +5361,11 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum)
   obj_vnum lastobj_v = 0, j;
   struct trig_proto_list *tpl;
  
-  if (trnum == NOTHING) {
+  if (!trg) {
     send_to_char(ch, "That trigger does not exist.\r\n");
     return;
   }
 
-  struct trig_data* trg = trig_index[trnum]->proto;
- 
   send_to_char(ch, "Checking load info for the %s trigger [%d] '%s':\r\n",
                     trg->attach_type == MOB_TRIGGER ? "mobile" :
                     (trg->attach_type == OBJ_TRIGGER ? "object" : "room"),                   

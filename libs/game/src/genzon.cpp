@@ -16,7 +16,6 @@
 zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error)
 {
   FILE *fp;
-  struct zone_data *zone;
   int i;
   zone_rnum rznum;
   char buf[MAX_STRING_LENGTH];
@@ -360,7 +359,7 @@ if(!zone) {
 		? zn->builders : "None.",
 	  (zn->name && *zn->name)
 		? zn->name : "undefined",
-          zn->bottom,
+          zn->bot,
 	  zn->top,
 	  zn->lifespan,
 	  zn->reset_mode,
@@ -386,9 +385,9 @@ if(!zone) {
 	 * -----------------------------------------------------------------------------------------
 	 */
 
-   struct reset_com *cmd = zone->cmd[0];
+   struct reset_com *cmd = &zone->cmd[0];
   for (subcmd = 0; cmd->command != 'S'; subcmd++) {
-    cmd = zone->cmd[subcmd];
+    cmd = &zone->cmd[subcmd];
     switch (cmd->command) {
     case 'M': {
       auto proto = mob_proto_by_id(cmd->arg1);
@@ -458,11 +457,11 @@ if(!zone) {
       break;
     case 'T':
       arg1 = cmd->arg1; /* trigger type */
-      arg2 = trig_index[cmd->arg2]->vnum; /* trigger vnum */
+      arg2 = cmd->arg2; /* trigger vnum */
       arg3 = cmd->arg3; /* room num */
       arg4 = -1;
       arg5 = cmd->arg5;
-      comment = GET_TRIG_NAME(trig_index[real_trigger(arg2)]->proto); 
+      comment = GET_TRIG_NAME(trig_proto_by_id(arg2)); 
       break;
     case 'V':
       arg1 = cmd->arg1; /* trigger type */

@@ -6,6 +6,7 @@
 #include "dbat/db/htree.h"
 #include "dbat/db/shops.h"
 #include "dbat/db/guilds.h"
+#include "dbat/db/iterate.hpp"
 #include "dbat/game/genmob.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/db.h"
@@ -451,4 +452,3 @@ void check_mobile_string(mob_vnum i, char **string, const char *dscr)
     *string = strdup("An undefined string.");
   }
 }
-

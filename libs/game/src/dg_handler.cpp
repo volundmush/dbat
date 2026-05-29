@@ -111,7 +111,7 @@ void extract_trigger(struct trig_data *trig)
     GET_TRIG_WAIT(trig) = NULL;
   }
 
-  trig_index[trig->nr]->number--;
+  trig_proto_count_decrement(trig->vnum);
 
   /* walk the trigger list and remove this one */
   REMOVE_FROM_LIST(trig, trigger_list, next_in_world, temp);
