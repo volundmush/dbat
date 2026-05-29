@@ -267,12 +267,12 @@ static void generate_multiform(struct char_data *ch, int count)
 {
     char blamo[MAX_INPUT_LENGTH];
     sprintf(blamo, "p.%s", GET_NAME(ch));
+    struct char_data *proto = mob_proto_by_id(25);
+     if (!proto) {
+         send_to_imm("Multiform Clone doesn't exist!");
+         return;
+     }
 
-    mob_rnum r_num;
-    if ((r_num = real_mobile(25)) == NOBODY) {
-        send_to_imm("Multiform Clone doesn't exist!");
-        return;
-    }
 
     char clone_name[MAX_INPUT_LENGTH];
     snprintf(clone_name, sizeof(clone_name), "%s's Clone", ch->name);
@@ -284,7 +284,7 @@ static void generate_multiform(struct char_data *ch, int count)
 
     for(int i = 0; i < count; i++) {
         char_data *clone = nullptr;
-        clone = read_mobile(r_num, REAL);
+        clone = read_mobile(25, VIRTUAL);
 
         clone->name = strdup(clone_name);
         clone->short_descr = strdup(clone_sdesc);

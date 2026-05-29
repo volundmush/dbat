@@ -163,10 +163,10 @@ ACMD(do_oasis_medit)
   /** If this is a new mobile, setup a new one, otherwise, setup the         **/
   /** existing mobile.                                                       **/
   /****************************************************************************/
-  if ((real_num = real_mobile(number)) == NOBODY)
+  if (!mob_proto_by_id(number))
     medit_setup_new(d);
   else
-    medit_setup_existing(d, real_num);
+    medit_setup_existing(d, number);
  
   medit_disp_menu(d); 
   STATE(d) = CON_MEDIT;
@@ -198,7 +198,7 @@ void medit_setup_new(struct descriptor_data *d)
 
   init_mobile(mob);
 
-  GET_MOB_RNUM(mob) = NOBODY;
+  mob->vnum = NOBODY;
   /*
    * Set up some default strings.
    */
@@ -218,7 +218,7 @@ void medit_setup_new(struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-void medit_setup_existing(struct descriptor_data *d, int rmob_num)
+void medit_setup_existing(struct descriptor_data *d, mob_vnum mob_num)
 {
   struct char_data *mob;
 
@@ -227,7 +227,7 @@ void medit_setup_existing(struct descriptor_data *d, int rmob_num)
    */
   CREATE(mob, struct char_data, 1);
 
-  copy_mobile(mob, mob_proto + rmob_num);
+  copy_mobile(mob, mob_proto_by_id(mob_num));
 
   OLC_MOB(d) = mob;
   OLC_ITEM_TYPE(d) = MOB_TRIGGER;
@@ -275,19 +275,17 @@ void init_mobile(struct char_data *mob)
  */
 void medit_save_internally(struct descriptor_data *d)
 {
-  int i;
   mob_rnum new_rnum;
   struct descriptor_data *dsc;
   struct char_data *mob;
+  mob_vnum v = OLC_NUM(d);
 
-  i = (real_mobile(OLC_NUM(d)) == NOBODY);
-
-  if ((new_rnum = add_mobile(OLC_MOB(d), OLC_NUM(d))) == NOBODY) {
+  if ((new_rnum = add_mobile(OLC_MOB(d), v)) == NOBODY) {
     log("medit_save_internally: add_mobile failed.");
     return;
   }
 
-  struct char_data* proto = &mob_proto[new_rnum];
+  struct char_data* proto = mob_proto_by_id(v);
 
   /* Update triggers */
   /* Free old proto list  */
@@ -299,7 +297,7 @@ void medit_save_internally(struct descriptor_data *d)
 
   /* this takes care of the mobs currently in-game */
   for (mob = character_list; mob; mob = mob->next) {
-    if (GET_MOB_RNUM(mob) != new_rnum) 
+    if (GET_MOB_VNUM(mob) != v) 
       continue;
     
     /* remove any old scripts */
@@ -311,29 +309,6 @@ void medit_save_internally(struct descriptor_data *d)
     assign_triggers(mob, MOB_TRIGGER);
   }
   /* end trigger update */  
-
-  if (!i)	/* Only renumber on new mobiles. */
-    return;
-
-  /*
-   * Update keepers in shops being edited and other mobs being edited.
-   */
-  for (dsc = descriptor_list; dsc; dsc = dsc->next) {
-    if (STATE(dsc) == CON_SEDIT)
-      S_KEEPER(OLC_SHOP(dsc)) += (S_KEEPER(OLC_SHOP(dsc)) != NOTHING && S_KEEPER(OLC_SHOP(dsc)) >= new_rnum);
-    else if (STATE(dsc) == CON_MEDIT)
-      GET_MOB_RNUM(OLC_MOB(dsc)) += (GET_MOB_RNUM(OLC_MOB(dsc)) != NOTHING && GET_MOB_RNUM(OLC_MOB(dsc)) >= new_rnum);
-  }
-
-  /*
-   * Update other people in zedit too. From: C.Raehl 4/27/99
-   */
-  for (dsc = descriptor_list; dsc; dsc = dsc->next)
-    if (STATE(dsc) == CON_ZEDIT)
-      for (i = 0; OLC_ZONE(dsc)->cmd[i].command != 'S'; i++)
-        if (OLC_ZONE(dsc)->cmd[i].command == 'M')
-          if (OLC_ZONE(dsc)->cmd[i].arg1 >= new_rnum)
-            OLC_ZONE(dsc)->cmd[i].arg1++;
 }
 
 /**************************************************************************
@@ -544,6 +519,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
 {
   int i = -1;
   char *oldtext = NULL;
+  struct char_data *mob = NULL;
   dbat::race::Race *chosen_race;
 
   if (OLC_MODE(d) > MEDIT_NUMERICAL_RESPONSE) {
@@ -937,15 +913,15 @@ void medit_parse(struct descriptor_data *d, char *arg)
     break;
 
   case MEDIT_COPY:
-    if ((i = real_mobile(atoi(arg))) != NOWHERE) {
-      medit_setup_existing(d, i);
+    if ((mob_proto_by_id(atoi(arg)))) {
+      medit_setup_existing(d, atoi(arg));
     } else
       write_to_output(d, "That mob does not exist.\r\n");
     break;
 
   case MEDIT_DELETE:
     if (*arg == 'y' || *arg == 'Y') {
-      if (delete_mobile(GET_MOB_RNUM(OLC_MOB(d))) != NOBODY)
+      if (delete_mobile(OLC_MOB(d)->vnum) != NOBODY)
         write_to_output(d, "Mobile deleted.\r\n");
       else
         write_to_output(d, "Couldn't delete the mobile!\r\n");

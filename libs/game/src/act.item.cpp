@@ -1173,7 +1173,7 @@ void dball_load()
 
 if (dballtime == 0) {
  struct char_data *hunter = NULL;
- mob_rnum r_num;
+ struct char_data *proto = NULL;
 
  WISHTIME = 0;
  for (k = object_list; k; k = k->next) {
@@ -1232,20 +1232,20 @@ if (dballtime == 0) {
    }
    if (rand_number(1, 10) > 8) {
     if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER1_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
+     hunter = read_mobile(DBALL_HUNTER1_VNUM, VIRTUAL);
      char_to_room(hunter, room_by_id(room));
      hunter1 = TRUE;
      DBALL_HUNTER1 = room;
      k = read_object(20, VIRTUAL);
      obj_to_char(k, hunter);
     } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER2_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
+     hunter = read_mobile(DBALL_HUNTER2_VNUM, VIRTUAL);
      char_to_room(hunter, room_by_id(room));
      hunter2 = TRUE;
      DBALL_HUNTER2 = room;
@@ -1280,20 +1280,20 @@ if (dballtime == 0) {
    }
    if (rand_number(1, 10) > 8) {
     if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER1_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
+     hunter = read_mobile(DBALL_HUNTER1_VNUM, VIRTUAL);
      char_to_room(hunter, room_by_id(room));
      hunter1 = TRUE;
      DBALL_HUNTER1 = room;
      k = read_object(21, VIRTUAL);
      obj_to_char(k, hunter);
     } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER2_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
+     hunter = read_mobile(DBALL_HUNTER2_VNUM, VIRTUAL);
      char_to_room(hunter, room_by_id(room));
      hunter2 = TRUE;
      DBALL_HUNTER2 = room;
@@ -1328,20 +1328,20 @@ if (dballtime == 0) {
    }
    if (rand_number(1, 10) > 8) {
     if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER1_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
+     hunter = read_mobile(DBALL_HUNTER1_VNUM, VIRTUAL);
      char_to_room(hunter, room_by_id(room));
      hunter1 = TRUE;
      DBALL_HUNTER1 = room;
      k = read_object(22, VIRTUAL);
      obj_to_char(k, hunter);
     } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER2_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
+     hunter = read_mobile(DBALL_HUNTER2_VNUM, VIRTUAL);
      char_to_room(hunter, room_by_id(room));
      hunter2 = TRUE;
      DBALL_HUNTER2 = room;
@@ -1376,20 +1376,20 @@ if (dballtime == 0) {
    }
    if (rand_number(1, 10) > 8) {
     if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER1_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
+     hunter = read_mobile(DBALL_HUNTER1_VNUM, VIRTUAL);
      char_to_room(hunter, room_by_id(room));
      hunter1 = TRUE;
      DBALL_HUNTER1 = room;
      k = read_object(23, VIRTUAL);
      obj_to_char(k, hunter);
     } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER2_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
+     hunter = read_mobile(DBALL_HUNTER2_VNUM, VIRTUAL);
      char_to_room(hunter, room_by_id(room));
      hunter2 = TRUE;
      DBALL_HUNTER2 = room;
@@ -1424,20 +1424,20 @@ if (dballtime == 0) {
    }
    if (rand_number(1, 10) > 8) {
     if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER1_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
+     hunter = read_mobile(DBALL_HUNTER1_VNUM, VIRTUAL);
      char_to_room(hunter, room_by_id(room));
      hunter1 = TRUE;
      DBALL_HUNTER1 = room;
      k = read_object(24, VIRTUAL);
      obj_to_char(k, hunter);
     } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER2_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
+     hunter = read_mobile(DBALL_HUNTER2_VNUM, VIRTUAL);
      char_to_room(hunter, room_by_id(room));
      hunter2 = TRUE;
      DBALL_HUNTER2 = room;
@@ -1472,20 +1472,20 @@ if (dballtime == 0) {
    }
    if (rand_number(1, 10) > 8) {
     if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER1_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
+     hunter = read_mobile(DBALL_HUNTER1_VNUM, VIRTUAL);
      char_to_room(hunter, room_by_id(room));
      hunter1 = TRUE;
      DBALL_HUNTER1 = room;
      k = read_object(25, VIRTUAL);
      obj_to_char(k, hunter);
     } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER2_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
+     hunter = read_mobile(DBALL_HUNTER2_VNUM, VIRTUAL);
      char_to_room(hunter, room_by_id(room));
      hunter2 = TRUE;
      DBALL_HUNTER2 = room;
@@ -1520,20 +1520,20 @@ if (dballtime == 0) {
    }
    if (rand_number(1, 10) > 8) {
     if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER1_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
+     hunter = read_mobile(DBALL_HUNTER1_VNUM, VIRTUAL);
      char_to_room(hunter, room_by_id(room));
      hunter1 = TRUE;
      DBALL_HUNTER1 = room;
      k = read_object(26, VIRTUAL);
      obj_to_char(k, hunter);
     } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER2_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
+     hunter = read_mobile(DBALL_HUNTER2_VNUM, VIRTUAL);
      char_to_room(hunter, room_by_id(room));
      hunter2 = TRUE;
      DBALL_HUNTER2 = room;

@@ -406,6 +406,8 @@ void sedit_disp_menu(struct descriptor_data *d)
 
   shop = OLC_SHOP(d);
 
+  auto keeper = mob_proto_by_id(S_KEEPER(shop));
+
   clear_screen(d);
   sprintbitarray(S_NOTRADE(shop), trade_letters, 4, buf1, sizeof(buf1));
   sprintbit(S_BITVECTOR(shop), shop_bits, buf2, sizeof(buf2));
@@ -432,8 +434,8 @@ void sedit_disp_menu(struct descriptor_data *d)
 	  "Enter Choice : ",
 
 	  OLC_NUM(d),
-	  S_KEEPER(shop) == NOBODY ? -1 : mob_index[S_KEEPER(shop)].vnum,
-	  S_KEEPER(shop) == NOBODY ? "None" : mob_proto[S_KEEPER(shop)].short_descr,
+	  keeper ? keeper->vnum : -1,
+	  keeper ? keeper->short_descr : "None",
 	  S_OPEN1(shop),
 	  S_CLOSE1(shop),
 	  S_OPEN2(shop),
@@ -461,6 +463,8 @@ void sedit_disp_menu(struct descriptor_data *d)
 void sedit_parse(struct descriptor_data *d, char *arg)
 {
   int i;
+
+  struct char_data *keeper = NULL;
 
   if (OLC_MODE(d) > SEDIT_NUMERICAL_RESPONSE) {
     if (!isdigit(arg[0]) && ((*arg == '-') && (!isdigit(arg[1])))) {
@@ -716,7 +720,7 @@ void sedit_parse(struct descriptor_data *d, char *arg)
   case SEDIT_KEEPER:
     i = atoi(arg);
     if ((i = atoi(arg)) != -1)
-      if ((i = real_mobile(i)) == NOBODY) {
+      if ((keeper = mob_proto_by_id(i)) == NULL) {
 	write_to_output(d, "That mobile does not exist, try again : ");
 	return;
       }
@@ -726,8 +730,8 @@ void sedit_parse(struct descriptor_data *d, char *arg)
     /*
      * Fiddle with special procs.
      */
-    S_FUNC(OLC_SHOP(d)) = mob_index[i].func != shop_keeper ? mob_index[i].func : NULL;
-    mob_index[i].func = shop_keeper;
+    S_FUNC(OLC_SHOP(d)) = mob_proto_special_get(keeper->vnum) != shop_keeper ? mob_proto_special_get(keeper->vnum) : NULL;
+    mob_proto_special_set(keeper->vnum, shop_keeper);
     break;
   case SEDIT_OPEN1:
     S_OPEN1(OLC_SHOP(d)) = LIMIT(atoi(arg), 0, 28);

@@ -441,13 +441,15 @@ int save_zone(zone_rnum zone_num)
 
   for (subcmd = 0; ZCMD(zone_num, subcmd).command != 'S'; subcmd++) {
     switch (ZCMD(zone_num, subcmd).command) {
-    case 'M':
-      arg1 = mob_index[ZCMD(zone_num, subcmd).arg1].vnum;
+    case 'M': {
+      auto proto = mob_proto_by_id(ZCMD(zone_num, subcmd).arg1);
+      arg1 = proto->vnum;
       arg2 = ZCMD(zone_num, subcmd).arg2;
       arg3 = world[ZCMD(zone_num, subcmd).arg3].number;
       arg4 = ZCMD(zone_num, subcmd).arg4;
       arg5 = ZCMD(zone_num, subcmd).arg5;
-      comment = mob_proto[ZCMD(zone_num, subcmd).arg1].short_descr;
+      comment = proto->short_descr;
+    }
       break;
     case 'O':
       arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vnum;

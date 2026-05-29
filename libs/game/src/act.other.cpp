@@ -7207,55 +7207,22 @@ ACMD(do_instant)
 
 void load_shadow_dragons()
 {
-  struct char_data *mob = NULL;
-  mob_rnum r_num;
 
-  if (SHADOW_DRAGON1 > 0) {
-   r_num = real_mobile(SHADOW_DRAGON1_VNUM);
-   mob = read_mobile(r_num, REAL);
-   char_to_room(mob, room_by_id(SHADOW_DRAGON1));
-   mob = NULL;
-  }
+  const std::pair<mob_vnum, room_vnum> shadow_dragons[] = {
+    {SHADOW_DRAGON1_VNUM, SHADOW_DRAGON1},
+    {SHADOW_DRAGON2_VNUM, SHADOW_DRAGON2},
+    {SHADOW_DRAGON3_VNUM, SHADOW_DRAGON3},
+    {SHADOW_DRAGON4_VNUM, SHADOW_DRAGON4},
+    {SHADOW_DRAGON5_VNUM, SHADOW_DRAGON5},
+    {SHADOW_DRAGON6_VNUM, SHADOW_DRAGON6},
+    {SHADOW_DRAGON7_VNUM, SHADOW_DRAGON7},
+  };
 
-  if (SHADOW_DRAGON2 > 0) {
-   r_num = real_mobile(SHADOW_DRAGON2_VNUM);
-   mob = read_mobile(r_num, REAL);
-   char_to_room(mob, room_by_id(SHADOW_DRAGON2));
-   mob = NULL;
-  }
-
-  if (SHADOW_DRAGON3 > 0) {
-   r_num = real_mobile(SHADOW_DRAGON3_VNUM);
-   mob = read_mobile(r_num, REAL);
-   char_to_room(mob, room_by_id(SHADOW_DRAGON3));
-   mob = NULL;
-  }
-
-  if (SHADOW_DRAGON4 > 0) {
-   r_num = real_mobile(SHADOW_DRAGON4_VNUM);
-   mob = read_mobile(r_num, REAL);
-   char_to_room(mob, room_by_id(SHADOW_DRAGON4));
-   mob = NULL;
-  }
-
-  if (SHADOW_DRAGON5 > 0) {
-   r_num = real_mobile(SHADOW_DRAGON5_VNUM);
-   mob = read_mobile(r_num, REAL);
-   char_to_room(mob, room_by_id(SHADOW_DRAGON5));
-   mob = NULL;
-  }
-
-  if (SHADOW_DRAGON6 > 0) {
-   r_num = real_mobile(SHADOW_DRAGON6_VNUM);
-   mob = read_mobile(r_num, REAL);
-   char_to_room(mob, room_by_id(SHADOW_DRAGON6));
-   mob = NULL;
-  }
-
-  if (SHADOW_DRAGON7 > 0) {
-   r_num = real_mobile(SHADOW_DRAGON7_VNUM);
-   mob = read_mobile(r_num, REAL);
-   char_to_room(mob, room_by_id(SHADOW_DRAGON7));
+  for (const auto& [vnum, room] : shadow_dragons) {
+    if(room > 0) {
+      struct char_data *mob = read_mobile(vnum, VIRTUAL);
+      char_to_room(mob, room_by_id(room));
+    }
   }
 
  save_mud_time(&time_info);
@@ -7438,43 +7405,23 @@ void wishSYS(void)
      } /* End switch */
      save_mud_time(&time_info);
     } /* End while */
-     struct char_data *mob = NULL;
-     mob_rnum r_num;
 
-     r_num = real_mobile(SHADOW_DRAGON1_VNUM);
-     mob = read_mobile(r_num, REAL);
-     char_to_room(mob, room_by_id(SHADOW_DRAGON1));
-     mob = NULL;
+    const std::pair<mob_vnum, room_vnum> shadow_dragons[] = {
+      {SHADOW_DRAGON1_VNUM, SHADOW_DRAGON1},
+      {SHADOW_DRAGON2_VNUM, SHADOW_DRAGON2},
+      {SHADOW_DRAGON3_VNUM, SHADOW_DRAGON3},
+      {SHADOW_DRAGON4_VNUM, SHADOW_DRAGON4},
+      {SHADOW_DRAGON5_VNUM, SHADOW_DRAGON5},
+      {SHADOW_DRAGON6_VNUM, SHADOW_DRAGON6},
+      {SHADOW_DRAGON7_VNUM, SHADOW_DRAGON7},
+    };
 
-     r_num = real_mobile(SHADOW_DRAGON2_VNUM);
-     mob = read_mobile(r_num, REAL);
-     char_to_room(mob, room_by_id(SHADOW_DRAGON2));
-     mob = NULL;
-
-     r_num = real_mobile(SHADOW_DRAGON3_VNUM);
-     mob = read_mobile(r_num, REAL);
-     char_to_room(mob, room_by_id(SHADOW_DRAGON3));
-     mob = NULL;
-
-     r_num = real_mobile(SHADOW_DRAGON4_VNUM);
-     mob = read_mobile(r_num, REAL);
-     char_to_room(mob, room_by_id(SHADOW_DRAGON4));
-     mob = NULL;
-
-     r_num = real_mobile(SHADOW_DRAGON5_VNUM);
-     mob = read_mobile(r_num, REAL);
-     char_to_room(mob, room_by_id(SHADOW_DRAGON5));
-     mob = NULL;
-
-     r_num = real_mobile(SHADOW_DRAGON6_VNUM);
-     mob = read_mobile(r_num, REAL);
-     char_to_room(mob, room_by_id(SHADOW_DRAGON6));
-     mob = NULL;
-
-     r_num = real_mobile(SHADOW_DRAGON7_VNUM);
-     mob = read_mobile(r_num, REAL);
-     char_to_room(mob, room_by_id(SHADOW_DRAGON7));
-     mob = NULL;
+    for (const auto& [vnum, room] : shadow_dragons) {
+      if(room > 0) {
+        struct char_data *mob = read_mobile(vnum, VIRTUAL);
+        char_to_room(mob, room_by_id(room));
+      }
+    }
  
      extract_char(EDRAGON);
      SHENRON = FALSE;
@@ -7491,7 +7438,7 @@ ACMD(do_summon)
    int dball2[7] = {20, 21, 22, 23, 24, 25, 26};
    struct obj_data *obj, *next_obj;
    struct char_data *mob=NULL;
-   mob_rnum r_num;
+   struct char_data *proto = NULL;
 
    struct room_data* room = char_room_get(ch);
 
@@ -7624,11 +7571,11 @@ ACMD(do_summon)
        continue;
       }
      }
-     if ((r_num = real_mobile(21)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(21))) {
       send_to_imm("Shenron doesn't exist!");
       return;
      }
-     mob = read_mobile(r_num, REAL);
+     mob = read_mobile(21, VIRTUAL);
      char_to_room(mob, 0);
      EDRAGON = mob;
      return;

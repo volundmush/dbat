@@ -1536,7 +1536,7 @@ SPECIAL(guild)
   };
 
   for (guild_nr = 0; guild_nr <= top_guild; guild_nr++)
-    if (GM_TRAINER(guild_nr) == keeper->nr)
+    if (GM_TRAINER(guild_nr) == keeper->vnum)
       break;
 
   if (guild_nr > top_guild)
@@ -1652,7 +1652,6 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
       read_guild_line(gm_f, "%d", &GM_MINLVL(top_guild), "GM_MINLVL");
       read_guild_line(gm_f, "%d", &GM_TRAINER(top_guild), "GM_TRAINER");
 
-      GM_TRAINER(top_guild) = real_mobile(GM_TRAINER(top_guild));
       read_guild_line(gm_f, "%d", &GM_WITH_WHO(top_guild)[0], "GM_WITH_WHO");
 
       read_guild_line(gm_f, "%d", &GM_OPEN(top_guild), "GM_OPEN");
@@ -1702,20 +1701,19 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
 
 void assign_the_guilds(void)
 {
-	int gdindex;
+  int gdindex;
 
-	cmd_say = find_command("say");
-	cmd_tell = find_command("tell");
+  for (gdindex = 0; gdindex <= top_guild; gdindex++)
+  {
+    auto keeper = mob_proto_by_id(GM_TRAINER(gdindex));
+    if (!keeper)
+      continue;
 
-	for (gdindex = 0; gdindex <= top_guild; gdindex++) {
-		if (GM_TRAINER(gdindex) == NOBODY)
-			continue;
+    if (mob_proto_special_get(GET_MOB_VNUM(keeper)) && mob_proto_special_get(GET_MOB_VNUM(keeper)) != guild)
+      GM_FUNC(gdindex) = mob_proto_special_get(GET_MOB_VNUM(keeper));
 
-          if (mob_index[GM_TRAINER(gdindex)].func && mob_index[GM_TRAINER(gdindex)].func != guild)
-			GM_FUNC(gdindex) = mob_index[GM_TRAINER(gdindex)].func;
-
-		mob_index[GM_TRAINER(gdindex)].func = guild;
-	}
+    mob_proto_special_set(GET_MOB_VNUM(keeper), guild);
+  }
 }
 
 char *guild_customer_string(int guild_nr, int detailed)
@@ -1773,10 +1771,12 @@ void list_all_guilds(struct char_data *ch)
     len += headerlen;
     }
 
-    if (GM_TRAINER(gm_nr) == NOBODY)
+    auto keeper = mob_proto_by_id(GM_TRAINER(gm_nr));
+
+    if (!keeper)
       strcpy(buf1, "<NONE>");  /* strcpy: OK (for 'buf1 >= 7') */
     else
-      sprintf(buf1, "%6d", mob_index[GM_TRAINER(gm_nr)].vnum);  /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */	
+      sprintf(buf1, "%6d", keeper->vnum);  /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */	
 
     len += snprintf(buf + len, sizeof(buf) - len, "%6d	%s		%5.2f	%s\r\n",
       GM_NUM(gm_nr), buf1, GM_CHARGE(gm_nr), guild_customer_string(gm_nr, FALSE));
@@ -1792,10 +1792,12 @@ void list_detailed_guild(struct char_data * ch, int gm_nr)
   char buf[MAX_STRING_LENGTH];
   char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 
-  if (GM_TRAINER(gm_nr) < NOBODY)
+  auto keeper = mob_proto_by_id(GM_TRAINER(gm_nr));
+
+  if (!keeper)
     strcpy(buf1, "<NONE>");
   else
-    sprintf(buf1, "%6d   ", mob_index[GM_TRAINER(gm_nr)].vnum);
+    sprintf(buf1, "%6d   ", keeper->vnum);
 
   sprintf(buf, " Guild Master: %s\r\n", buf1);
   sprintf(buf, "%s Hours: %4d to %4d,  Surcharge: %5.2f\r\n", buf,
@@ -1871,24 +1873,22 @@ void list_guilds(struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vn
   if (!top_guild)
     return;
 
-  for (i = 0; i <= top_guild; i++) {
-    if (GM_NUM(i) >= bottom && GM_NUM(i) <= top) {
-      counter++;
+  for (i = bottom; i <= top; i++) {
+    auto guild = guild_by_id(i);
+    counter++;
       
-      send_to_char(ch, "@g%4d@n) [@c%-5d@n]", counter, GM_NUM(i));
+    send_to_char(ch, "@g%4d@n) [@c%-5d@n]", counter, guild->vnum);
 
-      /************************************************************************/
-      /** Retrieve the list of rooms for this guild.                         **/
-      /************************************************************************/
+    /************************************************************************/
+    /** Retrieve the list of rooms for this guild.                         **/
+    /************************************************************************/
 
-		send_to_char(ch, " @c[@y%d@c]@y %s@n", 
-			(GM_TRAINER(i) == NOBODY) ?
-			  -1 : mob_index[GM_TRAINER(i)].vnum,
-			(GM_TRAINER(i) == NOBODY) ?
-			  "" : mob_proto[GM_TRAINER(i)].short_descr); 
-      
-      send_to_char(ch, "\r\n");
-    }
+  auto keeper = mob_proto_by_id(guild->gm);
+
+  send_to_char(ch, " @c[@y%d@c]@y %s@n", keeper ? keeper->vnum : -1,
+    keeper ? keeper->short_descr : "None"); 
+    
+    send_to_char(ch, "\r\n");
   }
   
   if (counter == 0)

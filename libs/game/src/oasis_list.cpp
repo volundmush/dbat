@@ -215,9 +215,6 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
   send_to_char(ch,
   "@nIndex VNum    Mobile Name                    Race      Class     Level\r\n"
   "----- ------- -------------------------      --------- --------- -----\r\n");
-
-  if (!top_of_mobt)
-    return;
   
   for (i = bottom; i <= top; i++) {
     struct char_data *mob = mob_proto_by_id(i);
@@ -369,19 +366,22 @@ void print_zone(struct char_data *ch, zone_vnum vnum)
   /** Locate the largest of the three, top_of_world, top_of_mobt, or         **/
   /** top_of_objt.                                                           **/
   /****************************************************************************/
-  if (top_of_world >= top_of_objt && top_of_world >= top_of_mobt)
+  
+  size_t num_mob_proto = mob_proto_count();
+  
+  if (top_of_world >= top_of_objt && top_of_world >= num_mob_proto)
     largest_table = top_of_world;
-  else if (top_of_objt >= top_of_mobt && top_of_objt >= top_of_world)
+  else if (top_of_objt >= num_mob_proto && top_of_objt >= top_of_world)
     largest_table = top_of_objt;
   else
-    largest_table = top_of_mobt;
+    largest_table = num_mob_proto;
   
   /****************************************************************************/
   /** Initialize some of the variables.                                      **/
   /****************************************************************************/
   size_rooms   = 0;
   size_objects = 0;
-  size_mobiles = 0;
+  size_mobiles = num_mob_proto;
   top          = zone->top;
   bottom       = zone->bot;
   size_shops   = 0;
@@ -398,9 +398,9 @@ void print_zone(struct char_data *ch, zone_vnum vnum)
       if (obj_index[i].vnum >= bottom && obj_index[i].vnum <= top)
         size_objects++;
     
-    if (i <= top_of_mobt)
-      if (mob_index[i].vnum >= bottom && mob_index[i].vnum <= top)
-        size_mobiles++;
+    for(i = bottom; i <= top; i++)
+       if (mob_proto_by_id(i))
+         size_mobiles++;
 
     size_shops = count_shops(bottom, top);
 

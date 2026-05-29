@@ -68,6 +68,7 @@ ACMD(do_olc)
   void *olc_targ = NULL;
   char mode_arg[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
   room_rnum rnum;
+  struct char_data *mob = NULL;
   room_vnum vnum = NOWHERE;
   int olc_mode;
 
@@ -128,10 +129,10 @@ ACMD(do_olc)
       return;
     }
     vnum = atoi(arg);
-    if ((rnum = real_mobile(vnum)) == NOBODY)
+    if (!(mob = mob_proto_by_id(vnum)))
       send_to_char(ch, "No such mobile vnum.\r\n");
     else
-      olc_targ = (void *) &(mob_proto[rnum]);
+      olc_targ = (void *) &(mob);
     break;
   case OLC_OBJ:
     argument = one_argument(argument, arg);

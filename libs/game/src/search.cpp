@@ -141,12 +141,12 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room)
 
 
 /* search all over the world for a char num, and return a pointer if found */
-struct char_data *get_char_num(mob_rnum nr)
+struct char_data *get_char_num(mob_vnum nr)
 {
   struct char_data *i;
 
   for (i = character_list; i; i = i->next)
-    if (GET_MOB_RNUM(i) == nr)
+    if (GET_MOB_VNUM(i) == nr)
       return (i);
 
   return (NULL);

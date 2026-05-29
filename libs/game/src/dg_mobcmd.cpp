@@ -964,7 +964,6 @@ ACMD(do_mtransform)
   char arg[MAX_INPUT_LENGTH];
   char_data *m, tmpmob;
   obj_data *obj[NUM_WEARS];
-  mob_rnum this_rnum = GET_MOB_RNUM(ch);
   int pos;
 
     if (!MOB_OR_IMPL(ch)) {
@@ -1050,7 +1049,6 @@ ACMD(do_mtransform)
         equip_char(ch, obj[pos], pos);
     }
 
-    ch->nr = this_rnum;
     extract_char(m);
   }
 }

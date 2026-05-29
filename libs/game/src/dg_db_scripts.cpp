@@ -157,10 +157,12 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
   rnum = real_trigger(vnum);
   if (rnum == NOTHING) {
     switch(type) {
-      case MOB_TRIGGER:
-        mudlog(BRF, ADMLVL_BUILDER, TRUE,
-               "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (mob: %s - %d)",
-               vnum, GET_NAME((char_data *)proto), GET_MOB_VNUM((char_data *)proto));
+      case MOB_TRIGGER: {
+        struct char_data *m = (char_data *)proto;
+          mudlog(BRF, ADMLVL_BUILDER, TRUE,
+          "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (mob: %s - %d)",
+          vnum, GET_NAME(m), GET_MOB_VNUM(m));
+      }
         break;
       case WLD_TRIGGER:
         mudlog(BRF, ADMLVL_BUILDER, TRUE,
@@ -274,7 +276,7 @@ void assign_triggers(void *i, int type)
         if (rnum==NOTHING) {
           mudlog(BRF, ADMLVL_BUILDER, TRUE,
                  "SYSERR: trigger #%d non-existant, for mob #%d",
-                 trg_proto->vnum, mob_index[mob->nr].vnum);
+                 trg_proto->vnum, mob->vnum);
         } else {
           if (!SCRIPT(mob))
             CREATE(SCRIPT(mob), struct script_data, 1);

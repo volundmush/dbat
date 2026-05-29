@@ -196,10 +196,11 @@ int save_guilds(zone_rnum zone_num)
       /* Write what the GM teaches */
       fprintf(guild_file, "%d\n", G_MINLVL(guild));
 
+      auto keeper = mob_proto_by_id(G_TRAINER(guild));
 
       /*. Save the rest . */
       fprintf(guild_file, "%d\n%d\n%d\n%d\n",
-	      G_TRAINER(guild) == NOBODY ? -1 : mob_index[G_TRAINER(guild)].vnum,
+	      keeper ? keeper->vnum : -1,
 	      G_WITH_WHO(guild)[0],
 	      G_OPEN(guild),
 	      G_CLOSE(guild)

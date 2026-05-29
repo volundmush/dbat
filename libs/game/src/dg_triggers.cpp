@@ -543,8 +543,8 @@ void load_mtrigger(char_data *ch)
   if (result == SCRIPT_ERROR_CODE) {
     /* we have recursed beyond reasonable depth */
     /* make sure this mob is the last one in the load chain */
-    if (GET_MOB_RNUM(ch) != NOBODY) {
-      free_proto_script(&mob_proto[GET_MOB_RNUM(ch)], MOB_TRIGGER);
+    if (auto proto = mob_proto_by_id(char_proto_id_get(ch))) {
+      free_proto_script(proto, MOB_TRIGGER);
     }
   }
 }

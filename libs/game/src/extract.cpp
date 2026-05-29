@@ -197,8 +197,8 @@ void extract_char_final(struct char_data *ch)
   char_from_room(ch);
 
   if (IS_NPC(ch)) {
-    if (GET_MOB_RNUM(ch) != NOTHING)	/* prototyped */
-      mob_index[GET_MOB_RNUM(ch)].number--;
+    if (ch->vnum != NOTHING)	/* prototyped */
+      mob_proto_count_decrement(ch->vnum);
     clearMemory(ch);
     if (SCRIPT(ch))
       extract_script(ch, MOB_TRIGGER);
@@ -245,8 +245,6 @@ void extract_char(struct char_data *ch)
     else
       return;
   }
-
-  /*save_char_pets(ch);*/
 
   for (foll = ch->followers; foll; foll = foll->next) {
     if (IS_NPC(foll->follower) && AFF_FLAGGED(foll->follower, AFF_CHARM) &&

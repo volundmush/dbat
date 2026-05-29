@@ -496,12 +496,14 @@ void zedit_disp_menu(struct descriptor_data *d)
      */
     write_to_output(d, "@n%d - @y", counter++);
     switch (MYCMD.command) {
-    case 'M':
+    case 'M': {
+      auto mob = mob_proto_by_id(MYCMD.arg1);
       write_to_output(d, "%sLoad %s@y [@c%d@y], Max : %d, MaxR %d, Chance %d",
-              MYCMD.if_flag ? " then " : "",
-              mob_proto[MYCMD.arg1].short_descr,
-              mob_index[MYCMD.arg1].vnum, MYCMD.arg2, MYCMD.arg4, MYCMD.arg5
-              );
+        MYCMD.if_flag ? " then " : "",
+        mob->short_descr,
+        mob->vnum, MYCMD.arg2, MYCMD.arg4, MYCMD.arg5
+        );
+    }
       break;
     case 'G':
       write_to_output(d, "%sGive it %s@y [@c%d@y], Max : %d, Chance %d",
@@ -827,6 +829,7 @@ void zedit_parse(struct descriptor_data *d, char *arg)
 {
   int pos, i = 0;
   int number;
+  struct char_data *mob = NULL;
 
   switch (OLC_MODE(d)) {
 /*-------------------------------------------------------------------*/
@@ -1107,8 +1110,8 @@ void zedit_parse(struct descriptor_data *d, char *arg)
     }
     switch (OLC_CMD(d).command) {
     case 'M':
-      if ((pos = real_mobile(atoi(arg))) != NOBODY) {
-	OLC_CMD(d).arg1 = pos;
+      if ((mob = mob_proto_by_id(atoi(arg)))) {
+	OLC_CMD(d).arg1 = mob->vnum;
 	zedit_disp_arg2(d);
       } else
 	write_to_output(d, "That mobile does not exist, try again : ");

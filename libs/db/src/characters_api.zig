@@ -147,12 +147,11 @@ pub export fn char_proto_id_set(ch: *cdb.char_data, vnum: cdb.mob_vnum) void {
 }
 
 pub export fn char_vnum_get(ch: *cdb.char_data) cdb.mob_vnum {
-    if (!validMobRnum(ch.nr)) return cdb.NOTHING;
-    return cdb.mob_index[@intCast(ch.nr)].vnum;
+    return ch.vnum;
 }
 
 pub export fn char_vnum_set(ch: *cdb.char_data, vnum: cdb.mob_vnum) void {
-    ch.nr = cdb.real_mobile(vnum);
+    ch.vnum = vnum;
 }
 
 pub export fn char_room_get(ch: *cdb.char_data) [*c]cdb.room_data {
@@ -322,29 +321,21 @@ pub export fn char_equipment_get(ch: *cdb.char_data, pos: usize) [*c]cdb.obj_dat
     return ch.equipment[pos];
 }
 
-fn validMobRnum(rnum: cdb.mob_rnum) bool {
-    return rnum != cdb.NOBODY and rnum >= 0 and rnum <= cdb.top_of_mobt and cdb.mob_index != null;
-}
-
 fn validRoomRnum(rnum: cdb.room_rnum) bool {
     return rnum != cdb.NOWHERE and rnum >= 0 and rnum <= cdb.top_of_world and cdb.world != null;
-}
-
-fn validProto(ch: *cdb.char_data) bool {
-    return validMobRnum(ch.nr) and cdb.mob_proto != null;
 }
 
 const StringField = enum { name, description, short_descr, long_descr, title };
 
 fn protoString(ch: *cdb.char_data, field: StringField) [*c]u8 {
-    if (!validProto(ch)) return null;
-    const proto = &cdb.mob_proto[@intCast(ch.nr)];
+    const proto = cdb.mob_proto_by_id(ch.vnum);
+    if (proto == null) return null;
     return switch (field) {
-        .name => proto.name,
-        .description => proto.description,
-        .short_descr => proto.short_descr,
-        .long_descr => proto.long_descr,
-        .title => proto.title,
+        .name => proto.*.name,
+        .description => proto.*.description,
+        .short_descr => proto.*.short_descr,
+        .long_descr => proto.*.long_descr,
+        .title => proto.*.title,
     };
 }
 

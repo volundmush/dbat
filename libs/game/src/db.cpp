@@ -60,6 +60,8 @@
 #include "dbat/game/spell_parser.h"
 #include "dbat/game/genobj.h"
 
+#include "dbat/db/iterate.hpp"
+
 #include <errno.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -690,8 +692,8 @@ void destroy_db(void)
   htree_free(obj_htree);
 
   /* Mobiles */
-  for (cnt = 0; cnt <= top_of_mobt; cnt++) {
-    struct char_data *mob = &mob_proto[cnt];
+  mob_proto_iterate([&](auto mob) {
+    mob_vnum v = char_proto_id_get(mob);
     if (mob->name)
       free(mob->name);
     if (mob->title)
@@ -708,10 +710,10 @@ void destroy_db(void)
 
     while (mob->affected)
       affect_remove(mob, mob->affected);
-  }
-  free(mob_proto);
-  free(mob_index);
-  htree_free(mob_htree);
+    free(mob);
+    mob_proto_delete(v);
+    return true;
+  });
 
   /* Shops */
   destroy_shops();
@@ -1353,11 +1355,9 @@ void index_boot(int mode)
     log("   %d rooms, %d bytes.", rec_count, size[0]);
     break;
   case DB_BOOT_MOB:
-    CREATE(mob_proto, struct char_data, rec_count);
-    CREATE(mob_index, struct index_data, rec_count);
     size[0] = sizeof(struct index_data) * rec_count;
     size[1] = sizeof(struct char_data) * rec_count;
-    log("   %d mobs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
+    log("   %d mobs, %d bytes in prototypes.", rec_count, size[1]);
     break;
   case DB_BOOT_OBJ:
     CREATE(obj_proto, struct obj_data, rec_count);
@@ -1825,7 +1825,7 @@ static void renum_zone_table(void)
       switch (cmd->command)
       {
       case 'M':
-        a = cmd->arg1 = real_mobile(cmd->arg1);
+        a = cmd->arg1 = cmd->arg1;
         c = cmd->arg3 = real_room(cmd->arg3);
         break;
       case 'O':
@@ -2200,7 +2200,7 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
   char line[READ_SIZE], *tmpptr, letter;
   char f1[128], f2[128], f3[128], f4[128], f5[128], f6[128];
   char f7[128], f8[128], buf2[128];
-  mob_vnum nr = mob_index[ch->nr].vnum;
+  mob_vnum nr = ch->vnum;
  
   /*
    * Mobiles should NEVER use anything in the 'player_specials' structure.
@@ -2349,23 +2349,16 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
 
 static void parse_mobile(FILE *mob_f, int nr)
 {
-  static int i = 0;
 
-  mob_index[i].vnum = nr;
-  mob_index[i].number = 0;
-  mob_index[i].func = NULL;
+  struct char_data *ch = NULL;
+  CREATE(ch, struct char_data, 1);
+  clear_char(ch);
 
-  clear_char(mob_proto + i);
+  ch->vnum = nr;
+  ch->desc = NULL;
 
-  mob_proto[i].nr = i;
-  mob_proto[i].desc = NULL;
-
-  if (parse_mobile_from_file(mob_f, mob_proto + i)) {
-    if (! mob_htree)
-      mob_htree = htree_init();
-    htree_add(mob_htree, nr, i);
-
-    top_of_mobt = i++;
+  if (parse_mobile_from_file(mob_f, ch)) {
+    mob_proto_put(nr, ch);
   } else { /* We used to exit in the file reading code, but now we do it here */
     exit(1);
   }
@@ -2980,15 +2973,15 @@ int hsort(const void *a, const void *b)
 
 int vnum_mobile(char *searchname, struct char_data *ch)
 {
-  int nr, found = 0;
+  int found = 0;
 
-  for (nr = 0; nr <= top_of_mobt; nr++) {
-    struct char_data *mob = &mob_proto[nr];
+  mob_proto_iterate([&](auto mob) {
     if (isname(searchname, mob->name))
       send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                   ++found, mob_index[nr].vnum, mob->short_descr,
+                   ++found, mob->vnum, mob->short_descr,
                    mob->proto_script ? "[TRIG]" : "" );
-  }
+    return true;
+  });
 
   return (found);
 }
@@ -3091,19 +3084,23 @@ struct char_data *create_char(void)
 struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 {
   mob_rnum i;
-  struct char_data *mob;
+  struct char_data *mob = NULL, *proto = NULL;
+
+  if(type == REAL) {
+    log("real is no longer supported!");
+    exit(1);
+  }
 
   if (type == VIRTUAL) {
-    if ((i = real_mobile(nr)) == NOBODY) {
+    if (!(proto = mob_proto_by_id(nr))) {
       log("WARNING: Mobile vnum %d does not exist in database.", nr);
       return (NULL);
     }
-  } else
-    i = nr;
+  }
 
   CREATE(mob, struct char_data, 1);
   clear_char(mob);
-  *mob = mob_proto[i];
+  *mob = *proto; /* copy prototype data */
   mob->next = character_list;
   character_list = mob;
   mob->next_affect = NULL;
@@ -3669,14 +3666,14 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
    SET_BIT_AR(MOB_FLAGS(mob), MOB_LLEG);
   }
  
-  mob_index[i].number++;
+  mob_proto_count_increment(nr);
 
   GET_ID(mob) = max_mob_id++;
   /* find_char helper */
   add_to_lookup_table(GET_ID(mob), (void *)mob);
   (void)char_register_id(GET_ID(mob), mob);
 
-  copy_proto_script(&mob_proto[i], mob, MOB_TRIGGER);
+  copy_proto_script(proto, mob, MOB_TRIGGER);
   assign_triggers(mob, MOB_TRIGGER);
   racial_body_parts(mob); 
 
@@ -3883,6 +3880,8 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
   obj_rnum i = type == VIRTUAL ? real_object(nr) : nr;
   int j;
 
+  int top = top_of_objt;
+
   if (i == NOTHING || i > top_of_objt) {
     log("Object (%c) %d does not exist in database.", type == VIRTUAL ? 'V' : 'R', nr);
     return (NULL);
@@ -4036,9 +4035,8 @@ void reset_zone(struct zone_data *zone)
   int obj_load = FALSE; /* ### */
 
  if (!pre_reset(zone)) {
-  struct reset_com *cmd = &zone->cmd[0];
-  for (cmd_no = 0; cmd->command != 'S'; cmd_no++) {
-    cmd = &zone->cmd[cmd_no];
+  for (cmd_no = 0; zone->cmd[cmd_no].command != 'S'; cmd_no++) {
+    struct reset_com *cmd = &zone->cmd[cmd_no];
 
     if (cmd->if_flag && !last_cmd && !mob_load && !obj_load)
       continue;
@@ -4060,11 +4058,11 @@ void reset_zone(struct zone_data *zone)
 
     case 'M':			/* read a mobile */
 
-      if ((mob_index[cmd->arg1].number < cmd->arg2) &&
+      if ((mob_proto_count_get(cmd->arg1) < cmd->arg2) &&
            (rand_number(1, 100) >= cmd->arg5)) {
         int room_max = 0;
         struct char_data *i;
-	mob = read_mobile(cmd->arg1, REAL);
+	mob = read_mobile(cmd->arg1, VIRTUAL);
 	
 	/* First find out how many mobs of VNUM are in the mud with this rooms */
                /* VNUM as a load point for max from room checks. */
@@ -4106,6 +4104,9 @@ void reset_zone(struct zone_data *zone)
 	if (cmd->arg3 != NOWHERE) {
           int room_max = 0;
           struct obj_data *k;
+    if(cmd->arg1 == 10700) {
+      log("blah!");
+    }
 	  obj = read_object(cmd->arg1, REAL);
 	  
 	  	/* First find out how many obj of VNUM are in the mud with this rooms */
@@ -4507,7 +4508,10 @@ void free_char(struct char_data *ch)
     if (IS_NPC(ch))
       log("SYSERR: Mob %s (#%d) had player_specials allocated!", GET_NAME(ch), GET_MOB_VNUM(ch));
   }
-  if (!IS_NPC(ch) || (IS_NPC(ch) && GET_MOB_RNUM(ch) == NOBODY)) {
+
+  auto proto = mob_proto_by_id(GET_MOB_VNUM(ch));
+
+  if (!IS_NPC(ch) || (!proto || ch != proto)) {
     /* if this is a player, or a non-prototyped non-player, free all */
     if (GET_NAME(ch))
       free(GET_NAME(ch));
@@ -4532,8 +4536,7 @@ void free_char(struct char_data *ch)
     /* free script proto list */
     free_proto_script(ch, MOB_TRIGGER);
     
-  } else if ((i = GET_MOB_RNUM(ch)) != NOBODY) {
-    struct char_data *proto = &mob_proto[i];
+  } else if (ch && proto) {
     /* otherwise, free strings only if the string is not pointing at proto */
     if (ch->name && ch->name != proto->name)
       free(ch->name);
@@ -4751,7 +4754,7 @@ void clear_char(struct char_data *ch)
 
   IN_ROOM(ch) = NOWHERE;
   GET_PFILEPOS(ch) = -1;
-  GET_MOB_RNUM(ch) = NOBODY;
+  GET_MOB_VNUM(ch) = NOBODY;
   GET_WAS_IN(ch) = NOWHERE;
   GET_POS(ch) = POS_STANDING;
   ch->mob_specials.default_pos = POS_STANDING;

@@ -118,7 +118,7 @@ fn serializeResetCommandArgs(allocator: std.mem.Allocator, command: *cdb.reset_c
 fn denumberResetCommandArgs(command: u8, args: *[5]c_int) void {
     switch (command) {
         'M' => {
-            args[0] = mobVnumFromRnum(args[0]);
+            args[0] = args[0];
             args[2] = roomVnumFromRnum(args[2]);
         },
         'O' => {
@@ -153,11 +153,6 @@ fn denumberResetCommandArgs(command: u8, args: *[5]c_int) void {
 fn roomVnumFromRnum(rnum: c_int) c_int {
     if (rnum == cdb.NOWHERE or rnum < 0 or rnum > cdb.top_of_world or cdb.world == null) return rnum;
     return cdb.world[@intCast(rnum)].number;
-}
-
-fn mobVnumFromRnum(rnum: c_int) c_int {
-    if (rnum == cdb.NOBODY or rnum < 0 or rnum > cdb.top_of_mobt or cdb.mob_index == null) return rnum;
-    return cdb.mob_index[@intCast(rnum)].vnum;
 }
 
 fn objVnumFromRnum(rnum: c_int) c_int {

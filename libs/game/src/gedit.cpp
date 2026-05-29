@@ -421,6 +421,8 @@ void gedit_disp_menu(struct descriptor_data *d)
 
 	sprintbitarray(G_WITH_WHO(guilddata), trade_letters, 4, buf1, sizeof(buf1));
 
+	auto keeper = mob_proto_by_id(G_TRAINER(guilddata));
+
 	write_to_output(d, 
 			  "-- Guild Number: [@c%d@n]\r\n"
 			  "@g 0@n) Guild Master : [@c%d@n] @y%s\r\n"
@@ -438,8 +440,8 @@ void gedit_disp_menu(struct descriptor_data *d)
 			  "Enter Choice : ",
 
 			  OLC_NUM(d),
-			  G_TRAINER(guilddata) == NOBODY ? -1 : mob_index[G_TRAINER(guilddata)].vnum,
-			  G_TRAINER(guilddata) == NOBODY ? "None" : mob_proto[G_TRAINER(guilddata)].short_descr,
+			  keeper ? keeper->vnum : NOTHING,
+			  keeper ? keeper->short_descr : "None",
 			  G_NO_SKILL(guilddata),
 			  G_NO_GOLD(guilddata),
 			  G_OPEN(guilddata),
@@ -458,6 +460,7 @@ void gedit_disp_menu(struct descriptor_data *d)
 void gedit_parse(struct descriptor_data *d, char *arg)
 {
 	int i;
+	struct char_data *keeper = NULL;
 
 	if (OLC_MODE(d) > GEDIT_NUMERICAL_RESPONSE) {
 		if (!isdigit(arg[0]) && ((*arg == '-') && (!isdigit(arg[1])))) {
@@ -585,9 +588,8 @@ void gedit_parse(struct descriptor_data *d, char *arg)
 
 		case GEDIT_TRAINER:
 			if (isdigit(*arg)) {
-				i = atoi(arg);
 				if ((i = atoi(arg)) != -1)
-					if ((i = real_mobile(i)) == NOBODY) {
+					if (!(keeper = mob_proto_by_id(i))) {
 						write_to_output(d, "That mobile does not exist, try again : ");
 						return;
 					}
@@ -595,8 +597,9 @@ void gedit_parse(struct descriptor_data *d, char *arg)
 				if (i == -1)
 					break;
 				/*. Fiddle with special procs . */
-				G_FUNC(OLC_GUILD(d)) = mob_index[i].func != guild ? mob_index[i].func : NULL;
-				mob_index[i].func = guild;
+				auto spec = mob_proto_special_get(keeper->vnum);
+				G_FUNC(OLC_GUILD(d)) = spec != guild ? spec : NULL;
+				mob_proto_special_set(keeper->vnum, guild);
 				break;
 			} else {
 				write_to_output(d, "Invalid response.\r\n");

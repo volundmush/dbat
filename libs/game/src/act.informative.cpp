@@ -3683,7 +3683,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch)
       if (CONFIG_STACK_MOBS) {
         /* How many other occurences of this mob are there? */
         for (j = list; j != i; j = j->next_in_room)
-          if ( (i->nr           == j->nr            ) &&
+          if ( (i->vnum           == j->vnum            ) &&
                (GET_POS(i)      == GET_POS(j)       ) &&
                (AFF_FLAGS(i)[0]    == AFF_FLAGS(j)[0]     ) &&
                (AFF_FLAGS(i)[1]    == AFF_FLAGS(j)[1]     ) &&
@@ -3705,7 +3705,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch)
 	   */
           continue;
  	for (j = i; j; j = j->next_in_room)
-          if ( (i->nr           == j->nr            ) &&
+          if ( (i->vnum           == j->vnum            ) &&
                (GET_POS(i)      == GET_POS(j)       ) &&
                (AFF_FLAGS(i)[0]    == AFF_FLAGS(j)[0]     ) &&
                (AFF_FLAGS(i)[1]    == AFF_FLAGS(j)[1]     ) &&

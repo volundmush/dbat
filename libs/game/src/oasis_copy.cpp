@@ -65,7 +65,7 @@ ACMD(do_oasis_copy)
   } oasis_copy_info[] = {
     { CON_REDIT,  real_room,   redit_save_internally, redit_setup_existing, "rcopy", "room" },
     { CON_OEDIT,  real_object, oedit_save_internally, oedit_setup_existing, "ocopy", "object" },
-    { CON_MEDIT,  real_mobile, medit_save_internally, medit_setup_existing, "mcopy", "mobile" },
+    { CON_MEDIT,  mob_proto_vnum_check, medit_save_internally, medit_setup_existing, "mcopy", "mobile" },
     { CON_SEDIT,  real_shop,   sedit_save_internally, sedit_setup_existing, "scopy", "shop" },
     { CON_TRIGEDIT, real_trigger, trigedit_save,   trigedit_setup_existing, "tcopy", "trigger" },
     { -1,         NULL,        NULL,                  NULL,                 "\n", "\n" }

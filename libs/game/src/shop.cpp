@@ -1264,7 +1264,7 @@ SPECIAL(shop_keeper)
   int shop_nr;
 
   for (shop_nr = 0; shop_nr <= top_shop; shop_nr++)
-    if (SHOP_KEEPER(shop_nr) == keeper->nr)
+    if (SHOP_KEEPER(shop_nr) == keeper->vnum)
       break;
 
   if (shop_nr > top_shop)
@@ -1323,7 +1323,7 @@ int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim)
 {
   int sindex;
 
-  if (!IS_MOB(victim) || mob_index[GET_MOB_RNUM(victim)].func != shop_keeper)
+  if (!IS_MOB(victim) || mob_proto_special_get(GET_MOB_VNUM(victim)) != shop_keeper)
     return (TRUE);
 
   /* Prevent "invincible" shopkeepers if they're charmed. */
@@ -1331,7 +1331,7 @@ int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim)
     return (TRUE);
 
   for (sindex = 0; sindex <= top_shop; sindex++)
-    if (GET_MOB_RNUM(victim) == SHOP_KEEPER(sindex) && !SHOP_KILL_CHARS(sindex)) {
+    if (GET_MOB_VNUM(victim) == SHOP_KEEPER(sindex) && !SHOP_KILL_CHARS(sindex)) {
       char buf[MAX_INPUT_LENGTH];
 
       snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_CANT_KILL_KEEPER);
@@ -1537,7 +1537,6 @@ void boot_the_shops(FILE *shop_f, char *filename, int rec_count)
       read_line(shop_f, "%ld", &SHOP_BITVECTOR(top_shop));
       read_line(shop_f, "%hd", &SHOP_KEEPER(top_shop));
 
-      SHOP_KEEPER(top_shop) = real_mobile(SHOP_KEEPER(top_shop));
       CREATE(buf, char, READ_SIZE);
       get_line(shop_f, buf);
       p = buf;
@@ -1595,21 +1594,17 @@ void assign_the_shopkeepers(void)
 {
   int cindex;
 
-  cmd_say = find_command("say");
-  cmd_tell = find_command("tell");
-  cmd_emote = find_command("emote");
-  cmd_slap = find_command("slap");
-  cmd_puke = find_command("puke");
-
   for (cindex = 0; cindex <= top_shop; cindex++) {
-    if (SHOP_KEEPER(cindex) == NOBODY)
+    auto proto = mob_proto_by_id(SHOP_KEEPER(cindex));
+    if (!proto)
       continue;
 
     /* Having SHOP_FUNC() as 'shop_keeper' will cause infinite recursion. */
-    if (mob_index[SHOP_KEEPER(cindex)].func && mob_index[SHOP_KEEPER(cindex)].func != shop_keeper)
-      SHOP_FUNC(cindex) = mob_index[SHOP_KEEPER(cindex)].func;
+    auto func = mob_proto_special_get(proto->vnum);
+    if (func && func != shop_keeper)
+      SHOP_FUNC(cindex) = func;
 
-    mob_index[SHOP_KEEPER(cindex)].func = shop_keeper;
+    mob_proto_special_set(proto->vnum, shop_keeper);
   }
 }
 
@@ -1668,11 +1663,13 @@ static void list_all_shops(struct char_data *ch)
       strcpy(buf + len, list_all_shops_header);	/* strcpy: OK (length checked above) */
       len += headerlen;
     }
+    
+    auto keeper = mob_proto_by_id(SHOP_KEEPER(shop_nr));
 
-    if (SHOP_KEEPER(shop_nr) == NOBODY)
+    if (!keeper)
       strcpy(buf1, "<NONE>");	/* strcpy: OK (for 'buf1 >= 7') */
     else
-      sprintf(buf1, "%6d", mob_index[SHOP_KEEPER(shop_nr)].vnum);	/* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
+      sprintf(buf1, "%6d", keeper->vnum);	/* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
 
     len += snprintf(buf + len, sizeof(buf) - len,
                "%3d   %6d   %6d    %s   %3.2f   %3.2f    %s\r\n",
@@ -1726,13 +1723,14 @@ static void list_detailed_shop(struct char_data *ch, int shop_nr)
     send_to_char(ch, "Rooms:      None!");
 
   send_to_char(ch, "\r\nShopkeeper: ");
-  if (SHOP_KEEPER(shop_nr) != NOBODY) {
+  auto keeper = mob_proto_by_id(SHOP_KEEPER(shop_nr));
+  if (keeper) {
     send_to_char(ch, "%s (#%d), Special Function: %s\r\n",
-	GET_NAME(&mob_proto[SHOP_KEEPER(shop_nr)]),
-	mob_index[SHOP_KEEPER(shop_nr)].vnum,
+	GET_NAME(keeper),
+	keeper->vnum,
 	YESNO(SHOP_FUNC(shop_nr)));
 
-    if ((k = get_char_num(SHOP_KEEPER(shop_nr))))
+    if ((k = get_char_num(keeper->vnum)))
       send_to_char(ch, "Coins:      [%9d], Bank: [%9d] (Total: %d)\r\n",
 	 GET_GOLD(k), SHOP_BANK(shop_nr), GET_GOLD(k) + SHOP_BANK(shop_nr));
   } else

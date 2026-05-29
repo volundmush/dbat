@@ -149,9 +149,7 @@ void auc_save(void);
 void load_config(void);
 
 int	load_char(const char *name, struct char_data *ch);
-void	load_char_pets(struct char_data *ch);
 void	save_char(struct char_data *ch);
-void	save_char_pets(struct char_data *ch);
 void	init_char(struct char_data *ch);
 struct char_data* create_char(void);
 struct char_data *read_mobile(mob_vnum nr, int type);

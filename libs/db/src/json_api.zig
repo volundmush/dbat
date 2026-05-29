@@ -194,13 +194,15 @@ fn exportNpcPrototype(vnum: cdb.mob_vnum, filename: []const u8) !void {
 
 fn exportNpcPrototypes(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.mob_proto == null or cdb.mob_index == null) return;
-    if (cdb.top_of_mobt < 0) return;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_of_mobt))) : (index += 1) {
-        const path = try assetPath(folder, cdb.mob_index[index].vnum);
+    const iterator = cdb.mob_proto_iterator_create() orelse return;
+    defer cdb.mob_proto_iterator_free(iterator);
+
+    while (cdb.mob_proto_next(iterator)) |mob| {
+        const vnum = cdb.char_vnum_get(mob);
+        if (vnum == cdb.NOTHING) continue;
+        const path = try assetPath(folder, vnum);
         defer std.heap.page_allocator.free(path);
-        try exportNpcPrototype(cdb.mob_index[index].vnum, path);
+        try exportNpcPrototype(vnum, path);
     }
 }
 
@@ -490,17 +492,6 @@ fn importDgScripts(folder: []const u8) !void {
 fn importNpcPrototypes(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
     var progress = Progress.init("npc_prototypes", files.len);
-    cdb.mob_proto = try allocCArray(cdb.char_data, files.len);
-    cdb.mob_index = try allocCArray(cdb.index_data, files.len);
-    cdb.top_of_mobt = if (files.len == 0) -1 else @intCast(files.len - 1);
-    resetHtree(&cdb.mob_htree);
-
-    for (files, 0..) |file, index| {
-        cdb.mob_index[index].vnum = @intCast(file.vnum);
-        cdb.mob_index[index].number = 0;
-        cdb.mob_index[index].func = null;
-        cdb.htree_add(cdb.mob_htree, @intCast(file.vnum), @intCast(index));
-    }
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -509,15 +500,16 @@ fn importNpcPrototypes(folder: []const u8) !void {
             logImportFileError("npc_prototypes", file, err);
             return err;
         };
-        const mob = ptrAt(cdb.char_data, cdb.mob_proto, index);
-        mob.nr = @intCast(index);
+        const mob = try allocCOne(cdb.char_data);
+        mob.vnum = file.vnum;
         mob.player_specials = &cdb.dummy_mob;
         characters_json.deserializeCharacter(mob, .{ .mode = .npc_prototype }, value) catch |err| {
             logImportFileError("npc_prototypes", file, err);
             return err;
         };
-        mob.nr = @intCast(index);
+        mob.vnum = file.vnum;
         mob.player_specials = &cdb.dummy_mob;
+        cdb.mob_proto_put(@intCast(file.vnum), mob);
         progress.tick(index);
     }
 }
@@ -612,7 +604,7 @@ fn renumberZoneCommands() void {
             const command: *cdb.reset_com = @ptrCast(&zone.cmd[command_index]);
             switch (command.command) {
                 'M' => {
-                    command.arg1 = cdb.real_mobile(command.arg1);
+                    command.arg1 = command.arg1;
                     command.arg3 = cdb.real_room(command.arg3);
                 },
                 'O' => {

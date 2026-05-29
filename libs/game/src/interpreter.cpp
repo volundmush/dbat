@@ -412,7 +412,6 @@ int enter_player_game (struct descriptor_data *d)
       add_to_lookup_table(GET_ID(d->character), (void *)d->character);
       (void)char_register_id(GET_ID(d->character), d->character);
       read_saved_vars(d->character);
-      /*load_char_pets(d->character);*/
       for (check = character_list; check; check = check->next)
         if (!check->master && IS_NPC(check) && check->master_id == GET_IDNUM(d->character) &&
             AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, d->character))

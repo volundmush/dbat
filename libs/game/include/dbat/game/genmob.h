@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-int delete_mobile(mob_rnum);
+int delete_mobile(mob_vnum vnum);
 int copy_mobile(struct char_data *to, struct char_data *from);
 int add_mobile(struct char_data *, mob_vnum);
 int copy_mob_strings(struct char_data *to, struct char_data *from);

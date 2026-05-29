@@ -2510,7 +2510,7 @@ int script_driver(void *go_adress, trig_data *trig, int type, int mode)
     switch (type) {
       case MOB_TRIGGER:
         script_log("It was attached to %s [%d]",
-           GET_NAME((char_data *) go), GET_MOB_VNUM((char_data *) go));
+           GET_NAME(((char_data *) go)), GET_MOB_VNUM(((char_data *) go)));
         break;
       case OBJ_TRIGGER:
         script_log("It was attached to %s [%d]",

@@ -917,9 +917,9 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
       for (i = lev - 1; i >= 0; i--) {
         for (count = 0; monsum_list[i][j][count] != NOBODY; count++) {
           mob_num = monsum_list[i][j][count];
-          if (real_mobile(mob_num) == NOBODY)
+          if (auto proto = mob_proto_by_id(mob_num); !proto)
             mob_num = NOBODY;
-          else if (!is_name(buf2, mob_proto[real_mobile(mob_num)].name))
+          else if (!is_name(buf2, proto->name))
             mob_num = NOBODY;
           else
             break;
