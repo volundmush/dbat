@@ -1,4 +1,8 @@
-# 2.9.3 (latest)
+# 2.9.4 (latest)
+- (Internal) Object Prototypes, Mobile Prototypes, Rooms, Shops, Guilds, and Zones are now stored in Zig HashMaps. The global arrays and rnum<->vnum mappings are gone. New per-type APIs have been added for handling entity retrieval, iteration, and querying. [Volund]
+- (Internal) Adjusted many functions for shops, guilds, zones, and rooms that used rnum indexes to now use pointers. [Volund]
+
+# 2.9.3
 - Fixing fireshield message to not get all mishmoshed. [Volund]
 - Altered snet's history so staff log all messages while online. [Volund]
 - Altered all headers to enclose declarations in `extern "C" {}`, made some minor adjustments to isolate C++ usage in headers to just two files left. This enables seamless Zig integration. [Volund]
