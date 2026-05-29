@@ -5092,7 +5092,7 @@ ACMD(do_focus)
     send_to_char(ch, "Your body is not able to withstand increasing its strength beyond 70.\r\n");
     return;
    } else if (GET_BONUS(ch, BONUS_FRAIL) > 0 && GET_CON(ch) + 2 > 70) {
-    send_to_char(ch, "Your body is not able to withstand increasing its strength beyond 70.\r\n");
+    send_to_char(ch, "Your body is not able to withstand increasing its constitution beyond 70.\r\n");
     return;
    } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
     send_to_char(ch, "You do not have enough ki to infuse into your muscles.\r\n");
