@@ -28,7 +28,7 @@ int update_mobile_strings(struct char_data *t, struct char_data *f);
 void check_mobile_strings(struct char_data *mob);
 void check_mobile_string(mob_vnum i, char **string, const char *dscr);
 int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd);
-int copy_mobile_strings(struct char_data *t, struct char_data *f);
+
 
 #if CONFIG_GENOLC_MOBPROG
 int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd);

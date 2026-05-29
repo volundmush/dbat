@@ -14,6 +14,7 @@ int free_mobile_strings(struct char_data *mob);
 int free_mobile(struct char_data *mob);
 int save_mobiles(struct zone_data *zone);
 int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd);
+int copy_mobile_strings(struct char_data *t, struct char_data *f);
 
 /* Handy macros. */
 #define GET_NDD(mob)	((mob)->mob_specials.damnodice)
