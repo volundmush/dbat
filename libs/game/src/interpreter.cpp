@@ -258,9 +258,9 @@ int perform_dupe_check(struct descriptor_data *d)
     }
 
     /* we've found a duplicate - blow him away, dumping his eq in limbo. */
-    if (IN_ROOM(ch) != NOWHERE)
+    if (char_room_get(ch) != NULL)
       char_from_room(ch);
-    char_to_room(ch, 1);
+    char_to_room(ch, room_by_id(1));
     extract_char(ch);
   }
 
@@ -369,7 +369,7 @@ int perform_dupe_check(struct descriptor_data *d)
 int enter_player_game (struct descriptor_data *d)
 {
     int load_result;
-    IDXTYPE load_room;
+    struct room_data *load_room = NULL;
     struct char_data *check;
 
 
@@ -385,20 +385,18 @@ int enter_player_game (struct descriptor_data *d)
        * We have to place the character in a room before equipping them
        * or equip_char() will gripe about the person in NOWHERE.
        */
-
-      if ((load_room = GET_LOADROOM(d->character)) != NOWHERE)
-	load_room = real_room(load_room);
+    load_room = room_by_id(GET_LOADROOM(d->character));
 
       /* If char was saved with NOWHERE, or real_room above failed... */
-      if (load_room == NOWHERE) {
+      if (!load_room) {
 	if (GET_ADMLEVEL(d->character))
-	  load_room = real_room(CONFIG_IMMORTAL_START);
+	  load_room = room_by_id(CONFIG_IMMORTAL_START);
 	else
-	  load_room = real_room(CONFIG_MORTAL_START);
+	  load_room = room_by_id(CONFIG_MORTAL_START);
       }
 
       if (PLR_FLAGGED(d->character, PLR_FROZEN))
-	load_room = real_room(CONFIG_FROZEN_START);
+	load_room = room_by_id(CONFIG_FROZEN_START);
 
       d->character->next = character_list;
       character_list = d->character;
@@ -414,7 +412,6 @@ int enter_player_game (struct descriptor_data *d)
       add_to_lookup_table(GET_ID(d->character), (void *)d->character);
       (void)char_register_id(GET_ID(d->character), d->character);
       read_saved_vars(d->character);
-      /*load_char_pets(d->character);*/
       for (check = character_list; check; check = check->next)
         if (!check->master && IS_NPC(check) && check->master_id == GET_IDNUM(d->character) &&
             AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, d->character))
@@ -4652,12 +4649,12 @@ void nanny(struct descriptor_data *d, char *arg)
 	do_start(d->character);
 	send_to_char(d->character, "%s", CONFIG_START_MESSG);
       }
-      if (GET_ROOM_VNUM(IN_ROOM(d->character)) <= 1 && GET_LOADROOM(d->character) != NOWHERE) {
+      if (char_room_vnum_get(d->character) <= 1 && GET_LOADROOM(d->character) != NOWHERE) {
        char_from_room(d->character);
-       char_to_room(d->character, real_room(real_room(GET_LOADROOM(d->character))));
-      } else if (GET_ROOM_VNUM(IN_ROOM(d->character)) <= 1) {
+       char_to_room(d->character, room_by_id(GET_LOADROOM(d->character)));
+      } else if (char_room_vnum_get(d->character) <= 1) {
        char_from_room(d->character);
-       char_to_room(d->character, real_room(real_room(300)));
+       char_to_room(d->character, room_by_id(300));
       } else {
        look_at_room(char_room_get(d->character), d->character, 0);
       }

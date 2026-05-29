@@ -2,6 +2,7 @@ const std = @import("std");
 const zlua = @import("zlua");
 const cdb = @import("cdb");
 const objects_lua = @import("objects_lua.zig");
+const rooms_lua = @import("rooms_lua.zig");
 
 const Lua = zlua.Lua;
 const character_metatable = "dbat.Character";
@@ -60,6 +61,7 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "vnum_set", luaCharacterVnumSet);
     addMethod(lua, "room_vnum_get", luaCharacterRoomVnumGet);
     addMethod(lua, "room_vnum_set", luaCharacterRoomVnumSet);
+    addMethod(lua, "room_get", luaCharacterRoomGet);
     addMethod(lua, "zone_vnum_get", luaCharacterZoneVnumGet);
     addMethod(lua, "name_get", luaCharacterNameGet);
     addMethod(lua, "name_set", luaCharacterNameSet);
@@ -282,6 +284,16 @@ fn luaCharacterRoomVnumGet(lua: *Lua) i32 {
 fn luaCharacterRoomVnumSet(lua: *Lua) i32 {
     cdb.char_room_vnum_set(checkCharacter(lua), intCastOrError(lua, cdb.room_vnum, integer(lua, 2), "room vnum"));
     return 0;
+}
+
+fn luaCharacterRoomGet(lua: *Lua) i32 {
+    const room = cdb.char_room_get(checkCharacter(lua));
+    if (room == null) {
+        lua.pushNil();
+        return 1;
+    }
+    rooms_lua.pushRoom(lua, room.*.number);
+    return 1;
 }
 
 fn luaCharacterZoneVnumGet(lua: *Lua) i32 {

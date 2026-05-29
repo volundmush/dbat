@@ -16,6 +16,8 @@
 #include "dbat/game/objsave.h"
 #include "dbat/game/mail.h"
 
+#include "dbat/db/iterate.hpp"
+
 /* local functions */
 void ASSIGNROOM(room_vnum room, SPECIAL(fname));
 void ASSIGNMOB(mob_vnum mob, SPECIAL(fname));
@@ -25,20 +27,20 @@ void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname));
 
 void ASSIGNMOB(mob_vnum mob, SPECIAL(fname))
 {
-  mob_rnum rnum;
+  auto proto = mob_proto_by_id(mob);
 
-  if ((rnum = real_mobile(mob)) != NOBODY)
-    mob_index[rnum].func = fname;
+  if (proto)
+    mob_proto_special_set(mob, fname);
   else if (!mini_mud)
     log("SYSERR: Attempt to assign spec to non-existant mob #%d", mob);
 }
 
 void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname))
 {
-  obj_rnum rnum;
+  auto proto = obj_proto_by_id(obj);
 
-  if ((rnum = real_object(obj)) != NOTHING)
-    obj_index[rnum].func = fname;
+  if (proto)
+    obj_proto_special_set(obj, fname);
   else if (!mini_mud)
     log("SYSERR: Attempt to assign spec to non-existant obj #%d", obj);
 }
@@ -82,8 +84,6 @@ void assign_rooms(void)
   room_rnum i;
 
   ASSIGNROOM(5, dump);
-  ASSIGNROOM(3, pet_shops);
-  ASSIGNROOM(4, pet_shops);
   ASSIGNROOM(81, auction);
   ASSIGNROOM(82, auction);
   ASSIGNROOM(83, auction);
@@ -93,10 +93,10 @@ void assign_rooms(void)
   /* Gauntlet rooms track how far a player progressed into zone  Jamdog - 13th Feb 2006 */
 
   if (CONFIG_DTS_ARE_DUMPS)
-    for (i = 0; i <= top_of_world; i++) {
-      struct room_data* room = &world[i];
-      if (room_flagged(room, ROOM_DEATH))
-        room->func = dump;
-    }
+  room_iterate([&](auto room) {
+    if (room_flagged(room, ROOM_DEATH))
+      room->func = dump;
+    return true;
+  });
       
 }

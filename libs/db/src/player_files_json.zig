@@ -14,7 +14,7 @@ extern fn time(tloc: ?*cdb.time_t) cdb.time_t;
 extern fn create_obj() ?*cdb.obj_data;
 extern fn read_object(nr: cdb.obj_vnum, type_: c_int) ?*cdb.obj_data;
 extern fn obj_to_char(object: *cdb.obj_data, ch: *cdb.char_data) void;
-extern fn obj_to_room(object: *cdb.obj_data, room: cdb.room_rnum) void;
+extern fn obj_to_room(object: *cdb.obj_data, room: *cdb.room_data) void;
 extern fn obj_to_obj(obj: *cdb.obj_data, obj_to: *cdb.obj_data) void;
 extern fn json_save_char_for_objects(ch: *cdb.char_data) void;
 extern fn json_obj_auto_equip(ch: *cdb.char_data, obj: *cdb.obj_data, location: c_int) void;
@@ -115,14 +115,14 @@ fn writeHouseObjectsJson(path: []const u8, room_vnum: cdb.room_vnum) !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
     const allocator = arena.allocator();
-    const room_rnum = cdb.real_room(room_vnum);
-    if (room_rnum == cdb.NOWHERE) return error.RoomNotFound;
+    const room = cdb.room_by_id(room_vnum);
+    if (room == null) return error.RoomNotFound;
 
     var object = std.json.Value{ .object = std.json.ObjectMap.empty };
     try object.object.put(allocator, "kind", .{ .string = "house_objects" });
     try object.object.put(allocator, "version", .{ .integer = 1 });
     try object.object.put(allocator, "room", .{ .integer = room_vnum });
-    try object.object.put(allocator, "objects", try serializeRoomInventory(allocator, cdb.world[@intCast(room_rnum)].contents));
+    try object.object.put(allocator, "objects", try serializeRoomInventory(allocator, room.*.contents));
 
     try writeJsonFile(path, object);
 }
@@ -256,13 +256,13 @@ fn deserializeObjectRoots(ch: *cdb.char_data, value: std.json.Value) !void {
 
 fn deserializeHouseObjects(room_vnum: cdb.room_vnum, value: std.json.Value) !void {
     if (value != .object) return error.ExpectedObject;
-    const room_rnum = cdb.real_room(room_vnum);
-    if (room_rnum == cdb.NOWHERE) return error.RoomNotFound;
+    const room = cdb.room_by_id(room_vnum);
+    if (room == null) return error.RoomNotFound;
     const objects = jsonx.field(value, "objects") orelse return error.ExpectedArray;
     if (objects != .array) return error.ExpectedArray;
     for (objects.array.items) |item| {
         const obj = try deserializeObjectTree(item);
-        obj_to_room(obj, room_rnum);
+        obj_to_room(obj, room);
     }
 }
 
@@ -300,7 +300,7 @@ fn deserializeObjectTree(value: std.json.Value) !*cdb.obj_data {
 
 fn createUniqueObject() !*cdb.obj_data {
     const obj = create_obj() orelse return error.OutOfMemory;
-    obj.item_number = cdb.NOTHING;
+    obj.vnum = cdb.NOTHING;
     obj.size = cdb.SIZE_MEDIUM;
     return obj;
 }

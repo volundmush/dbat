@@ -68,6 +68,8 @@ ACMD(do_olc)
   void *olc_targ = NULL;
   char mode_arg[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
   room_rnum rnum;
+  struct char_data *mob = NULL;
+  struct obj_data *obj = NULL;
   room_vnum vnum = NOWHERE;
   int olc_mode;
 
@@ -105,21 +107,17 @@ ACMD(do_olc)
 	return;
       }
       vnum = atoi(arg);
-      if ((rnum = real_room(vnum)) == NOWHERE) {
+      if (!room_by_id(vnum)) {
 	send_to_char(ch, "No such room!\r\n");
 	return;
       }
     } else {
       rnum = IN_ROOM(ch);
-      vnum = GET_ROOM_VNUM(IN_ROOM(ch));
+      vnum = char_room_vnum_get(ch);
       send_to_char(ch, "(Using current room %d)\r\n", vnum);
     }
 
-/*   if (!ROOM_FLAGGED(rnum, ROOM_OLC))
-	 send_to_char(ch, "That room is not modifyable.\r\n");
-     else
-*/
-    olc_targ = (void *) &(world[rnum]);
+    olc_targ = char_room_get(ch);
     break;
   case OLC_MOB:
     argument = one_argument(argument, arg);
@@ -128,10 +126,10 @@ ACMD(do_olc)
       return;
     }
     vnum = atoi(arg);
-    if ((rnum = real_mobile(vnum)) == NOBODY)
+    if (!(mob = mob_proto_by_id(vnum)))
       send_to_char(ch, "No such mobile vnum.\r\n");
     else
-      olc_targ = (void *) &(mob_proto[rnum]);
+      olc_targ = (void *) &(mob);
     break;
   case OLC_OBJ:
     argument = one_argument(argument, arg);
@@ -140,10 +138,10 @@ ACMD(do_olc)
       return;
     }
     vnum = atoi(arg);
-    if ((rnum = real_object(vnum)) == NOTHING)
+    if (!(obj = obj_proto_by_id(vnum)))
       send_to_char(ch, "No object with vnum %d.\r\n", vnum);
     else
-      olc_targ = (void *) &(obj_proto[rnum]);
+      olc_targ = (void *) &(obj);
     break;
   default:
     send_to_char(ch, "Usage: olc {.|set|show|obj|mob|room} [args]\r\n");

@@ -139,7 +139,7 @@ struct board_info *create_new_board(obj_vnum board_vnum) {
     WRITE_LVL(temp)=CONFIG_LEVEL_CAP;
     REMOVE_LVL(temp)=CONFIG_LEVEL_CAP;
     } else {
-      obj = &(obj_proto[real_object(board_vnum)]);
+      obj = obj_proto_by_id(board_vnum);
       READ_LVL(temp)=GET_OBJ_VAL(obj, VAL_BOARD_READ);
       WRITE_LVL(temp)=GET_OBJ_VAL(obj, VAL_BOARD_WRITE);
       REMOVE_LVL(temp)=GET_OBJ_VAL(obj, VAL_BOARD_ERASE);
@@ -265,7 +265,7 @@ struct board_info *load_board(obj_vnum board_vnum) {
     BOARD_VERSION(temp_board)=t[4];
     log("Board vnum %d, Version %d", BOARD_VNUM(temp_board), BOARD_VERSION(temp_board));
   } else {
-    obj = &(obj_proto[real_object(board_vnum)]);
+    obj = obj_proto_by_id(board_vnum);
     /* double check one or two things */
     if(t[0] != GET_OBJ_VAL(obj,VAL_BOARD_READ) ||
        t[1] != GET_OBJ_VAL(obj,VAL_BOARD_WRITE) ||
@@ -497,7 +497,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
     "     @CVieworder@W, this changes the order in which posts are listed to you.@n\r\n");
   }
   else {
-  obj = read_object(board_vnum, REAL);
+  obj = read_object(board_vnum, VIRTUAL);
   bnum = GET_OBJ_VNUM(obj);
   char clan[120];
    if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
@@ -616,7 +616,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
    send_to_imm("Error with %d board, object doesn't exist.", board_vnum);
   }
   else {
-  obj = read_object(board_vnum, REAL);
+  obj = read_object(board_vnum, VIRTUAL);
   bnum = GET_OBJ_VNUM(obj);
    char clan[200];
    if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
@@ -1029,7 +1029,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg)
   }
   else {
    char clan[120];
-   obj = read_object(board_vnum, REAL);
+   obj = read_object(board_vnum, VIRTUAL);
    if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
     if (GET_CLAN(ch) != NULL) {
       sprintf(clan, "%s", GET_CLAN(ch));

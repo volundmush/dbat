@@ -6,14 +6,15 @@
 extern "C" {
 #endif
 
-int delete_mobile(mob_rnum);
+int delete_mobile(mob_vnum vnum);
 int copy_mobile(struct char_data *to, struct char_data *from);
 int add_mobile(struct char_data *, mob_vnum);
 int copy_mob_strings(struct char_data *to, struct char_data *from);
 int free_mobile_strings(struct char_data *mob);
 int free_mobile(struct char_data *mob);
-int save_mobiles(zone_rnum rznum);
+int save_mobiles(struct zone_data *zone);
 int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd);
+int copy_mobile_strings(struct char_data *t, struct char_data *f);
 
 /* Handy macros. */
 #define GET_NDD(mob)	((mob)->mob_specials.damnodice)

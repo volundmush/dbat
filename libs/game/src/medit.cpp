@@ -67,12 +67,12 @@ ACMD(do_oasis_medit)
     if (is_number(buf2))
       number = atoi(buf2);
     else if (GET_OLC_ZONE(ch) > 0) {
-      zone_rnum zlok;
+      struct zone_data *zone = zone_by_id(GET_OLC_ZONE(ch));
       
-      if ((zlok = real_zone(GET_OLC_ZONE(ch))) == NOWHERE)
+      if (!zone)
         number = NOWHERE;
       else
-        number = genolc_zone_bottom(zlok);
+        number = zone->bot;
     }
     
     if (number == NOWHERE) {
@@ -116,7 +116,7 @@ ACMD(do_oasis_medit)
   /****************************************************************************/
   /** Find the zone.                                                         **/
   /****************************************************************************/
-  OLC_ZNUM(d) = save ? real_zone(number) : real_zone_by_thing(number);
+  OLC_ZNUM(d) = virtual_zone_by_thing(number);
   if (OLC_ZNUM(d) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
     free(d->olc);
@@ -127,8 +127,9 @@ ACMD(do_oasis_medit)
   /****************************************************************************/
   /** Everyone but IMPLs can only edit zones they have been assigned.        **/
   /****************************************************************************/
-  if (!can_edit_zone(ch, OLC_ZNUM(d))) {
-    send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
+  auto zone = zone_by_id(OLC_ZNUM(d));
+  if (!can_edit_zone(ch, zone)) {
+    send_cannot_edit(ch, zone->number);
     free(d->olc);
     d->olc = NULL;
     return;
@@ -139,15 +140,15 @@ ACMD(do_oasis_medit)
   /****************************************************************************/
   if (save) {
     send_to_char(ch, "Saving all mobiles in zone %d.\r\n",
-      zone_table[OLC_ZNUM(d)].number);
+      zone->number);
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE,
       "OLC: %s saves mobile info for zone %d.",
-      GET_NAME(ch), zone_table[OLC_ZNUM(d)].number);
+      GET_NAME(ch), zone->number);
     
     /**************************************************************************/
     /** Save the mobiles.                                                    **/
     /**************************************************************************/
-    save_mobiles(OLC_ZNUM(d));
+    save_mobiles(zone);
     
     /**************************************************************************/
     /** Free the olc structure stored in the descriptor.                     **/
@@ -163,10 +164,10 @@ ACMD(do_oasis_medit)
   /** If this is a new mobile, setup a new one, otherwise, setup the         **/
   /** existing mobile.                                                       **/
   /****************************************************************************/
-  if ((real_num = real_mobile(number)) == NOBODY)
+  if (!mob_proto_by_id(number))
     medit_setup_new(d);
   else
-    medit_setup_existing(d, real_num);
+    medit_setup_existing(d, number);
  
   medit_disp_menu(d); 
   STATE(d) = CON_MEDIT;
@@ -179,12 +180,12 @@ ACMD(do_oasis_medit)
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE,"OLC: %s starts editing zone %d allowed zone %d",
-    GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+    GET_NAME(ch), zone->number, GET_OLC_ZONE(ch));
 }
 
 void medit_save_to_disk(zone_vnum foo)
 {
-  save_mobiles(real_zone(foo));
+  save_mobiles(zone_by_id(foo));
 }
 
 void medit_setup_new(struct descriptor_data *d)
@@ -198,7 +199,7 @@ void medit_setup_new(struct descriptor_data *d)
 
   init_mobile(mob);
 
-  GET_MOB_RNUM(mob) = NOBODY;
+  mob->vnum = NOBODY;
   /*
    * Set up some default strings.
    */
@@ -218,7 +219,7 @@ void medit_setup_new(struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-void medit_setup_existing(struct descriptor_data *d, int rmob_num)
+void medit_setup_existing(struct descriptor_data *d, mob_vnum mob_num)
 {
   struct char_data *mob;
 
@@ -227,7 +228,7 @@ void medit_setup_existing(struct descriptor_data *d, int rmob_num)
    */
   CREATE(mob, struct char_data, 1);
 
-  copy_mobile(mob, mob_proto + rmob_num);
+  copy_mobile(mob, mob_proto_by_id(mob_num));
 
   OLC_MOB(d) = mob;
   OLC_ITEM_TYPE(d) = MOB_TRIGGER;
@@ -275,19 +276,17 @@ void init_mobile(struct char_data *mob)
  */
 void medit_save_internally(struct descriptor_data *d)
 {
-  int i;
   mob_rnum new_rnum;
   struct descriptor_data *dsc;
   struct char_data *mob;
+  mob_vnum v = OLC_NUM(d);
 
-  i = (real_mobile(OLC_NUM(d)) == NOBODY);
-
-  if ((new_rnum = add_mobile(OLC_MOB(d), OLC_NUM(d))) == NOBODY) {
+  if ((new_rnum = add_mobile(OLC_MOB(d), v)) == NOBODY) {
     log("medit_save_internally: add_mobile failed.");
     return;
   }
 
-  struct char_data* proto = &mob_proto[new_rnum];
+  struct char_data* proto = mob_proto_by_id(v);
 
   /* Update triggers */
   /* Free old proto list  */
@@ -299,7 +298,7 @@ void medit_save_internally(struct descriptor_data *d)
 
   /* this takes care of the mobs currently in-game */
   for (mob = character_list; mob; mob = mob->next) {
-    if (GET_MOB_RNUM(mob) != new_rnum) 
+    if (GET_MOB_VNUM(mob) != v) 
       continue;
     
     /* remove any old scripts */
@@ -311,29 +310,6 @@ void medit_save_internally(struct descriptor_data *d)
     assign_triggers(mob, MOB_TRIGGER);
   }
   /* end trigger update */  
-
-  if (!i)	/* Only renumber on new mobiles. */
-    return;
-
-  /*
-   * Update keepers in shops being edited and other mobs being edited.
-   */
-  for (dsc = descriptor_list; dsc; dsc = dsc->next) {
-    if (STATE(dsc) == CON_SEDIT)
-      S_KEEPER(OLC_SHOP(dsc)) += (S_KEEPER(OLC_SHOP(dsc)) != NOTHING && S_KEEPER(OLC_SHOP(dsc)) >= new_rnum);
-    else if (STATE(dsc) == CON_MEDIT)
-      GET_MOB_RNUM(OLC_MOB(dsc)) += (GET_MOB_RNUM(OLC_MOB(dsc)) != NOTHING && GET_MOB_RNUM(OLC_MOB(dsc)) >= new_rnum);
-  }
-
-  /*
-   * Update other people in zedit too. From: C.Raehl 4/27/99
-   */
-  for (dsc = descriptor_list; dsc; dsc = dsc->next)
-    if (STATE(dsc) == CON_ZEDIT)
-      for (i = 0; OLC_ZONE(dsc)->cmd[i].command != 'S'; i++)
-        if (OLC_ZONE(dsc)->cmd[i].command == 'M')
-          if (OLC_ZONE(dsc)->cmd[i].arg1 >= new_rnum)
-            OLC_ZONE(dsc)->cmd[i].arg1++;
 }
 
 /**************************************************************************
@@ -544,6 +520,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
 {
   int i = -1;
   char *oldtext = NULL;
+  struct char_data *mob = NULL;
   dbat::race::Race *chosen_race;
 
   if (OLC_MODE(d) > MEDIT_NUMERICAL_RESPONSE) {
@@ -574,7 +551,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
       mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
 	"OLC: %s edits mob %d", GET_NAME(d->character), OLC_NUM(d));
       if (CONFIG_OLC_SAVE) {
-	medit_save_to_disk(zone_table[real_zone_by_thing(OLC_NUM(d))].number);
+	medit_save_to_disk(virtual_zone_by_thing(OLC_NUM(d)));
 	write_to_output(d, "Mobile saved to disk.\r\n");
       } else
         write_to_output(d, "Mobile saved to memory.\r\n");
@@ -937,15 +914,15 @@ void medit_parse(struct descriptor_data *d, char *arg)
     break;
 
   case MEDIT_COPY:
-    if ((i = real_mobile(atoi(arg))) != NOWHERE) {
-      medit_setup_existing(d, i);
+    if ((mob_proto_by_id(atoi(arg)))) {
+      medit_setup_existing(d, atoi(arg));
     } else
       write_to_output(d, "That mob does not exist.\r\n");
     break;
 
   case MEDIT_DELETE:
     if (*arg == 'y' || *arg == 'Y') {
-      if (delete_mobile(GET_MOB_RNUM(OLC_MOB(d))) != NOBODY)
+      if (delete_mobile(OLC_MOB(d)->vnum) != NOBODY)
         write_to_output(d, "Mobile deleted.\r\n");
       else
         write_to_output(d, "Couldn't delete the mobile!\r\n");
@@ -1007,4 +984,3 @@ void medit_string_cleanup(struct descriptor_data *d, int terminator)
      break;
   }
 }
-

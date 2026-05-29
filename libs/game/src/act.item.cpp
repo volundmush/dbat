@@ -74,8 +74,8 @@ static void get_check_money(struct char_data *ch, struct obj_data *obj);
 static void get_from_room(struct char_data *ch, char *arg, int howmany);
 static void perform_give_gold(struct char_data *ch, struct char_data *vict, int amount);
 static void perform_give(struct char_data *ch, struct char_data *vict, struct obj_data *obj);
-static int perform_drop(struct char_data *ch, struct obj_data *obj, int8_t mode, const char *sname, room_rnum RDR);
-static void perform_drop_gold(struct char_data *ch, int amount, int8_t mode, room_rnum RDR);
+static int perform_drop(struct char_data *ch, struct obj_data *obj, int8_t mode, const char *sname, struct room_data* RDR);
+static void perform_drop_gold(struct char_data *ch, int amount, int8_t mode, struct room_data* RDR);
 static struct char_data *give_find_vict(struct char_data *ch, char *arg);
 static void perform_put(struct char_data *ch, struct obj_data *obj, struct obj_data *cont);
 static void get_from_container(struct char_data *ch, struct obj_data *cont, char *arg, int mode, int howmany);
@@ -578,7 +578,7 @@ ACMD(do_garden)
     act("@GYou dig a proper sized hole and plant @g$p@G in it.@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@g$n@G digs a proper sized hole in a planter and plants @g$p@G in it.@n", TRUE, ch, obj, 0, TO_ROOM);
     obj_from_char(obj);
-    obj_to_room(obj, IN_ROOM(ch));
+    obj_to_room(obj, char_room_get(ch));
        decCurST(ch, cost);
     GET_OBJ_VAL(obj, VAL_MAXMATURE) = 6;
     GET_OBJ_VAL(obj, VAL_MATGOAL) = 200;
@@ -688,12 +688,12 @@ ACMD(do_pack)
    if (GET_OBJ_VNUM(obj) == 11) {
     extract_obj(obj);
     packed = read_object(19085, VIRTUAL);
-    obj_to_room(packed, IN_ROOM(ch));
+    obj_to_room(packed, char_room_get(ch));
    } else {
     int fnum = GET_OBJ_VNUM(obj) - 10;
     packed = read_object(fnum, VIRTUAL);
     extract_obj(obj);
-    obj_to_room(packed, IN_ROOM(ch));
+    obj_to_room(packed, char_room_get(ch));
    }
    return;
   } else if (GET_OBJ_VNUM(obj) >= 18800 && GET_OBJ_VNUM(obj) <= 19199 && GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
@@ -757,7 +757,7 @@ ACMD(do_pack)
       }
     }
      struct obj_data *money_obj = create_money(money);
-     obj_to_room(money_obj, IN_ROOM(ch));
+     obj_to_room(money_obj, char_room_get(ch));
     extract_obj(obj);
     return;
    }
@@ -797,9 +797,9 @@ int check_saveroom_count(struct char_data *ch, struct obj_data *cont)
  struct obj_data *obj, *next_obj = NULL;
  int count = 0, was = 0;
 
- if (IN_ROOM(ch) == NOWHERE)
+ if (char_room_get(ch) == NULL)
   return 0;
- else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_HOUSE))
+ else if (!(char_room_get(ch) && room_flagged(char_room_get(ch), ROOM_HOUSE)))
   return 0;
 
  for (obj = char_room_get(ch)->contents; obj; obj = next_obj) {
@@ -893,11 +893,11 @@ ACMD(do_deploy)
    struct obj_data *furn = read_object(fnum, VIRTUAL);
    act("@CYou click the capsule's button and toss it to the floor. A puff of smoke erupts immediately and quickly dissipates to reveal, $p@C.@n", TRUE, ch, furn, 0, TO_CHAR);
    act("@c$n@C clicks a capsule's button and tosses it to the floor. A puff of smoke erupts immediately and quickly dissipates to reveal, $p@C.@n", TRUE, ch, furn, 0, TO_ROOM);
-   obj_to_room(furn, IN_ROOM(ch));
+   obj_to_room(furn, char_room_get(ch));
    extract_obj(obj);
    return;
   } else {
-   send_to_imm("ERROR: Furniture failed to deploy at %d.", GET_ROOM_VNUM(IN_ROOM(ch)));
+   send_to_imm("ERROR: Furniture failed to deploy at %d.", char_room_vnum_get(ch));
    return;
   }
  }
@@ -938,22 +938,22 @@ ACMD(do_deploy)
  } /* End while */
 
  if (cont == TRUE) {
-  int hnum = GET_ROOM_VNUM(IN_ROOM(ch));
+  int hnum = char_room_vnum_get(ch);
   struct obj_data *door = read_object(18801, VIRTUAL);
 
-  GET_OBJ_VAL(door, 6) = GET_ROOM_VNUM(IN_ROOM(ch));
+  GET_OBJ_VAL(door, 6) = char_room_vnum_get(ch);
   if (rnum != 18800)
    GET_OBJ_VAL(door, 0) = rnum + 1;
   else
    GET_OBJ_VAL(door, 0) = 18802;
   GET_OBJ_VAL(door, 2) = rnum;
-  obj_to_room(door, real_room(rnum));
+  obj_to_room(door, room_by_id(rnum));
   struct obj_data *key = read_object(rnum, VIRTUAL);
   obj_to_char(key, ch);
   act("@WYou click the capsule and toss it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@C$n@W clicks a capsule and then tosses it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n", TRUE, ch, 0, 0, TO_ROOM);
   struct obj_data *foun = read_object(18803, VIRTUAL);
-  obj_to_room(foun, real_room(rnum + 1));
+  obj_to_room(foun, room_by_id(rnum + 1));
   extract_obj(obj);
  } else {
   send_to_char(ch, "@ROOC@D: @wSorry for the inconvenience, but it appears there are no houses available. Please contact Iovan.@n\r\n");
@@ -1148,8 +1148,8 @@ void check_auction(void)
 	}
 }
 
-static bool _db_planet(room_rnum room) {
-  struct room_data* rm = &world[room];
+static bool _db_planet(room_vnum room) {
+  struct room_data* rm = room_by_id(room);
 
   for(auto flag : { ROOM_EARTH, ROOM_VEGETA, ROOM_FRIGID, ROOM_AETHER, ROOM_NAMEK, ROOM_KONACK, ROOM_YARDRAT }) {
     if (room_flagged(rm, flag)) {
@@ -1173,7 +1173,7 @@ void dball_load()
 
 if (dballtime == 0) {
  struct char_data *hunter = NULL;
- mob_rnum r_num;
+ struct char_data *proto = NULL;
 
  WISHTIME = 0;
  for (k = object_list; k; k = k->next) {
@@ -1201,7 +1201,7 @@ if (dballtime == 0) {
   else if (GET_OBJ_VNUM(k) == 26) {
    found7 = TRUE;
   }
-  else if (IN_ROOM(k) != NOWHERE && room_geffect_get(obj_room_get(k)) == 6 && !OBJ_FLAGGED(k, ITEM_UNBREAKABLE)) {
+  else if (obj_room_get(k) != NULL && room_geffect_get(obj_room_get(k)) == 6 && !OBJ_FLAGGED(k, ITEM_UNBREAKABLE)) {
    send_to_room(obj_room_get(k), "@R%s@r melts in the lava!@n\r\n", k->short_description);
    extract_obj(k);
   }
@@ -1213,10 +1213,10 @@ if (dballtime == 0) {
    load = FALSE;
    int zone = 0;
    while (load == FALSE) {
-    if (real_room(num) != NOWHERE) {
-      if ((zone = real_zone_by_thing(real_room(num))) != NOWHERE) {
-       if (ZONE_FLAGGED(zone, ZONE_DBALLS)) {
-        room = num;
+    if (auto room = room_by_id(num); room) {
+      if (auto zone = room_zone_get(room); zone) {
+       if (zone_flagged(zone, ZONE_DBALLS)) {
+        //room = num;
         load = TRUE;
         num = rand_number(200, 20000);
        } else {
@@ -1232,40 +1232,40 @@ if (dballtime == 0) {
    }
    if (rand_number(1, 10) > 8) {
     if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER1_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
+     hunter = read_mobile(DBALL_HUNTER1_VNUM, VIRTUAL);
+     char_to_room(hunter, room_by_id(room));
      hunter1 = TRUE;
      DBALL_HUNTER1 = room;
      k = read_object(20, VIRTUAL);
      obj_to_char(k, hunter);
     } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER2_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
+     hunter = read_mobile(DBALL_HUNTER2_VNUM, VIRTUAL);
+     char_to_room(hunter, room_by_id(room));
      hunter2 = TRUE;
      DBALL_HUNTER2 = room;
      k = read_object(20, VIRTUAL);
      obj_to_char(k, hunter);
     } else {
      k = read_object(20, VIRTUAL);
-     obj_to_room(k, real_room(room));
+     obj_to_room(k, room_by_id(room));
     }
    } else {
     k = read_object(20, VIRTUAL);
-    obj_to_room(k, real_room(room));
+    obj_to_room(k, room_by_id(room));
    }
    loaded = TRUE;
   }
   if (found2 == FALSE) {
    load = FALSE;
    while (load == FALSE) {
-    if (real_room(num) != NOWHERE) {
-     if (_db_planet(real_room(num))) {
+    if (room_by_id(num)) {
+     if (_db_planet(num)) {
        room = num;
        load = TRUE;
        num = rand_number(200, 20000);
@@ -1280,40 +1280,40 @@ if (dballtime == 0) {
    }
    if (rand_number(1, 10) > 8) {
     if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER1_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
+     hunter = read_mobile(DBALL_HUNTER1_VNUM, VIRTUAL);
+     char_to_room(hunter, room_by_id(room));
      hunter1 = TRUE;
      DBALL_HUNTER1 = room;
      k = read_object(21, VIRTUAL);
      obj_to_char(k, hunter);
     } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER2_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
+     hunter = read_mobile(DBALL_HUNTER2_VNUM, VIRTUAL);
+     char_to_room(hunter, room_by_id(room));
      hunter2 = TRUE;
      DBALL_HUNTER2 = room;
      k = read_object(21, VIRTUAL);
      obj_to_char(k, hunter);
     } else {
      k = read_object(21, VIRTUAL);
-     obj_to_room(k, real_room(room));
+     obj_to_room(k, room_by_id(room));
     }
    } else {
     k = read_object(21, VIRTUAL);
-    obj_to_room(k, real_room(room));
+    obj_to_room(k, room_by_id(room));
    }
    loaded = TRUE;
   }
   if (found3 == FALSE) {
    load = FALSE;
    while (load == FALSE) {
-    if (real_room(num) != NOWHERE) {
-     if (_db_planet(real_room(num))) {
+    if (room_by_id(num)) {
+     if (_db_planet(num)) {
        room = num;
        load = TRUE;
        num = rand_number(200, 20000);
@@ -1328,40 +1328,40 @@ if (dballtime == 0) {
    }
    if (rand_number(1, 10) > 8) {
     if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER1_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
+     hunter = read_mobile(DBALL_HUNTER1_VNUM, VIRTUAL);
+     char_to_room(hunter, room_by_id(room));
      hunter1 = TRUE;
      DBALL_HUNTER1 = room;
      k = read_object(22, VIRTUAL);
      obj_to_char(k, hunter);
     } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER2_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
+     hunter = read_mobile(DBALL_HUNTER2_VNUM, VIRTUAL);
+     char_to_room(hunter, room_by_id(room));
      hunter2 = TRUE;
      DBALL_HUNTER2 = room;
      k = read_object(22, VIRTUAL);
      obj_to_char(k, hunter);
     } else {
      k = read_object(22, VIRTUAL);
-     obj_to_room(k, real_room(room));
+     obj_to_room(k, room_by_id(room));
     }
    } else {
     k = read_object(22, VIRTUAL);
-    obj_to_room(k, real_room(room));
+    obj_to_room(k, room_by_id(room));
    }
    loaded = TRUE;
   }
   if (found4 == FALSE) {
    load = FALSE;
    while (load == FALSE) {
-    if (real_room(num) != NOWHERE) {
-     if (_db_planet(real_room(num))) {
+    if (room_by_id(num)) {
+     if (_db_planet(num)) {
        room = num;
        load = TRUE;
        num = rand_number(200, 20000);
@@ -1376,40 +1376,40 @@ if (dballtime == 0) {
    }
    if (rand_number(1, 10) > 8) {
     if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER1_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
+     hunter = read_mobile(DBALL_HUNTER1_VNUM, VIRTUAL);
+     char_to_room(hunter, room_by_id(room));
      hunter1 = TRUE;
      DBALL_HUNTER1 = room;
      k = read_object(23, VIRTUAL);
      obj_to_char(k, hunter);
     } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER2_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
+     hunter = read_mobile(DBALL_HUNTER2_VNUM, VIRTUAL);
+     char_to_room(hunter, room_by_id(room));
      hunter2 = TRUE;
      DBALL_HUNTER2 = room;
      k = read_object(23, VIRTUAL);
      obj_to_char(k, hunter);
     } else {
      k = read_object(23, VIRTUAL);
-     obj_to_room(k, real_room(room));
+     obj_to_room(k, room_by_id(room));
     }
    } else {
     k = read_object(23, VIRTUAL);
-    obj_to_room(k, real_room(room));
+    obj_to_room(k, room_by_id(room));
    }
    loaded = TRUE;
   }
   if (found5 == FALSE) {
    load = FALSE;
    while (load == FALSE) {
-    if (real_room(num) != NOWHERE) {
-     if (_db_planet(real_room(num))) {
+    if (room_by_id(num)) {
+     if (_db_planet(num)) {
        room = num;
        load = TRUE;
        num = rand_number(200, 20000);
@@ -1424,40 +1424,40 @@ if (dballtime == 0) {
    }
    if (rand_number(1, 10) > 8) {
     if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER1_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
+     hunter = read_mobile(DBALL_HUNTER1_VNUM, VIRTUAL);
+     char_to_room(hunter, room_by_id(room));
      hunter1 = TRUE;
      DBALL_HUNTER1 = room;
      k = read_object(24, VIRTUAL);
      obj_to_char(k, hunter);
     } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER2_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
+     hunter = read_mobile(DBALL_HUNTER2_VNUM, VIRTUAL);
+     char_to_room(hunter, room_by_id(room));
      hunter2 = TRUE;
      DBALL_HUNTER2 = room;
      k = read_object(24, VIRTUAL);
      obj_to_char(k, hunter);
     } else {
      k = read_object(24, VIRTUAL);
-     obj_to_room(k, real_room(room));
+     obj_to_room(k, room_by_id(room));
     }
    } else {
     k = read_object(24, VIRTUAL);
-    obj_to_room(k, real_room(room));
+    obj_to_room(k, room_by_id(room));
    }
    loaded = TRUE;
   }
   if (found6 == FALSE) {
    load = FALSE;
    while (load == FALSE) {
-    if (real_room(num) != NOWHERE) {
-     if (_db_planet(real_room(num))) {
+    if (room_by_id(num)) {
+     if (_db_planet(num)) {
        room = num;
        load = TRUE;
        num = rand_number(200, 20000);
@@ -1472,40 +1472,40 @@ if (dballtime == 0) {
    }
    if (rand_number(1, 10) > 8) {
     if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER1_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
+     hunter = read_mobile(DBALL_HUNTER1_VNUM, VIRTUAL);
+     char_to_room(hunter, room_by_id(room));
      hunter1 = TRUE;
      DBALL_HUNTER1 = room;
      k = read_object(25, VIRTUAL);
      obj_to_char(k, hunter);
     } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER2_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
+     hunter = read_mobile(DBALL_HUNTER2_VNUM, VIRTUAL);
+     char_to_room(hunter, room_by_id(room));
      hunter2 = TRUE;
      DBALL_HUNTER2 = room;
      k = read_object(25, VIRTUAL);
      obj_to_char(k, hunter);
     } else {
      k = read_object(25, VIRTUAL);
-     obj_to_room(k, real_room(room));
+     obj_to_room(k, room_by_id(room));
     }
    } else {
     k = read_object(25, VIRTUAL);
-    obj_to_room(k, real_room(room));
+    obj_to_room(k, room_by_id(room));
    }
    loaded = TRUE;
   }
   if (found7 == FALSE) {
    load = FALSE;
    while (load == FALSE) {
-    if (real_room(num) != NOWHERE) {
-     if (_db_planet(real_room(num))) {
+    if (room_by_id(num)) {
+     if (_db_planet(num)) {
        room = num;
        load = TRUE;
        num = rand_number(200, 20000);
@@ -1520,32 +1520,32 @@ if (dballtime == 0) {
    }
    if (rand_number(1, 10) > 8) {
     if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER1_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
+     hunter = read_mobile(DBALL_HUNTER1_VNUM, VIRTUAL);
+     char_to_room(hunter, room_by_id(room));
      hunter1 = TRUE;
      DBALL_HUNTER1 = room;
      k = read_object(26, VIRTUAL);
      obj_to_char(k, hunter);
     } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
+     if (!(proto = mob_proto_by_id(DBALL_HUNTER2_VNUM))) {
       return;
      }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
+     hunter = read_mobile(DBALL_HUNTER2_VNUM, VIRTUAL);
+     char_to_room(hunter, room_by_id(room));
      hunter2 = TRUE;
      DBALL_HUNTER2 = room;
      k = read_object(26, VIRTUAL);
      obj_to_char(k, hunter);
     } else {
      k = read_object(26, VIRTUAL);
-     obj_to_room(k, real_room(room));
+     obj_to_room(k, room_by_id(room));
     }
    } else {
     k = read_object(26, VIRTUAL);
-    obj_to_room(k, real_room(room));
+    obj_to_room(k, room_by_id(room));
    }
    loaded = TRUE;
   }
@@ -2200,7 +2200,7 @@ ACMD(do_assemble)
     }
    }
   } else {
-   obj_to_room(pObject, IN_ROOM(ch));
+   obj_to_room(pObject, char_room_get(ch));
    GET_OBJ_TIMER(pObject) = (GET_SKILL(ch,SKILL_SURVIVAL) * 0.12);
   }
   
@@ -2287,7 +2287,7 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
       (GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY) > 0) &&
       (GET_OBJ_WEIGHT(cont) + GET_OBJ_WEIGHT(obj) > GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY)))
     act("$p won't fit in $P.", FALSE, ch, obj, cont, TO_CHAR);
-  else if (OBJ_FLAGGED(obj, ITEM_NODROP) && IN_ROOM(cont) != NOWHERE)
+  else if (OBJ_FLAGGED(obj, ITEM_NODROP) && obj_room_get(cont) != NULL)
     act("You can't get $p out of your hand.", FALSE, ch, obj, NULL, TO_CHAR);
   else if (GET_OBJ_VNUM(obj) == dball[0] || GET_OBJ_VNUM(obj) == dball[1] || GET_OBJ_VNUM(obj) == dball[2] || GET_OBJ_VNUM(obj) == dball[3] || GET_OBJ_VNUM(obj) == dball[4] || GET_OBJ_VNUM(obj) == dball[5] || GET_OBJ_VNUM(obj) == dball[6])
     send_to_char(ch, "You can not bag dragon balls.\r\n");
@@ -2316,7 +2316,7 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
     if ((GET_OBJ_TYPE(cont) == ITEM_PORTAL) ||
         (GET_OBJ_TYPE(cont) == ITEM_VEHICLE)) {
       obj_from_obj(obj);
-      obj_to_room(obj, real_room(GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY)));
+      obj_to_room(obj, room_by_id(GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY)));
       if (GET_OBJ_TYPE(cont) == ITEM_PORTAL) {
         act("What? $U$p disappears from $P in a puff of smoke!", 
 	     TRUE, ch, obj, cont, TO_ROOM);
@@ -2450,7 +2450,7 @@ static void get_check_money(struct char_data *ch, struct obj_data *obj)
     int diff = 0;
     diff = (GET_GOLD(ch) + value) - GOLD_CARRY(ch);
     obj = create_money(diff);
-    obj_to_room(obj, IN_ROOM(ch));
+    obj_to_room(obj, char_room_get(ch));
     GET_GOLD(ch) = GOLD_CARRY(ch);
     return;
   }
@@ -2749,7 +2749,7 @@ ACMD(do_get)
 }
 
 static void perform_drop_gold(struct char_data *ch, int amount,
-		            int8_t mode, room_rnum RDR)
+		            int8_t mode, struct room_data* RDR)
 {
   struct obj_data *obj;
 
@@ -2784,10 +2784,10 @@ static void perform_drop_gold(struct char_data *ch, int amount,
 	act(buf, TRUE, ch, 0, 0, TO_ROOM);
 
 	send_to_char(ch, "You drop some zenni.\r\n");
-	obj_to_room(obj, IN_ROOM(ch));
+	obj_to_room(obj, char_room_get(ch));
         if (GET_ADMLEVEL(ch) > 0) {
-         send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description, GET_ROOM_VNUM(IN_ROOM(obj)));
-         log_imm_action("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description, GET_ROOM_VNUM(IN_ROOM(obj)));
+         send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description, obj_room_vnum_get(obj));
+         log_imm_action("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description, obj_room_vnum_get(obj));
          if (check_insidebag(obj, 0.0) > 1) {
           send_to_imm("IMM DROP: Object contains %d other items.", check_insidebag(obj, 0.0));
           log_imm_action("IMM DROP: Object contains %d other items.", check_insidebag(obj, 0.0));
@@ -2810,7 +2810,7 @@ static void perform_drop_gold(struct char_data *ch, int amount,
 		      "  It vanishes in a puff of smoke!" : "")
 
 static int perform_drop(struct char_data *ch, struct obj_data *obj,
-		     int8_t mode, const char *sname, room_rnum RDR)
+		     int8_t mode, const char *sname, struct room_data* RDR)
 {
   char buf[MAX_STRING_LENGTH];
   int value;
@@ -2892,17 +2892,17 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
     else if (room_geffect_get(room) == 6) {
      act("$p plops down on some cooled lava!", FALSE, ch, obj, 0, TO_CHAR);
      act("$p plops down on some cooled lava!", FALSE, ch, obj, 0, TO_ROOM);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_room_get(ch));
         if (GET_ADMLEVEL(ch) > 0) {
-         send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description, GET_ROOM_VNUM(IN_ROOM(obj)));
-         log_imm_action("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description, GET_ROOM_VNUM(IN_ROOM(obj)));
+         send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description, obj_room_vnum_get(obj));
+         log_imm_action("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description, obj_room_vnum_get(obj));
         }
     }
     else {
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_room_get(ch));
         if (GET_ADMLEVEL(ch) > 0) {
-         send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description, GET_ROOM_VNUM(IN_ROOM(obj)));
-         log_imm_action("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description, GET_ROOM_VNUM(IN_ROOM(obj)));
+         send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description, obj_room_vnum_get(obj));
+         log_imm_action("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->short_description, obj_room_vnum_get(obj));
         }
     }
     return (0);
@@ -2930,7 +2930,7 @@ ACMD(do_drop)
 {
   char arg[MAX_INPUT_LENGTH];
   struct obj_data *obj, *next_obj;
-  room_rnum RDR = 0;
+  struct room_data *RDR = NULL;
   int8_t mode = SCMD_DROP;
   int dotmode, amount = 0, multi, num_don_rooms;
   const char *sname;
@@ -2965,13 +2965,13 @@ ACMD(do_drop)
       break;
     case 1:
     case 2:
-      RDR = real_room(CONFIG_DON_ROOM_1);
+      RDR = room_by_id(CONFIG_DON_ROOM_1);
       break;
-    case 3: RDR = real_room(CONFIG_DON_ROOM_2); break;
-    case 4: RDR = real_room(CONFIG_DON_ROOM_3); break;
+    case 3: RDR = room_by_id(CONFIG_DON_ROOM_2); break;
+    case 4: RDR = room_by_id(CONFIG_DON_ROOM_3); break;
 
     }
-    if (RDR == NOWHERE) {
+    if (RDR == NULL) {
       send_to_char(ch, "Sorry, you can't donate anything right now.\r\n");
       return;
     }
@@ -3087,7 +3087,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
      act("$n@n drops $p because you can't carry anymore.", TRUE, ch, obj, vict, TO_VICT);
      act("$n@n drops $p on the ground since $N's unable to carry it.", TRUE, ch, obj, vict, TO_NOTVICT);
      obj_from_char(obj);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_room_get(ch));
     }
     return;
   }
@@ -3102,7 +3102,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
      act("$n@n drops $p because you can't carry anymore.", TRUE, ch, obj, vict, TO_VICT);
      act("$n@n drops $p on the ground since $N's unable to carry it.", TRUE, ch, obj, vict, TO_NOTVICT);
      obj_from_char(obj);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_room_get(ch));
     }
     return;
   }
@@ -3112,7 +3112,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
      act("$n@n drops $p because you can't carry anymore.", TRUE, ch, obj, vict, TO_VICT);
      act("$n@n drops $p on the ground since $N's unable to carry it.", TRUE, ch, obj, vict, TO_NOTVICT);
      obj_from_char(obj);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_room_get(ch));
     }
     return;
   }
@@ -3291,7 +3291,7 @@ void weight_change_object(struct obj_data *obj, int weight)
   struct obj_data *tmp_obj;
   struct char_data *tmp_ch;
 
-  if (IN_ROOM(obj) != NOWHERE) {
+  if (obj_room_get(obj) != NULL) {
     GET_OBJ_WEIGHT(obj) += weight;
   } else if ((tmp_ch = obj->carried_by)) {
     obj_from_char(obj);
@@ -3350,7 +3350,7 @@ void name_from_drinkcon(struct obj_data *obj)
     strncat(new_name, cur_name, cpylen);	/* strncat: OK (size precalculated) */
   }
 
-  if (GET_OBJ_RNUM(obj) == NOTHING || obj->name != obj_proto[GET_OBJ_RNUM(obj)].name)
+  if (GET_OBJ_VNUM(obj) == NOTHING || obj->name != obj_proto_by_id(GET_OBJ_VNUM(obj))->name)
     free(obj->name);
   obj->name = new_name;
 }
@@ -3365,7 +3365,7 @@ void name_to_drinkcon(struct obj_data *obj, int type)
   CREATE(new_name, char, strlen(obj->name) + strlen(drinknames[type]) + 2);
   sprintf(new_name, "%s %s", obj->name, drinknames[type]);	/* sprintf: OK */
 
-  if (GET_OBJ_RNUM(obj) == NOTHING || obj->name != obj_proto[GET_OBJ_RNUM(obj)].name)
+  if (GET_OBJ_VNUM(obj) == NOTHING || obj->name != obj_proto_by_id(GET_OBJ_VNUM(obj))->name)
     free(obj->name);
 
   obj->name = new_name;

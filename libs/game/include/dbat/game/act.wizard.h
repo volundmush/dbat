@@ -12,7 +12,7 @@ extern "C" {
 // functions
 void search_replace(char *string, const char *find, const char *replace);
 void update_space(void);
-room_rnum find_target_room(struct char_data *ch, char *rawroomstr);
+struct room_data *find_target_room(struct char_data *ch, char *rawroomstr);
 void perform_immort_vis(struct char_data *ch);
 void snoop_check(struct char_data *ch);
 void copyover_check(void);

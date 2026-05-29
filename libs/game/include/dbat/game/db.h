@@ -149,9 +149,7 @@ void auc_save(void);
 void load_config(void);
 
 int	load_char(const char *name, struct char_data *ch);
-void	load_char_pets(struct char_data *ch);
 void	save_char(struct char_data *ch);
-void	save_char_pets(struct char_data *ch);
 void	init_char(struct char_data *ch);
 struct char_data* create_char(void);
 struct char_data *read_mobile(mob_vnum nr, int type);
@@ -192,7 +190,7 @@ extern int xap_objs;
 void strip_string(char *buffer);
 int read_xap_objects(FILE *fl,struct char_data *ch);
 bitvector_t asciiflag_conv(char *flag);
-void reset_zone(zone_rnum zone);
+void reset_zone(struct zone_data *zone);
 
 /* For disabled commands code by Erwin S. Andreasen, */
 /* ported to CircleMUD by Myrdred (Alexei Svitkine)  */

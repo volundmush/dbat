@@ -218,32 +218,6 @@ char *get_name_by_id(long id)
 }
 
 
-void load_follower_from_file(FILE *fl, struct char_data *ch)
-{
-  int nr;
-  char line[MAX_INPUT_LENGTH + 1];
-  struct char_data *newch;
-
-  if (!get_line(fl, line))
-    return;
-
-  if (line[0] != '#' || !line[1])
-    return;
-
-  nr = atoi(line + 1);
-  newch = create_char();
-  newch->nr = real_mobile(nr);
-
-  if (!parse_mobile_from_file(fl, newch)) {
-    free(newch);
-  } else {
-    add_follower(newch, ch);
-    newch->master_id = GET_IDNUM(ch);
-    GET_POS(newch) = POS_STANDING;
-  }
-}
-
-
 /*************************************************************************
 *  stuff related to the save/load player system				 *
 *************************************************************************/
@@ -797,62 +771,6 @@ void kill_ems(char *str)
 	ptr1++;
   }
   *ptr2 = '\0';
-}
-
-
-void save_char_pets(struct char_data *ch)
-{
-  struct follow_type *foll;
-  char fname[40];
-  FILE *fl;
-
-  if (IS_NPC(ch) || GET_PFILEPOS(ch) < 0)
-    return;
-
-  if (!get_filename(fname, sizeof(fname), PET_FILE, GET_NAME(ch)))
-    return;
-
-  if (!(fl = fopen(fname, "w"))) {
-    mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: Couldn't open pet file %s for write", fname);
-    return;
-  }
-
-  for (foll = ch->followers; foll; foll = foll->next) {
-        write_mobile_record(GET_MOB_VNUM(foll->follower), foll->follower, fl);
-  }
-
-  fclose(fl);
-}
-
-
-void load_char_pets(struct char_data *ch)
-{
-  char fname[40];
-  FILE *fl;
-  IDXTYPE load_room;
-  struct follow_type *foll;
-
-  if (IS_NPC(ch) || GET_PFILEPOS(ch) < 0)
-    return;
-
-  if (!get_filename(fname, sizeof(fname), PET_FILE, GET_NAME(ch)))
-    return;
-
-  if (!(fl = fopen(fname, "r")))
-    return;
-
-  while (!feof(fl))
-    load_follower_from_file(fl, ch);
-   /*load_room = IN_ROOM(ch);*/
- 
-  for (foll = ch->followers; foll; foll = foll->next) {
-       load_room = real_room(1);
-  if (load_room == NOWHERE) {
-       load_room = real_room(IN_ROOM(ch));
-  }
-    char_to_room(foll->follower, load_room);
-    act("You are joined by $N.", FALSE, ch, 0, foll->follower, TO_CHAR);
-  }
 }
 
 

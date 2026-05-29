@@ -193,7 +193,7 @@ void update_wait_events(struct room_data *to, struct room_data *from);
 /* from dg_comm.c */
 char *any_one_name(char *argument, char *first_arg);
 void sub_write(char *arg, char_data *ch, int8_t find_invis, int targets);
-void send_to_zone(char *messg, zone_rnum zone);
+void send_to_zone(char *messg, struct zone_data *zone);
 
 /* from dg_misc.c */
 void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
@@ -207,7 +207,7 @@ void script_damage(char_data *vict, int dam);
 int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *namelist[]);
 
 /* from dg_objcmd.c */
-room_rnum obj_room(obj_data *obj);
+struct room_data *obj_room(obj_data *obj);
 
 /* defines for valid_dg_target */
 #define DG_ALLOW_GODS (1<<0)
@@ -216,8 +216,7 @@ room_rnum obj_room(obj_data *obj);
 
 #define UID_CHAR   '}'
 #define GET_TRIG_NAME(t)          ((t)->name)
-#define GET_TRIG_RNUM(t)          ((t)->nr)
-#define GET_TRIG_VNUM(t)	  (trig_index[(t)->nr]->vnum)
+#define GET_TRIG_VNUM(t)	  ((t)->vnum)
 #define GET_TRIG_TYPE(t)          ((t)->trigger_type)
 #define GET_TRIG_DATA_TYPE(t)	  ((t)->data_type)
 #define GET_TRIG_NARG(t)          ((t)->narg)

@@ -409,7 +409,7 @@ struct obj_data *create_money(int amount)
   SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_TAKE);
   GET_OBJ_VAL(obj, VAL_MONEY_SIZE) = amount;
   GET_OBJ_COST(obj) = amount;
-  obj->item_number = NOTHING;
+  obj->vnum = NOTHING;
 
   return (obj);
 }
@@ -484,4 +484,11 @@ struct room_direction_data* obj_exit_dir_3rd(struct obj_data *obj, int dir) {
     }
 
     return dest->dir_option[dir];
+}
+
+
+bool obj_planet_zenith(struct obj_data *obj) {
+    room_vnum v = obj_room_vnum_get(obj);
+    if(v == NOWHERE) return false;
+    return ((v >= 3400 && v <= 3599) || (v >= 62900 && v <= 62999) || (v == 19600));
 }

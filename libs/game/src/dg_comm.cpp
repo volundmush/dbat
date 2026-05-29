@@ -200,7 +200,7 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
 
 
 
-void send_to_zone(char *messg, zone_rnum zone)
+void send_to_zone(char *messg, struct zone_data *zone)
 {
   struct descriptor_data *i;
 
@@ -209,12 +209,12 @@ void send_to_zone(char *messg, zone_rnum zone)
 
   for (i = descriptor_list; i; i = i->next)
     if (!i->connected && i->character && AWAKE(i->character) &&
-        (IN_ROOM(i->character) != NOWHERE) &&
-        (char_room_get(i->character)->zone == zone))
+        (char_room_get(i->character) != NULL) &&
+        (char_zone_get(i->character) == zone))
       write_to_output(i, "%s", messg);
 }
 
-void fly_zone(zone_rnum zone, char *messg, struct char_data *ch)
+void fly_zone(struct zone_data* zone, char *messg, struct char_data *ch)
 {
   struct descriptor_data *i;
 
@@ -222,7 +222,7 @@ void fly_zone(zone_rnum zone, char *messg, struct char_data *ch)
     return;
 
   for (i = descriptor_list; i; i = i->next) {
-    if (!i->connected && i->character && AWAKE(i->character) && OUTSIDE(i->character) && (IN_ROOM(i->character) != NOWHERE) && (char_room_get(i->character)->zone == zone) && i->character != ch) {
+    if (!i->connected && i->character && AWAKE(i->character) && OUTSIDE(i->character) && (char_room_get(i->character) != NULL) && (char_zone_get(i->character) == zone) && i->character != ch) {
        if (PLR_FLAGGED(i->character, PLR_DISGUISED)) {
          write_to_output(i, "A disguised figure %s", messg);
        } else {
@@ -265,7 +265,7 @@ void send_to_sense(int type, char *messg, struct char_data *ch)
     if (IS_ANDROID(ch)) {
      continue;
     }
-    if (IN_ROOM(ch) == IN_ROOM(tch)) {
+    if (char_room_get(ch) == char_room_get(tch)) {
        continue;
     } else if (GET_HIT(ch) < (GET_HIT(tch) * 0.001) + 1) {
        continue;
@@ -360,7 +360,7 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type)
     if ((((char_room_get(ch)->zone != char_room_get(tch)->zone) && type == 0) || !AWAKE(tch))) {
       continue;
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SHIP)) {
+    if ((char_room_get(ch) && room_flagged(char_room_get(ch), ROOM_SHIP))) {
       continue;
     }
     if (GET_INVIS_LEV(ch) > GET_ADMLEVEL(tch)) {
@@ -372,7 +372,7 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type)
      continue;
     } else if (room_flagged(room, ROOM_EARTH) && !room_flagged(tch_room, ROOM_EARTH)) {
      continue;
-    } else if (PLANET_ZENITH(IN_ROOM(ch)) && !PLANET_ZENITH(IN_ROOM(tch))) {
+    } else if (char_planet_zenith(ch) && !char_planet_zenith(tch)) {
      continue;
     } else if (room_flagged(room, ROOM_FRIGID) && !room_flagged(tch_room, ROOM_FRIGID)) {
      continue;
@@ -397,7 +397,7 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type)
     }
     if (!obj) {
      continue;
-    } else if (IN_ROOM(ch) == IN_ROOM(tch)) {
+    } else if (char_room_get(ch) == char_room_get(tch)) {
      continue;
     } else if (type == 0) {
         if (num == 1) {
@@ -483,7 +483,7 @@ void send_to_worlds(struct char_data *ch)
      send_to_char(i->character, "%s", message);
     } else if (room_flagged(iroom, ROOM_VEGETA) && room_flagged(room, ROOM_VEGETA)) {
      send_to_char(i->character, "%s", message);
-    } else if (PLANET_ZENITH(IN_ROOM(i->character)) && PLANET_ZENITH(IN_ROOM(ch))) {
+    } else if (char_planet_zenith(i->character) && char_planet_zenith(ch)) {
      send_to_char(i->character, "%s", message);
     } else if (room_flagged(iroom, ROOM_NAMEK) && room_flagged(room, ROOM_NAMEK)) {
      send_to_char(i->character, "%s", message);

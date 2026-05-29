@@ -96,10 +96,10 @@ void resurrect(char_data *ch, int mode) {
     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_PDEATH);
     char_from_room(ch);
     if (GET_DROOM(ch) != NOWHERE && GET_DROOM(ch) != 0 && GET_DROOM(ch) != 1) {
-        char_to_room(ch, real_room(GET_DROOM(ch)));
+        char_to_room(ch, room_by_id(GET_DROOM(ch)));
     }
     else {
-        char_to_room(ch, real_room(sensei_start_room(ch->chclass)));
+        char_to_room(ch, room_by_id(sensei_start_room(ch->chclass)));
     }
     look_at_room(char_room_get(ch), ch, 0);
 
@@ -166,13 +166,13 @@ void ghostify(char_data *ch) {
 
 void teleport_to(char_data *ch, IDXTYPE rnum) {
     char_from_room(ch);
-    char_to_room(ch, real_room(rnum));
+    char_to_room(ch, room_by_id(rnum));
     look_at_room(char_room_get(ch), ch, 0);
     update_pos(ch);
 }
 
 bool in_room_range(char_data *ch, IDXTYPE low_rnum, IDXTYPE high_rnum) {
-    return GET_ROOM_VNUM(IN_ROOM(ch)) >= low_rnum && GET_ROOM_VNUM(IN_ROOM(ch)) <= high_rnum;
+    return char_room_vnum_get(ch) >= low_rnum && char_room_vnum_get(ch) <= high_rnum;
 }
 
 bool in_past(char_data *ch) {
@@ -2443,7 +2443,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict)
   skill = GET_SKILL(ch, SKILL_PURSUIT);
  } else if (IS_NPC(ch) && !MOB_FLAGGED(ch, MOB_SENTINEL)) {
   skill = GET_LEVEL(ch);
-  if (ROOM_FLAGGED(IN_ROOM(vict), ROOM_NOMOB))
+  if ((char_room_get(vict) && room_flagged(char_room_get(vict), ROOM_NOMOB)))
    skill = -1;
  } else {
   skill = -1;
@@ -2456,10 +2456,10 @@ int roll_pursue(struct char_data *ch, struct char_data *vict)
  }
 
  if (skill > perc) {
-  int inroom = GET_ROOM_VNUM(IN_ROOM(ch));
+  int inroom = char_room_vnum_get(ch);
   act("@C$n@R pursues after the fleeing @c$N@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);  
   char_from_room(ch);
-  char_to_room(ch, IN_ROOM(vict));
+  char_to_room(ch, char_room_get(vict));
   act("@GYou pursue right after @c$N@G!@n", TRUE, ch, 0, vict, TO_CHAR);
   act("@C$n@R pursues after you!@n", TRUE, ch, 0, vict, TO_VICT);
   act("@C$n@R pursues after the fleeing @c$N@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -2469,12 +2469,12 @@ int roll_pursue(struct char_data *ch, struct char_data *vict)
   if (ch->followers) {
    for (k = ch->followers; k; k = next) {
     next = k->next;
-    if ((GET_ROOM_VNUM(IN_ROOM(k->follower)) == inroom) && (GET_POS(k->follower) >= POS_STANDING) && (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(k->follower, AFF_GROUP)))) {
+    if ((char_room_vnum_get(k->follower) == inroom) && (GET_POS(k->follower) >= POS_STANDING) && (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(k->follower, AFF_GROUP)))) {
      act("You follow $N.", TRUE, k->follower, 0, ch, TO_CHAR);
      act("$n follows after $N.", TRUE, k->follower, 0, ch, TO_NOTVICT);
      act("$n follows after you.", TRUE, k->follower, 0, ch, TO_VICT);
      char_from_room(k->follower);
-     char_to_room(k->follower, IN_ROOM(ch));
+     char_to_room(k->follower, char_room_get(ch));
     }
    }
   }
@@ -2498,10 +2498,9 @@ char *sense_location(struct char_data *ch)
 
 	char *message;
     CREATE(message, char, MAX_INPUT_LENGTH);
-	int roomnum = GET_ROOM_VNUM(IN_ROOM(ch)), num = 0;
-	if ((num = real_zone_by_thing(roomnum)) != NOWHERE) {
-		num = real_zone_by_thing(roomnum);
-	}
+	int roomnum = char_room_vnum_get(ch), num = 0;
+    auto zone = char_zone_get(ch);
+	num = zone->number;
 
 	switch (num) {
 	case 2:
@@ -2926,7 +2925,7 @@ void reveal_hiding(struct char_data *ch, int type)
    if (tch == ch)
     continue;
 
-   if (IN_ROOM(tch) != IN_ROOM(ch))
+   if (char_room_get(tch) != char_room_get(ch))
     continue;
   
    if (GET_SKILL(tch, SKILL_SPOT) + rand1 >= GET_SKILL(ch, SKILL_HIDE) + rand2) {
@@ -2950,7 +2949,7 @@ void reveal_hiding(struct char_data *ch, int type)
    if (tch == ch)
     continue;
 
-   if (IN_ROOM(tch) != IN_ROOM(ch))
+   if (char_room_get(tch) != char_room_get(ch))
     continue;
 
    if (GET_SKILL(tch, SKILL_LISTEN) > axion_dice(0)) {
@@ -3639,7 +3638,7 @@ int planet_check(struct char_data *ch, struct char_data *vict)
       }
     }
      if (!success) {
-      success = PLANET_ZENITH(IN_ROOM(ch)) && PLANET_ZENITH(IN_ROOM(vict));
+      success = char_planet_zenith(ch) && char_planet_zenith(vict);
      }
   }
   return (success);
@@ -3935,7 +3934,7 @@ void add_follower(struct char_data *ch, struct char_data *leader)
   leader->followers = k;
 
   act("You now follow $N.", FALSE, ch, 0, leader, TO_CHAR);
-  if (IN_ROOM(ch) != NOWHERE && IN_ROOM(leader) != NOWHERE && CAN_SEE(leader, ch)) {
+  if (char_room_get(ch) != NULL && char_room_get(leader) != NULL && CAN_SEE(leader, ch)) {
     act("$n starts following you.", TRUE, ch, 0, leader, TO_VICT);  
   act("\r\n$n starts to follow $N.", TRUE, ch, 0, leader, TO_NOTVICT);
   }
@@ -5000,7 +4999,7 @@ bool char_ether_stream(struct char_data *ch) {
     for(auto flag : {ROOM_EARTH, ROOM_AETHER, ROOM_NAMEK}) {
         if(room_flagged(room, flag)) return true;
     }
-    if(PLANET_ZENITH(IN_ROOM(ch))) return true;
+    if(char_planet_zenith(ch)) return true;
     return false;
 }
 
@@ -5013,4 +5012,11 @@ bool char_has_moon(struct char_data *ch) {
         if(room_flagged(room, flag)) return true;
     }
     return false;
+}
+
+
+bool char_planet_zenith(struct char_data *ch) {
+    room_vnum v = char_room_vnum_get(ch);
+    if(v == NOWHERE) return false;
+    return ((v >= 3400 && v <= 3599) || (v >= 62900 && v <= 62999) || (v == 19600));
 }

@@ -14,6 +14,8 @@ struct room_direction_data* obj_exit_dir(struct obj_data *obj, int dir);
 struct room_direction_data* obj_exit_dir_2nd(struct obj_data *obj, int dir);
 struct room_direction_data* obj_exit_dir_3rd(struct obj_data *obj, int dir);
 
+bool obj_planet_zenith(struct obj_data *obj);
+
 #ifdef __cplusplus
 }
 #endif

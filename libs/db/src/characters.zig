@@ -4,22 +4,31 @@ const std = @import("std");
 const IdSet = std.AutoHashMap(i64, void);
 const ListSet = std.StringHashMap(void);
 const CharCallback = *const fn (*cdb.char_data) callconv(.c) void;
+const MobProtoEntry = struct {
+    proto: ?*cdb.char_data = null,
+    special: cdb.SpecialFunc = null,
+    count: usize = 0,
+};
+const MobProtoMap = std.AutoHashMap(cdb.mob_vnum, MobProtoEntry);
 
 var allocator: std.mem.Allocator = undefined;
 var chars_by_id: std.AutoHashMap(i64, *cdb.char_data) = undefined;
 var subscriptions_by_list: std.StringHashMap(IdSet) = undefined;
 var lists_by_id: std.AutoHashMap(i64, ListSet) = undefined;
+var mob_proto_map: MobProtoMap = undefined;
 
 pub fn init(init_allocator: std.mem.Allocator) void {
     allocator = init_allocator;
     chars_by_id = std.AutoHashMap(i64, *cdb.char_data).init(allocator);
     subscriptions_by_list = std.StringHashMap(IdSet).init(allocator);
     lists_by_id = std.AutoHashMap(i64, ListSet).init(allocator);
+    mob_proto_map = MobProtoMap.init(allocator);
 }
 
 pub fn deinit() void {
     deinitSubscriptions();
     chars_by_id.deinit();
+    mob_proto_map.deinit();
 }
 
 pub export fn char_by_id(id: i64) ?*cdb.char_data {
@@ -110,6 +119,109 @@ pub export fn char_for_each(list_name: ?[*:0]const u8, callback: ?CharCallback) 
         if (char_by_id(id_ptr.*)) |ch| {
             cb(ch);
         }
+    }
+}
+
+const MobProtoIterator = struct {
+    iter: MobProtoMap.Iterator,
+};
+
+pub export fn mob_proto_iterator_create() ?*anyopaque {
+    const iterator = allocator.create(MobProtoIterator) catch return null;
+    iterator.* = .{ .iter = mob_proto_map.iterator() };
+    return iterator;
+}
+
+pub export fn mob_proto_next(iterator_ptr: ?*anyopaque) ?*cdb.char_data {
+    const iterator: *MobProtoIterator = @ptrCast(@alignCast(iterator_ptr orelse return null));
+    while (iterator.iter.next()) |entry| {
+        if (entry.value_ptr.*.proto) |ptr| {
+            return ptr;
+        }
+    }
+    return null;
+}
+
+pub export fn mob_proto_iterator_free(iterator_ptr: ?*anyopaque) void {
+    const iterator = iterator_ptr orelse return;
+    allocator.destroy(@as(*MobProtoIterator, @ptrCast(@alignCast(iterator))));
+}
+
+pub export fn mob_proto_get(vnum: cdb.mob_vnum) ?*cdb.char_data {
+    return if (mob_proto_map.get(vnum)) |entry| entry.proto else null;
+}
+
+pub export fn mob_proto_count() usize {
+    var total: usize = 0;
+    var it = mob_proto_map.valueIterator();
+    while (it.next()) |entry| {
+        if (entry.*.proto != null) total += 1;
+    }
+    return total;
+}
+
+pub export fn mob_proto_put(vnum: cdb.mob_vnum, mob: ?*cdb.char_data) void {
+    if (mob) |ptr| {
+        const entry = mob_proto_map.getOrPut(vnum) catch return;
+        if (!entry.found_existing) {
+            entry.value_ptr.* = .{ .proto = ptr };
+            return;
+        }
+        entry.value_ptr.*.proto = ptr;
+        return;
+    }
+
+    if (mob_proto_map.getPtr(vnum)) |entry| {
+        entry.proto = null;
+        entry.special = null;
+        if (entry.count == 0) {
+            _ = mob_proto_map.remove(vnum);
+        }
+    }
+}
+
+pub export fn mob_proto_delete(vnum: cdb.mob_vnum) void {
+    if (mob_proto_map.getPtr(vnum)) |entry| {
+        entry.proto = null;
+        entry.special = null;
+        if (entry.count == 0) {
+            _ = mob_proto_map.remove(vnum);
+        }
+    }
+}
+
+pub export fn mob_proto_special_get(vnum: cdb.mob_vnum) cdb.SpecialFunc {
+    return if (mob_proto_map.get(vnum)) |entry| entry.special else null;
+}
+
+pub export fn mob_proto_special_set(vnum: cdb.mob_vnum, func: cdb.SpecialFunc) void {
+    const entry = mob_proto_map.getOrPut(vnum) catch return;
+    if (!entry.found_existing) {
+        entry.value_ptr.* = .{ .special = func };
+        return;
+    }
+    entry.value_ptr.*.special = func;
+}
+
+pub export fn mob_proto_count_increment(vnum: cdb.mob_vnum) void {
+    const entry = mob_proto_map.getOrPut(vnum) catch return;
+    if (!entry.found_existing) {
+        entry.value_ptr.* = .{ .count = 1 };
+        return;
+    }
+    entry.value_ptr.*.count += 1;
+}
+
+pub export fn mob_proto_count_get(vnum: cdb.mob_vnum) usize {
+    return if (mob_proto_map.get(vnum)) |entry| entry.count else 0;
+}
+
+pub export fn mob_proto_count_decrement(vnum: cdb.mob_vnum) void {
+    const entry = mob_proto_map.getPtr(vnum) orelse return;
+    if (entry.count == 0) return;
+    entry.count -= 1;
+    if (entry.count == 0 and (entry.proto == null and entry.special == null)) {
+        _ = mob_proto_map.remove(vnum);
     }
 }
 

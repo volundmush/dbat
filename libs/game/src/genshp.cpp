@@ -338,81 +338,58 @@ void modify_string(char **str, char *new_s)
 
 int add_shop(struct shop_data *nshp)
 {
-  shop_rnum rshop;
+  struct shop_data *shop;
   int found = 0;
-  zone_rnum rznum = real_zone_by_thing(S_NUM(nshp));
+  struct zone_data *zone = zone_by_id(virtual_zone_by_thing(S_NUM(nshp)));
 
   /*
    * The shop already exists, just update it.
    */
-  if ((rshop = real_shop(S_NUM(nshp))) != NOWHERE) {
+  if (shop = shop_by_id(nshp->vnum)) {
    /* free old strings. They're not used in any other place -- Welcor */
-   copy_shop(&shop_index[rshop], nshp, TRUE);
-    if (rznum != NOWHERE)
-      add_to_save_list(zone_table[rznum].number, SL_SHP);
+   copy_shop(shop, nshp, TRUE);
+    if (zone)
+      add_to_save_list(zone->number, SL_SHP);
     else
       mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Cannot determine shop zone.");
-    return rshop;
+    return shop->vnum;
   }
 
-  top_shop++;
-  RECREATE(shop_index, struct shop_data, top_shop + 1);
+  CREATE(shop, struct shop_data, 1);
+  copy_shop(shop, nshp, FALSE);
+  shop_put(shop->vnum, shop);
 
-  for (rshop = top_shop; rshop > 0; rshop--) {
-    if (nshp->vnum > SHOP_NUM(rshop - 1)) {
-      found = rshop;
-
-      /* Make a "nofree" variant and remove these later. */
-      shop_index[rshop].in_room = NULL;
-      shop_index[rshop].producing = NULL;
-      shop_index[rshop].type = NULL;
-      /* don't free old strings - they're still in use -- Welcor */
-      copy_shop(&shop_index[rshop], nshp, FALSE);
-      break;
-    }
-    shop_index[rshop] = shop_index[rshop - 1];
-  }
-
-  if (!found) {
-    /* Make a "nofree" variant and remove these later. */
-    shop_index[rshop].in_room = NULL;
-    shop_index[rshop].producing = NULL;
-    shop_index[rshop].type = NULL;
-    /* don't free old strings - they're still in use -- Welcor */
-    copy_shop(&shop_index[0], nshp, FALSE);
-  }
-
-  if (rznum != NOWHERE)
-    add_to_save_list(zone_table[rznum].number, SL_SHP);
+  if (zone)
+    add_to_save_list(zone->number, SL_SHP);
   else
     mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Cannot determine shop zone.");
 
-  return rshop;
+  return shop->vnum;
 }
 
 /*-------------------------------------------------------------------*/
 
-int save_shops(zone_rnum zone_num)
+int save_shops(struct zone_data *zone)
 {
   int i, j, rshop;
   FILE *shop_file;
   char fname[128], oldname[128];
   struct shop_data *shop;
 
-#if CIRCLE_UNSIGNED_INDEX
-  if (zone_num == NOWHERE || zone_num > top_of_zone_table) {
-#else
-  if (zone_num < 0 || zone_num > top_of_zone_table) {
-#endif
-    log("SYSERR: GenOLC: save_shops: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
+  if (!zone)
+  {
+    log("SYSERR: GenOLC: save_shops: Invalid zone pointer.");
     return FALSE;
   }
 
-  snprintf(fname, sizeof(fname), "%s%d.new", SHP_PREFIX, zone_table[zone_num].number);
-  if (!(shop_file = fopen(fname, "w"))) {
+  snprintf(fname, sizeof(fname), "%s%d.new", SHP_PREFIX, zone->number);
+  if (!(shop_file = fopen(fname, "w")))
+  {
     mudlog(BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC: Cannot open shop file!");
     return FALSE;
-  } else if (fprintf(shop_file, "CircleMUD v3.0 Shop File~\n") < 0) {
+  }
+  else if (fprintf(shop_file, "CircleMUD v3.0 Shop File~\n") < 0)
+  {
     mudlog(BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC: Cannot write to shop file!");
     fclose(shop_file);
     return FALSE;
@@ -420,93 +397,95 @@ int save_shops(zone_rnum zone_num)
   /*
    * Search database for shops in this zone.
    */
-  for (i = genolc_zone_bottom(zone_num); i <= zone_table[zone_num].top; i++) {
-    if ((rshop = real_shop(i)) != NOWHERE) {
-      fprintf(shop_file, "#%d~\n", i);
-      shop = shop_index + rshop;
+  for (i = zone->bot; i <= zone->top; i++)
+  {
+    auto shop = shop_by_id(i);
+    if (!shop)
+      continue;
+    fprintf(shop_file, "#%d~\n", i);
 
-      /*
-       * Save the products.
-       */
-      for (j = 0; S_PRODUCT(shop, j) != NOTHING; j++)
-	fprintf(shop_file, "%d\n", obj_index[S_PRODUCT(shop, j)].vnum);
-      fprintf(shop_file, "-1\n");
+    /*
+     * Save the products.
+     */
+    for (j = 0; S_PRODUCT(shop, j) != NOTHING; j++)
+      fprintf(shop_file, "%d\n", S_PRODUCT(shop, j));
+    fprintf(shop_file, "-1\n");
 
-      /*
-       * Save the rates.
-       */
-      fprintf(shop_file, "%1.2f\n"
-                         "%1.2f\n",
-                         S_BUYPROFIT(shop),
-                         S_SELLPROFIT(shop));
+    /*
+     * Save the rates.
+     */
+    fprintf(shop_file, "%1.2f\n"
+                       "%1.2f\n",
+            S_BUYPROFIT(shop),
+            S_SELLPROFIT(shop));
 
-      /*
-       * Save the buy types and namelists.
-       */
-      for (j = 0;S_BUYTYPE(shop, j) != NOTHING; j++) 
-        fprintf(shop_file, "%d%s\n", 
-                S_BUYTYPE(shop, j),
-		S_BUYWORD(shop, j) ? S_BUYWORD(shop, j) : "");
-      fprintf(shop_file, "-1\n");
+    /*
+     * Save the buy types and namelists.
+     */
+    for (j = 0; S_BUYTYPE(shop, j) != NOTHING; j++)
+      fprintf(shop_file, "%d%s\n",
+              S_BUYTYPE(shop, j),
+              S_BUYWORD(shop, j) ? S_BUYWORD(shop, j) : "");
+    fprintf(shop_file, "-1\n");
 
-/* Not allowed to use Ascii in shopfile anymore (bpl21)
-      sprintascii(buf1, S_BITVECTOR(shop));
-      sprintascii(buf2, S_NOTRADE(shop));
-*/
+    /* Not allowed to use Ascii in shopfile anymore (bpl21)
+          sprintascii(buf1, S_BITVECTOR(shop));
+          sprintascii(buf2, S_NOTRADE(shop));
+    */
 
-      /*
-       * Save messages'n'stuff.
-       * Added some small'n'silly defaults as sanity checks.
-       */
-      fprintf(shop_file,
-	      "%s~\n"
-	      "%s~\n"
-	      "%s~\n"
-	      "%s~\n"
-	      "%s~\n"
-	      "%s~\n"
-	      "%s~\n"
-	      "%d\n"
-	      "%d\n"
-	      "%d\n",
-	      S_NOITEM1(shop) ? S_NOITEM1(shop) : "%s Ke?!",
-	      S_NOITEM2(shop) ? S_NOITEM2(shop) : "%s Ke?!",
-	      S_NOBUY(shop) ? S_NOBUY(shop) : "%s Ke?!",
-	      S_NOCASH1(shop) ? S_NOCASH1(shop) : "%s Ke?!",
-	      S_NOCASH2(shop) ? S_NOCASH2(shop) : "%s Ke?!",
-	      S_BUY(shop) ? S_BUY(shop) : "%s Ke?! %d?",
-	      S_SELL(shop) ? S_SELL(shop) : "%s Ke?! %d?",
-	      S_BROKE_TEMPER(shop),
-	      S_BITVECTOR(shop),
-	      S_KEEPER(shop) == NOBODY ? -1 : mob_index[S_KEEPER(shop)].vnum
-	      );
-      for (j = 0; j < SW_ARRAY_MAX; j++)
-        fprintf(shop_file, "%s%d", j ? " " : "", S_NOTRADE(shop)[j]);
-      fprintf(shop_file, "\n");
+    /*
+     * Save messages'n'stuff.
+     * Added some small'n'silly defaults as sanity checks.
+     */
+    auto keeper = mob_proto_by_id(S_KEEPER(shop));
+    fprintf(shop_file,
+            "%s~\n"
+            "%s~\n"
+            "%s~\n"
+            "%s~\n"
+            "%s~\n"
+            "%s~\n"
+            "%s~\n"
+            "%d\n"
+            "%d\n"
+            "%d\n",
+            S_NOITEM1(shop) ? S_NOITEM1(shop) : "%s Ke?!",
+            S_NOITEM2(shop) ? S_NOITEM2(shop) : "%s Ke?!",
+            S_NOBUY(shop) ? S_NOBUY(shop) : "%s Ke?!",
+            S_NOCASH1(shop) ? S_NOCASH1(shop) : "%s Ke?!",
+            S_NOCASH2(shop) ? S_NOCASH2(shop) : "%s Ke?!",
+            S_BUY(shop) ? S_BUY(shop) : "%s Ke?! %d?",
+            S_SELL(shop) ? S_SELL(shop) : "%s Ke?! %d?",
+            S_BROKE_TEMPER(shop),
+            S_BITVECTOR(shop),
+            keeper ? keeper->vnum : -1);
+    for (j = 0; j < SW_ARRAY_MAX; j++)
+      fprintf(shop_file, "%s%d", j ? " " : "", S_NOTRADE(shop)[j]);
+    fprintf(shop_file, "\n");
 
-      /*
-       * Save the rooms.
-       */
-      for (j = 0;S_ROOM(shop, j) != NOWHERE; j++) 
-        fprintf(shop_file, "%d\n", S_ROOM(shop, j));
-      fprintf(shop_file, "-1\n");
+    /*
+     * Save the rooms.
+     */
+    for (j = 0; S_ROOM(shop, j) != NOWHERE; j++)
+      fprintf(shop_file, "%d\n", S_ROOM(shop, j));
+    fprintf(shop_file, "-1\n");
 
-      /*
-       * Save open/closing times 
-       */
-      fprintf(shop_file, "%d\n%d\n%d\n%d\n", S_OPEN1(shop), S_CLOSE1(shop),
-		S_OPEN2(shop), S_CLOSE2(shop));
-    }
+    /*
+     * Save open/closing times
+     */
+    fprintf(shop_file, "%d\n%d\n%d\n%d\n", S_OPEN1(shop), S_CLOSE1(shop),
+            S_OPEN2(shop), S_CLOSE2(shop));
   }
   fprintf(shop_file, "$~\n");
   fclose(shop_file);
-  snprintf(oldname, sizeof(oldname), "%s%d.shp", SHP_PREFIX, zone_table[zone_num].number);
+  snprintf(oldname, sizeof(oldname), "%s%d.shp", SHP_PREFIX, zone->number);
   remove(oldname);
   rename(fname, oldname);
 
-  if (in_save_list(zone_table[zone_num].number, SL_SHP)) {
-    remove_from_save_list(zone_table[zone_num].number, SL_SHP);
-    create_world_index(zone_table[zone_num].number, "shp");
+  if (in_save_list(zone->number, SL_SHP))
+  {
+    remove_from_save_list(zone->number, SL_SHP);
+    create_world_index(zone->number, "shp");
     log("GenOLC: save_shops: Saving shops '%s'", oldname);
   }
   return TRUE;

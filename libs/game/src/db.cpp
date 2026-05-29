@@ -11,7 +11,6 @@
 #include "dbat/db/consts/maximums.h"
 
 #include "dbat/db/help.h"
-#include "dbat/db/htree.h"
 #include "dbat/game/utils.h"
 
 #include "dbat/game/fileop.h"
@@ -42,7 +41,6 @@
 #include "dbat/game/comm.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/interpreter.h"
-#include "dbat/db/htree.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/handler.h"
@@ -59,6 +57,8 @@
 #include "dbat/game/races_plus.h"
 #include "dbat/game/spell_parser.h"
 #include "dbat/game/genobj.h"
+
+#include "dbat/db/iterate.hpp"
 
 #include <errno.h>
 #include <stdlib.h>
@@ -118,7 +118,7 @@ static void dragon_level(struct char_data *ch);
 static int check_bitvector_names(bitvector_t bits, size_t namecount, const char *whatami, const char *whatbits);
 static int check_object_spell_number(struct obj_data *obj, int val);
 static int check_object_level(struct obj_data *obj, int val);
-static void setup_dir(FILE *fl, int room, int dir);
+static void setup_dir(FILE *fl, struct room_data *room, int dir);
 static void discrete_load(FILE *fl, int mode, char *filename);
 static int check_object(struct obj_data *);
 static void parse_room(FILE *fl, int virtual_nr);
@@ -136,9 +136,7 @@ static void parse_espec(char *buf, struct char_data *ch, int nr);
 static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr);
 static void get_one_line(FILE *fl, char *buf);
 static void check_start_rooms(void);
-static void renum_world(void);
-static void renum_zone_table(void);
-static void log_zone_error(zone_rnum zone, int cmd_no, const char *message);
+static void log_zone_error(struct zone_data *zone, int cmd_no, const char *message);
 static void reset_time(void);
 static int suntzu_armor_convert(struct obj_data *obj);
 static int suntzu_weapon_convert(int wp_type);
@@ -358,7 +356,7 @@ static int suntzu_armor_convert(struct obj_data *obj)
     conv = 1;
   }
   log("Converted armor #%d [%s] armor=%d i=%d maxdex=%d acheck=%d sfail=%d",
-      obj_index[obj - obj_proto].vnum, GET_OBJ_SHORT(obj), GET_OBJ_VAL(obj, 0),
+      obj->vnum, GET_OBJ_SHORT(obj), GET_OBJ_VAL(obj, 0),
       i, GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 3), GET_OBJ_VAL(obj, 6));
   return conv;
 }
@@ -566,9 +564,6 @@ void boot_world(void)
   log("Loading rooms.");
   index_boot(DB_BOOT_WLD);
 
-  log("Renumbering rooms.");
-  renum_world();
-
   log("Checking start rooms.");
   check_start_rooms();
 
@@ -578,8 +573,6 @@ void boot_world(void)
   log("Loading objs and generating index.");
   index_boot(DB_BOOT_OBJ);
 
-  log("Renumbering zone table.");
-  renum_zone_table();
 
   log("Loading disabled commands list...");
   load_disabled();
@@ -642,8 +635,7 @@ void destroy_db(void)
   }
 
   /* Rooms */
-  for (cnt = 0; cnt <= top_of_world; cnt++) {
-    struct room_data *room = &world[cnt];
+  room_iterate([&](auto room) {
     if (room->name)
       free(room->name);
     if (room->description)
@@ -667,14 +659,11 @@ void destroy_db(void)
         free(ex->keyword);
       free(ex);
     }
-  }
-  free(world);
-  top_of_world = 0;
-  htree_free(room_htree);
+    return true;
+  });
 
   /* Objects */
-  for (cnt = 0; cnt <= top_of_objt; cnt++) {
-    struct obj_data *obj = &obj_proto[cnt];
+  obj_proto_iterate ([&](auto obj) {
     if (obj->name)
       free(obj->name);
     if (obj->description)
@@ -688,14 +677,14 @@ void destroy_db(void)
 
     /* free script proto list */
     free_proto_script(obj, OBJ_TRIGGER);
-  }
-  free(obj_proto);
-  free(obj_index);
-  htree_free(obj_htree);
+    obj_proto_delete(obj->vnum);
+    free(obj);
+    return true;
+  });
 
   /* Mobiles */
-  for (cnt = 0; cnt <= top_of_mobt; cnt++) {
-    struct char_data *mob = &mob_proto[cnt];
+  mob_proto_iterate([&](auto mob) {
+    mob_vnum v = char_proto_id_get(mob);
     if (mob->name)
       free(mob->name);
     if (mob->title)
@@ -712,10 +701,10 @@ void destroy_db(void)
 
     while (mob->affected)
       affect_remove(mob, mob->affected);
-  }
-  free(mob_proto);
-  free(mob_index);
-  htree_free(mob_htree);
+    free(mob);
+    mob_proto_delete(v);
+    return true;
+  });
 
   /* Shops */
   destroy_shops();
@@ -734,30 +723,28 @@ void destroy_db(void)
     }
   }
 
-#define THIS_CMD zone_table[cnt].cmd[itr]
-
-  for (cnt = 0; cnt <= top_of_zone_table; cnt++) {
-    struct zone_data *zone = &zone_table[cnt];
+  zone_iterate ([&](auto zone) {
     if (zone->name)
       free(zone->name);
     if (zone->builders)
       free(zone->builders);
     if (zone->cmd) {
        /* first see if any vars were defined in this zone */
-       for (itr = 0;THIS_CMD.command != 'S';itr++)
-         if (THIS_CMD.command == 'V') {
-           if (THIS_CMD.sarg1)
-             free(THIS_CMD.sarg1);
-           if (THIS_CMD.sarg2)
-             free(THIS_CMD.sarg2);
+       for (itr = 0;zone->cmd[itr].command != 'S';itr++)
+         if (zone->cmd[itr].command == 'V') {
+           if (zone->cmd[itr].sarg1)
+             free(zone->cmd[itr].sarg1);
+           if (zone->cmd[itr].sarg2)
+             free(zone->cmd[itr].sarg2);
          }
        /* then free the command list */
       free(zone->cmd);
     }
-  }
-  free(zone_table);
+    zone_delete(zone->number);
+    free(zone);
+    return true;
+  });
 
-#undef THIS_CMD
 
   /* zone table reset queue */
   if (reset_q.head) {
@@ -770,28 +757,25 @@ void destroy_db(void)
   }
 
   /* Triggers */
-  for (cnt=0; cnt < top_of_trigt; cnt++) {
-    struct index_data *trigger = trig_index[cnt];
-    struct trig_data *proto = trig_index[cnt]->proto;
-    if (proto) {
-      /* make sure to nuke the command list (memory leak) */
-      /* free_trigger() doesn't free the command list */
-      if (proto->cmdlist) {
-        struct cmdlist_element *i, *j;
-        i = proto->cmdlist;
-        while (i) {
-          j = i->next;
-          if (i->cmd)
-            free(i->cmd);
-          free(i);
-          i = j;
-        }
+  trig_proto_iterate ([&](auto trig) {
+    trig_vnum vnum = trig->vnum;
+    /* make sure to nuke the command list (memory leak) */
+    /* free_trigger() doesn't free the command list */
+    if (trig->cmdlist) {
+      struct cmdlist_element *i, *j;
+      i = trig->cmdlist;
+      while (i) {
+        j = i->next;
+        if (i->cmd)
+          free(i->cmd);
+        free(i);
+        i = j;
       }
-      free_trigger(proto);
     }
-    free(trigger);
-  }
-  free(trig_index);
+    trig_proto_delete(vnum);
+    free_trigger(trig);
+    return true;
+  });
 
   /* Events */
   event_free_all();
@@ -802,8 +786,6 @@ void destroy_db(void)
   free_feats();
 
   free_obj_unique_hash();
-
-  htree_shutdown();
 
   log("Freeing Assemblies.");
   free_assemblies();
@@ -862,9 +844,6 @@ static void load_assets(void) {
     log("Loading JSON exits.");
     json_import_or_die("exits", json_import_room_exits("data/assets/exits"));
 
-    log("Renumbering rooms.");
-    renum_world();
-
     log("Checking start rooms.");
     check_start_rooms();
 
@@ -876,9 +855,6 @@ static void load_assets(void) {
 
     log("Loading JSON objs and generating index.");
     json_import_or_die("obj_prototypes", json_import_obj_prototypes("data/assets/obj_prototypes"));
-
-    log("Renumbering zone table.");
-    renum_zone_table();
 
     log("Loading disabled commands list...");
     load_disabled();
@@ -1026,12 +1002,12 @@ void boot_db(void)
     House_boot();
   }
 
-  for (i = 0; i <= top_of_zone_table; i++) {
-    struct zone_data *zone = &zone_table[i];
+  zone_iterate ([&](auto zone) {
     log("Resetting #%d: %s (rooms %d-%d).", zone->number,
 	    zone->name, zone->bot, zone->top);
-    reset_zone(i);
-  }
+    reset_zone(zone);
+    return true;
+  });
 
   reset_q.head = reset_q.tail = NULL;
 
@@ -1352,29 +1328,20 @@ void index_boot(int mode)
    */
   switch (mode) {
   case DB_BOOT_TRG:
-    CREATE(trig_index, struct index_data *, rec_count);
     break;
   case DB_BOOT_WLD:
-    CREATE(world, struct room_data, rec_count);
     size[0] = sizeof(struct room_data) * rec_count;
     log("   %d rooms, %d bytes.", rec_count, size[0]);
     break;
   case DB_BOOT_MOB:
-    CREATE(mob_proto, struct char_data, rec_count);
-    CREATE(mob_index, struct index_data, rec_count);
-    size[0] = sizeof(struct index_data) * rec_count;
     size[1] = sizeof(struct char_data) * rec_count;
-    log("   %d mobs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
+    log("   %d mobs, %d bytes in prototypes.", rec_count, size[1]);
     break;
   case DB_BOOT_OBJ:
-    CREATE(obj_proto, struct obj_data, rec_count);
-    CREATE(obj_index, struct index_data, rec_count);
-    size[0] = sizeof(struct index_data) * rec_count;
     size[1] = sizeof(struct obj_data) * rec_count;
-    log("   %d objs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
+    log("   %d objs, %d bytes in prototypes.", rec_count, size[1]);
     break;
   case DB_BOOT_ZON:
-    CREATE(zone_table, struct zone_data, rec_count);
     size[0] = sizeof(struct zone_data) * rec_count;
     log("   %d zones, %d bytes.", rec_count, size[0]);
     break;
@@ -1542,7 +1509,7 @@ static bitvector_t asciiflag_conv_aff(char *flag)
 /* load the rooms */
 static void parse_room(FILE *fl, int virtual_nr)
 {
-  static int room_nr = 0, zone = 0;
+  static int zone = 0;
   int t[10], i, retval;
   char line[READ_SIZE], flags[128], flags2[128], flags3[128];
   char flags4[128], buf2[MAX_STRING_LENGTH], buf[128];
@@ -1552,22 +1519,20 @@ static void parse_room(FILE *fl, int virtual_nr)
   /* This really had better fit or there are other problems. */
   snprintf(buf2, sizeof(buf2), "room #%d", virtual_nr);
 
-  zone = real_zone_by_thing(virtual_nr);
+  zone = virtual_zone_by_thing(virtual_nr);
   if(zone == NOWHERE) {
       log("SYSERR: Room #%d is outside of any zone.", virtual_nr);
       exit(1);
   }
 
-  struct room_data *rm = &world[room_nr];
+  struct room_data *rm = NULL;
+  CREATE(rm, struct room_data, 1);
+  room_put(virtual_nr, rm);
 
   rm->zone = zone;
   rm->number = virtual_nr;
   rm->name = fread_string(fl, buf2);
   rm->description = fread_string(fl, buf2);
-
-  if (! room_htree)
-    room_htree = htree_init();
-  htree_add(room_htree, virtual_nr, room_nr);
 
   if (!get_line(fl, line)) {
     log("SYSERR: Expecting roomflags/sector type of room #%d but file ended!",
@@ -1660,7 +1625,7 @@ static void parse_room(FILE *fl, int virtual_nr)
     }
     switch (*line) {
     case 'D':
-      setup_dir(fl, room_nr, atoi(line + 1));
+      setup_dir(fl, rm, atoi(line + 1));
       break;
     case 'E':
       CREATE(new_descr, struct extra_descr_data, 1);
@@ -1691,7 +1656,6 @@ static void parse_room(FILE *fl, int virtual_nr)
         letter = fread_letter(fl);
         ungetc(letter, fl);
       }
-      top_of_world = room_nr++;
       return;
     default:
       log("%s", buf);
@@ -1701,14 +1665,14 @@ static void parse_room(FILE *fl, int virtual_nr)
 }
 
 /* read direction data */
-static void setup_dir(FILE *fl, int room, int dir)
+static void setup_dir(FILE *fl, struct room_data *room, int dir)
 {
   int t[11], retval;
   char line[READ_SIZE], buf2[128];
 
-  struct room_data* rm = &world[room];
+  struct room_data* rm = room;
 
-  snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", GET_ROOM_VNUM(room)+1, dir);
+  snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", room->number, dir);
 
   CREATE(rm->dir_option[dir], struct room_direction_data, 1);
   struct room_direction_data *ex = rm->dir_option[dir];
@@ -1797,112 +1761,9 @@ static void setup_dir(FILE *fl, int room, int dir)
 /* make sure the start rooms exist & resolve their vnums to rnums */
 static void check_start_rooms(void)
 {
-  if ((r_mortal_start_room = real_room(CONFIG_MORTAL_START)) == NOWHERE) {
-    log("SYSERR:  Mortal start room does not exist.  Change mortal_start_room in lib/etc/config.");
-    exit(1);
-  }
-  if ((r_immort_start_room = real_room(CONFIG_IMMORTAL_START)) == NOWHERE) {
-    if (!mini_mud)
-      log("SYSERR:  Warning: Immort start room does not exist.  Change immort_start_room in /lib/etc/config.");
-    r_immort_start_room = r_mortal_start_room;
-  }
-  if ((r_frozen_start_room = real_room(CONFIG_FROZEN_START)) == NOWHERE) {
-    if (!mini_mud)
-      log("SYSERR:  Warning: Frozen start room does not exist.  Change frozen_start_room in /lib/etc/config.");
-    r_frozen_start_room = r_mortal_start_room;
-  }
+
 }
 
-
-/* resolve all vnums into rnums in the world */
-static void renum_world(void)
-{
-  int room, door;
-
-  for (room = 0; room <= top_of_world; room++) {
-    struct room_data *rm = &world[room];
-    for (door = 0; door < NUM_OF_DIRS; door++) {
-      struct room_direction_data *ex = rm->dir_option[door];
-      if(!ex) continue;
-      if (ex->to_room != NOWHERE)
-          ex->to_room = real_room(ex->to_room);
-    }
-        
-  }
-    
-}
-
-#define ZCMD2 zone_table[zone].cmd[cmd_no]
-
-/*
- * "resulve vnums into rnums in the zone reset tables"
- *
- * Or in English: Once all of the zone reset tables have been loaded, we
- * resolve the virtual numbers into real numbers all at once so we don't have
- * to do it repeatedly while the game is running.  This does make adding any
- * room, mobile, or object a little more difficult while the game is running.
- *
- * NOTE 1: Assumes NOWHERE == NOBODY == NOTHING.
- * NOTE 2: Assumes sizeof(room_rnum) >= (sizeof(mob_rnum) and sizeof(obj_rnum))
- */
-static void renum_zone_table(void)
-{
-  int cmd_no;
-  room_rnum a, b, c, olda, oldb, oldc;
-  zone_rnum zone;
-  char buf[128];
-
-  for (zone = 0; zone <= top_of_zone_table; zone++)
-    for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
-      a = b = c = 0;
-      olda = ZCMD2.arg1;
-      oldb = ZCMD2.arg2;
-      oldc = ZCMD2.arg3;
-      switch (ZCMD2.command) {
-      case 'M':
-	a = ZCMD2.arg1 = real_mobile(ZCMD2.arg1);
-	c = ZCMD2.arg3 = real_room(ZCMD2.arg3);
-	break;
-      case 'O':
-	a = ZCMD2.arg1 = real_object(ZCMD2.arg1);
-	if (ZCMD2.arg3 != NOWHERE)
-	  c = ZCMD2.arg3 = real_room(ZCMD2.arg3);
-	break;
-      case 'G':
-	a = ZCMD2.arg1 = real_object(ZCMD2.arg1);
-	break;
-      case 'E':
-	a = ZCMD2.arg1 = real_object(ZCMD2.arg1);
-	break;
-      case 'P':
-	a = ZCMD2.arg1 = real_object(ZCMD2.arg1);
-	c = ZCMD2.arg3 = real_object(ZCMD2.arg3);
-	break;
-      case 'D':
-	a = ZCMD2.arg1 = real_room(ZCMD2.arg1);
-	break;
-      case 'R': /* rem obj from room */
-        a = ZCMD2.arg1 = real_room(ZCMD2.arg1);
-	b = ZCMD2.arg2 = real_object(ZCMD2.arg2);
-        break;
-      case 'T': /* a trigger */
-        b = ZCMD2.arg2 = real_trigger(ZCMD2.arg2);
-        c = ZCMD2.arg3 = real_room(ZCMD2.arg3);
-        break;
-      case 'V': /* trigger variable assignment */
-        b = ZCMD2.arg3 = real_room(ZCMD2.arg3);
-        break;
-      }
-      if (a == NOWHERE || b == NOWHERE || c == NOWHERE) {
-	if (!mini_mud) {
-	  snprintf(buf, sizeof(buf), "Invalid vnum %d, cmd disabled",
-			 a == NOWHERE ? olda : b == NOWHERE ? oldb : oldc);
-	  log_zone_error(zone, cmd_no, buf);
-	}
-	ZCMD2.command = '*';
-      }
-    }
-}
 
 static void mob_autobalance(struct char_data *ch)
 {
@@ -2231,7 +2092,7 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
   char line[READ_SIZE], *tmpptr, letter;
   char f1[128], f2[128], f3[128], f4[128], f5[128], f6[128];
   char f7[128], f8[128], buf2[128];
-  mob_vnum nr = mob_index[ch->nr].vnum;
+  mob_vnum nr = ch->vnum;
  
   /*
    * Mobiles should NEVER use anything in the 'player_specials' structure.
@@ -2380,23 +2241,16 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
 
 static void parse_mobile(FILE *mob_f, int nr)
 {
-  static int i = 0;
 
-  mob_index[i].vnum = nr;
-  mob_index[i].number = 0;
-  mob_index[i].func = NULL;
+  struct char_data *ch = NULL;
+  CREATE(ch, struct char_data, 1);
+  clear_char(ch);
 
-  clear_char(mob_proto + i);
+  ch->vnum = nr;
+  ch->desc = NULL;
 
-  mob_proto[i].nr = i;
-  mob_proto[i].desc = NULL;
-
-  if (parse_mobile_from_file(mob_f, mob_proto + i)) {
-    if (! mob_htree)
-      mob_htree = htree_init();
-    htree_add(mob_htree, nr, i);
-
-    top_of_mobt = i++;
+  if (parse_mobile_from_file(mob_f, ch)) {
+    mob_proto_put(nr, ch);
   } else { /* We used to exit in the file reading code, but now we do it here */
     exit(1);
   }
@@ -2416,17 +2270,13 @@ static char *parse_object(FILE *obj_f, int nr)
   char f9[READ_SIZE], f10[READ_SIZE], f11[READ_SIZE], f12[READ_SIZE];
   struct extra_descr_data *new_descr;
 
-  obj_index[i].vnum = nr;
-  obj_index[i].number = 0;
-  obj_index[i].func = NULL;
+  struct obj_data *proto = NULL;
+  CREATE(proto, struct obj_data, 1);
+  obj_proto_put(nr, proto);
 
-  if (! obj_htree)
-    obj_htree = htree_init();
-  htree_add(obj_htree, nr, i);
-
-  clear_object(obj_proto + i);
-  struct obj_data *proto = &obj_proto[i];
-  proto->item_number = i;
+  clear_object(proto);
+  
+  proto->vnum = nr;
 
   sprintf(buf2, "object #%d", nr);	/* sprintf: OK (for 'buf2 >= 19') */
 
@@ -2632,7 +2482,7 @@ static char *parse_object(FILE *obj_f, int nr)
 
       if (t[0] >= APPLY_UNUSED3 && t[0] <= APPLY_UNUSED4) {
         log("Warning: object #%d (%s) uses deprecated saving throw applies",
-            nr, GET_OBJ_SHORT(obj_proto + i));
+            nr, GET_OBJ_SHORT(proto));
       }
       proto->affected[j].location = t[0];
       proto->affected[j].modifier = t[1];
@@ -2688,7 +2538,6 @@ static char *parse_object(FILE *obj_f, int nr)
         log("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
         REMOVE_BIT_AR(GET_OBJ_PERM(proto), AFF_CHARM);
       }
-      top_of_objt = i;
       check_object(proto);
       i++;
       return (line);
@@ -2700,17 +2549,17 @@ static char *parse_object(FILE *obj_f, int nr)
   return line;
 }
 
-
-#define Z	zone_table[zone]
-
 /* load the zone table and command tables */
 static void load_zones(FILE *fl, char *zonename)
 {
   static zone_rnum zone = 0;
-  int cmd_no, num_of_cmds = 0, line_num = 0, tmp, error, arg_num, version = 1;
+  int cmd_no = 0, num_of_cmds = 0, line_num = 0, tmp, error, arg_num, version = 1;
   char *ptr, buf[READ_SIZE], zname[READ_SIZE], buf2[MAX_STRING_LENGTH];
   int zone_fix = FALSE;
   char t1[80], t2[80], line[MAX_STRING_LENGTH];
+
+  struct zone_data *z;
+  CREATE(z, struct zone_data, 1);
 
   strlcpy(zname, zonename, sizeof(zname));
 
@@ -2728,147 +2577,174 @@ static void load_zones(FILE *fl, char *zonename)
 
   rewind(fl);
 
-  if (num_of_cmds == 0) {
+  if (num_of_cmds == 0)
+  {
     log("SYSERR: %s is empty!", zname);
     exit(1);
-  } else
-    CREATE(Z.cmd, struct reset_com, num_of_cmds);
+  }
+  else
+    CREATE(z->cmd, struct reset_com, num_of_cmds);
 
   line_num += get_line(fl, buf);
 
-  if(*buf=='@') {
-    if(sscanf(buf,"@Version: %d", &version)!=1) {
+  if (*buf == '@')
+  {
+    if (sscanf(buf, "@Version: %d", &version) != 1)
+    {
       log("SYSERR: Format error in %s (version)", zname);
       log("SYSERR: ...Line: %s", line);
       exit(1);
     }
-    line_num+=get_line(fl,buf);
+    line_num += get_line(fl, buf);
   }
 
-  if (sscanf(buf, "#%hd", &Z.number) != 1) {
+  if (sscanf(buf, "#%hd", &z->number) != 1)
+  {
     log("SYSERR: Format error in %s, line %d", zname, line_num);
     exit(1);
   }
-  snprintf(buf2, sizeof(buf2), "beginning of zone #%d", Z.number);
+  snprintf(buf2, sizeof(buf2), "beginning of zone #%d", z->number);
+  zone_put(z->number, z);
 
   line_num += get_line(fl, buf);
-  if ((ptr = strchr(buf, '~')) != NULL)	/* take off the '~' if it's there */
+  if ((ptr = strchr(buf, '~')) != NULL) /* take off the '~' if it's there */
     *ptr = '\0';
-  Z.builders = strdup(buf);
-  
-  line_num += get_line(fl, buf);
-  if ((ptr = strchr(buf, '~')) != NULL)	/* take off the '~' if it's there */
-    *ptr = '\0';
-  Z.name = strdup(buf);
+  z->builders = strdup(buf);
 
   line_num += get_line(fl, buf);
-  if (version >= 2) {
+  if ((ptr = strchr(buf, '~')) != NULL) /* take off the '~' if it's there */
+    *ptr = '\0';
+  z->name = strdup(buf);
+
+  line_num += get_line(fl, buf);
+  if (version >= 2)
+  {
 
     char zbuf1[MAX_STRING_LENGTH];
     char zbuf2[MAX_STRING_LENGTH];
     char zbuf3[MAX_STRING_LENGTH];
     char zbuf4[MAX_STRING_LENGTH];
 
-    if  (sscanf(buf, " %hd %hd %d %d %s %s %s %s %d %d", &Z.bot, &Z.top, &Z.lifespan,
-      &Z.reset_mode, zbuf1, zbuf2, zbuf3, zbuf4, &Z.min_level, &Z.max_level) != 10) {
+    if (sscanf(buf, " %hd %hd %d %d %s %s %s %s %d %d", &z->bot, &z->top, &z->lifespan,
+               &z->reset_mode, zbuf1, zbuf2, zbuf3, zbuf4, &z->min_level, &z->max_level) != 10)
+    {
       log("SYSERR: Format error in 10-constant line of %s", zname);
       exit(1);
     }
 
-    Z.zone_flags[0] = asciiflag_conv(zbuf1);
-    Z.zone_flags[1] = asciiflag_conv(zbuf2);
-    Z.zone_flags[2] = asciiflag_conv(zbuf3);
-    Z.zone_flags[3] = asciiflag_conv(zbuf4);
-
-  } else if (sscanf(buf, " %hd %hd %d %d ", &Z.bot, &Z.top, &Z.lifespan, &Z.reset_mode) != 4) {
+    z->zone_flags[0] = asciiflag_conv(zbuf1);
+    z->zone_flags[1] = asciiflag_conv(zbuf2);
+    z->zone_flags[2] = asciiflag_conv(zbuf3);
+    z->zone_flags[3] = asciiflag_conv(zbuf4);
+  }
+  else if (sscanf(buf, " %hd %hd %d %d ", &z->bot, &z->top, &z->lifespan, &z->reset_mode) != 4)
+  {
     /*
      * This may be due to the fact that the zone has no builder.  So, we just attempt
      * to fix this by copying the previous 2 last reads into this variable and the
      * last one.
      */
     log("SYSERR: Format error in numeric constant line of %s, attempting to fix.", zname);
-    if (sscanf(Z.name, " %hd %hd %d %d ", &Z.bot, &Z.top, &Z.lifespan, &Z.reset_mode) != 4) {
+    if (sscanf(z->name, " %hd %hd %d %d ", &z->bot, &z->top, &z->lifespan, &z->reset_mode) != 4)
+    {
       log("SYSERR: Could not fix previous error, aborting game.");
-    exit(1);
-    } else {
-      free(Z.name);
-      Z.name = strdup(Z.builders);
-      free(Z.builders);
-      Z.builders = strdup("None.");
+      exit(1);
+    }
+    else
+    {
+      free(z->name);
+      z->name = strdup(z->builders);
+      free(z->builders);
+      z->builders = strdup("None.");
       zone_fix = TRUE;
     }
   }
-  if (Z.bot > Z.top) {
-    log("SYSERR: Zone %d bottom (%d) > top (%d).", Z.number, Z.bot, Z.top);
+  if (z->bot > z->top)
+  {
+    log("SYSERR: Zone %d bottom (%d) > top (%d).", z->number, z->bot, z->top);
     exit(1);
   }
 
   cmd_no = 0;
 
-  for (;;) {
+  for (;;)
+  {
     /* skip reading one line if we fixed above (line is correct already) */
-    if (zone_fix != TRUE) {
-    if ((tmp = get_line(fl, buf)) == 0) {
-      log("SYSERR: Format error in %s - premature end of file", zname);
-      exit(1);
+    if (zone_fix != TRUE)
+    {
+      if ((tmp = get_line(fl, buf)) == 0)
+      {
+        log("SYSERR: Format error in %s - premature end of file", zname);
+        exit(1);
+      }
     }
-    } else
+    else
       zone_fix = FALSE;
-    
+
     line_num += tmp;
     ptr = buf;
     skip_spaces(&ptr);
 
-    if ((ZCMD2.command = *ptr) == '*')
+    struct reset_com *cmd = &z->cmd[cmd_no];
+
+    if ((cmd->command = *ptr) == '*')
       continue;
 
     ptr++;
 
-    if (ZCMD2.command == 'S' || ZCMD2.command == '$') {
-      ZCMD2.command = 'S';
+    if (cmd->command == 'S' || cmd->command == '$')
+    {
+      cmd->command = 'S';
       break;
     }
     error = 0;
-    if (strchr("MOEPDTVG", ZCMD2.command) == nullptr) {	/* a 4-arg command */
-      if (sscanf(ptr, " %d %d %d %d ", &tmp, &ZCMD2.arg1, &ZCMD2.arg2, &ZCMD2.arg3) != 4)
-	error = 1;
-    } else if (ZCMD2.command=='V') { /* a string-arg command */
-      if (sscanf(ptr, " %d %d %d %d %d %d %79s %79[^\f\n\r\t\v]", &tmp, &ZCMD2.arg1, &ZCMD2.arg2, &ZCMD2.arg3, &ZCMD2.arg4, &ZCMD2.arg5, t1, t2) != 8) 
-      error = 1;
-      else {
-        ZCMD2.sarg1 = strdup(t1);
-        ZCMD2.sarg2 = strdup(t2);
+    if (strchr("MOEPDTVG", cmd->command) == nullptr)
+    { /* a 4-arg command */
+      if (sscanf(ptr, " %d %d %d %d ", &tmp, &cmd->arg1, &cmd->arg2, &cmd->arg3) != 4)
+        error = 1;
+    }
+    else if (cmd->command == 'V')
+    { /* a string-arg command */
+      if (sscanf(ptr, " %d %d %d %d %d %d %79s %79[^\f\n\r\t\v]", &tmp, &cmd->arg1, &cmd->arg2, &cmd->arg3, &cmd->arg4, &cmd->arg5, t1, t2) != 8)
+        error = 1;
+      else
+      {
+        cmd->sarg1 = strdup(t1);
+        cmd->sarg2 = strdup(t2);
       }
-    } else {
-      if ((arg_num = sscanf(ptr, " %d %d %d %d %d %d ", &tmp, &ZCMD2.arg1, &ZCMD2.arg2, &ZCMD2.arg3, &ZCMD2.arg4, &ZCMD2.arg5)) != 6){
-        if (arg_num != 5) {
-	error = 1;
-        } else {
-          ZCMD2.arg5 = 0;
+    }
+    else
+    {
+      if ((arg_num = sscanf(ptr, " %d %d %d %d %d %d ", &tmp, &cmd->arg1, &cmd->arg2, &cmd->arg3, &cmd->arg4, &cmd->arg5)) != 6)
+      {
+        if (arg_num != 5)
+        {
+          error = 1;
         }
-    }
+        else
+        {
+          cmd->arg5 = 0;
+        }
+      }
     }
 
-    ZCMD2.if_flag = tmp;
+    cmd->if_flag = tmp;
 
-    if (error) {
+    if (error)
+    {
       log("SYSERR: Format error in %s, line %d: '%s'", zname, line_num, buf);
       exit(1);
     }
-    ZCMD2.line = line_num;
+    cmd->line = line_num;
     cmd_no++;
   }
 
-  if (num_of_cmds != cmd_no + 1) {
+  if (num_of_cmds != cmd_no + 1)
+  {
     log("SYSERR: Zone command count mismatch for %s. Estimated: %d, Actual: %d", zname, num_of_cmds, cmd_no + 1);
     exit(1);
   }
-
-  top_of_zone_table = zone++;
 }
-
-#undef Z
-
 
 static void get_one_line(FILE *fl, char *buf)
 {
@@ -2984,15 +2860,15 @@ int hsort(const void *a, const void *b)
 
 int vnum_mobile(char *searchname, struct char_data *ch)
 {
-  int nr, found = 0;
+  int found = 0;
 
-  for (nr = 0; nr <= top_of_mobt; nr++) {
-    struct char_data *mob = &mob_proto[nr];
+  mob_proto_iterate([&](auto mob) {
     if (isname(searchname, mob->name))
       send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                   ++found, mob_index[nr].vnum, mob->short_descr,
+                   ++found, mob->vnum, mob->short_descr,
                    mob->proto_script ? "[TRIG]" : "" );
-  }
+    return true;
+  });
 
   return (found);
 }
@@ -3001,15 +2877,15 @@ int vnum_mobile(char *searchname, struct char_data *ch)
 
 int vnum_object(char *searchname, struct char_data *ch)
 {
-  int nr, found = 0;
+  int found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++) {
-    struct obj_data *obj = &obj_proto[nr];
+  obj_proto_iterate([&](auto obj) {
     if (isname(searchname, obj->name))
       send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                    ++found, obj_index[nr].vnum, obj->short_description,
+                    ++found, obj->vnum, obj->short_description,
                     obj->proto_script ? "[TRIG]" : "" );
-  }
+    return true;
+  });
 
   return (found);
 }
@@ -3018,16 +2894,16 @@ int vnum_object(char *searchname, struct char_data *ch)
 
 int vnum_material(char *searchname, struct char_data *ch)
 {
-  int nr, found = 0;
+  int found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++) {
-    struct obj_data *obj = &obj_proto[nr];
-        if (isname(searchname, material_names[obj->value[VAL_ALL_MATERIAL]])) {
+  obj_proto_iterate([&](auto obj) {
+    if (isname(searchname, material_names[obj->value[VAL_ALL_MATERIAL]])) {
       send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                    ++found, obj_index[nr].vnum, obj->short_description,
+                    ++found, obj->vnum, obj->short_description,
                     obj->proto_script ? "[TRIG]" : "" );
     }
-  }
+    return true;
+  });
 
   return (found);
 }
@@ -3036,18 +2912,18 @@ int vnum_material(char *searchname, struct char_data *ch)
 
 int vnum_weapontype(char *searchname, struct char_data *ch)
 {
-  int nr, found = 0;
+  int found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++) {
-    struct obj_data *obj = &obj_proto[nr];
+  obj_proto_iterate([&](auto obj) {
     if (obj->type_flag == ITEM_WEAPON) {
       if (isname(searchname, weapon_type[obj->value[VAL_WEAPON_SKILL]])) {
         send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                    ++found, obj_index[nr].vnum, obj->short_description,
+                    ++found, obj->vnum, obj->short_description,
                     obj->proto_script ? "[TRIG]" : "" );
       }
     }
-  }
+    return true;
+  });
 
   return (found);
 }
@@ -3055,18 +2931,18 @@ int vnum_weapontype(char *searchname, struct char_data *ch)
 
 int vnum_armortype(char *searchname, struct char_data *ch)
 {
-  int nr, found = 0;
+  int found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++) {
-    struct obj_data *obj = &obj_proto[nr];
+  obj_proto_iterate([&](auto obj) {
     if (obj->type_flag == ITEM_ARMOR) {
       if (isname(searchname, armor_type[obj->value[VAL_ARMOR_SKILL]])) {
         send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                    ++found, obj_index[nr].vnum, obj->short_description,
+                    ++found, obj->vnum, obj->short_description,
                     obj->proto_script ? "[TRIG]" : "" );
       }
     }
-  }
+    return true;
+  });
 
   return (found);
 }
@@ -3095,19 +2971,24 @@ struct char_data *create_char(void)
 struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 {
   mob_rnum i;
-  struct char_data *mob;
+  struct char_data *mob = NULL, *proto = NULL;
+
+  if(type == REAL) {
+    log("real is no longer supported!");
+    exit(1);
+  }
 
   if (type == VIRTUAL) {
-    if ((i = real_mobile(nr)) == NOBODY) {
+    if (!(proto = mob_proto_by_id(nr))) {
       log("WARNING: Mobile vnum %d does not exist in database.", nr);
       return (NULL);
     }
-  } else
-    i = nr;
+  }
 
   CREATE(mob, struct char_data, 1);
   clear_char(mob);
-  *mob = mob_proto[i];
+  *mob = *proto; /* copy prototype data */
+  copy_mobile_strings(mob, proto);
   mob->next = character_list;
   character_list = mob;
   mob->next_affect = NULL;
@@ -3673,14 +3554,14 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
    SET_BIT_AR(MOB_FLAGS(mob), MOB_LLEG);
   }
  
-  mob_index[i].number++;
+  mob_proto_count_increment(nr);
 
   GET_ID(mob) = max_mob_id++;
   /* find_char helper */
   add_to_lookup_table(GET_ID(mob), (void *)mob);
   (void)char_register_id(GET_ID(mob), mob);
 
-  copy_proto_script(&mob_proto[i], mob, MOB_TRIGGER);
+  copy_proto_script(proto, mob, MOB_TRIGGER);
   assign_triggers(mob, MOB_TRIGGER);
   racial_body_parts(mob); 
 
@@ -3776,15 +3657,15 @@ void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2)
         GET_OBJ_VNUM(obj1), obj1->generation, obj1->unique_id);
   mudlog(BRF, ADMLVL_GOD, TRUE, "DUPE: First: In room: %d (%s), "
                              "In object: %s, Carried by: %s, Worn by: %s",
-        GET_ROOM_VNUM(IN_ROOM(obj1)),
-        IN_ROOM(obj1) == NOWHERE ? "Nowhere" : obj_room_get(obj1)->name,
+        obj_room_vnum_get(obj1),
+        obj_room_get(obj1) == NULL ? "Nowhere" : obj_room_get(obj1)->name,
         obj1->in_obj ? obj1->in_obj->short_description : "None",
         obj1->carried_by ? GET_NAME(obj1->carried_by) : "Nobody",
         obj1->worn_by ? GET_NAME(obj1->worn_by) : "Nobody");
   mudlog(BRF, ADMLVL_GOD, TRUE, "DUPE: Newer: In room: %d (%s), "
                              "In object: %s, Carried by: %s, Worn by: %s",
-        GET_ROOM_VNUM(IN_ROOM(obj2)),
-        IN_ROOM(obj2) == NOWHERE ? "Nowhere" : obj_room_get(obj2)->name,
+        obj_room_vnum_get(obj2),
+        obj_room_get(obj2) == NULL ? "Nowhere" : obj_room_get(obj2)->name,
         obj2->in_obj ? obj2->in_obj->short_description : "None",
         obj2->carried_by ? GET_NAME(obj2->carried_by) : "Nobody",
         obj2->worn_by ? GET_NAME(obj2->worn_by) : "Nobody");
@@ -3884,23 +3765,28 @@ struct obj_data *create_obj(void)
 struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
 {
   struct obj_data *obj;
-  obj_rnum i = type == VIRTUAL ? real_object(nr) : nr;
   int j;
 
-  if (i == NOTHING || i > top_of_objt) {
-    log("Object (%c) %d does not exist in database.", type == VIRTUAL ? 'V' : 'R', nr);
+  if(type == REAL) {
+    log("real is no longer supported!");
+    exit(1);
+  }
+
+  struct obj_data *proto = obj_proto_by_id(nr);
+  if(!proto) {
+    log("WARNING: Object vnum %d does not exist in database.", nr);
     return (NULL);
   }
-  struct obj_data *proto = &obj_proto[i];
 
   CREATE(obj, struct obj_data, 1);
   clear_object(obj);
   *obj = *proto;
+  copy_object_strings(obj, proto);
   obj->next = object_list;
   object_list = obj;
   OBJ_LOADROOM(obj) = NOWHERE;
 
-  obj_index[i].number++;
+  obj_proto_count_increment(nr);
 
   GET_ID(obj) = max_obj_id++;
   /* find_obj helper */
@@ -3954,9 +3840,7 @@ void zone_update(void)
     timer = 0;
 
     /* since one minute has passed, increment zone ages */
-    for (i = 0; i <= top_of_zone_table; i++)
-    {
-      struct zone_data* zone = &zone_table[i];
+    zone_iterate ([&](auto zone) {
       if (zone->age < zone->lifespan &&
           zone->reset_mode)
         (zone->age)++;
@@ -3968,7 +3852,7 @@ void zone_update(void)
 
         CREATE(update_u, struct reset_q_element, 1);
 
-        update_u->zone_to_reset = i;
+        update_u->zone_to_reset = zone->number;
         update_u->next = 0;
 
         if (!reset_q.head)
@@ -3981,17 +3865,17 @@ void zone_update(void)
 
         zone->age = ZO_DEAD;
       }
-    }
-  } /* end - one minute has passed */
+    return true;
+  }); /* end - one minute has passed */
 
   /* dequeue zones (if possible) and reset */
   /* this code is executed every 10 seconds (i.e. PULSE_ZONE) */
   for (update_u = reset_q.head; update_u; update_u = update_u->next) {
-    struct zone_data* zone = &zone_table[update_u->zone_to_reset];
+    struct zone_data* zone = zone_by_id(update_u->zone_to_reset);
     if (zone->reset_mode == 2 ||
         is_empty(update_u->zone_to_reset))
     {
-      reset_zone(update_u->zone_to_reset);
+      reset_zone(zone);
       mudlog(CMP, ADMLVL_GOD, FALSE, "Auto zone reset: %s (Zone %d)",
              zone->name, zone->number);
       /* dequeue */
@@ -4014,384 +3898,566 @@ void zone_update(void)
     }
   }
 }
+}
 
-static void log_zone_error(zone_rnum zone, int cmd_no, const char *message)
+
+static void log_zone_error(struct zone_data* zone, int cmd_no, const char *message)
 {
   mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: zone file: %s", message);
+  struct reset_com *cmd = &zone->cmd[cmd_no];
   mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: ...offending cmd: '%c' cmd in zone #%d, line %d",
-	ZCMD2.command, zone_table[zone].number, ZCMD2.line);
+	cmd->command, zone->number, cmd->line);
 }
 
-#define ZONE_ERROR(message) \
-	{ log_zone_error(zone, cmd_no, message); last_cmd = 0; }
+#define ZONE_ERROR(message) log_zone_error(zone, cmd_no, message)
+
+struct reset_context {
+  struct zone_data *zone = nullptr;
+  struct reset_com *cmd = nullptr;
+  int cmd_no = 0;
+  struct char_data *mob = nullptr;
+  struct obj_data *obj = nullptr;
+  struct char_data *tmob = nullptr;
+  struct obj_data *tobj = nullptr;
+  bool mob_load = false;
+  bool obj_load = false;
+};
+
+static bool reset_command_mobile(struct reset_context* ctx, mob_vnum vnum, room_vnum rv, int max_in_room, int max_in_world, int percent_chance) {
+  if(mob_proto_count_get(vnum) >= max_in_world) {
+    return false;
+  }
+  if(rand_number(1, 100) < percent_chance) {
+    return false;
+  }
+  auto room = room_by_id(rv);
+
+  auto zone = ctx->zone;
+  auto cmd_no = ctx->cmd_no;
+  if(!room) {
+    ZONE_ERROR("invalid room vnum");
+    ctx->cmd->command = '*'; /* skip command */
+    return false;
+  };
+  auto proto = mob_proto_by_id(vnum);
+  if(!proto) {
+    ZONE_ERROR("invalid mob vnum");
+    ctx->cmd->command = '*'; /* skip command */
+    return false;
+  }
+
+  size_t count_total = mob_proto_count_get(vnum);
+
+  if(max_in_world > 0 && count_total >= max_in_world) {
+    return false;
+  }
+
+  size_t count_room = 0;
+  if(max_in_room > 0)
+    for(auto i = character_list; i; i = i->next) {
+      if(GET_MOB_VNUM(i) == vnum) {
+        if(MOB_LOADROOM(i) == rv) {
+          count_room++;
+        }
+      }
+    }
+
+  if(max_in_room > 0 && count_room >= max_in_room) {
+    return false;
+  }
+
+  auto mob = read_mobile(vnum, VIRTUAL);
+  char_to_room(mob, room);
+  MOB_LOADROOM(mob) = rv;
+  load_mtrigger(mob);
+  ctx->mob = mob;
+  ctx->tmob = mob;
+  ctx->mob_load = true;
+
+  return true;
+}
+
+static bool reset_command_object(struct reset_context* ctx, obj_vnum vnum, room_vnum rv, int max_in_room, int max_in_world, int percent_chance) {
+  if(obj_proto_count_get(vnum) >= max_in_world) {
+    return false;
+  }
+  if(rand_number(1, 100) < percent_chance) {
+    return false;
+  }
+  auto room = room_by_id(rv);
+
+  auto zone = ctx->zone;
+  auto cmd_no = ctx->cmd_no;
+  if(!room) {
+    ZONE_ERROR("invalid room vnum");
+    ctx->cmd->command = '*'; /* skip command */
+    return false;
+  };
+  auto proto = obj_proto_by_id(vnum);
+  if(!proto) {
+    ZONE_ERROR("invalid obj vnum");
+    ctx->cmd->command = '*'; /* skip command */
+    return false;
+  }
+
+  size_t count_total = obj_proto_count_get(vnum);
+
+  if(max_in_world > 0 && count_total >= max_in_world) {
+    return false;
+  }
+
+  size_t count_room = 0;
+  if(max_in_room > 0)
+    for(auto i = object_list; i; i = i->next) {
+      if(GET_OBJ_VNUM(i) == vnum) {
+        if(OBJ_LOADROOM(i) == rv || (i->in_room && i->in_room == rv)) {
+          count_room++;
+        }
+      }
+    }
+
+  if(max_in_room > 0 && count_room >= max_in_room) {
+    return false;
+  }
+
+  auto obj = read_object(vnum, VIRTUAL);
+  obj_to_room(obj, room);
+  OBJ_LOADROOM(obj) = rv;
+  load_otrigger(obj);
+
+  ctx->obj = obj;
+  ctx->tobj = obj;
+  ctx->obj_load = true;
+  return true;
+
+}
+
+
+static bool reset_command_put(struct reset_context* ctx, obj_vnum vnum, obj_vnum to_vnum, int percent_chance) {
+  if(rand_number(1, 100) < percent_chance) {
+    return false;
+  }
+
+  auto zone = ctx->zone;
+  auto cmd_no = ctx->cmd_no;
+
+  auto to = get_obj_num(to_vnum);
+  if(!to) {
+    ZONE_ERROR("invalid to obj vnum");
+    ctx->cmd->command = '*'; /* skip command */
+    return false;
+  }
+
+  auto obj_proto = obj_proto_by_id(vnum);
+  if(!obj_proto) {
+    ZONE_ERROR("invalid obj vnum");
+    ctx->cmd->command = '*'; /* skip command */
+    return false;
+  }
+
+  auto obj = read_object(vnum, VIRTUAL);
+  add_unique_id(obj);
+  obj_to_obj(obj, to);
+  load_otrigger(obj);
+  ctx->obj = obj;
+  ctx->tobj = obj;
+
+  return true;
+
+}
+
+static bool reset_command_give(struct reset_context* ctx, obj_vnum vnum, int max_in_world, int percent_chance) {
+  if(rand_number(1, 100) < percent_chance) {
+    return false;
+  }
+
+  if(obj_proto_count_get(vnum) >= max_in_world) {
+    return false;
+  }
+
+  auto zone = ctx->zone;
+  auto cmd_no = ctx->cmd_no;
+
+  if(!ctx->mob) {
+    ZONE_ERROR("no mob to give to");
+    ctx->cmd->command = '*'; /* skip command */
+    return false;
+  }
+
+  auto obj_proto = obj_proto_by_id(vnum);
+  if(!obj_proto) {
+    ZONE_ERROR("invalid obj vnum");
+    ctx->cmd->command = '*'; /* skip command */
+    return false;
+  }
+
+  auto obj = read_object(vnum, VIRTUAL);
+  add_unique_id(obj);
+  obj_to_char(obj, ctx->mob);
+  load_otrigger(obj);
+  ctx->obj = obj;
+  ctx->tobj = obj;
+
+  return true;
+
+}
+
+static bool reset_command_equip(struct reset_context* ctx, obj_vnum vnum, int max_in_world, int wear_loc, int percent_chance) {
+  if(rand_number(1, 100) < percent_chance) {
+    return false;
+  }
+
+  if(obj_proto_count_get(vnum) >= max_in_world) {
+    return false;
+  }
+
+  auto zone = ctx->zone;
+  auto cmd_no = ctx->cmd_no;
+
+  if(!ctx->mob) {
+    ZONE_ERROR("no mob to equip");
+    ctx->cmd->command = '*'; /* skip command */
+    return false;
+  }
+
+  auto obj_proto = obj_proto_by_id(vnum);
+  if(!obj_proto) {
+    ZONE_ERROR("invalid obj vnum");
+    ctx->cmd->command = '*'; /* skip command */
+    return false;
+  }
+
+  if(wear_loc < 0 || wear_loc >= NUM_WEARS) {
+    ZONE_ERROR("invalid wear location");
+    ctx->cmd->command = '*'; /* skip command */
+    return false;
+  }
+
+  auto room = char_room_get(ctx->mob);
+
+  auto obj = read_object(vnum, VIRTUAL);
+  add_unique_id(obj);
+
+  obj->in_room = room->number;
+  load_otrigger(obj);
+
+  if(wear_otrigger(obj, ctx->mob, wear_loc)) {
+    obj->in_room = NOWHERE;
+    equip_char(ctx->mob, obj, wear_loc);
+  } else {
+    obj->in_room = NOWHERE;
+    obj_to_char(obj, ctx->mob);
+  }
+  ctx->obj = obj;
+  ctx->tobj = obj;
+
+  return true;
+
+}
+
+static bool reset_command_remove(struct reset_context* ctx, room_vnum rv, obj_vnum vnum) {
+  auto room = room_by_id(rv);
+  struct obj_data *obj = nullptr;
+  if(!room) goto finish;
+  obj = get_obj_in_list_num(vnum, room->contents);
+  if(obj) extract_obj(obj);
+
+  finish:
+  ctx->obj = nullptr;
+  ctx->mob = nullptr;
+  return true;
+}
+
+static bool reset_command_door(struct reset_context* ctx, room_vnum rv, int dir, int state) {
+  auto room = room_by_id(rv);
+  auto zone = ctx->zone;
+  auto cmd_no = ctx->cmd_no;
+
+  struct room_direction_data *exit = nullptr;
+  if(!room) goto finish;
+  exit = room->dir_option[dir];
+  if(!exit) goto finish;
+
+  switch(state) {
+    case 0: /* open */
+      REMOVE_BIT(exit->exit_info, EX_CLOSED);
+      break;
+    case 1: /* closed */
+      SET_BIT(exit->exit_info, EX_CLOSED);
+      break;
+    case 2: /* locked */
+      SET_BIT(exit->exit_info, EX_CLOSED | EX_LOCKED);
+      break;
+    default:
+      ZONE_ERROR("invalid door state");
+      ctx->cmd->command = '*'; /* skip command */
+      break;
+  }
+
+  finish:
+  ctx->obj = nullptr;
+  ctx->mob = nullptr;
+  return true;
+}
+
+static bool reset_command_trigger(struct reset_context* ctx, int attach_type, trig_vnum vnum, room_vnum rv) {
+  auto zone = ctx->zone;
+  auto cmd_no = ctx->cmd_no;
+
+  auto proto = trig_proto_by_id(vnum);
+  if(!proto) {
+    ZONE_ERROR("invalid trigger vnum");
+    ctx->cmd->command = '*'; /* skip command */
+    return false;
+  }
+
+  switch(attach_type) {
+    case MOB_TRIGGER:
+      if(!ctx->mob) {
+        ZONE_ERROR("no mob to attach trigger to");
+        ctx->cmd->command = '*'; /* skip command */
+        return false;
+      }
+      if(!SCRIPT(ctx->mob)) {
+        CREATE(SCRIPT(ctx->mob), struct script_data, 1);
+      }
+      add_trigger(SCRIPT(ctx->mob), proto, -1);
+      break;
+    case OBJ_TRIGGER:
+      if(!ctx->obj) {
+        ZONE_ERROR("no obj to attach trigger to");
+        ctx->cmd->command = '*'; /* skip command */
+        return false;
+      }
+      if(!SCRIPT(ctx->obj)) {
+        CREATE(SCRIPT(ctx->obj), struct script_data, 1);
+      }
+      add_trigger(SCRIPT(ctx->obj), proto, -1);
+      break;
+    case WLD_TRIGGER:
+      {
+        auto room = room_by_id(rv);
+        if(!room) {
+          ZONE_ERROR("invalid room vnum for trigger");
+          ctx->cmd->command = '*'; /* skip command */
+          return false;
+        }
+        if(!SCRIPT(room)) {
+          CREATE(SCRIPT(room), struct script_data, 1);
+        }
+        add_trigger(SCRIPT(room), proto, -1);
+      }
+      break;
+    default:
+      ZONE_ERROR("invalid trigger attach type");
+      ctx->cmd->command = '*'; /* skip command */
+      return false;
+  }
+  return true;
+}
+
+static bool reset_command_variable(struct reset_context* ctx, int attach_type, char* name, char* value, room_vnum rv, int unused) {
+  auto zone = ctx->zone;
+  auto cmd_no = ctx->cmd_no;
+
+  switch(attach_type) {
+    case MOB_TRIGGER:
+      if(!ctx->mob) {
+        ZONE_ERROR("no mob to attach variable to");
+        ctx->cmd->command = '*'; /* skip command */
+        return false;
+      }
+      if(!SCRIPT(ctx->mob)) {
+        CREATE(SCRIPT(ctx->mob), struct script_data, 1);
+      }
+      add_var(&(SCRIPT(ctx->mob)->global_vars), name, value, rv);
+      break;
+    case OBJ_TRIGGER:
+      if(!ctx->obj) {
+        ZONE_ERROR("no obj to attach variable to");
+        ctx->cmd->command = '*'; /* skip command */
+        return false;
+      }
+      if(!SCRIPT(ctx->obj)) {
+        CREATE(SCRIPT(ctx->obj), struct script_data, 1);
+      }
+      add_var(&(SCRIPT(ctx->obj)->global_vars), name, value, rv);
+      break;
+    case WLD_TRIGGER:
+      {
+        auto room = room_by_id(rv);
+        if(!room) {
+          ZONE_ERROR("invalid room vnum for variable");
+          ctx->cmd->command = '*'; /* skip command */
+          return false;
+        }
+        if(!SCRIPT(room)) {
+          CREATE(SCRIPT(room), struct script_data, 1);
+        }
+        add_var(&(SCRIPT(room)->global_vars), name, value, unused);
+      }
+      break;
+    default:
+      ZONE_ERROR("invalid variable attach type");
+      ctx->cmd->command = '*'; /* skip command */
+      return false;
+  }
+  return true;
+}
+
+static void execute_reset_commands(struct zone_data *zone) {
+  int cmd_no = 0;
+  bool last_cmd = false;
+  struct reset_context ctx;
+  ctx.zone = zone;
+
+  for(cmd_no = 0; zone->cmd[cmd_no].command != 'S'; cmd_no++) {
+    ctx.cmd = &zone->cmd[cmd_no];
+    if (ctx.cmd->if_flag && !last_cmd && !ctx.mob_load && !ctx.obj_load) {
+      continue;
+    }
+    ctx.cmd_no = cmd_no;
+
+    if(!ctx.cmd->if_flag) {
+      ctx.mob_load = false;
+      ctx.obj_load = false;
+    }
+
+    switch (ctx.cmd->command) {
+      case '*':
+        last_cmd = false;
+        break;
+      case 'M':
+        last_cmd = reset_command_mobile(&ctx, ctx.cmd->arg1, ctx.cmd->arg3, ctx.cmd->arg4, ctx.cmd->arg2, ctx.cmd->arg5);
+        if(!last_cmd) {
+          ctx.tobj = nullptr;
+        }
+        break;
+      case 'O':
+        last_cmd = reset_command_object(&ctx, ctx.cmd->arg1, ctx.cmd->arg3, ctx.cmd->arg4, ctx.cmd->arg2, ctx.cmd->arg5);
+        if(!last_cmd) {
+          ctx.tmob = nullptr;
+        }
+        break;
+      case 'P':
+        last_cmd = reset_command_put(&ctx, ctx.cmd->arg1, ctx.cmd->arg3, ctx.cmd->arg5);
+        if(!last_cmd) {
+          ctx.tmob = nullptr;
+        }
+        break;
+      case 'G':
+        last_cmd = reset_command_give(&ctx, ctx.cmd->arg1, ctx.cmd->arg2, ctx.cmd->arg5);
+        if(!last_cmd) {
+          ctx.tmob = nullptr;
+        }
+        break;
+      case 'E':
+        last_cmd = reset_command_equip(&ctx, ctx.cmd->arg1, ctx.cmd->arg2, ctx.cmd->arg3, ctx.cmd->arg5);
+        if(!last_cmd) {
+          ctx.tmob = nullptr;
+        }
+        break;
+      case 'R':
+        last_cmd = reset_command_remove(&ctx, ctx.cmd->arg1, ctx.cmd->arg2);
+        break;
+      case 'D':
+        last_cmd = reset_command_door(&ctx, ctx.cmd->arg1, ctx.cmd->arg2, ctx.cmd->arg3);
+        break;
+      case 'T':
+        last_cmd = reset_command_trigger(&ctx, ctx.cmd->arg1, ctx.cmd->arg2, ctx.cmd->arg3);
+        break;
+      case 'V':
+        last_cmd = reset_command_variable(&ctx, ctx.cmd->arg1, ctx.cmd->sarg1, ctx.cmd->sarg2, ctx.cmd->arg4, ctx.cmd->arg2);
+        break;
+      default:
+        ZONE_ERROR("invalid command");
+        break;
+    }
+  }
+
+}
 
 /* execute the reset command table of a given zone */
-void reset_zone(zone_rnum zone)
+void reset_zone(struct zone_data *zone)
 {
-  int cmd_no, last_cmd = 0;
-  struct char_data *mob = NULL;
-  struct obj_data *obj, *obj_to;
-  room_vnum rvnum;
-  room_rnum rrnum;
-  struct char_data *tmob=NULL; /* for trigger assignment */
-  struct obj_data *tobj=NULL;  /* for trigger assignment */
-  int mob_load = FALSE; /* ### */
-  int obj_load = FALSE; /* ### */
 
- if (pre_reset(zone_table[zone].number) == FALSE) {
-  for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
+  if (!pre_reset(zone))
+  {
+    execute_reset_commands(zone);
 
-    if (ZCMD2.if_flag && !last_cmd && !mob_load && !obj_load)
-      continue;
+    zone->age = 0;
 
-     if (!ZCMD2.if_flag) { /* ### */
-       mob_load = FALSE;
-       obj_load = FALSE;
-     }
-
-    /*  This is the list of actual zone commands.  If any new
-     *  zone commands are added to the game, be certain to update
-     *  the list of commands in load_zone() so that the counting
-     *  will still be correct. - ae.
-     */
-    switch (ZCMD2.command) {
-    case '*':			/* ignore command */
-      last_cmd = 0;
-      break;
-
-    case 'M':			/* read a mobile */
-
-      if ((mob_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
-           (rand_number(1, 100) >= ZCMD2.arg5)) {
-        int room_max = 0;
-        struct char_data *i;
-	mob = read_mobile(ZCMD2.arg1, REAL);
-	
-	/* First find out how many mobs of VNUM are in the mud with this rooms */
-               /* VNUM as a load point for max from room checks. */
-       /* Let's only count if room_max is in use.  If left at zero, max_in_mud will handle*/
-
-        if (ZCMD2.arg4 > 0) {
-          for (i = character_list; i; i = i->next) {
-            if ((MOB_LOADROOM(i) == GET_ROOM_VNUM(ZCMD2.arg3)) 
-               && (GET_MOB_VNUM(i) == GET_MOB_VNUM(mob))) {
-  	      room_max++;
-            }
-	  }
-	}
-	char_to_room(mob, ZCMD2.arg3);
-	
-           /* Get rid of it if room_max has been met, ignore room_max if zero */
-
-	if (room_max && (room_max >= ZCMD2.arg4)){
-	   extract_char(mob);
-	   extract_pending_chars();
-	   break;
-	   }
-	
-	   /*  Set the mobs loadroom for room_max checks. */
-	MOB_LOADROOM(mob) = GET_ROOM_VNUM(ZCMD2.arg3);
-	
-        load_mtrigger(mob);
-        tmob = mob;
-	last_cmd = 1;
-        mob_load = TRUE;
-      } else
-	last_cmd = 0;
-        tobj = NULL;
-        break;
-
-    case 'O':			/* read an object */
-       if ((obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
-           (rand_number(1, 100) >= ZCMD2.arg5)) {
-	if (ZCMD2.arg3 != NOWHERE) {
-          int room_max = 0;
-          struct obj_data *k;
-	  obj = read_object(ZCMD2.arg1, REAL);
-	  
-	  	/* First find out how many obj of VNUM are in the mud with this rooms */
-               /* VNUM as a load point for max from room checks. */
-       /* Let's only count if room_max is in use.  If left at zero, max_in_mud will handle*/
-
-        if (ZCMD2.arg4 > 0) {
-          for (k = object_list; k; k = k->next) {
-            if (((OBJ_LOADROOM(k)==GET_ROOM_VNUM(ZCMD2.arg3)) 
-                && (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj))) || (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj) && GET_ROOM_VNUM(ZCMD2.arg3) ==  GET_ROOM_VNUM(IN_ROOM(k)))) {
-              /*  For objects, lets not count them if they've been removed from the room */
-              /*  We'll let max_in_mud handle those. */
-               if (IN_ROOM(k) == NOWHERE || GET_ROOM_VNUM(IN_ROOM(k)) 
-                   != GET_ROOM_VNUM(ZCMD2.arg3)) {
-                 continue;
-               }
-	       room_max++;
-            }
-          }
-        }
-
-          add_unique_id(obj);
-	  obj_to_room(obj, ZCMD2.arg3);
-	  
-           /* Get rid of it if room_max has been met. */
-
-	  if (room_max && (room_max >= ZCMD2.arg4)){
-	     extract_obj(obj);
-	     break;
-	     }
-	  
-	  /* Set the loadroom for room_max checks */
-
-	  OBJ_LOADROOM(obj) = GET_ROOM_VNUM(ZCMD2.arg3);
-	
-	  last_cmd = 1;
-          load_otrigger(obj);
-          tobj = obj;
-	  obj_load = TRUE;
-	} else {
-	  obj = read_object(ZCMD2.arg1, REAL);
-          add_unique_id(obj);
-	  IN_ROOM(obj) = NOWHERE;
-	  last_cmd = 1;
-          tobj = obj;
-	  obj_load = TRUE;
-	}
-      } else
-	last_cmd = 0;
-	tmob = NULL;
-      break;
-
-    case 'P':			/* object to object */
-       if ((obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
-           obj_load && (rand_number(1, 100) >= ZCMD2.arg5)) {
-	obj = read_object(ZCMD2.arg1, REAL);
-	if (!(obj_to = get_obj_num(ZCMD2.arg3))) {
-	  ZONE_ERROR("target obj not found, command disabled");
-	  ZCMD2.command = '*';
-	  break;
-	}
-        add_unique_id(obj);
-	obj_to_obj(obj, obj_to);
-	last_cmd = 1;
-        load_otrigger(obj);
-        tobj = obj;
-      } else
-	last_cmd = 0;
-        tmob = NULL;
-      break;
-
-    case 'G':			/* obj_to_char */
-      if (!mob) {
-	ZONE_ERROR("attempt to give obj to non-existant mob, command disabled");
-	ZCMD2.command = '*';
-	break;
+    /* handle reset_wtrigger's */
+    for (auto i = zone->bot; i <= zone->top; i++)
+    {
+      struct room_data *room = room_by_id(i);
+      if (!room)
+        continue;
+      reset_wtrigger(room);
+      if (room_flagged(room, ROOM_AURA) && rand_number(1, 5) >= 4)
+      {
+        send_to_room(room, "The aura of regeneration covering the surrounding area disappears.\r\n");
+        room_flag_set(room, ROOM_AURA, FALSE);
       }
-      if ((obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
-          mob_load && (rand_number(1, 100) >= ZCMD2.arg5)) {
-	obj = read_object(ZCMD2.arg1, REAL);
-        add_unique_id(obj);
-	obj_to_char(obj, mob);
-        if (GET_MOB_SPEC(mob) != shop_keeper) {
-         randomize_eq(obj);
-        }
-	last_cmd = 1;
-        load_otrigger(obj);
-        tobj = obj;
-      } else
-	last_cmd = 0;
-        tmob = NULL;
-      break;
-
-    case 'E':			/* object to equipment list */
-      if (!mob) {
-	ZONE_ERROR("trying to equip non-existant mob, command disabled");
-	ZCMD2.command = '*';
-	break;
+      if (room_sector_type_get(room) == SECT_LAVA)
+      {
+        room_geffect_set(room, 5);
       }
-      if ((obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
-          mob_load && (rand_number(1, 100) >= ZCMD2.arg5)) {
-	if (ZCMD2.arg3 < 0 || ZCMD2.arg3 >= NUM_WEARS) {
-	  ZONE_ERROR("invalid equipment pos number");
-	} else {
-	  obj = read_object(ZCMD2.arg1, REAL);
-          add_unique_id(obj);
-          IN_ROOM(obj) = IN_ROOM(mob);
-          load_otrigger(obj);
-          if (wear_otrigger(obj, mob, ZCMD2.arg3)) {
-            IN_ROOM(obj) = NOWHERE;
-	    equip_char(mob, obj, ZCMD2.arg3);
-          } else
-            obj_to_char(obj, mob);
-            tobj = obj;
-	    last_cmd = 1;
-	  }
-      } else
-	last_cmd = 0;
-        tmob = NULL;
-      break;
-
-    case 'R': /* rem obj from room */
-      if ((obj = get_obj_in_list_num(ZCMD2.arg2, world[ZCMD2.arg1].contents)) != NULL)
-        extract_obj(obj);
-        last_cmd = 1;
-        tmob = NULL;
-        tobj = NULL;
-      break;
-
-
-    case 'D':			/* set state of door */
-      if (ZCMD2.arg2 < 0 || ZCMD2.arg2 >= NUM_OF_DIRS ||
-	  (world[ZCMD2.arg1].dir_option[ZCMD2.arg2] == NULL)) {
-	ZONE_ERROR("door does not exist, command disabled");
-	ZCMD2.command = '*';
-      } else
-	switch (ZCMD2.arg3) {
-	case 0:
-	  REMOVE_BIT(world[ZCMD2.arg1].dir_option[ZCMD2.arg2]->exit_info,
-		     EX_LOCKED);
-	  REMOVE_BIT(world[ZCMD2.arg1].dir_option[ZCMD2.arg2]->exit_info,
-		     EX_CLOSED);
-	  break;
-	case 1:
-	  SET_BIT(world[ZCMD2.arg1].dir_option[ZCMD2.arg2]->exit_info,
-		  EX_CLOSED);
-	  REMOVE_BIT(world[ZCMD2.arg1].dir_option[ZCMD2.arg2]->exit_info,
-		     EX_LOCKED);
-	  break;
-	case 2:
-	  SET_BIT(world[ZCMD2.arg1].dir_option[ZCMD2.arg2]->exit_info,
-		  EX_LOCKED);
-	  SET_BIT(world[ZCMD2.arg1].dir_option[ZCMD2.arg2]->exit_info,
-		  EX_CLOSED);
-	  break;
-	}
-      last_cmd = 1;
-      tmob = NULL;
-      tobj = NULL;
-      break;
-
-    case 'T': /* trigger command */
-      if (ZCMD2.arg1==MOB_TRIGGER && tmob) {
-        if (!SCRIPT(tmob))
-          CREATE(SCRIPT(tmob), struct script_data, 1);
-        add_trigger(SCRIPT(tmob), read_trigger(ZCMD2.arg2), -1);
-        last_cmd = 1;
-      } else if (ZCMD2.arg1==OBJ_TRIGGER && tobj) {
-        if (!SCRIPT(tobj))
-          CREATE(SCRIPT(tobj), struct script_data, 1);
-        add_trigger(SCRIPT(tobj), read_trigger(ZCMD2.arg2), -1);
-        last_cmd = 1;
-      } else if (ZCMD2.arg1==WLD_TRIGGER) {
-        if (ZCMD2.arg3 == NOWHERE || ZCMD2.arg3>top_of_world) {
-          ZONE_ERROR("Invalid room number in trigger assignment");
-        }
-        if (!world[ZCMD2.arg3].script)
-          CREATE(world[ZCMD2.arg3].script, struct script_data, 1);
-        add_trigger(world[ZCMD2.arg3].script, read_trigger(ZCMD2.arg2), -1);
-        last_cmd = 1;
+      if (room_geffect_get(room) < -1)
+      {
+        send_to_room(room, "The area loses some of the water flooding it.\r\n");
+        room_geffect_mod(room, 1);
       }
-
-      break;
-
-    case 'V':
-      if (ZCMD2.arg1==MOB_TRIGGER && tmob) {
-        if (!SCRIPT(tmob)) {
-          ZONE_ERROR("Attempt to give variable to scriptless mobile");
-        } else
-          add_var(&(SCRIPT(tmob)->global_vars), ZCMD2.sarg1, ZCMD2.sarg2,
-                  ZCMD2.arg3);
-        last_cmd = 1;
-      } else if (ZCMD2.arg1==OBJ_TRIGGER && tobj) {
-        if (!SCRIPT(tobj)) {
-          ZONE_ERROR("Attempt to give variable to scriptless object");
-        } else
-          add_var(&(SCRIPT(tobj)->global_vars), ZCMD2.sarg1, ZCMD2.sarg2,
-                  ZCMD2.arg3);
-        last_cmd = 1;
-      } else if (ZCMD2.arg1==WLD_TRIGGER) {
-        if (ZCMD2.arg3 == NOWHERE || ZCMD2.arg3>top_of_world) {
-          ZONE_ERROR("Invalid room number in variable assignment");
-        } else {
-          if (!(world[ZCMD2.arg3].script)) {
-            ZONE_ERROR("Attempt to give variable to scriptless object");
-          } else
-            add_var(&(world[ZCMD2.arg3].script->global_vars),
-                    ZCMD2.sarg1, ZCMD2.sarg2, ZCMD2.arg2);
-          last_cmd = 1;
-        }
+      else if (room_geffect_get(room) == -1)
+      {
+        send_to_room(room, "The area loses the last of the water flooding it in one large rush.\r\n");
+        room_geffect_set(room, 0);
       }
-      break;
-
-    default:
-      ZONE_ERROR("unknown cmd in reset table; cmd disabled");
-      ZCMD2.command = '*';
-      break;
+      if (room_dmg_get(room) >= 100)
+      {
+        send_to_room(room, "The area gets rebuilt a little.\r\n");
+        room_dmg_mod(room, -rand_number(5, 10));
+      }
+      else if (room_dmg_get(room) >= 50)
+      {
+        send_to_room(room, "The area gets rebuilt a little.\r\n");
+        room_dmg_mod(room, -rand_number(1, 10));
+      }
+      else if (room_dmg_get(room) >= 10)
+      {
+        send_to_room(room, "The area gets rebuilt a little.\r\n");
+        room_dmg_mod(room, -rand_number(1, 10));
+      }
+      else if (room_dmg_get(room) > 1)
+      {
+        send_to_room(room, "The area gets rebuilt a little.\r\n");
+        room_dmg_mod(room, -rand_number(1, room_dmg_get(room)));
+      }
+      else if (room_dmg_get(room) > 0)
+      {
+        send_to_room(room, "The area gets rebuilt a little.\r\n");
+        room_dmg_mod(room, -1);
+      }
+      int sect = room_sector_type_get(room);
+      if (room_geffect_get(room) >= 1 && rand_number(1, 4) == 4 && !room_is_sunken(room) && sect != SECT_LAVA)
+      {
+        send_to_room(room, "The lava has cooled and become solid rock.\r\n");
+        room_geffect_set(room, 0);
+      }
+      else if (room_geffect_get(room) >= 1 && rand_number(1, 2) == 2 && room_is_sunken(room) && sect != SECT_LAVA)
+      {
+        send_to_room(room, "The water has cooled the lava and it has become solid rock.\r\n");
+        room_geffect_set(room, 0);
+      }
     }
   }
-
-  zone_table[zone].age = 0;
-
-  /* handle reset_wtrigger's */
-  rvnum = zone_table[zone].bot;
-  while (rvnum <= zone_table[zone].top) {
-    rrnum = real_room(rvnum);
-    if (rrnum != NOWHERE) {
-     reset_wtrigger(&world[rrnum]);
-     struct room_data *room = &world[rrnum];
-     if (room_flagged(room, ROOM_AURA) && rand_number(1, 5) >= 4) {
-      send_to_room(room, "The aura of regeneration covering the surrounding area disappears.\r\n");
-      room_flag_set(room, ROOM_AURA, FALSE);
-     }
-     if (room_sector_type_get(room) == SECT_LAVA) {
-      room_geffect_set(room, 5);
-     }
-     if (room_geffect_get(room) < -1) {
-      send_to_room(room, "The area loses some of the water flooding it.\r\n");
-      room_geffect_mod(room, 1);
-     }
-     else if (room_geffect_get(room) == -1) {
-      send_to_room(room, "The area loses the last of the water flooding it in one large rush.\r\n");
-      room_geffect_set(room, 0);
-     }
-     if (room_dmg_get(room) >= 100) {
-      send_to_room(room, "The area gets rebuilt a little.\r\n");
-      room_dmg_mod(room, -rand_number(5, 10));
-     }
-     else if (room_dmg_get(room) >= 50) {
-      send_to_room(room, "The area gets rebuilt a little.\r\n");
-      room_dmg_mod(room, -rand_number(1, 10));
-     }
-     else if (room_dmg_get(room) >= 10) {
-      send_to_room(room, "The area gets rebuilt a little.\r\n");
-      room_dmg_mod(room, -rand_number(1, 10));
-     }
-     else if (room_dmg_get(room) > 1) {
-      send_to_room(room, "The area gets rebuilt a little.\r\n");
-      room_dmg_mod(room, -rand_number(1, room_dmg_get(room)));
-     }
-     else if (room_dmg_get(room) > 0) {
-      send_to_room(room, "The area gets rebuilt a little.\r\n");
-      room_dmg_mod(room, -1);
-     }
-     int sect = room_sector_type_get(room);
-     if (room_geffect_get(room) >= 1 && rand_number(1, 4) == 4 && !room_is_sunken(room) && sect != SECT_LAVA) {
-      send_to_room(room, "The lava has cooled and become solid rock.\r\n");
-      room_geffect_set(room, 0);
-     } else if (room_geffect_get(room) >= 1 && rand_number(1, 2) == 2 && room_is_sunken(room) && sect != SECT_LAVA) {
-      send_to_room(room, "The water has cooled the lava and it has become solid rock.\r\n");
-      room_geffect_set(room, 0);
-     }
-    }
-    rvnum++;
+  else
+  {
+    /* even if reset is blocked, age should be reset */
+    zone->age = 0;
   }
- } 
-  else 
-  { 
-   /* even if reset is blocked, age should be reset */ 
-   zone_table[zone].age = 0; 
-  } 
-  post_reset(zone_table[zone].number);
+  post_reset(zone);
 }
-
-
 
 /* for use in reset_zone; return TRUE if zone 'nr' is free of PC's  */
 int is_empty(zone_rnum zone_nr)
@@ -4401,7 +4467,7 @@ int is_empty(zone_rnum zone_nr)
   for (i = descriptor_list; i; i = i->next) {
     if (STATE(i) != CON_PLAYING)
       continue;
-    if (IN_ROOM(i->character) == NOWHERE)
+    if (char_room_get(i->character) == NULL)
       continue;
     if (char_room_get(i->character)->zone != zone_nr)
       continue;
@@ -4509,46 +4575,45 @@ void free_char(struct char_data *ch)
     if (IS_NPC(ch))
       log("SYSERR: Mob %s (#%d) had player_specials allocated!", GET_NAME(ch), GET_MOB_VNUM(ch));
   }
-  if (!IS_NPC(ch) || (IS_NPC(ch) && GET_MOB_RNUM(ch) == NOBODY)) {
+
+  if(ch->name)
+    free(ch->name);
+  if(ch->voice)
+    free(ch->voice);
+  if(ch->clan)
+    free(ch->clan);
+  if(ch->title)
+    free(ch->title);
+  if(ch->short_descr)
+    free(ch->short_descr);
+  if(ch->long_descr)
+    free(ch->long_descr);
+  if(ch->description)
+    free(ch->description);
+
+  if (!IS_NPC(ch)) {
     /* if this is a player, or a non-prototyped non-player, free all */
-    if (GET_NAME(ch))
-      free(GET_NAME(ch));
-    if (GET_VOICE(ch))
-      free(GET_VOICE(ch));
-    if (GET_CLAN(ch))
-      free(GET_CLAN(ch));
-    if (ch->title)
-      free(ch->title);
-    if (ch->short_descr)
-      free(ch->short_descr);
-    if (ch->long_descr)
-      free(ch->long_descr);
-    if (ch->description)
-      free(ch->description);
+
     for (i = 0; i < NUM_HIST; i++)
       if (GET_HISTORY(ch, i))
         free(GET_HISTORY(ch, i));
+    
     if (ch->player_specials)
       free(ch->player_specials);
     
     /* free script proto list */
     free_proto_script(ch, MOB_TRIGGER);
     
-  } else if ((i = GET_MOB_RNUM(ch)) != NOBODY) {
-    struct char_data *proto = &mob_proto[i];
+  } else {
     /* otherwise, free strings only if the string is not pointing at proto */
-    if (ch->name && ch->name != proto->name)
-      free(ch->name);
-    if (ch->title && ch->title != proto->title)
-      free(ch->title);
-    if (ch->short_descr && ch->short_descr != proto->short_descr)
-      free(ch->short_descr);
-    if (ch->long_descr && ch->long_descr != proto->long_descr)
-      free(ch->long_descr);
-    if (ch->description && ch->description != proto->description)
-      free(ch->description);
     /* free script proto list if it's not the prototype */
-    if (ch->proto_script && ch->proto_script != proto->proto_script)
+    auto proto = mob_proto_by_id(GET_MOB_VNUM(ch));
+    if(proto) {
+      if(ch->proto_script && ch->proto_script != proto->proto_script) {
+        free_proto_script(ch, MOB_TRIGGER);
+      }
+    } else
+    if (ch->proto_script)
       free_proto_script(ch, MOB_TRIGGER);
   }
   while (ch->affected)
@@ -4594,22 +4659,14 @@ void free_char(struct char_data *ch)
   free(ch);
 }
 
-
-
-
 /* release memory allocated for an obj struct */
 void free_obj(struct obj_data *obj)
 {
   remove_unique_id(obj);
-  if (GET_OBJ_RNUM(obj) == NOWHERE) {
-    free_object_strings(obj);
-    /* free script proto list */
+  free_object_strings(obj);
+  auto proto = obj_proto_by_id(GET_OBJ_VNUM(obj));
+  if(proto && obj->proto_script && obj->proto_script != proto->proto_script) {
     free_proto_script(obj, OBJ_TRIGGER);
-  } else {
-    free_object_strings_proto(obj);
-    if (obj->proto_script != obj_proto[GET_OBJ_RNUM(obj)].proto_script)
-      free_proto_script(obj, OBJ_TRIGGER);
-
   }
   
   /* Let's make sure that we free up this memory */
@@ -4753,7 +4810,7 @@ void clear_char(struct char_data *ch)
 
   IN_ROOM(ch) = NOWHERE;
   GET_PFILEPOS(ch) = -1;
-  GET_MOB_RNUM(ch) = NOBODY;
+  GET_MOB_VNUM(ch) = NOBODY;
   GET_WAS_IN(ch) = NOWHERE;
   GET_POS(ch) = POS_STANDING;
   ch->mob_specials.default_pos = POS_STANDING;
@@ -4769,7 +4826,7 @@ void clear_object(struct obj_data *obj)
 {
   memset((char *) obj, 0, sizeof(struct obj_data));
 
-  obj->item_number = NOTHING;
+  obj->vnum = NOTHING;
   IN_ROOM(obj) = NOWHERE;
   obj->worn_on = NOWHERE;
 }

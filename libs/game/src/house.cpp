@@ -114,11 +114,11 @@ void House_restore_weight(struct obj_data *obj)
 /* Save all objects in a house */
 void House_crashsave(room_vnum vnum)
 {
-  int rnum;
+  struct room_data *room;
   char buf[MAX_STRING_LENGTH], tmpfile[MAX_STRING_LENGTH];
   FILE *fp;
 
-  if ((rnum = real_room(vnum)) == NOWHERE)
+  if ((room = room_by_id(vnum)) == NULL)
     return;
   if (!House_get_filename(vnum, buf, sizeof(buf)))
     return;
@@ -130,7 +130,7 @@ void House_crashsave(room_vnum vnum)
       remove(tmpfile);
       return;
     }
-    REMOVE_BIT_AR(ROOM_FLAGS(rnum), ROOM_HOUSE_CRASH);
+    room_flag_set(room, ROOM_HOUSE_CRASH, FALSE);
     return;
   }
 
@@ -141,13 +141,13 @@ void House_crashsave(room_vnum vnum)
     perror("SYSERR: Error saving house file");
     return;
   }
-  if (!House_save(world[rnum].contents, fp, 0)) {
+  if (!House_save(room->contents, fp, 0)) {
     fclose(fp);
     return;
   }
   fclose(fp);
-  House_restore_weight(world[rnum].contents);
-  REMOVE_BIT_AR(ROOM_FLAGS(rnum), ROOM_HOUSE_CRASH);
+  House_restore_weight(room->contents);
+  room_flag_set(room, ROOM_HOUSE_CRASH, FALSE);
 }
 
 
@@ -211,7 +211,7 @@ void House_save_control(void)
 void House_boot(void)
 {
   struct house_control_rec temp_house;
-  room_rnum real_house;
+  struct room_data *real_house;
   FILE *fl;
 
   memset((char *)house_control,0,sizeof(struct house_control_rec)*MAX_HOUSES);
@@ -232,7 +232,7 @@ void House_boot(void)
     if (get_name_by_id(temp_house.owner) == NULL)
       continue;			/* owner no longer exists -- skip */
 
-    if ((real_house = real_room(temp_house.vnum)) == NOWHERE)
+    if ((real_house = room_by_id(temp_house.vnum)) == NULL)
       continue;			/* this vnum doesn't exist -- skip */
 
     if (find_house(temp_house.vnum) != NOWHERE)
@@ -240,7 +240,7 @@ void House_boot(void)
 
     house_control[num_of_houses++] = temp_house;
 
-    SET_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE); 
+    room_flag_set(real_house, ROOM_HOUSE, TRUE); 
     House_load(temp_house.vnum);
   }
 
@@ -308,7 +308,7 @@ void hcontrol_build_house(struct char_data *ch, char *arg)
   char arg1[MAX_INPUT_LENGTH];
   struct house_control_rec temp_house;
   room_vnum virt_house;
-  room_rnum real_house;
+  struct room_data *real_house;
   int16_t exit_num;
   long owner;
 
@@ -324,7 +324,7 @@ void hcontrol_build_house(struct char_data *ch, char *arg)
     return;
   }
   virt_house = atoi(arg1);
-  if ((real_house = real_room(virt_house)) == NOWHERE) {
+  if ((real_house = room_by_id(virt_house)) == NULL) {
     send_to_char(ch, "No such room exists.\r\n");
     return;
   }
@@ -344,7 +344,7 @@ void hcontrol_build_house(struct char_data *ch, char *arg)
     send_to_char(ch, "'%s' is not a valid direction.\r\n", arg1);
     return;
   }
-  if (TOROOM(real_house, exit_num) == NOWHERE) {
+  if (!real_house->dir_option[exit_num]) {
     send_to_char(ch, "There is no exit %s from room %d.\r\n", dirs[exit_num], virt_house);
     return;
   }
@@ -371,7 +371,7 @@ void hcontrol_build_house(struct char_data *ch, char *arg)
 
   house_control[num_of_houses++] = temp_house;
 
-  SET_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE);
+  room_flag_set(real_house, ROOM_HOUSE, TRUE);
   House_crashsave(virt_house);
 
   send_to_char(ch, "House built.  Mazel tov!\r\n");
@@ -383,7 +383,7 @@ void hcontrol_build_house(struct char_data *ch, char *arg)
 void hcontrol_destroy_house(struct char_data *ch, char *arg)
 {
   int i, j;
-  room_rnum real_atrium, real_house;
+  struct room_data *real_atrium = NULL, *real_house = NULL;
 
   if (!*arg) {
     send_to_char(ch, "%s", HCONTROL_FORMAT);
@@ -393,16 +393,16 @@ void hcontrol_destroy_house(struct char_data *ch, char *arg)
     send_to_char(ch, "Unknown house.\r\n");
     return;
   }
-  if ((real_atrium = real_room(house_control[i].atrium)) == NOWHERE)
+  if ((real_atrium = room_by_id(house_control[i].atrium)) == NULL)
     log("SYSERR: House %d had invalid atrium %d!", atoi(arg), house_control[i].atrium);
   else
-    REMOVE_BIT_AR(ROOM_FLAGS(real_atrium), ROOM_ATRIUM);
+    room_flag_set(real_atrium, ROOM_ATRIUM, FALSE);
 
-  if ((real_house = real_room(house_control[i].vnum)) == NOWHERE)
+  if ((real_house = room_by_id(house_control[i].vnum)) == NULL)
     log("SYSERR: House %d had invalid vnum %d!", atoi(arg), house_control[i].vnum);
   else {
-    REMOVE_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE); 
-    REMOVE_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE_CRASH); 
+    room_flag_set(real_house, ROOM_HOUSE, FALSE);
+    room_flag_set(real_house, ROOM_HOUSE_CRASH, FALSE);
   }
   
   House_delete_file(house_control[i].vnum);
@@ -421,8 +421,8 @@ void hcontrol_destroy_house(struct char_data *ch, char *arg)
    * house.  --JE 9/19/94
    */
   for (i = 0; i < num_of_houses; i++)
-    if ((real_atrium = real_room(house_control[i].atrium)) != NOWHERE)
-      SET_BIT_AR(ROOM_FLAGS(real_atrium), ROOM_ATRIUM);
+    if ((real_atrium = room_by_id(house_control[i].atrium)) != NULL)
+      room_flag_set(real_atrium, ROOM_ATRIUM, FALSE);
 }
 
 
@@ -474,7 +474,7 @@ ACMD(do_house)
 
   if (!room_flagged(char_room_get(ch), ROOM_HOUSE))
     send_to_char(ch, "You must be in your house to set guests.\r\n");
-  else if ((i = find_house(GET_ROOM_VNUM(IN_ROOM(ch)))) == NOWHERE)
+  else if ((i = find_house(char_room_vnum_get(ch))) == NOWHERE)
     send_to_char(ch, "Um.. this house seems to be screwed up.\r\n");
   else if (GET_IDNUM(ch) != house_control[i].owner)
     send_to_char(ch, "Only the primary owner can set guests.\r\n");
@@ -514,11 +514,11 @@ ACMD(do_house)
 void House_save_all(void)
 {
   int i;
-  room_rnum real_house;
+  struct room_data *real_house = NULL;
 
   for (i = 0; i < num_of_houses; i++)
-    if ((real_house = real_room(house_control[i].vnum)) != NOWHERE)
-	House_crashsave(house_control[i].vnum);
+    if ((real_house = room_by_id(house_control[i].vnum)) != NULL)
+      House_crashsave(house_control[i].vnum);
 }
 
 
@@ -587,9 +587,9 @@ int House_load(room_vnum rvnum)
   struct obj_data *obj1;
   struct obj_data *cont_row[MAX_BAG_ROWS];
   struct extra_descr_data *new_descr;
-  room_rnum rrnum;
+  struct room_data *room = NULL;
 
-  if ((rrnum = real_room(rvnum)) == NOWHERE)
+  if ((room = room_by_id(rvnum)) == NULL)
     return 0;
 
   if (!House_get_filename(rvnum, cmfname, sizeof(cmfname)))
@@ -623,7 +623,7 @@ int House_load(room_vnum rvnum)
       /* we have the number, check it, load obj. */
       if (nr == NOTHING) {   /* then it is unique */
         temp = create_obj();
-        temp->item_number=NOTHING;
+        temp->vnum=NOTHING;
       } else if (nr < 0) {
         continue;
       } else {
@@ -780,7 +780,7 @@ int House_load(room_vnum rvnum)
       }   /* exit our xap loop */
       if(temp != NULL) {
         num_objs++;
-        obj_to_room(temp, rrnum);
+        obj_to_room(temp, room);
       } else {
         continue;
       }
@@ -790,7 +790,7 @@ int House_load(room_vnum rvnum)
             if (cont_row[j]) { /* no container -> back to ch's inventory */
               for (;cont_row[j];cont_row[j] = obj1) {
                 obj1 = cont_row[j]->next_content;
-                obj_to_room(cont_row[j], rrnum);
+                obj_to_room(cont_row[j], room);
               }
               cont_row[j] = NULL;
             }
@@ -804,11 +804,11 @@ int House_load(room_vnum rvnum)
                 obj1 = cont_row[j]->next_content;
                 obj_to_obj(cont_row[j], temp);
               }
-              obj_to_room(temp, rrnum); /* add to inv first ... */
+              obj_to_room(temp, room); /* add to inv first ... */
             } else { /* object isn't container -> empty content list */
               for (;cont_row[j];cont_row[j] = obj1) {
                 obj1 = cont_row[j]->next_content;
-                obj_to_room(cont_row[j], rrnum);
+                obj_to_room(cont_row[j], room);
               }
               cont_row[j] = NULL;
             }

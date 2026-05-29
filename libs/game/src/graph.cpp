@@ -19,14 +19,16 @@
 #include "dbat/game/vehicles.h"
 #include "dbat/game/act.informative.h"
 
+#include "dbat/db/iterate.hpp"
+
 /* local functions */
-int VALID_EDGE(room_rnum x, int y);
-void bfs_enqueue(room_rnum room, int dir);
+int VALID_EDGE(struct room_data* x, int y);
+void bfs_enqueue(struct room_data *room, int dir);
 void bfs_dequeue(void);
 void bfs_clear_queue(void);
 
 struct bfs_queue_struct {
-  room_rnum room;
+  struct room_data* room;
   char dir;
   struct bfs_queue_struct *next;
 };
@@ -34,25 +36,28 @@ struct bfs_queue_struct {
 static struct bfs_queue_struct *bfs_queue_head = 0, *bfs_queue_tail = 0;
 
 /* Utility macros */
-#define MARK(room)	(SET_BIT_AR(ROOM_FLAGS(room), ROOM_BFS_MARK))
-#define UNMARK(room)	(REMOVE_BIT_AR(ROOM_FLAGS(room), ROOM_BFS_MARK))
-#define IS_MARKED(room)	(ROOM_FLAGGED(room, ROOM_BFS_MARK))
-#define TOROOM(x, y)	(world[(x)].dir_option[(y)]->to_room)
-#define IS_CLOSED(x, y)	(EXIT_FLAGGED(world[(x)].dir_option[(y)], EX_CLOSED))
+#define MARK(room)	(room_flag_set(room, ROOM_BFS_MARK, TRUE))
+#define UNMARK(room)	(room_flag_set(room, ROOM_BFS_MARK, FALSE))
+#define IS_MARKED(room)	(room_flagged(room, ROOM_BFS_MARK))
+#define TOROOM(x, y)	(exit_dest_get((x)->dir_option[(y)]))
+#define IS_CLOSED(x, y)	(EXIT_FLAGGED((x)->dir_option[(y)], EX_CLOSED))
 
-int VALID_EDGE(room_rnum x, int y)
+int VALID_EDGE(struct room_data* x, int y)
 {
-  if (world[x].dir_option[y] == NULL || TOROOM(x, y) == NOWHERE)
+  if (!x || !TOROOM(x, y))
     return 0;
+
+ struct room_data* dest = TOROOM(x, y);
+
   if (CONFIG_TRACK_T_DOORS == FALSE && IS_CLOSED(x, y))
     return 0;
-  if (ROOM_FLAGGED(TOROOM(x, y), ROOM_NOTRACK) || IS_MARKED(TOROOM(x, y)))
+  if (room_flagged(dest, ROOM_NOTRACK) || IS_MARKED(dest))
     return 0;
 
   return 1;
 }
 
-void bfs_enqueue(room_rnum room, int dir)
+void bfs_enqueue(struct room_data *room, int dir)
 {
   struct bfs_queue_struct *curr;
 
@@ -95,22 +100,24 @@ void bfs_clear_queue(void)
  * Intended usage: in mobile_activity, give a mob a dir to go if they're
  * tracking another mob or a PC.  Or, a 'track' skill for PCs.
  */
-int find_first_step(room_rnum src, room_rnum target)
+int find_first_step(struct room_data *src, struct room_data *target)
 {
   int curr_dir;
   room_rnum curr_room;
 
-  if (src == NOWHERE || target == NOWHERE || src > top_of_world || target > top_of_world) {
-    log("SYSERR: Illegal value %d or %d passed to find_first_step. (%s)", src, target, __FILE__);
+  if (!src || !target) {
+    log("SYSERR: Illegal value %d or %d passed to find_first_step.");
     return (BFS_ERROR);
   }
+
   if (src == target)
     return (BFS_ALREADY_THERE);
 
   /* clear marks first, some OLC systems will save the mark. */
-  for (curr_room = 0; curr_room <= top_of_world; curr_room++) {
-     UNMARK(curr_room);
-  }
+  room_iterate([](auto room) {
+     UNMARK(room);
+	 return true;
+  });
   MARK(src);
   /* first, enqueue the first steps, saving which direction we're going. */
   for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++) {
@@ -201,23 +208,24 @@ ACMD(do_sradar)
   }
 
   if (noship == FALSE) {
+	struct room_data *vroom = obj_room_get(vehicle);
   if (!strcasecmp(arg, "earth") || !strcasecmp(arg, "Earth")) {
-   dir = find_first_step(IN_ROOM(vehicle), real_room(40979));
+   dir = find_first_step(vroom, room_by_id(40979));
    sprintf(planet, "Earth");
   } else if (!strcasecmp(arg, "frigid") || !strcasecmp(arg, "Frigid")) {
-   dir = find_first_step(IN_ROOM(vehicle), real_room(30889));
+   dir = find_first_step(vroom, room_by_id(30889));
    sprintf(planet, "Frigid");
   } else if (!strcasecmp(arg, "konack") || !strcasecmp(arg, "Konack")) {
-   dir = find_first_step(IN_ROOM(vehicle), real_room(27065));
+   dir = find_first_step(vroom, room_by_id(27065));
    sprintf(planet, "Konack");
   } else if (!strcasecmp(arg, "vegeta") || !strcasecmp(arg, "Vegeta")) {
-   dir = find_first_step(IN_ROOM(vehicle), real_room(32365));
+   dir = find_first_step(vroom, room_by_id(32365));
    sprintf(planet, "Vegeta");
   } else if (!strcasecmp(arg, "aether") || !strcasecmp(arg, "Aether")) {
-   dir = find_first_step(IN_ROOM(vehicle), real_room(41959));
+   dir = find_first_step(vroom, room_by_id(41959));
    sprintf(planet, "Aether");
   } else if (!strcasecmp(arg, "namek") || !strcasecmp(arg, "Namek")) {
-   dir = find_first_step(IN_ROOM(vehicle), real_room(42880));
+   dir = find_first_step(vroom, room_by_id(42880));
    sprintf(planet, "Namek");
   } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) <= 0) {
     send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
@@ -230,15 +238,15 @@ ACMD(do_sradar)
     return;
   } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) > 0) {
    int rad = GET_RADAR1(ch);
-   dir = find_first_step(IN_ROOM(vehicle), real_room(rad));
+   dir = find_first_step(vroom, room_by_id(rad));
    sprintf(planet, "Buoy One");
   } else if (!strcasecmp(arg, "buoy2") && GET_RADAR2(ch) > 0) {
    int rad = GET_RADAR2(ch);
-   dir = find_first_step(IN_ROOM(vehicle), real_room(rad));
+   dir = find_first_step(vroom, room_by_id(rad));
    sprintf(planet, "Buoy Two");
   } else if (!strcasecmp(arg, "buoy3") && GET_RADAR3(ch) > 0) {
    int rad = GET_RADAR3(ch);
-   dir = find_first_step(IN_ROOM(vehicle), real_room(rad));
+   dir = find_first_step(vroom, room_by_id(rad));
    sprintf(planet, "Buoy Three");
   } else {
    send_to_char(ch, "@wThat is not an existing planet.@n\r\n");
@@ -247,23 +255,24 @@ ACMD(do_sradar)
   }
 
   if (noship == TRUE) {
+	struct room_data *croom = char_room_get(ch);
   if (!strcasecmp(arg, "earth") || !strcasecmp(arg, "Earth")) {
-   dir = find_first_step(IN_ROOM(ch), real_room(40979));
+   dir = find_first_step(croom, room_by_id(40979));
    sprintf(planet, "Earth");
   } else if (!strcasecmp(arg, "frigid") || !strcasecmp(arg, "Frigid")) {
-   dir = find_first_step(IN_ROOM(ch), real_room(30889));
+   dir = find_first_step(croom, room_by_id(30889));
    sprintf(planet, "Frigid");
   } else if (!strcasecmp(arg, "konack") || !strcasecmp(arg, "Konack")) {
-   dir = find_first_step(IN_ROOM(ch), real_room(27065));
+   dir = find_first_step(croom, room_by_id(27065));
    sprintf(planet, "Konack");
   } else if (!strcasecmp(arg, "vegeta") || !strcasecmp(arg, "Vegeta")) {
-   dir = find_first_step(IN_ROOM(ch), real_room(32365));
+   dir = find_first_step(croom, room_by_id(32365));
    sprintf(planet, "Vegeta");
   } else if (!strcasecmp(arg, "aether") || !strcasecmp(arg, "Aether")) {
-   dir = find_first_step(IN_ROOM(ch), real_room(41959));
+   dir = find_first_step(croom, room_by_id(41959));
    sprintf(planet, "Aether");
   } else if (!strcasecmp(arg, "namek") || !strcasecmp(arg, "Namek")) {
-   dir = find_first_step(IN_ROOM(ch), real_room(42880));
+   dir = find_first_step(croom, room_by_id(42880));
    sprintf(planet, "Namek");
   } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) <= 0) {
     send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
@@ -276,15 +285,15 @@ ACMD(do_sradar)
     return;
   } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) > 0) {
    int rad = GET_RADAR1(ch);
-   dir = find_first_step(IN_ROOM(ch), real_room(rad));
+   dir = find_first_step(croom, room_by_id(rad));
    sprintf(planet, "Buoy One");
   } else if (!strcasecmp(arg, "buoy2") && GET_RADAR2(ch) > 0) {
    int rad = GET_RADAR2(ch);
-   dir = find_first_step(IN_ROOM(ch), real_room(rad));
+   dir = find_first_step(croom, room_by_id(rad));
    sprintf(planet, "Buoy Two");
   } else if (!strcasecmp(arg, "buoy3") && GET_RADAR3(ch) > 0) {
    int rad = GET_RADAR3(ch);
-   dir = find_first_step(IN_ROOM(ch), real_room(rad));
+   dir = find_first_step(croom, room_by_id(rad));
    sprintf(planet, "Buoy Three");
   } else {
    send_to_char(ch, "@wThat is not an existing planet.@n\r\n");
@@ -336,13 +345,13 @@ ACMD(do_radar)
     WAIT_STATE(ch, PULSE_2SEC);
  act("$n holds up a dragon radar and pushes its button.", FALSE, ch, 0, 0, TO_ROOM);
  while (num < 20000) {
- if (real_room(room) != NOWHERE) {
+ if (room_by_id(room)) {
  for (obj = room_by_id(room)->contents; obj; obj = next_obj) {
       next_obj = obj->next_content;
   if (OBJ_FLAGGED(obj, ITEM_FORGED)) {
    continue;
   } else if (GET_OBJ_VNUM(obj) == 20 || GET_OBJ_VNUM(obj) == 21 || GET_OBJ_VNUM(obj) == 22 || GET_OBJ_VNUM(obj) == 23 || GET_OBJ_VNUM(obj) == 24 || GET_OBJ_VNUM(obj) == 25 || GET_OBJ_VNUM(obj) == 26) {
-   dir = find_first_step(IN_ROOM(ch), IN_ROOM(obj));
+   dir = find_first_step(char_room_get(ch), obj_room_get(obj));
    fcount += 1;
   switch (dir) {
   case BFS_ERROR:
@@ -370,7 +379,7 @@ ACMD(do_radar)
    if (OBJ_FLAGGED(obj, ITEM_FORGED)) {
     continue;
    } else if (GET_OBJ_VNUM(obj) == 20 || GET_OBJ_VNUM(obj) == 21 || GET_OBJ_VNUM(obj) == 22 || GET_OBJ_VNUM(obj) == 23 || GET_OBJ_VNUM(obj) == 24 || GET_OBJ_VNUM(obj) == 25 || GET_OBJ_VNUM(obj) == 26) {
-      dir = find_first_step(IN_ROOM(ch), IN_ROOM(tch));
+      dir = find_first_step(char_room_get(ch), char_room_get(tch));
       fcount += 1;
   switch (dir) {
   case BFS_ERROR:
@@ -618,7 +627,7 @@ ACMD(do_track)
 	}
 
 	if (GET_HIT(vict) < (GET_HIT(ch) * 0.001) + 1) {
-		if (IN_ROOM(ch) == IN_ROOM(vict)) {
+		if (char_room_get(ch) == char_room_get(vict)) {
 			if (!read_sense_memory(ch, vict)) {
 				send_to_char(ch, "Their powerlevel is too weak for you to sense properly, but you will recognise their ki signal from now on.\r\n");
 				sense_memory_write(ch, vict);
@@ -726,7 +735,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(PLANET_ZENITH(IN_ROOM(ch))) && (PLANET_ZENITH(IN_ROOM(vict)))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(char_planet_zenith(ch))) && (char_planet_zenith(vict)))
    {
 	send_to_char(ch, "@WSense@D: @CZenith@n\r\n");
 	if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -755,7 +764,7 @@ ACMD(do_track)
 		}
 
 		/* They passed the skill check. */
-		dir = find_first_step(IN_ROOM(ch), IN_ROOM(vict));
+		dir = find_first_step(char_room_get(ch), char_room_get(vict));
 
 		switch (dir) {
 		case BFS_ERROR:

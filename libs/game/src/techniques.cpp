@@ -75,7 +75,7 @@ bool tech_handle_charge(char_data *ch, char *arg, double minimum, double *attper
 bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, obj_data **obj) {
     *vict = nullptr; *obj = nullptr;
     if (!*arg || !(*vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-        if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
+        if (FIGHTING(ch) && char_room_get(FIGHTING(ch)) == char_room_get(ch)) {
             *vict = FIGHTING(ch);
             return true;
         } else if (!(*obj = get_obj_in_list_vis(ch, arg, nullptr, char_room_get(ch)->contents))) {

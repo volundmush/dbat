@@ -133,24 +133,24 @@ struct stack_data {
 #define MAX_OPER		4
 
 
-#define SHOP_NUM(i)		(shop_index[(i)].vnum)
-#define SHOP_KEEPER(i)		(shop_index[(i)].keeper)
-#define SHOP_OPEN1(i)		(shop_index[(i)].open1)
-#define SHOP_CLOSE1(i)		(shop_index[(i)].close1)
-#define SHOP_OPEN2(i)		(shop_index[(i)].open2)
-#define SHOP_CLOSE2(i)		(shop_index[(i)].close2)
-#define SHOP_ROOM(i, num)	(shop_index[(i)].in_room[(num)])
-#define SHOP_BUYTYPE(i, num)	(BUY_TYPE(shop_index[(i)].type[(num)]))
-#define SHOP_BUYWORD(i, num)	(BUY_WORD(shop_index[(i)].type[(num)]))
-#define SHOP_PRODUCT(i, num)	(shop_index[(i)].producing[(num)])
-#define SHOP_BANK(i)		(shop_index[(i)].bankAccount)
-#define SHOP_BROKE_TEMPER(i)	(shop_index[(i)].temper1)
-#define SHOP_BITVECTOR(i)	(shop_index[(i)].bitvector)
-#define SHOP_TRADE_WITH(i)	(shop_index[(i)].with_who)
-#define SHOP_SORT(i)		(shop_index[(i)].lastsort)
-#define SHOP_BUYPROFIT(i)	(shop_index[(i)].profit_buy)
-#define SHOP_SELLPROFIT(i)	(shop_index[(i)].profit_sell)
-#define SHOP_FUNC(i)		(shop_index[(i)].func)
+#define SHOP_NUM(i)		((i)->vnum)
+#define SHOP_KEEPER(i)		((i)->keeper)
+#define SHOP_OPEN1(i)		((i)->open1)
+#define SHOP_CLOSE1(i)		((i)->close1)
+#define SHOP_OPEN2(i)		((i)->open2)
+#define SHOP_CLOSE2(i)		((i)->close2)
+#define SHOP_ROOM(i, num)	((i)->in_room[(num)])
+#define SHOP_BUYTYPE(i, num)	(BUY_TYPE((i)->type[(num)]))
+#define SHOP_BUYWORD(i, num)	(BUY_WORD((i)->type[(num)]))
+#define SHOP_PRODUCT(i, num)	((i)->producing[(num)])
+#define SHOP_BANK(i)		((i)->bankAccount)
+#define SHOP_BROKE_TEMPER(i)	((i)->temper1)
+#define SHOP_BITVECTOR(i)	((i)->bitvector)
+#define SHOP_TRADE_WITH(i)	((i)->with_who)
+#define SHOP_SORT(i)		((i)->lastsort)
+#define SHOP_BUYPROFIT(i)	((i)->profit_buy)
+#define SHOP_SELLPROFIT(i)	((i)->profit_sell)
+#define SHOP_FUNC(i)		((i)->func)
 
 #define NOTRADE_GOOD(i)		(IS_SET_AR(SHOP_TRADE_WITH((i)), TRADE_NOGOOD))
 #define NOTRADE_EVIL(i)		(IS_SET_AR(SHOP_TRADE_WITH((i)), TRADE_NOEVIL))
@@ -221,11 +221,11 @@ extern const char *shop_bits[];
 extern int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 
 // functions
-int shop_producing(struct obj_data *item, int shop_nr);
+int shop_producing(struct obj_data *item, struct shop_data *shop);
 int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim);
 void boot_the_shops(FILE *shop_f, char *filename, int rec_count);
 void assign_the_shopkeepers(void);
-int ok_shop_room(int shop_nr, room_vnum room);
+int ok_shop_room(struct shop_data *shop, room_vnum room);
 void destroy_shops(void);
 void show_shops(struct char_data *ch, char *arg);
 int count_shops(shop_vnum low, shop_vnum high);

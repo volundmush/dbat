@@ -44,6 +44,7 @@ ACMD(do_oasis_redit)
   char buf2[MAX_STRING_LENGTH];
   int number = NOWHERE, save = 0, real_num;
   struct descriptor_data *d;
+  struct room_data *room = NULL;
   
   /* Parse any arguments. */
   if (GET_ADMLEVEL(ch) > 0) {
@@ -78,7 +79,7 @@ ACMD(do_oasis_redit)
   }
   
   if (!*buf1 || GET_ADMLEVEL(ch) < 1)
-    number = GET_ROOM_VNUM(IN_ROOM(ch));
+    number = char_room_vnum_get(ch);
   else if (!isdigit(*buf1)) {
     if (strcasecmp("save", buf1) != 0) {
       send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
@@ -90,12 +91,12 @@ ACMD(do_oasis_redit)
     if (is_number(buf2))
       number = atoi(buf2);
     else if (GET_OLC_ZONE(ch) >= 0) {
-      zone_rnum zlok;
+      struct zone_data *zone = zone_by_id(GET_OLC_ZONE(ch));
         
-      if ((zlok = real_zone(GET_OLC_ZONE(ch))) == NOWHERE)
+      if (!zone)
         number = NOWHERE;
       else
-        number = genolc_zone_bottom(zlok);
+        number = zone->bot;
     }
       
     if (number == NOWHERE) {
@@ -134,7 +135,7 @@ ACMD(do_oasis_redit)
   CREATE(d->olc, struct oasis_olc_data, 1);
   
   /* Find the zone. */
-  OLC_ZNUM(d) = save ? real_zone(number) : real_zone_by_thing(number);
+  OLC_ZNUM(d) = virtual_zone_by_thing(number);
   if (OLC_ZNUM(d) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
     free(d->olc);
@@ -142,10 +143,10 @@ ACMD(do_oasis_redit)
     return;
   }
 
-  struct zone_data *zone = &zone_table[OLC_ZNUM(d)];
+  struct zone_data *zone = zone_by_id(OLC_ZNUM(d));
   
   /* Make sure the builder is allowed to modify this zone. */
-  if (!can_edit_zone(ch, OLC_ZNUM(d)) && remodeling == FALSE) {
+  if (!can_edit_zone(ch, zone) && remodeling == FALSE) {
     send_cannot_edit(ch, zone->number);
     free(d->olc);
     d->olc = NULL;
@@ -157,7 +158,7 @@ ACMD(do_oasis_redit)
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s saves room info for zone %d.", GET_NAME(ch), zone->number);
     
     /* Save the rooms. */
-    save_rooms(OLC_ZNUM(d));
+    save_rooms(zone);
     
     /* Free the olc data from the descriptor. */
     free(d->olc);
@@ -167,8 +168,8 @@ ACMD(do_oasis_redit)
   
   OLC_NUM(d) = number;
   
-  if ((real_num = real_room(number)) != NOWHERE)
-    redit_setup_existing(d, real_num);
+  if ((room = room_by_id(number)) != NULL)
+    redit_setup_existing(d, number);
   else
     redit_setup_new(d);
 
@@ -196,7 +197,7 @@ void redit_setup_new(struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-void redit_setup_existing(struct descriptor_data *d, int real_num)
+void redit_setup_existing(struct descriptor_data *d, room_vnum num)
 {
   struct room_data *room;
   int counter;
@@ -205,7 +206,7 @@ void redit_setup_existing(struct descriptor_data *d, int real_num)
    * Build a copy of the room for editing.
    */
   CREATE(room, struct room_data, 1);
-  struct room_data *exist = &world[real_num];
+  struct room_data *exist = room_by_id(num);
 
   *room = *exist;
   /*
@@ -286,7 +287,7 @@ void redit_save_internally(struct descriptor_data *d)
     return;
   }
 
-  struct room_data *room = &world[room_num];
+  struct room_data *room = room_by_id(OLC_NUM(d));
 
   /* Update triggers */  
   /* Free old proto list */
@@ -297,46 +298,13 @@ void redit_save_internally(struct descriptor_data *d)
   room->proto_script = OLC_SCRIPT(d);
   assign_triggers(room, WLD_TRIGGER);
   /* end trigger update */  
-  
-  /* Don't adjust numbers on a room update. */
-  if (!new_room)
-    return;
-
-  /* Idea contributed by C.Raehl 4/27/99 */
-  for (dsc = descriptor_list; dsc; dsc = dsc->next) {
-    if (dsc == d)
-      continue;
-
-    if (STATE(dsc) == CON_ZEDIT) {
-      for (j = 0; OLC_ZONE(dsc)->cmd[j].command != 'S'; j++)
-        switch (OLC_ZONE(dsc)->cmd[j].command) {
-          case 'O':
-          case 'M':
-          case 'T':
-          case 'V':
-            OLC_ZONE(dsc)->cmd[j].arg3 += (OLC_ZONE(dsc)->cmd[j].arg3 >= room_num);
-            break;
-          case 'D':
-            OLC_ZONE(dsc)->cmd[j].arg2 += (OLC_ZONE(dsc)->cmd[j].arg2 >= room_num);
-            /* Fall through */
-          case 'R':
-            OLC_ZONE(dsc)->cmd[j].arg1 += (OLC_ZONE(dsc)->cmd[j].arg1 >= room_num);
-            break;
-          }
-    } else if (STATE(dsc) == CON_REDIT) {
-      for (j = 0; j < NUM_OF_DIRS; j++)
-        if (OLC_ROOM(dsc)->dir_option[j])
-          if (OLC_ROOM(dsc)->dir_option[j]->to_room >= room_num)
-            OLC_ROOM(dsc)->dir_option[j]->to_room++;
-    }
-  }
 }
 
 /*------------------------------------------------------------------------*/
 
-void redit_save_to_disk(zone_vnum zone_num)
+void redit_save_to_disk(struct zone_data *zone)
 {
-  save_rooms(zone_num);		/* :) */
+  save_rooms(zone);		/* :) */
   update_space();
 }
 
@@ -413,7 +381,7 @@ void redit_disp_exit_menu(struct descriptor_data *d)
 	  "@gE@n) Major Fail Dest. Room	: @c%d@n\r\n"
 	  "Enter choice, 0 to quit : ",
 
-	  OLC_EXIT(d)->to_room != NOWHERE ? world[OLC_EXIT(d)->to_room].number : -1,
+	  OLC_EXIT(d)->to_room != NOWHERE ? OLC_EXIT(d)->to_room : -1,
 	  OLC_EXIT(d)->general_description ? OLC_EXIT(d)->general_description : "<NONE>",
 	  OLC_EXIT(d)->keyword ? OLC_EXIT(d)->keyword : "<NONE>",
 	  OLC_EXIT(d)->key != NOTHING ? OLC_EXIT(d)->key : -1,
@@ -490,8 +458,8 @@ void redit_disp_sector_menu(struct descriptor_data *d)
 
 static int _redit_disp_menu_helper(struct room_data *room, int dir)
 {
-  if (room->dir_option[dir] && room->dir_option[dir]->to_room != NOWHERE)
-    return world[room->dir_option[dir]->to_room].number;
+  if (auto dest = exit_dest_get(room->dir_option[dir]); dest)
+    return dest->number;
   else
     return -1;
 }
@@ -527,7 +495,7 @@ void redit_disp_menu(struct descriptor_data *d)
 	  "@gQ@n) Quit\r\n"
 	  "Enter choice : ",
 
-	  OLC_NUM(d), zone_table[OLC_ZNUM(d)].number, room->name,
+	  OLC_NUM(d), OLC_ZNUM(d), room->name,
 	  room->description, buf1, buf2,
 	  _redit_disp_menu_helper(room, NORTH),
 	  _redit_disp_menu_helper(room, NORTHWEST),
@@ -552,7 +520,7 @@ void redit_disp_menu(struct descriptor_data *d)
           "@gQ@n) Quit\r\n"
           "Enter choice : ",
 
-          OLC_NUM(d), zone_table[OLC_ZNUM(d)].number, room->name,
+          OLC_NUM(d), OLC_ZNUM(d), room->name,
           room->description);
    }
 
@@ -567,6 +535,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
 {
   int number;
   char *oldtext = NULL;
+  struct room_data *room = NULL;
 
   switch (OLC_MODE(d)) {
   case REDIT_CONFIRM_SAVESTRING:
@@ -577,7 +546,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
 	"OLC: %s edits room %d.", GET_NAME(d->character), OLC_NUM(d));
       if (CONFIG_OLC_SAVE) {
-	redit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
+	redit_save_to_disk(zone_by_id(virtual_zone_by_thing(OLC_NUM(d))));
         if (GET_ADMLEVEL(d->character) < 1) {
          write_to_output(d, "@GThe remodeling droid quickly launches about with remodeling the room to your specifications. It seems to finish in no time at all...@n\r\n");
          act("@GThe remodeling droid quickly launches about with remodeling the room as to @g$n's@G specifications. It seems to finish in no time at all...@n", TRUE, d->character, 0, 0, TO_ROOM);
@@ -951,7 +920,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
 
   case REDIT_EXIT_NUMBER:
     if ((number = atoi(arg)) != -1)
-      if ((number = real_room(number)) == NOWHERE) {
+      if (!room_by_id(number)) {
 	write_to_output(d, "That room does not exist, try again : ");
 	return;
       }
@@ -1065,15 +1034,15 @@ void redit_parse(struct descriptor_data *d, char *arg)
     break;
 
   case REDIT_COPY:
-    if ((number = real_room(atoi(arg))) != NOWHERE) {
-      redit_setup_existing(d, number);
+    if ((room = room_by_id(atoi(arg))) != NULL) {
+      redit_setup_existing(d, room->number);
     } else
       write_to_output(d, "That room does not exist.\r\n");
     break;
   
   case REDIT_DELETE:
     if (*arg == 'y' || *arg == 'Y') {
-      if (delete_room(real_room(OLC_ROOM(d)->number)))
+      if (delete_room(OLC_ROOM(d)->number))
         write_to_output(d, "Room deleted.\r\n");
       else
         write_to_output(d, "Couldn't delete the room!\r\n");

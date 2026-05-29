@@ -15,6 +15,7 @@
 #include "dbat/game/improved-edit.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/spec_assign.h"
+#include "dbat/db/iterate.hpp"
 
 /******************************************************************************/
 /** External Functions                                                       **/
@@ -1895,7 +1896,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
         write_to_output(d,
           "That is an invalid choice!\r\n"
           "Enter the room's vnum where mortals should load into : ");
-      } else if (real_room(atoi(arg)) == NOWHERE) {
+      } else if (!room_by_id(atoi(arg))) {
         write_to_output(d,
           "That room doesn't exist!\r\n"
           "Enter the room's vnum where mortals should load into : ");
@@ -1912,7 +1913,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
         write_to_output(d,
           "That is an invalid choice!\r\n"
           "Enter the room's vnum where immortals should load into : ");
-      } else if (real_room(atoi(arg)) == NOWHERE) {
+      } else if (!room_by_id(atoi(arg))) {
         write_to_output(d,
           "That room doesn't exist!\r\n"
           "Enter the room's vnum where immortals should load into : ");
@@ -1929,7 +1930,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
         write_to_output(d,
           "That is an invalid choice!\r\n"
           "Enter the room's vnum where frozen people should load into : ");
-      } else if (real_room(atoi(arg)) == NOWHERE) {
+      } else if (!room_by_id(atoi(arg))) {
         write_to_output(d,
           "That room doesn't exist!\r\n"
           "Enter the room's vnum where frozen people should load into : ");
@@ -1946,7 +1947,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
         write_to_output(d,
           "That is an invalid choice!\r\n"
           "Enter the vnum for donation room #1 : ");
-      } else if (real_room(atoi(arg)) == NOWHERE) {
+      } else if (!room_by_id(atoi(arg))) {
         write_to_output(d,
           "That room doesn't exist!\r\n"
           "Enter the vnum for donation room #1 : ");
@@ -1963,7 +1964,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
         write_to_output(d,
           "That is an invalid choice!\r\n"
           "Enter the vnum for donation room #2 : ");
-      } else if (real_room(atoi(arg)) == NOWHERE) {
+      } else if (!room_by_id(atoi(arg))) {
         write_to_output(d,
           "That room doesn't exist!\r\n"
           "Enter the vnum for donation room #2 : ");
@@ -1980,7 +1981,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
         write_to_output(d,
           "That is an invalid choice!\r\n"
           "Enter the vnum for donation room #3 : ");
-      } else if (real_room(atoi(arg)) == NOWHERE) {
+      } else if (!room_by_id(atoi(arg))) {
         write_to_output(d,
           "That room doesn't exist!\r\n"
           "Enter the vnum for donation room #3 : ");
@@ -2245,9 +2246,11 @@ void reassign_rooms(void)
   int i;
 
   /* remove old funcs */
-  for (i = 0; i < top_of_world; i++)
-    world[i].func = NULL;
-        
+  room_iterate([&](auto room) {
+    room->func = NULL;
+    return true;
+  });
+
   /* reassign spec_procs */
   assign_rooms();
 }

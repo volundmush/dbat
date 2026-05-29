@@ -32,7 +32,7 @@
    void (name)(obj_data *obj, char *argument, int cmd, int subcmd)
 
 void obj_log(obj_data *obj, const char *format, ...);
-room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr);
+struct room_data *find_obj_target_room(obj_data *obj, char *rawroomstr);
 OCMD(do_oecho);
 OCMD(do_oforce);
 OCMD(do_ozoneecho);
@@ -80,26 +80,26 @@ void obj_log(obj_data *obj, const char *format, ...)
 }
 
 /* returns the real room number that the object or object's carrier is in */
-room_rnum obj_room(obj_data *obj)
+struct room_data* obj_room(obj_data *obj)
 {
-    if (IN_ROOM(obj) != NOWHERE)
-        return IN_ROOM(obj);
+    if (obj_room_get(obj))
+        return obj_room_get(obj);
     else if (obj->carried_by)
-        return IN_ROOM(obj->carried_by);
+        return char_room_get(obj->carried_by);
     else if (obj->worn_by)
-        return IN_ROOM(obj->worn_by);
+        return char_room_get(obj->worn_by);
     else if (obj->in_obj)
         return obj_room(obj->in_obj);
     else
-        return NOWHERE;
+        return NULL;
 }
 
 
 /* returns the real room number, or NOWHERE if not found or invalid */
-room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr)
+struct room_data *find_obj_target_room(obj_data *obj, char *rawroomstr)
 {
     int tmp;
-    room_rnum location;
+    struct room_data *location;
     char_data *target_mob;
     obj_data *target_obj;
     char roomstr[MAX_INPUT_LENGTH];
@@ -107,34 +107,34 @@ room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr)
     one_argument(rawroomstr, roomstr);
 
     if (!*roomstr)
-        return NOWHERE;
+        return NULL;
 
     if (isdigit(*roomstr) && !strchr(roomstr, '.'))
     {
         tmp = atoi(roomstr);
-        if ((location = real_room(tmp)) == NOWHERE)
-            return NOWHERE;
+        if ((location = room_by_id(tmp)) == NULL)
+            return NULL;
     }
 
     else if ((target_mob = get_char_by_obj(obj, roomstr)))
-        location = IN_ROOM(target_mob);
+        location = char_room_get(target_mob);
     else if ((target_obj = get_obj_by_obj(obj, roomstr)))
     {
-        if (IN_ROOM(target_obj) != NOWHERE)
-            location = IN_ROOM(target_obj);
+        if (obj_room_get(target_obj) != NULL)
+            location = obj_room_get(target_obj);
         else
-            return NOWHERE;
+            return NULL;
     }
     else
-        return NOWHERE;
+        return NULL;
 
     /* a room has been found.  Check for permission */
-    if (ROOM_FLAGGED(location, ROOM_GODROOM) ||
+    if (room_flagged(location, ROOM_GODROOM) ||
 #ifdef ROOM_IMPROOM
-        ROOM_FLAGGED(location, ROOM_IMPROOM) ||
+        room_flagged(location, ROOM_IMPROOM) ||
 #endif
-        ROOM_FLAGGED(location, ROOM_PRIVATE))
-        return NOWHERE;
+        room_flagged(location, ROOM_PRIVATE))
+        return NULL;
 
     return location;
 }
@@ -145,19 +145,18 @@ room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr)
 
 OCMD(do_oecho)
 {
-    int room;
+    struct room_data *room;
 
     skip_spaces(&argument);
 
     if (!*argument)
         obj_log(obj, "oecho called with no args");
 
-    else if ((room = obj_room(obj)) != NOWHERE)
+    else if ((room = obj_room(obj)) != NULL)
     {
-      struct room_data *rm = &world[room];
-      if (rm->people) {
-        sub_write(argument, rm->people, TRUE, TO_ROOM);
-        sub_write(argument, rm->people, TRUE, TO_CHAR);
+      if (room->people) {
+        sub_write(argument, room->people, TRUE, TO_ROOM);
+        sub_write(argument, room->people, TRUE, TO_CHAR);
       }
     }
 
@@ -169,7 +168,7 @@ OCMD(do_oecho)
 OCMD(do_oforce)
 {
     char_data *ch, *next_ch;
-    int room;
+    struct room_data *room = NULL;
     char arg1[MAX_INPUT_LENGTH], *line;
 
     line = one_argument(argument, arg1);
@@ -182,12 +181,11 @@ OCMD(do_oforce)
 
     if (!strcasecmp(arg1, "all"))
     {
-        if ((room = obj_room(obj)) == NOWHERE)
+        if ((room = obj_room(obj)) == NULL)
             obj_log(obj, "oforce called by object in NOWHERE");
         else
         {
-          struct room_data *rm = &world[room];
-            for (ch = rm->people; ch; ch = next_ch)
+            for (ch = room->people; ch; ch = next_ch)
             {
                 next_ch = ch->next_in_room;
                 if (valid_dg_target(ch, 0))
@@ -215,7 +213,7 @@ OCMD(do_oforce)
 
 OCMD(do_ozoneecho)
 {
-    int zone;
+    struct zone_data *zone = NULL;
     char room_number[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
 
     msg = any_one_arg(argument, room_number);
@@ -224,7 +222,7 @@ OCMD(do_ozoneecho)
     if (!*room_number || !*msg)
 	obj_log(obj, "ozoneecho called with too few args");
 
-    else if ((zone = real_zone_by_thing(atoi(room_number))) == NOWHERE)
+    else if ((zone = zone_by_id(atoi(room_number))) == NULL)
 	obj_log(obj, "ozoneecho called for nonexistant zone");
 
     else {
@@ -371,21 +369,20 @@ OCMD(do_opurge)
     char arg[MAX_INPUT_LENGTH];
     char_data *ch, *next_ch;
     obj_data *o, *next_obj;
-    int room;
+    struct room_data *room = NULL;
 
     one_argument(argument, arg);
 
     if (!*arg) {
       /* purge all */
-      if ((room = obj_room(obj)) != NOWHERE) {
-        struct room_data *rm = &world[room];
-        for (ch = rm->people; ch; ch = next_ch ) {
+      if ((room = obj_room(obj)) != NULL) {
+        for (ch = room->people; ch; ch = next_ch ) {
            next_ch = ch->next_in_room;
            if (IS_NPC(ch))
              extract_char(ch);
         }
 
-        for (o = rm->contents; o; o = next_obj ) {
+        for (o = room->contents; o; o = next_obj ) {
            next_obj = o->next_content;
            if (o != obj)
              extract_obj(o);
@@ -421,7 +418,7 @@ OCMD(do_opurge)
    on their own.                             */
 OCMD(do_ogoto)
 {
- room_rnum target;
+ struct room_data *target = NULL;
  char arg1[MAX_INPUT_LENGTH];
 
  one_argument(argument, arg1);
@@ -434,10 +431,10 @@ OCMD(do_ogoto)
 
  target = find_obj_target_room(obj, arg1);
 
- if (target == NOWHERE) {
+ if (target == NULL) {
   obj_log(obj, "ogoto target is an invalid room");
  }
- else if (IN_ROOM(obj) == NOWHERE) {
+ else if (obj_room_get(obj) == NULL) {
   obj_log(obj, "ogoto tried to leave nowhere");
  }
  else {
@@ -449,7 +446,7 @@ OCMD(do_ogoto)
 OCMD(do_oteleport)
 {
     char_data *ch, *next_ch;
-    room_rnum target, room;
+    struct room_data *target = NULL, *room = NULL;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg1, arg2);
@@ -462,7 +459,7 @@ OCMD(do_oteleport)
 
     target = find_obj_target_room(obj, arg2);
 
-    if (target == NOWHERE)
+    if (target == NULL)
         obj_log(obj, "oteleport target is an invalid room");
 
     else if (!strcasecmp(arg1, "all"))
@@ -470,9 +467,8 @@ OCMD(do_oteleport)
         room = obj_room(obj);
         if (target == room)
             obj_log(obj, "oteleport target is itself");
-        struct room_data *rm = &world[room];
 
-        for (ch = rm->people; ch; ch = next_ch)
+        for (ch = room->people; ch; ch = next_ch)
         {
             next_ch = ch->next_in_room;
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
@@ -502,13 +498,16 @@ OCMD(do_oteleport)
 OCMD(do_dgoload)
 {
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    int number = 0, room;
+    int number = 0;
+    struct room_data *room = NULL;
+     char_data *ch;
     char_data *mob;
     obj_data *object;
     char *target;
     char_data *tch;
     obj_data *cnt;
     int pos;
+    struct room_data *dest = NULL;
 
     target = two_arguments(argument, arg1, arg2);
 
@@ -518,7 +517,7 @@ OCMD(do_dgoload)
         return;
     }
 
-    if ((room = obj_room(obj)) == NOWHERE)
+    if ((room = obj_room(obj)) == NULL)
     {
         obj_log(obj, "oload: object in NOWHERE trying to load");
         return;
@@ -526,11 +525,10 @@ OCMD(do_dgoload)
 
     /* load mob to target room - Jamie Nelson, April 13 2004 */
     if (is_abbrev(arg1, "mob")) {
-      room_rnum rnum;
       if (!target || !*target) {
-        rnum = room;
+        dest = room;
       } else {
-        if (!isdigit(*target) || (rnum = real_room(atoi(target))) == NOWHERE) {
+        if (!isdigit(*target) || (dest = room_by_id(atoi(target))) == NULL) {
           obj_log(obj, "oload: room target vnum doesn't exist "
                        "(loading mob vnum %d to room %s)", number, target);
           return;
@@ -540,7 +538,7 @@ OCMD(do_dgoload)
         obj_log(obj, "oload: bad mob vnum");
         return;
       }
-      char_to_room(mob, rnum);
+      char_to_room(mob, dest);
 
       if (SCRIPT(obj)) { /* It _should_ have, but it might be detached. */
         char buf[MAX_INPUT_LENGTH];
@@ -629,7 +627,7 @@ OCMD(do_odamage) {
 
 OCMD(do_oasound)
 {
-  room_rnum room;
+  struct room_data *room;
   int door;
 
   skip_spaces(&argument);
@@ -639,15 +637,13 @@ OCMD(do_oasound)
     return;
   }
 
-  if ((room = obj_room(obj)) == NOWHERE) {
+  if ((room = obj_room(obj)) == NULL) {
     obj_log(obj, "oecho called by object in NOWHERE");
     return;
   }
 
-  struct room_data *rm = &world[room];
-
   for (door = 0; door < NUM_OF_DIRS; door++) {
-    struct room_direction_data *ex = rm->dir_option[door];
+    struct room_direction_data *ex = room->dir_option[door];
     struct room_data *dest = exit_dest_get(ex);
     if(dest && dest->people) {
       sub_write(argument, dest->people, TRUE, TO_ROOM);
@@ -663,7 +659,8 @@ OCMD(do_odoor)
     char field[MAX_INPUT_LENGTH], *value;
     room_data *rm;
     struct room_direction_data *newexit;
-    int dir, fd, to_room;
+    int dir, fd;
+    room_vnum to_room;
 
     const char *door_field[] = {
         "purge",
@@ -741,7 +738,7 @@ OCMD(do_odoor)
             strcpy(newexit->keyword, value);
             break;
         case 5:  /* room        */
-            if ((to_room = real_room(atoi(value))) != NOWHERE)
+            if ((to_room = room_vnum_check(atoi(value))) != NOWHERE)
                 newexit->to_room = to_room;
             else
                 obj_log(obj, "odoor: invalid door target");
@@ -774,7 +771,7 @@ OCMD(do_osetval)
 /* submitted by PurpleOnyx - tkhasi@shadowglen.com*/
 OCMD(do_oat)
 {
-  room_rnum loc = NOWHERE;
+  struct room_data *loc = NULL;
   struct char_data *ch;
   struct obj_data *object;
   char arg[MAX_INPUT_LENGTH], *command;
@@ -794,11 +791,11 @@ OCMD(do_oat)
   }
 
   if (isdigit(*arg)) 
-    loc = real_room(atoi(arg));
+    loc = room_by_id(atoi(arg));
   else if ((ch = get_char_by_obj(obj, arg))) 
-    loc = IN_ROOM(ch);
+    loc = char_room_get(ch);
 
-  if (loc == NOWHERE) {
+  if (loc == NULL) {
     obj_log(obj, "oat: location not found (%s)", arg);
     return;
   }
@@ -810,7 +807,7 @@ OCMD(do_oat)
   obj_to_room(object, loc);
   obj_command_interpreter(object, command);
 
-  if (IN_ROOM(object) == loc)
+  if (obj_room_get(object) == loc)
     extract_obj(object);
 }
 

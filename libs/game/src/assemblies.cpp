@@ -159,7 +159,8 @@ void assemblyListToChar( struct char_data *pCharacter )
 
   for( i = 0; i < g_lNumAssemblies; i++ )
   {
-    if( (lRnum = real_object( g_pAssemblyTable[ i ].lVnum )) < 0 )
+    auto proto = obj_proto_by_id(g_pAssemblyTable[i].lVnum);
+    if(!proto)
     {
       send_to_char(pCharacter, "[-----] ***RESERVED***\r\n");
       log( "SYSERR: assemblyListToChar(): Invalid vnum #%ld in assembly table.", g_pAssemblyTable[i].lVnum);
@@ -168,7 +169,7 @@ void assemblyListToChar( struct char_data *pCharacter )
     {
       sprinttype(g_pAssemblyTable[ i ].uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
       sprintf( szBuffer, "[%5ld] %s (%s)\r\n", g_pAssemblyTable[ i ].lVnum,
-       obj_proto[ lRnum ].short_description, szAssmType );
+       proto->short_description, szAssmType );
       send_to_char(pCharacter, szBuffer);
 
       for( j = 0; j < g_pAssemblyTable[ i ].lNumComponents; j++ )
@@ -182,7 +183,7 @@ void assemblyListToChar( struct char_data *pCharacter )
        else
        {
          sprintf( szBuffer, " %5ld: %-20.20s Extract=%-3.3s InRoom=%-3.3s\r\n",+           g_pAssemblyTable[ i ].pComponents[ j ].lVnum,
-           obj_proto[ lRnum ].short_description,
+           proto->short_description,
            (g_pAssemblyTable[ i ].pComponents[ j ].bExtract ? "Yes" : "No"),
            (g_pAssemblyTable[ i ].pComponents[ j ].bInRoom  ? "Yes" : "No") );
          send_to_char(pCharacter, szBuffer);
@@ -299,7 +300,7 @@ bool assemblyCheckComponents( long lVnum, struct char_data *pCharacter, int extr
     if( pAssembly->pComponents[ i ].bExtract && bOk && extract_yes == TRUE)
       extract_obj( ppComponentObjects[ i ] );
     else if( pAssembly->pComponents[ i ].bInRoom )
-      obj_to_room( ppComponentObjects[ i ], IN_ROOM( pCharacter ) );
+      obj_to_room( ppComponentObjects[ i ], char_room_get( pCharacter ) );
     else
       obj_to_char( ppComponentObjects[ i ], pCharacter );
   }
@@ -503,9 +504,9 @@ long assemblyFindAssembly( const char *pszAssemblyName )
 
   for( i = 0; i < g_lNumAssemblies; i++ )
   {
-    if( (lRnum = real_object( g_pAssemblyTable[ i ].lVnum )) < 0 )
+    if(auto proto = obj_proto_by_id(g_pAssemblyTable[ i ].lVnum); !proto)
       log( "SYSERR: assemblyFindAssembly(): Invalid vnum #%ld in assembly table.", g_pAssemblyTable[i].lVnum );
-    else if( isname( pszAssemblyName, obj_proto[ lRnum ].name ) )
+    else if( isname( pszAssemblyName, proto->name ) )
       return (g_pAssemblyTable[ i ].lVnum);
   }
 

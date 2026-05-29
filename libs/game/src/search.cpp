@@ -103,50 +103,25 @@ struct obj_data *get_obj_in_list_num(int num, struct obj_data *list)
 
 
 /* search the entire world for an object number, and return a pointer  */
-struct obj_data *get_obj_num(obj_rnum nr)
+struct obj_data *get_obj_num(obj_vnum vnum)
 {
   struct obj_data *i;
 
   for (i = object_list; i; i = i->next)
-    if (GET_OBJ_RNUM(i) == nr)
+    if (GET_OBJ_VNUM(i) == vnum)
       return (i);
 
   return (NULL);
 }
 
 
-
-/* search a room for a char, and return a pointer if found..  */
-struct char_data *get_char_room(char *name, int *number, room_rnum room)
-{
-  struct char_data *i;
-  int num;
-
-  if (!number) {
-    number = &num;
-    num = get_number(&name);
-  }
-
-  if (*number == 0)
-    return (NULL);
-
-  for (i = world[room].people; i && *number; i = i->next_in_room)
-    if (isname(name, i->name))
-      if (--(*number) == 0)
-	return (i);
-
-  return (NULL);
-}
-
-
-
 /* search all over the world for a char num, and return a pointer if found */
-struct char_data *get_char_num(mob_rnum nr)
+struct char_data *get_char_num(mob_vnum nr)
 {
   struct char_data *i;
 
   for (i = character_list; i; i = i->next)
-    if (GET_MOB_RNUM(i) == nr)
+    if (GET_MOB_VNUM(i) == nr)
       return (i);
 
   return (NULL);
@@ -167,7 +142,7 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
   for (i = character_list; i; i = i->next) {
     if (IS_NPC(i))
       continue;
-    if (inroom == FIND_CHAR_ROOM && IN_ROOM(i) != IN_ROOM(ch))
+    if (inroom == FIND_CHAR_ROOM && char_room_get(i) != char_room_get(ch))
       continue;
     if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
      if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
@@ -292,7 +267,7 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
     return get_player_vis(ch, name, NULL, 0);
 
   for (i = character_list; i && *number; i = i->next) {
-    if (IN_ROOM(ch) == IN_ROOM(i))
+    if (char_room_get(ch) == char_room_get(i))
       continue;
     if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
      if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {

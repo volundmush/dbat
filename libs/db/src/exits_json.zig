@@ -12,7 +12,7 @@ pub fn serializeExit(allocator: std.mem.Allocator, exit: *cdb.room_direction_dat
     try jsonx.putString(&object, allocator, "keyword", cdb.exit_keyword_get(exit));
     try jsonx.putInt(&object, allocator, "flags", cdb.exit_info_get(exit));
     try jsonx.putInt(&object, allocator, "key", cdb.exit_key_get(exit));
-    try jsonx.putInt(&object, allocator, "to_room", cdb.exit_to_room_get(exit));
+    try jsonx.putInt(&object, allocator, "to_room", cdb.exit_to_room_vnum_get(exit));
     try jsonx.putInt(&object, allocator, "dclock", cdb.exit_dclock_get(exit));
     try jsonx.putInt(&object, allocator, "dchide", cdb.exit_dchide_get(exit));
     try jsonx.putInt(&object, allocator, "dcskill", cdb.exit_dcskill_get(exit));

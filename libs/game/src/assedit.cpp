@@ -164,7 +164,7 @@ void assedit_disp_menu(struct descriptor_data *d)
       "Assembly Type  : @y%s@n\r\n"
       "Components:\r\n",
         OLC_ASSEDIT(d)->lVnum,
-        obj_proto[real_object(OLC_ASSEDIT(d)->lVnum)].short_description,
+        obj_proto_by_id(OLC_ASSEDIT(d)->lVnum)->short_description,
         szAssmType
        );
 
@@ -172,13 +172,13 @@ void assedit_disp_menu(struct descriptor_data *d)
     send_to_char(d->character, "   < NONE > \r\n");
   else {
    for (i = 0; i < OLC_ASSEDIT(d)->lNumComponents; i++ ) {
-     if ((lRnum = real_object(OLC_ASSEDIT(d)->pComponents[i].lVnum)) < 0) {
+     if (auto proto = obj_proto_by_id(OLC_ASSEDIT(d)->pComponents[i].lVnum); !proto) {
         send_to_char(d->character, "@g%2d@n) @y ERROR --- Contact an Implementor @n\r\n ", i+1);
        }  else   {
         send_to_char(d->character,
           "@g%2d@n) [@c%5ld@n] %-20.20s  In room: @c%-3.3s@n    Extract: @y%-3.3s@n\r\n",
            i+1, OLC_ASSEDIT(d)->pComponents[i].lVnum,
-           obj_proto[lRnum].short_description,
+           proto->short_description,
            (OLC_ASSEDIT(d)->pComponents[i].bInRoom  ? "Yes" : "No"),
            (OLC_ASSEDIT(d)->pComponents[i].bExtract ? "Yes" : "No"));
        }

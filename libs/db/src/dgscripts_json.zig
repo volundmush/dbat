@@ -54,7 +54,7 @@ fn freeProtoScript(head: [*c]cdb.trig_proto_list) void {
 pub fn serializeTrigger(allocator: std.mem.Allocator, trigger: *cdb.trig_data) !JsonValue {
     var object = jsonx.newObject(allocator);
     try jsonx.putSlice(&object, allocator, "kind", "trigger");
-    try jsonx.putInt(&object, allocator, "id", triggerVnum(trigger));
+    try jsonx.putInt(&object, allocator, "id", trigger.vnum);
     try jsonx.putString(&object, allocator, "name", trigger.name);
     try jsonx.putInt(&object, allocator, "attach_type", trigger.attach_type);
     try jsonx.putInt(&object, allocator, "trigger_type", trigger.trigger_type);
@@ -79,11 +79,6 @@ pub fn deserializeTrigger(trigger: *cdb.trig_data, value: JsonValue) !void {
     }
     if (jsonx.field(value, "lines")) |lines| try deserializeCommandLines(&trigger.cmdlist, lines);
     trigger.curr_state = trigger.cmdlist;
-}
-
-fn triggerVnum(trigger: *cdb.trig_data) cdb.mob_vnum {
-    if (trigger.nr < 0 or cdb.trig_index == null) return cdb.NOBODY;
-    return cdb.trig_index[@intCast(trigger.nr)].*.vnum;
 }
 
 fn serializeCommandLines(allocator: std.mem.Allocator, head: [*c]cdb.cmdlist_element) !JsonValue {

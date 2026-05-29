@@ -1213,7 +1213,7 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
       if (nr == NOTHING)
       { /* then it is unique */
         temp = create_obj();
-        temp->item_number = NOTHING;
+        temp->vnum = NOTHING;
         GET_OBJ_SIZE(temp) = SIZE_MEDIUM;
       }
       else if (nr < 0)

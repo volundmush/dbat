@@ -15,6 +15,7 @@
 #include "dbat/game/handler.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/fileop.h"
+#include "dbat/db/iterate.hpp"
 
 #include <unistd.h>
 #include <errno.h>
@@ -273,17 +274,10 @@ obj_data *find_obj(long n)
 /* return room with UID n */
 room_data *find_room(long n)
 {
-  room_rnum rnum;
-
   n -= ROOM_ID_BASE;
   if (n<0)
     return NULL;
-  rnum = real_room((room_vnum)n);
-
-  if (rnum != NOWHERE)
-    return &world[rnum];
-
-  return NULL;
+  return room_by_id((room_vnum)n);
 }
 
 /************************************************************
@@ -324,8 +318,9 @@ char_data *get_char_near_obj(obj_data *obj, char *name)
       return ch;
   } else {
     room_rnum num;
-    if ((num = obj_room(obj)) != NOWHERE)
-      for (ch = world[num].people; ch; ch = ch->next_in_room)
+    struct room_data *rm = obj_room(obj);
+    if (rm)
+      for (ch = rm->people; ch; ch = ch->next_in_room)
         if (isname(name, ch->name) &&
             valid_dg_target(ch, DG_ALLOW_GODS))
           return ch;
@@ -364,7 +359,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name)
 {
   obj_data *i = NULL;
   char_data *ch;
-  int rm;
+  struct room_data *rm;
   long id;
 
   if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
@@ -391,13 +386,13 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name)
   else if (obj->carried_by &&
           (i = get_obj_in_list(name, obj->carried_by->carrying)))
     return i;
-  else if ((rm = obj_room(obj)) != NOWHERE) {
+  else if ((rm = obj_room(obj)) != NULL) {
     /* check the floor */
-    if ((i = get_obj_in_list(name, world[rm].contents)))
+    if ((i = get_obj_in_list(name, rm->contents)))
       return i;
 
     /* check peoples' inventory */
-    for (ch = world[rm].people;ch ; ch = ch->next_in_room)
+    for (ch = rm->people;ch ; ch = ch->next_in_room)
       if ((i = get_object_in_equip(ch, name)))
         return i;
   }
@@ -428,10 +423,7 @@ room_data *get_room(char *name)
 
   if (*name == UID_CHAR)
     return find_room(atoi(name + 1));
-  else if ((nr = real_room(atoi(name))) == NOWHERE)
-    return NULL;
-  else
-    return &world[nr];
+  return room_by_id(atoi(name));
 }
 
 
@@ -505,7 +497,7 @@ char_data *get_char_by_room(room_data *room, char *name)
 obj_data *get_obj_by_obj(obj_data *obj, char *name)
 {
   obj_data *i = NULL;
-  int rm;
+  struct room_data *rm = NULL;
 
   if (*name == UID_CHAR)
     return find_obj(atoi(name + 1));
@@ -526,8 +518,8 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name)
      (i = get_obj_in_list(name, obj->carried_by->carrying)))
     return i;
 
-  if (((rm = obj_room(obj)) != NOWHERE) &&
-      (i = get_obj_in_list(name, world[rm].contents)))
+  if (((rm = obj_room(obj)) != NULL) &&
+      (i = get_obj_in_list(name, rm->contents)))
     return i;
 
   return get_obj(name);
@@ -601,15 +593,15 @@ void script_trigger_check(void)
     }
   }
 
-  for (nr = 0; nr <= top_of_world; nr++) {
-    room = &world[nr];
+  room_iterate([&](auto room) {
     if ((sc = SCRIPT(room))) {
       if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
           (!is_empty(room->zone) ||
            IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
         random_wtrigger(room);
     }
-  }
+    return true;
+  });
 }
 
 void check_time_triggers(void)
@@ -640,15 +632,15 @@ void check_time_triggers(void)
     }
   }
 
-  for (nr = 0; nr <= top_of_world; nr++) {
-    room = &world[nr];
+  room_iterate([&](auto room) {
     if ((sc = SCRIPT(room))) {
       if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
           (!is_empty(room->zone) ||
            IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
         time_wtrigger(room);
     }
-  }
+    return true;
+  });
 }
 
 
@@ -665,35 +657,6 @@ EVENTFUNC(trig_wait_event)
 
   free(wait_event_obj);
   GET_TRIG_WAIT(trig) = NULL;
-
-#if 1  /* debugging */
-  {
-    int found = FALSE;
-    if (type == MOB_TRIGGER) {
-      struct char_data *tch;
-      for (tch = character_list;tch && !found;tch = tch->next)
-        if (tch == (struct char_data *)go)
-          found = TRUE;
-    } else if (type == OBJ_TRIGGER) {
-      struct obj_data *obj;
-      for (obj = object_list;obj && !found;obj = obj->next)
-        if (obj == (struct obj_data *)go)
-          found = TRUE;
-    } else {
-      room_rnum i;
-      for (i = 0;i<top_of_world && !found;i++)
-        if (&world[i] == (struct room_data *)go)
-          found = TRUE;
-    }
-    if (!found) {
-      log("Trigger restarted on unknown entity. Vnum: %d", GET_TRIG_VNUM(trig));
-      log("Type: %s trigger", type==MOB_TRIGGER ? "Mob" : type == OBJ_TRIGGER ? "Obj" : "Room");
-      log("attached %d places", trig_index[trig->nr]->number);
-      script_log("Trigger restart attempt on unknown entity.");
-      return 0;
-    }
-  }
-#endif
 
   script_driver(&go, trig, type, TRIG_RESTART);
 
@@ -714,8 +677,8 @@ void do_stat_trigger(struct char_data *ch, trig_data *trig)
         return;
     }
 
-    len += snprintf(sb, sizeof(sb), "Name: '@y%s@n',  VNum: [@g%5d@n], RNum: [%5d]\r\n",
-              GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), GET_TRIG_RNUM(trig));
+    len += snprintf(sb, sizeof(sb), "Name: '@y%s@n',  VNum: [@g%5d@n]\r\n",
+              GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig));
 
     if (trig->attach_type==OBJ_TRIGGER) {
       len += snprintf(sb + len, sizeof(sb)-len, "Trigger Intended Assignment: Objects\r\n");
@@ -788,8 +751,8 @@ void script_stat (char_data *ch, struct script_data *sc)
   }
 
   for (t = TRIGGERS(sc); t; t = t->next) {
-    send_to_char(ch, "\r\n  Trigger: @y%s@n, VNum: [@y%5d@n], RNum: [%5d]\r\n",
-            GET_TRIG_NAME(t), GET_TRIG_VNUM(t), GET_TRIG_RNUM(t));
+    send_to_char(ch, "\r\n  Trigger: @y%s@n, VNum: [@y%5d@n]\r\n",
+            GET_TRIG_NAME(t), GET_TRIG_VNUM(t));
 
     if (t->attach_type==OBJ_TRIGGER) {
       send_to_char(ch, "  Trigger Intended Assignment: Objects\r\n");
@@ -927,7 +890,7 @@ ACMD(do_attach)
       send_to_char(ch, "Players can't have scripts.\r\n");
       return;
     }
-    if (!can_edit_zone(ch, char_room_get(ch)->zone)) {
+    if (!can_edit_zone(ch, char_zone_get(ch))) {
       send_to_char(ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
@@ -965,7 +928,7 @@ ACMD(do_attach)
       }
     }
 
-    if (!can_edit_zone(ch, char_room_get(ch)->zone)) {
+    if (!can_edit_zone(ch, char_zone_get(ch))) {
       send_to_char(ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
@@ -989,18 +952,18 @@ ACMD(do_attach)
 
   else if (is_abbrev(arg, "room") || is_abbrev(arg, "wtr")) {
     if (strchr(targ_name, '.'))
-      rnum = IN_ROOM(ch);
+      room = char_room_get(ch);
     else if (isdigit(*targ_name))
-      rnum = find_target_room(ch, targ_name);
+      room = find_target_room(ch, targ_name);
     else
-      rnum = NOWHERE;
+      room = NULL;
 
-    if (rnum == NOWHERE) {
+    if (room == NULL) {
       send_to_char(ch, "You need to supply a room number or . for current room.\r\n");
       return;
     }
 
-    if (!can_edit_zone(ch, world[rnum].zone)) {
+    if (!can_edit_zone(ch, room_zone_get(room))) {
       send_to_char(ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
@@ -1011,14 +974,12 @@ ACMD(do_attach)
       return;
     }
 
-    room = &world[rnum];
-
     if (!SCRIPT(room))
       CREATE(SCRIPT(room), struct script_data, 1);
     add_trigger(SCRIPT(room), trig, loc);
 
     send_to_char(ch, "Trigger %d (%s) attached to room %d.\r\n",
-                 tn, GET_TRIG_NAME(trig), world[rnum].number);
+                 tn, GET_TRIG_NAME(trig), room->number);
   }
 
   else
@@ -1066,7 +1027,7 @@ int remove_trigger(struct script_data *sc, char *name)
     /* is found. originally the number was position-only */
     else if (++n >= num)
       break;
-    else if (trig_index[i->nr]->vnum == num)
+    else if (i->vnum == num)
       break;
   }
 
@@ -1115,7 +1076,7 @@ ACMD(do_detach)
 
   if (!strcasecmp(arg1, "room") || !strcasecmp(arg1, "wtr")) {
     room = char_room_get(ch);
-    if (!can_edit_zone(ch, room->zone)) {
+    if (!can_edit_zone(ch, room_zone_get(room))) {
       send_to_char(ch, "You can only detach triggers in your own zone\r\n");
       return;
     }
@@ -1197,7 +1158,7 @@ ACMD(do_detach)
 
       else if (!SCRIPT(victim))
         send_to_char(ch, "That mob doesn't have any triggers.\r\n");
-      else if (!can_edit_zone(ch, real_zone_by_thing(GET_MOB_VNUM(victim)))) {
+      else if (!can_edit_zone(ch, zone_by_id(virtual_zone_by_thing(GET_MOB_VNUM(victim))))) {
         send_to_char(ch, "You can only detach triggers in your own zone\r\n");
         return;
       }
@@ -1219,7 +1180,7 @@ ACMD(do_detach)
       if (!SCRIPT(object))
         send_to_char(ch, "That object doesn't have any triggers.\r\n");
 
-      else if (!can_edit_zone(ch, real_zone_by_thing(GET_OBJ_VNUM(object)))) {
+      else if (!can_edit_zone(ch, zone_by_id(virtual_zone_by_thing(GET_OBJ_VNUM(object))))) {
         send_to_char(ch, "You can only detach triggers in your own zone\r\n");
         return;
       }
@@ -1927,7 +1888,7 @@ void process_detach(void *go, struct script_data *sc, trig_data *trig,
 
 struct room_data *dg_room_of_obj(struct obj_data *obj)
 {
-  if (IN_ROOM(obj) != NOWHERE) return obj_room_get(obj);
+  if (obj_room_get(obj) != NULL) return obj_room_get(obj);
   if (obj->carried_by)        return char_room_get(obj->carried_by);
   if (obj->worn_by)           return char_room_get(obj->worn_by);
   if (obj->in_obj)            return (dg_room_of_obj(obj->in_obj));
@@ -2008,20 +1969,20 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
       if (o)
         snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, GET_ID(o));
     } else if (is_abbrev(arg, "room")) {
-      room_rnum r = NOWHERE;
+      struct room_data *r = NULL;
       switch (type) {
         case WLD_TRIGGER:
-          r = real_room(((struct room_data *) go)->number);
+          r = room_by_id(((struct room_data *) go)->number);
           break;
         case OBJ_TRIGGER:
           r = obj_room((struct obj_data *)go);
           break;
         case MOB_TRIGGER:
-          r = IN_ROOM((struct char_data *)go);
+          r = char_room_get((struct char_data *)go);
           break;
       }
-      if (r != NOWHERE)
-        snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, world[r].number+ROOM_ID_BASE);
+      if (r != NULL)
+        snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, r->number+ROOM_ID_BASE);
     } else {
       script_log("Trigger: %s, VNum %d. makeuid syntax error: '%s'",
             GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), cmd);
@@ -2521,7 +2482,7 @@ int script_driver(void *go_adress, trig_data *trig, int type, int mode)
     switch (type) {
       case MOB_TRIGGER:
         script_log("It was attached to %s [%d]",
-           GET_NAME((char_data *) go), GET_MOB_VNUM((char_data *) go));
+           GET_NAME(((char_data *) go)), GET_MOB_VNUM(((char_data *) go)));
         break;
       case OBJ_TRIGGER:
         script_log("It was attached to %s [%d]",
@@ -2744,42 +2705,22 @@ int script_driver(void *go_adress, trig_data *trig, int type, int mode)
 /* returns the real number of the trigger with given virtual number */
 trig_rnum real_trigger(trig_vnum vnum)
 {
-  trig_rnum bot, top, mid;
-
-  bot = 0;
-  top = top_of_trigt - 1;
-
-  if (!top_of_trigt || trig_index[bot]->vnum > vnum || trig_index[top]->vnum < vnum)
-    return (NOTHING);
-
-  /* perform binary search on trigger-table */
-  while (bot <= top) {
-    mid = (bot + top) / 2;
-
-    if (trig_index[mid]->vnum == vnum)
-      return (mid);
-    if (trig_index[mid]->vnum > vnum)
-      top = mid - 1;
-    else
-      bot = mid + 1;
-  }
-  return (NOTHING);
+  return trig_proto_by_id(vnum) ? vnum : NOTHING;
 }
 
 ACMD(do_tstat)
 {
-  int rnum;
   char str[MAX_INPUT_LENGTH];
 
   half_chop(argument, str, argument);
   if (*str) {
-    rnum = real_trigger(atoi(str));
-    if (rnum == NOTHING) {
+    auto trig = trig_proto_by_id(atoi(str));
+    if (!trig) {
       send_to_char(ch, "That vnum does not exist.\r\n");
       return;
     }
 
-    do_stat_trigger(ch, trig_index[rnum]->proto);
+    do_stat_trigger(ch, trig);
   } else
     send_to_char(ch, "Usage: tstat <vnum>\r\n");
 }

@@ -21,8 +21,6 @@
 #include "consts/races.h"
 #include "consts/senseis.h"
 #include "consts/sizes.h"
-#include "index.h"
-#include "htree.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -234,9 +232,9 @@ struct char_data
    int32_t idnum;                 /* player's idnum; -1 for mobiles	*/
 
    int pfilepos;          /* playerfile pos			*/
-   mob_rnum nr;           /* Mob's rnum				*/
-   room_rnum in_room;     /* Location (real room number)		*/
-   room_rnum was_in_room; /* location for linkdead people		*/
+   mob_vnum vnum;           /* Mob's vnum. -1 for non-mobs	*/
+   room_vnum in_room;     /* Location (real room number)		*/
+   room_vnum was_in_room; /* location for linkdead people		*/
    int wait;              /* wait for how many loops		*/
 
    char *name;        /* PC / NPC s name (kill ...  )		*/
@@ -666,13 +664,9 @@ extern struct char_data *affect_list;
 extern struct char_data *affectv_list;
 extern struct player_special_data dummy_mob;
 
-extern struct index_data *mob_index;
-extern struct char_data *mob_proto;
-extern mob_rnum top_of_mobt;
-extern struct htree_node *mob_htree;
 extern long max_mob_id;
 
-mob_rnum real_mobile(mob_vnum vnum);
+mob_vnum mob_proto_vnum_check(mob_vnum vnum);
 struct char_data *mob_proto_by_id(mob_vnum vnum);
 
 struct char_data *char_by_id(int64_t id);
@@ -682,6 +676,21 @@ int char_subscribe(int64_t id, const char *list_name);
 void char_unsubscribe(int64_t id, const char *list_name);
 void char_clear_subscriptions(int64_t id);
 void char_for_each(const char *list_name, void (*func)(struct char_data *ch));
+
+void* mob_proto_iterator_create();
+struct char_data* mob_proto_next(void* iterator);
+void mob_proto_iterator_free(void* iterator);
+
+void mob_proto_put(mob_vnum vnum, struct char_data *mob);
+void mob_proto_delete(mob_vnum vnum);
+struct char_data* mob_proto_get(mob_vnum vnum);
+size_t mob_proto_count();
+SpecialFunc mob_proto_special_get(mob_vnum vnum);
+void mob_proto_special_set(mob_vnum vnum, SpecialFunc func);
+
+void mob_proto_count_increment(mob_vnum vnum);
+size_t mob_proto_count_get(mob_vnum vnum);
+void mob_proto_count_decrement(mob_vnum vnum);
 
 #ifdef __cplusplus
 }

@@ -93,11 +93,16 @@ void shop_buy_data_type_set(struct shop_buy_data *data, int type);
 const char *shop_buy_data_keywords_get(struct shop_buy_data *data);
 void shop_buy_data_keywords_set(struct shop_buy_data *data, const char *keywords);
 
-extern struct shop_data *shop_index;
-extern int top_shop;
-
 shop_rnum real_shop(shop_vnum vnum);
 struct shop_data *shop_by_id(shop_vnum vnum);
+
+void* shop_iterator_create();
+struct shop_data* shop_next(void* iterator);
+void shop_iterator_free(void* iterator);
+
+void shop_put(shop_vnum vnum, struct shop_data *shop);
+void shop_delete(shop_vnum vnum);
+size_t shop_count();
 
 #ifdef __cplusplus
 }

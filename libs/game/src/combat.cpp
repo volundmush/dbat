@@ -304,12 +304,12 @@ int handle_defender(struct char_data *vict, struct char_data *ch)
   struct char_data *def = GET_DEFENDER(vict);
   int64_t defnum = (GET_SPEEDI(def) * 0.01) * rand_number(-10, 10);
   int64_t chnum = (GET_SPEEDI(ch) * 0.01) * rand_number(-5, 10);
-  if (GET_SPEEDI(def) + defnum > GET_SPEEDI(ch) + chnum && IN_ROOM(def) == IN_ROOM(vict) && GET_POS(def) > POS_SITTING) {
+  if (GET_SPEEDI(def) + defnum > GET_SPEEDI(ch) + chnum && char_room_get(def) == char_room_get(vict) && GET_POS(def) > POS_SITTING) {
    act("@YYou move to and manage to intercept the attack aimed at @y$N@Y!@n", TRUE, def, 0, vict, TO_CHAR);
    act("@y$n@Y moves to and manages to intercept the attack aimed at YOU!@n", TRUE, def, 0, vict, TO_VICT);
    act("@y$n@Y moves to and manages to intercept the attack aimed at @y$N@Y!@n", TRUE, def, 0, vict, TO_NOTVICT);
    result = TRUE;
-  } else if (IN_ROOM(def) == IN_ROOM(vict) && GET_POS(def) > POS_SITTING) {
+  } else if (char_room_get(def) == char_room_get(vict) && GET_POS(def) > POS_SITTING) {
    act("@YYou move to intercept the attack aimed at @y$N@Y, but just not fast enough!@n", TRUE, def, 0, vict, TO_CHAR);
    act("@y$n@Y moves to intercept the attack aimed at YOU, but $e wasn't fast enough!@n", TRUE, def, 0, vict, TO_VICT);
    act("@y$n@Y moves to intercept the attack aimed at @y$N@Y, but $e wasn't fast enough!@n", TRUE, def, 0, vict, TO_NOTVICT);
@@ -356,7 +356,7 @@ void handle_disarm(struct char_data *ch, struct char_data *vict)
    perform_remove(ch, 16);
    if (GET_OBJ_VNUM(obj) != 20098) {
     obj_from_char(obj);
-    obj_to_room(obj, IN_ROOM(ch));
+    obj_to_room(obj, char_room_get(ch));
    }
   } else if (GET_EQ(ch, WEAR_WIELD1) && handled == TRUE) {
    obj = GET_EQ(ch, WEAR_WIELD1);
@@ -376,7 +376,7 @@ void handle_disarm(struct char_data *ch, struct char_data *vict)
    perform_remove(ch, 17);
    if (GET_OBJ_VNUM(obj) != 20098) {
     obj_from_char(obj);
-    obj_to_room(obj, IN_ROOM(ch));
+    obj_to_room(obj, char_room_get(ch));
    }
   }
  }
@@ -1694,9 +1694,9 @@ void huge_update()
  /* Checking the object list for any huge ki attacks */
  for (k = object_list; k; k = k->next) {
   if (GET_AUCTER(k) > 0 && GET_AUCTIME(k) + 604800 <= time(0)) {
-   if (IN_ROOM(k) && GET_ROOM_VNUM(IN_ROOM(k)) == 80) {
-    room_vnum inroom = IN_ROOM(k);
-    REMOVE_BIT_AR(ROOM_FLAGS(inroom), ROOM_HOUSE_CRASH);
+   if (obj_room_vnum_get(k) == 80) {
+    struct room_data* inroom = obj_room_get(k);
+    room_flag_set(inroom, ROOM_HOUSE_CRASH, FALSE);
     extract_obj(k);
     continue;
    }
@@ -1710,9 +1710,9 @@ void huge_update()
   else if (KIDIST(k) <= 0) {
   /* Genki Dama Section */
   if (KITYPE(k) == 497) {
-  if (IN_ROOM(TARGET(k)) == IN_ROOM(k)) {
+  if (char_room_get(TARGET(k)) == obj_room_get(k)) {
    ch = USER(k); 
-   if (GET_ROOM_VNUM(IN_ROOM(ch)) == GET_ROOM_VNUM(IN_ROOM(k))) {
+   if (char_room_vnum_get(ch) == obj_room_vnum_get(k)) {
     bonus = 2;
    }
 
@@ -1801,8 +1801,7 @@ void huge_update()
      }
     }
     room_dmg_set(obj_room_get(k), 100);
-        int zone = 0;
-      if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
+      if (auto zone = char_zone_get(ch); zone) {
        send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
       }
 
@@ -1818,7 +1817,7 @@ void huge_update()
     continue;
    }
   } 
-  else if (IN_ROOM(TARGET(k)) != IN_ROOM(k)) {
+  else if (char_room_get(TARGET(k)) != obj_room_get(k)) {
    ch = USER(k); 
    
    send_to_room(obj_room_get(k), "@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on the area! It slowly burns into the ground before exploding magnificently!@n\r\n");
@@ -1875,8 +1874,8 @@ void huge_update()
      }
     }
     room_dmg_set(obj_room_get(k), 100);
-        int zone = 0;
-      if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
+      auto zone = char_zone_get(ch);
+      if (zone) {
        send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
       }
     extract_obj(k);
@@ -1886,9 +1885,9 @@ void huge_update()
   }
   /* Genocide Section */
   if (KITYPE(k) == 498) {
-   if (IN_ROOM(TARGET(k)) == IN_ROOM(k)) {
+   if (char_room_get(TARGET(k)) == obj_room_get(k)) {
    ch = USER(k); 
-   if (GET_ROOM_VNUM(IN_ROOM(ch)) == GET_ROOM_VNUM(IN_ROOM(k))) {
+   if (char_room_vnum_get(ch) == obj_room_vnum_get(k)) {
     bonus = 2;
    }
    
@@ -1976,8 +1975,8 @@ void huge_update()
      }
     }
     room_dmg_set(obj_room_get(k), 100);
-        int zone = 0;
-      if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
+      auto zone = char_zone_get(ch);
+      if (zone) {
        send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
       }
     extract_obj(k);
@@ -1992,7 +1991,7 @@ void huge_update()
     continue;
    }
   } 
-  else if (IN_ROOM(TARGET(k)) != IN_ROOM(k)) {
+  else if (char_room_get(TARGET(k)) != obj_room_get(k)) {
    ch = USER(k); 
    
    send_to_room(obj_room_get(k), "@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on the area! It slowly burns into the ground before exploding magnificantly!@n\r\n");
@@ -2048,8 +2047,8 @@ void huge_update()
      }
     }
     room_dmg_set(obj_room_get(k), 100);
-        int zone = 0;
-      if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
+      auto zone = char_zone_get(ch);
+      if (zone) {
        send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
       }
     extract_obj(k);
@@ -2090,11 +2089,11 @@ void homing_update()
    struct char_data *vict = TARGET(k);
 
    if (GET_OBJ_VNUM(k) == 80) { // Tsuihidan
-    if (IN_ROOM(k) != IN_ROOM(vict)) {
+    if (obj_room_get(k) != char_room_get(vict)) {
      act("@wThe $p@w pursues after you!@n", TRUE, vict, k, 0, TO_CHAR);
      act("@wThe $p@W pursues after @C$n@w!@n", TRUE, vict, k, 0, TO_ROOM);
      obj_from_room(k);
-     obj_to_room(k, IN_ROOM(vict));
+     obj_to_room(k, char_room_get(vict));
      continue;
     } else {
      act("@RThe $p@R makes a tight turn and rockets straight for you!@n", TRUE, vict, k, 0, TO_CHAR);
@@ -2127,7 +2126,7 @@ void homing_update()
     }
     continue;
    } else if (GET_OBJ_VNUM(k) == 81 || GET_OBJ_VNUM(k) == 84) { // Spirit Ball
-    if (IN_ROOM(k) != IN_ROOM(vict)) {
+    if (obj_room_get(k) != char_room_get(vict)) {
      act("@wYou lose sight of @C$N@W and let $p@W fly away!@n", TRUE, ch, k, vict, TO_CHAR);
      act("@wYou manage to escape @C$n's@W $p@W!@n", TRUE, ch, k, vict, TO_VICT);
      act("@C$n@W loses sight of @c$N@W and lets $s $p@W fly away!@n", TRUE, ch, k, vict, TO_NOTVICT);
@@ -2596,8 +2595,8 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char
       if (room_dmg_get(char_room_get(ch)) <= 95) {
        room_dmg_mod(char_room_get(ch), 5);
       }
-        int zone = 0;
-      if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
+      auto zone = char_zone_get(ch);
+      if (zone) {
        send_to_zone("An explosion shakes the entire area!\r\n", zone);
       }
       return;
@@ -2712,8 +2711,8 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
      if (room_dmg_get(room) <= 95) {
        room_dmg_mod(room, 5);
      }
-        int zone = 0;
-      if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
+      auto zone = char_zone_get(ch);
+      if (zone) {
        send_to_zone("An explosion shakes the entire area!\r\n", zone);
       }
   }
@@ -2736,7 +2735,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
     }
    
     obj = read_object(num, VIRTUAL);
-    obj_to_room(obj, IN_ROOM(ch));     
+    obj_to_room(obj, char_room_get(ch));     
     
     TARGET(obj) = vict;
     KICHARGE(obj) = damtype(ch, type2, skill, .2);
@@ -2782,7 +2781,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
     }
 
     obj = read_object(num, VIRTUAL);
-    obj_to_room(obj, IN_ROOM(ch));
+    obj_to_room(obj, char_room_get(ch));
 
     TARGET(obj) = vict;
     KICHARGE(obj) = damtype(ch, type2, skill, .3);
@@ -3589,7 +3588,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
     gaincalc = gaincalc - (gaincalc * .20);
    }
    if (room_flagged(char_room_get(ch), ROOM_WORKOUT) || (room_flagged(char_room_get(ch), ROOM_HBTC))) {
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+    if (char_room_vnum_get(ch) >= 19100 && char_room_vnum_get(ch) <= 19199) {
      gaincalc *= 1.5;
     } else {
      gaincalc *= 1.25;
@@ -3610,8 +3609,8 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
     }
    }
     
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
-      if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+    if ((char_room_get(ch) && room_flagged(char_room_get(ch), ROOM_WORKOUT)) || ((char_room_get(ch) && room_flagged(char_room_get(ch), ROOM_HBTC)))) {
+      if (char_room_vnum_get(ch) >= 19100 && char_room_vnum_get(ch) <= 19199) {
       vitalgain *= 1.75;
       } else {
       vitalgain *= 1.25;
@@ -3710,7 +3709,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
  if (vict) {
 
-   if (GET_ROOM_VNUM(IN_ROOM(vict)) == 17875) {
+   if (char_room_vnum_get(vict) == 17875) {
     return;
    }
 
@@ -4144,7 +4143,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
       next_rew = rew->next_content;
       if (rew) {
        obj_from_char(rew);
-       obj_to_room(rew, IN_ROOM(vict));
+       obj_to_room(rew, char_room_get(vict));
        founded = 1;
       }
      }
@@ -4198,10 +4197,10 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    if (IN_ARENA(vict)) {
        send_to_all("@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", GET_NAME(ch), GET_NAME(vict));
        char_from_room(ch);
-       char_to_room(ch, real_room(17875));
+       char_to_room(ch, room_by_id(17875));
        look_at_room(char_room_get(ch), ch, 0);
        char_from_room(vict);
-       char_to_room(vict, real_room(17875));
+       char_to_room(vict, room_by_id(17875));
        setCurHealth(vict, 1);
        look_at_room(char_room_get(vict), vict, 0);
        if (FIGHTING(vict)) {
@@ -4228,7 +4227,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    }
    GET_POS(vict) = POS_SITTING;
    char_from_room(vict);
-   char_to_room(vict, real_room(sensei_start_room(vict->chclass)));
+   char_to_room(vict, room_by_id(sensei_start_room(vict->chclass)));
    }
    return;
   }

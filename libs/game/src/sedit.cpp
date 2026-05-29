@@ -27,9 +27,9 @@ void sedit_save_internally(struct descriptor_data *d)
   add_shop(OLC_SHOP(d));
 }
 
-void sedit_save_to_disk(int num)
+void sedit_save_to_disk(struct zone_data *zone)
 {
-  save_shops(num);
+  save_shops(zone);
 }
 
 /*-------------------------------------------------------------------*\
@@ -44,6 +44,7 @@ ACMD(do_oasis_sedit)
   char *buf3;
   char buf1[MAX_INPUT_LENGTH];
   char buf2[MAX_INPUT_LENGTH];
+  struct shop_data *shop = NULL;
   
   /****************************************************************************/
   /** Parse any arguments.                                                   **/
@@ -64,12 +65,12 @@ ACMD(do_oasis_sedit)
     if (is_number(buf2))
       number = atoi(buf2);
     else if (GET_OLC_ZONE(ch) > 0) {
-      zone_rnum zlok;
+      struct zone_data *zone = zone_by_id(GET_OLC_ZONE(ch));
       
-      if ((zlok = real_zone(GET_OLC_ZONE(ch))) == NOWHERE)
+      if (!zone)
         number = NOWHERE;
       else
-        number = genolc_zone_bottom(zlok);
+        number = zone->bot;
     }
     
     if (number == NOWHERE) {
@@ -116,7 +117,7 @@ ACMD(do_oasis_sedit)
   /****************************************************************************/
   /** Find the zone.                                                         **/
   /****************************************************************************/
-  OLC_ZNUM(d) = save ? real_zone(number) : real_zone_by_thing(number);
+  OLC_ZNUM(d) = virtual_zone_by_thing(number);
   if (OLC_ZNUM(d) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
     free(d->olc);
@@ -124,12 +125,12 @@ ACMD(do_oasis_sedit)
     return;
   }
 
-  struct zone_data *zone = &zone_table[OLC_ZNUM(d)];
+  struct zone_data *zone = zone_by_id(OLC_ZNUM(d));
   
   /****************************************************************************/
   /** Everyone but IMPLs can only edit zones they have been assigned.        **/
   /****************************************************************************/
-  if (!can_edit_zone(ch, OLC_ZNUM(d))) {
+  if (!can_edit_zone(ch, zone)) {
     send_cannot_edit(ch, zone->number);
     
     /**************************************************************************/
@@ -150,7 +151,7 @@ ACMD(do_oasis_sedit)
     /**************************************************************************/
     /** Save the shops to the shop file.                                     **/
     /**************************************************************************/
-    save_shops(OLC_ZNUM(d));
+    save_shops(zone);
     
     /**************************************************************************/
     /** Free the OLC structure.                                              **/
@@ -162,8 +163,8 @@ ACMD(do_oasis_sedit)
   
   OLC_NUM(d) = number;
   
-  if ((real_num = real_shop(number)) != NOTHING)
-    sedit_setup_existing(d, real_num);
+  if (shop = shop_by_id(number))
+    sedit_setup_existing(d, number);
   else
     sedit_setup_new(d);
 
@@ -225,15 +226,16 @@ void sedit_setup_new(struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-void sedit_setup_existing(struct descriptor_data *d, int rshop_num)
+void sedit_setup_existing(struct descriptor_data *d, shop_vnum num)
 {
   /*
    * Create a scratch shop structure.
    */
   CREATE(OLC_SHOP(d), struct shop_data, 1);
+  auto proto = shop_by_id(num);
 
   /* don't waste time trying to free NULL strings -- Welcor */
-  copy_shop(OLC_SHOP(d), shop_index + rshop_num, FALSE);
+  copy_shop(OLC_SHOP(d), proto, FALSE);
 }
 
 /**************************************************************************
@@ -250,9 +252,10 @@ void sedit_products_menu(struct descriptor_data *d)
   clear_screen(d);
   write_to_output(d, "##     VNUM     Product\r\n");
   for (i = 0; S_PRODUCT(shop, i) != NOTHING; i++) {
+    auto obj = obj_proto_by_id(S_PRODUCT(shop, i));
     write_to_output(d, "%2d - [@c%5d@n] - @y%s@n\r\n", i,
-	    obj_index[S_PRODUCT(shop, i)].vnum,
-	    obj_proto[S_PRODUCT(shop, i)].short_description);
+	    obj->vnum,
+	    obj->short_description);
   }
   write_to_output(d, "\r\n"
 	  "@gA@n) Add a new product.\r\n"
@@ -299,7 +302,7 @@ void sedit_rooms_menu(struct descriptor_data *d)
   clear_screen(d);
   write_to_output(d, "##     VNUM     Room\r\n\r\n");
   for (i = 0; S_ROOM(shop, i) != NOWHERE; i++) {
-    if (real_room(S_ROOM(shop, i)) != NOWHERE) {
+    if (room_by_id(S_ROOM(shop, i))) {
       write_to_output(d, "%2d - [@c%5d@n] - @y%s@n\r\n", i, S_ROOM(shop, i), room_by_id(S_ROOM(shop, i))->name);
     } else {
       write_to_output(d, "%2d - [@R!Removed Room!@n]\r\n", i);
@@ -406,6 +409,8 @@ void sedit_disp_menu(struct descriptor_data *d)
 
   shop = OLC_SHOP(d);
 
+  auto keeper = mob_proto_by_id(S_KEEPER(shop));
+
   clear_screen(d);
   sprintbitarray(S_NOTRADE(shop), trade_letters, 4, buf1, sizeof(buf1));
   sprintbit(S_BITVECTOR(shop), shop_bits, buf2, sizeof(buf2));
@@ -432,8 +437,8 @@ void sedit_disp_menu(struct descriptor_data *d)
 	  "Enter Choice : ",
 
 	  OLC_NUM(d),
-	  S_KEEPER(shop) == NOBODY ? -1 : mob_index[S_KEEPER(shop)].vnum,
-	  S_KEEPER(shop) == NOBODY ? "None" : mob_proto[S_KEEPER(shop)].short_descr,
+	  keeper ? keeper->vnum : -1,
+	  keeper ? keeper->short_descr : "None",
 	  S_OPEN1(shop),
 	  S_CLOSE1(shop),
 	  S_OPEN2(shop),
@@ -462,6 +467,8 @@ void sedit_parse(struct descriptor_data *d, char *arg)
 {
   int i;
 
+  struct char_data *keeper = NULL;
+
   if (OLC_MODE(d) > SEDIT_NUMERICAL_RESPONSE) {
     if (!isdigit(arg[0]) && ((*arg == '-') && (!isdigit(arg[1])))) {
       write_to_output(d, "Field must be numerical, try again : ");
@@ -478,7 +485,7 @@ void sedit_parse(struct descriptor_data *d, char *arg)
       mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
         "OLC: %s edits shop %d", GET_NAME(d->character), OLC_NUM(d));
       if (CONFIG_OLC_SAVE) {
-	sedit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
+	sedit_save_to_disk(zone_by_id(OLC_ZNUM(d)));
 	write_to_output(d, "Shop saved to disk.\r\n");
       } else
         write_to_output(d, "Shop saved to memory.\r\n");
@@ -716,7 +723,7 @@ void sedit_parse(struct descriptor_data *d, char *arg)
   case SEDIT_KEEPER:
     i = atoi(arg);
     if ((i = atoi(arg)) != -1)
-      if ((i = real_mobile(i)) == NOBODY) {
+      if ((keeper = mob_proto_by_id(i)) == NULL) {
 	write_to_output(d, "That mobile does not exist, try again : ");
 	return;
       }
@@ -726,8 +733,8 @@ void sedit_parse(struct descriptor_data *d, char *arg)
     /*
      * Fiddle with special procs.
      */
-    S_FUNC(OLC_SHOP(d)) = mob_index[i].func != shop_keeper ? mob_index[i].func : NULL;
-    mob_index[i].func = shop_keeper;
+    S_FUNC(OLC_SHOP(d)) = mob_proto_special_get(keeper->vnum) != shop_keeper ? mob_proto_special_get(keeper->vnum) : NULL;
+    mob_proto_special_set(keeper->vnum, shop_keeper);
     break;
   case SEDIT_OPEN1:
     S_OPEN1(OLC_SHOP(d)) = LIMIT(atoi(arg), 0, 28);
@@ -772,12 +779,12 @@ void sedit_parse(struct descriptor_data *d, char *arg)
     return;
   case SEDIT_NEW_ROOM:
     if ((i = atoi(arg)) != -1)
-      if ((i = real_room(i)) == NOWHERE) {
+      if ((i = room_vnum_check(i)) == NOWHERE) {
 	write_to_output(d, "That room does not exist, try again : ");
 	return;
       }
     if (i >= 0)
-      add_to_int_list(&(S_ROOMS(OLC_SHOP(d))), atoi(arg));
+      add_to_int_list(&(S_ROOMS(OLC_SHOP(d))), i);
     sedit_rooms_menu(d);
     return;
   case SEDIT_DELETE_ROOM:
@@ -799,8 +806,8 @@ void sedit_parse(struct descriptor_data *d, char *arg)
     }
     break;
   case SEDIT_COPY:
-    if ((i = real_room(atoi(arg))) != NOWHERE) {
-      sedit_setup_existing(d, i);
+    if (auto room = room_by_id(atoi(arg)); room) {
+      sedit_setup_existing(d, room->number);
     } else
       write_to_output(d, "That shop does not exist.\r\n");
     break;

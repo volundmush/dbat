@@ -530,9 +530,9 @@ void medit_string_cleanup(struct descriptor_data *d, int terminator);
 ACMD(do_oasis_medit);
 
 void oedit_setup_new(struct descriptor_data *d);
-void oedit_setup_existing(struct descriptor_data *d, int real_num);
+void oedit_setup_existing(struct descriptor_data *d, obj_vnum num);
 void oedit_save_internally(struct descriptor_data *d);
-void oedit_save_to_disk(int zone_num);
+void oedit_save_to_disk(struct zone_data *zone);
 void oedit_disp_container_flags_menu(struct descriptor_data *d);
 void oedit_disp_extradesc_menu(struct descriptor_data *d);
 void oedit_disp_prompt_apply_menu(struct descriptor_data *d);
@@ -565,9 +565,9 @@ void iedit_parse(struct descriptor_data *d, char *arg);
 
 void redit_string_cleanup(struct descriptor_data *d, int terminator);
 void redit_setup_new(struct descriptor_data *d);
-void redit_setup_existing(struct descriptor_data *d, int real_num);
+void redit_setup_existing(struct descriptor_data *d, room_vnum num);
 void redit_save_internally(struct descriptor_data *d);
-void redit_save_to_disk(zone_vnum zone_num);
+void redit_save_to_disk(struct zone_data *zone);
 void redit_disp_extradesc_menu(struct descriptor_data *d);
 void redit_disp_exit_menu(struct descriptor_data *d);
 void redit_disp_exit_flag_menu(struct descriptor_data *d);
@@ -579,7 +579,7 @@ void free_room(struct room_data *room);
 ACMD(do_oasis_redit);
 
 void sedit_setup_new(struct descriptor_data *d);
-void sedit_setup_existing(struct descriptor_data *d, int rshop_num);
+void sedit_setup_existing(struct descriptor_data *d, shop_vnum num);
 void sedit_save_internally(struct descriptor_data *d);
 void sedit_save_to_disk(int zone_num);
 void sedit_products_menu(struct descriptor_data *d);
@@ -593,12 +593,12 @@ void sedit_disp_menu(struct descriptor_data *d);
 void sedit_parse(struct descriptor_data *d, char *arg);
 ACMD(do_oasis_sedit);
 void gedit_setup_new(struct descriptor_data *d);
-void gedit_setup_existing(struct descriptor_data *d, int rgm_num);
+void gedit_setup_existing(struct descriptor_data *d, guild_vnum num);
 void gedit_parse(struct descriptor_data *d, char *arg);
 void gedit_disp_menu(struct descriptor_data *d);
 void gedit_no_train_menu(struct descriptor_data *d);
 void gedit_save_internally(struct descriptor_data *d);
-void gedit_save_to_disk(int num);
+void gedit_save_to_disk(struct zone_data *zone);
 void copy_guild(struct guild_data *tgm, struct guild_data *fgm);
 void free_guild_strings(struct guild_data *guild);
 void free_guild(struct guild_data *guild);
@@ -628,7 +628,7 @@ void cedit_string_cleanup(struct descriptor_data *d, int terminator);
 ACMD(do_oasis_cedit);
 
 void trigedit_parse(struct descriptor_data *d, char *arg);
-void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num);
+void trigedit_setup_existing(struct descriptor_data *d, trig_vnum num);
 void trigedit_setup_new(struct descriptor_data *d);
 ACMD(do_oasis_trigedit);
 
@@ -658,13 +658,13 @@ int parse_stats(struct descriptor_data *d, char *arg);
 int stats_disp_menu(struct descriptor_data *d);
 
 int free_strings(void *data, int type);
-void list_rooms(struct char_data *ch  , zone_rnum rnum, room_vnum vmin, room_vnum vmax);
+void list_rooms(struct char_data *ch  , zone_vnum zv, room_vnum vmin, room_vnum vmax);
 void list_mobiles(struct char_data *ch, zone_rnum rnum, mob_vnum vmin , mob_vnum vmax );
 void list_objects(struct char_data *ch, zone_rnum rnum, obj_vnum vmin , obj_vnum vmax );
 void list_shops(struct char_data *ch  , zone_rnum rnum, shop_vnum vmin, shop_vnum vmax);
 void list_zones(struct char_data *ch);
-void print_zone(struct char_data *ch, zone_vnum vnum);
-int can_edit_zone(struct char_data *ch, zone_rnum rnum);
+void print_zone(struct char_data *ch, struct zone_data *zone);
+int can_edit_zone(struct char_data *ch, struct zone_data *zone);
 
 #define CONTEXT_HELP_STRING "help"
 

@@ -18,18 +18,20 @@
 #include "dbat/game/class.h"
 #include "dbat/db/shops.h"
 
+#include "dbat/db/iterate.hpp"
+
 
 /******************************************************************************/
 /** Internal Functions                                                       **/
 /******************************************************************************/
-void list_rooms(struct char_data *ch  , zone_rnum rnum, room_vnum vmin, room_vnum vmax);
-void list_mobiles(struct char_data *ch, zone_rnum rnum, mob_vnum vmin , mob_vnum vmax );
-void list_objects(struct char_data *ch, zone_rnum rnum, obj_vnum vmin , obj_vnum vmax );
-void list_shops(struct char_data *ch  , zone_rnum rnum, shop_vnum vmin, shop_vnum vmax);
-void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vnum vmax);
+void list_rooms(struct char_data *ch  , struct zone_data *zone, room_vnum vmin, room_vnum vmax);
+void list_mobiles(struct char_data *ch, struct zone_data *zone, mob_vnum vmin , mob_vnum vmax );
+void list_objects(struct char_data *ch, struct zone_data *zone, obj_vnum vmin , obj_vnum vmax );
+void list_shops(struct char_data *ch  , struct zone_data *zone, shop_vnum vmin, shop_vnum vmax);
+void list_triggers(struct char_data *ch, struct zone_data *zone, trig_vnum vmin, trig_vnum vmax);
 void list_zones(struct char_data *ch);
-void print_zone(struct char_data *ch, zone_vnum vnum);
-void list_guilds(struct char_data *ch  , zone_rnum rnum, guild_vnum vmin, guild_vnum vmax);
+void print_zone(struct char_data *ch, struct zone_data *zone);
+void list_guilds(struct char_data *ch  , struct zone_data *zone, guild_vnum vmin, guild_vnum vmax);
 
 
 /******************************************************************************/
@@ -42,23 +44,24 @@ ACMD(do_oasis_list)
   room_rnum vmax = NOWHERE;
   char smin[MAX_INPUT_LENGTH];
   char smax[MAX_INPUT_LENGTH];
+  struct zone_data *zone = NULL;
   
   two_arguments(argument, smin, smax);
   
   if (subcmd == SCMD_OASIS_ZLIST) { /* special case */
     if (smin != NULL && *smin && is_number(smin)) 
-      print_zone(ch, atoi(smin));
+      print_zone(ch, zone_by_id(atoi(smin)));
     else
       list_zones(ch);  
       return;
     }
     
   if (!*smin || *smin == '.') {
-    rzone = char_room_get(ch)->zone;
+    zone = char_zone_get(ch);
   } else if (!*smax) {
-    rzone = real_zone(atoi(smin));
+    zone = zone_by_id(atoi(smin));
     
-    if (rzone == NOWHERE) {
+    if (zone == NULL) {
       send_to_char(ch, "Sorry, there's no zone with that number\r\n");
       return;
     }
@@ -78,12 +81,12 @@ ACMD(do_oasis_list)
     }
     
   switch (subcmd) {
-    case SCMD_OASIS_RLIST: list_rooms(ch, rzone, vmin, vmax); break;
-    case SCMD_OASIS_OLIST: list_objects(ch, rzone, vmin, vmax); break;
-    case SCMD_OASIS_MLIST: list_mobiles(ch, rzone, vmin, vmax); break;
-    case SCMD_OASIS_TLIST: list_triggers(ch, rzone, vmin, vmax); break;
-    case SCMD_OASIS_SLIST: list_shops(ch, rzone, vmin, vmax); break;
-    case SCMD_OASIS_GLIST: list_guilds(ch, rzone, vmin, vmax); break;
+    case SCMD_OASIS_RLIST: list_rooms(ch, zone, vmin, vmax); break;
+    case SCMD_OASIS_OLIST: list_objects(ch, zone, vmin, vmax); break;
+    case SCMD_OASIS_MLIST: list_mobiles(ch, zone, vmin, vmax); break;
+    case SCMD_OASIS_TLIST: list_triggers(ch, zone, vmin, vmax); break;
+    case SCMD_OASIS_SLIST: list_shops(ch, zone, vmin, vmax); break;
+    case SCMD_OASIS_GLIST: list_guilds(ch, zone, vmin, vmax); break;
     default: 
       send_to_char(ch, "You can't list that!\r\n");
       mudlog(BRF, ADMLVL_IMMORT, TRUE, 
@@ -103,38 +106,39 @@ ACMD(do_oasis_links)
   one_argument(argument, arg);
 
   if (!strcmp(arg, ".") || (arg == NULL || !*arg)) {
-    zrnum = char_room_get(ch)->zone;
-    zvnum = zone_table[zrnum].number;
+    auto zone = char_zone_get(ch);
+    zvnum = zone->number;
   } else {
     zvnum = atoi(arg);
-    zrnum = real_zone(zvnum);
   }
 
-  if (zrnum == NOWHERE || zvnum == NOWHERE) {
+  auto zone = zone_by_id(zvnum);
+
+  if (zone == NULL) {
     send_to_char(ch, "No zone was found with that number.\n\r");
     return;
   }
 
-  last  = zone_table[zrnum].top;
-  first = zone_table[zrnum].bot;
+  last  = zone->top;
+  first = zone->bot;
 
   send_to_char(ch, "Zone %d is linked to the following zones:\r\n", zvnum);
-  for (nr = 0; nr <= top_of_world && (GET_ROOM_VNUM(nr) <= last); nr++) {
-    struct room_data *nrm = &world[nr];
-    if (GET_ROOM_VNUM(nr) >= first) {
+  room_iterate([&](auto room) {
+    if (room_vnum_get(room) >= first) {
       for (j = 0; j < NUM_OF_DIRS; j++) {
-      if (nrm->dir_option[j]) {
-        to_room = nrm->dir_option[j]->to_room;
-        struct room_data *trm = &world[to_room];
-        if (to_room != NOWHERE && (zrnum != trm->zone))
-          send_to_char(ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
-            zone_table[trm->zone].number,
-            zone_table[trm->zone].name,
-            GET_ROOM_VNUM(nr), dirs[j], trm->number);
+      if (room->dir_option[j]) {
+        struct room_data *trm = exit_dest_get(room->dir_option[j]);
+        if(!trm) continue;
+        auto tz = room_zone_get(trm);
+        send_to_char(ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
+          tz->number,
+          tz->name,
+          room_vnum_get(room), dirs[j], trm->number);
       }
       }
     }
-  }
+    return true;
+  });
 }
 
 /******************************************************************************/
@@ -145,15 +149,15 @@ ACMD(do_oasis_links)
 /*
  * List all rooms in a zone.                              
  */                                                                           
-void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax)
+void list_rooms(struct char_data *ch, struct zone_data *zone, room_vnum vmin, room_vnum vmax)
 {
   int i, j, bottom, top, counter = 0;
   /*
    * Expect a minimum / maximum number if the rnum for the zone is NOWHERE. 
    */
-  if (rnum != NOWHERE) {
-    bottom = zone_table[rnum].bot;
-    top    = zone_table[rnum].top;
+  if (zone != NULL) {
+    bottom = zone->bot;
+    top    = zone->top;
   } else {
     bottom = vmin;
     top    = vmax;
@@ -162,20 +166,16 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
   send_to_char(ch,
   "@nIndex VNum    Room Name                                Exits\r\n"
   "----- ------- ---------------------------------------- -----@n\r\n");
-
-  if (!top_of_world)
-    return;
   
-  for (i = 0; i <= top_of_world; i++) {
-    struct room_data *rm = &world[i];
+  for (i = bottom; i <= top; i++) {
+    struct room_data *rm = room_by_id(i);
+    if(!rm) continue;
     
-    /** Check to see if this room is one of the ones needed to be listed.    **/
-    if ((rm->number >= bottom) && (rm->number <= top)) {
-      counter++;
+    counter++;
 
-        send_to_char(ch, "%4d) [@g%-5d@n] @[1]%-*s@n %s",
-                          counter, rm->number, count_color_chars(rm->name)+44, 
-                          rm->name, rm->proto_script ? "[TRIG] " : "");
+      send_to_char(ch, "%4d) [@g%-5d@n] @[1]%-*s@n %s",
+                        counter, rm->number, count_color_chars(rm->name)+44, 
+                        rm->name, rm->proto_script ? "[TRIG] " : "");
 
       for (j = 0; j < NUM_OF_DIRS; j++) {
         struct room_direction_data *exit = rm->dir_option[j];
@@ -191,7 +191,6 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
       }
     
       send_to_char(ch, "\r\n");
-    }
   }
   
   if (counter == 0) {
@@ -202,13 +201,13 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
 /*
  * List all mobiles in a zone.                              
  */                                                                           
-void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax)
+void list_mobiles(struct char_data *ch, struct zone_data *zone, mob_vnum vmin, mob_vnum vmax)
 {
   int i, bottom, top, counter = 0, admg;
   
-  if (rnum != NOWHERE) {
-    bottom = zone_table[rnum].bot;
-    top    = zone_table[rnum].top;
+  if (zone != NULL) {
+    bottom = zone->bot;
+    top    = zone->top;
   } else {
     bottom = vmin;
     top    = vmax;
@@ -217,20 +216,16 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
   send_to_char(ch,
   "@nIndex VNum    Mobile Name                    Race      Class     Level\r\n"
   "----- ------- -------------------------      --------- --------- -----\r\n");
-
-  if (!top_of_mobt)
-    return;
   
-  for (i = 0; i <= top_of_mobt; i++) {
-    struct char_data *mob = &mob_proto[i];
-    if (mob_index[i].vnum >= bottom && mob_index[i].vnum <= top) {
-      counter++;
+  for (i = bottom; i <= top; i++) {
+    struct char_data *mob = mob_proto_by_id(i);
+    if(!mob) continue;
+    counter++;
 
-      admg = ((mob->mob_specials.damsizedice + 1) / 2.0) * (mob->mob_specials.damnodice);
-      send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
-                   counter, mob_index[i].vnum, count_color_chars(mob->short_descr)+30, mob->short_descr, TRUE_RACE((mob)), SENSEI_NAME((mob)),
-                   mob->level + mob->level_adj + mob->race_level, mob->proto_script ? " [TRIG]" : "");
-    }
+    admg = ((mob->mob_specials.damsizedice + 1) / 2.0) * (mob->mob_specials.damnodice);
+    send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
+                  counter, char_proto_id_get(mob), count_color_chars(mob->short_descr)+30, mob->short_descr, TRUE_RACE((mob)), SENSEI_NAME((mob)),
+                  mob->level + mob->level_adj + mob->race_level, mob->proto_script ? " [TRIG]" : "");
   }
   
   if (counter == 0) {
@@ -241,13 +236,13 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
 /*
  * List all objects in a zone.                              
  */                                                                           
-void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax)
+void list_objects(struct char_data *ch, struct zone_data *zone, obj_vnum vmin, obj_vnum vmax)
 {
   int i, bottom, top, counter = 0;
   
-  if (rnum != NOWHERE) {
-    bottom = zone_table[rnum].bot;
-    top    = zone_table[rnum].top;
+  if (zone != NULL) {
+    bottom = zone->bot;
+    top    = zone->top;
   } else {
     bottom = vmin;
     top    = vmax;
@@ -256,20 +251,16 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
   send_to_char(ch,
   "@nIndex VNum    Object Name                                  Object Type\r\n"
   "----- ------- -------------------------------------------- ----------------\r\n");
-
-  if (!top_of_objt)
-    return;
   
-  for (i = 0; i <= top_of_objt; i++) {
-    struct obj_data *obj = &obj_proto[i];
-    if (obj_index[i].vnum >= bottom && obj_index[i].vnum <= top) {
-      counter++;
+  for (i = bottom; i <= top; i++) {
+    struct obj_data *obj = obj_proto_by_id(i);
+    if(!obj) continue;
+    counter++;
 
-      send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
-                   counter, obj_index[i].vnum, count_color_chars(obj->short_description)+44,
-                   obj->short_description, item_types[obj->type_flag],
-                   obj->proto_script ? " [TRIG]" : "");
-    }
+    send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
+                  counter, obj_vnum_get(obj), count_color_chars(obj->short_description)+44,
+                  obj->short_description, item_types[obj->type_flag],
+                  obj->proto_script ? " [TRIG]" : "");
   }
   
   if (counter == 0) {
@@ -281,13 +272,13 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
 /*
  * List all shops in a zone.                              
  */                                                                           
-void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax)
+void list_shops(struct char_data *ch, struct zone_data *zone, shop_vnum vmin, shop_vnum vmax)
 {
   int i, j, bottom, top, counter = 0;
   
-  if (rnum != NOWHERE) {
-    bottom = zone_table[rnum].bot;
-    top    = zone_table[rnum].top;
+  if (zone != NULL) {
+    bottom = zone->bot;
+    top    = zone->top;
   } else {
     bottom = vmin;
     top    = vmax;
@@ -300,19 +291,19 @@ void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum 
   "Index VNum    Shop Room(s)\r\n"
   "----- ------- ---------------------------------------------\r\n");
   
-  for (i = 0; i <= top_shop; i++) {
-    if (SHOP_NUM(i) >= bottom && SHOP_NUM(i) <= top) {
+  for (i = bottom; i <= top; i++) {
+    if (auto shop = shop_by_id(i); shop) {
       counter++;
       
-      send_to_char(ch, "@g%4d@n) [@g%-5d@n]", counter, SHOP_NUM(i));
+      send_to_char(ch, "@g%4d@n) [@g%-5d@n]", counter, shop->vnum);
 
       /************************************************************************/
       /** Retrieve the list of rooms for this shop.                          **/
       /************************************************************************/
       
-      for (j = 0; SHOP_ROOM(i, j) != NOWHERE; j++)
+      for (j = 0; shop->in_room[j] != NOWHERE; j++)
         send_to_char(ch, "%s@c[@y%d@c]@n",
-          ((j > 0) && (j % 8 == 0)) ? "\r\n              " : " ", SHOP_ROOM(i, j));
+          ((j > 0) && (j % 8 == 0)) ? "\r\n              " : " ", shop->in_room[j]);
 
       if (j == 0)
         send_to_char(ch, "@cNone.@n");
@@ -335,16 +326,13 @@ void list_zones(struct char_data *ch)
   send_to_char(ch,
   "VNum  Zone Name                      Builder(s)\r\n"
   "----- ------------------------------ --------------------------------------\r\n");
-
-  if (!top_of_zone_table)
-    return;
   
-  for (i = 0; i <= top_of_zone_table; i++) {
-    struct zone_data *zone = &zone_table[i];
+  zone_iterate([&](auto zone) {
     send_to_char(ch, "[@g%3d@n] @c%-*s @y%-1s@n\r\n",
               zone->number, count_color_chars(zone->name)+30, zone->name,
               zone->builders ? zone->builders : "None.");
-  }
+              return true;
+  });
 }
 
 
@@ -352,7 +340,7 @@ void list_zones(struct char_data *ch)
 /*
  * Prints all of the zone information for the selected zone.
  */
-void print_zone(struct char_data *ch, zone_vnum vnum)
+void print_zone(struct char_data *ch, struct zone_data *zone)
 {
   zone_rnum rnum;
   int size_rooms, size_objects, size_mobiles, i;
@@ -361,59 +349,46 @@ void print_zone(struct char_data *ch, zone_vnum vnum)
   int largest_table;
   char bits[MAX_STRING_LENGTH];
   
-  if ((rnum = real_zone(vnum)) == NOWHERE) {
-    send_to_char(ch, "Zone #%d does not exist in the database.\r\n", vnum);
+  if (!zone) {
+    send_to_char(ch, "Zone not found.\r\n");
     return;
   }
 
-  struct zone_data *zone = &zone_table[rnum];
-
   sprintbitarray(zone->zone_flags, zone_bits, ZF_ARRAY_MAX, bits, sizeof(bits));  
-  /****************************************************************************/
-  /** Locate the largest of the three, top_of_world, top_of_mobt, or         **/
-  /** top_of_objt.                                                           **/
-  /****************************************************************************/
-  if (top_of_world >= top_of_objt && top_of_world >= top_of_mobt)
-    largest_table = top_of_world;
-  else if (top_of_objt >= top_of_mobt && top_of_objt >= top_of_world)
-    largest_table = top_of_objt;
-  else
-    largest_table = top_of_mobt;
   
   /****************************************************************************/
   /** Initialize some of the variables.                                      **/
   /****************************************************************************/
-  size_rooms   = 0;
-  size_objects = 0;
-  size_mobiles = 0;
   top          = zone->top;
   bottom       = zone->bot;
+  size_objects = 0;
+  size_mobiles = 0;
+  size_rooms   = 0;
   size_shops   = 0;
   size_triggers= 0;
   size_guilds  = 0;
   size_shops  = 0;
   
-  for (i = 0; i <= largest_table; i++) {
-    if (i <= top_of_world)
-      if (world[i].zone == rnum)
-        size_rooms++;
-    
-    if (i <= top_of_objt)
-      if (obj_index[i].vnum >= bottom && obj_index[i].vnum <= top)
-        size_objects++;
-    
-    if (i <= top_of_mobt)
-      if (mob_index[i].vnum >= bottom && mob_index[i].vnum <= top)
+  for (i = bottom; i <= top; i++)
+    if (room_by_id(i))
+      size_rooms++;
+   
+  for (i = bottom; i <= top; i++) {
+    if (obj_proto_by_id(i))
+      size_objects++;
+  }
+   
+  for(i = bottom; i <= top; i++)
+      if (mob_proto_by_id(i))
         size_mobiles++;
 
-    size_shops = count_shops(bottom, top);
+  size_shops = count_shops(bottom, top);
 
-    if (i < top_of_trigt)
-      if (trig_index[i]->vnum >= bottom && trig_index[i]->vnum <= top)
-        size_triggers++;
+  for (i = bottom; i <= top; i++)
+    if (trig_proto_by_id(i))
+      size_triggers++;
 
-    size_guilds = count_guilds(bottom, top);
-  }
+  size_guilds = count_guilds(bottom, top);
   
   /****************************************************************************/
   /** Display all of the zone information at once.                           **/
@@ -447,15 +422,15 @@ void print_zone(struct char_data *ch, zone_vnum vnum)
 }
 
 /* List code by Ronald Evers - dlanor@xs4all.nl */
-void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vnum vmax)
+void list_triggers(struct char_data *ch, struct zone_data *zone, trig_vnum vmin, trig_vnum vmax)
 {
   int i, bottom, top, counter = 0;
   char trgtypes[256];
 
   /** Expect a minimum / maximum number if the rnum for the zone is NOWHERE. **/
-  if (rnum != NOWHERE) {
-    bottom = zone_table[rnum].bot;
-    top    = zone_table[rnum].top;
+  if (zone != NULL) {
+    bottom = zone->bot;
+    top    = zone->top;
   } else {
     bottom = vmin;
     top    = vmax;
@@ -469,26 +444,24 @@ void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vn
 
 
   /** Loop through the world and find each room. **/
-  for (i = 0; i < top_of_trigt; i++) {
-    /** Check to see if this room is one of the ones needed to be listed.    **/
-    if ((trig_index[i]->vnum >= bottom) && (trig_index[i]->vnum <= top)) {
-      counter++;
+  for (i = bottom; i <= top; i++) {
+    auto trig = trig_proto_by_id(i);
+    if(!trig) continue;
+    counter++;
 
       send_to_char(ch, "%4d) [@g%5d@n] @[1]%-45.45s ",
-        counter, trig_index[i]->vnum, trig_index[i]->proto->name);
+        counter, trig->vnum, trig->name);
 
-      if (trig_index[i]->proto->attach_type == OBJ_TRIGGER) {
-        sprintbit(GET_TRIG_TYPE(trig_index[i]->proto), otrig_types, trgtypes, sizeof(trgtypes));
+      if (trig->attach_type == OBJ_TRIGGER) {
+        sprintbit(GET_TRIG_TYPE(trig), otrig_types, trgtypes, sizeof(trgtypes));
         send_to_char(ch, "obj @y%s@n\r\n", trgtypes);
-      } else if (trig_index[i]->proto->attach_type==WLD_TRIGGER) {
-        sprintbit(GET_TRIG_TYPE(trig_index[i]->proto), wtrig_types, trgtypes, sizeof(trgtypes));
+      } else if (trig->attach_type==WLD_TRIGGER) {
+        sprintbit(GET_TRIG_TYPE(trig), wtrig_types, trgtypes, sizeof(trgtypes));
         send_to_char(ch, "wld @y%s@n\r\n", trgtypes);
       } else {
-        sprintbit(GET_TRIG_TYPE(trig_index[i]->proto), trig_types, trgtypes, sizeof(trgtypes));
+        sprintbit(GET_TRIG_TYPE(trig), trig_types, trgtypes, sizeof(trgtypes));
         send_to_char(ch, "mob @y%s@n\r\n", trgtypes);
       }
-
-    }
   }
 
   if (counter == 0) {

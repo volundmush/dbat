@@ -156,14 +156,13 @@ fn exportRoom(vnum: cdb.room_vnum, filename: []const u8) !void {
 
 fn exportRooms(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.world == null) return;
-    if (cdb.top_of_world < 0) return;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_of_world))) : (index += 1) {
-        const room = ptrAt(cdb.room_data, cdb.world, index);
-        const path = try assetPath(folder, room.number);
+    const iterator = cdb.room_iterator_create() orelse return;
+    defer cdb.room_iterator_free(iterator);
+
+    while (cdb.room_next(iterator)) |room| {
+        const path = try assetPath(folder, room.*.number);
         defer std.heap.page_allocator.free(path);
-        try exportRoom(room.number, path);
+        try exportRoom(room.*.number, path);
     }
 }
 
@@ -175,14 +174,13 @@ fn exportRoomExits(vnum: cdb.room_vnum, filename: []const u8) !void {
 
 fn exportAllRoomExits(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.world == null) return;
-    if (cdb.top_of_world < 0) return;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_of_world))) : (index += 1) {
-        const room = ptrAt(cdb.room_data, cdb.world, index);
-        const path = try assetPath(folder, room.number);
+    const iterator = cdb.room_iterator_create() orelse return;
+    defer cdb.room_iterator_free(iterator);
+
+    while (cdb.room_next(iterator)) |room| {
+        const path = try assetPath(folder, room.*.number);
         defer std.heap.page_allocator.free(path);
-        try exportRoomExits(room.number, path);
+        try exportRoomExits(room.*.number, path);
     }
 }
 
@@ -194,13 +192,15 @@ fn exportNpcPrototype(vnum: cdb.mob_vnum, filename: []const u8) !void {
 
 fn exportNpcPrototypes(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.mob_proto == null or cdb.mob_index == null) return;
-    if (cdb.top_of_mobt < 0) return;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_of_mobt))) : (index += 1) {
-        const path = try assetPath(folder, cdb.mob_index[index].vnum);
+    const iterator = cdb.mob_proto_iterator_create() orelse return;
+    defer cdb.mob_proto_iterator_free(iterator);
+
+    while (cdb.mob_proto_next(iterator)) |mob| {
+        const vnum = cdb.char_vnum_get(mob);
+        if (vnum == cdb.NOTHING) continue;
+        const path = try assetPath(folder, vnum);
         defer std.heap.page_allocator.free(path);
-        try exportNpcPrototype(cdb.mob_index[index].vnum, path);
+        try exportNpcPrototype(vnum, path);
     }
 }
 
@@ -212,13 +212,15 @@ fn exportObjPrototype(vnum: cdb.obj_vnum, filename: []const u8) !void {
 
 fn exportObjPrototypes(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.obj_proto == null or cdb.obj_index == null) return;
-    if (cdb.top_of_objt < 0) return;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_of_objt))) : (index += 1) {
-        const path = try assetPath(folder, cdb.obj_index[index].vnum);
+    const iterator = cdb.obj_proto_iterator_create() orelse return;
+    defer cdb.obj_proto_iterator_free(iterator);
+
+    while (cdb.obj_proto_next(iterator)) |obj| {
+        const vnum = cdb.obj_vnum_get(obj);
+        if (vnum == cdb.NOTHING) continue;
+        const path = try assetPath(folder, vnum);
         defer std.heap.page_allocator.free(path);
-        try exportObjPrototype(cdb.obj_index[index].vnum, path);
+        try exportObjPrototype(vnum, path);
     }
 }
 
@@ -230,14 +232,13 @@ fn exportZone(vnum: cdb.zone_vnum, filename: []const u8) !void {
 
 fn exportZones(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.zone_table == null) return;
-    if (cdb.top_of_zone_table < 0) return;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_of_zone_table))) : (index += 1) {
-        const zone = ptrAt(cdb.zone_data, cdb.zone_table, index);
-        const path = try assetPath(folder, zone.number);
+    const iterator = cdb.zone_iterator_create() orelse return;
+    defer cdb.zone_iterator_free(iterator);
+
+    while (cdb.zone_next(iterator)) |zone| {
+        const path = try assetPath(folder, zone.*.number);
         defer std.heap.page_allocator.free(path);
-        try exportZone(zone.number, path);
+        try exportZone(zone.*.number, path);
     }
 }
 
@@ -249,14 +250,13 @@ fn exportShop(vnum: cdb.shop_vnum, filename: []const u8) !void {
 
 fn exportShops(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.shop_index == null) return;
-    if (cdb.top_shop < 0) return;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_shop))) : (index += 1) {
-        const shop = ptrAt(cdb.shop_data, cdb.shop_index, index);
-        const path = try assetPath(folder, shop.vnum);
+    const iterator = cdb.shop_iterator_create() orelse return;
+    defer cdb.shop_iterator_free(iterator);
+
+    while (cdb.shop_next(iterator)) |shop| {
+        const path = try assetPath(folder, shop.*.vnum);
         defer std.heap.page_allocator.free(path);
-        try exportShop(shop.vnum, path);
+        try exportShop(shop.*.vnum, path);
     }
 }
 
@@ -268,34 +268,32 @@ fn exportGuild(vnum: cdb.guild_vnum, filename: []const u8) !void {
 
 fn exportGuilds(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.guild_index == null) return;
-    if (cdb.top_guild < 0) return;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_guild))) : (index += 1) {
-        const guild = ptrAt(cdb.guild_data, cdb.guild_index, index);
-        const path = try assetPath(folder, guild.vnum);
+    const iterator = cdb.guild_iterator_create() orelse return;
+    defer cdb.guild_iterator_free(iterator);
+
+    while (cdb.guild_next(iterator)) |guild| {
+        const path = try assetPath(folder, guild.*.vnum);
         defer std.heap.page_allocator.free(path);
-        try exportGuild(guild.vnum, path);
+        try exportGuild(guild.*.vnum, path);
     }
 }
 
 fn exportDgScript(vnum: cdb.trig_vnum, filename: []const u8) !void {
-    const trigger = triggerByVnum(vnum) orelse return error.NotFound;
+    const trigger = cdb.trig_proto_by_id(vnum) orelse return error.NotFound;
     try writeJsonFile(filename, dgscripts_json.serializeTrigger, .{trigger});
 }
 
 fn exportDgScripts(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.trig_index == null) return;
-    if (cdb.top_of_trigt <= 0) return;
-    var index: usize = 0;
-    while (index < @as(usize, @intCast(cdb.top_of_trigt))) : (index += 1) {
-        const entry = cdb.trig_index[index];
-        if (entry != null and entry.*.proto != null) {
-            const path = try assetPath(folder, entry.*.vnum);
-            defer std.heap.page_allocator.free(path);
-            try exportDgScript(entry.*.vnum, path);
-        }
+    const iterator = cdb.trig_proto_iterator_create() orelse return;
+    defer cdb.trig_proto_iterator_free(iterator);
+
+    while (cdb.trig_proto_next(iterator)) |trigger| {
+        const vnum = trigger.*.vnum;
+        if (vnum == cdb.NOTHING) continue;
+        const path = try assetPath(folder, vnum);
+        defer std.heap.page_allocator.free(path);
+        try exportDgScript(vnum, path);
     }
 }
 
@@ -349,13 +347,11 @@ fn importAll(folder: []const u8) !void {
     try importZones(zones);
     try importRooms(rooms);
     try importRoomExits(exits);
-    renumberRoomExits();
     try importDgScripts(dgscripts);
     try importNpcPrototypes(npc_prototypes);
     try importObjPrototypes(obj_prototypes);
     try importShops(shops);
     try importGuilds(guilds);
-    renumberZoneCommands();
 }
 
 const JsonFile = struct {
@@ -391,8 +387,6 @@ fn logImportFileError(label: []const u8, file: JsonFile, err: anyerror) void {
 fn importZones(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
     var progress = Progress.init("zones", files.len);
-    cdb.zone_table = try allocCArray(cdb.zone_data, files.len);
-    cdb.top_of_zone_table = if (files.len == 0) -1 else @intCast(files.len - 1);
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -401,11 +395,12 @@ fn importZones(folder: []const u8) !void {
             logImportFileError("zones", file, err);
             return err;
         };
-        const zone = ptrAt(cdb.zone_data, cdb.zone_table, index);
+        const zone = try allocCOne(cdb.zone_data);
         zones_json.deserializeZone(zone, .{}, value) catch |err| {
             logImportFileError("zones", file, err);
             return err;
         };
+        cdb.zone_put(zone.number, zone);
         progress.tick(index);
     }
 }
@@ -413,9 +408,6 @@ fn importZones(folder: []const u8) !void {
 fn importRooms(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
     var progress = Progress.init("rooms", files.len);
-    cdb.world = try allocCArray(cdb.room_data, files.len);
-    cdb.top_of_world = if (files.len == 0) -1 else @intCast(files.len - 1);
-    resetHtree(&cdb.room_htree);
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -424,15 +416,15 @@ fn importRooms(folder: []const u8) !void {
             logImportFileError("rooms", file, err);
             return err;
         };
-        const room = ptrAt(cdb.room_data, cdb.world, index);
+        const room = try allocCOne(cdb.room_data);
         room.number = @intCast(file.vnum);
-        room.zone = zoneRnumForRoom(room.number);
+        room.zone = cdb.virtual_zone_by_thing(room.number);
         rooms_json.deserializeRoom(room, .{}, value) catch |err| {
             logImportFileError("rooms", file, err);
             return err;
         };
-        room.zone = zoneRnumForRoom(room.number);
-        cdb.htree_add(cdb.room_htree, room.number, @intCast(index));
+        room.zone = cdb.virtual_zone_by_thing(room.number);
+        cdb.room_put(room.number, room);
         progress.tick(index);
     }
 }
@@ -460,8 +452,6 @@ fn importRoomExits(folder: []const u8) !void {
 fn importDgScripts(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
     var progress = Progress.init("dgscripts", files.len);
-    cdb.trig_index = try allocCArray([*c]cdb.index_data, files.len);
-    cdb.top_of_trigt = @intCast(files.len);
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -471,19 +461,12 @@ fn importDgScripts(folder: []const u8) !void {
             return err;
         };
 
-        const entry = try allocCOne(cdb.index_data);
         const trigger = try allocCOne(cdb.trig_data);
-        entry.vnum = @intCast(file.vnum);
-        entry.number = 0;
-        entry.func = null;
-        entry.proto = trigger;
-        trigger.nr = @intCast(index);
         dgscripts_json.deserializeTrigger(trigger, value) catch |err| {
             logImportFileError("dgscripts", file, err);
             return err;
         };
-        trigger.nr = @intCast(index);
-        cdb.trig_index[index] = entry;
+        cdb.trig_proto_put(@intCast(file.vnum), trigger);
         progress.tick(index);
     }
 }
@@ -491,17 +474,6 @@ fn importDgScripts(folder: []const u8) !void {
 fn importNpcPrototypes(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
     var progress = Progress.init("npc_prototypes", files.len);
-    cdb.mob_proto = try allocCArray(cdb.char_data, files.len);
-    cdb.mob_index = try allocCArray(cdb.index_data, files.len);
-    cdb.top_of_mobt = if (files.len == 0) -1 else @intCast(files.len - 1);
-    resetHtree(&cdb.mob_htree);
-
-    for (files, 0..) |file, index| {
-        cdb.mob_index[index].vnum = @intCast(file.vnum);
-        cdb.mob_index[index].number = 0;
-        cdb.mob_index[index].func = null;
-        cdb.htree_add(cdb.mob_htree, @intCast(file.vnum), @intCast(index));
-    }
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -510,15 +482,16 @@ fn importNpcPrototypes(folder: []const u8) !void {
             logImportFileError("npc_prototypes", file, err);
             return err;
         };
-        const mob = ptrAt(cdb.char_data, cdb.mob_proto, index);
-        mob.nr = @intCast(index);
+        const mob = try allocCOne(cdb.char_data);
+        mob.vnum = file.vnum;
         mob.player_specials = &cdb.dummy_mob;
         characters_json.deserializeCharacter(mob, .{ .mode = .npc_prototype }, value) catch |err| {
             logImportFileError("npc_prototypes", file, err);
             return err;
         };
-        mob.nr = @intCast(index);
+        mob.vnum = file.vnum;
         mob.player_specials = &cdb.dummy_mob;
+        cdb.mob_proto_put(@intCast(file.vnum), mob);
         progress.tick(index);
     }
 }
@@ -526,17 +499,6 @@ fn importNpcPrototypes(folder: []const u8) !void {
 fn importObjPrototypes(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
     var progress = Progress.init("obj_prototypes", files.len);
-    cdb.obj_proto = try allocCArray(cdb.obj_data, files.len);
-    cdb.obj_index = try allocCArray(cdb.index_data, files.len);
-    cdb.top_of_objt = if (files.len == 0) -1 else @intCast(files.len - 1);
-    resetHtree(&cdb.obj_htree);
-
-    for (files, 0..) |file, index| {
-        cdb.obj_index[index].vnum = @intCast(file.vnum);
-        cdb.obj_index[index].number = 0;
-        cdb.obj_index[index].func = null;
-        cdb.htree_add(cdb.obj_htree, @intCast(file.vnum), @intCast(index));
-    }
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -545,13 +507,14 @@ fn importObjPrototypes(folder: []const u8) !void {
             logImportFileError("obj_prototypes", file, err);
             return err;
         };
-        const obj = ptrAt(cdb.obj_data, cdb.obj_proto, index);
-        obj.item_number = @intCast(index);
+        const obj = try allocCOne(cdb.obj_data);
+        obj.vnum = @intCast(file.vnum);
         objects_json.deserializeObject(obj, .{ .mode = .prototype }, value) catch |err| {
             logImportFileError("obj_prototypes", file, err);
             return err;
         };
-        obj.item_number = @intCast(index);
+        obj.vnum = @intCast(file.vnum);
+        cdb.obj_proto_put(@intCast(file.vnum), obj);
         progress.tick(index);
     }
 }
@@ -559,8 +522,6 @@ fn importObjPrototypes(folder: []const u8) !void {
 fn importShops(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
     var progress = Progress.init("shops", files.len);
-    cdb.shop_index = try allocCArray(cdb.shop_data, files.len);
-    cdb.top_shop = if (files.len == 0) -1 else @intCast(files.len - 1);
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -569,12 +530,13 @@ fn importShops(folder: []const u8) !void {
             logImportFileError("shops", file, err);
             return err;
         };
-        const shop = ptrAt(cdb.shop_data, cdb.shop_index, index);
+        const shop = try allocCOne(cdb.shop_data);
         shop.vnum = @intCast(file.vnum);
         shops_json.deserializeShop(shop, .{}, value) catch |err| {
             logImportFileError("shops", file, err);
             return err;
         };
+        cdb.shop_put(@intCast(file.vnum), shop);
         progress.tick(index);
     }
 }
@@ -582,8 +544,6 @@ fn importShops(folder: []const u8) !void {
 fn importGuilds(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
     var progress = Progress.init("guilds", files.len);
-    cdb.guild_index = try allocCArray(cdb.guild_data, files.len);
-    cdb.top_guild = if (files.len == 0) -1 else @intCast(files.len - 1);
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -592,76 +552,15 @@ fn importGuilds(folder: []const u8) !void {
             logImportFileError("guilds", file, err);
             return err;
         };
-        const guild = ptrAt(cdb.guild_data, cdb.guild_index, index);
+        const guild = try allocCOne(cdb.guild_data);
         guild.vnum = @intCast(file.vnum);
         guilds_json.deserializeGuild(guild, .{}, value) catch |err| {
             logImportFileError("guilds", file, err);
             return err;
         };
+        cdb.guild_put(@intCast(file.vnum), guild);
         progress.tick(index);
     }
-}
-
-fn renumberRoomExits() void {
-    if (cdb.world == null or cdb.top_of_world < 0) return;
-    var room_index: usize = 0;
-    while (room_index <= @as(usize, @intCast(cdb.top_of_world))) : (room_index += 1) {
-        const room = ptrAt(cdb.room_data, cdb.world, room_index);
-        for (0..cdb.NUM_OF_DIRS) |dir| {
-            const exit = room.dir_option[dir];
-            if (exit == null) continue;
-            if (exit.*.to_room != cdb.NOWHERE) exit.*.to_room = cdb.real_room(exit.*.to_room);
-        }
-    }
-}
-
-fn renumberZoneCommands() void {
-    if (cdb.zone_table == null or cdb.top_of_zone_table < 0) return;
-    var zone_index: usize = 0;
-    while (zone_index <= @as(usize, @intCast(cdb.top_of_zone_table))) : (zone_index += 1) {
-        const zone = ptrAt(cdb.zone_data, cdb.zone_table, zone_index);
-        if (zone.cmd == null) continue;
-        var command_index: usize = 0;
-        while (zone.cmd[command_index].command != 'S') : (command_index += 1) {
-            const command: *cdb.reset_com = @ptrCast(&zone.cmd[command_index]);
-            switch (command.command) {
-                'M' => {
-                    command.arg1 = cdb.real_mobile(command.arg1);
-                    command.arg3 = cdb.real_room(command.arg3);
-                },
-                'O' => {
-                    command.arg1 = cdb.real_object(command.arg1);
-                    if (command.arg3 != cdb.NOWHERE) command.arg3 = cdb.real_room(command.arg3);
-                },
-                'G', 'E' => command.arg1 = cdb.real_object(command.arg1),
-                'P' => {
-                    command.arg1 = cdb.real_object(command.arg1);
-                    command.arg3 = cdb.real_object(command.arg3);
-                },
-                'D' => command.arg1 = cdb.real_room(command.arg1),
-                'R' => {
-                    command.arg1 = cdb.real_room(command.arg1);
-                    command.arg2 = cdb.real_object(command.arg2);
-                },
-                'T' => {
-                    command.arg2 = realTrigger(command.arg2);
-                    command.arg3 = cdb.real_room(command.arg3);
-                },
-                'V' => command.arg3 = cdb.real_room(command.arg3),
-                else => {},
-            }
-        }
-    }
-}
-
-fn realTrigger(vnum: cdb.trig_vnum) cdb.trig_rnum {
-    if (cdb.trig_index == null or cdb.top_of_trigt <= 0) return cdb.NOTHING;
-    var index: usize = 0;
-    while (index < @as(usize, @intCast(cdb.top_of_trigt))) : (index += 1) {
-        const entry = cdb.trig_index[index];
-        if (entry != null and entry.*.vnum == vnum) return @intCast(index);
-    }
-    return cdb.NOTHING;
 }
 
 fn writeJsonFile(filename: []const u8, comptime serializer: anytype, args: anytype) !void {
@@ -719,21 +618,6 @@ fn ptrAt(comptime T: type, ptr: [*c]T, index: usize) *T {
     return @ptrCast(&ptr[index]);
 }
 
-fn resetHtree(tree: *[*c]cdb.htree_node) void {
-    if (tree.* != null) cdb.htree_free(tree.*);
-    tree.* = cdb.htree_init();
-}
-
-fn zoneRnumForRoom(vnum: cdb.room_vnum) cdb.zone_rnum {
-    if (cdb.zone_table == null or cdb.top_of_zone_table < 0) return cdb.NOWHERE;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_of_zone_table))) : (index += 1) {
-        const zone = ptrAt(cdb.zone_data, cdb.zone_table, index);
-        if (vnum >= zone.bot and vnum <= zone.top) return @intCast(index);
-    }
-    return cdb.NOWHERE;
-}
-
 fn ensureFolder(folder: []const u8) !void {
     if (!has_io) return error.NotInitialized;
     try std.Io.Dir.cwd().createDirPath(global_io, folder);
@@ -745,17 +629,6 @@ fn assetPath(folder: []const u8, vnum: anytype) ![]const u8 {
 
 fn childPath(folder: []const u8, child: []const u8) ![]const u8 {
     return try std.fmt.allocPrint(std.heap.page_allocator, "{s}/{s}", .{ folder, child });
-}
-
-fn triggerByVnum(vnum: cdb.trig_vnum) ?*cdb.trig_data {
-    if (cdb.trig_index == null) return null;
-    if (cdb.top_of_trigt <= 0) return null;
-    var index: usize = 0;
-    while (index < @as(usize, @intCast(cdb.top_of_trigt))) : (index += 1) {
-        const entry = cdb.trig_index[index];
-        if (entry != null and entry.*.vnum == vnum) return entry.*.proto;
-    }
-    return null;
 }
 
 fn cString(value: ?[*:0]const u8) []const u8 {

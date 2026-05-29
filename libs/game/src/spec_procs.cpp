@@ -175,9 +175,7 @@ int num_players_in_room(room_vnum room)
       continue; 
     if (!(i->character)) 
       continue; 
-    if (IN_ROOM(i->character) == NOWHERE || IN_ROOM(i->character) > top_of_world) 
-      continue; 
-    if (char_room_get(i->character)->number != room) 
+    if (char_room_vnum_get(i->character) != room) 
       continue; 
     if ((GET_ADMLEVEL(i->character) >= ADMLVL_IMMORT) && (PRF_FLAGGED(i->character, PRF_NOHASSLE))) /* Ignore Imms */ 
       continue; 
@@ -216,318 +214,6 @@ bool check_obj_in_room(obj_vnum obj, room_vnum room)
   return found; 
 } 
 
-static const int gauntlet_info[][3] = {  /* --mystic 26 Oct 2005 */
-
-/* Gauntlet Room Scoring*/ 
-/* Num  Rm Num   Direction   */ 
-  {0,   2403,  SCMD_SOUTH},  /* Waiting Room     */ 
-  {1,   2404,  SCMD_SOUTH},  /* About level 5    */ 
-  {2,   2405,  SCMD_SOUTH},  /* About level 10   */ 
-  {3,   2406,  SCMD_SOUTH},  /* About level 15   */ 
-  {4,   2407,  SCMD_SOUTH},  /* About level 20   */ 
-  {5,   2408,  SCMD_SOUTH},  /* About level 25   */ 
-  {6,   2409,  SCMD_SOUTH},  /* About level 30   */ 
-  {7,   2410,  SCMD_SOUTH},  /* About level 35   */ 
-  {8,   2411,  SCMD_SOUTH},  /* About level 40   */ 
-  {9,   2412,  SCMD_SOUTH},  /* About level 45   */ 
-  {10,  2413,  SCMD_SOUTH},  /* About level 50   */ 
-  {11,  2414,  SCMD_SOUTH},  /* About level 55   */ 
-  {12,  2415,  SCMD_SOUTH},  /* About level 60   */ 
-  {13,  2416,  SCMD_SOUTH},  /* About level 65   */ 
-  {14,  2417,  SCMD_SOUTH},  /* About level 70   */ 
-  {15,  2418,  SCMD_SOUTH},  /* About level 75   */ 
-  {16,  2420,  SCMD_SOUTH},  /* About level 80   */ 
-  {17,  2421,  SCMD_SOUTH},  /* About level 85   */ 
-  {18,  2422,  SCMD_SOUTH},  /* About level 90   */ 
-  {19,  2423,  SCMD_SOUTH},  /* About level 95   */ 
-  {20,  2424,  SCMD_SOUTH},  /* About level 100  */ 
-  {21,  2425,  SCMD_SOUTH},  /* About level 5    */
-  {22,  2426,  SCMD_SOUTH},  /* About level 10   */
-  {23,  2427,  SCMD_SOUTH},  /* About level 15   */
-  {24,  2428,  SCMD_SOUTH},  /* About level 20   */
-  {25,  2429,  SCMD_SOUTH},  /* About level 25   */
-  {26,  2430,  SCMD_SOUTH},  /* About level 30   */
-  {27,  2431,  SCMD_SOUTH},  /* About level 35   */
-  {28,  2432,  SCMD_SOUTH},  /* About level 40   */
-  {29,  2433,  SCMD_SOUTH},  /* About level 45   */
-  {30,  2434,  SCMD_SOUTH},  /* About level 50   */
-  {31,  2435,  SCMD_SOUTH},  /* About level 55   */
-  {32,  2436,  SCMD_SOUTH},  /* About level 60   */
-  {33,  2437,  SCMD_SOUTH},  /* About level 65   */
-  {34,  2438,  SCMD_SOUTH},  /* About level 70   */
-  {35,  2439,  SCMD_SOUTH},  /* About level 75   */
-  {36,  2440,  SCMD_SOUTH},  /* About level 80   */
-  {37,  2441,  SCMD_SOUTH},  /* About level 85   */
-  {38,  2442,  SCMD_SOUTH},  /* About level 90   */
-  {39,  2443,  SCMD_SOUTH},  /* About level 95   */
-  {40,  2444,  SCMD_SOUTH},  /* About level 100  */
-  {-1, -1, -1} 
-}; 
-
-SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */ 
-{ 
-  int i=0; 
-  int proceed = 1; 
-  struct char_data *tch; 
-  char *buf2 = "$N tried to sneak past without a fight, and got nowhere."; 
-  char buf[MAX_STRING_LENGTH]; 
-  bool nomob=TRUE; 
-
-  /* give player credit for making it this far */ 
-  for (i = 0; gauntlet_info[i][0] != -1; i++) 
-  { 
-    if ((!IS_NPC(ch)) && (char_room_get(ch)->number == gauntlet_info[i][1])) 
-    { 
-      /* Check not overwriting gauntlet rank with lower value (Jamdog - 20th July 2006) */ 
-      if (GET_GAUNTLET(ch) < (gauntlet_info[i][0])) 
-      { 
-        //set player's gauntlet rank 
-        GET_GAUNTLET(ch) = (gauntlet_info[i][0]); 
-      } 
-    } 
-  } 
-
-  if (!cmd)                        /* If no command, then nothing to do             */ 
-    return FALSE; 
-
-  if (CMD_IS("flee")) 
-  { 
-    send_to_char(ch, "Fleeing is not allowed!  If you want to get out of here, type @Ysurrender@n while fighting to be returned to the start."); 
-    return TRUE; 
-  } 
-
-  if (!IS_MOVE(cmd) && !CMD_IS("surrender") ) /* Only movement commands need to be checked     */ 
-    return FALSE; 
-
-  if (IS_NPC(ch))                  /* Mobs can move about - Jamdog 20th July 2006   */ 
-    return FALSE;                  /* This also allows following pets!              */ 
-
-  if (CMD_IS("surrender")) 
-  { 
-    if (FIGHTING(ch)) 
-    { 
-      /* OK, player has had enough - position is already stored, so throw them back to the start */ 
-      char_from_room(ch); 
-      char_to_room(ch, real_room(gauntlet_info[0][1])); 
-      act("$n suddenly appears looking relieved after $s trial in the Gauntlet",FALSE,ch,0,ch,TO_NOTVICT); 
-      act("You are returned to the start of the Gauntlet",FALSE,ch,0,ch,TO_VICT); 
-
-      /* Hit point penalty for surrendering */
-      decCurHealth(ch, 2000);
-
-      look_at_room(char_room_get(ch), ch, 0); 
-      return TRUE; 
-    } 
-    else 
-    { 
-      send_to_char(ch, "You can only surrender while fighting, so at least TRY to make an effort"); 
-      return TRUE; 
-    } 
-  } 
-
-  if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) /* Imms can walk through the gauntlet unhindered */ 
-    return FALSE; 
-
-  /* Only Avatars may pass the 11th room 
-  if ((char_room_get(ch)->number == gauntlet_info[GAUNTLET_AV][1] ) && (cmd == gauntlet_info[GAUNTLET_AV][2])) 
-  { 
-    if (GET_CLASS(ch) != CLASS_AVATAR) 
-    { 
-      send_to_char (ch, "Only Avatars may proceed further!\r\n"); 
-      return TRUE; 
-    } 
-  } */ 
-  for (i = 0; gauntlet_info[i][0] != -1; i++) 
-  { 
-    if (char_room_get(ch)->number == gauntlet_info[i][1]) 
-    { 
-      if (cmd == gauntlet_info[i][2]) 
-      { 
-        //don't let him proceed if mob is still alive 
-        for (tch = char_room_get(ch)->people; tch; tch = tch->next_in_room) 
-        { 
-          if (IS_NPC(tch) && i > 0)  /* Ignore mobs in the waiting room */ 
-          { 
-            proceed = 0; 
-            sprintf(buf,"%s wants to teach you a lesson first.\r\n", GET_NAME(tch)); 
-          } 
-        } 
-        /* In the case of the phoenix room, don't progress if there is 1st or 2nd ashes */ 
-        /* TODO: (add in here when ash is created) */ 
-        if (proceed) 
-        { 
-          nomob = TRUE; 
-
-          /* Check the next room for players and ensure mob is waiting */ 
-          for (tch = room_by_id(gauntlet_info[i+1][1])->people; tch; tch = tch->next_in_room)
-          { 
-            if (!IS_NPC(tch)) 
-            { 
-              proceed=0;  /* There is a player there */ 
-              sprintf(buf,"%s is in the next room.  You must wait for them to finish.\r\n", GET_NAME(tch)); 
-            } 
-            else 
-            { 
-              nomob = FALSE; 
-            } 
-          } 
-          if (nomob == TRUE) 
-          { 
-            proceed=0;  /* There is no mob there in the next room */ 
-            sprintf(buf,"The next room is empty.  You must wait for your opponent to re-appear.\r\n"); 
-          } 
-        } 
-
-        if (proceed == 0) 
-        { 
-          send_to_char(ch, buf); 
-          act(buf2, FALSE, ch, 0, ch, TO_ROOM); 
-          return TRUE; 
-        } 
-      } 
-    } 
-  } 
-  return FALSE; 
-} 
-
-SPECIAL(gauntlet_end)  /* Jamdog - 20th Feb 2007 */ 
-{ 
-  int i=0; 
-
-  /* give player credit for making it this far */ 
-  if (!IS_NPC(ch)) 
-  { 
-    /* Check not overwriting gauntlet rank with lower value (Jamdog - 20th July 2006) */ 
-    if (GET_GAUNTLET(ch) < GAUNTLET_END) 
-    { 
-      //set player's gauntlet rank 
-      GET_GAUNTLET(ch) = GAUNTLET_END; 
-    } 
-  } 
-
-  if (!cmd)                        /* If no command, then nothing to do             */ 
-    return FALSE; 
-
-  if (CMD_IS("flee")) 
-  { 
-    if ((FIGHTING(ch)) && (GET_POS(ch) == POS_FIGHTING)) 
-    { 
-      send_to_char(ch, "You can't flee from this fight./r/nIt's your own fault for summoning creatures into the gauntlet!\r\n"); 
-      return TRUE; 
-    } 
-    else 
-    { 
-      send_to_char(ch, "There is nothing here to flee from\r\n"); 
-      return TRUE; 
-    } 
-  } 
-
-  if (CMD_IS("surrender")) 
-  { 
-    send_to_char(ch, "You have completed the gauntlet, why would you need to surrender?\r\n"); 
-    return TRUE; 
-  } 
-
-  if (!IS_MOVE(cmd)) /* Only movement commands need to be checked     */ 
-    return FALSE; 
-
-  if (IS_NPC(ch))                  /* Mobs can move about - Jamdog 20th July 2006   */ 
-    return FALSE;                  /* This also allows following pets!              */ 
-
-  if (!EXIT(ch, cmd-1) || EXIT(ch, cmd-1)->to_room == NOWHERE) 
-    return FALSE; 
-  if (EXIT_FLAGGED(EXIT(ch, cmd-1), EX_CLOSED)) 
-    return FALSE; 
-
-  for (i = 0; gauntlet_info[i][0] != -1; i++) 
-  { 
-    if (world[EXIT(ch, (cmd-1))->to_room].number == gauntlet_info[i][1]) 
-    { 
-      send_to_char(ch, "You have completed the gauntlet, you cannot go backwards!\r\n"); 
-      return TRUE; 
-    } 
-  } 
-  return FALSE; 
-} 
-
-SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */ 
-{ 
-  int i=0; 
-  int proceed = 1, door; 
-  struct char_data *tch; 
-  char *buf2 = "$N tried to return to the gauntlet, and got nowhere."; 
-  char buf[MAX_STRING_LENGTH]; 
-  bool nomob=TRUE; 
-
-  if (!cmd)                        /* If no command, then nothing to do             */ 
-    return FALSE; 
-
-  if (CMD_IS("flee")) 
-  { 
-    send_to_char(ch, "Fleeing is not allowed!  If you want to get out of here, type @Ysurrender@n while fighting to be returned to the start."); 
-    return TRUE; 
-  } 
-
-  if (CMD_IS("surrender")) 
-  { 
-    send_to_char(ch, "You are in a rest-room.  Surrender is not an option.\r\nIf you want to leave the Gauntlet, you can surrender while fighting.\r\n"); 
-    return TRUE; 
-  } 
-
-  if (!IS_MOVE(cmd)) /* Only movement commands need to be checked     */ 
-    return FALSE; 
-
-  if (IS_NPC(ch))                  /* Mobs can move about - Jamdog 20th July 2006   */ 
-    return FALSE;                  /* This also allows following pets!              */ 
-
-  if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) /* Imms can walk through the gauntlet unhindered */ 
-    return FALSE; 
-
-  for (i = 0; gauntlet_info[i][0] != -1; i++) 
-  { 
-    for (door = 0; door < NUM_OF_DIRS; door++) 
-    { 
-      if (!EXIT(ch, door) || EXIT(ch, door)->to_room == NOWHERE) 
-        continue; 
-      if (EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED)) 
-        continue; 
-
-      if ((world[EXIT(ch, door)->to_room].number == gauntlet_info[i][1]) && (door == (cmd-1))) 
-      { 
-        nomob = TRUE; 
-
-        /* Check the next room for players and ensure mob is waiting */ 
-        for (tch = room_by_id(gauntlet_info[i][1])->people; tch; tch = tch->next_in_room)
-        { 
-          if (!IS_NPC(tch)) 
-          { 
-            proceed=0;  /* There is a player there */ 
-            sprintf(buf,"%s has moved into the next room.  You must wait for them to finish.\r\n", GET_NAME(tch)); 
-          } 
-          else 
-          { 
-            nomob = FALSE; 
-          } 
-        } 
-/* Not needed - players can go back if the mob is dead 
-        if (nomob == TRUE) 
-        { 
-          proceed=0;  // There is no mob there in the next room 
-          sprintf(buf,"The next room is empty.  You must wait for your opponent to re-appear.\r\n"); 
-        } 
-*/ 
-        if (proceed == 0) 
-        { 
-          send_to_char(ch, buf); 
-          act(buf2, FALSE, ch, 0, ch, TO_ROOM); 
-          return TRUE; 
-        } 
-      } 
-    } 
-  } 
-  return FALSE; 
-} 
-
 void npc_steal(struct char_data *ch, struct char_data *victim)
 {
   int gold;
@@ -563,7 +249,7 @@ SPECIAL(snake)
   if (cmd || GET_POS(ch) != POS_FIGHTING || !FIGHTING(ch))
     return (FALSE);
 
-  if (IN_ROOM(FIGHTING(ch)) != IN_ROOM(ch) || rand_number(0, GET_LEVEL(ch)) != 0)
+  if (char_room_get(FIGHTING(ch)) != char_room_get(ch) || rand_number(0, GET_LEVEL(ch)) != 0)
     return (FALSE);
 
   act("$n bites $N!", 1, ch, 0, FIGHTING(ch), TO_NOTVICT);
@@ -606,7 +292,7 @@ SPECIAL(magic_user_orig)
       break;
 
   /* if I didn't pick any of those, then just slam the guy I'm fighting */
-  if (vict == NULL && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch))
+  if (vict == NULL && char_room_get(FIGHTING(ch)) == char_room_get(ch))
     vict = FIGHTING(ch);
 
   /* Hm...didn't pick anyone...I'll wait a round. */
@@ -710,7 +396,7 @@ SPECIAL(fido)
     for (temp = i->contains; temp; temp = next_obj) {
       next_obj = temp->next_content;
       obj_from_obj(temp);
-      obj_to_room(temp, IN_ROOM(ch));
+      obj_to_room(temp, char_room_get(ch));
     }
     extract_obj(i);
     return (TRUE);
@@ -805,82 +491,18 @@ SPECIAL(cityguard)
 
 #define PET_PRICE(pet) (GET_LEVEL(pet) * 300)
 
-SPECIAL(pet_shops)
-{
-  char buf[MAX_STRING_LENGTH], pet_name[256];
-  room_rnum pet_room;
-  struct char_data *pet;
-
-  /* Gross. */
-  pet_room = IN_ROOM(ch) + 1;
-
-  if (CMD_IS("list")) {
-    send_to_char(ch, "Available pets are:\r\n");
-    for (pet = world[pet_room].people; pet; pet = pet->next_in_room) {
-      /* No, you can't have the Implementor as a pet if he's in there. */
-      if (!IS_NPC(pet))
-        continue;
-      send_to_char(ch, "%8d - %s\r\n", PET_PRICE(pet), GET_NAME(pet));
-    }
-    return (TRUE);
-  } else if (CMD_IS("buy")) {
-
-    two_arguments(argument, buf, pet_name);
-
-    if (!(pet = get_char_room(buf, NULL, pet_room)) || !IS_NPC(pet)) {
-      send_to_char(ch, "There is no such pet!\r\n");
-      return (TRUE);
-    }
-    if (GET_GOLD(ch) < PET_PRICE(pet)) {
-      send_to_char(ch, "You don't have enough zenni!\r\n");
-      return (TRUE);
-    }
-    GET_GOLD(ch) -= PET_PRICE(pet);
-
-    pet = read_mobile(GET_MOB_RNUM(pet), REAL);
-    GET_EXP(pet) = 0;
-    SET_BIT_AR(AFF_FLAGS(pet), AFF_CHARM);
-
-    if (*pet_name) {
-      snprintf(buf, sizeof(buf), "%s %s", pet->name, pet_name);
-      /* free(pet->name); don't free the prototype! */
-      pet->name = strdup(buf);
-
-      snprintf(buf, sizeof(buf), "%sA small sign on a chain around the neck says 'My name is %s'\r\n",
-	      pet->description, pet_name);
-      /* free(pet->description); don't free the prototype! */
-      pet->description = strdup(buf);
-    }
-    char_to_room(pet, IN_ROOM(ch));
-    add_follower(pet, ch);
-    pet->master_id = GET_IDNUM(ch);
-
-    /* Be certain that pets can't get/carry/use/wield/wear items */
-    IS_CARRYING_W(pet) = 1000;
-    IS_CARRYING_N(pet) = 100;
-
-    send_to_char(ch, "May you enjoy your pet.\r\n");
-    act("$n buys $N as a pet.", FALSE, ch, 0, pet, TO_ROOM);
-
-    return (TRUE);
-  }
-
-  /* All commands except list and buy */
-  return (FALSE);
-}
 
 SPECIAL(auction)
 {
-  room_rnum auct_room;
+  struct room_data *auct_room = room_by_id(80);
   struct obj_data *obj, *next_obj, *obj2 = NULL;
   int found = FALSE;
 
   /* Gross. */
-  auct_room = real_room(80);
 
   if (CMD_IS("cancel")) {
 
-    for (obj = world[auct_room].contents; obj; obj = next_obj) {
+    for (obj = auct_room->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
      if (obj && GET_AUCTER(obj) == GET_ID(ch)) {
       obj2 = obj;
@@ -924,7 +546,7 @@ SPECIAL(auction)
     struct descriptor_data *d;
     int founded = FALSE;
 
-    for (obj = world[auct_room].contents; obj; obj = next_obj) {
+    for (obj = auct_room->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
      if (obj && GET_CURBID(obj) == GET_ID(ch)) {
       obj2 = obj;

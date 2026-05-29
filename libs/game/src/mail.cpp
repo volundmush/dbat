@@ -618,7 +618,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
   }
   while (has_mail(GET_IDNUM(ch))) {
     obj = create_obj();
-    obj->item_number = NOTHING;
+    obj->vnum = NOTHING;
 
     GET_OBJ_TYPE(obj) = ITEM_NOTE;
     for(y = 0; y < TW_ARRAY_MAX; y++)
@@ -674,4 +674,3 @@ void notify_if_playing(struct char_data *from, int recipient_id)
     }
   }
 } 
-

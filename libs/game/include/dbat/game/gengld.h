@@ -16,7 +16,7 @@ void free_guild(struct guild_data *guild);
 void free_guild_strings(struct guild_data *guild);
 void modify_string(char **str, char *newstr);
 int add_guild(struct guild_data *guild);
-int save_guilds(zone_rnum zone_num);
+int save_guilds(struct zone_data *zone);
 
 /*
  * Handy macros.

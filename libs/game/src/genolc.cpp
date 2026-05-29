@@ -21,10 +21,15 @@
 /* List of zones to be saved.  */
 struct save_list_data *save_list;
 
+static int save_config_for_zone(struct zone_data *)
+{
+  return save_config(NOWHERE);
+}
+
 /* Structure defining all known save types.  */
 struct {
   int save_type;
-  int (*func)(IDXTYPE rnum);
+  int (*func)(struct zone_data *zone);
   const char *message;
 } save_types[] = {
   { SL_MOB, save_mobiles , "mobile" },
@@ -32,7 +37,7 @@ struct {
   { SL_SHP, save_shops, "shop" },
   { SL_WLD, save_rooms, "room" },
   { SL_ZON, save_zone, "zone" },
-  { SL_CFG, save_config, "config" },
+  { SL_CFG, save_config_for_zone, "config" },
   { SL_GLD, save_guilds, "guild" },
   { SL_ACT, NULL, "social" },
   { SL_HLP, NULL, "help" },
@@ -68,7 +73,7 @@ int save_all(void)
       log("SYSERR: GenOLC: Invalid save type %d in save list.\n", save_list->type);
           break;
       }
-    } else if ((*save_types[save_list->type].func) (real_zone(save_list->zone)) < 0)
+    } else if ((*save_types[save_list->type].func) (zone_by_id(save_list->zone)) < 0)
       save_list = save_list->next;	/* Fatal error, skip this one. */
   }
 
@@ -148,11 +153,12 @@ int add_to_save_list(zone_vnum zone, int type)
   
   if (type == SL_CFG)
     return FALSE; 
+  
+  auto z = zone_by_id(zone);
     
-  rznum = real_zone(zone);
-  if (rznum == NOWHERE || rznum > top_of_zone_table) {
+  if (!z) {
      if (zone != AEDIT_PERMISSION && zone != HEDIT_PERMISSION) {
-      log("SYSERR: add_to_save_list: Invalid zone number passed. (%d => %d, 0-%d)", zone, rznum, top_of_zone_table);
+      log("SYSERR: add_to_save_list: Invalid zone number passed. (%d)", zone);
       return FALSE;
     }
   }
@@ -208,16 +214,6 @@ ACMD(do_show_save_list)
   }
 }
 
-room_vnum genolc_zonep_bottom(struct zone_data *zone)
-{
-  return zone->bot;
-}
-
-zone_vnum genolc_zone_bottom(zone_rnum rznum)
-{
-  return zone_table[rznum].bot;
-}
-
 int sprintascii(char *out, bitvector_t bits)
 {
   int i, j = 0;
@@ -235,4 +231,3 @@ int sprintascii(char *out, bitvector_t bits)
   out[j++] = '\0';
   return j;
 }
-

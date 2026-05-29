@@ -92,7 +92,7 @@ WCMD(do_weffect)
 {
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   int num = 0;
-  room_rnum target, nr;
+  room_rnum nr;
 
   two_arguments(argument, arg, arg2);
 
@@ -109,9 +109,7 @@ WCMD(do_weffect)
   num = atoi(arg2);
 
   nr = num;
-  target = real_room(nr);
-
-  struct room_data *rm = &world[target];
+  struct room_data *rm = room_by_id(nr);
 
   if (!strcasecmp(arg, "gravity")) { /* Set gravity */
    if (num < 0 || num > 10000) {
@@ -121,14 +119,14 @@ WCMD(do_weffect)
     room_gravity_set(rm, num);
    }
   } else if (!strcasecmp(arg, "light")) {
-   if (target == NOWHERE) {
+   if (rm == NULL) {
     wld_log(room, "weffect target is NOWHERE.");
     return;
    } else {
     room_flag_toggle(rm, ROOM_INDOORS);
    }
   } else if (!strcasecmp(arg, "lava")) {
-   if (target == NOWHERE) {
+   if (rm == NULL) {
     wld_log(room, "weffect target is NOWHERE.");
     return;
    } else {
@@ -156,11 +154,11 @@ WCMD(do_wasound)
     }
 
     for (door = 0; door < NUM_OF_DIRS; door++) {
-        struct room_direction_data *newexit;
-
-        if ((newexit = room->dir_option[door]) && (newexit->to_room != NOWHERE) &&
-            room != &world[newexit->to_room])
-            act_to_room(argument, &world[newexit->to_room]);
+        auto ex = R_EXIT(room, door);
+        if(!ex) continue;
+        auto dest = exit_dest_get(ex);
+        if(!dest) continue;
+        act_to_room(argument, dest);
     }
 }
 
@@ -212,7 +210,7 @@ WCMD(do_wsend)
 
 WCMD(do_wzoneecho)
 {
-    zone_rnum zone;
+    struct zone_data *zone = NULL;
     char room_num[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
 
     msg = any_one_arg(argument, room_num);
@@ -221,7 +219,7 @@ WCMD(do_wzoneecho)
     if (!*room_num || !*msg)
         wld_log(room, "wzoneecho called with too few args");
 
-    else if ((zone = real_zone_by_thing(atoi(room_num))) == NOWHERE)
+    else if (!(zone = zone_by_id(virtual_zone_by_thing(atoi(room_num)))))
         wld_log(room, "wzoneecho called for nonexistant zone");
 
     else {
@@ -253,7 +251,8 @@ WCMD(do_wdoor)
     char field[MAX_INPUT_LENGTH], *value;
     room_data *rm;
     struct room_direction_data *newexit;
-    int dir, fd, to_room;
+    int dir, fd;
+    room_vnum to_room;
 
     const char *door_field[] = {
         "purge",
@@ -336,7 +335,7 @@ WCMD(do_wdoor)
             strcpy(newexit->keyword, value);
             break;
         case 5:  /* room        */
-            if ((to_room = real_room(atoi(value))) != NOWHERE)
+            if ((to_room = room_vnum_check(atoi(value))) != NOWHERE)
                 newexit->to_room = to_room;
             else
                 wld_log(room, "wdoor: invalid door target");
@@ -349,7 +348,7 @@ WCMD(do_wdoor)
 WCMD(do_wteleport)
 {
     char_data *ch, *next_ch;
-    room_rnum target, nr;
+    room_rnum nr;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg1, arg2);
@@ -360,9 +359,9 @@ WCMD(do_wteleport)
     }
 
     nr = atoi(arg2);
-    target = real_room(nr);
+    struct room_data *target = room_by_id(nr);
 
-    if (target == NOWHERE)
+    if (target == NULL)
         wld_log(room, "wteleport target is an invalid room");
 
     else if (!strcasecmp(arg1, "all")) {
@@ -513,11 +512,11 @@ WCMD(do_wload)
 
     /* load mob to target room - Jamie Nelson, April 13 2004 */
     if (is_abbrev(arg1, "mob")) {
-      room_rnum rnum;
+      struct room_data *rnum;
       if (!target || !*target) {
-        rnum = real_room(room->number);
+        rnum = room_by_id(room->number);
       } else {
-        if (!isdigit(*target) || (rnum = real_room(atoi(target))) == NOWHERE) {
+        if (!isdigit(*target) || (rnum = room_by_id(atoi(target))) == NULL) {
           wld_log(room, "wload: room target vnum doesn't exist (loading mob vnum %d to room %s)", number, target);
           return;
         }
@@ -543,7 +542,7 @@ WCMD(do_wload)
       /* special handling to make objects able to load on a person/in a container/worn etc. */
       if (!target || !*target) {
         add_unique_id(object);
-        obj_to_room(object, real_room(room->number));
+        obj_to_room(object, room);
         if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
           char buf[MAX_INPUT_LENGTH];
           sprintf(buf, "%c%d", UID_CHAR, GET_ID(object));
@@ -576,7 +575,7 @@ WCMD(do_wload)
       }
       /* neither char nor container found - just dump it in room */
       add_unique_id(object);
-      obj_to_room(object, real_room(room->number));
+      obj_to_room(object, room);
       load_otrigger(object);
       return;
     }
@@ -611,7 +610,7 @@ WCMD(do_wdamage) {
 
 WCMD(do_wat)
 {
-  room_rnum loc = NOWHERE;
+  struct room_data *loc = NULL;
   struct char_data *ch;
   char arg[MAX_INPUT_LENGTH], *command;
 
@@ -630,17 +629,17 @@ WCMD(do_wat)
   }
 
   if (isdigit(*arg)) {
-    loc = real_room(atoi(arg));
+    loc = room_by_id(atoi(arg));
   } else if ((ch = get_char_by_room(room, arg))) {
-    loc = IN_ROOM(ch);
+    loc = char_room_get(ch);
   }
 
-  if (loc == NOWHERE) {
+  if (loc == NULL) {
     wld_log(room, "wat: location not found (%s)", arg);
     return;
   }
 
-  wld_command_interpreter(&world[loc], command);
+  wld_command_interpreter(loc, command);
 }
 
 const struct wld_command_info wld_cmd_info[] = {
