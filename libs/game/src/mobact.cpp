@@ -26,6 +26,8 @@
 #include "dbat/game/class.h"
 #include "dbat/db/shops.h"
 
+#include "dbat/db/iterate.hpp"
+
 
 /* local functions */
 int player_present(struct char_data *ch);
@@ -452,20 +454,21 @@ void mobile_activity(void)
       if (diff > 86400)
       {
         struct obj_data *sobj, *next_obj;
-        int shop_nr, shopnr = -1;
+        int shop_nr;
+        struct shop_data *shop = NULL;
 
         GET_LPLAY(ch) = time(0);
-        for (shop_nr = 0; shop_nr <= top_shop; shop_nr++)
-        {
-          if (SHOP_KEEPER(shop_nr) == ch->vnum)
-          {
-            shopnr = shop_nr;
-          }
-        }
+        shop_iterate ([&](auto s) {
+           if (SHOP_KEEPER(s) == GET_MOB_VNUM(ch)) {
+             shop = s;
+             return false;
+           }
+           return true;
+        });
         for (sobj = ch->carrying; sobj; sobj = next_obj)
         {
           next_obj = sobj->next_content;
-          if (sobj != NULL && !shop_producing(sobj, shopnr))
+          if (sobj != NULL && (!shop || !shop_producing(sobj, shop)))
           {
             GET_GOLD(ch) += GET_OBJ_COST(sobj);
             extract_obj(sobj);
@@ -536,7 +539,7 @@ void mobile_activity(void)
 
     if (IS_KABITO(ch))
     {
-      int shop_nr;
+      struct shop_data *shop = NULL;
       found = FALSE;
       /* Is there a shopkeeper around? */
       for (vict = char_room_get(ch)->people; vict && !found; vict = vict->next_in_room)
@@ -544,14 +547,18 @@ void mobile_activity(void)
         if (GET_MOB_SPEC(vict) == shop_keeper)
         {
           /* Ok, vict is a shop keeper.  Which shop is his? */
-          for (shop_nr = 0; shop_nr <= top_shop; shop_nr++)
-            if (SHOP_KEEPER(shop_nr) == vict->vnum)
-              break;
-          if (shop_nr <= top_shop)
+          shop_iterate ([&](auto s) {
+             if (SHOP_KEEPER(s) == vict->vnum) {
+               shop = s;
+               return false;
+             }
+             return true;
+          });
+          if (shop)
             /* Is the shopkeeper in his shop? */
-            if (ok_shop_room(shop_nr, char_room_vnum_get(vict)))
+            if (ok_shop_room(shop, char_room_vnum_get(vict)))
               /* Does the shopkeeper prevent stealing? */
-              if (!SHOP_ALLOW_STEAL(shop_nr))
+              if (!SHOP_ALLOW_STEAL(shop))
                 found = TRUE;
         }
         /* Note: found will be true if there the character is in a shop where
@@ -903,4 +910,3 @@ bool aggressive_mob_on_a_leash(struct char_data *slave, struct char_data *master
   /* So sorry, now you're a player killer... Tsk tsk. */
   return (FALSE);
 }
-

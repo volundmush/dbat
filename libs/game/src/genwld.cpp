@@ -158,15 +158,15 @@ int delete_room(room_vnum vnum)
    * Remove this room from all shop lists.
    */
   {
-    extern int top_shop;
-    for (i = 0; i < top_shop; i++)
+    shop_iterate ([&](auto shop)
     {
-      for (j = 0; SHOP_ROOM(i, j) != NOWHERE; j++)
+      for (j = 0; SHOP_ROOM(shop, j) != NOWHERE; j++)
       {
-        if (SHOP_ROOM(i, j) == vnum)
-          SHOP_ROOM(i, j) = 0; /* set to the void */
+        if (SHOP_ROOM(shop, j) == vnum)
+          SHOP_ROOM(shop, j) = 0; /* set to the void */
       }
-    }
+      return true;
+    });
   }
 
   // Remove from Zig.

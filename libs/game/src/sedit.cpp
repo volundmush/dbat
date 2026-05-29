@@ -44,6 +44,7 @@ ACMD(do_oasis_sedit)
   char *buf3;
   char buf1[MAX_INPUT_LENGTH];
   char buf2[MAX_INPUT_LENGTH];
+  struct shop_data *shop = NULL;
   
   /****************************************************************************/
   /** Parse any arguments.                                                   **/
@@ -162,8 +163,8 @@ ACMD(do_oasis_sedit)
   
   OLC_NUM(d) = number;
   
-  if ((real_num = real_shop(number)) != NOTHING)
-    sedit_setup_existing(d, real_num);
+  if (shop = shop_by_id(number))
+    sedit_setup_existing(d, number);
   else
     sedit_setup_new(d);
 
@@ -225,15 +226,16 @@ void sedit_setup_new(struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-void sedit_setup_existing(struct descriptor_data *d, int rshop_num)
+void sedit_setup_existing(struct descriptor_data *d, shop_vnum num)
 {
   /*
    * Create a scratch shop structure.
    */
   CREATE(OLC_SHOP(d), struct shop_data, 1);
+  auto proto = shop_by_id(num);
 
   /* don't waste time trying to free NULL strings -- Welcor */
-  copy_shop(OLC_SHOP(d), shop_index + rshop_num, FALSE);
+  copy_shop(OLC_SHOP(d), proto, FALSE);
 }
 
 /**************************************************************************

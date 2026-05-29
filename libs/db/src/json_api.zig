@@ -250,14 +250,13 @@ fn exportShop(vnum: cdb.shop_vnum, filename: []const u8) !void {
 
 fn exportShops(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.shop_index == null) return;
-    if (cdb.top_shop < 0) return;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_shop))) : (index += 1) {
-        const shop = ptrAt(cdb.shop_data, cdb.shop_index, index);
-        const path = try assetPath(folder, shop.vnum);
+    const iterator = cdb.shop_iterator_create() orelse return;
+    defer cdb.shop_iterator_free(iterator);
+
+    while (cdb.shop_next(iterator)) |shop| {
+        const path = try assetPath(folder, shop.*.vnum);
         defer std.heap.page_allocator.free(path);
-        try exportShop(shop.vnum, path);
+        try exportShop(shop.*.vnum, path);
     }
 }
 
@@ -269,14 +268,13 @@ fn exportGuild(vnum: cdb.guild_vnum, filename: []const u8) !void {
 
 fn exportGuilds(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.guild_index == null) return;
-    if (cdb.top_guild < 0) return;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_guild))) : (index += 1) {
-        const guild = ptrAt(cdb.guild_data, cdb.guild_index, index);
-        const path = try assetPath(folder, guild.vnum);
+    const iterator = cdb.guild_iterator_create() orelse return;
+    defer cdb.guild_iterator_free(iterator);
+
+    while (cdb.guild_next(iterator)) |guild| {
+        const path = try assetPath(folder, guild.*.vnum);
         defer std.heap.page_allocator.free(path);
-        try exportGuild(guild.vnum, path);
+        try exportGuild(guild.*.vnum, path);
     }
 }
 
@@ -524,8 +522,6 @@ fn importObjPrototypes(folder: []const u8) !void {
 fn importShops(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
     var progress = Progress.init("shops", files.len);
-    cdb.shop_index = try allocCArray(cdb.shop_data, files.len);
-    cdb.top_shop = if (files.len == 0) -1 else @intCast(files.len - 1);
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -534,12 +530,13 @@ fn importShops(folder: []const u8) !void {
             logImportFileError("shops", file, err);
             return err;
         };
-        const shop = ptrAt(cdb.shop_data, cdb.shop_index, index);
+        const shop = try allocCOne(cdb.shop_data);
         shop.vnum = @intCast(file.vnum);
         shops_json.deserializeShop(shop, .{}, value) catch |err| {
             logImportFileError("shops", file, err);
             return err;
         };
+        cdb.shop_put(@intCast(file.vnum), shop);
         progress.tick(index);
     }
 }
@@ -547,8 +544,6 @@ fn importShops(folder: []const u8) !void {
 fn importGuilds(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
     var progress = Progress.init("guilds", files.len);
-    cdb.guild_index = try allocCArray(cdb.guild_data, files.len);
-    cdb.top_guild = if (files.len == 0) -1 else @intCast(files.len - 1);
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -557,12 +552,13 @@ fn importGuilds(folder: []const u8) !void {
             logImportFileError("guilds", file, err);
             return err;
         };
-        const guild = ptrAt(cdb.guild_data, cdb.guild_index, index);
+        const guild = try allocCOne(cdb.guild_data);
         guild.vnum = @intCast(file.vnum);
         guilds_json.deserializeGuild(guild, .{}, value) catch |err| {
             logImportFileError("guilds", file, err);
             return err;
         };
+        cdb.guild_put(@intCast(file.vnum), guild);
         progress.tick(index);
     }
 }

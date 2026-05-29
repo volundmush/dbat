@@ -44,6 +44,10 @@ pub export fn shop_put(vnum: cdb.shop_vnum, shop: ?*cdb.shop_data) void {
     }
 }
 
+pub export fn shop_by_id(vnum: cdb.shop_vnum) ?*cdb.shop_data {
+    return shop_map.get(vnum);
+}
+
 pub export fn shop_delete(vnum: cdb.shop_vnum) void {
     _ = shop_map.remove(vnum);
 }

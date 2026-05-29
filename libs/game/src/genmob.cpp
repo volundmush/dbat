@@ -128,19 +128,19 @@ int delete_mobile(mob_vnum refpt)
 
   zone_vnum last_saved_zone = NOTHING;
   /* Update shop keepers.  */
-  if (shop_index)
-    for (counter = 0; counter <= top_shop; counter++) {
-      zone_vnum zone = virtual_zone_by_thing(counter);
+    shop_iterate ([&](auto shop) {
+      zone_vnum zone = virtual_zone_by_thing(SHOP_NUM(shop));
       /* Find the shop for this keeper and reset it's keeper to
        * -1 to keep the shop so it could be assigned to someone else */
-      if (SHOP_KEEPER(counter) == vnum) {
-        SHOP_KEEPER(counter) = NOTHING;
+      if (SHOP_KEEPER(shop) == vnum) {
+        SHOP_KEEPER(shop) = NOTHING;
         if(zone != last_saved_zone) {
           add_to_save_list(zone, SL_SHP);
           last_saved_zone = zone;
         }
       }
-    }
+      return true;
+    });
   
     last_saved_zone = NOTHING;
   /* Update guild masters */

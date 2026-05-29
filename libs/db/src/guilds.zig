@@ -44,6 +44,10 @@ pub export fn guild_put(vnum: cdb.guild_vnum, guild: ?*cdb.guild_data) void {
     }
 }
 
+pub export fn guild_by_id(vnum: cdb.guild_vnum) ?*cdb.guild_data {
+    return guild_map.get(vnum);
+}
+
 pub export fn guild_delete(vnum: cdb.guild_vnum) void {
     _ = guild_map.remove(vnum);
 }
