@@ -137,7 +137,7 @@ void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
       caster->short_descr = strdup("The gods");
     caster->next_in_room = caster_room->people;
     caster_room->people = caster;
-    IN_ROOM(caster) = real_room(caster_room->number);
+    IN_ROOM(caster) = caster_room->number;
     call_magic(caster, tch, tobj, spellnum, DG_SPELL_LEVEL, CAST_SPELL, t);
     extract_char(caster);
   } else

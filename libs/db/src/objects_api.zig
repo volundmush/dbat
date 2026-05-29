@@ -32,8 +32,7 @@ pub export fn obj_vnum_set(obj: *cdb.obj_data, vnum: cdb.obj_vnum) void {
 }
 
 pub export fn obj_room_get(obj: *cdb.obj_data) [*c]cdb.room_data {
-    if (!validRoomRnum(obj.in_room)) return null;
-    return &cdb.world[@intCast(obj.in_room)];
+    return cdb.room_by_id(obj.in_room);
 }
 
 pub export fn obj_room_vnum_get(obj: *cdb.obj_data) cdb.room_vnum {

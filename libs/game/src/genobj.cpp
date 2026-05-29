@@ -504,11 +504,11 @@ int delete_object(obj_rnum rnum)
       for (this_content = tmp->contains; this_content; this_content = next_content)
       {
         next_content = this_content->next_content;
-        if (IN_ROOM(tmp))
+        if (obj_room_get(tmp))
         {
           /* Transfer stuff from object to room. */
           obj_from_obj(this_content);
-          obj_to_room(this_content, IN_ROOM(tmp));
+          obj_to_room(this_content, obj_room_get(tmp));
         }
         else if (tmp->worn_by || tmp->carried_by)
         {

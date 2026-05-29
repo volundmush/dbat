@@ -212,7 +212,7 @@ ACMD(do_say)
 
   skip_spaces(&argument);
 
-  if (GET_BONUS(ch, BONUS_MUTE) > 0 && GET_ROOM_VNUM(IN_ROOM(ch)) > 160) {
+  if (GET_BONUS(ch, BONUS_MUTE) > 0 && char_room_vnum_get(ch) > 160) {
    send_to_char(ch, "You are mute and unable to talk though.\r\n");
    return;
   } else if (GET_BONUS(ch, BONUS_MUTE) > 0) {
@@ -285,7 +285,7 @@ ACMD(do_say)
         send_to_char(ch, "%s", buf);
         add_history(ch, buf, HIST_SAY);
        if (SHENRON == TRUE) {
-       if (GET_ROOM_VNUM(IN_ROOM(ch)) == DRAGONR && GET_ROOM_VNUM(IN_ROOM(EDRAGON)) == DRAGONR) {
+       if (char_room_vnum_get(ch) == DRAGONR && char_room_vnum_get(EDRAGON) == DRAGONR) {
         struct room_data *droom = room_by_id(DRAGONR);
         if (strstr(argument, "wish")) {
 
@@ -537,15 +537,15 @@ ACMD(do_say)
            }
            else {
            send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s has returned to life!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-           if (real_room(GET_DROOM(wch)) == NOWHERE) {
+           if (!room_by_id(GET_DROOM(wch))) {
             GET_DROOM(wch) = 300;
            }
-           if (real_room(GET_DROOM(wch)) != NOWHERE) {
+           if (room_by_id(GET_DROOM(wch))) {
             char_from_room(wch);
             if (GET_DROOM(wch) > 0) {
-             char_to_room(wch, real_room(GET_DROOM(wch)));
+             char_to_room(wch, room_by_id(GET_DROOM(wch)));
             } else {
-             char_to_room(wch, real_room(300));
+             char_to_room(wch, room_by_id(300));
             }
             look_at_room(char_room_get(wch), wch, 0);
             send_to_char(wch, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
@@ -566,23 +566,23 @@ ACMD(do_say)
            }
            else if (AFF_FLAGGED(wch, AFF_SPIRIT) && AFF_FLAGGED(wch2, AFF_SPIRIT)) {
            send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s and %s have returned to life!%s@w'@n\r\n", GET_NAME(wch), GET_NAME(wch2), WISH[0] ? "" : " Now make your second wish.");
-           if (real_room(GET_DROOM(wch)) == NOWHERE) {
+           if (!room_by_id(GET_DROOM(wch))) {
             GET_DROOM(wch) = 300;
            }
-           if (real_room(GET_DROOM(wch)) != NOWHERE) {
+           if (room_by_id(GET_DROOM(wch))) {
             char_from_room(wch);
-            char_to_room(wch, real_room(GET_DROOM(wch)));
+            char_to_room(wch, room_by_id(GET_DROOM(wch)));
             look_at_room(char_room_get(wch), wch, 0);
             send_to_char(wch, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
             REMOVE_BIT_AR(AFF_FLAGS(wch), AFF_SPIRIT);
             REMOVE_BIT_AR(AFF_FLAGS(wch), AFF_ETHEREAL);
            }
-           if (real_room(GET_DROOM(wch2)) == NOWHERE) {
+           if (!room_by_id(GET_DROOM(wch2))) {
             GET_DROOM(wch2) = 300;
            }
-           if (real_room(GET_DROOM(wch2)) != NOWHERE) {
+           if (room_by_id(GET_DROOM(wch2))) {
             char_from_room(wch2);
-            char_to_room(wch2, real_room(GET_DROOM(wch2)));
+            char_to_room(wch2, room_by_id(GET_DROOM(wch2)));
             look_at_room(char_room_get(wch2), wch2, 0);
             send_to_char(wch2, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
             REMOVE_BIT_AR(AFF_FLAGS(wch2), AFF_SPIRIT);
@@ -606,34 +606,34 @@ ACMD(do_say)
            }
            else if (AFF_FLAGGED(wch, AFF_SPIRIT) && AFF_FLAGGED(wch2, AFF_SPIRIT) && AFF_FLAGGED(wch3, AFF_SPIRIT)) {
            send_to_room(droom, "@wShenron says, '@CYour wish has been granted, %s, %s, and %s have returned to life!!%s@w'@n\r\n", GET_NAME(wch), GET_NAME(wch2), GET_NAME(wch3), WISH[0] ? "" : " Now make your second wish.");
-           if (real_room(GET_DROOM(wch)) == NOWHERE) {
+           if (!room_by_id(GET_DROOM(wch))) {
             GET_DROOM(wch) = 300;
            }
-           if (real_room(GET_DROOM(wch)) != NOWHERE) {
+           if (room_by_id(GET_DROOM(wch))) {
             char_from_room(wch);
-            char_to_room(wch, real_room(GET_DROOM(wch)));
+            char_to_room(wch, room_by_id(GET_DROOM(wch)));
             look_at_room(char_room_get(wch), wch, 0);
             send_to_char(wch, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
             REMOVE_BIT_AR(AFF_FLAGS(wch), AFF_SPIRIT);
             REMOVE_BIT_AR(AFF_FLAGS(wch), AFF_ETHEREAL);
            }
-           if (real_room(GET_DROOM(wch2)) == NOWHERE) {
+           if (!room_by_id(GET_DROOM(wch2))) {
             GET_DROOM(wch2) = 300;
            }
-           if (real_room(GET_DROOM(wch2)) != NOWHERE) {
+           if (room_by_id(GET_DROOM(wch2))) {
             char_from_room(wch2);
-            char_to_room(wch2, real_room(GET_DROOM(wch2)));
+            char_to_room(wch2, room_by_id(GET_DROOM(wch2)));
             look_at_room(char_room_get(wch2), wch2, 0);
             send_to_char(wch2, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
             REMOVE_BIT_AR(AFF_FLAGS(wch2), AFF_SPIRIT);
             REMOVE_BIT_AR(AFF_FLAGS(wch2), AFF_ETHEREAL);
            }
-           if (real_room(GET_DROOM(wch3)) == NOWHERE) {
+           if (!room_by_id(GET_DROOM(wch3))) {
             GET_DROOM(wch3) = 300;
            }
-           if (real_room(GET_DROOM(wch3)) != NOWHERE) {
+           if (room_by_id(GET_DROOM(wch3))) {
             char_from_room(wch3);
-            char_to_room(wch3, real_room(GET_DROOM(wch3)));
+            char_to_room(wch3, room_by_id(GET_DROOM(wch3)));
             look_at_room(char_room_get(wch3), wch3, 0);
             send_to_char(wch3, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
             REMOVE_BIT_AR(AFF_FLAGS(wch3), AFF_SPIRIT);
@@ -749,7 +749,7 @@ ACMD(do_say)
     /* trigger check */
     speech_mtrigger(ch, argument);
     speech_wtrigger(ch, argument);
-    if (SHENRON == FALSE || (SHENRON == TRUE && IN_ROOM(ch) != real_room(DRAGONR))) {
+    if (SHENRON == FALSE || (SHENRON == TRUE && char_room_get(ch) != room_by_id(DRAGONR))) {
      mob_talk(ch, argument);
     }
 }
@@ -872,7 +872,7 @@ static int is_tell_ok(struct char_data *ch, struct char_data *vict)
     send_to_char(ch, "They need to be level 3 or higher to send or receive tells");
   else if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_NOTELL) && GET_ADMLEVEL(vict) < 1)
     send_to_char(ch, "You can't tell other people while you have notell on.\r\n");
-  else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SOUNDPROOF) && GET_ADMLEVEL(vict) < 1)
+  else if ((char_room_get(ch) && room_flagged(char_room_get(ch), ROOM_SOUNDPROOF)) && GET_ADMLEVEL(vict) < 1)
     send_to_char(ch, "The walls seem to absorb your words.\r\n");
   else if (IS_NPC(vict))
     send_to_char(ch, "You can't send tells to mobs.\r\n");
@@ -880,7 +880,7 @@ static int is_tell_ok(struct char_data *ch, struct char_data *vict)
     act("$E's linkless at the moment.", FALSE, ch, 0, vict, TO_CHAR | TO_SLEEP);
   else if (PLR_FLAGGED(vict, PLR_WRITING))
     act("$E's writing a message right now; try again later.", FALSE, ch, 0, vict, TO_CHAR | TO_SLEEP);
-  else if ((!IS_NPC(vict)  && GET_ADMLEVEL(ch) < 1 && PRF_FLAGGED(vict, PRF_NOTELL)) || ROOM_FLAGGED(IN_ROOM(vict), ROOM_SOUNDPROOF))
+  else if ((!IS_NPC(vict)  && GET_ADMLEVEL(ch) < 1 && PRF_FLAGGED(vict, PRF_NOTELL)) || (char_room_get(vict) && room_flagged(char_room_get(vict), ROOM_SOUNDPROOF)))
     act("$E can't hear you.", FALSE, ch, 0, vict, TO_CHAR | TO_SLEEP);
   else
     return (TRUE);
@@ -940,11 +940,11 @@ ACMD(do_reply)
   if (IS_NPC(ch))
     return;
 
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+  if ((char_room_get(ch) && room_flagged(char_room_get(ch), ROOM_HBTC))) {
     send_to_char(ch, "This is a different dimension!\r\n");
     return;
    }
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST)) {
+  if ((char_room_get(ch) && room_flagged(char_room_get(ch), ROOM_PAST))) {
     send_to_char(ch, "This is the past, you can't send tells!\r\n");
     return;
    }
@@ -1376,7 +1376,7 @@ ACMD(do_gen_comm)
     send_to_char(ch, "%s", com_msgs[subcmd][0]);
     return;
   }
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SOUNDPROOF)) {
+  if ((char_room_get(ch) && room_flagged(char_room_get(ch), ROOM_SOUNDPROOF))) {
     send_to_char(ch, "The walls seem to absorb your words.\r\n");
     return;
   }
@@ -1437,7 +1437,7 @@ ACMD(do_gen_comm)
     if (STATE(i) == CON_PLAYING && i != ch->desc && i->character &&
        (IS_NPC(i->character) || !PRF_FLAGGED(i->character, channels[subcmd])) &&
        (IS_NPC(i->character) || !PLR_FLAGGED(i->character, PLR_WRITING)) &&
-	!ROOM_FLAGGED(IN_ROOM(i->character), ROOM_SOUNDPROOF)) {
+	!(char_room_get(i->character) && room_flagged(char_room_get(i->character), ROOM_SOUNDPROOF))) {
 
       if (subcmd == SCMD_SHOUT &&
 	  ((char_room_get(ch)->zone != char_room_get(i->character)->zone) ||
@@ -1447,9 +1447,9 @@ ACMD(do_gen_comm)
       if (CONFIG_ENABLE_LANGUAGES) {
         garble_text(argument, GET_SKILL(i->character, SPEAKING(ch)), SPEAKING(ch));
         snprintf(buf1, sizeof(buf1), "%s%s %ss%s '%s@n'%s", color_on, GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) :  ch->desc->user, com_msgs[subcmd][1], GET_SKILL(i->character, SPEAKING(ch)) ? "," : ", in an unfamiliar tongue,", argument, color_on);
-      } else if (subcmd == SCMD_SHOUT && IN_ROOM(i->character) != IN_ROOM(ch)) {
+      } else if (subcmd == SCMD_SHOUT && char_room_get(i->character) != char_room_get(ch)) {
         snprintf(buf1, sizeof(buf1), "%s@WSomeone nearby %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], argument, color_on);
-      } else if (subcmd == SCMD_SHOUT && IN_ROOM(i->character) == IN_ROOM(ch)) {
+      } else if (subcmd == SCMD_SHOUT && char_room_get(i->character) == char_room_get(ch)) {
         snprintf(buf1, sizeof(buf1), "%s@W$n@W %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], argument, color_on);
       } else {
         if (GET_ADMLEVEL(ch) > 0) {

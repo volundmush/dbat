@@ -31,7 +31,7 @@ room_rnum add_room(struct room_data *room)
   int j, found = FALSE;
   room_rnum i;
 
-  if (room == NULL)
+  if (!room)
     return NOWHERE;
 
   if ((i = real_room(room->number)) != NOWHERE) {
@@ -63,13 +63,6 @@ room_rnum add_room(struct room_data *room)
       world[i] = world[i - 1];
       update_wait_events(&world[i], &world[i-1]);
 
-      /* People in this room must have their in_rooms moved up one. */
-      for (tch = world[i].people; tch; tch = tch->next_in_room)
-	IN_ROOM(tch) += (IN_ROOM(tch) != NOWHERE);
-
-      /* Move objects too. */
-      for (tobj = world[i].contents; tobj; tobj = tobj->next_content)
-	IN_ROOM(tobj) += (IN_ROOM(tobj) != NOWHERE);
     }
     htree_add(room_htree, world[i].number, i);
   }
@@ -110,9 +103,6 @@ room_rnum add_room(struct room_data *room)
   /*
    * Update the loadroom table. Adds 1 or 0.
    */
-  r_mortal_start_room += (r_mortal_start_room >= found);
-  r_immort_start_room += (r_immort_start_room >= found);
-  r_frozen_start_room += (r_frozen_start_room >= found);
 
   /*
    * Update world exits.
@@ -156,19 +146,6 @@ int delete_room(room_rnum rnum)
 
   /* This is something you might want to read about in the logs. */
   log("GenOLC: delete_room: Deleting room #%d (%s).", room->number, room->name);
-
-  if (r_mortal_start_room == rnum) {
-    log("WARNING: GenOLC: delete_room: Deleting mortal start room!");
-    r_mortal_start_room = 0;	/* The Void */
-  }
-  if (r_immort_start_room == rnum) {
-    log("WARNING: GenOLC: delete_room: Deleting immortal start room!");
-    r_immort_start_room = 0;	/* The Void */
-  }
-  if (r_frozen_start_room == rnum) {
-    log("WARNING: GenOLC: delete_room: Deleting frozen start room!");
-    r_frozen_start_room = 0;	/* The Void */
-  }
 
   /*
    * Dump the contents of this room into the Void.  We could also just
@@ -270,11 +247,6 @@ int delete_room(room_rnum rnum)
     world[i] = world[i + 1];
     update_wait_events(&world[i], &world[i+1]);
 
-    for (ppl = world[i].people; ppl; ppl = ppl->next_in_room)
-      IN_ROOM(ppl) -= (IN_ROOM(ppl) != NOWHERE);	/* Redundant check? */
-
-    for (obj = world[i].contents; obj; obj = obj->next_content)
-      IN_ROOM(obj) -= (IN_ROOM(obj) != NOWHERE);	/* Redundant check? */
   }
 
   top_of_world--;

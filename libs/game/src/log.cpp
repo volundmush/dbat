@@ -4,7 +4,7 @@
 /* log a death trap hit */
 void log_death_trap(struct char_data *ch)
 {
-  mudlog(BRF, ADMLVL_IMMORT, TRUE, "%s hit death trap #%d (%s)", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)), char_room_get(ch)->name);
+  mudlog(BRF, ADMLVL_IMMORT, TRUE, "%s hit death trap #%d (%s)", GET_NAME(ch), char_room_vnum_get(ch), char_room_get(ch)->name);
 }
 
 

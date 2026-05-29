@@ -105,13 +105,13 @@ ACMD(do_olc)
 	return;
       }
       vnum = atoi(arg);
-      if ((rnum = real_room(vnum)) == NOWHERE) {
+      if (!room_by_id(vnum)) {
 	send_to_char(ch, "No such room!\r\n");
 	return;
       }
     } else {
       rnum = IN_ROOM(ch);
-      vnum = GET_ROOM_VNUM(IN_ROOM(ch));
+      vnum = char_room_vnum_get(ch);
       send_to_char(ch, "(Using current room %d)\r\n", vnum);
     }
 
@@ -119,7 +119,7 @@ ACMD(do_olc)
 	 send_to_char(ch, "That room is not modifyable.\r\n");
      else
 */
-    olc_targ = (void *) &(world[rnum]);
+    olc_targ = char_room_get(ch);
     break;
   case OLC_MOB:
     argument = one_argument(argument, arg);

@@ -137,7 +137,7 @@ ACMD(do_tailhide)
   
   one_argument(argument, arg);
 
-		if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 178 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 184) {
+		if (char_room_vnum_get(ch) >= 178 && char_room_vnum_get(ch) <= 184) {
 			pay = 5000;
 			if (GET_GOLD(ch) < pay) {
 				send_to_char(ch, "You need at least 5,000 zenni to initiate an equipment restring.\r\n");
@@ -336,7 +336,7 @@ static void generate_multiform(struct char_data *ch, int count)
         GET_CLONES(ch) += 1;
 
         GET_ORIGINAL(clone) = ch;
-        char_to_room(clone, IN_ROOM(ch));
+        char_to_room(clone, char_room_get(ch));
         add_follower(clone, ch);
     }
 }
@@ -517,7 +517,7 @@ static void resolve_song(struct char_data *ch)
           act("@c$n's@C Teleportation Melody has transported you to Earth in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           char_from_room(vict);
-          char_to_room(vict, real_room(300));
+          char_to_room(vict, room_by_id(300));
          }
         }
       }
@@ -532,7 +532,7 @@ static void resolve_song(struct char_data *ch)
           act("@c$n's@C Teleportation Melody has transported you to Vegeta in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           char_from_room(vict);
-          char_to_room(vict, real_room(2234));
+          char_to_room(vict, room_by_id(2234));
          }
         }
       }
@@ -547,7 +547,7 @@ static void resolve_song(struct char_data *ch)
           act("@c$n's@C Teleportation Melody has transported you to Frigid in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           char_from_room(vict);
-          char_to_room(vict, real_room(4047));
+          char_to_room(vict, room_by_id(4047));
          }
         }
       }
@@ -562,7 +562,7 @@ static void resolve_song(struct char_data *ch)
           act("@c$n's@C Teleportation Melody has transported you to Konack in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           char_from_room(vict);
-          char_to_room(vict, real_room(8003));
+          char_to_room(vict, room_by_id(8003));
          }
         }
       }
@@ -577,7 +577,7 @@ static void resolve_song(struct char_data *ch)
           act("@c$n's@C Teleportation Melody has transported you to Namek in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           char_from_room(vict);
-          char_to_room(vict, real_room(10182));
+          char_to_room(vict, room_by_id(10182));
          }
         }
       }
@@ -592,7 +592,7 @@ static void resolve_song(struct char_data *ch)
           act("@c$n's@C Teleportation Melody has transported you to Arlia in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           char_from_room(vict);
-          char_to_room(vict, real_room(16087));
+          char_to_room(vict, room_by_id(16087));
          }
         }
       }
@@ -607,7 +607,7 @@ static void resolve_song(struct char_data *ch)
           act("@c$n's@C Teleportation Melody has transported you to Aether in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           char_from_room(vict);
-          char_to_room(vict, real_room(12025));
+          char_to_room(vict, room_by_id(12025));
          }
         }
       }
@@ -622,7 +622,7 @@ static void resolve_song(struct char_data *ch)
           act("@c$n's@C Teleportation Melody has transported you to Kanassa in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           char_from_room(vict);
-          char_to_room(vict, real_room(14910));
+          char_to_room(vict, room_by_id(14910));
          }
         }
       }
@@ -664,49 +664,49 @@ static void resolve_song(struct char_data *ch)
   switch (GET_SONG(ch)) {
    case SONG_TELEPORT_EARTH:
     char_from_room(ch);
-    char_to_room(ch, real_room(300));
+    char_to_room(ch, room_by_id(300));
     GET_SONG(ch) = 0;
     act("@CFinally as the last of your comrades has been teleported you teleport yourself to Earth and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
     break;
    case SONG_TELEPORT_VEGETA:
     char_from_room(ch);
-    char_to_room(ch, real_room(2234));
+    char_to_room(ch, room_by_id(2234));
     GET_SONG(ch) = 0;
     act("@CFinally as the last of your comrades has been teleported you teleport yourself to Vegeta and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
     break;
    case SONG_TELEPORT_FRIGID:
     char_from_room(ch);
-    char_to_room(ch, real_room(4047));
+    char_to_room(ch, room_by_id(4047));
     GET_SONG(ch) = 0;
     act("@CFinally as the last of your comrades has been teleported you teleport yourself to Frigid and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
     break;
    case SONG_TELEPORT_NAMEK:
     char_from_room(ch);
-    char_to_room(ch, real_room(10182));
+    char_to_room(ch, room_by_id(10182));
     GET_SONG(ch) = 0;
     act("@CFinally as the last of your comrades has been teleported you teleport yourself to Namek and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
     break;
    case SONG_TELEPORT_KANASSA:
     char_from_room(ch);
-    char_to_room(ch, real_room(14910));
+    char_to_room(ch, room_by_id(14910));
     GET_SONG(ch) = 0;
     act("@CFinally as the last of your comrades has been teleported you teleport yourself to Kanassa and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
     break;
    case SONG_TELEPORT_AETHER:
     char_from_room(ch);
-    char_to_room(ch, real_room(12025));
+    char_to_room(ch, room_by_id(12025));
     GET_SONG(ch) = 0;
     act("@CFinally as the last of your comrades has been teleported you teleport yourself to Aether and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
     break;
    case SONG_TELEPORT_ARLIA:
     char_from_room(ch);
-    char_to_room(ch, real_room(16087));
+    char_to_room(ch, room_by_id(16087));
     GET_SONG(ch) = 0;
     act("@CFinally as the last of your comrades has been teleported you teleport yourself to Arlia and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
     break;
    case SONG_TELEPORT_KONACK:
     char_from_room(ch);
-    char_to_room(ch, real_room(8003));
+    char_to_room(ch, room_by_id(8003));
     GET_SONG(ch) = 0;
     act("@CFinally as the last of your comrades has been teleported you teleport yourself to Konack and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
     break;
@@ -1565,7 +1565,7 @@ static void catch_fish(struct char_data *ch, int quality)
  GET_OBJ_WEIGHT(fish) += weight;
 
  GET_OBJ_VAL(pole, 0) = 0;
- obj_to_room(fish, IN_ROOM(ch));
+ obj_to_room(fish, char_room_get(ch));
  do_get(ch, "fish", 0, 0);
  send_to_char(ch, "@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", GET_OBJ_WEIGHT(fish));
  REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_FISHING);
@@ -2124,7 +2124,7 @@ void ash_burn(struct char_data *ch)
 {
   struct obj_data *obj, *next_obj;
 
-   if (ch && IN_ROOM(ch) != NOWHERE) {
+   if (ch && char_room_get(ch) != NULL) {
     for (obj = char_room_get(ch)->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
      if (GET_OBJ_VNUM(obj) == 1306) {
@@ -2248,7 +2248,7 @@ ACMD(do_ashcloud)
    act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_ROOM);
    send_to_room(room, "@WThe ashes ripple with an intense aftershock of power.@n\r\n");
    ashcloud = read_object(1306, VIRTUAL);
-   obj_to_room(ashcloud, IN_ROOM(ch));
+   obj_to_room(ashcloud, char_room_get(ch));
    extract_obj(ash);
    GET_OBJ_TIMER(ashcloud) = 4;
    GET_OBJ_COST(ashcloud) = 3;
@@ -2259,7 +2259,7 @@ ACMD(do_ashcloud)
    act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_ROOM);
    send_to_room(room, "@WThe ashes ripple with a strong aftershock of power.@n\r\n");
    ashcloud = read_object(1306, VIRTUAL);
-   obj_to_room(ashcloud, IN_ROOM(ch));
+   obj_to_room(ashcloud, char_room_get(ch));
    GET_OBJ_TIMER(ashcloud) = 2;
    GET_OBJ_COST(ashcloud) = 2;
    extract_obj(ash);
@@ -2269,7 +2269,7 @@ ACMD(do_ashcloud)
    act("@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_ROOM);
    ashcloud = read_object(1306, VIRTUAL);
-   obj_to_room(ashcloud, IN_ROOM(ch));
+   obj_to_room(ashcloud, char_room_get(ch));
    extract_obj(ash);
    GET_OBJ_TIMER(ashcloud) = 1;
    GET_OBJ_COST(ashcloud) = 1;
@@ -2536,7 +2536,7 @@ ACMD(do_shimmer)
   } else if (PLR_FLAGGED(ch, PLR_HEALT)) {
    send_to_char(ch, "You are inside a healing tank!\r\n");
    return;
-  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+  } else if (char_room_vnum_get(ch) >= 19800 && char_room_vnum_get(ch) <= 19899) {
    send_to_char(ch, "@rYou are in a pocket dimension!@n\r\n");
    return;
   } else if (!*arg) {
@@ -2784,7 +2784,7 @@ ACMD(do_hydromancy)
   else {
    send_to_char(ch, "You are unable to hold it and so let it go at your feet.\r\n");
    act("@C$n@w drops an ice spike.@n", TRUE, ch, 0, 0, TO_ROOM);
-   obj_to_room(obj, IN_ROOM(ch));
+   obj_to_room(obj, char_room_get(ch));
   }
   improve_skill(ch, SKILL_STYLE, 1);
   GET_COOLDOWN(ch) = 10;
@@ -3227,7 +3227,7 @@ ACMD(do_bury)
     act("@C$n@Y starts digging in a spot of soft sand. Once $e has an appropriately sized hole $e drops @G$p@Y in and then covers it.@n", TRUE, ch, obj, 0, TO_ROOM);
    }
    obj_from_char(obj);
-   obj_to_room(obj, IN_ROOM(ch));
+   obj_to_room(obj, char_room_get(ch));
    SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BURIED);
   }
  } else if (!strcasecmp(arg, "uncover")) {
@@ -3271,7 +3271,7 @@ ACMD(do_arena)
   REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
   ARENA_IDNUM(ch) = -1;
   return;
- } else if (GET_ROOM_VNUM(IN_ROOM(ch)) != 17875) {
+ } else if (char_room_vnum_get(ch) != 17875) {
   send_to_char(ch, "You are not close enough to the arena floor to see it.\r\n");
   return;
  } else if (!strcasecmp(arg, "look")) {
@@ -3282,7 +3282,7 @@ ACMD(do_arena)
    look_at_room(room_by_id(arena_watch(ch)), ch, 0);
   }
  } else if (!strcasecmp(arg, "scan")) {
-  if (GET_ROOM_VNUM(IN_ROOM(ch)) == 17875) {
+  if (char_room_vnum_get(ch) == 17875) {
    int found = FALSE;
    struct descriptor_data *d;
    
@@ -3516,7 +3516,7 @@ ACMD(do_silk)
      return;
     } else {
      weaved = read_object(16705, VIRTUAL);
-     obj_to_room(weaved, IN_ROOM(ch));
+     obj_to_room(weaved, char_room_get(ch));
      if (GET_OBJ_VNUM(obj) == 16708) {
       armor *= 20;
       str = 4;
@@ -3576,7 +3576,7 @@ ACMD(do_silk)
      return;
     } else {
      weaved = read_object(16706, VIRTUAL);
-     obj_to_room(weaved, IN_ROOM(ch));
+     obj_to_room(weaved, char_room_get(ch));
      if (GET_OBJ_VNUM(obj) == 16708) {
       armor *= 20;
       str = 4;
@@ -3636,7 +3636,7 @@ ACMD(do_silk)
      return;
     } else {
      weaved = read_object(16707, VIRTUAL);
-     obj_to_room(weaved, IN_ROOM(ch));
+     obj_to_room(weaved, char_room_get(ch));
      if (GET_OBJ_VNUM(obj) == 16708) {
       armor *= 20;
       str = 4;
@@ -3720,38 +3720,38 @@ ACMD(do_silk)
    }
    if (super == TRUE) {
     obj = read_object(16708, VIRTUAL);
-    obj_to_room(obj, IN_ROOM(ch));
+    obj_to_room(obj, char_room_get(ch));
     act("@YYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@Y piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
     send_to_char(ch, "@YIt's SUPER grand!@n\r\n");
     act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
        decCurKI(ch, cost);
    } else if (prob > perc && prob >= 100) { /* Second Best Quality */
     obj = read_object(16700, VIRTUAL);
-    obj_to_room(obj, IN_ROOM(ch));
+    obj_to_room(obj, char_room_get(ch));
     act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
        decCurKI(ch, cost);
    } else if (prob > perc && prob >= 90) { /* Great Quality */
     obj = read_object(16701, VIRTUAL);
-    obj_to_room(obj, IN_ROOM(ch));
+    obj_to_room(obj, char_room_get(ch));
     act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
        decCurKI(ch, cost);
    } else if (prob > perc && prob >= 80) { /* Good Quality */
     obj = read_object(16702, VIRTUAL);
-    obj_to_room(obj, IN_ROOM(ch));
+    obj_to_room(obj, char_room_get(ch));
     act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
        decCurKI(ch, cost);
    } else if (prob > perc && prob >= 50) { /* Decent Quality */
     obj = read_object(16703, VIRTUAL);
-    obj_to_room(obj, IN_ROOM(ch));
+    obj_to_room(obj, char_room_get(ch));
     act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
        decCurKI(ch, cost);
    } else if (prob > perc) { /* Bad Quality */
     obj = read_object(16704, VIRTUAL);
-    obj_to_room(obj, IN_ROOM(ch));
+    obj_to_room(obj, char_room_get(ch));
     act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
        decCurKI(ch, cost);
@@ -4919,17 +4919,17 @@ ACMD(do_warppool)
 
  struct room_data* room = char_room_get(ch);
 
- if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 4600 && GET_ROOM_VNUM(IN_ROOM(ch)) < 4700) {
+ if (char_room_vnum_get(ch) >= 4600 && char_room_vnum_get(ch) < 4700) {
   pass = TRUE;
- } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 795 && GET_ROOM_VNUM(IN_ROOM(ch)) < 1099) {
+ } else if (char_room_vnum_get(ch) >= 795 && char_room_vnum_get(ch) < 1099) {
   pass = TRUE;
- } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 15100 && GET_ROOM_VNUM(IN_ROOM(ch)) < 15299) {
+ } else if (char_room_vnum_get(ch) >= 15100 && char_room_vnum_get(ch) < 15299) {
   pass = TRUE;
- } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 13155 && GET_ROOM_VNUM(IN_ROOM(ch)) < 13199) {
+ } else if (char_room_vnum_get(ch) >= 13155 && char_room_vnum_get(ch) < 13199) {
   pass = TRUE;
  } else if (room_flagged(room, ROOM_NAMEK) && room_sector_type_get(room) == SECT_WATER_NOSWIM) {
   pass = TRUE;
- } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 12103 && GET_ROOM_VNUM(IN_ROOM(ch)) < 12289) {
+ } else if (char_room_vnum_get(ch) >= 12103 && char_room_vnum_get(ch) < 12289) {
   pass = TRUE;
  }
 
@@ -4964,7 +4964,7 @@ ACMD(do_warppool)
    act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", TRUE, ch, 0, 0, TO_ROOM);
    improve_skill(ch, SKILL_WARP, 1);
    char_from_room(ch);
-   char_to_room(ch, real_room(850));
+   char_to_room(ch, room_by_id(850));
    act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", TRUE, ch, 0, 0, TO_ROOM);
       decCurKI(ch, cost);
   }
@@ -4979,7 +4979,7 @@ ACMD(do_warppool)
    act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", TRUE, ch, 0, 0, TO_ROOM);
    improve_skill(ch, SKILL_WARP, 1);
    char_from_room(ch);
-   char_to_room(ch, real_room(4609));
+   char_to_room(ch, room_by_id(4609));
    act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", TRUE, ch, 0, 0, TO_ROOM);
       decCurKI(ch, cost);
   }
@@ -4994,7 +4994,7 @@ ACMD(do_warppool)
    act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", TRUE, ch, 0, 0, TO_ROOM);
    improve_skill(ch, SKILL_WARP, 1);
    char_from_room(ch);
-   char_to_room(ch, real_room(10904));
+   char_to_room(ch, room_by_id(10904));
    act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", TRUE, ch, 0, 0, TO_ROOM);
       decCurKI(ch, cost);
   } 
@@ -5009,7 +5009,7 @@ ACMD(do_warppool)
    act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", TRUE, ch, 0, 0, TO_ROOM);
    improve_skill(ch, SKILL_WARP, 1);
    char_from_room(ch);
-   char_to_room(ch, real_room(15100));
+   char_to_room(ch, room_by_id(15100));
    act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", TRUE, ch, 0, 0, TO_ROOM);
       decCurKI(ch, cost);
   }
@@ -5024,7 +5024,7 @@ ACMD(do_warppool)
    act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n", TRUE, ch, 0, 0, TO_ROOM);
    improve_skill(ch, SKILL_WARP, 1);
    char_from_room(ch);
-   char_to_room(ch, real_room(12252));
+   char_to_room(ch, room_by_id(12252));
    act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n", TRUE, ch, 0, 0, TO_ROOM);
       decCurKI(ch, cost);
   }
@@ -5162,9 +5162,9 @@ ACMD(do_obstruct)
   struct obj_data *obj2, *obj3;
 
   obj2 = read_object(79, VIRTUAL);
-  obj_to_room(obj2, newroom);
+  obj_to_room(obj2, nrm);
   obj3 = read_object(79, VIRTUAL);
-  obj_to_room(obj3, IN_ROOM(ch));
+  obj_to_room(obj3, char_room_get(ch));
 
   int64_t strength = (((GET_INT(ch) * skill) * GET_WIS(ch)) * 20) + (GET_MAX_MANA(ch) * 0.001);
 
@@ -5220,7 +5220,7 @@ ACMD(do_dimizu)
  } else if (room_sector_type_get(room) == SECT_UNDERWATER) {
   send_to_char(ch, "The area is already underwater!\r\n");
   return;
- } else if (room_sector_type_get(room) == SECT_SPACE || ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
+ } else if (room_sector_type_get(room) == SECT_SPACE || (char_room_get(ch) && room_flagged(char_room_get(ch), ROOM_SPACE))) {
   send_to_char(ch, "You can't flood space!\r\n");
   return;
  } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 12) {
@@ -5254,12 +5254,12 @@ ACMD(do_beacon)
   send_to_char(ch, "You are dead. You can not stake out a room to return to upon revival.\r\n");
   return;
  }
- else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 0 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 14) {
+ else if (char_room_vnum_get(ch) >= 0 && char_room_vnum_get(ch) <= 14) {
   send_to_char(ch, "You can not stake out an immortal room to be revived in.\r\n");
   return;
  } else {
   send_to_char(ch, "You stake out the room you are in and will return to it if you die and are revived.\r\n");
-  GET_DROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
+  GET_DROOM(ch) = char_room_vnum_get(ch);
   return;
  }
 
@@ -5436,7 +5436,7 @@ ACMD(do_spoil)
   GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);
   GET_OBJ_RENT(body_part) = 0;
   add_unique_id(body_part);
-  obj_to_room(body_part, IN_ROOM(ch));
+  obj_to_room(body_part, char_room_get(ch));
   obj_from_room(body_part);
   obj_to_char(body_part, ch);
 

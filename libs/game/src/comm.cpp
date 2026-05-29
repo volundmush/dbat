@@ -519,9 +519,9 @@ void game_loop(socklen_t cmmother_desc)
 	/* Reset the idle timer & pull char back from void if necessary */
 	d->character->timer = 0;
 	if (STATE(d) == CON_PLAYING && GET_WAS_IN(d->character) != NOWHERE) {
-	  if (IN_ROOM(d->character) != NOWHERE)
+	  if (char_room_get(d->character) != NULL)
 	    char_from_room(d->character);
-	  char_to_room(d->character, GET_WAS_IN(d->character));
+	  char_to_room(d->character, room_by_id(GET_WAS_IN(d->character)));
 	  GET_WAS_IN(d->character) = NOWHERE;
 	  act("$n has returned.", TRUE, d->character, 0, 0, TO_ROOM);
 	}
@@ -2779,7 +2779,7 @@ int arena_watch(struct char_data *ch)
   if (IN_ARENA(d->character)) {
    if (ARENA_IDNUM(ch) == GET_IDNUM(d->character)) {
     found = TRUE;
-    room = GET_ROOM_VNUM(IN_ROOM(d->character));
+    room = char_room_vnum_get(d->character);
    }
   }
  }
@@ -2804,7 +2804,7 @@ void send_to_eaves(const char *messg, struct char_data *tch, ...)
       continue;
 
      int roll = rand_number(1, 101);
-     if (GET_EAVESDROP(d->character) == GET_ROOM_VNUM(IN_ROOM(tch)) && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
+     if (GET_EAVESDROP(d->character) == char_room_vnum_get(tch) && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
       char buf[1000];
       char buf2[1000];
       *buf = '\0';
@@ -3173,9 +3173,9 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
 
   /* ASSUMPTION: at this point we know type must be TO_NOTVICT or TO_ROOM */
 
-  if (ch && IN_ROOM(ch) != NOWHERE)
+  if (ch && char_room_get(ch) != NULL)
     to = char_room_get(ch)->people;
-  else if (obj && IN_ROOM(obj) != NOWHERE)
+  else if (obj && obj_room_get(obj) != NULL)
     to = obj_room_get(obj)->people;
   else {
     return NULL;
@@ -3191,7 +3191,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
      if (ch != NULL) {
       if (IN_ARENA(ch)) {
        if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
-        if (arena_watch(d->character) == GET_ROOM_VNUM(IN_ROOM(ch))) {
+        if (arena_watch(d->character) == char_room_vnum_get(ch)) {
           char buf3[2000];
           *buf3 = '\0';
           sprintf(buf3, "@c-----@CArena@c-----@n\r\n%s\r\n@c-----@CArena@c-----@n\r\n", str);
@@ -3202,13 +3202,13 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
      } if (GET_EAVESDROP(d->character) > 0) {
        int roll = rand_number(1, 101);
        if (!resskill || (roll_skill(d->character, resskill) >= dcval)) {
-        if (ch != NULL && GET_EAVESDROP(d->character) == GET_ROOM_VNUM(IN_ROOM(ch)) && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
+        if (ch != NULL && GET_EAVESDROP(d->character) == char_room_vnum_get(ch) && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
          char buf3[1000];
          *buf3 = '\0';
          sprintf(buf3, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", str);
          perform_act(buf3, ch, obj, vict_obj, d->character);
         }
-        else if (obj != NULL && GET_EAVESDROP(d->character) == GET_ROOM_VNUM(IN_ROOM(obj)) && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
+        else if (obj != NULL && GET_EAVESDROP(d->character) == obj_room_vnum_get(obj) && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
          char buf3[1000];
          *buf3 = '\0';
          sprintf(buf3, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", str);

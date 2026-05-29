@@ -304,7 +304,7 @@ ACMD(do_dig)
   struct room_data *rm = char_room_get(ch);
   CREATE(rm->dir_option[dir], struct room_direction_data, 1);
   struct room_direction_data *new_exit = rm->dir_option[dir];
-  new_exit->to_room = rrnum;
+  new_exit->to_room = rvnum;
   zone_vnum zvn = room_zone_vnum_get(rm);
   add_to_save_list(zvn, SL_WLD);
   save_rooms(zvn);
@@ -322,7 +322,7 @@ ACMD(do_dig)
   else {
     CREATE(R_EXIT(dest, rev_dir[dir]), struct room_direction_data, 1);
     struct room_direction_data *rev_ex = R_EXIT(dest, rev_dir[dir]);
-    rev_ex->to_room = IN_ROOM(ch);
+    rev_ex->to_room = char_room_vnum_get(ch);
     zvn = zone_table[world[rrnum].zone].number;
     add_to_save_list(zvn, SL_WLD);
     save_rooms(zvn);
@@ -350,7 +350,7 @@ ACMD(do_rcopy)
 
   if (!arg2 || !*arg2) {
      tvnum = atoi(arg);
-     rvnum = GET_ROOM_VNUM(IN_ROOM(ch));
+     rvnum = char_room_vnum_get(ch);
   }
   else if (arg2 || *arg2) {
   rvnum = atoi(arg2); 
@@ -423,21 +423,12 @@ ACMD(do_rcopy)
 /* For buildwalk. Finds the next free vnum in the zone */
 room_vnum redit_find_new_vnum(zone_rnum zone) 
 {
-  room_vnum vnum = genolc_zone_bottom(zone);
-  room_rnum rnum = real_room(vnum);
 
-  if (rnum == NOWHERE) 
-    return NOWHERE;
-
-  for(;;) {
-    if (vnum > zone_table[zone].top)
-      return(NOWHERE);
-    if (rnum > top_of_world || world[rnum].number > vnum)
-      break;
-    rnum++;
-    vnum++;
-  }
-  return(vnum);
+  for(room_vnum vnum = genolc_zone_bottom(zone); vnum <= zone_table[zone].top; vnum++)
+    if (!room_by_id(vnum))
+      return vnum;
+  
+      return NOWHERE;
 }
 
 int buildwalk(struct char_data *ch, int dir)
@@ -486,9 +477,9 @@ int buildwalk(struct char_data *ch, int dir)
       rnum = real_room(vnum);
       struct room_data *rm = char_room_get(ch);
       CREATE(rm->dir_option[dir], struct room_direction_data, 1);
-      rm->dir_option[dir]->to_room = rnum;
+      rm->dir_option[dir]->to_room = vnum;
       CREATE(world[rnum].dir_option[rev_dir[dir]], struct room_direction_data, 1);
-      world[rnum].dir_option[rev_dir[dir]]->to_room = IN_ROOM(ch);
+      world[rnum].dir_option[rev_dir[dir]]->to_room = char_room_vnum_get(ch);
 
       /* Report room creation to user */
       send_to_char(ch, "@yRoom #%d created by BuildWalk.@n\r\n", vnum);

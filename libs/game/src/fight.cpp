@@ -757,7 +757,7 @@ void remove_limb(struct char_data *vict, int num)
   GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);
   GET_OBJ_RENT(body_part) = 0;
   add_unique_id(body_part);
-  obj_to_room(body_part, IN_ROOM(vict));
+  obj_to_room(body_part, char_room_get(vict));
 }
 
 /* Weapon attack texts */
@@ -830,7 +830,7 @@ void fight_stack()
       if (!GRAPPLING(ch) && !GRAPPLED(ch) && !FIGHTING(ch) && !PLR_FLAGGED(ch, PLR_CHARGE) && !PLR_FLAGGED(ch, PLR_POWERUP) && GET_CHARGE(ch) <= 0 && !IS_TRANSFORMED(ch)) {
        continue;
       }
-      if (FIGHTING(ch) && (IN_ROOM(FIGHTING(ch)) != IN_ROOM(ch))) {
+      if (FIGHTING(ch) && (char_room_get(FIGHTING(ch)) != char_room_get(ch))) {
        wch = FIGHTING(ch);
        stop_fighting(wch);
        stop_fighting(ch);
@@ -1084,7 +1084,7 @@ void fight_stack()
 
         vict = FIGHTING(ch);
         sprintf(buf, "%s", GET_NAME(vict));
-        if (IN_ROOM(ch) == IN_ROOM(vict) && !MOB_FLAGGED(ch, MOB_DUMMY) && !AFF_FLAGGED(ch, AFF_KNOCKED) && GET_POS(ch) != POS_SITTING && GET_POS(ch) != POS_RESTING && GET_POS(ch) != POS_SLEEPING) {
+        if (char_room_get(ch) == char_room_get(vict) && !MOB_FLAGGED(ch, MOB_DUMMY) && !AFF_FLAGGED(ch, AFF_KNOCKED) && GET_POS(ch) != POS_SITTING && GET_POS(ch) != POS_RESTING && GET_POS(ch) != POS_SLEEPING) {
 
          if (IS_NPC(ch) && rand_number(1, 30) <= 12)
           continue;
@@ -1521,19 +1521,19 @@ static void make_pcorpse(struct char_data *ch)
    struct obj_data *ashes;
    if (rand_number(1, 3) == 2) {
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_room_get(ch));
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_room_get(ch));
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_room_get(ch));
    } else if (rand_number(1, 2) == 2) {
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_room_get(ch));
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_room_get(ch));
    } else {
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_room_get(ch));
    }
   }
 
@@ -1591,7 +1591,7 @@ static void make_pcorpse(struct char_data *ch)
     GET_GOLD(ch) = 0;
   }
 
-  obj_to_room(corpse, IN_ROOM(ch));
+  obj_to_room(corpse, char_room_get(ch));
 }
 
 /* This handles how corpses are viewed. How many limbs they have. If they were *
@@ -1727,19 +1727,19 @@ static void make_corpse(struct char_data *ch, struct char_data *tch)
    struct obj_data *ashes;
    if (rand_number(1, 3) == 2) {   
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_room_get(ch));
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_room_get(ch));
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_room_get(ch));
    } else if (rand_number(1, 2) == 2) {
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_room_get(ch));
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_room_get(ch));
    } else {
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_room_get(ch));
    }
   }
 
@@ -1829,7 +1829,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch)
   IS_CARRYING_N(ch) = 0;
   IS_CARRYING_W(ch) = 0;
  }
-  obj_to_room(corpse, IN_ROOM(ch));
+  obj_to_room(corpse, char_room_get(ch));
   
   if (!IS_NPC(ch))
     Crash_rentsave(ch, 0);
@@ -1966,7 +1966,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
   
   if (killer && !IS_NPC(killer)) {
   if (!IS_NPC(killer) && !IS_NPC(ch)) {
-   send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(killer), GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(killer)));
+   send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(killer), GET_NAME(ch), char_room_vnum_get(killer));
   }
    if ((IS_SAIYAN(killer) && rand_number(1, 2) == 2) || !IS_SAIYAN(killer)) {
     if (rand_number(1, 6) >= 5 && (level_exp(killer, GET_LEVEL(killer) + 1) - GET_EXP(killer) > 0 || GET_LEVEL(killer) == 100)) {
@@ -2061,7 +2061,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
      send_to_room(room, "@YThe one star dragon ball falls to the ground!@n\r\n");
      
      obj = read_object(20, VIRTUAL);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_room_get(ch));
      shadowed = TRUE;
     } else if (IS_SHADOW_DRAGON2(ch)) {
      struct obj_data *obj = NULL;
@@ -2069,7 +2069,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
      send_to_room(room, "@YThe two star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(21, VIRTUAL);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_room_get(ch));
      shadowed = TRUE;
     } else if (IS_SHADOW_DRAGON3(ch)) {
      struct obj_data *obj = NULL;
@@ -2077,7 +2077,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
      send_to_room(room, "@YThe three star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(22, VIRTUAL);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_room_get(ch));
      shadowed = TRUE;
     } else if (IS_SHADOW_DRAGON4(ch)) {
      struct obj_data *obj = NULL;
@@ -2085,7 +2085,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
      send_to_room(room, "@YThe four star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(23, VIRTUAL);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_room_get(ch));
      shadowed = TRUE;
     } else if (IS_SHADOW_DRAGON5(ch)) {
      struct obj_data *obj = NULL;
@@ -2093,7 +2093,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
      send_to_room(room, "@YThe five star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(24, VIRTUAL);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_room_get(ch));
      shadowed = TRUE;
     } else if (IS_SHADOW_DRAGON6(ch)) {
      struct obj_data *obj = NULL;
@@ -2101,7 +2101,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
      send_to_room(room, "@YThe six star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(25, VIRTUAL);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_room_get(ch));
      shadowed = TRUE;
     } else if (IS_SHADOW_DRAGON7(ch)) {
      struct obj_data *obj = NULL;
@@ -2109,7 +2109,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
      send_to_room(room, "@YThe seven star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(26, VIRTUAL);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_room_get(ch));
      shadowed = TRUE;
     }
     make_corpse(ch, killer);
@@ -2122,7 +2122,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
       decCurHealthPercent(ch, 1);
     extract_char(ch);
   } else {
-    if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !room_flagged(char_room_get(ch), ROOM_PAST) && (GET_ROOM_VNUM(IN_ROOM(ch)) < 17900 || GET_ROOM_VNUM(IN_ROOM(ch)) > 17999)) {
+    if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !room_flagged(char_room_get(ch), ROOM_PAST) && (char_room_vnum_get(ch) < 17900 || char_room_vnum_get(ch) > 17999)) {
      if (!PLR_FLAGGED(ch, PLR_ABSORBED)) {
      make_pcorpse(ch);
      loadmap(ch);
@@ -2291,7 +2291,7 @@ void die(struct char_data *ch, struct char_data *killer)
       send_to_all("@R%s@r dies in the water of the Arena and is disqualified!@n\r\n", GET_NAME(ch));
     }
     char_from_room(ch);
-    char_to_room(ch, real_room(17875));
+    char_to_room(ch, room_by_id(17875));
     decCurHealthPercentFloored(ch, 1, 1);
     look_at_room(char_room_get(ch), ch, 0);
     final_combat_resolve(ch);
@@ -2303,7 +2303,7 @@ void die(struct char_data *ch, struct char_data *killer)
 
   if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !room_flagged(char_room_get(ch), ROOM_PAST) && GET_LEVEL(ch) > 8)
   {
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 2002 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 2011)
+    if (char_room_vnum_get(ch) >= 2002 && char_room_vnum_get(ch) <= 2011)
     {
       GET_DTIME(ch) = time(0);
     }
@@ -2495,7 +2495,7 @@ void group_gain(struct char_data *ch, struct char_data *victim)
   if (!(k = ch->master))
     k = ch;
 
-  if (AFF_FLAGGED(k, AFF_GROUP) && (IN_ROOM(k) == IN_ROOM(ch))) {
+  if (AFF_FLAGGED(k, AFF_GROUP) && (char_room_get(k) == char_room_get(ch))) {
     tot_levels = GET_LEVEL(k);
     tot_members = 1;
   } else {
@@ -2504,7 +2504,7 @@ void group_gain(struct char_data *ch, struct char_data *victim)
   }
 
   for (f = k->followers; f; f = f->next)
-    if (AFF_FLAGGED(f->follower, AFF_GROUP) && IN_ROOM(f->follower) == IN_ROOM(ch)) {
+    if (AFF_FLAGGED(f->follower, AFF_GROUP) && char_room_get(f->follower) == char_room_get(ch)) {
      if (!IS_WEIGHTED(f->follower)) {
       tot_levels += GET_LEVEL(f->follower);
       tot_members++;
@@ -2535,7 +2535,7 @@ void group_gain(struct char_data *ch, struct char_data *victim)
     base = 0;
 
   /*
-  if (AFF_FLAGGED(k, AFF_GROUP) && IN_ROOM(k) == IN_ROOM(ch)) {
+  if (AFF_FLAGGED(k, AFF_GROUP) && char_room_get(k) == char_room_get(ch)) {
    if (!IS_WEIGHTED(k)) {
     perform_group_gain(k, base, victim);
    } else if (k != ch && (getEffMaxPL(k)()) >= (getEffMaxPL(ch)) * 0.5) {
@@ -2554,7 +2554,7 @@ void group_gain(struct char_data *ch, struct char_data *victim)
   //perform_group_gain(k, base, victim);
 
   for (f = k->followers; f; f = f->next) {
-    if (AFF_FLAGGED(f->follower, AFF_GROUP) && IN_ROOM(f->follower) == IN_ROOM(ch)) {
+    if (AFF_FLAGGED(f->follower, AFF_GROUP) && char_room_get(f->follower) == char_room_get(ch)) {
      //if ((getEffMaxPL(f->follower)()) >= GET_MAX_HIT(ch) * 0.5)
       //perform_group_gain(f->follower, base, victim);
     }

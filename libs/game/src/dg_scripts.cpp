@@ -273,17 +273,10 @@ obj_data *find_obj(long n)
 /* return room with UID n */
 room_data *find_room(long n)
 {
-  room_rnum rnum;
-
   n -= ROOM_ID_BASE;
   if (n<0)
     return NULL;
-  rnum = real_room((room_vnum)n);
-
-  if (rnum != NOWHERE)
-    return &world[rnum];
-
-  return NULL;
+  return room_by_id((room_vnum)n);
 }
 
 /************************************************************
@@ -324,8 +317,9 @@ char_data *get_char_near_obj(obj_data *obj, char *name)
       return ch;
   } else {
     room_rnum num;
-    if ((num = obj_room(obj)) != NOWHERE)
-      for (ch = world[num].people; ch; ch = ch->next_in_room)
+    struct room_data *rm = obj_room(obj);
+    if (rm)
+      for (ch = rm->people; ch; ch = ch->next_in_room)
         if (isname(name, ch->name) &&
             valid_dg_target(ch, DG_ALLOW_GODS))
           return ch;
@@ -364,7 +358,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name)
 {
   obj_data *i = NULL;
   char_data *ch;
-  int rm;
+  struct room_data *rm;
   long id;
 
   if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
@@ -391,13 +385,13 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name)
   else if (obj->carried_by &&
           (i = get_obj_in_list(name, obj->carried_by->carrying)))
     return i;
-  else if ((rm = obj_room(obj)) != NOWHERE) {
+  else if ((rm = obj_room(obj)) != NULL) {
     /* check the floor */
-    if ((i = get_obj_in_list(name, world[rm].contents)))
+    if ((i = get_obj_in_list(name, rm->contents)))
       return i;
 
     /* check peoples' inventory */
-    for (ch = world[rm].people;ch ; ch = ch->next_in_room)
+    for (ch = rm->people;ch ; ch = ch->next_in_room)
       if ((i = get_object_in_equip(ch, name)))
         return i;
   }
@@ -428,10 +422,7 @@ room_data *get_room(char *name)
 
   if (*name == UID_CHAR)
     return find_room(atoi(name + 1));
-  else if ((nr = real_room(atoi(name))) == NOWHERE)
-    return NULL;
-  else
-    return &world[nr];
+  return room_by_id(atoi(name));
 }
 
 
@@ -505,7 +496,7 @@ char_data *get_char_by_room(room_data *room, char *name)
 obj_data *get_obj_by_obj(obj_data *obj, char *name)
 {
   obj_data *i = NULL;
-  int rm;
+  struct room_data *rm = NULL;
 
   if (*name == UID_CHAR)
     return find_obj(atoi(name + 1));
@@ -526,8 +517,8 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name)
      (i = get_obj_in_list(name, obj->carried_by->carrying)))
     return i;
 
-  if (((rm = obj_room(obj)) != NOWHERE) &&
-      (i = get_obj_in_list(name, world[rm].contents)))
+  if (((rm = obj_room(obj)) != NULL) &&
+      (i = get_obj_in_list(name, rm->contents)))
     return i;
 
   return get_obj(name);
@@ -989,18 +980,18 @@ ACMD(do_attach)
 
   else if (is_abbrev(arg, "room") || is_abbrev(arg, "wtr")) {
     if (strchr(targ_name, '.'))
-      rnum = IN_ROOM(ch);
+      room = char_room_get(ch);
     else if (isdigit(*targ_name))
-      rnum = find_target_room(ch, targ_name);
+      room = find_target_room(ch, targ_name);
     else
-      rnum = NOWHERE;
+      room = NULL;
 
-    if (rnum == NOWHERE) {
+    if (room == NULL) {
       send_to_char(ch, "You need to supply a room number or . for current room.\r\n");
       return;
     }
 
-    if (!can_edit_zone(ch, world[rnum].zone)) {
+    if (!can_edit_zone(ch, room->zone)) {
       send_to_char(ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
@@ -1010,8 +1001,6 @@ ACMD(do_attach)
       send_to_char(ch, "That trigger does not exist.\r\n");
       return;
     }
-
-    room = &world[rnum];
 
     if (!SCRIPT(room))
       CREATE(SCRIPT(room), struct script_data, 1);
@@ -1927,7 +1916,7 @@ void process_detach(void *go, struct script_data *sc, trig_data *trig,
 
 struct room_data *dg_room_of_obj(struct obj_data *obj)
 {
-  if (IN_ROOM(obj) != NOWHERE) return obj_room_get(obj);
+  if (obj_room_get(obj) != NULL) return obj_room_get(obj);
   if (obj->carried_by)        return char_room_get(obj->carried_by);
   if (obj->worn_by)           return char_room_get(obj->worn_by);
   if (obj->in_obj)            return (dg_room_of_obj(obj->in_obj));
@@ -2008,20 +1997,20 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
       if (o)
         snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, GET_ID(o));
     } else if (is_abbrev(arg, "room")) {
-      room_rnum r = NOWHERE;
+      struct room_data *r = NULL;
       switch (type) {
         case WLD_TRIGGER:
-          r = real_room(((struct room_data *) go)->number);
+          r = room_by_id(((struct room_data *) go)->number);
           break;
         case OBJ_TRIGGER:
           r = obj_room((struct obj_data *)go);
           break;
         case MOB_TRIGGER:
-          r = IN_ROOM((struct char_data *)go);
+          r = char_room_get((struct char_data *)go);
           break;
       }
-      if (r != NOWHERE)
-        snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, world[r].number+ROOM_ID_BASE);
+      if (r != NULL)
+        snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, r->number+ROOM_ID_BASE);
     } else {
       script_log("Trigger: %s, VNum %d. makeuid syntax error: '%s'",
             GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), cmd);

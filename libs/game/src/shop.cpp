@@ -1279,7 +1279,7 @@ SPECIAL(shop_keeper)
       SHOP_SORT(shop_nr) = 0;	/* Safety in case "drop all" */
     return (FALSE);
   }
-  if (!ok_shop_room(shop_nr, GET_ROOM_VNUM(IN_ROOM(ch))))
+  if (!ok_shop_room(shop_nr, char_room_vnum_get(ch)))
     return (0);
 
   if (!AWAKE(keeper))
@@ -1698,16 +1698,18 @@ static void list_detailed_shop(struct char_data *ch, int shop_nr)
   for (sindex = 0; SHOP_ROOM(shop_nr, sindex) != NOWHERE; sindex++) {
     char buf1[128];
     int linelen, temp;
+    struct room_data *room = NULL;
 
     if (sindex) {
       send_to_char(ch, ", ");
       column += 2;
     }
 
-    if ((temp = real_room(SHOP_ROOM(shop_nr, sindex))) != NOWHERE)
-      linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", world[temp].name, GET_ROOM_VNUM(temp));
-    else
+    if ((room = room_by_id(SHOP_ROOM(shop_nr, sindex)))) {
+      linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", room->name, room_vnum_get(room));
+    } else {
       linelen = snprintf(buf1, sizeof(buf1), "<UNKNOWN> (#%d)", SHOP_ROOM(shop_nr, sindex));
+    }
 
     /* Implementing word-wrapping: assumes screen-size == 80 */
     if (linelen + column >= 78 && column >= 20) {
@@ -1820,7 +1822,7 @@ void show_shops(struct char_data *ch, char *arg)
   else {
     if (!strcasecmp(arg, ".")) {
       for (shop_nr = 0; shop_nr <= top_shop; shop_nr++)
-	if (ok_shop_room(shop_nr, GET_ROOM_VNUM(IN_ROOM(ch))))
+	if (ok_shop_room(shop_nr, char_room_vnum_get(ch)))
 	  break;
 
       if (shop_nr > top_shop) {

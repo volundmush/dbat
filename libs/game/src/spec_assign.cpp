@@ -82,8 +82,6 @@ void assign_rooms(void)
   room_rnum i;
 
   ASSIGNROOM(5, dump);
-  ASSIGNROOM(3, pet_shops);
-  ASSIGNROOM(4, pet_shops);
   ASSIGNROOM(81, auction);
   ASSIGNROOM(82, auction);
   ASSIGNROOM(83, auction);

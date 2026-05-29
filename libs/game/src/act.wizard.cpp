@@ -792,11 +792,11 @@ ACMD(do_recall)
  else {
   send_to_char(ch, "You disappear in a burst of light!\r\n");
   act("$n disappears in a burst of light!", FALSE, ch, 0, 0, TO_ROOM);
-  if (real_room(2) != NOWHERE) {
+  if (room_by_id(2)) {
   char_from_room(ch);
-  char_to_room(ch, real_room(2));
+  char_to_room(ch, room_by_id(2));
   look_at_room(char_room_get(ch), ch, 0);
-  GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
+  GET_LOADROOM(ch) = char_room_vnum_get(ch);
   }
  }
 
@@ -951,9 +951,9 @@ ACMD(do_send)
 }
 
 /* take a string, and return an rnum.. used for goto, at, etc.  -je 4/6/93 */
-room_rnum find_target_room(struct char_data *ch, char *rawroomstr)
+struct room_data *find_target_room(struct char_data *ch, char *rawroomstr)
 {
-  room_rnum location = NOWHERE;
+  struct room_data* location = NULL;
   char roomstr[MAX_INPUT_LENGTH];
   struct room_data *rm;
 
@@ -961,13 +961,13 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr)
 
   if (!*roomstr) {
     send_to_char(ch, "You must supply a room number or name.\r\n");
-    return (NOWHERE);
+    return (NULL);
   }
 
   if (isdigit(*roomstr) && !strchr(roomstr, '.')) {
-    if ((location = real_room((room_vnum)atoi(roomstr))) == NOWHERE) {
+    if ((location = room_by_id((room_vnum)atoi(roomstr))) == NULL) {
       send_to_char(ch, "No room exists with that number.\r\n");
-      return (NOWHERE);
+      return (NULL);
     }
   } else {
     struct char_data *target_mob;
@@ -977,27 +977,27 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr)
 
     num = get_number(&mobobjstr);
     if ((target_mob = get_char_vis(ch, mobobjstr, &num, FIND_CHAR_WORLD)) != NULL) {
-      if ((location = IN_ROOM(target_mob)) == NOWHERE) {
+      if ((location = char_room_get(target_mob)) == NULL) {
         send_to_char(ch, "That character is currently lost.\r\n");
-        return (NOWHERE);
+        return (NULL);
       }
     } else if ((target_obj = get_obj_vis(ch, mobobjstr, &num)) != NULL) {
-      if (IN_ROOM(target_obj) != NOWHERE)
-        location = IN_ROOM(target_obj);
-      else if (target_obj->carried_by && IN_ROOM(target_obj->carried_by) != NOWHERE)
-        location = IN_ROOM(target_obj->carried_by);
-      else if (target_obj->worn_by && IN_ROOM(target_obj->worn_by) != NOWHERE)
-        location = IN_ROOM(target_obj->worn_by);
+      if (obj_room_get(target_obj))
+        location = obj_room_get(target_obj);
+      else if (target_obj->carried_by && char_room_get(target_obj->carried_by) != NULL)
+        location = char_room_get(target_obj->carried_by);
+      else if (target_obj->worn_by && char_room_get(target_obj->worn_by) != NULL)
+        location = char_room_get(target_obj->worn_by);
 
-      if (location == NOWHERE) {
+      if (location == NULL) {
         send_to_char(ch, "That object is currently not in a room.\r\n");
-        return (NOWHERE);
+        return (NULL);
       }
     }
 
-    if (location == NOWHERE) {
+    if (location == NULL) {
       send_to_char(ch, "Nothing exists by that name.\r\n");
-      return (NOWHERE);
+      return (NULL);
     }
   }
 
@@ -1005,17 +1005,17 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr)
   if (GET_ADMLEVEL(ch) >= ADMLVL_VICE)
     return (location);
 
-  rm = &world[location];
+  rm = location;
 
   if ((!can_edit_zone(ch, rm->zone) && GET_ADMLEVEL(ch) < ADMLVL_GOD)
        && ZONE_FLAGGED(rm->zone, ZONE_QUEST)) {
        send_to_char(ch, "This target is in a quest zone.\r\n");
-       return (NOWHERE);
+       return (NULL);
        }
 
   if ((GET_ADMLEVEL(ch) < ADMLVL_VICE) && ZONE_FLAGGED(rm->zone, ZONE_NOIMMORT)){
        send_to_char(ch, "This target is in a zone closed to all.\r\n");
-       return (NOWHERE);
+       return (NULL);
       }
 
   if (room_flagged(rm, ROOM_GODROOM))
@@ -1023,13 +1023,13 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr)
   else
     return (location);
 
-  return (NOWHERE);
+  return (NULL);
 }
 
 ACMD(do_at)
 {
   char command[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
-  room_rnum location, original_loc;
+  struct room_data *location, *original_loc;
 
   half_chop(argument, buf, command);
   if (!*buf) {
@@ -1042,17 +1042,17 @@ ACMD(do_at)
     return;
   }
 
-  if ((location = find_target_room(ch, buf)) == NOWHERE)
+  if ((location = find_target_room(ch, buf)) == NULL)
     return;
 
   /* a location has been found. */
-  original_loc = IN_ROOM(ch);
+  original_loc = char_room_get(ch);
   char_from_room(ch);
   char_to_room(ch, location);
   command_interpreter(ch, command);
 
   /* check if the char is still there */
-  if (IN_ROOM(ch) == location) {
+  if (char_room_get(ch) == location) {
     char_from_room(ch);
     char_to_room(ch, original_loc);
   }
@@ -1061,9 +1061,9 @@ ACMD(do_at)
 ACMD(do_goto)
 {
   char buf[MAX_STRING_LENGTH];
-  room_rnum location;
+  struct room_data *location;
 
-  if ((location = find_target_room(ch, argument)) == NOWHERE)
+  if ((location = find_target_room(ch, argument)) == NULL)
     return;
   if (PLR_FLAGGED(ch, PLR_HEALT)) {
    send_to_char(ch, "They are inside a healing tank!\r\n");
@@ -1108,7 +1108,7 @@ ACMD(do_trans)
       }
       act("$n disappears in a mushroom cloud.", FALSE, victim, 0, 0, TO_ROOM);
       char_from_room(victim);
-      char_to_room(victim, IN_ROOM(ch));
+      char_to_room(victim, char_room_get(ch));
       act("$n arrives from a puff of smoke.", FALSE, victim, 0, 0, TO_ROOM);
       act("$n has transferred you!", FALSE, ch, 0, victim, TO_VICT);
       look_at_room(char_room_get(victim), victim, 0);
@@ -1127,7 +1127,7 @@ ACMD(do_trans)
 	  continue;
 	act("$n disappears in a mushroom cloud.", FALSE, victim, 0, 0, TO_ROOM);
 	char_from_room(victim);
-	char_to_room(victim, IN_ROOM(ch));
+	char_to_room(victim, char_room_get(ch));
 	act("$n arrives from a puff of smoke.", FALSE, victim, 0, 0, TO_ROOM);
 	act("$n has transferred you!", FALSE, ch, 0, victim, TO_VICT);
         look_at_room(char_room_get(victim), victim, 0);
@@ -1141,7 +1141,7 @@ ACMD(do_teleport)
 {
   char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
   struct char_data *victim;
-  room_rnum target;
+  struct room_data *target;
 
   two_arguments(argument, buf, buf2);
 
@@ -1155,7 +1155,7 @@ ACMD(do_teleport)
     send_to_char(ch, "Maybe you shouldn't do that.\r\n");
   else if (!*buf2)
     send_to_char(ch, "Where do you wish to send this person?\r\n");
-  else if ((target = find_target_room(ch, buf2)) != NOWHERE) {
+  else if ((target = find_target_room(ch, buf2)) != NULL) {
     if (PLR_FLAGGED(victim, PLR_HEALT)) {
      send_to_char(ch, "They are inside a healing tank!\r\n");
      return;
@@ -1338,8 +1338,8 @@ static void do_stat_room(struct char_data *ch)
   send_to_char(ch, "Room name: @c%s@n\r\n", rm->name);
 
   sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
-  send_to_char(ch, "Zone: [%3d], VNum: [@g%5d@n], RNum: [%5d], IDNum: [%5ld], Type: %s\r\n",
-	  room_zone_vnum_get(rm), rm->number, IN_ROOM(ch),
+  send_to_char(ch, "Zone: [%3d], VNum: [@g%5d@n], IDNum: [%5ld], Type: %s\r\n",
+	  room_zone_vnum_get(rm), rm->number,
           (long) rm->number + ROOM_ID_BASE, buf2);
 
   sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf2, sizeof(buf2));
@@ -1479,8 +1479,8 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
   send_to_char(ch, "Weight: %" I64T ", Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n",
      GET_OBJ_WEIGHT(j), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
 
-  send_to_char(ch, "In room: %d (%s), ", GET_ROOM_VNUM(IN_ROOM(j)),
-	IN_ROOM(j) == NOWHERE ? "Nowhere" : obj_room_get(j)->name);
+  send_to_char(ch, "In room: %d (%s), ", obj_room_vnum_get(j),
+	obj_room_get(j) == NULL ? "Nowhere" : obj_room_get(j)->name);
 
   /*
    * NOTE: In order to make it this far, we must already be able to see the
@@ -1632,7 +1632,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   sprinttype(GET_SEX(k), genders, buf, sizeof(buf));
   send_to_char(ch, "%s %s '%s'  IDNum: [%5d], In room [%5d], Loadroom : [%5d]\r\n",
 	  buf, (!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB")),
-	  GET_NAME(k), IS_NPC(k) ? GET_ID(k) : GET_IDNUM(k), GET_ROOM_VNUM(IN_ROOM(k)), IS_NPC(k) ? MOB_LOADROOM(k) : GET_LOADROOM(k));
+	  GET_NAME(k), IS_NPC(k) ? GET_ID(k) : GET_IDNUM(k), char_room_vnum_get(k), IS_NPC(k) ? MOB_LOADROOM(k) : GET_LOADROOM(k));
 
   send_to_char(ch, "DROOM: [%5d]\r\n", GET_DROOM(k));
   if (IS_MOB(k)) {
@@ -2209,7 +2209,7 @@ ACMD(do_load)
     }
     for (i=0; i < n; i++) {
     mob = read_mobile(r_num, REAL);
-    char_to_room(mob, IN_ROOM(ch));
+    char_to_room(mob, char_room_get(ch));
 
       act("$n makes a quaint, magical gesture with one hand.", TRUE, ch, 0, 0, TO_ROOM);
     act("$n has created $N!", FALSE, ch, 0, mob, TO_ROOM);
@@ -2234,7 +2234,7 @@ ACMD(do_load)
     if (CONFIG_LOAD_INVENTORY)
       obj_to_char(obj, ch);
     else
-      obj_to_room(obj, IN_ROOM(ch));
+      obj_to_room(obj, char_room_get(ch));
     act("$n makes a strange magical gesture.", TRUE, ch, 0, 0, TO_ROOM);
     act("$n has created $p!", FALSE, ch, obj, 0, TO_ROOM);
     act("You create $p.", FALSE, ch, obj, 0, TO_CHAR);
@@ -2485,9 +2485,9 @@ static void execute_copyover(void)
       write_to_descriptor (d->descriptor, "\n\rSorry, we are rebooting. Come back in a few seconds.\n\r");
       close_socket(d); /* throw'em out */
     } else {
-      if (GET_ROOM_VNUM(IN_ROOM(och)) > 1) {
-       fprintf (fp, "%d %s %s %d %s\n", d->descriptor, GET_NAME(och), d->host, GET_ROOM_VNUM(IN_ROOM(och)), d->user);
-      } else if (GET_ROOM_VNUM(IN_ROOM(och)) <= 1 && GET_ROOM_VNUM(GET_WAS_IN(och)) > 1) {
+      if (char_room_vnum_get(och) > 1) {
+       fprintf (fp, "%d %s %s %d %s\n", d->descriptor, GET_NAME(och), d->host, char_room_vnum_get(och), d->user);
+      } else if (char_room_vnum_get(och) <= 1 && GET_ROOM_VNUM(GET_WAS_IN(och)) > 1) {
        fprintf (fp, "%d %s %s %d %s\n", d->descriptor, GET_NAME(och), d->host, GET_ROOM_VNUM(GET_WAS_IN(och)), d->user);
       } else {
        fprintf (fp, "%d %s %s 300 %s\n", d->descriptor, GET_NAME(och), d->host, d->user);
@@ -2994,7 +2994,7 @@ ACMD(do_force)
   } else if (!strcasecmp("room", arg)) {
     send_to_char(ch, "%s", CONFIG_OK);
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s forced room %d to %s",
-		GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)), to_force);
+		GET_NAME(ch), char_room_vnum_get(ch), to_force);
 
     for (vict = char_room_get(ch)->people; vict; vict = next_force) {
       next_force = vict->next_in_room;
@@ -3528,16 +3528,20 @@ ACMD(do_show)
     for (i = 0, k = 0; i <= top_of_world; i++) {
       struct room_data *rm = &world[i];
       for (j = 0; j < NUM_OF_DIRS; j++) {
-      	if (!R_EXIT(rm, j))
+
+        room_vnum v = room_vnum_get(rm);
+
+        struct room_direction_data *exit = R_EXIT(rm, j);
+      	if (!exit)
       	  continue;
-        if (R_EXIT(rm, j)->to_room == 0) {
-            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k, GET_ROOM_VNUM(i), count_color_chars(rm->name)+40, rm->name, QNRM, dirs[j]);
+        if (exit->to_room == 0) {
+            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k, v, count_color_chars(rm->name)+40, rm->name, QNRM, dirs[j]);
           if (len + nlen >= sizeof(buf) || nlen < 0)
             break;
           len += nlen;
         }
-        if (R_EXIT(rm, j)->to_room == NOWHERE && !R_EXIT(rm, j)->general_description) {
-            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k, GET_ROOM_VNUM(i), count_color_chars(rm->name)+ 40, rm->name, QNRM, dirs[j]);
+        if (!exit_dest_get(exit) && !exit->general_description) {
+            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k, v, count_color_chars(rm->name)+ 40, rm->name, QNRM, dirs[j]);
           if (len + nlen >= sizeof(buf) || nlen < 0)
             break;
           len += nlen;
@@ -3592,7 +3596,7 @@ ACMD(do_show)
 	continue;
       if (STATE(d) != CON_PLAYING || GET_ADMLEVEL(ch) < GET_ADMLEVEL(d->character))
 	continue;
-      if (!CAN_SEE(ch, d->character) || IN_ROOM(d->character) == NOWHERE)
+      if (!CAN_SEE(ch, d->character) || char_room_get(d->character) == NULL)
 	continue;
       i++;
       send_to_char(ch, "%-10s - snooped by %s.\r\n", GET_NAME(d->snooping->character), GET_NAME(d->character));
@@ -3811,6 +3815,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   int i, on = 0, off = 0;
   int64_t value = 0;
   room_rnum rnum;
+  struct room_data *room = NULL;
   room_vnum rvnum;
   dbat::race::RaceMap v_races;
   dbat::race::Race *chosen_race;
@@ -4052,13 +4057,13 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     vict->level = value;
     break;
   case 35:
-    if ((rnum = real_room(value)) == NOWHERE) {
+    if ((room = room_by_id(value)) == NULL) {
       send_to_char(ch, "No room exists with that number.\r\n");
       return (0);
     }
-    if (IN_ROOM(vict) != NOWHERE)	/* Another Eric Green special. */
+    if (char_room_get(vict) != NULL)	/* Another Eric Green special. */
       char_from_room(vict);
-    char_to_room(vict, rnum);
+    char_to_room(vict, room);
     break;
   case 36:
     SET_OR_REMOVE(PRF_FLAGS(vict), PRF_ROOMFLAGS);
@@ -4089,7 +4094,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
       GET_LOADROOM(vict) = NOWHERE;
     } else if (is_number(val_arg)) {
       rvnum = atoi(val_arg);
-      if (real_room(rvnum) != NOWHERE) {
+      if (room_by_id(rvnum)) {
         SET_BIT_AR(PLR_FLAGS(vict), PLR_LOADROOM);
 	GET_LOADROOM(vict) = rvnum;
 	send_to_char(ch, "%s will enter at room #%d.\r\n", GET_NAME(vict), GET_LOADROOM(vict));
@@ -4698,15 +4703,16 @@ ACMD(do_zpurge)
    }
 
    for (room = genolc_zone_bottom(stored); room <= zone_table[stored].top; room++) {
-     if ((i = real_room(room)) != NOWHERE) {
-       for (mob = world[i].people; mob; mob = next_mob) {
+    struct room_data *roomp = room_by_id(room);
+     if (roomp) {
+       for (mob = roomp->people; mob; mob = next_mob) {
          next_mob = mob->next_in_room;
          if (IS_NPC(mob)) {
            extract_char(mob);
          }
         }
 
-       for (obj = world[i].contents; obj; obj = next_obj) {
+       for (obj = roomp->contents; obj; obj = next_obj) {
          next_obj = obj->next_content;
          extract_obj(obj);
        }

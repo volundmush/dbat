@@ -6,12 +6,6 @@
 extern "C" {
 #endif
 
-//#define SECT(room)	(VALID_ROOM_RNUM(room) ? \
-				world[(room)].sector_type : SECT_INSIDE)
-//#define ROOM_DAMAGE(room)   (world[(room)].dmg)
-//#define ROOM_EFFECT(room)   (world[(room)].geffect)
-//#define ROOM_GRAVITY(room)  (world[(room)].gravity)
-//#define SUNKEN(room)    (ROOM_EFFECT(room) < 0 || SECT(room) == SECT_UNDERWATER)
 
 #define IS_DARK(room)	room_is_dark((room))
 #define IS_LIGHT(room)  (!room_is_dark(room))
@@ -21,8 +15,6 @@ extern "C" {
 	((room_vnum)(VALID_ROOM_RNUM(rnum) ? world[(rnum)].number : NOWHERE))
 
 /* Minor Planet Defines */
-#define PLANET_ZENITH(room) ((GET_ROOM_VNUM(room) >= 3400 && GET_ROOM_VNUM(room) <= 3599) || (GET_ROOM_VNUM(room) >= 62900 && GET_ROOM_VNUM(room) <= 62999) || \
-				(GET_ROOM_VNUM(room) == 19600))
     
 #define ROOM_FLAGS(loc)	(world[(loc)].room_flags)
 #define ROOM_FLAGGED(loc, flag) (IS_SET_AR(ROOM_FLAGS(loc), (flag)))

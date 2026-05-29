@@ -3,9 +3,10 @@ const std = @import("std");
 
 extern fn strdup(s: [*:0]const u8) ?[*:0]u8;
 
-pub export fn exit_dest_get(exit: *cdb.room_direction_data) [*c]cdb.room_data {
-    if (exit.to_room == cdb.NOWHERE or cdb.world == null) return null;
-    return &cdb.world[@intCast(exit.to_room)];
+pub export fn exit_dest_get(exit: [*c]cdb.room_direction_data) [*c]cdb.room_data {
+    if (exit == null) return null;
+    if (exit.*.to_room == cdb.NOWHERE) return null;
+    return cdb.room_by_id(exit.*.to_room);
 }
 
 pub export fn exit_general_description_get(exit: *cdb.room_direction_data) [*c]const u8 {
@@ -40,12 +41,12 @@ pub export fn exit_key_set(exit: *cdb.room_direction_data, key: cdb.obj_vnum) vo
     exit.key = key;
 }
 
-pub export fn exit_to_room_get(exit: *cdb.room_direction_data) cdb.room_vnum {
-    return roomVnumFromRnum(exit.to_room);
+pub export fn exit_to_room_vnum_get(exit: *cdb.room_direction_data) cdb.room_vnum {
+    return exit.to_room;
 }
 
-pub export fn exit_to_room_set(exit: *cdb.room_direction_data, to_room: cdb.room_vnum) void {
-    exit.to_room = cdb.real_room(to_room);
+pub export fn exit_to_room_vnum_set(exit: *cdb.room_direction_data, to_room: cdb.room_vnum) void {
+    exit.to_room = cdb.room_vnum_check(to_room);
 }
 
 pub export fn exit_dclock_get(exit: *cdb.room_direction_data) c_int {
@@ -97,19 +98,19 @@ pub export fn exit_dcfailsave_set(exit: *cdb.room_direction_data, dcfailsave: c_
 }
 
 pub export fn exit_failroom_get(exit: *cdb.room_direction_data) c_int {
-    return roomVnumFromRnum(exit.failroom);
+    return exit.failroom;
 }
 
 pub export fn exit_failroom_set(exit: *cdb.room_direction_data, failroom: cdb.room_vnum) void {
-    exit.failroom = cdb.real_room(failroom);
+    exit.failroom = cdb.room_vnum_check(failroom);
 }
 
 pub export fn exit_totalfailroom_get(exit: *cdb.room_direction_data) c_int {
-    return roomVnumFromRnum(exit.totalfailroom);
+    return exit.totalfailroom;
 }
 
 pub export fn exit_totalfailroom_set(exit: *cdb.room_direction_data, totalfailroom: cdb.room_vnum) void {
-    exit.totalfailroom = cdb.real_room(totalfailroom);
+    exit.totalfailroom = cdb.room_vnum_check(totalfailroom);
 }
 
 fn replaceString(field: *[*c]u8, value: ?[*:0]const u8) void {

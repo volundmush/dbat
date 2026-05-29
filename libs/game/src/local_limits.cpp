@@ -1316,7 +1316,7 @@ void gain_condition(struct char_data *ch, int condition, int value)
     return;
   }
 
-  if (GET_ROOM_VNUM(IN_ROOM(ch)) <= 1)
+  if (char_room_vnum_get(ch) <= 1)
   {
     return;
   }
@@ -1439,7 +1439,7 @@ static void check_idling(struct char_data *ch)
 
   if (++(ch->timer) > CONFIG_IDLE_VOID)
   {
-    if (GET_WAS_IN(ch) == NOWHERE && IN_ROOM(ch) != NOWHERE)
+    if (GET_WAS_IN(ch) == NOWHERE && room)
     {
       GET_WAS_IN(ch) = IN_ROOM(ch);
       if (FIGHTING(ch))
@@ -1447,82 +1447,81 @@ static void check_idling(struct char_data *ch)
         stop_fighting(FIGHTING(ch));
         stop_fighting(ch);
       }
-      if (IN_ROOM(ch) == 0 || IN_ROOM(ch) == 1)
+
+      room_vnum v = room_vnum_get(room);
+
+      if (!room_flagged(room, ROOM_PAST) && (v < 19800 || v > 19899))
       {
-        GET_LOADROOM(ch) = GET_LOADROOM(ch);
-      }
-      if (!room_flagged(room, ROOM_PAST) && (GET_ROOM_VNUM(IN_ROOM(ch)) < 19800 || GET_ROOM_VNUM(IN_ROOM(ch)) > 19899))
-      {
-        GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
+        GET_LOADROOM(ch) = v;
       }
       if (room_flagged(room, ROOM_PAST))
       {
-        GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1561));
+        GET_LOADROOM(ch) = room_vnum_check(1561);
       }
-      if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 2002 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 2011)
+      if (v >= 2002 && v <= 2011)
       {
-        GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1960));
+        GET_LOADROOM(ch) = room_vnum_check(1960);
       }
-      if (GET_ROOM_VNUM(IN_ROOM(ch)) == 2069)
+      if (v == 2069)
       {
-        GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(2017));
+        GET_LOADROOM(ch) = room_vnum_check(2017);
       }
-      if (GET_ROOM_VNUM(IN_ROOM(ch)) == 2070)
+      if (v == 2070)
       {
-        GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(2046));
+        GET_LOADROOM(ch) = room_vnum_check(2046);
       }
-      if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 101 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 139)
+      if (v >= 101 && v <= 139)
       {
         if (GET_LEVEL(ch) == 1)
         {
-          GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(100));
+          GET_LOADROOM(ch) = room_vnum_check(100);
           GET_EXP(ch) = 0;
         }
         else
         {
           if (IS_ROSHI(ch))
           {
-            GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1130));
+            GET_LOADROOM(ch) = room_vnum_check(1130);
           }
           if (IS_KABITO(ch))
           {
-            GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(12098));
+            GET_LOADROOM(ch) = room_vnum_check(12098);
           }
           if (IS_NAIL(ch))
           {
-            GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(11683));
+            GET_LOADROOM(ch) = room_vnum_check(11683);
           }
           if (IS_BARDOCK(ch))
           {
-            GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(2268));
+            GET_LOADROOM(ch) = room_vnum_check(2268);
           }
           if (IS_KRANE(ch))
           {
-            GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(13009));
+            GET_LOADROOM(ch) = room_vnum_check(13009);
           }
           if (IS_TAPION(ch))
           {
-            GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(8231));
+            GET_LOADROOM(ch) = room_vnum_check(8231);
           }
           if (IS_PICCOLO(ch))
           {
-            GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1659));
+            GET_LOADROOM(ch) = room_vnum_check(1659);
           }
           if (IS_ANDSIX(ch))
           {
-            GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1713));
+            GET_LOADROOM(ch) = room_vnum_check(1713);
           }
           if (IS_DABURA(ch))
           {
-            GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(6486));
+            GET_LOADROOM(ch) = room_vnum_check(6486);
           }
           if (IS_FRIEZA(ch))
           {
-            GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(4282));
+            GET_LOADROOM(ch) = room_vnum_check(4282);
           }
           if (IS_GINYU(ch))
           {
-            GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(4289));
+            GET_LOADROOM(ch) = room_vnum_check(4289);
           }
         }
       }
@@ -1530,14 +1529,14 @@ static void check_idling(struct char_data *ch)
       send_to_char(ch, "You have been idle, and are pulled into a void.\r\n");
       save_char(ch);
       char_from_room(ch);
-      char_to_room(ch, 1);
+      char_to_room(ch, room_by_id(1));
     }
     else if (ch->timer > CONFIG_IDLE_RENT_TIME)
     {
-      if (IN_ROOM(ch) != NOWHERE)
+      if (char_room_get(ch) != NULL)
       {
         char_from_room(ch);
-        char_to_room(ch, 3);
+        char_to_room(ch, room_by_id(3));
       }
       if (ch->desc)
       {
@@ -1731,7 +1730,7 @@ static void point_update_characters(void)
   {
     next_char = i->next;
 
-    if (!IS_NPC(i) && IN_ROOM(i) != NOWHERE)
+    if (!IS_NPC(i) && char_room_get(i) != NULL)
     {
       if (room_flagged(char_room_get(i), ROOM_HOUSE))
       {
@@ -2080,7 +2079,7 @@ static void point_update_objects(void)
       diff = time(0) - GET_LAST_LOAD(j);
       if (diff > 240 && GET_LAST_LOAD(j) > 0)
       {
-        log("No rent object (%s) extracted from room (%d)", j->short_description, GET_ROOM_VNUM(IN_ROOM(j)));
+        log("No rent object (%s) extracted from room (%d)", j->short_description, obj_room_vnum_get(j));
         extract_obj(j);
         continue;
       }
@@ -2090,7 +2089,7 @@ static void point_update_objects(void)
     {
       if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(j, VAL_HATCH_DEST))))
       {
-        GET_OBJ_VAL(j, 3) = GET_ROOM_VNUM(IN_ROOM(vehicle));
+        GET_OBJ_VAL(j, 3) = obj_room_vnum_get(vehicle);
       }
     }
 
@@ -2105,7 +2104,7 @@ static void point_update_objects(void)
       {
         if (GET_OBJ_TIMER(j) == 5)
         {
-          if ((IN_ROOM(j) != NOWHERE) && (obj_room_get(j)->people))
+          if ((obj_room_get(j) != NULL) && (obj_room_get(j)->people))
           {
             act("@DFlies start to gather around $p@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_CHAR);
             act("@DFlies start to gather around $p@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_ROOM);
@@ -2113,7 +2112,7 @@ static void point_update_objects(void)
         }
         if (GET_OBJ_TIMER(j) == 3)
         {
-          if ((IN_ROOM(j) != NOWHERE) && (obj_room_get(j)->people))
+          if ((obj_room_get(j) != NULL) && (obj_room_get(j)->people))
           {
             act("@DA cloud of flies has formed over $p@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_CHAR);
             act("@DA cloud of flies has formed over $p@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_ROOM);
@@ -2121,7 +2120,7 @@ static void point_update_objects(void)
         }
         if (GET_OBJ_TIMER(j) == 2)
         {
-          if ((IN_ROOM(j) != NOWHERE) && (obj_room_get(j)->people))
+          if ((obj_room_get(j) != NULL) && (obj_room_get(j)->people))
           {
             act("@DMaggots can be seen crawling all over $p@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_CHAR);
             act("@DMaggots can be seen crawling all over $p@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_ROOM);
@@ -2129,7 +2128,7 @@ static void point_update_objects(void)
         }
         if (GET_OBJ_TIMER(j) == 1)
         {
-          if ((IN_ROOM(j) != NOWHERE) && (obj_room_get(j)->people))
+          if ((obj_room_get(j) != NULL) && (obj_room_get(j)->people))
           {
             act("@DMaggots have nearly stripped $p of all its flesh@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_CHAR);
             act("@DMaggots have nearly stripped $p of all its flesh@D.@n", TRUE, obj_room_get(j)->people, j, 0, TO_ROOM);
@@ -2144,7 +2143,7 @@ static void point_update_objects(void)
           if (!strstr(j->name, "android"))
           {
             act("$p decays in your hands.", FALSE, j->carried_by, j, 0, TO_CHAR);
-            if ((IN_ROOM(j) != NOWHERE) && (obj_room_get(j)->people))
+            if ((obj_room_get(j) != NULL) && (obj_room_get(j)->people))
             {
               act("A quivering horde of maggots consumes $p.",
                   TRUE, obj_room_get(j)->people, j, 0, TO_ROOM);
@@ -2155,7 +2154,7 @@ static void point_update_objects(void)
           else
           {
             act("$p decays in your hands.", FALSE, j->carried_by, j, 0, TO_CHAR);
-            if ((IN_ROOM(j) != NOWHERE) && (obj_room_get(j)->people))
+            if ((obj_room_get(j) != NULL) && (obj_room_get(j)->people))
             {
               act("$p breaks down completely into a pile of junk.",
                   TRUE, obj_room_get(j)->people, j, 0, TO_ROOM);
@@ -2172,9 +2171,9 @@ static void point_update_objects(void)
           if (j->in_obj)
             obj_to_obj(jj, j->in_obj);
           else if (j->carried_by)
-            obj_to_room(jj, IN_ROOM(j->carried_by));
-          else if (IN_ROOM(j) != NOWHERE)
-            obj_to_room(jj, IN_ROOM(j));
+            obj_to_room(jj, char_room_get(j->carried_by));
+          else if (obj_room_get(j) != NULL)
+            obj_to_room(jj, obj_room_get(j));
           else
             core_dump();
         }
@@ -2273,7 +2272,7 @@ static void point_update_objects(void)
             continue;
           }
         }
-        else if (IN_ROOM(j) != NOWHERE)
+        else if (obj_room_get(j) != NULL)
         {
           if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0)
           {
@@ -2328,7 +2327,7 @@ void timed_dt(struct char_data *ch)
       if (IS_NPC(vict))
         continue;
 
-      if (IN_ROOM(vict) == NOWHERE)
+      if (char_room_get(vict) == NULL)
         continue;
 
       if (!room_flagged(char_room_get(vict), ROOM_TIMED_DT))

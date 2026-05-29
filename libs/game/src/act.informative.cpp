@@ -79,7 +79,7 @@ static void display_scroll(struct char_data *ch, struct obj_data *obj);
 static void space_to_minus(char *str);
 static void free_history(struct char_data *ch, int type);
 static int yesrace(int num);
-static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
+static void map_draw_room(char map[9][10], int x, int y, room_vnum vnum,
                           struct char_data *ch);
 // definitions
 ACMD(do_evolve)
@@ -545,7 +545,7 @@ ACMD(do_shuffle)
  for (obj2 = obj->contains; obj2; obj2 = next_obj) {
   next_obj = obj2->next_content;
   obj_from_obj(obj2);
-  obj_to_room(obj2, real_room(48));
+  obj_to_room(obj2, room_by_id(48));
  }
  while (count > 0) {
  for (obj2 = room_by_id(48)->contents; obj2; obj2 = next_obj) {
@@ -678,7 +678,7 @@ ACMD(do_post)
   act("@WYou post $p@W on a nearby structure.@n", TRUE, ch, obj, 0, TO_CHAR);
   act("@C$n@W posts $p@W on a nearby structure.@n", TRUE, ch, obj, 0, TO_ROOM);
   obj_from_char(obj);
-  obj_to_room(obj, IN_ROOM(ch));
+  obj_to_room(obj, char_room_get(ch));
   GET_OBJ_POSTTYPE(obj) = 1;
   return;
  } else {
@@ -697,7 +697,7 @@ ACMD(do_post)
     send_to_char(ch, "@WYou post %s@W on %s@W.@n\r\n", obj->short_description, obj2->short_description);
     act(buf, TRUE, ch, 0, 0, TO_ROOM);   
     obj_from_char(obj);
-    obj_to_room(obj, IN_ROOM(ch));
+    obj_to_room(obj, char_room_get(ch));
     GET_OBJ_POSTTYPE(obj) = 2;
     GET_OBJ_POSTED(obj) = obj2;
     GET_OBJ_POSTED(obj2) = obj;
@@ -804,9 +804,9 @@ ACMD(do_nickname)
      for (k = object_list; k; k = k->next) {
       if (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(ship2) + 1000) {
        extract_obj(k);
-       int was_in = GET_ROOM_VNUM(IN_ROOM(ship2));
+       struct room_data *was_in = obj_room_get(ship2);
        obj_from_room(ship2);
-       obj_to_room(ship2, real_room(was_in));
+       obj_to_room(ship2, was_in);
       }
      }
     }
@@ -1442,11 +1442,11 @@ static void bringdesc(struct char_data *ch, struct char_data *tch)
   }
 }
 
-static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
+static void map_draw_room(char map[9][10], int x, int y, room_vnum vnum,
 struct char_data *ch)
 {
   int door;
-  struct room_data* room = &world[rnum];
+  struct room_data* room = room_by_id(vnum);
 
   for (door = 0; door < NUM_OF_DIRS; door++) {
     struct room_direction_data *exit = room->dir_option[door];
@@ -2276,7 +2276,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      */
     if (*obj->description == '.' && (IS_NPC(ch) || !PRF_FLAGGED(ch, PRF_HOLYLIGHT))) 
       return;
-    if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && GET_ROOM_VNUM(IN_ROOM(ch)) == GET_OBJ_VAL(obj, 0)) {
+    if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && char_room_vnum_get(ch) == GET_OBJ_VAL(obj, 0)) {
       return;
     }
     if (SITTING(obj) && GET_ADMLEVEL(ch) < 1) {
@@ -3495,7 +3495,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
         count = TRUE;
      }
      else {
-      if (IN_ROOM(i) == IN_ROOM(FIGHTING(i))) {
+      if (char_room_get(i) == char_room_get(FIGHTING(i))) {
        send_to_char(ch, "%s", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
        count = TRUE;
       }
@@ -3540,7 +3540,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
       if (FIGHTING(i) == ch)
 	send_to_char(ch, "@rYOU@w!");
       else {
-	if (IN_ROOM(i) == IN_ROOM(FIGHTING(i)))
+	if (char_room_get(i) == char_room_get(FIGHTING(i)))
 	  send_to_char(ch, "%s!", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
 	else
 	  send_to_char(ch,  "someone who has already left!");
@@ -3760,7 +3760,7 @@ static bool append_immortal_exit_door_details(char *line, size_t line_size, stru
   const char *keyword = fname(exit->keyword);
   if (!keyword) {
     send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION %s@n\r\n", dirs[door]);
-    log("ERROR: %s found error direction %s at room %d", GET_NAME(ch), dirs[door], GET_ROOM_VNUM(IN_ROOM(ch)));
+    log("ERROR: %s found error direction %s at room %d", GET_NAME(ch), dirs[door], char_room_vnum_get(ch));
     return false;
   }
 
@@ -4309,15 +4309,14 @@ static void look_in_obj(struct char_data *ch, char *arg)
     else if (GET_OBJ_VAL(obj, VAL_VEHICLE_APPEAR) < 0) {
       /* You can look inside the vehicle */
       /* where does this lead to? */
-      room_rnum vehicle_inside = real_room(GET_OBJ_VAL(obj, VAL_VEHICLE_ROOM));
-      struct room_data *vehicle_inside_room = &world[vehicle_inside];
-      if (vehicle_inside == NOWHERE) {
+      struct room_data *vehicle_inside = room_by_id(GET_OBJ_VAL(obj, VAL_VEHICLE_ROOM));
+      if (!vehicle_inside) {
         send_to_char(ch, "You cannot see inside that.\r\n");
-      } else if (IS_DARK(vehicle_inside_room) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+      } else if (IS_DARK(vehicle_inside) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
         send_to_char(ch, "It is pitch black...\r\n");
       } else {
         send_to_char(ch, "You look inside and see:\r\n");
-        look_at_room(vehicle_inside_room, ch, 0);
+        look_at_room(vehicle_inside, ch, 0);
       }
     } else {
       send_to_char(ch, "You cannot see inside that.\r\n");
@@ -4593,7 +4592,7 @@ static void look_out_window(struct char_data *ch, char *arg)
 {
   struct obj_data *i, *viewport = NULL, *vehicle = NULL;
   struct char_data *dummy = NULL;
-  room_rnum target_room = NOWHERE;
+  struct room_data* target_room = NULL;
   int bits, door;
 
   /* First, lets find something to look out of or through. */
@@ -4633,22 +4632,25 @@ static void look_out_window(struct char_data *ch, char *arg)
       /* We are looking out of the room */
       if (GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED4) < 0) {
         /* Look for the default "outside" room */
-        for (door = 0; door < NUM_OF_DIRS; door++)
-          if (EXIT(ch, door))
-            if (EXIT(ch, door)->to_room != NOWHERE)
-              if (!ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_INDOORS)) {
-                target_room = EXIT(ch, door)->to_room;
+        for (door = 0; door < NUM_OF_DIRS; door++) {
+          struct room_direction_data *exit = EXIT(ch, door);
+          if(!exit) continue;
+          struct room_data *dest = exit_dest_get(exit);
+          if(!dest) continue;
+          if (!room_flagged(dest, ROOM_INDOORS)) {
+                target_room = dest;
                 continue;
               }
+        }
       } else {
-        target_room = real_room(GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED4));
+        target_room = room_by_id(GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED4));
       }
     } else {
       /* We are looking out of a vehicle */
       if ( (vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED1))) )
-        target_room = IN_ROOM(vehicle);
+        target_room = obj_room_get(vehicle);
     }
-    if (target_room == NOWHERE) {
+    if (target_room == NULL) {
       send_to_char(ch, "You don't seem to be able to see outside.\r\n");
     } else {
       if (viewport->action_description)
@@ -4656,7 +4658,7 @@ static void look_out_window(struct char_data *ch, char *arg)
       else
         act("$n looks out the window.", TRUE, ch, 0, 0, TO_ROOM);
         send_to_char(ch, "You look outside and see:\r\n");
-      look_at_room(&world[target_room], ch, 0);
+      look_at_room(target_room, ch, 0);
     }
   }
 }
@@ -5535,7 +5537,7 @@ ACMD(do_status)
         if (PLR_FLAGGED(ch, PLR_NOSHOUT)) {
             send_to_char(ch, "         You have been @rmuted@n on public channels.\r\n");
         }
-        if (IN_ROOM(ch) == real_room(9)) {
+        if (char_room_get(ch) == room_by_id(9)) {
             send_to_char(ch, "         You are in punishment hell, so sad....\r\n");
         }
         if (!PRF_FLAGGED(ch, PRF_HINTS)) {
@@ -6452,7 +6454,7 @@ ACMD(do_who)
        hide += 1;
        continue;
     }
-    if (who_room && (IN_ROOM(tch) != IN_ROOM(ch)))
+    if (who_room && (char_room_get(tch) != char_room_get(ch)))
       continue;
     if (showclass && !(showclass & (1 << GET_CLASS(tch))))
       continue;
@@ -6496,7 +6498,7 @@ ACMD(do_who)
         continue;
       if (localwho && char_room_get(ch)->zone != char_room_get(tch)->zone)
         continue;
-      if (who_room && (IN_ROOM(tch) != IN_ROOM(ch)))
+      if (who_room && (char_room_get(tch) != char_room_get(ch)))
         continue;
       if (PRF_FLAGGED(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
         continue;
@@ -6819,7 +6821,7 @@ static void perform_mortal_where(struct char_data *ch, char *arg)
 	continue;
       if ((i = (d->original ? d->original : d->character)) == NULL)
 	continue;
-      if (IN_ROOM(i) == NOWHERE || !CAN_SEE(ch, i))
+      if (char_room_get(i) == NULL || !CAN_SEE(ch, i))
 	continue;
       if (char_room_get(ch)->zone != char_room_get(i)->zone)
 	continue;
@@ -6827,7 +6829,7 @@ static void perform_mortal_where(struct char_data *ch, char *arg)
     }
   } else {			/* print only FIRST char, not all. */
     for (i = character_list; i; i = i->next) {
-      if (IN_ROOM(i) == NOWHERE || i == ch)
+      if (char_room_get(i) == NULL || i == ch)
 	continue;
       if (!CAN_SEE(ch, i) || char_room_get(i)->zone != char_room_get(ch)->zone)
 	continue;
@@ -6851,12 +6853,12 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
   if (SCRIPT(obj))
     send_to_char(ch, "[T%d]", obj->proto_script->vnum);
 
-  if (IN_ROOM(obj) != NOWHERE)
-    send_to_char(ch, "[%5d] %s\r\n", GET_ROOM_VNUM(IN_ROOM(obj)), obj_room_get(obj)->name);
+  if (obj_room_get(obj) != NULL)
+    send_to_char(ch, "[%5d] %s\r\n", obj_room_vnum_get(obj), obj_room_get(obj)->name);
   else if (obj->carried_by)
-    send_to_char(ch, "carried by %s in room [%d]\r\n", PERS(obj->carried_by, ch), GET_ROOM_VNUM(IN_ROOM(obj->carried_by)));
+    send_to_char(ch, "carried by %s in room [%d]\r\n", PERS(obj->carried_by, ch), char_room_vnum_get(obj->carried_by));
   else if (obj->worn_by)
-    send_to_char(ch, "worn by %s in room [%d]\r\n", PERS(obj->worn_by, ch), GET_ROOM_VNUM(IN_ROOM(obj->worn_by)));
+    send_to_char(ch, "worn by %s in room [%d]\r\n", PERS(obj->worn_by, ch), char_room_vnum_get(obj->worn_by));
   else if (obj->in_obj) {
     send_to_char(ch, "inside %s%s\r\n", obj->in_obj->short_description, (recur ? ", which is" : " "));
     if (recur)
@@ -6891,39 +6893,39 @@ static void perform_immort_where(struct char_data *ch, char *arg)
     send_to_char(ch, "Players                  Vnum    Planet        Location\r\n-------                 ------   ----------    ----------------\r\n");
     for (d = descriptor_list; d; d = d->next)
       if (IS_PLAYING(d)) {
-        if (IN_ROOM(d->character) != NOWHERE) {
-         if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_EARTH)) {
+        if (char_room_get(d->character) != NULL) {
+         if ((char_room_get(d->character) && room_flagged(char_room_get(d->character), ROOM_EARTH))) {
           num2 = 0;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_FRIGID)) {
+         } else if ((char_room_get(d->character) && room_flagged(char_room_get(d->character), ROOM_FRIGID))) {
           num2 = 1;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_VEGETA)) {
+         } else if ((char_room_get(d->character) && room_flagged(char_room_get(d->character), ROOM_VEGETA))) {
           num2 = 2;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_KONACK)) {
+         } else if ((char_room_get(d->character) && room_flagged(char_room_get(d->character), ROOM_KONACK))) {
           num2 = 3;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_NAMEK)) {
+         } else if ((char_room_get(d->character) && room_flagged(char_room_get(d->character), ROOM_NAMEK))) {
           num2 = 4;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_AETHER)) {
+         } else if ((char_room_get(d->character) && room_flagged(char_room_get(d->character), ROOM_AETHER))) {
           num2 = 5;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_ARLIA)) {
+         } else if ((char_room_get(d->character) && room_flagged(char_room_get(d->character), ROOM_ARLIA))) {
           num2 = 6;
-         } else if (PLANET_ZENITH(IN_ROOM(d->character))) {
+         } else if (char_planet_zenith(d->character)) {
           num2 = 7;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_YARDRAT)) {
+         } else if ((char_room_get(d->character) && room_flagged(char_room_get(d->character), ROOM_YARDRAT))) {
           num2 = 8;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_KANASSA)) {
+         } else if ((char_room_get(d->character) && room_flagged(char_room_get(d->character), ROOM_KANASSA))) {
           num2 = 9;
          } else {
           num2 = 10;
          }
         }
 	i = (d->original ? d->original : d->character);
-	if (i && CAN_SEE(ch, i) && (IN_ROOM(i) != NOWHERE)) {
+	if (i && CAN_SEE(ch, i) && (char_room_get(i) != NULL)) {
 	  if (d->original)
 	    send_to_char(ch, "%-20s - [%5d]   %s (in %s)\r\n",
-		GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(d->character)),
+		GET_NAME(i), char_room_vnum_get(d->character),
 		char_room_get(d->character)->name, GET_NAME(d->character));
 	  else {
-	    send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(i)), planet[num2], char_room_get(i)->name);
+	    send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), char_room_vnum_get(i), planet[num2], char_room_get(i)->name);
           }
            
 	}
@@ -6931,10 +6933,10 @@ static void perform_immort_where(struct char_data *ch, char *arg)
   } else {
     mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "GODCMD: %s has checked where for the location of %s", GET_NAME(ch), arg);
     for (i = character_list; i; i = i->next) {
-      if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->name)) {
+      if (CAN_SEE(ch, i) && char_room_get(i) != NULL && isname(arg, i->name)) {
 	found = 1;
 	send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
-		GET_ROOM_VNUM(IN_ROOM(i)), char_room_get(i)->name);
+		char_room_vnum_get(i), char_room_get(i)->name);
         if (IS_NPC(i) && SCRIPT(i)) { 
           if (!TRIGGERS(SCRIPT(i))->next) 
             send_to_char(ch, "[T%5d] ", GET_TRIG_VNUM(TRIGGERS(SCRIPT(i)))); 

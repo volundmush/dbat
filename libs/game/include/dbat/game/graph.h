@@ -11,7 +11,7 @@ extern "C" {
 #define BFS_NO_PATH		(-4)
 
 // functions
-int find_first_step(room_rnum src, room_rnum target);
+int find_first_step(struct room_data *src, struct room_data *target);
 
 ACMD(do_track);
 ACMD(do_sradar);

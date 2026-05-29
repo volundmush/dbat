@@ -286,6 +286,8 @@ bool char_outside_roomflag(struct char_data *ch);
 bool char_ether_stream(struct char_data *ch);
 bool char_has_moon(struct char_data *ch);
 
+bool char_planet_zenith(struct char_data *ch);
+
 #ifdef __cplusplus
 }
 #endif

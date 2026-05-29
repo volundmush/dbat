@@ -136,7 +136,6 @@ static void parse_espec(char *buf, struct char_data *ch, int nr);
 static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr);
 static void get_one_line(FILE *fl, char *buf);
 static void check_start_rooms(void);
-static void renum_world(void);
 static void renum_zone_table(void);
 static void log_zone_error(zone_rnum zone, int cmd_no, const char *message);
 static void reset_time(void);
@@ -566,9 +565,6 @@ void boot_world(void)
   log("Loading rooms.");
   index_boot(DB_BOOT_WLD);
 
-  log("Renumbering rooms.");
-  renum_world();
-
   log("Checking start rooms.");
   check_start_rooms();
 
@@ -861,9 +857,6 @@ static void load_assets(void) {
 
     log("Loading JSON exits.");
     json_import_or_die("exits", json_import_room_exits("data/assets/exits"));
-
-    log("Renumbering rooms.");
-    renum_world();
 
     log("Checking start rooms.");
     check_start_rooms();
@@ -1797,39 +1790,7 @@ static void setup_dir(FILE *fl, int room, int dir)
 /* make sure the start rooms exist & resolve their vnums to rnums */
 static void check_start_rooms(void)
 {
-  if ((r_mortal_start_room = real_room(CONFIG_MORTAL_START)) == NOWHERE) {
-    log("SYSERR:  Mortal start room does not exist.  Change mortal_start_room in lib/etc/config.");
-    exit(1);
-  }
-  if ((r_immort_start_room = real_room(CONFIG_IMMORTAL_START)) == NOWHERE) {
-    if (!mini_mud)
-      log("SYSERR:  Warning: Immort start room does not exist.  Change immort_start_room in /lib/etc/config.");
-    r_immort_start_room = r_mortal_start_room;
-  }
-  if ((r_frozen_start_room = real_room(CONFIG_FROZEN_START)) == NOWHERE) {
-    if (!mini_mud)
-      log("SYSERR:  Warning: Frozen start room does not exist.  Change frozen_start_room in /lib/etc/config.");
-    r_frozen_start_room = r_mortal_start_room;
-  }
-}
 
-
-/* resolve all vnums into rnums in the world */
-static void renum_world(void)
-{
-  int room, door;
-
-  for (room = 0; room <= top_of_world; room++) {
-    struct room_data *rm = &world[room];
-    for (door = 0; door < NUM_OF_DIRS; door++) {
-      struct room_direction_data *ex = rm->dir_option[door];
-      if(!ex) continue;
-      if (ex->to_room != NOWHERE)
-          ex->to_room = real_room(ex->to_room);
-    }
-        
-  }
-    
 }
 
 #define ZCMD2 zone_table[zone].cmd[cmd_no]
@@ -3776,15 +3737,15 @@ void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2)
         GET_OBJ_VNUM(obj1), obj1->generation, obj1->unique_id);
   mudlog(BRF, ADMLVL_GOD, TRUE, "DUPE: First: In room: %d (%s), "
                              "In object: %s, Carried by: %s, Worn by: %s",
-        GET_ROOM_VNUM(IN_ROOM(obj1)),
-        IN_ROOM(obj1) == NOWHERE ? "Nowhere" : obj_room_get(obj1)->name,
+        obj_room_vnum_get(obj1),
+        obj_room_get(obj1) == NULL ? "Nowhere" : obj_room_get(obj1)->name,
         obj1->in_obj ? obj1->in_obj->short_description : "None",
         obj1->carried_by ? GET_NAME(obj1->carried_by) : "Nobody",
         obj1->worn_by ? GET_NAME(obj1->worn_by) : "Nobody");
   mudlog(BRF, ADMLVL_GOD, TRUE, "DUPE: Newer: In room: %d (%s), "
                              "In object: %s, Carried by: %s, Worn by: %s",
-        GET_ROOM_VNUM(IN_ROOM(obj2)),
-        IN_ROOM(obj2) == NOWHERE ? "Nowhere" : obj_room_get(obj2)->name,
+        obj_room_vnum_get(obj2),
+        obj_room_get(obj2) == NULL ? "Nowhere" : obj_room_get(obj2)->name,
         obj2->in_obj ? obj2->in_obj->short_description : "None",
         obj2->carried_by ? GET_NAME(obj2->carried_by) : "Nobody",
         obj2->worn_by ? GET_NAME(obj2->worn_by) : "Nobody");
@@ -4079,7 +4040,7 @@ void reset_zone(zone_rnum zone)
             }
 	  }
 	}
-	char_to_room(mob, ZCMD2.arg3);
+	char_to_room(mob, &world[ZCMD2.arg3]);
 	
            /* Get rid of it if room_max has been met, ignore room_max if zero */
 
@@ -4116,10 +4077,10 @@ void reset_zone(zone_rnum zone)
         if (ZCMD2.arg4 > 0) {
           for (k = object_list; k; k = k->next) {
             if (((OBJ_LOADROOM(k)==GET_ROOM_VNUM(ZCMD2.arg3)) 
-                && (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj))) || (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj) && GET_ROOM_VNUM(ZCMD2.arg3) ==  GET_ROOM_VNUM(IN_ROOM(k)))) {
+                && (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj))) || (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj) && GET_ROOM_VNUM(ZCMD2.arg3) == obj_room_vnum_get(k))) {
               /*  For objects, lets not count them if they've been removed from the room */
               /*  We'll let max_in_mud handle those. */
-               if (IN_ROOM(k) == NOWHERE || GET_ROOM_VNUM(IN_ROOM(k)) 
+               if (obj_room_get(k) == NULL || obj_room_vnum_get(k) 
                    != GET_ROOM_VNUM(ZCMD2.arg3)) {
                  continue;
                }
@@ -4129,7 +4090,7 @@ void reset_zone(zone_rnum zone)
         }
 
           add_unique_id(obj);
-	  obj_to_room(obj, ZCMD2.arg3);
+	  obj_to_room(obj, &world[ZCMD2.arg3]);
 	  
            /* Get rid of it if room_max has been met. */
 
@@ -4332,10 +4293,9 @@ void reset_zone(zone_rnum zone)
   /* handle reset_wtrigger's */
   rvnum = zone_table[zone].bot;
   while (rvnum <= zone_table[zone].top) {
-    rrnum = real_room(rvnum);
-    if (rrnum != NOWHERE) {
-     reset_wtrigger(&world[rrnum]);
-     struct room_data *room = &world[rrnum];
+    struct room_data *room = room_by_id(rvnum);
+    if (room) {
+     reset_wtrigger(room);
      if (room_flagged(room, ROOM_AURA) && rand_number(1, 5) >= 4) {
       send_to_room(room, "The aura of regeneration covering the surrounding area disappears.\r\n");
       room_flag_set(room, ROOM_AURA, FALSE);
@@ -4401,7 +4361,7 @@ int is_empty(zone_rnum zone_nr)
   for (i = descriptor_list; i; i = i->next) {
     if (STATE(i) != CON_PLAYING)
       continue;
-    if (IN_ROOM(i->character) == NOWHERE)
+    if (char_room_get(i->character) == NULL)
       continue;
     if (char_room_get(i->character)->zone != zone_nr)
       continue;

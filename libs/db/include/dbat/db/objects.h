@@ -22,7 +22,7 @@ struct obj_spellbook_spell {
 
 struct obj_data {
    obj_vnum item_number;	/* Where in data-base			*/
-   room_rnum in_room;		/* In what room -1 when conta/carr	*/
+   room_vnum in_room;		/* In what room -1 when conta/carr	*/
    room_vnum room_loaded;	/* Room loaded in, for room_max checks	*/
 
    int  value[NUM_OBJ_VAL_POSITIONS];   /* Values of the item (see list)    */

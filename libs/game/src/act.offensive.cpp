@@ -1771,7 +1771,7 @@ ACMD(do_geno)
   }
 
  vict = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
+  if (FIGHTING(ch) && char_room_get(FIGHTING(ch)) == char_room_get(ch)) {
    vict = FIGHTING(ch);
   }
   else {
@@ -1814,7 +1814,7 @@ ACMD(do_geno)
   }
 
   obj = read_object(83, VIRTUAL);
-  obj_to_room(obj, IN_ROOM(vict));
+  obj_to_room(obj, char_room_get(vict));
 
   GET_CHARGE(ch) += GET_MAX_HIT(ch) / 10;
   TARGET(obj) = vict;
@@ -1869,7 +1869,7 @@ ACMD(do_genki)
   }
 
  vict = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
+  if (FIGHTING(ch) && char_room_get(FIGHTING(ch)) == char_room_get(ch)) {
    vict = FIGHTING(ch);
   }
   else {
@@ -1924,7 +1924,7 @@ ACMD(do_genki)
   struct obj_data *obj;
 
   obj = read_object(82, VIRTUAL);
-  obj_to_room(obj, IN_ROOM(vict));
+  obj_to_room(obj, char_room_get(vict));
 
   TARGET(obj) = vict;
   KICHARGE(obj) = damtype(ch, 40, prob, attperc);
@@ -9737,7 +9737,7 @@ ACMD(do_attack2)
  else if (IS_NPC(ch) && GET_LEVEL(ch) > 100) {
  skill = rand_number(95, 100);
  }
- if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
+ if (FIGHTING(ch) && char_room_get(FIGHTING(ch)) == char_room_get(ch)) {
   vict = FIGHTING(ch);
  }
 
@@ -10300,7 +10300,7 @@ ACMD(do_bite)
 	}
 
 	vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-		if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
+		if (FIGHTING(ch) && char_room_get(FIGHTING(ch)) == char_room_get(ch)) {
 			vict = FIGHTING(ch);
 		}
 		else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
@@ -13359,7 +13359,7 @@ ACMD(do_charge)
      SET_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
     }
   }
-  else if (amt < 1 && GET_ROOM_VNUM(IN_ROOM(ch)) != 1562) {
+  else if (amt < 1 && char_room_vnum_get(ch) != 1562) {
      send_to_char(ch, "You have set it too low!\r\n");
      return;
   }

@@ -50,7 +50,7 @@ void broken_update()
    } else if (health <= 80 && dice == 4) {
     send_to_room(room, "@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
     money = create_money(rand_number(1, 30));
-    obj_to_room(money, IN_ROOM(k));
+    obj_to_room(money, obj_room_get(k));
    } else if (health <= 99 && dice < 4) {
     send_to_room(room, "@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
    }

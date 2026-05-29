@@ -78,7 +78,7 @@ ACMD(do_oasis_redit)
   }
   
   if (!*buf1 || GET_ADMLEVEL(ch) < 1)
-    number = GET_ROOM_VNUM(IN_ROOM(ch));
+    number = char_room_vnum_get(ch);
   else if (!isdigit(*buf1)) {
     if (strcasecmp("save", buf1) != 0) {
       send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
@@ -951,7 +951,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
 
   case REDIT_EXIT_NUMBER:
     if ((number = atoi(arg)) != -1)
-      if ((number = real_room(number)) == NOWHERE) {
+      if (!room_by_id(number)) {
 	write_to_output(d, "That room does not exist, try again : ");
 	return;
       }

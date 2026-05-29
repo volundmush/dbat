@@ -105,7 +105,7 @@ int player_present(struct char_data *ch)
   struct char_data *vict, *next_v;
   int found = FALSE;
 
-  if (IN_ROOM(ch) == NOWHERE)
+  if (char_room_get(ch) == NULL)
    return 0;
 
   for (vict = char_room_get(ch)->people; vict; vict = next_v) {
@@ -184,10 +184,10 @@ void mobile_activity(void)
     if (!MOB_FLAGGED(ch, MOB_SENTINEL) && (GET_POS(ch) == POS_STANDING) && !FIGHTING(ch) &&
         (!AFF_FLAGGED(ch, AFF_TAMED)) && !ABSORBBY(ch) &&
 	((door = rand_number(0, 18)) < NUM_OF_DIRS) && CAN_GO(ch, door) &&
-	!ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_NOMOB) &&
-	!ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_DEATH) &&
+	!room_flagged(exit_dest_get(EXIT(ch, door)), ROOM_NOMOB) &&
+	!room_flagged(exit_dest_get(EXIT(ch, door)), ROOM_DEATH) &&
 	(!MOB_FLAGGED(ch, MOB_STAY_ZONE) ||
-	 (world[EXIT(ch, door)->to_room].zone == char_room_get(ch)->zone))) {
+	 (exit_dest_get(EXIT(ch, door))->zone == char_room_get(ch)->zone))) {
      if (rand_number(1, 2) == 2 && !IS_AFFECTED(ch, AFF_PARALYZE) && block_calc(ch)) {
       perform_move(ch, door, 1);
      }
@@ -472,7 +472,7 @@ void mobile_activity(void)
               break;
           if (shop_nr <= top_shop)
             /* Is the shopkeeper in his shop? */
-            if (ok_shop_room(shop_nr, IN_ROOM(vict)))
+            if (ok_shop_room(shop_nr, char_room_vnum_get(vict)))
               /* Does the shopkeeper prevent stealing? */
               if (!SHOP_ALLOW_STEAL(shop_nr))
                 found = TRUE;

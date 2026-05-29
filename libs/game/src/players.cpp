@@ -829,7 +829,7 @@ void load_char_pets(struct char_data *ch)
 {
   char fname[40];
   FILE *fl;
-  IDXTYPE load_room;
+  struct room_data *load_room;
   struct follow_type *foll;
 
   if (IS_NPC(ch) || GET_PFILEPOS(ch) < 0)
@@ -846,9 +846,9 @@ void load_char_pets(struct char_data *ch)
    /*load_room = IN_ROOM(ch);*/
  
   for (foll = ch->followers; foll; foll = foll->next) {
-       load_room = real_room(1);
-  if (load_room == NOWHERE) {
-       load_room = real_room(IN_ROOM(ch));
+       load_room = room_by_id(1);
+  if (load_room == NULL) {
+       load_room = char_room_get(ch);
   }
     char_to_room(foll->follower, load_room);
     act("You are joined by $N.", FALSE, ch, 0, foll->follower, TO_CHAR);

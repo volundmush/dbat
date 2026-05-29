@@ -181,13 +181,13 @@ void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
     }
   }
 
-  if (tch != NULL && IN_ROOM(tch) == IN_ROOM(ch)) {
+  if (tch != NULL && char_room_get(tch) == char_room_get(ch)) {
     if (tch == ch)
       format = "$n closes $s eyes and utters the words, '%s'.";
     else
       format = "$n stares at $N and utters the words, '%s'.";
   } else if (tobj != NULL &&
-	     ((IN_ROOM(tobj) == IN_ROOM(ch)) || (tobj->carried_by == ch)))
+	     ((obj_room_get(tobj) == char_room_get(ch)) || (tobj->carried_by == ch)))
     format = "$n stares at $p and utters the words, '%s'.";
   else
     format = "$n utters the words, '%s'.";
@@ -205,7 +205,7 @@ void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
       perform_act(buf2, ch, tobj, tch, i);
   }
 
-  if (tch != NULL && tch != ch && IN_ROOM(tch) == IN_ROOM(ch)) {
+  if (tch != NULL && tch != ch && char_room_get(tch) == char_room_get(ch)) {
     snprintf(buf1, sizeof(buf1), "$n stares at you and utters the words, '%s'.",
 	    GET_CLASS_RANKS(tch, GET_CLASS(ch)) ? skill_name(spellnum) : buf);
     act(buf1, FALSE, ch, NULL, tch, TO_VICT);
@@ -333,7 +333,6 @@ int call_magic(struct char_data *caster, struct char_data *cvict,
     case SPELL_WORD_OF_RECALL:  MANUAL_SPELL(spell_recall); break;
     case SPELL_TELEPORT:	MANUAL_SPELL(spell_teleport); break;
     case SPELL_PORTAL:		MANUAL_SPELL(spell_portal); break;
-    case ART_ABUNDANT_STEP:	MANUAL_SPELL(art_abundant_step); break;
     }
 
   if (IS_SET(SINFO.routines, MAG_AFFECTSV))

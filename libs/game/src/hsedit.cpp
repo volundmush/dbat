@@ -129,11 +129,11 @@ void hsedit_save_internally(struct descriptor_data *d)
     } 
   } 
   /* The new house is stored - now to ensure the roomsflags are correct */ 
-  if (real_room(OLC_HOUSE(d)->vnum) != NOWHERE) 
-    SET_BIT_AR(ROOM_FLAGS(real_room(OLC_HOUSE(d)->vnum)), ROOM_HOUSE);
+  if (auto room = room_by_id(OLC_HOUSE(d)->vnum); room)
+    room_flag_set(room, ROOM_HOUSE, TRUE);
 
-  if (real_room(OLC_HOUSE(d)->atrium) != NOWHERE) 
-    SET_BIT_AR(ROOM_FLAGS(real_room(OLC_HOUSE(d)->atrium)), ROOM_ATRIUM); 
+  if (auto room = room_by_id(OLC_HOUSE(d)->atrium); room)
+    room_flag_set(room, ROOM_ATRIUM, TRUE);
 
 //  olc_add_to_save_list(zone_table[OLC_ZNUM(d)].number, OLC_SAVE_HOUSE); 
 } 
@@ -160,7 +160,7 @@ void free_house(struct house_control_rec *house)
 void hedit_delete_house(struct descriptor_data *d, int house_vnum) 
 { 
   int i, j; 
-  room_rnum real_atrium, real_house; 
+  room_rnum real_atrium; 
 
   if ((i = find_house(house_vnum)) == NOWHERE) { 
     mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: hsedit: Invalid house vnum in hedit_delete_house\r\n"); 
@@ -168,10 +168,10 @@ void hedit_delete_house(struct descriptor_data *d, int house_vnum)
     return; 
   } 
 
-  if ((real_house = real_room(house_control[i].vnum)) == NOWHERE) 
-    log("SYSERR: House %d had invalid vnum %d!", house_vnum, house_control[i].vnum); 
-  else 
-    REMOVE_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE | ROOM_HOUSE_CRASH); 
+  if (auto room = room_by_id(house_control[i].vnum); room)
+    room_flag_set(room, ROOM_HOUSE, FALSE);
+  else
+    log("SYSERR: House %d had invalid vnum %d!", house_vnum, house_control[i].vnum);
 
   House_delete_file(house_control[i].vnum); 
 
@@ -230,14 +230,15 @@ void hsedit_dir_menu(struct descriptor_data *d)
 { 
   char buf[MAX_STRING_LENGTH]; 
   struct house_control_rec *house; 
-  int house_rnum, newroom[12], i; 
+  struct room_data *newroom[12];
+  int i; 
 
   house = OLC_HOUSE(d); 
 
   mudlog(CMP, ADMLVL_BUILDER, TRUE, "(LOG) hsedit_dir_menu: house vnum = %d", house->vnum); 
-  house_rnum = real_room(house->vnum); 
+  struct room_data *house_rnum = room_by_id(house->vnum); 
 
-  if ((house_rnum < 0) || (house_rnum == NOWHERE)) 
+  if (!house_rnum) 
   { 
     sprintf(buf, "WARNING: You cannot set an atium direction before selecting a valid room vnum\r\n" 
       "(Press Enter)\r\n"); 
@@ -248,10 +249,10 @@ void hsedit_dir_menu(struct descriptor_data *d)
     /* Grab exit rooms */ 
     for(i=0;i<12;i++) 
     { 
-      if (world[house_rnum].dir_option[i]) 
-        newroom[i] = world[house_rnum].dir_option[i]->to_room; 
+      if (house_rnum->dir_option[i]) 
+        newroom[i] = exit_dest_get(house_rnum->dir_option[i]); 
       else 
-        newroom[i] = NOWHERE; 
+        newroom[i] = NULL; 
     } 
 
     sprintf(buf, 
@@ -270,18 +271,18 @@ void hsedit_dir_menu(struct descriptor_data *d)
      "@gQ@D)@g Back to main menu\r\n" 
      "@gEnter atrium direction : @n", 
 
-   newroom[0] == NOWHERE ? "NO ROOM" : world[(newroom[0])].name, 
-   newroom[1] == NOWHERE ? "NO ROOM" : world[(newroom[1])].name,
-   newroom[2] == NOWHERE ? "NO ROOM" : world[(newroom[2])].name,
-   newroom[3] == NOWHERE ? "NO ROOM" : world[(newroom[3])].name, 
-   newroom[4] == NOWHERE ? "NO ROOM" : world[(newroom[4])].name, 
-   newroom[5] == NOWHERE ? "NO ROOM" : world[(newroom[5])].name, 
-   newroom[6] == NOWHERE ? "NO ROOM" : world[(newroom[6])].name,
-   newroom[7] == NOWHERE ? "NO ROOM" : world[(newroom[7])].name,
-   newroom[8] == NOWHERE ? "NO ROOM" : world[(newroom[8])].name,
-   newroom[9] == NOWHERE ? "NO ROOM" : world[(newroom[9])].name,
-   newroom[10] == NOWHERE ? "NO ROOM" : world[(newroom[10])].name,
-   newroom[11] == NOWHERE ? "NO ROOM" : world[(newroom[11])].name); 
+   newroom[0] == NULL ? "NO ROOM" : newroom[0]->name, 
+   newroom[1] == NULL ? "NO ROOM" : newroom[1]->name,
+   newroom[2] == NULL ? "NO ROOM" : newroom[2]->name,
+   newroom[3] == NULL ? "NO ROOM" : newroom[3]->name, 
+   newroom[4] == NULL ? "NO ROOM" : newroom[4]->name, 
+   newroom[5] == NULL ? "NO ROOM" : newroom[5]->name, 
+   newroom[6] == NULL ? "NO ROOM" : newroom[6]->name,
+   newroom[7] == NULL ? "NO ROOM" : newroom[7]->name,
+   newroom[8] == NULL ? "NO ROOM" : newroom[8]->name,
+   newroom[9] == NULL ? "NO ROOM" : newroom[9]->name,
+   newroom[10] == NULL ? "NO ROOM" : newroom[10]->name,
+   newroom[11] == NULL ? "NO ROOM" : newroom[11]->name); 
     OLC_MODE(d) = HSEDIT_DIR_MENU; 
   } 
   send_to_char(d->character, buf); 
@@ -668,7 +669,7 @@ void hsedit_parse(struct descriptor_data * d, char *arg)
       { 
         if (world[room_rnum].dir_option[i]) 
         { 
-          if (world[room_rnum].dir_option[i]->to_room == real_room(number)) 
+          if (world[room_rnum].dir_option[i]->to_room == room_vnum_check(number)) 
           { 
             found=TRUE; 
             id = i; 
@@ -1015,7 +1016,7 @@ ACMD(do_oasis_hsedit)
   
 /****************************************************************************/ 
   if (!*buf1) { 
-    number = GET_ROOM_VNUM(IN_ROOM(ch)); 
+    number = char_room_vnum_get(ch); 
   } else if (!isdigit(*buf1)) { 
     if (strcasecmp("save", buf1) != 0) {
       send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n"); 

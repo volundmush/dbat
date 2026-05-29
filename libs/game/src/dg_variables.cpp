@@ -331,7 +331,7 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 
         if ((o = get_object_in_equip(ch, name)));
         else if ((o = get_obj_in_list(name, ch->carrying)));
-        else if (IN_ROOM(ch) != NOWHERE && (c = get_char_in_room(char_room_get(ch), name)));
+        else if (char_room_get(ch) != NULL && (c = get_char_in_room(char_room_get(ch), name)));
         else if ((o = get_obj_in_list(name,char_room_get(ch)->contents)));
         else if ((c = get_char(name)));
         else if ((o = get_obj(name)));
@@ -437,14 +437,14 @@ in the vault (vnum: 453) now and then. you can just use
           script_log("findmob.vnum(mvnum) - illegal syntax");
           strcpy(str, "0");
         } else {
-          room_rnum rrnum = real_room(atoi(field));
+          struct room_data *room = room_by_id(atoi(field));
           mob_vnum mvnum = atoi(subfield);
 
-          if (rrnum == NOWHERE) {
+          if (room == NULL) {
             script_log("findmob.vnum(ovnum): No room with vnum %d", atoi(field));
             strcpy(str, "0");
           } else {
-            for (i = 0, ch = world[rrnum].people; ch; ch = ch->next_in_room)
+            for (i = 0, ch = room->people; ch; ch = ch->next_in_room)
               if (GET_MOB_VNUM(ch) == mvnum)
                 i++;
 
@@ -458,14 +458,14 @@ in the vault (vnum: 453) now and then. you can just use
           script_log("findobj.vnum(ovnum) - illegal syntax");
           strcpy(str, "0");
         } else {
-          room_rnum rrnum = real_room(atoi(field));
+          struct room_data *room = room_by_id(atoi(field));
 
-          if (rrnum == NOWHERE) {
+          if (room == NULL) {
             script_log("findobj.vnum(ovnum): No room with vnum %d", atoi(field));
             strcpy(str, "0");
           } else {
             /* item_in_list looks within containers as well. */
-            snprintf(str, slen, "%d", item_in_list(subfield, world[rrnum].contents));
+            snprintf(str, slen, "%d", item_in_list(subfield, room->contents));
           }
         }
       }
@@ -486,7 +486,8 @@ in the vault (vnum: 453) now and then. you can just use
           }
 
           else if (type == OBJ_TRIGGER) {
-            for (c = world[obj_room((obj_data *) go)].people; c;
+            struct room_data *rm = obj_room((obj_data *) go);
+            for (c = rm->people; c;
                  c = c->next_in_room)
               if (valid_dg_target(c, DG_ALLOW_GODS)) {
                 if (!rand_number(0, count))
@@ -513,24 +514,24 @@ in the vault (vnum: 453) now and then. you can just use
         }
 
         else if (!strcasecmp(field, "dir")) {
-          room_rnum in_room = NOWHERE;
+          struct room_data *in_room = NULL;
 
           switch (type) {
             case WLD_TRIGGER:
-              in_room = real_room(((struct room_data *) go)->number);
+              in_room = room_by_id(((struct room_data *) go)->number);
               break;
             case OBJ_TRIGGER:
               in_room = obj_room((struct obj_data *) go);
               break;
             case MOB_TRIGGER:
-              in_room = IN_ROOM((struct char_data *)go);
+              in_room = char_room_get((struct char_data *)go);
               break;
           }
-          if (in_room == NOWHERE) {
+          if (in_room == NULL) {
             *str = '\0';
           } else {
             doors = 0;
-            room = &world[in_room];
+            room = in_room;
             for (i = 0; i < NUM_OF_DIRS ; i++)
               if (R_EXIT(room, i))
                 doors++;
@@ -933,7 +934,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
           else if (!strcasecmp(field, "prac")) {
             if (IS_NPC(c)) {
-             if (IN_ROOM(c) != NOWHERE) {
+             if (char_room_get(c) != NULL) {
               send_to_room(char_room_get(c), "Error!: Report this trigger error to the coding authorities!\r\n");
              }
             }
@@ -969,9 +970,9 @@ in the vault (vnum: 453) now and then. you can just use
 /* see note in dg_scripts.h */
 #ifdef ACTOR_ROOM_IS_UID
             snprintf(str, slen, "%c%d",UID_CHAR,
-               (IN_ROOM(c)!= NOWHERE) ? char_room_get(c)->number + ROOM_ID_BASE : ROOM_ID_BASE);
+               (char_room_get(c) != NULL) ? char_room_get(c)->number + ROOM_ID_BASE : ROOM_ID_BASE);
 #else
-            snprintf(str, slen, "%d", (IN_ROOM(c)!= NOWHERE) ? char_room_get(c)->number : 0);
+            snprintf(str, slen, "%d", (char_room_get(c) != NULL) ? char_room_get(c)->number : 0);
 #endif
           }
 #ifdef GET_RACE
@@ -1231,7 +1232,7 @@ in the vault (vnum: 453) now and then. you can just use
             snprintf(str, slen, "%d", GET_ID(o));
 
           else if (!strcasecmp(field, "is_inroom")) {
-            if (IN_ROOM(o) != NOWHERE)
+            if (obj_room_get(o) != NULL)
               snprintf(str, slen,"%c%d",UID_CHAR, obj_room_get(o)->number + ROOM_ID_BASE);
             else
               *str = '\0';
@@ -1274,8 +1275,8 @@ in the vault (vnum: 453) now and then. you can just use
           break;
         case 'r':
           if (!strcasecmp(field, "room")) {
-            if (obj_room(o) != NOWHERE)
-              snprintf(str, slen,"%c%d",UID_CHAR, world[obj_room(o)].number + ROOM_ID_BASE);
+            if (obj_room(o))
+              snprintf(str, slen,"%c%d",UID_CHAR, obj_room(o)->number + ROOM_ID_BASE);
             else
               *str = '\0';
           }
@@ -1466,9 +1467,9 @@ in the vault (vnum: 453) now and then. you can just use
           *str = '\0';
       }
       else if (!strcasecmp(field, "id")) {
-        room_rnum rnum = real_room(r->number);
-        if (rnum != NOWHERE)
-          snprintf(str, slen, "%d", world[rnum].number + ROOM_ID_BASE);
+        struct room_data *room = room_by_id(r->number);
+        if (room)
+          snprintf(str, slen, "%d", room->number + ROOM_ID_BASE);
         else
           *str = '\0';
       }
@@ -1498,8 +1499,8 @@ in the vault (vnum: 453) now and then. you can just use
         snprintf(str, slen, "%s",  zone_table[r->zone].name);
       else if (!strcasecmp(field, "roomflag")) {
         if (subfield && *subfield) {
-          room_rnum thisroom = real_room(r->number);
-          if (check_flags_by_name_ar(ROOM_FLAGS(thisroom), NUM_ROOM_FLAGS, subfield, room_bits) > 0)
+          struct room_data *thisroom = room_by_id(r->number);
+          if (check_flags_by_name_ar(thisroom->room_flags, NUM_ROOM_FLAGS, subfield, room_bits) > 0)
             snprintf(str, slen, "1");
           else
             snprintf(str, slen, "0");
@@ -1510,7 +1511,7 @@ in the vault (vnum: 453) now and then. you can just use
         if (R_EXIT(r, NORTH)) {
           if (subfield && *subfield) {
             if (!strcasecmp(subfield, "vnum"))
-              snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, NORTH)->to_room));
+              snprintf(str, slen, "%d", exit_to_room_vnum_get(R_EXIT(r, NORTH)));
             else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, NORTH)->key);
             else if (!strcasecmp(subfield, "bits"))
@@ -1530,7 +1531,7 @@ in the vault (vnum: 453) now and then. you can just use
         if (R_EXIT(r, EAST)) {
           if (subfield && *subfield) {
             if (!strcasecmp(subfield, "vnum"))
-              snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, EAST)->to_room));
+              snprintf(str, slen, "%d", exit_to_room_vnum_get(R_EXIT(r, EAST)));
             else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, EAST)->key);
             else if (!strcasecmp(subfield, "bits"))
@@ -1550,7 +1551,7 @@ in the vault (vnum: 453) now and then. you can just use
         if (R_EXIT(r, SOUTH)) {
           if (subfield && *subfield) {
             if (!strcasecmp(subfield, "vnum"))
-              snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, SOUTH)->to_room));
+              snprintf(str, slen, "%d", exit_to_room_vnum_get(R_EXIT(r, SOUTH)));
             else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, SOUTH)->key);
             else if (!strcasecmp(subfield, "bits"))
@@ -1570,7 +1571,7 @@ in the vault (vnum: 453) now and then. you can just use
         if (R_EXIT(r, WEST)) {
           if (subfield && *subfield) {
             if (!strcasecmp(subfield, "vnum"))
-              snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, WEST)->to_room));
+              snprintf(str, slen, "%d", exit_to_room_vnum_get(R_EXIT(r, WEST)));
             else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, WEST)->key);
             else if (!strcasecmp(subfield, "bits"))
@@ -1590,7 +1591,7 @@ in the vault (vnum: 453) now and then. you can just use
         if (R_EXIT(r, UP)) {
           if (subfield && *subfield) {
             if (!strcasecmp(subfield, "vnum"))
-              snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, UP)->to_room));
+              snprintf(str, slen, "%d", exit_to_room_vnum_get(R_EXIT(r, UP)));
             else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, UP)->key);
             else if (!strcasecmp(subfield, "bits"))
@@ -1610,7 +1611,7 @@ in the vault (vnum: 453) now and then. you can just use
         if (R_EXIT(r, DOWN)) {
           if (subfield && *subfield) {
             if (!strcasecmp(subfield, "vnum"))
-              snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, DOWN)->to_room));
+              snprintf(str, slen, "%d", exit_to_room_vnum_get(R_EXIT(r, DOWN)));
             else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, DOWN)->key);
             else if (!strcasecmp(subfield, "bits"))
@@ -1630,7 +1631,7 @@ in the vault (vnum: 453) now and then. you can just use
         if (R_EXIT(r, NORTHWEST)) {
           if (subfield && *subfield) {
             if (!strcasecmp(subfield, "vnum"))
-              snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, NORTHWEST)->to_room));
+              snprintf(str, slen, "%d", exit_to_room_vnum_get(R_EXIT(r, NORTHWEST)));
             else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, NORTHWEST)->key);
             else if (!strcasecmp(subfield, "bits"))
@@ -1650,7 +1651,7 @@ in the vault (vnum: 453) now and then. you can just use
         if (R_EXIT(r, NORTHEAST)) {
           if (subfield && *subfield) {
             if (!strcasecmp(subfield, "vnum"))
-              snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, NORTHEAST)->to_room));
+              snprintf(str, slen, "%d", exit_to_room_vnum_get(R_EXIT(r, NORTHEAST)));
             else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, NORTHEAST)->key);
             else if (!strcasecmp(subfield, "bits"))
@@ -1670,7 +1671,7 @@ in the vault (vnum: 453) now and then. you can just use
         if (R_EXIT(r, SOUTHWEST)) {
           if (subfield && *subfield) {
             if (!strcasecmp(subfield, "vnum"))
-              snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, SOUTHWEST)->to_room));
+              snprintf(str, slen, "%d", exit_to_room_vnum_get(R_EXIT(r, SOUTHWEST)));
             else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, SOUTHWEST)->key);
             else if (!strcasecmp(subfield, "bits"))
@@ -1690,7 +1691,7 @@ in the vault (vnum: 453) now and then. you can just use
         if (R_EXIT(r, SOUTHEAST)) {
           if (subfield && *subfield) {
             if (!strcasecmp(subfield, "vnum"))
-              snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, SOUTHEAST)->to_room));
+              snprintf(str, slen, "%d", exit_to_room_vnum_get(R_EXIT(r, SOUTHEAST)));
             else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, SOUTHEAST)->key);
             else if (!strcasecmp(subfield, "bits"))
@@ -1710,7 +1711,7 @@ in the vault (vnum: 453) now and then. you can just use
         if (R_EXIT(r, INDIR)) {
           if (subfield && *subfield) {
             if (!strcasecmp(subfield, "vnum"))
-              snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, INDIR)->to_room));
+              snprintf(str, slen, "%d", exit_to_room_vnum_get(R_EXIT(r, INDIR)));
             else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, INDIR)->key);
             else if (!strcasecmp(subfield, "bits"))
@@ -1730,7 +1731,7 @@ in the vault (vnum: 453) now and then. you can just use
         if (R_EXIT(r, OUTDIR)) {
           if (subfield && *subfield) {
             if (!strcasecmp(subfield, "vnum"))
-              snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, OUTDIR)->to_room));
+              snprintf(str, slen, "%d", exit_to_room_vnum_get(R_EXIT(r, OUTDIR)));
             else if (!strcasecmp(subfield, "key"))
               snprintf(str, slen, "%d", R_EXIT(r, OUTDIR)->key);
             else if (!strcasecmp(subfield, "bits"))

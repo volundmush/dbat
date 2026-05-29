@@ -354,7 +354,7 @@ extern "C" {
 #define ALIGN_TYPE(ch)	((IS_GOOD(ch) ? 0 : (IS_EVIL(ch) ? 6 : 3)) + \
                          (IS_LAWFUL(ch) ? 0 : (IS_CHAOTIC(ch) ? 2 : 1)))
 
-#define IN_ARENA(ch)   (GET_ROOM_VNUM(IN_ROOM(ch)) >= 17800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 17874)
+#define IN_ARENA(ch)   (char_room_vnum_get(ch) >= 17800 && char_room_vnum_get(ch) <= 17874)
 #define ARENA_IDNUM(ch) ((ch)->arenawatch)
 
 /* These three deprecated. */

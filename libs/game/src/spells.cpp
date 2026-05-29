@@ -67,7 +67,7 @@ ASPELL(spell_recall)
 
   act("$n disappears.", TRUE, victim, 0, 0, TO_ROOM);
   char_from_room(victim);
-  char_to_room(victim, real_room(CONFIG_MORTAL_START));
+  char_to_room(victim, room_by_id(CONFIG_MORTAL_START));
   act("$n appears in the middle of the room.", TRUE, victim, 0, 0, TO_ROOM);
   look_at_room(char_room_get(victim), victim, 0);
   entry_memory_mtrigger(victim);
@@ -90,7 +90,8 @@ ASPELL(spell_teleport)
   act("$n slowly fades out of existence and is gone.",
       FALSE, victim, 0, 0, TO_ROOM);
   char_from_room(victim);
-  char_to_room(victim, to_room);
+  struct room_data *room = &world[to_room];
+  char_to_room(victim, room);
   act("$n slowly fades into existence.", FALSE, victim, 0, 0, TO_ROOM);
   look_at_room(char_room_get(victim), victim, 0);
   entry_memory_mtrigger(victim);
@@ -142,7 +143,7 @@ ASPELL(spell_summon)
   act("$n disappears suddenly.", TRUE, victim, 0, 0, TO_ROOM);
 
   char_from_room(victim);
-  char_to_room(victim, IN_ROOM(ch));
+  char_to_room(victim, char_room_get(ch));
 
   act("$n arrives suddenly.", TRUE, victim, 0, 0, TO_ROOM);
   act("$n has summoned you!", FALSE, ch, 0, victim, TO_VICT);
@@ -183,7 +184,7 @@ ASPELL(spell_locate_object)
 
     if (i->carried_by)
       send_to_char(ch, " is being carried by %s.\r\n", PERS(i->carried_by, ch));
-    else if (IN_ROOM(i) != NOWHERE)
+    else if (obj_room_get(i) != NULL)
       send_to_char(ch, " is in %s.\r\n", obj_room_get(i)->name);
     else if (i->in_obj)
       send_to_char(ch, " is in %s.\r\n", i->in_obj->short_description);
@@ -453,99 +454,28 @@ ASPELL(spell_portal)
 
   /* create the portal */
   portal = read_object(portal_object, VIRTUAL);
-  GET_OBJ_VAL(portal, VAL_PORTAL_DEST) = GET_ROOM_VNUM(IN_ROOM(victim));
+  GET_OBJ_VAL(portal, VAL_PORTAL_DEST) = char_room_vnum_get(victim);
   GET_OBJ_VAL(portal, VAL_PORTAL_HEALTH) = 100;
   GET_OBJ_VAL(portal, VAL_PORTAL_MAXHEALTH) = 100;
   GET_OBJ_TIMER(portal) = (int) (level / 10);
   add_unique_id(portal);
-  obj_to_room(portal, IN_ROOM(ch));
+  obj_to_room(portal, char_room_get(ch));
   act("$n opens a portal in thin air.",
        TRUE, ch, 0, 0, TO_ROOM);
   act("You open a portal out of thin air.",
        TRUE, ch, 0, 0, TO_CHAR);
   /* create the portal at the other end */
   tportal = read_object(portal_object, VIRTUAL);
-  GET_OBJ_VAL(tportal, VAL_PORTAL_DEST) = GET_ROOM_VNUM(IN_ROOM(ch));
+  GET_OBJ_VAL(tportal, VAL_PORTAL_DEST) = char_room_vnum_get(ch);
   GET_OBJ_VAL(tportal, VAL_PORTAL_HEALTH) = 100;
   GET_OBJ_VAL(tportal, VAL_PORTAL_MAXHEALTH) = 100;
   GET_OBJ_TIMER(tportal) = (int) (level / 10);
   add_unique_id(portal);
-  obj_to_room(tportal, IN_ROOM(victim));
+  obj_to_room(tportal, char_room_get(victim));
   act("A shimmering portal appears out of thin air.",
        TRUE, victim, 0, 0, TO_ROOM);
   act("A shimmering portal opens here for you.",
        TRUE, victim, 0, 0, TO_CHAR);
-}
-
-
-ASPELL(art_abundant_step)
-{
-  int steps, i=0, j, rep, max;
-  room_rnum r, nextroom;
-  char buf[MAX_INPUT_LENGTH], tc;
-  const char *p;
-
-  steps = 0;
-  r = IN_ROOM(ch);
-  struct room_data *room = &world[r];
-  p = arg;
-  max = 10 + GET_CLASS_RANKS(ch, CLASS_KABITO) / 2;
-
-  while (p && *p && !isdigit(*p) && !isalpha(*p)) p++;
-
-  if (!p || !*p) {
-    send_to_char(ch, "You must give directions from your current location. Examples:\r\n"
-                 "  w w nw n e\r\n"
-                 "  2w nw n e\r\n");
-    return;
-  }
-
-  while (*p) {
-    while (*p && !isdigit(*p) && !isalpha(*p)) p++;
-    if (isdigit(*p)) {
-      rep = atoi(p);
-      while (isdigit(*p)) p++;
-    } else
-      rep = 1;
-    if (isalpha(*p)) {
-      for (i = 0; isalpha(*p); i++, p++) buf[i] = LOWER(*p);
-      j = i;
-      tc = buf[i];
-      buf[i] = 0;
-      for (i = 1; complete_cmd_info[i].command_pointer == do_move && strcmp(complete_cmd_info[i].sort_as, buf); i++);
-      if (complete_cmd_info[i].command_pointer == do_move) {
-        i = complete_cmd_info[i].subcmd - 1;
-      } else
-        i = -1;
-      buf[j] = tc;
-    }
-    if (i > -1)
-      while (rep--) {
-        if (++steps > max)
-          break;
-        if (!R_EXIT(room, i)) {
-          send_to_char(ch, "Invalid step. Skipping.\r\n");
-          break;
-        }
-        nextroom = R_EXIT(room, i)->to_room;
-        if (nextroom == NOWHERE)
-          break;
-        r = nextroom;
-      }
-    if (steps > max)
-      break;
-  }
-  send_to_char(ch, "Your will bends reality as you travel through the ethereal plane.\r\n");
-  act("$n is suddenly absent.", TRUE, ch, 0, 0, TO_ROOM);
-
-  char_from_room(ch);
-  char_to_room(ch, r);
-
-  act("$n is suddenly present.", TRUE, ch, 0, 0, TO_ROOM);
-
-  look_at_room(char_room_get(ch), ch, 0);
-
-  return;
 }
 
 

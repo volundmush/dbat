@@ -73,7 +73,7 @@ ACMD(do_lightgrenade)
 
  targ = NULL;
  if (!*arg || !(targ = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
+  if (FIGHTING(ch) && char_room_get(FIGHTING(ch)) == char_room_get(ch)) {
    targ = FIGHTING(ch);
   } else {
    send_to_char(ch, "Nobody around here by that name.\r\n");
@@ -247,7 +247,7 @@ ACMD(do_breath)
  skill = init_skill(ch, SKILL_KNEE);
 
  vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
+  if (FIGHTING(ch) && char_room_get(FIGHTING(ch)) == char_room_get(ch)) {
    vict = FIGHTING(ch);
   }
   else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
@@ -445,7 +445,7 @@ ACMD(do_ram)
  skill = init_skill(ch, SKILL_KNEE);
 
  vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
+  if (FIGHTING(ch) && char_room_get(FIGHTING(ch)) == char_room_get(ch)) {
    vict = FIGHTING(ch);
   }
   else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
@@ -622,7 +622,7 @@ ACMD(do_strike)
  skill = init_skill(ch, SKILL_KNEE);
 
  vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
+  if (FIGHTING(ch) && char_room_get(FIGHTING(ch)) == char_room_get(ch)) {
    vict = FIGHTING(ch);
   }
   else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, char_room_get(ch)->contents))) {
@@ -2529,7 +2529,7 @@ ACMD(do_throw)
   }
 
   if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
-   if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
+   if (FIGHTING(ch) && char_room_get(FIGHTING(ch)) == char_room_get(ch)) {
     vict = FIGHTING(ch);
    } else {
     send_to_char(ch, "Who do you want to target?\r\n");
@@ -2685,7 +2685,7 @@ ACMD(do_throw)
         pcost(ch, 0, stcost / 2);
         pcost(vict, 0, GET_MAX_HIT(vict) / 200);
         obj_from_char(obj);
-        obj_to_room(obj, IN_ROOM(vict));
+        obj_to_room(obj, char_room_get(vict));
         return;
     }
 
@@ -2713,7 +2713,7 @@ ACMD(do_throw)
       LASTATK(ch) = -50;
       hurt(0, 0, ch, vict, NULL, 0, 0);
       obj_from_char(obj);
-      obj_to_room(obj, IN_ROOM(vict));
+      obj_to_room(obj, char_room_get(vict));
         decCurST(ch, ((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj)));
       if (!GET_EQ(ch, WEAR_WIELD1) && !GET_EQ(ch, WEAR_WIELD2))
        perc += 20;
@@ -2814,7 +2814,7 @@ ACMD(do_throw)
 	}
     hurt(0, 0, ch, vict, NULL, damage, 0);
     obj_from_char(obj);
-    obj_to_room(obj, IN_ROOM(vict));
+    obj_to_room(obj, char_room_get(vict));
 
     decCurST(ch, ((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj)));
     if (!GET_EQ(ch, WEAR_WIELD1) && !GET_EQ(ch, WEAR_WIELD2))

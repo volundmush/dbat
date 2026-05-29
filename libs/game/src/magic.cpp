@@ -632,7 +632,7 @@ void mag_groups(int level, struct char_data *ch, int spellnum)
   for (f = k->followers; f; f = f_next) {
     f_next = f->next;
     tch = f->follower;
-    if (IN_ROOM(tch) != IN_ROOM(ch))
+    if (char_room_get(tch) != char_room_get(ch))
       continue;
     if (!AFF_FLAGGED(tch, AFF_GROUP))
       continue;
@@ -969,7 +969,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
       send_to_char(ch, "You don't quite remember how to summon that creature.\r\n");
       return;
     }
-    char_to_room(mob, IN_ROOM(ch));
+    char_to_room(mob, char_room_get(ch));
     if (affs)
       mag_affects(level, ch, mob, spellnum);
     if (affvs)

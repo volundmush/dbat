@@ -175,9 +175,7 @@ int num_players_in_room(room_vnum room)
       continue; 
     if (!(i->character)) 
       continue; 
-    if (IN_ROOM(i->character) == NOWHERE || IN_ROOM(i->character) > top_of_world) 
-      continue; 
-    if (char_room_get(i->character)->number != room) 
+    if (char_room_vnum_get(i->character) != room) 
       continue; 
     if ((GET_ADMLEVEL(i->character) >= ADMLVL_IMMORT) && (PRF_FLAGGED(i->character, PRF_NOHASSLE))) /* Ignore Imms */ 
       continue; 
@@ -308,7 +306,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
     { 
       /* OK, player has had enough - position is already stored, so throw them back to the start */ 
       char_from_room(ch); 
-      char_to_room(ch, real_room(gauntlet_info[0][1])); 
+      char_to_room(ch, room_by_id(gauntlet_info[0][1])); 
       act("$n suddenly appears looking relieved after $s trial in the Gauntlet",FALSE,ch,0,ch,TO_NOTVICT); 
       act("You are returned to the start of the Gauntlet",FALSE,ch,0,ch,TO_VICT); 
 
@@ -563,7 +561,7 @@ SPECIAL(snake)
   if (cmd || GET_POS(ch) != POS_FIGHTING || !FIGHTING(ch))
     return (FALSE);
 
-  if (IN_ROOM(FIGHTING(ch)) != IN_ROOM(ch) || rand_number(0, GET_LEVEL(ch)) != 0)
+  if (char_room_get(FIGHTING(ch)) != char_room_get(ch) || rand_number(0, GET_LEVEL(ch)) != 0)
     return (FALSE);
 
   act("$n bites $N!", 1, ch, 0, FIGHTING(ch), TO_NOTVICT);
@@ -606,7 +604,7 @@ SPECIAL(magic_user_orig)
       break;
 
   /* if I didn't pick any of those, then just slam the guy I'm fighting */
-  if (vict == NULL && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch))
+  if (vict == NULL && char_room_get(FIGHTING(ch)) == char_room_get(ch))
     vict = FIGHTING(ch);
 
   /* Hm...didn't pick anyone...I'll wait a round. */
@@ -710,7 +708,7 @@ SPECIAL(fido)
     for (temp = i->contains; temp; temp = next_obj) {
       next_obj = temp->next_content;
       obj_from_obj(temp);
-      obj_to_room(temp, IN_ROOM(ch));
+      obj_to_room(temp, char_room_get(ch));
     }
     extract_obj(i);
     return (TRUE);
@@ -805,82 +803,18 @@ SPECIAL(cityguard)
 
 #define PET_PRICE(pet) (GET_LEVEL(pet) * 300)
 
-SPECIAL(pet_shops)
-{
-  char buf[MAX_STRING_LENGTH], pet_name[256];
-  room_rnum pet_room;
-  struct char_data *pet;
-
-  /* Gross. */
-  pet_room = IN_ROOM(ch) + 1;
-
-  if (CMD_IS("list")) {
-    send_to_char(ch, "Available pets are:\r\n");
-    for (pet = world[pet_room].people; pet; pet = pet->next_in_room) {
-      /* No, you can't have the Implementor as a pet if he's in there. */
-      if (!IS_NPC(pet))
-        continue;
-      send_to_char(ch, "%8d - %s\r\n", PET_PRICE(pet), GET_NAME(pet));
-    }
-    return (TRUE);
-  } else if (CMD_IS("buy")) {
-
-    two_arguments(argument, buf, pet_name);
-
-    if (!(pet = get_char_room(buf, NULL, pet_room)) || !IS_NPC(pet)) {
-      send_to_char(ch, "There is no such pet!\r\n");
-      return (TRUE);
-    }
-    if (GET_GOLD(ch) < PET_PRICE(pet)) {
-      send_to_char(ch, "You don't have enough zenni!\r\n");
-      return (TRUE);
-    }
-    GET_GOLD(ch) -= PET_PRICE(pet);
-
-    pet = read_mobile(GET_MOB_RNUM(pet), REAL);
-    GET_EXP(pet) = 0;
-    SET_BIT_AR(AFF_FLAGS(pet), AFF_CHARM);
-
-    if (*pet_name) {
-      snprintf(buf, sizeof(buf), "%s %s", pet->name, pet_name);
-      /* free(pet->name); don't free the prototype! */
-      pet->name = strdup(buf);
-
-      snprintf(buf, sizeof(buf), "%sA small sign on a chain around the neck says 'My name is %s'\r\n",
-	      pet->description, pet_name);
-      /* free(pet->description); don't free the prototype! */
-      pet->description = strdup(buf);
-    }
-    char_to_room(pet, IN_ROOM(ch));
-    add_follower(pet, ch);
-    pet->master_id = GET_IDNUM(ch);
-
-    /* Be certain that pets can't get/carry/use/wield/wear items */
-    IS_CARRYING_W(pet) = 1000;
-    IS_CARRYING_N(pet) = 100;
-
-    send_to_char(ch, "May you enjoy your pet.\r\n");
-    act("$n buys $N as a pet.", FALSE, ch, 0, pet, TO_ROOM);
-
-    return (TRUE);
-  }
-
-  /* All commands except list and buy */
-  return (FALSE);
-}
 
 SPECIAL(auction)
 {
-  room_rnum auct_room;
+  struct room_data *auct_room = room_by_id(80);
   struct obj_data *obj, *next_obj, *obj2 = NULL;
   int found = FALSE;
 
   /* Gross. */
-  auct_room = real_room(80);
 
   if (CMD_IS("cancel")) {
 
-    for (obj = world[auct_room].contents; obj; obj = next_obj) {
+    for (obj = auct_room->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
      if (obj && GET_AUCTER(obj) == GET_ID(ch)) {
       obj2 = obj;
@@ -924,7 +858,7 @@ SPECIAL(auction)
     struct descriptor_data *d;
     int founded = FALSE;
 
-    for (obj = world[auct_room].contents; obj; obj = next_obj) {
+    for (obj = auct_room->contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
      if (obj && GET_CURBID(obj) == GET_ID(ch)) {
       obj2 = obj;

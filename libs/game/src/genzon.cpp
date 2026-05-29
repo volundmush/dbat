@@ -198,13 +198,13 @@ if (vzone_num < 0) {
   if (vzone_num > zone_table[top_of_zone_table].number)
     rznum = top_of_zone_table + 1;
   else {
-    int j, room;
+    int j;
     for (i = top_of_zone_table + 1; i > 0 && vzone_num < zone_table[i - 1].number; i--) {
       zone_table[i] = zone_table[i - 1];
       for (j = zone_table[i].bot; j <= zone_table[i].top; j++)
-        if ((room = real_room(j)) != NOWHERE)
-          world[room].zone++;
-    } 
+        if (auto room = room_by_id(j); room)
+          room->zone++;
+    }
     rznum = i;
   }
   zone = &zone_table[rznum];

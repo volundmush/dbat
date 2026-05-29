@@ -167,7 +167,7 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
   for (i = character_list; i; i = i->next) {
     if (IS_NPC(i))
       continue;
-    if (inroom == FIND_CHAR_ROOM && IN_ROOM(i) != IN_ROOM(ch))
+    if (inroom == FIND_CHAR_ROOM && char_room_get(i) != char_room_get(ch))
       continue;
     if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
      if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
@@ -292,7 +292,7 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
     return get_player_vis(ch, name, NULL, 0);
 
   for (i = character_list; i && *number; i = i->next) {
-    if (IN_ROOM(ch) == IN_ROOM(i))
+    if (char_room_get(ch) == char_room_get(i))
       continue;
     if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
      if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {

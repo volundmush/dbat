@@ -20,7 +20,7 @@ void extract_char_final(struct char_data *ch)
   struct obj_data *obj;
   int i;
 
-  if (IN_ROOM(ch) == NOWHERE) {
+  if (char_room_get(ch) == NULL) {
     log("SYSERR: NOWHERE extracting char %s. (%s, extract_char_final)",
         GET_NAME(ch), __FILE__);
     exit(1);
@@ -177,13 +177,13 @@ void extract_char_final(struct char_data *ch)
   while (ch->carrying) {
     obj = ch->carrying;
     obj_from_char(obj);
-    obj_to_room(obj, IN_ROOM(ch));
+    obj_to_room(obj, char_room_get(ch));
   }
 
   /* transfer equipment to room, if any */
   for (i = 0; i < NUM_WEARS; i++)
     if (GET_EQ(ch, i))
-      obj_to_room(unequip_char(ch, i), IN_ROOM(ch));
+      obj_to_room(unequip_char(ch, i), char_room_get(ch));
 
   if (FIGHTING(ch))
     stop_fighting(ch);
@@ -250,7 +250,7 @@ void extract_char(struct char_data *ch)
 
   for (foll = ch->followers; foll; foll = foll->next) {
     if (IS_NPC(foll->follower) && AFF_FLAGGED(foll->follower, AFF_CHARM) &&
-        (IN_ROOM(foll->follower) == IN_ROOM(ch) || IN_ROOM(ch) == 1)) {
+        (char_room_get(foll->follower) == char_room_get(ch) || char_room_vnum_get(ch) == 1)) {
       /* transfer objects to char, if any */
       while (foll->follower->carrying) {
         obj = foll->follower->carrying;
@@ -282,7 +282,7 @@ void extract_obj(struct obj_data *obj)
   if (obj->worn_by != NULL)
     if (unequip_char(obj->worn_by, obj->worn_on) != obj)
       log("SYSERR: Inconsistent worn_by and worn_on pointers!!");
-  if (IN_ROOM(obj) != NOWHERE)
+  if (obj_room_get(obj) != NULL)
     obj_from_room(obj);
   else if (obj->carried_by)
     obj_from_char(obj);

@@ -81,7 +81,7 @@ char *getmapchar(struct room_data *room, struct char_data * ch, struct room_data
 
   struct room_data *rm = room;
 
-  if (room->number == GET_RADAR1(ch) || room->number == real_room(GET_RADAR2(ch)) || room->number == real_room(GET_RADAR3(ch))) {
+  if (room == room_by_id(GET_RADAR1(ch)) || room == room_by_id(GET_RADAR2(ch)) || room == room_by_id(GET_RADAR3(ch))) {
    if (there) {
     sprintf(mapchar, "@WB@RX");
    } else if (enemy == TRUE) {

@@ -156,8 +156,7 @@ pub export fn char_vnum_set(ch: *cdb.char_data, vnum: cdb.mob_vnum) void {
 }
 
 pub export fn char_room_get(ch: *cdb.char_data) [*c]cdb.room_data {
-    if (!validRoomRnum(ch.in_room)) return null;
-    return &cdb.world[@intCast(ch.in_room)];
+    return cdb.room_by_id(ch.in_room);
 }
 
 pub export fn char_room_vnum_get(ch: *cdb.char_data) cdb.room_vnum {

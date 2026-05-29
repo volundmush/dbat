@@ -39,8 +39,8 @@ int16_t exit_info_get(struct room_direction_data *exit);
 void exit_info_set(struct room_direction_data *exit, int16_t info);
 obj_vnum exit_key_get(struct room_direction_data *exit);
 void exit_key_set(struct room_direction_data *exit, obj_vnum key);
-room_vnum exit_to_room_get(struct room_direction_data *exit);
-void exit_to_room_set(struct room_direction_data *exit, room_vnum to_room);
+room_vnum exit_to_room_vnum_get(struct room_direction_data *exit);
+void exit_to_room_vnum_set(struct room_direction_data *exit, room_vnum to_room);
 int exit_dclock_get(struct room_direction_data *exit);
 void exit_dclock_set(struct room_direction_data *exit, int dclock);
 int exit_dchide_get(struct room_direction_data *exit);
@@ -142,6 +142,8 @@ extern struct htree_node *room_htree;
 
 room_rnum real_room(room_vnum vnum);
 struct room_data *room_by_id(room_vnum vnum);
+
+room_vnum room_vnum_check(room_vnum vnum);
 
 #ifdef __cplusplus
 }

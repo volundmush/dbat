@@ -207,7 +207,7 @@ void script_damage(char_data *vict, int dam);
 int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *namelist[]);
 
 /* from dg_objcmd.c */
-room_rnum obj_room(obj_data *obj);
+struct room_data *obj_room(obj_data *obj);
 
 /* defines for valid_dg_target */
 #define DG_ALLOW_GODS (1<<0)

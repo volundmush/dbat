@@ -103,7 +103,7 @@ void mob_log(char_data *mob, const char *format, ...)
 /* prints the argument to all the rooms aroud the mobile */
 ACMD(do_masound)
 {
-    room_rnum was_in_room;
+    struct room_data *was_in_room;
     int  door;
 
     if (!MOB_OR_IMPL(ch))
@@ -123,20 +123,19 @@ ACMD(do_masound)
 
     skip_spaces(&argument);
 
-    was_in_room = IN_ROOM(ch);
+    was_in_room = char_room_get(ch);
     for (door = 0; door < NUM_OF_DIRS; door++)
     {
-        struct room_direction_data *newexit;
+      auto ex = char_exit_dir(ch, door);
+      if(!ex) continue;
+      auto dest = exit_dest_get(ex);
+      if(!dest) continue;
 
-        if (((newexit = world[was_in_room].dir_option[door]) != NULL) &&
-            newexit->to_room != NOWHERE && newexit->to_room != was_in_room)
-        {
-            IN_ROOM(ch) = newexit->to_room;
-            sub_write(argument, ch, TRUE, TO_ROOM);
-        }
+      IN_ROOM(ch) = dest->number;
+      sub_write(argument, ch, TRUE, TO_ROOM);
     }
 
-    IN_ROOM(ch) = was_in_room;
+    IN_ROOM(ch) = room_vnum_get(was_in_room);
 }
 
 /* Heals a stat of the mob */
@@ -456,11 +455,11 @@ ACMD(do_mload)
 
      /* load mob to target room - Jamie Nelson, April 13 2004 */
     if (is_abbrev(arg1, "mob")) {
-      room_rnum rnum;
+      struct room_data *room;
       if (!target || !*target) {
-        rnum = IN_ROOM(ch);
+        room = char_room_get(ch);
       } else {
-        if (!isdigit(*target) || (rnum = real_room(atoi(target))) == NOWHERE) {
+        if (!isdigit(*target) || (room = room_by_id(atoi(target))) == NULL) {
           mob_log(ch, "mload: room target vnum doesn't exist "
                       "(loading mob vnum %d to room %s)", number, target);
           return;
@@ -470,7 +469,7 @@ ACMD(do_mload)
         mob_log(ch, "mload: bad mob vnum");
         return;
       }
-      char_to_room(mob, rnum);
+      char_to_room(mob, room);
       if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
         char buf[MAX_INPUT_LENGTH];
         sprintf(buf, "%c%d", UID_CHAR, GET_ID(mob));
@@ -496,7 +495,7 @@ ACMD(do_mload)
         if (CAN_WEAR(object, ITEM_WEAR_TAKE)) {
             obj_to_char(object, ch);
         } else {
-            obj_to_room(object, IN_ROOM(ch));
+            obj_to_room(object, char_room_get(ch));
         }
         load_otrigger(object);
         return;
@@ -524,7 +523,7 @@ ACMD(do_mload)
       }
       /* neither char nor container found - just dump it in room */
       add_unique_id(object);
-      obj_to_room(object, IN_ROOM(ch));
+      obj_to_room(object, char_room_get(ch));
       load_otrigger(object);
       return;
     }
@@ -611,7 +610,7 @@ ACMD(do_mpurge)
 ACMD(do_mgoto)
 {
     char arg[MAX_INPUT_LENGTH];
-    room_rnum location;
+    struct room_data *location;
 
     if (!MOB_OR_IMPL(ch)) {
         send_to_char(ch, "Huh?!?\r\n");
@@ -628,10 +627,10 @@ ACMD(do_mgoto)
         return;
     }
 
-    if ((location = find_target_room(ch, arg)) == NOWHERE && GET_MOB_VNUM(ch) != 3) {
+    if ((location = find_target_room(ch, arg)) == NULL && GET_MOB_VNUM(ch) != 3) {
         mob_log(ch, "mgoto: invalid location");
         return;
-    } else if ((location = find_target_room(ch, arg)) == NOWHERE) {
+    } else if ((location = find_target_room(ch, arg)) == NULL) {
      return;
     }
 
@@ -648,7 +647,7 @@ ACMD(do_mgoto)
 ACMD(do_mat)
 {
     char arg[MAX_INPUT_LENGTH];
-    room_rnum location, original;
+    struct room_data *location, *original;
 
     if (!MOB_OR_IMPL(ch)) {
         send_to_char(ch, "Huh?!?\r\n");
@@ -665,18 +664,18 @@ ACMD(do_mat)
         return;
     }
 
-    if ((location = find_target_room(ch, arg)) == NOWHERE) {
+    if ((location = find_target_room(ch, arg)) == NULL) {
         mob_log(ch, "mat: invalid location");
         return;
     }
 
-    original = IN_ROOM(ch);
+    original = char_room_get(ch);
     char_from_room(ch);
     char_to_room(ch, location);
     command_interpreter(ch, argument);
 
     /* See if 'ch' still exists before continuing! Handles 'at XXXX quit' case. */
-    if (IN_ROOM(ch) == location) {
+    if (char_room_get(ch) == location) {
         char_from_room(ch);
         char_to_room(ch, original);
     }
@@ -690,7 +689,7 @@ ACMD(do_mat)
 ACMD(do_mteleport)
 {
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-  room_rnum target;
+  struct room_data *target;
   char_data *vict, *next_ch;
 
   if (!MOB_OR_IMPL(ch)) {
@@ -710,13 +709,13 @@ ACMD(do_mteleport)
 
   target = find_target_room(ch, arg2);
 
-  if (target == NOWHERE) {
+  if (target == NULL) {
     mob_log(ch, "mteleport target is an invalid room");
     return;
   }
 
   if (!strcasecmp(arg1, "all")) {
-    if (target == IN_ROOM(ch)) {
+    if (target == char_room_get(ch)) {
       mob_log(ch, "mteleport all target is itself");
       return;
     }
@@ -818,7 +817,7 @@ ACMD(do_mforce)
           if(!i->character) continue;
           
             if ((i->character != ch) && !i->connected &&
-                (IN_ROOM(i->character) == IN_ROOM(ch))) {
+                (char_room_get(i->character) == char_room_get(ch))) {
                 vch = i->character;
                 if (GET_LEVEL(vch) < GET_LEVEL(ch) && CAN_SEE(ch, vch) &&
                     valid_dg_target(vch, 0)) {
@@ -1008,7 +1007,7 @@ ACMD(do_mtransform)
     }
 
     /* put the mob in the same room as ch so extract will work */
-    char_to_room(m, IN_ROOM(ch));
+    char_to_room(m, char_room_get(ch));
 
     memcpy(&tmpmob, m, sizeof(*m));
 
@@ -1149,7 +1148,7 @@ ACMD(do_mdoor)
             strcpy(newexit->keyword, value);
             break;
         case 5:  /* room        */
-            if ((to_room = real_room(atoi(value))) != NOWHERE)
+            if ((to_room = room_vnum_check(atoi(value))) != NOWHERE)
                 newexit->to_room = to_room;
             else
                 mob_log(ch, "mdoor: invalid door target");

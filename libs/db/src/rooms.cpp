@@ -48,3 +48,8 @@ struct room_data *room_by_id(room_vnum vnum)
 
   return &world[rnum];
 }
+
+room_vnum room_vnum_check(room_vnum vnum)
+{
+    return room_by_id(vnum) ? vnum : NOWHERE;
+}
