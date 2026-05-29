@@ -349,7 +349,6 @@ fn importAll(folder: []const u8) !void {
     try importZones(zones);
     try importRooms(rooms);
     try importRoomExits(exits);
-    renumberRoomExits();
     try importDgScripts(dgscripts);
     try importNpcPrototypes(npc_prototypes);
     try importObjPrototypes(obj_prototypes);
@@ -599,19 +598,6 @@ fn importGuilds(folder: []const u8) !void {
             return err;
         };
         progress.tick(index);
-    }
-}
-
-fn renumberRoomExits() void {
-    if (cdb.world == null or cdb.top_of_world < 0) return;
-    var room_index: usize = 0;
-    while (room_index <= @as(usize, @intCast(cdb.top_of_world))) : (room_index += 1) {
-        const room = ptrAt(cdb.room_data, cdb.world, room_index);
-        for (0..cdb.NUM_OF_DIRS) |dir| {
-            const exit = room.dir_option[dir];
-            if (exit == null) continue;
-            if (exit.*.to_room != cdb.NOWHERE) exit.*.to_room = cdb.real_room(exit.*.to_room);
-        }
     }
 }
 

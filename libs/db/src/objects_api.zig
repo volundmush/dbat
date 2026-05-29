@@ -42,7 +42,7 @@ pub export fn obj_room_vnum_get(obj: *cdb.obj_data) cdb.room_vnum {
 }
 
 pub export fn obj_room_vnum_set(obj: *cdb.obj_data, vnum: cdb.room_vnum) void {
-    obj.in_room = cdb.real_room(vnum);
+    obj.in_room = cdb.room_vnum_check(vnum);
 }
 
 pub export fn obj_room_loaded_get(obj: *cdb.obj_data) cdb.room_vnum {

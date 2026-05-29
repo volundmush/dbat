@@ -17,12 +17,12 @@
 
 
 /* pre_reset is called before a zone is reset - returns TRUE to prevent a normal reset of the zone */ 
-bool pre_reset(zone_vnum znum) 
+bool pre_reset(struct zone_data *zone) 
 { 
   /* By default, a normal zone reset follows this function */ 
   bool ret_value = PERFORM_NORMAL_RESET; 
 
-  switch(znum) 
+  switch(zone->number) 
   { 
     /* Gauntlet zone reset type determined by players in the zone */ 
     case RESET_GAUNTLET:      ret_value = prereset_gauntlet_zone(); 
@@ -37,9 +37,9 @@ bool pre_reset(zone_vnum znum)
 
 
 /* post_reset is called after a normal zone reset */ 
-void post_reset(zone_vnum znum) 
+void post_reset(struct zone_data *zone) 
 { 
-  switch(znum) 
+  switch(zone->number) 
   { 
     default: 
       break; 

@@ -3130,7 +3130,7 @@ ACMD(do_zreset)
       {
         if (i < 200)
         {
-          reset_zone(i);
+          reset_zone(&zone_table[i]);
         }
       }
       send_to_char(ch, "Reset world.\r\n");
@@ -3151,7 +3151,7 @@ ACMD(do_zreset)
   if (i <= top_of_zone_table && (can_edit_zone(ch, i) || GET_ADMLEVEL(ch) > ADMLVL_IMMORT))
   {
     struct zone_data *zi = &zone_table[i];
-    reset_zone(i);
+    reset_zone(zi);
     send_to_char(ch, "Reset zone #%d: %s.\r\n", zi->number, zi->name);
     mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s reset zone %d (%s)", GET_NAME(ch), zi->number, zi->name);
     log_imm_action("RESET: %s has reset zone #%d: %s.", GET_NAME(ch), zi->number, zi->name);

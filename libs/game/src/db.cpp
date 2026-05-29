@@ -137,7 +137,7 @@ static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr);
 static void get_one_line(FILE *fl, char *buf);
 static void check_start_rooms(void);
 static void renum_zone_table(void);
-static void log_zone_error(zone_rnum zone, int cmd_no, const char *message);
+static void log_zone_error(struct zone_data *zone, int cmd_no, const char *message);
 static void reset_time(void);
 static int suntzu_armor_convert(struct obj_data *obj);
 static int suntzu_weapon_convert(int wp_type);
@@ -1023,7 +1023,7 @@ void boot_db(void)
     struct zone_data *zone = &zone_table[i];
     log("Resetting #%d: %s (rooms %d-%d).", zone->number,
 	    zone->name, zone->bot, zone->top);
-    reset_zone(i);
+    reset_zone(zone);
   }
 
   reset_q.head = reset_q.tail = NULL;
@@ -1793,8 +1793,6 @@ static void check_start_rooms(void)
 
 }
 
-#define ZCMD2 zone_table[zone].cmd[cmd_no]
-
 /*
  * "resulve vnums into rnums in the zone reset tables"
  *
@@ -1809,60 +1807,70 @@ static void check_start_rooms(void)
 static void renum_zone_table(void)
 {
   int cmd_no;
-  room_rnum a, b, c, olda, oldb, oldc;
-  zone_rnum zone;
+  room_rnum a, b, c, olda, oldb, oldc, iter;
+  struct zone_data *zone;
   char buf[128];
 
-  for (zone = 0; zone <= top_of_zone_table; zone++)
-    for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
+  for (iter = 0; iter <= top_of_zone_table; iter++)
+  {
+    zone = &zone_table[iter];
+    struct reset_com *cmd = &zone->cmd[cmd_no];
+    for (cmd_no = 0; cmd->command != 'S'; cmd_no++)
+    {
+      cmd = &zone->cmd[cmd_no];
       a = b = c = 0;
-      olda = ZCMD2.arg1;
-      oldb = ZCMD2.arg2;
-      oldc = ZCMD2.arg3;
-      switch (ZCMD2.command) {
+      olda = cmd->arg1;
+      oldb = cmd->arg2;
+      oldc = cmd->arg3;
+      switch (cmd->command)
+      {
       case 'M':
-	a = ZCMD2.arg1 = real_mobile(ZCMD2.arg1);
-	c = ZCMD2.arg3 = real_room(ZCMD2.arg3);
-	break;
+        a = cmd->arg1 = real_mobile(cmd->arg1);
+        c = cmd->arg3 = real_room(cmd->arg3);
+        break;
       case 'O':
-	a = ZCMD2.arg1 = real_object(ZCMD2.arg1);
-	if (ZCMD2.arg3 != NOWHERE)
-	  c = ZCMD2.arg3 = real_room(ZCMD2.arg3);
-	break;
+        a = cmd->arg1 = real_object(cmd->arg1);
+        if (cmd->arg3 != NOWHERE)
+          c = cmd->arg3 = real_room(cmd->arg3);
+        break;
       case 'G':
-	a = ZCMD2.arg1 = real_object(ZCMD2.arg1);
-	break;
+        a = cmd->arg1 = real_object(cmd->arg1);
+        break;
       case 'E':
-	a = ZCMD2.arg1 = real_object(ZCMD2.arg1);
-	break;
+        a = cmd->arg1 = real_object(cmd->arg1);
+        break;
       case 'P':
-	a = ZCMD2.arg1 = real_object(ZCMD2.arg1);
-	c = ZCMD2.arg3 = real_object(ZCMD2.arg3);
-	break;
+        a = cmd->arg1 = real_object(cmd->arg1);
+        c = cmd->arg3 = real_object(cmd->arg3);
+        break;
       case 'D':
-	a = ZCMD2.arg1 = real_room(ZCMD2.arg1);
-	break;
+        a = cmd->arg1 = real_room(cmd->arg1);
+        break;
       case 'R': /* rem obj from room */
-        a = ZCMD2.arg1 = real_room(ZCMD2.arg1);
-	b = ZCMD2.arg2 = real_object(ZCMD2.arg2);
+        a = cmd->arg1 = real_room(cmd->arg1);
+        b = cmd->arg2 = real_object(cmd->arg2);
         break;
       case 'T': /* a trigger */
-        b = ZCMD2.arg2 = real_trigger(ZCMD2.arg2);
-        c = ZCMD2.arg3 = real_room(ZCMD2.arg3);
+        b = cmd->arg2 = real_trigger(cmd->arg2);
+        c = cmd->arg3 = real_room(cmd->arg3);
         break;
       case 'V': /* trigger variable assignment */
-        b = ZCMD2.arg3 = real_room(ZCMD2.arg3);
+        b = cmd->arg3 = real_room(cmd->arg3);
         break;
       }
-      if (a == NOWHERE || b == NOWHERE || c == NOWHERE) {
-	if (!mini_mud) {
-	  snprintf(buf, sizeof(buf), "Invalid vnum %d, cmd disabled",
-			 a == NOWHERE ? olda : b == NOWHERE ? oldb : oldc);
-	  log_zone_error(zone, cmd_no, buf);
-	}
-	ZCMD2.command = '*';
+      if (a == NOWHERE || b == NOWHERE || c == NOWHERE)
+      {
+        if (!mini_mud)
+        {
+          snprintf(buf, sizeof(buf), "Invalid vnum %d, cmd disabled",
+                   a == NOWHERE ? olda : b == NOWHERE ? oldb
+                                                      : oldc);
+          log_zone_error(zone, cmd_no, buf);
+        }
+        cmd->command = '*';
       }
     }
+  }
 }
 
 static void mob_autobalance(struct char_data *ch)
@@ -2661,17 +2669,16 @@ static char *parse_object(FILE *obj_f, int nr)
   return line;
 }
 
-
-#define Z	zone_table[zone]
-
 /* load the zone table and command tables */
 static void load_zones(FILE *fl, char *zonename)
 {
   static zone_rnum zone = 0;
-  int cmd_no, num_of_cmds = 0, line_num = 0, tmp, error, arg_num, version = 1;
+  int cmd_no = 0, num_of_cmds = 0, line_num = 0, tmp, error, arg_num, version = 1;
   char *ptr, buf[READ_SIZE], zname[READ_SIZE], buf2[MAX_STRING_LENGTH];
   int zone_fix = FALSE;
   char t1[80], t2[80], line[MAX_STRING_LENGTH];
+
+  struct zone_data *z = &zone_table[zone];
 
   strlcpy(zname, zonename, sizeof(zname));
 
@@ -2689,147 +2696,175 @@ static void load_zones(FILE *fl, char *zonename)
 
   rewind(fl);
 
-  if (num_of_cmds == 0) {
+  if (num_of_cmds == 0)
+  {
     log("SYSERR: %s is empty!", zname);
     exit(1);
-  } else
-    CREATE(Z.cmd, struct reset_com, num_of_cmds);
+  }
+  else
+    CREATE(z->cmd, struct reset_com, num_of_cmds);
 
   line_num += get_line(fl, buf);
 
-  if(*buf=='@') {
-    if(sscanf(buf,"@Version: %d", &version)!=1) {
+  if (*buf == '@')
+  {
+    if (sscanf(buf, "@Version: %d", &version) != 1)
+    {
       log("SYSERR: Format error in %s (version)", zname);
       log("SYSERR: ...Line: %s", line);
       exit(1);
     }
-    line_num+=get_line(fl,buf);
+    line_num += get_line(fl, buf);
   }
 
-  if (sscanf(buf, "#%hd", &Z.number) != 1) {
+  if (sscanf(buf, "#%hd", &z->number) != 1)
+  {
     log("SYSERR: Format error in %s, line %d", zname, line_num);
     exit(1);
   }
-  snprintf(buf2, sizeof(buf2), "beginning of zone #%d", Z.number);
+  snprintf(buf2, sizeof(buf2), "beginning of zone #%d", z->number);
 
   line_num += get_line(fl, buf);
-  if ((ptr = strchr(buf, '~')) != NULL)	/* take off the '~' if it's there */
+  if ((ptr = strchr(buf, '~')) != NULL) /* take off the '~' if it's there */
     *ptr = '\0';
-  Z.builders = strdup(buf);
-  
-  line_num += get_line(fl, buf);
-  if ((ptr = strchr(buf, '~')) != NULL)	/* take off the '~' if it's there */
-    *ptr = '\0';
-  Z.name = strdup(buf);
+  z->builders = strdup(buf);
 
   line_num += get_line(fl, buf);
-  if (version >= 2) {
+  if ((ptr = strchr(buf, '~')) != NULL) /* take off the '~' if it's there */
+    *ptr = '\0';
+  z->name = strdup(buf);
+
+  line_num += get_line(fl, buf);
+  if (version >= 2)
+  {
 
     char zbuf1[MAX_STRING_LENGTH];
     char zbuf2[MAX_STRING_LENGTH];
     char zbuf3[MAX_STRING_LENGTH];
     char zbuf4[MAX_STRING_LENGTH];
 
-    if  (sscanf(buf, " %hd %hd %d %d %s %s %s %s %d %d", &Z.bot, &Z.top, &Z.lifespan,
-      &Z.reset_mode, zbuf1, zbuf2, zbuf3, zbuf4, &Z.min_level, &Z.max_level) != 10) {
+    if (sscanf(buf, " %hd %hd %d %d %s %s %s %s %d %d", &z->bot, &z->top, &z->lifespan,
+               &z->reset_mode, zbuf1, zbuf2, zbuf3, zbuf4, &z->min_level, &z->max_level) != 10)
+    {
       log("SYSERR: Format error in 10-constant line of %s", zname);
       exit(1);
     }
 
-    Z.zone_flags[0] = asciiflag_conv(zbuf1);
-    Z.zone_flags[1] = asciiflag_conv(zbuf2);
-    Z.zone_flags[2] = asciiflag_conv(zbuf3);
-    Z.zone_flags[3] = asciiflag_conv(zbuf4);
-
-  } else if (sscanf(buf, " %hd %hd %d %d ", &Z.bot, &Z.top, &Z.lifespan, &Z.reset_mode) != 4) {
+    z->zone_flags[0] = asciiflag_conv(zbuf1);
+    z->zone_flags[1] = asciiflag_conv(zbuf2);
+    z->zone_flags[2] = asciiflag_conv(zbuf3);
+    z->zone_flags[3] = asciiflag_conv(zbuf4);
+  }
+  else if (sscanf(buf, " %hd %hd %d %d ", &z->bot, &z->top, &z->lifespan, &z->reset_mode) != 4)
+  {
     /*
      * This may be due to the fact that the zone has no builder.  So, we just attempt
      * to fix this by copying the previous 2 last reads into this variable and the
      * last one.
      */
     log("SYSERR: Format error in numeric constant line of %s, attempting to fix.", zname);
-    if (sscanf(Z.name, " %hd %hd %d %d ", &Z.bot, &Z.top, &Z.lifespan, &Z.reset_mode) != 4) {
+    if (sscanf(z->name, " %hd %hd %d %d ", &z->bot, &z->top, &z->lifespan, &z->reset_mode) != 4)
+    {
       log("SYSERR: Could not fix previous error, aborting game.");
-    exit(1);
-    } else {
-      free(Z.name);
-      Z.name = strdup(Z.builders);
-      free(Z.builders);
-      Z.builders = strdup("None.");
+      exit(1);
+    }
+    else
+    {
+      free(z->name);
+      z->name = strdup(z->builders);
+      free(z->builders);
+      z->builders = strdup("None.");
       zone_fix = TRUE;
     }
   }
-  if (Z.bot > Z.top) {
-    log("SYSERR: Zone %d bottom (%d) > top (%d).", Z.number, Z.bot, Z.top);
+  if (z->bot > z->top)
+  {
+    log("SYSERR: Zone %d bottom (%d) > top (%d).", z->number, z->bot, z->top);
     exit(1);
   }
 
   cmd_no = 0;
 
-  for (;;) {
+  for (;;)
+  {
     /* skip reading one line if we fixed above (line is correct already) */
-    if (zone_fix != TRUE) {
-    if ((tmp = get_line(fl, buf)) == 0) {
-      log("SYSERR: Format error in %s - premature end of file", zname);
-      exit(1);
+    if (zone_fix != TRUE)
+    {
+      if ((tmp = get_line(fl, buf)) == 0)
+      {
+        log("SYSERR: Format error in %s - premature end of file", zname);
+        exit(1);
+      }
     }
-    } else
+    else
       zone_fix = FALSE;
-    
+
     line_num += tmp;
     ptr = buf;
     skip_spaces(&ptr);
 
-    if ((ZCMD2.command = *ptr) == '*')
+    struct reset_com *cmd = &z->cmd[cmd_no];
+
+    if ((cmd->command = *ptr) == '*')
       continue;
 
     ptr++;
 
-    if (ZCMD2.command == 'S' || ZCMD2.command == '$') {
-      ZCMD2.command = 'S';
+    if (cmd->command == 'S' || cmd->command == '$')
+    {
+      cmd->command = 'S';
       break;
     }
     error = 0;
-    if (strchr("MOEPDTVG", ZCMD2.command) == nullptr) {	/* a 4-arg command */
-      if (sscanf(ptr, " %d %d %d %d ", &tmp, &ZCMD2.arg1, &ZCMD2.arg2, &ZCMD2.arg3) != 4)
-	error = 1;
-    } else if (ZCMD2.command=='V') { /* a string-arg command */
-      if (sscanf(ptr, " %d %d %d %d %d %d %79s %79[^\f\n\r\t\v]", &tmp, &ZCMD2.arg1, &ZCMD2.arg2, &ZCMD2.arg3, &ZCMD2.arg4, &ZCMD2.arg5, t1, t2) != 8) 
-      error = 1;
-      else {
-        ZCMD2.sarg1 = strdup(t1);
-        ZCMD2.sarg2 = strdup(t2);
+    if (strchr("MOEPDTVG", cmd->command) == nullptr)
+    { /* a 4-arg command */
+      if (sscanf(ptr, " %d %d %d %d ", &tmp, &cmd->arg1, &cmd->arg2, &cmd->arg3) != 4)
+        error = 1;
+    }
+    else if (cmd->command == 'V')
+    { /* a string-arg command */
+      if (sscanf(ptr, " %d %d %d %d %d %d %79s %79[^\f\n\r\t\v]", &tmp, &cmd->arg1, &cmd->arg2, &cmd->arg3, &cmd->arg4, &cmd->arg5, t1, t2) != 8)
+        error = 1;
+      else
+      {
+        cmd->sarg1 = strdup(t1);
+        cmd->sarg2 = strdup(t2);
       }
-    } else {
-      if ((arg_num = sscanf(ptr, " %d %d %d %d %d %d ", &tmp, &ZCMD2.arg1, &ZCMD2.arg2, &ZCMD2.arg3, &ZCMD2.arg4, &ZCMD2.arg5)) != 6){
-        if (arg_num != 5) {
-	error = 1;
-        } else {
-          ZCMD2.arg5 = 0;
+    }
+    else
+    {
+      if ((arg_num = sscanf(ptr, " %d %d %d %d %d %d ", &tmp, &cmd->arg1, &cmd->arg2, &cmd->arg3, &cmd->arg4, &cmd->arg5)) != 6)
+      {
+        if (arg_num != 5)
+        {
+          error = 1;
         }
-    }
+        else
+        {
+          cmd->arg5 = 0;
+        }
+      }
     }
 
-    ZCMD2.if_flag = tmp;
+    cmd->if_flag = tmp;
 
-    if (error) {
+    if (error)
+    {
       log("SYSERR: Format error in %s, line %d: '%s'", zname, line_num, buf);
       exit(1);
     }
-    ZCMD2.line = line_num;
+    cmd->line = line_num;
     cmd_no++;
   }
 
-  if (num_of_cmds != cmd_no + 1) {
+  if (num_of_cmds != cmd_no + 1)
+  {
     log("SYSERR: Zone command count mismatch for %s. Estimated: %d, Actual: %d", zname, num_of_cmds, cmd_no + 1);
     exit(1);
   }
 
   top_of_zone_table = zone++;
 }
-
-#undef Z
-
 
 static void get_one_line(FILE *fl, char *buf)
 {
@@ -3952,7 +3987,7 @@ void zone_update(void)
     if (zone->reset_mode == 2 ||
         is_empty(update_u->zone_to_reset))
     {
-      reset_zone(update_u->zone_to_reset);
+      reset_zone(&zone_table[update_u->zone_to_reset]);
       mudlog(CMP, ADMLVL_GOD, FALSE, "Auto zone reset: %s (Zone %d)",
              zone->name, zone->number);
       /* dequeue */
@@ -3976,20 +4011,21 @@ void zone_update(void)
   }
 }
 
-static void log_zone_error(zone_rnum zone, int cmd_no, const char *message)
+static void log_zone_error(struct zone_data* zone, int cmd_no, const char *message)
 {
   mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: zone file: %s", message);
+  struct reset_com *cmd = &zone->cmd[cmd_no];
   mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: ...offending cmd: '%c' cmd in zone #%d, line %d",
-	ZCMD2.command, zone_table[zone].number, ZCMD2.line);
+	cmd->command, zone->number, cmd->line);
 }
 
 #define ZONE_ERROR(message) \
 	{ log_zone_error(zone, cmd_no, message); last_cmd = 0; }
 
 /* execute the reset command table of a given zone */
-void reset_zone(zone_rnum zone)
+void reset_zone(struct zone_data *zone)
 {
-  int cmd_no, last_cmd = 0;
+  int cmd_no = 0, last_cmd = 0;
   struct char_data *mob = NULL;
   struct obj_data *obj, *obj_to;
   room_vnum rvnum;
@@ -3999,13 +4035,15 @@ void reset_zone(zone_rnum zone)
   int mob_load = FALSE; /* ### */
   int obj_load = FALSE; /* ### */
 
- if (pre_reset(zone_table[zone].number) == FALSE) {
-  for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
+ if (!pre_reset(zone)) {
+  struct reset_com *cmd = &zone->cmd[0];
+  for (cmd_no = 0; cmd->command != 'S'; cmd_no++) {
+    cmd = &zone->cmd[cmd_no];
 
-    if (ZCMD2.if_flag && !last_cmd && !mob_load && !obj_load)
+    if (cmd->if_flag && !last_cmd && !mob_load && !obj_load)
       continue;
 
-     if (!ZCMD2.if_flag) { /* ### */
+     if (!cmd->if_flag) { /* ### */
        mob_load = FALSE;
        obj_load = FALSE;
      }
@@ -4015,43 +4053,43 @@ void reset_zone(zone_rnum zone)
      *  the list of commands in load_zone() so that the counting
      *  will still be correct. - ae.
      */
-    switch (ZCMD2.command) {
+    switch (cmd->command) {
     case '*':			/* ignore command */
       last_cmd = 0;
       break;
 
     case 'M':			/* read a mobile */
 
-      if ((mob_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
-           (rand_number(1, 100) >= ZCMD2.arg5)) {
+      if ((mob_index[cmd->arg1].number < cmd->arg2) &&
+           (rand_number(1, 100) >= cmd->arg5)) {
         int room_max = 0;
         struct char_data *i;
-	mob = read_mobile(ZCMD2.arg1, REAL);
+	mob = read_mobile(cmd->arg1, REAL);
 	
 	/* First find out how many mobs of VNUM are in the mud with this rooms */
                /* VNUM as a load point for max from room checks. */
        /* Let's only count if room_max is in use.  If left at zero, max_in_mud will handle*/
 
-        if (ZCMD2.arg4 > 0) {
+        if (cmd->arg4 > 0) {
           for (i = character_list; i; i = i->next) {
-            if ((MOB_LOADROOM(i) == GET_ROOM_VNUM(ZCMD2.arg3)) 
+            if ((MOB_LOADROOM(i) == GET_ROOM_VNUM(cmd->arg3)) 
                && (GET_MOB_VNUM(i) == GET_MOB_VNUM(mob))) {
   	      room_max++;
             }
 	  }
 	}
-	char_to_room(mob, &world[ZCMD2.arg3]);
+	char_to_room(mob, &world[cmd->arg3]);
 	
            /* Get rid of it if room_max has been met, ignore room_max if zero */
 
-	if (room_max && (room_max >= ZCMD2.arg4)){
+	if (room_max && (room_max >= cmd->arg4)){
 	   extract_char(mob);
 	   extract_pending_chars();
 	   break;
 	   }
 	
 	   /*  Set the mobs loadroom for room_max checks. */
-	MOB_LOADROOM(mob) = GET_ROOM_VNUM(ZCMD2.arg3);
+	MOB_LOADROOM(mob) = GET_ROOM_VNUM(cmd->arg3);
 	
         load_mtrigger(mob);
         tmob = mob;
@@ -4063,25 +4101,25 @@ void reset_zone(zone_rnum zone)
         break;
 
     case 'O':			/* read an object */
-       if ((obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
-           (rand_number(1, 100) >= ZCMD2.arg5)) {
-	if (ZCMD2.arg3 != NOWHERE) {
+       if ((obj_index[cmd->arg1].number < cmd->arg2) &&
+           (rand_number(1, 100) >= cmd->arg5)) {
+	if (cmd->arg3 != NOWHERE) {
           int room_max = 0;
           struct obj_data *k;
-	  obj = read_object(ZCMD2.arg1, REAL);
+	  obj = read_object(cmd->arg1, REAL);
 	  
 	  	/* First find out how many obj of VNUM are in the mud with this rooms */
                /* VNUM as a load point for max from room checks. */
        /* Let's only count if room_max is in use.  If left at zero, max_in_mud will handle*/
 
-        if (ZCMD2.arg4 > 0) {
+        if (cmd->arg4 > 0) {
           for (k = object_list; k; k = k->next) {
-            if (((OBJ_LOADROOM(k)==GET_ROOM_VNUM(ZCMD2.arg3)) 
-                && (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj))) || (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj) && GET_ROOM_VNUM(ZCMD2.arg3) == obj_room_vnum_get(k))) {
+            if (((OBJ_LOADROOM(k)==GET_ROOM_VNUM(cmd->arg3)) 
+                && (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj))) || (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj) && GET_ROOM_VNUM(cmd->arg3) == obj_room_vnum_get(k))) {
               /*  For objects, lets not count them if they've been removed from the room */
               /*  We'll let max_in_mud handle those. */
                if (obj_room_get(k) == NULL || obj_room_vnum_get(k) 
-                   != GET_ROOM_VNUM(ZCMD2.arg3)) {
+                   != GET_ROOM_VNUM(cmd->arg3)) {
                  continue;
                }
 	       room_max++;
@@ -4090,25 +4128,25 @@ void reset_zone(zone_rnum zone)
         }
 
           add_unique_id(obj);
-	  obj_to_room(obj, &world[ZCMD2.arg3]);
+	  obj_to_room(obj, &world[cmd->arg3]);
 	  
            /* Get rid of it if room_max has been met. */
 
-	  if (room_max && (room_max >= ZCMD2.arg4)){
+	  if (room_max && (room_max >= cmd->arg4)){
 	     extract_obj(obj);
 	     break;
 	     }
 	  
 	  /* Set the loadroom for room_max checks */
 
-	  OBJ_LOADROOM(obj) = GET_ROOM_VNUM(ZCMD2.arg3);
+	  OBJ_LOADROOM(obj) = GET_ROOM_VNUM(cmd->arg3);
 	
 	  last_cmd = 1;
           load_otrigger(obj);
           tobj = obj;
 	  obj_load = TRUE;
 	} else {
-	  obj = read_object(ZCMD2.arg1, REAL);
+	  obj = read_object(cmd->arg1, REAL);
           add_unique_id(obj);
 	  IN_ROOM(obj) = NOWHERE;
 	  last_cmd = 1;
@@ -4121,12 +4159,12 @@ void reset_zone(zone_rnum zone)
       break;
 
     case 'P':			/* object to object */
-       if ((obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
-           obj_load && (rand_number(1, 100) >= ZCMD2.arg5)) {
-	obj = read_object(ZCMD2.arg1, REAL);
-	if (!(obj_to = get_obj_num(ZCMD2.arg3))) {
+       if ((obj_index[cmd->arg1].number < cmd->arg2) &&
+           obj_load && (rand_number(1, 100) >= cmd->arg5)) {
+	obj = read_object(cmd->arg1, REAL);
+	if (!(obj_to = get_obj_num(cmd->arg3))) {
 	  ZONE_ERROR("target obj not found, command disabled");
-	  ZCMD2.command = '*';
+	  cmd->command = '*';
 	  break;
 	}
         add_unique_id(obj);
@@ -4142,12 +4180,12 @@ void reset_zone(zone_rnum zone)
     case 'G':			/* obj_to_char */
       if (!mob) {
 	ZONE_ERROR("attempt to give obj to non-existant mob, command disabled");
-	ZCMD2.command = '*';
+	cmd->command = '*';
 	break;
       }
-      if ((obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
-          mob_load && (rand_number(1, 100) >= ZCMD2.arg5)) {
-	obj = read_object(ZCMD2.arg1, REAL);
+      if ((obj_index[cmd->arg1].number < cmd->arg2) &&
+          mob_load && (rand_number(1, 100) >= cmd->arg5)) {
+	obj = read_object(cmd->arg1, REAL);
         add_unique_id(obj);
 	obj_to_char(obj, mob);
         if (GET_MOB_SPEC(mob) != shop_keeper) {
@@ -4164,21 +4202,21 @@ void reset_zone(zone_rnum zone)
     case 'E':			/* object to equipment list */
       if (!mob) {
 	ZONE_ERROR("trying to equip non-existant mob, command disabled");
-	ZCMD2.command = '*';
+	cmd->command = '*';
 	break;
       }
-      if ((obj_index[ZCMD2.arg1].number < ZCMD2.arg2) &&
-          mob_load && (rand_number(1, 100) >= ZCMD2.arg5)) {
-	if (ZCMD2.arg3 < 0 || ZCMD2.arg3 >= NUM_WEARS) {
+      if ((obj_index[cmd->arg1].number < cmd->arg2) &&
+          mob_load && (rand_number(1, 100) >= cmd->arg5)) {
+	if (cmd->arg3 < 0 || cmd->arg3 >= NUM_WEARS) {
 	  ZONE_ERROR("invalid equipment pos number");
 	} else {
-	  obj = read_object(ZCMD2.arg1, REAL);
+	  obj = read_object(cmd->arg1, REAL);
           add_unique_id(obj);
           IN_ROOM(obj) = IN_ROOM(mob);
           load_otrigger(obj);
-          if (wear_otrigger(obj, mob, ZCMD2.arg3)) {
+          if (wear_otrigger(obj, mob, cmd->arg3)) {
             IN_ROOM(obj) = NOWHERE;
-	    equip_char(mob, obj, ZCMD2.arg3);
+	    equip_char(mob, obj, cmd->arg3);
           } else
             obj_to_char(obj, mob);
             tobj = obj;
@@ -4190,7 +4228,7 @@ void reset_zone(zone_rnum zone)
       break;
 
     case 'R': /* rem obj from room */
-      if ((obj = get_obj_in_list_num(ZCMD2.arg2, world[ZCMD2.arg1].contents)) != NULL)
+      if ((obj = get_obj_in_list_num(cmd->arg2, world[cmd->arg1].contents)) != NULL)
         extract_obj(obj);
         last_cmd = 1;
         tmob = NULL;
@@ -4199,28 +4237,28 @@ void reset_zone(zone_rnum zone)
 
 
     case 'D':			/* set state of door */
-      if (ZCMD2.arg2 < 0 || ZCMD2.arg2 >= NUM_OF_DIRS ||
-	  (world[ZCMD2.arg1].dir_option[ZCMD2.arg2] == NULL)) {
+      if (cmd->arg2 < 0 || cmd->arg2 >= NUM_OF_DIRS ||
+	  (world[cmd->arg1].dir_option[cmd->arg2] == NULL)) {
 	ZONE_ERROR("door does not exist, command disabled");
-	ZCMD2.command = '*';
+	cmd->command = '*';
       } else
-	switch (ZCMD2.arg3) {
+	switch (cmd->arg3) {
 	case 0:
-	  REMOVE_BIT(world[ZCMD2.arg1].dir_option[ZCMD2.arg2]->exit_info,
+	  REMOVE_BIT(world[cmd->arg1].dir_option[cmd->arg2]->exit_info,
 		     EX_LOCKED);
-	  REMOVE_BIT(world[ZCMD2.arg1].dir_option[ZCMD2.arg2]->exit_info,
+	  REMOVE_BIT(world[cmd->arg1].dir_option[cmd->arg2]->exit_info,
 		     EX_CLOSED);
 	  break;
 	case 1:
-	  SET_BIT(world[ZCMD2.arg1].dir_option[ZCMD2.arg2]->exit_info,
+	  SET_BIT(world[cmd->arg1].dir_option[cmd->arg2]->exit_info,
 		  EX_CLOSED);
-	  REMOVE_BIT(world[ZCMD2.arg1].dir_option[ZCMD2.arg2]->exit_info,
+	  REMOVE_BIT(world[cmd->arg1].dir_option[cmd->arg2]->exit_info,
 		     EX_LOCKED);
 	  break;
 	case 2:
-	  SET_BIT(world[ZCMD2.arg1].dir_option[ZCMD2.arg2]->exit_info,
+	  SET_BIT(world[cmd->arg1].dir_option[cmd->arg2]->exit_info,
 		  EX_LOCKED);
-	  SET_BIT(world[ZCMD2.arg1].dir_option[ZCMD2.arg2]->exit_info,
+	  SET_BIT(world[cmd->arg1].dir_option[cmd->arg2]->exit_info,
 		  EX_CLOSED);
 	  break;
 	}
@@ -4230,52 +4268,52 @@ void reset_zone(zone_rnum zone)
       break;
 
     case 'T': /* trigger command */
-      if (ZCMD2.arg1==MOB_TRIGGER && tmob) {
+      if (cmd->arg1==MOB_TRIGGER && tmob) {
         if (!SCRIPT(tmob))
           CREATE(SCRIPT(tmob), struct script_data, 1);
-        add_trigger(SCRIPT(tmob), read_trigger(ZCMD2.arg2), -1);
+        add_trigger(SCRIPT(tmob), read_trigger(cmd->arg2), -1);
         last_cmd = 1;
-      } else if (ZCMD2.arg1==OBJ_TRIGGER && tobj) {
+      } else if (cmd->arg1==OBJ_TRIGGER && tobj) {
         if (!SCRIPT(tobj))
           CREATE(SCRIPT(tobj), struct script_data, 1);
-        add_trigger(SCRIPT(tobj), read_trigger(ZCMD2.arg2), -1);
+        add_trigger(SCRIPT(tobj), read_trigger(cmd->arg2), -1);
         last_cmd = 1;
-      } else if (ZCMD2.arg1==WLD_TRIGGER) {
-        if (ZCMD2.arg3 == NOWHERE || ZCMD2.arg3>top_of_world) {
+      } else if (cmd->arg1==WLD_TRIGGER) {
+        if (cmd->arg3 == NOWHERE || cmd->arg3>top_of_world) {
           ZONE_ERROR("Invalid room number in trigger assignment");
         }
-        if (!world[ZCMD2.arg3].script)
-          CREATE(world[ZCMD2.arg3].script, struct script_data, 1);
-        add_trigger(world[ZCMD2.arg3].script, read_trigger(ZCMD2.arg2), -1);
+        if (!world[cmd->arg3].script)
+          CREATE(world[cmd->arg3].script, struct script_data, 1);
+        add_trigger(world[cmd->arg3].script, read_trigger(cmd->arg2), -1);
         last_cmd = 1;
       }
 
       break;
 
     case 'V':
-      if (ZCMD2.arg1==MOB_TRIGGER && tmob) {
+      if (cmd->arg1==MOB_TRIGGER && tmob) {
         if (!SCRIPT(tmob)) {
           ZONE_ERROR("Attempt to give variable to scriptless mobile");
         } else
-          add_var(&(SCRIPT(tmob)->global_vars), ZCMD2.sarg1, ZCMD2.sarg2,
-                  ZCMD2.arg3);
+          add_var(&(SCRIPT(tmob)->global_vars), cmd->sarg1, cmd->sarg2,
+                  cmd->arg3);
         last_cmd = 1;
-      } else if (ZCMD2.arg1==OBJ_TRIGGER && tobj) {
+      } else if (cmd->arg1==OBJ_TRIGGER && tobj) {
         if (!SCRIPT(tobj)) {
           ZONE_ERROR("Attempt to give variable to scriptless object");
         } else
-          add_var(&(SCRIPT(tobj)->global_vars), ZCMD2.sarg1, ZCMD2.sarg2,
-                  ZCMD2.arg3);
+          add_var(&(SCRIPT(tobj)->global_vars), cmd->sarg1, cmd->sarg2,
+                  cmd->arg3);
         last_cmd = 1;
-      } else if (ZCMD2.arg1==WLD_TRIGGER) {
-        if (ZCMD2.arg3 == NOWHERE || ZCMD2.arg3>top_of_world) {
+      } else if (cmd->arg1==WLD_TRIGGER) {
+        if (cmd->arg3 == NOWHERE || cmd->arg3>top_of_world) {
           ZONE_ERROR("Invalid room number in variable assignment");
         } else {
-          if (!(world[ZCMD2.arg3].script)) {
+          if (!(world[cmd->arg3].script)) {
             ZONE_ERROR("Attempt to give variable to scriptless object");
           } else
-            add_var(&(world[ZCMD2.arg3].script->global_vars),
-                    ZCMD2.sarg1, ZCMD2.sarg2, ZCMD2.arg2);
+            add_var(&(world[cmd->arg3].script->global_vars),
+                    cmd->sarg1, cmd->sarg2, cmd->arg2);
           last_cmd = 1;
         }
       }
@@ -4283,16 +4321,16 @@ void reset_zone(zone_rnum zone)
 
     default:
       ZONE_ERROR("unknown cmd in reset table; cmd disabled");
-      ZCMD2.command = '*';
+      cmd->command = '*';
       break;
     }
   }
 
-  zone_table[zone].age = 0;
+  zone->age = 0;
 
   /* handle reset_wtrigger's */
-  rvnum = zone_table[zone].bot;
-  while (rvnum <= zone_table[zone].top) {
+  rvnum = zone->bot;
+  while (rvnum <= zone->top) {
     struct room_data *room = room_by_id(rvnum);
     if (room) {
      reset_wtrigger(room);
@@ -4346,9 +4384,9 @@ void reset_zone(zone_rnum zone)
   else 
   { 
    /* even if reset is blocked, age should be reset */ 
-   zone_table[zone].age = 0; 
+   zone->age = 0; 
   } 
-  post_reset(zone_table[zone].number);
+  post_reset(zone);
 }
 
 

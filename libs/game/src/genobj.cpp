@@ -27,8 +27,9 @@ obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum)
    */
   if ((newobj->item_number = real_object(ovnum)) != NOTHING)
   {
-    copy_object(&obj_proto[newobj->item_number], newobj);
-    update_objects(&obj_proto[newobj->item_number]);
+    auto proto = obj_proto_by_id(newobj->item_number);
+    copy_object(proto, newobj);
+    update_objects(proto);
     add_to_save_list(znum, SL_OBJ);
     return newobj->item_number;
   }

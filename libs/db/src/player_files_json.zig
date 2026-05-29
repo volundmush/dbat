@@ -115,14 +115,14 @@ fn writeHouseObjectsJson(path: []const u8, room_vnum: cdb.room_vnum) !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
     const allocator = arena.allocator();
-    const room_rnum = cdb.real_room(room_vnum);
-    if (room_rnum == cdb.NOWHERE) return error.RoomNotFound;
+    const room = cdb.room_by_id(room_vnum);
+    if (room == null) return error.RoomNotFound;
 
     var object = std.json.Value{ .object = std.json.ObjectMap.empty };
     try object.object.put(allocator, "kind", .{ .string = "house_objects" });
     try object.object.put(allocator, "version", .{ .integer = 1 });
     try object.object.put(allocator, "room", .{ .integer = room_vnum });
-    try object.object.put(allocator, "objects", try serializeRoomInventory(allocator, cdb.world[@intCast(room_rnum)].contents));
+    try object.object.put(allocator, "objects", try serializeRoomInventory(allocator, room.*.contents));
 
     try writeJsonFile(path, object);
 }

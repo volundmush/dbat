@@ -192,7 +192,7 @@ extern int xap_objs;
 void strip_string(char *buffer);
 int read_xap_objects(FILE *fl,struct char_data *ch);
 bitvector_t asciiflag_conv(char *flag);
-void reset_zone(zone_rnum zone);
+void reset_zone(struct zone_data *zone);
 
 /* For disabled commands code by Erwin S. Andreasen, */
 /* ported to CircleMUD by Myrdred (Alexei Svitkine)  */

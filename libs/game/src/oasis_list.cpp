@@ -166,16 +166,15 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
   if (!top_of_world)
     return;
   
-  for (i = 0; i <= top_of_world; i++) {
-    struct room_data *rm = &world[i];
+  for (i = bottom; i <= top; i++) {
+    struct room_data *rm = room_by_id(i);
+    if(!rm) continue;
     
-    /** Check to see if this room is one of the ones needed to be listed.    **/
-    if ((rm->number >= bottom) && (rm->number <= top)) {
-      counter++;
+    counter++;
 
-        send_to_char(ch, "%4d) [@g%-5d@n] @[1]%-*s@n %s",
-                          counter, rm->number, count_color_chars(rm->name)+44, 
-                          rm->name, rm->proto_script ? "[TRIG] " : "");
+      send_to_char(ch, "%4d) [@g%-5d@n] @[1]%-*s@n %s",
+                        counter, rm->number, count_color_chars(rm->name)+44, 
+                        rm->name, rm->proto_script ? "[TRIG] " : "");
 
       for (j = 0; j < NUM_OF_DIRS; j++) {
         struct room_direction_data *exit = rm->dir_option[j];
@@ -191,7 +190,6 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
       }
     
       send_to_char(ch, "\r\n");
-    }
   }
   
   if (counter == 0) {
@@ -221,16 +219,15 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
   if (!top_of_mobt)
     return;
   
-  for (i = 0; i <= top_of_mobt; i++) {
-    struct char_data *mob = &mob_proto[i];
-    if (mob_index[i].vnum >= bottom && mob_index[i].vnum <= top) {
-      counter++;
+  for (i = bottom; i <= top; i++) {
+    struct char_data *mob = mob_proto_by_id(i);
+    if(!mob) continue;
+    counter++;
 
-      admg = ((mob->mob_specials.damsizedice + 1) / 2.0) * (mob->mob_specials.damnodice);
-      send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
-                   counter, mob_index[i].vnum, count_color_chars(mob->short_descr)+30, mob->short_descr, TRUE_RACE((mob)), SENSEI_NAME((mob)),
-                   mob->level + mob->level_adj + mob->race_level, mob->proto_script ? " [TRIG]" : "");
-    }
+    admg = ((mob->mob_specials.damsizedice + 1) / 2.0) * (mob->mob_specials.damnodice);
+    send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
+                  counter, char_proto_id_get(mob), count_color_chars(mob->short_descr)+30, mob->short_descr, TRUE_RACE((mob)), SENSEI_NAME((mob)),
+                  mob->level + mob->level_adj + mob->race_level, mob->proto_script ? " [TRIG]" : "");
   }
   
   if (counter == 0) {
@@ -260,16 +257,15 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
   if (!top_of_objt)
     return;
   
-  for (i = 0; i <= top_of_objt; i++) {
-    struct obj_data *obj = &obj_proto[i];
-    if (obj_index[i].vnum >= bottom && obj_index[i].vnum <= top) {
-      counter++;
+  for (i = vmin; i <= vmax; i++) {
+    struct obj_data *obj = obj_proto_by_id(i);
+    if(!obj) continue;
+    counter++;
 
-      send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
-                   counter, obj_index[i].vnum, count_color_chars(obj->short_description)+44,
-                   obj->short_description, item_types[obj->type_flag],
-                   obj->proto_script ? " [TRIG]" : "");
-    }
+    send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
+                  counter, obj_vnum_get(obj), count_color_chars(obj->short_description)+44,
+                  obj->short_description, item_types[obj->type_flag],
+                  obj->proto_script ? " [TRIG]" : "");
   }
   
   if (counter == 0) {
@@ -300,19 +296,19 @@ void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum 
   "Index VNum    Shop Room(s)\r\n"
   "----- ------- ---------------------------------------------\r\n");
   
-  for (i = 0; i <= top_shop; i++) {
-    if (SHOP_NUM(i) >= bottom && SHOP_NUM(i) <= top) {
+  for (i = bottom; i <= top; i++) {
+    if (auto shop = shop_by_id(i); shop) {
       counter++;
       
-      send_to_char(ch, "@g%4d@n) [@g%-5d@n]", counter, SHOP_NUM(i));
+      send_to_char(ch, "@g%4d@n) [@g%-5d@n]", counter, shop->vnum);
 
       /************************************************************************/
       /** Retrieve the list of rooms for this shop.                          **/
       /************************************************************************/
       
-      for (j = 0; SHOP_ROOM(i, j) != NOWHERE; j++)
+      for (j = 0; shop->in_room[j] != NOWHERE; j++)
         send_to_char(ch, "%s@c[@y%d@c]@n",
-          ((j > 0) && (j % 8 == 0)) ? "\r\n              " : " ", SHOP_ROOM(i, j));
+          ((j > 0) && (j % 8 == 0)) ? "\r\n              " : " ", shop->in_room[j]);
 
       if (j == 0)
         send_to_char(ch, "@cNone.@n");

@@ -22,8 +22,8 @@ struct gauntlet_mob
 }; 
 
 /* Reset functions */ 
-bool pre_reset(zone_vnum znum); 
-void post_reset(zone_vnum znum); 
+bool pre_reset(struct zone_data *zone); 
+void post_reset(struct zone_data *zone); 
 
 /* Zone pre-reset functions */ 
 bool prereset_gauntlet_zone(void); 

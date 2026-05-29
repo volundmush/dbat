@@ -772,12 +772,12 @@ void sedit_parse(struct descriptor_data *d, char *arg)
     return;
   case SEDIT_NEW_ROOM:
     if ((i = atoi(arg)) != -1)
-      if ((i = real_room(i)) == NOWHERE) {
+      if ((i = room_vnum_check(i)) == NOWHERE) {
 	write_to_output(d, "That room does not exist, try again : ");
 	return;
       }
     if (i >= 0)
-      add_to_int_list(&(S_ROOMS(OLC_SHOP(d))), atoi(arg));
+      add_to_int_list(&(S_ROOMS(OLC_SHOP(d))), i);
     sedit_rooms_menu(d);
     return;
   case SEDIT_DELETE_ROOM:
