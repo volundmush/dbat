@@ -219,7 +219,7 @@ WCMD(do_wzoneecho)
     if (!*room_num || !*msg)
         wld_log(room, "wzoneecho called with too few args");
 
-    else if ((zone = zone_by_id(atoi(room_num))) == NULL)
+    else if (!(zone = zone_by_id(virtual_zone_by_thing(atoi(room_num)))))
         wld_log(room, "wzoneecho called for nonexistant zone");
 
     else {

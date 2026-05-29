@@ -411,7 +411,7 @@ ACMD(do_mzoneecho)
     if (!*room_number || !*msg)
         mob_log(ch, "mzoneecho called with too few args");
 
-    else if ((zone = zone_by_id(atoi(room_number))) == NULL)
+    else if (!(zone = zone_by_id(virtual_zone_by_thing(atoi(room_number)))))
         mob_log(ch, "mzoneecho called for nonexistant zone");
 
     else {

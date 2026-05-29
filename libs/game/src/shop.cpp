@@ -1520,6 +1520,7 @@ void boot_the_shops(FILE *shop_f, char *filename, int rec_count)
       struct shop_data *shop = NULL;
       CREATE(shop, struct shop_data, 1);
       shop->vnum = temp;
+      shop_put(temp, shop);
       temp = read_list(shop_f, list, new_format, MAX_PROD, LIST_PRODUCE, shop);
       CREATE(shop->producing, obj_vnum, temp);
       for (count = 0; count < temp; count++)

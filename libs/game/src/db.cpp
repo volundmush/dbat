@@ -3917,6 +3917,8 @@ struct reset_context {
   int cmd_no = 0;
   struct char_data *mob = nullptr;
   struct obj_data *obj = nullptr;
+  struct char_data *tmob = nullptr;
+  struct obj_data *tobj = nullptr;
   bool mob_load = false;
   bool obj_load = false;
 };
@@ -3969,6 +3971,7 @@ static bool reset_command_mobile(struct reset_context* ctx, mob_vnum vnum, room_
   MOB_LOADROOM(mob) = rv;
   load_mtrigger(mob);
   ctx->mob = mob;
+  ctx->tmob = mob;
   ctx->mob_load = true;
 
   return true;
@@ -4023,19 +4026,12 @@ static bool reset_command_object(struct reset_context* ctx, obj_vnum vnum, room_
   load_otrigger(obj);
 
   ctx->obj = obj;
+  ctx->tobj = obj;
   ctx->obj_load = true;
   return true;
 
 }
 
-static struct obj_data* get_obj_vnum(obj_vnum vnum) {
-  for(auto obj = object_list; obj; obj = obj->next) {
-    if(GET_OBJ_VNUM(obj) == vnum) {
-      return obj;
-    }
-  }
-  return nullptr;
-}
 
 static bool reset_command_put(struct reset_context* ctx, obj_vnum vnum, obj_vnum to_vnum, int percent_chance) {
   if(rand_number(1, 100) < percent_chance) {
@@ -4045,7 +4041,7 @@ static bool reset_command_put(struct reset_context* ctx, obj_vnum vnum, obj_vnum
   auto zone = ctx->zone;
   auto cmd_no = ctx->cmd_no;
 
-  auto to = get_obj_vnum(to_vnum);
+  auto to = get_obj_num(to_vnum);
   if(!to) {
     ZONE_ERROR("invalid to obj vnum");
     ctx->cmd->command = '*'; /* skip command */
@@ -4064,6 +4060,7 @@ static bool reset_command_put(struct reset_context* ctx, obj_vnum vnum, obj_vnum
   obj_to_obj(obj, to);
   load_otrigger(obj);
   ctx->obj = obj;
+  ctx->tobj = obj;
 
   return true;
 
@@ -4099,6 +4096,7 @@ static bool reset_command_give(struct reset_context* ctx, obj_vnum vnum, int max
   obj_to_char(obj, ctx->mob);
   load_otrigger(obj);
   ctx->obj = obj;
+  ctx->tobj = obj;
 
   return true;
 
@@ -4150,6 +4148,8 @@ static bool reset_command_equip(struct reset_context* ctx, obj_vnum vnum, int ma
     obj->in_room = NOWHERE;
     obj_to_char(obj, ctx->mob);
   }
+  ctx->obj = obj;
+  ctx->tobj = obj;
 
   return true;
 
@@ -4330,31 +4330,31 @@ static void execute_reset_commands(struct zone_data *zone) {
       case 'M':
         last_cmd = reset_command_mobile(&ctx, ctx.cmd->arg1, ctx.cmd->arg3, ctx.cmd->arg4, ctx.cmd->arg2, ctx.cmd->arg5);
         if(!last_cmd) {
-          ctx.obj = nullptr;
+          ctx.tobj = nullptr;
         }
         break;
       case 'O':
         last_cmd = reset_command_object(&ctx, ctx.cmd->arg1, ctx.cmd->arg3, ctx.cmd->arg4, ctx.cmd->arg2, ctx.cmd->arg5);
         if(!last_cmd) {
-          ctx.mob = nullptr;
+          ctx.tmob = nullptr;
         }
         break;
       case 'P':
         last_cmd = reset_command_put(&ctx, ctx.cmd->arg1, ctx.cmd->arg3, ctx.cmd->arg5);
         if(!last_cmd) {
-          ctx.mob = nullptr;
+          ctx.tmob = nullptr;
         }
         break;
       case 'G':
         last_cmd = reset_command_give(&ctx, ctx.cmd->arg1, ctx.cmd->arg2, ctx.cmd->arg5);
         if(!last_cmd) {
-          ctx.mob = nullptr;
+          ctx.tmob = nullptr;
         }
         break;
       case 'E':
         last_cmd = reset_command_equip(&ctx, ctx.cmd->arg1, ctx.cmd->arg2, ctx.cmd->arg3, ctx.cmd->arg5);
         if(!last_cmd) {
-          ctx.mob = nullptr;
+          ctx.tmob = nullptr;
         }
         break;
       case 'R':
