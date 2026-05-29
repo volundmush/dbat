@@ -51,6 +51,7 @@ ACMD(do_oasis_gedit)
   char *buf3;
   char buf1[MAX_INPUT_LENGTH];
   char buf2[MAX_INPUT_LENGTH];
+  struct guild_data *guild = NULL;
   
   /****************************************************************************/
   /** Parse any arguments.                                                   **/
@@ -167,8 +168,8 @@ ACMD(do_oasis_gedit)
   
   OLC_NUM(d) = number;
   
-  if ((real_num = real_guild(number)) != NOTHING)
-    gedit_setup_existing(d, real_num);
+  if (guild = guild_by_id(number))
+    gedit_setup_existing(d, number);
   else
     gedit_setup_new(d);
   
@@ -223,11 +224,12 @@ void gedit_setup_new(struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-void gedit_setup_existing(struct descriptor_data *d, int rgm_num)
+void gedit_setup_existing(struct descriptor_data *d, guild_vnum num)
 {
 	/*. Alloc some guild shaped space . */
 	CREATE(OLC_GUILD(d), struct guild_data, 1);
-	copy_guild(OLC_GUILD(d), guild_index + rgm_num);
+	auto proto = guild_by_id(num);
+	copy_guild(OLC_GUILD(d), proto);
 	gedit_disp_menu(d);
 }
 

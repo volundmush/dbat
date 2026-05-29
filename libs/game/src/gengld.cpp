@@ -97,40 +97,27 @@ void gedit_modify_string(char **str, char *new_g)
 
 int add_guild(struct guild_data *ngld)
 {
-  guild_rnum rguild;
+  struct guild_data *guild;
   int found = 0;
   zone_vnum zv = virtual_zone_by_thing(G_NUM(ngld));
 
   /*
    * The guild already exists, just update it.
    */
-  if ((rguild = real_guild(G_NUM(ngld))) != NOWHERE) {
-    copy_guild(&guild_index[rguild], ngld);
+  if (guild = guild_by_id(G_NUM(ngld))) {
+    copy_guild(guild, ngld);
     if (zv != NOTHING) {
       add_to_save_list(zv, SL_GLD);
     } else
       mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Cannot determine guild zone.");
-    return rguild;
+    return guild->vnum;
   }
 
   mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Creating new guild.");
 
-  top_guild++;
-  RECREATE(guild_index, struct guild_data, top_guild + 1);
-
-  for (rguild = top_guild; rguild > 0; rguild--) {
-    if (ngld->vnum > GM_NUM(rguild - 1)) {
-      found = rguild;
-
-      copy_guild(&guild_index[rguild], ngld);
-      break;
-    }
-    guild_index[rguild] = guild_index[rguild - 1];
-  }
-
-  if (!found) {
-    copy_guild(&guild_index[0], ngld);
-  }
+  CREATE(guild, struct guild_data, 1);
+  copy_guild(guild, ngld);
+  guild_put(guild->vnum, guild);
 
   if (zv != NOTHING) {
     add_to_save_list(zv, SL_GLD);
@@ -138,7 +125,7 @@ int add_guild(struct guild_data *ngld)
   else
     mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Cannot determine guild zone.");
 
-  return rguild;
+  return guild->vnum;
 }
 
 /*-------------------------------------------------------------------*/
@@ -150,66 +137,67 @@ int save_guilds(struct zone_data *zone)
   char fname[64];
   struct guild_data *guild;
 
-if(!zone)
-      {
-	log("SYSERR: GenOLC: save_guilds: Invalid zone!");
-	return FALSE;
-      }
+  if (!zone)
+  {
+    log("SYSERR: GenOLC: save_guilds: Invalid zone!");
+    return FALSE;
+  }
 
   snprintf(fname, sizeof(fname), "%s%d.gld", GLD_PREFIX, zone->number);
-  if (!(guild_file = fopen(fname, "w"))) {
+  if (!(guild_file = fopen(fname, "w")))
+  {
     mudlog(BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC: Cannot open Guild file!");
     return FALSE;
   }
 
   /*. Search database for guilds in this zone . */
-  for (i = zone->bot; i <= zone->top; i++) {
-    if ((rguild = real_guild(i)) != NOWHERE) {
-      fprintf(guild_file, "#%d~\n", i);
-      guild = guild_index + rguild;
+  for (i = zone->bot; i <= zone->top; i++)
+  {
+    auto guild = guild_by_id(i);
+    if (!guild)
+      continue;
+    fprintf(guild_file, "#%d~\n", i);
 
-      for (j = 0; j < SKILL_TABLE_SIZE; j++)
-	if (G_SK_AND_SP(guild, j))
-	  fprintf(guild_file, "%d 1\n", j);
+    for (j = 0; j < SKILL_TABLE_SIZE; j++)
+      if (G_SK_AND_SP(guild, j))
+        fprintf(guild_file, "%d 1\n", j);
 
-      for (j = 0; j < NUM_FEATS_DEFINED; j++)
-	if (G_FEATS(guild, j))
-	  fprintf(guild_file, "%d 2\n", j);
+    for (j = 0; j < NUM_FEATS_DEFINED; j++)
+      if (G_FEATS(guild, j))
+        fprintf(guild_file, "%d 2\n", j);
 
-      fprintf(guild_file, "-1\n");
+    fprintf(guild_file, "-1\n");
 
-      /*. Save charge . */
-      fprintf(guild_file, "%1.2f\n", G_CHARGE(guild));
+    /*. Save charge . */
+    fprintf(guild_file, "%1.2f\n", G_CHARGE(guild));
 
-      /*. Save messages . */
-      fprintf(guild_file,
-	      "%s~\n%s~\n",
-	      /*. Added some small'n'silly defaults as sanity checks . */
-	      (G_NO_SKILL(guild) ? G_NO_SKILL(guild) : "%s ERROR"),
-	      (G_NO_GOLD(guild) ? G_NO_GOLD(guild) : "%s ERROR")
-	      );
+    /*. Save messages . */
+    fprintf(guild_file,
+            "%s~\n%s~\n",
+            /*. Added some small'n'silly defaults as sanity checks . */
+            (G_NO_SKILL(guild) ? G_NO_SKILL(guild) : "%s ERROR"),
+            (G_NO_GOLD(guild) ? G_NO_GOLD(guild) : "%s ERROR"));
 
-      /* Write what the GM teaches */
-      fprintf(guild_file, "%d\n", G_MINLVL(guild));
+    /* Write what the GM teaches */
+    fprintf(guild_file, "%d\n", G_MINLVL(guild));
 
-      auto keeper = mob_proto_by_id(G_TRAINER(guild));
+    auto keeper = mob_proto_by_id(G_TRAINER(guild));
 
-      /*. Save the rest . */
-      fprintf(guild_file, "%d\n%d\n%d\n%d\n",
-	      keeper ? keeper->vnum : -1,
-	      G_WITH_WHO(guild)[0],
-	      G_OPEN(guild),
-	      G_CLOSE(guild)
-	      );
-      for (j = 1; j < SW_ARRAY_MAX; j++)
-	fprintf(guild_file, "%s%d", j == 1 ? "" : " ", G_WITH_WHO(guild)[j]);
-      fprintf(guild_file, "\n");
-    }
+    /*. Save the rest . */
+    fprintf(guild_file, "%d\n%d\n%d\n%d\n",
+            keeper ? keeper->vnum : -1,
+            G_WITH_WHO(guild)[0],
+            G_OPEN(guild),
+            G_CLOSE(guild));
+    for (j = 1; j < SW_ARRAY_MAX; j++)
+      fprintf(guild_file, "%s%d", j == 1 ? "" : " ", G_WITH_WHO(guild)[j]);
+    fprintf(guild_file, "\n");
   }
   fprintf(guild_file, "$~\n");
   fclose(guild_file);
 
-  if (in_save_list(zone->number, SL_GLD)) {
+  if (in_save_list(zone->number, SL_GLD))
+  {
     remove_from_save_list(zone->number, SL_GLD);
     create_world_index(zone->number, "gld");
     log("GenOLC: save_guilds: Saving guilds '%s'", fname);

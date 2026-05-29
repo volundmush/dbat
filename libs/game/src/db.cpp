@@ -11,7 +11,6 @@
 #include "dbat/db/consts/maximums.h"
 
 #include "dbat/db/help.h"
-#include "dbat/db/htree.h"
 #include "dbat/game/utils.h"
 
 #include "dbat/game/fileop.h"
@@ -42,7 +41,6 @@
 #include "dbat/game/comm.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/interpreter.h"
-#include "dbat/db/htree.h"
 #include "dbat/game/genolc.h"
 #include "dbat/game/shop.h"
 #include "dbat/game/handler.h"
@@ -789,8 +787,6 @@ void destroy_db(void)
 
   free_obj_unique_hash();
 
-  htree_shutdown();
-
   log("Freeing Assemblies.");
   free_assemblies();
 }
@@ -1338,12 +1334,10 @@ void index_boot(int mode)
     log("   %d rooms, %d bytes.", rec_count, size[0]);
     break;
   case DB_BOOT_MOB:
-    size[0] = sizeof(struct index_data) * rec_count;
     size[1] = sizeof(struct char_data) * rec_count;
     log("   %d mobs, %d bytes in prototypes.", rec_count, size[1]);
     break;
   case DB_BOOT_OBJ:
-    size[0] = sizeof(struct index_data) * rec_count;
     size[1] = sizeof(struct obj_data) * rec_count;
     log("   %d objs, %d bytes in prototypes.", rec_count, size[1]);
     break;
@@ -3973,7 +3967,7 @@ void reset_zone(struct zone_data *zone)
 	}
 	char_to_room(mob, room_by_id(cmd->arg3));
 	
-           /* Get rid of it if room_max has been met, ignore room_max if zero */
+  /* Get rid of it if room_max has been met, ignore room_max if zero */
 
 	if (room_max && (room_max >= cmd->arg4)){
 	   extract_char(mob);
@@ -4002,7 +3996,7 @@ void reset_zone(struct zone_data *zone)
     if(cmd->arg1 == 10700) {
       log("blah!");
     }
-	  obj = read_object(cmd->arg1, REAL);
+	  obj = read_object(cmd->arg1, VIRTUAL);
 	  
 	  	/* First find out how many obj of VNUM are in the mud with this rooms */
                /* VNUM as a load point for max from room checks. */
@@ -4042,7 +4036,7 @@ void reset_zone(struct zone_data *zone)
           tobj = obj;
 	  obj_load = TRUE;
 	} else {
-	  obj = read_object(cmd->arg1, REAL);
+	  obj = read_object(cmd->arg1, VIRTUAL);
           add_unique_id(obj);
 	  IN_ROOM(obj) = NOWHERE;
 	  last_cmd = 1;
@@ -4057,7 +4051,7 @@ void reset_zone(struct zone_data *zone)
     case 'P':			/* object to object */
        if ((obj_proto_count_get(cmd->arg1) < cmd->arg2) &&
            obj_load && (rand_number(1, 100) >= cmd->arg5)) {
-	obj = read_object(cmd->arg1, REAL);
+	obj = read_object(cmd->arg1, VIRTUAL);
 	if (!(obj_to = get_obj_num(cmd->arg3))) {
 	  ZONE_ERROR("target obj not found, command disabled");
 	  cmd->command = '*';
@@ -4081,7 +4075,7 @@ void reset_zone(struct zone_data *zone)
       }
       if ((obj_proto_count_get(cmd->arg1) < cmd->arg2) &&
           mob_load && (rand_number(1, 100) >= cmd->arg5)) {
-	obj = read_object(cmd->arg1, REAL);
+	obj = read_object(cmd->arg1, VIRTUAL);
         add_unique_id(obj);
 	obj_to_char(obj, mob);
         if (GET_MOB_SPEC(mob) != shop_keeper) {
@@ -4106,7 +4100,7 @@ void reset_zone(struct zone_data *zone)
 	if (cmd->arg3 < 0 || cmd->arg3 >= NUM_WEARS) {
 	  ZONE_ERROR("invalid equipment pos number");
 	} else {
-	  obj = read_object(cmd->arg1, REAL);
+	  obj = read_object(cmd->arg1, VIRTUAL);
           add_unique_id(obj);
           IN_ROOM(obj) = IN_ROOM(mob);
           load_otrigger(obj);

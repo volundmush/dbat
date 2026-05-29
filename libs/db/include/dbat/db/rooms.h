@@ -4,7 +4,6 @@
 #include "consts/directions.h"
 #include "consts/sectortypes.h"
 #include "consts/exitflags.h"
-#include "htree.h"
 #include "extradesc.h"
 
 #ifdef __cplusplus

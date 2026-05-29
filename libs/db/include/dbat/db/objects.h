@@ -7,8 +7,6 @@
 #include "consts/weapons.h"
 #include "consts/applies.h"
 #include "affected.h"
-#include "index.h"
-#include "htree.h"
 #include "extradesc.h"
 
 #ifdef __cplusplus

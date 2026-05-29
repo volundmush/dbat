@@ -13,6 +13,5 @@
 #include "guilds.h"
 #include "dgscripts.h"
 #include "help.h"
-#include "index.h"
 #include "config.h"
 #include "extradesc.h"

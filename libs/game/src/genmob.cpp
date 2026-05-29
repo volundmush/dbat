@@ -3,7 +3,6 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include "dbat/db/htree.h"
 #include "dbat/db/shops.h"
 #include "dbat/db/guilds.h"
 #include "dbat/db/iterate.hpp"
@@ -144,20 +143,20 @@ int delete_mobile(mob_vnum refpt)
   
     last_saved_zone = NOTHING;
   /* Update guild masters */
-  if (guild_index)
-    for (counter = 0; counter <= top_guild; counter++) {
-      zone_vnum zone = virtual_zone_by_thing(counter);
+    guild_iterate ([&](auto guild) {
+      zone_vnum zone = virtual_zone_by_thing(guild->vnum);
       /* Find the guild for this trainer and reset it's trainer to
        * -1 to keep the guild so it could be assigned to someone else */
-      if (GM_TRAINER(counter) == vnum) {
-        GM_TRAINER(counter) = NOTHING;
-        zone_vnum zone = virtual_zone_by_thing(counter);
+      if (GM_TRAINER(guild) == vnum) {
+        GM_TRAINER(guild) = NOTHING;
+        zone_vnum zone = virtual_zone_by_thing(guild->vnum);
         if(zone != last_saved_zone) {
           add_to_save_list(zone, SL_GLD);
           last_saved_zone = zone;
         }
       }
-    }
+      return true;
+    });
 
   return refpt;
 }

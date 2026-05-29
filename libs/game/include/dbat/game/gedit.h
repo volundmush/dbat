@@ -7,7 +7,7 @@ extern "C" {
 #endif
 
 void gedit_setup_new(struct descriptor_data *d);
-void gedit_setup_existing(struct descriptor_data *d, int rgm_num);
+void gedit_setup_existing(struct descriptor_data *d, guild_vnum num);
 void gedit_parse(struct descriptor_data *d, char *arg);
 void gedit_disp_menu(struct descriptor_data *d);
 void gedit_no_train_menu(struct descriptor_data *d);

@@ -50,9 +50,6 @@ void guild_close_set(struct guild_data *guild, int value);
 SpecialFunc guild_func_get(struct guild_data *guild);
 void guild_func_set(struct guild_data *guild, SpecialFunc func);
 
-extern struct guild_data *guild_index;
-extern int top_guild;
-
 guild_rnum real_guild(guild_vnum vnum);
 struct guild_data *guild_by_id(guild_vnum vnum);
 

@@ -497,7 +497,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
     "     @CVieworder@W, this changes the order in which posts are listed to you.@n\r\n");
   }
   else {
-  obj = read_object(board_vnum, REAL);
+  obj = read_object(board_vnum, VIRTUAL);
   bnum = GET_OBJ_VNUM(obj);
   char clan[120];
    if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
@@ -616,7 +616,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
    send_to_imm("Error with %d board, object doesn't exist.", board_vnum);
   }
   else {
-  obj = read_object(board_vnum, REAL);
+  obj = read_object(board_vnum, VIRTUAL);
   bnum = GET_OBJ_VNUM(obj);
    char clan[200];
    if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
@@ -1029,7 +1029,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg)
   }
   else {
    char clan[120];
-   obj = read_object(board_vnum, REAL);
+   obj = read_object(board_vnum, VIRTUAL);
    if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
     if (GET_CLAN(ch) != NULL) {
       sprintf(clan, "%s", GET_CLAN(ch));

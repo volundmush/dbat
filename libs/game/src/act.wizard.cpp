@@ -1208,7 +1208,7 @@ ACMD(do_vnum)
  
 void list_zone_commands_room(struct char_data *ch, room_vnum rvnum)
 {
-  extern struct index_data **trig_index;
+
   room_rnum cmd_room = NOWHERE;
   int subcmd = 0, count = 0;
 
@@ -2237,15 +2237,14 @@ ACMD(do_load)
     load_mtrigger(mob);
     }
   } else if (is_abbrev(buf, "obj")) {
-    struct obj_data *obj;
-    obj_rnum r_num;
+    struct obj_data *obj, *proto;
 
-    if ((r_num = real_object(atoi(buf2))) == NOTHING) {
+    if (!(proto = obj_proto_by_id(atoi(buf2)))) {
       send_to_char(ch, "There is no object with that number.\r\n");
       return;
     }
     for (i=0; i < n; i++) {
-    obj = read_object(r_num, REAL);
+    obj = read_object(proto->vnum, VIRTUAL);
     add_unique_id(obj);
     if (GET_ADMLEVEL(ch) > 0) {
      send_to_imm("LOAD: %s has loaded a %s", GET_NAME(ch), obj->short_description);
@@ -2292,14 +2291,13 @@ ACMD(do_vstat)
     do_stat_character(ch, mob);
     extract_char(mob);
   } else if (is_abbrev(buf, "obj")) {
-    struct obj_data *obj;
-    obj_rnum r_num;
+    struct obj_data *obj, *proto;
 
-    if ((r_num = real_object(atoi(buf2))) == NOTHING) {
+    if (!(proto = obj_proto_by_id(atoi(buf2)))) {
       send_to_char(ch, "There is no object with that number.\r\n");
       return;
     }
-    obj = read_object(r_num, REAL);
+    obj = read_object(proto->vnum, VIRTUAL);
     do_stat_object(ch, obj);
     extract_obj(obj);
   } else

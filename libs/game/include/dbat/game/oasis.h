@@ -593,7 +593,7 @@ void sedit_disp_menu(struct descriptor_data *d);
 void sedit_parse(struct descriptor_data *d, char *arg);
 ACMD(do_oasis_sedit);
 void gedit_setup_new(struct descriptor_data *d);
-void gedit_setup_existing(struct descriptor_data *d, int rgm_num);
+void gedit_setup_existing(struct descriptor_data *d, guild_vnum num);
 void gedit_parse(struct descriptor_data *d, char *arg);
 void gedit_disp_menu(struct descriptor_data *d);
 void gedit_no_train_menu(struct descriptor_data *d);
@@ -628,7 +628,7 @@ void cedit_string_cleanup(struct descriptor_data *d, int terminator);
 ACMD(do_oasis_cedit);
 
 void trigedit_parse(struct descriptor_data *d, char *arg);
-void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num);
+void trigedit_setup_existing(struct descriptor_data *d, trig_vnum num);
 void trigedit_setup_new(struct descriptor_data *d);
 ACMD(do_oasis_trigedit);
 

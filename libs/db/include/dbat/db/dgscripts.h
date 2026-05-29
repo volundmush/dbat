@@ -1,7 +1,6 @@
 #pragma once
 #include "consts/types.h"
 #include "consts/triggers.h"
-#include "index.h"
 
 #ifdef __cplusplus
 extern "C" {

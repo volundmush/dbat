@@ -21,8 +21,6 @@
 #include "consts/races.h"
 #include "consts/senseis.h"
 #include "consts/sizes.h"
-#include "index.h"
-#include "htree.h"
 
 #ifdef __cplusplus
 extern "C" {

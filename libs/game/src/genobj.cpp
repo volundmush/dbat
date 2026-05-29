@@ -4,7 +4,6 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include "dbat/db/htree.h"
 #include "dbat/db/shops.h"
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/genobj.h"

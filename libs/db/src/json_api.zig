@@ -618,11 +618,6 @@ fn ptrAt(comptime T: type, ptr: [*c]T, index: usize) *T {
     return @ptrCast(&ptr[index]);
 }
 
-fn resetHtree(tree: *[*c]cdb.htree_node) void {
-    if (tree.* != null) cdb.htree_free(tree.*);
-    tree.* = cdb.htree_init();
-}
-
 fn ensureFolder(folder: []const u8) !void {
     if (!has_io) return error.NotInitialized;
     try std.Io.Dir.cwd().createDirPath(global_io, folder);

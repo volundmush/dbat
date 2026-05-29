@@ -32,7 +32,6 @@ void parse_trigger(FILE *trig_f, int nr)
     int t[2], k, attach_type;
     char line[256], *cmds, *s, flags[256], errors[MAX_INPUT_LENGTH];
     struct cmdlist_element *cle;
-    struct index_data *t_index;
     struct trig_data *trig;
 
     CREATE(trig, struct trig_data, 1);

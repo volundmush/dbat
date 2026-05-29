@@ -38,6 +38,7 @@ ACMD(do_oasis_trigedit)
 {
   int number, real_num;
   struct descriptor_data *d;
+  struct trig_data *trig = NULL;
 
   /*
    * Parse any arguments.
@@ -99,10 +100,11 @@ ACMD(do_oasis_trigedit)
    *  If this is a new trigger, setup a new one,
    *  otherwise, setup the a copy of the existing trigger
    */
-  if ((real_num = real_trigger(number)) == NOTHING)
+  if (trig = trig_proto_by_id(number)) {
+    trigedit_setup_existing(d, number);
+  } else {
     trigedit_setup_new(d);
-  else
-    trigedit_setup_existing(d, real_num);
+  }
   int disp = 0;
   if (disp == 0) {
   trigedit_disp_menu(d);
@@ -424,7 +426,6 @@ void trigedit_save(struct descriptor_data *d)
   trig_data *trig = OLC_TRIG(d);
   trig_data *live_trig;
   struct cmdlist_element *cmd, *next_cmd;
-  struct index_data **new_index;
   struct descriptor_data *dsc;
   FILE *trig_file;
   int zone, top;
@@ -544,7 +545,6 @@ void trigedit_save(struct descriptor_data *d)
 
     
     CREATE(proto, struct trig_data, 1);
-    new_index[rnum]->proto = proto;
     trig_data_copy(proto, trig);
     trig_proto_put(OLC_NUM(d), proto);
 

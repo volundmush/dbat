@@ -7,6 +7,7 @@
  * Written by Jason Goodwin.   jgoodwin@expert.cc.purdue.edu               *
  ************************************************************************ */
 #include "dbat/db/guilds.h"
+#include "dbat/db/iterate.hpp"
 #include "dbat/game/config.h"
 #include "dbat/game/affect.h"
 #include "dbat/game/fileop.h"
@@ -29,7 +30,7 @@
 /* Local variables */
 int spell_sort_info[SKILL_TABLE_SIZE];
 
-char *guild_customer_string(int guild_nr, int detailed);
+char *guild_customer_string(struct guild_data *guild, int detailed);
 int calculate_skill_cost(struct char_data *ch, int skill);
 
 int calculate_skill_cost(struct char_data *ch, int skill)
@@ -428,13 +429,13 @@ void list_skills(struct char_data *ch, char *arg)
 }
 
 
-int is_guild_open(struct char_data *keeper, int guild_nr, int msg)
+int is_guild_open(struct char_data *keeper, struct guild_data *guild, int msg)
 {
   char buf[200];
   *buf = 0;
 
-  if (GM_OPEN(guild_nr) > time_info.hours &&
-    GM_CLOSE(guild_nr) < time_info.hours)
+  if (GM_OPEN(guild) > time_info.hours &&
+    GM_CLOSE(guild) < time_info.hours)
   strlcpy(buf, MSG_TRAINER_NOT_OPEN, sizeof(buf));
 
   if (!*buf)
@@ -446,7 +447,7 @@ int is_guild_open(struct char_data *keeper, int guild_nr, int msg)
 }
 
 
-int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild_nr)
+int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, struct guild_data *guild)
 {
 	char buf[200];
 
@@ -456,7 +457,7 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
 	}
 
 	
-	if (GET_LEVEL(ch) < GM_MINLVL(guild_nr)) {
+	if (GET_LEVEL(ch) < GM_MINLVL(guild)) {
 				snprintf(buf, sizeof(buf), "%s %s", 
 					GET_NAME(ch), MSG_TRAINER_MINLVL);
 		do_tell(keeper, buf, cmd_tell, 0); 
@@ -464,9 +465,9 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
 	}
 
 
-	if ((IS_GOOD(ch) && NOTRAIN_GOOD(guild_nr)) ||
-		 (IS_EVIL(ch) && NOTRAIN_EVIL(guild_nr)) ||
-		 (IS_NEUTRAL(ch) && NOTRAIN_NEUTRAL(guild_nr))) {
+	if ((IS_GOOD(ch) && NOTRAIN_GOOD(guild)) ||
+		 (IS_EVIL(ch) && NOTRAIN_EVIL(guild)) ||
+		 (IS_NEUTRAL(ch) && NOTRAIN_NEUTRAL(guild))) {
 		snprintf(buf, sizeof(buf), "%s %s", 
 					GET_NAME(ch), MSG_TRAINER_DISLIKE_ALIGN);
 		do_tell(keeper, buf, cmd_tell, 0);
@@ -476,32 +477,32 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
 	if (IS_NPC(ch))
 		return (FALSE);
 
-	if ((IS_ROSHI(ch) && NOTRAIN_WIZARD(guild_nr)) ||
-		(IS_PICCOLO(ch) && NOTRAIN_CLERIC(guild_nr)) ||
-		(IS_KRANE(ch) && NOTRAIN_ROGUE(guild_nr)) ||
-		(IS_NAIL(ch) && NOTRAIN_FIGHTER(guild_nr)) ||
-		(IS_GINYU(ch) && NOTRAIN_PALADIN(guild_nr)) ||
-		(IS_FRIEZA(ch) && NOTRAIN_SORCERER(guild_nr)) ||
-		(IS_TAPION(ch) && NOTRAIN_DRUID(guild_nr)) ||
-		(IS_ANDSIX(ch) && NOTRAIN_BARD(guild_nr)) ||
-		(IS_DABURA(ch) && NOTRAIN_RANGER(guild_nr)) ||
-		(IS_BARDOCK(ch) && NOTRAIN_MONK(guild_nr)) ||
-		(IS_KABITO(ch) && NOTRAIN_BARBARIAN(guild_nr)) ||
-        	(IS_JINTO(ch) && NOTRAIN_ARCANE_ARCHER(guild_nr)) ||
-		(IS_TSUNA(ch) && NOTRAIN_ARCANE_TRICKSTER(guild_nr)) ||
-		(IS_KURZAK(ch) && NOTRAIN_ARCHMAGE(guild_nr)) ||
-		(IS_ASSASSIN(ch) && NOTRAIN_ASSASSIN(guild_nr)) ||
-		(IS_BLACKGUARD(ch) && NOTRAIN_BLACKGUARD(guild_nr)) ||
-		(IS_DRAGON_DISCIPLE(ch) && NOTRAIN_DRAGON_DISCIPLE(guild_nr)) ||
-		(IS_DUELIST(ch) && NOTRAIN_DUELIST(guild_nr)) ||
-		(IS_DWARVEN_DEFENDER(ch) && NOTRAIN_DWARVEN_DEFENDER(guild_nr)) ||
-		(IS_ELDRITCH_KNIGHT(ch) && NOTRAIN_ELDRITCH_KNIGHT(guild_nr)) ||
-		(IS_HIEROPHANT(ch) && NOTRAIN_HIEROPHANT(guild_nr)) ||
-        	(IS_HORIZON_WALKER(ch) && NOTRAIN_HORIZON_WALKER(guild_nr)) ||
-        	(IS_LOREMASTER(ch) && NOTRAIN_LOREMASTER(guild_nr)) ||
-		(IS_MYSTIC_THEURGE(ch) && NOTRAIN_MYSTIC_THEURGE(guild_nr)) ||
-		(IS_SHADOWDANCER(ch) && NOTRAIN_SHADOWDANCER(guild_nr)) ||
-        	(IS_THAUMATURGIST(ch) && NOTRAIN_THAUMATURGIST(guild_nr))) {
+	if ((IS_ROSHI(ch) && NOTRAIN_WIZARD(guild)) ||
+		(IS_PICCOLO(ch) && NOTRAIN_CLERIC(guild)) ||
+		(IS_KRANE(ch) && NOTRAIN_ROGUE(guild)) ||
+		(IS_NAIL(ch) && NOTRAIN_FIGHTER(guild)) ||
+		(IS_GINYU(ch) && NOTRAIN_PALADIN(guild)) ||
+		(IS_FRIEZA(ch) && NOTRAIN_SORCERER(guild)) ||
+		(IS_TAPION(ch) && NOTRAIN_DRUID(guild)) ||
+		(IS_ANDSIX(ch) && NOTRAIN_BARD(guild)) ||
+		(IS_DABURA(ch) && NOTRAIN_RANGER(guild)) ||
+		(IS_BARDOCK(ch) && NOTRAIN_MONK(guild)) ||
+		(IS_KABITO(ch) && NOTRAIN_BARBARIAN(guild)) ||
+        	(IS_JINTO(ch) && NOTRAIN_ARCANE_ARCHER(guild)) ||
+		(IS_TSUNA(ch) && NOTRAIN_ARCANE_TRICKSTER(guild)) ||
+		(IS_KURZAK(ch) && NOTRAIN_ARCHMAGE(guild)) ||
+		(IS_ASSASSIN(ch) && NOTRAIN_ASSASSIN(guild)) ||
+		(IS_BLACKGUARD(ch) && NOTRAIN_BLACKGUARD(guild)) ||
+		(IS_DRAGON_DISCIPLE(ch) && NOTRAIN_DRAGON_DISCIPLE(guild)) ||
+		(IS_DUELIST(ch) && NOTRAIN_DUELIST(guild)) ||
+		(IS_DWARVEN_DEFENDER(ch) && NOTRAIN_DWARVEN_DEFENDER(guild)) ||
+		(IS_ELDRITCH_KNIGHT(ch) && NOTRAIN_ELDRITCH_KNIGHT(guild)) ||
+		(IS_HIEROPHANT(ch) && NOTRAIN_HIEROPHANT(guild)) ||
+        	(IS_HORIZON_WALKER(ch) && NOTRAIN_HORIZON_WALKER(guild)) ||
+        	(IS_LOREMASTER(ch) && NOTRAIN_LOREMASTER(guild)) ||
+		(IS_MYSTIC_THEURGE(ch) && NOTRAIN_MYSTIC_THEURGE(guild)) ||
+		(IS_SHADOWDANCER(ch) && NOTRAIN_SHADOWDANCER(guild)) ||
+        	(IS_THAUMATURGIST(ch) && NOTRAIN_THAUMATURGIST(guild))) {
 
 		snprintf(buf, sizeof(buf), "%s %s", 
 					GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
@@ -509,59 +510,59 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
 		return (FALSE);
 	}
 
-	if ((!IS_ROSHI(ch) && TRAIN_WIZARD(guild_nr)) ||
-	    (!IS_PICCOLO(ch) && TRAIN_CLERIC(guild_nr)) ||
-	    (!IS_KRANE(ch) && TRAIN_ROGUE(guild_nr)) ||
-	    (!IS_BARDOCK(ch) && TRAIN_MONK(guild_nr)) ||
-	    (!IS_GINYU(ch) && TRAIN_PALADIN(guild_nr)) ||
-	    (!IS_NAIL(ch) && TRAIN_FIGHTER(guild_nr)) ||
-	    (!IS_FRIEZA(ch) && TRAIN_SORCERER(guild_nr)) ||
-	    (!IS_TAPION(ch) && TRAIN_DRUID(guild_nr)) ||
-	    (!IS_ANDSIX(ch) && TRAIN_BARD(guild_nr)) ||
-	    (!IS_DABURA(ch) && TRAIN_RANGER(guild_nr)) ||
-	    (!IS_KABITO(ch) && TRAIN_BARBARIAN(guild_nr)) ||
-            (!IS_JINTO(ch) && TRAIN_ARCANE_ARCHER(guild_nr)) ||
-	    (!IS_TSUNA(ch) && TRAIN_ARCANE_TRICKSTER(guild_nr)) ||
-	    (!IS_KURZAK(ch) && TRAIN_ARCHMAGE(guild_nr)) ||
-            (!IS_ASSASSIN(ch) && TRAIN_ASSASSIN(guild_nr)) ||
-            (!IS_BLACKGUARD(ch) && TRAIN_BLACKGUARD(guild_nr)) ||
-            (!IS_DRAGON_DISCIPLE(ch) && TRAIN_DRAGON_DISCIPLE(guild_nr)) ||
-            (!IS_DUELIST(ch) && TRAIN_DUELIST(guild_nr)) ||
-            (!IS_DWARVEN_DEFENDER(ch) && TRAIN_DWARVEN_DEFENDER(guild_nr)) ||
-            (!IS_ELDRITCH_KNIGHT(ch) && TRAIN_ELDRITCH_KNIGHT(guild_nr)) ||
-            (!IS_HIEROPHANT(ch) && TRAIN_HIEROPHANT(guild_nr)) ||
-            (!IS_HORIZON_WALKER(ch) && TRAIN_HORIZON_WALKER(guild_nr)) ||
-            (!IS_LOREMASTER(ch) && TRAIN_LOREMASTER(guild_nr)) ||
-            (!IS_MYSTIC_THEURGE(ch) && TRAIN_MYSTIC_THEURGE(guild_nr)) ||
-            (!IS_SHADOWDANCER(ch) && TRAIN_SHADOWDANCER(guild_nr)) ||
-            (!IS_THAUMATURGIST(ch) && TRAIN_THAUMATURGIST(guild_nr))) {
+	if ((!IS_ROSHI(ch) && TRAIN_WIZARD(guild)) ||
+	    (!IS_PICCOLO(ch) && TRAIN_CLERIC(guild)) ||
+	    (!IS_KRANE(ch) && TRAIN_ROGUE(guild)) ||
+	    (!IS_BARDOCK(ch) && TRAIN_MONK(guild)) ||
+	    (!IS_GINYU(ch) && TRAIN_PALADIN(guild)) ||
+	    (!IS_NAIL(ch) && TRAIN_FIGHTER(guild)) ||
+	    (!IS_FRIEZA(ch) && TRAIN_SORCERER(guild)) ||
+	    (!IS_TAPION(ch) && TRAIN_DRUID(guild)) ||
+	    (!IS_ANDSIX(ch) && TRAIN_BARD(guild)) ||
+	    (!IS_DABURA(ch) && TRAIN_RANGER(guild)) ||
+	    (!IS_KABITO(ch) && TRAIN_BARBARIAN(guild)) ||
+            (!IS_JINTO(ch) && TRAIN_ARCANE_ARCHER(guild)) ||
+	    (!IS_TSUNA(ch) && TRAIN_ARCANE_TRICKSTER(guild)) ||
+	    (!IS_KURZAK(ch) && TRAIN_ARCHMAGE(guild)) ||
+            (!IS_ASSASSIN(ch) && TRAIN_ASSASSIN(guild)) ||
+            (!IS_BLACKGUARD(ch) && TRAIN_BLACKGUARD(guild)) ||
+            (!IS_DRAGON_DISCIPLE(ch) && TRAIN_DRAGON_DISCIPLE(guild)) ||
+            (!IS_DUELIST(ch) && TRAIN_DUELIST(guild)) ||
+            (!IS_DWARVEN_DEFENDER(ch) && TRAIN_DWARVEN_DEFENDER(guild)) ||
+            (!IS_ELDRITCH_KNIGHT(ch) && TRAIN_ELDRITCH_KNIGHT(guild)) ||
+            (!IS_HIEROPHANT(ch) && TRAIN_HIEROPHANT(guild)) ||
+            (!IS_HORIZON_WALKER(ch) && TRAIN_HORIZON_WALKER(guild)) ||
+            (!IS_LOREMASTER(ch) && TRAIN_LOREMASTER(guild)) ||
+            (!IS_MYSTIC_THEURGE(ch) && TRAIN_MYSTIC_THEURGE(guild)) ||
+            (!IS_SHADOWDANCER(ch) && TRAIN_SHADOWDANCER(guild)) ||
+            (!IS_THAUMATURGIST(ch) && TRAIN_THAUMATURGIST(guild))) {
 		snprintf(buf, sizeof(buf), "%s %s", 
 					GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
 		do_tell(keeper, buf, cmd_tell, 0);
 		return (FALSE);
 	}
 
-	if ((IS_HUMAN(ch) && NOTRAIN_HUMAN(guild_nr)) ||
-		 (IS_SAIYAN(ch)   && NOTRAIN_SAIYAN(guild_nr)) ||
-		 (IS_ICER(ch) && NOTRAIN_ICER(guild_nr)) ||
-		 (IS_KONATSU(ch) && NOTRAIN_KONATSU(guild_nr)) ||
-		 (IS_NAMEK(ch) && NOTRAIN_NAMEK(guild_nr)) ||
-		 (IS_MUTANT(ch) && NOTRAIN_MUTANT(guild_nr)) ||
-		 (IS_KANASSAN(ch) && NOTRAIN_KANASSAN(guild_nr)) ||
- 		 (IS_ANDROID(ch) && NOTRAIN_ANDROID(guild_nr)) ||
-		 (IS_BIO(ch) && NOTRAIN_BIO(guild_nr)) ||
-		 (IS_DEMON(ch) && NOTRAIN_DEMON(guild_nr)) ||
- 		 (IS_MAJIN(ch) && NOTRAIN_MAJIN(guild_nr)) ||
- 		 (IS_KAI(ch) && NOTRAIN_KAI(guild_nr)) ||
- 		 (IS_TRUFFLE(ch) && NOTRAIN_TRUFFLE(guild_nr)) ||
- 		 (IS_HOSHIJIN(ch) && NOTRAIN_GOBLIN(guild_nr)) ||
- 		 (IS_ANIMAL(ch) && NOTRAIN_ANIMAL(guild_nr)) ||
- 		 (IS_SAIBA(ch) && NOTRAIN_ORC(guild_nr)) ||
- 		 (IS_SERPENT(ch) && NOTRAIN_SNAKE(guild_nr)) ||
-		 (IS_OGRE(ch) && NOTRAIN_TROLL(guild_nr)) ||
- 		 (IS_HALFBREED(ch) && NOTRAIN_HALFBREED(guild_nr)) ||
- 		 (IS_YARDRATIAN(ch) && NOTRAIN_MINOTAUR(guild_nr)) ||
- 		 (IS_ARLIAN(ch) && NOTRAIN_KOBOLD(guild_nr))) {
+	if ((IS_HUMAN(ch) && NOTRAIN_HUMAN(guild)) ||
+		 (IS_SAIYAN(ch)   && NOTRAIN_SAIYAN(guild)) ||
+		 (IS_ICER(ch) && NOTRAIN_ICER(guild)) ||
+		 (IS_KONATSU(ch) && NOTRAIN_KONATSU(guild)) ||
+		 (IS_NAMEK(ch) && NOTRAIN_NAMEK(guild)) ||
+		 (IS_MUTANT(ch) && NOTRAIN_MUTANT(guild)) ||
+		 (IS_KANASSAN(ch) && NOTRAIN_KANASSAN(guild)) ||
+ 		 (IS_ANDROID(ch) && NOTRAIN_ANDROID(guild)) ||
+		 (IS_BIO(ch) && NOTRAIN_BIO(guild)) ||
+		 (IS_DEMON(ch) && NOTRAIN_DEMON(guild)) ||
+ 		 (IS_MAJIN(ch) && NOTRAIN_MAJIN(guild)) ||
+ 		 (IS_KAI(ch) && NOTRAIN_KAI(guild)) ||
+ 		 (IS_TRUFFLE(ch) && NOTRAIN_TRUFFLE(guild)) ||
+ 		 (IS_HOSHIJIN(ch) && NOTRAIN_GOBLIN(guild)) ||
+ 		 (IS_ANIMAL(ch) && NOTRAIN_ANIMAL(guild)) ||
+ 		 (IS_SAIBA(ch) && NOTRAIN_ORC(guild)) ||
+ 		 (IS_SERPENT(ch) && NOTRAIN_SNAKE(guild)) ||
+		 (IS_OGRE(ch) && NOTRAIN_TROLL(guild)) ||
+ 		 (IS_HALFBREED(ch) && NOTRAIN_HALFBREED(guild)) ||
+ 		 (IS_YARDRATIAN(ch) && NOTRAIN_MINOTAUR(guild)) ||
+ 		 (IS_ARLIAN(ch) && NOTRAIN_KOBOLD(guild))) {
 		snprintf(buf, sizeof(buf), "%s %s", 
 					GET_NAME(ch), MSG_TRAINER_DISLIKE_RACE);
 		do_tell(keeper, buf, cmd_tell, 0);
@@ -571,27 +572,27 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
 }
 
 
-int is_guild_ok(struct char_data * keeper, struct char_data * ch, int guild_nr)
+int is_guild_ok(struct char_data * keeper, struct char_data * ch, struct guild_data *guild)
 {
-	if (is_guild_open(keeper, guild_nr, TRUE))
-		return (is_guild_ok_char(keeper, ch, guild_nr));
+	if (is_guild_open(keeper, guild, TRUE))
+		return (is_guild_ok_char(keeper, ch, guild));
 
 	return (FALSE);
 }
 
 
-int does_guild_know(int guild_nr, int i)
+int does_guild_know(struct guild_data *guild, int i)
 {
   if(i < 0 || i >= SKILL_TABLE_SIZE)
     return (FALSE);
-  return ((int)(guild_index[guild_nr].skills[i]));
+  return ((int)(guild->skills[i]));
 }
 
-int does_guild_know_feat(int guild_nr, int i)
+int does_guild_know_feat(struct guild_data *guild, int i)
 {
   if(i < 0 || i >= NUM_FEATS_DEFINED)
     return (FALSE);
-  return ((int)(guild_index[guild_nr].feats[i]));
+  return ((int)(guild->feats[i]));
 }
 
 
@@ -609,7 +610,7 @@ void sort_spells(void)
 
 /* this and list skills should probally be combined.  perhaps in the
  * next release?  */
-void what_does_guild_know(int guild_nr, struct char_data * ch)
+void what_does_guild_know(struct guild_data *guild, struct char_data * ch)
 {
   const char *overflow = "\r\n**OVERFLOW**\r\n";
   char buf2[MAX_STRING_LENGTH];
@@ -624,7 +625,7 @@ void what_does_guild_know(int guild_nr, struct char_data * ch)
   /* Need to check if trainer can train doesnt do it now ??? */
   for (sortpos = 0; sortpos < SKILL_TABLE_SIZE; sortpos++) {
     i = sortpos; /* spell_sort_info[sortpos]; */
-    if (does_guild_know(guild_nr, i) && skill_type(i) == SKTYPE_SKILL) {
+    if (does_guild_know(guild, i) && skill_type(i) == SKTYPE_SKILL) {
       for (canknow = 0, k = 0, j = 0; j < NUM_CLASSES; j++)
         if (GET_CLASS_RANKS(ch, j) > 0 && (spell_info[i].can_learn_skill[j] > SKLEARN_CANT)) {
           k = spell_info[i].can_learn_skill[j];
@@ -655,7 +656,7 @@ void what_does_guild_know(int guild_nr, struct char_data * ch)
 
   for (sortpos = 1; sortpos <= NUM_FEATS_DEFINED; sortpos++) {
     i = feat_sort_info[sortpos];
-    if (does_guild_know_feat(guild_nr, i) && feat_is_available(ch, i, 0, NULL) && feat_list[i].in_game && feat_list[i].can_learn) {
+    if (does_guild_know_feat(guild, i) && feat_is_available(ch, i, 0, NULL) && feat_list[i].in_game && feat_list[i].can_learn) {
       nlen = snprintf(buf2 + len, sizeof(buf2) - len, "@b%-20s@n\r\n", feat_list[i].name);
       if (len + nlen >= sizeof(buf2) || nlen < 0)
         break;
@@ -668,7 +669,7 @@ void what_does_guild_know(int guild_nr, struct char_data * ch)
 
   for (sortpos = 0; sortpos < SKILL_TABLE_SIZE; sortpos++) {
     i = sortpos; /* spell_sort_info[sortpos]; */
-    if (does_guild_know(guild_nr, i) && IS_SET(skill_type(i), SKTYPE_LANG)) {
+    if (does_guild_know(guild, i) && IS_SET(skill_type(i), SKTYPE_LANG)) {
       //if (GET_LEVEL(ch) >= spell_info[i].min_level[(int) GET_CLASS(ch)]) {
         for (canknow = 0, j = 0; j < NUM_CLASSES; j++)
 	  if (spell_info[i].can_learn_skill[j] > canknow)
@@ -785,7 +786,7 @@ int prereq_pass(struct char_data *ch, int snum)
 }
 
 
-void handle_forget(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
+void handle_forget(struct char_data *keeper, struct guild_data *guild, struct char_data *ch, char *argument)
 {
 
  int skill_num;
@@ -829,7 +830,7 @@ void handle_forget(struct char_data *keeper, int guild_nr, struct char_data *ch,
 
 }
 
-void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
+void handle_grand(struct char_data *keeper, struct guild_data *guild, struct char_data *ch, char *argument)
 {
 
  int skill_num;
@@ -853,8 +854,8 @@ void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, 
  }
  char buf[MAX_STRING_LENGTH];
 
- if (!(does_guild_know(guild_nr, skill_num))) {
-   snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, GET_NAME(ch));
+ if (!(does_guild_know(guild, skill_num))) {
+   snprintf(buf, sizeof(buf), GM_NO_SKILL(guild), GET_NAME(ch));
    do_tell(keeper, buf, cmd_tell, 0);
    return;
  }
@@ -884,7 +885,7 @@ void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, 
 
 }
 
-void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
+void handle_practice(struct char_data *keeper, struct guild_data *guild, struct char_data *ch, char *argument)
 {
   //int percent = GET_SKILL(ch, skill);
   int skill_num, learntype, pointcost, highest, i;
@@ -893,7 +894,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
   skip_spaces(&argument);
 
   if (!*argument) {
-    what_does_guild_know(guild_nr, ch);
+    what_does_guild_know(guild, ch);
     return;
   }
 
@@ -923,8 +924,8 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
   }
 
   /****  Does the GM know the skill the player wants to learn?  ****/
-  if (!(does_guild_know(guild_nr, skill_num))) {
-    snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, GET_NAME(ch));
+  if (!(does_guild_know(guild, skill_num))) {
+    snprintf(buf, sizeof(buf), GM_NO_SKILL(guild), GET_NAME(ch));
     do_tell(keeper, buf, cmd_tell, 0);
     return;
   }
@@ -936,7 +937,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
         learntype = spell_info[skill_num].can_learn_skill[i];
     switch (learntype) {
     case SKLEARN_CANT:
-      snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, GET_NAME(ch));
+      snprintf(buf, sizeof(buf), GM_NO_SKILL(guild), GET_NAME(ch));
       do_tell(keeper, buf, cmd_tell, 0);
       return;
     case SKLEARN_CROSSCLASS:
@@ -1047,13 +1048,13 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
              pointcost, (pointcost == 1) ? "" : "s");
     }
   } else {
-    snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, GET_NAME(ch));
+      snprintf(buf, sizeof(buf), GM_NO_SKILL(guild), GET_NAME(ch));
     do_tell(keeper, buf, cmd_tell, 0);
   }
 }
 
 
-void handle_train(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
+void handle_train(struct char_data *keeper, struct guild_data *guild, struct char_data *ch, char *argument)
 {
   skip_spaces(&argument);
   if (!argument || !*argument)
@@ -1099,7 +1100,7 @@ void handle_train(struct char_data *keeper, int guild_nr, struct char_data *ch, 
 }
 
 
-void handle_gain(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
+void handle_gain(struct char_data *keeper, struct guild_data *guild, struct char_data *ch, char *argument)
 {
   int whichclass = GET_CLASS(ch);
 
@@ -1148,7 +1149,7 @@ int rpp_to_level(struct char_data *ch) {
     }
 }
 
-void handle_exp(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
+void handle_exp(struct char_data *keeper, struct guild_data *guild, struct char_data *ch, char *argument)
 {
  if (GET_PRACTICES(ch, GET_CLASS(ch)) < 25) {
     send_to_char(ch, "You need at least 25 practice sessions to learn.\r\n");
@@ -1178,7 +1179,7 @@ void handle_exp(struct char_data *keeper, int guild_nr, struct char_data *ch, ch
  }
 }
 
-void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
+void handle_study(struct char_data *keeper, struct guild_data *guild, struct char_data *ch, char *argument)
 {
 
  int expcost = 25000, goldcost = 750, fail = FALSE, reward = 25, goldadjust = 0, expadjust = 0;
@@ -1238,7 +1239,7 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
 
 }
 
-void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
+void handle_learn(struct char_data *keeper, struct guild_data *guild, struct char_data *ch, char *argument)
 {
   int feat_num, subval, sftype, subfeat;
   char *ptr;
@@ -1262,8 +1263,8 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
   if (ptr)
     *ptr = ':';
 
-  if (!(does_guild_know_feat(guild_nr, feat_num))) {
-    snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, GET_NAME(ch));
+  if (!(does_guild_know_feat(guild, feat_num))) {
+    snprintf(buf, sizeof(buf), GM_NO_SKILL(guild), GET_NAME(ch));
     do_tell(keeper, buf, cmd_tell, 0);
     return;
   }
@@ -1521,11 +1522,12 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
 SPECIAL(guild)
 {
   char arg[MAX_INPUT_LENGTH];
-  int guild_nr, i;
+  int i;
   struct char_data *keeper = (struct char_data *) me;
+  struct guild_data *guild = NULL;
   struct {
     const char *cmd;
-    void (*func)(struct char_data *, int, struct char_data *, char *);
+    void (*func)(struct char_data *, struct guild_data *, struct char_data *, char *);
   } guild_cmd_tab[] = {
     { "practice",	handle_practice },
     { "gain",		handle_gain },
@@ -1535,15 +1537,19 @@ SPECIAL(guild)
     { NULL,		NULL }
   };
 
-  for (guild_nr = 0; guild_nr <= top_guild; guild_nr++)
-    if (GM_TRAINER(guild_nr) == keeper->vnum)
-      break;
+  guild_iterate([&](auto g) {
+    if (GM_TRAINER(g) == keeper->vnum) {
+      guild = g;
+      return false;
+    }
+    return true;
+  });
 
-  if (guild_nr > top_guild)
+  if (!guild)
     return (FALSE);
 
-  if (GM_FUNC(guild_nr))
-    if ((GM_FUNC(guild_nr)) (ch, me, cmd, arg))
+  if (GM_FUNC(guild))
+    if ((GM_FUNC(guild)) (ch, me, cmd, arg))
       return (TRUE);
 
   /*** Is the GM able to train?    ****/
@@ -1557,10 +1563,10 @@ SPECIAL(guild)
   if (!guild_cmd_tab[i].cmd)
     return (FALSE);
 
-  if (!(is_guild_ok(keeper, ch, guild_nr)))
+  if (!(is_guild_ok(keeper, ch, guild)))
     return (TRUE);
 
-  (guild_cmd_tab[i].func)(keeper, guild_nr, ch, argument);
+  (guild_cmd_tab[i].func)(keeper, guild, ch, argument);
 
   return (TRUE);
 }
@@ -1568,12 +1574,12 @@ SPECIAL(guild)
 
 /**** This function is here just because I'm extremely paranoid.  Take
       it out if you aren't ;)  ****/
-void clear_skills(int gdindex)
+void clear_skills(struct guild_data *guild)
 {
   int i;
 
   for  (i = 0; i < SKILL_TABLE_SIZE; i++) 
-    guild_index[gdindex].skills[i] = 0;
+    guild->skills[i] = 0;
 }
 
 
@@ -1585,7 +1591,7 @@ void read_guild_line(FILE * gm_f, char *string, void *data, char *type)
 	char buf[MAX_STRING_LENGTH];
 	
 	if (!get_line(gm_f, buf) || !sscanf(buf, string, data)) {
-		fprintf(stderr, "Error in guild #%d, Could not get %s\n", GM_NUM(top_guild), type);
+		fprintf(stderr, "Error in guild, Could not get %s\n", type);
 		exit(1);
 	}
 }
@@ -1606,13 +1612,14 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
       sscanf(buf, "#%d\n", &temp);
       snprintf(buf2, sizeof(buf2), "GM #%d in GM file %s", temp, filename);
       free(buf); /* Plug memory leak! */
-      top_guild++;
-      if (!top_guild)
-        CREATE(guild_index, struct guild_data, rec_count);
-      struct guild_data *guild = &guild_index[top_guild];
-      GM_NUM(top_guild) = temp;
 
-      clear_skills(top_guild);
+      
+      struct guild_data *guild = NULL;
+      CREATE(guild, struct guild_data, 1);
+
+      GM_NUM(guild) = temp;
+
+      clear_skills(guild);
       get_line(gm_f, buf3);
       rv = sscanf(buf3, "%d %d", &t1, &t2);
       while (t1 > -1)
@@ -1645,19 +1652,19 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
         get_line(gm_f, buf3);
         rv = sscanf(buf3, "%d %d", &t1, &t2);
       }
-      read_guild_line(gm_f, "%f", &GM_CHARGE(top_guild), "GM_CHARGE");
+      read_guild_line(gm_f, "%f", &GM_CHARGE(guild), "GM_CHARGE");
       guild->no_such_skill = fread_string(gm_f, buf2);
       guild->not_enough_gold = fread_string(gm_f, buf2);
 
-      read_guild_line(gm_f, "%d", &GM_MINLVL(top_guild), "GM_MINLVL");
-      read_guild_line(gm_f, "%d", &GM_TRAINER(top_guild), "GM_TRAINER");
+      read_guild_line(gm_f, "%d", &GM_MINLVL(guild), "GM_MINLVL");
+      read_guild_line(gm_f, "%d", &GM_TRAINER(guild), "GM_TRAINER");
 
-      read_guild_line(gm_f, "%d", &GM_WITH_WHO(top_guild)[0], "GM_WITH_WHO");
+      read_guild_line(gm_f, "%d", &GM_WITH_WHO(guild)[0], "GM_WITH_WHO");
 
-      read_guild_line(gm_f, "%d", &GM_OPEN(top_guild), "GM_OPEN");
-      read_guild_line(gm_f, "%d", &GM_CLOSE(top_guild), "GM_CLOSE");
+      read_guild_line(gm_f, "%d", &GM_OPEN(guild), "GM_OPEN");
+      read_guild_line(gm_f, "%d", &GM_CLOSE(guild), "GM_CLOSE");
 
-      GM_FUNC(top_guild) = NULL;
+      GM_FUNC(guild) = NULL;
       CREATE(buf, char, READ_SIZE);
       get_line(gm_f, buf);
       if (buf && *buf != '#' && *buf != '$')
@@ -1672,7 +1679,7 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
             log("SYSERR: Can't parse GM_WITH_WHO line in %s: '%s'", buf2, buf);
             break;
           }
-          GM_WITH_WHO(top_guild)
+          GM_WITH_WHO(guild)
           [temp] = val;
           while (isdigit(*p) || *p == '-')
           {
@@ -1684,9 +1691,10 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
           }
         }
         while (temp < GW_ARRAY_MAX)
-          GM_WITH_WHO(top_guild)
+          GM_WITH_WHO(guild)
           [temp++] = 0;
         free(buf);
+        guild_put(GM_NUM(guild), guild);
         buf = fread_string(gm_f, buf2);
       }
     }
@@ -1701,22 +1709,20 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
 
 void assign_the_guilds(void)
 {
-  int gdindex;
-
-  for (gdindex = 0; gdindex <= top_guild; gdindex++)
-  {
-    auto keeper = mob_proto_by_id(GM_TRAINER(gdindex));
+  guild_iterate([&](auto g) {
+    auto keeper = mob_proto_by_id(GM_TRAINER(g));
     if (!keeper)
-      continue;
+      return true;
 
     if (mob_proto_special_get(GET_MOB_VNUM(keeper)) && mob_proto_special_get(GET_MOB_VNUM(keeper)) != guild)
-      GM_FUNC(gdindex) = mob_proto_special_get(GET_MOB_VNUM(keeper));
+      GM_FUNC(g) = mob_proto_special_get(GET_MOB_VNUM(keeper));
 
     mob_proto_special_set(GET_MOB_VNUM(keeper), guild);
-  }
+    return true;
+  });
 }
 
-char *guild_customer_string(int guild_nr, int detailed)
+char *guild_customer_string(struct guild_data *guild, int detailed)
 {
   int gindex = 0, flag = 0, nlen;
   size_t len = 0;
@@ -1724,7 +1730,7 @@ char *guild_customer_string(int guild_nr, int detailed)
 
   while (*trade_letters[gindex] != '\n' && len + 1 < sizeof(buf)) {
     if (detailed) {
-      if (!IS_SET_AR(GM_WITH_WHO(guild_nr), flag)) {
+      if (!IS_SET_AR(GM_WITH_WHO(guild), flag)) {
 	nlen = snprintf(buf + len, sizeof(buf) - len, ", %s", trade_letters[gindex]);
 
         if (len + nlen >= sizeof(buf) || nlen < 0)
@@ -1733,7 +1739,7 @@ char *guild_customer_string(int guild_nr, int detailed)
         len += nlen;
       }
     } else {
-      buf[len++] = (IS_SET_AR(GM_WITH_WHO(guild_nr), flag) ? '_' : *trade_letters[gindex]);
+      buf[len++] = (IS_SET_AR(GM_WITH_WHO(guild), flag) ? '_' : *trade_letters[gindex]);
       buf[len] = '\0';
 
       if (len >= sizeof(buf))
@@ -1758,7 +1764,10 @@ void list_all_guilds(struct char_data *ch)
   char buf[MAX_STRING_LENGTH], buf1[16];
 
   *buf = '\0';
-  for (gm_nr = 0; gm_nr <= top_guild && len < sizeof(buf); gm_nr++) {
+  gm_nr = 0;
+  guild_iterate([&](auto guild) {
+    if (len >= sizeof(buf))
+      return false;
   /* New page in page_string() mechanism, print the header again. */
     if (!(gm_nr % (PAGE_LENGTH - 2))) {
     /*
@@ -1766,12 +1775,12 @@ void list_all_guilds(struct char_data *ch)
      * for is the header, then don't add it and just quit now.
      */
     if (len + headerlen + 1 >= sizeof(buf))
-      break;
+      return false;
     strcpy(buf + len, list_all_guilds_header);	/* strcpy: OK (length checked above) */
     len += headerlen;
     }
 
-    auto keeper = mob_proto_by_id(GM_TRAINER(gm_nr));
+    auto keeper = mob_proto_by_id(GM_TRAINER(guild));
 
     if (!keeper)
       strcpy(buf1, "<NONE>");  /* strcpy: OK (for 'buf1 >= 7') */
@@ -1779,20 +1788,22 @@ void list_all_guilds(struct char_data *ch)
       sprintf(buf1, "%6d", keeper->vnum);  /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */	
 
     len += snprintf(buf + len, sizeof(buf) - len, "%6d	%s		%5.2f	%s\r\n",
-      GM_NUM(gm_nr), buf1, GM_CHARGE(gm_nr), guild_customer_string(gm_nr, FALSE));
-  }
+      GM_NUM(guild), buf1, GM_CHARGE(guild), guild_customer_string(guild, FALSE));
+    gm_nr++;
+    return true;
+  });
 
   page_string(ch->desc, buf, TRUE);
 }
 
 
-void list_detailed_guild(struct char_data * ch, int gm_nr)
+void list_detailed_guild(struct char_data * ch, struct guild_data *guild)
 {
   int i;
   char buf[MAX_STRING_LENGTH];
   char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 
-  auto keeper = mob_proto_by_id(GM_TRAINER(gm_nr));
+  auto keeper = mob_proto_by_id(GM_TRAINER(guild));
 
   if (!keeper)
     strcpy(buf1, "<NONE>");
@@ -1800,10 +1811,10 @@ void list_detailed_guild(struct char_data * ch, int gm_nr)
     sprintf(buf1, "%6d   ", keeper->vnum);
 
   sprintf(buf, " Guild Master: %s\r\n", buf1);
-  sprintf(buf, "%s Hours: %4d to %4d,  Surcharge: %5.2f\r\n", buf,
-			  GM_OPEN(gm_nr), GM_CLOSE(gm_nr), GM_CHARGE(gm_nr));
-  sprintf(buf, "%s Min Level will train: %d\r\n", buf, GM_MINLVL(gm_nr));
-  sprintf(buf, "%s Whom will train: %s\r\n", buf, guild_customer_string(gm_nr, TRUE));
+	sprintf(buf, "%s Hours: %4d to %4d,  Surcharge: %5.2f\r\n", buf,
+			  GM_OPEN(guild), GM_CLOSE(guild), GM_CHARGE(guild));
+  sprintf(buf, "%s Min Level will train: %d\r\n", buf, GM_MINLVL(guild));
+  sprintf(buf, "%s Whom will train: %s\r\n", buf, guild_customer_string(guild, TRUE));
 
    /* now for the REAL reason why someone would want to see a Guild :) */
 
@@ -1811,7 +1822,7 @@ void list_detailed_guild(struct char_data * ch, int gm_nr)
 
   *buf2 = '\0';
   for (i = 0; i < SKILL_TABLE_SIZE; i++) {
-    if (does_guild_know(gm_nr, i))
+    if (does_guild_know(guild, i))
       sprintf(buf2, "%s %s \r\n", buf2, spell_info[i].name);
   }
  
@@ -1823,7 +1834,7 @@ void list_detailed_guild(struct char_data * ch, int gm_nr)
 
 void show_guild(struct char_data * ch, char *arg)
 {
-  int gm_nr, gm_num;
+  int gm_num;
 
   if (!*arg)
     list_all_guilds(ch);
@@ -1834,16 +1845,13 @@ void show_guild(struct char_data * ch, char *arg)
       gm_num = -1;
 
     if (gm_num > 0) {
-      for (gm_nr = 0; gm_nr <= top_guild; gm_nr++) {
-      if (gm_num == GM_NUM(gm_nr))
-        break; 
-      }
+      auto guild = guild_by_id(gm_num);
 
-      if (gm_num < 0 || gm_nr > top_guild) {
+      if (gm_num < 0 || !guild) {
         send_to_char(ch, "Illegal guild master number.\n\r");
         return;
       }
-      list_detailed_guild(ch, gm_nr);
+      list_detailed_guild(ch, guild);
     }
   }
 }
@@ -1870,11 +1878,10 @@ void list_guilds(struct char_data *ch, struct zone_data *zone, guild_vnum vmin, 
   "Index VNum    Guild Master\r\n"
   "----- ------- ---------------------------------------------\r\n");
   
-  if (!top_guild)
-    return;
-
   for (i = bottom; i <= top; i++) {
     auto guild = guild_by_id(i);
+    if (!guild)
+      continue;
     counter++;
       
     send_to_char(ch, "@g%4d@n) [@c%-5d@n]", counter, guild->vnum);
@@ -1897,33 +1904,27 @@ void list_guilds(struct char_data *ch, struct zone_data *zone, guild_vnum vmin, 
 
 void destroy_guilds(void)
 {
-  ssize_t cnt/*, itr*/;
-
-  if (!guild_index)
-    return;
-
-  for (cnt = 0; cnt <= top_guild; cnt++) {
-    if (guild_index[cnt].no_such_skill)
-      free(guild_index[cnt].no_such_skill);
-    if (guild_index[cnt].not_enough_gold)
-      free(guild_index[cnt].not_enough_gold);
-  }
-
-  free(guild_index);
-  guild_index = NULL;
-  top_guild = -1;
+  guild_iterate([&](auto guild) {
+    guild_vnum vnum = GM_NUM(guild);
+    if (GM_NO_SKILL(guild))
+      free(GM_NO_SKILL(guild));
+    if (GM_NO_GOLD(guild))
+      free(GM_NO_GOLD(guild));
+    guild_delete(vnum);
+    free(guild);
+    return true;
+  });
 }
 
 
 int count_guilds(guild_vnum low, guild_vnum high)
 {
-  int i, j;
-  
-  for (i = j = 0; (GM_NUM(i) <= high && i <= top_guild); i++) {
-    if (GM_NUM(i) >= low) {
+  int j = 0;
+  guild_iterate([&](auto guild) {
+    if (GM_NUM(guild) >= low && GM_NUM(guild) <= high)
       j++;
-    }
-  }
+    return true;
+  });
  
   return j;
 }

@@ -35,11 +35,11 @@ void redit_save_internally(struct descriptor_data *d);
 void oedit_save_internally(struct descriptor_data *d);
 void medit_save_internally(struct descriptor_data *d);
 void sedit_save_internally(struct descriptor_data *d);
-void trigedit_setup_existing(struct descriptor_data *d, room_vnum num);
-void redit_setup_existing(struct descriptor_data *d, int rnum);
-void oedit_setup_existing(struct descriptor_data *d, int rnum);
-void medit_setup_existing(struct descriptor_data *d, int rnum);
-void sedit_setup_existing(struct descriptor_data *d, int rnum);
+void trigedit_setup_existing(struct descriptor_data *d, trig_vnum num);
+void redit_setup_existing(struct descriptor_data *d, room_vnum num);
+void oedit_setup_existing(struct descriptor_data *d, obj_vnum num);
+void medit_setup_existing(struct descriptor_data *d, mob_vnum num);
+void sedit_setup_existing(struct descriptor_data *d, shop_vnum num);
 
 
 /***********************************************************
@@ -59,7 +59,7 @@ ACMD(do_oasis_copy)
     int con_type;
     IDXTYPE (*binary_search)(IDXTYPE vnum);
     void (*save_func)(struct descriptor_data *d);
-    void (*setup_existing)(struct descriptor_data *d, int rnum);
+    void (*setup_existing)(struct descriptor_data *d, IDXTYPE rnum);
     const char *command;
     const char *text;
   } oasis_copy_info[] = {
