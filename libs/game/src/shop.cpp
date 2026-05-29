@@ -421,7 +421,7 @@ static int same_obj(struct obj_data *obj1, struct obj_data *obj2)
   if (!obj1 || !obj2)
     return (obj1 == obj2);
 
-  if (GET_OBJ_RNUM(obj1) != GET_OBJ_RNUM(obj2))
+  if (GET_OBJ_VNUM(obj1) != GET_OBJ_VNUM(obj2))
     return (FALSE);
 
   if (GET_OBJ_COST(obj1) != GET_OBJ_COST(obj2))
@@ -450,11 +450,11 @@ int shop_producing(struct obj_data *item, int shop_nr)
 {
   int counter;
 
-  if (GET_OBJ_RNUM(item) == NOTHING)
+  if (GET_OBJ_VNUM(item) == NOTHING)
     return (FALSE);
 
   for (counter = 0; SHOP_PRODUCT(shop_nr, counter) != NOTHING; counter++)
-    if (same_obj(item, &obj_proto[SHOP_PRODUCT(shop_nr, counter)]))
+    if (same_obj(item, obj_proto_by_id(SHOP_PRODUCT(shop_nr, counter))))
       return (TRUE);
   return (FALSE);
 }
@@ -863,7 +863,7 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
     bought++;
     /* Test if producing shop ! */
     if (shop_producing(obj, shop_nr)) {
-      obj = read_object(GET_OBJ_RNUM(obj), REAL);
+      obj = read_object(obj->vnum, VIRTUAL);
       add_unique_id(obj);
     } else {
       obj_from_char(obj);
@@ -983,9 +983,9 @@ static struct obj_data *slide_obj(struct obj_data *obj, struct char_data *keeper
 
   /* Extract the object if it is identical to one produced */
   if (shop_producing(obj, shop_nr)) {
-    temp = GET_OBJ_RNUM(obj);
+    temp = GET_OBJ_VNUM(obj);
     extract_obj(obj);
-    return (&obj_proto[temp]);
+    return obj_proto_by_id(temp);
   }
   SHOP_SORT(shop_nr)++;
   loop = keeper->carrying;
@@ -1750,9 +1750,10 @@ static void list_detailed_shop(struct char_data *ch, int shop_nr)
       send_to_char(ch, ", ");
       column += 2;
     }
+    auto obj = obj_proto_by_id(SHOP_PRODUCT(shop_nr, sindex));
     linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)",
-		obj_proto[SHOP_PRODUCT(shop_nr, sindex)].short_description,
-		obj_index[SHOP_PRODUCT(shop_nr, sindex)].vnum);
+		obj->short_description,
+		obj->vnum);
 
     /* Implementing word-wrapping: assumes screen-size == 80 */
     if (linelen + column >= 78 && column >= 20) {

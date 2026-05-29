@@ -292,7 +292,7 @@ void assign_triggers(void *i, int type)
         rnum = real_trigger(trg_proto->vnum);
         if (rnum==NOTHING) {
           log("SYSERR: trigger #%d non-existant, for obj #%d",
-            trg_proto->vnum, obj_index[obj->item_number].vnum);
+            trg_proto->vnum, obj->vnum);
         } else {
           if (!SCRIPT(obj))
             CREATE(SCRIPT(obj), struct script_data, 1);

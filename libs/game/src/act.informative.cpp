@@ -2778,7 +2778,7 @@ static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mo
     if (CONFIG_STACK_OBJS) {
       for (j = list; j != i; j = j->next_content)
        if ((!strcasecmp(j->short_description, i->short_description) && !strcasecmp(j->description, i->description)) &&
-            (j->item_number == i->item_number) && ((OBJ_FLAGGED(j, ITEM_BROKEN) && OBJ_FLAGGED(i, ITEM_BROKEN)) || (!OBJ_FLAGGED(j, ITEM_BROKEN) && !OBJ_FLAGGED(i, ITEM_BROKEN))))
+            (j->vnum == i->vnum) && ((OBJ_FLAGGED(j, ITEM_BROKEN) && OBJ_FLAGGED(i, ITEM_BROKEN)) || (!OBJ_FLAGGED(j, ITEM_BROKEN) && !OBJ_FLAGGED(i, ITEM_BROKEN))))
          if ((!SITTING(j) && !SITTING(i)))
           if (GET_OBJ_VAL(j, 6) == GET_OBJ_VAL(i, 6))
             if ((GET_OBJ_TYPE(j) != ITEM_PLANT && GET_OBJ_TYPE(i) != ITEM_PLANT) || (GET_OBJ_TYPE(j) == ITEM_PLANT && GET_OBJ_TYPE(i) == ITEM_PLANT && GET_OBJ_VAL(j, VAL_MATURITY) == GET_OBJ_VAL(i, VAL_MATURITY) && GET_OBJ_VAL(j, VAL_WATERLEVEL) == GET_OBJ_VAL(i, VAL_WATERLEVEL)))
@@ -2791,7 +2791,7 @@ static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mo
         continue;
       for (d = j = i; j; j = j->next_content)
        if ((!strcasecmp(j->short_description, i->short_description) && !strcasecmp(j->description, i->description)) &&
-            (j->item_number == i->item_number) && ((OBJ_FLAGGED(j, ITEM_BROKEN) && OBJ_FLAGGED(i, ITEM_BROKEN)) || (!OBJ_FLAGGED(j, ITEM_BROKEN) && !OBJ_FLAGGED(i, ITEM_BROKEN))))
+            (j->vnum == i->vnum) && ((OBJ_FLAGGED(j, ITEM_BROKEN) && OBJ_FLAGGED(i, ITEM_BROKEN)) || (!OBJ_FLAGGED(j, ITEM_BROKEN) && !OBJ_FLAGGED(i, ITEM_BROKEN))))
          if ((!SITTING(j) && !SITTING(i)))
           if (GET_OBJ_POSTTYPE(j) == 0 && GET_OBJ_POSTTYPE(i) == 0)
            if (GET_OBJ_VAL(j, 6) == GET_OBJ_VAL(i, 6))

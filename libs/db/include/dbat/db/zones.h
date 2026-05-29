@@ -125,6 +125,15 @@ extern struct reset_q_type reset_q;	/* queue of zones to be reset	 */
 
 zone_rnum real_zone(zone_vnum vnum);
 struct zone_data *zone_by_id(zone_vnum vnum);
+struct zone_data *zone_get(zone_vnum vnum);
+
+void* zone_iterator_create();
+struct zone_data* zone_next(void* iterator);
+void zone_iterator_free(void* iterator);
+
+void zone_put(zone_vnum vnum, struct zone_data *zone);
+void zone_delete(zone_vnum vnum);
+size_t zone_count();
 
 #ifdef __cplusplus
 }

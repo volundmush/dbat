@@ -214,13 +214,15 @@ fn exportObjPrototype(vnum: cdb.obj_vnum, filename: []const u8) !void {
 
 fn exportObjPrototypes(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.obj_proto == null or cdb.obj_index == null) return;
-    if (cdb.top_of_objt < 0) return;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_of_objt))) : (index += 1) {
-        const path = try assetPath(folder, cdb.obj_index[index].vnum);
+    const iterator = cdb.obj_proto_iterator_create() orelse return;
+    defer cdb.obj_proto_iterator_free(iterator);
+
+    while (cdb.obj_proto_next(iterator)) |obj| {
+        const vnum = cdb.obj_vnum_get(obj);
+        if (vnum == cdb.NOTHING) continue;
+        const path = try assetPath(folder, vnum);
         defer std.heap.page_allocator.free(path);
-        try exportObjPrototype(cdb.obj_index[index].vnum, path);
+        try exportObjPrototype(vnum, path);
     }
 }
 
@@ -232,14 +234,13 @@ fn exportZone(vnum: cdb.zone_vnum, filename: []const u8) !void {
 
 fn exportZones(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.zone_table == null) return;
-    if (cdb.top_of_zone_table < 0) return;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_of_zone_table))) : (index += 1) {
-        const zone = ptrAt(cdb.zone_data, cdb.zone_table, index);
-        const path = try assetPath(folder, zone.number);
+    const iterator = cdb.zone_iterator_create() orelse return;
+    defer cdb.zone_iterator_free(iterator);
+
+    while (cdb.zone_next(iterator)) |zone| {
+        const path = try assetPath(folder, zone.*.number);
         defer std.heap.page_allocator.free(path);
-        try exportZone(zone.number, path);
+        try exportZone(zone.*.number, path);
     }
 }
 
@@ -407,6 +408,7 @@ fn importZones(folder: []const u8) !void {
             logImportFileError("zones", file, err);
             return err;
         };
+        cdb.zone_put(zone.number, zone);
         progress.tick(index);
     }
 }
@@ -517,17 +519,6 @@ fn importNpcPrototypes(folder: []const u8) !void {
 fn importObjPrototypes(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
     var progress = Progress.init("obj_prototypes", files.len);
-    cdb.obj_proto = try allocCArray(cdb.obj_data, files.len);
-    cdb.obj_index = try allocCArray(cdb.index_data, files.len);
-    cdb.top_of_objt = if (files.len == 0) -1 else @intCast(files.len - 1);
-    resetHtree(&cdb.obj_htree);
-
-    for (files, 0..) |file, index| {
-        cdb.obj_index[index].vnum = @intCast(file.vnum);
-        cdb.obj_index[index].number = 0;
-        cdb.obj_index[index].func = null;
-        cdb.htree_add(cdb.obj_htree, @intCast(file.vnum), @intCast(index));
-    }
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -536,13 +527,14 @@ fn importObjPrototypes(folder: []const u8) !void {
             logImportFileError("obj_prototypes", file, err);
             return err;
         };
-        const obj = ptrAt(cdb.obj_data, cdb.obj_proto, index);
-        obj.item_number = @intCast(index);
+        const obj = try allocCOne(cdb.obj_data);
+        obj.vnum = @intCast(file.vnum);
         objects_json.deserializeObject(obj, .{ .mode = .prototype }, value) catch |err| {
             logImportFileError("obj_prototypes", file, err);
             return err;
         };
-        obj.item_number = @intCast(index);
+        obj.vnum = @intCast(file.vnum);
+        cdb.obj_proto_put(@intCast(file.vnum), obj);
         progress.tick(index);
     }
 }

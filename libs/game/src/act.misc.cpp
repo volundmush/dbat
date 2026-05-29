@@ -5405,7 +5405,7 @@ ACMD(do_spoil)
   *buf3 = '\0';
 
   body_part = create_obj();
-  body_part->item_number = NOTHING;
+  body_part->vnum = NOTHING;
   IN_ROOM(body_part) = NOWHERE;
   snprintf(part, sizeof(part), "%s", obj->name);
   search_replace(part, "headless", "");

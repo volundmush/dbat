@@ -35,10 +35,10 @@ void ASSIGNMOB(mob_vnum mob, SPECIAL(fname))
 
 void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname))
 {
-  obj_rnum rnum;
+  auto proto = obj_proto_by_id(obj);
 
-  if ((rnum = real_object(obj)) != NOTHING)
-    obj_index[rnum].func = fname;
+  if (proto)
+    obj_proto_special_set(obj, fname);
   else if (!mini_mud)
     log("SYSERR: Attempt to assign spec to non-existant obj #%d", obj);
 }

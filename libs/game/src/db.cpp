@@ -359,7 +359,7 @@ static int suntzu_armor_convert(struct obj_data *obj)
     conv = 1;
   }
   log("Converted armor #%d [%s] armor=%d i=%d maxdex=%d acheck=%d sfail=%d",
-      obj_index[obj - obj_proto].vnum, GET_OBJ_SHORT(obj), GET_OBJ_VAL(obj, 0),
+      obj->vnum, GET_OBJ_SHORT(obj), GET_OBJ_VAL(obj, 0),
       i, GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 3), GET_OBJ_VAL(obj, 6));
   return conv;
 }
@@ -671,8 +671,7 @@ void destroy_db(void)
   htree_free(room_htree);
 
   /* Objects */
-  for (cnt = 0; cnt <= top_of_objt; cnt++) {
-    struct obj_data *obj = &obj_proto[cnt];
+  obj_proto_iterate ([&](auto obj) {
     if (obj->name)
       free(obj->name);
     if (obj->description)
@@ -686,10 +685,10 @@ void destroy_db(void)
 
     /* free script proto list */
     free_proto_script(obj, OBJ_TRIGGER);
-  }
-  free(obj_proto);
-  free(obj_index);
-  htree_free(obj_htree);
+    obj_proto_delete(obj->vnum);
+    free(obj);
+    return true;
+  });
 
   /* Mobiles */
   mob_proto_iterate([&](auto mob) {
@@ -1360,11 +1359,9 @@ void index_boot(int mode)
     log("   %d mobs, %d bytes in prototypes.", rec_count, size[1]);
     break;
   case DB_BOOT_OBJ:
-    CREATE(obj_proto, struct obj_data, rec_count);
-    CREATE(obj_index, struct index_data, rec_count);
     size[0] = sizeof(struct index_data) * rec_count;
     size[1] = sizeof(struct obj_data) * rec_count;
-    log("   %d objs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
+    log("   %d objs, %d bytes in prototypes.", rec_count, size[1]);
     break;
   case DB_BOOT_ZON:
     CREATE(zone_table, struct zone_data, rec_count);
@@ -2378,17 +2375,13 @@ static char *parse_object(FILE *obj_f, int nr)
   char f9[READ_SIZE], f10[READ_SIZE], f11[READ_SIZE], f12[READ_SIZE];
   struct extra_descr_data *new_descr;
 
-  obj_index[i].vnum = nr;
-  obj_index[i].number = 0;
-  obj_index[i].func = NULL;
+  struct obj_data *proto = NULL;
+  CREATE(proto, struct obj_data, 1);
+  obj_proto_put(nr, proto);
 
-  if (! obj_htree)
-    obj_htree = htree_init();
-  htree_add(obj_htree, nr, i);
-
-  clear_object(obj_proto + i);
-  struct obj_data *proto = &obj_proto[i];
-  proto->item_number = i;
+  clear_object(proto);
+  
+  proto->vnum = nr;
 
   sprintf(buf2, "object #%d", nr);	/* sprintf: OK (for 'buf2 >= 19') */
 
@@ -2594,7 +2587,7 @@ static char *parse_object(FILE *obj_f, int nr)
 
       if (t[0] >= APPLY_UNUSED3 && t[0] <= APPLY_UNUSED4) {
         log("Warning: object #%d (%s) uses deprecated saving throw applies",
-            nr, GET_OBJ_SHORT(obj_proto + i));
+            nr, GET_OBJ_SHORT(proto));
       }
       proto->affected[j].location = t[0];
       proto->affected[j].modifier = t[1];
@@ -2650,7 +2643,6 @@ static char *parse_object(FILE *obj_f, int nr)
         log("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
         REMOVE_BIT_AR(GET_OBJ_PERM(proto), AFF_CHARM);
       }
-      top_of_objt = i;
       check_object(proto);
       i++;
       return (line);
@@ -2990,15 +2982,15 @@ int vnum_mobile(char *searchname, struct char_data *ch)
 
 int vnum_object(char *searchname, struct char_data *ch)
 {
-  int nr, found = 0;
+  int found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++) {
-    struct obj_data *obj = &obj_proto[nr];
+  obj_proto_iterate([&](auto obj) {
     if (isname(searchname, obj->name))
       send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                    ++found, obj_index[nr].vnum, obj->short_description,
+                    ++found, obj->vnum, obj->short_description,
                     obj->proto_script ? "[TRIG]" : "" );
-  }
+    return true;
+  });
 
   return (found);
 }
@@ -3007,16 +2999,16 @@ int vnum_object(char *searchname, struct char_data *ch)
 
 int vnum_material(char *searchname, struct char_data *ch)
 {
-  int nr, found = 0;
+  int found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++) {
-    struct obj_data *obj = &obj_proto[nr];
-        if (isname(searchname, material_names[obj->value[VAL_ALL_MATERIAL]])) {
+  obj_proto_iterate([&](auto obj) {
+    if (isname(searchname, material_names[obj->value[VAL_ALL_MATERIAL]])) {
       send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                    ++found, obj_index[nr].vnum, obj->short_description,
+                    ++found, obj->vnum, obj->short_description,
                     obj->proto_script ? "[TRIG]" : "" );
     }
-  }
+    return true;
+  });
 
   return (found);
 }
@@ -3025,18 +3017,18 @@ int vnum_material(char *searchname, struct char_data *ch)
 
 int vnum_weapontype(char *searchname, struct char_data *ch)
 {
-  int nr, found = 0;
+  int found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++) {
-    struct obj_data *obj = &obj_proto[nr];
+  obj_proto_iterate([&](auto obj) {
     if (obj->type_flag == ITEM_WEAPON) {
       if (isname(searchname, weapon_type[obj->value[VAL_WEAPON_SKILL]])) {
         send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                    ++found, obj_index[nr].vnum, obj->short_description,
+                    ++found, obj->vnum, obj->short_description,
                     obj->proto_script ? "[TRIG]" : "" );
       }
     }
-  }
+    return true;
+  });
 
   return (found);
 }
@@ -3044,18 +3036,18 @@ int vnum_weapontype(char *searchname, struct char_data *ch)
 
 int vnum_armortype(char *searchname, struct char_data *ch)
 {
-  int nr, found = 0;
+  int found = 0;
 
-  for (nr = 0; nr <= top_of_objt; nr++) {
-    struct obj_data *obj = &obj_proto[nr];
+  obj_proto_iterate([&](auto obj) {
     if (obj->type_flag == ITEM_ARMOR) {
       if (isname(searchname, armor_type[obj->value[VAL_ARMOR_SKILL]])) {
         send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                    ++found, obj_index[nr].vnum, obj->short_description,
+                    ++found, obj->vnum, obj->short_description,
                     obj->proto_script ? "[TRIG]" : "" );
       }
     }
-  }
+    return true;
+  });
 
   return (found);
 }
@@ -3877,16 +3869,18 @@ struct obj_data *create_obj(void)
 struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
 {
   struct obj_data *obj;
-  obj_rnum i = type == VIRTUAL ? real_object(nr) : nr;
   int j;
 
-  int top = top_of_objt;
+  if(type == REAL) {
+    log("real is no longer supported!");
+    exit(1);
+  }
 
-  if (i == NOTHING || i > top_of_objt) {
-    log("Object (%c) %d does not exist in database.", type == VIRTUAL ? 'V' : 'R', nr);
+  struct obj_data *proto = obj_proto_by_id(nr);
+  if(!proto) {
+    log("WARNING: Object vnum %d does not exist in database.", nr);
     return (NULL);
   }
-  struct obj_data *proto = &obj_proto[i];
 
   CREATE(obj, struct obj_data, 1);
   clear_object(obj);
@@ -3895,7 +3889,7 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
   object_list = obj;
   OBJ_LOADROOM(obj) = NOWHERE;
 
-  obj_index[i].number++;
+  obj_proto_count_increment(nr);
 
   GET_ID(obj) = max_obj_id++;
   /* find_obj helper */
@@ -4099,7 +4093,7 @@ void reset_zone(struct zone_data *zone)
         break;
 
     case 'O':			/* read an object */
-       if ((obj_index[cmd->arg1].number < cmd->arg2) &&
+       if ((obj_proto_count_get(cmd->arg1) < cmd->arg2) &&
            (rand_number(1, 100) >= cmd->arg5)) {
 	if (cmd->arg3 != NOWHERE) {
           int room_max = 0;
@@ -4160,7 +4154,7 @@ void reset_zone(struct zone_data *zone)
       break;
 
     case 'P':			/* object to object */
-       if ((obj_index[cmd->arg1].number < cmd->arg2) &&
+       if ((obj_proto_count_get(cmd->arg1) < cmd->arg2) &&
            obj_load && (rand_number(1, 100) >= cmd->arg5)) {
 	obj = read_object(cmd->arg1, REAL);
 	if (!(obj_to = get_obj_num(cmd->arg3))) {
@@ -4184,7 +4178,7 @@ void reset_zone(struct zone_data *zone)
 	cmd->command = '*';
 	break;
       }
-      if ((obj_index[cmd->arg1].number < cmd->arg2) &&
+      if ((obj_proto_count_get(cmd->arg1) < cmd->arg2) &&
           mob_load && (rand_number(1, 100) >= cmd->arg5)) {
 	obj = read_object(cmd->arg1, REAL);
         add_unique_id(obj);
@@ -4206,7 +4200,7 @@ void reset_zone(struct zone_data *zone)
 	cmd->command = '*';
 	break;
       }
-      if ((obj_index[cmd->arg1].number < cmd->arg2) &&
+      if ((obj_proto_count_get(cmd->arg1) < cmd->arg2) &&
           mob_load && (rand_number(1, 100) >= cmd->arg5)) {
 	if (cmd->arg3 < 0 || cmd->arg3 >= NUM_WEARS) {
 	  ZONE_ERROR("invalid equipment pos number");
@@ -4608,7 +4602,7 @@ void free_obj(struct obj_data *obj)
     free_proto_script(obj, OBJ_TRIGGER);
   } else {
     free_object_strings_proto(obj);
-    if (obj->proto_script != obj_proto[GET_OBJ_RNUM(obj)].proto_script)
+    if (auto proto = obj_proto_by_id(GET_OBJ_VNUM(obj)); proto && obj->proto_script != proto->proto_script)
       free_proto_script(obj, OBJ_TRIGGER);
 
   }
@@ -4770,7 +4764,7 @@ void clear_object(struct obj_data *obj)
 {
   memset((char *) obj, 0, sizeof(struct obj_data));
 
-  obj->item_number = NOTHING;
+  obj->vnum = NOTHING;
   IN_ROOM(obj) = NOWHERE;
   obj->worn_on = NOWHERE;
 }

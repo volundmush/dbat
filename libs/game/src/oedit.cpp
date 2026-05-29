@@ -47,6 +47,7 @@ ACMD(do_oasis_oedit)
   char *buf3;
   char buf1[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
+  struct obj_data *proto = NULL;
   
   /****************************************************************************/
   /** Parse any arguments.                                                   **/
@@ -179,8 +180,8 @@ ACMD(do_oasis_oedit)
   /** If this is a new object, setup a new object, otherwise setup the       **/
   /** existing object.                                                       **/
   /****************************************************************************/
-  if ((real_num = real_object(number)) != NOTHING)
-    oedit_setup_existing(d, real_num);
+  if ((proto = obj_proto_by_id(number)))
+    oedit_setup_existing(d, proto->vnum);
   else
     oedit_setup_new(d);
 
@@ -223,7 +224,7 @@ void oedit_setup_new(struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-void oedit_setup_existing(struct descriptor_data *d, int real_num)
+void oedit_setup_existing(struct descriptor_data *d, room_vnum num)
 {
   struct obj_data *obj;
 
@@ -231,7 +232,8 @@ void oedit_setup_existing(struct descriptor_data *d, int real_num)
    * Allocate object in memory.
    */
   CREATE(obj, struct obj_data, 1);
-  copy_object(obj, &obj_proto[real_num]);
+  auto proto = obj_proto_by_id(num);
+  copy_object(obj, proto);
 
   /*
    * Attach new object to player's descriptor.
@@ -255,16 +257,18 @@ void oedit_save_internally(struct descriptor_data *d)
   int i;
   obj_rnum robj_num;
   struct descriptor_data *dsc;
-  struct obj_data *obj;
+  struct obj_data *obj, *proto;
 
-  i = (real_object(OLC_NUM(d)) == NOTHING);
+  obj_vnum v = OLC_NUM(d);
 
-  if ((robj_num = add_object(OLC_OBJ(d), OLC_NUM(d))) == NOTHING) {
+  i = (obj_proto_by_id(v) == NULL);
+
+  if ((robj_num = add_object(OLC_OBJ(d), v)) == NOTHING) {
     log("oedit_save_internally: add_object failed.");
     return;
   }
 
-  struct obj_data *proto = &obj_proto[robj_num];
+  proto = obj_proto_by_id(v);
 
   /* Update triggers : */
   /* Free old proto list  */
@@ -276,7 +280,7 @@ void oedit_save_internally(struct descriptor_data *d)
 
   /* this takes care of the objects currently in-game */
   for (obj = object_list; obj; obj = obj->next) {
-    if (obj->item_number != robj_num)
+    if (obj->vnum != v)
       continue;
     /* remove any old scripts */
     if (SCRIPT(obj)) 
@@ -1025,7 +1029,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
   int number, max_val, min_val;
   char *oldtext = NULL;
   struct board_info *tmp;
-  struct obj_data *obj;
+  struct obj_data *obj, *proto;
   obj_rnum robj;
 
   switch (OLC_MODE(d)) {
@@ -1071,8 +1075,8 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     }
 
   case OEDIT_COPY:
-    if ((number = real_object(atoi(arg))) != NOWHERE) {
-      oedit_setup_existing(d, number);
+    if ((proto = obj_proto_by_id(atoi(arg)))) {
+      oedit_setup_existing(d, proto->vnum);
     } else
       write_to_output(d, "That object does not exist.\r\n");
     break;
@@ -1121,8 +1125,8 @@ void oedit_parse(struct descriptor_data *d, char *arg)
           }
 
           free_proto_script(obj, OBJ_TRIGGER);
-          robj = real_object(GET_OBJ_VNUM(obj));
-          copy_proto_script(&obj_proto[robj], obj, OBJ_TRIGGER);
+          auto proto = obj_proto_by_id(GET_OBJ_VNUM(obj));
+          copy_proto_script(proto, obj, OBJ_TRIGGER);
           assign_triggers(obj, OBJ_TRIGGER);
         }
         SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE);

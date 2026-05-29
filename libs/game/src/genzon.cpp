@@ -451,37 +451,45 @@ int save_zone(zone_rnum zone_num)
       comment = proto->short_descr;
     }
       break;
-    case 'O':
-      arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vnum;
+    case 'O': {
+      auto obj = obj_proto_by_id(ZCMD(zone_num, subcmd).arg1);
+      arg1 = obj->vnum;
       arg2 = ZCMD(zone_num, subcmd).arg2;
       arg3 = world[ZCMD(zone_num, subcmd).arg3].number;
       arg4 = ZCMD(zone_num, subcmd).arg4;
       arg5 = ZCMD(zone_num, subcmd).arg5;
-      comment = obj_proto[ZCMD(zone_num, subcmd).arg1].short_description;
+      comment = obj->short_description;
+    }
       break;
-    case 'G':
-      arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vnum;
+    case 'G': {
+      auto obj = obj_proto_by_id(ZCMD(zone_num, subcmd).arg1);
+      arg1 = obj->vnum;
       arg2 = ZCMD(zone_num, subcmd).arg2;
       arg3 = -1;
       arg4 = -1;
       arg5 = ZCMD(zone_num, subcmd).arg5;
-      comment = obj_proto[ZCMD(zone_num, subcmd).arg1].short_description;
+      comment = obj->short_description;
+    }
       break;
-    case 'E':
-      arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vnum;
+    case 'E': {
+      auto obj = obj_proto_by_id(ZCMD(zone_num, subcmd).arg1);
+      arg1 = obj->vnum;
       arg2 = ZCMD(zone_num, subcmd).arg2;
       arg3 = ZCMD(zone_num, subcmd).arg3;
       arg4 = -1;
       arg5 = ZCMD(zone_num, subcmd).arg5;
-      comment = obj_proto[ZCMD(zone_num, subcmd).arg1].short_description;
+      comment = obj->short_description;
+    }
       break;
-    case 'P':
-      arg1 = obj_index[ZCMD(zone_num, subcmd).arg1].vnum;
+    case 'P': {
+      auto obj = obj_proto_by_id(ZCMD(zone_num, subcmd).arg1);
+      arg1 = obj->vnum;
       arg2 = ZCMD(zone_num, subcmd).arg2;
-      arg3 = obj_index[ZCMD(zone_num, subcmd).arg3].vnum;
+      arg3 = ZCMD(zone_num, subcmd).arg3;
       arg4 = -1;
       arg5 = ZCMD(zone_num, subcmd).arg5;
-      comment = obj_proto[ZCMD(zone_num, subcmd).arg1].short_description;
+      comment = obj->short_description;
+    }
       break;
     case 'D':
       arg1 = world[ZCMD(zone_num, subcmd).arg1].number;
@@ -489,10 +497,12 @@ int save_zone(zone_rnum zone_num)
       arg3 = ZCMD(zone_num, subcmd).arg3;
       comment = world[ZCMD(zone_num, subcmd).arg1].name;
       break;
-    case 'R':
+    case 'R': {
+      auto obj = obj_proto_by_id(ZCMD(zone_num, subcmd).arg2);
       arg1 = world[ZCMD(zone_num, subcmd).arg1].number;
-      arg2 = obj_index[ZCMD(zone_num, subcmd).arg2].vnum;
-      comment = obj_proto[ZCMD(zone_num, subcmd).arg2].short_description;
+      arg2 = obj->vnum;
+      comment = obj->short_description;
+    }
       arg3 = -1;
       break;
     case 'T':

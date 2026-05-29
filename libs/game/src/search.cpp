@@ -103,12 +103,12 @@ struct obj_data *get_obj_in_list_num(int num, struct obj_data *list)
 
 
 /* search the entire world for an object number, and return a pointer  */
-struct obj_data *get_obj_num(obj_rnum nr)
+struct obj_data *get_obj_num(obj_vnum vnum)
 {
   struct obj_data *i;
 
   for (i = object_list; i; i = i->next)
-    if (GET_OBJ_RNUM(i) == nr)
+    if (GET_OBJ_VNUM(i) == vnum)
       return (i);
 
   return (NULL);

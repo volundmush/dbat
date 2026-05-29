@@ -23,12 +23,11 @@ pub export fn obj_proto_id_set(obj: *cdb.obj_data, vnum: cdb.obj_vnum) void {
 }
 
 pub export fn obj_vnum_get(obj: *cdb.obj_data) cdb.obj_vnum {
-    if (!validObjRnum(obj.item_number)) return cdb.NOTHING;
-    return cdb.obj_index[@intCast(obj.item_number)].vnum;
+    return obj.vnum;
 }
 
 pub export fn obj_vnum_set(obj: *cdb.obj_data, vnum: cdb.obj_vnum) void {
-    obj.item_number = cdb.real_object(vnum);
+    obj.vnum = vnum;
 }
 
 pub export fn obj_room_get(obj: *cdb.obj_data) [*c]cdb.room_data {
@@ -284,28 +283,20 @@ pub export fn obj_sitting_set(obj: *cdb.obj_data, ch: [*c]cdb.char_data) void {
     obj.sitting = ch;
 }
 
-fn validObjRnum(rnum: cdb.obj_rnum) bool {
-    return rnum != cdb.NOTHING and rnum >= 0 and rnum <= cdb.top_of_objt and cdb.obj_index != null;
-}
-
 fn validRoomRnum(rnum: cdb.room_rnum) bool {
     return rnum != cdb.NOWHERE and rnum >= 0 and rnum <= cdb.top_of_world and cdb.world != null;
-}
-
-fn validProto(obj: *cdb.obj_data) bool {
-    return validObjRnum(obj.item_number) and cdb.obj_proto != null;
 }
 
 const StringField = enum { name, description, short_description, action_description };
 
 fn protoString(obj: *cdb.obj_data, field: StringField) [*c]u8 {
-    if (!validProto(obj)) return null;
-    const proto = &cdb.obj_proto[@intCast(obj.item_number)];
+    const proto = cdb.obj_proto_by_id(obj.vnum);
+    if (proto == null) return null;
     return switch (field) {
-        .name => proto.name,
-        .description => proto.description,
-        .short_description => proto.short_description,
-        .action_description => proto.action_description,
+        .name => proto.*.name,
+        .description => proto.*.description,
+        .short_description => proto.*.short_description,
+        .action_description => proto.*.action_description,
     };
 }
 

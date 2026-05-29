@@ -429,7 +429,7 @@ int save_shops(zone_rnum zone_num)
        * Save the products.
        */
       for (j = 0; S_PRODUCT(shop, j) != NOTHING; j++)
-	fprintf(shop_file, "%d\n", obj_index[S_PRODUCT(shop, j)].vnum);
+	fprintf(shop_file, "%d\n", S_PRODUCT(shop, j));
       fprintf(shop_file, "-1\n");
 
       /*

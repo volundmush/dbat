@@ -139,7 +139,7 @@ struct board_info *create_new_board(obj_vnum board_vnum) {
     WRITE_LVL(temp)=CONFIG_LEVEL_CAP;
     REMOVE_LVL(temp)=CONFIG_LEVEL_CAP;
     } else {
-      obj = &(obj_proto[real_object(board_vnum)]);
+      obj = obj_proto_by_id(board_vnum);
       READ_LVL(temp)=GET_OBJ_VAL(obj, VAL_BOARD_READ);
       WRITE_LVL(temp)=GET_OBJ_VAL(obj, VAL_BOARD_WRITE);
       REMOVE_LVL(temp)=GET_OBJ_VAL(obj, VAL_BOARD_ERASE);
@@ -265,7 +265,7 @@ struct board_info *load_board(obj_vnum board_vnum) {
     BOARD_VERSION(temp_board)=t[4];
     log("Board vnum %d, Version %d", BOARD_VNUM(temp_board), BOARD_VERSION(temp_board));
   } else {
-    obj = &(obj_proto[real_object(board_vnum)]);
+    obj = obj_proto_by_id(board_vnum);
     /* double check one or two things */
     if(t[0] != GET_OBJ_VAL(obj,VAL_BOARD_READ) ||
        t[1] != GET_OBJ_VAL(obj,VAL_BOARD_WRITE) ||

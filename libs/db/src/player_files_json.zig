@@ -300,7 +300,7 @@ fn deserializeObjectTree(value: std.json.Value) !*cdb.obj_data {
 
 fn createUniqueObject() !*cdb.obj_data {
     const obj = create_obj() orelse return error.OutOfMemory;
-    obj.item_number = cdb.NOTHING;
+    obj.vnum = cdb.NOTHING;
     obj.size = cdb.SIZE_MEDIUM;
     return obj;
 }

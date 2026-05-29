@@ -4,22 +4,31 @@ const std = @import("std");
 const IdSet = std.AutoHashMap(i64, void);
 const ListSet = std.StringHashMap(void);
 const ObjCallback = *const fn (*cdb.obj_data) callconv(.c) void;
+const ObjProtoEntry = struct {
+    proto: ?*cdb.obj_data = null,
+    special: cdb.SpecialFunc = null,
+    count: usize = 0,
+};
+const ObjProtoMap = std.AutoHashMap(cdb.obj_vnum, ObjProtoEntry);
 
 var allocator: std.mem.Allocator = undefined;
 var objs_by_id: std.AutoHashMap(i64, *cdb.obj_data) = undefined;
 var subscriptions_by_list: std.StringHashMap(IdSet) = undefined;
 var lists_by_id: std.AutoHashMap(i64, ListSet) = undefined;
+var obj_proto_map: ObjProtoMap = undefined;
 
 pub fn init(init_allocator: std.mem.Allocator) void {
     allocator = init_allocator;
     objs_by_id = std.AutoHashMap(i64, *cdb.obj_data).init(allocator);
     subscriptions_by_list = std.StringHashMap(IdSet).init(allocator);
     lists_by_id = std.AutoHashMap(i64, ListSet).init(allocator);
+    obj_proto_map = ObjProtoMap.init(allocator);
 }
 
 pub fn deinit() void {
     deinitSubscriptions();
     objs_by_id.deinit();
+    obj_proto_map.deinit();
 }
 
 pub export fn obj_by_id(id: i64) ?*cdb.obj_data {
@@ -110,6 +119,109 @@ pub export fn obj_for_each(list_name: ?[*:0]const u8, callback: ?ObjCallback) vo
         if (obj_by_id(id_ptr.*)) |obj| {
             cb(obj);
         }
+    }
+}
+
+const ObjProtoIterator = struct {
+    iter: ObjProtoMap.Iterator,
+};
+
+pub export fn obj_proto_iterator_create() ?*anyopaque {
+    const iterator = allocator.create(ObjProtoIterator) catch return null;
+    iterator.* = .{ .iter = obj_proto_map.iterator() };
+    return iterator;
+}
+
+pub export fn obj_proto_next(iterator_ptr: ?*anyopaque) ?*cdb.obj_data {
+    const iterator: *ObjProtoIterator = @ptrCast(@alignCast(iterator_ptr orelse return null));
+    while (iterator.iter.next()) |entry| {
+        if (entry.value_ptr.*.proto) |ptr| {
+            return ptr;
+        }
+    }
+    return null;
+}
+
+pub export fn obj_proto_iterator_free(iterator_ptr: ?*anyopaque) void {
+    const iterator = iterator_ptr orelse return;
+    allocator.destroy(@as(*ObjProtoIterator, @ptrCast(@alignCast(iterator))));
+}
+
+pub export fn obj_proto_get(vnum: cdb.obj_vnum) ?*cdb.obj_data {
+    return if (obj_proto_map.get(vnum)) |entry| entry.proto else null;
+}
+
+pub export fn obj_proto_count() usize {
+    var total: usize = 0;
+    var it = obj_proto_map.valueIterator();
+    while (it.next()) |entry| {
+        if (entry.*.proto != null) total += 1;
+    }
+    return total;
+}
+
+pub export fn obj_proto_put(vnum: cdb.obj_vnum, obj: ?*cdb.obj_data) void {
+    if (obj) |ptr| {
+        const entry = obj_proto_map.getOrPut(vnum) catch return;
+        if (!entry.found_existing) {
+        entry.value_ptr.* = .{ .proto = ptr };
+        return;
+    }
+    entry.value_ptr.*.proto = ptr;
+    return;
+    }
+
+    if (obj_proto_map.getPtr(vnum)) |entry| {
+        entry.proto = null;
+        entry.special = null;
+        if (entry.count == 0) {
+            _ = obj_proto_map.remove(vnum);
+        }
+    }
+}
+
+pub export fn obj_proto_delete(vnum: cdb.obj_vnum) void {
+    if (obj_proto_map.getPtr(vnum)) |entry| {
+        entry.proto = null;
+        entry.special = null;
+        if (entry.count == 0) {
+            _ = obj_proto_map.remove(vnum);
+        }
+    }
+}
+
+pub export fn obj_proto_special_get(vnum: cdb.obj_vnum) cdb.SpecialFunc {
+    return if (obj_proto_map.get(vnum)) |entry| entry.special else null;
+}
+
+pub export fn obj_proto_special_set(vnum: cdb.obj_vnum, func: cdb.SpecialFunc) void {
+    const entry = obj_proto_map.getOrPut(vnum) catch return;
+    if (!entry.found_existing) {
+        entry.value_ptr.* = .{ .special = func };
+        return;
+    }
+    entry.value_ptr.*.special = func;
+}
+
+pub export fn obj_proto_count_increment(vnum: cdb.obj_vnum) void {
+    const entry = obj_proto_map.getOrPut(vnum) catch return;
+    if (!entry.found_existing) {
+        entry.value_ptr.* = .{ .count = 1 };
+        return;
+    }
+    entry.value_ptr.*.count += 1;
+}
+
+pub export fn obj_proto_count_get(vnum: cdb.obj_vnum) usize {
+    return if (obj_proto_map.get(vnum)) |entry| entry.count else 0;
+}
+
+pub export fn obj_proto_count_decrement(vnum: cdb.obj_vnum) void {
+    const entry = obj_proto_map.getPtr(vnum) orelse return;
+    if (entry.count == 0) return;
+    entry.count -= 1;
+    if (entry.count == 0 and entry.proto == null and entry.special == null) {
+        _ = obj_proto_map.remove(vnum);
     }
 }
 

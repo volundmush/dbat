@@ -33,10 +33,5 @@ zone_rnum real_zone(zone_vnum vnum)
 
 struct zone_data *zone_by_id(zone_vnum vnum)
 {
-  zone_rnum rnum = real_zone(vnum);
-
-  if (rnum == NOWHERE || !zone_table)
-    return nullptr;
-
-  return &zone_table[rnum];
+  return zone_get(vnum);
 }

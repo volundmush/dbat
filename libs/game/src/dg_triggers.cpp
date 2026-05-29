@@ -914,8 +914,8 @@ void load_otrigger(obj_data *obj)
   if (result == SCRIPT_ERROR_CODE) {
     /* we have recursed beyond reasonable depth */
     /* make sure this mob is the last one in the load chain */
-    if (GET_OBJ_RNUM(obj) != NOTHING) {
-      free_proto_script(&obj_proto[GET_OBJ_RNUM(obj)], OBJ_TRIGGER);
+    if (auto proto = obj_proto_by_id(GET_OBJ_VNUM(obj)); proto) {
+      free_proto_script(proto, OBJ_TRIGGER);
     }
   }
 }

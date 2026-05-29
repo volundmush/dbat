@@ -530,7 +530,7 @@ void medit_string_cleanup(struct descriptor_data *d, int terminator);
 ACMD(do_oasis_medit);
 
 void oedit_setup_new(struct descriptor_data *d);
-void oedit_setup_existing(struct descriptor_data *d, int real_num);
+void oedit_setup_existing(struct descriptor_data *d, obj_vnum num);
 void oedit_save_internally(struct descriptor_data *d);
 void oedit_save_to_disk(int zone_num);
 void oedit_disp_container_flags_menu(struct descriptor_data *d);

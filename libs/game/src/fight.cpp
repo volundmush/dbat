@@ -681,7 +681,7 @@ void remove_limb(struct char_data *vict, int num)
   char buf2[1000];
 
   body_part = create_obj();
-  body_part->item_number = NOTHING;
+  body_part->vnum = NOTHING;
   IN_ROOM(body_part) = NOWHERE;
 
   switch (num)
@@ -1510,7 +1510,7 @@ static void make_pcorpse(struct char_data *ch)
 
   corpse = create_obj();
 
-  corpse->item_number = NOTHING;
+  corpse->vnum = NOTHING;
   IN_ROOM(corpse) = NOWHERE;
 
   /* This handles how the corpse is viewed - Iovan */
@@ -1716,7 +1716,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch)
 
   corpse = create_obj();
 
-  corpse->item_number = NOTHING;
+  corpse->vnum = NOTHING;
   IN_ROOM(corpse) = NOWHERE;
 
   /* This handles how the corpse is viewed - Iovan */

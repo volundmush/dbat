@@ -9,13 +9,14 @@
 extern "C" {
 #endif
 
+SpecialFunc obj_proto_special_get(obj_vnum vnum);
+
 #define OBJAFF_FLAGGED(obj, flag) (IS_SET_AR(GET_OBJ_PERM(obj), (flag)))
 #define OBJVAL_FLAGGED(obj, flag) (IS_SET(GET_OBJ_VAL((obj), VAL_CONTAINER_FLAGS), (flag)))
 #define OBJWEAR_FLAGGED(obj, flag) (IS_SET_AR(GET_OBJ_WEAR(obj), (flag)))
 #define OBJ_FLAGGED(obj, flag) (IS_SET_AR(GET_OBJ_EXTRA(obj), (flag)))
 
-#define VALID_OBJ_RNUM(obj)	(GET_OBJ_RNUM(obj) <= top_of_objt && \
-				 GET_OBJ_RNUM(obj) != NOTHING)
+#define VALID_OBJ_RNUM(obj)	((obj) && GET_OBJ_RNUM(obj) != NOTHING)
 
 #define GET_OBJ_LEVEL(obj)      ((obj)->level)
 #define GET_OBJ_PERM(obj)       ((obj)->bitvector)
@@ -50,11 +51,9 @@ extern "C" {
 #define HCHARGE(obj)            ((obj)->healcharge)
 #define GET_LAST_LOAD(obj)      ((obj)->lload)
 #define GET_OBJ_SIZE(obj)	((obj)->size)
-#define GET_OBJ_RNUM(obj)	((obj)->item_number)
-#define GET_OBJ_VNUM(obj)	(VALID_OBJ_RNUM(obj) ? \
-				obj_index[GET_OBJ_RNUM(obj)].vnum : NOTHING)
-#define GET_OBJ_SPEC(obj)	(VALID_OBJ_RNUM(obj) ? \
-				obj_index[GET_OBJ_RNUM(obj)].func : NULL)
+#define GET_OBJ_RNUM(obj)	((obj)->vnum)
+#define GET_OBJ_VNUM(obj)	((obj) ? (obj)->vnum : NOTHING)
+#define GET_OBJ_SPEC(obj)	(VALID_OBJ_RNUM(obj) ? obj_proto_special_get(GET_OBJ_VNUM(obj)) : NULL)
 #define GET_FUEL(obj)           (GET_OBJ_VAL((obj), 2))
 #define GET_FUELCOUNT(obj)      (GET_OBJ_VAL((obj), 3))
 

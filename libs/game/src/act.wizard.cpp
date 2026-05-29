@@ -750,7 +750,7 @@ ACMD(do_finddoor)
     send_to_char(ch, "Format: finddoor <obj/vnum>\r\n"); 
   } else if (is_number(arg)) { 
     vnum = atoi(arg); 
-    obj = &obj_proto[real_object(vnum)]; 
+    obj = obj_proto_by_id(vnum); 
   } else { 
     generic_find(arg, 
          FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_WORLD | FIND_OBJ_EQUIP, 
@@ -1250,47 +1250,58 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum)
           );
         }
           break;
-        case 'G':
-          send_to_char(ch, "%sGive it %s@y [@c%d@y], Max : %d, Chance : %d\r\n",
+        case 'G': {
+            auto obj = obj_proto_by_id(cmd->arg1);
+            send_to_char(ch, "%sGive it %s@y [@c%d@y], Max : %d, Chance : %d\r\n",
     	      cmd->if_flag ? " then " : "",
-    	      obj_proto[cmd->arg1].short_description,
-    	      obj_index[cmd->arg1].vnum,
+    	      obj->short_description,
+    	      obj->vnum,
     	      cmd->arg2, cmd->arg5
     	      );
+        }
           break;
-        case 'O':
-          send_to_char(ch, "%sLoad %s@y [@c%d@y], Max : %d, MaxR : %d, Chance : %d\r\n",
+        case 'O': {
+            auto obj = obj_proto_by_id(cmd->arg1);
+            send_to_char(ch, "%sLoad %s@y [@c%d@y], Max : %d, MaxR : %d, Chance : %d\r\n",
     	      cmd->if_flag ? " then " : "",
-    	      obj_proto[cmd->arg1].short_description,
-    	      obj_index[cmd->arg1].vnum,
+    	      obj->short_description,
+    	      obj->vnum,
     	      cmd->arg2, cmd->arg4, cmd->arg5
     	      );
+        }
           break;
-        case 'E':
-          send_to_char(ch, "%sEquip with %s@y [@c%d@y], %s, Max : %d, Chance : %d\r\n",
+        case 'E': {
+            auto obj = obj_proto_by_id(cmd->arg1);
+            send_to_char(ch, "%sEquip with %s@y [@c%d@y], %s, Max : %d, Chance : %d\r\n",
     	      cmd->if_flag ? " then " : "",
-    	      obj_proto[cmd->arg1].short_description,
-    	      obj_index[cmd->arg1].vnum,
+    	      obj->short_description,
+    	      obj->vnum,
     	      equipment_types[cmd->arg3],
     	      cmd->arg2, cmd->arg5
     	      );
+        }
           break;
-        case 'P':
-          send_to_char(ch, "%sPut %s@y [@c%d@y] in %s@y [@c%d@y], Max : %d, Chance : %d\r\n",
+        case 'P': {
+            auto obj1 = obj_proto_by_id(cmd->arg1);
+            auto obj3 = obj_proto_by_id(cmd->arg3);
+            send_to_char(ch, "%sPut %s@y [@c%d@y] in %s@y [@c%d@y], Max : %d, Chance : %d\r\n",
     	      cmd->if_flag ? " then " : "",
-    	      obj_proto[cmd->arg1].short_description,
-    	      obj_index[cmd->arg1].vnum,
-    	      obj_proto[cmd->arg3].short_description,
-    	      obj_index[cmd->arg3].vnum,
+    	      obj1->short_description,
+    	      obj1->vnum,
+    	      obj3->short_description,
+    	      obj3->vnum,
     	      cmd->arg2, cmd->arg5
     	      );
+        }
           break;
-        case 'R':
-          send_to_char(ch, "%sRemove %s@y [@c%d@y] from room.\r\n",
+        case 'R': {
+            auto obj = obj_proto_by_id(cmd->arg2);
+            send_to_char(ch, "%sRemove %s@y [@c%d@y] from room.\r\n",
     	      cmd->if_flag ? " then " : "",
-    	      obj_proto[cmd->arg2].short_description,
-    	      obj_index[cmd->arg2].vnum
+    	      obj->short_description,
+    	      obj->vnum
     	      );
+        }
           break;
         case 'D':
           send_to_char(ch, "%sSet door %s as %s.\r\n",
@@ -3315,8 +3326,8 @@ static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int l
       if (world[i].number >= zn->bot && world[i].number <= zn->top)
         j++;
 
-    for (i = 0; i < top_of_objt; i++)
-      if (obj_index[i].vnum >= zn->bot && obj_index[i].vnum <= zn->top)
+    for (i = zn->bot; i < zn->top; i++)
+      if (obj_proto_by_id(i))
         k++;
 
     for (i = zn->bot; i < zn->top; i++)
@@ -3515,7 +3526,7 @@ ACMD(do_show)
 	i, con,
 	top_of_p_table + 1,
 	j, mob_proto_count(),
-	k, top_of_objt + 1,
+	k, obj_proto_count(),
 	top_of_world + 1, top_of_zone_table + 1,
 	top_of_trigt + 1,
 	buf_largecount,
@@ -4975,9 +4986,8 @@ ACMD (do_zcheck)
 
  /************** Check objects *****************/
   send_to_char(ch, "\r\nChecking Objects for limits...\r\n");
-  for (i=0; i<top_of_objt; i++) {
-    if (real_zone_by_thing(obj_index[i].vnum) == zrnum) { /*is object in this zone?*/
-      obj = &obj_proto[i];
+  obj_proto_iterate([&](auto obj) {
+    if (real_zone_by_thing(obj->vnum) == zrnum) { /*is object in this zone?*/
       switch (GET_OBJ_TYPE(obj)) {       
         case ITEM_MONEY:
           if ((value = GET_OBJ_VAL(obj, 1))>MAX_GOLD_ALLOWED && (found=1))
@@ -5100,7 +5110,8 @@ ACMD (do_zcheck)
       len = 0;
       found = 0;
     }   /*object is in zone*/
-  } /*check objects*/
+    return true;
+  }); /*check objects*/
 
   /************** Check rooms *****************/
   send_to_char(ch, "\r\nChecking Rooms for limits...\r\n");
@@ -5225,18 +5236,18 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum)
 {
   int cmd_no, count = 0;
   zone_rnum zone;
-  obj_rnum ornum = real_object(ovnum);
+  struct obj_data *proto = obj_proto_by_id(ovnum);
   room_vnum lastroom_v = 0;
   room_rnum lastroom_r = 0;
   mob_vnum lastmob_v = 0;
 
-  if (ornum ==NOTHING) {
+  if (!proto) {
     send_to_char(ch, "That object does not exist.\r\n");
     return;
   }
  
   send_to_char(ch, "Checking load info for the obj [%d] %s...\r\n",
-                   ovnum, obj_proto[ornum].short_description);
+                   ovnum, proto->short_description);
 
   for (zone=0; zone <= top_of_zone_table; zone++) {   
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
@@ -5249,7 +5260,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum)
         case 'O':                   /* read an object */
           lastroom_v = world[ZCMD2.arg3].number;
           lastroom_r = ZCMD2.arg3;
-          if (ZCMD2.arg1 == ornum) {                       
+          if (ZCMD2.arg1 == ovnum) {                       
             send_to_char(ch, "  [%5d] %s (%d Max)\r\n",
                              lastroom_v,
                              world[lastroom_r].name,
@@ -5258,7 +5269,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum)
           }
           break;
         case 'P':                   /* object to object */
-          if (ZCMD2.arg1 == ornum) {
+          if (ZCMD2.arg1 == ovnum) {
             send_to_char(ch, "  [%5d] %s (Put in another object [%d Max])\r\n",
                              lastroom_v,
                              world[lastroom_r].name,
@@ -5267,7 +5278,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum)
           }
           break;
         case 'G':                   /* obj_to_char */
-          if (ZCMD2.arg1 == ornum) {
+          if (ZCMD2.arg1 == ovnum) {
             auto mob = mob_proto_by_id(lastmob_v);
             send_to_char(ch, "  [%5d] %s (Given to %s [%d][%d Max])\r\n",
                              lastroom_v,
@@ -5279,7 +5290,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum)
           }
           break;
         case 'E':                   /* object to equipment list */
-          if (ZCMD2.arg1 == ornum) {
+          if (ZCMD2.arg1 == ovnum) {
             auto mob = mob_proto_by_id(lastmob_v);
             send_to_char(ch, "  [%5d] %s (Equipped to %s [%d][%d Max])\r\n",
                              lastroom_v,
@@ -5293,7 +5304,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum)
           case 'R': /* rem obj from room */
             lastroom_v = world[ZCMD2.arg1].number;
             lastroom_r = ZCMD2.arg1;
-            if (ZCMD2.arg2 == ornum) {
+            if (ZCMD2.arg2 == ovnum) {
               send_to_char(ch, "  [%5d] %s (Removed from room)\r\n",
                                lastroom_v,
                                world[lastroom_r].name);                   
@@ -5316,7 +5327,7 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum)
   room_vnum lastroom_v = 0;
   room_rnum lastroom_r = 0, k;
   mob_vnum lastmob_v = 0, i;
-  obj_rnum lastobj_r = 0, j;
+  obj_vnum lastobj_v = 0, j;
   struct trig_proto_list *tpl;
  
   if (trnum == NOTHING) {
@@ -5342,21 +5353,21 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum)
         case 'O':                   /* read an object */
           lastroom_v = world[ZCMD2.arg3].number;
           lastroom_r = ZCMD2.arg3;
-          lastobj_r = ZCMD2.arg1;
+          lastobj_v = ZCMD2.arg1;
           break;
         case 'P':                   /* object to object */
-          lastobj_r = ZCMD2.arg1;
+          lastobj_v = ZCMD2.arg1;
           break;
         case 'G':                   /* obj_to_char */
-          lastobj_r = ZCMD2.arg1;
+          lastobj_v = ZCMD2.arg1;
           break;
         case 'E':                   /* object to equipment list */
-          lastobj_r = ZCMD2.arg1;
+          lastobj_v = ZCMD2.arg1;
           break;
         case 'R':                   /* rem obj from room */
           lastroom_v = 0;
           lastroom_r = 0;
-          lastobj_r = 0;
+          lastobj_v = 0;
           lastmob_v = 0;
         case 'T':                   /* trigger to something */
           if (ZCMD2.arg2 != trnum)
@@ -5369,9 +5380,10 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum)
                                lastroom_v);   
             found = 1;
           } else if (ZCMD2.arg1 == OBJ_TRIGGER) {
+            auto obj = obj_proto_by_id(lastobj_v);
             send_to_char(ch, "obj [%5d] %-60s  (zedit room %d)\r\n",
-                               obj_index[lastobj_r].vnum,
-                               obj_proto[lastobj_r].short_description,
+                               obj->vnum,
+                               obj->short_description,
                                lastroom_v); 
             found = 1;
           } else if (ZCMD2.arg1==WLD_TRIGGER) {
@@ -5398,20 +5410,20 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum)
       return true;
     });
    
-  for (j = 0; j < top_of_objt; j++) {
-    struct obj_data *obj = &obj_proto[j];
+  
+  obj_proto_iterate([&](auto obj) {
     if (!obj->proto_script)
-      continue;
+      return true;
    
     for (tpl = obj->proto_script;tpl;tpl = tpl->next)
       if (tpl->vnum == tvnum) {
         send_to_char(ch, "obj [%5d] %s\r\n",
-                         obj_index[j].vnum,
+                         obj->vnum,
                          obj->short_description);
         found = 1;
       }
- 
-  }
+      return true;
+  });
  
   for (k = 0;k < top_of_world; k++) {
     struct room_data *room = &world[k];

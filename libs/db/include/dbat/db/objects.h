@@ -21,7 +21,7 @@ struct obj_spellbook_spell {
 };
 
 struct obj_data {
-   obj_vnum item_number;	/* Where in data-base			*/
+   obj_vnum vnum;	/* Where in data-base			*/
    room_vnum in_room;		/* In what room -1 when conta/carr	*/
    room_vnum room_loaded;	/* Room loaded in, for room_max checks	*/
 
@@ -179,16 +179,25 @@ struct obj_data* obj_inventory_search_type(struct obj_data *obj, int type, bool 
 
 
 // Below this is global variables and database functions
-
-extern struct index_data *obj_index;
 extern struct obj_data *object_list;
-extern struct obj_data *obj_proto;
-extern obj_rnum top_of_objt;
-extern struct htree_node *obj_htree;
 extern long max_obj_id;
 
 obj_rnum real_object(obj_vnum vnum);
 struct obj_data *obj_proto_by_id(obj_vnum vnum);
+
+void* obj_proto_iterator_create();
+struct obj_data* obj_proto_next(void* iterator);
+void obj_proto_iterator_free(void* iterator);
+
+struct obj_data* obj_proto_get(obj_vnum vnum);
+size_t obj_proto_count();
+void obj_proto_put(obj_vnum vnum, struct obj_data *obj);
+void obj_proto_delete(obj_vnum vnum);
+SpecialFunc obj_proto_special_get(obj_vnum vnum);
+void obj_proto_special_set(obj_vnum vnum, SpecialFunc func);
+void obj_proto_count_increment(obj_vnum vnum);
+size_t obj_proto_count_get(obj_vnum vnum);
+void obj_proto_count_decrement(obj_vnum vnum);
 
 struct obj_data *obj_by_id(int64_t id);
 int obj_register_id(int64_t id, struct obj_data *obj);

@@ -69,6 +69,7 @@ ACMD(do_olc)
   char mode_arg[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
   room_rnum rnum;
   struct char_data *mob = NULL;
+  struct obj_data *obj = NULL;
   room_vnum vnum = NOWHERE;
   int olc_mode;
 
@@ -141,10 +142,10 @@ ACMD(do_olc)
       return;
     }
     vnum = atoi(arg);
-    if ((rnum = real_object(vnum)) == NOTHING)
+    if (!(obj = obj_proto_by_id(vnum)))
       send_to_char(ch, "No object with vnum %d.\r\n", vnum);
     else
-      olc_targ = (void *) &(obj_proto[rnum]);
+      olc_targ = (void *) &(obj);
     break;
   default:
     send_to_char(ch, "Usage: olc {.|set|show|obj|mob|room} [args]\r\n");

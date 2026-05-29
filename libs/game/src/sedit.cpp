@@ -250,9 +250,10 @@ void sedit_products_menu(struct descriptor_data *d)
   clear_screen(d);
   write_to_output(d, "##     VNUM     Product\r\n");
   for (i = 0; S_PRODUCT(shop, i) != NOTHING; i++) {
+    auto obj = obj_proto_by_id(S_PRODUCT(shop, i));
     write_to_output(d, "%2d - [@c%5d@n] - @y%s@n\r\n", i,
-	    obj_index[S_PRODUCT(shop, i)].vnum,
-	    obj_proto[S_PRODUCT(shop, i)].short_description);
+	    obj->vnum,
+	    obj->short_description);
   }
   write_to_output(d, "\r\n"
 	  "@gA@n) Add a new product.\r\n"

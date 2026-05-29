@@ -250,9 +250,6 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
   send_to_char(ch,
   "@nIndex VNum    Object Name                                  Object Type\r\n"
   "----- ------- -------------------------------------------- ----------------\r\n");
-
-  if (!top_of_objt)
-    return;
   
   for (i = vmin; i <= vmax; i++) {
     struct obj_data *obj = obj_proto_by_id(i);
@@ -362,54 +359,40 @@ void print_zone(struct char_data *ch, zone_vnum vnum)
   struct zone_data *zone = &zone_table[rnum];
 
   sprintbitarray(zone->zone_flags, zone_bits, ZF_ARRAY_MAX, bits, sizeof(bits));  
-  /****************************************************************************/
-  /** Locate the largest of the three, top_of_world, top_of_mobt, or         **/
-  /** top_of_objt.                                                           **/
-  /****************************************************************************/
-  
-  size_t num_mob_proto = mob_proto_count();
-  
-  if (top_of_world >= top_of_objt && top_of_world >= num_mob_proto)
-    largest_table = top_of_world;
-  else if (top_of_objt >= num_mob_proto && top_of_objt >= top_of_world)
-    largest_table = top_of_objt;
-  else
-    largest_table = num_mob_proto;
   
   /****************************************************************************/
   /** Initialize some of the variables.                                      **/
   /****************************************************************************/
-  size_rooms   = 0;
-  size_objects = 0;
-  size_mobiles = num_mob_proto;
   top          = zone->top;
   bottom       = zone->bot;
+  size_objects = 0;
+  size_mobiles = 0;
+  size_rooms   = 0;
   size_shops   = 0;
   size_triggers= 0;
   size_guilds  = 0;
   size_shops  = 0;
   
-  for (i = 0; i <= largest_table; i++) {
-    if (i <= top_of_world)
-      if (world[i].zone == rnum)
-        size_rooms++;
-    
-    if (i <= top_of_objt)
-      if (obj_index[i].vnum >= bottom && obj_index[i].vnum <= top)
-        size_objects++;
-    
-    for(i = bottom; i <= top; i++)
-       if (mob_proto_by_id(i))
-         size_mobiles++;
-
-    size_shops = count_shops(bottom, top);
-
-    if (i < top_of_trigt)
-      if (trig_index[i]->vnum >= bottom && trig_index[i]->vnum <= top)
-        size_triggers++;
-
-    size_guilds = count_guilds(bottom, top);
+  for (i = bottom; i <= top; i++)
+    if (room_by_id(i))
+      size_rooms++;
+   
+  for (i = bottom; i <= top; i++) {
+    if (obj_proto_by_id(i))
+      size_objects++;
   }
+   
+  for(i = bottom; i <= top; i++)
+      if (mob_proto_by_id(i))
+        size_mobiles++;
+
+  size_shops = count_shops(bottom, top);
+
+  for (i = bottom; i <= top; i++)
+    if (trig_proto_by_id(i))
+      size_triggers++;
+
+  size_guilds = count_guilds(bottom, top);
   
   /****************************************************************************/
   /** Display all of the zone information at once.                           **/

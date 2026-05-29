@@ -505,47 +505,58 @@ void zedit_disp_menu(struct descriptor_data *d)
         );
     }
       break;
-    case 'G':
-      write_to_output(d, "%sGive it %s@y [@c%d@y], Max : %d, Chance %d",
+    case 'G': {
+      auto obj = obj_proto_by_id(MYCMD.arg1);
+        write_to_output(d, "%sGive it %s@y [@c%d@y], Max : %d, Chance %d",
 	      MYCMD.if_flag ? " then " : "",
-	      obj_proto[MYCMD.arg1].short_description,
-	      obj_index[MYCMD.arg1].vnum,
+	      obj->short_description,
+	      obj->vnum,
 	      MYCMD.arg2, MYCMD.arg5
 	      );
+    }
       break;
-    case 'O':
+    case 'O': {
+      auto obj = obj_proto_by_id(MYCMD.arg1);
       write_to_output(d, "%sLoad %s@y [@c%d@y], Max : %d, MaxR %d, Chance %d",
 	      MYCMD.if_flag ? " then " : "",
-	      obj_proto[MYCMD.arg1].short_description,
-	      obj_index[MYCMD.arg1].vnum,
+	      obj->short_description,
+	      obj->vnum,
 	      MYCMD.arg2, MYCMD.arg4, MYCMD.arg5
 	      );
+    }
       break;
-    case 'E':
+    case 'E': {
+      auto obj = obj_proto_by_id(MYCMD.arg1);
       write_to_output(d, "%sEquip with %s@y [@c%d@n], %s, Max : %d, Chance %d",
 	      MYCMD.if_flag ? " then " : "",
-	      obj_proto[MYCMD.arg1].short_description,
-	      obj_index[MYCMD.arg1].vnum,
+	      obj->short_description,
+	      obj->vnum,
 	      equipment_types[MYCMD.arg3],
 	      MYCMD.arg2, MYCMD.arg5
 	      );
+    }
       break;
-    case 'P':
+    case 'P': {
+      auto obj1 = obj_proto_by_id(MYCMD.arg1);
+      auto obj3 = obj_proto_by_id(MYCMD.arg3);
       write_to_output(d, "%sPut %s@y [@c%d@n] in %s [@c%d@n], Max : %d, %% Chance %d",
 	      MYCMD.if_flag ? " then " : "",
-	      obj_proto[MYCMD.arg1].short_description,
-	      obj_index[MYCMD.arg1].vnum,
-	      obj_proto[MYCMD.arg3].short_description,
-	      obj_index[MYCMD.arg3].vnum,
+	      obj1->short_description,
+	      obj1->vnum,
+	      obj3->short_description,
+	      obj3->vnum,
 	      MYCMD.arg2, MYCMD.arg5
 	      );
+    }
       break;
-    case 'R':
-      write_to_output(d, "%sRemove %s@y [@c%d@n] from room.",
+    case 'R': {
+        auto obj = obj_proto_by_id(MYCMD.arg2);
+            write_to_output(d, "%sRemove %s@y [@c%d@n] from room.",
 	      MYCMD.if_flag ? " then " : "",
-	      obj_proto[MYCMD.arg2].short_description,
-	      obj_index[MYCMD.arg2].vnum
+	      obj->short_description,
+	      obj->vnum
 	      );
+    }
       break;
     case 'D':
       write_to_output(d, "%sSet door %s@y as %s.",
