@@ -321,10 +321,6 @@ pub export fn char_equipment_get(ch: *cdb.char_data, pos: usize) [*c]cdb.obj_dat
     return ch.equipment[pos];
 }
 
-fn validRoomRnum(rnum: cdb.room_rnum) bool {
-    return rnum != cdb.NOWHERE and rnum >= 0 and rnum <= cdb.top_of_world and cdb.world != null;
-}
-
 const StringField = enum { name, description, short_descr, long_descr, title };
 
 fn protoString(ch: *cdb.char_data, field: StringField) [*c]u8 {

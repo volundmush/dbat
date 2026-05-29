@@ -18,10 +18,6 @@
 #include "dbat/game/races_plus.h"
 #include "dbat/game/act.informative.h"
 
-#ifndef EXITN
-#  define EXITN(room, door)		(world[room].dir_option[door])
-#endif
-
 static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, char *arg);
 static void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle);
 

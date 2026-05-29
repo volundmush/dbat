@@ -15,6 +15,7 @@
 #include "dbat/game/improved-edit.h"
 #include "dbat/game/utils.h"
 #include "dbat/game/spec_assign.h"
+#include "dbat/db/iterate.hpp"
 
 /******************************************************************************/
 /** External Functions                                                       **/
@@ -2245,9 +2246,11 @@ void reassign_rooms(void)
   int i;
 
   /* remove old funcs */
-  for (i = 0; i < top_of_world; i++)
-    world[i].func = NULL;
-        
+  room_iterate([&](auto room) {
+    room->func = NULL;
+    return true;
+  });
+
   /* reassign spec_procs */
   assign_rooms();
 }

@@ -50,9 +50,7 @@ struct house_control_rec {
 #define HOUSE_NOSAVE     (1 << 6)   /* Do not crash save this room - private only */ 
  
 #define HOUSE_NUM_FLAGS 7
-   
-#define TOROOM(room, dir) (world[room].dir_option[dir] ? \
-			    world[room].dir_option[dir]->to_room : NOWHERE)
+
 
 extern struct house_control_rec house_control[MAX_HOUSES];     /* house.c */
 extern int num_of_houses;                                      /* house.c */

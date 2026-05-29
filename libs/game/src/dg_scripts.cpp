@@ -15,6 +15,7 @@
 #include "dbat/game/handler.h"
 #include "dbat/game/comm.h"
 #include "dbat/game/fileop.h"
+#include "dbat/db/iterate.hpp"
 
 #include <unistd.h>
 #include <errno.h>
@@ -592,15 +593,15 @@ void script_trigger_check(void)
     }
   }
 
-  for (nr = 0; nr <= top_of_world; nr++) {
-    room = &world[nr];
+  room_iterate([&](auto room) {
     if ((sc = SCRIPT(room))) {
       if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
           (!is_empty(room->zone) ||
            IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
         random_wtrigger(room);
     }
-  }
+    return true;
+  });
 }
 
 void check_time_triggers(void)
@@ -631,15 +632,15 @@ void check_time_triggers(void)
     }
   }
 
-  for (nr = 0; nr <= top_of_world; nr++) {
-    room = &world[nr];
+  room_iterate([&](auto room) {
     if ((sc = SCRIPT(room))) {
       if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
           (!is_empty(room->zone) ||
            IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
         time_wtrigger(room);
     }
-  }
+    return true;
+  });
 }
 
 
@@ -656,35 +657,6 @@ EVENTFUNC(trig_wait_event)
 
   free(wait_event_obj);
   GET_TRIG_WAIT(trig) = NULL;
-
-#if 1  /* debugging */
-  {
-    int found = FALSE;
-    if (type == MOB_TRIGGER) {
-      struct char_data *tch;
-      for (tch = character_list;tch && !found;tch = tch->next)
-        if (tch == (struct char_data *)go)
-          found = TRUE;
-    } else if (type == OBJ_TRIGGER) {
-      struct obj_data *obj;
-      for (obj = object_list;obj && !found;obj = obj->next)
-        if (obj == (struct obj_data *)go)
-          found = TRUE;
-    } else {
-      room_rnum i;
-      for (i = 0;i<top_of_world && !found;i++)
-        if (&world[i] == (struct room_data *)go)
-          found = TRUE;
-    }
-    if (!found) {
-      log("Trigger restarted on unknown entity. Vnum: %d", GET_TRIG_VNUM(trig));
-      log("Type: %s trigger", type==MOB_TRIGGER ? "Mob" : type == OBJ_TRIGGER ? "Obj" : "Room");
-      log("attached %d places", trig_index[trig->nr]->number);
-      script_log("Trigger restart attempt on unknown entity.");
-      return 0;
-    }
-  }
-#endif
 
   script_driver(&go, trig, type, TRIG_RESTART);
 
@@ -1007,7 +979,7 @@ ACMD(do_attach)
     add_trigger(SCRIPT(room), trig, loc);
 
     send_to_char(ch, "Trigger %d (%s) attached to room %d.\r\n",
-                 tn, GET_TRIG_NAME(trig), world[rnum].number);
+                 tn, GET_TRIG_NAME(trig), room->number);
   }
 
   else

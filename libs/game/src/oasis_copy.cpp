@@ -35,7 +35,7 @@ void redit_save_internally(struct descriptor_data *d);
 void oedit_save_internally(struct descriptor_data *d);
 void medit_save_internally(struct descriptor_data *d);
 void sedit_save_internally(struct descriptor_data *d);
-void trigedit_setup_existing(struct descriptor_data *d, int rnum);
+void trigedit_setup_existing(struct descriptor_data *d, room_vnum num);
 void redit_setup_existing(struct descriptor_data *d, int rnum);
 void oedit_setup_existing(struct descriptor_data *d, int rnum);
 void medit_setup_existing(struct descriptor_data *d, int rnum);
@@ -172,6 +172,7 @@ ACMD(do_dig)
   room_rnum rrnum = NOWHERE;
   zone_rnum zone;
   int dir = 0, rawvnum;
+  struct room_data *trm = NULL, *rrm = NULL;
   struct descriptor_data *d = ch->desc; /* will save us some typing */
   
   /* Grab the room's name (if available). */
@@ -190,7 +191,7 @@ ACMD(do_dig)
     rvnum = NOWHERE;
   else
     rvnum = (room_vnum)rawvnum;
-  rrnum = real_room(rvnum);  
+  rrm = room_by_id(rvnum);
   if ((dir = search_block(sdir, abbr_dirs, FALSE)) < 0)
   dir = search_block(sdir, dirs, FALSE);
   zone = char_room_get(ch)->zone;
@@ -256,7 +257,7 @@ ACMD(do_dig)
    * Now we know the builder is allowed to make the link 
    */
   /* If the room doesn't exist, create it.*/
-  if (rrnum == NOWHERE) {
+  if (rrm == NULL) {
     /*
      * Give the descriptor an olc struct.
      * This way we can let redit_save_internally handle the room adding.
@@ -295,7 +296,7 @@ ACMD(do_dig)
     /* 
      * update rrnum to the correct room rnum after adding the room 
      */
-    rrnum = real_room(rvnum);
+    rrm = room_by_id(rvnum);
   }
 
   /*
@@ -309,7 +310,7 @@ ACMD(do_dig)
   add_to_save_list(zvn, SL_WLD);
   save_rooms(zvn);
   send_to_char(ch, "You make an exit %s to room %d (%s).\r\n", 
-                   dirs[dir], rvnum, world[rrnum].name);
+                   dirs[dir], rvnum, rrm->name);
   
   struct room_data *dest = exit_dest_get(new_exit);
 
@@ -323,7 +324,7 @@ ACMD(do_dig)
     CREATE(R_EXIT(dest, rev_dir[dir]), struct room_direction_data, 1);
     struct room_direction_data *rev_ex = R_EXIT(dest, rev_dir[dir]);
     rev_ex->to_room = char_room_vnum_get(ch);
-    zvn = zone_table[world[rrnum].zone].number;
+    zvn = zone_table[rrm->zone].number;
     add_to_save_list(zvn, SL_WLD);
     save_rooms(zvn);
   }
@@ -366,26 +367,25 @@ ACMD(do_rcopy)
     return;
   }
   
-  trnum = real_room(tvnum);
-  rrnum = real_room(rvnum); 
+  struct room_data* rrm = room_by_id(rvnum);
+  struct room_data* trm = room_by_id(tvnum);
 
-  if (trnum == NOWHERE) { 
+  if (trm == NULL) { 
     send_to_char(ch, "Could not find base room: %d\r\n", tvnum); 
     return; 
   }
-  if (rrnum == NOWHERE) { 
+  if (rrm == NULL) { 
     send_to_char(ch, "Could not find target room: %d\r\n", rvnum); 
     return; 
   }
 
-  zone = world[rrnum].zone;
+  zone = rrm->zone;
   if ((zone == NOWHERE) || !can_edit_zone(ch, zone)) {
     send_to_char(ch, "\r\n");
     send_cannot_edit(ch, zone);
     return;
   }
-  struct room_data* rrm = &world[rrnum];
-  struct room_data* trm = &world[trnum]; 
+
 
   /* Free descriptions. */ 
   if (rrm->name) 
@@ -474,12 +474,12 @@ int buildwalk(struct char_data *ch, int dir)
       OLC_VAL(d) = 0;
 
       /* Link rooms */
-      rnum = real_room(vnum);
+      struct room_data *trm = room_by_id(vnum);
       struct room_data *rm = char_room_get(ch);
       CREATE(rm->dir_option[dir], struct room_direction_data, 1);
       rm->dir_option[dir]->to_room = vnum;
-      CREATE(world[rnum].dir_option[rev_dir[dir]], struct room_direction_data, 1);
-      world[rnum].dir_option[rev_dir[dir]]->to_room = char_room_vnum_get(ch);
+      CREATE(trm->dir_option[rev_dir[dir]], struct room_direction_data, 1);
+      trm->dir_option[rev_dir[dir]]->to_room = room_vnum_get(rm);
 
       /* Report room creation to user */
       send_to_char(ch, "@yRoom #%d created by BuildWalk.@n\r\n", vnum);

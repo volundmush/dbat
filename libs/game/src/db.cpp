@@ -120,7 +120,7 @@ static void dragon_level(struct char_data *ch);
 static int check_bitvector_names(bitvector_t bits, size_t namecount, const char *whatami, const char *whatbits);
 static int check_object_spell_number(struct obj_data *obj, int val);
 static int check_object_level(struct obj_data *obj, int val);
-static void setup_dir(FILE *fl, int room, int dir);
+static void setup_dir(FILE *fl, struct room_data *room, int dir);
 static void discrete_load(FILE *fl, int mode, char *filename);
 static int check_object(struct obj_data *);
 static void parse_room(FILE *fl, int virtual_nr);
@@ -640,8 +640,7 @@ void destroy_db(void)
   }
 
   /* Rooms */
-  for (cnt = 0; cnt <= top_of_world; cnt++) {
-    struct room_data *room = &world[cnt];
+  room_iterate([&](auto room) {
     if (room->name)
       free(room->name);
     if (room->description)
@@ -665,10 +664,8 @@ void destroy_db(void)
         free(ex->keyword);
       free(ex);
     }
-  }
-  free(world);
-  top_of_world = 0;
-  htree_free(room_htree);
+    return true;
+  });
 
   /* Objects */
   obj_proto_iterate ([&](auto obj) {
@@ -1548,16 +1545,14 @@ static void parse_room(FILE *fl, int virtual_nr)
       exit(1);
   }
 
-  struct room_data *rm = &world[room_nr];
+  struct room_data *rm = NULL;
+  CREATE(rm, struct room_data, 1);
+  room_put(room_nr, rm);
 
   rm->zone = zone;
   rm->number = virtual_nr;
   rm->name = fread_string(fl, buf2);
   rm->description = fread_string(fl, buf2);
-
-  if (! room_htree)
-    room_htree = htree_init();
-  htree_add(room_htree, virtual_nr, room_nr);
 
   if (!get_line(fl, line)) {
     log("SYSERR: Expecting roomflags/sector type of room #%d but file ended!",
@@ -1650,7 +1645,7 @@ static void parse_room(FILE *fl, int virtual_nr)
     }
     switch (*line) {
     case 'D':
-      setup_dir(fl, room_nr, atoi(line + 1));
+      setup_dir(fl, rm, atoi(line + 1));
       break;
     case 'E':
       CREATE(new_descr, struct extra_descr_data, 1);
@@ -1681,7 +1676,6 @@ static void parse_room(FILE *fl, int virtual_nr)
         letter = fread_letter(fl);
         ungetc(letter, fl);
       }
-      top_of_world = room_nr++;
       return;
     default:
       log("%s", buf);
@@ -1691,14 +1685,14 @@ static void parse_room(FILE *fl, int virtual_nr)
 }
 
 /* read direction data */
-static void setup_dir(FILE *fl, int room, int dir)
+static void setup_dir(FILE *fl, struct room_data *room, int dir)
 {
   int t[11], retval;
   char line[READ_SIZE], buf2[128];
 
-  struct room_data* rm = &world[room];
+  struct room_data* rm = room;
 
-  snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", GET_ROOM_VNUM(room)+1, dir);
+  snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", room->number, dir);
 
   CREATE(rm->dir_option[dir], struct room_direction_data, 1);
   struct room_direction_data *ex = rm->dir_option[dir];
@@ -4064,13 +4058,13 @@ void reset_zone(struct zone_data *zone)
 
         if (cmd->arg4 > 0) {
           for (i = character_list; i; i = i->next) {
-            if ((MOB_LOADROOM(i) == GET_ROOM_VNUM(cmd->arg3)) 
+            if ((MOB_LOADROOM(i) == cmd->arg3) 
                && (GET_MOB_VNUM(i) == GET_MOB_VNUM(mob))) {
   	      room_max++;
             }
 	  }
 	}
-	char_to_room(mob, &world[cmd->arg3]);
+	char_to_room(mob, room_by_id(cmd->arg3));
 	
            /* Get rid of it if room_max has been met, ignore room_max if zero */
 
@@ -4081,7 +4075,7 @@ void reset_zone(struct zone_data *zone)
 	   }
 	
 	   /*  Set the mobs loadroom for room_max checks. */
-	MOB_LOADROOM(mob) = GET_ROOM_VNUM(cmd->arg3);
+	MOB_LOADROOM(mob) = cmd->arg3;
 	
         load_mtrigger(mob);
         tmob = mob;
@@ -4109,12 +4103,12 @@ void reset_zone(struct zone_data *zone)
 
         if (cmd->arg4 > 0) {
           for (k = object_list; k; k = k->next) {
-            if (((OBJ_LOADROOM(k)==GET_ROOM_VNUM(cmd->arg3)) 
-                && (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj))) || (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj) && GET_ROOM_VNUM(cmd->arg3) == obj_room_vnum_get(k))) {
+            if (((OBJ_LOADROOM(k)==cmd->arg3) 
+                && (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj))) || (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj) && cmd->arg3 == obj_room_vnum_get(k))) {
               /*  For objects, lets not count them if they've been removed from the room */
               /*  We'll let max_in_mud handle those. */
                if (obj_room_get(k) == NULL || obj_room_vnum_get(k) 
-                   != GET_ROOM_VNUM(cmd->arg3)) {
+                   != cmd->arg3) {
                  continue;
                }
 	       room_max++;
@@ -4123,7 +4117,7 @@ void reset_zone(struct zone_data *zone)
         }
 
           add_unique_id(obj);
-	  obj_to_room(obj, &world[cmd->arg3]);
+	  obj_to_room(obj, room_by_id(cmd->arg3));
 	  
            /* Get rid of it if room_max has been met. */
 
@@ -4134,7 +4128,7 @@ void reset_zone(struct zone_data *zone)
 	  
 	  /* Set the loadroom for room_max checks */
 
-	  OBJ_LOADROOM(obj) = GET_ROOM_VNUM(cmd->arg3);
+	  OBJ_LOADROOM(obj) = cmd->arg3;
 	
 	  last_cmd = 1;
           load_otrigger(obj);
@@ -4223,7 +4217,7 @@ void reset_zone(struct zone_data *zone)
       break;
 
     case 'R': /* rem obj from room */
-      if ((obj = get_obj_in_list_num(cmd->arg2, world[cmd->arg1].contents)) != NULL)
+      if ((obj = get_obj_in_list_num(cmd->arg2, room_by_id(cmd->arg1)->contents)) != NULL)
         extract_obj(obj);
         last_cmd = 1;
         tmob = NULL;
@@ -4232,31 +4226,33 @@ void reset_zone(struct zone_data *zone)
 
 
     case 'D':			/* set state of door */
-      if (cmd->arg2 < 0 || cmd->arg2 >= NUM_OF_DIRS ||
-	  (world[cmd->arg1].dir_option[cmd->arg2] == NULL)) {
+      if (cmd->arg2 < 0 || cmd->arg2 >= NUM_OF_DIRS || (room_by_id(cmd->arg1)->dir_option[cmd->arg2] == NULL)) {
 	ZONE_ERROR("door does not exist, command disabled");
 	cmd->command = '*';
-      } else
-	switch (cmd->arg3) {
+      } else {
+        auto room = room_by_id(cmd->arg1);
+        auto ex = room->dir_option[cmd->arg2];
+      switch (cmd->arg3) {
 	case 0:
-	  REMOVE_BIT(world[cmd->arg1].dir_option[cmd->arg2]->exit_info,
+	  REMOVE_BIT(ex->exit_info,
 		     EX_LOCKED);
-	  REMOVE_BIT(world[cmd->arg1].dir_option[cmd->arg2]->exit_info,
+	  REMOVE_BIT(ex->exit_info,
 		     EX_CLOSED);
 	  break;
 	case 1:
-	  SET_BIT(world[cmd->arg1].dir_option[cmd->arg2]->exit_info,
+	  SET_BIT(ex->exit_info,
 		  EX_CLOSED);
-	  REMOVE_BIT(world[cmd->arg1].dir_option[cmd->arg2]->exit_info,
+	  REMOVE_BIT(ex->exit_info,
 		     EX_LOCKED);
 	  break;
 	case 2:
-	  SET_BIT(world[cmd->arg1].dir_option[cmd->arg2]->exit_info,
+	  SET_BIT(ex->exit_info,
 		  EX_LOCKED);
-	  SET_BIT(world[cmd->arg1].dir_option[cmd->arg2]->exit_info,
+	  SET_BIT(ex->exit_info,
 		  EX_CLOSED);
 	  break;
 	}
+      }
       last_cmd = 1;
       tmob = NULL;
       tobj = NULL;
@@ -4274,12 +4270,13 @@ void reset_zone(struct zone_data *zone)
         add_trigger(SCRIPT(tobj), read_trigger(cmd->arg2), -1);
         last_cmd = 1;
       } else if (cmd->arg1==WLD_TRIGGER) {
-        if (cmd->arg3 == NOWHERE || cmd->arg3>top_of_world) {
+        auto room = room_by_id(cmd->arg3);
+        if (!room) {
           ZONE_ERROR("Invalid room number in trigger assignment");
         }
-        if (!world[cmd->arg3].script)
-          CREATE(world[cmd->arg3].script, struct script_data, 1);
-        add_trigger(world[cmd->arg3].script, read_trigger(cmd->arg2), -1);
+        if (!room->script)
+          CREATE(room->script, struct script_data, 1);
+        add_trigger(room->script, read_trigger(cmd->arg2), -1);
         last_cmd = 1;
       }
 
@@ -4301,13 +4298,14 @@ void reset_zone(struct zone_data *zone)
                   cmd->arg3);
         last_cmd = 1;
       } else if (cmd->arg1==WLD_TRIGGER) {
-        if (cmd->arg3 == NOWHERE || cmd->arg3>top_of_world) {
+        auto room = room_by_id(cmd->arg3);
+        if (!room) {
           ZONE_ERROR("Invalid room number in variable assignment");
         } else {
-          if (!(world[cmd->arg3].script)) {
+          if (!(room->script)) {
             ZONE_ERROR("Attempt to give variable to scriptless object");
           } else
-            add_var(&(world[cmd->arg3].script->global_vars),
+            add_var(&(room->script->global_vars),
                     cmd->sarg1, cmd->sarg2, cmd->arg2);
           last_cmd = 1;
         }

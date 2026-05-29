@@ -7674,8 +7674,8 @@ ACMD(do_scan)
         continue; 
       } 
       if(CAN_GO(ch,i)) { 
-        newroom=char_room_get(ch)->dir_option[i]->to_room;
-        struct room_data *nrm = &world[newroom];
+        newroom=EXIT(ch, i)->to_room;
+        struct room_data *nrm = exit_dest_get(EXIT(ch, i));
         send_to_char(ch, "@w-----------------------------------------@n\r\n");
         send_to_char(ch,"          %s%s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i], nrm->name ? nrm->name : "You don't think you saw what you just saw.", CCNRM(ch, C_NRM)); 
         send_to_char(ch, "@W          -----------------          @n\r\n");

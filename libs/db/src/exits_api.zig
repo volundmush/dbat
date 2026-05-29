@@ -118,8 +118,3 @@ fn replaceString(field: *[*c]u8, value: ?[*:0]const u8) void {
     if (field.* != null) std.c.free(field.*);
     field.* = new_value;
 }
-
-fn roomVnumFromRnum(rnum: cdb.room_rnum) cdb.room_vnum {
-    if (rnum == cdb.NOWHERE or cdb.world == null) return cdb.NOWHERE;
-    return cdb.world[@intCast(rnum)].number;
-}

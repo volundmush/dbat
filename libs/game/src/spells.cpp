@@ -78,25 +78,7 @@ ASPELL(spell_recall)
 
 ASPELL(spell_teleport)
 {
-  room_rnum to_room;
 
-  if (victim == NULL || IS_NPC(victim))
-    return;
-
-  do {
-    to_room = rand_number(0, top_of_world);
-  } while (ROOM_FLAGGED(to_room, ROOM_PRIVATE | ROOM_DEATH | ROOM_GODROOM));
-
-  act("$n slowly fades out of existence and is gone.",
-      FALSE, victim, 0, 0, TO_ROOM);
-  char_from_room(victim);
-  struct room_data *room = &world[to_room];
-  char_to_room(victim, room);
-  act("$n slowly fades into existence.", FALSE, victim, 0, 0, TO_ROOM);
-  look_at_room(char_room_get(victim), victim, 0);
-  entry_memory_mtrigger(victim);
-  greet_mtrigger(victim, -1);
-  greet_memory_mtrigger(victim);
   
 }
 

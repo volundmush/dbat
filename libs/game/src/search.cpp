@@ -115,31 +115,6 @@ struct obj_data *get_obj_num(obj_vnum vnum)
 }
 
 
-
-/* search a room for a char, and return a pointer if found..  */
-struct char_data *get_char_room(char *name, int *number, room_rnum room)
-{
-  struct char_data *i;
-  int num;
-
-  if (!number) {
-    number = &num;
-    num = get_number(&name);
-  }
-
-  if (*number == 0)
-    return (NULL);
-
-  for (i = world[room].people; i && *number; i = i->next_in_room)
-    if (isname(name, i->name))
-      if (--(*number) == 0)
-	return (i);
-
-  return (NULL);
-}
-
-
-
 /* search all over the world for a char num, and return a pointer if found */
 struct char_data *get_char_num(mob_vnum nr)
 {

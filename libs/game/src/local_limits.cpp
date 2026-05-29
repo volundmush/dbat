@@ -25,6 +25,8 @@
 #include "dbat/game/dg_scripts.h"
 #include "dbat/game/character_utils.h"
 
+#include "dbat/db/iterate.hpp"
+
 #include <unistd.h>
 
 /* local defines */
@@ -2319,8 +2321,10 @@ void timed_dt(struct char_data *ch)
       value decreased if its not -1.
       */
 
-    for (rrnum = 0; rrnum < top_of_world; rrnum++)
-      world[rrnum].timed -= (world[rrnum].timed != -1);
+    room_iterate([&](auto room) {
+      room->timed -= (room->timed != -1);
+      return true;
+    });
 
     for (vict = character_list; vict; vict = vict->next)
     {

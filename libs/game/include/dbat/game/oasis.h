@@ -565,7 +565,7 @@ void iedit_parse(struct descriptor_data *d, char *arg);
 
 void redit_string_cleanup(struct descriptor_data *d, int terminator);
 void redit_setup_new(struct descriptor_data *d);
-void redit_setup_existing(struct descriptor_data *d, int real_num);
+void redit_setup_existing(struct descriptor_data *d, room_vnum num);
 void redit_save_internally(struct descriptor_data *d);
 void redit_save_to_disk(zone_vnum zone_num);
 void redit_disp_extradesc_menu(struct descriptor_data *d);

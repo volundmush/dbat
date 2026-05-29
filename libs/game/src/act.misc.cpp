@@ -5133,10 +5133,11 @@ ACMD(do_obstruct)
   return;
  } else {
    struct obj_data *obj;
-   int newroom = char_room_get(ch)->dir_option[dir]->to_room;
-   struct room_data *nrm = &world[newroom];
+   auto ex = EXIT(ch, dir);
+   int newroom = ex->to_room;
+   struct room_data *nrm = exit_dest_get(ex);
 
-  if (ROOM_FLAGGED(newroom, ROOM_PEACEFUL)) {
+  if (room_flagged(nrm, ROOM_PEACEFUL)) {
    send_to_char(ch, "You can not block off a peaceful area.\r\n");
    return;
   }   

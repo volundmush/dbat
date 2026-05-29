@@ -3344,16 +3344,16 @@ void send_to_range(room_vnum start, room_vnum finish, const char *messg, ...)
   if (messg == NULL)
     return;
 
-  for (j = 0; j < top_of_world; j++) {
-    if (GET_ROOM_VNUM(j) >= start && GET_ROOM_VNUM(j) <= finish) {
-      for (i = world[j].people; i; i = i->next_in_room) {
-        if (!i->desc)
-          continue;
+  for (j = start; j <= finish; j++) {
+    auto room = room_by_id(j);
+    if(!room) continue;
+    for (i = room->people; i; i = i->next_in_room) {
+      if (!i->desc)
+        continue;
 
-        va_start(args, messg);
-        vwrite_to_output(i->desc, messg, args);
-        va_end(args);
-      }
+      va_start(args, messg);
+      vwrite_to_output(i->desc, messg, args);
+      va_end(args);
     }
   }
 }

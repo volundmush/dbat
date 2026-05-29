@@ -6516,12 +6516,12 @@ ACMD(do_eavesdrop) {
   if (!know_skill(ch, SKILL_EAVESDROP)) {
     return;
   }
-  if (EXIT(ch, dir)) {
-    if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED) && EXIT(ch, dir)->keyword) {
-      sprintf(buf, "The %s is closed.\r\n", fname(EXIT(ch, dir)->keyword));
+  if (auto ex = EXIT(ch, dir); ex) {
+    if (IS_SET(ex->exit_info, EX_CLOSED) && ex->keyword) {
+      sprintf(buf, "The %s is closed.\r\n", fname(ex->keyword));
       send_to_char(ch, buf);
     } else {
-      GET_EAVESDROP(ch) = GET_ROOM_VNUM(EXIT(ch, dir)->to_room);
+      GET_EAVESDROP(ch) = ex->to_room;
       GET_EAVESDIR(ch) = dir;
       send_to_char(ch, "Okay.\r\n");
     }

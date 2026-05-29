@@ -16,6 +16,8 @@
 #include "dbat/game/objsave.h"
 #include "dbat/game/mail.h"
 
+#include "dbat/db/iterate.hpp"
+
 /* local functions */
 void ASSIGNROOM(room_vnum room, SPECIAL(fname));
 void ASSIGNMOB(mob_vnum mob, SPECIAL(fname));
@@ -91,10 +93,10 @@ void assign_rooms(void)
   /* Gauntlet rooms track how far a player progressed into zone  Jamdog - 13th Feb 2006 */
 
   if (CONFIG_DTS_ARE_DUMPS)
-    for (i = 0; i <= top_of_world; i++) {
-      struct room_data* room = &world[i];
-      if (room_flagged(room, ROOM_DEATH))
-        room->func = dump;
-    }
+  room_iterate([&](auto room) {
+    if (room_flagged(room, ROOM_DEATH))
+      room->func = dump;
+    return true;
+  });
       
 }

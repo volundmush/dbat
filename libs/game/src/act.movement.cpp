@@ -1032,7 +1032,7 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check)
       send_to_char(ch, "The %s seems to be closed.\r\n", fname(EXIT(ch, dir)->keyword));
     else
       send_to_char(ch, "It seems to be closed.\r\n");
-  } else if (GET_ROOM_VNUM(EXIT(ch, dir)->to_room) == 0 || GET_ROOM_VNUM(EXIT(ch, dir)->to_room) == 1) {
+  } else if (EXIT(ch, dir)->to_room == 0 || EXIT(ch, dir)->to_room == 1) {
      send_to_char(ch, "Report this direction, it is illegal.\r\n");
   } else {
 
@@ -2050,10 +2050,10 @@ ACMD(do_enter)
   } else {
     /* try to locate an entrance */
     for (door = 0; door < NUM_OF_DIRS; door++)
-      if (EXIT(ch, door))
-        if (EXIT(ch, door)->to_room != NOWHERE)
-          if (!EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED) &&
-              ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_INDOORS))
+      if (auto ex = EXIT(ch, door); ex)
+        if (auto dest = exit_dest_get(ex); dest)
+          if (!EXIT_FLAGGED(ex, EX_CLOSED) &&
+              room_flagged(dest, ROOM_INDOORS))
             move_dir = door;
     if (move_dir > -1)
       perform_move(ch, move_dir, 1);
@@ -2267,10 +2267,10 @@ ACMD(do_leave)
     send_to_char(ch, "You are outside.. where do you want to go?\r\n");
   else {
     for (door = 0; door < NUM_OF_DIRS; door++)
-      if (EXIT(ch, door))
-	if (EXIT(ch, door)->to_room != NOWHERE)
-	  if (!EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED) &&
-	    !ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_INDOORS)) {
+  if (auto ex = EXIT(ch, door); ex)
+	if (auto dest = exit_dest_get(ex); dest)
+	  if (!EXIT_FLAGGED(ex, EX_CLOSED) &&
+	    !room_flagged(dest, ROOM_INDOORS)) {
 	    perform_move(ch, door, 1);
 	    return;
 	  }
@@ -2282,7 +2282,7 @@ static void handle_fall(struct char_data *ch)
 {
  int room = -1;
  while (EXIT(ch, 5) && room_sector_type_get(char_room_get(ch)) == SECT_FLYING) {
-  room = GET_ROOM_VNUM(EXIT(ch, 5)->to_room);
+  room = EXIT(ch, 5)->to_room;
   char_from_room(ch);
   char_to_room(ch, room_by_id(room));
   if (CARRYING(ch)) {

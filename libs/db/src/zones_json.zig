@@ -119,11 +119,11 @@ fn denumberResetCommandArgs(command: u8, args: *[5]c_int) void {
     switch (command) {
         'M' => {
             args[0] = args[0];
-            args[2] = roomVnumFromRnum(args[2]);
+            args[2] = args[2];
         },
         'O' => {
             args[0] = args[0];
-            if (args[2] != cdb.NOWHERE) args[2] = roomVnumFromRnum(args[2]);
+            if (args[2] != cdb.NOWHERE) args[2] = args[2];
         },
         'G', 'E' => {
             args[0] = args[0];
@@ -133,26 +133,21 @@ fn denumberResetCommandArgs(command: u8, args: *[5]c_int) void {
             args[2] = args[2];
         },
         'D' => {
-            args[0] = roomVnumFromRnum(args[0]);
+            args[0] = args[0];
         },
         'R' => {
-            args[0] = roomVnumFromRnum(args[0]);
+            args[0] = args[0];
             args[1] = args[1];
         },
         'T' => {
             args[1] = trigVnumFromRnum(args[1]);
-            args[2] = roomVnumFromRnum(args[2]);
+            args[2] = args[2];
         },
         'V' => {
-            args[2] = roomVnumFromRnum(args[2]);
+            args[2] = args[2];
         },
         else => {},
     }
-}
-
-fn roomVnumFromRnum(rnum: c_int) c_int {
-    if (rnum == cdb.NOWHERE or rnum < 0 or rnum > cdb.top_of_world or cdb.world == null) return rnum;
-    return cdb.world[@intCast(rnum)].number;
 }
 
 fn trigVnumFromRnum(rnum: c_int) c_int {

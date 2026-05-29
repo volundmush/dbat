@@ -10,6 +10,8 @@
 #include "dbat/game/genolc.h"
 #include "dbat/game/dg_scripts.h"
 
+#include "dbat/db/iterate.hpp"
+
 /* real zone of room/mobile/object/shop given */
 zone_rnum real_zone_by_thing(room_vnum vznum)
 {
@@ -234,11 +236,13 @@ if (vzone_num < 0) {
 
   top_of_zone_table++;
 
-  for (i = top_of_world; i > 0; i--)
-    if (world[i].zone < real_zone(rznum))
-      break;
+  room_iterate([&](auto room) {
+    if (room->zone < real_zone(rznum))
+      return false;
     else
-      world[i].zone = real_zone_by_thing(GET_ROOM_VNUM(i)); 
+      room->zone = real_zone_by_thing(room_vnum_get(room));
+    return true;
+  });
 
   add_to_save_list(zone->number, SL_ZON);
   return rznum;
@@ -445,7 +449,7 @@ int save_zone(zone_rnum zone_num)
       auto proto = mob_proto_by_id(ZCMD(zone_num, subcmd).arg1);
       arg1 = proto->vnum;
       arg2 = ZCMD(zone_num, subcmd).arg2;
-      arg3 = world[ZCMD(zone_num, subcmd).arg3].number;
+      arg3 = ZCMD(zone_num, subcmd).arg3;
       arg4 = ZCMD(zone_num, subcmd).arg4;
       arg5 = ZCMD(zone_num, subcmd).arg5;
       comment = proto->short_descr;
@@ -455,7 +459,7 @@ int save_zone(zone_rnum zone_num)
       auto obj = obj_proto_by_id(ZCMD(zone_num, subcmd).arg1);
       arg1 = obj->vnum;
       arg2 = ZCMD(zone_num, subcmd).arg2;
-      arg3 = world[ZCMD(zone_num, subcmd).arg3].number;
+      arg3 = ZCMD(zone_num, subcmd).arg3;
       arg4 = ZCMD(zone_num, subcmd).arg4;
       arg5 = ZCMD(zone_num, subcmd).arg5;
       comment = obj->short_description;
@@ -491,15 +495,17 @@ int save_zone(zone_rnum zone_num)
       comment = obj->short_description;
     }
       break;
-    case 'D':
-      arg1 = world[ZCMD(zone_num, subcmd).arg1].number;
+    case 'D': {
+      auto room = room_by_id(ZCMD(zone_num, subcmd).arg1);
+      arg1 = ZCMD(zone_num, subcmd).arg1;
       arg2 = ZCMD(zone_num, subcmd).arg2;
       arg3 = ZCMD(zone_num, subcmd).arg3;
-      comment = world[ZCMD(zone_num, subcmd).arg1].name;
+      comment = room->name;
+    }
       break;
     case 'R': {
       auto obj = obj_proto_by_id(ZCMD(zone_num, subcmd).arg2);
-      arg1 = world[ZCMD(zone_num, subcmd).arg1].number;
+      arg1 = ZCMD(zone_num, subcmd).arg1;
       arg2 = obj->vnum;
       comment = obj->short_description;
     }
@@ -508,7 +514,7 @@ int save_zone(zone_rnum zone_num)
     case 'T':
       arg1 = ZCMD(zone_num, subcmd).arg1; /* trigger type */
       arg2 = trig_index[ZCMD(zone_num, subcmd).arg2]->vnum; /* trigger vnum */
-      arg3 = world[ZCMD(zone_num, subcmd).arg3].number; /* room num */
+      arg3 = ZCMD(zone_num, subcmd).arg3; /* room num */
       arg4 = -1;
       arg5 = ZCMD(zone_num, subcmd).arg5;
       comment = GET_TRIG_NAME(trig_index[real_trigger(arg2)]->proto); 
@@ -516,7 +522,7 @@ int save_zone(zone_rnum zone_num)
     case 'V':
       arg1 = ZCMD(zone_num, subcmd).arg1; /* trigger type */
       arg2 = ZCMD(zone_num, subcmd).arg2; /* context */
-      arg3 = world[ZCMD(zone_num, subcmd).arg3].number;
+      arg3 = ZCMD(zone_num, subcmd).arg3;
       arg4 = -1;
       arg5 = ZCMD(zone_num, subcmd).arg5;
       break;

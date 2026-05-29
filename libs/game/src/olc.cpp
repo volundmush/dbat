@@ -117,10 +117,6 @@ ACMD(do_olc)
       send_to_char(ch, "(Using current room %d)\r\n", vnum);
     }
 
-/*   if (!ROOM_FLAGGED(rnum, ROOM_OLC))
-	 send_to_char(ch, "That room is not modifyable.\r\n");
-     else
-*/
     olc_targ = char_room_get(ch);
     break;
   case OLC_MOB:

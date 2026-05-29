@@ -19,9 +19,11 @@
 #include "dbat/game/vehicles.h"
 #include "dbat/game/act.informative.h"
 
+#include "dbat/db/iterate.hpp"
+
 /* local functions */
-int VALID_EDGE(room_rnum x, int y);
-void bfs_enqueue(room_rnum room, int dir);
+int VALID_EDGE(struct room_data* x, int y);
+void bfs_enqueue(struct room_data *room, int dir);
 void bfs_dequeue(void);
 void bfs_clear_queue(void);
 
@@ -112,9 +114,10 @@ int find_first_step(struct room_data *src, struct room_data *target)
     return (BFS_ALREADY_THERE);
 
   /* clear marks first, some OLC systems will save the mark. */
-  for (curr_room = 0; curr_room <= top_of_world; curr_room++) {
-     UNMARK(&world[curr_room]);
-  }
+  room_iterate([](auto room) {
+     UNMARK(room);
+	 return true;
+  });
   MARK(src);
   /* first, enqueue the first steps, saving which direction we're going. */
   for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++) {

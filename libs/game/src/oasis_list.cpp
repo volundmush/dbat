@@ -18,6 +18,8 @@
 #include "dbat/game/class.h"
 #include "dbat/db/shops.h"
 
+#include "dbat/db/iterate.hpp"
+
 
 /******************************************************************************/
 /** Internal Functions                                                       **/
@@ -119,22 +121,21 @@ ACMD(do_oasis_links)
   first = zone_table[zrnum].bot;
 
   send_to_char(ch, "Zone %d is linked to the following zones:\r\n", zvnum);
-  for (nr = 0; nr <= top_of_world && (GET_ROOM_VNUM(nr) <= last); nr++) {
-    struct room_data *nrm = &world[nr];
-    if (GET_ROOM_VNUM(nr) >= first) {
+  room_iterate([&](auto room) {
+    if (room_vnum_get(room) >= first) {
       for (j = 0; j < NUM_OF_DIRS; j++) {
-      if (nrm->dir_option[j]) {
-        to_room = nrm->dir_option[j]->to_room;
-        struct room_data *trm = &world[to_room];
-        if (to_room != NOWHERE && (zrnum != trm->zone))
+      if (room->dir_option[j]) {
+        struct room_data *trm = exit_dest_get(room->dir_option[j]);
+        if (trm && (zrnum != trm->zone))
           send_to_char(ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
             zone_table[trm->zone].number,
             zone_table[trm->zone].name,
-            GET_ROOM_VNUM(nr), dirs[j], trm->number);
+            room_vnum_get(room), dirs[j], trm->number);
       }
       }
     }
-  }
+    return true;
+  });
 }
 
 /******************************************************************************/
@@ -162,9 +163,6 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
   send_to_char(ch,
   "@nIndex VNum    Room Name                                Exits\r\n"
   "----- ------- ---------------------------------------- -----@n\r\n");
-
-  if (!top_of_world)
-    return;
   
   for (i = bottom; i <= top; i++) {
     struct room_data *rm = room_by_id(i);

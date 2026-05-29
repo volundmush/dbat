@@ -19,7 +19,6 @@ void	object_list_new_owner(struct obj_data *list, struct char_data *ch);
 
 void	obj_to_char(struct obj_data *object, struct char_data *ch);
 
-struct char_data *get_char_room(char *name, int *num, room_rnum room);
 struct char_data *get_char_num(mob_vnum nr);
 void	char_from_room(struct char_data *ch);
 void	char_to_room(struct char_data *ch, struct room_data* room);

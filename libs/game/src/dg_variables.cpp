@@ -379,7 +379,7 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
       }
 
       else if (!strcasecmp(var, "global")) {
-        struct script_data *thescript = SCRIPT(&world[0]);
+        struct script_data *thescript = SCRIPT(room_by_id(0));
         *str = '\0';
         if (!thescript) {
           script_log("Attempt to find global var. Apparently the void has no script.");
@@ -1517,8 +1517,8 @@ in the vault (vnum: 453) now and then. you can just use
             else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, NORTH)->exit_info ,exit_bits, str, slen);
             else if (!strcasecmp(subfield, "room")) {
-              if (R_EXIT(r, NORTH)->to_room != NOWHERE)
-                snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, NORTH)->to_room].number + ROOM_ID_BASE);
+              if (auto dest = exit_dest_get(R_EXIT(r, NORTH)))
+                snprintf(str, slen, "%c%d", UID_CHAR, dest->number + ROOM_ID_BASE);
               else
                 *str = '\0';
             }
@@ -1537,8 +1537,8 @@ in the vault (vnum: 453) now and then. you can just use
             else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, EAST)->exit_info ,exit_bits, str, slen);
             else if (!strcasecmp(subfield, "room")) {
-              if (R_EXIT(r, EAST)->to_room != NOWHERE)
-                snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, EAST)->to_room].number + ROOM_ID_BASE);
+              if (auto dest = exit_dest_get(R_EXIT(r, EAST)))
+                snprintf(str, slen, "%c%d", UID_CHAR, dest->number + ROOM_ID_BASE);
               else
                 *str = '\0';
             }
@@ -1557,8 +1557,8 @@ in the vault (vnum: 453) now and then. you can just use
             else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, SOUTH)->exit_info ,exit_bits, str, slen);
             else if (!strcasecmp(subfield, "room")) {
-              if (R_EXIT(r, SOUTH)->to_room != NOWHERE)
-                snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, SOUTH)->to_room].number + ROOM_ID_BASE);
+              if (auto dest = exit_dest_get(R_EXIT(r, SOUTH)))
+                snprintf(str, slen, "%c%d", UID_CHAR, dest->number + ROOM_ID_BASE);
               else
                 *str = '\0';
             }
@@ -1577,8 +1577,8 @@ in the vault (vnum: 453) now and then. you can just use
             else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, WEST)->exit_info ,exit_bits, str, slen);
             else if (!strcasecmp(subfield, "room")) {
-              if (R_EXIT(r, WEST)->to_room != NOWHERE)
-                snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, WEST)->to_room].number + ROOM_ID_BASE);
+              if (auto dest = exit_dest_get(R_EXIT(r, WEST)))
+                snprintf(str, slen, "%c%d", UID_CHAR, dest->number + ROOM_ID_BASE);
               else
                 *str = '\0';
             }
@@ -1597,8 +1597,8 @@ in the vault (vnum: 453) now and then. you can just use
             else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, UP)->exit_info ,exit_bits, str, slen);
             else if (!strcasecmp(subfield, "room")) {
-              if (R_EXIT(r, UP)->to_room != NOWHERE)
-                snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, UP)->to_room].number + ROOM_ID_BASE);
+              if (auto dest = exit_dest_get(R_EXIT(r, UP)))
+                snprintf(str, slen, "%c%d", UID_CHAR, dest->number + ROOM_ID_BASE);
               else
                 *str = '\0';
             }
@@ -1617,8 +1617,8 @@ in the vault (vnum: 453) now and then. you can just use
             else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, DOWN)->exit_info ,exit_bits, str, slen);
             else if (!strcasecmp(subfield, "room")) {
-              if (R_EXIT(r, DOWN)->to_room != NOWHERE)
-                snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, DOWN)->to_room].number + ROOM_ID_BASE);
+              if (auto dest = exit_dest_get(R_EXIT(r, DOWN)))
+                snprintf(str, slen, "%c%d", UID_CHAR, dest->number + ROOM_ID_BASE);
               else
                 *str = '\0';
             }
@@ -1637,8 +1637,8 @@ in the vault (vnum: 453) now and then. you can just use
             else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, NORTHWEST)->exit_info ,exit_bits, str, slen);
             else if (!strcasecmp(subfield, "room")) {
-              if (R_EXIT(r, NORTHWEST)->to_room != NOWHERE)
-                snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, NORTHWEST)->to_room].number + ROOM_ID_BASE);
+              if (auto dest = exit_dest_get(R_EXIT(r, NORTHWEST)))
+                snprintf(str, slen, "%c%d", UID_CHAR, dest->number + ROOM_ID_BASE);
               else
                 *str = '\0';
             }
@@ -1657,8 +1657,8 @@ in the vault (vnum: 453) now and then. you can just use
             else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, NORTHEAST)->exit_info ,exit_bits, str, slen);
             else if (!strcasecmp(subfield, "room")) {
-              if (R_EXIT(r, NORTHEAST)->to_room != NOWHERE)
-                snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, NORTHEAST)->to_room].number + ROOM_ID_BASE);
+              if (auto dest = exit_dest_get(R_EXIT(r, NORTHEAST)))
+                snprintf(str, slen, "%c%d", UID_CHAR, dest->number + ROOM_ID_BASE);
               else
                 *str = '\0';
             }
@@ -1677,8 +1677,8 @@ in the vault (vnum: 453) now and then. you can just use
             else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, SOUTHWEST)->exit_info ,exit_bits, str, slen);
             else if (!strcasecmp(subfield, "room")) {
-              if (R_EXIT(r, SOUTHWEST)->to_room != NOWHERE)
-                snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, SOUTHWEST)->to_room].number + ROOM_ID_BASE);
+              if (auto dest = exit_dest_get(R_EXIT(r, SOUTHWEST)))
+                snprintf(str, slen, "%c%d", UID_CHAR, dest->number + ROOM_ID_BASE);
               else
                 *str = '\0';
             }
@@ -1697,8 +1697,8 @@ in the vault (vnum: 453) now and then. you can just use
             else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, SOUTHEAST)->exit_info ,exit_bits, str, slen);
             else if (!strcasecmp(subfield, "room")) {
-              if (R_EXIT(r, SOUTHEAST)->to_room != NOWHERE)
-                snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, SOUTHEAST)->to_room].number + ROOM_ID_BASE);
+              if (auto dest = exit_dest_get(R_EXIT(r, SOUTHEAST)))
+                snprintf(str, slen, "%c%d", UID_CHAR, dest->number + ROOM_ID_BASE);
               else
                 *str = '\0';
             }
@@ -1717,8 +1717,8 @@ in the vault (vnum: 453) now and then. you can just use
             else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, INDIR)->exit_info ,exit_bits, str, slen);
             else if (!strcasecmp(subfield, "room")) {
-              if (R_EXIT(r, INDIR)->to_room != NOWHERE)
-                snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, INDIR)->to_room].number + ROOM_ID_BASE);
+              if (auto dest = exit_dest_get(R_EXIT(r, INDIR)))
+                snprintf(str, slen, "%c%d", UID_CHAR, dest->number + ROOM_ID_BASE);
               else
                 *str = '\0';
             }
@@ -1737,8 +1737,8 @@ in the vault (vnum: 453) now and then. you can just use
             else if (!strcasecmp(subfield, "bits"))
               sprintbit(R_EXIT(r, OUTDIR)->exit_info ,exit_bits, str, slen);
             else if (!strcasecmp(subfield, "room")) {
-              if (R_EXIT(r, OUTDIR)->to_room != NOWHERE)
-                snprintf(str, slen, "%c%d", UID_CHAR, world[R_EXIT(r, OUTDIR)->to_room].number + ROOM_ID_BASE);
+              if (auto dest = exit_dest_get(R_EXIT(r, OUTDIR)))
+                snprintf(str, slen, "%c%d", UID_CHAR, dest->number + ROOM_ID_BASE);
               else
                 *str = '\0';
             }

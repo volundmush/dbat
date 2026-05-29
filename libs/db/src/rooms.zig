@@ -51,3 +51,7 @@ pub export fn room_delete(vnum: cdb.room_vnum) void {
 pub export fn room_count() usize {
     return room_map.count();
 }
+
+pub export fn room_get(vnum: cdb.room_vnum) ?*cdb.room_data {
+    return room_map.get(vnum) orelse null;
+}

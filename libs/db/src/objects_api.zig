@@ -283,10 +283,6 @@ pub export fn obj_sitting_set(obj: *cdb.obj_data, ch: [*c]cdb.char_data) void {
     obj.sitting = ch;
 }
 
-fn validRoomRnum(rnum: cdb.room_rnum) bool {
-    return rnum != cdb.NOWHERE and rnum >= 0 and rnum <= cdb.top_of_world and cdb.world != null;
-}
-
 const StringField = enum { name, description, short_description, action_description };
 
 fn protoString(obj: *cdb.obj_data, field: StringField) [*c]u8 {

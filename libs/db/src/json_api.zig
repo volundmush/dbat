@@ -156,14 +156,13 @@ fn exportRoom(vnum: cdb.room_vnum, filename: []const u8) !void {
 
 fn exportRooms(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.world == null) return;
-    if (cdb.top_of_world < 0) return;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_of_world))) : (index += 1) {
-        const room = ptrAt(cdb.room_data, cdb.world, index);
-        const path = try assetPath(folder, room.number);
+    const iterator = cdb.room_iterator_create() orelse return;
+    defer cdb.room_iterator_free(iterator);
+
+    while (cdb.room_next(iterator)) |room| {
+        const path = try assetPath(folder, room.*.number);
         defer std.heap.page_allocator.free(path);
-        try exportRoom(room.number, path);
+        try exportRoom(room.*.number, path);
     }
 }
 
@@ -175,14 +174,13 @@ fn exportRoomExits(vnum: cdb.room_vnum, filename: []const u8) !void {
 
 fn exportAllRoomExits(folder: []const u8) !void {
     try ensureFolder(folder);
-    if (cdb.world == null) return;
-    if (cdb.top_of_world < 0) return;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_of_world))) : (index += 1) {
-        const room = ptrAt(cdb.room_data, cdb.world, index);
-        const path = try assetPath(folder, room.number);
+    const iterator = cdb.room_iterator_create() orelse return;
+    defer cdb.room_iterator_free(iterator);
+
+    while (cdb.room_next(iterator)) |room| {
+        const path = try assetPath(folder, room.*.number);
         defer std.heap.page_allocator.free(path);
-        try exportRoomExits(room.number, path);
+        try exportRoomExits(room.*.number, path);
     }
 }
 
@@ -416,9 +414,6 @@ fn importZones(folder: []const u8) !void {
 fn importRooms(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
     var progress = Progress.init("rooms", files.len);
-    cdb.world = try allocCArray(cdb.room_data, files.len);
-    cdb.top_of_world = if (files.len == 0) -1 else @intCast(files.len - 1);
-    resetHtree(&cdb.room_htree);
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -427,7 +422,7 @@ fn importRooms(folder: []const u8) !void {
             logImportFileError("rooms", file, err);
             return err;
         };
-        const room = ptrAt(cdb.room_data, cdb.world, index);
+        const room = try allocCOne(cdb.room_data);
         room.number = @intCast(file.vnum);
         room.zone = zoneRnumForRoom(room.number);
         rooms_json.deserializeRoom(room, .{}, value) catch |err| {
@@ -435,7 +430,9 @@ fn importRooms(folder: []const u8) !void {
             return err;
         };
         room.zone = zoneRnumForRoom(room.number);
+        ptrAt(cdb.room_data, cdb.world, index).* = room.*;
         cdb.htree_add(cdb.room_htree, room.number, @intCast(index));
+        cdb.room_put(room.number, room);
         progress.tick(index);
     }
 }

@@ -154,11 +154,11 @@ WCMD(do_wasound)
     }
 
     for (door = 0; door < NUM_OF_DIRS; door++) {
-        struct room_direction_data *newexit;
-
-        if ((newexit = room->dir_option[door]) && (newexit->to_room != NOWHERE) &&
-            room != &world[newexit->to_room])
-            act_to_room(argument, &world[newexit->to_room]);
+        auto ex = R_EXIT(room, door);
+        if(!ex) continue;
+        auto dest = exit_dest_get(ex);
+        if(!dest) continue;
+        act_to_room(argument, dest);
     }
 }
 
