@@ -134,8 +134,6 @@ void hsedit_save_internally(struct descriptor_data *d)
 
   if (auto room = room_by_id(OLC_HOUSE(d)->atrium); room)
     room_flag_set(room, ROOM_ATRIUM, TRUE);
-
-//  olc_add_to_save_list(zone_table[OLC_ZNUM(d)].number, OLC_SAVE_HOUSE); 
 } 
 
 
@@ -472,7 +470,7 @@ last_pay[128], buf2[MAX_STRING_LENGTH];
    "@gQ@D)@g Quit\r\n" 
    "@gEnter choice : @n", 
 
-   OLC_NUM(d), zone_table[OLC_ZNUM(d)].number, 
+   OLC_NUM(d), OLC_ZNUM(d), 
    house->owner, get_name_by_id(house->owner) == NULL ? no_name : get_name_by_id(house->owner), 
    house->atrium, ((house->exit_num >= 0) && (house->exit_num <= 11)) ? dirs[(house->exit_num)] : "NONE", 
    house_types[(house->mode)], built_on, last_pay, hsedit_list_guests(house, buf2), buf1); 
@@ -1026,12 +1024,12 @@ ACMD(do_oasis_hsedit)
     if (is_number(buf2)) 
       number = atoi(buf2); 
     else if (GET_OLC_ZONE(ch) > 0) { 
-      zone_rnum zlok; 
-      
-      if ((zlok = real_zone(GET_OLC_ZONE(ch))) == NOWHERE) 
+      struct zone_data *zone = zone_by_id(GET_OLC_ZONE(ch)); 
+  
+      if (!zone) 
         number = NOWHERE; 
       else 
-        number = genolc_zone_bottom(zlok); 
+        number = zone->bot; 
     } 
     
     if (number == NOWHERE) { 
@@ -1087,7 +1085,7 @@ ACMD(do_oasis_hsedit)
   /** Find the zone.                                                         **/ 
   
 /****************************************************************************/ 
-  OLC_ZNUM(d) = save ? real_zone(number) : real_zone_by_thing(number); 
+  OLC_ZNUM(d) = virtual_zone_by_thing(number); 
   if (OLC_ZNUM(d) == NOWHERE) { 
     send_to_char(ch, "Sorry, there is no zone for that number!\r\n"); 
     
@@ -1106,10 +1104,11 @@ ACMD(do_oasis_hsedit)
   /** Everyone but IMPLs can only edit zones they have been assigned.        **/ 
   
 /****************************************************************************/ 
-  if (!can_edit_zone(ch, OLC_ZNUM(d))) { 
-    send_to_char(ch, " You do not have permission to edit zone %d. Try zone %d.\r\n", zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch)); 
+  auto zone = zone_by_id(OLC_ZNUM(d));
+  if (!can_edit_zone(ch, zone)) { 
+    send_to_char(ch, " You do not have permission to edit zone %d. Try zone %d.\r\n", zone->number, GET_OLC_ZONE(ch)); 
     mudlog(BRF, ADMLVL_BUILDER, TRUE, "OLC: %s tried to edit zone %d allowed zone %d", 
-      GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch)); 
+      GET_NAME(ch), zone->number, GET_OLC_ZONE(ch)); 
     
     
 /**************************************************************************/ 
@@ -1128,10 +1127,10 @@ ACMD(do_oasis_hsedit)
 /****************************************************************************/ 
   if (save) { 
     send_to_char(ch, "Saving all houses in zone %d.\r\n", 
-      zone_table[OLC_ZNUM(d)].number); 
+      zone->number); 
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, 
       "OLC: %s saves house info for zone %d.", GET_NAME(ch), 
-      zone_table[OLC_ZNUM(d)].number); 
+      zone->number); 
     
     
 /**************************************************************************/ 
@@ -1194,5 +1193,5 @@ ACMD(do_oasis_hsedit)
   
 /****************************************************************************/ 
   mudlog(CMP, ADMLVL_BUILDER, TRUE, "OLC: (hsedit) %s starts editing zone %d allowed zone %d", 
-    GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch)); 
+    GET_NAME(ch), zone->number, GET_OLC_ZONE(ch)); 
 }

@@ -128,21 +128,21 @@ int delete_room(room_vnum vnum)
   /*
    * Find what zone that room was in so we can update the loading table.
    */
-  for (i = 0; i <= top_of_zone_table; i++)
-    for (j = 0; ZCMD(i, j).command != 'S'; j++)
-      switch (ZCMD(i, j).command)
+  zone_iterate([&](auto zone) {
+    for (j = 0; zone->cmd[j].command != 'S'; j++)
+      switch (zone->cmd[j].command)
       {
       case 'M':
       case 'O':
       case 'T':
       case 'V':
-        if (ZCMD(i, j).arg3 == vnum)
-          ZCMD(i, j).command = '*'; /* Cancel command. */
+        if (zone->cmd[j].arg3 == vnum)
+          zone->cmd[j].command = '*'; /* Cancel command. */
         break;
       case 'D':
       case 'R':
-        if (ZCMD(i, j).arg1 == vnum)
-          ZCMD(i, j).command = '*'; /* Cancel command. */
+        if (zone->cmd[j].arg1 == vnum)
+          zone->cmd[j].command = '*'; /* Cancel command. */
       case 'G':
       case 'P':
       case 'E':
@@ -152,6 +152,7 @@ int delete_room(room_vnum vnum)
       default:
         mudlog(BRF, ADMLVL_GOD, TRUE, "SYSERR: GenOLC: delete_room: Unknown zone entry found!");
       }
+      return true; });
 
   /*
    * Remove this room from all shop lists.
@@ -175,40 +176,33 @@ int delete_room(room_vnum vnum)
   return TRUE;
 }
 
-int save_rooms(zone_rnum zone_num)
+int save_rooms(struct zone_data *zone)
 {
   int i;
-  struct room_data *room;
   FILE *sf;
   char filename[128];
   char buf[MAX_STRING_LENGTH], buf1[MAX_STRING_LENGTH];
   char rbuf1[MAX_STRING_LENGTH], rbuf2[MAX_STRING_LENGTH];
   char rbuf3[MAX_STRING_LENGTH], rbuf4[MAX_STRING_LENGTH];
 
-#if CIRCLE_UNSIGNED_INDEX
-  if (zone_num == NOWHERE || zone_num > top_of_zone_table)
-  {
-#else
-  if (zone_num < 0 || zone_num > top_of_zone_table)
-  {
-#endif
-    log("SYSERR: GenOLC: save_rooms: Invalid zone number %d passed! (0-%d)", zone_num, top_of_zone_table);
+ if(!zone) {
+    log("SYSERR: GenOLC: save_rooms: Invalid zone!");
     return FALSE;
   }
 
   log("GenOLC: save_rooms: Saving rooms in zone #%d (%d-%d).",
-      zone_table[zone_num].number, genolc_zone_bottom(zone_num), zone_table[zone_num].top);
+      zone->number, zone->bot, zone->top);
 
-  snprintf(filename, sizeof(filename), "%s%d.new", WLD_PREFIX, zone_table[zone_num].number);
+  snprintf(filename, sizeof(filename), "%s%d.new", WLD_PREFIX, zone->number);
   if (!(sf = fopen(filename, "w")))
   {
     perror("SYSERR: save_rooms");
     return FALSE;
   }
 
-  for (i = genolc_zone_bottom(zone_num); i <= zone_table[zone_num].top; i++)
+  for (i = zone->bot; i <= zone->top; i++)
   {
-    room = room_by_id(i);
+    auto room = room_by_id(i);
     if (!room)
       continue;
 
@@ -234,7 +228,7 @@ int save_rooms(zone_rnum zone_num)
             room->number,
             room->name ? room->name : "Untitled", STRING_TERMINATOR,
             buf, STRING_TERMINATOR,
-            zone_table[room->zone].number,
+            room->zone,
             rbuf1, rbuf2, rbuf3, rbuf4, room->sector_type);
 
     /*
@@ -319,15 +313,15 @@ int save_rooms(zone_rnum zone_num)
   fclose(sf);
 
   /* Old file we're replacing. */
-  snprintf(buf, sizeof(buf), "%s%d.wld", WLD_PREFIX, zone_table[zone_num].number);
+  snprintf(buf, sizeof(buf), "%s%d.wld", WLD_PREFIX, zone->number);
 
   remove(buf);
   rename(filename, buf);
 
-  if (in_save_list(zone_table[zone_num].number, SL_WLD))
+  if (in_save_list(zone->number, SL_WLD))
   {
-    remove_from_save_list(zone_table[zone_num].number, SL_WLD);
-    create_world_index(zone_table[zone_num].number, "wld");
+    remove_from_save_list(zone->number, SL_WLD);
+    create_world_index(zone->number, "wld");
     log("GenOLC: save_rooms: Saving rooms '%s'", buf);
   }
   return TRUE;

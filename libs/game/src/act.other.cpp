@@ -7518,9 +7518,7 @@ ACMD(do_summon)
      }
      send_to_imm("Shenron summoned to room: %d\r\n", DRAGONR);
 
-     if ((DRAGONZ = real_zone_by_thing(DRAGONR)) != NOWHERE) {
-      DRAGONZ = real_zone_by_thing(DRAGONR);
-     }
+     DRAGONZ = virtual_zone_by_thing(DRAGONR);
 
      for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
@@ -7699,7 +7697,8 @@ ACMD(do_transform)
     // Announce noisy transformations in the zone.
     int zone = 0;
     if(get_race(ch->race)->raceHasNoisyTransformations()) {
-        if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+      auto zone = char_zone_get(ch);
+        if (zone) {
             send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
         };
     }

@@ -418,18 +418,20 @@ ASPELL(spell_portal)
 
   if (ch == NULL || victim == NULL)
     return;
+  
+  auto zone = room_zone_get(rm);
 
-  if (!can_edit_zone(ch, rm->zone) && ZONE_FLAGGED(rm->zone, ZONE_QUEST)) {
+  if (!can_edit_zone(ch, zone) && zone_flagged(zone, ZONE_QUEST)) {
     send_to_char(ch, "That target is in a quest zone.\r\n");
     return;
   }
 
-  if (ZONE_FLAGGED(rm->zone, ZONE_CLOSED) && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
+  if (zone_flagged(zone, ZONE_CLOSED) && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
     send_to_char(ch, "That target is in a closed zone.\r\n");
     return;
   }
 
-  if (ZONE_FLAGGED(rm->zone, ZONE_NOIMMORT) && GET_ADMLEVEL(ch) < ADMLVL_GRGOD) {
+  if (zone_flagged(zone, ZONE_NOIMMORT) && GET_ADMLEVEL(ch) < ADMLVL_GRGOD) {
     send_to_char(ch, "That target is in a zone closed to all.\r\n");
     return;
   }

@@ -210,7 +210,7 @@ WCMD(do_wsend)
 
 WCMD(do_wzoneecho)
 {
-    zone_rnum zone;
+    struct zone_data *zone = NULL;
     char room_num[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
 
     msg = any_one_arg(argument, room_num);
@@ -219,7 +219,7 @@ WCMD(do_wzoneecho)
     if (!*room_num || !*msg)
         wld_log(room, "wzoneecho called with too few args");
 
-    else if ((zone = real_zone_by_thing(atoi(room_num))) == NOWHERE)
+    else if ((zone = zone_by_id(atoi(room_num))) == NULL)
         wld_log(room, "wzoneecho called for nonexistant zone");
 
     else {

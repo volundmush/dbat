@@ -22,17 +22,19 @@ pub export fn room_vnum_set(room: *cdb.room_data, vnum: cdb.room_vnum) void {
 }
 
 pub export fn room_zone_get(room: *cdb.room_data) [*c]cdb.zone_data {
-    if (room.zone == cdb.NOWHERE or cdb.zone_table == null) return null;
-    return &cdb.zone_table[@intCast(room.zone)];
+    const zone = cdb.zone_by_id(room.zone);
+    if (zone == null) return null;
+    return zone;
 }
 
 pub export fn room_zone_vnum_get(room: *cdb.room_data) cdb.zone_vnum {
-    if (room.zone == cdb.NOWHERE or cdb.zone_table == null) return cdb.NOWHERE;
-    return cdb.zone_table[@intCast(room.zone)].number;
+    const zone = cdb.zone_by_id(room.zone);
+    if (zone == null) return cdb.NOWHERE;
+    return zone.number;
 }
 
 pub export fn room_zone_set(room: *cdb.room_data, vnum: cdb.zone_vnum) void {
-    room.zone = cdb.real_zone(vnum);
+    room.zone = vnum;
 }
 
 pub export fn room_sector_type_get(room: *cdb.room_data) c_int {

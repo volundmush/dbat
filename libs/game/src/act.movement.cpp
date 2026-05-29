@@ -530,8 +530,7 @@ ACMD(do_land)
   act(sendback, TRUE, ch, 0, 0, TO_ROOM);
   char_from_room(ch);
   char_to_room(ch, room_by_id(landing));
-  int zone = 0;
-  if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+  if (auto zone = char_zone_get(ch); zone) {
    fly_zone(zone, "can be seen landing from space nearby!@n\r\n", ch);
   }
   send_to_sense(1, "landing on the planet", ch);
@@ -818,33 +817,36 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   /******* Zone flag checks *******/
 
   rm = dest;
+  auto zone = room_zone_get(rm);
+  auto zone_min = zone->min_level;
+  auto zone_max = zone->max_level;
 
   if (!IS_NPC(ch) && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) &&
-    (GET_LEVEL(ch) < ZONE_MINLVL(rm->zone)) && (ZONE_MINLVL(rm->zone) > 0)) {
+    (GET_LEVEL(ch) < zone_min) && (zone_min > 0)) {
     send_to_char(ch, "Sorry, you are too low a level to enter this zone.\r\n");
     return(0);
   }
 
-  if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && (GET_LEVEL(ch) > ZONE_MAXLVL(rm->zone)) &&
-    (ZONE_MAXLVL(rm->zone) > 0)) {
+  if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && (GET_LEVEL(ch) > zone_max) &&
+    (zone_max > 0)) {
     send_to_char(ch, "Sorry, you are too high a level to enter this zone.\r\n");
     return(0);
   }
 
-  if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && ZONE_FLAGGED(rm->zone, ZONE_CLOSED)){
+  if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && zone_flagged(zone, ZONE_CLOSED)){
      send_to_char(ch, "This zone is currently closed to mortals.\r\n");
      return (0);
   }
 
   if ((GET_ADMLEVEL(ch) >= ADMLVL_IMMORT && GET_ADMLEVEL(ch) < ADMLVL_GRGOD)
-       && ZONE_FLAGGED(rm->zone, ZONE_NOIMMORT)){
+       && zone_flagged(zone, ZONE_NOIMMORT)){
        send_to_char(ch, "This zone is closed to all.\r\n");
        return (0);
   }
 
   /* No low level immortal scouting */
   if ((GET_ADMLEVEL(ch) >= ADMLVL_IMMORT && GET_ADMLEVEL(ch) < ADMLVL_GOD) &&
-       !can_edit_zone(ch, rm->zone) && ZONE_FLAGGED(rm->zone, ZONE_QUEST)) {
+       !can_edit_zone(ch, room_zone_get(rm)) && zone_flagged(zone, ZONE_QUEST)) {
        send_to_char(ch, "This is a Quest zone.\r\n");
        return (0);
   }
@@ -2460,8 +2462,7 @@ ACMD(do_fly)
    }
    GET_ALT(ch) = 0;
    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-    int zone = 0;
-    if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+    if (auto zone = char_zone_get(ch); zone) {
      fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
     }
     send_to_sense(1, "leaving the planet", ch);
@@ -2484,8 +2485,7 @@ ACMD(do_fly)
    if (!block_calc(ch)) {
     return;
    }
-    int zone = 0;
-    if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+    if (auto zone = char_zone_get(ch); zone) {
      fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
     }
     send_to_sense(1, "leaving the planet", ch);
@@ -2512,8 +2512,7 @@ ACMD(do_fly)
    if (!block_calc(ch)) {
     return;
    }
-    int zone = 0;
-    if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+    if (auto zone = char_zone_get(ch); zone) {
      fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
     }
     send_to_sense(1, "leaving the planet", ch);
@@ -2541,8 +2540,7 @@ ACMD(do_fly)
      }
      GET_ALT(ch) = 0;
      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-    int zone = 0;
-    if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+    if (auto zone = char_zone_get(ch); zone) {
      fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
     }
     send_to_sense(1, "leaving the planet", ch);
@@ -2570,8 +2568,7 @@ ACMD(do_fly)
    }
    GET_ALT(ch) = 0;
    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-    int zone = 0;
-    if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+    if (auto zone = char_zone_get(ch); zone) {
      fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
     }
     send_to_sense(1, "leaving the planet", ch);
@@ -2596,8 +2593,7 @@ ACMD(do_fly)
    }
    GET_ALT(ch) = 0;
    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-    int zone = 0;
-    if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+    if (auto zone = char_zone_get(ch); zone) {
      fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
     }
     send_to_sense(1, "leaving the planet", ch);
@@ -2622,8 +2618,7 @@ ACMD(do_fly)
    }
    GET_ALT(ch) = 0;
    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-    int zone = 0;
-    if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+    if (auto zone = char_zone_get(ch); zone) {
      fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
     }
     send_to_sense(1, "leaving the planet", ch);
@@ -2648,8 +2643,7 @@ ACMD(do_fly)
    }
    GET_ALT(ch) = 0;
    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-    int zone = 0;
-    if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+    if (auto zone = char_zone_get(ch); zone) {
      fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
     }
     send_to_sense(1, "leaving the planet", ch);
@@ -2674,8 +2668,7 @@ ACMD(do_fly)
    }
    GET_ALT(ch) = 0;
    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-    int zone = 0;
-    if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+    if (auto zone = char_zone_get(ch); zone) {
      fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
     }
     send_to_sense(1, "leaving the planet", ch);
@@ -2700,8 +2693,7 @@ ACMD(do_fly)
    }
    GET_ALT(ch) = 0;
    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-    int zone = 0;
-    if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+    if (auto zone = char_zone_get(ch); zone) {
      fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
     }
     send_to_sense(1, "leaving the planet", ch);
@@ -2726,8 +2718,7 @@ ACMD(do_fly)
    }
    GET_ALT(ch) = 0;
    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-    int zone = 0;
-    if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+    if (auto zone = char_zone_get(ch); zone) {
      fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
     }
     send_to_sense(1, "leaving the planet", ch);

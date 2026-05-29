@@ -91,12 +91,12 @@ ACMD(do_oasis_redit)
     if (is_number(buf2))
       number = atoi(buf2);
     else if (GET_OLC_ZONE(ch) >= 0) {
-      zone_rnum zlok;
+      struct zone_data *zone = zone_by_id(GET_OLC_ZONE(ch));
         
-      if ((zlok = real_zone(GET_OLC_ZONE(ch))) == NOWHERE)
+      if (!zone)
         number = NOWHERE;
       else
-        number = genolc_zone_bottom(zlok);
+        number = zone->bot;
     }
       
     if (number == NOWHERE) {
@@ -135,7 +135,7 @@ ACMD(do_oasis_redit)
   CREATE(d->olc, struct oasis_olc_data, 1);
   
   /* Find the zone. */
-  OLC_ZNUM(d) = save ? real_zone(number) : real_zone_by_thing(number);
+  OLC_ZNUM(d) = virtual_zone_by_thing(number);
   if (OLC_ZNUM(d) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
     free(d->olc);
@@ -143,10 +143,10 @@ ACMD(do_oasis_redit)
     return;
   }
 
-  struct zone_data *zone = &zone_table[OLC_ZNUM(d)];
+  struct zone_data *zone = zone_by_id(OLC_ZNUM(d));
   
   /* Make sure the builder is allowed to modify this zone. */
-  if (!can_edit_zone(ch, OLC_ZNUM(d)) && remodeling == FALSE) {
+  if (!can_edit_zone(ch, zone) && remodeling == FALSE) {
     send_cannot_edit(ch, zone->number);
     free(d->olc);
     d->olc = NULL;
@@ -158,7 +158,7 @@ ACMD(do_oasis_redit)
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s saves room info for zone %d.", GET_NAME(ch), zone->number);
     
     /* Save the rooms. */
-    save_rooms(OLC_ZNUM(d));
+    save_rooms(zone);
     
     /* Free the olc data from the descriptor. */
     free(d->olc);
@@ -302,9 +302,9 @@ void redit_save_internally(struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-void redit_save_to_disk(zone_vnum zone_num)
+void redit_save_to_disk(struct zone_data *zone)
 {
-  save_rooms(zone_num);		/* :) */
+  save_rooms(zone);		/* :) */
   update_space();
 }
 
@@ -495,7 +495,7 @@ void redit_disp_menu(struct descriptor_data *d)
 	  "@gQ@n) Quit\r\n"
 	  "Enter choice : ",
 
-	  OLC_NUM(d), zone_table[OLC_ZNUM(d)].number, room->name,
+	  OLC_NUM(d), OLC_ZNUM(d), room->name,
 	  room->description, buf1, buf2,
 	  _redit_disp_menu_helper(room, NORTH),
 	  _redit_disp_menu_helper(room, NORTHWEST),
@@ -520,7 +520,7 @@ void redit_disp_menu(struct descriptor_data *d)
           "@gQ@n) Quit\r\n"
           "Enter choice : ",
 
-          OLC_NUM(d), zone_table[OLC_ZNUM(d)].number, room->name,
+          OLC_NUM(d), OLC_ZNUM(d), room->name,
           room->description);
    }
 
@@ -546,7 +546,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
 	"OLC: %s edits room %d.", GET_NAME(d->character), OLC_NUM(d));
       if (CONFIG_OLC_SAVE) {
-	redit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
+	redit_save_to_disk(zone_by_id(virtual_zone_by_thing(OLC_NUM(d))));
         if (GET_ADMLEVEL(d->character) < 1) {
          write_to_output(d, "@GThe remodeling droid quickly launches about with remodeling the room to your specifications. It seems to finish in no time at all...@n\r\n");
          act("@GThe remodeling droid quickly launches about with remodeling the room as to @g$n's@G specifications. It seems to finish in no time at all...@n", TRUE, d->character, 0, 0, TO_ROOM);

@@ -105,22 +105,25 @@ int delete_mobile(mob_vnum refpt)
   vnum = refpt;
   extract_mobile_all(vnum);
 
-  add_to_save_list(virtual_zone_by_thing(vnum), SL_MOB);
+  auto vz = virtual_zone_by_thing(vnum);
+
+  add_to_save_list(vz, SL_MOB);
 
   /* Update zone table.  */
-  for (zone = 0; zone <= top_of_zone_table; zone++) {
+  zone_iterate ([&](auto zone) {
     bool changed = FALSE;
-    for (cmd_no = 0; ZCMD(zone, cmd_no).command != 'S'; cmd_no++) {
-      if (ZCMD(zone, cmd_no).command == 'M' && ZCMD(zone, cmd_no).arg1 == vnum) {
-        ZCMD(zone, cmd_no).command = '*';
-        ZCMD(zone, cmd_no).arg1 = NOTHING;
+    for (cmd_no = 0; zone->cmd[cmd_no].command != 'S'; cmd_no++) {
+      if (zone->cmd[cmd_no].command == 'M' && zone->cmd[cmd_no].arg1 == vnum) {
+        zone->cmd[cmd_no].command = '*';
+        zone->cmd[cmd_no].arg1 = NOTHING;
         changed = true;
       }
     }
     if(changed) {
-      add_to_save_list(zone_table[zone].number, SL_ZON);
+      add_to_save_list(zone->number, SL_ZON);
     }
-  }
+  return true;
+});
 
   zone_vnum last_saved_zone = NOTHING;
   /* Update shop keepers.  */
@@ -246,7 +249,7 @@ int free_mobile(struct char_data *mob)
   return TRUE;
 }
 
-int save_mobiles(zone_rnum zone_num)
+int save_mobiles(struct zone_data *zone)
 {
   FILE *mobfd;
   room_vnum i;
@@ -254,16 +257,10 @@ int save_mobiles(zone_rnum zone_num)
   int written;
   char mobfname[64], usedfname[64];
 
-#if CIRCLE_UNSIGNED_INDEX
-  if (zone_num == NOWHERE || zone_num > top_of_zone_table) {
-#else
-  if (zone_num < 0 || zone_num > top_of_zone_table) {
-#endif
-    log("SYSERR: GenOLC: save_mobiles: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
+if(!zone) {
+    log("SYSERR: GenOLC: save_mobiles: Invalid zone!");
     return FALSE;
   }
-
-  struct zone_data *zone = &zone_table[zone_num];
 
   snprintf(mobfname, sizeof(mobfname), "%s%d.new", MOB_PREFIX, zone->number);
   if ((mobfd = fopen(mobfname, "w")) == NULL) {
@@ -271,7 +268,7 @@ int save_mobiles(zone_rnum zone_num)
     return FALSE;
   }
 
-  for (i = genolc_zone_bottom(zone_num); i <= zone->top; i++) {
+  for (i = zone->bot; i <= zone->top; i++) {
     auto proto = mob_proto_by_id(i);
     if (!proto) continue;
     check_mobile_strings(proto);

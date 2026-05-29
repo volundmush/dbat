@@ -52,6 +52,10 @@ pub export fn room_count() usize {
     return room_map.count();
 }
 
-pub export fn room_get(vnum: cdb.room_vnum) ?*cdb.room_data {
+pub export fn room_by_id(vnum: cdb.room_vnum) ?*cdb.room_data {
     return room_map.get(vnum) orelse null;
+}
+
+pub export fn room_get(vnum: cdb.room_vnum) ?*cdb.room_data {
+    return room_by_id(vnum);
 }

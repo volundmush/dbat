@@ -200,7 +200,7 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
 
 
 
-void send_to_zone(char *messg, zone_rnum zone)
+void send_to_zone(char *messg, struct zone_data *zone)
 {
   struct descriptor_data *i;
 
@@ -210,11 +210,11 @@ void send_to_zone(char *messg, zone_rnum zone)
   for (i = descriptor_list; i; i = i->next)
     if (!i->connected && i->character && AWAKE(i->character) &&
         (char_room_get(i->character) != NULL) &&
-        (char_room_get(i->character)->zone == zone))
+        (char_zone_get(i->character) == zone))
       write_to_output(i, "%s", messg);
 }
 
-void fly_zone(zone_rnum zone, char *messg, struct char_data *ch)
+void fly_zone(struct zone_data* zone, char *messg, struct char_data *ch)
 {
   struct descriptor_data *i;
 
@@ -222,7 +222,7 @@ void fly_zone(zone_rnum zone, char *messg, struct char_data *ch)
     return;
 
   for (i = descriptor_list; i; i = i->next) {
-    if (!i->connected && i->character && AWAKE(i->character) && OUTSIDE(i->character) && (char_room_get(i->character) != NULL) && (char_room_get(i->character)->zone == zone) && i->character != ch) {
+    if (!i->connected && i->character && AWAKE(i->character) && OUTSIDE(i->character) && (char_room_get(i->character) != NULL) && (char_zone_get(i->character) == zone) && i->character != ch) {
        if (PLR_FLAGGED(i->character, PLR_DISGUISED)) {
          write_to_output(i, "A disguised figure %s", messg);
        } else {

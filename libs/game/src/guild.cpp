@@ -1851,13 +1851,13 @@ void show_guild(struct char_data * ch, char *arg)
 /*
  * List all guilds in a zone.                              
  */                                                                           
-void list_guilds(struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vnum vmax)
+void list_guilds(struct char_data *ch, struct zone_data *zone, guild_vnum vmin, guild_vnum vmax)
 {
   int i, bottom, top, counter = 0;
   
-  if (rnum != NOWHERE) {
-    bottom = zone_table[rnum].bot;
-    top    = zone_table[rnum].top;
+  if (zone != NULL) {
+    bottom = zone->bot;
+    top    = zone->top;
   } else {
     bottom = vmin;
     top    = vmax;

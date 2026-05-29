@@ -7,7 +7,7 @@ extern "C" {
 
 room_rnum add_room(struct room_data *);
 int delete_room(room_rnum);
-int save_rooms(zone_rnum);
+int save_rooms(struct zone_data *zone);
 int copy_room(struct room_data *to, struct room_data *from);
 room_rnum duplicate_room(room_vnum to, room_rnum from);
 int copy_room_strings(struct room_data *dest, struct room_data *source);

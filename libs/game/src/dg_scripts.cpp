@@ -890,7 +890,7 @@ ACMD(do_attach)
       send_to_char(ch, "Players can't have scripts.\r\n");
       return;
     }
-    if (!can_edit_zone(ch, char_room_get(ch)->zone)) {
+    if (!can_edit_zone(ch, char_zone_get(ch))) {
       send_to_char(ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
@@ -928,7 +928,7 @@ ACMD(do_attach)
       }
     }
 
-    if (!can_edit_zone(ch, char_room_get(ch)->zone)) {
+    if (!can_edit_zone(ch, char_zone_get(ch))) {
       send_to_char(ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
@@ -963,7 +963,7 @@ ACMD(do_attach)
       return;
     }
 
-    if (!can_edit_zone(ch, room->zone)) {
+    if (!can_edit_zone(ch, room_zone_get(room))) {
       send_to_char(ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
@@ -1076,7 +1076,7 @@ ACMD(do_detach)
 
   if (!strcasecmp(arg1, "room") || !strcasecmp(arg1, "wtr")) {
     room = char_room_get(ch);
-    if (!can_edit_zone(ch, room->zone)) {
+    if (!can_edit_zone(ch, room_zone_get(room))) {
       send_to_char(ch, "You can only detach triggers in your own zone\r\n");
       return;
     }
@@ -1158,7 +1158,7 @@ ACMD(do_detach)
 
       else if (!SCRIPT(victim))
         send_to_char(ch, "That mob doesn't have any triggers.\r\n");
-      else if (!can_edit_zone(ch, real_zone_by_thing(GET_MOB_VNUM(victim)))) {
+      else if (!can_edit_zone(ch, zone_by_id(virtual_zone_by_thing(GET_MOB_VNUM(victim))))) {
         send_to_char(ch, "You can only detach triggers in your own zone\r\n");
         return;
       }
@@ -1180,7 +1180,7 @@ ACMD(do_detach)
       if (!SCRIPT(object))
         send_to_char(ch, "That object doesn't have any triggers.\r\n");
 
-      else if (!can_edit_zone(ch, real_zone_by_thing(GET_OBJ_VNUM(object)))) {
+      else if (!can_edit_zone(ch, zone_by_id(virtual_zone_by_thing(GET_OBJ_VNUM(object))))) {
         send_to_char(ch, "You can only detach triggers in your own zone\r\n");
         return;
       }

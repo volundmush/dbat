@@ -355,7 +355,6 @@ fn importAll(folder: []const u8) !void {
     try importObjPrototypes(obj_prototypes);
     try importShops(shops);
     try importGuilds(guilds);
-    renumberZoneCommands();
 }
 
 const JsonFile = struct {
@@ -391,8 +390,6 @@ fn logImportFileError(label: []const u8, file: JsonFile, err: anyerror) void {
 fn importZones(folder: []const u8) !void {
     const files = try listJsonFiles(folder);
     var progress = Progress.init("zones", files.len);
-    cdb.zone_table = try allocCArray(cdb.zone_data, files.len);
-    cdb.top_of_zone_table = if (files.len == 0) -1 else @intCast(files.len - 1);
 
     for (files, 0..) |file, index| {
         var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -401,7 +398,7 @@ fn importZones(folder: []const u8) !void {
             logImportFileError("zones", file, err);
             return err;
         };
-        const zone = ptrAt(cdb.zone_data, cdb.zone_table, index);
+        const zone = try allocCOne(cdb.zone_data);
         zones_json.deserializeZone(zone, .{}, value) catch |err| {
             logImportFileError("zones", file, err);
             return err;
@@ -424,14 +421,12 @@ fn importRooms(folder: []const u8) !void {
         };
         const room = try allocCOne(cdb.room_data);
         room.number = @intCast(file.vnum);
-        room.zone = zoneRnumForRoom(room.number);
+        room.zone = cdb.virtual_zone_by_thing(room.number);
         rooms_json.deserializeRoom(room, .{}, value) catch |err| {
             logImportFileError("rooms", file, err);
             return err;
         };
-        room.zone = zoneRnumForRoom(room.number);
-        ptrAt(cdb.room_data, cdb.world, index).* = room.*;
-        cdb.htree_add(cdb.room_htree, room.number, @intCast(index));
+        room.zone = cdb.virtual_zone_by_thing(room.number);
         cdb.room_put(room.number, room);
         progress.tick(index);
     }
@@ -582,45 +577,6 @@ fn importGuilds(folder: []const u8) !void {
     }
 }
 
-fn renumberZoneCommands() void {
-    if (cdb.zone_table == null or cdb.top_of_zone_table < 0) return;
-    var zone_index: usize = 0;
-    while (zone_index <= @as(usize, @intCast(cdb.top_of_zone_table))) : (zone_index += 1) {
-        const zone = ptrAt(cdb.zone_data, cdb.zone_table, zone_index);
-        if (zone.cmd == null) continue;
-        var command_index: usize = 0;
-        while (zone.cmd[command_index].command != 'S') : (command_index += 1) {
-            const command: *cdb.reset_com = @ptrCast(&zone.cmd[command_index]);
-            switch (command.command) {
-                'M' => {
-                    command.arg1 = command.arg1;
-                    command.arg3 = cdb.real_room(command.arg3);
-                },
-                'O' => {
-                    command.arg1 = cdb.real_object(command.arg1);
-                    if (command.arg3 != cdb.NOWHERE) command.arg3 = cdb.real_room(command.arg3);
-                },
-                'G', 'E' => command.arg1 = cdb.real_object(command.arg1),
-                'P' => {
-                    command.arg1 = cdb.real_object(command.arg1);
-                    command.arg3 = cdb.real_object(command.arg3);
-                },
-                'D' => command.arg1 = cdb.real_room(command.arg1),
-                'R' => {
-                    command.arg1 = cdb.real_room(command.arg1);
-                    command.arg2 = cdb.real_object(command.arg2);
-                },
-                'T' => {
-                    command.arg2 = realTrigger(command.arg2);
-                    command.arg3 = cdb.real_room(command.arg3);
-                },
-                'V' => command.arg3 = cdb.real_room(command.arg3),
-                else => {},
-            }
-        }
-    }
-}
-
 fn realTrigger(vnum: cdb.trig_vnum) cdb.trig_rnum {
     if (cdb.trig_index == null or cdb.top_of_trigt <= 0) return cdb.NOTHING;
     var index: usize = 0;
@@ -689,16 +645,6 @@ fn ptrAt(comptime T: type, ptr: [*c]T, index: usize) *T {
 fn resetHtree(tree: *[*c]cdb.htree_node) void {
     if (tree.* != null) cdb.htree_free(tree.*);
     tree.* = cdb.htree_init();
-}
-
-fn zoneRnumForRoom(vnum: cdb.room_vnum) cdb.zone_rnum {
-    if (cdb.zone_table == null or cdb.top_of_zone_table < 0) return cdb.NOWHERE;
-    var index: usize = 0;
-    while (index <= @as(usize, @intCast(cdb.top_of_zone_table))) : (index += 1) {
-        const zone = ptrAt(cdb.zone_data, cdb.zone_table, index);
-        if (vnum >= zone.bot and vnum <= zone.top) return @intCast(index);
-    }
-    return cdb.NOWHERE;
 }
 
 fn ensureFolder(folder: []const u8) !void {

@@ -20,7 +20,7 @@ void free_shop(struct shop_data *shop);
 void free_shop_strings(struct shop_data *shop);
 void modify_string(char **str, char *newstr);
 int add_shop(struct shop_data *shop);
-int save_shops(zone_rnum zone_num);
+int save_shops(struct zone_data *zone);
 
 /*
  * Handy macros.

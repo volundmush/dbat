@@ -340,7 +340,7 @@ int add_shop(struct shop_data *nshp)
 {
   shop_rnum rshop;
   int found = 0;
-  zone_rnum rznum = real_zone_by_thing(S_NUM(nshp));
+  struct zone_data *zone = zone_by_id(virtual_zone_by_thing(S_NUM(nshp)));
 
   /*
    * The shop already exists, just update it.
@@ -348,8 +348,8 @@ int add_shop(struct shop_data *nshp)
   if ((rshop = real_shop(S_NUM(nshp))) != NOWHERE) {
    /* free old strings. They're not used in any other place -- Welcor */
    copy_shop(&shop_index[rshop], nshp, TRUE);
-    if (rznum != NOWHERE)
-      add_to_save_list(zone_table[rznum].number, SL_SHP);
+    if (zone)
+      add_to_save_list(zone->number, SL_SHP);
     else
       mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Cannot determine shop zone.");
     return rshop;
@@ -382,8 +382,8 @@ int add_shop(struct shop_data *nshp)
     copy_shop(&shop_index[0], nshp, FALSE);
   }
 
-  if (rznum != NOWHERE)
-    add_to_save_list(zone_table[rznum].number, SL_SHP);
+  if (zone)
+    add_to_save_list(zone->number, SL_SHP);
   else
     mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Cannot determine shop zone.");
 
@@ -392,23 +392,19 @@ int add_shop(struct shop_data *nshp)
 
 /*-------------------------------------------------------------------*/
 
-int save_shops(zone_rnum zone_num)
+int save_shops(struct zone_data *zone)
 {
   int i, j, rshop;
   FILE *shop_file;
   char fname[128], oldname[128];
   struct shop_data *shop;
 
-#if CIRCLE_UNSIGNED_INDEX
-  if (zone_num == NOWHERE || zone_num > top_of_zone_table) {
-#else
-  if (zone_num < 0 || zone_num > top_of_zone_table) {
-#endif
-    log("SYSERR: GenOLC: save_shops: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
+if(!zone) {
+    log("SYSERR: GenOLC: save_shops: Invalid zone pointer.");
     return FALSE;
   }
 
-  snprintf(fname, sizeof(fname), "%s%d.new", SHP_PREFIX, zone_table[zone_num].number);
+  snprintf(fname, sizeof(fname), "%s%d.new", SHP_PREFIX, zone->number);
   if (!(shop_file = fopen(fname, "w"))) {
     mudlog(BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC: Cannot open shop file!");
     return FALSE;
@@ -420,7 +416,7 @@ int save_shops(zone_rnum zone_num)
   /*
    * Search database for shops in this zone.
    */
-  for (i = genolc_zone_bottom(zone_num); i <= zone_table[zone_num].top; i++) {
+  for (i = zone->bottom; i <= zone->top; i++) {
     if ((rshop = real_shop(i)) != NOWHERE) {
       fprintf(shop_file, "#%d~\n", i);
       shop = shop_index + rshop;
@@ -501,13 +497,13 @@ int save_shops(zone_rnum zone_num)
   }
   fprintf(shop_file, "$~\n");
   fclose(shop_file);
-  snprintf(oldname, sizeof(oldname), "%s%d.shp", SHP_PREFIX, zone_table[zone_num].number);
+  snprintf(oldname, sizeof(oldname), "%s%d.shp", SHP_PREFIX, zone->number);
   remove(oldname);
   rename(fname, oldname);
 
-  if (in_save_list(zone_table[zone_num].number, SL_SHP)) {
-    remove_from_save_list(zone_table[zone_num].number, SL_SHP);
-    create_world_index(zone_table[zone_num].number, "shp");
+  if (in_save_list(zone->number, SL_SHP)) {
+    remove_from_save_list(zone->number, SL_SHP);
+    create_world_index(zone->number, "shp");
     log("GenOLC: save_shops: Saving shops '%s'", oldname);
   }
   return TRUE;

@@ -118,14 +118,14 @@ struct reset_q_type {
    struct reset_q_element *tail;
 };
 
-extern struct zone_data *zone_table;
-extern zone_rnum top_of_zone_table;
 
 extern struct reset_q_type reset_q;	/* queue of zones to be reset	 */
 
-zone_rnum real_zone(zone_vnum vnum);
+zone_vnum real_zone(zone_vnum vnum);
 struct zone_data *zone_by_id(zone_vnum vnum);
 struct zone_data *zone_get(zone_vnum vnum);
+
+zone_vnum virtual_zone_by_thing(room_vnum vznum);
 
 void* zone_iterator_create();
 struct zone_data* zone_next(void* iterator);

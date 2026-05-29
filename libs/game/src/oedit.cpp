@@ -72,12 +72,12 @@ ACMD(do_oasis_oedit)
     if (is_number(buf2))
       number = atoi(buf2);
     else if (GET_OLC_ZONE(ch) > 0) {
-      zone_rnum zlok;
+      struct zone_data *zone = zone_by_id(GET_OLC_ZONE(ch));
       
-      if ((zlok = real_zone(GET_OLC_ZONE(ch))) == NOWHERE)
+      if (!zone)
         number = NOWHERE;
       else
-        number = genolc_zone_bottom(zlok);
+        number = zone->bot;
     }
     
     if (number == NOWHERE) {
@@ -124,7 +124,7 @@ ACMD(do_oasis_oedit)
   /****************************************************************************/
   /** Find the zone.                                                         **/
   /****************************************************************************/
-  OLC_ZNUM(d) = save ? real_zone(number) : real_zone_by_thing(number);
+  OLC_ZNUM(d) = virtual_zone_by_thing(number);
   if (OLC_ZNUM(d) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
     
@@ -135,12 +135,12 @@ ACMD(do_oasis_oedit)
     d->olc = NULL;
     return;
   }
-  struct zone_data *zone = &zone_table[OLC_ZNUM(d)];
+  struct zone_data *zone = zone_by_id(OLC_ZNUM(d));
   
   /****************************************************************************/
   /** Everyone but IMPLs can only edit zones they have been assigned.        **/
   /****************************************************************************/
-  if (!can_edit_zone(ch, OLC_ZNUM(d))) {
+  if (!can_edit_zone(ch, zone)) {
     send_cannot_edit(ch, zone->number);
     
     /**************************************************************************/
@@ -328,9 +328,9 @@ void oedit_save_internally(struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-void oedit_save_to_disk(int zone_num)
+void oedit_save_to_disk(struct zone_data *zone)
 {
-  save_objects(zone_num);
+  save_objects(zone);
 }
 
 /**************************************************************************
@@ -1042,7 +1042,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
 	"OLC: %s edits obj %d", GET_NAME(d->character), OLC_NUM(d));
       if (CONFIG_OLC_SAVE) {
-	oedit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
+	oedit_save_to_disk(zone_by_id(virtual_zone_by_thing(OLC_NUM(d))));
 	write_to_output(d, "Object saved to disk.\r\n");
       } else
         write_to_output(d, "Object saved to memory.\r\n");

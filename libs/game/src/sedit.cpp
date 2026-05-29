@@ -27,9 +27,9 @@ void sedit_save_internally(struct descriptor_data *d)
   add_shop(OLC_SHOP(d));
 }
 
-void sedit_save_to_disk(int num)
+void sedit_save_to_disk(struct zone_data *zone)
 {
-  save_shops(num);
+  save_shops(zone);
 }
 
 /*-------------------------------------------------------------------*\
@@ -64,12 +64,12 @@ ACMD(do_oasis_sedit)
     if (is_number(buf2))
       number = atoi(buf2);
     else if (GET_OLC_ZONE(ch) > 0) {
-      zone_rnum zlok;
+      struct zone_data *zone = zone_by_id(GET_OLC_ZONE(ch));
       
-      if ((zlok = real_zone(GET_OLC_ZONE(ch))) == NOWHERE)
+      if (!zone)
         number = NOWHERE;
       else
-        number = genolc_zone_bottom(zlok);
+        number = zone->bot;
     }
     
     if (number == NOWHERE) {
@@ -116,7 +116,7 @@ ACMD(do_oasis_sedit)
   /****************************************************************************/
   /** Find the zone.                                                         **/
   /****************************************************************************/
-  OLC_ZNUM(d) = save ? real_zone(number) : real_zone_by_thing(number);
+  OLC_ZNUM(d) = virtual_zone_by_thing(number);
   if (OLC_ZNUM(d) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
     free(d->olc);
@@ -124,12 +124,12 @@ ACMD(do_oasis_sedit)
     return;
   }
 
-  struct zone_data *zone = &zone_table[OLC_ZNUM(d)];
+  struct zone_data *zone = zone_by_id(OLC_ZNUM(d));
   
   /****************************************************************************/
   /** Everyone but IMPLs can only edit zones they have been assigned.        **/
   /****************************************************************************/
-  if (!can_edit_zone(ch, OLC_ZNUM(d))) {
+  if (!can_edit_zone(ch, zone)) {
     send_cannot_edit(ch, zone->number);
     
     /**************************************************************************/
@@ -150,7 +150,7 @@ ACMD(do_oasis_sedit)
     /**************************************************************************/
     /** Save the shops to the shop file.                                     **/
     /**************************************************************************/
-    save_shops(OLC_ZNUM(d));
+    save_shops(zone);
     
     /**************************************************************************/
     /** Free the OLC structure.                                              **/
@@ -483,7 +483,7 @@ void sedit_parse(struct descriptor_data *d, char *arg)
       mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
         "OLC: %s edits shop %d", GET_NAME(d->character), OLC_NUM(d));
       if (CONFIG_OLC_SAVE) {
-	sedit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
+	sedit_save_to_disk(zone_by_id(OLC_ZNUM(d)));
 	write_to_output(d, "Shop saved to disk.\r\n");
       } else
         write_to_output(d, "Shop saved to memory.\r\n");
@@ -804,8 +804,8 @@ void sedit_parse(struct descriptor_data *d, char *arg)
     }
     break;
   case SEDIT_COPY:
-    if ((i = real_room(atoi(arg))) != NOWHERE) {
-      sedit_setup_existing(d, i);
+    if (auto room = room_by_id(atoi(arg)); room) {
+      sedit_setup_existing(d, room->number);
     } else
       write_to_output(d, "That shop does not exist.\r\n");
     break;

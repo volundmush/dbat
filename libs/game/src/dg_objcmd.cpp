@@ -213,7 +213,7 @@ OCMD(do_oforce)
 
 OCMD(do_ozoneecho)
 {
-    int zone;
+    struct zone_data *zone = NULL;
     char room_number[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
 
     msg = any_one_arg(argument, room_number);
@@ -222,7 +222,7 @@ OCMD(do_ozoneecho)
     if (!*room_number || !*msg)
 	obj_log(obj, "ozoneecho called with too few args");
 
-    else if ((zone = real_zone_by_thing(atoi(room_number))) == NOWHERE)
+    else if ((zone = zone_by_id(atoi(room_number))) == NULL)
 	obj_log(obj, "ozoneecho called for nonexistant zone");
 
     else {

@@ -24,7 +24,7 @@
 /** Internal Functions                                                       **/
 /******************************************************************************/
 
-room_vnum redit_find_new_vnum(zone_rnum zone);
+room_vnum redit_find_new_vnum(struct zone_data* zone);
 
 
 /* External Functions */
@@ -133,7 +133,7 @@ ACMD(do_oasis_copy)
   CREATE(d->olc, struct oasis_olc_data, 1);
 
   /* Find the zone. */
-  if ((OLC_ZNUM(d) = real_zone_by_thing(dst_vnum)) == NOWHERE) {
+  if ((OLC_ZNUM(d) = virtual_zone_by_thing(dst_vnum)) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for the given vnum (#%d)!\r\n", dst_vnum);
     free(d->olc);
     d->olc = NULL;
@@ -141,8 +141,9 @@ ACMD(do_oasis_copy)
   }
 
   /* Make sure the builder is allowed to modify the target zone. */
-  if (!can_edit_zone(ch, OLC_ZNUM(d))) {
-    send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
+  auto zone = zone_by_id(OLC_ZNUM(d));
+  if (!can_edit_zone(ch, zone)) {
+    send_cannot_edit(ch, zone->number);
     free(d->olc);
     d->olc = NULL;
     return;
@@ -170,7 +171,6 @@ ACMD(do_dig)
   char sdir[MAX_INPUT_LENGTH], sroom[MAX_INPUT_LENGTH], *new_room_name;
   room_vnum rvnum = NOWHERE;
   room_rnum rrnum = NOWHERE;
-  zone_rnum zone;
   int dir = 0, rawvnum;
   struct room_data *trm = NULL, *rrm = NULL;
   struct descriptor_data *d = ch->desc; /* will save us some typing */
@@ -194,15 +194,15 @@ ACMD(do_dig)
   rrm = room_by_id(rvnum);
   if ((dir = search_block(sdir, abbr_dirs, FALSE)) < 0)
   dir = search_block(sdir, dirs, FALSE);
-  zone = char_room_get(ch)->zone;
+  auto zone = char_zone_get(ch);
 
   if (dir < 0) {
     send_to_char(ch, "Cannot create an exit to the '%s'.\r\n", sdir);
     return;
   }
   /* Make sure that the builder has access to the zone he's in. */
-  if ((zone == NOWHERE) || !can_edit_zone(ch, zone)) {
-    send_cannot_edit(ch, zone);
+  if (!can_edit_zone(ch, zone)) {
+    send_cannot_edit(ch, zone->number);
     return;
   }
   /*
@@ -244,13 +244,13 @@ ACMD(do_dig)
   }
   
   /* Make sure that the builder has access to the zone he's linking to. */
-  zone = real_zone_by_thing(rvnum);  
-  if (zone == NOWHERE) {
+  auto z2 = room_zone_get(rrm);
+  if (!z2) {
     send_to_char(ch, "You cannot link to a non-existing zone!\r\n");
     return;
   }
-  if (!can_edit_zone(ch, zone)) {
-    send_cannot_edit(ch, zone);
+  if (!can_edit_zone(ch, z2)) {
+    send_cannot_edit(ch, z2->number);
     return;
   }
   /*
@@ -267,7 +267,7 @@ ACMD(do_dig)
       free(d->olc);
     }
     CREATE(d->olc, struct oasis_olc_data, 1);
-    OLC_ZNUM(d) = zone;
+    OLC_ZNUM(d) = zone->number;
     OLC_NUM(d) = rvnum;
     CREATE(OLC_ROOM(d), struct room_data, 1);
     
@@ -306,9 +306,9 @@ ACMD(do_dig)
   CREATE(rm->dir_option[dir], struct room_direction_data, 1);
   struct room_direction_data *new_exit = rm->dir_option[dir];
   new_exit->to_room = rvnum;
-  zone_vnum zvn = room_zone_vnum_get(rm);
-  add_to_save_list(zvn, SL_WLD);
-  save_rooms(zvn);
+  auto zone = zone_by_id(room_zone_vnum_get(rm));
+  add_to_save_list(zone->number, SL_WLD);
+  save_rooms(zone);
   send_to_char(ch, "You make an exit %s to room %d (%s).\r\n", 
                    dirs[dir], rvnum, rrm->name);
   
@@ -324,9 +324,9 @@ ACMD(do_dig)
     CREATE(R_EXIT(dest, rev_dir[dir]), struct room_direction_data, 1);
     struct room_direction_data *rev_ex = R_EXIT(dest, rev_dir[dir]);
     rev_ex->to_room = char_room_vnum_get(ch);
-    zvn = zone_table[rrm->zone].number;
-    add_to_save_list(zvn, SL_WLD);
-    save_rooms(zvn);
+    auto zone = zone_by_id(rrm->zone);
+    add_to_save_list(zone->number, SL_WLD);
+    save_rooms(zone);
   }
 }
 
@@ -336,7 +336,6 @@ ACMD(do_rcopy)
   room_rnum rrnum; 
   room_rnum trnum;
   room_rnum tvnum;
-  zone_rnum zone;
 
   char arg[MAX_INPUT_LENGTH]; 
   char arg2[MAX_INPUT_LENGTH];
@@ -379,10 +378,10 @@ ACMD(do_rcopy)
     return; 
   }
 
-  zone = rrm->zone;
-  if ((zone == NOWHERE) || !can_edit_zone(ch, zone)) {
+  auto zone = zone_by_id(rrm->zone);
+  if (!can_edit_zone(ch, zone)) {
     send_to_char(ch, "\r\n");
-    send_cannot_edit(ch, zone);
+    send_cannot_edit(ch, zone->number);
     return;
   }
 
@@ -411,8 +410,9 @@ ACMD(do_rcopy)
    rrm->room_flags[i] = trm->room_flags[i]; 
   }
   send_to_imm("Log: %s has copied room [%d] to room [%d].", GET_NAME(ch), tvnum, rvnum);
-  add_to_save_list(zone_table[rrm->zone].number, SL_WLD);
-  save_rooms(zone_table[rrm->zone].number);
+  auto zone = zone_by_id(rrm->zone);
+  add_to_save_list(zone->number, SL_WLD);
+  save_rooms(zone);
   send_to_char(ch, "Room [%d] copied to room [%d].\r\n", tvnum, rvnum); 
 }
 
@@ -421,10 +421,10 @@ ACMD(do_rcopy)
 ****************************************************************************/
 
 /* For buildwalk. Finds the next free vnum in the zone */
-room_vnum redit_find_new_vnum(zone_rnum zone) 
+room_vnum redit_find_new_vnum(struct zone_data* zone) 
 {
 
-  for(room_vnum vnum = genolc_zone_bottom(zone); vnum <= zone_table[zone].top; vnum++)
+  for(room_vnum vnum = zone->bottom; vnum <= zone->top; vnum++)
     if (!room_by_id(vnum))
       return vnum;
   
@@ -439,10 +439,12 @@ int buildwalk(struct char_data *ch, int dir)
 
   if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_BUILDWALK) &&
       GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
+    
+    auto zone = char_zone_get(ch);
 
-    if (!can_edit_zone(ch, char_room_get(ch)->zone)) {
-      send_cannot_edit(ch, char_room_get(ch)->zone);
-    } else if ((vnum = redit_find_new_vnum(char_room_get(ch)->zone)) == NOWHERE)
+    if (!can_edit_zone(ch, zone)) {
+      send_cannot_edit(ch, zone->number);
+    } else if ((vnum = redit_find_new_vnum(zone)) == NOWHERE)
       send_to_char(ch, "No free vnums are available in this zone!\r\n");
     else {
       struct descriptor_data *d = ch->desc;
@@ -455,7 +457,7 @@ int buildwalk(struct char_data *ch, int dir)
         free(d->olc);
       }
       CREATE(d->olc, struct oasis_olc_data, 1);
-      OLC_ZNUM(d) = char_room_get(ch)->zone;
+      OLC_ZNUM(d) = zone->number;
       OLC_NUM(d) = vnum;
       CREATE(OLC_ROOM(d), struct room_data, 1);
 

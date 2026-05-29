@@ -76,18 +76,18 @@ ACMD(do_oasis_trigedit)
   /*
    * Find the zone.
    */
-  if ((OLC_ZNUM(d) = real_zone_by_thing(number)) == NOWHERE) {
+  if ((OLC_ZNUM(d) = virtual_zone_by_thing(number)) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
     free(d->olc);
     d->olc = NULL;
     return;
   }
-  struct zone_data *zone = &zone_table[OLC_ZNUM(d)];
+  struct zone_data *zone = zone_by_id(OLC_ZNUM(d));
 
   /*
    * Everyone but IMPLs can only edit zones they have been assigned.
    */
-  if (!can_edit_zone(ch, OLC_ZNUM(d))) {
+  if (!can_edit_zone(ch, zone)) {
     send_cannot_edit(ch, zone->number);
     free(d->olc);
     d->olc = NULL;
@@ -620,7 +620,7 @@ void trigedit_save(struct descriptor_data *d)
   /* new trigger to an item, we will get SYSERR's upton reboot that */
   /* could make things hard to debug.                               */
 
-  struct zone_data *zn = &zone_table[OLC_ZNUM(d)];
+  struct zone_data *zn = zone_by_id(OLC_ZNUM(d));
   zone = zn->number;
   top = zn->top;
   

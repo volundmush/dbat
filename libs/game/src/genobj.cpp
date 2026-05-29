@@ -86,7 +86,7 @@ int update_objects(struct obj_data *refobj)
 
 /* ------------------------------------------------------------------------------------------------------------------------------ */
 
-int save_objects(zone_rnum zone_num)
+int save_objects(struct zone_data *zone)
 {
   char cmfname[128], buf[MAX_STRING_LENGTH];
   char ebuf1[MAX_STRING_LENGTH], ebuf2[MAX_STRING_LENGTH];
@@ -100,18 +100,12 @@ int save_objects(zone_rnum zone_num)
   struct obj_data *obj;
   struct extra_descr_data *ex_desc;
 
-#if CIRCLE_UNSIGNED_INDEX
-  if (zone_num == NOWHERE || zone_num > top_of_zone_table)
-  {
-#else
-  if (zone_num < 0 || zone_num > top_of_zone_table)
-  {
-#endif
-    log("SYSERR: OasisOLC: save_objects: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
+if(!zone) {
+    log("SYSERR: OasisOLC: save_objects: Invalid zone!");
     return FALSE;
   }
 
-  snprintf(cmfname, sizeof(cmfname), "%s%d.new", OBJ_PREFIX, zone_table[zone_num].number);
+  snprintf(cmfname, sizeof(cmfname), "%s%d.new", OBJ_PREFIX, zone->number);
   if (!(fp = fopen(cmfname, "w+")))
   {
     mudlog(BRF, ADMLVL_IMMORT, TRUE, "SYSERR: OLC: Cannot open objects file %s!", cmfname);
@@ -120,7 +114,7 @@ int save_objects(zone_rnum zone_num)
   /*
    * Start running through all objects in this zone.
    */
-  for (counter = genolc_zone_bottom(zone_num); counter <= zone_table[zone_num].top; counter++)
+  for (counter = zone->bot; counter <= zone->top; counter++)
   {
     auto obj = obj_proto_by_id(counter);
     if (!obj)
@@ -236,14 +230,14 @@ int save_objects(zone_rnum zone_num)
    */
   fprintf(fp, "$~\n");
   fclose(fp);
-  snprintf(buf, sizeof(buf), "%s%d.obj", OBJ_PREFIX, zone_table[zone_num].number);
+  snprintf(buf, sizeof(buf), "%s%d.obj", OBJ_PREFIX, zone->number);
   remove(buf);
   rename(cmfname, buf);
 
-  if (in_save_list(zone_table[zone_num].number, SL_OBJ))
+  if (in_save_list(zone->number, SL_OBJ))
   {
-    remove_from_save_list(zone_table[zone_num].number, SL_OBJ);
-    create_world_index(zone_table[zone_num].number, "obj");
+    remove_from_save_list(zone->number, SL_OBJ);
+    create_world_index(zone->number, "obj");
     log("GenOLC: save_objects: Saving objects '%s'", buf);
   }
   return TRUE;
@@ -368,9 +362,10 @@ int delete_object(obj_vnum vnum)
 
   if (!obj)
     return NOTHING;
+  
+  auto zone = zone_by_id(virtual_zone_by_thing(vnum));
 
-  zrnum = real_zone_by_thing(GET_OBJ_VNUM(obj));
-  add_to_save_list(zone_table[zrnum].number, SL_OBJ);
+  add_to_save_list(zone->number, SL_OBJ);
 
   obj_proto_delete(obj->vnum);
   // TODO: ensure the pointer is actually freed darnit!

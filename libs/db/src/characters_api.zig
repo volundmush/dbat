@@ -167,7 +167,7 @@ pub export fn char_room_vnum_get(ch: *cdb.char_data) cdb.room_vnum {
 pub export fn char_zone_get(ch: *cdb.char_data) [*c]cdb.zone_data {
     const room = char_room_get(ch);
     if (room == null) return null;
-    return &cdb.zone_table[@intCast(room.*.zone)];
+    return cdb.room_zone_get(room);
 }
 
 pub export fn char_zone_vnum_get(ch: *cdb.char_data) cdb.zone_vnum {

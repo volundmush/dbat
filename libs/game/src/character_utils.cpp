@@ -2499,9 +2499,8 @@ char *sense_location(struct char_data *ch)
 	char *message;
     CREATE(message, char, MAX_INPUT_LENGTH);
 	int roomnum = char_room_vnum_get(ch), num = 0;
-	if ((num = real_zone_by_thing(roomnum)) != NOWHERE) {
-		num = real_zone_by_thing(roomnum);
-	}
+    auto zone = char_zone_get(ch);
+	num = zone->number;
 
 	switch (num) {
 	case 2:

@@ -136,11 +136,7 @@ void room_contents_iterate(struct room_data *room, bool recursive, obj_iter_fn f
 void room_people_iterate(struct room_data *room, char_iter_fn func, void *ctx);
 
 // Room globals and database stuff below this
-extern struct room_data *world;
-extern room_rnum top_of_world;
-extern struct htree_node *room_htree;
-
-room_rnum real_room(room_vnum vnum);
+room_vnum real_room(room_vnum vnum);
 struct room_data *room_by_id(room_vnum vnum);
 struct room_data *room_get(room_vnum vnum);
 

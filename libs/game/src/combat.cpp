@@ -1801,8 +1801,7 @@ void huge_update()
      }
     }
     room_dmg_set(obj_room_get(k), 100);
-        int zone = 0;
-      if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+      if (auto zone = char_zone_get(ch); zone) {
        send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
       }
 
@@ -1875,8 +1874,8 @@ void huge_update()
      }
     }
     room_dmg_set(obj_room_get(k), 100);
-        int zone = 0;
-      if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+      auto zone = char_zone_get(ch);
+      if (zone) {
        send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
       }
     extract_obj(k);
@@ -1976,8 +1975,8 @@ void huge_update()
      }
     }
     room_dmg_set(obj_room_get(k), 100);
-        int zone = 0;
-      if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+      auto zone = char_zone_get(ch);
+      if (zone) {
        send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
       }
     extract_obj(k);
@@ -2048,8 +2047,8 @@ void huge_update()
      }
     }
     room_dmg_set(obj_room_get(k), 100);
-        int zone = 0;
-      if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+      auto zone = char_zone_get(ch);
+      if (zone) {
        send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
       }
     extract_obj(k);
@@ -2596,8 +2595,8 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char
       if (room_dmg_get(char_room_get(ch)) <= 95) {
        room_dmg_mod(char_room_get(ch), 5);
       }
-        int zone = 0;
-      if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+      auto zone = char_zone_get(ch);
+      if (zone) {
        send_to_zone("An explosion shakes the entire area!\r\n", zone);
       }
       return;
@@ -2712,8 +2711,8 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
      if (room_dmg_get(room) <= 95) {
        room_dmg_mod(room, 5);
      }
-        int zone = 0;
-      if ((zone = real_zone_by_thing(char_room_vnum_get(ch))) != NOWHERE) {
+      auto zone = char_zone_get(ch);
+      if (zone) {
        send_to_zone("An explosion shakes the entire area!\r\n", zone);
       }
   }

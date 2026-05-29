@@ -336,7 +336,7 @@ if(OLC_HOUSE(d))
     else if (STATE(d) == CON_HEDIT)
       mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing help files.", GET_NAME(d->character));
     else
-      mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing zone %d allowed zone %d", GET_NAME(d->character), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(d->character));
+      mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing zone %d allowed zone %d", GET_NAME(d->character), OLC_ZNUM(d), GET_OLC_ZONE(d->character));
 
     STATE(d) = CON_PLAYING;
   }
@@ -402,13 +402,13 @@ void free_config(struct config_data *data)
 /**                  FALSE.                                                  **/
 /**                                                                          **/
 /******************************************************************************/
-int can_edit_zone(struct char_data *ch, zone_rnum rnum)
+int can_edit_zone(struct char_data *ch, struct zone_data *zone)
 {
   /* no access if called with bad arguments */
-  if (!ch->desc || IS_NPC(ch) || rnum == NOWHERE)
+  if (!ch->desc || IS_NPC(ch) || zone == NULL)
     return FALSE;
 
-  if (rnum == HEDIT_PERMISSION)
+  if (zone->number == HEDIT_PERMISSION)
     return TRUE;
 
   /* always access if ch is high enough level */
@@ -416,7 +416,7 @@ int can_edit_zone(struct char_data *ch, zone_rnum rnum)
     return (TRUE);
   
   /* always access if a player helped build the zone in the first place */ 
-  if (is_name(GET_NAME(ch), zone_table[rnum].builders))
+  if (is_name(GET_NAME(ch), zone->builders))
     return (TRUE);
   
   /* no access if you haven't been assigned a zone */
@@ -428,7 +428,7 @@ int can_edit_zone(struct char_data *ch, zone_rnum rnum)
     return FALSE;
 
   /* always access if you're assigned to this zone */
-  if (real_zone(GET_OLC_ZONE(ch)) == rnum)
+  if (GET_OLC_ZONE(ch) == zone->number)
     return TRUE;
 
   return (FALSE);

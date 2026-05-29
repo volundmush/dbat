@@ -1214,8 +1214,8 @@ if (dballtime == 0) {
    int zone = 0;
    while (load == FALSE) {
     if (auto room = room_by_id(num); room) {
-      if ((zone = room->zone) != NOWHERE) {
-       if (ZONE_FLAGGED(zone, ZONE_DBALLS)) {
+      if (auto zone = room_zone_get(room); zone) {
+       if (zone_flagged(zone, ZONE_DBALLS)) {
         //room = num;
         load = TRUE;
         num = rand_number(200, 20000);

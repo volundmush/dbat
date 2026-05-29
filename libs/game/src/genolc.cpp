@@ -148,11 +148,12 @@ int add_to_save_list(zone_vnum zone, int type)
   
   if (type == SL_CFG)
     return FALSE; 
+  
+  auto z = zone_by_id(zone);
     
-  rznum = real_zone(zone);
-  if (rznum == NOWHERE || rznum > top_of_zone_table) {
+  if (!z) {
      if (zone != AEDIT_PERMISSION && zone != HEDIT_PERMISSION) {
-      log("SYSERR: add_to_save_list: Invalid zone number passed. (%d => %d, 0-%d)", zone, rznum, top_of_zone_table);
+      log("SYSERR: add_to_save_list: Invalid zone number passed. (%d)", zone);
       return FALSE;
     }
   }
@@ -206,16 +207,6 @@ ACMD(do_show_save_list)
         send_to_char(ch, " - Game configuration data.\r\n");
     }
   }
-}
-
-room_vnum genolc_zonep_bottom(struct zone_data *zone)
-{
-  return zone->bot;
-}
-
-zone_vnum genolc_zone_bottom(zone_rnum rznum)
-{
-  return zone_table[rznum].bot;
 }
 
 int sprintascii(char *out, bitvector_t bits)

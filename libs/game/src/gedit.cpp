@@ -33,9 +33,9 @@ void gedit_save_internally(struct descriptor_data *d)
   add_guild(OLC_GUILD(d));
 }
 
-void gedit_save_to_disk(int num)
+void gedit_save_to_disk(struct zone_data *zone)
 {
-  save_guilds(num);
+  save_guilds(zone);
 }
 
 
@@ -71,12 +71,12 @@ ACMD(do_oasis_gedit)
     if (is_number(buf2))
       number = atoi(buf2);
     else if (GET_OLC_ZONE(ch) > 0) {
-      zone_rnum zlok;
+      struct zone_data *zone = zone_by_id(GET_OLC_ZONE(ch));
       
-      if ((zlok = real_zone(GET_OLC_ZONE(ch))) == NOWHERE)
+      if (!zone)
         number = NOWHERE;
       else
-        number = genolc_zone_bottom(zlok);
+        number = zone->bot;
     }
     
     if (number == NOWHERE) {
@@ -123,7 +123,7 @@ ACMD(do_oasis_gedit)
   /****************************************************************************/
   /** Find the zone.                                                         **/
   /****************************************************************************/
-  if ((OLC_ZNUM(d) = real_zone_by_thing(number)) == NOWHERE) {
+  if ((OLC_ZNUM(d) = virtual_zone_by_thing(number)) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
     free(d->olc);
     d->olc = NULL;
@@ -133,8 +133,9 @@ ACMD(do_oasis_gedit)
   /****************************************************************************/
   /** Everyone but IMPLs can only edit zones they have been assigned.        **/
   /****************************************************************************/
-  if (!can_edit_zone(ch, OLC_ZNUM(d))) {
-    send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
+  struct zone_data *zone = zone_by_id(OLC_ZNUM(d));
+  if (!can_edit_zone(ch, zone)) {
+    send_cannot_edit(ch, zone->number);
     
     /**************************************************************************/
     /** Free the OLC structure.                                              **/
@@ -146,15 +147,15 @@ ACMD(do_oasis_gedit)
   
   if (save) {
     send_to_char(ch, "Saving all guilds in zone %d.\r\n",
-      zone_table[OLC_ZNUM(d)].number);
+      zone->number);
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE,
       "OLC: %s saves guild info for zone %d.",
-      GET_NAME(ch), zone_table[OLC_ZNUM(d)].number);
+      GET_NAME(ch), zone->number);
     
     /**************************************************************************/
     /** Save the guild to the guild file.                                    **/
     /**************************************************************************/
-    gedit_save_to_disk(OLC_ZNUM(d));
+    gedit_save_to_disk(zone);
     
     /**************************************************************************/
     /** Free the OLC structure.                                              **/
@@ -177,7 +178,7 @@ ACMD(do_oasis_gedit)
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
-    GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+    GET_NAME(ch), OLC_ZNUM(d), GET_OLC_ZONE(ch));
 }
 
 void gedit_setup_new(struct descriptor_data *d)
@@ -479,7 +480,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
 					mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
 						  "OLC: %s edits guild %d", GET_NAME(d->character), OLC_NUM(d));
 					if (CONFIG_OLC_SAVE) {
-						gedit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
+						gedit_save_to_disk(zone_by_id(virtual_zone_by_thing(OLC_NUM(d))));
 						write_to_output(d, "Guild %d saved to disk.\r\n", OLC_NUM(d));
 					} else
 						write_to_output(d, "Guild %d saved to memory.\r\n", OLC_NUM(d));

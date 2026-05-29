@@ -99,15 +99,15 @@ int add_guild(struct guild_data *ngld)
 {
   guild_rnum rguild;
   int found = 0;
-  zone_rnum rznum = real_zone_by_thing(G_NUM(ngld));
+  zone_vnum zv = virtual_zone_by_thing(G_NUM(ngld));
 
   /*
    * The guild already exists, just update it.
    */
   if ((rguild = real_guild(G_NUM(ngld))) != NOWHERE) {
     copy_guild(&guild_index[rguild], ngld);
-    if (rznum != NOWHERE) {
-      add_to_save_list(zone_table[rznum].number, SL_GLD);
+    if (zv != NOTHING) {
+      add_to_save_list(zv, SL_GLD);
     } else
       mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Cannot determine guild zone.");
     return rguild;
@@ -132,8 +132,8 @@ int add_guild(struct guild_data *ngld)
     copy_guild(&guild_index[0], ngld);
   }
 
-  if (rznum != NOWHERE) {
-    add_to_save_list(zone_table[rznum].number, SL_GLD);
+  if (zv != NOTHING) {
+    add_to_save_list(zv, SL_GLD);
   }
   else
     mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Cannot determine guild zone.");
@@ -143,31 +143,27 @@ int add_guild(struct guild_data *ngld)
 
 /*-------------------------------------------------------------------*/
 
-int save_guilds(zone_rnum zone_num)
+int save_guilds(struct zone_data *zone)
 {
   int i, j, rguild;
   FILE *guild_file;
   char fname[64];
   struct guild_data *guild;
 
-#if CIRCLE_UNSIGNED_INDEX
-  if (zone_num == NOWHERE || zone_num > top_of_zone_table)
-#else
-    if (zone_num < 0 || zone_num > top_of_zone_table)
-#endif
+if(!zone)
       {
-	log("SYSERR: GenOLC: save_guilds: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
+	log("SYSERR: GenOLC: save_guilds: Invalid zone!");
 	return FALSE;
       }
 
-  snprintf(fname, sizeof(fname), "%s%d.gld", GLD_PREFIX, zone_table[zone_num].number);
+  snprintf(fname, sizeof(fname), "%s%d.gld", GLD_PREFIX, zone->number);
   if (!(guild_file = fopen(fname, "w"))) {
     mudlog(BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC: Cannot open Guild file!");
     return FALSE;
   }
 
   /*. Search database for guilds in this zone . */
-  for (i = genolc_zone_bottom(zone_num); i <= zone_table[zone_num].top; i++) {
+  for (i = zone->bot; i <= zone->top; i++) {
     if ((rguild = real_guild(i)) != NOWHERE) {
       fprintf(guild_file, "#%d~\n", i);
       guild = guild_index + rguild;
@@ -213,9 +209,9 @@ int save_guilds(zone_rnum zone_num)
   fprintf(guild_file, "$~\n");
   fclose(guild_file);
 
-  if (in_save_list(zone_table[zone_num].number, SL_GLD)) {
-    remove_from_save_list(zone_table[zone_num].number, SL_GLD);
-    create_world_index(zone_table[zone_num].number, "gld");
+  if (in_save_list(zone->number, SL_GLD)) {
+    remove_from_save_list(zone->number, SL_GLD);
+    create_world_index(zone->number, "gld");
     log("GenOLC: save_guilds: Saving guilds '%s'", fname);
   }
   return TRUE;

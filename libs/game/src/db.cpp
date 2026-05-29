@@ -138,7 +138,6 @@ static void parse_espec(char *buf, struct char_data *ch, int nr);
 static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr);
 static void get_one_line(FILE *fl, char *buf);
 static void check_start_rooms(void);
-static void renum_zone_table(void);
 static void log_zone_error(struct zone_data *zone, int cmd_no, const char *message);
 static void reset_time(void);
 static int suntzu_armor_convert(struct obj_data *obj);
@@ -576,8 +575,6 @@ void boot_world(void)
   log("Loading objs and generating index.");
   index_boot(DB_BOOT_OBJ);
 
-  log("Renumbering zone table.");
-  renum_zone_table();
 
   log("Loading disabled commands list...");
   load_disabled();
@@ -728,30 +725,28 @@ void destroy_db(void)
     }
   }
 
-#define THIS_CMD zone_table[cnt].cmd[itr]
-
-  for (cnt = 0; cnt <= top_of_zone_table; cnt++) {
-    struct zone_data *zone = &zone_table[cnt];
+  zone_iterate ([&](auto zone) {
     if (zone->name)
       free(zone->name);
     if (zone->builders)
       free(zone->builders);
     if (zone->cmd) {
        /* first see if any vars were defined in this zone */
-       for (itr = 0;THIS_CMD.command != 'S';itr++)
-         if (THIS_CMD.command == 'V') {
-           if (THIS_CMD.sarg1)
-             free(THIS_CMD.sarg1);
-           if (THIS_CMD.sarg2)
-             free(THIS_CMD.sarg2);
+       for (itr = 0;zone->cmd[itr].command != 'S';itr++)
+         if (zone->cmd[itr].command == 'V') {
+           if (zone->cmd[itr].sarg1)
+             free(zone->cmd[itr].sarg1);
+           if (zone->cmd[itr].sarg2)
+             free(zone->cmd[itr].sarg2);
          }
        /* then free the command list */
       free(zone->cmd);
     }
-  }
-  free(zone_table);
+    zone_delete(zone->number);
+    free(zone);
+    return true;
+  });
 
-#undef THIS_CMD
 
   /* zone table reset queue */
   if (reset_q.head) {
@@ -867,9 +862,6 @@ static void load_assets(void) {
 
     log("Loading JSON objs and generating index.");
     json_import_or_die("obj_prototypes", json_import_obj_prototypes("data/assets/obj_prototypes"));
-
-    log("Renumbering zone table.");
-    renum_zone_table();
 
     log("Loading disabled commands list...");
     load_disabled();
@@ -1017,12 +1009,12 @@ void boot_db(void)
     House_boot();
   }
 
-  for (i = 0; i <= top_of_zone_table; i++) {
-    struct zone_data *zone = &zone_table[i];
+  zone_iterate ([&](auto zone) {
     log("Resetting #%d: %s (rooms %d-%d).", zone->number,
 	    zone->name, zone->bot, zone->top);
     reset_zone(zone);
-  }
+    return true;
+  });
 
   reset_q.head = reset_q.tail = NULL;
 
@@ -1346,7 +1338,6 @@ void index_boot(int mode)
     CREATE(trig_index, struct index_data *, rec_count);
     break;
   case DB_BOOT_WLD:
-    CREATE(world, struct room_data, rec_count);
     size[0] = sizeof(struct room_data) * rec_count;
     log("   %d rooms, %d bytes.", rec_count, size[0]);
     break;
@@ -1361,7 +1352,6 @@ void index_boot(int mode)
     log("   %d objs, %d bytes in prototypes.", rec_count, size[1]);
     break;
   case DB_BOOT_ZON:
-    CREATE(zone_table, struct zone_data, rec_count);
     size[0] = sizeof(struct zone_data) * rec_count;
     log("   %d zones, %d bytes.", rec_count, size[0]);
     break;
@@ -1529,7 +1519,7 @@ static bitvector_t asciiflag_conv_aff(char *flag)
 /* load the rooms */
 static void parse_room(FILE *fl, int virtual_nr)
 {
-  static int room_nr = 0, zone = 0;
+  static int zone = 0;
   int t[10], i, retval;
   char line[READ_SIZE], flags[128], flags2[128], flags3[128];
   char flags4[128], buf2[MAX_STRING_LENGTH], buf[128];
@@ -1539,7 +1529,7 @@ static void parse_room(FILE *fl, int virtual_nr)
   /* This really had better fit or there are other problems. */
   snprintf(buf2, sizeof(buf2), "room #%d", virtual_nr);
 
-  zone = real_zone_by_thing(virtual_nr);
+  zone = virtual_zone_by_thing(virtual_nr);
   if(zone == NOWHERE) {
       log("SYSERR: Room #%d is outside of any zone.", virtual_nr);
       exit(1);
@@ -1547,7 +1537,7 @@ static void parse_room(FILE *fl, int virtual_nr)
 
   struct room_data *rm = NULL;
   CREATE(rm, struct room_data, 1);
-  room_put(room_nr, rm);
+  room_put(virtual_nr, rm);
 
   rm->zone = zone;
   rm->number = virtual_nr;
@@ -1784,85 +1774,6 @@ static void check_start_rooms(void)
 
 }
 
-/*
- * "resulve vnums into rnums in the zone reset tables"
- *
- * Or in English: Once all of the zone reset tables have been loaded, we
- * resolve the virtual numbers into real numbers all at once so we don't have
- * to do it repeatedly while the game is running.  This does make adding any
- * room, mobile, or object a little more difficult while the game is running.
- *
- * NOTE 1: Assumes NOWHERE == NOBODY == NOTHING.
- * NOTE 2: Assumes sizeof(room_rnum) >= (sizeof(mob_rnum) and sizeof(obj_rnum))
- */
-static void renum_zone_table(void)
-{
-  int cmd_no;
-  room_rnum a, b, c, olda, oldb, oldc, iter;
-  struct zone_data *zone;
-  char buf[128];
-
-  for (iter = 0; iter <= top_of_zone_table; iter++)
-  {
-    zone = &zone_table[iter];
-    struct reset_com *cmd = &zone->cmd[cmd_no];
-    for (cmd_no = 0; cmd->command != 'S'; cmd_no++)
-    {
-      cmd = &zone->cmd[cmd_no];
-      a = b = c = 0;
-      olda = cmd->arg1;
-      oldb = cmd->arg2;
-      oldc = cmd->arg3;
-      switch (cmd->command)
-      {
-      case 'M':
-        a = cmd->arg1 = cmd->arg1;
-        c = cmd->arg3 = real_room(cmd->arg3);
-        break;
-      case 'O':
-        a = cmd->arg1 = real_object(cmd->arg1);
-        if (cmd->arg3 != NOWHERE)
-          c = cmd->arg3 = real_room(cmd->arg3);
-        break;
-      case 'G':
-        a = cmd->arg1 = real_object(cmd->arg1);
-        break;
-      case 'E':
-        a = cmd->arg1 = real_object(cmd->arg1);
-        break;
-      case 'P':
-        a = cmd->arg1 = real_object(cmd->arg1);
-        c = cmd->arg3 = real_object(cmd->arg3);
-        break;
-      case 'D':
-        a = cmd->arg1 = real_room(cmd->arg1);
-        break;
-      case 'R': /* rem obj from room */
-        a = cmd->arg1 = real_room(cmd->arg1);
-        b = cmd->arg2 = real_object(cmd->arg2);
-        break;
-      case 'T': /* a trigger */
-        b = cmd->arg2 = real_trigger(cmd->arg2);
-        c = cmd->arg3 = real_room(cmd->arg3);
-        break;
-      case 'V': /* trigger variable assignment */
-        b = cmd->arg3 = real_room(cmd->arg3);
-        break;
-      }
-      if (a == NOWHERE || b == NOWHERE || c == NOWHERE)
-      {
-        if (!mini_mud)
-        {
-          snprintf(buf, sizeof(buf), "Invalid vnum %d, cmd disabled",
-                   a == NOWHERE ? olda : b == NOWHERE ? oldb
-                                                      : oldc);
-          log_zone_error(zone, cmd_no, buf);
-        }
-        cmd->command = '*';
-      }
-    }
-  }
-}
 
 static void mob_autobalance(struct char_data *ch)
 {
@@ -2657,7 +2568,8 @@ static void load_zones(FILE *fl, char *zonename)
   int zone_fix = FALSE;
   char t1[80], t2[80], line[MAX_STRING_LENGTH];
 
-  struct zone_data *z = &zone_table[zone];
+  struct zone_data *z;
+  CREATE(z, struct zone_data, 1);
 
   strlcpy(zname, zonename, sizeof(zname));
 
@@ -2702,6 +2614,7 @@ static void load_zones(FILE *fl, char *zonename)
     exit(1);
   }
   snprintf(buf2, sizeof(buf2), "beginning of zone #%d", z->number);
+  zone_put(z->number, z);
 
   line_num += get_line(fl, buf);
   if ((ptr = strchr(buf, '~')) != NULL) /* take off the '~' if it's there */
@@ -2841,8 +2754,6 @@ static void load_zones(FILE *fl, char *zonename)
     log("SYSERR: Zone command count mismatch for %s. Estimated: %d, Actual: %d", zname, num_of_cmds, cmd_no + 1);
     exit(1);
   }
-
-  top_of_zone_table = zone++;
 }
 
 static void get_one_line(FILE *fl, char *buf)
@@ -3937,9 +3848,7 @@ void zone_update(void)
     timer = 0;
 
     /* since one minute has passed, increment zone ages */
-    for (i = 0; i <= top_of_zone_table; i++)
-    {
-      struct zone_data* zone = &zone_table[i];
+    zone_iterate ([&](auto zone) {
       if (zone->age < zone->lifespan &&
           zone->reset_mode)
         (zone->age)++;
@@ -3964,17 +3873,17 @@ void zone_update(void)
 
         zone->age = ZO_DEAD;
       }
-    }
-  } /* end - one minute has passed */
+    return true;
+  }); /* end - one minute has passed */
 
   /* dequeue zones (if possible) and reset */
   /* this code is executed every 10 seconds (i.e. PULSE_ZONE) */
   for (update_u = reset_q.head; update_u; update_u = update_u->next) {
-    struct zone_data* zone = &zone_table[update_u->zone_to_reset];
+    struct zone_data* zone = zone_by_id(update_u->zone_to_reset);
     if (zone->reset_mode == 2 ||
         is_empty(update_u->zone_to_reset))
     {
-      reset_zone(&zone_table[update_u->zone_to_reset]);
+      reset_zone(zone);
       mudlog(CMP, ADMLVL_GOD, FALSE, "Auto zone reset: %s (Zone %d)",
              zone->name, zone->number);
       /* dequeue */
