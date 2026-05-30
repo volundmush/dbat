@@ -5098,8 +5098,8 @@ ACMD(do_focus)
    } else if (GET_BONUS(ch, BONUS_WIMP) > 0 && GET_STR(ch) + 10 > 70) {
     send_to_char(ch, "Your body is not able to withstand increasing its strength beyond 70.\r\n");
     return;
-   } else if (GET_BONUS(ch, BONUS_FRAIL) > 0 && GET_STR(ch) + 2 > 70) {
-    send_to_char(ch, "Your body is not able to withstand increasing its strength beyond 70.\r\n");
+   } else if (GET_BONUS(ch, BONUS_FRAIL) > 0 && GET_CON(ch) + 2 > 70) {
+    send_to_char(ch, "Your body is not able to withstand increasing its constitution beyond 70.\r\n");
     return;
    } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
     send_to_char(ch, "You do not have enough ki to infuse into your muscles.\r\n");
@@ -5484,7 +5484,7 @@ ACMD(do_focus)
      send_to_char(ch, "They already have superior agility!\r\n");
      return;
     }
-   else if (GET_BONUS(vict, BONUS_CLUMSY) > 0 && GET_DEX(vict) + 3 > 70) {
+   else if (GET_BONUS(vict, BONUS_CLUMSY) > 0 && GET_DEX(vict) + 10 > 70) {
     send_to_char(ch, "They're not able to withstand increasing their agility beyond 70.\r\n");
     return;
    }
