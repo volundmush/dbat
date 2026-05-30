@@ -425,7 +425,7 @@ void list_skills(struct char_data *ch, char *arg)
   if (len >= sizeof(buf2))
     strcpy(buf2 + sizeof(buf2) - strlen(overflow) - 1, overflow); /* strcpy: OK */
 
-  page_string(ch->desc, buf2, TRUE);
+  send_to_char(ch, buf2);
 }
 
 
@@ -688,7 +688,7 @@ void what_does_guild_know(struct guild_data *guild, struct char_data * ch)
   if (len >= sizeof(buf2))
     strcpy(buf2 + sizeof(buf2) - strlen(overflow) - 1, overflow); /* strcpy: OK */
 
-  page_string(ch->desc, buf2, TRUE);
+  send_to_char(ch, buf2);
 }
 
 int prereq_pass(struct char_data *ch, int snum)
@@ -1313,7 +1313,7 @@ void handle_learn(struct char_data *keeper, struct guild_data *guild, struct cha
           cptr = weapon_type[subval];
         subfeat += snprintf(buf + subfeat, sizeof(buf) - subfeat, "  %s\r\n", cptr);
       }
-      page_string(ch->desc, buf, TRUE);
+      send_to_char(ch, buf);
       return;
     }
     if (*ptr == ':') ptr++;
@@ -1335,7 +1335,7 @@ void handle_learn(struct char_data *keeper, struct guild_data *guild, struct cha
           cptr = weapon_type[subval];
         subfeat += snprintf(buf + subfeat, sizeof(buf) - subfeat, "  %s\r\n", cptr);
       }
-      page_string(ch->desc, buf, TRUE);
+      send_to_char(ch, buf);
       return;
     }
     subval = search_block(ptr, (sftype == 2) ? spell_schools : weapon_type, FALSE);
@@ -1355,7 +1355,7 @@ void handle_learn(struct char_data *keeper, struct guild_data *guild, struct cha
           cptr = weapon_type[subval];
         subfeat += snprintf(buf + subfeat, sizeof(buf) - subfeat, "  %s\r\n", cptr);
       }
-      page_string(ch->desc, buf, TRUE);
+      send_to_char(ch, buf);
       return;
     }
     if (!feat_is_available(ch, feat_num, subval, NULL)) {
@@ -1793,7 +1793,7 @@ void list_all_guilds(struct char_data *ch)
     return true;
   });
 
-  page_string(ch->desc, buf, TRUE);
+  send_to_char(ch, buf);
 }
 
 
@@ -1828,7 +1828,7 @@ void list_detailed_guild(struct char_data * ch, struct guild_data *guild)
  
   strcat(buf, buf2);
 
-  page_string(ch->desc, buf, 1);
+  send_to_char(ch, buf);
 }
   
 

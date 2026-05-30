@@ -615,7 +615,7 @@ void list_feats_known(struct char_data *ch)
     strcat(buf2, buf);
   }
    
-  page_string(ch->desc, buf2, 1);
+  send_to_char(ch, buf2);
 }
 
 void list_feats_available(struct char_data *ch) 
@@ -656,7 +656,7 @@ void list_feats_available(struct char_data *ch)
     strcat(buf2, buf);
   }
    
-  page_string(ch->desc, buf2, 1);
+  send_to_char(ch, buf2);
 }
 void list_feats_complete(struct char_data *ch) 
 {
@@ -700,7 +700,7 @@ void list_feats_complete(struct char_data *ch)
     strcat(buf2, buf);
   }
    
-  page_string(ch->desc, buf2, 1);
+  send_to_char(ch, buf2);
 }
 
 int find_feat_num(char *name)

@@ -710,7 +710,7 @@ void do_stat_trigger(struct char_data *ch, trig_data *trig)
       cmd_list = cmd_list->next;
     }
 
-    page_string(ch->desc, sb, 1);
+    send_to_char(ch, sb);
 }
 
 

@@ -1246,7 +1246,7 @@ static void shopping_list(char *arg, struct char_data *ch, struct char_data *kee
        sprintf(zen, "@W[@wYour Zenni@D: @Y%s@W]", add_commas(GET_GOLD(ch)));
        strncat(buf, zen, sizeof(buf) - len - 1);
       }
-    page_string(ch->desc, buf, TRUE);
+    send_to_char(ch, buf);
   }
 }
 
@@ -1687,7 +1687,7 @@ static void list_all_shops(struct char_data *ch)
   return true;
   });
 
-  page_string(ch->desc, buf, TRUE);
+  send_to_char(ch, buf);
 }
 
 static void list_detailed_shop(struct char_data *ch, struct shop_data *shop)

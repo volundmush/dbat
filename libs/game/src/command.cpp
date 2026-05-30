@@ -353,7 +353,6 @@ const struct command_info cmd_info[] = {
   { "pack"     , "pac"          , POS_STANDING, do_pack     , 0, 0 , 0 },
   { "page"     , "pag"		, POS_DEAD    , do_page     , 0, ADMLVL_BUILDER	, 0 },
   { "paralyze" , "paralyz"      , POS_FIGHTING, do_paralyze , 0, ADMLVL_NONE    , 0 },
-  { "pagelength", "pagel"	, POS_DEAD    , do_pagelength, 0, 0, 0 },
   { "peace"    , "pea"		, POS_DEAD    , do_peace    , 0, ADMLVL_BUILDER	, 0 },
   { "perfect"  , "perfec"       , POS_DEAD    , do_perf     , 0, ADMLVL_NONE , 0 },
   { "permission", "permiss"     , POS_DEAD    , do_permission, 0, ADMLVL_IMMORT , 0 },

@@ -1,6 +1,7 @@
 # 2.9.4 (latest)
 - (Internal) Object Prototypes, Mobile Prototypes, Rooms, Shops, Guilds, and Zones are now stored in Zig HashMaps. The global arrays and rnum<->vnum mappings are gone. New per-type APIs have been added for handling entity retrieval, iteration, and querying. [Volund]
 - (Internal) Adjusted many functions for shops, guilds, zones, and rooms that used rnum indexes to now use pointers. [Volund]
+- Removed text page system. [Volund]
 
 # 2.9.3
 - Fixing fireshield message to not get all mishmoshed. [Volund]

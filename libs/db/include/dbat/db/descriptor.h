@@ -29,10 +29,7 @@ struct descriptor_data {
    int	connected;		/* mode of 'connectedness'		*/
    int	desc_num;		/* unique num assigned to desc		*/
    time_t login_time;		/* when the person connected		*/
-   char *showstr_head;		/* for keeping track of an internal str	*/
-   char **showstr_vector;	/* for paging through texts		*/
-   int  showstr_count;		/* number of pages to page through	*/
-   int  showstr_page;		/* which page are we currently showing?	*/
+
    char	**str;			/* for the modify-str system		*/
    char *backstr;		/* backup string for modify-str system	*/
    size_t max_str;	        /* maximum size of string in modify-str	*/
