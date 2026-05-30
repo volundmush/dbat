@@ -83,4 +83,5 @@ __pycache__
 *.pyc
 .env
 /.vs
-/.gitignore
+
+compile_commands.json

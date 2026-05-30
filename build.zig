@@ -1,4 +1,5 @@
 const std = @import("std");
+const zcc = @import("compile_commands");
 
 fn getSourceFiles(b: *std.Build, base_path: []const u8, ext: []const u8) []const []const u8 {
     const allocator = b.allocator;
@@ -40,6 +41,8 @@ fn getSourceFiles(b: *std.Build, base_path: []const u8, ext: []const u8) []const
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+
+    var targets: std.ArrayList(*std.Build.Step.Compile) = .empty;
 
     const zlua = b.dependency("zlua", .{
         .target = target,
@@ -148,6 +151,8 @@ pub fn build(b: *std.Build) void {
         .root_module = circle_mod,
     });
 
+    targets.append(b.allocator, exe) catch @panic("OOM");
+
     b.installArtifact(dbat_db);
     b.installArtifact(dbat_game);
     b.installArtifact(exe);
@@ -156,6 +161,8 @@ pub fn build(b: *std.Build) void {
     const run_cmd = b.addRunArtifact(exe);
     run_step.dependOn(&run_cmd.step);
     run_cmd.step.dependOn(b.getInstallStep());
+
+    _ = zcc.createStep(b, "cdb", targets.toOwnedSlice(b.allocator) catch @panic("OOM"));
 
     if (b.args) |args| {
         run_cmd.addArgs(args);

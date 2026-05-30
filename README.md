@@ -12,3 +12,8 @@ The `doc` folder.
 
 # Why is there also CMake config?
 Alternate build system for some testing. Largely ignorable.
+
+# Editor Integration?
+The project is designed for Visual Studio Code, using the Zig, ZLS, and clangd extensions.
+
+Use `zig build cdb` to generate `compile_commands.json`

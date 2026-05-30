@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "name": "Manual Zig Build Approximation",
+      "includePath": [
+        "${workspaceFolder}/libs/game",
+        "${workspaceFolder}/libs/db",
+        "/usr/include",
+        "/usr/local/include"
+      ],
+      "defines": [
+
+      ],
+      "compilerPath": "/usr/bin/env clang",
+      "compileCommands": "${workspaceFolder}/compile_commands.json",
+      "cStandard": "gnu23",
+      "cppStandard": "gnu++23",
+      "intelliSenseMode": "linux-clang-x64"
+    }
+  ],
+  "version": 4
+}
