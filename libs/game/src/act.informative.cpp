@@ -2482,7 +2482,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
         char notebuf[MAX_NOTE_LENGTH];
 
         snprintf(notebuf, sizeof(notebuf), "There is something written on it:\r\n\r\n%s", obj->action_description);
-        page_string(ch->desc, notebuf, TRUE);
+        send_to_char(ch, "%s", notebuf);
       } else
 	send_to_char(ch, "There appears to be nothing written on it.\r\n");
       return;
@@ -4484,7 +4484,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
 
   /* Does the argument match an extra desc in the room? */
   if ((desc = find_exdesc(arg, char_room_get(ch)->ex_description)) != NULL && ++i == fnum) {
-    page_string(ch->desc, desc, FALSE);
+    send_to_char(ch, "%s", desc);
     return;
   } 
 
@@ -6344,9 +6344,9 @@ ACMD(do_help)
 
   if (!*argument) {
     if (GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
-      page_string(ch->desc, help, 0);
+      send_to_char(ch, help);
     else
-      page_string(ch->desc, ihelp, 0);
+      send_to_char(ch, ihelp);
     return;
   }
 
@@ -6384,7 +6384,7 @@ ACMD(do_help)
   if (GET_ADMLEVEL(ch) > 0) {
    sprintf(buf+strlen(buf), "@WHelp File Level@w: @D(@R%d@D)@n\n", help_table[mid].min_level);
   }
-  page_string(ch->desc, buf, 0);
+  send_to_char(ch, buf);
 }
 
 #define WHO_FORMAT \
@@ -6759,33 +6759,33 @@ ACMD(do_gen_ps)
   
   switch (subcmd) {
   case SCMD_CREDITS:
-    page_string(ch->desc, credits, 0);
+    send_to_char(ch, credits);
     break;
   case SCMD_NEWS:
-    page_string(ch->desc, news, 0);
+    send_to_char(ch, news);
     GET_LPLAY(ch) = time(0);
     break;
   case SCMD_INFO:
-    page_string(ch->desc, info, 0);
+    send_to_char(ch, info);
     break;
   case SCMD_WIZLIST:
-    page_string(ch->desc, wizlist, 0);
+    send_to_char(ch, wizlist);
     break;
   case SCMD_IMMLIST:
-    page_string(ch->desc, immlist, 0);
+    send_to_char(ch, immlist);
     break;
   case SCMD_HANDBOOK:
-    page_string(ch->desc, handbook, 0);
+    send_to_char(ch, handbook);
     break;
   case SCMD_POLICIES:
     sprintf(bum, "--------------------\r\n%s\r\n--------------------\r\n", policies);
-    page_string(ch->desc, bum, 0);
+    send_to_char(ch, bum);
     break;
   case SCMD_MOTD:
-    page_string(ch->desc, motd, 0);
+    send_to_char(ch, motd);
     break;
   case SCMD_IMOTD:
-    page_string(ch->desc, imotd, 0);
+    send_to_char(ch, imotd);
     break;
   case SCMD_CLEAR:
     send_to_char(ch, "\033[H\033[J");
@@ -6992,7 +6992,7 @@ ACMD(do_levels)
     len += nlen;
   }
 
-  page_string(ch->desc, buf, TRUE);
+  send_to_char(ch, buf);
 }
 
 ACMD(do_consider)

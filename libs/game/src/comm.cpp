@@ -529,9 +529,7 @@ void game_loop(socklen_t cmmother_desc)
       }
       d->has_prompt = FALSE;
 
-      if (d->showstr_count) /* Reading something w/ pager */
-	show_string(d, comm);
-      else if (d->str)		/* Writing boards, mail, etc. */
+      if (d->str)		/* Writing boards, mail, etc. */
 	string_add(d, comm);
       else if (STATE(d) != CON_PLAYING) /* In menus, etc. */
 	nanny(d, comm);
@@ -786,11 +784,7 @@ char *make_prompt(struct descriptor_data *d)
 
   /* Note, prompt is truncated at MAX_PROMPT_LENGTH chars (structs.h) */
 
-  if (d->showstr_count) {
-    snprintf(prompt, sizeof(prompt),
-	    "\r\n[ Return to continue, (q)uit, (r)efresh, (b)ack, or page number (%d/%d) ]",
-	    d->showstr_page, d->showstr_count);
-  } else if (d->str) {
+  if (d->str) {
      if (STATE(d) == CON_EXDESC) {
      strcpy(prompt, "Enter Description(/h for editor help)> ");
      }
@@ -2577,10 +2571,6 @@ void close_socket(struct descriptor_data *d)
     free(d->history);
   }
 
-  if (d->showstr_head)
-    free(d->showstr_head);
-  if (d->showstr_count)
-    free(d->showstr_vector);
   if (d->obj_name)
     free(d->obj_name);
   if (d->obj_short)
@@ -3321,7 +3311,7 @@ void show_help(struct descriptor_data *t, const char *entry)
       write_to_output(t, "\r\n");
       snprintf(buf, sizeof(buf), "%s\r\n[ PRESS RETURN TO CONTINUE ]",
        help_table[mid].entry);
-      page_string(t, buf, 0);
+      write_to_output(t, buf);
       return;
     } else {
       if (chk > 0) bot = mid + 1;

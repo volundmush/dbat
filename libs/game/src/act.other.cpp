@@ -11192,7 +11192,7 @@ ACMD(do_file)
    }
    fclose(req_file);
 
-   page_string(ch->desc, buf, 1);
+   send_to_char(ch, buf);
 
 }
 
@@ -12274,26 +12274,6 @@ ACMD(do_clan) {
   }
 }
 
-ACMD(do_pagelength)
-{
-  char arg[MAX_INPUT_LENGTH];
-
-  if (IS_NPC(ch))
-    return;
-
-  one_argument(argument, arg);
-
-  if (!*arg) {
-    send_to_char(ch, "You current page length is set to %d lines.\r\n",
-                 GET_PAGE_LENGTH(ch));
-  } else if (is_number(arg)) {
-    GET_PAGE_LENGTH(ch) = MIN(MAX(atoi(arg), 5), 50);
-    send_to_char(ch, "Okay, your page length is now set to %d lines.\r\n",
-                 GET_PAGE_LENGTH(ch));
-  } else {
-    send_to_char(ch, "Please specify a number of lines (5 - 50).\r\n");
-  }
-}
 
 ACMD(do_aid)
 {

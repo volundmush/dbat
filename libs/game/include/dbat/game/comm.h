@@ -61,7 +61,7 @@ void	string_write(struct descriptor_data *d, char **txt, size_t len, long mailto
 
 #define PAGE_LENGTH	22
 #define PAGE_WIDTH	79
-void	page_string(struct descriptor_data *d, char *str, int keep_internal);
+
 
 
 void   show_help(struct descriptor_data *t, const char *entry);
