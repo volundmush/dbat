@@ -557,7 +557,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
   }
   sprintf(buf+strlen(buf), "@rO@b============================================================================@rO@n\n");
   strcpy(buf2, buf);
-  send_to_char(ch, buf2);
+  send_to_char(ch, "%s", buf2);
   if (bnum == 3092) {
    GET_BOARD(ch, 0) = time(0);
    /* Mort board */
@@ -715,7 +715,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
 	  CAP(name),
 	  MESG_SUBJECT(message) ? MESG_SUBJECT(message) : "No Subject",
 	  MESG_DATA(message) ? MESG_DATA(message) : "Looks like this message is empty.");
-  send_to_char(ch, buf);
+  send_to_char(ch, "%s", buf);
   if (bnum == 3092) {
    GET_BOARD(ch, 0) = time(0);
    /* Mort board */

@@ -2209,7 +2209,7 @@ static void gen_map(struct char_data *ch, int num)
      key += 1;
     }
     else {
-      send_to_char(ch, buf2);
+      send_to_char(ch, "%s", buf2);
     }
   }
   if (num == 1) {
@@ -3500,7 +3500,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
        count = TRUE;
       }
       else {
-       send_to_char(ch,  "someone who has already left!");
+       send_to_char(ch, "someone who has already left!");
       }
      }
   }
@@ -3543,7 +3543,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
 	if (char_room_get(i) == char_room_get(FIGHTING(i)))
 	  send_to_char(ch, "%s!", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
 	else
-	  send_to_char(ch,  "someone who has already left!");
+	  send_to_char(ch, "someone who has already left!");
       }
     } else if (!IS_NPC(i)) {			/* NIL fighting pointer */
       send_to_char(ch, " is here struggling with thin air.");
@@ -6344,9 +6344,9 @@ ACMD(do_help)
 
   if (!*argument) {
     if (GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
-      send_to_char(ch, help);
+      send_to_char(ch, "%s", help);
     else
-      send_to_char(ch, ihelp);
+      send_to_char(ch, "%s", ihelp);
     return;
   }
 
@@ -6384,7 +6384,7 @@ ACMD(do_help)
   if (GET_ADMLEVEL(ch) > 0) {
    sprintf(buf+strlen(buf), "@WHelp File Level@w: @D(@R%d@D)@n\n", help_table[mid].min_level);
   }
-  send_to_char(ch, buf);
+  send_to_char(ch, "%s", buf);
 }
 
 #define WHO_FORMAT \
@@ -6473,7 +6473,7 @@ ACMD(do_who)
     if (short_list)
       send_to_char(ch, "Players\r\n-------\r\n");
     else
-      send_to_char(ch, rank[i].disp);
+      send_to_char(ch, "%s", rank[i].disp);
 
     for (d = descriptor_list; d; d = d->next) {
       if (!IS_PLAYING(d))
@@ -6759,33 +6759,33 @@ ACMD(do_gen_ps)
   
   switch (subcmd) {
   case SCMD_CREDITS:
-    send_to_char(ch, credits);
+    send_to_char(ch, "%s", credits);
     break;
   case SCMD_NEWS:
-    send_to_char(ch, news);
+    send_to_char(ch, "%s", news);
     GET_LPLAY(ch) = time(0);
     break;
   case SCMD_INFO:
-    send_to_char(ch, info);
+    send_to_char(ch, "%s", info);
     break;
   case SCMD_WIZLIST:
-    send_to_char(ch, wizlist);
+    send_to_char(ch, "%s", wizlist);
     break;
   case SCMD_IMMLIST:
-    send_to_char(ch, immlist);
+    send_to_char(ch, "%s", immlist);
     break;
   case SCMD_HANDBOOK:
-    send_to_char(ch, handbook);
+    send_to_char(ch, "%s", handbook);
     break;
   case SCMD_POLICIES:
     sprintf(bum, "--------------------\r\n%s\r\n--------------------\r\n", policies);
-    send_to_char(ch, bum);
+    send_to_char(ch, "%s", bum);
     break;
   case SCMD_MOTD:
-    send_to_char(ch, motd);
+    send_to_char(ch, "%s", motd);
     break;
   case SCMD_IMOTD:
-    send_to_char(ch, imotd);
+    send_to_char(ch, "%s", imotd);
     break;
   case SCMD_CLEAR:
     send_to_char(ch, "\033[H\033[J");
@@ -6992,7 +6992,7 @@ ACMD(do_levels)
     len += nlen;
   }
 
-  send_to_char(ch, buf);
+  send_to_char(ch, "%s", buf);
 }
 
 ACMD(do_consider)
@@ -7954,7 +7954,7 @@ static void search_in_direction(struct char_data * ch, int dir)
   if (EXIT(ch, dir)) {
     if (EXIT(ch, dir)->general_description &&
         !EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET))
-      send_to_char(ch, EXIT(ch, dir)->general_description);
+      send_to_char(ch, "%s", EXIT(ch, dir)->general_description);
     else if (!EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET))
       send_to_char(ch, "There is a normal exit there.\r\n");
     else if (EXIT_FLAGGED(EXIT(ch, dir), EX_ISDOOR) &&

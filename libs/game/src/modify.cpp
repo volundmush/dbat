@@ -383,7 +383,7 @@ ACMD(do_skillset)
     }
     if (i >= sizeof(help))
       strcpy(help + sizeof(help) - strlen("** OVERFLOW **") - 1, "** OVERFLOW **"); /* strcpy: OK */
-    send_to_char(ch, help);
+    send_to_char(ch, "%s", help);
     return;
   }
 

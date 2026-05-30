@@ -128,12 +128,12 @@ ACMD(do_ban)
       send_to_char(ch, "No sites are banned.\r\n");
       return;
     }
-    send_to_char(ch, BAN_LIST_FORMAT,
+    send_to_char(ch, "%s", BAN_LIST_FORMAT,
 	    "Banned Site Name",
 	    "Ban Type",
 	    "Banned On",
 	    "Banned By");
-    send_to_char(ch, BAN_LIST_FORMAT,
+    send_to_char(ch, "%s", BAN_LIST_FORMAT,
 	    "---------------------------------",
 	    "---------------------------------",
 	    "---------------------------------",
@@ -146,7 +146,7 @@ ACMD(do_ban)
       } else
 	strcpy(timestr, "Unknown");	/* strcpy: OK (strlen("Unknown") < 16) */
 
-      send_to_char(ch, BAN_LIST_FORMAT, ban_node->site, ban_types[ban_node->type], timestr, ban_node->name);
+      send_to_char(ch, "%s", BAN_LIST_FORMAT, ban_node->site, ban_types[ban_node->type], timestr, ban_node->name);
     }
     return;
   }

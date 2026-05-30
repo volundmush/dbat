@@ -710,7 +710,7 @@ void do_stat_trigger(struct char_data *ch, trig_data *trig)
       cmd_list = cmd_list->next;
     }
 
-    send_to_char(ch, sb);
+    send_to_char(ch, "%s", sb);
 }
 
 

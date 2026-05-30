@@ -244,7 +244,7 @@ ACMD(do_news)
   if (entries > 0) {
    GET_LPLAY(ch) = time(0);
    WAIT_STATE(ch, PULSE_1SEC);
-   send_to_char(ch, buf);
+   send_to_char(ch, "%s", buf);
   } else {
    send_to_char(ch, "The news file is empty right now.\r\n");
   }
@@ -409,7 +409,7 @@ static void print_lockout(struct char_data *ch)
   }
   sprintf(buf+strlen(buf), "@b------------------[ @RLOCKOUT @b]------------------@n\n");
 
-  send_to_char(ch, buf);
+  send_to_char(ch, "%s", buf);
 
   fclose(file);
 }
@@ -779,7 +779,7 @@ ACMD(do_finddoor)
         return true;
       }); /* for all rooms */ 
       if (num > 0) 
-        send_to_char(ch, buf); 
+        send_to_char(ch, "%s", buf); 
       else 
         send_to_char(ch, "No doors were found for key [%d] %s.\r\n", 
                          vnum, GET_OBJ_SHORT(obj)); 
@@ -3451,7 +3451,7 @@ ACMD(do_show)
         len += nlen;
         return true;
       });
-    send_to_char(ch, buf);
+    send_to_char(ch, "%s", buf);
     break;
 
   /* show player */
@@ -3570,7 +3570,7 @@ ACMD(do_show)
         }
       }
       return true; });
-    send_to_char(ch, buf);
+    send_to_char(ch, "%s", buf);
     break;
 
   /* show death */
@@ -3587,7 +3587,7 @@ ACMD(do_show)
       }
       return true; });
 
-    send_to_char(ch, buf);
+    send_to_char(ch, "%s", buf);
     break;
 
   /* show godrooms */
@@ -3604,7 +3604,7 @@ ACMD(do_show)
       }
       return true; });
 
-    send_to_char(ch, buf);
+    send_to_char(ch, "%s", buf);
     break;
 
   /* show shops */
@@ -3671,7 +3671,7 @@ ACMD(do_show)
       high = 9999999;
     }
     strp = sprintuniques(low, high);
-    send_to_char(ch, strp);
+    send_to_char(ch, "%s", strp);
     free(strp);
     break;
 
@@ -3735,7 +3735,7 @@ ACMD(do_show)
       else
         vict = vict->next_affectv;
     } while (low && vict);
-    send_to_char(ch, strp);
+    send_to_char(ch, "%s", strp);
     free(strp);
     break;
 
@@ -4608,7 +4608,7 @@ ACMD(do_plist)
   } 
   snprintf(buf + len, sizeof(buf) - len, "%s-----------------------------------------------%s\r\n" 
            "%d players listed.\r\n", CCCYN(ch, C_NRM), CCNRM(ch, C_NRM), count); 
-  send_to_char(ch, buf); 
+  send_to_char(ch, "%s", buf); 
 }
 
 ACMD(do_peace)

@@ -641,7 +641,7 @@ void Crash_listrent(struct char_data *ch, char *name)
     }
   }
 
-  send_to_char(ch, buf);
+  send_to_char(ch, "%s", buf);
   fclose(fl);
 }
 

@@ -425,7 +425,7 @@ void list_skills(struct char_data *ch, char *arg)
   if (len >= sizeof(buf2))
     strcpy(buf2 + sizeof(buf2) - strlen(overflow) - 1, overflow); /* strcpy: OK */
 
-  send_to_char(ch, buf2);
+  send_to_char(ch, "%s", buf2);
 }
 
 
@@ -688,7 +688,7 @@ void what_does_guild_know(struct guild_data *guild, struct char_data * ch)
   if (len >= sizeof(buf2))
     strcpy(buf2 + sizeof(buf2) - strlen(overflow) - 1, overflow); /* strcpy: OK */
 
-  send_to_char(ch, buf2);
+  send_to_char(ch, "%s", buf2);
 }
 
 int prereq_pass(struct char_data *ch, int snum)
@@ -1064,33 +1064,33 @@ void handle_train(struct char_data *keeper, struct guild_data *guild, struct cha
   else if (!GET_TRAINS(ch))
     send_to_char(ch, "You have no ability training sessions.\r\n");
   else if (!strncasecmp("strength", argument, strlen(argument))) {
-    send_to_char(ch, CONFIG_OK);
+    send_to_char(ch, "%s", CONFIG_OK);
     ch->real_abils.str += 1;
     GET_TRAINS(ch) -= 1;
   } else if (!strncasecmp("constitution", argument, strlen(argument))) {
-    send_to_char(ch, CONFIG_OK);
+    send_to_char(ch, "%s", CONFIG_OK);
     ch->real_abils.con += 1;
     /* Give them retroactive hit points for constitution */
     if (! (ch->real_abils.con % 2))
       //GET_MAX_HIT(ch) += GET_LEVEL(ch);
     GET_TRAINS(ch) -= 1;
   } else if (!strncasecmp("agility", argument, strlen(argument))) {
-    send_to_char(ch, CONFIG_OK);
+    send_to_char(ch, "%s", CONFIG_OK);
     ch->real_abils.dex += 1;
     GET_TRAINS(ch) -= 1;
   } else if (!strncasecmp("intelligence", argument, strlen(argument))) {
-    send_to_char(ch, CONFIG_OK);
+    send_to_char(ch, "%s", CONFIG_OK);
     ch->real_abils.intel += 1;
     /* Give extra skill practice, but only for this level */
     if (! (ch->real_abils.intel % 2))
       GET_PRACTICES(ch, GET_CLASS(ch)) += 1;
     GET_TRAINS(ch) -= 1;
   } else if (!strncasecmp("wisdom", argument, strlen(argument))) {
-    send_to_char(ch, CONFIG_OK);
+    send_to_char(ch, "%s", CONFIG_OK);
     ch->real_abils.wis += 1;
     GET_TRAINS(ch) -= 1;
   } else if (!strncasecmp("speed", argument, strlen(argument))) {
-    send_to_char(ch, CONFIG_OK);
+    send_to_char(ch, "%s", CONFIG_OK);
     ch->real_abils.cha += 1;
     GET_TRAINS(ch) -= 1;
   } else
@@ -1313,7 +1313,7 @@ void handle_learn(struct char_data *keeper, struct guild_data *guild, struct cha
           cptr = weapon_type[subval];
         subfeat += snprintf(buf + subfeat, sizeof(buf) - subfeat, "  %s\r\n", cptr);
       }
-      send_to_char(ch, buf);
+      send_to_char(ch, "%s", buf);
       return;
     }
     if (*ptr == ':') ptr++;
@@ -1335,7 +1335,7 @@ void handle_learn(struct char_data *keeper, struct guild_data *guild, struct cha
           cptr = weapon_type[subval];
         subfeat += snprintf(buf + subfeat, sizeof(buf) - subfeat, "  %s\r\n", cptr);
       }
-      send_to_char(ch, buf);
+      send_to_char(ch, "%s", buf);
       return;
     }
     subval = search_block(ptr, (sftype == 2) ? spell_schools : weapon_type, FALSE);
@@ -1355,7 +1355,7 @@ void handle_learn(struct char_data *keeper, struct guild_data *guild, struct cha
           cptr = weapon_type[subval];
         subfeat += snprintf(buf + subfeat, sizeof(buf) - subfeat, "  %s\r\n", cptr);
       }
-      send_to_char(ch, buf);
+      send_to_char(ch, "%s", buf);
       return;
     }
     if (!feat_is_available(ch, feat_num, subval, NULL)) {
@@ -1793,7 +1793,7 @@ void list_all_guilds(struct char_data *ch)
     return true;
   });
 
-  send_to_char(ch, buf);
+  send_to_char(ch, "%s", buf);
 }
 
 
@@ -1828,7 +1828,7 @@ void list_detailed_guild(struct char_data * ch, struct guild_data *guild)
  
   strcat(buf, buf2);
 
-  send_to_char(ch, buf);
+  send_to_char(ch, "%s", buf);
 }
   
 

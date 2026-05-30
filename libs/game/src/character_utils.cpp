@@ -3796,7 +3796,7 @@ void improve_skill(struct char_data *ch, int skill, int num)
   SET_SKILL(ch, skill, percent);
   if (newpercent >= 1) {
      sprintf(skillbuf, "@WYou feel you have learned something new about @G%s@W.@n\r\n", spell_info[skill].name);
-     send_to_char(ch, skillbuf);
+     send_to_char(ch, "%s", skillbuf);
      if (GET_SKILL_BASE(ch, skill) >= 100) {
       send_to_char(ch, "You learned a lot by mastering that skill.\r\n");
       if (perf_skill(skill)) {

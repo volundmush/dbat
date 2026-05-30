@@ -4035,7 +4035,7 @@ ACMD(do_upgrade)
                    "@cUpgrade @GStamina   @D: @Y50 @WPoints\r\n"
                    "@D            -----------\r\n");
   }
-  send_to_char(ch,  "@cAugment @RPowerlevel\r\n"
+  send_to_char(ch, "@cAugment @RPowerlevel\r\n"
                    "@cAugment @CKi\r\n"
                    "@cAugment @GStamina\r\n"
                    "@WCurrent Upgrade Points @D[@y%s@D]@n\r\n", add_commas(GET_UP(ch)));
@@ -6519,7 +6519,7 @@ ACMD(do_eavesdrop) {
   if (auto ex = EXIT(ch, dir); ex) {
     if (IS_SET(ex->exit_info, EX_CLOSED) && ex->keyword) {
       sprintf(buf, "The %s is closed.\r\n", fname(ex->keyword));
-      send_to_char(ch, buf);
+      send_to_char(ch, "%s", buf);
     } else {
       GET_EAVESDROP(ch) = ex->to_room;
       GET_EAVESDIR(ch) = dir;
@@ -11135,7 +11135,7 @@ ACMD(do_file)
      for (j = 0, i = 1; fields[i].level; i++)
        if (fields[i].level <= GET_LEVEL(ch))
          sprintf(buf+strlen(buf), "%-15s%s\r\n", fields[i].cmd, fields[i].file);
-     send_to_char(ch, buf);
+     send_to_char(ch, "%s", buf);
      return;
    }
 
@@ -11192,7 +11192,7 @@ ACMD(do_file)
    }
    fclose(req_file);
 
-   send_to_char(ch, buf);
+   send_to_char(ch, "%s", buf);
 
 }
 
@@ -11646,7 +11646,7 @@ ACMD(do_resurrect)
 
 static void show_clan_info(struct char_data *ch) {
 
-  send_to_char(ch,   "@c----------------------------------------\r\n"
+  send_to_char(ch, "@c----------------------------------------\r\n"
                      "@c|@WProvided by@D: @YAlister of Aeonian Dreams@c|\r\n"
                      "@c|@YWith many changes made by Iovan.      @c|\r\n"
                      "@c----------------------------------------@w\r\n"
