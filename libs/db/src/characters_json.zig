@@ -106,6 +106,7 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
     }
 
     if (mode == .player) {
+        try jsonx.putInt(&object, allocator, "idnum", ch.idnum);
         if (ch.player_specials != null and ch.player_specials != &cdb.dummy_mob) {
             const ps: *cdb.player_special_data = ch.player_specials;
             try jsonx.putString(&object, allocator, "host", ps.*.host);
@@ -285,6 +286,7 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
 
     if (options.mode == .player) {
         // player-specific fields go here.
+        if (try jsonx.intField(value, "idnum", i32)) |v| ch.idnum = v;
         const ps = try ensurePlayerSpecials(ch);
         try setPointerStringField(options.c_allocator, value, "host", &ps.host, setPlayerString);
         if (try jsonx.intField(value, "load_room", cdb.room_vnum)) |v| ps.load_room = v;
