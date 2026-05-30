@@ -36,7 +36,7 @@ void parse_trigger(FILE *trig_f, int nr)
 
     CREATE(trig, struct trig_data, 1);
     snprintf(errors, sizeof(errors), "trig vnum %d", nr);
-
+    trig->vnum = nr;
     trig->name = fread_string(trig_f, errors);
 
     trig_proto_put(nr, trig);
