@@ -18,8 +18,6 @@ void wishSYS(void);
 void bring_to_cap(struct char_data *ch);
 void base_update(void);
 void load_shadow_dragons();
-void innate_remove(struct char_data * ch, struct innate_node * inn);
-void innate_add(struct char_data * ch, int innate, int timer);
 int is_innate(struct char_data *ch, int spellnum);
 int is_innate_ready(struct char_data *ch, int spellnum);
 void add_innate_timer(struct char_data *ch, int spellnum);

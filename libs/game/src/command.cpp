@@ -63,7 +63,6 @@ const struct command_info cmd_info[] = {
   { "alias"    , "ali"		, POS_DEAD    , do_alias    , 0, ADMLVL_NONE	, 0 },
   { "afk"      , "afk"		, POS_DEAD    , do_gen_tog  , 0, ADMLVL_NONE	, SCMD_AFK },
   { "aid"      , "aid"          , POS_STANDING, do_aid      , 0, ADMLVL_NONE    , 0 },
-  { "amnesiac" , "amnesia"      , POS_STANDING, do_amnisiac , 0, ADMLVL_NONE    , 0 },
   { "appraise" , "apprais"      , POS_STANDING, do_appraise , 0, ADMLVL_NONE    , 0 },
   { "approve"  , "approve"      , POS_STANDING, do_approve  , 0, ADMLVL_IMMORT  , 0 },
   { "arena"    , "aren"         , POS_RESTING , do_arena    , 0, ADMLVL_NONE    , 0 },

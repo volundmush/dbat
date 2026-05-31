@@ -484,13 +484,11 @@ fn importNpcPrototypes(folder: []const u8) !void {
         };
         const mob = try allocCOne(cdb.char_data);
         mob.vnum = file.vnum;
-        mob.player_specials = &cdb.dummy_mob;
         characters_json.deserializeCharacter(mob, .{ .mode = .npc_prototype }, value) catch |err| {
             logImportFileError("npc_prototypes", file, err);
             return err;
         };
         mob.vnum = file.vnum;
-        mob.player_specials = &cdb.dummy_mob;
         cdb.mob_proto_put(@intCast(file.vnum), mob);
         progress.tick(index);
     }

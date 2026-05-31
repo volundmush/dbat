@@ -394,13 +394,6 @@ fn clampStat(value: i64, definition: lua_api.StatDefinition) i64 {
     return result;
 }
 
-pub export fn char_legacy_modifier(ch: *cdb.char_data, location: c_int, specific: c_int) i64 {
-    _ = ch;
-    _ = location;
-    _ = specific;
-    return 0;
-}
-
 pub export fn char_der_get_base(ch: *cdb.char_data, stat: ?[*:0]const u8) i64 {
     const name = statName(stat) orelse return 0;
     return charDerGetBaseName(ch, name);
@@ -625,12 +618,14 @@ pub export fn char_skill_base_mod(ch: *cdb.char_data, skill: ?[*:0]const u8, mod
 
 pub export fn char_skill_modifier_get(ch: *cdb.char_data, skill: ?[*:0]const u8) i64 {
     const index = skillIndex(skill) orelse return 0;
-    return ch.skills[index].mod;
+    const bonus = cdb.char_legacy_modifier(ch, cdb.APPLY_SKILL, @intCast(index));
+    return bonus;
 }
 
 pub export fn char_skill_total_get(ch: *cdb.char_data, skill: ?[*:0]const u8) i64 {
     const index = skillIndex(skill) orelse return 0;
-    return @as(i64, ch.skills[index].base) + ch.skills[index].mod;
+    const bonus = cdb.char_legacy_modifier(ch, cdb.APPLY_SKILL, @intCast(index));
+    return @as(i64, ch.skills[index].base + bonus);
 }
 
 pub export fn char_skill_perf_get(ch: *cdb.char_data, skill: ?[*:0]const u8) i64 {

@@ -1034,25 +1034,13 @@ in the vault (vnum: 453) now and then. you can just use
             *str = '\0'; /* so the parser know we recognize 'skillset' as a field */
           }
           else if (!strcasecmp(field, "saving_fortitude")) {
-            if (subfield && *subfield) {
-              int addition = atoi(subfield);
-              GET_SAVE_MOD(c, SAVING_FORTITUDE) += addition;
-            }
-            snprintf(str, slen, "%d", GET_SAVE_MOD(c, SAVING_FORTITUDE));
+            snprintf(str, slen, "%d", 0);
           }
           else if (!strcasecmp(field, "saving_reflex")) {
-            if (subfield && *subfield) {
-              int addition = atoi(subfield);
-              GET_SAVE_MOD(c, SAVING_REFLEX) += addition;
-            }
-            snprintf(str, slen, "%d", GET_SAVE_MOD(c, SAVING_REFLEX));
+            snprintf(str, slen, "%d", 0);
           }
           else if (!strcasecmp(field, "saving_will")) {
-            if (subfield && *subfield) {
-              int addition = atoi(subfield);
-              GET_SAVE_MOD(c, SAVING_WILL) += addition;
-            }
-            snprintf(str, slen, "%d", GET_SAVE_MOD(c, SAVING_WILL));
+            snprintf(str, slen, "%d", 0);
           }
 
           break;
@@ -1168,11 +1156,7 @@ in the vault (vnum: 453) now and then. you can just use
           }
 
           else if (!strcasecmp(field, "cost_per_day")) {
-            if (subfield && *subfield) {
-              int addition = atoi(subfield);
-              GET_OBJ_RENT(o) = MAX(0, addition + GET_OBJ_RENT(o));
-            }
-            snprintf(str, slen, "%d", GET_OBJ_RENT(o));
+            snprintf(str, slen, "%d", 0);
           }
 
           else if (!strcasecmp(field, "carried_by")) {

@@ -416,15 +416,6 @@ void oedit_disp_prompt_spellbook_menu(struct descriptor_data *d)
 
   clear_screen(d);
 
-  for (counter = 0; counter < SPELLBOOK_SIZE; counter++) {
-    if (OLC_OBJ(d)->sbinfo && OLC_OBJ(d)->sbinfo[counter].spellname != 0 &&
-        OLC_OBJ(d)->sbinfo[counter].spellname < MAX_SPELLS) {
-      write_to_output(d, " @g%3d@n) %-20.20s %s", counter + 1,
-             spell_info[OLC_OBJ(d)->sbinfo[counter].spellname].name, !(++columns % 3) ? "\r\n" : "");
-    } else {
-      write_to_output(d, " @g%3d@n) None.%s", counter + 1, !(++columns % 3) ? "\r\n" : "");
-    }
-  }
   write_to_output(d, "\r\nEnter spell to modify (0 to quit) : ");
   OLC_MODE(d) = OEDIT_PROMPT_SPELLBOOK;
 }
@@ -991,7 +982,7 @@ void oedit_disp_menu(struct descriptor_data *d)
   write_to_output(d,
 	  "@g7@n) Wear flags  : @c%s@n\r\n"
 	  "@g8@n) Weight      : @c%-4" I64T "@n, 	@g9@n) Cost        : @c%-4d@n\r\n"
-	  "@gA@n) Cost/Day    : @c%-4d@n, 	@gB@n) Timer       : @c%-4d@n\r\n"
+	  "@gA@n) ----    : @c%-4d@n, 	@gB@n) Timer       : @c%-4d@n\r\n"
 	  "@gC@n) Values      : @c%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d@n\r\n"
 	  "@gD@n) Applies menu@n\r\n"
 	  "@gE@n) Extra descriptions menu %s\r\n"
@@ -1006,7 +997,7 @@ void oedit_disp_menu(struct descriptor_data *d)
 	  "@gQ@n) Quit\r\n"
 	  "Enter choice : ",
 
-	  tbitbuf, GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_RENT(obj),
+	  tbitbuf, GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), 0,
 	  GET_OBJ_TIMER(obj), GET_OBJ_VAL(obj, 0), GET_OBJ_VAL(obj, 1),
           GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 3), GET_OBJ_VAL(obj, 4),
           GET_OBJ_VAL(obj, 5), GET_OBJ_VAL(obj, 6), GET_OBJ_VAL(obj, 7),
@@ -1358,7 +1349,6 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     break;
 
   case OEDIT_COSTPERDAY:
-    GET_OBJ_RENT(OLC_OBJ(d)) = LIMIT(atoi(arg), 0, MAX_OBJ_RENT);
     break;
 
   case OEDIT_TIMER:
@@ -1726,39 +1716,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     return;
 
   case OEDIT_SPELLBOOK:
-    if ((number = atoi(arg)) == 0) {
-      if (OLC_OBJ(d)->sbinfo) {
-        OLC_OBJ(d)->sbinfo[OLC_VAL(d)].spellname = 0;
-        OLC_OBJ(d)->sbinfo[OLC_VAL(d)].pages = 0;
-      } else {
-        CREATE(OLC_OBJ(d)->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-        OLC_OBJ(d)->sbinfo[OLC_VAL(d)].spellname = 0;
-        OLC_OBJ(d)->sbinfo[OLC_VAL(d)].pages = 0;
-      }
-      oedit_disp_prompt_spellbook_menu(d);
-    } else if (number < 0 || number >= SKILL_TABLE_SIZE) {
-      oedit_disp_spellbook_menu(d);
-    } else {
-      int counter;
-
-      /* add in check here if already applied.. deny builders another */
-      if (GET_LEVEL(d->character) < ADMLVL_IMPL) {
-        for (counter = 0; counter < SKILL_TABLE_SIZE; counter++) {
-          if (OLC_OBJ(d)->sbinfo && OLC_OBJ(d)->sbinfo[counter].spellname == number) {
-            write_to_output(d, "Object already has that spell.");
-            return;
-          }
-        }
-      }
-
-      if (!OLC_OBJ(d)->sbinfo) {
-        CREATE(OLC_OBJ(d)->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-      } 
-
-      OLC_OBJ(d)->sbinfo[OLC_VAL(d)].spellname = number;
-      OLC_OBJ(d)->sbinfo[OLC_VAL(d)].pages = MAX(1, spell_info[number].spell_level * 2);
-      oedit_disp_prompt_spellbook_menu(d);
-    }
+    write_to_output(d, "What do you think this is? D&D?");
     return;
 
   default:

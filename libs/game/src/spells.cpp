@@ -258,7 +258,7 @@ ASPELL(spell_identify)
     sprintbitarray(GET_OBJ_EXTRA(obj), extra_bits, EF_ARRAY_MAX, bitbuf, sizeof(bitbuf));
     send_to_char(ch, "Item is: %s\r\n", bitbuf);
 
-    send_to_char(ch, "Weight: %" I64T ", Value: %d, Rent: %d, Min Level: %d\r\n", GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_RENT(obj), GET_OBJ_LEVEL(obj));
+    send_to_char(ch, "Weight: %" I64T ", Value: %d, Min Level: %d\r\n", GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_LEVEL(obj));
 
     switch (GET_OBJ_TYPE(obj)) {
     case ITEM_SCROLL:
@@ -463,7 +463,7 @@ ASPELL(spell_portal)
 }
 
 
-int roll_skill(const struct char_data *ch, int snum)
+int roll_skill(struct char_data *ch, int snum)
 {
   int roll, skval, i;
   if (!IS_NPC(ch)) {
@@ -551,7 +551,7 @@ int roll_skill(const struct char_data *ch, int snum)
   }
 }
 
-int roll_resisted(const struct char_data *actor, int sact, const struct char_data *resistor, int sres)
+int roll_resisted(struct char_data *actor, int sact, struct char_data *resistor, int sres)
 {
   return roll_skill(actor, sact) >= roll_skill(resistor, sres);
 }

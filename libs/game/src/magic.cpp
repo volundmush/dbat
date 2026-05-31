@@ -116,27 +116,6 @@ int mag_materials(struct char_data *ch, int item0, int item1, int item2,
 
 int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum, int level, int cast_stat)
 {
-  int stype;
-  int dc;
-  int total;
-  if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_FORT))
-    stype = SAVING_FORTITUDE;
-  else if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_REFLEX))
-    stype = SAVING_REFLEX;
-  else if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_WILL))
-    stype = SAVING_WILL;
-  else
-    return FALSE;
-  total = GET_SAVE(victim, stype) + rand_number(1, 20);
-  dc = spell_info[spellnum].spell_level + level + ability_mod_value(cast_stat);
-  if (ch) {
-    if (HAS_SCHOOL_FEAT(ch, CFEAT_SPELL_FOCUS, spell_info[spellnum].school))
-      dc++;
-    if (HAS_SCHOOL_FEAT(ch, CFEAT_GREATER_SPELL_FOCUS, spell_info[spellnum].school))
-      dc++;
-  }
-  if (total >= dc)
-    return TRUE;
   return FALSE;
 }
 
@@ -1017,10 +996,6 @@ void mag_points(int level, struct char_data *ch, struct char_data *victim,
   case SPELL_HEAL:
     healing = 100 + dice(3, 8);
     send_to_char(victim, "A warm feeling floods your body.\r\n");
-    if (AFF_FLAGGED(ch, AFF_CDEATH)) {
-      affectv_from_char(ch, ART_QUIVERING_PALM);
-      send_to_char(ch, "Your nerves settle slightly\r\n");
-    }
     break;
   case SPELL_SENSU:
     if (GET_COND(victim, HUNGER) > -1) {
@@ -1188,54 +1163,6 @@ void mag_creations(int level, struct char_data *ch, int spellnum)
   load_otrigger(tobj);
 }
 
-/* affect_update_violence: called from fight.c (causes spells to wear off) */
-void affect_update_violence(void)
-{
-  struct affected_type *af, *next;
-  struct char_data *i;
-  int dam;
-  int maxdam;
-
-  for (i = affectv_list; i; i = i->next_affectv) {
-    for (af = i->affectedv; af; af = next) {
-      next = af->next;
-      if (af->duration >= 1) {
-        af->duration--;
-        switch (af->type) {
-        case ART_EMPTY_BODY:
-          if (GET_KI(i) >= 10) {
-            GET_KI(i) -= 10;
-          } else {
-            af->duration = 0; /* Wear it off immediately! No more ki */
-          }
-        }
-      } else if (af->duration == -1) {     /* No action */
-        continue;
-      }
-      if (!af->duration) {
-        if ((af->type > 0) && (af->type < SKILL_TABLE_SIZE))
-          if (!af->next || (af->next->type != af->type) ||
-              (af->next->duration > 0))
-            if (spell_info[af->type].wear_off_msg)
-              send_to_char(i, "%s\r\n", spell_info[af->type].wear_off_msg);
-          if (af->bitvector == AFF_SUMMONED) {
-            stop_follower(i);
-            if (!DEAD(i))
-              extract_char(i);
-          }
-          if (af->type == ART_QUIVERING_PALM) {
-            maxdam = GET_HIT(i) + 8;
-            dam = GET_MAX_HIT(i) * 3 / 4;
-            dam = MIN(dam, maxdam);
-            dam = MAX(0, dam);
-            log("Creeping death strike doing %d dam", dam);
-          }
-        affectv_remove(i, af);
-      }
-    }
-  }
-}
-
 void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
                       int spellnum)
 {
@@ -1367,10 +1294,6 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
     send_to_char(ch, "%s", CONFIG_NOEFFECT);
     return;
   }
-
-  for (i = 0; i < MAX_SPELL_AFFECTS; i++)
-    if (af[i].bitvector || (af[i].location != APPLY_NONE))
-      affectv_join(victim, af+i, accum_duration, FALSE, accum_affect, FALSE);
 
   if (to_vict != NULL)
     act(to_vict, FALSE, victim, 0, ch, TO_CHAR);

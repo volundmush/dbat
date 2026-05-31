@@ -167,7 +167,7 @@ if(!zone) {
             GET_OBJ_VAL(obj, 9), GET_OBJ_VAL(obj, 10), GET_OBJ_VAL(obj, 11),
             GET_OBJ_VAL(obj, 12), GET_OBJ_VAL(obj, 13), GET_OBJ_VAL(obj, 14),
             GET_OBJ_VAL(obj, 15),
-            GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_RENT(obj), GET_OBJ_LEVEL(obj));
+            GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), 0, GET_OBJ_LEVEL(obj));
 
     /*
      * Do we have script(s) attached ?
@@ -207,21 +207,6 @@ if(!zone) {
                     "%d %d %d\n",
                 obj->affected[counter2].location,
                 obj->affected[counter2].modifier, obj->affected[counter2].specific);
-    /* Do we have spells? */
-    if (obj->sbinfo)
-    { /*. Yep, save them too . */
-      for (counter2 = 0; counter2 < SKILL_TABLE_SIZE; counter2++)
-      {
-        if (obj->sbinfo[counter2].spellname == 0)
-        {
-          break;
-        }
-        fprintf(fp, "S\n"
-                    "%d %d\n",
-                obj->sbinfo[counter2].spellname, obj->sbinfo[counter2].pages);
-        continue;
-      }
-    }
   }
 
   /*

@@ -748,14 +748,9 @@ void remove_limb(struct char_data *vict, int num)
   GET_OBJ_TYPE(body_part) = ITEM_OTHER;
   SET_BIT_AR(GET_OBJ_WEAR(body_part), ITEM_WEAR_TAKE);
   SET_BIT_AR(GET_OBJ_EXTRA(body_part), ITEM_UNIQUE_SAVE);
-  GET_OBJ_VAL(body_part, 0) = 0;
-  GET_OBJ_VAL(body_part, 1) = 0;
-  GET_OBJ_VAL(body_part, 2) = 0;
-  GET_OBJ_VAL(body_part, 3) = 0;
   GET_OBJ_VAL(body_part, 4) = 1;
   GET_OBJ_VAL(body_part, 5) = 1;
   GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);
-  GET_OBJ_RENT(body_part) = 0;
   add_unique_id(body_part);
   obj_to_room(body_part, char_room_get(vict));
 }
@@ -1552,7 +1547,6 @@ static void make_pcorpse(struct char_data *ch)
   GET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE) = 1;        /* corpse identifier */
   GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = GET_PFILEPOS(ch);  /* corpse identifier */
   GET_OBJ_WEIGHT(corpse) = GET_PC_WEIGHT(ch) + IS_CARRYING_W(ch);
-  GET_OBJ_RENT(corpse) = 100000;
   GET_OBJ_TIMER(corpse) = CONFIG_MAX_PC_CORPSE_TIME;
   SET_BIT_AR(GET_OBJ_EXTRA(corpse), ITEM_UNIQUE_SAVE);
 
@@ -1777,7 +1771,6 @@ static void make_corpse(struct char_data *ch, struct char_data *tch)
   GET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE) = 1;	/* corpse identifier */
   GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = GET_PFILEPOS(ch);	/* corpse identifier */
   GET_OBJ_WEIGHT(corpse) = GET_PC_WEIGHT(ch) + IS_CARRYING_W(ch);
-  GET_OBJ_RENT(corpse) = 100000;
   if (IS_NPC(ch))
     GET_OBJ_TIMER(corpse) = CONFIG_MAX_NPC_CORPSE_TIME;
   else
@@ -1956,9 +1949,6 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
 
   while (ch->affected)
     affect_remove(ch, ch->affected);
-
-  while (ch->affectedv)
-    affectv_remove(ch, ch->affectedv);
 
   /* To make ordinary commands work in scripts.  welcor*/  
   if (GET_POS(ch) != POS_SITTING && GET_POS(ch) != POS_SLEEPING && GET_POS(ch) != POS_RESTING) 

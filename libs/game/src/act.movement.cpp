@@ -3166,11 +3166,6 @@ ACMD(do_sleep)
     }
 
     /* Fury Mode Loss for halfbreeds */
-
-    if (GET_STUPIDKISS(ch) > 0) {
-     GET_STUPIDKISS(ch) = 0;
-     send_to_char(ch, "You forget about that stupid kiss.\r\n");
-    }
     break;
   case POS_SLEEPING:
     send_to_char(ch, "You are already sound asleep.\r\n");
@@ -3228,11 +3223,6 @@ ACMD(do_sleep)
     }
 
     /* Fury Mode Loss for halfbreeds */
-
-    if (GET_STUPIDKISS(ch) > 0) {
-     GET_STUPIDKISS(ch) = 0;
-     send_to_char(ch, "You forget about that stupid kiss.\r\n");
-    }
     SITS(ch) = chair;
     SITTING(chair) = ch;
     GET_POS(ch) = POS_SLEEPING;

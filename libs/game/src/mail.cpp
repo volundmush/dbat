@@ -627,7 +627,6 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
     SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_HOLD);
     GET_OBJ_WEIGHT(obj) = 1;
     GET_OBJ_COST(obj) = 30;
-    GET_OBJ_RENT(obj) = 10;
     obj->action_description = read_delete(GET_IDNUM(ch), &from);
     char bla[256], blm[256];
     sprintf(bla, "@WA piece of mail@n");

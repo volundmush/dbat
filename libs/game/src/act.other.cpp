@@ -1321,7 +1321,7 @@ ACMD(do_train)
       stat_name = "strength";
       bonus_trait = BONUS_BRAWNY;
       nega_trait = BONUS_WIMP;
-      stat_train = &(ch->player_specials->trainstr);
+      stat_train = &(ch->trainstr);
       needed = strcap;
   } else if (!strcasecmp("spd", arg)) {
       stat_id = 2;
@@ -1329,7 +1329,7 @@ ACMD(do_train)
       stat_name = "speed";
       bonus_trait = BONUS_QUICK;
       nega_trait = BONUS_SLOW;
-      stat_train = &(ch->player_specials->trainspd);
+      stat_train = &(ch->trainspd);
       needed = spdcap;
   } else if (!strcasecmp("con", arg)) {
       stat_id = 3;
@@ -1337,7 +1337,7 @@ ACMD(do_train)
       stat_name = "constitution";
       bonus_trait = BONUS_STURDY;
       nega_trait = BONUS_FRAIL;
-      stat_train = &(ch->player_specials->traincon);
+      stat_train = &(ch->traincon);
       needed = concap;
   } else if (!strcasecmp("agl", arg)) {
       stat_id = 4;
@@ -1345,7 +1345,7 @@ ACMD(do_train)
       stat_name = "agility";
       bonus_trait = BONUS_AGILE;
       nega_trait = BONUS_CLUMSY;
-      stat_train = &(ch->player_specials->trainagl);
+      stat_train = &(ch->trainagl);
       needed = aglcap;
   } else if (!strcasecmp("int", arg)) {
       stat_id = 5;
@@ -1353,7 +1353,7 @@ ACMD(do_train)
       stat_name = "intelligence";
       bonus_trait = BONUS_SCHOLARLY;
       nega_trait = BONUS_DULL;
-      stat_train = &(ch->player_specials->trainint);
+      stat_train = &(ch->trainint);
       needed = intcap;
   } else if (!strcasecmp("wis", arg)) {
       stat_id = 6;
@@ -1361,7 +1361,7 @@ ACMD(do_train)
       stat_name = "wisdom";
       bonus_trait = BONUS_SAGE;
       nega_trait = BONUS_FOOLISH;
-      stat_train = &(ch->player_specials->trainwis);
+      stat_train = &(ch->trainwis);
       needed = wiscap;
   } else {
       send_to_char(ch, "Syntax: train (str | spd | agl | wis | int | con)\r\n");
@@ -10068,18 +10068,6 @@ ACMD(do_visible)
     send_to_char(ch, "You break the spell of invisibility.\r\n");
   }
 
-  if (AFF_FLAGGED(ch, AFF_ETHEREAL) && affectedv_by_spell(ch, ART_EMPTY_BODY)) {
-    affectv_from_char(ch, ART_EMPTY_BODY);
-    if (AFF_FLAGGED(ch, AFF_ETHEREAL)) {
-      send_to_char(ch, "Returning to the material plane will not be so easy.\r\n");
-    } else {
-      send_to_char(ch, "You return to the material plane.\r\n");
-      if (!appeared)
-        act("$n flashes into existence.", FALSE, ch, 0, 0, TO_ROOM);
-    }
-    appeared = 1;
-  }
-
   if (!appeared)
     send_to_char(ch, "You are already visible.\r\n");
 }
@@ -11434,31 +11422,6 @@ ACMD(do_fix)
  }
 }
 
-/* new spell memorization code */
-/* remove a spell from a character's innate linked list */
-void innate_remove(struct char_data * ch, struct innate_node * inn)
-{
-  struct innate_node *temp;
-
-  if (ch->innate == NULL) {
-    core_dump();
-    return;
-  }
-
-  REMOVE_FROM_LIST(inn, ch->innate, next, temp);
-  free(inn);
-}
-
-void innate_add(struct char_data * ch, int innate, int timer)
-{
-  struct innate_node * inn;
-
-  CREATE(inn, struct innate_node, 1);
-  inn->timer = timer;
-  inn->spellnum = innate;
-  inn->next = ch->innate;
-  ch->innate = inn;
-}
 
 /* Returns true if the spell/skillnum is innate to the character
    (as opposed to just practiced).
@@ -11480,13 +11443,7 @@ int is_innate(struct char_data *ch, int spellnum)
 */
 int is_innate_ready(struct char_data *ch, int spellnum)
 {
-  struct innate_node *inn, *next_inn;
 
-  for(inn = ch->innate; inn; inn = next_inn) {
-    next_inn = inn->next;
-    if(inn->spellnum == spellnum)
-      return FALSE;
-  }
   return TRUE;
 }
 
@@ -11498,21 +11455,7 @@ int is_innate_ready(struct char_data *ch, int spellnum)
 */
 void add_innate_timer(struct char_data *ch, int spellnum) 
 {
-  int timer = 6; /* number of ticks */
 
-  switch(spellnum) {
-    case SPELL_FAERIE_FIRE:
-      timer = 6;   
-      break;
-    case ABIL_LAY_HANDS:
-      timer = 12;
-      break;
-  }
-  if(is_innate_ready(ch, spellnum)) {
-    innate_add(ch, spellnum, timer);
-  } else {
-    send_to_char(ch, "BUG!\r\n");
-  }
 }
 
 
@@ -11536,42 +11479,12 @@ void add_innate_affects(struct char_data *ch)
 /* Called to update the innate timers */
 void update_innate(struct char_data *ch)
 {
-  struct innate_node *inn, *next_inn;
 
-  for (inn = ch->innate; inn; inn = next_inn) {
-    next_inn = inn->next;
-    if (inn->timer > 0) { 
-      inn->timer--;
-    } else {
-      switch(inn->spellnum) {
-      case ABIL_LAY_HANDS:
-        send_to_char(ch, "Your special healing abilities have returned.\r\n");
-        break;
-      default:
-        send_to_char(ch, "You are now able to use your innate %s again.\r\n", spell_info[inn->spellnum].name);
-        break;
-      }  
-      innate_remove(ch, inn);
-    }
-  } 
 }
 
 static int spell_in_book(struct obj_data *obj, int spellnum)
 {
-  int i;
-  bool found = FALSE;
 
-  if (!obj->sbinfo)
-    return FALSE;
-
-  for (i=0; i < SPELLBOOK_SIZE; i++)
-    if (obj->sbinfo[i].spellname == spellnum) {
-      found = TRUE;
-      break;
-    }
-
-  if (found)
-    return 1;
 
   return 0;
 }
@@ -12098,7 +12011,6 @@ ACMD(do_clan) {
     } else if(!(vict = get_char_vis(ch, name1, NULL, FIND_CHAR_WORLD))) {
        CREATE(vict, struct char_data, 1);
        clear_char(vict);
-       CREATE(vict->player_specials, struct player_special_data, 1);
 
        sprintf(name, "%s", rIntro(ch, name1));
 

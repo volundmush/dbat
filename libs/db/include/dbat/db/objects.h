@@ -13,9 +13,27 @@
 extern "C" {
 #endif
 
-struct obj_spellbook_spell {
-   int spellname;	/* Which spell is written */
-   int pages;		/* How many pages does it take up */
+struct obj_proto_data {
+   obj_vnum id;	/* Where in data-base			*/
+   int  value[NUM_OBJ_VAL_POSITIONS];   /* Values of the item (see list)    */
+   int8_t type_flag;      /* Type of item                        */
+   int  level;           /* Minimum level of object.            */
+   bitvector_t  wear_flags[TW_ARRAY_MAX]; /* Where you can wear it     */
+   bitvector_t  extra_flags[EF_ARRAY_MAX]; /* If it hums, glows, etc.  */
+   int64_t  weight;         /* Weigt what else                     */
+   int  cost;           /* Value when sold (gp.)               */
+   bitvector_t  bitvector[AF_ARRAY_MAX]; /* To set chars bits          */
+   int  size;           /* Size class of object                */
+
+   struct obj_affected_type affected[MAX_OBJ_AFFECT];  /* affects */
+
+   char	*name;                    /* Title of object :get etc.        */
+   char	*description;		  /* When in room                     */
+   char	*short_description;       /* when worn/carry/in cont.         */
+   char	*action_description;      /* What to write when used          */
+   struct extra_descr_data *ex_description; /* extra descriptions     */
+   struct trig_proto_list *proto_script; /* list of default triggers  */
+
 };
 
 struct obj_data {
@@ -92,10 +110,6 @@ struct obj_data {
 
    // icewall stuff
    struct obj_data *fellow_wall;
-
-   // UNUSED FIELDS below here
-   int  cost_per_day;   /* Cost to keep pr. real day           */
-   struct obj_spellbook_spell *sbinfo;  /* For spellbook info */
 };
 
 // Object API functions, implemented in objects_api.zig

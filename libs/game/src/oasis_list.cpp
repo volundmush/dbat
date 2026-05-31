@@ -222,7 +222,6 @@ void list_mobiles(struct char_data *ch, struct zone_data *zone, mob_vnum vmin, m
     if(!mob) continue;
     counter++;
 
-    admg = ((mob->mob_specials.damsizedice + 1) / 2.0) * (mob->mob_specials.damnodice);
     send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
                   counter, char_proto_id_get(mob), count_color_chars(mob->short_descr)+30, mob->short_descr, TRUE_RACE((mob)), SENSEI_NAME((mob)),
                   mob->level + mob->level_adj + mob->race_level, mob->proto_script ? " [TRIG]" : "");

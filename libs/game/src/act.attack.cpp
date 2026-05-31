@@ -2994,7 +2994,6 @@ ACMD(do_selfd)
   dmg += (getBasePL(ch)) * 0.6;
   dmg += (getBaseST(ch));
   decCurHealthPercentFloored(ch, 1, 1);
-  GET_SUPP(ch) = 0;
   GET_SUPPRESS(ch) = 0;
   act("@RYou EXPLODE! The explosion concentrates on @r$N@R, engulfing $M in a sphere of deadly energy!@n", TRUE, ch, 0, tch, TO_CHAR);
   act("@R$n EXPLODES! The explosion concentrates on YOU, engulfing your body in a sphere of deadly energy!@n", TRUE, ch, 0, tch, TO_VICT);
@@ -3026,7 +3025,6 @@ ACMD(do_selfd)
   dmg += (getBaseST(ch));
   dmg *= 1.5;
    decCurHealthPercentFloored(ch, 1, 1);
-  GET_SUPP(ch) = 0;
   GET_SUPPRESS(ch) = 0;
   act("@RYou EXPLODE! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with you at its center!@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@R$n EXPLODES! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with $n at its center!@n", TRUE, ch, 0, 0, TO_ROOM);

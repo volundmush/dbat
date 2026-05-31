@@ -562,7 +562,7 @@ void do_start(struct char_data *ch)
   }
   restoreVitals(ch);
 
-  ch->player_specials->olc_zone = NOWHERE;
+  ch->olc_zone = NOWHERE;
   save_char(ch);
 }
 
@@ -702,7 +702,6 @@ static const int *free_start_feats[] = {
  /* Rillao: transloc, add new transes here */
 void advance_level(struct char_data *ch, int whichclass)
 {
-  struct levelup_data *llog;
   int64_t add_hp = 0, add_move = 0, add_mana = 0, add_ki = 0;
   int add_prac = 1, add_train, i, j = 0, ranks;
   int add_gen_feats = 0, add_class_feats = 0;
@@ -718,18 +717,6 @@ void advance_level(struct char_data *ch, int whichclass)
     whichclass = GET_CLASS(ch);
   }
   ranks = GET_CLASS_RANKS(ch, whichclass);
-
-  CREATE(llog, struct levelup_data, 1);
-  llog->next = ch->level_info;
-  llog->prev = NULL;
-  if (llog->next)
-    llog->next->prev = llog;
-  ch->level_info = llog;
-
-  llog->skills = llog->feats = NULL;
-  llog->type = LEVELTYPE_CLASS;
-  llog->spec = whichclass;
-  llog->level = GET_LEVEL(ch);
 
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
   switch (ranks) {
@@ -758,13 +745,6 @@ void advance_level(struct char_data *ch, int whichclass)
       break;
     }
     break;
-  }
-
-  if (GET_CLASS_LEVEL(ch) == 1 && GET_HITDICE(ch) < 2) { /* Filled in below */
-      GET_HITDICE(ch) = 0;
-      GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
-      GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;
-      GET_SAVE_BASE(ch, SAVING_WILL) = 0;
   }
 
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
@@ -1069,15 +1049,8 @@ void advance_level(struct char_data *ch, int whichclass)
     add_prac *= 2;
     }
   }
-  llog->hp_roll = j;
 
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-  if (rand_number(1, 8) == 2) {
-  add_train = 1;
-   if (add_train) {
-    GET_TRAINS(ch) += add_train;
-   }
-  }
   if (rand_number(1, 4) == 4) {
   send_to_char(ch, "@D[@mPractice Session Bonus!@D]@n\r\n");
   add_prac += rand_number(4, 12);
@@ -1104,10 +1077,6 @@ void advance_level(struct char_data *ch, int whichclass)
    add_mana *= 1.25;
    add_move *= 1.25;
   }
-  llog->mana_roll = add_mana;
-  llog->move_roll = add_move;
-  llog->ki_roll = add_ki;
-  llog->add_skill = add_prac;
   GET_PRACTICES(ch, whichclass) += add_prac;
    gainBasePLTransformed(ch, add_hp, true);
    gainBaseKITransformed(ch, add_mana, true);
@@ -1118,17 +1087,6 @@ void advance_level(struct char_data *ch, int whichclass)
  add_hp = nhp;
  add_mana = nma;
  add_move = nmo;
-  if (GET_CLASS_LEVEL(ch) >= LVL_EPICSTART) { /* Epic character */
-    GET_EPIC_FEAT_POINTS(ch) += add_gen_feats;
-    llog->add_epic_feats = add_gen_feats;
-    GET_EPIC_CLASS_FEATS(ch, whichclass) += add_class_feats;
-    llog->add_class_epic_feats = add_class_feats;
-  } else {
-    GET_FEAT_POINTS(ch) += add_gen_feats;
-    llog->add_gen_feats = add_gen_feats;
-    GET_CLASS_FEATS(ch, whichclass) += add_class_feats;
-    llog->add_class_feats = add_class_feats;
-  }
 
   if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
     for (i = 0; i < 3; i++)

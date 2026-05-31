@@ -165,6 +165,10 @@ int copy_mobile_strings(struct char_data *t, struct char_data *f)
 {
   if (f->name)
     t->name = strdup(f->name);
+  if (f->voice)
+    t->voice = strdup(f->voice);
+  if (f->clan)
+    t->clan = strdup(f->clan);
   if (f->title)
     t->title = strdup(f->title);
   if (f->short_descr)
@@ -195,6 +199,10 @@ int free_mobile_strings(struct char_data *mob)
 {
   if (mob->name)
     free(mob->name);
+  if (mob->voice)
+    free(mob->voice);
+  if (mob->clan)
+    free(mob->clan);
   if (mob->title)
     free(mob->title);
   if (mob->short_descr)
@@ -209,7 +217,7 @@ int free_mobile_strings(struct char_data *mob)
 
 /* Free a mobile structure that has been edited. Take care of existing mobiles 
  * and their mob_proto!  */
-int free_mobile(struct char_data *mob)
+int mobile_free_editor(struct char_data *mob)
 {
   mob_rnum i;
 
@@ -226,6 +234,10 @@ int free_mobile(struct char_data *mob)
    } else {	/* Prototyped mobile. */
     if (mob->name && mob->name != proto->name)
       free(mob->name);
+    if (mob->voice && mob->voice != proto->voice)
+      free(mob->voice);
+    if (mob->clan && mob->clan != proto->clan)
+      free(mob->clan);
     if (mob->title && mob->title != proto->title)
       free(mob->title);
     if (mob->short_descr && mob->short_descr != proto->short_descr)
@@ -247,6 +259,11 @@ int free_mobile(struct char_data *mob)
 
   free(mob);
   return TRUE;
+}
+
+int free_mobile(struct char_data *mob)
+{
+  return mobile_free_editor(mob);
 }
 
 int save_mobiles(struct zone_data *zone)
@@ -320,8 +337,6 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 
   if (get_size(mob) != race_get_size(mob->race))
     fprintf(fd, "Size: %d\n", get_size(mob));
-  if (GET_ATTACK(mob) != 0)
-    fprintf(fd, "BareHandAttack: %d\n", GET_ATTACK(mob));
   if (GET_STR(mob) != 0)
     fprintf(fd, "Str: %d\n", GET_STR(mob));
   if (GET_DEX(mob) != 0)
@@ -341,10 +356,6 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
     for (aff = mob->affected; aff; aff = aff->next)
       if (aff->type)
         fprintf(fd, "Affect: %d %d %d %d %d %d\n", aff->type, aff->duration,
-                aff->modifier, aff->location, (int)aff->bitvector, aff->specific);
-    for (aff = mob->affectedv; aff; aff = aff->next)
-      if (aff->type)
-        fprintf(fd, "AffectV: %d %d %d %d %d %d\n", aff->type, aff->duration,
                 aff->modifier, aff->location, (int)aff->bitvector, aff->specific);
   }
   for (i = 0; i <= NUM_FEATS_DEFINED; i++)
@@ -407,9 +418,9 @@ int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
                 fbuf1, fbuf2, fbuf3, fbuf4,
                 abuf1, abuf2, abuf3, abuf4,
 		GET_ALIGNMENT(mob),
-		GET_HITDICE(mob), GET_FISHD(mob), 10 - (GET_ARMOR(mob) / 10),
-                GET_HIT(mob), (getCurKI(mob)), (getCurST(mob)), GET_NDD(mob), GET_SDD(mob),
-		GET_DAMAGE_MOD(mob)
+		GET_HITDICE(mob), 0, 10 - (GET_ARMOR(mob) / 10),
+                0, (getCurKI(mob)), (getCurST(mob)), 0, 0,
+		0
   );
   fprintf(fd, 	"%d 0 %d %d\n"
 		"%d %d %d\n",

@@ -664,45 +664,17 @@ void destroy_db(void)
 
   /* Objects */
   obj_proto_iterate ([&](auto obj) {
-    if (obj->name)
-      free(obj->name);
-    if (obj->description)
-      free(obj->description);
-    if (obj->short_description)
-      free(obj->short_description);
-    if (obj->action_description)
-      free(obj->action_description);
-    if (obj->ex_description)
-    free_extra_descriptions(obj->ex_description);
-
-    /* free script proto list */
-    free_proto_script(obj, OBJ_TRIGGER);
-    obj_proto_delete(obj->vnum);
-    free(obj);
+    obj_vnum v = obj->vnum;
+    obj_proto_delete(v);
+    obj_free_prototype(obj);
     return true;
   });
 
   /* Mobiles */
   mob_proto_iterate([&](auto mob) {
     mob_vnum v = char_proto_id_get(mob);
-    if (mob->name)
-      free(mob->name);
-    if (mob->title)
-      free(mob->title);
-    if (mob->short_descr)
-      free(mob->short_descr);
-    if (mob->long_descr)
-      free(mob->long_descr);
-    if (mob->description)
-      free(mob->description);
-
-    /* free script proto list */
-    free_proto_script(mob, MOB_TRIGGER);
-
-    while (mob->affected)
-      affect_remove(mob, mob->affected);
-    free(mob);
     mob_proto_delete(v);
+    char_free_prototype(mob);
     return true;
   });
 
@@ -1767,28 +1739,13 @@ static void check_start_rooms(void)
 
 static void mob_autobalance(struct char_data *ch)
 {
-    /* Try to add some baseline defaults based on level choice. */
-    //GET_HIT(ch) = 0;
-    //GET_MANA(ch) = 0;
-    //GET_MOVE(ch) = 0;
-    GET_EXP(ch) = 0;
-    GET_ARMOR(ch) = 0;
-    GET_NDD(ch) = 0;
-    GET_SDD(ch) = 0;
-    GET_DAMAGE_MOD(ch) = 0;
+
 }
 
 static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
 {
   int j, t[10];
   char line[READ_SIZE];
- 
-  ch->real_abils.str = 0;
-  ch->real_abils.intel = 0;
-  ch->real_abils.wis = 0;
-  ch->real_abils.dex = 0;
-  ch->real_abils.con = 0;
-  ch->real_abils.cha = 0;
  
   if (!get_line(mob_f, line)) {
     log("SYSERR: Format error in mob #%d, file ended after S flag!", nr);
@@ -1814,10 +1771,6 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
   ch->health = 1.0;
   ch->energy = 1.0;
   ch->stamina = 1.0;
-
-  ch->mob_specials.damnodice = t[6];
-  ch->mob_specials.damsizedice = t[7];
-  GET_DAMAGE_MOD(ch) = t[8];
  
   if (!get_line(mob_f, line)) {
     log("SYSERR: Format error in mob #%d, second line after S flag\n"
@@ -1831,8 +1784,6 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
     return 0;
   }
  
-  GET_GOLD(ch) = t[0];
-  GET_EXP(ch) = 0;
   ch->race = t[2];
 
   ch->chclass = t[3];
@@ -1840,9 +1791,6 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
     log("SYSERR: Invalid class %d for mob #%d", ch->chclass, nr);
     ch->chclass = 28; /* set to commoner */
   }
-  GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
-  GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;
-  GET_SAVE_BASE(ch, SAVING_WILL) = 0;
 
   /* GET_CLASS_RANKS(ch, t[3]) = GET_LEVEL(ch); */
  
@@ -1870,9 +1818,6 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
  
   SPEAKING(ch) = MIN_LANGUAGES;
   set_height_and_weight_by_race(ch);
- 
-  for (j = 0; j < 3; j++)
-    GET_SAVE_MOD(ch, j) = 0;
  
   if (MOB_FLAGGED(ch, MOB_AUTOBALANCE)) {
     mob_autobalance(ch); 
@@ -1915,8 +1860,6 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
     num_arg = atoi(value);
 
   CASE("BareHandAttack") {
-    RANGE(0, 99);
-    ch->mob_specials.attack_type = num_arg;
   }
 
   CASE("Size") {
@@ -2004,17 +1947,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
   }
 
   CASE("AffectV") {
-    num = num2 = num3 = num4 = num5 = num6 = 0;
-    sscanf(value, "%d %d %d %d %d %d", &num, &num2, &num3, &num4, &num5, &num6);
-    if (num > 0) {
-      af.type = num;
-      af.duration = num2;
-      af.modifier = num3;
-      af.location = num4;
-      af.bitvector = num5;
-      af.specific = num6;
-      affectv_to_char(ch, &af);
-    }
+
   }
 
   CASE("Feat") {
@@ -2029,7 +1962,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
   CASE("SkillMod") {
     sscanf(value, "%d %d", &num, &num2);
-    SET_SKILL_BONUS(ch, num, num2);
+    //SET_SKILL_BONUS(ch, num, num2);
   }
 
   CASE("Class") {
@@ -2094,12 +2027,6 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
   char f7[128], f8[128], buf2[128];
   mob_vnum nr = ch->vnum;
  
-  /*
-   * Mobiles should NEVER use anything in the 'player_specials' structure.
-   * The only reason we have every mob in the game share this copy of the
-   * structure is to save newbie coders from themselves. -gg 2/25/98
-   */
-  ch->player_specials = &dummy_mob;
   sprintf(buf2, "mob vnum %d", nr);   /* sprintf: OK (for 'buf2 >= 19') */
 
   /***** String data *****/
@@ -2419,7 +2346,6 @@ static char *parse_object(FILE *obj_f, int nr)
   }
   GET_OBJ_WEIGHT(proto) = t[0];
   GET_OBJ_COST(proto) = t[1];
-  GET_OBJ_RENT(proto) = t[2];
   GET_OBJ_LEVEL(proto) = t[3];
   GET_OBJ_SIZE(proto) = SIZE_MEDIUM;
 
@@ -2506,12 +2432,7 @@ static char *parse_object(FILE *obj_f, int nr)
 	    "...offending line: '%s'", buf2, retval, line);
 	exit(1);
       }
-      if (!proto->sbinfo) {
-        CREATE(proto->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-        memset((char *) proto->sbinfo, 0, SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
-      }
-      proto->sbinfo[j].spellname = t[0];
-      proto->sbinfo[j].pages = t[1];
+
       j++;
       break;
     case 'T':  /* DG triggers */
@@ -2956,8 +2877,6 @@ struct char_data *create_char(void)
   clear_char(ch);
   ch->next = character_list;
   character_list = ch;
-  ch->next_affect = NULL;
-  ch->next_affectv = NULL;
   GET_ID(ch) = max_mob_id++;
   /* find_char helper */
   add_to_lookup_table(GET_ID(ch), (void *)ch);
@@ -2992,7 +2911,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   mob->next = character_list;
   character_list = mob;
   mob->next_affect = NULL;
-  mob->next_affectv = NULL;
+
 
   if (IS_HOSHIJIN(mob) && GET_SEX(mob) == SEX_MALE) {
    mob->hairl = 0;
@@ -3572,6 +3491,11 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   return (mob);
 }
 
+struct char_data *mob_spawn(mob_vnum nr)
+{
+  return read_mobile(nr, VIRTUAL);
+}
+
 
 struct obj_unique_hash_elem {
   time_t generation;
@@ -3796,13 +3720,6 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
   obj->generation = time(0);
   obj->unique_id = -1;
 
-  if (proto->sbinfo) {
-    CREATE(obj->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-    for (j = 0; j < SPELLBOOK_SIZE; j++) {
-      obj->sbinfo[j].spellname = proto->sbinfo[j].spellname;
-      obj->sbinfo[j].pages = proto->sbinfo[j].pages;
-    }
-  }
   copy_proto_script(proto, obj, OBJ_TRIGGER);
   assign_triggers(obj, OBJ_TRIGGER);
   if (GET_OBJ_VNUM(obj) == 65) {
@@ -3815,6 +3732,11 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
    FOOB(obj) = GET_OBJ_VAL(obj, 1);
   }
   return (obj);
+}
+
+struct obj_data *obj_spawn(obj_vnum nr)
+{
+  return read_object(nr, VIRTUAL);
 }
 
 
@@ -4550,31 +4472,24 @@ void free_followers(struct follow_type *k)
 }
 
 /* release memory allocated for a char struct */
-void free_char(struct char_data *ch)
+void char_free_instance(struct char_data *ch)
 {
   int i;
   struct alias_data *a;
-  struct levelup_data *data, *next_data;
-  struct level_learn_entry *learn, *next_learn;
 
-  if (ch->player_specials != NULL && ch->player_specials != &dummy_mob) {
-
-    while ((a = GET_ALIASES(ch)) != NULL) {
-      GET_ALIASES(ch) = (GET_ALIASES(ch))->next;
-      free_alias(a);
-    }
-    if (ch->player_specials->poofin)
-      free(ch->player_specials->poofin);
-    if (ch->player_specials->poofout)
-      free(ch->player_specials->poofout);
-    if (ch->player_specials->host)
-      free(ch->player_specials->host);
-    for (i = 0; i < NUM_COLOR; i++)
-      if (ch->player_specials->color_choices[i])
-        free(ch->player_specials->color_choices[i]);
-    if (IS_NPC(ch))
-      log("SYSERR: Mob %s (#%d) had player_specials allocated!", GET_NAME(ch), GET_MOB_VNUM(ch));
+  while ((a = GET_ALIASES(ch)) != NULL) {
+    GET_ALIASES(ch) = (GET_ALIASES(ch))->next;
+    free_alias(a);
   }
+  if (ch->poofin)
+    free(ch->poofin);
+  if (ch->poofout)
+    free(ch->poofout);
+  if (ch->host)
+    free(ch->host);
+  for (i = 0; i < NUM_COLOR; i++)
+    if (ch->color_choices[i])
+      free(ch->color_choices[i]);
 
   if(ch->name)
     free(ch->name);
@@ -4598,21 +4513,10 @@ void free_char(struct char_data *ch)
       if (GET_HISTORY(ch, i))
         free(GET_HISTORY(ch, i));
     
-    if (ch->player_specials)
-      free(ch->player_specials);
-    
     /* free script proto list */
     free_proto_script(ch, MOB_TRIGGER);
     
   } else {
-    /* otherwise, free strings only if the string is not pointing at proto */
-    /* free script proto list if it's not the prototype */
-    auto proto = mob_proto_by_id(GET_MOB_VNUM(ch));
-    if(proto) {
-      if(ch->proto_script && ch->proto_script != proto->proto_script) {
-        free_proto_script(ch, MOB_TRIGGER);
-      }
-    } else
     if (ch->proto_script)
       free_proto_script(ch, MOB_TRIGGER);
   }
@@ -4629,22 +4533,6 @@ void free_char(struct char_data *ch)
   if (ch->desc)
     ch->desc->character = NULL;
 
-  if (ch->level_info) {
-    for (data = ch->level_info; data; data = next_data) {
-      next_data = data->next;
-      for (learn = data->skills; learn; learn = next_learn) {
-        next_learn = learn->next;
-        free(learn);
-      }
-      for (learn = data->feats; learn; learn = next_learn) {
-        next_learn = learn->next;
-        free(learn);
-      }
-      free(data);
-    }
-  }
-  ch->level_info = NULL;
-
   /* find_char helper */
   /*
   * when free_char is called with a blank character struct, ID is set
@@ -4659,15 +4547,61 @@ void free_char(struct char_data *ch)
   free(ch);
 }
 
-/* release memory allocated for an obj struct */
-void free_obj(struct obj_data *obj)
+void char_free_prototype(struct char_data *ch)
 {
+  if (ch == NULL)
+    return;
+
+  if (ch->name)
+    free(ch->name);
+  if (ch->voice)
+    free(ch->voice);
+  if (ch->clan)
+    free(ch->clan);
+  if (ch->title)
+    free(ch->title);
+  if (ch->short_descr)
+    free(ch->short_descr);
+  if (ch->long_descr)
+    free(ch->long_descr);
+  if (ch->description)
+    free(ch->description);
+
+  if (ch->proto_script)
+    free_proto_script(ch, MOB_TRIGGER);
+
+  while (ch->affected)
+    affect_remove(ch, ch->affected);
+
+  if (SCRIPT(ch))
+    extract_script(ch, MOB_TRIGGER);
+
+  char_zig_free(ch);
+  free(ch);
+}
+
+void free_char(struct char_data *ch)
+{
+  char_free_instance(ch);
+}
+
+/* release memory allocated for an obj struct */
+void obj_free_instance(struct obj_data *obj)
+{
+  if (obj == NULL)
+    return;
+
   remove_unique_id(obj);
-  free_object_strings(obj);
   auto proto = obj_proto_by_id(GET_OBJ_VNUM(obj));
-  if(proto && obj->proto_script && obj->proto_script != proto->proto_script) {
+  if (proto)
+    free_object_strings_proto(obj);
+  else
+    free_object_strings(obj);
+  if (proto) {
+    if(obj->proto_script && obj->proto_script != proto->proto_script)
+      free_proto_script(obj, OBJ_TRIGGER);
+  } else if (obj->proto_script)
     free_proto_script(obj, OBJ_TRIGGER);
-  }
   
   /* Let's make sure that we free up this memory */
   if (obj->auctname) {
@@ -4682,10 +4616,31 @@ void free_obj(struct obj_data *obj)
   remove_from_lookup_table(GET_ID(obj));
   obj_unregister_id(GET_ID(obj));
 
-  if (obj->sbinfo)
-    free(obj->sbinfo);
+  free(obj);
+}
+
+void obj_free_prototype(struct obj_data *obj)
+{
+  if (obj == NULL)
+    return;
+
+  free_object_strings(obj);
+
+  if (obj->proto_script)
+    free_proto_script(obj, OBJ_TRIGGER);
+
+  if (SCRIPT(obj))
+    extract_script(obj, OBJ_TRIGGER);
+
+  if (obj->auctname)
+    free(obj->auctname);
 
   free(obj);
+}
+
+void free_obj(struct obj_data *obj)
+{
+  obj_free_instance(obj);
 }
 
 
@@ -4828,21 +4783,8 @@ void init_char(struct char_data *ch)
 {
   int i;
 
-  /* create a player_special structure */
-  if (ch->player_specials == NULL) {
-    CREATE(ch->player_specials, struct player_special_data, 1);
-    memset((void *) ch->player_specials, 0, sizeof(struct player_special_data));
-  }
-
   GET_ADMLEVEL(ch) = ADMLVL_NONE;
-  GET_CRANK(ch) = 0;
   GET_CLAN(ch) = strdup("None.");
-  GET_ABSORBS(ch) = 0;
-  ABSORBING(ch) = NULL;
-  ABSORBBY(ch) = NULL;
-  SITS(ch) = NULL;
-  BLOCKED(ch) = NULL;
-  BLOCKS(ch) = NULL;
 
   /* If this is our first player make him LVL_IMPL. */
   if (top_of_p_table == 0) {
@@ -4855,18 +4797,10 @@ void init_char(struct char_data *ch)
     ch->basest = 1000;
   }
 
-  set_title(ch, NULL);
-  ch->short_descr = NULL;
-  ch->long_descr = NULL;
-  ch->description = NULL;
-
   /*ch->time.birth = time(0) - birth_age(ch);*/
-  ch->time.logon = ch->time.created = time(0);
   ch->time.maxage = ch->time.birth + max_age(ch);
-  ch->time.played = 0;
 
   GET_HOME(ch) = 1;
-  GET_ARMOR(ch) = 0;
 
   set_height_and_weight_by_race(ch);
 
@@ -4875,26 +4809,11 @@ void init_char(struct char_data *ch)
   else
     log("SYSERR: init_char: Character '%s' not found in player table.", GET_NAME(ch));
 
-  for (i = 0; i < SKILL_TABLE_SIZE; i++) {
-    if (GET_ADMLEVEL(ch) < ADMLVL_IMPL)
-      SET_SKILL(ch, i, 0);
-    else
-      SET_SKILL(ch, i, 100);
-    SET_SKILL_BONUS(ch, i, 0);
-  }
-
-  for (i = 0; i < AF_ARRAY_MAX; i++)
-    AFF_FLAGS(ch)[i] = 0;
-
   for (i = 0; i < 3; i++)
-    GET_SAVE_MOD(ch, i) = 0;
-
-  for (i = 0; i < 3; i++)
-    GET_COND(ch, i) = (GET_ADMLEVEL(ch) == ADMLVL_IMPL ? -1 : 24);
+    GET_COND(ch, i) = (GET_ADMLEVEL(ch) == ADMLVL_IMPL ? -1 : 48);
 
   GET_LOADROOM(ch) = NOWHERE;
   SPEAKING(ch) = SKILL_LANG_COMMON;
-  GET_FEAT_POINTS(ch) = 1;
   // initialize plrobjs so it doesn't complain on startup.
   Crash_crashsave(ch);
 }
@@ -4912,10 +4831,6 @@ static int check_object(struct obj_data *obj)
   if (GET_OBJ_WEIGHT(obj) < 0 && (error = TRUE))
     log("SYSERR: Object #%d (%s) has negative weight (%" I64T ").",
 	GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_WEIGHT(obj));
-
-  if (GET_OBJ_RENT(obj) < 0 && (error = TRUE))
-    log("SYSERR: Object #%d (%s) has negative cost/day (%d).",
-	GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_RENT(obj));
 
   snprintf(objname, sizeof(objname), "Object #%d (%s)", GET_OBJ_VNUM(obj), obj->short_description);
 
@@ -5107,7 +5022,7 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
     obj->description ? obj->description : "undefined",
     buf1, GET_OBJ_TYPE(obj), GET_OBJ_WEAR(obj)[0], 
     GET_OBJ_WEAR(obj)[1], GET_OBJ_WEAR(obj)[2], GET_OBJ_WEAR(obj)[3], 
-    GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_RENT(obj)))
+    GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), 0))
     return 0;
 
   if (obj->generation)
@@ -5147,17 +5062,6 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
       }
     }
 
-  /* Do we have spells? */
-    if (obj->sbinfo) {        /*. Yep, save them too . */
-      for (i=0; i < SPELLBOOK_SIZE; i++) {
-        if (obj->sbinfo[i].spellname == 0) {
-          break;
-        }
-        if (!OBJ_SAVE_FPRINTF(fp, obj, "spellbook", "S\n" "%d %d\n", obj->sbinfo[i].spellname, obj->sbinfo[i].pages))
-          return 0;
-        continue;
-      }
-    }
     return 1;
 }
 
@@ -5589,107 +5493,4 @@ void load_config( void )
   }
   
   fclose(fl);
-}
-
-
-void read_level_data(struct char_data *ch, FILE *fl)
-{
-  char buf[READ_SIZE], *p;
-  int i = 1;
-  int t[16];
-  struct levelup_data *curr = NULL;
-  struct level_learn_entry *learn;
-
-  ch->level_info = NULL;
-  while (!feof(fl)) {
-    i++;
-    if (!get_line(fl, buf)) {
-      log("read_level_data: get_line() failed reading level data line %d for %s", i, GET_NAME(ch));
-      return;
-    }
-    for (p = buf; *p && *p != ' '; p++);
-    if (!strcmp(buf, "end")) {
-      return;
-    }
-    if (!*p) {
-      log("read_level_data: malformed line reading level data line %d for %s: %s", i, GET_NAME(ch), buf);
-      return;
-    }
-    *(p++) = 0;
-    if (!strcmp(buf, "level")) {
-      if (sscanf(p, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", t,t+1,t+2,t+3,
-                 t+4,t+5,t+6,t+7,t+8,t+9,t+10,t+11,t+12,t+13,t+14,t+15) != 16) {
-        log("read_level_data: missing fields on level_data line %d for %s", i, GET_NAME(ch));
-        curr = NULL;
-        continue;
-      }
-      CREATE(curr, struct levelup_data, 1);
-      curr->prev = NULL;
-      curr->next = ch->level_info;
-      if ((curr->next = ch->level_info)) {
-        curr->next->prev = curr;
-      }
-      ch->level_info = curr;
-      curr->type = t[0];
-      curr->spec = t[1];
-      curr->level = t[2];
-      curr->hp_roll = t[3];
-      curr->mana_roll = t[4];
-      curr->ki_roll = t[5];
-      curr->move_roll = t[6];
-      curr->fort = t[8];
-      curr->reflex = t[9];
-      curr->will = t[10];
-      curr->add_skill = t[11];
-      curr->add_gen_feats = t[12];
-      curr->add_epic_feats = t[13];
-      curr->add_class_feats = t[14];
-      curr->add_class_epic_feats = t[15];
-      curr->skills = curr->feats = NULL;
-      continue;
-    }
-    if (!curr) {
-      log("read_level_data: found continuation entry without current level for %s", GET_NAME(ch));
-      continue;
-    }
-    if (sscanf(p, "%d %d %d", t, t+1, t+2) != 3) {
-      log("read_level_data: missing fields on level_data %s line %d for %s", buf, i, GET_NAME(ch));
-      continue;
-    }
-    CREATE(learn, struct level_learn_entry, 1);
-    learn->location = t[0];
-    learn->specific = t[1];
-    learn->value = t[2];
-    if (!strcmp(buf, "skill")) {
-      learn->next = curr->skills;
-      curr->skills = learn;
-    } else if (!strcmp(buf, "feat")) {
-      learn->next = curr->feats;
-      curr->feats = learn;
-    }
-  }
-  log("read_level_data: EOF reached reading level_data for %s", GET_NAME(ch));
-  return;
-}
-
-void write_level_data(struct char_data *ch, FILE *fl)
-{
-  struct levelup_data *lev;
-  struct level_learn_entry *learn;
-
-  for (lev = ch->level_info; lev && lev->next; lev = lev->next);
-
-  while (lev) {
-    fprintf(fl, "level %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
-            lev->type, lev->spec, lev->level, lev->hp_roll, lev->mana_roll,
-            lev->ki_roll, lev->move_roll, lev->accuracy, lev->fort,
-            lev->reflex, lev->will, lev->add_skill, lev->add_gen_feats,
-            lev->add_epic_feats, lev->add_class_feats, lev->add_class_epic_feats);
-    for (learn = lev->skills; learn; learn = learn->next)
-      fprintf(fl, "skill %d %d %d", learn->location, learn->specific, learn->value);
-    for (learn = lev->feats; learn; learn = learn->next)
-      fprintf(fl, "feat %d %d %d", learn->location, learn->specific, learn->value);
-    lev = lev->prev;
-  }
-  fprintf(fl, "end\n");
 }

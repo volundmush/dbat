@@ -1530,8 +1530,6 @@ int know_skill(struct char_data *ch, int skill)
 
  if (GET_SKILL(ch, skill) > 0)
   know = 1;
- if (GET_STUPIDKISS(ch) == skill)
-  know = 2;
 
  if (know == 0) {
   send_to_char(ch, "You do not know how to perform %s.\r\n", spell_info[skill].name);

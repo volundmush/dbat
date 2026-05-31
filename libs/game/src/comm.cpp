@@ -152,7 +152,6 @@ void copyover_recover()
 		
     CREATE(d->character, struct char_data, 1);
     clear_char(d->character);
-    CREATE(d->character->player_specials, struct player_special_data, 1);
     d->character->desc = d;
 
     if ((player_i = load_char(name, d->character)) >= 0) {
@@ -668,10 +667,6 @@ void heartbeat(int heart_pulse)
 
   if (!(heart_pulse % (1 * PASSES_PER_SEC))) { /* EVERY second */ 
     copyover_check(); 
-  }
-
-  if (!(heart_pulse % PULSE_VIOLENCE)) {
-    affect_update_violence();
   }
 
   if (!(heart_pulse % (SECS_PER_MUD_HOUR * PASSES_PER_SEC))) {
@@ -1929,7 +1924,6 @@ void set_color(struct descriptor_data *d)
    if (d->character == NULL) {
       CREATE(d->character, struct char_data, 1);
       clear_char(d->character);
-      CREATE(d->character->player_specials, struct player_special_data, 1);
       d->character->desc = d;
     }
   SET_BIT_AR(PRF_FLAGS(d->character), PRF_COLOR);

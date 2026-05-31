@@ -355,7 +355,6 @@ void extract_pending_chars(void)
     }
 
     REMOVE_FROM_LIST(vict, affect_list, next_affect, temp);
-    REMOVE_FROM_LIST(vict, affectv_list, next_affectv, temp);
     extract_char_final(vict);
     extractions_pending--;
 
