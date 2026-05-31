@@ -31,19 +31,7 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
     break;
 
   case APPLY_CLASS:
-    /* ??? GET_CLASS(ch) += mod; */
-    break;
-
-  /*
-   * My personal thoughts on these two would be to set the person to the
-   * value of the apply.  That way you won't have to worry about people
-   * making +1 level things to be imp (you restrict anything that gives
-   * immortal level of course).  It also makes more sense to set someone
-   * to a class rather than adding to the class number. -gg
-   */
-
   case APPLY_LEVEL:
-    /* ??? GET_LEVEL(ch) += mod; */
     break;
 
   case APPLY_AGE:
@@ -72,8 +60,6 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
     break;
 
   case APPLY_GOLD:
-    break;
-
   case APPLY_EXP:
     break;
 
@@ -82,19 +68,9 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
     break;
 
   case APPLY_ACCURACY:
-    GET_POLE_BONUS(ch) += mod;
-    break;
-
   case APPLY_DAMAGE:
-    GET_DAMAGE_MOD(ch) += mod;
-    break;
-
   case APPLY_REGEN:
-    GET_REGEN(ch) += mod;
-    break;
-
   case APPLY_TRAIN:
-    GET_ASB(ch) += mod;
     break;
 
   case APPLY_LIFEMAX:
@@ -102,91 +78,30 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
     break;
   case APPLY_UNUSED3:
   case APPLY_UNUSED4:
-    /* Don't exist anymore */
-    break;
-
   case APPLY_RACE:
-    /* ??? GET_RACE(ch) += mod; */
-    break;
-
   case APPLY_TURN_LEVEL:
-    GET_TLEVEL(ch) += mod;
-    break;
-
   case APPLY_SPELL_LVL_0:
-    if(!IS_NPC(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_0) += mod;
-    break;
-
   case APPLY_SPELL_LVL_1:
-    if(!IS_NPC(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_1) += mod;
-    break;
-
   case APPLY_SPELL_LVL_2:
-    if(!IS_NPC(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_2) += mod;
-    break;
-
   case APPLY_SPELL_LVL_3:
-    if(!IS_NPC(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_3) += mod;
-    break;
-
   case APPLY_SPELL_LVL_4:
-    if(!IS_NPC(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_4) += mod;
-    break;
-
   case APPLY_SPELL_LVL_5:
-    if(!IS_NPC(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_5) += mod;
-    break;
-
   case APPLY_SPELL_LVL_6:
-    if(!IS_NPC(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_6) += mod;
-    break;
-
   case APPLY_SPELL_LVL_7:
-    if(!IS_NPC(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_7) += mod;
-    break;
-
   case APPLY_SPELL_LVL_8:
-    if(!IS_NPC(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_8) += mod;
-    break;
-
   case APPLY_SPELL_LVL_9:
-    if(!IS_NPC(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_9) += mod;
-    break;
-
   case APPLY_FORTITUDE:
-    GET_SAVE_MOD(ch, SAVING_FORTITUDE) += mod;
-    break;
-
   case APPLY_REFLEX:
-    GET_SAVE_MOD(ch, SAVING_REFLEX) += mod;
-    break;
-
   case APPLY_WILL:
-    GET_SAVE_MOD(ch, SAVING_WILL) += mod;
     break;
 
   case APPLY_SKILL:
-    SET_SKILL_BONUS(ch, spec, GET_SKILL_BONUS(ch, spec) + mod);
     break;
 
   case APPLY_FEAT:
-    HAS_FEAT(ch, spec) += mod;
     break;
 
   case APPLY_ALLSAVES:
-    GET_SAVE_MOD(ch, SAVING_FORTITUDE) += mod;
-    GET_SAVE_MOD(ch, SAVING_REFLEX) += mod;
-    GET_SAVE_MOD(ch, SAVING_WILL) += mod;
     break;
 
   case APPLY_ALL_STATS:
@@ -276,10 +191,6 @@ void affect_total(struct char_data *ch)
     affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, FALSE);
 
   ch->aff_abils = ch->real_abils;
-
-  GET_SAVE_MOD(ch, SAVING_FORTITUDE) = HAS_FEAT(ch, FEAT_GREAT_FORTITUDE) * 3;
-  GET_SAVE_MOD(ch, SAVING_REFLEX) = HAS_FEAT(ch, FEAT_LIGHTNING_REFLEXES) * 3;
-  GET_SAVE_MOD(ch, SAVING_WILL) = HAS_FEAT(ch, FEAT_IRON_WILL) * 3;
 
   for (i = 0; i < NUM_WEARS; i++) {
     if (GET_EQ(ch, i)) {
@@ -398,20 +309,6 @@ void affect_from_char(struct char_data *ch, int type)
 
 
 
-/* Call affect_remove with every spell of spelltype "skill" */
-void affectv_from_char(struct char_data *ch, int type)
-{
-  struct affected_type *hjp, *next;
-
-  for (hjp = ch->affectedv; hjp; hjp = next) {
-    next = hjp->next;
-    if (hjp->type == type)
-      affectv_remove(ch, hjp);
-  }
-}
-
-
-
 /*
  * Return TRUE if a char is affected by a spell (SPELL_XXX),
  * FALSE indicates not affected.
@@ -426,24 +323,6 @@ bool affected_by_spell(struct char_data *ch, int type)
 
   return (FALSE);
 }
-
-
-
-/*
- * Return TRUE if a char is affected by a spell (SPELL_XXX),
- * FALSE indicates not affected.
- */
-bool affectedv_by_spell(struct char_data *ch, int type)
-{
-  struct affected_type *hjp;
-
-  for (hjp = ch->affectedv; hjp; hjp = hjp->next)
-    if (hjp->type == type)
-      return (TRUE);
-
-  return (FALSE);
-}
-
 
 
 void affect_join(struct char_data *ch, struct affected_type *af,
@@ -473,72 +352,4 @@ void affect_join(struct char_data *ch, struct affected_type *af,
   }
   if (!found)
     affect_to_char(ch, af);
-}
-
-
-void affectv_to_char(struct char_data *ch, struct affected_type *af)
-{
-  struct affected_type *affected_alloc;
-
-  CREATE(affected_alloc, struct affected_type, 1);
-
-  if (!ch->affectedv) {
-    ch->next_affectv = affectv_list;
-    affectv_list = ch;
-  }
-  *affected_alloc = *af;
-  affected_alloc->next = ch->affectedv;
-  ch->affectedv = affected_alloc;
-
-  affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, TRUE);
-  affect_total(ch);
-}
-
-void affectv_remove(struct char_data *ch, struct affected_type *af)
-{
-  struct affected_type *cmtemp;
-
-  if (ch->affectedv == NULL) {
-    core_dump();
-    return;
-  }
-
-  affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, FALSE);
-  REMOVE_FROM_LIST(af, ch->affectedv, next, cmtemp);
-  free(af);
-  affect_total(ch);
-  if (!ch->affectedv) {
-    struct char_data *temp;
-    REMOVE_FROM_LIST(ch, affectv_list, next_affectv, temp);
-    ch->next_affectv = NULL;
-  }
-}
-
-void affectv_join(struct char_data *ch, struct affected_type *af,
-                      bool add_dur, bool avg_dur, bool add_mod, bool avg_mod)
-{
-  struct affected_type *hjp, *next;
-  bool found = FALSE;
-
-  for (hjp = ch->affectedv; !found && hjp; hjp = next) {
-    next = hjp->next;
-
-    if ((hjp->type == af->type) && (hjp->location == af->location)) {
-      if (add_dur)
-        af->duration += hjp->duration;
-      if (avg_dur)
-        af->duration /= 2;
-
-      if (add_mod)
-        af->modifier += hjp->modifier;
-      if (avg_mod)
-        af->modifier /= 2;
-
-      affectv_remove(ch, hjp);
-      affectv_to_char(ch, af);
-      found = TRUE;
-    }
-  }
-  if (!found)
-    affectv_to_char(ch, af);
 }

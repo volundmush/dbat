@@ -1530,8 +1530,6 @@ int know_skill(struct char_data *ch, int skill)
 
  if (GET_SKILL(ch, skill) > 0)
   know = 1;
- if (GET_STUPIDKISS(ch) == skill)
-  know = 2;
 
  if (know == 0) {
   send_to_char(ch, "You do not know how to perform %s.\r\n", spell_info[skill].name);
@@ -3943,27 +3941,6 @@ void add_follower(struct char_data *ch, struct char_data *leader)
 int count_metamagic_feats(struct char_data *ch)
 {
   int count = 0;                /* Number of Metamagic Feats Known */
-
-  if (HAS_FEAT(ch, FEAT_STILL_SPELL))
-    count++;
-
-  if (HAS_FEAT(ch, FEAT_SILENT_SPELL))
-    count++;
-
-  if (HAS_FEAT(ch, FEAT_QUICKEN_SPELL))
-    count++;
-
-  if (HAS_FEAT(ch, FEAT_MAXIMIZE_SPELL))
-    count++;
-
-  if (HAS_FEAT(ch, FEAT_HEIGHTEN_SPELL))
-    count++;
-
-  if (HAS_FEAT(ch, FEAT_EXTEND_SPELL))
-    count++;
-
-  if (HAS_FEAT(ch, FEAT_EMPOWER_SPELL))
-    count++;
 
   return count;
 }

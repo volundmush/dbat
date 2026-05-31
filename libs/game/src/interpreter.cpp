@@ -402,11 +402,11 @@ int enter_player_game (struct descriptor_data *d)
       character_list = d->character;
       char_to_room(d->character, load_room);
       load_result = Crash_load(d->character);
-      if (d->character->player_specials->host) {
-        free(d->character->player_specials->host);
-        d->character->player_specials->host = NULL;
+      if (d->character->host) {
+        free(d->character->host);
+        d->character->host = NULL;
       }
-      d->character->player_specials->host = strdup(d->host);
+      d->character->host = strdup(d->host);
       GET_ID(d->character) = GET_IDNUM(d->character);
       /* find_char helper */
       add_to_lookup_table(GET_ID(d->character), (void *)d->character);
@@ -514,7 +514,6 @@ int enter_player_game (struct descriptor_data *d)
      }
     }
     d->character->rp = d->rpp;
-	d->character->rbank = d->rbank;
     if(MOON_OK(d->character)) {
         oozaru_transform(d->character);
     } else {
@@ -1938,7 +1937,6 @@ void nanny(struct descriptor_data *d, char *arg)
   if (d->character == NULL) {
     CREATE(d->character, struct char_data, 1);
     clear_char(d->character);
-    CREATE(d->character->player_specials, struct player_special_data, 1);
     d->character->desc = d;
   }
 
@@ -1962,7 +1960,6 @@ void nanny(struct descriptor_data *d, char *arg)
     if (!d->character) {
       CREATE(d->character, struct char_data, 1);
       clear_char(d->character);
-      CREATE(d->character->player_specials, struct player_special_data, 1);
       d->character->desc = d;
       SET_BIT_AR(PRF_FLAGS(d->character), PRF_COLOR);
     }
@@ -2016,7 +2013,6 @@ void nanny(struct descriptor_data *d, char *arg)
 	  }
 	  CREATE(d->character, struct char_data, 1);
 	  clear_char(d->character);
-	  CREATE(d->character->player_specials, struct player_special_data, 1);
 	  d->character->desc = d;
 	  CREATE(d->character->name, char, strlen(tmp_name) + 1);
 	  strcpy(d->character->name, CAP(tmp_name));	/* strcpy: OK (size checked above) */
@@ -2748,17 +2744,17 @@ void nanny(struct descriptor_data *d, char *arg)
   case CON_RACIAL:
     switch (*arg) {
       case '1':
-      d->character->player_specials->racial_pref = 1;
+      d->character->racial_pref = 1;
       break;
       case '2':
-      d->character->player_specials->racial_pref = 2;
+      d->character->racial_pref = 2;
       break;
       case '3':
       if (IS_HALFBREED(d->character)) {
        write_to_output(d, "That is not an acceptable option.\r\n");
        return;
       } else {
-       d->character->player_specials->racial_pref = 3;
+       d->character->racial_pref = 3;
       }
       break;
       default:
@@ -4895,4 +4891,3 @@ void nanny(struct descriptor_data *d, char *arg)
     break;
   }
 }
-

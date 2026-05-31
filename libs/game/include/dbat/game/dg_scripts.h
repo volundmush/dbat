@@ -160,7 +160,7 @@ void parse_trigger(FILE *trig_f, int nr);
 trig_data *read_trigger(int nr);
 void trig_data_copy(trig_data *this_data, const trig_data *trg);
 void dg_read_trigger(FILE *fp, void *proto, int type);
-void dg_obj_trigger(char *line, struct obj_data *obj);
+void dg_obj_trigger(char *line, struct obj_proto_data *obj);
 void assign_triggers(void *i, int type);
 
 
@@ -187,6 +187,8 @@ void extract_script(void *thing, int type);
 void extract_script_mem(struct script_memory *sc);
 void free_proto_script(void *thing, int type);
 void copy_proto_script(void *source, void *dest, int type);
+void obj_proto_free_script(struct obj_proto_data *obj);
+void obj_proto_copy_script_to_obj(struct obj_proto_data *source, struct obj_data *dest);
 void delete_variables(const char *charname);
 void update_wait_events(struct room_data *to, struct room_data *from);
 

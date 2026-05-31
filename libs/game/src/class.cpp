@@ -226,7 +226,7 @@ void do_start(struct char_data *ch)
   GET_CLASS_LEVEL(ch) = 1;
   GET_HITDICE(ch) = 0;
   GET_LEVEL_ADJ(ch) = 0;
-  GET_CLASS_NONEPIC(ch, GET_CLASS(ch)) = 1;
+  ch->level = 1;
   GET_EXP(ch) = 1;
  
   if (IS_ANDROID(ch)) {
@@ -562,7 +562,7 @@ void do_start(struct char_data *ch)
   }
   restoreVitals(ch);
 
-  ch->player_specials->olc_zone = NOWHERE;
+  ch->olc_zone = NOWHERE;
   save_char(ch);
 }
 
@@ -702,7 +702,6 @@ static const int *free_start_feats[] = {
  /* Rillao: transloc, add new transes here */
 void advance_level(struct char_data *ch, int whichclass)
 {
-  struct levelup_data *llog;
   int64_t add_hp = 0, add_move = 0, add_mana = 0, add_ki = 0;
   int add_prac = 1, add_train, i, j = 0, ranks;
   int add_gen_feats = 0, add_class_feats = 0;
@@ -717,26 +716,11 @@ void advance_level(struct char_data *ch, int whichclass)
     log("Attempt to gain a second class without multiclass enabled for %s", GET_NAME(ch));
     whichclass = GET_CLASS(ch);
   }
-  ranks = GET_CLASS_RANKS(ch, whichclass);
-
-  CREATE(llog, struct levelup_data, 1);
-  llog->next = ch->level_info;
-  llog->prev = NULL;
-  if (llog->next)
-    llog->next->prev = llog;
-  ch->level_info = llog;
-
-  llog->skills = llog->feats = NULL;
-  llog->type = LEVELTYPE_CLASS;
-  llog->spec = whichclass;
-  llog->level = GET_LEVEL(ch);
+  ranks = ch->level;
 
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
   switch (ranks) {
   case 1:
-    for (i = 0; (j = free_start_feats[whichclass][i]); i++) {
-      HAS_FEAT(ch, j) = 1;
-    }
     break;
   case 2:
     switch (whichclass) {
@@ -758,13 +742,6 @@ void advance_level(struct char_data *ch, int whichclass)
       break;
     }
     break;
-  }
-
-  if (GET_CLASS_LEVEL(ch) == 1 && GET_HITDICE(ch) < 2) { /* Filled in below */
-      GET_HITDICE(ch) = 0;
-      GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
-      GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;
-      GET_SAVE_BASE(ch, SAVING_WILL) = 0;
   }
 
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
@@ -1069,15 +1046,8 @@ void advance_level(struct char_data *ch, int whichclass)
     add_prac *= 2;
     }
   }
-  llog->hp_roll = j;
 
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-  if (rand_number(1, 8) == 2) {
-  add_train = 1;
-   if (add_train) {
-    GET_TRAINS(ch) += add_train;
-   }
-  }
   if (rand_number(1, 4) == 4) {
   send_to_char(ch, "@D[@mPractice Session Bonus!@D]@n\r\n");
   add_prac += rand_number(4, 12);
@@ -1104,10 +1074,6 @@ void advance_level(struct char_data *ch, int whichclass)
    add_mana *= 1.25;
    add_move *= 1.25;
   }
-  llog->mana_roll = add_mana;
-  llog->move_roll = add_move;
-  llog->ki_roll = add_ki;
-  llog->add_skill = add_prac;
   GET_PRACTICES(ch, whichclass) += add_prac;
    gainBasePLTransformed(ch, add_hp, true);
    gainBaseKITransformed(ch, add_mana, true);
@@ -1118,17 +1084,6 @@ void advance_level(struct char_data *ch, int whichclass)
  add_hp = nhp;
  add_mana = nma;
  add_move = nmo;
-  if (GET_CLASS_LEVEL(ch) >= LVL_EPICSTART) { /* Epic character */
-    GET_EPIC_FEAT_POINTS(ch) += add_gen_feats;
-    llog->add_epic_feats = add_gen_feats;
-    GET_EPIC_CLASS_FEATS(ch, whichclass) += add_class_feats;
-    llog->add_class_epic_feats = add_class_feats;
-  } else {
-    GET_FEAT_POINTS(ch) += add_gen_feats;
-    llog->add_gen_feats = add_gen_feats;
-    GET_CLASS_FEATS(ch, whichclass) += add_class_feats;
-    llog->add_class_feats = add_class_feats;
-  }
 
   if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
     for (i = 0; i < 3; i++)
@@ -1392,40 +1347,6 @@ int invalid_class(struct char_data *ch, struct obj_data *obj)
 
   if (OBJ_FLAGGED(obj, ITEM_ANTI_ARCHMAGE) && IS_KURZAK(ch))
     return TRUE;
-
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_BLACKGUARD) && IS_BLACKGUARD(ch))
-    return TRUE;
-
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_DRAGON_DISCIPLE) && IS_DRAGON_DISCIPLE(ch))
-    return TRUE;
-
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_DUELIST) && IS_DUELIST(ch))
-    return TRUE;
-
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_DWARVEN_DEFENDER) && IS_DWARVEN_DEFENDER(ch))
-    return TRUE;
-
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_ELDRITCH_KNIGHT) && IS_ELDRITCH_KNIGHT(ch))
-    return TRUE;
-
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT) && IS_HIEROPHANT(ch))
-    return TRUE;
-
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_HORIZON_WALKER) && IS_HORIZON_WALKER(ch))
-    return TRUE;
-
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_LOREMASTER) && IS_LOREMASTER(ch))
-    return TRUE;
-
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_MYSTIC_THEURGE) && IS_MYSTIC_THEURGE(ch))
-    return TRUE;
-
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_SHADOWDANCER) && IS_SHADOWDANCER(ch))
-    return TRUE;
-
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_THAUMATURGIST) && IS_THAUMATURGIST(ch))
-    return TRUE;
-
 
   return FALSE;
 }
@@ -1785,71 +1706,6 @@ static int comp_rank(const void *a, const void *b)
   return cabbr_ranktable[second] - cabbr_ranktable[first];
 }
 
-/* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
-{
-  static char str[MAX_STRING_LENGTH];
-  char *ptr = str;
-  int i, rank, j;
-  int rankorder[NUM_CLASSES];
-  char *buf, *buf2, *buf3;
-
-  if (IS_NPC(ch)) {
-    snprintf(ptr, sizeof(str) - (ptr - str), "%s%d", CLASS_ABBR(ch), GET_LEVEL(ch) );
-    return str;
-  }
-
-  if (wantthe)
-    ptr += sprintf(str, "the ");
-
-  if (howlong) {
-    buf2 = buf = buf3 = "";
-    if (howlong == 2) {
-      buf3 = " ";
-      if (GET_CLASS_LEVEL(ch) >= LVL_EPICSTART)
-        ptr += sprintf(ptr, "Epic ");
-    }
-    for (i = 0; i < NUM_CLASSES; i++) {
-      cabbr_ranktable[i] = GET_CLASS_RANKS(ch, i);
-      rankorder[i] = i;
-    }
-    rankorder[0] = GET_CLASS(ch); /* we always want primary class first */
-    rankorder[GET_CLASS(ch)] = 0;
-    qsort((void *)rankorder, NUM_CLASSES, sizeof(int), comp_rank);
-    for(const auto& sen : dbat::sensei::sensei_map) {
-      ptr += snprintf(ptr, sizeof(str) - (ptr - str), "%s%s%s%s%s%d", buf, buf2, buf,
-                      (howlong == 2 ? sen.second->getName().c_str() : sen.second->getAbbr().c_str()), buf3,
-                      cabbr_ranktable[rank]);
-      buf2 = "/";
-      if (howlong == 2)
-        buf = " ";
-    }
-    return str;
-  } else {
-    rank = GET_CLASS_RANKS(ch, GET_CLASS(ch));
-    j = GET_CLASS(ch);
-    for (i = 0; i < NUM_CLASSES; i++)
-      if (GET_CLASS_RANKS(ch, i) > rank) {
-        j = i;
-        rank = GET_CLASS_RANKS(ch, j);
-      }
-    rank = GET_CLASS_RANKS(ch, GET_CLASS(ch));
-    snprintf(ptr, sizeof(str) - (ptr - str), "%s%d%s", SENSEI_NAME_LOWER(ch),
-             rank, GET_LEVEL(ch) == rank ? "" : "+");
-    return str;
-  }
-}
-
-int total_skill_levels(struct char_data *ch, int skill)
-{
-  int i = 0, j, total = 0;
-  for (i = 0; i < NUM_CLASSES; i++) {
-    j = 1 + GET_CLASS_RANKS(ch, i) - spell_info[skill].min_level[i];
-    if (j > 0)
-     total += j;
-  }
-  return total;
-}
 
 int load_levels()
 {

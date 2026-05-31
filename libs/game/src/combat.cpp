@@ -4113,16 +4113,12 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     do_stand(vict, 0, 0, 0);
   }
  int suppresso = FALSE;
-  if (is_sparring(ch) && is_sparring(vict) && (GET_SUPP(vict) + getCurHealth(vict)) - dmg <= 0) {
+  if (is_sparring(ch) && is_sparring(vict)) {
     if (!IS_NPC(vict)) {
      act("@c$N@w falls down unconscious, and you stop sparring with $M.@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@C$n@w stops sparring with you as you fall unconscious.@n", TRUE, ch, 0, vict, TO_VICT);
      act("@c$N@w falls down unconscious, and @C$n@w stops sparring with $M.@n", TRUE, ch, 0, vict, TO_NOTVICT);
      setCurHealth(vict, 1);
-     if (GET_SUPP(vict) > 0) {
-      GET_SUPP(vict) = 0;
-      GET_SUPPRESS(vict) = 0;
-     }
      if (FIGHTING(vict)) {
       stop_fighting(vict);
      }
@@ -4155,7 +4151,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
      return;
    }
   }
-  else if (is_sparring(ch) && (GET_SUPP(vict) + GET_HIT(vict)) - dmg <= 0) {
+  else if (is_sparring(ch)) {
    act("@c$N@w falls down unconscious, and you spare $S life.@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@C$n@w spares your life as you fall unconscious.@n", TRUE, ch, 0, vict, TO_VICT);
    act("@c$N@w falls down unconscious, and @C$n@w spares $S life.@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -4179,18 +4175,6 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    act("@w$n@w stops sparring!@n", TRUE, ch, 0, vict, TO_ROOM);
    REMOVE_BIT_AR(MOB_FLAGS(vict), MOB_SPAR);
   }
-  if (GET_SUPP(vict) > 0 && GET_SUPPRESS(vict) > 0) {
-    if (GET_SUPP(vict) > dmg) {
-     GET_SUPP(vict) -= dmg;
-     suppresso = TRUE;
-    }
-    else if (GET_SUPP(vict) <= dmg) {
-     send_to_char(vict, "@GYou no longer have any reserve powerlevel suppressed.@n\r\n");
-     dmg -= GET_SUPP(vict);
-     GET_SUPP(vict) = 0;
-     GET_SUPPRESS(vict) = 0;
-    }
-   }
 
 
   if (PLR_FLAGGED(vict, PLR_IMMORTAL) && !is_sparring(ch) && getCurHealth(vict) - dmg <= 0) {
@@ -4386,7 +4370,6 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    } else if (dmg > 1 && suppresso == TRUE && !PRF_FLAGGED(ch, PRF_NODEC)) {
     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg));
     send_to_char(vict, "@D[@rDamage@W: @R%s @c-Suppression-@D]@n\r\n", add_commas(dmg));
-    send_to_char(vict, "@D[Suppression@W: @G%s@D]@n\r\n", add_commas(GET_SUPP(vict)));
     //int64_t healhp = GET_HIT(vict) * 0.12;
     if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
      if (IS_ANDROID(vict)) {
@@ -4406,7 +4389,6 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    } else if (dmg <= 1 && suppresso == TRUE && !PRF_FLAGGED(ch, PRF_NODEC)) {
     send_to_char(ch, "@D[@GDamage@W: @BPitiful...@D]@n");
     send_to_char(vict, "@D[@rDamage@W: @BPitiful... @c-Suppression-@D]@n\r\n");
-    send_to_char(vict, "@D[Suppression@W: @G%s@D]@n\r\n", add_commas(GET_SUPP(vict)));
     if (GET_EQ(ch, WEAR_EYE) && vict) {
      if (IS_ANDROID(vict) && !PRF_FLAGGED(ch, PRF_NODEC)) {
       send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");

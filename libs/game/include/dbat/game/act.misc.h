@@ -38,7 +38,6 @@ ACMD(do_hydromancy);
 ACMD(do_channel);
 ACMD(do_shimmer);
 ACMD(do_metamorph);
-ACMD(do_amnisiac);
 ACMD(do_healglow);
 ACMD(do_resize);
 ACMD(do_scry);

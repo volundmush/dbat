@@ -185,7 +185,7 @@ pub export fn char_name_get(ch: *cdb.char_data) [*c]const u8 {
 }
 
 pub export fn char_name_set(ch: *cdb.char_data, value: ?[*:0]const u8) void {
-    replaceString(ch, &ch.name, protoString(ch, .name), value);
+    replaceString(&ch.name, value);
 }
 
 pub export fn char_description_get(ch: *cdb.char_data) [*c]const u8 {
@@ -193,7 +193,7 @@ pub export fn char_description_get(ch: *cdb.char_data) [*c]const u8 {
 }
 
 pub export fn char_description_set(ch: *cdb.char_data, value: ?[*:0]const u8) void {
-    replaceString(ch, &ch.description, protoString(ch, .description), value);
+    replaceString(&ch.description, value);
 }
 
 pub export fn char_short_description_get(ch: *cdb.char_data) [*c]const u8 {
@@ -201,7 +201,7 @@ pub export fn char_short_description_get(ch: *cdb.char_data) [*c]const u8 {
 }
 
 pub export fn char_short_description_set(ch: *cdb.char_data, value: ?[*:0]const u8) void {
-    replaceString(ch, &ch.short_descr, protoString(ch, .short_descr), value);
+    replaceString(&ch.short_descr, value);
 }
 
 pub export fn char_long_description_get(ch: *cdb.char_data) [*c]const u8 {
@@ -209,7 +209,7 @@ pub export fn char_long_description_get(ch: *cdb.char_data) [*c]const u8 {
 }
 
 pub export fn char_long_description_set(ch: *cdb.char_data, value: ?[*:0]const u8) void {
-    replaceString(ch, &ch.long_descr, protoString(ch, .long_descr), value);
+    replaceString(&ch.long_descr, value);
 }
 
 pub export fn char_title_get(ch: *cdb.char_data) [*c]const u8 {
@@ -217,7 +217,7 @@ pub export fn char_title_get(ch: *cdb.char_data) [*c]const u8 {
 }
 
 pub export fn char_title_set(ch: *cdb.char_data, value: ?[*:0]const u8) void {
-    replaceString(ch, &ch.title, protoString(ch, .title), value);
+    replaceString(&ch.title, value);
 }
 
 pub export fn char_class_get(ch: *cdb.char_data) c_int {
@@ -321,24 +321,9 @@ pub export fn char_equipment_get(ch: *cdb.char_data, pos: usize) [*c]cdb.obj_dat
     return ch.equipment[pos];
 }
 
-const StringField = enum { name, description, short_descr, long_descr, title };
-
-fn protoString(ch: *cdb.char_data, field: StringField) [*c]u8 {
-    const proto = cdb.mob_proto_by_id(ch.vnum);
-    if (proto == null) return null;
-    return switch (field) {
-        .name => proto.*.name,
-        .description => proto.*.description,
-        .short_descr => proto.*.short_descr,
-        .long_descr => proto.*.long_descr,
-        .title => proto.*.title,
-    };
-}
-
-fn replaceString(ch: *cdb.char_data, field: *[*c]u8, proto_value: [*c]u8, value: ?[*:0]const u8) void {
-    _ = ch;
+fn replaceString(field: *[*c]u8, value: ?[*:0]const u8) void {
     const new_value = if (value) |new_string| strdup(new_string) orelse return else null;
-    if (field.* != null and field.* != proto_value) std.c.free(field.*);
+    if (field.* != null) std.c.free(field.*);
     field.* = new_value;
 }
 
@@ -392,13 +377,6 @@ fn clampStat(value: i64, definition: lua_api.StatDefinition) i64 {
     if (definition.min_value) |min| result = @max(result, min);
     if (definition.max_value) |max| result = @min(result, max);
     return result;
-}
-
-pub export fn char_legacy_modifier(ch: *cdb.char_data, location: c_int, specific: c_int) i64 {
-    _ = ch;
-    _ = location;
-    _ = specific;
-    return 0;
 }
 
 pub export fn char_der_get_base(ch: *cdb.char_data, stat: ?[*:0]const u8) i64 {
@@ -625,12 +603,14 @@ pub export fn char_skill_base_mod(ch: *cdb.char_data, skill: ?[*:0]const u8, mod
 
 pub export fn char_skill_modifier_get(ch: *cdb.char_data, skill: ?[*:0]const u8) i64 {
     const index = skillIndex(skill) orelse return 0;
-    return ch.skills[index].mod;
+    const bonus = cdb.char_legacy_modifier(ch, cdb.APPLY_SKILL, @intCast(index));
+    return bonus;
 }
 
 pub export fn char_skill_total_get(ch: *cdb.char_data, skill: ?[*:0]const u8) i64 {
     const index = skillIndex(skill) orelse return 0;
-    return @as(i64, ch.skills[index].base) + ch.skills[index].mod;
+    const bonus = cdb.char_legacy_modifier(ch, cdb.APPLY_SKILL, @intCast(index));
+    return @as(i64, ch.skills[index].base + bonus);
 }
 
 pub export fn char_skill_perf_get(ch: *cdb.char_data, skill: ?[*:0]const u8) i64 {

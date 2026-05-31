@@ -743,6 +743,8 @@ ACMD(do_finddoor)
   char buf[MAX_STRING_LENGTH] = {0}; 
   struct char_data *tmp_char; 
   struct obj_data *obj; 
+  struct obj_proto_data *proto = NULL;
+  const char *key_short = NULL;
 
   one_argument(argument, arg); 
 
@@ -750,19 +752,26 @@ ACMD(do_finddoor)
     send_to_char(ch, "Format: finddoor <obj/vnum>\r\n"); 
   } else if (is_number(arg)) { 
     vnum = atoi(arg); 
-    obj = obj_proto_by_id(vnum); 
+    proto = obj_proto_by_id(vnum); 
+    if (!proto) {
+      send_to_char(ch, "What key do you want to find a door for?\r\n");
+      return;
+    }
+    key_short = GET_OBJ_SHORT(proto);
   } else { 
     generic_find(arg, 
          FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_WORLD | FIND_OBJ_EQUIP, 
          ch, &tmp_char, &obj); 
     if (!obj) 
       send_to_char(ch, "What key do you want to find a door for?\r\n"); 
-    else 
+    else {
       vnum = GET_OBJ_VNUM(obj); 
+      key_short = GET_OBJ_SHORT(obj);
+    }
   } 
   if (vnum != NOTHING) { 
       len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n", 
-                      vnum, GET_OBJ_SHORT(obj)); 
+                      vnum, key_short); 
       room_iterate ([&](auto room) {
         for (d = 0; d < NUM_OF_DIRS; d++) { 
           if (room->dir_option[d] && room->dir_option[d]->key && 
@@ -782,7 +791,7 @@ ACMD(do_finddoor)
         send_to_char(ch, "%s", buf); 
       else 
         send_to_char(ch, "No doors were found for key [%d] %s.\r\n", 
-                         vnum, GET_OBJ_SHORT(obj)); 
+                         vnum, key_short); 
   } 
 }
 
@@ -1495,8 +1504,8 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
   sprintbitarray(GET_OBJ_EXTRA(j), extra_bits, EF_ARRAY_MAX, buf, sizeof(buf));
   send_to_char(ch, "Extra flags   : %s\r\n", buf);
 
-  send_to_char(ch, "Weight: %" I64T ", Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n",
-     GET_OBJ_WEIGHT(j), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
+  send_to_char(ch, "Weight: %" I64T ", Value: %d, Timer: %d, Min Level: %d\r\n",
+     GET_OBJ_WEIGHT(j), GET_OBJ_COST(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
 
   send_to_char(ch, "In room: %d (%s), ", obj_room_vnum_get(j),
 	obj_room_get(j) == NULL ? "Nowhere" : obj_room_get(j)->name);
@@ -1666,11 +1675,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   send_to_char(ch, "Title: %s\r\n", k->title ? k->title : "<None>");
 
   send_to_char(ch, "L-Des: %s@n", k->long_descr ? k->long_descr : "<None>\r\n");
-  if (CONFIG_ALLOW_MULTICLASS) {
-    strncpy(buf, class_desc_str(k, 1, 0), sizeof(buf));
-  } else {
-    snprintf(buf, sizeof(buf), "%s", SENSEI_NAME(k));
-  }
+  snprintf(buf, sizeof(buf), "%s", SENSEI_NAME(k));
     snprintf(buf2, sizeof(buf2), "%s", TRUE_RACE(k));
   send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d(%dHD+%dcl+%d)@n], XP: [@y%" I64T "@n]\r\n",
                    buf, buf2, GET_LEVEL(k), GET_HITDICE(k),
@@ -1696,8 +1701,8 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
      send_to_char(ch, "@RCharacter Deaths@D: @r%d@n\r\n", GET_DCOUNT(k));
     }
 
-    send_to_char(ch, "Hometown: [%d], Align: [%4d], Ethic: [%4d]", GET_HOME(k),
-                 GET_ALIGNMENT(k), GET_ETHIC_ALIGNMENT(k));
+    send_to_char(ch, "Hometown: [%d], Align: [%4d]", GET_HOME(k),
+                 GET_ALIGNMENT(k));
 
     /*. Display OLC zone for immorts .*/
     if (GET_ADMLEVEL(k) >= ADMLVL_BUILDER) {
@@ -1731,9 +1736,8 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   send_to_char(ch, "Coins: [%9d], Bank: [%9d] (Total: %d)\r\n",
 	  GET_GOLD(k), GET_BANK_GOLD(k), GET_GOLD(k) + GET_BANK_GOLD(k));
 
-  send_to_char(ch, "Armor: [%d ], Damage: [%2d], Saving throws: [%d/%d/%d]\r\n",
-	  GET_ARMOR(k), GET_DAMAGE_MOD(k), GET_SAVE_MOD(k, 0),
-          GET_SAVE_MOD(k, 1), GET_SAVE_MOD(k, 2));
+  send_to_char(ch, "Armor: [%d ]\r\n",
+	  GET_ARMOR(k));
 
   sprinttype(GET_POS(k), position_types, buf, sizeof(buf));
   send_to_char(ch, "Pos: %s, Fighting: %s", buf, FIGHTING(k) ? GET_NAME(FIGHTING(k)) : "Nobody");
@@ -1759,10 +1763,8 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   }
 
   if (IS_MOB(k)) {
-    send_to_char(ch, "Mob Spec-Proc: %s, NPC Bare Hand Dam: %dd%d\r\n",
-	    (mob_proto_special_get(k->vnum) ? "Exists" : "None"),
-	    k->mob_specials.damnodice, k->mob_specials.damsizedice);
-    send_to_char(ch, "Average damage per round %.1f (%.1f [BHD] + %d [STR MOD] + %d [DMG MOD])\r\n", (((k->mob_specials.damsizedice) + 1) / 2.0) * (k->mob_specials.damnodice) + ability_mod_value(GET_STR(k)) + GET_DAMAGE_MOD(k), (((k->mob_specials.damsizedice) + 1) / 2.0) * (k->mob_specials.damnodice), ability_mod_value(GET_STR(k)), GET_DAMAGE_MOD(k));
+    send_to_char(ch, "Mob Spec-Proc: %s\r\n",
+	    (mob_proto_special_get(k->vnum) ? "Exists" : "None"));
   }
 
   int counts = 0, total = 0;
@@ -1822,25 +1824,6 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
 	  send_to_char(ch, ", ");
 
 	strcpy(buf, affected_bits[aff->bitvector]);
-        send_to_char(ch, "sets %s", buf);
-      }
-      send_to_char(ch, "\r\n");
-    }
-  }
-
-  /* Routine to show what spells a char is affectedv by */
-  if (k->affectedv) {
-    for (aff = k->affectedv; aff; aff = aff->next) {
-      send_to_char(ch, "SPL: (%3d rounds) @c%-21s@n ", aff->duration + 1, skill_name(aff->type));
-
-      if (aff->modifier)
-        send_to_char(ch, "%+d to %s", aff->modifier, apply_types[(int) aff->location]);
-
-      if (aff->bitvector) {
-        if (aff->modifier)
-          send_to_char(ch, ", ");
-
-        strcpy(buf, affected_bits[aff->bitvector]);
         send_to_char(ch, "sets %s", buf);
       }
       send_to_char(ch, "\r\n");
@@ -1966,7 +1949,6 @@ ACMD(do_stat)
     else {
       CREATE(victim, struct char_data, 1);
       clear_char(victim);
-      CREATE(victim->player_specials, struct player_special_data, 1);
       if (load_char(buf2, victim) >= 0) {
 	char_to_room(victim, 0);
 	if (GET_ADMLEVEL(victim) > GET_ADMLEVEL(ch))
@@ -2220,7 +2202,8 @@ ACMD(do_load)
   }
 
   if (is_abbrev(buf, "mob")) {
-    struct char_data *mob=NULL, *proto = NULL;
+    struct char_data *mob=NULL;
+    struct mob_proto_data *proto = NULL;
     mob_vnum v_num = atoi(buf2);
 
     if (!(proto = mob_proto_by_id(v_num))) {
@@ -2237,7 +2220,8 @@ ACMD(do_load)
     load_mtrigger(mob);
     }
   } else if (is_abbrev(buf, "obj")) {
-    struct obj_data *obj, *proto;
+    struct obj_data *obj;
+    struct obj_proto_data *proto;
 
     if (!(proto = obj_proto_by_id(atoi(buf2)))) {
       send_to_char(ch, "There is no object with that number.\r\n");
@@ -2279,7 +2263,8 @@ ACMD(do_vstat)
   }
 
   if (is_abbrev(buf, "mob")) {
-    struct char_data *mob = NULL, *proto = NULL;
+    struct char_data *mob = NULL;
+    struct mob_proto_data *proto = NULL;
     mob_vnum v_num = atoi(buf2);
 
     if (!(proto = mob_proto_by_id(v_num))) {
@@ -2291,7 +2276,8 @@ ACMD(do_vstat)
     do_stat_character(ch, mob);
     extract_char(mob);
   } else if (is_abbrev(buf, "obj")) {
-    struct obj_data *obj, *proto;
+    struct obj_data *obj;
+    struct obj_proto_data *proto;
 
     if (!(proto = obj_proto_by_id(atoi(buf2)))) {
       send_to_char(ch, "There is no object with that number.\r\n");
@@ -2966,7 +2952,6 @@ ACMD(do_last)
   }
   CREATE(vict, struct char_data, 1);
   clear_char(vict);
-  CREATE(vict->player_specials, struct player_special_data, 1);
   if (load_char(arg, vict) <  0) {
     send_to_char(ch, "There is no such player.\r\n");
     free_char(vict);
@@ -2980,8 +2965,8 @@ ACMD(do_last)
   send_to_char(ch, "[%5d] [%2d %s %s] %-12s : %-18s : %-20s\r\n",
     GET_IDNUM(vict), (int) GET_LEVEL(vict),
                RACE_ABBR(vict), CLASS_ABBR(vict),
-    GET_NAME(vict), vict->player_specials->host && *vict->player_specials->host
-    ? vict->player_specials->host : "(NOHOST)",
+    GET_NAME(vict), vict->host && *vict->host
+    ? vict->host : "(NOHOST)",
     ctime(&vict->time.logon));
   free_char(vict);
 }
@@ -3263,14 +3248,10 @@ ACMD(do_wizutil)
       act("A sudden fireball conjured from nowhere thaws $n!", FALSE, vict, 0, 0, TO_ROOM);
       break;
     case SCMD_UNAFFECT:
-      if (vict->affected || AFF_FLAGS(vict) || vict->affectedv) {
+      if (vict->affected || AFF_FLAGS(vict)) {
         while (vict->affected)
           affect_remove(vict, vict->affected);
-          for(taeller=0; taeller < AF_ARRAY_MAX; taeller++)
-          AFF_FLAGS(ch)[taeller] = 0;
-        while (vict->affectedv)
-          affectv_remove(vict, vict->affectedv);
-          for(taeller=0; taeller < AF_ARRAY_MAX; taeller++)
+        for(taeller=0; taeller < AF_ARRAY_MAX; taeller++)
           AFF_FLAGS(ch)[taeller] = 0;
 	send_to_char(vict, "There is a brief flash of light!\r\nYou feel slightly different.\r\n");
 	send_to_char(ch, "All spells removed.\r\n");
@@ -3464,7 +3445,6 @@ ACMD(do_show)
 
     CREATE(vict, struct char_data, 1);
     clear_char(vict);
-    CREATE(vict->player_specials, struct player_special_data, 1);
     if (load_char(value, vict) < 0)
     {
       send_to_char(ch, "There is no such player.\r\n");
@@ -3473,11 +3453,9 @@ ACMD(do_show)
     }
     send_to_char(ch, "Player: %-12s (%s) [%2d %s %s]\r\n", GET_NAME(vict),
                  genders[(int)GET_SEX(vict)], GET_LEVEL(vict), CLASS_ABBR(vict), RACE_ABBR(vict));
-    send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %" I64T "  Align: %-5d  Ethic: %-5d\r\n",
+    send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %" I64T "  Align: %-5d\r\n",
                  GET_GOLD(vict), GET_BANK_GOLD(vict), GET_EXP(vict),
-                 GET_ALIGNMENT(vict), GET_ETHIC_ALIGNMENT(vict));
-    if (CONFIG_ALLOW_MULTICLASS)
-      send_to_char(ch, "Class ranks: %s\r\n", class_desc_str(vict, 1, 0));
+                 GET_ALIGNMENT(vict));
 
     /* ctime() uses static buffer: do not combine. */
     send_to_char(ch, "Started: %-20.16s  ", ctime(&vict->time.created));
@@ -3680,7 +3658,7 @@ ACMD(do_show)
     if (!*value)
     {
       low = 1;
-      vict = (l == 15) ? affect_list : affectv_list;
+      vict = (l == 15) ? affect_list : affect_list;
     }
     else
     {
@@ -3710,7 +3688,7 @@ ACMD(do_show)
       if (l == 15)
         aff = vict->affected;
       else
-        aff = vict->affectedv;
+        aff = vict->affected;
       for (; aff; aff = aff->next)
       {
         j += snprintf(strp + j, k - j, "SPL: (%3d%s) @c%-21s@n ", aff->duration + 1,
@@ -3732,8 +3710,6 @@ ACMD(do_show)
       }
       if (l == 15)
         vict = vict->next_affect;
-      else
-        vict = vict->next_affectv;
     } while (low && vict);
     send_to_char(ch, "%s", strp);
     free(strp);
@@ -3926,33 +3902,33 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     send_to_char(ch, "Nosummon %s for %s.\r\n", ONOFF(!on), GET_NAME(vict));
     break;
   case 4:
-    vict->max_hit = value;
+    //vict->max_hit = value;
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxpl for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set maxpl for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 5:
-    vict->max_mana = value;
+    //vict->max_mana = value;
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxki for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set maxki for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 6:
-    vict->max_move = value;
+    //vict->max_move = value;
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxsta for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set maxsta for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 7:
-    vict->hit = value;
+    //vict->hit = value;
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set pl for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set pl for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 8:
-    vict->mana = value;
+    //vict->mana = value;
     affect_total(vict);
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set ki for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set ki for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 9:
-    vict->move = value;
+    //vict->move = value;
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set st for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set st for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
@@ -4068,7 +4044,6 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     log_imm_action("SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
     }
     else {
-      GET_RACE_PRACTICES(vict) = RANGE(0, 10000);
       mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
      log_imm_action("SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
     }
@@ -4126,7 +4101,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
       send_to_char(ch, "That is not a class.\r\n");
       return (0);
     }
-    value = GET_CLASS_RANKS(vict, GET_CLASS(vict));
+    value = ch->level;
     vict->chclass = chosen_sensei->getID();
     break;
   case 40:
@@ -4234,16 +4209,12 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     break;
 
   case 53:
-    GET_TRAINS(vict) = RANGE(0, 500);
     break;
 
   case 54:
-    GET_FEAT_POINTS(vict) = RANGE(0, 500);
     break;
 
   case 55:
-    GET_ETHIC_ALIGNMENT(vict) = RANGE(-1000, 1000);
-    affect_total(vict);
     break;
 
   case 56:
@@ -4459,7 +4430,6 @@ ACMD(do_set)
     /* try to load the player off disk */
     CREATE(cbuf, struct char_data, 1);
     clear_char(cbuf);
-    CREATE(cbuf->player_specials, struct player_special_data, 1);
     if ((player_i = load_char(name, cbuf)) > -1) {
       if (GET_ADMLEVEL(cbuf) >= GET_ADMLEVEL(ch)) {
 	free_char(cbuf);
@@ -4915,7 +4885,7 @@ ACMD (do_zcheck)
   /*check mobs first*/
   mob_proto_iterate ([&](auto mob)
     {
-      if (virtual_zone_by_thing(char_proto_id_get(mob)) == zone->number) {  /*is mob in this zone?*/
+      if (virtual_zone_by_thing(mob->vnum) == zone->number) {  /*is mob in this zone?*/
         if (!strcmp(mob->name, "mob unfinished") && (found=1))
           len += snprintf(buf + len, sizeof(buf) - len,
                           "- Alias hasn't been set.\r\n");
@@ -4941,25 +4911,6 @@ ACMD (do_zcheck)
           len += snprintf(buf + len, sizeof(buf) - len,
                           "- Is level %d (limit: 1-%d)\r\n",
                           GET_LEVEL(mob), MAX_LEVEL_ALLOWED);
-
-        if (GET_DAMAGE_MOD(mob)>MAX_DAMAGE_MOD_ALLOWED && (found=1))
-          len += snprintf(buf + len, sizeof(buf) - len,
-                          "- Damage mod of %d is too high (limit: %d)\r\n",
-                          GET_DAMAGE_MOD(mob), MAX_DAMAGE_MOD_ALLOWED);
-
-        /* avg. dam including damroll per round of combat */
-        avg_dam = (((mob->mob_specials.damsizedice / 2.0) * mob->mob_specials.damnodice)+GET_DAMAGE_MOD(mob));
-        if (avg_dam>MAX_MOB_DAM_ALLOWED && (found=1))
-          len += snprintf(buf + len, sizeof(buf) - len,
-                          "- average damage of %4.1f is too high (limit: %d)\r\n",
-                          avg_dam, MAX_MOB_DAM_ALLOWED);
-
-        if (mob->mob_specials.damsizedice == 1 &&
-            mob->mob_specials.damnodice == 1 &&
-            GET_LEVEL(mob) == 0 &&
-            (found=1))
-          len += snprintf(buf + len, sizeof(buf) - len,
-                          "- Needs to be fixed - %sAutogenerate!%s\r\n", CCYEL(ch, C_NRM), CCNRM(ch, C_NRM));
        
         if (MOB_FLAGGED(mob, MOB_AGGRESSIVE) &&
             MOB_FLAGGED(mob, MOB_AGGR_GOOD | MOB_AGGR_EVIL | MOB_AGGR_NEUTRAL) && (found=1))
@@ -5043,11 +4994,10 @@ ACMD (do_zcheck)
       }  /*switch on Item_Type*/
 
       if (!CAN_WEAR(obj, ITEM_WEAR_TAKE)) {
-        if ((GET_OBJ_COST(obj) || (GET_OBJ_WEIGHT(obj) && GET_OBJ_TYPE(obj) != ITEM_FOUNTAIN) ||
-           GET_OBJ_RENT(obj)) && (found = 1))
+        if ((GET_OBJ_COST(obj) || (GET_OBJ_WEIGHT(obj) && GET_OBJ_TYPE(obj) != ITEM_FOUNTAIN)) && (found = 1))
           len += snprintf(buf + len, sizeof(buf) - len,
-                          "- is NO_TAKE, but has cost (%d) weight (%" I64T ") or rent (%d) set.\r\n",
-                          GET_OBJ_COST(obj), GET_OBJ_WEIGHT(obj), GET_OBJ_RENT(obj));
+                          "- is NO_TAKE, but has cost (%d) weight (%" I64T ") set.\r\n",
+                          GET_OBJ_COST(obj), GET_OBJ_WEIGHT(obj));
       } else {
         if (GET_OBJ_COST(obj) == 0 && (found=1))
           len += snprintf(buf + len, sizeof(buf) - len,
@@ -5223,7 +5173,7 @@ static void mob_checkload(struct char_data *ch, mob_vnum mvnum)
 {
   int cmd_no, count = 0;
   zone_rnum zone;
-  struct char_data *mob = mob_proto_by_id(mvnum);
+  struct mob_proto_data *mob = mob_proto_by_id(mvnum);
  
   if (!mob) {
       send_to_char(ch, "That mob does not exist.\r\n");
@@ -5257,7 +5207,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum)
 {
   int cmd_no, count = 0;
   zone_rnum zone;
-  struct obj_data *proto = obj_proto_by_id(ovnum);
+  struct obj_proto_data *proto = obj_proto_by_id(ovnum);
   room_vnum lastroom_v = 0;
   room_rnum lastroom_r = 0;
   mob_vnum lastmob_v = 0;

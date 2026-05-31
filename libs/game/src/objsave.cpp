@@ -590,7 +590,7 @@ void Crash_listrent(struct char_data *ch, char *name)
           if (len + 255 < sizeof(buf))
           {
             len += snprintf(buf + len, sizeof(buf) - len, "[%5d] (%5dau) %-20s\r\n",
-                            nr, GET_OBJ_RENT(obj), obj->short_description);
+                            nr, 0, obj->short_description);
           }
           else
           {
@@ -711,13 +711,13 @@ static int Crash_is_unrentable(struct obj_data *obj)
   if (!obj)
     return (0);
 #if CIRCLE_UNSIGNED_INDEX
-  if (OBJ_FLAGGED(obj, ITEM_NORENT) || GET_OBJ_RENT(obj) < 0 ||
+  if (OBJ_FLAGGED(obj, ITEM_NORENT) ||
       (GET_OBJ_RNUM(obj) == NOTHING &&
        !IS_SET_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE)))
   {
     return (1);
 #else
-  if (OBJ_FLAGGED(obj, ITEM_NORENT) || GET_OBJ_RENT(obj) < 0 ||
+  if (OBJ_FLAGGED(obj, ITEM_NORENT) ||
       (GET_OBJ_RNUM(obj) <= NOTHING &&
        !IS_SET_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE)))
   {
@@ -740,23 +740,12 @@ static void Crash_extract_norents(struct obj_data *obj)
 
 static void Crash_extract_expensive(struct obj_data *obj)
 {
-  struct obj_data *tobj, *max;
 
-  max = obj;
-  for (tobj = obj; tobj; tobj = tobj->next_content)
-    if (GET_OBJ_RENT(tobj) > GET_OBJ_RENT(max))
-      max = tobj;
-  extract_obj(max);
 }
 
 static void Crash_calculate_rent(struct obj_data *obj, int *cost)
 {
-  if (obj)
-  {
-    *cost += MAX(0, GET_OBJ_RENT(obj));
-    Crash_calculate_rent(obj->contains, cost);
-    Crash_calculate_rent(obj->next_content, cost);
-  }
+
 }
 
 void Crash_crashsave(struct char_data *ch)
@@ -919,12 +908,12 @@ static void Crash_report_rent(struct char_data *ch, struct char_data *recep,
     if (!Crash_is_unrentable(obj))
     {
       (*nitems)++;
-      *cost += MAX(0, (GET_OBJ_RENT(obj) * factor));
+      *cost += MAX(0, (0 * factor));
       if (display)
       {
         char buf[256];
 
-        snprintf(buf, sizeof(buf), "$n tells you, '%5d zenni for %s..'", GET_OBJ_RENT(obj) * factor, OBJS(obj, ch));
+        snprintf(buf, sizeof(buf), "$n tells you, '%5d zenni for %s..'", 0 * factor, OBJS(obj, ch));
         act(buf, FALSE, recep, 0, ch, TO_VICT);
       }
     }

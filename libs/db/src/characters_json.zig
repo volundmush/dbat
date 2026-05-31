@@ -51,6 +51,7 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
     try jsonx.putInt(&object, allocator, "race", cdb.char_race_get(ch));
     try jsonx.putInt(&object, allocator, "size", cdb.char_size_get(ch));
     try jsonx.putInt(&object, allocator, "sex", cdb.char_sex_get(ch));
+    try jsonx.putInt(&object, allocator, "level", ch.level);
     try jsonx.putInt(&object, allocator, "admin_level", cdb.char_admlevel_get(ch));
     try jsonx.putNonEmpty(&object, allocator, "admin_flags", try jsonx.serializeFlags(allocator, ch, 128, admFlagged));
     try jsonx.putInt(&object, allocator, "height", ch.height);
@@ -107,51 +108,38 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
 
     if (mode == .player) {
         try jsonx.putInt(&object, allocator, "idnum", ch.idnum);
-        if (ch.player_specials != null and ch.player_specials != &cdb.dummy_mob) {
-            const ps: *cdb.player_special_data = ch.player_specials;
-            try jsonx.putString(&object, allocator, "host", ps.*.host);
-            try jsonx.putInt(&object, allocator, "load_room", ps.*.load_room);
-            try jsonx.putInt(&object, allocator, "wimp_level", ps.*.wimp_level);
-            try jsonx.putInt(&object, allocator, "freeze_level", ps.*.freeze_level);
-            try jsonx.putInt(&object, allocator, "invis_level", ps.*.invis_level);
-            try jsonx.putInt(&object, allocator, "bad_passwords", ps.*.bad_pws);
-            try jsonx.putInt(&object, allocator, "olc_zone", ps.*.olc_zone);
-            try jsonx.putString(&object, allocator, "poofin", ps.*.poofin);
-            try jsonx.putString(&object, allocator, "poofout", ps.*.poofout);
-            try jsonx.putInt(&object, allocator, "murder", ps.*.murder);
-            try jsonx.putInt(&object, allocator, "gauntlet", ps.*.gauntlet);
-            try jsonx.putInt(&object, allocator, "race_practices", ps.*.skill_points);
-            try jsonx.putInt(&object, allocator, "ability_trains", ps.*.ability_trains);
-            try jsonx.putInt(&object, allocator, "racial_pref", ps.*.racial_pref);
-            try jsonx.putInt(&object, allocator, "speaking", ps.*.speaking);
-            try jsonx.putInt(&object, allocator, "page_length", ps.*.page_length);
-            try jsonx.putNonEmpty(&object, allocator, "pref_flags", try jsonx.serializeFlags(allocator, ps, 128, prefFlagged));
-            try jsonx.put(&object, allocator, "conditions", try serializeIntArray(allocator, ps.*.conditions[0..]));
-            try jsonx.put(&object, allocator, "class_practices", try serializeIntArray(allocator, ps.*.class_skill_points[0..]));
-            try jsonx.put(&object, allocator, "color_choices", try serializeStringArray(allocator, ps.*.color_choices[0..]));
-            if (validClassIndex(ch.chclass)) {
-                const class_index: usize = @intCast(ch.chclass);
-                try putStat(&stats, allocator, "practices", ps.class_skill_points[class_index], true);
-            }
-            try putStat(&stats, allocator, "train_strength", ps.*.trainstr, true);
-            try putStat(&stats, allocator, "train_intelligence", ps.*.trainint, true);
-            try putStat(&stats, allocator, "train_constitution", ps.*.traincon, true);
-            try putStat(&stats, allocator, "train_wisdom", ps.*.trainwis, true);
-            try putStat(&stats, allocator, "train_agility", ps.*.trainagl, true);
-            try putStat(&stats, allocator, "train_speed", ps.*.trainspd, true);
+        try jsonx.putString(&object, allocator, "host", ch.host);
+        try jsonx.putInt(&object, allocator, "load_room", ch.load_room);
+        try jsonx.putInt(&object, allocator, "wimp_level", ch.wimp_level);
+        try jsonx.putInt(&object, allocator, "freeze_level", ch.freeze_level);
+        try jsonx.putInt(&object, allocator, "invis_level", ch.invis_level);
+        try jsonx.putInt(&object, allocator, "bad_passwords", ch.bad_pws);
+        try jsonx.putInt(&object, allocator, "olc_zone", ch.olc_zone);
+        try jsonx.putString(&object, allocator, "poofin", ch.poofin);
+        try jsonx.putString(&object, allocator, "poofout", ch.poofout);
+        try jsonx.putInt(&object, allocator, "murder", ch.murder);
+        try jsonx.putInt(&object, allocator, "racial_pref", ch.racial_pref);
+        try jsonx.putInt(&object, allocator, "speaking", ch.speaking);
+        try jsonx.putNonEmpty(&object, allocator, "pref_flags", try jsonx.serializeFlags(allocator, ch, 128, prefFlagged));
+        try jsonx.put(&object, allocator, "conditions", try serializeIntArray(allocator, ch.conditions[0..]));
+        try jsonx.put(&object, allocator, "class_practices", try serializeIntArray(allocator, ch.class_skill_points[0..]));
+        try jsonx.put(&object, allocator, "color_choices", try serializeStringArray(allocator, ch.color_choices[0..]));
+        if (validClassIndex(ch.chclass)) {
+            const class_index: usize = @intCast(ch.chclass);
+            try putStat(&stats, allocator, "practices", ch.class_skill_points[class_index], true);
         }
+        try putStat(&stats, allocator, "train_strength", ch.trainstr, true);
+        try putStat(&stats, allocator, "train_intelligence", ch.trainint, true);
+        try putStat(&stats, allocator, "train_constitution", ch.traincon, true);
+        try putStat(&stats, allocator, "train_wisdom", ch.trainwis, true);
+        try putStat(&stats, allocator, "train_agility", ch.trainagl, true);
+        try putStat(&stats, allocator, "train_speed", ch.trainspd, true);
         try jsonx.putString(&object, allocator, "user", ch.loguser);
         try jsonx.putString(&object, allocator, "clan", ch.clan);
         try jsonx.putString(&object, allocator, "feature", ch.feature);
         try jsonx.putString(&object, allocator, "rdisplay", ch.rdisplay);
         try jsonx.putString(&object, allocator, "voice", ch.voice);
         try jsonx.put(&object, allocator, "time", try serializeTime(allocator, ch));
-        try jsonx.put(&object, allocator, "levels", try serializeLevels(allocator, ch));
-        try jsonx.put(&object, allocator, "class_ranks", try serializeIntArray(allocator, ch.chclasses[0..]));
-        try jsonx.put(&object, allocator, "epic_class_ranks", try serializeIntArray(allocator, ch.epicclasses[0..]));
-        try jsonx.put(&object, allocator, "save_base", try serializeIntArray(allocator, ch.saving_throw[0..]));
-        try jsonx.put(&object, allocator, "save_mod", try serializeIntArray(allocator, ch.apply_saving_throw[0..]));
-        try jsonx.putInt(&object, allocator, "ethical_alignment", ch.alignment_ethic);
         try jsonx.putInt(&object, allocator, "forgeting", ch.forgeting);
         try jsonx.putInt(&object, allocator, "forgetcount", ch.forgetcount);
         try jsonx.putInt(&object, allocator, "lastint", ch.lastint);
@@ -173,21 +161,12 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
         try jsonx.putInt(&object, allocator, "relax_count", ch.relax_count);
         try jsonx.putInt(&object, allocator, "rp", ch.rp);
         try jsonx.putInt(&object, allocator, "total_rp", ch.trp);
-        try jsonx.putInt(&object, allocator, "rp_bank", ch.rbank);
-        try jsonx.putInt(&object, allocator, "suppressed", ch.suppressed);
         try jsonx.putInt(&object, allocator, "clank_rank", ch.crank);
-        try jsonx.putInt(&object, allocator, "ship", ch.ship);
-        try jsonx.putInt(&object, allocator, "ship_room", ch.shipr);
         try jsonx.putInt(&object, allocator, "last_play", ch.lastpl);
         try jsonx.putInt(&object, allocator, "boosts", ch.boosts);
-        try jsonx.putInt(&object, allocator, "powerattack", ch.powerattack);
-        try jsonx.putInt(&object, allocator, "group_kills", ch.combatexpertise);
         try putStat(&stats, allocator, "life_percent", ch.lifeperc, true);
         try jsonx.putInt(&object, allocator, "life_percent", ch.lifeperc);
-        try jsonx.putInt(&object, allocator, "stupid_kiss", ch.stupidkiss);
         try jsonx.putInt(&object, allocator, "damage_mod", ch.damage_mod);
-        try jsonx.putInt(&object, allocator, "pole_bonus", ch.accuracy);
-        try jsonx.putInt(&object, allocator, "fish_damage", ch.accuracy_mod);
         try jsonx.putInt(&object, allocator, "absorbs", ch.absorbs);
         try jsonx.putInt(&object, allocator, "ingest_learned", ch.ingestLearned);
         try jsonx.putInt(&object, allocator, "bless_level", ch.blesslvl);
@@ -196,7 +175,6 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
         try jsonx.putInt(&object, allocator, "radar3", ch.radar3);
         try jsonx.putNonEmpty(&object, allocator, "player_flags", try jsonx.serializeFlags(allocator, ch, cdb.NUM_PLR_FLAGS, actFlagged));
         try jsonx.putNonEmpty(&object, allocator, "affects", try serializeAffects(allocator, ch.affected));
-        try jsonx.putNonEmpty(&object, allocator, "combat_affects", try serializeAffects(allocator, ch.affectedv));
         try putStat(&stats, allocator, "upgrades", ch.upgrade, true);
         try putStat(&stats, allocator, "molt_experience", ch.moltexp, true);
         try putStat(&stats, allocator, "molt_level", ch.moltlevel, true);
@@ -216,6 +194,83 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
     return object;
 }
 
+pub fn serializeMobPrototype(allocator: std.mem.Allocator, proto: *cdb.mob_proto_data) !JsonValue {
+    var ch: cdb.char_data = std.mem.zeroes(cdb.char_data);
+    mobProtoToCharacter(&ch, proto);
+    return serializeCharacter(allocator, &ch, .npc_prototype);
+}
+
+pub fn deserializeMobPrototype(proto: *cdb.mob_proto_data, options: DeserializeOptions, value: JsonValue) !void {
+    var ch: cdb.char_data = std.mem.zeroes(cdb.char_data);
+    ch.vnum = proto.vnum;
+    try deserializeCharacter(&ch, .{ .c_allocator = options.c_allocator, .mode = .npc_prototype }, value);
+    characterToMobProto(proto, &ch);
+}
+
+fn mobProtoToCharacter(ch: *cdb.char_data, proto: *const cdb.mob_proto_data) void {
+    ch.vnum = proto.vnum;
+    ch.name = proto.name;
+    ch.short_descr = proto.short_descr;
+    ch.long_descr = proto.long_descr;
+    ch.description = proto.description;
+    ch.title = proto.title;
+    ch.size = proto.size;
+    ch.sex = proto.sex;
+    ch.race = proto.race;
+    ch.chclass = proto.chclass;
+    ch.alignment = proto.alignment;
+    ch.weight = proto.weight;
+    ch.height = proto.height;
+    ch.level = proto.level;
+    ch.race_level = proto.race_level;
+    ch.level_adj = proto.level_adj;
+    ch.gold = proto.gold;
+    ch.exp = proto.exp;
+    ch.basepl = proto.basepl;
+    ch.baseki = proto.baseki;
+    ch.basest = proto.basest;
+    ch.armor = proto.armor;
+    ch.real_abils = proto.real_abils;
+    ch.mob_specials = proto.mob_specials;
+    ch.position = proto.position;
+    ch.speaking = proto.speaking;
+    ch.act = proto.act;
+    ch.affected_by = proto.affected_by;
+    ch.proto_script = proto.proto_script;
+}
+
+fn characterToMobProto(proto: *cdb.mob_proto_data, ch: *const cdb.char_data) void {
+    proto.vnum = ch.vnum;
+    proto.name = ch.name;
+    proto.short_descr = ch.short_descr;
+    proto.long_descr = ch.long_descr;
+    proto.description = ch.description;
+    proto.title = ch.title;
+    proto.size = ch.size;
+    proto.sex = ch.sex;
+    proto.race = ch.race;
+    proto.chclass = ch.chclass;
+    proto.alignment = ch.alignment;
+    proto.weight = ch.weight;
+    proto.height = ch.height;
+    proto.level = ch.level;
+    proto.race_level = ch.race_level;
+    proto.level_adj = ch.level_adj;
+    proto.gold = ch.gold;
+    proto.exp = ch.exp;
+    proto.basepl = ch.basepl;
+    proto.baseki = ch.baseki;
+    proto.basest = ch.basest;
+    proto.armor = ch.armor;
+    proto.real_abils = ch.real_abils;
+    proto.mob_specials = ch.mob_specials;
+    proto.position = ch.position;
+    proto.speaking = ch.speaking;
+    proto.act = ch.act;
+    proto.affected_by = ch.affected_by;
+    proto.proto_script = ch.proto_script;
+}
+
 pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, value: JsonValue) !void {
     if (value != .object) return error.ExpectedObject;
 
@@ -231,6 +286,7 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
     if (try jsonx.intField(value, "size", c_int)) |v| cdb.char_size_set(ch, v);
     if (try jsonx.intField(value, "sex", c_int)) |v| cdb.char_sex_set(ch, v);
     if (try jsonx.intField(value, "admin_level", c_int)) |v| cdb.char_admlevel_set(ch, v);
+    if (try jsonx.intField(value, "level", c_int)) |v| ch.level = v;
     if (jsonx.field(value, "admin_flags")) |flags| try jsonx.deserializeFlags(ch, flags, 128, admFlagSet);
     if (try jsonx.intField(value, "height", u8)) |v| ch.height = v;
     if (try jsonx.intField(value, "weight", u8)) |v| ch.weight = v;
@@ -279,7 +335,6 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
 
     if (options.mode != .player) {
         // Fields for only npcs and npc prototypes.
-        ch.player_specials = &cdb.dummy_mob;
         if (try jsonx.intField(value, "proto_id", cdb.mob_vnum)) |v| cdb.char_proto_id_set(ch, v);
         if (jsonx.field(value, "mob_flags")) |flags| try jsonx.deserializeFlags(ch, flags, cdb.NUM_MOB_FLAGS, actFlagSet);
     }
@@ -287,40 +342,29 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
     if (options.mode == .player) {
         // player-specific fields go here.
         if (try jsonx.intField(value, "idnum", i32)) |v| ch.idnum = v;
-        const ps = try ensurePlayerSpecials(ch);
-        try setPointerStringField(options.c_allocator, value, "host", &ps.host, setPlayerString);
-        if (try jsonx.intField(value, "load_room", cdb.room_vnum)) |v| ps.load_room = v;
-        if (try jsonx.intField(value, "wimp_level", c_int)) |v| ps.wimp_level = v;
-        if (try jsonx.intField(value, "freeze_level", i8)) |v| ps.freeze_level = v;
-        if (try jsonx.intField(value, "invis_level", i16)) |v| ps.invis_level = v;
-        if (try jsonx.intField(value, "bad_passwords", u8)) |v| ps.bad_pws = v;
-        if (try jsonx.intField(value, "olc_zone", c_int)) |v| ps.olc_zone = v;
-        try setPointerStringField(options.c_allocator, value, "poofin", &ps.poofin, setPlayerString);
-        try setPointerStringField(options.c_allocator, value, "poofout", &ps.poofout, setPlayerString);
-        if (try jsonx.intField(value, "murder", c_int)) |v| ps.murder = v;
-        if (try jsonx.intField(value, "gauntlet", c_int)) |v| ps.gauntlet = v;
-        if (try jsonx.intField(value, "race_practices", c_int)) |v| ps.skill_points = v;
-        if (try jsonx.intField(value, "ability_trains", c_int)) |v| ps.ability_trains = v;
-        if (try jsonx.intField(value, "racial_pref", c_int)) |v| ps.racial_pref = v;
-        if (try jsonx.intField(value, "speaking", c_int)) |v| ps.speaking = v;
-        if (try jsonx.intField(value, "page_length", u8)) |v| ps.page_length = v;
-        if (jsonx.field(value, "pref_flags")) |flags| try jsonx.deserializeFlags(ps, flags, 128, prefFlagSet);
-        if (jsonx.field(value, "conditions")) |items| try deserializeIntArray(ps.conditions[0..], items);
-        if (jsonx.field(value, "class_practices")) |items| try deserializeIntArray(ps.class_skill_points[0..], items);
-        if (jsonx.field(value, "color_choices")) |items| try deserializeStringArray(options.c_allocator, ps.color_choices[0..], items);
-        if (jsonx.field(value, "stats")) |stats| try deserializePlayerStats(ch, ps, stats);
+        try setPointerStringField(options.c_allocator, value, "host", &ch.host, setPlayerString);
+        if (try jsonx.intField(value, "load_room", cdb.room_vnum)) |v| ch.load_room = v;
+        if (try jsonx.intField(value, "wimp_level", c_int)) |v| ch.wimp_level = v;
+        if (try jsonx.intField(value, "freeze_level", i8)) |v| ch.freeze_level = v;
+        if (try jsonx.intField(value, "invis_level", i16)) |v| ch.invis_level = v;
+        if (try jsonx.intField(value, "bad_passwords", u8)) |v| ch.bad_pws = v;
+        if (try jsonx.intField(value, "olc_zone", c_int)) |v| ch.olc_zone = v;
+        try setPointerStringField(options.c_allocator, value, "poofin", &ch.poofin, setPlayerString);
+        try setPointerStringField(options.c_allocator, value, "poofout", &ch.poofout, setPlayerString);
+        if (try jsonx.intField(value, "murder", c_int)) |v| ch.murder = v;
+        if (try jsonx.intField(value, "racial_pref", c_int)) |v| ch.racial_pref = v;
+        if (try jsonx.intField(value, "speaking", c_int)) |v| ch.speaking = v;
+        if (jsonx.field(value, "pref_flags")) |flags| try jsonx.deserializeFlags(ch, flags, 128, prefFlagSet);
+        if (jsonx.field(value, "conditions")) |items| try deserializeIntArray(ch.conditions[0..], items);
+        if (jsonx.field(value, "class_practices")) |items| try deserializeIntArray(ch.class_skill_points[0..], items);
+        if (jsonx.field(value, "color_choices")) |items| try deserializeStringArray(options.c_allocator, ch.color_choices[0..], items);
+        if (jsonx.field(value, "stats")) |stats| try deserializePlayerStats(ch, stats);
         try setPointerStringField(options.c_allocator, value, "user", &ch.loguser, setRawString);
         try setPointerStringField(options.c_allocator, value, "clan", &ch.clan, setRawString);
         try setPointerStringField(options.c_allocator, value, "feature", &ch.feature, setRawString);
         try setPointerStringField(options.c_allocator, value, "rdisplay", &ch.rdisplay, setRawString);
         try setPointerStringField(options.c_allocator, value, "voice", &ch.voice, setRawString);
         if (jsonx.field(value, "time")) |time| try deserializeTime(ch, time);
-        if (jsonx.field(value, "levels")) |levels| try deserializeLevels(ch, levels);
-        if (jsonx.field(value, "class_ranks")) |items| try deserializeIntArray(ch.chclasses[0..], items);
-        if (jsonx.field(value, "epic_class_ranks")) |items| try deserializeIntArray(ch.epicclasses[0..], items);
-        if (jsonx.field(value, "save_base")) |items| try deserializeIntArray(ch.saving_throw[0..], items);
-        if (jsonx.field(value, "save_mod")) |items| try deserializeIntArray(ch.apply_saving_throw[0..], items);
-        if (try jsonx.intField(value, "ethical_alignment", c_int)) |v| ch.alignment_ethic = v;
         if (try jsonx.intField(value, "forgeting", c_int)) |v| ch.forgeting = v;
         if (try jsonx.intField(value, "forgetcount", c_int)) |v| ch.forgetcount = v;
         if (try jsonx.intField(value, "lastint", cdb.time_t)) |v| ch.lastint = v;
@@ -345,21 +389,12 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
         if (try jsonx.intField(value, "relax_count", c_int)) |v| ch.relax_count = v;
         if (try jsonx.intField(value, "rp", c_int)) |v| ch.rp = v;
         if (try jsonx.intField(value, "total_rp", c_int)) |v| ch.trp = v;
-        if (try jsonx.intField(value, "rp_bank", c_int)) |v| ch.rbank = v;
-        if (try jsonx.intField(value, "suppressed", i64)) |v| ch.suppressed = v;
         if (try jsonx.intField(value, "clank_rank", c_int)) |v| ch.crank = v;
-        if (try jsonx.intField(value, "ship", c_int)) |v| ch.ship = v;
-        if (try jsonx.intField(value, "ship_room", cdb.room_vnum)) |v| ch.shipr = v;
         if (try jsonx.intField(value, "last_play", cdb.time_t)) |v| ch.lastpl = v;
         if (try jsonx.intField(value, "boosts", c_int)) |v| ch.boosts = v;
-        if (try jsonx.intField(value, "powerattack", c_int)) |v| ch.powerattack = v;
-        if (try jsonx.intField(value, "group_kills", c_int)) |v| ch.combatexpertise = v;
         if (try jsonx.intField(value, "life_percent", c_int)) |v| ch.lifeperc = v;
-        if (try jsonx.intField(value, "stupid_kiss", c_short)) |v| ch.stupidkiss = v;
         if (try jsonx.intField(value, "damage_mod", c_int)) |v| ch.damage_mod = v;
         if (try jsonx.intField(value, "armor", c_int)) |v| ch.armor = v;
-        if (try jsonx.intField(value, "pole_bonus", c_int)) |v| ch.accuracy = v;
-        if (try jsonx.intField(value, "fish_damage", c_int)) |v| ch.accuracy_mod = v;
         if (try jsonx.intField(value, "absorbs", c_int)) |v| ch.absorbs = v;
         if (try jsonx.intField(value, "ingest_learned", c_int)) |v| ch.ingestLearned = v;
         if (try jsonx.intField(value, "bless_level", c_int)) |v| ch.blesslvl = v;
@@ -367,8 +402,7 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
         if (try jsonx.intField(value, "radar2", cdb.room_vnum)) |v| ch.radar2 = v;
         if (try jsonx.intField(value, "radar3", cdb.room_vnum)) |v| ch.radar3 = v;
         if (jsonx.field(value, "player_flags")) |flags| try jsonx.deserializeFlags(ch, flags, cdb.NUM_PLR_FLAGS, actFlagSet);
-        if (jsonx.field(value, "affects")) |items| try deserializeAffects(ch, items, false);
-        if (jsonx.field(value, "combat_affects")) |items| try deserializeAffects(ch, items, true);
+        if (jsonx.field(value, "affects")) |items| try deserializeAffects(ch, items);
         if (jsonx.field(value, "skills")) |skills| try deserializeSkills(ch, skills);
         if (jsonx.field(value, "lboard")) |items| try deserializeIntArray(ch.lboard[0..], items);
         if (jsonx.field(value, "limbs")) |items| try deserializeIntArray(ch.limb_condition[0..], items);
@@ -481,35 +515,35 @@ fn deserializeSharedStats(ch: *cdb.char_data, stats: JsonValue) !void {
     }
 }
 
-fn deserializePlayerStats(ch: *cdb.char_data, ps: *cdb.player_special_data, stats: JsonValue) !void {
+fn deserializePlayerStats(ch: *cdb.char_data, stats: JsonValue) !void {
     if (stats != .object) return error.ExpectedObject;
     if (try jsonx.intField(stats, "practices", c_int)) |v| if (validClassIndex(ch.chclass)) {
         const class_index: usize = @intCast(ch.chclass);
-        ps.class_skill_points[class_index] = v;
+        ch.class_skill_points[class_index] = v;
         _ = cdb.char_stat_set(ch, "practices", v);
     };
     if (try jsonx.intField(stats, "train_strength", c_int)) |v| {
-        ps.trainstr = v;
+        ch.trainstr = v;
         _ = cdb.char_stat_set(ch, "train_strength", v);
     }
     if (try jsonx.intField(stats, "train_intelligence", c_int)) |v| {
-        ps.trainint = v;
+        ch.trainint = v;
         _ = cdb.char_stat_set(ch, "train_intelligence", v);
     }
     if (try jsonx.intField(stats, "train_constitution", c_int)) |v| {
-        ps.traincon = v;
+        ch.traincon = v;
         _ = cdb.char_stat_set(ch, "train_constitution", v);
     }
     if (try jsonx.intField(stats, "train_wisdom", c_int)) |v| {
-        ps.trainwis = v;
+        ch.trainwis = v;
         _ = cdb.char_stat_set(ch, "train_wisdom", v);
     }
     if (try jsonx.intField(stats, "train_agility", c_int)) |v| {
-        ps.trainagl = v;
+        ch.trainagl = v;
         _ = cdb.char_stat_set(ch, "train_agility", v);
     }
     if (try jsonx.intField(stats, "train_speed", c_int)) |v| {
-        ps.trainspd = v;
+        ch.trainspd = v;
         _ = cdb.char_stat_set(ch, "train_speed", v);
     }
     if (try jsonx.intField(stats, "upgrades", c_int)) |v| {
@@ -758,7 +792,7 @@ fn serializeAffects(allocator: std.mem.Allocator, head: ?*cdb.affected_type) !Js
     return .{ .array = array };
 }
 
-fn deserializeAffects(ch: *cdb.char_data, value: JsonValue, violent: bool) !void {
+fn deserializeAffects(ch: *cdb.char_data, value: JsonValue) !void {
     if (value != .array) return error.ExpectedArray;
     for (value.array.items) |item| {
         if (item != .object) return error.ExpectedObject;
@@ -770,7 +804,7 @@ fn deserializeAffects(ch: *cdb.char_data, value: JsonValue, violent: bool) !void
         if (try jsonx.intField(item, "bitvector", cdb.bitvector_t)) |v| af.bitvector = v;
         if (try jsonx.intField(item, "specific", c_int)) |v| af.specific = v;
         if (af.type == 0) continue;
-        if (violent) affectv_to_char(ch, &af) else affect_to_char(ch, &af);
+        affect_to_char(ch, &af);
     }
 }
 
@@ -782,7 +816,6 @@ fn serializeSkills(allocator: std.mem.Allocator, ch: *cdb.char_data) !JsonValue 
         const key = try std.fmt.allocPrint(allocator, "{}", .{index});
         var skill_object = jsonx.newObject(allocator);
         if (skill.base != 0) try jsonx.putInt(&skill_object, allocator, "base", skill.base);
-        if (skill.mod != 0) try jsonx.putInt(&skill_object, allocator, "bonus", skill.mod);
         if (skill.perf != 0) try jsonx.putInt(&skill_object, allocator, "perf", skill.perf);
         try jsonx.put(&object, allocator, key, skill_object);
     }
@@ -798,16 +831,8 @@ fn deserializeSkills(ch: *cdb.char_data, value: JsonValue) !void {
         const skill = entry.value_ptr.*;
         if (skill != .object) return error.ExpectedObject;
         if (try jsonx.intField(skill, "base", i8)) |v| ch.skills[index].base = v;
-        if (try jsonx.intField(skill, "bonus", i8)) |v| ch.skills[index].mod = v;
         if (try jsonx.intField(skill, "perf", i8)) |v| ch.skills[index].perf = v;
     }
-}
-
-fn ensurePlayerSpecials(ch: *cdb.char_data) !*cdb.player_special_data {
-    if (ch.player_specials == null or ch.player_specials == &cdb.dummy_mob) {
-        ch.player_specials = @ptrCast(@alignCast(calloc(1, @sizeOf(cdb.player_special_data)) orelse return error.OutOfMemory));
-    }
-    return ch.player_specials;
 }
 
 fn setPlayerString(allocator: std.mem.Allocator, field: *[*c]u8, value: []const u8) !void {
@@ -855,10 +880,10 @@ fn bodypartFlagSet(ch: *cdb.char_data, pos: c_int, value: bool) void {
     bitflags.set(ch.bodyparts[0..], pos, value);
 }
 
-fn prefFlagged(ps: *cdb.player_special_data, pos: c_int) bool {
-    return bitflags.get(ps.pref[0..], pos);
+fn prefFlagged(ch: *cdb.char_data, pos: c_int) bool {
+    return bitflags.get(ch.pref[0..], pos);
 }
 
-fn prefFlagSet(ps: *cdb.player_special_data, pos: c_int, value: bool) void {
-    bitflags.set(ps.pref[0..], pos, value);
+fn prefFlagSet(ch: *cdb.char_data, pos: c_int, value: bool) void {
+    bitflags.set(ch.pref[0..], pos, value);
 }

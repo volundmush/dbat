@@ -307,8 +307,8 @@ void skill_level(int spell, int chclass, int level);
 void skill_race_class(int spell, int race, int learntype);
 void skill_class(int skill, int chclass, int learntype);
 const char *skill_name(int num);
-int roll_skill(const struct char_data *ch, int snum);
-int roll_resisted(const struct char_data *actor, int sact, const struct char_data *resistor, int sres);
+int roll_skill(struct char_data *ch, int snum);
+int roll_resisted(struct char_data *actor, int sact, struct char_data *resistor, int sres);
 int skill_type(int skill);
 
 

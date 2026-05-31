@@ -20,6 +20,8 @@
 #include "dbat/game/races_plus.h"
 #include "dbat/game/affect.h"
 
+#include <string.h>
+
 /* From db.c */
 void init_mobile_skills(void);
 
@@ -37,9 +39,185 @@ int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd);
 /* local functions */
 void extract_mobile_all(mob_vnum vnum);
 
+static void free_trig_proto_list(struct trig_proto_list *list)
+{
+  while (list) {
+    auto next = list->next;
+    free(list);
+    list = next;
+  }
+}
+
+static struct trig_proto_list *copy_trig_proto_list(const struct trig_proto_list *from)
+{
+  struct trig_proto_list *head = NULL, *tail = NULL;
+
+  for (; from; from = from->next) {
+    struct trig_proto_list *node;
+    CREATE(node, struct trig_proto_list, 1);
+    node->vnum = from->vnum;
+    if (tail)
+      tail->next = node;
+    else
+      head = node;
+    tail = node;
+  }
+
+  return head;
+}
+
+static void mob_proto_free_strings(struct mob_proto_data *mob)
+{
+  if (mob->name)
+    free(mob->name);
+  if (mob->title)
+    free(mob->title);
+  if (mob->short_descr)
+    free(mob->short_descr);
+  if (mob->long_descr)
+    free(mob->long_descr);
+  if (mob->description)
+    free(mob->description);
+  mob->name = NULL;
+  mob->title = NULL;
+  mob->short_descr = NULL;
+  mob->long_descr = NULL;
+  mob->description = NULL;
+}
+
+void mob_proto_free(struct mob_proto_data *mob)
+{
+  if (!mob)
+    return;
+  mob_proto_free_strings(mob);
+  free_trig_proto_list(mob->proto_script);
+  free(mob);
+}
+
+void mob_proto_free_script(struct mob_proto_data *mob)
+{
+  if (!mob)
+    return;
+  free_trig_proto_list(mob->proto_script);
+  mob->proto_script = NULL;
+}
+
+void mob_proto_copy_script_to_mobile(struct mob_proto_data *source, struct char_data *dest)
+{
+  if (!dest)
+    return;
+  if (dest->proto_script)
+    free_proto_script(dest, MOB_TRIGGER);
+  dest->proto_script = source ? copy_trig_proto_list(source->proto_script) : NULL;
+}
+
+int copy_mobile_to_proto(struct mob_proto_data *to, struct char_data *from)
+{
+  char *old_name = to->name;
+  char *old_title = to->title;
+  char *old_short_descr = to->short_descr;
+  char *old_long_descr = to->long_descr;
+  char *old_description = to->description;
+  struct trig_proto_list *old_proto_script = to->proto_script;
+
+  memset(to, 0, sizeof(*to));
+
+  to->name = old_name;
+  to->title = old_title;
+  to->short_descr = old_short_descr;
+  to->long_descr = old_long_descr;
+  to->description = old_description;
+  to->proto_script = old_proto_script;
+
+  mob_proto_free_strings(to);
+  free_trig_proto_list(to->proto_script);
+  to->proto_script = NULL;
+
+  to->vnum = from->vnum;
+  to->size = from->size;
+  to->sex = from->sex;
+  to->race = from->race;
+  to->chclass = from->chclass;
+  to->alignment = from->alignment;
+  to->weight = from->weight;
+  to->height = from->height;
+  to->level = from->level;
+  to->race_level = from->race_level;
+  to->level_adj = from->level_adj;
+  to->gold = from->gold;
+  to->exp = from->exp;
+  to->basepl = from->basepl;
+  to->baseki = from->baseki;
+  to->basest = from->basest;
+  to->armor = from->armor;
+  to->real_abils = from->real_abils;
+  to->mob_specials = from->mob_specials;
+  to->position = from->position;
+  to->speaking = from->speaking;
+  memcpy(to->act, from->act, sizeof(to->act));
+  memcpy(to->affected_by, from->affected_by, sizeof(to->affected_by));
+  to->name = from->name ? strdup(from->name) : NULL;
+  to->title = from->title ? strdup(from->title) : NULL;
+  to->short_descr = from->short_descr ? strdup(from->short_descr) : NULL;
+  to->long_descr = from->long_descr ? strdup(from->long_descr) : NULL;
+  to->description = from->description ? strdup(from->description) : NULL;
+  to->proto_script = copy_trig_proto_list(from->proto_script);
+  return TRUE;
+}
+
+int copy_mobile_from_proto(struct char_data *to, struct mob_proto_data *from)
+{
+  int32_t id = to->id;
+  struct descriptor_data *desc = to->desc;
+  struct char_data *next = to->next;
+  struct char_data *next_affect = to->next_affect;
+
+  free_mobile_strings(to);
+  if (to->proto_script)
+    free_proto_script(to, MOB_TRIGGER);
+
+  memset(to, 0, sizeof(*to));
+
+  to->id = id;
+  to->desc = desc;
+  to->next = next;
+  to->next_affect = next_affect;
+
+  to->vnum = from->vnum;
+  to->size = from->size;
+  to->sex = from->sex;
+  to->race = from->race;
+  to->chclass = from->chclass;
+  to->alignment = from->alignment;
+  to->weight = from->weight;
+  to->height = from->height;
+  to->level = from->level;
+  to->race_level = from->race_level;
+  to->level_adj = from->level_adj;
+  to->gold = from->gold;
+  to->exp = from->exp;
+  to->basepl = from->basepl;
+  to->baseki = from->baseki;
+  to->basest = from->basest;
+  to->armor = from->armor;
+  to->real_abils = from->real_abils;
+  to->mob_specials = from->mob_specials;
+  to->position = from->position;
+  to->speaking = from->speaking;
+  memcpy(to->act, from->act, sizeof(to->act));
+  memcpy(to->affected_by, from->affected_by, sizeof(to->affected_by));
+  to->name = from->name ? strdup(from->name) : NULL;
+  to->title = from->title ? strdup(from->title) : NULL;
+  to->short_descr = from->short_descr ? strdup(from->short_descr) : NULL;
+  to->long_descr = from->long_descr ? strdup(from->long_descr) : NULL;
+  to->description = from->description ? strdup(from->description) : NULL;
+  to->proto_script = copy_trig_proto_list(from->proto_script);
+  return TRUE;
+}
+
 int add_mobile(struct char_data *mob, mob_vnum vnum)
 {
-  int rnum, i, found = FALSE, shop, guild, cmd_no;
+  int i, shop, guild, cmd_no;
   zone_rnum zone;
   struct char_data *live_mob;
 
@@ -47,35 +225,44 @@ int add_mobile(struct char_data *mob, mob_vnum vnum)
 
   if (proto) {
     /* Copy over the mobile and free() the old strings. */
-    copy_mobile(proto, mob);
+    copy_mobile_to_proto(proto, mob);
 
     /* Now re-point all existing mobile strings to here. */
     for (live_mob = character_list; live_mob; live_mob = live_mob->next)
-      if (rnum == live_mob->vnum)
-        update_mobile_strings(live_mob, proto);
+      if (vnum == live_mob->vnum) {
+        struct char_data temp = {};
+        copy_mobile_from_proto(&temp, proto);
+        update_mobile_strings(live_mob, &temp);
+        free_mobile_strings(&temp);
+        if (temp.proto_script)
+          free_proto_script(&temp, MOB_TRIGGER);
+      }
 
     add_to_save_list(virtual_zone_by_thing(vnum), SL_MOB);
     log("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
-    return rnum;
+    return vnum;
   }
 
-  CREATE(live_mob, struct char_data, 1);
-  copy_mobile(live_mob, mob);
+  struct mob_proto_data *new_proto = NULL;
+  CREATE(new_proto, struct mob_proto_data, 1);
+  copy_mobile_to_proto(new_proto, mob);
 
-  mob_proto_put(vnum, live_mob);
+  mob_proto_put(vnum, new_proto);
 
-  log("GenOLC: add_mobile: Added mobile %d at index #%d.", vnum, found);
+  log("GenOLC: add_mobile: Added mobile %d.", vnum);
 
   add_to_save_list(virtual_zone_by_thing(vnum), SL_MOB);
-  return found;
+  return vnum;
 }
 
 int copy_mobile(struct char_data *to, struct char_data *from)
 {
-  free_mobile_strings(to);
-  *to = *from;
-  check_mobile_strings(from);
-  copy_mobile_strings(to, from);
+  struct mob_proto_data tmp = {};
+
+  copy_mobile_to_proto(&tmp, from);
+  copy_mobile_from_proto(to, &tmp);
+  mob_proto_free_strings(&tmp);
+  free_trig_proto_list(tmp.proto_script);
   return TRUE;
 }
 
@@ -165,6 +352,10 @@ int copy_mobile_strings(struct char_data *t, struct char_data *f)
 {
   if (f->name)
     t->name = strdup(f->name);
+  if (f->voice)
+    t->voice = strdup(f->voice);
+  if (f->clan)
+    t->clan = strdup(f->clan);
   if (f->title)
     t->title = strdup(f->title);
   if (f->short_descr)
@@ -178,16 +369,8 @@ int copy_mobile_strings(struct char_data *t, struct char_data *f)
 
 int update_mobile_strings(struct char_data *t, struct char_data *f)
 {
-  if (f->name)
-    t->name = f->name;
-  if (f->title)
-    t->title = f->title;
-  if (f->short_descr)
-    t->short_descr = f->short_descr;
-  if (f->long_descr)
-    t->long_descr = f->long_descr;
-  if (f->description)
-    t->description = f->description;
+  free_mobile_strings(t);
+  copy_mobile_strings(t, f);
   return TRUE;
 }
 
@@ -195,6 +378,10 @@ int free_mobile_strings(struct char_data *mob)
 {
   if (mob->name)
     free(mob->name);
+  if (mob->voice)
+    free(mob->voice);
+  if (mob->clan)
+    free(mob->clan);
   if (mob->title)
     free(mob->title);
   if (mob->short_descr)
@@ -209,35 +396,16 @@ int free_mobile_strings(struct char_data *mob)
 
 /* Free a mobile structure that has been edited. Take care of existing mobiles 
  * and their mob_proto!  */
-int free_mobile(struct char_data *mob)
+int mobile_free_editor(struct char_data *mob)
 {
   mob_rnum i;
 
   if (mob == NULL)
     return FALSE;
   
-  auto proto = mob_proto_by_id(GET_MOB_VNUM(mob));
-
-  /* Non-prototyped mobile.  Also known as new mobiles.  */
-  if (!proto) {
-    free_mobile_strings(mob);
-    /* free script proto list */
+  free_mobile_strings(mob);
+  if (mob->proto_script)
     free_proto_script(mob, MOB_TRIGGER);
-   } else {	/* Prototyped mobile. */
-    if (mob->name && mob->name != proto->name)
-      free(mob->name);
-    if (mob->title && mob->title != proto->title)
-      free(mob->title);
-    if (mob->short_descr && mob->short_descr != proto->short_descr)
-      free(mob->short_descr);
-    if (mob->long_descr && mob->long_descr != proto->long_descr)
-      free(mob->long_descr);
-    if (mob->description && mob->description != proto->description)
-      free(mob->description);
-    /* free script proto list if it's not the prototype */
-    if (mob->proto_script && mob->proto_script != proto->proto_script)
-      free_proto_script(mob, MOB_TRIGGER);
-  }
   while (mob->affected)
     affect_remove(mob, mob->affected);
 
@@ -247,6 +415,11 @@ int free_mobile(struct char_data *mob)
 
   free(mob);
   return TRUE;
+}
+
+int free_mobile(struct char_data *mob)
+{
+  return mobile_free_editor(mob);
 }
 
 int save_mobiles(struct zone_data *zone)
@@ -271,7 +444,6 @@ if(!zone) {
   for (i = zone->bot; i <= zone->top; i++) {
     auto proto = mob_proto_by_id(i);
     if (!proto) continue;
-    check_mobile_strings(proto);
     if (write_mobile_record(i, proto, mobfd) < 0)
       log("SYSERR: GenOLC: Error writing mobile #%d.", i);
   }
@@ -320,8 +492,6 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 
   if (get_size(mob) != race_get_size(mob->race))
     fprintf(fd, "Size: %d\n", get_size(mob));
-  if (GET_ATTACK(mob) != 0)
-    fprintf(fd, "BareHandAttack: %d\n", GET_ATTACK(mob));
   if (GET_STR(mob) != 0)
     fprintf(fd, "Str: %d\n", GET_STR(mob));
   if (GET_DEX(mob) != 0)
@@ -334,47 +504,22 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
     fprintf(fd, "Con: %d\n", GET_CON(mob));
   if (GET_CHA(mob) != 0)
     fprintf(fd, "Cha: %d\n", GET_CHA(mob));
-  if (mob->vnum != NOTHING) { /* Not saving a prototype */
-    fprintf(fd, "Hit: %" I64T "\nMaxHit: %" I64T "\nMana: %" I64T "\nMaxMana: %" I64T "\nMoves: %" I64T "\nMaxMoves: %" I64T "\n",
-            GET_HIT(mob), GET_MAX_HIT(mob), (getCurKI(mob)), GET_MAX_MANA(mob),
-            (getCurST(mob)), GET_MAX_MOVE(mob));
-    for (aff = mob->affected; aff; aff = aff->next)
-      if (aff->type)
-        fprintf(fd, "Affect: %d %d %d %d %d %d\n", aff->type, aff->duration,
-                aff->modifier, aff->location, (int)aff->bitvector, aff->specific);
-    for (aff = mob->affectedv; aff; aff = aff->next)
-      if (aff->type)
-        fprintf(fd, "AffectV: %d %d %d %d %d %d\n", aff->type, aff->duration,
-                aff->modifier, aff->location, (int)aff->bitvector, aff->specific);
-  }
-  for (i = 0; i <= NUM_FEATS_DEFINED; i++)
-    if (HAS_FEAT(mob, i))
-      fprintf(fd, "Feat: %d %d\n", i, HAS_FEAT(mob, i));
-  for (i = 0; i < SKILL_TABLE_SIZE; i++)
-    if (GET_SKILL_BASE(mob, i))
-      fprintf(fd, "Skill: %d %d\n", i, HAS_FEAT(mob, i));
-  for (i = 0; i <= NUM_FEATS_DEFINED; i++)
-    if (GET_SKILL_BONUS(mob, i))
-      fprintf(fd, "SkillMod: %d %d\n", i, HAS_FEAT(mob, i));
-  for (i = 0; i < NUM_CLASSES; i++) {
-    if (GET_CLASS_NONEPIC(mob, i))
-      fprintf(fd, "Class: %d %d\n", i, GET_CLASS_NONEPIC(mob, i));
-    if (GET_CLASS_EPIC(mob, i))
-      fprintf(fd, "EpicClass: %d %d\n", i, GET_CLASS_EPIC(mob, i));
-  }
   fputs("E\n", fd);
   return TRUE;
 }
 
 
-int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
+int write_mobile_record(mob_vnum mvnum, struct mob_proto_data *proto, FILE *fd)
 {
-
+  struct char_data temp = {};
+  struct char_data *mob = &temp;
   char ldesc[MAX_STRING_LENGTH], ddesc[MAX_STRING_LENGTH];
   char fbuf1[MAX_STRING_LENGTH], fbuf2[MAX_STRING_LENGTH];
   char fbuf3[MAX_STRING_LENGTH], fbuf4[MAX_STRING_LENGTH];
   char abuf1[MAX_STRING_LENGTH], abuf2[MAX_STRING_LENGTH];
   char abuf3[MAX_STRING_LENGTH], abuf4[MAX_STRING_LENGTH];
+
+  copy_mobile_from_proto(mob, proto);
 
   ldesc[MAX_STRING_LENGTH - 1] = '\0';
   ddesc[MAX_STRING_LENGTH - 1] = '\0';
@@ -407,9 +552,9 @@ int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
                 fbuf1, fbuf2, fbuf3, fbuf4,
                 abuf1, abuf2, abuf3, abuf4,
 		GET_ALIGNMENT(mob),
-		GET_HITDICE(mob), GET_FISHD(mob), 10 - (GET_ARMOR(mob) / 10),
-                GET_HIT(mob), (getCurKI(mob)), (getCurST(mob)), GET_NDD(mob), GET_SDD(mob),
-		GET_DAMAGE_MOD(mob)
+		GET_HITDICE(mob), 0, 10 - (GET_ARMOR(mob) / 10),
+                0, (getCurKI(mob)), (getCurST(mob)), 0, 0,
+		0
   );
   fprintf(fd, 	"%d 0 %d %d\n"
 		"%d %d %d\n",
@@ -420,7 +565,7 @@ int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
   if (write_mobile_espec(mvnum, mob, fd) < 0)
     log("SYSERR: GenOLC: Error writing E-specs for mobile #%d.", mvnum);
 
-  script_save_to_disk(fd, mob, MOB_TRIGGER);
+  mob_proto_script_save_to_disk(fd, proto);
 
 
 #if CONFIG_GENOLC_MOBPROG
@@ -428,6 +573,9 @@ int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
     log("SYSERR: GenOLC: Error writing MobProgs for mobile #%d.", mvnum);
 #endif
 
+  free_mobile_strings(mob);
+  if (mob->proto_script)
+    free_proto_script(mob, MOB_TRIGGER);
   return TRUE;
 }
 

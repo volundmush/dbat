@@ -187,7 +187,7 @@ fn exportAllRoomExits(folder: []const u8) !void {
 fn exportNpcPrototype(vnum: cdb.mob_vnum, filename: []const u8) !void {
     const mob = cdb.mob_proto_by_id(vnum);
     if (mob == null) return error.NotFound;
-    try writeJsonFile(filename, characters_json.serializeCharacter, .{ mob, characters_json.CharacterJsonMode.npc_prototype });
+    try writeJsonFile(filename, characters_json.serializeMobPrototype, .{mob});
 }
 
 fn exportNpcPrototypes(folder: []const u8) !void {
@@ -196,7 +196,7 @@ fn exportNpcPrototypes(folder: []const u8) !void {
     defer cdb.mob_proto_iterator_free(iterator);
 
     while (cdb.mob_proto_next(iterator)) |mob| {
-        const vnum = cdb.char_vnum_get(mob);
+        const vnum = mob.*.vnum;
         if (vnum == cdb.NOTHING) continue;
         const path = try assetPath(folder, vnum);
         defer std.heap.page_allocator.free(path);
@@ -207,7 +207,7 @@ fn exportNpcPrototypes(folder: []const u8) !void {
 fn exportObjPrototype(vnum: cdb.obj_vnum, filename: []const u8) !void {
     const obj = cdb.obj_proto_by_id(vnum);
     if (obj == null) return error.NotFound;
-    try writeJsonFile(filename, objects_json.serializeObject, .{ obj, objects_json.ObjectJsonMode.prototype });
+    try writeJsonFile(filename, objects_json.serializeObjectPrototype, .{obj});
 }
 
 fn exportObjPrototypes(folder: []const u8) !void {
@@ -216,7 +216,7 @@ fn exportObjPrototypes(folder: []const u8) !void {
     defer cdb.obj_proto_iterator_free(iterator);
 
     while (cdb.obj_proto_next(iterator)) |obj| {
-        const vnum = cdb.obj_vnum_get(obj);
+        const vnum = obj.*.vnum;
         if (vnum == cdb.NOTHING) continue;
         const path = try assetPath(folder, vnum);
         defer std.heap.page_allocator.free(path);
@@ -482,15 +482,13 @@ fn importNpcPrototypes(folder: []const u8) !void {
             logImportFileError("npc_prototypes", file, err);
             return err;
         };
-        const mob = try allocCOne(cdb.char_data);
-        mob.vnum = file.vnum;
-        mob.player_specials = &cdb.dummy_mob;
-        characters_json.deserializeCharacter(mob, .{ .mode = .npc_prototype }, value) catch |err| {
+        const mob = try allocCOne(cdb.mob_proto_data);
+        mob.vnum = @intCast(file.vnum);
+        characters_json.deserializeMobPrototype(mob, .{ .mode = .npc_prototype }, value) catch |err| {
             logImportFileError("npc_prototypes", file, err);
             return err;
         };
-        mob.vnum = file.vnum;
-        mob.player_specials = &cdb.dummy_mob;
+        mob.vnum = @intCast(file.vnum);
         cdb.mob_proto_put(@intCast(file.vnum), mob);
         progress.tick(index);
     }
@@ -507,9 +505,9 @@ fn importObjPrototypes(folder: []const u8) !void {
             logImportFileError("obj_prototypes", file, err);
             return err;
         };
-        const obj = try allocCOne(cdb.obj_data);
+        const obj = try allocCOne(cdb.obj_proto_data);
         obj.vnum = @intCast(file.vnum);
-        objects_json.deserializeObject(obj, .{ .mode = .prototype }, value) catch |err| {
+        objects_json.deserializeObjectPrototype(obj, .{ .mode = .prototype }, value) catch |err| {
             logImportFileError("obj_prototypes", file, err);
             return err;
         };

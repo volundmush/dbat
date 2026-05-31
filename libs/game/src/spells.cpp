@@ -258,7 +258,7 @@ ASPELL(spell_identify)
     sprintbitarray(GET_OBJ_EXTRA(obj), extra_bits, EF_ARRAY_MAX, bitbuf, sizeof(bitbuf));
     send_to_char(ch, "Item is: %s\r\n", bitbuf);
 
-    send_to_char(ch, "Weight: %" I64T ", Value: %d, Rent: %d, Min Level: %d\r\n", GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_RENT(obj), GET_OBJ_LEVEL(obj));
+    send_to_char(ch, "Weight: %" I64T ", Value: %d, Min Level: %d\r\n", GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_LEVEL(obj));
 
     switch (GET_OBJ_TYPE(obj)) {
     case ITEM_SCROLL:
@@ -463,7 +463,7 @@ ASPELL(spell_portal)
 }
 
 
-int roll_skill(const struct char_data *ch, int snum)
+int roll_skill(struct char_data *ch, int snum)
 {
   int roll, skval, i;
   if (!IS_NPC(ch)) {
@@ -517,10 +517,6 @@ int roll_skill(const struct char_data *ch, int snum)
      * higher than this roll to avoid it. Most spells should also have some
      * kind of save called after roll_skill.
      */
-      for (i = 0, roll = 0; i < NUM_CLASSES; i++)
-        if (GET_CLASS_RANKS(ch, i) &&
-            (spell_info[snum].min_level[i] < GET_CLASS_RANKS(ch, i)))
-          roll += GET_CLASS_RANKS(ch, i); /* Caster level for eligable classes */
       return roll + rand_number(1, 20);
   } else if (IS_SET(spell_info[snum].skilltype, SKTYPE_SKILL)) {
       if (!skval && IS_SET(spell_info[snum].flags, SKFLAG_NEEDTRAIN)) {
@@ -551,7 +547,7 @@ int roll_skill(const struct char_data *ch, int snum)
   }
 }
 
-int roll_resisted(const struct char_data *actor, int sact, const struct char_data *resistor, int sres)
+int roll_resisted(struct char_data *actor, int sact, struct char_data *resistor, int sres)
 {
   return roll_skill(actor, sact) >= roll_skill(resistor, sres);
 }

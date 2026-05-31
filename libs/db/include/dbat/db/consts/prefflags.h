@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-/*  flags: used by char_data.player_specials.pref */
+/*  flags: used by char_data.pref */
 #define PRF_BRIEF	0  /* Room descs won't normally be shown	*/
 #define PRF_COMPACT	1  /* No extra CRLF pair before prompts		*/
 #define PRF_DEAF	2  /* Can't hear shouts              		*/

@@ -5,13 +5,11 @@
 
 struct char_data *character_list;
 struct char_data *affect_list;
-struct char_data *affectv_list;
-struct player_special_data dummy_mob;
 
 
 long max_mob_id = MOB_ID_BASE;
 
-struct char_data *mob_proto_by_id(mob_vnum vnum)
+struct mob_proto_data *mob_proto_by_id(mob_vnum vnum)
 {
   return mob_proto_get(vnum);
 }
@@ -41,4 +39,27 @@ struct obj_data* char_inventory_search_type(struct char_data *ch, int type, bool
     };
     char_inventory_iterate(ch, recursive, obj_search_type_match, &data);
     return data.found;
+}
+
+int64_t char_legacy_modifier(struct char_data *ch, int location, int specific) {
+    int64_t mod = 0;
+
+    for(auto i = 0; i < NUM_WEARS; i++) {
+        if (auto eq = ch->equipment[i]) {
+            for (auto j = 0; j < MAX_OBJ_AFFECT; j++) {
+                if(eq->affected[j].location != location) continue;
+                if (eq->affected[j].specific == specific || eq->affected[j].specific == -1) {
+                    mod += eq->affected[j].modifier;
+                }
+            }
+        }
+    }
+
+    for (auto af = ch->affected; af; af = af->next) {
+        if(af->location != location) continue;
+        if (af->specific == specific || af->specific == -1) {
+            mod += af->modifier;
+        }
+    }
+    return mod;
 }

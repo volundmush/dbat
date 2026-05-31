@@ -29,6 +29,14 @@
 #include "dbat/game/races_plus.h"
 #include "dbat/game/fight.h"
 
+#include <stddef.h>
+
+static_assert(sizeof(struct obj_proto_data) == offsetof(struct obj_data, in_room),
+              "oedit shared object fields must stay prefix-compatible");
+
+#undef OLC_OBJ
+#define OLC_OBJ(d) OLC_OPROTO(d)
+
 /*------------------------------------------------------------------------*/
 
 /*
@@ -47,7 +55,7 @@ ACMD(do_oasis_oedit)
   char *buf3;
   char buf1[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
-  struct obj_data *proto = NULL;
+  struct obj_proto_data *proto = NULL;
   
   /****************************************************************************/
   /** Parse any arguments.                                                   **/
@@ -203,9 +211,9 @@ ACMD(do_oasis_oedit)
 
 void oedit_setup_new(struct descriptor_data *d)
 {
-  CREATE(OLC_OBJ(d), struct obj_data, 1);
+  CREATE(OLC_OPROTO(d), struct obj_proto_data, 1);
 
-  clear_object(OLC_OBJ(d));
+  OLC_OPROTO(d)->vnum = OLC_NUM(d);
   OLC_OBJ(d)->name = strdup("unfinished object");
   OLC_OBJ(d)->description = strdup("An unfinished object is lying here.");
   OLC_OBJ(d)->short_description = strdup("an unfinished object");
@@ -218,7 +226,6 @@ void oedit_setup_new(struct descriptor_data *d)
   GET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_MATERIAL) = MATERIAL_STEEL;
   GET_OBJ_SIZE(OLC_OBJ(d)) = SIZE_MEDIUM;
 
-  SCRIPT(OLC_OBJ(d)) = NULL;
   OLC_OBJ(d)->proto_script = OLC_SCRIPT(d) = NULL;
 }
 
@@ -226,19 +233,19 @@ void oedit_setup_new(struct descriptor_data *d)
 
 void oedit_setup_existing(struct descriptor_data *d, room_vnum num)
 {
-  struct obj_data *obj;
+  struct obj_proto_data *obj;
 
   /*
    * Allocate object in memory.
    */
-  CREATE(obj, struct obj_data, 1);
+  CREATE(obj, struct obj_proto_data, 1);
   auto proto = obj_proto_by_id(num);
-  copy_object(obj, proto);
+  obj_proto_copy(obj, proto);
 
   /*
    * Attach new object to player's descriptor.
    */
-  OLC_OBJ(d) = obj;
+  OLC_OPROTO(d) = obj;
   OLC_VAL(d) = 0;
   OLC_ITEM_TYPE(d) = OBJ_TRIGGER;
   dg_olc_script_copy(d);
@@ -246,7 +253,6 @@ void oedit_setup_existing(struct descriptor_data *d, room_vnum num)
    * The edited obj must not have a script.
    * It will be assigned to the updated obj later, after editing.
    */
-  SCRIPT(obj) = NULL;
   OLC_OBJ(d)->proto_script = NULL;
 }
 
@@ -257,26 +263,21 @@ void oedit_save_internally(struct descriptor_data *d)
   int i;
   obj_rnum robj_num;
   struct descriptor_data *dsc;
-  struct obj_data *obj, *proto;
+  struct obj_data *obj;
+  struct obj_proto_data *proto;
 
   obj_vnum v = OLC_NUM(d);
 
   i = (obj_proto_by_id(v) == NULL);
 
-  if ((robj_num = add_object(OLC_OBJ(d), v)) == NOTHING) {
+  OLC_OPROTO(d)->vnum = v;
+  OLC_OPROTO(d)->proto_script = OLC_SCRIPT(d);
+  if ((robj_num = add_object(OLC_OPROTO(d), v)) == NOTHING) {
     log("oedit_save_internally: add_object failed.");
     return;
   }
 
   proto = obj_proto_by_id(v);
-
-  /* Update triggers : */
-  /* Free old proto list  */
-  if (proto->proto_script &&
-      proto->proto_script != OLC_SCRIPT(d)) 
-    free_proto_script(proto, OBJ_TRIGGER);   
-  /* this will handle new instances of the object: */
-  proto->proto_script = OLC_SCRIPT(d);
 
   /* this takes care of the objects currently in-game */
   for (obj = object_list; obj; obj = obj->next) {
@@ -286,8 +287,7 @@ void oedit_save_internally(struct descriptor_data *d)
     if (SCRIPT(obj)) 
       extract_script(obj, OBJ_TRIGGER);
 
-    free_proto_script(obj, OBJ_TRIGGER);
-    copy_proto_script(proto, obj, OBJ_TRIGGER);
+    obj_proto_copy_script_to_obj(proto, obj);
     assign_triggers(obj, OBJ_TRIGGER);
   }
   /* end trigger update */
@@ -416,15 +416,6 @@ void oedit_disp_prompt_spellbook_menu(struct descriptor_data *d)
 
   clear_screen(d);
 
-  for (counter = 0; counter < SPELLBOOK_SIZE; counter++) {
-    if (OLC_OBJ(d)->sbinfo && OLC_OBJ(d)->sbinfo[counter].spellname != 0 &&
-        OLC_OBJ(d)->sbinfo[counter].spellname < MAX_SPELLS) {
-      write_to_output(d, " @g%3d@n) %-20.20s %s", counter + 1,
-             spell_info[OLC_OBJ(d)->sbinfo[counter].spellname].name, !(++columns % 3) ? "\r\n" : "");
-    } else {
-      write_to_output(d, " @g%3d@n) None.%s", counter + 1, !(++columns % 3) ? "\r\n" : "");
-    }
-  }
   write_to_output(d, "\r\nEnter spell to modify (0 to quit) : ");
   OLC_MODE(d) = OEDIT_PROMPT_SPELLBOOK;
 }
@@ -947,7 +938,7 @@ void oedit_disp_wear_menu(struct descriptor_data *d)
 void oedit_disp_menu(struct descriptor_data *d)
 {
   char tbitbuf[MAX_INPUT_LENGTH], ebitbuf[MAX_INPUT_LENGTH];
-  struct obj_data *obj;
+  struct obj_proto_data *obj;
 
   obj = OLC_OBJ(d);
   clear_screen(d);
@@ -991,7 +982,7 @@ void oedit_disp_menu(struct descriptor_data *d)
   write_to_output(d,
 	  "@g7@n) Wear flags  : @c%s@n\r\n"
 	  "@g8@n) Weight      : @c%-4" I64T "@n, 	@g9@n) Cost        : @c%-4d@n\r\n"
-	  "@gA@n) Cost/Day    : @c%-4d@n, 	@gB@n) Timer       : @c%-4d@n\r\n"
+	  "@gA@n) ----    : @c%-4d@n, 	@gB@n) Timer       : @c%-4d@n\r\n"
 	  "@gC@n) Values      : @c%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d@n\r\n"
 	  "@gD@n) Applies menu@n\r\n"
 	  "@gE@n) Extra descriptions menu %s\r\n"
@@ -1006,7 +997,7 @@ void oedit_disp_menu(struct descriptor_data *d)
 	  "@gQ@n) Quit\r\n"
 	  "Enter choice : ",
 
-	  tbitbuf, GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_RENT(obj),
+	  tbitbuf, GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), 0,
 	  GET_OBJ_TIMER(obj), GET_OBJ_VAL(obj, 0), GET_OBJ_VAL(obj, 1),
           GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 3), GET_OBJ_VAL(obj, 4),
           GET_OBJ_VAL(obj, 5), GET_OBJ_VAL(obj, 6), GET_OBJ_VAL(obj, 7),
@@ -1029,7 +1020,8 @@ void oedit_parse(struct descriptor_data *d, char *arg)
   int number, max_val, min_val;
   char *oldtext = NULL;
   struct board_info *tmp;
-  struct obj_data *obj, *proto;
+  struct obj_data *obj;
+  struct obj_proto_data *proto;
   obj_rnum robj;
 
   switch (OLC_MODE(d)) {
@@ -1060,8 +1052,8 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     case 'n':
     case 'N':
       /* If not saving, we must free the script_proto list. */
-      OLC_OBJ(d)->proto_script = OLC_SCRIPT(d);
-      free_proto_script(OLC_OBJ(d), OBJ_TRIGGER);
+      OLC_OPROTO(d)->proto_script = OLC_SCRIPT(d);
+      obj_proto_free_script(OLC_OPROTO(d));
       cleanup_olc(d, CLEANUP_ALL);
       return;
     case 'a': /* abort quit */
@@ -1112,7 +1104,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       } else {
         send_to_char(d->character, "\r\nCommitting iedit changes.\r\n");
         obj = OLC_IOBJ(d);
-        *obj = *(OLC_OBJ(d));
+        obj_apply_proto_to_instance(obj, OLC_OBJ(d));
         GET_ID(obj) = max_obj_id++;
         /* find_obj helper */
         add_to_lookup_table(GET_ID(obj), (void *)obj);
@@ -1124,9 +1116,8 @@ void oedit_parse(struct descriptor_data *d, char *arg)
             SCRIPT(obj) = NULL;
           }
 
-          free_proto_script(obj, OBJ_TRIGGER);
           auto proto = obj_proto_by_id(GET_OBJ_VNUM(obj));
-          copy_proto_script(proto, obj, OBJ_TRIGGER);
+          obj_proto_copy_script_to_obj(proto, obj);
           assign_triggers(obj, OBJ_TRIGGER);
         }
         SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE);
@@ -1138,6 +1129,8 @@ void oedit_parse(struct descriptor_data *d, char *arg)
           STATE(d) = CON_PLAYING;
           act("$n stops using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
         }
+        if (OLC_OPROTO(d))
+          obj_proto_free(OLC_OPROTO(d));
         free(d->olc);
         d->olc = NULL;
       }
@@ -1358,7 +1351,6 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     break;
 
   case OEDIT_COSTPERDAY:
-    GET_OBJ_RENT(OLC_OBJ(d)) = LIMIT(atoi(arg), 0, MAX_OBJ_RENT);
     break;
 
   case OEDIT_TIMER:
@@ -1726,39 +1718,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     return;
 
   case OEDIT_SPELLBOOK:
-    if ((number = atoi(arg)) == 0) {
-      if (OLC_OBJ(d)->sbinfo) {
-        OLC_OBJ(d)->sbinfo[OLC_VAL(d)].spellname = 0;
-        OLC_OBJ(d)->sbinfo[OLC_VAL(d)].pages = 0;
-      } else {
-        CREATE(OLC_OBJ(d)->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-        OLC_OBJ(d)->sbinfo[OLC_VAL(d)].spellname = 0;
-        OLC_OBJ(d)->sbinfo[OLC_VAL(d)].pages = 0;
-      }
-      oedit_disp_prompt_spellbook_menu(d);
-    } else if (number < 0 || number >= SKILL_TABLE_SIZE) {
-      oedit_disp_spellbook_menu(d);
-    } else {
-      int counter;
-
-      /* add in check here if already applied.. deny builders another */
-      if (GET_LEVEL(d->character) < ADMLVL_IMPL) {
-        for (counter = 0; counter < SKILL_TABLE_SIZE; counter++) {
-          if (OLC_OBJ(d)->sbinfo && OLC_OBJ(d)->sbinfo[counter].spellname == number) {
-            write_to_output(d, "Object already has that spell.");
-            return;
-          }
-        }
-      }
-
-      if (!OLC_OBJ(d)->sbinfo) {
-        CREATE(OLC_OBJ(d)->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-      } 
-
-      OLC_OBJ(d)->sbinfo[OLC_VAL(d)].spellname = number;
-      OLC_OBJ(d)->sbinfo[OLC_VAL(d)].pages = MAX(1, spell_info[number].spell_level * 2);
-      oedit_disp_prompt_spellbook_menu(d);
-    }
+    write_to_output(d, "What do you think this is? D&D?");
     return;
 
   default:
@@ -1789,24 +1749,10 @@ void oedit_string_cleanup(struct descriptor_data *d, int terminator)
 /* this is all iedit stuff */
 void iedit_setup_existing(struct descriptor_data *d, struct obj_data *real_num)
 {
-  struct obj_data *obj;
-  int64_t temp_id;
-
   OLC_IOBJ(d) = real_num;
 
-  obj = create_obj();
-  temp_id = GET_ID(obj);
-  copy_object(obj,real_num);
-
-  /* free any assigned scripts */
-  if (SCRIPT(obj))
-    extract_script(obj, OBJ_TRIGGER);
-  SCRIPT(obj) = NULL;
-  /* find_obj helper */
-  remove_from_lookup_table(temp_id);
-  obj_unregister_id(temp_id);
-
-  OLC_OBJ(d) = obj;
+  CREATE(OLC_OPROTO(d), struct obj_proto_data, 1);
+  obj_proto_from_instance(OLC_OPROTO(d), real_num);
   OLC_IOBJ(d) = real_num;
   OLC_VAL(d) = 0;
   oedit_disp_menu(d);

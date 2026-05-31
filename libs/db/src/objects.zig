@@ -5,7 +5,7 @@ const IdSet = std.AutoHashMap(i64, void);
 const ListSet = std.StringHashMap(void);
 const ObjCallback = *const fn (*cdb.obj_data) callconv(.c) void;
 const ObjProtoEntry = struct {
-    proto: ?*cdb.obj_data = null,
+    proto: ?*cdb.obj_proto_data = null,
     special: cdb.SpecialFunc = null,
     count: usize = 0,
 };
@@ -132,7 +132,7 @@ pub export fn obj_proto_iterator_create() ?*anyopaque {
     return iterator;
 }
 
-pub export fn obj_proto_next(iterator_ptr: ?*anyopaque) ?*cdb.obj_data {
+pub export fn obj_proto_next(iterator_ptr: ?*anyopaque) ?*cdb.obj_proto_data {
     const iterator: *ObjProtoIterator = @ptrCast(@alignCast(iterator_ptr orelse return null));
     while (iterator.iter.next()) |entry| {
         if (entry.value_ptr.*.proto) |ptr| {
@@ -147,7 +147,7 @@ pub export fn obj_proto_iterator_free(iterator_ptr: ?*anyopaque) void {
     allocator.destroy(@as(*ObjProtoIterator, @ptrCast(@alignCast(iterator))));
 }
 
-pub export fn obj_proto_get(vnum: cdb.obj_vnum) ?*cdb.obj_data {
+pub export fn obj_proto_get(vnum: cdb.obj_vnum) ?*cdb.obj_proto_data {
     return if (obj_proto_map.get(vnum)) |entry| entry.proto else null;
 }
 
@@ -160,7 +160,7 @@ pub export fn obj_proto_count() usize {
     return total;
 }
 
-pub export fn obj_proto_put(vnum: cdb.obj_vnum, obj: ?*cdb.obj_data) void {
+pub export fn obj_proto_put(vnum: cdb.obj_vnum, obj: ?*cdb.obj_proto_data) void {
     if (obj) |ptr| {
         const entry = obj_proto_map.getOrPut(vnum) catch return;
         if (!entry.found_existing) {

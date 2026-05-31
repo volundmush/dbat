@@ -1173,7 +1173,7 @@ void dball_load()
 
 if (dballtime == 0) {
  struct char_data *hunter = NULL;
- struct char_data *proto = NULL;
+ struct mob_proto_data *proto = NULL;
 
  WISHTIME = 0;
  for (k = object_list; k; k = k->next) {
@@ -3350,7 +3350,7 @@ void name_from_drinkcon(struct obj_data *obj)
     strncat(new_name, cur_name, cpylen);	/* strncat: OK (size precalculated) */
   }
 
-  if (GET_OBJ_VNUM(obj) == NOTHING || obj->name != obj_proto_by_id(GET_OBJ_VNUM(obj))->name)
+  if (obj->name)
     free(obj->name);
   obj->name = new_name;
 }
@@ -3365,7 +3365,7 @@ void name_to_drinkcon(struct obj_data *obj, int type)
   CREATE(new_name, char, strlen(obj->name) + strlen(drinknames[type]) + 2);
   sprintf(new_name, "%s %s", obj->name, drinknames[type]);	/* sprintf: OK */
 
-  if (GET_OBJ_VNUM(obj) == NOTHING || obj->name != obj_proto_by_id(GET_OBJ_VNUM(obj))->name)
+  if (obj->name)
     free(obj->name);
 
   obj->name = new_name;

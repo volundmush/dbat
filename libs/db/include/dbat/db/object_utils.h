@@ -22,7 +22,6 @@ SpecialFunc obj_proto_special_get(obj_vnum vnum);
 #define GET_OBJ_PERM(obj)       ((obj)->bitvector)
 #define GET_OBJ_TYPE(obj)	((obj)->type_flag)
 #define GET_OBJ_COST(obj)	((obj)->cost)
-#define GET_OBJ_RENT(obj)	((obj)->cost_per_day)
 #define GET_OBJ_EXTRA(obj)	((obj)->extra_flags)
 #define GET_OBJ_EXTRA_AR(obj, i)   ((obj)->extra_flags[(i)])
 #define GET_OBJ_WEAR(obj)	((obj)->wear_flags)

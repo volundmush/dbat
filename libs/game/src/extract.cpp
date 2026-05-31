@@ -324,10 +324,8 @@ void extract_obj(struct obj_data *obj)
   if (SCRIPT(obj))
      extract_script(obj, OBJ_TRIGGER);
 
-  if (GET_OBJ_VNUM(obj) != 80 && GET_OBJ_VNUM(obj) != 81) {
-   if (obj->proto_script && obj->proto_script != obj_proto_by_id(GET_OBJ_VNUM(obj))->proto_script)
-     free_proto_script(obj, OBJ_TRIGGER);
-  }
+  if (obj->proto_script)
+    free_proto_script(obj, OBJ_TRIGGER);
 
   free_obj(obj);
 }
@@ -355,7 +353,6 @@ void extract_pending_chars(void)
     }
 
     REMOVE_FROM_LIST(vict, affect_list, next_affect, temp);
-    REMOVE_FROM_LIST(vict, affectv_list, next_affectv, temp);
     extract_char_final(vict);
     extractions_pending--;
 

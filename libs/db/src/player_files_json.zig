@@ -177,11 +177,9 @@ fn serializeObjectTree(allocator: std.mem.Allocator, obj: *cdb.obj_data, locatio
     _ = object.object.swapRemove("id");
     try jsonx.putInt(&object, allocator, "location", location);
     try jsonx.putInt(&object, allocator, "weight", objectBaseWeight(obj));
-    try jsonx.putInt(&object, allocator, "rent", obj.cost_per_day);
     try jsonx.putInt(&object, allocator, "generation", obj.generation);
     try jsonx.putInt(&object, allocator, "unique_id", obj.unique_id);
     try jsonx.putNonEmpty(&object, allocator, "object_affects", try serializeObjectAffects(allocator, obj));
-    try jsonx.putNonEmpty(&object, allocator, "spellbook", try serializeSpellbook(allocator, obj));
 
     var contents = std.json.Array.init(allocator);
     var child = obj.contains;
@@ -208,20 +206,6 @@ fn serializeObjectAffects(allocator: std.mem.Allocator, obj: *cdb.obj_data) !std
         try jsonx.putInt(&item, allocator, "location", aff.location);
         try jsonx.putInt(&item, allocator, "modifier", aff.modifier);
         try jsonx.putInt(&item, allocator, "specific", aff.specific);
-        try array.append(item);
-    }
-    return .{ .array = array };
-}
-
-fn serializeSpellbook(allocator: std.mem.Allocator, obj: *cdb.obj_data) !std.json.Value {
-    var array = std.json.Array.init(allocator);
-    if (obj.sbinfo == null) return .{ .array = array };
-    for (0..cdb.SPELLBOOK_SIZE) |index| {
-        const spell = obj.sbinfo[index];
-        if (spell.spellname == 0) break;
-        var item = std.json.Value{ .object = std.json.ObjectMap.empty };
-        try jsonx.putInt(&item, allocator, "spell", spell.spellname);
-        try jsonx.putInt(&item, allocator, "pages", spell.pages);
         try array.append(item);
     }
     return .{ .array = array };
@@ -272,11 +256,9 @@ fn deserializeObjectTree(value: std.json.Value) !*cdb.obj_data {
     const obj = if (proto_id != cdb.NOTHING) read_object(proto_id, VIRTUAL) orelse try createUniqueObject() else try createUniqueObject();
     obj.ex_description = null;
     try objects_json.deserializeObject(obj, .{ .mode = .instance, .preserve_id = false }, value);
-    if (try jsonx.intField(value, "rent", c_int)) |v| obj.cost_per_day = v;
     if (try jsonx.intField(value, "generation", cdb.time_t)) |v| obj.generation = v;
     if (try jsonx.intField(value, "unique_id", i64)) |v| obj.unique_id = v;
     if (jsonx.field(value, "object_affects")) |affects| try deserializeObjectAffects(obj, affects);
-    if (jsonx.field(value, "spellbook")) |spellbook| try deserializeSpellbook(obj, spellbook);
 
     if (jsonx.field(value, "contains")) |contents| {
         if (contents != .array) return error.ExpectedArray;
@@ -318,24 +300,6 @@ fn deserializeObjectAffects(obj: *cdb.obj_data, value: std.json.Value) !void {
         if (try jsonx.intField(item, "location", c_int)) |v| obj.affected[index].location = v;
         if (try jsonx.intField(item, "modifier", c_int)) |v| obj.affected[index].modifier = v;
         if (try jsonx.intField(item, "specific", c_int)) |v| obj.affected[index].specific = v;
-    }
-}
-
-fn deserializeSpellbook(obj: *cdb.obj_data, value: std.json.Value) !void {
-    if (value != .array) return error.ExpectedArray;
-    if (value.array.items.len == 0) return;
-    if (obj.sbinfo == null) {
-        obj.sbinfo = @ptrCast(@alignCast(calloc(cdb.SPELLBOOK_SIZE, @sizeOf(cdb.obj_spellbook_spell)) orelse return error.OutOfMemory));
-    }
-    for (0..cdb.SPELLBOOK_SIZE) |index| {
-        obj.sbinfo[index].spellname = 0;
-        obj.sbinfo[index].pages = 0;
-    }
-    for (value.array.items, 0..) |item, index| {
-        if (index >= cdb.SPELLBOOK_SIZE) break;
-        if (item != .object) return error.ExpectedObject;
-        if (try jsonx.intField(item, "spell", c_int)) |v| obj.sbinfo[index].spellname = v;
-        if (try jsonx.intField(item, "pages", c_int)) |v| obj.sbinfo[index].pages = v;
     }
 }
 

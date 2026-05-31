@@ -195,291 +195,19 @@ feato(FEAT_WIDEN_SPELL, "widen spell", FALSE, FALSE, FALSE);
 
 int feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg)
 {
-  if (featnum > NUM_FEATS_DEFINED)
-    return FALSE;
-
-  if (HAS_FEAT(ch, featnum) && !feat_list[featnum].can_stack)
-    return FALSE;
-
-  switch (featnum) {
-
-  case FEAT_ARMOR_PROFICIENCY_HEAVY:
-    if (HAS_FEAT(ch, FEAT_ARMOR_PROFICIENCY_MEDIUM))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_ARMOR_PROFICIENCY_MEDIUM:
-    if (HAS_FEAT(ch, FEAT_ARMOR_PROFICIENCY_LIGHT))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_AUGMENT_SUMMONING:
-    if (HAS_FEAT(ch, FEAT_SPELL_FOCUS))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_IMPROVED_SHIELD_BASH:
-    if (HAS_FEAT(ch, FEAT_ARMOR_PROFICIENCY_SHIELD))
-      return TRUE;
-    return FALSE;    
-  
-  case FEAT_DODGE:
-    if (GET_DEX(ch) >= 13)
-      return TRUE;
-    return FALSE;
-
-  case FEAT_COMBAT_EXPERTISE:
-    if (GET_INT(ch) >= 13)
-      return TRUE;
-   return FALSE;
-   
-  case FEAT_DIEHARD:
-    if (HAS_FEAT(ch, FEAT_ENDURANCE))
-      return TRUE;
-    return FALSE; 
-  
-  case FEAT_SUNDER:
-  case FEAT_IMPROVED_OVERRUN: 
-  case FEAT_IMPROVED_BULL_RUSH:
-    if (HAS_FEAT(ch, FEAT_POWER_ATTACK))
-      return TRUE;
-    return FALSE; 
-   
-  case FEAT_MOBILITY:
-    if (HAS_FEAT(ch, FEAT_DODGE))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_EXOTIC_WEAPON_PROFICIENCY:
-    if (GET_BAB(ch) >= 1)
-      return TRUE;
-    return FALSE;
-
-  case FEAT_WEAPON_PROFICIENCY_BASTARD_SWORD:
-    if (GET_BAB(ch) >= 1)
-    return TRUE;
-    return FALSE;
-
-  case FEAT_IMPROVED_FEINT:
-  case FEAT_IMPROVED_DISARM:
-  case FEAT_IMPROVED_TRIP:
-   if (HAS_FEAT(ch, FEAT_COMBAT_EXPERTISE))
-    return TRUE;
-   return FALSE;
-
-  case FEAT_IMPROVED_GRAPPLE:
-  case FEAT_DEFLECT_ARROWS:
-    if (HAS_FEAT(ch, FEAT_IMPROVED_UNARMED_STRIKE))
-      if (GET_DEX(ch) >= 13) 
-        return TRUE;
-    return FALSE;
-
-  case FEAT_STUNNING_FIST:
-    if (GET_DEX(ch) >= 13)
-      if (GET_WIS(ch) >= 13)
-        if (HAS_FEAT(ch, FEAT_IMPROVED_UNARMED_STRIKE))
-          if (GET_BAB(ch) >= 8)
-            return TRUE;
-    return FALSE;
-  
-  case FEAT_POWER_ATTACK:
-    if (GET_STR(ch) >= 13)
-      return TRUE;
-    return FALSE;
-
-  case FEAT_IMPROVED_PRECISE_SHOT:
-    if (GET_DEX(ch) >= 19)
-      if (HAS_FEAT(ch, FEAT_POINT_BLANK_SHOT))
-        if (GET_BAB(ch) >= 11)
-      return TRUE;
-    return FALSE;
-
-  case FEAT_CLEAVE:
-    if (HAS_FEAT(ch, FEAT_POWER_ATTACK))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_TWO_WEAPON_FIGHTING:
-    if (GET_DEX(ch) >= 15)
-      return TRUE;
-    return FALSE;
-
-  case FEAT_IMPROVED_TWO_WEAPON_FIGHTING:
-    if (GET_DEX(ch) >= 17 && HAS_FEAT(ch, FEAT_TWO_WEAPON_FIGHTING) && GET_BAB(ch) >= 6)
-      return TRUE;
-    return FALSE;
-
-  case FEAT_IMPROVED_CRITICAL:
-    if (GET_BAB(ch) < 8)
-      return FALSE;
-    if (!iarg || is_proficient_with_weapon(ch, iarg))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_FAR_SHOT:
-    if (HAS_FEAT(ch, FEAT_POINT_BLANK_SHOT))
-      return TRUE;
-   return FALSE;
-
-  case FEAT_WEAPON_FINESSE:
-  case FEAT_WEAPON_FOCUS:
-    if (GET_BAB(ch) < 1)
-      return FALSE;
-    if (!iarg || is_proficient_with_weapon(ch, iarg))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_WEAPON_SPECIALIZATION:
-    if (GET_CLASS_RANKS(ch, CLASS_NAIL) < 4)
-      return FALSE;
-    if (!iarg || is_proficient_with_weapon(ch, iarg))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_GREATER_WEAPON_FOCUS:
-    if (GET_CLASS_RANKS(ch, CLASS_NAIL) < 8)
-      return FALSE;
-    if (!iarg)
-      return TRUE;
-    if (is_proficient_with_weapon(ch, iarg) && HAS_COMBAT_FEAT(ch, CFEAT_WEAPON_FOCUS, iarg))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_WHIRLWIND_ATTACK:
-     if (HAS_FEAT(ch, FEAT_COMBAT_EXPERTISE))
-       if (HAS_FEAT(ch, FEAT_DODGE))
-         if (HAS_FEAT(ch, FEAT_MOBILITY))
-            if (HAS_FEAT(ch, FEAT_SPRING_ATTACK))
-               if (GET_BAB(ch) >= 4)
-                  return TRUE;
-    return FALSE;
-
-  case FEAT_GREATER_WEAPON_SPECIALIZATION:
-    if (GET_CLASS_RANKS(ch, CLASS_NAIL) < 12)
-      return FALSE;
-    if (!iarg)
-      return TRUE;
-    if (is_proficient_with_weapon(ch, iarg) &&
-        HAS_COMBAT_FEAT(ch, CFEAT_GREATER_WEAPON_FOCUS, iarg) &&
-        HAS_COMBAT_FEAT(ch, CFEAT_WEAPON_SPECIALIZATION, iarg) &&
-        HAS_COMBAT_FEAT(ch, CFEAT_WEAPON_FOCUS, iarg))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_SPELL_FOCUS:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_SPELL_PENETRATION:
-    if (GET_LEVEL(ch))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_BREW_POTION:
-    if (GET_LEVEL(ch) >= 3)
-      return TRUE;
-    return FALSE;
-
-  case FEAT_CRAFT_MAGICAL_ARMS_AND_ARMOR:
-    if (GET_LEVEL(ch) >= 5)
-      return TRUE;
-    return FALSE;
-
-  case FEAT_CRAFT_ROD:
-    if (GET_LEVEL(ch) >= 9)
-      return TRUE;
-    return FALSE;
-
-  case FEAT_CRAFT_STAFF:
-    if (GET_LEVEL(ch) >= 12)
-      return TRUE;
-    return FALSE;
-
-  case FEAT_CRAFT_WAND:
-    if (GET_LEVEL(ch) >= 5)
-      return TRUE;
-    return FALSE;
-
-  case FEAT_FORGE_RING:
-    if (GET_LEVEL(ch) >= 5)
-      return TRUE;
-    return FALSE;
-
-  case FEAT_SCRIBE_SCROLL:
-    if (GET_LEVEL(ch) >= 1)
-      return TRUE;
-    return FALSE;
-
-  case FEAT_EMPOWER_SPELL:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_EXTEND_SPELL:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_HEIGHTEN_SPELL:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_MAXIMIZE_SPELL:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_QUICKEN_SPELL:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_SILENT_SPELL:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_STILL_SPELL:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_EXTRA_TURNING:
-    if (GET_CLASS_RANKS(ch, CLASS_PICCOLO))
-      return TRUE;
-    return FALSE;
-
-  case FEAT_SPELL_MASTERY:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
-      return TRUE;
-    return FALSE;
-
-  default:
-    return TRUE;
-
-  }
+  return FALSE;
 }
 
 int is_proficient_with_armor(const struct char_data *ch, int cmarmor_type)
 {
   switch (cmarmor_type) {
     case ARMOR_TYPE_LIGHT:
-      if (HAS_FEAT(ch, FEAT_ARMOR_PROFICIENCY_LIGHT))
-        return TRUE;
     break;
     case ARMOR_TYPE_MEDIUM:
-      if (HAS_FEAT(ch, FEAT_ARMOR_PROFICIENCY_MEDIUM))
-        return TRUE;
     break;
     case ARMOR_TYPE_HEAVY:
-      if (HAS_FEAT(ch, FEAT_ARMOR_PROFICIENCY_HEAVY))
-        return TRUE;
     break;
     case ARMOR_TYPE_SHIELD:
-      if (HAS_FEAT(ch, FEAT_ARMOR_PROFICIENCY_SHIELD))
-        return TRUE;
     break;
   }
   return FALSE;
@@ -499,8 +227,6 @@ int is_proficient_with_weapon(const struct char_data *ch, int cmweapon_type)
   case WEAPON_TYPE_SLING:
   case WEAPON_TYPE_THROWN:
   case WEAPON_TYPE_CLUB:
-    if (HAS_FEAT(ch, FEAT_SIMPLE_WEAPON_PROFICIENCY))
-      return TRUE;
     break;
   case WEAPON_TYPE_SHORTBOW:
   case WEAPON_TYPE_LONGBOW:
@@ -515,8 +241,6 @@ int is_proficient_with_weapon(const struct char_data *ch, int cmweapon_type)
   case WEAPON_TYPE_POLEARM:
   case WEAPON_TYPE_BASTARD_SWORD:
   case WEAPON_TYPE_AXE:
-    if (HAS_FEAT(ch, FEAT_MARTIAL_WEAPON_PROFICIENCY))
-      return TRUE;
     break;
   default:
     return FALSE;
@@ -546,161 +270,14 @@ void sort_feats(void)
 
 void list_feats_known(struct char_data *ch) 
 {
-  int i, j, sortpos;
-  int none_shown = TRUE;
-  int temp_value;
-  int added_hp = 0;
-  char buf [MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
-
-  if (!GET_FEAT_POINTS(ch))
-    strcpy(buf, "\r\nYou cannot learn any feats right now.\r\n");
-  else
-    sprintf(buf, "\r\nYou can learn %d feat%s right now.\r\n",
-            GET_FEAT_POINTS(ch), (GET_FEAT_POINTS(ch) == 1 ? "" : "s"));
-
-    
-    // Display Headings
-    sprintf(buf + strlen(buf), "\r\n");
-    sprintf(buf + strlen(buf), "@WFeats Known@n\r\n");
-    sprintf(buf + strlen(buf), "@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@n\r\n");
-    sprintf(buf + strlen(buf), "\r\n");
-
-  strcpy(buf2, buf);
-
-  for (sortpos = 1; sortpos <= NUM_FEATS_DEFINED; sortpos++) {
-
-    if (strlen(buf2) > MAX_STRING_LENGTH -32)
-      break;
-
-    i = feat_sort_info[sortpos];
-    if (HAS_FEAT(ch, i)  && feat_list[i].in_game) {
-      switch (i) {
-        case FEAT_SKILL_FOCUS:
-        sprintf(buf, "%-20s (+%d points overall)\r\n", feat_list[i].name, HAS_FEAT(ch, i) * 2);
-        strcat(buf2, buf);
-        none_shown = FALSE;
-        break;
-        case FEAT_TOUGHNESS:
-      temp_value = HAS_FEAT(ch, FEAT_TOUGHNESS);
-      added_hp = temp_value * 3;
-      sprintf(buf, "%-20s (+%d hp)\r\n", feat_list[i].name, added_hp);
-      strcat(buf2, buf);  
-      none_shown = FALSE;
-        break;
-        case FEAT_IMPROVED_CRITICAL:
-        case FEAT_WEAPON_FINESSE:
-        case FEAT_WEAPON_FOCUS:
-        case FEAT_WEAPON_SPECIALIZATION:
-        case FEAT_GREATER_WEAPON_FOCUS:
-        case FEAT_GREATER_WEAPON_SPECIALIZATION:
-      for (j = 0; j <= MAX_WEAPON_TYPES; j++) {
-        if (HAS_COMBAT_FEAT(ch, feat_to_subfeat(i), j)) {
-          sprintf(buf, "%-20s (%s)\r\n", feat_list[i].name, weapon_type[j]);
-          strcat(buf2, buf);
-          none_shown = FALSE;
-        }
-      }
-        break;
-        default: 
-        sprintf(buf, "%-20s\r\n", feat_list[i].name);
-        strcat(buf2, buf);        /* The above, @ should always be safe to do. */
-        none_shown = FALSE;
-        break;
-      }
-    }
-  }
-
-  if (none_shown) {
-    sprintf(buf, "You do not know any feats at this time.\r\n");
-    strcat(buf2, buf);
-  }
-   
-  send_to_char(ch, "%s", buf2);
 }
 
 void list_feats_available(struct char_data *ch) 
 {
-  char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
-  int i, sortpos;
-  int none_shown = TRUE;
-
-  if (!GET_FEAT_POINTS(ch))
-    strcpy(buf, "\r\nYou cannot learn any feats right now.\r\n");
-  else
-    sprintf(buf, "\r\nYou can learn %d feat%s right now.\r\n",
-            GET_FEAT_POINTS(ch), (GET_FEAT_POINTS(ch) == 1 ? "" : "s"));
-    
-    // Display Headings
-    sprintf(buf + strlen(buf), "\r\n");
-    sprintf(buf + strlen(buf), "@WFeats Available to Learn@n\r\n");
-    sprintf(buf + strlen(buf), "@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@n\r\n");
-    sprintf(buf + strlen(buf), "\r\n");
-
-  strcpy(buf2, buf);
-
-  for (sortpos = 1; sortpos <= NUM_FEATS_DEFINED; sortpos++) {
-    i = feat_sort_info[sortpos];
-    if (strlen(buf2) >= MAX_STRING_LENGTH - 32) {
-      strcat(buf2, "**OVERFLOW**\r\n"); 
-      break;   
-    }
-    if (feat_is_available(ch, i, 0, NULL) && feat_list[i].in_game && feat_list[i].can_learn) {
-      sprintf(buf, "%-20s\r\n", feat_list[i].name);
-      strcat(buf2, buf);        /* The above, @ should always be safe to do. */
-      none_shown = FALSE;
-    }
-  }
-
-  if (none_shown) {
-    sprintf(buf, "There are no feats available for you to learn at this point.\r\n");
-    strcat(buf2, buf);
-  }
-   
-  send_to_char(ch, "%s", buf2);
 }
 void list_feats_complete(struct char_data *ch) 
 {
 
-	char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
-  int i, sortpos;
-  int none_shown = TRUE;
-
-  if (!GET_FEAT_POINTS(ch))
-    strcpy(buf, "\r\nYou cannot learn any feats right now.\r\n");
-  else
-    sprintf(buf, "\r\nYou can learn %d feat%s right now.\r\n",
-            GET_FEAT_POINTS(ch), (GET_FEAT_POINTS(ch) == 1 ? "" : "s"));
-
-    
-    // Display Headings
-    sprintf(buf + strlen(buf), "\r\n");
-    sprintf(buf + strlen(buf), "@WComplete Feat List@n\r\n");
-    sprintf(buf + strlen(buf), "@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@n\r\n");
-    sprintf(buf + strlen(buf), "\r\n");
-
-  strcpy(buf2, buf);
-
-  for (sortpos = 1; sortpos <= NUM_FEATS_DEFINED; sortpos++) {
-    i = feat_sort_info[sortpos];
-    if (strlen(buf2) >= MAX_STRING_LENGTH - 32) {
-      strcat(buf2, "**OVERFLOW**\r\n"); 
-      break;   
-    }
-//	sprintf(buf, "%s : %s\r\n", feat_list[i].name, feat_list[i].in_game ? "In Game" : "Not In Game");
-//	strcat(buf2, buf);
-    if (feat_list[i].in_game) {
-      sprintf(buf, "%-20s\r\n", feat_list[i].name);
-      strcat(buf2, buf);        /* The above, @ should always be safe to do. */
-      none_shown = FALSE;
-    }
-  }
-
-  if (none_shown) {
-    sprintf(buf, "There are currently no feats in the game.\r\n");
-    strcat(buf2, buf);
-  }
-   
-  send_to_char(ch, "%s", buf2);
 }
 
 int find_feat_num(char *name)

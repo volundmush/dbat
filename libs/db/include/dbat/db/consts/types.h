@@ -66,7 +66,6 @@ struct command_info;
 struct alias_data;
 struct time_data;
 struct abil_data;
-struct player_special_data;
 struct guild_data;
 struct shop_data;
 struct shop_buy_data;
@@ -77,7 +76,6 @@ struct social_messg;
 struct weather_data;
 struct time_info_data;
 struct reset_com;
-struct innate_node;
 struct skill_data;
 
 typedef struct char_data char_data;
@@ -95,7 +93,6 @@ typedef struct command_info command_info;
 typedef struct alias_data alias_data;
 typedef struct time_data time_data;
 typedef struct abil_data abil_data;
-typedef struct player_special_data player_special_data;
 typedef struct guild_data guild_data;
 typedef struct shop_data shop_data;
 typedef struct shop_buy_data shop_buy_data;
@@ -106,7 +103,6 @@ typedef struct social_messg social_messg;
 typedef struct weather_data weather_data;
 typedef struct time_info_data time_info_data;
 typedef struct reset_com reset_com;
-typedef struct innate_node innate_node;
 typedef struct skill_data skill_data;
 
 #define ACMD(name) void (name)(struct char_data *ch, char *argument, int cmd, int subcmd)

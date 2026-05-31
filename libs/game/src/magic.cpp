@@ -116,27 +116,6 @@ int mag_materials(struct char_data *ch, int item0, int item1, int item2,
 
 int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum, int level, int cast_stat)
 {
-  int stype;
-  int dc;
-  int total;
-  if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_FORT))
-    stype = SAVING_FORTITUDE;
-  else if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_REFLEX))
-    stype = SAVING_REFLEX;
-  else if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_WILL))
-    stype = SAVING_WILL;
-  else
-    return FALSE;
-  total = GET_SAVE(victim, stype) + rand_number(1, 20);
-  dc = spell_info[spellnum].spell_level + level + ability_mod_value(cast_stat);
-  if (ch) {
-    if (HAS_SCHOOL_FEAT(ch, CFEAT_SPELL_FOCUS, spell_info[spellnum].school))
-      dc++;
-    if (HAS_SCHOOL_FEAT(ch, CFEAT_GREATER_SPELL_FOCUS, spell_info[spellnum].school))
-      dc++;
-  }
-  if (total >= dc)
-    return TRUE;
   return FALSE;
 }
 
@@ -151,142 +130,7 @@ int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum, i
 int mag_damage(int level, struct char_data *ch, struct char_data *victim,
 		     int spellnum)
 {
-  int dam = 0;
-
-  if (victim == NULL || ch == NULL)
-    return (0);
-
-  switch (spellnum) {
-    /* Mostly mages */
-  case SPELL_MAGIC_MISSILE:
-    dam = dice(MIN(level, 5), 4) + MIN(level, 5);
-    break;
-
-  case SPELL_CHILL_TOUCH:	/* chill touch also has an affect */
-    dam = dice(1, 6);
-    break;
-
-  case SPELL_BURNING_HANDS:
-    dam = dice(MIN(level, 5), 4);
-    break;
-
-  case SPELL_SHOCKING_GRASP:
-    dam = dice(1, 8) + MIN(level, 20);
-    break;
-
-  case SPELL_LIGHTNING_BOLT:
-  case SPELL_FIREBALL:
-    dam = dice(MIN(level, 10), 6);
-    break;
-
-  case SPELL_COLOR_SPRAY:
-    dam = dice(1, 1) + 1;
-    break;
-
-    /* Mostly clerics */
-  case SPELL_DISPEL_EVIL:
-    dam = dice(6, 8) + 6;
-    if (IS_EVIL(ch)) {
-      victim = ch;
-      dam = GET_HIT(ch) - 1;
-    } else if (IS_GOOD(victim)) {
-      act("The gods protect $N.", FALSE, ch, 0, victim, TO_CHAR);
-      return (0);
-    }
-    break;
-
-  case SPELL_DISPEL_GOOD:
-    dam = dice(6, 8) + 6;
-    if (IS_GOOD(ch)) {
-      victim = ch;
-      dam = GET_HIT(ch) - 1;
-    } else if (IS_EVIL(victim)) {
-      act("The gods protect $N.", FALSE, ch, 0, victim, TO_CHAR);
-      return (0);
-    }
-    break;
-
-  case SPELL_CALL_LIGHTNING:
-    dam = dice(MIN(level, 10), 10);
-    break;
-
-  case SPELL_HARM:
-    dam = dice(8, 8) + 8;
-    break;
-
-  case SPELL_ENERGY_DRAIN:
-    if (GET_LEVEL(victim) <= 2)
-      dam = 100;
-    else
-      dam = dice(1, 10);
-    break;
-
-    /* Area spells */
-  case SPELL_EARTHQUAKE:
-    dam = dice(2, 8) + level;
-    break;
-
-  case SPELL_INFLICT_LIGHT:
-    dam = dice(1, 8) + MIN(level, 5);
-    break;
-  case SPELL_INFLICT_CRITIC:
-    dam = dice(4, 8) + MIN(level, 20);
-    break;
-
-  case SPELL_ACID_SPLASH:
-  case SPELL_RAY_OF_FROST:
-    dam = dice(1, 3);
-    break;
-
-  case SPELL_DISRUPT_UNDEAD:
-    if (AFF_FLAGGED(victim, AFF_UNDEAD))
-      dam = dice(1, 6);
-    else {
-      send_to_char(ch, "This magic only affects the undead!\r\n");
-      dam = 0;
-    }
-    break;
-
-  case SPELL_ICE_STORM:
-  case SPELL_SHOUT:
-    dam = dice(5, 6);
-    break;
-
-  case SPELL_CONE_OF_COLD:
-    dam = dice(MIN(level, 15), 6);
-    break;
-
-  } /* switch(spellnum) */
-
-  if (mag_newsaves(ch, victim, spellnum, level, GET_INT(ch))) {
-    if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_NONE)) {
-      send_to_char(victim, "@g*save*@y You avoid any injury.@n\r\n");
-      dam = 0;
-    } else if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_HALF)) {
-      if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_REFLEX) &&
-          HAS_FEAT(victim, FEAT_EVASION) && 
-          (!GET_EQ(victim, WEAR_BODY) ||
-          GET_OBJ_TYPE(GET_EQ(victim, WEAR_BODY)) != ITEM_ARMOR ||
-          GET_OBJ_VAL(GET_EQ(victim, WEAR_BODY), VAL_ARMOR_SKILL) < ARMOR_TYPE_MEDIUM)) {
-        send_to_char(victim, "@g*save*@y Your evasion ability allows you to avoid ANY injury.@n\r\n");
-        dam = 0;
-      } else {
-        send_to_char(victim, "@g*save*@y You take half damage.@n\r\n");
-        dam /= 2;
-      }
-    }
-  } else if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_HALF) &&
-             IS_SET(spell_info[spellnum].save_flags, MAGSAVE_REFLEX) &&
-             HAS_FEAT(victim, FEAT_IMPROVED_EVASION) && 
-             (!GET_EQ(victim, WEAR_BODY) ||
-              GET_OBJ_TYPE(GET_EQ(victim, WEAR_BODY)) != ITEM_ARMOR ||
-              GET_OBJ_VAL(GET_EQ(victim, WEAR_BODY), VAL_ARMOR_SKILL) < ARMOR_TYPE_MEDIUM)) {
-    send_to_char(victim, "@r*save*@y Your improved evasion prevents full damage even on failure.@n\r\n");
-    dam /= 2;
-  }
-
-  /* and finally, inflict the damage */
-  return (1);
+  return 0;
 }
 
 
@@ -1017,10 +861,6 @@ void mag_points(int level, struct char_data *ch, struct char_data *victim,
   case SPELL_HEAL:
     healing = 100 + dice(3, 8);
     send_to_char(victim, "A warm feeling floods your body.\r\n");
-    if (AFF_FLAGGED(ch, AFF_CDEATH)) {
-      affectv_from_char(ch, ART_QUIVERING_PALM);
-      send_to_char(ch, "Your nerves settle slightly\r\n");
-    }
     break;
   case SPELL_SENSU:
     if (GET_COND(victim, HUNGER) > -1) {
@@ -1188,54 +1028,6 @@ void mag_creations(int level, struct char_data *ch, int spellnum)
   load_otrigger(tobj);
 }
 
-/* affect_update_violence: called from fight.c (causes spells to wear off) */
-void affect_update_violence(void)
-{
-  struct affected_type *af, *next;
-  struct char_data *i;
-  int dam;
-  int maxdam;
-
-  for (i = affectv_list; i; i = i->next_affectv) {
-    for (af = i->affectedv; af; af = next) {
-      next = af->next;
-      if (af->duration >= 1) {
-        af->duration--;
-        switch (af->type) {
-        case ART_EMPTY_BODY:
-          if (GET_KI(i) >= 10) {
-            GET_KI(i) -= 10;
-          } else {
-            af->duration = 0; /* Wear it off immediately! No more ki */
-          }
-        }
-      } else if (af->duration == -1) {     /* No action */
-        continue;
-      }
-      if (!af->duration) {
-        if ((af->type > 0) && (af->type < SKILL_TABLE_SIZE))
-          if (!af->next || (af->next->type != af->type) ||
-              (af->next->duration > 0))
-            if (spell_info[af->type].wear_off_msg)
-              send_to_char(i, "%s\r\n", spell_info[af->type].wear_off_msg);
-          if (af->bitvector == AFF_SUMMONED) {
-            stop_follower(i);
-            if (!DEAD(i))
-              extract_char(i);
-          }
-          if (af->type == ART_QUIVERING_PALM) {
-            maxdam = GET_HIT(i) + 8;
-            dam = GET_MAX_HIT(i) * 3 / 4;
-            dam = MIN(dam, maxdam);
-            dam = MAX(0, dam);
-            log("Creeping death strike doing %d dam", dam);
-          }
-        affectv_remove(i, af);
-      }
-    }
-  }
-}
-
 void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
                       int spellnum)
 {
@@ -1367,10 +1159,6 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
     send_to_char(ch, "%s", CONFIG_NOEFFECT);
     return;
   }
-
-  for (i = 0; i < MAX_SPELL_AFFECTS; i++)
-    if (af[i].bitvector || (af[i].location != APPLY_NONE))
-      affectv_join(victim, af+i, accum_duration, FALSE, accum_affect, FALSE);
 
   if (to_vict != NULL)
     act(to_vict, FALSE, victim, 0, ch, TO_CHAR);

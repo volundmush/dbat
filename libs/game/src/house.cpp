@@ -695,7 +695,6 @@ int House_load(room_vnum rvnum)
         temp->wear_flags[3] = t[4];
         temp->weight = t[5];
         temp->cost = t[6];
-        temp->cost_per_day = t[7];
 
         /* buf2 is error codes pretty much */
         //strcat(buf2, ", after numeric constants (expecting E/#xxx)");
@@ -754,12 +753,6 @@ int House_load(room_vnum rvnum)
               get_line(fl, line); 
               sscanf(line, "%d %d", t, t + 1); 
 
-              if (!temp->sbinfo) { 
-                CREATE(temp->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE); 
-                memset((char *) temp->sbinfo, 0, SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell)); 
-              } 
-              temp->sbinfo[j].spellname = t[0]; 
-              temp->sbinfo[j].pages = t[1]; 
               j++; 
               get_line(fl,line); 
               break;

@@ -1051,19 +1051,6 @@ void set_title(struct char_data *ch, char *title)
     send_to_char(ch, "Title is disabled for the time being while Iovan works on a brand new and fancier title system.\r\n");
     return;
   }
-  /*
-   if (title == NULL) {
-     title = class_desc_str(ch, 2, TRUE);
-   }
-
-   if (strlen(title) > MAX_TITLE_LENGTH)
-     title[MAX_TITLE_LENGTH] = '\0';
-
-   if (GET_TITLE(ch) != NULL)
-     free(GET_TITLE(ch));
-
-   GET_TITLE(ch) = strdup(title);
-  */
 }
 
 void gain_level(struct char_data *ch, int whichclass)

@@ -29,29 +29,11 @@ extern "C" {
 
 #define GET_BANK_INTEREST(ch) MIN(25000, (int)(((double)GET_BANK_GOLD((ch)) * 0.04)))
 
-/*
- * Accessing player specific data structures on a mobile is a very bad thing
- * to do.  Consider that changing these variables for a single mob will change
- * it for every other single mob in the game.  If we didn't specifically check
- * for it, 'wimpy' would be an extremely bad thing for a mob to do, as an
- * example.  If you really couldn't care less, change this to a '#if 0'.
- */
-#if 1
-/* Subtle bug in the '#var', but works well for now. */
-#define CHECK_PLAYER_SPECIAL(ch, var) \
-	(*(((ch)->player_specials == &dummy_mob) ? (log("OHNO: Mob using '"#var"' at %s:%d.", __FILE__, __LINE__), &(var)) : &(var)))
-#else
-#define CHECK_PLAYER_SPECIAL(ch, var)	(var)
-#endif
-
 #define MOB_FLAGS(ch)	((ch)->act)
 #define PLR_FLAGS(ch)	((ch)->act)
-#define PRF_FLAGS(ch) CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->pref))
+#define PRF_FLAGS(ch) ((ch)->pref)
 #define AFF_FLAGS(ch)	((ch)->affected_by)
 #define ADM_FLAGS(ch)	((ch)->admflags)
-
-/* Return the gauntlet highest room for ch */ 
-#define GET_GAUNTLET(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->gauntlet))
 
 #define IS_NPC(ch)	(IS_SET_AR(MOB_FLAGS(ch), MOB_ISNPC))
 #define IS_MOB(ch)	(IS_NPC(ch) && ch->vnum != NOTHING)
@@ -99,11 +81,7 @@ extern "C" {
 #define GET_LEVEL(ch)	(GET_CLASS_LEVEL(ch) + GET_LEVEL_ADJ(ch) + GET_HITDICE(ch))
 #define GET_PFILEPOS(ch)((ch)->pfilepos)
 
-#define GET_CLASS(ch)   ((ch)->chclass ? (ch)->chclass : 0)
-#define GET_CLASS_NONEPIC(ch, whichclass) ((ch)->chclasses[whichclass])
-#define GET_CLASS_EPIC(ch, whichclass) ((ch)->epicclasses[whichclass])
-#define GET_CLASS_RANKS(ch, whichclass) (GET_CLASS_NONEPIC(ch, whichclass) + \
-                                         GET_CLASS_EPIC(ch, whichclass))
+#define GET_CLASS(ch)   ((ch)->chclass)
 #define GET_RACE(ch)    ((ch)->race)
 #define GET_HAIRL(ch)   ((ch)->hairl)
 #define GET_HAIRC(ch)   ((ch)->hairc)
@@ -117,15 +95,12 @@ extern "C" {
 #define GET_PC_HEIGHT(ch)	(!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)((ch)->height * 0.68) : age(ch)->year <= 12 ? (int)((ch)->height * 0.72) : age(ch)->year <= 14 ? (int)((ch)->height * 0.85) : age(ch)->year <= 16 ? (int)((ch)->height * 0.92) : (ch)->height : (ch)->height)
 #define GET_PC_WEIGHT(ch)	(!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)((ch)->weight * 0.48) : age(ch)->year <= 12 ? (int)((ch)->weight * 0.55) : age(ch)->year <= 14 ? (int)((ch)->weight * 0.7) : age(ch)->year <= 16 ? (int)((ch)->weight * 0.85) : (ch)->weight : (ch)->weight)
 #define GET_SEX(ch)	((ch)->sex)
-#define GET_TLEVEL(ch)	((ch)->player_specials->tlevel)
-#define CARRYING(ch)    ((ch)->player_specials->carrying)
-#define CARRIED_BY(ch)  ((ch)->player_specials->carried_by)
-#define RACIAL_PREF(ch) ((ch)->player_specials->racial_pref)
+#define CARRYING(ch)    ((ch)->carrying_char)
+#define CARRIED_BY(ch)  ((ch)->carried_by_char)
+#define RACIAL_PREF(ch) ((ch)->racial_pref)
 #define GET_RP(ch)      ((ch)->rp)
-#define GET_RBANK(ch)   ((ch)->rbank)
 #define GET_TRP(ch)     ((ch)->trp)
 #define GET_SUPPRESS(ch) ((ch)->suppression)
-#define GET_SUPP(ch)    ((ch)->suppressed)
 #define GET_RDISPLAY(ch) ((ch)->rdisplay)
 
 #define GET_STR(ch)     ((ch)->aff_abils.str)
@@ -170,7 +145,6 @@ extern "C" {
 #define GET_CHARGE(ch)    ((ch)->charge)
 #define GET_CHARGETO(ch)  ((ch)->chargeto)
 #define GET_ARMOR(ch)     ((ch)->armor)
-#define GET_ARMOR_LAST(ch) ((ch)->armor_last)
 #define GET_HIT(ch)	  getCurPL(ch)
 #define GET_MAX_HIT(ch)	  getEffMaxPL(ch)
 #define GET_MAX_MOVE(ch)  getMaxST(ch)
@@ -180,8 +154,6 @@ extern "C" {
 #define GET_DROOM(ch)     ((ch)->droom)
 #define GET_OVERFLOW(ch)  ((ch)->overf)
 #define GET_SPAM(ch)      ((ch)->spam)
-#define GET_SHIP(ch)      ((ch)->ship)
-#define GET_SHIPROOM(ch)  ((ch)->shipr)
 #define GET_LPLAY(ch)     ((ch)->lastpl)
 #define GET_DTIME(ch)     ((ch)->deathtime)
 #define GET_RTIME(ch)     ((ch)->rewtime)
@@ -191,7 +163,7 @@ extern "C" {
 // why is this i-1? Because whoever wrote it didn't know how C arrays work.
 // We'll be replacing the limb system anyways so fuck this macro.
 #define GET_LIMBCOND(ch, i) ((ch)->limb_condition[i-1])
-#define GET_SONG(ch)      ((ch)->powerattack)
+#define GET_SONG(ch)      ((ch)->song)
 #define GET_BONUS(ch, i)  ((ch)->bonuses[i])
 #define GET_TRANSCOST(ch, i) ((ch)->transcost[i-1])
 #define GET_CCPOINTS(ch)  ((ch)->ccpoints)
@@ -214,15 +186,14 @@ extern "C" {
 #define GET_PREFERENCE(ch) ((ch)->preference)
 #define GET_RELAXCOUNT(ch) ((ch)->relax_count)
 #define GET_BLESSLVL(ch)  ((ch)->blesslvl)
-#define GET_ASB(ch)       ((ch)->asb)
-#define GET_REGEN(ch)     ((ch)->regen)
+#define GET_ASB(ch)       char_legacy_modifier(ch, APPLY_TRAIN, -1)
+#define GET_REGEN(ch)     char_legacy_modifier(ch, APPLY_REGEN, -1)
 #define GET_BLESSBONUS(ch) (AFF_FLAGGED(ch, AFF_BLESS) ? (GET_BLESSLVL(ch) >= 100 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.1 : GET_BLESSLVL(ch) >= 60 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.05 : GET_BLESSLVL(ch) >= 40 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.02 : 0) : 0) 
 #define GET_POSELF(ch)    (!IS_NPC(ch) ? is_affected(ch, AFF_SPECIAL_POSE) ? GET_SKILL(ch, SKILL_POSE) >= 100 ? 0.15 : GET_SKILL(ch, SKILL_POSE) >= 60 ? 0.1 : GET_SKILL(ch, SKILL_POSE) >= 40 ? 0.05 : 0 : 0 : 0)
 #define GET_POSEBONUS(ch) (((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * GET_POSELF(ch))
 #define GET_LIFEBONUS(ch) (IS_ARLIAN(ch) ? ((GET_MAX_MANA(ch) * 0.01) * (GET_MOLT_LEVEL(ch) / 100)) + ((GET_MAX_MOVE(ch) * 0.01) * (GET_MOLT_LEVEL(ch) / 100)) : 0)
 #define GET_LIFEBONUSES(ch) ((ch)->lifebonus > 0 ? (GET_LIFEBONUS(ch) + GET_BLESSBONUS(ch) + GET_POSEBONUS(ch)) * (((ch)->lifebonus + 100) * 0.01) : (GET_LIFEBONUS(ch) + GET_BLESSBONUS(ch) + GET_POSEBONUS(ch)))
 #define GET_LIFEPERC(ch)  ((ch)->lifeperc)
-#define GET_STUPIDKISS(ch) ((ch)->stupidkiss)
 #define GET_SPEEDBOOST(ch) ((ch)->speedboost)
 #define GET_BACKSTAB_COOL(ch) ((ch)->backstabcool)
 #define GET_COOLDOWN(ch)  ((ch)->con_cooldown)
@@ -238,10 +209,9 @@ extern "C" {
 #define GET_FORGETING(ch) ((ch)->forgeting)
 #define GET_FORGET_COUNT(ch) ((ch)->forgetcount)
 #define GET_BANK_GOLD(ch) ((ch)->bank_gold)
-#define GET_POLE_BONUS(ch) ((ch)->accuracy)
+#define GET_POLE_BONUS(ch) char_legacy_modifier(ch, APPLY_ACCURACY, -1)
 #define GET_FISHSTATE(ch)  ((ch)->fishstate)
-#define GET_FISHD(ch)     ((ch)->accuracy_mod)
-#define GET_DAMAGE_MOD(ch) ((ch)->damage_mod)
+#define GET_FISHD(ch)     ((ch)->fishdistance)
 #define GET_SPELLFAIL(ch) ((ch)->spellfail)
 #define GET_ARMORCHECK(ch) ((ch)->armorcheck)
 #define GET_ARMORCHECKALL(ch) ((ch)->armorcheckall)
@@ -255,13 +225,9 @@ extern "C" {
 #define IS_CARRYING_W(ch)	((ch)->carry_weight)
 #define IS_CARRYING_N(ch)	((ch)->carry_items)
 #define FIGHTING(ch)		((ch)->fighting)
-#define GET_POWERATTACK(ch)	((ch)->powerattack)
-#define GET_GROUPKILLS(ch)	((ch)->combatexpertise)
-#define GET_SAVE_BASE(ch, i)	((ch)->saving_throw[i])
-#define GET_SAVE_MOD(ch, i)	((ch)->apply_saving_throw[i])
-#define GET_SAVE(ch, i)		(GET_SAVE_BASE(ch, i) + GET_SAVE_MOD(ch, i))
+#define GET_GROUPKILLS(ch)	((ch)->group_kills)
 #define GET_ALIGNMENT(ch)	((ch)->alignment)
-#define GET_ETHIC_ALIGNMENT(ch)	((ch)->alignment_ethic)
+#define GET_ETHIC_ALIGNMENT(ch)	0
 #define SITS(ch)                ((ch)->sits)
 #define MINDLINK(ch)            ((ch)->mindlink)
 #define LINKER(ch)              ((ch)->linker)
@@ -284,35 +250,31 @@ extern "C" {
 #define GET_ABSORBS(ch)         ((ch)->absorbs)
 #define GET_LINTEREST(ch)       ((ch)->lastint)
 
-#define GET_COND(ch, i)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->conditions[(i)]))
-#define GET_LOADROOM(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->load_room))
-#define GET_PRACTICES(ch,cl)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->class_skill_points[cl]))
-#define GET_RACE_PRACTICES(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->skill_points))
-#define GET_TRAINS(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->ability_trains))
-#define GET_TRAINSTR(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainstr))
-#define GET_TRAININT(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainint))
-#define GET_TRAINCON(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->traincon))
-#define GET_TRAINWIS(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainwis))
-#define GET_TRAINAGL(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainagl))
-#define GET_TRAINSPD(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainspd))
-#define GET_INVIS_LEV(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->invis_level))
-#define GET_WIMP_LEV(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->wimp_level))
-#define GET_FREEZE_LEV(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->freeze_level))
-#define GET_BAD_PWS(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->bad_pws))
-#define GET_TALK(ch, i)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->talks[i]))
-#define POOFIN(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->poofin))
-#define POOFOUT(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->poofout))
-#define GET_OLC_ZONE(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->olc_zone))
-#define GET_LAST_OLC_TARG(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_olc_targ))
-#define GET_LAST_OLC_MODE(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_olc_mode))
-#define GET_ALIASES(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->aliases))
-#define GET_LAST_TELL(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_tell))
-#define GET_HOST(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->host))
-#define GET_HISTORY(ch, i)      CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->comm_hist[i]))
+#define GET_COND(ch, i)		((ch)->conditions[(i)])
+#define GET_LOADROOM(ch)	((ch)->load_room)
+#define GET_PRACTICES(ch,cl)	((ch)->class_skill_points[cl])
+#define GET_TRAINSTR(ch)        ((ch)->trainstr)
+#define GET_TRAININT(ch)        ((ch)->trainint)
+#define GET_TRAINCON(ch)        ((ch)->traincon)
+#define GET_TRAINWIS(ch)        ((ch)->trainwis)
+#define GET_TRAINAGL(ch)        ((ch)->trainagl)
+#define GET_TRAINSPD(ch)        ((ch)->trainspd)
+#define GET_INVIS_LEV(ch)	((ch)->invis_level)
+#define GET_WIMP_LEV(ch)	((ch)->wimp_level)
+#define GET_FREEZE_LEV(ch)	((ch)->freeze_level)
+#define GET_BAD_PWS(ch)		((ch)->bad_pws)
+#define POOFIN(ch)		((ch)->poofin)
+#define POOFOUT(ch)		((ch)->poofout)
+#define GET_OLC_ZONE(ch)	((ch)->olc_zone)
+#define GET_LAST_OLC_TARG(ch)	((ch)->last_olc_targ)
+#define GET_LAST_OLC_MODE(ch)	((ch)->last_olc_mode)
+#define GET_ALIASES(ch)		((ch)->aliases)
+#define GET_LAST_TELL(ch)	((ch)->last_tell)
+#define GET_HOST(ch)		((ch)->host)
+#define GET_HISTORY(ch, i)      ((ch)->comm_hist[i])
 
-#define GET_SKILL_BONUS(ch, i)		(ch->skills[i].mod)
+#define GET_SKILL_BONUS(ch, i)		char_legacy_modifier(ch, APPLY_SKILL, i)
 #define GET_SKILL_PERF(ch, i)           (ch->skills[i].perf)
-#define SET_SKILL_BONUS(ch, i, value)	do { (ch)->skills[i].mod = value; } while (0)
 #define SET_SKILL_PERF(ch, i, value)    do { (ch)->skills[i].perf = value; } while (0)
 #define GET_SKILL_BASE(ch, i)		(ch->skills[i].base)
 #define GET_SKILL(ch, i)		((ch)->skills[i].base + GET_SKILL_BONUS(ch, i))
@@ -427,20 +389,6 @@ extern "C" {
 #define IS_TSUNA(ch)            (GET_CLASS(ch) == CLASS_TSUNA)
 #define IS_KURZAK(ch)           (GET_CLASS(ch) == CLASS_KURZAK)
 
-#define IS_ASSASSIN(ch)         (GET_CLASS_RANKS(ch, CLASS_ASSASSIN) > 0)
-#define IS_BLACKGUARD(ch)       (GET_CLASS_RANKS(ch, CLASS_BLACKGUARD) > 0)
-#define IS_DRAGON_DISCIPLE(ch)  (GET_CLASS_RANKS(ch, CLASS_DRAGON_DISCIPLE) > 0)
-#define IS_DUELIST(ch)          (GET_CLASS_RANKS(ch, CLASS_DUELIST) > 0)
-#define IS_DWARVEN_DEFENDER(ch) (GET_CLASS_RANKS(ch, CLASS_DWARVEN_DEFENDER) > 0)
-#define IS_ELDRITCH_KNIGHT(ch)  (GET_CLASS_RANKS(ch, CLASS_ELDRITCH_KNIGHT) > 0)
-#define IS_HIEROPHANT(ch)       (GET_CLASS_RANKS(ch, CLASS_HIEROPHANT) > 0)
-#define IS_HORIZON_WALKER(ch)   (GET_CLASS_RANKS(ch, CLASS_HORIZON_WALKER) > 0)
-#define IS_LOREMASTER(ch)       (GET_CLASS_RANKS(ch, CLASS_LOREMASTER) > 0)
-#define IS_MYSTIC_THEURGE(ch)   (GET_CLASS_RANKS(ch, CLASS_MYSTIC_THEURGE) > 0)
-#define IS_SHADOWDANCER(ch)     (GET_CLASS_RANKS(ch, CLASS_SHADOWDANCER) > 0)
-#define IS_THAUMATURGIST(ch)    (GET_CLASS_RANKS(ch, CLASS_THAUMATURGIST) > 0)
-
-
 #define GOLD_CARRY(ch)		(GET_LEVEL(ch) < 100 ? (GET_LEVEL(ch) < 50 ? GET_LEVEL(ch) * 10000 : 500000) : 50000000)
 #define IS_SHADOW_DRAGON1(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON1_VNUM)
 #define IS_SHADOW_DRAGON2(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON2_VNUM)
@@ -515,7 +463,7 @@ bool MOON_TIMECHECK();
 
 #define OUTSIDE_SECTTYPE(ch)	char_outside_sector_type(ch)
 
-#define SPEAKING(ch)     ((ch)->player_specials->speaking)
+#define SPEAKING(ch)     ((ch)->speaking)
 
 #define HSHR(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "his":"her") :"its")
 #define HSSH(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "he" :"she") : "it")
@@ -523,27 +471,11 @@ bool MOON_TIMECHECK();
 #define MAFE(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "male":"female") : "questionably gendered")
 
 
-#define GET_SPELLMEM(ch, i)	((ch->player_specials->spellmem[i]))
-#define GET_MEMCURSOR(ch)	((ch->player_specials->memcursor))
 /* returns the number of spells per slot */
-#define GET_SPELL_LEVEL(ch, i)	((ch)->player_specials->spell_level[i])
 #define IS_ARCANE(ch)		(IS_WIZARD(ch))
 #define IS_DIVINE(ch)		(IS_CLERIC(ch))
-#define HAS_FEAT(ch, i)		((ch)->feats[i])
-#define HAS_COMBAT_FEAT(ch,i,j)	IS_SET_AR((ch)->combat_feats[(i)], (j))
-#define SET_COMBAT_FEAT(ch,i,j)	SET_BIT_AR((ch)->combat_feats[(i)], (j))
-#define HAS_SCHOOL_FEAT(ch,i,j)	IS_SET((ch)->school_feats[(i)], (j))
-#define SET_SCHOOL_FEAT(ch,i,j)	SET_BIT((ch)->school_feats[(i)], (j))
 #define GET_BAB(ch)		GET_POLE_BONUS(ch)
-#define SET_FEAT(ch, i, value)	do { CHECK_PLAYER_SPECIAL((ch), (ch)->feats[i]) = value; } while(0)
-#define GET_SPELL_MASTERY_POINTS(ch) \
-				(ch->player_specials->spell_mastery_points)
-#define GET_FEAT_POINTS(ch)	(ch->player_specials->feat_points)
-#define GET_EPIC_FEAT_POINTS(ch) \
-				(ch->player_specials->epic_feat_points)
-#define GET_CLASS_FEATS(ch,cl)	(ch->player_specials->class_feat_points[cl])
-#define GET_EPIC_CLASS_FEATS(ch,cl) \
-				(ch->player_specials->epic_class_feat_points[cl])
+#define SET_FEAT(ch, i, value)	do { (ch)->feats[i] = value; } while(0)
 #define IS_EPIC_LEVEL(ch)	(GET_CLASS_LEVEL(ch) >= 20)
 #define HAS_CRAFT_SKILL(ch,i,j)	IS_SET_AR((ch)->craft_skill[(i)], (j))
 #define SET_CRAFT_SKILL(ch,i,j)	SET_BIT_AR((ch)->craft_skill[(i)], (j))
@@ -553,9 +485,7 @@ bool MOON_TIMECHECK();
 #define SET_PROFESSION_SKILL(ch,i,j)	SET_BIT_AR((ch)->profession_skill[(i)], (j))
 
 #define MOB_LOADROOM(ch)      ((ch)->hometown)  /*hometown not used for mobs*/
-#define GET_MURDER(ch)          CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->murder))
-
-#define GET_PAGE_LENGTH(ch)         CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->page_length))
+#define GET_MURDER(ch)          ((ch)->murder)
 
 
 #ifdef __cplusplus

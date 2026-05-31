@@ -227,8 +227,9 @@ void medit_setup_existing(struct descriptor_data *d, mob_vnum mob_num)
    * Allocate a scratch mobile structure. 
    */
   CREATE(mob, struct char_data, 1);
+  clear_char(mob);
 
-  copy_mobile(mob, mob_proto_by_id(mob_num));
+  copy_mobile_from_proto(mob, mob_proto_by_id(mob_num));
 
   OLC_MOB(d) = mob;
   OLC_ITEM_TYPE(d) = MOB_TRIGGER;
@@ -253,9 +254,7 @@ void init_mobile(struct char_data *mob)
 
   //GET_HIT(mob) = 0;
   //GET_MAX_MANA(mob) = 0;
-  GET_NDD(mob) = 0;
   GET_SEX(mob) = SEX_MALE;
-  GET_HITDICE(mob) = 0;
   mob->chclass = CLASS_NPC_COMMONER;
 
   GET_WEIGHT(mob) = rand_number(100, 200);
@@ -266,7 +265,6 @@ void init_mobile(struct char_data *mob)
   mob->aff_abils = mob->real_abils;
 
   SET_BIT_AR(MOB_FLAGS(mob), MOB_ISNPC);
-  mob->player_specials = &dummy_mob;
 }
 
 /*-------------------------------------------------------------------*/
@@ -281,20 +279,14 @@ void medit_save_internally(struct descriptor_data *d)
   struct char_data *mob;
   mob_vnum v = OLC_NUM(d);
 
+  OLC_MOB(d)->vnum = v;
+  OLC_MOB(d)->proto_script = OLC_SCRIPT(d);
   if ((new_rnum = add_mobile(OLC_MOB(d), v)) == NOBODY) {
     log("medit_save_internally: add_mobile failed.");
     return;
   }
 
-  struct char_data* proto = mob_proto_by_id(v);
-
-  /* Update triggers */
-  /* Free old proto list  */
-  if (proto->proto_script &&
-      proto->proto_script != OLC_SCRIPT(d)) 
-    free_proto_script(proto, MOB_TRIGGER);   
-
-  proto->proto_script = OLC_SCRIPT(d);
+  struct mob_proto_data* proto = mob_proto_by_id(v);
 
   /* this takes care of the mobs currently in-game */
   for (mob = character_list; mob; mob = mob->next) {
@@ -305,8 +297,7 @@ void medit_save_internally(struct descriptor_data *d)
     if (SCRIPT(mob)) 
       extract_script(mob, MOB_TRIGGER);
 
-    free_proto_script(mob, MOB_TRIGGER);
-    copy_proto_script(proto, mob, MOB_TRIGGER);
+    mob_proto_copy_script_to_mobile(proto, mob);
     assign_triggers(mob, MOB_TRIGGER);
   }
   /* end trigger update */  
@@ -475,15 +466,15 @@ void medit_disp_menu(struct descriptor_data *d)
   "@g4@n) L-Desc:-\r\n@y%s"
   "@g5@n) D-Desc:-\r\n@y%s"
   "@g6@n) Level:       [@c%4d@n],  @g7@n) Alignment:    [@c%5d@n]\r\n"
-  "@g8@n) Accuracy Mod:[@c%4d@n],  @g9@n) Damage Mod:   [@c%5d@n]\r\n"
-  "@gA@n) NumDamDice:  [@c%4d@n],  @gB@n) SizeDamDice:  [@c%5d@n]\r\n"
+  "@g8@n) ---:[@c%4d@n],  @g9@n) ---:   [@c%5d@n]\r\n"
+  "@gA@n) ---:  [@c%4d@n],  @gB@n) ---:  [@c%5d@n]\r\n"
   "@gC@n) Num HP Dice: [@c%4" I64T "@n],  @gD@n) Size HP Dice: [@c%5" I64T "@n],  @gE@n) HP Bonus: [@c%5" I64T "@n]\r\n"
   "@gF@n) Armor Class: [@c%4d@n],  @gG@n) Exp:      [@c%" I64T "@n],  @gH@n) Gold:  [@c%8d@n]\r\n",
 
 	  OLC_NUM(d), genders[(int)GET_SEX(mob)], GET_ALIAS(mob),
 	  GET_SDESC(mob), GET_LDESC(mob), GET_DDESC(mob), GET_HITDICE(mob),
-	  GET_ALIGNMENT(mob), GET_FISHD(mob), GET_DAMAGE_MOD(mob),
-	  GET_NDD(mob), GET_SDD(mob), GET_HIT(mob), (getCurKI(mob)),
+	  GET_ALIGNMENT(mob), 0, 0,
+	  0, 0, GET_HIT(mob), (getCurKI(mob)),
                   (getCurST(mob)), GET_ARMOR(mob), GET_EXP(mob), GET_GOLD(mob)
 	  );
   sprintbitarray(MOB_FLAGS(mob), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
@@ -818,31 +809,15 @@ void medit_parse(struct descriptor_data *d, char *arg)
     break;
 
   case MEDIT_ACCURACY:
-    GET_FISHD(OLC_MOB(d)) = LIMIT(i, 0, 50);
-    if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
-    }
     break;
 
   case MEDIT_DAMAGE:
-    GET_DAMAGE_MOD(OLC_MOB(d)) = LIMIT(i, 0, 50);
-    if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
-    }
     break;
 
   case MEDIT_NDD:
-    GET_NDD(OLC_MOB(d)) = LIMIT(i, 0, 30);
-    if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
-    }
     break;
 
   case MEDIT_SDD:
-    GET_SDD(OLC_MOB(d)) = LIMIT(i, 0, 127);
-    if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
-    }
     break;
 
   case MEDIT_NUM_HP_DICE:
@@ -893,7 +868,6 @@ void medit_parse(struct descriptor_data *d, char *arg)
     break;
 
   case MEDIT_ATTACK:
-    GET_ATTACK(OLC_MOB(d)) = LIMIT(i, 0, NUM_ATTACK_TYPES - 1);
     break;
 
   case MEDIT_LEVEL:

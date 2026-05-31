@@ -2220,22 +2220,7 @@ static void gen_map(struct char_data *ch, int num)
 
 static void display_spells(struct char_data *ch, struct obj_data *obj)
 {
-  int i;
 
-  send_to_char(ch, "The spellbook contains the following spells:\r\n");
-  send_to_char(ch, "@c---@wSpell Name@c------------------------------------@w# of pages@c-----@n\r\n");
-
-  if (!obj->sbinfo) {
-    return;
-  }
-  for (i=0; i < SPELLBOOK_SIZE; i++) {
-    if (obj->sbinfo[i].spellname != 0) {
-      if (obj->sbinfo[i].spellname > MAX_SPELLS) {
-        continue;
-      }
-      send_to_char(ch, "@y%-20s@n					[@R%2d@n]\r\n", spell_info[obj->sbinfo[i].spellname].name ,obj->sbinfo[i].pages);
-    }
-  }
   return;
 }
 
@@ -5118,7 +5103,7 @@ ACMD(do_score)
  }
  if (view == full || view == stats) {
  send_to_char(ch, "  @cO@D-----------------------------@D[ @cStatistics @D]-----------------------------@cO@n\n");
- send_to_char(ch, "      @D<@wCharacter Level@D: @w%-3d@D> <@wRPP@D: @w%-3d@D> <@wRPP Bank@D: @w%-3d@D>@n\n", GET_LEVEL(ch), GET_RP(ch), GET_RBANK(ch));
+ send_to_char(ch, "      @D<@wCharacter Level@D: @w%-3d@D> <@wRPP@D: @w%-3d@D>\n", GET_LEVEL(ch), GET_RP(ch));
  send_to_char(ch, "      @D<@wSpeed Index@D: @w%-15s@D> <@wArmor Index@D: @w%-15s@D>@n\n", add_commas(GET_SPEEDI(ch)), add_commas(GET_ARMOR(ch)));
  send_to_char(ch, "    @D[    @RStrength@D|@G%2d (%3d)@D] [     @YAgility@D|@G%2d (%3d)@D] [      @BSpeed@D|@G%2d (%3d)@D]@n\n", ch->real_abils.str, GET_STR(ch), ch->real_abils.dex, GET_DEX(ch), ch->real_abils.cha, GET_CHA(ch));
  send_to_char(ch, "    @D[@gConstitution@D|@G%2d (%3d)@D] [@CIntelligence@D|@G%2d (%3d)@D] [     @MWisdom@D|@G%2d (%3d)@D]@n\n", ch->real_abils.con, GET_CON(ch), ch->real_abils.intel, GET_INT(ch), ch->real_abils.wis, GET_WIS(ch));
@@ -7892,7 +7877,6 @@ ACMD(do_whois)
   } else {
   CREATE(victim, struct char_data, 1);
   clear_char(victim);
-  CREATE(victim->player_specials, struct player_special_data, 1);
   if (load_char(argument, victim) >= 0) {
     if (GET_CLAN(victim) != NULL) {
      if (!strstr(GET_CLAN(victim), "None")) {

@@ -437,58 +437,5 @@ ACMD(do_skillset)
 *
 *********************************************************************/
 
-/* Traverse down the string until the begining of the next page has been
- * reached.  Return NULL if this is the last page of the string.
- */
-static char *next_page(char *str, struct char_data *ch)
-{ 
-  int col = 1, line = 1; 
 
-  for (;; str++) { 
-    /* If end of string, return NULL. */ 
-    if (*str == '\0') 
-      return (NULL); 
-
-    /* If we're at the start of the next page, return this fact. */ 
-    else if (line > (GET_PAGE_LENGTH(ch) - (PRF_FLAGGED(ch, PRF_COMPACT) ? 1 : 2)))
-      return (str);
-
-    /* Check for the begining of an ANSI color code block. */ 
-    else if (*str == '\x1B') 
-      str++; 
-
-    else if (*str == '@') { 
-      if (*(str + 1) != '@') 
-        str++; 
-    } 
-
-    /* Check for everything else. */ 
-    else { 
-      /* Carriage return puts us in column one. */ 
-      if (*str == '\r') 
-        col = 1; 
-      /* Newline puts us on the next line. */ 
-      else if (*str == '\n') 
-        line++; 
-
-      /* We need to check here and see if we are over the page width, 
-       * and if so, compensate by going to the begining of the next line. 
-       */ 
-      else if (col++ > PAGE_WIDTH) { 
-        col = 1; 
-        line++; 
-      } 
-    } 
-  } 
-}
-
-
-/* Function that returns the number of pages in the string. */
-static int count_pages(char *str, struct char_data *ch)
-{
-  int pages;
-
-  for (pages = 1; (str = next_page(str, ch)); pages++);
-  return (pages);
-}
 

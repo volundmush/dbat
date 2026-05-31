@@ -100,6 +100,7 @@ struct oasis_olc_data {
   char *storage;                 /* used for 'tedit'         */
   struct char_data *mob;         /* used for 'medit'         */
   struct room_data *room;        /* used for 'redit'         */
+  struct obj_proto_data *oproto; /* used for 'oedit'         */
   struct obj_data *obj;          /* used for 'oedit'         */
   struct obj_data *iobj;         /* used for 'iedit'         */
   struct zone_data *zone;        /* used for 'zedit'         */
@@ -129,6 +130,7 @@ struct oasis_olc_data {
 
 #define OLC_STORAGE(d)  (OLC(d)->storage)	/* char pointer.	*/
 #define OLC_ROOM(d) 	(OLC(d)->room)		/* Room structure.	*/
+#define OLC_OPROTO(d) 	(OLC(d)->oproto)	/* Object prototype structure. */
 #define OLC_OBJ(d) 	(OLC(d)->obj)		/* Object structure.	*/
 #define OLC_IOBJ(d) 	(OLC(d)->iobj)		/* Individual object structure.	*/
 #define OLC_ZONE(d)     (OLC(d)->zone)          /* Zone structure.	*/

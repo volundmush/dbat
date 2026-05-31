@@ -598,7 +598,6 @@ SPECIAL(auction)
 
        CREATE(vict, struct char_data, 1);
        clear_char(vict);
-       CREATE(vict->player_specials, struct player_special_data, 1);
        char blam[50];
        sprintf(blam, "%s", GET_AUCTERN(obj2));
        if ((player_i = load_char(blam, vict)) > -1) {
@@ -1232,7 +1231,6 @@ SPECIAL(bank)
 
        CREATE(vict, struct char_data, 1);
        clear_char(vict);
-       CREATE(vict->player_specials, struct player_special_data, 1);
 
        sprintf(name, "%s", rIntro(ch, arg2));
 
