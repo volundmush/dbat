@@ -267,7 +267,7 @@ static void generate_multiform(struct char_data *ch, int count)
 {
     char blamo[MAX_INPUT_LENGTH];
     sprintf(blamo, "p.%s", GET_NAME(ch));
-    struct char_data *proto = mob_proto_by_id(25);
+    struct mob_proto_data *proto = mob_proto_by_id(25);
      if (!proto) {
          send_to_imm("Multiform Clone doesn't exist!");
          return;

@@ -467,7 +467,7 @@ void sedit_parse(struct descriptor_data *d, char *arg)
 {
   int i;
 
-  struct char_data *keeper = NULL;
+  struct mob_proto_data *keeper = NULL;
 
   if (OLC_MODE(d) > SEDIT_NUMERICAL_RESPONSE) {
     if (!isdigit(arg[0]) && ((*arg == '-') && (!isdigit(arg[1])))) {

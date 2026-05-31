@@ -79,7 +79,18 @@ void obj_proto_copy(struct obj_proto_data *to, const struct obj_proto_data *from
 {
   obj_proto_free_strings(to);
   free_trig_proto_list(to->proto_script);
-  *to = *from;
+  to->vnum = from->vnum;
+  memcpy(to->value, from->value, sizeof(to->value));
+  to->type_flag = from->type_flag;
+  to->level = from->level;
+  memcpy(to->wear_flags, from->wear_flags, sizeof(to->wear_flags));
+  memcpy(to->extra_flags, from->extra_flags, sizeof(to->extra_flags));
+  to->weight = from->weight;
+  to->cost = from->cost;
+  to->timer = from->timer;
+  memcpy(to->bitvector, from->bitvector, sizeof(to->bitvector));
+  to->size = from->size;
+  memcpy(to->affected, from->affected, sizeof(to->affected));
   to->name = from->name ? strdup(from->name) : NULL;
   to->description = from->description ? strdup(from->description) : NULL;
   to->short_description = from->short_description ? strdup(from->short_description) : NULL;

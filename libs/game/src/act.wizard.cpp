@@ -2202,7 +2202,8 @@ ACMD(do_load)
   }
 
   if (is_abbrev(buf, "mob")) {
-    struct char_data *mob=NULL, *proto = NULL;
+    struct char_data *mob=NULL;
+    struct mob_proto_data *proto = NULL;
     mob_vnum v_num = atoi(buf2);
 
     if (!(proto = mob_proto_by_id(v_num))) {
@@ -2262,7 +2263,8 @@ ACMD(do_vstat)
   }
 
   if (is_abbrev(buf, "mob")) {
-    struct char_data *mob = NULL, *proto = NULL;
+    struct char_data *mob = NULL;
+    struct mob_proto_data *proto = NULL;
     mob_vnum v_num = atoi(buf2);
 
     if (!(proto = mob_proto_by_id(v_num))) {
@@ -4883,7 +4885,7 @@ ACMD (do_zcheck)
   /*check mobs first*/
   mob_proto_iterate ([&](auto mob)
     {
-      if (virtual_zone_by_thing(char_proto_id_get(mob)) == zone->number) {  /*is mob in this zone?*/
+      if (virtual_zone_by_thing(mob->vnum) == zone->number) {  /*is mob in this zone?*/
         if (!strcmp(mob->name, "mob unfinished") && (found=1))
           len += snprintf(buf + len, sizeof(buf) - len,
                           "- Alias hasn't been set.\r\n");
@@ -5171,7 +5173,7 @@ static void mob_checkload(struct char_data *ch, mob_vnum mvnum)
 {
   int cmd_no, count = 0;
   zone_rnum zone;
-  struct char_data *mob = mob_proto_by_id(mvnum);
+  struct mob_proto_data *mob = mob_proto_by_id(mvnum);
  
   if (!mob) {
       send_to_char(ch, "That mob does not exist.\r\n");

@@ -9,7 +9,7 @@ struct char_data *affect_list;
 
 long max_mob_id = MOB_ID_BASE;
 
-struct char_data *mob_proto_by_id(mob_vnum vnum)
+struct mob_proto_data *mob_proto_by_id(mob_vnum vnum)
 {
   return mob_proto_get(vnum);
 }

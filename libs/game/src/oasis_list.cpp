@@ -218,12 +218,12 @@ void list_mobiles(struct char_data *ch, struct zone_data *zone, mob_vnum vmin, m
   "----- ------- -------------------------      --------- --------- -----\r\n");
   
   for (i = bottom; i <= top; i++) {
-    struct char_data *mob = mob_proto_by_id(i);
+    struct mob_proto_data *mob = mob_proto_by_id(i);
     if(!mob) continue;
     counter++;
 
     send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
-                  counter, char_proto_id_get(mob), count_color_chars(mob->short_descr)+30, mob->short_descr, TRUE_RACE((mob)), SENSEI_NAME((mob)),
+                  counter, mob->vnum, count_color_chars(mob->short_descr)+30, mob->short_descr, TRUE_RACE((mob)), SENSEI_NAME((mob)),
                   mob->level + mob->level_adj + mob->race_level, mob->proto_script ? " [TRIG]" : "");
   }
   

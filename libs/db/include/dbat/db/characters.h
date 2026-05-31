@@ -92,7 +92,7 @@ struct skill_data {
 
 struct mob_proto_data
 {
-   mob_vnum id;                         /* Where in data-base                 */
+   mob_vnum vnum;                       /* Where in data-base                 */
 
    char *name;                          /* NPC aliases / keywords             */
    char *short_descr;                   /* NPC short description              */
@@ -111,6 +111,8 @@ struct mob_proto_data
    int level;                           /* Class level                        */
    int race_level;                      /* Race / hit dice level              */
    int level_adj;                       /* Level adjustment                   */
+   int gold;                            /* Default carried gold               */
+   int64_t exp;                         /* Default experience                 */
    int64_t basepl;                      /* Base powerlevel                    */
    int64_t baseki;                      /* Base ki                            */
    int64_t basest;                      /* Base stamina                       */
@@ -575,7 +577,7 @@ extern struct char_data *affect_list;
 extern long max_mob_id;
 
 mob_vnum mob_proto_vnum_check(mob_vnum vnum);
-struct char_data *mob_proto_by_id(mob_vnum vnum);
+struct mob_proto_data *mob_proto_by_id(mob_vnum vnum);
 
 struct char_data *char_by_id(int64_t id);
 int char_register_id(int64_t id, struct char_data *ch);
@@ -586,12 +588,12 @@ void char_clear_subscriptions(int64_t id);
 void char_for_each(const char *list_name, void (*func)(struct char_data *ch));
 
 void* mob_proto_iterator_create();
-struct char_data* mob_proto_next(void* iterator);
+struct mob_proto_data* mob_proto_next(void* iterator);
 void mob_proto_iterator_free(void* iterator);
 
-void mob_proto_put(mob_vnum vnum, struct char_data *mob);
+void mob_proto_put(mob_vnum vnum, struct mob_proto_data *mob);
 void mob_proto_delete(mob_vnum vnum);
-struct char_data* mob_proto_get(mob_vnum vnum);
+struct mob_proto_data* mob_proto_get(mob_vnum vnum);
 size_t mob_proto_count();
 SpecialFunc mob_proto_special_get(mob_vnum vnum);
 void mob_proto_special_set(mob_vnum vnum, SpecialFunc func);

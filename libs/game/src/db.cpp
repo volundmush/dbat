@@ -672,9 +672,9 @@ void destroy_db(void)
 
   /* Mobiles */
   mob_proto_iterate([&](auto mob) {
-    mob_vnum v = char_proto_id_get(mob);
+    mob_vnum v = mob->vnum;
     mob_proto_delete(v);
-    char_free_prototype(mob);
+    mob_proto_free(mob);
     return true;
   });
 
@@ -2156,7 +2156,11 @@ static void parse_mobile(FILE *mob_f, int nr)
   ch->desc = NULL;
 
   if (parse_mobile_from_file(mob_f, ch)) {
-    mob_proto_put(nr, ch);
+    struct mob_proto_data *proto = NULL;
+    CREATE(proto, struct mob_proto_data, 1);
+    copy_mobile_to_proto(proto, ch);
+    mob_proto_put(nr, proto);
+    char_free_prototype(ch);
   } else { /* We used to exit in the file reading code, but now we do it here */
     exit(1);
   }
@@ -2867,7 +2871,8 @@ struct char_data *create_char(void)
 struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 {
   mob_rnum i;
-  struct char_data *mob = NULL, *proto = NULL;
+  struct char_data *mob = NULL;
+  struct mob_proto_data *proto = NULL;
 
   if(type == REAL) {
     log("real is no longer supported!");
@@ -2883,12 +2888,15 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 
   CREATE(mob, struct char_data, 1);
   clear_char(mob);
-  *mob = *proto; /* copy prototype data */
-  copy_mobile_strings(mob, proto);
+  copy_mobile_from_proto(mob, proto);
   mob->next = character_list;
   character_list = mob;
   mob->next_affect = NULL;
 
+  mob->energy = 1.0;
+  mob->stamina = 1.0;
+  mob->health = 1.0;
+  
 
   if (IS_HOSHIJIN(mob) && GET_SEX(mob) == SEX_MALE) {
    mob->hairl = 0;
@@ -3457,7 +3465,6 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   add_to_lookup_table(GET_ID(mob), (void *)mob);
   (void)char_register_id(GET_ID(mob), mob);
 
-  copy_proto_script(proto, mob, MOB_TRIGGER);
   assign_triggers(mob, MOB_TRIGGER);
   racial_body_parts(mob); 
 

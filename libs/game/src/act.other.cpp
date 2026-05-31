@@ -7435,7 +7435,7 @@ ACMD(do_summon)
    int dball2[7] = {20, 21, 22, 23, 24, 25, 26};
    struct obj_data *obj, *next_obj;
    struct char_data *mob=NULL;
-   struct char_data *proto = NULL;
+   struct mob_proto_data *proto = NULL;
 
    struct room_data* room = char_room_get(ch);
 

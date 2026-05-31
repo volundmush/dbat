@@ -154,6 +154,17 @@ void obj_proto_script_save_to_disk(FILE *fp, struct obj_proto_data *obj)
   }
 }
 
+void mob_proto_script_save_to_disk(FILE *fp, struct mob_proto_data *mob)
+{
+  struct trig_proto_list *t = mob ? mob->proto_script : NULL;
+
+  while (t)
+  {
+    fprintf(fp,"T %d\n", t->vnum);
+    t = t->next;
+  }
+}
+
 
 void trigedit_setup_new(struct descriptor_data *d)
 {

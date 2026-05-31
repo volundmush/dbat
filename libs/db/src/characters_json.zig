@@ -194,6 +194,89 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
     return object;
 }
 
+pub fn serializeMobPrototype(allocator: std.mem.Allocator, proto: *cdb.mob_proto_data) !JsonValue {
+    var ch: cdb.char_data = std.mem.zeroes(cdb.char_data);
+    mobProtoToCharacter(&ch, proto);
+    return serializeCharacter(allocator, &ch, .npc_prototype);
+}
+
+pub fn deserializeMobPrototype(proto: *cdb.mob_proto_data, options: DeserializeOptions, value: JsonValue) !void {
+    var ch: cdb.char_data = std.mem.zeroes(cdb.char_data);
+    ch.vnum = proto.vnum;
+    try deserializeCharacter(&ch, .{ .c_allocator = options.c_allocator, .mode = .npc_prototype }, value);
+    characterToMobProto(proto, &ch);
+}
+
+fn mobProtoToCharacter(ch: *cdb.char_data, proto: *const cdb.mob_proto_data) void {
+    ch.vnum = proto.vnum;
+    ch.name = proto.name;
+    ch.short_descr = proto.short_descr;
+    ch.long_descr = proto.long_descr;
+    ch.description = proto.description;
+    ch.title = proto.title;
+    ch.size = proto.size;
+    ch.sex = proto.sex;
+    ch.race = proto.race;
+    ch.chclass = proto.chclass;
+    ch.alignment = proto.alignment;
+    ch.weight = proto.weight;
+    ch.height = proto.height;
+    ch.level = proto.level;
+    ch.race_level = proto.race_level;
+    ch.level_adj = proto.level_adj;
+    ch.gold = proto.gold;
+    ch.exp = proto.exp;
+    ch.basepl = proto.basepl;
+    ch.baseki = proto.baseki;
+    ch.basest = proto.basest;
+    ch.armor = proto.armor;
+    ch.real_abils = proto.real_abils;
+    ch.aff_abils = proto.aff_abils;
+    ch.mob_specials = proto.mob_specials;
+    ch.position = proto.position;
+    ch.speaking = proto.speaking;
+    ch.act = proto.act;
+    ch.affected_by = proto.affected_by;
+    ch.admflags = proto.admflags;
+    ch.admlevel = proto.admlevel;
+    ch.proto_script = proto.proto_script;
+}
+
+fn characterToMobProto(proto: *cdb.mob_proto_data, ch: *const cdb.char_data) void {
+    proto.vnum = ch.vnum;
+    proto.name = ch.name;
+    proto.short_descr = ch.short_descr;
+    proto.long_descr = ch.long_descr;
+    proto.description = ch.description;
+    proto.title = ch.title;
+    proto.size = ch.size;
+    proto.sex = ch.sex;
+    proto.race = ch.race;
+    proto.chclass = ch.chclass;
+    proto.alignment = ch.alignment;
+    proto.weight = ch.weight;
+    proto.height = ch.height;
+    proto.level = ch.level;
+    proto.race_level = ch.race_level;
+    proto.level_adj = ch.level_adj;
+    proto.gold = ch.gold;
+    proto.exp = ch.exp;
+    proto.basepl = ch.basepl;
+    proto.baseki = ch.baseki;
+    proto.basest = ch.basest;
+    proto.armor = ch.armor;
+    proto.real_abils = ch.real_abils;
+    proto.aff_abils = ch.aff_abils;
+    proto.mob_specials = ch.mob_specials;
+    proto.position = ch.position;
+    proto.speaking = ch.speaking;
+    proto.act = ch.act;
+    proto.affected_by = ch.affected_by;
+    proto.admflags = ch.admflags;
+    proto.admlevel = ch.admlevel;
+    proto.proto_script = ch.proto_script;
+}
+
 pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, value: JsonValue) !void {
     if (value != .object) return error.ExpectedObject;
 

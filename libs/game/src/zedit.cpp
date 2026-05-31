@@ -832,7 +832,7 @@ void zedit_parse(struct descriptor_data *d, char *arg)
 {
   int pos, i = 0;
   int number;
-  struct char_data *mob = NULL;
+  struct mob_proto_data *mob = NULL;
 
   switch (OLC_MODE(d)) {
 /*-------------------------------------------------------------------*/

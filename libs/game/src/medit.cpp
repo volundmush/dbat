@@ -227,8 +227,9 @@ void medit_setup_existing(struct descriptor_data *d, mob_vnum mob_num)
    * Allocate a scratch mobile structure. 
    */
   CREATE(mob, struct char_data, 1);
+  clear_char(mob);
 
-  copy_mobile(mob, mob_proto_by_id(mob_num));
+  copy_mobile_from_proto(mob, mob_proto_by_id(mob_num));
 
   OLC_MOB(d) = mob;
   OLC_ITEM_TYPE(d) = MOB_TRIGGER;
@@ -278,20 +279,14 @@ void medit_save_internally(struct descriptor_data *d)
   struct char_data *mob;
   mob_vnum v = OLC_NUM(d);
 
+  OLC_MOB(d)->vnum = v;
+  OLC_MOB(d)->proto_script = OLC_SCRIPT(d);
   if ((new_rnum = add_mobile(OLC_MOB(d), v)) == NOBODY) {
     log("medit_save_internally: add_mobile failed.");
     return;
   }
 
-  struct char_data* proto = mob_proto_by_id(v);
-
-  /* Update triggers */
-  /* Free old proto list  */
-  if (proto->proto_script &&
-      proto->proto_script != OLC_SCRIPT(d)) 
-    free_proto_script(proto, MOB_TRIGGER);   
-
-  proto->proto_script = OLC_SCRIPT(d);
+  struct mob_proto_data* proto = mob_proto_by_id(v);
 
   /* this takes care of the mobs currently in-game */
   for (mob = character_list; mob; mob = mob->next) {
@@ -302,8 +297,7 @@ void medit_save_internally(struct descriptor_data *d)
     if (SCRIPT(mob)) 
       extract_script(mob, MOB_TRIGGER);
 
-    free_proto_script(mob, MOB_TRIGGER);
-    copy_proto_script(proto, mob, MOB_TRIGGER);
+    mob_proto_copy_script_to_mobile(proto, mob);
     assign_triggers(mob, MOB_TRIGGER);
   }
   /* end trigger update */  

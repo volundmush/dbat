@@ -1173,7 +1173,7 @@ void dball_load()
 
 if (dballtime == 0) {
  struct char_data *hunter = NULL;
- struct char_data *proto = NULL;
+ struct mob_proto_data *proto = NULL;
 
  WISHTIME = 0;
  for (k = object_list; k; k = k->next) {

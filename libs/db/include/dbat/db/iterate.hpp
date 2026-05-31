@@ -17,7 +17,7 @@ inline void mob_proto_iterate(Func &&func)
   }
 
   for (;;) {
-    struct char_data *mob = mob_proto_next(iterator);
+    struct mob_proto_data *mob = mob_proto_next(iterator);
     if (!mob) {
       break;
     }
@@ -29,12 +29,12 @@ inline void mob_proto_iterate(Func &&func)
   mob_proto_iterator_free(iterator);
 }
 
-inline void mob_proto_iterate(bool (*func)(struct char_data *mob))
+inline void mob_proto_iterate(bool (*func)(struct mob_proto_data *mob))
 {
   if (!func) {
     return;
   }
-  mob_proto_iterate([&](struct char_data *mob) { return func(mob); });
+  mob_proto_iterate([&](struct mob_proto_data *mob) { return func(mob); });
 }
 
 template <typename Func>

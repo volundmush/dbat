@@ -5,7 +5,7 @@ const IdSet = std.AutoHashMap(i64, void);
 const ListSet = std.StringHashMap(void);
 const CharCallback = *const fn (*cdb.char_data) callconv(.c) void;
 const MobProtoEntry = struct {
-    proto: ?*cdb.char_data = null,
+    proto: ?*cdb.mob_proto_data = null,
     special: cdb.SpecialFunc = null,
     count: usize = 0,
 };
@@ -132,7 +132,7 @@ pub export fn mob_proto_iterator_create() ?*anyopaque {
     return iterator;
 }
 
-pub export fn mob_proto_next(iterator_ptr: ?*anyopaque) ?*cdb.char_data {
+pub export fn mob_proto_next(iterator_ptr: ?*anyopaque) ?*cdb.mob_proto_data {
     const iterator: *MobProtoIterator = @ptrCast(@alignCast(iterator_ptr orelse return null));
     while (iterator.iter.next()) |entry| {
         if (entry.value_ptr.*.proto) |ptr| {
@@ -147,7 +147,7 @@ pub export fn mob_proto_iterator_free(iterator_ptr: ?*anyopaque) void {
     allocator.destroy(@as(*MobProtoIterator, @ptrCast(@alignCast(iterator))));
 }
 
-pub export fn mob_proto_get(vnum: cdb.mob_vnum) ?*cdb.char_data {
+pub export fn mob_proto_get(vnum: cdb.mob_vnum) ?*cdb.mob_proto_data {
     return if (mob_proto_map.get(vnum)) |entry| entry.proto else null;
 }
 
@@ -160,7 +160,7 @@ pub export fn mob_proto_count() usize {
     return total;
 }
 
-pub export fn mob_proto_put(vnum: cdb.mob_vnum, mob: ?*cdb.char_data) void {
+pub export fn mob_proto_put(vnum: cdb.mob_vnum, mob: ?*cdb.mob_proto_data) void {
     if (mob) |ptr| {
         const entry = mob_proto_map.getOrPut(vnum) catch return;
         if (!entry.found_existing) {
