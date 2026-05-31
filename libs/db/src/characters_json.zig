@@ -231,14 +231,11 @@ fn mobProtoToCharacter(ch: *cdb.char_data, proto: *const cdb.mob_proto_data) voi
     ch.basest = proto.basest;
     ch.armor = proto.armor;
     ch.real_abils = proto.real_abils;
-    ch.aff_abils = proto.aff_abils;
     ch.mob_specials = proto.mob_specials;
     ch.position = proto.position;
     ch.speaking = proto.speaking;
     ch.act = proto.act;
     ch.affected_by = proto.affected_by;
-    ch.admflags = proto.admflags;
-    ch.admlevel = proto.admlevel;
     ch.proto_script = proto.proto_script;
 }
 
@@ -266,14 +263,11 @@ fn characterToMobProto(proto: *cdb.mob_proto_data, ch: *const cdb.char_data) voi
     proto.basest = ch.basest;
     proto.armor = ch.armor;
     proto.real_abils = ch.real_abils;
-    proto.aff_abils = ch.aff_abils;
     proto.mob_specials = ch.mob_specials;
     proto.position = ch.position;
     proto.speaking = ch.speaking;
     proto.act = ch.act;
     proto.affected_by = ch.affected_by;
-    proto.admflags = ch.admflags;
-    proto.admlevel = ch.admlevel;
     proto.proto_script = ch.proto_script;
 }
 

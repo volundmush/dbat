@@ -119,7 +119,6 @@ struct mob_proto_data
    int armor;                           /* Internally stored *10              */
 
    struct abil_data real_abils;         /* Prototype abilities                */
-   struct abil_data aff_abils;          /* Default affected abilities         */
    struct mob_special_data mob_specials;/* NPC defaults                       */
 
    int8_t position;                     /* Load position                      */
@@ -127,8 +126,6 @@ struct mob_proto_data
 
    bitvector_t act[PM_ARRAY_MAX];       /* Mob flags                          */
    bitvector_t affected_by[AF_ARRAY_MAX]; /* Permanent affect flags            */
-   bitvector_t admflags[AD_ARRAY_MAX];  /* Admin flags, if serialized         */
-   int admlevel;                        /* Admin level, if serialized         */
 
    struct trig_proto_list *proto_script;/* Prototype trigger list             */
 };
