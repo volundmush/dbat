@@ -143,6 +143,17 @@ void script_save_to_disk(FILE *fp, void *item, int type)
   }
 }
 
+void obj_proto_script_save_to_disk(FILE *fp, struct obj_proto_data *obj)
+{
+  struct trig_proto_list *t = obj ? obj->proto_script : NULL;
+
+  while (t)
+  {
+    fprintf(fp,"T %d\n", t->vnum);
+    t = t->next;
+  }
+}
+
 
 void trigedit_setup_new(struct descriptor_data *d)
 {
@@ -627,7 +638,7 @@ void dg_olc_script_copy(struct descriptor_data *d)
   if (OLC_ITEM_TYPE(d)==MOB_TRIGGER)
     origscript = OLC_MOB(d)->proto_script;
   else if (OLC_ITEM_TYPE(d)==OBJ_TRIGGER)
-    origscript = OLC_OBJ(d)->proto_script;
+    origscript = OLC_OPROTO(d)->proto_script;
   else origscript = OLC_ROOM(d)->proto_script;
 
   if (origscript) {

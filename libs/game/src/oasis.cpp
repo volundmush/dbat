@@ -214,6 +214,8 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
   }
 
   if (OLC_OBJ(d)) {
+    if (OLC_OBJ(d)->proto_script)
+      free_proto_script(OLC_OBJ(d), OBJ_TRIGGER);
     free_object_strings(OLC_OBJ(d));
     free(OLC_OBJ(d));
   }

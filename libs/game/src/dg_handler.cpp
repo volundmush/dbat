@@ -202,6 +202,49 @@ void free_proto_script(void *thing, int type)
   }
 }
 
+static struct trig_proto_list *copy_trig_proto_list(const struct trig_proto_list *from)
+{
+  struct trig_proto_list *head = NULL, *tail = NULL;
+
+  for (; from; from = from->next) {
+    struct trig_proto_list *node;
+    CREATE(node, struct trig_proto_list, 1);
+    node->vnum = from->vnum;
+    if (tail)
+      tail->next = node;
+    else
+      head = node;
+    tail = node;
+  }
+
+  return head;
+}
+
+void obj_proto_free_script(struct obj_proto_data *obj)
+{
+  struct trig_proto_list *proto, *next;
+
+  if (!obj)
+    return;
+
+  proto = obj->proto_script;
+  obj->proto_script = NULL;
+  while (proto) {
+    next = proto->next;
+    free(proto);
+    proto = next;
+  }
+}
+
+void obj_proto_copy_script_to_obj(struct obj_proto_data *source, struct obj_data *dest)
+{
+  if (!dest)
+    return;
+
+  free_proto_script(dest, OBJ_TRIGGER);
+  dest->proto_script = source ? copy_trig_proto_list(source->proto_script) : NULL;
+}
+
 void copy_proto_script(void *source, void *dest, int type)
 {
   struct trig_proto_list *tp_src = NULL, *tp_dst = NULL;

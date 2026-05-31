@@ -4566,15 +4566,8 @@ void obj_free_instance(struct obj_data *obj)
     return;
 
   remove_unique_id(obj);
-  auto proto = obj_proto_by_id(GET_OBJ_VNUM(obj));
-  if (proto)
-    free_object_strings_proto(obj);
-  else
-    free_object_strings(obj);
-  if (proto) {
-    if(obj->proto_script && obj->proto_script != proto->proto_script)
-      free_proto_script(obj, OBJ_TRIGGER);
-  } else if (obj->proto_script)
+  free_object_strings(obj);
+  if (obj->proto_script)
     free_proto_script(obj, OBJ_TRIGGER);
   
   /* Let's make sure that we free up this memory */

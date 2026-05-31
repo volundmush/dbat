@@ -29,8 +29,13 @@
 #include "dbat/game/races_plus.h"
 #include "dbat/game/fight.h"
 
+#include <stddef.h>
+
+static_assert(sizeof(struct obj_proto_data) == offsetof(struct obj_data, in_room),
+              "oedit shared object fields must stay prefix-compatible");
+
 #undef OLC_OBJ
-#define OLC_OBJ(d) (STATE(d) == CON_IEDIT ? OLC(d)->obj : (struct obj_data *)OLC(d)->oproto)
+#define OLC_OBJ(d) OLC_OPROTO(d)
 
 /*------------------------------------------------------------------------*/
 
@@ -266,20 +271,13 @@ void oedit_save_internally(struct descriptor_data *d)
   i = (obj_proto_by_id(v) == NULL);
 
   OLC_OPROTO(d)->vnum = v;
+  OLC_OPROTO(d)->proto_script = OLC_SCRIPT(d);
   if ((robj_num = add_object(OLC_OPROTO(d), v)) == NOTHING) {
     log("oedit_save_internally: add_object failed.");
     return;
   }
 
   proto = obj_proto_by_id(v);
-
-  /* Update triggers : */
-  /* Free old proto list  */
-  if (proto->proto_script &&
-      proto->proto_script != OLC_SCRIPT(d)) 
-    free_proto_script(proto, OBJ_TRIGGER);   
-  /* this will handle new instances of the object: */
-  proto->proto_script = OLC_SCRIPT(d);
 
   /* this takes care of the objects currently in-game */
   for (obj = object_list; obj; obj = obj->next) {
@@ -289,8 +287,7 @@ void oedit_save_internally(struct descriptor_data *d)
     if (SCRIPT(obj)) 
       extract_script(obj, OBJ_TRIGGER);
 
-    free_proto_script(obj, OBJ_TRIGGER);
-    copy_proto_script(proto, obj, OBJ_TRIGGER);
+    obj_proto_copy_script_to_obj(proto, obj);
     assign_triggers(obj, OBJ_TRIGGER);
   }
   /* end trigger update */
@@ -941,7 +938,7 @@ void oedit_disp_wear_menu(struct descriptor_data *d)
 void oedit_disp_menu(struct descriptor_data *d)
 {
   char tbitbuf[MAX_INPUT_LENGTH], ebitbuf[MAX_INPUT_LENGTH];
-  struct obj_data *obj;
+  struct obj_proto_data *obj;
 
   obj = OLC_OBJ(d);
   clear_screen(d);
@@ -1055,8 +1052,8 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     case 'n':
     case 'N':
       /* If not saving, we must free the script_proto list. */
-      OLC_OBJ(d)->proto_script = OLC_SCRIPT(d);
-      free_proto_script(OLC_OBJ(d), OBJ_TRIGGER);
+      OLC_OPROTO(d)->proto_script = OLC_SCRIPT(d);
+      obj_proto_free_script(OLC_OPROTO(d));
       cleanup_olc(d, CLEANUP_ALL);
       return;
     case 'a': /* abort quit */
@@ -1107,7 +1104,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       } else {
         send_to_char(d->character, "\r\nCommitting iedit changes.\r\n");
         obj = OLC_IOBJ(d);
-        *obj = *(OLC_OBJ(d));
+        obj_apply_proto_to_instance(obj, OLC_OBJ(d));
         GET_ID(obj) = max_obj_id++;
         /* find_obj helper */
         add_to_lookup_table(GET_ID(obj), (void *)obj);
@@ -1119,9 +1116,8 @@ void oedit_parse(struct descriptor_data *d, char *arg)
             SCRIPT(obj) = NULL;
           }
 
-          free_proto_script(obj, OBJ_TRIGGER);
           auto proto = obj_proto_by_id(GET_OBJ_VNUM(obj));
-          copy_proto_script(proto, obj, OBJ_TRIGGER);
+          obj_proto_copy_script_to_obj(proto, obj);
           assign_triggers(obj, OBJ_TRIGGER);
         }
         SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE);
@@ -1133,6 +1129,8 @@ void oedit_parse(struct descriptor_data *d, char *arg)
           STATE(d) = CON_PLAYING;
           act("$n stops using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
         }
+        if (OLC_OPROTO(d))
+          obj_proto_free(OLC_OPROTO(d));
         free(d->olc);
         d->olc = NULL;
       }
@@ -1751,24 +1749,10 @@ void oedit_string_cleanup(struct descriptor_data *d, int terminator)
 /* this is all iedit stuff */
 void iedit_setup_existing(struct descriptor_data *d, struct obj_data *real_num)
 {
-  struct obj_data *obj;
-  int64_t temp_id;
-
   OLC_IOBJ(d) = real_num;
 
-  obj = create_obj();
-  temp_id = GET_ID(obj);
-  copy_object(obj,real_num);
-
-  /* free any assigned scripts */
-  if (SCRIPT(obj))
-    extract_script(obj, OBJ_TRIGGER);
-  SCRIPT(obj) = NULL;
-  /* find_obj helper */
-  remove_from_lookup_table(temp_id);
-  obj_unregister_id(temp_id);
-
-  OLC(d)->obj = obj;
+  CREATE(OLC_OPROTO(d), struct obj_proto_data, 1);
+  obj_proto_from_instance(OLC_OPROTO(d), real_num);
   OLC_IOBJ(d) = real_num;
   OLC_VAL(d) = 0;
   oedit_disp_menu(d);

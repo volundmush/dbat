@@ -185,7 +185,7 @@ pub export fn obj_name_get(obj: *cdb.obj_data) [*c]const u8 {
 }
 
 pub export fn obj_name_set(obj: *cdb.obj_data, value: ?[*:0]const u8) void {
-    replaceString(obj, &obj.name, protoString(obj, .name), value);
+    replaceString(&obj.name, value);
 }
 
 pub export fn obj_description_get(obj: *cdb.obj_data) [*c]const u8 {
@@ -193,7 +193,7 @@ pub export fn obj_description_get(obj: *cdb.obj_data) [*c]const u8 {
 }
 
 pub export fn obj_description_set(obj: *cdb.obj_data, value: ?[*:0]const u8) void {
-    replaceString(obj, &obj.description, protoString(obj, .description), value);
+    replaceString(&obj.description, value);
 }
 
 pub export fn obj_short_description_get(obj: *cdb.obj_data) [*c]const u8 {
@@ -201,7 +201,7 @@ pub export fn obj_short_description_get(obj: *cdb.obj_data) [*c]const u8 {
 }
 
 pub export fn obj_short_description_set(obj: *cdb.obj_data, value: ?[*:0]const u8) void {
-    replaceString(obj, &obj.short_description, protoString(obj, .short_description), value);
+    replaceString(&obj.short_description, value);
 }
 
 pub export fn obj_action_description_get(obj: *cdb.obj_data) [*c]const u8 {
@@ -209,7 +209,7 @@ pub export fn obj_action_description_get(obj: *cdb.obj_data) [*c]const u8 {
 }
 
 pub export fn obj_action_description_set(obj: *cdb.obj_data, value: ?[*:0]const u8) void {
-    replaceString(obj, &obj.action_description, protoString(obj, .action_description), value);
+    replaceString(&obj.action_description, value);
 }
 
 pub export fn obj_carried_by_get(obj: *cdb.obj_data) i64 {
@@ -283,23 +283,9 @@ pub export fn obj_sitting_set(obj: *cdb.obj_data, ch: [*c]cdb.char_data) void {
     obj.sitting = ch;
 }
 
-const StringField = enum { name, description, short_description, action_description };
-
-fn protoString(obj: *cdb.obj_data, field: StringField) [*c]u8 {
-    const proto = cdb.obj_proto_by_id(obj.vnum);
-    if (proto == null) return null;
-    return switch (field) {
-        .name => proto.*.name,
-        .description => proto.*.description,
-        .short_description => proto.*.short_description,
-        .action_description => proto.*.action_description,
-    };
-}
-
-fn replaceString(obj: *cdb.obj_data, field: *[*c]u8, proto_value: [*c]u8, value: ?[*:0]const u8) void {
-    _ = obj;
+fn replaceString(field: *[*c]u8, value: ?[*:0]const u8) void {
     const new_value = if (value) |new_string| strdup(new_string) orelse return else null;
-    if (field.* != null and field.* != proto_value) std.c.free(field.*);
+    if (field.* != null) std.c.free(field.*);
     field.* = new_value;
 }
 
