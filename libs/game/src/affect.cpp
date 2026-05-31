@@ -99,7 +99,6 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
     break;
 
   case APPLY_FEAT:
-    HAS_FEAT(ch, spec) += mod;
     break;
 
   case APPLY_ALLSAVES:

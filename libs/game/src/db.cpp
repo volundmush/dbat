@@ -1791,8 +1791,6 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
     log("SYSERR: Invalid class %d for mob #%d", ch->chclass, nr);
     ch->chclass = 28; /* set to commoner */
   }
-
-  /* GET_CLASS_RANKS(ch, t[3]) = GET_LEVEL(ch); */
  
   if (!IS_HUMAN(ch))
     if (!AFF_FLAGGED(ch, AFF_INFRAVISION))
@@ -1909,7 +1907,6 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
  
   CASE("MaxHit") {
     RANGE(0, 99999);
-    ch->max_hit = num_arg;
   }
  
   CASE("Mana") {
@@ -1919,7 +1916,6 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
  
   CASE("MaxMana") {
     RANGE(0, 99999);
-    ch->max_mana = num_arg;
   }
  
   CASE("Moves") {
@@ -1929,21 +1925,10 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
  
   CASE("MaxMoves") {
     RANGE(0, 99999);
-    ch->max_move = num_arg;
   }
  
   CASE("Affect") {
-    num = num2 = num3 = num4 = num5 = num6 = 0;
-    sscanf(value, "%d %d %d %d %d %d", &num, &num2, &num3, &num4, &num5, &num6);
-    if (num > 0) {
-      af.type = num;
-      af.duration = num2;
-      af.modifier = num3;
-      af.location = num4;
-      af.bitvector = num5;
-      af.specific = num6;
-      affect_to_char(ch, &af);
-    }
+
   }
 
   CASE("AffectV") {
@@ -1952,12 +1937,10 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
   CASE("Feat") {
     sscanf(value, "%d %d", &num, &num2);
-    HAS_FEAT(ch, num) = num2;
   }
 
   CASE("Skill") {
     sscanf(value, "%d %d", &num, &num2);
-    SET_SKILL(ch, num, num2);
   }
 
   CASE("SkillMod") {
@@ -1967,14 +1950,10 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
   CASE("Class") {
     sscanf(value, "%d %d", &num, &num2);
-    GET_CLASS_NONEPIC(ch, num) = num2;
-    GET_CLASS_LEVEL(ch) += num2;
   }
 
   CASE("EpicClass") {
     sscanf(value, "%d %d", &num, &num2);
-    GET_CLASS_EPIC(ch, num) = num2;
-    GET_CLASS_LEVEL(ch) += num2;
   }
 
   if (!matched) {
@@ -4789,7 +4768,6 @@ void init_char(struct char_data *ch)
   /* If this is our first player make him LVL_IMPL. */
   if (top_of_p_table == 0) {
     admin_set(ch, ADMLVL_IMPL);
-    GET_CLASS_NONEPIC(ch, GET_CLASS(ch)) = GET_LEVEL(ch);
 
     /* The implementor never goes through do_start(). */
     ch->baseki = 1000;

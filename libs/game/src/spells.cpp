@@ -517,10 +517,6 @@ int roll_skill(struct char_data *ch, int snum)
      * higher than this roll to avoid it. Most spells should also have some
      * kind of save called after roll_skill.
      */
-      for (i = 0, roll = 0; i < NUM_CLASSES; i++)
-        if (GET_CLASS_RANKS(ch, i) &&
-            (spell_info[snum].min_level[i] < GET_CLASS_RANKS(ch, i)))
-          roll += GET_CLASS_RANKS(ch, i); /* Caster level for eligable classes */
       return roll + rand_number(1, 20);
   } else if (IS_SET(spell_info[snum].skilltype, SKTYPE_SKILL)) {
       if (!skval && IS_SET(spell_info[snum].flags, SKFLAG_NEEDTRAIN)) {

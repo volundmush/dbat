@@ -212,19 +212,7 @@ static int is_ok_char(struct char_data *keeper, struct char_data *ch, struct sho
       (IS_NAIL(ch) && NOTRADE_FIGHTER(shop)) ||
       (IS_JINTO(ch) && NOTRADE_ARCANE_ARCHER(shop)) ||
       (IS_TSUNA(ch) && NOTRADE_ARCANE_TRICKSTER(shop)) ||
-      (IS_KURZAK(ch) && NOTRADE_ARCHMAGE(shop)) ||
-      (IS_ASSASSIN(ch) && NOTRADE_ASSASSIN(shop)) ||
-      (IS_BLACKGUARD(ch) && NOTRADE_BLACKGUARD(shop)) ||
-      (IS_DRAGON_DISCIPLE(ch) && NOTRADE_DRAGON_DISCIPLE(shop)) ||
-      (IS_DUELIST(ch) && NOTRADE_DUELIST(shop)) ||
-      (IS_DWARVEN_DEFENDER(ch) && NOTRADE_DWARVEN_DEFENDER(shop)) ||
-      (IS_ELDRITCH_KNIGHT(ch) && NOTRADE_ELDRITCH_KNIGHT(shop)) ||
-      (IS_HIEROPHANT(ch) && NOTRADE_HIEROPHANT(shop)) ||
-      (IS_HORIZON_WALKER(ch) && NOTRADE_HORIZON_WALKER(shop)) ||
-      (IS_LOREMASTER(ch) && NOTRADE_LOREMASTER(shop)) ||
-      (IS_MYSTIC_THEURGE(ch) && NOTRADE_MYSTIC_THEURGE(shop)) ||
-      (IS_SHADOWDANCER(ch) && NOTRADE_SHADOWDANCER(shop)) ||
-      (IS_THAUMATURGIST(ch) && NOTRADE_THAUMATURGIST(shop))) {
+      (IS_KURZAK(ch) && NOTRADE_ARCHMAGE(shop))) {
 
     snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_CLASS);
     do_tell(keeper, buf, cmd_tell, 0);

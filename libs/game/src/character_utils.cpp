@@ -3942,27 +3942,6 @@ int count_metamagic_feats(struct char_data *ch)
 {
   int count = 0;                /* Number of Metamagic Feats Known */
 
-  if (HAS_FEAT(ch, FEAT_STILL_SPELL))
-    count++;
-
-  if (HAS_FEAT(ch, FEAT_SILENT_SPELL))
-    count++;
-
-  if (HAS_FEAT(ch, FEAT_QUICKEN_SPELL))
-    count++;
-
-  if (HAS_FEAT(ch, FEAT_MAXIMIZE_SPELL))
-    count++;
-
-  if (HAS_FEAT(ch, FEAT_HEIGHTEN_SPELL))
-    count++;
-
-  if (HAS_FEAT(ch, FEAT_EXTEND_SPELL))
-    count++;
-
-  if (HAS_FEAT(ch, FEAT_EMPOWER_SPELL))
-    count++;
-
   return count;
 }
 

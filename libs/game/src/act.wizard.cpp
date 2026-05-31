@@ -1666,11 +1666,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   send_to_char(ch, "Title: %s\r\n", k->title ? k->title : "<None>");
 
   send_to_char(ch, "L-Des: %s@n", k->long_descr ? k->long_descr : "<None>\r\n");
-  if (CONFIG_ALLOW_MULTICLASS) {
-    strncpy(buf, class_desc_str(k, 1, 0), sizeof(buf));
-  } else {
-    snprintf(buf, sizeof(buf), "%s", SENSEI_NAME(k));
-  }
+  snprintf(buf, sizeof(buf), "%s", SENSEI_NAME(k));
     snprintf(buf2, sizeof(buf2), "%s", TRUE_RACE(k));
   send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d(%dHD+%dcl+%d)@n], XP: [@y%" I64T "@n]\r\n",
                    buf, buf2, GET_LEVEL(k), GET_HITDICE(k),
@@ -3447,8 +3443,6 @@ ACMD(do_show)
     send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %" I64T "  Align: %-5d\r\n",
                  GET_GOLD(vict), GET_BANK_GOLD(vict), GET_EXP(vict),
                  GET_ALIGNMENT(vict));
-    if (CONFIG_ALLOW_MULTICLASS)
-      send_to_char(ch, "Class ranks: %s\r\n", class_desc_str(vict, 1, 0));
 
     /* ctime() uses static buffer: do not combine. */
     send_to_char(ch, "Started: %-20.16s  ", ctime(&vict->time.created));
@@ -3895,33 +3889,33 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     send_to_char(ch, "Nosummon %s for %s.\r\n", ONOFF(!on), GET_NAME(vict));
     break;
   case 4:
-    vict->max_hit = value;
+    //vict->max_hit = value;
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxpl for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set maxpl for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 5:
-    vict->max_mana = value;
+    //vict->max_mana = value;
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxki for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set maxki for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 6:
-    vict->max_move = value;
+    //vict->max_move = value;
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxsta for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set maxsta for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 7:
-    vict->hit = value;
+    //vict->hit = value;
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set pl for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set pl for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 8:
-    vict->mana = value;
+    //vict->mana = value;
     affect_total(vict);
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set ki for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set ki for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
   case 9:
-    vict->move = value;
+    //vict->move = value;
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set st for %s.", GET_NAME(ch), GET_NAME(vict));
     log_imm_action("SET: %s has set st for %s.", GET_NAME(ch), GET_NAME(vict));
     break;
@@ -4094,7 +4088,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
       send_to_char(ch, "That is not a class.\r\n");
       return (0);
     }
-    value = GET_CLASS_RANKS(vict, GET_CLASS(vict));
+    value = ch->level;
     vict->chclass = chosen_sensei->getID();
     break;
   case 40:

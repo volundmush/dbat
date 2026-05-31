@@ -90,6 +90,47 @@ struct skill_data {
    int8_t perf;
 };
 
+struct mob_proto_data
+{
+   mob_vnum id;                         /* Where in data-base                 */
+
+   char *name;                          /* NPC aliases / keywords             */
+   char *short_descr;                   /* NPC short description              */
+   char *long_descr;                    /* NPC room description               */
+   char *description;                   /* NPC look description               */
+   char *title;                         /* Shared character title field       */
+
+   int size;                            /* Size class                         */
+   int8_t sex;                          /* NPC sex                            */
+   int race;                            /* NPC race                           */
+   int chclass;                         /* NPC class                          */
+   int alignment;                       /* +-1000 for alignment               */
+   uint8_t weight;                      /* Default weight                     */
+   uint8_t height;                      /* Default height                     */
+
+   int level;                           /* Class level                        */
+   int race_level;                      /* Race / hit dice level              */
+   int level_adj;                       /* Level adjustment                   */
+   int64_t basepl;                      /* Base powerlevel                    */
+   int64_t baseki;                      /* Base ki                            */
+   int64_t basest;                      /* Base stamina                       */
+   int armor;                           /* Internally stored *10              */
+
+   struct abil_data real_abils;         /* Prototype abilities                */
+   struct abil_data aff_abils;          /* Default affected abilities         */
+   struct mob_special_data mob_specials;/* NPC defaults                       */
+
+   int8_t position;                     /* Load position                      */
+   int speaking;                        /* Default language                   */
+
+   bitvector_t act[PM_ARRAY_MAX];       /* Mob flags                          */
+   bitvector_t affected_by[AF_ARRAY_MAX]; /* Permanent affect flags            */
+   bitvector_t admflags[AD_ARRAY_MAX];  /* Admin flags, if serialized         */
+   int admlevel;                        /* Admin level, if serialized         */
+
+   struct trig_proto_list *proto_script;/* Prototype trigger list             */
+};
+
 struct char_data
 {
    int32_t id;                   /* used by DG triggers			*/
@@ -420,9 +461,6 @@ struct char_data
    // UNUSED STUFF BELOW HERE
    int race_level;               /* PC / NPC's racial level / hit dice   */
    int level_adj;                /* PC level adjustment                  */
-   
-   int chclasses[NUM_CLASSES];   /* Ranks in all classes        */
-   int epicclasses[NUM_CLASSES]; /* Ranks in all epic classes */
 
    int64_t mana;
    int64_t hit;
@@ -434,8 +472,6 @@ struct char_data
    int16_t armorcheck;    /* Total armorcheck penalty with proficiency forgiveness */
    int16_t armorcheckall; /* Total armorcheck penalty regardless of proficiency */
    int crank; // clank rank
-   int8_t feats[MAX_FEATS + 1]; /* Feats (booleans and counters)	*/
-   int combat_feats[CFEAT_MAX + 1][FT_ARRAY_MAX];
    char *clan;
 };
 

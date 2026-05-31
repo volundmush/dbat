@@ -51,6 +51,7 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
     try jsonx.putInt(&object, allocator, "race", cdb.char_race_get(ch));
     try jsonx.putInt(&object, allocator, "size", cdb.char_size_get(ch));
     try jsonx.putInt(&object, allocator, "sex", cdb.char_sex_get(ch));
+    try jsonx.putInt(&object, allocator, "level", ch.level);
     try jsonx.putInt(&object, allocator, "admin_level", cdb.char_admlevel_get(ch));
     try jsonx.putNonEmpty(&object, allocator, "admin_flags", try jsonx.serializeFlags(allocator, ch, 128, admFlagged));
     try jsonx.putInt(&object, allocator, "height", ch.height);
@@ -139,9 +140,6 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
         try jsonx.putString(&object, allocator, "rdisplay", ch.rdisplay);
         try jsonx.putString(&object, allocator, "voice", ch.voice);
         try jsonx.put(&object, allocator, "time", try serializeTime(allocator, ch));
-        try jsonx.put(&object, allocator, "levels", try serializeLevels(allocator, ch));
-        try jsonx.put(&object, allocator, "class_ranks", try serializeIntArray(allocator, ch.chclasses[0..]));
-        try jsonx.put(&object, allocator, "epic_class_ranks", try serializeIntArray(allocator, ch.epicclasses[0..]));
         try jsonx.putInt(&object, allocator, "forgeting", ch.forgeting);
         try jsonx.putInt(&object, allocator, "forgetcount", ch.forgetcount);
         try jsonx.putInt(&object, allocator, "lastint", ch.lastint);
@@ -211,6 +209,7 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
     if (try jsonx.intField(value, "size", c_int)) |v| cdb.char_size_set(ch, v);
     if (try jsonx.intField(value, "sex", c_int)) |v| cdb.char_sex_set(ch, v);
     if (try jsonx.intField(value, "admin_level", c_int)) |v| cdb.char_admlevel_set(ch, v);
+    if (try jsonx.intField(value, "level", c_int)) |v| ch.level = v;
     if (jsonx.field(value, "admin_flags")) |flags| try jsonx.deserializeFlags(ch, flags, 128, admFlagSet);
     if (try jsonx.intField(value, "height", u8)) |v| ch.height = v;
     if (try jsonx.intField(value, "weight", u8)) |v| ch.weight = v;
@@ -289,9 +288,6 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
         try setPointerStringField(options.c_allocator, value, "rdisplay", &ch.rdisplay, setRawString);
         try setPointerStringField(options.c_allocator, value, "voice", &ch.voice, setRawString);
         if (jsonx.field(value, "time")) |time| try deserializeTime(ch, time);
-        if (jsonx.field(value, "levels")) |levels| try deserializeLevels(ch, levels);
-        if (jsonx.field(value, "class_ranks")) |items| try deserializeIntArray(ch.chclasses[0..], items);
-        if (jsonx.field(value, "epic_class_ranks")) |items| try deserializeIntArray(ch.epicclasses[0..], items);
         if (try jsonx.intField(value, "forgeting", c_int)) |v| ch.forgeting = v;
         if (try jsonx.intField(value, "forgetcount", c_int)) |v| ch.forgetcount = v;
         if (try jsonx.intField(value, "lastint", cdb.time_t)) |v| ch.lastint = v;

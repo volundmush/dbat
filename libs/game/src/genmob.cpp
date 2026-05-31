@@ -349,30 +349,6 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
     fprintf(fd, "Con: %d\n", GET_CON(mob));
   if (GET_CHA(mob) != 0)
     fprintf(fd, "Cha: %d\n", GET_CHA(mob));
-  if (mob->vnum != NOTHING) { /* Not saving a prototype */
-    fprintf(fd, "Hit: %" I64T "\nMaxHit: %" I64T "\nMana: %" I64T "\nMaxMana: %" I64T "\nMoves: %" I64T "\nMaxMoves: %" I64T "\n",
-            GET_HIT(mob), GET_MAX_HIT(mob), (getCurKI(mob)), GET_MAX_MANA(mob),
-            (getCurST(mob)), GET_MAX_MOVE(mob));
-    for (aff = mob->affected; aff; aff = aff->next)
-      if (aff->type)
-        fprintf(fd, "Affect: %d %d %d %d %d %d\n", aff->type, aff->duration,
-                aff->modifier, aff->location, (int)aff->bitvector, aff->specific);
-  }
-  for (i = 0; i <= NUM_FEATS_DEFINED; i++)
-    if (HAS_FEAT(mob, i))
-      fprintf(fd, "Feat: %d %d\n", i, HAS_FEAT(mob, i));
-  for (i = 0; i < SKILL_TABLE_SIZE; i++)
-    if (GET_SKILL_BASE(mob, i))
-      fprintf(fd, "Skill: %d %d\n", i, HAS_FEAT(mob, i));
-  for (i = 0; i <= NUM_FEATS_DEFINED; i++)
-    if (GET_SKILL_BONUS(mob, i))
-      fprintf(fd, "SkillMod: %d %d\n", i, HAS_FEAT(mob, i));
-  for (i = 0; i < NUM_CLASSES; i++) {
-    if (GET_CLASS_NONEPIC(mob, i))
-      fprintf(fd, "Class: %d %d\n", i, GET_CLASS_NONEPIC(mob, i));
-    if (GET_CLASS_EPIC(mob, i))
-      fprintf(fd, "EpicClass: %d %d\n", i, GET_CLASS_EPIC(mob, i));
-  }
   fputs("E\n", fd);
   return TRUE;
 }

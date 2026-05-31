@@ -450,8 +450,7 @@ int load_char(const char *name, struct char_data *ch)
       case 'E':
              if (!strcmp(tag, "Exp "))  GET_EXP(ch)             = atoi(line);
         else if (!strcmp(tag, "Eali"));
-        else if (!strcmp(tag, "Ecls"))  { sscanf(line, "%d=%d", &num, &num2);
-                                          GET_CLASS_EPIC(ch, num) = num2; }
+        else if (!strcmp(tag, "Ecls"))  { sscanf(line, "%d=%d", &num, &num2); ch->level += num2; }
         else if (!strcmp(tag, "Eye "))  GET_EYE(ch)             = atoi(line);
       break;
 
@@ -520,7 +519,7 @@ int load_char(const char *name, struct char_data *ch)
         else if (!strcmp(tag, "Mlvl"))  GET_MOLT_LEVEL(ch)      = atoi(line);
         else if (!strcmp(tag, "Move"))  load_HMVS(ch, line, LOAD_MOVE);
         else if (!strcmp(tag, "Mcls"))  { sscanf(line, "%d=%d", &num, &num2);
-                                          GET_CLASS_NONEPIC(ch, num) = num2; }
+                                          ch->level += num2; }
         else if (!strcmp(tag, "Maji"))  MAJINIZED(ch)           = atoi(line);
         else if (!strcmp(tag, "Majm"))  load_majin(ch, line);
         else if (!strcmp(tag, "Mimi"))  ch->mimic = atoi(line);
@@ -848,10 +847,6 @@ void save_char(struct char_data * ch)
   if (GET_HITDICE(ch)      != PFDEF_LEVEL)	fprintf(fl, "HitD: %d\n", GET_HITDICE(ch));
   if (GET_LEVEL_ADJ(ch)    != PFDEF_LEVEL)	fprintf(fl, "LvlA: %d\n", GET_LEVEL_ADJ(ch));
   if (GET_HOME(ch)	   != PFDEF_HOMETOWN)	fprintf(fl, "Home: %d\n", GET_HOME(ch));
-  for (i = 0; i < NUM_CLASSES; i++) {
-    if(GET_CLASS_RANKS(ch, i))	fprintf(fl, "Mcls: %d=%d\n", i, GET_CLASS_NONEPIC(ch, i));
-    if(GET_CLASS_EPIC(ch, i))	fprintf(fl, "Ecls: %d=%d\n", i, GET_CLASS_EPIC(ch, i));
-  }
   fprintf(fl, "Id  : %d\n", GET_IDNUM(ch));
   fprintf(fl, "Brth: %ld\n", ch->time.birth);
   fprintf(fl, "Crtd: %ld\n", ch->time.created);
@@ -1034,14 +1029,6 @@ void save_char(struct char_data * ch)
     }
     fprintf(fl, "0 0\n");
   }
-
-  /* Save feats 
-   *  fprintf(fl, "Feat:\n");
-   *  for (i = 1; i <= NUM_FEATS_DEFINED; i++) {
-   *   if (HAS_FEAT(ch, i))
-   *     fprintf(fl, "%d %d\n", i, HAS_FEAT(ch, i));
-   *  }
-   *  fprintf(fl, "0 0\n"); */
 
   /* Save affects */
   fprintf(fl, "Affs:\n");
@@ -1247,8 +1234,7 @@ void load_feats(FILE *fl, struct char_data *ch)
   do {
     get_line(fl, line);
     sscanf(line, "%d %d", &num, &num2);
-      if (num != 0)
-	HAS_FEAT(ch, num) = num2;
+
   } while (num != 0);
 }
 
@@ -1260,23 +1246,15 @@ void load_HMVS(struct char_data *ch, const char *line, int mode)
 
   switch (mode) {
   case LOAD_HIT:
-    //GET_HIT(ch) = num;
-    ch->max_hit = num2;
     break;
 
   case LOAD_MANA:
-    //GET_MANA(ch) = num;
-    ch->max_mana = num2;
     break;
 
   case LOAD_MOVE:
-    //GET_MOVE(ch) = num;
-    ch->max_move = num2;
     break;
 
   case LOAD_KI:
-    //GET_KI(ch) = num;
-    ch->max_ki = num2;
     break;
   }
 }

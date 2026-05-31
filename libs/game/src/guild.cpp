@@ -490,19 +490,7 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, struct gu
 		(IS_KABITO(ch) && NOTRAIN_BARBARIAN(guild)) ||
         	(IS_JINTO(ch) && NOTRAIN_ARCANE_ARCHER(guild)) ||
 		(IS_TSUNA(ch) && NOTRAIN_ARCANE_TRICKSTER(guild)) ||
-		(IS_KURZAK(ch) && NOTRAIN_ARCHMAGE(guild)) ||
-		(IS_ASSASSIN(ch) && NOTRAIN_ASSASSIN(guild)) ||
-		(IS_BLACKGUARD(ch) && NOTRAIN_BLACKGUARD(guild)) ||
-		(IS_DRAGON_DISCIPLE(ch) && NOTRAIN_DRAGON_DISCIPLE(guild)) ||
-		(IS_DUELIST(ch) && NOTRAIN_DUELIST(guild)) ||
-		(IS_DWARVEN_DEFENDER(ch) && NOTRAIN_DWARVEN_DEFENDER(guild)) ||
-		(IS_ELDRITCH_KNIGHT(ch) && NOTRAIN_ELDRITCH_KNIGHT(guild)) ||
-		(IS_HIEROPHANT(ch) && NOTRAIN_HIEROPHANT(guild)) ||
-        	(IS_HORIZON_WALKER(ch) && NOTRAIN_HORIZON_WALKER(guild)) ||
-        	(IS_LOREMASTER(ch) && NOTRAIN_LOREMASTER(guild)) ||
-		(IS_MYSTIC_THEURGE(ch) && NOTRAIN_MYSTIC_THEURGE(guild)) ||
-		(IS_SHADOWDANCER(ch) && NOTRAIN_SHADOWDANCER(guild)) ||
-        	(IS_THAUMATURGIST(ch) && NOTRAIN_THAUMATURGIST(guild))) {
+		(IS_KURZAK(ch) && NOTRAIN_ARCHMAGE(guild))) {
 
 		snprintf(buf, sizeof(buf), "%s %s", 
 					GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
@@ -523,19 +511,7 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, struct gu
 	    (!IS_KABITO(ch) && TRAIN_BARBARIAN(guild)) ||
             (!IS_JINTO(ch) && TRAIN_ARCANE_ARCHER(guild)) ||
 	    (!IS_TSUNA(ch) && TRAIN_ARCANE_TRICKSTER(guild)) ||
-	    (!IS_KURZAK(ch) && TRAIN_ARCHMAGE(guild)) ||
-            (!IS_ASSASSIN(ch) && TRAIN_ASSASSIN(guild)) ||
-            (!IS_BLACKGUARD(ch) && TRAIN_BLACKGUARD(guild)) ||
-            (!IS_DRAGON_DISCIPLE(ch) && TRAIN_DRAGON_DISCIPLE(guild)) ||
-            (!IS_DUELIST(ch) && TRAIN_DUELIST(guild)) ||
-            (!IS_DWARVEN_DEFENDER(ch) && TRAIN_DWARVEN_DEFENDER(guild)) ||
-            (!IS_ELDRITCH_KNIGHT(ch) && TRAIN_ELDRITCH_KNIGHT(guild)) ||
-            (!IS_HIEROPHANT(ch) && TRAIN_HIEROPHANT(guild)) ||
-            (!IS_HORIZON_WALKER(ch) && TRAIN_HORIZON_WALKER(guild)) ||
-            (!IS_LOREMASTER(ch) && TRAIN_LOREMASTER(guild)) ||
-            (!IS_MYSTIC_THEURGE(ch) && TRAIN_MYSTIC_THEURGE(guild)) ||
-            (!IS_SHADOWDANCER(ch) && TRAIN_SHADOWDANCER(guild)) ||
-            (!IS_THAUMATURGIST(ch) && TRAIN_THAUMATURGIST(guild))) {
+	    (!IS_KURZAK(ch) && TRAIN_ARCHMAGE(guild))) {
 		snprintf(buf, sizeof(buf), "%s %s", 
 					GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
 		do_tell(keeper, buf, cmd_tell, 0);
@@ -627,7 +603,7 @@ void what_does_guild_know(struct guild_data *guild, struct char_data * ch)
     i = sortpos; /* spell_sort_info[sortpos]; */
     if (does_guild_know(guild, i) && skill_type(i) == SKTYPE_SKILL) {
       for (canknow = 0, k = 0, j = 0; j < NUM_CLASSES; j++)
-        if (GET_CLASS_RANKS(ch, j) > 0 && (spell_info[i].can_learn_skill[j] > SKLEARN_CANT)) {
+        if (ch->chclass == j && (spell_info[i].can_learn_skill[j] > SKLEARN_CANT)) {
           k = spell_info[i].can_learn_skill[j];
         }
         canknow = highest_skill_value(GET_LEVEL(ch), k);

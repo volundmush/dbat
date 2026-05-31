@@ -81,11 +81,7 @@ extern "C" {
 #define GET_LEVEL(ch)	(GET_CLASS_LEVEL(ch) + GET_LEVEL_ADJ(ch) + GET_HITDICE(ch))
 #define GET_PFILEPOS(ch)((ch)->pfilepos)
 
-#define GET_CLASS(ch)   ((ch)->chclass ? (ch)->chclass : 0)
-#define GET_CLASS_NONEPIC(ch, whichclass) ((ch)->chclasses[whichclass])
-#define GET_CLASS_EPIC(ch, whichclass) ((ch)->epicclasses[whichclass])
-#define GET_CLASS_RANKS(ch, whichclass) (GET_CLASS_NONEPIC(ch, whichclass) + \
-                                         GET_CLASS_EPIC(ch, whichclass))
+#define GET_CLASS(ch)   ((ch)->chclass)
 #define GET_RACE(ch)    ((ch)->race)
 #define GET_HAIRL(ch)   ((ch)->hairl)
 #define GET_HAIRC(ch)   ((ch)->hairc)
@@ -393,20 +389,6 @@ extern "C" {
 #define IS_TSUNA(ch)            (GET_CLASS(ch) == CLASS_TSUNA)
 #define IS_KURZAK(ch)           (GET_CLASS(ch) == CLASS_KURZAK)
 
-#define IS_ASSASSIN(ch)         (GET_CLASS_RANKS(ch, CLASS_ASSASSIN) > 0)
-#define IS_BLACKGUARD(ch)       (GET_CLASS_RANKS(ch, CLASS_BLACKGUARD) > 0)
-#define IS_DRAGON_DISCIPLE(ch)  (GET_CLASS_RANKS(ch, CLASS_DRAGON_DISCIPLE) > 0)
-#define IS_DUELIST(ch)          (GET_CLASS_RANKS(ch, CLASS_DUELIST) > 0)
-#define IS_DWARVEN_DEFENDER(ch) (GET_CLASS_RANKS(ch, CLASS_DWARVEN_DEFENDER) > 0)
-#define IS_ELDRITCH_KNIGHT(ch)  (GET_CLASS_RANKS(ch, CLASS_ELDRITCH_KNIGHT) > 0)
-#define IS_HIEROPHANT(ch)       (GET_CLASS_RANKS(ch, CLASS_HIEROPHANT) > 0)
-#define IS_HORIZON_WALKER(ch)   (GET_CLASS_RANKS(ch, CLASS_HORIZON_WALKER) > 0)
-#define IS_LOREMASTER(ch)       (GET_CLASS_RANKS(ch, CLASS_LOREMASTER) > 0)
-#define IS_MYSTIC_THEURGE(ch)   (GET_CLASS_RANKS(ch, CLASS_MYSTIC_THEURGE) > 0)
-#define IS_SHADOWDANCER(ch)     (GET_CLASS_RANKS(ch, CLASS_SHADOWDANCER) > 0)
-#define IS_THAUMATURGIST(ch)    (GET_CLASS_RANKS(ch, CLASS_THAUMATURGIST) > 0)
-
-
 #define GOLD_CARRY(ch)		(GET_LEVEL(ch) < 100 ? (GET_LEVEL(ch) < 50 ? GET_LEVEL(ch) * 10000 : 500000) : 50000000)
 #define IS_SHADOW_DRAGON1(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON1_VNUM)
 #define IS_SHADOW_DRAGON2(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON2_VNUM)
@@ -492,9 +474,6 @@ bool MOON_TIMECHECK();
 /* returns the number of spells per slot */
 #define IS_ARCANE(ch)		(IS_WIZARD(ch))
 #define IS_DIVINE(ch)		(IS_CLERIC(ch))
-#define HAS_FEAT(ch, i)		((ch)->feats[i])
-#define HAS_COMBAT_FEAT(ch,i,j)	IS_SET_AR((ch)->combat_feats[(i)], (j))
-#define SET_COMBAT_FEAT(ch,i,j)	SET_BIT_AR((ch)->combat_feats[(i)], (j))
 #define GET_BAB(ch)		GET_POLE_BONUS(ch)
 #define SET_FEAT(ch, i, value)	do { (ch)->feats[i] = value; } while(0)
 #define IS_EPIC_LEVEL(ch)	(GET_CLASS_LEVEL(ch) >= 20)

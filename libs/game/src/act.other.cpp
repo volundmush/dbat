@@ -6167,9 +6167,6 @@ ACMD(do_plant)
   roll = roll_skill(ch, SKILL_SLEIGHT_OF_HAND) + rand_number(1, 3);
   fail = rand_number(1, 105);
 
-  if (HAS_FEAT(ch, FEAT_DEFT_HANDS))
-    roll += 2;
-
   if (GET_POS(vict) < POS_SLEEPING)
     detect = 0;
   else
