@@ -46,7 +46,7 @@ inline void obj_proto_iterate(Func &&func)
   }
 
   for (;;) {
-    struct obj_data *obj = obj_proto_next(iterator);
+    struct obj_proto_data *obj = obj_proto_next(iterator);
     if (!obj) {
       break;
     }
@@ -58,12 +58,12 @@ inline void obj_proto_iterate(Func &&func)
   obj_proto_iterator_free(iterator);
 }
 
-inline void obj_proto_iterate(bool (*func)(struct obj_data *obj))
+inline void obj_proto_iterate(bool (*func)(struct obj_proto_data *obj))
 {
   if (!func) {
     return;
   }
-  obj_proto_iterate([&](struct obj_data *obj) { return func(obj); });
+  obj_proto_iterate([&](struct obj_proto_data *obj) { return func(obj); });
 }
 
 template <typename Func>

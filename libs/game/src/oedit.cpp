@@ -29,6 +29,9 @@
 #include "dbat/game/races_plus.h"
 #include "dbat/game/fight.h"
 
+#undef OLC_OBJ
+#define OLC_OBJ(d) (STATE(d) == CON_IEDIT ? OLC(d)->obj : (struct obj_data *)OLC(d)->oproto)
+
 /*------------------------------------------------------------------------*/
 
 /*
@@ -47,7 +50,7 @@ ACMD(do_oasis_oedit)
   char *buf3;
   char buf1[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
-  struct obj_data *proto = NULL;
+  struct obj_proto_data *proto = NULL;
   
   /****************************************************************************/
   /** Parse any arguments.                                                   **/
@@ -203,9 +206,9 @@ ACMD(do_oasis_oedit)
 
 void oedit_setup_new(struct descriptor_data *d)
 {
-  CREATE(OLC_OBJ(d), struct obj_data, 1);
+  CREATE(OLC_OPROTO(d), struct obj_proto_data, 1);
 
-  clear_object(OLC_OBJ(d));
+  OLC_OPROTO(d)->vnum = OLC_NUM(d);
   OLC_OBJ(d)->name = strdup("unfinished object");
   OLC_OBJ(d)->description = strdup("An unfinished object is lying here.");
   OLC_OBJ(d)->short_description = strdup("an unfinished object");
@@ -218,7 +221,6 @@ void oedit_setup_new(struct descriptor_data *d)
   GET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_MATERIAL) = MATERIAL_STEEL;
   GET_OBJ_SIZE(OLC_OBJ(d)) = SIZE_MEDIUM;
 
-  SCRIPT(OLC_OBJ(d)) = NULL;
   OLC_OBJ(d)->proto_script = OLC_SCRIPT(d) = NULL;
 }
 
@@ -226,19 +228,19 @@ void oedit_setup_new(struct descriptor_data *d)
 
 void oedit_setup_existing(struct descriptor_data *d, room_vnum num)
 {
-  struct obj_data *obj;
+  struct obj_proto_data *obj;
 
   /*
    * Allocate object in memory.
    */
-  CREATE(obj, struct obj_data, 1);
+  CREATE(obj, struct obj_proto_data, 1);
   auto proto = obj_proto_by_id(num);
-  copy_object(obj, proto);
+  obj_proto_copy(obj, proto);
 
   /*
    * Attach new object to player's descriptor.
    */
-  OLC_OBJ(d) = obj;
+  OLC_OPROTO(d) = obj;
   OLC_VAL(d) = 0;
   OLC_ITEM_TYPE(d) = OBJ_TRIGGER;
   dg_olc_script_copy(d);
@@ -246,7 +248,6 @@ void oedit_setup_existing(struct descriptor_data *d, room_vnum num)
    * The edited obj must not have a script.
    * It will be assigned to the updated obj later, after editing.
    */
-  SCRIPT(obj) = NULL;
   OLC_OBJ(d)->proto_script = NULL;
 }
 
@@ -257,13 +258,15 @@ void oedit_save_internally(struct descriptor_data *d)
   int i;
   obj_rnum robj_num;
   struct descriptor_data *dsc;
-  struct obj_data *obj, *proto;
+  struct obj_data *obj;
+  struct obj_proto_data *proto;
 
   obj_vnum v = OLC_NUM(d);
 
   i = (obj_proto_by_id(v) == NULL);
 
-  if ((robj_num = add_object(OLC_OBJ(d), v)) == NOTHING) {
+  OLC_OPROTO(d)->vnum = v;
+  if ((robj_num = add_object(OLC_OPROTO(d), v)) == NOTHING) {
     log("oedit_save_internally: add_object failed.");
     return;
   }
@@ -1020,7 +1023,8 @@ void oedit_parse(struct descriptor_data *d, char *arg)
   int number, max_val, min_val;
   char *oldtext = NULL;
   struct board_info *tmp;
-  struct obj_data *obj, *proto;
+  struct obj_data *obj;
+  struct obj_proto_data *proto;
   obj_rnum robj;
 
   switch (OLC_MODE(d)) {
@@ -1764,7 +1768,7 @@ void iedit_setup_existing(struct descriptor_data *d, struct obj_data *real_num)
   remove_from_lookup_table(temp_id);
   obj_unregister_id(temp_id);
 
-  OLC_OBJ(d) = obj;
+  OLC(d)->obj = obj;
   OLC_IOBJ(d) = real_num;
   OLC_VAL(d) = 0;
   oedit_disp_menu(d);

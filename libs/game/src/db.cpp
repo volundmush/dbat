@@ -116,11 +116,11 @@ extern struct board_info *boards; /* our boards */
 static void mob_stats(struct char_data *mob);
 static void dragon_level(struct char_data *ch);
 static int check_bitvector_names(bitvector_t bits, size_t namecount, const char *whatami, const char *whatbits);
-static int check_object_spell_number(struct obj_data *obj, int val);
-static int check_object_level(struct obj_data *obj, int val);
+static int check_object_spell_number(struct obj_proto_data *obj, int val);
+static int check_object_level(struct obj_proto_data *obj, int val);
 static void setup_dir(FILE *fl, struct room_data *room, int dir);
 static void discrete_load(FILE *fl, int mode, char *filename);
-static int check_object(struct obj_data *);
+static int check_object(struct obj_proto_data *);
 static void parse_room(FILE *fl, int virtual_nr);
 static void parse_mobile(FILE *mob_f, int nr);
 static char *parse_object(FILE *obj_f, int nr);
@@ -666,7 +666,7 @@ void destroy_db(void)
   obj_proto_iterate ([&](auto obj) {
     obj_vnum v = obj->vnum;
     obj_proto_delete(v);
-    obj_free_prototype(obj);
+    obj_proto_free(obj);
     return true;
   });
 
@@ -2176,12 +2176,10 @@ static char *parse_object(FILE *obj_f, int nr)
   char f9[READ_SIZE], f10[READ_SIZE], f11[READ_SIZE], f12[READ_SIZE];
   struct extra_descr_data *new_descr;
 
-  struct obj_data *proto = NULL;
-  CREATE(proto, struct obj_data, 1);
+  struct obj_proto_data *proto = NULL;
+  CREATE(proto, struct obj_proto_data, 1);
   obj_proto_put(nr, proto);
 
-  clear_object(proto);
-  
   proto->vnum = nr;
 
   sprintf(buf2, "object #%d", nr);	/* sprintf: OK (for 'buf2 >= 19') */
@@ -3668,14 +3666,13 @@ struct obj_data *create_obj(void)
 struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
 {
   struct obj_data *obj;
-  int j;
 
   if(type == REAL) {
     log("real is no longer supported!");
     exit(1);
   }
 
-  struct obj_data *proto = obj_proto_by_id(nr);
+  struct obj_proto_data *proto = obj_proto_by_id(nr);
   if(!proto) {
     log("WARNING: Object vnum %d does not exist in database.", nr);
     return (NULL);
@@ -3683,8 +3680,7 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
 
   CREATE(obj, struct obj_data, 1);
   clear_object(obj);
-  *obj = *proto;
-  copy_object_strings(obj, proto);
+  obj_proto_to_instance(obj, proto);
   obj->next = object_list;
   object_list = obj;
   OBJ_LOADROOM(obj) = NOWHERE;
@@ -3699,7 +3695,6 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
   obj->generation = time(0);
   obj->unique_id = -1;
 
-  copy_proto_script(proto, obj, OBJ_TRIGGER);
   assign_triggers(obj, OBJ_TRIGGER);
   if (GET_OBJ_VNUM(obj) == 65) {
    HCHARGE(obj) = 20;
@@ -4801,7 +4796,7 @@ void init_char(struct char_data *ch)
  *
  * TODO: Add checks for unknown bitvectors.
  */
-static int check_object(struct obj_data *obj)
+static int check_object(struct obj_proto_data *obj)
 {
   char objname[MAX_INPUT_LENGTH + 32];
   int error = FALSE, y;
@@ -4851,7 +4846,7 @@ static int check_object(struct obj_data *obj)
 }
 
 
-static int check_object_spell_number(struct obj_data *obj, int val)
+static int check_object_spell_number(struct obj_proto_data *obj, int val)
 {
   int error = FALSE;
   const char *spellname;
@@ -4900,7 +4895,7 @@ static int check_object_spell_number(struct obj_data *obj, int val)
   return (error);
 }
 
-static int check_object_level(struct obj_data *obj, int val)
+static int check_object_level(struct obj_proto_data *obj, int val)
 {
   int error = FALSE;
 

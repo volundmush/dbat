@@ -252,12 +252,12 @@ void list_objects(struct char_data *ch, struct zone_data *zone, obj_vnum vmin, o
   "----- ------- -------------------------------------------- ----------------\r\n");
   
   for (i = bottom; i <= top; i++) {
-    struct obj_data *obj = obj_proto_by_id(i);
+    struct obj_proto_data *obj = obj_proto_by_id(i);
     if(!obj) continue;
     counter++;
 
     send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
-                  counter, obj_vnum_get(obj), count_color_chars(obj->short_description)+44,
+                  counter, obj->vnum, count_color_chars(obj->short_description)+44,
                   obj->short_description, item_types[obj->type_flag],
                   obj->proto_script ? " [TRIG]" : "");
   }

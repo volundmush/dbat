@@ -65,6 +65,7 @@ static int find_oper_num(char token);
 static int evaluate_expression(struct obj_data *obj, char *expr);
 static int trade_with(struct obj_data *item, struct shop_data *shop);
 static int same_obj(struct obj_data *obj1, struct obj_data *obj2);
+static int same_obj(struct obj_data *obj1, struct obj_proto_data *obj2);
 
 static int transaction_amt(char *arg);
 static char *times_message(struct obj_data *obj, char *name, int num);
@@ -409,7 +410,7 @@ static int same_obj(struct obj_data *obj1, struct obj_data *obj2)
   int ef1, ef2;
 
   if (!obj1 || !obj2)
-    return (obj1 == obj2);
+    return (!obj1 && !obj2);
 
   if (GET_OBJ_VNUM(obj1) != GET_OBJ_VNUM(obj2))
     return (FALSE);
@@ -434,6 +435,11 @@ static int same_obj(struct obj_data *obj1, struct obj_data *obj2)
       return (FALSE);
 
   return (TRUE);
+}
+
+static int same_obj(struct obj_data *obj1, struct obj_proto_data *obj2)
+{
+  return same_obj(obj1, reinterpret_cast<struct obj_data *>(obj2));
 }
 
 int shop_producing(struct obj_data *item, struct shop_data *shop)
@@ -975,7 +981,7 @@ static struct obj_data *slide_obj(struct obj_data *obj, struct char_data *keeper
   if (shop_producing(obj, shop)) {
     temp = GET_OBJ_VNUM(obj);
     extract_obj(obj);
-    return obj_proto_by_id(temp);
+    return NULL;
   }
   shop->lastsort++;
   loop = keeper->carrying;

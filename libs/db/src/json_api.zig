@@ -207,7 +207,7 @@ fn exportNpcPrototypes(folder: []const u8) !void {
 fn exportObjPrototype(vnum: cdb.obj_vnum, filename: []const u8) !void {
     const obj = cdb.obj_proto_by_id(vnum);
     if (obj == null) return error.NotFound;
-    try writeJsonFile(filename, objects_json.serializeObject, .{ obj, objects_json.ObjectJsonMode.prototype });
+    try writeJsonFile(filename, objects_json.serializeObjectPrototype, .{obj});
 }
 
 fn exportObjPrototypes(folder: []const u8) !void {
@@ -216,7 +216,7 @@ fn exportObjPrototypes(folder: []const u8) !void {
     defer cdb.obj_proto_iterator_free(iterator);
 
     while (cdb.obj_proto_next(iterator)) |obj| {
-        const vnum = cdb.obj_vnum_get(obj);
+        const vnum = obj.*.vnum;
         if (vnum == cdb.NOTHING) continue;
         const path = try assetPath(folder, vnum);
         defer std.heap.page_allocator.free(path);
@@ -505,9 +505,9 @@ fn importObjPrototypes(folder: []const u8) !void {
             logImportFileError("obj_prototypes", file, err);
             return err;
         };
-        const obj = try allocCOne(cdb.obj_data);
+        const obj = try allocCOne(cdb.obj_proto_data);
         obj.vnum = @intCast(file.vnum);
-        objects_json.deserializeObject(obj, .{ .mode = .prototype }, value) catch |err| {
+        objects_json.deserializeObjectPrototype(obj, .{ .mode = .prototype }, value) catch |err| {
             logImportFileError("obj_prototypes", file, err);
             return err;
         };

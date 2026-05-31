@@ -14,9 +14,116 @@
 #include "dbat/game/dg_olc.h"
 #include "dbat/game/shop.h"
 
+#include <string.h>
+
 static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
 
-obj_vnum add_object(struct obj_data *newobj, obj_vnum ovnum)
+static void free_trig_proto_list(struct trig_proto_list *list)
+{
+  while (list) {
+    struct trig_proto_list *next = list->next;
+    free(list);
+    list = next;
+  }
+}
+
+static struct trig_proto_list *copy_trig_proto_list(const struct trig_proto_list *from)
+{
+  struct trig_proto_list *head = NULL, *tail = NULL;
+
+  for (; from; from = from->next) {
+    struct trig_proto_list *node;
+    CREATE(node, struct trig_proto_list, 1);
+    node->vnum = from->vnum;
+    if (tail)
+      tail->next = node;
+    else
+      head = node;
+    tail = node;
+  }
+
+  return head;
+}
+
+void obj_proto_free_strings(struct obj_proto_data *obj)
+{
+  if (obj->name)
+    free(obj->name);
+  if (obj->description)
+    free(obj->description);
+  if (obj->short_description)
+    free(obj->short_description);
+  if (obj->action_description)
+    free(obj->action_description);
+  if (obj->ex_description)
+    free_ex_descriptions(obj->ex_description);
+  obj->name = NULL;
+  obj->description = NULL;
+  obj->short_description = NULL;
+  obj->action_description = NULL;
+  obj->ex_description = NULL;
+}
+
+void obj_proto_free(struct obj_proto_data *obj)
+{
+  if (!obj)
+    return;
+  obj_proto_free_strings(obj);
+  free_trig_proto_list(obj->proto_script);
+  free(obj);
+}
+
+void obj_proto_copy(struct obj_proto_data *to, const struct obj_proto_data *from)
+{
+  obj_proto_free_strings(to);
+  free_trig_proto_list(to->proto_script);
+  *to = *from;
+  to->name = from->name ? strdup(from->name) : NULL;
+  to->description = from->description ? strdup(from->description) : NULL;
+  to->short_description = from->short_description ? strdup(from->short_description) : NULL;
+  to->action_description = from->action_description ? strdup(from->action_description) : NULL;
+  if (from->ex_description)
+    copy_ex_descriptions(&to->ex_description, from->ex_description);
+  else
+    to->ex_description = NULL;
+  to->proto_script = copy_trig_proto_list(from->proto_script);
+}
+
+void obj_apply_proto_to_instance(struct obj_data *to, const struct obj_proto_data *from)
+{
+  to->vnum = from->vnum;
+  memcpy(to->value, from->value, sizeof(to->value));
+  to->type_flag = from->type_flag;
+  to->level = from->level;
+  memcpy(to->wear_flags, from->wear_flags, sizeof(to->wear_flags));
+  memcpy(to->extra_flags, from->extra_flags, sizeof(to->extra_flags));
+  to->weight = from->weight;
+  to->cost = from->cost;
+  to->timer = from->timer;
+  memcpy(to->bitvector, from->bitvector, sizeof(to->bitvector));
+  to->size = from->size;
+  memcpy(to->affected, from->affected, sizeof(to->affected));
+
+  free_object_strings(to);
+  to->name = from->name ? strdup(from->name) : NULL;
+  to->description = from->description ? strdup(from->description) : NULL;
+  to->short_description = from->short_description ? strdup(from->short_description) : NULL;
+  to->action_description = from->action_description ? strdup(from->action_description) : NULL;
+  if (from->ex_description)
+    copy_ex_descriptions(&to->ex_description, from->ex_description);
+  else
+    to->ex_description = NULL;
+
+  free_trig_proto_list(to->proto_script);
+  to->proto_script = copy_trig_proto_list(from->proto_script);
+}
+
+void obj_proto_to_instance(struct obj_data *to, const struct obj_proto_data *from)
+{
+  obj_apply_proto_to_instance(to, from);
+}
+
+obj_vnum add_object(struct obj_proto_data *newobj, obj_vnum ovnum)
 {
   int found = NOTHING;
   zone_vnum znum = virtual_zone_by_thing(ovnum);
@@ -26,15 +133,15 @@ obj_vnum add_object(struct obj_data *newobj, obj_vnum ovnum)
    */
   if (auto proto = obj_proto_by_id(ovnum); proto)
   {
-    copy_object(proto, newobj);
+    obj_proto_copy(proto, newobj);
     update_objects(proto);
     add_to_save_list(znum, SL_OBJ);
     return newobj->vnum;
   }
 
-  struct obj_data *obj = NULL;
-  CREATE(obj, struct obj_data, 1);
-  copy_object(obj, newobj);
+  struct obj_proto_data *obj = NULL;
+  CREATE(obj, struct obj_proto_data, 1);
+  obj_proto_copy(obj, newobj);
   obj_proto_put(ovnum, obj);
 
   add_to_save_list(znum, SL_OBJ);
@@ -50,9 +157,9 @@ obj_vnum add_object(struct obj_data *newobj, obj_vnum ovnum)
  * if object is pointing to this prototype, then we need to replace it
  * with the new one.
  */
-int update_objects(struct obj_data *refobj)
+int update_objects(struct obj_proto_data *refobj)
 {
-  struct obj_data *obj, swap;
+  struct obj_data *obj;
   int count = 0;
 
   for (obj = object_list; obj; obj = obj->next)
@@ -61,20 +168,7 @@ int update_objects(struct obj_data *refobj)
       continue;
 
     count++;
-
-    /* Update the existing object but save a copy for private information. */
-    swap = *obj;
-    *obj = *refobj;
-
-    /* Copy game-time dependent variables over. */
-    IN_ROOM(obj) = swap.in_room;
-    obj->carried_by = swap.carried_by;
-    obj->worn_by = swap.worn_by;
-    obj->worn_on = swap.worn_on;
-    obj->in_obj = swap.in_obj;
-    obj->contains = swap.contains;
-    obj->next_content = swap.next_content;
-    obj->next = swap.next;
+    obj_apply_proto_to_instance(obj, refobj);
   }
 
   return count;
@@ -269,7 +363,7 @@ void free_object_strings(struct obj_data *obj)
 void free_object_strings_proto(struct obj_data *obj)
 {
   int robj_num = GET_OBJ_RNUM(obj);
-  struct obj_data *proto = obj_proto_by_id(GET_OBJ_VNUM(obj));
+  struct obj_proto_data *proto = obj_proto_by_id(GET_OBJ_VNUM(obj));
 
   if (obj->name && obj->name != proto->name)
     free(obj->name);
@@ -352,7 +446,6 @@ int delete_object(obj_vnum vnum)
   add_to_save_list(zone->number, SL_OBJ);
 
   obj_proto_delete(obj->vnum);
-  // TODO: ensure the pointer is actually freed darnit!
 
   /* This is something you might want to read about in the logs. */
   log("GenOLC: delete_object: Deleting object #%d (%s).", GET_OBJ_VNUM(obj), obj->short_description);
@@ -393,5 +486,6 @@ int delete_object(obj_vnum vnum)
     extract_obj(tmp);
   }
 
+  obj_proto_free(obj);
   return vnum;
 }

@@ -11,7 +11,7 @@ obj_rnum real_object(obj_vnum vnum)
   return obj_proto_by_id(vnum) ? vnum : NOTHING;
 }
 
-struct obj_data *obj_proto_by_id(obj_vnum vnum)
+struct obj_proto_data *obj_proto_by_id(obj_vnum vnum)
 {
   return obj_proto_get(vnum);
 }

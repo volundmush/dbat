@@ -743,6 +743,8 @@ ACMD(do_finddoor)
   char buf[MAX_STRING_LENGTH] = {0}; 
   struct char_data *tmp_char; 
   struct obj_data *obj; 
+  struct obj_proto_data *proto = NULL;
+  const char *key_short = NULL;
 
   one_argument(argument, arg); 
 
@@ -750,19 +752,26 @@ ACMD(do_finddoor)
     send_to_char(ch, "Format: finddoor <obj/vnum>\r\n"); 
   } else if (is_number(arg)) { 
     vnum = atoi(arg); 
-    obj = obj_proto_by_id(vnum); 
+    proto = obj_proto_by_id(vnum); 
+    if (!proto) {
+      send_to_char(ch, "What key do you want to find a door for?\r\n");
+      return;
+    }
+    key_short = GET_OBJ_SHORT(proto);
   } else { 
     generic_find(arg, 
          FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_WORLD | FIND_OBJ_EQUIP, 
          ch, &tmp_char, &obj); 
     if (!obj) 
       send_to_char(ch, "What key do you want to find a door for?\r\n"); 
-    else 
+    else {
       vnum = GET_OBJ_VNUM(obj); 
+      key_short = GET_OBJ_SHORT(obj);
+    }
   } 
   if (vnum != NOTHING) { 
       len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n", 
-                      vnum, GET_OBJ_SHORT(obj)); 
+                      vnum, key_short); 
       room_iterate ([&](auto room) {
         for (d = 0; d < NUM_OF_DIRS; d++) { 
           if (room->dir_option[d] && room->dir_option[d]->key && 
@@ -782,7 +791,7 @@ ACMD(do_finddoor)
         send_to_char(ch, "%s", buf); 
       else 
         send_to_char(ch, "No doors were found for key [%d] %s.\r\n", 
-                         vnum, GET_OBJ_SHORT(obj)); 
+                         vnum, key_short); 
   } 
 }
 
@@ -2210,7 +2219,8 @@ ACMD(do_load)
     load_mtrigger(mob);
     }
   } else if (is_abbrev(buf, "obj")) {
-    struct obj_data *obj, *proto;
+    struct obj_data *obj;
+    struct obj_proto_data *proto;
 
     if (!(proto = obj_proto_by_id(atoi(buf2)))) {
       send_to_char(ch, "There is no object with that number.\r\n");
@@ -2264,7 +2274,8 @@ ACMD(do_vstat)
     do_stat_character(ch, mob);
     extract_char(mob);
   } else if (is_abbrev(buf, "obj")) {
-    struct obj_data *obj, *proto;
+    struct obj_data *obj;
+    struct obj_proto_data *proto;
 
     if (!(proto = obj_proto_by_id(atoi(buf2)))) {
       send_to_char(ch, "There is no object with that number.\r\n");
@@ -5194,7 +5205,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum)
 {
   int cmd_no, count = 0;
   zone_rnum zone;
-  struct obj_data *proto = obj_proto_by_id(ovnum);
+  struct obj_proto_data *proto = obj_proto_by_id(ovnum);
   room_vnum lastroom_v = 0;
   room_rnum lastroom_r = 0;
   mob_vnum lastmob_v = 0;

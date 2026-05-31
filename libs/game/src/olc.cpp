@@ -69,7 +69,7 @@ ACMD(do_olc)
   char mode_arg[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
   room_rnum rnum;
   struct char_data *mob = NULL;
-  struct obj_data *obj = NULL;
+  struct obj_proto_data *obj = NULL;
   room_vnum vnum = NOWHERE;
   int olc_mode;
 

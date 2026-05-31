@@ -111,7 +111,7 @@ struct board_info *create_new_board(obj_vnum board_vnum) {
   char buf[512];
   FILE *fl;
   struct board_info *temp=NULL,*backup;
-  struct obj_data *obj=NULL;
+  struct obj_proto_data *obj=NULL;
   
   /* object exists, but no board file (yet) */
 
@@ -206,7 +206,7 @@ int save_board(struct board_info *ts) {
 struct board_info *load_board(obj_vnum board_vnum) {
   struct board_info *temp_board;
   struct board_msg *bmsg;
-  struct obj_data *obj=NULL;
+  struct obj_proto_data *obj=NULL;
   struct stat st;
   struct board_memory *memboard, *list;
   int t[10], mnum, poster, timestamp, msg_num, retval = 0;
@@ -1072,5 +1072,4 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg)
   save_board(thisboard);
   return;
 }
-
 

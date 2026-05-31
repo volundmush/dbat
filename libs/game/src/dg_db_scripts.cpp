@@ -212,7 +212,7 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
   }
 }
 
-void dg_obj_trigger(char *line, struct obj_data *obj)
+void dg_obj_trigger(char *line, struct obj_proto_data *obj)
 {
   char junk[8];
   int vnum, rnum, count;
