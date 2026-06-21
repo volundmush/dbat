@@ -305,6 +305,7 @@ ACMD(do_energize) {
 }
 
 ACMD(do_breath) {
+  return;
   int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
   int64_t dmg, stcost = GET_MAX_HIT(ch) / 5000;
   struct char_data *vict;
@@ -567,6 +568,7 @@ ACMD(do_breath) {
 }
 
 ACMD(do_ram) {
+  return;
   int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
   int64_t dmg, stcost = GET_MAX_HIT(ch) / 200;
   struct char_data *vict;
@@ -764,6 +766,7 @@ ACMD(do_ram) {
 }
 
 ACMD(do_strike) {
+  return;
   int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
   int64_t dmg, stcost = GET_MAX_HIT(ch) / 400;
   struct char_data *vict;

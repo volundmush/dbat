@@ -26,10 +26,6 @@ return {
     base_power    = 1.25,
     spar_safe = true,
 
-    on_calculate_cost = function(inst)
-        inst.cost.stamina = 20 + math.floor(inst.attacker:meter_max("powerlevel") / 500)
-    end,
-
     on_check = function(inst)
         if not can_bite(inst.attacker) then
             return false, "You don't want to put that in your mouth, you don't know where it has been!"

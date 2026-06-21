@@ -35,7 +35,7 @@ return {
         local db  = require("dbat")
         local PLR = db.consts.player_flags
         if not ch:is_npc() and not ch:player_flagged(PLR.TAIL) then return false end
-        return ch:skill_known("tailwhip")
+        return ch:skill_get("tailwhip")
     end,
 
     on_hit = function(inst)

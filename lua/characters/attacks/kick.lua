@@ -29,7 +29,7 @@ return {
 
     on_check_combo = function(ch)
         if ch:limbcond_get(3) <= 0 and ch:limbcond_get(4) <= 0 then return false end
-        return ch:skill_known("kick")
+        return ch:skill_get("kick")
     end,
 
     on_hit = function(inst)

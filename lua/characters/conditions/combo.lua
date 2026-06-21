@@ -9,19 +9,14 @@ return {
     tags = { "combo" },
     persistent = false,
 
-    -- Returns the next attack id in the combo chain, or nil if the chain is exhausted.
-    -- Advances state even on nil so callers don't loop forever.
+    -- Returns the suggested next attack id. Advances state first so the
+    -- returned suggestion matches what the HUD will display after this call.
     next_attack = function(ch, cond)
-        local count = cond:number_get("count")
-        if count >= 3 then
-            cond:number_set("count", 0)
-            cond:number_set("state", 0)
-            return nil
-        end
-        local state = cond:number_get("state")
-        local id    = COMBO_SEQUENCE[(state % #COMBO_SEQUENCE) + 1]
-        cond:number_set("state", state + 1)
+        local state     = cond:number_get("state")
+        local count     = cond:number_get("count")
+        local new_state = (state + 1) % #COMBO_SEQUENCE
+        cond:number_set("state", new_state)
         cond:number_set("count", count + 1)
-        return id
+        return COMBO_SEQUENCE[new_state + 1]
     end,
 }

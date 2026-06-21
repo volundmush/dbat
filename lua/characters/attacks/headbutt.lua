@@ -23,7 +23,7 @@ return {
     end,
 
     on_check_combo = function(ch)
-        return ch:skill_known("headbutt")
+        return ch:skill_get("headbutt")
     end,
 
     on_hit = function(inst)

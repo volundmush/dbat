@@ -345,7 +345,26 @@ local function launch_instance(ch, def, target, inst)
     if inst.hit and inst.damage > 0 and not inst.target_is_object
        and not inst.is_multihit and def.family == "melee"
     then
+        local had_combo = ch:condition_has("combo")
+        if had_combo then
+            local cond     = ch:condition("combo")
+            local state    = cond:number_get("state")
+            local expected = COMBO_SEQUENCE[(state % #COMBO_SEQUENCE) + 1]
+            if def.id ~= expected then
+                ch:condition_remove("combo")
+                ch:send_line("@RCombo broken!@W You needed to use @C%s@n.", expected)
+                had_combo = false
+            end
+        end
         ch:condition_apply("combo")
+        local next_id = M.combo_next(ch, inst)
+        if next_id then
+            if had_combo then
+                ch:send_line("@GCOMBO@n! Try a @C%s@n next!", next_id)
+            else
+                ch:send_line("You have a chance for a @GCOMBO@n! Try a @C%s@n next!", next_id)
+            end
+        end
     end
 
     -- 13. Backlash (only on successful hits)

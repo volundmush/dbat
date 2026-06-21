@@ -419,7 +419,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
       };
       auto dragon_or_charged = [&](auto fn) {
         if (IS_DRAGON(ch) && rand_number(1, 4) == 4)
-          do_breath(ch, buf, 0, 0);
+          char_cmd_execute(ch, "breath", buf);
         else
           fire_charged(fn);
       };
@@ -449,7 +449,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
         break;
       case 19: case 20:
         if (IS_DRAGON(ch))
-          do_breath(ch, buf, 0, 0);
+          char_cmd_execute(ch, "breath", buf);
         fire_charged([&]{
           switch (GET_CLASS(ch)) {
           case CLASS_ROSHI:
@@ -550,12 +550,12 @@ static void mob_attack(struct char_data *ch, char *buf) {
     }
   } else if (!IS_HUMANOID(ch) || dragonpass == FALSE) {
     if (IS_SERPENT(ch) && rand_number(1, 5) == 5)
-      do_strike(ch, buf, 0, 0);
+      char_cmd_execute(ch, "strike", buf);
     else if (IS_DRAGON(ch) && rand_number(1, 12) >= 10 &&
              GET_MOB_VNUM(ch) != 17917)
-      do_breath(ch, buf, 0, 0);
+      char_cmd_execute(ch, "breath", buf);
     else if (rand_number(1, 10) >= 7 && GET_LEVEL(ch) >= 10)
-      do_ram(ch, buf, 0, 0);
+      char_cmd_execute(ch, "ram", buf);
     else
       char_cmd_execute(ch, "bite", buf);
   }

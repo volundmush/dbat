@@ -25,7 +25,7 @@ return {
 
     on_check_combo = function(ch)
         if ch:limbcond_get(1) <= 0 and ch:limbcond_get(2) <= 0 then return false end
-        return ch:skill_known("uppercut")
+        return ch:skill_get("uppercut")
     end,
 
     on_hit = function(inst)
