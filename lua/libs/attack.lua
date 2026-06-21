@@ -263,7 +263,7 @@ local function launch_instance(ch, def, target, inst)
     -- 12. Hit vs miss routing
     if inst.hit and inst.damage > 0 then
         if next(inst.damage_to) == nil then
-            inst.damage_to = { lifeforce = inst.damage }
+            inst.damage_to = { powerlevel = inst.damage }
         end
         if inst.target_is_object then
             if def.on_hit_object then def.on_hit_object(inst) end

@@ -71,7 +71,7 @@ function M.ki_parry_redirect(inst, dmg)
     for person in room:people() do
         if not person:is_same(ch) and not person:is_same(inst.target) then
             if math.random(1, 100) >= 90 then
-                person:meter_mod_int("lifeforce", -dmg)
+                person:damage({ powerlevel = dmg }, ch)
                 act().message({
                     actor  = "@WYour ki blast deflects and smashes into @C$N@W!@n",
                     target = "@WA ki blast deflects and smashes into you!@n",

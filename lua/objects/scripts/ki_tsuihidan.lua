@@ -39,7 +39,7 @@ return {
             target:send_line("@WYou parry the homing blast and it strikes the surroundings!@n")
             user:send_line("@WYour tsuihidan was deflected at the last moment!@n")
         else
-            target:meter_mod_int("lifeforce", -dmg)
+            target:damage({ powerlevel = dmg }, user)
             target:send_line("@RThe homing blast finally catches you and SLAMS into you!@n")
             user:send_line("@WYour tsuihidan finally catches @C%s@W and detonates!@n", target:name_get())
             target_room:send_text("@WA homing blast detonates!@n\r\n")

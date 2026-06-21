@@ -99,7 +99,7 @@ return {
         }, ctx)
         local counter = math.floor(inst.base_damage / 4)
         if counter > 0 then
-            inst.attacker:meter_mod_int("powerlevel", -counter)
+            inst.attacker:damage({ powerlevel = counter, spar = inst.spar })
         end
     end,
 }

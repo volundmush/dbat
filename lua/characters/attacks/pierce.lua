@@ -118,7 +118,7 @@ return {
                         room   = "@r$n@R sneaks up behind @r$N@R and stabs $M in the back!@n",
                     }, ctx)
                     local bonus = BACKSTAB_BONUS[wlvl] or 0
-                    inst.damage_to = { lifeforce = math.floor(inst.damage * (1 + bonus)) }
+                    inst.damage_to = { powerlevel = math.floor(inst.damage * (1 + bonus)) }
                     -- no further messages
                     if inst.weapon then inst.weapon:weapon_damage(1) end
                     return

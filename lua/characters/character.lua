@@ -538,6 +538,34 @@ local function check_attack_defense(ch, instance)
     end
 end
 
+-- General-purpose combat damage: routes through spar protection and future death hooks.
+-- dmg_table: { powerlevel = N, ki = M, ..., spar = bool }
+-- source: attacking Character|nil (for spar detection and future kill credit)
+local function damage(ch, dmg_table, source)
+    local spar = dmg_table.spar
+    if spar == nil then
+        if source then
+            local db  = require("dbat")
+            local PLR = db.consts.player_flags
+            local MF  = db.consts.mob_flags
+            spar = source:is_npc() and source:mob_flagged(MF.SPAR) or source:player_flagged(PLR.SPAR)
+        else
+            spar = false
+        end
+    end
+    for meter, amount in pairs(dmg_table) do
+        if meter ~= "spar" and type(amount) == "number" and amount > 0 then
+            local dmg = amount
+            if spar then
+                local cur = ch:meter_current(meter)
+                if cur > 1 then dmg = math.min(dmg, cur - 1) end
+            end
+            ch:meter_mod_int(meter, -dmg)
+        end
+    end
+    -- TODO: death/vulnerable state when powerlevel reaches 0
+end
+
 -- Called after on_hit; applies damage_to meters and fires victim-side condition hooks.
 local function on_attacked(ch, instance)
     for meter, amount in pairs(instance.damage_to) do
@@ -1025,6 +1053,7 @@ return {
   render_room_line = render_room_line,
   check_attack_offense = check_attack_offense,
   check_attack_defense = check_attack_defense,
+  damage = damage,
   on_attacked = on_attacked,
   launch_attack = launch_attack,
 }

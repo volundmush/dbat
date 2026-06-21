@@ -41,7 +41,7 @@ return {
         local actual = math.floor(dmg * 1.25)
         for person in room:people() do
             if not is_ally(person) then
-                person:meter_mod_int("lifeforce", -actual)
+                person:damage({ powerlevel = actual }, user)
                 person:send_line("@BYou are engulfed by the Spirit Bomb's explosion!@n")
             end
         end
