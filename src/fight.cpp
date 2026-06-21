@@ -427,22 +427,22 @@ static void mob_attack(struct char_data *ch, char *buf) {
       switch (power) {
       case 1: case 2: case 3: case 4:
         if (special > 80) do_zanzoken(ch, buf, 0, 0);
-        fire_charged([&]{ do_kiball(ch, buf, 0, 0); });
+        fire_charged([&]{ char_cmd_execute(ch, "kiball", buf); });
         break;
       case 5: case 6: case 7: case 8:
         if (special > 80) do_zanzoken(ch, buf, 0, 0);
-        fire_charged([&]{ do_kiblast(ch, buf, 0, 0); });
+        fire_charged([&]{ char_cmd_execute(ch, "kiblast", buf); });
         break;
       case 9: case 10: case 11:
         if (special > 80) do_zanzoken(ch, buf, 0, 0);
-        dragon_or_charged([&]{ do_beam(ch, buf, 0, 0); });
+        dragon_or_charged([&]{ char_cmd_execute(ch, "beam", buf); });
         break;
       case 12: case 13: case 14:
         if (special > 80) do_zanzoken(ch, buf, 0, 0);
-        dragon_or_charged([&]{ do_renzo(ch, buf, 0, 0); });
+        dragon_or_charged([&]{ char_cmd_execute(ch, "renzokou", buf); });
         break;
       case 15: case 16:
-        dragon_or_charged([&]{ do_tsuihidan(ch, buf, 0, 0); });
+        dragon_or_charged([&]{ char_cmd_execute(ch, "tsuihidan", buf); });
         break;
       case 17: case 18:
         dragon_or_charged([&]{ do_shogekiha(ch, buf, 0, 0); });
@@ -455,7 +455,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
           case CLASS_ROSHI:
             if (special >= 100) do_kakusanha(ch, buf, 0, 0);
             else if (special >= 80) do_kienzan(ch, buf, 0, 0);
-            else if (special >= 70) do_kamehameha(ch, buf, 0, 0);
+            else if (special >= 70) char_cmd_execute(ch, "kamehameha", buf);
             else if (special >= 50) do_barrier(ch, "40", 0, 0);
             else do_barrier(ch, "25", 0, 0);
             break;
@@ -469,14 +469,14 @@ static void mob_attack(struct char_data *ch, char *buf) {
           case CLASS_KRANE:
             if (special >= 100) do_tribeam(ch, buf, 0, 0);
             else if (special >= 80) do_hass(ch, NULL, 0, 0);
-            else if (special >= 70) do_dodonpa(ch, buf, 0, 0);
+            else if (special >= 70) char_cmd_execute(ch, "dodonpa", buf);
             else if (special >= 50) do_barrier(ch, "40", 0, 0);
             else do_barrier(ch, "25", 0, 0);
             break;
           case CLASS_PICCOLO:
             if (special >= 100) do_scatter(ch, buf, 0, 0);
             else if (special >= 80) do_sbc(ch, buf, 0, 0);
-            else if (special >= 70) do_masenko(ch, buf, 0, 0);
+            else if (special >= 70) char_cmd_execute(ch, "masenko", buf);
             else if (special >= 50) do_barrier(ch, "40", 0, 0);
             else do_barrier(ch, "25", 0, 0);
             break;
@@ -497,13 +497,13 @@ static void mob_attack(struct char_data *ch, char *buf) {
           case CLASS_NAIL:
             if (special >= 100) do_regenerate(ch, "50", 0, 0);
             else if (special >= 80) do_heal(ch, "self", 0, 0);
-            else if (special >= 70) do_masenko(ch, buf, 0, 0);
+            else if (special >= 70) char_cmd_execute(ch, "masenko", buf);
             else do_zanzoken(ch, NULL, 0, 0);
             break;
           case CLASS_KURZAK:
             if (special >= 100) do_ensnare(ch, buf, 0, 0);
             else if (special >= 80) do_seishou(ch, buf, 0, 0);
-            else if (special >= 70) do_renzo(ch, buf, 0, 0);
+            else if (special >= 70) char_cmd_execute(ch, "renzokou", buf);
             else if (special >= 50) do_barrier(ch, "40", 0, 0);
             else do_barrier(ch, "25", 0, 0);
             break;

@@ -1,4 +1,5 @@
 local function act() return require("dbat").lib.act end
+local ki = require("lua.libs.ki")
 
 local CHANT_ACTOR =
     "@WYou cup your hands at your side and begin to pool your charged ki there. " ..
@@ -48,7 +49,7 @@ return {
     skill = "kamehameha",
     tier  = 3,
     elements = { ki = 1.0 },
-    limbs_required = {},
+    limbs_required = { "arm" },
     damages_limbs = false,
     can_combo = false,
     in_combo  = false,
@@ -64,6 +65,10 @@ return {
     base_power    = 2.5,
     spar_safe = true,
 
+    on_check = function(inst)
+        return ki.can_grav(inst.attacker)
+    end,
+
     on_hit = function(inst)
         local a   = act()
         local ctx = { actor = inst.attacker, target = inst.target }
@@ -74,7 +79,6 @@ return {
             target = CHANT_TARGET .. con.target,
             room   = CHANT_ROOM   .. con.room,
         }, ctx)
-        -- TODO: dam_eq_loc
     end,
 
     on_miss = function(inst)
@@ -95,7 +99,6 @@ return {
             room   = "@C$N@W manages to dodge @c$n's@W kamehameha, letting it slam into the surroundings!@n",
         }, ctx)
         a.to_room("@wA bright explosion erupts from the impact!\r\n", { actor = inst.attacker })
-        -- TODO: dodge_ki scatter damage to room
     end,
 
     on_blocked = function(inst)
@@ -105,7 +108,6 @@ return {
             target = "@WYou move quickly and block @C$n's@W kamehameha!@n",
             room   = "@C$N@W moves quickly and blocks @c$n's@W kamehameha!@n",
         }, ctx)
-        -- TODO: blocked kamehameha deals 1/4 damage back
     end,
 
     on_absorbed = function(inst)
@@ -121,6 +123,12 @@ return {
         local skill = inst.skill_level
         local amt   = inst.cost.ki or 0
         if amt <= 0 then return end
+        -- Perf type 3: extra cooldown for the ultimate charge
+        local perf = inst.attacker:skill_perf_get("kamehameha")
+        if perf >= 3 then
+            inst.attacker:wait_set(12)
+        end
+        -- Ki refund mastery
         local refund
         if     skill >= 100 then refund = math.floor(amt * 0.25)
         elseif skill >= 60  then refund = math.floor(amt * 0.10)

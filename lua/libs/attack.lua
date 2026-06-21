@@ -275,9 +275,10 @@ local function launch_instance(ch, def, target, inst)
     else
         inst.speed_modifier = speed_modifier(ch, target)
         inst.defense_total  = defense_total(target)
-        local avo           = math.floor(inst.defense_total / 4)
-        local effective     = inst.accuracy_roll - avo + inst.speed_modifier
-        inst.hit            = (effective >= inst.hit_threshold - 20)
+        local avo              = math.floor(inst.defense_total / 4)
+        local effective        = inst.accuracy_roll - avo + inst.speed_modifier
+        inst.effective_accuracy = effective
+        inst.hit               = (effective >= inst.hit_threshold - 20)
     end
 
     -- 9. Damage phase

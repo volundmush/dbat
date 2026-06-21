@@ -270,6 +270,7 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "preference_set", luaCharacterPreferenceSet);
     addMethod(lua, "genome_get", luaCharacterGenomeGet);
     addMethod(lua, "wait_set", luaCharacterWaitSet);
+    addMethod(lua, "try_move", luaCharacterTryMove);
     addMethod(lua, "cooldown_get", luaCharacterCooldownGet);
     addMethod(lua, "cooldown_set", luaCharacterCooldownSet);
     addMethod(lua, "inventory_find_vnum", luaCharacterInventoryFindVnum);
@@ -1976,6 +1977,23 @@ fn luaCharacterGenomeGet(lua: *Lua) i32 {
 fn luaCharacterWaitSet(lua: *Lua) i32 {
     cdb.char_wait_set(checkCharacter(lua), intCastOrError(lua, c_int, integer(lua, 2), "pulses"));
     return 0;
+}
+
+fn luaCharacterTryMove(lua: *Lua) i32 {
+    const ch  = checkCharacter(lua);
+    const dir = string(lua, 2);
+    const dir_index: c_int = blk: {
+        if (std.mem.eql(u8, dir, "north")) break :blk 0;
+        if (std.mem.eql(u8, dir, "east"))  break :blk 1;
+        if (std.mem.eql(u8, dir, "south")) break :blk 2;
+        if (std.mem.eql(u8, dir, "west"))  break :blk 3;
+        if (std.mem.eql(u8, dir, "up"))    break :blk 4;
+        if (std.mem.eql(u8, dir, "down"))  break :blk 5;
+        lua.pushBoolean(false);
+        return 1;
+    };
+    lua.pushBoolean(cdb.do_simple_move(ch, dir_index, 1) != 0);
+    return 1;
 }
 
 fn luaCharacterCooldownGet(lua: *Lua) i32 {

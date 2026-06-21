@@ -10,15 +10,8 @@ ACMD(do_assist);
 ACMD(do_kill);
 ACMD(do_flee);
 ACMD(do_powerup);
-ACMD(do_kiball);
-ACMD(do_kiblast);
-ACMD(do_beam);
 ACMD(do_attack);
 ACMD(do_attack2);
-ACMD(do_renzo);
-ACMD(do_kamehameha);
-ACMD(do_masenko);
-ACMD(do_dodonpa);
 ACMD(do_galikgun);
 ACMD(do_deathbeam);
 ACMD(do_eraser);
@@ -49,7 +42,6 @@ ACMD(do_kousengan);
 ACMD(do_balefire);
 ACMD(do_blessedhammer);
 ACMD(do_shogekiha);
-ACMD(do_tsuihidan);
 ACMD(do_rescue);
 
 #ifdef __cplusplus

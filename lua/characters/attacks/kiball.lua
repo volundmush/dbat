@@ -1,5 +1,6 @@
 local function ke() return require("lua.libs.ki_effects") end
 local function act() return require("dbat").lib.act end
+local ki = require("lua.libs.ki")
 
 local HIT_MSGS = {
     body = {
@@ -31,7 +32,7 @@ return {
     skill = "kiball",
     tier  = 2,
     elements = { ki = 1.0 },
-    limbs_required = {},
+    limbs_required = { "arm" },
     damages_limbs = false,
     can_combo = false,
     in_combo  = false,
@@ -43,6 +44,10 @@ return {
     spar_safe = true,
     base_accuracy = 1.0,
     base_power    = 1.0,
+
+    on_check = function(inst)
+        return ki.can_grav(inst.attacker)
+    end,
 
     on_dodged = function(inst)
         act().message({

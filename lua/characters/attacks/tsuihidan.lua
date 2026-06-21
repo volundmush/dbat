@@ -1,5 +1,6 @@
 local function ke() return require("lua.libs.ki_effects") end
 local function act() return require("dbat").lib.act end
+local ki = require("lua.libs.ki")
 
 local HIT_MSGS = {
     body = {
@@ -40,7 +41,7 @@ return {
     skill = "tsuihidan",
     tier  = 2,
     elements = { ki = 1.0 },
-    limbs_required = {},
+    limbs_required = { "arm" },
     damages_limbs = false,
     can_combo = false,
     in_combo  = false,
@@ -52,6 +53,10 @@ return {
     spar_safe = true,
     base_accuracy = 1.0,
     base_power    = 1.0,
+
+    on_check = function(inst)
+        return ki.can_grav(inst.attacker)
+    end,
 
     on_miss = function(inst)
         act().message({
@@ -81,7 +86,19 @@ return {
     end,
 
     on_hit = function(inst)
-        local ctx = { actor = inst.attacker, target = inst.target }
+        local ctx   = { actor = inst.attacker, target = inst.target }
         act().message(HIT_MSGS[inst.hit_location] or HIT_MSGS.body, ctx)
+
+        -- Stamina drain mastery: chance based on skill level
+        local skill = inst.skill_level
+        local chance = skill >= 100 and 20 or skill >= 75 and 10 or 5
+        if math.random(100) <= chance then
+            inst.target:meter_mod_int("stamina", -inst.damage)
+            act().message({
+                actor  = "@C$N@C's stamina takes a serious hit from the tsuihidan!@n",
+                target = "@WThe tsuihidan hits a vital spot and saps your stamina!@n",
+                room   = "@c$n@C's tsuihidan saps @C$N@C's stamina!@n",
+            }, ctx)
+        end
     end,
 }
