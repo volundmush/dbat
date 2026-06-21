@@ -240,26 +240,26 @@ ACMD(do_mkill) {
   if (IS_HUMANOID(ch)) {
     switch (rand_number(1, 7)) {
     case 1:
-      do_punch(ch, buf, 0, 0);
+      char_cmd_execute(ch, "punch", buf);
       break;
     case 2:
-      do_kick(ch, buf, 0, 0);
+      char_cmd_execute(ch, "kick", buf);
       break;
     case 3:
-      do_elbow(ch, buf, 0, 0);
+      char_cmd_execute(ch, "elbow", buf);
       break;
     case 4:
-      do_knee(ch, buf, 0, 0);
+      char_cmd_execute(ch, "knee", buf);
       break;
     case 5:
-      do_kick(ch, buf, 0, 0);
+      char_cmd_execute(ch, "kick", buf);
       break;
     default:
-      do_punch(ch, buf, 0, 0);
+      char_cmd_execute(ch, "punch", buf);
       break;
     } // end switch
   } else {
-    do_bite(ch, buf, 0, 0);
+    char_cmd_execute(ch, "bite", buf);
   } // end humanoid if
   return;
 }

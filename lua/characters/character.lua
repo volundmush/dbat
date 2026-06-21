@@ -190,7 +190,7 @@ local function keywords_for(ch, viewer)
   end
 
   if ch:is_npc() then
-    add_words(ch:short_description_get())
+    add_words(ch:name_get())
     return keywords
   end
 
@@ -514,6 +514,25 @@ local function visible_commands(ch, cmd_class)
     return visible
 end
 
+-- Search the character's room for a visible target by name.
+-- With no name (or empty string) returns the current fighting target.
+-- With allow_objects=true, room objects are also eligible.
+local function acquire_room_target(ch, name, allow_objects)
+    if not name or name == "" then
+        return ch:fighting_get()
+    end
+    local room = ch:room_get()
+    if not room then return nil end
+    local Search = require("lua.libs.search").new
+    local s = Search(ch)
+        :add_room_people(room)
+        :add_filter(function(searcher, e) return searcher:can_see(e) end)
+    if allow_objects then
+        s:add_room_objects(room)
+    end
+    return s:find_one(name)
+end
+
 -- Called by the attack pipeline so victim conditions/scripts can respond.
 -- Defense conditions write inst.blocked/parried/dodged/absorbed/partial_negation/backlash.
 local function launch_attack(ch, attack_id, target, opts)
@@ -527,6 +546,20 @@ local function check_attack_offense(ch, instance)
             def.on_check_attack_offense(ch, ch:condition(cond_id), instance)
         end
     end
+    local race_id = ch:race_get()
+    if race_id then
+        local race_def = dbat.get("races", race_id)
+        if race_def and race_def.on_check_attack_offense then
+            race_def.on_check_attack_offense(ch, instance)
+        end
+    end
+    local sensei_id = ch:sensei_get()
+    if sensei_id then
+        local sensei_def = dbat.get("senseis", sensei_id)
+        if sensei_def and sensei_def.on_check_attack_offense then
+            sensei_def.on_check_attack_offense(ch, instance)
+        end
+    end
 end
 
 local function check_attack_defense(ch, instance)
@@ -536,6 +569,20 @@ local function check_attack_defense(ch, instance)
             def.on_check_attack_defense(ch, ch:condition(cond_id), instance)
         end
     end
+    local race_id = ch:race_get()
+    if race_id then
+        local race_def = dbat.get("races", race_id)
+        if race_def and race_def.on_check_attack_defense then
+            race_def.on_check_attack_defense(ch, instance)
+        end
+    end
+    local sensei_id = ch:sensei_get()
+    if sensei_id then
+        local sensei_def = dbat.get("senseis", sensei_id)
+        if sensei_def and sensei_def.on_check_attack_defense then
+            sensei_def.on_check_attack_defense(ch, instance)
+        end
+    end
 end
 
 -- General-purpose combat damage: routes through spar protection and future death hooks.
@@ -543,27 +590,21 @@ end
 -- source: attacking Character|nil (for spar detection and future kill credit)
 local function damage(ch, dmg_table, source)
     local spar = dmg_table.spar
-    if spar == nil then
-        if source then
-            local db  = require("dbat")
-            local PLR = db.consts.player_flags
-            local MF  = db.consts.mob_flags
-            spar = source:is_npc() and source:mob_flagged(MF.SPAR) or source:player_flagged(PLR.SPAR)
-        else
-            spar = false
-        end
-    end
     for meter, amount in pairs(dmg_table) do
         if meter ~= "spar" and type(amount) == "number" and amount > 0 then
             local dmg = amount
-            if spar then
-                local cur = ch:meter_current(meter)
-                if cur > 1 then dmg = math.min(dmg, cur - 1) end
-            end
             ch:meter_mod_int(meter, -dmg)
         end
     end
-    -- TODO: death/vulnerable state when powerlevel reaches 0
+    local remaining = ch:meter_current("powerlevel")
+    if remaining <= 0 then
+      if spar then
+        ch:send_line("You are too exhausted to continue sparring!")
+        ch:meter_set_int("powerlevel", 1)
+      else
+        ch:die(source)
+      end
+    end
 end
 
 -- Called after on_hit; applies damage_to meters and fires victim-side condition hooks.
@@ -1056,4 +1097,5 @@ return {
   damage = damage,
   on_attacked = on_attacked,
   launch_attack = launch_attack,
+  acquire_room_target = acquire_room_target,
 }

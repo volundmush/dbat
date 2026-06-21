@@ -33,6 +33,7 @@ local HIT_MSGS = {
 
 return {
     id   = "stab",
+    family = "weapon",
     name = "Stab",
     skill = "spear",
     weapon_type = "stab",

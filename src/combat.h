@@ -68,7 +68,6 @@ int check_ruby(struct char_data *ch);
 void combine_attacks(struct char_data *ch, struct char_data *vict);
 void handle_disarm(struct char_data *ch, struct char_data *vict);
 int handle_defender(struct char_data *vict, struct char_data *ch);
-void handle_multihit(struct char_data *ch, struct char_data *vict);
 int64_t armor_calc(struct char_data *ch, int64_t dmg, int type);
 
 #ifdef __cplusplus

@@ -43,6 +43,7 @@ local CONCLUSIONS = {
 
 return {
     id   = "kamehameha",
+    family = "ki",
     name = "Kamehameha",
     skill = "kamehameha",
     tier  = 3,

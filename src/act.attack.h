@@ -15,8 +15,6 @@ ACMD(do_razor);
 ACMD(do_koteiru);
 ACMD(do_hspiral);
 ACMD(do_seishou);
-ACMD(do_bash);
-ACMD(do_head);
 ACMD(do_nova);
 ACMD(do_malice);
 ACMD(do_zen);

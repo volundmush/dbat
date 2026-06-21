@@ -40,6 +40,7 @@ end
 
 return {
     id   = "brawl",
+    family = "weapon",
     name = "Brawl",
     skill = "brawl",
     weapon_type = "brawl",

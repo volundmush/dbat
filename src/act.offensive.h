@@ -9,19 +9,10 @@ extern "C" {
 ACMD(do_assist);
 ACMD(do_kill);
 ACMD(do_flee);
-ACMD(do_punch);
-ACMD(do_kick);
-ACMD(do_elbow);
-ACMD(do_knee);
 ACMD(do_powerup);
-ACMD(do_roundhouse);
-ACMD(do_tailwhip);
-ACMD(do_uppercut);
 ACMD(do_kiball);
 ACMD(do_kiblast);
 ACMD(do_beam);
-ACMD(do_bite);
-ACMD(do_heeldrop);
 ACMD(do_attack);
 ACMD(do_attack2);
 ACMD(do_renzo);
@@ -59,7 +50,6 @@ ACMD(do_balefire);
 ACMD(do_blessedhammer);
 ACMD(do_shogekiha);
 ACMD(do_tsuihidan);
-ACMD(do_slam);
 ACMD(do_rescue);
 
 #ifdef __cplusplus

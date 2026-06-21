@@ -361,7 +361,7 @@ static void mob_aggressive_update() {
           do_fly(ch, 0, 0, 0);
           return true;
         }
-        do_punch(ch, tar, 0, 0);
+        char_cmd_execute(ch, "punch", tar);
       } else {
         if (char_condition_has(vict, "flying") && !char_condition_has(ch, "flying") &&
             IS_HUMANOID(ch) && GET_LEVEL(ch) > 10) {
@@ -380,7 +380,7 @@ static void mob_aggressive_update() {
           act("@C$n@w notices @c$N@w.\n@C$n @wgrowls viciously at @c$N@w!@n",
               TRUE, ch, 0, vict, TO_NOTVICT);
         }
-        do_bite(ch, tar, 0, 0);
+        char_cmd_execute(ch, "bite", tar);
       }
       found = TRUE;
       return true;
@@ -400,11 +400,11 @@ static void mob_multiform_update() {
     char target[MAX_INPUT_LENGTH];
     sprintf(target, "%s", FIGHTING(original)->name);
     if (rand_number(1, 5) >= 4)
-      do_kick(ch, target, 0, 0);
+      char_cmd_execute(ch, "kick", target);
     else if (rand_number(1, 5) >= 4)
-      do_elbow(ch, target, 0, 0);
+      char_cmd_execute(ch, "elbow", target);
     else
-      do_punch(ch, target, 0, 0);
+      char_cmd_execute(ch, "punch", target);
   });
 }
 
@@ -468,7 +468,7 @@ static void mob_memory_update() {
             FALSE, ch, 0, 0, TO_ROOM);
         char tar[MAX_INPUT_LENGTH];
         sprintf(tar, "%s", GET_NAME(vict));
-        do_punch(ch, tar, 0, 0);
+        char_cmd_execute(ch, "punch", tar);
       }
       return true;
     });
@@ -504,7 +504,7 @@ static void mob_helper_update() {
       act("$n jumps to the aid of $N!", FALSE, ch, 0, vict, TO_ROOM);
       char tar[MAX_INPUT_LENGTH];
       sprintf(tar, "%s", GET_NAME(FIGHTING(vict)));
-      do_punch(ch, tar, 0, 0);
+      char_cmd_execute(ch, "punch", tar);
       found = TRUE;
       return true;
     });
@@ -528,9 +528,9 @@ static void huge_attack_update() {
       act("@W$n@R leaps at @C$N@R desperately!@n", TRUE, ch, 0, user, TO_ROOM);
       act("@W$n@R leaps at YOU desperately!@n", TRUE, ch, 0, user, TO_VICT);
       if (IS_HUMANOID(ch))
-        do_punch(ch, tar, 0, 0);
+        char_cmd_execute(ch, "punch", tar);
       else
-        do_bite(ch, tar, 0, 0);
+        char_cmd_execute(ch, "bite", tar);
       return true;
     });
   });

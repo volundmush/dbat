@@ -346,65 +346,65 @@ static void mob_attack(struct char_data *ch, char *buf) {
           if (GET_EQ(ch, WEAR_WIELD1))
             do_attack(ch, buf, 0, 0);
           else if (rand_number(1, 5) == 5)
-            do_kick(ch, buf, 0, 0);
+            char_cmd_execute(ch, "kick", buf);
           else if (rand_number(1, 10) == 10)
-            do_elbow(ch, buf, 0, 0);
+            char_cmd_execute(ch, "elbow", buf);
           else
-            do_punch(ch, buf, 0, 0);
+            char_cmd_execute(ch, "punch", buf);
           break;
         case 6: case 7: case 8:
           if (GET_EQ(ch, WEAR_WIELD1))
             do_attack(ch, buf, 0, 0);
           else if (rand_number(1, 5) == 5)
-            do_punch(ch, buf, 0, 0);
+            char_cmd_execute(ch, "punch", buf);
           else if (rand_number(1, 10) == 10)
-            do_knee(ch, buf, 0, 0);
+            char_cmd_execute(ch, "knee", buf);
           else
-            do_kick(ch, buf, 0, 0);
+            char_cmd_execute(ch, "kick", buf);
           break;
         case 9: case 10:
           if (rand_number(1, 5) == 5)
-            do_knee(ch, buf, 0, 0);
+            char_cmd_execute(ch, "knee", buf);
           else if (rand_number(1, 10) == 10)
-            do_uppercut(ch, buf, 0, 0);
+            char_cmd_execute(ch, "uppercut", buf);
           else
-            do_elbow(ch, buf, 0, 0);
+            char_cmd_execute(ch, "elbow", buf);
           break;
         case 11: case 12:
           if (rand_number(1, 5) == 5)
-            do_elbow(ch, buf, 0, 0);
+            char_cmd_execute(ch, "elbow", buf);
           else if (rand_number(1, 10) == 10)
-            do_roundhouse(ch, buf, 0, 0);
+            char_cmd_execute(ch, "roundhouse", buf);
           else if (rand_number(1, 8) == 8)
             do_trip(ch, buf, 0, 0);
           else
-            do_knee(ch, buf, 0, 0);
+            char_cmd_execute(ch, "knee", buf);
           break;
         case 13: case 14:
           if ((IS_BARDOCK(ch) || IS_KURZAK(ch)) && rand_number(1, 2) == 2)
-            do_head(ch, buf, 0, 0);
+            char_cmd_execute(ch, "headbutt", buf);
           else if ((IS_ICER(ch) || IS_BIO(ch)) && rand_number(1, 2) == 2)
-            do_tailwhip(ch, buf, 0, 0);
+            char_cmd_execute(ch, "tailwhip", buf);
           else if (rand_number(1, 8) == 8)
             do_trip(ch, buf, 0, 0);
           else
-            do_uppercut(ch, buf, 0, 0);
+            char_cmd_execute(ch, "uppercut", buf);
           break;
         case 15: case 16:
           if ((IS_BARDOCK(ch) || IS_KURZAK(ch)) && rand_number(1, 2) == 2)
-            do_head(ch, buf, 0, 0);
+            char_cmd_execute(ch, "headbutt", buf);
           else if ((IS_ICER(ch) || IS_BIO(ch)) && rand_number(1, 2) == 2)
-            do_tailwhip(ch, buf, 0, 0);
+            char_cmd_execute(ch, "tailwhip", buf);
           else if (rand_number(1, 8) >= 7)
             do_trip(ch, buf, 0, 0);
           else
-            do_roundhouse(ch, buf, 0, 0);
+            char_cmd_execute(ch, "roundhouse", buf);
           break;
         case 17: case 18:
-          do_slam(ch, buf, 0, 0);
+          char_cmd_execute(ch, "slam", buf);
           break;
         case 19: case 20:
-          do_heeldrop(ch, buf, 0, 0);
+          char_cmd_execute(ch, "heeldrop", buf);
           break;
         }
       }
@@ -557,7 +557,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
     else if (rand_number(1, 10) >= 7 && GET_LEVEL(ch) >= 10)
       do_ram(ch, buf, 0, 0);
     else
-      do_bite(ch, buf, 0, 0);
+      char_cmd_execute(ch, "bite", buf);
   }
 
   fight_mtrigger(ch);

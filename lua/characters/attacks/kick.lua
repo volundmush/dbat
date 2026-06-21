@@ -4,6 +4,7 @@ return {
     id   = "kick",
     name = "Kick",
     skill = "kick",
+    family = "melee",
     tier  = 1,
     elements = { blunt = 1.0 },
     limbs_required = { "legs" },
@@ -21,6 +22,15 @@ return {
     base_accuracy = 1.0,
     base_power    = 1.1,
     spar_safe = true,
+
+    on_calculate_cost = function(inst)
+        inst.cost.stamina = math.floor(inst.attacker:meter_max("powerlevel") / 400)
+    end,
+
+    on_check_combo = function(ch)
+        if ch:limbcond_get(3) <= 0 and ch:limbcond_get(4) <= 0 then return false end
+        return ch:skill_known("kick")
+    end,
 
     on_hit = function(inst)
         local a   = act()
@@ -99,7 +109,7 @@ return {
         }, ctx)
         local counter = math.floor(inst.base_damage / 4)
         if counter > 0 then
-            inst.attacker:meter_mod_int("lifeforce", -counter)
+            inst.attacker:damage({ powerlevel = counter, spar = inst.spar })
         end
     end,
 }

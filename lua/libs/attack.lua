@@ -79,7 +79,55 @@ local function base_damage(ch, def, inst)
     local tier_scale = { 0.0001, 0.00015, 0.0002, 0.0003, 0.0005 }
     local base  = math.floor(pl * (tier_scale[tier] or 0.0001))
     local skill_mult = 1.0 + (inst.skill_level / 100) * 0.5
-    return math.floor(base * skill_mult * (def.base_power or 1.0))
+    base = math.floor(base * skill_mult * (def.base_power or 1.0))
+    if def.family == "melee" then
+        base = math.floor(base * 0.92)
+        if base > ch:meter_max("powerlevel") * 0.10 then
+            base = math.floor(base * 0.60)
+        end
+    end
+    return base
+end
+
+-- Returns true if inst matches all provided filter criteria.
+-- filter keys: family, attack_ids (table set), tier_min, tier_max, elements (table set)
+function M.matches_filter(inst, filter)
+    if filter.family     and inst.def.family ~= filter.family then return false end
+    if filter.attack_ids and not filter.attack_ids[inst.def.id] then return false end
+    if filter.tier_min   and inst.def.tier < filter.tier_min then return false end
+    if filter.tier_max   and inst.def.tier > filter.tier_max then return false end
+    if filter.elements then
+        local found = false
+        for el in pairs(inst.def.elements or {}) do
+            if filter.elements[el] then found = true; break end
+        end
+        if not found then return false end
+    end
+    return true
+end
+
+local COMBO_SEQUENCE = {
+    "punch", "kick", "elbow", "knee",
+    "roundhouse", "uppercut", "slam", "heeldrop",
+}
+
+-- Returns the next attack_id for a combo chain, or nil if chain is exhausted/unavailable.
+-- Checks on_check_combo on the candidate def to validate limb/skill eligibility.
+function M.combo_next(ch, inst)
+    if not ch:condition_has("combo") then return nil end
+    local cond_def = dbat.get("conditions", "combo")
+    if not cond_def or not cond_def.next_attack then return nil end
+    local cond = ch:condition("combo")
+    for _ = 1, #COMBO_SEQUENCE do
+        local id = cond_def.next_attack(ch, cond)
+        if not id then return nil end
+        local next_def = dbat.get("attacks", id)
+        if next_def and next_def.in_multihit ~= false then
+            local ok = not next_def.on_check_combo or next_def.on_check_combo(ch)
+            if ok then return id end
+        end
+    end
+    return nil
 end
 
 local function process_defense(inst)
@@ -242,6 +290,8 @@ local function launch_instance(ch, def, target, inst)
         else
             inst.base_damage = base_damage(ch, def, inst)
         end
+        -- on_hit_location: attack def sets base crit_multiplier per location before condition hooks run
+        if def.on_hit_location then def.on_hit_location(inst) end
         inst.damage                     = math.floor(inst.base_damage * inst.crit_multiplier)
         for elem, portion in pairs(def.elements or {}) do
             inst.damage_by_element[elem] = math.floor(inst.damage * portion)
@@ -285,6 +335,19 @@ local function launch_instance(ch, def, target, inst)
         end
     end
 
+    -- 12.5. Engage combat (both directions, regardless of hit/miss)
+    if not inst.target_is_object then
+        if not ch:fighting_get() then ch:start_fighting(target) end
+        if not target:fighting_get() then target:start_fighting(ch) end
+    end
+
+    -- 12.6. Advance combo streak on successful non-multihit melee hits
+    if inst.hit and inst.damage > 0 and not inst.target_is_object
+       and not inst.is_multihit and def.family == "melee"
+    then
+        ch:condition_apply("combo")
+    end
+
     -- 13. Backlash (only on successful hits)
     if inst.hit and inst.damage > 0 and inst.backlash then
         for _, entry in ipairs(inst.backlash) do
@@ -310,20 +373,28 @@ local function launch_instance(ch, def, target, inst)
         ch:improve_skill(def.skill, 1)
     end
 
-    -- 17. Multi-hit follow-up (never for object targets)
+    -- 17. Multi-hit / combo follow-up (never for object targets)
     if inst.hit
        and not inst.target_is_object
        and def.can_trigger_multihit ~= false
-       and def.in_multihit ~= false
        and inst.multihit_index < 3
-       and multihit_check(ch, target)
     then
-        local follow = build_instance(ch, def, target, {
-            is_multihit    = true,
-            multihit_index = inst.multihit_index + 1,
-        })
-        follow.cost = {}
-        launch_instance(ch, def, target, follow)
+        local atk_dex = ch:stat_get("dexterity") or 0
+        local def_dex = (target:stat_get("dexterity") or 0) + math.random(1, 15)
+        local style   = ch:skill_get("style") or 0
+        local reduction = style >= 100 and 0.10 or style >= 80 and 0.08
+                       or style >= 60  and 0.06 or style >= 40 and 0.04
+                       or style >= 20  and 0.02 or 0
+        def_dex = math.floor(def_dex * (1 - reduction))
+
+        if atk_dex >= def_dex and def.in_multihit ~= false then
+            local follow = build_instance(ch, def, target, {
+                is_multihit    = true,
+                multihit_index = inst.multihit_index + 1,
+            })
+            follow.cost = {}
+            launch_instance(ch, def, target, follow)
+        end
     end
 
     return true

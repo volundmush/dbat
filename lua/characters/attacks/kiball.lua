@@ -26,6 +26,7 @@ local HIT_MSGS = {
 
 return {
     id    = "kiball",
+    family = "ki",
     name  = "Ki Ball",
     skill = "kiball",
     tier  = 2,

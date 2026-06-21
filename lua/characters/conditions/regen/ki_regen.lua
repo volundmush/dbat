@@ -13,12 +13,12 @@ return {
     persistent = false,
 
     on_apply = function(ch, cond)
-        cond:schedule_event("tick", 2000, 2000)
+        cond:schedule_event("tick", 100000, 100000)
     end,
 
     on_game_activate = function(ch, cond)
         if not cond:event_pending("tick") then
-            cond:schedule_event("tick", 2000, 2000)
+            cond:schedule_event("tick", 100000, 100000)
         end
     end,
 

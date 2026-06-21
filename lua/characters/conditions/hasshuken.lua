@@ -1,10 +1,7 @@
+local HASSHUKEN_ATTACKS = { punch = true, elbow = true, uppercut = true }
+
 local function modifiers(ch, cond)
-    local mods = {}
-
-
---    mods[#mods + 1] = { target = { "derived", "constitution" }, kind = "flat", value = 2, label = "Might" }
-
-    return mods
+    return {}
 end
 
 return {
@@ -14,4 +11,9 @@ return {
     persistent = true,
     modifiers = modifiers,
     status_line = function(ch, cond) return "Your arms are moving fast." end,
+
+    on_check_attack_offense = function(ch, cond, inst)
+        if not HASSHUKEN_ATTACKS[inst.def.id] then return end
+        inst.damage = inst.damage * 2
+    end,
 }

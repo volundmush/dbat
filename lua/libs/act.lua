@@ -34,6 +34,10 @@ end
 local function entity_name(value, viewer)
     if value == nil then return "someone" end
     if is_same(value, viewer) then return "you" end
+    if type(value) == "userdata" and value.display_name_for ~= nil then
+        local ok, result = pcall(function() return value:display_name_for(viewer) end)
+        if ok and result then return result end
+    end
     return object_text(value) or "<error>"
 end
 

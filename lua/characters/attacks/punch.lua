@@ -4,6 +4,7 @@ return {
     id   = "punch",
     name = "Punch",
     skill = "punch",
+    family = "melee",
     tier  = 1,
     elements = { blunt = 1.0 },
     limbs_required = { "arms" },
@@ -21,6 +22,15 @@ return {
     base_accuracy = 1.0,
     base_power    = 1.0,
     spar_safe = true,
+
+    on_calculate_cost = function(inst)
+        inst.cost.stamina = math.floor(inst.attacker:meter_max("powerlevel") / 500)
+    end,
+
+    on_check_combo = function(ch)
+        if ch:limbcond_get(1) <= 0 and ch:limbcond_get(2) <= 0 then return false end
+        return ch:skill_known("punch")
+    end,
 
     on_hit = function(inst)
         local a   = act()

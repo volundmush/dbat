@@ -35,6 +35,7 @@ end
 
 return {
     id    = "tsuihidan",
+    family = "ki",
     name  = "Tsuihidan",
     skill = "tsuihidan",
     tier  = 2,
