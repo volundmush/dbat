@@ -242,8 +242,13 @@ local function launch_instance(ch, def, target, inst)
         end
     end
 
-    -- 10. check_attack: victim defense hooks
-    target:check_attack(inst)
+    -- 9b. Attacker offense hooks (damage multipliers: hasshuken, infuse, kaioken, etc.)
+    if inst.hit then
+        ch:check_attack_offense(inst)
+    end
+
+    -- 10. Victim defense hooks (evasion: zanzoken, absorb, fireshield backlash, etc.)
+    target:check_attack_defense(inst)
 
     -- 11. process_defense
     process_defense(inst)
@@ -273,8 +278,8 @@ local function launch_instance(ch, def, target, inst)
         end
     end
 
-    -- 13. Backlash
-    if inst.backlash then
+    -- 13. Backlash (only on successful hits)
+    if inst.hit and inst.damage > 0 and inst.backlash then
         for _, entry in ipairs(inst.backlash) do
             apply_backlash(ch, entry, inst)
         end
@@ -286,6 +291,9 @@ local function launch_instance(ch, def, target, inst)
             ch:meter_mod_int(slug, -amount)
         end
     end
+
+    -- 14.5. Post-cost hook (e.g. partial ki recovery)
+    if def.on_after_cost then def.on_after_cost(inst) end
 
     -- 15. Lag
     ch:wait_set(lag_for_tier[tier] or 4)

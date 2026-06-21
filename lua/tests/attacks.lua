@@ -113,16 +113,17 @@ test:case("ki attack aborts when charge is insufficient", function(t)
     t:eq(vict:meter_current("lifeforce"), vict:meter_max("lifeforce"))
 end)
 
-test:case("check_attack is callable directly", function(t)
+test:case("check_attack_defense and check_attack_offense are callable", function(t)
     local ch   = mob()
     local vict = mob()
     local def  = dbat.get("attacks", "punch")
     local inst = atk._build_instance(ch, def, vict, {})
     inst.hit    = true
     inst.damage = 100
-    -- Should not error
-    local ok = pcall(function() vict:check_attack(inst) end)
-    t:assert(ok, "check_attack should be callable without error")
+    local ok1 = pcall(function() vict:check_attack_defense(inst) end)
+    t:assert(ok1, "check_attack_defense should be callable without error")
+    local ok2 = pcall(function() ch:check_attack_offense(inst) end)
+    t:assert(ok2, "check_attack_offense should be callable without error")
 end)
 
 test:case("on_attacked drains the correct meter", function(t)

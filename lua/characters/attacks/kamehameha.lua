@@ -106,4 +106,27 @@ return {
         }, ctx)
         -- TODO: blocked kamehameha deals 1/4 damage back
     end,
+
+    on_absorbed = function(inst)
+        local ctx = { actor = inst.attacker, target = inst.target }
+        act().message({
+            actor  = "@C$N@W absorbs your kamehameha into $S android systems!@n",
+            target = "@WYou absorb @C$n's@W kamehameha into your android systems!@n",
+            room   = "@C$N@W absorbs @c$n's@W kamehameha into $S android systems!@n",
+        }, ctx)
+    end,
+
+    on_after_cost = function(inst)
+        local skill = inst.skill_level
+        local amt   = inst.cost.ki or 0
+        if amt <= 0 then return end
+        local refund
+        if     skill >= 100 then refund = math.floor(amt * 0.25)
+        elseif skill >= 60  then refund = math.floor(amt * 0.10)
+        elseif skill >= 40  then refund = math.floor(amt * 0.05)
+        end
+        if refund and refund > 0 then
+            inst.attacker:meter_mod_int("ki", refund)
+        end
+    end,
 }

@@ -520,11 +520,20 @@ local function launch_attack(ch, attack_id, target, opts)
     return require("lua.libs.attack").launch(ch, attack_id, target, opts)
 end
 
-local function check_attack(ch, instance)
+local function check_attack_offense(ch, instance)
     for _, cond_id in ipairs(ch:conditions()) do
         local def = dbat.get("conditions", cond_id)
-        if def and def.on_check_attack then
-            def.on_check_attack(ch, ch:condition(cond_id), instance)
+        if def and def.on_check_attack_offense then
+            def.on_check_attack_offense(ch, ch:condition(cond_id), instance)
+        end
+    end
+end
+
+local function check_attack_defense(ch, instance)
+    for _, cond_id in ipairs(ch:conditions()) do
+        local def = dbat.get("conditions", cond_id)
+        if def and def.on_check_attack_defense then
+            def.on_check_attack_defense(ch, ch:condition(cond_id), instance)
         end
     end
 end
@@ -1014,7 +1023,8 @@ return {
   is_transformed = is_transformed,
   stack_key = stack_key,
   render_room_line = render_room_line,
-  check_attack = check_attack,
+  check_attack_offense = check_attack_offense,
+  check_attack_defense = check_attack_defense,
   on_attacked = on_attacked,
   launch_attack = launch_attack,
 }

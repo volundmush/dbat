@@ -62,7 +62,10 @@ local function modifiers(obj)
   return mods
 end
 
-local function check_attack(obj, instance)
+local function check_attack_offense(obj, instance)
+end
+
+local function check_attack_defense(obj, instance)
 end
 
 local function on_attacked(obj, instance)
@@ -456,7 +459,8 @@ return {
   render_inventory_line = render_inventory_line,
   render_room_line = render_room_line,
   modifiers = modifiers,
-  check_attack = check_attack,
+  check_attack_offense = check_attack_offense,
+  check_attack_defense = check_attack_defense,
   on_attacked = on_attacked,
   on_mud_hour = on_mud_hour,
   on_second = on_second,
