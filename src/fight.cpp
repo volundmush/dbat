@@ -445,7 +445,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
         dragon_or_charged([&]{ char_cmd_execute(ch, "tsuihidan", buf); });
         break;
       case 17: case 18:
-        dragon_or_charged([&]{ do_shogekiha(ch, buf, 0, 0); });
+        dragon_or_charged([&]{ char_cmd_execute(ch, "shogekiha", buf); });
         break;
       case 19: case 20:
         if (IS_DRAGON(ch))
@@ -462,7 +462,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
           case CLASS_FRIEZA:
             if (special >= 100) do_deathball(ch, buf, 0, 0);
             else if (special >= 80) do_kienzan(ch, buf, 0, 0);
-            else if (special >= 70) do_deathbeam(ch, buf, 0, 0);
+            else if (special >= 70) char_cmd_execute(ch, "deathbeam", buf);
             else if (special >= 50) do_barrier(ch, "40", 0, 0);
             else do_barrier(ch, "25", 0, 0);
             break;
@@ -483,14 +483,14 @@ static void mob_attack(struct char_data *ch, char *buf) {
           case CLASS_BARDOCK:
             if (special >= 100) do_final(ch, buf, 0, 0);
             else if (special >= 80) do_bigbang(ch, buf, 0, 0);
-            else if (special >= 70) do_galikgun(ch, buf, 0, 0);
+            else if (special >= 70) char_cmd_execute(ch, "galikgun", buf);
             else if (special >= 50) do_barrier(ch, "40", 0, 0);
             else do_barrier(ch, "25", 0, 0);
             break;
           case CLASS_ANDSIX:
             if (special >= 100) do_hellflash(ch, buf, 0, 0);
             else if (special >= 80) do_kousengan(ch, buf, 0, 0);
-            else if (special >= 70) do_dualbeam(ch, buf, 0, 0);
+            else if (special >= 70) char_cmd_execute(ch, "dualbeam", buf);
             else if (special >= 50) do_barrier(ch, "40", 0, 0);
             else do_barrier(ch, "25", 0, 0);
             break;
@@ -527,20 +527,20 @@ static void mob_attack(struct char_data *ch, char *buf) {
             break;
           case CLASS_KABITO:
             if (special >= 100) do_pbarrage(ch, buf, 0, 0);
-            else if (special >= 80) do_psyblast(ch, buf, 0, 0);
+            else if (special >= 80) char_cmd_execute(ch, "psychic", buf);
             else if (special >= 70) do_heal(ch, buf, 0, 0);
             else do_zanzoken(ch, "40", 0, 0);
             break;
           case CLASS_DABURA:
             if (special >= 100) do_hellspear(ch, buf, 0, 0);
-            else if (special >= 80) do_honoo(ch, buf, 0, 0);
+            else if (special >= 80) char_cmd_execute(ch, "honoo", buf);
             else if (special >= 70) do_fireshield(ch, buf, 0, 0);
             else do_zanzoken(ch, "40", 0, 0);
             break;
           case CLASS_GINYU:
             if (special >= 100) do_spiral(ch, buf, 0, 0);
             else if (special >= 80) do_crusher(ch, buf, 0, 0);
-            else if (special >= 70) do_eraser(ch, buf, 0, 0);
+            else if (special >= 70) char_cmd_execute(ch, "eraser", buf);
             else do_zanzoken(ch, "40", 0, 0);
             break;
           }

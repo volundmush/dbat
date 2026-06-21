@@ -64,20 +64,20 @@ Tracks all combat-relevant attack commands and their migration status from C++ t
 | kiball | 7 | do_kiball | ✅ Done | |
 | kiblast | 9 | do_kiblast | ✅ Done | Android damage bonus + knockout mastery |
 | beam | 10 | do_beam | ✅ Done | Knockback mastery (try_move) |
-| shogekiha | 10 | do_shogekiha | ❌ C++ | Distinct: Kabito race bonus, no parry, charge-drain mastery |
+| shogekiha | 10 | do_shogekiha | ✅ Done | Kibito no-cooldown; charge-drain mastery; ki regen |
 | tsuihidan | 11 | do_tsuihidan | ✅ Done | Stamina drain mastery |
 | renzo | 12 | do_renzo | ✅ Done | Multi-shot count via effective_accuracy; Nail sensei bonus |
 | kamehameha | 13 | do_kamehameha | ✅ Done | Ki refund mastery; perf type 3 extra lag |
 | masenko | 14 | do_masenko | ✅ Done | Piccolo sensei bonus; stamina drain |
 | dodonpa | 15 | do_dodonpa | ✅ Done | Kibito sensei bonus; ki drain |
-| galikgun | 16 | do_galikgun | ❌ C++ | |
-| deathbeam | 17 | do_deathbeam | ❌ C++ | |
-| eraser | 18 | do_eraser | ❌ C++ | Eraser Cannon |
-| twinslash | 19 | do_tslash | ❌ C++ | |
-| psyblast | 20 | do_psyblast | ❌ C++ | Psychic Blast |
-| honoo | 21 | do_honoo | ❌ C++ | |
-| dualbeam | 22 | do_dualbeam | ❌ C++ | |
-| rogafufuken | 23 | do_rogafufuken | ❌ C++ | |
+| galikgun | 16 | do_galikgun | ✅ Done | Ki refund mastery |
+| deathbeam | 17 | do_deathbeam | ✅ Done | base_accuracy 1.3; lifeforce drain; perf type 3 lag |
+| eraser | 18 | do_eraser | ✅ Done | Eraser Cannon; ki refund mastery |
+| twinslash | 19 | do_tslash | ❌ C++ | Deferred to batch 3: needs sword-type-check, limb severance |
+| psyblast | 20 | do_psyblast | ✅ Done | Psychic Blast; ki drain + shocked condition |
+| honoo | 21 | do_honoo | ✅ Done | burned condition; fire damage modifiers |
+| dualbeam | 22 | do_dualbeam | ✅ Done | 3-hit multi with recursion guard |
+| rogafufuken | 23 | do_rogafufuken | ✅ Done | stamina cost; parry counter-damage |
 | bakuhatsuha | 24 | do_baku | ❌ C++ | |
 | kienzan | 25 | do_kienzan | ❌ C++ | |
 | tribeam | 26 | do_tribeam | ❌ C++ | |

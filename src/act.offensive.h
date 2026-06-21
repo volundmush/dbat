@@ -12,14 +12,7 @@ ACMD(do_flee);
 ACMD(do_powerup);
 ACMD(do_attack);
 ACMD(do_attack2);
-ACMD(do_galikgun);
-ACMD(do_deathbeam);
-ACMD(do_eraser);
 ACMD(do_tslash);
-ACMD(do_psyblast);
-ACMD(do_honoo);
-ACMD(do_dualbeam);
-ACMD(do_rogafufuken);
 ACMD(do_baku);
 ACMD(do_kienzan);
 ACMD(do_tribeam);
@@ -41,7 +34,6 @@ ACMD(do_geno);
 ACMD(do_kousengan);
 ACMD(do_balefire);
 ACMD(do_blessedhammer);
-ACMD(do_shogekiha);
 ACMD(do_rescue);
 
 #ifdef __cplusplus

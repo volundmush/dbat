@@ -61,7 +61,7 @@ return {
             local dir = DIRS[math.random(#DIRS)]
             if not inst.target:try_move(dir) then
                 -- Slammed into a wall — deal bonus damage
-                inst.target:deal_damage({ powerlevel = math.floor(inst.damage * 0.25) })
+                inst.target:meter_mod_int("powerlevel", -math.floor(inst.damage * 0.25))
                 act().message({
                     actor  = "@C$N@W is slammed into a wall by the force of your beam!@n",
                     target = "@WYou are slammed into a wall by @c$n@W's beam!@n",
