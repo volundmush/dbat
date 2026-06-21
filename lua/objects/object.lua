@@ -14,9 +14,43 @@ local function C()
         CF  = d.consts.container_flags,
         RF  = d.consts.room_flags,
         ST  = d.consts.sector_types,
+        WP  = d.consts.wear_positions,
         dirs = d.consts.direction_names,
     }
     return _C
+end
+
+-- VAL_WEAPON_DAMTYPE (value[3]) integer → string
+local DAMTYPE_STRINGS = {
+    [3]  = "slash",
+    [6]  = "crush",
+    [11] = "pierce",
+    [12] = "blast",
+    [14] = "stab",
+}
+
+local function weapon_damtype_get(obj)
+    return DAMTYPE_STRINGS[obj:value_get(3)]
+end
+
+local function weapon_level_get(obj)
+    local EF = C().EF
+    if obj:extra_flagged(EF.WEAPLVL5) then return 5 end
+    if obj:extra_flagged(EF.WEAPLVL4) then return 4 end
+    if obj:extra_flagged(EF.WEAPLVL3) then return 3 end
+    if obj:extra_flagged(EF.WEAPLVL2) then return 2 end
+    if obj:extra_flagged(EF.WEAPLVL1) then return 1 end
+    return 0
+end
+
+local function is_broken(obj)
+    return obj:extra_flagged(C().EF.BROKEN)
+end
+
+-- Reduce VAL_WEAPON_HEALTH (value[4]) by amount, clamped to 0.
+local function weapon_damage(obj, amount)
+    local cur = obj:value_get(4)
+    obj:value_set(4, math.max(0, cur - amount))
 end
 
 local function keywords_for(obj, viewer)
@@ -466,4 +500,8 @@ return {
   on_second = on_second,
   on_heartbeat = on_heartbeat,
   on_event = on_event,
+  weapon_damtype_get = weapon_damtype_get,
+  weapon_level_get = weapon_level_get,
+  is_broken = is_broken,
+  weapon_damage = weapon_damage,
 }

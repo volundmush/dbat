@@ -128,6 +128,8 @@ local function build_instance(ch, def, target, opts)
         target_is_object = (target:reftype() == "object"),
         spar            = is_sparring(ch),
 
+        weapon      = nil,
+
         cost        = {},
         charge_used = ch:charge_get(),
         skill_level = (def.skill and ch:skill_get(def.skill)) or 0,
@@ -235,7 +237,11 @@ local function launch_instance(ch, def, target, inst)
         inst.hit_location               = inst.target_is_object and "body"
                                           or roll_hitloc(ch, target, inst.skill_level)
         inst.crit, inst.crit_multiplier = calc_crit(ch, inst.hit_location)
-        inst.base_damage                = base_damage(ch, def, inst)
+        if def.on_calculate_damage then
+            inst.base_damage = def.on_calculate_damage(inst)
+        else
+            inst.base_damage = base_damage(ch, def, inst)
+        end
         inst.damage                     = math.floor(inst.base_damage * inst.crit_multiplier)
         for elem, portion in pairs(def.elements or {}) do
             inst.damage_by_element[elem] = math.floor(inst.damage * portion)
@@ -245,6 +251,7 @@ local function launch_instance(ch, def, target, inst)
     -- 9b. Attacker offense hooks (damage multipliers: hasshuken, infuse, kaioken, etc.)
     if inst.hit then
         ch:check_attack_offense(inst)
+        if def.on_check_attack_offense then def.on_check_attack_offense(inst) end
     end
 
     -- 10. Victim defense hooks (evasion: zanzoken, absorb, fireshield backlash, etc.)
