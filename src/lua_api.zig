@@ -34,6 +34,7 @@ const categories = [_]Category{
     .{ .namespace = "characters", .name = "skills",            .dir = "characters/skills" },
     .{ .namespace = "characters", .name = "stats",             .dir = "characters/stats" },
     .{ .namespace = "characters", .name = "transformations",   .dir = "characters/transformations" },
+    .{ .namespace = "characters", .name = "attacks",           .dir = "characters/attacks" },
     .{ .namespace = "characters", .name = "character_scripts", .dir = "characters/scripts" },
     .{ .namespace = "objects",    .name = "object_scripts",    .dir = "objects/scripts" },
     .{ .namespace = "rooms",      .name = "room_scripts",      .dir = "rooms/scripts" },
@@ -1073,6 +1074,7 @@ fn cacheReturnedValue(category: []const u8, id: []const u8, index: i32) !void {
     if (std.mem.eql(u8, category, "derived")) return cacheDerivedDefinition(id, index);
     if (std.mem.eql(u8, category, "meters")) return cacheMeterDefinition(id, index);
     if (std.mem.eql(u8, category, "conditions")) return cacheConditionDefinition(id, index);
+    if (std.mem.eql(u8, category, "attacks")) return; // full def lives in Lua registry; id already interned above
     if (std.mem.eql(u8, category, "character_scripts")) return cacheScriptDefinition(&definition_cache.character_scripts, id, index);
     if (std.mem.eql(u8, category, "object_scripts")) return cacheScriptDefinition(&definition_cache.object_scripts, id, index);
     if (std.mem.eql(u8, category, "room_scripts")) return cacheScriptDefinition(&definition_cache.room_scripts, id, index);

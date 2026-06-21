@@ -109,8 +109,8 @@ local function harvest_plant(ch, plant, skill)
     last_fruit = proto:spawn()
     last_fruit:to_char(ch)
   end
-  ch:send_line(string.format("@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n",
-    reward, (last_fruit and last_fruit:short_description_get()) or "fruit"))
+  ch:send_line("@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n",
+    reward, (last_fruit and last_fruit:short_description_get()) or "fruit")
 
   if entry.extract then
     ch:send_line("@wThe harvesting process has killed the plant. Do not worry, this is normal for that type.@n")

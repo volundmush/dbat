@@ -514,6 +514,44 @@ local function visible_commands(ch, cmd_class)
     return visible
 end
 
+-- Called by the attack pipeline so victim conditions/scripts can respond.
+-- Defense conditions write inst.blocked/parried/dodged/absorbed/partial_negation/backlash.
+local function launch_attack(ch, attack_id, target, opts)
+    return require("lua.libs.attack").launch(ch, attack_id, target, opts)
+end
+
+local function check_attack(ch, instance)
+    for _, cond_id in ipairs(ch:conditions()) do
+        local def = dbat.get("conditions", cond_id)
+        if def and def.on_check_attack then
+            def.on_check_attack(ch, ch:condition(cond_id), instance)
+        end
+    end
+end
+
+-- Called after on_hit; applies damage_to meters and fires victim-side condition hooks.
+local function on_attacked(ch, instance)
+    for meter, amount in pairs(instance.damage_to) do
+        if amount > 0 then
+            local dmg = amount
+            if instance.spar then
+                local cur = ch:meter_current(meter)
+                if cur > 1 then dmg = math.min(dmg, cur - 1) end
+            end
+            ch:meter_mod_int(meter, -dmg)
+        end
+    end
+    for _, cond_id in ipairs(ch:conditions()) do
+        local def = dbat.get("conditions", cond_id)
+        if def and def.on_attacked then
+            def.on_attacked(ch, ch:condition(cond_id), instance)
+        end
+    end
+    if instance.xp_credit > 0 then
+        instance.attacker:gain_exp(instance.xp_credit)
+    end
+end
+
 local function meter_is_full(ch, name)
     return ch:meter_current(name) >= ch:meter_max(name)
 end
@@ -976,4 +1014,7 @@ return {
   is_transformed = is_transformed,
   stack_key = stack_key,
   render_room_line = render_room_line,
+  check_attack = check_attack,
+  on_attacked = on_attacked,
+  launch_attack = launch_attack,
 }
