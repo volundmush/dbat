@@ -3565,7 +3565,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
                (!is_sparring(ch) || !is_sparring(vict))) {
       send_to_char(ch, "Newbie Shield Protects you until level 8.\r\n");
       return 0;
-    } else if (PLR_FLAGGED(vict, PLR_SPIRAL) && num != 3) {
+    } else if (char_condition_has(vict, "spiral") && num != 3) {
       send_to_char(ch,
                    "Due to the nature of their current technique anything less "
                    "than a Tier 4 or AOE attack will not work on them.\r\n");

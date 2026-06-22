@@ -2579,7 +2579,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     if (AFF_FLAGGED(i, AFF_SANCTUARY) && GET_SKILL(i, SKILL_AQUA_BARRIER))
       act("...$e has a @Gbarrier@w of @cwater@w and @Cki@w around $s body!",
           FALSE, i, 0, ch, TO_VICT);
-    if (!IS_NPC(i) && PLR_FLAGGED(i, PLR_SPIRAL))
+    if (char_condition_has(i, "spiral"))
       act("...$e is spinning in a vortex!", FALSE, i, 0, ch, TO_VICT);
     if (GET_CHARGE(i))
       act("...$e has a bright %s aura around $s body!", FALSE, i, 0, ch,
@@ -2971,7 +2971,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     act("@w...$e is high in the air!", TRUE, i, 0, ch, TO_VICT);
   if (GET_KAIOKEN(i) > 0)
     act("@w...@r$e has a red aura around $s body!", TRUE, i, 0, ch, TO_VICT);
-  if (!IS_NPC(i) && PLR_FLAGGED(i, PLR_SPIRAL))
+  if (char_condition_has(i, "spiral"))
     act("@w...$e is spinning in a vortex!", FALSE, i, 0, ch, TO_VICT);
   if (IS_TRANSFORMED(i) && !IS_ANDROID(i) && !IS_SAIYAN(i) && !IS_HALFBREED(i))
     act("@w...$e has energy crackling around $s body!", TRUE, i, 0, ch,

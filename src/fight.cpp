@@ -245,7 +245,7 @@ static int pick_n_throw(struct char_data *ch, char *buf) {
         sprintf(buf2, "%s", cont->name);
         do_get(ch, buf2, 0, 0);
         sprintf(buf3, "%s %s", buf2, buf);
-        do_throw(ch, buf3, 0, 0);
+        char_cmd_execute(ch, "throw", buf3);
         thrown = true;
         return false;
       }
@@ -316,7 +316,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
     if (special < 100) {
       if (GET_CLASS(ch) == CLASS_SHADOWDANCER && rand_number(1, 3) == 3) {
         sprintf(buf2, "ass %s", buf);
-        do_throw(ch, buf2, 0, 0);
+        char_cmd_execute(ch, "throw", buf2);
       } else if (IS_ANDROID(ch) && MOB_FLAGGED(ch, MOB_REPAIR) &&
                  GET_HIT(ch) <= (getMaxPL(ch)) * 0.5 &&
                  rand_number(1, 20) >= 16) {
@@ -538,7 +538,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
             else do_zanzoken(ch, "40", 0, 0);
             break;
           case CLASS_GINYU:
-            if (special >= 100) do_spiral(ch, buf, 0, 0);
+            if (special >= 100) char_cmd_execute(ch, "spiral", buf);
             else if (special >= 80) char_cmd_execute(ch, "crusher", buf);
             else if (special >= 70) char_cmd_execute(ch, "eraser", buf);
             else do_zanzoken(ch, "40", 0, 0);
@@ -699,9 +699,6 @@ struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES] = {
 static void reset_fighting_position(struct char_data *ch) {
   if (GET_POS(ch) == POS_FIGHTING) {
     char_position_set(ch, POS_STANDING);
-  }
-  if (PLR_FLAGGED(ch, PLR_SPIRAL)) {
-    handle_spiral(ch, NULL, GET_SKILL(ch, SKILL_SPIRAL), FALSE);
   }
 }
 

@@ -98,7 +98,7 @@ Tracks all combat-relevant attack commands and their migration status from C++ t
 | genocide | 41 | do_geno | ✅ Done | Manifested projectile (vnum 83, ki_genocide script), kidist countdown, single-target detonation |
 | kousengan | 42 | do_kousengan | ✅ Done | blocked by mystic_melody; +15 acc; sanctuary×3 damage |
 | waterspikes | 43 | do_spike | ✅ Done | perf mechanics; ki refund; aqua barrier; head knockdown |
-| spiral | 44/45 | do_spiral | ❌ C++ | Spiral Comet (two variants) |
+| spiral | 44/45 | do_spiral | ✅ Done | Spiral Comet; Condition with scheduled tick (first hit 50%/follow-ups 5% ki cost, 5 hit locations); PLR_SPIRAL refs replaced with char_condition_has |
 | starbreaker | 46 | do_breaker | ✅ Done | EXP theft on hit scaled by level diff |
 | waterrazor | 47 | do_razor | ✅ Done | no arm; android blocked; on_hit drain ki+stamina; aqua barrier |
 | koteiru | 48 | do_koteiru | ✅ Done | aqua barrier; 25% freeze on hit vs non-demon |
@@ -120,7 +120,7 @@ Tracks all combat-relevant attack commands and their migration status from C++ t
 | malice | do_malice | ✅ Done | 6 random hit locations, time-of-day dmg bonus, dodge→room_dmg +20 |
 | selfdestruct | do_selfd | ✅ Done | Condition with scheduled tick (phase 1→2 via skill roll), 3-phase command, grapple/room AOE, majin/bio survival |
 | sunder | do_sunder | ✅ Done | |
-| throw | do_throw | ❌ C++ | |
+| throw | do_throw | ✅ Done | Object-throw (weight/STR/CHA formula, multi-throw loop 1–3, weapon-level bonuses, energize, ICE/HOT effects) + person-throw (speed grab check, damage to both thrown and victim); mob AI pick_n_throw + Shadowdancer use char_cmd_execute |
 | zen | do_zen | ✅ Done | Sword, mystic_melody block, limb severing 80%+, majin/bio regen, dodge→room_dmg +5 |
 
 ---

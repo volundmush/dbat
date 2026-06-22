@@ -41,7 +41,6 @@ ACMD(do_renzo);
 ACMD(do_tsuihidan);
 ACMD(do_kamehameha);
 ACMD(do_masenko);
-ACMD(do_spiral);
 ACMD(do_dodonpa);
 ACMD(do_hass);
 ACMD(do_zanzoken);
