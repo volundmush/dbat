@@ -113,6 +113,8 @@ fn registerRoomMetatable(lua: *Lua) void {
     lua.setField(-2, "damage_get");
     lua.pushFunction(zlua.wrap(luaRoomDamageSet));
     lua.setField(-2, "damage_set");
+    lua.pushFunction(zlua.wrap(luaRoomDamageMod));
+    lua.setField(-2, "damage_mod");
     lua.pushFunction(zlua.wrap(luaRoomGravityGet));
     lua.setField(-2, "gravity_get");
     lua.pushFunction(zlua.wrap(luaRoomGravitySet));
@@ -349,6 +351,13 @@ fn luaRoomDamageSet(lua: *Lua) i32 {
     const room = checkRoom(lua);
     const damage = lua.toInteger(2) catch lua.typeError(2, "integer");
     cdb.room_dmg_set(room, @intCast(damage));
+    return 0;
+}
+
+fn luaRoomDamageMod(lua: *Lua) i32 {
+    const room = checkRoom(lua);
+    const delta = lua.toInteger(2) catch lua.typeError(2, "integer");
+    cdb.room_dmg_mod(room, @intCast(delta));
     return 0;
 }
 

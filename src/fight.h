@@ -27,7 +27,6 @@ void mutant_limb_regen(struct char_data *ch);
 // commands
 ACMD(do_heal);
 ACMD(do_trip);
-ACMD(do_kakusanha);
 ACMD(do_powerup);
 ACMD(do_srepair);
 ACMD(do_absorb);
@@ -46,7 +45,6 @@ ACMD(do_spiral);
 ACMD(do_dodonpa);
 ACMD(do_hass);
 ACMD(do_zanzoken);
-ACMD(do_sbc);
 ACMD(do_ensnare);
 ACMD(do_barrier);
 ACMD(do_attack);

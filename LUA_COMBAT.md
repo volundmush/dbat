@@ -81,14 +81,14 @@ Tracks all combat-relevant attack commands and their migration status from C++ t
 | bakuhatsuha | 24 | do_baku | ✅ Done | AOE, count-scaled dmg, group ally filter, always knockdown |
 | kienzan | 25 | do_kienzan | ✅ Done | skill bonus 25/15/5%; instant-kill vs non-majin/bio if dmg > PL/5 |
 | tribeam | 26 | do_tribeam | ✅ Done | |
-| sbc | 27 | do_sbc | ❌ C++ | Deferred: skill not in spell_parser.cpp; dodge causes room damage |
+| sbc | 27 | do_sbc | ✅ Done | Dodge causes room damage (+10) |
 | finalflash | 28 | do_final | ✅ Done | |
 | crusher | 29 | do_crusher | ✅ Done | Crusher Ball; perf2=+5 acc, perf3=cost reduction |
 | ddslash | 30 | do_ddslash | ✅ Done | Sword type check, skill bonus, 33% blind via darkness_dragon_slash condition |
 | pbarrage | 31 | do_pbarrage | ✅ Done | Psychic Barrage; head hit = 1.5× damage |
 | hellflash | 32 | do_hellflash | ✅ Done | perf2=+5 acc, perf3=cost reduction |
 | hellspear | 33 | do_hellspear | ✅ Done | AOE, no group filter, 25% knockdown |
-| kakusanha | 34 | do_kakusanha | ❌ C++ | |
+| kakusanha | 34 | do_kakusanha | ✅ Done | AOE 5-beam, count-scaled dmg, group ally filter, env effects, room damage |
 | scatter | 35 | do_scatter | ✅ Done | Scatter Shot; random +10–20 acc; Piccolo sensei cooldown |
 | bigbang | 36 | do_bigbang | ✅ Done | |
 | phoenix | 37 | do_pslash | ✅ Done | Sword type check, fire element, burned condition on hit |
@@ -105,7 +105,7 @@ Tracks all combat-relevant attack commands and their migration status from C++ t
 | hspiral | 49 | do_hspiral | ✅ Done | |
 | seishou | 50 | do_seishou | ✅ Done | no arm; mystic_melody blocked; molt_level ≥150 doubles dmg |
 | starnova | 53 | do_nova | ✅ Done | AOE, time-of-day dmg bonus, group ally filter, 3 perf types |
-| lightgrenade | 57 | do_lightgrenade | ❌ C++ | |
+| lightgrenade | 57 | do_lightgrenade | ✅ Done | Targeted with AoE splash: primary=full dmg, bystanders=0.5x; 25% knockdown |
 
 ---
 
@@ -117,11 +117,11 @@ Tracks all combat-relevant attack commands and their migration status from C++ t
 | blessedhammer | do_blessedhammer | ✅ Done | +15 acc; sanctuary×3 damage |
 | combine | do_combine | ❌ C++ | |
 | energize | do_energize | ❌ C++ | |
-| malice | do_malice | ❌ C++ | |
+| malice | do_malice | ✅ Done | 6 random hit locations, time-of-day dmg bonus, dodge→room_dmg +20 |
 | selfdestruct | do_selfd | ❌ C++ | |
-| sunder | do_sunder | ❌ C++ | |
+| sunder | do_sunder | ✅ Done | |
 | throw | do_throw | ❌ C++ | |
-| zen | do_zen | ❌ C++ | |
+| zen | do_zen | ✅ Done | Sword, mystic_melody block, limb severing 80%+, majin/bio regen, dodge→room_dmg +5 |
 
 ---
 

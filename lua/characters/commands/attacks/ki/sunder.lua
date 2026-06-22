@@ -1,0 +1,21 @@
+return {
+    id      = "sunder",
+    aliases = { { "sunder", 5 } },
+
+    can_execute = function(ch)
+        if (ch:skill_get("sundering force") or 0) <= 0 then
+            return false, "You do not know the sundering force."
+        end
+        return true
+    end,
+
+    execute = function(ctx)
+        local ch     = ctx.ch
+        local target = ch:acquire_room_target(ctx.argparams.tokens[1])
+        if not target then
+            ch:send_line("Use sundering force on who?")
+            return
+        end
+        ch:launch_attack("sunder", target)
+    end,
+}

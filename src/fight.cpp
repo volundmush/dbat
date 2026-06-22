@@ -453,7 +453,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
         fire_charged([&]{
           switch (GET_CLASS(ch)) {
           case CLASS_ROSHI:
-            if (special >= 100) do_kakusanha(ch, buf, 0, 0);
+            if (special >= 100) char_cmd_execute(ch, "kakusanha", buf);
             else if (special >= 80) char_cmd_execute(ch, "kienzan", buf);
             else if (special >= 70) char_cmd_execute(ch, "kamehameha", buf);
             else if (special >= 50) do_barrier(ch, "40", 0, 0);
@@ -475,7 +475,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
             break;
           case CLASS_PICCOLO:
             if (special >= 100) char_cmd_execute(ch, "scatter", buf);
-            else if (special >= 80) do_sbc(ch, buf, 0, 0);
+            else if (special >= 80) char_cmd_execute(ch, "sbc", buf);
             else if (special >= 70) char_cmd_execute(ch, "masenko", buf);
             else if (special >= 50) do_barrier(ch, "40", 0, 0);
             else do_barrier(ch, "25", 0, 0);
