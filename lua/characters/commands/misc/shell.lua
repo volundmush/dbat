@@ -1,10 +1,9 @@
 local dbat = require("dbat")
-local AFF   = dbat.consts.aff_flags
 
 local function execute(ctx)
     local ch = ctx.ch
 
-    if ch:aff_flagged(AFF.SHELL) then
+    if ch:condition_has("arlian_shell") then
         ch:send_line("@mYou quickly absorb the armor carapace covering your body back inside.@n")
         ch:act_around("@M$n's@m armored carapce retreats back to its original size.@n")
         ch:condition_remove("arlian_shell", "retract")

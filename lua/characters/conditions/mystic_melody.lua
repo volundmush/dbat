@@ -121,8 +121,6 @@ local function on_tick(ch, cond)
         return
     end
 
-    local AFF = dbat.consts.aff_flags
-
     if song == SONG_SAFETY then
         for vict in room:people() do
             if vict:id_get() == ch:id_get() or is_group_ally(ch, vict) then
@@ -194,8 +192,8 @@ local function on_tick(ch, cond)
             local max_barrier = math.floor(vict:meter_max("powerlevel") * 0.75)
             local add = math.floor(ch:meter_max("powerlevel") * 0.005 * (skill * 0.25) + skill)
             vict:barrier_set(math.min(max_barrier, vict:barrier_get() + add))
-            if not vict:aff_flagged(AFF.SANCTUARY) then
-                vict:aff_flag_set(AFF.SANCTUARY, true)
+            if not vict:condition_has("barrier") then
+                vict:condition_apply("barrier", "mystic_melody", "shield")
             end
             ch:meter_mod_int("ki", -math.floor(ch:meter_max("ki") * 0.02 + skill))
             if ki_exhausted() then return end

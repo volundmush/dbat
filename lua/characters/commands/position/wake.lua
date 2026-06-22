@@ -1,5 +1,4 @@
 local dbat   = require("dbat")
-local AFF    = dbat.consts.aff_flags
 local BONUS  = dbat.consts.bonus_flags
 local POS    = dbat.consts.positions
 local Search = dbat.lib.search
@@ -16,7 +15,7 @@ local function execute(ctx)
     local ch  = ctx.ch
     local arg = ctx.argparams.tokens[1] or ""
 
-    if ch:aff_flagged(AFF.KNOCKED) then
+    if ch:condition_has("knocked_out") then
         ch:send_line("You are knocked out cold for right now!")
         return
     end
@@ -45,13 +44,13 @@ local function execute(ctx)
         elseif vict:position_get() > POS.SLEEPING then
             act.to_char(ch, "$E is already awake.", { actor = ch, target = vict })
             return
-        elseif vict:aff_flagged(AFF.SLEEP) then
+        elseif vict:condition_has("yoikominminken") then
             act.to_char(ch, "You can't wake $M up!", { actor = ch, target = vict })
             return
         elseif vict:position_get() < POS.SLEEPING then
             act.to_char(ch, "$E's in pretty bad shape!", { actor = ch, target = vict })
             return
-        elseif vict:aff_flagged(AFF.KNOCKED) then
+        elseif vict:condition_has("knocked_out") then
             ch:send_line("They are knocked out cold for right now!")
             return
         elseif ch:bonus_flagged(BONUS.LATE) then
@@ -72,7 +71,7 @@ local function execute(ctx)
     end
 
     if not handled_self then
-        if ch:aff_flagged(AFF.SLEEP) then
+        if ch:condition_has("yoikominminken") then
             ch:send_line("You can't wake up!")
             return
         elseif ch:position_get() > POS.SLEEPING then

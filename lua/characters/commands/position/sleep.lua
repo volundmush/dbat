@@ -1,5 +1,4 @@
 local dbat   = require("dbat")
-local AFF    = dbat.consts.aff_flags
 local PLR    = dbat.consts.player_flags
 local PRF    = dbat.consts.pref_flags
 local BONUS  = dbat.consts.bonus_flags
@@ -63,7 +62,7 @@ local function execute(ctx)
         ch:send_line("You are busy powering up!")
         return
     end
-    if ch:aff_flagged(AFF.SANCTUARY) then
+    if ch:condition_has("barrier") then
         if ch:know_skill("barrier") then
             ch:send_line("You have a barrier around you and can't sleep.")
             return

@@ -4,6 +4,6 @@ return {
     aliases  = {{"--", 2}},
     execute  = function(ctx)
         ctx.ch:command_queue_clear()
-        ctx.ch:send("Command queue cleared.\r\n")
+        ctx.ch:send_line("Command queue cleared.")
     end,
 }

@@ -64,14 +64,11 @@ return {
         local ctx    = { actor = inst.attacker, target = target }
         local loc    = inst.hit_location
 
-        -- Fire damage modifiers
-        if target:condition_has("fireprone") then inst.damage = math.floor(inst.damage * 1.4) end
-        if target:condition_has("fireproof") then inst.damage = math.floor(inst.damage * 0.6) end
-
         act().message(HIT_MSGS[loc] or HIT_MSGS.body, ctx)
 
-        -- Apply burned condition; demons and fireproof are immune
-        local immune = target:race_get() == "demon" or target:condition_has("fireproof")
+        -- Apply burned condition; demons and fireproof are immune.
+        -- Damage modifiers for fire resistance are handled by fireprone/fireproof condition hooks.
+        local immune = target:race_get() == "demon" or inst.fire_immune
         if not immune then
             target:condition_apply("burned")
             act().message({

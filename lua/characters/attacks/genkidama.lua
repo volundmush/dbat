@@ -2,7 +2,7 @@ local function ke() return require("lua.libs.ki_effects") end
 local function act() return require("dbat").lib.act end
 
 local function is_same_group(person, ch)
-    if not (person:has_group() and person:aff_flagged(require("dbat").consts.aff_flags.GROUP)) then
+    if not person:has_group() then
         return false
     end
     local leader    = person:following_get()

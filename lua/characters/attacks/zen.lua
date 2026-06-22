@@ -116,7 +116,7 @@ return {
         elseif loc == "arm" then
             act().message(zen_msg("arm"), { actor = ch, target = target })
             if math.random(1, 100) >= 80 and not target:is_npc()
-                    and not target:aff_flagged(require("dbat").consts.aff_flags.SANCTUARY)
+                    and not target:condition_has("barrier")
                     and not inst.spar then
                 local limb
                 if target:limbcond_get(2) > 0 and math.random(1, 2) == 2 then
@@ -139,7 +139,7 @@ return {
         elseif loc == "leg" then
             act().message(zen_msg("leg"), { actor = ch, target = target })
             if math.random(1, 100) >= 80 and not target:is_npc()
-                    and not target:aff_flagged(require("dbat").consts.aff_flags.SANCTUARY)
+                    and not target:condition_has("barrier")
                     and not inst.spar then
                 local limb
                 if target:limbcond_get(4) > 0 and math.random(1, 2) == 2 then

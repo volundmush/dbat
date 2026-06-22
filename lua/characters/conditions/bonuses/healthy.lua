@@ -1,5 +1,4 @@
 local dbat = require("dbat")
-local AFF  = dbat.consts.aff_flags
 local POS  = dbat.consts.positions
 
 local function on_tick(ch, cond)
@@ -8,13 +7,13 @@ local function on_tick(ch, cond)
 
     local change = false
 
-    if ch:aff_flagged(AFF.SHOCKED) then
-        ch:aff_flag_set(AFF.SHOCKED, false)
+    if ch:condition_has("shocked") then
+        ch:condition_remove("shocked", "healthy")
         change = true
     end
 
-    if ch:aff_flagged(AFF.MBREAK) then
-        ch:aff_flag_set(AFF.MBREAK, false)
+    if ch:condition_has("mental_break") then
+        ch:condition_remove("mental_break", "healthy")
         change = true
     end
 
@@ -22,8 +21,8 @@ local function on_tick(ch, cond)
         change = true
     end
 
-    if ch:aff_flagged(AFF.KNOCKED) then
-        ch:aff_flag_set(AFF.KNOCKED, false)
+    if ch:condition_has("knocked_out") then
+        ch:condition_remove("knocked_out", "healthy")
         ch:position_set(POS.SITTING)
         change = true
     end

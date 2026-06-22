@@ -2,7 +2,6 @@ local dbat   = require("dbat")
 local Search = require("lua.libs.search").new
 local function act() return dbat.lib.act end
 
-local AFF  = dbat.consts.aff_flags
 local BON  = dbat.consts.bonuses
 local WEAR = dbat.consts.wear_positions
 
@@ -429,8 +428,8 @@ local function fire_combine(ch, vict, leader_idx, att, ready_followers)
 
     -- Shock effect (psychic blast)
     if att.shocked then
-        if not vict:aff_flagged(AFF.SHOCKED) and math.random(1, 4) == 4
-           and not vict:aff_flagged(AFF.SANCTUARY) then
+        if not vict:condition_has("shocked") and math.random(1, 4) == 4
+           and not vict:condition_has("barrier") then
             vict:send_line("@MYour mind has been shocked!@n")
             a.message({ room = "@M$n@m's mind has been shocked!@n" }, { actor = vict })
             vict:condition_apply("shocked")

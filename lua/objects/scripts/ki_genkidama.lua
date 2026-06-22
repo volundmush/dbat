@@ -13,8 +13,6 @@ return {
         local kidist = script:number_get("kidist")
         local dmg    = script:number_get("damage")
         local user   = db.characters.by_id(script:number_get("user_id"))
-        local AFF    = db.consts.aff_flags
-
         if kidist > 1 then
             script:number_set("kidist", kidist - 1)
             room:send_text(("@BA massive @bSpirit Bomb@B descends! @W(%d seconds remain)@n\r\n"):format(kidist - 1))
@@ -30,7 +28,7 @@ return {
         local function is_ally(person)
             if not user then return false end
             if person:is_same(user) then return true end
-            if not (person:has_group() and person:aff_flagged(AFF.GROUP)) then return false end
+            if not person:has_group() then return false end
             local leader    = person:following_get()
             local my_leader = user:following_get()
             return (leader    and leader:is_same(user))      or

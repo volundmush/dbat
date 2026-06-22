@@ -1,5 +1,4 @@
 local dbat  = require("dbat")
-local AFF   = dbat.consts.aff_flags
 local PLR   = dbat.consts.player_flags
 local POS   = dbat.consts.positions
 local ITYPE = dbat.consts.item_types
@@ -22,7 +21,7 @@ end
 local function execute(ctx)
     local ch = ctx.ch
 
-    if ch:aff_flagged(AFF.KNOCKED) then
+    if ch:condition_has("knocked_out") then
         ch:send_line("You are knocked out cold for right now!")
         return
     end

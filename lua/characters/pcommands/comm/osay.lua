@@ -12,7 +12,7 @@ return {
         local ch  = ctx.ch
         local msg = ctx.arguments
         if not msg or msg == "" then
-            ch:send("Yes, but WHAT do you want to osay?\r\n")
+            ch:send_line("Yes, but WHAT do you want to osay?")
             return
         end
         local PRF = dbat.consts.prf_flags

@@ -1,5 +1,4 @@
 local dbat = require("dbat")
-local AFF  = dbat.consts.aff_flags
 local P    = dbat.consts.pulses
 
 local function execute(ctx)
@@ -11,7 +10,7 @@ local function execute(ctx)
         return
     end
 
-    if ch:aff_flagged(AFF.HAYASA) then
+    if ch:condition_has("hayasa") then
         ch:send_line("You are already focusing ki to continually speed up your movements.")
         return
     end

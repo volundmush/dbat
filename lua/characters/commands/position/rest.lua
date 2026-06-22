@@ -1,5 +1,4 @@
 local dbat   = require("dbat")
-local AFF    = dbat.consts.aff_flags
 local PLR    = dbat.consts.player_flags
 local POS    = dbat.consts.positions
 local ITYPE  = dbat.consts.item_types
@@ -35,7 +34,7 @@ local function execute(ctx)
         return
     end
 
-    if ch:aff_flagged(AFF.SANCTUARY) then
+    if ch:condition_has("barrier") then
         if ch:know_skill("barrier") then
             ch:send_line("You have a barrier around you and can't rest.")
             return

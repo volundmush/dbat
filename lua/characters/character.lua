@@ -431,6 +431,14 @@ local function act_around(ch, msg, ctx)
   dbat.lib.act.around(ch, msg, context)
 end
 
+-- Three-way message send (actor/target/room) with ch as implicit actor.
+-- ctx may contain { target = vict, tool = obj, ... }; actor is always ch.
+local function act_message(ch, msgs, ctx)
+  local context = ctx or {}
+  context.actor = ch
+  require("dbat").lib.act.message(msgs, context)
+end
+
 -- Build the argparams table — mirrors lua_api.zig:pushArgParams/pushTokens.
 local function build_argparams(arguments)
     local function tokenize(s)
@@ -729,10 +737,10 @@ local function append_effects(t, ch, viewer, ctx, c)
     local aura_name = c.aura[ch:aura_get() + 1] or "white"
     t[#t+1] = act.render_for(viewer, "...is surrounded by a bright " .. aura_name .. " aura.@n\r\n", ctx)
   end
-  if ch:aff_flagged(AF.SANCTUARY) and not ch:know_skill("aqua_barrier") then
+  if ch:condition_has("barrier") and not ch:know_skill("aqua_barrier") then
     t[#t+1] = act.render_for(viewer, "@w...$e has a @bbarrier@w around $s body!\r\n", ctx)
   end
-  if ch:aff_flagged(AF.FIRESHIELD) then
+  if ch:condition_has("fireshield") then
     t[#t+1] = act.render_for(viewer, "@w...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!\r\n", ctx)
   end
   if ch:condition_has("healing_glow") then
@@ -741,7 +749,7 @@ local function append_effects(t, ch, viewer, ctx, c)
   if ch:condition_has("ethereal_armor") then
     t[#t+1] = act.render_for(viewer, "@w...$e has ghostly @Ggreen@w ethereal armor around $s body.\r\n", ctx)
   end
-  if ch:aff_flagged(AF.SANCTUARY) and ch:know_skill("aqua_barrier") then
+  if ch:condition_has("barrier") and ch:know_skill("aqua_barrier") then
     t[#t+1] = act.render_for(viewer, "@w...$e has a @bbarrier@w of @cwater@w and @CKi@w around $s body!\r\n", ctx)
   end
   if ch:condition_has("flying") then
@@ -762,7 +770,7 @@ local function append_effects(t, ch, viewer, ctx, c)
   if ch:condition_has("kyodaika") then
     t[#t+1] = act.render_for(viewer, "@w...$e has expanded $s body size@w!\r\n", ctx)
   end
-  if ch:aff_flagged(AF.HAYASA) then
+  if ch:condition_has("hayasa") then
     t[#t+1] = act.render_for(viewer, "@w...$e has a soft @cblue@w glow around $s body!\r\n", ctx)
   end
   local feat = ch:feature_get()
@@ -786,13 +794,13 @@ local function append_npc_path1_effects(t, ch, viewer, ctx, c)
     elseif alt == 2 then t[#t+1] = act.render_for(viewer, "...$e is high in the air!\r\n", ctx)
     end
   end
-  if ch:aff_flagged(AF.SANCTUARY) and not ch:know_skill("aqua_barrier") then
+  if ch:condition_has("barrier") and not ch:know_skill("aqua_barrier") then
     t[#t+1] = act.render_for(viewer, "...$e has a barrier around $s body!\r\n", ctx)
   end
-  if ch:aff_flagged(AF.FIRESHIELD) then
+  if ch:condition_has("fireshield") then
     t[#t+1] = act.render_for(viewer, "...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!\r\n", ctx)
   end
-  if ch:aff_flagged(AF.SANCTUARY) and ch:know_skill("aqua_barrier") then
+  if ch:condition_has("barrier") and ch:know_skill("aqua_barrier") then
     t[#t+1] = act.render_for(viewer, "...$e has a @Gbarrier@w of @cwater@w and @Cki@w around $s body!\r\n", ctx)
   end
   if not ch:is_npc() and ch:player_flagged(PLR.SPIRAL) then
@@ -805,7 +813,7 @@ local function append_npc_path1_effects(t, ch, viewer, ctx, c)
   if ch:condition_has("dark_metamorphosis") then
     t[#t+1] = act.render_for(viewer, "@w...$e has a dark, @rred@w aura and menacing presence.\r\n", ctx)
   end
-  if ch:aff_flagged(AF.HAYASA) then
+  if ch:condition_has("hayasa") then
     t[#t+1] = act.render_for(viewer, "...$e has a soft @cblue@w glow around $s body!\r\n", ctx)
   end
   if ch:aff_flagged(AF.BLIND) then
@@ -1082,6 +1090,7 @@ return {
   on_event = on_event,
   act_self = act_self,
   act_around = act_around,
+  act_message = act_message,
   der_total = der_total,
   execute_command = execute_command,
   visible_commands = visible_commands,
