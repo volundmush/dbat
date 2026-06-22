@@ -100,6 +100,23 @@ function M.spawn_homing(inst)
     obj:event_schedule("script:ki_tsuihidan:tick", 1000, 1000)
 end
 
+-- Spawn vnum 83 Genocide ball driven by ki_genocide object script
+function M.spawn_genocide(inst, kidist)
+    local ch    = inst.attacker
+    local vict  = inst.target
+    local proto = db.obj_protos.by_id(83)
+    if not proto then return end
+    local obj = proto:spawn()
+    obj:to_room(vict:room_get())
+    obj:script_add("ki_genocide")
+    local s = obj:script("ki_genocide")
+    s:number_set("damage",    inst.base_damage)
+    s:number_set("target_id", vict:id_get())
+    s:number_set("user_id",   ch:id_get())
+    s:number_set("kidist",    kidist)
+    obj:event_schedule("script:ki_genocide:tick", 1000, 1000)
+end
+
 -- Spawn vnum 82 Spirit Bomb driven by ki_genkidama object script
 function M.spawn_huge_ki(inst, kidist)
     local ch    = inst.attacker

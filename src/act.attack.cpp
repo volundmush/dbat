@@ -57,39 +57,7 @@
 
 
 ACMD(do_energize) {
-
-  if (IS_NPC(ch))
-    return;
-
-  if (GET_PREFERENCE(ch) != PREFERENCE_THROWING) {
-    send_to_char(ch, "You aren't dedicated to throwing!\r\n");
-    return;
-  }
-
-  if (!GET_SKILL(ch, SKILL_ENERGIZE)) {
-    if (GET_SKILL(ch, SKILL_FOCUS) >= 30) {
-      int result = rand_number(10, 14);
-      SET_SKILL(ch, SKILL_ENERGIZE, result);
-      send_to_char(ch, "You learn the basics for energizing thrown weapons! "
-                       "Now use the energize command again.\r\n");
-      return;
-    } else {
-      send_to_char(ch, "You need a Focus skill level of 30 to figure out the "
-                       "basics of this technique.\r\n");
-      return;
-    }
-  } else {
-    if (PRF_FLAGGED(ch, PRF_ENERGIZE)) {
-      send_to_char(ch, "You stop focusing ki into your fingertips.\r\n");
-      REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ENERGIZE);
-      return;
-    } else {
-      send_to_char(
-          ch, "You start focusing your latent ki into your fingertips.\r\n");
-      SET_BIT_AR(PRF_FLAGS(ch), PRF_ENERGIZE);
-      return;
-    }
-  }
+  return;
 }
 
 ACMD(do_breath) {
@@ -1184,7 +1152,7 @@ ACMD(do_throw) {
       } else if (perc - (perc2 / 10) > prob) {
         miss = FALSE;
       }
-      if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ENERGIZE) &&
+      if (!IS_NPC(ch) && char_condition_has(ch, "energize") &&
           (getCurKI(ch)) >= GET_MAX_MANA(ch) * 0.02) {
         damage += (damage * (0.0016 * GET_SKILL(ch, SKILL_ENERGIZE)));
         act("You charge $p with the energy in your fingertips! As it begins to "
@@ -1479,155 +1447,7 @@ ACMD(do_throw) {
 }
 
 ACMD(do_selfd) {
-
-  struct char_data *tch = NULL, *next_v = NULL;
-  int64_t dmg = 0;
-
-  if (IS_NPC(ch))
-    return;
-
-  if (IN_ARENA(ch)) {
-    send_to_char(ch, "You can not use self destruct in the arena.\r\n");
-    return;
-  }
-
-  if (AFF_FLAGGED(ch, AFF_SPIRIT)) {
-    send_to_char(ch, "You are already dead!\r\n");
-    return;
-  }
-
-  if (GET_LEVEL(ch) < 9) {
-    send_to_char(
-        ch,
-        "You can't self destruct while protected by the newbie shield!\r\n");
-    return;
-  }
-
-  /*Andros Start*/
-  if (!GET_SDCOOLDOWN(ch) <= 0) {
-    send_to_char(
-        ch, "Your body is still recovering from the last self destruct!\r\n");
-    return;
-  } /*Andros End*/
-
-  if (!GET_SKILL(ch, SKILL_SELFD)) {
-    int num = rand_number(10, 20);
-    SET_SKILL(ch, SKILL_SELFD, num);
-  }
-
-  if (!PLR_FLAGGED(ch, PLR_SELFD)) {
-    act("@RYour body starts to glow @wwhite@R and flash. The flashes start out "
-        "slowly but steadilly increase in speed. Your aura begins to burn "
-        "around your body at the same time in a violent fashion!@n",
-        TRUE, ch, 0, 0, TO_CHAR);
-    act("@R$n's body starts to glow @wwhite@R and flash. The flashes start out "
-        "slowly but steadilly increase in speed. $n's aura begins to burn "
-        "around $s body at the same time in a violent fashion!@n",
-        TRUE, ch, 0, 0, TO_ROOM);
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_SELFD);
-    return;
-  } else if (!PLR_FLAGGED(ch, PLR_SELFD2)) {
-    act("@wYour body slowly stops flashing. Steam rises from your skin as you "
-        "slowly let off the energy you built up in a safe manner.@n",
-        TRUE, ch, 0, 0, TO_CHAR);
-    act("@w$n's body slowly stops flashing. Steam rises from $s skin as $e "
-        "slowly lets off the energy $e built up in a safe manner.@n",
-        TRUE, ch, 0, 0, TO_ROOM);
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD);
-    return;
-  } else if (GRAPPLING(ch) != NULL && !can_kill(ch, GRAPPLING(ch), NULL, 3)) {
-    act("@wYour body slowly stops flashing. Steam rises from your skin as you "
-        "slowly let off the energy you built up in a safe manner.@n",
-        TRUE, ch, 0, 0, TO_CHAR);
-    act("@w$n's body slowly stops flashing. Steam rises from $s skin as $e "
-        "slowly lets off the energy $e built up in a safe manner.@n",
-        TRUE, ch, 0, 0, TO_ROOM);
-    send_to_char(ch, "You can't kill them, the immortals won't allow it!\r\n");
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD);
-    return;
-  } else if (GRAPPLING(ch) != NULL) {
-    tch = GRAPPLING(ch);
-    dmg += GET_CHARGE(ch);
-    char_charge_set(ch, 0);
-    dmg += (getBasePL(ch)) * 0.6;
-    dmg += (getBaseST(ch));
-    decCurHealthPercentFloored(ch, 1, 1);
-    char_stat_set(ch, "suppression", 0);
-    act("@RYou EXPLODE! The explosion concentrates on @r$N@R, engulfing $M in "
-        "a sphere of deadly energy!@n",
-        TRUE, ch, 0, tch, TO_CHAR);
-    act("@R$n EXPLODES! The explosion concentrates on YOU, engulfing your body "
-        "in a sphere of deadly energy!@n",
-        TRUE, ch, 0, tch, TO_VICT);
-    act("@R$n EXPLODES! The explosion concentrates on @r$N@R, engulfing $M in "
-        "a sphere of deadly energy!@n",
-        TRUE, ch, 0, tch, TO_NOTVICT);
-    hurt(0, 0, ch, tch, NULL, dmg, 1);
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD);
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD2);
-    if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
-      GET_SDCOOLDOWN(ch) = 600;
-    }
-    if ((IS_MAJIN(ch) || IS_BIO(ch)) && getCurLFPercent(ch) > 0.5) {
-      decCurLFPercentFloored(ch, 2, -1);
-      SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
-      ch->gooptime = 70;
-    } else {
-      die(ch, NULL);
-    }
-    int num = rand_number(10, 20) + GET_SKILL(ch, SKILL_SELFD);
-    if (GET_SKILL(ch, SKILL_SELFD) + num <= 100) {
-      SET_SKILL(ch, SKILL_SELFD, num);
-    } else {
-      SET_SKILL(ch, SKILL_SELFD, 100);
-    }
-    return;
-  } else {
-    dmg += GET_CHARGE(ch);
-    char_charge_set(ch, 0);
-    dmg += (getBasePL(ch)) * 0.6;
-    dmg += (getBaseST(ch));
-    dmg *= 1.5;
-    decCurHealthPercentFloored(ch, 1, 1);
-    char_stat_set(ch, "suppression", 0);
-    act("@RYou EXPLODE! The explosion expands outward burning up all "
-        "surroundings for a large distance. The explosion takes on the shape "
-        "of a large energy dome with you at its center!@n",
-        TRUE, ch, 0, 0, TO_CHAR);
-    act("@R$n EXPLODES! The explosion expands outward burning up all "
-        "surroundings for a large distance. The explosion takes on the shape "
-        "of a large energy dome with $n at its center!@n",
-        TRUE, ch, 0, 0, TO_ROOM);
-    room_people_iterate(char_room_get(ch), [&](auto tch) {
-      if (tch == ch) {
-        return true;
-      }
-      if (!can_kill(ch, tch, NULL, 3)) {
-        return true;
-      }
-      if (MOB_FLAGGED(tch, MOB_NOKILL)) {
-        return true;
-      }
-      act("@r$N@R is caught in the explosion!@n", TRUE, ch, 0, tch, TO_CHAR);
-      act("@RYou are caught in the explosion!@n", TRUE, ch, 0, tch, TO_VICT);
-      act("@r$N@R is caught in the explosion!@n", TRUE, ch, 0, tch, TO_NOTVICT);
-      hurt(0, 0, ch, tch, NULL, dmg, 1);
-      return true;
-    });
-    if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
-      GET_SDCOOLDOWN(ch) = 600;
-    }
-    die(ch, NULL);
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD);
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD2);
-    int num = rand_number(10, 20) + GET_SKILL(ch, SKILL_SELFD);
-    if (GET_SKILL(ch, SKILL_SELFD) + num <= 100) {
-      SET_SKILL(ch, SKILL_SELFD, num);
-    } else {
-      SET_SKILL(ch, SKILL_SELFD, 100);
-    }
-    return;
-  }
+  return;
 }
 
 ACMD(do_spiral) {

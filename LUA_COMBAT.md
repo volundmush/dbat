@@ -95,7 +95,7 @@ Tracks all combat-relevant attack commands and their migration status from C++ t
 | deathball | 38 | do_deathball | ✅ Done | -8 to -10 accuracy penalty |
 | spiritball | 39 | do_spiritball | ✅ Done | dodging drains defender stamina (max/200) |
 | genkidama | 40 | do_genki | ✅ Done | Spirit Bomb; gathers group ki; manifested projectile |
-| genocide | 41 | do_geno | ❌ C++ | |
+| genocide | 41 | do_geno | ✅ Done | Manifested projectile (vnum 83, ki_genocide script), kidist countdown, single-target detonation |
 | kousengan | 42 | do_kousengan | ✅ Done | blocked by mystic_melody; +15 acc; sanctuary×3 damage |
 | waterspikes | 43 | do_spike | ✅ Done | perf mechanics; ki refund; aqua barrier; head knockdown |
 | spiral | 44/45 | do_spiral | ❌ C++ | Spiral Comet (two variants) |
@@ -116,9 +116,9 @@ Tracks all combat-relevant attack commands and their migration status from C++ t
 | balefire | do_balefire | ✅ Done | random +10–20 acc; Piccolo sensei cooldown |
 | blessedhammer | do_blessedhammer | ✅ Done | +15 acc; sanctuary×3 damage |
 | combine | do_combine | ❌ C++ | |
-| energize | do_energize | ❌ C++ | |
+| energize | do_energize | ✅ Done | Condition toggle; PREFERENCE_THROWING guard; do_throw updated to char_condition_has("energize") |
 | malice | do_malice | ✅ Done | 6 random hit locations, time-of-day dmg bonus, dodge→room_dmg +20 |
-| selfdestruct | do_selfd | ❌ C++ | |
+| selfdestruct | do_selfd | ✅ Done | Condition with scheduled tick (phase 1→2 via skill roll), 3-phase command, grapple/room AOE, majin/bio survival |
 | sunder | do_sunder | ✅ Done | |
 | throw | do_throw | ❌ C++ | |
 | zen | do_zen | ✅ Done | Sword, mystic_melody block, limb severing 80%+, majin/bio regen, dodge→room_dmg +5 |

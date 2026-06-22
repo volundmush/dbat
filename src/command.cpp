@@ -160,7 +160,6 @@ const struct command_info cmd_info[] = {
     {"eavesdrop", "eaves", POS_RESTING, do_eavesdrop, 0, ADMLVL_NONE, 0},
     {"echo", "ec", POS_SLEEPING, do_echo, 0, ADMLVL_IMMORT, SCMD_ECHO},
     {"emote", "em", POS_RESTING, do_echo, 1, ADMLVL_NONE, SCMD_EMOTE},
-    {"energize", "energiz", POS_RESTING, do_energize, 1, ADMLVL_NONE, 0},
     {":", ":", POS_RESTING, do_echo, 1, ADMLVL_NONE, SCMD_EMOTE},
     {"ensnare", "ensnar", POS_FIGHTING, do_ensnare, 0, ADMLVL_NONE, 0},
     {"enter", "ent", POS_STANDING, do_enter, 0, ADMLVL_NONE, 0},
@@ -190,7 +189,6 @@ const struct command_info cmd_info[] = {
 
     {"gain", "ga", POS_RESTING, do_not_here, 0, ADMLVL_NONE, 0},
     {"game", "gam", POS_RESTING, do_show, 0, ADMLVL_IMMORT, 0},
-    {"genocide", "genocid", POS_FIGHTING, do_geno, 0, ADMLVL_NONE, 0},
     {"get", "get", POS_RESTING, do_get, 0, ADMLVL_NONE, 0},
     {"gecho", "gecho", POS_DEAD, do_gecho, 0, ADMLVL_BUILDER, 0},
     {"gedit", "gedit", POS_DEAD, do_oasis, 0, ADMLVL_BUILDER, SCMD_OASIS_GEDIT},
@@ -374,7 +372,6 @@ const struct command_info cmd_info[] = {
     {"snet", "snet", POS_RESTING, do_snet, 0, ADMLVL_NONE, 0},
     {"search", "sea", POS_STANDING, do_look, 0, ADMLVL_NONE, SCMD_SEARCH},
     {"sell", "sell", POS_STANDING, do_not_here, 0, ADMLVL_NONE, 0},
-    {"selfdestruct", "selfdest", POS_STANDING, do_selfd, 0, ADMLVL_NONE, 0},
     {"sedit", "sedit", POS_DEAD, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_SEDIT},
     {"send", "send", POS_SLEEPING, do_send, 0, ADMLVL_GOD, 0},
     {"sense", "sense", POS_RESTING, do_track, 0, ADMLVL_NONE, 0},
