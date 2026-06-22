@@ -115,7 +115,7 @@ Tracks all combat-relevant attack commands and their migration status from C++ t
 |---------|--------|--------|-------|
 | balefire | do_balefire | ✅ Done | random +10–20 acc; Piccolo sensei cooldown |
 | blessedhammer | do_blessedhammer | ✅ Done | +15 acc; sanctuary×3 damage |
-| combine | do_combine | ❌ C++ | |
+| combine | do_combine | ✅ Done | Two-phase group coordination: followers prepare with combine_ready Condition (attack_index var), leader fires inlined combine_attacks logic; 14 attacks, synergy double-bonus if all-same, burn/shock effects, twin-slash sword check, renzo Nail-only |
 | energize | do_energize | ✅ Done | Condition toggle; PREFERENCE_THROWING guard; do_throw updated to char_condition_has("energize") |
 | malice | do_malice | ✅ Done | 6 random hit locations, time-of-day dmg bonus, dodge→room_dmg +20 |
 | selfdestruct | do_selfd | ✅ Done | Condition with scheduled tick (phase 1→2 via skill roll), 3-phase command, grapple/room AOE, majin/bio survival |

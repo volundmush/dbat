@@ -43,6 +43,8 @@ The bridge works through `src/zig_api.h`, which aggregates ~65 C++ headers. `bui
 
 All headers wrap declarations in `extern "C" {}` for seamless Zig integration.
 
+There are a few `.hpp` files which do not use `extern "C" {}`; these must only ever be #include'd by `.cpp` files, never `.h` files, in order to keep the C API clean for Zig.
+
 ### Per-Entity Type Pattern
 
 Each major entity follows a four-file Zig pattern:
@@ -140,3 +142,41 @@ Game world data is in `data/world/` (zone/room definitions). Player data in `dat
 ### autorun.sh Behavior
 
 Loops `zig-out/bin/dbat`, rotates syslog (6 versions), parses log events into `log/` subdirectories. Exit code 52 from the binary signals a reboot. Control files: `.fastboot` (5s delay), `.killscript` (stop loop), `pause` (hold restarts). Loads `.env` for environment overrides.
+
+## Self Maintenance
+When new idiomatic patterns are developed/discovered, propose their addition to this `CLAUDE.md`.
+
+## Ongoing Goals
+
+### Lua Conversion
+Eventually, the codebase will have Zig/C++ (maybe just Zig!) handling just database, networking, event queue, and managing lua reload. All game logic is to be migrated into Lua where at all possible.
+
+#### Lua Conversion Guidelines
+Prefer data-oriented/data-driven and object-oriented principles when porting game logic from hardcode to Lua. Concepts loaded by Lua defs, such as Races, Senseis, Commands, and Conditions should have a rich ecosystem of hook methods called by other game systems. Bonuses, special gameplay effects, etc, should live in the thing that grants it.
+
+Many complicated systems benefit from convenience wrapper functions. For instance, the hardcoded `act()` function has been ported as `dbat.libs.act`, which exposes the full suite of functionality. But convenience wrappers for commonly used patterns like `ch:act()` and `ch:act_around()` can be very useful.
+
+Prefer `ch:send_line()` when sending text directly to characters and the `act()` substitutions aren't in use. `ch:send_line()` will accept additional arguments the same way that `string.format` does, so `ch:send_line("You have %d zenni!", ch:stat_get("money"))` is perfectly fine. It will automatically add a `\r\n` if the line doesn't already end in it. This keeps the Lua code cleaner.
+
+#### Lua Conversion of Utilities
+Where possible, prefer re-implementing/porting hardcoded C/C++ functions as pure Lua over exposing them via the API; if we are porting a function that calls subfunctions x, y, and z, and x and y are not used anywhere else, then port them to Lua too.
+
+#### Lua Conversion of Commands
+Eventually, all commands linked by the command_info table in `src/command.cpp` should be handled by Lua. These will become new files in the `lua/characters/commands/` and `lua/characters/pcommands/` directories; the difference being that a pcommand is never queued to happen later when a character's delayed by action. Good candidates for `pcommands` are those with no impact on gameplay that are visible to others and aren't representing "in-character actions within the game world". Checking your inventory, viewing your current status, speaking on a chat channel are all good examples of `pcommands`. Dropping items in the room, combat, interacting with other entities, these are almost always going to be `commands`.
+
+#### Lua Conversion of Flags and Affects
+Many buffs, debuffs, active skill use or toggled options are handled through the use of bitflags that are toggled on/off: player flags, mob flags, object flags, room flags, etc. AFF_*, PLR_*, and MOB_* are some of the biggest offenders. In many cases, these represent gameplay mechanics that should become new `lua/characters/conditions/`.
+
+When converting an AFF_* usage to a Condition, all uses of `AFF_FLAGGED(ch, AFF_FLAG)` must be replaced with `char_condition_has(ch, "condition_id")` or `is_affected(ch, AFF_FLAG)` when the new Condition emits a `legacy_affects = {dbat.consts.aff_flags.FLAG}`
+
+#### Lua Conversion of struct variables
+Related to the conversion of Affects and Commands, there are many systems, attacks, and buffs/affects which have a corresponding variable declared on `struct char_data`, `struct obj_data`, and `struct room_data`; many of these can and should become variables attached to `lua/characters/conditions/` or `lua/<type>/scripts/` instances.
+
+#### Lua Conversion of Recurring Code Calls
+A good deal of hardcoded event calls remain in the code that drive the simulation state forward by iterating numerous entities and performing the same logic on them. Most of this logic is tied to specific circumstances, such as Conditions. Always prefer moving such logic into the relevant Condition and using the Condition API's event scheduling capabilities to let individual entities manage this.
+
+### Eventual: Database?
+The game state is currently stored entirely in RAM, with some aspects dumped to disk. If the game state was stored in a database then the running process could be restructured to be significantly less obtuse. We're not presently acting on this, but where small changes put the code in a state more receptive to this transition I am happy.
+
+### Eventual: Networking overhaul?
+The networking is currently tied directly to the main loop and part of the same binary process, which is fragile and stateful and not very modular. Eventually, wish for the user-facing networking to be put at a further-out layer and likely its own process. Not currently actionable, but attempting to shift the code into a state where this transition will be easier.

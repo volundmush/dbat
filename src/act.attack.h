@@ -6,7 +6,6 @@ extern "C" {
 #endif
 
 // Commands
-ACMD(do_combine);
 ACMD(do_strike);
 ACMD(do_ram);
 ACMD(do_breath);
