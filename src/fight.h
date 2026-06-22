@@ -25,13 +25,8 @@ void group_gain(struct char_data *ch, struct char_data *victim);
 void mutant_limb_regen(struct char_data *ch);
 
 // commands
-ACMD(do_kousengan);
 ACMD(do_heal);
 ACMD(do_trip);
-ACMD(do_koteiru);
-ACMD(do_razor);
-ACMD(do_spike);
-ACMD(do_ddslash);
 ACMD(do_kakusanha);
 ACMD(do_powerup);
 ACMD(do_srepair);
@@ -47,19 +42,11 @@ ACMD(do_renzo);
 ACMD(do_tsuihidan);
 ACMD(do_kamehameha);
 ACMD(do_masenko);
-ACMD(do_hellspear);
-ACMD(do_tslash);
-ACMD(do_pslash);
 ACMD(do_spiral);
 ACMD(do_dodonpa);
 ACMD(do_hass);
 ACMD(do_zanzoken);
-ACMD(do_deathball);
-ACMD(do_kienzan);
 ACMD(do_sbc);
-ACMD(do_nova);
-ACMD(do_breaker);
-ACMD(do_seishou);
 ACMD(do_ensnare);
 ACMD(do_barrier);
 ACMD(do_attack);
@@ -72,8 +59,6 @@ ACMD(do_split);
 ACMD(do_sac);
 ACMD(do_kaioken);
 ACMD(do_escape);
-ACMD(do_balefire);
-ACMD(do_blessedhammer);
 
 #ifdef __cplusplus
 }

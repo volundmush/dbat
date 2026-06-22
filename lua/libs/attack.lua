@@ -6,13 +6,14 @@ local M = {}
 local base_divisor = { 500, 400, 300, 200, 100 }
 local lag_for_tier = { 4, 5, 6, 7, 8 }
 
-local _PLR, _MF
+local _PLR, _MF, _AFF
 local function flags()
     if not _PLR then
         _PLR = dbat.consts.player_flags
         _MF  = dbat.consts.mob_flags
+        _AFF = dbat.consts.aff_flags
     end
-    return _PLR, _MF
+    return _PLR, _MF, _AFF
 end
 
 local function is_sparring(ch)
@@ -210,6 +211,122 @@ local function build_instance(ch, def, target, opts)
         xp_credit    = 0,
         skill_credit = 0,
     }
+end
+
+local function aoe_valid_target(ch, person)
+    local _, MF, AFF = flags()
+    if person:id_get() == ch:id_get() then return false end
+    if not person:is_npc() and person:aff_flagged(AFF.SPIRIT) then return false end
+    if not person:is_npc() and (person:stat_get("level") or 0) <= 8 then return false end
+    if person:mob_flagged(MF.NOKILL) then return false end
+    return true
+end
+
+local function launch_aoe_instance(ch, def, inst)
+    local tier = def.tier or 1
+
+    -- 1. Default cost
+    if next(inst.cost) == nil then
+        inst.cost.stamina = math.floor(ch:meter_max("stamina") / (base_divisor[tier] or 500))
+        if def.consumes_charge and inst.charge_used > 0 then
+            inst.cost.ki = inst.charge_used
+        end
+    end
+
+    -- 2. on_calculate_cost
+    if def.on_calculate_cost then def.on_calculate_cost(inst) end
+
+    -- 3. Cost precondition checks
+    for slug, amount in pairs(inst.cost) do
+        if ch:meter_current(slug) < amount then
+            ch:send_line("You do not have enough %s.", slug)
+            return false
+        end
+    end
+
+    -- 4. Limbs check
+    if def.limbs_required then
+        for _, limb in ipairs(def.limbs_required) do
+            if limb == "arm" then
+                if ch:limbcond_get(1) <= 0 and ch:limbcond_get(2) <= 0 then
+                    ch:send_line("You have no available arms!")
+                    return false
+                end
+            elseif limb == "leg" then
+                if ch:limbcond_get(3) <= 0 and ch:limbcond_get(4) <= 0 then
+                    ch:send_line("You have no available legs!")
+                    return false
+                end
+            end
+        end
+    end
+
+    -- 5. on_check
+    if def.on_check then
+        local ok, reason = def.on_check(inst)
+        if ok == false then
+            if reason then ch:send_line(reason) end
+            return false
+        end
+    end
+
+    -- 6. Peaceful room check
+    local RF = dbat.consts.room_flags
+    local room = ch:room_get()
+    if room and room:flagged(RF.PEACEFUL) then
+        ch:send_line("This room just has such a peaceful, easy feeling...")
+        return false
+    end
+
+    -- 7. Count valid targets
+    local count = 0
+    if room then
+        for person in room:people() do
+            if aoe_valid_target(ch, person) then count = count + 1 end
+        end
+    end
+    if count == 0 then
+        ch:send_line("There is no one worth targeting around.")
+        return false
+    end
+
+    -- 8. Accuracy roll
+    inst.accuracy_roll    = roll_accuracy(ch, inst.skill_level)
+    inst.hit_threshold    = dbat.axion_dice(0)
+    inst.accuracy_modifier = 0
+    if def.on_modify_accuracy then def.on_modify_accuracy(inst) end
+    inst.hit = (inst.accuracy_roll + inst.accuracy_modifier >= inst.hit_threshold - 20)
+
+    -- 9. Miss or hit
+    if inst.hit then
+        if def.on_calculate_damage then
+            inst.base_damage = def.on_calculate_damage(inst)
+        else
+            inst.base_damage = base_damage(ch, def, inst)
+        end
+        inst.damage = inst.base_damage
+        if def.on_aoe then def.on_aoe(inst, count) end
+    else
+        if def.on_aoe_miss then def.on_aoe_miss(inst) end
+    end
+
+    -- 10. Cost deduction
+    for slug, amount in pairs(inst.cost) do
+        if amount > 0 then ch:meter_mod_int(slug, -amount) end
+    end
+
+    -- 11. on_after_cost
+    if def.on_after_cost then def.on_after_cost(inst) end
+
+    -- 12. Lag
+    ch:wait_set(lag_for_tier[tier] or 4)
+
+    -- 13. Skill gain
+    if inst.hit and def.skill then
+        ch:improve_skill(def.skill, 1)
+    end
+
+    return true
 end
 
 local function launch_instance(ch, def, target, inst)
@@ -428,6 +545,24 @@ function M.launch(ch, attack_id, target, opts)
         ch:send_line("Unknown attack: %s", tostring(attack_id))
         return false
     end
+    if def.is_aoe then
+        local inst = {
+            def         = def,
+            attacker    = ch,
+            target      = nil,
+            spar        = is_sparring(ch),
+            cost        = {},
+            charge_used = ch:charge_get(),
+            skill_level = (def.skill and ch:skill_get(def.skill)) or 0,
+            accuracy_roll     = 0,
+            accuracy_modifier = 0,
+            hit_threshold     = 0,
+            hit           = false,
+            base_damage   = 0,
+            damage        = 0,
+        }
+        return launch_aoe_instance(ch, def, inst)
+    end
     local inst = build_instance(ch, def, target, opts)
     return launch_instance(ch, def, target, inst)
 end
@@ -441,5 +576,6 @@ M._base_damage     = base_damage
 M._process_defense = process_defense
 M._build_instance  = build_instance
 M._launch_instance = launch_instance
+M._aoe_valid_target = aoe_valid_target
 
 return M

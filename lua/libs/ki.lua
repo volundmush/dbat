@@ -34,4 +34,18 @@ function M.can_grav(ch)
     return true
 end
 
+-- Aqua Barrier bonus: when attacker has sanctuary, a fraction of damage
+-- dealt feeds back into their barrier (from SKILL_AQUA_BARRIER interaction).
+-- Call in on_hit before the normal hit message.
+function M.aqua_barrier_boost(ch, dmg)
+    if not ch:condition_has("sanctuary") then return end
+    local sk = ch:skill_get("aqua barrier") or 0
+    local frac = sk >= 100 and 0.10 or sk >= 60 and 0.05 or sk >= 40 and 0.02 or 0
+    if frac <= 0 then return end
+    local gain   = math.floor(dmg * frac)
+    local ki_max = ch:meter_max("ki")
+    local new_val = math.min(ch:barrier_get() + gain, ki_max)
+    ch:barrier_set(new_val)
+end
+
 return M

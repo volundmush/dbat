@@ -256,6 +256,9 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "limbcond_set", luaCharacterLimbCondSet);
     addMethod(lua, "gain_tail", luaCharacterGainTail);
     addMethod(lua, "has_tail", luaCharacterHasTail);
+    addMethod(lua, "lose_tail", luaCharacterLoseTail);
+    addMethod(lua, "remove_limb", luaCharacterRemoveLimb);
+    addMethod(lua, "wielded_weapon_type", luaCharacterWieldedWeaponType);
     addMethod(lua, "charge_get", luaCharacterChargeGet);
     addMethod(lua, "charge_set", luaCharacterChargeSet);
     addMethod(lua, "barrier_get", luaCharacterBarrierGet);
@@ -1905,6 +1908,42 @@ fn luaCharacterGainTail(lua: *Lua) i32 {
 
 fn luaCharacterHasTail(lua: *Lua) i32 {
     lua.pushBoolean(cdb.char_has_tail(checkCharacter(lua)));
+    return 1;
+}
+
+fn luaCharacterLoseTail(lua: *Lua) i32 {
+    cdb.char_lose_tail(checkCharacter(lua));
+    return 0;
+}
+
+fn luaCharacterRemoveLimb(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const n = intCastOrError(lua, c_int, integer(lua, 2), "limb index");
+    cdb.remove_limb(ch, n);
+    return 0;
+}
+
+fn luaCharacterWieldedWeaponType(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const weapon = cdb.char_equipment_get(ch, cdb.WEAR_WIELD1) orelse {
+        lua.pushNil();
+        return 1;
+    };
+    const dam_val = cdb.obj_value_get(weapon, 3); // VAL_WEAPON_DAMTYPE = 3
+    const attack_type = dam_val + cdb.TYPE_HIT;
+    const type_name: [:0]const u8 = switch (attack_type) {
+        cdb.TYPE_SLASH    => "slash",
+        cdb.TYPE_PIERCE   => "pierce",
+        cdb.TYPE_STAB     => "stab",
+        cdb.TYPE_CRUSH    => "crush",
+        cdb.TYPE_BLUDGEON => "bludgeon",
+        cdb.TYPE_BITE     => "bite",
+        cdb.TYPE_CLAW     => "claw",
+        cdb.TYPE_WHIP     => "whip",
+        cdb.TYPE_POUND    => "pound",
+        else              => "hit",
+    };
+    _ = lua.pushString(type_name);
     return 1;
 }
 

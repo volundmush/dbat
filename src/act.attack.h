@@ -6,16 +6,9 @@ extern "C" {
 #endif
 
 // Commands
-ACMD(do_spike);
 ACMD(do_selfd);
 ACMD(do_spiral);
-ACMD(do_breaker);
 ACMD(do_throw);
-ACMD(do_razor);
-ACMD(do_koteiru);
-ACMD(do_hspiral);
-ACMD(do_seishou);
-ACMD(do_nova);
 ACMD(do_malice);
 ACMD(do_zen);
 ACMD(do_sunder);

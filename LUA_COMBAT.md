@@ -73,38 +73,38 @@ Tracks all combat-relevant attack commands and their migration status from C++ t
 | galikgun | 16 | do_galikgun | ✅ Done | Ki refund mastery |
 | deathbeam | 17 | do_deathbeam | ✅ Done | base_accuracy 1.3; lifeforce drain; perf type 3 lag |
 | eraser | 18 | do_eraser | ✅ Done | Eraser Cannon; ki refund mastery |
-| twinslash | 19 | do_tslash | ❌ C++ | Deferred to batch 3: needs sword-type-check, limb severance |
+| twinslash | 19 | do_tslash | ✅ Done | Sword type check, weapon-level bonus, limb severing, tail cut |
 | psyblast | 20 | do_psyblast | ✅ Done | Psychic Blast; ki drain + shocked condition |
 | honoo | 21 | do_honoo | ✅ Done | burned condition; fire damage modifiers |
 | dualbeam | 22 | do_dualbeam | ✅ Done | 3-hit multi with recursion guard |
 | rogafufuken | 23 | do_rogafufuken | ✅ Done | stamina cost; parry counter-damage |
-| bakuhatsuha | 24 | do_baku | ❌ C++ | |
-| kienzan | 25 | do_kienzan | ❌ C++ | |
+| bakuhatsuha | 24 | do_baku | ✅ Done | AOE, count-scaled dmg, group ally filter, always knockdown |
+| kienzan | 25 | do_kienzan | ✅ Done | skill bonus 25/15/5%; instant-kill vs non-majin/bio if dmg > PL/5 |
 | tribeam | 26 | do_tribeam | ✅ Done | |
 | sbc | 27 | do_sbc | ❌ C++ | Deferred: skill not in spell_parser.cpp; dodge causes room damage |
 | finalflash | 28 | do_final | ✅ Done | |
 | crusher | 29 | do_crusher | ✅ Done | Crusher Ball; perf2=+5 acc, perf3=cost reduction |
-| ddslash | 30 | do_ddslash | ❌ C++ | Darkness Dragon Slash |
+| ddslash | 30 | do_ddslash | ✅ Done | Sword type check, skill bonus, 33% blind via darkness_dragon_slash condition |
 | pbarrage | 31 | do_pbarrage | ✅ Done | Psychic Barrage; head hit = 1.5× damage |
 | hellflash | 32 | do_hellflash | ✅ Done | perf2=+5 acc, perf3=cost reduction |
-| hellspear | 33 | do_hellspear | ❌ C++ | Hell Spear Blast |
+| hellspear | 33 | do_hellspear | ✅ Done | AOE, no group filter, 25% knockdown |
 | kakusanha | 34 | do_kakusanha | ❌ C++ | |
 | scatter | 35 | do_scatter | ✅ Done | Scatter Shot; random +10–20 acc; Piccolo sensei cooldown |
 | bigbang | 36 | do_bigbang | ✅ Done | |
-| phoenix | 37 | do_pslash | ❌ C++ | Phoenix Slash |
-| deathball | 38 | do_deathball | ❌ C++ | |
-| spiritball | 39 | do_spiritball | ❌ C++ | |
-| genkidama | 40 | do_genki | 🔄 Partial | Attack def exists; ki/ command + C++ stub needed |
+| phoenix | 37 | do_pslash | ✅ Done | Sword type check, fire element, burned condition on hit |
+| deathball | 38 | do_deathball | ✅ Done | -8 to -10 accuracy penalty |
+| spiritball | 39 | do_spiritball | ✅ Done | dodging drains defender stamina (max/200) |
+| genkidama | 40 | do_genki | ✅ Done | Spirit Bomb; gathers group ki; manifested projectile |
 | genocide | 41 | do_geno | ❌ C++ | |
-| kousengan | 42 | do_kousengan | ❌ C++ | |
-| waterspikes | 43 | do_spike | ❌ C++ | |
+| kousengan | 42 | do_kousengan | ✅ Done | blocked by mystic_melody; +15 acc; sanctuary×3 damage |
+| waterspikes | 43 | do_spike | ✅ Done | perf mechanics; ki refund; aqua barrier; head knockdown |
 | spiral | 44/45 | do_spiral | ❌ C++ | Spiral Comet (two variants) |
-| starbreaker | 46 | do_breaker | ❌ C++ | |
-| waterrazor | 47 | do_razor | ❌ C++ | |
-| koteiru | 48 | do_koteiru | ❌ C++ | Koteiru Bakuha |
-| hspiral | 49 | do_hspiral | ❌ C++ | Hell Spiral |
-| seishou | 50 | do_seishou | ❌ C++ | Seishou Enko |
-| starnova | 53 | do_nova | ❌ C++ | |
+| starbreaker | 46 | do_breaker | ✅ Done | EXP theft on hit scaled by level diff |
+| waterrazor | 47 | do_razor | ✅ Done | no arm; android blocked; on_hit drain ki+stamina; aqua barrier |
+| koteiru | 48 | do_koteiru | ✅ Done | aqua barrier; 25% freeze on hit vs non-demon |
+| hspiral | 49 | do_hspiral | ✅ Done | |
+| seishou | 50 | do_seishou | ✅ Done | no arm; mystic_melody blocked; molt_level ≥150 doubles dmg |
+| starnova | 53 | do_nova | ✅ Done | AOE, time-of-day dmg bonus, group ally filter, 3 perf types |
 | lightgrenade | 57 | do_lightgrenade | ❌ C++ | |
 
 ---
@@ -113,8 +113,8 @@ Tracks all combat-relevant attack commands and their migration status from C++ t
 
 | command | C++ fn | Status | Notes |
 |---------|--------|--------|-------|
-| balefire | do_balefire | ❌ C++ | |
-| blessedhammer | do_blessedhammer | ❌ C++ | |
+| balefire | do_balefire | ✅ Done | random +10–20 acc; Piccolo sensei cooldown |
+| blessedhammer | do_blessedhammer | ✅ Done | +15 acc; sanctuary×3 damage |
 | combine | do_combine | ❌ C++ | |
 | energize | do_energize | ❌ C++ | |
 | malice | do_malice | ❌ C++ | |
