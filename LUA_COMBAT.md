@@ -80,17 +80,17 @@ Tracks all combat-relevant attack commands and their migration status from C++ t
 | rogafufuken | 23 | do_rogafufuken | ✅ Done | stamina cost; parry counter-damage |
 | bakuhatsuha | 24 | do_baku | ❌ C++ | |
 | kienzan | 25 | do_kienzan | ❌ C++ | |
-| tribeam | 26 | do_tribeam | ❌ C++ | |
-| sbc | 27 | do_sbc | ❌ C++ | Special Beam Cannon |
-| finalflash | 28 | do_final | ❌ C++ | |
-| crusher | 29 | do_crusher | ❌ C++ | Crusher Ball |
+| tribeam | 26 | do_tribeam | ✅ Done | |
+| sbc | 27 | do_sbc | ❌ C++ | Deferred: skill not in spell_parser.cpp; dodge causes room damage |
+| finalflash | 28 | do_final | ✅ Done | |
+| crusher | 29 | do_crusher | ✅ Done | Crusher Ball; perf2=+5 acc, perf3=cost reduction |
 | ddslash | 30 | do_ddslash | ❌ C++ | Darkness Dragon Slash |
-| pbarrage | 31 | do_pbarrage | ❌ C++ | Psychic Barrage |
-| hellflash | 32 | do_hellflash | ❌ C++ | |
+| pbarrage | 31 | do_pbarrage | ✅ Done | Psychic Barrage; head hit = 1.5× damage |
+| hellflash | 32 | do_hellflash | ✅ Done | perf2=+5 acc, perf3=cost reduction |
 | hellspear | 33 | do_hellspear | ❌ C++ | Hell Spear Blast |
 | kakusanha | 34 | do_kakusanha | ❌ C++ | |
-| scatter | 35 | do_scatter | ❌ C++ | Scatter Shot |
-| bigbang | 36 | do_bigbang | ❌ C++ | |
+| scatter | 35 | do_scatter | ✅ Done | Scatter Shot; random +10–20 acc; Piccolo sensei cooldown |
+| bigbang | 36 | do_bigbang | ✅ Done | |
 | phoenix | 37 | do_pslash | ❌ C++ | Phoenix Slash |
 | deathball | 38 | do_deathball | ❌ C++ | |
 | spiritball | 39 | do_spiritball | ❌ C++ | |

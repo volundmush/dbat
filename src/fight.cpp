@@ -467,28 +467,28 @@ static void mob_attack(struct char_data *ch, char *buf) {
             else do_barrier(ch, "25", 0, 0);
             break;
           case CLASS_KRANE:
-            if (special >= 100) do_tribeam(ch, buf, 0, 0);
+            if (special >= 100) char_cmd_execute(ch, "tribeam", buf);
             else if (special >= 80) do_hass(ch, NULL, 0, 0);
             else if (special >= 70) char_cmd_execute(ch, "dodonpa", buf);
             else if (special >= 50) do_barrier(ch, "40", 0, 0);
             else do_barrier(ch, "25", 0, 0);
             break;
           case CLASS_PICCOLO:
-            if (special >= 100) do_scatter(ch, buf, 0, 0);
+            if (special >= 100) char_cmd_execute(ch, "scatter", buf);
             else if (special >= 80) do_sbc(ch, buf, 0, 0);
             else if (special >= 70) char_cmd_execute(ch, "masenko", buf);
             else if (special >= 50) do_barrier(ch, "40", 0, 0);
             else do_barrier(ch, "25", 0, 0);
             break;
           case CLASS_BARDOCK:
-            if (special >= 100) do_final(ch, buf, 0, 0);
-            else if (special >= 80) do_bigbang(ch, buf, 0, 0);
+            if (special >= 100) char_cmd_execute(ch, "finalflash", buf);
+            else if (special >= 80) char_cmd_execute(ch, "bigbang", buf);
             else if (special >= 70) char_cmd_execute(ch, "galikgun", buf);
             else if (special >= 50) do_barrier(ch, "40", 0, 0);
             else do_barrier(ch, "25", 0, 0);
             break;
           case CLASS_ANDSIX:
-            if (special >= 100) do_hellflash(ch, buf, 0, 0);
+            if (special >= 100) char_cmd_execute(ch, "hellflash", buf);
             else if (special >= 80) do_kousengan(ch, buf, 0, 0);
             else if (special >= 70) char_cmd_execute(ch, "dualbeam", buf);
             else if (special >= 50) do_barrier(ch, "40", 0, 0);
@@ -526,7 +526,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
             else do_zanzoken(ch, "40", 0, 0);
             break;
           case CLASS_KABITO:
-            if (special >= 100) do_pbarrage(ch, buf, 0, 0);
+            if (special >= 100) char_cmd_execute(ch, "barrage", buf);
             else if (special >= 80) char_cmd_execute(ch, "psychic", buf);
             else if (special >= 70) do_heal(ch, buf, 0, 0);
             else do_zanzoken(ch, "40", 0, 0);
@@ -539,7 +539,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
             break;
           case CLASS_GINYU:
             if (special >= 100) do_spiral(ch, buf, 0, 0);
-            else if (special >= 80) do_crusher(ch, buf, 0, 0);
+            else if (special >= 80) char_cmd_execute(ch, "crusher", buf);
             else if (special >= 70) char_cmd_execute(ch, "eraser", buf);
             else do_zanzoken(ch, "40", 0, 0);
             break;

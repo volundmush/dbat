@@ -266,8 +266,10 @@ local function launch_instance(ch, def, target, inst)
     end
 
     -- 8. Accuracy phase
-    inst.accuracy_roll = roll_accuracy(ch, inst.skill_level)
-    inst.hit_threshold = dbat.axion_dice(0)
+    inst.accuracy_roll     = roll_accuracy(ch, inst.skill_level)
+    inst.hit_threshold     = dbat.axion_dice(0)
+    inst.accuracy_modifier = 0
+    if def.on_modify_accuracy then def.on_modify_accuracy(inst) end
     if inst.target_is_object then
         inst.speed_modifier = 0
         inst.defense_total  = 0
@@ -276,7 +278,7 @@ local function launch_instance(ch, def, target, inst)
         inst.speed_modifier = speed_modifier(ch, target)
         inst.defense_total  = defense_total(target)
         local avo              = math.floor(inst.defense_total / 4)
-        local effective        = inst.accuracy_roll - avo + inst.speed_modifier
+        local effective        = inst.accuracy_roll - avo + inst.speed_modifier + inst.accuracy_modifier
         inst.effective_accuracy = effective
         inst.hit               = (effective >= inst.hit_threshold - 20)
     end
