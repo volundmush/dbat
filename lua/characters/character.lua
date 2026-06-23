@@ -618,32 +618,39 @@ local function check_attack_defense(ch, instance)
     end
 end
 
--- General-purpose combat damage: routes through spar protection and future death hooks.
+-- General-purpose damage entry point.
 -- dmg_table: { powerlevel = N, ki = M, ..., spar = bool }
--- source: attacking Character|nil (for spar detection and future kill credit)
+-- Powerlevel damage routes through the damage pipeline (lua/libs/damage.lua).
+-- Other meter entries (ki drain, stamina drain, etc.) are applied directly.
+-- Callers that need element-specific pipeline hooks should use damage.inflict() directly.
 local function damage(ch, dmg_table, source)
-    local spar = dmg_table.spar
+    local spar = dmg_table.spar or false
+
+    -- Non-powerlevel entries (ki drain, stamina drain, etc.) bypass the pipeline.
     for meter, amount in pairs(dmg_table) do
-        if meter ~= "spar" and type(amount) == "number" and amount > 0 then
-            local dmg = amount
-            ch:meter_mod_int(meter, -dmg)
+        if meter ~= "spar" and meter ~= "powerlevel" and type(amount) == "number" and amount > 0 then
+            ch:meter_mod_int(meter, -amount)
         end
     end
-    local remaining = ch:meter_current("powerlevel")
-    if remaining <= 0 then
-      if spar then
-        ch:send_line("You are too exhausted to continue sparring!")
-        ch:meter_set_int("powerlevel", 1)
-      else
-        ch:die(source)
-      end
+
+    local pl_dmg = dmg_table.powerlevel
+    if pl_dmg and type(pl_dmg) == "number" and pl_dmg > 0 then
+        require("lua.libs.damage").inflict({
+            source            = source,
+            target            = ch,
+            damage            = pl_dmg,
+            damage_by_element = {},
+            spar              = spar,
+            hooks_applied     = true,
+        })
     end
 end
 
--- Called after on_hit; applies damage_to meters and fires victim-side condition hooks.
+-- Called after on_hit; applies damage_to meters, handles death, fires victim-side hooks.
 local function on_attacked(ch, instance)
+    -- Non-powerlevel damage_to entries (ki drain, etc.) applied directly with spar clamp.
     for meter, amount in pairs(instance.damage_to) do
-        if amount > 0 then
+        if meter ~= "powerlevel" and amount > 0 then
             local dmg = amount
             if instance.spar then
                 local cur = ch:meter_current(meter)
@@ -652,10 +659,21 @@ local function on_attacked(ch, instance)
             ch:meter_mod_int(meter, -dmg)
         end
     end
-    for _, cond_id in ipairs(ch:conditions()) do
-        local def = dbat.get("conditions", cond_id)
-        if def and def.on_attacked then
-            def.on_attacked(ch, ch:condition(cond_id), instance)
+
+    -- Powerlevel routes through the damage pipeline.
+    -- Offense/defense hooks already ran in the attack pipeline, so hooks_applied = true.
+    if (instance.damage_to.powerlevel or 0) > 0 then
+        instance.hooks_applied = true
+        require("lua.libs.damage").inflict(instance)
+    end
+
+    -- Condition hooks only for survivors (on_kill hooks fire inside damage.inflict).
+    if not instance.killed then
+        for _, cond_id in ipairs(ch:conditions()) do
+            local def = dbat.get("conditions", cond_id)
+            if def and def.on_attacked then
+                def.on_attacked(ch, ch:condition(cond_id), instance)
+            end
         end
     end
     if instance.xp_credit > 0 then

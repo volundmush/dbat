@@ -448,7 +448,6 @@ static void ev_check_idle_menu(int, int64_t, int64_t) { check_idle_menu(); }
 static void ev_fight_stack(int, int64_t, int64_t) { fight_stack(); }
 
 static void ev_homing_huge_broken(int, int64_t, int64_t) {
-  if (rand_number(1, 2) == 2) homing_update();
   huge_update();
   broken_update();
 }

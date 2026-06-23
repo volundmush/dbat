@@ -12,6 +12,11 @@ return {
         cond:cancel_event("tick")
         ch:stat_set("rage_meter", 0)
     end,
+    on_check_attack_defense = function(ch, cond, ctx)
+        if ctx.absorbed or ctx.damage <= 0 then return end
+        ctx.damage = math.floor(ctx.damage * 0.9)
+    end,
+
     on_event = function(ch, cond, event)
         if event ~= "tick" then return end
         ch:stat_mod("rage_meter", 1)

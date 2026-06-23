@@ -124,44 +124,7 @@ bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict,
   return true;
 }
 
-void tech_handle_fireshield(char_data *ch, char_data *vict, const char *part) {
 
-  const char *msg = part ? part : "body";
-  if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) &&
-      AFF_FLAGGED(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) &&
-      !IS_DEMON(ch)) {
-    char buf[MAX_INPUT_LENGTH];
-    snprintf(buf, sizeof(buf), "@c$N's@W fireshield burns your %s!@n", msg);
-    act(buf, TRUE, ch, nullptr, vict, TO_CHAR);
-    buf[0] = '\0';
-    snprintf(buf, sizeof(buf), "@C$n's@W %s is burned by your fireshield!@n",
-             msg);
-    act(buf, TRUE, ch, nullptr, vict, TO_VICT);
-    buf[0] = '\0';
-    snprintf(buf, sizeof(buf),
-             "@c$n's@W %s is burned by @C$N's@W fireshield!@n", msg);
-    act(buf, TRUE, ch, nullptr, vict, TO_NOTVICT);
-    buf[0] = '\0';
-    int64_t dmg = GET_MAX_MANA(vict) * 0.02;
-    LASTATK(vict) += 1000;
-    hurt(0, 0, vict, ch, nullptr, dmg, 0);
-    if (GET_BONUS(ch, BONUS_FIREPRONE)) {
-      send_to_char(
-          ch,
-          "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-      send_to_char(vict, "@RThey are easily burned!@n\r\n");
-      char_condition_add(ch, "burned", "attack", "fiery");
-    } else if (GET_CON(ch) < axion_dice(0)) {
-      send_to_char(ch, "@RYou are badly burned!@n\r\n");
-      send_to_char(vict, "@RThey are burned!@n\r\n");
-      char_condition_add(ch, "burned", "attack", "fiery");
-    }
-  } else if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) &&
-             AFF_FLAGGED(vict, AFF_FIRESHIELD) &&
-             (GET_BONUS(ch, BONUS_FIREPROOF) || IS_DEMON(ch))) {
-    send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
-  }
-}
 
 bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
   if (IS_ANDROID(vict) && HAS_ARMS(vict) &&

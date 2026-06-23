@@ -60,7 +60,7 @@ ACMD(do_plant);
 ACMD(do_kaioken);
 ACMD(do_focus);
 ACMD(do_regenerate);
-ACMD(do_escape);
+/* do_escape → lua/characters/commands/misc/escape.lua */
 ACMD(do_absorb);
 ACMD(do_ingest);
 ACMD(do_upgrade);

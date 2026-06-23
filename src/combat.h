@@ -6,7 +6,6 @@ extern "C" {
 #endif
 
 /* combat.c functions */
-void homing_update(void);
 void damage_weapon(struct char_data *ch, struct obj_data *obj,
                    struct char_data *vict);
 int64_t advanced_energy(struct char_data *ch, int64_t dmg);
@@ -14,13 +13,9 @@ int roll_accuracy(struct char_data *ch, int skill, bool kiatt);
 void handle_death_msg(struct char_data *ch, struct char_data *vict, int type);
 int handle_combo(struct char_data *ch, struct char_data *vict);
 int handle_parry(struct char_data *ch);
-void handle_spiral(struct char_data *ch, struct char_data *vict, int skill,
-                   int first);
+
 void handle_cooldown(struct char_data *ch, int cooldown);
-void parry_ki(double attperc, struct char_data *ch, struct char_data *vict,
-              char sname[1000], int prob, int perc, int skill, int type);
-void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
-              int skill, int skill2);
+
 void damage_eq(struct char_data *vict, int location);
 void remove_limb(struct char_data *vict, int num);
 
@@ -48,8 +43,7 @@ void sword_chop(struct char_data *ch, struct char_data *vict, int wlvl, int loc,
                 int type);
 void armor_pierce(struct char_data *ch, struct char_data *vict, int wlvl,
                   int type);
-int backstab(struct char_data *ch, struct char_data *vict, int wlvl,
-             int64_t dmg);
+
 int64_t gun_dam(struct char_data *ch, int wlvl);
 int physical_mastery(struct char_data *ch);
 int count_physical(struct char_data *ch);
@@ -65,7 +59,6 @@ void handle_knockdown(struct char_data *ch);
 int roll_balance(struct char_data *ch);
 int64_t combo_damage(struct char_data *ch, int64_t damage, int type);
 int check_ruby(struct char_data *ch);
-void combine_attacks(struct char_data *ch, struct char_data *vict);
 void handle_disarm(struct char_data *ch, struct char_data *vict);
 int handle_defender(struct char_data *vict, struct char_data *ch);
 int64_t armor_calc(struct char_data *ch, int64_t dmg, int type);

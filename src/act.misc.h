@@ -42,7 +42,7 @@ ACMD(do_scry);
 /* do_fish moved to lua/characters/commands/misc/fish.lua */
 /* do_defend moved to lua/characters/commands/misc/defend.lua */
 /* do_lifeforce moved to lua/characters/pcommands/info/lifeforce.lua */
-ACMD(do_liquefy);
+/* do_liquefy → lua/characters/commands/misc/liquefy.lua */
 /* do_shell moved to lua/characters/commands/misc/shell.lua */
 ACMD(do_moondust);
 /* do_preference moved to lua/characters/commands/misc/preference.lua */

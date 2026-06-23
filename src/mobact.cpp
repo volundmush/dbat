@@ -188,10 +188,7 @@ void char_game_deactivate(struct char_data *ch) {
 void obj_game_activate(struct obj_data *obj) {
   if (GET_OBJ_VNUM(obj) == 82 || GET_OBJ_VNUM(obj) == 83) {
     obj_subscribe_add(obj, "obj_huge_attack");
-    obj_subscribe_add(obj, "obj_huge_ki");
   }
-  if (GET_OBJ_VNUM(obj) == 80 || GET_OBJ_VNUM(obj) == 81 || GET_OBJ_VNUM(obj) == 84)
-    obj_subscribe_add(obj, "obj_homing");
   if (GET_OBJ_VNUM(obj) == 11 || GET_OBJ_VNUM(obj) == 3034)
     obj_subscribe_add(obj, "obj_broken");
   if (GET_OBJ_TYPE(obj) == ITEM_PLANT)
@@ -411,7 +408,7 @@ static void mob_runtime_update() {
   char_for_each("mob_active", [](struct char_data *ch) {
     if (!zone_player_count_get(char_zone_vnum_get(ch))) return;
     if (ABSORBBY(ch) && rand_number(1, 3) == 3)
-      do_escape(ch, 0, 0, 0);
+      char_cmd_execute(ch, "escape", NULL);
     if (GET_POS(ch) == POS_SLEEPING && rand_number(1, 3) == 3)
       char_cmd_execute(ch, "wake", NULL);
   });

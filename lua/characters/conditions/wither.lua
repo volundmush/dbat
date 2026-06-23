@@ -13,6 +13,11 @@ return {
     tags       = { "wither", "healthy_clear" },
     persistent = true,
     modifiers  = modifiers,
+
+    on_check_attack_defense = function(ch, cond, ctx)
+        if ctx.absorbed or ctx.damage <= 0 then return end
+        ctx.damage = math.floor(ctx.damage * 1.2)
+    end,
     status_line = function(ch, cond) return "You've been withered! You feel so weak..." end,
     on_apply = function(ch, cond)
         cond:schedule_expire(800)

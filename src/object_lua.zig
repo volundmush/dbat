@@ -168,6 +168,7 @@ fn registerObjectMetatable(lua: *Lua) void {
     addMethod(lua, "event_remaining_ms", luaObjectEventRemainingMs);
     addMethod(lua, "kicharge_get", luaObjectKichargeGet);
     addMethod(lua, "user_get", luaObjectUserGet);
+    addMethod(lua, "target_get", luaObjectTargetGet);
     addMethod(lua, "distance_get", luaObjectDistanceGet);
     addMethod(lua, "scoutfreq_get", luaObjectScoutfreqGet);
     addMethod(lua, "room_get", luaObjectRoomGet);
@@ -911,6 +912,15 @@ fn luaObjectUserGet(lua: *Lua) i32 {
     const obj = checkObject(lua);
     if (obj.user) |user|
         characters_lua.pushCharacter(lua, cdb.char_id_get(user))
+    else
+        lua.pushNil();
+    return 1;
+}
+
+fn luaObjectTargetGet(lua: *Lua) i32 {
+    const obj = checkObject(lua);
+    if (obj.target) |target|
+        characters_lua.pushCharacter(lua, cdb.char_id_get(target))
     else
         lua.pushNil();
     return 1;

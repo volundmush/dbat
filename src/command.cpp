@@ -138,7 +138,7 @@ const struct command_info cmd_info[] = {
     {"emote", "em", POS_RESTING, do_echo, 1, ADMLVL_NONE, SCMD_EMOTE},
     {":", ":", POS_RESTING, do_echo, 1, ADMLVL_NONE, SCMD_EMOTE},
     {"ensnare", "ensnar", POS_FIGHTING, do_ensnare, 0, ADMLVL_NONE, 0},
-    {"escape", "esca", POS_RESTING, do_escape, 0, ADMLVL_NONE, 0},
+    /* escape → lua/characters/commands/misc/escape.lua */
     {"exchange", "exchan", POS_RESTING, do_rptrans, 0, ADMLVL_NONE, 0},
     {"exits", "ex", POS_RESTING, do_exits, 0, ADMLVL_NONE, 0},
     {"examine", "exa", POS_SITTING, do_examine, 0, ADMLVL_NONE, 0},
@@ -220,7 +220,7 @@ const struct command_info cmd_info[] = {
     {"learn", "lear", POS_RESTING, do_not_here, 0, ADMLVL_NONE, 0},
     {"list", "lis", POS_STANDING, do_not_here, 0, ADMLVL_NONE, 0},
     {"links", "lin", POS_DEAD, do_oasis, 0, ADMLVL_BUILDER, SCMD_OASIS_LINKS},
-    {"liquefy", "liquef", POS_SLEEPING, do_liquefy, 0, ADMLVL_NONE, 0},
+    /* liquefy → lua/characters/commands/misc/liquefy.lua */
     {"lkeep", "lkee", POS_DEAD, do_gen_tog, 0, ADMLVL_NONE, SCMD_LKEEP},
     {"lock", "loc", POS_SITTING, do_gen_door, 0, ADMLVL_NONE, SCMD_LOCK},
     {"lockout", "lock", POS_STANDING, do_hell, 0, ADMLVL_IMMORT, 0},

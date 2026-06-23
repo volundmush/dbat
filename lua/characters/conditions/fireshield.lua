@@ -1,8 +1,41 @@
+local act = dbat.lib.act
+
 local function on_tick(ch, cond)
     if ch:is_fighting() then return end
     if math.random(1, 101) > ch:skill_get("fireshield") then
         ch:condition_remove("fireshield", "expired")
     end
+end
+
+local function on_check_attack_defense(ch, cond, ctx)
+    if ctx.absorbed or ctx.damage <= 0 then return end
+    if math.random(1, 200) >= ch:skill_get("fireshield") then return end
+
+    local attacker = ctx.attacker or ctx.source
+    if attacker then
+        act.message({
+            actor  = "@c$N's@C fireshield repels the damage!@n",
+            target = "@CYour fireshield repels the damage!@n",
+            room   = "@c$N's@C fireshield repels the damage!@n",
+        }, { actor = attacker, target = ch })
+    else
+        ch:send_line("@CYour fireshield repels the damage!@n")
+    end
+
+    if math.random(1, 3) == 3 then
+        if attacker then
+            act.message({
+                actor  = "@c$N's@C fireshield disappears...@n",
+                target = "@CYour fireshield disappears...@n",
+                room   = "@c$N's@C fireshield disappears...@n",
+            }, { actor = attacker, target = ch })
+        else
+            ch:send_line("@CYour fireshield disappears...@n")
+        end
+        ch:condition_remove("fireshield", "blocked")
+    end
+
+    ctx.absorbed = true
 end
 
 return {
@@ -11,6 +44,7 @@ return {
     tags       = { "fireshield" },
     persistent = false,
     legacy_affects = { dbat.consts.aff_flags.FIRESHIELD },
+    on_check_attack_defense = on_check_attack_defense,
     on_apply = function(ch, cond)
         cond:schedule_event("tick", 100000, 100000)
     end,
