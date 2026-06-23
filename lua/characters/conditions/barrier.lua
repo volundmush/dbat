@@ -36,6 +36,7 @@ local function on_tick(ch, cond)
         ch:send_line("@cYour barrier loses some energy.")
         ch:send_line(string.format("@D[@C%s@D]", text.add_commas(loss)))
         ch:act_around("@c$n@c's barrier sends some sparks into the air as it seems to get a bit weaker.")
+        ch:improve_skill("barrier", 0)
     end
 
     if recharge > 0 and ch:meter_current("ki") < ch:meter_max("ki") then

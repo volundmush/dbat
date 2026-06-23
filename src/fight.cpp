@@ -9,7 +9,6 @@
  ************************************************************************ */
 
 #include "fight.h"
-#include "act.attack.h"
 #include "act.informative.h"
 #include "act.misc.h"
 #include "act.movement.h"
@@ -84,7 +83,7 @@ static void change_alignment(struct char_data *ch, struct char_data *victim);
 static void final_combat_resolve(struct char_data *ch);
 static void shadow_dragons_live(void);
 static void cleanup_arena_watch(struct char_data *ch);
-static void mob_attack(struct char_data *ch, char *buf);
+void mob_attack(struct char_data *ch, char *buf);
 static int pick_n_throw(struct char_data *ch, char *buf);
 
 int group_bonus(struct char_data *ch, int type) {
@@ -257,7 +256,7 @@ static int pick_n_throw(struct char_data *ch, char *buf) {
   return (FALSE);
 }
 
-static void mob_attack(struct char_data *ch, char *buf) {
+void mob_attack(struct char_data *ch, char *buf) {
   int power = rand_number(1, 5);
   int bonus = GET_LEVEL(ch) * 0.1;
   int special = 0;
@@ -285,7 +284,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
   if (axion_dice(-10) > 90 && getCurHealthPercent(ch) <= .5 &&
       !MOB_FLAGGED(ch, MOB_POWERUP) && GET_MOB_VNUM(ch) != 25 &&
       !(IS_ANDROID(ch) || IS_ANIMAL(ch) || ch->chclass == CLASS_NPC_COMMONER)) {
-    do_powerup(ch, nullptr, 0, 0);
+    char_cmd_execute(ch, "powerup", "");
     return;
   }
 
@@ -344,7 +343,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
         switch (power) {
         case 1: case 2: case 3: case 4: case 5:
           if (GET_EQ(ch, WEAR_WIELD1))
-            do_attack(ch, buf, 0, 0);
+            char_cmd_execute(ch, "attack", buf);
           else if (rand_number(1, 5) == 5)
             char_cmd_execute(ch, "kick", buf);
           else if (rand_number(1, 10) == 10)
@@ -354,7 +353,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
           break;
         case 6: case 7: case 8:
           if (GET_EQ(ch, WEAR_WIELD1))
-            do_attack(ch, buf, 0, 0);
+            char_cmd_execute(ch, "attack", buf);
           else if (rand_number(1, 5) == 5)
             char_cmd_execute(ch, "punch", buf);
           else if (rand_number(1, 10) == 10)
@@ -426,19 +425,19 @@ static void mob_attack(struct char_data *ch, char *buf) {
 
       switch (power) {
       case 1: case 2: case 3: case 4:
-        if (special > 80) do_zanzoken(ch, buf, 0, 0);
+        if (special > 80) char_cmd_execute(ch, "zanzoken", "");
         fire_charged([&]{ char_cmd_execute(ch, "kiball", buf); });
         break;
       case 5: case 6: case 7: case 8:
-        if (special > 80) do_zanzoken(ch, buf, 0, 0);
+        if (special > 80) char_cmd_execute(ch, "zanzoken", "");
         fire_charged([&]{ char_cmd_execute(ch, "kiblast", buf); });
         break;
       case 9: case 10: case 11:
-        if (special > 80) do_zanzoken(ch, buf, 0, 0);
+        if (special > 80) char_cmd_execute(ch, "zanzoken", "");
         dragon_or_charged([&]{ char_cmd_execute(ch, "beam", buf); });
         break;
       case 12: case 13: case 14:
-        if (special > 80) do_zanzoken(ch, buf, 0, 0);
+        if (special > 80) char_cmd_execute(ch, "zanzoken", "");
         dragon_or_charged([&]{ char_cmd_execute(ch, "renzokou", buf); });
         break;
       case 15: case 16:
@@ -456,92 +455,92 @@ static void mob_attack(struct char_data *ch, char *buf) {
             if (special >= 100) char_cmd_execute(ch, "kakusanha", buf);
             else if (special >= 80) char_cmd_execute(ch, "kienzan", buf);
             else if (special >= 70) char_cmd_execute(ch, "kamehameha", buf);
-            else if (special >= 50) do_barrier(ch, "40", 0, 0);
-            else do_barrier(ch, "25", 0, 0);
+            else if (special >= 50) char_cmd_execute(ch, "barrier", "40");
+            else char_cmd_execute(ch, "barrier", "25");
             break;
           case CLASS_FRIEZA:
             if (special >= 100) char_cmd_execute(ch, "deathball", buf);
             else if (special >= 80) char_cmd_execute(ch, "kienzan", buf);
             else if (special >= 70) char_cmd_execute(ch, "deathbeam", buf);
-            else if (special >= 50) do_barrier(ch, "40", 0, 0);
-            else do_barrier(ch, "25", 0, 0);
+            else if (special >= 50) char_cmd_execute(ch, "barrier", "40");
+            else char_cmd_execute(ch, "barrier", "25");
             break;
           case CLASS_KRANE:
             if (special >= 100) char_cmd_execute(ch, "tribeam", buf);
             else if (special >= 80) do_hass(ch, NULL, 0, 0);
             else if (special >= 70) char_cmd_execute(ch, "dodonpa", buf);
-            else if (special >= 50) do_barrier(ch, "40", 0, 0);
-            else do_barrier(ch, "25", 0, 0);
+            else if (special >= 50) char_cmd_execute(ch, "barrier", "40");
+            else char_cmd_execute(ch, "barrier", "25");
             break;
           case CLASS_PICCOLO:
             if (special >= 100) char_cmd_execute(ch, "scatter", buf);
             else if (special >= 80) char_cmd_execute(ch, "sbc", buf);
             else if (special >= 70) char_cmd_execute(ch, "masenko", buf);
-            else if (special >= 50) do_barrier(ch, "40", 0, 0);
-            else do_barrier(ch, "25", 0, 0);
+            else if (special >= 50) char_cmd_execute(ch, "barrier", "40");
+            else char_cmd_execute(ch, "barrier", "25");
             break;
           case CLASS_BARDOCK:
             if (special >= 100) char_cmd_execute(ch, "finalflash", buf);
             else if (special >= 80) char_cmd_execute(ch, "bigbang", buf);
             else if (special >= 70) char_cmd_execute(ch, "galikgun", buf);
-            else if (special >= 50) do_barrier(ch, "40", 0, 0);
-            else do_barrier(ch, "25", 0, 0);
+            else if (special >= 50) char_cmd_execute(ch, "barrier", "40");
+            else char_cmd_execute(ch, "barrier", "25");
             break;
           case CLASS_ANDSIX:
             if (special >= 100) char_cmd_execute(ch, "hellflash", buf);
             else if (special >= 80) char_cmd_execute(ch, "kousengan", buf);
             else if (special >= 70) char_cmd_execute(ch, "dualbeam", buf);
-            else if (special >= 50) do_barrier(ch, "40", 0, 0);
-            else do_barrier(ch, "25", 0, 0);
+            else if (special >= 50) char_cmd_execute(ch, "barrier", "40");
+            else char_cmd_execute(ch, "barrier", "25");
             break;
           case CLASS_NAIL:
             if (special >= 100) do_regenerate(ch, "50", 0, 0);
-            else if (special >= 80) do_heal(ch, "self", 0, 0);
+            else if (special >= 80) char_cmd_execute(ch, "heal", "self");
             else if (special >= 70) char_cmd_execute(ch, "masenko", buf);
-            else do_zanzoken(ch, NULL, 0, 0);
+            else char_cmd_execute(ch, "zanzoken", "");
             break;
           case CLASS_KURZAK:
             if (special >= 100) do_ensnare(ch, buf, 0, 0);
             else if (special >= 80) char_cmd_execute(ch, "seishou", buf);
             else if (special >= 70) char_cmd_execute(ch, "renzokou", buf);
-            else if (special >= 50) do_barrier(ch, "40", 0, 0);
-            else do_barrier(ch, "25", 0, 0);
+            else if (special >= 50) char_cmd_execute(ch, "barrier", "40");
+            else char_cmd_execute(ch, "barrier", "25");
             break;
           case CLASS_JINTO:
             if (special >= 100) char_cmd_execute(ch, "nova", buf);
             else if (special >= 80) char_cmd_execute(ch, "starbreaker", buf);
             else if (special >= 70) do_trip(ch, buf, 0, 0);
-            else do_zanzoken(ch, "40", 0, 0);
+            else char_cmd_execute(ch, "zanzoken", "");
             break;
           case CLASS_TSUNA:
             if (special >= 100) char_cmd_execute(ch, "koteiru", buf);
             else if (special >= 80) char_cmd_execute(ch, "waterrazor", buf);
             else if (special >= 70) char_cmd_execute(ch, "waterspikes", buf);
-            else do_barrier(ch, "20", 0, 0);
+            else char_cmd_execute(ch, "barrier", "20");
             break;
           case CLASS_TAPION:
             if (special >= 100) char_cmd_execute(ch, "phoenix", buf);
             else if (special >= 80) char_cmd_execute(ch, "darkness", buf);
             else if (special >= 70) char_cmd_execute(ch, "twinslash", buf);
-            else do_zanzoken(ch, "40", 0, 0);
+            else char_cmd_execute(ch, "zanzoken", "");
             break;
           case CLASS_KABITO:
             if (special >= 100) char_cmd_execute(ch, "barrage", buf);
             else if (special >= 80) char_cmd_execute(ch, "psychic", buf);
-            else if (special >= 70) do_heal(ch, buf, 0, 0);
-            else do_zanzoken(ch, "40", 0, 0);
+            else if (special >= 70) char_cmd_execute(ch, "heal", buf);
+            else char_cmd_execute(ch, "zanzoken", "");
             break;
           case CLASS_DABURA:
             if (special >= 100) char_cmd_execute(ch, "hellspear", buf);
             else if (special >= 80) char_cmd_execute(ch, "honoo", buf);
             else if (special >= 70) do_fireshield(ch, buf, 0, 0);
-            else do_zanzoken(ch, "40", 0, 0);
+            else char_cmd_execute(ch, "zanzoken", "");
             break;
           case CLASS_GINYU:
             if (special >= 100) char_cmd_execute(ch, "spiral", buf);
             else if (special >= 80) char_cmd_execute(ch, "crusher", buf);
             else if (special >= 70) char_cmd_execute(ch, "eraser", buf);
-            else do_zanzoken(ch, "40", 0, 0);
+            else char_cmd_execute(ch, "zanzoken", "");
             break;
           }
         });
@@ -746,7 +745,7 @@ static bool tick_frozen_skip(struct char_data *ch) {
 
 static bool tick_idle_skip(struct char_data *ch) {
   return !GRAPPLING(ch) && !GRAPPLED(ch) && !FIGHTING(ch) &&
-         !PLR_FLAGGED(ch, PLR_CHARGE) && !PLR_FLAGGED(ch, PLR_POWERUP) &&
+         !PLR_FLAGGED(ch, PLR_CHARGE) && !char_condition_has(ch, "powering_up") &&
          GET_CHARGE(ch) <= 0 && !IS_TRANSFORMED(ch);
 }
 
@@ -804,90 +803,6 @@ static void tick_lifeforce_heal(struct char_data *ch) {
   send_to_char(ch, "@YYour life force has kept you strong@n!\r\n");
 }
 
-static void tick_position_advantage(struct char_data *ch) {
-  if (!AFF_FLAGGED(ch, AFF_POSITION)) {
-    if (roll_balance(ch) > axion_dice(0) && rand_number(1, 10) >= 7) {
-      if (FIGHTING(ch)) {
-        if (!AFF_FLAGGED(FIGHTING(ch), AFF_POSITION)) {
-          act("@YYou manage to move into an advantageous position!@n", TRUE,
-              ch, 0, 0, TO_CHAR);
-          act("@y$n@Y manages to move into an advantageous position!@n", TRUE,
-              ch, 0, 0, TO_ROOM);
-          SET_BIT_AR(AFF_FLAGS(ch), AFF_POSITION);
-        } else {
-          struct char_data *vict = FIGHTING(ch);
-          if (roll_balance(ch) > roll_balance(vict)) {
-            act("@YYou struggle to gain a better position than @y$N@Y and "
-                "succeed!@n",
-                TRUE, ch, 0, vict, TO_CHAR);
-            act("@y$n@Y struggles to gain a better position than you and "
-                "succeeds!@n",
-                TRUE, ch, 0, vict, TO_VICT);
-            act("@y$n@Y struggles to gain a better position than @y$N@Y and "
-                "succeeds!@n",
-                TRUE, ch, 0, vict, TO_NOTVICT);
-            REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_POSITION);
-            SET_BIT_AR(AFF_FLAGS(ch), AFF_POSITION);
-          }
-        }
-      }
-    }
-  } else {
-    if (roll_balance(ch) < axion_dice(-30) || GET_POS(ch) < POS_STANDING) {
-      act("@YYou are moved out of your position!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@y$n@Y is moved out of $s position!@n", TRUE, ch, 0, 0, TO_ROOM);
-      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_POSITION);
-    }
-  }
-}
-
-static void tick_grapple_damage(struct char_data *ch) {
-  if (GRAPPLING(ch) && GRAPTYPE(ch) == 2 && rand_number(1, 11) >= 8) {
-    if ((getCurST(GRAPPLING(ch))) >= GET_MAX_MOVE(GRAPPLING(ch)) / 8) {
-      act("@WYou choke @C$N@W!@n", TRUE, ch, 0, GRAPPLING(ch), TO_CHAR);
-      act("@C$n@W chokes YOU@W!@n", TRUE, ch, 0, GRAPPLING(ch), TO_VICT);
-      act("@C$n@W chokes @c$N@W!@n", TRUE, ch, 0, GRAPPLING(ch), TO_NOTVICT);
-      decCurST(GRAPPLING(ch), (getMaxST(GRAPPLING(ch)) / 8));
-    } else {
-      act("@WYou choke @C$N@W, and $E passes out!@n", TRUE, ch, 0,
-          GRAPPLING(ch), TO_CHAR);
-      act("@C$n@W chokes YOU@W, and you pass out!@n", TRUE, ch, 0,
-          GRAPPLING(ch), TO_VICT);
-      act("@C$n@W chokes @c$N@W, and $E passes out!@n", TRUE, ch, 0,
-          GRAPPLING(ch), TO_NOTVICT);
-      char_condition_apply(GRAPPLING(ch), "knocked_out", "combat", "choke");
-      char_position_set(GRAPPLING(ch), POS_SLEEPING);
-      {
-        struct char_data *other = GRAPPLING(ch);
-        char_grappling_set(ch, NULL, 0);
-        char_grappled_set(other, NULL, 0);
-      }
-    }
-  } else if (GRAPPLING(ch) && GRAPTYPE(ch) == 4 && rand_number(1, 12) >= 8) {
-    act("@WYou crush @C$N@W some more!@n", TRUE, ch, 0, GRAPPLING(ch),
-        TO_CHAR);
-    act("@C$n@W crushes YOU@W some more!@n", TRUE, ch, 0, GRAPPLING(ch),
-        TO_VICT);
-    act("@C$n@W crushes @c$N@W some more!@n", TRUE, ch, 0, GRAPPLING(ch),
-        TO_NOTVICT);
-    int64_t damg = GET_STR(ch) * (10 + (GET_MAX_HIT(ch) * 0.005));
-    hurt(0, 0, ch, GRAPPLING(ch), NULL, damg, 0);
-  }
-}
-
-static void tick_halfbreed_fury(struct char_data *ch) {
-  if (IS_HALFBREED(ch) && PLR_FLAGGED(ch, PLR_FURY)) {
-    GET_RMETER(ch) += 1;
-    if (GET_RMETER(ch) >= 1000) {
-      incCurHealthPercent(ch, .15);
-      incCurKIPercent(ch, .15);
-      incCurSTPercent(ch, .15);
-      send_to_char(ch, "Your fury has called forth more of your hidden power "
-                       "and you feel better!\r\n");
-    }
-  }
-}
-
 static void tick_transformation_drain(struct char_data *ch) {
   if (IS_NPC(ch) || !IS_TRANSFORMED(ch) || IS_ICER(ch) || !IS_NONPTRANS(ch))
     return;
@@ -936,50 +851,6 @@ static void tick_transformation_drain(struct char_data *ch) {
   }
 }
 
-static void tick_wimp_flee(struct char_data *ch) {
-  if (!IS_NPC(ch) && GET_WIMP_LEV(ch) && GET_HIT(ch) < GET_WIMP_LEV(ch) &&
-      GET_HIT(ch) > 0 && FIGHTING(ch)) {
-    send_to_char(ch, "You wimp out, and attempt to flee!\r\n");
-    do_flee(ch, NULL, 0, 0);
-  }
-  if (IS_NPC(ch) && GET_HIT(ch) < GET_MAX_HIT(ch) / 10 && GET_HIT(ch) > 0 &&
-      FIGHTING(ch) && !MOB_FLAGGED(ch, MOB_SENTINEL)) {
-    if (rand_number(1, 30) >= 25 && GET_POS(ch) > POS_SITTING) {
-      do_flee(ch, NULL, 0, 0);
-    }
-  }
-}
-
-static void tick_disguise_slip(struct char_data *ch) {
-  if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && FIGHTING(ch)) {
-    if (GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125)) {
-      send_to_char(
-          ch, "Your disguise comes off because of your swift movements!\r\n");
-      REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_DISGUISED);
-      act("@W$n's@W disguise comes off because of $s swift movements!@n",
-          FALSE, ch, 0, 0, TO_ROOM);
-    }
-  }
-}
-
-static void tick_mob_blind_recovery(struct char_data *ch) {
-  if (IS_NPC(ch) && AFF_FLAGGED(ch, AFF_BLIND) &&
-      rand_number(1, 200) >= 190) {
-    act("@W$n@W is no longer blind.@n", FALSE, ch, 0, 0, TO_ROOM);
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_BLIND);
-  }
-}
-
-static void tick_knocked_recovery(struct char_data *ch) {
-  if (AFF_FLAGGED(ch, AFF_KNOCKED) && rand_number(1, 200) >= 195) {
-    cureStatusKnockedOutAnnounced(ch, true);
-    if (IS_NPC(ch) && rand_number(1, 20) >= 12) {
-      act("@W$n@W stands up.@n", FALSE, ch, 0, 0, TO_ROOM);
-      char_position_set(ch, POS_STANDING);
-    }
-  }
-}
-
 static void tick_linkdead_flee(struct char_data *ch) {
   if (!IS_NPC(ch) && !(ch->desc) && GET_POS(ch) > POS_STUNNED &&
       !IS_AFFECTED(ch, AFF_FROZEN)) {
@@ -989,176 +860,7 @@ static void tick_linkdead_flee(struct char_data *ch) {
   }
 }
 
-static bool tick_mob_grapple_escape(struct char_data *ch) {
-  if (IS_NPC(ch) && GRAPPLED(ch) && !MOB_FLAGGED(ch, MOB_DUMMY) &&
-      rand_number(1, 5) >= 4) {
-    do_escape(ch, 0, 0, 0);
-    return true;
-  }
-  return false;
-}
 
-static bool tick_mob_combat_ai(struct char_data *ch) {
-  if (!FIGHTING(ch) || !IS_NPC(ch) || MOB_FLAGGED(ch, MOB_DUMMY))
-    return false;
-
-  struct char_data *vict = FIGHTING(ch);
-  bool foe_flying = char_condition_has(vict, "flying");
-  bool ch_flying  = char_condition_has(ch, "flying");
-
-  auto flee_mob = [&](const char *msg) {
-    act(msg, TRUE, ch, 0, 0, TO_ROOM);
-    char_inventory_iterate(ch, [&](auto obj) { extract_obj(obj); return true; });
-    extract_char(ch);
-  };
-
-  // Altitude matching: fly up to engage, or land if foe is grounded
-  if (foe_flying && !ch_flying && IS_HUMANOID(ch) && GET_LEVEL(ch) > 10) {
-    do_fly(ch, 0, 0, 0);
-    return true;
-  }
-  if (!foe_flying && ch_flying) {
-    do_fly(ch, 0, 0, 0);
-    return true;
-  }
-  if (foe_flying && ch_flying && GET_ALT(ch) < GET_ALT(vict)) {
-    do_fly(ch, "high", 0, 0);
-    return true;
-  }
-
-  // Non-flyers facing an airborne foe may flee rather than fight
-  if (foe_flying && !ch_flying && !IS_HUMANOID(ch) && GET_POS(ch) > POS_RESTING &&
-      rand_number(1, 30) >= 22 && !block_calc(ch)) {
-    flee_mob("$n@G flees in terror and you lose sight of $m!");
-    return true;
-  }
-  if (foe_flying && IS_HUMANOID(ch) && GET_LEVEL(ch) <= 10 &&
-      rand_number(1, 30) >= 22 && !block_calc(ch)) {
-    flee_mob("$n@G turns and runs away. You lose sight of $m!");
-    return true;
-  }
-
-  // Position recovery before attacking
-  if ((GET_POS(ch) == POS_SITTING || GET_POS(ch) == POS_RESTING) && sec_roll_check(ch) == 1) {
-    do_stand(ch, 0, 0, 0);
-    return true;
-  }
-  if (IS_AFFECTED(ch, AFF_PARA) && GET_INT(ch) + 10 < rand_number(1, 60)) {
-    act("@yYou fail to overcome your paralysis!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@Y$n @ystruggles with $s paralysis!@n", TRUE, ch, 0, 0, TO_ROOM);
-    return true;
-  }
-  if (GET_POS(ch) == POS_SLEEPING && !AFF_FLAGGED(ch, AFF_KNOCKED) && sec_roll_check(ch) == 1) {
-    do_wake(ch, 0, 0, 0);
-    do_stand(ch, 0, 0, 0);
-    return true;
-  }
-
-  // Can't attack if out of range, incapacitated, or not upright
-  if (char_room_get(ch) != char_room_get(vict) || AFF_FLAGGED(ch, AFF_KNOCKED) ||
-      GET_POS(ch) == POS_SITTING || GET_POS(ch) == POS_RESTING || GET_POS(ch) == POS_SLEEPING)
-    return true;
-
-  if (rand_number(1, 30) <= 12)
-    return true;
-
-  char buf[100];
-  sprintf(buf, "%s", GET_NAME(vict));
-  mob_attack(ch, buf);
-  return false;
-}
-
-static void tick_barrier_skill(struct char_data *ch) {
-  if (GET_BARRIER(ch) > 0) {
-    improve_skill(ch, SKILL_BARRIER, 0);
-  }
-}
-
-static void tick_player_powerup(struct char_data *ch) {
-  if (PLR_FLAGGED(ch, PLR_POWERUP) && GET_POS(ch) <= POS_RESTING) {
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
-    return;
-  }
-  if (!PLR_FLAGGED(ch, PLR_POWERUP) || rand_number(1, 3) != 3)
-    return;
-
-  bool ki_pref   = (GET_PREFERENCE(ch) == PREFERENCE_KI);
-  int64_t gmaxki = GET_MAX_MANA(ch);
-  // ki_threshold: minimum ki needed to tick; ki_cost: ki consumed per tick
-  int64_t ki_threshold = ki_pref ? (int64_t)(gmaxki * 0.0375) + 1 : gmaxki / 20;
-  int64_t ki_cost      = ki_pref ? (int64_t)(gmaxki * 0.0375)     : gmaxki / 20;
-
-  char buf3[MAX_STRING_LENGTH];
-
-  auto st_boost = [&]() {
-    incCurST(ch, (int64_t)(GET_MAX_MOVE(ch) * 0.02));
-  };
-
-  auto stop_powerup = [&](const char *reason) {
-    act(reason, TRUE, ch, 0, 0, TO_CHAR);
-    act("@R$n stops powering up in a flash of light!@n", TRUE, ch, 0, 0, TO_ROOM);
-    send_to_sense(0, "You sense someone stop powering up", ch);
-    sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-    send_to_scouter(buf3, ch, 1, 0);
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
-  };
-
-  int64_t ghit    = GET_HIT(ch);
-  int64_t gmaxhit = getMaxPL(ch);
-  int64_t gki     = getCurKI(ch);
-
-  if (ghit >= gmaxhit && gki >= ki_threshold) {
-    if (ki_pref || gki >= gmaxki * 0.5) st_boost();
-    restoreHealthAnnounced(ch, false);
-    decCurKI(ch, ki_pref ? ki_threshold : getMaxKI(ch) / 20);
-    dispel_ash(ch);
-    stop_powerup("@RYou have reached your maximum!@n");
-    return;
-  }
-
-  if (gki < ki_threshold) {
-    decCurKI(ch, ki_threshold);
-    stop_powerup("@RYou have run out of ki.@n");
-    return;
-  }
-
-  // Active tick: ghit < gmaxhit && gki >= ki_threshold
-  incCurHealthPercent(ch, .1);
-  decCurKI(ch, ki_cost);
-  if (getCurKI(ch) >= gmaxki * 0.5) st_boost();
-
-  static const struct {
-    int64_t threshold;
-    const char *self_msg;
-    const char *room_msg;
-  } tiers[] = {
-    {      50000, "@RYou continue to powerup, as wind billows out from around you!@n",                   "@R$n continues to powerup, as wind billows out from around $m!@n"                  },
-    {     500000, "@RYou continue to powerup, as the ground splits beneath you!@n",                      "@R$n continues to powerup, as the ground splits beneath $m!@n"                     },
-    {    5000000, "@RYou continue to powerup, as the ground shudders and splits beneath you!@n",         "@R$n continues to powerup, as the ground shudders and splits beneath $m!@n"         },
-    {   50000000, "@RYou continue to powerup, as a huge depression forms beneath you!@n",                "@R$n continues to powerup, as a huge depression forms beneath $m!@n"               },
-    {  100000000, "@RYou continue to powerup, as the entire area quakes around you!@n",                  "@R$n continues to powerup, as the entire area quakes around $m!@n"                 },
-    {  300000000, "@RYou continue to powerup, as huge chunks of ground are ripped apart beneath you!@n", "@R$n continues to powerup, as huge chunks of ground are ripped apart beanth $m!@n" },
-  };
-
-  gmaxhit = getMaxPL(ch);
-  const char *self_msg = "@RYou continue to powerup, as the very air around you crackles and burns!@n";
-  const char *room_msg = "@R$n continues to powerup, as the very air around $m crackles and burns!@n";
-  for (const auto &tier : tiers) {
-    if (gmaxhit < tier.threshold) {
-      self_msg = tier.self_msg;
-      room_msg = tier.room_msg;
-      break;
-    }
-  }
-  act(self_msg, TRUE, ch, 0, 0, TO_CHAR);
-  act(room_msg, TRUE, ch, 0, 0, TO_ROOM);
-
-  send_to_sense(0, "You sense someone powering up", ch);
-  send_to_worlds(ch);
-  sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Detected@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
-  send_to_scouter(buf3, ch, 1, 0);
-  dispel_ash(ch);
-}
 
 static void fight_stack_one(struct char_data *ch) {
   reset_fighting_position(ch);
@@ -1173,30 +875,14 @@ static void fight_stack_one(struct char_data *ch) {
   tick_fight_room_check(ch);
   tick_dragging_interrupt(ch);
   tick_lifeforce_heal(ch);
-  tick_position_advantage(ch);
-  tick_grapple_damage(ch);
 
   if (GRAPPLED(ch) && rand_number(1, 2) == 2)
     send_to_char(ch, "@CTry 'escape' to break free from the hold!@n\r\n");
 
-  tick_halfbreed_fury(ch);
   tick_transformation_drain(ch);
-  tick_wimp_flee(ch);
 
-  if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 6 || GET_GENOME(ch, 1) == 6) &&
-      rand_number(1, 200) >= 175)
-    mutant_limb_regen(ch);
-
-  tick_disguise_slip(ch);
-  tick_mob_blind_recovery(ch);
-  tick_knocked_recovery(ch);
   tick_linkdead_flee(ch);
 
-  if (tick_mob_grapple_escape(ch)) return;
-  if (tick_mob_combat_ai(ch)) return;
-
-  tick_barrier_skill(ch);
-  tick_player_powerup(ch);
 }
 
 void fight_stack() {

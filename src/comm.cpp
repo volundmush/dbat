@@ -619,7 +619,7 @@ static void prompt_status_flags(struct descriptor_data *d, struct char_data *ch,
           PLR_FLAGGED(ch, PLR_SELFD2) ? "READY" : "PREP");
 
   if (IS_HALFBREED(ch) && PRF_FLAGGED(ch, PRF_FURY)) {
-    if (PLR_FLAGGED(ch, PLR_FURY))
+    if (char_condition_has(ch, "halfbreed_fury"))
       PFLAG("@D[@mFury@W: @rENGAGED@D]@w");
     else
       PFLAG("@D[@mFury@W: @r%d@D]@w", GET_FURY(ch));

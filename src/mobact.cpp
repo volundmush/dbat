@@ -12,7 +12,6 @@
 
 #include "act.item.h"
 #include "act.movement.h"
-#include "act.offensive.h"
 #include "act.other.h"
 #include "act.social.h"
 #include "character_api.h"
@@ -354,22 +353,22 @@ static void mob_aggressive_update() {
         }
         if (char_condition_has(vict, "flying") && !char_condition_has(ch, "flying") &&
             IS_HUMANOID(ch) && GET_LEVEL(ch) > 10) {
-          do_fly(ch, 0, 0, 0);
+          char_cmd_execute(ch, "fly", "");
           return true;
         }
         if (!char_condition_has(vict, "flying") && char_condition_has(ch, "flying")) {
-          do_fly(ch, 0, 0, 0);
+          char_cmd_execute(ch, "fly", "");
           return true;
         }
         char_cmd_execute(ch, "punch", tar);
       } else {
         if (char_condition_has(vict, "flying") && !char_condition_has(ch, "flying") &&
             IS_HUMANOID(ch) && GET_LEVEL(ch) > 10) {
-          do_fly(ch, 0, 0, 0);
+          char_cmd_execute(ch, "fly", "");
           return true;
         }
         if (!char_condition_has(vict, "flying") && char_condition_has(ch, "flying")) {
-          do_fly(ch, 0, 0, 0);
+          char_cmd_execute(ch, "fly", "");
           return true;
         }
         if (!AFF_FLAGGED(vict, AFF_HIDE) && !AFF_FLAGGED(vict, AFF_SNEAK)) {
@@ -414,7 +413,7 @@ static void mob_runtime_update() {
     if (ABSORBBY(ch) && rand_number(1, 3) == 3)
       do_escape(ch, 0, 0, 0);
     if (GET_POS(ch) == POS_SLEEPING && rand_number(1, 3) == 3)
-      do_wake(ch, 0, 0, 0);
+      char_cmd_execute(ch, "wake", NULL);
   });
 }
 

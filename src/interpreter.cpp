@@ -491,8 +491,8 @@ int enter_player_game(struct descriptor_data *d) {
   }
   GET_COMBINE(ch) = -1;
   GET_SLEEPT(ch) = 8;
-  if (AFF_FLAGGED(ch, AFF_POSITION)) {
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_POSITION);
+  if (char_condition_has(ch, "advantageous_position")) {
+    char_condition_remove(ch, "advantageous_position", "command");
   }
   if (AFF_FLAGGED(ch, AFF_SANCTUARY)) {
     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SANCTUARY);

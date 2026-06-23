@@ -74,9 +74,9 @@
 #include "iterate.hpp"
 
 /* local functions */
-static void handle_fall(struct char_data *ch);
+void handle_fall(struct char_data *ch);
 static int check_swim(struct char_data *ch);
-static void disp_locations(struct char_data *ch);
+void disp_locations(struct char_data *ch);
 static int has_boat(struct char_data *ch);
 static int find_door(struct char_data *ch, const char *type, char *dir,
                      const char *cmdname);
@@ -86,12 +86,12 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door,
 static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof,
                    int dclock, int scmd, struct obj_data *obj);
 static int has_flight(struct char_data *ch);
-static int do_simple_enter(struct char_data *ch, struct obj_data *obj,
-                           int need_specials_check);
+int do_simple_enter(struct char_data *ch, struct obj_data *obj,
+                    int need_specials_check);
 static int perform_enter_obj(struct char_data *ch, struct obj_data *obj,
                              int need_specials_check);
-static int do_simple_leave(struct char_data *ch, struct obj_data *obj,
-                           int need_specials_check);
+int do_simple_leave(struct char_data *ch, struct obj_data *obj,
+                    int need_specials_check);
 static int perform_leave_obj(struct char_data *ch, struct obj_data *obj,
                              int need_specials_check);
 
@@ -512,7 +512,7 @@ int land_location(struct char_data *ch, char *arg) {
 }
 
 /* This shows the player what locations the planet has to land at. */
-static void disp_locations(struct char_data *ch) {
+void disp_locations(struct char_data *ch) {
   if (char_room_vnum_get(ch) == 50) { // Above Earth
     send_to_char(ch, "@D------------------[ @GEarth@D ]------------------@c\n");
     send_to_char(
@@ -588,60 +588,7 @@ static void disp_locations(struct char_data *ch) {
   }
 }
 
-ACMD(do_land) {
-
-  int above_planet = TRUE, inroom = char_room_vnum_get(ch);
-  skip_spaces(&argument);
-
-  if (inroom != 50 && inroom != 198 && inroom != 51 && inroom != 52 &&
-      inroom != 53 && inroom != 54 && inroom != 55 && inroom != 56 &&
-      inroom != 57 && inroom != 58 && inroom != 59) {
-    above_planet = FALSE;
-  }
-
-  if (!*argument) {
-    if (above_planet == TRUE) {
-      send_to_char(ch, "Land where?\n");
-      disp_locations(ch);
-      return;
-    } else {
-      send_to_char(ch,
-                   "You are not even in the lower atmosphere of a planet!\r\n");
-      return;
-    }
-  }
-
-  int landing = land_location(ch, argument);
-
-  if (landing != -1) {
-    int was_in = char_room_vnum_get(ch);
-    send_to_char(
-        ch, "You descend through the upper atmosphere, and coming down through "
-            "the clouds you land quickly on the ground below.\r\n");
-    char_from_room(ch);
-    char_to_room(ch, room_by_id(landing));
-    char *blah = sense_location(ch);
-    char sendback[MAX_INPUT_LENGTH];
-    char_from_room(ch);
-    char_to_room(ch, room_by_id(was_in));
-    sprintf(sendback,
-            "@C$n@Y flies down through the atmosphere toward @G%s@Y!@n", blah);
-    act(sendback, TRUE, ch, 0, 0, TO_ROOM);
-    char_from_room(ch);
-    char_to_room(ch, room_by_id(landing));
-    if (auto zone = char_zone_get(ch); zone) {
-      fly_zone(zone, "can be seen landing from space nearby!@n\r\n", ch);
-    }
-    send_to_sense(1, "landing on the planet", ch);
-    send_to_scouter(
-        "A powerlevel signal has been detected landing on the planet", ch, 0,
-        1);
-    act("$n comes down from high above in the sky and quickly lands on the "
-        "ground.",
-        TRUE, ch, 0, 0, TO_ROOM);
-    return;
-  }
-}
+ACMD(do_land) {}
 
 /* simple function to determine if char can walk on water */
 static int has_boat(struct char_data *ch) {
@@ -1258,336 +1205,7 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check) {
   return (0);
 }
 
-ACMD(do_move) {
-  if (IS_NPC(ch)) {
-    perform_move(ch, subcmd - 1, 0);
-    return;
-  }
-  if (PLR_FLAGGED(ch, PLR_SELFD)) {
-    send_to_char(ch, "You are preparing to blow up!\r\n");
-    return;
-  }
-  if (AFF_FLAGGED(ch, AFF_LIQUEFIED)) {
-    send_to_char(ch, "You are liquefied right now!\r\n");
-    return;
-  }
-  if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) * .51) {
-    send_to_char(ch, "You have too much ki charged. You can't concentrate on "
-                     "keeping it charged while also traveling.\r\n");
-    return;
-  } else if ((GET_CHARGE(ch) >= GET_MAX_MANA(ch) * .5 &&
-              GET_CHARGE(ch) < GET_MAX_MANA(ch) * .51) &&
-             GET_SKILL(ch, SKILL_CONCENTRATION) < 100) {
-    send_to_char(ch, "You have too much ki charged. You can't concentrate on "
-                     "keeping it charged while also traveling.\r\n");
-    return;
-  } else if ((GET_CHARGE(ch) >= GET_MAX_MANA(ch) * .4 &&
-              GET_CHARGE(ch) < GET_MAX_MANA(ch) * .5) &&
-             GET_SKILL(ch, SKILL_CONCENTRATION) < 80) {
-    send_to_char(ch, "You have too much ki charged. You can't concentrate on "
-                     "keeping it charged while also traveling.\r\n");
-    return;
-  } else if ((GET_CHARGE(ch) >= GET_MAX_MANA(ch) * .3 &&
-              GET_CHARGE(ch) < GET_MAX_MANA(ch) * .4) &&
-             GET_SKILL(ch, SKILL_CONCENTRATION) < 70) {
-    send_to_char(ch, "You have too much ki charged. You can't concentrate on "
-                     "keeping it charged while also traveling.\r\n");
-    return;
-  } else if ((GET_CHARGE(ch) >= GET_MAX_MANA(ch) * .2 &&
-              GET_CHARGE(ch) < GET_MAX_MANA(ch) * .3) &&
-             GET_SKILL(ch, SKILL_CONCENTRATION) < 60) {
-    send_to_char(ch, "You have too much ki charged. You can't concentrate on "
-                     "keeping it charged while also traveling.\r\n");
-    return;
-  }
-
-  if (char_stat_get(ch, "drunk") > 4 &&
-      (rand_number(1, 9) + char_stat_get(ch, "drunk")) >= rand_number(14, 20)) {
-    send_to_char(ch, "You wobble around and then fall on your ass.\r\n");
-    act("@C$n@W wobbles around before falling on $s ass@n.", TRUE, ch, 0, 0,
-        TO_ROOM);
-    char_position_set(ch, POS_SITTING);
-    return;
-  }
-
-  if (FIGHTING(ch) && !IS_NPC(ch)) {
-    char blah[MAX_INPUT_LENGTH];
-    sprintf(blah, "%s", dirs[subcmd - 1]);
-    do_flee(ch, blah, 0, 0);
-    return;
-  }
-
-  /*
-   * This is basically a mapping of cmd numbers to perform_move indices.
-   * It cannot be done in perform_move because perform_move is called
-   * by other functions which do not require the remapping.
-   */
-  if (PLR_FLAGGED(ch, PLR_PILOTING)) {
-    struct obj_data *vehicle = NULL, *controls = NULL;
-    int noship = FALSE;
-    if (!(controls = find_control(ch)) && GET_ADMLEVEL(ch) < 1) {
-      noship = TRUE;
-    } else if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, 0)))) {
-      noship = TRUE;
-    }
-    if (noship == TRUE) {
-      send_to_char(ch, "Your ship controls are not here or your ship was not "
-                       "found, report to Iovan!\r\n");
-      return;
-    } else if (controls != NULL && vehicle != NULL) {
-      if (GET_FUEL(controls) <= 0) {
-        send_to_char(ch, "The ship is out of fuel!\r\n");
-        return;
-      }
-      drive_in_direction(ch, vehicle, subcmd - 1);
-      if (GET_OBJ_VAL(controls, 1) == 1) {
-        WAIT_STATE(ch, PULSE_2SEC);
-      } else if (GET_OBJ_VAL(controls, 1) == 2) {
-        WAIT_STATE(ch, PULSE_1SEC);
-      }
-      controls = NULL;
-      vehicle = NULL;
-      return;
-    }
-    return;
-  }
-  if (PLR_FLAGGED(ch, PLR_HEALT)) {
-    send_to_char(ch, "You are inside a healing tank!\r\n");
-    return;
-  }
-  if (!IS_NPC(ch)) {
-    int fail = FALSE;
-    room_contents_iterate(char_room_get(ch), [&](auto obj) {
-      if (KICHARGE(obj) > 0 && USER(obj) == ch) {
-        fail = TRUE;
-      }
-      return true;
-    });
-    if (fail == TRUE) {
-      send_to_char(ch, "You are too busy controlling your attack!\r\n");
-      return;
-    }
-  }
-
-  if (!IS_NPC(ch) && GET_LIMBCOND(ch, 1) <= 0 && GET_LIMBCOND(ch, 2) <= 0 &&
-      GET_LIMBCOND(ch, 3) <= 0 && GET_LIMBCOND(ch, 4) <= 0 &&
-      !char_condition_has(ch, "flying")) {
-    send_to_char(ch, "Unless you fly, you can't get far with no limbs.\r\n");
-    return;
-  }
-  if (GRAPPLING(ch) || GRAPPLED(ch)) {
-    send_to_char(ch, "You are grappling with someone!\r\n");
-    return;
-  }
-  if (ABSORBING(ch)) {
-    send_to_char(ch, "You are busy absorbing from %s!\r\n",
-                 GET_NAME(ABSORBING(ch)));
-    return;
-  }
-  if (ABSORBBY(ch)) {
-    if (axion_dice(0) < GET_SKILL(ABSORBBY(ch), SKILL_ABSORB)) {
-      send_to_char(ch, "You are being held by %s, they are absorbing you!\r\n",
-                   GET_NAME(ABSORBBY(ch)));
-      send_to_char(ABSORBBY(ch), "%s struggles in your grasp!\r\n",
-                   GET_NAME(ch));
-      WAIT_STATE(ch, PULSE_2SEC);
-      return;
-    } else {
-      act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE,
-          ABSORBBY(ch), 0, ch, TO_NOTVICT);
-      act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch),
-          0, ch, TO_VICT);
-      act("@c$N@W manages to break loose of your hold!@n", TRUE, ABSORBBY(ch),
-          0, ch, TO_CHAR);
-      struct char_data *absorber = ABSORBBY(ch);
-      char_absorbed_by_set(ch, NULL);
-      char_absorbing_set(absorber, NULL);
-    }
-  }
-  if (!block_calc(ch)) {
-    return;
-  }
-  if (GET_EAVESDROP(ch) > 0) {
-    send_to_char(ch, "You stop eavesdropping.\r\n");
-    GET_EAVESDROP(ch) = 0;
-  }
-  if (!IS_NPC(ch)) {
-    int gravity = room_gravity_get(char_room_get(ch));
-    if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-      REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
-      ARENA_IDNUM(ch) = -1;
-    }
-    if (char_room_vnum_get(ch) != NOWHERE && char_room_vnum_get(ch) != 0 &&
-        char_room_vnum_get(ch) != 1) {
-      GET_LOADROOM(ch) = char_room_vnum_get(ch);
-    }
-    if (gravity == 10 && GET_MAX_HIT(ch) <= 10000 && !IS_BARDOCK(ch) &&
-        !IS_NPC(ch)) {
-      send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_1SEC);
-    }
-    if (gravity == 20 && GET_MAX_HIT(ch) <= 30000) {
-      send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_2SEC);
-    }
-    if (gravity == 30 && GET_MAX_HIT(ch) <= 100000) {
-      send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_3SEC);
-    }
-    if (gravity == 40 && GET_MAX_HIT(ch) <= 200000) {
-      send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_3SEC);
-    }
-    if (gravity == 50 && GET_MAX_HIT(ch) <= 300000) {
-      send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_3SEC);
-    }
-    if (gravity == 100 && GET_MAX_HIT(ch) <= 500000) {
-      send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_3SEC);
-    }
-    if (gravity == 200 && GET_MAX_HIT(ch) <= 1000000) {
-      send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_3SEC);
-    }
-    if (gravity == 300 && GET_MAX_HIT(ch) <= 8000000) {
-      send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_3SEC);
-    }
-    if (gravity == 400 && GET_MAX_HIT(ch) <= 15000000) {
-      send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_3SEC);
-    }
-    if (gravity == 500 && GET_MAX_HIT(ch) <= 25000000) {
-      send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_4SEC);
-    }
-    if (gravity == 1000 && GET_MAX_HIT(ch) <= 35000000) {
-      send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_5SEC);
-    }
-    if (gravity == 5000 && GET_MAX_HIT(ch) <= 100000000) {
-      send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_5SEC);
-    }
-    if (gravity == 10000 && GET_MAX_HIT(ch) <= 200000000) {
-      send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_5SEC);
-    }
-    if ((char_room_get(ch) && room_flagged(char_room_get(ch), ROOM_SPACE)) &&
-        GET_ADMLEVEL(ch) < 1) {
-      send_to_char(ch, "You struggle to cross the vast distance.\r\n");
-      WAIT_STATE(ch, PULSE_6SEC);
-    } else if ((GET_LIMBCOND(ch, 3) <= 0 && GET_LIMBCOND(ch, 4) <= 0) &&
-               GET_LIMBCOND(ch, 1) <= 0 && !char_condition_has(ch, "flying")) {
-      act("@wYou slowly pull yourself along with your arm...@n", TRUE, ch, 0, 0,
-          TO_CHAR);
-      act("@C$n@w slowly pulls $mself along with one arm...@n", TRUE, ch, 0, 0,
-          TO_ROOM);
-      if (GET_LIMBCOND(ch, 2) < 50) {
-        send_to_char(ch, "@RYour left arm is damaged by the forced use!@n\r\n");
-        SET_LIMBCOND(ch, 2, GET_LIMBCOND(ch, 2) - (rand_number(1, 5)));
-        if (GET_LIMBCOND(ch, 1) <= 0) {
-          act("@RYour left arm falls apart!@n", TRUE, ch, 0, 0, TO_CHAR);
-          act("@r$n's@R left arm falls apart!@n", TRUE, ch, 0, 0, TO_ROOM);
-        }
-      }
-      WAIT_STATE(ch, PULSE_5SEC);
-    } else if ((GET_LIMBCOND(ch, 3) <= 0 && GET_LIMBCOND(ch, 4) <= 0) &&
-               GET_LIMBCOND(ch, 2) <= 0 && !char_condition_has(ch, "flying")) {
-      act("@wYou slowly pull yourself along with your arm...@n", TRUE, ch, 0, 0,
-          TO_CHAR);
-      act("@C$n@w slowly pulls $mself along with one arm...@n", TRUE, ch, 0, 0,
-          TO_ROOM);
-      if (GET_LIMBCOND(ch, 1) < 50) {
-        send_to_char(ch,
-                     "@RYour right arm is damaged by the forced use!@n\r\n");
-        SET_LIMBCOND(ch, 1, GET_LIMBCOND(ch, 1) - (rand_number(1, 5)));
-        if (GET_LIMBCOND(ch, 1) <= 0) {
-          act("@RYour right arm falls apart!@n", TRUE, ch, 0, 0, TO_CHAR);
-          act("@r$n's@R right arm falls apart!@n", TRUE, ch, 0, 0, TO_ROOM);
-        }
-      }
-      WAIT_STATE(ch, PULSE_5SEC);
-    } else if ((GET_LIMBCOND(ch, 3) <= 0 && GET_LIMBCOND(ch, 4) <= 0) &&
-               !char_condition_has(ch, "flying")) {
-      act("@wYou slowly pull yourself along with your arms...@n", TRUE, ch, 0,
-          0, TO_CHAR);
-      act("@C$n@w slowly pulls $mself along with one arms...@n", TRUE, ch, 0, 0,
-          TO_ROOM);
-      if (GET_LIMBCOND(ch, 2) < 50) {
-        send_to_char(ch, "@RYour left arm is damaged by the forced use!@n\r\n");
-        SET_LIMBCOND(ch, 2, GET_LIMBCOND(ch, 2) - (rand_number(1, 5)));
-        if (GET_LIMBCOND(ch, 2) <= 0) {
-          act("@RYour left arm falls apart!@n", TRUE, ch, 0, 0, TO_CHAR);
-          act("@r$n's@R left arm falls apart!@n", TRUE, ch, 0, 0, TO_ROOM);
-        }
-      }
-      if (GET_LIMBCOND(ch, 1) < 50) {
-        send_to_char(ch,
-                     "@RYour right arm is damaged by the forced use!@n\r\n");
-        SET_LIMBCOND(ch, 1, GET_LIMBCOND(ch, 1) - (rand_number(1, 5)));
-        if (GET_LIMBCOND(ch, 1) <= 0) {
-          act("@RYour right arm falls apart!@n", TRUE, ch, 0, 0, TO_CHAR);
-          act("@r$n's@R right arm falls apart!@n", TRUE, ch, 0, 0, TO_ROOM);
-        }
-      }
-      WAIT_STATE(ch, PULSE_3SEC);
-    } else if (GET_LIMBCOND(ch, 3) <= 0 && !char_condition_has(ch, "flying")) {
-      act("@wYou hop on one leg...@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@w hops on one leg...@n", TRUE, ch, 0, 0, TO_ROOM);
-      if (GET_LIMBCOND(ch, 4) < 50) {
-        send_to_char(ch, "@RYour left leg is damaged by the forced use!@n\r\n");
-        SET_LIMBCOND(ch, 4, GET_LIMBCOND(ch, 4) - (rand_number(1, 5)));
-        if (GET_LIMBCOND(ch, 4) <= 0) {
-          act("@RYour left leg falls apart!@n", TRUE, ch, 0, 0, TO_CHAR);
-          act("@r$n's@R left leg falls apart!@n", TRUE, ch, 0, 0, TO_ROOM);
-        }
-      }
-      WAIT_STATE(ch, PULSE_2SEC);
-    } else if (GET_LIMBCOND(ch, 4) <= 0 && !char_condition_has(ch, "flying")) {
-      act("@wYou hop on one leg...@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@w hops on one leg...@n", TRUE, ch, 0, 0, TO_ROOM);
-      if (GET_LIMBCOND(ch, 3) < 50) {
-        send_to_char(ch,
-                     "@RYour right leg is damaged by the forced use!@n\r\n");
-        SET_LIMBCOND(ch, 3, GET_LIMBCOND(ch, 3) - (rand_number(1, 5)));
-        if (GET_LIMBCOND(ch, 3) <= 0) {
-          act("@RYour right leg falls apart!@n", TRUE, ch, 0, 0, TO_CHAR);
-          act("@r$n's@R right leg falls apart!@n", TRUE, ch, 0, 0, TO_ROOM);
-        }
-      }
-      WAIT_STATE(ch, PULSE_2SEC);
-    } else if (GET_POS(ch) == POS_RESTING) {
-      act("@wYou crawl on your hands and knees.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@w crawls on $s hands and knees.@n", TRUE, ch, 0, 0, TO_ROOM);
-      if (SITS(ch)) {
-        struct obj_data *chair = SITS(ch);
-        SITTING(chair) = NULL;
-        SITS(ch) = NULL;
-      }
-      WAIT_STATE(ch, PULSE_3SEC);
-    } else if (GET_POS(ch) == POS_SITTING) {
-      act("@wYou shuffle on your hands and knees.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@w shuffles on $s hands and knees.@n", TRUE, ch, 0, 0, TO_ROOM);
-      if (SITS(ch)) {
-        struct obj_data *chair = SITS(ch);
-        SITTING(chair) = NULL;
-        SITS(ch) = NULL;
-      }
-      WAIT_STATE(ch, PULSE_2SEC);
-    } else if (GET_POS(ch) < POS_RESTING) {
-      send_to_char(ch, "You are in no condition to move! Try standing...\r\n");
-      return;
-    }
-  }
-  perform_move(ch, subcmd - 1, 0);
-  if (GET_RDISPLAY(ch)) {
-    if (GET_RDISPLAY(ch) != "Empty") {
-      GET_RDISPLAY(ch) = "Empty";
-    }
-  }
-}
+ACMD(do_move) {}
 
 static int find_door(struct char_data *ch, const char *type, char *dir,
                      const char *cmdname) {
@@ -2105,8 +1723,8 @@ ACMD(do_gen_door) {
   return;
 }
 
-static int do_simple_enter(struct char_data *ch, struct obj_data *obj,
-                           int need_specials_check) {
+int do_simple_enter(struct char_data *ch, struct obj_data *obj,
+                    int need_specials_check) {
   struct room_data *dest_room = room_by_id(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
   struct room_data *was_in = char_room_get(ch);
   int need_movement = 0;
@@ -2287,65 +1905,9 @@ static int perform_enter_obj(struct char_data *ch, struct obj_data *obj,
   return could_move;
 }
 
-ACMD(do_enter) {
-  struct obj_data *obj = NULL;
-  char buf[MAX_INPUT_LENGTH];
-  int door, move_dir = -1;
+ACMD(do_enter) {}
 
-  one_argument(argument, buf);
-
-  if (*buf) { /* an argument was supplied, search for door keyword */
-    /* Is the object in the room? */
-    obj = get_obj_in_list_vis(ch, buf, NULL, inv_for_room(char_room_get(ch)));
-    /* Is the object in the character's inventory? */
-    if (!obj)
-      obj = get_obj_in_list_vis(ch, buf, NULL, inv_for_char(ch));
-    /* Is the character carrying the object? */
-    if (!obj)
-      obj = get_obj_in_equip_vis(ch, buf, NULL, ch->equipment);
-    /* We have an object to enter */
-    if (obj)
-      perform_enter_obj(ch, obj, 0);
-    /* Is there a door to enter? */
-    else {
-      room_exits_iterate(char_room_get(ch), [&](auto dir, auto exit) {
-        auto dest = exit_dest_get(exit);
-        if(!dest) return true;
-        if(!exit_keyword_get(exit)) return true;
-        if(!isname(buf, exit_keyword_get(exit))) {
-          move_dir = door;
-          return false;
-        }
-        return true;
-      });
-      /* Did we find what they wanted to enter. */
-      if (move_dir > -1)
-        perform_move(ch, move_dir, 1);
-      else
-        send_to_char(ch, "There is no %s here.\r\n", buf);
-    }
-  } else if ((char_room_get(ch) &&
-              room_flagged(char_room_get(ch), ROOM_INDOORS))) {
-    send_to_char(ch, "You are already indoors.\r\n");
-  } else {
-    /* try to locate an entrance */
-    room_exits_iterate(char_room_get(ch), [&](auto dir, auto exit) {
-      auto dest = exit_dest_get(exit);
-      if(!dest) return true;
-      if(!exit_flagged(exit, EX_CLOSED) && room_flagged(dest, ROOM_INDOORS)) {
-        move_dir = dir;
-        return false;
-      }
-      return true;
-    });
-    if (move_dir > -1)
-      perform_move(ch, move_dir, 1);
-    else
-      send_to_char(ch, "You can't seem to find anything to enter.\r\n");
-  }
-}
-
-static int do_simple_leave(struct char_data *ch, struct obj_data *obj,
+int do_simple_leave(struct char_data *ch, struct obj_data *obj,
                            int need_specials_check)
 
 {
@@ -2540,50 +2102,9 @@ static int perform_leave_obj(struct char_data *ch, struct obj_data *obj,
   return could_move;
 }
 
-ACMD(do_leave) {
-  int door;
-  struct obj_data *obj = NULL;
+ACMD(do_leave) {}
 
-  if (PLR_FLAGGED(ch, PLR_HEALT)) {
-    send_to_char(ch, "You are inside a healing tank!\r\n");
-    return;
-  }
-
-  {
-    int found = 0;
-    room_contents_iterate(char_room_get(ch), [&](auto obj) {
-      if (CAN_SEE_OBJ(ch, obj))
-        if (GET_OBJ_TYPE(obj) == ITEM_HATCH || GET_OBJ_TYPE(obj) == ITEM_PORTAL) {
-          perform_leave_obj(ch, obj, 0);
-          found = 1;
-          return false;
-        }
-      return true;
-    });
-    if (found)
-      return;
-  }
-
-  if (OUTSIDE(ch))
-    send_to_char(ch, "You are outside.. where do you want to go?\r\n");
-  else {
-    bool moved = false;
-    room_exits_iterate(char_room_get(ch), [&](auto dir, auto exit) {
-      auto dest = char_can_go_exit(ch, exit);
-      if(!dest) return true;
-      if(!room_flagged(dest, ROOM_INDOORS)) {
-        perform_move(ch, dir, 1);
-        moved = true;
-        return false;
-      }
-      return true;
-    });
-    if (!moved)
-      send_to_char(ch, "I see no obvious exits to the outside.\r\n");
-  }
-}
-
-static void handle_fall(struct char_data *ch) {
+void handle_fall(struct char_data *ch) {
   int room = -1;
   while (EXIT(ch, 5) &&
          room_sector_type_get(char_room_get(ch)) == SECT_FLYING) {
@@ -2651,249 +2172,6 @@ static int check_swim(struct char_data *ch) {
   }
 }
 
-ACMD(do_fly) {
-  char arg[MAX_INPUT_LENGTH];
+ACMD(do_fly) {}
 
-  one_argument(argument, arg);
-
-  if (ABSORBING(ch) || ABSORBBY(ch)) {
-    send_to_char(ch,
-                 "You can't fly, you are struggling with someone right now!");
-    return;
-  }
-  if (GRAPPLING(ch) || GRAPPLED(ch)) {
-    send_to_char(ch,
-                 "You can't fly, you are struggling with someone right now!");
-    return;
-  }
-  if (!IS_NPC(ch)) {
-    if (PLR_FLAGGED(ch, PLR_HEALT)) {
-      send_to_char(ch, "You are inside a healing tank!\r\n");
-      return;
-    }
-    if (PLR_FLAGGED(ch, PLR_PILOTING)) {
-      send_to_char(ch, "You are busy piloting a ship!\r\n");
-      return;
-    }
-  }
-
-  if (!IS_NPC(ch) && GET_SKILL(ch, SKILL_FOCUS) < 30 && !IS_ANDROID(ch)) {
-    send_to_char(ch,
-                 "You do not have enough focus to hold yourself aloft.\r\n");
-    send_to_char(ch, "@wOOC@D: @WYou need the skill Focus at @m30@W.@n\r\n");
-    return;
-  }
-
-  struct room_data *room = char_room_get(ch);
-  int sect = room_sector_type_get(room);
-
-  if (!*arg) {
-    if (char_condition_has(ch, "flying") && sect != SECT_FLYING &&
-        sect != SECT_SPACE) {
-      act("@WYou slowly settle down to the ground.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@W$n slowly settles down to the ground.@n", TRUE, ch, 0, 0, TO_ROOM);
-      char_condition_remove(ch, "flying", "stop_flying");
-      return;
-    }
-    if (char_condition_has(ch, "flying") && sect == SECT_FLYING) {
-      act("@WYou begin to plummet to the ground!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@W$n starts to pummet to the ground below!@n", TRUE, ch, 0, 0,
-          TO_ROOM);
-      char_condition_remove(ch, "flying", "stop_flying");
-      handle_fall(ch);
-      return;
-    }
-    if (char_condition_has(ch, "flying") && sect == SECT_SPACE) {
-      act("@WYou let yourself drift aimlessly through space.@n", TRUE, ch, 0, 0,
-          TO_CHAR);
-      act("@W$n starts to drift slowly.!@n", TRUE, ch, 0, 0, TO_ROOM);
-      char_condition_remove(ch, "flying", "stop_flying");
-      return;
-    }
-    if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 100 && !IS_ANDROID(ch)) {
-      send_to_char(ch, "You do not have the ki to fly.");
-      return;
-    }
-    reveal_hiding(ch, 0);
-    act("@WYou slowly take off into the sky.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@W$n slowly takes off into the sky.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (SITS(ch)) {
-      SITTING(SITS(ch)) = NULL;
-      SITS(ch) = NULL;
-    }
-    if (GET_POS(ch) < POS_STANDING)
-      char_position_set(ch, POS_STANDING);
-    char_condition_add(ch, "flying", "skill", "fly");
-    char_condition_number_set(ch, "flying", "altitude", 1);
-    decCurKI(ch, getMaxKI(ch) / 100);
-    return;
-  }
-
-  if (!strcasecmp("high", arg)) {
-    if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 100 && !IS_ANDROID(ch)) {
-      send_to_char(ch, "You do not have the ki to fly.");
-      return;
-    }
-    reveal_hiding(ch, 0);
-    act("@WYou rocket high into the sky.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@W$n rockets high into the sky.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (SITS(ch)) {
-      SITTING(SITS(ch)) = NULL;
-      SITS(ch) = NULL;
-    }
-    if (GET_POS(ch) < POS_STANDING)
-      char_position_set(ch, POS_STANDING);
-    char_condition_add(ch, "flying", "skill", "fly");
-    char_condition_number_set(ch, "flying", "altitude", 2);
-    decCurKI(ch, getMaxKI(ch) / 100);
-    return;
-  }
-
-  if (!strcasecmp("space", arg)) {
-    if (!OUTSIDE(ch)) {
-      send_to_char(ch, "You are not outside!");
-      return;
-    }
-    if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 10 && !IS_ANDROID(ch)) {
-      send_to_char(ch, "You do not have the ki to fly to space.");
-      return;
-    }
-    if (FIGHTING(ch)) {
-      send_to_char(ch, "You are too busy fighting!");
-      return;
-    }
-
-    auto blast_off = [&](int dest_id) {
-      reveal_hiding(ch, 0);
-      char_condition_add(ch, "flying", "skill", "fly");
-      char_condition_number_set(ch, "flying", "altitude", 2);
-      if (!block_calc(ch))
-        return;
-      char_condition_remove(ch, "flying", "stop_flying");
-      if (auto zone = char_zone_get(ch); zone)
-        fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
-      send_to_sense(1, "leaving the planet", ch);
-      send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
-      act("@CYou blast off from the ground and rocket through the air. Your "
-          "speed increases until you manage to reach the brink of space!@n",
-          TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n blasts off from the ground and rockets through the air. You "
-          "quickly lose sight of $m as $e continues upward!@n",
-          TRUE, ch, 0, 0, TO_ROOM);
-      char_from_room(ch);
-      char_to_room(ch, room_by_id(dest_id));
-      act("@C$n blasts up from the atmosphere below and then comes to a "
-          "stop.@n",
-          TRUE, ch, 0, 0, TO_ROOM);
-      send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet "
-                       "from here.@n\r\n");
-      if (!IS_ANDROID(ch))
-        decCurKI(ch, getMaxKI(ch) / 10);
-      WAIT_STATE(ch, PULSE_3SEC);
-    };
-
-    static const struct {
-      int room_flag;
-      int dest_id;
-    } planet_table[] = {
-      {ROOM_EARTH,   50},
-      {ROOM_CERRIA, 198},
-      {ROOM_VEGETA,  53},
-      {ROOM_FRIGID,  51},
-      {ROOM_KONACK,  52},
-      {ROOM_NAMEK,   54},
-      {ROOM_AETHER,  55},
-      {ROOM_YARDRAT, 56},
-      {ROOM_ARLIA,   59},
-    };
-
-    if (room_flagged(room, ROOM_KANASSA)) {
-      if (char_room_vnum_get(ch) != 14904) {
-        send_to_char(
-            ch,
-            "You can only fly off the planet from the launchpad of Aquis.\r\n");
-        return;
-      }
-      blast_off(58);
-      return;
-    }
-
-    for (auto &p : planet_table) {
-      if (room_flagged(room, p.room_flag)) {
-        blast_off(p.dest_id);
-        return;
-      }
-    }
-
-    if (char_planet_zenith(ch)) {
-      blast_off(57);
-      return;
-    }
-
-    send_to_char(ch, "You are not on a planet.\r\n");
-  }
-}
-
-/* do_stand moved to lua/characters/commands/position/stand.lua */
-ACMD(do_stand) { (void)ch; (void)argument; (void)cmd; (void)subcmd; }
-
-/* do_sit moved to lua/characters/commands/position/sit.lua */
-ACMD(do_sit) { (void)ch; (void)argument; (void)cmd; (void)subcmd; }
-
-/* do_rest moved to lua/characters/commands/position/rest.lua */
-ACMD(do_rest) { (void)ch; (void)argument; (void)cmd; (void)subcmd; }
-
-/* do_sleep moved to lua/characters/commands/position/sleep.lua */
-ACMD(do_sleep) { (void)ch; (void)argument; (void)cmd; (void)subcmd; }
-
-/* do_wake moved to lua/characters/commands/position/wake.lua */
-ACMD(do_wake) { (void)ch; (void)argument; (void)cmd; (void)subcmd; }
-
-ACMD(do_follow) {
-  char buf[MAX_INPUT_LENGTH];
-  struct char_data *leader;
-
-  one_argument(argument, buf);
-
-  if (PLR_FLAGGED(ch, PLR_HEALT)) {
-    send_to_char(ch, "You are inside a healing tank!\r\n");
-    return;
-  }
-
-  if (*buf) {
-    if (!(leader = get_char_vis(ch, buf, NULL, FIND_CHAR_ROOM))) {
-      send_to_char(ch, "%s", CONFIG_NOPERSON);
-      return;
-    }
-  } else {
-    send_to_char(ch, "Whom do you wish to follow?\r\n");
-    return;
-  }
-
-  if (MASTER(ch) == leader) {
-    act("You are already following $M.", FALSE, ch, 0, leader, TO_CHAR);
-    return;
-  }
-  if (AFF_FLAGGED(ch, AFF_CHARM) && (MASTER(ch))) {
-    act("But you only feel like following $N!", FALSE, ch, 0, MASTER(ch),
-        TO_CHAR);
-  } else { /* Not Charmed follow person */
-    if (leader == ch) {
-      if (!MASTER(ch)) {
-        send_to_char(ch, "You are already following yourself.\r\n");
-        return;
-      }
-      stop_follower(ch);
-    } else {
-      if (circle_follow(ch, leader)) {
-        send_to_char(ch, "Sorry, but following in loops is not allowed.\r\n");
-        return;
-      }
-      if (MASTER(ch))
-        stop_follower(ch);
-      char_condition_remove(ch, "group", "leave_group");
-      reveal_hiding(ch, 0);
-      add_follower(ch, leader);
-    }
-  }
-}
+ACMD(do_follow) {}

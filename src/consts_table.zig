@@ -367,6 +367,14 @@ pub const room_flags = .{
     .CANREMODEL  = cdb.ROOM_CANREMODEL,
 };
 
+pub const exit_flags = .{
+    .ISDOOR    = cdb.EX_ISDOOR,
+    .CLOSED    = cdb.EX_CLOSED,
+    .LOCKED    = cdb.EX_LOCKED,
+    .PICKPROOF = cdb.EX_PICKPROOF,
+    .SECRET    = cdb.EX_SECRET,
+};
+
 pub const zone_flags = .{
     .CLOSED   = cdb.ZONE_CLOSED,
     .NOIMMORT = cdb.ZONE_NOIMMORT,

@@ -45,6 +45,7 @@ pub fn register(lua: *Lua) void {
     pushConstTable(lua, ct.mob_flags);       lua.setField(-2, "mob_flags");
     pushConstTable(lua, ct.aff_flags);       lua.setField(-2, "aff_flags");
     pushConstTable(lua, ct.room_flags);      lua.setField(-2, "room_flags");
+    pushConstTable(lua, ct.exit_flags);      lua.setField(-2, "exit_flags");
     pushConstTable(lua, ct.zone_flags);      lua.setField(-2, "zone_flags");
     pushConstTable(lua, ct.positions);       lua.setField(-2, "positions");
     pushConstTable(lua, ct.races);           lua.setField(-2, "races");

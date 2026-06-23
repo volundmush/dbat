@@ -134,6 +134,11 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "zone_vnum_get", luaCharacterZoneVnumGet);
     addMethod(lua, "zone_get", luaCharacterZoneGet);
     addMethod(lua, "reveal_hiding", luaCharacterRevealHiding);
+    addMethod(lua, "fly_zone", luaCharacterFlyZone);
+    addMethod(lua, "is_planet_zenith", luaCharacterIsPlanetZenith);
+    addMethod(lua, "land_location", luaCharacterLandLocation);
+    addMethod(lua, "disp_locations", luaCharacterDispLocations);
+    addMethod(lua, "sense_location", luaCharacterSenseLocation);
     addMethod(lua, "die", luaCharacterDie);
     addMethod(lua, "release_charge", luaCharacterReleaseCharge);
     addMethod(lua, "send_to_sense", luaCharacterSendToSense);
@@ -298,10 +303,12 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "gain_condition", luaCharacterGainCondition);
     addMethod(lua, "has_o2", luaCharacterHasO2);
     addMethod(lua, "mob_flagged", luaCharacterMobFlagged);
+    addMethod(lua, "mob_flag_set", luaCharacterMobFlagSet);
     addMethod(lua, "is_soft_cap", luaCharacterIsSoftCapType);
     addMethod(lua, "following_get", luaCharacterFollowingGet);
     addMethod(lua, "group_bonus", luaCharacterGroupBonus);
     addMethod(lua, "start_fighting", luaCharacterStartFighting);
+    addMethod(lua, "stop_fighting", luaCharacterStopFighting);
     addMethod(lua, "news_pending", luaCharacterNewsPending);
     addMethod(lua, "intro_known", luaCharacterIntroKnown);
     addMethod(lua, "get_intro_name", luaCharacterGetIntroName);
@@ -325,19 +332,45 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "look_at_room", luaCharacterLookAtRoom);
     addMethod(lua, "restore", luaCharacterRestore);
     addMethod(lua, "find_target_room", luaCharacterFindTargetRoom);
+    addMethod(lua, "flee", luaCharacterFlee);
+    addMethod(lua, "drive_vehicle", luaCharacterDriveVehicle);
+    addMethod(lua, "block_calc", luaCharacterBlockCalc);
+    addMethod(lua, "sec_roll", luaCharacterSecRoll);
+    addMethod(lua, "handle_fall", luaCharacterHandleFall);
+    addMethod(lua, "try_enter", luaCharacterTryEnter);
+    addMethod(lua, "try_leave", luaCharacterTryLeave);
+    addMethod(lua, "mob_attack", luaCharacterMobAttack);
+    addMethod(lua, "followers_each", luaCharacterFollowersEach);
+    addMethod(lua, "add_follower", luaCharacterAddFollower);
+    addMethod(lua, "stop_follower", luaCharacterStopFollower);
+    addMethod(lua, "circle_follow", luaCharacterCircleFollow);
 
     // Combat-pointer getters for room display
     addMethod(lua, "fighting_get", luaCharacterFightingGet);
     addMethod(lua, "grappling_get", luaCharacterGrapplingGet);
+    addMethod(lua, "grappling_set", luaCharacterGrapplingSet);
     addMethod(lua, "grappled_get", luaCharacterGrappledGet);
+    addMethod(lua, "grappled_set", luaCharacterGrappledSet);
+    addMethod(lua, "graptype_get", luaCharacterGraptypeGet);
     addMethod(lua, "absorbing_get", luaCharacterAbsorbingGet);
+    addMethod(lua, "absorbing_set", luaCharacterAbsorbingSet);
     addMethod(lua, "absorbed_by_get", luaCharacterAbsorbedByGet);
+    addMethod(lua, "absorbed_by_set", luaCharacterAbsorbedBySet);
+    addMethod(lua, "roll_balance", luaCharacterRollBalance);
+    addMethod(lua, "hurt_target", luaCharacterHurtTarget);
+    addMethod(lua, "wimp_level_get", luaCharacterWimpLevelGet);
+    addMethod(lua, "send_to_worlds", luaCharacterSendToWorlds);
+    addMethod(lua, "dispel_ash", luaCharacterDispelAsh);
+    addMethod(lua, "restore_announced", luaCharacterRestoreAnnounced);
+    addMethod(lua, "cure_knocked_out", luaCharacterCureKnockedOut);
     // Misc display fields
     addMethod(lua, "timer_get", luaCharacterTimerGet);
     addMethod(lua, "has_connection", luaCharacterHasConnection);
     addMethod(lua, "default_position_get", luaCharacterDefaultPositionGet);
     addMethod(lua, "eavesdrop_get", luaCharacterEavesdropGet);
+    addMethod(lua, "eavesdrop_set", luaCharacterEavesdropSet);
     addMethod(lua, "eavesdrop_dir_get", luaCharacterEavesdropDirGet);
+    addMethod(lua, "rdisplay_clear", luaCharacterRdisplayClear);
     addMethod(lua, "slot_count", luaCharacterSlotCount);
     addMethod(lua, "script_add", luaCharacterScriptAdd);
     addMethod(lua, "script_remove", luaCharacterScriptRemove);
@@ -871,6 +904,46 @@ fn luaCharacterZoneGet(lua: *Lua) i32 {
         return 1;
     }
     zones_lua.pushZone(lua, cdb.zone_id_get(zone));
+    return 1;
+}
+
+fn luaCharacterFlyZone(lua: *Lua) i32 {
+    const ch  = checkCharacter(lua);
+    const msg = lua.toString(2) catch lua.typeError(2, "string");
+    const zone = cdb.char_zone_get(ch) orelse return 0;
+    cdb.fly_zone(zone, @constCast(msg.ptr), ch);
+    return 0;
+}
+
+fn luaCharacterIsPlanetZenith(lua: *Lua) i32 {
+    lua.pushBoolean(cdb.char_planet_zenith(checkCharacter(lua)));
+    return 1;
+}
+
+fn luaCharacterLandLocation(lua: *Lua) i32 {
+    const ch  = checkCharacter(lua);
+    const arg = lua.toString(2) catch lua.typeError(2, "string");
+    var buf: [256]u8 = undefined;
+    const len = @min(arg.len, buf.len - 1);
+    @memcpy(buf[0..len], arg[0..len]);
+    buf[len] = 0;
+    const room = cdb.land_location(ch, &buf);
+    lua.pushInteger(room);
+    return 1;
+}
+
+fn luaCharacterDispLocations(lua: *Lua) i32 {
+    cdb.disp_locations(checkCharacter(lua));
+    return 0;
+}
+
+fn luaCharacterSenseLocation(lua: *Lua) i32 {
+    const loc = cdb.sense_location(checkCharacter(lua));
+    if (loc) |s| {
+        _ = lua.pushString(std.mem.span(s));
+    } else {
+        lua.pushNil();
+    }
     return 1;
 }
 
@@ -2022,12 +2095,18 @@ fn luaCharacterTryMove(lua: *Lua) i32 {
     const ch  = checkCharacter(lua);
     const dir = string(lua, 2);
     const dir_index: c_int = blk: {
-        if (std.mem.eql(u8, dir, "north")) break :blk 0;
-        if (std.mem.eql(u8, dir, "east"))  break :blk 1;
-        if (std.mem.eql(u8, dir, "south")) break :blk 2;
-        if (std.mem.eql(u8, dir, "west"))  break :blk 3;
-        if (std.mem.eql(u8, dir, "up"))    break :blk 4;
-        if (std.mem.eql(u8, dir, "down"))  break :blk 5;
+        if (std.mem.eql(u8, dir, "north"))     break :blk 0;
+        if (std.mem.eql(u8, dir, "east"))      break :blk 1;
+        if (std.mem.eql(u8, dir, "south"))     break :blk 2;
+        if (std.mem.eql(u8, dir, "west"))      break :blk 3;
+        if (std.mem.eql(u8, dir, "up"))        break :blk 4;
+        if (std.mem.eql(u8, dir, "down"))      break :blk 5;
+        if (std.mem.eql(u8, dir, "northwest")) break :blk 6;
+        if (std.mem.eql(u8, dir, "northeast")) break :blk 7;
+        if (std.mem.eql(u8, dir, "southeast")) break :blk 8;
+        if (std.mem.eql(u8, dir, "southwest")) break :blk 9;
+        if (std.mem.eql(u8, dir, "inside"))    break :blk 10;
+        if (std.mem.eql(u8, dir, "outside"))   break :blk 11;
         lua.pushBoolean(false);
         return 1;
     };
@@ -2191,6 +2270,13 @@ fn luaCharacterMobFlagged(lua: *Lua) i32 {
     return 1;
 }
 
+fn luaCharacterMobFlagSet(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const flag = intCastOrError(lua, c_int, integer(lua, 2), "mob flag");
+    bitflags.set(ch.act[0..], flag, boolean(lua, 3));
+    return 0;
+}
+
 fn luaCharacterIsSoftCapType(lua: *Lua) i32 {
     const ch = checkCharacter(lua);
     const cap_type = intCastOrError(lua, i64, integer(lua, 2), "soft cap type");
@@ -2220,6 +2306,122 @@ fn luaCharacterStartFighting(lua: *Lua) i32 {
     const target = checkCharacterAt(lua, 2);
     cdb.set_fighting(ch, target);
     return 0;
+}
+
+fn luaCharacterStopFighting(lua: *Lua) i32 {
+    cdb.stop_fighting(checkCharacter(lua));
+    return 0;
+}
+
+fn luaCharacterFlee(lua: *Lua) i32 {
+    const ch  = checkCharacter(lua);
+    const dir = if (lua.getTop() >= 2) lua.toString(2) catch "" else "";
+    var buf: [128]u8 = undefined;
+    const len = @min(dir.len, buf.len - 1);
+    @memcpy(buf[0..len], dir[0..len]);
+    buf[len] = 0;
+    _ = cdb.char_cmd_execute(ch, @constCast("flee"), &buf);
+    return 0;
+}
+
+fn luaCharacterDriveVehicle(lua: *Lua) i32 {
+    const ch  = checkCharacter(lua);
+    const dir = intCastOrError(lua, c_int, integer(lua, 2), "dir");
+    const controls = cdb.find_control(ch) orelse {
+        _ = cdb.send_to_char(ch, "%s", "Your ship controls are not here or your ship was not found, report to Iovan!\r\n");
+        return 0;
+    };
+    const vnum = cdb.obj_value_get(controls, 0);
+    const vehicle = cdb.find_vehicle_by_vnum(vnum) orelse {
+        _ = cdb.send_to_char(ch, "%s", "Your ship controls are not here or your ship was not found, report to Iovan!\r\n");
+        return 0;
+    };
+    if (cdb.obj_value_get(controls, 2) <= 0) {
+        _ = cdb.send_to_char(ch, "%s", "The ship is out of fuel!\r\n");
+        return 0;
+    }
+    cdb.drive_in_direction(ch, vehicle, dir);
+    const speed = cdb.obj_value_get(controls, 1);
+    if (speed == 1) {
+        cdb.char_wait_set(ch, 20);
+    } else if (speed == 2) {
+        cdb.char_wait_set(ch, 10);
+    }
+    lua.pushBoolean(true);
+    return 1;
+}
+
+fn luaCharacterBlockCalc(lua: *Lua) i32 {
+    lua.pushInteger(cdb.block_calc(checkCharacter(lua)));
+    return 1;
+}
+
+fn luaCharacterSecRoll(lua: *Lua) i32 {
+    lua.pushInteger(cdb.sec_roll_check(checkCharacter(lua)));
+    return 1;
+}
+
+fn luaCharacterHandleFall(lua: *Lua) i32 {
+    cdb.handle_fall(checkCharacter(lua));
+    return 0;
+}
+
+fn luaCharacterTryEnter(lua: *Lua) i32 {
+    const ch  = checkCharacter(lua);
+    const obj = objects_lua.checkObjectAt(lua, 2);
+    lua.pushBoolean(cdb.do_simple_enter(ch, obj, 1) != 0);
+    return 1;
+}
+
+fn luaCharacterTryLeave(lua: *Lua) i32 {
+    const ch  = checkCharacter(lua);
+    const obj = objects_lua.checkObjectAt(lua, 2);
+    lua.pushBoolean(cdb.do_simple_leave(ch, obj, 1) != 0);
+    return 1;
+}
+
+fn luaCharacterMobAttack(lua: *Lua) i32 {
+    const ch  = checkCharacter(lua);
+    const name = lua.toString(2) catch lua.typeError(2, "string");
+    var buf: [256]u8 = undefined;
+    const len = @min(name.len, buf.len - 1);
+    @memcpy(buf[0..len], name[0..len]);
+    buf[len] = 0;
+    cdb.mob_attack(ch, &buf);
+    return 0;
+}
+
+fn luaCharacterFollowersEach(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    if (lua.typeOf(2) != .function) lua.typeError(2, "function");
+    var count: usize = 0;
+    const ids = cdb.char_follower_ids(ch, &count) orelse return 0;
+    defer cdb.char_follower_ids_free(ids);
+    for (ids[0..count]) |id| {
+        lua.pushValue(2);
+        pushCharacter(lua, id);
+        lua.protectedCall(.{ .args = 1, .results = 0 }) catch {};
+    }
+    return 0;
+}
+
+fn luaCharacterAddFollower(lua: *Lua) i32 {
+    const ch     = checkCharacter(lua);
+    const leader = checkCharacterAt(lua, 2);
+    cdb.add_follower(ch, leader);
+    return 0;
+}
+
+fn luaCharacterStopFollower(lua: *Lua) i32 {
+    cdb.stop_follower(checkCharacter(lua));
+    return 0;
+}
+
+fn luaCharacterCircleFollow(lua: *Lua) i32 {
+    const ch     = checkCharacter(lua);
+    const target = checkCharacterAt(lua, 2);
+    lua.pushBoolean(cdb.circle_follow(ch, target));
+    return 1;
 }
 
 fn luaCharacterNewsPending(lua: *Lua) i32 {
@@ -2420,15 +2622,86 @@ fn luaCharacterGrappledGet(lua: *Lua) i32 {
     if (t) |v| pushCharacter(lua, cdb.char_id_get(v)) else lua.pushNil();
     return 1;
 }
+fn luaCharacterGrapplingSet(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const graptype: c_int = if (lua.getTop() >= 3) @intCast(lua.toInteger(3) catch 0) else 0;
+    if (lua.typeOf(2) == .nil)
+        cdb.char_grappling_set(ch, null, graptype)
+    else
+        cdb.char_grappling_set(ch, checkCharacterAt(lua, 2), graptype);
+    return 0;
+}
+fn luaCharacterGrappledSet(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const graptype: c_int = if (lua.getTop() >= 3) @intCast(lua.toInteger(3) catch 0) else 0;
+    if (lua.typeOf(2) == .nil)
+        cdb.char_grappled_set(ch, null, graptype)
+    else
+        cdb.char_grappled_set(ch, checkCharacterAt(lua, 2), graptype);
+    return 0;
+}
+fn luaCharacterGraptypeGet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_graptype_get(checkCharacter(lua)));
+    return 1;
+}
+fn luaCharacterRollBalance(lua: *Lua) i32 {
+    lua.pushInteger(cdb.roll_balance(checkCharacter(lua)));
+    return 1;
+}
+fn luaCharacterHurtTarget(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const target = checkCharacterAt(lua, 2);
+    const amount = intCastOrError(lua, i64, integer(lua, 3), "damage amount");
+    cdb.hurt(0, 0, ch, target, null, amount, 0);
+    return 0;
+}
+fn luaCharacterWimpLevelGet(lua: *Lua) i32 {
+    lua.pushInteger(checkCharacter(lua).wimp_level);
+    return 1;
+}
+fn luaCharacterSendToWorlds(lua: *Lua) i32 {
+    cdb.send_to_worlds(checkCharacter(lua));
+    return 0;
+}
+fn luaCharacterDispelAsh(lua: *Lua) i32 {
+    cdb.dispel_ash(checkCharacter(lua));
+    return 0;
+}
+fn luaCharacterRestoreAnnounced(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const announce = lua.toBoolean(2);
+    cdb.restoreHealthAnnounced(ch, announce);
+    return 0;
+}
+fn luaCharacterCureKnockedOut(lua: *Lua) i32 {
+    cdb.cureStatusKnockedOutAnnounced(checkCharacter(lua), true);
+    return 0;
+}
 fn luaCharacterAbsorbingGet(lua: *Lua) i32 {
     const t = cdb.char_absorbing_get(checkCharacter(lua));
     if (t) |v| pushCharacter(lua, cdb.char_id_get(v)) else lua.pushNil();
     return 1;
 }
+fn luaCharacterAbsorbingSet(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    if (lua.typeOf(2) == .nil)
+        cdb.char_absorbing_set(ch, null)
+    else
+        cdb.char_absorbing_set(ch, checkCharacterAt(lua, 2));
+    return 0;
+}
 fn luaCharacterAbsorbedByGet(lua: *Lua) i32 {
     const t = cdb.char_absorbed_by_get(checkCharacter(lua));
     if (t) |v| pushCharacter(lua, cdb.char_id_get(v)) else lua.pushNil();
     return 1;
+}
+fn luaCharacterAbsorbedBySet(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    if (lua.typeOf(2) == .nil)
+        cdb.char_absorbed_by_set(ch, null)
+    else
+        cdb.char_absorbed_by_set(ch, checkCharacterAt(lua, 2));
+    return 0;
 }
 
 // Misc display field accessors
@@ -2448,9 +2721,21 @@ fn luaCharacterEavesdropGet(lua: *Lua) i32 {
     lua.pushInteger(checkCharacter(lua).listenroom);
     return 1;
 }
+fn luaCharacterEavesdropSet(lua: *Lua) i32 {
+    checkCharacter(lua).listenroom = intCastOrError(lua, c_int, integer(lua, 2), "listenroom");
+    return 0;
+}
 fn luaCharacterEavesdropDirGet(lua: *Lua) i32 {
     lua.pushInteger(checkCharacter(lua).eavesdir);
     return 1;
+}
+fn luaCharacterRdisplayClear(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const rdis = ch.rdisplay;
+    if (rdis != null and !std.mem.eql(u8, std.mem.span(rdis.?), "Empty")) {
+        ch.rdisplay = @constCast(@as([*:0]const u8, "Empty"));
+    }
+    return 0;
 }
 fn luaCharacterSlotCount(lua: *Lua) i32 {
     lua.pushInteger(cdb.char_slot_count(checkCharacter(lua)));

@@ -9,6 +9,12 @@ const room_api = @import("room_api.zig");
 const Lua = zlua.Lua;
 const room_metatable = "dbat.Room";
 const room_script_metatable = "dbat.RoomScript";
+const exit_metatable = "dbat.Exit";
+
+const ExitHandle = extern struct {
+    room_vnum: cdb.room_vnum,
+    dir: i32,
+};
 
 extern fn event_schedule_lua_room_update(fire_at: i64, interval: i64, kind: ?[*:0]const u8, room_id: cdb.room_vnum) u64;
 extern fn eq_cancel_owner(owner_kind: c_int, owner_id: i64, tag: ?[*:0]const u8) i64;
@@ -28,6 +34,7 @@ const RoomScriptHandle = extern struct {
 pub fn register(lua: *Lua) void {
     registerRoomMetatable(lua);
     registerRoomScriptMetatable(lua);
+    registerExitMetatable(lua);
 
     lua.newTable();
     lua.pushFunction(zlua.wrap(luaRoomById));
@@ -139,6 +146,8 @@ fn registerRoomMetatable(lua: *Lua) void {
     lua.setField(-2, "event_count");
     lua.pushFunction(zlua.wrap(luaRoomEventRemainingMs));
     lua.setField(-2, "event_remaining_ms");
+    lua.pushFunction(zlua.wrap(luaRoomExitGet));
+    lua.setField(-2, "exit_get");
 
     lua_meta.mergeMethods(lua, "lua.rooms.room");
     lua.pushFunction(zlua.wrap(luaRoomScriptAdd)); lua.setField(-2, "script_add");
@@ -700,4 +709,90 @@ fn luaRoomScriptTextSet(lua: *Lua) i32 {
     const val = lua.toString(4) catch lua.typeError(4, "string");
     cdb.room_script_text_set(room, id.ptr, key.ptr, val.ptr);
     return 0;
+}
+
+// --- Exit userdata ---
+
+fn registerExitMetatable(lua: *Lua) void {
+    lua.newMetatable(exit_metatable) catch {
+        lua.pop(1);
+        return;
+    };
+    lua.pushValue(-1);
+    lua.setField(-2, "__index");
+    lua.pushFunction(zlua.wrap(luaExitValid));       lua.setField(-2, "valid");
+    lua.pushFunction(zlua.wrap(luaExitDestination)); lua.setField(-2, "destination");
+    lua.pushFunction(zlua.wrap(luaExitFlagged));     lua.setField(-2, "flagged");
+    lua.pushFunction(zlua.wrap(luaExitKeyword));     lua.setField(-2, "keyword");
+    lua.pushFunction(zlua.wrap(luaExitKey));         lua.setField(-2, "key");
+    lua.pop(1);
+}
+
+fn pushExit(lua: *Lua, room_vnum: cdb.room_vnum, dir: i32) void {
+    const handle = lua.newUserdata(ExitHandle, 0);
+    handle.* = .{ .room_vnum = room_vnum, .dir = dir };
+    _ = lua.getMetatableRegistry(exit_metatable);
+    lua.setMetatable(-2);
+}
+
+fn checkExitHandle(lua: *Lua) *ExitHandle {
+    return lua.checkUserdata(ExitHandle, 1, exit_metatable);
+}
+
+fn getExitPtr(handle: *ExitHandle) ?*cdb.room_direction_data {
+    const room = cdb.room_by_id(handle.room_vnum) orelse return null;
+    return cdb.room_dir_option_get(room, handle.dir);
+}
+
+fn luaRoomExitGet(lua: *Lua) i32 {
+    const room = checkRoom(lua);
+    const dir = lua.toInteger(2) catch lua.typeError(2, "integer");
+    const exit = cdb.room_dir_option_get(room, @intCast(dir));
+    if (exit == null) {
+        lua.pushNil();
+    } else {
+        pushExit(lua, cdb.room_vnum_get(room), @intCast(dir));
+    }
+    return 1;
+}
+
+fn luaExitValid(lua: *Lua) i32 {
+    const handle = checkExitHandle(lua);
+    lua.pushBoolean(getExitPtr(handle) != null);
+    return 1;
+}
+
+fn luaExitDestination(lua: *Lua) i32 {
+    const handle = checkExitHandle(lua);
+    const exit = getExitPtr(handle) orelse { lua.pushNil(); return 1; };
+    const dest = cdb.exit_dest_get(exit);
+    if (dest == null) {
+        lua.pushNil();
+    } else {
+        pushRoom(lua, cdb.room_vnum_get(dest));
+    }
+    return 1;
+}
+
+fn luaExitFlagged(lua: *Lua) i32 {
+    const handle = checkExitHandle(lua);
+    const flag: c_int = @intCast(lua.toInteger(2) catch lua.typeError(2, "integer"));
+    const exit = getExitPtr(handle) orelse { lua.pushBoolean(false); return 1; };
+    lua.pushBoolean(cdb.exit_flagged(exit, flag));
+    return 1;
+}
+
+fn luaExitKeyword(lua: *Lua) i32 {
+    const handle = checkExitHandle(lua);
+    const exit = getExitPtr(handle) orelse { _ = lua.pushString(""); return 1; };
+    const kw = cdb.exit_keyword_get(exit);
+    if (kw == null) _ = lua.pushString("") else _ = lua.pushString(std.mem.span(kw));
+    return 1;
+}
+
+fn luaExitKey(lua: *Lua) i32 {
+    const handle = checkExitHandle(lua);
+    const exit = getExitPtr(handle) orelse { lua.pushInteger(-1); return 1; };
+    lua.pushInteger(cdb.exit_key_get(exit));
+    return 1;
 }

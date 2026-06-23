@@ -5,4 +5,5 @@ return {
     abbreviation = "Ser",
     size = "medium",
     pc_ok = false,
+    is_humanoid = false,
 }

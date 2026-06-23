@@ -10,7 +10,6 @@
  *  System (RDBS) of the MUD Dragonball Advent Truth.                      *
  ************************************************************************ */
 #include "combat.h"
-#include "act.attack.h"
 #include "act.informative.h"
 #include "act.item.h"
 #include "act.movement.h"
@@ -3447,7 +3446,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
   }
 
   /* Start of Fury Mode for halfbreeds */
-  if (PLR_FLAGGED(ch, PLR_FURY) &&
+  if (char_condition_has(ch, "halfbreed_fury") &&
       (type == 0 || type == 1 || type == 2 || type == 3 || type == 4 ||
        type == 5 || type == 6 || type == 8 || type == 51 || type == 52)) {
     dam *= 1.5;
@@ -3456,14 +3455,14 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
         TRUE, ch, 0, 0, TO_ROOM);
     if (rand_number(1, 10) >= 7) {
       send_to_char(ch, "You feel less angry.\r\n");
-      REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_FURY);
+      char_condition_remove(ch, "halfbreed_fury", "spent");
     }
-  } else if (PLR_FLAGGED(ch, PLR_FURY)) {
+  } else if (char_condition_has(ch, "halfbreed_fury")) {
     dam *= 2;
     act("Your rage magnifies your attack power!", TRUE, ch, 0, 0, TO_CHAR);
     act("Swirling energy flows around $n as $e releases $s rage in the attack!",
         TRUE, ch, 0, 0, TO_ROOM);
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_FURY);
+    char_condition_remove(ch, "halfbreed_fury", "spent");
   }
   /* End of Fury Mode for halfbreeds */
 
@@ -3949,7 +3948,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict,
         dmg += dmg * 0.10;
     }
 
-    if (PLR_FLAGGED(vict, PLR_FURY))
+    if (char_condition_has(vict, "halfbreed_fury"))
       dmg -= dmg * 0.1;
     if (IS_MUTANT(vict)) {
       if (type <= 0)
@@ -4015,7 +4014,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict,
             TO_CHAR);
         act("@G$n rolls to $s feet in an agile fashion!@n", TRUE, vict, 0, 0,
             TO_ROOM);
-        do_stand(vict, 0, 0, 0);
+        char_cmd_execute(vict, "stand", NULL);
         decCurST(vict, rollcost);
       }
     }
@@ -4090,7 +4089,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict,
 
     if (GET_POS(vict) == POS_SITTING && IS_NPC(vict) &&
         getCurHealth(vict) >= ((getMaxPL(vict))) * .98)
-      do_stand(vict, 0, 0, 0);
+      char_cmd_execute(vict, "stand", NULL);
 
     if (is_sparring(ch) && is_sparring(vict)) {
       if (!IS_NPC(vict)) {
@@ -4349,7 +4348,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict,
     if (dead != TRUE) {
       /* Increases GET_FURY for halfbreeds who get damaged. */
       if (!is_sparring(ch) && IS_HALFBREED(vict) && GET_FURY(vict) < 100 &&
-          !PLR_FLAGGED(vict, PLR_FURY)) {
+          !char_condition_has(vict, "halfbreed_fury")) {
         send_to_char(vict, "@RYour fury increases a little bit!@n\r\n");
         char_stat_mod(vict, "fury", 1);
       }

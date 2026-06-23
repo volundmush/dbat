@@ -5,4 +5,5 @@ return {
     abbreviation = "Ani",
     size = "fine",
     pc_ok = false,
+    is_humanoid = false,
 }

@@ -1079,7 +1079,13 @@ local function render_room_line(ch, viewer)
   return table.concat(t)
 end
 
+local function is_humanoid(ch)
+  local race = dbat.characters.registry.races and dbat.characters.registry.races[ch:race_get()]
+  return not race or race.is_humanoid ~= false
+end
+
 return {
+  is_humanoid = is_humanoid,
   meter_is_full = meter_is_full,
   can_see = can_see,
   keywords_for = keywords_for,
