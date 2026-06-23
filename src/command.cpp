@@ -194,7 +194,6 @@ const struct command_info cmd_info[] = {
     {"hsedit", "hsedit", POS_DEAD, do_oasis, 0, ADMLVL_BUILDER,
      SCMD_OASIS_HSEDIT},
     {"htank", "htan", POS_STANDING, do_not_here, 1, ADMLVL_NONE, 0},
-    {"hydromancy", "hydrom", POS_STANDING, do_hydromancy, 0, ADMLVL_NONE, 0},
     {"hyoga", "hyoga", POS_STANDING, do_obstruct, 0, ADMLVL_NONE, 0},
 
     {"ihealth", "ihea", POS_DEAD, do_gen_tog, 0, ADMLVL_NONE, SCMD_IHEALTH},

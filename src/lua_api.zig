@@ -1288,6 +1288,9 @@ fn openDbat(lua: *Lua) i32 {
     lua.pushFunction(zlua.wrap(luaAxionDice));
     lua.setField(-2, "axion_dice");
 
+    lua.pushFunction(zlua.wrap(luaReadObject));
+    lua.setField(-2, "read_object");
+
     lua.pushFunction(zlua.wrap(luaSendToImm));
     lua.setField(-2, "send_to_imm");
 
@@ -1402,6 +1405,17 @@ fn luaWeather(lua: *Lua) i32 {
 fn luaAxionDice(lua: *Lua) i32 {
     const adjust: c_int = if (lua.isNoneOrNil(1)) 0 else @intCast(lua.toInteger(1) catch 0);
     lua.pushInteger(cdb.axion_dice(adjust));
+    return 1;
+}
+
+fn luaReadObject(lua: *Lua) i32 {
+    const vnum: c_int = @intCast(lua.toInteger(1) catch lua.typeError(1, "integer"));
+    const obj = cdb.read_object(vnum, 1); // 1 = VIRTUAL
+    if (obj) |o| {
+        objects_lua.pushObject(lua, cdb.obj_id_get(o));
+    } else {
+        lua.pushNil();
+    }
     return 1;
 }
 

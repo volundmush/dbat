@@ -855,7 +855,7 @@ static void tick_linkdead_flee(struct char_data *ch) {
   if (!IS_NPC(ch) && !(ch->desc) && GET_POS(ch) > POS_STUNNED &&
       !IS_AFFECTED(ch, AFF_FROZEN)) {
     if (FIGHTING(ch)) {
-      do_flee(ch, NULL, 0, 0);
+      char_cmd_execute(ch, "flee", NULL);
     }
   }
 }

@@ -33,7 +33,6 @@ ACMD(do_kaioken);
 ACMD(do_hass);
 ACMD(do_ensnare);
 ACMD(do_fly);
-ACMD(do_flee);
 ACMD(do_get);
 ACMD(do_split);
 ACMD(do_sac);

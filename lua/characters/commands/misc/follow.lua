@@ -14,7 +14,7 @@ return {
         local ch  = ctx.ch
         local arg = ctx.argparams and ctx.argparams.tokens and ctx.argparams.tokens[1] or ""
 
-        if ch:plr_flagged(PLR.HEALT) then
+        if ch:player_flagged(PLR.HEALT) then
             ch:send_line("You are inside a healing tank!")
             return
         end

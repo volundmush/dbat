@@ -20,19 +20,20 @@ local DIR_NAMES = movement.DIR_NAMES
 
 return {
     id = "move",
+    priority = 100,
     aliases = {
-        {"north",     "north",     5}, {"n",         "n",         1},
-        {"south",     "south",     5}, {"s",         "s",         1},
-        {"east",      "east",      4}, {"e",         "e",         1},
-        {"west",      "west",      4}, {"w",         "w",         1},
-        {"up",        "up",        2}, {"u",         "u",         1},
-        {"down",      "down",      4}, {"d",         "d",         1},
-        {"northwest", "northw",    9}, {"nw",        "nw",        2},
-        {"northeast", "northe",    9}, {"ne",        "ne",        2},
-        {"southeast", "southe",    9}, {"se",        "se",        2},
-        {"southwest", "southw",    9}, {"sw",        "sw",        2},
-        {"inside",    "inside",    6}, {"in",        "in",        2},
-        {"outside",   "outside",   7}, {"out",       "out",       3},
+        {"north",     5}, {"n",         1},
+        {"south",     5}, {"s",         1},
+        {"east",      4}, {"e",         1},
+        {"west",      4}, {"w",         1},
+        {"up",        2}, {"u",         1},
+        {"down",      4}, {"d",         1},
+        {"northwest", 6}, {"nw",        2},
+        {"northeast", 6}, {"ne",        2},
+        {"southeast", 6}, {"se",        2},
+        {"southwest", 6}, {"sw",        2},
+        {"inside",    3}, {"in",        2},
+        {"outside",   4}, {"out",       3},
     },
     execute = function(ctx)
         local ch  = ctx.ch
@@ -44,7 +45,7 @@ return {
             return
         end
 
-        if ch:plr_flagged(PLR.SELFD) then
+        if ch:player_flagged(PLR.SELFD) then
             ch:send_line("You are preparing to blow up!")
             return
         end
@@ -85,12 +86,12 @@ return {
             return
         end
 
-        if ch:plr_flagged(PLR.PILOTING) then
+        if ch:player_flagged(PLR.PILOTING) then
             ch:drive_vehicle(dir)
             return
         end
 
-        if ch:plr_flagged(PLR.HEALT) then
+        if ch:player_flagged(PLR.HEALT) then
             ch:send_line("You are inside a healing tank!")
             return
         end
@@ -148,8 +149,8 @@ return {
             ch:eavesdrop_set(0)
         end
 
-        if ch:prf_flagged(PRF.ARENAWATCH) then
-            ch:prf_flag_set(PRF.ARENAWATCH, false)
+        if ch:pref_flagged(PRF.ARENAWATCH) then
+            ch:pref_flag_set(PRF.ARENAWATCH, false)
             ch:arena_idnum_set(-1)
         end
 

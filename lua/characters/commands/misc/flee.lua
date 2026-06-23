@@ -119,6 +119,6 @@ end
 
 return {
     id      = "flee",
-    aliases = { { "flee", "fl", 2 } },
+    aliases = { { "flee", 2 } },
     execute = execute,
 }

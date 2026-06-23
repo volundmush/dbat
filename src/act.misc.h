@@ -31,7 +31,6 @@ ACMD(do_arena);
 ACMD(do_bury);
 /* do_hayasa moved to lua/characters/commands/misc/hayasa.lua */
 ACMD(do_instill);
-ACMD(do_hydromancy);
 ACMD(do_channel);
 ACMD(do_shimmer);
 /* do_metamorph moved to lua/characters/commands/misc/metamorph.lua */

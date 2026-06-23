@@ -358,6 +358,11 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "absorbed_by_set", luaCharacterAbsorbedBySet);
     addMethod(lua, "roll_balance", luaCharacterRollBalance);
     addMethod(lua, "hurt_target", luaCharacterHurtTarget);
+    addMethod(lua, "can_kill", luaCharacterCanKill);
+    addMethod(lua, "lastatk_get", luaCharacterLastAtkGet);
+    addMethod(lua, "lastatk_set", luaCharacterLastAtkSet);
+    addMethod(lua, "carry_weight_get", luaCharacterCarryWeightGet);
+    addMethod(lua, "carry_weight_max", luaCharacterCarryWeightMax);
     addMethod(lua, "wimp_level_get", luaCharacterWimpLevelGet);
     addMethod(lua, "send_to_worlds", luaCharacterSendToWorlds);
     addMethod(lua, "dispel_ash", luaCharacterDispelAsh);
@@ -2652,8 +2657,32 @@ fn luaCharacterHurtTarget(lua: *Lua) i32 {
     const ch = checkCharacter(lua);
     const target = checkCharacterAt(lua, 2);
     const amount = intCastOrError(lua, i64, integer(lua, 3), "damage amount");
-    cdb.hurt(0, 0, ch, target, null, amount, 0);
+    const dmg_type: c_int = if (lua.getTop() >= 4) @intCast(lua.toInteger(4) catch 0) else 0;
+    cdb.hurt(0, 0, ch, target, null, amount, dmg_type);
     return 0;
+}
+fn luaCharacterCanKill(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const vict = checkCharacterAt(lua, 2);
+    lua.pushBoolean(cdb.can_kill(ch, vict, null, 1) != 0);
+    return 1;
+}
+fn luaCharacterLastAtkGet(lua: *Lua) i32 {
+    lua.pushInteger(checkCharacter(lua).lastattack);
+    return 1;
+}
+fn luaCharacterLastAtkSet(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    ch.*.lastattack = @intCast(lua.toInteger(2) catch lua.typeError(2, "integer"));
+    return 0;
+}
+fn luaCharacterCarryWeightGet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.getCurCarriedWeight(checkCharacter(lua)));
+    return 1;
+}
+fn luaCharacterCarryWeightMax(lua: *Lua) i32 {
+    lua.pushInteger(cdb.getMaxCarryWeight(checkCharacter(lua)));
+    return 1;
 }
 fn luaCharacterWimpLevelGet(lua: *Lua) i32 {
     lua.pushInteger(checkCharacter(lua).wimp_level);

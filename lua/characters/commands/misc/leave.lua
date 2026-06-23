@@ -15,7 +15,7 @@ return {
         local ch   = ctx.ch
         local room = ch:room_get()
 
-        if ch:plr_flagged(PLR.HEALT) then
+        if ch:player_flagged(PLR.HEALT) then
             ch:send_line("You are inside a healing tank!")
             return
         end

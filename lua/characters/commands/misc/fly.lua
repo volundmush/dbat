@@ -63,11 +63,11 @@ return {
             return
         end
         if not ch:is_npc() then
-            if ch:plr_flagged(PLR.HEALT) then
+            if ch:player_flagged(PLR.HEALT) then
                 ch:send_line("You are inside a healing tank!")
                 return
             end
-            if ch:plr_flagged(PLR.PILOTING) then
+            if ch:player_flagged(PLR.PILOTING) then
                 ch:send_line("You are busy piloting a ship!")
                 return
             end

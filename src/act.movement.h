@@ -25,7 +25,6 @@ int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_special
 
 // commands
 ACMD(do_gen_door);
-ACMD(do_flee);
 ACMD(do_carry);
 
 #ifdef __cplusplus
