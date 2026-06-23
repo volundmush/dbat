@@ -1,7 +1,7 @@
 local dbat   = require("dbat")
 local BONUS  = dbat.consts.bonus_flags
 local POS    = dbat.consts.positions
-local Search = dbat.lib.search
+local Search = dbat.lib.search.new
 local act    = dbat.lib.act
 
 local function stop_drag_for(dragger, vict)

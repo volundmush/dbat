@@ -93,6 +93,7 @@ fn registerObjectMetatable(lua: *Lua) void {
     addMethod(lua, "reftype", luaObjectRefType);
     addMethod(lua, "valid", luaObjectValid);
     addMethod(lua, "is_same", luaObjectIsSame);
+    addMethod(lua, "__eq", luaObjectIsSame);
     addMethod(lua, "extract", luaObjectExtract);
     addMethod(lua, "id_get", luaObjectIdGet);
     addMethod(lua, "proto_id_get", luaObjectProtoIdGet);

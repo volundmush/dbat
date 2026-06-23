@@ -45,6 +45,7 @@ fn registerZoneMetatable(lua: *Lua) void {
     addMethod(lua, "__tostring", luaZoneToString);
     addMethod(lua, "valid", luaZoneValid);
     addMethod(lua, "is_same", luaZoneIsSame);
+    addMethod(lua, "__eq", luaZoneIsSame);
     addMethod(lua, "id_get", luaZoneIdGet);
     addMethod(lua, "vnum_get", luaZoneIdGet);
     addMethod(lua, "name_get", luaZoneNameGet);

@@ -1,5 +1,5 @@
 local dbat   = require("dbat")
-local Search = dbat.lib.search
+local Search = dbat.lib.search.new
 local act    = dbat.lib.act
 local CARD   = dbat.consts.item_extra_flags.ANTI_HIEROPHANT
 

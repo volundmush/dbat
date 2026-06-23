@@ -1,6 +1,5 @@
 local dbat   = require("dbat")
 local act    = dbat.lib.act
-local Search = dbat.lib.search
 
 local function execute(ctx)
     local ch   = ctx.ch
@@ -19,7 +18,7 @@ local function execute(ctx)
         ch:send_line("You can not target anyone except yourself unless you are a master of this technique.\nSyntax: healingglow")
         return
     else
-        vict = Search(ch):add_room_people(ch:room_get()):add_filter(function(s, e) return s:can_see(e) end):find_one(arg)
+        vict = ch:acquire_room_target(arg)
         if not vict then
             ch:send_line("Nobody around by that name.")
             return

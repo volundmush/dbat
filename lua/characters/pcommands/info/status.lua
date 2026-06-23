@@ -680,6 +680,6 @@ end
 
 return {
     id      = "status",
-    aliases = { { "status", 4 } },
+    aliases = { { "status", 5 } },
     execute = execute,
 }

@@ -9,7 +9,7 @@ local ITEM = dbat.consts.item_types
 return {
     id = "leave",
     aliases = {
-        {"leave", "leave", 5},
+        {"leave", 5},
     },
     execute = function(ctx)
         local ch   = ctx.ch

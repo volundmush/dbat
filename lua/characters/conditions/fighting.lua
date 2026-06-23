@@ -89,9 +89,9 @@ local function tick_position_advantage(ch)
     local vict = ch:fighting_get()
     if not vict then return end
 
-    if not ch:aff_flagged(AFF.POSITION) then
+    if not ch:condition_has("advantageous_position") then
         if ch:roll_balance() > dbat.axion_dice(0) and math.random(1, 10) >= 7 then
-            if not vict:aff_flagged(AFF.POSITION) then
+            if not vict:condition_has("advantageous_position") then
                 ch:send_line("@YYou manage to move into an advantageous position!@n")
                 act.around(ch, "@y$n@Y manages to move into an advantageous position!@n", {actor=ch})
                 ch:condition_add("advantageous_position")

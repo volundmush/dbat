@@ -4,7 +4,7 @@ local PLR    = dbat.consts.player_flags
 local POS    = dbat.consts.positions
 local ITYPE  = dbat.consts.item_types
 local SECT   = dbat.consts.sector_types
-local Search = dbat.lib.search
+local search = dbat.lib.search
 local act    = dbat.lib.act
 
 local function stop_dragging(ch)
@@ -67,7 +67,7 @@ local function execute(ctx)
             return
         end
         local room  = ch:room_get()
-        local chair = Search(ch):add_room_objects(room):add_filter(function(s, e)
+        local chair = search.new(ch):add_room_objects(room):add_filter(function(s, e)
             return s:can_see(e)
         end):find_one(arg)
         if not chair then

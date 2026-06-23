@@ -328,19 +328,6 @@ void handle_multi_merge(struct char_data *form) {
   extract_char(form);
 }
 
-/* song system moved to lua/characters/conditions/mystic_melody.lua */
-void handle_songs() {}
-
-
-
-
-
-
-/* do_song moved to lua/characters/commands/misc/song.lua */
-ACMD(do_song) { (void)ch; (void)argument; (void)cmd; (void)subcmd; }
-
-/* do_preference moved to lua/characters/commands/misc/preference.lua */
-
 ACMD(do_moondust) {
   int64_t cost = GET_MAX_MOVE(ch) * 0.02, heal = 0;
 
@@ -1194,8 +1181,6 @@ ACMD(do_channel) {
   }
 }
 
-ACMD(do_hydromancy) {
-}
 
 void rpp_feature(struct char_data *ch, const char *arg) {
   int cost = 0, change = FALSE;

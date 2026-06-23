@@ -5,7 +5,7 @@ local BONUS  = dbat.consts.bonus_flags
 local POS    = dbat.consts.positions
 local ITYPE  = dbat.consts.item_types
 local SECT   = dbat.consts.sector_types
-local Search = dbat.lib.search
+local Search = dbat.lib.search.new
 local act    = dbat.lib.act
 
 local function stop_dragging(ch)

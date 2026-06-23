@@ -75,14 +75,14 @@ function dbat._values(list)
   end
 end
 
--- Lua dispatch entry points called from Zig (char_pcommand_try / char_command_fallback).
+-- Lua dispatch entry points called from Zig (char_pcommand_try / char_command_try).
 -- Wired onto dbat.characters after Zig has initialised that table.
 function dbat.characters.pcommand_try(ch, full_input)
     local cls = require("lua.characters.pcommands")
     return ch:execute_command(full_input, cls)
 end
 
-function dbat.characters.command_fallback(ch, cmd_word, arguments)
+function dbat.characters.command_try(ch, cmd_word, arguments)
     local cls = require("lua.characters.commands")
     local input = (arguments ~= nil and arguments ~= "")
                   and (cmd_word .. " " .. arguments) or cmd_word

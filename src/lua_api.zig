@@ -353,9 +353,9 @@ pub export fn char_pcommand_try(ch: *cdb.char_data, full_input: [*:0]const u8) b
     return callCharacterDispatch(ch, "pcommand_try", full_input, null);
 }
 
-// Call dbat.characters.command_fallback(ch, cmd_word, arguments) — returns true if handled.
-pub export fn char_command_fallback(ch: *cdb.char_data, cmd_word: [*:0]const u8, arguments: [*:0]const u8) bool {
-    return callCharacterDispatch(ch, "command_fallback", cmd_word, arguments);
+// Call dbat.characters.command_try(ch, cmd_word, arguments) — returns true if handled.
+pub export fn char_command_try(ch: *cdb.char_data, cmd_word: [*:0]const u8, arguments: [*:0]const u8) bool {
+    return callCharacterDispatch(ch, "command_try", cmd_word, arguments);
 }
 
 fn callCharacterDispatch(ch: *cdb.char_data, comptime fn_name: [:0]const u8, first_arg: [*:0]const u8, second_arg: ?[*:0]const u8) bool {

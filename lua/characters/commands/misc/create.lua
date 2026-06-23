@@ -1,6 +1,5 @@
 local dbat   = require("dbat")
 local act    = dbat.lib.act
-local search = dbat.lib.search
 
 local APPLY = dbat.consts.applies
 local EF    = dbat.consts.item_extra_flags
@@ -195,7 +194,7 @@ local function execute(ctx)
             ch:send_line("Who do you want to hit with clothesbeam?\nSyntax: create clothesbeam (target)")
             return
         end
-        local vict = search.new(ch):add_room_people(ch:room_get()):find_one(arg2)
+        local vict = ch:acquire_room_target(arg2)
         if not vict then
             ch:send_line("Clothesbeam who?\nSyntax: create clothesbeam (target)")
             return

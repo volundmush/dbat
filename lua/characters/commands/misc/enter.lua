@@ -30,7 +30,7 @@ end
 return {
     id = "enter",
     aliases = {
-        {"enter", "enter", 5},
+        {"enter", 5},
     },
     execute = function(ctx)
         local ch  = ctx.ch

@@ -1,5 +1,5 @@
 local dbat   = require("dbat")
-local Search = dbat.lib.search
+local Search = dbat.lib.search.new
 
 local function execute(ctx)
     local ch  = ctx.ch

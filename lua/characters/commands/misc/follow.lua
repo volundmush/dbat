@@ -1,6 +1,5 @@
 local dbat   = require("dbat")
 local act    = require("lua.libs.act")
-local search = dbat.lib.search
 
 local PLR = dbat.consts.player_flags
 local AFF = dbat.consts.aff_flags
@@ -8,7 +7,7 @@ local AFF = dbat.consts.aff_flags
 return {
     id = "follow",
     aliases = {
-        {"follow", "follo", 5},
+        {"follow", 5},
     },
     execute = function(ctx)
         local ch  = ctx.ch
@@ -24,7 +23,7 @@ return {
             return
         end
 
-        local leader = search.new(ch):add_room_people(ch:room_get()):find_one(arg)
+        local leader = ch:acquire_room_target(arg)
         if not leader then
             ch:send_line("%s", dbat.consts.noperson)
             return

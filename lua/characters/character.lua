@@ -486,7 +486,7 @@ end
 
 -- Try to dispatch `input` against the commands in cmd_class (must have sorted_list()).
 -- Returns true if a command was matched (even if can_execute blocked it).
--- Used by: pcommand_try (bypass wait), command_fallback (after C++ miss).
+-- Used by: pcommand_try (bypass wait), command_try (before C++ table).
 local function execute_command(ch, input, cmd_class)
     local word = (input or ""):match("^(%S+)") or ""
     local rest = (input or ""):match("^%S+%s*(.-)$") or ""
@@ -520,6 +520,31 @@ local function visible_commands(ch, cmd_class)
         end
     end
     return visible
+end
+
+-- Port of C++ init_skill(): returns the effective skill level for a roll.
+-- For PCs: their actual skill (+ TRANSMISSION bonus, capped 118).
+-- For NPCs: a level-scaled random range matching old mob AI behaviour.
+local function init_skill(ch, skill_name)
+    if not ch:is_npc() then
+        local sk = ch:skill_get(skill_name)
+        if ch:player_flagged(dbat.consts.player_flags.TRANSMISSION) then
+            sk = sk + 4
+        end
+        return math.min(sk, 118)
+    end
+    local level = ch:stat_get("level")
+    if     level <= 10  then return math.random(30,  50)
+    elseif level <= 20  then return math.random(45,  65)
+    elseif level <= 30  then return math.random(55,  70)
+    elseif level <= 50  then return math.random(65,  80)
+    elseif level <= 70  then return math.random(75,  90)
+    elseif level <= 80  then return math.random(85, 100)
+    elseif level <= 90  then return math.random(90, 100)
+    elseif level <= 100 then return math.random(95, 100)
+    elseif level <= 110 then return math.random(95, 105)
+    else                     return math.random(100, 110)
+    end
 end
 
 -- Search the character's room for a visible target by name.
@@ -1112,5 +1137,6 @@ return {
   damage = damage,
   on_attacked = on_attacked,
   launch_attack = launch_attack,
+  init_skill          = init_skill,
   acquire_room_target = acquire_room_target,
 }

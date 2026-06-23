@@ -80,6 +80,8 @@ fn registerRoomMetatable(lua: *Lua) void {
     lua.setField(-2, "valid");
     lua.pushFunction(zlua.wrap(luaRoomIsSame));
     lua.setField(-2, "is_same");
+    lua.pushFunction(zlua.wrap(luaRoomIsSame));
+    lua.setField(-2, "__eq");
     lua.pushFunction(zlua.wrap(luaRoomIsDark));
     lua.setField(-2, "is_dark");
     lua.pushFunction(zlua.wrap(luaRoomIsSunken));

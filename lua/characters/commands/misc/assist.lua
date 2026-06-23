@@ -1,5 +1,4 @@
 local dbat   = require("dbat")
-local search = dbat.lib.search
 
 local function execute(ctx)
     local ch  = ctx.ch
@@ -15,7 +14,7 @@ local function execute(ctx)
         return
     end
 
-    local helpee = search.new(ch):add_room_people(ch:room_get()):find_one(arg)
+    local helpee = ch:acquire_room_target(arg)
     if not helpee then
         ch:send_line("That person isn't here.")
         return

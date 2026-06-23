@@ -7,7 +7,7 @@ local SKY_ROOMS = {[50]=true,[51]=true,[52]=true,[53]=true,[54]=true,
 return {
     id = "land",
     aliases = {
-        {"land", "land", 4},
+        {"land", 4},
     },
     execute = function(ctx)
         local ch    = ctx.ch

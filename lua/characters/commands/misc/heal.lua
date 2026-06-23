@@ -1,5 +1,4 @@
 local dbat = require("dbat")
-local search = dbat.lib.search
 
 local function limb_ok_arm(ch)
     if ch:condition_has("mystic_melody") then
@@ -33,7 +32,7 @@ local function execute(ctx)
         return
     end
 
-    local vict = search.new(ch):add_room_people(ch:room_get()):find_one(arg)
+    local vict = ch:acquire_room_target(arg)
     if not vict then
         ch:send_line("You do not see the target here.")
         return

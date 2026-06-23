@@ -77,15 +77,12 @@ end
 local function base_damage(ch, def, inst)
     local pl    = ch:der_total("powerlevel")
     local tier  = def.tier or 1
-    local tier_scale = { 0.0001, 0.00015, 0.0002, 0.0003, 0.0005 }
-    local base  = math.floor(pl * (tier_scale[tier] or 0.0001))
+    local tier_scale = { 0.016, 0.024, 0.032, 0.048, 0.072 }
+    local base  = math.floor(pl * (tier_scale[tier] or 0.016))
     local skill_mult = 1.0 + (inst.skill_level / 100) * 0.5
     base = math.floor(base * skill_mult * (def.base_power or 1.0))
     if def.family == "melee" then
         base = math.floor(base * 0.92)
-        if base > ch:meter_max("powerlevel") * 0.10 then
-            base = math.floor(base * 0.60)
-        end
     end
     return base
 end
@@ -168,6 +165,11 @@ local function multihit_check(ch, vict)
     return ch:der_total("speed_index") >= vict:der_total("speed_index") + math.random(1, 15)
 end
 
+local function skill_level_for(ch, def)
+    if not def.skill then return 0 end
+    return ch:init_skill(def.skill)
+end
+
 local function build_instance(ch, def, target, opts)
     opts = opts or {}
     return {
@@ -181,7 +183,7 @@ local function build_instance(ch, def, target, opts)
 
         cost        = {},
         charge_used = ch:charge_get(),
-        skill_level = (def.skill and ch:skill_get(def.skill)) or 0,
+        skill_level = skill_level_for(ch, def),
 
         accuracy_roll  = 0,
         hit_threshold  = 0,

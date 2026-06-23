@@ -1,5 +1,5 @@
 local dbat   = require("dbat")
-local Search = dbat.lib.search
+local Search = dbat.lib.search.new
 local act    = dbat.lib.act
 
 local DUEL_TABLE_MIN = 604

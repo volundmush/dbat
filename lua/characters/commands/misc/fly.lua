@@ -48,7 +48,7 @@ end
 return {
     id = "fly",
     aliases = {
-        {"fly", "fly", 3},
+        {"fly", 3},
     },
     execute = function(ctx)
         local ch  = ctx.ch

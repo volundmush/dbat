@@ -1,6 +1,5 @@
 local dbat   = require("dbat")
 local act    = dbat.lib.act
-local Search = dbat.lib.search
 
 local function execute(ctx)
     local ch  = ctx.ch
@@ -23,7 +22,7 @@ local function execute(ctx)
         return
     end
 
-    local vict = Search(ch):add_room_people(ch:room_get()):add_filter(function(s, e) return s:can_see(e) end):find_one(arg)
+    local vict = ch:acquire_room_target(arg)
     if not vict then
         ch:send_line("You can't seem to find that person.")
         return

@@ -644,6 +644,11 @@ void command_interpreter(struct char_data *ch, char *argument) {
     if (cont)
       return; /* yes, command trigger took over */
   }
+
+  /* Try Lua commands before the hardcoded table. */
+  if (char_command_try(ch, arg, line))
+    return;
+
   for (length = strlen(arg), cmd = 0; *complete_cmd_info[cmd].command != '\n';
        cmd++) {
     if (!strncmp(complete_cmd_info[cmd].command, arg, length))
@@ -657,8 +662,7 @@ void command_interpreter(struct char_data *ch, char *argument) {
   sprintf(blah, "%s", complete_cmd_info[cmd].command);
 
   if (*complete_cmd_info[cmd].command == '\n') {
-    if (!char_command_fallback(ch, arg, line))
-      send_to_char(ch, "Huh!?!\r\n");
+    send_to_char(ch, "Huh!?!\r\n");
     return;
   }
 
