@@ -12,7 +12,6 @@
 #include "act.comm.h"
 #include "act.informative.h"
 #include "act.item.h"
-#include "act.movement.h"
 #include "act.social.h"
 #include "character_api.h"
 #include "character_db.h"

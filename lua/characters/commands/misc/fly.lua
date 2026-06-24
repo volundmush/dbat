@@ -1,5 +1,7 @@
-local dbat = require("dbat")
-local act  = require("lua.libs.act")
+local dbat     = require("dbat")
+local act      = require("lua.libs.act")
+local combat   = require("lua.libs.combat")
+local movement = require("lua.libs.movement")
 
 local PLR  = dbat.consts.player_flags
 local AFF  = dbat.consts.aff_flags
@@ -28,7 +30,7 @@ local function blast_off(ch, dest_vnum)
     ch:reveal_hiding(0)
     ch:condition_add("flying", "skill", "fly")
     ch:condition_number_set("flying", "altitude", 2)
-    if not ch:block_calc() then return end
+    if not combat.block_calc(ch) then return end
     ch:condition_remove("flying", "stop_flying")
     ch:fly_zone("can be seen blasting off into space!@n\r\n")
     ch:send_to_sense(1, "leaving the planet")
@@ -93,7 +95,7 @@ return {
                 act.to_char(ch, "@WYou begin to plummet to the ground!@n", {actor=ch})
                 act.around(ch, "@W$n starts to pummet to the ground below!@n", {actor=ch})
                 ch:condition_remove("flying", "stop_flying")
-                ch:handle_fall()
+                movement.handle_fall(ch)
                 return
             end
             if ch:condition_has("flying") and sect == SECT.SPACE then

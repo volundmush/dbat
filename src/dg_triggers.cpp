@@ -13,7 +13,6 @@
  *  $Revision: 1.0.14 $                                                    *
  **************************************************************************/
 
-#include "act.movement.h"
 #include "character_api.h"
 #include "character_db.h"
 #include "character_impl.h"
@@ -50,6 +49,8 @@
 #include <cctype>
 #include <cstdlib>
 #include <cstring>
+
+const char *cmd_door[] = {"open", "close", "unlock", "lock", "pick"};
 
 /*
  *  General functions used by several triggers

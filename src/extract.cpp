@@ -1,6 +1,5 @@
 #include "extract.h"
 #include "act.misc.h"
-#include "act.movement.h"
 #include "act.wizard.h"
 #include "comm.h"
 #include "config.h"

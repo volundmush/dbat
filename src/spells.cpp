@@ -11,7 +11,6 @@
 #include "spells.h"
 #include "act.informative.h"
 #include "act.item.h"
-#include "act.movement.h"
 #include "character_api.h"
 #include "character_impl.h"
 #include "character_macros.h"

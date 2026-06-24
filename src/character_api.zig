@@ -1748,7 +1748,6 @@ extern fn get_i_name(ch: *cdb.char_data, vict: *cdb.char_data) ?[*:0]const u8;
 extern fn introd_calc(ch: *cdb.char_data) ?[*:0]u8;
 extern fn carry_drop(ch: *cdb.char_data, @"type": c_int) void;
 extern fn look_at_room(room: *cdb.room_data, ch: *cdb.char_data, mode: c_int) void;
-extern fn do_fly(ch: *cdb.char_data, arg: ?[*:0]u8, cmd: c_int, subcmd: c_int) void;
 extern fn find_target_room(ch: *cdb.char_data, rawroomstr: [*:0]u8) ?*cdb.room_data;
 
 pub export fn char_bonus_flagged(ch: *cdb.char_data, n: c_int) bool {
@@ -1775,7 +1774,7 @@ pub export fn char_carry_drop(ch: *cdb.char_data, @"type": c_int) void {
     carry_drop(ch, @"type");
 }
 pub export fn char_land(ch: *cdb.char_data) void {
-    if (cdb.char_condition_has(ch, "flying")) do_fly(ch, null, 0, 0);
+    if (cdb.char_condition_has(ch, "flying")) _ = cdb.char_condition_remove(ch, "flying", "land");
 }
 pub export fn char_arena_idnum_get(ch: *cdb.char_data) c_int {
     return @intCast(ch.arenawatch);

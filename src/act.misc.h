@@ -16,7 +16,6 @@ void ash_burn(struct char_data *ch);
 ACMD(do_restring);
 /* do_tailhide moved to lua/characters/commands/misc/tailhide.lua */
 /* do_nogrow moved to lua/characters/commands/misc/nogrow.lua */
-ACMD(do_follow);
 ACMD(do_spoil);
 ACMD(do_feed);
 ACMD(do_beacon);

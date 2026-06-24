@@ -60,7 +60,6 @@ ACMD(do_plant);
 ACMD(do_kaioken);
 ACMD(do_focus);
 ACMD(do_regenerate);
-/* do_escape → lua/characters/commands/misc/escape.lua */
 ACMD(do_absorb);
 ACMD(do_ingest);
 ACMD(do_upgrade);
@@ -83,7 +82,6 @@ ACMD(do_candy);
 ACMD(do_kura);
 ACMD(do_taisha);
 ACMD(do_paralyze);
-ACMD(do_infuse);
 ACMD(do_rip);
 ACMD(do_train);
 ACMD(do_trip);

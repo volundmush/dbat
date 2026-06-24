@@ -9,7 +9,6 @@ extern "C" {
 
 #define CMD_NAME (complete_cmd_info[cmd].command)
 #define CMD_IS(cmd_name) (!strcmp(cmd_name, complete_cmd_info[cmd].command))
-#define IS_MOVE(cmdnum) (complete_cmd_info[cmdnum].command_pointer == do_move)
 
 extern const char *list_bonus[];
 extern const struct command_info cmd_info[];

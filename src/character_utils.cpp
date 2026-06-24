@@ -9,7 +9,6 @@
 #include "util_macros.h"
 
 #include "act.informative.h"
-#include "act.movement.h"
 #include "class.h"
 #include "guild.h"
 #include "combat.h"
@@ -4411,4 +4410,32 @@ extern "C" bool char_news_pending(struct char_data *ch) {
 
 extern "C" int char_slot_count(struct char_data *ch) {
   return slot_count(ch);
+}
+
+void carry_drop(struct char_data *ch, int type) {
+  struct char_data *vict = CARRYING(ch);
+  switch (type) {
+  case 0:
+    act("@WYou gently set @C$N@W down on the ground.@n", TRUE, ch, 0, vict, TO_CHAR);
+    act("@C$n @Wgently sets you down on the ground.@n", TRUE, ch, 0, vict, TO_VICT);
+    act("@C$n @Wgently sets @c$N@W down on the ground.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    break;
+  case 1:
+    act("@WYou set @C$N@W hastily onto the ground.@n", TRUE, ch, 0, vict, TO_CHAR);
+    act("@C$n @Wsets you hastily onto the ground.@n", TRUE, ch, 0, vict, TO_VICT);
+    act("@C$n @Wsets @c$N@W hastily onto the ground.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    break;
+  case 2:
+    act("@WYou have @C$N@W knocked out of your arms and onto the ground!@n", TRUE, ch, 0, vict, TO_CHAR);
+    act("@WYou are knocked out of @C$n's@W arms and onto the ground!@n", TRUE, ch, 0, vict, TO_VICT);
+    act("@C$n @Whas @c$N@W knocked out of $s arms and onto the ground!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    break;
+  case 3:
+    act("@WYou stop carrying @C$N@W for some reason.@n", TRUE, ch, 0, vict, TO_CHAR);
+    act("@C$n @Wstops carrying you for some reason.@n", TRUE, ch, 0, vict, TO_VICT);
+    act("@C$n @Wstops carrying @c$N@W for some reason.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    break;
+  }
+  char_carrying_char_set(ch, NULL);
+  char_carried_by_char_set(vict, NULL);
 }

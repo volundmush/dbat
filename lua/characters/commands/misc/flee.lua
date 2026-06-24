@@ -1,6 +1,7 @@
 local dbat     = require("dbat")
 local act      = require("lua.libs.act")
 local movement = require("lua.libs.movement")
+local combat   = require("lua.libs.combat")
 
 local RF  = dbat.consts.room_flags
 local EX  = dbat.consts.exit_flags
@@ -75,7 +76,7 @@ local function execute(ctx)
                 end
                 if hit_wall then return end
 
-                if not ch:block_calc() then return end
+                if not combat.block_calc(ch) then return end
 
                 -- Absorb checks inside the loop (can change after block_calc)
                 local absorbing = ch:absorbing_get()
@@ -102,7 +103,7 @@ local function execute(ctx)
                     end
                 end
 
-                if ch:try_move(movement.DIR_NAMES[attempt + 1]) then
+                if movement.perform_move(ch, attempt) then
                     ch:send_line("You flee head over heels.")
                     ch:wait_set(20)
                 else

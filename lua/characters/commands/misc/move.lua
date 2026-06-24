@@ -1,6 +1,7 @@
 local dbat     = require("dbat")
 local movement = require("lua.libs.movement")
 local act      = require("lua.libs.act")
+local combat   = require("lua.libs.combat")
 
 local PLR = dbat.consts.player_flags
 local AFF = dbat.consts.aff_flags
@@ -142,7 +143,7 @@ return {
             end
         end
 
-        if not ch:block_calc() then return end
+        if not combat.block_calc(ch) then return end
 
         if ch:eavesdrop_get() > 0 then
             ch:send_line("You stop eavesdropping.")

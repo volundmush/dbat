@@ -8,13 +8,15 @@ local _C
 local function C()
   if _C then return _C end
   local d = require("dbat")
+  local mov = require("lua.libs.movement")
   _C = {
-    AF   = d.consts.aff_flags,
-    PLR  = d.consts.player_flags,
-    PRF  = d.consts.prf_flags,
-    dirs = d.consts.direction_names,
-    aura = d.consts.aura_color_names,
-    skin = d.consts.skin_color_names,
+    AF     = d.consts.aff_flags,
+    PLR    = d.consts.player_flags,
+    PRF    = d.consts.prf_flags,
+    dirs   = d.consts.direction_names,
+    aura   = d.consts.aura_color_names,
+    skin   = d.consts.skin_color_names,
+    has_o2 = mov.has_o2,
   }
   return _C
 end
@@ -324,7 +326,7 @@ local function survival_check(ch)
   local pl_regen = ch:der_total("powerlevel_regen")
 
   -- 2. Sunken room (not space), no O2: ki drain then health drain
-  if not ch:has_o2() and room:is_sunken() and not room:flagged(RF.SPACE) then
+  if not C().has_o2(ch) and room:is_sunken() and not room:flagged(RF.SPACE) then
     local max_ki = ch:meter_max("ki")
     if ch:meter_current("ki") - ki_regen > max_ki // 200 then
       ch:send_line("Your ki holds an atmosphere around you.")
@@ -344,7 +346,7 @@ local function survival_check(ch)
   end
 
   -- 3. Space, no O2: same pattern with slightly different ki threshold
-  if not ch:has_o2() and room:flagged(RF.SPACE) then
+  if not C().has_o2(ch) and room:flagged(RF.SPACE) then
     local max_ki = ch:meter_max("ki")
     if ch:meter_current("ki") - ki_regen > math.floor(max_ki * 0.005) then
       ch:send_line("Your ki holds an atmosphere around you.")

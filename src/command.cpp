@@ -8,7 +8,6 @@
 #include "act.informative.h"
 #include "act.item.h"
 #include "act.misc.h"
-#include "act.movement.h"
 #include "act.other.h"
 #include "act.social.h"
 #include "act.wizard.h"
@@ -98,7 +97,6 @@ const struct command_info cmd_info[] = {
 
     {"cancel", "cance", POS_RESTING, do_not_here, 0, 0, 0},
     {"candy", "cand", POS_FIGHTING, do_candy, 0, 0, 0},
-    {"carry", "carr", POS_STANDING, do_carry, 0, 0, 0},
     {"carve", "carv", POS_SLEEPING, do_gen_tog, 0, 0, SCMD_CARVE},
     {"cedit", "cedit", POS_DEAD, do_oasis, 0, ADMLVL_IMPL, SCMD_OASIS_CEDIT},
     {"channel", "channe", POS_FIGHTING, do_channel, 0, 0, 0},
@@ -107,7 +105,6 @@ const struct command_info cmd_info[] = {
     {"chown", "cho", POS_DEAD, do_chown, 1, ADMLVL_IMPL, 0},
     {"clan", "cla", POS_DEAD, do_clan, 0, ADMLVL_NONE, 0},
     {"clear", "cle", POS_DEAD, do_gen_ps, 0, ADMLVL_NONE, SCMD_CLEAR},
-    {"close", "cl", POS_SITTING, do_gen_door, 0, ADMLVL_NONE, SCMD_CLOSE},
     {"cls", "cls", POS_DEAD, do_gen_ps, 0, ADMLVL_NONE, SCMD_CLEAR},
     {"clsolc", "clsolc", POS_DEAD, do_gen_tog, 0, ADMLVL_BUILDER, SCMD_CLS},
     {"color", "col", POS_DEAD, do_color, 0, ADMLVL_NONE, 0},
@@ -222,7 +219,6 @@ const struct command_info cmd_info[] = {
     {"links", "lin", POS_DEAD, do_oasis, 0, ADMLVL_BUILDER, SCMD_OASIS_LINKS},
     /* liquefy → lua/characters/commands/misc/liquefy.lua */
     {"lkeep", "lkee", POS_DEAD, do_gen_tog, 0, ADMLVL_NONE, SCMD_LKEEP},
-    {"lock", "loc", POS_SITTING, do_gen_door, 0, ADMLVL_NONE, SCMD_LOCK},
     {"lockout", "lock", POS_STANDING, do_hell, 0, ADMLVL_IMMORT, 0},
     {"lua", "lua", POS_DEAD, do_lua, 0, ADMLVL_IMPL, 0},
     {"majinize", "majini", POS_STANDING, do_majinize, 0, ADMLVL_NONE, 0},
@@ -266,7 +262,6 @@ const struct command_info cmd_info[] = {
     {"nowiz", "nowiz", POS_DEAD, do_gen_tog, 0, ADMLVL_IMMORT, SCMD_NOWIZ},
     {"ooc", "ooc", POS_SLEEPING, do_gen_comm, 0, ADMLVL_NONE, SCMD_GOSSIP},
     {"offer", "off", POS_STANDING, do_not_here, 1, ADMLVL_NONE, 0},
-    {"open", "ope", POS_SITTING, do_gen_door, 0, ADMLVL_NONE, SCMD_OPEN},
     {"olc", "olc", POS_DEAD, do_show_save_list, 0, ADMLVL_IMMORT, 0},
     {"olist", "olist", POS_DEAD, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_OLIST},
     {"oedit", "oedit", POS_DEAD, do_oasis, 0, ADMLVL_IMMORT, SCMD_OASIS_OEDIT},
@@ -276,7 +271,6 @@ const struct command_info cmd_info[] = {
     {"peace", "pea", POS_DEAD, do_peace, 0, ADMLVL_BUILDER, 0},
     {"perfect", "perfec", POS_DEAD, do_perf, 0, ADMLVL_NONE, 0},
     {"permission", "permiss", POS_DEAD, do_permission, 0, ADMLVL_IMMORT, 0},
-    {"pick", "pi", POS_STANDING, do_gen_door, 1, ADMLVL_NONE, SCMD_PICK},
     {"pickup", "picku", POS_RESTING, do_not_here, 0, 0, 0},
     {"pilot", "pilot", POS_SITTING, do_drive, 0, ADMLVL_NONE, 0},
     {"plant", "plan", POS_STANDING, do_plant, 0, ADMLVL_NONE, 0},
@@ -332,7 +326,6 @@ const struct command_info cmd_info[] = {
     {"scan", "sca", POS_FIGHTING, do_scan, 0, ADMLVL_NONE, 0},
     {"scouter", "scou", POS_RESTING, do_scouter, 0, ADMLVL_NONE, 0},
     {"scry", "scr", POS_STANDING, do_scry, 0, ADMLVL_NONE, 0},
-    {"shimmer", "shimme", POS_STANDING, do_shimmer, 0, ADMLVL_NONE, 0},
     {"snet", "snet", POS_RESTING, do_snet, 0, ADMLVL_NONE, 0},
     {"search", "sea", POS_STANDING, do_look, 0, ADMLVL_NONE, SCMD_SEARCH},
     {"sell", "sell", POS_STANDING, do_not_here, 0, ADMLVL_NONE, 0},
@@ -396,7 +389,6 @@ const struct command_info cmd_info[] = {
     {"twohand", "twohand", POS_DEAD, do_twohand, 0, ADMLVL_NONE, 0},
     {"typo", "typo", POS_DEAD, do_gen_write, 0, ADMLVL_NONE, SCMD_TYPO},
 
-    {"unlock", "unlock", POS_SITTING, do_gen_door, 0, ADMLVL_NONE, SCMD_UNLOCK},
     {"ungroup", "ungroup", POS_DEAD, do_ungroup, 0, ADMLVL_NONE, 0},
     {"unban", "unban", POS_DEAD, do_unban, 0, ADMLVL_GRGOD, 0},
     {"unaffect", "unaffect", POS_DEAD, do_wizutil, 0, ADMLVL_GOD,

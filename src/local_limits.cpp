@@ -11,7 +11,6 @@
 #include "config.h"
 
 #include "act.item.h"
-#include "act.movement.h"
 #include "act.other.h"
 #include "alias.h"
 #include "character_api.h"

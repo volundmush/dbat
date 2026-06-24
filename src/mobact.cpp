@@ -11,10 +11,10 @@
 #include "mobact.h"
 
 #include "act.item.h"
-#include "act.movement.h"
 #include "act.other.h"
 #include "act.social.h"
 #include "character_api.h"
+#include "character_scripts.h"
 #include "character_impl.h"
 #include "character_macros.h"
 #include "character_utils.h"
@@ -167,7 +167,7 @@ void char_game_activate(struct char_data *ch) {
   if (IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOSCAVENGER) && !MOB_FLAGGED(ch, MOB_NOKILL))
     char_subscribe_add(ch, "mob_scavenger");
   if (!MOB_FLAGGED(ch, MOB_SENTINEL))
-    char_subscribe_add(ch, "mob_wander");
+    char_script_add(ch, "mob_wander");
   if (MOB_FLAGGED(ch, MOB_AGGRESSIVE))
     char_subscribe_add(ch, "mob_aggressive");
   if (MOB_FLAGGED(ch, MOB_HELPER))
@@ -273,37 +273,6 @@ static void mob_scavenger_update() {
   });
 }
 
-static void mob_wander_update() {
-  std::vector<int> available_dirs(12, 0);
-  size_t available = 0;
-  zone_iterate_active([&](auto zone) {
-    zone_mobs_iterate(zone_id_get(zone), [&](struct char_data *ch) {
-      if (MOB_FLAGGED(ch, MOB_SENTINEL) || GET_POS(ch) != POS_STANDING)
-        return true;
-      if (!AWAKE(ch) || FIGHTING(ch))
-        return true;
-      if (AFF_FLAGGED(ch, AFF_TAMED) || ABSORBBY(ch) || IS_AFFECTED(ch, AFF_PARALYZE))
-        return true;
-      if (rand_number(1, 3) != 3)
-        return true;
-
-      available = 0;
-
-      room_exits_iterate(char_room_get(ch), [&](auto dir, auto exit) {
-        if (auto dest = char_can_go_exit(ch, exit); dest &&
-            !room_flagged(dest, ROOM_NOMOB) && !room_flagged(dest, ROOM_DEATH) &&
-            (!MOB_FLAGGED(ch, MOB_STAY_ZONE) || (room_zone_get(dest) == zone))) {
-          available_dirs[available++] = dir;
-        }
-        return true;
-      });
-      if (available > 0 && block_calc(ch))
-        perform_move(ch, available_dirs[rand_number(0, available - 1)], 1);
-      return true;
-    });
-    return true;
-  });
-}
 
 static void mob_aggressive_update() {
   char_for_each("mob_aggressive", [](struct char_data *ch) {
@@ -556,7 +525,6 @@ void mobile_activity(void) {
 
   time_phase("mob_spec_update",      [&]{ mob_spec_update(); });
   time_phase("mob_scavenger_update", [&]{ mob_scavenger_update(); });
-  time_phase("mob_wander_update",    [&]{ mob_wander_update(); });
   time_phase("mob_aggressive_update",[&]{ mob_aggressive_update(); });
   time_phase("mob_multiform_update", [&]{ mob_multiform_update(); });
   time_phase("mob_runtime_update",   [&]{ mob_runtime_update(); });

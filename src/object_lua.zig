@@ -12,6 +12,7 @@ const obj_proto_metatable = "dbat.ObjectPrototype";
 const obj_script_metatable = "dbat.ObjectScript";
 
 extern fn event_schedule_lua_obj_update(fire_at: i64, interval: i64, kind: ?[*:0]const u8, obj_id: i64) u64;
+extern fn hatch_get_vehicle(hatch: *cdb.obj_data) ?*cdb.obj_data;
 extern fn eq_cancel_owner(owner_kind: c_int, owner_id: i64, tag: ?[*:0]const u8) i64;
 extern fn eq_owner_count(owner_kind: c_int, owner_id: i64, tag: ?[*:0]const u8) i64;
 extern fn eq_owner_next_ms(owner_kind: c_int, owner_id: i64, tag: ?[*:0]const u8) i64;
@@ -172,6 +173,7 @@ fn registerObjectMetatable(lua: *Lua) void {
     addMethod(lua, "distance_get", luaObjectDistanceGet);
     addMethod(lua, "scoutfreq_get", luaObjectScoutfreqGet);
     addMethod(lua, "room_get", luaObjectRoomGet);
+    addMethod(lua, "hatch_vehicle_get", luaObjectHatchVehicleGet);
     addMethod(lua, "post_type_get", luaObjectPostTypeGet);
     addMethod(lua, "is_posted", luaObjectIsPosted);
     addMethod(lua, "fellow_wall_has", luaObjectFellowWallHas);
@@ -943,6 +945,16 @@ fn luaObjectRoomGet(lua: *Lua) i32 {
         return 1;
     }
     rooms_lua.pushRoom(lua, room.*.id);
+    return 1;
+}
+
+fn luaObjectHatchVehicleGet(lua: *Lua) i32 {
+    const vehicle = hatch_get_vehicle(checkObject(lua));
+    if (vehicle == null) {
+        lua.pushNil();
+        return 1;
+    }
+    pushObject(lua, cdb.obj_id_get(vehicle.?));
     return 1;
 }
 

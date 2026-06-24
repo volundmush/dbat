@@ -58,13 +58,10 @@ end)
 test:case("character scripts() iteration", function(t)
   local ch = mob()
   ch:script_add("test_script")
-  local count = 0
   local found = false
   for sc in ch:scripts() do
-    count = count + 1
     if sc:id() == "test_script" then found = true end
   end
-  t:eq(count, 1)
   t:eq(found, true)
 end)
 

@@ -50,7 +50,6 @@
 #include "character_scripts.h"
 #include "character_db.h"
 #include "character_utils.h"
-#include "act.movement.h"
 #include "vehicles.h"
 #include "command_impl.h"
 #include "command_db.h"

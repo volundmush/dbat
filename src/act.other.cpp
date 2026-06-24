@@ -72,7 +72,6 @@
 #include "act.informative.h"
 #include "act.item.h"
 #include "act.misc.h"
-#include "act.movement.h"
 #include "act.wizard.h"
 #include "alias.h"
 #include "clan.h"
@@ -1960,9 +1959,6 @@ ACMD(do_rip) {
     return;
   }
 }
-
-/* do_infuse moved to lua/characters/commands/misc/infuse.lua */
-ACMD(do_infuse) { (void)ch; (void)argument; (void)cmd; (void)subcmd; }
 
 ACMD(do_paralyze) {
   struct char_data *vict;
@@ -4402,8 +4398,6 @@ ACMD(do_absorb) {
     return;
   } // Error
 }
-
-ACMD(do_escape) { /* ported to lua/characters/commands/misc/escape.lua */ }
 
 ACMD(do_regenerate) {
 
@@ -7395,8 +7389,9 @@ static int has_scanner(struct char_data *ch) {
   int success = 0;
 
   char_inventory_iterate(ch, [&](auto obj) {
-    if (obj && GET_OBJ_VNUM(obj) == 13600) {
+    if (GET_OBJ_VNUM(obj) == 13600) {
       success = 1;
+      return false;
     }
     return true;
   });
@@ -7417,7 +7412,7 @@ ACMD(do_snet) {
 
   auto room = char_room_get(ch);
 
-  if ((room && room_flagged(room, ROOM_HBTC))) {
+  if ((room_flagged(room, ROOM_HBTC))) {
     send_to_char(ch, "This is a different dimension!\r\n");
     return;
   }
@@ -7425,11 +7420,11 @@ ACMD(do_snet) {
     send_to_char(ch, "Lol, no.\r\n");
     return;
   }
-  if ((room && room_flagged(room, ROOM_PAST))) {
+  if ((room_flagged(room, ROOM_PAST))) {
     send_to_char(ch, "This is the past, you can't talk on scouter net!\r\n");
     return;
   }
-  if ((room && room_flagged(room, ROOM_HELL))) {
+  if ((room_flagged(room, ROOM_HELL))) {
     send_to_char(ch, "The fire eats your transmission!\r\n");
     return;
   }

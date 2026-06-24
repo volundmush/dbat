@@ -292,6 +292,8 @@ bool char_planet_zenith(struct char_data *ch);
 
 bool release_charge(struct char_data *ch);
 
+void carry_drop(struct char_data *ch, int type);
+
 #ifdef __cplusplus
 }
 #endif

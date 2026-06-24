@@ -1,3 +1,5 @@
+local dbat = require("dbat")
+
 local Condition = {}
 Condition.__index = Condition
 
@@ -6,6 +8,18 @@ function Condition.wrap(def)
   def.exclusive_tags = def.exclusive_tags or {}
   def.persistent     = def.persistent     ~= nil and def.persistent     or false
   def.stackable      = def.stackable      ~= nil and def.stackable      or false
+  -- A condition may embed a derived stat definition. Register it into the
+  -- derived registry so ch:der_total() can find it without a separate file.
+  if def.derived then
+    local d = def.derived
+    d.id = d.id or def.id
+    local bucket = dbat.characters.registry["derived"]
+    if not bucket then
+      bucket = {}
+      dbat.characters.registry["derived"] = bucket
+    end
+    if not bucket[d.id] then bucket[d.id] = d end
+  end
   return setmetatable(def, Condition)
 end
 

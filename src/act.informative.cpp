@@ -6440,24 +6440,25 @@ static void search_in_direction(struct char_data *ch, int dir) {
   if (IS_HALFBREED(ch))
     skill_lvl = skill_lvl + 1;
 
-  if (EXIT(ch, dir))
+  auto ex = EXIT(ch, dir);
+  if (ex)
     dchide = DOOR_DCHIDE(ch, dir);
 
   if (skill_lvl > dchide)
     check = TRUE;
 
-  if (EXIT(ch, dir)) {
-    if (exit_general_description_get(EXIT(ch, dir)) &&
-        !exit_flagged(EXIT(ch, dir), EX_SECRET))
-      send_to_char(ch, "%s", exit_general_description_get(EXIT(ch, dir)));
-    else if (!exit_flagged(EXIT(ch, dir), EX_SECRET))
+  if (ex) {
+    if (exit_general_description_get(ex) &&
+        !exit_flagged(ex, EX_SECRET))
+      send_to_char(ch, "%s", exit_general_description_get(ex));
+    else if (!exit_flagged(ex, EX_SECRET))
       send_to_char(ch, "There is a normal exit there.\r\n");
-    else if (exit_flagged(EXIT(ch, dir), EX_ISDOOR) &&
-             exit_flagged(EXIT(ch, dir), EX_SECRET) && exit_keyword_get(EXIT(ch, dir)) &&
+    else if (exit_flagged(ex, EX_ISDOOR) &&
+             exit_flagged(ex, EX_SECRET) && exit_keyword_get(ex) &&
              (check == TRUE))
       send_to_char(ch, "There is a hidden door keyword: '%s' %sthere.\r\n",
-                   fname(exit_keyword_get(EXIT(ch, dir))),
-                   (exit_flagged(EXIT(ch, dir), EX_CLOSED)) ? "" : "open ");
+                   fname(exit_keyword_get(ex)),
+                   (exit_flagged(ex, EX_CLOSED)) ? "" : "open ");
     else
       send_to_char(ch, "There is no exit there.\r\n");
   } else

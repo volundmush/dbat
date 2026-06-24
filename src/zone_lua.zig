@@ -49,6 +49,9 @@ fn registerZoneMetatable(lua: *Lua) void {
     addMethod(lua, "id_get", luaZoneIdGet);
     addMethod(lua, "vnum_get", luaZoneIdGet);
     addMethod(lua, "name_get", luaZoneNameGet);
+    addMethod(lua, "min_level_get", luaZoneMinLevelGet);
+    addMethod(lua, "max_level_get", luaZoneMaxLevelGet);
+    addMethod(lua, "flagged", luaZoneFlagged);
     addMethod(lua, "send_text", luaZoneSendText);
     addMethod(lua, "event_schedule", luaZoneEventSchedule);
     addMethod(lua, "event_cancel", luaZoneEventCancel);
@@ -169,6 +172,23 @@ fn luaZoneNameGet(lua: *Lua) i32 {
     } else {
         _ = lua.pushString(std.mem.span(name));
     }
+    return 1;
+}
+
+fn luaZoneMinLevelGet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.zone_min_level_get(checkZone(lua)));
+    return 1;
+}
+
+fn luaZoneMaxLevelGet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.zone_max_level_get(checkZone(lua)));
+    return 1;
+}
+
+fn luaZoneFlagged(lua: *Lua) i32 {
+    const zone = checkZone(lua);
+    const flag = lua.toInteger(2) catch lua.typeError(2, "integer");
+    lua.pushBoolean(cdb.zone_flagged(zone, @intCast(flag)));
     return 1;
 }
 
