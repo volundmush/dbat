@@ -2142,7 +2142,7 @@ static void get_check_money(struct char_data *ch, struct obj_data *obj) {
     if (char_condition_has(ch, "group") && PRF_FLAGGED(ch, PRF_AUTOSPLIT)) {
       char split[MAX_INPUT_LENGTH];
       sprintf(split, "%d", value);
-      do_split(ch, split, 0, 0);
+      char_cmd_execute(ch, "split", split);
     }
   }
 }

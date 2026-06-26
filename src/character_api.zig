@@ -1375,6 +1375,10 @@ fn conditionGet(ch: *cdb.char_data, condition: ?[*:0]const u8) ?*ConditionInstan
     return conditionGetName(ch, name);
 }
 
+pub fn conditionGetByName(ch: *cdb.char_data, name: []const u8) ?*ConditionInstance {
+    return conditionGetName(ch, name);
+}
+
 fn conditionGetName(ch: *cdb.char_data, name: []const u8) ?*ConditionInstance {
     if (ch.zigdata == null) return null;
     const zigdata: *CharacterData = @ptrCast(@alignCast(ch.zigdata.?));
@@ -1663,6 +1667,21 @@ pub export fn char_rdisplay_get(ch: *cdb.char_data) ?[*:0]const u8 {
 pub export fn char_feature_get(ch: *cdb.char_data) ?[*:0]const u8 {
     return ch.feature;
 }
+pub export fn char_feature_set(ch: *cdb.char_data, value: ?[*:0]const u8) void {
+    replaceString(&ch.feature, value);
+}
+
+pub export fn char_rp_set(ch: *cdb.char_data, value: c_int) void {
+    ch.rp = value;
+}
+
+pub export fn char_radar1_get(ch: *cdb.char_data) c_int { return @intCast(ch.radar1); }
+pub export fn char_radar1_set(ch: *cdb.char_data, vnum: c_int) void { ch.radar1 = @intCast(vnum); }
+pub export fn char_radar2_get(ch: *cdb.char_data) c_int { return @intCast(ch.radar2); }
+pub export fn char_radar2_set(ch: *cdb.char_data, vnum: c_int) void { ch.radar2 = @intCast(vnum); }
+pub export fn char_radar3_get(ch: *cdb.char_data) c_int { return @intCast(ch.radar3); }
+pub export fn char_radar3_set(ch: *cdb.char_data, vnum: c_int) void { ch.radar3 = @intCast(vnum); }
+pub export fn char_idnum_get(ch: *cdb.char_data) c_int { return @intCast(ch.idnum); }
 
 pub export fn char_absorbs_get(ch: *cdb.char_data) c_int {
     return ch.absorbs;
@@ -1713,23 +1732,44 @@ pub export fn char_improve_skill(ch: *cdb.char_data, skill_name: ?[*:0]const u8,
 pub export fn char_aura_get(ch: *cdb.char_data) c_int {
     return ch.aura;
 }
+pub export fn char_aura_set(ch: *cdb.char_data, value: c_int) void {
+    ch.aura = value;
+}
 pub export fn char_hairl_get(ch: *cdb.char_data) c_int {
     return @intCast(ch.hairl);
+}
+pub export fn char_hairl_set(ch: *cdb.char_data, value: c_int) void {
+    ch.hairl = @truncate(value);
 }
 pub export fn char_hairs_get(ch: *cdb.char_data) c_int {
     return @intCast(ch.hairs);
 }
+pub export fn char_hairs_set(ch: *cdb.char_data, value: c_int) void {
+    ch.hairs = @truncate(value);
+}
 pub export fn char_hairc_get(ch: *cdb.char_data) c_int {
     return @intCast(ch.hairc);
+}
+pub export fn char_hairc_set(ch: *cdb.char_data, value: c_int) void {
+    ch.hairc = @truncate(value);
 }
 pub export fn char_skin_get(ch: *cdb.char_data) c_int {
     return @intCast(ch.skin);
 }
+pub export fn char_skin_set(ch: *cdb.char_data, value: c_int) void {
+    ch.skin = @truncate(value);
+}
 pub export fn char_eye_get(ch: *cdb.char_data) c_int {
     return @intCast(ch.eye);
 }
+pub export fn char_eye_set(ch: *cdb.char_data, value: c_int) void {
+    ch.eye = @truncate(value);
+}
 pub export fn char_distfea_get(ch: *cdb.char_data) c_int {
     return @intCast(ch.distfea);
+}
+pub export fn char_distfea_set(ch: *cdb.char_data, value: c_int) void {
+    ch.distfea = @truncate(value);
 }
 pub export fn char_sleeptime_get(ch: *cdb.char_data) c_int {
     return ch.sleeptime;
@@ -1795,8 +1835,17 @@ pub export fn char_loadroom_get(ch: *cdb.char_data) c_int {
 pub export fn char_loadroom_set(ch: *cdb.char_data, vnum: c_int) void {
     ch.load_room = @intCast(vnum);
 }
+pub export fn char_droom_get(ch: *cdb.char_data) c_int {
+    return @intCast(ch.droom);
+}
+pub export fn char_droom_set(ch: *cdb.char_data, vnum: c_int) void {
+    ch.droom = @intCast(vnum);
+}
 pub export fn char_look_at_room(ch: *cdb.char_data) void {
     const room = cdb.char_room_get(ch) orelse return;
+    look_at_room(room, ch, 0);
+}
+pub export fn char_look_at_specific_room(ch: *cdb.char_data, room: *cdb.room_data) void {
     look_at_room(room, ch, 0);
 }
 pub export fn char_restore(vict: *cdb.char_data, healer: *cdb.char_data) void {

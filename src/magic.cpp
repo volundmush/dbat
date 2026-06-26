@@ -385,17 +385,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
  */
 void perform_mag_groups(int level, struct char_data *ch, struct char_data *tch,
                         int spellnum) {
-  switch (spellnum) {
-  case SPELL_MASS_HEAL:
-    mag_points(level, ch, tch, SPELL_HEAL);
-    break;
-  case SPELL_GROUP_ARMOR:
-    mag_affects(level, ch, tch, SPELL_MAGE_ARMOR);
-    break;
-  case SPELL_GROUP_RECALL:
-    spell_recall(level, ch, tch, NULL, NULL);
-    break;
-  }
+
 }
 
 /*

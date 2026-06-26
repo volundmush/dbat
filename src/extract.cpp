@@ -113,14 +113,14 @@ void extract_char_final(struct char_data *ch) {
     }
   }
 
-  if (!IS_NPC(ch) && char_condition_number_get(ch, "multiform_original", "count") > 0) {
-    char_iterate_all([&](struct char_data *clone) {
-      if (IS_NPC(clone) && GET_MOB_VNUM(clone) == 25 &&
-          GET_ORIGINAL(clone) == ch) {
-        handle_multi_merge(clone);
-      }
-      return true;
-    });
+  if (!IS_NPC(ch) && char_clone_count(ch) > 0) {
+    size_t clone_count = 0;
+    auto clone_ids = char_clone_ids(ch, &clone_count);
+    for (size_t i = 0; i < clone_count; i++) {
+      auto clone = char_by_id(clone_ids[i]);
+      if (clone) extract_char(clone);
+    }
+    if (clone_ids) free(clone_ids);
   }
 
   purge_homing(ch);

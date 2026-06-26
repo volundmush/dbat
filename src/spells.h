@@ -290,9 +290,6 @@ int call_magic(struct char_data *caster, struct char_data *cvict,
 void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                      char *argument);
 
-int cast_spell(struct char_data *ch, struct char_data *tch,
-               struct obj_data *tobj, int spellnum, char *arg);
-
 int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum,
                  int level, int cast_stat);
 

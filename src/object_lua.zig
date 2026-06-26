@@ -13,6 +13,8 @@ const obj_script_metatable = "dbat.ObjectScript";
 
 extern fn event_schedule_lua_obj_update(fire_at: i64, interval: i64, kind: ?[*:0]const u8, obj_id: i64) u64;
 extern fn hatch_get_vehicle(hatch: *cdb.obj_data) ?*cdb.obj_data;
+extern fn find_vehicle_by_vnum(vnum: c_int) ?*cdb.obj_data;
+extern fn create_obj() ?*cdb.obj_data;
 extern fn eq_cancel_owner(owner_kind: c_int, owner_id: i64, tag: ?[*:0]const u8) i64;
 extern fn eq_owner_count(owner_kind: c_int, owner_id: i64, tag: ?[*:0]const u8) i64;
 extern fn eq_owner_next_ms(owner_kind: c_int, owner_id: i64, tag: ?[*:0]const u8) i64;
@@ -41,7 +43,12 @@ pub fn register(lua: *Lua) void {
     lua.setField(-2, "by_id");
     lua.pushFunction(zlua.wrap(luaObjectsAll));
     lua.setField(-2, "all");
+    lua.pushFunction(zlua.wrap(luaFindVehicle));
+    lua.setField(-2, "find_vehicle");
     lua.setField(-2, "objects");
+
+    lua.pushFunction(zlua.wrap(luaObjCreate));
+    lua.setField(-2, "obj_create");
 
     lua.newTable();
     lua.pushFunction(zlua.wrap(luaObjProtoById));
@@ -63,6 +70,14 @@ fn luaObjectById(lua: *Lua) i32 {
     }
 
     pushObject(lua, id);
+    return 1;
+}
+
+fn luaFindVehicle(lua: *Lua) i32 {
+    const vnum = lua.toInteger(1) catch { lua.pushNil(); return 1; };
+    const vehicle = find_vehicle_by_vnum(@intCast(vnum));
+    if (vehicle == null) { lua.pushNil(); return 1; }
+    pushObject(lua, cdb.obj_id_get(vehicle));
     return 1;
 }
 
@@ -122,6 +137,8 @@ fn registerObjectMetatable(lua: *Lua) void {
     addMethod(lua, "level_set", luaObjectLevelSet);
     addMethod(lua, "level_mod", luaObjectLevelMod);
     addMethod(lua, "affect_set", luaObjectAffectSet);
+    addMethod(lua, "affect_location_get", luaObjectAffectLocationGet);
+    addMethod(lua, "affect_modifier_get", luaObjectAffectModifierGet);
     addMethod(lua, "wear_flagged", luaObjectWearFlagged);
     addMethod(lua, "wear_flag_set", luaObjectWearFlagSet);
     addMethod(lua, "wear_flag_toggle", luaObjectWearFlagToggle);
@@ -177,6 +194,7 @@ fn registerObjectMetatable(lua: *Lua) void {
     addMethod(lua, "post_type_get", luaObjectPostTypeGet);
     addMethod(lua, "is_posted", luaObjectIsPosted);
     addMethod(lua, "fellow_wall_has", luaObjectFellowWallHas);
+    addMethod(lua, "fellow_wall_set", luaObjectFellowWallSet);
     addMethod(lua, "foob_get", luaObjectFoobGet);
     addMethod(lua, "drinkcon_weight_drain", luaObjectDrinkconWeightDrain);
     addMethod(lua, "drinkcon_name_update", luaObjectDrinkconNameUpdate);
@@ -500,6 +518,12 @@ fn luaObjProtoVnumGet(lua: *Lua) i32 {
     return 1;
 }
 
+fn luaObjCreate(lua: *Lua) i32 {
+    const obj = create_obj() orelse { lua.pushNil(); return 1; };
+    pushObject(lua, cdb.obj_id_get(obj));
+    return 1;
+}
+
 fn luaObjProtoSpawn(lua: *Lua) i32 {
     const handle = checkObjProtoHandle(lua);
     _ = checkObjProto(lua);
@@ -629,6 +653,18 @@ fn luaObjectAffectSet(lua: *Lua) i32 {
         obj.affected[index].modifier = modifier;
     }
     return 0;
+}
+fn luaObjectAffectLocationGet(lua: *Lua) i32 {
+    const obj = checkObject(lua);
+    const index = @as(usize, @intCast(integer(lua, 2)));
+    lua.pushInteger(if (index < obj.affected.len) obj.affected[index].location else 0);
+    return 1;
+}
+fn luaObjectAffectModifierGet(lua: *Lua) i32 {
+    const obj = checkObject(lua);
+    const index = @as(usize, @intCast(integer(lua, 2)));
+    lua.pushInteger(if (index < obj.affected.len) obj.affected[index].modifier else 0);
+    return 1;
 }
 
 fn luaObjectWearFlagged(lua: *Lua) i32 {
@@ -971,6 +1007,16 @@ fn luaObjectIsPosted(lua: *Lua) i32 {
 fn luaObjectFellowWallHas(lua: *Lua) i32 {
     lua.pushBoolean(checkObject(lua).fellow_wall != null);
     return 1;
+}
+
+fn luaObjectFellowWallSet(lua: *Lua) i32 {
+    const obj = checkObject(lua);
+    if (lua.isNoneOrNil(2)) {
+        obj.fellow_wall = null;
+    } else {
+        obj.fellow_wall = checkObjectAt(lua, 2);
+    }
+    return 0;
 }
 
 fn luaObjectFoobGet(lua: *Lua) i32 {

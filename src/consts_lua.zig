@@ -184,5 +184,13 @@ pub fn register(lua: *Lua) void {
     lua.pushInteger(cdb.NUM_PLR_FLAGS);      lua.setField(-2, "NUM_PLR_FLAGS");
     lua.pushInteger(cdb.NUM_PRF_FLAGS);      lua.setField(-2, "NUM_PRF_FLAGS");
 
+    // BFS pathfinding result constants (from graph.h / room:find_first_step)
+    lua.newTable();
+    lua.pushInteger(cdb.BFS_ERROR);        lua.setField(-2, "ERROR");
+    lua.pushInteger(cdb.BFS_ALREADY_THERE); lua.setField(-2, "ALREADY_THERE");
+    lua.pushInteger(cdb.BFS_TO_FAR);       lua.setField(-2, "TOO_FAR");
+    lua.pushInteger(cdb.BFS_NO_PATH);      lua.setField(-2, "NO_PATH");
+    lua.setField(-2, "bfs");
+
     lua.setField(-2, "consts");
 }

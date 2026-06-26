@@ -4354,7 +4354,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     send_to_char(ch, "Use the reward command.\r\n");
     break;
   case 72:
-    GET_BOOSTS(vict) = RANGE(-1000, 1000);
+    SET_BOOSTS(vict, RANGE(-1000, 1000));
     break;
   case 73:
     SET_OR_REMOVE(PLR_FLAGS(vict), PLR_MULTP);

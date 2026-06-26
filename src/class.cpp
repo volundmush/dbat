@@ -1145,23 +1145,23 @@ void advance_level(struct char_data *ch, int whichclass) {
 
   if (GET_SKILL(ch, SKILL_POTENTIAL) && rand_number(1, 4) == 4) {
     send_to_char(ch, "You can now perform another Potential Release.\r\n");
-    GET_BOOSTS(ch) += 1;
+    MOD_BOOSTS(ch, 1);
   }
   if (IS_MAJIN(ch) && GET_LEVEL(ch) == 25) {
     send_to_char(ch, "You can now perform another Majinization.\r\n");
-    GET_BOOSTS(ch) += 1;
+    MOD_BOOSTS(ch, 1);
   }
   if (IS_MAJIN(ch) && GET_LEVEL(ch) == 50) {
     send_to_char(ch, "You can now perform another Majinization.\r\n");
-    GET_BOOSTS(ch) += 1;
+    MOD_BOOSTS(ch, 1);
   }
   if (IS_MAJIN(ch) && GET_LEVEL(ch) == 75) {
     send_to_char(ch, "You can now perform another Majinization.\r\n");
-    GET_BOOSTS(ch) += 1;
+    MOD_BOOSTS(ch, 1);
   }
   if (IS_MAJIN(ch) && GET_LEVEL(ch) == 100) {
     send_to_char(ch, "You can now perform another Majinization.\r\n");
-    GET_BOOSTS(ch) += 1;
+    MOD_BOOSTS(ch, 1);
   }
 
   switch (GET_LEVEL(ch)) {

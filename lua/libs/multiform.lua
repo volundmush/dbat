@@ -11,7 +11,7 @@ function M.base(ch, stat)
 
     local value = ch:stat_get(stat)
     if ch:condition_has("multiform_original") then
-        local clones = ch:condition_number_get("multiform_original", "clones")
+        local clones = ch:clone_count()
         if clones < 0 then clones = 0 end
         return value // (clones + 1)
     end

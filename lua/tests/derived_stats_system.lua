@@ -37,12 +37,17 @@ end)
 
 test:case("multiform splits original power stats across clones", function(t)
   local ch = mob()
+  local clone1 = mob()
+  local clone2 = mob()
 
   ch:stat_set("powerlevel", 1200)
   ch:stat_set("ki", 900)
   ch:stat_set("stamina", 600)
 
-  t:eq(ch:condition_apply_number("multiform_original", "clones", 2), true)
+  -- Register 2 clones in the Zig map and apply multiform_original condition
+  ch:clone_add(clone1)
+  ch:clone_add(clone2)
+  t:eq(ch:condition_apply("multiform_original", "skill", "multiform"), true)
   t:eq(ch:der_base("powerlevel"), 400)
   t:eq(ch:der_base("ki"), 300)
   t:eq(ch:der_base("stamina"), 200)
@@ -50,6 +55,8 @@ end)
 
 test:case("multiform clones use original derived bases", function(t)
   local original = mob()
+  local clone1 = mob()
+  local clone2 = mob()
   local clone = mob()
 
   original:stat_set("powerlevel", 1200)
@@ -59,7 +66,9 @@ test:case("multiform clones use original derived bases", function(t)
   clone:stat_set("ki", 1)
   clone:stat_set("stamina", 1)
 
-  t:eq(original:condition_apply_number("multiform_original", "clones", 2), true)
+  original:clone_add(clone1)
+  original:clone_add(clone2)
+  t:eq(original:condition_apply("multiform_original", "skill", "multiform"), true)
   t:eq(clone:condition_apply_number("multiform", "original_id", original:id_get()), true)
 
   t:eq(clone:der_base("powerlevel"), original:der_base("powerlevel"))

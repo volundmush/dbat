@@ -5,9 +5,9 @@
 extern "C" {
 #endif
 
-// functions
-void drive_in_direction(struct char_data *ch, struct obj_data *vehicle,
-                        int dir);
+// functions — drive_in_direction ported to drive.lua
+// void drive_in_direction(struct char_data *ch, struct obj_data *vehicle,
+//                         int dir);
 struct obj_data *find_control(struct char_data *ch);
 struct obj_data *find_vehicle_by_vnum(int vnum);
 struct obj_data *find_hatch_by_vnum(int vnum);
@@ -20,10 +20,9 @@ void    hatch_vehicle_id_set(struct obj_data *hatch, int64_t id);
 // Returns the vehicle this hatch leads to; uses stored ID, falls back to scan.
 struct obj_data *hatch_get_vehicle(struct obj_data *hatch);
 
-// commands
-ACMD(do_warp);
-ACMD(do_drive);
-ACMD(do_ship_fire);
+// commands — ported to Lua
+// ACMD(do_warp);   // lua/characters/commands/misc/warp.lua
+// ACMD(do_drive);  // lua/characters/commands/misc/drive.lua
 
 #ifdef __cplusplus
 }

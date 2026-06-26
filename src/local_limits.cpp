@@ -669,10 +669,6 @@ static void process_char_point_update(struct char_data *i, PUTimings &t) {
     t.obj_upd += pu_elapsed(tp, pu_now());
 
     tp = pu_now();
-    update_innate(i);
-    t.innate += pu_elapsed(tp, pu_now());
-
-    tp = pu_now();
     if (GET_ADMLEVEL(i) < CONFIG_IDLE_MAX_LEVEL)
       check_idling(i);
     else
@@ -743,16 +739,7 @@ static bool tick_obj_timed(struct obj_data *j) {
       extract_obj(j);
       return true;
     }
-  } else if (GET_OBJ_VNUM(j) == 1306) {
-    if (GET_OBJ_TIMER(j) > 0) GET_OBJ_TIMER(j)--;
-    if (GET_OBJ_TIMER(j) == 0) {
-      act("The $p@n settles to the ground and goes out.", TRUE,
-          room_people_get(obj_room_get(j)), j, 0, TO_ROOM);
-      act("A $p@n settles to the ground and goes out.", TRUE,
-          room_people_get(obj_room_get(j)), j, 0, TO_CHAR);
-      extract_obj(j);
-      return true;
-    }
+  /* vnum 1306 (ashcloud) lifecycle moved to lua/objects/scripts/ashcloud.lua */
   } else if (GET_OBJ_TIMER(j) > 0) {
     GET_OBJ_TIMER(j)--;
     if (!GET_OBJ_TIMER(j))

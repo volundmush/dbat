@@ -159,6 +159,8 @@ fn registerRoomMetatable(lua: *Lua) void {
     lua.setField(-2, "house_can_enter");
     lua.pushFunction(zlua.wrap(luaRoomSendLine));
     lua.setField(-2, "send_line");
+    lua.pushFunction(zlua.wrap(luaRoomFindFirstStep));
+    lua.setField(-2, "find_first_step");
 
     lua_meta.mergeMethods(lua, "lua.rooms.room");
     lua.pushFunction(zlua.wrap(luaRoomScriptAdd)); lua.setField(-2, "script_add");
@@ -868,4 +870,11 @@ fn luaRoomSendLine(lua: *Lua) i32 {
     defer lua.allocator().free(msg_z);
     send_to_room(room, "%s", msg_z.ptr);
     return 0;
+}
+
+fn luaRoomFindFirstStep(lua: *Lua) i32 {
+    const src = checkRoom(lua);
+    const target = checkRoomAt(lua, 2);
+    lua.pushInteger(cdb.find_first_step(src, target));
+    return 1;
 }

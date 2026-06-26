@@ -19,6 +19,7 @@ var mob_proto_map: MobProtoMap = undefined;
 var extract_pending: std.array_list.Managed(i64) = undefined;
 var char_inventory_map: std.AutoHashMap(i64, IdList) = undefined;
 var char_followers_map: std.AutoHashMap(i64, IdList) = undefined;
+var char_clones_map: std.AutoHashMap(i64, IdList) = undefined;
 var command_queues: std.AutoHashMap(i64, std.ArrayListUnmanaged([]u8)) = undefined;
 
 pub fn init(init_allocator: std.mem.Allocator) void {
@@ -29,6 +30,7 @@ pub fn init(init_allocator: std.mem.Allocator) void {
     extract_pending = std.array_list.Managed(i64).init(allocator);
     char_inventory_map = std.AutoHashMap(i64, IdList).init(allocator);
     char_followers_map = std.AutoHashMap(i64, IdList).init(allocator);
+    char_clones_map = std.AutoHashMap(i64, IdList).init(allocator);
     command_queues = std.AutoHashMap(i64, std.ArrayListUnmanaged([]u8)).init(allocator);
 }
 
@@ -46,6 +48,11 @@ pub fn deinit() void {
         var it = char_followers_map.valueIterator();
         while (it.next()) |list| list.deinit(allocator);
         char_followers_map.deinit();
+    }
+    {
+        var it = char_clones_map.valueIterator();
+        while (it.next()) |list| list.deinit(allocator);
+        char_clones_map.deinit();
     }
     {
         var it = command_queues.valueIterator();
@@ -105,6 +112,10 @@ pub export fn char_unregister_id(id: i64) void {
         list.deinit(allocator);
     }
     if (char_followers_map.fetchRemove(id)) |kv| {
+        var list = kv.value;
+        list.deinit(allocator);
+    }
+    if (char_clones_map.fetchRemove(id)) |kv| {
         var list = kv.value;
         list.deinit(allocator);
     }
@@ -502,6 +513,59 @@ pub export fn char_follower_count(master: *cdb.char_data) usize {
 }
 
 pub export fn char_follower_ids_free(ptr: ?[*]i64) void {
+    std.c.free(@as(?*anyopaque, @ptrCast(ptr)));
+}
+
+// --- Clone tracking (original → list of clone char ids) ---
+
+pub export fn char_clone_add(original: *cdb.char_data, clone: *cdb.char_data) void {
+    const orig_id = cdb.char_id_get(original);
+    const clone_id = cdb.char_id_get(clone);
+    const entry = char_clones_map.getOrPut(orig_id) catch return;
+    if (!entry.found_existing) entry.value_ptr.* = IdList.empty;
+    entry.value_ptr.append(allocator, clone_id) catch {};
+}
+
+pub export fn char_clone_remove(original: *cdb.char_data, clone: *cdb.char_data) void {
+    const orig_id = cdb.char_id_get(original);
+    const clone_id = cdb.char_id_get(clone);
+    const list = char_clones_map.getPtr(orig_id) orelse return;
+    for (list.items, 0..) |item, i| {
+        if (item == clone_id) {
+            _ = list.swapRemove(i);
+            return;
+        }
+    }
+}
+
+pub export fn char_clone_count(original: *cdb.char_data) usize {
+    const orig_id = cdb.char_id_get(original);
+    const list = char_clones_map.getPtr(orig_id) orelse return 0;
+    return list.items.len;
+}
+
+pub export fn char_clone_ids(original: *cdb.char_data, out_count: *usize) ?[*]i64 {
+    const orig_id = cdb.char_id_get(original);
+    const list = char_clones_map.getPtr(orig_id) orelse {
+        out_count.* = 0;
+        return null;
+    };
+    const count = list.items.len;
+    if (count == 0) {
+        out_count.* = 0;
+        return null;
+    }
+    const mem = std.c.malloc(count * @sizeOf(i64)) orelse {
+        out_count.* = 0;
+        return null;
+    };
+    const ids: [*]i64 = @ptrCast(@alignCast(mem));
+    @memcpy(ids[0..count], list.items);
+    out_count.* = count;
+    return ids;
+}
+
+pub export fn char_clone_ids_free(ptr: ?[*]i64) void {
     std.c.free(@as(?*anyopaque, @ptrCast(ptr)));
 }
 

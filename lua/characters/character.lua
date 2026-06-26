@@ -441,6 +441,28 @@ local function act_message(ch, msgs, ctx)
   require("dbat").lib.act.message(msgs, context)
 end
 
+-- Convenience wrapper: ch:act(msg, hide_inv, obj, vict, dest)
+-- dest: "char" | "room" | "vict" | "notvict"
+-- Mirrors C++ act() call signature used in ported commands.
+local function act(ch, msg, hide_inv, obj, vict, dest)
+  local act_lib = get_act()
+  local ctx = { actor = ch, tool = obj, target = vict, hide_invisible = hide_inv }
+  if dest == "char" then
+    act_lib.to_char(ch, msg, ctx)
+  elseif dest == "room" then
+    act_lib.around(ch, msg, ctx)
+  elseif dest == "vict" then
+    if vict ~= nil then act_lib.to_char(vict, msg, ctx) end
+  elseif dest == "notvict" then
+    local room = ch:room_get()
+    if not room then return end
+    ctx.exclude = { ch }
+    if vict ~= nil then ctx.exclude[2] = vict end
+    ctx.room = room
+    act_lib.to_room(msg, ctx)
+  end
+end
+
 -- Build the argparams table — mirrors lua_api.zig:pushArgParams/pushTokens.
 local function build_argparams(arguments)
     local function tokenize(s)
@@ -1139,6 +1161,7 @@ return {
   apparent_race = apparent_race,
   display_name_for = display_name_for,
   on_event = on_event,
+  act = act,
   act_self = act_self,
   act_around = act_around,
   act_message = act_message,

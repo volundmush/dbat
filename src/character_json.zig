@@ -111,7 +111,7 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
         try jsonx.putInt(&object, allocator, "total_rp", ch.trp);
         try jsonx.putInt(&object, allocator, "clank_rank", ch.crank);
         try jsonx.putInt(&object, allocator, "last_play", ch.lastpl);
-        try jsonx.putInt(&object, allocator, "boosts", ch.boosts);
+        // boosts is now a stat (migrated); no longer serialized here
         try jsonx.putInt(&object, allocator, "absorbs", ch.absorbs);
         try jsonx.putInt(&object, allocator, "ingest_learned", ch.ingestLearned);
         try jsonx.putInt(&object, allocator, "radar1", ch.radar1);
@@ -278,7 +278,7 @@ pub fn deserializeCharacter(ch: *cdb.char_data, options: DeserializeOptions, val
         if (try jsonx.intField(value, "total_rp", c_int)) |v| ch.trp = v;
         if (try jsonx.intField(value, "clank_rank", c_int)) |v| ch.crank = v;
         if (try jsonx.intField(value, "last_play", cdb.time_t)) |v| ch.lastpl = v;
-        if (try jsonx.intField(value, "boosts", c_int)) |v| ch.boosts = v;
+        if (try jsonx.intField(value, "boosts", c_int)) |v| _ = cdb.char_stat_set(ch, "boosts", @intCast(v)); // migrate old field into stat system
         if (try jsonx.intField(value, "absorbs", c_int)) |v| ch.absorbs = v;
         if (try jsonx.intField(value, "ingest_learned", c_int)) |v| ch.ingestLearned = v;
         if (try jsonx.intField(value, "radar1", cdb.room_vnum)) |v| ch.radar1 = v;

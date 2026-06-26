@@ -9,6 +9,7 @@ const lua_meta = @import("lua_meta.zig");
 const character_api = @import("character_api.zig");
 const lua_api = @import("lua_api.zig");
 const modifiers_api = @import("modifiers_api.zig");
+const intern_mod = @import("intern.zig");
 
 const Lua = zlua.Lua;
 const character_metatable = "dbat.Character";
@@ -59,6 +60,8 @@ pub fn register(lua: *Lua) void {
     lua.setField(-2, "by_id");
     lua.pushFunction(zlua.wrap(luaCharactersAll));
     lua.setField(-2, "all");
+    lua.pushFunction(zlua.wrap(luaCharactersBySubscription));
+    lua.setField(-2, "by_subscription");
     lua.setField(-2, "characters");
 
     lua.newTable();
@@ -95,6 +98,30 @@ fn luaCharactersAll(lua: *Lua) i32 {
         pushCharacter(lua, cdb.char_id_get(ch));
         lua.setIndex(-2, @intCast(index));
         index += 1;
+    }
+
+    return valueIterator(lua);
+}
+
+fn luaCharactersBySubscription(lua: *Lua) i32 {
+    const tag = lua.toString(1) catch {
+        lua.newTable();
+        return valueIterator(lua);
+    };
+
+    var count: usize = 0;
+    const ids = cdb.char_subscribe_ids(tag.ptr, &count);
+    defer cdb.char_subscribe_ids_free(ids);
+
+    lua.newTable();
+    var index: usize = 1;
+    if (ids) |id_slice| {
+        for (id_slice[0..count]) |id| {
+            if (cdb.char_by_id(id) == null) continue;
+            pushCharacter(lua, id);
+            lua.setIndex(-2, @intCast(index));
+            index += 1;
+        }
     }
 
     return valueIterator(lua);
@@ -253,6 +280,16 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "age_years", luaCharacterAgeYears);
     addMethod(lua, "clan_get", luaCharacterClanGet);
     addMethod(lua, "rp_get", luaCharacterRpGet);
+    addMethod(lua, "rp_set", luaCharacterRpSet);
+    addMethod(lua, "rp_save", luaCharacterRpSave);
+    addMethod(lua, "radar1_get", luaCharacterRadar1Get);
+    addMethod(lua, "radar1_set", luaCharacterRadar1Set);
+    addMethod(lua, "radar2_get", luaCharacterRadar2Get);
+    addMethod(lua, "radar2_set", luaCharacterRadar2Set);
+    addMethod(lua, "radar3_get", luaCharacterRadar3Get);
+    addMethod(lua, "radar3_set",   luaCharacterRadar3Set);
+    addMethod(lua, "has_arms",     luaCharacterHasArms);
+    addMethod(lua, "player_id_get", luaCharacterPlayerIdGet);
     addMethod(lua, "height_cm", luaCharacterHeightCm);
     addMethod(lua, "weight_kg", luaCharacterWeightKg);
     addMethod(lua, "align_str", luaCharacterAlignStr);
@@ -273,6 +310,10 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "distfea_get", luaCharacterDistfeaGet);
     addMethod(lua, "rdisplay_get", luaCharacterRdisplayGet);
     addMethod(lua, "feature_get", luaCharacterFeatureGet);
+    addMethod(lua, "feature_set", luaCharacterFeatureSet);
+    addMethod(lua, "bring_to_cap", luaCharacterBringToCap);
+    addMethod(lua, "rpp_custom_equip_launch", luaCharacterRppCustomEquipLaunch);
+    addMethod(lua, "rpp_restring_launch", luaCharacterRppRestringLaunch);
     addMethod(lua, "absorbs_get", luaCharacterAbsorbsGet);
     addMethod(lua, "mimic_get", luaCharacterMimicGet);
     addMethod(lua, "backstab_cooldown", luaCharacterBackstabCooldown);
@@ -290,11 +331,18 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "defended_by_get", luaCharacterDefendedByGet);
     addMethod(lua, "defended_by_set", luaCharacterDefendedBySet);
     addMethod(lua, "aura_get", luaCharacterAuraGet);
+    addMethod(lua, "aura_set", luaCharacterAuraSet);
     addMethod(lua, "hairl_get", luaCharacterHairlGet);
+    addMethod(lua, "hairl_set", luaCharacterHairlSet);
     addMethod(lua, "hairs_get", luaCharacterHairsGet);
+    addMethod(lua, "hairs_set", luaCharacterHairsSet);
     addMethod(lua, "hairc_get", luaCharacterHaircGet);
+    addMethod(lua, "hairc_set", luaCharacterHaircSet);
     addMethod(lua, "skin_get", luaCharacterSkinGet);
+    addMethod(lua, "skin_set", luaCharacterSkinSet);
     addMethod(lua, "eye_get", luaCharacterEyeGet);
+    addMethod(lua, "eye_set", luaCharacterEyeSet);
+    addMethod(lua, "distfea_set", luaCharacterDistfeaSet);
     addMethod(lua, "sleeptime_get", luaCharacterSleepcountGet);
     addMethod(lua, "has_group", luaCharacterHasGroup);
     addMethod(lua, "has_mail", luaCharacterHasMail);
@@ -318,7 +366,10 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "barrier_set", luaCharacterBarrierSet);
     addMethod(lua, "carry_drop", luaCharacterCarryDrop);
     addMethod(lua, "land", luaCharacterLand);
+    addMethod(lua, "arena_idnum_get", luaCharacterArenaIdnumGet);
     addMethod(lua, "arena_idnum_set", luaCharacterArenaIdnumSet);
+    addMethod(lua, "droom_get", luaCharacterDroomGet);
+    addMethod(lua, "droom_set", luaCharacterDroomSet);
     addMethod(lua, "dragging_get", luaCharacterDraggingGet);
     addMethod(lua, "dragging_set", luaCharacterDraggingSet);
     addMethod(lua, "being_dragged_get", luaCharacterBeingDraggedGet);
@@ -332,14 +383,20 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "loadroom_get", luaCharacterLoadRoomGet);
     addMethod(lua, "loadroom_set", luaCharacterLoadRoomSet);
     addMethod(lua, "look_at_room", luaCharacterLookAtRoom);
+    addMethod(lua, "look_at_specific_room", luaCharacterLookAtSpecificRoom);
     addMethod(lua, "restore", luaCharacterRestore);
     addMethod(lua, "find_target_room", luaCharacterFindTargetRoom);
     addMethod(lua, "flee", luaCharacterFlee);
-    addMethod(lua, "drive_vehicle", luaCharacterDriveVehicle);
     addMethod(lua, "followers_each", luaCharacterFollowersEach);
     addMethod(lua, "add_follower", luaCharacterAddFollower);
     addMethod(lua, "stop_follower", luaCharacterStopFollower);
     addMethod(lua, "circle_follow", luaCharacterCircleFollow);
+    addMethod(lua, "clones", luaCharacterClones);
+    addMethod(lua, "clone_count", luaCharacterCloneCount);
+    addMethod(lua, "clone_add", luaCharacterCloneAdd);
+    addMethod(lua, "conditions_active", luaCharacterConditionsActive);
+    addMethod(lua, "condition_number_vars", luaCharacterConditionNumberVars);
+    addMethod(lua, "condition_string_vars", luaCharacterConditionStringVars);
 
     // Combat-pointer getters for room display
     addMethod(lua, "fighting_get", luaCharacterFightingGet);
@@ -1919,6 +1976,16 @@ fn luaCharacterRpGet(lua: *Lua) i32 {
     return 1;
 }
 
+fn luaCharacterRpSet(lua: *Lua) i32 {
+    cdb.char_rp_set(checkCharacter(lua), intCastOrError(lua, c_int, integer(lua, 2), "rp value"));
+    return 0;
+}
+
+fn luaCharacterRpSave(lua: *Lua) i32 {
+    cdb.char_rp_save(checkCharacter(lua));
+    return 0;
+}
+
 fn luaCharacterHeightCm(lua: *Lua) i32 {
     const ch = checkCharacter(lua);
     const raw = intCastOrError(lua, c_int, cdb.char_der_total_get(ch, "height"), "height");
@@ -2060,6 +2127,59 @@ fn luaCharacterFeatureGet(lua: *Lua) i32 {
     return 1;
 }
 
+fn luaCharacterFeatureSet(lua: *Lua) i32 {
+    cdb.char_feature_set(checkCharacter(lua), string(lua, 2));
+    return 0;
+}
+
+fn luaCharacterBringToCap(lua: *Lua) i32 {
+    cdb.char_bring_to_cap(checkCharacter(lua));
+    return 0;
+}
+
+fn luaCharacterRadar1Get(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_radar1_get(checkCharacter(lua)));
+    return 1;
+}
+fn luaCharacterRadar1Set(lua: *Lua) i32 {
+    cdb.char_radar1_set(checkCharacter(lua), intCastOrError(lua, c_int, integer(lua, 2), "radar1 vnum"));
+    return 0;
+}
+fn luaCharacterRadar2Get(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_radar2_get(checkCharacter(lua)));
+    return 1;
+}
+fn luaCharacterRadar2Set(lua: *Lua) i32 {
+    cdb.char_radar2_set(checkCharacter(lua), intCastOrError(lua, c_int, integer(lua, 2), "radar2 vnum"));
+    return 0;
+}
+fn luaCharacterRadar3Get(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_radar3_get(checkCharacter(lua)));
+    return 1;
+}
+fn luaCharacterRadar3Set(lua: *Lua) i32 {
+    cdb.char_radar3_set(checkCharacter(lua), intCastOrError(lua, c_int, integer(lua, 2), "radar3 vnum"));
+    return 0;
+}
+fn luaCharacterHasArms(lua: *Lua) i32 {
+    lua.pushBoolean(cdb.char_has_arms(checkCharacter(lua)));
+    return 1;
+}
+fn luaCharacterPlayerIdGet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_idnum_get(checkCharacter(lua)));
+    return 1;
+}
+
+fn luaCharacterRppCustomEquipLaunch(lua: *Lua) i32 {
+    cdb.char_rpp_custom_equip_launch(checkCharacter(lua));
+    return 0;
+}
+
+fn luaCharacterRppRestringLaunch(lua: *Lua) i32 {
+    cdb.char_rpp_restring_launch(checkCharacter(lua), objects_lua.checkObjectAt(lua, 2));
+    return 0;
+}
+
 fn luaCharacterAbsorbsGet(lua: *Lua) i32 {
     lua.pushInteger(cdb.char_absorbs_get(checkCharacter(lua)));
     return 1;
@@ -2180,30 +2300,58 @@ fn luaCharacterAuraGet(lua: *Lua) i32 {
     lua.pushInteger(cdb.char_aura_get(checkCharacter(lua)));
     return 1;
 }
+fn luaCharacterAuraSet(lua: *Lua) i32 {
+    cdb.char_aura_set(checkCharacter(lua), @intCast(integer(lua, 2)));
+    return 0;
+}
 
 fn luaCharacterHairlGet(lua: *Lua) i32 {
     lua.pushInteger(cdb.char_hairl_get(checkCharacter(lua)));
     return 1;
+}
+fn luaCharacterHairlSet(lua: *Lua) i32 {
+    cdb.char_hairl_set(checkCharacter(lua), @intCast(integer(lua, 2)));
+    return 0;
 }
 
 fn luaCharacterHairsGet(lua: *Lua) i32 {
     lua.pushInteger(cdb.char_hairs_get(checkCharacter(lua)));
     return 1;
 }
+fn luaCharacterHairsSet(lua: *Lua) i32 {
+    cdb.char_hairs_set(checkCharacter(lua), @intCast(integer(lua, 2)));
+    return 0;
+}
 
 fn luaCharacterHaircGet(lua: *Lua) i32 {
     lua.pushInteger(cdb.char_hairc_get(checkCharacter(lua)));
     return 1;
+}
+fn luaCharacterHaircSet(lua: *Lua) i32 {
+    cdb.char_hairc_set(checkCharacter(lua), @intCast(integer(lua, 2)));
+    return 0;
 }
 
 fn luaCharacterSkinGet(lua: *Lua) i32 {
     lua.pushInteger(cdb.char_skin_get(checkCharacter(lua)));
     return 1;
 }
+fn luaCharacterSkinSet(lua: *Lua) i32 {
+    cdb.char_skin_set(checkCharacter(lua), @intCast(integer(lua, 2)));
+    return 0;
+}
 
 fn luaCharacterEyeGet(lua: *Lua) i32 {
     lua.pushInteger(cdb.char_eye_get(checkCharacter(lua)));
     return 1;
+}
+fn luaCharacterEyeSet(lua: *Lua) i32 {
+    cdb.char_eye_set(checkCharacter(lua), @intCast(integer(lua, 2)));
+    return 0;
+}
+fn luaCharacterDistfeaSet(lua: *Lua) i32 {
+    cdb.char_distfea_set(checkCharacter(lua), @intCast(integer(lua, 2)));
+    return 0;
 }
 
 fn luaCharacterSleepcountGet(lua: *Lua) i32 {
@@ -2306,33 +2454,6 @@ fn luaCharacterFlee(lua: *Lua) i32 {
     return 0;
 }
 
-fn luaCharacterDriveVehicle(lua: *Lua) i32 {
-    const ch = checkCharacter(lua);
-    const dir = intCastOrError(lua, c_int, integer(lua, 2), "dir");
-    const controls = cdb.find_control(ch) orelse {
-        _ = cdb.send_to_char(ch, "%s", "Your ship controls are not here or your ship was not found, report to Iovan!\r\n");
-        return 0;
-    };
-    const vnum = cdb.obj_value_get(controls, 0);
-    const vehicle = cdb.find_vehicle_by_vnum(vnum) orelse {
-        _ = cdb.send_to_char(ch, "%s", "Your ship controls are not here or your ship was not found, report to Iovan!\r\n");
-        return 0;
-    };
-    if (cdb.obj_value_get(controls, 2) <= 0) {
-        _ = cdb.send_to_char(ch, "%s", "The ship is out of fuel!\r\n");
-        return 0;
-    }
-    cdb.drive_in_direction(ch, vehicle, dir);
-    const speed = cdb.obj_value_get(controls, 1);
-    if (speed == 1) {
-        cdb.char_wait_set(ch, 20);
-    } else if (speed == 2) {
-        cdb.char_wait_set(ch, 10);
-    }
-    lua.pushBoolean(true);
-    return 1;
-}
-
 
 
 fn luaCharacterFollowersEach(lua: *Lua) i32 {
@@ -2365,6 +2486,77 @@ fn luaCharacterCircleFollow(lua: *Lua) i32 {
     const ch = checkCharacter(lua);
     const target = checkCharacterAt(lua, 2);
     lua.pushBoolean(cdb.circle_follow(ch, target));
+    return 1;
+}
+
+fn luaCharacterClones(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    var count: usize = 0;
+    const ids = cdb.char_clone_ids(ch, &count) orelse {
+        lua.newTable();
+        return valueIterator(lua);
+    };
+    defer cdb.char_clone_ids_free(ids);
+    lua.newTable();
+    for (0..count) |i| {
+        pushCharacter(lua, ids[i]);
+        lua.setIndex(-2, @intCast(i + 1));
+    }
+    return valueIterator(lua);
+}
+
+fn luaCharacterCloneCount(lua: *Lua) i32 {
+    lua.pushInteger(@intCast(cdb.char_clone_count(checkCharacter(lua))));
+    return 1;
+}
+
+fn luaCharacterCloneAdd(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const clone = checkCharacterAt(lua, 2);
+    cdb.char_clone_add(ch, clone);
+    return 0;
+}
+
+fn luaCharacterConditionsActive(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    lua.newTable();
+    if (ch.zigdata == null) return 1;
+    const zigdata: *character_api.CharacterData = @ptrCast(@alignCast(ch.zigdata.?));
+    var it = zigdata.conditions.keyIterator();
+    while (it.next()) |id_ptr| {
+        const name = intern_mod.nameOf(id_ptr.*);
+        _ = lua.pushString(name);
+        lua.pushBoolean(true);
+        lua.setTable(-3);
+    }
+    return 1;
+}
+
+fn luaCharacterConditionNumberVars(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const cond_name = string(lua, 2);
+    lua.newTable();
+    const instance = character_api.conditionGetByName(ch, cond_name) orelse return 1;
+    var it = instance.numbers.iterator();
+    while (it.next()) |entry| {
+        _ = lua.pushString(entry.key_ptr.*);
+        lua.pushInteger(entry.value_ptr.*);
+        lua.setTable(-3);
+    }
+    return 1;
+}
+
+fn luaCharacterConditionStringVars(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const cond_name = string(lua, 2);
+    lua.newTable();
+    const instance = character_api.conditionGetByName(ch, cond_name) orelse return 1;
+    var it = instance.strings.iterator();
+    while (it.next()) |entry| {
+        _ = lua.pushString(entry.key_ptr.*);
+        _ = lua.pushString(entry.value_ptr.*);
+        lua.setTable(-3);
+    }
     return 1;
 }
 
@@ -2417,8 +2609,20 @@ fn luaCharacterLand(lua: *Lua) i32 {
     cdb.char_land(checkCharacter(lua));
     return 0;
 }
+fn luaCharacterArenaIdnumGet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_arena_idnum_get(checkCharacter(lua)));
+    return 1;
+}
 fn luaCharacterArenaIdnumSet(lua: *Lua) i32 {
     cdb.char_arena_idnum_set(checkCharacter(lua), intCastOrError(lua, c_int, integer(lua, 2), "arena idnum"));
+    return 0;
+}
+fn luaCharacterDroomGet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_droom_get(checkCharacter(lua)));
+    return 1;
+}
+fn luaCharacterDroomSet(lua: *Lua) i32 {
+    cdb.char_droom_set(checkCharacter(lua), intCastOrError(lua, c_int, integer(lua, 2), "droom vnum"));
     return 0;
 }
 
@@ -2519,6 +2723,12 @@ fn luaCharacterLoadRoomSet(lua: *Lua) i32 {
 }
 fn luaCharacterLookAtRoom(lua: *Lua) i32 {
     cdb.char_look_at_room(checkCharacter(lua));
+    return 0;
+}
+fn luaCharacterLookAtSpecificRoom(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const room = rooms_lua.checkRoomAt(lua, 2);
+    cdb.char_look_at_specific_room(ch, room);
     return 0;
 }
 fn luaCharacterRestore(lua: *Lua) i32 {

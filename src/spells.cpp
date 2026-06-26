@@ -89,17 +89,7 @@ ASPELL(spell_create_water) {
 }
 
 ASPELL(spell_recall) {
-  if (victim == NULL || IS_NPC(victim))
-    return;
 
-  act("$n disappears.", TRUE, victim, 0, 0, TO_ROOM);
-  char_from_room(victim);
-  char_to_room(victim, room_by_id(CONFIG_MORTAL_START));
-  act("$n appears in the middle of the room.", TRUE, victim, 0, 0, TO_ROOM);
-  look_at_room(char_room_get(victim), victim, 0);
-  entry_memory_mtrigger(victim);
-  greet_mtrigger(victim, -1);
-  greet_memory_mtrigger(victim);
 }
 
 ASPELL(spell_teleport) {}
@@ -107,57 +97,7 @@ ASPELL(spell_teleport) {}
 #define SUMMON_FAIL "You failed.\r\n"
 
 ASPELL(spell_summon) {
-  if (ch == NULL || victim == NULL)
-    return;
 
-  if (GET_LEVEL(victim) > level + 3) {
-    send_to_char(ch, "%s", SUMMON_FAIL);
-    return;
-  }
-
-  if (!CONFIG_PK_ALLOWED) {
-    if (MOB_FLAGGED(victim, MOB_AGGRESSIVE)) {
-      act("As the words escape your lips and $N travels\r\n"
-          "through time and space towards you, you realize that $E is\r\n"
-          "aggressive and might harm you, so you wisely send $M back.",
-          FALSE, ch, 0, victim, TO_CHAR);
-      return;
-    }
-    if (!IS_NPC(victim) && !PRF_FLAGGED(victim, PRF_SUMMONABLE) &&
-        !PLR_FLAGGED(victim, PLR_KILLER)) {
-      send_to_char(victim,
-                   "%s just tried to summon you to: %s.\r\n"
-                   "%s failed because you have summon protection on.\r\n"
-                   "Type NOSUMMON to allow other players to summon you.\r\n",
-                   GET_NAME(ch), room_name_get(char_room_get(ch)),
-                   (ch->sex == SEX_MALE) ? "He" : "She");
-
-      send_to_char(ch, "You failed because %s has summon protection on.\r\n",
-                   GET_NAME(victim));
-      mudlog(BRF, ADMLVL_IMMORT, TRUE, "%s failed summoning %s to %s.",
-             GET_NAME(ch), GET_NAME(victim), room_name_get(char_room_get(ch)));
-      return;
-    }
-  }
-
-  if (MOB_FLAGGED(victim, MOB_NOSUMMON) ||
-      (IS_NPC(victim) &&
-       mag_newsaves(ch, victim, SPELL_SUMMON, level, GET_INT(ch)))) {
-    send_to_char(ch, "%s", SUMMON_FAIL);
-    return;
-  }
-
-  act("$n disappears suddenly.", TRUE, victim, 0, 0, TO_ROOM);
-
-  char_from_room(victim);
-  char_to_room(victim, char_room_get(ch));
-
-  act("$n arrives suddenly.", TRUE, victim, 0, 0, TO_ROOM);
-  act("$n has summoned you!", FALSE, ch, 0, victim, TO_VICT);
-  look_at_room(char_room_get(victim), victim, 0);
-  entry_memory_mtrigger(victim);
-  greet_mtrigger(victim, -1);
-  greet_memory_mtrigger(victim);
 }
 
 ASPELL(spell_locate_object) {

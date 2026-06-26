@@ -307,7 +307,7 @@ int load_char(const char *name, struct char_data *ch) {
     GET_DISTFEA(ch) = PFDEF_DISTFEA;
     GET_RADAR1(ch) = PFDEF_RADAR1;
     GET_LPLAY(ch) = PFDEF_LPLAY;
-    GET_BOOSTS(ch) = PFDEF_DISTFEA;
+    SET_BOOSTS(ch, PFDEF_DISTFEA);
     GET_LINTEREST(ch) = PFDEF_LPLAY;
     GET_DTIME(ch) = PFDEF_LPLAY;
     GET_PHASE(ch) = PFDEF_EYE;
@@ -411,7 +411,7 @@ int load_char(const char *name, struct char_data *ch) {
         else if (!strcmp(tag, "Bonu"))
           load_bonuses(fl, ch, FALSE);
         else if (!strcmp(tag, "Boos"))
-          GET_BOOSTS(ch) = atoi(line);
+          SET_BOOSTS(ch, atoi(line));
         else if (!strcmp(tag, "Bpl "))
           load_BASE(ch, line, LOAD_HIT);
         else if (!strcmp(tag, "Brth"))
