@@ -376,20 +376,6 @@ int perform_dupe_check(struct descriptor_data *d) {
           "latest entry or 'news list' to see available entries.@n\r\n",
           LASTNEWS);
 
-    if (LASTINTEREST != 0 && LASTINTEREST > GET_LINTEREST(d->character)) {
-      int diff = (LASTINTEREST - GET_LINTEREST(d->character));
-      int days = MIN(3, diff / 86400);
-      GET_LINTEREST(d->character) = LASTINTEREST;
-      int base_interest = GET_BANK_INTEREST(d->character);
-      int total_interest = base_interest * days;
-      if (total_interest > 0) {
-        char_stat_mod(d->character, "money_bank", total_interest);
-        send_to_char(d->character,
-                     "Interest happened while you were away, %d times.\r\n"
-                     "@cBank Interest@D: @Y%s@n\r\n",
-                     days, add_commas(total_interest));
-      }
-    }
     break;
   case USURP:
     write_to_output(d, "You take over your own body, already in use!\r\n");
@@ -5117,36 +5103,6 @@ void nanny(struct descriptor_data *d, char *arg) {
             "\r\n@GThe NEWS file has been updated, type 'news %d' to see the "
             "latest entry or 'news list' to see available entries.@n\r\n",
             LASTNEWS);
-      if (LASTINTEREST != 0 && LASTINTEREST > GET_LINTEREST(d->character)) {
-        int diff = (LASTINTEREST - GET_LINTEREST(d->character));
-        int mult = 0;
-        while (diff > 0) {
-          if ((diff - 86400) < 0 && mult == 0) {
-            mult = 1;
-          } else if ((diff - 86400) >= 0) {
-            diff -= 86400;
-            mult++;
-          } else {
-            diff = 0;
-          }
-        }
-        if (mult > 3) {
-          mult = 3;
-        }
-        GET_LINTEREST(d->character) = LASTINTEREST;
-        if (GET_BANK_GOLD(d->character) > 0) {
-          int inc = ((GET_BANK_GOLD(d->character) / 100) * 2);
-          if (inc >= 7500) {
-            inc = 7500;
-          }
-          inc *= mult;
-          char_stat_mod(d->character, "money_bank", inc);
-          send_to_char(d->character,
-                       "Interest happened while you were away, %d times.\r\n"
-                       "@cBank Interest@D: @Y%s@n\r\n",
-                       mult, add_commas(inc));
-        }
-      }
       if (!IS_ANDROID(d->character)) {
         char buf3[MAX_INPUT_LENGTH];
         send_to_sense(0, "You sense someone appear suddenly", d->character);

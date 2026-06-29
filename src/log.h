@@ -26,6 +26,10 @@ void mud_log(const char *format, ...)
 void mudlog(int type, int level, int file, const char *str, ...)
     __attribute__((format(printf, 4, 5)));
 
+void log_imm_action(char *messg, ...) __attribute__((format(printf, 1, 2)));
+void log_custom(struct descriptor_data *d, struct obj_data *obj);
+
+
 #define CREATE(result, type, number)                                           \
   do {                                                                         \
     if ((number) * sizeof(type) <= 0)                                          \

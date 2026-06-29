@@ -25,16 +25,16 @@ void group_gain(struct char_data *ch, struct char_data *victim);
 void mutant_limb_regen(struct char_data *ch);
 
 // commands
-ACMD(do_trip);
-ACMD(do_srepair);
-ACMD(do_absorb);
-ACMD(do_kaioken);
+// ACMD(do_trip);  // lua/characters/commands/misc/trip.lua
+// ACMD(do_srepair);  // lua/characters/commands/misc/repair.lua
+// ACMD(do_absorb);  // lua/characters/commands/misc/absorb.lua
+// ACMD(do_kaioken);  // lua/characters/commands/misc/kaioken.lua
 ACMD(do_hass);
 ACMD(do_ensnare);
 ACMD(do_get);
 ACMD(do_split);
 ACMD(do_sac);
-ACMD(do_kaioken);
+// ACMD(do_kaioken);  // lua/characters/commands/misc/kaioken.lua
 
 #ifdef __cplusplus
 }

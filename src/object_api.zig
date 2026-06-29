@@ -260,7 +260,24 @@ pub export fn obj_extra_flag_toggle(obj: *cdb.obj_data, pos: c_int) bool {
 }
 
 pub export fn obj_extra_flag_set(obj: *cdb.obj_data, pos: c_int, value: bool) void {
+    if (pos == cdb.ITEM_BROKEN) {
+        obj_broken_set(obj, value);
+        return;
+    }
     bitflags.set(&obj.extra_flags, pos, value);
+}
+
+pub export fn obj_broken_set(obj: *cdb.obj_data, value: bool) void {
+    const was_broken = bitflags.get(&obj.extra_flags, cdb.ITEM_BROKEN);
+    bitflags.set(&obj.extra_flags, cdb.ITEM_BROKEN, value);
+    if (!value or was_broken) return;
+
+    const wearer = obj.worn_by orelse return;
+    const pos = obj.worn_on;
+    if (pos < 0) return;
+    _ = cdb.act("@W$p@W falls apart and you remove it.@n", cdb.FALSE, wearer, obj, null, cdb.TO_CHAR);
+    _ = cdb.act("@W$p@W falls apart and @C$n@W remove it.@n", cdb.FALSE, wearer, obj, null, cdb.TO_ROOM);
+    cdb.perform_remove(wearer, pos);
 }
 
 pub export fn obj_aff_flagged(obj: *cdb.obj_data, pos: c_int) bool {

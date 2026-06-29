@@ -34,6 +34,7 @@
 #include "dg_comm.h"
 #include "obj_edit.h"
 #include "races_plus.h"
+#include "log.h"
 
 #include <cstdlib>
 #include <cstring>

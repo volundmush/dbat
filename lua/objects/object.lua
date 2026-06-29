@@ -47,6 +47,10 @@ local function is_broken(obj)
     return obj:extra_flagged(C().EF.BROKEN)
 end
 
+local function broken_set(obj, value)
+    obj:extra_flag_set(C().EF.BROKEN, value and true or false)
+end
+
 -- Reduce VAL_WEAPON_HEALTH (value[4]) by amount, clamped to 0.
 local function weapon_damage(obj, amount)
     local cur = obj:value_get(4)
@@ -503,5 +507,6 @@ return {
   weapon_damtype_get = weapon_damtype_get,
   weapon_level_get = weapon_level_get,
   is_broken = is_broken,
+  broken_set = broken_set,
   weapon_damage = weapon_damage,
 }

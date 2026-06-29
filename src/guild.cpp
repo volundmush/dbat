@@ -151,6 +151,10 @@ void handle_ingest_learn(struct char_data *ch, struct char_data *vict) {
   }
 }
 
+void char_handle_ingest_learn(struct char_data *ch, struct char_data *vict) {
+  handle_ingest_learn(ch, vict);
+}
+
 ACMD(do_teach) {
 
   if (IS_NPC(ch))

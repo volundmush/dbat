@@ -456,7 +456,7 @@ static void tick_transformation_drain(struct char_data *ch) {
       act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n",
           TRUE, ch, 0, 0, TO_ROOM);
       if (GET_KAIOKEN(ch) < 1)
-        do_kaioken(ch, "0", 0, 0);
+        char_cmd_execute(ch, "kaioken", "0");
       char_cmd_execute(ch, "transform", "revert");
       return;
     }
@@ -592,8 +592,6 @@ void stop_fighting(struct char_data *ch) {
 
   char_subscribe_remove(ch, "combat");
 
-  char_condition_remove(ch, "combo", "end_combo");
-  
   char_fighting_set(ch, NULL);
   if (AFF_FLAGGED(ch, AFF_POSITION)) {
     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_POSITION);
@@ -1165,12 +1163,10 @@ void die(struct char_data *ch, struct char_data *killer) {
 
   // Saiyan Zenkai mechanic: if at 75% lifeforce or higher, 25% chance of
   // triggering Zenkai. Added check for character having AFF_SPIRIT to prevent
-  // triggering in Afterlife this is implemented by setting PLR_GOOP with
-  // gooptime 0
+  // triggering in Afterlife this is implemented by applying saiyan_zenkai.
   if (IS_SAIYAN(ch) && !AFF_FLAGGED(ch, AFF_SPIRIT) &&
       (getCurLFPercent(ch) >= 0.75) && rand_number(1, 4) == 4) {
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
-    ch->gooptime = 0;
+    char_condition_apply_with_duration(ch, "saiyan_zenkai", "death", "zenkai", 1);
     decCurLFPercent(ch, 0.5);
     return;
   }
@@ -1178,12 +1174,13 @@ void die(struct char_data *ch, struct char_data *killer) {
   // majin and bio regen mechanic skips actually dying...
   if ((IS_MAJIN(ch) || IS_BIO(ch)) &&
       ((getCurLF(ch)) >= (getMaxLF(ch)) * 0.75 ||
-       (PLR_FLAGGED(ch, PLR_SELFD2) &&
+       (char_condition_number_get(ch, "self_destructing", "phase") >= 2 &&
         (getCurLF(ch)) >= (getMaxLF(ch)) * 0.5))) {
     decCurLFPercentFloored(ch, 2, -1);
     decCurHealthPercentFloored(ch, 1, 1);
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
-    ch->gooptime = 32;
+    char_condition_apply_with_duration(ch,
+        IS_BIO(ch) ? "bio_android_regen" : "majin_goop",
+        "death", "regeneration", 64);
     return;
   }
 

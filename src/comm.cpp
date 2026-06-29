@@ -433,9 +433,6 @@ static void ev_char_condition_update(int, int64_t, int64_t) {
   copyover_check();
 }
 
-static void ev_base_update(int, int64_t, int64_t) {
-  base_update();
-}
 
 static void ev_script_trigger_check(int, int64_t, int64_t) {
   script_trigger_check();
@@ -498,7 +495,6 @@ void event_queue_register_heartbeat_events() {
   event_schedule_c(now + 100LL, 100LL, ev_process_character_commands, EQ_CTX_NONE, 0, 0);
   event_schedule_c(now + EQ_MS_1SEC,  EQ_MS_1SEC,  ev_wishSYS,               EQ_CTX_NONE, 0, 0);
   event_schedule_c(now + EQ_MS_1SEC,  EQ_MS_1SEC,  ev_char_condition_update, EQ_CTX_NONE, 0, 0);
-  event_schedule_c(now + EQ_MS_2SEC,  EQ_MS_2SEC,  ev_base_update,           EQ_CTX_NONE, 0, 0);
   event_schedule_c(now + EQ_MS_15SEC, EQ_MS_15SEC, ev_check_auction,         EQ_CTX_NONE, 0, 0);
   /* ev_handle_songs removed — song ticking moved to mystic_melody condition */
   event_schedule_c(now + EQ_MS_1MIN,  EQ_MS_1MIN,  ev_check_idle_menu,       EQ_CTX_NONE, 0, 0);
@@ -613,9 +609,9 @@ static void prompt_status_flags(struct descriptor_data *d, struct char_data *ch,
   bool flagged = false;
 #define PFLAG(fmt, ...) do { papp(p, max, len, fmt, ##__VA_ARGS__); flagged = true; } while(0)
 
-  if (PLR_FLAGGED(ch, PLR_SELFD))
+  if (char_condition_has(ch, "self_destructing"))
     PFLAG("@D[@RSELF-D@r: @w%s@D]@n",
-          PLR_FLAGGED(ch, PLR_SELFD2) ? "READY" : "PREP");
+          char_condition_number_get(ch, "self_destructing", "phase") >= 2 ? "READY" : "PREP");
 
   if (IS_HALFBREED(ch) && PRF_FLAGGED(ch, PRF_FURY)) {
     if (char_condition_has(ch, "halfbreed_fury"))

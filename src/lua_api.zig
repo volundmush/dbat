@@ -23,22 +23,22 @@ const lua_root = "lua";
 
 const Category = struct { namespace: []const u8, name: []const u8, dir: []const u8 };
 const categories = [_]Category{
-    .{ .namespace = "characters", .name = "commands",          .dir = "characters/commands" },
-    .{ .namespace = "characters", .name = "conditions",        .dir = "characters/conditions" },
-    .{ .namespace = "characters", .name = "derived",           .dir = "characters/derived" },
-    .{ .namespace = "characters", .name = "modifiers",         .dir = "characters/modifiers" },
-    .{ .namespace = "characters", .name = "meters",            .dir = "characters/meters" },
-    .{ .namespace = "characters", .name = "pcommands",         .dir = "characters/pcommands" },
-    .{ .namespace = "characters", .name = "races",             .dir = "characters/races" },
-    .{ .namespace = "characters", .name = "senseis",           .dir = "characters/senseis" },
-    .{ .namespace = "characters", .name = "skills",            .dir = "characters/skills" },
-    .{ .namespace = "characters", .name = "stats",             .dir = "characters/stats" },
-    .{ .namespace = "characters", .name = "transformations",   .dir = "characters/transformations" },
-    .{ .namespace = "characters", .name = "attacks",           .dir = "characters/attacks" },
+    .{ .namespace = "characters", .name = "commands", .dir = "characters/commands" },
+    .{ .namespace = "characters", .name = "conditions", .dir = "characters/conditions" },
+    .{ .namespace = "characters", .name = "derived", .dir = "characters/derived" },
+    .{ .namespace = "characters", .name = "modifiers", .dir = "characters/modifiers" },
+    .{ .namespace = "characters", .name = "meters", .dir = "characters/meters" },
+    .{ .namespace = "characters", .name = "pcommands", .dir = "characters/pcommands" },
+    .{ .namespace = "characters", .name = "races", .dir = "characters/races" },
+    .{ .namespace = "characters", .name = "senseis", .dir = "characters/senseis" },
+    .{ .namespace = "characters", .name = "skills", .dir = "characters/skills" },
+    .{ .namespace = "characters", .name = "stats", .dir = "characters/stats" },
+    .{ .namespace = "characters", .name = "transformations", .dir = "characters/transformations" },
+    .{ .namespace = "characters", .name = "attacks", .dir = "characters/attacks" },
     .{ .namespace = "characters", .name = "character_scripts", .dir = "characters/scripts" },
-    .{ .namespace = "objects",    .name = "object_scripts",    .dir = "objects/scripts" },
-    .{ .namespace = "rooms",      .name = "room_scripts",      .dir = "rooms/scripts" },
-    .{ .namespace = "zones",      .name = "zone_scripts",      .dir = "zones/scripts" },
+    .{ .namespace = "objects", .name = "object_scripts", .dir = "objects/scripts" },
+    .{ .namespace = "rooms", .name = "room_scripts", .dir = "rooms/scripts" },
+    .{ .namespace = "zones", .name = "zone_scripts", .dir = "zones/scripts" },
 };
 
 var allocator: std.mem.Allocator = undefined;
@@ -363,9 +363,18 @@ fn callCharacterDispatch(ch: *cdb.char_data, comptime fn_name: [:0]const u8, fir
     const lua = lua_state orelse return false;
     const top = lua.getTop();
 
-    if (lua.getGlobal("dbat") != .table) { lua.setTop(top); return false; }
-    if (lua.getField(-1, "characters") != .table) { lua.setTop(top); return false; }
-    if (lua.getField(-1, fn_name) != .function) { lua.setTop(top); return false; }
+    if (lua.getGlobal("dbat") != .table) {
+        lua.setTop(top);
+        return false;
+    }
+    if (lua.getField(-1, "characters") != .table) {
+        lua.setTop(top);
+        return false;
+    }
+    if (lua.getField(-1, fn_name) != .function) {
+        lua.setTop(top);
+        return false;
+    }
     lua.remove(-2); // characters table
     lua.remove(-2); // dbat table
 
@@ -607,6 +616,26 @@ pub fn calculateDerivedBase(ch: *cdb.char_data, name: []const u8) ?i64 {
 pub fn meterDefinition(name: []const u8) ?MeterDefinition {
     if (!initialized or name.len == 0) return null;
     return definition_cache.meters.get(name);
+}
+
+pub fn callMeterUpdateHook(ch: *cdb.char_data, meter: []const u8, old_value: i64, new_value: i64) void {
+    if (!initialized or meter.len == 0) return;
+    if (!(pushThing("meters", meter) catch return)) return;
+    const lua = lua_state.?;
+    defer pop(1);
+    if (lua.getField(-1, "on_update") != .function) {
+        lua.pop(1);
+        return;
+    }
+
+    characters_lua.pushCharacter(lua, cdb.char_id_get(ch));
+    lua.pushInteger(old_value);
+    lua.pushInteger(new_value);
+    lua.protectedCall(.{ .args = 3, .results = 0 }) catch |err| {
+        const message = lua.toString(-1) catch @errorName(err);
+        std.log.err("meter {s} on_update failed: {s}", .{ meter, message });
+        lua.pop(1);
+    };
 }
 
 pub fn conditionDefinition(name: []const u8) ?ConditionDefinition {
@@ -1303,8 +1332,37 @@ fn openDbat(lua: *Lua) i32 {
     lua.pushBoolean(cdb.config_info.play.load_into_inventory != 0);
     lua.setField(-2, "load_into_inventory");
 
+    registerConfigModule(lua);
     registerTestModule(lua);
 
+    return 1;
+}
+
+fn registerConfigModule(lua: *Lua) void {
+    lua.newTable();
+    lua.pushFunction(zlua.wrap(luaConfigCompressionEnabled));
+    lua.setField(-2, "compression_enabled");
+    lua.pushFunction(zlua.wrap(luaConfigNameserverSlowToggle));
+    lua.setField(-2, "nameserver_slow_toggle");
+    lua.pushFunction(zlua.wrap(luaConfigTrackThroughDoorsToggle));
+    lua.setField(-2, "track_through_doors_toggle");
+    lua.setField(-2, "config");
+}
+
+fn luaConfigCompressionEnabled(lua: *Lua) i32 {
+    lua.pushBoolean(cdb.config_info.play.enable_compression != 0);
+    return 1;
+}
+
+fn luaConfigNameserverSlowToggle(lua: *Lua) i32 {
+    cdb.config_info.operation.nameserver_is_slow = if (cdb.config_info.operation.nameserver_is_slow == 0) 1 else 0;
+    lua.pushBoolean(cdb.config_info.operation.nameserver_is_slow != 0);
+    return 1;
+}
+
+fn luaConfigTrackThroughDoorsToggle(lua: *Lua) i32 {
+    cdb.config_info.play.track_through_doors = if (cdb.config_info.play.track_through_doors == 0) 1 else 0;
+    lua.pushBoolean(cdb.config_info.play.track_through_doors != 0);
     return 1;
 }
 

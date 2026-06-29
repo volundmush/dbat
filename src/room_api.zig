@@ -138,12 +138,22 @@ pub export fn room_geffect_get(room: *cdb.room_data) c_int {
     return room.geffect;
 }
 
+fn syncGeoEffectScript(room: *cdb.room_data) void {
+    if (room.geffect > 0 and room.geffect < 6) {
+        _ = room_script_add(room, "geo_effect");
+    } else {
+        _ = room_script_remove(room, "geo_effect", "inactive");
+    }
+}
+
 pub export fn room_geffect_mod(room: *cdb.room_data, delta: c_int) void {
     room.geffect += delta;
+    syncGeoEffectScript(room);
 }
 
 pub export fn room_geffect_set(room: *cdb.room_data, geffect: c_int) void {
     room.geffect = geffect;
+    syncGeoEffectScript(room);
 }
 
 pub export fn room_dir_option_get(room: *cdb.room_data, dir: c_int) [*c]cdb.room_direction_data {

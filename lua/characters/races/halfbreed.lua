@@ -5,4 +5,5 @@ return {
     abbreviation = "H-B",
     size = "medium",
     pc_ok = true,
+    mimic_ok = true,
 }

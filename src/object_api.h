@@ -34,6 +34,7 @@ void obj_wear_flag_set(struct obj_data *obj, int pos, bool value);
 bool obj_extra_flagged(struct obj_data *obj, int pos);
 bool obj_extra_flag_toggle(struct obj_data *obj, int pos);
 void obj_extra_flag_set(struct obj_data *obj, int pos, bool value);
+void obj_broken_set(struct obj_data *obj, bool value);
 bool obj_aff_flagged(struct obj_data *obj, int pos);
 bool obj_aff_flag_toggle(struct obj_data *obj, int pos);
 void obj_aff_flag_set(struct obj_data *obj, int pos, bool value);

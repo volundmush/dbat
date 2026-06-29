@@ -66,7 +66,7 @@ ACMD(do_post);
 /* do_shuffle moved to lua/characters/commands/cardgame/shuffle.lua */
 /* do_draw moved to lua/characters/commands/cardgame/draw.lua */
 /* do_kyodaika moved to lua/characters/commands/namek/kyodaika.lua */
-ACMD(do_mimic);
+/* do_mimic moved to lua/characters/commands/misc/mimic.lua */
 ACMD(do_rdisplay);
 /* do_evolve moved to lua/characters/commands/advancement/evolve.lua */
 /* do_showoff moved to lua/characters/commands/items/show.lua */

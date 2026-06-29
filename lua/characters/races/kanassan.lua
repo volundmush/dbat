@@ -22,5 +22,6 @@ return {
     abbreviation = "Kan",
     size = "medium",
     pc_ok = true,
+    mimic_ok = true,
     modifiers = modifiers
 }

@@ -135,12 +135,14 @@ void resurrect(char_data *ch, int mode) {
   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SPIRIT);
   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_PDEATH);
   char_from_room(ch);
+  struct room_data *target_room = NULL;
   if (GET_DROOM(ch) != NOWHERE && GET_DROOM(ch) != 0 && GET_DROOM(ch) != 1) {
-    char_to_room(ch, room_by_id(GET_DROOM(ch)));
+    target_room = room_by_id(GET_DROOM(ch));
   } else {
-    char_to_room(ch, room_by_id(sensei_start_room(ch->chclass)));
+    target_room = room_by_id(sensei_start_room(ch->chclass));
   }
-  look_at_room(char_room_get(ch), ch, 0);
+  char_to_room(ch, target_room);
+  look_at_room(target_room, ch, 0);
 
   int dur = 100;
   switch (mode) {
@@ -166,9 +168,6 @@ void resurrect(char_data *ch, int mode) {
       int psloss = rand_number(100, 300);
       char_stat_mod(ch, "practices", -psloss);
       send_to_char(ch, "@R...and a loss of @r%d@R PS!@n", psloss);
-      if (GET_PRACTICES(ch, GET_CLASS(ch)) < 0) {
-        char_stat_set(ch, "practices", 0);
-      }
     }
   }
   GET_DTIME(ch) = 0;
@@ -3510,7 +3509,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
       send_to_char(ch, "That's insane, don't hurt yourself. Hurt others! "
                        "That's the key to life ^_^\r\n");
       return 0;
-    } else if (vict->gooptime > 0) {
+    } else if (char_condition_has_tag(vict, "goop")) {
       send_to_char(ch,
                    "It seems like it'll be hard to kill them right now...\r\n");
       return 0;

@@ -46,7 +46,7 @@ return {
             return
         end
 
-        if ch:player_flagged(PLR.SELFD) then
+        if ch:condition_has("self_destructing") then
             ch:send_line("You are preparing to blow up!")
             return
         end

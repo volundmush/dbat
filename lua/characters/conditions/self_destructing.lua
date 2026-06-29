@@ -1,8 +1,5 @@
-local dbat = require("dbat")
-local PLR  = dbat.consts.player_flags
-
 local TICK_INTERVAL_MS = 1000
-local MAX_TICKS        = 60  -- auto-remove after 60 seconds
+local MAX_TICKS        = 60
 
 local function on_tick(ch, cond)
     local ticks = (cond:number_get("ticks") or 0) + 1
@@ -11,12 +8,12 @@ local function on_tick(ch, cond)
     if ticks >= MAX_TICKS then
         ch:send_line("@wYour body slowly stops flashing. The energy you built up dissipates harmlessly.@n")
         ch:act_around("@w$n@w's body slowly stops flashing as the built-up energy dissipates harmlessly.@n")
-        ch:condition_remove("selfdestruct", "timeout")
+        ch:condition_remove("self_destructing", "timeout")
         return
     end
 
     if (cond:number_get("phase") or 1) == 1 then
-        local sk = ch:skill_get("selfd") or 0
+        local sk = ch:skill_get("self destruct") or 0
         if math.random(4, 100) < sk then
             cond:number_set("phase", 2)
             ch:send_line("@RYou feel you are ready to self destruct!@n")
@@ -25,9 +22,9 @@ local function on_tick(ch, cond)
 end
 
 return {
-    id         = "selfdestruct",
-    name       = "Self Destruct",
-    tags       = { "selfdestruct" },
+    id         = "self_destructing",
+    name       = "Self Destructing",
+    tags       = { "selfdestruct", "self_destructing" },
     persistent = false,
 
     on_apply = function(ch, cond)

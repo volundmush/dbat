@@ -5,6 +5,7 @@ return {
     abbreviation = "Nam",
     size = "medium",
     pc_ok = true,
+    mimic_ok = false,
     valid_sexes = {"neutral"},
     modifiers = function(ch)
         return {

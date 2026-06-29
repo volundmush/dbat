@@ -2,7 +2,6 @@ local dbat   = require("dbat")
 local RF     = dbat.consts.room_flags
 local EF     = dbat.consts.item_extra_flags
 local WEAR   = dbat.consts.wear_positions
-local PLR    = dbat.consts.plr_flags
 local BFS    = dbat.consts.bfs
 local text   = dbat.lib.text
 
@@ -180,7 +179,7 @@ local function execute(ctx)
     if vict:condition_has("hasshuken")    then infos[#infos+1] = "Accelerated Arms" end
     if vict:condition_has("healing_glow") then infos[#infos+1] = "Healing Glow Prepared" end
     if vict:condition_has("poison")       then infos[#infos+1] = "Poisoned" end
-    if vict:player_flagged(PLR.SELFD)     then infos[#infos+1] = "Explosive Energy" end
+    if vict:condition_has("self_destructing") then infos[#infos+1] = "Explosive Energy" end
 
     ch:send_line("@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D: @Y%21s@n@D|@n",
         infos[1] or "None Detected.")

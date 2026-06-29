@@ -5,4 +5,5 @@ return {
     abbreviation = "Bio",
     size = "medium",
     pc_ok = true,
+    mimic_ok = false,
 }

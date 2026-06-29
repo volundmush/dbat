@@ -35,6 +35,7 @@ Access: `dbat.characters.all()` → iterator of all non-extracted Characters
 | `size_mod` | `ch:size_mod(delta)` | integer (new value) | |
 | `position_get` | `ch:position_get()` | integer | See `dbat.consts.positions` |
 | `position_set` | `ch:position_set(n)` | — | |
+| `starphase_get` | `ch:starphase_get()` | integer | Legacy Hoshijin phase field |
 | `user_get` | `ch:user_get()` | string\|nil | Player account username |
 
 ---
@@ -50,6 +51,16 @@ Access: `dbat.characters.all()` → iterator of all non-extracted Characters
 | `reftype` | `ch:reftype()` | `"character"` | Useful for generic entity code |
 | `extract` | `ch:extract()` | — | Remove from world |
 | `update` | `ch:update([kind], [seconds])` | — | Trigger condition updates |
+| `absorbs_get` | `ch:absorbs_get()` | integer | Bio absorb counter |
+| `absorbs_set` | `ch:absorbs_set(value)` | integer | |
+| `absorbs_mod` | `ch:absorbs_mod(delta)` | integer | |
+| `handle_ingest_learn` | `ch:handle_ingest_learn(victim)` | — | Legacy Majin ingest skill-learning routine |
+| `limb_ok` | `ch:limb_ok(type)` | bool | Legacy limb availability check |
+| `backstab_cooldown` | `ch:backstab_cooldown()` | integer | Seconds remaining on `cooldown_backstab` |
+| `cooldown_get` | `ch:cooldown_get()` | integer | Seconds remaining on `cooldown_concentrate` |
+| `cooldown_set` | `ch:cooldown_set(seconds)` | — | Set or clear `cooldown_concentrate` |
+| `selfdestruct_cooldown_get` | `ch:selfdestruct_cooldown_get()` | integer | Seconds remaining on `cooldown_selfdestruct` |
+| `selfdestruct_cooldown_set` | `ch:selfdestruct_cooldown_set(seconds)` | — | Set or clear `cooldown_selfdestruct` |
 
 ---
 
@@ -81,6 +92,7 @@ Access: `dbat.characters.all()` → iterator of all non-extracted Characters
 | `player_flagged` | `ch:player_flagged(flag)` | bool | |
 | `player_flag_set` | `ch:player_flag_set(flag, bool)` | — | |
 | `player_flag_toggle` | `ch:player_flag_toggle(flag)` | bool | |
+| `is_shopkeeper` | `ch:is_shopkeeper()` | bool | True when NPC prototype uses the shopkeeper special proc |
 | `pref_flagged` | `ch:pref_flagged(flag)` | bool | |
 | `pref_flag_set` | `ch:pref_flag_set(flag, bool)` | — | |
 | `pref_flag_toggle` | `ch:pref_flag_toggle(flag)` | bool | |
@@ -98,6 +110,7 @@ Base stats are persistent integers stored by name. Derived stats are computed va
 | `stat_get` | `ch:stat_get(name)` | integer | |
 | `stat_set` | `ch:stat_set(name, value)` | integer (new) | |
 | `stat_mod` | `ch:stat_mod(name, delta)` | integer (new) | |
+| `perform_get_from_room` | `ch:perform_get_from_room(obj)` | bool | Runs normal get-from-room behavior for a specific room object |
 | `der_base` | `ch:der_base(name)` | integer | Base value before modifiers |
 | `der_total` | `ch:der_total(name)` | integer | Final value after all modifiers (cached via Lua) |
 | `der_invalidate` | `ch:der_invalidate()` | — | Force modifier cache rebuild |
@@ -133,6 +146,8 @@ Meters are capped resource pools (powerlevel, ki, lifeforce, stamina). Each mete
 | `meter_current` | `ch:meter_current(name)` | integer | Raw current value |
 | `meter_max` | `ch:meter_max(name)` | integer | Max (from derived stat) |
 
+Meter definitions may provide `on_update(ch, old_value, new_value)`, called after `meter_set` changes the fixed-point current value.
+
 ---
 
 ## Skills
@@ -145,6 +160,7 @@ Meters are capped resource pools (powerlevel, ki, lifeforce, stamina). Each mete
 | `skill_modifier_get` | `ch:skill_modifier_get(name)` | integer | Modifier bonus only |
 | `skill_total_get` | `ch:skill_total_get(name)` | integer | base + modifier |
 | `skill_get` | `ch:skill_get(name)` | integer | Alias for `skill_total_get` |
+| `init_skill` | `ch:init_skill(name)` | integer | Legacy initialized skill roll/value |
 | `skill_perf_get` | `ch:skill_perf_get(name)` | integer | Performance metric |
 | `skill_perf_set` | `ch:skill_perf_set(name, value)` | integer | |
 | `skill_perf_mod` | `ch:skill_perf_mod(name, delta)` | integer | |
@@ -164,6 +180,7 @@ Conditions are named status effects. They can store per-character number and str
 | `condition_apply` | `ch:condition_apply(id [, category [, source_id]])` | bool | Add and trigger on_apply |
 | `condition_apply_variables` | `ch:condition_apply_variables(id, nums, strs [, cat [, src]])` | bool | Apply with initial variables |
 | `condition_apply_number` | `ch:condition_apply_number(id, key, value [, cat [, src]])` | bool | Apply with one initial number |
+| `condition_apply_with_duration` | `ch:condition_apply_with_duration(id, duration [, cat [, src]])` | bool | Apply with duration |
 | `condition_remove` | `ch:condition_remove(id [, reason])` | bool | |
 | `condition_remove_tag` | `ch:condition_remove_tag(tag [, reason])` | integer | Count removed |
 | `condition` | `ch:condition(id)` | Condition\|nil | Get Condition userdata |
@@ -258,6 +275,7 @@ Transformation state is tracked separately from conditions. A transformation may
 | `can_see_char` | `ch:can_see_char(other)` | bool | |
 | `can_see_obj` | `ch:can_see_obj(obj)` | bool | |
 | `can_see` | `ch:can_see(entref)` | bool | Generic; accepts character or object (Lua-side) |
+| `can_kill` | `ch:can_kill(other [, mode])` | bool | Legacy permission check; mode defaults to 1 |
 | `reveal_hiding` | `ch:reveal_hiding([reveal_type])` | — | |
 | `release_charge` | `ch:release_charge()` | bool | |
 | `command_queue_clear` | `ch:command_queue_clear()` | — | |
@@ -266,11 +284,19 @@ Transformation state is tracked separately from conditions. A transformation may
 | `grappled_get` | `ch:grappled_get()` | Character\|nil | Who is grappling ch |
 | `absorbing_get` | `ch:absorbing_get()` | Character\|nil | Who ch is absorbing from |
 | `absorbed_by_get` | `ch:absorbed_by_get()` | Character\|nil | Who is absorbing from ch |
+| `mindlinked_get` | `ch:mindlinked_get()` | Character\|nil | Who ch is mind linked with |
+| `mindlinked_set` | `ch:mindlinked_set(vict_or_nil)` | — | Set or clear mind link condition |
+| `linker_get` | `ch:linker_get()` | integer | Legacy mind-link owner flag |
+| `linker_set` | `ch:linker_set(value)` | — | |
+| `wimp_level_get` | `ch:wimp_level_get()` | integer | Auto-flee powerlevel threshold |
+| `wimp_level_set` | `ch:wimp_level_set(value)` | — | |
 | `timer_get` | `ch:timer_get()` | integer | Idle timer (>3 = idle) |
 | `has_connection` | `ch:has_connection()` | bool | Has live descriptor (false = blank stare) |
 | `default_position_get` | `ch:default_position_get()` | integer | NPC default position |
 | `eavesdrop_get` | `ch:eavesdrop_get()` | integer | Eavesdrop target room (0 = none) |
+| `eavesdrop_set` | `ch:eavesdrop_set(vnum)` | — | Set eavesdrop target room |
 | `eavesdrop_dir_get` | `ch:eavesdrop_dir_get()` | integer | Eavesdrop direction index |
+| `eavesdrop_dir_set` | `ch:eavesdrop_dir_set(dir)` | — | Set eavesdrop direction index |
 
 ---
 
@@ -282,7 +308,7 @@ These are merged into the Character metatable at load time:
 |--------|-----------|-------|
 | `can_see` | `ch:can_see(entref)` | Dispatches to `can_see_char` or `can_see_obj` by reftype |
 | `keywords_for` | `ch:keywords_for([viewer])` | Returns keyword list for search |
-| `modifiers` | `ch:modifiers()` | Collects all active modifiers from race/sensei/conditions/room/furniture |
+| `modifiers` | `ch:modifiers()` | Collects all active modifiers from race/sensei/conditions/room; furniture is included through `using_furniture` |
 | `apparent_sex` | `ch:apparent_sex([viewer])` | |
 | `apparent_race` | `ch:apparent_race([viewer])` | |
 | `display_name_for` | `ch:display_name_for([viewer])` | |

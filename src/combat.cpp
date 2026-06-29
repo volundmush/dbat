@@ -1574,7 +1574,7 @@ void handle_defense(struct char_data *vict, int *pry, int *blk, int *dge) {
     if (*pry > 110) {
       *pry = 110;
     }
-    if (PLR_FLAGGED(vict, PLR_GOOP) && rand_number(1, 100) >= 15) {
+    if (char_condition_has_tag(vict, "goop") && rand_number(1, 100) >= 15) {
       *dge += 100;
       *blk += 100;
       *pry += 100;

@@ -230,7 +230,13 @@ ACMD(do_sradar) {
     return;
   }
 
-  if (GET_PING(ch) > 0) {
+  if (GET_PING(ch) > 0 && !char_condition_has(ch, "cooldown_radar_ping")) {
+    char_condition_apply_with_duration(ch, "cooldown_radar_ping", "legacy",
+                                       "radar_ping", GET_PING(ch));
+    GET_PING(ch) = 0;
+  }
+
+  if (char_condition_duration_get(ch, "cooldown_radar_ping") > 0) {
     send_to_char(ch, "@wYou need to wait a few more seconds before pinging a "
                      "destination again.\r\n");
     return;
@@ -345,7 +351,8 @@ ACMD(do_sradar) {
                  dirs[dir]);
     break;
   }
-  GET_PING(ch) = 5;
+  char_condition_apply_with_duration(ch, "cooldown_radar_ping", "cooldown",
+                                     "radar_ping", 5);
 }
 
 ACMD(do_radar) {

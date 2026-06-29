@@ -819,6 +819,7 @@ pub export fn char_meter_set(ch: *cdb.char_data, meter: ?[*:0]const u8, value: i
                     _ = char_condition_remove(ch, linked.ptr, "meter_full");
             }
         }
+        lua_api.callMeterUpdateHook(ch, name, old_value, clamped);
     }
 
     return clamped;
@@ -1475,11 +1476,24 @@ pub export fn char_is_outside(ch: *cdb.char_data) bool {
 }
 
 pub export fn char_sits_get(ch: *cdb.char_data) ?*cdb.obj_data {
+    const id = char_condition_number_get(ch, "using_furniture", "obj_id");
+    if (id > 0) {
+        if (cdb.obj_by_id(id)) |obj| return obj;
+        _ = char_condition_remove(ch, "using_furniture", "stale_object");
+    }
     return ch.sits;
 }
 
 pub export fn char_sits_set(ch: *cdb.char_data, obj: ?*cdb.obj_data) void {
+    if (ch.sits) |old| {
+        if (obj == null or old != obj.?) old.*.sitting = null;
+    }
+    _ = char_condition_remove(ch, "using_furniture", "update");
     ch.sits = obj;
+    if (obj) |chair| {
+        chair.sitting = ch;
+        _ = char_condition_apply_with_number(ch, "using_furniture", "position", "furniture", "obj_id", cdb.obj_id_get(chair));
+    }
 }
 
 pub export fn char_position_get(ch: *cdb.char_data) i64 {
@@ -1599,6 +1613,17 @@ pub export fn char_apply_entry_conditions(ch: *cdb.char_data) void {
     if (bitflags.get(ch.affected_by[0..], cdb.AFF_HAYASA))
         _ = cdb.char_condition_apply(ch, "hayasa", "entry", "hayasa_sync");
 
+    // Bank interest is tracked per-player by a persistent Lua condition. Seed
+    // new instances from the legacy player timestamp when one exists.
+    if (!cdb.char_condition_has(ch, "bank_interest")) {
+        if (ch.lastint > 0) {
+            _ = cdb.char_condition_apply_with_number(ch, "bank_interest", "entry", "login", "last_ts", ch.lastint);
+        } else {
+            _ = cdb.char_condition_apply(ch, "bank_interest", "entry", "login");
+        }
+    }
+    cdb.char_condition_event_dispatch(ch, "bank_interest", "catchup");
+
     // Fire "activate" event so Lua can schedule recurring needs/timers
     _ = event_schedule_lua_char_update(event_queue_now_ms(), 0, "activate", cdb.char_id_get(ch));
 }
@@ -1611,12 +1636,12 @@ const limb_stat_names = [4][*:0]const u8{
 
 pub export fn char_limbcond_get(ch: *cdb.char_data, n: c_int) c_int {
     if (n < 1 or n > 4) return 0;
-    return @intCast(char_stat_get(ch, limb_stat_names[@as(usize, @intCast(n)) - 1]));
+    return @intCast(char_meter_current(ch, limb_stat_names[@as(usize, @intCast(n)) - 1]));
 }
 
 pub export fn char_limbcond_set(ch: *cdb.char_data, n: c_int, val: c_int) void {
     if (n < 1 or n > 4) return;
-    _ = char_stat_set(ch, limb_stat_names[@as(usize, @intCast(n)) - 1], @intCast(val));
+    _ = char_meter_set_int(ch, limb_stat_names[@as(usize, @intCast(n)) - 1], @intCast(val));
     char_limb_healing_sync(ch);
 }
 
@@ -1675,22 +1700,52 @@ pub export fn char_rp_set(ch: *cdb.char_data, value: c_int) void {
     ch.rp = value;
 }
 
-pub export fn char_radar1_get(ch: *cdb.char_data) c_int { return @intCast(ch.radar1); }
-pub export fn char_radar1_set(ch: *cdb.char_data, vnum: c_int) void { ch.radar1 = @intCast(vnum); }
-pub export fn char_radar2_get(ch: *cdb.char_data) c_int { return @intCast(ch.radar2); }
-pub export fn char_radar2_set(ch: *cdb.char_data, vnum: c_int) void { ch.radar2 = @intCast(vnum); }
-pub export fn char_radar3_get(ch: *cdb.char_data) c_int { return @intCast(ch.radar3); }
-pub export fn char_radar3_set(ch: *cdb.char_data, vnum: c_int) void { ch.radar3 = @intCast(vnum); }
-pub export fn char_idnum_get(ch: *cdb.char_data) c_int { return @intCast(ch.idnum); }
+pub export fn char_radar1_get(ch: *cdb.char_data) c_int {
+    return @intCast(ch.radar1);
+}
+pub export fn char_radar1_set(ch: *cdb.char_data, vnum: c_int) void {
+    ch.radar1 = @intCast(vnum);
+}
+pub export fn char_radar2_get(ch: *cdb.char_data) c_int {
+    return @intCast(ch.radar2);
+}
+pub export fn char_radar2_set(ch: *cdb.char_data, vnum: c_int) void {
+    ch.radar2 = @intCast(vnum);
+}
+pub export fn char_radar3_get(ch: *cdb.char_data) c_int {
+    return @intCast(ch.radar3);
+}
+pub export fn char_radar3_set(ch: *cdb.char_data, vnum: c_int) void {
+    ch.radar3 = @intCast(vnum);
+}
+pub export fn char_idnum_get(ch: *cdb.char_data) c_int {
+    return @intCast(ch.idnum);
+}
 
 pub export fn char_absorbs_get(ch: *cdb.char_data) c_int {
+    return ch.absorbs;
+}
+pub export fn char_absorbs_set(ch: *cdb.char_data, value: c_int) c_int {
+    ch.absorbs = value;
+    return ch.absorbs;
+}
+pub export fn char_absorbs_mod(ch: *cdb.char_data, delta: c_int) c_int {
+    ch.absorbs += delta;
     return ch.absorbs;
 }
 pub export fn char_mimic_get(ch: *cdb.char_data) c_int {
     return ch.mimic;
 }
+pub export fn char_mimic_set(ch: *cdb.char_data, value: c_int) c_int {
+    ch.mimic = value;
+    return ch.mimic;
+}
 pub export fn char_backstab_cooldown_get(ch: *cdb.char_data) c_int {
-    return ch.backstabcool;
+    if (ch.backstabcool > 0 and !char_condition_has(ch, "cooldown_backstab")) {
+        _ = char_condition_apply_with_duration(ch, "cooldown_backstab", "legacy", "backstab", @as(i64, ch.backstabcool) * 2);
+        ch.backstabcool = 0;
+    }
+    return @intCast(@max(0, char_condition_duration_get(ch, "cooldown_backstab")));
 }
 pub export fn char_preference_get(ch: *cdb.char_data) c_int {
     return ch.preference;
@@ -1707,10 +1762,34 @@ pub export fn char_wait_set(ch: *cdb.char_data, pulses: c_int) void {
     if (ch.desc != null) ch.wait = pulses;
 }
 pub export fn char_cooldown_get(ch: *cdb.char_data) c_int {
-    return ch.con_cooldown;
+    if (ch.con_cooldown > 0 and !char_condition_has(ch, "cooldown_concentrate")) {
+        _ = char_condition_apply_with_duration(ch, "cooldown_concentrate", "legacy", "concentrate", ch.con_cooldown);
+        ch.con_cooldown = 0;
+    }
+    return @intCast(@max(0, char_condition_duration_get(ch, "cooldown_concentrate")));
 }
 pub export fn char_cooldown_set(ch: *cdb.char_data, val: c_int) void {
-    ch.con_cooldown = val;
+    ch.con_cooldown = 0;
+    if (val <= 0) {
+        _ = char_condition_remove(ch, "cooldown_concentrate", "cleared");
+    } else {
+        _ = char_condition_apply_with_duration(ch, "cooldown_concentrate", "cooldown", "concentrate", val);
+    }
+}
+pub export fn char_selfdestruct_cooldown_get(ch: *cdb.char_data) c_int {
+    if (ch.con_sdcooldown > 0 and !char_condition_has(ch, "cooldown_selfdestruct")) {
+        _ = char_condition_apply_with_duration(ch, "cooldown_selfdestruct", "legacy", "selfdestruct", @divTrunc(ch.con_sdcooldown + 4, 5));
+        ch.con_sdcooldown = 0;
+    }
+    return @intCast(@max(0, char_condition_duration_get(ch, "cooldown_selfdestruct")));
+}
+pub export fn char_selfdestruct_cooldown_set(ch: *cdb.char_data, val: c_int) void {
+    ch.con_sdcooldown = 0;
+    if (val <= 0) {
+        _ = char_condition_remove(ch, "cooldown_selfdestruct", "cleared");
+    } else {
+        _ = char_condition_apply_with_duration(ch, "cooldown_selfdestruct", "cooldown", "selfdestruct", val);
+    }
 }
 pub export fn char_intro_known(ch: *cdb.char_data, vict: *cdb.char_data) c_int {
     return readIntro(ch, vict);

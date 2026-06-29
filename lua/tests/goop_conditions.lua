@@ -1,0 +1,51 @@
+local test = require("lua.test").new()
+local dbat = require("dbat")
+
+local function mob()
+  return assert(dbat.mob_protos.by_id(1):spawn(dbat.rooms.by_id(1)))
+end
+
+test:case("majin goop only restores on expiry", function(t)
+  local ch = mob()
+  ch:meter_set("powerlevel", 100000)
+  t:eq(ch:condition_apply("majin_goop"), true)
+  ch:condition_remove("majin_goop", "cancelled")
+  t:eq(ch:meter_get("powerlevel"), 100000)
+
+  t:eq(ch:condition_apply("majin_goop"), true)
+  dbat.get("conditions", "majin_goop"):dispatch_event(ch, ch:condition("majin_goop"), "expire")
+  t:eq(ch:meter_get("powerlevel"), 1000000)
+  ch:extract()
+end)
+
+test:case("bio android regen only restores on expiry", function(t)
+  local ch = mob()
+  ch:meter_set("powerlevel", 100000)
+  t:eq(ch:condition_apply("bio_android_regen"), true)
+  ch:condition_remove("bio_android_regen", "cancelled")
+  t:eq(ch:meter_get("powerlevel"), 100000)
+
+  t:eq(ch:condition_apply("bio_android_regen"), true)
+  dbat.get("conditions", "bio_android_regen"):dispatch_event(ch, ch:condition("bio_android_regen"), "expire")
+  t:eq(ch:meter_get("powerlevel"), 1000000)
+  ch:extract()
+end)
+
+test:case("saiyan zenkai only boosts on expiry", function(t)
+  local ch = mob()
+  ch:stat_set("powerlevel", 1000)
+  ch:stat_set("ki", 1000)
+  ch:stat_set("stamina", 1000)
+  ch:meter_set("powerlevel", 100000)
+  t:eq(ch:condition_apply("saiyan_zenkai"), true)
+  ch:condition_remove("saiyan_zenkai", "cancelled")
+  t:eq(ch:stat_get("powerlevel"), 1000)
+
+  t:eq(ch:condition_apply("saiyan_zenkai"), true)
+  dbat.get("conditions", "saiyan_zenkai"):dispatch_event(ch, ch:condition("saiyan_zenkai"), "expire")
+  t:eq(ch:stat_get("powerlevel"), 1030)
+  t:eq(ch:meter_get("powerlevel"), 500000)
+  ch:extract()
+end)
+
+return test:run()

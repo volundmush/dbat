@@ -5,6 +5,7 @@ return {
     abbreviation = "Dem",
     size = "medium",
     pc_ok = true,
+    mimic_ok = false,
     modifiers = function(ch)
         local mods = {
             { target = { "derived", "lifeforce" }, kind = "multiplier", value = 7500, label = "Demon" },

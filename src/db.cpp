@@ -1023,8 +1023,9 @@ static void reset_time(void) {
     fscanf(bgtime, "%ld\n", &BOARDNEWCOD);
     fscanf(bgtime, "%ld\n", &BOARDNEWBUI);
     fscanf(bgtime, "%ld\n", &BOARDNEWIMM);
-    fscanf(bgtime, "%ld\n", &INTERESTTIME);
-    fscanf(bgtime, "%ld\n", &LASTINTEREST);
+    time_t legacy_interest_time = 0, legacy_last_interest = 0;
+    fscanf(bgtime, "%ld\n", &legacy_interest_time);
+    fscanf(bgtime, "%ld\n", &legacy_last_interest);
     fscanf(bgtime, "%d\n", &HIGHPCOUNT);
     fscanf(bgtime, "%ld\n", &PCOUNTDATE);
     fscanf(bgtime, "%d\n", &WISHTIME);
@@ -1099,8 +1100,8 @@ void save_mud_time(struct time_info_data *when) {
     fprintf(bgtime, "%ld\n", BOARDNEWCOD);
     fprintf(bgtime, "%ld\n", BOARDNEWBUI);
     fprintf(bgtime, "%ld\n", BOARDNEWIMM);
-    fprintf(bgtime, "%ld\n", INTERESTTIME);
-    fprintf(bgtime, "%ld\n", LASTINTEREST);
+    fprintf(bgtime, "%ld\n", (time_t)0);
+    fprintf(bgtime, "%ld\n", (time_t)0);
     fprintf(bgtime, "%d\n", HIGHPCOUNT);
     fprintf(bgtime, "%ld\n", PCOUNTDATE);
     fprintf(bgtime, "%d\n", WISHTIME);

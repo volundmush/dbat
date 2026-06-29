@@ -54,6 +54,10 @@ Access: `dbat.objects.all()` → iterator of all objects
 | `cost_get` | `obj:cost_get()` | integer | Gold value |
 | `cost_set` | `obj:cost_set(n)` | — | |
 | `cost_mod` | `obj:cost_mod(delta)` | integer | |
+| `affect_location_get` | `obj:affect_location_get(index)` | integer | Object affect apply location |
+| `affect_modifier_get` | `obj:affect_modifier_get(index)` | integer | Object affect modifier |
+| `affect_specific_get` | `obj:affect_specific_get(index)` | integer | Object affect specific id |
+| `affect_specific_name_get` | `obj:affect_specific_name_get(index)` | string\|nil | Skill name for skill-specific affects |
 | `weight_get` | `obj:weight_get()` | integer | Own weight |
 | `weight_contained_get` | `obj:weight_contained_get()` | integer | Weight of contents only |
 | `weight_total_get` | `obj:weight_total_get()` | integer | Own + contents weight |
@@ -75,6 +79,7 @@ Access: `dbat.objects.all()` → iterator of all objects
 | `extra_flagged` | `obj:extra_flagged(flag)` | bool | See `dbat.consts.item_extra_flags` |
 | `extra_flag_set` | `obj:extra_flag_set(flag, bool)` | — | |
 | `extra_flag_toggle` | `obj:extra_flag_toggle(flag)` | bool | |
+| `broken_set` | `obj:broken_set(bool)` | — | Sets `ITEM_BROKEN`; setting true removes the item if worn |
 | `aff_flagged` | `obj:aff_flagged(flag)` | bool | See `dbat.consts.aff_flags` |
 | `aff_flag_set` | `obj:aff_flag_set(flag, bool)` | — | |
 | `aff_flag_toggle` | `obj:aff_flag_toggle(flag)` | bool | |

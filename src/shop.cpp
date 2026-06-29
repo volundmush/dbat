@@ -711,7 +711,7 @@ static void shopping_app(char *arg, struct char_data *ch,
     return;
   }
   if (!(obj = get_purchase_obj(ch, arg, keeper, shop, TRUE))) {
-    do_appraise(ch, arg, 0, 0);
+    char_cmd_execute(ch, "appraise", arg);
     return;
   }
 

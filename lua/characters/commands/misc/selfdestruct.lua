@@ -18,7 +18,7 @@ end
 local function safe_discharge(ch)
     ch:send_line("@wYour body slowly stops flashing. Steam rises from your skin as you slowly let off the energy you built up in a safe manner.@n")
     ch:act_around("@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n")
-    ch:condition_remove("selfdestruct", "cancelled")
+    ch:condition_remove("self_destructing", "cancelled")
 end
 
 local function execute(ctx)
@@ -41,20 +41,25 @@ local function execute(ctx)
         return
     end
 
-    -- Bootstrap skill if needed
-    if (ch:skill_get("selfd") or 0) == 0 then
-        ch:skill_set("selfd", math.random(10, 20))
+    if ch:selfdestruct_cooldown_get() > 0 then
+        ch:send_line("Your body has not recovered from your last selfdestruct.")
+        return
     end
 
-    local phase = ch:condition_has("selfdestruct")
-        and ch:condition_number_get("selfdestruct", "phase")
+    -- Bootstrap skill if needed
+    if (ch:skill_get("self destruct") or 0) == 0 then
+        ch:skill_base_set("self destruct", math.random(10, 20))
+    end
+
+    local phase = ch:condition_has("self_destructing")
+        and ch:condition_number_get("self_destructing", "phase")
         or 0
 
     if phase == 0 then
         -- Phase 1: begin charging
         ch:send_line("@RYour body starts to glow @wwhite@R and flash. The flashes start out slowly but steadilly increase in speed. Your aura begins to burn around your body at the same time in a violent fashion!@n")
         ch:act_around("@R$n's body starts to glow @wwhite@R and flash. The flashes start out slowly but steadilly increase in speed. $n's aura begins to burn around $s body at the same time in a violent fashion!@n")
-        ch:condition_apply("selfdestruct", "command", "selfdestruct")
+        ch:condition_apply("self_destructing", "command", "selfdestruct")
         return
     end
 
@@ -82,7 +87,7 @@ local function execute(ctx)
     local self_dmg = math.max(1, math.floor((ch:meter_current("powerlevel") or 0) * 0.01))
     ch:meter_mod_int("powerlevel", -self_dmg)
 
-    ch:condition_remove("selfdestruct", "detonated")
+    ch:condition_remove("self_destructing", "detonated")
 
     if grapple_tch then
         -- Focused explosion
@@ -113,8 +118,9 @@ local function execute(ctx)
     end
 
     -- Skill improvement
-    local sk = ch:skill_get("selfd") or 0
-    ch:skill_set("selfd", math.min(100, sk + math.random(10, 20)))
+    local sk = ch:skill_get("self destruct") or 0
+    ch:skill_base_set("self destruct", math.min(100, sk + math.random(10, 20)))
+    ch:selfdestruct_cooldown_set(120)
 
     -- Survival check
     local race = ch:race_get()
@@ -129,6 +135,8 @@ local function execute(ctx)
         end
         ch:meter_mod_int("powerlevel", -math.floor((ch:meter_max("powerlevel") or 0) * 0.01))
         ch:send_line("@WYour body begins to regenerate from the explosion!@n")
+        local condition = race == "bio" and "bio_android_regen" or "majin_goop"
+        ch:condition_apply_with_duration(condition, 64, "selfdestruct", "regeneration")
     else
         ch:die(nil)
     end

@@ -5,4 +5,5 @@ return {
     abbreviation = "Tru",
     size = "small",
     pc_ok = true,
+    mimic_ok = true,
 }

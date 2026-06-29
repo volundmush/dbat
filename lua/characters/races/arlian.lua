@@ -5,6 +5,7 @@ return {
     abbreviation = "Arl",
     size = "medium",
     pc_ok = true,
+    mimic_ok = false,
     modifiers = function(ch)
         local molt_level = ch:stat_get("molt_level")
         local mods = {}

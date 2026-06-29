@@ -38,8 +38,8 @@ Access: `dbat.rooms.by_id(vnum)` → Room or nil
 | `damage_set` | `room:damage_set(n)` | — | |
 | `gravity_get` | `room:gravity_get()` | integer | Gravity multiplier |
 | `gravity_set` | `room:gravity_set(n)` | — | |
-| `geffect_get` | `room:geffect_get()` | integer | Global effect id |
-| `geffect_set` | `room:geffect_set(n)` | — | |
+| `geffect_get` | `room:geffect_get()` | integer | Global effect id; positive lava states attach `geo_effect` |
+| `geffect_set` | `room:geffect_set(n)` | — | Adds/removes the `geo_effect` room script as needed |
 | `is_dark` | `room:is_dark()` | bool | |
 | `is_sunken` | `room:is_sunken()` | bool | Underwater room |
 | `cook_element` | `room:cook_element()` | integer | Cooking element type (0 if none) |

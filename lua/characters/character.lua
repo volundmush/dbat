@@ -265,12 +265,6 @@ local function modifiers(ch)
     append_mods(all, room:modifiers())
   end
 
-  -- Sitting object
-  local obj = ch:sits_get()
-  if obj then
-    append_mods(all, obj:modifiers())
-  end
-
   return all
 end
 

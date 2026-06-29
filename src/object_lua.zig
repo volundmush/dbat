@@ -139,12 +139,15 @@ fn registerObjectMetatable(lua: *Lua) void {
     addMethod(lua, "affect_set", luaObjectAffectSet);
     addMethod(lua, "affect_location_get", luaObjectAffectLocationGet);
     addMethod(lua, "affect_modifier_get", luaObjectAffectModifierGet);
+    addMethod(lua, "affect_specific_get", luaObjectAffectSpecificGet);
+    addMethod(lua, "affect_specific_name_get", luaObjectAffectSpecificNameGet);
     addMethod(lua, "wear_flagged", luaObjectWearFlagged);
     addMethod(lua, "wear_flag_set", luaObjectWearFlagSet);
     addMethod(lua, "wear_flag_toggle", luaObjectWearFlagToggle);
     addMethod(lua, "extra_flagged", luaObjectExtraFlagged);
     addMethod(lua, "extra_flag_set", luaObjectExtraFlagSet);
     addMethod(lua, "extra_flag_toggle", luaObjectExtraFlagToggle);
+    addMethod(lua, "broken_set", luaObjectBrokenSet);
     addMethod(lua, "aff_flagged", luaObjectAffFlagged);
     addMethod(lua, "aff_flag_set", luaObjectAffFlagSet);
     addMethod(lua, "aff_flag_toggle", luaObjectAffFlagToggle);
@@ -666,6 +669,29 @@ fn luaObjectAffectModifierGet(lua: *Lua) i32 {
     lua.pushInteger(if (index < obj.affected.len) obj.affected[index].modifier else 0);
     return 1;
 }
+fn luaObjectAffectSpecificGet(lua: *Lua) i32 {
+    const obj = checkObject(lua);
+    const index = @as(usize, @intCast(integer(lua, 2)));
+    lua.pushInteger(if (index < obj.affected.len) obj.affected[index].specific else 0);
+    return 1;
+}
+fn luaObjectAffectSpecificNameGet(lua: *Lua) i32 {
+    const obj = checkObject(lua);
+    const index = @as(usize, @intCast(integer(lua, 2)));
+    if (index >= obj.affected.len) {
+        lua.pushNil();
+        return 1;
+    }
+
+    const affect = obj.affected[index];
+    const specific: usize = @intCast(@max(affect.specific, 0));
+    if (affect.location == cdb.APPLY_SKILL and specific < cdb.spell_info.len) {
+        pushCString(lua, cdb.spell_info[specific].name);
+    } else {
+        lua.pushNil();
+    }
+    return 1;
+}
 
 fn luaObjectWearFlagged(lua: *Lua) i32 {
     lua.pushBoolean(cdb.obj_wear_flagged(checkObject(lua), intCastOrError(lua, c_int, integer(lua, 2), "wear flag")));
@@ -695,6 +721,11 @@ fn luaObjectExtraFlagSet(lua: *Lua) i32 {
 fn luaObjectExtraFlagToggle(lua: *Lua) i32 {
     lua.pushBoolean(cdb.obj_extra_flag_toggle(checkObject(lua), intCastOrError(lua, c_int, integer(lua, 2), "extra flag")));
     return 1;
+}
+
+fn luaObjectBrokenSet(lua: *Lua) i32 {
+    cdb.obj_broken_set(checkObject(lua), boolean(lua, 2));
+    return 0;
 }
 
 fn luaObjectAffFlagged(lua: *Lua) i32 {

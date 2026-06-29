@@ -8,6 +8,7 @@
  *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
  ************************************************************************ */
 #include "act.wizard.h"
+#include "character_api.h"
 #include "character_impl.h"
 #include "character_macros.h"
 #include "consts/admlevel.h"
@@ -799,16 +800,17 @@ ACMD(do_interest) {
     send_to_char(ch, "Huh!?\r\n");
     return;
   } else {
-    if (INTERESTTIME > 0) {
-      char *tmstr;
-      tmstr = (char *)asctime(localtime(&INTERESTTIME));
-      *(tmstr + strlen(tmstr) - 1) = '\0';
-      send_to_char(ch, "INTEREST TIME: [%s]\r\n", tmstr);
-      return;
-    }
-    send_to_char(ch, "Interest time has been initiated!\r\n");
-    INTERESTTIME = time(0) + 86400;
-    LASTINTEREST = time(0) + 86400;
+    int count = 0;
+    char_iterate_all([&](struct char_data *vict) {
+      if (IS_NPC(vict) || !vict->desc || !IS_PLAYING(vict->desc)) return true;
+      if (!char_condition_has(vict, "bank_interest"))
+        char_condition_apply(vict, "bank_interest", "wizard", "interest");
+      char_condition_event_dispatch(vict, "bank_interest", "tick");
+      count++;
+      return true;
+    });
+    send_to_char(ch, "Bank interest checked for %d player%s.\r\n",
+                 count, count == 1 ? "" : "s");
     return;
   }
 }

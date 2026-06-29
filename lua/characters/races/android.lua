@@ -5,4 +5,5 @@ return {
     abbreviation = "And",
     size = "medium",
     pc_ok = true,
+    mimic_ok = true,
 }

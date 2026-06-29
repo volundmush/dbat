@@ -13,6 +13,7 @@ return {
         local kidist = script:number_get("kidist")
         local dmg    = script:number_get("damage")
         local user   = db.characters.by_id(script:number_get("user_id"))
+        require("lua.objects.scripts.huge_attack").provoke_room_mobs(obj, script)
         if kidist > 1 then
             script:number_set("kidist", kidist - 1)
             room:send_text(("@BA massive @bSpirit Bomb@B descends! @W(%d seconds remain)@n\r\n"):format(kidist - 1))

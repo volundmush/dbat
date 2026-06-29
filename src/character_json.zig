@@ -120,7 +120,7 @@ pub fn serializeCharacter(allocator: std.mem.Allocator, ch: *cdb.char_data, mode
         try jsonx.putNonEmpty(&object, allocator, "player_flags", try jsonx.serializeFlags(allocator, ch, cdb.NUM_PLR_FLAGS, actFlagged));
         try jsonx.putNonEmpty(&object, allocator, "skills", try serializeSkills(allocator, ch));
         try jsonx.put(&object, allocator, "lboard", try serializeIntArray(allocator, ch.lboard[0..]));
-        // limbs are now stored as stats (limb_right_arm, limb_left_arm, etc.)
+        // limbs are now stored as meters (limb_right_arm, limb_left_arm, etc.)
         try jsonx.put(&object, allocator, "genome", try serializeIntArray(allocator, ch.genome[0..]));
         try jsonx.put(&object, allocator, "bonuses", try serializeIntArray(allocator, ch.bonuses[0..]));
         try jsonx.put(&object, allocator, "transcost", try serializeIntArray(allocator, ch.transcost[0..]));
@@ -537,8 +537,8 @@ fn migrateOldLimbs(ch: *cdb.char_data, json: JsonValue) !void {
     for (json.array.items, 0..) |item, index| {
         if (index >= 4) break;
         if (item != .integer) return error.ExpectedInteger;
-        const val: i64 = @intCast(item.integer);
-        _ = characters_api.char_stat_set(ch, limb_stat_names[index], val);
+        const val = std.math.cast(c_int, item.integer) orelse return error.IntegerOutOfRange;
+        characters_api.char_limbcond_set(ch, @intCast(index + 1), val);
     }
 }
 

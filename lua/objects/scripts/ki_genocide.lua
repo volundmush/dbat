@@ -12,6 +12,7 @@ return {
         local kidist = script:number_get("kidist")
         local user   = db.characters.by_id(script:number_get("user_id"))
         local target = db.characters.by_id(script:number_get("target_id"))
+        require("lua.objects.scripts.huge_attack").provoke_room_mobs(obj, script)
 
         if kidist > 1 then
             script:number_set("kidist", kidist - 1)

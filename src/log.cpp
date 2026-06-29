@@ -15,7 +15,11 @@
 #include "flags.h"
 #include "log.h"
 #include "room_api.h"
+#include "object_api.h"
+#include "config_db.h"
+#include "db.h"
 
+#include <sys/stat.h>
 
 #include <cstring>
 #include <ctime>
@@ -99,4 +103,89 @@ void mudlog(int type, int level, int file, const char *str, ...) {
 
 void core_dump_real(const char *who, int line) {
   /* mud_log("SYSERR: Assertion failed at %s:%d!", who, line); */
+}
+
+
+void log_imm_action(char *messg, ...) {
+
+  FILE *fl;
+  const char *filename;
+  struct stat fbuf;
+
+  filename = REQUEST_FILE;
+
+  if (stat(filename, &fbuf) < 0) {
+    perror("SYSERR: Can't stat() file");
+    /*  SYSERR_DESC:
+     *  This is from do_gen_write() and indicates that it cannot call the
+     *  stat() system call on the file required.  The error string at the
+     *  end of the line should explain what the problem is.
+     */
+    return;
+  }
+  if (fbuf.st_size >= CONFIG_MAX_FILESIZE * 4) {
+    return;
+  }
+  if (!(fl = fopen(filename, "a"))) {
+    perror("SYSERR: log_imm_action");
+    /*  SYSERR_DESC:
+     *  This is from do_gen_write(), and will be output if the file in
+     *  question cannot be opened for appending to.  The error string
+     *  at the end of the line should explain what the problem is.
+     */
+
+    return;
+  }
+  time_t ct = time(0);
+  char *time_s = asctime(localtime(&ct));
+
+  va_list args;
+
+  va_start(args, messg);
+  time_s[strlen(time_s) - 1] = '\0';
+
+  fprintf(fl, "%-15.15s :: ", time_s + 4);
+  vfprintf(fl, messg, args);
+  fprintf(fl, "\n");
+  va_end(args);
+
+  fclose(fl);
+}
+
+
+
+void log_custom(struct descriptor_data *d, struct obj_data *obj) {
+  FILE *fl;
+  const char *filename;
+  struct stat fbuf;
+
+  filename = CUSTOM_FILE;
+
+  if (stat(filename, &fbuf) < 0) {
+    perror("SYSERR: Can't stat() file");
+    /*  SYSERR_DESC:
+     *  This is from do_gen_write() and indicates that it cannot call the
+     *  stat() system call on the file required.  The error string at the
+     *  end of the line should explain what the problem is.
+     */
+    return;
+  }
+  if (fbuf.st_size >= CONFIG_MAX_FILESIZE * 4) {
+    return;
+  }
+  if (!(fl = fopen(filename, "a"))) {
+    perror("SYSERR: log_custom");
+    /*  SYSERR_DESC:
+     *  This is from do_gen_write(), and will be output if the file in
+     *  question cannot be opened for appending to.  The error string
+     *  at the end of the line should explain what the problem is.
+     */
+
+    return;
+  }
+
+  fprintf(fl, "@D[@cUser@W: @R%-20s @cName@W: @C%-20s @cCustom@W: @Y%s@D]\n",
+          GET_USER(d->character), GET_NAME(d->character),
+          obj_short_description_get(obj));
+  fclose(fl);
 }

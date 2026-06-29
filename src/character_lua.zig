@@ -23,6 +23,8 @@ extern fn eq_cancel_owner(owner_kind: c_int, owner_id: i64, tag: ?[*:0]const u8)
 extern fn eq_owner_count(owner_kind: c_int, owner_id: i64, tag: ?[*:0]const u8) i64;
 extern fn eq_owner_next_ms(owner_kind: c_int, owner_id: i64, tag: ?[*:0]const u8) i64;
 extern fn event_queue_now_ms() i64;
+extern fn shop_keeper(ch: *cdb.char_data, me: ?*anyopaque, cmd: c_int, argument: [*c]u8) c_int;
+extern fn limb_ok(ch: *cdb.char_data, type: c_int) c_int;
 const mob_proto_metatable = "dbat.MobPrototype";
 const condition_metatable = "dbat.Condition";
 const char_script_metatable = "dbat.CharacterScript";
@@ -150,6 +152,7 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "can_see_in_dark", luaCharacterCanSeeInDark);
     addMethod(lua, "can_see_char", luaCharacterCanSeeChar);
     addMethod(lua, "can_see_obj", luaCharacterCanSeeObj);
+    addMethod(lua, "perform_get_from_room", luaCharacterPerformGetFromRoom);
     addMethod(lua, "id_get", luaCharacterIdGet);
     addMethod(lua, "proto_id_get", luaCharacterProtoIdGet);
     addMethod(lua, "proto_id_set", luaCharacterProtoIdSet);
@@ -230,6 +233,7 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "skill_modifier_get", luaCharacterSkillModifierGet);
     addMethod(lua, "skill_total_get", luaCharacterSkillTotalGet);
     addMethod(lua, "skill_get", luaCharacterSkillTotalGet);
+    addMethod(lua, "init_skill", luaCharacterInitSkill);
     addMethod(lua, "roll_skill", luaCharacterRollSkill);
     addMethod(lua, "skill_perf_get", luaCharacterSkillPerfGet);
     addMethod(lua, "skill_perf_set", luaCharacterSkillPerfSet);
@@ -287,8 +291,8 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "radar2_get", luaCharacterRadar2Get);
     addMethod(lua, "radar2_set", luaCharacterRadar2Set);
     addMethod(lua, "radar3_get", luaCharacterRadar3Get);
-    addMethod(lua, "radar3_set",   luaCharacterRadar3Set);
-    addMethod(lua, "has_arms",     luaCharacterHasArms);
+    addMethod(lua, "radar3_set", luaCharacterRadar3Set);
+    addMethod(lua, "has_arms", luaCharacterHasArms);
     addMethod(lua, "player_id_get", luaCharacterPlayerIdGet);
     addMethod(lua, "height_cm", luaCharacterHeightCm);
     addMethod(lua, "weight_kg", luaCharacterWeightKg);
@@ -298,6 +302,7 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "molt_threshold", luaCharacterMoltThreshold);
     addMethod(lua, "limbcond_get", luaCharacterLimbCondGet);
     addMethod(lua, "limbcond_set", luaCharacterLimbCondSet);
+    addMethod(lua, "limb_ok", luaCharacterLimbOk);
     addMethod(lua, "gain_tail", luaCharacterGainTail);
     addMethod(lua, "has_tail", luaCharacterHasTail);
     addMethod(lua, "lose_tail", luaCharacterLoseTail);
@@ -315,7 +320,11 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "rpp_custom_equip_launch", luaCharacterRppCustomEquipLaunch);
     addMethod(lua, "rpp_restring_launch", luaCharacterRppRestringLaunch);
     addMethod(lua, "absorbs_get", luaCharacterAbsorbsGet);
+    addMethod(lua, "absorbs_set", luaCharacterAbsorbsSet);
+    addMethod(lua, "absorbs_mod", luaCharacterAbsorbsMod);
+    addMethod(lua, "handle_ingest_learn", luaCharacterHandleIngestLearn);
     addMethod(lua, "mimic_get", luaCharacterMimicGet);
+    addMethod(lua, "mimic_set", luaCharacterMimicSet);
     addMethod(lua, "backstab_cooldown", luaCharacterBackstabCooldown);
     addMethod(lua, "preference_get", luaCharacterPreferenceGet);
     addMethod(lua, "preference_set", luaCharacterPreferenceSet);
@@ -323,6 +332,8 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "wait_set", luaCharacterWaitSet);
     addMethod(lua, "cooldown_get", luaCharacterCooldownGet);
     addMethod(lua, "cooldown_set", luaCharacterCooldownSet);
+    addMethod(lua, "selfdestruct_cooldown_get", luaCharacterSelfdestructCooldownGet);
+    addMethod(lua, "selfdestruct_cooldown_set", luaCharacterSelfdestructCooldownSet);
     addMethod(lua, "inventory_find_vnum", luaCharacterInventoryFindVnum);
     addMethod(lua, "know_skill", luaCharacterKnowSkill);
     addMethod(lua, "improve_skill", luaCharacterImproveSkill);
@@ -346,12 +357,14 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "sleeptime_get", luaCharacterSleepcountGet);
     addMethod(lua, "has_group", luaCharacterHasGroup);
     addMethod(lua, "has_mail", luaCharacterHasMail);
+    addMethod(lua, "starphase_get", luaCharacterStarphaseGet);
     addMethod(lua, "soft_cap", luaCharacterSoftCap);
     addMethod(lua, "is_soft_capped", luaCharacterIsSoftCapped);
     addMethod(lua, "gain_exp", luaCharacterGainExp);
     addMethod(lua, "gain_condition", luaCharacterGainCondition);
     addMethod(lua, "mob_flagged", luaCharacterMobFlagged);
     addMethod(lua, "mob_flag_set", luaCharacterMobFlagSet);
+    addMethod(lua, "is_shopkeeper", luaCharacterIsShopkeeper);
     addMethod(lua, "is_soft_cap", luaCharacterIsSoftCapType);
     addMethod(lua, "following_get", luaCharacterFollowingGet);
     addMethod(lua, "group_bonus", luaCharacterGroupBonus);
@@ -409,6 +422,10 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "absorbing_set", luaCharacterAbsorbingSet);
     addMethod(lua, "absorbed_by_get", luaCharacterAbsorbedByGet);
     addMethod(lua, "absorbed_by_set", luaCharacterAbsorbedBySet);
+    addMethod(lua, "mindlinked_get", luaCharacterMindlinkedGet);
+    addMethod(lua, "mindlinked_set", luaCharacterMindlinkedSet);
+    addMethod(lua, "linker_get", luaCharacterLinkerGet);
+    addMethod(lua, "linker_set", luaCharacterLinkerSet);
     addMethod(lua, "blocking_get", luaCharacterBlockingGet);
     addMethod(lua, "blocking_set", luaCharacterBlockingSet);
     addMethod(lua, "blocked_by_get", luaCharacterBlockedByGet);
@@ -419,6 +436,7 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "carry_weight_get", luaCharacterCarryWeightGet);
     addMethod(lua, "carry_weight_max", luaCharacterCarryWeightMax);
     addMethod(lua, "wimp_level_get", luaCharacterWimpLevelGet);
+    addMethod(lua, "wimp_level_set", luaCharacterWimpLevelSet);
     addMethod(lua, "send_to_worlds", luaCharacterSendToWorlds);
     addMethod(lua, "dispel_ash", luaCharacterDispelAsh);
     addMethod(lua, "restore_announced", luaCharacterRestoreAnnounced);
@@ -430,6 +448,7 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "eavesdrop_get", luaCharacterEavesdropGet);
     addMethod(lua, "eavesdrop_set", luaCharacterEavesdropSet);
     addMethod(lua, "eavesdrop_dir_get", luaCharacterEavesdropDirGet);
+    addMethod(lua, "eavesdrop_dir_set", luaCharacterEavesdropDirSet);
     addMethod(lua, "rdisplay_clear", luaCharacterRdisplayClear);
     addMethod(lua, "slot_count", luaCharacterSlotCount);
     addMethod(lua, "check_special", luaCharacterCheckSpecial);
@@ -779,6 +798,13 @@ fn luaCharacterCanSeeChar(lua: *Lua) i32 {
 
 fn luaCharacterCanSeeObj(lua: *Lua) i32 {
     lua.pushBoolean(cdb.char_can_see_obj(checkCharacter(lua), objects_lua.checkObjectAt(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterPerformGetFromRoom(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const obj = objects_lua.checkObjectAt(lua, 2);
+    lua.pushBoolean(cdb.perform_get_from_room(ch, obj) != 0);
     return 1;
 }
 
@@ -1409,6 +1435,23 @@ fn luaCharacterSkillModifierGet(lua: *Lua) i32 {
 
 fn luaCharacterSkillTotalGet(lua: *Lua) i32 {
     lua.pushInteger(cdb.char_skill_total_get(checkCharacter(lua), string(lua, 2)));
+    return 1;
+}
+
+fn luaCharacterInitSkill(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const name = lua.toString(2) catch lua.typeError(2, "string");
+    var buf: [256:0]u8 = undefined;
+    const len = @min(name.len, buf.len - 1);
+    @memcpy(buf[0..len], name[0..len]);
+    buf[len] = 0;
+    const SKTYPE_SKILL: c_int = 1 << 1;
+    const snum = find_skill_num(&buf, SKTYPE_SKILL);
+    if (snum < 0) {
+        lua.pushInteger(0);
+    } else {
+        lua.pushInteger(cdb.init_skill(ch, snum));
+    }
     return 1;
 }
 
@@ -2045,6 +2088,12 @@ fn luaCharacterLimbCondSet(lua: *Lua) i32 {
     cdb.char_limbcond_set(ch, n, val);
     return 0;
 }
+fn luaCharacterLimbOk(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const n = intCastOrError(lua, c_int, integer(lua, 2), "limb type");
+    lua.pushBoolean(limb_ok(ch, n) != 0);
+    return 1;
+}
 
 fn luaCharacterGainTail(lua: *Lua) i32 {
     cdb.char_gain_tail(checkCharacter(lua), false);
@@ -2184,9 +2233,27 @@ fn luaCharacterAbsorbsGet(lua: *Lua) i32 {
     lua.pushInteger(cdb.char_absorbs_get(checkCharacter(lua)));
     return 1;
 }
+fn luaCharacterAbsorbsSet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_absorbs_set(checkCharacter(lua), intCastOrError(lua, c_int, integer(lua, 2), "absorbs")));
+    return 1;
+}
+fn luaCharacterAbsorbsMod(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_absorbs_mod(checkCharacter(lua), intCastOrError(lua, c_int, integer(lua, 2), "absorbs delta")));
+    return 1;
+}
+
+fn luaCharacterHandleIngestLearn(lua: *Lua) i32 {
+    cdb.char_handle_ingest_learn(checkCharacter(lua), checkCharacterAt(lua, 2));
+    return 0;
+}
 
 fn luaCharacterMimicGet(lua: *Lua) i32 {
     lua.pushInteger(cdb.char_mimic_get(checkCharacter(lua)));
+    return 1;
+}
+
+fn luaCharacterMimicSet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_mimic_set(checkCharacter(lua), intCastOrError(lua, c_int, integer(lua, 2), "mimic race")));
     return 1;
 }
 
@@ -2231,6 +2298,16 @@ fn luaCharacterCooldownGet(lua: *Lua) i32 {
 
 fn luaCharacterCooldownSet(lua: *Lua) i32 {
     cdb.char_cooldown_set(checkCharacter(lua), intCastOrError(lua, c_int, integer(lua, 2), "cooldown"));
+    return 0;
+}
+
+fn luaCharacterSelfdestructCooldownGet(lua: *Lua) i32 {
+    lua.pushInteger(cdb.char_selfdestruct_cooldown_get(checkCharacter(lua)));
+    return 1;
+}
+
+fn luaCharacterSelfdestructCooldownSet(lua: *Lua) i32 {
+    cdb.char_selfdestruct_cooldown_set(checkCharacter(lua), intCastOrError(lua, c_int, integer(lua, 2), "selfdestruct cooldown"));
     return 0;
 }
 
@@ -2369,6 +2446,11 @@ fn luaCharacterHasMail(lua: *Lua) i32 {
     return 1;
 }
 
+fn luaCharacterStarphaseGet(lua: *Lua) i32 {
+    lua.pushInteger(checkCharacter(lua).starphase);
+    return 1;
+}
+
 fn luaCharacterSoftCap(lua: *Lua) i32 {
     lua.pushInteger(cdb.char_soft_cap(checkCharacter(lua)));
     return 1;
@@ -2405,6 +2487,12 @@ fn luaCharacterMobFlagSet(lua: *Lua) i32 {
     const flag = intCastOrError(lua, c_int, integer(lua, 2), "mob flag");
     bitflags.set(ch.act[0..], flag, boolean(lua, 3));
     return 0;
+}
+
+fn luaCharacterIsShopkeeper(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    lua.pushBoolean(cdb.mob_proto_special_get(ch.proto_id) == shop_keeper);
+    return 1;
 }
 
 fn luaCharacterIsSoftCapType(lua: *Lua) i32 {
@@ -2453,8 +2541,6 @@ fn luaCharacterFlee(lua: *Lua) i32 {
     _ = cdb.char_cmd_execute(ch, @constCast("flee"), &buf);
     return 0;
 }
-
-
 
 fn luaCharacterFollowersEach(lua: *Lua) i32 {
     const ch = checkCharacter(lua);
@@ -2820,7 +2906,8 @@ fn luaCharacterGraptypeGet(lua: *Lua) i32 {
 fn luaCharacterCanKill(lua: *Lua) i32 {
     const ch = checkCharacter(lua);
     const vict = checkCharacterAt(lua, 2);
-    lua.pushBoolean(cdb.can_kill(ch, vict, null, 1) != 0);
+    const mode: c_int = if (lua.isNoneOrNil(3)) 1 else intCastOrError(lua, c_int, integer(lua, 3), "can_kill mode");
+    lua.pushBoolean(cdb.can_kill(ch, vict, null, mode) != 0);
     return 1;
 }
 fn luaCharacterLastAtkGet(lua: *Lua) i32 {
@@ -2843,6 +2930,10 @@ fn luaCharacterCarryWeightMax(lua: *Lua) i32 {
 fn luaCharacterWimpLevelGet(lua: *Lua) i32 {
     lua.pushInteger(checkCharacter(lua).wimp_level);
     return 1;
+}
+fn luaCharacterWimpLevelSet(lua: *Lua) i32 {
+    checkCharacter(lua).wimp_level = intCastOrError(lua, c_int, integer(lua, 2), "wimp level");
+    return 0;
 }
 fn luaCharacterSendToWorlds(lua: *Lua) i32 {
     cdb.send_to_worlds(checkCharacter(lua));
@@ -2886,6 +2977,27 @@ fn luaCharacterAbsorbedBySet(lua: *Lua) i32 {
         cdb.char_absorbed_by_set(ch, null)
     else
         cdb.char_absorbed_by_set(ch, checkCharacterAt(lua, 2));
+    return 0;
+}
+fn luaCharacterMindlinkedGet(lua: *Lua) i32 {
+    const t = cdb.char_mindlinked_get(checkCharacter(lua));
+    if (t) |v| pushCharacter(lua, cdb.char_id_get(v)) else lua.pushNil();
+    return 1;
+}
+fn luaCharacterMindlinkedSet(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    if (lua.typeOf(2) == .nil)
+        cdb.char_mindlinked_set(ch, null)
+    else
+        cdb.char_mindlinked_set(ch, checkCharacterAt(lua, 2));
+    return 0;
+}
+fn luaCharacterLinkerGet(lua: *Lua) i32 {
+    lua.pushInteger(checkCharacter(lua).linker);
+    return 1;
+}
+fn luaCharacterLinkerSet(lua: *Lua) i32 {
+    checkCharacter(lua).linker = intCastOrError(lua, c_int, integer(lua, 2), "linker");
     return 0;
 }
 fn luaCharacterBlockingGet(lua: *Lua) i32 {
@@ -2939,6 +3051,10 @@ fn luaCharacterEavesdropSet(lua: *Lua) i32 {
 fn luaCharacterEavesdropDirGet(lua: *Lua) i32 {
     lua.pushInteger(checkCharacter(lua).eavesdir);
     return 1;
+}
+fn luaCharacterEavesdropDirSet(lua: *Lua) i32 {
+    checkCharacter(lua).eavesdir = intCastOrError(lua, c_int, integer(lua, 2), "eavesdir");
+    return 0;
 }
 fn luaCharacterRdisplayClear(lua: *Lua) i32 {
     const ch = checkCharacter(lua);

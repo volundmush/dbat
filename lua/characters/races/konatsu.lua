@@ -5,6 +5,7 @@ return {
     abbreviation = "kon",
     size = "medium",
     pc_ok = true,
+    mimic_ok = true,
     modifiers = function(ch)
         local mods = {
             { target = { "derived", "lifeforce" }, kind = "multiplier", value = 8500, label = "Konatsu" },

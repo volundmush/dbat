@@ -71,4 +71,36 @@ test:case("sex API uses string ids", function(t)
   ch:extract()
 end)
 
+test:case("mind link helpers expose relationship and linker flag", function(t)
+  local room = assert(dbat.rooms.by_id(1))
+  local ch = assert(dbat.mob_protos.by_id(1):spawn(room))
+  local vict = assert(dbat.mob_protos.by_id(2):spawn(room))
+
+  ch:mindlinked_set(vict)
+  t:assert(ch:mindlinked_get():is_same(vict))
+
+  vict:linker_set(1)
+  t:eq(vict:linker_get(), 1)
+  vict:linker_set(0)
+  t:eq(vict:linker_get(), 0)
+
+  ch:mindlinked_set(nil)
+  t:eq(ch:mindlinked_get(), nil)
+
+  vict:extract()
+  ch:extract()
+end)
+
+test:case("wimp level setter updates auto-flee threshold", function(t)
+  local room = assert(dbat.rooms.by_id(1))
+  local ch = assert(dbat.mob_protos.by_id(1):spawn(room))
+
+  ch:wimp_level_set(123)
+  t:eq(ch:wimp_level_get(), 123)
+  ch:wimp_level_set(0)
+  t:eq(ch:wimp_level_get(), 0)
+
+  ch:extract()
+end)
+
 return test:run()
