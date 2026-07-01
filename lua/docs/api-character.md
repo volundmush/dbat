@@ -111,6 +111,7 @@ Base stats are persistent integers stored by name. Derived stats are computed va
 | `stat_set` | `ch:stat_set(name, value)` | integer (new) | |
 | `stat_mod` | `ch:stat_mod(name, delta)` | integer (new) | |
 | `perform_get_from_room` | `ch:perform_get_from_room(obj)` | bool | Runs normal get-from-room behavior for a specific room object |
+| `item_legacy_command` | `ch:item_legacy_command(command, argument)` | — | Bridge for Lua item command ports that still use legacy item-side effects |
 | `der_base` | `ch:der_base(name)` | integer | Base value before modifiers |
 | `der_total` | `ch:der_total(name)` | integer | Final value after all modifiers (cached via Lua) |
 | `der_invalidate` | `ch:der_invalidate()` | — | Force modifier cache rebuild |

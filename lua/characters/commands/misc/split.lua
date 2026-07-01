@@ -1,9 +1,8 @@
-local dbat = require("dbat")
-local ADMLVL = dbat.consts.adm_levels
-
 local function execute(ctx)
     local ch  = ctx.ch
     local arg = ctx.argparams.tokens[1] or ""
+
+    if ch:is_npc() then return end
 
     local amount = tonumber(arg)
     if not amount or amount ~= math.floor(amount) then
@@ -82,17 +81,8 @@ local function execute(ctx)
     end
 end
 
-local function can_execute(ch)
-    if ch:is_npc() then return false end
-    if ch:admin_level_get() < ADMLVL.IMMORT then
-        return false, "Huh?!?"
-    end
-    return true
-end
-
 return {
-    id          = "split",
-    aliases     = { {"split", 5} },
-    execute     = execute,
-    can_execute = can_execute,
+    id      = "split",
+    aliases = { {"split", 5} },
+    execute = execute,
 }

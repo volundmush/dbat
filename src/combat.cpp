@@ -575,11 +575,11 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl,
     char corp[256];
     if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOGOLD)) {
       sprintf(corp, "all.zenni corpse");
-      do_get(ch, corp, 0, 0);
+      char_cmd_execute(ch, "get", corp);
     }
     if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOLOOT)) {
       sprintf(corp, "all corpse");
-      do_get(ch, corp, 0, 0);
+      char_cmd_execute(ch, "get", corp);
     }
     return;
   } else { /* We've only succeeded in removing a limb. */

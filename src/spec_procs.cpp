@@ -100,6 +100,45 @@ SPECIAL(dump) {
   return (TRUE);
 }
 
+extern "C" int dump_drop_special_try(struct char_data *ch,
+                                      const char *argument) {
+  char arg[MAX_INPUT_LENGTH];
+  int value = 0;
+
+  if (!ch || !char_room_get(ch) || room_func_get(char_room_get(ch)) != dump)
+    return FALSE;
+
+  snprintf(arg, sizeof(arg), "%s", argument ? argument : "");
+
+  room_contents_iterate(char_room_get(ch), [&](auto k) {
+    act("$p vanishes in a puff of smoke!", FALSE, 0, k, 0, TO_ROOM);
+    extract_obj(k);
+    return true;
+  });
+
+  do_drop(ch, arg, 0, SCMD_DROP);
+
+  room_contents_iterate(char_room_get(ch), [&](auto k) {
+    act("$p vanishes in a puff of smoke!", FALSE, 0, k, 0, TO_ROOM);
+    value += MAX(1, MIN(50, GET_OBJ_COST(k) / 10));
+    extract_obj(k);
+    return true;
+  });
+
+  if (value) {
+    send_to_char(ch, "You are awarded for outstanding performance.\r\n");
+    act("$n has been awarded for being a good citizen.", TRUE, ch, 0, 0,
+        TO_ROOM);
+
+    if (GET_LEVEL(ch) < 3)
+      gain_exp(ch, value);
+    else
+      char_stat_mod(ch, "money", value);
+  }
+
+  return TRUE;
+}
+
 /* ********************************************************************
  *  General special procedures for mobiles                             *
  ******************************************************************** */

@@ -82,6 +82,8 @@ void char_send_text(struct char_data *ch, const char *text);
 void char_send_textf(struct char_data *ch, const char *format, ...);
 bool char_cmd_execute(struct char_data *ch, const char *command,
                       const char *arguments);
+void char_item_legacy_command(struct char_data *ch, const char *command,
+                              const char *argument);
 
 // Per-character command queue (managed by Zig).
 void char_command_enqueue(struct char_data *ch, const char *cmd);

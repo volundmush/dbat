@@ -76,6 +76,7 @@
 #include "room_utils.h"
 #include "skills.h"
 #include "spells.h"
+#include "spec_procs.h"
 #include "stringutils.h"
 #include "util_macros.h"
 #include "vehicles.h"
@@ -3892,6 +3893,51 @@ ACMD(do_sac) {
     send_to_char(ch, "You send the corpse on to the next life!\r\n");
   }
   extract_obj(j);
+}
+
+extern "C" void char_item_legacy_command(struct char_data *ch,
+                                          const char *command,
+                                          const char *argument) {
+  char arg[MAX_INPUT_LENGTH];
+
+  snprintf(arg, sizeof(arg), "%s", argument ? argument : "");
+
+  if (!command || !*command)
+    return;
+
+  if (!strcasecmp(command, "refuel")) {
+    do_refuel(ch, arg, 0, 0);
+  } else if (!strcasecmp(command, "twohand")) {
+    do_twohand(ch, arg, 0, 0);
+  } else if (!strcasecmp(command, "put")) {
+    do_put(ch, arg, 0, 0);
+  } else if (!strcasecmp(command, "get") || !strcasecmp(command, "take")) {
+    do_get(ch, arg, 0, 0);
+  } else if (!strcasecmp(command, "drop")) {
+    if (!dump_drop_special_try(ch, arg))
+      do_drop(ch, arg, 0, SCMD_DROP);
+  } else if (!strcasecmp(command, "donate")) {
+    do_drop(ch, arg, 0, SCMD_DONATE);
+  } else if (!strcasecmp(command, "junk")) {
+    do_drop(ch, arg, 0, SCMD_JUNK);
+  } else if (!strcasecmp(command, "give")) {
+    do_give(ch, arg, 0, 0);
+  } else if (!strcasecmp(command, "pour")) {
+    do_pour(ch, arg, 0, SCMD_POUR);
+  } else if (!strcasecmp(command, "fill")) {
+    do_pour(ch, arg, 0, SCMD_FILL);
+  } else if (!strcasecmp(command, "wear")) {
+    do_wear(ch, arg, 0, 0);
+  } else if (!strcasecmp(command, "wield")) {
+    do_wield(ch, arg, 0, 0);
+  } else if (!strcasecmp(command, "grab") || !strcasecmp(command, "hold")) {
+    do_grab(ch, arg, 0, 0);
+  } else if (!strcasecmp(command, "remove")) {
+    do_remove(ch, arg, 0, 0);
+  } else if (!strcasecmp(command, "sac") ||
+             !strcasecmp(command, "sacrifice")) {
+    do_sac(ch, arg, 0, 0);
+  }
 }
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */

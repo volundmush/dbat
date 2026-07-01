@@ -25,6 +25,7 @@ extern fn eq_owner_next_ms(owner_kind: c_int, owner_id: i64, tag: ?[*:0]const u8
 extern fn event_queue_now_ms() i64;
 extern fn shop_keeper(ch: *cdb.char_data, me: ?*anyopaque, cmd: c_int, argument: [*c]u8) c_int;
 extern fn limb_ok(ch: *cdb.char_data, type: c_int) c_int;
+extern fn char_item_legacy_command(ch: *cdb.char_data, command: [*:0]const u8, argument: [*:0]const u8) void;
 const mob_proto_metatable = "dbat.MobPrototype";
 const condition_metatable = "dbat.Condition";
 const char_script_metatable = "dbat.CharacterScript";
@@ -452,6 +453,7 @@ fn registerCharacterMetatable(lua: *Lua) void {
     addMethod(lua, "rdisplay_clear", luaCharacterRdisplayClear);
     addMethod(lua, "slot_count", luaCharacterSlotCount);
     addMethod(lua, "check_special", luaCharacterCheckSpecial);
+    addMethod(lua, "item_legacy_command", luaCharacterItemLegacyCommand);
     addMethod(lua, "script_add", luaCharacterScriptAdd);
     addMethod(lua, "script_remove", luaCharacterScriptRemove);
     addMethod(lua, "script_has", luaCharacterScriptHas);
@@ -806,6 +808,14 @@ fn luaCharacterPerformGetFromRoom(lua: *Lua) i32 {
     const obj = objects_lua.checkObjectAt(lua, 2);
     lua.pushBoolean(cdb.perform_get_from_room(ch, obj) != 0);
     return 1;
+}
+
+fn luaCharacterItemLegacyCommand(lua: *Lua) i32 {
+    const ch = checkCharacter(lua);
+    const command = string(lua, 2);
+    const argument = if (lua.isNoneOrNil(3)) "" else string(lua, 3);
+    char_item_legacy_command(ch, command.ptr, argument.ptr);
+    return 0;
 }
 
 fn luaCharacterIsOutside(lua: *Lua) i32 {
