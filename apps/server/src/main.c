@@ -2,16 +2,16 @@
 // Created by basti on 10/22/2021.
 //
 
-#include "dbat/game/config.h"
-#include "dbat/game/comm.h"
-#include "dbat/game/utils.h"
-#include "dbat/game/mail.h"
-#include "dbat/game/boards.h"
-#include "dbat/game/act.informative.h"
-#include "dbat/game/act.social.h"
-#include "dbat/game/dg_scripts.h"
-#include "dbat/game/ban.h"
-#include "dbat/game/genolc.h"
+#include "dbat/config.h"
+#include "dbat/comm.h"
+#include "dbat/utils.h"
+#include "dbat/mail.h"
+#include "dbat/boards.h"
+#include "dbat/act.informative.h"
+#include "dbat/act.social.h"
+#include "dbat/dg_scripts.h"
+#include "dbat/ban.h"
+#include "dbat/genolc.h"
 
 #include <unistd.h>
 

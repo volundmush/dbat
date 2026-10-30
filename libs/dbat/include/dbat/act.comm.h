@@ -1,0 +1,17 @@
+#pragma once
+#include "dbat/consts/types.h"
+
+// commands
+ACMD(do_say);
+ACMD(do_gsay);
+ACMD(do_tell);
+ACMD(do_reply);
+ACMD(do_respond);
+ACMD(do_spec_comm);
+ACMD(do_write);
+ACMD(do_page);
+ACMD(do_gen_comm);
+ACMD(do_qcomm);
+ACMD(do_voice);
+ACMD(do_languages);
+ACMD(do_osay);

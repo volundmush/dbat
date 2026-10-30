@@ -9,6 +9,5 @@ target_sources(dbat_server
 
 target_link_libraries(dbat_server
     PUBLIC
-    dbat::db
-    dbat::game
+    dbat::dbat
 )

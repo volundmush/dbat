@@ -42,47 +42,30 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    // C library - libs/db
-    const mod_dbat_db = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
+    // C library - libs/dbat
+    const mod_dbat = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
+    mod_dbat.addIncludePath(b.path("libs/dbat/include"));
+    const dbat_files = getSourceFiles(b, "libs/dbat/src", ".c");
+    mod_dbat.addCSourceFiles(.{ .files = dbat_files, .flags = &[_][]const u8{ "-std=gnu23", "-w", "-g", "-DPATH_MAX=4096" } });
 
-    mod_dbat_db.addIncludePath(b.path("libs/db/include"));
-    const db_files = getSourceFiles(b, "libs/db/src", ".c");
-    mod_dbat_db.addCSourceFiles(.{ .files = db_files, .flags = &[_][]const u8{ "-std=gnu23", "-w", "-g" } });
-
-    const dbat_db = b.addLibrary(.{
-        .name = "dbat_db",
+    const dbat_lib = b.addLibrary(.{
+        .name = "dbat",
         .linkage = .static,
-        .root_module = mod_dbat_db,
+        .root_module = mod_dbat,
     });
-
-    const mod_dbat_game = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
-    mod_dbat_game.addIncludePath(b.path("libs/db/include"));
-    mod_dbat_game.addIncludePath(b.path("libs/game/include"));
-    const game_files = getSourceFiles(b, "libs/game/src", ".c");
-    mod_dbat_game.addCSourceFiles(.{ .files = game_files, .flags = &[_][]const u8{ "-std=gnu23", "-w", "-g", "-DPATH_MAX=4096" } });
-
-    const dbat_game = b.addLibrary(.{
-        .name = "dbat_game",
-        .linkage = .static,
-        .root_module = mod_dbat_game,
-    });
-    mod_dbat_game.linkLibrary(dbat_db);
 
     // Executable - pure C app (circle)
     const circle_mod = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
-    circle_mod.addIncludePath(b.path("libs/db/include"));
-    circle_mod.addIncludePath(b.path("libs/game/include"));
+    circle_mod.addIncludePath(b.path("libs/dbat/include"));
     circle_mod.addCSourceFiles(.{ .files = &[_][]const u8{"apps/server/src/main.c"}, .flags = &[_][]const u8{ "-std=gnu23", "-w", "-g", "-DPATH_MAX=4096" } });
 
     const exe = b.addExecutable(.{
         .name = "dbat",
         .root_module = circle_mod,
     });
-    circle_mod.linkLibrary(dbat_db);
-    circle_mod.linkLibrary(dbat_game);
+    circle_mod.linkLibrary(dbat_lib);
 
-    b.installArtifact(dbat_db);
-    b.installArtifact(dbat_game);
+    b.installArtifact(dbat_lib);
     b.installArtifact(exe);
 
     const run_step = b.step("run", "Run the app");
