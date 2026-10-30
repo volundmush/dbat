@@ -345,21 +345,21 @@ ACMD(do_mimic)
  int count = 0, x = 0;
 
  // generate a list of mimic'able races.
- dbat::race::RaceMap r_map;
-    for(const auto& r : dbat::race::race_map) {
-        if (r.second->raceCanBeMimiced() && r.second->isValidSex(GET_SEX(ch))) {
-            r_map[r.first] = r.second;
-        }
+ bool can_mimic[NUM_RACES];
+    for(int r = 0; r < NUM_RACES; r++) {
+        can_mimic[r] = race_can_be_mimiced(r) && race_valid_sex(r, GET_SEX(ch));
     }
 
  if (!*arg) {
    send_to_char(ch, "@CMimic Menu\n@c--------------------@W\r\n");
-   for(const auto& r : r_map) {
+   for(int r = 0; r < NUM_RACES; r++) {
+       if (!can_mimic[r])
+           continue;
        if (count == 2) {
-           send_to_char(ch, "%s\n", r.second->getName().c_str());
+           send_to_char(ch, "%s\n", race_name(r));
            count = 0;
        } else {
-           send_to_char(ch, "%s\n", r.second->getName().c_str());
+           send_to_char(ch, "%s\n", race_name(r));
            count++;
        }
    }
@@ -381,8 +381,14 @@ ACMD(do_mimic)
       ch->mimic = 0;
   }
 
-  auto race = dbat::race::find_race_map(arg, r_map);
-  if(!race) {
+  int race = RACE_UNDEFINED;
+  for(int r = 0; r < NUM_RACES; r++) {
+      if (can_mimic[r] && !strcasecmp(arg, race_name(r))) {
+          race = r;
+          break;
+      }
+  }
+  if(race == RACE_UNDEFINED) {
       send_to_char(ch, "That is not a race you can change into. Enter mimic without arugments for the mimic menu.\r\n");
       return;
   }
@@ -391,20 +397,20 @@ ACMD(do_mimic)
   double mult = 1 / prob;
   int64_t cost = GET_MAX_MANA(ch) * mult;
 
- if (race->getID() == ch->mimic) {
+ if (race == ch->mimic) {
 	send_to_char(ch, "You are already mimicing that race. To stop enter 'mimic stop'\r\n");
 	return;
- } else if (race && (getCurKI(ch)) < cost) {
+ } else if ((getCurKI(ch)) < cost) {
    send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
    return;
- } else if (race && prob < perc) {
+ } else if (prob < perc) {
      decCurKI(ch, cost, 0);
    act("@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n", TRUE, ch, 0, 0, TO_ROOM);
    return;
  } else {
 	char buf[MAX_STRING_LENGTH];
-	ch->mimic = race->getID();
+	ch->mimic = race;
      decCurKI(ch, cost, 0);
 	sprintf(buf, "@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be %s @M%s!@n", AN(RACE(ch)), LRACE(ch));
 	send_to_char(ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be %s %s.@n\r\n", AN(RACE(ch)), LRACE(ch));

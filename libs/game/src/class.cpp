@@ -18,9 +18,6 @@
 #include "dbat/db/utils.h"
 #include "dbat/game/class.h"
 
-#include <utility>
-#include <string>
-#include <algorithm>
 
 #include "dbat/game/db.h"
 #include "dbat/game/comm.h"
@@ -1821,9 +1818,11 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
     rankorder[0] = GET_CLASS(ch); /* we always want primary class first */
     rankorder[GET_CLASS(ch)] = 0;
     qsort((void *)rankorder, NUM_CLASSES, sizeof(int), comp_rank);
-    for(const auto& sen : dbat::sensei::sensei_map) {
+    for (int sen = 0; sen < NUM_CLASSES; sen++) {
+      if (!sensei_exists(sen))
+        continue;
       ptr += snprintf(ptr, sizeof(str) - (ptr - str), "%s%s%s%s%s%d", buf, buf2, buf,
-                      (howlong == 2 ? sen.second->getName().c_str() : sen.second->getAbbr().c_str()), buf3,
+                      (howlong == 2 ? sensei_name(sen) : sensei_abbr(sen)), buf3,
                       cabbr_ranktable[rank]);
       buf2 = "/";
       if (howlong == 2)
@@ -2039,208 +2038,135 @@ static const int *class_bonus_feats[NUM_CLASSES] = {
 };
 
 
-namespace dbat::sensei {
+/* Sensei behaviour. A sensei is identified by its CLASS_* constant (ch->chclass). */
 
-    Sensei::Sensei(sensei_id sid, const std::string &name, std::string abbr, std::string style) {
-        this->s_id=sid;
-        this->abbr = std::move(abbr);
-        this->name = name;
-        this->lower_name = name;
-        this->style = std::move(style);
-        std::transform(lower_name.begin(), lower_name.end(), lower_name.begin(), ::tolower);
+bool sensei_exists(int s) {
+    switch (s) {
+        case CLASS_ROSHI:
+        case CLASS_PICCOLO:
+        case CLASS_KRANE:
+        case CLASS_NAIL:
+        case CLASS_BARDOCK:
+        case CLASS_GINYU:
+        case CLASS_FRIEZA:
+        case CLASS_TAPION:
+        case CLASS_ANDSIX:
+        case CLASS_DABURA:
+        case CLASS_KABITO:
+        case CLASS_JINTO:
+        case CLASS_TSUNA:
+        case CLASS_KURZAK:
+        case CLASS_NPC_COMMONER:
+            return true;
+        default:
+            return false;
     }
+}
 
-    sensei_id Sensei::getID() const {
-        return s_id;
+const char *sensei_name(int s) {
+    switch (s) {
+        case CLASS_ROSHI:
+            return "Roshi";
+        case CLASS_PICCOLO:
+            return "Piccolo";
+        case CLASS_KRANE:
+            return "Krane";
+        case CLASS_NAIL:
+            return "Nail";
+        case CLASS_BARDOCK:
+            return "Bardock";
+        case CLASS_GINYU:
+            return "Ginyu";
+        case CLASS_FRIEZA:
+            return "Frieza";
+        case CLASS_TAPION:
+            return "Tapion";
+        case CLASS_ANDSIX:
+            return "Android 16";
+        case CLASS_DABURA:
+            return "Dabura";
+        case CLASS_KABITO:
+            return "Kibito";
+        case CLASS_JINTO:
+            return "Jinto";
+        case CLASS_TSUNA:
+            return "Tsuna";
+        case CLASS_KURZAK:
+            return "Kurzak";
+        case CLASS_NPC_COMMONER:
+            return "Commoner";
+        default:
+            return "Unknown";
     }
+}
 
-    const std::string& Sensei::getAbbr() const {
-        return abbr;
+const char *sensei_abbr(int s) {
+    switch (s) {
+        case CLASS_ROSHI:
+            return "Ro";
+        case CLASS_PICCOLO:
+            return "Pi";
+        case CLASS_KRANE:
+            return "Kr";
+        case CLASS_NAIL:
+            return "Na";
+        case CLASS_BARDOCK:
+            return "Ba";
+        case CLASS_GINYU:
+            return "Gi";
+        case CLASS_FRIEZA:
+            return "Fr";
+        case CLASS_TAPION:
+            return "Ta";
+        case CLASS_ANDSIX:
+            return "16";
+        case CLASS_DABURA:
+            return "Da";
+        case CLASS_KABITO:
+            return "Ki";
+        case CLASS_JINTO:
+            return "Ji";
+        case CLASS_TSUNA:
+            return "Ts";
+        case CLASS_KURZAK:
+            return "Kurzak";
+        case CLASS_NPC_COMMONER:
+            return "--";
+        default:
+            return "??";
     }
+}
 
-    const std::string& Sensei::getName() const {
-        return name;
+bool sensei_is_pc_ok(int s) {
+    switch (s) {
+        case CLASS_NPC_COMMONER:
+            return false;
+        default:
+            return sensei_exists(s);
     }
+}
 
-    const std::string& Sensei::getNameLower() const {
-        return lower_name;
+bool sensei_available_for_race(int s, int r) {
+    switch (s) {
+        case CLASS_ANDSIX:
+            return r == RACE_ANDROID;
+        case CLASS_DABURA:
+            return r == RACE_DEMON;
+        case CLASS_TSUNA:
+            return r == RACE_KANASSAN;
+        case CLASS_KURZAK:
+            return r == RACE_ARLIAN;
+        case CLASS_JINTO:
+            return r == RACE_HOSHIJIN;
+        default:
+            return r != RACE_ANDROID;
     }
+}
 
-    const std::string& Sensei::getStyleName() const {
-        return style;
+int sensei_find(const char *arg) {
+    for (int s = 0; s < NUM_CLASSES; s++) {
+        if (sensei_exists(s) && !strcasecmp(arg, sensei_name(s)))
+            return s;
     }
-
-    bool Sensei::senseiAvailableForRace(race::race_id r_id) const {
-        switch(s_id) {
-            case sixteen:
-                return r_id == race::android;
-            case dabura:
-                return r_id == race::demon;
-            case tsuna:
-                return r_id == race::kanassan;
-            case kurzak:
-                return r_id == race::arlian;
-            case jinto:
-                return r_id == race::hoshijin;
-            default:
-                return r_id != race::android;
-        }
-    }
-
-    IDXTYPE Sensei::senseiLocationID() const {
-        switch(s_id) {
-            case roshi:
-                return 1131;
-            case kibito:
-                return 12098;
-            case nail:
-                return 11683;
-            case bardock:
-                return 2267;
-            case krane:
-                return 13012;
-            case tapion:
-                return 8233;
-            case piccolo:
-                return 1662;
-            case sixteen:
-                return 1714;
-            case dabura:
-                return 6487;
-            case frieza:
-                return 4283;
-            case ginyu:
-                return 4290;
-            case jinto:
-                return 3499;
-            case kurzak:
-                return 16100;
-            case tsuna:
-                return 15009;
-            case commoner:
-                return 300;
-        }
-    }
-
-    IDXTYPE Sensei::senseiStartRoom() const {
-        switch(s_id) {
-            case roshi:
-                return 1130;
-            case kibito:
-                return 12098;
-            case nail:
-                return 11683;
-            case bardock:
-                return 2268;
-            case krane:
-                return 13009;
-            case tapion:
-                return 8231;
-            case piccolo:
-                return 1659;
-            case sixteen:
-                return 1713;
-            case dabura:
-                return 6486;
-            case frieza:
-                return 4282;
-            case ginyu:
-                return 4289;
-            case jinto:
-                return 3499;
-            case kurzak:
-                return 16100;
-            case tsuna:
-                return 15009;
-            case commoner:
-                return 300;
-        }
-    }
-
-    int Sensei::getGravTolerance() const {
-        switch(s_id) {
-            case bardock:
-                return 10;
-            default:
-                return 0;
-        }
-    }
-
-    bool Sensei::senseiIsPcOk() const {
-        switch(s_id) {
-            case commoner:
-                return false;
-            default:
-                return true;
-        }
-    }
-
-    int Sensei::getRPPCost(race::race_id rid) const {
-        switch(s_id) {
-            case kibito:
-                if(rid != race::kai) {
-                    return 10;
-                } else {
-                    return 0;
-                }
-            default:
-                return 0;
-        }
-    }
-
-    SenseiMap sensei_map;
-
-    void load_sensei() {
-        sensei_map[roshi] = new Sensei(roshi, "Roshi", "Ro", "Kame Arts");
-        sensei_map[piccolo] = new Sensei(piccolo, "Piccolo", "Pi", "Demon Taijutsu");
-        sensei_map[krane] = new Sensei(krane, "Krane", "Kr", "Crane Arts");
-        sensei_map[nail] = new Sensei(nail, "Nail", "Na", "Tranquil Palm");
-        sensei_map[bardock] = new Sensei(bardock, "Bardock", "Ba", "Brutal Beast");
-        sensei_map[ginyu] = new Sensei(ginyu, "Ginyu", "Gi", "Flaunted Style");
-        sensei_map[frieza] = new Sensei(frieza, "Frieza", "Fr", "Frozen Fist");
-        sensei_map[tapion] = new Sensei(tapion, "Tapion", "Ta", "Shadow Grappling");
-        sensei_map[sixteen] = new Sensei(sixteen, "Android 16", "16", "Iron Hand");
-        sensei_map[dabura] = new Sensei(dabura, "Dabura", "Da", "Devil Dance");
-        sensei_map[kibito] = new Sensei(kibito, "Kibito", "Ki", "Gentle Fist");
-        sensei_map[jinto] = new Sensei(jinto, "Jinto", "Ji", "Star's Radiance");
-        sensei_map[tsuna] = new Sensei(tsuna, "Tsuna", "Ts", "Sacred Tsunami");
-        sensei_map[kurzak] = new Sensei(kurzak, "Kurzak", "Kurzak", "Adaptive Taijutsu");
-
-        sensei_map[commoner] = new Sensei(commoner, "Commoner", "--", "Like a Bum");
-    }
-
-    Sensei* find_sensei(const std::string& arg) {
-        return find_sensei_map(arg, sensei_map);
-    }
-
-    Sensei* find_sensei_map(const std::string& arg, const SenseiMap& s_map) {
-        std::string lower(arg);
-        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-
-        for(const auto& s : s_map) {
-            if(s.second->getNameLower() == lower) {
-                return s.second;
-            }
-        }
-        return nullptr;
-    }
-
-    Sensei* find_sensei_map_id(const int id, const SenseiMap& s_map) {
-        for(const auto& s : s_map) {
-            if(s.first == id) {
-                return s.second;
-            }
-        }
-        return nullptr;
-    }
-
-    SenseiMap valid_for_race_pc(char_data *ch) {
-        SenseiMap out;
-        for(const auto& s : sensei_map) {
-            if(s.second->senseiIsPcOk() && s.second->senseiAvailableForRace(get_race(ch->race)->getID())) {
-                out[s.first] = s.second;
-            }
-        }
-        return out;
-    }
+    return CLASS_UNDEFINED;
 }

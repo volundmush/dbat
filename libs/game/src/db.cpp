@@ -829,8 +829,6 @@ void init_obj_unique_hash()
 void boot_db(void)
 {
   zone_rnum i;
-    dbat::race::load_races();
-    dbat::sensei::load_sensei();
 
   log("Boot db -- BEGIN.");
 

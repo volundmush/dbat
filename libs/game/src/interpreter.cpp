@@ -68,15 +68,13 @@
  */
 
 
-static dbat::race::RaceMap valid_races(descriptor_data *d) {
-    return dbat::race::valid_for_sex_pc(GET_SEX(d->character));
-}
-
 static void display_races_sub(descriptor_data *d) {
-    auto v_races = valid_races(d);
     int i = 0;
-    for (const auto& r : v_races)
-        send_to_char(d->character, "@C%-15s@D[@R%i RPP@D]@n%s", r.second->getName().c_str(), r.second->getRPPCost(), !(++i %2) ? "\r\n" : "   ");
+    for (int r = 0; r < NUM_RACES; r++) {
+        if (!race_is_playable(r) || !race_valid_sex(r, GET_SEX(d->character)))
+            continue;
+        send_to_char(d->character, "@C%-15s@D[@R%i RPP@D]@n%s", race_name(r), race_rpp_cost(r), !(++i %2) ? "\r\n" : "   ");
+    }
 }
 
 void display_races(struct descriptor_data *d)
@@ -89,15 +87,13 @@ void display_races(struct descriptor_data *d)
     send_to_char(d->character, "\n@WRace: @n");
 }
 
-static dbat::sensei::SenseiMap valid_classes(descriptor_data *d) {
-    return dbat::sensei::valid_for_race_pc(d->character);
-}
-
 static void display_classes_sub(descriptor_data *d) {
-    auto v_classes = valid_classes(d);
     int i = 0;
-    for (const auto& s : v_classes)
-        send_to_char(d->character, "@C%s@n%s", s.second->getName().c_str(), !(++i%2) ? "\r\n" : "	");
+    for (int s = 0; s < NUM_CLASSES; s++) {
+        if (!sensei_is_pc_ok(s) || !sensei_available_for_race(s, d->character->race))
+            continue;
+        send_to_char(d->character, "@C%s@n%s", sensei_name(s), !(++i%2) ? "\r\n" : "	");
+    }
 }
 
 void display_classes(struct descriptor_data *d)
@@ -1903,10 +1899,8 @@ void nanny(struct descriptor_data *d, char *arg)
   int player_i;
   int value, roll = rand_number(1, 6); /* For parse_bonuses */
   struct descriptor_data *k;
-  dbat::race::Race *chosen_race;
-  dbat::race::RaceMap v_races;
-  dbat::sensei::Sensei *chosen_sensei;
-  dbat::sensei::SenseiMap v_sensei;
+  int chosen_race;
+  int chosen_sensei;
 
     int count = 0, oldcount = HIGHPCOUNT;
   /* OasisOLC states */
@@ -2701,23 +2695,22 @@ void nanny(struct descriptor_data *d, char *arg)
                 }
                 break;
             default:
-                v_races = valid_races(d);
-                chosen_race = dbat::race::find_race_map(arg, v_races);
-                if(!chosen_race) {
+                chosen_race = race_find(arg, GET_SEX(d->character), true);
+                if(chosen_race == RACE_UNDEFINED) {
                     write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
                     return;
                 }
 
                 switch(STATE(d)) {
                     case CON_QRACE:
-                        if(chosen_race->getRPPCost()) {
-                            write_to_output(d, "\r\n%i RPP will be paid upon your first level up.\r\n", chosen_race->getRPPCost());
+                        if(race_rpp_cost(chosen_race)) {
+                            write_to_output(d, "\r\n%i RPP will be paid upon your first level up.\r\n", race_rpp_cost(chosen_race));
                         }
-                        d->character->race = chosen_race->getID();
+                        d->character->race = chosen_race;
                         break;
                     case CON_RACE_HELP:
-                        show_help(d, chosen_race->getName().c_str());
-                        chosen_sensei = nullptr;
+                        show_help(d, race_name(chosen_race));
+                        chosen_sensei = CLASS_UNDEFINED;
                         return;
                 }
         }
@@ -4378,19 +4371,19 @@ void nanny(struct descriptor_data *d, char *arg)
               }
               break;
           default:
-              chosen_sensei = dbat::sensei::find_sensei(arg);
-              if (!chosen_sensei) {
+              chosen_sensei = sensei_find(arg);
+              if (chosen_sensei == CLASS_UNDEFINED) {
                   write_to_output(d, "\r\nThat's not a sensei.\r\nSensei: ");
                   return;
               }
 
               switch(STATE(d)) {
                   case CON_CLASS_HELP:
-                      show_help(d, chosen_sensei->getName().c_str());
-                      chosen_sensei = nullptr;
+                      show_help(d, sensei_name(chosen_sensei));
+                      chosen_sensei = CLASS_UNDEFINED;
                       return;
                   case CON_QCLASS:
-                      d->character->chclass = chosen_sensei->getID();
+                      d->character->chclass = chosen_sensei;
                       break;
               }
       }
@@ -4815,7 +4808,7 @@ void nanny(struct descriptor_data *d, char *arg)
       if (GET_LEVEL(d->character) <= 40 && CHEAP_RACE(d->character)) {
        write_to_output(d, "@D[@gSince your race doesn't cost RPP to level before 40 you are refunded 0 RPP.@D]@n\r\n");
       }
-      int refund = get_race(d->character->race)->getRPPRefund();
+      int refund = race_rpp_refund(d->character->race);
       if(refund && GET_LEVEL(d->character) > 1) {
           write_to_output(d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, TRUE_RACE(d->character));
           d->rpp += refund;

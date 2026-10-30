@@ -3875,10 +3875,8 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   int64_t value = 0;
   room_rnum rnum;
   room_vnum rvnum;
-  dbat::race::RaceMap v_races;
-  dbat::race::Race *chosen_race;
-  dbat::sensei::SenseiMap v_sensei;
-  dbat::sensei::Sensei *chosen_sensei;
+  int chosen_race;
+  int chosen_sensei;
 
   /* Check to make sure all the levels are correct */
   if (GET_ADMLEVEL(ch) != ADMLVL_IMPL) {
@@ -4133,12 +4131,12 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     SET_OR_REMOVE(PLR_FLAGS(vict), PLR_DELETED);
     break;
   case 39:
-      if(!(chosen_sensei = dbat::sensei::find_sensei(val_arg))) {
+      if((chosen_sensei = sensei_find(val_arg)) == CLASS_UNDEFINED) {
       send_to_char(ch, "That is not a class.\r\n");
       return (0);
     }
     value = GET_CLASS_RANKS(vict, GET_CLASS(vict));
-    vict->chclass = chosen_sensei->getID();
+    vict->chclass = chosen_sensei;
     break;
   case 40:
     SET_OR_REMOVE(PLR_FLAGS(vict), PLR_NOWIZLIST);
@@ -4232,15 +4230,15 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
   case 52:
       if(IS_NPC(vict)) {
-          chosen_race = dbat::race::find_race_map(val_arg, dbat::race::valid_for_sex(GET_SEX(ch)));
+          chosen_race = race_find(val_arg, GET_SEX(ch), false);
       } else {
-          chosen_race = dbat::race::find_race_map(val_arg, dbat::race::valid_for_sex_pc(GET_SEX(ch)));
+          chosen_race = race_find(val_arg, GET_SEX(ch), true);
       }
-      if(!chosen_race) {
+      if(chosen_race == RACE_UNDEFINED) {
           send_to_char(ch, "That is not a valid race for them.\r\n");
           return (0);
       }
-      vict->race = chosen_race->getID();
+      vict->race = chosen_race;
     racial_body_parts(vict);
     break;
 

@@ -160,11 +160,11 @@ void log_custom(struct descriptor_data *d, struct obj_data *obj)
 void bring_to_cap(struct char_data *ch)
 {
 
-  bool p_trans = (get_race(ch->race)->raceCanTransform() && !get_race(ch->race)->raceCanRevert());
+  bool p_trans = (race_can_transform(ch->race) && !race_can_revert(ch->race));
   int64_t cap = calc_soft_cap(ch);
 
- switch(get_race(ch->race)->getSoftType(ch)) {
-     case dbat::race::Fixed:
+ switch(race_soft_cap_type(ch)) {
+     case SOFTCAP_FIXED:
          if(getBasePL(ch) < cap)
              gainBasePL(ch, cap - getBasePL(ch)-1, p_trans);
          if(getBaseKI(ch) < cap)
@@ -7624,7 +7624,7 @@ ACMD(do_transform)
 	char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	char buf3[MAX_INPUT_LENGTH];
 
-    if(!get_race(ch->race)->raceCanTransform()) {
+    if(!race_can_transform(ch->race)) {
         send_to_char(ch, "You do not have a transformation.\r\n");
         return;
     }
@@ -7642,18 +7642,18 @@ ACMD(do_transform)
 
     /* Called with no argument - display transformation information */
 	if (!*arg) {
-        get_race(ch->race)->displayForms(ch);
+        race_display_forms(ch);
 		if (trans_req(ch, 1) > 0) {
-            get_race(ch->race)->displayTransReq(ch);
+            race_display_trans_req(ch);
 		}
 		return;
 	}/* End of No Argument */
 
-    auto cur_form = get_race(ch->race)->getCurForm(ch);
-    bool can_revert = get_race(ch->race)->raceCanRevert();
+    transform_bonus cur_form = race_current_form(ch);
+    bool can_revert = race_can_revert(ch->race);
 
     // If we are in kaioken or something weird like that, prevent transforming.
-    if(!get_race(ch->race)->checkCanTransform(ch)) {
+    if(!race_check_can_transform(ch)) {
         return;
     }
 
@@ -7671,7 +7671,7 @@ ACMD(do_transform)
         if ((GET_CHARGE(ch) > 0)) {
             do_charge(ch, "release", 0, 0);
         }
-        get_race(ch->race)->echoRevert(ch, get_race(ch->race)->flagToTier(cur_form.flag));
+        race_echo_revert(ch, race_flag_to_tier(cur_form.flag));
         REMOVE_BIT_AR(PLR_FLAGS(ch), cur_form.flag);
 
         if (*arg2) {
@@ -7681,14 +7681,13 @@ ACMD(do_transform)
     }
 
     // Search for available transformations. Error out if we can't find one.
-    auto trans_maybe = get_race(ch->race)->findForm(ch, arg);
-    if(!trans_maybe) {
+    transform_bonus trans;
+    if(!race_find_form(ch, arg, &trans)) {
         send_to_char(ch, "You don't have that form.\r\n");
         return;
     }
-    auto trans = trans_maybe.value();
 
-    auto to_tier = get_race(ch->race)->flagToTier(trans.flag);
+    int to_tier = race_flag_to_tier(trans.flag);
 
     if (PLR_FLAGGED(ch, trans.flag)) {
         send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
@@ -7707,7 +7706,7 @@ ACMD(do_transform)
 
     if(!npc) {
         // Pay the price to unlock form if necessary.
-        if(!get_race(ch->race)->checkTransUnlock(ch, to_tier)) {
+        if(!race_check_trans_unlock(ch, to_tier)) {
             return;
         }
     }
@@ -7722,14 +7721,14 @@ ACMD(do_transform)
     SET_BIT_AR(PLR_FLAGS(ch), trans.flag);
 
     // Custom racial messages displayed.
-    get_race(ch->race)->echoTransform(ch, to_tier);
+    race_echo_transform(ch, to_tier);
 
     // No way is this a stealthy process...
     reveal_hiding(ch, 0);
 
     // Announce noisy transformations in the zone.
     int zone = 0;
-    if(get_race(ch->race)->raceHasNoisyTransformations()) {
+    if(race_has_noisy_transformations(ch->race)) {
         if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
             send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
         };

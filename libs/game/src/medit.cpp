@@ -435,8 +435,10 @@ void medit_disp_class(struct descriptor_data *d)
   char buf[MAX_INPUT_LENGTH];
   clear_screen(d);
 
-  for (const auto cl : dbat::sensei::sensei_map) {
-    sprintf(buf, "@g%2d@n) %s\r\n", cl.first, cl.second->getName().c_str());
+  for (i = 0; i < NUM_CLASSES; i++) {
+    if (!sensei_exists(i))
+      continue;
+    sprintf(buf, "@g%2d@n) %s\r\n", i, sensei_name(i));
     write_to_output(d, buf);
   }
   write_to_output(d, "Enter class number : ");
@@ -451,8 +453,8 @@ void medit_disp_race(struct descriptor_data *d)
   char buf[MAX_INPUT_LENGTH];
 
   clear_screen(d);
-  for (const auto &r : dbat::race::race_map) {
-    sprintf(buf, "@g%2d@n) %-20.20s  %s", r.first , r.second->getName().c_str(),
+  for (int r = 0; r < NUM_RACES; r++) {
+    sprintf(buf, "@g%2d@n) %-20.20s  %s", r, race_name(r),
                         !(++columns % 2) ? "\r\n" : "");
     write_to_output(d, buf);
   }
@@ -543,7 +545,6 @@ void medit_parse(struct descriptor_data *d, char *arg)
 {
   int i = -1;
   char *oldtext = NULL;
-  dbat::race::Race *chosen_race;
 
   if (OLC_MODE(d) > MEDIT_NUMERICAL_RESPONSE) {
     i = atoi(arg);
@@ -960,12 +961,11 @@ void medit_parse(struct descriptor_data *d, char *arg)
     break;
 
   case MEDIT_RACE:
-      chosen_race = dbat::race::find_race_map_id(i, dbat::race::race_map);
-      if(!chosen_race) {
+      if(!race_exists(i)) {
           write_to_output(d, "That's not a race!");
           break;
       }
-      OLC_MOB(d)->race = chosen_race->getID();
+      OLC_MOB(d)->race = i;
     /*  Change racial size based on race choice. */
     OLC_MOB(d)->size = race_get_size(OLC_MOB(d)->race);
     break;

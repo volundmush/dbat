@@ -25,7 +25,6 @@
 #include "dbat/game/time.h"
 #include "dbat/game/weather.h"
 
-#include <string>
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
@@ -238,7 +237,7 @@ int calcTier(char_data *ch) {
 
 int64_t calc_soft_cap(char_data *ch) {
     int tier = calcTier(ch);
-    auto softmap = get_race(ch->race)->getSoftMap(ch);
+    const int64_t *softmap = race_soft_cap_table(ch);
     return ch->level * softmap[tier];
 }
 
@@ -253,8 +252,8 @@ bool is_soft_cap(char_data *ch, int64_t type, long double mult) {
 
     int64_t against = 0;
 
-    switch(get_race(ch->race)->getSoftType(ch)) {
-        case dbat::race::Fixed:
+    switch(race_soft_cap_type(ch)) {
+        case SOFTCAP_FIXED:
             switch(type) {
                 case 0:
                     against = (getBasePL(ch));
@@ -267,7 +266,7 @@ bool is_soft_cap(char_data *ch, int64_t type, long double mult) {
                     break;
             }
             break;
-        case dbat::race::Variable:
+        case SOFTCAP_VARIABLE:
             against = (getBasePL(ch)) + (getBaseKI(ch)) + (getBaseST(ch));
             if(IS_ANDROID(ch) && type > 0) {
                 cur_cap += type;
@@ -400,7 +399,7 @@ int64_t harmCurHealth(char_data *ch, int64_t amt) {
 }
 
 int64_t getMaxPLTrans(char_data *ch) {
-    auto form = get_race(ch->race)->getCurForm(ch);
+    transform_bonus form = race_current_form(ch);
     int64_t total = 0;
     if(form.flag) {
         total = (form.bonus + getEffBasePL(ch)) * form.mult;
@@ -465,7 +464,7 @@ int64_t getCurKI(char_data *ch) {
 }
 
 int64_t getMaxKI(char_data *ch) {
-    auto form = get_race(ch->race)->getCurForm(ch);
+    transform_bonus form = race_current_form(ch);
     int64_t total = 0;
     if(form.flag) {
         total = (form.bonus + getEffBaseKI(ch)) * form.mult;
@@ -567,7 +566,7 @@ int64_t getCurST(char_data *ch) {
 }
 
 int64_t getMaxST(char_data *ch) {
-    auto form = get_race(ch->race)->getCurForm(ch);
+    transform_bonus form = race_current_form(ch);
     int64_t total = 0;
     if(form.flag) {
         total = (form.bonus + getEffBaseST(ch)) * form.mult;
