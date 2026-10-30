@@ -1832,7 +1832,6 @@ static void mob_autobalance(struct char_data *ch)
     GET_ARMOR(ch) = 0;
     GET_NDD(ch) = 0;
     GET_SDD(ch) = 0;
-    GET_DAMAGE_MOD(ch) = 0;
 }
 
 static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
@@ -1874,7 +1873,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
 
   ch->mob_specials.damnodice = t[6];
   ch->mob_specials.damsizedice = t[7];
-  GET_DAMAGE_MOD(ch) = t[8];
+  /* t[8] (damage mod) is still parsed to keep the mob file format, but unused */
  
   if (!get_line(mob_f, line)) {
     log("SYSERR: Format error in mob #%d, second line after S flag\n"
@@ -2091,14 +2090,10 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
   CASE("Class") {
     sscanf(value, "%d %d", &num, &num2);
-    GET_CLASS_NONEPIC(ch, num) = num2;
-    GET_CLASS_LEVEL(ch) += num2;
   }
 
   CASE("EpicClass") {
     sscanf(value, "%d %d", &num, &num2);
-    GET_CLASS_EPIC(ch, num) = num2;
-    GET_CLASS_LEVEL(ch) += num2;
   }
 
   if (!matched) {
@@ -4378,8 +4373,6 @@ void free_char(struct char_data *ch)
 {
   int i;
   struct alias_data *a;
-  struct levelup_data *data, *next_data;
-  struct level_learn_entry *learn, *next_learn;
 
   if (ch->player_specials != NULL && ch->player_specials != &dummy_mob) {
 
@@ -4452,22 +4445,6 @@ void free_char(struct char_data *ch)
 
   if (ch->desc)
     ch->desc->character = NULL;
-
-  if (ch->level_info) {
-    for (data = ch->level_info; data; data = next_data) {
-      next_data = data->next;
-      for (learn = data->skills; learn; learn = next_learn) {
-        next_learn = learn->next;
-        free(learn);
-      }
-      for (learn = data->feats; learn; learn = next_learn) {
-        next_learn = learn->next;
-        free(learn);
-      }
-      free(data);
-    }
-  }
-  ch->level_info = NULL;
 
   /* find_char helper */
   /*
@@ -5577,104 +5554,3 @@ void load_config( void )
 }
 
 
-void read_level_data(struct char_data *ch, FILE *fl)
-{
-  char buf[READ_SIZE], *p;
-  int i = 1;
-  int t[16];
-  struct levelup_data *curr = NULL;
-  struct level_learn_entry *learn;
-
-  ch->level_info = NULL;
-  while (!feof(fl)) {
-    i++;
-    if (!get_line(fl, buf)) {
-      log("read_level_data: get_line() failed reading level data line %d for %s", i, char_get_name(ch));
-      return;
-    }
-    for (p = buf; *p && *p != ' '; p++);
-    if (!strcmp(buf, "end")) {
-      return;
-    }
-    if (!*p) {
-      log("read_level_data: malformed line reading level data line %d for %s: %s", i, char_get_name(ch), buf);
-      return;
-    }
-    *(p++) = 0;
-    if (!strcmp(buf, "level")) {
-      if (sscanf(p, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", t,t+1,t+2,t+3,
-                 t+4,t+5,t+6,t+7,t+8,t+9,t+10,t+11,t+12,t+13,t+14,t+15) != 16) {
-        log("read_level_data: missing fields on level_data line %d for %s", i, char_get_name(ch));
-        curr = NULL;
-        continue;
-      }
-      CREATE(curr, struct levelup_data, 1);
-      curr->prev = NULL;
-      curr->next = ch->level_info;
-      if ((curr->next = ch->level_info)) {
-        curr->next->prev = curr;
-      }
-      ch->level_info = curr;
-      curr->type = t[0];
-      curr->spec = t[1];
-      curr->level = t[2];
-      curr->hp_roll = t[3];
-      curr->mana_roll = t[4];
-      curr->ki_roll = t[5];
-      curr->move_roll = t[6];
-      curr->fort = t[8];
-      curr->reflex = t[9];
-      curr->will = t[10];
-      curr->add_skill = t[11];
-      curr->add_gen_feats = t[12];
-      curr->add_epic_feats = t[13];
-      curr->add_class_feats = t[14];
-      curr->add_class_epic_feats = t[15];
-      curr->skills = curr->feats = NULL;
-      continue;
-    }
-    if (!curr) {
-      log("read_level_data: found continuation entry without current level for %s", char_get_name(ch));
-      continue;
-    }
-    if (sscanf(p, "%d %d %d", t, t+1, t+2) != 3) {
-      log("read_level_data: missing fields on level_data %s line %d for %s", buf, i, char_get_name(ch));
-      continue;
-    }
-    CREATE(learn, struct level_learn_entry, 1);
-    learn->location = t[0];
-    learn->specific = t[1];
-    learn->value = t[2];
-    if (!strcmp(buf, "skill")) {
-      learn->next = curr->skills;
-      curr->skills = learn;
-    } else if (!strcmp(buf, "feat")) {
-      learn->next = curr->feats;
-      curr->feats = learn;
-    }
-  }
-  log("read_level_data: EOF reached reading level_data for %s", char_get_name(ch));
-  return;
-}
-
-void write_level_data(struct char_data *ch, FILE *fl)
-{
-  struct levelup_data *lev;
-  struct level_learn_entry *learn;
-
-  for (lev = ch->level_info; lev && lev->next; lev = lev->next);
-
-  while (lev) {
-    fprintf(fl, "level %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
-            lev->type, lev->spec, lev->level, lev->hp_roll, lev->mana_roll,
-            lev->ki_roll, lev->move_roll, lev->accuracy, lev->fort,
-            lev->reflex, lev->will, lev->add_skill, lev->add_gen_feats,
-            lev->add_epic_feats, lev->add_class_feats, lev->add_class_epic_feats);
-    for (learn = lev->skills; learn; learn = learn->next)
-      fprintf(fl, "skill %d %d %d", learn->location, learn->specific, learn->value);
-    for (learn = lev->feats; learn; learn = learn->next)
-      fprintf(fl, "feat %d %d %d", learn->location, learn->specific, learn->value);
-    lev = lev->prev;
-  }
-  fprintf(fl, "end\n");
-}

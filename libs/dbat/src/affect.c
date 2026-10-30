@@ -87,8 +87,7 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
     GET_POLE_BONUS(ch) += mod;
     break;
 
-  case APPLY_DAMAGE:
-    GET_DAMAGE_MOD(ch) += mod;
+  case APPLY_DAMAGE: /* the damage mod it adjusted no longer exists */
     break;
 
   case APPLY_REGEN:

@@ -1429,7 +1429,6 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
   case FEAT_SPELL_MASTERY:
     subval = HAS_FEAT(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
-    GET_SPELL_MASTERY_POINTS(ch) += MAX(1, ability_mod_value(GET_INT(ch)));
     break;
   case FEAT_ACROBATIC:
     subval = HAS_FEAT(ch, feat_num) + 1;

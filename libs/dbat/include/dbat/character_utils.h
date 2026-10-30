@@ -2,8 +2,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
-#include "characters.h"
-#include "flags.h"
+
+#include "consts/types.h"
 #include "consts/pulse.h"
 #include "consts/races.h"
 #include "consts/sex.h"
@@ -11,6 +11,14 @@
 #include "consts/playerflags.h"
 #include "consts/adminflags.h"
 #include "consts/mobflags.h"
+
+#include "characters.h"
+#include "flags.h"
+#include "characters.h"
+#include "log.h"
+#include "races.h"
+#include "class.h"
+#include "weather.h"
 
 // Legacy Macros
 
@@ -162,8 +170,6 @@ bool char_is_spoiled(const struct char_data *ch);
 #define GET_DROOM(ch)     ((ch)->droom)
 #define GET_OVERFLOW(ch)  ((ch)->overf)
 #define GET_SPAM(ch)      ((ch)->spam)
-#define GET_SHIP(ch)      ((ch)->ship)
-#define GET_SHIPROOM(ch)  ((ch)->shipr)
 #define GET_LPLAY(ch)     ((ch)->lastpl)
 #define GET_DTIME(ch)     ((ch)->deathtime)
 #define GET_RTIME(ch)     ((ch)->rewtime)
@@ -215,7 +221,6 @@ double char_get_lifebonuses(struct char_data *ch);
 #define MAJINIZED(ch)     ((ch)->majinize)
 #define GET_MAJINIZED(ch) ((ch)->majinizer)
 #define GET_FURY(ch)      ((ch)->fury)
-#define GET_BTIME(ch)     ((ch)->btime)
 #define GET_UP(ch)        ((ch)->upgrade)
 #define GET_FORGETING(ch) ((ch)->forgeting)
 #define GET_FORGET_COUNT(ch) ((ch)->forgetcount)
@@ -223,7 +228,6 @@ double char_get_lifebonuses(struct char_data *ch);
 #define GET_POLE_BONUS(ch) ((ch)->accuracy)
 #define GET_FISHSTATE(ch)  ((ch)->fishstate)
 #define GET_FISHD(ch)     ((ch)->accuracy_mod)
-#define GET_DAMAGE_MOD(ch) ((ch)->damage_mod)
 #define GET_SPELLFAIL(ch) ((ch)->spellfail)
 #define GET_ARMORCHECK(ch) ((ch)->armorcheck)
 #define GET_ARMORCHECKALL(ch) ((ch)->armorcheckall)
@@ -269,7 +273,6 @@ int char_get_save(const struct char_data *ch, int i);
 #define GET_COND(ch, i)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->conditions[(i)]))
 #define GET_LOADROOM(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->load_room))
 #define GET_PRACTICES(ch,cl)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->class_skill_points[cl]))
-#define GET_RACE_PRACTICES(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->skill_points))
 #define GET_TRAINS(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->ability_trains))
 #define GET_TRAINSTR(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainstr))
 #define GET_TRAININT(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainint))
@@ -506,8 +509,6 @@ char *char_hmhr(const struct char_data *ch);
 char *char_mafe(const struct char_data *ch);
 
 
-#define GET_SPELLMEM(ch, i)	((ch->player_specials->spellmem[i]))
-#define GET_MEMCURSOR(ch)	((ch->player_specials->memcursor))
 /* returns the number of spells per slot */
 #define GET_SPELL_LEVEL(ch, i)	((ch)->player_specials->spell_level[i])
 #define HAS_FEAT(ch, i)		((ch)->feats[i])
@@ -517,26 +518,12 @@ bool char_has_school_feat(const struct char_data *ch, int i, bitvector_t j);
 #define SET_SCHOOL_FEAT(ch,i,j)	SET_BIT((ch)->school_feats[(i)], (j))
 #define GET_BAB(ch)		GET_POLE_BONUS(ch)
 #define SET_FEAT(ch, i, value)	do { CHECK_PLAYER_SPECIAL((ch), (ch)->feats[i]) = value; } while(0)
-#define GET_SPELL_MASTERY_POINTS(ch) \
-				(ch->player_specials->spell_mastery_points)
 #define GET_FEAT_POINTS(ch)	(ch->player_specials->feat_points)
-#define GET_EPIC_FEAT_POINTS(ch) \
-				(ch->player_specials->epic_feat_points)
-#define GET_CLASS_FEATS(ch,cl)	(ch->player_specials->class_feat_points[cl])
-#define GET_EPIC_CLASS_FEATS(ch,cl) \
-				(ch->player_specials->epic_class_feat_points[cl])
 
 #define MOB_LOADROOM(ch)      ((ch)->hometown)  /*hometown not used for mobs*/
 #define GET_MURDER(ch)          CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->murder))
 
 #define GET_PAGE_LENGTH(ch)         CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->page_length))
-
-#include "dbat/consts/types.h"
-#include "dbat/characters.h"
-#include "dbat/log.h"
-#include "dbat/races.h"
-#include "dbat/class.h"
-#include "dbat/weather.h"
 
 int roll_stats(struct char_data *ch, int type, int bonus);
 const char* juggleRaceName(char_data *ch, bool capitalized);

@@ -349,8 +349,8 @@ bool isFullHealth(char_data *ch) {
 }
 
 int64_t setCurHealth(char_data *ch, int64_t amt) {
-    ch->hit = MAX(0L, ABS(amt));
-    return ch->hit;
+    /* the legacy hit field this stored into no longer exists */
+    return MAX(0L, ABS(amt));
 }
 
 int64_t setCurHealthPercent(char_data *ch, double amt) {
@@ -616,13 +616,13 @@ bool isFullST(char_data *ch) {
 }
 
 int64_t setCurST(char_data *ch, int64_t amt) {
-    ch->move = MAX(0L, ABS(amt));
-    return ch->move;
+    /* the legacy move field this stored into no longer exists */
+    return MAX(0L, ABS(amt));
 }
 
 int64_t setCurSTPercent(char_data *ch, double amt) {
-    ch->move = MAX(0L, (int64_t)(getMaxST(ch) * ABS(amt)));
-    return ch->move;
+    /* the legacy move field this stored into no longer exists */
+    return MAX(0L, (int64_t)(getMaxST(ch) * ABS(amt)));
 }
 
 int64_t incCurST(char_data *ch, int64_t amt, bool limit_max) {

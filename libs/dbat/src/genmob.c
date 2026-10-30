@@ -482,7 +482,7 @@ int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 		GET_ALIGNMENT(mob),
 		GET_HITDICE(mob), GET_FISHD(mob), 10 - (GET_ARMOR(mob) / 10),
                 GET_HIT(mob), (getCurKI(mob)), (getCurST(mob)), GET_NDD(mob), GET_SDD(mob),
-		GET_DAMAGE_MOD(mob)
+		0 /* damage mod: unused, still written to keep the file format */
   );
   fprintf(fd, 	"%d 0 %d %d\n"
 		"%d %d %d\n",

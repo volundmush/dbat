@@ -1791,8 +1791,8 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   send_to_char(ch, "Coins: [%9d], Bank: [%9d] (Total: %d)\r\n",
 	  GET_GOLD(k), GET_BANK_GOLD(k), GET_GOLD(k) + GET_BANK_GOLD(k));
 
-  send_to_char(ch, "Armor: [%d ], Damage: [%2d], Saving throws: [%d/%d/%d]\r\n",
-	  GET_ARMOR(k), GET_DAMAGE_MOD(k), GET_SAVE_MOD(k, 0),
+  send_to_char(ch, "Armor: [%d ], Saving throws: [%d/%d/%d]\r\n",
+	  GET_ARMOR(k), GET_SAVE_MOD(k, 0),
           GET_SAVE_MOD(k, 1), GET_SAVE_MOD(k, 2));
 
   sprinttype(GET_POS(k), position_types, buf, sizeof(buf));
@@ -1822,7 +1822,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
     send_to_char(ch, "Mob Spec-Proc: %s, NPC Bare Hand Dam: %dd%d\r\n",
 	    (mob_index[GET_MOB_RNUM(k)].func ? "Exists" : "None"),
 	    k->mob_specials.damnodice, k->mob_specials.damsizedice);
-    send_to_char(ch, "Average damage per round %.1f (%.1f [BHD] + %d [STR MOD] + %d [DMG MOD])\r\n", (((k->mob_specials.damsizedice) + 1) / 2.0) * (k->mob_specials.damnodice) + ability_mod_value(GET_STR(k)) + GET_DAMAGE_MOD(k), (((k->mob_specials.damsizedice) + 1) / 2.0) * (k->mob_specials.damnodice), ability_mod_value(GET_STR(k)), GET_DAMAGE_MOD(k));
+    send_to_char(ch, "Average damage per round %.1f (%.1f [BHD] + %d [STR MOD])\r\n", (((k->mob_specials.damsizedice) + 1) / 2.0) * (k->mob_specials.damnodice) + ability_mod_value(GET_STR(k)), (((k->mob_specials.damsizedice) + 1) / 2.0) * (k->mob_specials.damnodice), ability_mod_value(GET_STR(k)));
   }
 
   int counts = 0, total = 0;
@@ -3948,21 +3948,10 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxsta for %s.", char_get_name(ch), char_get_name(vict));
     log_imm_action("SET: %s has set maxsta for %s.", char_get_name(ch), char_get_name(vict));
     break;
-  case 7:
-    vict->hit = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set pl for %s.", char_get_name(ch), char_get_name(vict));
-    log_imm_action("SET: %s has set pl for %s.", char_get_name(ch), char_get_name(vict));
-    break;
-  case 8:
-    vict->mana = value;
-    affect_total(vict);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set ki for %s.", char_get_name(ch), char_get_name(vict));
-    log_imm_action("SET: %s has set ki for %s.", char_get_name(ch), char_get_name(vict));
-    break;
-  case 9:
-    vict->move = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set st for %s.", char_get_name(ch), char_get_name(vict));
-    log_imm_action("SET: %s has set st for %s.", char_get_name(ch), char_get_name(vict));
+  case 7: /* pl: the legacy hit field it set no longer exists */
+  case 8: /* ki: the legacy mana field it set no longer exists */
+  case 9: /* st: the legacy move field it set no longer exists */
+    send_to_char(ch, "This does nothing at the moment.\r\n");
     break;
   case 10:
     GET_ALIGNMENT(vict) = RANGE(-1000, 1000);
@@ -4043,9 +4032,8 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   case 22:
     send_to_char(ch, "This does nothing at the moment.\r\n");
     break;
-  case 23:
-    vict->damage_mod = RANGE(-20, 20);
-    affect_total(vict);
+  case 23: /* damage mod no longer exists */
+    send_to_char(ch, "This does nothing at the moment.\r\n");
     break;
   case 24:
     if (GET_ADMLEVEL(ch) < ADMLVL_IMPL && ch != vict) {
@@ -4076,9 +4064,8 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     log_imm_action("SET: %s has set PS for %s.", char_get_name(ch), char_get_name(vict));
     }
     else {
-      GET_RACE_PRACTICES(vict) = RANGE(0, 10000);
-      mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set PS for %s.", char_get_name(ch), char_get_name(vict));
-     log_imm_action("SET: %s has set PS for %s.", char_get_name(ch), char_get_name(vict));
+      /* race practices (skill_points) no longer exist */
+      send_to_char(ch, "This does nothing at the moment.\r\n");
     }
     break;
   case 29:
@@ -4957,13 +4944,8 @@ ACMD (do_zcheck)
                           "- Is level %d (limit: 1-%d)\r\n",
                           char_get_level(mob), MAX_LEVEL_ALLOWED);
 
-        if (GET_DAMAGE_MOD(mob)>MAX_DAMAGE_MOD_ALLOWED && (found=1))
-          len += snprintf(buf + len, sizeof(buf) - len,
-                          "- Damage mod of %d is too high (limit: %d)\r\n",
-                          GET_DAMAGE_MOD(mob), MAX_DAMAGE_MOD_ALLOWED);
-
-        /* avg. dam including damroll per round of combat */
-        avg_dam = (((mob->mob_specials.damsizedice / 2.0) * mob->mob_specials.damnodice)+GET_DAMAGE_MOD(mob));
+        /* avg. dam per round of combat */
+        avg_dam = ((mob->mob_specials.damsizedice / 2.0) * mob->mob_specials.damnodice);
         if (avg_dam>MAX_MOB_DAM_ALLOWED && (found=1))
           len += snprintf(buf + len, sizeof(buf) - len,
                           "- average damage of %4.1f is too high (limit: %d)\r\n",

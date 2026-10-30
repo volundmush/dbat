@@ -105,32 +105,13 @@ struct player_special_data
 
    // UNUSED
    int gauntlet;
-   int skill_points;
    int tlevel;
    int ability_trains;
-   int spellmem[MAX_MEM];
    int feat_points;
-   int epic_feat_points;
-   int class_feat_points[NUM_CLASSES];
-   int epic_class_feat_points[NUM_CLASSES];
-   int domain[NUM_DOMAINS];
-   int school[NUM_SCHOOLS];
-   int deity;
-   int spell_mastery_points;
    int spell_level[MAX_SPELL_LEVEL];
-   int memcursor;
    // END UNUSED
 };
 
-// UNUSED
-struct memorize_node
-{
-   int timer;                  /* how many ticks till memorized */
-   int spell;                  /* the spell number */
-   struct memorize_node *next; /* link to the next node */
-};
-
-// UNUSED
 struct innate_node
 {
    int timer;
@@ -172,48 +153,6 @@ struct follow_type
 {
    struct char_data *follower;
    struct follow_type *next;
-};
-
-// LEVEL UP STUFF IS UNUSED
-#define LEVELTYPE_CLASS 1
-#define LEVELTYPE_RACE 2
-
-// LEVEL UP STUFF IS UNUSED
-struct level_learn_entry
-{
-   struct level_learn_entry *next;
-   int location;
-   int specific;
-   int8_t value;
-};
-
-// LEVEL UP STUFF IS UNUSED
-struct levelup_data
-{
-   struct levelup_data *next; /* Form a linked list			*/
-   struct levelup_data *prev; /* Form a linked list			*/
-   int8_t type;               /* LEVELTYPE_ value			*/
-   int8_t spec;               /* Specific class or race		*/
-   int8_t level;              /* Level ir HD # for that class or race	*/
-
-   int8_t hp_roll;   /* Straight die-roll value with no mods	*/
-   int8_t mana_roll; /* Straight die-roll value with no mods	*/
-   int8_t ki_roll;   /* Straight die-roll value with no mods	*/
-   int8_t move_roll; /* Straight die-roll value with no mods	*/
-
-   int8_t accuracy; /* Hit accuracy change			*/
-   int8_t fort;     /* Fortitude change			*/
-   int8_t reflex;   /* Reflex change			*/
-   int8_t will;     /* Will change				*/
-
-   int8_t add_skill;            /* Total added skill points		*/
-   int8_t add_gen_feats;        /* General feat points			*/
-   int8_t add_epic_feats;       /* General epic feat points		*/
-   int8_t add_class_feats;      /* Class feat points			*/
-   int8_t add_class_epic_feats; /* Epic class feat points		*/
-
-   struct level_learn_entry *skills; /* Head of linked list		*/
-   struct level_learn_entry *feats;  /* Head of linked list		*/
 };
 
 struct skill_data {
@@ -356,6 +295,8 @@ struct char_data
    int level;  /* PC / NPC's level                     */
    int64_t exp; /* The experience of the player		*/
    int upgrade; // android upgrade points
+   int race_level;               /* a mob's entire level (see GET_HITDICE) */
+   int level_adj;
 
    // Base stats
    int64_t basepl;
@@ -516,46 +457,30 @@ struct char_data
 
    int relax_count;
 
-   // UNUSED STUFF BELOW HERE
-   int race_level;               /* PC / NPC's racial level / hit dice   */
-   int level_adj;                /* PC level adjustment                  */
-   int chclasses[NUM_CLASSES];   /* Ranks in all classes        */
-   int epicclasses[NUM_CLASSES]; /* Ranks in all epic classes */
-   struct levelup_data *level_info;
-   int16_t saving_throw[3];       /* Saving throw				*/
-   int16_t apply_saving_throw[3]; /* Saving throw bonuses			*/
-   int64_t mana;
-   
-   int64_t hit;
-   
-   int64_t move;
-   
+   // Legacy fields still read by gameplay code.
+   int chclasses[NUM_CLASSES];
+
+   // UNUSED
+   int epicclasses[NUM_CLASSES];
+   int16_t saving_throw[3];
+   int16_t apply_saving_throw[3];
    int64_t ki;
-   
-   int64_t lifeforce;
-   int16_t shield_bonus;  /* Shield bonus for AC			*/
-   int damage_mod;        /* Any bonus or penalty to the damage	*/
-   int16_t spellfail;     /* Total spell failure %                 */
-   int16_t armorcheck;    /* Total armorcheck penalty with proficiency forgiveness */
-   int16_t armorcheckall; /* Total armorcheck penalty regardless of proficiency */
-   int crank; // clank rank
-   int8_t feats[MAX_FEATS + 1]; /* Feats (booleans and counters)	*/
+   int16_t spellfail;
+   int16_t armorcheck;
+   int16_t armorcheckall;
+   int crank;
+   int8_t feats[MAX_FEATS + 1];
    int combat_feats[CFEAT_MAX + 1][FT_ARRAY_MAX];
-   /* One bitvector array per CFEAT_ type	*/
-   bitvector_t school_feats[SFEAT_MAX + 1]; /* One bitvector array per CFEAT_ type	*/
-   int ship;
-   room_vnum shipr;
+   bitvector_t school_feats[SFEAT_MAX + 1];
    short stupidkiss;
    int64_t suppressed;
    char *clan;
-   int alignment_ethic; /* +-1000 for alignment law vs. chaos	*/
-   struct memorize_node *memorized;
+   int alignment_ethic;
    struct innate_node *innate;
    struct char_data *next_affectv;
    struct affected_type *affectedv;
-   /* affected by what combat spells	*/
-   struct queued_act *actq; /* queued spells / other actions	*/
-   short btime;
+   struct queued_act *actq;
+   // END UNUSED
 };
 
 extern struct char_data *character_list;

@@ -323,7 +323,6 @@ int load_char(const char *name, struct char_data *ch)
     GET_HAIRS(ch) = PFDEF_HAIRS;
     GET_DISTFEA(ch) = PFDEF_DISTFEA;
     GET_RADAR1(ch) = PFDEF_RADAR1;
-    GET_SHIP(ch) = PFDEF_SHIP;
     GET_LPLAY(ch) = PFDEF_LPLAY;
     GET_BOOSTS(ch) = PFDEF_DISTFEA;
     MAJINIZED(ch) = PFDEF_DISTFEA;
@@ -359,7 +358,6 @@ int load_char(const char *name, struct char_data *ch)
     GET_BOARD(ch, 2) = PFDEF_BOARD;
     GET_BOARD(ch, 3) = PFDEF_BOARD;
     GET_BOARD(ch, 4) = PFDEF_BOARD;
-    GET_SHIPROOM(ch) = PFDEF_SHIPROOM;
     GET_RADAR2(ch) = PFDEF_RADAR2;
     GET_RADAR3(ch) = PFDEF_RADAR3;
     GET_DROOM(ch) = PFDEF_DROOM;
@@ -387,7 +385,6 @@ int load_char(const char *name, struct char_data *ch)
     GET_COND(ch, THIRST) = PFDEF_THIRST;
     GET_COND(ch, DRUNK) = PFDEF_DRUNK;
     GET_BAD_PWS(ch) = PFDEF_BADPWS;
-    GET_RACE_PRACTICES(ch) = PFDEF_PRACTICES;
     for (i = 0; i < NUM_CLASSES; i++)
       GET_PRACTICES(ch, i) = PFDEF_PRACTICES;
     GET_GOLD(ch) = PFDEF_GOLD;
@@ -407,7 +404,6 @@ int load_char(const char *name, struct char_data *ch)
     GET_MOLT_EXP(ch) = PFDEF_EXP;
     GET_FISHD(ch) = PFDEF_ACCURACY;
     GET_POLE_BONUS(ch) = PFDEF_ACCURACY;
-    GET_DAMAGE_MOD(ch) = PFDEF_DAMAGE;
     GET_ARMOR(ch) = PFDEF_AC;
     ch->real_abils.str = PFDEF_STR;
     ch->real_abils.dex = PFDEF_DEX;
@@ -426,11 +422,8 @@ int load_char(const char *name, struct char_data *ch)
     SPEAKING(ch) = PFDEF_SPEAKING;
     GET_OLC_ZONE(ch) = PFDEF_OLC;
     GET_HOST(ch) = NULL;
-    for(i = 1; i < MAX_MEM; i++)
-      GET_SPELLMEM(ch, i) = 0;
     for(i = 0; i < MAX_SPELL_LEVEL; i++)
       GET_SPELL_LEVEL(ch, i) = 0;
-    GET_MEMCURSOR(ch) = 0;
     ch->time.birth = ch->time.created = ch->time.maxage = 0;
     ch->followers = NULL;
     GET_PAGE_LENGTH(ch) = PFDEF_PAGELENGTH;
@@ -506,7 +499,7 @@ int load_char(const char *name, struct char_data *ch)
         else if (!strcmp(tag, "Desc"))  ch->description  = fread_string(fl, buf2);
         else if (!strcmp(tag, "Dex "))  ch->real_abils.dex      = atoi(line);
         else if (!strcmp(tag, "Drnk"))  GET_COND(ch, DRUNK)     = atoi(line);
-        else if (!strcmp(tag, "Damg"))  GET_DAMAGE_MOD(ch)          = atoi(line);
+        else if (!strcmp(tag, "Damg"))  ; /* obsolete damage mod: ignored */
         else if (!strcmp(tag, "Droo"))  GET_DROOM(ch)          = atoi(line);
       break;
 
@@ -637,14 +630,14 @@ int load_char(const char *name, struct char_data *ch)
 
       case 'S':
              if (!strcmp(tag, "Sex "))  GET_SEX(ch)             = atoi(line);
-        else if (!strcmp(tag, "Ship"))  GET_SHIP(ch)            = atoi(line);
+        else if (!strcmp(tag, "Ship"))  ; /* obsolete ship: ignored */
 		else if (!strcmp(tag, "Scoo"))  GET_SDCOOLDOWN(ch)      = atoi(line);
-        else if (!strcmp(tag, "Shpr"))  GET_SHIPROOM(ch)        = atoi(line);
+        else if (!strcmp(tag, "Shpr"))  ; /* obsolete ship room: ignored */
         else if (!strcmp(tag, "Skil"))  load_skills(fl, ch, FALSE);
         else if (!strcmp(tag, "Skn "))  GET_SKIN(ch)            = atoi(line);
         else if (!strcmp(tag, "Size"))  ch->size		= atoi(line);
         else if (!strcmp(tag, "SklB"))  load_skills(fl, ch, TRUE);
-        else if (!strcmp(tag, "SkRc"))  GET_RACE_PRACTICES(ch)	= atoi(line);
+        else if (!strcmp(tag, "SkRc"))  ; /* obsolete race practices: ignored */
         else if (!strcmp(tag, "SkCl")) {
           sscanf(line, "%d %d", &num2, &num3);
           GET_PRACTICES(ch, num2) = num3;
@@ -1022,7 +1015,6 @@ void save_char(struct char_data * ch)
 
   if (GET_BAD_PWS(ch)	   != PFDEF_BADPWS)	fprintf(fl, "Badp: %d\n", GET_BAD_PWS(ch));
 
-  if (GET_RACE_PRACTICES(ch)!= PFDEF_PRACTICES)	fprintf(fl, "SkRc: %d\n", GET_RACE_PRACTICES(ch));
   for (i = 0; i < 6; i++)
    if (ch->transcost[i] != FALSE)
     fprintf(fl, "Tcos: %d %d\n", i, ch->transcost[i]);
@@ -1074,7 +1066,6 @@ void save_char(struct char_data * ch)
   if (GET_FISHD(ch)        != PFDEF_ACCURACY)	fprintf(fl, "Fisd: %d\n", GET_FISHD(ch));
   if (GET_POLE_BONUS(ch)   != PFDEF_ACCURACY)	fprintf(fl, "Pole: %d\n", GET_POLE_BONUS(ch));
   if (GET_PREFERENCE(ch)   != PFDEF_EYE)        fprintf(fl, "Prff: %d\n", GET_PREFERENCE(ch));
-  if (GET_DAMAGE_MOD(ch)   != PFDEF_DAMAGE)	fprintf(fl, "Damg: %d\n", GET_DAMAGE_MOD(ch));
   if (SPEAKING(ch)	   != PFDEF_SPEAKING)	fprintf(fl, "Spek: %d\n", SPEAKING(ch));
   if (GET_OLC_ZONE(ch)	   != PFDEF_OLC)	fprintf(fl, "Olc : %d\n", GET_OLC_ZONE(ch));
   if (GET_PAGE_LENGTH(ch)  != PFDEF_PAGELENGTH)	fprintf(fl, "Page: %d\n", GET_PAGE_LENGTH(ch));
@@ -1098,8 +1089,6 @@ void save_char(struct char_data * ch)
   if (GET_RADAR1(ch)       != PFDEF_RADAR1)     fprintf(fl, "Rad1: %d\n", GET_RADAR1(ch));
   if (GET_RADAR2(ch)       != PFDEF_RADAR2)     fprintf(fl, "Rad2: %d\n", GET_RADAR2(ch));
   if (GET_RADAR3(ch)       != PFDEF_RADAR3)     fprintf(fl, "Rad3: %d\n", GET_RADAR3(ch));
-  if (GET_SHIP(ch)         != PFDEF_SHIP)       fprintf(fl, "Ship: %d\n", GET_SHIP(ch));
-  if (GET_SHIPROOM(ch)     != PFDEF_SHIPROOM)   fprintf(fl, "Shpr: %d\n", GET_SHIPROOM(ch));
   if (GET_LPLAY(ch)        != PFDEF_LPLAY)      fprintf(fl, "Lpla: %ld\n", GET_LPLAY(ch));
   if (GET_LINTEREST(ch)    != PFDEF_LPLAY)      fprintf(fl, "Lint: %ld\n", GET_LINTEREST(ch));
   if (GET_DTIME(ch)        != PFDEF_LPLAY)      fprintf(fl, "Deat: %ld\n", GET_DTIME(ch));
@@ -1263,14 +1252,6 @@ void save_char(struct char_data * ch)
   if (GET_CLAN(ch) == NULL) {
     save_index = TRUE;
     player_table[id].clan = strdup("None.");
-  }
-  if (player_table[id].ship != GET_SHIP(ch)) {
-    save_index = TRUE;
-    player_table[id].ship = GET_SHIP(ch);
-  }
-  if (player_table[id].shiproom != GET_SHIPROOM(ch)) {
-    save_index = TRUE;
-    player_table[id].shiproom = GET_SHIPROOM(ch);
   }
   i = player_table[id].flags;
   if (char_plr_flagged(ch, PLR_DELETED))

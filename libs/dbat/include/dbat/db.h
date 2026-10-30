@@ -156,8 +156,6 @@ void	reset_char(struct char_data *ch);
 void	free_char(struct char_data *ch);
 void	save_player_index(void);
 long  get_ptable_by_name(const char *name);
-void	read_level_data(struct char_data *ch, FILE *fl);
-void	write_level_data(struct char_data *ch, FILE *fl);
 
 int parse_mobile_from_file(FILE *mob_f, struct char_data *ch);
 

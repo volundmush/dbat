@@ -704,8 +704,7 @@ static const int *free_start_feats[] = {
  /* Rillao: transloc, add new transes here */
 void advance_level(struct char_data *ch, int whichclass)
 {
-  struct levelup_data *llog;
-  int64_t add_hp = 0, add_move = 0, add_mana = 0, add_ki = 0;
+  int64_t add_hp = 0, add_move = 0, add_mana = 0;
   int add_prac = 1, add_train, i, j = 0, ranks;
   int add_gen_feats = 0, add_class_feats = 0;
   char buf[MAX_STRING_LENGTH];
@@ -720,18 +719,6 @@ void advance_level(struct char_data *ch, int whichclass)
     whichclass = char_get_class(ch);
   }
   ranks = char_get_class_ranks(ch, whichclass);
-
-  CREATE(llog, struct levelup_data, 1);
-  llog->next = ch->level_info;
-  llog->prev = NULL;
-  if (llog->next)
-    llog->next->prev = llog;
-  ch->level_info = llog;
-
-  llog->skills = llog->feats = NULL;
-  llog->type = LEVELTYPE_CLASS;
-  llog->spec = whichclass;
-  llog->level = char_get_level(ch);
 
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
   switch (ranks) {
@@ -1071,7 +1058,6 @@ void advance_level(struct char_data *ch, int whichclass)
     add_prac *= 2;
     }
   }
-  llog->hp_roll = j;
 
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
   if (rand_number(1, 8) == 2) {
@@ -1106,10 +1092,6 @@ void advance_level(struct char_data *ch, int whichclass)
    add_mana *= 1.25;
    add_move *= 1.25;
   }
-  llog->mana_roll = add_mana;
-  llog->move_roll = add_move;
-  llog->ki_roll = add_ki;
-  llog->add_skill = add_prac;
   GET_PRACTICES(ch, whichclass) += add_prac;
   gainBasePL(ch, add_hp, true);
   gainBaseKI(ch, add_mana, true);
@@ -1120,17 +1102,9 @@ void advance_level(struct char_data *ch, int whichclass)
  add_hp = nhp;
  add_mana = nma;
  add_move = nmo;
-  if (GET_CLASS_LEVEL(ch) >= LVL_EPICSTART) { /* Epic character */
-    GET_EPIC_FEAT_POINTS(ch) += add_gen_feats;
-    llog->add_epic_feats = add_gen_feats;
-    GET_EPIC_CLASS_FEATS(ch, whichclass) += add_class_feats;
-    llog->add_class_epic_feats = add_class_feats;
-  } else {
+  /* epic and class feat points no longer exist; epic characters gained only those */
+  if (GET_CLASS_LEVEL(ch) < LVL_EPICSTART)
     GET_FEAT_POINTS(ch) += add_gen_feats;
-    llog->add_gen_feats = add_gen_feats;
-    GET_CLASS_FEATS(ch, whichclass) += add_class_feats;
-    llog->add_class_feats = add_class_feats;
-  }
 
   if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
     for (i = 0; i < 3; i++)
