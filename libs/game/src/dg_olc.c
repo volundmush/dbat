@@ -390,7 +390,7 @@ void trigedit_parse(struct descriptor_data *d, char *arg)
       if ((i = atoi(arg)) == 0)
         break;
       else if (!((i < 0) || (i > NUM_TRIG_TYPE_FLAGS)))
-        TOGGLE_BIT((GET_TRIG_TYPE(OLC_TRIG(d))), 1 << (i - 1));
+        TOGGLE_BIT((GET_TRIG_TYPE(OLC_TRIG(d))), 1U << (i - 1));
       OLC_VAL(d)++;
       trigedit_disp_types(d);
       return;

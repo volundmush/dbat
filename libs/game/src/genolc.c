@@ -225,7 +225,7 @@ int sprintascii(char *out, bitvector_t bits)
   char *flags = "abcdefghijklmnopqrstuvwxyzABCDEF";
 
   for (i = 0; flags[i] != '\0'; i++)
-    if (bits & (1 << i))
+    if (bits & (1U << i))
       out[j++] = flags[i];
 
   if (j == 0) /* Didn't write anything. */

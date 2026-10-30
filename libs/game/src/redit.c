@@ -991,7 +991,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       redit_disp_exit_menu(d);
     } else {
       /* Toggle the bit. */
-      TOGGLE_BIT(OLC_EXIT(d)->exit_info, 1 << (number - 1));
+      TOGGLE_BIT(OLC_EXIT(d)->exit_info, 1U << (number - 1));
       redit_disp_exit_flag_menu(d);
     }
     return;

@@ -333,9 +333,9 @@ void olc_bitvector(int *bv, const char **names, char *arg)
       send_to_char(olc_ch, "Unknown flag: %s\r\n", this_name);
     else {
       if (doremove)
-	REMOVE_BIT(newbv, (1 << flagnum));
+	REMOVE_BIT(newbv, (1U << flagnum));
       else
-	SET_BIT(newbv, (1 << flagnum));
+	SET_BIT(newbv, (1U << flagnum));
     }
   }
 

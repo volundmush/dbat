@@ -784,7 +784,7 @@ void sedit_parse(struct descriptor_data *d, char *arg)
     return;
   case SEDIT_SHOP_FLAGS:
     if ((i = LIMIT(atoi(arg), 0, NUM_SHOP_FLAGS)) > 0) {
-      TOGGLE_BIT(S_BITVECTOR(OLC_SHOP(d)), 1 << (i - 1));
+      TOGGLE_BIT(S_BITVECTOR(OLC_SHOP(d)), 1U << (i - 1));
       sedit_shop_flags_menu(d);
       return;
     }

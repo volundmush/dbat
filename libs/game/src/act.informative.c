@@ -7012,7 +7012,7 @@ ACMD(do_who)
     }
     if (who_room && (IN_ROOM(tch) != IN_ROOM(ch)))
       continue;
-    if (showclass && !(showclass & (1 << GET_CLASS(tch))))
+    if (showclass && !(showclass & (1U << GET_CLASS(tch))))
       continue;
       if (showgroup && (!tch->master || !AFF_FLAGGED(tch, AFF_GROUP)))
         continue;
@@ -7058,7 +7058,7 @@ ACMD(do_who)
         continue;
       if (PRF_FLAGGED(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
         continue;
-      if (showclass && !(showclass & (1 << GET_CLASS(tch))))
+      if (showclass && !(showclass & (1U << GET_CLASS(tch))))
         continue;
       if (showgroup && (!tch->master || !AFF_FLAGGED(tch, AFF_GROUP)))
         continue;
@@ -7259,9 +7259,9 @@ ACMD(do_users)
       if (outlaws && !PLR_FLAGGED(tch, PLR_KILLER) &&
 	  !PLR_FLAGGED(tch, PLR_THIEF))
 	continue;
-      if (showclass && !(showclass & (1 << GET_CLASS(tch))))
+      if (showclass && !(showclass & (1U << GET_CLASS(tch))))
 	continue;
-      if (showrace && !(showrace & (1 << GET_RACE(tch))))
+      if (showrace && !(showrace & (1U << GET_RACE(tch))))
         continue;
       if (GET_INVIS_LEV(tch) > GET_ADMLEVEL(ch))
 	continue;

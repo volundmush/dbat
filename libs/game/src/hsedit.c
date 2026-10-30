@@ -945,10 +945,10 @@ void hsedit_parse(struct descriptor_data * d, char *arg)
         break; 
       else { 
    /* toggle bits */ 
-   if (IS_SET(OLC_HOUSE(d)->bitvector, 1 << (number - 1))) 
-     REMOVE_BIT(OLC_HOUSE(d)->bitvector, 1 << (number - 1)); 
+   if (IS_SET(OLC_HOUSE(d)->bitvector, 1U << (number - 1))) 
+     REMOVE_BIT(OLC_HOUSE(d)->bitvector, 1U << (number - 1)); 
    else 
-     SET_BIT(OLC_HOUSE(d)->bitvector, 1 << (number - 1)); 
+     SET_BIT(OLC_HOUSE(d)->bitvector, 1U << (number - 1)); 
    hsedit_disp_flags_menu(d); 
       } 
     } 

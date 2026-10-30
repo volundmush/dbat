@@ -1417,9 +1417,9 @@ bitvector_t asciiflag_conv(char *flag)
 
   for (p = flag; *p; p++) {
     if (islower(*p))
-      flags |= 1 << (*p - 'a');
+      flags |= 1U << (*p - 'a');
     else if (isupper(*p))
-      flags |= 1 << (26 + (*p - 'A'));
+      flags |= 1U << (26 + (*p - 'A'));
 
     if (!(isdigit(*p) || (*p == '-')))
       is_num = FALSE;
@@ -1439,9 +1439,9 @@ static bitvector_t asciiflag_conv_aff(char *flag)
 
   for (p = flag; *p; p++) {
     if (islower(*p))
-      flags |= 1 << (1 + (*p - 'a'));
+      flags |= 1U << (1 + (*p - 'a'));
     else if (isupper(*p))
-      flags |= 1 << (26 + (*p - 'A'));
+      flags |= 1U << (26 + (*p - 'A'));
 
     if (!(isdigit(*p) || (*p == '-')))
       is_num = FALSE;
@@ -5005,7 +5005,7 @@ static int check_bitvector_names(bitvector_t bits, size_t namecount, const char 
     return (FALSE);
 
   for (flagnum = namecount; flagnum < sizeof(bitvector_t) * 8; flagnum++)
-    if ((1 << flagnum) & bits) {
+    if ((1U << flagnum) & bits) {
       log("SYSERR: %s has unknown %s flag, bit %d (0 through %" SZT " known).", whatami, whatbits, flagnum, namecount - 1);
       error = TRUE;
     }

@@ -123,6 +123,7 @@ long event_time(struct event *event)
 void event_free_all(void)
 {
   queue_free(event_q);
+  event_q = NULL;
 }
 
 /* boolean function to tell whether an event is queued or not */
@@ -268,6 +269,9 @@ void queue_free(struct queue *q)
   int i;
   struct q_element *qe, *next_qe;
   struct event *event;
+
+  if (q == NULL)
+    return;
 
   for (i = 0; i < NUM_EVENT_QUEUES; i++)
     for (qe = q->head[i]; qe; qe = next_qe) {

@@ -157,7 +157,7 @@
 #define GET_CHARGETO(ch)  ((ch)->chargeto)
 #define GET_ARMOR(ch)     ((ch)->armor)
 #define GET_ARMOR_LAST(ch) ((ch)->armor_last)
-#define GET_HIT(ch)	  (getCurPL(ch))
+#define GET_HIT(ch)	      (getCurPL(ch))
 #define GET_MAX_HIT(ch)	  (getEffMaxPL(ch))
 #define GET_MAX_MOVE(ch)  (getMaxST(ch))
 #define GET_MAX_MANA(ch)  (getMaxKI(ch))
@@ -190,7 +190,7 @@
 #define GET_AURA(ch)      ((ch)->aura)
 #define GET_RADAR1(ch)    ((ch)->radar1)
 #define GET_RADAR2(ch)    ((ch)->radar2)
-#define GET_RADAR3(ch)    ((ch)->radar3)
+#define GET_RADAR3(ch)    ((ch)->radar3)CAN_SEE
 #define GET_PING(ch)      ((ch)->ping)
 #define GET_SLOTS(ch)     ((ch)->skill_slots)
 #define GET_TGROWTH(ch)   ((ch)->tail_growth)
@@ -552,7 +552,9 @@ bool MOON_TIMECHECK();
 #define OUTSIDE_ROOMFLAG(ch)	(!ROOM_FLAGGED(IN_ROOM(ch), ROOM_INDOORS) && \
 			 !ROOM_FLAGGED(IN_ROOM(ch), ROOM_UNDERGROUND) && \
                           !ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE))
-
+=SEX_MALE ? "his":"her") :"its")
+#define HSSH(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "he" :"she") : "it")
+#define HMHR(ch) (GET_SEX(ch) ? (GET_SEX(ch)=
 #define OUTSIDE_SECTTYPE(ch)	((SECT(IN_ROOM(ch)) != SECT_INSIDE) && \
                          (SECT(IN_ROOM(ch)) != SECT_UNDERWATER) && \
                           (SECT(IN_ROOM(ch)) != SECT_IMPORTANT) && \
