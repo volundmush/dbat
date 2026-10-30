@@ -1,14 +1,14 @@
 #pragma once
-#define ALIGN_SAINT              0
-#define ALIGN_VALIANT            1
-#define ALIGN_HERO               2
-#define ALIGN_DOGOOD             3
-#define ALIGN_NEUTRAL            4
-#define ALIGN_CROOK              5
-#define ALIGN_VILLAIN            6
-#define ALIGN_TERRIBLE           7
-#define ALIGN_HORRIBLE           8
+constexpr int ALIGN_SAINT              = 0;
+constexpr int ALIGN_VALIANT            = 1;
+constexpr int ALIGN_HERO               = 2;
+constexpr int ALIGN_DOGOOD             = 3;
+constexpr int ALIGN_NEUTRAL            = 4;
+constexpr int ALIGN_CROOK              = 5;
+constexpr int ALIGN_VILLAIN            = 6;
+constexpr int ALIGN_TERRIBLE           = 7;
+constexpr int ALIGN_HORRIBLE           = 8;
 
-#define NUM_ALIGNS               9
+constexpr int NUM_ALIGNS               = 9;
 
 extern const char *alignments[NUM_ALIGNS+1];

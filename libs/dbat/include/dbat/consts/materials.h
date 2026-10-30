@@ -1,71 +1,71 @@
 #pragma once
 
 /* Some different kind of liquids for use in values of drink containers */
-#define LIQ_WATER      0
-#define LIQ_BEER       1
-#define LIQ_WINE       2
-#define LIQ_ALE        3
-#define LIQ_DARKALE    4
-#define LIQ_WHISKY     5
-#define LIQ_LEMONADE   6
-#define LIQ_FIREBRT    7
-#define LIQ_LOCALSPC   8
-#define LIQ_SLIME      9
-#define LIQ_MILK       10
-#define LIQ_TEA        11
-#define LIQ_COFFE      12
-#define LIQ_BLOOD      13
-#define LIQ_SALTWATER  14
-#define LIQ_CLEARWATER 15
+constexpr int LIQ_WATER      = 0;
+constexpr int LIQ_BEER       = 1;
+constexpr int LIQ_WINE       = 2;
+constexpr int LIQ_ALE        = 3;
+constexpr int LIQ_DARKALE    = 4;
+constexpr int LIQ_WHISKY     = 5;
+constexpr int LIQ_LEMONADE   = 6;
+constexpr int LIQ_FIREBRT    = 7;
+constexpr int LIQ_LOCALSPC   = 8;
+constexpr int LIQ_SLIME      = 9;
+constexpr int LIQ_MILK       = 10;
+constexpr int LIQ_TEA        = 11;
+constexpr int LIQ_COFFE      = 12;
+constexpr int LIQ_BLOOD      = 13;
+constexpr int LIQ_SALTWATER  = 14;
+constexpr int LIQ_CLEARWATER = 15;
 
-#define NUM_LIQ_TYPES 16
+constexpr int NUM_LIQ_TYPES = 16;
 
-#define MATERIAL_BONE           0
-#define MATERIAL_CERAMIC        1
-#define MATERIAL_COPPER         2
-#define MATERIAL_DIAMOND        3
-#define MATERIAL_GOLD           4
-#define MATERIAL_IRON           5
-#define MATERIAL_LEATHER        6
-#define MATERIAL_MITHRIL        7
-#define MATERIAL_OBSIDIAN       8
-#define MATERIAL_STEEL          9
-#define MATERIAL_STONE          10
-#define MATERIAL_SILVER         11
-#define MATERIAL_WOOD           12
-#define MATERIAL_GLASS          13
-#define MATERIAL_ORGANIC        14
-#define MATERIAL_CURRENCY       15
-#define MATERIAL_PAPER          16
-#define MATERIAL_COTTON         17
-#define MATERIAL_SATIN          18
-#define MATERIAL_SILK           19
-#define MATERIAL_BURLAP         20
-#define MATERIAL_VELVET         21
-#define MATERIAL_PLATINUM       22
-#define MATERIAL_ADAMANTINE     23
-#define MATERIAL_WOOL           24
-#define MATERIAL_ONYX           25
-#define MATERIAL_IVORY          26
-#define MATERIAL_BRASS          27
-#define MATERIAL_MARBLE         28
-#define MATERIAL_BRONZE         29
-#define MATERIAL_KACHIN         30
-#define MATERIAL_RUBY           31
-#define MATERIAL_SAPPHIRE       32
-#define MATERIAL_EMERALD        33
-#define MATERIAL_GEMSTONE       34
-#define MATERIAL_GRANITE        35
-#define MATERIAL_ENERGY         36
-#define MATERIAL_HEMP           37
-#define MATERIAL_CRYSTAL        38
-#define MATERIAL_EARTH  	39
-#define MATERIAL_LIQUID  	40
-#define MATERIAL_CLOTH  	41
-#define MATERIAL_METAL  	42
-#define MATERIAL_WAX	  	43
-#define MATERIAL_OTHER	  	44
-#define MATERIAL_FOOD	  	45
-#define MATERIAL_OIL	  	46
+constexpr int MATERIAL_BONE           = 0;
+constexpr int MATERIAL_CERAMIC        = 1;
+constexpr int MATERIAL_COPPER         = 2;
+constexpr int MATERIAL_DIAMOND        = 3;
+constexpr int MATERIAL_GOLD           = 4;
+constexpr int MATERIAL_IRON           = 5;
+constexpr int MATERIAL_LEATHER        = 6;
+constexpr int MATERIAL_MITHRIL        = 7;
+constexpr int MATERIAL_OBSIDIAN       = 8;
+constexpr int MATERIAL_STEEL          = 9;
+constexpr int MATERIAL_STONE          = 10;
+constexpr int MATERIAL_SILVER         = 11;
+constexpr int MATERIAL_WOOD           = 12;
+constexpr int MATERIAL_GLASS          = 13;
+constexpr int MATERIAL_ORGANIC        = 14;
+constexpr int MATERIAL_CURRENCY       = 15;
+constexpr int MATERIAL_PAPER          = 16;
+constexpr int MATERIAL_COTTON         = 17;
+constexpr int MATERIAL_SATIN          = 18;
+constexpr int MATERIAL_SILK           = 19;
+constexpr int MATERIAL_BURLAP         = 20;
+constexpr int MATERIAL_VELVET         = 21;
+constexpr int MATERIAL_PLATINUM       = 22;
+constexpr int MATERIAL_ADAMANTINE     = 23;
+constexpr int MATERIAL_WOOL           = 24;
+constexpr int MATERIAL_ONYX           = 25;
+constexpr int MATERIAL_IVORY          = 26;
+constexpr int MATERIAL_BRASS          = 27;
+constexpr int MATERIAL_MARBLE         = 28;
+constexpr int MATERIAL_BRONZE         = 29;
+constexpr int MATERIAL_KACHIN         = 30;
+constexpr int MATERIAL_RUBY           = 31;
+constexpr int MATERIAL_SAPPHIRE       = 32;
+constexpr int MATERIAL_EMERALD        = 33;
+constexpr int MATERIAL_GEMSTONE       = 34;
+constexpr int MATERIAL_GRANITE        = 35;
+constexpr int MATERIAL_ENERGY         = 36;
+constexpr int MATERIAL_HEMP           = 37;
+constexpr int MATERIAL_CRYSTAL        = 38;
+constexpr int MATERIAL_EARTH  	= 39;
+constexpr int MATERIAL_LIQUID  	= 40;
+constexpr int MATERIAL_CLOTH  	= 41;
+constexpr int MATERIAL_METAL  	= 42;
+constexpr int MATERIAL_WAX	  	= 43;
+constexpr int MATERIAL_OTHER	  	= 44;
+constexpr int MATERIAL_FOOD	  	= 45;
+constexpr int MATERIAL_OIL	  	= 46;
 
-#define NUM_MATERIALS           47
+constexpr int NUM_MATERIALS           = 47;

@@ -1,159 +1,159 @@
 #pragma once
 
 
-#define SKILL_FLEX       		400
-#define SKILL_GENIUS			401
-#define SKILL_SOLARF     		402
-#define SKILL_MIGHT      		403
-#define SKILL_BALANCE			404
-#define SKILL_BUILD			405
-#define SKILL_TSKIN			406
-#define SKILL_CONCENTRATION		407
-#define SKILL_KAIOKEN    		408
-#define SKILL_SPOT			409
-#define SKILL_FIRST_AID 		410
-#define SKILL_DISGUISE			411
-#define SKILL_ESCAPE_ARTIST		412
-#define SKILL_APPRAISE			413
-#define SKILL_HEAL			414
-#define SKILL_FORGERY			415
-#define SKILL_HIDE			416
-#define SKILL_BLESS     		417
-#define SKILL_CURSE			418
-#define SKILL_LISTEN			419
-#define SKILL_EAVESDROP         	420
-#define SKILL_POISON			421
-#define SKILL_CURE			422
-#define SKILL_OPEN_LOCK			423
-#define SKILL_VIGOR			424
-#define SKILL_REGENERATE		425
-#define SKILL_KEEN			426
-#define SKILL_SEARCH			427
-#define SKILL_MOVE_SILENTLY		428
-#define SKILL_ABSORB    		429
-#define SKILL_SLEIGHT_OF_HAND		430
-#define SKILL_INGEST			431
-#define SKILL_REPAIR			432
-#define SKILL_SENSE             	433
-#define SKILL_SURVIVAL			434
-#define SKILL_YOIK        		435
-#define SKILL_CREATE    		436
-#define SKILL_SPIT               	437
-#define SKILL_POTENTIAL  		438
-#define SKILL_TELEPATHY  		439
-#define SKILL_RENZO      		440
-#define SKILL_MASENKO   		441
-#define SKILL_DODONPA    		442
-#define SKILL_BARRIER   		443
-#define SKILL_GALIKGUN  		444
-#define SKILL_THROW                     445
-#define SKILL_DODGE                     446
-#define SKILL_PARRY                     447
-#define SKILL_BLOCK                     448
-#define SKILL_PUNCH                     449
-#define SKILL_KICK                      450
-#define SKILL_ELBOW                     451
-#define SKILL_KNEE                      452
-#define SKILL_ROUNDHOUSE                453
-#define SKILL_UPPERCUT                  454
-#define SKILL_SLAM                      455
-#define SKILL_HEELDROP                  456
-#define SKILL_FOCUS                     457
-#define SKILL_KIBALL                    458
-#define SKILL_KIBLAST                   459
-#define SKILL_BEAM                      460
-#define SKILL_TSUIHIDAN                 461
-#define SKILL_SHOGEKIHA                 462
-#define SKILL_ZANZOKEN                  463
-#define SKILL_KAMEHAMEHA                464
-#define SKILL_DAGGER                    465
-#define SKILL_SWORD                     466
-#define SKILL_CLUB                      467
-#define SKILL_SPEAR                     468
-#define SKILL_GUN                       469
-#define SKILL_BRAWL                     470
-#define SKILL_INSTANTT                  471
-#define SKILL_DEATHBEAM                 472
-#define SKILL_ERASER                    473
-#define SKILL_TSLASH                    474
-#define SKILL_PSYBLAST                  475
-#define SKILL_HONOO                     476
-#define SKILL_DUALBEAM                  477
-#define SKILL_ROGAFUFUKEN               478
-#define SKILL_POSE                      479
-#define SKILL_BAKUHATSUHA               480
-#define SKILL_KIENZAN                   481
-#define SKILL_TRIBEAM                   482
-#define SKILL_SBC                       483
-#define SKILL_FINALFLASH                484
-#define SKILL_CRUSHER                   485
-#define SKILL_DDSLASH                   486
-#define SKILL_PBARRAGE                  487
-#define SKILL_HELLFLASH                 488
-#define SKILL_HELLSPEAR                 489
-#define SKILL_KAKUSANHA                 490
-#define SKILL_HASSHUKEN                 491
-#define SKILL_SCATTER                   492
-#define SKILL_BIGBANG                   493
-#define SKILL_PSLASH                    494
-#define SKILL_DEATHBALL                 495
-#define SKILL_SPIRITBALL                496
-#define SKILL_GENKIDAMA                 497
-#define SKILL_GENOCIDE                  498
-#define SKILL_DUALWIELD                 499
-#define SKILL_KURA                      500
-#define SKILL_TAILWHIP                  501
-#define SKILL_KOUSENGAN                 502
-#define SKILL_TAISHA                    503
-#define SKILL_PARALYZE                  505
-#define SKILL_INFUSE                    506
-#define SKILL_ROLL                      507
-#define SKILL_TRIP                      508
-#define SKILL_GRAPPLE                   509
-#define SKILL_WSPIKE                    510
-#define SKILL_SELFD                     511
-#define SKILL_SPIRAL                    512
-#define SKILL_BREAKER                   513
-#define SKILL_ENLIGHTEN                 514
-#define SKILL_COMMUNE                   515
-#define SKILL_MIMIC                     516
-#define SKILL_WRAZOR                    517
-#define SKILL_KOTEIRU                   518
-#define SKILL_DIMIZU                    519
-#define SKILL_HYOGA_KABE                520
-#define SKILL_WELLSPRING                521
-#define SKILL_AQUA_BARRIER              522
-#define SKILL_WARP                      523
-#define SKILL_HSPIRAL                   524
-#define SKILL_ARMOR                     525
-#define SKILL_FIRESHIELD                526
-#define SKILL_COOKING                   527
-#define SKILL_SEISHOU                   528
-#define SKILL_SILK                      529
-#define SKILL_BASH                      530
-#define SKILL_HEADBUTT                  531
-#define SKILL_ENSNARE                   532
-#define SKILL_STARNOVA                  533
-#define SKILL_PURSUIT                   534
-#define SKILL_ZEN                       535
-#define SKILL_SUNDER                    536
-#define SKILL_WITHER                    537
-#define SKILL_TWOHAND                   538
-#define SKILL_STYLE                     539
-#define SKILL_METAMORPH                 540
-#define SKILL_HEALGLOW                  541
-#define SKILL_RUNIC                     542
-#define SKILL_EXTRACT                   543
-#define SKILL_GARDENING                 544
-#define SKILL_ENERGIZE                  545
-#define SKILL_MALICE                    549
-#define SKILL_HAYASA                    550
-#define SKILL_HANDLING                  551
-#define SKILL_MYSTICMUSIC               552
-#define SKILL_LIGHTGRENADE              553
-#define SKILL_MULTIFORM                 554
-#define SKILL_SPIRITCONTROL             555
-#define SKILL_BALEFIRE                  556
-#define SKILL_BLESSEDHAMMER             557
+constexpr int SKILL_FLEX       		= 400;
+constexpr int SKILL_GENIUS			= 401;
+constexpr int SKILL_SOLARF     		= 402;
+constexpr int SKILL_MIGHT      		= 403;
+constexpr int SKILL_BALANCE			= 404;
+constexpr int SKILL_BUILD			= 405;
+constexpr int SKILL_TSKIN			= 406;
+constexpr int SKILL_CONCENTRATION		= 407;
+constexpr int SKILL_KAIOKEN    		= 408;
+constexpr int SKILL_SPOT			= 409;
+constexpr int SKILL_FIRST_AID 		= 410;
+constexpr int SKILL_DISGUISE			= 411;
+constexpr int SKILL_ESCAPE_ARTIST		= 412;
+constexpr int SKILL_APPRAISE			= 413;
+constexpr int SKILL_HEAL			= 414;
+constexpr int SKILL_FORGERY			= 415;
+constexpr int SKILL_HIDE			= 416;
+constexpr int SKILL_BLESS     		= 417;
+constexpr int SKILL_CURSE			= 418;
+constexpr int SKILL_LISTEN			= 419;
+constexpr int SKILL_EAVESDROP         	= 420;
+constexpr int SKILL_POISON			= 421;
+constexpr int SKILL_CURE			= 422;
+constexpr int SKILL_OPEN_LOCK			= 423;
+constexpr int SKILL_VIGOR			= 424;
+constexpr int SKILL_REGENERATE		= 425;
+constexpr int SKILL_KEEN			= 426;
+constexpr int SKILL_SEARCH			= 427;
+constexpr int SKILL_MOVE_SILENTLY		= 428;
+constexpr int SKILL_ABSORB    		= 429;
+constexpr int SKILL_SLEIGHT_OF_HAND		= 430;
+constexpr int SKILL_INGEST			= 431;
+constexpr int SKILL_REPAIR			= 432;
+constexpr int SKILL_SENSE             	= 433;
+constexpr int SKILL_SURVIVAL			= 434;
+constexpr int SKILL_YOIK        		= 435;
+constexpr int SKILL_CREATE    		= 436;
+constexpr int SKILL_SPIT               	= 437;
+constexpr int SKILL_POTENTIAL  		= 438;
+constexpr int SKILL_TELEPATHY  		= 439;
+constexpr int SKILL_RENZO      		= 440;
+constexpr int SKILL_MASENKO   		= 441;
+constexpr int SKILL_DODONPA    		= 442;
+constexpr int SKILL_BARRIER   		= 443;
+constexpr int SKILL_GALIKGUN  		= 444;
+constexpr int SKILL_THROW                     = 445;
+constexpr int SKILL_DODGE                     = 446;
+constexpr int SKILL_PARRY                     = 447;
+constexpr int SKILL_BLOCK                     = 448;
+constexpr int SKILL_PUNCH                     = 449;
+constexpr int SKILL_KICK                      = 450;
+constexpr int SKILL_ELBOW                     = 451;
+constexpr int SKILL_KNEE                      = 452;
+constexpr int SKILL_ROUNDHOUSE                = 453;
+constexpr int SKILL_UPPERCUT                  = 454;
+constexpr int SKILL_SLAM                      = 455;
+constexpr int SKILL_HEELDROP                  = 456;
+constexpr int SKILL_FOCUS                     = 457;
+constexpr int SKILL_KIBALL                    = 458;
+constexpr int SKILL_KIBLAST                   = 459;
+constexpr int SKILL_BEAM                      = 460;
+constexpr int SKILL_TSUIHIDAN                 = 461;
+constexpr int SKILL_SHOGEKIHA                 = 462;
+constexpr int SKILL_ZANZOKEN                  = 463;
+constexpr int SKILL_KAMEHAMEHA                = 464;
+constexpr int SKILL_DAGGER                    = 465;
+constexpr int SKILL_SWORD                     = 466;
+constexpr int SKILL_CLUB                      = 467;
+constexpr int SKILL_SPEAR                     = 468;
+constexpr int SKILL_GUN                       = 469;
+constexpr int SKILL_BRAWL                     = 470;
+constexpr int SKILL_INSTANTT                  = 471;
+constexpr int SKILL_DEATHBEAM                 = 472;
+constexpr int SKILL_ERASER                    = 473;
+constexpr int SKILL_TSLASH                    = 474;
+constexpr int SKILL_PSYBLAST                  = 475;
+constexpr int SKILL_HONOO                     = 476;
+constexpr int SKILL_DUALBEAM                  = 477;
+constexpr int SKILL_ROGAFUFUKEN               = 478;
+constexpr int SKILL_POSE                      = 479;
+constexpr int SKILL_BAKUHATSUHA               = 480;
+constexpr int SKILL_KIENZAN                   = 481;
+constexpr int SKILL_TRIBEAM                   = 482;
+constexpr int SKILL_SBC                       = 483;
+constexpr int SKILL_FINALFLASH                = 484;
+constexpr int SKILL_CRUSHER                   = 485;
+constexpr int SKILL_DDSLASH                   = 486;
+constexpr int SKILL_PBARRAGE                  = 487;
+constexpr int SKILL_HELLFLASH                 = 488;
+constexpr int SKILL_HELLSPEAR                 = 489;
+constexpr int SKILL_KAKUSANHA                 = 490;
+constexpr int SKILL_HASSHUKEN                 = 491;
+constexpr int SKILL_SCATTER                   = 492;
+constexpr int SKILL_BIGBANG                   = 493;
+constexpr int SKILL_PSLASH                    = 494;
+constexpr int SKILL_DEATHBALL                 = 495;
+constexpr int SKILL_SPIRITBALL                = 496;
+constexpr int SKILL_GENKIDAMA                 = 497;
+constexpr int SKILL_GENOCIDE                  = 498;
+constexpr int SKILL_DUALWIELD                 = 499;
+constexpr int SKILL_KURA                      = 500;
+constexpr int SKILL_TAILWHIP                  = 501;
+constexpr int SKILL_KOUSENGAN                 = 502;
+constexpr int SKILL_TAISHA                    = 503;
+constexpr int SKILL_PARALYZE                  = 505;
+constexpr int SKILL_INFUSE                    = 506;
+constexpr int SKILL_ROLL                      = 507;
+constexpr int SKILL_TRIP                      = 508;
+constexpr int SKILL_GRAPPLE                   = 509;
+constexpr int SKILL_WSPIKE                    = 510;
+constexpr int SKILL_SELFD                     = 511;
+constexpr int SKILL_SPIRAL                    = 512;
+constexpr int SKILL_BREAKER                   = 513;
+constexpr int SKILL_ENLIGHTEN                 = 514;
+constexpr int SKILL_COMMUNE                   = 515;
+constexpr int SKILL_MIMIC                     = 516;
+constexpr int SKILL_WRAZOR                    = 517;
+constexpr int SKILL_KOTEIRU                   = 518;
+constexpr int SKILL_DIMIZU                    = 519;
+constexpr int SKILL_HYOGA_KABE                = 520;
+constexpr int SKILL_WELLSPRING                = 521;
+constexpr int SKILL_AQUA_BARRIER              = 522;
+constexpr int SKILL_WARP                      = 523;
+constexpr int SKILL_HSPIRAL                   = 524;
+constexpr int SKILL_ARMOR                     = 525;
+constexpr int SKILL_FIRESHIELD                = 526;
+constexpr int SKILL_COOKING                   = 527;
+constexpr int SKILL_SEISHOU                   = 528;
+constexpr int SKILL_SILK                      = 529;
+constexpr int SKILL_BASH                      = 530;
+constexpr int SKILL_HEADBUTT                  = 531;
+constexpr int SKILL_ENSNARE                   = 532;
+constexpr int SKILL_STARNOVA                  = 533;
+constexpr int SKILL_PURSUIT                   = 534;
+constexpr int SKILL_ZEN                       = 535;
+constexpr int SKILL_SUNDER                    = 536;
+constexpr int SKILL_WITHER                    = 537;
+constexpr int SKILL_TWOHAND                   = 538;
+constexpr int SKILL_STYLE                     = 539;
+constexpr int SKILL_METAMORPH                 = 540;
+constexpr int SKILL_HEALGLOW                  = 541;
+constexpr int SKILL_RUNIC                     = 542;
+constexpr int SKILL_EXTRACT                   = 543;
+constexpr int SKILL_GARDENING                 = 544;
+constexpr int SKILL_ENERGIZE                  = 545;
+constexpr int SKILL_MALICE                    = 549;
+constexpr int SKILL_HAYASA                    = 550;
+constexpr int SKILL_HANDLING                  = 551;
+constexpr int SKILL_MYSTICMUSIC               = 552;
+constexpr int SKILL_LIGHTGRENADE              = 553;
+constexpr int SKILL_MULTIFORM                 = 554;
+constexpr int SKILL_SPIRITCONTROL             = 555;
+constexpr int SKILL_BALEFIRE                  = 556;
+constexpr int SKILL_BLESSEDHAMMER             = 557;
 
-#define SKILL_TABLE_SIZE	600
+constexpr int SKILL_TABLE_SIZE	= 600;

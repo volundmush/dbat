@@ -1,4 +1,5 @@
 #pragma once
+#include "consts/autoexit.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
@@ -886,10 +887,6 @@ bool is_affected(struct char_data *ch, int aff_flag);
 void remove_affect(struct char_data *ch, int aff_flag);
 int planet_check(struct char_data *ch, struct char_data *vict);
 /* Player autoexit levels: used as an index to exitlevels           */
-#define EXIT_OFF        0       /* Autoexit off                     */
-#define EXIT_NORMAL     1       /* Brief display (stock behaviour)  */
-#define EXIT_NA         2       /* Not implemented - do not use     */
-#define EXIT_COMPLETE   3       /* Full display                     */
 
 int char_exit_level(const struct char_data *ch);
 

@@ -1,9 +1,9 @@
 #pragma once
 /* Sex */
-#define SEX_NEUTRAL   0
-#define SEX_MALE      1
-#define SEX_FEMALE    2
+constexpr int SEX_NEUTRAL   = 0;
+constexpr int SEX_MALE      = 1;
+constexpr int SEX_FEMALE    = 2;
 
-#define NUM_SEX       3
+constexpr int NUM_SEX       = 3;
 
 extern const char *genders[NUM_SEX+1];

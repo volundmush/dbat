@@ -7,15 +7,15 @@
 
 #if CIRCLE_UNSIGNED_INDEX
 #define IDXTYPE	uint16_t
-#define NOTHING	((IDXTYPE)~0)
+constexpr IDXTYPE NOTHING	= ((IDXTYPE)~0);
 #else
 #define IDXTYPE	int
-#define NOTHING	-1	/* nil reference for objects	*/
+constexpr IDXTYPE NOTHING	= -1; /* nil reference for objects	*/
 #endif
 
-#define NOWHERE NOTHING
-#define NOBODY NOTHING
-#define NOFLAG NOTHING
+constexpr IDXTYPE NOWHERE = NOTHING;
+constexpr IDXTYPE NOBODY = NOTHING;
+constexpr IDXTYPE NOFLAG = NOTHING;
 
 #define I64T "ld"
 #define SZT "ld"

@@ -2,88 +2,88 @@
 
 /* Affect bits: used in char_data.affected_by */
 /* WARNING: In the world files, NEVER set the bits marked "R" ("Reserved") */
-#define AFF_DONTUSE           0    /* DON'T USE! 		*/
-#define AFF_BLIND             1    /* (R) Char is blind         */
-#define AFF_INVISIBLE         2    /* Char is invisible         */
-#define AFF_DETECT_ALIGN      3    /* Char is sensitive to align*/
-#define AFF_DETECT_INVIS      4    /* Char can see invis chars  */
-#define AFF_DETECT_MAGIC      5    /* Char is sensitive to magic*/
-#define AFF_SENSE_LIFE        6    /* Char can sense hidden life*/
-#define AFF_WATERWALK         7    /* Char can walk on water    */
-#define AFF_SANCTUARY         8    /* Char protected by sanct.  */
-#define AFF_GROUP             9    /* (R) Char is grouped       */
-#define AFF_CURSE             10   /* Char is cursed            */
-#define AFF_INFRAVISION       11   /* Char can see in dark      */
-#define AFF_POISON            12   /* (R) Char is poisoned      */
-#define AFF_WEAKENED_STATE    13   /* Char protected from evil  */
-#define AFF_PROTECT_GOOD      14   /* Char protected from good  */
-#define AFF_SLEEP             15   /* (R) Char magically asleep */
-#define AFF_NOTRACK           16   /* Char can't be tracked     */
-#define AFF_UNDEAD            17   /* Char is undead 		*/
-#define AFF_PARALYZE          18   /* Char is paralized		*/
-#define AFF_SNEAK             19   /* Char can move quietly     */
-#define AFF_HIDE              20   /* Char is hidden            */
-#define AFF_UNUSED20          21   /* Room for future expansion */
-#define AFF_CHARM             22   /* Char is charmed         	*/
-#define AFF_FLYING            23   /* Char is flying         	*/
-#define AFF_WATERBREATH       24   /* Char can breath non O2    */
-#define AFF_ANGELIC           25   /* Char is an angelic being  */
-#define AFF_ETHEREAL          26   /* Char is ethereal          */
-#define AFF_MAGICONLY         27   /* Char only hurt by magic   */
-#define AFF_NEXTPARTIAL       28   /* Next action cannot be full*/
-#define AFF_NEXTNOACTION      29   /* Next action cannot attack (took full action between rounds) */
-#define AFF_STUNNED           30   /* Char is stunned		*/
-#define AFF_TAMED             31   /* Char has been tamed	*/
-#define AFF_CDEATH            32   /* Char is undergoing creeping death */
-#define AFF_SPIRIT            33   /* Char has no body          */
-#define AFF_STONESKIN         34   /* Char has temporary DR     */
-#define AFF_SUMMONED          35   /* Char is summoned (i.e. transient */
-#define AFF_CELESTIAL         36   /* Char is celestial         */
-#define AFF_FIENDISH          37   /* Char is fiendish          */
-#define AFF_FIRE_SHIELD       38   /* Char has fire shield      */
-#define AFF_LOW_LIGHT         39   /* Char has low light eyes   */
-#define AFF_ZANZOKEN          40   /* Char is ready to zanzoken */
-#define AFF_KNOCKED           41   /* Char is knocked OUT!      */
-#define AFF_MIGHT             42   /* Strength +3               */
-#define AFF_FLEX              43   /* Agility +3                */
-#define AFF_GENIUS            44   /* Intelligence +3           */
-#define AFF_BLESS             45   /* Bless for better regen    */
-#define AFF_BURNT             46   /* Disintergrated corpse     */
-#define AFF_BURNED            47   /* Burned by honoo or similar skill */
-#define AFF_MBREAK            48   /* Can't charge while flagged */
-#define AFF_HASS              49   /* Does double punch damage  */
-#define AFF_FUTURE            50   /* Future Sight */
-#define AFF_PARA              51   /* Real Paralyze */
-#define AFF_INFUSE            52   /* Ki infused attacks */
-#define AFF_ENLIGHTEN         53   /* Enlighten */
-#define AFF_FROZEN            54   /* They got frozededed */
-#define AFF_FIRESHIELD        55   /* They have a blazing personality */
-#define AFF_ENSNARED          56   /* They have silk ensnaring their arms! */
-#define AFF_HAYASA            57   /* They are speedy!                */
-#define AFF_PURSUIT           58   /* Being followed */
-#define AFF_WITHER            59   /* Their body is withered */
-#define AFF_HYDROZAP          60   /* Custom Skill Kanso Suru */
-#define AFF_POSITION          61   /* Better combat position */
-#define AFF_SHOCKED           62   /* Psychic Shock          */
-#define AFF_METAMORPH         63   /* Metamorphisis, Demon's Ripoff Custom Skill */
-#define AFF_HEALGLOW          64   /* Healing Glow */
-#define AFF_EARMOR            65   /* Ethereal Armor */
-#define AFF_ECHAINS           66   /* Ethereal Chains */
-#define AFF_WUNJO             67   /* Wunjo rune */
-#define AFF_POTENT            68   /* Purisaz rune */
-#define AFF_ASHED             69   /* Leaves ash */
-#define AFF_PUKED             70
-#define AFF_LIQUEFIED         71
-#define AFF_SHELL             72
-#define AFF_IMMUNITY          73
-#define AFF_SPIRITCONTROL     74
-#define AFF_KYODAIKA          75   /* Kyodaika */
-#define AFF_STARPHASE         76
-#define AFF_SPECIAL_POSE      77
-#define AFF_SHADOW_STITCH     78
+constexpr int AFF_DONTUSE           = 0; /* DON'T USE! 		*/
+constexpr int AFF_BLIND             = 1; /* (R) Char is blind         */
+constexpr int AFF_INVISIBLE         = 2; /* Char is invisible         */
+constexpr int AFF_DETECT_ALIGN      = 3; /* Char is sensitive to align*/
+constexpr int AFF_DETECT_INVIS      = 4; /* Char can see invis chars  */
+constexpr int AFF_DETECT_MAGIC      = 5; /* Char is sensitive to magic*/
+constexpr int AFF_SENSE_LIFE        = 6; /* Char can sense hidden life*/
+constexpr int AFF_WATERWALK         = 7; /* Char can walk on water    */
+constexpr int AFF_SANCTUARY         = 8; /* Char protected by sanct.  */
+constexpr int AFF_GROUP             = 9; /* (R) Char is grouped       */
+constexpr int AFF_CURSE             = 10; /* Char is cursed            */
+constexpr int AFF_INFRAVISION       = 11; /* Char can see in dark      */
+constexpr int AFF_POISON            = 12; /* (R) Char is poisoned      */
+constexpr int AFF_WEAKENED_STATE    = 13; /* Char protected from evil  */
+constexpr int AFF_PROTECT_GOOD      = 14; /* Char protected from good  */
+constexpr int AFF_SLEEP             = 15; /* (R) Char magically asleep */
+constexpr int AFF_NOTRACK           = 16; /* Char can't be tracked     */
+constexpr int AFF_UNDEAD            = 17; /* Char is undead 		*/
+constexpr int AFF_PARALYZE          = 18; /* Char is paralized		*/
+constexpr int AFF_SNEAK             = 19; /* Char can move quietly     */
+constexpr int AFF_HIDE              = 20; /* Char is hidden            */
+constexpr int AFF_UNUSED20          = 21; /* Room for future expansion */
+constexpr int AFF_CHARM             = 22; /* Char is charmed         	*/
+constexpr int AFF_FLYING            = 23; /* Char is flying         	*/
+constexpr int AFF_WATERBREATH       = 24; /* Char can breath non O2    */
+constexpr int AFF_ANGELIC           = 25; /* Char is an angelic being  */
+constexpr int AFF_ETHEREAL          = 26; /* Char is ethereal          */
+constexpr int AFF_MAGICONLY         = 27; /* Char only hurt by magic   */
+constexpr int AFF_NEXTPARTIAL       = 28; /* Next action cannot be full*/
+constexpr int AFF_NEXTNOACTION      = 29; /* Next action cannot attack (took full action between rounds) */
+constexpr int AFF_STUNNED           = 30; /* Char is stunned		*/
+constexpr int AFF_TAMED             = 31; /* Char has been tamed	*/
+constexpr int AFF_CDEATH            = 32; /* Char is undergoing creeping death */
+constexpr int AFF_SPIRIT            = 33; /* Char has no body          */
+constexpr int AFF_STONESKIN         = 34; /* Char has temporary DR     */
+constexpr int AFF_SUMMONED          = 35; /* Char is summoned (i.e. transient */
+constexpr int AFF_CELESTIAL         = 36; /* Char is celestial         */
+constexpr int AFF_FIENDISH          = 37; /* Char is fiendish          */
+constexpr int AFF_FIRE_SHIELD       = 38; /* Char has fire shield      */
+constexpr int AFF_LOW_LIGHT         = 39; /* Char has low light eyes   */
+constexpr int AFF_ZANZOKEN          = 40; /* Char is ready to zanzoken */
+constexpr int AFF_KNOCKED           = 41; /* Char is knocked OUT!      */
+constexpr int AFF_MIGHT             = 42; /* Strength +3               */
+constexpr int AFF_FLEX              = 43; /* Agility +3                */
+constexpr int AFF_GENIUS            = 44; /* Intelligence +3           */
+constexpr int AFF_BLESS             = 45; /* Bless for better regen    */
+constexpr int AFF_BURNT             = 46; /* Disintergrated corpse     */
+constexpr int AFF_BURNED            = 47; /* Burned by honoo or similar skill */
+constexpr int AFF_MBREAK            = 48; /* Can't charge while flagged */
+constexpr int AFF_HASS              = 49; /* Does double punch damage  */
+constexpr int AFF_FUTURE            = 50; /* Future Sight */
+constexpr int AFF_PARA              = 51; /* Real Paralyze */
+constexpr int AFF_INFUSE            = 52; /* Ki infused attacks */
+constexpr int AFF_ENLIGHTEN         = 53; /* Enlighten */
+constexpr int AFF_FROZEN            = 54; /* They got frozededed */
+constexpr int AFF_FIRESHIELD        = 55; /* They have a blazing personality */
+constexpr int AFF_ENSNARED          = 56; /* They have silk ensnaring their arms! */
+constexpr int AFF_HAYASA            = 57; /* They are speedy!                */
+constexpr int AFF_PURSUIT           = 58; /* Being followed */
+constexpr int AFF_WITHER            = 59; /* Their body is withered */
+constexpr int AFF_HYDROZAP          = 60; /* Custom Skill Kanso Suru */
+constexpr int AFF_POSITION          = 61; /* Better combat position */
+constexpr int AFF_SHOCKED           = 62; /* Psychic Shock          */
+constexpr int AFF_METAMORPH         = 63; /* Metamorphisis, Demon's Ripoff Custom Skill */
+constexpr int AFF_HEALGLOW          = 64; /* Healing Glow */
+constexpr int AFF_EARMOR            = 65; /* Ethereal Armor */
+constexpr int AFF_ECHAINS           = 66; /* Ethereal Chains */
+constexpr int AFF_WUNJO             = 67; /* Wunjo rune */
+constexpr int AFF_POTENT            = 68; /* Purisaz rune */
+constexpr int AFF_ASHED             = 69; /* Leaves ash */
+constexpr int AFF_PUKED             = 70;
+constexpr int AFF_LIQUEFIED         = 71;
+constexpr int AFF_SHELL             = 72;
+constexpr int AFF_IMMUNITY          = 73;
+constexpr int AFF_SPIRITCONTROL     = 74;
+constexpr int AFF_KYODAIKA          = 75; /* Kyodaika */
+constexpr int AFF_STARPHASE         = 76;
+constexpr int AFF_SPECIAL_POSE      = 77;
+constexpr int AFF_SHADOW_STITCH     = 78;
 
-#define NUM_AFF_FLAGS 79
+constexpr int NUM_AFF_FLAGS = 79;
 
-#define AF_ARRAY_MAX    4
+constexpr int AF_ARRAY_MAX    = 4;
 
 extern const char *affected_bits[NUM_AFF_FLAGS+1];

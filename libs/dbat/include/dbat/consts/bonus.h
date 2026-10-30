@@ -1,57 +1,57 @@
 #pragma once
 
 /* Let's define bonuses/negatives */
-#define BONUS_THRIFTY           0
-#define BONUS_PRODIGY           1
-#define BONUS_QUICK_STUDY       2
-#define BONUS_DIEHARD           3
-#define BONUS_BRAWLER           4
-#define BONUS_DESTROYER         5
-#define BONUS_HARDWORKER        6
-#define BONUS_HEALER            7
-#define BONUS_LOYAL             8
-#define BONUS_BRAWNY            9
-#define BONUS_SCHOLARLY        10
-#define BONUS_SAGE             11
-#define BONUS_AGILE            12
-#define BONUS_QUICK            13
-#define BONUS_STURDY           14
-#define BONUS_THICKSKIN        15
-#define BONUS_RECIPE           16
-#define BONUS_FIREPROOF        17
-#define BONUS_POWERHIT         18
-#define BONUS_HEALTHY          19
-#define BONUS_INSOMNIAC        20
-#define BONUS_EVASIVE          21
-#define BONUS_WALL             22
-#define BONUS_ACCURATE         23
-#define BONUS_LEECH            24
-#define BONUS_GMEMORY          25
-#define BONUS_SOFT             26
-#define BONUS_LATE             27
-#define BONUS_IMPULSE          28
-#define BONUS_SICKLY           29
-#define BONUS_PUNCHINGBAG      30
-#define BONUS_PUSHOVER         31
-#define BONUS_POORDEPTH        32
-#define BONUS_THINSKIN         33
-#define BONUS_FIREPRONE        34
-#define BONUS_INTOLERANT       35
-#define BONUS_COWARD           36
-#define BONUS_ARROGANT         37
-#define BONUS_UNFOCUSED        38
-#define BONUS_SLACKER          39
-#define BONUS_SLOW_LEARNER     40
-#define BONUS_MASOCHISTIC      41
-#define BONUS_MUTE             42
-#define BONUS_WIMP             43
-#define BONUS_DULL             44
-#define BONUS_FOOLISH          45
-#define BONUS_CLUMSY           46
-#define BONUS_SLOW             47
-#define BONUS_FRAIL            48
-#define BONUS_SADISTIC         49
-#define BONUS_LONER            50
-#define BONUS_BMEMORY          51
+constexpr int BONUS_THRIFTY           = 0;
+constexpr int BONUS_PRODIGY           = 1;
+constexpr int BONUS_QUICK_STUDY       = 2;
+constexpr int BONUS_DIEHARD           = 3;
+constexpr int BONUS_BRAWLER           = 4;
+constexpr int BONUS_DESTROYER         = 5;
+constexpr int BONUS_HARDWORKER        = 6;
+constexpr int BONUS_HEALER            = 7;
+constexpr int BONUS_LOYAL             = 8;
+constexpr int BONUS_BRAWNY            = 9;
+constexpr int BONUS_SCHOLARLY        = 10;
+constexpr int BONUS_SAGE             = 11;
+constexpr int BONUS_AGILE            = 12;
+constexpr int BONUS_QUICK            = 13;
+constexpr int BONUS_STURDY           = 14;
+constexpr int BONUS_THICKSKIN        = 15;
+constexpr int BONUS_RECIPE           = 16;
+constexpr int BONUS_FIREPROOF        = 17;
+constexpr int BONUS_POWERHIT         = 18;
+constexpr int BONUS_HEALTHY          = 19;
+constexpr int BONUS_INSOMNIAC        = 20;
+constexpr int BONUS_EVASIVE          = 21;
+constexpr int BONUS_WALL             = 22;
+constexpr int BONUS_ACCURATE         = 23;
+constexpr int BONUS_LEECH            = 24;
+constexpr int BONUS_GMEMORY          = 25;
+constexpr int BONUS_SOFT             = 26;
+constexpr int BONUS_LATE             = 27;
+constexpr int BONUS_IMPULSE          = 28;
+constexpr int BONUS_SICKLY           = 29;
+constexpr int BONUS_PUNCHINGBAG      = 30;
+constexpr int BONUS_PUSHOVER         = 31;
+constexpr int BONUS_POORDEPTH        = 32;
+constexpr int BONUS_THINSKIN         = 33;
+constexpr int BONUS_FIREPRONE        = 34;
+constexpr int BONUS_INTOLERANT       = 35;
+constexpr int BONUS_COWARD           = 36;
+constexpr int BONUS_ARROGANT         = 37;
+constexpr int BONUS_UNFOCUSED        = 38;
+constexpr int BONUS_SLACKER          = 39;
+constexpr int BONUS_SLOW_LEARNER     = 40;
+constexpr int BONUS_MASOCHISTIC      = 41;
+constexpr int BONUS_MUTE             = 42;
+constexpr int BONUS_WIMP             = 43;
+constexpr int BONUS_DULL             = 44;
+constexpr int BONUS_FOOLISH          = 45;
+constexpr int BONUS_CLUMSY           = 46;
+constexpr int BONUS_SLOW             = 47;
+constexpr int BONUS_FRAIL            = 48;
+constexpr int BONUS_SADISTIC         = 49;
+constexpr int BONUS_LONER            = 50;
+constexpr int BONUS_BMEMORY          = 51;
 
-#define MAX_BONUSES            52
+constexpr int MAX_BONUSES            = 52;

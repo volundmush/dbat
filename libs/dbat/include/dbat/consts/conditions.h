@@ -1,7 +1,7 @@
 #pragma once
 /* Player conditions */
-#define DRUNK        0
-#define HUNGER       1
-#define THIRST       2
+constexpr int DRUNK        = 0;
+constexpr int HUNGER       = 1;
+constexpr int THIRST       = 2;
 
-#define NUM_CONDITIONS 3
+constexpr int NUM_CONDITIONS = 3;

@@ -1,4 +1,6 @@
 #pragma once
+#include "dbat/consts/maximums.h"
+#include "dbat/consts/zoneflags.h"
 #include "dbat/consts/types.h"
 
 
@@ -17,10 +19,8 @@
  * Macros, defines, structs and globals for the OLC suite.  You will need
  * to adjust these numbers if you ever add more.
  */
-#define NUM_ZONE_FLAGS          36
 
 #define NUM_GENDERS		3
-#define NUM_SHOP_FLAGS 		3
 
 /* -------------------------------------------------------------------------- */
 
