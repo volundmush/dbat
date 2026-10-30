@@ -175,7 +175,7 @@ ACMD(do_oasis_medit)
   /** builder and also log it.                                               **/
   /****************************************************************************/
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
-  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
+  char_plr_set(ch, PLR_WRITING, true);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE,"OLC: %s starts editing zone %d allowed zone %d",
     char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
@@ -263,7 +263,7 @@ void init_mobile(struct char_data *mob)
   mob->real_abils.dex = mob->real_abils.con = mob->real_abils.cha = rand_number(8, 16);
   mob->aff_abils = mob->real_abils;
 
-  SET_BIT_AR(char_get_act(mob), MOB_ISNPC);
+  char_mob_set(mob, MOB_ISNPC, true);
   mob->player_specials = &dummy_mob;
 }
 
@@ -563,7 +563,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
     /*
      * Ensure mob has MOB_ISNPC set or things will go pear shaped.
      */
-    SET_BIT_AR(char_get_act(OLC_MOB(d)), MOB_ISNPC);
+    char_mob_set(OLC_MOB(d), MOB_ISNPC, true);
     switch (*arg) {
     case 'y':
     case 'Y':
@@ -808,7 +808,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
     if ((i = atoi(arg)) <= 0)
       break;
     else if (i <= NUM_MOB_FLAGS)
-      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), i - 1);
+      char_mob_toggle(OLC_MOB(d), i - 1);
     medit_disp_mob_flags(d);
     return;
 /*-------------------------------------------------------------------*/
@@ -824,10 +824,9 @@ void medit_parse(struct descriptor_data *d, char *arg)
     if ((i = atoi(arg)) <= 0)
       break;
     else if (i <= NUM_AFF_FLAGS)
-      TOGGLE_BIT_AR(char_get_affected_by(OLC_MOB(d)), i);
+      char_aff_toggle(OLC_MOB(d), i);
     /* Remove unwanted bits right away. */
-    REMOVE_BIT_AR(char_get_affected_by(OLC_MOB(d)),
-       AFF_CHARM | AFF_POISON | AFF_GROUP | AFF_SLEEP);
+    char_aff_set(OLC_MOB(d), AFF_CHARM | AFF_POISON | AFF_GROUP | AFF_SLEEP, false);
     medit_disp_aff_flags(d);
     return;
 /*-------------------------------------------------------------------*/
@@ -843,62 +842,62 @@ void medit_parse(struct descriptor_data *d, char *arg)
   case MEDIT_ACCURACY:
     char_set_accuracy_mod(OLC_MOB(d), LIMIT(i, 0, 50));
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
+      char_mob_toggle(OLC_MOB(d), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_DAMAGE: /* damage mod no longer exists; input is ignored */
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
+      char_mob_toggle(OLC_MOB(d), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_NDD:
     GET_NDD(OLC_MOB(d)) = LIMIT(i, 0, 30);
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
+      char_mob_toggle(OLC_MOB(d), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_SDD:
     GET_SDD(OLC_MOB(d)) = LIMIT(i, 0, 127);
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
+      char_mob_toggle(OLC_MOB(d), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_NUM_HP_DICE:
     //GET_HIT(OLC_MOB(d)) = LIMIT(i, 0, CONFIG_LEVEL_CAP);
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
+      char_mob_toggle(OLC_MOB(d), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_SIZE_HP_DICE:
     //GET_MANA(OLC_MOB(d)) = LIMIT(i, 0, 1000);
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
+      char_mob_toggle(OLC_MOB(d), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_ADD_HP:
     //GET_MOVE(OLC_MOB(d)) = LIMIT(i, 0, 30000);
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
+      char_mob_toggle(OLC_MOB(d), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_AC:
     char_set_armor(OLC_MOB(d), LIMIT(i, 10, 200000));
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
+      char_mob_toggle(OLC_MOB(d), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_EXP:
     char_set_exp(OLC_MOB(d), LIMIT(i, 0, MAX_MOB_EXP));
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
+      char_mob_toggle(OLC_MOB(d), MOB_AUTOBALANCE);
     }
     break;
 

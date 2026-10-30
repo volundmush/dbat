@@ -30,8 +30,8 @@ void obj_to_room(struct obj_data *object, room_rnum room)
     obj_set_in_room(object, room);
     object->carried_by = NULL;
     obj_set_lload(object, time(0));
-    if (obj_get_type_flag(object) == ITEM_VEHICLE && !obj_flagged(object, ITEM_UNBREAKABLE) && obj_get_vnum(object) > 19199) {
-      SET_BIT_AR(obj_get_extra_flags(object), ITEM_UNBREAKABLE);
+    if (obj_get_type_flag(object) == ITEM_VEHICLE && !obj_extra_flagged(object, ITEM_UNBREAKABLE) && obj_get_vnum(object) > 19199) {
+      obj_extra_set(object, ITEM_UNBREAKABLE, true);
     } if (obj_get_type_flag(object) == ITEM_HATCH && obj_get_vnum(object) <= 19199) {
      if ((obj_get_vnum(object) <= 18999 && obj_get_vnum(object) >= 18800) || (obj_get_vnum(object) <= 19199 && obj_get_vnum(object) >= 19100)) {
       int hnum = obj_get_value(object, 0);
@@ -91,7 +91,7 @@ void obj_to_room(struct obj_data *object, room_rnum room)
      }
     }
     if (rroom_flagged(room, ROOM_HOUSE))
-      SET_BIT_AR(rroom_get_room_flags(room), ROOM_HOUSE_CRASH);
+      rroom_set_flag(room, ROOM_HOUSE_CRASH, true);
   }
 }
 
@@ -123,7 +123,7 @@ void obj_from_room(struct obj_data *object)
   REMOVE_FROM_LIST(object, world[obj_get_in_room(object)].contents, next_content, temp);
 
   if (rroom_flagged(obj_get_in_room(object), ROOM_HOUSE))
-    SET_BIT_AR(rroom_get_room_flags(obj_get_in_room(object)), ROOM_HOUSE_CRASH);
+    rroom_set_flag(obj_get_in_room(object), ROOM_HOUSE_CRASH, true);
   obj_set_in_room(object, NOWHERE);
   object->next_content = NULL;
 }
@@ -158,7 +158,7 @@ void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to)
     char_set_carry_weight(tmp_obj->carried_by, char_get_carry_weight(tmp_obj->carried_by) + (obj_get_weight(obj)));
   }
   if (obj_get_in_room(obj_to) != NOWHERE && rroom_flagged(obj_get_in_room(obj_to), ROOM_HOUSE)) {
-   SET_BIT_AR(rroom_get_room_flags(obj_get_in_room(obj_to)), ROOM_HOUSE_CRASH);
+   rroom_set_flag(obj_get_in_room(obj_to), ROOM_HOUSE_CRASH, true);
   }
 }
 
@@ -191,7 +191,7 @@ void obj_from_obj(struct obj_data *obj)
   }
 
   if (obj_get_in_room(obj_from) != NOWHERE && rroom_flagged(obj_get_in_room(obj_from), ROOM_HOUSE)) {
-   SET_BIT_AR(rroom_get_room_flags(obj_get_in_room(obj_from)), ROOM_HOUSE_CRASH);
+   rroom_set_flag(obj_get_in_room(obj_from), ROOM_HOUSE_CRASH, true);
   }
 
   obj->in_obj = NULL;
@@ -215,7 +215,7 @@ void char_from_room(struct char_data *ch)
   if (char_get_fighting(ch) != NULL && !char_aff_flagged(ch, AFF_PURSUIT))
     stop_fighting(ch);
   if (char_aff_flagged(ch, AFF_PURSUIT) && char_get_fighting(ch) == NULL)
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_PURSUIT);
+    char_aff_set(ch, AFF_PURSUIT, false);
 
   for (i = 0; i < NUM_WEARS; i++)
     if (char_get_equipment(ch, i) != NULL)
@@ -261,7 +261,7 @@ void char_to_room(struct char_data *ch, room_rnum room)
     }
     if (!char_is_npc(ch)) {
      if (char_prf_flagged(ch, PRF_ARENAWATCH)) {
-      REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
+      char_prf_set(ch, PRF_ARENAWATCH, false);
       char_set_arenawatch(ch, -1);
      }
     }
@@ -279,7 +279,7 @@ void obj_to_char(struct obj_data *object, struct char_data *ch)
     obj_set_in_room(object, NOWHERE);
     char_set_carry_weight(ch, char_get_carry_weight(ch) + (obj_get_weight(object)));
     char_set_carry_items(ch, char_get_carry_items(ch) + 1);
-    if ((char_get_kaioken(ch) <= 0 && !char_aff_flagged(ch, AFF_METAMORPH)) && !obj_flagged(object, ITEM_THROW)) {
+    if ((char_get_kaioken(ch) <= 0 && !char_aff_flagged(ch, AFF_METAMORPH)) && !obj_extra_flagged(object, ITEM_THROW)) {
 
     } else if (GET_HIT(ch) > getEffMaxPL(ch)) {
        if (char_get_kaioken(ch) > 0) {
@@ -296,7 +296,7 @@ void obj_to_char(struct obj_data *object, struct char_data *ch)
      }
     }
     if (!char_is_npc(ch))
-      SET_BIT_AR(char_get_act(ch), PLR_CRASH);
+      char_plr_set(ch, PLR_CRASH, true);
   } else
     log("SYSERR: NULL obj (%p) or char (%p) passed to obj_to_char.", object, ch);
 }
@@ -315,7 +315,7 @@ void obj_from_char(struct obj_data *object)
 
   /* set flag for crash-save system, but not on mobs! */
   if (!char_is_npc(object->carried_by))
-    SET_BIT_AR(char_get_act(object->carried_by), PLR_CRASH);
+    char_plr_set(object->carried_by, PLR_CRASH, true);
  
   int64_t previous = getEffMaxPL(object->carried_by);
 
@@ -371,11 +371,11 @@ static int apply_ac(struct char_data *ch, int eq_pos)
 
 int invalid_align(struct char_data *ch, struct obj_data *obj)
 {
-  if (obj_flagged(obj, ITEM_ANTI_EVIL) && char_is_evil(ch))
+  if (obj_extra_flagged(obj, ITEM_ANTI_EVIL) && char_is_evil(ch))
     return TRUE;
-  if (obj_flagged(obj, ITEM_ANTI_GOOD) && char_is_good(ch))
+  if (obj_extra_flagged(obj, ITEM_ANTI_GOOD) && char_is_good(ch))
     return TRUE;
-  if (obj_flagged(obj, ITEM_ANTI_NEUTRAL) && char_is_neutral(ch))
+  if (obj_extra_flagged(obj, ITEM_ANTI_NEUTRAL) && char_is_neutral(ch))
     return TRUE;
   return FALSE;
 }

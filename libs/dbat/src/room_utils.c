@@ -162,3 +162,28 @@ struct room_direction_data *room_get_dir_option(const struct room_data *room, in
 void room_set_dir_option(struct room_data *room, int i, struct room_direction_data *v) {
     room->dir_option[i] = v;
 }
+
+/* Room flag setters and toggles; the rroom_ versions take a world[] rnum. */
+
+bool room_flagged(const struct room_data *room, int flag) {
+    return IS_SET_AR(room->room_flags, flag) != 0;
+}
+
+void room_set_flag(struct room_data *room, int flag, bool on) {
+    if (on)
+        SET_BIT_AR(room->room_flags, flag);
+    else
+        REMOVE_BIT_AR(room->room_flags, flag);
+}
+
+bool room_toggle_flag(struct room_data *room, int flag) {
+    return (TOGGLE_BIT_AR(room->room_flags, flag) & Q_BIT(flag)) != 0;
+}
+
+void rroom_set_flag(room_rnum room, int flag, bool on) {
+    room_set_flag(&world[room], flag, on);
+}
+
+bool rroom_toggle_flag(room_rnum room, int flag) {
+    return room_toggle_flag(&world[room], flag);
+}

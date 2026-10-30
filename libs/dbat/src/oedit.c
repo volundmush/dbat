@@ -189,7 +189,7 @@ ACMD(do_oasis_oedit)
   /** Send the OLC message to the players in the same room as the builder.   **/
   /****************************************************************************/
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
-  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
+  char_plr_set(ch, PLR_WRITING, true);
   
   /****************************************************************************/
   /** Log the OLC message.                                                   **/
@@ -206,7 +206,7 @@ void oedit_setup_new(struct descriptor_data *d)
   OLC_OBJ(d)->name = strdup("unfinished object");
   OLC_OBJ(d)->description = strdup("An unfinished object is lying here.");
   OLC_OBJ(d)->short_description = strdup("an unfinished object");
-  SET_BIT_AR(obj_get_wear_flags(OLC_OBJ(d)), ITEM_WEAR_TAKE);
+  obj_wear_set(OLC_OBJ(d), ITEM_WEAR_TAKE, true);
   OLC_VAL(d) = 0;
   OLC_ITEM_TYPE(d) = OBJ_TRIGGER;
   obj_set_type_flag(OLC_OBJ(d), ITEM_WORN);
@@ -1122,12 +1122,12 @@ void oedit_parse(struct descriptor_data *d, char *arg)
           copy_proto_script(&obj_proto[robj], obj, OBJ_TRIGGER);
           assign_triggers(obj, OBJ_TRIGGER);
         }
-        SET_BIT_AR(obj_get_extra_flags(obj), ITEM_UNIQUE_SAVE);
+        obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
   /* Xap - ought to save the old pointer, free after assignment I suppose */
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
                "OLC: %s iedit a unique #%d", char_get_name(d->character), obj_get_vnum(obj));
         if (d->character) {
-          REMOVE_BIT_AR(char_get_act(d->character), PLR_WRITING);
+          char_plr_set(d->character, PLR_WRITING, false);
           desc_set_connected(d, CON_PLAYING);
           act("$n stops using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
         }
@@ -1325,7 +1325,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     } else if (number == 0)
       break;
     else {
-      TOGGLE_BIT_AR(obj_get_extra_flags(OLC_OBJ(d)), number - 1);
+      obj_extra_toggle(OLC_OBJ(d), number - 1);
       oedit_disp_extra_menu(d);
       return;
     }
@@ -1339,7 +1339,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     } else if (number == 0)	/* Quit. */
       break;
     else {
-      TOGGLE_BIT_AR(obj_get_wear_flags(OLC_OBJ(d)), (number - 1));
+      obj_wear_toggle(OLC_OBJ(d), (number - 1));
       oedit_disp_wear_menu(d);
       return;
     }
@@ -1382,7 +1382,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     if (number > 0 && number <= NUM_AFF_FLAGS) {
       /* Setting AFF_CHARM on objects like this is dangerous. */
       if (number != AFF_CHARM) {
-        TOGGLE_BIT_AR(obj_get_bitvector(OLC_OBJ(d)), number);
+        obj_aff_toggle(OLC_OBJ(d), number);
       }
     } 
     oedit_disp_perm_menu(d);
@@ -1833,9 +1833,9 @@ ACMD(do_iedit) {
 
                 /* set up here */
   CREATE(OLC(ch->desc), struct oasis_olc_data, 1);
-  SET_BIT_AR(obj_get_extra_flags(k), ITEM_UNIQUE_SAVE);
+  obj_extra_set(k, ITEM_UNIQUE_SAVE, true);
 
-  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
+  char_plr_set(ch, PLR_WRITING, true);
   iedit_setup_existing(ch->desc,k);
   OLC_VAL(ch->desc) = 0;
 

@@ -214,11 +214,11 @@ void affect_modify(struct char_data * ch, int loc, int mod, int spec, long bitv,
 {
   if (add) {
    if (bitv != AFF_INFRAVISION || !char_is_android(ch)) {
-    SET_BIT_AR(char_get_affected_by(ch), bitv);
+    char_aff_set(ch, bitv, true);
    }
   } else {
    if (bitv != AFF_INFRAVISION || !char_is_android(ch)) {
-    REMOVE_BIT_AR(char_get_affected_by(ch), bitv);
+    char_aff_set(ch, bitv, false);
     mod = -mod;
    }
   }
@@ -236,7 +236,7 @@ void affect_modify_ar(struct char_data * ch, int loc, int mod, int spec, bitvect
       for(j = 0; j < 32; j++)
         if(IS_SET_AR(bitv, (i*32)+j)) {
          if ((i*32)+j != AFF_INFRAVISION || !char_is_android(ch)) {
-          SET_BIT_AR(char_get_affected_by(ch), (i*32)+j);
+          char_aff_set(ch, (i*32)+j, true);
          }
         }
   } else {
@@ -244,7 +244,7 @@ void affect_modify_ar(struct char_data * ch, int loc, int mod, int spec, bitvect
       for(j = 0; j < 32; j++)
         if(IS_SET_AR(bitv, (i*32)+j)) {
          if ((i*32)+j != AFF_INFRAVISION || !char_is_android(ch)) {
-          REMOVE_BIT_AR(char_get_affected_by(ch), (i*32)+j);
+          char_aff_set(ch, (i*32)+j, false);
          }
         }
     mod = -mod;

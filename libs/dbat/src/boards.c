@@ -503,7 +503,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
   obj = read_object(board_vnum, REAL);
   bnum = obj_get_vnum(obj);
   char clan[120];
-   if (obj_flagged(obj, ITEM_CBOARD)) {
+   if (obj_extra_flagged(obj, ITEM_CBOARD)) {
     if (char_get_clan(ch) != NULL) {
       sprintf(clan, "%s", char_get_clan(ch));
     }
@@ -622,7 +622,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
   obj = read_object(board_vnum, REAL);
   bnum = obj_get_vnum(obj);
    char clan[200];
-   if (obj_flagged(obj, ITEM_CBOARD)) {
+   if (obj_extra_flagged(obj, ITEM_CBOARD)) {
     if (char_get_clan(ch) != NULL) {
       sprintf(clan, "%s", char_get_clan(ch));
     }
@@ -837,7 +837,7 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg)
   BOARD_MESSAGES(thisboard) = message;
   send_to_char(ch,"Write your message.  (/s saves /h for help)\r\n");
 
-  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
+  char_plr_set(ch, PLR_WRITING, true);
   string_write(ch->desc, &(MESG_DATA(message)), MAX_MESSAGE_LENGTH, board_vnum + BOARD_MAGIC, NULL);
   if (board_vnum == 3092) {
    BOARDNEWMORT = time(0);
@@ -928,7 +928,7 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum){
   act("@C$n@w starts writing on the board.@n", TRUE, ch, 0, 0, TO_ROOM);
 
   if (!char_is_npc(ch)) {
-    SET_BIT_AR(char_get_act(ch), PLR_WRITING);
+    char_plr_set(ch, PLR_WRITING, true);
   }
 
   /* don't need number anymore, so we'll reuse it. */
@@ -1033,7 +1033,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg)
   else {
    char clan[120];
    obj = read_object(board_vnum, REAL);
-   if (obj_flagged(obj, ITEM_CBOARD)) {
+   if (obj_extra_flagged(obj, ITEM_CBOARD)) {
     if (char_get_clan(ch) != NULL) {
       sprintf(clan, "%s", char_get_clan(ch));
     }
@@ -1046,7 +1046,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg)
           return;
     }
    }
-   else if (!obj_flagged(obj, ITEM_CBOARD)) {
+   else if (!obj_extra_flagged(obj, ITEM_CBOARD)) {
      if (char_get_admlevel(ch) < REMOVE_LVL(thisboard) && strcmp(char_get_name(ch), MESG_POSTER_NAME(cur))) {
 	  send_to_char(ch, "You can't remove other people's messages.\r\n");
           extract_obj(obj);

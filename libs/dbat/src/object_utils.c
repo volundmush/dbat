@@ -12,39 +12,39 @@ int wearable_obj(struct obj_data *obj)
 {
   int pass = FALSE;
 
-    if (obj_can_wear(obj, ITEM_WEAR_FINGER))
+    if (obj_wear_flagged(obj, ITEM_WEAR_FINGER))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_NECK))
+    if (obj_wear_flagged(obj, ITEM_WEAR_NECK))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_BODY))
+    if (obj_wear_flagged(obj, ITEM_WEAR_BODY))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_HEAD))
+    if (obj_wear_flagged(obj, ITEM_WEAR_HEAD))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_LEGS))
+    if (obj_wear_flagged(obj, ITEM_WEAR_LEGS))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_FEET))
+    if (obj_wear_flagged(obj, ITEM_WEAR_FEET))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_HANDS))
+    if (obj_wear_flagged(obj, ITEM_WEAR_HANDS))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_ARMS))
+    if (obj_wear_flagged(obj, ITEM_WEAR_ARMS))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_SHIELD))
+    if (obj_wear_flagged(obj, ITEM_WEAR_SHIELD))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_ABOUT))
+    if (obj_wear_flagged(obj, ITEM_WEAR_ABOUT))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_WAIST))
+    if (obj_wear_flagged(obj, ITEM_WEAR_WAIST))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_WRIST))
+    if (obj_wear_flagged(obj, ITEM_WEAR_WRIST))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_WIELD))
+    if (obj_wear_flagged(obj, ITEM_WEAR_WIELD))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_EYE))
+    if (obj_wear_flagged(obj, ITEM_WEAR_EYE))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_PACK))
+    if (obj_wear_flagged(obj, ITEM_WEAR_PACK))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_SH))
+    if (obj_wear_flagged(obj, ITEM_WEAR_SH))
      pass = TRUE;
-    if (obj_can_wear(obj, ITEM_WEAR_EAR))
+    if (obj_wear_flagged(obj, ITEM_WEAR_EAR))
      pass = TRUE;
   
   if (pass == TRUE)
@@ -55,7 +55,7 @@ int wearable_obj(struct obj_data *obj)
 
 void randomize_eq(struct obj_data *obj)
 {
-    if (wearable_obj(obj) && !obj_flagged(obj, ITEM_NORANDOM)) {
+    if (wearable_obj(obj) && !obj_extra_flagged(obj, ITEM_NORANDOM)) {
      int value = 0, slot = 0, roll = rand_number(2, 12), slot1 = 1, slot2 = 1, slot3 = 1, slot4 = 1, slot5 = 1, slot6 = 1;
      int stat = 0;
      int strength = FALSE, wisdom = FALSE, intelligence = FALSE, dexterity = FALSE, speed = FALSE, constitution = FALSE;
@@ -308,9 +308,9 @@ void randomize_eq(struct obj_data *obj)
      }
      int dice = rand_number(2, 12);
      if (dice >= 10) {
-      SET_BIT_AR(obj_get_extra_flags(obj), ITEM_SLOT2);
+      obj_extra_set(obj, ITEM_SLOT2, true);
      } else if (dice >= 7) {
-      SET_BIT_AR(obj_get_extra_flags(obj), ITEM_SLOT1);
+      obj_extra_set(obj, ITEM_SLOT1, true);
      }
     }
 }
@@ -409,7 +409,7 @@ struct obj_data *create_money(int amount)
   obj_set_value(obj, VAL_ALL_HEALTH, 100); 
   for(y = 0; y < TW_ARRAY_MAX; y++)
     obj->wear_flags[y] = 0;
-  SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_TAKE);
+  obj_wear_set(obj, ITEM_WEAR_TAKE, true);
   obj_set_value(obj, VAL_MONEY_SIZE, amount);
   obj_set_cost(obj, amount);
   obj->item_number = NOTHING;
@@ -460,7 +460,7 @@ bool obj_val_flagged(const struct obj_data *obj, bitvector_t flag) {
     return (IS_SET(obj_get_value((obj), VAL_CONTAINER_FLAGS), (flag)));
 }
 
-bool obj_flagged(const struct obj_data *obj, int flag) {
+bool obj_extra_flagged(const struct obj_data *obj, int flag) {
     return (IS_SET_AR(obj_get_extra_flags(obj), (flag)));
 }
 
@@ -476,7 +476,7 @@ bool obj_is_corpse(const struct obj_data *obj) {
     return (obj_get_type_flag(obj) == ITEM_CONTAINER && obj_get_value((obj), VAL_CONTAINER_CORPSE) == 1);
 }
 
-bool obj_can_wear(const struct obj_data *obj, int part) {
+bool obj_wear_flagged(const struct obj_data *obj, int part) {
     return (IS_SET_AR(obj_get_wear_flags(obj), (part)));
 }
 
@@ -756,4 +756,41 @@ void obj_set_in_room(struct obj_data *obj, room_rnum v) {
 
 struct room_direction_data *obj_get_exit(const struct obj_data *obj, int door) {
     return world[obj_get_in_room(obj)].dir_option[door];
+}
+
+/* Flag setters and toggles. */
+
+static void flag_array_set(bitvector_t *array, int flag, bool on) {
+    if (on)
+        SET_BIT_AR(array, flag);
+    else
+        REMOVE_BIT_AR(array, flag);
+}
+
+static bool flag_array_toggle(bitvector_t *array, int flag) {
+    return (TOGGLE_BIT_AR(array, flag) & Q_BIT(flag)) != 0;
+}
+
+void obj_extra_set(struct obj_data *obj, int flag, bool on) {
+    flag_array_set(obj_get_extra_flags(obj), flag, on);
+}
+
+bool obj_extra_toggle(struct obj_data *obj, int flag) {
+    return flag_array_toggle(obj_get_extra_flags(obj), flag);
+}
+
+void obj_aff_set(struct obj_data *obj, int flag, bool on) {
+    flag_array_set(obj_get_bitvector(obj), flag, on);
+}
+
+bool obj_aff_toggle(struct obj_data *obj, int flag) {
+    return flag_array_toggle(obj_get_bitvector(obj), flag);
+}
+
+void obj_wear_set(struct obj_data *obj, int flag, bool on) {
+    flag_array_set(obj_get_wear_flags(obj), flag, on);
+}
+
+bool obj_wear_toggle(struct obj_data *obj, int flag) {
+    return flag_array_toggle(obj_get_wear_flags(obj), flag);
 }

@@ -974,7 +974,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
       mag_affectsv(level, ch, mob, spellnum);
     char_set_carry_weight(mob, 0);
     char_set_carry_items(mob, 0);
-    SET_BIT_AR(char_get_affected_by(mob), AFF_CHARM);
+    char_aff_set(mob, AFF_CHARM, true);
     act(mag_summon_msgs[msg], FALSE, ch, 0, mob, TO_ROOM);
     load_mtrigger(mob);
     add_follower(mob, ch);
@@ -1103,15 +1103,15 @@ void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
 
   switch (spellnum) {
     case SPELL_BLESS:
-      if (!obj_flagged(obj, ITEM_BLESS) &&
+      if (!obj_extra_flagged(obj, ITEM_BLESS) &&
 	  (obj_get_weight(obj) <= 5 * level)) {
-	SET_BIT_AR(obj_get_extra_flags(obj), ITEM_BLESS);
+	obj_extra_set(obj, ITEM_BLESS, true);
 	to_char = "$p glows briefly.";
       }
       break;
     case SPELL_INVISIBLE:
-      if (!obj_flagged(obj, ITEM_NOINVIS | ITEM_INVISIBLE)) {
-        SET_BIT_AR(obj_get_extra_flags(obj), ITEM_INVISIBLE);
+      if (!obj_extra_flagged(obj, ITEM_NOINVIS | ITEM_INVISIBLE)) {
+        obj_extra_set(obj, ITEM_INVISIBLE, true);
         to_char = "$p vanishes.";
       }
       break;
@@ -1124,8 +1124,8 @@ void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
       }
       break;
     case SPELL_REMOVE_CURSE:
-      if (obj_flagged(obj, ITEM_NODROP)) {
-        REMOVE_BIT_AR(obj_get_extra_flags(obj), ITEM_NODROP);
+      if (obj_extra_flagged(obj, ITEM_NODROP)) {
+        obj_extra_set(obj, ITEM_NODROP, false);
         if (obj_get_type_flag(obj) == ITEM_WEAPON)
           obj_set_value(obj, VAL_WEAPON_DAMSIZE, obj_get_value(obj, VAL_WEAPON_DAMSIZE) + 1);
         to_char = "$p briefly glows blue.";

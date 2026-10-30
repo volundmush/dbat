@@ -728,7 +728,7 @@ SPECIAL(janitor)
     return (FALSE);
 
   for (i = world[char_get_in_room(ch)].contents; i; i = i->next_content) {
-    if (!obj_can_wear(i, ITEM_WEAR_TAKE))
+    if (!obj_wear_flagged(i, ITEM_WEAR_TAKE))
       continue;
     if (obj_get_type_flag(i) == ITEM_DRINKCON || obj_get_cost(i) >= 100)
       continue;
@@ -840,7 +840,7 @@ SPECIAL(pet_shops)
 
     pet = read_mobile(char_get_nr(pet), REAL);
     char_set_exp(pet, 0);
-    SET_BIT_AR(char_get_affected_by(pet), AFF_CHARM);
+    char_aff_set(pet, AFF_CHARM, true);
 
     if (*pet_name) {
       snprintf(buf, sizeof(buf), "%s %s", pet->name, pet_name);
@@ -1024,12 +1024,12 @@ SPECIAL(auction)
      return (TRUE);
     }
 
-    if (obj_flagged(obj2, ITEM_BROKEN)) {
+    if (obj_extra_flagged(obj2, ITEM_BROKEN)) {
      act("$P is broken and we will not accept it.", FALSE, ch, 0, obj2, TO_CHAR);
      return (TRUE);
     }
 
-    if (obj_flagged(obj2, ITEM_NODONATE)) {
+    if (obj_extra_flagged(obj2, ITEM_NODONATE)) {
      act("$P is junk and we will not accept it.", FALSE, ch, 0, obj2, TO_CHAR);
      return (TRUE);
     }
@@ -1113,7 +1113,7 @@ SPECIAL(healtank)
     } else if (obj_get_healcharge(htank) <= 0) {
      send_to_char(ch, "That healing tank needs to recharge, wait a while.\r\n");
      return (TRUE);
-    } else if (obj_flagged(htank, ITEM_BROKEN)) {
+    } else if (obj_extra_flagged(htank, ITEM_BROKEN)) {
      send_to_char(ch, "It is broken! You will need to fix it yourself or wait for someone else to fix it.\r\n");
      return (TRUE);
     } else if (char_get_sits(ch)) {
@@ -1124,12 +1124,12 @@ SPECIAL(healtank)
      return (TRUE);
     } else {
      char_set_charge(ch, 0);
-     REMOVE_BIT_AR(char_get_act(ch), PLR_CHARGE);
+     char_plr_set(ch, PLR_CHARGE, false);
      char_set_chargeto(ch, 0);
      char_set_barrier(ch, 0);
      act("@wYou step inside the healing tank and put on its breathing mask. A water like solution pours over your body until the tank is full.@n", TRUE, ch, 0, 0, TO_CHAR);
      act("@C$n@w steps inside the healing tank and puts on its breathing mask. A water like solution pours over $s body until the tank is full.@n", TRUE, ch, 0, 0, TO_ROOM);
-     SET_BIT_AR(char_get_act(ch), PLR_HEALT);
+     char_plr_set(ch, PLR_HEALT, true);
      char_set_sits(ch, htank);
      obj_set_sitting(htank, ch);
      return (TRUE);
@@ -1145,7 +1145,7 @@ SPECIAL(healtank)
    else {
     act("@wThe healing tank drains and you exit it shortly after.", TRUE, ch, 0, 0, TO_CHAR);
     act("@C$n@w exits the healing tank after letting it drain.@n", TRUE, ch, 0, 0, TO_ROOM);
-    REMOVE_BIT_AR(char_get_act(ch), PLR_HEALT);
+    char_plr_set(ch, PLR_HEALT, false);
     obj_set_sitting(htank, NULL);
     char_set_sits(ch, NULL);
     return (TRUE);
@@ -1314,7 +1314,7 @@ SPECIAL(gravity)
                     "          [  300 | 400 | 500 | 1,000 | 5,000 | 10,000  ]@n\r\n");
     return (TRUE);
    }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It's broken!\r\n");
     return (TRUE);
    }
@@ -1347,7 +1347,7 @@ SPECIAL(gravity)
     send_to_char(ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
-     REMOVE_BIT_AR(rroom_get_room_flags(char_get_in_room(ch)), ROOM_AURA);
+     rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
      send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
     rroom_set_gravity(char_get_in_room(ch), 10);
@@ -1369,7 +1369,7 @@ SPECIAL(gravity)
     send_to_char(ch, "You punch in twenty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
-     REMOVE_BIT_AR(rroom_get_room_flags(char_get_in_room(ch)), ROOM_AURA);
+     rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
      send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
     rroom_set_gravity(char_get_in_room(ch), 20);
@@ -1384,7 +1384,7 @@ SPECIAL(gravity)
     send_to_char(ch, "You punch in thirty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
-     REMOVE_BIT_AR(rroom_get_room_flags(char_get_in_room(ch)), ROOM_AURA);
+     rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
      send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
     rroom_set_gravity(char_get_in_room(ch), 30);
@@ -1399,7 +1399,7 @@ SPECIAL(gravity)
     send_to_char(ch, "You punch in fourty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
-     REMOVE_BIT_AR(rroom_get_room_flags(char_get_in_room(ch)), ROOM_AURA);
+     rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
      send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
     rroom_set_gravity(char_get_in_room(ch), 40);
@@ -1414,7 +1414,7 @@ SPECIAL(gravity)
     send_to_char(ch, "You punch in fifty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
-     REMOVE_BIT_AR(rroom_get_room_flags(char_get_in_room(ch)), ROOM_AURA);
+     rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
      send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
     rroom_set_gravity(char_get_in_room(ch), 50);
@@ -1429,7 +1429,7 @@ SPECIAL(gravity)
     send_to_char(ch, "You punch in one hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
-     REMOVE_BIT_AR(rroom_get_room_flags(char_get_in_room(ch)), ROOM_AURA);
+     rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
      send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
     rroom_set_gravity(char_get_in_room(ch), 100);
@@ -1444,7 +1444,7 @@ SPECIAL(gravity)
     send_to_char(ch, "You punch in two hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
-     REMOVE_BIT_AR(rroom_get_room_flags(char_get_in_room(ch)), ROOM_AURA);
+     rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
      send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
     rroom_set_gravity(char_get_in_room(ch), 200);
@@ -1459,7 +1459,7 @@ SPECIAL(gravity)
     send_to_char(ch, "You punch in three hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
-     REMOVE_BIT_AR(rroom_get_room_flags(char_get_in_room(ch)), ROOM_AURA);
+     rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
      send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
     rroom_set_gravity(char_get_in_room(ch), 300);
@@ -1474,7 +1474,7 @@ SPECIAL(gravity)
     send_to_char(ch, "You punch in four hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
-     REMOVE_BIT_AR(rroom_get_room_flags(char_get_in_room(ch)), ROOM_AURA);
+     rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
      send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
     rroom_set_gravity(char_get_in_room(ch), 400);
@@ -1489,7 +1489,7 @@ SPECIAL(gravity)
     send_to_char(ch, "You punch in five hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
-     REMOVE_BIT_AR(rroom_get_room_flags(char_get_in_room(ch)), ROOM_AURA);
+     rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
      send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
     rroom_set_gravity(char_get_in_room(ch), 500);
@@ -1504,7 +1504,7 @@ SPECIAL(gravity)
     send_to_char(ch, "You punch in one thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
-     REMOVE_BIT_AR(rroom_get_room_flags(char_get_in_room(ch)), ROOM_AURA);
+     rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
      send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
     rroom_set_gravity(char_get_in_room(ch), 1000);
@@ -1519,7 +1519,7 @@ SPECIAL(gravity)
     send_to_char(ch, "You punch in five thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
-     REMOVE_BIT_AR(rroom_get_room_flags(char_get_in_room(ch)), ROOM_AURA);
+     rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
      send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
     rroom_set_gravity(char_get_in_room(ch), 5000);
@@ -1534,7 +1534,7 @@ SPECIAL(gravity)
     send_to_char(ch, "You punch in ten thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
     if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
-     REMOVE_BIT_AR(rroom_get_room_flags(char_get_in_room(ch)), ROOM_AURA);
+     rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
      send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
     rroom_set_gravity(char_get_in_room(ch), 10000);
@@ -1571,7 +1571,7 @@ SPECIAL(bank)
    }
 
   if (CMD_IS("balance")) {
-    if (obj_flagged(obj, ITEM_BROKEN)) {
+    if (obj_extra_flagged(obj, ITEM_BROKEN)) {
      send_to_char(ch, "The ATM is broken!\r\n");
      return (TRUE);
     }
@@ -1587,7 +1587,7 @@ SPECIAL(bank)
 
     two_arguments(argument, arg, arg2);
 
-    if (obj_flagged(obj, ITEM_BROKEN)) {
+    if (obj_extra_flagged(obj, ITEM_BROKEN)) {
      send_to_char(ch, "The ATM is broken!\r\n");
      return (TRUE);
     }
@@ -1648,7 +1648,7 @@ SPECIAL(bank)
     return (TRUE);
   } else if (CMD_IS("deposit")) {
 
-    if (obj_flagged(obj, ITEM_BROKEN)) {
+    if (obj_extra_flagged(obj, ITEM_BROKEN)) {
      send_to_char(ch, "The ATM is broken!\r\n");
      return (TRUE);
     }
@@ -1668,7 +1668,7 @@ SPECIAL(bank)
     return (TRUE);
   } else if (CMD_IS("withdraw")) {
 
-    if (obj_flagged(obj, ITEM_BROKEN)) {
+    if (obj_extra_flagged(obj, ITEM_BROKEN)) {
      send_to_char(ch, "The ATM is broken!\r\n");
      return (TRUE);
     }

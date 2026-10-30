@@ -497,7 +497,7 @@ ACMD(do_mload)
       /* special handling to make objects able to load on a person/in a container/worn etc. */
       if (!target || !*target) {
         add_unique_id(object);
-        if (obj_can_wear(object, ITEM_WEAR_TAKE)) {
+        if (obj_wear_flagged(object, ITEM_WEAR_TAKE)) {
             obj_to_char(object, ch);
         } else {
             obj_to_room(object, char_get_in_room(ch));

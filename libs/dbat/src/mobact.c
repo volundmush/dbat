@@ -67,7 +67,7 @@ void mob_absorb(struct char_data *ch, struct char_data *vict)
     if (char_get_speedi(ch) < char_get_speedi(vict)) {
      zanzo = TRUE;
     } else {
-     REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ZANZOKEN);
+     char_aff_set(ch, AFF_ZANZOKEN, false);
     }
    } else {
     zanzo = TRUE;
@@ -75,13 +75,13 @@ void mob_absorb(struct char_data *ch, struct char_data *vict)
    if (zanzo == TRUE) {
     act("@R$n@c tries to grab @RYOU@c but you @Czanzoken@c out of the way!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@R$n@ctries to grab @R$N@c but $E @Czanzokens@c out of the way!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ZANZOKEN);
-    REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
+    char_aff_set(ch, AFF_ZANZOKEN, false);
+    char_aff_set(vict, AFF_ZANZOKEN, false);
     return;
    } else {
     act("@cYou try to @Czanzoken@c out of @R$n's@c reach, but $e is too fast!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@c$N tries to @Czanzoken@c out of @R$n's@c reach, but $e is too fast!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
+    char_aff_set(vict, AFF_ZANZOKEN, false);
    }
   }
 
@@ -136,7 +136,7 @@ void mobile_activity(void)
       if (mob_index[char_get_nr(ch)].func == NULL) {
 	log("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
 		char_get_name(ch), char_get_mob_vnum(ch));
-	REMOVE_BIT_AR(char_get_act(ch), MOB_SPEC);
+	char_mob_set(ch, MOB_SPEC, false);
       } else {
         char actbuf[MAX_INPUT_LENGTH] = "";
 	if ((mob_index[char_get_nr(ch)].func) (ch, ch, 0, actbuf))
@@ -158,7 +158,7 @@ void mobile_activity(void)
 	    best_obj = obj;
 	    max = obj_get_cost(obj);
 	  }
-	if (best_obj != NULL && char_can_get_obj(ch, best_obj) && obj_get_type_flag(best_obj) != ITEM_BED && !obj_get_posted_to(best_obj) && !obj_flagged(best_obj, ITEM_NOPICKUP)) {
+	if (best_obj != NULL && char_can_get_obj(ch, best_obj) && obj_get_type_flag(best_obj) != ITEM_BED && !obj_get_posted_to(best_obj) && !obj_extra_flagged(best_obj, ITEM_NOPICKUP)) {
           switch (rand_number(1, 5)) {
            case 1:
             act("$n@W says, '@CFinders keepers, losers weepers.@W'@n", TRUE, ch, 0, 0, TO_ROOM);

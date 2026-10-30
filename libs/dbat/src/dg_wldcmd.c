@@ -124,9 +124,9 @@ WCMD(do_weffect)
     return;
    } else {
     if (!rroom_flagged(target, ROOM_INDOORS)) {
-     SET_BIT_AR(rroom_get_room_flags(target), ROOM_INDOORS);
+     rroom_set_flag(target, ROOM_INDOORS, true);
     } else {
-     REMOVE_BIT_AR(rroom_get_room_flags(target), ROOM_INDOORS);
+     rroom_set_flag(target, ROOM_INDOORS, false);
     }
    }
   } else if (!strcasecmp(arg, "lava")) {

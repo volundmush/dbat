@@ -161,9 +161,9 @@ void copyover_recover()
     if ((player_i = load_char(name, d->character)) >= 0) {
      char_set_pfilepos(d->character, player_i);
      if (!char_plr_flagged(d->character, PLR_DELETED)) {
-        REMOVE_BIT_AR(char_get_act(d->character), PLR_WRITING);
-        REMOVE_BIT_AR(char_get_act(d->character), PLR_MAILING);
-        REMOVE_BIT_AR(char_get_act(d->character), PLR_CRYO);
+        char_plr_set(d->character, PLR_WRITING, false);
+        char_plr_set(d->character, PLR_MAILING, false);
+        char_plr_set(d->character, PLR_CRYO, false);
         userLoad(d, username);
      }
      /*else
@@ -1927,7 +1927,7 @@ void set_color(struct descriptor_data *d)
       CREATE(d->character->player_specials, struct player_special_data, 1);
       d->character->desc = d;
     }
-  SET_BIT_AR(PRF_FLAGS(d->character), PRF_COLOR);
+  char_prf_set(d->character, PRF_COLOR, true);
   write_to_output(d, GREETANSI);
   write_to_output(d, "\r\n@w                  Welcome to Dragonball Advent Truth\r\n");
   write_to_output(d, "@D                 ---(@CPeak Logon Count Today@W: @w%4d@D)---@n\r\n", PCOUNT);
@@ -2774,7 +2774,7 @@ int arena_watch(struct char_data *ch)
  }
 
  if (found == FALSE) {
-  REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
+  char_prf_set(ch, PRF_ARENAWATCH, false);
   char_set_arenawatch(ch, -1);
   return (NOWHERE);
  } else {

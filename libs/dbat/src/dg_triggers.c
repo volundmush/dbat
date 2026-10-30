@@ -769,15 +769,15 @@ int command_otrigger(char_data *actor, char *cmd, char *argument)
 
   for (i = 0; i < NUM_WEARS; i++)
     if (char_get_equipment(actor, i))
-      if (cmd_otrig(char_get_equipment(actor, i), actor, cmd, argument, OCMD_EQUIP) && !obj_flagged(char_get_equipment(actor, i), ITEM_FORGED))
+      if (cmd_otrig(char_get_equipment(actor, i), actor, cmd, argument, OCMD_EQUIP) && !obj_extra_flagged(char_get_equipment(actor, i), ITEM_FORGED))
         return 1;
 
   for (obj = actor->carrying; obj; obj = obj->next_content)
-    if (cmd_otrig(obj, actor, cmd, argument, OCMD_INVEN) && !obj_flagged(obj, ITEM_FORGED))
+    if (cmd_otrig(obj, actor, cmd, argument, OCMD_INVEN) && !obj_extra_flagged(obj, ITEM_FORGED))
       return 1;
 
   for (obj = world[char_get_in_room(actor)].contents; obj; obj = obj->next_content)
-    if (cmd_otrig(obj, actor, cmd, argument, OCMD_ROOM) && !obj_flagged(obj, ITEM_FORGED))
+    if (cmd_otrig(obj, actor, cmd, argument, OCMD_ROOM) && !obj_extra_flagged(obj, ITEM_FORGED))
       return 1;
 
   return 0;

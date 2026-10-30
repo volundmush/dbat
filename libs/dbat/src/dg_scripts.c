@@ -222,27 +222,27 @@ int find_eq_pos_script(char *arg)
 int can_wear_on_pos(struct obj_data *obj, int pos)
 {
   switch (pos) {
-    case WEAR_WIELD1:   return obj_can_wear(obj, ITEM_WEAR_WIELD);
-    case WEAR_WIELD2:   return obj_can_wear(obj, ITEM_WEAR_TAKE);
+    case WEAR_WIELD1:   return obj_wear_flagged(obj, ITEM_WEAR_WIELD);
+    case WEAR_WIELD2:   return obj_wear_flagged(obj, ITEM_WEAR_TAKE);
     case WEAR_FINGER_R:
-    case WEAR_FINGER_L: return obj_can_wear(obj, ITEM_WEAR_FINGER);
+    case WEAR_FINGER_L: return obj_wear_flagged(obj, ITEM_WEAR_FINGER);
     case WEAR_NECK_1:
-    case WEAR_NECK_2:   return obj_can_wear(obj, ITEM_WEAR_NECK);
-    case WEAR_BODY:     return obj_can_wear(obj, ITEM_WEAR_BODY);
-    case WEAR_HEAD:     return obj_can_wear(obj, ITEM_WEAR_HEAD);
-    case WEAR_LEGS:     return obj_can_wear(obj, ITEM_WEAR_LEGS);
-    case WEAR_FEET:     return obj_can_wear(obj, ITEM_WEAR_FEET);
-    case WEAR_HANDS:    return obj_can_wear(obj, ITEM_WEAR_HANDS);
-    case WEAR_ARMS:     return obj_can_wear(obj, ITEM_WEAR_ARMS);
-    case WEAR_ABOUT:    return obj_can_wear(obj, ITEM_WEAR_ABOUT);
-    case WEAR_WAIST:    return obj_can_wear(obj, ITEM_WEAR_WAIST);
+    case WEAR_NECK_2:   return obj_wear_flagged(obj, ITEM_WEAR_NECK);
+    case WEAR_BODY:     return obj_wear_flagged(obj, ITEM_WEAR_BODY);
+    case WEAR_HEAD:     return obj_wear_flagged(obj, ITEM_WEAR_HEAD);
+    case WEAR_LEGS:     return obj_wear_flagged(obj, ITEM_WEAR_LEGS);
+    case WEAR_FEET:     return obj_wear_flagged(obj, ITEM_WEAR_FEET);
+    case WEAR_HANDS:    return obj_wear_flagged(obj, ITEM_WEAR_HANDS);
+    case WEAR_ARMS:     return obj_wear_flagged(obj, ITEM_WEAR_ARMS);
+    case WEAR_ABOUT:    return obj_wear_flagged(obj, ITEM_WEAR_ABOUT);
+    case WEAR_WAIST:    return obj_wear_flagged(obj, ITEM_WEAR_WAIST);
     case WEAR_WRIST_R:
-    case WEAR_WRIST_L:  return obj_can_wear(obj, ITEM_WEAR_WRIST);
-    case WEAR_BACKPACK: return obj_can_wear(obj, ITEM_WEAR_PACK);
+    case WEAR_WRIST_L:  return obj_wear_flagged(obj, ITEM_WEAR_WRIST);
+    case WEAR_BACKPACK: return obj_wear_flagged(obj, ITEM_WEAR_PACK);
     case WEAR_EAR_R:
-    case WEAR_EAR_L:    return obj_can_wear(obj, ITEM_WEAR_EAR);
-    case WEAR_SH:       return obj_can_wear(obj, ITEM_WEAR_SH);
-    case WEAR_EYE:      return obj_can_wear(obj, ITEM_WEAR_EYE);
+    case WEAR_EAR_L:    return obj_wear_flagged(obj, ITEM_WEAR_EAR);
+    case WEAR_SH:       return obj_wear_flagged(obj, ITEM_WEAR_SH);
+    case WEAR_EYE:      return obj_wear_flagged(obj, ITEM_WEAR_EYE);
     default: return FALSE;
   }
 }

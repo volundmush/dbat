@@ -130,10 +130,10 @@ void hsedit_save_internally(struct descriptor_data *d)
   } 
   /* The new house is stored - now to ensure the roomsflags are correct */ 
   if (real_room(OLC_HOUSE(d)->vnum) != NOWHERE) 
-    SET_BIT_AR(rroom_get_room_flags(real_room(OLC_HOUSE(d)->vnum)), ROOM_HOUSE);
+    rroom_set_flag(real_room(OLC_HOUSE(d)->vnum), ROOM_HOUSE, true);
 
   if (real_room(OLC_HOUSE(d)->atrium) != NOWHERE) 
-    SET_BIT_AR(rroom_get_room_flags(real_room(OLC_HOUSE(d)->atrium)), ROOM_ATRIUM); 
+    rroom_set_flag(real_room(OLC_HOUSE(d)->atrium), ROOM_ATRIUM, true); 
 
 //  olc_add_to_save_list(zone_table[OLC_ZNUM(d)].number, OLC_SAVE_HOUSE); 
 } 
@@ -171,7 +171,7 @@ void hedit_delete_house(struct descriptor_data *d, int house_vnum)
   if ((real_house = real_room(house_control[i].vnum)) == NOWHERE) 
     log("SYSERR: House %d had invalid vnum %d!", house_vnum, house_control[i].vnum); 
   else 
-    REMOVE_BIT_AR(rroom_get_room_flags(real_house), ROOM_HOUSE | ROOM_HOUSE_CRASH); 
+    rroom_set_flag(real_house, ROOM_HOUSE | ROOM_HOUSE_CRASH, false); 
 
   House_delete_file(house_control[i].vnum); 
 
@@ -1186,7 +1186,7 @@ ACMD(do_oasis_hsedit)
   
 /****************************************************************************/ 
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM); 
-  SET_BIT_AR(char_get_act(ch), PLR_WRITING); 
+  char_plr_set(ch, PLR_WRITING, true); 
   
   
 /****************************************************************************/ 

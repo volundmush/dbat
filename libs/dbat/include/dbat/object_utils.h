@@ -18,7 +18,13 @@ obj_vnum obj_get_vnum(const struct obj_data *obj);
 
 bool obj_aff_flagged(const struct obj_data *obj, int flag);
 bool obj_val_flagged(const struct obj_data *obj, bitvector_t flag);
-bool obj_flagged(const struct obj_data *obj, int flag);
+bool obj_extra_flagged(const struct obj_data *obj, int flag);
+void obj_extra_set(struct obj_data *obj, int flag, bool on);
+bool obj_extra_toggle(struct obj_data *obj, int flag);
+void obj_aff_set(struct obj_data *obj, int flag, bool on);
+bool obj_aff_toggle(struct obj_data *obj, int flag);
+void obj_wear_set(struct obj_data *obj, int flag, bool on);
+bool obj_wear_toggle(struct obj_data *obj, int flag);
 
 bool obj_valid_rnum(const struct obj_data *obj);
 
@@ -87,7 +93,7 @@ spec_proc_func obj_get_spec(const struct obj_data *obj);
 
 bool obj_is_corpse(const struct obj_data *obj);
 
-bool obj_can_wear(const struct obj_data *obj, int part);
+bool obj_wear_flagged(const struct obj_data *obj, int part);
 char *obj_get_short_description(const struct obj_data *obj);
 void obj_set_short_description(struct obj_data *obj, char *v);
 

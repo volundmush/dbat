@@ -811,9 +811,9 @@ in the vault (vnum: 453) now and then. you can just use
           else if (!strcasecmp(field, "is_killer")) {
             if (subfield && *subfield) {
               if (!strcasecmp("on", subfield))
-                SET_BIT_AR(char_get_act(c), PLR_KILLER);
+                char_plr_set(c, PLR_KILLER, true);
               else if (!strcasecmp("off", subfield))
-                REMOVE_BIT_AR(char_get_act(c), PLR_KILLER);
+                char_plr_set(c, PLR_KILLER, false);
             }
             if (char_plr_flagged(c, PLR_KILLER))
               strcpy(str, "1");
@@ -824,9 +824,9 @@ in the vault (vnum: 453) now and then. you can just use
           else if (!strcasecmp(field, "is_thief")) {
             if (subfield && *subfield) {
               if (!strcasecmp("on", subfield))
-                SET_BIT_AR(char_get_act(c), PLR_THIEF);
+                char_plr_set(c, PLR_THIEF, true);
               else if (!strcasecmp("off", subfield))
-                REMOVE_BIT_AR(char_get_act(c), PLR_THIEF);
+                char_plr_set(c, PLR_THIEF, false);
             }
             if (char_plr_flagged(c, PLR_THIEF))
               strcpy(str, "1");
@@ -1218,8 +1218,8 @@ in the vault (vnum: 453) now and then. you can just use
            if (subfield && *subfield) {
               int addition = atoi(subfield);
               obj_set_value(o, VAL_ALL_HEALTH, MAX(1, addition + obj_get_value(o, VAL_ALL_HEALTH)));
-              if (obj_flagged(o, ITEM_BROKEN) && obj_get_value(o, VAL_ALL_HEALTH) >= 100)
-               REMOVE_BIT_AR(obj_get_extra_flags(o), ITEM_BROKEN);
+              if (obj_extra_flagged(o, ITEM_BROKEN) && obj_get_value(o, VAL_ALL_HEALTH) >= 100)
+               obj_extra_set(o, ITEM_BROKEN, false);
            }
              snprintf(str, slen, "%d", obj_get_value(o, VAL_ALL_HEALTH));
           }
@@ -1240,7 +1240,7 @@ in the vault (vnum: 453) now and then. you can just use
           else if (!strcasecmp(field, "itemflag")) {
              if (subfield && *subfield) {
                int item = get_flag_by_name(extra_bits, subfield);
-               if (item != NOFLAG && obj_flagged(o, item))
+               if (item != NOFLAG && obj_extra_flagged(o, item))
                  strcpy(str, "1");
                else
                  strcpy(str, "0");
@@ -1292,7 +1292,7 @@ in the vault (vnum: 453) now and then. you can just use
             if (subfield && *subfield) {
               int ns;
               if ((ns = check_flags_by_name_ar(obj_get_bitvector(o), NUM_AFF_FLAGS, subfield, affected_bits)) > 0) {
-                TOGGLE_BIT_AR(obj_get_bitvector(o), ns);
+                obj_aff_toggle(o, ns);
                 snprintf(str, slen, "1");
               }
             }
@@ -1301,7 +1301,7 @@ in the vault (vnum: 453) now and then. you can just use
             if (subfield && *subfield) {
               int ns;
               if ((ns = check_flags_by_name_ar(obj_get_extra_flags(o), NUM_ITEM_FLAGS, subfield, extra_bits)) > 0) {
-                TOGGLE_BIT_AR(obj_get_extra_flags(o), ns);
+                obj_extra_toggle(o, ns);
                 snprintf(str, slen, "1");
               }
             }
@@ -1478,7 +1478,7 @@ in the vault (vnum: 453) now and then. you can just use
           "lightning"
         };
 
-        if (!IS_SET_AR(r->room_flags, ROOM_INDOORS))
+        if (!room_flagged(r, ROOM_INDOORS))
           snprintf(str, slen, "%s", sky_look[weather_info.sky]);
         else
           *str = '\0';

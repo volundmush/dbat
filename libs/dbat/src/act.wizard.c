@@ -435,7 +435,7 @@ ACMD(do_approve)
   send_to_char(ch, "They have already been approved. If this was made in error inform Iovan.\r\n");
   return;
  } else {
-  SET_BIT_AR(char_get_act(vict), PLR_BIOGR);
+  char_plr_set(vict, PLR_BIOGR, true);
   send_to_char(ch, "They have now been approved.\r\n");
   return;
  }
@@ -2459,10 +2459,10 @@ ACMD(do_syslog)
     send_to_char(ch, "Usage: syslog { Off | Brief | Normal | Complete }\r\n");
     return;
   }
-  REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_LOG1);
-  REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_LOG2);
-  if (tp & 1) SET_BIT_AR(PRF_FLAGS(ch), PRF_LOG1);
-  if (tp & 2) SET_BIT_AR(PRF_FLAGS(ch), PRF_LOG2);
+  char_prf_set(ch, PRF_LOG1, false);
+  char_prf_set(ch, PRF_LOG2, false);
+  if (tp & 1) char_prf_set(ch, PRF_LOG1, true);
+  if (tp & 2) char_prf_set(ch, PRF_LOG2, true);
 
   send_to_char(ch, "Your syslog is now %s.\r\n", logtypes[tp]);
 }
@@ -3265,8 +3265,8 @@ ACMD(do_wizutil)
 	send_to_char(ch, "Your victim is not flagged.\r\n");
 	return;
       }
-      REMOVE_BIT_AR(char_get_act(vict), PLR_THIEF);
-      REMOVE_BIT_AR(char_get_act(vict), PLR_KILLER);
+      char_plr_set(vict, PLR_THIEF, false);
+      char_plr_set(vict, PLR_KILLER, false);
       send_to_char(ch, "Pardoned.\r\n");
       send_to_char(vict, "You have been pardoned by the Gods!\r\n");
       mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s pardoned by %s", char_get_name(vict), char_get_name(ch));
@@ -3297,7 +3297,7 @@ ACMD(do_wizutil)
 	send_to_char(ch, "Your victim is already pretty cold.\r\n");
 	return;
       }
-      SET_BIT_AR(char_get_act(vict), PLR_FROZEN);
+      char_plr_set(vict, PLR_FROZEN, true);
       GET_FREEZE_LEV(vict) = char_get_admlevel(ch);
       send_to_char(vict, "A bitter wind suddenly rises and drains every erg of heat from your body!\r\nYou feel frozen!\r\n");
       send_to_char(ch, "Frozen.\r\n");
@@ -3315,7 +3315,7 @@ ACMD(do_wizutil)
 	return;
       }
       mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s un-frozen by %s.", char_get_name(vict), char_get_name(ch));
-      REMOVE_BIT_AR(char_get_act(vict), PLR_FROZEN);
+      char_plr_set(vict, PLR_FROZEN, false);
       send_to_char(vict, "A fireball suddenly explodes in front of you, melting the ice!\r\nYou feel thawed.\r\n");
       send_to_char(ch, "Thawed.\r\n");
       act("A sudden fireball conjured from nowhere thaws $n!", FALSE, vict, 0, 0, TO_ROOM);
@@ -4134,12 +4134,12 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     break;
   case 42:
     if (!strcasecmp(val_arg, "off")) {
-      REMOVE_BIT_AR(char_get_act(vict), PLR_LOADROOM);
+      char_plr_set(vict, PLR_LOADROOM, false);
       GET_LOADROOM(vict) = NOWHERE;
     } else if (is_number(val_arg)) {
       rvnum = atoi(val_arg);
       if (real_room(rvnum) != NOWHERE) {
-        SET_BIT_AR(char_get_act(vict), PLR_LOADROOM);
+        char_plr_set(vict, PLR_LOADROOM, true);
 	GET_LOADROOM(vict) = rvnum;
 	send_to_char(ch, "%s will enter at room #%d.\r\n", char_get_name(vict), GET_LOADROOM(vict));
       } else {
@@ -5032,7 +5032,7 @@ ACMD (do_zcheck)
         case ITEM_ARMOR:
           ac=obj_get_value(obj, 0);
           for (j=0; j<TOTAL_WEAR_CHECKS;j++) {
-            if (obj_can_wear(obj,zarmor[j].bitvector) && (ac>zarmor[j].ac_allowed) && (found=1))
+            if (obj_wear_flagged(obj,zarmor[j].bitvector) && (ac>zarmor[j].ac_allowed) && (found=1))
               len += snprintf(buf + len, sizeof(buf) - len,
                                    "- Has AC %d (%s limit is %d)\r\n",
                                    ac, zarmor[j].message, zarmor[j].ac_allowed);
@@ -5041,7 +5041,7 @@ ACMD (do_zcheck)
      
       }  /*switch on Item_Type*/
 
-      if (!obj_can_wear(obj, ITEM_WEAR_TAKE)) {
+      if (!obj_wear_flagged(obj, ITEM_WEAR_TAKE)) {
         if ((obj_get_cost(obj) || (obj_get_weight(obj) && obj_get_type_flag(obj) != ITEM_FOUNTAIN) ||
            obj_get_cost_per_day(obj)) && (found = 1))
           len += snprintf(buf + len, sizeof(buf) - len,

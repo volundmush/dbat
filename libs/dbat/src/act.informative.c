@@ -299,10 +299,10 @@ static void search_room(struct char_data *ch)
  struct obj_data *obj = NULL;
 
  for (obj = world[char_get_in_room(ch)].contents; obj;obj=obj->next_content) {
-  if (obj_flagged(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200)) {
+  if (obj_extra_flagged(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200)) {
    act("@YYou uncover @y$p@Y, which had been burried here.@n", TRUE, ch, obj, 0, TO_CHAR);
    act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", TRUE, ch, obj, 0, TO_ROOM);
-   REMOVE_BIT_AR(obj_get_extra_flags(obj), ITEM_BURIED);
+   obj_extra_set(obj, ITEM_BURIED, false);
    found++;
   }
  }
@@ -539,7 +539,7 @@ ACMD(do_shuffle)
 
  for (obj2 = obj->contains; obj2; obj2 = next_obj) {
   next_obj = obj2->next_content;
-  if (!obj_flagged(obj2, ITEM_ANTI_HIEROPHANT)) {
+  if (!obj_extra_flagged(obj2, ITEM_ANTI_HIEROPHANT)) {
    continue;
   }
   count += 1;
@@ -557,7 +557,7 @@ ACMD(do_shuffle)
  while (count > 0) {
  for (obj2 = world[real_room(48)].contents; obj2; obj2 = next_obj) {
     next_obj = obj2->next_content;
-   if (!obj_flagged(obj2, ITEM_ANTI_HIEROPHANT)) {
+   if (!obj_extra_flagged(obj2, ITEM_ANTI_HIEROPHANT)) {
     continue;
    }
    if (obj2 && count > 1 && rand_number(1, 4) == 3) {
@@ -594,7 +594,7 @@ ACMD(do_hand)
    send_to_char(ch, "@CYour hand contains:\r\n@D---------------------------@n\r\n");
    for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
-     if (obj && !obj_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
+     if (obj && !obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
       continue;
      }
      if (obj) {
@@ -621,7 +621,7 @@ ACMD(do_hand)
    act("@C$n's hand contains:\r\n@D---------------------------@n", TRUE, ch, 0, 0, TO_ROOM);
    for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
-     if (obj && !obj_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
+     if (obj && !obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
       continue;
      }
      if (obj) {
@@ -2280,7 +2280,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
       see_plant(obj, ch);
       return;
     }
-    if (obj_flagged(obj, ITEM_BURIED)) {
+    if (obj_extra_flagged(obj, ITEM_BURIED)) {
      char bury[MAX_INPUT_LENGTH];
      if (!obj_is_corpse(obj)) {
       if (obj_get_weight(obj) < 10) {
@@ -2333,7 +2333,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
       send_to_char(ch, "%s@w, has been posted here.@n", obj->short_description);
      }
     } else {
-     if (!obj_flagged(obj, ITEM_BURIED)) {
+     if (!obj_extra_flagged(obj, ITEM_BURIED)) {
       send_to_char(ch, "%s@n", obj->description);
      }
     }
@@ -2345,9 +2345,9 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
        send_to_char(ch, "\r\n@c...its door is open@n");
      }
      if (obj_get_type_flag(obj) == ITEM_CONTAINER && !obj_is_corpse(obj)) {
-      if (!obj_val_flagged(obj, CONT_CLOSED) && !obj_flagged(obj, ITEM_SHEATH))
+      if (!obj_val_flagged(obj, CONT_CLOSED) && !obj_extra_flagged(obj, ITEM_SHEATH))
        send_to_char(ch, ". @D[@G-open-@D]@n");
-      else if (!obj_flagged(obj, ITEM_SHEATH))
+      else if (!obj_extra_flagged(obj, ITEM_SHEATH))
        send_to_char(ch, ". @D[@rclosed@D]@n");
      }
      if (obj_get_type_flag(obj) == ITEM_HATCH) {
@@ -2421,10 +2421,10 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      if (obj_get_vnum(obj) == 3423) {
       send_to_char(ch, " @D[@B%d@D/@B24 Inks@D]@n", obj_get_value(obj, 6));
      }
-     if (obj_flagged(obj, ITEM_THROW)) {
+     if (obj_extra_flagged(obj, ITEM_THROW)) {
        send_to_char(ch, " @D[@RThrow Only@D]@n");
      }
-     if (obj_get_type_flag(obj) == ITEM_PLANT && !obj_flagged(obj, ITEM_MATURE)) {
+     if (obj_get_type_flag(obj) == ITEM_PLANT && !obj_extra_flagged(obj, ITEM_MATURE)) {
       if (obj_get_value(obj, VAL_WATERLEVEL) < -9) {
        send_to_char(ch, "@D[@RDead@D]@n");
       } else {
@@ -2454,12 +2454,12 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
       }
      }
      if (obj_get_type_flag(obj) == ITEM_CONTAINER && !obj_is_corpse(obj)) {
-      if (!obj_val_flagged(obj, CONT_CLOSED) && !obj_flagged(obj, ITEM_SHEATH))
+      if (!obj_val_flagged(obj, CONT_CLOSED) && !obj_extra_flagged(obj, ITEM_SHEATH))
        send_to_char(ch, " @D[@G-open-@D]@n");
-      else if (!obj_flagged(obj, ITEM_SHEATH))
+      else if (!obj_extra_flagged(obj, ITEM_SHEATH))
        send_to_char(ch, " @D[@rclosed@D]@n");
      }
-     if (obj_flagged(obj, ITEM_DUPLICATE)) {
+     if (obj_extra_flagged(obj, ITEM_DUPLICATE)) {
       send_to_char(ch, " @D[@YDuplicate@D]@n");
      }
     break;
@@ -2663,41 +2663,41 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
 {
   int found = FALSE;
 
-  if (obj_flagged(obj, ITEM_INVISIBLE)) {
+  if (obj_extra_flagged(obj, ITEM_INVISIBLE)) {
     send_to_char(ch, " (invisible)");
     found++;
   }
-  if (obj_flagged(obj, ITEM_BLESS) && char_aff_flagged(ch, AFF_DETECT_ALIGN)) {
+  if (obj_extra_flagged(obj, ITEM_BLESS) && char_aff_flagged(ch, AFF_DETECT_ALIGN)) {
     send_to_char(ch, " ..It glows blue!");
     found++;
   }
-  if (obj_flagged(obj, ITEM_MAGIC) && char_aff_flagged(ch, AFF_DETECT_MAGIC)) {
+  if (obj_extra_flagged(obj, ITEM_MAGIC) && char_aff_flagged(ch, AFF_DETECT_MAGIC)) {
     send_to_char(ch, " ..It glows yellow!");
     found++;
   }
-  if (obj_flagged(obj, ITEM_GLOW)) {
+  if (obj_extra_flagged(obj, ITEM_GLOW)) {
     send_to_char(ch, " @D(@GGlowing@D)@n");
     found++;
   }
-  if (obj_flagged(obj, ITEM_HOT)) {
+  if (obj_extra_flagged(obj, ITEM_HOT)) {
    send_to_char(ch, " @D(@RHOT@D)@n");
    found++;
   }
-  if (obj_flagged(obj, ITEM_HUM)) {
+  if (obj_extra_flagged(obj, ITEM_HUM)) {
     send_to_char(ch, " @D(@RHumming@D)@n");
     found++;
   }
-  if (obj_flagged(obj, ITEM_SLOT2)) {
-   if (obj_flagged(obj, ITEM_SLOT_ONE) && !obj_flagged(obj, ITEM_SLOTS_FILLED))
+  if (obj_extra_flagged(obj, ITEM_SLOT2)) {
+   if (obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED))
     send_to_char(ch, " @D[@m1/2 Tokens@D]@n");
-   else if (obj_flagged(obj, ITEM_SLOTS_FILLED))
+   else if (obj_extra_flagged(obj, ITEM_SLOTS_FILLED))
     send_to_char(ch, " @D[@m2/2 Tokens@D]@n");
    else
     send_to_char(ch, " @D[@m0/2 Tokens@D]@n");
    found++;
   }
-  if (obj_flagged(obj, ITEM_SLOT1)) {
-   if (obj_flagged(obj, ITEM_SLOTS_FILLED))
+  if (obj_extra_flagged(obj, ITEM_SLOT1)) {
+   if (obj_extra_flagged(obj, ITEM_SLOTS_FILLED))
     send_to_char(ch, " @D[@m1/1 Tokens@D]@n");
    else
     send_to_char(ch, " @D[@m0/1 Tokens@D]@n");
@@ -2708,13 +2708,13 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
     send_to_char(ch, " %d meters away", num);
     found++;
   }
-  if (obj_flagged(obj, ITEM_CUSTOM)) {
+  if (obj_extra_flagged(obj, ITEM_CUSTOM)) {
    send_to_char(ch, " @D(@YCUSTOM@D)@n");
   }
-  if (obj_flagged(obj, ITEM_RESTRING)) {
+  if (obj_extra_flagged(obj, ITEM_RESTRING)) {
    send_to_char(ch, " @D(@R%s@D)@n", char_get_admlevel(ch) > 0 ? obj->name : "*");
   }
-  if (obj_flagged(obj, ITEM_BROKEN)) {
+  if (obj_extra_flagged(obj, ITEM_BROKEN)) {
    if (obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_STEEL || obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_MITHRIL || obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_METAL) {
     send_to_char(ch, ", and appears to be twisted and broken.");
    }
@@ -2767,11 +2767,11 @@ static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mo
     if (CONFIG_STACK_OBJS) {
       for (j = list; j != i; j = j->next_content)
        if ((!strcasecmp(j->short_description, i->short_description) && !strcasecmp(j->description, i->description)) &&
-            (j->item_number == i->item_number) && ((obj_flagged(j, ITEM_BROKEN) && obj_flagged(i, ITEM_BROKEN)) || (!obj_flagged(j, ITEM_BROKEN) && !obj_flagged(i, ITEM_BROKEN))))
+            (j->item_number == i->item_number) && ((obj_extra_flagged(j, ITEM_BROKEN) && obj_extra_flagged(i, ITEM_BROKEN)) || (!obj_extra_flagged(j, ITEM_BROKEN) && !obj_extra_flagged(i, ITEM_BROKEN))))
          if ((!obj_get_sitting(j) && !obj_get_sitting(i)))
           if (obj_get_value(j, 6) == obj_get_value(i, 6))
             if ((obj_get_type_flag(j) != ITEM_PLANT && obj_get_type_flag(i) != ITEM_PLANT) || (obj_get_type_flag(j) == ITEM_PLANT && obj_get_type_flag(i) == ITEM_PLANT && obj_get_value(j, VAL_MATURITY) == obj_get_value(i, VAL_MATURITY) && obj_get_value(j, VAL_WATERLEVEL) == obj_get_value(i, VAL_WATERLEVEL)))
-            if ((!obj_flagged(j, ITEM_DUPLICATE) && !obj_flagged(i, ITEM_DUPLICATE)) || (obj_flagged(j, ITEM_DUPLICATE) && obj_flagged(i, ITEM_DUPLICATE)))
+            if ((!obj_extra_flagged(j, ITEM_DUPLICATE) && !obj_extra_flagged(i, ITEM_DUPLICATE)) || (obj_extra_flagged(j, ITEM_DUPLICATE) && obj_extra_flagged(i, ITEM_DUPLICATE)))
              if (obj_get_posttype(j) == 0 && obj_get_posttype(i) == 0)
               if (!obj_get_fellow_wall(j) && !obj_get_fellow_wall(i))
                if ((obj_get_value(j, 0) == obj_get_value(i, 0) && obj_get_vnum(j) == 255 && obj_get_vnum(i) == 255) || (obj_get_vnum(j) != 255 && obj_get_vnum(i) != 255))
@@ -2780,12 +2780,12 @@ static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mo
         continue;
       for (d = j = i; j; j = j->next_content)
        if ((!strcasecmp(j->short_description, i->short_description) && !strcasecmp(j->description, i->description)) &&
-            (j->item_number == i->item_number) && ((obj_flagged(j, ITEM_BROKEN) && obj_flagged(i, ITEM_BROKEN)) || (!obj_flagged(j, ITEM_BROKEN) && !obj_flagged(i, ITEM_BROKEN))))
+            (j->item_number == i->item_number) && ((obj_extra_flagged(j, ITEM_BROKEN) && obj_extra_flagged(i, ITEM_BROKEN)) || (!obj_extra_flagged(j, ITEM_BROKEN) && !obj_extra_flagged(i, ITEM_BROKEN))))
          if ((!obj_get_sitting(j) && !obj_get_sitting(i)))
           if (obj_get_posttype(j) == 0 && obj_get_posttype(i) == 0)
            if (obj_get_value(j, 6) == obj_get_value(i, 6))
             if ((obj_get_type_flag(j) != ITEM_PLANT && obj_get_type_flag(i) != ITEM_PLANT) || (obj_get_type_flag(j) == ITEM_PLANT && obj_get_type_flag(i) == ITEM_PLANT && obj_get_value(j, VAL_MATURITY) == obj_get_value(i, VAL_MATURITY) && obj_get_value(j, VAL_WATERLEVEL) == obj_get_value(i, VAL_WATERLEVEL)))
-             if ((!obj_flagged(j, ITEM_DUPLICATE) && !obj_flagged(i, ITEM_DUPLICATE)) || (obj_flagged(j, ITEM_DUPLICATE) && obj_flagged(i, ITEM_DUPLICATE)))
+             if ((!obj_extra_flagged(j, ITEM_DUPLICATE) && !obj_extra_flagged(i, ITEM_DUPLICATE)) || (obj_extra_flagged(j, ITEM_DUPLICATE) && obj_extra_flagged(i, ITEM_DUPLICATE)))
               if (!obj_get_fellow_wall(j) && !obj_get_fellow_wall(i))
                if ((obj_get_value(j, 0) == obj_get_value(i, 0) && obj_get_vnum(i) == 255 && obj_get_vnum(j) == 255) || (obj_get_vnum(j) != 255 && obj_get_vnum(i) != 255))
                if (char_can_see_obj(ch, j)) {
@@ -3085,7 +3085,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 			if (char_get_equipment(i, j) && char_can_see_obj(ch, char_get_equipment(i, j)) && (j != WEAR_WIELD1 && j != WEAR_WIELD2)) {
 				send_to_char(ch, "%s", wear_where[j]);
 				show_obj_to_char(char_get_equipment(i, j), ch, SHOW_OBJ_SHORT);
-				if (obj_flagged(char_get_equipment(i, j), ITEM_SHEATH)) {
+				if (obj_extra_flagged(char_get_equipment(i, j), ITEM_SHEATH)) {
 					struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = char_get_equipment(i, j);
 					for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
 						next_obj = obj2->next_content;
@@ -3100,7 +3100,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 			else if (char_get_equipment(i, j) && char_can_see_obj(ch, char_get_equipment(i, j)) && (!char_plr_flagged(i, PLR_THANDW))) {
 				send_to_char(ch, "%s", wear_where[j]);
 				show_obj_to_char(char_get_equipment(i, j), ch, SHOW_OBJ_SHORT);
-				if (obj_flagged(char_get_equipment(i, j), ITEM_SHEATH)) {
+				if (obj_extra_flagged(char_get_equipment(i, j), ITEM_SHEATH)) {
 					struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = char_get_equipment(i, j);
 					for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
 						next_obj = obj2->next_content;
@@ -4363,16 +4363,16 @@ ACMD(do_autoexit)
   }
   switch (tp) {
     case EXIT_OFF:
-      REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_AUTOEXIT);
-      REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_FULL_EXIT);
+      char_prf_set(ch, PRF_AUTOEXIT, false);
+      char_prf_set(ch, PRF_FULL_EXIT, false);
       break;
     case EXIT_NORMAL:
-      SET_BIT_AR(PRF_FLAGS(ch), PRF_AUTOEXIT);
-      REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_FULL_EXIT);
+      char_prf_set(ch, PRF_AUTOEXIT, true);
+      char_prf_set(ch, PRF_FULL_EXIT, false);
       break;
     case EXIT_COMPLETE:
-      SET_BIT_AR(PRF_FLAGS(ch), PRF_AUTOEXIT);
-      SET_BIT_AR(PRF_FLAGS(ch), PRF_FULL_EXIT);
+      char_prf_set(ch, PRF_AUTOEXIT, true);
+      char_prf_set(ch, PRF_FULL_EXIT, true);
       break;
   }
   send_to_char(ch, "Your @rautoexit level@n is now %s.\r\n", exitlevels[char_exit_level(ch)]);
@@ -6707,7 +6707,7 @@ ACMD(do_inventory)
   send_to_char(ch, "@w              @YInventory\r\n@D-------------------------------------@w\r\n");
   if (!char_is_npc(ch)) {
    if (char_plr_flagged(ch, PLR_STOLEN)) {
-    REMOVE_BIT_AR(char_get_act(ch), PLR_STOLEN);
+    char_plr_set(ch, PLR_STOLEN, false);
     send_to_char(ch, "@r   --------------------------------------------------@n\n");
     send_to_char(ch, "@R    You notice that you have been robbed sometime recently!\n");
     send_to_char(ch, "@r   --------------------------------------------------@n\n");
@@ -6729,7 +6729,7 @@ ACMD(do_equipment)
 	send_to_char(ch, "%s", wear_where[i]);
 	show_obj_to_char(char_get_equipment(ch, i), ch, SHOW_OBJ_SHORT);
 
-       if (obj_flagged(char_get_equipment(ch, i), ITEM_SHEATH)) {
+       if (obj_extra_flagged(char_get_equipment(ch, i), ITEM_SHEATH)) {
          struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = char_get_equipment(ch, i);
          for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
          next_obj = obj2->next_content;
@@ -6744,7 +6744,7 @@ ACMD(do_equipment)
       } else if (char_can_see_obj(ch, char_get_equipment(ch, i)) && (!char_plr_flagged(ch, PLR_THANDW))) {
         send_to_char(ch, "%s", wear_where[i]);
         show_obj_to_char(char_get_equipment(ch, i), ch, SHOW_OBJ_SHORT);
-        if (obj_flagged(char_get_equipment(ch, i), ITEM_SHEATH)) {
+        if (obj_extra_flagged(char_get_equipment(ch, i), ITEM_SHEATH)) {
          struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = char_get_equipment(ch, i);
          for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
          next_obj = obj2->next_content;
@@ -7905,10 +7905,10 @@ ACMD(do_color)
   }
   switch (tp) {
     case C_OFF:
-      REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_COLOR);
+      char_prf_set(ch, PRF_COLOR, false);
       break;
     case C_ON:
-      SET_BIT_AR(PRF_FLAGS(ch), PRF_COLOR);
+      char_prf_set(ch, PRF_COLOR, true);
       break;
   }
   send_to_char(ch, "Your color is now @o%s@n.\r\n", ctypes[tp]);

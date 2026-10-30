@@ -217,7 +217,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
      d->obj_editflag = EDIT_NONE;
      d->obj_editval = EDIT_NONE;
      d->character->gold -= 5000;
-     SET_BIT_AR(obj_get_extra_flags(obj), ITEM_RESTRING);
+     obj_extra_set(obj, ITEM_RESTRING, true);
      write_to_output(d, "Purchase complete.");
      send_to_imm("Restring Eq: %s has bought: %s, which was %s.", char_get_name(d->character), obj->short_description, d->obj_was);
      desc_set_connected(d, CON_PLAYING);
@@ -418,49 +418,49 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
       obj_to_char(obj, d->character);
       switch(d->obj_type) {
        case 1:
-        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_BODY);
+        obj_wear_set(obj, ITEM_WEAR_BODY, true);
         break;
        case 2:
-        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_ABOUT);
+        obj_wear_set(obj, ITEM_WEAR_ABOUT, true);
         break;
        case 3:
-        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_WRIST);
+        obj_wear_set(obj, ITEM_WEAR_WRIST, true);
         break;
        case 4:
-        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_EAR);
+        obj_wear_set(obj, ITEM_WEAR_EAR, true);
         break;
        case 5:
-        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_FINGER);
+        obj_wear_set(obj, ITEM_WEAR_FINGER, true);
         break;
        case 6:
-        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_EYE);
+        obj_wear_set(obj, ITEM_WEAR_EYE, true);
         break;
        case 7:
-        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_HANDS);
+        obj_wear_set(obj, ITEM_WEAR_HANDS, true);
        break;
        case 8:
-        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_FEET);
+        obj_wear_set(obj, ITEM_WEAR_FEET, true);
         break;
        case 9:
-        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_WAIST);
+        obj_wear_set(obj, ITEM_WEAR_WAIST, true);
         break;
        case 10:
-        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_LEGS);
+        obj_wear_set(obj, ITEM_WEAR_LEGS, true);
         break;
        case 11:
-        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_ARMS);
+        obj_wear_set(obj, ITEM_WEAR_ARMS, true);
         break;
        case 12:
-        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_HEAD);
+        obj_wear_set(obj, ITEM_WEAR_HEAD, true);
         break;
        case 13:
-        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_NECK);
+        obj_wear_set(obj, ITEM_WEAR_NECK, true);
         break;
        case 14:
-        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_PACK);
+        obj_wear_set(obj, ITEM_WEAR_PACK, true);
         break;
        case 15:
-        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_SH);
+        obj_wear_set(obj, ITEM_WEAR_SH, true);
         break;
       }
       *buf = '\0';
@@ -506,7 +506,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
       }
       obj_set_level(obj, 20);
      }
-     SET_BIT_AR(obj_get_extra_flags(obj), ITEM_SLOT2);
+     obj_extra_set(obj, ITEM_SLOT2, true);
      d->obj_editflag = EDIT_NONE;
      d->obj_editval = EDIT_NONE;
      d->character->rp -= 20;
@@ -514,7 +514,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
      d->rpp -= 20;
      userWrite(d, 0, 0, 0, "index");
      obj_set_size(obj, get_size(d->character));
-     SET_BIT_AR(obj_get_extra_flags(obj), ITEM_CUSTOM);
+     obj_extra_set(obj, ITEM_CUSTOM, true);
      send_to_imm("Custom Eq: %s has bought: %s.", char_get_name(d->character), obj->short_description);
      customWrite(d->character, obj);
      log_custom(d, obj);

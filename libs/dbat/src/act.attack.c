@@ -132,7 +132,7 @@ ACMD(do_lightgrenade)
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_VICT);
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-       REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
+       char_aff_set(vict, AFF_ZANZOKEN, false);
        pcost(vict, 0, GET_MAX_HIT(vict) / 200);
        if (vict == targ) {
         pcost(ch, attperc, 0);
@@ -209,11 +209,11 @@ ACMD(do_energize)
  } else {
   if (char_prf_flagged(ch, PRF_ENERGIZE)) {
     send_to_char(ch, "You stop focusing ki into your fingertips.\r\n");
-	REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ENERGIZE);
+	char_prf_set(ch, PRF_ENERGIZE, false);
 	return;
   } else {
     send_to_char(ch, "You start focusing your latent ki into your fingertips.\r\n");
-	SET_BIT_AR(PRF_FLAGS(ch), PRF_ENERGIZE);
+	char_prf_set(ch, PRF_ENERGIZE, true);
 	return;
   }
  }
@@ -298,13 +298,13 @@ ACMD(do_breath)
      if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
       send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
+      char_aff_set(vict, AFF_BURNED, true);
      } else if (char_get_bonuses(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
       send_to_char(ch, "@RThey appear to be fireproof!@n\r\n");
      } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
       send_to_char(vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are easily burned!@n\r\n");
-      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
+      char_aff_set(vict, AFF_BURNED, true);
      }
      hurt(0, 0, ch, vict, NULL, dmg, 0);
 
@@ -388,13 +388,13 @@ ACMD(do_breath)
      if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
       send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
+      char_aff_set(vict, AFF_BURNED, true);
      } else if (char_get_bonuses(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
       send_to_char(ch, "@RThey appear to be fireproof!@n\r\n");
      } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
       send_to_char(vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are easily burned!@n\r\n");
-      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
+      char_aff_set(vict, AFF_BURNED, true);
      }
    return;
   }
@@ -402,7 +402,7 @@ ACMD(do_breath)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -579,7 +579,7 @@ ACMD(do_ram)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -767,7 +767,7 @@ ACMD(do_strike)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -1079,7 +1079,7 @@ ACMD(do_sunder)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -1441,7 +1441,7 @@ ACMD(do_zen)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -1665,7 +1665,7 @@ ACMD(do_malice)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -1816,7 +1816,7 @@ ACMD(do_nova)
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_VICT);
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-       REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
+       char_aff_set(vict, AFF_ZANZOKEN, false);
        pcost(vict, 0, GET_MAX_HIT(vict) / 200);
        hurt(0, 0, ch, vict, NULL, 0, 1);
        continue;
@@ -2462,7 +2462,7 @@ ACMD(do_seishou)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -2544,7 +2544,7 @@ ACMD(do_throw)
     send_to_char(ch, "You do not have enough stamina to do it...\r\n");
     return;
    }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "That is broken and useless to throw!\r\n");
     return;
    }
@@ -2563,19 +2563,19 @@ ACMD(do_throw)
      chance -= chance * 0.25;
     }
 
-    if (obj_flagged(obj, ITEM_WEAPLVL1)) {
+    if (obj_extra_flagged(obj, ITEM_WEAPLVL1)) {
      damage += damage * 0.1;
      wlvl = 1;
-    } else if (obj_flagged(obj, ITEM_WEAPLVL2)) {
+    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL2)) {
      damage += damage * 0.2;
      wlvl = 2;
-    } else if (obj_flagged(obj, ITEM_WEAPLVL3)) {
+    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL3)) {
      damage += damage * 0.3;
      wlvl = 3;
-    } else if (obj_flagged(obj, ITEM_WEAPLVL4)) {
+    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL4)) {
      damage += damage * 0.4;
      wlvl = 4;
-    } else if (obj_flagged(obj, ITEM_WEAPLVL5)) {
+    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL5)) {
      damage += damage * 0.5;
      wlvl = 5;
     }
@@ -2617,7 +2617,7 @@ ACMD(do_throw)
     } else {
      odam = rand_number(90, 100);
     }
-    if (!obj_flagged(obj, ITEM_THROW)) {
+    if (!obj_extra_flagged(obj, ITEM_THROW)) {
      penalty = 15;
      multithrow = FALSE;
      damage = damage * 0.45;
@@ -2640,7 +2640,7 @@ ACMD(do_throw)
     }    
 
     int hot = FALSE;
-    if (obj_flagged(obj, ITEM_HOT)) {
+    if (obj_extra_flagged(obj, ITEM_HOT)) {
      hot = TRUE;
     }
 
@@ -2664,7 +2664,7 @@ ACMD(do_throw)
         char_set_combo(ch, -1);
         char_set_combhits(ch, 0);
         int stcost = ((GET_MAX_HIT(ch) / 200) + obj_get_weight(obj));
-        REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
+        char_aff_set(vict, AFF_ZANZOKEN, false);
         pcost(ch, 0, stcost / 2);
         pcost(vict, 0, GET_MAX_HIT(vict) / 200);
         obj_from_char(obj);
@@ -2673,7 +2673,7 @@ ACMD(do_throw)
     }
 
     if (perc - (perc2 / 10) < prob) {
-     if (obj_flagged(obj, ITEM_ICE) && char_is_demon(vict)) {
+     if (obj_extra_flagged(obj, ITEM_ICE) && char_is_demon(vict)) {
       act("You throw $p at $N@n, but it melts before touching $M!", TRUE, ch, obj, vict, TO_CHAR);
       act("$n@n throws $p at $N@n, but it melts before touching $M!", TRUE, ch, obj, vict, TO_NOTVICT);
       act("$n@n throws $p at you, but it melts before touching you!", TRUE, ch, obj, vict, TO_VICT);
@@ -2690,7 +2690,7 @@ ACMD(do_throw)
       act("$n@n throws $p at you, but thankfully misses you.", TRUE, ch, obj, vict, TO_VICT);
      }
         decCurST(ch, ((GET_MAX_HIT(ch) / 100) + obj_get_weight(obj)), 0);
-     if (!obj_flagged(obj, ITEM_UNBREAKABLE)) {
+     if (!obj_extra_flagged(obj, ITEM_UNBREAKABLE)) {
       obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) - (odam / 2));
      }
       char_set_lastattack(ch, -50);
@@ -2747,15 +2747,15 @@ ACMD(do_throw)
       act("$n@n pulls out and throws $p at $N@n full speed, and watches it hit $M!", TRUE, ch, obj, vict, TO_NOTVICT);
       act("$n@n pulls out and throws $p at you full speed. You reel as it hits your body!", TRUE, ch, obj, vict, TO_VICT);
      }
-     if (!obj_flagged(obj, ITEM_UNBREAKABLE)) {
+     if (!obj_extra_flagged(obj, ITEM_UNBREAKABLE)) {
       obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) - (odam));
      }
      char_set_lastattack(ch, -50);
-    if ((obj_get_value(obj, VAL_ALL_HEALTH) - odam) <= 0 && !obj_flagged(obj, ITEM_UNBREAKABLE)) {
+    if ((obj_get_value(obj, VAL_ALL_HEALTH) - odam) <= 0 && !obj_extra_flagged(obj, ITEM_UNBREAKABLE)) {
      act("You smile as $p breaks on $N's@n face!", TRUE, ch, obj, vict, TO_CHAR);
      act("$n@n smiles as $p breaks on $N's@n face!", TRUE, ch, obj, vict, TO_NOTVICT);
      act("$n@n smiles as $p breaks on your face!", TRUE, ch, obj, vict, TO_VICT);
-     TOGGLE_BIT_AR(obj_get_extra_flags(obj), ITEM_BROKEN);
+     obj_extra_toggle(obj, ITEM_BROKEN);
     } else if (char_get_aff_abils_dex(ch) >= axion_dice(0)) {
       if (char_is_android(vict) || char_is_mechanical(vict)) {
        act("@RSome pieces of metal are sent flying!@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -2770,7 +2770,7 @@ ACMD(do_throw)
        act("@RBlood flies out from the impact!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@RBlood flies out from the impact!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       }
-     if (obj_flagged(obj, ITEM_ICE)) {
+     if (obj_extra_flagged(obj, ITEM_ICE)) {
       if (!char_is_android(vict) && !char_is_icer(vict)) {
           decCurST(vict, (getMaxST(vict) * .005) + obj_get_weight(obj), 0);
        act("@mYou lose some stamina to the @ccold@m!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -2785,7 +2785,7 @@ ACMD(do_throw)
       act("@R$N@R is burned by it!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@RYou are burned by it!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@R$N@R is burned by it!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
+      char_aff_set(vict, AFF_BURNED, true);
       damage += damage * 0.4;
      }
     }
@@ -2957,18 +2957,18 @@ ACMD(do_selfd)
  if (!char_plr_flagged(ch, PLR_SELFD)) {
   act("@RYour body starts to glow @wwhite@R and flash. The flashes start out slowly but steadilly increase in speed. Your aura begins to burn around your body at the same time in a violent fashion!@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@R$n's body starts to glow @wwhite@R and flash. The flashes start out slowly but steadilly increase in speed. $n's aura begins to burn around $s body at the same time in a violent fashion!@n", TRUE, ch, 0, 0, TO_ROOM);
-  SET_BIT_AR(char_get_act(ch), PLR_SELFD);
+  char_plr_set(ch, PLR_SELFD, true);
   return;
  } else if (!char_plr_flagged(ch, PLR_SELFD2)) {
   act("@wYour body slowly stops flashing. Steam rises from your skin as you slowly let off the energy you built up in a safe manner.@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n", TRUE, ch, 0, 0, TO_ROOM);
-  REMOVE_BIT_AR(char_get_act(ch), PLR_SELFD);
+  char_plr_set(ch, PLR_SELFD, false);
   return;
  } else if (char_get_grappling(ch) != NULL && !can_kill(ch, char_get_grappling(ch), NULL, 3)) {
   act("@wYour body slowly stops flashing. Steam rises from your skin as you slowly let off the energy you built up in a safe manner.@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n", TRUE, ch, 0, 0, TO_ROOM);
   send_to_char(ch, "You can't kill them, the immortals won't allow it!\r\n");
-  REMOVE_BIT_AR(char_get_act(ch), PLR_SELFD);
+  char_plr_set(ch, PLR_SELFD, false);
   return;
  } else if (char_get_grappling(ch) != NULL) {
   tch = char_get_grappling(ch);
@@ -2983,14 +2983,14 @@ ACMD(do_selfd)
   act("@R$n EXPLODES! The explosion concentrates on YOU, engulfing your body in a sphere of deadly energy!@n", TRUE, ch, 0, tch, TO_VICT);
   act("@R$n EXPLODES! The explosion concentrates on @r$N@R, engulfing $M in a sphere of deadly energy!@n", TRUE, ch, 0, tch, TO_NOTVICT);
   hurt(0, 0, ch, tch, NULL, dmg, 1);
-  REMOVE_BIT_AR(char_get_act(ch), PLR_SELFD);
-  REMOVE_BIT_AR(char_get_act(ch), PLR_SELFD2);
+  char_plr_set(ch, PLR_SELFD, false);
+  char_plr_set(ch, PLR_SELFD2, false);
   if (char_plr_flagged(ch, PLR_IMMORTAL)) {
     char_set_con_sdcooldown(ch, 600);
   }
   if ((char_is_majin(ch) || char_is_bio(ch)) && getCurLFPercent(ch) > 0.5) {
    decCurLFPercent(ch, 2,-1);
-   SET_BIT_AR(char_get_act(ch), PLR_GOOP);
+   char_plr_set(ch, PLR_GOOP, true);
    ch->gooptime = 70;
   } else {
    die(ch, NULL);
@@ -3035,8 +3035,8 @@ ACMD(do_selfd)
     char_set_con_sdcooldown(ch, 600);
   }
   die(ch, NULL);
-  REMOVE_BIT_AR(char_get_act(ch), PLR_SELFD);
-  REMOVE_BIT_AR(char_get_act(ch), PLR_SELFD2);
+  char_plr_set(ch, PLR_SELFD, false);
+  char_plr_set(ch, PLR_SELFD2, false);
   int num = rand_number(10, 20) + char_get_skill(ch, SKILL_SELFD);
   if (char_get_skill(ch, SKILL_SELFD) + num <= 100) {
    SET_SKILL(ch, SKILL_SELFD, num);
@@ -3542,7 +3542,7 @@ ACMD(do_spike)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -3743,7 +3743,7 @@ ACMD(do_koteiru)
       if (rand_number(1, 4) == 1 && !char_aff_flagged(vict, AFF_FROZEN) && !char_is_demon(vict)) {
        act("@CYour body completely freezes!@n", TRUE, vict, 0, 0, TO_CHAR);
        act("@c$n's@C body completely freezes!@n", TRUE, vict, 0, 0, TO_ROOM);
-       SET_BIT_AR(char_get_affected_by(vict), AFF_FROZEN);
+       char_aff_set(vict, AFF_FROZEN, true);
       }
      }
     }
@@ -3754,7 +3754,7 @@ ACMD(do_koteiru)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -3935,7 +3935,7 @@ ACMD(do_hspiral)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -4007,7 +4007,7 @@ ACMD(do_spiral)
    vict = def;
   }
 
-  SET_BIT_AR(char_get_act(ch), PLR_SPIRAL);
+  char_plr_set(ch, PLR_SPIRAL, true);
   improve_skill(ch, SKILL_SPIRAL, 0);
   act("@mFlying to a spot above your intended target you begin to move so fast all that can be seen of you are trails of color. You focus your movements into a vortex and prepare to attack!@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@w$n@m flies to a spot above and begins to move so fast all that can be seen of $m are trails of color. Suddenly $e focuses $s movements into a spinning vortex and you lose track of $s movements entirely!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -4228,7 +4228,7 @@ ACMD(do_breaker)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }

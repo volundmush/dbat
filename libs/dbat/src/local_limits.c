@@ -141,12 +141,12 @@ static void healthy_check(struct char_data *ch)
 
   if (char_aff_flagged(ch, AFF_SHOCKED) && roll >= chance)
   {
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_SHOCKED);
+    char_aff_set(ch, AFF_SHOCKED, false);
     change = TRUE;
   }
   if (char_aff_flagged(ch, AFF_MBREAK) && roll >= chance)
   {
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_MBREAK);
+    char_aff_set(ch, AFF_MBREAK, false);
     change = TRUE;
   }
   if (is_affected(ch, AFF_WITHER) && roll >= chance)
@@ -157,7 +157,7 @@ static void healthy_check(struct char_data *ch)
   }
   if (char_aff_flagged(ch, AFF_CURSE) && roll >= chance)
   {
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_CURSE);
+    char_aff_set(ch, AFF_CURSE, false);
     change = TRUE;
   }
   if (char_aff_flagged(ch, AFF_POISON) && roll >= chance)
@@ -188,7 +188,7 @@ static void healthy_check(struct char_data *ch)
   }
   if (char_aff_flagged(ch, AFF_KNOCKED) && roll >= chance)
   {
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_KNOCKED);
+    char_aff_set(ch, AFF_KNOCKED, false);
     char_set_position(ch, POS_SITTING);
     change = TRUE;
   }
@@ -643,7 +643,7 @@ int64_t hit_gain(struct char_data *ch)
   if (char_plr_flagged(ch, PLR_FURY))
   {
     send_to_char(ch, "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
-    REMOVE_BIT_AR(char_get_act(ch), PLR_FURY);
+    char_plr_set(ch, PLR_FURY, false);
   }
 
   /* Fury Mode Loss for halfbreeds */
@@ -875,17 +875,17 @@ static void update_flags(struct char_data *ch)
   if (char_aff_flagged(ch, AFF_FIRESHIELD) && !char_get_fighting(ch) && rand_number(1, 101) > char_get_skill(ch, SKILL_FIRESHIELD))
   {
     send_to_char(ch, "Your fireshield disappears.\r\n");
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_FIRESHIELD);
+    char_aff_set(ch, AFF_FIRESHIELD, false);
   }
   if (char_aff_flagged(ch, AFF_ZANZOKEN) && !char_get_fighting(ch) && rand_number(1, 3) == 2)
   {
     send_to_char(ch, "You lose concentration and no longer are ready to zanzoken.\r\n");
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ZANZOKEN);
+    char_aff_set(ch, AFF_ZANZOKEN, false);
   }
   if (char_aff_flagged(ch, AFF_ENSNARED) && rand_number(1, 3) == 2)
   {
     send_to_char(ch, "The silk ensnaring your arms disolves enough for you to break it!\r\n");
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ENSNARED);
+    char_aff_set(ch, AFF_ENSNARED, false);
   }
 
   if ((char_is_saiyan(ch) || char_is_halfbreed(ch)) && char_plr_flagged(ch, PLR_TRANS1) && !char_plr_flagged(ch, PLR_FPSSJ))
@@ -894,7 +894,7 @@ static void update_flags(struct char_data *ch)
     if (char_get_absorbs(ch) >= 300)
     {
       send_to_char(ch, "You have mastered the base Super Saiyan transformation and achieved Full Power Super Saiyan! Super Saiyan First can now be maintained effortlessly.\r\n");
-      SET_BIT_AR(char_get_act(ch), PLR_FPSSJ);
+      char_plr_set(ch, PLR_FPSSJ, true);
       char_set_absorbs(ch, 0);
     }
   }
@@ -931,7 +931,7 @@ static void update_flags(struct char_data *ch)
   if (char_aff_flagged(ch, AFF_MBREAK) && rand_number(1, 3 + sick_fail) == 2)
   {
     send_to_char(ch, "@wYour mind is no longer in turmoil, you can charge ki again.@n\r\n");
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_MBREAK);
+    char_aff_set(ch, AFF_MBREAK, false);
     if (char_get_skill(ch, SKILL_TELEPATHY) <= 0 && rand_number(1, 2) == 2)
     {
       ch->real_abils.intel -= 1;
@@ -970,13 +970,13 @@ static void update_flags(struct char_data *ch)
       if (skill < char_get_skill(ch, SKILL_TELEPATHY))
         send_to_char(ch, "Your mental damage and recovery has taught you things about your own mind.\r\n");
     }
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_SHOCKED);
+    char_aff_set(ch, AFF_SHOCKED, false);
   }
   if (char_aff_flagged(ch, AFF_FROZEN) && rand_number(1, 2) == 2)
   {
     send_to_char(ch, "@wYou realize you have thawed enough and break out of the ice holding you prisoner!\r\n");
     act("$n@W breaks out of the ice holding $m prisoner!", TRUE, ch, 0, 0, TO_ROOM);
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_FROZEN);
+    char_aff_set(ch, AFF_FROZEN, false);
   }
   if (is_affected(ch, AFF_WITHER) && rand_number(1, 6 + sick_fail) == 2)
   {
@@ -987,7 +987,7 @@ static void update_flags(struct char_data *ch)
   }
   if (wearing_stardust(ch) == 1)
   {
-    SET_BIT_AR(char_get_affected_by(ch), AFF_ZANZOKEN);
+    char_aff_set(ch, AFF_ZANZOKEN, true);
     send_to_char(ch, "The stardust armor blesses you with a free zanzoken when you next need it.\r\n");
   }
 }
@@ -1707,7 +1707,7 @@ static void heal_limb(struct char_data *ch)
 
   if (char_plr_flagged(ch, PLR_BANDAGED) && recovered == TRUE)
   {
-    REMOVE_BIT_AR(char_get_act(ch), PLR_BANDAGED);
+    char_plr_set(ch, PLR_BANDAGED, false);
     send_to_char(ch, "You remove your bandages.\r\n");
     return;
   }
@@ -1790,7 +1790,7 @@ static void point_update_characters(void)
         {
           send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
           act("$n's aura slowly stops shining and fades.\r\n", TRUE, i, nullptr, nullptr, TO_ROOM);
-          REMOVE_BIT_AR(char_get_act(i), PLR_AURALIGHT);
+          char_plr_set(i, PLR_AURALIGHT, false);
           world[char_get_in_room(i)].light--;
         }
       }
@@ -1827,7 +1827,7 @@ static void point_update_characters(void)
         {
           send_to_char(i, "Your burns are healed now.\r\n");
           act("$n@w's burns are now healed.@n", TRUE, i, 0, 0, TO_ROOM);
-          REMOVE_BIT_AR(char_get_affected_by(i), AFF_BURNED);
+          char_aff_set(i, AFF_BURNED, false);
         }
       }
 
@@ -1937,7 +1937,7 @@ static void point_update_characters(void)
             send_to_char(i, "@wThe healing tank is now too low on energy to heal you.\r\n");
             act("You step out of the now empty healing tank.", TRUE, i, 0, 0, TO_CHAR);
             act("@C$n@w steps out of the now empty healing tank.@n", TRUE, i, 0, 0, TO_ROOM);
-            REMOVE_BIT_AR(char_get_act(i), PLR_HEALT);
+            char_plr_set(i, PLR_HEALT, false);
             obj_set_sitting(char_get_sits(i), NULL);
             char_set_sits(i, NULL);
           }
@@ -1946,14 +1946,14 @@ static void point_update_characters(void)
             send_to_char(i, "@wYou are fully recovered now.\r\n");
             act("You step out of the now empty healing tank.", TRUE, i, 0, 0, TO_CHAR);
             act("@C$n@w steps out of the now empty healing tank.@n", TRUE, i, 0, 0, TO_ROOM);
-            REMOVE_BIT_AR(char_get_act(i), PLR_HEALT);
+            char_plr_set(i, PLR_HEALT, false);
             obj_set_sitting(char_get_sits(i), NULL);
             char_set_sits(i, NULL);
           }
         }
         else if (char_plr_flagged(i, PLR_HEALT) && char_get_sits(i) == NULL)
         {
-          REMOVE_BIT_AR(char_get_act(i), PLR_HEALT);
+          char_plr_set(i, PLR_HEALT, false);
         }
         else if (char_get_position(i) == POS_SLEEPING)
         {
@@ -2072,7 +2072,7 @@ static void point_update_objects(void)
     next_thing = j->next; /* Next in object list */
 
     /* Let's get rid of dropped norent items. */
-    if (obj_flagged(j, ITEM_NORENT) && j->worn_by == NULL && j->carried_by == NULL && obj_selling != j && obj_get_vnum(j) != 7200)
+    if (obj_extra_flagged(j, ITEM_NORENT) && j->worn_by == NULL && j->carried_by == NULL && obj_selling != j && obj_get_vnum(j) != 7200)
     {
       time_t diff = 0;
 
@@ -2099,7 +2099,7 @@ static void point_update_objects(void)
       /* timer count down */
       if (obj_get_timer(j) > 0)
         obj_set_timer(j, obj_get_timer(j) - 1);
-      if (!strstr(j->name, "android") && !strstr(j->name, "Android") && !obj_flagged(j, ITEM_BURIED))
+      if (!strstr(j->name, "android") && !strstr(j->name, "Android") && !obj_extra_flagged(j, ITEM_BURIED))
       {
         if (obj_get_timer(j) == 5)
         {
@@ -2218,7 +2218,7 @@ static void point_update_objects(void)
         continue;
       }
     }
-    else if (obj_flagged(j, ITEM_ICE))
+    else if (obj_extra_flagged(j, ITEM_ICE))
     {
       if (obj_get_vnum(j) == 79 && rand_number(1, 2) == 2)
       {

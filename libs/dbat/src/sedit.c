@@ -169,7 +169,7 @@ ACMD(do_oasis_sedit)
   desc_set_connected(d, CON_SEDIT);
   
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
-  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
+  char_plr_set(ch, PLR_WRITING, true);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
     char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
@@ -213,7 +213,7 @@ void sedit_setup_new(struct descriptor_data *d)
   CREATE(S_NAMELISTS(shop), struct shop_buy_data, 1);
 
   S_BUYTYPE(shop, 0) = NOTHING;
-  SET_BIT_AR(S_NOTRADE(shop), TRADE_NOBROKEN);
+  shop_trade_set(shop, TRADE_NOBROKEN, true);
 
   /*
    * Presto! A shop.
@@ -791,7 +791,7 @@ void sedit_parse(struct descriptor_data *d, char *arg)
     break;
   case SEDIT_NOTRADE:
     if ((i = LIMIT(atoi(arg), 0, NUM_TRADERS)) > 0) {
-      TOGGLE_BIT_AR(S_NOTRADE(OLC_SHOP(d)), i - 1);
+      shop_trade_toggle(OLC_SHOP(d), i - 1);
       sedit_no_trade_menu(d);
       return;
     }

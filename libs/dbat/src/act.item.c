@@ -391,7 +391,7 @@ ACMD(do_garden)
 
    for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
           next_obj = obj2->next_content;
-     if (obj_get_vnum(obj2) == 254 && !obj_flagged(obj2, ITEM_BROKEN) && !obj_flagged(obj2, ITEM_FORGED)) {
+     if (obj_get_vnum(obj2) == 254 && !obj_extra_flagged(obj2, ITEM_BROKEN) && !obj_extra_flagged(obj2, ITEM_FORGED)) {
       found = TRUE;
       shovel = obj2;
      }
@@ -474,7 +474,7 @@ ACMD(do_garden)
 
    for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
           next_obj = obj2->next_content;
-     if (obj_get_vnum(obj2) == 251 && !obj_flagged(obj2, ITEM_FORGED)) {
+     if (obj_get_vnum(obj2) == 251 && !obj_extra_flagged(obj2, ITEM_FORGED)) {
       found = TRUE;
       water = obj2;
      }
@@ -522,7 +522,7 @@ ACMD(do_garden)
 
    for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
           next_obj = obj2->next_content;
-     if (obj_get_vnum(obj2) == 253 && !obj_flagged(obj2, ITEM_BROKEN) && !obj_flagged(obj2, ITEM_FORGED)) {
+     if (obj_get_vnum(obj2) == 253 && !obj_extra_flagged(obj2, ITEM_BROKEN) && !obj_extra_flagged(obj2, ITEM_FORGED)) {
       found = TRUE;
       clippers = obj2;
      }
@@ -567,7 +567,7 @@ ACMD(do_garden)
 
    for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
           next_obj = obj2->next_content;
-     if (obj_get_vnum(obj2) == 254 && !obj_flagged(obj2, ITEM_BROKEN) && !obj_flagged(obj2, ITEM_FORGED)) {
+     if (obj_get_vnum(obj2) == 254 && !obj_extra_flagged(obj2, ITEM_BROKEN) && !obj_extra_flagged(obj2, ITEM_FORGED)) {
       found = TRUE;
       shovel = obj2;
      }
@@ -592,7 +592,7 @@ ACMD(do_garden)
 
    for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
           next_obj = obj2->next_content;
-     if (obj_get_vnum(obj2) == 254 && !obj_flagged(obj2, ITEM_BROKEN) && !obj_flagged(obj2, ITEM_FORGED)) {
+     if (obj_get_vnum(obj2) == 254 && !obj_extra_flagged(obj2, ITEM_BROKEN) && !obj_extra_flagged(obj2, ITEM_FORGED)) {
       found = TRUE;
       shovel = obj2;
      }
@@ -606,7 +606,7 @@ ACMD(do_garden)
 
    for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
           next_obj = obj2->next_content;
-     if (obj_get_vnum(obj2) == 255 && !obj_flagged(obj2, ITEM_FORGED)) {
+     if (obj_get_vnum(obj2) == 255 && !obj_extra_flagged(obj2, ITEM_FORGED)) {
       found = TRUE;
       soil = obj2;
      }
@@ -666,7 +666,7 @@ ACMD(do_garden)
     improve_skill(ch, SKILL_GARDENING, 0);
    }
   } else if (!strcasecmp(arg2, "pick")) {
-   if (!obj_flagged(obj, ITEM_MATURE)) {
+   if (!obj_extra_flagged(obj, ITEM_MATURE)) {
     send_to_char(ch, "You can't pick that type of plant. Syntax: garden (plant) harvest\r\n");
     return;
    } else if (obj_get_value(obj, VAL_MATURITY) < obj_get_value(obj, VAL_MAXMATURE)) {
@@ -700,7 +700,7 @@ static int has_housekey(struct char_data *ch, struct obj_data *obj)
     struct obj_data *obj2 = NULL, *next_obj;
     for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
           next_obj = obj2->next_content;
-      if (obj_flagged(obj, ITEM_DUPLICATE))
+      if (obj_extra_flagged(obj, ITEM_DUPLICATE))
        continue;
       if (obj_get_vnum(obj) == 18802) {
        if (obj_get_vnum(obj2) == 18800) {
@@ -857,7 +857,7 @@ int check_saveroom_count(struct char_data *ch, struct obj_data *cont)
  for (obj = world[char_get_in_room(ch)].contents; obj; obj = next_obj) {
   next_obj = obj->next_content;
    count++;
-   if (!obj_flagged(obj, ITEM_CARDCASE)) {
+   if (!obj_extra_flagged(obj, ITEM_CARDCASE)) {
     count += check_insidebag(obj, 0.5);
    }
  }
@@ -865,7 +865,7 @@ int check_saveroom_count(struct char_data *ch, struct obj_data *cont)
  was = count;
 
  if (cont != NULL) {
-  if (!obj_flagged(cont, ITEM_CARDCASE)) {
+  if (!obj_extra_flagged(cont, ITEM_CARDCASE)) {
    count += check_insidebag(cont, 0.5);
   }
   count++;
@@ -1039,13 +1039,13 @@ ACMD(do_twohand)
  else if (char_plr_flagged(ch, PLR_THANDW)) {
   send_to_char(ch, "You stop wielding your weapon with both hands.\r\n");
   act("$n stops wielding $s weapon with both hands.", TRUE, ch, 0, 0, TO_ROOM);
-  REMOVE_BIT_AR(char_get_act(ch), PLR_THANDW);
+  char_plr_set(ch, PLR_THANDW, false);
   return;
  }
  else {
   send_to_char(ch, "You grab your weapon with both hands.\r\n");
   act("$n starts wielding $s weapon with both hands.", TRUE, ch, 0, 0, TO_ROOM);
-  SET_BIT_AR(char_get_act(ch), PLR_THANDW);
+  char_plr_set(ch, PLR_THANDW, true);
   return;
  }
 }
@@ -1215,7 +1215,7 @@ if (dballtime == 0) {
 
  WISHTIME = 0;
  for (k = object_list; k; k = k->next) {
-  if (obj_flagged(k, ITEM_FORGED)) {
+  if (obj_extra_flagged(k, ITEM_FORGED)) {
    continue;
   }
   if (obj_get_vnum(k) == 20) {
@@ -1239,7 +1239,7 @@ if (dballtime == 0) {
   else if (obj_get_vnum(k) == 26) {
    found7 = TRUE;
   }
-  else if (obj_get_in_room(k) != NOWHERE && rroom_get_geffect(obj_get_in_room(k)) == 6 && !obj_flagged(k, ITEM_UNBREAKABLE)) {
+  else if (obj_get_in_room(k) != NOWHERE && rroom_get_geffect(obj_get_in_room(k)) == 6 && !obj_extra_flagged(k, ITEM_UNBREAKABLE)) {
    send_to_room(obj_get_in_room(k), "@R%s@r melts in the lava!@n\r\n", k->short_description);
    extract_obj(k);
   }
@@ -1674,7 +1674,7 @@ ACMD(do_auction)
 		send_to_char(ch, buf);
 		return;
 	}
-	else if (obj_flagged(obj, ITEM_NOSELL))
+	else if (obj_extra_flagged(obj, ITEM_NOSELL))
 	{
 		send_to_char(ch, "Sorry but you can't sell that!\r\n");
 		return;
@@ -1819,19 +1819,19 @@ ACMD(do_bid)
     search_replace(bits, "TAKE", "");
     send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
     if (obj_get_type_flag(obj2) == ITEM_WEAPON) {
-     if (obj_flagged(obj2, ITEM_WEAPLVL1)) {
+     if (obj_extra_flagged(obj2, ITEM_WEAPLVL1)) {
       send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w5%s@D]@n\r\n", "%");
      }
-     else if (obj_flagged(obj2, ITEM_WEAPLVL2)) {
+     else if (obj_extra_flagged(obj2, ITEM_WEAPLVL2)) {
       send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w10%s@D]@n\r\n", "%");
      }
-     else if (obj_flagged(obj2, ITEM_WEAPLVL3)) {
+     else if (obj_extra_flagged(obj2, ITEM_WEAPLVL3)) {
       send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w20%s@D]@n\r\n", "%");
      }
-     else if (obj_flagged(obj2, ITEM_WEAPLVL4)) {
+     else if (obj_extra_flagged(obj2, ITEM_WEAPLVL4)) {
       send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w30%s@D]@n\r\n", "%");
      }
-     else if (obj_flagged(obj2, ITEM_WEAPLVL5)) {
+     else if (obj_extra_flagged(obj2, ITEM_WEAPLVL5)) {
       send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w50%s@D]@n\r\n", "%");
      }
     }
@@ -2284,15 +2284,15 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
 
   if (!obj) /* object might be extracted by drop_otrigger */
     return;
-  if (obj_flagged(cont, ITEM_FORGED)) {
+  if (obj_extra_flagged(cont, ITEM_FORGED)) {
     act("$P is forged and won't hold anything.", FALSE, ch, 0, cont, TO_CHAR);
     return;
   }
-  if (obj_flagged(cont, ITEM_SHEATH) && obj_get_type_flag(obj) != ITEM_WEAPON) {
+  if (obj_extra_flagged(cont, ITEM_SHEATH) && obj_get_type_flag(obj) != ITEM_WEAPON) {
    send_to_char(ch, "That is made to only hold weapons.\r\n");
    return;
   }
-  if (obj_flagged(cont, ITEM_SHEATH)) {
+  if (obj_extra_flagged(cont, ITEM_SHEATH)) {
     struct obj_data *obj2 = NULL, *next_obj = NULL;
     int count = 0, minus = 0;
     for (obj2 = cont->contains; obj2; obj2 = next_obj) {
@@ -2311,17 +2311,17 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
     act("$p won't fit in $P.", FALSE, ch, obj, cont, TO_CHAR);
   else if (obj_get_vnum(cont) >= 600 && obj_get_vnum(cont) <= 603)
       send_to_char(ch, "You can't put cards on a duel table. You have to @Gplay@n them.\r\n");
-  else if ((obj_get_vnum(cont) == 697 || obj_get_vnum(cont) == 698 || obj_get_vnum(cont) == 682 || obj_get_vnum(cont) == 683 || obj_get_vnum(cont) == 684 || obj_flagged(cont, ITEM_CARDCASE)) && !obj_flagged(obj, ITEM_ANTI_HIEROPHANT))
+  else if ((obj_get_vnum(cont) == 697 || obj_get_vnum(cont) == 698 || obj_get_vnum(cont) == 682 || obj_get_vnum(cont) == 683 || obj_get_vnum(cont) == 684 || obj_extra_flagged(cont, ITEM_CARDCASE)) && !obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT))
       send_to_char(ch, "You can only put cards in a case.\r\n");
   else if ((obj_get_type_flag(cont) == ITEM_CONTAINER) &&
       (obj_get_value(cont, VAL_CONTAINER_CAPACITY) > 0) &&
       (obj_get_weight(cont) + obj_get_weight(obj) > obj_get_value(cont, VAL_CONTAINER_CAPACITY)))
     act("$p won't fit in $P.", FALSE, ch, obj, cont, TO_CHAR);
-  else if (obj_flagged(obj, ITEM_NODROP) && obj_get_in_room(cont) != NOWHERE)
+  else if (obj_extra_flagged(obj, ITEM_NODROP) && obj_get_in_room(cont) != NOWHERE)
     act("You can't get $p out of your hand.", FALSE, ch, obj, NULL, TO_CHAR);
   else if (obj_get_vnum(obj) == dball[0] || obj_get_vnum(obj) == dball[1] || obj_get_vnum(obj) == dball[2] || obj_get_vnum(obj) == dball[3] || obj_get_vnum(obj) == dball[4] || obj_get_vnum(obj) == dball[5] || obj_get_vnum(obj) == dball[6])
     send_to_char(ch, "You can not bag dragon balls.\r\n");
-  else if (obj_flagged(obj, ITEM_NORENT))
+  else if (obj_extra_flagged(obj, ITEM_NORENT))
     send_to_char(ch, "That isn't worth bagging. Better keep that close if you wanna keep it at all.\r\n");
   else if (!cont->carried_by && check_saveroom_count(ch, obj) > 150) {
    send_to_char(ch, "The save room can not hold anymore items. (150 max, count of items in containers is halved)\r\n");
@@ -2329,15 +2329,15 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
     obj_from_char(obj);
     obj_to_obj(obj, cont);
 
-   if (!obj_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
+   if (!obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
     act("$n puts $p in $P.", TRUE, ch, obj, cont, TO_ROOM);
    } else {
     act("$n puts an @DA@wd@cv@Ce@Wnt @DD@wu@ce@Cl @mC@Ma@Wr@wd@n in $P.", TRUE, ch, obj, cont, TO_ROOM);
    }
 
     /* Yes, I realize this is strange until we have auto-equip on rent. -gg */
-    if (obj_flagged(obj, ITEM_NODROP) && !obj_flagged(cont, ITEM_NODROP)) {
-      SET_BIT_AR(obj_get_extra_flags(cont), ITEM_NODROP);
+    if (obj_extra_flagged(obj, ITEM_NODROP) && !obj_extra_flagged(cont, ITEM_NODROP)) {
+      obj_extra_set(cont, ITEM_NODROP, true);
       act("You get a strange feeling as you put $p in $P.", FALSE,
                 ch, obj, cont, TO_CHAR);
     } else
@@ -2450,7 +2450,7 @@ ACMD(do_put)
 
 static int can_take_obj(struct char_data *ch, struct obj_data *obj)
 {
-  if (!(obj_can_wear(obj, ITEM_WEAR_TAKE))) {
+  if (!(obj_wear_flagged(obj, ITEM_WEAR_TAKE))) {
     act("$p: you can't take that!", FALSE, ch, obj, 0, TO_CHAR);
     return(0);
   } else if (char_get_carry_items(ch) >= CAN_CARRY_N(ch)) {
@@ -2515,7 +2515,7 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
     } else if (get_otrigger(obj, ch)) { 
       obj_from_obj(obj);
       obj_to_char(obj, ch);
-      if (obj_flagged(cont, ITEM_SHEATH)) {
+      if (obj_extra_flagged(cont, ITEM_SHEATH)) {
        act("You draw $p from $P.", FALSE, ch, obj, cont, TO_CHAR);
        act("$n draws $p from $P.", TRUE, ch, obj, cont, TO_ROOM);
       }
@@ -2523,13 +2523,13 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
        act("You get $p from $P.", FALSE, ch, obj, cont, TO_CHAR);
        act("$n gets $p from $P.", TRUE, ch, obj, cont, TO_ROOM);
       }
-      if (obj_flagged(obj, ITEM_HOT)) {
+      if (obj_extra_flagged(obj, ITEM_HOT)) {
        if (char_get_bonuses(ch, BONUS_FIREPROOF) <= 0 && !char_is_demon(ch)) {
            decCurHealthPercent(ch, .25, 0);
         if (char_get_bonuses(ch, BONUS_FIREPRONE) > 0)
             decCurHealthPercent(ch, 1, 1);
 
-        SET_BIT_AR(char_get_affected_by(ch), AFF_BURNED);
+        char_aff_set(ch, AFF_BURNED, true);
         act("@RYou are burned by it!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@R$n@R is burned by it!@n", TRUE, ch, 0, 0, TO_ROOM);
        }
@@ -2602,7 +2602,7 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj)
    return (0);
   }
  
-  if (obj_flagged(obj, ITEM_BURIED)) {
+  if (obj_extra_flagged(obj, ITEM_BURIED)) {
    send_to_char(ch, "Get what?\r\n");
    return (0);
   }
@@ -2618,13 +2618,13 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj)
     act("You get $p.", FALSE, ch, obj, 0, TO_CHAR);
     act("$n gets $p.", TRUE, ch, obj, 0, TO_ROOM);
 
-      if (obj_flagged(obj, ITEM_HOT)) {
+      if (obj_extra_flagged(obj, ITEM_HOT)) {
        if (char_get_bonuses(ch, BONUS_FIREPROOF) <= 0 && !char_is_demon(ch)) {
            decCurHealthPercent(ch, .25, 1);
         if (char_get_bonuses(ch, BONUS_FIREPRONE) > 0)
             decCurHealthPercent(ch, 1, 1);
 
-        SET_BIT_AR(char_get_affected_by(ch), AFF_BURNED);
+        char_aff_set(ch, AFF_BURNED, true);
         act("@RYou are burned by it!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@R$n@R is burned by it!@n", TRUE, ch, 0, 0, TO_ROOM);
        }
@@ -2865,7 +2865,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
     act(buf, FALSE, ch, obj, 0, TO_CHAR);
     return (0);
    }
-   if ((mode == SCMD_DROP) && obj_flagged(obj, ITEM_NORENT)) {
+   if ((mode == SCMD_DROP) && obj_extra_flagged(obj, ITEM_NORENT)) {
     snprintf(buf, sizeof(buf), "You drop $p but it gets lost on the ground!");
     act(buf, FALSE, ch, obj, 0, TO_CHAR);
     obj_from_char(obj);
@@ -2888,12 +2888,12 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
     return (0);
    }
   }
-  if (obj_flagged(obj, ITEM_NODROP) && char_get_admlevel(ch) < 1) {
+  if (obj_extra_flagged(obj, ITEM_NODROP) && char_get_admlevel(ch) < 1) {
     snprintf(buf, sizeof(buf), "You can't %s $p, it must be CURSED!", sname);
     act(buf, FALSE, ch, obj, 0, TO_CHAR);
     return (0);
   }
-  if ((mode == SCMD_DONATE || mode == SCMD_JUNK) && obj_flagged(obj, ITEM_NODONATE)) {
+  if ((mode == SCMD_DONATE || mode == SCMD_JUNK) && obj_extra_flagged(obj, ITEM_NODONATE)) {
     snprintf(buf, sizeof(buf), "You can't %s $p!", sname);
     act(buf, FALSE, ch, obj, 0, TO_CHAR);
     return (0);
@@ -2909,7 +2909,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
 
   switch (mode) {
   case SCMD_DROP:
-    if (!obj_flagged(obj, ITEM_UNBREAKABLE) && rroom_get_geffect(char_get_in_room(ch)) == 6) {
+    if (!obj_extra_flagged(obj, ITEM_UNBREAKABLE) && rroom_get_geffect(char_get_in_room(ch)) == 6) {
      act("$p melts in the lava!", FALSE, ch, obj, 0, TO_CHAR);
      act("$p melts in the lava!", FALSE, ch, obj, 0, TO_ROOM);
      extract_obj(obj);
@@ -3100,7 +3100,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
   if (!receive_mtrigger(vict, ch, obj))
     return;
 
-  if (obj_flagged(obj, ITEM_NODROP)) {
+  if (obj_extra_flagged(obj, ITEM_NODROP)) {
     act("You can't let go of $p!!  Yeech!", FALSE, ch, obj, 0, TO_CHAR);
     return;
   }
@@ -3114,7 +3114,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
     }
     return;
   }
-  if (char_is_npc(vict) && (obj_flagged(obj, ITEM_FORGED) || obj_flagged(obj, ITEM_FORGED))) {
+  if (char_is_npc(vict) && (obj_extra_flagged(obj, ITEM_FORGED) || obj_extra_flagged(obj, ITEM_FORGED))) {
    act("$n tries to hand $p to $N.", TRUE, ch, obj, vict, TO_NOTVICT);
    do_say(vict, "I don't want that piece of junk.", 0, 0);
    return;
@@ -3153,13 +3153,13 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
   act("$n gives you $p.", FALSE, ch, obj, vict, TO_VICT);
   act("$n gives $p to $N.", TRUE, ch, obj, vict, TO_NOTVICT);
 
-      if (obj_flagged(obj, ITEM_HOT)) {
+      if (obj_extra_flagged(obj, ITEM_HOT)) {
        if (char_get_bonuses(vict, BONUS_FIREPROOF) <= 0 && !char_is_demon(vict)) {
            decCurHealthPercent(ch, .25, 1);
         if (char_get_bonuses(vict, BONUS_FIREPRONE) > 0)
             decCurHealthPercent(ch, 1, 1);
 
-        SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
+        char_aff_set(vict, AFF_BURNED, true);
         act("@RYou are burned by it!@n", TRUE, vict, 0, 0, TO_CHAR);
         act("@R$n@R is burned by it!@n", TRUE, vict, 0, 0, TO_ROOM);
        }
@@ -3489,11 +3489,11 @@ ACMD(do_drink)
     send_to_char(ch, "You have to be holding that to drink from it.\r\n");
     return;
   }
-  if (obj_flagged(temp, ITEM_BROKEN)) {
+  if (obj_extra_flagged(temp, ITEM_BROKEN)) {
     send_to_char(ch, "Seems like it's broken!\r\n");
     return;
   }
-  if (obj_flagged(temp, ITEM_FORGED)) {
+  if (obj_extra_flagged(temp, ITEM_FORGED)) {
     send_to_char(ch, "Seems like it doesn't work, maybe it is fake...\r\n");
     return;
   }
@@ -3687,7 +3687,7 @@ ACMD(do_eat)
   if(majin_gain_mode != -100) {
       incCurLFPercent(ch, 0.01, true);
       incCurSTPercent(ch, majin_st_recovery, true);
-      if (obj_flagged(food, ITEM_FORGED))
+      if (obj_extra_flagged(food, ITEM_FORGED))
       {
         send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
       }
@@ -3740,7 +3740,7 @@ ACMD(do_eat)
   {
     incCurSTPercent(ch, 0.01 * (double)amount, true);
     char_set_foodr(ch, 2);
-    if (obj_flagged(food, ITEM_YUM))
+    if (obj_extra_flagged(food, ITEM_YUM))
     {
       incCurSTPercent(ch, .25, true);
     }
@@ -3764,7 +3764,7 @@ ACMD(do_eat)
         {
           incCurHealthPercent(ch, .1, true);
         }
-        if (obj_flagged(food, ITEM_YUM))
+        if (obj_extra_flagged(food, ITEM_YUM))
         {
           incCurHealthPercent(ch, .2, true);
         }
@@ -3888,10 +3888,10 @@ ACMD(do_pour)
       send_to_char(ch, "There doesn't seem to be %s %s here.\r\n", AN(arg2), arg2);
       return;
     }
-    if (obj_get_type_flag(from_obj) != ITEM_FOUNTAIN && !obj_flagged(from_obj, ITEM_BROKEN)) {
+    if (obj_get_type_flag(from_obj) != ITEM_FOUNTAIN && !obj_extra_flagged(from_obj, ITEM_BROKEN)) {
       act("You can't fill something from $p.", FALSE, ch, from_obj, 0, TO_CHAR);
       return;
-    } else if (obj_get_type_flag(from_obj) == ITEM_FOUNTAIN && obj_flagged(from_obj, ITEM_BROKEN)) {
+    } else if (obj_get_type_flag(from_obj) == ITEM_FOUNTAIN && obj_extra_flagged(from_obj, ITEM_BROKEN)) {
       act("You can't fill something from a broken fountain.", FALSE, ch, from_obj, 0, TO_CHAR);
       return;
     }
@@ -4079,14 +4079,14 @@ static int hands(struct char_data * ch)
   int x;
 
   if (char_get_equipment(ch, WEAR_WIELD1)) {
-    if (obj_flagged(char_get_equipment(ch, WEAR_WIELD1), ITEM_2H) || wield_type(get_size(ch), char_get_equipment(ch, WEAR_WIELD1)) == WIELD_TWOHAND) {
+    if (obj_extra_flagged(char_get_equipment(ch, WEAR_WIELD1), ITEM_2H) || wield_type(get_size(ch), char_get_equipment(ch, WEAR_WIELD1)) == WIELD_TWOHAND) {
       x = 2;
     } else
     x = 1;
   } else x = 0;
 
   if (char_get_equipment(ch, WEAR_WIELD2)) {
-    if (obj_flagged(char_get_equipment(ch, WEAR_WIELD2), ITEM_2H) || wield_type(get_size(ch), char_get_equipment(ch, WEAR_WIELD2)) == WIELD_TWOHAND) {
+    if (obj_extra_flagged(char_get_equipment(ch, WEAR_WIELD2), ITEM_2H) || wield_type(get_size(ch), char_get_equipment(ch, WEAR_WIELD2)) == WIELD_TWOHAND) {
       x += 2;
     } else
     x += 1;
@@ -4139,7 +4139,7 @@ void perform_wear(struct char_data *ch, struct obj_data *obj, int where)
   };
 
   /* first, make sure that the wear position is valid. */
-  if (!obj_can_wear(obj, wear_bitvectors[where])) {
+  if (!obj_wear_flagged(obj, wear_bitvectors[where])) {
     act("You can't wear $p there.", FALSE, ch, obj, 0, TO_CHAR);
     return;
   }
@@ -4155,7 +4155,7 @@ void perform_wear(struct char_data *ch, struct obj_data *obj, int where)
       where++;
 
   /* checks for 2H sanity */
-  if ((obj_flagged(obj, ITEM_2H)||(wield_type(get_size(ch), obj) == WIELD_TWOHAND)) && hands(ch) > 0) {
+  if ((obj_extra_flagged(obj, ITEM_2H)||(wield_type(get_size(ch), obj) == WIELD_TWOHAND)) && hands(ch) > 0) {
     send_to_char(ch, "Seems like you might not have enough free hands.\r\n");
     return;
   }
@@ -4179,7 +4179,7 @@ void perform_wear(struct char_data *ch, struct obj_data *obj, int where)
   if (!wear_otrigger(obj, ch, where) || (obj->carried_by != ch))
     return;
 
-  if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_flagged(obj, ITEM_CUSTOM)) {
+  if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_extra_flagged(obj, ITEM_CUSTOM)) {
    if (char_get_level(ch) < 20) {
     send_to_char(ch, "You are not experienced enough to hold that.\r\n");
     return;
@@ -4234,23 +4234,23 @@ int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg)
   };
 
   if (!arg || !*arg) {
-    if (obj_can_wear(obj, ITEM_WEAR_FINGER) && char_body_flagged(ch, WEAR_FINGER_R))  return WEAR_FINGER_R;
-    if (obj_can_wear(obj, ITEM_WEAR_NECK) && char_body_flagged(ch, WEAR_NECK_1))      return WEAR_NECK_1;
-    if (obj_can_wear(obj, ITEM_WEAR_BODY) && char_body_flagged(ch, WEAR_BODY))        return WEAR_BODY;
-    if (obj_can_wear(obj, ITEM_WEAR_HEAD) && char_body_flagged(ch, WEAR_HEAD))        return WEAR_HEAD;
-    if (obj_can_wear(obj, ITEM_WEAR_LEGS) && char_body_flagged(ch, WEAR_LEGS))        return WEAR_LEGS;
-    if (obj_can_wear(obj, ITEM_WEAR_FEET) && char_body_flagged(ch, WEAR_FEET))        return WEAR_FEET;
-    if (obj_can_wear(obj, ITEM_WEAR_HANDS) && char_body_flagged(ch, WEAR_HANDS))      return WEAR_HANDS;
-    if (obj_can_wear(obj, ITEM_WEAR_ARMS) && char_body_flagged(ch, WEAR_ARMS))        return WEAR_ARMS;
-    if (obj_can_wear(obj, ITEM_WEAR_SHIELD) && char_body_flagged(ch, WEAR_WIELD2))    return WEAR_WIELD2;
-    if (obj_can_wear(obj, ITEM_WEAR_ABOUT) && char_body_flagged(ch, WEAR_ABOUT))      return WEAR_ABOUT;
-    if (obj_can_wear(obj, ITEM_WEAR_WAIST) && char_body_flagged(ch, WEAR_WAIST))      return WEAR_WAIST;
-    if (obj_can_wear(obj, ITEM_WEAR_WRIST) && char_body_flagged(ch, WEAR_WRIST_R))    return WEAR_WRIST_R;
-    if (obj_can_wear(obj, ITEM_WEAR_HOLD) && char_body_flagged(ch, WEAR_WIELD2))      return WEAR_WIELD2;
-    if (obj_can_wear(obj, ITEM_WEAR_PACK) && char_body_flagged(ch, WEAR_BACKPACK))    return WEAR_BACKPACK;
-    if (obj_can_wear(obj, ITEM_WEAR_EAR) && char_body_flagged(ch, WEAR_EAR_R))        return WEAR_EAR_R;
-    if (obj_can_wear(obj, ITEM_WEAR_SH) && char_body_flagged(ch, WEAR_SH))            return WEAR_SH;
-    if (obj_can_wear(obj, ITEM_WEAR_EYE) && char_body_flagged(ch, WEAR_EYE))          return WEAR_EYE;
+    if (obj_wear_flagged(obj, ITEM_WEAR_FINGER) && char_body_flagged(ch, WEAR_FINGER_R))  return WEAR_FINGER_R;
+    if (obj_wear_flagged(obj, ITEM_WEAR_NECK) && char_body_flagged(ch, WEAR_NECK_1))      return WEAR_NECK_1;
+    if (obj_wear_flagged(obj, ITEM_WEAR_BODY) && char_body_flagged(ch, WEAR_BODY))        return WEAR_BODY;
+    if (obj_wear_flagged(obj, ITEM_WEAR_HEAD) && char_body_flagged(ch, WEAR_HEAD))        return WEAR_HEAD;
+    if (obj_wear_flagged(obj, ITEM_WEAR_LEGS) && char_body_flagged(ch, WEAR_LEGS))        return WEAR_LEGS;
+    if (obj_wear_flagged(obj, ITEM_WEAR_FEET) && char_body_flagged(ch, WEAR_FEET))        return WEAR_FEET;
+    if (obj_wear_flagged(obj, ITEM_WEAR_HANDS) && char_body_flagged(ch, WEAR_HANDS))      return WEAR_HANDS;
+    if (obj_wear_flagged(obj, ITEM_WEAR_ARMS) && char_body_flagged(ch, WEAR_ARMS))        return WEAR_ARMS;
+    if (obj_wear_flagged(obj, ITEM_WEAR_SHIELD) && char_body_flagged(ch, WEAR_WIELD2))    return WEAR_WIELD2;
+    if (obj_wear_flagged(obj, ITEM_WEAR_ABOUT) && char_body_flagged(ch, WEAR_ABOUT))      return WEAR_ABOUT;
+    if (obj_wear_flagged(obj, ITEM_WEAR_WAIST) && char_body_flagged(ch, WEAR_WAIST))      return WEAR_WAIST;
+    if (obj_wear_flagged(obj, ITEM_WEAR_WRIST) && char_body_flagged(ch, WEAR_WRIST_R))    return WEAR_WRIST_R;
+    if (obj_wear_flagged(obj, ITEM_WEAR_HOLD) && char_body_flagged(ch, WEAR_WIELD2))      return WEAR_WIELD2;
+    if (obj_wear_flagged(obj, ITEM_WEAR_PACK) && char_body_flagged(ch, WEAR_BACKPACK))    return WEAR_BACKPACK;
+    if (obj_wear_flagged(obj, ITEM_WEAR_EAR) && char_body_flagged(ch, WEAR_EAR_R))        return WEAR_EAR_R;
+    if (obj_wear_flagged(obj, ITEM_WEAR_SH) && char_body_flagged(ch, WEAR_SH))            return WEAR_SH;
+    if (obj_wear_flagged(obj, ITEM_WEAR_EYE) && char_body_flagged(ch, WEAR_EYE))          return WEAR_EYE;
   } else if (((where = search_block(arg, keywords, FALSE)) < 0) || (*arg=='!')) {
     send_to_char(ch, "'%s'?  What part of your body is THAT?\r\n", arg);
     return -1;
@@ -4285,9 +4285,9 @@ ACMD(do_wear)
           act("$p: you are not experienced enough to use that.",
               FALSE, ch, obj, 0, TO_CHAR);
           send_to_char(ch, "You need to be at least %d level to use it.\r\n", obj_get_level(obj));
-        } else if (obj_flagged(obj, ITEM_BROKEN)) {
+        } else if (obj_extra_flagged(obj, ITEM_BROKEN)) {
           act("$p: it seems to be broken.", FALSE, ch, obj, 0, TO_CHAR);
-        } else if (obj_flagged(obj, ITEM_FORGED)) {
+        } else if (obj_extra_flagged(obj, ITEM_FORGED)) {
           act("$p: it seems to be fake...", FALSE, ch, obj, 0, TO_CHAR);
         } else {
           items_worn++;
@@ -4324,9 +4324,9 @@ ACMD(do_wear)
   } else {
     if (!(obj = get_obj_in_list_vis(ch, arg1, NULL, ch->carrying)))
       send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg1), arg1);
-    else if (obj_flagged(obj, ITEM_BROKEN))
+    else if (obj_extra_flagged(obj, ITEM_BROKEN))
       send_to_char(ch, "But it seems to be broken!\r\n");
-    else if (obj_flagged(obj, ITEM_FORGED))
+    else if (obj_extra_flagged(obj, ITEM_FORGED))
       send_to_char(ch, "But it seems to be fake!\r\n");
     else if (char_get_level(ch) < obj_get_level(obj))
       send_to_char(ch, "You are not experienced enough to use that.\r\n");
@@ -4354,13 +4354,13 @@ ACMD(do_wield)
   else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying)))
     send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
   else {
-    if (!obj_can_wear(obj, ITEM_WEAR_WIELD))
+    if (!obj_wear_flagged(obj, ITEM_WEAR_WIELD))
       send_to_char(ch, "You can't wield that.\r\n");
     else if (obj_get_weight(obj) > max_carry_weight(ch))
       send_to_char(ch, "It's too heavy for you to use.\r\n");
-    else if (obj_flagged(obj, ITEM_BROKEN))
+    else if (obj_extra_flagged(obj, ITEM_BROKEN))
       send_to_char(ch, "But it seems to be broken!\r\n");
-    else if (obj_flagged(obj, ITEM_FORGED))
+    else if (obj_extra_flagged(obj, ITEM_FORGED))
       send_to_char(ch, "But it seems to be fake!\r\n");
     else if (char_get_level(ch) < obj_get_level(obj))
       send_to_char(ch, "You are not experienced enough to use that.\r\n");
@@ -4403,7 +4403,7 @@ ACMD(do_grab)
       }
     }
     else {
-      if (!obj_can_wear(obj, ITEM_WEAR_HOLD) && obj_get_type_flag(obj) != ITEM_WAND &&
+      if (!obj_wear_flagged(obj, ITEM_WEAR_HOLD) && obj_get_type_flag(obj) != ITEM_WAND &&
       obj_get_type_flag(obj) != ITEM_STAFF && obj_get_type_flag(obj) != ITEM_SCROLL &&
 	  obj_get_type_flag(obj) != ITEM_POTION)
 	send_to_char(ch, "You can't hold that.\r\n");
@@ -4425,7 +4425,7 @@ void perform_remove(struct char_data *ch, int pos)
      *  This error occurs when perform_remove() is passed a bad 'pos'
      *  (location) to remove an object from.
      */
-  else if (obj_flagged(obj, ITEM_NODROP) && char_get_admlevel(ch) < 1)
+  else if (obj_extra_flagged(obj, ITEM_NODROP) && char_get_admlevel(ch) < 1)
     act("You can't remove $p, it must be CURSED!", FALSE, ch, obj, 0, TO_CHAR);
   else if (char_get_carry_items(ch) >= CAN_CARRY_N(ch))
     act("$p: your arms are full!", FALSE, ch, obj, 0, TO_CHAR);
@@ -4434,7 +4434,7 @@ void perform_remove(struct char_data *ch, int pos)
        return;
 
     if (pos == WEAR_WIELD1 && char_plr_flagged(ch, PLR_THANDW)) {
-     REMOVE_BIT_AR(char_get_act(ch), PLR_THANDW);
+     char_plr_set(ch, PLR_THANDW, false);
     }
     obj_to_char(unequip_char(ch, pos), ch);
     act("You stop using $p.", FALSE, ch, obj, 0, TO_CHAR);
@@ -4539,7 +4539,7 @@ ACMD(do_sac)
      return; 
    } 
 
-  if (!obj_can_wear(j, ITEM_WEAR_TAKE)) { 
+  if (!obj_wear_flagged(j, ITEM_WEAR_TAKE)) { 
      send_to_char(ch, "You can't sacrifice that!\n\r"); 
      return; 
    } 

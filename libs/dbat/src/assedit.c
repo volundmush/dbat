@@ -143,7 +143,7 @@ void assedit_setup(struct descriptor_data *d, int number)
 
  desc_set_connected(d, CON_ASSEDIT);
  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
- SET_BIT_AR(char_get_act(d->character), PLR_WRITING);
+ char_plr_set(d->character, PLR_WRITING, true);
  assedit_disp_menu(d);
 
 }

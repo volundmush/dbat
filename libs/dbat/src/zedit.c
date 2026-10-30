@@ -200,7 +200,7 @@ ACMD(do_oasis_zedit)
   desc_set_connected(d, CON_ZEDIT);
   
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
-  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
+  char_plr_set(ch, PLR_WRITING, true);
   
   mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
     char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
@@ -1461,7 +1461,7 @@ void zedit_parse(struct descriptor_data *d, char *arg)
       /*
        * Toggle the bit.
        */
-      TOGGLE_BIT_AR(OLC_ZONE(d)->zone_flags, number - 1);
+      zone_data_toggle_flag(OLC_ZONE(d), number - 1);
       OLC_ZONE(d)->number = 1;
       zedit_disp_flag_menu(d);
     }

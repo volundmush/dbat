@@ -213,6 +213,6 @@ ACMD(do_tedit)
   string_write(ch->desc, fields[l].buffer, fields[l].size, 0, backstr);
 
   act("$n begins editing a text file.", TRUE, ch, 0, 0, TO_ROOM);
-  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
+  char_plr_set(ch, PLR_WRITING, true);
   desc_set_connected(ch->desc, CON_TEDIT);
 }

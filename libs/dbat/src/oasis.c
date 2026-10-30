@@ -326,7 +326,7 @@ if(OLC_HOUSE(d))
    * Restore descriptor playing status.
    */
   if (d->character) {
-    REMOVE_BIT_AR(char_get_act(d->character), PLR_WRITING);
+    char_plr_set(d->character, PLR_WRITING, false);
     act("$n stops using OLC.", TRUE, d->character, NULL, NULL, TO_ROOM);
     
     if (cleanup_type == CLEANUP_CONFIG)

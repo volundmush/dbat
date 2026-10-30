@@ -405,26 +405,26 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type)
     } else if (type == 0) {
         if (num == 1) {
          struct obj_data *obj = char_get_equipment(tch, WEAR_EYE);        
-          if (obj_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
+          if (obj_extra_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
           write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
           }
-          else if (obj_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
+          else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
           write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
           }
-          else if (obj_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
+          else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
           write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
           }
           else {
           write_to_output(i, "%s@n", messg);
          }
         } else {
-          if (obj_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
+          if (obj_extra_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
            write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
           }
-          else if (obj_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
+          else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
            write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
           }
-          else if (obj_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
+          else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
            write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
           }
           else {
@@ -432,22 +432,22 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type)
           }
         }
        } else if (type == 1 && char_get_skill(tch, SKILL_SENSE) < 20) {
-          if (obj_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
+          if (obj_extra_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
            write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
-          } else if (obj_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
+          } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
            write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
-          } else if (obj_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
+          } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
            write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
           } else {
            write_to_output(i, "@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(GET_HIT(ch)));
           }
        }  else if (type == 2 && char_get_skill(tch, SKILL_SENSE) < 20) {
           char *blah = sense_location(ch);
-          if (obj_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
+          if (obj_extra_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
            write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
-          } else if (obj_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
+          } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
            write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
-          } else if (obj_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
+          } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
            write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
           } else {
            write_to_output(i, "@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, blah, add_commas(GET_HIT(ch)));

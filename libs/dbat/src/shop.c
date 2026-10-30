@@ -186,9 +186,9 @@ static int is_ok_char(struct char_data *keeper, struct char_data *ch, int shop_n
   if (char_adm_flagged(ch, ADM_ALLSHOPS))
     return (TRUE);
 
-  if ((char_get_alignment(ch) > 0 && NOTRADE_GOOD(shop_nr)) ||
-      (char_get_alignment(ch) < 0&& NOTRADE_EVIL(shop_nr)) ||
-      (char_get_alignment(ch) == 0 && NOTRADE_NEUTRAL(shop_nr))) {
+  if ((char_get_alignment(ch) > 0 && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOGOOD)) ||
+      (char_get_alignment(ch) < 0&& shop_trade_flagged(&shop_index[shop_nr], TRADE_NOEVIL)) ||
+      (char_get_alignment(ch) == 0 && shop_trade_flagged(&shop_index[shop_nr], TRADE_NONEUTRAL))) {
     snprintf(buf, sizeof(buf), "%s %s", char_get_name(ch), MSG_NO_SELL_ALIGN);
     do_tell(keeper, buf, cmd_tell, 0);
     return (FALSE);
@@ -196,42 +196,42 @@ static int is_ok_char(struct char_data *keeper, struct char_data *ch, int shop_n
   if (char_is_npc(ch))
     return (TRUE);
 
-  if ((char_is_roshi(ch) && NOTRADE_WIZARD(shop_nr)) ||
-      (char_is_piccolo(ch) && NOTRADE_CLERIC(shop_nr)) ||
-      (char_is_krane(ch) && NOTRADE_ROGUE(shop_nr)) ||
-      (char_is_bardock(ch) && NOTRADE_MONK(shop_nr)) ||
-      (char_is_ginyu(ch) && NOTRADE_PALADIN(shop_nr)) ||
-      (char_is_nail(ch) && NOTRADE_FIGHTER(shop_nr)) ||
-      (char_is_kabito(ch) && NOTRADE_BARBARIAN(shop_nr)) ||
-      (char_is_frieza(ch) && NOTRADE_SORCERER(shop_nr)) ||
-      (char_is_andsix(ch) && NOTRADE_BARD(shop_nr)) ||
-      (char_is_dabura(ch) && NOTRADE_RANGER(shop_nr)) ||
-      (char_is_tapion(ch) && NOTRADE_DRUID(shop_nr)) ||
-      (char_is_nail(ch) && NOTRADE_FIGHTER(shop_nr)) ||
-      (char_is_jinto(ch) && NOTRADE_ARCANE_ARCHER(shop_nr)) ||
-      (char_is_tsuna(ch) && NOTRADE_ARCANE_TRICKSTER(shop_nr)) ||
-      (char_is_kurzak(ch) && NOTRADE_ARCHMAGE(shop_nr)) ||
-      (char_is_assassin(ch) && NOTRADE_ASSASSIN(shop_nr)) ||
-      (char_is_blackguard(ch) && NOTRADE_BLACKGUARD(shop_nr)) ||
-      (char_is_dragon_disciple(ch) && NOTRADE_DRAGON_DISCIPLE(shop_nr)) ||
-      (char_is_duelist(ch) && NOTRADE_DUELIST(shop_nr)) ||
-      (char_is_dwarven_defender(ch) && NOTRADE_DWARVEN_DEFENDER(shop_nr)) ||
-      (char_is_eldritch_knight(ch) && NOTRADE_ELDRITCH_KNIGHT(shop_nr)) ||
-      (char_is_hierophant(ch) && NOTRADE_HIEROPHANT(shop_nr)) ||
-      (char_is_horizon_walker(ch) && NOTRADE_HORIZON_WALKER(shop_nr)) ||
-      (char_is_loremaster(ch) && NOTRADE_LOREMASTER(shop_nr)) ||
-      (char_is_mystic_theurge(ch) && NOTRADE_MYSTIC_THEURGE(shop_nr)) ||
-      (char_is_shadowdancer(ch) && NOTRADE_SHADOWDANCER(shop_nr)) ||
-      (char_is_thaumaturgist(ch) && NOTRADE_THAUMATURGIST(shop_nr))) {
+  if ((char_is_roshi(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOWIZARD)) ||
+      (char_is_piccolo(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOCLERIC)) ||
+      (char_is_krane(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOROGUE)) ||
+      (char_is_bardock(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOMONK)) ||
+      (char_is_ginyu(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOPALADIN)) ||
+      (char_is_nail(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOFIGHTER)) ||
+      (char_is_kabito(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOBARBARIAN)) ||
+      (char_is_frieza(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOSORCERER)) ||
+      (char_is_andsix(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOBARD)) ||
+      (char_is_dabura(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NORANGER)) ||
+      (char_is_tapion(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NODRUID)) ||
+      (char_is_nail(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOFIGHTER)) ||
+      (char_is_jinto(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOARCANE_ARCHER)) ||
+      (char_is_tsuna(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOARCANE_TRICKSTER)) ||
+      (char_is_kurzak(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOARCHMAGE)) ||
+      (char_is_assassin(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOASSASSIN)) ||
+      (char_is_blackguard(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOBLACKGUARD)) ||
+      (char_is_dragon_disciple(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NODRAGON_DISCIPLE)) ||
+      (char_is_duelist(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NODUELIST)) ||
+      (char_is_dwarven_defender(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NODWARVEN_DEFENDER)) ||
+      (char_is_eldritch_knight(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOELDRITCH_KNIGHT)) ||
+      (char_is_hierophant(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOHIEROPHANT)) ||
+      (char_is_horizon_walker(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOHORIZON_WALKER)) ||
+      (char_is_loremaster(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOLOREMASTER)) ||
+      (char_is_mystic_theurge(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOMYSTIC_THEURGE)) ||
+      (char_is_shadowdancer(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOSHADOWDANCER)) ||
+      (char_is_thaumaturgist(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOTHAUMATURGIST))) {
 
     snprintf(buf, sizeof(buf), "%s %s", char_get_name(ch), MSG_NO_SELL_CLASS);
     do_tell(keeper, buf, cmd_tell, 0);
     return (FALSE);
   }
-  if ((char_is_human(ch) && NOTRADE_HUMAN(shop_nr)) ||
-      (char_is_icer(ch) && NOTRADE_ICER(shop_nr)) ||
-      (char_is_saiyan(ch) && NOTRADE_SAIYAN(shop_nr)) ||
-      (char_is_konatsu(ch) && NOTRADE_KONATSU(shop_nr))) {
+  if ((char_is_human(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOHUMAN)) ||
+      (char_is_icer(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOICER)) ||
+      (char_is_saiyan(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOSAIYAN)) ||
+      (char_is_konatsu(ch) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOKONATSU))) {
     snprintf(buf, sizeof(buf), "%s %s", char_get_name(ch), MSG_NO_SELL_RACE);
     do_tell(keeper, buf, cmd_tell, 0);
     return (FALSE);
@@ -244,12 +244,12 @@ static int is_ok_obj(struct char_data *keeper, struct char_data *ch, struct obj_
 {
   char buf[MAX_INPUT_LENGTH];
 
-  if (obj_flagged(obj, ITEM_BROKEN) && NOTRADE_BROKEN(shop_nr)) {
+  if (obj_extra_flagged(obj, ITEM_BROKEN) && shop_trade_flagged(&shop_index[shop_nr], TRADE_NOBROKEN)) {
     snprintf(buf, sizeof(buf), "%s %s", char_get_name(ch), MSG_NO_BUY_BROKEN);
     do_tell(keeper, buf, cmd_tell, 0);
     return (FALSE);
   }
-  if (obj_flagged(obj, ITEM_FORGED)) {
+  if (obj_extra_flagged(obj, ITEM_FORGED)) {
     snprintf(buf, sizeof(buf), "%s that piece of junk is an obvious forgery!", char_get_name(ch));
     do_tell(keeper, buf, cmd_tell, 0);
     return (FALSE);
@@ -360,7 +360,7 @@ static int evaluate_expression(struct obj_data *obj, char *expr)
 	name[ptr - end] = '\0';
 	for (eindex = 0; *extra_bits[eindex] != '\n'; eindex++)
 	  if (!strcasecmp(name, extra_bits[eindex])) {
-	    push(&vals, obj_flagged(obj, eindex));
+	    push(&vals, obj_extra_flagged(obj, eindex));
 	    break;
 	  }
 	if (*extra_bits[eindex] == '\n')
@@ -398,7 +398,7 @@ static int trade_with(struct obj_data *item, int shop_nr)
   if (obj_get_cost(item) < 1)
     return (OBJECT_NOVAL);
 
-  if (obj_flagged(item, ITEM_NOSELL))
+  if (obj_extra_flagged(item, ITEM_NOSELL))
     return (OBJECT_NOTOK);
 
   for (counter = 0; SHOP_BUYTYPE(shop_nr, counter) != NOTHING; counter++)
@@ -724,7 +724,7 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
   } else {
     int displevel = obj_get_level(obj);
 
-    if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_flagged(obj, ITEM_CUSTOM))
+    if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_extra_flagged(obj, ITEM_CUSTOM))
      displevel = 20;
 
     send_to_char(ch, "@c---------------------------------------------------------------@n\n");
@@ -742,15 +742,15 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
     }
     send_to_char(ch, "@GItem Size   @W:@w %s@n\n", size_names[obj_get_size(obj)]);
     send_to_char(ch, "@GItem Weight @W: @w%s@n\n", add_commas(obj_get_weight(obj)));
-    if (obj_flagged(obj, ITEM_SLOT1) && !obj_flagged(obj, ITEM_SLOTS_FILLED)) {
+    if (obj_extra_flagged(obj, ITEM_SLOT1) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
      send_to_char(ch, "GToken Slots  @W: @m0/1@n\n");
-    } else if (obj_flagged(obj, ITEM_SLOT1) && obj_flagged(obj, ITEM_SLOTS_FILLED)) {
+    } else if (obj_extra_flagged(obj, ITEM_SLOT1) && obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
      send_to_char(ch, "GToken Slots  @W: @m1/1@n\n");
-    } else if (obj_flagged(obj, ITEM_SLOT2) && !obj_flagged(obj, ITEM_SLOT_ONE) && !obj_flagged(obj, ITEM_SLOTS_FILLED)) {
+    } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
      send_to_char(ch, "GToken Slots  @W: @m0/2@n\n");
-    } else if (obj_flagged(obj, ITEM_SLOT2) && obj_flagged(obj, ITEM_SLOT_ONE) && !obj_flagged(obj, ITEM_SLOTS_FILLED)) {
+    } else if (obj_extra_flagged(obj, ITEM_SLOT2) && obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
      send_to_char(ch, "GToken Slots  @W: @m1/2@n\n");
-    } else if (obj_flagged(obj, ITEM_SLOT2) && !obj_flagged(obj, ITEM_SLOTS_FILLED)) {
+    } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
      send_to_char(ch, "GToken Slots  @W: @m2/2@n\n");
     }
     char bits[MAX_STRING_LENGTH];
@@ -758,19 +758,19 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
     search_replace(bits, "TAKE", "");
     send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
     if (obj_get_type_flag(obj) == ITEM_WEAPON) {
-     if (obj_flagged(obj, ITEM_WEAPLVL1)) {
+     if (obj_extra_flagged(obj, ITEM_WEAPLVL1)) {
       send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w5%s@D]@n\r\n", "%");
      }
-     else if (obj_flagged(obj, ITEM_WEAPLVL2)) {
+     else if (obj_extra_flagged(obj, ITEM_WEAPLVL2)) {
       send_to_char(ch, "@GWeapon Level@W: @D[@C2@D]\n@GDamage Bonus@W: @D[@w10%s@D]@n\r\n", "%");
      }
-     else if (obj_flagged(obj, ITEM_WEAPLVL3)) {
+     else if (obj_extra_flagged(obj, ITEM_WEAPLVL3)) {
       send_to_char(ch, "@GWeapon Level@W: @D[@C3@D]\n@GDamage Bonus@W: @D[@w20%s@D]@n\r\n", "%");
      }
-     else if (obj_flagged(obj, ITEM_WEAPLVL4)) {
+     else if (obj_extra_flagged(obj, ITEM_WEAPLVL4)) {
       send_to_char(ch, "@GWeapon Level@W: @D[@C4@D]\n@GDamage Bonus@W: @D[@w30%s@D]@n\r\n", "%");
      }
-     else if (obj_flagged(obj, ITEM_WEAPLVL5)) {
+     else if (obj_extra_flagged(obj, ITEM_WEAPLVL5)) {
       send_to_char(ch, "@GWeapon Level@W: @D[@C5@D]\n@GDamage Bonus@W: @D[@w50%s@D]@n\r\n", "%");
      }
     }
@@ -870,7 +870,7 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
       SHOP_SORT(shop_nr)--;
     }
     obj_to_char(obj, ch);
-    if (obj_flagged(obj, ITEM_MATURE)) {
+    if (obj_extra_flagged(obj, ITEM_MATURE)) {
      obj_set_value(obj, VAL_MAXMATURE, 6);
     }
 
@@ -1172,7 +1172,7 @@ static char *list_object(struct obj_data *obj, int cnt, int aindex, int shop_nr,
     strlcpy(itemname, obj->short_description, sizeof(itemname));
     break;
   }
-  if (obj_flagged(obj, ITEM_BROKEN)) {
+  if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     char titemname[128];
     strlcpy(titemname, itemname, sizeof(titemname));
     snprintf(itemname, sizeof(itemname), "%s [broken]", titemname);
@@ -1182,7 +1182,7 @@ static char *list_object(struct obj_data *obj, int cnt, int aindex, int shop_nr,
 
   int displevel = obj_get_level(obj);
 
-    if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_flagged(obj, ITEM_CUSTOM))
+    if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_extra_flagged(obj, ITEM_CUSTOM))
      displevel = 20;
 
   snprintf(result, sizeof(result), " %2d)  %9s %-*s %3d %13s\r\n", aindex, quantity,
@@ -1609,7 +1609,7 @@ static char *customer_string(int shop_nr, int detailed)
 
   while (*trade_letters[sindex] != '\n' && len + 1 < sizeof(buf)) {
     if (detailed) {
-      if (!IS_SET_AR(SHOP_TRADE_WITH(shop_nr), flag)) {
+      if (!shop_trade_flagged(&shop_index[shop_nr], flag)) {
 	nlen = snprintf(buf + len, sizeof(buf) - len, ", %s", trade_letters[sindex]);
 
         if (len + nlen >= sizeof(buf) || nlen < 0)
@@ -1618,7 +1618,7 @@ static char *customer_string(int shop_nr, int detailed)
         len += nlen;
       }
     } else {
-      buf[len++] = (IS_SET_AR(SHOP_TRADE_WITH(shop_nr), flag) ? '_' : *trade_letters[sindex]);
+      buf[len++] = (shop_trade_flagged(&shop_index[shop_nr], flag) ? '_' : *trade_letters[sindex]);
       buf[len] = '\0';
 
       if (len >= sizeof(buf))
@@ -1879,4 +1879,19 @@ int count_shops(shop_vnum low, shop_vnum high)
   }
  
   return j;
+}
+
+bool shop_trade_flagged(const struct shop_data *rec, int flag) {
+    return IS_SET_AR(rec->with_who, flag) != 0;
+}
+
+void shop_trade_set(struct shop_data *rec, int flag, bool on) {
+    if (on)
+        SET_BIT_AR(rec->with_who, flag);
+    else
+        REMOVE_BIT_AR(rec->with_who, flag);
+}
+
+bool shop_trade_toggle(struct shop_data *rec, int flag) {
+    return (TOGGLE_BIT_AR(rec->with_who, flag) & Q_BIT(flag)) != 0;
 }

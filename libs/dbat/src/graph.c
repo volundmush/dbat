@@ -34,8 +34,8 @@ struct bfs_queue_struct {
 static struct bfs_queue_struct *bfs_queue_head = 0, *bfs_queue_tail = 0;
 
 /* Utility macros */
-#define MARK(room)	(SET_BIT_AR(rroom_get_room_flags(room), ROOM_BFS_MARK))
-#define UNMARK(room)	(REMOVE_BIT_AR(rroom_get_room_flags(room), ROOM_BFS_MARK))
+#define MARK(room)	(rroom_set_flag(room, ROOM_BFS_MARK, true))
+#define UNMARK(room)	(rroom_set_flag(room, ROOM_BFS_MARK, false))
 #define IS_MARKED(room)	(rroom_flagged(room, ROOM_BFS_MARK))
 #define TOROOM(x, y)	(world[(x)].dir_option[(y)]->to_room)
 #define IS_CLOSED(x, y)	(room_exit_flagged(world[(x)].dir_option[(y)], EX_CLOSED))
@@ -318,7 +318,7 @@ ACMD(do_radar)
 
   for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
        next_obj = obj2->next_content;
-   if (obj_get_vnum(obj2) == 12 && (!obj_flagged(obj2, ITEM_BROKEN)) && (!obj_flagged(obj2, ITEM_FORGED))) {
+   if (obj_get_vnum(obj2) == 12 && (!obj_extra_flagged(obj2, ITEM_BROKEN)) && (!obj_extra_flagged(obj2, ITEM_FORGED))) {
     found2 = TRUE;
    }
   }
@@ -339,7 +339,7 @@ ACMD(do_radar)
  if (real_room(room) != NOWHERE) {
  for (obj = world[real_room(room)].contents; obj; obj = next_obj) {
       next_obj = obj->next_content;
-  if (obj_flagged(obj, ITEM_FORGED)) {
+  if (obj_extra_flagged(obj, ITEM_FORGED)) {
    continue;
   } else if (obj_get_vnum(obj) == 20 || obj_get_vnum(obj) == 21 || obj_get_vnum(obj) == 22 || obj_get_vnum(obj) == 23 || obj_get_vnum(obj) == 24 || obj_get_vnum(obj) == 25 || obj_get_vnum(obj) == 26) {
    dir = find_first_step(char_get_in_room(ch), obj_get_in_room(obj));
@@ -367,7 +367,7 @@ ACMD(do_radar)
   }
   for (obj = tch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
-   if (obj_flagged(obj, ITEM_FORGED)) {
+   if (obj_extra_flagged(obj, ITEM_FORGED)) {
     continue;
    } else if (obj_get_vnum(obj) == 20 || obj_get_vnum(obj) == 21 || obj_get_vnum(obj) == 22 || obj_get_vnum(obj) == 23 || obj_get_vnum(obj) == 24 || obj_get_vnum(obj) == 25 || obj_get_vnum(obj) == 26) {
       dir = find_first_step(char_get_in_room(ch), char_get_in_room(tch));

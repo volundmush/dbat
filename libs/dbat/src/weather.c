@@ -247,7 +247,7 @@ void oozaru_transform(char_data *ch) {
 
     act("@rLooking up at the moon your heart begins to beat loudly. Sudden rage begins to fill your mind while your body begins to grow. Hair sprouts  all over your body and your teeth become sharp as your body takes on the Oozaru form!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant ape!@n", TRUE, ch, 0, 0, TO_ROOM);
-    SET_BIT_AR(char_get_act(ch), oozaru.flag);
+    char_plr_set(ch, oozaru.flag, true);
 }
 
 void oozaru_add()
@@ -271,7 +271,7 @@ void oozaru_revert(char_data *ch) {
     act("@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal and asleep.@n", TRUE, ch, 0, 0, TO_ROOM);
     char_set_position(ch, POS_SLEEPING);
 
-    REMOVE_BIT_AR(char_get_act(ch), PLR_OOZARU);
+    char_plr_set(ch, PLR_OOZARU, false);
 }
 
 void oozaru_drop()

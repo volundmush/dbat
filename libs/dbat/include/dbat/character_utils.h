@@ -59,6 +59,18 @@ bool char_is_affected(const struct char_data *ch, int skill);
 bool char_plr_toggle(struct char_data *ch, int flag);
 bool char_prf_toggle(struct char_data *ch, int flag);
 bool char_aff_toggle(struct char_data *ch, int flag);
+bool char_mob_toggle(struct char_data *ch, int flag);
+bool char_adm_toggle(struct char_data *ch, int flag);
+bool char_body_toggle(struct char_data *ch, int flag);
+
+/* Flag setters. PLR bits are ignored on NPCs, and MOB bits on PCs (except MOB_ISNPC);
+ * both kinds share char_data::act. */
+void char_plr_set(struct char_data *ch, int flag, bool on);
+void char_mob_set(struct char_data *ch, int flag, bool on);
+void char_aff_set(struct char_data *ch, int flag, bool on);
+void char_prf_set(struct char_data *ch, int flag, bool on);
+void char_adm_set(struct char_data *ch, int flag, bool on);
+void char_body_set(struct char_data *ch, int flag, bool on);
 
 /* new define for quick check */
 bool char_is_dead(const struct char_data *ch);

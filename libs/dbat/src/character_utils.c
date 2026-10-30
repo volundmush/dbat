@@ -102,9 +102,9 @@ void restore(char_data *ch, bool announce) {
 
 void resurrect(char_data *ch, int mode) {
     restore(ch, true);
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ETHEREAL);
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_SPIRIT);
-    REMOVE_BIT_AR(char_get_act(ch), PLR_PDEATH);
+    char_aff_set(ch, AFF_ETHEREAL, false);
+    char_aff_set(ch, AFF_SPIRIT, false);
+    char_plr_set(ch, PLR_PDEATH, false);
     char_from_room(ch);
     if (char_get_droom(ch) != NOWHERE && char_get_droom(ch) != 0 && char_get_droom(ch) != 1) {
         char_to_room(ch, real_room(char_get_droom(ch)));
@@ -152,27 +152,27 @@ void resurrect(char_data *ch, int mode) {
 
 void ghostify(char_data *ch) {
     restore(ch, true);
-    SET_BIT_AR(char_get_affected_by(ch), AFF_SPIRIT);
-    SET_BIT_AR(char_get_affected_by(ch), AFF_ETHEREAL);
+    char_aff_set(ch, AFF_SPIRIT, true);
+    char_aff_set(ch, AFF_ETHEREAL, true);
 
     if (!char_prf_flagged(ch, PRF_LKEEP)) {
         if (char_plr_flagged(ch, PLR_CLLEG)) {
-            REMOVE_BIT_AR(char_get_act(ch), PLR_CLLEG);
+            char_plr_set(ch, PLR_CLLEG, false);
         }
         if (char_plr_flagged(ch, PLR_CRLEG)) {
-            REMOVE_BIT_AR(char_get_act(ch), PLR_CRLEG);
+            char_plr_set(ch, PLR_CRLEG, false);
         }
         if (char_plr_flagged(ch, PLR_CRARM)) {
-            REMOVE_BIT_AR(char_get_act(ch), PLR_CRARM);
+            char_plr_set(ch, PLR_CRARM, false);
         }
         if (char_plr_flagged(ch, PLR_CLARM)) {
-            REMOVE_BIT_AR(char_get_act(ch), PLR_CLARM);
+            char_plr_set(ch, PLR_CLARM, false);
         }
     }
 
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_KNOCKED);
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_SLEEP);
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_PARALYZE);
+    char_aff_set(ch, AFF_KNOCKED, false);
+    char_aff_set(ch, AFF_SLEEP, false);
+    char_aff_set(ch, AFF_PARALYZE, false);
 }
 
 void teleport_to(char_data *ch, IDXTYPE rnum) {
@@ -760,9 +760,9 @@ void restoreStatus(char_data *ch, bool announce) {
 }
 
 void setStatusKnockedOut(char_data *ch) {
-    SET_BIT_AR(char_get_affected_by(ch), AFF_KNOCKED);
+    char_aff_set(ch, AFF_KNOCKED, true);
     if (char_aff_flagged(ch, AFF_FLYING)) {
-        REMOVE_BIT_AR(char_get_affected_by(ch), AFF_FLYING);
+        char_aff_set(ch, AFF_FLYING, false);
         char_set_altitude(ch, 0);
     }
     char_set_position(ch, POS_SLEEPING);
@@ -783,7 +783,7 @@ void cureStatusKnockedOut(char_data *ch, bool announce) {
             }
         }
 
-        REMOVE_BIT_AR(char_get_affected_by(ch), AFF_KNOCKED);
+        char_aff_set(ch, AFF_KNOCKED, false);
         char_set_position(ch, POS_SITTING);
     }
 }
@@ -794,7 +794,7 @@ void cureStatusBurn(char_data *ch, bool announce) {
             send_to_char(ch, "Your burns are healed now.\r\n");
             act("$n@w's burns are now healed.@n", TRUE, ch, 0, 0, TO_ROOM);
         }
-        REMOVE_BIT_AR(char_get_affected_by(ch), AFF_BURNED);
+        char_aff_set(ch, AFF_BURNED, false);
     }
 }
 
@@ -944,7 +944,7 @@ bool isWeightedPL(char_data *ch) {
 
 void apply_kaioken(char_data *ch, int times, bool announce) {
     char_set_kaioken(ch, times);
-    REMOVE_BIT_AR(char_get_act(ch), PLR_POWERUP);
+    char_plr_set(ch, PLR_POWERUP, false);
 
     if(announce) {
         send_to_char(ch, "@rA dark red aura bursts up around your body as you achieve Kaioken x %d!@n\r\n", times);
@@ -2329,7 +2329,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict)
     }
    }
   }
-  REMOVE_BIT_AR(char_get_affected_by(vict), AFF_PURSUIT);
+  char_aff_set(vict, AFF_PURSUIT, false);
   return (TRUE);
  } else {
   send_to_char(ch, "@RYou fail to pursue after them!@n\r\n");
@@ -2759,12 +2759,12 @@ void reveal_hiding(struct char_data *ch, int type)
  if (type == 0) { /* Automatic reveal. */
    act("@MYou feel as though what you just did may have revealed your hiding spot...@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@M$n moves a little and you notice them!@n", TRUE, ch, 0, 0, TO_ROOM);
-   REMOVE_BIT_AR(char_get_affected_by(ch), AFF_HIDE);
+   char_aff_set(ch, AFF_HIDE, false);
  } else if (type == 1) { /* Their skill at hiding failed, reveal */
   if (char_get_skill(ch, SKILL_HIDE) + bonus < axion_dice(0)) {
    act("@MYou feel as though what you just did may have revealed your hiding spot...@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@M$n moves a little and you notice them!@n", TRUE, ch, 0, 0, TO_ROOM);
-   REMOVE_BIT_AR(char_get_affected_by(ch), AFF_HIDE);
+   char_aff_set(ch, AFF_HIDE, false);
   }
  } else if (type == 2) { /* They were spotted */
   struct descriptor_data *d;
@@ -2781,7 +2781,7 @@ void reveal_hiding(struct char_data *ch, int type)
     continue;
   
    if (char_get_skill(tch, SKILL_SPOT) + rand1 >= char_get_skill(ch, SKILL_HIDE) + rand2) {
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_HIDE);
+    char_aff_set(ch, AFF_HIDE, false);
     act("@M$N seems to notice you!@n", TRUE, ch, 0, tch, TO_CHAR);
     act("@MYou notice $n's movements reveal $s hiding spot!@n", TRUE, ch, 0, tch, TO_VICT);
     act("@MYou notice $N look keenly somewhere nearby. At that spot you see $n hiding!@n", TRUE, ch, 0, tch, TO_NOTVICT);
@@ -2816,7 +2816,7 @@ void reveal_hiding(struct char_data *ch, int type)
    }
   }
  } else if (type == 4) { /* You were found from search! */
-   REMOVE_BIT_AR(char_get_affected_by(ch), AFF_HIDE);
+   char_aff_set(ch, AFF_HIDE, false);
  }
 }
 
@@ -2842,11 +2842,11 @@ int block_calc(struct char_data *ch)
         act("You try to leave, but can't outrun $N!", TRUE, ch, 0, blocker, TO_CHAR);
         if (char_aff_flagged(ch, AFF_FLYING) && !char_aff_flagged(blocker, AFF_FLYING) && char_get_altitude(ch) == 1) {
          send_to_char(blocker, "You're now floating in the air.\r\n");
-         SET_BIT_AR(char_get_affected_by(blocker), AFF_FLYING);
+         char_aff_set(blocker, AFF_FLYING, true);
          char_set_altitude(blocker, char_get_altitude(ch));
         } else if (char_aff_flagged(ch, AFF_FLYING) && !char_aff_flagged(blocker, AFF_FLYING) && char_get_altitude(ch) == 2) {
          send_to_char(blocker, "You're now floating high in the sky.\r\n");
-         SET_BIT_AR(char_get_affected_by(blocker), AFF_FLYING);
+         char_aff_set(blocker, AFF_FLYING, true);
          char_set_altitude(blocker, char_get_altitude(ch));
         }
         return (0);
@@ -3195,7 +3195,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
 
         if(vict->original == ch) {
             act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
-            SET_BIT_AR(char_get_act(vict), MOB_SPAR);
+            char_mob_set(vict, MOB_SPAR, true);
             return 0;
         }
 
@@ -3237,10 +3237,10 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
          } else {
           if (char_mob_flagged(vict, MOB_SPAR)) {
            act("@w$n@W says, '@C$N, fine our match will wait till later then.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
-           REMOVE_BIT_AR(char_get_act(vict), MOB_SPAR);
+           char_mob_set(vict, MOB_SPAR, false);
           } else {
            act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
-           SET_BIT_AR(char_get_act(vict), MOB_SPAR);
+           char_mob_set(vict, MOB_SPAR, true);
           }
           return 0;
          }
@@ -3882,19 +3882,19 @@ void admin_set(struct char_data *ch, int value)
     while (char_get_admlevel(ch) < value) {
       char_set_admlevel(ch, char_get_admlevel(ch) + 1);
       for (i = 0; default_admin_flags[char_get_admlevel(ch)][i] != -1; i++)
-        SET_BIT_AR(char_get_admflags(ch), default_admin_flags[char_get_admlevel(ch)][i]);
+        char_adm_set(ch, default_admin_flags[char_get_admlevel(ch)][i], true);
     }
     run_autowiz();
     if (orig < ADMLVL_IMMORT && value >= ADMLVL_IMMORT) {
-      SET_BIT_AR(PRF_FLAGS(ch), PRF_LOG2);
-      SET_BIT_AR(PRF_FLAGS(ch), PRF_HOLYLIGHT);
-      SET_BIT_AR(PRF_FLAGS(ch), PRF_ROOMFLAGS);
-      SET_BIT_AR(PRF_FLAGS(ch), PRF_AUTOEXIT);
+      char_prf_set(ch, PRF_LOG2, true);
+      char_prf_set(ch, PRF_HOLYLIGHT, true);
+      char_prf_set(ch, PRF_ROOMFLAGS, true);
+      char_prf_set(ch, PRF_AUTOEXIT, true);
     }
     if (char_get_admlevel(ch) >= ADMLVL_IMMORT) {
       for (i = 0; i < 3; i++)
         GET_COND(ch, i) = (char) -1;
-      SET_BIT_AR(PRF_FLAGS(ch), PRF_HOLYLIGHT);
+      char_prf_set(ch, PRF_HOLYLIGHT, true);
     }
     return;
   }
@@ -3904,16 +3904,16 @@ void admin_set(struct char_data *ch, int value)
            admin_level_names[value]);
     while (char_get_admlevel(ch) > value) {
       for (i = 0; default_admin_flags[char_get_admlevel(ch)][i] != -1; i++)
-        REMOVE_BIT_AR(char_get_admflags(ch), default_admin_flags[char_get_admlevel(ch)][i]);
+        char_adm_set(ch, default_admin_flags[char_get_admlevel(ch)][i], false);
       char_set_admlevel(ch, char_get_admlevel(ch) - 1);
     }
     run_autowiz();
     if (orig >= ADMLVL_IMMORT && value < ADMLVL_IMMORT) {
-      REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_LOG1);
-      REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_LOG2);
-      REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_NOHASSLE);
-      REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_HOLYLIGHT);
-      REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ROOMFLAGS);
+      char_prf_set(ch, PRF_LOG1, false);
+      char_prf_set(ch, PRF_LOG2, false);
+      char_prf_set(ch, PRF_NOHASSLE, false);
+      char_prf_set(ch, PRF_HOLYLIGHT, false);
+      char_prf_set(ch, PRF_ROOMFLAGS, false);
     }
     return;
   }
@@ -4167,13 +4167,13 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
    if (rroom_flagged(char_get_in_room(ch), ROOM_PEACEFUL)) {
     send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
     return 0;
-   } else if (obj_flagged(obj, ITEM_UNBREAKABLE) && obj_get_vnum(obj) != 87 && obj_get_vnum(obj) != 80 && obj_get_vnum(obj) != 81 && obj_get_vnum(obj) != 82 && obj_get_vnum(obj) != 83) {
+   } else if (obj_extra_flagged(obj, ITEM_UNBREAKABLE) && obj_get_vnum(obj) != 87 && obj_get_vnum(obj) != 80 && obj_get_vnum(obj) != 81 && obj_get_vnum(obj) != 82 && obj_get_vnum(obj) != 83) {
     send_to_char(ch, "You can't hit that, it is protected by the immortals!\r\n");
     return 0;
    } else if (char_aff_flagged(ch, AFF_FLYING)) {
     send_to_char(ch, "You are too far above it.\r\n");
     return 0;
-   } else if (obj_flagged(obj, ITEM_BROKEN)) {
+   } else if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is already broken!\r\n");
     return 0;
    } else {
@@ -4384,7 +4384,7 @@ int limb_ok(struct char_data *ch, int type) {
   } else if (char_aff_flagged(ch, AFF_ENSNARED)) {
    act("You manage to break the silk ensnaring your arms!", TRUE, ch, 0, 0, TO_CHAR);
    act("$n manages to break the silk ensnaring $s arms!", TRUE, ch, 0, 0, TO_ROOM);
-   REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ENSNARED);
+   char_aff_set(ch, AFF_ENSNARED, false);
   }
   if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
    send_to_char(ch, "Your hands are full!\r\n");
@@ -4517,13 +4517,13 @@ void char_lose_tail(char_data *ch) {
     switch(ch->race) {
         case RACE_ICER:
         case RACE_BIO:
-            REMOVE_BIT_AR(char_get_act(ch), PLR_TAIL);
+            char_plr_set(ch, PLR_TAIL, false);
             remove_limb(ch, 6);
             char_set_tail_growth(ch, 0);
             break;
         case RACE_SAIYAN:
         case RACE_HALFBREED:
-            REMOVE_BIT_AR(char_get_act(ch), PLR_STAIL);
+            char_plr_set(ch, PLR_STAIL, false);
             remove_limb(ch, 5);
             if(char_plr_flagged(ch, PLR_OOZARU)) {
                 oozaru_revert(ch);
@@ -4554,11 +4554,11 @@ void char_gain_tail(char_data *ch, bool announce) {
     switch(ch->race) {
         case RACE_ICER:
         case RACE_BIO:
-            SET_BIT_AR(char_get_act(ch), PLR_TAIL);
+            char_plr_set(ch, PLR_TAIL, true);
             break;
         case RACE_SAIYAN:
         case RACE_HALFBREED:
-            SET_BIT_AR(char_get_act(ch), PLR_STAIL);
+            char_plr_set(ch, PLR_STAIL, true);
             if(char_moon_ok(ch)) {
                 oozaru_transform(ch);
             }
@@ -4754,6 +4754,8 @@ bool char_is_affected(const struct char_data *ch, int skill) {
 }
 
 bool char_plr_toggle(struct char_data *ch, int flag) {
+    if (char_is_npc(ch))
+        return false;
     return ((TOGGLE_BIT_AR(char_get_act(ch), (flag))) & Q_BIT(flag));
 }
 
@@ -4961,7 +4963,7 @@ bool char_not_hidden(const struct char_data *ch) {
 }
 
 bool char_invis_ok_obj(const struct char_data *sub, const struct obj_data *obj) {
-    return (!obj_flagged((obj), ITEM_INVISIBLE) || char_aff_flagged((sub), AFF_DETECT_INVIS));
+    return (!obj_extra_flagged((obj), ITEM_INVISIBLE) || char_aff_flagged((sub), AFF_DETECT_INVIS));
 }
 
 bool char_can_see_obj_carrier(const struct char_data *sub, const struct obj_data *obj) {
@@ -4985,7 +4987,7 @@ bool char_can_carry_obj(struct char_data *ch, struct obj_data *obj) {
 }
 
 bool char_can_get_obj(struct char_data *ch, struct obj_data *obj) {
-    return (obj_can_wear((obj), ITEM_WEAR_TAKE)
+    return (obj_wear_flagged((obj), ITEM_WEAR_TAKE)
            && !obj_get_sitting(obj)
            && char_can_carry_obj((ch),(obj))
            && char_can_see_obj((ch),(obj)));
@@ -5402,7 +5404,7 @@ bool char_has_school_feat(const struct char_data *ch, int i, bitvector_t j) {
 }
 
 int char_exit_level(const struct char_data *ch) {
-    return (!char_is_npc(ch) ? (char_prf_flagged((ch),PRF_AUTOEXIT) ? 1 : 0) + (char_prf_flagged((ch),PRF_FULL_EXIT) ? 2 : 0) : 0);
+    return (!char_is_npc(ch) ? (char_prf_flagged(ch,PRF_AUTOEXIT) ? 1 : 0) + (char_prf_flagged(ch, PRF_FULL_EXIT) ? 2 : 0) : 0);
 }
 
 int char_get_bank_interest(const struct char_data *ch) {
@@ -6665,4 +6667,64 @@ struct room_direction_data * char_get_exit2(const struct char_data *ch, int door
 
 void char_set_exit2(struct char_data *ch, int door, struct room_direction_data * v) {
     world[char_get_exit(ch, door)->to_room].dir_option[door] = v;
+}
+
+/* Flag setters and toggles. */
+
+static void flag_array_set(bitvector_t *array, int flag, bool on) {
+    if (on)
+        SET_BIT_AR(array, flag);
+    else
+        REMOVE_BIT_AR(array, flag);
+}
+
+static bool flag_array_toggle(bitvector_t *array, int flag) {
+    return (TOGGLE_BIT_AR(array, flag) & Q_BIT(flag)) != 0;
+}
+
+/* MOB bits only apply to NPCs; MOB_ISNPC is what makes a character one. */
+static bool mob_flag_applies(const struct char_data *ch, int flag) {
+    return flag == MOB_ISNPC || char_is_npc(ch);
+}
+
+void char_plr_set(struct char_data *ch, int flag, bool on) {
+    if (char_is_npc(ch))
+        return;
+    flag_array_set(char_get_act(ch), flag, on);
+}
+
+void char_mob_set(struct char_data *ch, int flag, bool on) {
+    if (!mob_flag_applies(ch, flag))
+        return;
+    flag_array_set(char_get_act(ch), flag, on);
+}
+
+bool char_mob_toggle(struct char_data *ch, int flag) {
+    if (!mob_flag_applies(ch, flag))
+        return false;
+    return flag_array_toggle(char_get_act(ch), flag);
+}
+
+void char_aff_set(struct char_data *ch, int flag, bool on) {
+    flag_array_set(char_get_affected_by(ch), flag, on);
+}
+
+void char_prf_set(struct char_data *ch, int flag, bool on) {
+    flag_array_set(PRF_FLAGS(ch), flag, on);
+}
+
+void char_adm_set(struct char_data *ch, int flag, bool on) {
+    flag_array_set(char_get_admflags(ch), flag, on);
+}
+
+bool char_adm_toggle(struct char_data *ch, int flag) {
+    return flag_array_toggle(char_get_admflags(ch), flag);
+}
+
+void char_body_set(struct char_data *ch, int flag, bool on) {
+    flag_array_set(char_get_bodyparts(ch), flag, on);
+}
+
+bool char_body_toggle(struct char_data *ch, int flag) {
+    return flag_array_toggle(char_get_bodyparts(ch), flag);
 }

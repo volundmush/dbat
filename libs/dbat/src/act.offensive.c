@@ -272,7 +272,7 @@ ACMD(do_galikgun)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -500,7 +500,7 @@ ACMD(do_honoo)
    } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
     dmg += dmg * 0.4;
    }
-   SET_BIT_AR(char_get_affected_by(vict), AFF_ASHED);
+   char_aff_set(vict, AFF_ASHED, true);
    switch(hitspot) {
     case 1:
       act("@WYou gather your charged ki and bring it up into your throat while mixing it with the air in your lungs. You grin evily at @c$N@W before unleashing a massive jet of @rf@Rl@Ya@rm@Re@Ys@W from your lips! @c$N@W's body is engulfed!@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -555,13 +555,13 @@ ACMD(do_honoo)
      if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
       send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
+      char_aff_set(vict, AFF_BURNED, true);
      } else if (char_get_bonuses(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
       send_to_char(ch, "@RThey appear to be fireproof!@n\r\n");
      } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
       send_to_char(vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are easily burned!@n\r\n");
-      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
+      char_aff_set(vict, AFF_BURNED, true);
      }
      if (char_get_skills_perf(ch, SKILL_HONOO) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
@@ -575,7 +575,7 @@ ACMD(do_honoo)
      send_to_room(char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
      rroom_set_geffect(char_get_in_room(ch), 0);
     }
-    REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ASHED);
+    char_aff_set(vict, AFF_ASHED, false);
     return;
   }
  }
@@ -583,7 +583,7 @@ ACMD(do_honoo)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -838,7 +838,7 @@ ACMD(do_psyblast)
      if (!char_aff_flagged(vict, AFF_SHOCKED) && rand_number(1, 4) == 4 && !char_aff_flagged(vict, AFF_SANCTUARY)) {
       act("@MYour mind has been shocked!@n", TRUE, vict, 0, 0, TO_CHAR);
       act("@M$n@m's mind has been shocked!@n", TRUE, vict, 0, 0, TO_ROOM);
-      SET_BIT_AR(char_get_affected_by(vict), AFF_SHOCKED);
+      char_aff_set(vict, AFF_SHOCKED, true);
      }
      if (char_get_skills_perf(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
@@ -852,7 +852,7 @@ ACMD(do_psyblast)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -926,15 +926,15 @@ ACMD(do_tslash)
 
   struct obj_data *wobj = char_get_equipment(ch, WEAR_WIELD1);
   int wlvl = 0;
-  if (obj_flagged(wobj, ITEM_WEAPLVL1)) { 
+  if (obj_extra_flagged(wobj, ITEM_WEAPLVL1)) { 
    wlvl = 1;
-  } else if (obj_flagged(wobj, ITEM_WEAPLVL2)) {
+  } else if (obj_extra_flagged(wobj, ITEM_WEAPLVL2)) {
    wlvl = 2;
-  } else if (obj_flagged(wobj, ITEM_WEAPLVL3)) {
+  } else if (obj_extra_flagged(wobj, ITEM_WEAPLVL3)) {
    wlvl = 3;
-  } else if (obj_flagged(wobj, ITEM_WEAPLVL4)) {
+  } else if (obj_extra_flagged(wobj, ITEM_WEAPLVL4)) {
    wlvl = 4;
-  } else if (obj_flagged(wobj, ITEM_WEAPLVL5)) {
+  } else if (obj_extra_flagged(wobj, ITEM_WEAPLVL5)) {
    wlvl = 5;
   }
 
@@ -1238,7 +1238,7 @@ ACMD(do_tslash)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -1487,7 +1487,7 @@ ACMD(do_eraser)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -1704,11 +1704,11 @@ ACMD(do_pbarrage)
      if (!char_aff_flagged(vict, AFF_MBREAK) && rand_number(1, 4) == 4 && !char_aff_flagged(vict, AFF_SANCTUARY)) {
       act("@mYour mind's eye has been shattered, you can't charge ki until you recover!@n", TRUE, vict, 0, 0, TO_CHAR);
       act("@M$n@m's mind has been damaged by the attack!@n", TRUE, vict, 0, 0, TO_ROOM);
-      SET_BIT_AR(char_get_affected_by(vict), AFF_MBREAK);
+      char_aff_set(vict, AFF_MBREAK, true);
      } else if (!char_aff_flagged(vict, AFF_SHOCKED) && rand_number(1, 4) == 4 && !char_aff_flagged(vict, AFF_SANCTUARY)) {
       act("@MYour mind has been shocked!@n", TRUE, vict, 0, 0, TO_CHAR);
       act("@M$n@m's mind has been shocked!@n", TRUE, vict, 0, 0, TO_ROOM);
-      SET_BIT_AR(char_get_affected_by(vict), AFF_SHOCKED);
+      char_aff_set(vict, AFF_SHOCKED, true);
      }
      pcost(ch, attperc, 0);
      
@@ -1719,7 +1719,7 @@ ACMD(do_pbarrage)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -2158,7 +2158,7 @@ ACMD(do_spiritball)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -2362,7 +2362,7 @@ ACMD(do_deathball)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -2538,7 +2538,7 @@ ACMD(do_pslash)
    } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
     dmg += dmg * 0.4;
    }
-   SET_BIT_AR(char_get_affected_by(vict), AFF_ASHED);
+   char_aff_set(vict, AFF_ASHED, true);
    switch(hitspot) {
     case 1:
       act("@WYou pour your charged ki into your sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surround the entire sword in the same instant that you pull the blade back and extend it behind your body. Suddenly you swing the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs $S body in flames a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -2593,16 +2593,16 @@ ACMD(do_pslash)
      if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(1, 4) == 4 && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
       send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
+      char_aff_set(vict, AFF_BURNED, true);
      } else if (char_get_bonuses(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
       send_to_char(ch, "@RThey appear to be fireproof!@n\r\n");
      } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
       send_to_char(vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are easily burned!@n\r\n");
-      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
+      char_aff_set(vict, AFF_BURNED, true);
      }
      pcost(ch, attperc, 0);
-    REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ASHED);
+    char_aff_set(vict, AFF_ASHED, false);
     return;
   }
  }
@@ -2610,7 +2610,7 @@ ACMD(do_pslash)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -2827,7 +2827,7 @@ ACMD(do_bigbang)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -3058,7 +3058,7 @@ ACMD(do_scatter)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -3290,7 +3290,7 @@ ACMD(do_balefire)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -3436,7 +3436,7 @@ ACMD(do_kakusanha)
        act("@C$N@c disappears, avoiding the beam chasing $M!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the beam chasing you!@n", FALSE, ch, 0, vict, TO_VICT);
        act("@C$N@c disappears, avoiding the beam chasing $M!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-       REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
+       char_aff_set(vict, AFF_ZANZOKEN, false);
        pcost(vict, 0, GET_MAX_HIT(vict) / 200);
        hurt(0, 0, ch, vict, NULL, 0, 1);
        continue;
@@ -3681,7 +3681,7 @@ ACMD(do_hellspear)
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_VICT);
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-       REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
+       char_aff_set(vict, AFF_ZANZOKEN, false);
        pcost(vict, 0, GET_MAX_HIT(vict) / 200);
        continue;
       }
@@ -3953,7 +3953,7 @@ ACMD(do_hellflash)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -4196,7 +4196,7 @@ ACMD(do_ddslash)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -4449,7 +4449,7 @@ ACMD(do_crusher)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -4669,7 +4669,7 @@ ACMD(do_final)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -4872,7 +4872,7 @@ ACMD(do_sbc)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -5098,7 +5098,7 @@ ACMD(do_tribeam)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -5449,7 +5449,7 @@ ACMD(do_kienzan)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -5597,7 +5597,7 @@ ACMD(do_baku)
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_VICT);
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-       REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
+       char_aff_set(vict, AFF_ZANZOKEN, false);
        pcost(vict, 0, GET_MAX_HIT(vict) / 200);
        hurt(0, 0, ch, vict, NULL, 0, 1);
        continue;
@@ -5831,7 +5831,7 @@ ACMD(do_rogafufuken)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -6088,7 +6088,7 @@ ACMD(do_dualbeam)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -6303,7 +6303,7 @@ ACMD(do_blessedhammer)
      if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !char_is_demon(vict)) {
       send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
+      char_aff_set(vict, AFF_BURNED, true);
      }
      pcost(ch, attperc, 0);
      
@@ -6314,7 +6314,7 @@ ACMD(do_blessedhammer)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -6530,7 +6530,7 @@ ACMD(do_kousengan)
      if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !char_is_demon(vict)) {
       send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
+      char_aff_set(vict, AFF_BURNED, true);
      }
      pcost(ch, attperc, 0);
      
@@ -6541,7 +6541,7 @@ ACMD(do_kousengan)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -6828,7 +6828,7 @@ ACMD(do_deathbeam)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -7085,7 +7085,7 @@ ACMD(do_dodonpa)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -7361,7 +7361,7 @@ ACMD(do_masenko)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -7691,7 +7691,7 @@ ACMD(do_kamehameha)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -8001,7 +8001,7 @@ ACMD(do_renzo)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -8293,7 +8293,7 @@ ACMD(do_heeldrop)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -8459,15 +8459,15 @@ ACMD(do_attack)
    } else {
     weap = char_get_equipment(ch, WEAR_WIELD2);
    }
-   if (obj_flagged(weap, ITEM_WEAPLVL1)) {
+   if (obj_extra_flagged(weap, ITEM_WEAPLVL1)) {
     wlvl = 1;
-   } else if (obj_flagged(weap, ITEM_WEAPLVL2)) {
+   } else if (obj_extra_flagged(weap, ITEM_WEAPLVL2)) {
     wlvl = 2;
-   } else if (obj_flagged(weap, ITEM_WEAPLVL3)) {
+   } else if (obj_extra_flagged(weap, ITEM_WEAPLVL3)) {
     wlvl = 3;
-   } else if (obj_flagged(weap, ITEM_WEAPLVL4)) {
+   } else if (obj_extra_flagged(weap, ITEM_WEAPLVL4)) {
     wlvl = 4;
-   } else if (obj_flagged(weap, ITEM_WEAPLVL5)) {
+   } else if (obj_extra_flagged(weap, ITEM_WEAPLVL5)) {
     wlvl = 5;
    }
 
@@ -8612,15 +8612,15 @@ ACMD(do_attack)
   }
   else {
       dmg = damtype(ch, -1, skill, attperc);
-     if (obj_flagged(weap, ITEM_WEAPLVL1)) {
+     if (obj_extra_flagged(weap, ITEM_WEAPLVL1)) {
 	dmg += dmg * 0.05;
-     } else if (obj_flagged(weap, ITEM_WEAPLVL2)) {
+     } else if (obj_extra_flagged(weap, ITEM_WEAPLVL2)) {
 	dmg += dmg * 0.1;
-     } else if (obj_flagged(weap, ITEM_WEAPLVL3)) {
+     } else if (obj_extra_flagged(weap, ITEM_WEAPLVL3)) {
 	dmg += dmg * 0.2;
-     } else if (obj_flagged(weap, ITEM_WEAPLVL4)) {
+     } else if (obj_extra_flagged(weap, ITEM_WEAPLVL4)) {
 	dmg += dmg * 0.3;
-     } else if (obj_flagged(weap, ITEM_WEAPLVL5)) {
+     } else if (obj_extra_flagged(weap, ITEM_WEAPLVL5)) {
 	dmg += dmg * 0.5;
      }
      if (wtype == 5) {
@@ -9080,7 +9080,7 @@ ACMD(do_attack)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -9316,7 +9316,7 @@ ACMD(do_shogekiha)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -9583,7 +9583,7 @@ ACMD(do_tsuihidan)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -9869,23 +9869,23 @@ ACMD(do_attack2)
       dmg = damtype(ch, -1, skill, attperc);
    int wlvl = 0;
         struct obj_data *weap = char_get_equipment(ch, WEAR_WIELD2);
-     if (obj_flagged(weap, ITEM_WEAPLVL1)) {
+     if (obj_extra_flagged(weap, ITEM_WEAPLVL1)) {
         dmg += dmg * .05;
         wlvl = 1;
      }
-     else if (obj_flagged(weap, ITEM_WEAPLVL2)) {
+     else if (obj_extra_flagged(weap, ITEM_WEAPLVL2)) {
         dmg += dmg * .1;
         wlvl = 2;
      }
-     else if (obj_flagged(weap, ITEM_WEAPLVL3)) {
+     else if (obj_extra_flagged(weap, ITEM_WEAPLVL3)) {
         dmg += dmg * .2;
         wlvl = 3;
      }
-     else if (obj_flagged(weap, ITEM_WEAPLVL4)) {
+     else if (obj_extra_flagged(weap, ITEM_WEAPLVL4)) {
         dmg += dmg * .3;
         wlvl = 4;
      }
-     else if (obj_flagged(weap, ITEM_WEAPLVL5)) {
+     else if (obj_extra_flagged(weap, ITEM_WEAPLVL5)) {
         dmg += dmg * .5;
         wlvl = 5;
      }
@@ -10250,7 +10250,7 @@ ACMD(do_attack2)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -10474,7 +10474,7 @@ ACMD(do_bite)
 		if (!can_kill(ch, NULL, obj, 0)) {
 			return;
 		}
-		if (obj_flagged(obj, ITEM_BROKEN)) {
+		if (obj_extra_flagged(obj, ITEM_BROKEN)) {
 			return;
 		}
 		dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
@@ -10748,7 +10748,7 @@ ACMD(do_kiball)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -11016,7 +11016,7 @@ ACMD(do_beam)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -11284,7 +11284,7 @@ ACMD(do_kiblast)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -11622,7 +11622,7 @@ ACMD(do_slam)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -11853,7 +11853,7 @@ ACMD(do_uppercut)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -12073,7 +12073,7 @@ ACMD(do_tailwhip)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -12310,7 +12310,7 @@ ACMD(do_roundhouse)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -13189,7 +13189,7 @@ ACMD(do_punch)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   if (obj_flagged(obj, ITEM_BROKEN)) {
+   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -13259,7 +13259,7 @@ ACMD(do_charge)
    incCurKI(ch, char_get_charge(ch), true);
    char_set_charge(ch, 0);
    char_set_chargeto(ch, 0);
-   REMOVE_BIT_AR(char_get_act(ch), PLR_CHARGE);
+   char_plr_set(ch, PLR_CHARGE, false);
    return;
   }
   else if (!strcasecmp("release", arg) && char_get_charge(ch) > 0) {
@@ -13299,7 +13299,7 @@ ACMD(do_charge)
      act("$n@w's aura disappears.@n", TRUE, ch, 0, 0, TO_ROOM);
      break;
    }
-   REMOVE_BIT_AR(char_get_act(ch), PLR_CHARGE);
+   char_plr_set(ch, PLR_CHARGE, false);
    char_set_chargeto(ch, 0);
    return;
   }
@@ -13353,7 +13353,7 @@ ACMD(do_charge)
      act(bloom, TRUE, ch, 0, 0, TO_ROOM);
      char_set_chargeto(ch, (((GET_MAX_MANA(ch) * 0.01) * amt) + 1));
      char_set_charge(ch, char_get_charge(ch) + (1));    
-     SET_BIT_AR(char_get_act(ch), PLR_CHARGE);
+     char_plr_set(ch, PLR_CHARGE, true);
     }
   }
   else if (amt < 1 && rroom_get_vnum(char_get_in_room(ch)) != 1562) {
@@ -13368,7 +13368,7 @@ ACMD(do_charge)
 ACMD(do_powerup)
 {
   if (char_is_npc(ch)) {
-   SET_BIT_AR(char_get_act(ch), MOB_POWERUP);
+   char_mob_set(ch, MOB_POWERUP, true);
     if (GET_MAX_HIT(ch) < 50000) {
      act("@RYou begin to powerup, and air billows outward around you!@n", TRUE, ch, 0, 0, TO_CHAR);
      act("@R$n begins to powerup, and air billows outward around $m!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -13413,7 +13413,7 @@ ACMD(do_powerup)
   }
   if (char_plr_flagged(ch, PLR_POWERUP)) {
    send_to_char(ch, "@WYou stop powering up.@n");
-   REMOVE_BIT_AR(char_get_act(ch), PLR_POWERUP);
+   char_plr_set(ch, PLR_POWERUP, false);
    return;
    }
   if (GET_HIT(ch) >= GET_MAX_HIT(ch)) {
@@ -13454,7 +13454,7 @@ ACMD(do_powerup)
      act("@RYou begin to powerup, and the very air around you begins to burn!@n", TRUE, ch, 0, 0, TO_CHAR);
      act("@R$n begins to powerup, and the very air around $m begins to burn!@n", TRUE, ch, 0, 0, TO_ROOM);
     }
-    SET_BIT_AR(char_get_act(ch), PLR_POWERUP);
+    char_plr_set(ch, PLR_POWERUP, true);
     return;
    }
 }

@@ -25,3 +25,26 @@ int zone_get_max_level(zone_rnum zone) {
 void zone_set_max_level(zone_rnum zone, int v) {
     zone_table[zone].max_level = v;
 }
+
+bool zone_data_flagged(const struct zone_data *zone, int flag) {
+    return IS_SET_AR(zone->zone_flags, flag) != 0;
+}
+
+void zone_data_set_flag(struct zone_data *zone, int flag, bool on) {
+    if (on)
+        SET_BIT_AR(zone->zone_flags, flag);
+    else
+        REMOVE_BIT_AR(zone->zone_flags, flag);
+}
+
+bool zone_data_toggle_flag(struct zone_data *zone, int flag) {
+    return (TOGGLE_BIT_AR(zone->zone_flags, flag) & Q_BIT(flag)) != 0;
+}
+
+void zone_set_flag(zone_rnum rnum, int flag, bool on) {
+    zone_data_set_flag(&zone_table[rnum], flag, on);
+}
+
+bool zone_toggle_flag(zone_rnum rnum, int flag) {
+    return zone_data_toggle_flag(&zone_table[rnum], flag);
+}

@@ -584,7 +584,7 @@ void postmaster_send_mail(struct char_data *ch, struct char_data *mailman,
   act(buf, FALSE, mailman, 0, ch, TO_VICT);
   act("@C$n@w starts writing a letter.@n", TRUE, ch, 0, 0, TO_ROOM);
   char_set_gold(ch, char_get_gold(ch) - (STAMP_PRICE));
-  SET_BIT_AR(char_get_act(ch), PLR_MAILING);	/* string_write() sets writing. */
+  char_plr_set(ch, PLR_MAILING, true);	/* string_write() sets writing. */
 
   /* Start writing! */
   CREATE(mailwrite, char *, 1);
@@ -622,8 +622,8 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
     obj_set_type_flag(obj, ITEM_NOTE);
     for(y = 0; y < TW_ARRAY_MAX; y++)
       obj->wear_flags[y] = 0;
-    SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_TAKE);
-    SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_HOLD);
+    obj_wear_set(obj, ITEM_WEAR_TAKE, true);
+    obj_wear_set(obj, ITEM_WEAR_HOLD, true);
     obj_set_weight(obj, 1);
     obj_set_cost(obj, 30);
     obj_set_cost_per_day(obj, 10);
@@ -637,7 +637,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
     obj->name = strdup(bla);
     *bla = '\0';
     *blm = '\0';
-    SET_BIT_AR(obj_get_extra_flags(obj), ITEM_UNIQUE_SAVE);
+    obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
     add_unique_id(obj);
     obj_set_value(obj, 7, MATERIAL_PAPER);
     obj_set_value(obj, VAL_NOTE_HEALTH, 100);
@@ -648,7 +648,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
 	strdup("Mail system error - please report.  Error #11.\r\n");
 
 	       /* so it saves */
-    SET_BIT_AR(obj_get_extra_flags(obj), ITEM_UNIQUE_SAVE);
+    obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
 
     if (desc_is_playing(ch->desc) && mailman != NULL) {
      obj_to_char(obj, ch);

@@ -504,7 +504,7 @@ ACMD(do_rpp)
      send_to_char(ch, "You don't have a that equipment to restring in your inventory.\r\n");
      send_to_char(ch, "Syntax: rpp 14 (obj name)\r\n");
      return;
-    } else if (obj_flagged(obj, ITEM_CUSTOM)) {
+    } else if (obj_extra_flagged(obj, ITEM_CUSTOM)) {
      send_to_char(ch, "You can not restring a custom piece. Why? Cause I say so. :P\r\n");
      return;
     } else {
@@ -558,7 +558,7 @@ ACMD(do_rpp)
      int found = FALSE;
      struct obj_data *k = NULL;
      for (k = object_list; k; k = k->next) {
-      if (obj_flagged(k, ITEM_FORGED)) {
+      if (obj_extra_flagged(k, ITEM_FORGED)) {
        continue;
       }
       if (obj_get_vnum(k) == 20) {
@@ -901,9 +901,9 @@ ACMD(do_grapple)
      act("@cYou disappear, avoiding @C$n's@c grapple attempt before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@c disappears, avoiding @C$n's@c grapple attempt before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
      if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ZANZOKEN);
+      char_aff_set(ch, AFF_ZANZOKEN, false);
      }
-     REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
+     char_aff_set(vict, AFF_ZANZOKEN, false);
      decCurST(ch, cost, 0);
      WAIT_STATE(ch, PULSE_4SEC);
      return;
@@ -913,8 +913,8 @@ ACMD(do_grapple)
      act("@C$N@c disappears, trying to avoid your grapple but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@cYou zanzoken to avoid the grapple attempt but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@c disappears, trying to avoid @C$n's@c grapple attempt but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ZANZOKEN);
+     char_aff_set(vict, AFF_ZANZOKEN, false);
+     char_aff_set(ch, AFF_ZANZOKEN, false);
    }
   }
 
@@ -1027,7 +1027,7 @@ ACMD(do_grapple)
    /* Let's grapple! */
 
    if (!char_plr_flagged(vict, PLR_THANDW)) {
-    REMOVE_BIT_AR(char_get_act(vict), PLR_THANDW);
+    char_plr_set(vict, PLR_THANDW, false);
    }
 
       decCurST(ch, cost, 0);
@@ -1113,9 +1113,9 @@ ACMD(do_trip)
      act("@cYou disappear, avoiding @C$n's@c trip before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@c disappears, avoiding @C$n's@c trip before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
      if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
-      REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ZANZOKEN);
+      char_aff_set(ch, AFF_ZANZOKEN, false);
      }
-     REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
+     char_aff_set(vict, AFF_ZANZOKEN, false);
        decCurST(ch, cost, 0);
      WAIT_STATE(ch, PULSE_4SEC);
      return;
@@ -1125,8 +1125,8 @@ ACMD(do_trip)
      act("@C$N@c disappears, trying to avoid your trip but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@cYou zanzoken to avoid the trip but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@c disappears, trying to avoid @C$n's@c trip but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
-     REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ZANZOKEN);
+     char_aff_set(vict, AFF_ZANZOKEN, false);
+     char_aff_set(ch, AFF_ZANZOKEN, false);
    }
   }
 
@@ -1679,7 +1679,7 @@ ACMD(do_infuse)
  if (char_aff_flagged(ch, AFF_INFUSE)) {
   act("You stop infusing ki into your attacks.", TRUE, ch, 0, 0, TO_CHAR);
   act("$n stops infusing ki into $s attacks.", TRUE, ch, 0, 0, TO_ROOM);
-  REMOVE_BIT_AR(char_get_affected_by(ch), AFF_INFUSE);
+  char_aff_set(ch, AFF_INFUSE, false);
   return;
  }
 
@@ -1690,7 +1690,7 @@ ACMD(do_infuse)
        reveal_hiding(ch, 0);
  act("You start infusing ki into your attacks.", TRUE, ch, 0, 0, TO_CHAR);
  act("$n starts infusing ki into $s attacks.", TRUE, ch, 0, 0, TO_ROOM);
- SET_BIT_AR(char_get_affected_by(ch), AFF_INFUSE);
+ char_aff_set(ch, AFF_INFUSE, true);
  decCurKI(ch, getMaxKI(ch) / 100, 0);
 }
 
@@ -1805,7 +1805,7 @@ ACMD(do_taisha)
   act("@WYou hold up your hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@g$n holds up $s hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n", TRUE, ch, 0, 0, TO_ROOM);
   improve_skill(ch, SKILL_TAISHA, 1);
-  SET_BIT_AR(rroom_get_room_flags(char_get_in_room(ch)), ROOM_AURA);
+  rroom_set_flag(char_get_in_room(ch), ROOM_AURA, true);
   return;
  }  
 }
@@ -1960,7 +1960,7 @@ ACMD(do_candy)
             obj = read_object(53, VIRTUAL);
             obj_to_char(obj, ch);
         }
-        SET_BIT_AR(char_get_act(vict), MOB_HUSK);
+        char_mob_set(vict, MOB_HUSK, true);
         die(vict, ch);
     }
 
@@ -2022,7 +2022,7 @@ ACMD(do_future)
   act("@CYou focus your energy into your fingers before stabbing your claws into $N and bestowing the power of Future Sight upon $M. Shortly after $E passes out.@n", TRUE, ch, 0, vict, TO_CHAR);
   act("@C$n focuses $s energy into $s fingers before stabbing $s claws into YOUR neck and bestowing the power of Future Sight upon you! Soon after you pass out!@n", TRUE, ch, 0, vict, TO_VICT);
   act("@C$n focuses $s energy into $s fingers before stabbing $s claws into $N's neck and bestowing the power of Future Sight upon $M! Soon after $E passes out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-  SET_BIT_AR(char_get_affected_by(vict), AFF_FUTURE);
+  char_aff_set(vict, AFF_FUTURE, true);
   vict->real_abils.cha += 5;
   vict->real_abils.intel += 2;
   char_set_position(vict, POS_SLEEPING);
@@ -2043,7 +2043,7 @@ ACMD(do_future)
   act("@CYou focus your energy into your mind and awaken your latent Future Sight powers!@n", TRUE, ch, 0, vict, TO_CHAR);
   act("@C$n focuses $s energy while closing $s eyes for a moment.@n", TRUE, ch, 0, vict, TO_VICT);
   act("@C$n focuses $s energy while closing $s eyes for a moment.@n", TRUE, ch, 0, vict, TO_NOTVICT);
-  SET_BIT_AR(char_get_affected_by(ch), AFF_FUTURE);
+  char_aff_set(ch, AFF_FUTURE, true);
   ch->real_abils.cha += 5;
   ch->real_abils.intel += 2;
   char_set_position(vict, POS_SLEEPING);
@@ -2301,7 +2301,7 @@ ACMD(do_implant)
 
  for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
-   if (found == FALSE && obj_get_vnum(obj) == 66 && (!obj_flagged(obj, ITEM_BROKEN) && !obj_flagged(obj, ITEM_FORGED))) {
+   if (found == FALSE && obj_get_vnum(obj) == 66 && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
     found = TRUE;
     limb = obj;
    }
@@ -2333,7 +2333,7 @@ ACMD(do_implant)
    act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, 0, TO_CHAR);
    act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, 0, TO_ROOM);
    }
-   SET_BIT_AR(char_get_act(vict), PLR_CRARM);
+   char_plr_set(vict, PLR_CRARM, true);
    obj_from_char(limb);
    extract_obj(limb);
    return;
@@ -2361,7 +2361,7 @@ ACMD(do_implant)
    act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, 0, TO_CHAR);
    act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, 0, TO_ROOM);
    }
-   SET_BIT_AR(char_get_act(vict), PLR_CLARM);
+   char_plr_set(vict, PLR_CLARM, true);
    obj_from_char(limb);
    extract_obj(limb);
    return;
@@ -2389,7 +2389,7 @@ ACMD(do_implant)
    act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, 0, TO_CHAR);
    act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, 0, TO_ROOM);
    }
-   SET_BIT_AR(char_get_act(vict), PLR_CRLEG);
+   char_plr_set(vict, PLR_CRLEG, true);
    obj_from_char(limb);
    extract_obj(limb);
    return;
@@ -2417,7 +2417,7 @@ ACMD(do_implant)
    act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, 0, TO_CHAR);
    act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, 0, TO_ROOM);
    }
-   SET_BIT_AR(char_get_act(vict), PLR_CLLEG);
+   char_plr_set(vict, PLR_CLLEG, true);
    obj_from_char(limb);
    extract_obj(limb);
    return;
@@ -2547,7 +2547,7 @@ ACMD(do_fury) {
   reveal_hiding(ch, 0);
   act("You release your fury! Your very next attack is guaranteed to rip your foes a new one!", TRUE, ch, 0, 0, TO_CHAR);
   act("$n screams furiously as a look of anger appears on $s face!", TRUE, ch, 0, 0, TO_ROOM);
-  SET_BIT_AR(char_get_act(ch), PLR_FURY);
+  char_plr_set(ch, PLR_FURY, true);
 }
 
 /* End of do_fury for halfbreeds to release their raaage, rawrg! */
@@ -2760,7 +2760,7 @@ ACMD(do_telepathy)
     act("@wYou attempt to read $N's@w mind, but fail to see it clearly.@n", TRUE, ch, 0, vict, TO_CHAR);
     if (rand_number(1, 15) >= 14 && !char_aff_flagged(ch, AFF_SHOCKED)) {
      act("@MYour mind has been shocked!@n", TRUE, ch, 0, 0, TO_CHAR);
-     SET_BIT_AR(char_get_affected_by(ch), AFF_SHOCKED);
+     char_aff_set(ch, AFF_SHOCKED, true);
     } else {
      improve_skill(ch, SKILL_TELEPATHY, 0);
     }
@@ -2921,7 +2921,7 @@ ACMD(do_potential)
  else {
   boost = char_get_skill(ch, SKILL_POTENTIAL) / 2;
 
-  SET_BIT_AR(char_get_act(vict), PLR_PR);
+  char_plr_set(vict, PLR_PR, true);
 
   gainBasePL(vict, (getBasePL(vict) / 100) * boost, false);
   if (char_is_halfbreed(vict)) {
@@ -3119,7 +3119,7 @@ ACMD(do_spit)
      act("@C$N@c disappears, avoiding your spit before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@cYou disappear, avoiding @C$n's@c @rstone spit@c before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@c disappears, avoiding @C$n's@c @rstone spit@c before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
+     char_aff_set(vict, AFF_ZANZOKEN, false);
      WAIT_STATE(ch, PULSE_2SEC);
      improve_skill(ch, SKILL_SPIT, 1);
      return;
@@ -3190,23 +3190,23 @@ static void boost_obj(struct obj_data *obj, struct char_data *ch, int type)
   case 1: /* This object is a weapon. */
    switch (boost) {
     case 30:
-     SET_BIT_AR(obj_get_extra_flags(obj), ITEM_WEAPLVL2);
+     obj_extra_set(obj, ITEM_WEAPLVL2, true);
      break;
     case 40:
     case 50:
-     SET_BIT_AR(obj_get_extra_flags(obj), ITEM_WEAPLVL3);
+     obj_extra_set(obj, ITEM_WEAPLVL3, true);
      break;
     case 60:
     case 70:
     case 80:
     case 90:
-     SET_BIT_AR(obj_get_extra_flags(obj), ITEM_WEAPLVL4);
+     obj_extra_set(obj, ITEM_WEAPLVL4, true);
      break;
     case 100:
-     SET_BIT_AR(obj_get_extra_flags(obj), ITEM_WEAPLVL5);
+     obj_extra_set(obj, ITEM_WEAPLVL5, true);
      break;
     default:
-     SET_BIT_AR(obj_get_extra_flags(obj), ITEM_WEAPLVL1);
+     obj_extra_set(obj, ITEM_WEAPLVL1, true);
      break;
    }
    if (boost != 0) {
@@ -3677,8 +3677,8 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    obj = read_object(19053, VIRTUAL);
     add_unique_id(obj);
    obj_to_char(obj, ch);
-   SET_BIT_AR(obj_get_extra_flags(obj), ITEM_NORENT);
-   SET_BIT_AR(obj_get_extra_flags(obj), ITEM_NOSELL);
+   obj_extra_set(obj, ITEM_NORENT, true);
+   obj_extra_set(obj, ITEM_NOSELL, true);
    obj_set_size(obj, get_size(ch));
    reveal_hiding(ch, 0);  char_set_con_cooldown(ch, 10);
    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
@@ -3981,8 +3981,8 @@ ACMD(do_srepair)
        if (obj_get_value(char_get_equipment(ch, i), VAL_ALL_HEALTH) > 100) {
         obj_set_value(char_get_equipment(ch, i), VAL_ALL_HEALTH, 100);
        }
-       if (obj_flagged(char_get_equipment(ch, i), ITEM_BROKEN)) {
-        REMOVE_BIT_AR(obj_get_extra_flags(char_get_equipment(ch, i)), ITEM_BROKEN);
+       if (obj_extra_flagged(char_get_equipment(ch, i), ITEM_BROKEN)) {
+        obj_extra_set(char_get_equipment(ch, i), ITEM_BROKEN, false);
        }
        repaired = TRUE;
       }
@@ -4339,7 +4339,7 @@ ACMD(do_ingest)
      act("@C$N@c disappears, avoiding your attempted ingestion!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@cYou disappear, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@c disappears, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
+     char_aff_set(vict, AFF_ZANZOKEN, false);
      WAIT_STATE(ch, PULSE_3SEC);
      return;
   }
@@ -4363,7 +4363,7 @@ ACMD(do_ingest)
     gainBaseKI(ch, ki, true);
     if (!char_is_npc(vict) && !char_is_npc(ch)) {
      send_to_imm("[PK] %s killed %s at room [%d]\r\n", char_get_name(ch), char_get_name(vict), rroom_get_vnum(char_get_in_room(vict)));
-     SET_BIT_AR(char_get_act(vict), PLR_ABSORBED);
+     char_plr_set(vict, PLR_ABSORBED, true);
     }
     send_to_char(ch, "@D[@mINGEST@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
     if (rand_number(1, 3) == 3) {
@@ -4592,7 +4592,7 @@ ACMD(do_absorb)
 
     if (!char_is_npc(vict) && !char_is_npc(ch)) {
      send_to_imm("[PK] %s killed %s at room [%d]\r\n", char_get_name(ch), char_get_name(vict), rroom_get_vnum(char_get_in_room(vict)));
-     SET_BIT_AR(char_get_act(vict), PLR_ABSORBED);
+     char_plr_set(vict, PLR_ABSORBED, true);
     }
 
     send_to_char(ch, "@D[@gABSORB@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
@@ -4662,7 +4662,7 @@ ACMD(do_absorb)
    send_to_char(ch, "@D[@gABSORB@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
    improve_skill(ch, SKILL_ABSORB, 0);
    WAIT_STATE(ch, PULSE_4SEC);
-   SET_BIT_AR(char_get_act(vict), MOB_HUSK);
+   char_mob_set(vict, MOB_HUSK, true);
    die(vict, ch);
   }
  }
@@ -4975,7 +4975,7 @@ ACMD(do_regenerate) {
    act("$n regenerates $s broken right leg!", TRUE, ch, 0, 0, TO_ROOM);
   }
   if (!char_plr_flagged(ch, PLR_TAIL) && char_is_bio(ch)) {
-   SET_BIT_AR(char_get_act(ch), PLR_TAIL);
+   char_plr_set(ch, PLR_TAIL, true);
    act("You regrow your tail!", TRUE, ch, 0, 0, TO_CHAR);
    act("$n regrows $s tail!", TRUE, ch, 0, 0, TO_ROOM);
   }
@@ -5109,7 +5109,7 @@ ACMD(do_focus)
     act("$n focuses ki into $s muscles, but fails in making them mighty!", TRUE, ch, 0, 0, TO_ROOM);
     return;
    } else {
-    SET_BIT_AR(char_get_affected_by(ch), AFF_MIGHT);
+    char_aff_set(ch, AFF_MIGHT, true);
        decCurKI(ch, getMaxKI(ch) / 20, 0);
     int duration = roll_aff_duration(char_get_aff_abils_intel(ch), 2);
                                         /* Str , Con, Int, Agl, Wis, Spd */
@@ -5773,7 +5773,7 @@ ACMD(do_focus)
      act("$n focuses ki while moving $s hands in a lulling pattern, putting $N to sleep!", TRUE, ch, 0, vict, TO_NOTVICT);
      char_set_position(vict, POS_SLEEPING);
      if (char_aff_flagged(vict, AFF_FLYING)) {
-      REMOVE_BIT_AR(char_get_affected_by(vict), AFF_FLYING);
+      char_aff_set(vict, AFF_FLYING, false);
       char_set_altitude(vict, 0);
      }
      return;
@@ -6245,7 +6245,7 @@ ACMD(do_forgery) {
 
   for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
-   if (found == FALSE && obj_get_vnum(obj) == 19 && (!obj_flagged(obj, ITEM_BROKEN) && !obj_flagged(obj, ITEM_FORGED))) {
+   if (found == FALSE && obj_get_vnum(obj) == 19 && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
     found = TRUE;
     obj4 = obj;
    }
@@ -6261,13 +6261,13 @@ ACMD(do_forgery) {
    return;
   }
 
-  if (obj_flagged(obj2, ITEM_FORGED)) {
+  if (obj_extra_flagged(obj2, ITEM_FORGED)) {
    send_to_char(ch, "%s is forgery, there is no reason to make a fake of a fake!\r\n", obj2->short_description);
    WAIT_STATE(ch, PULSE_2SEC);
    return;
   }
 
-  if (obj_flagged(obj2, ITEM_BROKEN)) {
+  if (obj_extra_flagged(obj2, ITEM_BROKEN)) {
    send_to_char(ch, "%s is broken, there is no reason to make a fake of this mess!\r\n", obj2->short_description);
    WAIT_STATE(ch, PULSE_2SEC);
    return;
@@ -6290,7 +6290,7 @@ ACMD(do_forgery) {
 	return;
   }
 
-  if (obj_flagged(obj2, ITEM_PROTECTED)) {
+  if (obj_extra_flagged(obj2, ITEM_PROTECTED)) {
    send_to_char(ch, "You don't know where to begin with this work of ART.\r\n");
    return;
   }
@@ -6320,7 +6320,7 @@ ACMD(do_forgery) {
   obj_to_char(obj3, ch);
 
    /* Set Object Variables */
-    SET_BIT_AR(obj_get_extra_flags(obj3), ITEM_FORGED);
+    obj_extra_set(obj3, ITEM_FORGED, true);
     obj_set_weight(obj3, rand_number(obj_get_weight(obj3) / 2, obj_get_weight(obj3)));
 
   obj_from_char(obj4);
@@ -6366,14 +6366,14 @@ ACMD(do_appraise) {
    return;
   }
 
-  if (obj_flagged(obj, ITEM_BROKEN)) {
+  if (obj_extra_flagged(obj, ITEM_BROKEN)) {
    send_to_char(ch, "%s is broken!\r\n", obj->short_description);
    act("@c$n@w looks at $p and frowns.@n", TRUE, ch, obj, 0, TO_ROOM);
    WAIT_STATE(ch, PULSE_2SEC);
    return;
   }
 
-  if (obj_flagged(obj, ITEM_FORGED)) {
+  if (obj_extra_flagged(obj, ITEM_FORGED)) {
    send_to_char(ch, "%s is fake and worthless!\r\n", obj->short_description);
    act("@c$n@w looks at $p with an angry face.@n", TRUE, ch, obj, 0, TO_ROOM);
    WAIT_STATE(ch, PULSE_2SEC);
@@ -6382,37 +6382,37 @@ ACMD(do_appraise) {
   found = FALSE;
   int displevel = obj_get_level(obj);
 
-   if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_flagged(obj, ITEM_CUSTOM))
+   if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_extra_flagged(obj, ITEM_CUSTOM))
     displevel = 20;
 
   send_to_char(ch, "%s is worth: %s\r\nMin Lvl: %d\r\n", obj->short_description, add_commas(obj_get_cost(obj)), displevel);
   if (obj_get_type_flag(obj) == ITEM_WEAPON) {
-     if (obj_flagged(obj, ITEM_WEAPLVL1)) {
+     if (obj_extra_flagged(obj, ITEM_WEAPLVL1)) {
       send_to_char(ch, "Weapon Level: 1\nDamage Bonus: 5%s\r\n", "%");
      }
-     else if (obj_flagged(obj, ITEM_WEAPLVL2)) {
+     else if (obj_extra_flagged(obj, ITEM_WEAPLVL2)) {
       send_to_char(ch, "Weapon Level: 2\nDamage Bonus: 10%s\r\n", "%");
      }
-     else if (obj_flagged(obj, ITEM_WEAPLVL3)) {
+     else if (obj_extra_flagged(obj, ITEM_WEAPLVL3)) {
       send_to_char(ch, "Weapon Level: 3\nDamage Bonus: 20%s\r\n", "%");
      }
-     else if (obj_flagged(obj, ITEM_WEAPLVL4)) {
+     else if (obj_extra_flagged(obj, ITEM_WEAPLVL4)) {
       send_to_char(ch, "Weapon Level: 4\nDamage Bonus: 30%s\r\n", "%");
      }
-     else if (obj_flagged(obj, ITEM_WEAPLVL5)) {
+     else if (obj_extra_flagged(obj, ITEM_WEAPLVL5)) {
       send_to_char(ch, "Weapon Level: 5\nDamage Bonus: 50%s\r\n", "%");
      }
   }
   send_to_char(ch, "Size: %s\r\n", size_names[obj_get_size(obj)]);
-  if (obj_flagged(obj, ITEM_SLOT1) && !obj_flagged(obj, ITEM_SLOTS_FILLED)) {
+  if (obj_extra_flagged(obj, ITEM_SLOT1) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
    send_to_char(ch, "Token Slots  : @m0/1@n\n");
-  } else if (obj_flagged(obj, ITEM_SLOT1) && obj_flagged(obj, ITEM_SLOTS_FILLED)) {
+  } else if (obj_extra_flagged(obj, ITEM_SLOT1) && obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
    send_to_char(ch, "Token Slots  : @m1/1@n\n");
-  } else if (obj_flagged(obj, ITEM_SLOT2) && !obj_flagged(obj, ITEM_SLOT_ONE) && !obj_flagged(obj, ITEM_SLOTS_FILLED)) {
+  } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
    send_to_char(ch, "Token Slots  : @m0/2@n\n");
-  } else if (obj_flagged(obj, ITEM_SLOT2) && obj_flagged(obj, ITEM_SLOT_ONE) && !obj_flagged(obj, ITEM_SLOTS_FILLED)) {
+  } else if (obj_extra_flagged(obj, ITEM_SLOT2) && obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
    send_to_char(ch, "Token Slots  : @m1/2@n\n");
-  } else if (obj_flagged(obj, ITEM_SLOT2) && !obj_flagged(obj, ITEM_SLOTS_FILLED)) {
+  } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
    send_to_char(ch, "Token Slots  : @m2/2@n\n");
   }
   send_to_char(ch, "Bonuses:");
@@ -6455,7 +6455,7 @@ ACMD(do_disguise) {
  
  if (char_plr_flagged(ch, PLR_DISGUISED)) {
   send_to_char(ch, "You stop disguising yourself.\r\n");
-  REMOVE_BIT_AR(char_get_act(ch), PLR_DISGUISED);
+  char_plr_set(ch, PLR_DISGUISED, false);
   act("@C$n @wpulls off $s disguise and reveals $mself!", TRUE, ch, 0, 0, TO_ROOM);
   return;
  }
@@ -6480,7 +6480,7 @@ ACMD(do_disguise) {
  if (skill > roll) {
   send_to_char(ch, "You managed to disguise yourself with some skilled manipulation of your headwear.\r\n");
   act("@C$n @wmanages to disguise $mself with some skilled manipulation of $s headwear.", TRUE, ch, 0, 0, TO_ROOM);
-  SET_BIT_AR(char_get_act(ch), PLR_DISGUISED);
+  char_plr_set(ch, PLR_DISGUISED, true);
   return;
  }
  else {
@@ -6539,7 +6539,7 @@ ACMD(do_zanzoken)
  }
 
  if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
-  REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ZANZOKEN);
+  char_aff_set(ch, AFF_ZANZOKEN, false);
   send_to_char(ch, "You release the ki you had prepared for a zanzoken.\r\n");
   return;
  }
@@ -6582,7 +6582,7 @@ ACMD(do_zanzoken)
  
  act("@wYou focus your ki, preparing to move at super speeds if necessary.@n", TRUE, ch, 0, 0, TO_CHAR);
     decCurKI(ch, cost, 0);
- SET_BIT_AR(char_get_affected_by(ch), AFF_ZANZOKEN);
+ char_aff_set(ch, AFF_ZANZOKEN, true);
  improve_skill(ch, SKILL_ZANZOKEN, 2);
  WAIT_STATE(ch, PULSE_2SEC);
 }
@@ -6666,13 +6666,13 @@ ACMD(do_eyec)
   return;
 
  if (char_plr_flagged(ch, PLR_EYEC)) {
-  REMOVE_BIT_AR(char_get_act(ch), PLR_EYEC);  
+  char_plr_set(ch, PLR_EYEC, false);  
   act("@wYou open your eyes.@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@C$n@w opens $s eyes.@n", TRUE, ch, 0, 0, TO_ROOM);
  }
 
  else if (!char_plr_flagged(ch, PLR_EYEC)) {
-  SET_BIT_AR(char_get_act(ch), PLR_EYEC);
+  char_plr_set(ch, PLR_EYEC, true);
   act("@wYou close your eyes.@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@C$n@w closes $s eyes.@n", TRUE, ch, 0, 0, TO_ROOM);
  }
@@ -6886,7 +6886,7 @@ ACMD(do_heal)
     if (char_aff_flagged(vict, AFF_BURNED)) {
         send_to_char(vict, "Your burns are healed now.\r\n");
         act("$n@w's burns are now healed.@n", TRUE, vict, 0, 0, TO_ROOM);
-        REMOVE_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
+        char_aff_set(vict, AFF_BURNED, false);
     }
     if (is_affected(vict, AFF_HYDROZAP)) {
         send_to_char(vict, "You no longer feel a great thirst.\r\n");
@@ -6933,16 +6933,16 @@ ACMD(do_heal)
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
     }
    }
-   REMOVE_BIT_AR(char_get_affected_by(vict), AFF_BLIND);
+   char_aff_set(vict, AFF_BLIND, false);
    char_set_limb_condition(vict, (1)-1, 100);
    char_set_limb_condition(vict, (2)-1, 100);
    char_set_limb_condition(vict, (3)-1, 100);
    char_set_limb_condition(vict, (4)-1, 100);
    if (!char_plr_flagged(vict, PLR_TAIL) && (char_is_bio(vict) || char_is_icer(vict))) {
-    SET_BIT_AR(char_get_act(vict), PLR_TAIL);
+    char_plr_set(vict, PLR_TAIL, true);
    }
    if (!char_plr_flagged(vict, PLR_STAIL) && (char_is_saiyan(vict) || char_is_halfbreed(vict))) {
-    SET_BIT_AR(char_get_act(vict), PLR_STAIL);
+    char_plr_set(vict, PLR_STAIL, true);
    }
    improve_skill(ch, SKILL_HEAL, 0);
    WAIT_STATE(ch, PULSE_2SEC);
@@ -6971,7 +6971,7 @@ ACMD(do_barrier)
    act("@BYou dispel your barrier, releasing its energy.@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@B$n@B dispels $s barrier, releasing its energy.@n", TRUE, ch, 0, 0, TO_ROOM);
    char_set_barrier(ch, 0);
-   REMOVE_BIT_AR(char_get_affected_by(ch), AFF_SANCTUARY);
+   char_aff_set(ch, AFF_SANCTUARY, false);
    return;
   } else if (!strcasecmp("release", arg)) {
    send_to_char(ch, "You don't have a barrier.\r\n");
@@ -7044,7 +7044,7 @@ ACMD(do_barrier)
    } else {
     improve_skill(ch, SKILL_AQUA_BARRIER, 2);
    }
-   SET_BIT_AR(char_get_affected_by(ch), AFF_SANCTUARY);
+   char_aff_set(ch, AFF_SANCTUARY, true);
    char_set_con_cooldown(ch, 20);
    return;
   }
@@ -7063,7 +7063,7 @@ ACMD(do_instant)
 
   if (!char_is_npc(ch)) {
    if (char_prf_flagged(ch, PRF_ARENAWATCH)) {
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
+    char_prf_set(ch, PRF_ARENAWATCH, false);
     char_set_arenawatch(ch, -1);
     send_to_char(ch, "You stop watching the arena action.\r\n");
    }
@@ -7183,7 +7183,7 @@ ACMD(do_instant)
   act("@wPlacing two fingers on your forehead you close your eyes and concentrate. Accelerating to such a speed that you move through the molecules of the universe faster than the speed of light. You stop as you arrive at $N@w!@n", TRUE, ch, 0, tar, TO_CHAR);
   act("@w$n@w appears in an instant out of nowhere right next to you!@n", TRUE, ch, 0, tar, TO_VICT);
   act("@w$n@w places two fingers on $s forehead and disappears in an instant!@n", TRUE, ch, 0, tar, TO_NOTVICT);
-  SET_BIT_AR(char_get_act(ch), PLR_TRANSMISSION);
+  char_plr_set(ch, PLR_TRANSMISSION, true);
   handle_teleport(ch, tar, 0);
   improve_skill(ch, skill_num, 2);
  } else {
@@ -7488,7 +7488,7 @@ ACMD(do_summon)
 
     for (obj = ch->carrying; obj; obj = next_obj) {
      next_obj = obj->next_content;
-     if (obj_flagged(obj, ITEM_FORGED)) {
+     if (obj_extra_flagged(obj, ITEM_FORGED)) {
       continue;
      }
      if (obj_get_vnum(obj) == dball[0]) {
@@ -7670,7 +7670,7 @@ ACMD(do_transform)
             do_charge(ch, "release", 0, 0);
         }
         race_echo_revert(ch, race_flag_to_tier(cur_form.flag));
-        REMOVE_BIT_AR(char_get_act(ch), cur_form.flag);
+        char_plr_set(ch, cur_form.flag, false);
 
         if (*arg2) {
             do_transform(ch, arg2, 0, 0);
@@ -7712,11 +7712,11 @@ ACMD(do_transform)
 
     // revert current form's flag.
     if(cur_form.flag) {
-        REMOVE_BIT_AR(char_get_act(ch), cur_form.flag);
+        char_plr_set(ch, cur_form.flag, false);
     }
 
     // The stats are applied automatically in the new system just by having the flag.
-    SET_BIT_AR(char_get_act(ch), trans.flag);
+    char_plr_set(ch, trans.flag, true);
 
     // Custom racial messages displayed.
     race_echo_transform(ch, to_tier);
@@ -8096,7 +8096,7 @@ ACMD(do_meditate)
    send_to_char(char_get_mindlink(ch), "@rYour mind linked target manages to push you out!@n\r\n");
    if (char_get_aff_abils_intel(char_get_mindlink(ch)) < axion_dice(-10) && !char_aff_flagged(char_get_mindlink(ch), AFF_SHOCKED)) {
     send_to_char(char_get_mindlink(ch), "Your mind is shocked by the flood of mental energy that pushed it out!@n\r\n");
-    REMOVE_BIT_AR(char_get_affected_by(char_get_mindlink(ch)), AFF_SHOCKED);
+    char_aff_set(char_get_mindlink(ch), AFF_SHOCKED, false);
    }
  
    char_set_linker(char_get_mindlink(ch), 0);
@@ -8613,7 +8613,7 @@ ACMD(do_spar)
    act("@wYou move into your sparring stance.@n", FALSE, ch, 0, 0, TO_CHAR);
    act("@C$n@w moves into $s sparring stance.@n", FALSE, ch, 0, 0, TO_ROOM);
   }
-  TOGGLE_BIT_AR(char_get_act(ch), PLR_SPAR);
+  char_plr_toggle(ch, PLR_SPAR);
  }
 }
 
@@ -8624,7 +8624,7 @@ static void check_eq(struct char_data *ch)
   for (i = 0; i < NUM_WEARS; i++) {
    if (char_get_equipment(ch, i)) {
       obj = char_get_equipment(ch, i);
-    if (obj_flagged(obj, ITEM_BROKEN)) {
+    if (obj_extra_flagged(obj, ITEM_BROKEN)) {
      act("@W$p@W falls apart and you remove it.@n", FALSE, ch, obj, 0, TO_CHAR);
      act("@W$p@W falls apart and @C$n@W remove it.@n", FALSE, ch, obj, 0, TO_ROOM);
      perform_remove(ch, i);
@@ -8789,7 +8789,7 @@ void base_update(void)
 				act("@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n", TRUE, d->character, 0, 0, TO_CHAR);
 				act("@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!", TRUE, d->character, 0, 0, TO_ROOM);
 			}
-			REMOVE_BIT_AR(char_get_act(d->character), PLR_GOOP);
+			char_plr_set(d->character, PLR_GOOP, false);
 		}
 		else {
 			d->character->gooptime -= 1;
@@ -8827,10 +8827,10 @@ void base_update(void)
 			}
 		}
 		if (char_plr_flagged(d->character, PLR_TRANSMISSION)) {
-			REMOVE_BIT_AR(char_get_act(d->character), PLR_TRANSMISSION);
+			char_plr_set(d->character, PLR_TRANSMISSION, false);
 		}
 		if (!char_get_fighting(d->character) && char_aff_flagged(d->character, AFF_POSITION)) {
-			REMOVE_BIT_AR(char_get_affected_by(d->character), AFF_POSITION);
+			char_aff_set(d->character, AFF_POSITION, false);
 		}
 		if (char_get_sits(d->character)) {
 			if (char_get_in_room(d->character) != obj_get_in_room(char_get_sits(d->character))) {
@@ -8851,7 +8851,7 @@ void base_update(void)
 		if (char_plr_flagged(d->character, PLR_SELFD) && !char_plr_flagged(d->character, PLR_SELFD2)) {
 			if (rand_number(4, 100) < char_get_skill(d->character, SKILL_SELFD)) {
 				send_to_char(d->character, "You feel you are ready to self destruct!\r\n");
-				SET_BIT_AR(char_get_act(d->character), PLR_SELFD2);
+				char_plr_set(d->character, PLR_SELFD2, true);
 			}
 		}
 		if (!char_get_fighting(d->character) && char_get_combo(d->character) > -1) {
@@ -9374,13 +9374,13 @@ ACMD(do_scouter)
           }
 
           char *blah = sense_location(i->character);
-          if (obj_flagged(obj, ITEM_BSCOUTER) && GET_HIT(i->character) >= 150000) {
+          if (obj_extra_flagged(obj, ITEM_BSCOUTER) && GET_HIT(i->character) >= 150000) {
            send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == TRUE ? pathway : blah);
           }
-          else if (obj_flagged(obj, ITEM_MSCOUTER) && GET_HIT(i->character) >= 5000000) {
+          else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && GET_HIT(i->character) >= 5000000) {
            send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == TRUE ? pathway : blah);
           }
-          else if (obj_flagged(obj, ITEM_ASCOUTER) && GET_HIT(i->character) >= 15000000) {
+          else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && GET_HIT(i->character) >= 15000000) {
            send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == TRUE ? pathway : blah);
           }
           else {
@@ -9420,7 +9420,7 @@ ACMD(do_scouter)
       return;
      }
      else {
-      if (obj_flagged(obj, ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
+      if (obj_extra_flagged(obj, ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
        act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
        act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
        perform_remove(ch, WEAR_EYE);
@@ -9430,7 +9430,7 @@ ACMD(do_scouter)
        save_char(ch);
        return;
       }
-      else if (obj_flagged(obj, ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
+      else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
        act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
        act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
        perform_remove(ch, WEAR_EYE);
@@ -9440,7 +9440,7 @@ ACMD(do_scouter)
        save_char(ch);
        return;
       }
-      else if (obj_flagged(obj, ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
+      else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
        act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
        act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
        perform_remove(ch, WEAR_EYE);
@@ -9809,7 +9809,7 @@ ACMD(do_steal)
      char_set_gold(vict, char_get_gold(vict) - (gold));
      char_set_gold(ch, char_get_gold(ch) + (gold));
      if (!char_is_npc(vict)) {
-      SET_BIT_AR(char_get_act(vict), PLR_STOLEN);
+      char_plr_set(vict, PLR_STOLEN, true);
       mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "THEFT: %s has stolen %s zenni@n from %s", char_get_name(ch), add_commas(gold), char_get_name(vict));
      }
      if (gold > 1)
@@ -9873,7 +9873,7 @@ ACMD(do_steal)
 	 } else if (obj_get_type_flag(obj) == ITEM_KEY) {
       send_to_char(ch, "No stealing keys!\r\n");
       return;
-	  } else if (obj_flagged(obj, ITEM_NOSTEAL)) {
+	  } else if (obj_extra_flagged(obj, ITEM_NOSTEAL)) {
 	   send_to_char(ch, "You can't steal that!\r\n");
 	   return;
      } else if (obj_get_weight(obj) + (getCurCarriedWeight(ch)) > CAN_CARRY_W(ch)) {
@@ -9916,7 +9916,7 @@ ACMD(do_steal)
      } else if (obj_get_vnum(obj) >= 20000) {
       send_to_char(ch, "You can't steal that!\r\n");
       return;
-     } else if (obj_flagged(obj, ITEM_NOSTEAL)) {
+     } else if (obj_extra_flagged(obj, ITEM_NOSTEAL)) {
 	   send_to_char(ch, "You can't steal that!\r\n");
 	   return;
 	  } else if (obj_get_type_flag(obj) == ITEM_KEY) {
@@ -9933,7 +9933,7 @@ ACMD(do_steal)
       obj_from_char(obj);
       obj_to_char(obj, ch);
       if (!char_is_npc(vict)) {
-       SET_BIT_AR(char_get_act(vict), PLR_STOLEN);
+       char_plr_set(vict, PLR_STOLEN, true);
        mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "THEFT: %s has stolen %s@n from %s", char_get_name(ch), obj->short_description, char_get_name(vict));
       }
       if (axion_dice(0) > prob) {
@@ -10076,7 +10076,7 @@ static int perform_group(struct char_data *ch, struct char_data *vict, int highl
   }
   */
 
-  SET_BIT_AR(char_get_affected_by(vict), AFF_GROUP);
+  char_aff_set(vict, AFF_GROUP, true);
   if (ch != vict)
     act("$N is now a member of your group.", FALSE, ch, 0, vict, TO_CHAR);
   act("You are now a member of $n's group.", FALSE, ch, 0, vict, TO_VICT);
@@ -10205,7 +10205,7 @@ ACMD(do_group)
     if (!char_aff_flagged(vict, AFF_GROUP)) {
      if (!char_aff_flagged(ch, AFF_GROUP)) {
       send_to_char(ch, "You form a group, with you as leader.\r\n");
-      SET_BIT_AR(char_get_affected_by(ch), AFF_GROUP);
+      char_aff_set(ch, AFF_GROUP, true);
      }
       perform_group(ch, vict, highlvl, lowlvl, highpl, lowpl);
     }
@@ -10214,7 +10214,7 @@ ACMD(do_group)
 	act("$N is no longer a member of your group.", FALSE, ch, 0, vict, TO_CHAR);
       act("You have been kicked out of $n's group!", FALSE, ch, 0, vict, TO_VICT);
       act("$N has been kicked out of $n's group!", FALSE, ch, 0, vict, TO_NOTVICT);
-      REMOVE_BIT_AR(char_get_affected_by(vict), AFF_GROUP);
+      char_aff_set(vict, AFF_GROUP, false);
     }
   }
 }
@@ -10236,7 +10236,7 @@ ACMD(do_ungroup)
     for (f = ch->followers; f; f = next_fol) {
       next_fol = f->next;
       if (char_aff_flagged(f->follower, AFF_GROUP)) {
-	REMOVE_BIT_AR(char_get_affected_by(f->follower), AFF_GROUP);
+	char_aff_set(f->follower, AFF_GROUP, false);
         act("$N has disbanded the group.", TRUE, f->follower, NULL, ch, TO_CHAR);
         char_set_combatexpertise(f->follower, 0);
         if (!char_aff_flagged(f->follower, AFF_CHARM))
@@ -10244,7 +10244,7 @@ ACMD(do_ungroup)
       }
     }
 
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_GROUP);
+    char_aff_set(ch, AFF_GROUP, false);
     char_set_combatexpertise(ch, 0);
     send_to_char(ch, "You disband the group.\r\n");
     return;
@@ -10263,7 +10263,7 @@ ACMD(do_ungroup)
     return;
   }
 
-  REMOVE_BIT_AR(char_get_affected_by(tch), AFF_GROUP);
+  char_aff_set(tch, AFF_GROUP, false);
   char_set_combatexpertise(tch, 0);
 
   act("$N is no longer a member of your group.", FALSE, ch, 0, tch, TO_CHAR);
@@ -10432,11 +10432,11 @@ ACMD(do_use)
       send_to_char(ch, "You can't swallow beans, you are an android.\r\n");
       return;
     }
-    if (obj_flagged(mag_item, ITEM_FORGED)) {
+    if (obj_extra_flagged(mag_item, ITEM_FORGED)) {
      send_to_char(ch, "You can't swallow that, it is fake!\r\n");
      return;
     }
-    if (obj_flagged(mag_item, ITEM_BROKEN)) {
+    if (obj_extra_flagged(mag_item, ITEM_BROKEN)) {
      send_to_char(ch, "You can't swallow that, it is broken!\r\n");
      return;
     }
@@ -10473,7 +10473,7 @@ ACMD(do_use)
        if (char_aff_flagged(ch, AFF_BURNED)) {
         act("@WYou gently apply the salve to your burns.@n", TRUE, ch, mag_item, 0, TO_CHAR);
         act("@C$n@W gently applies a burn salve to $s burns.@n", TRUE, ch, mag_item, 0, TO_ROOM);
-        REMOVE_BIT_AR(char_get_affected_by(ch), AFF_BURNED);
+        char_aff_set(ch, AFF_BURNED, false);
         extract_obj(mag_item);
        } else {
         send_to_char(ch, "You are not burned.\r\n");
@@ -10592,67 +10592,67 @@ ACMD(do_display)
   }
 
   if (!strcasecmp(argument, "on") || !strcasecmp(argument, "all")) {
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPHP);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPMOVE);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPKI);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPTNL);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_FURY);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_DISTIME);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_DISGOLD);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPRAC);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_DISHUTH);
-    SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPERC);
+    char_prf_set(ch, PRF_DISPHP, true);
+    char_prf_set(ch, PRF_DISPMOVE, true);
+    char_prf_set(ch, PRF_DISPKI, true);
+    char_prf_set(ch, PRF_DISPTNL, true);
+    char_prf_set(ch, PRF_FURY, true);
+    char_prf_set(ch, PRF_DISTIME, true);
+    char_prf_set(ch, PRF_DISGOLD, true);
+    char_prf_set(ch, PRF_DISPRAC, true);
+    char_prf_set(ch, PRF_DISHUTH, true);
+    char_prf_set(ch, PRF_DISPERC, true);
   } else if (!strcasecmp(argument, "off") || !strcasecmp(argument, "none")) {
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPHP);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPKI);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPMOVE);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPTNL);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_FURY);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISTIME);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISGOLD);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPRAC);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISHUTH);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPERC);
+    char_prf_set(ch, PRF_DISPHP, false);
+    char_prf_set(ch, PRF_DISPKI, false);
+    char_prf_set(ch, PRF_DISPMOVE, false);
+    char_prf_set(ch, PRF_DISPTNL, false);
+    char_prf_set(ch, PRF_FURY, false);
+    char_prf_set(ch, PRF_DISTIME, false);
+    char_prf_set(ch, PRF_DISGOLD, false);
+    char_prf_set(ch, PRF_DISPRAC, false);
+    char_prf_set(ch, PRF_DISHUTH, false);
+    char_prf_set(ch, PRF_DISPERC, false);
   } else {
-    /*REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPHP);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPMOVE);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPTNL);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPKI);*/
+    /*char_prf_set(ch, PRF_DISPHP, false);
+    char_prf_set(ch, PRF_DISPMOVE, false);
+    char_prf_set(ch, PRF_DISPTNL, false);
+    char_prf_set(ch, PRF_DISPKI, false);*/
 
     for (i = 0; i < strlen(argument); i++) {
       switch (tolower(argument[i])) {
       case 'p':
-	TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISPHP);
+	char_prf_toggle(ch, PRF_DISPHP);
 	break;
       case 's':
-	TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISPMOVE);
+	char_prf_toggle(ch, PRF_DISPMOVE);
 	break;
       case 'k':
-	TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISPKI);
+	char_prf_toggle(ch, PRF_DISPKI);
 	break;
       case 't':
-	TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISPTNL);
+	char_prf_toggle(ch, PRF_DISPTNL);
 	break;
       case 'h':
-        TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISTIME);
+        char_prf_toggle(ch, PRF_DISTIME);
         break;
       case 'g':
-        TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISGOLD);
+        char_prf_toggle(ch, PRF_DISGOLD);
         break;
       case 'l':
-        TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISPRAC);
+        char_prf_toggle(ch, PRF_DISPRAC);
         break;
       case 'c':
-        TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISPERC);
+        char_prf_toggle(ch, PRF_DISPERC);
         break;
       case 'm':
-        TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISHUTH);
+        char_prf_toggle(ch, PRF_DISHUTH);
         break;
       case 'f':
         if (!char_is_halfbreed(ch)) {
          send_to_char(ch, "Only halfbreeds use fury.\r\n");
         }
-        TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_FURY);
+        char_prf_toggle(ch, PRF_FURY);
         break;
       default:
 	send_to_char(ch, "Usage: prompt { P | K | T | S | F | H | G | L | all/on | none/off }\r\n");
@@ -10953,7 +10953,7 @@ ACMD(do_gen_tog)
     break;
   case SCMD_TEST:
     if (char_get_admlevel(ch) >= 1) {
-     TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_TEST);
+     char_prf_toggle(ch, PRF_TEST);
      send_to_char(ch, "Okay. Testing is now: %s\r\n", char_prf_flagged(ch, PRF_TEST) ? "On" : "Off");
      if (char_prf_flagged(ch, PRF_TEST)) {
       send_to_char(ch, "Make sure to remove nohassle as well.\r\n");
@@ -11211,7 +11211,7 @@ ACMD(do_break)
   }
 
 
-  if (obj_flagged(obj, ITEM_BROKEN)) {
+  if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "Seems like it's already broken!\r\n");
     return;
   }
@@ -11220,7 +11220,7 @@ ACMD(do_break)
   send_to_char(ch, "You ruin %s.\r\n", obj->short_description);
   act("$n ruins $p.", FALSE, ch, obj, 0, TO_ROOM);
   obj_set_value(obj, VAL_ALL_HEALTH, 0);
-  TOGGLE_BIT_AR(obj_get_extra_flags(obj), ITEM_BROKEN);
+  obj_extra_toggle(obj, ITEM_BROKEN);
 
   return;
 }
@@ -11263,7 +11263,7 @@ ACMD(do_fix)
     return;
    }
 
-   if (obj_flagged(obj, ITEM_FORGED)) {
+   if (obj_extra_flagged(obj, ITEM_FORGED)) {
     send_to_char(ch, "That is fake, why bother fixing it?\r\n");
     return;
    }
@@ -11287,12 +11287,12 @@ ACMD(do_fix)
   for (rep = ch->carrying; rep; rep = next_obj) {
        next_obj = rep->next_content;
    if (custom == FALSE) {
-    if (found == FALSE && obj_get_vnum(rep) == 48 && (!obj_flagged(rep, ITEM_BROKEN) && !obj_flagged(rep, ITEM_FORGED))) {
+    if (found == FALSE && obj_get_vnum(rep) == 48 && (!obj_extra_flagged(rep, ITEM_BROKEN) && !obj_extra_flagged(rep, ITEM_FORGED))) {
      found = TRUE;
      obj4 = rep;
     }
    } else {
-    if (found == FALSE && obj_get_vnum(rep) == 13593 && (!obj_flagged(rep, ITEM_BROKEN) && !obj_flagged(rep, ITEM_FORGED))) {
+    if (found == FALSE && obj_get_vnum(rep) == 13593 && (!obj_extra_flagged(rep, ITEM_BROKEN) && !obj_extra_flagged(rep, ITEM_FORGED))) {
      found = TRUE;
      obj4 = rep;
     }
@@ -11322,21 +11322,21 @@ ACMD(do_fix)
     send_to_char(ch, "You repair %s a bit.\r\n", obj->short_description);
     act("$n repairs $p a bit.", FALSE, ch, obj, 0, TO_ROOM);
     obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) + (char_get_skill(ch, SKILL_REPAIR)));
-    REMOVE_BIT_AR(obj_get_extra_flags(obj), ITEM_BROKEN);
+    obj_extra_set(obj, ITEM_BROKEN, false);
    }
    else {
     send_to_char(ch, "You repair %s completely.\r\n", obj->short_description);
     act("$n repairs $p completely.", FALSE, ch, obj, 0, TO_ROOM);
     obj_set_value(obj, VAL_ALL_HEALTH, 100);
-    REMOVE_BIT_AR(obj_get_extra_flags(obj), ITEM_BROKEN);
+    obj_extra_set(obj, ITEM_BROKEN, false);
    }
    if (obj->carried_by == NULL && !char_plr_flagged(ch, PLR_REPLEARN) && (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 || char_get_level(ch) >= 100)) {
     int64_t gain = (level_exp(ch, char_get_level(ch) + 1) * 0.0003) * char_get_skill(ch, SKILL_REPAIR);
     send_to_char(ch, "@mYou've learned a bit from repairing it. @D[@gEXP@W: @G+%s@D]@n\r\n", add_commas(gain));
-    SET_BIT_AR(char_get_act(ch), PLR_REPLEARN);
+    char_plr_set(ch, PLR_REPLEARN, true);
     gain_exp(ch, gain);
    } else if (rand_number(2, 12) >= 10 && char_plr_flagged(ch, PLR_REPLEARN)) {
-    REMOVE_BIT_AR(char_get_act(ch), PLR_REPLEARN);
+    char_plr_set(ch, PLR_REPLEARN, false);
     send_to_char(ch, "@mYou think you might be on to something...@n\r\n");
    }
    improve_skill(ch, SKILL_REPAIR, 1);
@@ -11772,7 +11772,7 @@ ACMD(do_clan) {
        send_to_char(ch, "You must be a moderator to edit the clan's information.\r\n");
       else {
         clanINFOW(char_get_clan(ch), ch);
-        REMOVE_BIT_AR(char_get_act(ch), PLR_WRITING);
+        char_plr_set(ch, PLR_WRITING, false);
       }
      return;
    }
@@ -12275,7 +12275,7 @@ ACMD(do_aid)
 
   for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
-   if (found == FALSE && obj_get_vnum(obj) == num && (!obj_flagged(obj, ITEM_BROKEN) && !obj_flagged(obj, ITEM_FORGED))) {
+   if (found == FALSE && obj_get_vnum(obj) == num && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
     found = TRUE;
     aid_obj = obj;
    }
@@ -12317,7 +12317,7 @@ ACMD(do_aid)
 
       send_to_char(vict, "Your wounds are bandaged by %s!\r\n", char_get_name(ch));
       act("$n's wounds are stablized by $N!", TRUE, vict, 0, ch, TO_NOTVICT);
-      SET_BIT_AR(char_get_act(vict), PLR_BANDAGED);
+      char_plr_set(vict, PLR_BANDAGED, true);
       extract_obj(aid_obj);
     } else {
       if (vict != ch) {
@@ -12448,7 +12448,7 @@ ACMD(do_aura) {
      if (char_plr_flagged(ch, PLR_AURALIGHT)) {
 	   send_to_char(ch, "Your aura fades as you stop shining light.\r\n");
 	   act("$n's aura fades as they stop shining light on the area.", TRUE, ch, 0, 0, TO_ROOM);
-	   REMOVE_BIT_AR(char_get_act(ch), PLR_AURALIGHT);
+	   char_plr_set(ch, PLR_AURALIGHT, false);
 	   world[char_get_in_room(ch)].light--;
         
      } else if ((getCurKI(ch)) > GET_MAX_MANA(ch) * 0.12) {
@@ -12461,7 +12461,7 @@ ACMD(do_aura) {
 	  char bloom[MAX_INPUT_LENGTH];
           sprintf(bloom, "@wA %s aura flashes up brightly around $n@w as they provide light to the area.@n", aura_types[char_get_aura(ch)]);
           act(bloom, TRUE, ch, 0, 0, TO_ROOM);
-	  SET_BIT_AR(char_get_act(ch), PLR_AURALIGHT);
+	  char_plr_set(ch, PLR_AURALIGHT, true);
 
      } else {
          send_to_char(ch, "You don't have enough KI to do that.\r\n");

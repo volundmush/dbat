@@ -400,7 +400,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
       send_to_char(ch, "@wMy, we are in a clever mood today, aren't we.\r\n");
   } else {
     is_going_to = real_room(obj_get_value(vehicle_in_out, 0));
-    if (!IS_SET_AR(rroom_get_room_flags(is_going_to), ROOM_VEHICLE)) {
+    if (!rroom_flagged(is_going_to, ROOM_VEHICLE)) {
       send_to_char(ch, "@wThat ship can't carry other ships.");
     } else {
     sprintf(buf, "%s @wenters %s.\n\r", vehicle->short_description, 
@@ -469,7 +469,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
         else
           send_to_char(ch, "@wIt seems to be closed.\r\n");
 
-      } else if (!IS_SET_AR(rroom_get_room_flags(obj_get_exit(vehicle, dir)->to_room),ROOM_VEHICLE) && !IS_SET_AR(rroom_get_room_flags(obj_get_exit(vehicle, dir)->to_room),ROOM_SPACE)) {
+      } else if (!rroom_flagged(obj_get_exit(vehicle, dir)->to_room, ROOM_VEHICLE) && !rroom_flagged(obj_get_exit(vehicle, dir)->to_room, ROOM_SPACE)) {
         /* But the vehicle can't go that way*/
         send_to_char(ch, "@wThe ship can't fit there!\r\n");
         } else {
@@ -711,7 +711,7 @@ ACMD(do_drive)
        act("@w$n stands up and stops piloting the ship.", TRUE, ch, 0, 0, TO_ROOM);
        send_to_char(ch, "@wYou stand up from the pilot's seat.\r\n");
        char_set_position(ch, POS_STANDING);
-       REMOVE_BIT_AR(char_get_act(ch), PLR_PILOTING);
+       char_plr_set(ch, PLR_PILOTING, false);
        return;
      }
    }
@@ -751,7 +751,7 @@ ACMD(do_drive)
       }
     }
   if (confirmed == TRUE) {
-      SET_BIT_AR(char_get_act(ch), PLR_PILOTING);
+      char_plr_set(ch, PLR_PILOTING, true);
       act("@w$n sits down and begins piloting the ship.", TRUE, ch, 0, 0, TO_ROOM);
       char_set_position(ch, POS_SITTING);
       send_to_char(ch, "@wYou take a seat in the pilot's chair.\r\n");

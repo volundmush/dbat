@@ -58,7 +58,7 @@ int House_save(struct obj_data *obj, FILE *fp, int location)
   struct obj_data *tmp;
   int result;
   if (obj) {
-   if (obj_flagged(obj, ITEM_NORENT)) {
+   if (obj_extra_flagged(obj, ITEM_NORENT)) {
     obj = obj->next_content;
    }
   }
@@ -109,7 +109,7 @@ void House_crashsave(room_vnum vnum)
   }
   fclose(fp);
   House_restore_weight(world[rnum].contents);
-  REMOVE_BIT_AR(rroom_get_room_flags(rnum), ROOM_HOUSE_CRASH);
+  rroom_set_flag(rnum, ROOM_HOUSE_CRASH, false);
 }
 
 
@@ -202,7 +202,7 @@ void House_boot(void)
 
     house_control[num_of_houses++] = temp_house;
 
-    SET_BIT_AR(rroom_get_room_flags(real_house), ROOM_HOUSE); 
+    rroom_set_flag(real_house, ROOM_HOUSE, true); 
     House_load(temp_house.vnum);
   }
 
@@ -333,7 +333,7 @@ void hcontrol_build_house(struct char_data *ch, char *arg)
 
   house_control[num_of_houses++] = temp_house;
 
-  SET_BIT_AR(rroom_get_room_flags(real_house), ROOM_HOUSE);
+  rroom_set_flag(real_house, ROOM_HOUSE, true);
   House_crashsave(virt_house);
 
   send_to_char(ch, "House built.  Mazel tov!\r\n");
@@ -358,13 +358,13 @@ void hcontrol_destroy_house(struct char_data *ch, char *arg)
   if ((real_atrium = real_room(house_control[i].atrium)) == NOWHERE)
     log("SYSERR: House %d had invalid atrium %d!", atoi(arg), house_control[i].atrium);
   else
-    REMOVE_BIT_AR(rroom_get_room_flags(real_atrium), ROOM_ATRIUM);
+    rroom_set_flag(real_atrium, ROOM_ATRIUM, false);
 
   if ((real_house = real_room(house_control[i].vnum)) == NOWHERE)
     log("SYSERR: House %d had invalid vnum %d!", atoi(arg), house_control[i].vnum);
   else {
-    REMOVE_BIT_AR(rroom_get_room_flags(real_house), ROOM_HOUSE); 
-    REMOVE_BIT_AR(rroom_get_room_flags(real_house), ROOM_HOUSE_CRASH); 
+    rroom_set_flag(real_house, ROOM_HOUSE, false); 
+    rroom_set_flag(real_house, ROOM_HOUSE_CRASH, false); 
   }
   
   House_delete_file(house_control[i].vnum);
@@ -384,7 +384,7 @@ void hcontrol_destroy_house(struct char_data *ch, char *arg)
    */
   for (i = 0; i < num_of_houses; i++)
     if ((real_atrium = real_room(house_control[i].atrium)) != NOWHERE)
-      SET_BIT_AR(rroom_get_room_flags(real_atrium), ROOM_ATRIUM);
+      rroom_set_flag(real_atrium, ROOM_ATRIUM, true);
 }
 
 

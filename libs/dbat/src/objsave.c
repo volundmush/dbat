@@ -238,77 +238,77 @@ static void auto_equip(struct char_data *ch, struct obj_data *obj, int location)
       break;
     case WEAR_FINGER_R:
     case WEAR_FINGER_L:
-      if (!obj_can_wear(obj, ITEM_WEAR_FINGER)) /* not fitting :( */
+      if (!obj_wear_flagged(obj, ITEM_WEAR_FINGER)) /* not fitting :( */
         location = LOC_INVENTORY;
       break;
     case WEAR_NECK_1:
     case WEAR_NECK_2:
-      if (!obj_can_wear(obj, ITEM_WEAR_NECK))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_NECK))
         location = LOC_INVENTORY;
       break;
     case WEAR_BODY:
-      if (!obj_can_wear(obj, ITEM_WEAR_BODY))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_BODY))
         location = LOC_INVENTORY;
       break;
     case WEAR_HEAD:
-      if (!obj_can_wear(obj, ITEM_WEAR_HEAD))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_HEAD))
         location = LOC_INVENTORY;
       break;
     case WEAR_LEGS:
-      if (!obj_can_wear(obj, ITEM_WEAR_LEGS))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_LEGS))
         location = LOC_INVENTORY;
       break;
     case WEAR_FEET:
-      if (!obj_can_wear(obj, ITEM_WEAR_FEET))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_FEET))
         location = LOC_INVENTORY;
       break;
     case WEAR_HANDS:
-      if (!obj_can_wear(obj, ITEM_WEAR_HANDS))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_HANDS))
         location = LOC_INVENTORY;
       break;
     case WEAR_ARMS:
-      if (!obj_can_wear(obj, ITEM_WEAR_ARMS))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_ARMS))
         location = LOC_INVENTORY;
       break;
     case WEAR_UNUSED1:
-      if (!obj_can_wear(obj, ITEM_WEAR_SHIELD))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_SHIELD))
         location = LOC_INVENTORY;
       j = WEAR_WIELD2;
       break;
     case WEAR_ABOUT:
-      if (!obj_can_wear(obj, ITEM_WEAR_ABOUT))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_ABOUT))
         location = LOC_INVENTORY;
       break;
     case WEAR_WAIST:
-      if (!obj_can_wear(obj, ITEM_WEAR_WAIST))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_WAIST))
         location = LOC_INVENTORY;
       break;
     case WEAR_WRIST_R:
     case WEAR_WRIST_L:
-      if (!obj_can_wear(obj, ITEM_WEAR_WRIST))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_WRIST))
         location = LOC_INVENTORY;
       break;
     case WEAR_WIELD1:
-      if (!obj_can_wear(obj, ITEM_WEAR_WIELD))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_WIELD))
         location = LOC_INVENTORY;
       break;
     case WEAR_WIELD2:
       break;
     case WEAR_EYE:
-      if (!obj_can_wear(obj, ITEM_WEAR_EYE))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_EYE))
         location = LOC_INVENTORY;
       break;
     case WEAR_BACKPACK:
-      if (!obj_can_wear(obj, ITEM_WEAR_PACK))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_PACK))
         location = LOC_INVENTORY;
       break;
     case WEAR_SH:
-      if (!obj_can_wear(obj, ITEM_WEAR_SH))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_SH))
         location = LOC_INVENTORY;
       break;
     case WEAR_EAR_R:
     case WEAR_EAR_L:
-      if (!obj_can_wear(obj, ITEM_WEAR_EAR))
+      if (!obj_wear_flagged(obj, ITEM_WEAR_EAR))
         location = LOC_INVENTORY;
       break;
     default:
@@ -653,15 +653,15 @@ static int Crash_is_unrentable(struct obj_data *obj)
   if (!obj)
     return (0);
 #if CIRCLE_UNSIGNED_INDEX
-  if (obj_flagged(obj, ITEM_NORENT) || obj_get_cost_per_day(obj) < 0 ||
+  if (obj_extra_flagged(obj, ITEM_NORENT) || obj_get_cost_per_day(obj) < 0 ||
       (obj_get_item_number(obj) == NOTHING &&
-       !IS_SET_AR(obj_get_extra_flags(obj), ITEM_UNIQUE_SAVE)))
+       !obj_extra_flagged(obj, ITEM_UNIQUE_SAVE)))
   {
     return (1);
 #else
-  if (obj_flagged(obj, ITEM_NORENT) || obj_get_cost_per_day(obj) < 0 ||
+  if (obj_extra_flagged(obj, ITEM_NORENT) || obj_get_cost_per_day(obj) < 0 ||
       (obj_get_item_number(obj) <= NOTHING &&
-       !IS_SET_AR(obj_get_extra_flags(obj), ITEM_UNIQUE_SAVE)))
+       !obj_extra_flagged(obj, ITEM_UNIQUE_SAVE)))
   {
     return (1);
 #endif
@@ -707,7 +707,7 @@ void Crash_crashsave(struct char_data *ch)
     return;
 
   if (Crash_write_safe_file(ch, RENT_CRASH, 0, "crashsave"))
-    REMOVE_BIT_AR(char_get_act(ch), PLR_CRASH);
+    char_plr_set(ch, PLR_CRASH, false);
 }
 
 void Crash_idlesave(struct char_data *ch)
@@ -853,7 +853,7 @@ static void Crash_cryosave(struct char_data *ch, int cost)
   fclose(fp);
 
   Crash_extract_objs(ch->carrying);
-  SET_BIT_AR(char_get_act(ch), PLR_CRYO);
+  char_plr_set(ch, PLR_CRYO, true);
 }
 
 /* ************************************************************************
@@ -1048,7 +1048,7 @@ static int gen_receptionist(struct char_data *ch, struct char_data *recep,
           FALSE, recep, 0, ch, TO_VICT);
       Crash_cryosave(ch, cost);
       mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has cryo-rented.", char_get_name(ch));
-      SET_BIT_AR(char_get_act(ch), PLR_CRYO);
+      char_plr_set(ch, PLR_CRYO, true);
     }
 
     act("$n helps $N into $S private chamber.", FALSE, recep, 0, ch, TO_NOTVICT);
@@ -1084,7 +1084,7 @@ void Crash_save_all(void)
       {
         Crash_crashsave(d->character);
         save_char(d->character);
-        REMOVE_BIT_AR(char_get_act(d->character), PLR_CRASH);
+        char_plr_set(d->character, PLR_CRASH, false);
       }
     }
   }
@@ -1377,8 +1377,8 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
             name_to_drinkcon(temp, obj_get_value(temp, 2));
         }
         if (obj_get_vnum(temp) == 20099 || obj_get_vnum(temp) == 20098)
-          if (obj_flagged(temp, ITEM_UNBREAKABLE))
-            REMOVE_BIT_AR(obj_get_extra_flags(temp), ITEM_UNBREAKABLE);
+          if (obj_extra_flagged(temp, ITEM_UNBREAKABLE))
+            obj_extra_set(temp, ITEM_UNBREAKABLE, false);
         auto_equip(ch, temp, locate);
       }
       else

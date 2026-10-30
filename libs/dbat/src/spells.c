@@ -248,7 +248,7 @@ ASPELL(spell_charm)
 
     act("Isn't $n just such a nice fellow?", FALSE, ch, 0, victim, TO_VICT);
     if (char_is_npc(victim))
-      REMOVE_BIT_AR(char_get_act(victim), MOB_SPEC);
+      char_mob_set(victim, MOB_SPEC, false);
   }
 }
 
@@ -356,7 +356,7 @@ ASPELL(spell_enchant_weapon)
     return;
 
   /* Either already enchanted or not a weapon. */
-  if (obj_get_type_flag(obj) != ITEM_WEAPON || obj_flagged(obj, ITEM_MAGIC))
+  if (obj_get_type_flag(obj) != ITEM_WEAPON || obj_extra_flagged(obj, ITEM_MAGIC))
     return;
 
   /* Make sure no other affections. */
@@ -364,7 +364,7 @@ ASPELL(spell_enchant_weapon)
     if (obj->affected[i].location != APPLY_NONE)
       return;
 
-  SET_BIT_AR(obj_get_extra_flags(obj), ITEM_MAGIC);
+  obj_extra_set(obj, ITEM_MAGIC, true);
 
   for (i = 0; i < MAX_OBJ_AFFECT; i++) {
     if (obj->affected[i].location == APPLY_NONE) {
@@ -383,10 +383,10 @@ ASPELL(spell_enchant_weapon)
   }
 
   if (char_is_good(ch)) {
-    SET_BIT_AR(obj_get_extra_flags(obj), ITEM_ANTI_EVIL);
+    obj_extra_set(obj, ITEM_ANTI_EVIL, true);
     act("$p glows blue.", FALSE, ch, obj, 0, TO_CHAR);
   } else if (char_is_evil(ch)) {
-    SET_BIT_AR(obj_get_extra_flags(obj), ITEM_ANTI_GOOD);
+    obj_extra_set(obj, ITEM_ANTI_GOOD, true);
     act("$p glows red.", FALSE, ch, obj, 0, TO_CHAR);
   } else
     act("$p glows yellow.", FALSE, ch, obj, 0, TO_CHAR);

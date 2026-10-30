@@ -333,7 +333,7 @@ static int suntzu_armor_convert(struct obj_data *obj)
 
   i = MAX(0, MIN(8, i));
 
-  if (obj_can_wear(obj, ITEM_WEAR_SHIELD)) {
+  if (obj_wear_flagged(obj, ITEM_WEAR_SHIELD)) {
     if (obj_get_value(obj, 6))
       return conv;
     obj_set_value(obj, 1, ARMOR_TYPE_SHIELD);
@@ -341,7 +341,7 @@ static int suntzu_armor_convert(struct obj_data *obj)
     obj_set_value(obj, 3, shield_table[i][0]);
     obj_set_value(obj, 6, shield_table[i][1]);
     conv = 1;
-  } else if (obj_can_wear(obj, ITEM_WEAR_BODY)) {
+  } else if (obj_wear_flagged(obj, ITEM_WEAR_BODY)) {
     if (obj_get_value(obj, 6))
       return conv;
     obj_set_value(obj, 2, conv_table[i][0]);
@@ -1904,7 +1904,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
  
   if (!char_is_human(ch))
     if (!char_aff_flagged(ch, AFF_INFRAVISION))
-      SET_BIT_AR(char_get_affected_by(ch), AFF_INFRAVISION);
+      char_aff_set(ch, AFF_INFRAVISION, true);
  
   SPEAKING(ch) = SKILL_LANG_COMMON;
  
@@ -2191,16 +2191,16 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
     char_set_alignment(ch, atoi(f3));
     
 	/* Make some basic checks. */
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_CHARM);
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_POISON);
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_GROUP);
-    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_SLEEP);
+    char_aff_set(ch, AFF_CHARM, false);
+    char_aff_set(ch, AFF_POISON, false);
+    char_aff_set(ch, AFF_GROUP, false);
+    char_aff_set(ch, AFF_SLEEP, false);
     if (char_mob_flagged(ch, MOB_AGGRESSIVE) && char_mob_flagged(ch, MOB_AGGR_GOOD))
-      REMOVE_BIT_AR(char_get_act(ch), MOB_AGGR_GOOD);
+      char_mob_set(ch, MOB_AGGR_GOOD, false);
     if (char_mob_flagged(ch, MOB_AGGRESSIVE) && char_mob_flagged(ch, MOB_AGGR_NEUTRAL))
-      REMOVE_BIT_AR(char_get_act(ch), MOB_AGGR_NEUTRAL);
+      char_mob_set(ch, MOB_AGGR_NEUTRAL, false);
     if (char_mob_flagged(ch, MOB_AGGRESSIVE) && char_mob_flagged(ch, MOB_AGGR_EVIL))
-      REMOVE_BIT_AR(char_get_act(ch), MOB_AGGR_EVIL);
+      char_mob_set(ch, MOB_AGGR_EVIL, false);
 
     /* 
      * This is necessary, since if we have conventional worldfiles, &letter
@@ -2237,11 +2237,11 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
     exit(1);
   }
 
-  SET_BIT_AR(char_get_act(ch), MOB_ISNPC);
+  char_mob_set(ch, MOB_ISNPC, true);
   if (char_mob_flagged(ch, MOB_NOTDEADYET)) {
     /* Rather bad to load mobiles with this bit already set. */
     log("SYSERR: Mob #%d has reserved bit MOB_NOTDEADYET set.", nr);
-    REMOVE_BIT_AR(char_get_act(ch), MOB_NOTDEADYET);
+    char_mob_set(ch, MOB_NOTDEADYET, false);
   }
 
   /* AGGR_TO_ALIGN is ignored if the mob is AGGRESSIVE.
@@ -2598,7 +2598,7 @@ static char *parse_object(FILE *obj_f, int nr)
       /* Objects that set CHARM on players are bad. */
       if (obj_aff_flagged(obj_proto + i, AFF_CHARM)) {
         log("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
-        REMOVE_BIT_AR(obj_get_bitvector(obj_proto + i), AFF_CHARM);
+        obj_aff_set(obj_proto + i, AFF_CHARM, false);
       }
       top_of_objt = i;
       check_object(obj_proto + i);
@@ -3569,10 +3569,10 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   char_set_hometown(mob, NOWHERE);
 
   if (char_is_humanoid(mob)) {
-   SET_BIT_AR(char_get_act(mob), MOB_RARM);
-   SET_BIT_AR(char_get_act(mob), MOB_LARM);
-   SET_BIT_AR(char_get_act(mob), MOB_RLEG);
-   SET_BIT_AR(char_get_act(mob), MOB_LLEG);
+   char_mob_set(mob, MOB_RARM, true);
+   char_mob_set(mob, MOB_LARM, true);
+   char_mob_set(mob, MOB_RLEG, true);
+   char_mob_set(mob, MOB_LLEG, true);
   }
  
   mob_index[i].number++;
@@ -3632,8 +3632,8 @@ void add_unique_id(struct obj_data *obj)
       obj->unique_id = circle_random();
   }
   if (CONFIG_ALL_ITEMS_UNIQUE) {
-    if (!IS_SET_AR(obj_get_extra_flags(obj), ITEM_UNIQUE_SAVE))
-      SET_BIT_AR(obj_get_extra_flags(obj), ITEM_UNIQUE_SAVE);
+    if (!obj_extra_flagged(obj, ITEM_UNIQUE_SAVE))
+      obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
   }
   CREATE(elem, struct obj_unique_hash_elem, 1);
   elem->generation = obj->generation;
@@ -3703,7 +3703,7 @@ void check_unique_id(struct obj_data *obj)
     }
     if (elem->generation == obj->generation && elem->unique_id == obj->unique_id) {
       log_dupe_objects(elem->obj, obj);
-      SET_BIT_AR(obj_get_extra_flags(obj), ITEM_PURGE);
+      obj_extra_set(obj, ITEM_PURGE, true);
     }
     elem = elem->next_e;
   }
@@ -4224,7 +4224,7 @@ void reset_zone(zone_rnum zone)
      reset_wtrigger(&world[rrnum]);
      if (rroom_flagged(rrnum, ROOM_AURA) && rand_number(1, 5) >= 4) {
       send_to_room(rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
-      REMOVE_BIT_AR(rroom_get_room_flags(rrnum), ROOM_AURA);
+      rroom_set_flag(rrnum, ROOM_AURA, false);
      }
      if (rroom_sect(rrnum) == SECT_LAVA) {
       rroom_set_geffect(rrnum, 5);
@@ -5055,7 +5055,7 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
       obj_get_value(obj, 13), obj_get_value(obj, 14), obj_get_value(obj, 15)))
       return 0;
 
-  if (!(obj_flagged(obj,ITEM_UNIQUE_SAVE)) && !obj_get_type_flag(obj) == ITEM_SPELLBOOK) {
+  if (!(obj_extra_flagged(obj,ITEM_UNIQUE_SAVE)) && !obj_get_type_flag(obj) == ITEM_SPELLBOOK) {
     return 1;
   }
 

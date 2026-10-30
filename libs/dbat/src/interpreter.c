@@ -264,9 +264,9 @@ int perform_dupe_check(struct descriptor_data *d)
   d->character->desc = d;
   d->original = NULL;
   d->character->timer = 0;
-  REMOVE_BIT_AR(char_get_act(d->character), PLR_MAILING);
-  REMOVE_BIT_AR(char_get_act(d->character), PLR_WRITING);
-  REMOVE_BIT_AR(char_get_affected_by(d->character), AFF_GROUP);
+  char_plr_set(d->character, PLR_MAILING, false);
+  char_plr_set(d->character, PLR_WRITING, false);
+  char_aff_set(d->character, AFF_GROUP, false);
   desc_set_connected(d, CON_PLAYING);
 
   switch (mode) {
@@ -419,19 +419,19 @@ int enter_player_game (struct descriptor_data *d)
 
     if (char_plr_flagged(d->character, PLR_RARM)) {
      char_set_limb_condition(d->character, (1)-1, 100);
-     REMOVE_BIT_AR(char_get_act(d->character), PLR_RARM);
+     char_plr_set(d->character, PLR_RARM, false);
     }
     if (char_plr_flagged(d->character, PLR_LARM)) {
      char_set_limb_condition(d->character, (2)-1, 100);
-     REMOVE_BIT_AR(char_get_act(d->character), PLR_LARM);
+     char_plr_set(d->character, PLR_LARM, false);
     }
     if (char_plr_flagged(d->character, PLR_LLEG)) {
      char_set_limb_condition(d->character, (4)-1, 100);
-     REMOVE_BIT_AR(char_get_act(d->character), PLR_LLEG);
+     char_plr_set(d->character, PLR_LLEG, false);
     }
     if (char_plr_flagged(d->character, PLR_RLEG)) {
      char_set_limb_condition(d->character, (3)-1, 100);
-     REMOVE_BIT_AR(char_get_act(d->character), PLR_RLEG);
+     char_plr_set(d->character, PLR_RLEG, false);
     }
     char_set_combine(d->character, -1);
     char_set_sleeptime(d->character, 8);
@@ -442,19 +442,19 @@ int enter_player_game (struct descriptor_data *d)
      char_set_altitude(d->character, 0);
     }
     if (char_aff_flagged(d->character, AFF_POSITION)) {
-     REMOVE_BIT_AR(char_get_affected_by(d->character), AFF_POSITION);
+     char_aff_set(d->character, AFF_POSITION, false);
     }
     if (char_aff_flagged(d->character, AFF_SANCTUARY)) {
-     REMOVE_BIT_AR(char_get_affected_by(d->character), AFF_SANCTUARY);
+     char_aff_set(d->character, AFF_SANCTUARY, false);
     }
     if (char_aff_flagged(d->character, AFF_ZANZOKEN)) {
-     REMOVE_BIT_AR(char_get_affected_by(d->character), AFF_ZANZOKEN);
+     char_aff_set(d->character, AFF_ZANZOKEN, false);
     }
     if (char_plr_flagged(d->character, PLR_KNOCKED)) {
-     REMOVE_BIT_AR(char_get_act(d->character), PLR_KNOCKED);
+     char_plr_set(d->character, PLR_KNOCKED, false);
     }
     if (char_is_android(d->character) && !char_aff_flagged(d->character, AFF_INFRAVISION)) {
-     SET_BIT_AR(char_get_affected_by(d->character), AFF_INFRAVISION);
+     char_aff_set(d->character, AFF_INFRAVISION, true);
     }
     char_set_absorbing(d->character, NULL);
     char_set_absorbby(d->character, NULL);
@@ -466,7 +466,7 @@ int enter_player_game (struct descriptor_data *d)
     char_set_rage_meter(d->character, 0);
     if (!d->character->affected) {
      if (char_aff_flagged(d->character, AFF_HEALGLOW)) {
-      REMOVE_BIT_AR(char_get_affected_by(d->character), AFF_HEALGLOW);
+      char_aff_set(d->character, AFF_HEALGLOW, false);
      }
     }
     if (char_aff_flagged(d->character, AFF_HAYASA)) {
@@ -483,7 +483,7 @@ int enter_player_game (struct descriptor_data *d)
     }
 
     if (char_plr_flagged(d->character, PLR_HEALT)) {
-     REMOVE_BIT_AR(char_get_act(d->character), PLR_HEALT);
+     char_plr_set(d->character, PLR_HEALT, false);
     }
 
     if (readIntro(d->character, d->character) == 2) {
@@ -1955,7 +1955,7 @@ void nanny(struct descriptor_data *d, char *arg)
       clear_char(d->character);
       CREATE(d->character->player_specials, struct player_special_data, 1);
       d->character->desc = d;
-      SET_BIT_AR(PRF_FLAGS(d->character), PRF_COLOR);
+      char_prf_set(d->character, PRF_COLOR, true);
     }
      /*  Check for other chars already logged in */
      /* Jamdog - 3rd May 2007 */
@@ -2012,16 +2012,16 @@ void nanny(struct descriptor_data *d, char *arg)
 	  CREATE(d->character->name, char, strlen(tmp_name) + 1);
 	  strcpy(d->character->name, CAP(tmp_name));	/* strcpy: OK (size checked above) */
 	  char_set_pfilepos(d->character, player_i);
-          SET_BIT_AR(PRF_FLAGS(d->character), PRF_COLOR);
+          char_prf_set(d->character, PRF_COLOR, true);
           display_races(d);
           d->character->rp = d->rpp;
           desc_set_connected(d, CON_QRACE);
 	} else {
 	  /* undo it just in case they are set */
-	  REMOVE_BIT_AR(char_get_act(d->character), PLR_WRITING);
-	  REMOVE_BIT_AR(char_get_act(d->character), PLR_MAILING);
-	  REMOVE_BIT_AR(char_get_act(d->character), PLR_CRYO);
-	  REMOVE_BIT_AR(char_get_affected_by(d->character), AFF_GROUP);
+	  char_plr_set(d->character, PLR_WRITING, false);
+	  char_plr_set(d->character, PLR_MAILING, false);
+	  char_plr_set(d->character, PLR_CRYO, false);
+	  char_aff_set(d->character, AFF_GROUP, false);
           if (isbanned(d->host) == BAN_SELECT &&
            !char_plr_flagged(d->character, PLR_SITEOK)) {
            write_to_output(d, "Sorry, this char has not been cleared for login from your site!\r\n");
@@ -3489,7 +3489,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->basepl += roll_stats(d->character, 5, 65);
       d->character->basest += roll_stats(d->character, 8, 65);
       d->character->baseki += roll_stats(d->character, 6, 65);
-      SET_BIT_AR(char_get_act(d->character), PLR_SKILLP);
+      char_plr_set(d->character, PLR_SKILLP, true);
       break;
       case '5':
       d->character->basepl += roll_stats(d->character, 5, 75);
@@ -4045,14 +4045,14 @@ void nanny(struct descriptor_data *d, char *arg)
       } else if (!strcasecmp(arg, "forget")) {
        if (!char_is_bio(d->character) && !char_is_mutant(d->character)) {
         GET_PRACTICES(d->character, char_get_class(d->character)) += 200;
-        SET_BIT_AR(char_get_act(d->character), PLR_FORGET);
+        char_plr_set(d->character, PLR_FORGET, true);
         display_bonus_menu(d->character, 0);
         write_to_output(d, "@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
         write_to_output(d, "@wChoose: ");
         desc_set_connected(d, CON_BONUS);
        } else if (char_is_mutant(d->character)) {
         GET_PRACTICES(d->character, char_get_class(d->character)) += 200;
-        SET_BIT_AR(char_get_act(d->character), PLR_FORGET);
+        char_plr_set(d->character, PLR_FORGET, true);
         write_to_output(d, "\n@RSelect a mutation. A second will be chosen automatically..\n");
         write_to_output(d, "@D--------------------------------------------------------@n\n");
         write_to_output(d, "@B 1@W) @CExtreme Speed       @c-+30%s to Speed Index @C@n\n", "%");
@@ -4071,7 +4071,7 @@ void nanny(struct descriptor_data *d, char *arg)
         desc_set_connected(d, CON_GENOME);
        } else {
         GET_PRACTICES(d->character, char_get_class(d->character)) += 200;
-        SET_BIT_AR(char_get_act(d->character), PLR_FORGET);
+        char_plr_set(d->character, PLR_FORGET, true);
         write_to_output(d, "\n@RSelect two genomes to be your primary DNA strains.\n");
         write_to_output(d, "@D--------------------------------------------------------@n\n");
         write_to_output(d, "@B1@W) @CHuman   @c- @CHigher PS gains from fighting@n\n");
@@ -4414,7 +4414,7 @@ void nanny(struct descriptor_data *d, char *arg)
     case CON_ANDROID:
     switch (*arg) {
       case '1':
-         SET_BIT_AR(char_get_act(d->character), PLR_ABSORB);
+         char_plr_set(d->character, PLR_ABSORB, true);
          write_to_output(d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer, or your stats contrary to your liking.\r\n\r\n");
          write_to_output(d, "\r\n@WQuestion (@G1@W out of @g10@W)");
          write_to_output(d, "@YAnswer the following question:\r\n");
@@ -4429,7 +4429,7 @@ void nanny(struct descriptor_data *d, char *arg)
          desc_set_connected(d, CON_Q1);
         break;
       case '2':
-         SET_BIT_AR(char_get_act(d->character), PLR_REPAIR);
+         char_plr_set(d->character, PLR_REPAIR, true);
          write_to_output(d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer, or your stats contrary to your linking.\r\n\r\n");
          write_to_output(d, "@YAnswer the following question:\r\n");
          write_to_output(d, "@wYou go to train one day, but do not know the best\r\nway to approach it, What do you do?\r\n");
@@ -4443,7 +4443,7 @@ void nanny(struct descriptor_data *d, char *arg)
          desc_set_connected(d, CON_Q1);
         break;
       case '3':
-         SET_BIT_AR(char_get_act(d->character), PLR_SENSEM);
+         char_plr_set(d->character, PLR_SENSEM, true);
          write_to_output(d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer or your stats contrary to your liking.\r\n\r\n");
          write_to_output(d, "@YAnswer the following question:\r\n");
          write_to_output(d, "@wYou go to train one day, but do not know the best\r\nway to approach it, What do you do?\r\n");
@@ -4705,9 +4705,9 @@ void nanny(struct descriptor_data *d, char *arg)
       }
       d->has_prompt = 0;
       /* We've updated to 3.1 - some bits might be set wrongly: */
-      REMOVE_BIT_AR(PRF_FLAGS(d->character), PRF_BUILDWALK);
+      char_prf_set(d->character, PRF_BUILDWALK, false);
       if (!char_get_equipment(d->character, WEAR_WIELD1) && char_plr_flagged(d->character, PLR_THANDW)) {
-       REMOVE_BIT_AR(char_get_act(d->character), PLR_THANDW);
+       char_plr_set(d->character, PLR_THANDW, false);
       }
       break;
 
@@ -4776,7 +4776,7 @@ void nanny(struct descriptor_data *d, char *arg)
 	return;
       }
       if (char_get_admlevel(d->character) < ADMLVL_GRGOD)
-	SET_BIT_AR(char_get_act(d->character), PLR_DELETED);
+	char_plr_set(d->character, PLR_DELETED, true);
       save_char(d->character);
       Crash_delete_file(char_get_name(d->character));
       /* If the selfdelete_fastwipe flag is set (in config.c), remove all

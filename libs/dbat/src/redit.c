@@ -173,7 +173,7 @@ ACMD(do_oasis_redit)
   redit_disp_menu(d);  
   desc_set_connected(d, CON_REDIT);
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
-  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
+  char_plr_set(ch, PLR_WRITING, true);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
     char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
@@ -848,7 +848,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       /*
        * Toggle the bit.
        */
-      TOGGLE_BIT_AR(OLC_ROOM(d)->room_flags, number - 1); 
+      room_toggle_flag(OLC_ROOM(d), number - 1); 
       redit_disp_flag_menu(d);
     }
     return;

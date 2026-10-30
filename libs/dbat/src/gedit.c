@@ -174,7 +174,7 @@ ACMD(do_oasis_gedit)
   desc_set_connected(d, CON_GEDIT);
   
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
-  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
+  char_plr_set(ch, PLR_WRITING, true);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
     char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
@@ -614,7 +614,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
 			break;
 		case GEDIT_NO_TRAIN:
 			    if ((i = LIMIT(atoi(arg), 0, NUM_TRADERS - 1)) > 0) {
-				TOGGLE_BIT_AR(G_WITH_WHO(OLC_GUILD(d)), i - 1);
+				guild_trade_toggle(OLC_GUILD(d), i - 1);
 				gedit_no_train_menu(d);
 				return;
 			}

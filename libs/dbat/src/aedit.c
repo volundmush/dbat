@@ -96,7 +96,7 @@ ACMD(do_oasis_aedit)
   }
   desc_set_connected(d, CON_AEDIT);
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
-  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
+  char_plr_set(ch, PLR_WRITING, true);
   mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing actions.", char_get_name(ch));
 }
 

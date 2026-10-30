@@ -235,13 +235,13 @@ void extract_char(struct char_data *ch)
   struct obj_data *obj;
 
   if (char_is_npc(ch)) {
-    if (!IS_SET_AR(char_get_act(ch), MOB_NOTDEADYET))
-      SET_BIT_AR(char_get_act(ch), MOB_NOTDEADYET);
+    if (!char_mob_flagged(ch, MOB_NOTDEADYET))
+      char_mob_set(ch, MOB_NOTDEADYET, true);
     else
       return;
   } else {
-    if (!IS_SET_AR(char_get_act(ch), PLR_NOTDEADYET))
-      SET_BIT_AR(char_get_act(ch), PLR_NOTDEADYET);
+    if (!char_plr_flagged(ch, PLR_NOTDEADYET))
+      char_plr_set(ch, PLR_NOTDEADYET, true);
     else
       return;
   }
@@ -347,9 +347,9 @@ void extract_pending_chars(void)
     next_vict = vict->next;
 
     if (char_mob_flagged(vict, MOB_NOTDEADYET))
-      REMOVE_BIT_AR(char_get_act(vict), MOB_NOTDEADYET);
+      char_mob_set(vict, MOB_NOTDEADYET, false);
     else if (char_plr_flagged(vict, PLR_NOTDEADYET))
-      REMOVE_BIT_AR(char_get_act(vict), PLR_NOTDEADYET);
+      char_plr_set(vict, PLR_NOTDEADYET, false);
     else {
       /* Last non-free'd character to continue chain from. */
       prev_vict = vict;

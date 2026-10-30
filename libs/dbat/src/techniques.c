@@ -21,17 +21,17 @@ bool tech_handle_zanzoken(char_data *ch, char_data *vict, const char* name) {
             snprintf(msg, sizeof(msg), "@C$N@c disappears, avoiding @C$n's@c %s before reappearing!@n", name);
             act(msg, TRUE, ch, nullptr, vict, TO_NOTVICT);
             if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
-                REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ZANZOKEN);
+                char_aff_set(ch, AFF_ZANZOKEN, false);
             }
-            REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
+            char_aff_set(vict, AFF_ZANZOKEN, false);
             return false;
         }
         else {
             act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
             act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
             act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-            REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
-            REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ZANZOKEN);
+            char_aff_set(vict, AFF_ZANZOKEN, false);
+            char_aff_set(ch, AFF_ZANZOKEN, false);
         }
     }
     return true;
@@ -105,11 +105,11 @@ void tech_handle_fireshield(char_data *ch, char_data *vict, const char* part) {
         if (char_get_bonuses(ch, BONUS_FIREPRONE)) {
             send_to_char(ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
             send_to_char(vict, "@RThey are easily burned!@n\r\n");
-            SET_BIT_AR(char_get_affected_by(ch), AFF_BURNED);
+            char_aff_set(ch, AFF_BURNED, true);
         } else if (char_get_aff_abils_con(ch) < axion_dice(0)) {
             send_to_char(ch, "@RYou are badly burned!@n\r\n");
             send_to_char(vict, "@RThey are burned!@n\r\n");
-            SET_BIT_AR(char_get_affected_by(ch), AFF_BURNED);
+            char_aff_set(ch, AFF_BURNED, true);
         }
     } else if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
         send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
@@ -142,7 +142,7 @@ void tech_handle_crashdown(char_data *ch, char_data *vict) {
         act("@w$N@w is knocked out of the air!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@wYou are knocked out of the air!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@w$N@w is knocked out of the air!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        REMOVE_BIT_AR(char_get_affected_by(vict), AFF_FLYING);
+        char_aff_set(vict, AFF_FLYING, false);
         char_set_altitude(vict, 0);
         char_set_position(vict, POS_SITTING);
     }

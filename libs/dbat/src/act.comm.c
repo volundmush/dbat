@@ -498,7 +498,7 @@ ACMD(do_say)
          if (granted == FALSE && strstr(argument, "immunity")) {
           if (wch != NULL) {
            send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now has immunity to Burn, Freezing, Mind Break, Poison, Blindness, Yoikominminken, and Paralysis!%s@w'@n\r\n", char_get_name(wch), WISH[0] ? "" : " Now make your second wish.");
-           SET_BIT_AR(char_get_affected_by(wch), AFF_IMMUNITY);
+           char_aff_set(wch, AFF_IMMUNITY, true);
            granted = TRUE;
            SELFISHMETER += 1;
 		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a immunity wish on %s.", char_get_name(ch), char_get_name(wch));
@@ -548,8 +548,8 @@ ACMD(do_say)
             }
             look_at_room(char_get_in_room(wch), wch, 0);
             send_to_char(wch, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-            REMOVE_BIT_AR(char_get_affected_by(wch), AFF_SPIRIT);
-            REMOVE_BIT_AR(char_get_affected_by(wch), AFF_ETHEREAL);
+            char_aff_set(wch, AFF_SPIRIT, false);
+            char_aff_set(wch, AFF_ETHEREAL, false);
            }
            granted = TRUE;
            SELFISHMETER -= 2;
@@ -573,8 +573,8 @@ ACMD(do_say)
             char_to_room(wch, real_room(char_get_droom(wch)));
             look_at_room(char_get_in_room(wch), wch, 0);
             send_to_char(wch, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-            REMOVE_BIT_AR(char_get_affected_by(wch), AFF_SPIRIT);
-            REMOVE_BIT_AR(char_get_affected_by(wch), AFF_ETHEREAL);
+            char_aff_set(wch, AFF_SPIRIT, false);
+            char_aff_set(wch, AFF_ETHEREAL, false);
            }
            if (real_room(char_get_droom(wch2)) == NOWHERE) {
             char_set_droom(wch2, 300);
@@ -584,8 +584,8 @@ ACMD(do_say)
             char_to_room(wch2, real_room(char_get_droom(wch2)));
             look_at_room(char_get_in_room(wch2), wch2, 0);
             send_to_char(wch2, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-            REMOVE_BIT_AR(char_get_affected_by(wch2), AFF_SPIRIT);
-            REMOVE_BIT_AR(char_get_affected_by(wch2), AFF_ETHEREAL);
+            char_aff_set(wch2, AFF_SPIRIT, false);
+            char_aff_set(wch2, AFF_ETHEREAL, false);
            }
            granted = TRUE;
            SELFISHMETER -= 3;
@@ -613,8 +613,8 @@ ACMD(do_say)
             char_to_room(wch, real_room(char_get_droom(wch)));
             look_at_room(char_get_in_room(wch), wch, 0);
             send_to_char(wch, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-            REMOVE_BIT_AR(char_get_affected_by(wch), AFF_SPIRIT);
-            REMOVE_BIT_AR(char_get_affected_by(wch), AFF_ETHEREAL);
+            char_aff_set(wch, AFF_SPIRIT, false);
+            char_aff_set(wch, AFF_ETHEREAL, false);
            }
            if (real_room(char_get_droom(wch2)) == NOWHERE) {
             char_set_droom(wch2, 300);
@@ -624,8 +624,8 @@ ACMD(do_say)
             char_to_room(wch2, real_room(char_get_droom(wch2)));
             look_at_room(char_get_in_room(wch2), wch2, 0);
             send_to_char(wch2, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-            REMOVE_BIT_AR(char_get_affected_by(wch2), AFF_SPIRIT);
-            REMOVE_BIT_AR(char_get_affected_by(wch2), AFF_ETHEREAL);
+            char_aff_set(wch2, AFF_SPIRIT, false);
+            char_aff_set(wch2, AFF_ETHEREAL, false);
            }
            if (real_room(char_get_droom(wch3)) == NOWHERE) {
             char_set_droom(wch3, 300);
@@ -635,8 +635,8 @@ ACMD(do_say)
             char_to_room(wch3, real_room(char_get_droom(wch3)));
             look_at_room(char_get_in_room(wch3), wch3, 0);
             send_to_char(wch3, "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-            REMOVE_BIT_AR(char_get_affected_by(wch3), AFF_SPIRIT);
-            REMOVE_BIT_AR(char_get_affected_by(wch3), AFF_ETHEREAL);
+            char_aff_set(wch3, AFF_SPIRIT, false);
+            char_aff_set(wch3, AFF_ETHEREAL, false);
            }
            granted = TRUE;
            SELFISHMETER -= 3;
@@ -649,7 +649,7 @@ ACMD(do_say)
          if (granted == FALSE && strstr(argument, "immortal") && WISH[0] == 0) {
           if (wch != NULL) {
            send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now immortal!@w'@n\r\n" , char_get_name(wch));
-           SET_BIT_AR(char_get_act(wch), PLR_IMMORTAL);
+           char_plr_set(wch, PLR_IMMORTAL, true);
            WISH[0] = 1;
            WISH[1] = 1;
            granted = TRUE;
@@ -668,7 +668,7 @@ ACMD(do_say)
          if (granted == FALSE && strstr(argument, " mortal")) {
           if (wch != NULL) {
            send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now mortal!%s@w'@n\r\n", char_get_name(wch), WISH[0] ? "" : " Now make your second wish.");
-           REMOVE_BIT_AR(char_get_act(wch), PLR_IMMORTAL);
+           char_plr_set(wch, PLR_IMMORTAL, false);
            granted = TRUE;
            SELFISHMETER += 4;
 		   mudlog(NRM, ADMLVL_GOD, TRUE, "Shenron: %s has made a mortal wish on %s.", char_get_name(ch), char_get_name(wch));
@@ -1274,7 +1274,7 @@ ACMD(do_write)
  
     /* we can write - hooray! */
     act("$n begins to jot down a note.", TRUE, ch, 0, 0, TO_ROOM);
-    SET_BIT_AR(obj_get_extra_flags(paper),ITEM_UNIQUE_SAVE);
+    obj_extra_set(paper, ITEM_UNIQUE_SAVE, true);
     send_editor_help(ch->desc);
     string_write(ch->desc, &paper->action_description, MAX_NOTE_LENGTH, 0, backstr);
   }
@@ -1487,7 +1487,7 @@ ACMD(do_gen_comm)
       if (char_get_spam(ch) >= 3 && char_get_admlevel(ch) < 1) {
        send_to_imm("SPAMMING: %s has been frozen for spamming!\r\n", char_get_name(ch));
        send_to_all("@rSPAMMING@D: @C%s@w has been frozen for spamming, let that be a lesson to 'em.@n\r\n", char_get_name(ch));
-       SET_BIT_AR(char_get_act(ch), PLR_FROZEN);
+       char_plr_set(ch, PLR_FROZEN, true);
        GET_FREEZE_LEV(ch) = 1;
       }
       else if (char_get_spam(ch) < 3) {

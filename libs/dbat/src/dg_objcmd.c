@@ -362,7 +362,7 @@ OCMD(do_otransform)
 OCMD(do_dupe)
 {
 
- SET_BIT_AR(obj_get_extra_flags(obj), ITEM_DUPLICATE);
+ obj_extra_set(obj, ITEM_DUPLICATE, true);
 
 }
 

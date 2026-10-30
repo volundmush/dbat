@@ -198,28 +198,28 @@ int invalid_race(struct char_data *ch, struct obj_data *obj) {
     if (char_get_admlevel(ch) >= ADMLVL_IMMORT)
         return FALSE;
 
-    if (obj_flagged(obj, ITEM_ANTI_HUMAN) && char_is_human(ch))
+    if (obj_extra_flagged(obj, ITEM_ANTI_HUMAN) && char_is_human(ch))
         return TRUE;
 
-    if (obj_flagged(obj, ITEM_ANTI_SAIYAN) && char_is_saiyan(ch))
+    if (obj_extra_flagged(obj, ITEM_ANTI_SAIYAN) && char_is_saiyan(ch))
         return TRUE;
 
-    if (obj_flagged(obj, ITEM_ANTI_ICER) && char_is_icer(ch))
+    if (obj_extra_flagged(obj, ITEM_ANTI_ICER) && char_is_icer(ch))
         return TRUE;
 
-    if (obj_flagged(obj, ITEM_ANTI_KONATSU) && char_is_konatsu(ch))
+    if (obj_extra_flagged(obj, ITEM_ANTI_KONATSU) && char_is_konatsu(ch))
         return TRUE;
 
-    if (obj_flagged(obj, ITEM_ONLY_HUMAN) && !char_is_human(ch))
+    if (obj_extra_flagged(obj, ITEM_ONLY_HUMAN) && !char_is_human(ch))
         return TRUE;
 
-    if (obj_flagged(obj, ITEM_ONLY_ICER) && !char_is_icer(ch))
+    if (obj_extra_flagged(obj, ITEM_ONLY_ICER) && !char_is_icer(ch))
         return TRUE;
 
-    if (obj_flagged(obj, ITEM_ONLY_SAIYAN) && !char_is_saiyan(ch))
+    if (obj_extra_flagged(obj, ITEM_ONLY_SAIYAN) && !char_is_saiyan(ch))
         return TRUE;
 
-    if (obj_flagged(obj, ITEM_ONLY_KONATSU) && !char_is_konatsu(ch))
+    if (obj_extra_flagged(obj, ITEM_ONLY_KONATSU) && !char_is_konatsu(ch))
         return TRUE;
 
     return FALSE;
@@ -256,7 +256,7 @@ int get_size_bonus(int sz) {
 
 int wield_type(int chsize, const struct obj_data *weap) {
     if (obj_get_type_flag(weap) != ITEM_WEAPON)
-        return obj_flagged(weap, ITEM_2H) ? WIELD_TWOHAND : WIELD_ONEHAND;
+        return obj_extra_flagged(weap, ITEM_2H) ? WIELD_TWOHAND : WIELD_ONEHAND;
 
     if (chsize > obj_get_size(weap)) {
         return WIELD_LIGHT;
@@ -327,10 +327,10 @@ void racial_body_parts(struct char_data *ch) {
 
     for (i = 1; i < NUM_WEARS; i++) {
         if (race_bodyparts[char_get_race(ch)][i]) {
-            SET_BIT_AR(char_get_bodyparts(ch), i);
+            char_body_set(ch, i, true);
         } else {
             if (char_body_flagged(ch, i))
-                REMOVE_BIT_AR(char_get_bodyparts(ch), i);
+                char_body_set(ch, i, false);
         }
     }
 }

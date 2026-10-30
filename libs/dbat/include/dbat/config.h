@@ -248,14 +248,6 @@ extern struct config_data config_info;
 #define YES 1
 #endif
 
-#if !defined(FALSE)
-#define FALSE 0
-#endif
-
-#if !defined(TRUE)
-#define TRUE  (!FALSE)
-#endif
-
 // global variables
 extern int pk_allowed, pt_allowed, level_can_shout, holler_move_cost, CURRENT_ERA;
 extern int mob_specials_used, number_of_assassins, TOPLOADED;

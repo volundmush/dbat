@@ -465,9 +465,9 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
 	}
 
 
-	if ((char_is_good(ch) && NOTRAIN_GOOD(guild_nr)) ||
-		 (char_is_evil(ch) && NOTRAIN_EVIL(guild_nr)) ||
-		 (char_is_neutral(ch) && NOTRAIN_NEUTRAL(guild_nr))) {
+	if ((char_is_good(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOGOOD)) ||
+		 (char_is_evil(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOEVIL)) ||
+		 (char_is_neutral(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NONEUTRAL))) {
 		snprintf(buf, sizeof(buf), "%s %s", 
 					char_get_name(ch), MSG_TRAINER_DISLIKE_ALIGN);
 		do_tell(keeper, buf, cmd_tell, 0);
@@ -477,32 +477,32 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
 	if (char_is_npc(ch))
 		return (FALSE);
 
-	if ((char_is_roshi(ch) && NOTRAIN_WIZARD(guild_nr)) ||
-		(char_is_piccolo(ch) && NOTRAIN_CLERIC(guild_nr)) ||
-		(char_is_krane(ch) && NOTRAIN_ROGUE(guild_nr)) ||
-		(char_is_nail(ch) && NOTRAIN_FIGHTER(guild_nr)) ||
-		(char_is_ginyu(ch) && NOTRAIN_PALADIN(guild_nr)) ||
-		(char_is_frieza(ch) && NOTRAIN_SORCERER(guild_nr)) ||
-		(char_is_tapion(ch) && NOTRAIN_DRUID(guild_nr)) ||
-		(char_is_andsix(ch) && NOTRAIN_BARD(guild_nr)) ||
-		(char_is_dabura(ch) && NOTRAIN_RANGER(guild_nr)) ||
-		(char_is_bardock(ch) && NOTRAIN_MONK(guild_nr)) ||
-		(char_is_kabito(ch) && NOTRAIN_BARBARIAN(guild_nr)) ||
-        	(char_is_jinto(ch) && NOTRAIN_ARCANE_ARCHER(guild_nr)) ||
-		(char_is_tsuna(ch) && NOTRAIN_ARCANE_TRICKSTER(guild_nr)) ||
-		(char_is_kurzak(ch) && NOTRAIN_ARCHMAGE(guild_nr)) ||
-		(char_is_assassin(ch) && NOTRAIN_ASSASSIN(guild_nr)) ||
-		(char_is_blackguard(ch) && NOTRAIN_BLACKGUARD(guild_nr)) ||
-		(char_is_dragon_disciple(ch) && NOTRAIN_DRAGON_DISCIPLE(guild_nr)) ||
-		(char_is_duelist(ch) && NOTRAIN_DUELIST(guild_nr)) ||
-		(char_is_dwarven_defender(ch) && NOTRAIN_DWARVEN_DEFENDER(guild_nr)) ||
-		(char_is_eldritch_knight(ch) && NOTRAIN_ELDRITCH_KNIGHT(guild_nr)) ||
-		(char_is_hierophant(ch) && NOTRAIN_HIEROPHANT(guild_nr)) ||
-        	(char_is_horizon_walker(ch) && NOTRAIN_HORIZON_WALKER(guild_nr)) ||
-        	(char_is_loremaster(ch) && NOTRAIN_LOREMASTER(guild_nr)) ||
-		(char_is_mystic_theurge(ch) && NOTRAIN_MYSTIC_THEURGE(guild_nr)) ||
-		(char_is_shadowdancer(ch) && NOTRAIN_SHADOWDANCER(guild_nr)) ||
-        	(char_is_thaumaturgist(ch) && NOTRAIN_THAUMATURGIST(guild_nr))) {
+	if ((char_is_roshi(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOWIZARD)) ||
+		(char_is_piccolo(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOCLERIC)) ||
+		(char_is_krane(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOROGUE)) ||
+		(char_is_nail(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOFIGHTER)) ||
+		(char_is_ginyu(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOPALADIN)) ||
+		(char_is_frieza(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOSORCERER)) ||
+		(char_is_tapion(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NODRUID)) ||
+		(char_is_andsix(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOBARD)) ||
+		(char_is_dabura(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NORANGER)) ||
+		(char_is_bardock(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOMONK)) ||
+		(char_is_kabito(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOBARBARIAN)) ||
+        	(char_is_jinto(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOARCANE_ARCHER)) ||
+		(char_is_tsuna(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOARCANE_TRICKSTER)) ||
+		(char_is_kurzak(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOARCHMAGE)) ||
+		(char_is_assassin(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOASSASSIN)) ||
+		(char_is_blackguard(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOBLACKGUARD)) ||
+		(char_is_dragon_disciple(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NODRAGON_DISCIPLE)) ||
+		(char_is_duelist(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NODUELIST)) ||
+		(char_is_dwarven_defender(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NODWARVEN_DEFENDER)) ||
+		(char_is_eldritch_knight(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOELDRITCH_KNIGHT)) ||
+		(char_is_hierophant(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOHIEROPHANT)) ||
+        	(char_is_horizon_walker(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOHORIZON_WALKER)) ||
+        	(char_is_loremaster(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOLOREMASTER)) ||
+		(char_is_mystic_theurge(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOMYSTIC_THEURGE)) ||
+		(char_is_shadowdancer(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOSHADOWDANCER)) ||
+        	(char_is_thaumaturgist(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOTHAUMATURGIST))) {
 
 		snprintf(buf, sizeof(buf), "%s %s", 
 					char_get_name(ch), MSG_TRAINER_DISLIKE_CLASS);
@@ -510,59 +510,59 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
 		return (FALSE);
 	}
 
-	if ((!char_is_roshi(ch) && TRAIN_WIZARD(guild_nr)) ||
-	    (!char_is_piccolo(ch) && TRAIN_CLERIC(guild_nr)) ||
-	    (!char_is_krane(ch) && TRAIN_ROGUE(guild_nr)) ||
-	    (!char_is_bardock(ch) && TRAIN_MONK(guild_nr)) ||
-	    (!char_is_ginyu(ch) && TRAIN_PALADIN(guild_nr)) ||
-	    (!char_is_nail(ch) && TRAIN_FIGHTER(guild_nr)) ||
-	    (!char_is_frieza(ch) && TRAIN_SORCERER(guild_nr)) ||
-	    (!char_is_tapion(ch) && TRAIN_DRUID(guild_nr)) ||
-	    (!char_is_andsix(ch) && TRAIN_BARD(guild_nr)) ||
-	    (!char_is_dabura(ch) && TRAIN_RANGER(guild_nr)) ||
-	    (!char_is_kabito(ch) && TRAIN_BARBARIAN(guild_nr)) ||
-            (!char_is_jinto(ch) && TRAIN_ARCANE_ARCHER(guild_nr)) ||
-	    (!char_is_tsuna(ch) && TRAIN_ARCANE_TRICKSTER(guild_nr)) ||
-	    (!char_is_kurzak(ch) && TRAIN_ARCHMAGE(guild_nr)) ||
-            (!char_is_assassin(ch) && TRAIN_ASSASSIN(guild_nr)) ||
-            (!char_is_blackguard(ch) && TRAIN_BLACKGUARD(guild_nr)) ||
-            (!char_is_dragon_disciple(ch) && TRAIN_DRAGON_DISCIPLE(guild_nr)) ||
-            (!char_is_duelist(ch) && TRAIN_DUELIST(guild_nr)) ||
-            (!char_is_dwarven_defender(ch) && TRAIN_DWARVEN_DEFENDER(guild_nr)) ||
-            (!char_is_eldritch_knight(ch) && TRAIN_ELDRITCH_KNIGHT(guild_nr)) ||
-            (!char_is_hierophant(ch) && TRAIN_HIEROPHANT(guild_nr)) ||
-            (!char_is_horizon_walker(ch) && TRAIN_HORIZON_WALKER(guild_nr)) ||
-            (!char_is_loremaster(ch) && TRAIN_LOREMASTER(guild_nr)) ||
-            (!char_is_mystic_theurge(ch) && TRAIN_MYSTIC_THEURGE(guild_nr)) ||
-            (!char_is_shadowdancer(ch) && TRAIN_SHADOWDANCER(guild_nr)) ||
-            (!char_is_thaumaturgist(ch) && TRAIN_THAUMATURGIST(guild_nr))) {
+	if ((!char_is_roshi(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYWIZARD)) ||
+	    (!char_is_piccolo(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYCLERIC)) ||
+	    (!char_is_krane(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYROGUE)) ||
+	    (!char_is_bardock(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYMONK)) ||
+	    (!char_is_ginyu(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYPALADIN)) ||
+	    (!char_is_nail(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYFIGHTER)) ||
+	    (!char_is_frieza(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYSORCERER)) ||
+	    (!char_is_tapion(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYDRUID)) ||
+	    (!char_is_andsix(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYBARD)) ||
+	    (!char_is_dabura(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYRANGER)) ||
+	    (!char_is_kabito(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYBARBARIAN)) ||
+            (!char_is_jinto(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYARCANE_ARCHER)) ||
+	    (!char_is_tsuna(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYARCANE_TRICKSTER)) ||
+	    (!char_is_kurzak(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYARCHMAGE)) ||
+            (!char_is_assassin(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYASSASSIN)) ||
+            (!char_is_blackguard(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYBLACKGUARD)) ||
+            (!char_is_dragon_disciple(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYDRAGON_DISCIPLE)) ||
+            (!char_is_duelist(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYDUELIST)) ||
+            (!char_is_dwarven_defender(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYDWARVEN_DEFENDER)) ||
+            (!char_is_eldritch_knight(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYELDRITCH_KNIGHT)) ||
+            (!char_is_hierophant(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYHIEROPHANT)) ||
+            (!char_is_horizon_walker(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYHORIZON_WALKER)) ||
+            (!char_is_loremaster(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYLOREMASTER)) ||
+            (!char_is_mystic_theurge(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYMYSTIC_THEURGE)) ||
+            (!char_is_shadowdancer(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYSHADOWDANCER)) ||
+            (!char_is_thaumaturgist(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_ONLYTHAUMATURGIST))) {
 		snprintf(buf, sizeof(buf), "%s %s", 
 					char_get_name(ch), MSG_TRAINER_DISLIKE_CLASS);
 		do_tell(keeper, buf, cmd_tell, 0);
 		return (FALSE);
 	}
 
-	if ((char_is_human(ch) && NOTRAIN_HUMAN(guild_nr)) ||
-		 (char_is_saiyan(ch)   && NOTRAIN_SAIYAN(guild_nr)) ||
-		 (char_is_icer(ch) && NOTRAIN_ICER(guild_nr)) ||
-		 (char_is_konatsu(ch) && NOTRAIN_KONATSU(guild_nr)) ||
-		 (char_is_namek(ch) && NOTRAIN_NAMEK(guild_nr)) ||
-		 (char_is_mutant(ch) && NOTRAIN_MUTANT(guild_nr)) ||
-		 (char_is_kanassan(ch) && NOTRAIN_KANASSAN(guild_nr)) ||
- 		 (char_is_android(ch) && NOTRAIN_ANDROID(guild_nr)) ||
-		 (char_is_bio(ch) && NOTRAIN_BIO(guild_nr)) ||
-		 (char_is_demon(ch) && NOTRAIN_DEMON(guild_nr)) ||
- 		 (char_is_majin(ch) && NOTRAIN_MAJIN(guild_nr)) ||
- 		 (char_is_kai(ch) && NOTRAIN_KAI(guild_nr)) ||
- 		 (char_is_truffle(ch) && NOTRAIN_TRUFFLE(guild_nr)) ||
- 		 (char_is_hoshijin(ch) && NOTRAIN_GOBLIN(guild_nr)) ||
- 		 (char_is_animal(ch) && NOTRAIN_ANIMAL(guild_nr)) ||
- 		 (char_is_saiba(ch) && NOTRAIN_ORC(guild_nr)) ||
- 		 (char_is_serpent(ch) && NOTRAIN_SNAKE(guild_nr)) ||
-		 (char_is_ogre(ch) && NOTRAIN_TROLL(guild_nr)) ||
- 		 (char_is_halfbreed(ch) && NOTRAIN_HALFBREED(guild_nr)) ||
- 		 (char_is_yardratian(ch) && NOTRAIN_MINOTAUR(guild_nr)) ||
- 		 (char_is_arlian(ch) && NOTRAIN_KOBOLD(guild_nr))) {
+	if ((char_is_human(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOHUMAN)) ||
+		 (char_is_saiyan(ch)   && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOSAIYAN)) ||
+		 (char_is_icer(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOICER)) ||
+		 (char_is_konatsu(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOKONATSU)) ||
+		 (char_is_namek(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NONAMEK)) ||
+		 (char_is_mutant(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOMUTANT)) ||
+		 (char_is_kanassan(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOKANASSAN)) ||
+ 		 (char_is_android(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOANDROID)) ||
+		 (char_is_bio(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOBIO)) ||
+		 (char_is_demon(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NODEMON)) ||
+ 		 (char_is_majin(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOMAJIN)) ||
+ 		 (char_is_kai(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOKAI)) ||
+ 		 (char_is_truffle(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOTRUFFLE)) ||
+ 		 (char_is_hoshijin(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOGOBLIN)) ||
+ 		 (char_is_animal(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOANIMAL)) ||
+ 		 (char_is_saiba(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOORC)) ||
+ 		 (char_is_serpent(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOSNAKE)) ||
+		 (char_is_ogre(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOTROLL)) ||
+ 		 (char_is_halfbreed(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOHALFBREED)) ||
+ 		 (char_is_yardratian(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOMINOTAUR)) ||
+ 		 (char_is_arlian(ch) && guild_trade_flagged(&guild_index[guild_nr], TRADE_NOKOBOLD))) {
 		snprintf(buf, sizeof(buf), "%s %s", 
 					char_get_name(ch), MSG_TRAINER_DISLIKE_RACE);
 		do_tell(keeper, buf, cmd_tell, 0);
@@ -1705,7 +1705,7 @@ char *guild_customer_string(int guild_nr, int detailed)
 
   while (*trade_letters[gindex] != '\n' && len + 1 < sizeof(buf)) {
     if (detailed) {
-      if (!IS_SET_AR(GM_WITH_WHO(guild_nr), flag)) {
+      if (!guild_trade_flagged(&guild_index[guild_nr], flag)) {
 	nlen = snprintf(buf + len, sizeof(buf) - len, ", %s", trade_letters[gindex]);
 
         if (len + nlen >= sizeof(buf) || nlen < 0)
@@ -1714,7 +1714,7 @@ char *guild_customer_string(int guild_nr, int detailed)
         len += nlen;
       }
     } else {
-      buf[len++] = (IS_SET_AR(GM_WITH_WHO(guild_nr), flag) ? '_' : *trade_letters[gindex]);
+      buf[len++] = (guild_trade_flagged(&guild_index[guild_nr], flag) ? '_' : *trade_letters[gindex]);
       buf[len] = '\0';
 
       if (len >= sizeof(buf))
@@ -1910,4 +1910,19 @@ int count_guilds(guild_vnum low, guild_vnum high)
 
 void levelup_parse(struct descriptor_data *d, char *arg)
 {
+}
+
+bool guild_trade_flagged(const struct guild_data *rec, int flag) {
+    return IS_SET_AR(rec->with_who, flag) != 0;
+}
+
+void guild_trade_set(struct guild_data *rec, int flag, bool on) {
+    if (on)
+        SET_BIT_AR(rec->with_who, flag);
+    else
+        REMOVE_BIT_AR(rec->with_who, flag);
+}
+
+bool guild_trade_toggle(struct guild_data *rec, int flag) {
+    return (TOGGLE_BIT_AR(rec->with_who, flag) & Q_BIT(flag)) != 0;
 }
