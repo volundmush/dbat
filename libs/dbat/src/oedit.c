@@ -94,7 +94,7 @@ ACMD(do_oasis_oedit)
   /** Check that whatever it is isn't already being edited.                  **/
   /****************************************************************************/
   for (d = descriptor_list; d; d = d->next) {
-    if (STATE(d) == CON_OEDIT) {
+    if (desc_get_connected(d) == CON_OEDIT) {
       if (d->olc && OLC_NUM(d) == number) {
         send_to_char(ch, "That object is currently being edited by %s.\r\n",
           char_pers(d->character, ch));
@@ -183,13 +183,13 @@ ACMD(do_oasis_oedit)
     oedit_setup_new(d);
 
   oedit_disp_menu(d);    
-  STATE(d) = CON_OEDIT;
+  desc_set_connected(d, CON_OEDIT);
   
   /****************************************************************************/
   /** Send the OLC message to the players in the same room as the builder.   **/
   /****************************************************************************/
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
-  SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
   
   /****************************************************************************/
   /** Log the OLC message.                                                   **/
@@ -206,14 +206,14 @@ void oedit_setup_new(struct descriptor_data *d)
   OLC_OBJ(d)->name = strdup("unfinished object");
   OLC_OBJ(d)->description = strdup("An unfinished object is lying here.");
   OLC_OBJ(d)->short_description = strdup("an unfinished object");
-  SET_BIT_AR(GET_OBJ_WEAR(OLC_OBJ(d)), ITEM_WEAR_TAKE);
+  SET_BIT_AR(obj_get_wear_flags(OLC_OBJ(d)), ITEM_WEAR_TAKE);
   OLC_VAL(d) = 0;
   OLC_ITEM_TYPE(d) = OBJ_TRIGGER;
-  GET_OBJ_TYPE(OLC_OBJ(d)) = ITEM_WORN;
-  GET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_HEALTH) = 100;
-  GET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_MAXHEALTH) = 100;
-  GET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_MATERIAL) = MATERIAL_STEEL;
-  GET_OBJ_SIZE(OLC_OBJ(d)) = SIZE_MEDIUM;
+  obj_set_type_flag(OLC_OBJ(d), ITEM_WORN);
+  obj_set_value(OLC_OBJ(d), VAL_ALL_HEALTH, 100);
+  obj_set_value(OLC_OBJ(d), VAL_ALL_MAXHEALTH, 100);
+  obj_set_value(OLC_OBJ(d), VAL_ALL_MATERIAL, MATERIAL_STEEL);
+  obj_set_size(OLC_OBJ(d), SIZE_MEDIUM);
 
   SCRIPT(OLC_OBJ(d)) = NULL;
   OLC_OBJ(d)->proto_script = OLC_SCRIPT(d) = NULL;
@@ -291,7 +291,7 @@ void oedit_save_internally(struct descriptor_data *d)
    * Renumber produce in shops being edited.
    */
   for (dsc = descriptor_list; dsc; dsc = dsc->next)
-    if (STATE(dsc) == CON_SEDIT)
+    if (desc_get_connected(dsc) == CON_SEDIT)
       for (i = 0; S_PRODUCT(OLC_SHOP(dsc), i) != NOTHING; i++)
 	if (S_PRODUCT(OLC_SHOP(dsc), i) >= robj_num)
 	  S_PRODUCT(OLC_SHOP(dsc), i)++;
@@ -299,7 +299,7 @@ void oedit_save_internally(struct descriptor_data *d)
 
   /* Update other people in zedit too. From: C.Raehl 4/27/99 */
   for (dsc = descriptor_list; dsc; dsc = dsc->next)
-    if (STATE(dsc) == CON_ZEDIT)
+    if (desc_get_connected(dsc) == CON_ZEDIT)
       for (i = 0; OLC_ZONE(dsc)->cmd[i].command != 'S'; i++)
         switch (OLC_ZONE(dsc)->cmd[i].command) {
           case 'P':
@@ -337,7 +337,7 @@ void oedit_disp_container_flags_menu(struct descriptor_data *d)
   char bits[MAX_STRING_LENGTH];
   clear_screen(d);
 
-  sprintbit(GET_OBJ_VAL(OLC_OBJ(d), 1), container_bits, bits, sizeof(bits));
+  sprintbit(obj_get_value(OLC_OBJ(d), 1), container_bits, bits, sizeof(bits));
   write_to_output(d, 
 	  "@g1@n) CLOSEABLE\r\n"
 	  "@g2@n) PICKPROOF\r\n"
@@ -585,7 +585,7 @@ void oedit_disp_val1_menu(struct descriptor_data *d)
 {
   int counter, columns = 0;
   OLC_MODE(d) = OEDIT_VALUE_1;
-  switch (GET_OBJ_TYPE(OLC_OBJ(d))) {
+  switch (obj_get_type_flag(OLC_OBJ(d))) {
   case ITEM_LIGHT:
     /*
      * values 0 and 1 are unused.. jump to 2 
@@ -658,7 +658,7 @@ void oedit_disp_val1_menu(struct descriptor_data *d)
 void oedit_disp_val2_menu(struct descriptor_data *d)
 {
   OLC_MODE(d) = OEDIT_VALUE_2;
-  switch (GET_OBJ_TYPE(OLC_OBJ(d))) {
+  switch (obj_get_type_flag(OLC_OBJ(d))) {
   case ITEM_SCROLL:
   case ITEM_POTION:
     oedit_disp_spells_menu(d);
@@ -710,7 +710,7 @@ void oedit_disp_val2_menu(struct descriptor_data *d)
 void oedit_disp_val3_menu(struct descriptor_data *d)
 {
   OLC_MODE(d) = OEDIT_VALUE_3;
-  switch (GET_OBJ_TYPE(OLC_OBJ(d))) {
+  switch (obj_get_type_flag(OLC_OBJ(d))) {
   case ITEM_LIGHT:
     write_to_output(d, "Number of hours (0 = burnt, -1 is infinite) : ");
     break;
@@ -758,7 +758,7 @@ void oedit_disp_val3_menu(struct descriptor_data *d)
 void oedit_disp_val4_menu(struct descriptor_data *d)
 {
   OLC_MODE(d) = OEDIT_VALUE_4;
-  switch (GET_OBJ_TYPE(OLC_OBJ(d))) {
+  switch (obj_get_type_flag(OLC_OBJ(d))) {
   case ITEM_WAND:
   case ITEM_STAFF:
     oedit_disp_spells_menu(d);
@@ -784,7 +784,7 @@ void oedit_disp_val4_menu(struct descriptor_data *d)
     write_to_output(d, "What is the portal's appearance? (-1 for transparent) : ");
     break;
   case ITEM_WINDOW:
-    if (GET_OBJ_VAL(OLC_OBJ(d), 0) < 0)
+    if (obj_get_value(OLC_OBJ(d), 0) < 0)
       write_to_output(d, "What is the viewport room vnum (-1 for default location) : ");
     else
       oedit_disp_menu(d);
@@ -810,7 +810,7 @@ void oedit_disp_val7_menu(struct descriptor_data *d)
 {
   OLC_MODE(d) = OEDIT_VALUE_7;
 
-  switch (GET_OBJ_TYPE(OLC_OBJ(d))) {
+  switch (obj_get_type_flag(OLC_OBJ(d))) {
   case ITEM_WEAPON:
     oedit_disp_crittype_menu(d);
     break;
@@ -830,7 +830,7 @@ void oedit_disp_val9_menu(struct descriptor_data *d)
 {
   OLC_MODE(d) = OEDIT_VALUE_9;
 
-  switch (GET_OBJ_TYPE(OLC_OBJ(d))) {
+  switch (obj_get_type_flag(OLC_OBJ(d))) {
   case ITEM_WEAPON:
     write_to_output(d, "Default crit is only on natural 20. Extend this range by: ");
     break;
@@ -870,7 +870,7 @@ void oedit_disp_extra_menu(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s %s", counter + 1,
 		extra_bits[counter], !(++columns % 3) ? "\r\n" : "");
   }
-  sprintbitarray(GET_OBJ_EXTRA(OLC_OBJ(d)), extra_bits, EF_ARRAY_MAX, bits, sizeof(bits));
+  sprintbitarray(obj_get_extra_flags(OLC_OBJ(d)), extra_bits, EF_ARRAY_MAX, bits, sizeof(bits));
   write_to_output(d, "\r\nObject flags: @c%s@n\r\n"
 	  "Enter object extra flag (0 to quit) : ",
 	  bits);
@@ -893,7 +893,7 @@ void oedit_disp_perm_menu(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s%s", counter, 
 		affected_bits[counter], !(++columns % 3) ? "\r\n" : "");
   }
-  sprintbitarray(GET_OBJ_PERM(OLC_OBJ(d)), affected_bits, EF_ARRAY_MAX, bitbuf, sizeof(bitbuf));
+  sprintbitarray(obj_get_bitvector(OLC_OBJ(d)), affected_bits, EF_ARRAY_MAX, bitbuf, sizeof(bitbuf));
   write_to_output(d, "\r\nObject permanent flags: @c%s@n\r\n"
           "Enter object perm flag (0 to quit) : ", bitbuf);
 }
@@ -928,7 +928,7 @@ void oedit_disp_wear_menu(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s %s", counter + 1,
 		wear_bits[counter], !(++columns % 3) ? "\r\n" : "");
   }
-  sprintbitarray(GET_OBJ_WEAR(OLC_OBJ(d)), wear_bits, TW_ARRAY_MAX, bits, sizeof(bits));
+  sprintbitarray(obj_get_wear_flags(OLC_OBJ(d)), wear_bits, TW_ARRAY_MAX, bits, sizeof(bits));
   write_to_output(d, "\r\nWear flags: @c%s@n\r\n"
 	  "Enter wear flag, 0 to quit : ", bits);
 }
@@ -947,8 +947,8 @@ void oedit_disp_menu(struct descriptor_data *d)
   /*
    * Build buffers for first part of menu.
    */
-  sprinttype(GET_OBJ_TYPE(obj), item_types, tbitbuf, sizeof(tbitbuf));
-  sprintbitarray(GET_OBJ_EXTRA(obj), extra_bits, EF_ARRAY_MAX, ebitbuf, sizeof(ebitbuf));
+  sprinttype(obj_get_type_flag(obj), item_types, tbitbuf, sizeof(tbitbuf));
+  sprintbitarray(obj_get_extra_flags(obj), extra_bits, EF_ARRAY_MAX, ebitbuf, sizeof(ebitbuf));
 
   /*
    * Build first half of menu.
@@ -977,8 +977,8 @@ void oedit_disp_menu(struct descriptor_data *d)
   /*
    * Build second half of menu.
    */
-  sprintbitarray(GET_OBJ_WEAR(OLC_OBJ(d)), wear_bits, EF_ARRAY_MAX, tbitbuf, sizeof(tbitbuf));
-  sprintbitarray(GET_OBJ_PERM(OLC_OBJ(d)), affected_bits, EF_ARRAY_MAX, ebitbuf, sizeof(ebitbuf));
+  sprintbitarray(obj_get_wear_flags(OLC_OBJ(d)), wear_bits, EF_ARRAY_MAX, tbitbuf, sizeof(tbitbuf));
+  sprintbitarray(obj_get_bitvector(OLC_OBJ(d)), affected_bits, EF_ARRAY_MAX, ebitbuf, sizeof(ebitbuf));
 
   write_to_output(d,
 	  "@g7@n) Wear flags  : @c%s@n\r\n"
@@ -998,16 +998,16 @@ void oedit_disp_menu(struct descriptor_data *d)
 	  "@gQ@n) Quit\r\n"
 	  "Enter choice : ",
 
-	  tbitbuf, GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_RENT(obj),
-	  GET_OBJ_TIMER(obj), GET_OBJ_VAL(obj, 0), GET_OBJ_VAL(obj, 1),
-          GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 3), GET_OBJ_VAL(obj, 4),
-          GET_OBJ_VAL(obj, 5), GET_OBJ_VAL(obj, 6), GET_OBJ_VAL(obj, 7),
-          GET_OBJ_VAL(obj, 8), GET_OBJ_VAL(obj, 9), GET_OBJ_VAL(obj, 10),
-          GET_OBJ_VAL(obj, 11), GET_OBJ_VAL(obj, 12), GET_OBJ_VAL(obj, 13),
-          GET_OBJ_VAL(obj, 14), GET_OBJ_VAL(obj, 15), GET_OBJ_EXTRA(obj) ? "Set." : "Not Set.",
-          GET_OBJ_LEVEL(obj), material_names[(int)GET_OBJ_MATERIAL(obj)],
+	  tbitbuf, obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj),
+	  obj_get_timer(obj), obj_get_value(obj, 0), obj_get_value(obj, 1),
+          obj_get_value(obj, 2), obj_get_value(obj, 3), obj_get_value(obj, 4),
+          obj_get_value(obj, 5), obj_get_value(obj, 6), obj_get_value(obj, 7),
+          obj_get_value(obj, 8), obj_get_value(obj, 9), obj_get_value(obj, 10),
+          obj_get_value(obj, 11), obj_get_value(obj, 12), obj_get_value(obj, 13),
+          obj_get_value(obj, 14), obj_get_value(obj, 15), obj_get_extra_flags(obj) ? "Set." : "Not Set.",
+          obj_get_level(obj), material_names[(int)obj_get_value(obj, 7)],
           ebitbuf, OLC_SCRIPT(d) ? "Set." : "Not Set.",
-          size_names[GET_OBJ_SIZE(obj)]
+          size_names[obj_get_size(obj)]
   );
   OLC_MODE(d) = OEDIT_MAIN_MENU;
 }
@@ -1038,7 +1038,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
 	write_to_output(d, "Object saved to disk.\r\n");
       } else
         write_to_output(d, "Object saved to memory.\r\n");
-      if(GET_OBJ_TYPE(OLC_OBJ(d)) == ITEM_BOARD) {
+      if(obj_get_type_flag(OLC_OBJ(d)) == ITEM_BOARD) {
 	if((tmp=locate_board(obj_get_vnum(OLC_OBJ(d)))) != NULL) {
 	  save_board(tmp);
 	} else {
@@ -1075,7 +1075,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
 
   case OEDIT_DELETE:
     if (*arg == 'y' || *arg == 'Y') {
-      if (delete_object(GET_OBJ_RNUM(OLC_OBJ(d))) != NOTHING)
+      if (delete_object(obj_get_item_number(OLC_OBJ(d))) != NOTHING)
         write_to_output(d, "Object deleted.\r\n");
       else
         write_to_output(d, "Couldn't delete the object!\r\n");
@@ -1095,7 +1095,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     switch (*arg) {
     case 'q':
     case 'Q':
-      if (STATE(d) != CON_IEDIT) {
+      if (desc_get_connected(d) != CON_IEDIT) {
       if (OLC_VAL(d)) {	/* Something has been modified. */
         write_to_output(d, "Do you wish to save your changes? : ");
 	OLC_MODE(d) = OEDIT_CONFIRM_SAVESTRING;
@@ -1105,11 +1105,11 @@ void oedit_parse(struct descriptor_data *d, char *arg)
         send_to_char(d->character, "\r\nCommitting iedit changes.\r\n");
         obj = OLC_IOBJ(d);
         /* obj gets a new UID below; drop its old lookup entry first */
-        remove_from_lookup_table(GET_ID(obj));
+        remove_from_lookup_table(obj_get_id(obj));
         *obj = *(OLC_OBJ(d));
-        GET_ID(obj) = dg_new_obj_uid();
+        obj_set_id(obj, dg_new_obj_uid());
         /* find_obj helper */
-        add_to_lookup_table(GET_ID(obj), OBJ_TRIGGER, (void *)obj);
+        add_to_lookup_table(obj_get_id(obj), OBJ_TRIGGER, (void *)obj);
         if (obj_get_vnum(obj) != NOTHING) {
           /* remove any old scripts */
           if (SCRIPT(obj)) {
@@ -1122,13 +1122,13 @@ void oedit_parse(struct descriptor_data *d, char *arg)
           copy_proto_script(&obj_proto[robj], obj, OBJ_TRIGGER);
           assign_triggers(obj, OBJ_TRIGGER);
         }
-        SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE);
+        SET_BIT_AR(obj_get_extra_flags(obj), ITEM_UNIQUE_SAVE);
   /* Xap - ought to save the old pointer, free after assignment I suppose */
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
                "OLC: %s iedit a unique #%d", char_get_name(d->character), obj_get_vnum(obj));
         if (d->character) {
-          REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
-          STATE(d) = CON_PLAYING;
+          REMOVE_BIT_AR(char_get_act(d->character), PLR_WRITING);
+          desc_set_connected(d, CON_PLAYING);
           act("$n stops using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
         }
         free(d->olc);
@@ -1193,13 +1193,13 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       /*
        * Clear any old values  
        */
-      GET_OBJ_VAL(OLC_OBJ(d), 0) = 0;
-      GET_OBJ_VAL(OLC_OBJ(d), 1) = 0;
-      GET_OBJ_VAL(OLC_OBJ(d), 2) = 0;
-      GET_OBJ_VAL(OLC_OBJ(d), 3) = 0;
-      GET_OBJ_VAL(OLC_OBJ(d), 4) = 0;
-      GET_OBJ_VAL(OLC_OBJ(d), 5) = 0;
-      GET_OBJ_VAL(OLC_OBJ(d), 6) = 0;
+      obj_set_value(OLC_OBJ(d), 0, 0);
+      obj_set_value(OLC_OBJ(d), 1, 0);
+      obj_set_value(OLC_OBJ(d), 2, 0);
+      obj_set_value(OLC_OBJ(d), 3, 0);
+      obj_set_value(OLC_OBJ(d), 4, 0);
+      obj_set_value(OLC_OBJ(d), 5, 0);
+      obj_set_value(OLC_OBJ(d), 6, 0);
       OLC_VAL(d) = 1;
       oedit_disp_val1_menu(d);
       break;
@@ -1236,7 +1236,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       break;
     case 's':
     case 'S':
-      if (STATE(d) != CON_IEDIT) {
+      if (desc_get_connected(d) != CON_IEDIT) {
       OLC_SCRIPT_EDIT_MODE(d) = SCRIPT_MAIN_MENU;
       dg_script_menu(d);
       } else {
@@ -1309,10 +1309,12 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       write_to_output(d, "Invalid choice, try again : ");
       return;
     } else
-      GET_OBJ_TYPE(OLC_OBJ(d)) = number;
+      obj_set_type_flag(OLC_OBJ(d), number);
     /* what's the boundschecking worth if we don't do this ? -- Welcor */
-    GET_OBJ_VAL(OLC_OBJ(d), 0) = GET_OBJ_VAL(OLC_OBJ(d), 1) =
-      GET_OBJ_VAL(OLC_OBJ(d), 2) = GET_OBJ_VAL(OLC_OBJ(d), 3) = 0;
+    obj_set_value(OLC_OBJ(d), 3, 0);
+    obj_set_value(OLC_OBJ(d), 2, 0);
+    obj_set_value(OLC_OBJ(d), 1, 0);
+    obj_set_value(OLC_OBJ(d), 0, 0);
     break;
 
   case OEDIT_EXTRAS:
@@ -1323,7 +1325,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     } else if (number == 0)
       break;
     else {
-      TOGGLE_BIT_AR(GET_OBJ_EXTRA(OLC_OBJ(d)), number - 1);
+      TOGGLE_BIT_AR(obj_get_extra_flags(OLC_OBJ(d)), number - 1);
       oedit_disp_extra_menu(d);
       return;
     }
@@ -1337,41 +1339,41 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     } else if (number == 0)	/* Quit. */
       break;
     else {
-      TOGGLE_BIT_AR(GET_OBJ_WEAR(OLC_OBJ(d)), (number - 1));
+      TOGGLE_BIT_AR(obj_get_wear_flags(OLC_OBJ(d)), (number - 1));
       oedit_disp_wear_menu(d);
       return;
     }
 
   case OEDIT_WEIGHT:
-    GET_OBJ_WEIGHT(OLC_OBJ(d)) = LIMIT(atoi(arg), 0, MAX_OBJ_WEIGHT);
+    obj_set_weight(OLC_OBJ(d), LIMIT(atoi(arg), 0, MAX_OBJ_WEIGHT));
     break;
 
   case OEDIT_COST:
-    GET_OBJ_COST(OLC_OBJ(d)) = LIMIT(atoi(arg), 0, MAX_OBJ_COST);
+    obj_set_cost(OLC_OBJ(d), LIMIT(atoi(arg), 0, MAX_OBJ_COST));
     break;
 
   case OEDIT_COSTPERDAY:
-    GET_OBJ_RENT(OLC_OBJ(d)) = LIMIT(atoi(arg), 0, MAX_OBJ_RENT);
+    obj_set_cost_per_day(OLC_OBJ(d), LIMIT(atoi(arg), 0, MAX_OBJ_RENT));
     break;
 
   case OEDIT_TIMER:
-    switch (GET_OBJ_TYPE(OLC_OBJ(d))) {
+    switch (obj_get_type_flag(OLC_OBJ(d))) {
       case ITEM_PORTAL:
-        GET_OBJ_TIMER(OLC_OBJ(d)) = LIMIT(atoi(arg), -1, MAX_OBJ_TIMER);
+        obj_set_timer(OLC_OBJ(d), LIMIT(atoi(arg), -1, MAX_OBJ_TIMER));
         break;
       default:
-        GET_OBJ_TIMER(OLC_OBJ(d)) = LIMIT(atoi(arg), 0, MAX_OBJ_TIMER);
+        obj_set_timer(OLC_OBJ(d), LIMIT(atoi(arg), 0, MAX_OBJ_TIMER));
         break;
     }
     break;
 
 
   case OEDIT_LEVEL:
-    GET_OBJ_LEVEL(OLC_OBJ(d)) = MAX(atoi(arg), 0);
+    obj_set_level(OLC_OBJ(d), MAX(atoi(arg), 0));
     break;
 
   case OEDIT_MATERIAL:
-    GET_OBJ_MATERIAL(OLC_OBJ(d)) = LIMIT(atoi(arg), 0, NUM_MATERIALS);
+    obj_set_value(OLC_OBJ(d), 7, LIMIT(atoi(arg), 0, NUM_MATERIALS));
     break;
 
   case OEDIT_PERM:
@@ -1380,7 +1382,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     if (number > 0 && number <= NUM_AFF_FLAGS) {
       /* Setting AFF_CHARM on objects like this is dangerous. */
       if (number != AFF_CHARM) {
-        TOGGLE_BIT_AR(GET_OBJ_PERM(OLC_OBJ(d)), number);
+        TOGGLE_BIT_AR(obj_get_bitvector(OLC_OBJ(d)), number);
       }
     } 
     oedit_disp_perm_menu(d);
@@ -1388,7 +1390,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
 
   case OEDIT_SIZE:
     number = atoi(arg) - 1;
-    GET_OBJ_SIZE(OLC_OBJ(d)) = LIMIT(number, 0, NUM_SIZES - 1);
+    obj_set_size(OLC_OBJ(d), LIMIT(number, 0, NUM_SIZES - 1));
     break;
 
   case OEDIT_VALUE_1:
@@ -1396,15 +1398,15 @@ void oedit_parse(struct descriptor_data *d, char *arg)
      * Lucky, I don't need to check any of these for out of range values.
      * Hmm, I'm not so sure - Rv  
      */
-    switch (GET_OBJ_TYPE(OLC_OBJ(d))) {
+    switch (obj_get_type_flag(OLC_OBJ(d))) {
       case ITEM_WEAPON:
-        GET_OBJ_VAL(OLC_OBJ(d), 0) = LIMIT(atoi(arg), WEAPON_TYPE_UNARMED, MAX_WEAPON_TYPES); 
+        obj_set_value(OLC_OBJ(d), 0, LIMIT(atoi(arg), WEAPON_TYPE_UNARMED, MAX_WEAPON_TYPES)); 
         break;
       case ITEM_CONTAINER:
-        GET_OBJ_VAL(OLC_OBJ(d), 0) = LIMIT(atoi(arg), -1, MAX_CONTAINER_SIZE); 
+        obj_set_value(OLC_OBJ(d), 0, LIMIT(atoi(arg), -1, MAX_CONTAINER_SIZE)); 
         break;
       default:
-    GET_OBJ_VAL(OLC_OBJ(d), 0) = atoi(arg);
+    obj_set_value(OLC_OBJ(d), 0, atoi(arg));
     }
     /*
      * proceed to menu 2 
@@ -1416,22 +1418,22 @@ void oedit_parse(struct descriptor_data *d, char *arg)
      * Here, I do need to check for out of range values.
      */
     number = atoi(arg);
-    switch (GET_OBJ_TYPE(OLC_OBJ(d))) {
+    switch (obj_get_type_flag(OLC_OBJ(d))) {
     case ITEM_SCROLL:
     case ITEM_POTION:
       if (number == 0 || number == -1)
-	GET_OBJ_VAL(OLC_OBJ(d), 1) = -1;
+	obj_set_value(OLC_OBJ(d), 1, -1);
       else
-        GET_OBJ_VAL(OLC_OBJ(d), 1) = LIMIT(number, 1, SKILL_TABLE_SIZE);
+        obj_set_value(OLC_OBJ(d), 1, LIMIT(number, 1, SKILL_TABLE_SIZE));
 	oedit_disp_val3_menu(d);
       break;
     case ITEM_CONTROL:
       if (number <= 0)
-       GET_OBJ_VAL(OLC_OBJ(d), 1) = 1;
+       obj_set_value(OLC_OBJ(d), 1, 1);
       else if (number > 3)
-       GET_OBJ_VAL(OLC_OBJ(d), 1) = 3;
+       obj_set_value(OLC_OBJ(d), 1, 3);
       else
-       GET_OBJ_VAL(OLC_OBJ(d), 1) = number;
+       obj_set_value(OLC_OBJ(d), 1, number);
       oedit_disp_val5_menu(d);
      break;
     case ITEM_CONTAINER:
@@ -1446,19 +1448,19 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       if (number < 0 || number > 4)
 	oedit_disp_container_flags_menu(d);
       else if (number != 0) {
-        TOGGLE_BIT(GET_OBJ_VAL(OLC_OBJ(d), 1), 1U << (number - 1));
+        obj_set_value(OLC_OBJ(d), 1, obj_get_value(OLC_OBJ(d), 1) ^ (1U << (number - 1)));
         OLC_VAL(d) = 1;
 	oedit_disp_val2_menu(d);
       } else
 	oedit_disp_val3_menu(d);
       break;
     case ITEM_WEAPON:
-      GET_OBJ_VAL(OLC_OBJ(d), 1) = LIMIT(number, 1, MAX_WEAPON_NDICE); 
+      obj_set_value(OLC_OBJ(d), 1, LIMIT(number, 1, MAX_WEAPON_NDICE)); 
       oedit_disp_val3_menu(d);
       break;
 
     default:
-      GET_OBJ_VAL(OLC_OBJ(d), 1) = number;
+      obj_set_value(OLC_OBJ(d), 1, number);
       oedit_disp_val3_menu(d);
     }
     return;
@@ -1468,7 +1470,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     /*
      * Quick'n'easy error checking.
      */
-    switch (GET_OBJ_TYPE(OLC_OBJ(d))) {
+    switch (obj_get_type_flag(OLC_OBJ(d))) {
     case ITEM_WEAPON:
       min_val = 1;
       max_val = MAX_WEAPON_SDICE;
@@ -1494,13 +1496,13 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       min_val = -32000;
       max_val = 60000;
     }
-    GET_OBJ_VAL(OLC_OBJ(d), 2) = LIMIT(number, min_val, max_val);
+    obj_set_value(OLC_OBJ(d), 2, LIMIT(number, min_val, max_val));
     oedit_disp_val4_menu(d);
     return;
 
   case OEDIT_VALUE_4:
     number = atoi(arg);
-    switch (GET_OBJ_TYPE(OLC_OBJ(d))) {
+    switch (obj_get_type_flag(OLC_OBJ(d))) {
     case ITEM_HATCH:
       min_val = 1;
       max_val = 60000;
@@ -1525,21 +1527,21 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       max_val = 32000;
       break;
     }
-    GET_OBJ_VAL(OLC_OBJ(d), 3) = LIMIT(number, min_val, max_val);
+    obj_set_value(OLC_OBJ(d), 3, LIMIT(number, min_val, max_val));
     oedit_disp_val5_menu(d);
     return;
 
   case OEDIT_VALUE_5:
     min_val = 1;
     max_val = 100;
-    GET_OBJ_VAL(OLC_OBJ(d), 4) = LIMIT(atoi(arg), min_val, max_val);
-    GET_OBJ_VAL(OLC_OBJ(d), 5) = max_val;
+    obj_set_value(OLC_OBJ(d), 4, LIMIT(atoi(arg), min_val, max_val));
+    obj_set_value(OLC_OBJ(d), 5, max_val);
     oedit_disp_val7_menu(d);
     return;
 
   case OEDIT_VALUE_7:
     number = atoi(arg);
-    switch (GET_OBJ_TYPE(OLC_OBJ(d))) {
+    switch (obj_get_type_flag(OLC_OBJ(d))) {
     case ITEM_WEAPON:
       min_val = 0;
       max_val = MAX_CRIT_TYPE;
@@ -1553,13 +1555,13 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       max_val = 32000;
       break;
     }
-    GET_OBJ_VAL(OLC_OBJ(d), 6) = LIMIT(atoi(arg), min_val, max_val);
+    obj_set_value(OLC_OBJ(d), 6, LIMIT(atoi(arg), min_val, max_val));
     oedit_disp_val9_menu(d);
     return;
 
   case OEDIT_VALUE_9:
     number = atoi(arg);
-    switch (GET_OBJ_TYPE(OLC_OBJ(d))) {
+    switch (obj_get_type_flag(OLC_OBJ(d))) {
     case ITEM_WEAPON:
       min_val = 0;
       max_val = 19;
@@ -1569,7 +1571,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       max_val = 32000;
       break;
     }
-    GET_OBJ_VAL(OLC_OBJ(d), 8) = LIMIT(atoi(arg), min_val, max_val);
+    obj_set_value(OLC_OBJ(d), 8, LIMIT(atoi(arg), min_val, max_val));
   break;
 
   case OEDIT_PROMPT_APPLY:
@@ -1595,7 +1597,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       int counter;
 
       /* add in check here if already applied.. deny builders another */
-      if (GET_ADMLEVEL(d->character) < ADMLVL_GRGOD) {
+      if (char_get_admlevel(d->character) < ADMLVL_GRGOD) {
         for (counter = 0; counter < MAX_OBJ_AFFECT; counter++) {
           if (OLC_OBJ(d)->affected[counter].location == number) {
             write_to_output(d, "Object already has that apply.");
@@ -1794,7 +1796,7 @@ void iedit_setup_existing(struct descriptor_data *d, struct obj_data *real_num)
     extract_script(obj, OBJ_TRIGGER);
   SCRIPT(obj) = NULL;
   /* find_obj helper */
-  remove_from_lookup_table(GET_ID(obj));
+  remove_from_lookup_table(obj_get_id(obj));
 
   OLC_OBJ(d) = obj;
   OLC_IOBJ(d) = real_num;
@@ -1818,7 +1820,7 @@ ACMD(do_iedit) {
     found=1;
   } else if ((k = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
     found=1;
-  } else if ((k = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+  } else if ((k = get_obj_in_list_vis(ch, arg, NULL, world[char_get_in_room(ch)].contents))) {
     found =1;
   } else if ((k = get_obj_vis(ch, arg, NULL))) {
     found=1;
@@ -1831,15 +1833,15 @@ ACMD(do_iedit) {
 
                 /* set up here */
   CREATE(OLC(ch->desc), struct oasis_olc_data, 1);
-  SET_BIT_AR(GET_OBJ_EXTRA(k), ITEM_UNIQUE_SAVE);
+  SET_BIT_AR(obj_get_extra_flags(k), ITEM_UNIQUE_SAVE);
 
-  SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
   iedit_setup_existing(ch->desc,k);
   OLC_VAL(ch->desc) = 0;
 
   act("$n starts using OLC.", TRUE, ch, 0, 0, TO_ROOM);
 
-  STATE(ch->desc) = CON_IEDIT;
+  desc_set_connected(ch->desc, CON_IEDIT);
 
   return;
 }

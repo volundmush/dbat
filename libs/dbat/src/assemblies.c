@@ -277,7 +277,7 @@ bool assemblyCheckComponents( long lVnum, struct char_data *pCharacter, int extr
       if( pAssembly->pComponents[ i ].bInRoom )
       {
        if((ppComponentObjects[ i ] = get_obj_in_list_num( lRnum,
-         world[ IN_ROOM( pCharacter ) ].contents )) == NULL )
+         world[ char_get_in_room(pCharacter) ].contents )) == NULL )
          bOk = FALSE;
         else {
           obj_from_room( ppComponentObjects[ i ] );
@@ -303,7 +303,7 @@ bool assemblyCheckComponents( long lVnum, struct char_data *pCharacter, int extr
     if( pAssembly->pComponents[ i ].bExtract && bOk && extract_yes == TRUE)
       extract_obj( ppComponentObjects[ i ] );
     else if( pAssembly->pComponents[ i ].bInRoom )
-      obj_to_room( ppComponentObjects[ i ], IN_ROOM( pCharacter ) );
+      obj_to_room( ppComponentObjects[ i ], char_get_in_room(pCharacter) );
     else
       obj_to_char( ppComponentObjects[ i ], pCharacter );
   }

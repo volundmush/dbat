@@ -42,8 +42,8 @@ void affect_update(void)
 	  if (!af->next || (af->next->type != af->type) || (af->next->duration > 0)) {
 	    if (spell_info[af->type].wear_off_msg)
 	      send_to_char(i, "%s\r\n", spell_info[af->type].wear_off_msg);
-            if (GET_SPEEDBOOST(i) > 0 && af->type == SPELL_HAYASA) {
-             GET_SPEEDBOOST(i) = 0;
+            if (char_get_speedboost(i) > 0 && af->type == SPELL_HAYASA) {
+             char_set_speedboost(i, 0);
             }
           }
 	affect_remove(i, af);
@@ -256,16 +256,16 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
 
   } /* switch(spellnum) */
 
-  if (mag_newsaves(ch, victim, spellnum, level, GET_INT(ch))) {
+  if (mag_newsaves(ch, victim, spellnum, level, char_get_aff_abils_intel(ch))) {
     if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_NONE)) {
       send_to_char(victim, "@g*save*@y You avoid any injury.@n\r\n");
       dam = 0;
     } else if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_HALF)) {
       if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_REFLEX) &&
-          HAS_FEAT(victim, FEAT_EVASION) && 
-          (!GET_EQ(victim, WEAR_BODY) ||
-          GET_OBJ_TYPE(GET_EQ(victim, WEAR_BODY)) != ITEM_ARMOR ||
-          GET_OBJ_VAL(GET_EQ(victim, WEAR_BODY), VAL_ARMOR_SKILL) < ARMOR_TYPE_MEDIUM)) {
+          char_get_feats(victim, FEAT_EVASION) && 
+          (!char_get_equipment(victim, WEAR_BODY) ||
+          obj_get_type_flag(char_get_equipment(victim, WEAR_BODY)) != ITEM_ARMOR ||
+          obj_get_value(char_get_equipment(victim, WEAR_BODY), VAL_ARMOR_SKILL) < ARMOR_TYPE_MEDIUM)) {
         send_to_char(victim, "@g*save*@y Your evasion ability allows you to avoid ANY injury.@n\r\n");
         dam = 0;
       } else {
@@ -275,10 +275,10 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
     }
   } else if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_HALF) &&
              IS_SET(spell_info[spellnum].save_flags, MAGSAVE_REFLEX) &&
-             HAS_FEAT(victim, FEAT_IMPROVED_EVASION) && 
-             (!GET_EQ(victim, WEAR_BODY) ||
-              GET_OBJ_TYPE(GET_EQ(victim, WEAR_BODY)) != ITEM_ARMOR ||
-              GET_OBJ_VAL(GET_EQ(victim, WEAR_BODY), VAL_ARMOR_SKILL) < ARMOR_TYPE_MEDIUM)) {
+             char_get_feats(victim, FEAT_IMPROVED_EVASION) && 
+             (!char_get_equipment(victim, WEAR_BODY) ||
+              obj_get_type_flag(char_get_equipment(victim, WEAR_BODY)) != ITEM_ARMOR ||
+              obj_get_value(char_get_equipment(victim, WEAR_BODY), VAL_ARMOR_SKILL) < ARMOR_TYPE_MEDIUM)) {
     send_to_char(victim, "@r*save*@y Your improved evasion prevents full damage even on failure.@n\r\n");
     dam /= 2;
   }
@@ -317,7 +317,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
     af[i].location = APPLY_NONE;
   }
 
-  if (mag_newsaves(ch, victim, spellnum, level, GET_INT(ch))) {
+  if (mag_newsaves(ch, victim, spellnum, level, char_get_aff_abils_intel(ch))) {
     if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_PARTIAL | MAGSAVE_NONE)) {
       send_to_char(victim, "@g*save*@y You avoid any lasting affects.@n\r\n");
       return;
@@ -495,10 +495,10 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
     af[0].duration = 4 + (level / 4);
     af[0].bitvector = AFF_SLEEP;
 
-    if (GET_POS(victim) > POS_SLEEPING) {
+    if (char_get_position(victim) > POS_SLEEPING) {
       send_to_char(victim, "You feel very sleepy...  Zzzz......\r\n");
       act("$n goes to sleep.", TRUE, victim, 0, 0, TO_ROOM);
-      GET_POS(victim) = POS_SLEEPING;
+      char_set_position(victim, POS_SLEEPING);
     }
     break;
 
@@ -511,10 +511,10 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
     af[0].duration = 4 + (level / 4);
     af[0].bitvector = AFF_SLEEP;
 
-    if (GET_POS(victim) > POS_SLEEPING) {
+    if (char_get_position(victim) > POS_SLEEPING) {
       send_to_char(victim, "You feel very sleepy...  Zzzz......\r\n");
       act("$n goes to sleep.", TRUE, victim, 0, 0, TO_ROOM);
-      GET_POS(victim) = POS_SLEEPING;
+      char_set_position(victim, POS_SLEEPING);
     }
     break;
 
@@ -630,7 +630,7 @@ void mag_groups(int level, struct char_data *ch, int spellnum)
   for (f = k->followers; f; f = f_next) {
     f_next = f->next;
     tch = f->follower;
-    if (IN_ROOM(tch) != IN_ROOM(ch))
+    if (char_get_in_room(tch) != char_get_in_room(ch))
       continue;
     if (!char_aff_flagged(tch, AFF_GROUP))
       continue;
@@ -654,7 +654,7 @@ void mag_masses(int level, struct char_data *ch, int spellnum)
 {
   struct char_data *tch, *tch_next;
 
-  for (tch = world[IN_ROOM(ch)].people; tch; tch = tch_next) {
+  for (tch = world[char_get_in_room(ch)].people; tch; tch = tch_next) {
     tch_next = tch->next_in_room;
     if (tch == ch)
       continue;
@@ -698,7 +698,7 @@ void mag_areas(int level, struct char_data *ch, int spellnum)
     act(to_room, FALSE, ch, 0, 0, TO_ROOM);
   
 
-  for (tch = world[IN_ROOM(ch)].people; tch; tch = next_tch) {
+  for (tch = world[char_get_in_room(ch)].people; tch; tch = next_tch) {
     next_tch = tch->next_in_room;
 
     /*
@@ -967,21 +967,21 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
       send_to_char(ch, "You don't quite remember how to summon that creature.\r\n");
       return;
     }
-    char_to_room(mob, IN_ROOM(ch));
+    char_to_room(mob, char_get_in_room(ch));
     if (affs)
       mag_affects(level, ch, mob, spellnum);
     if (affvs)
       mag_affectsv(level, ch, mob, spellnum);
-    IS_CARRYING_W(mob) = 0;
-    IS_CARRYING_N(mob) = 0;
-    SET_BIT_AR(AFF_FLAGS(mob), AFF_CHARM);
+    char_set_carry_weight(mob, 0);
+    char_set_carry_items(mob, 0);
+    SET_BIT_AR(char_get_affected_by(mob), AFF_CHARM);
     act(mag_summon_msgs[msg], FALSE, ch, 0, mob, TO_ROOM);
     load_mtrigger(mob);
     add_follower(mob, ch);
-    if (assist && FIGHTING(ch)) {
-      set_fighting(mob, FIGHTING(ch));
+    if (assist && char_get_fighting(ch)) {
+      set_fighting(mob, char_get_fighting(ch));
     }
-    mob->master_id = GET_IDNUM(ch);
+    mob->master_id = char_get_idnum(ch);
   }
   if (handle_corpse) {
     for (tobj = obj->contains; tobj; tobj = next_obj) {
@@ -1030,13 +1030,13 @@ void mag_points(int level, struct char_data *ch, struct char_data *victim,
   case ART_WHOLENESS_OF_BODY:
     healing = GET_MAX_HIT(victim) - GET_HIT(victim);
     healing = MAX(0, healing);
-    tmp = GET_KI(ch) / 2;
+    tmp = char_get_ki(ch) / 2;
     if (tmp > healing)
       tmp = healing;
     else {
       healing = tmp;
     }
-    GET_KI(ch) -= tmp * 2;
+    char_set_ki(ch, char_get_ki(ch) - (tmp * 2));
     break;
   }
   update_pos(victim);
@@ -1104,38 +1104,38 @@ void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
   switch (spellnum) {
     case SPELL_BLESS:
       if (!obj_flagged(obj, ITEM_BLESS) &&
-	  (GET_OBJ_WEIGHT(obj) <= 5 * level)) {
-	SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BLESS);
+	  (obj_get_weight(obj) <= 5 * level)) {
+	SET_BIT_AR(obj_get_extra_flags(obj), ITEM_BLESS);
 	to_char = "$p glows briefly.";
       }
       break;
     case SPELL_INVISIBLE:
       if (!obj_flagged(obj, ITEM_NOINVIS | ITEM_INVISIBLE)) {
-        SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_INVISIBLE);
+        SET_BIT_AR(obj_get_extra_flags(obj), ITEM_INVISIBLE);
         to_char = "$p vanishes.";
       }
       break;
     case SPELL_POISON:
-      if (((GET_OBJ_TYPE(obj) == ITEM_DRINKCON) ||
-         (GET_OBJ_TYPE(obj) == ITEM_FOUNTAIN) ||
-         (GET_OBJ_TYPE(obj) == ITEM_FOOD)) && !GET_OBJ_VAL(obj, VAL_FOOD_POISON)) {
-      GET_OBJ_VAL(obj, VAL_FOOD_POISON) = 1;
+      if (((obj_get_type_flag(obj) == ITEM_DRINKCON) ||
+         (obj_get_type_flag(obj) == ITEM_FOUNTAIN) ||
+         (obj_get_type_flag(obj) == ITEM_FOOD)) && !obj_get_value(obj, VAL_FOOD_POISON)) {
+      obj_set_value(obj, VAL_FOOD_POISON, 1);
       to_char = "$p steams briefly.";
       }
       break;
     case SPELL_REMOVE_CURSE:
       if (obj_flagged(obj, ITEM_NODROP)) {
-        REMOVE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_NODROP);
-        if (GET_OBJ_TYPE(obj) == ITEM_WEAPON)
-          GET_OBJ_VAL(obj, VAL_WEAPON_DAMSIZE)++;
+        REMOVE_BIT_AR(obj_get_extra_flags(obj), ITEM_NODROP);
+        if (obj_get_type_flag(obj) == ITEM_WEAPON)
+          obj_set_value(obj, VAL_WEAPON_DAMSIZE, obj_get_value(obj, VAL_WEAPON_DAMSIZE) + 1);
         to_char = "$p briefly glows blue.";
       }
       break;
     case SPELL_NEUTRALIZE_POISON:
-      if (((GET_OBJ_TYPE(obj) == ITEM_DRINKCON) ||
-         (GET_OBJ_TYPE(obj) == ITEM_FOUNTAIN) ||
-         (GET_OBJ_TYPE(obj) == ITEM_FOOD)) && GET_OBJ_VAL(obj, VAL_FOOD_POISON)) {
-        GET_OBJ_VAL(obj, VAL_FOOD_POISON) = 0;
+      if (((obj_get_type_flag(obj) == ITEM_DRINKCON) ||
+         (obj_get_type_flag(obj) == ITEM_FOUNTAIN) ||
+         (obj_get_type_flag(obj) == ITEM_FOOD)) && obj_get_value(obj, VAL_FOOD_POISON)) {
+        obj_set_value(obj, VAL_FOOD_POISON, 0);
         to_char = "$p steams briefly.";
       }
       break;
@@ -1201,8 +1201,8 @@ void affect_update_violence(void)
         af->duration--;
         switch (af->type) {
         case ART_EMPTY_BODY:
-          if (GET_KI(i) >= 10) {
-            GET_KI(i) -= 10;
+          if (char_get_ki(i) >= 10) {
+            char_set_ki(i, char_get_ki(i) - (10));
           } else {
             af->duration = 0; /* Wear it off immediately! No more ki */
           }
@@ -1253,7 +1253,7 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
     af[i].location = APPLY_NONE;
   }
 
-  if (mag_newsaves(ch, victim, spellnum, level, GET_INT(ch))) {
+  if (mag_newsaves(ch, victim, spellnum, level, char_get_aff_abils_intel(ch))) {
     if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_PARTIAL | MAGSAVE_NONE)) {
       send_to_char(victim, "@g*save*@y You avoid any lasting affects.@n\r\n");
       return;
@@ -1276,7 +1276,7 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
     to_room = "$n is stunned.";
     break;
   case ART_EMPTY_BODY:
-    af[0].duration = GET_KI(ch) / 10;
+    af[0].duration = char_get_ki(ch) / 10;
     af[0].bitvector = AFF_ETHEREAL;
     accum_duration = FALSE;
     to_vict = "You switch to the ethereal plane.";
@@ -1301,7 +1301,7 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
     to_room = "$n glows briefly with a silvery light.";
     break;
   case SPELL_DAZE:
-    if (GET_HITDICE(victim) < 5)
+    if (char_get_race_level(victim) < 5)
       af[0].bitvector = AFF_NEXTNOACTION;
       accum_duration = FALSE;
       to_vict = "You are struck dumb by a flash of bright light!";

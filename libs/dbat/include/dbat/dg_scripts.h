@@ -249,5 +249,7 @@ room_rnum obj_room(obj_data *obj);
 				  !GET_TRIG_DEPTH(t))
 
 #define ADD_UID_VAR(buf, trig, go, name, context) do { \
-		         sprintf(buf, "%c%d", UID_CHAR, GET_ID(go)); \
+		         sprintf(buf, "%c%d", UID_CHAR, \
+		                 _Generic((go), struct char_data *: char_get_id, const struct char_data *: char_get_id, \
+		                          struct obj_data *: obj_get_id, const struct obj_data *: obj_get_id)(go)); \
                          add_var(&GET_TRIG_VARS(trig), name, buf, context); } while (0)

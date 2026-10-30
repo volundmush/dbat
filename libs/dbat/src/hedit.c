@@ -38,7 +38,7 @@ ACMD(do_oasis_hedit)
   struct descriptor_data *d;
 
   /* No building as a mob or while being forced. */
-  if (char_is_npc(ch) || !ch->desc || STATE(ch->desc) != CON_PLAYING)
+  if (char_is_npc(ch) || !ch->desc || desc_get_connected(ch->desc) != CON_PLAYING)
     return;
 
   if (HEDITS == TRUE) {
@@ -46,7 +46,7 @@ ACMD(do_oasis_hedit)
    return;
   }
   
-  if (GET_ADMLEVEL(ch) < 4 && (!strcasecmp("Tepsih", char_get_name(ch)) && !strcasecmp("Rogoshen", char_get_name(ch)))) {
+  if (char_get_admlevel(ch) < 4 && (!strcasecmp("Tepsih", char_get_name(ch)) && !strcasecmp("Rogoshen", char_get_name(ch)))) {
    send_to_char(ch, "Sorry you are incapable of editing help files at this time.\r\n");
    return;
   }
@@ -87,11 +87,11 @@ ACMD(do_oasis_hedit)
     OLC_MODE(d) = HEDIT_CONFIRM_EDIT;
   }
 
-  STATE(d) = CON_HEDIT;
+  desc_set_connected(d, CON_HEDIT);
   /*send_to_room(IN_ROOM(ch), "%s starts using OLC.\r\n", GET_NAME(ch));*/
   act("$n starts using OLC.", TRUE, ch, 0, 0, TO_ROOM);
   HEDITS = TRUE;
-  SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
   mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing help files.", char_get_name(ch));
 }
 
@@ -452,7 +452,7 @@ ACMD(do_hindex)
     for (i = 0; i < top_of_helpt; i++) {
      num++;
     }
-    if (num > 0 && GET_ADMLEVEL(ch) > 0) {
+    if (num > 0 && char_get_admlevel(ch) > 0) {
      send_to_char(ch, "\r\n@D[@Y%d@y Help files in index.@D]@n\r\n", num);
     }
     return;
@@ -462,7 +462,7 @@ ACMD(do_hindex)
   for (i = 0; i < top_of_helpt; i++) {
     num++;
     if (is_abbrev(argument, help_table[i].keywords)
-        && (GET_ADMLEVEL(ch) >= help_table[i].min_level))
+        && (char_get_admlevel(ch) >= help_table[i].min_level))
       len +=
           snprintf(buf + len, sizeof(buf) - len, "%-20.20s%s", help_table[i].keywords,
                    (++count % 3 ? "" : "\r\n"));
@@ -473,7 +473,7 @@ ACMD(do_hindex)
     if (!count)
       len += snprintf(buf + len, sizeof(buf) - len, "  None.\r\n");
 
-  if (count > 0 && GET_ADMLEVEL(ch) > 0) {
+  if (count > 0 && char_get_admlevel(ch) > 0) {
          len += snprintf(buf + len, sizeof(buf) - len, "  %d Help files in index.\r\n", count);
   }
   page_string(ch->desc, buf, TRUE);

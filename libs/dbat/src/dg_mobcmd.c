@@ -100,7 +100,7 @@ void mob_log(char_data *mob, const char *format, ...)
 ** macro to determine if a mob is permitted to use these commands
 */
 #define MOB_OR_IMPL(ch) \
-  (char_is_npc(ch) && (!(ch)->desc || GET_ADMLEVEL((ch)->desc->original)>=ADMLVL_IMPL))
+  (char_is_npc(ch) && (!(ch)->desc || char_get_admlevel((ch)->desc->original)>=ADMLVL_IMPL))
 
 /* mob commands */
 
@@ -127,7 +127,7 @@ ACMD(do_masound)
 
     skip_spaces(&argument);
 
-    was_in_room = IN_ROOM(ch);
+    was_in_room = char_get_in_room(ch);
     for (door = 0; door < NUM_OF_DIRS; door++)
     {
         struct room_direction_data *newexit;
@@ -135,12 +135,12 @@ ACMD(do_masound)
         if (((newexit = world[was_in_room].dir_option[door]) != NULL) &&
             newexit->to_room != NOWHERE && newexit->to_room != was_in_room)
         {
-            IN_ROOM(ch) = newexit->to_room;
+            char_set_in_room(ch, newexit->to_room);
             sub_write(argument, ch, TRUE, TO_ROOM);
         }
     }
 
-    IN_ROOM(ch) = was_in_room;
+    char_set_in_room(ch, was_in_room);
 }
 
 /* Heals a stat of the mob */
@@ -448,7 +448,7 @@ ACMD(do_mload)
     if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
-    if( ch->desc && GET_ADMLEVEL(ch->desc->original) < ADMLVL_IMPL)
+    if( ch->desc && char_get_admlevel(ch->desc->original) < ADMLVL_IMPL)
         return;
 
     target = two_arguments(argument, arg1, arg2);
@@ -462,7 +462,7 @@ ACMD(do_mload)
     if (is_abbrev(arg1, "mob")) {
       room_rnum rnum;
       if (!target || !*target) {
-        rnum = IN_ROOM(ch);
+        rnum = char_get_in_room(ch);
       } else {
         if (!isdigit(*target) || (rnum = real_room(atoi(target))) == NOWHERE) {
           mob_log(ch, "mload: room target vnum doesn't exist "
@@ -477,7 +477,7 @@ ACMD(do_mload)
       char_to_room(mob, rnum);
       if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
         char buf[MAX_INPUT_LENGTH];
-        sprintf(buf, "%c%d", UID_CHAR, GET_ID(mob));
+        sprintf(buf, "%c%d", UID_CHAR, char_get_id(mob));
         add_var(&(SCRIPT(ch)->global_vars), "lastloaded", buf, 0);
       }
       load_mtrigger(mob);
@@ -490,7 +490,7 @@ ACMD(do_mload)
       }
       if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
         char buf[MAX_INPUT_LENGTH];
-        sprintf(buf, "%c%d", UID_CHAR, GET_ID(object));
+        sprintf(buf, "%c%d", UID_CHAR, obj_get_id(object));
         add_var(&(SCRIPT(ch)->global_vars), "lastloaded", buf, 0);
       }
       randomize_eq(object);
@@ -500,7 +500,7 @@ ACMD(do_mload)
         if (obj_can_wear(object, ITEM_WEAR_TAKE)) {
             obj_to_char(object, ch);
         } else {
-            obj_to_room(object, IN_ROOM(ch));
+            obj_to_room(object, char_get_in_room(ch));
         }
         load_otrigger(object);
         return;
@@ -510,7 +510,7 @@ ACMD(do_mload)
       if (tch) {
         if (arg2 != NULL && *arg2 &&
             (pos = find_eq_pos_script(arg2)) >= 0 &&
-            !GET_EQ(tch, pos) &&
+            !char_get_equipment(tch, pos) &&
             can_wear_on_pos(object, pos)) {
           equip_char(tch, object, pos);
           load_otrigger(object);
@@ -521,14 +521,14 @@ ACMD(do_mload)
         return;
       }
       cnt = (arg1 != NULL && *arg1 == UID_CHAR) ? get_obj(arg1) : get_obj_vis(ch, arg1, NULL);
-      if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
+      if (cnt && obj_get_type_flag(cnt) == ITEM_CONTAINER) {
       	obj_to_obj(object, cnt);
         load_otrigger(object);
       	return;
       }
       /* neither char nor container found - just dump it in room */
       add_unique_id(object);
-      obj_to_room(object, IN_ROOM(ch));
+      obj_to_room(object, char_get_in_room(ch));
       load_otrigger(object);
       return;
     }
@@ -557,7 +557,7 @@ ACMD(do_mpurge)
   if (char_aff_flagged(ch, AFF_CHARM))
     return;
 
-  if (ch->desc && (GET_ADMLEVEL(ch->desc->original) < ADMLVL_IMPL))
+  if (ch->desc && (char_get_admlevel(ch->desc->original) < ADMLVL_IMPL))
     return;
 
   one_argument(argument, arg);
@@ -567,13 +567,13 @@ ACMD(do_mpurge)
     char_data *vnext;
     obj_data  *obj_next;
 
-    for (victim = world[IN_ROOM(ch)].people; victim; victim = vnext) {
+    for (victim = world[char_get_in_room(ch)].people; victim; victim = vnext) {
       vnext = victim->next_in_room;
       if (char_is_npc(victim) && victim != ch)
         extract_char(victim);
     }
 
-    for (obj = world[IN_ROOM(ch)].contents; obj; obj = obj_next) {
+    for (obj = world[char_get_in_room(ch)].contents; obj; obj = obj_next) {
       obj_next = obj->next_content;
       extract_obj(obj);
     }
@@ -639,12 +639,12 @@ ACMD(do_mgoto)
      return;
     }
 
-    if (FIGHTING(ch))
+    if (char_get_fighting(ch))
         stop_fighting(ch);
 
     char_from_room(ch);
     char_to_room(ch, location);
-    enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+    enter_wtrigger(&world[char_get_in_room(ch)], ch, -1);
 }
 
 
@@ -674,13 +674,13 @@ ACMD(do_mat)
         return;
     }
 
-    original = IN_ROOM(ch);
+    original = char_get_in_room(ch);
     char_from_room(ch);
     char_to_room(ch, location);
     command_interpreter(ch, argument);
 
     /* See if 'ch' still exists before continuing! Handles 'at XXXX quit' case. */
-    if (IN_ROOM(ch) == location) {
+    if (char_get_in_room(ch) == location) {
         char_from_room(ch);
         char_to_room(ch, original);
     }
@@ -720,18 +720,18 @@ ACMD(do_mteleport)
   }
 
   if (!strcasecmp(arg1, "all")) {
-    if (target == IN_ROOM(ch)) {
+    if (target == char_get_in_room(ch)) {
       mob_log(ch, "mteleport all target is itself");
       return;
     }
 
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = next_ch) {
+    for (vict = world[char_get_in_room(ch)].people; vict; vict = next_ch) {
       next_ch = vict->next_in_room;
 
       if (valid_dg_target(vict, DG_ALLOW_GODS)) {
         char_from_room(vict);
         char_to_room(vict, target);
-        enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+        enter_wtrigger(&world[char_get_in_room(ch)], ch, -1);
       }
     }
   } else {
@@ -748,7 +748,7 @@ ACMD(do_mteleport)
     if (valid_dg_target(ch, DG_ALLOW_GODS)) {
       char_from_room(vict);
       char_to_room(vict, target);
-      enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+      enter_wtrigger(&world[char_get_in_room(ch)], ch, -1);
     }
   }
 }
@@ -804,7 +804,7 @@ ACMD(do_mforce)
     if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
-    if (ch->desc && (GET_ADMLEVEL(ch->desc->original) < ADMLVL_IMPL))
+    if (ch->desc && (char_get_admlevel(ch->desc->original) < ADMLVL_IMPL))
         return;
 
     argument = one_argument(argument, arg);
@@ -822,7 +822,7 @@ ACMD(do_mforce)
           if(!i->character) continue;
           
             if ((i->character != ch) && !i->connected &&
-                (IN_ROOM(i->character) == IN_ROOM(ch))) {
+                (char_get_in_room(i->character) == char_get_in_room(ch))) {
                 vch = i->character;
                 if (char_get_level(vch) < char_get_level(ch) && char_can_see(ch, vch) &&
                     valid_dg_target(vch, 0)) {
@@ -869,7 +869,7 @@ ACMD(do_mremember)
     if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
-    if (ch->desc && (GET_ADMLEVEL(ch->desc->original) < ADMLVL_IMPL))
+    if (ch->desc && (char_get_admlevel(ch->desc->original) < ADMLVL_IMPL))
         return;
 
     argument = one_argument(argument, arg);
@@ -899,7 +899,7 @@ ACMD(do_mremember)
     }
 
     /* fill in the structure */
-    mem->id = GET_ID(victim);
+    mem->id = char_get_id(victim);
     if (argument && *argument) {
       mem->cmd = strdup(argument);
     }
@@ -921,7 +921,7 @@ ACMD(do_mforget)
     if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
-    if (ch->desc && (GET_ADMLEVEL(ch->desc->original) < ADMLVL_IMPL))
+    if (ch->desc && (char_get_admlevel(ch->desc->original) < ADMLVL_IMPL))
         return;
 
     one_argument(argument, arg);
@@ -944,7 +944,7 @@ ACMD(do_mforget)
     mem = SCRIPT_MEM(ch);
     prev = NULL;
     while (mem) {
-      if (mem->id == GET_ID(victim)) {
+      if (mem->id == char_get_id(victim)) {
         if (mem->cmd) free(mem->cmd);
         if (prev==NULL) {
           SCRIPT_MEM(ch) = mem->next;
@@ -969,7 +969,7 @@ ACMD(do_mtransform)
   char arg[MAX_INPUT_LENGTH];
   char_data *m, tmpmob;
   obj_data *obj[NUM_WEARS];
-  mob_rnum this_rnum = GET_MOB_RNUM(ch);
+  mob_rnum this_rnum = char_get_nr(ch);
   int pos;
 
     if (!MOB_OR_IMPL(ch)) {
@@ -1005,14 +1005,14 @@ ACMD(do_mtransform)
     /* move new obj info over to old object and delete new obj */
 
     for (pos = 0; pos < NUM_WEARS; pos++) {
-      if (GET_EQ(ch, pos))
+      if (char_get_equipment(ch, pos))
         obj[pos] = unequip_char(ch, pos);
       else
         obj[pos] = NULL;
     }
 
     /* put the mob in the same room as ch so extract will work */
-    char_to_room(m, IN_ROOM(ch));
+    char_to_room(m, char_get_in_room(ch));
 
     memcpy(&tmpmob, m, sizeof(*m));
 
@@ -1042,12 +1042,12 @@ ACMD(do_mtransform)
     tmpmob.followers = ch->followers;
     tmpmob.master = ch->master;
 
-    GET_WAS_IN(&tmpmob) = GET_WAS_IN(ch);
-    GET_GOLD(&tmpmob) = GET_GOLD(ch);
-    GET_POS(&tmpmob) = GET_POS(ch);
-    IS_CARRYING_W(&tmpmob) = IS_CARRYING_W(ch);
-    IS_CARRYING_N(&tmpmob) = IS_CARRYING_N(ch);
-    FIGHTING(&tmpmob) = FIGHTING(ch);
+    char_set_was_in_room(&tmpmob, char_get_was_in_room(ch));
+    char_set_gold(&tmpmob, char_get_gold(ch));
+    char_set_position(&tmpmob, char_get_position(ch));
+    char_set_carry_weight(&tmpmob, char_get_carry_weight(ch));
+    char_set_carry_items(&tmpmob, char_get_carry_items(ch));
+    char_set_fighting(&tmpmob, char_get_fighting(ch));
     memcpy(ch, &tmpmob, sizeof(*ch));
 
     for (pos = 0; pos < NUM_WEARS; pos++) {

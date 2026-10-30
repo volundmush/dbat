@@ -102,17 +102,17 @@ void restore(char_data *ch, bool announce) {
 
 void resurrect(char_data *ch, int mode) {
     restore(ch, true);
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ETHEREAL);
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SPIRIT);
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_PDEATH);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ETHEREAL);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_SPIRIT);
+    REMOVE_BIT_AR(char_get_act(ch), PLR_PDEATH);
     char_from_room(ch);
-    if (GET_DROOM(ch) != NOWHERE && GET_DROOM(ch) != 0 && GET_DROOM(ch) != 1) {
-        char_to_room(ch, real_room(GET_DROOM(ch)));
+    if (char_get_droom(ch) != NOWHERE && char_get_droom(ch) != 0 && char_get_droom(ch) != 1) {
+        char_to_room(ch, real_room(char_get_droom(ch)));
     }
     else {
         char_to_room(ch, real_room(sensei_start_room(ch->chclass)));
     }
-    look_at_room(IN_ROOM(ch), ch, 0);
+    look_at_room(char_get_in_room(ch), ch, 0);
 
     int dur = 100;
     switch(mode) {
@@ -146,48 +146,48 @@ void resurrect(char_data *ch, int mode) {
             }
         }
     }
-    GET_DTIME(ch) = 0;
+    char_set_deathtime(ch, 0);
     act("$n's body forms in a pool of @Bblue light@n.", TRUE, ch, nullptr, nullptr, TO_ROOM);
 }
 
 void ghostify(char_data *ch) {
     restore(ch, true);
-    SET_BIT_AR(AFF_FLAGS(ch), AFF_SPIRIT);
-    SET_BIT_AR(AFF_FLAGS(ch), AFF_ETHEREAL);
+    SET_BIT_AR(char_get_affected_by(ch), AFF_SPIRIT);
+    SET_BIT_AR(char_get_affected_by(ch), AFF_ETHEREAL);
 
     if (!char_prf_flagged(ch, PRF_LKEEP)) {
         if (char_plr_flagged(ch, PLR_CLLEG)) {
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CLLEG);
+            REMOVE_BIT_AR(char_get_act(ch), PLR_CLLEG);
         }
         if (char_plr_flagged(ch, PLR_CRLEG)) {
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CRLEG);
+            REMOVE_BIT_AR(char_get_act(ch), PLR_CRLEG);
         }
         if (char_plr_flagged(ch, PLR_CRARM)) {
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CRARM);
+            REMOVE_BIT_AR(char_get_act(ch), PLR_CRARM);
         }
         if (char_plr_flagged(ch, PLR_CLARM)) {
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CLARM);
+            REMOVE_BIT_AR(char_get_act(ch), PLR_CLARM);
         }
     }
 
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_KNOCKED);
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SLEEP);
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PARALYZE);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_KNOCKED);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_SLEEP);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_PARALYZE);
 }
 
 void teleport_to(char_data *ch, IDXTYPE rnum) {
     char_from_room(ch);
     char_to_room(ch, real_room(rnum));
-    look_at_room(IN_ROOM(ch), ch, 0);
+    look_at_room(char_get_in_room(ch), ch, 0);
     update_pos(ch);
 }
 
 bool in_room_range(char_data *ch, IDXTYPE low_rnum, IDXTYPE high_rnum) {
-    return rroom_get_vnum(IN_ROOM(ch)) >= low_rnum && rroom_get_vnum(IN_ROOM(ch)) <= high_rnum;
+    return rroom_get_vnum(char_get_in_room(ch)) >= low_rnum && rroom_get_vnum(char_get_in_room(ch)) <= high_rnum;
 }
 
 bool in_past(char_data *ch) {
-    return rroom_flagged(IN_ROOM(ch), ROOM_PAST);
+    return rroom_flagged(char_get_in_room(ch), ROOM_PAST);
 }
 
 bool is_newbie(char_data *ch) {
@@ -288,7 +288,7 @@ bool is_soft_cap(char_data *ch, int64_t type, long double mult) {
 int wearing_android_canister(char_data *ch) {
     if(!char_is_android(ch))
         return 0;
-    struct obj_data* obj = GET_EQ(ch, WEAR_BACKPACK);
+    struct obj_data* obj = char_get_equipment(ch, WEAR_BACKPACK);
     if(!obj)
         return 0;
     switch(obj_get_vnum(obj)) {
@@ -303,8 +303,8 @@ int wearing_android_canister(char_data *ch) {
 
 int calcGravCost(char_data *ch, int64_t num) {
     int cost = 0;
-    if(!can_tolerate_gravity(ch, ROOM_GRAVITY(IN_ROOM(ch))))
-        cost = ROOM_GRAVITY(IN_ROOM(ch)) ^ 2;
+    if(!can_tolerate_gravity(ch, rroom_get_gravity(char_get_in_room(ch))))
+        cost = rroom_get_gravity(char_get_in_room(ch)) ^ 2;
 
     if (!num) {
         if(cost) {
@@ -421,8 +421,8 @@ int64_t getMaxPLTrans(char_data *ch) {
 
 int64_t getMaxPL(char_data *ch) {
     int64_t total = getMaxPLTrans(ch);
-    if(GET_KAIOKEN(ch) > 0) {
-        total += (total / 10) * GET_KAIOKEN(ch);
+    if(char_get_kaioken(ch) > 0) {
+        total += (total / 10) * char_get_kaioken(ch);
     }
     if(char_aff_flagged(ch, AFF_METAMORPH)) {
         total += (total * .6);
@@ -760,12 +760,12 @@ void restoreStatus(char_data *ch, bool announce) {
 }
 
 void setStatusKnockedOut(char_data *ch) {
-    SET_BIT_AR(AFF_FLAGS(ch), AFF_KNOCKED);
+    SET_BIT_AR(char_get_affected_by(ch), AFF_KNOCKED);
     if (char_aff_flagged(ch, AFF_FLYING)) {
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
-        GET_ALT(ch) = 0;
+        REMOVE_BIT_AR(char_get_affected_by(ch), AFF_FLYING);
+        char_set_altitude(ch, 0);
     }
-    GET_POS(ch) = POS_SLEEPING;
+    char_set_position(ch, POS_SLEEPING);
 }
 
 void cureStatusKnockedOut(char_data *ch, bool announce) {
@@ -776,15 +776,15 @@ void cureStatusKnockedOut(char_data *ch, bool announce) {
         }
 
         if (CARRIED_BY(ch)) {
-            if (GET_ALIGNMENT(CARRIED_BY(ch)) > 50) {
+            if (char_get_alignment(CARRIED_BY(ch)) > 50) {
                 carry_drop(CARRIED_BY(ch), 0);
             } else {
                 carry_drop(CARRIED_BY(ch), 1);
             }
         }
 
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_KNOCKED);
-        GET_POS(ch) = POS_SITTING;
+        REMOVE_BIT_AR(char_get_affected_by(ch), AFF_KNOCKED);
+        char_set_position(ch, POS_SITTING);
     }
 }
 
@@ -794,7 +794,7 @@ void cureStatusBurn(char_data *ch, bool announce) {
             send_to_char(ch, "Your burns are healed now.\r\n");
             act("$n@w's burns are now healed.@n", TRUE, ch, 0, 0, TO_ROOM);
         }
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
+        REMOVE_BIT_AR(char_get_affected_by(ch), AFF_BURNED);
     }
 }
 
@@ -815,12 +815,12 @@ void restoreLimbs(char_data *ch, bool announce) {
 
     for(int l = 1; l <= 4; l++) {
         if(announce) {
-            if(GET_LIMBCOND(ch, l) <= 0)
+            if(char_get_limb_condition(ch, (l)-1) <= 0)
                 send_to_char(ch, "Your %s grows back!\r\n", limb_names[l]);
-            else if (GET_LIMBCOND(ch, l) < 50)
+            else if (char_get_limb_condition(ch, (l)-1) < 50)
                 send_to_char(ch, "Your %s is no longer broken!\r\n", limb_names[l]);
         }
-        GET_LIMBCOND(ch, l) = 100;
+        char_set_limb_condition(ch, (l)-1, 100);
     }
 
     char_gain_tail(ch, announce);
@@ -905,15 +905,15 @@ void loseBaseAllPercent(char_data *ch, double amt, bool trans_mult) {
 }
 
 int64_t getMaxCarryWeight(char_data *ch) {
-    return MAX(1L, (getMaxPL(ch) / 200) + (GET_STR(ch) * 50));
+    return MAX(1L, (getMaxPL(ch) / 200) + (char_get_aff_abils_str(ch) * 50));
 }
 
 int64_t getCurGearWeight(char_data *ch) {
     int64_t total_weight = 0;
 
     for (int i = 0; i < NUM_WEARS; i++) {
-        if (GET_EQ(ch, i)) {
-            total_weight += GET_OBJ_WEIGHT(GET_EQ(ch, i));
+        if (char_get_equipment(ch, i)) {
+            total_weight += obj_get_weight(char_get_equipment(ch, i));
         }
     }
     return total_weight;
@@ -943,8 +943,8 @@ bool isWeightedPL(char_data *ch) {
 }
 
 void apply_kaioken(char_data *ch, int times, bool announce) {
-    GET_KAIOKEN(ch) = times;
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
+    char_set_kaioken(ch, times);
+    REMOVE_BIT_AR(char_get_act(ch), PLR_POWERUP);
 
     if(announce) {
         send_to_char(ch, "@rA dark red aura bursts up around your body as you achieve Kaioken x %d!@n\r\n", times);
@@ -953,11 +953,11 @@ void apply_kaioken(char_data *ch, int times, bool announce) {
 }
 
 void remove_kaioken(char_data *ch, int8_t announce) {
-    int8_t kaio = GET_KAIOKEN(ch);
+    int8_t kaio = char_get_kaioken(ch);
     if(!kaio) {
         return;
     }
-    GET_KAIOKEN(ch) = 0;
+    char_set_kaioken(ch, 0);
 
     switch(announce) {
         case 1:
@@ -975,7 +975,7 @@ void dispel_ash(struct char_data *ch)
  struct obj_data *obj, *next_obj, *ash = nullptr;
  int there = FALSE;
 
- for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+ for (obj = world[char_get_in_room(ch)].contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
   if (obj_get_vnum(obj) == 1306) {
    there = TRUE;
@@ -985,20 +985,20 @@ void dispel_ash(struct char_data *ch)
 
  if (ash) {
   int roll = axion_dice(0);
-  if (GET_OBJ_COST(ash) == 3) {
-   if (GET_INT(ch) > roll) {
+  if (obj_get_cost(ash) == 3) {
+   if (char_get_aff_abils_intel(ch) > roll) {
     act("@GYou clear the air with the shockwaves of your power!@n", TRUE, ch, ash, 0, TO_CHAR);
     act("@C$n@G clears the air with the shockwaves of $s power!@n", TRUE, ch, ash, 0, TO_ROOM);
     extract_obj(ash);
    }
-  } else if (GET_OBJ_COST(ash) == 2) {
-   if (GET_INT(ch) + 10 > roll) {
+  } else if (obj_get_cost(ash) == 2) {
+   if (char_get_aff_abils_intel(ch) + 10 > roll) {
     act("@GYou clear the air with the shockwaves of your power!@n", TRUE, ch, ash, 0, TO_CHAR);
     act("@C$n@G clears the air with the shockwaves of $s power!@n", TRUE, ch, ash, 0, TO_ROOM);
     extract_obj(ash);
    }
-  } else if (GET_OBJ_COST(ash) == 1) {
-   if (GET_INT(ch) + 20 > roll) {
+  } else if (obj_get_cost(ash) == 1) {
+   if (char_get_aff_abils_intel(ch) + 20 > roll) {
     act("@GYou clear the air with the shockwaves of your power!@n", TRUE, ch, ash, 0, TO_CHAR);
     act("@C$n@G clears the air with the shockwaves of $s power!@n", TRUE, ch, ash, 0, TO_ROOM);
     extract_obj(ash);
@@ -1090,7 +1090,7 @@ const char *report_party_health(struct char_data *ch)
      if (count == 1) {
       party1 = k->follower;
       plperc1 = (GET_HIT(party1) * 100) / GET_MAX_HIT(party1);
-      kiperc1 = (GET_CHARGE(party1) * 100) / GET_MAX_MANA(party1);
+      kiperc1 = (char_get_charge(party1) * 100) / GET_MAX_MANA(party1);
 
       if (plperc1 >= 80)
        plc1 = 3;
@@ -1121,7 +1121,7 @@ const char *report_party_health(struct char_data *ch)
      } else if (count == 2) {
       party2 = k->follower;
       plperc2 = (GET_HIT(party2) * 100) / GET_MAX_HIT(party2);
-      kiperc2 = (GET_CHARGE(party2) * 100) / GET_MAX_MANA(party2);
+      kiperc2 = (char_get_charge(party2) * 100) / GET_MAX_MANA(party2);
 
       if (plperc2 >= 80)
        plc2 = 3;
@@ -1152,7 +1152,7 @@ const char *report_party_health(struct char_data *ch)
      } else if (count == 3) {
       party3 = k->follower;
       plperc3 = (GET_HIT(party3) * 100) / GET_MAX_HIT(party3);
-      kiperc3 = (GET_CHARGE(party3) * 100) / GET_MAX_MANA(party3);
+      kiperc3 = (char_get_charge(party3) * 100) / GET_MAX_MANA(party3);
 
       if (plperc3 >= 80)
        plc3 = 3;
@@ -1183,7 +1183,7 @@ const char *report_party_health(struct char_data *ch)
      } else if (count == 4) {
       party4 = k->follower;
       plperc4 = (GET_HIT(party4) * 100) / GET_MAX_HIT(party4);
-      kiperc4 = (GET_CHARGE(party4) * 100) / GET_MAX_MANA(party4);
+      kiperc4 = (char_get_charge(party4) * 100) / GET_MAX_MANA(party4);
 
       if (plperc4 >= 80)
        plc4 = 3;
@@ -1214,7 +1214,7 @@ const char *report_party_health(struct char_data *ch)
      }
     }
    }
-   sprintf(result1, "@D[@BG@D]-------@mF@D------- -------@mF@D------- -------@mF@D------- -------@mF@D-------[@BG@D] <@RV@Y%s@R>@n\n", add_commas(GET_GROUPKILLS(ch)));
+   sprintf(result1, "@D[@BG@D]-------@mF@D------- -------@mF@D------- -------@mF@D------- -------@mF@D-------[@BG@D] <@RV@Y%s@R>@n\n", add_commas(char_get_combatexpertise(ch)));
    sprintf(result2, "@D[@BR@D]@C%-15s %-15s %-15s %-15s@D[@BR@D]@n\n", party1 ? get_i_name(ch, party1) : "Empty", party2 ? get_i_name(ch, party2) : "Empty", party3 ? get_i_name(ch, party3) : "Empty", party4 ? get_i_name(ch, party4) : "Empty");
    sprintf(result3, "@D[@BO@D]@RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
    sprintf(result4, "@D[@BU@D]@cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
@@ -1225,7 +1225,7 @@ const char *report_party_health(struct char_data *ch)
   } else if (ch->master && char_aff_flagged(ch->master, AFF_GROUP)) {
       party1 = ch->master;
       plperc1 = (GET_HIT(party1) * 100) / GET_MAX_HIT(party1);
-      kiperc1 = (GET_CHARGE(party1) * 100) / GET_MAX_MANA(party1);
+      kiperc1 = (char_get_charge(party1) * 100) / GET_MAX_MANA(party1);
 
       if (plperc1 >= 80)
        plc1 = 3;
@@ -1264,7 +1264,7 @@ const char *report_party_health(struct char_data *ch)
       if (count == 2) {
        party2 = k->follower;
        plperc2 = (GET_HIT(party2) * 100) / GET_MAX_HIT(party2);
-       kiperc2 = (GET_CHARGE(party2) * 100) / GET_MAX_MANA(party2);
+       kiperc2 = (char_get_charge(party2) * 100) / GET_MAX_MANA(party2);
 
        if (plperc2 >= 80)
         plc2 = 3;
@@ -1295,7 +1295,7 @@ const char *report_party_health(struct char_data *ch)
       } else if (count == 3) {
        party3 = k->follower;
        plperc3 = (GET_HIT(party3) * 100) / GET_MAX_HIT(party3);
-       kiperc3 = (GET_CHARGE(party3) * 100) / GET_MAX_MANA(party3);
+       kiperc3 = (char_get_charge(party3) * 100) / GET_MAX_MANA(party3);
 
        if (plperc3 >= 80)
         plc3 = 3;
@@ -1326,7 +1326,7 @@ const char *report_party_health(struct char_data *ch)
       } else if (count == 4) {
        party4 = k->follower;
        plperc4 = (GET_HIT(party4) * 100) / GET_MAX_HIT(party4);
-       kiperc4 = (GET_CHARGE(party4) * 100) / GET_MAX_MANA(party4);
+       kiperc4 = (char_get_charge(party4) * 100) / GET_MAX_MANA(party4);
 
        if (plperc4 >= 80)
         plc4 = 3;
@@ -1381,7 +1381,7 @@ int know_skill(struct char_data *ch, int skill)
 
  if (char_get_skill(ch, skill) > 0)
   know = 1;
- if (GET_STUPIDKISS(ch) == skill)
+ if (char_get_stupidkiss(ch) == skill)
   know = 2;
 
  if (know == 0) {
@@ -1522,7 +1522,7 @@ int sec_roll_check(struct char_data *ch)
 int get_measure(struct char_data *ch, int height, int weight)
 {
   int amt = 0;
-  if (!char_plr_flagged(ch, PLR_OOZARU) && (!char_is_icer(ch) || !char_is_transformed(ch)) && GET_GENOME(ch, 0) < 9) {
+  if (!char_plr_flagged(ch, PLR_OOZARU) && (!char_is_icer(ch) || !char_is_transformed(ch)) && char_get_genome(ch, 0) < 9) {
    if (height > 0) {
     amt = height;
    } else if (weight > 0) {
@@ -1552,7 +1552,7 @@ int get_measure(struct char_data *ch, int height, int weight)
    } else if (weight > 0) {
     amt = weight * 3;
    }
-  } else if (char_plr_flagged(ch, PLR_OOZARU) || GET_GENOME(ch, 0) == 9) {
+  } else if (char_plr_flagged(ch, PLR_OOZARU) || char_get_genome(ch, 0) == 9) {
    if (height > 0) {
     amt = height * 10;
    } else if (weight > 0) {
@@ -1590,15 +1590,15 @@ int64_t physical_cost(struct char_data *ch, int skill)
 
  result += rand_number(cou1, cou2);
 
- if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 100) {
+ if (char_get_skills_base(ch, SKILL_STYLE) >= 100) {
   result -= result * 0.4;
- } else if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75) {
+ } else if (char_get_skills_base(ch, SKILL_STYLE) >= 75) {
   if (char_is_tsuna(ch)) {
    result -= result * 0.40;
   } else if (char_is_tapion(ch) && (skill == SKILL_PUNCH || skill == SKILL_KICK)) {
    result -= result * 0.35;
   } else if (char_is_jinto(ch)) {
-   if (GET_SKILL_BASE(ch, skill) >= 100) {
+   if (char_get_skills_base(ch, skill) >= 100) {
     result -= result * 0.45;
    } else {
     result -= result * 0.25;
@@ -1606,7 +1606,7 @@ int64_t physical_cost(struct char_data *ch, int skill)
   } else {
    result -= result * 0.25;
   }
- } else if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 50) {
+ } else if (char_get_skills_base(ch, SKILL_STYLE) >= 50) {
   result -= result * 0.25;
  }
 
@@ -1620,7 +1620,7 @@ int64_t physical_cost(struct char_data *ch, int skill)
 int trans_cost(struct char_data *ch, int trans)
 {
 
- if (GET_TRANSCOST(ch, trans) == 0) {
+ if (char_get_transcost(ch, (trans)-1) == 0) {
   return (50);
  } else {
   return (0);
@@ -1639,38 +1639,38 @@ int trans_req(struct char_data *ch, int trans)
   switch (trans)
   {
    case 1:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 1500000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 1800000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 2100000;
     }
     break;
    case 2:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 37500000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 35000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 32500000;
     }
     break;
    case 3:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 200000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 190000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 185000000;
     }
     break;
    case 4:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 1400000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 1200000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 1100000000;
     }
     break;
@@ -1681,29 +1681,29 @@ int trans_req(struct char_data *ch, int trans)
   switch (trans)
   {
    case 1:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 1500000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 1400000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 1200000;
     }
     break;
    case 2:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 60000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 55000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 50000000;
     }
     break;
    case 3:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 1200000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 1050000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 950000000;
     }
     break;
@@ -1715,20 +1715,20 @@ int trans_req(struct char_data *ch, int trans)
    switch (trans)
    {
     case 1:
-     if (GET_TRANSCLASS(ch) == 1) {
+     if (char_get_transclass(ch) == 1) {
       requirement = 600000;
-     } else if (GET_TRANSCLASS(ch) == 2) {
+     } else if (char_get_transclass(ch) == 2) {
       requirement = 500000;
-     } else if (GET_TRANSCLASS(ch) == 3) {
+     } else if (char_get_transclass(ch) == 3) {
       requirement = 450000;
      }
      break;
      case 2:
-     if (GET_TRANSCLASS(ch) == 1) {
+     if (char_get_transclass(ch) == 1) {
       requirement = 300000000;
-     } else if (GET_TRANSCLASS(ch) == 2) {
+     } else if (char_get_transclass(ch) == 2) {
       requirement = 250000000;
-     } else if (GET_TRANSCLASS(ch) == 3) {
+     } else if (char_get_transclass(ch) == 3) {
       requirement = 225000000;
      }
      break;
@@ -1737,38 +1737,38 @@ int trans_req(struct char_data *ch, int trans)
    switch (trans)
    {
     case 1:
-     if (GET_TRANSCLASS(ch) == 1) {
+     if (char_get_transclass(ch) == 1) {
       requirement = 1400000;
-     } else if (GET_TRANSCLASS(ch) == 2) {
+     } else if (char_get_transclass(ch) == 2) {
       requirement = 1200000;
-     } else if (GET_TRANSCLASS(ch) == 3) {
+     } else if (char_get_transclass(ch) == 3) {
       requirement = 1100000;
      }
      break;
     case 2:
-     if (GET_TRANSCLASS(ch) == 1) {
+     if (char_get_transclass(ch) == 1) {
       requirement = 60000000;
-     } else if (GET_TRANSCLASS(ch) == 2) {
+     } else if (char_get_transclass(ch) == 2) {
       requirement = 55000000;
-     } else if (GET_TRANSCLASS(ch) == 3) {
+     } else if (char_get_transclass(ch) == 3) {
       requirement = 50000000;
      }
      break;
     case 3:
-     if (GET_TRANSCLASS(ch) == 1) {
+     if (char_get_transclass(ch) == 1) {
       requirement = 160000000;
-     } else if (GET_TRANSCLASS(ch) == 2) {
+     } else if (char_get_transclass(ch) == 2) {
       requirement = 150000000;
-     } else if (GET_TRANSCLASS(ch) == 3) {
+     } else if (char_get_transclass(ch) == 3) {
       requirement = 140000000;
      }
      break;
     case 4:
-     if (GET_TRANSCLASS(ch) == 1) {
+     if (char_get_transclass(ch) == 1) {
       requirement = 1800000000;
-     } else if (GET_TRANSCLASS(ch) == 2) {
+     } else if (char_get_transclass(ch) == 2) {
       requirement = 1625000000;
-     } else if (GET_TRANSCLASS(ch) == 3) {
+     } else if (char_get_transclass(ch) == 3) {
       requirement = 1400000000;
      }
     break;
@@ -1780,38 +1780,38 @@ int trans_req(struct char_data *ch, int trans)
   switch (trans)
   {
    case 1:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 400000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 360000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 335000;
     }
     break;
    case 2:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 10000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 9500000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 8000000;
     }
     break;
    case 3:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 240000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 220000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 200000000;
     }
     break;
    case 4:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 950000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 900000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 875000000;
     }
     break;
@@ -1822,38 +1822,38 @@ int trans_req(struct char_data *ch, int trans)
   switch (trans)
   {
    case 1:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 550000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 500000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 450000;
     }
     break;
    case 2:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 20000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 17500000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 15000000;
     }
     break;
    case 3:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 180000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 150000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 125000000;
     }
     break;
    case 4:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 880000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 850000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 820000000;
     }
     break;
@@ -1864,29 +1864,29 @@ int trans_req(struct char_data *ch, int trans)
   switch (trans)
   {
    case 1:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 2400000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 2200000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 2000000;
     }
     break;
    case 2:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 50000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 45000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 40000000;
     }
     break;
    case 3:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 1800000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 1550000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 1300000000;
     }
     break;
@@ -1897,29 +1897,29 @@ int trans_req(struct char_data *ch, int trans)
   switch (trans)
   {
    case 1:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 3800000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 3600000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 3500000;
     }
     break;
    case 2:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 400000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 300000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 200000000;
     }
     break;
     case 3:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 1550000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 1450000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 1250000000;
     }
     break;
@@ -1930,29 +1930,29 @@ int trans_req(struct char_data *ch, int trans)
   switch (trans)
   {
    case 1:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 200000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 180000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 160000;
     }
     break;
    case 2:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 30000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 27500000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 25000000;
     }
     break;
    case 3:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 750000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 700000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 675000000;
     }
     break;
@@ -1963,29 +1963,29 @@ int trans_req(struct char_data *ch, int trans)
   switch (trans)
   {
    case 1:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 3250000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 3000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 2850000;
     }
     break;
    case 2:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 700000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 650000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 625000000;
     }
     break;
     case 3:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 1500000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 1300000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 1250000000;
     }
     break;
@@ -1996,29 +1996,29 @@ int trans_req(struct char_data *ch, int trans)
   switch (trans)
   {
    case 1:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 2000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 1800000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 1600000;
     }
     break;
    case 2:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 250000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 225000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 200000000;
     }
     break;
    case 3:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 1600000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 1400000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 1300000000;
     }
     break;
@@ -2029,56 +2029,56 @@ int trans_req(struct char_data *ch, int trans)
   switch (trans)
   {
    case 1:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 1200000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 1000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 850000;
     }
     break;
    case 2:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 8500000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 8000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 7750000;
     }
     break;
    case 3:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 55000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 50000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 40000000;
     }
     break;
    case 4:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 325000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 300000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 275000000;
     }
     break;
    case 5:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 900000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 800000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 750000000;
     }
     break;
    case 6:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 1300000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 1200000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 1100000000;
     }
     break;
@@ -2089,38 +2089,38 @@ int trans_req(struct char_data *ch, int trans)
   switch (trans)
   {
    case 1:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 2000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 1800000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 1700000;
     }
     break;
    case 2:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 30000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 25000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 20000000;
     }
     break;
    case 3:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 235000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 220000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 210000000;
     }
     break;
    case 4:
-    if (GET_TRANSCLASS(ch) == 1) {
+    if (char_get_transclass(ch) == 1) {
      requirement = 1500000000;
-    } else if (GET_TRANSCLASS(ch) == 2) {
+    } else if (char_get_transclass(ch) == 2) {
      requirement = 1300000000;
-    } else if (GET_TRANSCLASS(ch) == 3) {
+    } else if (char_get_transclass(ch) == 3) {
      requirement = 1150000000;
     }
     break;
@@ -2135,21 +2135,21 @@ const char *disp_align(struct char_data *ch)
 {
  int align;
 
- if (GET_ALIGNMENT(ch) < -800) { // Horrifically Evil
+ if (char_get_alignment(ch) < -800) { // Horrifically Evil
   align = 8;
- } else if (GET_ALIGNMENT(ch) < -600) { // Terrible
+ } else if (char_get_alignment(ch) < -600) { // Terrible
   align = 7;
- } else if (GET_ALIGNMENT(ch) < -300) { // Villain
+ } else if (char_get_alignment(ch) < -300) { // Villain
   align = 6;
- } else if (GET_ALIGNMENT(ch) < -50) {  // Crook
+ } else if (char_get_alignment(ch) < -50) {  // Crook
   align = 5;
- } else if (GET_ALIGNMENT(ch) < 51) {   // Neutral
+ } else if (char_get_alignment(ch) < 51) {   // Neutral
   align = 4;
- } else if (GET_ALIGNMENT(ch) < 300) {  // Do-gooder
+ } else if (char_get_alignment(ch) < 300) {  // Do-gooder
   align = 3;
- } else if (GET_ALIGNMENT(ch) < 600) {  // Hero
+ } else if (char_get_alignment(ch) < 600) {  // Hero
   align = 2;
- } else if (GET_ALIGNMENT(ch) < 800) {  // Valiant
+ } else if (char_get_alignment(ch) < 800) {  // Valiant
   align = 1;
  } else {                               // Saintly
   align = 0;
@@ -2209,7 +2209,7 @@ int read_sense_memory(struct char_data *ch, struct char_data *vict) {
       known = TRUE;
      }
     } else {
-     if (idnums == GET_ID(vict)) {
+     if (idnums == char_get_id(vict)) {
       known = TRUE;
      }
     }
@@ -2259,7 +2259,7 @@ void sense_memory_write(struct char_data *ch, struct char_data *vict)
   while(x < count) {
     if (x == 0 || idnums[x-1] != idnums[x]) {
      if (!char_is_npc(vict)) {
-      if (idnums[x] != GET_ID(vict)) {
+      if (idnums[x] != char_get_id(vict)) {
        fprintf(fl, "%d\n", idnums[x]);
       }
      } else {
@@ -2272,7 +2272,7 @@ void sense_memory_write(struct char_data *ch, struct char_data *vict)
   }
 
   if (!char_is_npc(vict)) {
-   fprintf(fl, "%d\n", GET_ID(vict));
+   fprintf(fl, "%d\n", char_get_id(vict));
   } else {
    fprintf(fl, "%d\n", char_get_mob_vnum(vict));
   }
@@ -2294,7 +2294,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict)
   skill = char_get_skill(ch, SKILL_PURSUIT);
  } else if (char_is_npc(ch) && !char_mob_flagged(ch, MOB_SENTINEL)) {
   skill = char_get_level(ch);
-  if (rroom_flagged(IN_ROOM(vict), ROOM_NOMOB))
+  if (rroom_flagged(char_get_in_room(vict), ROOM_NOMOB))
    skill = -1;
  } else {
   skill = -1;
@@ -2307,10 +2307,10 @@ int roll_pursue(struct char_data *ch, struct char_data *vict)
  }
 
  if (skill > perc) {
-  int inroom = rroom_get_vnum(IN_ROOM(ch));
+  int inroom = rroom_get_vnum(char_get_in_room(ch));
   act("@C$n@R pursues after the fleeing @c$N@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);  
   char_from_room(ch);
-  char_to_room(ch, IN_ROOM(vict));
+  char_to_room(ch, char_get_in_room(vict));
   act("@GYou pursue right after @c$N@G!@n", TRUE, ch, 0, vict, TO_CHAR);
   act("@C$n@R pursues after you!@n", TRUE, ch, 0, vict, TO_VICT);
   act("@C$n@R pursues after the fleeing @c$N@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -2320,22 +2320,22 @@ int roll_pursue(struct char_data *ch, struct char_data *vict)
   if (ch->followers) {
    for (k = ch->followers; k; k = next) {
     next = k->next;
-    if ((rroom_get_vnum(IN_ROOM(k->follower)) == inroom) && (GET_POS(k->follower) >= POS_STANDING) && (!char_aff_flagged(ch, AFF_ZANZOKEN) || (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(k->follower, AFF_GROUP)))) {
+    if ((rroom_get_vnum(char_get_in_room(k->follower)) == inroom) && (char_get_position(k->follower) >= POS_STANDING) && (!char_aff_flagged(ch, AFF_ZANZOKEN) || (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(k->follower, AFF_GROUP)))) {
      act("You follow $N.", TRUE, k->follower, 0, ch, TO_CHAR);
      act("$n follows after $N.", TRUE, k->follower, 0, ch, TO_NOTVICT);
      act("$n follows after you.", TRUE, k->follower, 0, ch, TO_VICT);
      char_from_room(k->follower);
-     char_to_room(k->follower, IN_ROOM(ch));
+     char_to_room(k->follower, char_get_in_room(ch));
     }
    }
   }
-  REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_PURSUIT);
+  REMOVE_BIT_AR(char_get_affected_by(vict), AFF_PURSUIT);
   return (TRUE);
  } else {
   send_to_char(ch, "@RYou fail to pursue after them!@n\r\n");
-  if (FIGHTING(ch)) {
+  if (char_get_fighting(ch)) {
    stop_fighting(ch);
-  } if (FIGHTING(vict)) {
+  } if (char_get_fighting(vict)) {
    stop_fighting(vict);
   }
   return (FALSE);
@@ -2349,7 +2349,7 @@ char *sense_location(struct char_data *ch)
 
 	char *message;
     CREATE(message, char, MAX_INPUT_LENGTH);
-	int roomnum = rroom_get_vnum(IN_ROOM(ch)), num = 0;
+	int roomnum = rroom_get_vnum(char_get_in_room(ch)), num = 0;
 	if ((num = real_zone_by_thing(roomnum)) != NOWHERE) {
 		num = real_zone_by_thing(roomnum);
 	}
@@ -2759,29 +2759,29 @@ void reveal_hiding(struct char_data *ch, int type)
  if (type == 0) { /* Automatic reveal. */
    act("@MYou feel as though what you just did may have revealed your hiding spot...@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@M$n moves a little and you notice them!@n", TRUE, ch, 0, 0, TO_ROOM);
-   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_HIDE);
+   REMOVE_BIT_AR(char_get_affected_by(ch), AFF_HIDE);
  } else if (type == 1) { /* Their skill at hiding failed, reveal */
   if (char_get_skill(ch, SKILL_HIDE) + bonus < axion_dice(0)) {
    act("@MYou feel as though what you just did may have revealed your hiding spot...@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@M$n moves a little and you notice them!@n", TRUE, ch, 0, 0, TO_ROOM);
-   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_HIDE);
+   REMOVE_BIT_AR(char_get_affected_by(ch), AFF_HIDE);
   }
  } else if (type == 2) { /* They were spotted */
   struct descriptor_data *d;
   struct char_data *tch = NULL;
   for (d = descriptor_list; d; d = d->next) {
-   if (STATE(d) != CON_PLAYING)
+   if (desc_get_connected(d) != CON_PLAYING)
     continue;
     tch = d->character;
 
    if (tch == ch)
     continue;
 
-   if (IN_ROOM(tch) != IN_ROOM(ch))
+   if (char_get_in_room(tch) != char_get_in_room(ch))
     continue;
   
    if (char_get_skill(tch, SKILL_SPOT) + rand1 >= char_get_skill(ch, SKILL_HIDE) + rand2) {
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_HIDE);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_HIDE);
     act("@M$N seems to notice you!@n", TRUE, ch, 0, tch, TO_CHAR);
     act("@MYou notice $n's movements reveal $s hiding spot!@n", TRUE, ch, 0, tch, TO_VICT);
     act("@MYou notice $N look keenly somewhere nearby. At that spot you see $n hiding!@n", TRUE, ch, 0, tch, TO_NOTVICT);
@@ -2794,14 +2794,14 @@ void reveal_hiding(struct char_data *ch, int type)
 
   act("@MThe scouter makes some beeping sounds as you tinker with its buttons.@n", TRUE, ch, 0, 0, TO_CHAR);
   for (d = descriptor_list; d; d = d->next) {
-   if (STATE(d) != CON_PLAYING)
+   if (desc_get_connected(d) != CON_PLAYING)
     continue;
    tch = d->character;
 
    if (tch == ch)
     continue;
 
-   if (IN_ROOM(tch) != IN_ROOM(ch))
+   if (char_get_in_room(tch) != char_get_in_room(ch))
     continue;
 
    if (char_get_skill(tch, SKILL_LISTEN) > axion_dice(0)) {
@@ -2816,7 +2816,7 @@ void reveal_hiding(struct char_data *ch, int type)
    }
   }
  } else if (type == 4) { /* You were found from search! */
-   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_HIDE);
+   REMOVE_BIT_AR(char_get_affected_by(ch), AFF_HIDE);
  }
 }
 
@@ -2824,15 +2824,15 @@ int block_calc(struct char_data *ch)
 {
   struct char_data *blocker = NULL;
 
-  if (BLOCKED(ch)) {
-   blocker = BLOCKED(ch);
+  if (char_get_blocked(ch)) {
+   blocker = char_get_blocked(ch);
   } else {
    return (1);
   }
 
-   if (char_get_speedi(ch) < char_get_speedi(blocker) && GET_POS(blocker) > POS_SITTING) {
+   if (char_get_speedi(ch) < char_get_speedi(blocker) && char_get_position(blocker) > POS_SITTING) {
      if (!char_aff_flagged(blocker, AFF_BLIND) && !char_plr_flagged(blocker, PLR_EYEC)) {
-       int minimum = GET_CHA(blocker) + rand_number(5, 20);
+       int minimum = char_get_aff_abils_cha(blocker) + rand_number(5, 20);
        if (minimum > 100) {
         minimum = 100;
        }
@@ -2840,42 +2840,42 @@ int block_calc(struct char_data *ch)
         act("$n tries to leave, but can't outrun $N!", TRUE, ch, 0, blocker, TO_NOTVICT);
         act("$n tries to leave, but can't outrun you!", TRUE, ch, 0, blocker, TO_VICT);
         act("You try to leave, but can't outrun $N!", TRUE, ch, 0, blocker, TO_CHAR);
-        if (char_aff_flagged(ch, AFF_FLYING) && !char_aff_flagged(blocker, AFF_FLYING) && GET_ALT(ch) == 1) {
+        if (char_aff_flagged(ch, AFF_FLYING) && !char_aff_flagged(blocker, AFF_FLYING) && char_get_altitude(ch) == 1) {
          send_to_char(blocker, "You're now floating in the air.\r\n");
-         SET_BIT_AR(AFF_FLAGS(blocker), AFF_FLYING);
-         GET_ALT(blocker) = GET_ALT(ch);
-        } else if (char_aff_flagged(ch, AFF_FLYING) && !char_aff_flagged(blocker, AFF_FLYING) && GET_ALT(ch) == 2) {
+         SET_BIT_AR(char_get_affected_by(blocker), AFF_FLYING);
+         char_set_altitude(blocker, char_get_altitude(ch));
+        } else if (char_aff_flagged(ch, AFF_FLYING) && !char_aff_flagged(blocker, AFF_FLYING) && char_get_altitude(ch) == 2) {
          send_to_char(blocker, "You're now floating high in the sky.\r\n");
-         SET_BIT_AR(AFF_FLAGS(blocker), AFF_FLYING);
-         GET_ALT(blocker) = GET_ALT(ch);
+         SET_BIT_AR(char_get_affected_by(blocker), AFF_FLYING);
+         char_set_altitude(blocker, char_get_altitude(ch));
         }
         return (0);
        } else {
         act("$n proves $s great skill and escapes from $N's attempted block!", TRUE, ch, 0, blocker, TO_NOTVICT);
         act("$n proves $s great skill and escapes from your attempted block!", TRUE, ch, 0, blocker, TO_VICT);
         act("Using your great skill you manage to escape from $N's attempted block!", TRUE, ch, 0, blocker, TO_CHAR);
-        BLOCKED(ch) = NULL;
-        BLOCKS(blocker) = NULL;
+        char_set_blocked(ch, NULL);
+        char_set_blocks(blocker, NULL);
        }
     } else {
         act("$n proves $s great skill and escapes from $N's attempted block!", TRUE, ch, 0, blocker, TO_NOTVICT);
         act("$n proves $s great skill and escapes from your attempted block!", TRUE, ch, 0, blocker, TO_VICT);
         act("Using your great skill you manage to escape from $N's attempted block!", TRUE, ch, 0, blocker, TO_CHAR);
-        BLOCKED(ch) = NULL;
-        BLOCKS(blocker) = NULL;
+        char_set_blocked(ch, NULL);
+        char_set_blocks(blocker, NULL);
     }
-   } else if (GET_POS(blocker) <= POS_SITTING) {
+   } else if (char_get_position(blocker) <= POS_SITTING) {
     act("$n proves $s great skill and escapes from $N!", TRUE, ch, 0, blocker, TO_NOTVICT);
     act("$n proves $s great skill and escapes from you!", TRUE, ch, 0, blocker, TO_VICT);
     act("Using your great skill you manage to escape from $N!", TRUE, ch, 0, blocker, TO_CHAR);
-    BLOCKED(ch) = NULL;
-    BLOCKS(blocker) = NULL;
-   } else if (GET_POS(blocker) > POS_SITTING) {
+    char_set_blocked(ch, NULL);
+    char_set_blocks(blocker, NULL);
+   } else if (char_get_position(blocker) > POS_SITTING) {
     act("$n proves $s great skill and escapes from $N's attempted block!", TRUE, ch, 0, blocker, TO_NOTVICT);
     act("$n proves $s great skill and escapes from your attempted block!", TRUE, ch, 0, blocker, TO_VICT);
     act("Using your great skill you manage to escape from $N's attempted block!", TRUE, ch, 0, blocker, TO_CHAR);
-    BLOCKED(ch) = NULL;
-    BLOCKS(blocker) = NULL;
+    char_set_blocked(ch, NULL);
+    char_set_blocks(blocker, NULL);
    }
 
   return (1);
@@ -2890,20 +2890,20 @@ int64_t molt_threshold(struct char_data *ch)
 
  if (!char_is_arlian(ch))
   return (0);
- else if (GET_MOLT_LEVEL(ch) < 100) {
-  threshold = (((GET_MOLT_LEVEL(ch) + 1) * (getBasePL(ch) * 0.02)) * GET_CON(ch)) / 4;
+ else if (char_get_moltlevel(ch) < 100) {
+  threshold = (((char_get_moltlevel(ch) + 1) * (getBasePL(ch) * 0.02)) * char_get_aff_abils_con(ch)) / 4;
   threshold = threshold * 0.25;
- } else if (GET_MOLT_LEVEL(ch) < 200) {
-  threshold = (((GET_MOLT_LEVEL(ch) + 1) * (getBasePL(ch) * 0.02)) * GET_CON(ch)) / 2;
+ } else if (char_get_moltlevel(ch) < 200) {
+  threshold = (((char_get_moltlevel(ch) + 1) * (getBasePL(ch) * 0.02)) * char_get_aff_abils_con(ch)) / 2;
   threshold = threshold * 0.20;
- } else if (GET_MOLT_LEVEL(ch) < 400) {
-  threshold = (((GET_MOLT_LEVEL(ch) + 1) * (getBasePL(ch) * 0.02)) * GET_CON(ch));
+ } else if (char_get_moltlevel(ch) < 400) {
+  threshold = (((char_get_moltlevel(ch) + 1) * (getBasePL(ch) * 0.02)) * char_get_aff_abils_con(ch));
   threshold = threshold * 0.17;
- } else if (GET_MOLT_LEVEL(ch) < 800) {
-  threshold = (((GET_MOLT_LEVEL(ch) + 1) * (getBasePL(ch) * 0.02)) * GET_CON(ch)) * 2;
+ } else if (char_get_moltlevel(ch) < 800) {
+  threshold = (((char_get_moltlevel(ch) + 1) * (getBasePL(ch) * 0.02)) * char_get_aff_abils_con(ch)) * 2;
   threshold = threshold * 0.15;
  } else {
-  threshold = (((GET_MOLT_LEVEL(ch) + 1) * (getBasePL(ch) * 0.02)) * GET_CON(ch)) * 4;
+  threshold = (((char_get_moltlevel(ch) + 1) * (getBasePL(ch) * 0.02)) * char_get_aff_abils_con(ch)) * 4;
   threshold = threshold * 0.12;
  }
 
@@ -2914,23 +2914,23 @@ int armor_evolve(struct char_data *ch)
 {
  int value = 0;
 
- if (GET_MOLT_LEVEL(ch) <= 5) {
+ if (char_get_moltlevel(ch) <= 5) {
   value = 8;
- } else if (GET_MOLT_LEVEL(ch) <= 10) {
+ } else if (char_get_moltlevel(ch) <= 10) {
   value = 12;
- } else if (GET_MOLT_LEVEL(ch) <= 20) {
+ } else if (char_get_moltlevel(ch) <= 20) {
   value = 15;
- } else if (GET_MOLT_LEVEL(ch) <= 30) {
+ } else if (char_get_moltlevel(ch) <= 30) {
   value = 20;
- } else if (GET_MOLT_LEVEL(ch) <= 40) {
+ } else if (char_get_moltlevel(ch) <= 40) {
   value = 30;
- } else if (GET_MOLT_LEVEL(ch) <= 50) {
+ } else if (char_get_moltlevel(ch) <= 50) {
   value = 50;
- } else if (GET_MOLT_LEVEL(ch) <= 75) {
+ } else if (char_get_moltlevel(ch) <= 75) {
   value = 100;
- } else if (GET_MOLT_LEVEL(ch) <= 100) {
+ } else if (char_get_moltlevel(ch) <= 100) {
   value = 150;
- } else if (GET_MOLT_LEVEL(ch) <= 500) {
+ } else if (char_get_moltlevel(ch) <= 500) {
   value = 200;
  } else {
   value = 220;
@@ -2962,17 +2962,17 @@ void handle_evolution(struct char_data *ch, int64_t dmg)
  else if (char_get_level(ch) >= 10)
   moltgain += char_get_level(ch) * 50;
 
- GET_MOLT_EXP(ch) += moltgain;
+ char_set_moltexp(ch, char_get_moltexp(ch) + (moltgain));
  
  if (char_aff_flagged(ch, AFF_SPIRIT)) {
   send_to_char(ch, "You are dead and all evolution experience is reduced. Gains are divided by 100 or reduced to a minimum of 1.\r\n");
   moltgain /= 100;
  }
 
- if (GET_MOLT_EXP(ch) > molt_threshold(ch)) {
-  if (GET_MOLT_LEVEL(ch) <= char_get_level(ch) * 2 || char_get_level(ch) >= 100) {
-   GET_MOLT_EXP(ch) = 0;
-   GET_MOLT_LEVEL(ch) += 1;
+ if (char_get_moltexp(ch) > molt_threshold(ch)) {
+  if (char_get_moltlevel(ch) <= char_get_level(ch) * 2 || char_get_level(ch) >= 100) {
+   char_set_moltexp(ch, 0);
+   char_set_moltlevel(ch, char_get_moltlevel(ch) + (1));
    double rand1 = 0.02;
    double rand2 = 0.03;
    if (rand_number(1, 4) == 3) {
@@ -2987,13 +2987,13 @@ void handle_evolution(struct char_data *ch, int64_t dmg)
    armorgain = armor_evolve(ch);
    gainBasePL(ch, plgain, false);
    gainBaseST(ch, stamgain, false);
-   GET_ARMOR(ch) += armorgain;
-   if (GET_ARMOR(ch) > 50000) {
-    GET_ARMOR(ch) = 50000;
+   char_set_armor(ch, char_get_armor(ch) + (armorgain));
+   if (char_get_armor(ch) > 50000) {
+    char_set_armor(ch, 50000);
    }
    act("@gYour @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. You quickly shed it and reveal a stronger version that was growing beneath it! At the same time you feel your adrenal sacs to be more efficient@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@G$n's@g @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. Suddenly $e sheds the damaged @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn and reveals a stronger version that had been growing underneath!@n", TRUE, ch, 0, 0, TO_ROOM);
-   send_to_char(ch, "@D[@RPL@W: @G+%s@D] [@gStamina@W: @G+%s@D] [@wArmor Index@W: @G+%s@D]@n\r\n", add_commas(plgain), add_commas(stamgain), GET_ARMOR(ch) >= 50000 ? "50k CAP" : add_commas(armorgain));
+   send_to_char(ch, "@D[@RPL@W: @G+%s@D] [@gStamina@W: @G+%s@D] [@wArmor Index@W: @G+%s@D]@n\r\n", add_commas(plgain), add_commas(stamgain), char_get_armor(ch) >= 50000 ? "50k CAP" : add_commas(armorgain));
   } else {
    send_to_char(ch, "@gYou are unable to evolve while your evolution level is higher than twice your character level.@n\r\n");
   }
@@ -3005,7 +3005,7 @@ void demon_refill_lf(struct char_data *ch, int64_t num)
 {
  struct char_data *tch = NULL;
 
-  for (tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room) {
+  for (tch = world[char_get_in_room(ch)].people; tch; tch = tch->next_in_room) {
    if (!char_is_demon(tch))
     continue;
    if ((getCurLF(tch)) >= (getMaxLF(tch)))
@@ -3028,7 +3028,7 @@ void mob_talk(struct char_data *ch, const char *speech)
    return;
   }
 
-  for (tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room) {
+  for (tch = world[char_get_in_room(ch)].people; tch; tch = tch->next_in_room) {
    if (!char_is_npc(tch))
     continue;
    if (!char_is_humanoid(tch))
@@ -3049,8 +3049,8 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
 {
     if (ch != NULL && vict != NULL) {
      if (!char_is_npc(ch) && char_is_npc(vict)) {
-       if ((strstr(speech, "hello") || strstr(speech, "greet") || strstr(speech, "Hello") || strstr(speech, "Greet")) && !FIGHTING(vict)) {
-        send_to_room(IN_ROOM(vict), "\r\n");
+       if ((strstr(speech, "hello") || strstr(speech, "greet") || strstr(speech, "Hello") || strstr(speech, "Greet")) && !char_get_fighting(vict)) {
+        send_to_room(char_get_in_room(vict), "\r\n");
         if (char_is_human(vict) || char_is_halfbreed(vict)) {
          switch (rand_number(1, 4)) {
            case 1:
@@ -3190,21 +3190,21 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
         }
        } /* End Hello Section */
 
-       if ((strstr(speech, "spar") || strstr(speech, "Spar")) && !FIGHTING(vict)) {
-        send_to_room(IN_ROOM(vict), "\r\n");
+       if ((strstr(speech, "spar") || strstr(speech, "Spar")) && !char_get_fighting(vict)) {
+        send_to_room(char_get_in_room(vict), "\r\n");
 
         if(vict->original == ch) {
             act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
-            SET_BIT_AR(MOB_FLAGS(vict), MOB_SPAR);
+            SET_BIT_AR(char_get_act(vict), MOB_SPAR);
             return 0;
         }
 
-        if (char_get_level(vict) > 4 && GET_ALIGNMENT(vict) >= 0) {
+        if (char_get_level(vict) > 4 && char_get_alignment(vict) >= 0) {
          memory_rec *names;
          int remember = FALSE;
 
-          for (names = MEMORY(vict); names && !remember; names = names->next) {
-            if (names->id != GET_IDNUM(ch))
+          for (names = char_get_mob_specials_memory(vict); names && !remember; names = names->next) {
+            if (names->id != char_get_idnum(ch))
              continue;
 
              remember = TRUE;
@@ -3237,15 +3237,15 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
          } else {
           if (char_mob_flagged(vict, MOB_SPAR)) {
            act("@w$n@W says, '@C$N, fine our match will wait till later then.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
-           REMOVE_BIT_AR(MOB_FLAGS(vict), MOB_SPAR);
+           REMOVE_BIT_AR(char_get_act(vict), MOB_SPAR);
           } else {
            act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
-           SET_BIT_AR(MOB_FLAGS(vict), MOB_SPAR);
+           SET_BIT_AR(char_get_act(vict), MOB_SPAR);
           }
           return 0;
          }
         }
-        else if (char_get_level(vict) > 4 && GET_ALIGNMENT(vict) < 0) {
+        else if (char_get_level(vict) > 4 && char_get_alignment(vict) < 0) {
           act("@w$n@W says, '@CSpar? I don't play games, I play for blood...@W'@n", TRUE, vict, 0, ch, TO_ROOM);
           return 1;
         }
@@ -3255,18 +3255,18 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
         }
        } /* End challenge section */
        if (strstr(speech, "goodbye") || strstr(speech, "Goodbye") || strstr(speech, "bye") || strstr(speech, "Bye")) {
-        send_to_room(IN_ROOM(vict), "\r\n");
-          if (GET_ALIGNMENT(vict) >= 0) {
-           if (GET_SEX(vict) == SEX_MALE) {
-            if (GET_SEX(ch) == SEX_FEMALE) {
+        send_to_room(char_get_in_room(vict), "\r\n");
+          if (char_get_alignment(vict) >= 0) {
+           if (char_get_sex(vict) == SEX_MALE) {
+            if (char_get_sex(ch) == SEX_FEMALE) {
              act("@w$n@W says, '@C$N, goodbye babe.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
             }
             else {
              act("@w$n@W says, '@C$N, goodbye.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
             }
            }
-           else if (GET_SEX(vict) == SEX_FEMALE) {
-            if (GET_SEX(ch) == SEX_MALE) {
+           else if (char_get_sex(vict) == SEX_FEMALE) {
+            if (char_get_sex(ch) == SEX_MALE) {
              act("@w$n@W says, '@C$N, goodbye...@W'@n", TRUE, vict, 0, ch, TO_ROOM);
             }
             else {
@@ -3277,17 +3277,17 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
              act("@w$n@W says, '@C$N, goodbye.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
            }
           }
-          if (GET_ALIGNMENT(vict) < 0) {
-           if (GET_SEX(vict) == SEX_MALE) {
-            if (GET_SEX(ch) == SEX_FEMALE) {
+          if (char_get_alignment(vict) < 0) {
+           if (char_get_sex(vict) == SEX_MALE) {
+            if (char_get_sex(ch) == SEX_FEMALE) {
              act("@w$n@W says, '@CGoodbye. Eh heh heh.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
             }
             else {
              act("@w$n@W says, '@CSo long and good ridance.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
             }
            }
-           else if (GET_SEX(vict) == SEX_FEMALE) {
-            if (GET_SEX(ch) == SEX_MALE) {
+           else if (char_get_sex(vict) == SEX_FEMALE) {
+            if (char_get_sex(ch) == SEX_MALE) {
              act("@w$n@W says, '@CGoodbye then...@W'@n", TRUE, vict, 0, ch, TO_ROOM);
             }
             else {
@@ -3300,8 +3300,8 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
          }
        } /* End goodbye If */
        if (strstr(speech, "train") || strstr(speech, "Train") || strstr(speech, "exercise") || strstr(speech, "Exercise")) {
-        send_to_room(IN_ROOM(vict), "\r\n");
-        if (GET_ALIGNMENT(vict) >= 0 && !char_mob_flagged(vict, MOB_NOKILL)) {
+        send_to_room(char_get_in_room(vict), "\r\n");
+        if (char_get_alignment(vict) >= 0 && !char_mob_flagged(vict, MOB_NOKILL)) {
          if (char_get_level(vict) > 4 && char_get_level(vict) < 10) {
           act("@w$n@W says, '@CTraining is good for the body. I think I may need to go workout myself.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
          }
@@ -3318,7 +3318,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
           act("@w$n@W says, '@CI really need to bust ass and train.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
          }
         }
-        if (GET_ALIGNMENT(vict) < 0 && !char_mob_flagged(vict, MOB_NOKILL)) {
+        if (char_get_alignment(vict) < 0 && !char_mob_flagged(vict, MOB_NOKILL)) {
          if (char_get_level(vict) > 4 && char_get_level(vict) < 10) {
           act("@w$n@W says, '@CWell maybe I could use some more training.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
          }
@@ -3479,34 +3479,34 @@ int planet_check(struct char_data *ch, struct char_data *vict)
   return 0;
  } else {
   int success = 0;
-  if (GET_ADMLEVEL(vict) <= 0) {
-   if (rroom_flagged(IN_ROOM(ch), ROOM_EARTH) && rroom_flagged(IN_ROOM(vict), ROOM_EARTH)) {
+  if (char_get_admlevel(vict) <= 0) {
+   if (rroom_flagged(char_get_in_room(ch), ROOM_EARTH) && rroom_flagged(char_get_in_room(vict), ROOM_EARTH)) {
     success = 1;
-   } else if (rroom_flagged(IN_ROOM(ch), ROOM_FRIGID) && rroom_flagged(IN_ROOM(vict), ROOM_FRIGID)) {
+   } else if (rroom_flagged(char_get_in_room(ch), ROOM_FRIGID) && rroom_flagged(char_get_in_room(vict), ROOM_FRIGID)) {
     success = 1;
-   } else if (rroom_flagged(IN_ROOM(ch), ROOM_NAMEK) && rroom_flagged(IN_ROOM(vict), ROOM_NAMEK)) {
+   } else if (rroom_flagged(char_get_in_room(ch), ROOM_NAMEK) && rroom_flagged(char_get_in_room(vict), ROOM_NAMEK)) {
     success = 1;
-   } else if (rroom_flagged(IN_ROOM(ch), ROOM_VEGETA) && rroom_flagged(IN_ROOM(vict), ROOM_VEGETA)) {
+   } else if (rroom_flagged(char_get_in_room(ch), ROOM_VEGETA) && rroom_flagged(char_get_in_room(vict), ROOM_VEGETA)) {
     success = 1;
-   } else if (rroom_flagged(IN_ROOM(ch), ROOM_AETHER) && rroom_flagged(IN_ROOM(vict), ROOM_AETHER)) {
+   } else if (rroom_flagged(char_get_in_room(ch), ROOM_AETHER) && rroom_flagged(char_get_in_room(vict), ROOM_AETHER)) {
     success = 1;
-   } else if (rroom_flagged(IN_ROOM(ch), ROOM_KONACK) && rroom_flagged(IN_ROOM(vict), ROOM_KONACK)) {
+   } else if (rroom_flagged(char_get_in_room(ch), ROOM_KONACK) && rroom_flagged(char_get_in_room(vict), ROOM_KONACK)) {
     success = 1;
-   } else if (rroom_planet_zenith(IN_ROOM(ch)) && rroom_planet_zenith(IN_ROOM(vict))) {
+   } else if (rroom_planet_zenith(char_get_in_room(ch)) && rroom_planet_zenith(char_get_in_room(vict))) {
     success = 1;
-   } else if (rroom_flagged(IN_ROOM(ch), ROOM_KANASSA) && rroom_flagged(IN_ROOM(vict), ROOM_KANASSA)) {
+   } else if (rroom_flagged(char_get_in_room(ch), ROOM_KANASSA) && rroom_flagged(char_get_in_room(vict), ROOM_KANASSA)) {
     success = 1;
-   } else if (rroom_flagged(IN_ROOM(ch), ROOM_YARDRAT) && rroom_flagged(IN_ROOM(vict), ROOM_YARDRAT)) {
+   } else if (rroom_flagged(char_get_in_room(ch), ROOM_YARDRAT) && rroom_flagged(char_get_in_room(vict), ROOM_YARDRAT)) {
     success = 1;
-   } else if (rroom_flagged(IN_ROOM(ch), ROOM_AL) && rroom_flagged(IN_ROOM(vict), ROOM_AL)) {
+   } else if (rroom_flagged(char_get_in_room(ch), ROOM_AL) && rroom_flagged(char_get_in_room(vict), ROOM_AL)) {
     success = 1;
-   } else if (rroom_flagged(IN_ROOM(ch), ROOM_HELL) && rroom_flagged(IN_ROOM(vict), ROOM_HELL)) {
+   } else if (rroom_flagged(char_get_in_room(ch), ROOM_HELL) && rroom_flagged(char_get_in_room(vict), ROOM_HELL)) {
     success = 1;
-   } else if (rroom_flagged(IN_ROOM(ch), ROOM_ARLIA) && rroom_flagged(IN_ROOM(vict), ROOM_ARLIA)) {
+   } else if (rroom_flagged(char_get_in_room(ch), ROOM_ARLIA) && rroom_flagged(char_get_in_room(vict), ROOM_ARLIA)) {
     success = 1;
-   } else if (rroom_flagged(IN_ROOM(ch), ROOM_NEO) && rroom_flagged(IN_ROOM(vict), ROOM_NEO)) {
+   } else if (rroom_flagged(char_get_in_room(ch), ROOM_NEO) && rroom_flagged(char_get_in_room(vict), ROOM_NEO)) {
     success = 1;
-   } else if (rroom_flagged(IN_ROOM(ch), ROOM_CERRIA) && rroom_flagged(IN_ROOM(vict), ROOM_CERRIA)) {
+   } else if (rroom_flagged(char_get_in_room(ch), ROOM_CERRIA) && rroom_flagged(char_get_in_room(vict), ROOM_CERRIA)) {
     success = 1;
    }
   }
@@ -3518,10 +3518,10 @@ void purge_homing(struct char_data *ch)
 {
 
  struct obj_data *obj = NULL, *next_obj = NULL;
- for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+ for (obj = world[char_get_in_room(ch)].contents; obj; obj = next_obj) {
   next_obj = obj->next_content;
   if (obj_get_vnum(obj) == 80 || obj_get_vnum(obj) == 81) {
-   if (TARGET(obj) == ch || USER(obj) == ch) {
+   if (obj_get_target(obj) == ch || obj_get_user(obj) == ch) {
     act("$p @wloses its target and flies off into the distance.@n", TRUE, 0, obj, 0, TO_ROOM);
     extract_obj(obj);
     continue;
@@ -3547,19 +3547,19 @@ void improve_skill(struct char_data *ch, int skill, int num)
  if (char_aff_flagged(ch, AFF_SHOCKED))
   return;
 
- if (GET_FORGETING(ch) == skill)
+ if (char_get_forgeting(ch) == skill)
   return;
 
- if (GET_SKILL_BASE(ch, skill) >= 90) {
+ if (char_get_skills_base(ch, skill) >= 90) {
   roll += 800;
- } else if (GET_SKILL_BASE(ch, skill) >= 75) {
+ } else if (char_get_skills_base(ch, skill) >= 75) {
   roll += 600;
- } else if (GET_SKILL_BASE(ch, skill) >= 50) {
+ } else if (char_get_skills_base(ch, skill) >= 50) {
   roll += 400;
  }
 
  if (skill == SKILL_PARRY || skill == SKILL_DODGE || skill == SKILL_BARRIER || skill == SKILL_BLOCK || skill == SKILL_ZANZOKEN || skill == SKILL_TSKIN) {
-  if (GET_BONUS(ch, BONUS_MASOCHISTIC) > 0) {
+  if (char_get_bonuses(ch, BONUS_MASOCHISTIC) > 0) {
    return;
   }
  }
@@ -3580,11 +3580,11 @@ void improve_skill(struct char_data *ch, int skill, int num)
   }
  }
  
- if (FIGHTING(ch) != NULL && char_is_npc(FIGHTING(ch)) && char_mob_flagged(FIGHTING(ch), MOB_DUMMY)) {
+ if (char_get_fighting(ch) != NULL && char_is_npc(char_get_fighting(ch)) && char_mob_flagged(char_get_fighting(ch), MOB_DUMMY)) {
   roll -= 100;
  }
 
- if (char_is_truffle(ch) || (char_is_bio(ch) && (GET_GENOME(ch, 0) == 6 || GET_GENOME(ch, 1) == 6))) {
+ if (char_is_truffle(ch) || (char_is_bio(ch) && (char_get_genome(ch, 0) == 6 || char_get_genome(ch, 1) == 6))) {
   roll *= 0.5;
  } else if (char_is_majin(ch)) {
   roll += roll * .3;
@@ -3594,23 +3594,23 @@ void improve_skill(struct char_data *ch, int skill, int num)
   roll = roll * 0.30;
  }
 
- if (FIGHTING(ch) != NULL && char_is_npc(FIGHTING(ch)) && char_mob_flagged(FIGHTING(ch), MOB_DUMMY)) {
+ if (char_get_fighting(ch) != NULL && char_is_npc(char_get_fighting(ch)) && char_mob_flagged(char_get_fighting(ch), MOB_DUMMY)) {
   roll -= 100;
  }
  
- if (GET_BONUS(ch, BONUS_QUICK_STUDY) > 0) {
+ if (char_get_bonuses(ch, BONUS_QUICK_STUDY) > 0) {
   roll -= roll * .25;
- } else if (GET_BONUS(ch, BONUS_SLOW_LEARNER) > 0) {
+ } else if (char_get_bonuses(ch, BONUS_SLOW_LEARNER) > 0) {
   roll += roll * .25;
  }
 
- if (GET_ASB(ch) > 0) {
-  roll -= (roll * 0.01) * GET_ASB(ch);
+ if (char_get_asb(ch) > 0) {
+  roll -= (roll * 0.01) * char_get_asb(ch);
  }
 
  roll = MAX(roll, 300);
 
-  if (rand_number(1, roll) > ((GET_INT(ch) * 2) + GET_WIS(ch))) {
+  if (rand_number(1, roll) > ((char_get_aff_abils_intel(ch) * 2) + char_get_aff_abils_wis(ch))) {
      return;
   }
   if ((percent > 99 || percent <= 0)) {
@@ -3667,16 +3667,16 @@ void improve_skill(struct char_data *ch, int skill, int num)
   if (newpercent >= 1) {
      sprintf(skillbuf, "@WYou feel you have learned something new about @G%s@W.@n\r\n", spell_info[skill].name);
      send_to_char(ch, skillbuf);
-     if (GET_SKILL_BASE(ch, skill) >= 100) {
+     if (char_get_skills_base(ch, skill) >= 100) {
       send_to_char(ch, "You learned a lot by mastering that skill.\r\n");
       if (perf_skill(skill)) {
        send_to_char(ch, "You can now choose a perfection for this skill (help perfection).\r\n");
       }
       if (char_is_konatsu(ch) && skill == SKILL_PARRY) {
-       SET_SKILL(ch, skill, GET_SKILL_BASE(ch, skill) + 5);
+       SET_SKILL(ch, skill, char_get_skills_base(ch, skill) + 5);
       }
       if (char_get_level(ch) < 100) {
-       GET_EXP(ch) += level_exp(ch, char_get_level(ch) + 1) / 20;
+       char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) / 20));
       } else {
        gain_exp(ch, 5000000);
       }
@@ -3714,11 +3714,11 @@ void stop_follower(struct char_data *ch)
 
     act("You stop following $N.", FALSE, ch, 0, ch->master, TO_CHAR);
     act("$n stops following $N.", TRUE, ch, 0, ch->master, TO_NOTVICT);
-  if (!(char_is_dead(ch->master) || (ch->master->desc && STATE(ch->master->desc) == CON_MENU)))
+  if (!(char_is_dead(ch->master) || (ch->master->desc && desc_get_connected(ch->master->desc) == CON_MENU)))
     act("$n stops following you.", TRUE, ch, 0, ch->master, TO_VICT);
  
   if (has_group(ch))
-   GET_GROUPKILLS(ch) = 0;
+   char_set_combatexpertise(ch, 0);
 
   if (ch->master->followers->follower == ch) {  /* Head of follower-list? */
     k = ch->master->followers;
@@ -3804,7 +3804,7 @@ void add_follower(struct char_data *ch, struct char_data *leader)
   leader->followers = k;
 
   act("You now follow $N.", FALSE, ch, 0, leader, TO_CHAR);
-  if (IN_ROOM(ch) != NOWHERE && IN_ROOM(leader) != NOWHERE && char_can_see(leader, ch)) {
+  if (char_get_in_room(ch) != NOWHERE && char_get_in_room(leader) != NOWHERE && char_can_see(leader, ch)) {
     act("$n starts following you.", TRUE, ch, 0, leader, TO_VICT);  
   act("\r\n$n starts to follow $N.", TRUE, ch, 0, leader, TO_NOTVICT);
   }
@@ -3814,25 +3814,25 @@ int count_metamagic_feats(struct char_data *ch)
 {
   int count = 0;                /* Number of Metamagic Feats Known */
 
-  if (HAS_FEAT(ch, FEAT_STILL_SPELL))
+  if (char_get_feats(ch, FEAT_STILL_SPELL))
     count++;
 
-  if (HAS_FEAT(ch, FEAT_SILENT_SPELL))
+  if (char_get_feats(ch, FEAT_SILENT_SPELL))
     count++;
 
-  if (HAS_FEAT(ch, FEAT_QUICKEN_SPELL))
+  if (char_get_feats(ch, FEAT_QUICKEN_SPELL))
     count++;
 
-  if (HAS_FEAT(ch, FEAT_MAXIMIZE_SPELL))
+  if (char_get_feats(ch, FEAT_MAXIMIZE_SPELL))
     count++;
 
-  if (HAS_FEAT(ch, FEAT_HEIGHTEN_SPELL))
+  if (char_get_feats(ch, FEAT_HEIGHTEN_SPELL))
     count++;
 
-  if (HAS_FEAT(ch, FEAT_EXTEND_SPELL))
+  if (char_get_feats(ch, FEAT_EXTEND_SPELL))
     count++;
 
-  if (HAS_FEAT(ch, FEAT_EMPOWER_SPELL))
+  if (char_get_feats(ch, FEAT_EMPOWER_SPELL))
     count++;
 
   return count;
@@ -3871,18 +3871,18 @@ void admin_set(struct char_data *ch, int value)
 {
   void run_autowiz(void);
   int i;
-  int orig = GET_ADMLEVEL(ch);
+  int orig = char_get_admlevel(ch);
 
-  if (GET_ADMLEVEL(ch) == value)
+  if (char_get_admlevel(ch) == value)
     return;
-  if (GET_ADMLEVEL(ch) < value) { /* Promotion */
+  if (char_get_admlevel(ch) < value) { /* Promotion */
     mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE,
-           "%s promoted from %s to %s", char_get_name(ch), admin_level_names[GET_ADMLEVEL(ch)],
+           "%s promoted from %s to %s", char_get_name(ch), admin_level_names[char_get_admlevel(ch)],
            admin_level_names[value]);
-    while (GET_ADMLEVEL(ch) < value) {
-      GET_ADMLEVEL(ch)++;
-      for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
-        SET_BIT_AR(ADM_FLAGS(ch), default_admin_flags[GET_ADMLEVEL(ch)][i]);
+    while (char_get_admlevel(ch) < value) {
+      char_set_admlevel(ch, char_get_admlevel(ch) + 1);
+      for (i = 0; default_admin_flags[char_get_admlevel(ch)][i] != -1; i++)
+        SET_BIT_AR(char_get_admflags(ch), default_admin_flags[char_get_admlevel(ch)][i]);
     }
     run_autowiz();
     if (orig < ADMLVL_IMMORT && value >= ADMLVL_IMMORT) {
@@ -3891,21 +3891,21 @@ void admin_set(struct char_data *ch, int value)
       SET_BIT_AR(PRF_FLAGS(ch), PRF_ROOMFLAGS);
       SET_BIT_AR(PRF_FLAGS(ch), PRF_AUTOEXIT);
     }
-    if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
+    if (char_get_admlevel(ch) >= ADMLVL_IMMORT) {
       for (i = 0; i < 3; i++)
         GET_COND(ch, i) = (char) -1;
       SET_BIT_AR(PRF_FLAGS(ch), PRF_HOLYLIGHT);
     }
     return;
   }
-  if (GET_ADMLEVEL(ch) > value) { /* Demotion */
+  if (char_get_admlevel(ch) > value) { /* Demotion */
     mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE,
-           "%s demoted from %s to %s", char_get_name(ch), admin_level_names[GET_ADMLEVEL(ch)],
+           "%s demoted from %s to %s", char_get_name(ch), admin_level_names[char_get_admlevel(ch)],
            admin_level_names[value]);
-    while (GET_ADMLEVEL(ch) > value) {
-      for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
-        REMOVE_BIT_AR(ADM_FLAGS(ch), default_admin_flags[GET_ADMLEVEL(ch)][i]);
-      GET_ADMLEVEL(ch)--;
+    while (char_get_admlevel(ch) > value) {
+      for (i = 0; default_admin_flags[char_get_admlevel(ch)][i] != -1; i++)
+        REMOVE_BIT_AR(char_get_admflags(ch), default_admin_flags[char_get_admlevel(ch)][i]);
+      char_set_admlevel(ch, char_get_admlevel(ch) - 1);
     }
     run_autowiz();
     if (orig >= ADMLVL_IMMORT && value < ADMLVL_IMMORT) {
@@ -4001,55 +4001,55 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict) {
 int can_grav(struct char_data *ch)
 {
    /* Gravity Related */
-   if (ROOM_GRAVITY(IN_ROOM(ch)) == 10 && GET_MAX_HIT(ch) < 5000 && !char_is_bardock(ch) && !char_is_npc(ch)) {
+   if (rroom_get_gravity(char_get_in_room(ch)) == 10 && GET_MAX_HIT(ch) < 5000 && !char_is_bardock(ch) && !char_is_npc(ch)) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 20 && GET_MAX_HIT(ch) < 20000) {
+   else if (rroom_get_gravity(char_get_in_room(ch)) == 20 && GET_MAX_HIT(ch) < 20000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }   
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 30 && GET_MAX_HIT(ch) < 50000) {
+   else if (rroom_get_gravity(char_get_in_room(ch)) == 30 && GET_MAX_HIT(ch) < 50000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 40 && GET_MAX_HIT(ch) < 100000) {
+   else if (rroom_get_gravity(char_get_in_room(ch)) == 40 && GET_MAX_HIT(ch) < 100000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 50 && GET_MAX_HIT(ch) < 200000) {
+   else if (rroom_get_gravity(char_get_in_room(ch)) == 50 && GET_MAX_HIT(ch) < 200000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 100 && GET_MAX_HIT(ch) < 400000) {
+   else if (rroom_get_gravity(char_get_in_room(ch)) == 100 && GET_MAX_HIT(ch) < 400000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 200 && GET_MAX_HIT(ch) < 1000000) {
+   else if (rroom_get_gravity(char_get_in_room(ch)) == 200 && GET_MAX_HIT(ch) < 1000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 300 && GET_MAX_HIT(ch) < 5000000) {
+   else if (rroom_get_gravity(char_get_in_room(ch)) == 300 && GET_MAX_HIT(ch) < 5000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 400 && GET_MAX_HIT(ch) < 8000000) {
+   else if (rroom_get_gravity(char_get_in_room(ch)) == 400 && GET_MAX_HIT(ch) < 8000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 500 && GET_MAX_HIT(ch) < 15000000) {
+   else if (rroom_get_gravity(char_get_in_room(ch)) == 500 && GET_MAX_HIT(ch) < 15000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 1000 && GET_MAX_HIT(ch) < 25000000) {
+   else if (rroom_get_gravity(char_get_in_room(ch)) == 1000 && GET_MAX_HIT(ch) < 25000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 5000 && GET_MAX_HIT(ch) < 100000000) {
+   else if (rroom_get_gravity(char_get_in_room(ch)) == 5000 && GET_MAX_HIT(ch) < 100000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
-   else if (ROOM_GRAVITY(IN_ROOM(ch)) == 10000 && GET_MAX_HIT(ch) < 200000000) {
+   else if (rroom_get_gravity(char_get_in_room(ch)) == 10000 && GET_MAX_HIT(ch) < 200000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
     return 0;
    }
@@ -4067,15 +4067,15 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
    send_to_char(ch, "You are inside a healing tank!\r\n");
    return 0;
   }
-  if (IS_CARRYING_W(ch) > CAN_CARRY_W(ch)) {
+  if (char_get_carry_weight(ch) > CAN_CARRY_W(ch)) {
    send_to_char(ch, "You are weighted down too much!\r\n");
    return 0;
   } 
    if (vict) {
-   if (GET_HIT(vict) <= 0 && FIGHTING(vict)) {
+   if (GET_HIT(vict) <= 0 && char_get_fighting(vict)) {
     return 0;
    }
-   if (rroom_flagged(IN_ROOM(ch), ROOM_PEACEFUL)) {
+   if (rroom_flagged(char_get_in_room(ch), ROOM_PEACEFUL)) {
     send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
     return 0;
    } else if (vict == ch) {
@@ -4096,22 +4096,22 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
    } else if (char_mob_flagged(vict, MOB_NOKILL)) {
     send_to_char(ch, "But they are not to be killed!\r\n");
     return 0;
-   } else if (MAJINIZED(ch) == GET_ID(vict)) {
+   } else if (char_get_majinize(ch) == char_get_id(vict)) {
     send_to_char(ch, "You can not harm your master!\r\n");
     return 0;
-   } else if (GET_BONUS(ch, BONUS_COWARD) > 0 && GET_MAX_HIT(vict) > GET_MAX_HIT(ch) + (GET_MAX_HIT(ch) * .5) && !FIGHTING(ch)) {
+   } else if (char_get_bonuses(ch, BONUS_COWARD) > 0 && GET_MAX_HIT(vict) > GET_MAX_HIT(ch) + (GET_MAX_HIT(ch) * .5) && !char_get_fighting(ch)) {
     send_to_char(ch, "You are too cowardly to start anything with someone so much stronger than yourself!\r\n");
     return 0;
-   } else if (MAJINIZED(vict) == GET_ID(ch)) {
+   } else if (char_get_majinize(vict) == char_get_id(ch)) {
     send_to_char(ch, "You can not harm your servant.\r\n");
     return 0;
-   } else if ((GRAPPLING(ch) && GRAPTYPE(ch) != 3) || (GRAPPLED(ch) && (GRAPTYPE(ch) == 1 || GRAPTYPE(ch) == 4))) {
-    send_to_char(ch, "You are too busy grappling!%s\r\n", GRAPPLED(ch) != NULL ? " Try 'escape'!" : "");
+   } else if ((char_get_grappling(ch) && char_get_grap(ch) != 3) || (char_get_grappled(ch) && (char_get_grap(ch) == 1 || char_get_grap(ch) == 4))) {
+    send_to_char(ch, "You are too busy grappling!%s\r\n", char_get_grappled(ch) != NULL ? " Try 'escape'!" : "");
     return 0;
-   } else if (GRAPPLING(ch) && GRAPPLING(ch) != vict) {
+   } else if (char_get_grappling(ch) && char_get_grappling(ch) != vict) {
     send_to_char(ch, "You can't reach that far in your current position!\r\n");
     return 0;
-   } else if (GRAPPLED(ch) && GRAPPLED(ch) != vict) {
+   } else if (char_get_grappled(ch) && char_get_grappled(ch) != vict) {
     send_to_char(ch, "You can't reach that far in your current position!\r\n");
     return 0;
    } else if (!char_is_npc(ch) && !char_is_npc(vict) && char_aff_flagged(ch, AFF_SPIRIT) && (!is_sparring(ch) || !is_sparring(vict)) && num != 2) {
@@ -4126,13 +4126,13 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
    } else if (char_plr_flagged(vict, PLR_SPIRAL) && num != 3) {
     send_to_char(ch, "Due to the nature of their current technique anything less than a Tier 4 or AOE attack will not work on them.\r\n");
     return 0;
-   } else if (ABSORBING(ch)) {
-    send_to_char(ch, "You are too busy absorbing %s!\r\n", char_get_name(ABSORBING(ch)));
+   } else if (char_get_absorbing(ch)) {
+    send_to_char(ch, "You are too busy absorbing %s!\r\n", char_get_name(char_get_absorbing(ch)));
     return 0;
-   } else if (ABSORBBY(ch)) {
-    send_to_char(ch, "You are too busy being absorbed by %s!\r\n", char_get_name(ABSORBBY(ch)));
+   } else if (char_get_absorbby(ch)) {
+    send_to_char(ch, "You are too busy being absorbed by %s!\r\n", char_get_name(char_get_absorbby(ch)));
     return 0;
-   } else if ((GET_ALT(vict) -1 > GET_ALT(ch) || GET_ALT(vict) < GET_ALT(ch) -1) && char_is_namek(ch)) {
+   } else if ((char_get_altitude(vict) -1 > char_get_altitude(ch) || char_get_altitude(vict) < char_get_altitude(ch) -1) && char_is_namek(ch)) {
      act("@GYou stretch your limbs toward @g$N@G in an attempt to hit $M!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@g$n@G stretches $s limbs toward @RYOU@G in an attempt to land a hit!@n", TRUE, ch, 0, vict, TO_VICT);
      act("@g$n@G stretches $s limbs toward @g$N@G in an attempt to hit $M!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -4143,17 +4143,17 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
    } else if (!char_aff_flagged(ch, AFF_FLYING) && char_aff_flagged(vict, AFF_FLYING) && num == 0) {
     send_to_char(ch, "They are too far above you.\r\n");
     return 0;
-   } else if (!char_is_npc(ch) && GET_ALT(ch) > GET_ALT(vict) && !char_is_npc(vict) && num == 0) {
-    if (GET_ALT(vict) < 0) {
-     GET_ALT(vict) = GET_ALT(ch);
+   } else if (!char_is_npc(ch) && char_get_altitude(ch) > char_get_altitude(vict) && !char_is_npc(vict) && num == 0) {
+    if (char_get_altitude(vict) < 0) {
+     char_set_altitude(vict, char_get_altitude(ch));
      return 1;
     } else {
      send_to_char(ch, "You are too far above them.\r\n");
      return 0;
     }
-   } else if (!char_is_npc(ch) && GET_ALT(ch) < GET_ALT(vict) && !char_is_npc(vict)&& num == 0) {
-    if (GET_ALT(vict) > 2) {
-     GET_ALT(vict) = GET_ALT(ch);
+   } else if (!char_is_npc(ch) && char_get_altitude(ch) < char_get_altitude(vict) && !char_is_npc(vict)&& num == 0) {
+    if (char_get_altitude(vict) > 2) {
+     char_set_altitude(vict, char_get_altitude(ch));
      return 1;
     } else {
      send_to_char(ch, "They are too far above you.\r\n");
@@ -4164,7 +4164,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
    }   
   }
   if (obj) {
-   if (rroom_flagged(IN_ROOM(ch), ROOM_PEACEFUL)) {
+   if (rroom_flagged(char_get_in_room(ch), ROOM_PEACEFUL)) {
     send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
     return 0;
    } else if (obj_flagged(obj, ITEM_UNBREAKABLE) && obj_get_vnum(obj) != 87 && obj_get_vnum(obj) != 80 && obj_get_vnum(obj) != 81 && obj_get_vnum(obj) != 82 && obj_get_vnum(obj) != 83) {
@@ -4200,7 +4200,7 @@ int check_skill(struct char_data *ch, int skill)
 int check_points(struct char_data *ch, int64_t ki, int64_t st)
 {
 
- if (GET_PREFERENCE(ch) == PREFERENCE_H2H && GET_CHARGE(ch) >= GET_MAX_MANA(ch) * 0.1) {
+ if (char_get_preference(ch) == PREFERENCE_H2H && char_get_charge(ch) >= GET_MAX_MANA(ch) * 0.1) {
   st -= st * 0.5;
  }
 
@@ -4220,7 +4220,7 @@ int check_points(struct char_data *ch, int64_t ki, int64_t st)
     send_to_char(ch, "You do not have enough stamina to perform it in this gravity!\r\n");
     return 0;
   }
-  if (GET_CHARGE(ch) < ki) {
+  if (char_get_charge(ch) < ki) {
    send_to_char(ch, "You do not have enough ki charged.\r\n");
    int64_t perc = GET_MAX_MANA(ch) * 0.01;
    if (ki >= perc * 49) {
@@ -4295,24 +4295,24 @@ void pcost(struct char_data *ch, double ki, int64_t st)
     }
    }
   }
-  if (GET_CHARGE(ch) <= (GET_MAX_MANA(ch) * ki)) {
-   GET_CHARGE(ch) = 0;
+  if (char_get_charge(ch) <= (GET_MAX_MANA(ch) * ki)) {
+   char_set_charge(ch, 0);
   }
-  if (GET_CHARGE(ch) > (GET_MAX_MANA(ch) * ki)) {
-   GET_CHARGE(ch) -= (GET_MAX_MANA(ch) * ki);
+  if (char_get_charge(ch) > (GET_MAX_MANA(ch) * ki)) {
+   char_set_charge(ch, char_get_charge(ch) - ((GET_MAX_MANA(ch) * ki)));
   }
-  if (GET_CHARGE(ch) < 0) {
-   GET_CHARGE(ch) = 0;
+  if (char_get_charge(ch) < 0) {
+   char_set_charge(ch, 0);
   }
-  if (GET_KAIOKEN(ch) > 0) {
-   st += (st / 20) * GET_KAIOKEN(ch);
+  if (char_get_kaioken(ch) > 0) {
+   st += (st / 20) * char_get_kaioken(ch);
   }
   if (char_aff_flagged(ch, AFF_HASS)) {
    st += st * .3;
   }
-  if (!char_is_npc(ch) && GET_BONUS(ch, BONUS_HARDWORKER) > 0) {
+  if (!char_is_npc(ch) && char_get_bonuses(ch, BONUS_HARDWORKER) > 0) {
    st -= st * .25;
-  } else if (!char_is_npc(ch) && GET_BONUS(ch, BONUS_SLACKER) > 0) {
+  } else if (!char_is_npc(ch) && char_get_bonuses(ch, BONUS_SLACKER) > 0) {
    st += st * .25;
   }
    if (char_is_icer(ch)) {
@@ -4326,11 +4326,11 @@ void pcost(struct char_data *ch, double ki, int64_t st)
      st = st * 1.20;
     }
    }
-   if (GET_PREFERENCE(ch) == PREFERENCE_H2H && GET_CHARGE(ch) >= GET_MAX_MANA(ch) * 0.1) {
+   if (char_get_preference(ch) == PREFERENCE_H2H && char_get_charge(ch) >= GET_MAX_MANA(ch) * 0.1) {
     st -= st * 0.5;
-    GET_CHARGE(ch) -= st;
-    if (GET_CHARGE(ch) < 0)
-     GET_CHARGE(ch) = 0;
+    char_set_charge(ch, char_get_charge(ch) - (st));
+    if (char_get_charge(ch) < 0)
+     char_set_charge(ch, 0);
    }
   if (char_is_nonptrans(ch)) {
    if (char_plr_flagged(ch, PLR_TRANS1)) {
@@ -4360,15 +4360,15 @@ int limb_ok(struct char_data *ch, int type) {
   }
   return TRUE;
  }
- if (GRAPPLING(ch) && GRAPTYPE(ch) != 3) {
+ if (char_get_grappling(ch) && char_get_grap(ch) != 3) {
   send_to_char(ch, "You are too busy grappling!\r\n");
   return FALSE;
  }
- if (GRAPPLED(ch) && (GRAPTYPE(ch) == 1 || GRAPTYPE(ch) == 4)) {
+ if (char_get_grappled(ch) && (char_get_grap(ch) == 1 || char_get_grap(ch) == 4)) {
   send_to_char(ch, "You are unable to move while in this hold! Try using 'escape' to get out of it!\r\n");
   return FALSE;
  }
- if (GET_SONG(ch) > 0) {
+ if (char_get_powerattack(ch) > 0) {
   send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
   return FALSE;
  }
@@ -4384,9 +4384,9 @@ int limb_ok(struct char_data *ch, int type) {
   } else if (char_aff_flagged(ch, AFF_ENSNARED)) {
    act("You manage to break the silk ensnaring your arms!", TRUE, ch, 0, 0, TO_CHAR);
    act("$n manages to break the silk ensnaring $s arms!", TRUE, ch, 0, 0, TO_ROOM);
-   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ENSNARED);
+   REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ENSNARED);
   }
-  if (GET_EQ(ch, WEAR_WIELD1) && GET_EQ(ch, WEAR_WIELD2)) {
+  if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
    send_to_char(ch, "Your hands are full!\r\n");
    return FALSE;
   }
@@ -4517,18 +4517,18 @@ void char_lose_tail(char_data *ch) {
     switch(ch->race) {
         case RACE_ICER:
         case RACE_BIO:
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
+            REMOVE_BIT_AR(char_get_act(ch), PLR_TAIL);
             remove_limb(ch, 6);
-            GET_TGROWTH(ch) = 0;
+            char_set_tail_growth(ch, 0);
             break;
         case RACE_SAIYAN:
         case RACE_HALFBREED:
-            REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_STAIL);
+            REMOVE_BIT_AR(char_get_act(ch), PLR_STAIL);
             remove_limb(ch, 5);
             if(char_plr_flagged(ch, PLR_OOZARU)) {
                 oozaru_revert(ch);
             }
-            GET_TGROWTH(ch) = 0;
+            char_set_tail_growth(ch, 0);
             break;
     }
 }
@@ -4554,11 +4554,11 @@ void char_gain_tail(char_data *ch, bool announce) {
     switch(ch->race) {
         case RACE_ICER:
         case RACE_BIO:
-            SET_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
+            SET_BIT_AR(char_get_act(ch), PLR_TAIL);
             break;
         case RACE_SAIYAN:
         case RACE_HALFBREED:
-            SET_BIT_AR(PLR_FLAGS(ch), PLR_STAIL);
+            SET_BIT_AR(char_get_act(ch), PLR_STAIL);
             if(char_moon_ok(ch)) {
                 oozaru_transform(ch);
             }
@@ -4718,23 +4718,23 @@ bool MOON_TIMECHECK() {
 /* Formerly macros in character_utils.h. */
 
 bool char_is_npc(const struct char_data *ch) {
-    return (IS_SET_AR(MOB_FLAGS(ch), MOB_ISNPC));
+    return (IS_SET_AR(char_get_act(ch), MOB_ISNPC));
 }
 
 bool char_is_mob(const struct char_data *ch) {
-    return (char_is_npc(ch) && GET_MOB_RNUM(ch) <= top_of_mobt && GET_MOB_RNUM(ch) != NOBODY);
+    return (char_is_npc(ch) && char_get_nr(ch) <= top_of_mobt && char_get_nr(ch) != NOBODY);
 }
 
 bool char_mob_flagged(const struct char_data *ch, int flag) {
-    return (char_is_npc(ch) && IS_SET_AR(MOB_FLAGS(ch), (flag)));
+    return (char_is_npc(ch) && IS_SET_AR(char_get_act(ch), (flag)));
 }
 
 bool char_plr_flagged(const struct char_data *ch, int flag) {
-    return (!char_is_npc(ch) && IS_SET_AR(PLR_FLAGS(ch), (flag)));
+    return (!char_is_npc(ch) && IS_SET_AR(char_get_act(ch), (flag)));
 }
 
 bool char_aff_flagged(const struct char_data *ch, int flag) {
-    return (IS_SET_AR(AFF_FLAGS(ch), (flag)));
+    return (IS_SET_AR(char_get_affected_by(ch), (flag)));
 }
 
 bool char_prf_flagged(const struct char_data *ch, int flag) {
@@ -4742,11 +4742,11 @@ bool char_prf_flagged(const struct char_data *ch, int flag) {
 }
 
 bool char_adm_flagged(const struct char_data *ch, int flag) {
-    return (IS_SET_AR(ADM_FLAGS(ch), (flag)));
+    return (IS_SET_AR(char_get_admflags(ch), (flag)));
 }
 
 bool char_body_flagged(const struct char_data *ch, int flag) {
-    return (IS_SET_AR(BODY_PARTS(ch), (flag)));
+    return (IS_SET_AR(char_get_bodyparts(ch), (flag)));
 }
 
 bool char_is_affected(const struct char_data *ch, int skill) {
@@ -4754,7 +4754,7 @@ bool char_is_affected(const struct char_data *ch, int skill) {
 }
 
 bool char_plr_toggle(struct char_data *ch, int flag) {
-    return ((TOGGLE_BIT_AR(PLR_FLAGS(ch), (flag))) & Q_BIT(flag));
+    return ((TOGGLE_BIT_AR(char_get_act(ch), (flag))) & Q_BIT(flag));
 }
 
 bool char_prf_toggle(struct char_data *ch, int flag) {
@@ -4762,7 +4762,7 @@ bool char_prf_toggle(struct char_data *ch, int flag) {
 }
 
 bool char_aff_toggle(struct char_data *ch, int flag) {
-    return ((TOGGLE_BIT_AR(AFF_FLAGS(ch), (flag))) & Q_BIT(flag));
+    return ((TOGGLE_BIT_AR(char_get_affected_by(ch), (flag))) & Q_BIT(flag));
 }
 
 bool char_is_dead(const struct char_data *ch) {
@@ -4770,11 +4770,11 @@ bool char_is_dead(const struct char_data *ch) {
 }
 
 zone_vnum char_in_zone(const struct char_data *ch) {
-    return (zone_table[(world[(IN_ROOM(ch))].zone)].number);
+    return (zone_table[(world[(char_get_in_room(ch))].zone)].number);
 }
 
 char *char_get_name(const struct char_data *ch) {
-    return (char_is_npc(ch) ? (ch)->short_descr : GET_PC_NAME(ch));
+    return (char_is_npc(ch) ? (ch)->short_descr : char_get_pc_name(ch));
 }
 
 char *char_get_title(const struct char_data *ch) {
@@ -4786,7 +4786,7 @@ char *char_get_user(const struct char_data *ch) {
 }
 
 int char_get_level(const struct char_data *ch) {
-    return (GET_CLASS_LEVEL(ch) + GET_LEVEL_ADJ(ch) + GET_HITDICE(ch));
+    return (char_get_class_level(ch) + char_get_level_adj(ch) + char_get_race_level(ch));
 }
 
 int char_get_class(const struct char_data *ch) {
@@ -4794,7 +4794,7 @@ int char_get_class(const struct char_data *ch) {
 }
 
 int char_get_class_ranks(const struct char_data *ch, int whichclass) {
-    return (GET_CLASS_NONEPIC(ch, whichclass) + GET_CLASS_EPIC(ch, whichclass));
+    return (char_get_chclasses(ch, whichclass) + char_get_epicclasses(ch, whichclass));
 }
 
 int char_get_pc_height(struct char_data *ch) {
@@ -4806,16 +4806,16 @@ int char_get_pc_weight(struct char_data *ch) {
 }
 
 double char_get_mutboost(struct char_data *ch) {
-    return (char_is_mutant(ch) ? ((GET_GENOME(ch, 0) == 1
-           || GET_GENOME(ch, 1) == 1) ? (char_get_speedcalc(ch) + char_get_speedbonus(ch) + GET_SPEEDBOOST(ch)) * 0.3 : 0) : 0);
+    return (char_is_mutant(ch) ? ((char_get_genome(ch, 0) == 1
+           || char_get_genome(ch, 1) == 1) ? (char_get_speedcalc(ch) + char_get_speedbonus(ch) + char_get_speedboost(ch)) * 0.3 : 0) : 0);
 }
 
 double char_get_speedi(struct char_data *ch) {
-    return (char_get_speedcalc(ch) + char_get_speedbonus(ch) + GET_SPEEDBOOST(ch) + char_get_mutboost(ch));
+    return (char_get_speedcalc(ch) + char_get_speedbonus(ch) + char_get_speedboost(ch) + char_get_mutboost(ch));
 }
 
 double char_get_speedcalc(struct char_data *ch) {
-    return (char_is_grap(ch) ? GET_CHA(ch) : (char_is_inferior(ch) ? (char_aff_flagged(ch, AFF_FLYING) ? (char_get_speedvar(ch) * 1.25) : char_get_speedvar(ch)) : char_get_speedvar(ch)));
+    return (char_is_grap(ch) ? char_get_aff_abils_cha(ch) : (char_is_inferior(ch) ? (char_aff_flagged(ch, AFF_FLYING) ? (char_get_speedvar(ch) * 1.25) : char_get_speedvar(ch)) : char_get_speedvar(ch)));
 }
 
 double char_get_speedbonus(struct char_data *ch) {
@@ -4823,7 +4823,7 @@ double char_get_speedbonus(struct char_data *ch) {
 }
 
 double char_get_speedvar(struct char_data *ch) {
-    return (char_get_speedvem(ch) > GET_CHA(ch) ? char_get_speedvem(ch) : GET_CHA(ch));
+    return (char_get_speedvem(ch) > char_get_aff_abils_cha(ch) ? char_get_speedvem(ch) : char_get_aff_abils_cha(ch));
 }
 
 double char_get_speedvem(struct char_data *ch) {
@@ -4831,11 +4831,11 @@ double char_get_speedvem(struct char_data *ch) {
 }
 
 bool char_is_grap(const struct char_data *ch) {
-    return (GRAPPLING(ch) || GRAPPLED(ch));
+    return (char_get_grappling(ch) || char_get_grappled(ch));
 }
 
 long char_get_speedint(struct char_data *ch) {
-    return (char_is_bio(ch) ? ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1200) / 1200) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)) : ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1000) / 1000) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)));
+    return (char_is_bio(ch) ? ((char_get_aff_abils_cha(ch) * char_get_aff_abils_dex(ch)) * (GET_MAX_HIT(ch) / 1200) / 1200) + (char_get_aff_abils_cha(ch) * (char_get_kaioken(ch) * 100)) : ((char_get_aff_abils_cha(ch) * char_get_aff_abils_dex(ch)) * (GET_MAX_HIT(ch) / 1000) / 1000) + (char_get_aff_abils_cha(ch) * (char_get_kaioken(ch) * 100)));
 }
 
 bool char_is_inferior(const struct char_data *ch) {
@@ -4855,7 +4855,7 @@ bool char_has_genome(const struct char_data *ch, int i) {
 }
 
 double char_get_blessbonus(struct char_data *ch) {
-    return (char_aff_flagged(ch, AFF_BLESS) ? (GET_BLESSLVL(ch) >= 100 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.1 : GET_BLESSLVL(ch) >= 60 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.05 : GET_BLESSLVL(ch) >= 40 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.02 : 0) : 0);
+    return (char_aff_flagged(ch, AFF_BLESS) ? (char_get_blesslvl(ch) >= 100 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.1 : char_get_blesslvl(ch) >= 60 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.05 : char_get_blesslvl(ch) >= 40 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.02 : 0) : 0);
 }
 
 double char_get_poself(struct char_data *ch) {
@@ -4867,7 +4867,7 @@ double char_get_posebonus(struct char_data *ch) {
 }
 
 double char_get_lifebonus(struct char_data *ch) {
-    return (char_is_arlian(ch) ? ((GET_MAX_MANA(ch) * 0.01) * (GET_MOLT_LEVEL(ch) / 100)) + ((GET_MAX_MOVE(ch) * 0.01) * (GET_MOLT_LEVEL(ch) / 100)) : 0);
+    return (char_is_arlian(ch) ? ((GET_MAX_MANA(ch) * 0.01) * (char_get_moltlevel(ch) / 100)) + ((GET_MAX_MOVE(ch) * 0.01) * (char_get_moltlevel(ch) / 100)) : 0);
 }
 
 double char_get_lifebonuses(struct char_data *ch) {
@@ -4875,11 +4875,11 @@ double char_get_lifebonuses(struct char_data *ch) {
 }
 
 int char_get_save(const struct char_data *ch, int i) {
-    return (GET_SAVE_BASE(ch, i) + GET_SAVE_MOD(ch, i));
+    return (char_get_saving_throw(ch, i) + char_get_apply_saving_throw(ch, i));
 }
 
 int char_get_skill(const struct char_data *ch, int i) {
-    return ((ch)->skills[i].base + GET_SKILL_BONUS(ch, i));
+    return ((ch)->skills[i].base + char_get_skills_mod(ch, i));
 }
 
 spec_proc_func char_get_mob_spec(const struct char_data *ch) {
@@ -4887,34 +4887,34 @@ spec_proc_func char_get_mob_spec(const struct char_data *ch) {
 }
 
 mob_vnum char_get_mob_vnum(const struct char_data *mob) {
-    return (char_is_mob(mob) ? mob_index[GET_MOB_RNUM(mob)].vnum : NOBODY);
+    return (char_is_mob(mob) ? mob_index[char_get_nr(mob)].vnum : NOBODY);
 }
 
 bool char_is_awake(const struct char_data *ch) {
-    return (GET_POS(ch) > POS_SLEEPING);
+    return (char_get_position(ch) > POS_SLEEPING);
 }
 
 bool char_can_see_in_dark(const struct char_data *ch) {
     return (char_aff_flagged(ch, AFF_INFRAVISION)
            || (!char_is_npc(ch) && char_prf_flagged(ch, PRF_HOLYLIGHT))
-           || (char_is_mutant(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4))
+           || (char_is_mutant(ch) && (char_get_genome(ch, 0) == 4 || char_get_genome(ch, 1) == 4))
            || char_plr_flagged(ch, PLR_AURALIGHT));
 }
 
 bool char_is_good(const struct char_data *ch) {
-    return (GET_ALIGNMENT(ch) >= 50);
+    return (char_get_alignment(ch) >= 50);
 }
 
 bool char_is_evil(const struct char_data *ch) {
-    return (GET_ALIGNMENT(ch) <= -50);
+    return (char_get_alignment(ch) <= -50);
 }
 
 bool char_is_lawful(const struct char_data *ch) {
-    return (GET_ETHIC_ALIGNMENT(ch) >= 350);
+    return (char_get_alignment_ethic(ch) >= 350);
 }
 
 bool char_is_chaotic(const struct char_data *ch) {
-    return (GET_ETHIC_ALIGNMENT(ch) <= -350);
+    return (char_get_alignment_ethic(ch) <= -350);
 }
 
 bool char_is_neutral(const struct char_data *ch) {
@@ -4926,13 +4926,13 @@ int char_align_type(const struct char_data *ch) {
 }
 
 bool char_in_arena(const struct char_data *ch) {
-    return (rroom_get_vnum(IN_ROOM(ch)) >= 17800 && rroom_get_vnum(IN_ROOM(ch)) <= 17874);
+    return (rroom_get_vnum(char_get_in_room(ch)) >= 17800 && rroom_get_vnum(char_get_in_room(ch)) <= 17874);
 }
 
 bool char_light_ok(const struct char_data *sub) {
     return (!char_aff_flagged(sub, AFF_BLIND)
            && !char_plr_flagged(sub, PLR_EYEC)
-           && (rroom_is_light(IN_ROOM(sub)) || char_aff_flagged((sub), AFF_INFRAVISION) || (char_is_mutant(sub) && (GET_GENOME(sub, 0) == 4 || GET_GENOME(sub, 1) == 4)) || char_plr_flagged(sub, PLR_AURALIGHT)));
+           && (rroom_is_light(char_get_in_room(sub)) || char_aff_flagged((sub), AFF_INFRAVISION) || (char_is_mutant(sub) && (char_get_genome(sub, 0) == 4 || char_get_genome(sub, 1) == 4)) || char_plr_flagged(sub, PLR_AURALIGHT)));
 }
 
 bool char_invis_ok(const struct char_data *sub, const struct char_data *obj) {
@@ -4953,7 +4953,7 @@ bool char_is_self(const struct char_data *sub, const struct char_data *obj) {
 
 bool char_can_see(const struct char_data *sub, const struct char_data *obj) {
     return (char_is_self(sub, obj)
-           || ((GET_ADMLEVEL(sub) >= (char_is_npc(obj) ? 0 : GET_INVIS_LEV(obj))) && char_imm_can_see(sub, obj) && (char_not_hidden(obj) || GET_ADMLEVEL(sub) > 0)));
+           || ((char_get_admlevel(sub) >= (char_is_npc(obj) ? 0 : GET_INVIS_LEV(obj))) && char_imm_can_see(sub, obj) && (char_not_hidden(obj) || char_get_admlevel(sub) > 0)));
 }
 
 bool char_not_hidden(const struct char_data *ch) {
@@ -4980,32 +4980,32 @@ bool char_can_see_obj(const struct char_data *sub, const struct obj_data *obj) {
 }
 
 bool char_can_carry_obj(struct char_data *ch, struct obj_data *obj) {
-    return (((IS_CARRYING_W(ch) + GET_OBJ_WEIGHT(obj)) <= CAN_CARRY_W(ch))
-           && ((IS_CARRYING_N(ch) + 1) <= CAN_CARRY_N(ch)));
+    return (((char_get_carry_weight(ch) + obj_get_weight(obj)) <= CAN_CARRY_W(ch))
+           && ((char_get_carry_items(ch) + 1) <= CAN_CARRY_N(ch)));
 }
 
 bool char_can_get_obj(struct char_data *ch, struct obj_data *obj) {
     return (obj_can_wear((obj), ITEM_WEAR_TAKE)
-           && !SITTING(obj)
+           && !obj_get_sitting(obj)
            && char_can_carry_obj((ch),(obj))
            && char_can_see_obj((ch),(obj)));
 }
 
 bool char_disg(const struct char_data *ch, const struct char_data *vict) {
     return ((!char_plr_flagged(ch, PLR_DISGUISED))
-           || (char_plr_flagged(ch, PLR_DISGUISED) && (GET_ADMLEVEL(vict) > 0 || char_is_npc(vict))));
+           || (char_plr_flagged(ch, PLR_DISGUISED) && (char_get_admlevel(vict) > 0 || char_is_npc(vict))));
 }
 
 bool char_introd(struct char_data *ch, struct char_data *vict) {
     return (ch == vict
            || readIntro(ch, vict) == 1
-           || (char_is_npc(vict) || char_is_npc(ch) || (GET_ADMLEVEL(ch) > 0 || GET_ADMLEVEL(vict) > 0)));
+           || (char_is_npc(vict) || char_is_npc(ch) || (char_get_admlevel(ch) > 0 || char_get_admlevel(vict) > 0)));
 }
 
 bool char_iswiz(const struct char_data *ch, const struct char_data *vict) {
     return (ch == vict
-           || GET_ADMLEVEL(ch) > 0
-           || GET_ADMLEVEL(vict) > 0
+           || char_get_admlevel(ch) > 0
+           || char_get_admlevel(vict) > 0
            || char_is_npc(vict)
            || char_is_npc(ch));
 }
@@ -5023,9 +5023,9 @@ char *obj_fname_for(const struct obj_data *obj, const struct char_data *vict) {
 }
 
 bool char_can_go(const struct char_data *ch, int door) {
-    return (EXIT(ch,door)
-           && (EXIT(ch,door)->to_room != NOWHERE)
-           && !IS_SET(EXIT(ch, door)->exit_info, EX_CLOSED));
+    return (char_get_exit(ch, door)
+           && (char_get_exit(ch, door)->to_room != NOWHERE)
+           && !IS_SET(char_get_exit(ch, door)->exit_info, EX_CLOSED));
 }
 
 bool char_is_roshi(const struct char_data *ch) {
@@ -5185,11 +5185,11 @@ bool char_is_cheap_race(const struct char_data *ch) {
 }
 
 bool char_spar_train(const struct char_data *ch) {
-    return (FIGHTING(ch)
+    return (char_get_fighting(ch)
            && !char_is_npc(ch)
            && char_plr_flagged(ch, PLR_SPAR)
-           && !char_is_npc(FIGHTING(ch))
-           && char_plr_flagged(FIGHTING(ch), PLR_SPAR));
+           && !char_is_npc(char_get_fighting(ch))
+           && char_plr_flagged(char_get_fighting(ch), PLR_SPAR));
 }
 
 bool char_is_nonptrans(const struct char_data *ch) {
@@ -5232,119 +5232,119 @@ bool char_is_oozaru_race(const struct char_data *ch) {
 }
 
 bool char_ether_stream(const struct char_data *ch) {
-    return (rroom_flagged(IN_ROOM(ch), ROOM_EARTH)
-           || rroom_flagged(IN_ROOM(ch), ROOM_AETHER)
-           || rroom_flagged(IN_ROOM(ch), ROOM_NAMEK)
-           || rroom_planet_zenith(IN_ROOM(ch)));
+    return (rroom_flagged(char_get_in_room(ch), ROOM_EARTH)
+           || rroom_flagged(char_get_in_room(ch), ROOM_AETHER)
+           || rroom_flagged(char_get_in_room(ch), ROOM_NAMEK)
+           || rroom_planet_zenith(char_get_in_room(ch)));
 }
 
 bool char_has_moon(const struct char_data *ch) {
-    return (rroom_flagged(IN_ROOM(ch), ROOM_VEGETA)
-           || rroom_flagged(IN_ROOM(ch), ROOM_EARTH)
-           || rroom_flagged(IN_ROOM(ch), ROOM_FRIGID)
-           || rroom_flagged(IN_ROOM(ch), ROOM_AETHER));
+    return (rroom_flagged(char_get_in_room(ch), ROOM_VEGETA)
+           || rroom_flagged(char_get_in_room(ch), ROOM_EARTH)
+           || rroom_flagged(char_get_in_room(ch), ROOM_FRIGID)
+           || rroom_flagged(char_get_in_room(ch), ROOM_AETHER));
 }
 
 bool char_has_arms(const struct char_data *ch) {
-    return (((char_is_npc(ch) && (char_mob_flagged(ch, MOB_LARM) || char_mob_flagged(ch, MOB_RARM))) || GET_LIMBCOND(ch, 1) > 0 || GET_LIMBCOND(ch, 2) > 0 || char_plr_flagged(ch, PLR_CRARM) || char_plr_flagged(ch, PLR_CLARM))
-           && ((!GRAPPLING(ch) && !GRAPPLED(ch)) || (GRAPPLING(ch) && GRAPTYPE(ch) == 3) || (GRAPPLED(ch) && GRAPTYPE(ch) != 1 && GRAPTYPE(ch) != 4)));
+    return (((char_is_npc(ch) && (char_mob_flagged(ch, MOB_LARM) || char_mob_flagged(ch, MOB_RARM))) || char_get_limb_condition(ch, (1)-1) > 0 || char_get_limb_condition(ch, (2)-1) > 0 || char_plr_flagged(ch, PLR_CRARM) || char_plr_flagged(ch, PLR_CLARM))
+           && ((!char_get_grappling(ch) && !char_get_grappled(ch)) || (char_get_grappling(ch) && char_get_grap(ch) == 3) || (char_get_grappled(ch) && char_get_grap(ch) != 1 && char_get_grap(ch) != 4)));
 }
 
 bool char_has_legs(const struct char_data *ch) {
-    return (((char_is_npc(ch) && (char_mob_flagged(ch, MOB_LLEG) || char_mob_flagged(ch, MOB_RLEG))) || GET_LIMBCOND(ch, 3) > 0 || GET_LIMBCOND(ch, 4) > 0 || char_plr_flagged(ch, PLR_CRLEG) || char_plr_flagged(ch, PLR_CLLEG))
-           && ((!GRAPPLING(ch) && !GRAPPLED(ch)) || (GRAPPLING(ch) && GRAPTYPE(ch) == 3) || (GRAPPLED(ch) && GRAPTYPE(ch) != 1)));
+    return (((char_is_npc(ch) && (char_mob_flagged(ch, MOB_LLEG) || char_mob_flagged(ch, MOB_RLEG))) || char_get_limb_condition(ch, (3)-1) > 0 || char_get_limb_condition(ch, (4)-1) > 0 || char_plr_flagged(ch, PLR_CRLEG) || char_plr_flagged(ch, PLR_CLLEG))
+           && ((!char_get_grappling(ch) && !char_get_grappled(ch)) || (char_get_grappling(ch) && char_get_grap(ch) == 3) || (char_get_grappled(ch) && char_get_grap(ch) != 1)));
 }
 
 bool char_is_human(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_HUMAN);
+    return (char_get_race(ch) == RACE_HUMAN);
 }
 
 bool char_is_saiyan(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_SAIYAN);
+    return (char_get_race(ch) == RACE_SAIYAN);
 }
 
 bool char_is_icer(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_ICER);
+    return (char_get_race(ch) == RACE_ICER);
 }
 
 bool char_is_konatsu(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_KONATSU);
+    return (char_get_race(ch) == RACE_KONATSU);
 }
 
 bool char_is_namek(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_NAMEK);
+    return (char_get_race(ch) == RACE_NAMEK);
 }
 
 bool char_is_mutant(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_MUTANT);
+    return (char_get_race(ch) == RACE_MUTANT);
 }
 
 bool char_is_kanassan(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_KANASSAN);
+    return (char_get_race(ch) == RACE_KANASSAN);
 }
 
 bool char_is_halfbreed(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_HALFBREED);
+    return (char_get_race(ch) == RACE_HALFBREED);
 }
 
 bool char_is_bio(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_BIO);
+    return (char_get_race(ch) == RACE_BIO);
 }
 
 bool char_is_android(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_ANDROID);
+    return (char_get_race(ch) == RACE_ANDROID);
 }
 
 bool char_is_demon(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_DEMON);
+    return (char_get_race(ch) == RACE_DEMON);
 }
 
 bool char_is_majin(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_MAJIN);
+    return (char_get_race(ch) == RACE_MAJIN);
 }
 
 bool char_is_kai(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_KAI);
+    return (char_get_race(ch) == RACE_KAI);
 }
 
 bool char_is_truffle(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_TRUFFLE);
+    return (char_get_race(ch) == RACE_TRUFFLE);
 }
 
 bool char_is_hoshijin(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_HOSHIJIN);
+    return (char_get_race(ch) == RACE_HOSHIJIN);
 }
 
 bool char_is_animal(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_ANIMAL);
+    return (char_get_race(ch) == RACE_ANIMAL);
 }
 
 bool char_is_saiba(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_SAIBA);
+    return (char_get_race(ch) == RACE_SAIBA);
 }
 
 bool char_is_serpent(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_SERPENT);
+    return (char_get_race(ch) == RACE_SERPENT);
 }
 
 bool char_is_ogre(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_OGRE);
+    return (char_get_race(ch) == RACE_OGRE);
 }
 
 bool char_is_yardratian(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_YARDRATIAN);
+    return (char_get_race(ch) == RACE_YARDRATIAN);
 }
 
 bool char_is_arlian(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_ARLIAN);
+    return (char_get_race(ch) == RACE_ARLIAN);
 }
 
 bool char_is_dragon(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_DRAGON);
+    return (char_get_race(ch) == RACE_DRAGON);
 }
 
 bool char_is_mechanical(const struct char_data *ch) {
-    return (GET_RACE(ch) == RACE_MECHANICAL);
+    return (char_get_race(ch) == RACE_MECHANICAL);
 }
 
 bool char_is_undead(const struct char_data *ch) {
@@ -5352,11 +5352,11 @@ bool char_is_undead(const struct char_data *ch) {
 }
 
 bool char_is_male(const struct char_data *ch) {
-    return (GET_SEX(ch) == SEX_MALE);
+    return (char_get_sex(ch) == SEX_MALE);
 }
 
 bool char_is_female(const struct char_data *ch) {
-    return (GET_SEX(ch) == SEX_FEMALE);
+    return (char_get_sex(ch) == SEX_FEMALE);
 }
 
 bool char_is_outside(const struct char_data *ch) {
@@ -5364,33 +5364,33 @@ bool char_is_outside(const struct char_data *ch) {
 }
 
 bool char_outside_roomflag(const struct char_data *ch) {
-    return (!rroom_flagged(IN_ROOM(ch), ROOM_INDOORS)
-           && !rroom_flagged(IN_ROOM(ch), ROOM_UNDERGROUND)
-           && !rroom_flagged(IN_ROOM(ch), ROOM_SPACE));
+    return (!rroom_flagged(char_get_in_room(ch), ROOM_INDOORS)
+           && !rroom_flagged(char_get_in_room(ch), ROOM_UNDERGROUND)
+           && !rroom_flagged(char_get_in_room(ch), ROOM_SPACE));
 }
 
 bool char_outside_secttype(const struct char_data *ch) {
-    return ((rroom_sect(IN_ROOM(ch)) != SECT_INSIDE)
-           && (rroom_sect(IN_ROOM(ch)) != SECT_UNDERWATER)
-           && (rroom_sect(IN_ROOM(ch)) != SECT_IMPORTANT)
-           && (rroom_sect(IN_ROOM(ch)) != SECT_SHOP)
-           && (rroom_sect(IN_ROOM(ch)) != SECT_SPACE));
+    return ((rroom_sect(char_get_in_room(ch)) != SECT_INSIDE)
+           && (rroom_sect(char_get_in_room(ch)) != SECT_UNDERWATER)
+           && (rroom_sect(char_get_in_room(ch)) != SECT_IMPORTANT)
+           && (rroom_sect(char_get_in_room(ch)) != SECT_SHOP)
+           && (rroom_sect(char_get_in_room(ch)) != SECT_SPACE));
 }
 
 char *char_hshr(const struct char_data *ch) {
-    return (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "his":"her") :"its");
+    return (char_get_sex(ch) ? (char_get_sex(ch)==SEX_MALE ? "his":"her") :"its");
 }
 
 char *char_hssh(const struct char_data *ch) {
-    return (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "he" :"she") : "it");
+    return (char_get_sex(ch) ? (char_get_sex(ch)==SEX_MALE ? "he" :"she") : "it");
 }
 
 char *char_hmhr(const struct char_data *ch) {
-    return (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "him":"her") : "it");
+    return (char_get_sex(ch) ? (char_get_sex(ch)==SEX_MALE ? "him":"her") : "it");
 }
 
 char *char_mafe(const struct char_data *ch) {
-    return (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "male":"female") : "questionably gendered");
+    return (char_get_sex(ch) ? (char_get_sex(ch)==SEX_MALE ? "male":"female") : "questionably gendered");
 }
 
 bool char_has_combat_feat(const struct char_data *ch, int i, int j) {
@@ -5406,5 +5406,1263 @@ int char_exit_level(const struct char_data *ch) {
 }
 
 int char_get_bank_interest(const struct char_data *ch) {
-    return MIN(25000, (int)(((double)GET_BANK_GOLD((ch)) * 0.04)));
+    return MIN(25000, (int)(((double)char_get_bank_gold((ch)) * 0.04)));
+}
+
+/* Field accessors (formerly accessor macros). */
+
+bitvector_t *char_get_act(const struct char_data *ch) {
+    return (bitvector_t *)ch->act; /* writable flag array, as the macro allowed */
+}
+
+bitvector_t *char_get_affected_by(const struct char_data *ch) {
+    return (bitvector_t *)ch->affected_by; /* writable flag array, as the macro allowed */
+}
+
+bitvector_t *char_get_admflags(const struct char_data *ch) {
+    return (bitvector_t *)ch->admflags; /* writable flag array, as the macro allowed */
+}
+
+room_rnum char_get_in_room(const struct char_data *ch) {
+    return ch->in_room;
+}
+
+void char_set_in_room(struct char_data *ch, room_rnum v) {
+    ch->in_room = v;
+}
+
+room_rnum char_get_was_in_room(const struct char_data *ch) {
+    return ch->was_in_room;
+}
+
+void char_set_was_in_room(struct char_data *ch, room_rnum v) {
+    ch->was_in_room = v;
+}
+
+char *char_get_pc_name(const struct char_data *ch) {
+    return ch->name;
+}
+
+void char_set_pc_name(struct char_data *ch, char *v) {
+    ch->name = v;
+}
+
+int char_get_starphase(const struct char_data *ch) {
+    return ch->starphase;
+}
+
+void char_set_starphase(struct char_data *ch, int v) {
+    ch->starphase = v;
+}
+
+int char_get_mimic(const struct char_data *ch) {
+    return ch->mimic;
+}
+
+void char_set_mimic(struct char_data *ch, int v) {
+    ch->mimic = v;
+}
+
+char *char_get_voice(const struct char_data *ch) {
+    return ch->voice;
+}
+
+void char_set_voice(struct char_data *ch, char *v) {
+    ch->voice = v;
+}
+
+char *char_get_clan(const struct char_data *ch) {
+    return ch->clan;
+}
+
+void char_set_clan(struct char_data *ch, char *v) {
+    ch->clan = v;
+}
+
+int char_get_transclass(const struct char_data *ch) {
+    return ch->transclass;
+}
+
+void char_set_transclass(struct char_data *ch, int v) {
+    ch->transclass = v;
+}
+
+char *char_get_feature(const struct char_data *ch) {
+    return ch->feature;
+}
+
+void char_set_feature(struct char_data *ch, char *v) {
+    ch->feature = v;
+}
+
+char *char_get_loguser(const struct char_data *ch) {
+    return ch->loguser;
+}
+
+void char_set_loguser(struct char_data *ch, char *v) {
+    ch->loguser = v;
+}
+
+int char_get_crank(const struct char_data *ch) {
+    return ch->crank;
+}
+
+void char_set_crank(struct char_data *ch, int v) {
+    ch->crank = v;
+}
+
+int char_get_admlevel(const struct char_data *ch) {
+    return ch->admlevel;
+}
+
+void char_set_admlevel(struct char_data *ch, int v) {
+    ch->admlevel = v;
+}
+
+int char_get_class_level(const struct char_data *ch) {
+    return ch->level;
+}
+
+void char_set_class_level(struct char_data *ch, int v) {
+    ch->level = v;
+}
+
+int char_get_level_adj(const struct char_data *ch) {
+    return ch->level_adj;
+}
+
+void char_set_level_adj(struct char_data *ch, int v) {
+    ch->level_adj = v;
+}
+
+int char_get_race_level(const struct char_data *ch) {
+    return ch->race_level;
+}
+
+void char_set_race_level(struct char_data *ch, int v) {
+    ch->race_level = v;
+}
+
+int char_get_pfilepos(const struct char_data *ch) {
+    return ch->pfilepos;
+}
+
+void char_set_pfilepos(struct char_data *ch, int v) {
+    ch->pfilepos = v;
+}
+
+int char_get_chclasses(const struct char_data *ch, int i) {
+    return ch->chclasses[i];
+}
+
+void char_set_chclasses(struct char_data *ch, int i, int v) {
+    ch->chclasses[i] = v;
+}
+
+int char_get_epicclasses(const struct char_data *ch, int i) {
+    return ch->epicclasses[i];
+}
+
+void char_set_epicclasses(struct char_data *ch, int i, int v) {
+    ch->epicclasses[i] = v;
+}
+
+int char_get_race(const struct char_data *ch) {
+    return ch->race;
+}
+
+void char_set_race(struct char_data *ch, int v) {
+    ch->race = v;
+}
+
+int8_t char_get_hairl(const struct char_data *ch) {
+    return ch->hairl;
+}
+
+void char_set_hairl(struct char_data *ch, int8_t v) {
+    ch->hairl = v;
+}
+
+int8_t char_get_hairc(const struct char_data *ch) {
+    return ch->hairc;
+}
+
+void char_set_hairc(struct char_data *ch, int8_t v) {
+    ch->hairc = v;
+}
+
+int8_t char_get_hairs(const struct char_data *ch) {
+    return ch->hairs;
+}
+
+void char_set_hairs(struct char_data *ch, int8_t v) {
+    ch->hairs = v;
+}
+
+int8_t char_get_skin(const struct char_data *ch) {
+    return ch->skin;
+}
+
+void char_set_skin(struct char_data *ch, int8_t v) {
+    ch->skin = v;
+}
+
+int8_t char_get_eye(const struct char_data *ch) {
+    return ch->eye;
+}
+
+void char_set_eye(struct char_data *ch, int8_t v) {
+    ch->eye = v;
+}
+
+int8_t char_get_distfea(const struct char_data *ch) {
+    return ch->distfea;
+}
+
+void char_set_distfea(struct char_data *ch, int8_t v) {
+    ch->distfea = v;
+}
+
+room_vnum char_get_hometown(const struct char_data *ch) {
+    return ch->hometown;
+}
+
+void char_set_hometown(struct char_data *ch, room_vnum v) {
+    ch->hometown = v;
+}
+
+uint8_t char_get_weight(const struct char_data *ch) {
+    return ch->weight;
+}
+
+void char_set_weight(struct char_data *ch, uint8_t v) {
+    ch->weight = v;
+}
+
+uint8_t char_get_height(const struct char_data *ch) {
+    return ch->height;
+}
+
+void char_set_height(struct char_data *ch, uint8_t v) {
+    ch->height = v;
+}
+
+int8_t char_get_sex(const struct char_data *ch) {
+    return ch->sex;
+}
+
+void char_set_sex(struct char_data *ch, int8_t v) {
+    ch->sex = v;
+}
+
+int char_get_rp(const struct char_data *ch) {
+    return ch->rp;
+}
+
+void char_set_rp(struct char_data *ch, int v) {
+    ch->rp = v;
+}
+
+int char_get_rbank(const struct char_data *ch) {
+    return ch->rbank;
+}
+
+void char_set_rbank(struct char_data *ch, int v) {
+    ch->rbank = v;
+}
+
+int char_get_trp(const struct char_data *ch) {
+    return ch->trp;
+}
+
+void char_set_trp(struct char_data *ch, int v) {
+    ch->trp = v;
+}
+
+int64_t char_get_suppression(const struct char_data *ch) {
+    return ch->suppression;
+}
+
+void char_set_suppression(struct char_data *ch, int64_t v) {
+    ch->suppression = v;
+}
+
+int64_t char_get_suppressed(const struct char_data *ch) {
+    return ch->suppressed;
+}
+
+void char_set_suppressed(struct char_data *ch, int64_t v) {
+    ch->suppressed = v;
+}
+
+char *char_get_rdisplay(const struct char_data *ch) {
+    return ch->rdisplay;
+}
+
+void char_set_rdisplay(struct char_data *ch, char *v) {
+    ch->rdisplay = v;
+}
+
+int8_t char_get_aff_abils_str(const struct char_data *ch) {
+    return ch->aff_abils.str;
+}
+
+void char_set_aff_abils_str(struct char_data *ch, int8_t v) {
+    ch->aff_abils.str = v;
+}
+
+int8_t char_get_aff_abils_dex(const struct char_data *ch) {
+    return ch->aff_abils.dex;
+}
+
+void char_set_aff_abils_dex(struct char_data *ch, int8_t v) {
+    ch->aff_abils.dex = v;
+}
+
+int8_t char_get_aff_abils_intel(const struct char_data *ch) {
+    return ch->aff_abils.intel;
+}
+
+void char_set_aff_abils_intel(struct char_data *ch, int8_t v) {
+    ch->aff_abils.intel = v;
+}
+
+int8_t char_get_aff_abils_wis(const struct char_data *ch) {
+    return ch->aff_abils.wis;
+}
+
+void char_set_aff_abils_wis(struct char_data *ch, int8_t v) {
+    ch->aff_abils.wis = v;
+}
+
+int8_t char_get_aff_abils_con(const struct char_data *ch) {
+    return ch->aff_abils.con;
+}
+
+void char_set_aff_abils_con(struct char_data *ch, int8_t v) {
+    ch->aff_abils.con = v;
+}
+
+int8_t char_get_aff_abils_cha(const struct char_data *ch) {
+    return ch->aff_abils.cha;
+}
+
+void char_set_aff_abils_cha(struct char_data *ch, int8_t v) {
+    ch->aff_abils.cha = v;
+}
+
+int64_t char_get_exp(const struct char_data *ch) {
+    return ch->exp;
+}
+
+void char_set_exp(struct char_data *ch, int64_t v) {
+    ch->exp = v;
+}
+
+int char_get_death_type(const struct char_data *ch) {
+    return ch->death_type;
+}
+
+void char_set_death_type(struct char_data *ch, int v) {
+    ch->death_type = v;
+}
+
+int char_get_sleeptime(const struct char_data *ch) {
+    return ch->sleeptime;
+}
+
+void char_set_sleeptime(struct char_data *ch, int v) {
+    ch->sleeptime = v;
+}
+
+int char_get_foodr(const struct char_data *ch) {
+    return ch->foodr;
+}
+
+void char_set_foodr(struct char_data *ch, int v) {
+    ch->foodr = v;
+}
+
+int char_get_altitude(const struct char_data *ch) {
+    return ch->altitude;
+}
+
+void char_set_altitude(struct char_data *ch, int v) {
+    ch->altitude = v;
+}
+
+int64_t char_get_charge(const struct char_data *ch) {
+    return ch->charge;
+}
+
+void char_set_charge(struct char_data *ch, int64_t v) {
+    ch->charge = v;
+}
+
+int64_t char_get_chargeto(const struct char_data *ch) {
+    return ch->chargeto;
+}
+
+void char_set_chargeto(struct char_data *ch, int64_t v) {
+    ch->chargeto = v;
+}
+
+int char_get_armor(const struct char_data *ch) {
+    return ch->armor;
+}
+
+void char_set_armor(struct char_data *ch, int v) {
+    ch->armor = v;
+}
+
+int64_t char_get_ki(const struct char_data *ch) {
+    return ch->ki;
+}
+
+void char_set_ki(struct char_data *ch, int64_t v) {
+    ch->ki = v;
+}
+
+int64_t char_get_max_ki(const struct char_data *ch) {
+    return ch->max_ki;
+}
+
+void char_set_max_ki(struct char_data *ch, int64_t v) {
+    ch->max_ki = v;
+}
+
+room_vnum char_get_droom(const struct char_data *ch) {
+    return ch->droom;
+}
+
+void char_set_droom(struct char_data *ch, room_vnum v) {
+    ch->droom = v;
+}
+
+int char_get_overf(const struct char_data *ch) {
+    return ch->overf;
+}
+
+void char_set_overf(struct char_data *ch, int v) {
+    ch->overf = v;
+}
+
+int char_get_spam(const struct char_data *ch) {
+    return ch->spam;
+}
+
+void char_set_spam(struct char_data *ch, int v) {
+    ch->spam = v;
+}
+
+time_t char_get_lastpl(const struct char_data *ch) {
+    return ch->lastpl;
+}
+
+void char_set_lastpl(struct char_data *ch, time_t v) {
+    ch->lastpl = v;
+}
+
+time_t char_get_deathtime(const struct char_data *ch) {
+    return ch->deathtime;
+}
+
+void char_set_deathtime(struct char_data *ch, time_t v) {
+    ch->deathtime = v;
+}
+
+time_t char_get_rewtime(const struct char_data *ch) {
+    return ch->rewtime;
+}
+
+void char_set_rewtime(struct char_data *ch, time_t v) {
+    ch->rewtime = v;
+}
+
+int char_get_dcount(const struct char_data *ch) {
+    return ch->dcount;
+}
+
+void char_set_dcount(struct char_data *ch, int v) {
+    ch->dcount = v;
+}
+
+time_t char_get_lboard(const struct char_data *ch, int i) {
+    return ch->lboard[i];
+}
+
+void char_set_lboard(struct char_data *ch, int i, time_t v) {
+    ch->lboard[i] = v;
+}
+
+int char_get_limb_condition(const struct char_data *ch, int i) {
+    return ch->limb_condition[i];
+}
+
+void char_set_limb_condition(struct char_data *ch, int i, int v) {
+    ch->limb_condition[i] = v;
+}
+
+int char_get_powerattack(const struct char_data *ch) {
+    return ch->powerattack;
+}
+
+void char_set_powerattack(struct char_data *ch, int v) {
+    ch->powerattack = v;
+}
+
+int char_get_bonuses(const struct char_data *ch, int i) {
+    return ch->bonuses[i];
+}
+
+void char_set_bonuses(struct char_data *ch, int i, int v) {
+    ch->bonuses[i] = v;
+}
+
+int char_get_transcost(const struct char_data *ch, int i) {
+    return ch->transcost[i];
+}
+
+void char_set_transcost(struct char_data *ch, int i, int v) {
+    ch->transcost[i] = v;
+}
+
+int char_get_ccpoints(const struct char_data *ch) {
+    return ch->ccpoints;
+}
+
+void char_set_ccpoints(struct char_data *ch, int v) {
+    ch->ccpoints = v;
+}
+
+int char_get_negcount(const struct char_data *ch) {
+    return ch->negcount;
+}
+
+void char_set_negcount(struct char_data *ch, int v) {
+    ch->negcount = v;
+}
+
+int char_get_genome(const struct char_data *ch, int i) {
+    return ch->genome[i];
+}
+
+void char_set_genome(struct char_data *ch, int i, int v) {
+    ch->genome[i] = v;
+}
+
+int char_get_combo(const struct char_data *ch) {
+    return ch->combo;
+}
+
+void char_set_combo(struct char_data *ch, int v) {
+    ch->combo = v;
+}
+
+int char_get_lastattack(const struct char_data *ch) {
+    return ch->lastattack;
+}
+
+void char_set_lastattack(struct char_data *ch, int v) {
+    ch->lastattack = v;
+}
+
+int char_get_combhits(const struct char_data *ch) {
+    return ch->combhits;
+}
+
+void char_set_combhits(struct char_data *ch, int v) {
+    ch->combhits = v;
+}
+
+int char_get_aura(const struct char_data *ch) {
+    return ch->aura;
+}
+
+void char_set_aura(struct char_data *ch, int v) {
+    ch->aura = v;
+}
+
+room_vnum char_get_radar1(const struct char_data *ch) {
+    return ch->radar1;
+}
+
+void char_set_radar1(struct char_data *ch, room_vnum v) {
+    ch->radar1 = v;
+}
+
+room_vnum char_get_radar2(const struct char_data *ch) {
+    return ch->radar2;
+}
+
+void char_set_radar2(struct char_data *ch, room_vnum v) {
+    ch->radar2 = v;
+}
+
+room_vnum char_get_radar3(const struct char_data *ch) {
+    return ch->radar3;
+}
+
+void char_set_radar3(struct char_data *ch, room_vnum v) {
+    ch->radar3 = v;
+}
+
+int char_get_ping(const struct char_data *ch) {
+    return ch->ping;
+}
+
+void char_set_ping(struct char_data *ch, int v) {
+    ch->ping = v;
+}
+
+int char_get_skill_slots(const struct char_data *ch) {
+    return ch->skill_slots;
+}
+
+void char_set_skill_slots(struct char_data *ch, int v) {
+    ch->skill_slots = v;
+}
+
+int char_get_tail_growth(const struct char_data *ch) {
+    return ch->tail_growth;
+}
+
+void char_set_tail_growth(struct char_data *ch, int v) {
+    ch->tail_growth = v;
+}
+
+int char_get_rage_meter(const struct char_data *ch) {
+    return ch->rage_meter;
+}
+
+void char_set_rage_meter(struct char_data *ch, int v) {
+    ch->rage_meter = v;
+}
+
+int char_get_personality(const struct char_data *ch) {
+    return ch->personality;
+}
+
+void char_set_personality(struct char_data *ch, int v) {
+    ch->personality = v;
+}
+
+int char_get_combine(const struct char_data *ch) {
+    return ch->combine;
+}
+
+void char_set_combine(struct char_data *ch, int v) {
+    ch->combine = v;
+}
+
+int char_get_preference(const struct char_data *ch) {
+    return ch->preference;
+}
+
+void char_set_preference(struct char_data *ch, int v) {
+    ch->preference = v;
+}
+
+int char_get_relax_count(const struct char_data *ch) {
+    return ch->relax_count;
+}
+
+void char_set_relax_count(struct char_data *ch, int v) {
+    ch->relax_count = v;
+}
+
+int char_get_blesslvl(const struct char_data *ch) {
+    return ch->blesslvl;
+}
+
+void char_set_blesslvl(struct char_data *ch, int v) {
+    ch->blesslvl = v;
+}
+
+int char_get_asb(const struct char_data *ch) {
+    return ch->asb;
+}
+
+void char_set_asb(struct char_data *ch, int v) {
+    ch->asb = v;
+}
+
+int char_get_regen(const struct char_data *ch) {
+    return ch->regen;
+}
+
+void char_set_regen(struct char_data *ch, int v) {
+    ch->regen = v;
+}
+
+int char_get_lifeperc(const struct char_data *ch) {
+    return ch->lifeperc;
+}
+
+void char_set_lifeperc(struct char_data *ch, int v) {
+    ch->lifeperc = v;
+}
+
+short char_get_stupidkiss(const struct char_data *ch) {
+    return ch->stupidkiss;
+}
+
+void char_set_stupidkiss(struct char_data *ch, short v) {
+    ch->stupidkiss = v;
+}
+
+int char_get_speedboost(const struct char_data *ch) {
+    return ch->speedboost;
+}
+
+void char_set_speedboost(struct char_data *ch, int v) {
+    ch->speedboost = v;
+}
+
+int char_get_backstabcool(const struct char_data *ch) {
+    return ch->backstabcool;
+}
+
+void char_set_backstabcool(struct char_data *ch, int v) {
+    ch->backstabcool = v;
+}
+
+int char_get_con_cooldown(const struct char_data *ch) {
+    return ch->con_cooldown;
+}
+
+void char_set_con_cooldown(struct char_data *ch, int v) {
+    ch->con_cooldown = v;
+}
+
+int64_t char_get_barrier(const struct char_data *ch) {
+    return ch->barrier;
+}
+
+void char_set_barrier(struct char_data *ch, int64_t v) {
+    ch->barrier = v;
+}
+
+int char_get_gold(const struct char_data *ch) {
+    return ch->gold;
+}
+
+void char_set_gold(struct char_data *ch, int v) {
+    ch->gold = v;
+}
+
+int char_get_kaioken(const struct char_data *ch) {
+    return ch->kaioken;
+}
+
+void char_set_kaioken(struct char_data *ch, int v) {
+    ch->kaioken = v;
+}
+
+int char_get_boosts(const struct char_data *ch) {
+    return ch->boosts;
+}
+
+void char_set_boosts(struct char_data *ch, int v) {
+    ch->boosts = v;
+}
+
+int char_get_majinize(const struct char_data *ch) {
+    return ch->majinize;
+}
+
+void char_set_majinize(struct char_data *ch, int v) {
+    ch->majinize = v;
+}
+
+int64_t char_get_majinizer(const struct char_data *ch) {
+    return ch->majinizer;
+}
+
+void char_set_majinizer(struct char_data *ch, int64_t v) {
+    ch->majinizer = v;
+}
+
+short char_get_fury(const struct char_data *ch) {
+    return ch->fury;
+}
+
+void char_set_fury(struct char_data *ch, short v) {
+    ch->fury = v;
+}
+
+int char_get_upgrade(const struct char_data *ch) {
+    return ch->upgrade;
+}
+
+void char_set_upgrade(struct char_data *ch, int v) {
+    ch->upgrade = v;
+}
+
+int char_get_forgeting(const struct char_data *ch) {
+    return ch->forgeting;
+}
+
+void char_set_forgeting(struct char_data *ch, int v) {
+    ch->forgeting = v;
+}
+
+int char_get_forgetcount(const struct char_data *ch) {
+    return ch->forgetcount;
+}
+
+void char_set_forgetcount(struct char_data *ch, int v) {
+    ch->forgetcount = v;
+}
+
+int char_get_bank_gold(const struct char_data *ch) {
+    return ch->bank_gold;
+}
+
+void char_set_bank_gold(struct char_data *ch, int v) {
+    ch->bank_gold = v;
+}
+
+int char_get_accuracy(const struct char_data *ch) {
+    return ch->accuracy;
+}
+
+void char_set_accuracy(struct char_data *ch, int v) {
+    ch->accuracy = v;
+}
+
+int char_get_fishstate(const struct char_data *ch) {
+    return ch->fishstate;
+}
+
+void char_set_fishstate(struct char_data *ch, int v) {
+    ch->fishstate = v;
+}
+
+int char_get_accuracy_mod(const struct char_data *ch) {
+    return ch->accuracy_mod;
+}
+
+void char_set_accuracy_mod(struct char_data *ch, int v) {
+    ch->accuracy_mod = v;
+}
+
+int16_t char_get_spellfail(const struct char_data *ch) {
+    return ch->spellfail;
+}
+
+void char_set_spellfail(struct char_data *ch, int16_t v) {
+    ch->spellfail = v;
+}
+
+int16_t char_get_armorcheck(const struct char_data *ch) {
+    return ch->armorcheck;
+}
+
+void char_set_armorcheck(struct char_data *ch, int16_t v) {
+    ch->armorcheck = v;
+}
+
+int16_t char_get_armorcheckall(const struct char_data *ch) {
+    return ch->armorcheckall;
+}
+
+void char_set_armorcheckall(struct char_data *ch, int16_t v) {
+    ch->armorcheckall = v;
+}
+
+int64_t char_get_moltexp(const struct char_data *ch) {
+    return ch->moltexp;
+}
+
+void char_set_moltexp(struct char_data *ch, int64_t v) {
+    ch->moltexp = v;
+}
+
+int char_get_moltlevel(const struct char_data *ch) {
+    return ch->moltlevel;
+}
+
+void char_set_moltlevel(struct char_data *ch, int v) {
+    ch->moltlevel = v;
+}
+
+int char_get_con_sdcooldown(const struct char_data *ch) {
+    return ch->con_sdcooldown;
+}
+
+void char_set_con_sdcooldown(struct char_data *ch, int v) {
+    ch->con_sdcooldown = v;
+}
+
+int char_get_ingestLearned(const struct char_data *ch) {
+    return ch->ingestLearned;
+}
+
+void char_set_ingestLearned(struct char_data *ch, int v) {
+    ch->ingestLearned = v;
+}
+
+int8_t char_get_position(const struct char_data *ch) {
+    return ch->position;
+}
+
+void char_set_position(struct char_data *ch, int8_t v) {
+    ch->position = v;
+}
+
+int32_t char_get_idnum(const struct char_data *ch) {
+    return ch->idnum;
+}
+
+void char_set_idnum(struct char_data *ch, int32_t v) {
+    ch->idnum = v;
+}
+
+int32_t char_get_id(const struct char_data *ch) {
+    return ch->id;
+}
+
+void char_set_id(struct char_data *ch, int32_t v) {
+    ch->id = v;
+}
+
+int char_get_carry_weight(const struct char_data *ch) {
+    return ch->carry_weight;
+}
+
+void char_set_carry_weight(struct char_data *ch, int v) {
+    ch->carry_weight = v;
+}
+
+int8_t char_get_carry_items(const struct char_data *ch) {
+    return ch->carry_items;
+}
+
+void char_set_carry_items(struct char_data *ch, int8_t v) {
+    ch->carry_items = v;
+}
+
+struct char_data *char_get_fighting(const struct char_data *ch) {
+    return ch->fighting;
+}
+
+void char_set_fighting(struct char_data *ch, struct char_data *v) {
+    ch->fighting = v;
+}
+
+int char_get_combatexpertise(const struct char_data *ch) {
+    return ch->combatexpertise;
+}
+
+void char_set_combatexpertise(struct char_data *ch, int v) {
+    ch->combatexpertise = v;
+}
+
+int16_t char_get_saving_throw(const struct char_data *ch, int i) {
+    return ch->saving_throw[i];
+}
+
+void char_set_saving_throw(struct char_data *ch, int i, int16_t v) {
+    ch->saving_throw[i] = v;
+}
+
+int16_t char_get_apply_saving_throw(const struct char_data *ch, int i) {
+    return ch->apply_saving_throw[i];
+}
+
+void char_set_apply_saving_throw(struct char_data *ch, int i, int16_t v) {
+    ch->apply_saving_throw[i] = v;
+}
+
+int char_get_alignment(const struct char_data *ch) {
+    return ch->alignment;
+}
+
+void char_set_alignment(struct char_data *ch, int v) {
+    ch->alignment = v;
+}
+
+int char_get_alignment_ethic(const struct char_data *ch) {
+    return ch->alignment_ethic;
+}
+
+void char_set_alignment_ethic(struct char_data *ch, int v) {
+    ch->alignment_ethic = v;
+}
+
+struct obj_data *char_get_sits(const struct char_data *ch) {
+    return ch->sits;
+}
+
+void char_set_sits(struct char_data *ch, struct obj_data *v) {
+    ch->sits = v;
+}
+
+struct char_data *char_get_mindlink(const struct char_data *ch) {
+    return ch->mindlink;
+}
+
+void char_set_mindlink(struct char_data *ch, struct char_data *v) {
+    ch->mindlink = v;
+}
+
+int char_get_linker(const struct char_data *ch) {
+    return ch->linker;
+}
+
+void char_set_linker(struct char_data *ch, int v) {
+    ch->linker = v;
+}
+
+int char_get_lasthit(const struct char_data *ch) {
+    return ch->lasthit;
+}
+
+void char_set_lasthit(struct char_data *ch, int v) {
+    ch->lasthit = v;
+}
+
+struct char_data *char_get_drag(const struct char_data *ch) {
+    return ch->drag;
+}
+
+void char_set_drag(struct char_data *ch, struct char_data *v) {
+    ch->drag = v;
+}
+
+struct char_data *char_get_dragged(const struct char_data *ch) {
+    return ch->dragged;
+}
+
+void char_set_dragged(struct char_data *ch, struct char_data *v) {
+    ch->dragged = v;
+}
+
+struct char_data *char_get_grappling(const struct char_data *ch) {
+    return ch->grappling;
+}
+
+void char_set_grappling(struct char_data *ch, struct char_data *v) {
+    ch->grappling = v;
+}
+
+struct char_data *char_get_grappled(const struct char_data *ch) {
+    return ch->grappled;
+}
+
+void char_set_grappled(struct char_data *ch, struct char_data *v) {
+    ch->grappled = v;
+}
+
+int char_get_grap(const struct char_data *ch) {
+    return ch->grap;
+}
+
+void char_set_grap(struct char_data *ch, int v) {
+    ch->grap = v;
+}
+
+struct char_data *char_get_original(const struct char_data *ch) {
+    return ch->original;
+}
+
+void char_set_original(struct char_data *ch, struct char_data *v) {
+    ch->original = v;
+}
+
+short char_get_clones(const struct char_data *ch) {
+    return ch->clones;
+}
+
+void char_set_clones(struct char_data *ch, short v) {
+    ch->clones = v;
+}
+
+struct char_data *char_get_defender(const struct char_data *ch) {
+    return ch->defender;
+}
+
+void char_set_defender(struct char_data *ch, struct char_data *v) {
+    ch->defender = v;
+}
+
+struct char_data *char_get_defending(const struct char_data *ch) {
+    return ch->defending;
+}
+
+void char_set_defending(struct char_data *ch, struct char_data *v) {
+    ch->defending = v;
+}
+
+struct char_data *char_get_blocks(const struct char_data *ch) {
+    return ch->blocks;
+}
+
+void char_set_blocks(struct char_data *ch, struct char_data *v) {
+    ch->blocks = v;
+}
+
+struct char_data *char_get_blocked(const struct char_data *ch) {
+    return ch->blocked;
+}
+
+void char_set_blocked(struct char_data *ch, struct char_data *v) {
+    ch->blocked = v;
+}
+
+struct char_data *char_get_absorbing(const struct char_data *ch) {
+    return ch->absorbing;
+}
+
+void char_set_absorbing(struct char_data *ch, struct char_data *v) {
+    ch->absorbing = v;
+}
+
+struct char_data *char_get_absorbby(const struct char_data *ch) {
+    return ch->absorbby;
+}
+
+void char_set_absorbby(struct char_data *ch, struct char_data *v) {
+    ch->absorbby = v;
+}
+
+room_vnum char_get_listenroom(const struct char_data *ch) {
+    return ch->listenroom;
+}
+
+void char_set_listenroom(struct char_data *ch, room_vnum v) {
+    ch->listenroom = v;
+}
+
+int char_get_eavesdir(const struct char_data *ch) {
+    return ch->eavesdir;
+}
+
+void char_set_eavesdir(struct char_data *ch, int v) {
+    ch->eavesdir = v;
+}
+
+int char_get_absorbs(const struct char_data *ch) {
+    return ch->absorbs;
+}
+
+void char_set_absorbs(struct char_data *ch, int v) {
+    ch->absorbs = v;
+}
+
+time_t char_get_lastint(const struct char_data *ch) {
+    return ch->lastint;
+}
+
+void char_set_lastint(struct char_data *ch, time_t v) {
+    ch->lastint = v;
+}
+
+int8_t char_get_skills_mod(const struct char_data *ch, int i) {
+    return ch->skills[i].mod;
+}
+
+void char_set_skills_mod(struct char_data *ch, int i, int8_t v) {
+    ch->skills[i].mod = v;
+}
+
+int8_t char_get_skills_perf(const struct char_data *ch, int i) {
+    return ch->skills[i].perf;
+}
+
+void char_set_skills_perf(struct char_data *ch, int i, int8_t v) {
+    ch->skills[i].perf = v;
+}
+
+int8_t char_get_skills_base(const struct char_data *ch, int i) {
+    return ch->skills[i].base;
+}
+
+void char_set_skills_base(struct char_data *ch, int i, int8_t v) {
+    ch->skills[i].base = v;
+}
+
+bitvector_t *char_get_bodyparts(const struct char_data *ch) {
+    return (bitvector_t *)ch->bodyparts; /* writable flag array, as the macro allowed */
+}
+
+struct obj_data *char_get_equipment(const struct char_data *ch, int i) {
+    return ch->equipment[i];
+}
+
+void char_set_equipment(struct char_data *ch, int i, struct obj_data *v) {
+    ch->equipment[i] = v;
+}
+
+mob_rnum char_get_nr(const struct char_data *ch) {
+    return ch->nr;
+}
+
+void char_set_nr(struct char_data *ch, mob_rnum v) {
+    ch->nr = v;
+}
+
+int8_t char_get_mob_specials_default_pos(const struct char_data *ch) {
+    return ch->mob_specials.default_pos;
+}
+
+void char_set_mob_specials_default_pos(struct char_data *ch, int8_t v) {
+    ch->mob_specials.default_pos = v;
+}
+
+memory_rec *char_get_mob_specials_memory(const struct char_data *ch) {
+    return ch->mob_specials.memory;
+}
+
+void char_set_mob_specials_memory(struct char_data *ch, memory_rec *v) {
+    ch->mob_specials.memory = v;
+}
+
+int char_get_cooldown(const struct char_data *ch) {
+    return ch->cooldown;
+}
+
+void char_set_cooldown(struct char_data *ch, int v) {
+    ch->cooldown = v;
+}
+
+int char_get_arenawatch(const struct char_data *ch) {
+    return ch->arenawatch;
+}
+
+void char_set_arenawatch(struct char_data *ch, int v) {
+    ch->arenawatch = v;
+}
+
+int char_get_wait(const struct char_data *ch) {
+    return ch->wait;
+}
+
+void char_set_wait(struct char_data *ch, int v) {
+    ch->wait = v;
+}
+
+int8_t char_get_feats(const struct char_data *ch, int i) {
+    return ch->feats[i];
+}
+
+void char_set_feats(struct char_data *ch, int i, int8_t v) {
+    ch->feats[i] = v;
+}
+
+struct room_direction_data * char_get_exit(const struct char_data *ch, int door) {
+    return world[char_get_in_room(ch)].dir_option[door];
+}
+
+void char_set_exit(struct char_data *ch, int door, struct room_direction_data * v) {
+    world[char_get_in_room(ch)].dir_option[door] = v;
+}
+
+struct room_direction_data * char_get_exit2(const struct char_data *ch, int door) {
+    return world[char_get_exit(ch, door)->to_room].dir_option[door];
+}
+
+void char_set_exit2(struct char_data *ch, int door, struct room_direction_data * v) {
+    world[char_get_exit(ch, door)->to_room].dir_option[door] = v;
 }

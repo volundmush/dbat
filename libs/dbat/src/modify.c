@@ -126,7 +126,7 @@ static void smash_numb(char *str)
 void string_write(struct descriptor_data *d, char **writeto, size_t len, long mailto, void *data)
 {
   if (d->character && !char_is_npc(d->character))
-    SET_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
+    SET_BIT_AR(char_get_act(d->character), PLR_WRITING);
 
   if (using_improved_editor)
     d->backstr = (char *)data;
@@ -191,7 +191,7 @@ void string_add(struct descriptor_data *d, char *str)
    */
   switch (action) {
     case STRINGADD_ABORT:
-      switch (STATE(d)) {
+      switch (desc_get_connected(d)) {
         case CON_CEDIT:
         case CON_TEDIT:
         case CON_NEWSEDIT:
@@ -252,7 +252,7 @@ void string_add(struct descriptor_data *d, char *str)
     };
 
     for (i = 0; cleanup_modes[i].func; i++)
-      if (STATE(d) == cleanup_modes[i].mode)
+      if (desc_get_connected(d) == cleanup_modes[i].mode)
         (*cleanup_modes[i].func)(d, action);
 
     /* Common post cleanup code. */
@@ -260,8 +260,8 @@ void string_add(struct descriptor_data *d, char *str)
       d->mail_to = 0;
     d->max_str = 0;
     if (d->character && !char_is_npc(d->character)) {
-      REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_MAILING);
-	  REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
+      REMOVE_BIT_AR(char_get_act(d->character), PLR_MAILING);
+	  REMOVE_BIT_AR(char_get_act(d->character), PLR_WRITING);
 	}
   } else if (action != STRINGADD_ACTION && strlen(*d->str) + 3 <= d->max_str) /* 3 = \r\n\0 */
      strcat(*d->str, "\r\n");
@@ -274,7 +274,7 @@ static void playing_string_cleanup(struct descriptor_data *d, int action)
   
   if (char_plr_flagged(d->character, PLR_MAILING)) {
     if (action == STRINGADD_SAVE && *d->str) {
-      store_mail(d->mail_to, GET_IDNUM(d->character), *d->str);
+      store_mail(d->mail_to, char_get_idnum(d->character), *d->str);
       write_to_output(d, "Message sent!\r\n");
       notify_if_playing(d->character, d->mail_to);
     } else {
@@ -332,7 +332,7 @@ static void exdesc_string_cleanup(struct descriptor_data *d, int action)
     write_to_output(d, "Description aborted.\r\n");
   
   write_to_output(d, CONFIG_MENU);
-  STATE(d) = CON_MENU;
+  desc_set_connected(d, CON_MENU);
 }
 
 

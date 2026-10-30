@@ -46,11 +46,11 @@ ACMD(do_oasis_redit)
   struct descriptor_data *d;
   
   /* Parse any arguments. */
-  if (GET_ADMLEVEL(ch) > 0) {
+  if (char_get_admlevel(ch) > 0) {
    buf3 = two_arguments(argument, buf1, buf2);
   }
 
-  if (GET_ADMLEVEL(ch) < 1 && !rroom_flagged(IN_ROOM(ch), ROOM_CANREMODEL)) {
+  if (char_get_admlevel(ch) < 1 && !rroom_flagged(char_get_in_room(ch), ROOM_CANREMODEL)) {
    send_to_char(ch, "You can not remodel this room.\r\n");
    return;
   }
@@ -67,18 +67,18 @@ ACMD(do_oasis_redit)
     }
   }
 
-  if (remove == NULL && GET_ADMLEVEL(ch) < 1) {
+  if (remove == NULL && char_get_admlevel(ch) < 1) {
    send_to_char(ch, "You do not have a R.A.D. Remodeling Assistance Droid.\r\n");
    return;
-  } else if (GET_ADMLEVEL(ch) < 1) {
+  } else if (char_get_admlevel(ch) < 1) {
    act("@GYou open up the computer panel on the droid and begin to program its remodeling routine.@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@g$n@G opens up a computer panel on some kind of small spherical droid and begins to program it.@n", TRUE, ch, 0, 0, TO_ROOM);
    extract_obj(remove);
    remodeling = TRUE;
   }
   
-  if (!*buf1 || GET_ADMLEVEL(ch) < 1)
-    number = rroom_get_vnum(IN_ROOM(ch));
+  if (!*buf1 || char_get_admlevel(ch) < 1)
+    number = rroom_get_vnum(char_get_in_room(ch));
   else if (!isdigit(*buf1)) {
     if (strcasecmp("save", buf1) != 0) {
       send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
@@ -112,7 +112,7 @@ ACMD(do_oasis_redit)
   
   /* Check to make sure the room isn't already being edited. */
   for (d = descriptor_list; d; d = d->next) {
-    if (STATE(d) == CON_REDIT) {
+    if (desc_get_connected(d) == CON_REDIT) {
       if (d->olc && OLC_NUM(d) == number) {
         send_to_char(ch, "That room is currently being edited by %s.\r\n", 
           char_pers(d->character, ch));
@@ -171,9 +171,9 @@ ACMD(do_oasis_redit)
     redit_setup_new(d);
 
   redit_disp_menu(d);  
-  STATE(d) = CON_REDIT;
+  desc_set_connected(d, CON_REDIT);
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
-  SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
     char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
@@ -302,7 +302,7 @@ void redit_save_internally(struct descriptor_data *d)
     if (dsc == d)
       continue;
 
-    if (STATE(dsc) == CON_ZEDIT) {
+    if (desc_get_connected(dsc) == CON_ZEDIT) {
       for (j = 0; OLC_ZONE(dsc)->cmd[j].command != 'S'; j++)
         switch (OLC_ZONE(dsc)->cmd[j].command) {
           case 'O':
@@ -318,7 +318,7 @@ void redit_save_internally(struct descriptor_data *d)
             OLC_ZONE(dsc)->cmd[j].arg1 += (OLC_ZONE(dsc)->cmd[j].arg1 >= room_num);
             break;
           }
-    } else if (STATE(dsc) == CON_REDIT) {
+    } else if (desc_get_connected(dsc) == CON_REDIT) {
       for (j = 0; j < NUM_OF_DIRS; j++)
         if (OLC_ROOM(dsc)->dir_option[j])
           if (OLC_ROOM(dsc)->dir_option[j]->to_room >= room_num)
@@ -493,7 +493,7 @@ void redit_disp_menu(struct descriptor_data *d)
 
   sprintbitarray(room->room_flags, room_bits, RF_ARRAY_MAX, buf1, sizeof(buf1));
   sprinttype(room->sector_type, sector_types, buf2, sizeof(buf2));
-  if (GET_ADMLEVEL(d->character) > 0) {
+  if (char_get_admlevel(d->character) > 0) {
   write_to_output(d,
 	  "-- Room number : [@c%d@n]  	Room zone: [@c%d@n]\r\n"
 	  "@g1@n) Name        : @y%s\r\n"
@@ -577,7 +577,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
 	"OLC: %s edits room %d.", char_get_name(d->character), OLC_NUM(d));
       if (CONFIG_OLC_SAVE) {
 	redit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
-        if (GET_ADMLEVEL(d->character) < 1) {
+        if (char_get_admlevel(d->character) < 1) {
          write_to_output(d, "@GThe remodeling droid quickly launches about with remodeling the room to your specifications. It seems to finish in no time at all...@n\r\n");
          act("@GThe remodeling droid quickly launches about with remodeling the room as to @g$n's@G specifications. It seems to finish in no time at all...@n", TRUE, d->character, 0, 0, TO_ROOM);
         } else {
@@ -595,7 +595,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
        * cleanup_olc handle it. */
       OLC_ROOM(d)->proto_script = OLC_SCRIPT(d);
       cleanup_olc(d, CLEANUP_ALL);
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "@GYou close the droids interface and put it back among the rest of your things.@n\r\n");
        act("@g$n@G stops typing information into the droid in $s hands and closes it back up.@n\r\n", TRUE, d->character, 0, 0, TO_ROOM);
        struct obj_data *obj;
@@ -620,7 +620,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
         cleanup_olc(d, CLEANUP_ALL);
       return;
     case '1':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "Enter Location Name:\r\n");
       } else {
        write_to_output(d, "Enter Room Name:-\r\n] ");
@@ -631,7 +631,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       OLC_MODE(d) = REDIT_DESC;
       clear_screen(d);
       send_editor_help(d);
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "Set Remodel Parameters (Enter Room Description):-\r\n] ");
       } else {
        write_to_output(d, "Enter room description:\r\n\r\n");
@@ -645,21 +645,21 @@ void redit_parse(struct descriptor_data *d, char *arg)
       OLC_VAL(d) = 1;
       break;
     case '3':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
       redit_disp_flag_menu(d);
       break;
     case '4':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
       redit_disp_sector_menu(d);
       break;
     case '5':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
@@ -667,7 +667,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       redit_disp_exit_menu(d);
       break;
     case '6':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
@@ -675,7 +675,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       redit_disp_exit_menu(d);
       break;
     case '7':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
@@ -683,7 +683,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       redit_disp_exit_menu(d);
       break;
     case '8':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
@@ -691,7 +691,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       redit_disp_exit_menu(d);
       break;
     case '9':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
@@ -700,7 +700,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       break;
     case 'a':
     case 'A':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
@@ -709,7 +709,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       break;
     case 'b':
     case 'B':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
@@ -718,7 +718,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       break;
     case 'c':
     case 'C':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
@@ -727,7 +727,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       break;
     case 'd':
     case 'D':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
@@ -736,7 +736,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       break;
     case 'e':
     case 'E':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
@@ -745,7 +745,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       break;
     case 'f':
     case 'F':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
@@ -754,7 +754,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       break;
     case 'g':
     case 'G':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
@@ -773,7 +773,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       break;
     case 'w':
     case 'W':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
@@ -782,7 +782,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       break;
     case 'x':
     case 'X':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
@@ -792,7 +792,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       break;
     case 's':
     case 'S':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }
@@ -801,7 +801,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       return;
     case 'Z':
     case 'z':
-      if (GET_ADMLEVEL(d->character) < 1) {
+      if (char_get_admlevel(d->character) < 1) {
        write_to_output(d, "That options isn't available to non-builders.\r\n");
        break;
       }

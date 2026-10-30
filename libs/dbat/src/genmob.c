@@ -99,7 +99,7 @@ int add_mobile(struct char_data *mob, mob_vnum vnum)
 
   /* Update live mobile rnums. */
   for (live_mob = character_list; live_mob; live_mob = live_mob->next)
-    GET_MOB_RNUM(live_mob) += (GET_MOB_RNUM(live_mob) != NOTHING && GET_MOB_RNUM(live_mob) >= found);
+    char_set_nr(live_mob, char_get_nr(live_mob) + ((char_get_nr(live_mob) != NOTHING && char_get_nr(live_mob) >= found)));
 
   /* Update zone table. */
   for (zone = 0; zone <= top_of_zone_table; zone++)
@@ -174,7 +174,7 @@ int delete_mobile(mob_rnum refpt)
 
   /* Update live mobile rnums.  */
   for (live_mob = character_list; live_mob; live_mob = live_mob->next)
-    GET_MOB_RNUM(live_mob) -= (GET_MOB_RNUM(live_mob) >= refpt);
+    char_set_nr(live_mob, char_get_nr(live_mob) - ((char_get_nr(live_mob) >= refpt)));
 
   /* Update zone table.  */
   for (zone = 0; zone <= top_of_zone_table; zone++) {
@@ -288,7 +288,7 @@ int free_mobile(struct char_data *mob)
     return FALSE;
 
   /* Non-prototyped mobile.  Also known as new mobiles.  */
-  if ((i = GET_MOB_RNUM(mob)) == NOBODY) {
+  if ((i = char_get_nr(mob)) == NOBODY) {
     free_mobile_strings(mob);
     /* free script proto list */
     free_proto_script(mob, MOB_TRIGGER);
@@ -395,18 +395,18 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
     fprintf(fd, "Size: %d\n", get_size(mob));
   if (GET_ATTACK(mob) != 0)
     fprintf(fd, "BareHandAttack: %d\n", GET_ATTACK(mob));
-  if (GET_STR(mob) != 0)
-    fprintf(fd, "Str: %d\n", GET_STR(mob));
-  if (GET_DEX(mob) != 0)
-    fprintf(fd, "Dex: %d\n", GET_DEX(mob));
-  if (GET_INT(mob) != 0)
-    fprintf(fd, "Int: %d\n", GET_INT(mob));
-  if (GET_WIS(mob) != 0)
-    fprintf(fd, "Wis: %d\n", GET_WIS(mob));
-  if (GET_CON(mob) != 0)
-    fprintf(fd, "Con: %d\n", GET_CON(mob));
-  if (GET_CHA(mob) != 0)
-    fprintf(fd, "Cha: %d\n", GET_CHA(mob));
+  if (char_get_aff_abils_str(mob) != 0)
+    fprintf(fd, "Str: %d\n", char_get_aff_abils_str(mob));
+  if (char_get_aff_abils_dex(mob) != 0)
+    fprintf(fd, "Dex: %d\n", char_get_aff_abils_dex(mob));
+  if (char_get_aff_abils_intel(mob) != 0)
+    fprintf(fd, "Int: %d\n", char_get_aff_abils_intel(mob));
+  if (char_get_aff_abils_wis(mob) != 0)
+    fprintf(fd, "Wis: %d\n", char_get_aff_abils_wis(mob));
+  if (char_get_aff_abils_con(mob) != 0)
+    fprintf(fd, "Con: %d\n", char_get_aff_abils_con(mob));
+  if (char_get_aff_abils_cha(mob) != 0)
+    fprintf(fd, "Cha: %d\n", char_get_aff_abils_cha(mob));
   if (mob_proto + real_mobile(mvnum) != mob) { /* Not saving a prototype */
     fprintf(fd, "Hit: %" I64T "\nMaxHit: %" I64T "\nMana: %" I64T "\nMaxMana: %" I64T "\nMoves: %" I64T "\nMaxMoves: %" I64T "\n",
             GET_HIT(mob), GET_MAX_HIT(mob), (getCurKI(mob)), GET_MAX_MANA(mob),
@@ -421,19 +421,19 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
                 aff->modifier, aff->location, (int)aff->bitvector, aff->specific);
   }
   for (i = 0; i <= NUM_FEATS_DEFINED; i++)
-    if (HAS_FEAT(mob, i))
-      fprintf(fd, "Feat: %d %d\n", i, HAS_FEAT(mob, i));
+    if (char_get_feats(mob, i))
+      fprintf(fd, "Feat: %d %d\n", i, char_get_feats(mob, i));
   for (i = 0; i < SKILL_TABLE_SIZE; i++)
-    if (GET_SKILL_BASE(mob, i))
-      fprintf(fd, "Skill: %d %d\n", i, HAS_FEAT(mob, i));
+    if (char_get_skills_base(mob, i))
+      fprintf(fd, "Skill: %d %d\n", i, char_get_feats(mob, i));
   for (i = 0; i <= NUM_FEATS_DEFINED; i++)
-    if (GET_SKILL_BONUS(mob, i))
-      fprintf(fd, "SkillMod: %d %d\n", i, HAS_FEAT(mob, i));
+    if (char_get_skills_mod(mob, i))
+      fprintf(fd, "SkillMod: %d %d\n", i, char_get_feats(mob, i));
   for (i = 0; i < NUM_CLASSES; i++) {
-    if (GET_CLASS_NONEPIC(mob, i))
-      fprintf(fd, "Class: %d %d\n", i, GET_CLASS_NONEPIC(mob, i));
-    if (GET_CLASS_EPIC(mob, i))
-      fprintf(fd, "EpicClass: %d %d\n", i, GET_CLASS_EPIC(mob, i));
+    if (char_get_chclasses(mob, i))
+      fprintf(fd, "Class: %d %d\n", i, char_get_chclasses(mob, i));
+    if (char_get_epicclasses(mob, i))
+      fprintf(fd, "EpicClass: %d %d\n", i, char_get_epicclasses(mob, i));
   }
   fputs("E\n", fd);
   return TRUE;
@@ -466,28 +466,28 @@ int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 	ddesc, STRING_TERMINATOR
   );
 
-  sprintascii(fbuf1, MOB_FLAGS(mob)[0]);
-  sprintascii(fbuf2, MOB_FLAGS(mob)[1]);
-  sprintascii(fbuf3, MOB_FLAGS(mob)[2]);
-  sprintascii(fbuf4, MOB_FLAGS(mob)[3]);
-  sprintascii(abuf1, AFF_FLAGS(mob)[0]);
-  sprintascii(abuf2, AFF_FLAGS(mob)[1]);
-  sprintascii(abuf3, AFF_FLAGS(mob)[2]);
-  sprintascii(abuf4, AFF_FLAGS(mob)[3]);
+  sprintascii(fbuf1, char_get_act(mob)[0]);
+  sprintascii(fbuf2, char_get_act(mob)[1]);
+  sprintascii(fbuf3, char_get_act(mob)[2]);
+  sprintascii(fbuf4, char_get_act(mob)[3]);
+  sprintascii(abuf1, char_get_affected_by(mob)[0]);
+  sprintascii(abuf2, char_get_affected_by(mob)[1]);
+  sprintascii(abuf3, char_get_affected_by(mob)[2]);
+  sprintascii(abuf4, char_get_affected_by(mob)[3]);
 
   fprintf(fd, "%s %s %s %s %s %s %s %s %d E\n"
               "%d %d %d %" I64T "d%" I64T "+%" I64T " %dd%d+%d\n",
                 fbuf1, fbuf2, fbuf3, fbuf4,
                 abuf1, abuf2, abuf3, abuf4,
-		GET_ALIGNMENT(mob),
-		GET_HITDICE(mob), GET_FISHD(mob), 10 - (GET_ARMOR(mob) / 10),
+		char_get_alignment(mob),
+		char_get_race_level(mob), char_get_accuracy_mod(mob), 10 - (char_get_armor(mob) / 10),
                 GET_HIT(mob), (getCurKI(mob)), (getCurST(mob)), GET_NDD(mob), GET_SDD(mob),
 		0 /* damage mod: unused, still written to keep the file format */
   );
   fprintf(fd, 	"%d 0 %d %d\n"
 		"%d %d %d\n",
-		GET_GOLD(mob), GET_RACE(mob), char_get_class(mob),
-		GET_POS(mob), GET_DEFAULT_POS(mob), GET_SEX(mob)
+		char_get_gold(mob), char_get_race(mob), char_get_class(mob),
+		char_get_position(mob), char_get_mob_specials_default_pos(mob), char_get_sex(mob)
   );
 
   if (write_mobile_espec(mvnum, mob, fd) < 0)

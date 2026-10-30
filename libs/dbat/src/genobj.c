@@ -65,7 +65,7 @@ int update_objects(struct obj_data *refobj)
     *obj = *refobj;
 
     /* Copy game-time dependent variables over. */
-    IN_ROOM(obj) = swap.in_room;
+    obj_set_in_room(obj, swap.in_room);
     obj->carried_by = swap.carried_by;
     obj->worn_by = swap.worn_by;
     obj->worn_on = swap.worn_on;
@@ -100,7 +100,7 @@ obj_rnum adjust_objects(obj_rnum refpt)
    * Renumber live objects.
    */
   for (obj = object_list; obj; obj = obj->next)
-    GET_OBJ_RNUM(obj) += (GET_OBJ_RNUM(obj) != NOTHING && GET_OBJ_RNUM(obj) >= refpt);
+    obj_set_item_number(obj, obj_get_item_number(obj) + ((obj_get_item_number(obj) != NOTHING && obj_get_item_number(obj) >= refpt)));
 
   /*
    * Renumber zone table.
@@ -259,42 +259,42 @@ int save_objects(zone_rnum zone_num)
               (obj->description && *obj->description) ? obj->description : "undefined",
               buf);
 
-      sprintascii(ebuf1, GET_OBJ_EXTRA(obj)[0]);
-      sprintascii(ebuf2, GET_OBJ_EXTRA(obj)[1]);
-      sprintascii(ebuf3, GET_OBJ_EXTRA(obj)[2]);
-      sprintascii(ebuf4, GET_OBJ_EXTRA(obj)[3]);
-      sprintascii(wbuf1, GET_OBJ_WEAR(obj)[0]);
-      sprintascii(wbuf2, GET_OBJ_WEAR(obj)[1]);
-      sprintascii(wbuf3, GET_OBJ_WEAR(obj)[2]);
-      sprintascii(wbuf4, GET_OBJ_WEAR(obj)[3]);
-      sprintascii(pbuf1, GET_OBJ_PERM(obj)[0]);
-      sprintascii(pbuf2, GET_OBJ_PERM(obj)[1]);
-      sprintascii(pbuf3, GET_OBJ_PERM(obj)[2]);
-      sprintascii(pbuf4, GET_OBJ_PERM(obj)[3]);
+      sprintascii(ebuf1, obj_get_extra_flags(obj)[0]);
+      sprintascii(ebuf2, obj_get_extra_flags(obj)[1]);
+      sprintascii(ebuf3, obj_get_extra_flags(obj)[2]);
+      sprintascii(ebuf4, obj_get_extra_flags(obj)[3]);
+      sprintascii(wbuf1, obj_get_wear_flags(obj)[0]);
+      sprintascii(wbuf2, obj_get_wear_flags(obj)[1]);
+      sprintascii(wbuf3, obj_get_wear_flags(obj)[2]);
+      sprintascii(wbuf4, obj_get_wear_flags(obj)[3]);
+      sprintascii(pbuf1, obj_get_bitvector(obj)[0]);
+      sprintascii(pbuf2, obj_get_bitvector(obj)[1]);
+      sprintascii(pbuf3, obj_get_bitvector(obj)[2]);
+      sprintascii(pbuf4, obj_get_bitvector(obj)[3]);
 
       fprintf(fp,
               "%d %s %s %s %s %s %s %s %s %s %s %s %s\n"
               "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n"
               "%" I64T " %d %d %d\n",
 
-              GET_OBJ_TYPE(obj),
+              obj_get_type_flag(obj),
               ebuf1, ebuf2, ebuf3, ebuf4,
               wbuf1, wbuf2, wbuf3, wbuf4,
               pbuf1, pbuf2, pbuf3, pbuf4,
-              GET_OBJ_VAL(obj, 0), GET_OBJ_VAL(obj, 1), GET_OBJ_VAL(obj, 2),
-              GET_OBJ_VAL(obj, 3), GET_OBJ_VAL(obj, 4), GET_OBJ_VAL(obj, 5),
-              GET_OBJ_VAL(obj, 6), GET_OBJ_VAL(obj, 7), GET_OBJ_VAL(obj, 8),
-              GET_OBJ_VAL(obj, 9), GET_OBJ_VAL(obj, 10), GET_OBJ_VAL(obj, 11),
-              GET_OBJ_VAL(obj, 12), GET_OBJ_VAL(obj, 13), GET_OBJ_VAL(obj, 14),
-              GET_OBJ_VAL(obj, 15),
-              GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_RENT(obj), GET_OBJ_LEVEL(obj));
+              obj_get_value(obj, 0), obj_get_value(obj, 1), obj_get_value(obj, 2),
+              obj_get_value(obj, 3), obj_get_value(obj, 4), obj_get_value(obj, 5),
+              obj_get_value(obj, 6), obj_get_value(obj, 7), obj_get_value(obj, 8),
+              obj_get_value(obj, 9), obj_get_value(obj, 10), obj_get_value(obj, 11),
+              obj_get_value(obj, 12), obj_get_value(obj, 13), obj_get_value(obj, 14),
+              obj_get_value(obj, 15),
+              obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj), obj_get_level(obj));
 
       /*
        * Do we have script(s) attached ?
        */
       script_save_to_disk(fp, obj, OBJ_TRIGGER);
 
-      fprintf(fp, "Z\n%d\n", GET_OBJ_SIZE(obj));
+      fprintf(fp, "Z\n%d\n", obj_get_size(obj));
       /*
        * Do we have extra descriptions?
        */
@@ -404,7 +404,7 @@ void free_object_strings(struct obj_data *obj)
  */
 void free_object_strings_proto(struct obj_data *obj)
 {
-  int robj_num = GET_OBJ_RNUM(obj);
+  int robj_num = obj_get_item_number(obj);
 
   if (obj->name && obj->name != obj_proto[robj_num].name)
     free(obj->name);
@@ -503,11 +503,11 @@ int delete_object(obj_rnum rnum)
       for (this_content = tmp->contains; this_content; this_content = next_content)
       {
         next_content = this_content->next_content;
-        if (IN_ROOM(tmp))
+        if (obj_get_in_room(tmp))
         {
           /* Transfer stuff from object to room. */
           obj_from_obj(this_content);
-          obj_to_room(this_content, IN_ROOM(tmp));
+          obj_to_room(this_content, obj_get_in_room(tmp));
         }
         else if (tmp->worn_by || tmp->carried_by)
         {
@@ -530,7 +530,7 @@ int delete_object(obj_rnum rnum)
   /* Adjust rnums of all other objects. */
   for (tmp = object_list; tmp; tmp = tmp->next)
   {
-    GET_OBJ_RNUM(tmp) -= (GET_OBJ_RNUM(tmp) > rnum);
+    obj_set_item_number(tmp, obj_get_item_number(tmp) - ((obj_get_item_number(tmp) > rnum)));
   }
 
   for (i = rnum; i < top_of_objt; i++)

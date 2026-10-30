@@ -95,7 +95,7 @@ ACMD(do_oasis_gedit)
   /** Check that the guild isn't already being edited.                        **/
   /****************************************************************************/
   for (d = descriptor_list; d; d = d->next) {
-    if (STATE(d) == CON_GEDIT) {
+    if (desc_get_connected(d) == CON_GEDIT) {
       if (d->olc && OLC_NUM(d) == number) {
         send_to_char(ch, "That guild is currently being edited by %s.\r\n",
           char_pers(d->character, ch));
@@ -171,10 +171,10 @@ ACMD(do_oasis_gedit)
   else
     gedit_setup_new(d);
   
-  STATE(d) = CON_GEDIT;
+  desc_set_connected(d, CON_GEDIT);
   
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
-  SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
     char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));

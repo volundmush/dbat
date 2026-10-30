@@ -28,40 +28,40 @@ static void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle);
 /* This shows the player what locations the planet has to land at. */
 static void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle)
 {
- if (rroom_get_vnum(IN_ROOM(vehicle)) == 50) { // Above Earth
+ if (rroom_get_vnum(obj_get_in_room(vehicle)) == 50) { // Above Earth
   send_to_char(ch, "@D------------------[ @GEarth@D ]------------------@c\n");
   send_to_char(ch, "Nexus City, South Ocean, Nexus field, Cherry Blossom Mountain,\n");
   send_to_char(ch, "Sandy Desert, Northern Plains, Korin's Tower, Kami's Lookout,\n");
   send_to_char(ch, "Shadow Forest, Decrepit Area, West City, Hercule Beach, Satan City.\n");
   send_to_char(ch, "@D---------------------------------------------@n\n");
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 51) { // Above Frigid
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 51) { // Above Frigid
   send_to_char(ch, "@D------------------[ @CFrigid@D ]------------------@c\n");
   send_to_char(ch, "Ice Crown City, Ice Highway, Topica Snowfield, Glug's Volcano,\n");
   send_to_char(ch, "Platonic Sea, Slave City, Acturian Woods, Desolate Demesne,\n");
   send_to_char(ch, "Chateau Ishran, Wyrm Spine Mountain, Cloud Ruler Temple, Koltoan mine.\n");
   send_to_char(ch, "@D---------------------------------------------@n\n");
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 52) { // Above Konack
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 52) { // Above Konack
   send_to_char(ch, "@D------------------[ @MKonack@D ]------------------@c\n");
   send_to_char(ch, "Great Oroist Temple, Elzthuan Forest, Mazori Farm, Dres,\n");
   send_to_char(ch, "Colvian Farm, St Alucia, Meridius Memorial, Desert of Illusion,\n");
   send_to_char(ch, "Plains of Confusion, Turlon Fair, Wetlands, Kerberos,\n");
   send_to_char(ch, "Shaeras Mansion, Slavinus Ravine, Furian Citadel.\n");
   send_to_char(ch, "@D---------------------------------------------@n\n");
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 53) { // Above Vegeta
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 53) { // Above Vegeta
   send_to_char(ch, "@D------------------[ @YVegeta@D ]------------------@c\n");
   send_to_char(ch, "Vegetos City, Blood Dunes, Ancestral Mountains, Destopa Swamp,\n");
   send_to_char(ch, "Pride Forest, Pride tower, Ruby Cave.\n");
   send_to_char(ch, "@D---------------------------------------------@n\n");
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 198) { // Above Cerria
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 198) { // Above Cerria
   send_to_char(ch, "@D------------------[ @MCerria@D ]------------------@c\n");
   send_to_char(ch, "Cerria Colony, Fistarl Volcano, Crystalline Forest.\n");
   send_to_char(ch, "@D---------------------------------------------@n\n");
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 54) { // Above Namek
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 54) { // Above Namek
   send_to_char(ch, "@D------------------[ @gNamek@D ]------------------@c\n");
   send_to_char(ch, "Senzu Village, Guru's House, Crystalline Cave, Elder Village,\n");
   send_to_char(ch, "Frieza's Ship, Kakureta Village.\n");
   send_to_char(ch, "@D---------------------------------------------@n\n");
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 55) { // Above Aether
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 55) { // Above Aether
   send_to_char(ch, "@D------------------[ @BAether@D ]-----------------@c\n");
   send_to_char(ch, "Haven City, Serenity Lake, Kaiju Forest, Ortusian Temple,\n");
   send_to_char(ch, "Silent Glade.\n");
@@ -70,19 +70,19 @@ static void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle)
   send_to_char(ch, "Haven City, Serenity Lake, Kaiju Forest, Ortusian Temple,\n");
   send_to_char(ch, "Silent Glade.\n");
   send_to_char(ch, "@D--------------------------------------------@n\n");
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 56) { // Above Yardrat
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 56) { // Above Yardrat
   send_to_char(ch, "@D-----------------[ @mYardrat@D ]-----------------@c\n");
   send_to_char(ch, "Yardra City, Jade Forest, Jade Cliffs, Mount Valaria.\n");
   send_to_char(ch, "@D-------------------------------------------@n\n");
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 57) { // Above Zennith
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 57) { // Above Zennith
   send_to_char(ch, "@D-----------------[ @CZennith@D ]-----------------@c\n");
   send_to_char(ch, "Utatlan City, Zenith Jungle, Ancient Castle.\n");
   send_to_char(ch, "@D-------------------------------------------@n\n");
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 58) { // Above Kanassa
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 58) { // Above Kanassa
   send_to_char(ch, "@D-----------------[ @CKanassa@D ]-----------------@c\n");
   send_to_char(ch, "Aquis City, Yunkai Pirate Base.\n");
   send_to_char(ch, "@D-------------------------------------------@n\n");
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 59) { // Above Arlia
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 59) { // Above Arlia
   send_to_char(ch, "@D------------------[ @MArlia@D ]------------------@c\n");
   send_to_char(ch, "Janacre, Arlian Wasteland, Arlia Mine, Kemabra Wastes.\n");
   send_to_char(ch, "@D---------------------------------------------@n\n");
@@ -94,7 +94,7 @@ static void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle)
 static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, char *arg)
 {
  int landspot = 50;
- if (rroom_get_vnum(IN_ROOM(vehicle)) == 50) { // Above Earth
+ if (rroom_get_vnum(obj_get_in_room(vehicle)) == 50) { // Above Earth
   if (!strcasecmp(arg, "Nexus City")) {
     landspot = 300;
     landspot += rand_number(0, 63);
@@ -146,7 +146,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
    send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
    return (300);
   }
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 51) { // Above Frigid
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 51) { // Above Frigid
   if (!strcasecmp(arg, "Ice Crown City")) {
    return (4264);
   } else if (!strcasecmp(arg, "Ice Highway")) {
@@ -175,7 +175,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
    send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
    return (4264);
   }
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 52) { // Above Konack
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 52) { // Above Konack
   if (!strcasecmp(arg, "Tiranoc City")) {
    return (8006);
   } else if (!strcasecmp(arg, "Great Oroist Temple")) {
@@ -212,7 +212,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (8006);
   }
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 53) { // Above Vegeta
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 53) { // Above Vegeta
   if (!strcasecmp(arg, "Vegetos City")) {
    return (2226);
   } else if (!strcasecmp(arg, "Blood Dunes")) {
@@ -231,7 +231,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (2226);
   }
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 54) { // Above Namek
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 54) { // Above Namek
   if (!strcasecmp(arg, "Senzu Village")) {
    return (11600);
   } else if (!strcasecmp(arg, "Guru's House")) {
@@ -248,7 +248,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (11600);
   }
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 55) { // Above Aether
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 55) { // Above Aether
   if (!strcasecmp(arg, "Haven City")) {
    return (12010);
   } else if (!strcasecmp(arg, "Serenity Lake")) {
@@ -263,7 +263,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (12010);
   }
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 56) { // Above Yardrat
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 56) { // Above Yardrat
   if (!strcasecmp(arg, "Yardra City")) {
    return (14008);
   } else if (!strcasecmp(arg, "Jade Forest")) {
@@ -276,7 +276,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (14008);
   }
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 198) { // Above Cerria
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 198) { // Above Cerria
   if (!strcasecmp(arg, "Cerria Colony")) {
    return (17531);
   } else if (!strcasecmp(arg, "Crystalline Forest")) {
@@ -287,7 +287,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (17531);
   }
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 57) { // Above Zennith
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 57) { // Above Zennith
   if (!strcasecmp(arg, "Utatlan City")) {
    return (3412);
   } else if (!strcasecmp(arg, "Zenith Jungle")) {
@@ -298,7 +298,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (3412);
   }
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 58) { // Above Kanassa
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 58) { // Above Kanassa
   if (!strcasecmp(arg, "Aquis City")) {
    return (14904);
   } else if (!strcasecmp(arg, "Yunkai Pirate Base")) {
@@ -307,7 +307,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
    return (14904);
   }
- } else if (rroom_get_vnum(IN_ROOM(vehicle)) == 59) { // Above Arlia
+ } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 59) { // Above Arlia
   if (!strcasecmp(arg, "Janacre")) {
    return (16009);
   } else if (!strcasecmp(arg, "Arlian Wasteland")) {
@@ -332,7 +332,7 @@ struct obj_data *find_vehicle_by_vnum(int vnum)
   struct obj_data * i;
 
   for (i = object_list; i; i = i->next)
-    if (GET_OBJ_TYPE(i) == ITEM_VEHICLE)
+    if (obj_get_type_flag(i) == ITEM_VEHICLE)
       if (obj_get_vnum(i) == vnum)
         return i;
     
@@ -345,7 +345,7 @@ struct obj_data *find_hatch_by_vnum(int vnum)
   struct obj_data * i;
 
   for (i = object_list; i; i = i->next)
-    if (GET_OBJ_TYPE(i) == ITEM_HATCH)
+    if (obj_get_type_flag(i) == ITEM_HATCH)
       if (obj_get_vnum(i) == vnum)
         return i;
 
@@ -358,7 +358,7 @@ struct obj_data *get_obj_in_list_type(int type, struct obj_data *list)
   struct obj_data * i;
 
   for (i = list; i; i = i->next_content)
-    if (GET_OBJ_TYPE(i) == type)
+    if (obj_get_type_flag(i) == type)
       return i;
 
   return NULL;
@@ -370,16 +370,16 @@ struct obj_data *find_control(struct char_data *ch)
   struct obj_data *controls, *obj;
   int    j;
 
-  controls = get_obj_in_list_type(ITEM_CONTROL, world[IN_ROOM(ch)].contents);
+  controls = get_obj_in_list_type(ITEM_CONTROL, world[char_get_in_room(ch)].contents);
   if (!controls)
     for (obj = ch->carrying; obj && !controls; obj = obj->next_content)
-      if (char_can_see_obj(ch, obj) && GET_OBJ_TYPE(obj) == ITEM_CONTROL)
+      if (char_can_see_obj(ch, obj) && obj_get_type_flag(obj) == ITEM_CONTROL)
         controls = obj;
   if (!controls)
     for (j = 0; j < NUM_WEARS && !controls; j++)
-        if (GET_EQ(ch, j) && char_can_see_obj(ch, GET_EQ(ch, j)) && 
-          GET_OBJ_TYPE(GET_EQ(ch, j)) == ITEM_CONTROL)
-          controls = GET_EQ(ch, j);
+        if (char_get_equipment(ch, j) && char_can_see_obj(ch, char_get_equipment(ch, j)) && 
+          obj_get_type_flag(char_get_equipment(ch, j)) == ITEM_CONTROL)
+          controls = char_get_equipment(ch, j);
   return controls;
 }
 
@@ -392,29 +392,29 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
 
   if (!*arg) {
     send_to_char(ch, "@wDrive into what?\r\n");
-  } else if (!(vehicle_in_out = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(vehicle)].contents)) ) {
+  } else if (!(vehicle_in_out = get_obj_in_list_vis(ch, arg, NULL, world[obj_get_in_room(vehicle)].contents)) ) {
       send_to_char(ch, "@wNothing here by that name!\r\n");
-  } else if (GET_OBJ_TYPE(vehicle_in_out) != ITEM_VEHICLE) {
+  } else if (obj_get_type_flag(vehicle_in_out) != ITEM_VEHICLE) {
       send_to_char(ch, "@wThat's not a ship.\r\n");
   } else if (vehicle == vehicle_in_out) {
       send_to_char(ch, "@wMy, we are in a clever mood today, aren't we.\r\n");
   } else {
-    is_going_to = real_room(GET_OBJ_VAL(vehicle_in_out, 0));
-    if (!IS_SET_AR(ROOM_FLAGS(is_going_to), ROOM_VEHICLE)) {
+    is_going_to = real_room(obj_get_value(vehicle_in_out, 0));
+    if (!IS_SET_AR(rroom_get_room_flags(is_going_to), ROOM_VEHICLE)) {
       send_to_char(ch, "@wThat ship can't carry other ships.");
     } else {
     sprintf(buf, "%s @wenters %s.\n\r", vehicle->short_description, 
     vehicle_in_out->short_description);
-    send_to_room(IN_ROOM(vehicle), buf);
+    send_to_room(obj_get_in_room(vehicle), buf);
 
-    was_in = IN_ROOM(vehicle);
+    was_in = obj_get_in_room(vehicle);
     obj_from_room(vehicle);
     obj_to_room(vehicle, is_going_to);
-    is_in = IN_ROOM(vehicle);
+    is_in = obj_get_in_room(vehicle);
     if (ch->desc != NULL)
           act("", TRUE, ch, 0, 0, TO_ROOM);
           send_to_char(ch, "@wThe ship flies onward:\r\n");
-        look_at_room(IN_ROOM(vehicle), ch, 0);
+        look_at_room(obj_get_in_room(vehicle), ch, 0);
     sprintf(buf, "%s @wenters.\r\n", vehicle->short_description);
     send_to_room(is_in, buf);
         }
@@ -427,31 +427,31 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle)
   struct obj_data *hatch, *vehicle_in_out;
   char   buf[MAX_INPUT_LENGTH];
 
-  if ( !(hatch = get_obj_in_list_type(ITEM_HATCH,world[IN_ROOM(vehicle)].contents)) ) {
+  if ( !(hatch = get_obj_in_list_type(ITEM_HATCH,world[obj_get_in_room(vehicle)].contents)) ) {
     send_to_char(ch, "@wNowhere to pilot out of.\r\n");
-  } else if (!(vehicle_in_out = find_vehicle_by_vnum(GET_OBJ_VAL(hatch, 0)))) {
+  } else if (!(vehicle_in_out = find_vehicle_by_vnum(obj_get_value(hatch, 0)))) {
     send_to_char(ch, "@wYou can't pilot out anywhere!\r\n");
   } else {
         sprintf(buf, "%s @wexits %s.\r\n", vehicle->short_description, 
          vehicle_in_out->short_description);
-        send_to_room(IN_ROOM(vehicle), buf);
+        send_to_room(obj_get_in_room(vehicle), buf);
 		
         obj_from_room(vehicle);
-        obj_to_room(vehicle, IN_ROOM(vehicle_in_out));
+        obj_to_room(vehicle, obj_get_in_room(vehicle_in_out));
 		
         if (ch->desc != NULL)
           act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", TRUE, ch, 0, 0, TO_ROOM);
           send_to_char(ch, "@wThe ship flies onward:\r\n");
-          look_at_room(IN_ROOM(vehicle), ch, 0);
+          look_at_room(obj_get_in_room(vehicle), ch, 0);
           int door;
          for (door = 0; door < NUM_OF_DIRS; door++) {
           if (char_can_go(ch, door)) {
-           send_to_room(world[IN_ROOM(ch)].dir_option[door]->to_room, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
+           send_to_room(world[char_get_in_room(ch)].dir_option[door]->to_room, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
           }
         }
         sprintf(buf, "%s @wflies out of %s.\r\n", vehicle->short_description,
          vehicle_in_out->short_description);
-        send_to_room(IN_ROOM(vehicle), buf);
+        send_to_room(obj_get_in_room(vehicle), buf);
   }
 }
 
@@ -460,16 +460,16 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
 {
   char   buf[MAX_INPUT_LENGTH];
 
-     if (!EXIT(vehicle, dir) || EXIT(vehicle, dir)->to_room == NOWHERE) {
+     if (!obj_get_exit(vehicle, dir) || obj_get_exit(vehicle, dir)->to_room == NOWHERE) {
         send_to_char(ch, "@wApparently %s doesn't exist there.\r\n", dirs[dir]);
-      } else if (IS_SET(EXIT(vehicle, dir)->exit_info, EX_CLOSED)) {
+      } else if (IS_SET(obj_get_exit(vehicle, dir)->exit_info, EX_CLOSED)) {
         /* But the door is closed */
-        if (EXIT(vehicle, dir)->keyword)
-          send_to_char(ch, "@wThe %s seems to be closed.\r\n", fname(EXIT(vehicle,           dir)->keyword));
+        if (obj_get_exit(vehicle, dir)->keyword)
+          send_to_char(ch, "@wThe %s seems to be closed.\r\n", fname(obj_get_exit(vehicle, dir)->keyword));
         else
           send_to_char(ch, "@wIt seems to be closed.\r\n");
 
-      } else if (!IS_SET_AR(ROOM_FLAGS(EXIT(vehicle,dir)->to_room),ROOM_VEHICLE) && !IS_SET_AR(ROOM_FLAGS(EXIT(vehicle,dir)->to_room),ROOM_SPACE)) {
+      } else if (!IS_SET_AR(rroom_get_room_flags(obj_get_exit(vehicle, dir)->to_room),ROOM_VEHICLE) && !IS_SET_AR(rroom_get_room_flags(obj_get_exit(vehicle, dir)->to_room),ROOM_SPACE)) {
         /* But the vehicle can't go that way*/
         send_to_char(ch, "@wThe ship can't fit there!\r\n");
         } else {
@@ -477,45 +477,45 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
           int was_in, is_in;
 
           sprintf(buf, "%s @wflies %s.\n\r", vehicle->short_description, dirs[dir]);
-          send_to_room(IN_ROOM(vehicle), buf);
+          send_to_room(obj_get_in_room(vehicle), buf);
 
-          was_in = IN_ROOM(vehicle);
+          was_in = obj_get_in_room(vehicle);
           obj_from_room(vehicle);
           obj_to_room(vehicle, world[was_in].dir_option[dir]->to_room);
           struct obj_data *controls;
           if ((controls = find_control(ch) )) {
-           if (GET_FUELCOUNT(controls) < 5) {
-            GET_FUELCOUNT(controls) += 1;
+           if (obj_get_value(controls, 3) < 5) {
+            obj_set_value(controls, 3, obj_get_value(controls, 3) + (1));
            } else {
-            GET_FUELCOUNT(controls) = 0;
-            GET_FUEL(controls) -= 1;
-            if (GET_FUEL(controls) < 0) {
-             GET_FUEL(controls) = 0;
+            obj_set_value(controls, 3, 0);
+            obj_set_value(controls, 2, obj_get_value(controls, 2) - (1));
+            if (obj_get_value(controls, 2) < 0) {
+             obj_set_value(controls, 2, 0);
             }
            }
           }
 
           struct obj_data *hatch = NULL;
 
-          for (hatch = world[real_room(GET_OBJ_VAL(vehicle, 0))].contents; hatch;hatch=hatch->next_content) {
-           if (GET_OBJ_TYPE(hatch) == ITEM_HATCH) {
-            GET_OBJ_VAL(hatch, 3) = rroom_get_vnum(IN_ROOM(vehicle));
+          for (hatch = world[real_room(obj_get_value(vehicle, 0))].contents; hatch;hatch=hatch->next_content) {
+           if (obj_get_type_flag(hatch) == ITEM_HATCH) {
+            obj_set_value(hatch, 3, rroom_get_vnum(obj_get_in_room(vehicle)));
            }
           }
 
-          is_in = IN_ROOM(vehicle);
+          is_in = obj_get_in_room(vehicle);
 
           if (ch->desc != NULL)
           act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", TRUE, ch, 0, 0, TO_ROOM);
           send_to_char(ch, "@wThe ship flies onward:\r\n");
           look_at_room(is_in, ch, 0);
           if (controls) {
-           send_to_char(ch, "@RFUEL@D: %s%s@n\r\n", GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r", add_commas(GET_FUEL(controls)));
+           send_to_char(ch, "@RFUEL@D: %s%s@n\r\n", obj_get_value(controls, 2) >= 200 ? "@G" : obj_get_value(controls, 2) >= 100 ? "@Y" : "@r", add_commas(obj_get_value(controls, 2)));
           }
           int door;
          for (door = 0; door < NUM_OF_DIRS; door++) {
           if (char_can_go(ch, door)) {
-           send_to_room(world[IN_ROOM(ch)].dir_option[door]->to_room, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
+           send_to_room(world[char_get_in_room(ch)].dir_option[door]->to_room, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
           }
          }
           sprintf(buf, "%s @wflies in from the %s.\r\n",
@@ -548,7 +548,7 @@ ACMD(do_warp)
   send_to_char(ch,"@wYou have nothing to control here!\r\n");
   return;
  }
- if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, 0))) ) {
+ if (!(vehicle = find_vehicle_by_vnum(obj_get_value(controls, 0))) ) {
   send_to_char(ch, "@wYou can't find anything to pilot.\r\n");
   return;
  } else if (!*arg) {
@@ -557,7 +557,7 @@ ACMD(do_warp)
  } else if (strcasecmp(arg, "earth") && strcasecmp(arg, "vegeta") && strcasecmp(arg, "namek") && strcasecmp(arg, "konack") && strcasecmp(arg, "frigid") && strcasecmp(arg, "aether") && strcasecmp(arg, "buoy1") && strcasecmp(arg, "buoy2") && strcasecmp(arg, "buoy3")) {
   send_to_char(ch, "Syntax: shipwarp [ earth | vegeta | namek | konack | aether | frigid | buoy1 | buoy2 | buoy3 ]\r\n");
   return;
- } else if (rroom_flagged(!IN_ROOM(vehicle), ROOM_SPACE)) {
+ } else if (rroom_flagged(!obj_get_in_room(vehicle), ROOM_SPACE)) {
   send_to_char(ch, "Your ship needs to be in space to utilize its Instant Travel Warp Accelerator.\r\n");
   return;
  } else if (obj_get_vnum(vehicle) != 18400) {
@@ -565,121 +565,121 @@ ACMD(do_warp)
   return;
  } else {
   if (!strcasecmp(arg, "earth")) {
-   if (rroom_get_vnum(IN_ROOM(vehicle)) == 40979 || rroom_get_vnum(IN_ROOM(vehicle)) == 50) {
+   if (rroom_get_vnum(obj_get_in_room(vehicle)) == 40979 || rroom_get_vnum(obj_get_in_room(vehicle)) == 50) {
     send_to_char(ch, "Your ship is already there!\r\n");
     return;
    } else {
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-    send_to_room(IN_ROOM(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(40979));
-    send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
   } else if (!strcasecmp(arg, "namek")) {
-   if (rroom_get_vnum(IN_ROOM(vehicle)) == 42880 || rroom_get_vnum(IN_ROOM(vehicle)) == 54) {
+   if (rroom_get_vnum(obj_get_in_room(vehicle)) == 42880 || rroom_get_vnum(obj_get_in_room(vehicle)) == 54) {
     send_to_char(ch, "Your ship is already there!\r\n");
     return;
    } else {
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-    send_to_room(IN_ROOM(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(42880));
-    send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
   } else if (!strcasecmp(arg, "frigid")) {
-   if (rroom_get_vnum(IN_ROOM(vehicle)) == 30889 || rroom_get_vnum(IN_ROOM(vehicle)) == 51) {
+   if (rroom_get_vnum(obj_get_in_room(vehicle)) == 30889 || rroom_get_vnum(obj_get_in_room(vehicle)) == 51) {
     send_to_char(ch, "Your ship is already there!\r\n");
     return;
    } else {
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-    send_to_room(IN_ROOM(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(30889));
-    send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
   } else if (!strcasecmp(arg, "konack")) {
-   if (rroom_get_vnum(IN_ROOM(vehicle)) == 27065 || rroom_get_vnum(IN_ROOM(vehicle)) == 52) {
+   if (rroom_get_vnum(obj_get_in_room(vehicle)) == 27065 || rroom_get_vnum(obj_get_in_room(vehicle)) == 52) {
     send_to_char(ch, "Your ship is already there!\r\n");
     return;
    } else {
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-    send_to_room(IN_ROOM(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(27065));
-    send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
   } else if (!strcasecmp(arg, "vegeta")) {
-   if (rroom_get_vnum(IN_ROOM(vehicle)) == 32365 || rroom_get_vnum(IN_ROOM(vehicle)) == 53) {
+   if (rroom_get_vnum(obj_get_in_room(vehicle)) == 32365 || rroom_get_vnum(obj_get_in_room(vehicle)) == 53) {
     send_to_char(ch, "Your ship is already there!\r\n");
     return;
    } else {
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-    send_to_room(IN_ROOM(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(32365));
-    send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
   } else if (!strcasecmp(arg, "aether")) {
-   if (rroom_get_vnum(IN_ROOM(vehicle)) == 41959 || rroom_get_vnum(IN_ROOM(vehicle)) == 55) {
+   if (rroom_get_vnum(obj_get_in_room(vehicle)) == 41959 || rroom_get_vnum(obj_get_in_room(vehicle)) == 55) {
     send_to_char(ch, "Your ship is already there!\r\n");
     return;
    } else {
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-    send_to_room(IN_ROOM(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(41959));
-    send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
   } else if (!strcasecmp(arg, "buoy1")) {
-   if (GET_RADAR1(ch) <= 0) {
+   if (char_get_radar1(ch) <= 0) {
     send_to_char(ch, "You have not launched that buoy!\r\n");
     return;
-   } else if (rroom_get_vnum(IN_ROOM(vehicle)) == GET_RADAR1(ch)) {
+   } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == char_get_radar1(ch)) {
     send_to_char(ch, "Your ship is already there!\r\n");
     return;
    } else {
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-    send_to_room(IN_ROOM(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
     obj_from_room(vehicle);
-    obj_to_room(vehicle, real_room(GET_RADAR1(ch)));
-    send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
+    obj_to_room(vehicle, real_room(char_get_radar1(ch)));
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
   } else if (!strcasecmp(arg, "buoy2")) {
-   if (GET_RADAR2(ch) <= 0) {
+   if (char_get_radar2(ch) <= 0) {
     send_to_char(ch, "You have not launched that buoy!\r\n");
     return;
-   } else if (rroom_get_vnum(IN_ROOM(vehicle)) == GET_RADAR2(ch)) {
+   } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == char_get_radar2(ch)) {
     send_to_char(ch, "Your ship is already there!\r\n");
     return;
    } else {
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-    send_to_room(IN_ROOM(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
     obj_from_room(vehicle);
-    obj_to_room(vehicle, real_room(GET_RADAR2(ch)));
-    send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
+    obj_to_room(vehicle, real_room(char_get_radar2(ch)));
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
   } else if (!strcasecmp(arg, "buoy3")) {
-   if (GET_RADAR3(ch) <= 0) {
+   if (char_get_radar3(ch) <= 0) {
     send_to_char(ch, "You have not launched that buoy!\r\n");
     return;
-   } else if (rroom_get_vnum(IN_ROOM(vehicle)) == GET_RADAR3(ch)) {
+   } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == char_get_radar3(ch)) {
     send_to_char(ch, "Your ship is already there!\r\n");
     return;
    } else {
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-    send_to_room(IN_ROOM(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
     obj_from_room(vehicle);
-    obj_to_room(vehicle, real_room(GET_RADAR3(ch)));
-    send_to_room(IN_ROOM(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
+    obj_to_room(vehicle, real_room(char_get_radar3(ch)));
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description); 
    }
   } else {
    log("ERROR: Ship Instant Warp Failure! Unknown argument!");
@@ -710,8 +710,8 @@ ACMD(do_drive)
       else if (char_plr_flagged(ch, PLR_PILOTING)) {
        act("@w$n stands up and stops piloting the ship.", TRUE, ch, 0, 0, TO_ROOM);
        send_to_char(ch, "@wYou stand up from the pilot's seat.\r\n");
-       GET_POS(ch) = POS_STANDING;
-       REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_PILOTING);
+       char_set_position(ch, POS_STANDING);
+       REMOVE_BIT_AR(char_get_act(ch), PLR_PILOTING);
        return;
      }
    }
@@ -729,7 +729,7 @@ ACMD(do_drive)
       send_to_char(ch, "@wYou are busy carrying someone.\r\n");
        return;
      }
-     if (DRAGGING(ch)) {
+     if (char_get_drag(ch)) {
       send_to_char(ch, "@wYou are busy dragging someone.\r\n");
        return;
      }
@@ -740,7 +740,7 @@ ACMD(do_drive)
       if (d->character == ch) {
        continue;
       }
-      if (char_plr_flagged(d->character, PLR_PILOTING) && IN_ROOM(d->character) == IN_ROOM(ch)) {
+      if (char_plr_flagged(d->character, PLR_PILOTING) && char_get_in_room(d->character) == char_get_in_room(ch)) {
        send_to_char(ch, "@w%s is already piloting the ship!\r\n", char_get_name(d->character));
        count = 1;
        return;
@@ -751,18 +751,18 @@ ACMD(do_drive)
       }
     }
   if (confirmed == TRUE) {
-      SET_BIT_AR(PLR_FLAGS(ch), PLR_PILOTING);
+      SET_BIT_AR(char_get_act(ch), PLR_PILOTING);
       act("@w$n sits down and begins piloting the ship.", TRUE, ch, 0, 0, TO_ROOM);
-      GET_POS(ch) = POS_SITTING;
+      char_set_position(ch, POS_SITTING);
       send_to_char(ch, "@wYou take a seat in the pilot's chair.\r\n");
       return;
   } else if (!char_plr_flagged(ch, PLR_PILOTING)) {
     send_to_char(ch, "@wYou need to be seated in the pilot's seat.\r\n[Enter: Pilot ready/unready]\r\n");
-  } else if (GET_POS(ch) < POS_SLEEPING) {
+  } else if (char_get_position(ch) < POS_SLEEPING) {
     send_to_char(ch, "@wYou can't see anything but stars!\r\n");
   } else if (char_aff_flagged(ch, AFF_BLIND)) {
     send_to_char(ch, "@wYou can't see a damned thing, you're blind!\r\n");
-  } else if (room_is_dark(IN_ROOM(ch)) && !char_can_see_in_dark(ch)) {
+  } else if (room_is_dark(char_get_in_room(ch)) && !char_can_see_in_dark(ch)) {
     send_to_char(ch, "@wIt is pitch black...\r\n");
   } else if (!(controls = find_control(ch) )) {
     send_to_char(ch,"@wYou have nothing to control here!\r\n");
@@ -771,7 +771,7 @@ ACMD(do_drive)
              invalid_race(ch, controls)) {
     act("@wYou are zapped by $p@w and instantly step away from it.", FALSE, ch, controls, 0, TO_CHAR);
     act("@w$n@w is zapped by $p@w and instantly steps away from it.", FALSE, ch, controls, 0, TO_ROOM);
-  } else if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, 0))) ) {
+  } else if (!(vehicle = find_vehicle_by_vnum(obj_get_value(controls, 0))) ) {
     send_to_char(ch, "@wYou can't find anything to pilot.\r\n");
   } else {
 
@@ -780,7 +780,7 @@ ACMD(do_drive)
     /*argument = any_one_arg(argument, arg);*/
     half_chop(argument, arg, arg2); 
 
-    if (GET_FUEL(controls) <= 0) {
+    if (obj_get_value(controls, 2) <= 0) {
      send_to_char(ch, "Your ship doesn't have enough fuel to move.\r\n");
      return;
     }
@@ -791,7 +791,7 @@ ACMD(do_drive)
 	       is_abbrev(arg, "onto")    )  {
       /* Driving into another vehicle */
       drive_into_vehicle(ch, vehicle, arg2);
-    } else if (is_abbrev(arg, "out") && !EXIT(vehicle, OUTDIR)) {
+    } else if (is_abbrev(arg, "out") && !obj_get_exit(vehicle, OUTDIR)) {
       drive_outof_vehicle(ch, vehicle);
     } else {
             if (!obj_val_flagged(vehicle, CONT_CLOSED)) {
@@ -802,180 +802,180 @@ ACMD(do_drive)
       if (!strcasecmp(arg, "north") || !strcasecmp(arg, "n")) {
        dir = 0;
       drive_in_direction(ch, vehicle, dir);
-       if (GET_OBJ_VAL(controls, 1) == 1) {
+       if (obj_get_value(controls, 1) == 1) {
         WAIT_STATE(ch, PULSE_2SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 2) {
+       } else if (obj_get_value(controls, 1) == 2) {
         WAIT_STATE(ch, PULSE_2SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 3) {
+       } else if (obj_get_value(controls, 1) == 3) {
         WAIT_STATE(ch, PULSE_1SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 4) {
+       } else if (obj_get_value(controls, 1) == 4) {
         WAIT_STATE(ch, PULSE_1SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 5) {
+       } else if (obj_get_value(controls, 1) == 5) {
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
       else if (!strcasecmp(arg, "east") || !strcasecmp(arg, "e")) {
        dir = 1;
       drive_in_direction(ch, vehicle, dir);
-       if (GET_OBJ_VAL(controls, 1) == 1) {
+       if (obj_get_value(controls, 1) == 1) {
         WAIT_STATE(ch, PULSE_2SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 2) {
+       } else if (obj_get_value(controls, 1) == 2) {
         WAIT_STATE(ch, PULSE_2SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 3) {
+       } else if (obj_get_value(controls, 1) == 3) {
         WAIT_STATE(ch, PULSE_1SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 4) {
+       } else if (obj_get_value(controls, 1) == 4) {
         WAIT_STATE(ch, PULSE_1SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 5) {
+       } else if (obj_get_value(controls, 1) == 5) {
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
       else if (!strcasecmp(arg, "south") || !strcasecmp(arg, "s")) {
        dir = 2;
       drive_in_direction(ch, vehicle, dir);
-       if (GET_OBJ_VAL(controls, 1) == 1) {
+       if (obj_get_value(controls, 1) == 1) {
         WAIT_STATE(ch, PULSE_2SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 2) {
+       } else if (obj_get_value(controls, 1) == 2) {
         WAIT_STATE(ch, PULSE_2SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 3) {
+       } else if (obj_get_value(controls, 1) == 3) {
         WAIT_STATE(ch, PULSE_1SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 4) {
+       } else if (obj_get_value(controls, 1) == 4) {
         WAIT_STATE(ch, PULSE_1SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 5) {
+       } else if (obj_get_value(controls, 1) == 5) {
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
       else if (!strcasecmp(arg, "west") || !strcasecmp(arg, "w")) {
        dir = 3;
       drive_in_direction(ch, vehicle, dir);
-       if (GET_OBJ_VAL(controls, 1) == 1) {
+       if (obj_get_value(controls, 1) == 1) {
         WAIT_STATE(ch, PULSE_2SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 2) {
+       } else if (obj_get_value(controls, 1) == 2) {
         WAIT_STATE(ch, PULSE_2SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 3) {
+       } else if (obj_get_value(controls, 1) == 3) {
         WAIT_STATE(ch, PULSE_1SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 4) {
+       } else if (obj_get_value(controls, 1) == 4) {
         WAIT_STATE(ch, PULSE_1SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 5) {
+       } else if (obj_get_value(controls, 1) == 5) {
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
       else if (!strcasecmp(arg, "up") || !strcasecmp(arg, "u")) {
        dir = 4;
       drive_in_direction(ch, vehicle, dir);
-       if (GET_OBJ_VAL(controls, 1) == 1) {
+       if (obj_get_value(controls, 1) == 1) {
         WAIT_STATE(ch, PULSE_2SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 2) {
+       } else if (obj_get_value(controls, 1) == 2) {
         WAIT_STATE(ch, PULSE_2SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 3) {
+       } else if (obj_get_value(controls, 1) == 3) {
         WAIT_STATE(ch, PULSE_1SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 4) {
+       } else if (obj_get_value(controls, 1) == 4) {
         WAIT_STATE(ch, PULSE_1SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 5) {
+       } else if (obj_get_value(controls, 1) == 5) {
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
       else if (!strcasecmp(arg, "down") || !strcasecmp(arg, "d")) {
        dir = 5;
       drive_in_direction(ch, vehicle, dir);
-       if (GET_OBJ_VAL(controls, 1) == 1) {
+       if (obj_get_value(controls, 1) == 1) {
         WAIT_STATE(ch, PULSE_2SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 2) {
+       } else if (obj_get_value(controls, 1) == 2) {
         WAIT_STATE(ch, PULSE_2SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 3) {
+       } else if (obj_get_value(controls, 1) == 3) {
         WAIT_STATE(ch, PULSE_1SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 4) {
+       } else if (obj_get_value(controls, 1) == 4) {
         WAIT_STATE(ch, PULSE_1SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 5) {
+       } else if (obj_get_value(controls, 1) == 5) {
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
       else if (!strcasecmp(arg, "northwest") || !strcasecmp(arg, "nw") || !strcasecmp(arg, "northw")) {
        dir = 6;
       drive_in_direction(ch, vehicle, dir);
-       if (GET_OBJ_VAL(controls, 1) == 1) {
+       if (obj_get_value(controls, 1) == 1) {
         WAIT_STATE(ch, PULSE_2SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 2) {
+       } else if (obj_get_value(controls, 1) == 2) {
         WAIT_STATE(ch, PULSE_2SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 3) {
+       } else if (obj_get_value(controls, 1) == 3) {
         WAIT_STATE(ch, PULSE_1SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 4) {
+       } else if (obj_get_value(controls, 1) == 4) {
         WAIT_STATE(ch, PULSE_1SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 5) {
+       } else if (obj_get_value(controls, 1) == 5) {
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
       else if (!strcasecmp(arg, "northeast") || !strcasecmp(arg, "ne") || !strcasecmp(arg, "northe")) {
        dir = 7;
       drive_in_direction(ch, vehicle, dir);
-       if (GET_OBJ_VAL(controls, 1) == 1) {
+       if (obj_get_value(controls, 1) == 1) {
         WAIT_STATE(ch, PULSE_2SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 2) {
+       } else if (obj_get_value(controls, 1) == 2) {
         WAIT_STATE(ch, PULSE_2SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 3) {
+       } else if (obj_get_value(controls, 1) == 3) {
         WAIT_STATE(ch, PULSE_1SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 4) {
+       } else if (obj_get_value(controls, 1) == 4) {
         WAIT_STATE(ch, PULSE_1SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 5) {
+       } else if (obj_get_value(controls, 1) == 5) {
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
       else if (!strcasecmp(arg, "southeast") || !strcasecmp(arg, "se") || !strcasecmp(arg, "southe")) {
        dir = 8;
       drive_in_direction(ch, vehicle, dir);
-       if (GET_OBJ_VAL(controls, 1) == 1) {
+       if (obj_get_value(controls, 1) == 1) {
         WAIT_STATE(ch, PULSE_2SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 2) {
+       } else if (obj_get_value(controls, 1) == 2) {
         WAIT_STATE(ch, PULSE_2SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 3) {
+       } else if (obj_get_value(controls, 1) == 3) {
         WAIT_STATE(ch, PULSE_1SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 4) {
+       } else if (obj_get_value(controls, 1) == 4) {
         WAIT_STATE(ch, PULSE_1SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 5) {
+       } else if (obj_get_value(controls, 1) == 5) {
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
       else if (!strcasecmp(arg, "southwest") || !strcasecmp(arg, "sw") || !strcasecmp(arg, "southw")) {
        dir = 9;
       drive_in_direction(ch, vehicle, dir);
-       if (GET_OBJ_VAL(controls, 1) == 1) {
+       if (obj_get_value(controls, 1) == 1) {
         WAIT_STATE(ch, PULSE_2SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 2) {
+       } else if (obj_get_value(controls, 1) == 2) {
         WAIT_STATE(ch, PULSE_2SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 3) {
+       } else if (obj_get_value(controls, 1) == 3) {
         WAIT_STATE(ch, PULSE_1SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 4) {
+       } else if (obj_get_value(controls, 1) == 4) {
         WAIT_STATE(ch, PULSE_1SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 5) {
+       } else if (obj_get_value(controls, 1) == 5) {
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
       else if (!strcasecmp(arg, "inside")) {
        dir = 10;
       drive_in_direction(ch, vehicle, dir);
-       if (GET_OBJ_VAL(controls, 1) == 1) {
+       if (obj_get_value(controls, 1) == 1) {
         WAIT_STATE(ch, PULSE_2SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 2) {
+       } else if (obj_get_value(controls, 1) == 2) {
         WAIT_STATE(ch, PULSE_2SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 3) {
+       } else if (obj_get_value(controls, 1) == 3) {
         WAIT_STATE(ch, PULSE_1SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 4) {
+       } else if (obj_get_value(controls, 1) == 4) {
         WAIT_STATE(ch, PULSE_1SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 5) {
+       } else if (obj_get_value(controls, 1) == 5) {
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
       else if (!strcasecmp(arg, "outside")) {
        dir = 11;
       drive_in_direction(ch, vehicle, dir);
-       if (GET_OBJ_VAL(controls, 1) == 1) {
+       if (obj_get_value(controls, 1) == 1) {
         WAIT_STATE(ch, PULSE_2SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 2) {
+       } else if (obj_get_value(controls, 1) == 2) {
         WAIT_STATE(ch, PULSE_2SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 3) {
+       } else if (obj_get_value(controls, 1) == 3) {
         WAIT_STATE(ch, PULSE_1SEC * 1.5);
-       } else if (GET_OBJ_VAL(controls, 1) == 4) {
+       } else if (obj_get_value(controls, 1) == 4) {
         WAIT_STATE(ch, PULSE_1SEC);
-       } else if (GET_OBJ_VAL(controls, 1) == 5) {
+       } else if (obj_get_value(controls, 1) == 5) {
         WAIT_STATE(ch, PULSE_1SEC * 0.5);
        }
       }
@@ -1021,7 +1021,7 @@ ACMD(do_drive)
           act("@wThe ship slams into the ground and forms a small crater!@n", FALSE, ch, 0, 0, TO_ROOM);
           obj_from_room(vehicle);
           obj_to_room(vehicle, real_room(land_location));
-        } else if (IN_ROOM(vehicle) == real_room(50)) {
+        } else if (obj_get_in_room(vehicle) == real_room(50)) {
          if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(409));
@@ -1056,22 +1056,22 @@ ACMD(do_drive)
          }
         }
         /* For Zenith */
-        else if (IN_ROOM(vehicle) == real_room(57)) {
+        else if (obj_get_in_room(vehicle) == real_room(57)) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(3508));
         }
         /* For Cerria*/
-        else if (IN_ROOM(vehicle) == real_room(198)) {
+        else if (obj_get_in_room(vehicle) == real_room(198)) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(17420));
         }
         /* For Kanassa */
-        else if (IN_ROOM(vehicle) == real_room(58)) {
+        else if (obj_get_in_room(vehicle) == real_room(58)) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(14904));
         }
         /* For Vegeta */
-        else if (IN_ROOM(vehicle) == real_room(53)) {
+        else if (obj_get_in_room(vehicle) == real_room(53)) {
          if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(2319));
@@ -1099,7 +1099,7 @@ ACMD(do_drive)
         }
 
         /* For Yardrat */
-        else if (IN_ROOM(vehicle) == real_room(56)) {
+        else if (obj_get_in_room(vehicle) == real_room(56)) {
          if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(14003));
@@ -1123,7 +1123,7 @@ ACMD(do_drive)
         }
 
         /* For Aether */
-        else if (IN_ROOM(vehicle) == real_room(55)) {
+        else if (obj_get_in_room(vehicle) == real_room(55)) {
          if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(12003));
@@ -1147,7 +1147,7 @@ ACMD(do_drive)
         }
 
         /* For Arlia */
-        else if (IN_ROOM(vehicle) == real_room(59)) {
+        else if (obj_get_in_room(vehicle) == real_room(59)) {
          if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(16065));
@@ -1172,7 +1172,7 @@ ACMD(do_drive)
 
 
         /* For Frigid */
-        else if (IN_ROOM(vehicle) == real_room(51)) {
+        else if (obj_get_in_room(vehicle) == real_room(51)) {
          if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(4264));
@@ -1199,7 +1199,7 @@ ACMD(do_drive)
          }
         }
         /* For Namek */
-        else if (IN_ROOM(vehicle) == real_room(54)) {
+        else if (obj_get_in_room(vehicle) == real_room(54)) {
          if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(11628));
@@ -1222,7 +1222,7 @@ ACMD(do_drive)
          }
         }
         /* For Konack */
-        else if (IN_ROOM(vehicle) == real_room(52)) {
+        else if (obj_get_in_room(vehicle) == real_room(52)) {
          if (!strcasecmp(arg2, "1")) {
            obj_from_room(vehicle);
            obj_to_room(vehicle, real_room(8195));
@@ -1249,52 +1249,52 @@ ACMD(do_drive)
         }
           if (land_location <= 50) {
            sprintf(buf3, "%s @wcomes in from above and slowly settles on the launch-pad.@n\r\n", vehicle->short_description);
-           look_at_room(IN_ROOM(vehicle), ch, 0);
-           send_to_room(IN_ROOM(vehicle), buf3);
+           look_at_room(obj_get_in_room(vehicle), ch, 0);
+           send_to_room(obj_get_in_room(vehicle), buf3);
           } else {
            sprintf(buf3, "%s @wcomes in from above and slams into the ground!@n\r\n", vehicle->short_description);
-           ROOM_DAMAGE(IN_ROOM(vehicle)) += 1;
-           if (ROOM_DAMAGE(IN_ROOM(vehicle)) >= 10) {
-            ROOM_DAMAGE(IN_ROOM(vehicle)) = 10;
+           rroom_set_dmg(obj_get_in_room(vehicle), rroom_get_dmg(obj_get_in_room(vehicle)) + (1));
+           if (rroom_get_dmg(obj_get_in_room(vehicle)) >= 10) {
+            rroom_set_dmg(obj_get_in_room(vehicle), 10);
            }
-           look_at_room(IN_ROOM(vehicle), ch, 0);
-           send_to_room(IN_ROOM(vehicle), buf3);
+           look_at_room(obj_get_in_room(vehicle), ch, 0);
+           send_to_room(obj_get_in_room(vehicle), buf3);
           }
       }
      else if (!strcasecmp(arg, "launch")) {
        int lnum = 0;
        int rnum = 0;
-       if (rroom_flagged(IN_ROOM(vehicle), ROOM_EARTH)) {
+       if (rroom_flagged(obj_get_in_room(vehicle), ROOM_EARTH)) {
         lnum = 1;
        }
-       else if (rroom_flagged(IN_ROOM(vehicle), ROOM_FRIGID)) {
+       else if (rroom_flagged(obj_get_in_room(vehicle), ROOM_FRIGID)) {
         lnum = 2;
        }
-       else if (rroom_flagged(IN_ROOM(vehicle), ROOM_KONACK)) {
+       else if (rroom_flagged(obj_get_in_room(vehicle), ROOM_KONACK)) {
         lnum = 3;
        }
-       else if (rroom_flagged(IN_ROOM(vehicle), ROOM_VEGETA)) {
+       else if (rroom_flagged(obj_get_in_room(vehicle), ROOM_VEGETA)) {
         lnum = 4;
        }
-       else if (rroom_flagged(IN_ROOM(vehicle), ROOM_NAMEK)) {
+       else if (rroom_flagged(obj_get_in_room(vehicle), ROOM_NAMEK)) {
         lnum = 5;
        }
-       else if (rroom_flagged(IN_ROOM(vehicle), ROOM_AETHER)) {
+       else if (rroom_flagged(obj_get_in_room(vehicle), ROOM_AETHER)) {
         lnum = 6;
        }
-       else if (rroom_flagged(IN_ROOM(vehicle), ROOM_YARDRAT)) {
+       else if (rroom_flagged(obj_get_in_room(vehicle), ROOM_YARDRAT)) {
         lnum = 7;
        }
-       else if (rroom_planet_zenith(IN_ROOM(vehicle))) {
+       else if (rroom_planet_zenith(obj_get_in_room(vehicle))) {
         lnum = 8;
        }
-       else if (rroom_flagged(IN_ROOM(vehicle), ROOM_CERRIA)) {
+       else if (rroom_flagged(obj_get_in_room(vehicle), ROOM_CERRIA)) {
         lnum = 11;
        }
-       else if (rroom_flagged(IN_ROOM(vehicle), ROOM_KANASSA)) {
+       else if (rroom_flagged(obj_get_in_room(vehicle), ROOM_KANASSA)) {
         lnum = 9;
        }
-       else if (rroom_flagged(IN_ROOM(vehicle), ROOM_ARLIA)) {
+       else if (rroom_flagged(obj_get_in_room(vehicle), ROOM_ARLIA)) {
         lnum = 10;
        }
        else {
@@ -1307,7 +1307,7 @@ ACMD(do_drive)
            act("@RThe ship shudders as it launches up into the sky!@n", FALSE, ch, 0, 0, TO_ROOM);
            act("@wThe ship has reached low orbit.@n", FALSE, ch, 0, 0, TO_CHAR);
            act("@wThe ship has reached low orbit.@n", FALSE, ch, 0, 0, TO_ROOM);
-           send_to_room(IN_ROOM(vehicle), "@R%s @Rshudders before blasting off into the sky!@n", vehicle->short_description);
+           send_to_room(obj_get_in_room(vehicle), "@R%s @Rshudders before blasting off into the sky!@n", vehicle->short_description);
        if (lnum == 1) {
         rnum = real_room(50);
        }
@@ -1341,19 +1341,19 @@ ACMD(do_drive)
        if (lnum == 11) {
         rnum = real_room(198);
        }
-      if (GET_FUELCOUNT(controls) < 5) {
-        GET_FUELCOUNT(controls) += 1;
+      if (obj_get_value(controls, 3) < 5) {
+        obj_set_value(controls, 3, obj_get_value(controls, 3) + (1));
       } else {
-        GET_FUELCOUNT(controls) = 0;
-        GET_FUEL(controls) -= 1;
-            if (GET_FUEL(controls) < 0) {
-             GET_FUEL(controls) = 0;
+        obj_set_value(controls, 3, 0);
+        obj_set_value(controls, 2, obj_get_value(controls, 2) - (1));
+            if (obj_get_value(controls, 2) < 0) {
+             obj_set_value(controls, 2, 0);
             }
       }
       obj_from_room(vehicle);
       obj_to_room(vehicle, rnum);
-      look_at_room(IN_ROOM(vehicle), ch, 0);
-      send_to_char(ch, "@RFUEL@D: %s%s@n\r\n", GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r", add_commas(GET_FUEL(controls)));
+      look_at_room(obj_get_in_room(vehicle), ch, 0);
+      send_to_char(ch, "@RFUEL@D: %s%s@n\r\n", obj_get_value(controls, 2) >= 200 ? "@G" : obj_get_value(controls, 2) >= 100 ? "@Y" : "@r", add_commas(obj_get_value(controls, 2)));
      }
      else if (!strcasecmp(arg, "mark")) {
        int rnum = 0;
@@ -1366,39 +1366,39 @@ ACMD(do_drive)
         return;
        }
   
-       if (!rroom_flagged(IN_ROOM(vehicle), ROOM_SPACE)) {
+       if (!rroom_flagged(obj_get_in_room(vehicle), ROOM_SPACE)) {
         send_to_char(ch, "@wYou need to be in space to launch a marker buoy.\r\n");
         return;
        }
 
-       rnum = IN_ROOM(vehicle);
+       rnum = obj_get_in_room(vehicle);
 
-       if (GET_RADAR1(ch) > 0 && !strcasecmp(arg2, "1")) {
+       if (char_get_radar1(ch) > 0 && !strcasecmp(arg2, "1")) {
         send_to_char(ch, "@wYou need to 'deactivate' that marker.\r\n");
         return;
        }
-       else if (GET_RADAR1(ch) <= 0 && !strcasecmp(arg2, "1")) {
+       else if (char_get_radar1(ch) <= 0 && !strcasecmp(arg2, "1")) {
         act("@wYou enter a unique code and launch a marker buoy.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
-        GET_RADAR1(ch) = rroom_get_vnum(IN_ROOM(vehicle));
+        char_set_radar1(ch, rroom_get_vnum(obj_get_in_room(vehicle)));
        }
-       if (GET_RADAR2(ch) > 0 && !strcasecmp(arg2, "2")) {
+       if (char_get_radar2(ch) > 0 && !strcasecmp(arg2, "2")) {
         send_to_char(ch, "@wYou need to 'deactivate' that marker.\r\n");
         return;
        }
-       else if (GET_RADAR2(ch) <= 0 && !strcasecmp(arg2, "2")) {
+       else if (char_get_radar2(ch) <= 0 && !strcasecmp(arg2, "2")) {
         act("@wYou enter a unique code and launch a marker buoy.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
-        GET_RADAR2(ch) = rroom_get_vnum(IN_ROOM(vehicle));
+        char_set_radar2(ch, rroom_get_vnum(obj_get_in_room(vehicle)));
        }
-       if (GET_RADAR3(ch) > 0 && !strcasecmp(arg2, "3")) {
+       if (char_get_radar3(ch) > 0 && !strcasecmp(arg2, "3")) {
         send_to_char(ch, "@wYou need to 'deactivate' that marker.\r\n");
         return;
        }
-       else if (GET_RADAR3(ch) <= 0 && !strcasecmp(arg2, "3")) {
+       else if (char_get_radar3(ch) <= 0 && !strcasecmp(arg2, "3")) {
         act("@wYou enter a unique code and launch a marker buoy.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
-        GET_RADAR3(ch) = rroom_get_vnum(IN_ROOM(vehicle));
+        char_set_radar3(ch, rroom_get_vnum(obj_get_in_room(vehicle)));
        }
      }
      else if (!strcasecmp(arg, "deactivate")) {
@@ -1411,32 +1411,32 @@ ACMD(do_drive)
         return;
        }
 
-       if (GET_RADAR1(ch) <= 0 && !strcasecmp(arg2, "1")) {
+       if (char_get_radar1(ch) <= 0 && !strcasecmp(arg2, "1")) {
         send_to_char(ch, "@wYou haven't launched that buoy yet.\r\n");
         return;
        }
-       else if (GET_RADAR1(ch) > 0 && !strcasecmp(arg2, "1")) {
+       else if (char_get_radar1(ch) > 0 && !strcasecmp(arg2, "1")) {
         act("@wYou enter buoy one's code and command it to deactivate.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
-        GET_RADAR1(ch) = 0;
+        char_set_radar1(ch, 0);
        }
-       if (GET_RADAR2(ch) <= 0 && !strcasecmp(arg2, "2")) {
+       if (char_get_radar2(ch) <= 0 && !strcasecmp(arg2, "2")) {
         send_to_char(ch, "@wYou haven't launched that buoy yet.\r\n");
         return;
        }
-       else if (GET_RADAR2(ch) > 0 && !strcasecmp(arg2, "2")) {
+       else if (char_get_radar2(ch) > 0 && !strcasecmp(arg2, "2")) {
         act("@wYou enter buoy two's code and command it to deactivate.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
-        GET_RADAR2(ch) = 0;
+        char_set_radar2(ch, 0);
        }
-       if (GET_RADAR3(ch) <= 0 && !strcasecmp(arg2, "3")) {
+       if (char_get_radar3(ch) <= 0 && !strcasecmp(arg2, "3")) {
         send_to_char(ch, "@wYou haven't launched that buoy yet.\r\n");
         return;
        }
-       else if (GET_RADAR3(ch) > 0 && !strcasecmp(arg2, "3")) {
+       else if (char_get_radar3(ch) > 0 && !strcasecmp(arg2, "3")) {
         act("@wYou enter buoy three's code and command it to deactivate.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
-        GET_RADAR3(ch) = 0;
+        char_set_radar3(ch, 0);
        }
      }
      else {
@@ -1464,7 +1464,7 @@ ACMD(do_ship_fire)
    return;
   }
 
-  if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, 0))) ) {
+  if (!(vehicle = find_vehicle_by_vnum(obj_get_value(controls, 0))) ) {
    send_to_char(ch, "@wSomething cosmic is jamming your signal! Quick call Iovan to repair it!\r\n");
    return;
   }
@@ -1472,10 +1472,10 @@ ACMD(do_ship_fire)
   struct obj_data *obj = NULL, *obj2 = NULL, *next_obj = NULL;
   int shot = FALSE;
 
-  for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+  for (obj = world[char_get_in_room(ch)].contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
    if (shot == FALSE) {
-    if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && obj != vehicle) {
+    if (obj_get_type_flag(obj) == ITEM_VEHICLE && obj != vehicle) {
      if (!strcasecmp(arg1, obj->name)) {
       obj2 = obj;
       shot = TRUE;

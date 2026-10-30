@@ -161,7 +161,7 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
 	    *s = '\0';
 	    p = any_one_name(++p, name);
 	    otokens[i] =
-		find_invis ? (void *)get_char_in_room(&world[IN_ROOM(ch)], name) : (void *)get_char_room_vis(ch, name, NULL);
+		find_invis ? (void *)get_char_in_room(&world[char_get_in_room(ch)], name) : (void *)get_char_room_vis(ch, name, NULL);
 	    tokens[++i] = ++s;
 	    break;
 
@@ -171,8 +171,8 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
 	    *s = '\0';
 	    p = any_one_name(++p, name);
 
-            if (find_invis) obj = get_obj_in_room(&world[IN_ROOM(ch)], name);
-            else if (!(obj = get_obj_in_list_vis(ch, name, NULL, world[IN_ROOM(ch)].contents))) ;
+            if (find_invis) obj = get_obj_in_room(&world[char_get_in_room(ch)], name);
+            else if (!(obj = get_obj_in_list_vis(ch, name, NULL, world[char_get_in_room(ch)].contents))) ;
             else if (!(obj = get_obj_in_equip_vis(ch, name, &tmp, ch->equipment))) ;
             else obj = get_obj_in_list_vis(ch, name, NULL, ch->carrying);
 
@@ -197,7 +197,7 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
 	sub_write_to_char(ch, tokens, otokens, type);
 
     if (IS_SET(targets, TO_ROOM))
-	for (to = world[IN_ROOM(ch)].people;
+	for (to = world[char_get_in_room(ch)].people;
 	     to; to = to->next_in_room)
 	    if (to != ch && SENDOK(to))
 		sub_write_to_char(to, tokens, otokens, type);
@@ -214,8 +214,8 @@ void send_to_zone(char *messg, zone_rnum zone)
 
   for (i = descriptor_list; i; i = i->next)
     if (!i->connected && i->character && char_is_awake(i->character) &&
-        (IN_ROOM(i->character) != NOWHERE) &&
-        (world[IN_ROOM(i->character)].zone == zone))
+        (char_get_in_room(i->character) != NOWHERE) &&
+        (world[char_get_in_room(i->character)].zone == zone))
       write_to_output(i, "%s", messg);
 }
 
@@ -227,7 +227,7 @@ void fly_zone(zone_rnum zone, char *messg, struct char_data *ch)
     return;
 
   for (i = descriptor_list; i; i = i->next) {
-    if (!i->connected && i->character && char_is_awake(i->character) && char_is_outside(i->character) && (IN_ROOM(i->character) != NOWHERE) && (world[IN_ROOM(i->character)].zone == zone) && i->character != ch) {
+    if (!i->connected && i->character && char_is_awake(i->character) && char_is_outside(i->character) && (char_get_in_room(i->character) != NOWHERE) && (world[char_get_in_room(i->character)].zone == zone) && i->character != ch) {
        if (char_plr_flagged(i->character, PLR_DISGUISED)) {
          write_to_output(i, "A disguised figure %s", messg);
        } else {
@@ -247,21 +247,21 @@ void send_to_sense(int type, char *messg, struct char_data *ch)
     return;
 
   for (i = descriptor_list; i; i = i->next) {
-    if (STATE(i) != CON_PLAYING) {
+    if (desc_get_connected(i) != CON_PLAYING) {
      continue;
     }
     tch = i->character;
-    obj = GET_EQ(tch, WEAR_EYE);
+    obj = char_get_equipment(tch, WEAR_EYE);
     if (tch == ch) {
       continue;
     }
     if (!char_get_skill(tch, SKILL_SENSE)) {
       continue;
     }
-    if (((world[IN_ROOM(ch)].zone != world[IN_ROOM(tch)].zone && type == 0) || !char_is_awake(tch))) {
+    if (((world[char_get_in_room(ch)].zone != world[char_get_in_room(tch)].zone && type == 0) || !char_is_awake(tch))) {
       continue;
     }
-    if (rroom_flagged(IN_ROOM(ch), ROOM_SHIP)) {
+    if (rroom_flagged(char_get_in_room(ch), ROOM_SHIP)) {
       continue;
     }
     if (obj && type == 0) {
@@ -270,7 +270,7 @@ void send_to_sense(int type, char *messg, struct char_data *ch)
     if (char_is_android(ch)) {
      continue;
     }
-    if (IN_ROOM(ch) == IN_ROOM(tch)) {
+    if (char_get_in_room(ch) == char_get_in_room(tch)) {
        continue;
     } else if (GET_HIT(ch) < (GET_HIT(tch) * 0.001) + 1) {
        continue;
@@ -318,19 +318,19 @@ void send_to_sense(int type, char *messg, struct char_data *ch)
         } else {
          sprintf(power, ", who is close to @Cequal@Y with you");
         }
-        if (GET_ALIGNMENT(ch) >= 1000) {
+        if (char_get_alignment(ch) >= 1000) {
          sprintf(align, ", with a @wsaintly@Y aura,");
-        } else if (GET_ALIGNMENT(ch) >= 500) {
+        } else if (char_get_alignment(ch) >= 500) {
          sprintf(align, ", with a very @Cgood@Y aura,");
-        } else if (GET_ALIGNMENT(ch) >= 200) {
+        } else if (char_get_alignment(ch) >= 200) {
          sprintf(align, ", with a @cgood@Y aura,");
-        } else if (GET_ALIGNMENT(ch) > -100) {
+        } else if (char_get_alignment(ch) > -100) {
          sprintf(align, ", with a near @Wneutral@Y aura,");
-        } else if (GET_ALIGNMENT(ch) > -200) {
+        } else if (char_get_alignment(ch) > -200) {
          sprintf(align, ", with a sorta @revil@Y aura,");
-        } else if (GET_ALIGNMENT(ch) > -500) {
+        } else if (char_get_alignment(ch) > -500) {
          sprintf(align, ", with an @revil@Y aura,");
-        } else if (GET_ALIGNMENT(ch) > -900) {
+        } else if (char_get_alignment(ch) > -900) {
          sprintf(align, ", with a @rvery evil@Y aura,");
         } else {
          sprintf(align, ", with a @rd@De@Wv@wil@Wi@Ds@rh@Y aura,");
@@ -353,58 +353,58 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type)
     return;
 
   for (i = descriptor_list; i; i = i->next) {
-    if (STATE(i) != CON_PLAYING) {
+    if (desc_get_connected(i) != CON_PLAYING) {
      continue;
     }
     tch = i->character;
-    obj = GET_EQ(tch, WEAR_EYE);
+    obj = char_get_equipment(tch, WEAR_EYE);
     if (tch == ch) {
       continue;
     }
     else {
-    if ((((world[IN_ROOM(ch)].zone != world[IN_ROOM(tch)].zone) && type == 0) || !char_is_awake(tch))) {
+    if ((((world[char_get_in_room(ch)].zone != world[char_get_in_room(tch)].zone) && type == 0) || !char_is_awake(tch))) {
       continue;
     }
-    if (rroom_flagged(IN_ROOM(ch), ROOM_SHIP)) {
+    if (rroom_flagged(char_get_in_room(ch), ROOM_SHIP)) {
       continue;
     }
-    if (GET_INVIS_LEV(ch) > GET_ADMLEVEL(tch)) {
+    if (GET_INVIS_LEV(ch) > char_get_admlevel(tch)) {
      continue;
     }
     if (char_is_android(ch)) {
      continue;
-    } else if (rroom_flagged(IN_ROOM(ch), ROOM_EARTH) && !rroom_flagged(IN_ROOM(tch), ROOM_EARTH)) {
+    } else if (rroom_flagged(char_get_in_room(ch), ROOM_EARTH) && !rroom_flagged(char_get_in_room(tch), ROOM_EARTH)) {
      continue;
-    } else if (rroom_planet_zenith(IN_ROOM(ch)) && !rroom_planet_zenith(IN_ROOM(tch))) {
+    } else if (rroom_planet_zenith(char_get_in_room(ch)) && !rroom_planet_zenith(char_get_in_room(tch))) {
      continue;
-    } else if (rroom_flagged(IN_ROOM(ch), ROOM_FRIGID) && !rroom_flagged(IN_ROOM(tch), ROOM_FRIGID)) {
+    } else if (rroom_flagged(char_get_in_room(ch), ROOM_FRIGID) && !rroom_flagged(char_get_in_room(tch), ROOM_FRIGID)) {
      continue;
-    } else if (rroom_flagged(IN_ROOM(ch), ROOM_NAMEK) && !rroom_flagged(IN_ROOM(tch), ROOM_NAMEK)) {
+    } else if (rroom_flagged(char_get_in_room(ch), ROOM_NAMEK) && !rroom_flagged(char_get_in_room(tch), ROOM_NAMEK)) {
      continue;
-    } else if (rroom_flagged(IN_ROOM(ch), ROOM_AL) && !rroom_flagged(IN_ROOM(tch), ROOM_AL)) {
+    } else if (rroom_flagged(char_get_in_room(ch), ROOM_AL) && !rroom_flagged(char_get_in_room(tch), ROOM_AL)) {
      continue;
-    } else if (rroom_flagged(IN_ROOM(ch), ROOM_VEGETA) && !rroom_flagged(IN_ROOM(tch), ROOM_VEGETA)) {
+    } else if (rroom_flagged(char_get_in_room(ch), ROOM_VEGETA) && !rroom_flagged(char_get_in_room(tch), ROOM_VEGETA)) {
      continue;
-    } else if (rroom_flagged(IN_ROOM(ch), ROOM_KONACK) && !rroom_flagged(IN_ROOM(tch), ROOM_KONACK)) {
+    } else if (rroom_flagged(char_get_in_room(ch), ROOM_KONACK) && !rroom_flagged(char_get_in_room(tch), ROOM_KONACK)) {
      continue;
-    } else if (rroom_flagged(IN_ROOM(ch), ROOM_NEO) && !rroom_flagged(IN_ROOM(tch), ROOM_NEO)) {
+    } else if (rroom_flagged(char_get_in_room(ch), ROOM_NEO) && !rroom_flagged(char_get_in_room(tch), ROOM_NEO)) {
      continue;
-    } else if (rroom_flagged(IN_ROOM(ch), ROOM_YARDRAT) && !rroom_flagged(IN_ROOM(tch), ROOM_YARDRAT)) {
+    } else if (rroom_flagged(char_get_in_room(ch), ROOM_YARDRAT) && !rroom_flagged(char_get_in_room(tch), ROOM_YARDRAT)) {
      continue;
-    } else if (rroom_flagged(IN_ROOM(ch), ROOM_KANASSA) && !rroom_flagged(IN_ROOM(tch), ROOM_KANASSA)) {
+    } else if (rroom_flagged(char_get_in_room(ch), ROOM_KANASSA) && !rroom_flagged(char_get_in_room(tch), ROOM_KANASSA)) {
      continue;
-    } else if (rroom_flagged(IN_ROOM(ch), ROOM_ARLIA) && !rroom_flagged(IN_ROOM(tch), ROOM_ARLIA)) {
+    } else if (rroom_flagged(char_get_in_room(ch), ROOM_ARLIA) && !rroom_flagged(char_get_in_room(tch), ROOM_ARLIA)) {
      continue;
-    }  else if (rroom_flagged(IN_ROOM(ch), ROOM_AETHER) && !rroom_flagged(IN_ROOM(tch), ROOM_AETHER)) {
+    }  else if (rroom_flagged(char_get_in_room(ch), ROOM_AETHER) && !rroom_flagged(char_get_in_room(tch), ROOM_AETHER)) {
      continue;
     }
     if (!obj) {
      continue;
-    } else if (IN_ROOM(ch) == IN_ROOM(tch)) {
+    } else if (char_get_in_room(ch) == char_get_in_room(tch)) {
      continue;
     } else if (type == 0) {
         if (num == 1) {
-         struct obj_data *obj = GET_EQ(tch, WEAR_EYE);        
+         struct obj_data *obj = char_get_equipment(tch, WEAR_EYE);        
           if (obj_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
           write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
           }
@@ -477,28 +477,28 @@ void send_to_worlds(struct char_data *ch)
   }
 
   for (i = descriptor_list; i; i = i->next) {
-    if (STATE(i) != CON_PLAYING) {
+    if (desc_get_connected(i) != CON_PLAYING) {
      continue;
     }
-    if (rroom_flagged(IN_ROOM(i->character), ROOM_EARTH) && rroom_flagged(IN_ROOM(ch), ROOM_EARTH)) {   
+    if (rroom_flagged(char_get_in_room(i->character), ROOM_EARTH) && rroom_flagged(char_get_in_room(ch), ROOM_EARTH)) {   
      send_to_char(i->character, "%s", message);
-    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_VEGETA) && rroom_flagged(IN_ROOM(ch), ROOM_VEGETA)) {
+    } else if (rroom_flagged(char_get_in_room(i->character), ROOM_VEGETA) && rroom_flagged(char_get_in_room(ch), ROOM_VEGETA)) {
      send_to_char(i->character, "%s", message);
-    } else if (rroom_planet_zenith(IN_ROOM(i->character)) && rroom_planet_zenith(IN_ROOM(ch))) {
+    } else if (rroom_planet_zenith(char_get_in_room(i->character)) && rroom_planet_zenith(char_get_in_room(ch))) {
      send_to_char(i->character, "%s", message);
-    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_NAMEK) && rroom_flagged(IN_ROOM(ch), ROOM_NAMEK)) {
+    } else if (rroom_flagged(char_get_in_room(i->character), ROOM_NAMEK) && rroom_flagged(char_get_in_room(ch), ROOM_NAMEK)) {
      send_to_char(i->character, "%s", message);
-    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_KONACK) && rroom_flagged(IN_ROOM(ch), ROOM_KONACK)) {
+    } else if (rroom_flagged(char_get_in_room(i->character), ROOM_KONACK) && rroom_flagged(char_get_in_room(ch), ROOM_KONACK)) {
      send_to_char(i->character, "%s", message);
-    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_YARDRAT) && rroom_flagged(IN_ROOM(ch), ROOM_YARDRAT)) {
+    } else if (rroom_flagged(char_get_in_room(i->character), ROOM_YARDRAT) && rroom_flagged(char_get_in_room(ch), ROOM_YARDRAT)) {
      send_to_char(i->character, "%s", message);
-    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_FRIGID) && rroom_flagged(IN_ROOM(ch), ROOM_FRIGID)) {
+    } else if (rroom_flagged(char_get_in_room(i->character), ROOM_FRIGID) && rroom_flagged(char_get_in_room(ch), ROOM_FRIGID)) {
      send_to_char(i->character, "%s", message);
-    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_KANASSA) && rroom_flagged(IN_ROOM(ch), ROOM_KANASSA)) {
+    } else if (rroom_flagged(char_get_in_room(i->character), ROOM_KANASSA) && rroom_flagged(char_get_in_room(ch), ROOM_KANASSA)) {
      send_to_char(i->character, "%s", message);
-    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_ARLIA) && rroom_flagged(IN_ROOM(ch), ROOM_ARLIA)) {
+    } else if (rroom_flagged(char_get_in_room(i->character), ROOM_ARLIA) && rroom_flagged(char_get_in_room(ch), ROOM_ARLIA)) {
      send_to_char(i->character, "%s", message);
-    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_AETHER) && rroom_flagged(IN_ROOM(ch), ROOM_AETHER)) {
+    } else if (rroom_flagged(char_get_in_room(i->character), ROOM_AETHER) && rroom_flagged(char_get_in_room(ch), ROOM_AETHER)) {
      send_to_char(i->character, "%s", message);
     }
   }
@@ -512,10 +512,10 @@ void send_to_imm(char *messg, ...)
     return;
 
   for (i = descriptor_list; i; i = i->next) {
-    if (STATE(i) != CON_PLAYING) {
+    if (desc_get_connected(i) != CON_PLAYING) {
      continue;
     }
-    else if (GET_ADMLEVEL(i->character) == 0) {
+    else if (char_get_admlevel(i->character) == 0) {
     continue;
     }
     else if (!char_prf_flagged(i->character, PRF_LOG2)) {

@@ -553,7 +553,7 @@ void postmaster_send_mail(struct char_data *ch, struct char_data *mailman,
   long recipient;
   char buf[MAX_INPUT_LENGTH], **mailwrite;
 
-  if (char_get_level(ch) < MIN_MAIL_LEVEL && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
+  if (char_get_level(ch) < MIN_MAIL_LEVEL && char_get_admlevel(ch) < ADMLVL_IMMORT) {
     snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, you have to be level %d to send mail!'", MIN_MAIL_LEVEL);
     act(buf, FALSE, mailman, 0, ch, TO_VICT);
     return;
@@ -565,7 +565,7 @@ void postmaster_send_mail(struct char_data *ch, struct char_data *mailman,
 	FALSE, mailman, 0, ch, TO_VICT);
     return;
   }
-  if (GET_GOLD(ch) < STAMP_PRICE && !char_adm_flagged(ch, ADM_MONEY)) {
+  if (char_get_gold(ch) < STAMP_PRICE && !char_adm_flagged(ch, ADM_MONEY)) {
     snprintf(buf, sizeof(buf), "$n tells you, 'A stamp costs %d zenni.'\r\n"
 	    "$n tells you, '...which I see you can't afford.'", STAMP_PRICE);
     act(buf, FALSE, mailman, 0, ch, TO_VICT);
@@ -583,8 +583,8 @@ void postmaster_send_mail(struct char_data *ch, struct char_data *mailman,
 
   act(buf, FALSE, mailman, 0, ch, TO_VICT);
   act("@C$n@w starts writing a letter.@n", TRUE, ch, 0, 0, TO_ROOM);
-  GET_GOLD(ch) -= STAMP_PRICE;
-  SET_BIT_AR(PLR_FLAGS(ch), PLR_MAILING);	/* string_write() sets writing. */
+  char_set_gold(ch, char_get_gold(ch) - (STAMP_PRICE));
+  SET_BIT_AR(char_get_act(ch), PLR_MAILING);	/* string_write() sets writing. */
 
   /* Start writing! */
   CREATE(mailwrite, char *, 1);
@@ -595,7 +595,7 @@ void postmaster_send_mail(struct char_data *ch, struct char_data *mailman,
 void postmaster_check_mail(struct char_data *ch, struct char_data *mailman,
 			  int cmd, char *arg)
 {
-  if (has_mail(GET_IDNUM(ch)))
+  if (has_mail(char_get_idnum(ch)))
     act("$n tells you, 'You have mail waiting.'", FALSE, mailman, 0, ch, TO_VICT);
   else
     act("$n tells you, 'Sorry, you don't have any mail waiting.'", FALSE, mailman, 0, ch, TO_VICT);
@@ -610,24 +610,24 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
   int y;
   char *from;
 
-  if (!has_mail(GET_IDNUM(ch)) && mailman != NULL) {
+  if (!has_mail(char_get_idnum(ch)) && mailman != NULL) {
     snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, you don't have any mail waiting.'");
     act(buf, FALSE, mailman, 0, ch, TO_VICT);
     return;
   }
-  while (has_mail(GET_IDNUM(ch))) {
+  while (has_mail(char_get_idnum(ch))) {
     obj = create_obj();
     obj->item_number = NOTHING;
 
-    GET_OBJ_TYPE(obj) = ITEM_NOTE;
+    obj_set_type_flag(obj, ITEM_NOTE);
     for(y = 0; y < TW_ARRAY_MAX; y++)
       obj->wear_flags[y] = 0;
-    SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_TAKE);
-    SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_HOLD);
-    GET_OBJ_WEIGHT(obj) = 1;
-    GET_OBJ_COST(obj) = 30;
-    GET_OBJ_RENT(obj) = 10;
-    obj->action_description = read_delete(GET_IDNUM(ch), &from);
+    SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_TAKE);
+    SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_HOLD);
+    obj_set_weight(obj, 1);
+    obj_set_cost(obj, 30);
+    obj_set_cost_per_day(obj, 10);
+    obj->action_description = read_delete(char_get_idnum(ch), &from);
     char bla[256], blm[256];
     sprintf(bla, "@WA piece of mail@n");
     sprintf(blm, "@WSomeone has left a piece of mail here@n");
@@ -637,18 +637,18 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
     obj->name = strdup(bla);
     *bla = '\0';
     *blm = '\0';
-    SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE);
+    SET_BIT_AR(obj_get_extra_flags(obj), ITEM_UNIQUE_SAVE);
     add_unique_id(obj);
-    GET_OBJ_MATERIAL(obj) = MATERIAL_PAPER;
-    GET_OBJ_VAL(obj, VAL_NOTE_HEALTH) = 100;
-    GET_OBJ_VAL(obj, VAL_NOTE_MAXHEALTH) = 100;
+    obj_set_value(obj, 7, MATERIAL_PAPER);
+    obj_set_value(obj, VAL_NOTE_HEALTH, 100);
+    obj_set_value(obj, VAL_NOTE_MAXHEALTH, 100);
 
     if (obj->action_description == NULL)
       obj->action_description =
 	strdup("Mail system error - please report.  Error #11.\r\n");
 
 	       /* so it saves */
-    SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE);
+    SET_BIT_AR(obj_get_extra_flags(obj), ITEM_UNIQUE_SAVE);
 
     if (desc_is_playing(ch->desc) && mailman != NULL) {
      obj_to_char(obj, ch);
@@ -667,7 +667,7 @@ void notify_if_playing(struct char_data *from, int recipient_id)
 
   for (d = descriptor_list; d; d = d->next)
   {
-    if ((desc_is_playing(d)) && (GET_IDNUM(d->character) == recipient_id) && (has_mail(GET_IDNUM(d->character))))
+    if ((desc_is_playing(d)) && (char_get_idnum(d->character) == recipient_id) && (has_mail(char_get_idnum(d->character))))
     {
       send_to_char(d->character, "\r\n\007\007\007@G@lYou have new mudmail from %s.@n\r\n", char_get_name(from));
     }

@@ -14,22 +14,22 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
     break;
 
   case APPLY_STR:
-    GET_STR(ch) += mod;
+    char_set_aff_abils_str(ch, char_get_aff_abils_str(ch) + (mod));
     break;
   case APPLY_DEX:
-    GET_DEX(ch) += mod;
+    char_set_aff_abils_dex(ch, char_get_aff_abils_dex(ch) + (mod));
     break;
   case APPLY_INT:
-    GET_INT(ch) += mod;
+    char_set_aff_abils_intel(ch, char_get_aff_abils_intel(ch) + (mod));
     break;
   case APPLY_WIS:
-    GET_WIS(ch) += mod;
+    char_set_aff_abils_wis(ch, char_get_aff_abils_wis(ch) + (mod));
     break;
   case APPLY_CON:
-    GET_CON(ch) += mod;
+    char_set_aff_abils_con(ch, char_get_aff_abils_con(ch) + (mod));
     break;
   case APPLY_CHA:
-    GET_CHA(ch) += mod;
+    char_set_aff_abils_cha(ch, char_get_aff_abils_cha(ch) + (mod));
     break;
 
   case APPLY_CLASS:
@@ -53,11 +53,11 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
     break;
 
   case APPLY_CHAR_WEIGHT:
-    GET_WEIGHT(ch) += mod;
+    char_set_weight(ch, char_get_weight(ch) + (mod));
     break;
 
   case APPLY_CHAR_HEIGHT:
-    GET_HEIGHT(ch) += mod;
+    char_set_height(ch, char_get_height(ch) + (mod));
     break;
 
   case APPLY_MANA:
@@ -80,22 +80,22 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
     break;
 
   case APPLY_AC:
-    GET_ARMOR(ch) += mod;
+    char_set_armor(ch, char_get_armor(ch) + (mod));
     break;
 
   case APPLY_ACCURACY:
-    GET_POLE_BONUS(ch) += mod;
+    char_set_accuracy(ch, char_get_accuracy(ch) + (mod));
     break;
 
   case APPLY_DAMAGE: /* the damage mod it adjusted no longer exists */
     break;
 
   case APPLY_REGEN:
-    GET_REGEN(ch) += mod;
+    char_set_regen(ch, char_get_regen(ch) + (mod));
     break;
 
   case APPLY_TRAIN:
-    GET_ASB(ch) += mod;
+    char_set_asb(ch, char_get_asb(ch) + (mod));
     break;
 
   case APPLY_LIFEMAX:
@@ -165,38 +165,38 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
     break;
 
   case APPLY_FORTITUDE:
-    GET_SAVE_MOD(ch, SAVING_FORTITUDE) += mod;
+    char_set_apply_saving_throw(ch, SAVING_FORTITUDE, char_get_apply_saving_throw(ch, SAVING_FORTITUDE) + (mod));
     break;
 
   case APPLY_REFLEX:
-    GET_SAVE_MOD(ch, SAVING_REFLEX) += mod;
+    char_set_apply_saving_throw(ch, SAVING_REFLEX, char_get_apply_saving_throw(ch, SAVING_REFLEX) + (mod));
     break;
 
   case APPLY_WILL:
-    GET_SAVE_MOD(ch, SAVING_WILL) += mod;
+    char_set_apply_saving_throw(ch, SAVING_WILL, char_get_apply_saving_throw(ch, SAVING_WILL) + (mod));
     break;
 
   case APPLY_SKILL:
-    SET_SKILL_BONUS(ch, spec, GET_SKILL_BONUS(ch, spec) + mod);
+    SET_SKILL_BONUS(ch, spec, char_get_skills_mod(ch, spec) + mod);
     break;
 
   case APPLY_FEAT:
-    HAS_FEAT(ch, spec) += mod;
+    char_set_feats(ch, spec, char_get_feats(ch, spec) + (mod));
     break;
 
   case APPLY_ALLSAVES:
-    GET_SAVE_MOD(ch, SAVING_FORTITUDE) += mod;
-    GET_SAVE_MOD(ch, SAVING_REFLEX) += mod;
-    GET_SAVE_MOD(ch, SAVING_WILL) += mod;
+    char_set_apply_saving_throw(ch, SAVING_FORTITUDE, char_get_apply_saving_throw(ch, SAVING_FORTITUDE) + (mod));
+    char_set_apply_saving_throw(ch, SAVING_REFLEX, char_get_apply_saving_throw(ch, SAVING_REFLEX) + (mod));
+    char_set_apply_saving_throw(ch, SAVING_WILL, char_get_apply_saving_throw(ch, SAVING_WILL) + (mod));
     break;
 
   case APPLY_ALL_STATS:
-    GET_STR(ch) += mod;
-    GET_INT(ch) += mod;
-    GET_WIS(ch) += mod;
-    GET_DEX(ch) += mod;
-    GET_CON(ch) += mod;
-    GET_CHA(ch) += mod;
+    char_set_aff_abils_str(ch, char_get_aff_abils_str(ch) + (mod));
+    char_set_aff_abils_intel(ch, char_get_aff_abils_intel(ch) + (mod));
+    char_set_aff_abils_wis(ch, char_get_aff_abils_wis(ch) + (mod));
+    char_set_aff_abils_dex(ch, char_get_aff_abils_dex(ch) + (mod));
+    char_set_aff_abils_con(ch, char_get_aff_abils_con(ch) + (mod));
+    char_set_aff_abils_cha(ch, char_get_aff_abils_cha(ch) + (mod));
     break;
 
   case APPLY_RESISTANCE:
@@ -214,11 +214,11 @@ void affect_modify(struct char_data * ch, int loc, int mod, int spec, long bitv,
 {
   if (add) {
    if (bitv != AFF_INFRAVISION || !char_is_android(ch)) {
-    SET_BIT_AR(AFF_FLAGS(ch), bitv);
+    SET_BIT_AR(char_get_affected_by(ch), bitv);
    }
   } else {
    if (bitv != AFF_INFRAVISION || !char_is_android(ch)) {
-    REMOVE_BIT_AR(AFF_FLAGS(ch), bitv);
+    REMOVE_BIT_AR(char_get_affected_by(ch), bitv);
     mod = -mod;
    }
   }
@@ -236,7 +236,7 @@ void affect_modify_ar(struct char_data * ch, int loc, int mod, int spec, bitvect
       for(j = 0; j < 32; j++)
         if(IS_SET_AR(bitv, (i*32)+j)) {
          if ((i*32)+j != AFF_INFRAVISION || !char_is_android(ch)) {
-          SET_BIT_AR(AFF_FLAGS(ch), (i*32)+j);
+          SET_BIT_AR(char_get_affected_by(ch), (i*32)+j);
          }
         }
   } else {
@@ -244,7 +244,7 @@ void affect_modify_ar(struct char_data * ch, int loc, int mod, int spec, bitvect
       for(j = 0; j < 32; j++)
         if(IS_SET_AR(bitv, (i*32)+j)) {
          if ((i*32)+j != AFF_INFRAVISION || !char_is_android(ch)) {
-          REMOVE_BIT_AR(AFF_FLAGS(ch), (i*32)+j);
+          REMOVE_BIT_AR(char_get_affected_by(ch), (i*32)+j);
          }
         }
     mod = -mod;
@@ -261,15 +261,17 @@ void affect_total(struct char_data *ch)
   struct affected_type *af;
   int i, j;
 
-  GET_SPELLFAIL(ch) = GET_ARMORCHECK(ch) = GET_ARMORCHECKALL(ch) = 0;
+  char_set_armorcheckall(ch, 0);
+  char_set_armorcheck(ch, 0);
+  char_set_spellfail(ch, 0);
 
   for (i = 0; i < NUM_WEARS; i++) {
-    if (GET_EQ(ch, i))
+    if (char_get_equipment(ch, i))
       for (j = 0; j < MAX_OBJ_AFFECT; j++)
-	affect_modify_ar(ch, GET_EQ(ch, i)->affected[j].location,
-		      GET_EQ(ch, i)->affected[j].modifier,
-		      GET_EQ(ch, i)->affected[j].specific,
-		      GET_OBJ_PERM(GET_EQ(ch, i)), FALSE);
+	affect_modify_ar(ch, char_get_equipment(ch, i)->affected[j].location,
+		      char_get_equipment(ch, i)->affected[j].modifier,
+		      char_get_equipment(ch, i)->affected[j].specific,
+		      obj_get_bitvector(char_get_equipment(ch, i)), FALSE);
   }
 
 
@@ -278,23 +280,23 @@ void affect_total(struct char_data *ch)
 
   ch->aff_abils = ch->real_abils;
 
-  GET_SAVE_MOD(ch, SAVING_FORTITUDE) = HAS_FEAT(ch, FEAT_GREAT_FORTITUDE) * 3;
-  GET_SAVE_MOD(ch, SAVING_REFLEX) = HAS_FEAT(ch, FEAT_LIGHTNING_REFLEXES) * 3;
-  GET_SAVE_MOD(ch, SAVING_WILL) = HAS_FEAT(ch, FEAT_IRON_WILL) * 3;
+  char_set_apply_saving_throw(ch, SAVING_FORTITUDE, char_get_feats(ch, FEAT_GREAT_FORTITUDE) * 3);
+  char_set_apply_saving_throw(ch, SAVING_REFLEX, char_get_feats(ch, FEAT_LIGHTNING_REFLEXES) * 3);
+  char_set_apply_saving_throw(ch, SAVING_WILL, char_get_feats(ch, FEAT_IRON_WILL) * 3);
 
   for (i = 0; i < NUM_WEARS; i++) {
-    if (GET_EQ(ch, i)) {
-      if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_ARMOR) {
-        GET_SPELLFAIL(ch) += GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_SPELLFAIL);
-        GET_ARMORCHECKALL(ch) += GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_CHECK);
-        if (!is_proficient_with_armor(ch, GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_SKILL)))
-          GET_ARMORCHECK(ch) += GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_CHECK);
+    if (char_get_equipment(ch, i)) {
+      if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_ARMOR) {
+        char_set_spellfail(ch, char_get_spellfail(ch) + (obj_get_value(char_get_equipment(ch, i), VAL_ARMOR_SPELLFAIL)));
+        char_set_armorcheckall(ch, char_get_armorcheckall(ch) + (obj_get_value(char_get_equipment(ch, i), VAL_ARMOR_CHECK)));
+        if (!is_proficient_with_armor(ch, obj_get_value(char_get_equipment(ch, i), VAL_ARMOR_SKILL)))
+          char_set_armorcheck(ch, char_get_armorcheck(ch) + (obj_get_value(char_get_equipment(ch, i), VAL_ARMOR_CHECK)));
       }
       for (j = 0; j < MAX_OBJ_AFFECT; j++)
-	affect_modify_ar(ch, GET_EQ(ch, i)->affected[j].location,
-		      GET_EQ(ch, i)->affected[j].modifier,
-		      GET_EQ(ch, i)->affected[j].specific,
-		      GET_OBJ_PERM(GET_EQ(ch, i)), TRUE);
+	affect_modify_ar(ch, char_get_equipment(ch, i)->affected[j].location,
+		      char_get_equipment(ch, i)->affected[j].modifier,
+		      char_get_equipment(ch, i)->affected[j].specific,
+		      obj_get_bitvector(char_get_equipment(ch, i)), TRUE);
     }
   }
 
@@ -304,30 +306,30 @@ void affect_total(struct char_data *ch)
 
   /* Make certain values are between 0..100, not < 0 and not > 100! */
 
-   if (GET_BONUS(ch, BONUS_WIMP) > 0) {
-    GET_STR(ch) = MAX(0, MIN(GET_STR(ch), 70));
+   if (char_get_bonuses(ch, BONUS_WIMP) > 0) {
+    char_set_aff_abils_str(ch, MAX(0, MIN(char_get_aff_abils_str(ch), 70)));
    } else {
-    GET_STR(ch) = MAX(0, MIN(GET_STR(ch), 100));
-   } if (GET_BONUS(ch, BONUS_DULL) > 0) {
-    GET_INT(ch) = MAX(0, MIN(GET_INT(ch), 70));
+    char_set_aff_abils_str(ch, MAX(0, MIN(char_get_aff_abils_str(ch), 100)));
+   } if (char_get_bonuses(ch, BONUS_DULL) > 0) {
+    char_set_aff_abils_intel(ch, MAX(0, MIN(char_get_aff_abils_intel(ch), 70)));
    } else {
-    GET_INT(ch) = MAX(0, MIN(GET_INT(ch), 100));
-   } if (GET_BONUS(ch, BONUS_FOOLISH) > 0) {
-    GET_WIS(ch) = MAX(0, MIN(GET_WIS(ch), 70));
+    char_set_aff_abils_intel(ch, MAX(0, MIN(char_get_aff_abils_intel(ch), 100)));
+   } if (char_get_bonuses(ch, BONUS_FOOLISH) > 0) {
+    char_set_aff_abils_wis(ch, MAX(0, MIN(char_get_aff_abils_wis(ch), 70)));
    } else {
-    GET_WIS(ch) = MAX(0, MIN(GET_WIS(ch), 100));
-   } if (GET_BONUS(ch, BONUS_SLOW) > 0) {
-    GET_CHA(ch) = MAX(0, MIN(GET_CHA(ch), 70));
+    char_set_aff_abils_wis(ch, MAX(0, MIN(char_get_aff_abils_wis(ch), 100)));
+   } if (char_get_bonuses(ch, BONUS_SLOW) > 0) {
+    char_set_aff_abils_cha(ch, MAX(0, MIN(char_get_aff_abils_cha(ch), 70)));
    } else {
-    GET_CHA(ch) = MAX(0, MIN(GET_CHA(ch), 100));
-   } if (GET_BONUS(ch, BONUS_CLUMSY) > 0) {
-    GET_DEX(ch) = MAX(0, MIN(GET_DEX(ch), 70));
+    char_set_aff_abils_cha(ch, MAX(0, MIN(char_get_aff_abils_cha(ch), 100)));
+   } if (char_get_bonuses(ch, BONUS_CLUMSY) > 0) {
+    char_set_aff_abils_dex(ch, MAX(0, MIN(char_get_aff_abils_dex(ch), 70)));
    } else {
-    GET_DEX(ch) = MAX(0, MIN(GET_DEX(ch), 100));
-   } if (GET_BONUS(ch, BONUS_FRAIL) > 0) {
-    GET_CON(ch) = MAX(0, MIN(GET_CON(ch), 70));
+    char_set_aff_abils_dex(ch, MAX(0, MIN(char_get_aff_abils_dex(ch), 100)));
+   } if (char_get_bonuses(ch, BONUS_FRAIL) > 0) {
+    char_set_aff_abils_con(ch, MAX(0, MIN(char_get_aff_abils_con(ch), 70)));
    } else {
-    GET_CON(ch) = MAX(0, MIN(GET_CON(ch), 100));
+    char_set_aff_abils_con(ch, MAX(0, MIN(char_get_aff_abils_con(ch), 100)));
    }
 
 

@@ -52,7 +52,7 @@ void news_string_cleanup(struct descriptor_data *d, int terminator)
        continue;
       if (char_plr_flagged(i->character, PLR_WRITING))
        continue;
-      if (NEWSUPDATE > GET_LPLAY(i->character))
+      if (NEWSUPDATE > char_get_lastpl(i->character))
        send_to_char(i->character, "\r\n@GA news entry has been made by %s, type 'news %d' to see it.@n\r\n", char_get_name(d->character), TOP_OF_NEWS);
      }
      do_reboot(d->character, "news", 0, 0);
@@ -68,7 +68,7 @@ void news_string_cleanup(struct descriptor_data *d, int terminator)
   }
 
   /* Common cleanup code. */
-  STATE(d) = CON_PLAYING;
+  desc_set_connected(d, CON_PLAYING);
 }
 
 void tedit_string_cleanup(struct descriptor_data *d, int terminator)
@@ -111,7 +111,7 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator)
          continue;
         if (char_plr_flagged(i->character, PLR_WRITING))
          continue;
-        if (NEWSUPDATE > GET_LPLAY(i->character))
+        if (NEWSUPDATE > char_get_lastpl(i->character))
          send_to_char(i->character, "\r\n@GThe NEWS file has been updated, type 'news' to see it.@n\r\n");
        }
        do_reboot(d->character, "all", 0, 0);
@@ -129,7 +129,7 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator)
 
   /* Common cleanup code. */
   cleanup_olc(d, CLEANUP_ALL);
-  STATE(d) = CON_PLAYING;
+  desc_set_connected(d, CON_PLAYING);
 }
 
 ACMD(do_tedit)
@@ -167,7 +167,7 @@ ACMD(do_tedit)
   if (!*field) {
     send_to_char(ch, "Files available to be edited:\r\n");
     for (l = 0; *fields[l].cmd != '\n'; l++) {
-      if (GET_ADMLEVEL(ch) >= fields[l].level) {
+      if (char_get_admlevel(ch) >= fields[l].level) {
 	send_to_char(ch, "%-11.11s ", fields[l].cmd);
 	if (!(++i % 7))
 	  send_to_char(ch, "\r\n");
@@ -188,7 +188,7 @@ ACMD(do_tedit)
     return;
   }
    
-  if (GET_ADMLEVEL(ch) < fields[l].level) {
+  if (char_get_admlevel(ch) < fields[l].level) {
     send_to_char(ch, "You are not godly enough for that!\r\n");
     return;
   }
@@ -213,6 +213,6 @@ ACMD(do_tedit)
   string_write(ch->desc, fields[l].buffer, fields[l].size, 0, backstr);
 
   act("$n begins editing a text file.", TRUE, ch, 0, 0, TO_ROOM);
-  SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
-  STATE(ch->desc) = CON_TEDIT;
+  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
+  desc_set_connected(ch->desc, CON_TEDIT);
 }

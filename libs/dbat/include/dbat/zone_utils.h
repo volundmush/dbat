@@ -1,8 +1,9 @@
 #pragma once
 #include "flags.h"
-#define ZONE_FLAGS(rnum)       (zone_table[(rnum)].zone_flags)
-#define ZONE_MINLVL(rnum)      (zone_table[(rnum)].min_level)
-#define ZONE_MAXLVL(rnum)      (zone_table[(rnum)].max_level)
+int zone_get_min_level(zone_rnum zone);
+void zone_set_min_level(zone_rnum zone, int v);
+int zone_get_max_level(zone_rnum zone);
+void zone_set_max_level(zone_rnum zone, int v);
 bool zone_flagged(zone_rnum rnum, int flag);
 
 #include "dbat/zones.h"

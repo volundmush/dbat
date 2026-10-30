@@ -34,8 +34,8 @@ struct bfs_queue_struct {
 static struct bfs_queue_struct *bfs_queue_head = 0, *bfs_queue_tail = 0;
 
 /* Utility macros */
-#define MARK(room)	(SET_BIT_AR(ROOM_FLAGS(room), ROOM_BFS_MARK))
-#define UNMARK(room)	(REMOVE_BIT_AR(ROOM_FLAGS(room), ROOM_BFS_MARK))
+#define MARK(room)	(SET_BIT_AR(rroom_get_room_flags(room), ROOM_BFS_MARK))
+#define UNMARK(room)	(REMOVE_BIT_AR(rroom_get_room_flags(room), ROOM_BFS_MARK))
 #define IS_MARKED(room)	(rroom_flagged(room, ROOM_BFS_MARK))
 #define TOROOM(x, y)	(world[(x)].dir_option[(y)]->to_room)
 #define IS_CLOSED(x, y)	(room_exit_flagged(world[(x)].dir_option[(y)], EX_CLOSED))
@@ -152,37 +152,37 @@ ACMD(do_sradar)
 
   one_argument(argument, arg);
 
-  if (!char_plr_flagged(ch, PLR_PILOTING) && GET_ADMLEVEL(ch) < 1) {
+  if (!char_plr_flagged(ch, PLR_PILOTING) && char_get_admlevel(ch) < 1) {
    send_to_char(ch, "You are not flying a ship, maybe you want detect?\r\n");
    return;
   }
 
-  if (!(controls = find_control(ch)) && GET_ADMLEVEL(ch) < 1) {
+  if (!(controls = find_control(ch)) && char_get_admlevel(ch) < 1) {
     send_to_char(ch,"@wYou have nothing to control here!\r\n");
     return;
   }
 
-  if (!char_plr_flagged(ch, PLR_PILOTING) && GET_ADMLEVEL(ch) >= 1) {
+  if (!char_plr_flagged(ch, PLR_PILOTING) && char_get_admlevel(ch) >= 1) {
    noship = TRUE;
   }
-  else if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, 0))) ) {
+  else if (!(vehicle = find_vehicle_by_vnum(obj_get_value(controls, 0))) ) {
     send_to_char(ch, "@wYou can't find anything to pilot.\r\n");
     return;
   }
 
-  if (noship == FALSE && rroom_sect(IN_ROOM(vehicle)) != SECT_SPACE) {
+  if (noship == FALSE && rroom_sect(obj_get_in_room(vehicle)) != SECT_SPACE) {
     send_to_char(ch, "@wYour ship is not in space!\r\n");
     return;
-  } if (noship == TRUE && rroom_sect(IN_ROOM(ch)) != SECT_SPACE) {
+  } if (noship == TRUE && rroom_sect(char_get_in_room(ch)) != SECT_SPACE) {
     send_to_char(ch, "@wYou are not even in space!\r\n");
     return;
   } 
 
   if (!*arg) {
-   if (GET_ADMLEVEL(ch) >= 1 && noship == TRUE) {
+   if (char_get_admlevel(ch) >= 1 && noship == TRUE) {
     printmap(ch->in_room, ch, 0, -1);
    } else {
-    printmap(IN_ROOM(vehicle), ch, 0, obj_get_vnum(vehicle));
+    printmap(obj_get_in_room(vehicle), ch, 0, obj_get_vnum(vehicle));
    }
   /*
    send_to_char(ch, "     @D----------------[@C Radar @D]-----------------@n\r\n");
@@ -195,50 +195,50 @@ ACMD(do_sradar)
    return;
   }
 
-  if (GET_PING(ch) > 0) {
+  if (char_get_ping(ch) > 0) {
     send_to_char(ch, "@wYou need to wait a few more seconds before pinging a destination again.\r\n");
     return;
   }
 
   if (noship == FALSE) {
   if (!strcasecmp(arg, "earth") || !strcasecmp(arg, "Earth")) {
-   dir = find_first_step(IN_ROOM(vehicle), real_room(40979));
+   dir = find_first_step(obj_get_in_room(vehicle), real_room(40979));
    sprintf(planet, "Earth");
   } else if (!strcasecmp(arg, "frigid") || !strcasecmp(arg, "Frigid")) {
-   dir = find_first_step(IN_ROOM(vehicle), real_room(30889));
+   dir = find_first_step(obj_get_in_room(vehicle), real_room(30889));
    sprintf(planet, "Frigid");
   } else if (!strcasecmp(arg, "konack") || !strcasecmp(arg, "Konack")) {
-   dir = find_first_step(IN_ROOM(vehicle), real_room(27065));
+   dir = find_first_step(obj_get_in_room(vehicle), real_room(27065));
    sprintf(planet, "Konack");
   } else if (!strcasecmp(arg, "vegeta") || !strcasecmp(arg, "Vegeta")) {
-   dir = find_first_step(IN_ROOM(vehicle), real_room(32365));
+   dir = find_first_step(obj_get_in_room(vehicle), real_room(32365));
    sprintf(planet, "Vegeta");
   } else if (!strcasecmp(arg, "aether") || !strcasecmp(arg, "Aether")) {
-   dir = find_first_step(IN_ROOM(vehicle), real_room(41959));
+   dir = find_first_step(obj_get_in_room(vehicle), real_room(41959));
    sprintf(planet, "Aether");
   } else if (!strcasecmp(arg, "namek") || !strcasecmp(arg, "Namek")) {
-   dir = find_first_step(IN_ROOM(vehicle), real_room(42880));
+   dir = find_first_step(obj_get_in_room(vehicle), real_room(42880));
    sprintf(planet, "Namek");
-  } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) <= 0) {
+  } else if (!strcasecmp(arg, "buoy1") && char_get_radar1(ch) <= 0) {
     send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
     return;
-  } else if (!strcasecmp(arg, "buoy2") && GET_RADAR2(ch) <= 0) {
+  } else if (!strcasecmp(arg, "buoy2") && char_get_radar2(ch) <= 0) {
     send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
     return;
-  } else if (!strcasecmp(arg, "buoy3") && GET_RADAR3(ch) <= 0) {
+  } else if (!strcasecmp(arg, "buoy3") && char_get_radar3(ch) <= 0) {
     send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
     return;
-  } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) > 0) {
-   int rad = GET_RADAR1(ch);
-   dir = find_first_step(IN_ROOM(vehicle), real_room(rad));
+  } else if (!strcasecmp(arg, "buoy1") && char_get_radar1(ch) > 0) {
+   int rad = char_get_radar1(ch);
+   dir = find_first_step(obj_get_in_room(vehicle), real_room(rad));
    sprintf(planet, "Buoy One");
-  } else if (!strcasecmp(arg, "buoy2") && GET_RADAR2(ch) > 0) {
-   int rad = GET_RADAR2(ch);
-   dir = find_first_step(IN_ROOM(vehicle), real_room(rad));
+  } else if (!strcasecmp(arg, "buoy2") && char_get_radar2(ch) > 0) {
+   int rad = char_get_radar2(ch);
+   dir = find_first_step(obj_get_in_room(vehicle), real_room(rad));
    sprintf(planet, "Buoy Two");
-  } else if (!strcasecmp(arg, "buoy3") && GET_RADAR3(ch) > 0) {
-   int rad = GET_RADAR3(ch);
-   dir = find_first_step(IN_ROOM(vehicle), real_room(rad));
+  } else if (!strcasecmp(arg, "buoy3") && char_get_radar3(ch) > 0) {
+   int rad = char_get_radar3(ch);
+   dir = find_first_step(obj_get_in_room(vehicle), real_room(rad));
    sprintf(planet, "Buoy Three");
   } else {
    send_to_char(ch, "@wThat is not an existing planet.@n\r\n");
@@ -248,43 +248,43 @@ ACMD(do_sradar)
 
   if (noship == TRUE) {
   if (!strcasecmp(arg, "earth") || !strcasecmp(arg, "Earth")) {
-   dir = find_first_step(IN_ROOM(ch), real_room(40979));
+   dir = find_first_step(char_get_in_room(ch), real_room(40979));
    sprintf(planet, "Earth");
   } else if (!strcasecmp(arg, "frigid") || !strcasecmp(arg, "Frigid")) {
-   dir = find_first_step(IN_ROOM(ch), real_room(30889));
+   dir = find_first_step(char_get_in_room(ch), real_room(30889));
    sprintf(planet, "Frigid");
   } else if (!strcasecmp(arg, "konack") || !strcasecmp(arg, "Konack")) {
-   dir = find_first_step(IN_ROOM(ch), real_room(27065));
+   dir = find_first_step(char_get_in_room(ch), real_room(27065));
    sprintf(planet, "Konack");
   } else if (!strcasecmp(arg, "vegeta") || !strcasecmp(arg, "Vegeta")) {
-   dir = find_first_step(IN_ROOM(ch), real_room(32365));
+   dir = find_first_step(char_get_in_room(ch), real_room(32365));
    sprintf(planet, "Vegeta");
   } else if (!strcasecmp(arg, "aether") || !strcasecmp(arg, "Aether")) {
-   dir = find_first_step(IN_ROOM(ch), real_room(41959));
+   dir = find_first_step(char_get_in_room(ch), real_room(41959));
    sprintf(planet, "Aether");
   } else if (!strcasecmp(arg, "namek") || !strcasecmp(arg, "Namek")) {
-   dir = find_first_step(IN_ROOM(ch), real_room(42880));
+   dir = find_first_step(char_get_in_room(ch), real_room(42880));
    sprintf(planet, "Namek");
-  } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) <= 0) {
+  } else if (!strcasecmp(arg, "buoy1") && char_get_radar1(ch) <= 0) {
     send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
     return;
-  } else if (!strcasecmp(arg, "buoy2") && GET_RADAR2(ch) <= 0) {
+  } else if (!strcasecmp(arg, "buoy2") && char_get_radar2(ch) <= 0) {
     send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
     return;
-  } else if (!strcasecmp(arg, "buoy3") && GET_RADAR3(ch) <= 0) {
+  } else if (!strcasecmp(arg, "buoy3") && char_get_radar3(ch) <= 0) {
     send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
     return;
-  } else if (!strcasecmp(arg, "buoy1") && GET_RADAR1(ch) > 0) {
-   int rad = GET_RADAR1(ch);
-   dir = find_first_step(IN_ROOM(ch), real_room(rad));
+  } else if (!strcasecmp(arg, "buoy1") && char_get_radar1(ch) > 0) {
+   int rad = char_get_radar1(ch);
+   dir = find_first_step(char_get_in_room(ch), real_room(rad));
    sprintf(planet, "Buoy One");
-  } else if (!strcasecmp(arg, "buoy2") && GET_RADAR2(ch) > 0) {
-   int rad = GET_RADAR2(ch);
-   dir = find_first_step(IN_ROOM(ch), real_room(rad));
+  } else if (!strcasecmp(arg, "buoy2") && char_get_radar2(ch) > 0) {
+   int rad = char_get_radar2(ch);
+   dir = find_first_step(char_get_in_room(ch), real_room(rad));
    sprintf(planet, "Buoy Two");
-  } else if (!strcasecmp(arg, "buoy3") && GET_RADAR3(ch) > 0) {
-   int rad = GET_RADAR3(ch);
-   dir = find_first_step(IN_ROOM(ch), real_room(rad));
+  } else if (!strcasecmp(arg, "buoy3") && char_get_radar3(ch) > 0) {
+   int rad = char_get_radar3(ch);
+   dir = find_first_step(char_get_in_room(ch), real_room(rad));
    sprintf(planet, "Buoy Three");
   } else {
    send_to_char(ch, "@wThat is not an existing planet.@n\r\n");
@@ -306,7 +306,7 @@ ACMD(do_sradar)
     send_to_char(ch, "@wYour radar detects @C%s@w to the @G%s@n\r\n", planet, dirs[dir]);
     break;
    }
- GET_PING(ch) = 5;
+ char_set_ping(ch, 5);
  
 }
 
@@ -342,7 +342,7 @@ ACMD(do_radar)
   if (obj_flagged(obj, ITEM_FORGED)) {
    continue;
   } else if (obj_get_vnum(obj) == 20 || obj_get_vnum(obj) == 21 || obj_get_vnum(obj) == 22 || obj_get_vnum(obj) == 23 || obj_get_vnum(obj) == 24 || obj_get_vnum(obj) == 25 || obj_get_vnum(obj) == 26) {
-   dir = find_first_step(IN_ROOM(ch), IN_ROOM(obj));
+   dir = find_first_step(char_get_in_room(ch), obj_get_in_room(obj));
    fcount += 1;
   switch (dir) {
   case BFS_ERROR:
@@ -370,7 +370,7 @@ ACMD(do_radar)
    if (obj_flagged(obj, ITEM_FORGED)) {
     continue;
    } else if (obj_get_vnum(obj) == 20 || obj_get_vnum(obj) == 21 || obj_get_vnum(obj) == 22 || obj_get_vnum(obj) == 23 || obj_get_vnum(obj) == 24 || obj_get_vnum(obj) == 25 || obj_get_vnum(obj) == 26) {
-      dir = find_first_step(IN_ROOM(ch), IN_ROOM(tch));
+      dir = find_first_step(char_get_in_room(ch), char_get_in_room(tch));
       fcount += 1;
   switch (dir) {
   case BFS_ERROR:
@@ -413,18 +413,18 @@ ACMD(do_track)
 		send_to_char(ch, "You have no idea how.\r\n");
 		return;
 	}
-	if (GET_SUPPRESS(ch) <= 20 && GET_SUPPRESS(ch) > 0) {
+	if (char_get_suppression(ch) <= 20 && char_get_suppression(ch) > 0) {
 		send_to_char(ch, "You are concentrating too hard on suppressing your powerlevel at this level of suppression.\r\n");
 		return;
 	}
 
 	one_argument(argument, arg);
-	if (!*arg && !FIGHTING(ch)) {
+	if (!*arg && !char_get_fighting(ch)) {
 		send_to_char(ch, "Whom are you trying to sense?\r\n");
 		return;
 	}
-	else if (!*arg && FIGHTING(ch)) {
-		vict = FIGHTING(ch);
+	else if (!*arg && char_get_fighting(ch)) {
+		vict = char_get_fighting(ch);
 		send_to_char(ch, "You focus on the one your are fighting.\r\n");
 		if (char_aff_flagged(vict, AFF_NOTRACK) || char_is_android(vict)) {
 			send_to_char(ch, "You can't sense them.\r\n");
@@ -438,25 +438,25 @@ ACMD(do_track)
 		act("$n looks at you intently for a moment.", TRUE, ch, 0, vict, TO_VICT);
 		act("$n looks at $N@n intently for a moment.", TRUE, ch, 0, vict, TO_NOTVICT);
 		if (!char_is_android(vict)) {
-			if (GET_ALIGNMENT(vict) > 50 && GET_ALIGNMENT(vict) < 200) {
+			if (char_get_alignment(vict) > 50 && char_get_alignment(vict) < 200) {
 				send_to_char(ch, "You sense slightly pure and good ki from them.\r\n");
 			}
-			else if (GET_ALIGNMENT(vict) > 200 && GET_ALIGNMENT(vict) < 500) {
+			else if (char_get_alignment(vict) > 200 && char_get_alignment(vict) < 500) {
 				send_to_char(ch, "You sense a pure and good ki from them.\r\n");
 			}
-			else if (GET_ALIGNMENT(vict) >= 500) {
+			else if (char_get_alignment(vict) >= 500) {
 				send_to_char(ch, "You sense an extremely pure and good ki from them.\r\n");
 			}
-			else if (GET_ALIGNMENT(vict) < -50 && GET_ALIGNMENT(vict) > -200) {
+			else if (char_get_alignment(vict) < -50 && char_get_alignment(vict) > -200) {
 				send_to_char(ch, "You sense slightly sour and evil ki from them.\r\n");
 			}
-			else if (GET_ALIGNMENT(vict) < -200 && GET_ALIGNMENT(vict) > -500) {
+			else if (char_get_alignment(vict) < -200 && char_get_alignment(vict) > -500) {
 				send_to_char(ch, "You sense a sour and evil ki from them.\r\n");
 			}
-			else if (GET_ALIGNMENT(vict) <= -500) {
+			else if (char_get_alignment(vict) <= -500) {
 				send_to_char(ch, "You sense an extremely evil ki from them.\r\n");
 			}
-			else if (GET_ALIGNMENT(vict) > -50 && GET_ALIGNMENT(vict) < 50) {
+			else if (char_get_alignment(vict) > -50 && char_get_alignment(vict) < 50) {
 				send_to_char(ch, "You sense slightly mild indefinable ki from them.\r\n");
 			}
 			if (GET_HIT(vict) > GET_HIT(ch) * 50) {
@@ -508,7 +508,7 @@ ACMD(do_track)
 	/* Scanning the entire planet. */
 	if (!strcasecmp(arg, "scan")) {
 		for (i = descriptor_list; i; i = i->next) {
-			if (STATE(i) != CON_PLAYING) {
+			if (desc_get_connected(i) != CON_PLAYING) {
 				continue;
 			}
 			else if (char_is_android(i->character)) {
@@ -570,25 +570,25 @@ ACMD(do_track)
 
 				/* What's their alignment? */
 
-				if (GET_ALIGNMENT(i->character) >= 500) {
+				if (char_get_alignment(i->character) >= 500) {
 					send_to_char(ch, "@wYou sense an extremely pure and good ki from them.@n\n");
 				}
-				else if (GET_ALIGNMENT(i->character) > 200) {
+				else if (char_get_alignment(i->character) > 200) {
 					send_to_char(ch, "@wYou sense a pure and good ki from them.@n\n");
 				}
-				else if (GET_ALIGNMENT(i->character) > 50) {
+				else if (char_get_alignment(i->character) > 50) {
 					send_to_char(ch, "@wYou sense slightly pure and good ki from them.@n\n");
 				}
-				else if (GET_ALIGNMENT(i->character) > -50) {
+				else if (char_get_alignment(i->character) > -50) {
 					send_to_char(ch, "@wYou sense a slightly mild indefinable ki from them.@n\n");
 				}
-				else if (GET_ALIGNMENT(i->character) > -200) {
+				else if (char_get_alignment(i->character) > -200) {
 					send_to_char(ch, "@wYou sense a slightly sour and evil ki from them.@n\n");
 				}
-				else if (GET_ALIGNMENT(i->character) > -500) {
+				else if (char_get_alignment(i->character) > -500) {
 					send_to_char(ch, "@wYou sense a sour and evil ki from them.@n\n");
 				}
-				else if (GET_ALIGNMENT(i->character) <= -500) {
+				else if (char_get_alignment(i->character) <= -500) {
 					send_to_char(ch, "@wYou sense an extremely evil ki from them.@n\n");
 				}
 
@@ -618,7 +618,7 @@ ACMD(do_track)
 	}
 
 	if (GET_HIT(vict) < (GET_HIT(ch) * 0.001) + 1) {
-		if (IN_ROOM(ch) == IN_ROOM(vict)) {
+		if (char_get_in_room(ch) == char_get_in_room(vict)) {
 			if (!read_sense_memory(ch, vict)) {
 				send_to_char(ch, "Their powerlevel is too weak for you to sense properly, but you will recognise their ki signal from now on.\r\n");
 				sense_memory_write(ch, vict);
@@ -633,7 +633,7 @@ ACMD(do_track)
 		return;
 	}
 
-	if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_YARDRAT)) && (rroom_flagged(IN_ROOM(vict), ROOM_YARDRAT))))
+	if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_YARDRAT)) && (rroom_flagged(char_get_in_room(vict), ROOM_YARDRAT))))
 	{
 		send_to_char(ch, "@WSense@D: @YYardrat@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -643,7 +643,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_EARTH)) && (rroom_flagged(IN_ROOM(vict), ROOM_EARTH))))
+	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_EARTH)) && (rroom_flagged(char_get_in_room(vict), ROOM_EARTH))))
 	{
 		send_to_char(ch, "@WSense@D: @GEarth@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -653,7 +653,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_VEGETA)) && (rroom_flagged(IN_ROOM(vict), ROOM_VEGETA))))
+	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_VEGETA)) && (rroom_flagged(char_get_in_room(vict), ROOM_VEGETA))))
 	{
 		send_to_char(ch, "@WSense@D: @YVegeta@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -663,7 +663,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_NAMEK)) && (rroom_flagged(IN_ROOM(vict), ROOM_NAMEK))))
+	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_NAMEK)) && (rroom_flagged(char_get_in_room(vict), ROOM_NAMEK))))
 	{
 		send_to_char(ch, "@WSense@D: @gNamek@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -673,7 +673,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_FRIGID)) && (rroom_flagged(IN_ROOM(vict), ROOM_FRIGID))))
+	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_FRIGID)) && (rroom_flagged(char_get_in_room(vict), ROOM_FRIGID))))
 	{
 		send_to_char(ch, "@WSense@D: @CFrigid@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -683,7 +683,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_AETHER)) && (rroom_flagged(IN_ROOM(vict), ROOM_AETHER))))
+	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_AETHER)) && (rroom_flagged(char_get_in_room(vict), ROOM_AETHER))))
 	{
 		send_to_char(ch, "@WSense@D: @mAetherh@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -693,7 +693,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_KONACK)) && (rroom_flagged(IN_ROOM(vict), ROOM_KONACK))))
+	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_KONACK)) && (rroom_flagged(char_get_in_room(vict), ROOM_KONACK))))
 	{
 		send_to_char(ch, "@WSense@D: @MKonack@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -703,7 +703,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_KANASSA)) && (rroom_flagged(IN_ROOM(vict), ROOM_KANASSA))))
+	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_KANASSA)) && (rroom_flagged(char_get_in_room(vict), ROOM_KANASSA))))
 	{
 		send_to_char(ch, "@WSense@D: @cKanassa@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -713,7 +713,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_ARLIA)) && (rroom_flagged(IN_ROOM(vict), ROOM_ARLIA))))
+	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_ARLIA)) && (rroom_flagged(char_get_in_room(vict), ROOM_ARLIA))))
 	{
 		send_to_char(ch, "@WSense@D: @yArlia@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -723,7 +723,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_planet_zenith(IN_ROOM(ch))) && (rroom_planet_zenith(IN_ROOM(vict)))))
+	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_planet_zenith(char_get_in_room(ch))) && (rroom_planet_zenith(char_get_in_room(vict)))))
    {
 	send_to_char(ch, "@WSense@D: @CZenith@n\r\n");
 	if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -752,7 +752,7 @@ ACMD(do_track)
 		}
 
 		/* They passed the skill check. */
-		dir = find_first_step(IN_ROOM(ch), IN_ROOM(vict));
+		dir = find_first_step(char_get_in_room(ch), char_get_in_room(vict));
 
 		switch (dir) {
 		case BFS_ERROR:
@@ -763,25 +763,25 @@ ACMD(do_track)
 			act("$n looks at you intently for a moment.", TRUE, ch, 0, vict, TO_VICT);
 			act("$n looks at $N intently for a moment.", TRUE, ch, 0, vict, TO_NOTVICT);
 			if (!char_is_android(vict)) {
-				if (GET_ALIGNMENT(vict) > 50 && GET_ALIGNMENT(vict) < 200) {
+				if (char_get_alignment(vict) > 50 && char_get_alignment(vict) < 200) {
 					send_to_char(ch, "You sense slightly pure and good ki from them.\r\n");
 				}
-				else if (GET_ALIGNMENT(vict) > 200 && GET_ALIGNMENT(vict) < 500) {
+				else if (char_get_alignment(vict) > 200 && char_get_alignment(vict) < 500) {
 					send_to_char(ch, "You sense a pure and good ki from them.\r\n");
 				}
-				else if (GET_ALIGNMENT(vict) >= 500) {
+				else if (char_get_alignment(vict) >= 500) {
 					send_to_char(ch, "You sense an extremely pure and good ki from them.\r\n");
 				}
-				else if (GET_ALIGNMENT(vict) < -50 && GET_ALIGNMENT(vict) > -200) {
+				else if (char_get_alignment(vict) < -50 && char_get_alignment(vict) > -200) {
 					send_to_char(ch, "You sense slightly sour and evil ki from them.\r\n");
 				}
-				else if (GET_ALIGNMENT(vict) < -200 && GET_ALIGNMENT(vict) > -500) {
+				else if (char_get_alignment(vict) < -200 && char_get_alignment(vict) > -500) {
 					send_to_char(ch, "You sense a sour and evil ki from them.\r\n");
 				}
-				else if (GET_ALIGNMENT(vict) <= -500) {
+				else if (char_get_alignment(vict) <= -500) {
 					send_to_char(ch, "You sense an extremely evil ki from them.\r\n");
 				}
-				else if (GET_ALIGNMENT(vict) > -50 && GET_ALIGNMENT(vict) < 50) {
+				else if (char_get_alignment(vict) > -50 && char_get_alignment(vict) < 50) {
 					send_to_char(ch, "You sense slightly mild indefinable ki from them.\r\n");
 				}
 			}
@@ -841,7 +841,7 @@ ACMD(do_track)
 			send_to_char(ch, "You can't sense %s from here.\r\n", char_hmhr(vict));
 			break;
 		default:	/* Success! */
-			if ((GET_SKILL_BASE(ch, SKILL_SENSE) >= 75)) {
+			if ((char_get_skills_base(ch, SKILL_SENSE) >= 75)) {
 				char *blah = sense_location(vict);
 				send_to_char(ch, "You sense them %s from here!\r\n", dirs[dir]);
 				send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);

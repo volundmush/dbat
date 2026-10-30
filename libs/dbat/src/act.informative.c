@@ -108,13 +108,13 @@ ACMD(do_evolve)
   send_to_char(ch, "@CPowerlevel  @D: @Y%s @Wpts\r\n", add_commas(plcost));
   send_to_char(ch, "@CKi          @D: @Y%s @Wpts\r\n", add_commas(kicost));
   send_to_char(ch, "@CStamina     @D: @Y%s @Wpts\r\n", add_commas(stcost));
-  send_to_char(ch, "@D[@Y%s @Wpts currently@D]@n\r\n", add_commas(GET_MOLT_EXP(ch)));
+  send_to_char(ch, "@D[@Y%s @Wpts currently@D]@n\r\n", add_commas(char_get_moltexp(ch)));
   return;
  } else if (!strcasecmp(arg, "powerlevel") || !strcasecmp(arg, "pl")) {
   if (plcost > molt_threshold(ch)) {
    send_to_char(ch, "You need a few more evolution levels before you can start upgrading powerlevel.\r\n");
    return;
-  } else if (GET_MOLT_EXP(ch) < plcost) {
+  } else if (char_get_moltexp(ch) < plcost) {
    send_to_char(ch, "You do not have enough evolution experience.\r\n");
    return;
   } else {
@@ -126,14 +126,14 @@ ACMD(do_evolve)
     plgain = rand_number(plgain, plgain * .5);
    }
    gainBasePL(ch, plgain, false);
-   GET_MOLT_EXP(ch) -= plcost;
+   char_set_moltexp(ch, char_get_moltexp(ch) - (plcost));
    send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your body has strengthened. @D[@RPL@D: @Y+%s@D]@n\r\n", add_commas(plgain));
   }
  } else if (!strcasecmp(arg, "ki")) {
   if (kicost > molt_threshold(ch)) {
    send_to_char(ch, "You need a few more evolution levels before you can start upgrading ki.\r\n");
    return;
-  } else if (GET_MOLT_EXP(ch) < kicost) {
+  } else if (char_get_moltexp(ch) < kicost) {
    send_to_char(ch, "You do not have enough evolution experience.\r\n");
    return;
   } else {
@@ -145,14 +145,14 @@ ACMD(do_evolve)
     kigain = rand_number(kigain, kigain * .5);
    }
    gainBaseKI(ch, kigain, false);
-   GET_MOLT_EXP(ch) -= kicost;
+   char_set_moltexp(ch, char_get_moltexp(ch) - (kicost));
    send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your spirit has strengthened. @D[@CKi@D: @Y+%s@D]@n\r\n", add_commas(kigain));
   }
  } else if (!strcasecmp(arg, "stamina") || !strcasecmp(arg, "st")) {
   if (stcost > molt_threshold(ch)) {
    send_to_char(ch, "You need a few more evolution levels before you can start upgrading stamina.\r\n");
    return;
-  } else if (GET_MOLT_EXP(ch) < stcost) {
+  } else if (char_get_moltexp(ch) < stcost) {
    send_to_char(ch, "You do not have enough evolution experience.\r\n");
    return;
   } else {
@@ -164,7 +164,7 @@ ACMD(do_evolve)
     stgain = rand_number(stgain, stgain * .5);
    }
    gainBaseST(ch, stgain, false);
-   GET_MOLT_EXP(ch) -= stcost;
+   char_set_moltexp(ch, char_get_moltexp(ch) - (stcost));
    send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your body has more stamina. @D[@GST@D: @Y+%s@D]@n\r\n", add_commas(stgain));
   }
  }
@@ -173,10 +173,10 @@ ACMD(do_evolve)
 static void see_plant(struct obj_data *obj, struct char_data *ch)
 {
 
- int water = GET_OBJ_VAL(obj, VAL_WATERLEVEL);
+ int water = obj_get_value(obj, VAL_WATERLEVEL);
 
  if (water >= 0) {
-  switch (GET_OBJ_VAL(obj, VAL_MATURITY)) {
+  switch (obj_get_value(obj, VAL_MATURITY)) {
    case 0:
     send_to_char(ch, "@wA @G%s@y seed@w has been planted here. @D(@C%d Water Hours@D)@n\r\n", obj->short_description, water);
     break;
@@ -219,7 +219,7 @@ static double terrain_bonus(struct char_data *ch)
 
  double bonus = 0.0;
 
- switch (rroom_sect(IN_ROOM(ch))) {
+ switch (rroom_sect(char_get_in_room(ch))) {
   case SECT_FOREST:
    bonus += 0.5;
    break;
@@ -237,7 +237,7 @@ static double terrain_bonus(struct char_data *ch)
    break;
  }
 
- if (rroom_flagged(IN_ROOM(ch), ROOM_SPACE)) {
+ if (rroom_flagged(char_get_in_room(ch), ROOM_SPACE)) {
   bonus += -0.5;
  }
 
@@ -251,7 +251,7 @@ static void search_room(struct char_data *ch)
 {
 
  struct char_data *vict, *next_v;
- int perc = (GET_INT(ch) * 0.6) + char_get_skill(ch, SKILL_SPOT) + char_get_skill(ch, SKILL_SEARCH) + char_get_skill(ch, SKILL_LISTEN);
+ int perc = (char_get_aff_abils_intel(ch) * 0.6) + char_get_skill(ch, SKILL_SPOT) + char_get_skill(ch, SKILL_SEARCH) + char_get_skill(ch, SKILL_LISTEN);
  int prob = 0, found = 0;
  double bonus = 1.0, terrain = 1.0;
 
@@ -268,21 +268,21 @@ static void search_room(struct char_data *ch)
  act("@y$n@Y begins searching the room carefully.@n", TRUE, ch, 0, 0, TO_ROOM);
  WAIT_STATE(ch, PULSE_1SEC);
 
- for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+ for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
   next_v = vict->next_in_room;
   if (char_aff_flagged(vict, AFF_HIDE) && vict != ch) {
-   if (GET_SUPPRESS(vict) >= 1) {
-    perc *= (GET_SUPPRESS(vict) * 0.01);
+   if (char_get_suppression(vict) >= 1) {
+    perc *= (char_get_suppression(vict) * 0.01);
    }
-   prob = GET_DEX(vict) + (GET_INT(vict) * 0.6) + char_get_skill(vict, SKILL_HIDE) + char_get_skill(vict, SKILL_MOVE_SILENTLY);
+   prob = char_get_aff_abils_dex(vict) + (char_get_aff_abils_intel(vict) * 0.6) + char_get_skill(vict, SKILL_HIDE) + char_get_skill(vict, SKILL_MOVE_SILENTLY);
 
    if (char_aff_flagged(vict, AFF_LIQUEFIED)) {
     prob *= 1.5;
    }
-   if (char_is_mutant(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4)) {
+   if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 4 || char_get_genome(ch, 1) == 4)) {
     perc += 5;
    }
-   if (char_is_mutant(vict) && (GET_GENOME(vict, 0) == 5 || GET_GENOME(vict, 1) == 5)) {
+   if (char_is_mutant(vict) && (char_get_genome(vict, 0) == 5 || char_get_genome(vict, 1) == 5)) {
     prob += 10;
    }
    terrain += terrain_bonus(vict);
@@ -298,11 +298,11 @@ static void search_room(struct char_data *ch)
 
  struct obj_data *obj = NULL;
 
- for (obj = world[IN_ROOM(ch)].contents; obj;obj=obj->next_content) {
+ for (obj = world[char_get_in_room(ch)].contents; obj;obj=obj->next_content) {
   if (obj_flagged(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200)) {
    act("@YYou uncover @y$p@Y, which had been burried here.@n", TRUE, ch, obj, 0, TO_CHAR);
    act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", TRUE, ch, obj, 0, TO_ROOM);
-   REMOVE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BURIED);
+   REMOVE_BIT_AR(obj_get_extra_flags(obj), ITEM_BURIED);
    found++;
   }
  }
@@ -345,7 +345,7 @@ ACMD(do_mimic)
  // generate a list of mimic'able races.
  bool can_mimic[NUM_RACES];
     for(int r = 0; r < NUM_RACES; r++) {
-        can_mimic[r] = race_can_be_mimiced(r) && race_valid_sex(r, GET_SEX(ch));
+        can_mimic[r] = race_can_be_mimiced(r) && race_valid_sex(r, char_get_sex(ch));
     }
 
  if (!*arg) {
@@ -460,7 +460,7 @@ ACMD(do_table)
   return;
  }
 
- if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+ if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[char_get_in_room(ch)].contents))) {
   send_to_char(ch, "You don't see that table here.\r\n");
   return;
  }
@@ -478,12 +478,12 @@ ACMD(do_table)
 
 ACMD(do_draw)
 {
- if (!SITS(ch)) {
+ if (!char_get_sits(ch)) {
   send_to_char(ch, "You are not sitting at a duel table.\r\n");
   return;
  }
 
- if (obj_get_vnum(SITS(ch)) < 604 || obj_get_vnum(SITS(ch)) > 607) {
+ if (obj_get_vnum(char_get_sits(ch)) < 604 || obj_get_vnum(char_get_sits(ch)) > 607) {
   send_to_char(ch, "You need to be sitting at an official table to play.\r\n");
   return;
  }
@@ -519,12 +519,12 @@ ACMD(do_draw)
 ACMD(do_shuffle)
 {
 
- if (!SITS(ch)) {
+ if (!char_get_sits(ch)) {
   send_to_char(ch, "You are not sitting at a duel table.\r\n");
   return;
  }
 
- if (obj_get_vnum(SITS(ch)) < 604 || obj_get_vnum(SITS(ch)) > 607) {
+ if (obj_get_vnum(char_get_sits(ch)) < 604 || obj_get_vnum(char_get_sits(ch)) > 607) {
   send_to_char(ch, "You need to be sitting at an official table to play.\r\n");
   return;
  }
@@ -573,7 +573,7 @@ ACMD(do_shuffle)
  }
  send_to_char(ch, "You shuffle the cards carefully.\r\n");
  act("$n shuffles their deck.", TRUE, ch, 0, 0, TO_ROOM);
- send_to_room(IN_ROOM(ch), "There were %d cards in the deck.\r\n", total);
+ send_to_room(char_get_in_room(ch), "There were %d cards in the deck.\r\n", total);
 }
 
 ACMD(do_hand)
@@ -663,35 +663,35 @@ ACMD(do_post)
   return;
  }
 
- if (GET_OBJ_TYPE(obj) != ITEM_NOTE) {
+ if (obj_get_type_flag(obj) != ITEM_NOTE) {
   send_to_char(ch, "You can only post notepaper.\r\n");
   return;
  }
 
- if (rroom_flagged(IN_ROOM(ch), ROOM_GARDEN1) || rroom_flagged(IN_ROOM(ch), ROOM_GARDEN2)) {
+ if (rroom_flagged(char_get_in_room(ch), ROOM_GARDEN1) || rroom_flagged(char_get_in_room(ch), ROOM_GARDEN2)) {
   send_to_char(ch, "You can not post on things in a garden.\r\n");
   return;
  }
 
  if (!*arg2) {
-  if (rroom_sect(IN_ROOM(ch)) != SECT_INSIDE && rroom_sect(IN_ROOM(ch)) != SECT_CITY) {
+  if (rroom_sect(char_get_in_room(ch)) != SECT_INSIDE && rroom_sect(char_get_in_room(ch)) != SECT_CITY) {
    send_to_char(ch, "You are not near any general structure you can post it on.\r\n");
    return;
   }
   act("@WYou post $p@W on a nearby structure.@n", TRUE, ch, obj, 0, TO_CHAR);
   act("@C$n@W posts $p@W on a nearby structure.@n", TRUE, ch, obj, 0, TO_ROOM);
   obj_from_char(obj);
-  obj_to_room(obj, IN_ROOM(ch));
-  GET_OBJ_POSTTYPE(obj) = 1;
+  obj_to_room(obj, char_get_in_room(ch));
+  obj_set_posttype(obj, 1);
   return;
  } else {
-   if (!(obj2 = get_obj_in_list_vis(ch, arg2, NULL, world[IN_ROOM(ch)].contents))) {
+   if (!(obj2 = get_obj_in_list_vis(ch, arg2, NULL, world[char_get_in_room(ch)].contents))) {
     send_to_char(ch, "You can't seem to find the thing you want to post it on.\r\n");
     return;
-   } else if (GET_OBJ_POSTED(obj2)) {
+   } else if (obj_get_posted_to(obj2)) {
     send_to_char(ch, "It already has something posted on it. Get that first if you want to post.\r\n");
     return;
-   } else if (GET_OBJ_TYPE(obj2) == ITEM_BOARD) {
+   } else if (obj_get_type_flag(obj2) == ITEM_BOARD) {
     send_to_char(ch, "Boards come with their own means of posting messages.\r\n");
     return;
    } else {
@@ -700,10 +700,10 @@ ACMD(do_post)
     send_to_char(ch, "@WYou post %s@W on %s@W.@n\r\n", obj->short_description, obj2->short_description);
     act(buf, TRUE, ch, 0, 0, TO_ROOM);   
     obj_from_char(obj);
-    obj_to_room(obj, IN_ROOM(ch));
-    GET_OBJ_POSTTYPE(obj) = 2;
-    GET_OBJ_POSTED(obj) = obj2;
-    GET_OBJ_POSTED(obj2) = obj;
+    obj_to_room(obj, char_get_in_room(ch));
+    obj_set_posttype(obj, 2);
+    obj_set_posted_to(obj, obj2);
+    obj_set_posted_to(obj2, obj);
     return;
    }
  }
@@ -713,17 +713,17 @@ ACMD(do_post)
 ACMD(do_play)
 {
 
- if (GET_POS(ch) != POS_SITTING) {
+ if (char_get_position(ch) != POS_SITTING) {
   send_to_char(ch, "You need to be sitting at an official table to play.\r\n");
   return;
  }
 
- if (!SITS(ch)) {
+ if (!char_get_sits(ch)) {
   send_to_char(ch, "You need to be sitting at an official table to play.\r\n");
   return;
  }
 
- if (obj_get_vnum(SITS(ch)) < 604 || obj_get_vnum(SITS(ch)) > 607) {
+ if (obj_get_vnum(char_get_sits(ch)) < 604 || obj_get_vnum(char_get_sits(ch)) > 607) {
   send_to_char(ch, "You need to be sitting at an official table to play.\r\n");
   return;
  }
@@ -742,9 +742,9 @@ ACMD(do_play)
   return;
  }
 
- for (obj3 = world[IN_ROOM(ch)].contents; obj3; obj3 = next_obj) {
+ for (obj3 = world[char_get_in_room(ch)].contents; obj3; obj3 = next_obj) {
      next_obj = obj3->next_content;
-  if (obj_get_vnum(obj3) == obj_get_vnum(SITS(ch)) - 4) {
+  if (obj_get_vnum(obj3) == obj_get_vnum(char_get_sits(ch)) - 4) {
    obj2 = obj3;
   }
  }
@@ -788,7 +788,7 @@ ACMD(do_nickname)
   if (!strcasecmp(arg, "ship")) {
    struct obj_data *ship = NULL, *next_obj = NULL, *ship2 = NULL; 
    int found = FALSE;
-   for (ship = world[IN_ROOM(ch)].contents; ship; ship = next_obj) {
+   for (ship = world[char_get_in_room(ch)].contents; ship; ship = next_obj) {
     next_obj = ship->next_content;
     if (obj_get_vnum(ship) >= 45000 && obj_get_vnum(ship) <= 45999 && found == FALSE) {
      found = TRUE;
@@ -807,7 +807,7 @@ ACMD(do_nickname)
      for (k = object_list; k; k = k->next) {
       if (obj_get_vnum(k) == obj_get_vnum(ship2) + 1000) {
        extract_obj(k);
-       int was_in = rroom_get_vnum(IN_ROOM(ship2));
+       int was_in = rroom_get_vnum(obj_get_in_room(ship2));
        obj_from_room(ship2);
        obj_to_room(ship2, real_room(was_in));
       }
@@ -1080,40 +1080,40 @@ static void bringdesc(struct char_data *ch, struct char_data *tch)
    send_to_char(ch, "            @D[@cHair Color  @D: @WHidden.         @D]@n\r\n");
    send_to_char(ch, "            @D[@cHair Style  @D: @WHidden.         @D]@n\r\n");
    send_to_char(ch, "            @D[@cEye Color   @D: @WHidden.         @D]@n\r\n");
-   if (GET_SKIN(tch) == SKIN_WHITE) {
+   if (char_get_skin(tch) == SKIN_WHITE) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WWhite.        @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_TAN) {
+   else if (char_get_skin(tch) == SKIN_TAN) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WTan.          @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_BLACK) {
+   else if (char_get_skin(tch) == SKIN_BLACK) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WBlack.        @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_GREEN) {
+   else if (char_get_skin(tch) == SKIN_GREEN) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WGreen.        @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_ORANGE) {
+   else if (char_get_skin(tch) == SKIN_ORANGE) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WOrange.       @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_YELLOW) {
+   else if (char_get_skin(tch) == SKIN_YELLOW) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WYellow.       @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_RED) {
+   else if (char_get_skin(tch) == SKIN_RED) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WRed.          @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_GREY) {
+   else if (char_get_skin(tch) == SKIN_GREY) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WGrey.         @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_BLUE) {
+   else if (char_get_skin(tch) == SKIN_BLUE) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WBlue.         @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_AQUA) {
+   else if (char_get_skin(tch) == SKIN_AQUA) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WAqua.         @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_PINK) {
+   else if (char_get_skin(tch) == SKIN_PINK) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WPink.         @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_PURPLE) {
+   else if (char_get_skin(tch) == SKIN_PURPLE) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WPurple.       @D]@n\r\n");
    }
    return;
@@ -1121,109 +1121,109 @@ static void bringdesc(struct char_data *ch, struct char_data *tch)
 
   if (char_is_human(tch) || char_is_saiyan(tch) || char_is_konatsu(tch) || char_is_mutant(tch) || char_is_android(tch) || char_is_kai(tch) || char_is_halfbreed(tch) || char_is_truffle(tch) || char_is_hoshijin(tch)) {
   if ((!char_is_saiyan(tch) && !char_is_halfbreed(tch)) || ((char_is_saiyan(tch) || char_is_halfbreed(tch)) && !char_is_transformed(tch))) {
-   if (GET_HAIRL(tch) == HAIRL_LONG) {
+   if (char_get_hairl(tch) == HAIRL_LONG) {
     send_to_char(ch, "            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
    }
-   else if (GET_HAIRL(tch) == HAIRL_BALD) {
+   else if (char_get_hairl(tch) == HAIRL_BALD) {
     send_to_char(ch, "            @D[@cHair Length @D: @WBald.         @D]@n\r\n");
    }
-   else if (GET_HAIRL(tch) == HAIRL_SHORT) {
+   else if (char_get_hairl(tch) == HAIRL_SHORT) {
     send_to_char(ch, "            @D[@cHair Length @D: @WShort.        @D]@n\r\n");
    }
-   else if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
+   else if (char_get_hairl(tch) == HAIRL_MEDIUM) {
     send_to_char(ch, "            @D[@cHair Length @D: @WMedium.       @D]@n\r\n");
    }
-   else if (GET_HAIRL(tch) == HAIRL_RLONG) {
+   else if (char_get_hairl(tch) == HAIRL_RLONG) {
     send_to_char(ch, "            @D[@cHair Length @D: @WReally Long.  @D]@n\r\n");
    }
-   if (GET_HAIRS(tch) == HAIRS_PLAIN) {
+   if (char_get_hairs(tch) == HAIRS_PLAIN) {
     send_to_char(ch, "            @D[@cHair Style  @D: @WPlain.        @D]@n\r\n");
    }
-   else if (GET_HAIRS(tch) == HAIRS_MOHAWK) {
+   else if (char_get_hairs(tch) == HAIRS_MOHAWK) {
     send_to_char(ch, "            @D[@cHair Style  @D: @WMohawk.       @D]@n\r\n");
    }
-   else if (GET_HAIRS(tch) == HAIRS_SPIKY) {
+   else if (char_get_hairs(tch) == HAIRS_SPIKY) {
     send_to_char(ch, "            @D[@cHair Style  @D: @WSpiky.        @D]@n\r\n");
    }
-   else if (GET_HAIRS(tch) == HAIRS_CURLY) {
+   else if (char_get_hairs(tch) == HAIRS_CURLY) {
     send_to_char(ch, "            @D[@cHair Style  @D: @WCurly.        @D]@n\r\n");
    }
-   else if (GET_HAIRS(tch) == HAIRS_UNEVEN) {
+   else if (char_get_hairs(tch) == HAIRS_UNEVEN) {
     send_to_char(ch, "            @D[@cHair Style  @D: @WUneven.       @D]@n\r\n");
    }
-   else if (GET_HAIRS(tch) == HAIRS_PONYTAIL) {
+   else if (char_get_hairs(tch) == HAIRS_PONYTAIL) {
     send_to_char(ch, "            @D[@cHair Style  @D: @WPony Tail.    @D]@n\r\n");
    }
-   else if (GET_HAIRS(tch) == HAIRS_AFRO) {
+   else if (char_get_hairs(tch) == HAIRS_AFRO) {
     send_to_char(ch, "            @D[@cHair Style  @D: @WAfro.         @D]@n\r\n");
    }
-   else if (GET_HAIRS(tch) == HAIRS_FADE) {
+   else if (char_get_hairs(tch) == HAIRS_FADE) {
     send_to_char(ch, "            @D[@cHair Style  @D: @WFade.         @D]@n\r\n");
    }
-   else if (GET_HAIRS(tch) == HAIRS_CREW) {
+   else if (char_get_hairs(tch) == HAIRS_CREW) {
     send_to_char(ch, "            @D[@cHair Style  @D: @WCrew Cut.     @D]@n\r\n");
    }
-   else if (GET_HAIRS(tch) == HAIRS_FEATHERED) {
+   else if (char_get_hairs(tch) == HAIRS_FEATHERED) {
     send_to_char(ch, "            @D[@cHair Style  @D: @WFeathered.    @D]@n\r\n");
    }
-   else if (GET_HAIRS(tch) == HAIRS_DRED) {
+   else if (char_get_hairs(tch) == HAIRS_DRED) {
     send_to_char(ch, "            @D[@cHair Style  @D: @WDread Locks.  @D]@n\r\n");
    }
-   if (GET_HAIRC(tch) == HAIRC_BLACK) {
+   if (char_get_hairc(tch) == HAIRC_BLACK) {
     send_to_char(ch, "            @D[@cHair Color  @D: @WBlack.        @D]@n\r\n");
    }
-   else if (GET_HAIRC(tch) == HAIRC_BROWN) {
+   else if (char_get_hairc(tch) == HAIRC_BROWN) {
     send_to_char(ch, "            @D[@cHair Color  @D: @WBrown.        @D]@n\r\n");
    }
-   else if (GET_HAIRC(tch) == HAIRC_BLONDE) {
+   else if (char_get_hairc(tch) == HAIRC_BLONDE) {
     send_to_char(ch, "            @D[@cHair Color  @D: @WBlonde.       @D]@n\r\n");
    }
-   else if (GET_HAIRC(tch) == HAIRC_GREY) {
+   else if (char_get_hairc(tch) == HAIRC_GREY) {
     send_to_char(ch, "            @D[@cHair Color  @D: @WGrey.         @D]@n\r\n");
    }
-   else if (GET_HAIRC(tch) == HAIRC_RED) {
+   else if (char_get_hairc(tch) == HAIRC_RED) {
     send_to_char(ch, "            @D[@cHair Color  @D: @WRed.          @D]@n\r\n");
    }
-   else if (GET_HAIRC(tch) == HAIRC_ORANGE) {
+   else if (char_get_hairc(tch) == HAIRC_ORANGE) {
     send_to_char(ch, "            @D[@cHair Color  @D: @WOrange.       @D]@n\r\n");
    }
-   else if (GET_HAIRC(tch) == HAIRC_GREEN) {
+   else if (char_get_hairc(tch) == HAIRC_GREEN) {
     send_to_char(ch, "            @D[@cHair Color  @D: @WGreen.        @D]@n\r\n");
    }
-   else if (GET_HAIRC(tch) == HAIRC_BLUE) {
+   else if (char_get_hairc(tch) == HAIRC_BLUE) {
     send_to_char(ch, "            @D[@cHair Color  @D: @WBlue.         @D]@n\r\n");
    }
-   else if (GET_HAIRC(tch) == HAIRC_PINK) {
+   else if (char_get_hairc(tch) == HAIRC_PINK) {
     send_to_char(ch, "            @D[@cHair Color  @D: @WPink.         @D]@n\r\n");
    }
-   else if (GET_HAIRC(tch) == HAIRC_PURPLE) {
+   else if (char_get_hairc(tch) == HAIRC_PURPLE) {
     send_to_char(ch, "            @D[@cHair Color  @D: @WPurple.       @D]@n\r\n");
    }
-   else if (GET_HAIRC(tch) == HAIRC_SILVER) {
+   else if (char_get_hairc(tch) == HAIRC_SILVER) {
     send_to_char(ch, "            @D[@cHair Color  @D: @WSilver.       @D]@n\r\n");
    }
-   else if (GET_HAIRC(tch) == HAIRC_CRIMSON) {
+   else if (char_get_hairc(tch) == HAIRC_CRIMSON) {
     send_to_char(ch, "            @D[@cHair Color  @D: @WCrimson.      @D]@n\r\n");
    }
-   else if (GET_HAIRC(tch) == HAIRC_WHITE) {
+   else if (char_get_hairc(tch) == HAIRC_WHITE) {
     send_to_char(ch, "            @D[@cHair Color  @D: @WWhite.        @D]@n\r\n");
     }
    }
     else if (char_is_saiyan(tch) || char_is_halfbreed(tch)) {
      if (char_plr_flagged(tch, PLR_TRANS1)) {
-      if (GET_HAIRL(tch) == HAIRL_LONG) {
+      if (char_get_hairl(tch) == HAIRL_LONG) {
        send_to_char(ch, "            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
       }
-      else if (GET_HAIRL(tch) == HAIRL_BALD) {
+      else if (char_get_hairl(tch) == HAIRL_BALD) {
        send_to_char(ch, "            @D[@cHair Length @D: @WBald.         @D]@n\r\n");
       }
-      else if (GET_HAIRL(tch) == HAIRL_SHORT) {
+      else if (char_get_hairl(tch) == HAIRL_SHORT) {
        send_to_char(ch, "            @D[@cHair Length @D: @WShort.        @D]@n\r\n");
       }
-      else if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
+      else if (char_get_hairl(tch) == HAIRL_MEDIUM) {
        send_to_char(ch, "            @D[@cHair Length @D: @WMedium.       @D]@n\r\n");
       }
-      else if (GET_HAIRL(tch) == HAIRL_RLONG) {
+      else if (char_get_hairl(tch) == HAIRL_RLONG) {
        send_to_char(ch, "            @D[@cHair Length @D: @WReally Long.  @D]@n\r\n");
       }
       send_to_char(ch, "            @D[@cHair Style  @D: @WSpiky.        @D]@n\r\n");
@@ -1231,19 +1231,19 @@ static void bringdesc(struct char_data *ch, struct char_data *tch)
       send_to_char(ch, "            @D[@cEye Color   @D: @WEmerald.      @D]@n\r\n");
      }
      else if (char_plr_flagged(tch, PLR_TRANS2)) {
-      if (GET_HAIRL(tch) == HAIRL_LONG) {
+      if (char_get_hairl(tch) == HAIRL_LONG) {
        send_to_char(ch, "            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
       }
-      else if (GET_HAIRL(tch) == HAIRL_BALD) {
+      else if (char_get_hairl(tch) == HAIRL_BALD) {
        send_to_char(ch, "            @D[@cHair Length @D: @WBald.         @D]@n\r\n");
       }
-      else if (GET_HAIRL(tch) == HAIRL_SHORT) {
+      else if (char_get_hairl(tch) == HAIRL_SHORT) {
        send_to_char(ch, "            @D[@cHair Length @D: @WShort.        @D]@n\r\n");
       }
-      else if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
+      else if (char_get_hairl(tch) == HAIRL_MEDIUM) {
        send_to_char(ch, "            @D[@cHair Length @D: @WMedium.       @D]@n\r\n");
       }
-      else if (GET_HAIRL(tch) == HAIRL_RLONG) {
+      else if (char_get_hairl(tch) == HAIRL_RLONG) {
        send_to_char(ch, "            @D[@cHair Length @D: @WReally Long.  @D]@n\r\n");
       }
       send_to_char(ch, "            @D[@cHair Style  @D: @WSharp Spikes. @D]@n\r\n");
@@ -1265,174 +1265,174 @@ static void bringdesc(struct char_data *ch, struct char_data *tch)
     }
    }
    if (char_is_demon(tch) || char_is_icer(tch)) {
-    if (GET_HAIRL(tch) == HAIRL_BALD) {
+    if (char_get_hairl(tch) == HAIRL_BALD) {
      send_to_char(ch, "            @D[@cHorn Length @D: @WNone.         @D]@n\r\n");
     }
-    if (GET_HAIRL(tch) == HAIRL_SHORT) {
+    if (char_get_hairl(tch) == HAIRL_SHORT) {
      send_to_char(ch, "            @D[@cHorn Length @D: @WShort.        @D]@n\r\n");
     }
-    if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
+    if (char_get_hairl(tch) == HAIRL_MEDIUM) {
      send_to_char(ch, "            @D[@cHorn Length @D: @WMedium.       @D]@n\r\n");
     }
-    if (GET_HAIRL(tch) == HAIRL_LONG) {
+    if (char_get_hairl(tch) == HAIRL_LONG) {
      send_to_char(ch, "            @D[@cHorn Length @D: @WLong.         @D]@n\r\n");
     }
-    if (GET_HAIRL(tch) == HAIRL_RLONG) {
+    if (char_get_hairl(tch) == HAIRL_RLONG) {
      send_to_char(ch, "            @D[@cHorn Length @D: @WReally Long.  @D]@n\r\n");
     }
    }
    if (char_is_namek(tch) || char_is_arlian(tch)) {
-    if (GET_HAIRL(tch) == HAIRL_BALD) {
+    if (char_get_hairl(tch) == HAIRL_BALD) {
      send_to_char(ch, "            @D[@cAnt. Length @D: @WTiny.        @D]@n\r\n");
     }
-    if (GET_HAIRL(tch) == HAIRL_SHORT) {
+    if (char_get_hairl(tch) == HAIRL_SHORT) {
      send_to_char(ch, "            @D[@cAnt. Length @D: @WShort.       @D]@n\r\n");
     }
-    if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
+    if (char_get_hairl(tch) == HAIRL_MEDIUM) {
      send_to_char(ch, "            @D[@cAnt. Length @D: @WMedium.      @D]@n\r\n");
     }
-    if (GET_HAIRL(tch) == HAIRL_LONG) {
+    if (char_get_hairl(tch) == HAIRL_LONG) {
      send_to_char(ch, "            @D[@cAnt. Length @D: @WLong.        @D]@n\r\n");
     }
-    if (GET_HAIRL(tch) == HAIRL_RLONG) {
+    if (char_get_hairl(tch) == HAIRL_RLONG) {
      send_to_char(ch, "            @D[@cAnt. Length @D: @WR. Long.     @D]@n\r\n");
     }
    }
    if (char_is_arlian(tch) && char_is_female(tch)) {
-    if (GET_HAIRC(tch) == HAIRC_BLACK) {
+    if (char_get_hairc(tch) == HAIRC_BLACK) {
      send_to_char(ch, "            @D[@cWing Color  @D: @WBlack.        @D]@n\r\n");
     }
-    else if (GET_HAIRC(tch) == HAIRC_BROWN) {
+    else if (char_get_hairc(tch) == HAIRC_BROWN) {
      send_to_char(ch, "            @D[@cWing Color  @D: @WBrown.        @D]@n\r\n");
     }
-    else if (GET_HAIRC(tch) == HAIRC_BLONDE) {
+    else if (char_get_hairc(tch) == HAIRC_BLONDE) {
      send_to_char(ch, "            @D[@cWing Color  @D: @WBlonde.       @D]@n\r\n");
     }
-    else if (GET_HAIRC(tch) == HAIRC_GREY) {
+    else if (char_get_hairc(tch) == HAIRC_GREY) {
      send_to_char(ch, "            @D[@cWing Color  @D: @WGrey.         @D]@n\r\n");
     }
-    else if (GET_HAIRC(tch) == HAIRC_RED) {
+    else if (char_get_hairc(tch) == HAIRC_RED) {
      send_to_char(ch, "            @D[@cWing Color  @D: @WRed.          @D]@n\r\n");
     }
-    else if (GET_HAIRC(tch) == HAIRC_ORANGE) {
+    else if (char_get_hairc(tch) == HAIRC_ORANGE) {
      send_to_char(ch, "            @D[@cWing Color  @D: @WOrange.       @D]@n\r\n");
     }
-    else if (GET_HAIRC(tch) == HAIRC_GREEN) {
+    else if (char_get_hairc(tch) == HAIRC_GREEN) {
      send_to_char(ch, "            @D[@cWing Color  @D: @WGreen.        @D]@n\r\n");
     }
-    else if (GET_HAIRC(tch) == HAIRC_BLUE) {
+    else if (char_get_hairc(tch) == HAIRC_BLUE) {
      send_to_char(ch, "            @D[@cWing Color  @D: @WBlue.         @D]@n\r\n");
     }
-    else if (GET_HAIRC(tch) == HAIRC_PINK) {
+    else if (char_get_hairc(tch) == HAIRC_PINK) {
      send_to_char(ch, "            @D[@cWing Color  @D: @WPink.         @D]@n\r\n");
     }
-    else if (GET_HAIRC(tch) == HAIRC_PURPLE) {
+    else if (char_get_hairc(tch) == HAIRC_PURPLE) {
      send_to_char(ch, "            @D[@cWing Color  @D: @WPurple.       @D]@n\r\n");
     }
-    else if (GET_HAIRC(tch) == HAIRC_SILVER) {
+    else if (char_get_hairc(tch) == HAIRC_SILVER) {
      send_to_char(ch, "            @D[@cWing Color  @D: @WSilver.       @D]@n\r\n");
     }
-    else if (GET_HAIRC(tch) == HAIRC_CRIMSON) {
+    else if (char_get_hairc(tch) == HAIRC_CRIMSON) {
      send_to_char(ch, "            @D[@cWing Color  @D: @WCrimson.      @D]@n\r\n");
     }
-    else if (GET_HAIRC(tch) == HAIRC_WHITE) {
+    else if (char_get_hairc(tch) == HAIRC_WHITE) {
      send_to_char(ch, "            @D[@cWing Color  @D: @WWhite.        @D]@n\r\n");
     }    
    } else if (char_is_arlian(tch) && !char_is_female(tch)) {
     send_to_char(ch, "            @D[@cWing Color  @D: @WWhite.        @D]@n\r\n");
    }
    if (char_is_majin(tch)) {
-    if (GET_HAIRL(tch) == HAIRL_BALD) {
+    if (char_get_hairl(tch) == HAIRL_BALD) {
      send_to_char(ch, "            @D[@cFor. Length @D: @WTiny.         @D]@n\r\n");
     }
-    if (GET_HAIRL(tch) == HAIRL_SHORT) {
+    if (char_get_hairl(tch) == HAIRL_SHORT) {
      send_to_char(ch, "            @D[@cFor. Length @D: @WShort.        @D]@n\r\n");
     }
-    if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
+    if (char_get_hairl(tch) == HAIRL_MEDIUM) {
      send_to_char(ch, "            @D[@cFor. Length @D: @WMedium.       @D]@n\r\n");
     }
-    if (GET_HAIRL(tch) == HAIRL_LONG) {
+    if (char_get_hairl(tch) == HAIRL_LONG) {
      send_to_char(ch, "            @D[@cFor. Length @D: @WLong.         @D]@n\r\n");
     }
-    if (GET_HAIRL(tch) == HAIRL_RLONG) {
+    if (char_get_hairl(tch) == HAIRL_RLONG) {
      send_to_char(ch, "            @D[@cFor. Length @D: @WR. Long.      @D]@n\r\n");
     }
    }
   if ((!char_is_saiyan(tch) && !char_is_halfbreed(tch)) || ((char_is_saiyan(tch) || char_is_halfbreed(tch)) && !char_is_transformed(tch))) {
-   if (GET_EYE(tch) == EYE_BLUE) {
+   if (char_get_eye(tch) == EYE_BLUE) {
     send_to_char(ch, "            @D[@cEye Color   @D: @WBlue.         @D]@n\r\n");
    }
-   else if (GET_EYE(tch) == EYE_BLACK) {
+   else if (char_get_eye(tch) == EYE_BLACK) {
     send_to_char(ch, "            @D[@cEye Color   @D: @WBlack.        @D]@n\r\n");
    }
-   else if (GET_EYE(tch) == EYE_GREEN) {
+   else if (char_get_eye(tch) == EYE_GREEN) {
     send_to_char(ch, "            @D[@cEye Color   @D: @WGreen.        @D]@n\r\n");
    }
-   else if (GET_EYE(tch) == EYE_BROWN) {
+   else if (char_get_eye(tch) == EYE_BROWN) {
     send_to_char(ch, "            @D[@cEye Color   @D: @WBrown.        @D]@n\r\n");
    }
-   else if (GET_EYE(tch) == EYE_RED) {
+   else if (char_get_eye(tch) == EYE_RED) {
     send_to_char(ch, "            @D[@cEye Color   @D: @WRed.          @D]@n\r\n");
    }
-   else if (GET_EYE(tch) == EYE_AQUA) {
+   else if (char_get_eye(tch) == EYE_AQUA) {
     send_to_char(ch, "            @D[@cEye Color   @D: @WAqua.         @D]@n\r\n");
    }
-   else if (GET_EYE(tch) == EYE_PINK) {
+   else if (char_get_eye(tch) == EYE_PINK) {
     send_to_char(ch, "            @D[@cEye Color   @D: @WPink.         @D]@n\r\n");
    }
-   else if (GET_EYE(tch) == EYE_PURPLE) {
+   else if (char_get_eye(tch) == EYE_PURPLE) {
     send_to_char(ch, "            @D[@cEye Color   @D: @WPurple.       @D]@n\r\n");
    }
-   else if (GET_EYE(tch) == EYE_CRIMSON) {
+   else if (char_get_eye(tch) == EYE_CRIMSON) {
     send_to_char(ch, "            @D[@cEye Color   @D: @WCrimson.      @D]@n\r\n");
    }
-   else if (GET_EYE(tch) == EYE_GOLD) {
+   else if (char_get_eye(tch) == EYE_GOLD) {
     send_to_char(ch, "            @D[@cEye Color   @D: @WGold.         @D]@n\r\n");
    }
-   else if (GET_EYE(tch) == EYE_AMBER) {
+   else if (char_get_eye(tch) == EYE_AMBER) {
     send_to_char(ch, "            @D[@cEye Color   @D: @WAmber.        @D]@n\r\n");
    }
-   else if (GET_EYE(tch) == EYE_EMERALD) {
+   else if (char_get_eye(tch) == EYE_EMERALD) {
     send_to_char(ch, "            @D[@cEye Color   @D: @WEmerald.      @D]@n\r\n");
    }
   }
-   if (GET_SKIN(tch) == SKIN_WHITE) {
+   if (char_get_skin(tch) == SKIN_WHITE) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WWhite.        @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_TAN) {
+   else if (char_get_skin(tch) == SKIN_TAN) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WTan.          @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_BLACK) {
+   else if (char_get_skin(tch) == SKIN_BLACK) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WBlack.        @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_GREEN) {
+   else if (char_get_skin(tch) == SKIN_GREEN) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WGreen.        @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_ORANGE) {
+   else if (char_get_skin(tch) == SKIN_ORANGE) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WOrange.       @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_YELLOW) {
+   else if (char_get_skin(tch) == SKIN_YELLOW) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WYellow.       @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_RED) {
+   else if (char_get_skin(tch) == SKIN_RED) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WRed.          @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_GREY) {
+   else if (char_get_skin(tch) == SKIN_GREY) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WGrey.         @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_BLUE) {
+   else if (char_get_skin(tch) == SKIN_BLUE) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WBlue.         @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_AQUA) {
+   else if (char_get_skin(tch) == SKIN_AQUA) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WAqua.         @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_PINK) {
+   else if (char_get_skin(tch) == SKIN_PINK) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WPink.         @D]@n\r\n");
    }
-   else if (GET_SKIN(tch) == SKIN_PURPLE) {
+   else if (char_get_skin(tch) == SKIN_PURPLE) {
     send_to_char(ch, "            @D[@cSkin Color  @D: @WPurple.       @D]@n\r\n");
    }
-  if (MAJINIZED(tch) != 0 && MAJINIZED(tch) != 3) {
+  if (char_get_majinize(tch) != 0 && char_get_majinize(tch) != 3) {
     send_to_char(ch, "            @D[@cForehead    @D: @mMajin Symbol  @D]@n\r\n");
   }
   }
@@ -1485,49 +1485,49 @@ struct char_data *ch)
            map[y-1][x] = '=';
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x] = '2';
            } else {
             map[y-1][x] = 'i';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x] = '2';
            } else {
             map[y-1][x] = 'p';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x] = '7';
            } else {
             map[y-1][x] = '!';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x] = '1';
            } else {
             map[y-1][x] = '(';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x] = '6';
            } else {
             map[y-1][x] = 'f';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x] = '5';
            } else {
             map[y-1][x] = '^';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x] = '3';
            } else {
             map[y-1][x] = 'h';
@@ -1557,49 +1557,49 @@ struct char_data *ch)
            map[y][x+1] = '=';
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x+1] = '2';
            } else {
             map[y][x+1] = 'i';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x+1] = '2';
            } else {
             map[y][x+1] = 'p';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x+1] = '7';
            } else {
             map[y][x+1] = '!';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x+1] = '1';
            } else {
             map[y][x+1] = '(';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x+1] = '6';
            } else {
             map[y][x+1] = 'f';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x+1] = '5';
            } else {
             map[y][x+1] = '^';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x+1] = '3';
            } else {
             map[y][x+1] = 'h';
@@ -1629,49 +1629,49 @@ struct char_data *ch)
            map[y+1][x] = '=';
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '2';
            } else {
             map[y+1][x] = 'i';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '2';
            } else {
             map[y+1][x] = 'p';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '7';
            } else {
             map[y+1][x] = '!';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '1';
            } else {
             map[y+1][x] = '(';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '6';
            } else {
             map[y+1][x] = 'f';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '5';
            } else {
             map[y+1][x] = '^';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '3';
            } else {
             map[y+1][x] = 'h';
@@ -1701,49 +1701,49 @@ struct char_data *ch)
            map[y][x-1] = '=';
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '2';
            } else {
             map[y][x-1] = 'i';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x-1] = '2';
            } else {
             map[y][x-1] = 'p';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x-1] = '7';
            } else {
             map[y][x-1] = '!';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x-1] = '1';
            } else {
             map[y][x-1] = '(';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x-1] = '6';
            } else {
             map[y][x-1] = 'f';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x-1] = '5';
            } else {
             map[y][x-1] = '^';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x-1] = '3';
            } else {
             map[y][x-1] = 'h';
@@ -1773,49 +1773,49 @@ struct char_data *ch)
            map[y-1][x+1] = '=';
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x+1] = '2';
            } else {
             map[y-1][x+1] = 'i';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x+1] = '2';
            } else {
             map[y-1][x+1] = 'p';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x+1] = '7';
            } else {
             map[y-1][x+1] = '!';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x+1] = '1';
            } else {
             map[y-1][x+1] = '(';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x+1] = '6';
            } else {
             map[y-1][x+1] = 'f';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x+1] = '5';
            } else {
             map[y-1][x+1] = '^';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x+1] = '3';
            } else {
             map[y-1][x+1] = 'h';
@@ -1845,49 +1845,49 @@ struct char_data *ch)
            map[y-1][x-1] = '=';
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x-1] = '2';
            } else {
             map[y-1][x-1] = 'i';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x-1] = '2';
            } else {
             map[y-1][x-1] = 'p';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x-1] = '7';
            } else {
             map[y-1][x-1] = '!';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x-1] = '1';
            } else {
             map[y-1][x-1] = '(';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x-1] = '6';
            } else {
             map[y-1][x-1] = 'f';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x-1] = '5';
            } else {
             map[y-1][x-1] = '^';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x-1] = '3';
            } else {
             map[y-1][x-1] = 'h';
@@ -1917,49 +1917,49 @@ struct char_data *ch)
            map[y+1][x+1] = '=';
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x+1] = '2';
            } else {
             map[y+1][x+1] = 'i';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x+1] = '2';
            } else {
             map[y+1][x+1] = 'p';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x+1] = '7';
            } else {
             map[y+1][x+1] = '!';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x+1] = '1';
            } else {
             map[y+1][x+1] = '(';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x+1] = '6';
            } else {
             map[y+1][x+1] = 'f';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x+1] = '5';
            } else {
             map[y+1][x+1] = '^';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x+1] = '3';
            } else {
             map[y+1][x+1] = 'h';
@@ -1989,49 +1989,49 @@ struct char_data *ch)
            map[y+1][x-1] = '=';
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x-1] = '2';
            } else {
             map[y+1][x-1] = 'i';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x-1] = '2';
            } else {
             map[y+1][x-1] = 'p';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x-1] = '7';
            } else {
             map[y+1][x-1] = '!';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x-1] = '1';
            } else {
             map[y+1][x-1] = '(';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x-1] = '6';
            } else {
             map[y+1][x-1] = 'f';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x-1] = '5';
            } else {
             map[y+1][x-1] = '^';
            }
           }
           else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-           if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
+           if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x-1] = '3';
            } else {
             map[y+1][x-1] = 'h';
@@ -2098,31 +2098,31 @@ static void gen_map(struct char_data *ch, int num)
   /* print out exits */
   map_draw_room(map, 4, 4, ch->in_room, ch);
   for (door = 0; door < NUM_OF_DIRS; door++) {
-    if (EXIT(ch, door) && EXIT(ch, door)->to_room != NOWHERE && !room_exit_flagged(EXIT(ch, door), EX_CLOSED)) {
+    if (char_get_exit(ch, door) && char_get_exit(ch, door)->to_room != NOWHERE && !room_exit_flagged(char_get_exit(ch, door), EX_CLOSED)) {
       switch (door) {
         case NORTH:
-          map_draw_room(map, 4, 3,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 4, 3,char_get_exit(ch, door)->to_room, ch);
          break;
         case EAST:
-          map_draw_room(map, 5, 4,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 5, 4,char_get_exit(ch, door)->to_room, ch);
          break;
         case SOUTH:
-          map_draw_room(map, 4, 5,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 4, 5,char_get_exit(ch, door)->to_room, ch);
          break;
         case WEST:
-          map_draw_room(map, 3, 4,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 3, 4,char_get_exit(ch, door)->to_room, ch);
          break;
         case NORTHEAST:
-          map_draw_room(map, 5, 3,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 5, 3,char_get_exit(ch, door)->to_room, ch);
          break;
         case NORTHWEST:
-          map_draw_room(map, 3, 3,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 3, 3,char_get_exit(ch, door)->to_room, ch);
          break;
         case SOUTHEAST:
-          map_draw_room(map, 5, 5,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 5, 5,char_get_exit(ch, door)->to_room, ch);
          break;
         case SOUTHWEST:
-          map_draw_room(map, 3, 5,EXIT(ch,door)->to_room, ch);
+          map_draw_room(map, 3, 5,char_get_exit(ch, door)->to_room, ch);
          break;
       }
     }
@@ -2143,19 +2143,19 @@ static void gen_map(struct char_data *ch, int num)
     }
     else {
      if (i == 2) {
-      sprintf(buf2, "@w       @w|%s@w|           %s", (EXIT(ch, 0) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 0), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 0), EX_CLOSED) ? " @rN " : " @CN ") : "   ", map[i]);
+      sprintf(buf2, "@w       @w|%s@w|           %s", (char_get_exit(ch, 0) && !room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 0), EX_SECRET)) ? (room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 0), EX_CLOSED) ? " @rN " : " @CN ") : "   ", map[i]);
      }
      if (i == 3) {
-      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (EXIT(ch, 6) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 6), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 6), EX_CLOSED) ? " @rNW" : " @CNW") : "   ", (EXIT(ch, 4) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 4), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 4), EX_CLOSED) ? " @yU " : " @YU ") : "   ", (EXIT(ch, 7) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 7), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 7), EX_SECRET) ? "@rNE " : "@CNE ") : "   ", map[i]);
+      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (char_get_exit(ch, 6) && !room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 6), EX_SECRET)) ? (room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 6), EX_CLOSED) ? " @rNW" : " @CNW") : "   ", (char_get_exit(ch, 4) && !room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 4), EX_SECRET)) ? (room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 4), EX_CLOSED) ? " @yU " : " @YU ") : "   ", (char_get_exit(ch, 7) && !room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 7), EX_SECRET)) ? (room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 7), EX_SECRET) ? "@rNE " : "@CNE ") : "   ", map[i]);
      }
      if (i == 4) {
-      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (EXIT(ch, 3) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 3), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 3), EX_CLOSED) ? "  @rW" : "  @CW") : "   ", (EXIT(ch, 10) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 10), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 10), EX_CLOSED) ? " @rI " : " @mI ") : ((EXIT(ch, 11) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 11), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 11), EX_CLOSED) ? "@rOUT" : "@mOUT") : "@r{ }"), (EXIT(ch, 1) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 1), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 1), EX_CLOSED) ? "@rE  " : "@CE  ") : "   ", map[i]);
+      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (char_get_exit(ch, 3) && !room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 3), EX_SECRET)) ? (room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 3), EX_CLOSED) ? "  @rW" : "  @CW") : "   ", (char_get_exit(ch, 10) && !room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 10), EX_SECRET)) ? (room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 10), EX_CLOSED) ? " @rI " : " @mI ") : ((char_get_exit(ch, 11) && !room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 11), EX_SECRET)) ? (room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 11), EX_CLOSED) ? "@rOUT" : "@mOUT") : "@r{ }"), (char_get_exit(ch, 1) && !room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 1), EX_SECRET)) ? (room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 1), EX_CLOSED) ? "@rE  " : "@CE  ") : "   ", map[i]);
      }
      if (i == 5) {
-      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (EXIT(ch, 9) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 9), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 9), EX_CLOSED) ? " @rSW" : " @CSW") : "   ", (EXIT(ch, 5) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 5), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 5), EX_CLOSED) ? " @yD " : " @YD ") : "   ", (EXIT(ch, 8) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 8), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 8), EX_SECRET) ? "@rSE " : "@CSE ") : "   ", map[i]);
+      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (char_get_exit(ch, 9) && !room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 9), EX_SECRET)) ? (room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 9), EX_CLOSED) ? " @rSW" : " @CSW") : "   ", (char_get_exit(ch, 5) && !room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 5), EX_SECRET)) ? (room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 5), EX_CLOSED) ? " @yD " : " @YD ") : "   ", (char_get_exit(ch, 8) && !room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 8), EX_SECRET)) ? (room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 8), EX_SECRET) ? "@rSE " : "@CSE ") : "   ", map[i]);
      }
      if (i == 6) {
-      sprintf(buf2, "@w       @w|%s@w|           %s", (EXIT(ch, 2) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 2), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 2), EX_CLOSED) ? " @rS " : " @CS ") : "   ", map[i]);
+      sprintf(buf2, "@w       @w|%s@w|           %s", (char_get_exit(ch, 2) && !room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 2), EX_SECRET)) ? (room_exit_flagged(rroom_get_dir_option(char_get_in_room(ch), 2), EX_CLOSED) ? " @rS " : " @CS ") : "   ", map[i]);
      }
     }
      search_replace(buf2, "x", "@RX");
@@ -2236,7 +2236,7 @@ static void display_scroll(struct char_data *ch, struct obj_data *obj)
 {
   send_to_char(ch, "The scroll contains the following spell:\r\n");
   send_to_char(ch, "@c---@wSpell Name@c---------------------------------------------------@n\r\n");
-  send_to_char(ch, "@y%-20s@n\r\n", skill_name(GET_OBJ_VAL(obj, VAL_SCROLL_SPELL1)));
+  send_to_char(ch, "@y%-20s@n\r\n", skill_name(obj_get_value(obj, VAL_SCROLL_SPELL1)));
   return;
 }
 
@@ -2267,27 +2267,27 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      */
     if (*obj->description == '.' && (char_is_npc(ch) || !char_prf_flagged(ch, PRF_HOLYLIGHT))) 
       return;
-    if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && rroom_get_vnum(IN_ROOM(ch)) == GET_OBJ_VAL(obj, 0)) {
+    if (obj_get_type_flag(obj) == ITEM_VEHICLE && rroom_get_vnum(char_get_in_room(ch)) == obj_get_value(obj, 0)) {
       return;
     }
-    if (SITTING(obj) && GET_ADMLEVEL(ch) < 1) {
+    if (obj_get_sitting(obj) && char_get_admlevel(ch) < 1) {
       return;
     }
-    if (SITTING(obj) && GET_ADMLEVEL(ch) >= 1) {
+    if (obj_get_sitting(obj) && char_get_admlevel(ch) >= 1) {
       send_to_char(ch, "@D(@YBeing Used@D)@w");
     }
-    if (GET_OBJ_TYPE(obj) == ITEM_PLANT && (rroom_flagged(IN_ROOM(obj), ROOM_GARDEN1) || rroom_flagged(IN_ROOM(obj), ROOM_GARDEN2))) {
+    if (obj_get_type_flag(obj) == ITEM_PLANT && (rroom_flagged(obj_get_in_room(obj), ROOM_GARDEN1) || rroom_flagged(obj_get_in_room(obj), ROOM_GARDEN2))) {
       see_plant(obj, ch);
       return;
     }
     if (obj_flagged(obj, ITEM_BURIED)) {
      char bury[MAX_INPUT_LENGTH];
      if (!obj_is_corpse(obj)) {
-      if (GET_OBJ_WEIGHT(obj) < 10) {
+      if (obj_get_weight(obj) < 10) {
        sprintf(bury, "small mound of");
-      } else if (GET_OBJ_WEIGHT(obj) < 50) {
+      } else if (obj_get_weight(obj) < 50) {
        sprintf(bury, "medium sized mound of");
-      } else if (GET_OBJ_WEIGHT(obj) < 1000) {
+      } else if (obj_get_weight(obj) < 1000) {
        sprintf(bury, "large mound of");
       } else {
        sprintf(bury, "gigantic mound of");
@@ -2295,10 +2295,10 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      } else {
       sprintf(bury, "recent grave covered by");
      }
-     if (spotted == TRUE && rroom_sect(IN_ROOM(obj)) != SECT_DESERT) {
+     if (spotted == TRUE && rroom_sect(obj_get_in_room(obj)) != SECT_DESERT) {
       send_to_char(ch, "@yA %s soft dirt is here.@n\r\n", bury);
       return;
-     } else if (spotted == TRUE && rroom_sect(IN_ROOM(obj)) == SECT_DESERT) {
+     } else if (spotted == TRUE && rroom_sect(obj_get_in_room(obj)) == SECT_DESERT) {
       send_to_char(ch, "@YA %s soft sand is here.@n\r\n", bury);
       return;
      } else {
@@ -2306,19 +2306,19 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      }
     }
     if (obj_get_vnum(obj) == 11) {
-     send_to_char(ch, "@wA gravity generator, set to %sx gravity, is built here", add_commas(GET_OBJ_WEIGHT(obj)));
+     send_to_char(ch, "@wA gravity generator, set to %sx gravity, is built here", add_commas(obj_get_weight(obj)));
     } else if (obj_get_vnum(obj) == 79) {
-     send_to_char(ch, "@wA @cG@Cl@wa@cc@Ci@wa@cl @wW@ca@Cl@wl @D[@C%s@D]@w is blocking access to the @G%s@w direction", add_commas(GET_OBJ_WEIGHT(obj)), dirs[GET_OBJ_COST(obj)]);
+     send_to_char(ch, "@wA @cG@Cl@wa@cc@Ci@wa@cl @wW@ca@Cl@wl @D[@C%s@D]@w is blocking access to the @G%s@w direction", add_commas(obj_get_weight(obj)), dirs[obj_get_cost(obj)]);
     }
     else {
     send_to_char(ch, "@w");
     if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_ROOMFLAGS))  {
-     if (GET_OBJ_POSTED(obj) == NULL) {
+     if (obj_get_posted_to(obj) == NULL) {
       send_to_char(ch, "@D[@G%d@D]@w ", obj_get_vnum(obj));
       if (SCRIPT(obj))
         send_to_char(ch, "@D[@wT%d@D]@w ", obj->proto_script->vnum);
      } else {
-      if (GET_OBJ_POSTTYPE(obj) <= 0) {
+      if (obj_get_posttype(obj) <= 0) {
        send_to_char(ch, "@D[@G%d@D]@w ", obj_get_vnum(obj));
        if (SCRIPT(obj))
          send_to_char(ch, "@D[@wT%d@D]@w ", obj->proto_script->vnum);
@@ -2326,8 +2326,8 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      }
     }
 
-    if (GET_OBJ_POSTTYPE(obj) > 0) {
-     if (GET_OBJ_POSTED(obj)) {
+    if (obj_get_posttype(obj) > 0) {
+     if (obj_get_posted_to(obj)) {
       return;
      } else {
       send_to_char(ch, "%s@w, has been posted here.@n", obj->short_description);
@@ -2338,19 +2338,19 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      }
     }
 
-     if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
+     if (obj_get_type_flag(obj) == ITEM_VEHICLE) {
       if (!obj_val_flagged(obj, CONT_CLOSED) && obj_get_vnum(obj) > 19199)
        send_to_char(ch, "\r\n@c...its outer hatch is open@n");
       else if (!obj_val_flagged(obj, CONT_CLOSED) && obj_get_vnum(obj) <= 19199)
        send_to_char(ch, "\r\n@c...its door is open@n");
      }
-     if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && !obj_is_corpse(obj)) {
+     if (obj_get_type_flag(obj) == ITEM_CONTAINER && !obj_is_corpse(obj)) {
       if (!obj_val_flagged(obj, CONT_CLOSED) && !obj_flagged(obj, ITEM_SHEATH))
        send_to_char(ch, ". @D[@G-open-@D]@n");
       else if (!obj_flagged(obj, ITEM_SHEATH))
        send_to_char(ch, ". @D[@rclosed@D]@n");
      }
-     if (GET_OBJ_TYPE(obj) == ITEM_HATCH) {
+     if (obj_get_type_flag(obj) == ITEM_HATCH) {
       if (!obj_val_flagged(obj, CONT_CLOSED))
        send_to_char(ch, ", it is open");
       else if (obj_val_flagged(obj, CONT_CLOSED))
@@ -2360,8 +2360,8 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
       else
        send_to_char(ch, "@n");
      }
-     if (GET_OBJ_TYPE(obj) == ITEM_FOOD) {
-      if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) < FOOB(obj)) {
+     if (obj_get_type_flag(obj) == ITEM_FOOD) {
+      if (obj_get_value(obj, VAL_FOOD_FOODVAL) < obj_get_foob(obj)) {
        send_to_char(ch, ", and it has been ate on@n");
       }
      }
@@ -2376,17 +2376,17 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
     }
  
     if (char_prf_flagged(ch, PRF_IHEALTH)) {   
-     send_to_char(ch, "@D<@gH@D: @C%d@D>@w %s", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), obj->short_description);
+     send_to_char(ch, "@D<@gH@D: @C%d@D>@w %s", obj_get_value(obj, VAL_ALL_HEALTH), obj->short_description);
     } else {
      send_to_char(ch, "%s", obj->short_description);
     }
-     if (GET_OBJ_TYPE(obj) == ITEM_FOOD) {
-      if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) < FOOB(obj)) {
+     if (obj_get_type_flag(obj) == ITEM_FOOD) {
+      if (obj_get_value(obj, VAL_FOOD_FOODVAL) < obj_get_foob(obj)) {
        send_to_char(ch, ", and it has been ate on.@n");
       }
      }
      if (obj_get_vnum(obj) == 255) {
-      switch (GET_OBJ_VAL(obj, 0)) {
+      switch (obj_get_value(obj, 0)) {
        case 0:
        case 1:
         send_to_char(ch, " @D[@wQuality @RC@D]@n");
@@ -2416,19 +2416,19 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      }
      
      if (obj_get_vnum(obj) == 3424) {
-      send_to_char(ch, " @D[@bInk Remaining@D: @w%d@D]@n", GET_OBJ_VAL(obj, 6));
+      send_to_char(ch, " @D[@bInk Remaining@D: @w%d@D]@n", obj_get_value(obj, 6));
      }
      if (obj_get_vnum(obj) == 3423) {
-      send_to_char(ch, " @D[@B%d@D/@B24 Inks@D]@n", GET_OBJ_VAL(obj, 6));
+      send_to_char(ch, " @D[@B%d@D/@B24 Inks@D]@n", obj_get_value(obj, 6));
      }
      if (obj_flagged(obj, ITEM_THROW)) {
        send_to_char(ch, " @D[@RThrow Only@D]@n");
      }
-     if (GET_OBJ_TYPE(obj) == ITEM_PLANT && !obj_flagged(obj, ITEM_MATURE)) {
-      if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) < -9) {
+     if (obj_get_type_flag(obj) == ITEM_PLANT && !obj_flagged(obj, ITEM_MATURE)) {
+      if (obj_get_value(obj, VAL_WATERLEVEL) < -9) {
        send_to_char(ch, "@D[@RDead@D]@n");
       } else {
-       switch (GET_OBJ_VAL(obj, VAL_MATURITY)) {
+       switch (obj_get_value(obj, VAL_MATURITY)) {
         case 0:
          send_to_char(ch, " @D[@ySeed@D]@n");
          break;
@@ -2453,7 +2453,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
        }
       }
      }
-     if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && !obj_is_corpse(obj)) {
+     if (obj_get_type_flag(obj) == ITEM_CONTAINER && !obj_is_corpse(obj)) {
       if (!obj_val_flagged(obj, CONT_CLOSED) && !obj_flagged(obj, ITEM_SHEATH))
        send_to_char(ch, " @D[@G-open-@D]@n");
       else if (!obj_flagged(obj, ITEM_SHEATH))
@@ -2465,7 +2465,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
     break;
 
   case SHOW_OBJ_ACTION:
-    switch (GET_OBJ_TYPE(obj)) {
+    switch (obj_get_type_flag(obj)) {
     case ITEM_NOTE:
       if (obj->action_description) {
         char notebuf[MAX_NOTE_LENGTH];
@@ -2481,7 +2481,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
       break;
   
     case ITEM_CONTROL:
-      send_to_char(ch, "@RFUEL@D: %s%s@n\r\n", GET_FUEL(obj) >= 200 ? "@G" : GET_FUEL(obj) >= 100 ? "@Y" : "@r", add_commas(GET_FUEL(obj)));
+      send_to_char(ch, "@RFUEL@D: %s%s@n\r\n", obj_get_value(obj, 2) >= 200 ? "@G" : obj_get_value(obj, 2) >= 100 ? "@Y" : "@r", add_commas(obj_get_value(obj, 2)));
       break;
       
     case ITEM_DRINKCON:
@@ -2489,32 +2489,32 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
       break;
 
     case ITEM_LIGHT:
-      if (GET_OBJ_VAL(obj, VAL_LIGHT_HOURS) == -1)
+      if (obj_get_value(obj, VAL_LIGHT_HOURS) == -1)
         send_to_char(ch, "Light Cycles left: Infinite\r\n");
       else
-        send_to_char(ch, "Light Cycles left: [%d]\r\n", GET_OBJ_VAL(obj, VAL_LIGHT_HOURS));
+        send_to_char(ch, "Light Cycles left: [%d]\r\n", obj_get_value(obj, VAL_LIGHT_HOURS));
       break;
 
     case ITEM_FOOD:
-      if (FOOB(obj) >= 4) {
-       if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) < FOOB(obj) / 4) {
+      if (obj_get_foob(obj) >= 4) {
+       if (obj_get_value(obj, VAL_FOOD_FOODVAL) < obj_get_foob(obj) / 4) {
         send_to_char(ch, "Condition of the food: Almost gone.\r\n");
        }
-       else if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) < FOOB(obj) / 2) {
+       else if (obj_get_value(obj, VAL_FOOD_FOODVAL) < obj_get_foob(obj) / 2) {
         send_to_char(ch, "Condition of the food: Half Eaten.");
        }
-       else if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) < FOOB(obj)) {
+       else if (obj_get_value(obj, VAL_FOOD_FOODVAL) < obj_get_foob(obj)) {
         send_to_char(ch, "Condition of the food: Partially Eaten.");
        }
-       else if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) == FOOB(obj)) {
+       else if (obj_get_value(obj, VAL_FOOD_FOODVAL) == obj_get_foob(obj)) {
         send_to_char(ch, "Condition of the food: Whole.");
        }
       }
-      else if (FOOB(obj) > 0) {
-       if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) < FOOB(obj)) {
+      else if (obj_get_foob(obj) > 0) {
+       if (obj_get_value(obj, VAL_FOOD_FOODVAL) < obj_get_foob(obj)) {
         send_to_char(ch, "Condition of the food: Almost gone.");
        }
-       else if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) == FOOB(obj)) {
+       else if (obj_get_value(obj, VAL_FOOD_FOODVAL) == obj_get_foob(obj)) {
         send_to_char(ch, "Condition of the food: Whole.");
        }
       }
@@ -2573,39 +2573,39 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
        int mention = FALSE;
        send_to_char(ch, "This corpse has ");
       
-       if (GET_OBJ_VAL(obj, VAL_CORPSE_HEAD) == 0) {
+       if (obj_get_value(obj, VAL_CORPSE_HEAD) == 0) {
         send_to_char(ch, "no head,");
         mention = TRUE;
        }
 
-       if (GET_OBJ_VAL(obj, VAL_CORPSE_RARM) == 0) {
+       if (obj_get_value(obj, VAL_CORPSE_RARM) == 0) {
         send_to_char(ch, "no right arm, ");
         mention = TRUE;
-       } else if (GET_OBJ_VAL(obj, VAL_CORPSE_RARM) == 2) {
+       } else if (obj_get_value(obj, VAL_CORPSE_RARM) == 2) {
         send_to_char(ch, "a broken right arm, ");
         mention = TRUE;
        }
 
-       if (GET_OBJ_VAL(obj, VAL_CORPSE_LARM) == 0) {
+       if (obj_get_value(obj, VAL_CORPSE_LARM) == 0) {
         send_to_char(ch, "no left arm, ");
         mention = TRUE;
-       } else if (GET_OBJ_VAL(obj, VAL_CORPSE_LARM) == 2) {
+       } else if (obj_get_value(obj, VAL_CORPSE_LARM) == 2) {
         send_to_char(ch, "a broken left arm, ");
         mention = TRUE;
        }
 
-       if (GET_OBJ_VAL(obj, VAL_CORPSE_RLEG) == 0) {
+       if (obj_get_value(obj, VAL_CORPSE_RLEG) == 0) {
         send_to_char(ch, "no right leg, ");
         mention = TRUE;
-       } else if (GET_OBJ_VAL(obj, VAL_CORPSE_RLEG) == 2) {
+       } else if (obj_get_value(obj, VAL_CORPSE_RLEG) == 2) {
         send_to_char(ch, "a broken right leg, ");
         mention = TRUE;
        }
 
-       if (GET_OBJ_VAL(obj, VAL_CORPSE_LLEG) == 0) {
+       if (obj_get_value(obj, VAL_CORPSE_LLEG) == 0) {
         send_to_char(ch, "no left leg, ");
         mention = TRUE;
-       } else if (GET_OBJ_VAL(obj, VAL_CORPSE_LLEG) == 2) {
+       } else if (obj_get_value(obj, VAL_CORPSE_LLEG) == 2) {
         send_to_char(ch, "a broken left leg, ");
         mention = TRUE;
        }
@@ -2621,26 +2621,26 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
       break;
     }
 
-    if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
+    if (obj_get_type_flag(obj) == ITEM_WEAPON) {
      int num = 0;
-     if (GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
+     if (obj_get_value(obj, VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
       num = 1;
-     } else if (GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT) {
+     } else if (obj_get_value(obj, VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT) {
       num = 0;
-     } else if (GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT) {
+     } else if (obj_get_value(obj, VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT) {
       num = 3;
-     } else if (GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT) {
+     } else if (obj_get_value(obj, VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT) {
       num = 2;
-     } else if (GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
+     } else if (obj_get_value(obj, VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
       num = 4;
      } else {
       num = 5;
      }
-      send_to_char(ch, "The weapon type of %s@n is '%s'.\r\n", GET_OBJ_SHORT(obj), weapon_disp[num]);
+      send_to_char(ch, "The weapon type of %s@n is '%s'.\r\n", obj_get_short_description(obj), weapon_disp[num]);
       send_to_char(ch, "You could wield it %s.\r\n", wield_names[wield_type(get_size(ch), obj)]);
     }
     diag_obj_to_char(obj, ch);
-    send_to_char(ch, "It appears to be made of %s, and weighs %s", material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)));
+    send_to_char(ch, "It appears to be made of %s, and weighs %s", material_names[obj_get_value(obj, 7)], add_commas(obj_get_weight(obj)));
     break;
 
   default:
@@ -2703,8 +2703,8 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
     send_to_char(ch, " @D[@m0/1 Tokens@D]@n");
    found++;
   }
-  if (KICHARGE(obj) > 0) {
-    int num = (KIDIST(obj) * 20) + rand_number(1, 5);
+  if (obj_get_kicharge(obj) > 0) {
+    int num = (obj_get_distance(obj) * 20) + rand_number(1, 5);
     send_to_char(ch, " %d meters away", num);
     found++;
   }
@@ -2712,19 +2712,19 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
    send_to_char(ch, " @D(@YCUSTOM@D)@n");
   }
   if (obj_flagged(obj, ITEM_RESTRING)) {
-   send_to_char(ch, " @D(@R%s@D)@n", GET_ADMLEVEL(ch) > 0 ? obj->name : "*");
+   send_to_char(ch, " @D(@R%s@D)@n", char_get_admlevel(ch) > 0 ? obj->name : "*");
   }
   if (obj_flagged(obj, ITEM_BROKEN)) {
-   if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_STEEL || GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_MITHRIL || GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_METAL) {
+   if (obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_STEEL || obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_MITHRIL || obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_METAL) {
     send_to_char(ch, ", and appears to be twisted and broken.");
    }
-   else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_WOOD) {
+   else if (obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_WOOD) {
     send_to_char(ch, ", and is broken into hundreds of splinters.");
    }
-   else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_GLASS) {
+   else if (obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_GLASS) {
     send_to_char(ch, ", and is shattered on the ground.");
    }
-   else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_STONE) {
+   else if (obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_STONE) {
     send_to_char(ch, ", and is a pile of rubble.");
    }
    else {
@@ -2733,12 +2733,12 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
     found++;
   }
   else {
-    if (GET_OBJ_TYPE(obj) != ITEM_BOARD) {
-     if (GET_OBJ_TYPE(obj) != ITEM_CONTAINER) {
+    if (obj_get_type_flag(obj) != ITEM_BOARD) {
+     if (obj_get_type_flag(obj) != ITEM_CONTAINER) {
       send_to_char(ch, ".");
      }
-     if (!char_is_npc(ch) && GET_OBJ_POSTED(obj) && GET_OBJ_POSTTYPE(obj) <= 0) {
-      struct obj_data *obj2 = GET_OBJ_POSTED(obj);
+     if (!char_is_npc(ch) && obj_get_posted_to(obj) && obj_get_posttype(obj) <= 0) {
+      struct obj_data *obj2 = obj_get_posted_to(obj);
       char dvnum[200];
       *dvnum = '\0';
       sprintf(dvnum, "@D[@G%d@D] @w", obj_get_vnum(obj2));
@@ -2768,33 +2768,33 @@ static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mo
       for (j = list; j != i; j = j->next_content)
        if ((!strcasecmp(j->short_description, i->short_description) && !strcasecmp(j->description, i->description)) &&
             (j->item_number == i->item_number) && ((obj_flagged(j, ITEM_BROKEN) && obj_flagged(i, ITEM_BROKEN)) || (!obj_flagged(j, ITEM_BROKEN) && !obj_flagged(i, ITEM_BROKEN))))
-         if ((!SITTING(j) && !SITTING(i)))
-          if (GET_OBJ_VAL(j, 6) == GET_OBJ_VAL(i, 6))
-            if ((GET_OBJ_TYPE(j) != ITEM_PLANT && GET_OBJ_TYPE(i) != ITEM_PLANT) || (GET_OBJ_TYPE(j) == ITEM_PLANT && GET_OBJ_TYPE(i) == ITEM_PLANT && GET_OBJ_VAL(j, VAL_MATURITY) == GET_OBJ_VAL(i, VAL_MATURITY) && GET_OBJ_VAL(j, VAL_WATERLEVEL) == GET_OBJ_VAL(i, VAL_WATERLEVEL)))
+         if ((!obj_get_sitting(j) && !obj_get_sitting(i)))
+          if (obj_get_value(j, 6) == obj_get_value(i, 6))
+            if ((obj_get_type_flag(j) != ITEM_PLANT && obj_get_type_flag(i) != ITEM_PLANT) || (obj_get_type_flag(j) == ITEM_PLANT && obj_get_type_flag(i) == ITEM_PLANT && obj_get_value(j, VAL_MATURITY) == obj_get_value(i, VAL_MATURITY) && obj_get_value(j, VAL_WATERLEVEL) == obj_get_value(i, VAL_WATERLEVEL)))
             if ((!obj_flagged(j, ITEM_DUPLICATE) && !obj_flagged(i, ITEM_DUPLICATE)) || (obj_flagged(j, ITEM_DUPLICATE) && obj_flagged(i, ITEM_DUPLICATE)))
-             if (GET_OBJ_POSTTYPE(j) == 0 && GET_OBJ_POSTTYPE(i) == 0)
-              if (!GET_FELLOW_WALL(j) && !GET_FELLOW_WALL(i))
-               if ((GET_OBJ_VAL(j, 0) == GET_OBJ_VAL(i, 0) && obj_get_vnum(j) == 255 && obj_get_vnum(i) == 255) || (obj_get_vnum(j) != 255 && obj_get_vnum(i) != 255))
+             if (obj_get_posttype(j) == 0 && obj_get_posttype(i) == 0)
+              if (!obj_get_fellow_wall(j) && !obj_get_fellow_wall(i))
+               if ((obj_get_value(j, 0) == obj_get_value(i, 0) && obj_get_vnum(j) == 255 && obj_get_vnum(i) == 255) || (obj_get_vnum(j) != 255 && obj_get_vnum(i) != 255))
                break;
       if (j!=i)
         continue;
       for (d = j = i; j; j = j->next_content)
        if ((!strcasecmp(j->short_description, i->short_description) && !strcasecmp(j->description, i->description)) &&
             (j->item_number == i->item_number) && ((obj_flagged(j, ITEM_BROKEN) && obj_flagged(i, ITEM_BROKEN)) || (!obj_flagged(j, ITEM_BROKEN) && !obj_flagged(i, ITEM_BROKEN))))
-         if ((!SITTING(j) && !SITTING(i)))
-          if (GET_OBJ_POSTTYPE(j) == 0 && GET_OBJ_POSTTYPE(i) == 0)
-           if (GET_OBJ_VAL(j, 6) == GET_OBJ_VAL(i, 6))
-            if ((GET_OBJ_TYPE(j) != ITEM_PLANT && GET_OBJ_TYPE(i) != ITEM_PLANT) || (GET_OBJ_TYPE(j) == ITEM_PLANT && GET_OBJ_TYPE(i) == ITEM_PLANT && GET_OBJ_VAL(j, VAL_MATURITY) == GET_OBJ_VAL(i, VAL_MATURITY) && GET_OBJ_VAL(j, VAL_WATERLEVEL) == GET_OBJ_VAL(i, VAL_WATERLEVEL)))
+         if ((!obj_get_sitting(j) && !obj_get_sitting(i)))
+          if (obj_get_posttype(j) == 0 && obj_get_posttype(i) == 0)
+           if (obj_get_value(j, 6) == obj_get_value(i, 6))
+            if ((obj_get_type_flag(j) != ITEM_PLANT && obj_get_type_flag(i) != ITEM_PLANT) || (obj_get_type_flag(j) == ITEM_PLANT && obj_get_type_flag(i) == ITEM_PLANT && obj_get_value(j, VAL_MATURITY) == obj_get_value(i, VAL_MATURITY) && obj_get_value(j, VAL_WATERLEVEL) == obj_get_value(i, VAL_WATERLEVEL)))
              if ((!obj_flagged(j, ITEM_DUPLICATE) && !obj_flagged(i, ITEM_DUPLICATE)) || (obj_flagged(j, ITEM_DUPLICATE) && obj_flagged(i, ITEM_DUPLICATE)))
-              if (!GET_FELLOW_WALL(j) && !GET_FELLOW_WALL(i))
-               if ((GET_OBJ_VAL(j, 0) == GET_OBJ_VAL(i, 0) && obj_get_vnum(i) == 255 && obj_get_vnum(j) == 255) || (obj_get_vnum(j) != 255 && obj_get_vnum(i) != 255))
+              if (!obj_get_fellow_wall(j) && !obj_get_fellow_wall(i))
+               if ((obj_get_value(j, 0) == obj_get_value(i, 0) && obj_get_vnum(i) == 255 && obj_get_vnum(j) == 255) || (obj_get_vnum(j) != 255 && obj_get_vnum(i) != 255))
                if (char_can_see_obj(ch, j)) {
                 num++;
           if (d == i && !char_can_see_obj(ch, d))
             d = j;
           }
     }
-    if ((char_can_see_obj(ch, d) && ((*d->description != '.' && *d->short_description != '.' )|| char_prf_flagged(ch, PRF_HOLYLIGHT))) || (GET_OBJ_TYPE(d) == ITEM_LIGHT)) {
+    if ((char_can_see_obj(ch, d) && ((*d->description != '.' && *d->short_description != '.' )|| char_prf_flagged(ch, PRF_HOLYLIGHT))) || (obj_get_type_flag(d) == ITEM_LIGHT)) {
       if (num > 1)
         send_to_char(ch, "@D(@Rx@Y%2i@D)@n ", num);
       show_obj_to_char(d, ch, mode);
@@ -2823,8 +2823,8 @@ static void diag_obj_to_char(struct obj_data *obj, struct char_data *ch)
   int percent, ar_index;
   const char *objs = obj_shortdesc_for(obj, ch);
 
-  if (GET_OBJ_VAL(obj, VAL_ALL_MAXHEALTH) > 0)
-    percent = (100 * GET_OBJ_VAL(obj, VAL_ALL_HEALTH)) / GET_OBJ_VAL(obj, VAL_ALL_MAXHEALTH);
+  if (obj_get_value(obj, VAL_ALL_MAXHEALTH) > 0)
+    percent = (100 * obj_get_value(obj, VAL_ALL_HEALTH)) / obj_get_value(obj, VAL_ALL_MAXHEALTH);
   else
     percent = 0;               /* How could MAX_HIT be < 1?? */
 
@@ -2882,52 +2882,52 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 	}
 	send_to_char(ch, "\r\n");
 	if (!char_is_npc(i)) {
-		if (GET_LIMBCOND(i, 1) >= 50 && !char_plr_flagged(i, PLR_CRARM)) {
-			send_to_char(ch, "            @D[@cRight Arm   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 1), "%", "%");
+		if (char_get_limb_condition(i, (1)-1) >= 50 && !char_plr_flagged(i, PLR_CRARM)) {
+			send_to_char(ch, "            @D[@cRight Arm   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", char_get_limb_condition(i, (1)-1), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 1) > 0 && !char_plr_flagged(i, PLR_CRARM)) {
-			send_to_char(ch, "            @D[@cRight Arm   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 1), "%", "%");
+		else if (char_get_limb_condition(i, (1)-1) > 0 && !char_plr_flagged(i, PLR_CRARM)) {
+			send_to_char(ch, "            @D[@cRight Arm   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", char_get_limb_condition(i, (1)-1), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 1) > 0 && char_plr_flagged(i, PLR_CRARM)) {
-			send_to_char(ch, "            @D[@cRight Arm   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 1), "%", "%");
+		else if (char_get_limb_condition(i, (1)-1) > 0 && char_plr_flagged(i, PLR_CRARM)) {
+			send_to_char(ch, "            @D[@cRight Arm   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", char_get_limb_condition(i, (1)-1), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 1) <= 0) {
+		else if (char_get_limb_condition(i, (1)-1) <= 0) {
 			send_to_char(ch, "            @D[@cRight Arm   @D: @rMissing.            @D]@n\r\n");
 		}
-		if (GET_LIMBCOND(i, 2) >= 50 && !char_plr_flagged(i, PLR_CLARM)) {
-			send_to_char(ch, "            @D[@cLeft Arm    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 2), "%", "%");
+		if (char_get_limb_condition(i, (2)-1) >= 50 && !char_plr_flagged(i, PLR_CLARM)) {
+			send_to_char(ch, "            @D[@cLeft Arm    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", char_get_limb_condition(i, (2)-1), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 2) > 0 && !char_plr_flagged(i, PLR_CLARM)) {
-			send_to_char(ch, "            @D[@cLeft Arm    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 2), "%", "%");
+		else if (char_get_limb_condition(i, (2)-1) > 0 && !char_plr_flagged(i, PLR_CLARM)) {
+			send_to_char(ch, "            @D[@cLeft Arm    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", char_get_limb_condition(i, (2)-1), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 2) > 0 && char_plr_flagged(i, PLR_CLARM)) {
-			send_to_char(ch, "            @D[@cLeft Arm    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 2), "%", "%");
+		else if (char_get_limb_condition(i, (2)-1) > 0 && char_plr_flagged(i, PLR_CLARM)) {
+			send_to_char(ch, "            @D[@cLeft Arm    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", char_get_limb_condition(i, (2)-1), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 2) <= 0) {
+		else if (char_get_limb_condition(i, (2)-1) <= 0) {
 			send_to_char(ch, "            @D[@cLeft Arm    @D: @rMissing.            @D]@n\r\n");
 		}
-		if (GET_LIMBCOND(i, 3) >= 50 && !char_plr_flagged(i, PLR_CLARM)) {
-			send_to_char(ch, "            @D[@cRight Leg   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 3), "%", "%");
+		if (char_get_limb_condition(i, (3)-1) >= 50 && !char_plr_flagged(i, PLR_CLARM)) {
+			send_to_char(ch, "            @D[@cRight Leg   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", char_get_limb_condition(i, (3)-1), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 3) > 0 && !char_plr_flagged(i, PLR_CRLEG)) {
-			send_to_char(ch, "            @D[@cRight Leg   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 3), "%", "%");
+		else if (char_get_limb_condition(i, (3)-1) > 0 && !char_plr_flagged(i, PLR_CRLEG)) {
+			send_to_char(ch, "            @D[@cRight Leg   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", char_get_limb_condition(i, (3)-1), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 3) > 0 && char_plr_flagged(i, PLR_CRLEG)) {
-			send_to_char(ch, "            @D[@cRight Leg   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 3), "%", "%");
+		else if (char_get_limb_condition(i, (3)-1) > 0 && char_plr_flagged(i, PLR_CRLEG)) {
+			send_to_char(ch, "            @D[@cRight Leg   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", char_get_limb_condition(i, (3)-1), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 3) <= 0) {
+		else if (char_get_limb_condition(i, (3)-1) <= 0) {
 			send_to_char(ch, "            @D[@cRight Leg   @D: @rMissing.            @D]@n\r\n");
 		}
-		if (GET_LIMBCOND(i, 4) >= 50 && !char_plr_flagged(i, PLR_CLLEG)) {
-			send_to_char(ch, "            @D[@cLeft Leg    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 4), "%", "%");
+		if (char_get_limb_condition(i, (4)-1) >= 50 && !char_plr_flagged(i, PLR_CLLEG)) {
+			send_to_char(ch, "            @D[@cLeft Leg    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", char_get_limb_condition(i, (4)-1), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 4) > 0 && !char_plr_flagged(i, PLR_CLLEG)) {
-			send_to_char(ch, "            @D[@cLeft Leg    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 4), "%", "%");
+		else if (char_get_limb_condition(i, (4)-1) > 0 && !char_plr_flagged(i, PLR_CLLEG)) {
+			send_to_char(ch, "            @D[@cLeft Leg    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", char_get_limb_condition(i, (4)-1), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 4) > 0 && char_plr_flagged(i, PLR_CLLEG)) {
-			send_to_char(ch, "            @D[@cLeft Leg    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 4), "%", "%");
+		else if (char_get_limb_condition(i, (4)-1) > 0 && char_plr_flagged(i, PLR_CLLEG)) {
+			send_to_char(ch, "            @D[@cLeft Leg    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", char_get_limb_condition(i, (4)-1), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 4) <= 0) {
+		else if (char_get_limb_condition(i, (4)-1) <= 0) {
 			send_to_char(ch, "            @D[@cLeft Leg    @D: @rMissing.             @D]@n\r\n");
 		}
 		if (char_plr_flagged(i, PLR_HEAD)) {
@@ -2950,11 +2950,11 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 		}
 	}
 	send_to_char(ch, "\r\n");
-	if (GET_CLAN(i) != NULL && !strstr(GET_CLAN(i), "None")) {
-		sprintf(buf, "%s", GET_CLAN(i));
+	if (char_get_clan(i) != NULL && !strstr(char_get_clan(i), "None")) {
+		sprintf(buf, "%s", char_get_clan(i));
 		clan = TRUE;
 	}
-	if (GET_CLAN(i) == NULL) {
+	if (char_get_clan(i) == NULL) {
 		clan = FALSE;
 	}
 	if (!char_is_npc(i)) {
@@ -2968,19 +2968,19 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 	send_to_char(ch, "\r\n");
 
 	if ((!char_plr_flagged(i, PLR_DISGUISED) && (readIntro(ch, i) == 1 && !char_is_npc(i)))) {
-		if (GET_SEX(i) == SEX_NEUTRAL)
+		if (char_get_sex(i) == SEX_NEUTRAL)
 			send_to_char(ch, "%s appears to be %s %s, ", get_i_name(ch, i), AN(RACE(i)), LRACE(i));
 		else
 			send_to_char(ch, "%s appears to be %s %s %s, ", get_i_name(ch, i), AN(char_mafe(i)), char_mafe(i), LRACE(i));
 	}
 	else if (ch == i || char_is_npc(i)) {
-		if (GET_SEX(i) == SEX_NEUTRAL)
+		if (char_get_sex(i) == SEX_NEUTRAL)
 			send_to_char(ch, "%c%s appears to be %s %s, ", toupper(*char_get_name(i)), char_get_name(i) + 1, AN(RACE(i)), LRACE(i));
 		else
 			send_to_char(ch, "%c%s appears to be %s %s %s, ", toupper(*char_get_name(i)), char_get_name(i) + 1, AN(char_mafe(i)), char_mafe(i), LRACE(i));
 	}
 	else {
-		if (GET_SEX(i) == SEX_NEUTRAL)
+		if (char_get_sex(i) == SEX_NEUTRAL)
 			send_to_char(ch, "Appears to be %s %s, ", AN(RACE(i)), LRACE(i));
 		else
 			send_to_char(ch, "Appears to be %s %s %s, ", AN(char_mafe(i)), char_mafe(i), LRACE(i));
@@ -2990,7 +2990,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 		send_to_char(ch, "is %s sized, and\r\n", size_names[get_size(i)]);
 	}
 	if (!char_is_npc(i)) {
-		if (!char_plr_flagged(i, PLR_OOZARU) && (!char_is_icer(i) || !char_is_transformed(i)) && GET_GENOME(i, 0) < 11) {
+		if (!char_plr_flagged(i, PLR_OOZARU) && (!char_is_icer(i) || !char_is_transformed(i)) && char_get_genome(i, 0) < 11) {
 			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], char_get_pc_height(i), char_get_pc_weight(i));
 		}
 		else if (char_is_icer(i) && char_plr_flagged(i, PLR_TRANS1)) {
@@ -3013,7 +3013,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 			int num2 = char_get_pc_weight(i) * 3;
 			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
 		}
-		else if (char_plr_flagged(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
+		else if (char_plr_flagged(i, PLR_OOZARU) || char_get_genome(i, 0) == 11) {
 			int num1 = char_get_pc_height(i) * 10;
 			int num2 = char_get_pc_weight(i) * 50;
 			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
@@ -3070,7 +3070,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 	diag_char_to_char(i, ch);
 	found = FALSE;
 	for (j = 0; !found && j < NUM_WEARS; j++)
-		if (GET_EQ(i, j) && char_can_see_obj(ch, GET_EQ(i, j)))
+		if (char_get_equipment(i, j) && char_can_see_obj(ch, char_get_equipment(i, j)))
 			found = TRUE;
 
 	if (found && (!char_is_npc(ch) && !char_prf_flagged(ch, PRF_NOEQSEE))) {
@@ -3082,11 +3082,11 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 			act("The disguised person is using:", FALSE, i, 0, ch, TO_VICT);
 		}
 		for (j = 0; j < NUM_WEARS; j++)
-			if (GET_EQ(i, j) && char_can_see_obj(ch, GET_EQ(i, j)) && (j != WEAR_WIELD1 && j != WEAR_WIELD2)) {
+			if (char_get_equipment(i, j) && char_can_see_obj(ch, char_get_equipment(i, j)) && (j != WEAR_WIELD1 && j != WEAR_WIELD2)) {
 				send_to_char(ch, "%s", wear_where[j]);
-				show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
-				if (obj_flagged(GET_EQ(i, j), ITEM_SHEATH)) {
-					struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = GET_EQ(i, j);
+				show_obj_to_char(char_get_equipment(i, j), ch, SHOW_OBJ_SHORT);
+				if (obj_flagged(char_get_equipment(i, j), ITEM_SHEATH)) {
+					struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = char_get_equipment(i, j);
 					for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
 						next_obj = obj2->next_content;
 						if (obj2) {
@@ -3097,11 +3097,11 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 					obj2 = NULL;
 				}
 			}
-			else if (GET_EQ(i, j) && char_can_see_obj(ch, GET_EQ(i, j)) && (!char_plr_flagged(i, PLR_THANDW))) {
+			else if (char_get_equipment(i, j) && char_can_see_obj(ch, char_get_equipment(i, j)) && (!char_plr_flagged(i, PLR_THANDW))) {
 				send_to_char(ch, "%s", wear_where[j]);
-				show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
-				if (obj_flagged(GET_EQ(i, j), ITEM_SHEATH)) {
-					struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = GET_EQ(i, j);
+				show_obj_to_char(char_get_equipment(i, j), ch, SHOW_OBJ_SHORT);
+				if (obj_flagged(char_get_equipment(i, j), ITEM_SHEATH)) {
+					struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = char_get_equipment(i, j);
 					for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
 						next_obj = obj2->next_content;
 						if (obj2) {
@@ -3113,17 +3113,17 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 					obj2 = NULL;
 				}
 			}
-			else if (GET_EQ(i, j) && char_can_see_obj(ch, GET_EQ(i, j)) && (char_plr_flagged(i, PLR_THANDW))) {
+			else if (char_get_equipment(i, j) && char_can_see_obj(ch, char_get_equipment(i, j)) && (char_plr_flagged(i, PLR_THANDW))) {
 				send_to_char(ch, "@c<@CWielded by B. Hands@c>@n ");
-				show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
+				show_obj_to_char(char_get_equipment(i, j), ch, SHOW_OBJ_SHORT);
 			}
 	}
-	if (ch != i && ((char_get_skill(ch, SKILL_KEEN) && char_aff_flagged(ch, AFF_SNEAK)) || GET_ADMLEVEL(ch))) {
+	if (ch != i && ((char_get_skill(ch, SKILL_KEEN) && char_aff_flagged(ch, AFF_SNEAK)) || char_get_admlevel(ch))) {
 		found = FALSE;
 		act("\r\nYou attempt to peek at $s inventory:", FALSE, i, 0, ch, TO_VICT);
 		if (char_can_see(i, ch))
 			act("$n tries to evaluate what you have in your inventory.", TRUE, ch, 0, i, TO_VICT);
-		if (char_get_skill(ch, SKILL_KEEN) > axion_dice(0) && (!char_is_npc(i) || GET_ADMLEVEL(ch) > 1)) {
+		if (char_get_skill(ch, SKILL_KEEN) > axion_dice(0) && (!char_is_npc(i) || char_get_admlevel(ch) > 1)) {
 			for (tmp_obj = i->carrying; tmp_obj; tmp_obj = tmp_obj->next_content) {
 				if (char_can_see_obj(ch, tmp_obj) &&
 					(char_adm_flagged(ch, ADM_SEEINV) || (rand_number(0, 20) < char_get_level(ch)))) {
@@ -3133,7 +3133,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 			}
 			improve_skill(ch, SKILL_KEEN, 1);
 		}
-		else if (char_is_npc(i) && GET_ADMLEVEL(ch) < 2) {
+		else if (char_is_npc(i) && char_get_admlevel(ch) < 2) {
 			return;
 		}
 		else {
@@ -3169,7 +3169,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
   if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_ROOMFLAGS) && char_is_npc(i)) 
      send_to_char(ch, "@D[@G%d@D]@w %s", char_get_mob_vnum(i), SCRIPT(i) ? "[TRIG] " : "");
   
-  if (char_is_npc(i) && i->long_descr && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
+  if (char_is_npc(i) && i->long_descr && char_get_position(i) == char_get_mob_specials_default_pos(i) && !char_get_fighting(i)) {
     send_to_char(ch, "%s", i->long_descr);
 
     if(char_is_npc(i)) {
@@ -3198,14 +3198,14 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
     }
 
 
-    if (GET_EAVESDROP(i) > 0) {
+    if (char_get_listenroom(i) > 0) {
      char eaves[300];
-     sprintf(eaves, "@w...$e is spying on everything to the @c%s@w.", dirs[GET_EAVESDIR(i)]);
+     sprintf(eaves, "@w...$e is spying on everything to the @c%s@w.", dirs[char_get_eavesdir(i)]);
      act(eaves, TRUE, i, 0, ch, TO_VICT);
     }
-    if (char_aff_flagged(i, AFF_FLYING) && GET_ALT(i) == 1)
+    if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 1)
       act("...$e is in the air!", FALSE, i, 0, ch, TO_VICT);
-    if (char_aff_flagged(i, AFF_FLYING) && GET_ALT(i) == 2)
+    if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 2)
       act("...$e is high in the air!", FALSE, i, 0, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_SANCTUARY) && !char_get_skill(i, SKILL_AQUA_BARRIER))
       act("...$e has a barrier around $s body!", FALSE, i, 0, ch, TO_VICT);
@@ -3215,7 +3215,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
       act("...$e has a @Gbarrier@w of @cwater@w and @Cki@w around $s body!", FALSE, i, 0, ch, TO_VICT);
     if (!char_is_npc(i) && char_plr_flagged(i, PLR_SPIRAL))
       act("...$e is spinning in a vortex!", FALSE, i, 0, ch, TO_VICT);
-    if (GET_CHARGE(i))
+    if (char_get_charge(i))
       act("...$e has a bright %s aura around $s body!", FALSE, i, 0, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_METAMORPH))
       act("@w...$e has a dark, @rred@w aura and menacing presence.", FALSE, i, 0, ch, TO_VICT);
@@ -3225,77 +3225,77 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
       act("...$e is groping around blindly!", FALSE, i, 0, ch, TO_VICT);
     if (affected_by_spell(i, SPELL_FAERIE_FIRE))
       act("@m...$e @mis outlined with purple fire!@m", FALSE, i, 0, ch, TO_VICT);
-    if (GET_FEATURE(i)) {
+    if (char_get_feature(i)) {
       char woo[MAX_STRING_LENGTH];
-      sprintf(woo, "@C%s@n", GET_FEATURE(i));
+      sprintf(woo, "@C%s@n", char_get_feature(i));
       act(woo, FALSE, i, 0, ch, TO_VICT);
     }
 
     return;
   }
 
-  if (char_is_npc(i) && !FIGHTING(i) && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
+  if (char_is_npc(i) && !char_get_fighting(i) && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
     send_to_char(ch, "@w%c%s", toupper(*i->short_descr), i->short_descr + 1);
-  else if (char_is_npc(i) && GRAPPLED(i) && GRAPPLED(i) == ch)
+  else if (char_is_npc(i) && char_get_grappled(i) && char_get_grappled(i) == ch)
     send_to_char(ch, "@w%c%s is being grappled with by YOU!", toupper(*i->short_descr), i->short_descr + 1);
-  else if (char_is_npc(i) && GRAPPLED(i) && GRAPPLED(i) != ch)
-    send_to_char(ch, "@w%c%s is being absorbed from by %s!", toupper(*i->short_descr), i->short_descr + 1, readIntro(ch, GRAPPLED(i)) == 1 ? get_i_name(ch, GRAPPLED(i)) : AN(RACE(GRAPPLED(i))));
-  else if (char_is_npc(i) && ABSORBBY(i) && ABSORBBY(i) == ch)
+  else if (char_is_npc(i) && char_get_grappled(i) && char_get_grappled(i) != ch)
+    send_to_char(ch, "@w%c%s is being absorbed from by %s!", toupper(*i->short_descr), i->short_descr + 1, readIntro(ch, char_get_grappled(i)) == 1 ? get_i_name(ch, char_get_grappled(i)) : AN(RACE(char_get_grappled(i))));
+  else if (char_is_npc(i) && char_get_absorbby(i) && char_get_absorbby(i) == ch)
     send_to_char(ch, "@w%c%s is being absorbed from by YOU!", toupper(*i->short_descr), i->short_descr + 1);
-  else if (char_is_npc(i) && ABSORBBY(i) && ABSORBBY(i) != ch)
-    send_to_char(ch, "@w%c%s is being absorbed from by %s!", toupper(*i->short_descr), i->short_descr + 1, readIntro(ch, ABSORBBY(i)) == 1 ? get_i_name(ch, ABSORBBY(i)) : AN(RACE(ABSORBBY(i))));
-  else if (char_is_npc(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING && is_sparring(i))
-    send_to_char(ch, "@w%c%s is sparring with %s!", toupper(*i->short_descr), i->short_descr + 1, GET_ADMLEVEL(ch) ? char_get_name(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
-  else if (char_is_npc(i) && FIGHTING(i) && is_sparring(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
+  else if (char_is_npc(i) && char_get_absorbby(i) && char_get_absorbby(i) != ch)
+    send_to_char(ch, "@w%c%s is being absorbed from by %s!", toupper(*i->short_descr), i->short_descr + 1, readIntro(ch, char_get_absorbby(i)) == 1 ? get_i_name(ch, char_get_absorbby(i)) : AN(RACE(char_get_absorbby(i))));
+  else if (char_is_npc(i) && char_get_fighting(i) && char_get_fighting(i) != ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING && is_sparring(i))
+    send_to_char(ch, "@w%c%s is sparring with %s!", toupper(*i->short_descr), i->short_descr + 1, char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : LRACE(char_get_fighting(i))));
+  else if (char_is_npc(i) && char_get_fighting(i) && is_sparring(i) && char_get_fighting(i) == ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
     send_to_char(ch, "@w%c%s is sparring with you!", toupper(*i->short_descr), i->short_descr + 1);
-  else if (char_is_npc(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-    send_to_char(ch, "@w%c%s is fighting %s!", toupper(*i->short_descr), i->short_descr + 1, GET_ADMLEVEL(ch) ? char_get_name(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
-  else if (char_is_npc(i) && FIGHTING(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
+  else if (char_is_npc(i) && char_get_fighting(i) && char_get_fighting(i) != ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
+    send_to_char(ch, "@w%c%s is fighting %s!", toupper(*i->short_descr), i->short_descr + 1, char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : LRACE(char_get_fighting(i))));
+  else if (char_is_npc(i) && char_get_fighting(i) && char_get_fighting(i) == ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
     send_to_char(ch, "@w%c%s is fighting YOU!", toupper(*i->short_descr), i->short_descr + 1);
-  else if (char_is_npc(i) && FIGHTING(i) && GET_POS(i) == POS_SITTING)
+  else if (char_is_npc(i) && char_get_fighting(i) && char_get_position(i) == POS_SITTING)
     send_to_char(ch, "@w%c%s is sitting here.", toupper(*i->short_descr), i->short_descr + 1);
-  else if (char_is_npc(i) && FIGHTING(i) && GET_POS(i) == POS_SLEEPING)
+  else if (char_is_npc(i) && char_get_fighting(i) && char_get_position(i) == POS_SLEEPING)
     send_to_char(ch, "@w%c%s is sleeping here.", toupper(*i->short_descr), i->short_descr + 1);
   else if (char_is_npc(i))
     send_to_char(ch, "@w%c%s", toupper(*i->short_descr), i->short_descr + 1);
   else if (!char_is_npc(i)) {
    if (char_is_majin(i) && char_aff_flagged(i, AFF_LIQUEFIED)) {
-    send_to_char(ch, "@wSeveral blobs of %s colored goo spread out here.@n\n", skin_types[(int)GET_SKIN(i)]);
+    send_to_char(ch, "@wSeveral blobs of %s colored goo spread out here.@n\n", skin_types[(int)char_get_skin(i)]);
     return;
    }
-   if ((GET_ADMLEVEL(ch) > 0 || GET_ADMLEVEL(i) > 0) || char_is_npc(ch)) {
+   if ((char_get_admlevel(ch) > 0 || char_get_admlevel(i) > 0) || char_is_npc(ch)) {
      send_to_char(ch, "@w%s", i->name);
    }
    else if ((!char_plr_flagged(i, PLR_DISGUISED) && readIntro(ch, i) == 1)) {
     send_to_char(ch, "@w%s", get_i_name(ch, i));
    }
    else if (!char_plr_flagged(i, PLR_DISGUISED) && readIntro(ch, i) != 1) {
-    if (GET_DISTFEA(i) == DISTFEA_EYE) {
-      send_to_char(ch, "@wA %s eyed %s %s", eye_types[(int)GET_EYE(i)], char_mafe(i), LRACE(i));
+    if (char_get_distfea(i) == DISTFEA_EYE) {
+      send_to_char(ch, "@wA %s eyed %s %s", eye_types[(int)char_get_eye(i)], char_mafe(i), LRACE(i));
     }
-    else if (GET_DISTFEA(i) == DISTFEA_HAIR) {
+    else if (char_get_distfea(i) == DISTFEA_HAIR) {
      if (char_is_majin(i)) {
-       send_to_char(ch, "@wA %s majin, with a %s forelock,", char_mafe(i), FHA_types[(int)GET_HAIRL(i)]);
+       send_to_char(ch, "@wA %s majin, with a %s forelock,", char_mafe(i), FHA_types[(int)char_get_hairl(i)]);
      }
      else if (char_is_namek(i)) {
-       send_to_char(ch, "@wA namek, with %s antennae,", FHA_types[(int)GET_HAIRL(i)]);
+       send_to_char(ch, "@wA namek, with %s antennae,", FHA_types[(int)char_get_hairl(i)]);
      }
      else if (char_is_arlian(i)) {
-       send_to_char(ch, "@wA arlian, with %s antennae,", FHA_types[(int)GET_HAIRL(i)]);
+       send_to_char(ch, "@wA arlian, with %s antennae,", FHA_types[(int)char_get_hairl(i)]);
      }
      else if (char_is_icer(i) || char_is_demon(i)) {
-       send_to_char(ch, "@wA %s %s, with %s horns", char_mafe(i), LRACE(i), FHA_types[(int)GET_HAIRL(i)]);
+       send_to_char(ch, "@wA %s %s, with %s horns", char_mafe(i), LRACE(i), FHA_types[(int)char_get_hairl(i)]);
      }
      else {
        char blarg[MAX_INPUT_LENGTH];
-       sprintf(blarg, "%s %s hair %s", hairl_types[(int)GET_HAIRL(i)], hairc_types[(int)GET_HAIRC(i)], hairs_types[(int)GET_HAIRS(i)]);
-       send_to_char(ch, "@wA %s %s, with %s", char_mafe(i), LRACE(i), GET_HAIRL(i) == 0 ? "a bald head" : (blarg));
+       sprintf(blarg, "%s %s hair %s", hairl_types[(int)char_get_hairl(i)], hairc_types[(int)char_get_hairc(i)], hairs_types[(int)char_get_hairs(i)]);
+       send_to_char(ch, "@wA %s %s, with %s", char_mafe(i), LRACE(i), char_get_hairl(i) == 0 ? "a bald head" : (blarg));
      }
     }
-    else if (GET_DISTFEA(i) == DISTFEA_SKIN) {
-      send_to_char(ch, "@wA %s skinned %s %s", skin_types[(int)GET_SKIN(i)], char_mafe(i), LRACE(i));
+    else if (char_get_distfea(i) == DISTFEA_SKIN) {
+      send_to_char(ch, "@wA %s skinned %s %s", skin_types[(int)char_get_skin(i)], char_mafe(i), LRACE(i));
     }
-    else if (GET_DISTFEA(i) == DISTFEA_HEIGHT) {
+    else if (char_get_distfea(i) == DISTFEA_HEIGHT) {
       char *height;
       if (char_is_truffle(i)) {
        if (char_get_pc_height(i) > 70) {
@@ -3311,7 +3311,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
         height = strdup("short");
        }
       }
-      else if (char_plr_flagged(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
+      else if (char_plr_flagged(i, PLR_OOZARU) || char_get_genome(i, 0) == 11) {
        if (char_get_pc_height(i) * 10 > 2000) {
         height = strdup("very tall");
        }
@@ -3347,7 +3347,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
        free(height);
       }
     }
-    else if (GET_DISTFEA(i) == DISTFEA_WEIGHT) {
+    else if (char_get_distfea(i) == DISTFEA_WEIGHT) {
       char *height;
       if (char_is_truffle(i)) {
        if (char_get_pc_weight(i) > 35) {
@@ -3363,7 +3363,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
         height = strdup("welterweight");
        }
       }
-      else if (char_plr_flagged(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
+      else if (char_plr_flagged(i, PLR_OOZARU) || char_get_genome(i, 0) == 11) {
        if (char_get_pc_weight(i) * 50 > 6000) {
         height = strdup("very heavy");
        }
@@ -3408,7 +3408,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
    }
   }
 
- if (!char_is_npc(i) || !FIGHTING(i)) {
+ if (!char_is_npc(i) || !char_get_fighting(i)) {
   if (char_aff_flagged(i, AFF_INVISIBLE)) {
     send_to_char(ch, ", is invisible");
     count = TRUE;
@@ -3436,12 +3436,12 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
     send_to_char(ch, ", is buildwalking");
     count = TRUE;
   }
-  if (!char_is_npc(i) && ABSORBING(i) && ABSORBING(i) != ch) {
-    send_to_char(ch, ", is absorbing from %s", char_get_name(ABSORBING(i)));
+  if (!char_is_npc(i) && char_get_absorbing(i) && char_get_absorbing(i) != ch) {
+    send_to_char(ch, ", is absorbing from %s", char_get_name(char_get_absorbing(i)));
     count = TRUE;
   }
-  if (!char_is_npc(i) && GRAPPLING(i) && GRAPPLING(i) != ch) {
-    send_to_char(ch, ", is grappling with %s", readIntro(ch, GRAPPLING(i)) == 1 ? get_i_name(ch, GRAPPLING(i)) : introd_calc(GRAPPLING(i)));
+  if (!char_is_npc(i) && char_get_grappling(i) && char_get_grappling(i) != ch) {
+    send_to_char(ch, ", is grappling with %s", readIntro(ch, char_get_grappling(i)) == 1 ? get_i_name(ch, char_get_grappling(i)) : introd_calc(char_get_grappling(i)));
     count = TRUE;
   }
   if (!char_is_npc(i) && CARRYING(i) && CARRYING(i) != ch) {
@@ -3452,19 +3452,19 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
     send_to_char(ch, ", is being carried by %s", readIntro(ch, CARRIED_BY(i)) == 1 ? get_i_name(ch, CARRIED_BY(i)) : introd_calc(CARRIED_BY(i)));
     count = TRUE;
   }
-  if (!char_is_npc(i) && GRAPPLING(i) && GRAPPLING(i) == ch) {
+  if (!char_is_npc(i) && char_get_grappling(i) && char_get_grappling(i) == ch) {
     send_to_char(ch, ", is grappling with YOU");
     count = TRUE;
   }
-  if (!char_is_npc(i) && ABSORBING(i) && ABSORBING(i) == ch) {
+  if (!char_is_npc(i) && char_get_absorbing(i) && char_get_absorbing(i) == ch) {
     send_to_char(ch, ", is absorbing from YOU");
     count = TRUE;
   }
-  if (!char_is_npc(i) && ABSORBING(ch) && ABSORBING(ch) == i) {
+  if (!char_is_npc(i) && char_get_absorbing(ch) && char_get_absorbing(ch) == i) {
     send_to_char(ch, ", is being absorbed from by YOU");
     count = TRUE;
   }
-  if (!char_is_npc(i) && GRAPPLING(ch) && GRAPPLING(ch) == i) {
+  if (!char_is_npc(i) && char_get_grappling(ch) && char_get_grappling(ch) == i) {
     send_to_char(ch, ", is being grappled with by YOU");
     count = TRUE;
   }
@@ -3472,20 +3472,20 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
     send_to_char(ch, ", is being carried by you");
     count = TRUE;
   }
-  if (!char_is_npc(ch) && !char_is_npc(i) && FIGHTING(i)) {
-   if (!char_plr_flagged(i, PLR_SPAR) || (char_plr_flagged(i, PLR_SPAR) && (!char_plr_flagged(FIGHTING(i), PLR_SPAR) || char_is_npc(FIGHTING(i))))) {
+  if (!char_is_npc(ch) && !char_is_npc(i) && char_get_fighting(i)) {
+   if (!char_plr_flagged(i, PLR_SPAR) || (char_plr_flagged(i, PLR_SPAR) && (!char_plr_flagged(char_get_fighting(i), PLR_SPAR) || char_is_npc(char_get_fighting(i))))) {
    send_to_char(ch, ", is here fighting ");
    }
-   if (char_plr_flagged(i, PLR_SPAR) && char_plr_flagged(FIGHTING(i), PLR_SPAR)) {
+   if (char_plr_flagged(i, PLR_SPAR) && char_plr_flagged(char_get_fighting(i), PLR_SPAR)) {
    send_to_char(ch, ", is here sparring ");
    }
-     if (FIGHTING(i) == ch) {
+     if (char_get_fighting(i) == ch) {
         send_to_char(ch, "@rYOU@w");
         count = TRUE;
      }
      else {
-      if (IN_ROOM(i) == IN_ROOM(FIGHTING(i))) {
-       send_to_char(ch, "%s", GET_ADMLEVEL(ch) ? char_get_name(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
+      if (char_get_in_room(i) == char_get_in_room(char_get_fighting(i))) {
+       send_to_char(ch, "%s", char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : LRACE(char_get_fighting(i))));
        count = TRUE;
       }
       else {
@@ -3494,24 +3494,24 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
      }
   }
  }
-  if (SITS(i)) {
-       chair = SITS(i);
+  if (char_get_sits(i)) {
+       chair = char_get_sits(i);
        if (char_plr_flagged(i, PLR_HEALT)) {
         send_to_char(ch, "@w is floating inside a healing tank.");
        }
        else if (count == TRUE) {
-       send_to_char(ch, ",@w and%s on %s.", positions[(int) GET_POS(i)], chair->short_description);
+       send_to_char(ch, ",@w and%s on %s.", positions[(int) char_get_position(i)], chair->short_description);
        }
        else if (count == FALSE) {
-       send_to_char(ch, "@w%s on %s.", positions[(int) GET_POS(i)], chair->short_description);
+       send_to_char(ch, "@w%s on %s.", positions[(int) char_get_position(i)], chair->short_description);
        }
   }
-  else if (!char_plr_flagged(i, PLR_PILOTING) && !SITS(i) && (!char_is_npc(i) || !FIGHTING(i))) {
+  else if (!char_plr_flagged(i, PLR_PILOTING) && !char_get_sits(i) && (!char_is_npc(i) || !char_get_fighting(i))) {
    if (count == TRUE) {
-    send_to_char(ch, "@w, and%s.", positions[(int) GET_POS(i)]);
+    send_to_char(ch, "@w, and%s.", positions[(int) char_get_position(i)]);
    }
    if (count == FALSE) {
-    send_to_char(ch, "@w%s.", positions[(int) GET_POS(i)]);
+    send_to_char(ch, "@w%s.", positions[(int) char_get_position(i)]);
    }
   }
    else if (char_plr_flagged(i, PLR_PILOTING)) {
@@ -3519,18 +3519,18 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
    }
     else {
    
-    if (FIGHTING(i) && !char_is_npc(ch) && !char_is_npc(i)) {
+    if (char_get_fighting(i) && !char_is_npc(ch) && !char_is_npc(i)) {
       if (!char_plr_flagged(i, PLR_SPAR)) {
        send_to_char(ch, ", is here fighting ");
       }
       if (char_plr_flagged(i, PLR_SPAR)) {
        send_to_char(ch, ", is here sparring ");
       }
-      if (FIGHTING(i) == ch)
+      if (char_get_fighting(i) == ch)
 	send_to_char(ch, "@rYOU@w!");
       else {
-	if (IN_ROOM(i) == IN_ROOM(FIGHTING(i)))
-	  send_to_char(ch, "%s!", GET_ADMLEVEL(ch) ? char_get_name(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
+	if (char_get_in_room(i) == char_get_in_room(char_get_fighting(i)))
+	  send_to_char(ch, "%s!", char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : LRACE(char_get_fighting(i))));
 	else
 	  send_to_char(ch,  "someone who has already left!");
       }
@@ -3552,9 +3552,9 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
    send_to_char(ch, " @D(@RIDLE@D)");
   send_to_char(ch, "@n\r\n");
 
-  if (GET_EAVESDROP(i) > 0) {
+  if (char_get_listenroom(i) > 0) {
     char eaves[300];
-    sprintf(eaves, "@w...$e is spying on everything to the @c%s@w.", dirs[GET_EAVESDIR(i)]);
+    sprintf(eaves, "@w...$e is spying on everything to the @c%s@w.", dirs[char_get_eavesdir(i)]);
     act(eaves, TRUE, i, 0, ch, TO_VICT);
   }
   if (!char_is_npc(i)) {
@@ -3564,7 +3564,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
   }
   if (char_plr_flagged(i, PLR_AURALIGHT)) {
 	  char bloom[MAX_INPUT_LENGTH];
-      sprintf(bloom, "...is surrounded by a bright %s aura.@n", aura_types[GET_AURA(i)]);
+      sprintf(bloom, "...is surrounded by a bright %s aura.@n", aura_types[char_get_aura(i)]);
       act(bloom, TRUE, i, 0, ch, TO_VICT);
 	}
   if (char_aff_flagged(i, AFF_SANCTUARY) && !char_get_skill(i, SKILL_AQUA_BARRIER))
@@ -3577,48 +3577,48 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
       act("@w...$e has ghostly @Ggreen@w ethereal armor around $s body.", TRUE, i, 0, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_SANCTUARY) && char_get_skill(i, SKILL_AQUA_BARRIER))
     act("@w...$e has a @bbarrier@w of @cwater@w and @CKi@w around $s body!", TRUE, i, 0, ch, TO_VICT);
-  if (char_aff_flagged(i, AFF_FLYING) && GET_ALT(i) == 1)
+  if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 1)
     act("@w...$e is in the air!", TRUE, i, 0, ch, TO_VICT);
-  if (char_aff_flagged(i, AFF_FLYING) && GET_ALT(i) == 2)
+  if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 2)
     act("@w...$e is high in the air!", TRUE, i, 0, ch, TO_VICT);
-  if (GET_KAIOKEN(i) > 0)
+  if (char_get_kaioken(i) > 0)
     act("@w...@r$e has a red aura around $s body!", TRUE, i, 0, ch, TO_VICT);
   if (!char_is_npc(i) && char_plr_flagged(i, PLR_SPIRAL))
       act("@w...$e is spinning in a vortex!", FALSE, i, 0, ch, TO_VICT);
   if (char_is_transformed(i) && !char_is_android(i) && !char_is_saiyan(i) && !char_is_halfbreed(i))
     act("@w...$e has energy crackling around $s body!", TRUE, i, 0, ch, TO_VICT);
-  if (GET_CHARGE(i) && !char_is_saiyan(i) && !char_is_halfbreed(i)) {
+  if (char_get_charge(i) && !char_is_saiyan(i) && !char_is_halfbreed(i)) {
     char aura[MAX_INPUT_LENGTH];
-    sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
+    sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[char_get_aura(i)]);
     act(aura, TRUE, i, 0, ch, TO_VICT);
   }
-  if (!char_plr_flagged(i, PLR_OOZARU) && GET_CHARGE(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
+  if (!char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act("@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", TRUE, i, 0, ch, TO_VICT);
-  if (!char_plr_flagged(i, PLR_OOZARU) && GET_CHARGE(i) && !char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i))) {
+  if (!char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && !char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i))) {
     char aura[MAX_INPUT_LENGTH];
-    sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
+    sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[char_get_aura(i)]);
     act(aura, TRUE, i, 0, ch, TO_VICT);
   }
-  if (!char_plr_flagged(i, PLR_OOZARU) && !GET_CHARGE(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
+  if (!char_plr_flagged(i, PLR_OOZARU) && !char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act("@w...$e has energy crackling around $s body!", TRUE, i, 0, ch, TO_VICT);
-  if (char_plr_flagged(i, PLR_OOZARU) && GET_CHARGE(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
+  if (char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act("@w...$e is in the form of a @rgreat ape@w!", TRUE, i, 0, ch, TO_VICT);
   if (is_affected(i, AFF_KYODAIKA))
     act("@w...$e has expanded $s body size@w!", TRUE, i, 0, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_HAYASA))
       act("@w...$e has a soft @cblue@w glow around $s body!", FALSE, i, 0, ch, TO_VICT);
-  if (char_plr_flagged(i, PLR_OOZARU) && !GET_CHARGE(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
+  if (char_plr_flagged(i, PLR_OOZARU) && !char_get_charge(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act("@w...$e has energy crackling around $s @rgreat ape@w body!", TRUE, i, 0, ch, TO_VICT);
-  if (GET_FEATURE(i)) {
+  if (char_get_feature(i)) {
    char woo[MAX_STRING_LENGTH];
-   sprintf(woo, "@C%s@n", GET_FEATURE(i));
+   sprintf(woo, "@C%s@n", char_get_feature(i));
    act(woo, FALSE, i, 0, ch, TO_VICT);
   }
   
-    if (GET_RDISPLAY(i)) {
-	 if (GET_RDISPLAY(i) != "Empty") {
+    if (char_get_rdisplay(i)) {
+	 if (char_get_rdisplay(i) != "Empty") {
 		char rdis[MAX_STRING_LENGTH];
-		sprintf(rdis, "...%s", GET_RDISPLAY(i));
+		sprintf(rdis, "...%s", char_get_rdisplay(i));
 		act(rdis, FALSE, i, 0, ch, TO_VICT);
 	}
   }
@@ -3673,12 +3673,12 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch)
         /* How many other occurences of this mob are there? */
         for (j = list; j != i; j = j->next_in_room)
           if ( (i->nr           == j->nr            ) &&
-               (GET_POS(i)      == GET_POS(j)       ) &&
-               (AFF_FLAGS(i)[0]    == AFF_FLAGS(j)[0]     ) &&
-               (AFF_FLAGS(i)[1]    == AFF_FLAGS(j)[1]     ) &&
-               (AFF_FLAGS(i)[2]    == AFF_FLAGS(j)[2]     ) &&
-               (AFF_FLAGS(i)[3]    == AFF_FLAGS(j)[3]     ) &&
-               (!FIGHTING(i) && !FIGHTING(j)) &&
+               (char_get_position(i)      == char_get_position(j)       ) &&
+               (char_get_affected_by(i)[0]    == char_get_affected_by(j)[0]     ) &&
+               (char_get_affected_by(i)[1]    == char_get_affected_by(j)[1]     ) &&
+               (char_get_affected_by(i)[2]    == char_get_affected_by(j)[2]     ) &&
+               (char_get_affected_by(i)[3]    == char_get_affected_by(j)[3]     ) &&
+               (!char_get_fighting(i) && !char_get_fighting(j)) &&
                (GET_HIT(i) == getEffMaxPL(i) && GET_HIT(j) == getEffMaxPL(j)) &&
                !strcmp(char_get_name(i), char_get_name(j))         ) {
             for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
@@ -3695,12 +3695,12 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch)
           continue;
  	for (j = i; j; j = j->next_in_room)
           if ( (i->nr           == j->nr            ) &&
-               (GET_POS(i)      == GET_POS(j)       ) &&
-               (AFF_FLAGS(i)[0]    == AFF_FLAGS(j)[0]     ) &&
-               (AFF_FLAGS(i)[1]    == AFF_FLAGS(j)[1]     ) &&
-               (AFF_FLAGS(i)[2]    == AFF_FLAGS(j)[2]     ) &&
-               (AFF_FLAGS(i)[3]    == AFF_FLAGS(j)[3]     ) &&
-               (!FIGHTING(i) && !FIGHTING(j)) &&
+               (char_get_position(i)      == char_get_position(j)       ) &&
+               (char_get_affected_by(i)[0]    == char_get_affected_by(j)[0]     ) &&
+               (char_get_affected_by(i)[1]    == char_get_affected_by(j)[1]     ) &&
+               (char_get_affected_by(i)[2]    == char_get_affected_by(j)[2]     ) &&
+               (char_get_affected_by(i)[3]    == char_get_affected_by(j)[3]     ) &&
+               (!char_get_fighting(i) && !char_get_fighting(j)) &&
                (GET_HIT(i) == GET_MAX_HIT(i) && GET_HIT(j) == GET_MAX_HIT(j)) &&
                !strcmp(char_get_name(i), char_get_name(j))         ) {
             for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
@@ -3717,7 +3717,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch)
       list_one_char(i, ch);
       send_to_char(ch, "@n");
     } /* processed a character we can see */
-    else if (room_is_dark(IN_ROOM(ch)) && !char_can_see_in_dark(ch) &&
+    else if (room_is_dark(char_get_in_room(ch)) && !char_can_see_in_dark(ch) &&
            char_aff_flagged(i, AFF_INFRAVISION))
       send_to_char(ch, "@wYou see a pair of glowing red eyes looking your way.@n\r\n");
   } /* loop through all characters in room */
@@ -3759,7 +3759,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
   if (rroom_sect(target_room) == SECT_SPACE && rroom_get_vnum(target_room) >= 20000) {
    space = TRUE;
   }
-  if (exit_mode == EXIT_NORMAL && space == FALSE && IN_ROOM(ch) == target_room) {
+  if (exit_mode == EXIT_NORMAL && space == FALSE && char_get_in_room(ch) == target_room) {
     /* Compass and Auto-map - Iovan 9-11-10 */
     send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
     send_to_char(ch, "@w      Compass           Auto-Map            Map Key\r\n");
@@ -3774,7 +3774,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
     send_to_char(ch, "     @D[@wTurn autoexit complete on for directions instead of radar@D]@n\r\n");
     send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
   }
-  if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && space == FALSE && IN_ROOM(ch) != target_room)) {
+  if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && space == FALSE && char_get_in_room(ch) != target_room)) {
     send_to_char(ch, "@D----------------------------[@gObvious Exits@D]-----------------------------@n\r\n");
     if (char_is_affected(ch, AFF_BLIND)) {
       send_to_char(ch, "You can't see a damned thing, you're blind!\r\n");
@@ -3784,16 +3784,16 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
       send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
       return;
     }
-    if (room_is_dark(IN_ROOM(ch)) && !char_can_see_in_dark(ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
+    if (room_is_dark(char_get_in_room(ch)) && !char_can_see_in_dark(ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
       send_to_char(ch, "It is pitch black...\r\n");
       return;
     }
 
     /* Is the character using a working light source? */
     for (i = 0; i < NUM_WEARS; i++)
-      if (GET_EQ(ch, i))
-        if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT)
-          if (GET_OBJ_VAL(GET_EQ(ch, i),VAL_LIGHT_HOURS))
+      if (char_get_equipment(ch, i))
+        if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_LIGHT)
+          if (obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS))
             has_light = TRUE;
 			
 	  if (char_plr_flagged(ch, PLR_AURALIGHT)) {
@@ -3801,426 +3801,426 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
 	  }
 
     for (door = 0; door < NUM_OF_DIRS; door++) {
-      if (W_EXIT(target_room, door) &&
-          W_EXIT(target_room, door)->to_room != NOWHERE) {
+      if (rroom_get_dir_option(target_room, door) &&
+          rroom_get_dir_option(target_room, door)->to_room != NOWHERE) {
         /* We have a door that leads somewhere */
-        if (char_adm_flagged(ch, ADM_SEESECRET) || GET_ADMLEVEL(ch) > 4) {
+        if (char_adm_flagged(ch, ADM_SEESECRET) || char_get_admlevel(ch) > 4) {
           /* Immortals see everything */
           door_found++;
           char blam[9];
           sprintf(blam, "%s", dirs[door]);
           *blam = toupper(*blam);
           if (door == 6) {
-           sprintf(dlist1, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[W_EXIT(target_room, door)->to_room].number, world[W_EXIT(target_room, door)->to_room].name);
-          if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
-              IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)   ) {
+           sprintf(dlist1, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+          if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
+              IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)   ) {
             /* This exit has a door - tell all about it */
             char argh[100];
-            if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
+            if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTHWEST@n\r\n");
-             log("ERROR: %s found error direction NORTHWEST at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
+             log("ERROR: %s found error direction NORTHWEST at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
              return;
             }
-            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined") ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening");
             sprintf(dlist1+strlen(dlist1), "                    The %s%s %s %s %s%s.\r\n",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
-                (W_EXIT(target_room, door)->keyword &&
-                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
-                    fname(W_EXIT(target_room, door)->keyword) : "opening",
+                (rroom_get_dir_option(target_room, door)->keyword &&
+                 strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined")) ?
+                    fname(rroom_get_dir_option(target_room, door)->keyword) : "opening",
                  strstr(argh, "s ") != NULL ? "are" : "is",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ?
                     "closed" : "open",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_LOCKED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ?
                     "and locked" : "and unlocked",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_PICKPROOF) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ?
                     " (pickproof)" : "");
           }
           }
           if (door == 0) {
-           sprintf(dlist2, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[W_EXIT(target_room, door)->to_room].number, world[W_EXIT(target_room, door)->to_room].name);
-          if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
-              IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)   ) {
+           sprintf(dlist2, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+          if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
+              IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)   ) {
             /* This exit has a door - tell all about it */
-            if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
+            if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTH@n\r\n");
-             log("ERROR: %s found error direction NORTH at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
+             log("ERROR: %s found error direction NORTH at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
              return;
             }
             char argh[200];
-            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined") ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening");
             sprintf(dlist2+strlen(dlist2), "                    The %s%s %s %s %s%s.\r\n",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
-                (W_EXIT(target_room, door)->keyword &&
-                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
-                    fname(W_EXIT(target_room, door)->keyword) : "opening",
+                (rroom_get_dir_option(target_room, door)->keyword &&
+                 strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined")) ?
+                    fname(rroom_get_dir_option(target_room, door)->keyword) : "opening",
                 strstr(argh, "s ") != NULL ? "are" : "is",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ?
                     "closed" : "open",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_LOCKED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ?
                     "and locked" : "and unlocked",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_PICKPROOF) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ?
                     " (pickproof)" : "");
           }
           }
           if (door == 7) {
-           sprintf(dlist3, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[W_EXIT(target_room, door)->to_room].number, world[W_EXIT(target_room, door)->to_room].name);
-          if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
-              IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)   ) {
+           sprintf(dlist3, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+          if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
+              IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)   ) {
             /* This exit has a door - tell all about it */
-            if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
+            if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTHEAST@n\r\n");
-             log("ERROR: %s found error direction NORTHEAST at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
+             log("ERROR: %s found error direction NORTHEAST at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined") ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening");
             sprintf(dlist3+strlen(dlist3), "                    The %s%s %s %s %s%s.\r\n",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
-                (W_EXIT(target_room, door)->keyword &&
-                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
-                    fname(W_EXIT(target_room, door)->keyword) : "opening",
+                (rroom_get_dir_option(target_room, door)->keyword &&
+                 strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined")) ?
+                    fname(rroom_get_dir_option(target_room, door)->keyword) : "opening",
                  strstr(argh, "s ") != NULL ? "are" : "is",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ?
                     "closed" : "open",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_LOCKED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ?
                     "and locked" : "and unlocked",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_PICKPROOF) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ?
                     " (pickproof)" : "");
           }
           }
           if (door == 1) {
-           sprintf(dlist4, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[W_EXIT(target_room, door)->to_room].number, world[W_EXIT(target_room, door)->to_room].name);
-          if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
-              IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)   ) {
+           sprintf(dlist4, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+          if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
+              IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)   ) {
             /* This exit has a door - tell all about it */
-            if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
+            if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION EAST@n\r\n");
-             log("ERROR: %s found error direction EAST at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
+             log("ERROR: %s found error direction EAST at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined") ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening");
             sprintf(dlist4+strlen(dlist4), "                    The %s%s %s %s %s%s.\r\n",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
-                (W_EXIT(target_room, door)->keyword &&
-                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
-                    fname(W_EXIT(target_room, door)->keyword) : "opening",
+                (rroom_get_dir_option(target_room, door)->keyword &&
+                 strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined")) ?
+                    fname(rroom_get_dir_option(target_room, door)->keyword) : "opening",
                 strstr(argh, "s ") != NULL ? "are" : "is",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ?
                     "closed" : "open",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_LOCKED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ?
                     "and locked" : "and unlocked",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_PICKPROOF) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ?
                     " (pickproof)" : "");
           }
           }
           if (door == 8) {
-           sprintf(dlist5, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[W_EXIT(target_room, door)->to_room].number, world[W_EXIT(target_room, door)->to_room].name);
-          if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
-              IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)   ) {
+           sprintf(dlist5, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+          if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
+              IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)   ) {
             /* This exit has a door - tell all about it */
-            if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
+            if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION SOUTHEAST@n\r\n");
-             log("ERROR: %s found error direction SOUTHEAST at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
+             log("ERROR: %s found error direction SOUTHEAST at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined") ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening");
             sprintf(dlist5+strlen(dlist5), "                    The %s%s %s %s %s%s.\r\n",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
-                (W_EXIT(target_room, door)->keyword &&
-                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
-                    fname(W_EXIT(target_room, door)->keyword) : "opening",
+                (rroom_get_dir_option(target_room, door)->keyword &&
+                 strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined")) ?
+                    fname(rroom_get_dir_option(target_room, door)->keyword) : "opening",
                   strstr(argh, "s ") != NULL ? "are" : "is",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ?
                     "closed" : "open",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_LOCKED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ?
                     "and locked" : "and unlocked",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_PICKPROOF) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ?
                     " (pickproof)" : "");
           }
           }
           if (door == 2) {
-           sprintf(dlist6, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[W_EXIT(target_room, door)->to_room].number, world[W_EXIT(target_room, door)->to_room].name);
-          if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
-              IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)   ) {
+           sprintf(dlist6, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+          if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
+              IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)   ) {
             /* This exit has a door - tell all about it */
-            if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
+            if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION SOUTH@n\r\n");
-             log("ERROR: %s found error direction SOUTH at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
+             log("ERROR: %s found error direction SOUTH at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined") ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening");
             sprintf(dlist6+strlen(dlist6), "                    The %s%s %s %s %s%s.\r\n",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
-                (W_EXIT(target_room, door)->keyword &&
-                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
-                    fname(W_EXIT(target_room, door)->keyword) : "opening",
+                (rroom_get_dir_option(target_room, door)->keyword &&
+                 strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined")) ?
+                    fname(rroom_get_dir_option(target_room, door)->keyword) : "opening",
                  strstr(argh, "s ") != NULL ? "are" : "is",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ?
                     "closed" : "open",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_LOCKED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ?
                     "and locked" : "and unlocked",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_PICKPROOF) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ?
                     " (pickproof)" : "");
           }
           }
           if (door == 9) {
-           sprintf(dlist7, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[W_EXIT(target_room, door)->to_room].number, world[W_EXIT(target_room, door)->to_room].name);
-          if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
-              IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)   ) {
+           sprintf(dlist7, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+          if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
+              IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)   ) {
             /* This exit has a door - tell all about it */
-            if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
+            if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION SOUTHWEST@n\r\n");
-             log("ERROR: %s found error direction SOUTHWEST at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
+             log("ERROR: %s found error direction SOUTHWEST at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined") ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening");
             sprintf(dlist7+strlen(dlist7), "                    The %s%s %s %s %s%s.\r\n",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
-                (W_EXIT(target_room, door)->keyword &&
-                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
-                    fname(W_EXIT(target_room, door)->keyword) : "opening",
+                (rroom_get_dir_option(target_room, door)->keyword &&
+                 strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined")) ?
+                    fname(rroom_get_dir_option(target_room, door)->keyword) : "opening",
                 strstr(argh, "s ") != NULL ? "are" : "is",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ?
                     "closed" : "open",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_LOCKED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ?
                     "and locked" : "and unlocked",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_PICKPROOF) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ?
                     " (pickproof)" : "");
           }
           }
           if (door == 3) {
-           sprintf(dlist8, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[W_EXIT(target_room, door)->to_room].number, world[W_EXIT(target_room, door)->to_room].name);
-          if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
-              IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)   ) {
+           sprintf(dlist8, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+          if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
+              IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)   ) {
             /* This exit has a door - tell all about it */
-            if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
+            if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION WEST@n\r\n");
-             log("ERROR: %s found error direction WEST at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
+             log("ERROR: %s found error direction WEST at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined") ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening");
             sprintf(dlist8+strlen(dlist8), "                    The %s%s %s %s %s%s.\r\n",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
-                (W_EXIT(target_room, door)->keyword &&
-                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
-                    fname(W_EXIT(target_room, door)->keyword) : "opening",
+                (rroom_get_dir_option(target_room, door)->keyword &&
+                 strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined")) ?
+                    fname(rroom_get_dir_option(target_room, door)->keyword) : "opening",
                 strstr(argh, "s ") != NULL ? "are" : "is",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ?
                     "closed" : "open",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_LOCKED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ?
                     "and locked" : "and unlocked",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_PICKPROOF) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ?
                     " (pickproof)" : "");
           }
           }
           if (door == 4) {
-           sprintf(dlist9, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[W_EXIT(target_room, door)->to_room].number, world[W_EXIT(target_room, door)->to_room].name);
-          if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
-              IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)   ) {
+           sprintf(dlist9, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+          if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
+              IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)   ) {
             /* This exit has a door - tell all about it */
-            if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
+            if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION UP@n\r\n");
-             log("ERROR: %s found error direction UP at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
+             log("ERROR: %s found error direction UP at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined") ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening");
             sprintf(dlist9+strlen(dlist9), "                    The %s%s %s %s %s%s.\r\n",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
-                (W_EXIT(target_room, door)->keyword &&
-                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
-                    fname(W_EXIT(target_room, door)->keyword) : "opening",
+                (rroom_get_dir_option(target_room, door)->keyword &&
+                 strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined")) ?
+                    fname(rroom_get_dir_option(target_room, door)->keyword) : "opening",
                  strstr(argh, "s ") != NULL ? "are" : "is",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ?
                     "closed" : "open",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_LOCKED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ?
                     "and locked" : "and unlocked",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_PICKPROOF) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ?
                     " (pickproof)" : "");
           }
           }
           if (door == 5) {
-           sprintf(dlist10, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[W_EXIT(target_room, door)->to_room].number, world[W_EXIT(target_room, door)->to_room].name);
-          if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
-              IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)   ) {
+           sprintf(dlist10, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+          if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
+              IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)   ) {
             /* This exit has a door - tell all about it */
-            if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
+            if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION DOWN@n\r\n");
-             log("ERROR: %s found error direction DOWN at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
+             log("ERROR: %s found error direction DOWN at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined") ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening");
             sprintf(dlist10+strlen(dlist10), "                    The %s%s %s %s %s%s.\r\n",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
-                (W_EXIT(target_room, door)->keyword &&
-                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
-                    fname(W_EXIT(target_room, door)->keyword) : "opening",
+                (rroom_get_dir_option(target_room, door)->keyword &&
+                 strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined")) ?
+                    fname(rroom_get_dir_option(target_room, door)->keyword) : "opening",
                  strstr(argh, "s ") != NULL ? "are" : "is",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ?
                     "closed" : "open",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_LOCKED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ?
                     "and locked" : "and unlocked",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_PICKPROOF) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ?
                     " (pickproof)" : "");
           }
           }
           if (door == 10) {
-           sprintf(dlist11, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[W_EXIT(target_room, door)->to_room].number, world[W_EXIT(target_room, door)->to_room].name);
-          if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
-              IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)   ) {
+           sprintf(dlist11, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+          if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
+              IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)   ) {
             /* This exit has a door - tell all about it */
-            if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
+            if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION INSIDE@n\r\n");
-             log("ERROR: %s found error direction INSIDE at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
+             log("ERROR: %s found error direction INSIDE at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined") ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening");
             sprintf(dlist11+strlen(dlist11), "                    The %s%s %s %s %s%s.\r\n",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
-                (W_EXIT(target_room, door)->keyword &&
-                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
-                    fname(W_EXIT(target_room, door)->keyword) : "opening",
+                (rroom_get_dir_option(target_room, door)->keyword &&
+                 strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined")) ?
+                    fname(rroom_get_dir_option(target_room, door)->keyword) : "opening",
                  strstr(argh, "s ") != NULL ? "are" : "is",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ?
                     "closed" : "open",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_LOCKED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ?
                     "and locked" : "and unlocked",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_PICKPROOF) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ?
                     " (pickproof)" : "");
           }
           }
           if (door == 11) {
-           sprintf(dlist12, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[W_EXIT(target_room, door)->to_room].number, world[W_EXIT(target_room, door)->to_room].name);
-          if (IS_SET(W_EXIT(target_room, door)->exit_info, EX_ISDOOR) ||
-              IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)   ) {
+           sprintf(dlist12, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+          if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
+              IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)   ) {
             /* This exit has a door - tell all about it */
-            if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
+            if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION OUTSIDE@n\r\n");
-             log("ERROR: %s found error direction OUTSIDE at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
+             log("ERROR: %s found error direction OUTSIDE at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
              return;
             }
             char argh[100];
-            sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
+            sprintf(argh, "%s ", strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined") ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening");
             sprintf(dlist12+strlen(dlist12), "                    The %s%s %s %s %s%s.\r\n",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET) ?
                     "@rsecret@w " : "",
-                (W_EXIT(target_room, door)->keyword &&
-                 strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined")) ?
-                    fname(W_EXIT(target_room, door)->keyword) : "opening",
+                (rroom_get_dir_option(target_room, door)->keyword &&
+                 strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined")) ?
+                    fname(rroom_get_dir_option(target_room, door)->keyword) : "opening",
                  strstr(argh, "s ") != NULL ? "are" : "is",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ?
                     "closed" : "open",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_LOCKED) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ?
                     "and locked" : "and unlocked",
-                IS_SET(W_EXIT(target_room, door)->exit_info, EX_PICKPROOF) ?
+                IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ?
                     " (pickproof)" : "");
           }
           }
         }
         else { /* This is what mortal characters see */
-          if (!IS_SET(W_EXIT(target_room, door)->exit_info, EX_CLOSED)) {
+          if (!IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED)) {
             /* And the door is open */
             door_found++;
             char blam[9];
             sprintf(blam, "%s", dirs[door]);
             *blam = toupper(*blam);
           if (door == 6) {
-           sprintf(dlist1, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist1, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
           }
           if (door == 0) {
-           sprintf(dlist2, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist2, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
           }
           if (door == 7) {
-           sprintf(dlist3, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist3, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
           }
           if (door == 1) {
-           sprintf(dlist4, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist4, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
           }
           if (door == 8) {
-           sprintf(dlist5, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist5, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
           }
           if (door == 2) {
-           sprintf(dlist6, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist6, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
           }
           if (door == 9) {
-           sprintf(dlist7, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist7, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
           }
           if (door == 3) {
-           sprintf(dlist8, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist8, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
           }
           if (door == 4) {
-           sprintf(dlist9, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist9, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
           }
           if (door == 5) {
-           sprintf(dlist10, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist10, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
           }
           if (door == 10) {
-           sprintf(dlist11, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist11, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
           }
           if (door == 11) {
-           sprintf(dlist12, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist12, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
           }
 
           } else if (CONFIG_DISP_CLOSED_DOORS &&
-              !IS_SET(W_EXIT(target_room, door)->exit_info, EX_SECRET)) {
+              !IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* But we tell them the door is closed */
               door_found++;
               char blam[9];
               sprintf(blam, "%s", dirs[door]);
               *blam = toupper(*blam);
           if (door == 6) {
-           sprintf(dlist1, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (W_EXIT(target_room, door)->keyword) ? fname(W_EXIT(target_room,door)->keyword) : "opening" );
+           sprintf(dlist1, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (rroom_get_dir_option(target_room, door)->keyword) ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening" );
           }
           if (door == 0) {
-           sprintf(dlist2, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (W_EXIT(target_room, door)->keyword) ? fname(W_EXIT(target_room,door)->keyword) : "opening");
+           sprintf(dlist2, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (rroom_get_dir_option(target_room, door)->keyword) ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening");
           }
           if (door == 7) {
-           sprintf(dlist3, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (W_EXIT(target_room, door)->keyword) ? fname(W_EXIT(target_room,door)->keyword) : "opening" );
+           sprintf(dlist3, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (rroom_get_dir_option(target_room, door)->keyword) ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening" );
           }
           if (door == 1) {
-           sprintf(dlist4, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (W_EXIT(target_room, door)->keyword) ? fname(W_EXIT(target_room,door)->keyword) : "opening" );
+           sprintf(dlist4, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (rroom_get_dir_option(target_room, door)->keyword) ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening" );
           }
           if (door == 8) {
-           sprintf(dlist5, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (W_EXIT(target_room, door)->keyword) ? fname(W_EXIT(target_room,door)->keyword) : "opening" );
+           sprintf(dlist5, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (rroom_get_dir_option(target_room, door)->keyword) ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening" );
           }
           if (door == 2) {
-           sprintf(dlist6, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (W_EXIT(target_room, door)->keyword) ? fname(W_EXIT(target_room,door)->keyword) : "opening" );
+           sprintf(dlist6, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (rroom_get_dir_option(target_room, door)->keyword) ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening" );
           }
           if (door == 9) {
-           sprintf(dlist7, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (W_EXIT(target_room, door)->keyword) ? fname(W_EXIT(target_room,door)->keyword) : "opening" );
+           sprintf(dlist7, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (rroom_get_dir_option(target_room, door)->keyword) ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening" );
           }
           if (door == 3) {
-           sprintf(dlist8, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (W_EXIT(target_room, door)->keyword) ? fname(W_EXIT(target_room,door)->keyword) : "opening" );
+           sprintf(dlist8, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (rroom_get_dir_option(target_room, door)->keyword) ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening" );
           }
           if (door == 4) {
-           sprintf(dlist9, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (W_EXIT(target_room, door)->keyword) ? fname(W_EXIT(target_room,door)->keyword) : "opening" );
+           sprintf(dlist9, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (rroom_get_dir_option(target_room, door)->keyword) ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening" );
           }
           if (door == 5) {
-           sprintf(dlist10, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (W_EXIT(target_room, door)->keyword) ? fname(W_EXIT(target_room,door)->keyword) : "opening" );
+           sprintf(dlist10, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (rroom_get_dir_option(target_room, door)->keyword) ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening" );
           }
           if (door == 10) {
-           sprintf(dlist11, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (W_EXIT(target_room, door)->keyword) ? fname(W_EXIT(target_room,door)->keyword) : "opening" );
+           sprintf(dlist11, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (rroom_get_dir_option(target_room, door)->keyword) ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening" );
           }
           if (door == 11) {
-           sprintf(dlist12, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (W_EXIT(target_room, door)->keyword) ? fname(W_EXIT(target_room,door)->keyword) : "opening" );
+           sprintf(dlist12, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam, (rroom_get_dir_option(target_room, door)->keyword) ? fname(rroom_get_dir_option(target_room, door)->keyword) : "opening" );
           }
             }
         }
@@ -4286,25 +4286,25 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
    if (rroom_flagged(target_room, ROOM_HOUSE) && !rroom_flagged(target_room, ROOM_GARDEN1) && rroom_flagged(target_room, ROOM_GARDEN2)) {
     send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, NULL));
    }
-   if (GET_RADAR1(ch) == rroom_get_vnum(target_room) && GET_RADAR2(ch) == rroom_get_vnum(target_room) && GET_RADAR3(ch) !=  rroom_get_vnum(target_room)) {
+   if (char_get_radar1(ch) == rroom_get_vnum(target_room) && char_get_radar2(ch) == rroom_get_vnum(target_room) && char_get_radar3(ch) !=  rroom_get_vnum(target_room)) {
     send_to_char(ch, "@CTwo of your buoys are floating here.@n\r\n");
    }
-   else if (GET_RADAR1(ch) == rroom_get_vnum(target_room) && GET_RADAR2(ch) != rroom_get_vnum(target_room) && GET_RADAR3(ch) == rroom_get_vnum(target_room)) {
+   else if (char_get_radar1(ch) == rroom_get_vnum(target_room) && char_get_radar2(ch) != rroom_get_vnum(target_room) && char_get_radar3(ch) == rroom_get_vnum(target_room)) {
     send_to_char(ch, "@CTwo of your buoys are floating here.@n\r\n");
    }
-   else if (GET_RADAR1(ch) != rroom_get_vnum(target_room) && GET_RADAR2(ch) == rroom_get_vnum(target_room) && GET_RADAR3(ch) == rroom_get_vnum(target_room)) {
+   else if (char_get_radar1(ch) != rroom_get_vnum(target_room) && char_get_radar2(ch) == rroom_get_vnum(target_room) && char_get_radar3(ch) == rroom_get_vnum(target_room)) {
     send_to_char(ch, "@CTwo of your buoys are floating here.@n\r\n");
    }
-   else if (GET_RADAR1(ch) == rroom_get_vnum(target_room) && GET_RADAR2(ch) == rroom_get_vnum(target_room) && GET_RADAR3(ch) == rroom_get_vnum(target_room) && target_room != 0) {
+   else if (char_get_radar1(ch) == rroom_get_vnum(target_room) && char_get_radar2(ch) == rroom_get_vnum(target_room) && char_get_radar3(ch) == rroom_get_vnum(target_room) && target_room != 0) {
     send_to_char(ch, "@CAll three of your buoys are floating here. Why?@n\r\n");
    }
-   else if (GET_RADAR1(ch) == rroom_get_vnum(target_room)) {
+   else if (char_get_radar1(ch) == rroom_get_vnum(target_room)) {
     send_to_char(ch, "@CYour @cBuoy #1@C is floating here.@n\r\n");
    }
-   else if (GET_RADAR2(ch) == rroom_get_vnum(target_room)) {
+   else if (char_get_radar2(ch) == rroom_get_vnum(target_room)) {
     send_to_char(ch, "@CYour @cBuoy #2@C is floating here.@n\r\n");
    }
-   else if (GET_RADAR3(ch) == rroom_get_vnum(target_room)) {
+   else if (char_get_radar3(ch) == rroom_get_vnum(target_room)) {
     send_to_char(ch, "@CYour @cBuoy #3@C is floating here.@n\r\n");
    }
   }
@@ -4317,9 +4317,9 @@ static void do_auto_exits2(room_rnum target_room, struct char_data *ch)
   send_to_char(ch, "\nExits: ");
 
   for (door = 0; door < NUM_OF_DIRS; door++) {
-    if (!W_EXIT(target_room, door) || W_EXIT(target_room, door)->to_room == NOWHERE)
+    if (!rroom_get_dir_option(target_room, door) || rroom_get_dir_option(target_room, door)->to_room == NOWHERE)
       continue;
-    if (room_exit_flagged(W_EXIT(target_room, door), EX_CLOSED))
+    if (room_exit_flagged(rroom_get_dir_option(target_room, door), EX_CLOSED))
       continue;
 
     send_to_char(ch, "%s ", abbr_dirs[door]);
@@ -4333,9 +4333,9 @@ ACMD(do_exits)
 {
   /* Why duplicate code? */
   if (!char_prf_flagged(ch, PRF_NODEC)) {
-   do_auto_exits(IN_ROOM(ch), ch, EXIT_COMPLETE);
+   do_auto_exits(char_get_in_room(ch), ch, EXIT_COMPLETE);
   } else {
-   do_auto_exits2(IN_ROOM(ch), ch);
+   do_auto_exits2(char_get_in_room(ch), ch);
   }
 }
 
@@ -4380,7 +4380,7 @@ ACMD(do_autoexit)
 
 void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
 {
-  struct room_data *rm = &world[IN_ROOM(ch)];
+  struct room_data *rm = &world[char_get_in_room(ch)];
   trig_data *t;
 
   if (!ch->desc)
@@ -4401,7 +4401,7 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
     char buf2[MAX_STRING_LENGTH];
     char buf3[MAX_STRING_LENGTH];
 
-    sprintbitarray(ROOM_FLAGS(target_room), room_bits, RF_ARRAY_MAX, buf, sizeof(buf));
+    sprintbitarray(rroom_get_room_flags(target_room), room_bits, RF_ARRAY_MAX, buf, sizeof(buf));
     sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
     if (!char_is_npc(ch) && !char_prf_flagged(ch, PRF_NODEC)) {
       send_to_char(ch, "\r\n@wO----------------------------------------------------------------------O@n\r\n");
@@ -4476,46 +4476,46 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
      else {
       send_to_char(ch, "@wPlanet: @WUNKNOWN@n\r\n");
      }
-     if (ROOM_GRAVITY(target_room) <= 0) {
+     if (rroom_get_gravity(target_room) <= 0) {
       send_to_char(ch, "@wGravity: @WNormal@n\r\n");
      }
-     else if (ROOM_GRAVITY(target_room) == 10) {
+     else if (rroom_get_gravity(target_room) == 10) {
       send_to_char(ch, "@wGravity: @W10x@n\r\n");
      }
-     else if (ROOM_GRAVITY(target_room) == 20) {
+     else if (rroom_get_gravity(target_room) == 20) {
       send_to_char(ch, "@wGravity: @W20x@n\r\n");
      }
-     else if (ROOM_GRAVITY(target_room) == 30) {
+     else if (rroom_get_gravity(target_room) == 30) {
       send_to_char(ch, "@wGravity: @W30x@n\r\n");
      }
-     else if (ROOM_GRAVITY(target_room) == 40) {
+     else if (rroom_get_gravity(target_room) == 40) {
       send_to_char(ch, "@wGravity: @W40x@n\r\n");
      }
-     else if (ROOM_GRAVITY(target_room) == 50) {
+     else if (rroom_get_gravity(target_room) == 50) {
       send_to_char(ch, "@wGravity: @W50x@n\r\n");
      }
-     else if (ROOM_GRAVITY(target_room) == 100) {
+     else if (rroom_get_gravity(target_room) == 100) {
       send_to_char(ch, "@wGravity: @W100x@n\r\n");
      }
-     else if (ROOM_GRAVITY(target_room) == 200) {
+     else if (rroom_get_gravity(target_room) == 200) {
       send_to_char(ch, "@wGravity: @W200x@n\r\n");
      }
-     else if (ROOM_GRAVITY(target_room) == 300) {
+     else if (rroom_get_gravity(target_room) == 300) {
       send_to_char(ch, "@wGravity: @W300x@n\r\n");
      }
-     else if (ROOM_GRAVITY(target_room) == 400) {
+     else if (rroom_get_gravity(target_room) == 400) {
       send_to_char(ch, "@wGravity: @W400x@n\r\n");
      }
-     else if (ROOM_GRAVITY(target_room) == 500) {
+     else if (rroom_get_gravity(target_room) == 500) {
       send_to_char(ch, "@wGravity: @W500x@n\r\n");
      }
-     else if (ROOM_GRAVITY(target_room) == 1000) {
+     else if (rroom_get_gravity(target_room) == 1000) {
       send_to_char(ch, "@wGravity: @W1,000x@n\r\n");
      }
-     else if (ROOM_GRAVITY(target_room) == 5000) {
+     else if (rroom_get_gravity(target_room) == 5000) {
       send_to_char(ch, "@wGravity: @W5,000x@n\r\n");
      }
-     else if (ROOM_GRAVITY(target_room) == 10000) {
+     else if (rroom_get_gravity(target_room) == 10000) {
       send_to_char(ch, "@wGravity: @W10,000x@n\r\n");
      }
      if (rroom_flagged(target_room, ROOM_REGEN)) {
@@ -4533,155 +4533,155 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
     }
 
   if ((!char_is_npc(ch) && !char_prf_flagged(ch, PRF_BRIEF)) || rroom_flagged(target_room, ROOM_DEATH)) {
-    if (ROOM_DAMAGE(target_room) <= 99) {
+    if (rroom_get_dmg(target_room) <= 99) {
     send_to_char(ch, "@w%s@n", world[target_room].description);
     }
-    if (ROOM_DAMAGE(target_room) == 100 && (rroom_sect(target_room) == SECT_WATER_SWIM || rroom_sunken(target_room) || rroom_sect(target_room) == SECT_FLYING || rroom_sect(target_room) == SECT_SHOP || rroom_sect(target_room) == SECT_IMPORTANT)) {
+    if (rroom_get_dmg(target_room) == 100 && (rroom_sect(target_room) == SECT_WATER_SWIM || rroom_sunken(target_room) || rroom_sect(target_room) == SECT_FLYING || rroom_sect(target_room) == SECT_SHOP || rroom_sect(target_room) == SECT_IMPORTANT)) {
     send_to_char(ch, "@w%s@n", world[target_room].description);
     }
-    if (rroom_sect(target_room) == SECT_INSIDE && ROOM_DAMAGE(target_room) > 0) {
+    if (rroom_sect(target_room) == SECT_INSIDE && rroom_get_dmg(target_room) > 0) {
       send_to_char(ch, "\r\n");
-     if (ROOM_DAMAGE(target_room) <= 2) {
+     if (rroom_get_dmg(target_room) <= 2) {
       send_to_char(ch, "@wA small hole with chunks of debris that can be seen scarring the floor.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 4) {
+     else if (rroom_get_dmg(target_room) <= 4) {
       send_to_char(ch, "@wA couple small holes with chunks of debris that can be seen scarring the floor.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 6) {
+     else if (rroom_get_dmg(target_room) <= 6) {
       send_to_char(ch, "@wA few small holes with chunks of debris that can be seen scarring the floor.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 10) {
+     else if (rroom_get_dmg(target_room) <= 10) {
       send_to_char(ch, "@wThere are several small holes with chunks of debris that can be seen scarring the floor.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 20) {
+     else if (rroom_get_dmg(target_room) <= 20) {
       send_to_char(ch, "@wMany holes fill the floor of this area, many of which have burn marks.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 30) {
+     else if (rroom_get_dmg(target_room) <= 30) {
       send_to_char(ch, "@wThe floor is severely damaged with many large holes.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 50) {
+     else if (rroom_get_dmg(target_room) <= 50) {
       send_to_char(ch, "@wBattle damage covers the entire area. Displayed as a tribute to the battles that have\r\nbeen waged here.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 75) {
+     else if (rroom_get_dmg(target_room) <= 75) {
       send_to_char(ch, "@wThis entire area is falling apart, it has been damaged so badly.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 99) {
+     else if (rroom_get_dmg(target_room) <= 99) {
       send_to_char(ch, "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n");
      }
-     else if (ROOM_DAMAGE(target_room) >= 100) {
+     else if (rroom_get_dmg(target_room) >= 100) {
       send_to_char(ch, "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up holes, and overflowing onto what is left of the\r\nfloor. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n");
      }
       send_to_char(ch, "\r\n");
     }
-    else if ((rroom_sect(target_room) == SECT_CITY || rroom_sect(target_room) == SECT_FIELD || rroom_sect(target_room) == SECT_HILLS || rroom_sect(target_room) == SECT_IMPORTANT) && ROOM_DAMAGE(target_room) > 0) {
+    else if ((rroom_sect(target_room) == SECT_CITY || rroom_sect(target_room) == SECT_FIELD || rroom_sect(target_room) == SECT_HILLS || rroom_sect(target_room) == SECT_IMPORTANT) && rroom_get_dmg(target_room) > 0) {
       send_to_char(ch, "\r\n");
-     if (ROOM_DAMAGE(target_room) <= 2) {
+     if (rroom_get_dmg(target_room) <= 2) {
       send_to_char(ch, "@wA small hole with chunks of debris that can be seen scarring the ground.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 4) {
+     else if (rroom_get_dmg(target_room) <= 4) {
       send_to_char(ch, "@wA couple small craters with chunks of debris that can be seen scarring the ground.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 6) {
+     else if (rroom_get_dmg(target_room) <= 6) {
       send_to_char(ch, "@wA few small craters with chunks of debris that can be seen scarring the ground.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 10) {
+     else if (rroom_get_dmg(target_room) <= 10) {
       send_to_char(ch, "@wThere are several small craters with chunks of debris that can be seen scarring the ground.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 20) {
+     else if (rroom_get_dmg(target_room) <= 20) {
       send_to_char(ch, "@wMany craters fill the ground of this area, many of which have burn marks.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 30) {
+     else if (rroom_get_dmg(target_room) <= 30) {
       send_to_char(ch, "@wThe ground is severely damaged with many large craters.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 50) {
+     else if (rroom_get_dmg(target_room) <= 50) {
       send_to_char(ch, "@wBattle damage covers the entire area. Displayed as a tribute to the battles that have\r\nbeen waged here.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 75) {
+     else if (rroom_get_dmg(target_room) <= 75) {
       send_to_char(ch, "@wThis entire area is falling apart, it has been damaged so badly.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 99) {
+     else if (rroom_get_dmg(target_room) <= 99) {
       send_to_char(ch, "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n");
      }
-     else if (ROOM_DAMAGE(target_room) >= 100) {
+     else if (rroom_get_dmg(target_room) >= 100) {
       send_to_char(ch, "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up craters, and overflowing onto what is left of the\r\nground. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n");
      }
       send_to_char(ch, "\r\n");
     }
-    else if (rroom_sect(target_room) == SECT_FOREST && ROOM_DAMAGE(target_room) > 0) {
+    else if (rroom_sect(target_room) == SECT_FOREST && rroom_get_dmg(target_room) > 0) {
       send_to_char(ch, "\r\n");
-     if (ROOM_DAMAGE(target_room) <= 2) {
+     if (rroom_get_dmg(target_room) <= 2) {
       send_to_char(ch, "@wA small tree sits in a little crater here.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 4) {
+     else if (rroom_get_dmg(target_room) <= 4) {
       send_to_char(ch, "@wTrees have been uprooted by craters in the ground.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 6) {
+     else if (rroom_get_dmg(target_room) <= 6) {
       send_to_char(ch, "@wSeveral trees have been reduced to chunks of debris and are\r\nlaying in a few craters here. @n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 10) {
+     else if (rroom_get_dmg(target_room) <= 10) {
       send_to_char(ch, "@wA large patch of trees have been destroyed and are laying in craters here.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 20) {
+     else if (rroom_get_dmg(target_room) <= 20) {
       send_to_char(ch, "@wSeveral craters have merged into one large crater in one part of this forest.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 30) {
+     else if (rroom_get_dmg(target_room) <= 30) {
       send_to_char(ch, "@wThe open sky can easily be seen through a hole of trees destroyed\r\nand resting at the bottom of several craters here.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 50) {
+     else if (rroom_get_dmg(target_room) <= 50) {
       send_to_char(ch, "@wA good deal of burning tree pieces can be found strewn across the cratered ground here.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 75) {
+     else if (rroom_get_dmg(target_room) <= 75) {
       send_to_char(ch, "@wVery few trees are left standing in this area, replaced instead by large craters.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 99) {
+     else if (rroom_get_dmg(target_room) <= 99) {
       send_to_char(ch, "@wSingle solitary trees can be found still standing here or there in the area.\r\nThe rest have been almost completely obliterated in recent conflicts.@n");
      }
-     else if (ROOM_DAMAGE(target_room) >= 100) {
+     else if (rroom_get_dmg(target_room) >= 100) {
       send_to_char(ch, "@w  One massive crater fills this area. This desolate crater leaves no\r\nevidence of what used to be found in the area. Smoke slowly wafts into\r\nthe sky from the central point of the crater, creating an oppressive\r\natmosphere.@n");
      }
       send_to_char(ch, "\r\n");
     }
-    else if (rroom_sect(target_room) == SECT_MOUNTAIN && ROOM_DAMAGE(target_room) > 0) {
+    else if (rroom_sect(target_room) == SECT_MOUNTAIN && rroom_get_dmg(target_room) > 0) {
       send_to_char(ch, "\r\n");
-     if (ROOM_DAMAGE(target_room) <= 2) {
+     if (rroom_get_dmg(target_room) <= 2) {
       send_to_char(ch, "@wA small crater has been burned into the side of this mountain.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 4) {
+     else if (rroom_get_dmg(target_room) <= 4) {
       send_to_char(ch, "@wA couple craters have been burned into the side of this mountain.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 6) {
+     else if (rroom_get_dmg(target_room) <= 6) {
       send_to_char(ch, "@wBurned bits of boulders can be seen lying at the bottom of a few nearby craters.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 10) {
+     else if (rroom_get_dmg(target_room) <= 10) {
       send_to_char(ch, "@wSeveral bad craters can be seen in the side of the mountain here.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 20) {
+     else if (rroom_get_dmg(target_room) <= 20) {
       send_to_char(ch, "@wLarge boulders have rolled down the mountain side and collected in many nearby craters.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 30) {
+     else if (rroom_get_dmg(target_room) <= 30) {
       send_to_char(ch, "@wMany craters are covering the mountainside here.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 50) {
+     else if (rroom_get_dmg(target_room) <= 50) {
       send_to_char(ch, "@wThe mountain side has partially collapsed, shedding rubble down towards its base.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 75) {
+     else if (rroom_get_dmg(target_room) <= 75) {
       send_to_char(ch, "@wA peak of the mountain has been blown off, leaving behind a smoldering tip.@n");
      }
-     else if (ROOM_DAMAGE(target_room) <= 99) {
+     else if (rroom_get_dmg(target_room) <= 99) {
       send_to_char(ch, "@wThe mountain side here has completely collapsed, shedding dangerous rubble down to its base.@n");
      }
-     else if (ROOM_DAMAGE(target_room) >= 100) {
+     else if (rroom_get_dmg(target_room) >= 100) {
       send_to_char(ch, "@w  Half the mountain has been blown away, leaving a scarred and jagged\r\nrock in its place. Billowing smoke wafts up from several parts of the\r\nmountain, filling the nearby skies and blotting out the sun.@n");
      }
       send_to_char(ch, "\r\n");
     }
-    if (ROOM_EFFECT(target_room) >= 1 && ROOM_EFFECT(target_room) <= 5) {
+    if (rroom_get_geffect(target_room) >= 1 && rroom_get_geffect(target_room) <= 5) {
       send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
     }
-    if (ROOM_EFFECT(target_room) >= 6) {
+    if (rroom_get_geffect(target_room) >= 6) {
       send_to_char(ch, "@RLava@r covers pretty much the entire area!@n\r\n");
     }
-    if (ROOM_EFFECT(target_room) < 0) {
+    if (rroom_get_geffect(target_room) < 0) {
       send_to_char(ch, "@cThe entire area is flooded with a @Cmystical@c cube of @Bwater!@n\r\n");
     }
   }
@@ -4705,9 +4705,9 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
 
 static void look_in_direction(struct char_data *ch, int dir)
 {
-  if (EXIT(ch, dir)) {
-    if (EXIT(ch, dir)->general_description)
-      send_to_char(ch, "%s", EXIT(ch, dir)->general_description);
+  if (char_get_exit(ch, dir)) {
+    if (char_get_exit(ch, dir)->general_description)
+      send_to_char(ch, "%s", char_get_exit(ch, dir)->general_description);
     else {
      struct obj_data *obj, *next_obj;
      int founded = FALSE;
@@ -4725,12 +4725,12 @@ static void look_in_direction(struct char_data *ch, int dir)
      }
     }
 
-    if (room_exit_flagged(EXIT(ch, dir), EX_ISDOOR) && EXIT(ch, dir)->keyword) {
-      if (!room_exit_flagged(EXIT(ch, dir), EX_SECRET) &&
-           room_exit_flagged(EXIT(ch, dir), EX_CLOSED) )
-        send_to_char(ch, "The %s is closed.\r\n", fname(EXIT(ch, dir)->keyword));
-      else if (!room_exit_flagged(EXIT(ch, dir), EX_CLOSED))
-        send_to_char(ch, "The %s is open.\r\n", fname(EXIT(ch, dir)->keyword));
+    if (room_exit_flagged(char_get_exit(ch, dir), EX_ISDOOR) && char_get_exit(ch, dir)->keyword) {
+      if (!room_exit_flagged(char_get_exit(ch, dir), EX_SECRET) &&
+           room_exit_flagged(char_get_exit(ch, dir), EX_CLOSED) )
+        send_to_char(ch, "The %s is closed.\r\n", fname(char_get_exit(ch, dir)->keyword));
+      else if (!room_exit_flagged(char_get_exit(ch, dir), EX_CLOSED))
+        send_to_char(ch, "The %s is open.\r\n", fname(char_get_exit(ch, dir)->keyword));
     }
   } else
     send_to_char(ch, "Nothing special there...\r\n");
@@ -4748,11 +4748,11 @@ static void look_in_obj(struct char_data *ch, char *arg)
     send_to_char(ch, "There doesn't seem to be %s %s here.\r\n", AN(arg), arg);
   } else if (find_exdesc(arg, obj->ex_description) != NULL && !bits)
       send_to_char(ch, "There's nothing inside that!\r\n");
-    else if ((GET_OBJ_TYPE(obj) == ITEM_PORTAL) && !obj_val_flagged(obj, CONT_CLOSEABLE)) { 
-    if (GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR) < 0) {
+    else if ((obj_get_type_flag(obj) == ITEM_PORTAL) && !obj_val_flagged(obj, CONT_CLOSEABLE)) { 
+    if (obj_get_value(obj, VAL_PORTAL_APPEAR) < 0) {
       /* You can look through the portal to the destination */
       /* where does this lead to? */
-      room_rnum portal_dest = real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST)); 
+      room_rnum portal_dest = real_room(obj_get_value(obj, VAL_PORTAL_DEST)); 
       if (portal_dest == NOWHERE) {
         send_to_char(ch, "You see nothing but infinite darkness...\r\n");
       } else if (room_is_dark(portal_dest) && !char_can_see_in_dark(ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
@@ -4760,21 +4760,21 @@ static void look_in_obj(struct char_data *ch, char *arg)
       } else {
        send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n", world[portal_dest].name);
       }
-    } else if (GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR) < MAX_PORTAL_TYPES) {
+    } else if (obj_get_value(obj, VAL_PORTAL_APPEAR) < MAX_PORTAL_TYPES) {
      /* display the appropriate description from the list of descriptions
 */
-      send_to_char(ch, "%s\r\n", portal_appearance[GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR)]);
+      send_to_char(ch, "%s\r\n", portal_appearance[obj_get_value(obj, VAL_PORTAL_APPEAR)]);
     } else {
       /* We shouldn't really get here, so give a default message */
       send_to_char(ch, "All you can see is the glow of the portal.\r\n");
     }
-  } else if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
+  } else if (obj_get_type_flag(obj) == ITEM_VEHICLE) {
     if (obj_val_flagged(obj, CONT_CLOSED))
       send_to_char(ch, "It is closed.\r\n");
-    else if (GET_OBJ_VAL(obj, VAL_VEHICLE_APPEAR) < 0) {
+    else if (obj_get_value(obj, VAL_VEHICLE_APPEAR) < 0) {
       /* You can look inside the vehicle */
       /* where does this lead to? */
-      room_rnum vehicle_inside = real_room(GET_OBJ_VAL(obj, VAL_VEHICLE_ROOM)); 
+      room_rnum vehicle_inside = real_room(obj_get_value(obj, VAL_VEHICLE_ROOM)); 
       if (vehicle_inside == NOWHERE) {
         send_to_char(ch, "You cannot see inside that.\r\n");
       } else if (room_is_dark(vehicle_inside) && !char_can_see_in_dark(ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
@@ -4786,20 +4786,20 @@ static void look_in_obj(struct char_data *ch, char *arg)
     } else {
       send_to_char(ch, "You cannot see inside that.\r\n");
     }
-  } else if (GET_OBJ_TYPE(obj) == ITEM_WINDOW) {
+  } else if (obj_get_type_flag(obj) == ITEM_WINDOW) {
     look_out_window(ch, arg);
-  } else if ((GET_OBJ_TYPE(obj) != ITEM_DRINKCON) &&
-	     (GET_OBJ_TYPE(obj) != ITEM_FOUNTAIN) &&
-	     (GET_OBJ_TYPE(obj) != ITEM_CONTAINER)&&
-             (GET_OBJ_TYPE(obj) != ITEM_PORTAL))     {
+  } else if ((obj_get_type_flag(obj) != ITEM_DRINKCON) &&
+	     (obj_get_type_flag(obj) != ITEM_FOUNTAIN) &&
+	     (obj_get_type_flag(obj) != ITEM_CONTAINER)&&
+             (obj_get_type_flag(obj) != ITEM_PORTAL))     {
     send_to_char(ch, "There's nothing inside that!\r\n");
-  } else if ((GET_OBJ_TYPE(obj) == ITEM_CONTAINER) || 
-             (GET_OBJ_TYPE(obj) == ITEM_PORTAL)) {
+  } else if ((obj_get_type_flag(obj) == ITEM_CONTAINER) || 
+             (obj_get_type_flag(obj) == ITEM_PORTAL)) {
       if (obj_val_flagged(obj, CONT_CLOSED))
 	send_to_char(ch, "It is closed.\r\n");
       else {
 	send_to_char(ch, "%s", obj->short_description);
-        if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && (obj_get_vnum(obj) == 697 || obj_get_vnum(obj) == 698 || obj_get_vnum(obj) == 682 || obj_get_vnum(obj) == 683 || obj_get_vnum(obj) == 684)) {
+        if (obj_get_type_flag(obj) == ITEM_CONTAINER && (obj_get_vnum(obj) == 697 || obj_get_vnum(obj) == 698 || obj_get_vnum(obj) == 682 || obj_get_vnum(obj) == 683 || obj_get_vnum(obj) == 684)) {
          act("$n looks in $p.", TRUE, ch, obj, 0, TO_ROOM);
         }
 	switch (bits) {
@@ -4817,22 +4817,22 @@ static void look_in_obj(struct char_data *ch, char *arg)
 	list_obj_to_char(obj->contains, ch, SHOW_OBJ_SHORT, TRUE);
       }
     } else {		/* item must be a fountain or drink container */
-      if (GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL) <= 0 && (!GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY) == 1))
+      if (obj_get_value(obj, VAL_DRINKCON_HOWFULL) <= 0 && (!obj_get_value(obj, VAL_DRINKCON_CAPACITY) == 1))
 	send_to_char(ch, "It is empty.\r\n");
       else {
-        if (GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY) < 0)
+        if (obj_get_value(obj, VAL_DRINKCON_CAPACITY) < 0)
         {
           char buf2[MAX_STRING_LENGTH];
-	  sprinttype(GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID), color_liquid, buf2, sizeof(buf2));
+	  sprinttype(obj_get_value(obj, VAL_DRINKCON_LIQUID), color_liquid, buf2, sizeof(buf2));
 	  send_to_char(ch, "It's full of a %s liquid.\r\n", buf2);
         }
-       else if (GET_OBJ_VAL(obj,VAL_DRINKCON_HOWFULL)>GET_OBJ_VAL(obj,VAL_DRINKCON_CAPACITY)) {
+       else if (obj_get_value(obj, VAL_DRINKCON_HOWFULL)>obj_get_value(obj, VAL_DRINKCON_CAPACITY)) {
 	  send_to_char(ch, "Its contents seem somewhat murky.\r\n"); /* BUG */
 	} else {
           char buf2[MAX_STRING_LENGTH];
-	  amt = GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY);
-          int leftin = GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL);
-	  sprinttype(GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID), color_liquid, buf2, sizeof(buf2));
+	  amt = obj_get_value(obj, VAL_DRINKCON_CAPACITY);
+          int leftin = obj_get_value(obj, VAL_DRINKCON_HOWFULL);
+	  sprinttype(obj_get_value(obj, VAL_DRINKCON_LIQUID), color_liquid, buf2, sizeof(buf2));
           if (leftin == amt) {
            send_to_char(ch, "It's full of a %s liquid.\r\n", buf2);
           } else if (leftin >= amt * .8) {
@@ -4890,14 +4890,14 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
 
   if (cmread) {
     for (obj = ch->carrying; obj;obj=obj->next_content) {
-      if(GET_OBJ_TYPE(obj) == ITEM_BOARD) {
+      if(obj_get_type_flag(obj) == ITEM_BOARD) {
 	found = TRUE;
 	break;
       }
     }
     if(!obj) {
-      for (obj = world[IN_ROOM(ch)].contents; obj;obj=obj->next_content) {
-	if(GET_OBJ_TYPE(obj) == ITEM_BOARD) {
+      for (obj = world[char_get_in_room(ch)].contents; obj;obj=obj->next_content) {
+	if(obj_get_type_flag(obj) == ITEM_BOARD) {
 	  found = TRUE;
 	  break;
 	}
@@ -4948,30 +4948,30 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
   }
 
   /* Does the argument match an extra desc in the room? */
-  if ((desc = find_exdesc(arg, world[IN_ROOM(ch)].ex_description)) != NULL && ++i == fnum) {
+  if ((desc = find_exdesc(arg, world[char_get_in_room(ch)].ex_description)) != NULL && ++i == fnum) {
     page_string(ch->desc, desc, FALSE);
     return;
   } 
 
   /* Does the argument match an extra desc in the char's equipment? */
   for (j = 0; j < NUM_WEARS && !found; j++)
-    if (GET_EQ(ch, j) && char_can_see_obj(ch, GET_EQ(ch, j)))
-      if ((desc = find_exdesc(arg, GET_EQ(ch, j)->ex_description)) != NULL && ++i == fnum) {
+    if (char_get_equipment(ch, j) && char_can_see_obj(ch, char_get_equipment(ch, j)))
+      if ((desc = find_exdesc(arg, char_get_equipment(ch, j)->ex_description)) != NULL && ++i == fnum) {
 	send_to_char(ch, "%s", desc);
-        if (isname(arg, GET_EQ(ch, j)->name)) {
-          if (GET_OBJ_TYPE(GET_EQ(ch, j)) == ITEM_WEAPON) {
+        if (isname(arg, char_get_equipment(ch, j)->name)) {
+          if (obj_get_type_flag(char_get_equipment(ch, j)) == ITEM_WEAPON) {
             send_to_char(ch, "The weapon type of %s is a %s.\r\n", 
-              GET_OBJ_SHORT(GET_EQ(ch, j)), 
-              weapon_type[(int) GET_OBJ_VAL(GET_EQ(ch, j), VAL_WEAPON_SKILL)]);
+              obj_get_short_description(char_get_equipment(ch, j)), 
+              weapon_type[(int) obj_get_value(char_get_equipment(ch, j), VAL_WEAPON_SKILL)]);
           }
-          if (GET_OBJ_TYPE(GET_EQ(ch, j)) == ITEM_SPELLBOOK) {
-            display_spells(ch, GET_EQ(ch, j));
+          if (obj_get_type_flag(char_get_equipment(ch, j)) == ITEM_SPELLBOOK) {
+            display_spells(ch, char_get_equipment(ch, j));
           }
-          if (GET_OBJ_TYPE(GET_EQ(ch, j)) == ITEM_SCROLL) {
-            display_scroll(ch, GET_EQ(ch, j));
+          if (obj_get_type_flag(char_get_equipment(ch, j)) == ITEM_SCROLL) {
+            display_scroll(ch, char_get_equipment(ch, j));
           }
-          diag_obj_to_char(GET_EQ(ch, j), ch);
-          send_to_char(ch, "It appears to be made of %s", material_names[GET_OBJ_MATERIAL(GET_EQ(ch, j))]);
+          diag_obj_to_char(char_get_equipment(ch, j), ch);
+          send_to_char(ch, "It appears to be made of %s", material_names[obj_get_value(char_get_equipment(ch, j), 7)]);
         }
 	found = TRUE;
       }
@@ -4980,24 +4980,23 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
   for (obj = ch->carrying; obj && !found; obj = obj->next_content) {
     if (char_can_see_obj(ch, obj))
       if ((desc = find_exdesc(arg, obj->ex_description)) != NULL && ++i == fnum) {
-	if (GET_OBJ_TYPE(obj) == ITEM_BOARD) {
+	if (obj_get_type_flag(obj) == ITEM_BOARD) {
 	  show_board(obj_get_vnum(obj), ch);
 	} else {
 	  send_to_char(ch, "%s", desc);
           if (isname(arg, obj->name)) {
-            if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
+            if (obj_get_type_flag(obj) == ITEM_WEAPON) {
               send_to_char(ch, "The weapon type of %s is a %s.\r\n", 
-                GET_OBJ_SHORT(obj), weapon_type[(int) GET_OBJ_VAL(obj, 
-                VAL_WEAPON_SKILL)]);
+                obj_get_short_description(obj), weapon_type[(int) obj_get_value(obj, VAL_WEAPON_SKILL)]);
             }
-            if (GET_OBJ_TYPE(obj) == ITEM_SPELLBOOK) {
+            if (obj_get_type_flag(obj) == ITEM_SPELLBOOK) {
               display_spells(ch, obj);
             }
-            if (GET_OBJ_TYPE(obj) == ITEM_SCROLL) {
+            if (obj_get_type_flag(obj) == ITEM_SCROLL) {
               display_scroll(ch, obj);
             }
             diag_obj_to_char(obj, ch);
-            send_to_char(ch, "It appears to be made of %s, and weights %s", material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)));
+            send_to_char(ch, "It appears to be made of %s, and weights %s", material_names[obj_get_value(obj, 7)], add_commas(obj_get_weight(obj)));
           }
 	}
 	found = TRUE;
@@ -5005,37 +5004,37 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
   }
 
   /* Does the argument match an extra desc of an object in the room? */
-  for (obj = world[IN_ROOM(ch)].contents; obj && !found; obj = obj->next_content)
+  for (obj = world[char_get_in_room(ch)].contents; obj && !found; obj = obj->next_content)
     if (char_can_see_obj(ch, obj))
       if ((desc = find_exdesc(arg, obj->ex_description)) != NULL && ++i == fnum) {
-	if(GET_OBJ_TYPE(obj) == ITEM_BOARD) {
+	if(obj_get_type_flag(obj) == ITEM_BOARD) {
 	  show_board(obj_get_vnum(obj), ch);
 	} else {
 	send_to_char(ch, "%s", desc);
-        if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
+        if (obj_get_type_flag(obj) == ITEM_VEHICLE) {
          send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
          send_to_char(ch, "@YSyntax@D: @COpen hatch\r\n");
          send_to_char(ch, "@YSyntax@D: @CClose hatch\r\n");
          send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
          send_to_char(ch, "@YSyntax@D: @CEnter hatch\r\n");
-        } else if (GET_OBJ_TYPE(obj) == ITEM_HATCH) {
+        } else if (obj_get_type_flag(obj) == ITEM_HATCH) {
          send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
          send_to_char(ch, "@YSyntax@D: @COpen hatch\r\n");
          send_to_char(ch, "@YSyntax@D: @CClose hatch\r\n");
          send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
          send_to_char(ch, "@YSyntax@D: @CLeave@n\r\n");
-        } else if (GET_OBJ_TYPE(obj) == ITEM_WINDOW) {
+        } else if (obj_get_type_flag(obj) == ITEM_WINDOW) {
          look_out_window(ch, obj->name);
         }
 
-         if (GET_OBJ_TYPE(obj) == ITEM_CONTROL) {
-         send_to_char(ch, "@RFUEL@D: %s%s@n\r\n", GET_FUEL(obj) >= 200 ? "@G" : GET_FUEL(obj) >= 100 ? "@Y" : "@r", add_commas(GET_FUEL(obj)));
+         if (obj_get_type_flag(obj) == ITEM_CONTROL) {
+         send_to_char(ch, "@RFUEL@D: %s%s@n\r\n", obj_get_value(obj, 2) >= 200 ? "@G" : obj_get_value(obj, 2) >= 100 ? "@Y" : "@r", add_commas(obj_get_value(obj, 2)));
         }
-        if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
-          send_to_char(ch, "The weapon type of %s is a %s.\r\n", GET_OBJ_SHORT(obj), weapon_type[(int) GET_OBJ_VAL(obj, VAL_WEAPON_SKILL)]);
+        if (obj_get_type_flag(obj) == ITEM_WEAPON) {
+          send_to_char(ch, "The weapon type of %s is a %s.\r\n", obj_get_short_description(obj), weapon_type[(int) obj_get_value(obj, VAL_WEAPON_SKILL)]);
         }
         diag_obj_to_char(obj, ch);
-        send_to_char(ch, "It appears to be made of %s, and weights %s", material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)));
+        send_to_char(ch, "It appears to be made of %s, and weights %s", material_names[obj_get_value(obj, 7)], add_commas(obj_get_weight(obj)));
 	}
 	found = TRUE;
       }
@@ -5068,7 +5067,7 @@ static void look_out_window(struct char_data *ch, char *arg)
               ch, &dummy, &viewport))) {
       send_to_char(ch, "You don't see that here.\r\n");
       return;
-    } else if (GET_OBJ_TYPE(viewport) != ITEM_WINDOW) {
+    } else if (obj_get_type_flag(viewport) != ITEM_WINDOW) {
       send_to_char(ch, "You can't look out that!\r\n");
     return;
   }
@@ -5078,8 +5077,8 @@ static void look_out_window(struct char_data *ch, char *arg)
     return;
   } else {
     /* Look for any old window in the room */
-    for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content)
-      if ((GET_OBJ_TYPE(i) == ITEM_WINDOW) &&
+    for (i = world[char_get_in_room(ch)].contents; i; i = i->next_content)
+      if ((obj_get_type_flag(i) == ITEM_WINDOW) &&
            isname("window", i->name)) {
         viewport = i;
       continue;
@@ -5093,24 +5092,24 @@ static void look_out_window(struct char_data *ch, char *arg)
     /* The window is closed */
     send_to_char(ch, "It is closed.\r\n");
   } else {
-    if (GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED1) < 0) {
+    if (obj_get_value(viewport, VAL_WINDOW_UNUSED1) < 0) {
       /* We are looking out of the room */
-      if (GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED4) < 0) {
+      if (obj_get_value(viewport, VAL_WINDOW_UNUSED4) < 0) {
         /* Look for the default "outside" room */
         for (door = 0; door < NUM_OF_DIRS; door++)
-          if (EXIT(ch, door))
-            if (EXIT(ch, door)->to_room != NOWHERE)
-              if (!rroom_flagged(EXIT(ch, door)->to_room, ROOM_INDOORS)) {
-                target_room = EXIT(ch, door)->to_room;
+          if (char_get_exit(ch, door))
+            if (char_get_exit(ch, door)->to_room != NOWHERE)
+              if (!rroom_flagged(char_get_exit(ch, door)->to_room, ROOM_INDOORS)) {
+                target_room = char_get_exit(ch, door)->to_room;
                 continue;
               }
       } else {
-        target_room = real_room(GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED4));
+        target_room = real_room(obj_get_value(viewport, VAL_WINDOW_UNUSED4));
       }
     } else {
       /* We are looking out of a vehicle */
-      if ( (vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED1))) )
-        target_room = IN_ROOM(vehicle);
+      if ( (vehicle = find_vehicle_by_vnum(obj_get_value(viewport, VAL_WINDOW_UNUSED1))) )
+        target_room = obj_get_in_room(vehicle);
     }
     if (target_room == NOWHERE) {
       send_to_char(ch, "You don't seem to be able to see outside.\r\n");
@@ -5167,8 +5166,8 @@ ACMD(do_rptrans)
      return; 
     }
 
-    if (amt > GET_RP(ch)) {
-     send_to_char(ch, "@WYou only have @C%d@W RPP!@n\r\n", GET_RP(ch));
+    if (amt > char_get_rp(ch)) {
+     send_to_char(ch, "@WYou only have @C%d@W RPP!@n\r\n", char_get_rp(ch));
      return;
     }
 
@@ -5180,7 +5179,7 @@ ACMD(do_rptrans)
     for (k = descriptor_list; k; k = k->next) {
      if (char_is_npc(k->character))
       continue;
-     if (STATE(k) != CON_PLAYING)
+     if (desc_get_connected(k) != CON_PLAYING)
       continue;
      if (!strcasecmp(k->user, arg))
       vict = k->character;
@@ -5189,14 +5188,14 @@ ACMD(do_rptrans)
      userWrite(NULL, 0, amt, 0, arg);
     }
     else {
-     GET_RP(vict) += amt;
+     char_set_rp(vict, char_get_rp(vict) + (amt));
      vict->desc->rpp += amt;
      userWrite(vict->desc, 0, 0, 0, "index");
-     GET_TRP(vict) += amt;
+     char_set_trp(vict, char_get_trp(vict) + (amt));
      save_char(vict);
      send_to_char(vict, "@W%s gives @C%d@W of their RPP to you. How nice!\r\n", char_get_name(ch), amt);
     }
-    GET_RP(ch) -= amt;
+    char_set_rp(ch, char_get_rp(ch) - (amt));
     ch->desc->rpp -= amt;
     userWrite(ch->desc, 0, 0, 0, "index");          
     send_to_char(ch, "@WYou exchange @C%d@W RPP to user @c%s@W for a warm fuzzy feeling.\r\n", amt, CAP(arg));
@@ -5214,7 +5213,7 @@ ACMD(do_rpbank)
 	
 	if (!*arg) {
 	  send_to_char(ch, "Syntax: rpbank <amount>\r\n");
-	  send_to_char(ch, "Current RPP Bank: %d\r\n", GET_RBANK(ch));
+	  send_to_char(ch, "Current RPP Bank: %d\r\n", char_get_rbank(ch));
 	  return;
 	}
 	
@@ -5225,16 +5224,16 @@ ACMD(do_rpbank)
 	  return;
 	}
 	
-	if (amt > GET_RP(ch)) {
+	if (amt > char_get_rp(ch)) {
 	  send_to_char(ch, "You do not have that much RPP to send to the Bank!\r\n");
 	  return;
 	}
 	
-	GET_RP(ch) -= amt;
+	char_set_rp(ch, char_get_rp(ch) - (amt));
 	ch->desc->rpp -= amt;
-	GET_RBANK(ch) += amt;
+	char_set_rbank(ch, char_get_rbank(ch) + (amt));
 	ch->desc->rbank += amt;
-	send_to_char(ch, "You send %d to your RPP Bank. Your total is now %d.\r\n", amt, GET_RBANK(ch));
+	send_to_char(ch, "You send %d to your RPP Bank. Your total is now %d.\r\n", amt, char_get_rbank(ch));
 	mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "RPP Bank: %s has put %d RPP into their bank", char_get_name(ch), amt);
 	
 }
@@ -5261,8 +5260,8 @@ ACMD(do_rbanktrans)
      return; 
     }
 
-    if (amt > GET_RBANK(ch)) {
-     send_to_char(ch, "@WYou only have @C%d@W Banked RPP!@n\r\n", GET_RBANK(ch));
+    if (amt > char_get_rbank(ch)) {
+     send_to_char(ch, "@WYou only have @C%d@W Banked RPP!@n\r\n", char_get_rbank(ch));
      return;
     }
 
@@ -5274,7 +5273,7 @@ ACMD(do_rbanktrans)
     for (k = descriptor_list; k; k = k->next) {
      if (char_is_npc(k->character))
       continue;
-     if (STATE(k) != CON_PLAYING)
+     if (desc_get_connected(k) != CON_PLAYING)
       continue;
      if (!strcasecmp(k->user, arg))
       vict = k->character;
@@ -5283,13 +5282,13 @@ ACMD(do_rbanktrans)
      userWrite(NULL, 0, amt, 0, arg);
     }
     else {
-     GET_RBANK(vict) += amt;
+     char_set_rbank(vict, char_get_rbank(vict) + (amt));
      vict->desc->rbank += amt;
      userWrite(vict->desc, 0, 0, 0, "index");
      save_char(vict);
      send_to_char(vict, "@W%s gives @C%d@W of their Banked RPP to you. How nice!\r\n", char_get_name(ch), amt);
     }
-    GET_RBANK(ch) -= amt;
+    char_set_rbank(ch, char_get_rbank(ch) - (amt));
     ch->desc->rbank -= amt;
     userWrite(ch->desc, 0, 0, 0, "index");          
     send_to_char(ch, "@wWELL @xGOLLY @xGEE @xWILLICKERS@x! @wYOU @RZ@YIM @RZ@YAMMED @C%d @wRIPROOZLES TO @C%s!@n\r\n", amt, CAP(arg));
@@ -5307,7 +5306,7 @@ ACMD(do_rdisplay)
 	
 	if (!*argument) {
 		send_to_char(ch, "Clearing room display.\r\n");
-		GET_RDISPLAY(ch) = "Empty";
+		char_set_rdisplay(ch, "Empty");
 	}
 	else {
 		char derp[MAX_STRING_LENGTH];
@@ -5315,7 +5314,7 @@ ACMD(do_rdisplay)
 		strcpy(derp, argument);
 		
 		send_to_char(ch, "You set your display to; %s\r\n", derp);
-		GET_RDISPLAY(ch) = strdup(derp);
+		char_set_rdisplay(ch, strdup(derp));
 	}
 }
 
@@ -5376,7 +5375,7 @@ ACMD(do_perf)
 
  two_arguments(argument, arg, arg2);
 
- if (char_is_npc(ch) || GET_ADMLEVEL(ch) > 0) {
+ if (char_is_npc(ch) || char_get_admlevel(ch) > 0) {
   send_to_char(ch, "I don't think so.\r\n");
   return;
  }
@@ -5416,7 +5415,7 @@ ACMD(do_perf)
   send_to_char(ch, "You have not mastered the skill %s and thus can't perfect it.\r\n", arg);
   return;
  }
- if (GET_SKILL_PERF(ch, skill) > 0) {
+ if (char_get_skills_perf(ch, skill) > 0) {
   send_to_char(ch, "You have already mastered the skill %s and chosen how to perfect it.\r\n", arg);
   return;
  }
@@ -5436,15 +5435,15 @@ ACMD(do_perf)
   switch (type) {
    case 1:
     send_to_char(ch, "You perfect the skill %s so that you can over charge it!\r\n", spell_info[skill].name);
-    GET_SKILL_PERF(ch, skill) = 1;
+    char_set_skills_perf(ch, skill, 1);
     break;
    case 2:
     send_to_char(ch, "You perfect the skill %s so that you have supreme accuracy with it!\r\n", spell_info[skill].name);
-    GET_SKILL_PERF(ch, skill) = 2;
+    char_set_skills_perf(ch, skill, 2);
     break;
    case 3:
     send_to_char(ch, "You perfect the skill %s so that you require a lower minimum charge for it!\r\n", spell_info[skill].name);
-    GET_SKILL_PERF(ch, skill) = 3;
+    char_set_skills_perf(ch, skill, 3);
     break;
   }
  }
@@ -5457,15 +5456,15 @@ ACMD(do_look)
 
   if (!ch->desc)
     return;
-  if (GET_POS(ch) < POS_SLEEPING)
+  if (char_get_position(ch) < POS_SLEEPING)
     send_to_char(ch, "You can't see anything but stars!\r\n");
   else if (char_aff_flagged(ch, AFF_BLIND))
     send_to_char(ch, "You can't see a damned thing, you're blind!\r\n");
   else if (char_plr_flagged(ch, PLR_EYEC))
       send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
-  else if (room_is_dark(IN_ROOM(ch)) && !char_can_see_in_dark(ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
+  else if (room_is_dark(char_get_in_room(ch)) && !char_can_see_in_dark(ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
     send_to_char(ch, "It is pitch black...\r\n");
-    list_char_to_char(world[IN_ROOM(ch)].people, ch);	/* glowing red eyes */
+    list_char_to_char(world[char_get_in_room(ch)].people, ch);	/* glowing red eyes */
   } else {
     char arg[MAX_INPUT_LENGTH], arg2[200];
 
@@ -5483,12 +5482,12 @@ ACMD(do_look)
       if (subcmd == SCMD_SEARCH) {
        search_room(ch);
       } else {
-       look_at_room(IN_ROOM(ch), ch, 1);
-       if (GET_ADMLEVEL(ch) < 1 && !char_aff_flagged(ch, AFF_HIDE)) {
+       look_at_room(char_get_in_room(ch), ch, 1);
+       if (char_get_admlevel(ch) < 1 && !char_aff_flagged(ch, AFF_HIDE)) {
         //act("@w$n@w looks around the room.@n", TRUE, ch, 0, 0, TO_ROOM);
        }
       }
-    } else if (is_abbrev(arg, "inside")   && EXIT(ch, INDIR) && !*arg2) {
+    } else if (is_abbrev(arg, "inside")   && char_get_exit(ch, INDIR) && !*arg2) {
       if (subcmd == SCMD_SEARCH)
         search_in_direction(ch, INDIR);
       else
@@ -5504,7 +5503,7 @@ ACMD(do_look)
                (subcmd == SCMD_LOOK) && *arg2) {
       look_out_window(ch, arg2);
     } else if (is_abbrev(arg, "outside") && 
-               (subcmd == SCMD_LOOK) && !EXIT(ch, OUTDIR)) {
+               (subcmd == SCMD_LOOK) && !char_get_exit(ch, OUTDIR)) {
       look_out_window(ch, arg2);
     } else if ((look_type = search_block(arg, dirs, FALSE)) >= 0 ||
                (look_type = search_block(arg, abbr_dirs, FALSE)) >= 0) {
@@ -5528,7 +5527,7 @@ ACMD(do_look)
       struct extra_descr_data *i; 
       int found = 0; 
  
-      for (i = world[IN_ROOM(ch)].ex_description; i; i = i->next) { 
+      for (i = world[char_get_in_room(ch)].ex_description; i; i = i->next) { 
         if (*i->keyword != '.') { 
           send_to_char(ch, "%s%s:\r\n%s",                  
                 (found ? "\r\n" : ""), i->keyword, i->description);                
@@ -5537,7 +5536,7 @@ ACMD(do_look)
       } 
       if (!found) 
         send_to_char(ch, "You couldn't find anything noticeable.\r\n");
-    } else if (find_exdesc(arg, world[IN_ROOM(ch)].ex_description) != NULL) {
+    } else if (find_exdesc(arg, world[char_get_in_room(ch)].ex_description) != NULL) {
       look_at_target(ch, arg, 0);
     } else {
       if (subcmd == SCMD_SEARCH)
@@ -5568,9 +5567,9 @@ ACMD(do_examine)
 		      FIND_OBJ_EQUIP, ch, &tmp_char, &tmp_object);
 
   if (tmp_object) {
-    if ((GET_OBJ_TYPE(tmp_object) == ITEM_DRINKCON) ||
-	(GET_OBJ_TYPE(tmp_object) == ITEM_FOUNTAIN) ||
-	(GET_OBJ_TYPE(tmp_object) == ITEM_CONTAINER)) {
+    if ((obj_get_type_flag(tmp_object) == ITEM_DRINKCON) ||
+	(obj_get_type_flag(tmp_object) == ITEM_FOUNTAIN) ||
+	(obj_get_type_flag(tmp_object) == ITEM_CONTAINER)) {
       send_to_char(ch, "When you look inside, you see:\r\n");
       look_in_obj(ch, arg);
     }
@@ -5579,12 +5578,12 @@ ACMD(do_examine)
 
 ACMD(do_gold)
 {
-  if (GET_GOLD(ch) == 0)
+  if (char_get_gold(ch) == 0)
     send_to_char(ch, "You're broke!\r\n");
-  else if (GET_GOLD(ch) == 1)
+  else if (char_get_gold(ch) == 1)
     send_to_char(ch, "You have one little zenni.\r\n");
   else
-    send_to_char(ch, "You have %d zenni.\r\n", GET_GOLD(ch));
+    send_to_char(ch, "You have %d zenni.\r\n", char_get_gold(ch));
 }
 
 ACMD(do_score)
@@ -5642,17 +5641,17 @@ ACMD(do_score)
    } else {
      sprintf(version, "Alpha 0.5");
    }
-   send_to_char(ch, "  @D| @CModel@D: %15s@D,    @CUGP@D: @G%15s@D,  @CVersion@D: @r%-12s@D|@n\n", model, absorb > 0 ? "@RN/A" : add_commas(GET_UP(ch)), version);
+   send_to_char(ch, "  @D| @CModel@D: %15s@D,    @CUGP@D: @G%15s@D,  @CVersion@D: @r%-12s@D|@n\n", model, absorb > 0 ? "@RN/A" : add_commas(char_get_upgrade(ch)), version);
   }
-  if (GET_CLAN(ch) != NULL) {
-   send_to_char(ch, "  @D|  @CClan@D: @W%-64s@D|@n\n", GET_CLAN(ch));
+  if (char_get_clan(ch) != NULL) {
+   send_to_char(ch, "  @D|  @CClan@D: @W%-64s@D|@n\n", char_get_clan(ch));
   }
  send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", TRUE_RACE(ch), SENSEI_NAME(ch), SENSEI_STYLE(ch));
   char hei[300], wei[300];
   sprintf(hei, "%dcm", get_measure(ch, char_get_pc_height(ch), 0));
   sprintf(wei, "%dkg", get_measure(ch, 0, char_get_pc_weight(ch)));
  send_to_char(ch, "  @D|   @CAge@D: @W%10s@D,  @CHeight@D: @W%15s@D,  @CWeight@D: @W%-17s@D|@n\n", add_commas(GET_AGE(ch)), hei, wei);
- send_to_char(ch, "  @D|@CGender@D: @W%10s@D,  @C  Size@D: @W%15s@D,  @C Align@D: @W%-17s@D|@n\n", genders[(int)GET_SEX(ch)], size_names[get_size(ch)], disp_align(ch));
+ send_to_char(ch, "  @D|@CGender@D: @W%10s@D,  @C  Size@D: @W%15s@D,  @C Align@D: @W%-17s@D|@n\n", genders[(int)char_get_sex(ch)], size_names[get_size(ch)], disp_align(ch));
  }
  if (view == full || view == health) {
  send_to_char(ch, "  @cO@D-----------------------------@D[   @cHealth   @D]-----------------------------@cO@n\n");
@@ -5664,38 +5663,38 @@ ACMD(do_score)
          (getEffBaseKI(ch))), add_commas((getEffBaseST(ch))));
   if (!char_is_android(ch) && (getCurLF(ch)) > 0) {
    send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(
-           (getCurLF(ch))), "/", add_commas((getMaxLF(ch))), GET_LIFEPERC(ch), "%");
+           (getCurLF(ch))), "/", add_commas((getMaxLF(ch))), char_get_lifeperc(ch), "%");
   } else if (!char_is_android(ch)) {
    send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(0), "/", add_commas(
-           (getMaxLF(ch))), GET_LIFEPERC(ch), "%");
+           (getMaxLF(ch))), char_get_lifeperc(ch), "%");
   }
  }
  if (view == full || view == stats) {
  send_to_char(ch, "  @cO@D-----------------------------@D[ @cStatistics @D]-----------------------------@cO@n\n");
- send_to_char(ch, "      @D<@wCharacter Level@D: @w%-3d@D> <@wRPP@D: @w%-3d@D> <@wRPP Bank@D: @w%-3d@D>@n\n", char_get_level(ch), GET_RP(ch), GET_RBANK(ch));
- send_to_char(ch, "      @D<@wSpeed Index@D: @w%-15s@D> <@wArmor Index@D: @w%-15s@D>@n\n", add_commas(char_get_speedi(ch)), add_commas(GET_ARMOR(ch)));
- send_to_char(ch, "    @D[    @RStrength@D|@G%2d (%3d)@D] [     @YAgility@D|@G%2d (%3d)@D] [      @BSpeed@D|@G%2d (%3d)@D]@n\n", ch->real_abils.str, GET_STR(ch), ch->real_abils.dex, GET_DEX(ch), ch->real_abils.cha, GET_CHA(ch));
- send_to_char(ch, "    @D[@gConstitution@D|@G%2d (%3d)@D] [@CIntelligence@D|@G%2d (%3d)@D] [     @MWisdom@D|@G%2d (%3d)@D]@n\n", ch->real_abils.con, GET_CON(ch), ch->real_abils.intel, GET_INT(ch), ch->real_abils.wis, GET_WIS(ch));
+ send_to_char(ch, "      @D<@wCharacter Level@D: @w%-3d@D> <@wRPP@D: @w%-3d@D> <@wRPP Bank@D: @w%-3d@D>@n\n", char_get_level(ch), char_get_rp(ch), char_get_rbank(ch));
+ send_to_char(ch, "      @D<@wSpeed Index@D: @w%-15s@D> <@wArmor Index@D: @w%-15s@D>@n\n", add_commas(char_get_speedi(ch)), add_commas(char_get_armor(ch)));
+ send_to_char(ch, "    @D[    @RStrength@D|@G%2d (%3d)@D] [     @YAgility@D|@G%2d (%3d)@D] [      @BSpeed@D|@G%2d (%3d)@D]@n\n", ch->real_abils.str, char_get_aff_abils_str(ch), ch->real_abils.dex, char_get_aff_abils_dex(ch), ch->real_abils.cha, char_get_aff_abils_cha(ch));
+ send_to_char(ch, "    @D[@gConstitution@D|@G%2d (%3d)@D] [@CIntelligence@D|@G%2d (%3d)@D] [     @MWisdom@D|@G%2d (%3d)@D]@n\n", ch->real_abils.con, char_get_aff_abils_con(ch), ch->real_abils.intel, char_get_aff_abils_intel(ch), ch->real_abils.wis, char_get_aff_abils_wis(ch));
  }
  if (view == full || view == other) {
  send_to_char(ch, "  @cO@D-----------------------------@D[   @cOther    @D]-----------------------------@cO@n\n");
  send_to_char(ch, "                @D<@YZenni@D>                 <@rInventory Weight@D>@n\n");
- send_to_char(ch, "      @D[   @CCarried@D| @W%-15s@D] [   @CCarried@D| @W%-15s@D]@n\n", add_commas(GET_GOLD(ch)), add_commas(
+ send_to_char(ch, "      @D[   @CCarried@D| @W%-15s@D] [   @CCarried@D| @W%-15s@D]@n\n", add_commas(char_get_gold(ch)), add_commas(
          (getCurCarriedWeight(ch))));
- send_to_char(ch, "      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n\n", add_commas(GET_BANK_GOLD(ch)), add_commas(CAN_CARRY_W(ch)));
+ send_to_char(ch, "      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n\n", add_commas(char_get_bank_gold(ch)), add_commas(CAN_CARRY_W(ch)));
  send_to_char(ch, "      @D[ @CMax Carry@D| @W%-15s@D]@n\n", add_commas(char_gold_carry(ch)));
   int numb = char_get_bank_interest(ch);
  send_to_char(ch, "      @D[  @CInterest@D| @W%-15s@D]\n", add_commas(numb));
   if (char_is_arlian(ch)) {
    send_to_char(ch, "                             @D<@GEvolution @D>@n\n");
-   send_to_char(ch, "      @D[ @CEvo Level@D| @W%-15d@D] [   @CEvo Exp@D| @W%-15s@D]\n",GET_MOLT_LEVEL(ch), add_commas(GET_MOLT_EXP(ch)));
+   send_to_char(ch, "      @D[ @CEvo Level@D| @W%-15d@D] [   @CEvo Exp@D| @W%-15s@D]\n",char_get_moltlevel(ch), add_commas(char_get_moltexp(ch)));
    send_to_char(ch, "      @D[ @CThreshold@D| @W%-15s@D]@n\n", add_commas(molt_threshold(ch)));
   }
   if (char_get_level(ch) < 100) {
    send_to_char(ch, "                             @D<@gAdvancement@D>@n\n");
   }
   if (char_get_level(ch) < 100) {
-   send_to_char(ch, "      @D[@CExperience@D| @W%-15s@D] [@CNext Level@D| @W%-15s@D]@n\n", add_commas(GET_EXP(ch)), add_commas(level_exp(ch, char_get_level(ch) + 1) - GET_EXP(ch)));
+   send_to_char(ch, "      @D[@CExperience@D| @W%-15s@D] [@CNext Level@D| @W%-15s@D]@n\n", add_commas(char_get_exp(ch)), add_commas(level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch)));
    send_to_char(ch, "      @D[  @CRpp Cost@D| @W%-15d@D]@n\n", rpp_to_level(ch));
   }
 
@@ -5726,11 +5725,11 @@ static void trans_check(struct char_data *ch, struct char_data *vict)
   }
  }
  else if (char_is_hoshijin(vict)) {
-  if (GET_MIMIC(vict) == 0 || vict == ch) {
-   if (GET_PHASE(vict) == 1) {
+  if (char_get_mimic(vict) == 0 || vict == ch) {
+   if (char_get_starphase(vict) == 1) {
     send_to_char(ch, "         @cCurrent Transformation@D: @CBirth Phase@n\r\n");
    }
-   else if (GET_PHASE(vict) == 2) {
+   else if (char_get_starphase(vict) == 2) {
     send_to_char(ch, "         @cCurrent Transformation@D: @CLife Phase@n\r\n");
    } else {
    send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
@@ -5961,52 +5960,52 @@ ACMD(do_status)
         if (!char_plr_flagged(ch, PLR_HEAD)) {
             send_to_char(ch, "            @D[@cHead        @D: @rMissing.         @D]@n\r\n");
         }
-        if (GET_LIMBCOND(ch, 1) >= 50 && !char_plr_flagged(ch, PLR_CRARM)) {
-            send_to_char(ch, "            @D[@cRight Arm   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 1), "%", "%");
+        if (char_get_limb_condition(ch, (1)-1) >= 50 && !char_plr_flagged(ch, PLR_CRARM)) {
+            send_to_char(ch, "            @D[@cRight Arm   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", char_get_limb_condition(ch, (1)-1), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 1) > 0 && !char_plr_flagged(ch, PLR_CRARM)) {
-            send_to_char(ch, "            @D[@cRight Arm   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 1), "%", "%");
+        else if (char_get_limb_condition(ch, (1)-1) > 0 && !char_plr_flagged(ch, PLR_CRARM)) {
+            send_to_char(ch, "            @D[@cRight Arm   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", char_get_limb_condition(ch, (1)-1), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 1) > 0 && char_plr_flagged(ch, PLR_CRARM)) {
-            send_to_char(ch, "            @D[@cRight Arm   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 1), "%", "%");
+        else if (char_get_limb_condition(ch, (1)-1) > 0 && char_plr_flagged(ch, PLR_CRARM)) {
+            send_to_char(ch, "            @D[@cRight Arm   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", char_get_limb_condition(ch, (1)-1), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 1) <= 0) {
+        else if (char_get_limb_condition(ch, (1)-1) <= 0) {
             send_to_char(ch, "            @D[@cRight Arm   @D: @rMissing.         @D]@n\r\n");
         }
-        if (GET_LIMBCOND(ch, 2) >= 50 && !char_plr_flagged(ch, PLR_CLARM)) {
-            send_to_char(ch, "            @D[@cLeft Arm    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 2), "%", "%");
+        if (char_get_limb_condition(ch, (2)-1) >= 50 && !char_plr_flagged(ch, PLR_CLARM)) {
+            send_to_char(ch, "            @D[@cLeft Arm    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", char_get_limb_condition(ch, (2)-1), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 2) > 0 && !char_plr_flagged(ch, PLR_CLARM)) {
-            send_to_char(ch, "            @D[@cLeft Arm    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 2), "%", "%");
+        else if (char_get_limb_condition(ch, (2)-1) > 0 && !char_plr_flagged(ch, PLR_CLARM)) {
+            send_to_char(ch, "            @D[@cLeft Arm    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", char_get_limb_condition(ch, (2)-1), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 2) > 0 && char_plr_flagged(ch, PLR_CLARM)) {
-            send_to_char(ch, "            @D[@cLeft Arm    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 2), "%", "%");
+        else if (char_get_limb_condition(ch, (2)-1) > 0 && char_plr_flagged(ch, PLR_CLARM)) {
+            send_to_char(ch, "            @D[@cLeft Arm    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", char_get_limb_condition(ch, (2)-1), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 2) <= 0) {
+        else if (char_get_limb_condition(ch, (2)-1) <= 0) {
             send_to_char(ch, "            @D[@cLeft Arm    @D: @rMissing.         @D]@n\r\n");
         }
-        if (GET_LIMBCOND(ch, 3) >= 50 && !char_plr_flagged(ch, PLR_CLARM)) {
-            send_to_char(ch, "            @D[@cRight Leg   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 3), "%", "%");
+        if (char_get_limb_condition(ch, (3)-1) >= 50 && !char_plr_flagged(ch, PLR_CLARM)) {
+            send_to_char(ch, "            @D[@cRight Leg   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", char_get_limb_condition(ch, (3)-1), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 3) > 0 && !char_plr_flagged(ch, PLR_CRLEG)) {
-            send_to_char(ch, "            @D[@cRight Leg   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 3), "%", "%");
+        else if (char_get_limb_condition(ch, (3)-1) > 0 && !char_plr_flagged(ch, PLR_CRLEG)) {
+            send_to_char(ch, "            @D[@cRight Leg   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", char_get_limb_condition(ch, (3)-1), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 3) > 0 && char_plr_flagged(ch, PLR_CRLEG)) {
-            send_to_char(ch, "            @D[@cRight Leg   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 3), "%", "%");
+        else if (char_get_limb_condition(ch, (3)-1) > 0 && char_plr_flagged(ch, PLR_CRLEG)) {
+            send_to_char(ch, "            @D[@cRight Leg   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", char_get_limb_condition(ch, (3)-1), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 3) <= 0) {
+        else if (char_get_limb_condition(ch, (3)-1) <= 0) {
             send_to_char(ch, "            @D[@cRight Leg   @D: @rMissing.         @D]@n\r\n");
         }
-        if (GET_LIMBCOND(ch, 4) >= 50 && !char_plr_flagged(ch, PLR_CLLEG)) {
-            send_to_char(ch, "            @D[@cLeft Leg    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 4), "%", "%");
+        if (char_get_limb_condition(ch, (4)-1) >= 50 && !char_plr_flagged(ch, PLR_CLLEG)) {
+            send_to_char(ch, "            @D[@cLeft Leg    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", char_get_limb_condition(ch, (4)-1), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 4) > 0 && !char_plr_flagged(ch, PLR_CLLEG)) {
-            send_to_char(ch, "            @D[@cLeft Leg    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 4), "%", "%");
+        else if (char_get_limb_condition(ch, (4)-1) > 0 && !char_plr_flagged(ch, PLR_CLLEG)) {
+            send_to_char(ch, "            @D[@cLeft Leg    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", char_get_limb_condition(ch, (4)-1), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 4) > 0 && char_plr_flagged(ch, PLR_CLLEG)) {
-            send_to_char(ch, "            @D[@cLeft Leg    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 4), "%", "%");
+        else if (char_get_limb_condition(ch, (4)-1) > 0 && char_plr_flagged(ch, PLR_CLLEG)) {
+            send_to_char(ch, "            @D[@cLeft Leg    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", char_get_limb_condition(ch, (4)-1), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 4) <= 0) {
+        else if (char_get_limb_condition(ch, (4)-1) <= 0) {
             send_to_char(ch, "            @D[@cLeft Leg    @D: @rMissing.         @D]@n\r\n");
         }
 
@@ -6087,93 +6086,93 @@ ACMD(do_status)
         }
         send_to_char(ch, "         @D--------------------@D[@GInfo@D]---------------------@n\r\n");
         trans_check(ch, ch);
-        send_to_char(ch, "         You have died %d times.\r\n", GET_DCOUNT(ch));
+        send_to_char(ch, "         You have died %d times.\r\n", char_get_dcount(ch));
         if (char_plr_flagged(ch, PLR_NOSHOUT)) {
             send_to_char(ch, "         You have been @rmuted@n on public channels.\r\n");
         }
-        if (IN_ROOM(ch) == real_room(9)) {
+        if (char_get_in_room(ch) == real_room(9)) {
             send_to_char(ch, "         You are in punishment hell, so sad....\r\n");
         }
         if (!char_prf_flagged(ch, PRF_HINTS)) {
             send_to_char(ch, "         You have hints turned off.\r\n");
         }
-        if (NEWSUPDATE > GET_LPLAY(ch)) {
+        if (NEWSUPDATE > char_get_lastpl(ch)) {
             send_to_char(ch, "         Check the 'news', it has been updated recently.\r\n");
         }
-        if (has_mail(GET_IDNUM(ch))) {
+        if (has_mail(char_get_idnum(ch))) {
             send_to_char(ch, "         Check your mail at the nearest postmaster.\r\n");
         }
         if (char_prf_flagged(ch, PRF_HIDE)) {
             send_to_char(ch, "         You are hidden from who and ooc.\r\n");
         }
-        if (GET_VOICE(ch) != NULL) {
-            send_to_char(ch, "         Your voice desc: '%s'\r\n", GET_VOICE(ch));
+        if (char_get_voice(ch) != NULL) {
+            send_to_char(ch, "         Your voice desc: '%s'\r\n", char_get_voice(ch));
         }
-        if (GET_DISTFEA(ch) == DISTFEA_EYE) {
+        if (char_get_distfea(ch) == DISTFEA_EYE) {
             send_to_char(ch, "         Your eyes are your most distinctive feature.\r\n");
         }
-        if (GET_PREFERENCE(ch) == 0) {
+        if (char_get_preference(ch) == 0) {
             send_to_char(ch, "         You preferred a balanced form of fighting.\r\n");
-        } else if (GET_PREFERENCE(ch) == PREFERENCE_KI) {
+        } else if (char_get_preference(ch) == PREFERENCE_KI) {
             send_to_char(ch, "         You preferred a ki dominate form of fighting.\r\n");
-        } else if (GET_PREFERENCE(ch) == PREFERENCE_WEAPON) {
+        } else if (char_get_preference(ch) == PREFERENCE_WEAPON) {
             send_to_char(ch, "         You preferred a weapon dominate form of fighting.\r\n");
-        } else if (GET_PREFERENCE(ch) == PREFERENCE_H2H) {
+        } else if (char_get_preference(ch) == PREFERENCE_H2H) {
             send_to_char(ch, "         You preferred a body dominate form of fighting.\r\n");
-        } else if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
+        } else if (char_get_preference(ch) == PREFERENCE_THROWING) {
             send_to_char(ch, "         You preferred a throwing dominate form of fighting.\r\n");
         }
-        if (GET_DISTFEA(ch) == DISTFEA_HAIR && !char_is_demon(ch) && !char_is_majin(ch) && !char_is_icer(ch) && !char_is_namek(ch)) {
+        if (char_get_distfea(ch) == DISTFEA_HAIR && !char_is_demon(ch) && !char_is_majin(ch) && !char_is_icer(ch) && !char_is_namek(ch)) {
             send_to_char(ch, "         Your hair is your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && char_is_demon(ch)) {
+        } else if (char_get_distfea(ch) == DISTFEA_HAIR && char_is_demon(ch)) {
             send_to_char(ch, "         Your horns are your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && char_is_majin(ch)) {
+        } else if (char_get_distfea(ch) == DISTFEA_HAIR && char_is_majin(ch)) {
             send_to_char(ch, "         Your forelock is your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && char_is_icer(ch)) {
+        } else if (char_get_distfea(ch) == DISTFEA_HAIR && char_is_icer(ch)) {
             send_to_char(ch, "         Your horns are your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && char_is_namek(ch)) {
+        } else if (char_get_distfea(ch) == DISTFEA_HAIR && char_is_namek(ch)) {
             send_to_char(ch, "         Your antennae are your most distinctive feature.\r\n");
         }
 
-        if (GET_DISTFEA(ch) == DISTFEA_SKIN) {
+        if (char_get_distfea(ch) == DISTFEA_SKIN) {
             send_to_char(ch, "         Your skin is your most distinctive feature.\r\n");
         }
-        if (GET_DISTFEA(ch) == DISTFEA_HEIGHT) {
+        if (char_get_distfea(ch) == DISTFEA_HEIGHT) {
             send_to_char(ch, "         Your height is your most distinctive feature.\r\n");
         }
-        if (GET_DISTFEA(ch) == DISTFEA_WEIGHT) {
+        if (char_get_distfea(ch) == DISTFEA_WEIGHT) {
             send_to_char(ch, "         Your weight is your most distinctive feature.\r\n");
         }
-        if (GET_EQ(ch, WEAR_EYE)) {
-            struct obj_data *obj = GET_EQ(ch, WEAR_EYE);
-            if (SFREQ(obj) == 0) {
-                SFREQ(obj) = 1;
+        if (char_get_equipment(ch, WEAR_EYE)) {
+            struct obj_data *obj = char_get_equipment(ch, WEAR_EYE);
+            if (obj_get_scoutfreq(obj) == 0) {
+                obj_set_scoutfreq(obj, 1);
             }
-            send_to_char(ch, "         Your scouter is on frequency @G%d@n\r\n", SFREQ(obj));
+            send_to_char(ch, "         Your scouter is on frequency @G%d@n\r\n", obj_get_scoutfreq(obj));
             obj = NULL;
         }
-        if (GET_CHARGE(ch) > 0) {
-            send_to_char(ch, "         You have @C%s@n ki charged.\r\n", add_commas(GET_CHARGE(ch)));
+        if (char_get_charge(ch) > 0) {
+            send_to_char(ch, "         You have @C%s@n ki charged.\r\n", add_commas(char_get_charge(ch)));
         }
-        if (GET_KAIOKEN(ch) > 0) {
-            send_to_char(ch, "         You are focusing Kaioken x %d.\r\n", GET_KAIOKEN(ch));
+        if (char_get_kaioken(ch) > 0) {
+            send_to_char(ch, "         You are focusing Kaioken x %d.\r\n", char_get_kaioken(ch));
         }
         if (char_aff_flagged(ch, AFF_SANCTUARY)) {
-            send_to_char(ch, "         You are surrounded by a barrier @D(@Y%s@D)@n\r\n", add_commas(GET_BARRIER(ch)));
+            send_to_char(ch, "         You are surrounded by a barrier @D(@Y%s@D)@n\r\n", add_commas(char_get_barrier(ch)));
         }
         if (char_aff_flagged(ch, AFF_FIRESHIELD)) {
             send_to_char(ch, "         You are surrounded by flames!@n\r\n");
         }
-        if (GET_SUPPRESS(ch) > 0) {
-            send_to_char(ch, "         You are suppressing current PL to %" I64T ".\r\n", GET_SUPPRESS(ch));
+        if (char_get_suppression(ch) > 0) {
+            send_to_char(ch, "         You are suppressing current PL to %" I64T ".\r\n", char_get_suppression(ch));
         }
         if (char_is_majin(ch)) {
-            send_to_char(ch, "         You have ingested %d people.\r\n", GET_ABSORBS(ch));
+            send_to_char(ch, "         You have ingested %d people.\r\n", char_get_absorbs(ch));
         }
         if (char_is_bio(ch)) {
-            send_to_char(ch, "         You have %d absorbs left.\r\n", GET_ABSORBS(ch));
+            send_to_char(ch, "         You have %d absorbs left.\r\n", char_get_absorbs(ch));
         }
-        send_to_char(ch, "         You have %s colored aura.\r\n", aura_types[GET_AURA(ch)]);
+        send_to_char(ch, "         You have %s colored aura.\r\n", aura_types[char_get_aura(ch)]);
 
         if (char_get_level(ch) < 100) {
             if ((char_is_android(ch) && char_plr_flagged(ch, PLR_ABSORB)) || (!char_is_android(ch) && !char_is_bio(ch) && !char_is_majin(ch))) {
@@ -6185,188 +6184,188 @@ ACMD(do_status)
             send_to_char(ch, "         Your strengths are potentially limitless.\r\n");
         }
 
-        if (GET_FORGETING(ch) != 0) {
-            send_to_char(ch, "         @MForgetting @D[@m%s - %s@D]@n\r\n", spell_info[GET_FORGETING(ch)].name, forget_level[GET_FORGET_COUNT(ch)]);
+        if (char_get_forgeting(ch) != 0) {
+            send_to_char(ch, "         @MForgetting @D[@m%s - %s@D]@n\r\n", spell_info[char_get_forgeting(ch)].name, forget_level[char_get_forgetcount(ch)]);
         } else {
             send_to_char(ch, "         @MForgetting @D[@mNothing.@D]@n\r\n");
         }
 
         if (char_get_skill(ch, SKILL_DAGGER) > 0) {
-            if (GET_BACKSTAB_COOL(ch) > 0) {
+            if (char_get_backstabcool(ch) > 0) {
                 send_to_char(ch, "         @yYou can't preform a backstab yet.@n\r\n");
             } else {
                 send_to_char(ch, "         @YYou can backstab.@n\r\n");
             }
         }
 
-        if (GET_FEATURE(ch)) {
-            send_to_char(ch, "         Extra Feature: @C%s@n\r\n", GET_FEATURE(ch));
+        if (char_get_feature(ch)) {
+            send_to_char(ch, "         Extra Feature: @C%s@n\r\n", char_get_feature(ch));
         }
 
-        if (GET_RDISPLAY(ch)) {
-            if (GET_RDISPLAY(ch) != "Empty") {
-                send_to_char(ch, "         Room Display: @C...%s@n\r\n", GET_RDISPLAY(ch));
+        if (char_get_rdisplay(ch)) {
+            if (char_get_rdisplay(ch) != "Empty") {
+                send_to_char(ch, "         Room Display: @C...%s@n\r\n", char_get_rdisplay(ch));
             }
         }
 
         send_to_char(ch, "\r\n@D<@b-------------------------@D[@BCondition@D]@b--------------------------@D>@n\r\n");
 
-        if (GET_BONUS(ch, BONUS_INSOMNIAC)) {
+        if (char_get_bonuses(ch, BONUS_INSOMNIAC)) {
             send_to_char(ch, "You can not sleep.\r\n");
         } else {
-            if (GET_SLEEPT(ch) > 6 && GET_POS(ch) != POS_SLEEPING) {
+            if (char_get_sleeptime(ch) > 6 && char_get_position(ch) != POS_SLEEPING) {
                 send_to_char(ch, "You are well rested.\r\n");
             }
-            else if (GET_SLEEPT(ch) > 6 && GET_POS(ch) == POS_SLEEPING) {
+            else if (char_get_sleeptime(ch) > 6 && char_get_position(ch) == POS_SLEEPING) {
                 send_to_char(ch, "You are getting the rest you need.\r\n");
             }
-            else if (GET_SLEEPT(ch) > 4) {
+            else if (char_get_sleeptime(ch) > 4) {
                 send_to_char(ch, "You are rested.\r\n");
             }
-            else if (GET_SLEEPT(ch) > 2) {
+            else if (char_get_sleeptime(ch) > 2) {
                 send_to_char(ch, "You are not sleepy.\r\n");
             }
-            else if (GET_SLEEPT(ch) >= 1) {
+            else if (char_get_sleeptime(ch) >= 1) {
                 send_to_char(ch, "You are getting a little sleepy.\r\n");
             }
-            else if (GET_SLEEPT(ch) == 0) {
+            else if (char_get_sleeptime(ch) == 0) {
                 send_to_char(ch, "You could sleep at any time.\r\n");
             }
         }
 
 
-        if (GET_RELAXCOUNT(ch) > 464) {
+        if (char_get_relax_count(ch) > 464) {
             send_to_char(ch, "You are far too at ease to train hard like you should. Get out of the house more often.\r\n");
-        } else if (GET_RELAXCOUNT(ch) > 232) {
+        } else if (char_get_relax_count(ch) > 232) {
             send_to_char(ch, "You are too at ease to train hard like you should. Get out of the house more often.\r\n");
-        } else if (GET_RELAXCOUNT(ch) > 116) {
+        } else if (char_get_relax_count(ch) > 116) {
             send_to_char(ch, "You are a bit at ease and your training suffers. Get out of the house more often.\r\n");
         }
 
-        if (GET_MIMIC(ch) > 0) {
+        if (char_get_mimic(ch) > 0) {
             send_to_char(ch, "You are mimicing the general appearance of %s %s\r\n", AN(LRACE(ch)), LRACE(ch));
         }
         if (char_is_mutant(ch)) {
             send_to_char(ch, "Your Mutations:\r\n");
-            if (GET_GENOME(ch, 0) == 1) {
+            if (char_get_genome(ch, 0) == 1) {
                 send_to_char(ch, "  Extreme Speed.\r\n");
             }
-            if (GET_GENOME(ch, 0) == 2) {
+            if (char_get_genome(ch, 0) == 2) {
                 send_to_char(ch, "  Increased Cell Regeneration.\r\n");
             }
-            if (GET_GENOME(ch, 0) == 3) {
+            if (char_get_genome(ch, 0) == 3) {
                 send_to_char(ch, "  Extreme Reflexes.\r\n");
             }
-            if (GET_GENOME(ch, 0) == 4) {
+            if (char_get_genome(ch, 0) == 4) {
                 send_to_char(ch, "  Infravision.\r\n");
             }
-            if (GET_GENOME(ch, 0) == 5) {
+            if (char_get_genome(ch, 0) == 5) {
                 send_to_char(ch, "  Natural Camo.\r\n");
             }
-            if (GET_GENOME(ch, 0) == 6) {
+            if (char_get_genome(ch, 0) == 6) {
                 send_to_char(ch, "  Limb Regen.\r\n");
             }
-            if (GET_GENOME(ch, 0) == 7) {
+            if (char_get_genome(ch, 0) == 7) {
                 send_to_char(ch, "  Poisonous (you can use the bite attack).\r\n");
             }
-            if (GET_GENOME(ch, 0) == 8) {
+            if (char_get_genome(ch, 0) == 8) {
                 send_to_char(ch, "  Rubbery Body.\r\n");
             }
-            if (GET_GENOME(ch, 0) == 9) {
+            if (char_get_genome(ch, 0) == 9) {
                 send_to_char(ch, "  Innate Telepathy.\r\n");
             }
-            if (GET_GENOME(ch, 0) == 10) {
+            if (char_get_genome(ch, 0) == 10) {
                 send_to_char(ch, "  Natural Energy.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 1) {
+            if (char_get_genome(ch, 1) == 1) {
                 send_to_char(ch, "  Extreme Speed.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 2) {
+            if (char_get_genome(ch, 1) == 2) {
                 send_to_char(ch, "  Increased Cell Regeneration.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 3) {
+            if (char_get_genome(ch, 1) == 3) {
                 send_to_char(ch, "  Extreme Reflexes.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 4) {
+            if (char_get_genome(ch, 1) == 4) {
                 send_to_char(ch, "  Infravision.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 5) {
+            if (char_get_genome(ch, 1) == 5) {
                 send_to_char(ch, "  Natural Camo.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 6) {
+            if (char_get_genome(ch, 1) == 6) {
                 send_to_char(ch, "  Limb Regen.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 7) {
+            if (char_get_genome(ch, 1) == 7) {
                 send_to_char(ch, "  Poisonous (you can use the bite attack).\r\n");
             }
-            if (GET_GENOME(ch, 1) == 8) {
+            if (char_get_genome(ch, 1) == 8) {
                 send_to_char(ch, "  Rubbery Body.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 9) {
+            if (char_get_genome(ch, 1) == 9) {
                 send_to_char(ch, "  Innate Telepathy.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 10) {
+            if (char_get_genome(ch, 1) == 10) {
                 send_to_char(ch, "  Natural Energy.\r\n");
             }
         }
         if (char_is_bio(ch)) {
             send_to_char(ch, "Your genes carry:\r\n");
-            if (GET_GENOME(ch, 0) == 1) {
+            if (char_get_genome(ch, 0) == 1) {
                 send_to_char(ch, "  Human DNA.\r\n");
             }
-            if (GET_GENOME(ch, 0) == 2) {
+            if (char_get_genome(ch, 0) == 2) {
                 send_to_char(ch, "  Saiyan DNA.\r\n");
             }
-            if (GET_GENOME(ch, 0) == 3) {
+            if (char_get_genome(ch, 0) == 3) {
                 send_to_char(ch, "  Namek DNA.\r\n");
             }
-            if (GET_GENOME(ch, 0) == 4) {
+            if (char_get_genome(ch, 0) == 4) {
                 send_to_char(ch, "  Icer DNA.\r\n");
             }
-            if (GET_GENOME(ch, 0) == 5) {
+            if (char_get_genome(ch, 0) == 5) {
                 send_to_char(ch, "  Truffle DNA.\r\n");
             }
-            if (GET_GENOME(ch, 0) == 6) {
+            if (char_get_genome(ch, 0) == 6) {
                 send_to_char(ch, "  Arlian DNA.\r\n");
             }
-            if (GET_GENOME(ch, 0) == 7) {
+            if (char_get_genome(ch, 0) == 7) {
                 send_to_char(ch, "  Kai DNA.\r\n");
             }
-            if (GET_GENOME(ch, 0) == 8) {
+            if (char_get_genome(ch, 0) == 8) {
                 send_to_char(ch, "  Konatsu DNA.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 1) {
+            if (char_get_genome(ch, 1) == 1) {
                 send_to_char(ch, "  Human DNA.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 2) {
+            if (char_get_genome(ch, 1) == 2) {
                 send_to_char(ch, "  Saiyan DNA.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 3) {
+            if (char_get_genome(ch, 1) == 3) {
                 send_to_char(ch, "  Namek DNA.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 4) {
+            if (char_get_genome(ch, 1) == 4) {
                 send_to_char(ch, "  Icer DNA.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 5) {
+            if (char_get_genome(ch, 1) == 5) {
                 send_to_char(ch, "  Truffle DNA.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 6) {
+            if (char_get_genome(ch, 1) == 6) {
                 send_to_char(ch, "  Arlian DNA.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 7) {
+            if (char_get_genome(ch, 1) == 7) {
                 send_to_char(ch, "  Kai DNA.\r\n");
             }
-            if (GET_GENOME(ch, 1) == 8) {
+            if (char_get_genome(ch, 1) == 8) {
                 send_to_char(ch, "  Konatsu DNA.\r\n");
             }
         }
-        if (GET_GENOME(ch, 0) == 11) {
+        if (char_get_genome(ch, 0) == 11) {
             send_to_char(ch, "You have used kyodaika.\r\n");
         }
         if (char_prf_flagged(ch, PRF_NOPARRY)) {
             send_to_char(ch, "You have decided not to parry attacks.\r\n");
         }
-        switch (GET_POS(ch)) {
+        switch (char_get_position(ch)) {
             case POS_DEAD:
                 send_to_char(ch, "You are DEAD!\r\n");
                 break;
@@ -6389,7 +6388,7 @@ ACMD(do_status)
                 send_to_char(ch, "You are sitting.\r\n");
                 break;
             case POS_FIGHTING:
-                send_to_char(ch, "You are fighting %s.\r\n", FIGHTING(ch) ? char_pers(FIGHTING(ch), ch) : "thin air");
+                send_to_char(ch, "You are fighting %s.\r\n", char_get_fighting(ch) ? char_pers(char_get_fighting(ch), ch) : "thin air");
                 break;
             case POS_STANDING:
                 send_to_char(ch, "You are standing.\r\n");
@@ -6400,7 +6399,7 @@ ACMD(do_status)
         }
 
         if (has_group(ch)) {
-            send_to_char(ch, "@GGroup Victories@D: @w%s@n\r\n", add_commas(GET_GROUPKILLS(ch)));
+            send_to_char(ch, "@GGroup Victories@D: @w%s@n\r\n", add_commas(char_get_combatexpertise(ch)));
         }
 
         if (char_plr_flagged(ch, PLR_EYEC)) {
@@ -6418,8 +6417,8 @@ ACMD(do_status)
         if (char_plr_flagged(ch, PLR_PILOTING)) {
             send_to_char(ch, "You are busy piloting a ship.\r\n");
         }
-        if (GET_SONG(ch) > 0) {
-            send_to_char(ch, "You are playing @y'@Y%s@y'@n.\r\n", song_types[GET_SONG(ch)]);
+        if (char_get_powerattack(ch) > 0) {
+            send_to_char(ch, "You are playing @y'@Y%s@y'@n.\r\n", song_types[char_get_powerattack(ch)]);
         }
 
         if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
@@ -6591,12 +6590,12 @@ ACMD(do_status)
         if (char_aff_flagged(ch, AFF_ETHEREAL))
             send_to_char(ch, "You are ethereal and cannot interact with normal space!\r\n");
 
-        if (GET_REGEN(ch) > 0) {
-            send_to_char(ch, "Something is augmenting your regen rate by %s%d%s!\r\n", GET_REGEN(ch) > 0 ? "+" : "-", GET_REGEN(ch), "%");
+        if (char_get_regen(ch) > 0) {
+            send_to_char(ch, "Something is augmenting your regen rate by %s%d%s!\r\n", char_get_regen(ch) > 0 ? "+" : "-", char_get_regen(ch), "%");
         }
 
-        if (GET_ASB(ch) > 0) {
-            send_to_char(ch, "Something is augmenting your auto-skill training rate by %s%d%s!\r\n", GET_ASB(ch) > 0 ? "+" : "-", GET_ASB(ch), "%");
+        if (char_get_asb(ch) > 0) {
+            send_to_char(ch, "Something is augmenting your auto-skill training rate by %s%d%s!\r\n", char_get_asb(ch) > 0 ? "+" : "-", char_get_asb(ch), "%");
         }
 
         if (ch->lifebonus > 0) {
@@ -6604,7 +6603,7 @@ ACMD(do_status)
         }
 
         if (char_plr_flagged(ch, PLR_FISHING))
-            send_to_char(ch, "Current Fishing Pole Bonus @D[@C%d@D]@n\r\n", GET_POLE_BONUS(ch));
+            send_to_char(ch, "Current Fishing Pole Bonus @D[@C%d@D]@n\r\n", char_get_accuracy(ch));
 
         if (char_plr_flagged(ch, PLR_AURALIGHT))
             send_to_char(ch, "Aura Light is active.\r\n");
@@ -6682,7 +6681,7 @@ static void bonus_status(struct char_data *ch)
  send_to_char(ch, "@CYour Traits@n\n@D-----------------------------@w\n");
  for (i = 0; i < max; i++) {
   if (i < 26) {
-   if (GET_BONUS(ch, i)) {
+   if (char_get_bonuses(ch, i)) {
 	send_to_char(ch, "@c%s@n\n", list_bonuses[i]);
     count++;
    }
@@ -6690,7 +6689,7 @@ static void bonus_status(struct char_data *ch)
    if (i == 26) {
     send_to_char(ch, "\r\n");
    }
-   if (GET_BONUS(ch, i)) {
+   if (char_get_bonuses(ch, i)) {
     send_to_char(ch, "@r%s@n\n", list_bonuses[i]);
     count++;
    }
@@ -6708,7 +6707,7 @@ ACMD(do_inventory)
   send_to_char(ch, "@w              @YInventory\r\n@D-------------------------------------@w\r\n");
   if (!char_is_npc(ch)) {
    if (char_plr_flagged(ch, PLR_STOLEN)) {
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_STOLEN);
+    REMOVE_BIT_AR(char_get_act(ch), PLR_STOLEN);
     send_to_char(ch, "@r   --------------------------------------------------@n\n");
     send_to_char(ch, "@R    You notice that you have been robbed sometime recently!\n");
     send_to_char(ch, "@r   --------------------------------------------------@n\n");
@@ -6725,13 +6724,13 @@ ACMD(do_equipment)
 
   send_to_char(ch, "        @YEquipment Being Worn\r\n@D-------------------------------------@w\r\n");
   for (i = 1; i < NUM_WEARS; i++) {
-    if (GET_EQ(ch, i)) {
-      if (char_can_see_obj(ch, GET_EQ(ch, i)) && (i != WEAR_WIELD1 && i != WEAR_WIELD2)) {
+    if (char_get_equipment(ch, i)) {
+      if (char_can_see_obj(ch, char_get_equipment(ch, i)) && (i != WEAR_WIELD1 && i != WEAR_WIELD2)) {
 	send_to_char(ch, "%s", wear_where[i]);
-	show_obj_to_char(GET_EQ(ch, i), ch, SHOW_OBJ_SHORT);
+	show_obj_to_char(char_get_equipment(ch, i), ch, SHOW_OBJ_SHORT);
 
-       if (obj_flagged(GET_EQ(ch, i), ITEM_SHEATH)) {
-         struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = GET_EQ(ch, i);
+       if (obj_flagged(char_get_equipment(ch, i), ITEM_SHEATH)) {
+         struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = char_get_equipment(ch, i);
          for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
          next_obj = obj2->next_content;
          if (obj2) {
@@ -6742,11 +6741,11 @@ ACMD(do_equipment)
         }
         obj2 = NULL;
        }
-      } else if (char_can_see_obj(ch, GET_EQ(ch, i)) && (!char_plr_flagged(ch, PLR_THANDW))) {
+      } else if (char_can_see_obj(ch, char_get_equipment(ch, i)) && (!char_plr_flagged(ch, PLR_THANDW))) {
         send_to_char(ch, "%s", wear_where[i]);
-        show_obj_to_char(GET_EQ(ch, i), ch, SHOW_OBJ_SHORT);
-        if (obj_flagged(GET_EQ(ch, i), ITEM_SHEATH)) {
-         struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = GET_EQ(ch, i);
+        show_obj_to_char(char_get_equipment(ch, i), ch, SHOW_OBJ_SHORT);
+        if (obj_flagged(char_get_equipment(ch, i), ITEM_SHEATH)) {
+         struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = char_get_equipment(ch, i);
          for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
          next_obj = obj2->next_content;
          if (obj2) {
@@ -6757,9 +6756,9 @@ ACMD(do_equipment)
         }
         obj2 = NULL;
        }
-      } else if (char_can_see_obj(ch, GET_EQ(ch, i)) && (char_plr_flagged(ch, PLR_THANDW))) {
+      } else if (char_can_see_obj(ch, char_get_equipment(ch, i)) && (char_plr_flagged(ch, PLR_THANDW))) {
         send_to_char(ch, "@c<@CWielded by B. Hands@c>@n ");
-        show_obj_to_char(GET_EQ(ch, i), ch, SHOW_OBJ_SHORT);
+        show_obj_to_char(char_get_equipment(ch, i), ch, SHOW_OBJ_SHORT);
       } else {
 	send_to_char(ch, "%s", wear_where[i]);
 	send_to_char(ch, "Something.\r\n");
@@ -6897,7 +6896,7 @@ ACMD(do_help)
   }
 
   if (!*argument) {
-    if (GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
+    if (char_get_admlevel(ch) < ADMLVL_IMMORT)
       page_string(ch->desc, help, 0);
     else
       page_string(ch->desc, ihelp, 0);
@@ -6906,14 +6905,14 @@ ACMD(do_help)
 
   space_to_minus(argument);
 
-  if ((mid = search_help(argument, GET_ADMLEVEL(ch))) == NOWHERE) {
+  if ((mid = search_help(argument, char_get_admlevel(ch))) == NOWHERE) {
     int i, found = 0;
     send_to_char(ch, "There is no help on that word.\r\n");
-    if (GET_ADMLEVEL(ch) < 3) {
+    if (char_get_admlevel(ch) < 3) {
     mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "%s tried to get help on %s", char_get_name(ch), argument);
     }
     for (i = 0; i <= top_of_helpt; i++)  {
-      if (help_table[i].min_level > GET_ADMLEVEL(ch))
+      if (help_table[i].min_level > char_get_admlevel(ch))
         continue;
       /* To help narrow down results, if they don't start with the same letters, move on */
       if (*argument != *help_table[i].keywords)
@@ -6928,14 +6927,14 @@ ACMD(do_help)
     }
     return;
   }
-  if (help_table[mid].min_level > GET_ADMLEVEL(ch)) {
+  if (help_table[mid].min_level > char_get_admlevel(ch)) {
    send_to_char(ch, "There is no help on that word.\r\n");
    return;
   }
   sprintf(buf, "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
   sprintf(buf+strlen(buf), "%s", help_table[mid].entry);
   sprintf(buf+strlen(buf), "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
-  if (GET_ADMLEVEL(ch) > 0) {
+  if (char_get_admlevel(ch) > 0) {
    sprintf(buf+strlen(buf), "@WHelp File Level@w: @D(@R%d@D)@n\n", help_table[mid].min_level);
   }
   page_string(ch->desc, buf, 0);
@@ -6987,7 +6986,7 @@ ACMD(do_who)
     else if (!(tch = d->character))
       continue;
 
-    if (GET_ADMLEVEL(tch) >= ADMLVL_IMMORT)
+    if (char_get_admlevel(tch) >= ADMLVL_IMMORT)
       line_color = "@w";
     else
       line_color = "@w";
@@ -7002,20 +7001,20 @@ ACMD(do_who)
       continue;
     if (questwho && !char_prf_flagged(tch, PRF_QUEST))
       continue;
-    if (localwho && world[IN_ROOM(ch)].zone != world[IN_ROOM(tch)].zone)
+    if (localwho && world[char_get_in_room(ch)].zone != world[char_get_in_room(tch)].zone)
       continue;
-    if (char_prf_flagged(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
+    if (char_prf_flagged(tch, PRF_HIDE) && tch != ch && char_get_admlevel(ch) < ADMLVL_IMMORT) {
        hide += 1;
        continue;
     }
-    if (who_room && (IN_ROOM(tch) != IN_ROOM(ch)))
+    if (who_room && (char_get_in_room(tch) != char_get_in_room(ch)))
       continue;
     if (showclass && !(showclass & (1U << char_get_class(tch))))
       continue;
       if (showgroup && (!tch->master || !char_aff_flagged(tch, AFF_GROUP)))
         continue;
       for (i = 0; i < num_ranks; i++)
-        if (GET_ADMLEVEL(tch) >= rank[i].min_level && GET_ADMLEVEL(tch) <= rank[i].max_level)
+        if (char_get_admlevel(tch) >= rank[i].min_level && char_get_admlevel(tch) <= rank[i].max_level)
           rank[i].count++;
     }
   }
@@ -7037,7 +7036,7 @@ ACMD(do_who)
       else if (!(tch = d->character))
         continue;
 
-      if ((GET_ADMLEVEL(tch) < rank[i].min_level || GET_ADMLEVEL(tch) > rank[i].max_level) && !short_list)
+      if ((char_get_admlevel(tch) < rank[i].min_level || char_get_admlevel(tch) > rank[i].max_level) && !short_list)
         continue;
       if (!desc_is_playing(d))
         continue;
@@ -7050,11 +7049,11 @@ ACMD(do_who)
         continue;
       if (questwho && !char_prf_flagged(tch, PRF_QUEST))
         continue;
-      if (localwho && world[IN_ROOM(ch)].zone != world[IN_ROOM(tch)].zone)
+      if (localwho && world[char_get_in_room(ch)].zone != world[char_get_in_room(tch)].zone)
         continue;
-      if (who_room && (IN_ROOM(tch) != IN_ROOM(ch)))
+      if (who_room && (char_get_in_room(tch) != char_get_in_room(ch)))
         continue;
-      if (char_prf_flagged(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
+      if (char_prf_flagged(tch, PRF_HIDE) && tch != ch && char_get_admlevel(ch) < ADMLVL_IMMORT)
         continue;
       if (showclass && !(showclass & (1U << char_get_class(tch))))
         continue;
@@ -7072,13 +7071,13 @@ ACMD(do_who)
 
        char usr[100];
        sprintf(usr, "@W(@R%s@W)%s", tch->desc->user, char_plr_flagged(tch, PLR_BIOGR) ? "" : (char_is_spoiled(tch) ? " @R*@n" : ""));
-       send_to_char(ch, "%s               @D<@C%-12s@D> %s@w%s", line_color, GET_ADMLEVEL(ch) > 0 ? char_get_name(tch) : (GET_ADMLEVEL(tch) > 0 ? char_get_name(tch) : (char_get_user(tch) ? char_get_user(tch) : "NULL")), GET_ADMLEVEL(ch) > 0 ? usr : "", line_color);
+       send_to_char(ch, "%s               @D<@C%-12s@D> %s@w%s", line_color, char_get_admlevel(ch) > 0 ? char_get_name(tch) : (char_get_admlevel(tch) > 0 ? char_get_name(tch) : (char_get_user(tch) ? char_get_user(tch) : "NULL")), char_get_admlevel(ch) > 0 ? usr : "", line_color);
 
-      if (GET_ADMLEVEL(tch)) {
-        send_to_char(ch, " (%s)", admin_level_names[GET_ADMLEVEL(tch)]);
+      if (char_get_admlevel(tch)) {
+        send_to_char(ch, " (%s)", admin_level_names[char_get_admlevel(tch)]);
       }
 
-      if (d->snooping && d->snooping->character != ch && GET_ADMLEVEL(ch) >= 3)
+      if (d->snooping && d->snooping->character != ch && char_get_admlevel(ch) >= 3)
         send_to_char(ch, " (Snoop: %s)", char_get_name(d->snooping->character));
       if (GET_INVIS_LEV(tch))
         send_to_char(ch, " (i%d)", GET_INVIS_LEV(tch));
@@ -7129,7 +7128,7 @@ ACMD(do_who)
 	send_to_char(ch, " (Buildwalking)");
       if (char_prf_flagged(tch, PRF_AFK))
         send_to_char(ch, " (AFK)");
-      if (char_plr_flagged(tch, PLR_FISHING) && GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
+      if (char_plr_flagged(tch, PLR_FISHING) && char_get_admlevel(ch) >= ADMLVL_IMMORT)
         send_to_char(ch, " (@BFISHING@n)");
       if (char_prf_flagged(tch, PRF_NOWIZ))
         send_to_char(ch, " (NO WIZ)");
@@ -7235,9 +7234,9 @@ ACMD(do_users)
   one_argument(argument, arg);
 
   for (d = descriptor_list; d; d = d->next) {
-    if (STATE(d) != CON_PLAYING && playing)
+    if (desc_get_connected(d) != CON_PLAYING && playing)
       continue;
-    if (STATE(d) == CON_PLAYING && deadweight)
+    if (desc_get_connected(d) == CON_PLAYING && deadweight)
       continue;
     if (desc_is_playing(d)) {
       if (d->original)
@@ -7251,7 +7250,7 @@ ACMD(do_users)
 	continue;
       if (!char_can_see(ch, tch) || char_get_level(tch) < low || char_get_level(tch) > high)
 	continue;
-      if (char_prf_flagged(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
+      if (char_prf_flagged(tch, PRF_HIDE) && tch != ch && char_get_admlevel(ch) < ADMLVL_IMMORT) {
         continue;
       }
       if (outlaws && !char_plr_flagged(tch, PLR_KILLER) &&
@@ -7259,9 +7258,9 @@ ACMD(do_users)
 	continue;
       if (showclass && !(showclass & (1U << char_get_class(tch))))
 	continue;
-      if (showrace && !(showrace & (1U << GET_RACE(tch))))
+      if (showrace && !(showrace & (1U << char_get_race(tch))))
         continue;
-      if (GET_INVIS_LEV(tch) > GET_ADMLEVEL(ch))
+      if (GET_INVIS_LEV(tch) > char_get_admlevel(ch))
 	continue;
     }
 
@@ -7269,12 +7268,12 @@ ACMD(do_users)
     timeptr += 11;
     *(timeptr + 8) = '\0';
 
-    if (STATE(d) == CON_PLAYING && d->original)
+    if (desc_get_connected(d) == CON_PLAYING && d->original)
       strcpy(state, "Switched");
     else
-      strcpy(state, connected_types[STATE(d)]);
+      strcpy(state, connected_types[desc_get_connected(d)]);
 
-    if (d->character && STATE(d) == CON_PLAYING && GET_ADMLEVEL(d->character) <= GET_ADMLEVEL(ch))
+    if (d->character && desc_get_connected(d) == CON_PLAYING && char_get_admlevel(d->character) <= char_get_admlevel(ch))
       sprintf(idletime, "%3d", d->character->timer *
 	      SECS_PER_MUD_HOUR / SECS_PER_REAL_MIN);
     else
@@ -7290,12 +7289,12 @@ ACMD(do_users)
     else
       sprintf(line + strlen(line), "\n%3d [%s Site: Hostname unknown]\r\n", d->desc_num, d->user ? d->user : "UNKNOWN");
 
-    if (STATE(d) != CON_PLAYING) {
+    if (desc_get_connected(d) != CON_PLAYING) {
       sprintf(line2, "@g%s@n", line);
       strcpy(line, line2);
     }
-    if (STATE(d) != CON_PLAYING ||
-		(STATE(d) == CON_PLAYING && char_can_see(ch, d->character))) {
+    if (desc_get_connected(d) != CON_PLAYING ||
+		(desc_get_connected(d) == CON_PLAYING && char_can_see(ch, d->character))) {
       send_to_char(ch, "%s", line);
       num_can_see++;
     }
@@ -7317,7 +7316,7 @@ ACMD(do_gen_ps)
     break;
   case SCMD_NEWS:
     page_string(ch->desc, news, 0);
-    GET_LPLAY(ch) = time(0);
+    char_set_lastpl(ch, time(0));
     break;
   case SCMD_INFO:
     page_string(ch->desc, info, 0);
@@ -7371,25 +7370,25 @@ static void perform_mortal_where(struct char_data *ch, char *arg)
   if (!*arg) {
     send_to_char(ch, "Players in your Zone\r\n--------------------\r\n");
     for (d = descriptor_list; d; d = d->next) {
-      if (STATE(d) != CON_PLAYING || d->character == ch)
+      if (desc_get_connected(d) != CON_PLAYING || d->character == ch)
 	continue;
       if ((i = (d->original ? d->original : d->character)) == NULL)
 	continue;
-      if (IN_ROOM(i) == NOWHERE || !char_can_see(ch, i))
+      if (char_get_in_room(i) == NOWHERE || !char_can_see(ch, i))
 	continue;
-      if (world[IN_ROOM(ch)].zone != world[IN_ROOM(i)].zone)
+      if (world[char_get_in_room(ch)].zone != world[char_get_in_room(i)].zone)
 	continue;
-      send_to_char(ch, "%-20s - %s\r\n", char_get_name(i), world[IN_ROOM(i)].name);
+      send_to_char(ch, "%-20s - %s\r\n", char_get_name(i), world[char_get_in_room(i)].name);
     }
   } else {			/* print only FIRST char, not all. */
     for (i = character_list; i; i = i->next) {
-      if (IN_ROOM(i) == NOWHERE || i == ch)
+      if (char_get_in_room(i) == NOWHERE || i == ch)
 	continue;
-      if (!char_can_see(ch, i) || world[IN_ROOM(i)].zone != world[IN_ROOM(ch)].zone)
+      if (!char_can_see(ch, i) || world[char_get_in_room(i)].zone != world[char_get_in_room(ch)].zone)
 	continue;
       if (!isname(arg, i->name))
 	continue;
-      send_to_char(ch, "%-25s - %s\r\n", char_get_name(i), world[IN_ROOM(i)].name);
+      send_to_char(ch, "%-25s - %s\r\n", char_get_name(i), world[char_get_in_room(i)].name);
       return;
     }
     send_to_char(ch, "Nobody around by that name.\r\n");
@@ -7407,12 +7406,12 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
   if (SCRIPT(obj))
     send_to_char(ch, "[T%d]", obj->proto_script->vnum);
 
-  if (IN_ROOM(obj) != NOWHERE)
-    send_to_char(ch, "[%5d] %s\r\n", rroom_get_vnum(IN_ROOM(obj)), world[IN_ROOM(obj)].name);
+  if (obj_get_in_room(obj) != NOWHERE)
+    send_to_char(ch, "[%5d] %s\r\n", rroom_get_vnum(obj_get_in_room(obj)), world[obj_get_in_room(obj)].name);
   else if (obj->carried_by)
-    send_to_char(ch, "carried by %s in room [%d]\r\n", char_pers(obj->carried_by, ch), rroom_get_vnum(IN_ROOM(obj->carried_by)));
+    send_to_char(ch, "carried by %s in room [%d]\r\n", char_pers(obj->carried_by, ch), rroom_get_vnum(char_get_in_room(obj->carried_by)));
   else if (obj->worn_by)
-    send_to_char(ch, "worn by %s in room [%d]\r\n", char_pers(obj->worn_by, ch), rroom_get_vnum(IN_ROOM(obj->worn_by)));
+    send_to_char(ch, "worn by %s in room [%d]\r\n", char_pers(obj->worn_by, ch), rroom_get_vnum(char_get_in_room(obj->worn_by)));
   else if (obj->in_obj) {
     send_to_char(ch, "inside %s%s\r\n", obj->in_obj->short_description, (recur ? ", which is" : " "));
     if (recur)
@@ -7447,39 +7446,39 @@ static void perform_immort_where(struct char_data *ch, char *arg)
     send_to_char(ch, "Players                  Vnum    Planet        Location\r\n-------                 ------   ----------    ----------------\r\n");
     for (d = descriptor_list; d; d = d->next)
       if (desc_is_playing(d)) {
-        if (IN_ROOM(d->character) != NOWHERE) {
-         if (rroom_flagged(IN_ROOM(d->character), ROOM_EARTH)) {
+        if (char_get_in_room(d->character) != NOWHERE) {
+         if (rroom_flagged(char_get_in_room(d->character), ROOM_EARTH)) {
           num2 = 0;
-         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_FRIGID)) {
+         } else if (rroom_flagged(char_get_in_room(d->character), ROOM_FRIGID)) {
           num2 = 1;
-         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_VEGETA)) {
+         } else if (rroom_flagged(char_get_in_room(d->character), ROOM_VEGETA)) {
           num2 = 2;
-         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_KONACK)) {
+         } else if (rroom_flagged(char_get_in_room(d->character), ROOM_KONACK)) {
           num2 = 3;
-         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_NAMEK)) {
+         } else if (rroom_flagged(char_get_in_room(d->character), ROOM_NAMEK)) {
           num2 = 4;
-         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_AETHER)) {
+         } else if (rroom_flagged(char_get_in_room(d->character), ROOM_AETHER)) {
           num2 = 5;
-         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_ARLIA)) {
+         } else if (rroom_flagged(char_get_in_room(d->character), ROOM_ARLIA)) {
           num2 = 6;
-         } else if (rroom_planet_zenith(IN_ROOM(d->character))) {
+         } else if (rroom_planet_zenith(char_get_in_room(d->character))) {
           num2 = 7;
-         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_YARDRAT)) {
+         } else if (rroom_flagged(char_get_in_room(d->character), ROOM_YARDRAT)) {
           num2 = 8;
-         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_KANASSA)) {
+         } else if (rroom_flagged(char_get_in_room(d->character), ROOM_KANASSA)) {
           num2 = 9;
          } else {
           num2 = 10;
          }
         }
 	i = (d->original ? d->original : d->character);
-	if (i && char_can_see(ch, i) && (IN_ROOM(i) != NOWHERE)) {
+	if (i && char_can_see(ch, i) && (char_get_in_room(i) != NOWHERE)) {
 	  if (d->original)
 	    send_to_char(ch, "%-20s - [%5d]   %s (in %s)\r\n",
-		char_get_name(i), rroom_get_vnum(IN_ROOM(d->character)),
-		world[IN_ROOM(d->character)].name, char_get_name(d->character));
+		char_get_name(i), rroom_get_vnum(char_get_in_room(d->character)),
+		world[char_get_in_room(d->character)].name, char_get_name(d->character));
 	  else {
-	    send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", char_get_name(i), rroom_get_vnum(IN_ROOM(i)), planet[num2], world[IN_ROOM(i)].name);
+	    send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", char_get_name(i), rroom_get_vnum(char_get_in_room(i)), planet[num2], world[char_get_in_room(i)].name);
           }
            
 	}
@@ -7487,10 +7486,10 @@ static void perform_immort_where(struct char_data *ch, char *arg)
   } else {
     mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "GODCMD: %s has checked where for the location of %s", char_get_name(ch), arg);
     for (i = character_list; i; i = i->next) {
-      if (char_can_see(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->name)) {
+      if (char_can_see(ch, i) && char_get_in_room(i) != NOWHERE && isname(arg, i->name)) {
 	found = 1;
 	send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, char_get_name(i),
-		rroom_get_vnum(IN_ROOM(i)), world[IN_ROOM(i)].name);
+		rroom_get_vnum(char_get_in_room(i)), world[char_get_in_room(i)].name);
         if (char_is_npc(i) && SCRIPT(i)) { 
           if (!TRIGGERS(SCRIPT(i))->next) 
             send_to_char(ch, "[T%5d] ", GET_TRIG_VNUM(TRIGGERS(SCRIPT(i)))); 
@@ -7519,7 +7518,7 @@ ACMD(do_where)
 
   one_argument(argument, arg);
 
-  if (char_adm_flagged(ch, ADM_FULLWHERE) || GET_ADMLEVEL(ch) > 4)
+  if (char_adm_flagged(ch, ADM_FULLWHERE) || char_get_admlevel(ch) > 4)
     perform_immort_where(ch, arg);
   else
     perform_mortal_where(ch, arg);
@@ -7604,13 +7603,13 @@ ACMD(do_diagnose)
     if (!(vict = get_char_vis(ch, buf, NULL, FIND_CHAR_ROOM)))
       send_to_char(ch, "%s", CONFIG_NOPERSON);
     else {
-      send_to_char(ch, "%s", GET_SEX(vict) == SEX_MALE ? "He " : (GET_SEX(vict) == SEX_FEMALE ? "She " : "It "));
+      send_to_char(ch, "%s", char_get_sex(vict) == SEX_MALE ? "He " : (char_get_sex(vict) == SEX_FEMALE ? "She " : "It "));
       diag_char_to_char(vict, ch);
     }
   } else {
-    if (FIGHTING(ch)) {
-      send_to_char(ch, "%s", GET_SEX(FIGHTING(ch)) == SEX_MALE ? "He " : (GET_SEX(FIGHTING(ch)) == SEX_FEMALE ? "She " : "It "));
-      diag_char_to_char(FIGHTING(ch), ch);
+    if (char_get_fighting(ch)) {
+      send_to_char(ch, "%s", char_get_sex(char_get_fighting(ch)) == SEX_MALE ? "He " : (char_get_sex(char_get_fighting(ch)) == SEX_FEMALE ? "She " : "It "));
+      diag_char_to_char(char_get_fighting(ch), ch);
     }
     else {
       send_to_char(ch, "Diagnose who?\r\n");
@@ -7927,7 +7926,7 @@ ACMD(do_toggle)
   else
     sprintf(buf2, "%-3.3d", GET_WIMP_LEV(ch));	/* sprintf: OK */
 
-  if (GET_ADMLEVEL(ch)) {
+  if (char_get_admlevel(ch)) {
     send_to_char(ch,
           "      Buildwalk: %-3s    "
           "Clear Screen in OLC: %-3s\r\n",
@@ -8081,7 +8080,7 @@ ACMD(do_commands)
       continue;
 
     if (complete_cmd_info[i].minimum_admlevel < 0 ||
-        GET_ADMLEVEL(vict) < complete_cmd_info[i].minimum_admlevel)
+        char_get_admlevel(vict) < complete_cmd_info[i].minimum_admlevel)
       continue;
 
     if ((complete_cmd_info[i].minimum_admlevel >= ADMLVL_IMMORT) != wizhelp)
@@ -8130,14 +8129,14 @@ ACMD(do_history)
  
     send_to_char(ch, "Usage: history <"); 
     for (i = 0; *history_types[i] != '\n'; i++) { 
-      if ((i != 3 && GET_ADMLEVEL(ch) <= 0) || GET_ADMLEVEL(ch) >= 1) {
+      if ((i != 3 && char_get_admlevel(ch) <= 0) || char_get_admlevel(ch) >= 1) {
       send_to_char(ch, " %s ", history_types[i]); 
       }
       if (*history_types[i + 1] == '\n') {
         send_to_char(ch, ">\r\n"); 
       }
       else {
-       if ((i != 3 && GET_ADMLEVEL(ch) <= 0) || GET_ADMLEVEL(ch) >= 1) {
+       if ((i != 3 && char_get_admlevel(ch) <= 0) || char_get_admlevel(ch) >= 1) {
         send_to_char(ch, "|"); 
        }
       }
@@ -8204,7 +8203,7 @@ ACMD(do_scan)
   char *dirnames[]= { 
     "North", "East", "South", "West", "Up", "Down", "Northwest", "Northeast", "Southeast", "Southwest", "Inside", "Outside"}; 
 
-  if(GET_POS(ch) < POS_SLEEPING){ 
+  if(char_get_position(ch) < POS_SLEEPING){ 
     send_to_char(ch, "You can't see anything but stars!\n\r"); 
     return; 
   } 
@@ -8221,8 +8220,8 @@ ACMD(do_scan)
       return;
     }
   for(i=0;i<10;i++){ 
-    if(EXIT(ch, i)) { 
-      if(room_is_dark(ch->in_room) && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && 
+    if(char_get_exit(ch, i)) { 
+      if(room_is_dark(ch->in_room) && (char_get_admlevel(ch) < ADMLVL_IMMORT) && 
           (!char_aff_flagged(ch, AFF_INFRAVISION))){ 
         send_to_char(ch,"%s: DARK\n\r",dirnames[i]); 
         continue; 
@@ -8235,28 +8234,28 @@ ACMD(do_scan)
 
         list_obj_to_char(world[newroom].contents,ch,SHOW_OBJ_LONG, FALSE); 
         list_char_to_char(world[newroom].people,ch); 
-         if (ROOM_EFFECT(newroom) >= 1 && ROOM_EFFECT(newroom) <= 5) {
+         if (rroom_get_geffect(newroom) >= 1 && rroom_get_geffect(newroom) <= 5) {
            send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
          }
-         if (ROOM_EFFECT(newroom) >= 6) {
+         if (rroom_get_geffect(newroom) >= 6) {
            send_to_char(ch, "@RLava@r covers pretty much the entire area!@n\r\n");
          }
         /* Check 2nd room away */ 
-        if(_2ND_EXIT(ch, i) && _2ND_EXIT(ch, i)->to_room) { 
-          newroom = _2ND_EXIT(ch, i)->to_room; 
+        if(char_get_exit2(ch, i) && char_get_exit2(ch, i)->to_room) { 
+          newroom = char_get_exit2(ch, i)->to_room; 
 
-          if ((newroom != NOWHERE) && (!IS_SET(_2ND_EXIT(ch, i)->exit_info, EX_CLOSED)) ) { 
-            if (!room_is_dark(_2ND_EXIT(ch, i)->to_room)) { 
+          if ((newroom != NOWHERE) && (!IS_SET(char_get_exit2(ch, i)->exit_info, EX_CLOSED)) ) { 
+            if (!room_is_dark(char_get_exit2(ch, i)->to_room)) { 
               send_to_char(ch, "@w-----------------------------------------@n\r\n");
               send_to_char(ch,"          %sFar %s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i], world[newroom].name ? world[newroom].name : "You don't think you saw what you just saw.", CCNRM(ch, C_NRM) ); 
               send_to_char(ch, "@W          -----------------          @n\r\n");
 
              list_obj_to_char(world[newroom].contents,ch,SHOW_OBJ_LONG, FALSE); 
              list_char_to_char(world[newroom].people,ch); 
-             if (ROOM_EFFECT(newroom) >= 1 && ROOM_EFFECT(newroom) <= 5) {
+             if (rroom_get_geffect(newroom) >= 1 && rroom_get_geffect(newroom) <= 5) {
               send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
              }
-             if (ROOM_EFFECT(newroom) >= 6) {
+             if (rroom_get_geffect(newroom) >= 6) {
               send_to_char(ch, "@RLava@r covers pretty much the entire area!@n\r\n");
              }
             } 
@@ -8447,30 +8446,30 @@ ACMD(do_whois)
   clear_char(victim);
   CREATE(victim->player_specials, struct player_special_data, 1);
   if (load_char(argument, victim) >= 0) {
-    if (GET_CLAN(victim) != NULL) {
-     if (!strstr(GET_CLAN(victim), "None")) {
-      sprintf(buf, "%s", GET_CLAN(victim));
+    if (char_get_clan(victim) != NULL) {
+     if (!strstr(char_get_clan(victim), "None")) {
+      sprintf(buf, "%s", char_get_clan(victim));
       clan = TRUE;
      }
-     if (strstr(GET_CLAN(victim), "Applying")) {
-       sprintf(buf, "%s", GET_CLAN(victim));
+     if (strstr(char_get_clan(victim), "Applying")) {
+       sprintf(buf, "%s", char_get_clan(victim));
       clan = TRUE;
      }
     }
-    if (GET_CLAN(victim) == NULL || strstr(GET_CLAN(victim), "None")) {
+    if (char_get_clan(victim) == NULL || strstr(char_get_clan(victim), "None")) {
      clan = FALSE;
     }
     send_to_char(ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
-    if (GET_ADMLEVEL(victim) >= ADMLVL_IMMORT) {
+    if (char_get_admlevel(victim) >= ADMLVL_IMMORT) {
       send_to_char(ch, "@cName     @D: @G%s\r\n", char_get_name(victim));
-      send_to_char(ch, "@cImm Level@D: @G%s\r\n", immlevels[GET_ADMLEVEL(victim)]);
+      send_to_char(ch, "@cImm Level@D: @G%s\r\n", immlevels[char_get_admlevel(victim)]);
       send_to_char(ch, "@cTitle    @D: @G%s\r\n", char_get_title(victim));
     }
     else {
       send_to_char(ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", char_get_name(victim), SENSEI_NAME(victim), TRUE_RACE(victim), char_get_title(victim), clan ? buf : "None.");
-      if (clan == TRUE && !strstr(GET_CLAN(victim), "Applying")) {
+      if (clan == TRUE && !strstr(char_get_clan(victim), "Applying")) {
        if (checkCLAN(victim) == TRUE) {
-        clanRANKD(GET_CLAN(victim), ch, victim);
+        clanRANKD(char_get_clan(victim), ch, victim);
        }
       }
      }
@@ -8482,7 +8481,7 @@ ACMD(do_whois)
   }
 }
 
-#define DOOR_DCHIDE(ch, door)           (EXIT(ch, door)->dchide)
+#define DOOR_DCHIDE(ch, door)           (char_get_exit(ch, door)->dchide)
 
 static void search_in_direction(struct char_data * ch, int dir)
 {
@@ -8498,24 +8497,24 @@ static void search_in_direction(struct char_data * ch, int dir)
   if (char_is_halfbreed(ch))
     skill_lvl = skill_lvl + 1;
 
-  if (EXIT(ch, dir))
+  if (char_get_exit(ch, dir))
     dchide = DOOR_DCHIDE(ch, dir);
 
   if (skill_lvl > dchide)
     check = TRUE;
 
-  if (EXIT(ch, dir)) {
-    if (EXIT(ch, dir)->general_description &&
-        !room_exit_flagged(EXIT(ch, dir), EX_SECRET))
-      send_to_char(ch, EXIT(ch, dir)->general_description);
-    else if (!room_exit_flagged(EXIT(ch, dir), EX_SECRET))
+  if (char_get_exit(ch, dir)) {
+    if (char_get_exit(ch, dir)->general_description &&
+        !room_exit_flagged(char_get_exit(ch, dir), EX_SECRET))
+      send_to_char(ch, char_get_exit(ch, dir)->general_description);
+    else if (!room_exit_flagged(char_get_exit(ch, dir), EX_SECRET))
       send_to_char(ch, "There is a normal exit there.\r\n");
-    else if (room_exit_flagged(EXIT(ch, dir), EX_ISDOOR) &&
-             room_exit_flagged(EXIT(ch, dir), EX_SECRET) &&
-             EXIT(ch, dir)->keyword && (check == TRUE)  )
+    else if (room_exit_flagged(char_get_exit(ch, dir), EX_ISDOOR) &&
+             room_exit_flagged(char_get_exit(ch, dir), EX_SECRET) &&
+             char_get_exit(ch, dir)->keyword && (check == TRUE)  )
       send_to_char(ch, "There is a hidden door keyword: '%s' %sthere.\r\n",
-                   fname (EXIT(ch, dir)->keyword),
-                   (room_exit_flagged(EXIT(ch, dir), EX_CLOSED)) ? "" : "open ");
+                   fname (char_get_exit(ch, dir)->keyword),
+                   (room_exit_flagged(char_get_exit(ch, dir), EX_CLOSED)) ? "" : "open ");
     else
       send_to_char(ch, "There is no exit there.\r\n");
   } else

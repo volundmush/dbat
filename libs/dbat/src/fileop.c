@@ -175,7 +175,7 @@ void topLoad()
 /* Write the toplist to file */
 void topWrite(struct char_data *ch)
 {
-  if (GET_ADMLEVEL(ch) > 0 || char_is_npc(ch))
+  if (char_get_admlevel(ch) > 0 || char_is_npc(ch))
    return;
 
   if (TOPLOADED == FALSE) {
@@ -356,9 +356,9 @@ void topWrite(struct char_data *ch)
    for (x = start; x < finish; x++) { /* Save the new spots */
     if (placed == FALSE) { /* They Haven't Placed */
      if (strcasecmp(topname[x], char_get_name(ch))) { /* Name doesn't match */
-      if (GET_BANK_GOLD(ch) + GET_GOLD(ch) > toppoint[x]) {
+      if (char_get_bank_gold(ch) + char_get_gold(ch) > toppoint[x]) {
        free(topname[x]);
-       toppoint[x] = GET_BANK_GOLD(ch) + GET_GOLD(ch);
+       toppoint[x] = char_get_bank_gold(ch) + char_get_gold(ch);
        topname[x] = strdup(char_get_name(ch));
        placed = TRUE;
        writeEm = TRUE;
@@ -405,9 +405,9 @@ void topWrite(struct char_data *ch)
    for (x = start; x < finish; x++) { /* Save the new spots */
     if (placed == FALSE) { /* They Haven't Placed */
      if (strcasecmp(topname[x], char_get_user(ch))) { /* Name doesn't match */
-      if (GET_TRP(ch) > toppoint[x]) {
+      if (char_get_trp(ch) > toppoint[x]) {
        free(topname[x]);
-       toppoint[x] = GET_TRP(ch);
+       toppoint[x] = char_get_trp(ch);
        topname[x] = strdup(char_get_user(ch));
        placed = TRUE;
        writeEm = TRUE;

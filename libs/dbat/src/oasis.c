@@ -91,7 +91,7 @@ ACMD(do_oasis)
    * -- Welcor 09/03 
    * - thanks to Mark Garringer (zizazat@hotmail.com) for the bug report.
    */
-  if (STATE(ch->desc) != CON_PLAYING) 
+  if (desc_get_connected(ch->desc) != CON_PLAYING) 
     return;
   
 
@@ -326,19 +326,19 @@ if(OLC_HOUSE(d))
    * Restore descriptor playing status.
    */
   if (d->character) {
-    REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
+    REMOVE_BIT_AR(char_get_act(d->character), PLR_WRITING);
     act("$n stops using OLC.", TRUE, d->character, NULL, NULL, TO_ROOM);
     
     if (cleanup_type == CLEANUP_CONFIG)
       mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing the game configuration", char_get_name(d->character));
-    else if (STATE(d) == CON_TEDIT)
+    else if (desc_get_connected(d) == CON_TEDIT)
       mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing text files.", char_get_name(d->character));
-    else if (STATE(d) == CON_HEDIT)
+    else if (desc_get_connected(d) == CON_HEDIT)
       mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing help files.", char_get_name(d->character));
     else
       mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing zone %d allowed zone %d", char_get_name(d->character), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(d->character));
 
-    STATE(d) = CON_PLAYING;
+    desc_set_connected(d, CON_PLAYING);
   }
 
   free(d->olc);
@@ -412,7 +412,7 @@ int can_edit_zone(struct char_data *ch, zone_rnum rnum)
     return TRUE;
 
   /* always access if ch is high enough level */
-  if (GET_ADMLEVEL(ch) >= ADMLVL_GRGOD)
+  if (char_get_admlevel(ch) >= ADMLVL_GRGOD)
     return (TRUE);
   
   /* always access if a player helped build the zone in the first place */ 
@@ -424,7 +424,7 @@ int can_edit_zone(struct char_data *ch, zone_rnum rnum)
     return FALSE;
 
   /* no access if you're not at least LVL_BUILDER */
-  if (GET_ADMLEVEL(ch) < ADMLVL_BUILDER)
+  if (char_get_admlevel(ch) < ADMLVL_BUILDER)
     return FALSE;
 
   /* always access if you're assigned to this zone */

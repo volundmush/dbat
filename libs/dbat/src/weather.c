@@ -29,28 +29,28 @@ static void grow_plants(void)
   struct obj_data *k;
 
  for (k = object_list; k; k = k->next) {
-  if (IN_ROOM(k) == NOWHERE) {
+  if (obj_get_in_room(k) == NOWHERE) {
    continue;
   } else if (k->carried_by || k->in_obj) {
    continue;
-  } else if (rroom_flagged(IN_ROOM(k), ROOM_GARDEN1) || rroom_flagged(IN_ROOM(k), ROOM_GARDEN2)) {
-   if (GET_OBJ_VAL(k, VAL_WATERLEVEL) < 0 && GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {
-    GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
-    if (GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {
-     send_to_room(IN_ROOM(k), "%s@y withers a bit.\r\n", k->short_description);
+  } else if (rroom_flagged(obj_get_in_room(k), ROOM_GARDEN1) || rroom_flagged(obj_get_in_room(k), ROOM_GARDEN2)) {
+   if (obj_get_value(k, VAL_WATERLEVEL) < 0 && obj_get_value(k, VAL_WATERLEVEL) > -10) {
+    obj_set_value(k, VAL_WATERLEVEL, obj_get_value(k, VAL_WATERLEVEL) - (1));
+    if (obj_get_value(k, VAL_WATERLEVEL) > -10) {
+     send_to_room(obj_get_in_room(k), "%s@y withers a bit.\r\n", k->short_description);
     } else {
-     send_to_room(IN_ROOM(k), "%s@y has withered to a dried up dead husk.\r\n", k->short_description);
+     send_to_room(obj_get_in_room(k), "%s@y has withered to a dried up dead husk.\r\n", k->short_description);
     }    
-   } else if (GET_OBJ_VAL(k, VAL_WATERLEVEL) >= 0) {
-    GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
-    if (GET_OBJ_VAL(k, VAL_GROWTH) < GET_OBJ_VAL(k, VAL_MATGOAL) && GET_OBJ_VAL(k, VAL_MATURITY) < GET_OBJ_VAL(k, VAL_MAXMATURE)) {
-      GET_OBJ_VAL(k, VAL_GROWTH) += 1;
-     if (GET_OBJ_VAL(k, VAL_GROWTH) >= GET_OBJ_VAL(k, VAL_MATGOAL)) {
-      GET_OBJ_VAL(k, VAL_GROWTH) = 0;
-      GET_OBJ_VAL(k, VAL_MATURITY) += 1;
+   } else if (obj_get_value(k, VAL_WATERLEVEL) >= 0) {
+    obj_set_value(k, VAL_WATERLEVEL, obj_get_value(k, VAL_WATERLEVEL) - (1));
+    if (obj_get_value(k, VAL_GROWTH) < obj_get_value(k, VAL_MATGOAL) && obj_get_value(k, VAL_MATURITY) < obj_get_value(k, VAL_MAXMATURE)) {
+      obj_set_value(k, VAL_GROWTH, obj_get_value(k, VAL_GROWTH) + (1));
+     if (obj_get_value(k, VAL_GROWTH) >= obj_get_value(k, VAL_MATGOAL)) {
+      obj_set_value(k, VAL_GROWTH, 0);
+      obj_set_value(k, VAL_MATURITY, obj_get_value(k, VAL_MATURITY) + (1));
      }
-     if (GET_OBJ_VAL(k, VAL_MATURITY) >= GET_OBJ_VAL(k, VAL_MAXMATURE)) {
-      send_to_room(IN_ROOM(k), "%s@G is now fully grown!@n\r\n", k->short_description);
+     if (obj_get_value(k, VAL_MATURITY) >= obj_get_value(k, VAL_MAXMATURE)) {
+      send_to_room(obj_get_in_room(k), "%s@G is now fully grown!@n\r\n", k->short_description);
      }
     }
    }
@@ -247,7 +247,7 @@ void oozaru_transform(char_data *ch) {
 
     act("@rLooking up at the moon your heart begins to beat loudly. Sudden rage begins to fill your mind while your body begins to grow. Hair sprouts  all over your body and your teeth become sharp as your body takes on the Oozaru form!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant ape!@n", TRUE, ch, 0, 0, TO_ROOM);
-    SET_BIT_AR(PLR_FLAGS(ch), oozaru.flag);
+    SET_BIT_AR(char_get_act(ch), oozaru.flag);
 }
 
 void oozaru_add()
@@ -269,9 +269,9 @@ void oozaru_revert(char_data *ch) {
 
     act("@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal and asleep.@n", TRUE, ch, 0, 0, TO_ROOM);
-    GET_POS(ch) = POS_SLEEPING;
+    char_set_position(ch, POS_SLEEPING);
 
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_OOZARU);
+    REMOVE_BIT_AR(char_get_act(ch), PLR_OOZARU);
 }
 
 void oozaru_drop()
@@ -290,21 +290,21 @@ static void check_hoshi_phase(struct char_data *ch, int type) {
   if(!char_is_hoshijin(ch)) return;
     switch (type) {
 	  case 0:
-	     if (GET_PHASE(ch) > 0) {
+	     if (char_get_starphase(ch) > 0) {
 		  act("@WYour eyes and the glyphs on your skin slowly start to lose their glow. You feel the power received from the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W drain away from your body. It has apparently entered the @rDeath Phase@W of its cycle...@n", TRUE, ch, 0, 0, TO_CHAR);
 		  act("@c$n@W's eyes and the glyphs on $s skin slowly start to lose their glow. You notice that $e seems weaker now for some reason.@n", TRUE, ch, 0, 0, TO_ROOM);
 		  phase_powerup(ch, 0);
          	 }
 	   break; // Drop Powerup
 	  case 1:
-	     if (GET_PHASE(ch) != 1) {
+	     if (char_get_starphase(ch) != 1) {
 		  act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @CBirth Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an electric @bb@Bl@Cue@W!@n", TRUE, ch, 0, 0, TO_CHAR);
 		  act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow an electric @bb@Bl@Cue@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n", TRUE, ch, 0, 0, TO_ROOM);
 		  phase_powerup(ch, 1);
 		 }
 	   break; // Powerup Phase 1
 	  case 2:
-	     if (GET_PHASE(ch) != 2) {
+	     if (char_get_starphase(ch) != 2) {
 		  act("@WYou suddenly feel a @RSURGE@W of power through your body. You feel the @GE@gl@Dd@wri@Dt@gc@Gh @YS@yta@Yr@W come into its @GLife Phase@W and its power is flowing into your body! Finally your eyes and the glyphs on your skin begin to glow an fiery @Rr@re@Rd@W!@n", TRUE, ch, 0, 0, TO_CHAR);
 		  act("@c$n@W suddenly seems to grow stronger for some reason. You notice $s eyes begin to glow a fiery @rR@Re@rd@W. Suddenly glyphs start to appear all over $s skin and glow with the same light!@n", TRUE, ch, 0, 0, TO_ROOM);
 		  phase_powerup(ch, 2);
@@ -362,7 +362,7 @@ static void phase_powerup(struct char_data *ch, int phase) {
     if(bonus > 0) {
       assign_affect(ch, AFF_STARPHASE, 0, -1, bonus, 0, 0, 0, 0, bonus);
     }
-    GET_PHASE(ch) = phase;
+    char_set_starphase(ch, phase);
     save_char(ch);
 }
 

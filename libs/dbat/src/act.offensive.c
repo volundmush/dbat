@@ -65,14 +65,14 @@ ACMD(do_galikgun)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
-  if (GET_SKILL_PERF(ch, SKILL_GALIKGUN) == 1) {
+  if (char_get_skills_perf(ch, SKILL_GALIKGUN) == 1) {
    attperc += 0.05;
-  } else if (GET_SKILL_PERF(ch, SKILL_GALIKGUN) == 3) {
+  } else if (char_get_skills_perf(ch, SKILL_GALIKGUN) == 3) {
    minimum -= 0.05;
    if (minimum <= 0.0) {
     minimum = 0.01;
@@ -81,8 +81,8 @@ ACMD(do_galikgun)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -103,14 +103,14 @@ ACMD(do_galikgun)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_GALIKGUN, 0);
   index = check_def(vict); /* Check parry/block/dodge of vict */
   prob = roll_accuracy(ch, skill, TRUE);
 
-  if (GET_SKILL_PERF(ch, SKILL_GALIKGUN) == 2) {
+  if (char_get_skills_perf(ch, SKILL_GALIKGUN) == 2) {
    prob += 5;
   }
 
@@ -124,7 +124,7 @@ ACMD(do_galikgun)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Galik Gun")) {
-      if (GET_SKILL_PERF(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
+      if (char_get_skills_perf(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
           pcost(ch, attperc - 0.05, 0);
       } else {
           pcost(ch, attperc, 0);
@@ -142,7 +142,7 @@ ACMD(do_galikgun)
      act("@C$N@W moves quickly and blocks your Galik Gun!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W Galik Gun!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W moves quickly and blocks @c$n's@W Galik Gun!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -157,18 +157,18 @@ ACMD(do_galikgun)
      act("@C$N@W manages to dodge your Galik Gun, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W Galik Gun, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W Galik Gun, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 16, skill, SKILL_GALIKGUN); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
-     if (GET_SKILL_PERF(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -181,7 +181,7 @@ ACMD(do_galikgun)
      act("@C$n@W fires a Galik Gun at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a Galik Gun at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
 
-     if (GET_SKILL_PERF(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -194,7 +194,7 @@ ACMD(do_galikgun)
      act("@WYou can't believe it but your Galik Gun misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a Galik Gun at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a Galik Gun at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -212,7 +212,7 @@ ACMD(do_galikgun)
       act("@WYou take your charged ki and form a sparkling purple shroud of energy around your body! You swing your arms towards @c$N@W with your palms flatly facing $M and shout '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around your body forms into a beam and crashes into $S body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards you with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into your body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards @c$N@W with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -232,7 +232,7 @@ ACMD(do_galikgun)
       act("@WYou take your charged ki and form a sparkling purple shroud of energy around your body! You swing your arms towards @c$N@W with your palms flatly facing $M and shout '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around your body forms into a beam and crashes into $S gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards you with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into your gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards @c$N@W with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -258,7 +258,7 @@ ACMD(do_galikgun)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-     if (GET_SKILL_PERF(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -310,14 +310,14 @@ ACMD(do_honoo)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
-  if (GET_SKILL_PERF(ch, SKILL_HONOO) == 1) {
+  if (char_get_skills_perf(ch, SKILL_HONOO) == 1) {
    attperc += 0.05;
-  } else if (GET_SKILL_PERF(ch, SKILL_HONOO) == 3) {
+  } else if (char_get_skills_perf(ch, SKILL_HONOO) == 3) {
    minimum -= 0.05;
    if (minimum <= 0.0) {
     minimum = 0.01;
@@ -326,8 +326,8 @@ ACMD(do_honoo)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -346,7 +346,7 @@ ACMD(do_honoo)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_HONOO, 0);
@@ -354,7 +354,7 @@ ACMD(do_honoo)
   index = check_def(vict); /* Check parry/block/dodge of vict */
 
   prob = roll_accuracy(ch, skill, TRUE);
-  if (GET_SKILL_PERF(ch, SKILL_HONOO) == 2) {
+  if (char_get_skills_perf(ch, SKILL_HONOO) == 2) {
    prob += 5;
   }
   perc = chance_to_hit(ch);
@@ -369,18 +369,18 @@ ACMD(do_honoo)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Honoo")) {
-      if (GET_SKILL_PERF(ch, SKILL_HONOO) == 3 && attperc > minimum) {
+      if (char_get_skills_perf(ch, SKILL_HONOO) == 3 && attperc > minimum) {
           pcost(ch, attperc - 0.05, 0);
       } else {
           pcost(ch, attperc, 0);
       }
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-      if (ROOM_EFFECT(IN_ROOM(ch)) < -1) {
-          send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
-          ROOM_EFFECT(IN_ROOM(ch)) += 1;
-      } else if (ROOM_EFFECT(IN_ROOM(ch)) == -1) {
-          send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
-          ROOM_EFFECT(IN_ROOM(ch)) = 0;
+      if (rroom_get_geffect(char_get_in_room(ch)) < -1) {
+          send_to_room(char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
+          rroom_set_geffect(char_get_in_room(ch), rroom_get_geffect(char_get_in_room(ch)) + (1));
+      } else if (rroom_get_geffect(char_get_in_room(ch)) == -1) {
+          send_to_room(char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
+          rroom_set_geffect(char_get_in_room(ch), 0);
       }
       return;
   }
@@ -395,7 +395,7 @@ ACMD(do_honoo)
      act("@C$N@W moves quickly and blocks your honoo!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W honoo!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W moves quickly and blocks @c$n's@W honoo!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_HONOO) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_HONOO) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -405,12 +405,12 @@ ACMD(do_honoo)
      dmg /= 4;
      hurt(0, 0, ch, vict, NULL, dmg, 1);
 
-     if (ROOM_EFFECT(IN_ROOM(ch)) < -1) {
-      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
-      ROOM_EFFECT(IN_ROOM(ch)) += 1;
-     } else if (ROOM_EFFECT(IN_ROOM(ch)) == -1) {
-      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
-      ROOM_EFFECT(IN_ROOM(ch)) = 0;
+     if (rroom_get_geffect(char_get_in_room(ch)) < -1) {
+      send_to_room(char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
+      rroom_set_geffect(char_get_in_room(ch), rroom_get_geffect(char_get_in_room(ch)) + (1));
+     } else if (rroom_get_geffect(char_get_in_room(ch)) == -1) {
+      send_to_room(char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
+      rroom_set_geffect(char_get_in_room(ch), 0);
      }
      return;
     }
@@ -418,30 +418,30 @@ ACMD(do_honoo)
      act("@C$N@W manages to dodge your honoo, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W honoo, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W honoo, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 21, skill, SKILL_HONOO); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
-     if (GET_SKILL_PERF(ch, SKILL_HONOO) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_HONOO) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
      }
      hurt(0, 0, ch, vict, NULL, 0, 1);
 
-     if (ROOM_EFFECT(IN_ROOM(ch)) < -1) {
-      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
-      ROOM_EFFECT(IN_ROOM(ch)) += 1;
-     } else if (ROOM_EFFECT(IN_ROOM(ch)) == -1) {
-      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
-      ROOM_EFFECT(IN_ROOM(ch)) = 0;
+     if (rroom_get_geffect(char_get_in_room(ch)) < -1) {
+      send_to_room(char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
+      rroom_set_geffect(char_get_in_room(ch), rroom_get_geffect(char_get_in_room(ch)) + (1));
+     } else if (rroom_get_geffect(char_get_in_room(ch)) == -1) {
+      send_to_room(char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
+      rroom_set_geffect(char_get_in_room(ch), 0);
      }
      
      return;
@@ -451,18 +451,18 @@ ACMD(do_honoo)
      act("@C$n@W fires a honoo at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a honoo at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
 
-     if (GET_SKILL_PERF(ch, SKILL_HONOO) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_HONOO) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
      }
      hurt(0, 0, ch, vict, NULL, 0, 1);
-     if (ROOM_EFFECT(IN_ROOM(ch)) < -1) {
-      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
-      ROOM_EFFECT(IN_ROOM(ch)) += 1;
-     } else if (ROOM_EFFECT(IN_ROOM(ch)) == -1) {
-      send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
-      ROOM_EFFECT(IN_ROOM(ch)) = 0;
+     if (rroom_get_geffect(char_get_in_room(ch)) < -1) {
+      send_to_room(char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
+      rroom_set_geffect(char_get_in_room(ch), rroom_get_geffect(char_get_in_room(ch)) + (1));
+     } else if (rroom_get_geffect(char_get_in_room(ch)) == -1) {
+      send_to_room(char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
+      rroom_set_geffect(char_get_in_room(ch), 0);
      }
      
      return;
@@ -472,18 +472,18 @@ ACMD(do_honoo)
      act("@WYou can't believe it but your honoo misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a honoo at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a honoo at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_HONOO) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_HONOO) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
      }     
    }
-    if (ROOM_EFFECT(IN_ROOM(ch)) < -1) {
-     send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
-     ROOM_EFFECT(IN_ROOM(ch)) += 1;
-    } else if (ROOM_EFFECT(IN_ROOM(ch)) == -1) {
-     send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
-     ROOM_EFFECT(IN_ROOM(ch)) = 0;
+    if (rroom_get_geffect(char_get_in_room(ch)) < -1) {
+     send_to_room(char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
+     rroom_set_geffect(char_get_in_room(ch), rroom_get_geffect(char_get_in_room(ch)) + (1));
+    } else if (rroom_get_geffect(char_get_in_room(ch)) == -1) {
+     send_to_room(char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
+     rroom_set_geffect(char_get_in_room(ch), 0);
     }
      hurt(0, 0, ch, vict, NULL, 0, 1);
    return;
@@ -495,18 +495,18 @@ ACMD(do_honoo)
    if (check_ruby(ch) == 1) {
     dmg += dmg * 0.2;
    }
-   if (GET_BONUS(vict, BONUS_FIREPROOF)) {
+   if (char_get_bonuses(vict, BONUS_FIREPROOF)) {
     dmg -= dmg * 0.4;
-   } else if (GET_BONUS(vict, BONUS_FIREPRONE)) {
+   } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
     dmg += dmg * 0.4;
    }
-   SET_BIT_AR(AFF_FLAGS(vict), AFF_ASHED);
+   SET_BIT_AR(char_get_affected_by(vict), AFF_ASHED);
    switch(hitspot) {
     case 1:
       act("@WYou gather your charged ki and bring it up into your throat while mixing it with the air in your lungs. You grin evily at @c$N@W before unleashing a massive jet of @rf@Rl@Ya@rm@Re@Ys@W from your lips! @c$N@W's body is engulfed!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W gathers $s charged ki and brings it up into $s throat while mixing it with the air in $s lungs. $e grins evily at you before unleashing a massive jet of @rf@Rl@Ya@rm@Re@Ys@W from $s lips! YOUR body is engulfed!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W gathers $s charged ki and brings it up into $s throat while mixing it with the air in $s lungs. $e grins evily at @c$N@W before unleashing a massive jet of @rf@Rl@Ya@rm@Re@Ys@W from $s lips! @c$N@W's body is engulfed!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -526,7 +526,7 @@ ACMD(do_honoo)
       act("@WYou gather your charged ki and bring it up into your throat while mixing it with the air in your lungs. You grin evily at @c$N@W before unleashing a massive jet of @rf@Rl@Ya@rm@Re@Ys@W from your lips! @c$N@W's gut is engulfed!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W gathers $s charged ki and brings it up into $s throat while mixing it with the air in $s lungs. $e grins evily at you before unleashing a massive jet of @rf@Rl@Ya@rm@Re@Ys@W from $s lips! YOUR gut is engulfed!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W gathers $s charged ki and brings it up into $s throat while mixing it with the air in $s lungs. $e grins evily at @c$N@W before unleashing a massive jet of @rf@Rl@Ya@rm@Re@Ys@W from $s lips! @c$N@W's gut is engulfed!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -552,30 +552,30 @@ ACMD(do_honoo)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-     if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !char_is_demon(vict) && !GET_BONUS(vict, BONUS_FIREPROOF)) {
+     if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
       send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-      SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
-     } else if (GET_BONUS(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
+      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
+     } else if (char_get_bonuses(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
       send_to_char(ch, "@RThey appear to be fireproof!@n\r\n");
-     } else if (GET_BONUS(vict, BONUS_FIREPRONE)) {
+     } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
       send_to_char(vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are easily burned!@n\r\n");
-      SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
      }
-     if (GET_SKILL_PERF(ch, SKILL_HONOO) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_HONOO) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
      }
-    if (ROOM_EFFECT(IN_ROOM(ch)) < -1) {
-     send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates some!\r\n");
-     ROOM_EFFECT(IN_ROOM(ch)) += 1;
-    } else if (ROOM_EFFECT(IN_ROOM(ch)) == -1) {
-     send_to_room(IN_ROOM(ch), "The water surrounding the area evaporates completely away!\r\n");
-     ROOM_EFFECT(IN_ROOM(ch)) = 0;
+    if (rroom_get_geffect(char_get_in_room(ch)) < -1) {
+     send_to_room(char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
+     rroom_set_geffect(char_get_in_room(ch), rroom_get_geffect(char_get_in_room(ch)) + (1));
+    } else if (rroom_get_geffect(char_get_in_room(ch)) == -1) {
+     send_to_room(char_get_in_room(ch), "The water surrounding the area evaporates completely away!\r\n");
+     rroom_set_geffect(char_get_in_room(ch), 0);
     }
-    REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ASHED);
+    REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ASHED);
     return;
   }
  }
@@ -628,14 +628,14 @@ ACMD(do_psyblast)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
-  if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 1) {
+  if (char_get_skills_perf(ch, SKILL_PSYBLAST) == 1) {
    attperc += 0.05;
-  } else if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 3) {
+  } else if (char_get_skills_perf(ch, SKILL_PSYBLAST) == 3) {
    minimum -= 0.05;
    if (minimum <= 0.0) {
     minimum = 0.01;
@@ -644,8 +644,8 @@ ACMD(do_psyblast)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -665,7 +665,7 @@ ACMD(do_psyblast)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_PSYBLAST, 0);
@@ -673,7 +673,7 @@ ACMD(do_psyblast)
   index = check_def(vict); /* Check parry/block/dodge of vict */
 
   prob = roll_accuracy(ch, skill, TRUE);
-  if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 2) {
+  if (char_get_skills_perf(ch, SKILL_PSYBLAST) == 2) {
    prob += 5;
   }
   perc = chance_to_hit(ch);
@@ -688,7 +688,7 @@ ACMD(do_psyblast)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Psychic Blast")) {
-      if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
+      if (char_get_skills_perf(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
           pcost(ch, attperc - 0.05, 0);
       } else {
           pcost(ch, attperc, 0);
@@ -707,7 +707,7 @@ ACMD(do_psyblast)
      act("@C$N@W moves quickly and blocks your psychic blast!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W psychic blast!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W moves quickly and blocks @c$n's@W psychic blast!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -723,18 +723,18 @@ ACMD(do_psyblast)
      act("@C$N@W manages to dodge your psychic blast, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W psychic blast, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W psychic blast, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 20, skill, SKILL_PSYBLAST); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
-     if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -748,7 +748,7 @@ ACMD(do_psyblast)
      act("@C$n@W fires a psychic blast at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a psychic blast at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
 
-     if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -762,7 +762,7 @@ ACMD(do_psyblast)
      act("@WYou can't believe it but your psychic blast misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a psychic blast at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a psychic blast at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -780,7 +780,7 @@ ACMD(do_psyblast)
       act("@WYou gather your charged ki into your brain as a flash of @bb@Bl@wue@W light shoots from your forehead and slams into @c$N@W's body! $E screams for a moment as terrifying images sear through $S mind!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W gathers $s charged ki into $s brain as a flash of @bb@Bl@wue@W light shoots from $s forehead and slams into YOUR body! You scream for a moment as terrifying images sear through your mind!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W gathers $s charged ki into $s brain as a flash of @bb@Bl@wue@W light shoots from $s forehead and slams into @c$N@W's body! $E screams for a moment as terrifying images sear through $S mind!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -800,7 +800,7 @@ ACMD(do_psyblast)
       act("@WYou gather your charged ki into your brain as a flash of @bb@Bl@wue@W light shoots from your forehead and slams into @c$N@W's gut! $E screams for a moment as terrifying images sear through $S mind!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W gathers $s charged ki into $s brain as a flash of @bb@Bl@wue@W light shoots from $s forehead and slams into YOUR gut! You scream for a moment as terrifying images sear through your mind!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W gathers $s charged ki into $s brain as a flash of @bb@Bl@wue@W light shoots from $s forehead and slams into @c$N@W's gut! $E screams for a moment as terrifying images sear through $S mind!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -827,10 +827,10 @@ ACMD(do_psyblast)
      break;
    }
  
-     if (GET_CHARGE(vict) > 0 && rand_number(1, 3) == 2) {
-      GET_CHARGE(vict) -= dmg / 5;
-      if (GET_CHARGE(vict) < 0) {
-       GET_CHARGE(vict) = 0;
+     if (char_get_charge(vict) > 0 && rand_number(1, 3) == 2) {
+      char_set_charge(vict, char_get_charge(vict) - (dmg / 5));
+      if (char_get_charge(vict) < 0) {
+       char_set_charge(vict, 0);
       }
       send_to_char(vict, "@RYou lose some of your charged ki!@n\r\n");
      }
@@ -838,9 +838,9 @@ ACMD(do_psyblast)
      if (!char_aff_flagged(vict, AFF_SHOCKED) && rand_number(1, 4) == 4 && !char_aff_flagged(vict, AFF_SANCTUARY)) {
       act("@MYour mind has been shocked!@n", TRUE, vict, 0, 0, TO_CHAR);
       act("@M$n@m's mind has been shocked!@n", TRUE, vict, 0, 0, TO_ROOM);
-      SET_BIT_AR(AFF_FLAGS(vict), AFF_SHOCKED);
+      SET_BIT_AR(char_get_affected_by(vict), AFF_SHOCKED);
      }
-     if (GET_SKILL_PERF(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_PSYBLAST) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -894,37 +894,37 @@ ACMD(do_tslash)
   if (!char_has_arms(ch)) {
    send_to_char(ch, "You have no available arms!\r\n");
    return;
-  } else if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50 && GET_LIMBCOND(ch, 2) < 0) {
+  } else if (char_get_limb_condition(ch, (1)-1) > 0 && char_get_limb_condition(ch, (1)-1) < 50 && char_get_limb_condition(ch, (2)-1) < 0) {
    send_to_char(ch, "Using your broken right arm has damaged it more!@n\r\n");
-   GET_LIMBCOND(ch, 1) -= rand_number(3, 5);
-   if (GET_LIMBCOND(ch, 1) < 0) {
+   char_set_limb_condition(ch, (1)-1, char_get_limb_condition(ch, (1)-1) - (rand_number(3, 5)));
+   if (char_get_limb_condition(ch, (1)-1) < 0) {
     act("@RYour right arm has fallen apart!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@r$n@R's right arm has fallen apart!@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-  } else if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50 && GET_LIMBCOND(ch, 1) < 0) {
+  } else if (char_get_limb_condition(ch, (2)-1) > 0 && char_get_limb_condition(ch, (2)-1) < 50 && char_get_limb_condition(ch, (1)-1) < 0) {
    send_to_char(ch, "Using your broken left arm has damaged it more!@n\r\n");
-   GET_LIMBCOND(ch, 2) -= rand_number(3, 5);
-   if (GET_LIMBCOND(ch, 2) < 0) {
+   char_set_limb_condition(ch, (2)-1, char_get_limb_condition(ch, (2)-1) - (rand_number(3, 5)));
+   if (char_get_limb_condition(ch, (2)-1) < 0) {
     act("@RYour left arm has fallen apart!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@r$n@R's left arm has fallen apart!@n", TRUE, ch, 0, 0, TO_ROOM);
    }
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
-  if (!GET_EQ(ch, WEAR_WIELD1)) {
+  if (!char_get_equipment(ch, WEAR_WIELD1)) {
    send_to_char(ch, "You need to wield a sword to use this.\r\n");
    return;
   }
-  if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
+  if (obj_get_value(char_get_equipment(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
    send_to_char(ch, "You are not wielding a sword, you need one to use this technique.\r\n");
    return;
   }
 
-  struct obj_data *wobj = GET_EQ(ch, WEAR_WIELD1);
+  struct obj_data *wobj = char_get_equipment(ch, WEAR_WIELD1);
   int wlvl = 0;
   if (obj_flagged(wobj, ITEM_WEAPLVL1)) { 
    wlvl = 1;
@@ -938,9 +938,9 @@ ACMD(do_tslash)
    wlvl = 5;
   }
 
-  if (GET_SKILL_PERF(ch, SKILL_TSLASH) == 1) {
+  if (char_get_skills_perf(ch, SKILL_TSLASH) == 1) {
    attperc += 0.05;
-  } else if (GET_SKILL_PERF(ch, SKILL_TSLASH) == 3) {
+  } else if (char_get_skills_perf(ch, SKILL_TSLASH) == 3) {
    minimum -= 0.05;
    if (minimum <= 0.0) {
     minimum = 0.01;
@@ -949,8 +949,8 @@ ACMD(do_tslash)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -970,7 +970,7 @@ ACMD(do_tslash)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_TSLASH, 0);
@@ -978,7 +978,7 @@ ACMD(do_tslash)
   index = check_def(vict); /* Check parry/block/dodge of vict */
 
   prob = roll_accuracy(ch, skill, TRUE);
-  if (GET_SKILL_PERF(ch, SKILL_TSLASH) == 2) {
+  if (char_get_skills_perf(ch, SKILL_TSLASH) == 2) {
    prob += 5;
   }
   perc = chance_to_hit(ch);
@@ -993,7 +993,7 @@ ACMD(do_tslash)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Twin Slash")) {
-      if (GET_SKILL_PERF(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
+      if (char_get_skills_perf(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
           pcost(ch, attperc - 0.05, 0);
       } else {
           pcost(ch, attperc, 0);
@@ -1009,7 +1009,7 @@ ACMD(do_tslash)
      act("@C$N@W moves quickly and blocks your twin slash!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W twin slash!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W moves quickly and blocks @c$n's@W twin slash!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -1025,18 +1025,18 @@ ACMD(do_tslash)
      act("@C$N@W manages to dodge your twin slash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W twin slash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W twin slash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 19, skill, SKILL_TSLASH); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
-     if (GET_SKILL_PERF(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -1050,7 +1050,7 @@ ACMD(do_tslash)
      act("@C$n@W fires a twin slash at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a twin slash at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
 
-     if (GET_SKILL_PERF(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -1064,7 +1064,7 @@ ACMD(do_tslash)
      act("@WYou can't believe it but your twin slash misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a twin slash at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a twin slash at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -1090,7 +1090,7 @@ ACMD(do_tslash)
       act("@WYou channel your charged ki into the blade of your sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as you draw it up to attack. Two blindingly quick slashes connect with @c$N@W's body as you fly past, leaving a green after-image behind!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with YOUR body as $e flies past, leaving a green after-image behind!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with @c$N@W's body as $e flies past, leaving a green after-image behind!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -1112,7 +1112,7 @@ ACMD(do_tslash)
        act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@rYou have your head cut off by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       GET_DEATH_TYPE(vict) = DTYPE_HEAD;
+       char_set_death_type(vict, DTYPE_HEAD);
        remove_limb(vict, 0);
        die(vict, ch);
        if (char_aff_flagged(ch, AFF_GROUP)) {
@@ -1140,7 +1140,7 @@ ACMD(do_tslash)
        act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@rYou have your head cut off by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       GET_DEATH_TYPE(vict) = DTYPE_HEAD;
+       char_set_death_type(vict, DTYPE_HEAD);
        die(vict, ch);
        if (char_aff_flagged(ch, AFF_GROUP)) {
         group_gain(ch, vict);
@@ -1167,7 +1167,7 @@ ACMD(do_tslash)
       act("@WYou channel your charged ki into the blade of your sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as you draw it up to attack. Two blindingly quick slashes connect with @c$N@W's gut as you fly past, leaving a green after-image behind!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with YOUR gut as $e flies past, leaving a green after-image behind!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with @c$N@W's gut as $e flies past, leaving a green after-image behind!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -1180,18 +1180,18 @@ ACMD(do_tslash)
       act("@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with @c$N@W's arm as $e flies past, leaving a green after-image behind!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       dmg *= calc_critical(ch, 1);
       if (rand_number(1, 100) >= 70 && !char_is_npc(vict) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
-        if (GET_LIMBCOND(vict, 2) > 0 && !is_sparring(ch) && rand_number(1, 2) == 2) {
+        if (char_get_limb_condition(vict, (2)-1) > 0 && !is_sparring(ch) && rand_number(1, 2) == 2) {
          act("@RYour attack severs $N's left arm!@n", TRUE, ch, 0, vict, TO_CHAR);
          act("@R$n's attack severs your left arm!@n", TRUE, ch, 0, vict, TO_VICT);
          act("@R$N's left arm is severered in the attack!@n", TRUE, ch, 0, vict, TO_VICT);
-         GET_LIMBCOND(vict, 2) = 0;
+         char_set_limb_condition(vict, (2)-1, 0);
          remove_limb(vict, 2);
         }
-        else if (GET_LIMBCOND(vict, 1) > 0 && !is_sparring(ch)) {
+        else if (char_get_limb_condition(vict, (1)-1) > 0 && !is_sparring(ch)) {
          act("@RYour attack severs $N's right arm!@n", TRUE, ch, 0, vict, TO_CHAR);
          act("@R$n's attack severs your right arm!@n", TRUE, ch, 0, vict, TO_VICT);
          act("@R$N's right arm is severered in the attack!@n", TRUE, ch, 0, vict, TO_VICT);
-         GET_LIMBCOND(vict, 1) = 0;
+         char_set_limb_condition(vict, (1)-1, 0);
          remove_limb(vict, 1);
         }
       }
@@ -1205,18 +1205,18 @@ ACMD(do_tslash)
       act("@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with @c$N@W's leg as $e flies past, leaving a green after-image behind!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       dmg *= calc_critical(ch, 1);
       if (rand_number(1, 100) >= 70 && !char_is_npc(vict) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
-        if (GET_LIMBCOND(vict, 4) > 0 && !is_sparring(ch) && rand_number(1, 2) == 2) {
+        if (char_get_limb_condition(vict, (4)-1) > 0 && !is_sparring(ch) && rand_number(1, 2) == 2) {
          act("@RYour attack severs $N's left leg!@n", TRUE, ch, 0, vict, TO_CHAR);
          act("@R$n's attack severs your left leg!@n", TRUE, ch, 0, vict, TO_VICT);
          act("@R$N's left leg is severered in the attack!@n", TRUE, ch, 0, vict, TO_VICT);
-         GET_LIMBCOND(vict, 4) = 0;
+         char_set_limb_condition(vict, (4)-1, 0);
          remove_limb(vict, 4);
         }
-        else if (GET_LIMBCOND(vict, 3) > 0 && !is_sparring(ch)) {
+        else if (char_get_limb_condition(vict, (3)-1) > 0 && !is_sparring(ch)) {
          act("@RYour attack severs $N's right leg!@n", TRUE, ch, 0, vict, TO_CHAR);
          act("@R$n's attack severs your right leg!@n", TRUE, ch, 0, vict, TO_VICT);
          act("@R$N's right leg is severered in the attack!@n", TRUE, ch, 0, vict, TO_VICT);
-         GET_LIMBCOND(vict, 3) = 0;
+         char_set_limb_condition(vict, (3)-1, 0);
          remove_limb(vict, 3);
         }
       }
@@ -1225,7 +1225,7 @@ ACMD(do_tslash)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-     if (GET_SKILL_PERF(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_TSLASH) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -1277,15 +1277,15 @@ ACMD(do_eraser)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -1305,7 +1305,7 @@ ACMD(do_eraser)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_ERASER, 0);
@@ -1368,14 +1368,14 @@ ACMD(do_eraser)
      act("@C$N@W manages to dodge your eraser cannon, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W eraser cannon, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W eraser cannon, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 18, skill, SKILL_ERASER); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -1435,7 +1435,7 @@ ACMD(do_eraser)
       act("@WYou face @c$N@W quickly and open your mouth wide. A @Yg@yo@Yl@yd@Ye@yn@W glow forms from deep in your throat, growing brighter as it rises up and out your mouth. Suddenly a powerful Eraser Cannon erupts and slams into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n @Wfaces you quickly and opens $s mouth wide. A @Yg@yo@Yl@yd@Ye@yn@W glow forms from deep in $s throat, growing brighter as it rises up and out $s mouth. Suddenly a powerful Eraser Cannon erupts and slams into your body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n @Wfaces @c$N@W quickly and opens $s mouth wide. A @Yg@yo@Yl@yd@Ye@yn@W glow forms from deep in $s throat, growing brighter as it rises up and out $s mouth. Suddenly a powerful Eraser Cannon erupts and slams into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -1537,15 +1537,15 @@ ACMD(do_pbarrage)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -1565,7 +1565,7 @@ ACMD(do_pbarrage)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_PBARRAGE, 0);
@@ -1609,14 +1609,14 @@ ACMD(do_pbarrage)
      act("@C$N@W manages to dodge your psychic barrage, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W psychic barrage, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W psychic barrage, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 31, skill, SKILL_PBARRAGE); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -1655,7 +1655,7 @@ ACMD(do_pbarrage)
       act("@WYou close your eyes for a moment as your charged ki is pooled into your brain. Your eyes snap open, flashing with @bb@Bl@Wu@we @yl@Yi@Wg@wht@W, and look at @c$N@W intensly. Invisible waves of psychic energy slam into $S body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W closes $s eyes for a moment as $s charged ki is pooled into $s brain. @C$n@W's eyes snap open, flashing with @bb@Bl@Wu@we @yl@Yi@Wg@wht@W, and looks at YOU intensly. Invisible waves of psychic energy slam into YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W closes $s eyes for a moment as $s charged ki is pooled into $s brain. @C$n@W's eyes snap open, flashing with @bb@Bl@Wu@we @yl@Yi@Wg@wht@W, and looks at @c$N@W intensly. Invisible waves of psychic energy slam into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -1675,7 +1675,7 @@ ACMD(do_pbarrage)
       act("@WYou close your eyes for a moment as your charged ki is pooled into your brain. Your eyes snap open, flashing with @bb@Bl@Wu@we @yl@Yi@Wg@wht@W, and look at @c$N@W intensly. Invisible waves of psychic energy slam into $S gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W closes $s eyes for a moment as $s charged ki is pooled into $s brain. @C$n@W's eyes snap open, flashing with @bb@Bl@Wu@we @yl@Yi@Wg@wht@W, and looks at YOU intensly. Invisible waves of psychic energy slam into YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W closes $s eyes for a moment as $s charged ki is pooled into $s brain. @C$n@W's eyes snap open, flashing with @bb@Bl@Wu@we @yl@Yi@Wg@wht@W, and looks at @c$N@W intensly. Invisible waves of psychic energy slam into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -1704,11 +1704,11 @@ ACMD(do_pbarrage)
      if (!char_aff_flagged(vict, AFF_MBREAK) && rand_number(1, 4) == 4 && !char_aff_flagged(vict, AFF_SANCTUARY)) {
       act("@mYour mind's eye has been shattered, you can't charge ki until you recover!@n", TRUE, vict, 0, 0, TO_CHAR);
       act("@M$n@m's mind has been damaged by the attack!@n", TRUE, vict, 0, 0, TO_ROOM);
-      SET_BIT_AR(AFF_FLAGS(vict), AFF_MBREAK);
+      SET_BIT_AR(char_get_affected_by(vict), AFF_MBREAK);
      } else if (!char_aff_flagged(vict, AFF_SHOCKED) && rand_number(1, 4) == 4 && !char_aff_flagged(vict, AFF_SANCTUARY)) {
       act("@MYour mind has been shocked!@n", TRUE, vict, 0, 0, TO_CHAR);
       act("@M$n@m's mind has been shocked!@n", TRUE, vict, 0, 0, TO_ROOM);
-      SET_BIT_AR(AFF_FLAGS(vict), AFF_SHOCKED);
+      SET_BIT_AR(char_get_affected_by(vict), AFF_SHOCKED);
      }
      pcost(ch, attperc, 0);
      
@@ -1760,15 +1760,15 @@ ACMD(do_geno)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -1776,8 +1776,8 @@ ACMD(do_geno)
   }
 
  vict = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
+  if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
+   vict = char_get_fighting(ch);
   }
   else {
    send_to_char(ch, "No one around here by that name.\r\n");
@@ -1790,7 +1790,7 @@ ACMD(do_geno)
   }
 
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
 
@@ -1808,7 +1808,7 @@ ACMD(do_geno)
   }
 
   struct obj_data *obj;
-  int dista = 15 - (GET_INT(ch) * 0.1);
+  int dista = 15 - (char_get_aff_abils_intel(ch) * 0.1);
 
   if (char_get_skill(ch, SKILL_GENOCIDE) >= 100) {
    dista -= 3;
@@ -1819,14 +1819,14 @@ ACMD(do_geno)
   }
 
   obj = read_object(83, VIRTUAL);
-  obj_to_room(obj, IN_ROOM(vict));
+  obj_to_room(obj, char_get_in_room(vict));
 
-  GET_CHARGE(ch) += GET_MAX_HIT(ch) / 10;
-  TARGET(obj) = vict;
-  KICHARGE(obj) = damtype(ch, 41, prob, attperc);
-  KITYPE(obj) = SKILL_GENOCIDE;
-  USER(obj) = ch;
-  KIDIST(obj) = dista;
+  char_set_charge(ch, char_get_charge(ch) + (GET_MAX_HIT(ch) / 10));
+  obj_set_target(obj, vict);
+  obj_set_kicharge(obj, damtype(ch, 41, prob, attperc));
+  obj_set_kitype(obj, SKILL_GENOCIDE);
+  obj_set_user(obj, ch);
+  obj_set_distance(obj, dista);
   pcost(ch, attperc, 0);
   act("@WYou raise one arm above your head and pour your charged ki there. A large swirling pink ball of energy begins to form above your raised hand. You grin viciously as the @mG@Me@wn@mo@Mc@wi@md@Me@W attack is complete and you toss it at @c$N@W!@n", TRUE, ch, 0, vict, TO_CHAR);
   act("@C$n@W raises one arm above $s head and pours $s charged ki there. A large swirling pink ball of energy begins to form above $s raised hand. @C$n@W grins viciously as the @mG@Me@wn@mo@Mc@wi@md@Me@W attack is complete and $e tosses it at YOU!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -1858,15 +1858,15 @@ ACMD(do_genki)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -1874,8 +1874,8 @@ ACMD(do_genki)
   }
 
  vict = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-   vict = FIGHTING(ch);
+  if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
+   vict = char_get_fighting(ch);
   }
   else {
    send_to_char(ch, "No one around here by that name.\r\n");
@@ -1888,7 +1888,7 @@ ACMD(do_genki)
   }
 
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
 
@@ -1905,18 +1905,18 @@ ACMD(do_genki)
    return;
   }
 
-  for (friend_char = world[IN_ROOM(ch)].people; friend_char; friend_char = next_v) {
+  for (friend_char = world[char_get_in_room(ch)].people; friend_char; friend_char = next_v) {
    next_v = friend_char->next_in_room;
    if (friend_char == ch) {
     continue;
    }
    if (char_aff_flagged(friend_char, AFF_GROUP) && (friend_char->master == ch || ch->master == friend_char || friend_char->master == ch->master)) {
-    GET_CHARGE(ch) += (getCurKI(ch)) / 10;
+    char_set_charge(ch, char_get_charge(ch) + ((getCurKI(ch)) / 10));
     decCurKI(ch, getCurKI(ch) / 20, 0);
    }
   }
 
-  int dista = 15 - (GET_INT(ch) * 0.1);
+  int dista = 15 - (char_get_aff_abils_intel(ch) * 0.1);
 
   if (char_get_skill(ch, SKILL_GENKIDAMA) >= 100) {
    dista -= 3;
@@ -1929,13 +1929,13 @@ ACMD(do_genki)
   struct obj_data *obj;
 
   obj = read_object(82, VIRTUAL);
-  obj_to_room(obj, IN_ROOM(vict));
+  obj_to_room(obj, char_get_in_room(vict));
 
-  TARGET(obj) = vict;
-  KICHARGE(obj) = damtype(ch, 40, prob, attperc);
-  KITYPE(obj) = SKILL_GENKIDAMA;
-  USER(obj) = ch;
-  KIDIST(obj) = dista;
+  obj_set_target(obj, vict);
+  obj_set_kicharge(obj, damtype(ch, 40, prob, attperc));
+  obj_set_kitype(obj, SKILL_GENKIDAMA);
+  obj_set_user(obj, ch);
+  obj_set_distance(obj, dista);
   pcost(ch, attperc, 0);
   act("@WYou raise both your arms upwards and begin to pool your charged ki there. You also start calling on the ki of all living beings in the vicinity who are willing to help. A large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W forms above your hands, when it is finished you lob it toward @c$N@W!@n", TRUE, ch, 0, vict, TO_CHAR);
   act("@C$n@W raises both $s arms upwards and begin to pool $s charged ki there. @C$n@W also starts calling on the ki of all living beings in the vicinity who are willing to help. A large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W forms above $s hands, when it is finished $e lobs it toward YOU!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -1969,15 +1969,15 @@ ACMD(do_spiritball)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -1997,7 +1997,7 @@ ACMD(do_spiritball)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
 
@@ -2103,7 +2103,7 @@ ACMD(do_spiritball)
       act("@WYou raise your palm upward with your arm bent in front of you. Your charged ki slowly begins to creep up your arm and form a large glowing orb of energy above your upraised palm. With your @yS@Yp@Wi@wri@yt @YB@Wa@wll @Wcompleted you move your hand with index and middle fingers pointing at @c$N@W! The @yS@Yp@Wi@wri@yt @YB@Wa@wll @Wflies at $M, slamming into $S body, and explodes with a load roar!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W raises $s palm upward with $s arm bent in front of $m. @C$n@W's charged ki slowly begins to creep up $s arm and form a large glowing orb of energy above $s upraised palm. With $s @yS@Yp@Wi@wri@yt @YB@Wa@wll @Wcompleted $e moves $s hand with index and middle fingers pointing at YOU! The @yS@Yp@Wi@wri@yt @YB@Wa@wll @Wflies at you, slamming into YOUR body, and explodes with a load roar!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W raises $s palm upward with $s arm bent in front of $m. @C$n@W's charged ki slowly begins to creep up $s arm and form a large glowing orb of energy above $s upraised palm. With $s @yS@Yp@Wi@wri@yt @YB@Wa@wll @Wcompleted $e moves $s hand with index and middle fingers pointing at @c$N@W! The @yS@Yp@Wi@wri@yt @YB@Wa@wll @Wflies at $M, slamming into @c$N@W's body, and explodes with a load roar!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -2123,7 +2123,7 @@ ACMD(do_spiritball)
       act("@WYou raise your palm upward with your arm bent in front of you. Your charged ki slowly begins to creep up your arm and form a large glowing orb of energy above your upraised palm. With your @yS@Yp@Wi@wri@yt @YB@Wa@wll @Wcompleted you move your hand with index and middle fingers pointing at @c$N@W! The @yS@Yp@Wi@wri@yt @YB@Wa@wll @Wflies at $M, slamming into $S gut, and explodes with a load roar!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W raises $s palm upward with $s arm bent in front of $m. @C$n@W's charged ki slowly begins to creep up $s arm and form a large glowing orb of energy above $s upraised palm. With $s @yS@Yp@Wi@wri@yt @YB@Wa@wll @Wcompleted $e moves $s hand with index and middle fingers pointing at YOU! The @yS@Yp@Wi@wri@yt @YB@Wa@wll @Wflies at you, slamming into YOUR gut, and explodes with a load roar!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W raises $s palm upward with $s arm bent in front of $m. @C$n@W's charged ki slowly begins to creep up $s arm and form a large glowing orb of energy above $s upraised palm. With $s @yS@Yp@Wi@wri@yt @YB@Wa@wll @Wcompleted $e moves $s hand with index and middle fingers pointing at @c$N@W! The @yS@Yp@Wi@wri@yt @YB@Wa@wll @Wflies at $M, slamming into @c$N@W's gut, and explodes with a load roar!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -2201,15 +2201,15 @@ ACMD(do_deathball)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -2229,7 +2229,7 @@ ACMD(do_deathball)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_DEATHBALL, 0);
@@ -2261,14 +2261,14 @@ ACMD(do_deathball)
      act("@C$N@W manages to dodge your deathball, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W deathball, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W deathball, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 38, skill, SKILL_DEATHBALL); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 80) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 20;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 80) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (20));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -2307,7 +2307,7 @@ ACMD(do_deathball)
       act("@WYou raise your hand with its index finger extended upwards. Your charged ki begins to pool above that finger, forming a small @rred@W orb of energy. The orb of energy quickly grows to an enormous size as you look down on @c$N@W. You move the hand that formed the attack and point at $M as the @rD@Re@Da@rt@Rh@Db@ra@Rl@Dl@W above you follows the movement! It descends on $M and crushes into $S body before exploding into a massive blast!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W raises $s hand with its index finger extended upwards. @C$n@W's charged ki begins to pool above that finger, forming a small @rred@W orb of energy. The orb of energy quickly grows to an enormous size as $e looks down on YOU. @C$n@W moves the hand that formed the attack and points at YOU as the @rD@Re@Da@rt@Rh@Db@ra@Rl@Dl@W above $m follows the movement! It descends on YOU and crushes into YOUR body before exploding into a massive blast!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W raises $s hand with its index finger extended upwards. @C$n@W's charged ki begins to pool above that finger, forming a small @rred@W orb of energy. The orb of energy quickly grows to an enormous size as $e looks down on @c$N@W. @C$n@W moves the hand that formed the attack and points at @c$N@W as the @rD@Re@Da@rt@Rh@Db@ra@Rl@Dl@W above $m follows the movement! It descends on @c$N@W and crushes into $S body before exploding into a massive blast!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -2327,7 +2327,7 @@ ACMD(do_deathball)
       act("@WYou raise your hand with its index finger extended upwards. Your charged ki begins to pool above that finger, forming a small @rred@W orb of energy. The orb of energy quickly grows to an enormous size as you look down on @c$N@W. You move the hand that formed the attack and point at $M as the @rD@Re@Da@rt@Rh@Db@ra@Rl@Dl@W above you follows the movement! It descends on $M and crushes into $S gut before exploding into a massive blast!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W raises $s hand with its index finger extended upwards. @C$n@W's charged ki begins to pool above that finger, forming a small @rred@W orb of energy. The orb of energy quickly grows to an enormous size as $e looks down on YOU. @C$n@W moves the hand that formed the attack and points at YOU as the @rD@Re@Da@rt@Rh@Db@ra@Rl@Dl@W above $m follows the movement! It descends on YOU and crushes into YOUR gut before exploding into a massive blast!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W raises $s hand with its index finger extended upwards. @C$n@W's charged ki begins to pool above that finger, forming a small @rred@W orb of energy. The orb of energy quickly grows to an enormous size as $e looks down on @c$N@W. @C$n@W moves the hand that formed the attack and points at @c$N@W as the @rD@Re@Da@rt@Rh@Db@ra@Rl@Dl@W above $m follows the movement! It descends on @c$N@W and crushes into $S gut before exploding into a massive blast!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -2404,41 +2404,41 @@ ACMD(do_pslash)
   if (!char_has_arms(ch)) {
    send_to_char(ch, "You have no available arms!\r\n");
    return;
-  } else if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50 && GET_LIMBCOND(ch, 2) < 0) {
+  } else if (char_get_limb_condition(ch, (1)-1) > 0 && char_get_limb_condition(ch, (1)-1) < 50 && char_get_limb_condition(ch, (2)-1) < 0) {
    send_to_char(ch, "Using your broken right arm has damaged it more!@n\r\n");
-   GET_LIMBCOND(ch, 1) -= rand_number(3, 5);
-   if (GET_LIMBCOND(ch, 1) < 0) {
+   char_set_limb_condition(ch, (1)-1, char_get_limb_condition(ch, (1)-1) - (rand_number(3, 5)));
+   if (char_get_limb_condition(ch, (1)-1) < 0) {
     act("@RYour right arm has fallen apart!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@r$n@R's right arm has fallen apart!@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-  } else if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50 && GET_LIMBCOND(ch, 1) < 0) {
+  } else if (char_get_limb_condition(ch, (2)-1) > 0 && char_get_limb_condition(ch, (2)-1) < 50 && char_get_limb_condition(ch, (1)-1) < 0) {
    send_to_char(ch, "Using your broken left arm has damaged it more!@n\r\n");
-   GET_LIMBCOND(ch, 2) -= rand_number(3, 5);
-   if (GET_LIMBCOND(ch, 2) < 0) {
+   char_set_limb_condition(ch, (2)-1, char_get_limb_condition(ch, (2)-1) - (rand_number(3, 5)));
+   if (char_get_limb_condition(ch, (2)-1) < 0) {
     act("@RYour left arm has fallen apart!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@r$n@R's left arm has fallen apart!@n", TRUE, ch, 0, 0, TO_ROOM);
    }
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
    return;
   }
-  if (!GET_EQ(ch, WEAR_WIELD1)) {
+  if (!char_get_equipment(ch, WEAR_WIELD1)) {
    send_to_char(ch, "You need to wield a sword to use this.\r\n");
    return;
   }
-  if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
+  if (obj_get_value(char_get_equipment(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
    send_to_char(ch, "You are not wielding a sword, you need one to use this technique.\r\n");
    return;
   }
@@ -2456,7 +2456,7 @@ ACMD(do_pslash)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_PSLASH, 0);
@@ -2533,18 +2533,18 @@ ACMD(do_pslash)
    if (check_ruby(ch) == 1) {
     dmg += dmg * 0.2;
    }
-   if (GET_BONUS(vict, BONUS_FIREPROOF)) {
+   if (char_get_bonuses(vict, BONUS_FIREPROOF)) {
     dmg -= dmg * 0.4;
-   } else if (GET_BONUS(vict, BONUS_FIREPRONE)) {
+   } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
     dmg += dmg * 0.4;
    }
-   SET_BIT_AR(AFF_FLAGS(vict), AFF_ASHED);
+   SET_BIT_AR(char_get_affected_by(vict), AFF_ASHED);
    switch(hitspot) {
     case 1:
       act("@WYou pour your charged ki into your sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surround the entire sword in the same instant that you pull the blade back and extend it behind your body. Suddenly you swing the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs $S body in flames a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward YOU, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards YOU! The Phoenix Slash engulfs YOUR body in flames a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs @c$N@W's body in flames a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -2564,7 +2564,7 @@ ACMD(do_pslash)
       act("@WYou pour your charged ki into your sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surround the entire sword in the same instant that you pull the blade back and extend it behind your body. Suddenly you swing the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs $S gut in flames a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward YOU, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards YOU! The Phoenix Slash engulfs YOUR gut in flames a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W pours $s charged ki into $s sword's blade. @YF@ri@Re@Yr@ry @Rf@Yl@ra@Rm@Ye@rs@W surrounds the entire sword in the same instant that $e pulls the blade back and extends it behind $s body. Suddenly $e swings the blade forward toward @c$N@W, unleashing a large wave of flames! The flames take the shape of a large phoenix soaring towards @c$N@W! The Phoenix Slash engulfs @c$N@W's gut in flames a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -2590,19 +2590,19 @@ ACMD(do_pslash)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-     if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(1, 4) == 4 && !char_is_demon(vict) && !GET_BONUS(vict, BONUS_FIREPROOF)) {
+     if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(1, 4) == 4 && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
       send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-      SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
-     } else if (GET_BONUS(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
+      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
+     } else if (char_get_bonuses(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
       send_to_char(ch, "@RThey appear to be fireproof!@n\r\n");
-     } else if (GET_BONUS(vict, BONUS_FIREPRONE)) {
+     } else if (char_get_bonuses(vict, BONUS_FIREPRONE)) {
       send_to_char(vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are easily burned!@n\r\n");
-      SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
      }
      pcost(ch, attperc, 0);
-    REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ASHED);
+    REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ASHED);
     return;
   }
  }
@@ -2655,15 +2655,15 @@ ACMD(do_bigbang)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -2683,7 +2683,7 @@ ACMD(do_bigbang)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_BIGBANG, 0);
@@ -2727,14 +2727,14 @@ ACMD(do_bigbang)
      act("@C$N@W manages to dodge your Big Bang, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W Big Bang, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W Big Bang, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 36, skill, SKILL_BIGBANG); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 80) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 20;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 80) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (20));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -2771,7 +2771,7 @@ ACMD(do_bigbang)
       act("@WYou aim your hand at @c$N@W palm flat up at a ninety degree angle. Your charged ki pools there rapidly before a massive ball of energy explodes from your palm! The @yB@Yi@wg @yB@Ya@wn@yg @Wattack crosses the distance rapidly, slams into @c$N@W's body, and explodes leaving behind a mushroom cloud shortly after!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W aims $s hand at YOU palm flat up at a ninety degree angle. @C$n@W's charged ki pools there rapidly before a massive ball of energy explodes from $s palm! The @yB@Yi@wg @yB@Ya@wn@yg @Wattack crosses the distance rapidly, slams into YOUR body, and explodes leading behind a mushroom cloud shortly after!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W aims $s hand at @c$N@W palm flat up at a ninety degree angle. @C$n@W's charged ki pools there rapidly before a massive ball of energy explodes from $s palm! The @yB@Yi@wg @yB@Ya@wn@yg @Wattack crosses the distance rapidly, slams into @c$N@W's body, and explodes leading behind a mushroom cloud shortly after!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -2792,7 +2792,7 @@ ACMD(do_bigbang)
       act("@WYou aim your hand at @c$N@W palm flat up at a ninety degree angle. Your charged ki pools there rapidly before a massive ball of energy explodes from your palm! The @yB@Yi@wg @yB@Ya@wn@yg @Wattack crosses the distance rapidly, slams into @c$N@W's gut, and explodes leaving behind a mushroom cloud shortly after!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W aims $s hand at YOU palm flat up at a ninety degree angle. @C$n@W's charged ki pools there rapidly before a massive ball of energy explodes from $s palm! The @yB@Yi@wg @yB@Ya@wn@yg @Wattack crosses the distance rapidly, slams into YOUR gut, and explodes leading behind a mushroom cloud shortly after!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W aims $s hand at @c$N@W palm flat up at a ninety degree angle. @C$n@W's charged ki pools there rapidly before a massive ball of energy explodes from $s palm! The @yB@Yi@wg @yB@Ya@wn@yg @Wattack crosses the distance rapidly, slams into @c$N@W's gut, and explodes leading behind a mushroom cloud shortly after!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -2870,15 +2870,15 @@ ACMD(do_scatter)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -2895,11 +2895,11 @@ ACMD(do_scatter)
  int cool = 8;
 
  if (char_is_piccolo(ch)) {
-  if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 100)
+  if (char_get_skills_base(ch, SKILL_STYLE) >= 100)
    cool -= 3;
-  else if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+  else if (char_get_skills_base(ch, SKILL_STYLE) >= 75)
    cool -= 2;
-  else if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 40)
+  else if (char_get_skills_base(ch, SKILL_STYLE) >= 40)
    cool -= 1;
  }
  
@@ -2912,7 +2912,7 @@ ACMD(do_scatter)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_SCATTER, 0);
@@ -2957,14 +2957,14 @@ ACMD(do_scatter)
      act("@C$N@W manages to dodge your scatter shot kiballs, letting them slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W scatter shot kiballs, letting them slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W scatter shot kiballs, letting them slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wBright explosions erupts from the impacts!\r\n");
+     send_to_room(char_get_in_room(vict), "@wBright explosions erupts from the impacts!\r\n");
 
 	 dodge_ki(ch, vict, 0, 35, skill, SKILL_SCATTER); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 80) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 20;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 80) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (20));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -3003,7 +3003,7 @@ ACMD(do_scatter)
       act("@WYou bring your charged ki to your palms and furiously begin to throw hundreds of kiballs at @C$N@W! The kiballs surround $M from every direction in a sphere, preventing $S escape! You hold out your hand and clench it dramatically as your @yS@Yc@ra@Rt@yt@Yer @yS@Yh@ro@Rt@W kiballs close in and explode against @C$N@W's body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W brings $s charged ki to $s palms and furiously begins to throw hundreds of kiballs at YOU! The kiballs surround you from every direction in a sphere, preventing your escape! @C$n@W holds out $s hand and clenches it dramatically as $s @yS@Yc@ra@Rt@yt@Yer @yS@Yh@ro@Rt@W kiballs close in and explode against YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W brings $s charged ki to $s palms and furiously begins to throw hundreds of kiballs at @C$N@W! The kiballs surround $M from every direction in a sphere, preventing $S escape! @C$n@W holds out $s hand and clenches it dramatically as $s @yS@Yc@ra@Rt@yt@Yer @yS@Yh@ro@Rt@W kiballs close in and explode against @C$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -3023,7 +3023,7 @@ ACMD(do_scatter)
       act("@WYou bring your charged ki to your palms and furiously begin to throw hundreds of kiballs at @C$N@W! The kiballs surround $M from every direction in a sphere, preventing $S escape! You hold out your hand and clench it dramatically as your @yS@Yc@ra@Rt@yt@Yer @yS@Yh@ro@Rt@W kiballs close in and explode against @C$N@W's gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W brings $s charged ki to $s palms and furiously begins to throw hundreds of kiballs at YOU! The kiballs surround you from every direction in a sphere, preventing your escape! @C$n@W holds out $s hand and clenches it dramatically as $s @yS@Yc@ra@Rt@yt@Yer @yS@Yh@ro@Rt@W kiballs close in and explode against YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W brings $s charged ki to $s palms and furiously begins to throw hundreds of kiballs at @C$N@W! The kiballs surround $M from every direction in a sphere, preventing $S escape! @C$n@W holds out $s hand and clenches it dramatically as $s @yS@Yc@ra@Rt@yt@Yer @yS@Yh@ro@Rt@W kiballs close in and explode against @C$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -3101,15 +3101,15 @@ ACMD(do_balefire)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -3126,11 +3126,11 @@ ACMD(do_balefire)
  int cool = 8;
 
  if (char_is_piccolo(ch)) {
-  if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 100)
+  if (char_get_skills_base(ch, SKILL_STYLE) >= 100)
    cool -= 3;
-  else if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+  else if (char_get_skills_base(ch, SKILL_STYLE) >= 75)
    cool -= 2;
-  else if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 40)
+  else if (char_get_skills_base(ch, SKILL_STYLE) >= 40)
    cool -= 1;
  }
  
@@ -3143,7 +3143,7 @@ ACMD(do_balefire)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_BALEFIRE, 0);
@@ -3189,14 +3189,14 @@ ACMD(do_balefire)
      act("@C$N@W manages to dodge your balefire, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W balefire, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W balefire, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wBright explosions erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wBright explosions erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 35, skill, SKILL_BALEFIRE); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 80) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 20;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 80) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (20));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -3235,7 +3235,7 @@ ACMD(do_balefire)
       act("@WYou open yourself to the source and begin tracing weaves, the most complex combination, with just the right amounts of each! Your innate talent finishes the final weave and a giant bar of @WB@Ra@Yl@Wef@Yi@Rr@We@W lances out from your hands! Your @WB@Ra@Yl@Wef@Yi@Rr@We@W crosses the distance quickly and slams into @C$N@W's body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W begins to glow with a soft, white aura! Their hands begin manipulating something unseen when suddenly a giant bar of @WB@Ra@Yl@Wef@Yi@Rr@We@W lances out from $s hands, crossing the distance and slamming into YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W begins to glow with a soft, white aura! Their hands begin manipulating something unseen when suddenly a giant bar of @WB@Ra@Yl@Wef@Yi@Rr@We@W lances out from $s hands, crossing the distance and slamming into @C$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -3255,7 +3255,7 @@ ACMD(do_balefire)
       act("@WYou open yourself to the source and begin tracing weaves, the most complex combination, with just the right amounts of each! Your innate talent finishes the final weave and a giant bar of @WB@Ra@Yl@Wef@Yi@Rr@We@W lances out from your hands! Your @WB@Ra@Yl@Wef@Yi@Rr@We@W crosses the distance quickly and slams into @C$N@W's gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W begins to glow with a soft, white aura! Their hands begin manipulating something unseen when suddenly a giant bar of @WB@Ra@Yl@Wef@Yi@Rr@We@W lances out from $s hands, crossing the distance and slamming into YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W begins to glow with a soft, white aura! Their hands begin manipulating something unseen when suddenly a giant bar of @WB@Ra@Yl@Wef@Yi@Rr@We@W lances out from $s hands, crossing the distance and slamming into @C$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -3335,8 +3335,8 @@ ACMD(do_kakusanha)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -3347,7 +3347,7 @@ ACMD(do_kakusanha)
 
   skill = init_skill(ch, SKILL_KAKUSANHA); /* Set skill value */
 
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+  for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
    next_v = vict->next_in_room;
    if (vict == ch) {
     continue;
@@ -3406,7 +3406,7 @@ ACMD(do_kakusanha)
        dmg = (dmg / 100) * 60;
      }
 
-     for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+     for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
       next_v = vict->next_in_room;
       if (vict == ch) {
        continue;
@@ -3431,12 +3431,12 @@ ACMD(do_kakusanha)
       }
       dge = handle_dodge(vict);
       if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
-              (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+              (getCurST(vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
        hits++;
        act("@C$N@c disappears, avoiding the beam chasing $M!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the beam chasing you!@n", FALSE, ch, 0, vict, TO_VICT);
        act("@C$N@c disappears, avoiding the beam chasing $M!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-       REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+       REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
        pcost(vict, 0, GET_MAX_HIT(vict) / 200);
        hurt(0, 0, ch, vict, NULL, 0, 1);
        continue;
@@ -3460,11 +3460,11 @@ ACMD(do_kakusanha)
       }
      } /* Hitting targets! */
 
-     if (count < 5 && !rroom_flagged(IN_ROOM(ch), ROOM_SPACE)) {
-      send_to_room(IN_ROOM(ch), "The rest of the beams slam into the ground!@n\r\n");
-      send_to_room(IN_ROOM(ch), "@wBright explosions erupt from the impacts!\r\n");
+     if (count < 5 && !rroom_flagged(char_get_in_room(ch), ROOM_SPACE)) {
+      send_to_room(char_get_in_room(ch), "The rest of the beams slam into the ground!@n\r\n");
+      send_to_room(char_get_in_room(ch), "@wBright explosions erupt from the impacts!\r\n");
 
-      if (rroom_sect(IN_ROOM(ch)) != SECT_INSIDE) {
+      if (rroom_sect(char_get_in_room(ch)) != SECT_INSIDE) {
          impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
        switch (rand_number(1, 8)) {
         case 1:
@@ -3472,8 +3472,8 @@ ACMD(do_kakusanha)
          act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, 0, TO_ROOM);
         break;
         case 2:
-         if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(ch)) == 0) {
-         ROOM_EFFECT(IN_ROOM(ch)) = 5;
+         if (rand_number(1, 4) == 4 && rroom_get_geffect(char_get_in_room(ch)) == 0) {
+         rroom_set_geffect(char_get_in_room(ch), 5);
          act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", TRUE, ch, 0, 0, TO_CHAR);
          act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", TRUE, ch, 0, 0, TO_ROOM);
          }
@@ -3499,7 +3499,7 @@ ACMD(do_kakusanha)
         break;
        }
       }
-      if (rroom_sect(IN_ROOM(ch)) == SECT_UNDERWATER) {
+      if (rroom_sect(char_get_in_room(ch)) == SECT_UNDERWATER) {
        switch (rand_number(1, 3)) {
         case 1:
          act("The water churns violently!", TRUE, ch, 0, 0, TO_CHAR);
@@ -3515,7 +3515,7 @@ ACMD(do_kakusanha)
          break;
        }
       }
-      if (rroom_sect(IN_ROOM(ch)) == SECT_WATER_SWIM || rroom_sect(IN_ROOM(ch)) == SECT_WATER_NOSWIM) {
+      if (rroom_sect(char_get_in_room(ch)) == SECT_WATER_SWIM || rroom_sect(char_get_in_room(ch)) == SECT_WATER_NOSWIM) {
        switch (rand_number(1, 3)) {
         case 1:
          act("A huge column of water erupts from the impact!", TRUE, ch, 0, 0, TO_CHAR);
@@ -3531,7 +3531,7 @@ ACMD(do_kakusanha)
          break;
        }
       }
-      if (rroom_sect(IN_ROOM(ch)) == SECT_INSIDE) {
+      if (rroom_sect(char_get_in_room(ch)) == SECT_INSIDE) {
          impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
        switch (rand_number(1, 8)) {
         case 1:
@@ -3564,8 +3564,8 @@ ACMD(do_kakusanha)
        }
       }
 
-      if (ROOM_DAMAGE(IN_ROOM(ch)) <= (100 - ((5 - count) * 5))) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += (5 - count) * 5;
+      if (rroom_get_dmg(char_get_in_room(ch)) <= (100 - ((5 - count) * 5))) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + ((5 - count) * 5));
       }
      }
 
@@ -3604,15 +3604,15 @@ ACMD(do_hellspear)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
    return;
   }
 
-   if (rroom_flagged(IN_ROOM(ch), ROOM_PEACEFUL)) {
+   if (rroom_flagged(char_get_in_room(ch), ROOM_PEACEFUL)) {
     send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
    }
@@ -3621,7 +3621,7 @@ ACMD(do_hellspear)
 
   skill = init_skill(ch, SKILL_HELLSPEAR); /* Set skill value */
 
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+  for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
    next_v = vict->next_in_room;
    if (vict == ch) {
     continue;
@@ -3660,7 +3660,7 @@ ACMD(do_hellspear)
 
      dmg = damtype(ch, 33, skill, attperc);
 
-     for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+     for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
       next_v = vict->next_in_room;
       if (vict == ch) {
        continue;
@@ -3677,11 +3677,11 @@ ACMD(do_hellspear)
       dge = handle_dodge(vict);
 
       if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
-              (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+              (getCurST(vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_VICT);
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-       REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+       REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
        pcost(vict, 0, GET_MAX_HIT(vict) / 200);
        continue;
       }
@@ -3697,7 +3697,7 @@ ACMD(do_hellspear)
        act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@RYou are caught by the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       if (!char_aff_flagged(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING && rand_number(1, 4) == 4) {
+       if (!char_aff_flagged(vict, AFF_FLYING) && char_get_position(vict) == POS_STANDING && rand_number(1, 4) == 4) {
         handle_knockdown(vict);
        }
        hurt(0, 0, ch, vict, NULL, dmg, 1);       
@@ -3739,14 +3739,14 @@ ACMD(do_hellflash)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
-  if (GET_SKILL_PERF(ch, SKILL_HELLFLASH) == 1) {
+  if (char_get_skills_perf(ch, SKILL_HELLFLASH) == 1) {
    attperc += 0.05;
-  } else if (GET_SKILL_PERF(ch, SKILL_HELLFLASH) == 3) {
+  } else if (char_get_skills_perf(ch, SKILL_HELLFLASH) == 3) {
    minimum -= 0.05;
    if (minimum <= 0.0) {
     minimum = 0.01;
@@ -3755,8 +3755,8 @@ ACMD(do_hellflash)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -3776,7 +3776,7 @@ ACMD(do_hellflash)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_HELLFLASH, 0);
@@ -3784,7 +3784,7 @@ ACMD(do_hellflash)
   index = check_def(vict); /* Check parry/block/dodge of vict */
 
   prob = roll_accuracy(ch, skill, TRUE);
-  if (GET_SKILL_PERF(ch, SKILL_HELLFLASH) == 2) {
+  if (char_get_skills_perf(ch, SKILL_HELLFLASH) == 2) {
    prob += 5;
   }
   perc = chance_to_hit(ch);
@@ -3799,7 +3799,7 @@ ACMD(do_hellflash)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Hell Flash")) {
-      if (GET_SKILL_PERF(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
+      if (char_get_skills_perf(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
           pcost(ch, attperc - 0.05, 0);
       } else {
           pcost(ch, attperc, 0);
@@ -3815,7 +3815,7 @@ ACMD(do_hellflash)
      act("@C$N@W moves quickly and blocks your Hell Flash!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W Hell Flash!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W moves quickly and blocks @c$n's@W Hell Flash!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -3831,17 +3831,17 @@ ACMD(do_hellflash)
      act("@C$N@W manages to dodge your Hell Flash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W Hell Flash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W Hell Flash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 32, skill, SKILL_HELLFLASH); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
-     if (GET_SKILL_PERF(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -3855,7 +3855,7 @@ ACMD(do_hellflash)
      act("@WYou can't believe it but your Hell Flash misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a Hell Flash at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a Hell Flash at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -3869,7 +3869,7 @@ ACMD(do_hellflash)
      act("@WYou can't believe it but your Hell Flash misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a Hell Flash at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a Hell Flash at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -3881,10 +3881,10 @@ ACMD(do_hellflash)
   }
   else {
    dmg = damtype(ch, 32, skill, attperc);
-   if (GET_BARRIER(vict) > 0) {
-    GET_BARRIER(vict) -= dmg;
-    if (GET_BARRIER(vict) <= 0) {
-     GET_BARRIER(vict) = 1;
+   if (char_get_barrier(vict) > 0) {
+    char_set_barrier(vict, char_get_barrier(vict) - (dmg));
+    if (char_get_barrier(vict) <= 0) {
+     char_set_barrier(vict, 1);
     }
    }
    int hitspot = 1;
@@ -3894,7 +3894,7 @@ ACMD(do_hellflash)
       act("@WYou stick one of your hands in each of your armpits and by twisting you remove them. Then you aim your exposed wrist cannons at @c$N@W as your charged energy begins to be channeled into the cannons. Shouting '@YH@re@Rl@Yl @rF@Rl@Ya@rs@Rh@W' two large blasts of energy explode from the cannons and slam into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W sticks one of $s hands in each of $s armpits and by twisting $e removes them. Then $e aims $s exposed wrist cannons at YOU as $s charged energy begins to be channeled into the cannons. @C$n@W shouts '@YH@re@Rl@Yl @rF@Rl@Ya@rs@Rh@W' as two large blasts of energy explode from the cannons and slam into YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W sticks one of $s hands in each of $s armpits and by twisting $e removes them. Then $e aims $s exposed wrist cannons at @c$N@W as $s charged energy begins to be channeled into the cannons. @C$n@W shouts '@YH@re@Rl@Yl @rF@Rl@Ya@rs@Rh@W' as two large blasts of energy explode from the cannons and slam into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -3914,7 +3914,7 @@ ACMD(do_hellflash)
       act("@WYou stick one of your hands in each of your armpits and by twisting you remove them. Then you aim your exposed wrist cannons at @c$N@W as your charged energy begins to be channeled into the cannons. Shouting '@YH@re@Rl@Yl @rF@Rl@Ya@rs@Rh@W' two large blasts of energy explode from the cannons and slam into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W sticks one of $s hands in each of $s armpits and by twisting $e removes them. Then $e aims $s exposed wrist cannons at YOU as $s charged energy begins to be channeled into the cannons. @C$n@W shouts '@YH@re@Rl@Yl @rF@Rl@Ya@rs@Rh@W' as two large blasts of energy explode from the cannons and slam into YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W sticks one of $s hands in each of $s armpits and by twisting $e removes them. Then $e aims $s exposed wrist cannons at @c$N@W as $s charged energy begins to be channeled into the cannons. @C$n@W shouts '@YH@re@Rl@Yl @rF@Rl@Ya@rs@Rh@W' as two large blasts of energy explode from the cannons and slam into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -3940,7 +3940,7 @@ ACMD(do_hellflash)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
    }
-     if (GET_SKILL_PERF(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_HELLFLASH) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -3996,42 +3996,42 @@ ACMD(do_ddslash)
   if (!char_has_arms(ch)) {
    send_to_char(ch, "You have no available arms!\r\n");
    return;
-  } else if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50 && GET_LIMBCOND(ch, 2) < 0) {
+  } else if (char_get_limb_condition(ch, (1)-1) > 0 && char_get_limb_condition(ch, (1)-1) < 50 && char_get_limb_condition(ch, (2)-1) < 0) {
    send_to_char(ch, "Using your broken right arm has damaged it more!@n\r\n");
-   GET_LIMBCOND(ch, 1) -= rand_number(3, 5);
-   if (GET_LIMBCOND(ch, 1) < 0) {
+   char_set_limb_condition(ch, (1)-1, char_get_limb_condition(ch, (1)-1) - (rand_number(3, 5)));
+   if (char_get_limb_condition(ch, (1)-1) < 0) {
     act("@RYour right arm has fallen apart!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@r$n@R's right arm has fallen apart!@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-  } else if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50 && GET_LIMBCOND(ch, 1) < 0) {
+  } else if (char_get_limb_condition(ch, (2)-1) > 0 && char_get_limb_condition(ch, (2)-1) < 50 && char_get_limb_condition(ch, (1)-1) < 0) {
    send_to_char(ch, "Using your broken left arm has damaged it more!@n\r\n");
-   GET_LIMBCOND(ch, 2) -= rand_number(3, 5);
-   if (GET_LIMBCOND(ch, 2) < 0) {
+   char_set_limb_condition(ch, (2)-1, char_get_limb_condition(ch, (2)-1) - (rand_number(3, 5)));
+   if (char_get_limb_condition(ch, (2)-1) < 0) {
     act("@RYour left arm has fallen apart!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@r$n@R's left arm has fallen apart!@n", TRUE, ch, 0, 0, TO_ROOM);
    }
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
    return;
   }
 
-  if (!GET_EQ(ch, WEAR_WIELD1)) {
+  if (!char_get_equipment(ch, WEAR_WIELD1)) {
    send_to_char(ch, "You need to wield a sword to use this.\r\n");
    return;
   }
-  if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
+  if (obj_get_value(char_get_equipment(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
    send_to_char(ch, "You are not wielding a sword, you need one to use this technique.\r\n");
    return;
   }
@@ -4049,7 +4049,7 @@ ACMD(do_ddslash)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_DDSLASH, 0);
@@ -4135,7 +4135,7 @@ ACMD(do_ddslash)
       act("@WYou channel your charged ki into the blade of your sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging your sword at @c$N@W you unleash a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at YOU $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at @c$N@W $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -4155,7 +4155,7 @@ ACMD(do_ddslash)
       act("@WYou channel your charged ki into the blade of your sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging your sword at @c$N@W you unleash a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at YOU $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W channels $s charged ki into the blade of $s sword. The energy takes the form of @md@Ma@Wr@wk@W @mf@Ml@Wa@wmes@W burning along the very blade's edge. Swinging $s sword at @c$N@W $e unleashes a serpentine dragon of @md@Ma@Wr@wk @mf@Ml@Wa@wmes@W! The fiery dragon slams into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -4239,14 +4239,14 @@ ACMD(do_crusher)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
-  if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 1) {
+  if (char_get_skills_perf(ch, SKILL_CRUSHER) == 1) {
    attperc += 0.05;
-  } else if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 3) {
+  } else if (char_get_skills_perf(ch, SKILL_CRUSHER) == 3) {
    minimum -= 0.05;
    if (minimum <= 0.0) {
     minimum = 0.01;
@@ -4255,8 +4255,8 @@ ACMD(do_crusher)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -4276,7 +4276,7 @@ ACMD(do_crusher)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_CRUSHER, 0);
@@ -4284,7 +4284,7 @@ ACMD(do_crusher)
   index = check_def(vict); /* Check parry/block/dodge of vict */
 
   prob = roll_accuracy(ch, skill, TRUE);
-  if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 2) {
+  if (char_get_skills_perf(ch, SKILL_CRUSHER) == 2) {
    prob += 5;
   }
   perc = chance_to_hit(ch);
@@ -4299,7 +4299,7 @@ ACMD(do_crusher)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Crusher Ball")) {
-      if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
+      if (char_get_skills_perf(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
           pcost(ch, attperc - 0.05, 0);
       } else {
           pcost(ch, attperc, 0);
@@ -4315,7 +4315,7 @@ ACMD(do_crusher)
      act("@C$N@W moves quickly and blocks your crusher ball!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W crusher ball!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W moves quickly and blocks @c$n's@W crusher ball!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -4331,17 +4331,17 @@ ACMD(do_crusher)
      act("@C$N@W manages to dodge your crusher ball, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W crusher ball, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W crusher ball, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 29, skill, SKILL_CRUSHER); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 90) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 10;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 90) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (10));
      }
      improve_skill(vict, SKILL_DODGE, 0);
-     if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -4354,7 +4354,7 @@ ACMD(do_crusher)
      act("@WYou can't believe it but your crusher ball misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a crusher ball at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a crusher ball at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -4368,7 +4368,7 @@ ACMD(do_crusher)
      act("@WYou can't believe it but your crusher ball misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a crusher ball at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a crusher ball at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -4387,7 +4387,7 @@ ACMD(do_crusher)
       act("@WYou zoom up into the air higher than @c$N@W and raise your hand. Charged @rred@W ki pools above that hand in a large blazing ball. Looking down on @c$N@W you slam your hand into the ball of energy while shouting '@rC@Rr@Wu@wsher @rB@Ra@Wl@wl!@W' Moments later the ball of energy slams into $S body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W zooms up into the air higher than you and raises $s hand. Charged @rred@W ki pools above that hand in a large blazing ball. Looking down on YOU $e slams $s hand into the ball of energy while shouting '@rC@Rr@Wu@wsher @rB@Ra@Wl@wl!@W' Moments later the ball of energy slams into YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W zooms up into the air higher than @c$N@W and raises $s hand. Charged @rred@W ki pools above that hand in a large blazing ball. Looking down on @c$N@W $e slams $s hand into the ball of energy while shouting '@rC@Rr@Wu@wsher @rB@Ra@Wl@wl!@W' Moments later the ball of energy slams into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -4407,7 +4407,7 @@ ACMD(do_crusher)
       act("@WYou zoom up into the air higher than @c$N@W and raise your hand. Charged @rred@W ki pools above that hand in a large blazing ball. Looking down on @c$N@W you slam your hand into the ball of energy while shouting '@rC@Rr@Wu@wsher @rB@Ra@Wl@wl!@W' Moments later the ball of energy slams into $S gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W zooms up into the air higher than you and raises $s hand. Charged @rred@W ki pools above that hand in a large blazing ball. Looking down on YOU $e slams $s hand into the ball of energy while shouting '@rC@Rr@Wu@wsher @rB@Ra@Wl@wl!@W' Moments later the ball of energy slams into YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W zooms up into the air higher than @c$N@W and raises $s hand. Charged @rred@W ki pools above that hand in a large blazing ball. Looking down on @c$N@W $e slams $s hand into the ball of energy while shouting '@rC@Rr@Wu@wsher @rB@Ra@Wl@wl!@W' Moments later the ball of energy slams into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -4437,7 +4437,7 @@ ACMD(do_crusher)
          tech_handle_crashdown(ch, vict);
      }
 
-     if (GET_SKILL_PERF(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_CRUSHER) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -4493,15 +4493,15 @@ ACMD(do_final)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -4521,7 +4521,7 @@ ACMD(do_final)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_FINALFLASH, 0);
@@ -4564,14 +4564,14 @@ ACMD(do_final)
      act("@C$N@W manages to dodge your final flash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W final flash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W final flash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
 	 dodge_ki(ch, vict, 0, 28, skill, SKILL_FINALFLASH); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 90) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 10;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 90) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (10));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -4610,7 +4610,7 @@ ACMD(do_final)
       act("@WYou grin as you bring either hand to the sides of your body. Your charged ki begins to pool there as @bblue@W orbs of energy form in your palms. You quickly bring both hands forward slamming your wrists together with the palms flat out facing @c$N@W! You shout '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing YOU! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing @c$N@W! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -4621,7 +4621,7 @@ ACMD(do_final)
       act("@WYou grin as you bring either hand to the sides of your body. Your charged ki begins to pool there as @bblue@W orbs of energy form in your palms. You quickly bring both hands forward slamming your wrists together with the palms flat out facing @c$N@W! You shout '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's face!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing YOU! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over YOUR face!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing @c$N@W! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (!GET_BONUS(ch, BONUS_POWERHIT)) {
+      if (!char_get_bonuses(ch, BONUS_POWERHIT)) {
        dmg *= 3;
       } else {
        dmg *= 5;
@@ -4634,7 +4634,7 @@ ACMD(do_final)
       act("@WYou grin as you bring either hand to the sides of your body. Your charged ki begins to pool there as @bblue@W orbs of energy form in your palms. You quickly bring both hands forward slamming your wrists together with the palms flat out facing @c$N@W! You shout '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing YOU! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing @c$N@W! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -4712,15 +4712,15 @@ ACMD(do_sbc)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -4740,7 +4740,7 @@ ACMD(do_sbc)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_SBC, 0);
@@ -4771,14 +4771,14 @@ ACMD(do_sbc)
      act("@C$N@W manages to dodge your special beam cannon, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W special beam cannon, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W special beam cannon, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 27, skill, SKILL_SBC); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 90) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 10;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 90) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (10));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -4817,7 +4817,7 @@ ACMD(do_sbc)
       act("@WYou place your index and middle fingers against your forehead and pool your charged ki there. Sparks and light surround your fingertips as the technique becomes ready. You point your fingers at @c$N@W and yell '@YS@yp@De@Yc@yi@Da@Yl @yB@De@Ya@ym @DC@Ya@yn@Dn@Yo@yn@W!' A spiraling beam of energy fires from your fingers and slams into $S body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W places $s index and middle fingers against $s forehead and pools $s charged ki there. Sparks and light surround the fingertips as the technique becomes ready. @C$n@W points $s fingers at YOU and yells '@YS@yp@De@Yc@yi@Da@Yl @yB@De@Ya@ym @DC@Ya@yn@Dn@Yo@yn@W!' A spiraling beam of energy fires from the fingers and slams into YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W places $s index and middle fingers against $s forehead and pools $s charged ki there. Sparks and light surround the fingertips as the technique becomes ready. @C$n@W points $s fingers at @c$N@W and yells '@YS@yp@De@Yc@yi@Da@Yl @yB@De@Ya@ym @DC@Ya@yn@Dn@Yo@yn@W!' A spiraling beam of energy fires from the fingers and slams into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -4837,7 +4837,7 @@ ACMD(do_sbc)
       act("@WYou place your index and middle fingers against your forehead and pool your charged ki there. Sparks and light surround your fingertips as the technique becomes ready. You point your fingers at @c$N@W and yell '@YS@yp@De@Yc@yi@Da@Yl @yB@De@Ya@ym @DC@Ya@yn@Dn@Yo@yn@W!' A spiraling beam of energy fires from your fingers and slams into $S gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W places $s index and middle fingers against $s forehead and pools $s charged ki there. Sparks and light surround the fingertips as the technique becomes ready. @C$n@W points $s fingers at YOU and yells '@YS@yp@De@Yc@yi@Da@Yl @yB@De@Ya@ym @DC@Ya@yn@Dn@Yo@yn@W!' A spiraling beam of energy fires from the fingers and slams into YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W places $s index and middle fingers against $s forehead and pools $s charged ki there. Sparks and light surround the fingertips as the technique becomes ready. @C$n@W points $s fingers at @c$N@W and yells '@YS@yp@De@Yc@yi@Da@Yl @yB@De@Ya@ym @DC@Ya@yn@Dn@Yo@yn@W!' A spiraling beam of energy fires from the fingers and slams into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -4915,15 +4915,15 @@ ACMD(do_tribeam)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -4943,7 +4943,7 @@ ACMD(do_tribeam)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_TRIBEAM, 0);
@@ -4986,14 +4986,14 @@ ACMD(do_tribeam)
      act("@C$N@W manages to dodge your tribeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W tribeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W tribeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 26, skill, SKILL_TRIBEAM); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 90) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 10;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 90) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (10));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -5040,7 +5040,7 @@ ACMD(do_tribeam)
       act("@WYou gather your charged ki as you form a triangle with your hands. You aim the gap between your hands at @c$N@W and shout '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from your hands and slams into $S body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at YOU and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at @c$N@W and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -5060,7 +5060,7 @@ ACMD(do_tribeam)
       act("@WYou gather your charged ki as you form a triangle with your hands. You aim the gap between your hands at @c$N@W and shout '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from your hands and slams into $S gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at YOU and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at @c$N@W and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -5141,15 +5141,15 @@ ACMD(do_kienzan)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -5169,7 +5169,7 @@ ACMD(do_kienzan)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_KIENZAN, 0);
@@ -5200,14 +5200,14 @@ ACMD(do_kienzan)
      act("@C$N@W manages to dodge your kienzan, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W kienzan, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W kienzan, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wThe kienzan expands, cutting through everything in its path!\r\n");
+     send_to_room(char_get_in_room(vict), "@wThe kienzan expands, cutting through everything in its path!\r\n");
 
          dodge_ki(ch, vict, 2, 25, skill, SKILL_KIENZAN); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -5328,7 +5328,7 @@ ACMD(do_kienzan)
        act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@rYou have your head cut off by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       GET_DEATH_TYPE(vict) = DTYPE_HEAD;
+       char_set_death_type(vict, DTYPE_HEAD);
        remove_limb(vict, 0);
        die(vict, ch);
        if (char_aff_flagged(ch, AFF_GROUP)) {
@@ -5356,7 +5356,7 @@ ACMD(do_kienzan)
        act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@rYou have your head cut off by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       GET_DEATH_TYPE(vict) = DTYPE_HEAD;
+       char_set_death_type(vict, DTYPE_HEAD);
        die(vict, ch);
        if (char_aff_flagged(ch, AFF_GROUP)) {
         group_gain(ch, vict);
@@ -5382,7 +5382,7 @@ ACMD(do_kienzan)
       act("@WYou raise your hand above your head and pool your charged ki above your flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete you shout '@yK@Yi@we@yn@Yz@wa@yn@W!' and throw it! You watch as it slices into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -5395,18 +5395,18 @@ ACMD(do_kienzan)
       act("@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into @c$N@W's arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       dmg *= calc_critical(ch, 1);
       if (rand_number(1, 100) >= 70 && !char_is_npc(vict) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
-        if (GET_LIMBCOND(vict, 2) > 0 && !is_sparring(ch) && rand_number(1, 2) == 2) {
+        if (char_get_limb_condition(vict, (2)-1) > 0 && !is_sparring(ch) && rand_number(1, 2) == 2) {
          act("@RYour attack severes $N's left arm!@n", TRUE, ch, 0, vict, TO_CHAR);
          act("@R$n's attack severes your left arm!@n", TRUE, ch, 0, vict, TO_VICT);
          act("@R$N's left arm is severed in the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         GET_LIMBCOND(vict, 2) = 0;
+         char_set_limb_condition(vict, (2)-1, 0);
          remove_limb(vict, 2);
         }
-        else if (GET_LIMBCOND(vict, 1) > 0 && !is_sparring(ch)) {
+        else if (char_get_limb_condition(vict, (1)-1) > 0 && !is_sparring(ch)) {
          act("@RYour attack severes $N's right arm!@n", TRUE, ch, 0, vict, TO_CHAR);
          act("@R$n's attack severes your right arm!@n", TRUE, ch, 0, vict, TO_VICT);
          act("@R$N's right arm is severed in the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         GET_LIMBCOND(vict, 1) = 0;
+         char_set_limb_condition(vict, (1)-1, 0);
          remove_limb(vict, 1);
         }
       }
@@ -5420,18 +5420,18 @@ ACMD(do_kienzan)
       act("@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into @c$N@W's leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       dmg *= calc_critical(ch, 1);
       if (rand_number(1, 100) >= 70 && !char_is_npc(vict) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
-        if (GET_LIMBCOND(vict, 4) > 0 && !is_sparring(ch) && rand_number(1, 2) == 2) {
+        if (char_get_limb_condition(vict, (4)-1) > 0 && !is_sparring(ch) && rand_number(1, 2) == 2) {
          act("@RYour attack severes $N's left leg!@n", TRUE, ch, 0, vict, TO_CHAR);
          act("@R$n's attack severes your left leg!@n", TRUE, ch, 0, vict, TO_VICT);
          act("@R$N's left leg is severed in the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         GET_LIMBCOND(vict, 4) = 0;
+         char_set_limb_condition(vict, (4)-1, 0);
          remove_limb(vict, 4);
         }
-        else if (GET_LIMBCOND(vict, 3) > 0 && !is_sparring(ch)) {
+        else if (char_get_limb_condition(vict, (3)-1) > 0 && !is_sparring(ch)) {
          act("@RYour attack severes $N's right leg!@n", TRUE, ch, 0, vict, TO_CHAR);
          act("@R$n's attack severes your right leg!@n", TRUE, ch, 0, vict, TO_VICT);
          act("@R$N's right leg is severed in the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         GET_LIMBCOND(vict, 3) = 0;
+         char_set_limb_condition(vict, (3)-1, 0);
          remove_limb(vict, 3);
         }
       }
@@ -5493,15 +5493,15 @@ ACMD(do_baku)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
    return;
   }
 
-   if (rroom_flagged(IN_ROOM(ch), ROOM_PEACEFUL)) {
+   if (rroom_flagged(char_get_in_room(ch), ROOM_PEACEFUL)) {
     send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
    }
@@ -5510,7 +5510,7 @@ ACMD(do_baku)
 
   skill = init_skill(ch, SKILL_BAKUHATSUHA); /* Set skill value */
 
-  for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+  for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
    next_v = vict->next_in_room;
    if (vict == ch) {
     continue;
@@ -5574,7 +5574,7 @@ ACMD(do_baku)
         dmg = (dmg / 100) * 25;
         break;
      }
-     for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
+     for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
       next_v = vict->next_in_room;
       if (vict == ch) {
        continue;
@@ -5593,11 +5593,11 @@ ACMD(do_baku)
       }
       dge = handle_dodge(vict);
       if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
-              (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+              (getCurST(vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_VICT);
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-       REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
+       REMOVE_BIT_AR(char_get_affected_by(vict), AFF_ZANZOKEN);
        pcost(vict, 0, GET_MAX_HIT(vict) / 200);
        hurt(0, 0, ch, vict, NULL, 0, 1);
        continue;
@@ -5614,7 +5614,7 @@ ACMD(do_baku)
        act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@RYou are caught by the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       if (!char_aff_flagged(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING) {
+       if (!char_aff_flagged(vict, AFF_FLYING) && char_get_position(vict) == POS_STANDING) {
         handle_knockdown(vict);
        }
        hurt(0, 0, ch, vict, NULL, dmg, 1);       
@@ -5655,15 +5655,15 @@ ACMD(do_rogafufuken)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, GET_MAX_HIT(ch) / 50)) {
@@ -5683,7 +5683,7 @@ ACMD(do_rogafufuken)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_ROGAFUFUKEN, 0);
@@ -5775,7 +5775,7 @@ ACMD(do_rogafufuken)
       act("@WYou pour your charged energy into your hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as you leap towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. You unleash a flurry of hand strikes on @c$N@W's body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards YOU while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -5795,7 +5795,7 @@ ACMD(do_rogafufuken)
       act("@WYou pour your charged energy into your hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as you leap towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. You unleash a flurry of hand strikes on @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards YOU while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -5874,15 +5874,15 @@ ACMD(do_dualbeam)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -5902,7 +5902,7 @@ ACMD(do_dualbeam)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_DUALBEAM, 0);
@@ -5960,14 +5960,14 @@ ACMD(do_dualbeam)
      act("@C$N@W manages to dodge your dualbeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W dualbeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W dualbeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 22, skill, SKILL_DUALBEAM); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
      if (hits == 1) {
@@ -6024,7 +6024,7 @@ ACMD(do_dualbeam)
       act("@WYou gather your charged energy up through the circuits in your arms. A @gg@Gr@We@wen @Wglow appears around your hand right as you aim it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S body in that instant!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at YOU. A @gg@Gr@We@wen @Wbeam blasts out and slams into YOUR body in that instant!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S body in that instant!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -6044,7 +6044,7 @@ ACMD(do_dualbeam)
       act("@WYou gather your charged energy up through the circuits in your arms. A @gg@Gr@We@wen @Wglow appears around your hand right as you aim it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S gut in that instant!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at YOU. A @gg@Gr@We@wen @Wbeam blasts out and slams into YOUR gut in that instant!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S gut in that instant!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -6128,15 +6128,15 @@ ACMD(do_blessedhammer)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -6156,7 +6156,7 @@ ACMD(do_blessedhammer)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_BLESSEDHAMMER, 0);
@@ -6201,14 +6201,14 @@ ACMD(do_blessedhammer)
      act("@C$N@W manages to dodge your @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@W, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@W, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W @WB@Dl@We@Ds@Ws@De@Wd @DH@Wa@Dm@Wm@De@Wr@W, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 17, skill, SKILL_BLESSEDHAMMER); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -6250,7 +6250,7 @@ ACMD(do_blessedhammer)
       act("@WFocusing your attention on @R$N@W, you reach back and form an @ne@Dt@nh@De@nr@De@na@Dl @Whammer before hurling it with all your might into their chest!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W narrows $s eyes and focuses $s energy. They reach back to form an @ne@Dt@nh@De@nr@De@na@Dl @Whammer which they hurl at you with all their @Rmight@W into YOUR chest!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W narrows their eyes at @c$N@W. $n reaches back to form an @ne@Dt@nh@De@nr@De@na@Dl @Whammer which they hurl at @c$N@W with all their might into @c$N@W's chest!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -6258,7 +6258,7 @@ ACMD(do_blessedhammer)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
     case 2: /* Critical */
-      if (!GET_BONUS(ch, BONUS_POWERHIT)) {
+      if (!char_get_bonuses(ch, BONUS_POWERHIT)) {
        dmg *= 3;
       } else {
        dmg *= 5;
@@ -6274,7 +6274,7 @@ ACMD(do_blessedhammer)
       act("@WFocusing your attention on @R$N@W, you reach back and form an @ne@Dt@nh@De@nr@De@na@Dl @Whammer before hurling it with all your might into their gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W narrows $s eyes and focuses $s energy. They reach back to form an @ne@Dt@nh@De@nr@De@na@Dl @Whammer which they hurl at you with all their @Rmight@W into YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W narrows their eyes at @c$N@W. $n reaches back to form an @ne@Dt@nh@De@nr@De@na@Dl @Whammer which they hurl at @c$N@W with all their might into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -6303,7 +6303,7 @@ ACMD(do_blessedhammer)
      if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !char_is_demon(vict)) {
       send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-      SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
      }
      pcost(ch, attperc, 0);
      
@@ -6353,7 +6353,7 @@ ACMD(do_kousengan)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
@@ -6362,8 +6362,8 @@ ACMD(do_kousengan)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -6383,7 +6383,7 @@ ACMD(do_kousengan)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_KOUSENGAN, 0);
@@ -6428,14 +6428,14 @@ ACMD(do_kousengan)
      act("@C$N@W manages to dodge your kousengan, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W kousengan, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W kousengan, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 17, skill, SKILL_KOUSENGAN); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
 
@@ -6477,7 +6477,7 @@ ACMD(do_kousengan)
       act("@WYou look at @c$N@W and grin. Then bright @Mpink@W lasers shoot from your eyes and slam into $S chest!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W looks at YOU and grins. Then bright @Mpink@W lasers shoot from $s eyes and slam into YOUR chest!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W looks at @c$N@W and grins. Then bright @Mpink@W lasers shoot from $s eyes and slam into @c$N@W's chest!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -6485,7 +6485,7 @@ ACMD(do_kousengan)
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
      break;
     case 2: /* Critical */
-      if (!GET_BONUS(ch, BONUS_POWERHIT)) {
+      if (!char_get_bonuses(ch, BONUS_POWERHIT)) {
        dmg *= 3;
       } else {
        dmg *= 5;
@@ -6501,7 +6501,7 @@ ACMD(do_kousengan)
       act("@WYou look at @c$N@W and grin. Then bright @Mpink@W lasers shoot from your eyes and slam into $S gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W looks at YOU and grins. Then bright @Mpink@W lasers shoot from $s eyes and slam into YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W looks at @c$N@W and grins. Then bright @Mpink@W lasers shoot from $s eyes and slam into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -6530,7 +6530,7 @@ ACMD(do_kousengan)
      if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !char_is_demon(vict)) {
       send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-      SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
+      SET_BIT_AR(char_get_affected_by(vict), AFF_BURNED);
      }
      pcost(ch, attperc, 0);
      
@@ -6584,14 +6584,14 @@ ACMD(do_deathbeam)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
-  if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 1) {
+  if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 1) {
    attperc += 0.05;
-  } else if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3) {
+  } else if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
    minimum -= 0.05;
    if (minimum <= 0.0) {
     minimum = 0.01;
@@ -6600,8 +6600,8 @@ ACMD(do_deathbeam)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -6621,7 +6621,7 @@ ACMD(do_deathbeam)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_DEATHBEAM, 0);
@@ -6629,7 +6629,7 @@ ACMD(do_deathbeam)
   index = check_def(vict); /* Check parry/block/dodge of vict */
 
   prob = roll_accuracy(ch, skill, TRUE);
-  if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 2) {
+  if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 2) {
    prob += 5;
   }
   perc = chance_to_hit(ch);
@@ -6646,13 +6646,13 @@ ACMD(do_deathbeam)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Deathbeam")) {
-      if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
+      if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
           pcost(ch, attperc - 0.05, 0);
       } else {
           pcost(ch, attperc, 0);
       }
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-      if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3) {
+      if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
           WAIT_STATE(ch, PULSE_3SEC);
       }
 
@@ -6665,7 +6665,7 @@ ACMD(do_deathbeam)
      act("@C$N@W moves quickly and blocks your deathbeam!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W deathbeam!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W moves quickly and blocks @c$n's@W deathbeam!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -6674,7 +6674,7 @@ ACMD(do_deathbeam)
      dmg = damtype(ch, 17, skill, attperc);
      dmg /= 4;
      hurt(0, 0, ch, vict, NULL, dmg, 1);
-	 if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3) {
+	 if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
      
@@ -6684,23 +6684,23 @@ ACMD(do_deathbeam)
      act("@C$N@W manages to dodge your deathbeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W deathbeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W deathbeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 17, skill, SKILL_DEATHBEAM); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
-     if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
      }
      hurt(0, 0, ch, vict, NULL, 0, 1);
-	 if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3) {
+	 if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
      
@@ -6710,13 +6710,13 @@ ACMD(do_deathbeam)
      act("@WYou can't believe it but your deathbeam misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a deathbeam at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a deathbeam at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
      }
      hurt(0, 0, ch, vict, NULL, 0, 1);
-	 if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3) {
+	 if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
      
@@ -6727,14 +6727,14 @@ ACMD(do_deathbeam)
      act("@WYou can't believe it but your deathbeam misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a deathbeam at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a deathbeam at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
      }     
    }
      hurt(0, 0, ch, vict, NULL, 0, 1);
-	 if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3) {
+	 if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
    return;
@@ -6748,13 +6748,13 @@ ACMD(do_deathbeam)
       act("@WYou move swiftly, drawing your charged ki to your index finger, and point at @c$N@W! You fire a @Rred@W Deathbeam from your finger which slams into $S body and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W moves swiftly, drawing charged ki to $s index finger, and point at you@W! $e fires a @Rred@W Deathbeam from $s finger which slams into your body and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W moves swiftly, drawing charged ki to $s index finger, and point at @c$N@W! $e fires a @Rred@W Deathbeam from $s finger which slams into @c$N@W's body and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
       dam_eq_loc(vict, 4);
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-	  if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3) {
+	  if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
      break;
@@ -6766,7 +6766,7 @@ ACMD(do_deathbeam)
       hurt(0, 0, ch, vict, NULL, dmg, 1);
       dam_eq_loc(vict, 3);
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-	  if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3) {
+	  if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
      break;
@@ -6774,13 +6774,13 @@ ACMD(do_deathbeam)
       act("@WYou move swiftly, drawing your charged ki to your index finger, and point at @c$N@W! You fire a @Rred@W Deathbeam from your finger which slams into $S gut and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W moves swiftly, drawing charged ki to $s index finger, and points at you@W! $e fires a @Rred@W Deathbeam from $s finger which slams into your gut and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W moves swiftly, drawing charged ki to $s index finger, and points at @c$N@W! $e fires a @Rred@W Deathbeam from $s finger which slams into @c$N@W's gut and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
       dam_eq_loc(vict, 4);
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-	  if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3) {
+	  if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
      break;
@@ -6792,7 +6792,7 @@ ACMD(do_deathbeam)
       hurt(0, 190, ch, vict, NULL, dmg, 1);
       dam_eq_loc(vict, 1);
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-	  if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3) {
+	  if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
      break;
@@ -6804,7 +6804,7 @@ ACMD(do_deathbeam)
       hurt(1, 190, ch, vict, NULL, dmg, 1);
       dam_eq_loc(vict, 2);
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-	  if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3) {
+	  if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
      break;
@@ -6816,7 +6816,7 @@ ACMD(do_deathbeam)
      } else if (char_get_skill(ch, SKILL_DEATHBEAM) >= 40 && GET_HIT(vict) >= 2) {
          decCurLF(ch, dmg * .05, -1);
      }
-     if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -6838,7 +6838,7 @@ ACMD(do_deathbeam)
    act("@C$n@W fires a deathbeam at $p@W!@n", FALSE, ch, obj, 0, TO_ROOM);
    hurt(0, 0, ch, NULL, obj, dmg, 0);
    pcost(ch, attperc, 0);
-   if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3) {
+   if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
   
@@ -6874,14 +6874,14 @@ ACMD(do_dodonpa)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
-  if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 1) {
+  if (char_get_skills_perf(ch, SKILL_DODONPA) == 1) {
    attperc += 0.05;
-  } else if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3) {
+  } else if (char_get_skills_perf(ch, SKILL_DODONPA) == 3) {
    minimum -= 0.05;
    if (minimum <= 0.0) {
     minimum = 0.01;
@@ -6890,8 +6890,8 @@ ACMD(do_dodonpa)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -6910,7 +6910,7 @@ ACMD(do_dodonpa)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_DODONPA, 0);
@@ -6918,7 +6918,7 @@ ACMD(do_dodonpa)
   index = check_def(vict); /* Check parry/block/dodge of vict */
 
   prob = roll_accuracy(ch, skill, TRUE);
-  if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 2) {
+  if (char_get_skills_perf(ch, SKILL_DODONPA) == 2) {
    prob += 5;
   }
   perc = chance_to_hit(ch);
@@ -6932,12 +6932,12 @@ ACMD(do_dodonpa)
   prob -= avo;
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
   
-     if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3) {
+     if (char_get_skills_perf(ch, SKILL_DODONPA) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
 
      if(!tech_handle_zanzoken(ch, vict, "Dodonpa")) {
-         if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
+         if (char_get_skills_perf(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
              pcost(ch, attperc - 0.05, 0);
          } else {
              pcost(ch, attperc, 0);
@@ -6952,7 +6952,7 @@ ACMD(do_dodonpa)
      act("@C$N@W moves quickly and blocks your dodonpa!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W dodonpa!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W moves quickly and blocks @c$n's@W dodonpa!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -6968,17 +6968,17 @@ ACMD(do_dodonpa)
      act("@C$N@W manages to dodge your dodonpa, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W dodonpa, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W dodonpa, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 15, skill, SKILL_DODONPA); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
-     if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -6991,7 +6991,7 @@ ACMD(do_dodonpa)
      act("@WYou can't believe it but your dodonpa misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a dodonpa at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a dodonpa at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -7005,7 +7005,7 @@ ACMD(do_dodonpa)
      act("@WYou can't believe it but your dodonpa misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a dodonpa at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a dodonpa at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -7023,7 +7023,7 @@ ACMD(do_dodonpa)
       act("@WYou gather your charged ki into your index finger and point at @c$N@W. A @Ygolden@W glow forms around your finger tip right before you shout '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fire a large golden beam! The beam slams into $S body and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W gathers $s charged ki into $s index finger and points at you. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into your body and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W gathers $s charged ki into $s index finger and points at @c$N@W. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into @c$N@W's body and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -7043,7 +7043,7 @@ ACMD(do_dodonpa)
       act("@WYou gather your charged ki into your index finger and point at @c$N@W. A @Ygolden@W glow forms around your finger tip right before you shout '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fire a large golden beam! The beam slams into $S gut and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W gathers $s charged ki into $s index finger and points at you. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into your gut and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W gathers $s charged ki into $s index finger and points at @c$N@W. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into @c$N@W's gut and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -7073,7 +7073,7 @@ ACMD(do_dodonpa)
          decCurKI(vict, dmg / 4, 0);
       send_to_char(vict, "@RYou feel some of your ki drained away by the attack!@n\r\n");
      }
-     if (GET_SKILL_PERF(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -7128,14 +7128,14 @@ ACMD(do_masenko)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
-  if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 1) {
+  if (char_get_skills_perf(ch, SKILL_MASENKO) == 1) {
    attperc += 0.05;
-  } else if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3) {
+  } else if (char_get_skills_perf(ch, SKILL_MASENKO) == 3) {
    minimum -= 0.05;
    if (minimum <= 0.0) {
     minimum = 0.01;
@@ -7144,8 +7144,8 @@ ACMD(do_masenko)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -7165,7 +7165,7 @@ ACMD(do_masenko)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_MASENKO, 0);
@@ -7173,7 +7173,7 @@ ACMD(do_masenko)
   index = check_def(vict); /* Check parry/block/dodge of vict */
 
   prob = roll_accuracy(ch, skill, TRUE);
-  if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 2) {
+  if (char_get_skills_perf(ch, SKILL_MASENKO) == 2) {
    prob += 5;
   }
   perc = chance_to_hit(ch);
@@ -7188,7 +7188,7 @@ ACMD(do_masenko)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Masenko")) {
-      if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
+      if (char_get_skills_perf(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
           pcost(ch, attperc - 0.05, 0);
       } else {
           pcost(ch, attperc, 0);
@@ -7201,7 +7201,7 @@ ACMD(do_masenko)
   if (prob < perc - 20) {
    if ((getCurST(vict)) > 0) {
     if (tech_handle_android_absorb(ch, vict)) {
-     if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -7212,7 +7212,7 @@ ACMD(do_masenko)
      act("@C$N@W moves quickly and blocks your masenko!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou move quickly and block @C$n's@W masenko!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W moves quickly and blocks @c$n's@W masenko!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -7228,17 +7228,17 @@ ACMD(do_masenko)
      act("@C$N@W manages to dodge your masenko, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W masenko, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W masenko, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 14, skill, SKILL_MASENKO); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
-     if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -7252,7 +7252,7 @@ ACMD(do_masenko)
      act("@WYou can't believe it but your masenko misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a masenko at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a masenko at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -7266,7 +7266,7 @@ ACMD(do_masenko)
      act("@WYou can't believe it but your masenko misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a masenko at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a masenko at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -7287,11 +7287,11 @@ ACMD(do_masenko)
    int hitspot = 1;
    hitspot = roll_hitloc(ch, vict, skill);
    if (char_is_piccolo(ch)) {
-    if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 100)
+    if (char_get_skills_base(ch, SKILL_STYLE) >= 100)
      dmg += (GET_MAX_MANA(ch) * 0.08);
-    else if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 60)
+    else if (char_get_skills_base(ch, SKILL_STYLE) >= 60)
      dmg += (GET_MAX_MANA(ch) * 0.05);
-    else if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 40)
+    else if (char_get_skills_base(ch, SKILL_STYLE) >= 40)
      dmg += (GET_MAX_MANA(ch) * 0.03);
    }
    switch(hitspot) {
@@ -7299,7 +7299,7 @@ ACMD(do_masenko)
       act("@WYou place your hands on top of each other and raise them over your head. Energy that you have charged gathers into your palms just before you bring them down aimed at @c$N@W! You scream '@RMasenko @rHa!@W' as you release your attack. A bright red wave of energy flows from your hands and slams into $S body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at you! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at @c$N@W! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -7319,7 +7319,7 @@ ACMD(do_masenko)
       act("@WYou place your hands on top of each other and raise them over your head. Energy that you have charged gathers into your palms just before you bring them down aimed at @c$N@W! You scream '@RMasenko @rHa!@W' as you release your attack. A bright red wave of energy flows from your hands and slams into $S gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at you! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at @c$N@W! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -7349,7 +7349,7 @@ ACMD(do_masenko)
       send_to_char(vict, "@RThe attack seems to have taken a toll on your stamina!@n\r\n");
       decCurST(vict, dmg / 4, 0);
      }
-     if (GET_SKILL_PERF(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -7404,14 +7404,14 @@ ACMD(do_kamehameha)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
-  if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 1) {
+  if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 1) {
    attperc += 0.05;
-  } else if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
+  } else if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
    minimum -= 0.05;
    if (minimum <= 0.0) {
     minimum = 0.01;
@@ -7420,8 +7420,8 @@ ACMD(do_kamehameha)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -7441,7 +7441,7 @@ ACMD(do_kamehameha)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_KAMEHAMEHA, 0);
@@ -7449,7 +7449,7 @@ ACMD(do_kamehameha)
   index = check_def(vict); /* Check parry/block/dodge of vict */
 
   prob = roll_accuracy(ch, skill, TRUE);
-  if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 2) {
+  if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 2) {
    prob += 5;
   }
   perc = chance_to_hit(ch);
@@ -7464,7 +7464,7 @@ ACMD(do_kamehameha)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "KameHameHa Wave")) {
-      if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
+      if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
           pcost(ch, attperc - 0.05, 0);
       } else {
           pcost(ch, attperc, 0);
@@ -7478,7 +7478,7 @@ ACMD(do_kamehameha)
       } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 40) {
           incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, true);
       }
-      if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
+      if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
           WAIT_STATE(ch, PULSE_3SEC);
       }
       return;
@@ -7487,7 +7487,7 @@ ACMD(do_kamehameha)
   if (prob < perc - 20) {
    if ((getCurST(vict)) > 0) {
     if (tech_handle_android_absorb(ch, vict)) {
-     if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -7499,12 +7499,12 @@ ACMD(do_kamehameha)
      act("@WYou move quickly and block @C$n's@W kamehameha!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W moves quickly and blocks @c$n's@W kamehameha!@n", FALSE, ch, 0, vict, TO_NOTVICT);
      improve_skill(vict, SKILL_BLOCK, 0);
-     if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
      }
-	 if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
+	 if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
      pcost(vict, 0, GET_MAX_HIT(vict) / 500);
@@ -7525,16 +7525,16 @@ ACMD(do_kamehameha)
      act("@C$N@W manages to dodge your kamehameha, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@WYou dodge @C$n's@W kamehameha, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@W manages to dodge @c$n's@W kamehameha, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     send_to_room(IN_ROOM(vict), "@wA bright explosion erupts from the impact!\r\n");
+     send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
          dodge_ki(ch, vict, 0, 13, skill, SKILL_KAMEHAMEHA); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
-     if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -7547,7 +7547,7 @@ ACMD(do_kamehameha)
             incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, true);
         }
      improve_skill(vict, SKILL_DODGE, 0);
-	 if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
+	 if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
      hurt(0, 0, ch, vict, NULL, 0, 1);
@@ -7558,7 +7558,7 @@ ACMD(do_kamehameha)
      act("@WYou can't believe it but your kamehameha misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a kamehameha at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a kamehameha at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -7570,7 +7570,7 @@ ACMD(do_kamehameha)
         } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 40) {
             incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, true);
         }
-	 if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
+	 if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
      hurt(0, 0, ch, vict, NULL, 0, 1);
@@ -7582,7 +7582,7 @@ ACMD(do_kamehameha)
      act("@WYou can't believe it but your kamehameha misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@C$n@W fires a kamehameha at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@c$n@W fires a kamehameha at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -7595,7 +7595,7 @@ ACMD(do_kamehameha)
            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, true);
        }
    }
-   if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
+   if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
      hurt(0, 0, ch, vict, NULL, 0, 1);
@@ -7610,10 +7610,10 @@ ACMD(do_kamehameha)
       act("@WYou cup your hands at your side and begin to pool your charged ki there. As the ki pools there you begin to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly you bring your hands forward facing @c$N@W and shout '@BHAAAA!!!@W' while releasing a bright blue kamehameha at $M! It slams into $S body and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing you and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into your body and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S body and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
-	  if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
+	  if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -7625,7 +7625,7 @@ ACMD(do_kamehameha)
       act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing you and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into your face and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S face and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       dmg *= calc_critical(ch, 0);
-	  if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
+	  if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -7636,13 +7636,13 @@ ACMD(do_kamehameha)
       act("@WYou cup your hands at your side and begin to pool your charged ki there. As the ki pools there you begin to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly you bring your hands forward facing @c$N@W and shout '@BHAAAA!!!@W' while releasing a bright blue kamehameha at $M! It slams into $S gut and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing you and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into your gut and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S gut and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
       dam_eq_loc(vict, 4);
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-	  if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
+	  if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
      break;
@@ -7651,7 +7651,7 @@ ACMD(do_kamehameha)
       act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing you and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into your arm and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S arm and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       dmg *= calc_critical(ch, 1);
-	  if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
+	  if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
       hurt(0, 190, ch, vict, NULL, dmg, 1);
@@ -7666,12 +7666,12 @@ ACMD(do_kamehameha)
       hurt(1, 190, ch, vict, NULL, dmg, 1);
       dam_eq_loc(vict, 2);
       /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-	  if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
+	  if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
      break;
    }
-     if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
+     if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
       pcost(ch, attperc - 0.05, 0);
      } else {
       pcost(ch, attperc, 0);
@@ -7699,7 +7699,7 @@ ACMD(do_kamehameha)
    dmg /= 10;
    act("@WYou fire a kamehameha at $p@W!@n", FALSE, ch, obj, 0, TO_CHAR);
    act("@C$n@W fires a kamehameha at $p@W!@n", FALSE, ch, obj, 0, TO_ROOM);
-   if (GET_SKILL_PERF(ch, SKILL_KAMEHAMEHA) == 3) {
+   if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
 	  }
    hurt(0, 0, ch, NULL, obj, dmg, 0);
@@ -7743,7 +7743,7 @@ ACMD(do_renzo)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
@@ -7751,8 +7751,8 @@ ACMD(do_renzo)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -7772,7 +7772,7 @@ ACMD(do_renzo)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_RENZO, 0);
@@ -8038,7 +8038,7 @@ ACMD(do_heeldrop)
   return;
  }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
@@ -8052,7 +8052,7 @@ ACMD(do_heeldrop)
  if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  if (char_is_piccolo(ch)) {
-  if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+  if (char_get_skills_base(ch, SKILL_STYLE) >= 75)
    handle_cooldown(ch, 7);
   else
    handle_cooldown(ch, 9);
@@ -8064,7 +8064,7 @@ ACMD(do_heeldrop)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_HEELDROP, 1);
@@ -8073,7 +8073,7 @@ ACMD(do_heeldrop)
   perc = chance_to_hit(ch);
 
   if (char_is_kabito(ch) && !char_is_npc(ch)) {
-   if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+   if (char_get_skills_base(ch, SKILL_STYLE) >= 75)
     perc -= perc * 0.2;
   }
 
@@ -8159,8 +8159,8 @@ ACMD(do_heeldrop)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Heeldrop")) {
-      COMBO(ch) = -1;
-      COMBHITS(ch) = 0;
+      char_set_combo(ch, -1);
+      char_set_combhits(ch, 0);
       pcost(ch, 0, stcost / 2);
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
       return;
@@ -8235,7 +8235,7 @@ ACMD(do_heeldrop)
       act("@c$n@W disappears, only to appear above @C$N@W, spinning quickly and heeldropping $M in the face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       tech_handle_crashdown(ch, vict);
 
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -8256,7 +8256,7 @@ ACMD(do_heeldrop)
       act("@WYou fly at @C$N@W, heeldropping $S gut as you fly!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W flies at you, heeldropping your gut as $e flies!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@c$n@W flies at @C$N@W, heeldropping $S gut as $e flies!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -8297,7 +8297,7 @@ ACMD(do_heeldrop)
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
-   dmg = ((GET_HIT(ch) / 10000) + (GET_STR(ch)));
+   dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
    act("@WYou heeldrop $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
    act("@C$n@W heeldrops $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
    hurt(0, 0, ch, NULL, obj, dmg, 0);
@@ -8326,7 +8326,7 @@ ACMD(do_attack)
  }
   one_argument(argument, arg);
 
- if (!GET_EQ(ch, WEAR_WIELD1) && !GET_EQ(ch, WEAR_WIELD2)) {
+ if (!char_get_equipment(ch, WEAR_WIELD1) && !char_get_equipment(ch, WEAR_WIELD2)) {
    send_to_char(ch, "You need to wield a weapon to use this, without one try punch, kick, or other no weapon attacks.\r\n");
    return;
  }
@@ -8335,26 +8335,26 @@ ACMD(do_attack)
   return;
  }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
- if (GET_EQ(ch, WEAR_WIELD1)) {
+ if (char_get_equipment(ch, WEAR_WIELD1)) {
   if (!char_is_android(ch)) {
-   stcost += GET_OBJ_WEIGHT(GET_EQ(ch, WEAR_WIELD1));
+   stcost += obj_get_weight(char_get_equipment(ch, WEAR_WIELD1));
   } else {
-   stcost += GET_OBJ_WEIGHT(GET_EQ(ch, WEAR_WIELD1)) * 0.25;
+   stcost += obj_get_weight(char_get_equipment(ch, WEAR_WIELD1)) * 0.25;
   }
   if (!check_points(ch, 0, stcost)) {
    return;
   }
   wielded = 1;
  }
- else if (GET_EQ(ch, WEAR_WIELD2)) {
+ else if (char_get_equipment(ch, WEAR_WIELD2)) {
   if (!char_is_android(ch)) {
-   stcost += GET_OBJ_WEIGHT(GET_EQ(ch, WEAR_WIELD2));
+   stcost += obj_get_weight(char_get_equipment(ch, WEAR_WIELD2));
   } else {
-   stcost += GET_OBJ_WEIGHT(GET_EQ(ch, WEAR_WIELD2)) * 0.25;
+   stcost += obj_get_weight(char_get_equipment(ch, WEAR_WIELD2)) * 0.25;
   }
   if (!check_points(ch, 0, stcost)) {
    return;
@@ -8363,9 +8363,9 @@ ACMD(do_attack)
 
  if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
- if (GET_EQ(ch, WEAR_WIELD1)) {
+ if (char_get_equipment(ch, WEAR_WIELD1)) {
   if (vict) {
-   if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
+   if (obj_get_value(char_get_equipment(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
     if (!can_kill(ch, vict, NULL, 1)) {
      return;
     }
@@ -8375,23 +8375,23 @@ ACMD(do_attack)
     }
    }
   }
-  if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
+  if (obj_get_value(char_get_equipment(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
       skill = init_skill(ch, SKILL_DAGGER);
       improve_skill(ch, SKILL_DAGGER, 1);
       wtype = 1;
-  } else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT) {
+  } else if (obj_get_value(char_get_equipment(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT) {
       skill = init_skill(ch, SKILL_SWORD);
       improve_skill(ch, SKILL_SWORD, 1);
       wtype = 0;
-  } else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT) {
+  } else if (obj_get_value(char_get_equipment(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT) {
       skill = init_skill(ch, SKILL_CLUB);
       improve_skill(ch, SKILL_CLUB, 1);
       wtype = 2;
-  } else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT) {
+  } else if (obj_get_value(char_get_equipment(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT) {
       skill = init_skill(ch, SKILL_SPEAR);
       improve_skill(ch, SKILL_SPEAR, 1);
       wtype = 3;
-  } else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
+  } else if (obj_get_value(char_get_equipment(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
       gun = TRUE;
       skill = init_skill(ch, SKILL_GUN);
       improve_skill(ch, SKILL_GUN, 1);
@@ -8401,9 +8401,9 @@ ACMD(do_attack)
       improve_skill(ch, SKILL_BRAWL, 1);
       wtype = 5;
   }
- } else if (GET_EQ(ch, WEAR_WIELD2)) {
+ } else if (char_get_equipment(ch, WEAR_WIELD2)) {
   if (vict) {
-   if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
+   if (obj_get_value(char_get_equipment(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
     if (!can_kill(ch, vict, NULL, 1)) {
      return;
     }
@@ -8415,23 +8415,23 @@ ACMD(do_attack)
   }
   if (wielded == 1)
    wielded = 2;
-  if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
+  if (obj_get_value(char_get_equipment(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
       skill = init_skill(ch, SKILL_DAGGER);
       improve_skill(ch, SKILL_DAGGER, 1);
       wtype = 1;
-  } else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT) {
+  } else if (obj_get_value(char_get_equipment(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT) {
       skill = init_skill(ch, SKILL_SWORD);
       improve_skill(ch, SKILL_SWORD, 1);
       wtype = 0;
-  } else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT) {
+  } else if (obj_get_value(char_get_equipment(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT) {
       skill = init_skill(ch, SKILL_CLUB);
       improve_skill(ch, SKILL_CLUB, 1);
       wtype = 2;
-  } else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT) {
+  } else if (obj_get_value(char_get_equipment(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT) {
       skill = init_skill(ch, SKILL_SPEAR);
       improve_skill(ch, SKILL_SPEAR, 1);
       wtype = 3;
-  } else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
+  } else if (obj_get_value(char_get_equipment(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
       gun2 = TRUE;
       skill = init_skill(ch, SKILL_GUN);
       improve_skill(ch, SKILL_GUN, 1);
@@ -8443,10 +8443,10 @@ ACMD(do_attack)
   }
  }
  if (wielded == 2 && gun == FALSE) {
-  if (GET_SKILL_BASE(ch, SKILL_DUALWIELD) >= 100) {
+  if (char_get_skills_base(ch, SKILL_DUALWIELD) >= 100) {
    dualwield = 3;
    stcost -= stcost * 0.30;
-  } else if (GET_SKILL_BASE(ch, SKILL_DUALWIELD) >= 75) {
+  } else if (char_get_skills_base(ch, SKILL_DUALWIELD) >= 75) {
    dualwield = 2;
    stcost -= stcost * 0.25;
   }
@@ -8454,10 +8454,10 @@ ACMD(do_attack)
 
    int wlvl = 0;
    struct obj_data *weap = NULL;
-   if (GET_EQ(ch, WEAR_WIELD1)) {
-    weap = GET_EQ(ch, WEAR_WIELD1);
+   if (char_get_equipment(ch, WEAR_WIELD1)) {
+    weap = char_get_equipment(ch, WEAR_WIELD1);
    } else {
-    weap = GET_EQ(ch, WEAR_WIELD2);
+    weap = char_get_equipment(ch, WEAR_WIELD2);
    }
    if (obj_flagged(weap, ITEM_WEAPLVL1)) {
     wlvl = 1;
@@ -8471,7 +8471,7 @@ ACMD(do_attack)
     wlvl = 5;
    }
 
- if (GET_PREFERENCE(ch) != PREFERENCE_H2H) {
+ if (char_get_preference(ch) != PREFERENCE_H2H) {
   handle_cooldown(ch, 4);
  } else {
   handle_cooldown(ch, 8);
@@ -8487,11 +8487,11 @@ ACMD(do_attack)
    } else if (wlvl == 2) {
     guncost = 2;
    }
-   if (GET_GOLD(ch) < guncost) {
+   if (char_get_gold(ch) < guncost) {
     send_to_char(ch, "You do not have enough zenni. You need %d zenni per shot for that level of gun.\r\n", guncost);
     return;
    } else {
-    GET_GOLD(ch) -= guncost;
+    char_set_gold(ch, char_get_gold(ch) - (guncost));
    }
  } else if (wielded == 2 && gun == TRUE) {
    if (wlvl == 5) {
@@ -8503,17 +8503,17 @@ ACMD(do_attack)
    } else if (wlvl == 2) {
     guncost = 2;
    }
-   if (GET_GOLD(ch) < guncost) {
+   if (char_get_gold(ch) < guncost) {
     send_to_char(ch, "You do not have enough zenni. You need %d zenni per shot for that level of gun.\r\n", guncost);
     return;
    } else {
-    GET_GOLD(ch) -= guncost;
+    char_set_gold(ch, char_get_gold(ch) - (guncost));
    }
  }
 
  if (vict) {
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
 
@@ -8640,11 +8640,11 @@ ACMD(do_attack)
      }
        if (!char_is_npc(ch)) {
         if (char_plr_flagged(ch, PLR_THANDW) && gun == FALSE && gun2 == FALSE) {
-         if (GET_SKILL_BASE(ch, SKILL_TWOHAND) >= 100) {
+         if (char_get_skills_base(ch, SKILL_TWOHAND) >= 100) {
           dmg += dmg * 0.5;
-         } else if (GET_SKILL_BASE(ch, SKILL_TWOHAND) >= 75) {
+         } else if (char_get_skills_base(ch, SKILL_TWOHAND) >= 75) {
           dmg += dmg * 0.25;
-         } else if (GET_SKILL_BASE(ch, SKILL_TWOHAND) >= 50) {
+         } else if (char_get_skills_base(ch, SKILL_TWOHAND) >= 50) {
           dmg += dmg * 0.1;
          }
          if (wtype == 3) {
@@ -8681,7 +8681,7 @@ ACMD(do_attack)
      int64_t beforepl = GET_HIT(vict);
      switch (hitspot) {
       case 1:
-       if (GET_BONUS(ch, BONUS_SOFT)) {
+       if (char_get_bonuses(ch, BONUS_SOFT)) {
         dmg *= calc_critical(ch, 2);
        }
        break;
@@ -8690,7 +8690,7 @@ ACMD(do_attack)
        break;
       case 3: /* Body */
        hitspot = 5;
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
        break;
@@ -8742,7 +8742,7 @@ ACMD(do_attack)
          act("@c$n@W slashes @C$N@W across the face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
          if (!char_is_npc(ch)) {
           if (char_plr_flagged(ch, PLR_THANDW) && gun == FALSE && gun2 == FALSE) {
-           if (GET_SKILL_BASE(ch, SKILL_TWOHAND) >= 100) {
+           if (char_get_skills_base(ch, SKILL_TWOHAND) >= 100) {
             double mult = calc_critical(ch, 0);
             mult += 1.0;
             dmg *= mult;
@@ -8773,14 +8773,14 @@ ACMD(do_attack)
        }
       break;
       case 1:
-       if (!FIGHTING(ch) && backstab(ch, vict, wlvl, dmg)) {
-        if (vict != NULL && GET_HIT(vict) > 1 && axion_dice(0) < (char_get_skill(ch, SKILL_DUALWIELD)) && GET_EQ(ch, WEAR_WIELD1) && GET_EQ(ch, WEAR_WIELD2)) {
+       if (!char_get_fighting(ch) && backstab(ch, vict, wlvl, dmg)) {
+        if (vict != NULL && GET_HIT(vict) > 1 && axion_dice(0) < (char_get_skill(ch, SKILL_DUALWIELD)) && char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
          do_attack2(ch, 0, 0, 0);
         }
         pcost(ch, 0, stcost);
         return;
        }
-       dmg += (dmg * 0.01) * (GET_DEX(ch) * 0.5);
+       dmg += (dmg * 0.01) * (char_get_aff_abils_dex(ch) * 0.5);
        switch (hitspot) {
         case 1:
          act("@WYou pierce @C$N's@W stomach!@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -9025,25 +9025,25 @@ ACMD(do_attack)
      }/* end switch one*/
     }
      if ((wielded == 2 && gun == FALSE) || (gun2 == FALSE && gun == FALSE)) {
-     if (GET_EQ(ch, WEAR_WIELD1)) {
-      if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
+     if (char_get_equipment(ch, WEAR_WIELD1)) {
+      if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
        act("@c$N's@W fireshield burns your weapon!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@C$n's@W weapon is burned by your fireshield!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@c$n's@W weapon is burned by @C$N's@W fireshield!@n", TRUE, ch, 0, vict, TO_NOTVICT);
        int damdam = char_get_skill(vict, SKILL_FIRESHIELD) / 2;
-       hurt(0, 0, vict, NULL, GET_EQ(ch, WEAR_WIELD1), damdam, 0);
-      } else if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (GET_BONUS(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
+       hurt(0, 0, vict, NULL, char_get_equipment(ch, WEAR_WIELD1), damdam, 0);
+      } else if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
        send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
       }
        pcost(ch, 0, stcost);
      }
      else {
-      if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
+      if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
        act("@c$N's@W fireshield burns your weapon!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@C$n's@W weapon is burned by your fireshield!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@c$n's@W weapon is burned by @C$N's@W fireshield!@n", TRUE, ch, 0, vict, TO_NOTVICT);
        int damdam = char_get_skill(vict, SKILL_FIRESHIELD) / 2;
-       hurt(0, 0, vict, NULL, GET_EQ(ch, WEAR_WIELD2), damdam, 0);
+       hurt(0, 0, vict, NULL, char_get_equipment(ch, WEAR_WIELD2), damdam, 0);
       }
       pcost(ch, 0, stcost);
      }
@@ -9053,7 +9053,7 @@ ACMD(do_attack)
    }
    if (!char_is_npc(ch)) {
     if (char_plr_flagged(ch, PLR_THANDW)) {
-     if (!char_get_skill(ch, SKILL_TWOHAND) && slot_count(ch) + 1 <= GET_SLOTS(ch)) {
+     if (!char_get_skill(ch, SKILL_TWOHAND) && slot_count(ch) + 1 <= char_get_skill_slots(ch)) {
       int numb = rand_number(10, 15);
       SET_SKILL(ch, SKILL_TWOHAND, numb);
       send_to_char(ch, "@GYou learn the very basics of two-handing your weapon!@n\r\n");
@@ -9062,15 +9062,15 @@ ACMD(do_attack)
      }
     }
    }
-   if (GET_EQ(ch, WEAR_WIELD2)) {
-    if (!char_get_skill(ch, SKILL_DUALWIELD) && slot_count(ch) + 1 <= GET_SLOTS(ch) && (GET_OBJ_TYPE(GET_EQ(ch, WEAR_WIELD2)) != ITEM_LIGHT)) {
+   if (char_get_equipment(ch, WEAR_WIELD2)) {
+    if (!char_get_skill(ch, SKILL_DUALWIELD) && slot_count(ch) + 1 <= char_get_skill_slots(ch) && (obj_get_type_flag(char_get_equipment(ch, WEAR_WIELD2)) != ITEM_LIGHT)) {
      int numb = rand_number(10, 15);
      SET_SKILL(ch, SKILL_DUALWIELD, numb);
      send_to_char(ch, "@GYou learn the very basics of dual-wielding!@n\r\n");
     } else {
      improve_skill(ch, SKILL_DUALWIELD, 0);
     }
-    if (vict != NULL && GET_HIT(vict) > 1 && axion_dice(0) < (char_get_skill(ch, SKILL_DUALWIELD)) && GET_EQ(ch, WEAR_WIELD1)) {
+    if (vict != NULL && GET_HIT(vict) > 1 && axion_dice(0) < (char_get_skill(ch, SKILL_DUALWIELD)) && char_get_equipment(ch, WEAR_WIELD1)) {
       do_attack2(ch, 0, 0, 0);
     }
    }
@@ -9084,7 +9084,7 @@ ACMD(do_attack)
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
-   dmg = ((GET_HIT(ch) / 10000) + (GET_STR(ch)));
+   dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
    act("@WYou attack $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
    act("@C$n@W attacks $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
    hurt(0, 0, ch, NULL, obj, dmg, 0);
@@ -9123,15 +9123,15 @@ ACMD(do_shogekiha)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -9158,7 +9158,7 @@ ACMD(do_shogekiha)
   }
 
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_SHOGEKIHA, 0);
@@ -9305,7 +9305,7 @@ ACMD(do_shogekiha)
     act("@CYour skillful shogekiha disipated some of @c$N's@C charged ki!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@C$n@C's skillful shogekiha disipated some of YOUR charged ki!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@C$n@C's skillful shogekiha disipated some of @c$N's@C charged ki!", TRUE, ch, 0, vict, TO_NOTVICT);
-    GET_CHARGE(vict) -= GET_CHARGE(vict) * 0.25;
+    char_set_charge(vict, char_get_charge(vict) - (char_get_charge(vict) * 0.25));
    }
      pcost(ch, attperc, 0);
      
@@ -9320,19 +9320,19 @@ ACMD(do_shogekiha)
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
-   if (KICHARGE(obj) > 0 && GET_CHARGE(ch) > KICHARGE(obj)) {
+   if (obj_get_kicharge(obj) > 0 && char_get_charge(ch) > obj_get_kicharge(obj)) {
     act("@WYou leap at $p@W with your arms spread out to your sides. As you are about to make contact with $p@W you scream and shatter the attack with your ki!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@C$n@W leaps out at $p@W with $s arms spead out to $s sides. As $e is about to make contact with $p@W $e screams and shatters the attack with $s ki!@n", TRUE, ch, obj, 0, TO_ROOM);
-    KICHARGE(obj) -= GET_CHARGE(ch);
+    obj_set_kicharge(obj, obj_get_kicharge(obj) - (char_get_charge(ch)));
     extract_obj(obj);
    }
-   else if (KICHARGE(obj) > 0 && GET_CHARGE(ch) < KICHARGE(obj)) {
+   else if (obj_get_kicharge(obj) > 0 && char_get_charge(ch) < obj_get_kicharge(obj)) {
     act("@WYou leap at $p@W with your arms spread out to your sides. As you are about to make contact with $p@W you scream and weaken the attack with your ki before taking the rest of the attack in the chest!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@C$n@W leaps out at $p@W with $s arms spead out to $s sides. As $e is about to make contact with $p@W $e screams and weakens the attack with $s ki before taking the rest of the attack in the chest!@n", TRUE, ch, obj, 0, TO_ROOM);
-    KICHARGE(obj) -= GET_CHARGE(ch);
-    GET_CHARGE(ch) = 0;
-    dmg = KICHARGE(obj);
-    hurt(0, 0, USER(obj), ch, NULL, dmg, 0);
+    obj_set_kicharge(obj, obj_get_kicharge(obj) - (char_get_charge(ch)));
+    char_set_charge(ch, 0);
+    dmg = obj_get_kicharge(obj);
+    hurt(0, 0, obj_get_user(obj), ch, NULL, dmg, 0);
     extract_obj(obj);
    }
    else {
@@ -9376,15 +9376,15 @@ ACMD(do_tsuihidan)
    return;
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -9404,7 +9404,7 @@ ACMD(do_tsuihidan)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_TSUIHIDAN, 0);
@@ -9613,12 +9613,12 @@ ACMD(do_attack2)
 
   one_argument(argument, arg);
 
- if (!GET_EQ(ch, WEAR_WIELD2)) {
+ if (!char_get_equipment(ch, WEAR_WIELD2)) {
    return;
  }
 
- int64_t stcost = ((GET_MAX_HIT(ch) / 150) + GET_OBJ_WEIGHT(GET_EQ(ch, WEAR_WIELD2)));
- int64_t kicost = ((GET_MAX_HIT(ch) / 150) + GET_OBJ_WEIGHT(GET_EQ(ch, WEAR_WIELD2)));
+ int64_t stcost = ((GET_MAX_HIT(ch) / 150) + obj_get_weight(char_get_equipment(ch, WEAR_WIELD2)));
+ int64_t kicost = ((GET_MAX_HIT(ch) / 150) + obj_get_weight(char_get_equipment(ch, WEAR_WIELD2)));
 
  if (char_is_android(ch)) {
   stcost *= 0.25;
@@ -9635,23 +9635,23 @@ ACMD(do_attack2)
  if (!char_has_arms(ch)) {
    send_to_char(ch, "With what arms!?\r\n");
    return;
- } else if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50 && GET_LIMBCOND(ch, 2) < 0) {
+ } else if (char_get_limb_condition(ch, (1)-1) > 0 && char_get_limb_condition(ch, (1)-1) < 50 && char_get_limb_condition(ch, (2)-1) < 0) {
    send_to_char(ch, "Using your broken right arm has damaged it more!@n\r\n");
-   GET_LIMBCOND(ch, 1) -= rand_number(3, 5);
-   if (GET_LIMBCOND(ch, 1) < 0) {
+   char_set_limb_condition(ch, (1)-1, char_get_limb_condition(ch, (1)-1) - (rand_number(3, 5)));
+   if (char_get_limb_condition(ch, (1)-1) < 0) {
     act("@RYour right arm has fallen apart!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@r$n@R's right arm has fallen apart!@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-  } else if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50 && GET_LIMBCOND(ch, 1) < 0) {
+  } else if (char_get_limb_condition(ch, (2)-1) > 0 && char_get_limb_condition(ch, (2)-1) < 50 && char_get_limb_condition(ch, (1)-1) < 0) {
    send_to_char(ch, "Using your broken left arm has damaged it more!@n\r\n");
-   GET_LIMBCOND(ch, 2) -= rand_number(3, 5);
-   if (GET_LIMBCOND(ch, 2) < 0) {
+   char_set_limb_condition(ch, (2)-1, char_get_limb_condition(ch, (2)-1) - (rand_number(3, 5)));
+   if (char_get_limb_condition(ch, (2)-1) < 0) {
     act("@RYour left arm has fallen apart!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@r$n@R's left arm has fallen apart!@n", TRUE, ch, 0, 0, TO_ROOM);
    }
   }
 
- if (!FIGHTING(ch)) {
+ if (!char_get_fighting(ch)) {
   return;
  }
 
@@ -9661,7 +9661,7 @@ ACMD(do_attack2)
 
  if (!char_is_npc(ch) || char_is_npc(ch)) {
   if (vict) {
-   if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
+   if (obj_get_value(char_get_equipment(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
     if (!can_kill(ch, vict, NULL, 1)) {
      return;
     }
@@ -9672,23 +9672,23 @@ ACMD(do_attack2)
    }
   }
 
-  if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
+  if (obj_get_value(char_get_equipment(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
       skill = init_skill(ch, SKILL_DAGGER);
       improve_skill(ch, SKILL_DAGGER, 1);
       wtype = 1;
-  } else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT) {
+  } else if (obj_get_value(char_get_equipment(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT) {
       skill = init_skill(ch, SKILL_SWORD);
       improve_skill(ch, SKILL_SWORD, 1);
       wtype = 0;
-  } else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT) {
+  } else if (obj_get_value(char_get_equipment(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT) {
       skill = init_skill(ch, SKILL_CLUB);
       improve_skill(ch, SKILL_CLUB, 1);
       wtype = 2;
-  } else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT) {
+  } else if (obj_get_value(char_get_equipment(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT) {
       skill = init_skill(ch, SKILL_SPEAR);
       improve_skill(ch, SKILL_SPEAR, 1);
       wtype = 3;
-  } else if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
+  } else if (obj_get_value(char_get_equipment(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
       gun2 = TRUE;
       skill = init_skill(ch, SKILL_GUN);
       improve_skill(ch, SKILL_GUN, 1);
@@ -9701,13 +9701,13 @@ ACMD(do_attack2)
  }
 
   if (gun2 == FALSE) {
-   if (GET_SKILL_BASE(ch, SKILL_DUALWIELD) >= 100) {
+   if (char_get_skills_base(ch, SKILL_DUALWIELD) >= 100) {
     dualwield = 3;
     stcost -= stcost * 0.30;
-   } else if (GET_SKILL_BASE(ch, SKILL_DUALWIELD) >= 75) {
+   } else if (char_get_skills_base(ch, SKILL_DUALWIELD) >= 75) {
     dualwield = 2;
     stcost -= stcost * 0.25;
-   } else if (GET_SKILL_BASE(ch, SKILL_DUALWIELD) >= 50) {
+   } else if (char_get_skills_base(ch, SKILL_DUALWIELD) >= 50) {
     dualwield = 1;
     stcost -= stcost * 0.25;
    }
@@ -9740,27 +9740,27 @@ ACMD(do_attack2)
  else if (char_is_npc(ch) && char_get_level(ch) > 100) {
  skill = rand_number(95, 100);
  }
- if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-  vict = FIGHTING(ch);
+ if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
+  vict = char_get_fighting(ch);
  }
 
  if (gun2 == TRUE) {
-  if (GET_GOLD(ch) < 1) {
+  if (char_get_gold(ch) < 1) {
    send_to_char(ch, "You do not have enough zenni. You need 1 zenni per shot.\r\n");
    return;
   } else {
-   GET_GOLD(ch) -= 1;
+   char_set_gold(ch, char_get_gold(ch) - (1));
   }
  }
 
- if (GET_PREFERENCE(ch) != PREFERENCE_H2H) {
+ if (char_get_preference(ch) != PREFERENCE_H2H) {
   handle_cooldown(ch, 4);
  } else {
   handle_cooldown(ch, 8);
  }
 
  if (vict) {
-  if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
+  if (obj_get_value(char_get_equipment(ch, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
    if (!can_kill(ch, vict, NULL, 1)) {
     return;
    }
@@ -9868,7 +9868,7 @@ ACMD(do_attack2)
   else {
       dmg = damtype(ch, -1, skill, attperc);
    int wlvl = 0;
-        struct obj_data *weap = GET_EQ(ch, WEAR_WIELD2);
+        struct obj_data *weap = char_get_equipment(ch, WEAR_WIELD2);
      if (obj_flagged(weap, ITEM_WEAPLVL1)) {
         dmg += dmg * .05;
         wlvl = 1;
@@ -9920,7 +9920,7 @@ ACMD(do_attack2)
      }
      switch (hitspot) {
       case 1:
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
        break;
@@ -9989,7 +9989,7 @@ ACMD(do_attack2)
       }
       break;
       case 1:
-       dmg += (dmg * 0.01) * (GET_DEX(ch) * 0.5);
+       dmg += (dmg * 0.01) * (char_get_aff_abils_dex(ch) * 0.5);
        switch (hitspot) {
         case 1:
          act("@WYou pierce @C$N's@W stomach!@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -10234,13 +10234,13 @@ ACMD(do_attack2)
      }/* end switch one*/
     }
    if (gun2 == FALSE) {
-    if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
+    if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
     act("@c$N's@W fireshield burns your weapon!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@C$n's@W weapon is burned by your fireshield!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@c$n's@W weapon is burned by @C$N's@W fireshield!@n", TRUE, ch, 0, vict, TO_NOTVICT);
     int damdam = char_get_skill(vict, SKILL_FIRESHIELD) / 2;
-    hurt(0, 0, vict, NULL, GET_EQ(ch, WEAR_WIELD2), damdam, 0);
-    } else if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (GET_BONUS(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
+    hurt(0, 0, vict, NULL, char_get_equipment(ch, WEAR_WIELD2), damdam, 0);
+    } else if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
      send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
     }
     pcost(ch, 0, stcost);
@@ -10254,7 +10254,7 @@ ACMD(do_attack2)
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
-   dmg = ((GET_HIT(ch) / 10000) + (GET_STR(ch)));
+   dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
    act("@WYou attack $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
    act("@C$n@W attacks $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
    hurt(0, 0, ch, NULL, obj, dmg, 0);
@@ -10280,7 +10280,7 @@ ACMD(do_bite)
 	one_argument(argument, arg);
 
 
-	if (!char_is_npc(ch) && (!char_is_mutant(ch) || (GET_GENOME(ch, 0) != 7 && GET_GENOME(ch, 1) != 7))) {
+	if (!char_is_npc(ch) && (!char_is_mutant(ch) || (char_get_genome(ch, 0) != 7 && char_get_genome(ch, 1) != 7))) {
 		send_to_char(ch, "You don't want to put that in your mouth, you don't know where it has been!\r\n");
 		return;
 	}
@@ -10288,7 +10288,7 @@ ACMD(do_bite)
 		return;
 	}
 
-	if (!*arg && !FIGHTING(ch)) {
+	if (!*arg && !char_get_fighting(ch)) {
 		return;
 	}
 
@@ -10303,10 +10303,10 @@ ACMD(do_bite)
 	}
 
 	vict = NULL; obj = NULL; if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-		if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
-			vict = FIGHTING(ch);
+		if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
+			vict = char_get_fighting(ch);
 		}
-		else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents))) {
+		else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[char_get_in_room(ch)].contents))) {
 			return;
 		}
 	}
@@ -10316,7 +10316,7 @@ ACMD(do_bite)
 			return;
 		}
 		if (handle_defender(vict, ch)) {
-			struct char_data *def = GET_DEFENDER(vict);
+			struct char_data *def = char_get_defender(vict);
 			vict = def;
 		}
 		index = check_def(vict);
@@ -10409,7 +10409,7 @@ ACMD(do_bite)
 				act("@WYou bite @C$N's@W face!@n", TRUE, ch, 0, vict, TO_CHAR);
 				act("@C$n@W bites your face!@n", TRUE, ch, 0, vict, TO_VICT);
 				act("@c$n@W bites into $N's face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-				if (GET_BONUS(ch, BONUS_SOFT)) {
+				if (char_get_bonuses(ch, BONUS_SOFT)) {
 					dmg *= calc_critical(ch, 2);
 				}
 				hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -10429,7 +10429,7 @@ ACMD(do_bite)
 				act("@WYou bite @C$N's@W body!@n", TRUE, ch, 0, vict, TO_CHAR);
 				act("@C$n@W bites you on the body, sending blood flying!@n", TRUE, ch, 0, vict, TO_VICT);
 				act("@C$n@W bites @c$N@W on the body, sending blood flying!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-				if (GET_BONUS(ch, BONUS_SOFT)) {
+				if (char_get_bonuses(ch, BONUS_SOFT)) {
 					dmg *= calc_critical(ch, 2);
 				}
 				hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -10456,11 +10456,11 @@ ACMD(do_bite)
 				break;
 			}
 			if (!char_is_npc(ch)) {
-				if (axion_dice(0) > GET_CON(vict) && rand_number(1, 5) == 5) {
+				if (axion_dice(0) > char_get_aff_abils_con(vict) && rand_number(1, 5) == 5) {
 					act("@R$N@r was poisoned by your bite!@n", TRUE, ch, 0, vict, TO_CHAR);
 					act("@rYou were poisoned by the bite!@n", TRUE, ch, 0, vict, TO_VICT);
 					vict->poisonby = ch;
-					int duration = (GET_INT(ch) / 50) + 1;
+					int duration = (char_get_aff_abils_intel(ch) / 50) + 1;
 					assign_affect(vict, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
 				}
 			}
@@ -10477,7 +10477,7 @@ ACMD(do_bite)
 		if (obj_flagged(obj, ITEM_BROKEN)) {
 			return;
 		}
-		dmg = ((GET_HIT(ch) / 10000) + (GET_STR(ch)));
+		dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
 		act("@C$n@W bites $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
 		hurt(0, 0, ch, NULL, obj, dmg, 0);
 		pcost(ch, 0, stcost);
@@ -10512,12 +10512,12 @@ ACMD(do_kiball)
    return;
   }
 
- if (GET_EQ(ch, WEAR_WIELD1) && GET_EQ(ch, WEAR_WIELD2)) {
+ if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
   send_to_char(ch, "Your hands are full!\r\n");
   return;
  }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
@@ -10538,8 +10538,8 @@ ACMD(do_kiball)
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (!frompool && GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (!frompool && GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
    // log("Log 2 - attperc: %f, minimum: %f, charge: %" I64T "", attperc, minimum, GET_CHARGE(ch));
@@ -10557,7 +10557,7 @@ ACMD(do_kiball)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_KIBALL, 0);
@@ -10617,8 +10617,8 @@ ACMD(do_kiball)
       /*      User/target/skill name/skill/hurt type */
      pcost(ch, attperc, 0);
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 98) {
-      ROOM_DAMAGE(IN_ROOM(ch)) += 2;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 98) {
+      rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (2));
      }
      
      return;
@@ -10645,8 +10645,8 @@ ACMD(do_kiball)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 98) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 2;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 98) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (2));
      }
      improve_skill(vict, SKILL_DODGE, 0);
      pcost(ch, attperc, 0);
@@ -10689,7 +10689,7 @@ ACMD(do_kiball)
       act("@WYou hold out your hand towards @C$N@W, and fire a bright yellow kiball! The kiball slams into $M quickly and explodes with roaring light!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@c$n@W holds out $s hand towards you, and fires a bright yellow kiball! The kiball slams into you quickly and explodes with roaring light!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@c$n@W holds out $s hand towards @C$N@W, and fires a bright yellow kiball! The kiball slams into $M quickly and explodes with roaring light!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (GET_BONUS(ch, BONUS_SOFT)) {
+      if (char_get_bonuses(ch, BONUS_SOFT)) {
        dmg *= calc_critical(ch, 2);
       }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -10709,7 +10709,7 @@ ACMD(do_kiball)
       act("@WYou hold out your hand towards @C$N@W, and fire a bright yellow kiball! The kiball slams into $S body and explodes with a loud roar!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@c$n@W holds out $s hand towards you, and fires a bright yellow kiball! The kiball slams into your body and explodes with a loud roar!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@c$n@W holds out $s hand towards @C$N@W, and fires a bright yellow kiball! The kiball slams into $S body and explodes with a loud roar!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -10789,20 +10789,20 @@ ACMD(do_beam)
    return;
   }
 
- if (GET_EQ(ch, WEAR_WIELD1) && GET_EQ(ch, WEAR_WIELD2)) {
+ if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
   send_to_char(ch, "Your hands are full!\r\n");
   return;
  }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -10819,7 +10819,7 @@ ACMD(do_beam)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_BEAM, 0);
@@ -10858,8 +10858,8 @@ ACMD(do_beam)
       /*      User/target/skill name/skill/hurt type */
      pcost(ch, attperc, 0);
 
-      if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+      if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
       }
      
      return;
@@ -10886,8 +10886,8 @@ ACMD(do_beam)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
      pcost(ch, attperc, 0);
@@ -10924,7 +10924,7 @@ ACMD(do_beam)
       act("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S chest!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your chest!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's chest!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -10944,7 +10944,7 @@ ACMD(do_beam)
       act("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -11057,20 +11057,20 @@ ACMD(do_kiblast)
    return;
   }
 
- if (GET_EQ(ch, WEAR_WIELD1) && GET_EQ(ch, WEAR_WIELD2)) {
+ if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
   send_to_char(ch, "Your hands are full!\r\n");
   return;
  }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
 
   if(!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > GET_CHARGE(ch)) {
-   attperc = (long double)(GET_CHARGE(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
+   attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
   }
 
   if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
@@ -11089,7 +11089,7 @@ ACMD(do_kiblast)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_KIBLAST, 0);
@@ -11145,8 +11145,8 @@ ACMD(do_kiblast)
       /*      User/target/skill name/skill/hurt type */
      pcost(ch, attperc, 0);
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-      ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+      rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      
      return;
@@ -11173,8 +11173,8 @@ ACMD(do_kiblast)
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
 
-     if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-       ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
+       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
      }
      improve_skill(vict, SKILL_DODGE, 0);
      pcost(ch, attperc, 0);
@@ -11221,7 +11221,7 @@ ACMD(do_kiblast)
       act("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large kiblast that slams into $S chest!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large kiblast that slams into your chest!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large kiblast that slams into $N@W's chest!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -11241,7 +11241,7 @@ ACMD(do_kiblast)
       act("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large kiblast that slams into $S gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large kiblast that slams into your gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large kiblast that slams into $N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -11325,12 +11325,12 @@ ACMD(do_slam)
    return;
   }
 
- if (GET_EQ(ch, WEAR_WIELD1) && GET_EQ(ch, WEAR_WIELD2)) {
+ if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
   send_to_char(ch, "Your hands are full!\r\n");
   return;
  }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
@@ -11343,7 +11343,7 @@ ACMD(do_slam)
  if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  if (char_is_bardock(ch)) {
-  if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+  if (char_get_skills_base(ch, SKILL_STYLE) >= 75)
    handle_cooldown(ch, 7);
   else
    handle_cooldown(ch, 9);
@@ -11356,7 +11356,7 @@ ACMD(do_slam)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_SLAM, 1);
@@ -11365,7 +11365,7 @@ ACMD(do_slam)
   perc = chance_to_hit(ch);
 
   if (char_is_kabito(ch) && !char_is_npc(ch)) {
-   if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+   if (char_get_skills_base(ch, SKILL_STYLE) >= 75)
     perc -= perc * 0.2;
   }
 
@@ -11378,8 +11378,8 @@ ACMD(do_slam)
   prob -= avo;
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
   if(!tech_handle_zanzoken(ch, vict, "slam")) {
-      COMBO(ch) = -1;
-      COMBHITS(ch) = 0;
+      char_set_combo(ch, -1);
+      char_set_combhits(ch, 0);
       pcost(ch, 0, stcost / 2);
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
       return;
@@ -11452,7 +11452,7 @@ ACMD(do_slam)
       act("@WYou disappear, appearing above @C$N@W and slam a double fisted blow into $M!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W disappears, only to appear above you, slamming a double fisted blow into you!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@c$n@W disappears, only to appear above @C$N@W, slamming a double fisted blow into $M!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -11470,14 +11470,14 @@ ACMD(do_slam)
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
         setStatusKnockedOut(vict);
        }
-       else if ((GET_POS(vict) == POS_STANDING || GET_POS(vict) == POS_FIGHTING) && !char_aff_flagged(vict, AFF_KNOCKED)) {
-        GET_POS(vict) = POS_SITTING;
+       else if ((char_get_position(vict) == POS_STANDING || char_get_position(vict) == POS_FIGHTING) && !char_aff_flagged(vict, AFF_KNOCKED)) {
+        char_set_position(vict, POS_SITTING);
        }
-       if (ROOM_DAMAGE(IN_ROOM(vict)) <= 95 && !rroom_flagged(IN_ROOM(vict), ROOM_SPACE)) {
+       if (rroom_get_dmg(char_get_in_room(vict)) <= 95 && !rroom_flagged(char_get_in_room(vict), ROOM_SPACE)) {
          act("@W$N@W slams into the ground forming a large crater with $S body!@n", TRUE, ch, 0, vict, TO_CHAR);
          act("@WYou slam into the ground forming a large crater with your body!@n", TRUE, ch, 0, vict, TO_VICT);
          act("@W$N@W slams into the ground forming a large crater with $S body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      if (rroom_sect(IN_ROOM(vict)) != SECT_INSIDE && rroom_sect(IN_ROOM(vict)) != SECT_UNDERWATER && rroom_sect(IN_ROOM(vict)) != SECT_WATER_SWIM && rroom_sect(IN_ROOM(vict)) != SECT_WATER_NOSWIM) {
+      if (rroom_sect(char_get_in_room(vict)) != SECT_INSIDE && rroom_sect(char_get_in_room(vict)) != SECT_UNDERWATER && rroom_sect(char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(char_get_in_room(vict)) != SECT_WATER_NOSWIM) {
          impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
        switch (rand_number(1, 8)) {
         case 1:
@@ -11485,8 +11485,8 @@ ACMD(do_slam)
          act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, vict, TO_ROOM);
         break;
         case 2:
-         if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(vict)) == 0) {
-         ROOM_EFFECT(IN_ROOM(vict)) = 1;
+         if (rand_number(1, 4) == 4 && rroom_get_geffect(char_get_in_room(vict)) == 0) {
+         rroom_set_geffect(char_get_in_room(vict), 1);
          act("Lava leaks up through cracks in the crater!", TRUE, ch, 0, vict, TO_CHAR);
          act("Lava leaks up through cracks in the crater!", TRUE, ch, 0, vict, TO_ROOM);
          }
@@ -11511,7 +11511,7 @@ ACMD(do_slam)
 	break;
        }
       }
-      if (rroom_sect(IN_ROOM(vict)) == SECT_UNDERWATER) {
+      if (rroom_sect(char_get_in_room(vict)) == SECT_UNDERWATER) {
        switch (rand_number(1, 3)) {
         case 1:
          act("The water churns violently!", TRUE, ch, 0, vict, TO_CHAR);
@@ -11527,7 +11527,7 @@ ACMD(do_slam)
          break;
        }
       }
-      if (rroom_sect(IN_ROOM(vict)) == SECT_WATER_SWIM || rroom_sect(IN_ROOM(vict)) == SECT_WATER_NOSWIM) {
+      if (rroom_sect(char_get_in_room(vict)) == SECT_WATER_SWIM || rroom_sect(char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
        switch (rand_number(1, 3)) {
         case 1:
          act("A huge column of water erupts from the impact!", TRUE, ch, 0, vict, TO_CHAR);
@@ -11543,7 +11543,7 @@ ACMD(do_slam)
          break;
        }
       }
-      if (rroom_sect(IN_ROOM(vict)) == SECT_INSIDE) {
+      if (rroom_sect(char_get_in_room(vict)) == SECT_INSIDE) {
          impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
        switch (rand_number(1, 8)) {
         case 1:
@@ -11575,7 +11575,7 @@ ACMD(do_slam)
 	break;
        }
       }
-         ROOM_DAMAGE(IN_ROOM(vict)) += 5;
+         rroom_set_dmg(char_get_in_room(vict), rroom_get_dmg(char_get_in_room(vict)) + (5));
 	}
       hurt(0, 0, ch, vict, NULL, dmg, 0);
       dam_eq_loc(vict, 3);
@@ -11585,7 +11585,7 @@ ACMD(do_slam)
       act("@WYou fly at @C$N@W, slamming both your fists into $S gut as you fly!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W flies at you, slamming both $s fists into your gut as $e flies!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@c$n@W flies at @C$N@W, slamming both $s fists into $S gut as $e flies!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -11626,7 +11626,7 @@ ACMD(do_slam)
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
-   dmg = ((GET_HIT(ch) / 10000) + (GET_STR(ch)));
+   dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
    act("@WYou slam $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
    act("@C$n@W slams $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
    hurt(0, 0, ch, NULL, obj, dmg, 0);
@@ -11662,12 +11662,12 @@ ACMD(do_uppercut)
    return;
   }
 
- if (GET_EQ(ch, WEAR_WIELD1) && GET_EQ(ch, WEAR_WIELD2)) {
+ if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
   send_to_char(ch, "Your hands are full!\r\n");
   return;
  }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
@@ -11681,7 +11681,7 @@ ACMD(do_uppercut)
  if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  if (char_is_frieza(ch)) {
-  if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+  if (char_get_skills_base(ch, SKILL_STYLE) >= 75)
    handle_cooldown(ch, 5);
   else
    handle_cooldown(ch, 7);
@@ -11693,7 +11693,7 @@ ACMD(do_uppercut)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_UPPERCUT, 1);
@@ -11702,7 +11702,7 @@ ACMD(do_uppercut)
   perc = chance_to_hit(ch);
 
   if (char_is_kabito(ch) && !char_is_npc(ch)) {
-   if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+   if (char_get_skills_base(ch, SKILL_STYLE) >= 75)
     perc -= perc * 0.2;
   }
 
@@ -11716,8 +11716,8 @@ ACMD(do_uppercut)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "uppercut")) {
-      COMBO(ch) = -1;
-      COMBHITS(ch) = 0;
+      char_set_combo(ch, -1);
+      char_set_combhits(ch, 0);
       pcost(ch, 0, stcost / 2);
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
       return;
@@ -11790,7 +11790,7 @@ ACMD(do_uppercut)
       act("@WYou leap up and launch an uppercut into @C$N's@W body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W leaps up and launches an uppercut into your body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@c$n@W leaps up and launches an uppercut into @C$N's@W body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -11816,7 +11816,7 @@ ACMD(do_uppercut)
       act("@WYou uppercut @C$N@W, hitting $M directly in chest!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W uppercuts you, hitting you directly in the chest!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@c$n@W uppercuts @C$N@W, hitting $M directly in the chest!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -11857,7 +11857,7 @@ ACMD(do_uppercut)
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
-   dmg = ((GET_HIT(ch) / 10000) + (GET_STR(ch)));
+   dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
    act("@WYou uppercut $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
    act("@C$n@W uppercuts $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
    hurt(0, 0, ch, NULL, obj, dmg, 0);
@@ -11893,7 +11893,7 @@ ACMD(do_tailwhip)
    return;
  }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
@@ -11912,7 +11912,7 @@ ACMD(do_tailwhip)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_TAILWHIP, 1);
@@ -11921,7 +11921,7 @@ ACMD(do_tailwhip)
   perc = chance_to_hit(ch);
 
   if (char_is_kabito(ch) && !char_is_npc(ch)) {
-   if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+   if (char_get_skills_base(ch, SKILL_STYLE) >= 75)
     perc -= perc * 0.2;
   }
 
@@ -12007,10 +12007,10 @@ ACMD(do_tailwhip)
       act("@WYou spin to swing your tail and slam it into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W spins to swing $s tail and slams it into YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W spins to swing $s tail and slams it into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       if (!char_aff_flagged(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING && rand_number(1, 8) >= 7) {
+       if (!char_aff_flagged(vict, AFF_FLYING) && char_get_position(vict) == POS_STANDING && rand_number(1, 8) >= 7) {
         handle_knockdown(vict);
        }
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -12021,7 +12021,7 @@ ACMD(do_tailwhip)
       act("@WYou flip forward and slam your tail into the top of @c$N@W's head brutally!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W flips forward and slams $s tail into the top of YOUR head brutally!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W flips forward and slams $s tail into the top of @c$N@W's head brutally!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       if (!char_aff_flagged(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING && rand_number(1, 8) >= 6) {
+       if (!char_aff_flagged(vict, AFF_FLYING) && char_get_position(vict) == POS_STANDING && rand_number(1, 8) >= 6) {
         handle_knockdown(vict);
        }
       dmg *= calc_critical(ch, 0);
@@ -12033,10 +12033,10 @@ ACMD(do_tailwhip)
       act("@WYou swing your tail and manage to slam it into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W swings $s tail and manages to slam it into YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W swings $s tail and manages to slam it into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       if (!char_aff_flagged(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING && rand_number(1, 8) >= 7) {
+       if (!char_aff_flagged(vict, AFF_FLYING) && char_get_position(vict) == POS_STANDING && rand_number(1, 8) >= 7) {
         handle_knockdown(vict);
        }
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -12077,7 +12077,7 @@ ACMD(do_tailwhip)
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
-   dmg = ((GET_HIT(ch) / 10000) + (GET_STR(ch)));
+   dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
    act("@WYou tailwhip $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
    act("@C$n@W tailwhips $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
    hurt(0, 0, ch, NULL, obj, dmg, 0);
@@ -12111,23 +12111,23 @@ ACMD(do_roundhouse)
 
   if (!limb_ok(ch, 1)) {
    return;
-  } else if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50 && GET_LIMBCOND(ch, 4) < 0) {
+  } else if (char_get_limb_condition(ch, (3)-1) > 0 && char_get_limb_condition(ch, (3)-1) < 50 && char_get_limb_condition(ch, (4)-1) < 0) {
    send_to_char(ch, "Using your broken right leg has damaged it more!@n\r\n");
-   GET_LIMBCOND(ch, 3) -= rand_number(3, 5);
-   if (GET_LIMBCOND(ch, 3) < 0) {
+   char_set_limb_condition(ch, (3)-1, char_get_limb_condition(ch, (3)-1) - (rand_number(3, 5)));
+   if (char_get_limb_condition(ch, (3)-1) < 0) {
     act("@RYour right leg has fallen apart!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@r$n@R's right leg has fallen apart!@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-  } else if (GET_LIMBCOND(ch, 4) > 0 && GET_LIMBCOND(ch, 4) < 50 && GET_LIMBCOND(ch, 3) < 0) {
+  } else if (char_get_limb_condition(ch, (4)-1) > 0 && char_get_limb_condition(ch, (4)-1) < 50 && char_get_limb_condition(ch, (3)-1) < 0) {
    send_to_char(ch, "Using your broken left leg has damaged it more!@n\r\n");
-   GET_LIMBCOND(ch, 4) -= rand_number(3, 5);
-   if (GET_LIMBCOND(ch, 4) < 0) {
+   char_set_limb_condition(ch, (4)-1, char_get_limb_condition(ch, (4)-1) - (rand_number(3, 5)));
+   if (char_get_limb_condition(ch, (4)-1) < 0) {
     act("@RYour left leg has fallen apart!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@r$n@R's left leg has fallen apart!@n", TRUE, ch, 0, 0, TO_ROOM);
    }
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
@@ -12141,7 +12141,7 @@ ACMD(do_roundhouse)
  if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
  if (char_is_nail(ch)) {
-  if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+  if (char_get_skills_base(ch, SKILL_STYLE) >= 75)
    handle_cooldown(ch, 5);
   else
    handle_cooldown(ch, 7);
@@ -12153,7 +12153,7 @@ ACMD(do_roundhouse)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_ROUNDHOUSE, 1);
@@ -12162,7 +12162,7 @@ ACMD(do_roundhouse)
   perc = chance_to_hit(ch);
 
   if (char_is_kabito(ch) && !char_is_npc(ch)) {
-   if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+   if (char_get_skills_base(ch, SKILL_STYLE) >= 75)
     perc -= perc * 0.2;
   }
 
@@ -12176,8 +12176,8 @@ ACMD(do_roundhouse)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "roundhouse")) {
-      COMBO(ch) = -1;
-      COMBHITS(ch) = 0;
+      char_set_combo(ch, -1);
+      char_set_combhits(ch, 0);
       pcost(ch, 0, stcost / 2);
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
       return;
@@ -12250,7 +12250,7 @@ ACMD(do_roundhouse)
       act("@WYou spin in mid air and land a kick into @C$N's@W body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W spins in mid air and lands a kick into your body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@c$n@W spins in mid air and lands a kick into @C$N's@W body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -12261,7 +12261,7 @@ ACMD(do_roundhouse)
       act("@WYou spin a fierce roundhouse into @C$N's@W gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W spins a fierce roundhouse into your gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@c$n@W spins a fierce roundhouse into @C$N's@W gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       if (!char_aff_flagged(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING && rand_number(1, 8) >= 7) {
+       if (!char_aff_flagged(vict, AFF_FLYING) && char_get_position(vict) == POS_STANDING && rand_number(1, 8) >= 7) {
         handle_knockdown(vict);
        }
       dmg *= calc_critical(ch, 0);
@@ -12273,7 +12273,7 @@ ACMD(do_roundhouse)
       act("@WYou throw a roundhouse at @C$N@W, hitting $M directly in the neck!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W throws a roundhouse at you, hitting YOU directly in the neck!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@c$n@W throws a roundhouse at @C$N@W, hitting $M directly in the face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -12314,7 +12314,7 @@ ACMD(do_roundhouse)
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
-   dmg = ((GET_HIT(ch) / 10000) + (GET_STR(ch)));
+   dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
    act("@WYou roundhouse $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
    act("@C$n@W roundhouses $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
    hurt(0, 0, ch, NULL, obj, dmg, 0);
@@ -12350,12 +12350,12 @@ ACMD(do_elbow)
    return;
   }
 
- if (GET_EQ(ch, WEAR_WIELD1) && GET_EQ(ch, WEAR_WIELD2)) {
+ if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
   send_to_char(ch, "Your hands are full!\r\n");
   return;
  }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
@@ -12374,7 +12374,7 @@ ACMD(do_elbow)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_ELBOW, 0);
@@ -12384,7 +12384,7 @@ ACMD(do_elbow)
   perc = chance_to_hit(ch);
 
   if (char_is_kabito(ch) && !char_is_npc(ch)) {
-   if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+   if (char_get_skills_base(ch, SKILL_STYLE) >= 75)
     perc -= perc * 0.2;
   }
 
@@ -12398,8 +12398,8 @@ ACMD(do_elbow)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "elbow")) {
-      COMBO(ch) = -1;
-      COMBHITS(ch) = 0;
+      char_set_combo(ch, -1);
+      char_set_combhits(ch, 0);
       pcost(ch, 0, stcost / 2);
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
       return;
@@ -12472,7 +12472,7 @@ ACMD(do_elbow)
       act("@WYou slam your elbow into @C$N's@W body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W slams $s elbow into your body!@n", TRUE, ch, 0, vict, TO_VICT); 
       act("@c$n@W slams $s elbow into @C$N's@W body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -12492,7 +12492,7 @@ ACMD(do_elbow)
       act("@WYou land your elbow against @C$N's@W gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W lands $s elbow against your gut!@n", TRUE, ch, 0, vict, TO_VICT); 
       act("@C$n@W lands $s elbow against @C$N's@W gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -12530,7 +12530,7 @@ ACMD(do_elbow)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   dmg = ((GET_HIT(ch) / 10000) + (GET_STR(ch)));
+   dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
    act("@WYou elbow stike $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
    act("@C$n@W elbow strikes $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
    hurt(0, 0, ch, NULL, obj, dmg, 0);
@@ -12565,23 +12565,23 @@ ACMD(do_kick)
 
   if (!limb_ok(ch, 1)) {
    return;
-  } else if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50 && GET_LIMBCOND(ch, 4) < 0) {
+  } else if (char_get_limb_condition(ch, (3)-1) > 0 && char_get_limb_condition(ch, (3)-1) < 50 && char_get_limb_condition(ch, (4)-1) < 0) {
    send_to_char(ch, "Using your broken right leg has damaged it more!@n\r\n");
-   GET_LIMBCOND(ch, 3) -= rand_number(3, 5);
-   if (GET_LIMBCOND(ch, 3) < 0) {
+   char_set_limb_condition(ch, (3)-1, char_get_limb_condition(ch, (3)-1) - (rand_number(3, 5)));
+   if (char_get_limb_condition(ch, (3)-1) < 0) {
     act("@RYour right leg has fallen apart!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@r$n@R's right leg has fallen apart!@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-  } else if (GET_LIMBCOND(ch, 4) > 0 && GET_LIMBCOND(ch, 4) < 50 && GET_LIMBCOND(ch, 3) < 0) {
+  } else if (char_get_limb_condition(ch, (4)-1) > 0 && char_get_limb_condition(ch, (4)-1) < 50 && char_get_limb_condition(ch, (3)-1) < 0) {
    send_to_char(ch, "Using your broken left leg has damaged it more!@n\r\n");
-   GET_LIMBCOND(ch, 4) -= rand_number(3, 5);
-   if (GET_LIMBCOND(ch, 4) < 0) {
+   char_set_limb_condition(ch, (4)-1, char_get_limb_condition(ch, (4)-1) - (rand_number(3, 5)));
+   if (char_get_limb_condition(ch, (4)-1) < 0) {
     act("@RYour left leg has fallen apart!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@r$n@R's left leg has fallen apart!@n", TRUE, ch, 0, 0, TO_ROOM);
    }
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
@@ -12600,7 +12600,7 @@ ACMD(do_kick)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_KICK, 0);
@@ -12609,7 +12609,7 @@ ACMD(do_kick)
   perc = chance_to_hit(ch);
 
   if (char_is_kabito(ch) && !char_is_npc(ch)) {
-   if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+   if (char_get_skills_base(ch, SKILL_STYLE) >= 75)
     perc -= perc * 0.2;
   }
 
@@ -12623,8 +12623,8 @@ ACMD(do_kick)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "kick")) {
-      COMBO(ch) = -1;
-      COMBHITS(ch) = 0;
+      char_set_combo(ch, -1);
+      char_set_combhits(ch, 0);
       pcost(ch, 0, stcost / 2);
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
       return;
@@ -12698,7 +12698,7 @@ ACMD(do_kick)
       act("@WYou slam your foot into @C$N's@W body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W slams $s foot into your body!@n", TRUE, ch, 0, vict, TO_VICT); 
       act("@c$n@W slams $s foot into @C$N's@W body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -12718,7 +12718,7 @@ ACMD(do_kick)
       act("@WYou land your foot against @C$N's@W gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W lands $s foot against your gut!@n", TRUE, ch, 0, vict, TO_VICT); 
       act("@C$n@W lands $s foot against @C$N's@W gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -12755,7 +12755,7 @@ ACMD(do_kick)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   dmg = ((GET_HIT(ch) / 10000) + (GET_STR(ch)));
+   dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
    act("@WYou kick $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
    act("@C$n@W kicks $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
    hurt(0, 0, ch, NULL, obj, dmg, 0);
@@ -12790,23 +12790,23 @@ ACMD(do_knee)
 
   if (!limb_ok(ch, 1)) {
    return;
-  } else if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50 && GET_LIMBCOND(ch, 4) < 0) {
+  } else if (char_get_limb_condition(ch, (3)-1) > 0 && char_get_limb_condition(ch, (3)-1) < 50 && char_get_limb_condition(ch, (4)-1) < 0) {
    send_to_char(ch, "Using your broken right leg has damaged it more!@n\r\n");
-   GET_LIMBCOND(ch, 3) -= rand_number(3, 5);
-   if (GET_LIMBCOND(ch, 3) < 0) {
+   char_set_limb_condition(ch, (3)-1, char_get_limb_condition(ch, (3)-1) - (rand_number(3, 5)));
+   if (char_get_limb_condition(ch, (3)-1) < 0) {
     act("@RYour right leg has fallen apart!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@r$n@R's right leg has fallen apart!@n", TRUE, ch, 0, 0, TO_ROOM);
    }
-  } else if (GET_LIMBCOND(ch, 4) > 0 && GET_LIMBCOND(ch, 4) < 50 && GET_LIMBCOND(ch, 3) < 0) {
+  } else if (char_get_limb_condition(ch, (4)-1) > 0 && char_get_limb_condition(ch, (4)-1) < 50 && char_get_limb_condition(ch, (3)-1) < 0) {
    send_to_char(ch, "Using your broken left leg has damaged it more!@n\r\n");
-   GET_LIMBCOND(ch, 4) -= rand_number(3, 5);
-   if (GET_LIMBCOND(ch, 4) < 0) {
+   char_set_limb_condition(ch, (4)-1, char_get_limb_condition(ch, (4)-1) - (rand_number(3, 5)));
+   if (char_get_limb_condition(ch, (4)-1) < 0) {
     act("@RYour left leg has fallen apart!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@r$n@R's left leg has fallen apart!@n", TRUE, ch, 0, 0, TO_ROOM);
    }
   }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
@@ -12825,7 +12825,7 @@ ACMD(do_knee)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_KNEE, 0);
@@ -12834,7 +12834,7 @@ ACMD(do_knee)
   perc = chance_to_hit(ch);
 
   if (char_is_kabito(ch) && !char_is_npc(ch)) {
-   if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+   if (char_get_skills_base(ch, SKILL_STYLE) >= 75)
     perc -= perc * 0.2;
   }
 
@@ -12848,8 +12848,8 @@ ACMD(do_knee)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "knee strike")) {
-      COMBO(ch) = -1;
-      COMBHITS(ch) = 0;
+      char_set_combo(ch, -1);
+      char_set_combhits(ch, 0);
       pcost(ch, 0, stcost / 2);
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
       return;
@@ -12922,7 +12922,7 @@ ACMD(do_knee)
       act("@WYou slam your knee into @C$N's@W body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W slams $s knee into your body!@n", TRUE, ch, 0, vict, TO_VICT); 
       act("@c$n@W slams $s knee into @C$N's@W body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -12942,7 +12942,7 @@ ACMD(do_knee)
       act("@WYou land your knee against @C$N's@W gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W lands $s knee against your gut!@n", TRUE, ch, 0, vict, TO_VICT); 
       act("@C$n@W lands $s knee against @C$N's@W gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -12979,7 +12979,7 @@ ACMD(do_knee)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   dmg = ((GET_HIT(ch) / 10000) + (GET_STR(ch)));
+   dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
    act("@WYou knee stike $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
    act("@C$n@W knee strikes $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
    hurt(0, 0, ch, NULL, obj, dmg, 0);
@@ -13016,12 +13016,12 @@ ACMD(do_punch)
    return;
   }
 
- if (GET_EQ(ch, WEAR_WIELD1) && GET_EQ(ch, WEAR_WIELD2)) {
+ if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
   send_to_char(ch, "Your hands are full!\r\n");
   return;
  }
 
-  if (!*arg && !FIGHTING(ch)) {
+  if (!*arg && !char_get_fighting(ch)) {
    send_to_char(ch, "Direct it at who?\r\n");
    return;
   }
@@ -13039,7 +13039,7 @@ ACMD(do_punch)
    return;
   }
   if (handle_defender(vict, ch)) {
-   struct char_data *def = GET_DEFENDER(vict);
+   struct char_data *def = char_get_defender(vict);
    vict = def;
   }
   improve_skill(ch, SKILL_PUNCH, 0);
@@ -13048,7 +13048,7 @@ ACMD(do_punch)
   perc = chance_to_hit(ch);
 
   if (char_is_kabito(ch) && !char_is_npc(ch)) {
-   if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
+   if (char_get_skills_base(ch, SKILL_STYLE) >= 75)
     perc -= perc * 0.2;
   }
 
@@ -13063,8 +13063,8 @@ ACMD(do_punch)
   tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "punch")) {
-      COMBO(ch) = -1;
-      COMBHITS(ch) = 0;
+      char_set_combo(ch, -1);
+      char_set_combhits(ch, 0);
       pcost(ch, 0, stcost / 2);
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
       return;
@@ -13132,7 +13132,7 @@ ACMD(do_punch)
       act("@WYou slam your fist into @C$N's@W body!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W slams $s fist into your body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@c$n@W slams $s fist into @C$N's@W body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -13152,7 +13152,7 @@ ACMD(do_punch)
       act("@WYou punch @C$N@W directly in the gut!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W punches you directly in the gut!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@c$n@W punches @C$N@W directly in the gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-         if (GET_BONUS(ch, BONUS_SOFT)) {
+         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
          }
       hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -13193,7 +13193,7 @@ ACMD(do_punch)
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
-   dmg = ((GET_HIT(ch) / 10000) + (GET_STR(ch)));
+   dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
    act("@WYou punch $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
    act("@C$n@W punches $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
    hurt(0, 0, ch, NULL, obj, dmg, 0);
@@ -13236,11 +13236,11 @@ ACMD(do_charge)
    send_to_char(ch, "[ 1 - 100 | cancel | release]\r\n");
    return;
   }
-  else if (!strcasecmp("release", arg) && (char_plr_flagged(ch, PLR_CHARGE) && GET_CHARGE(ch) <= 0)) {
+  else if (!strcasecmp("release", arg) && (char_plr_flagged(ch, PLR_CHARGE) && char_get_charge(ch) <= 0)) {
   send_to_char(ch, "Try cancel instead, you have nothing charged up yet!\r\n");
    return;
   }
-  else if (!strcasecmp("release", arg) && (char_plr_flagged(ch, PLR_CHARGE) && GET_CHARGE(ch) > 0)) {
+  else if (!strcasecmp("release", arg) && (char_plr_flagged(ch, PLR_CHARGE) && char_get_charge(ch) > 0)) {
   send_to_char(ch, "You stop charging and release your pent up energy.\r\n");
    switch (rand_number(1, 3)) {
     case 1:
@@ -13256,13 +13256,13 @@ ACMD(do_charge)
      act("$n@w's aura disappears.@n", TRUE, ch, 0, 0, TO_ROOM);
      break;
    }
-   incCurKI(ch, GET_CHARGE(ch), true);
-   GET_CHARGE(ch) = 0;
-   GET_CHARGETO(ch) = 0;
-   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+   incCurKI(ch, char_get_charge(ch), true);
+   char_set_charge(ch, 0);
+   char_set_chargeto(ch, 0);
+   REMOVE_BIT_AR(char_get_act(ch), PLR_CHARGE);
    return;
   }
-  else if (!strcasecmp("release", arg) && GET_CHARGE(ch) > 0) {
+  else if (!strcasecmp("release", arg) && char_get_charge(ch) > 0) {
   send_to_char(ch, "You release your pent up energy.\r\n");
    switch (rand_number(1, 3)) {
     case 1:
@@ -13278,9 +13278,9 @@ ACMD(do_charge)
      act("$n@w's aura disappears.@n", TRUE, ch, 0, 0, TO_ROOM);
      break;
    }
-   incCurKI(ch, GET_CHARGE(ch), true);
-   GET_CHARGE(ch) = 0;
-   GET_CHARGETO(ch) = 0;
+   incCurKI(ch, char_get_charge(ch), true);
+   char_set_charge(ch, 0);
+   char_set_chargeto(ch, 0);
    return;
   }
   else if (!strcasecmp("cancel", arg) && char_plr_flagged(ch, PLR_CHARGE)) {
@@ -13299,8 +13299,8 @@ ACMD(do_charge)
      act("$n@w's aura disappears.@n", TRUE, ch, 0, 0, TO_ROOM);
      break;
    }
-   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
-   GET_CHARGETO(ch) = 0;
+   REMOVE_BIT_AR(char_get_act(ch), PLR_CHARGE);
+   char_set_chargeto(ch, 0);
    return;
   }
   else if (!strcasecmp("cancel", arg) && !char_plr_flagged(ch, PLR_CHARGE)) {
@@ -13337,26 +13337,26 @@ ACMD(do_charge)
        spiritcost = GET_MAX_MANA(ch) * 0.01;
       }
       reveal_hiding(ch, 0);
-      send_to_char(ch, "Your %s colored aura flashes up around you as you instantly take control of the ki you needed!\r\n", aura_types[GET_AURA(ch)]);
+      send_to_char(ch, "Your %s colored aura flashes up around you as you instantly take control of the ki you needed!\r\n", aura_types[char_get_aura(ch)]);
       send_to_char(ch, "@D[@RCost@D: @r%s@D]@n\r\n", add_commas(spiritcost));
       char bloom[MAX_INPUT_LENGTH];
-      sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", aura_types[GET_AURA(ch)]);
+      sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
       act(bloom, TRUE, ch, 0, 0, TO_ROOM);
-      GET_CHARGE(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff;
+      char_set_charge(ch, (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff);
       decCurKI(ch, (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff + spiritcost, 0);
      }     
     } else {
      reveal_hiding(ch, 0);
-     send_to_char(ch, "You begin to charge some energy, as a %s aura begins to burn around you!\r\n", aura_types[GET_AURA(ch)]);
+     send_to_char(ch, "You begin to charge some energy, as a %s aura begins to burn around you!\r\n", aura_types[char_get_aura(ch)]);
      char bloom[MAX_INPUT_LENGTH];
-     sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", aura_types[GET_AURA(ch)]);
+     sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
      act(bloom, TRUE, ch, 0, 0, TO_ROOM);
-     GET_CHARGETO(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1);
-     GET_CHARGE(ch) += 1;    
-     SET_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+     char_set_chargeto(ch, (((GET_MAX_MANA(ch) * 0.01) * amt) + 1));
+     char_set_charge(ch, char_get_charge(ch) + (1));    
+     SET_BIT_AR(char_get_act(ch), PLR_CHARGE);
     }
   }
-  else if (amt < 1 && rroom_get_vnum(IN_ROOM(ch)) != 1562) {
+  else if (amt < 1 && rroom_get_vnum(char_get_in_room(ch)) != 1562) {
      send_to_char(ch, "You have set it too low!\r\n");
      return;
   }
@@ -13368,7 +13368,7 @@ ACMD(do_charge)
 ACMD(do_powerup)
 {
   if (char_is_npc(ch)) {
-   SET_BIT_AR(MOB_FLAGS(ch), MOB_POWERUP);
+   SET_BIT_AR(char_get_act(ch), MOB_POWERUP);
     if (GET_MAX_HIT(ch) < 50000) {
      act("@RYou begin to powerup, and air billows outward around you!@n", TRUE, ch, 0, 0, TO_CHAR);
      act("@R$n begins to powerup, and air billows outward around $m!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -13407,13 +13407,13 @@ ACMD(do_powerup)
    send_to_char(ch, "@WYou are an android, you do not powerup.@n");
    return;
    }
-  if (GET_SUPPRESS(ch) > 0) {
-   send_to_char(ch, "@WYou currently have your powerlevel suppressed to %" I64T " percent.@n", GET_SUPPRESS(ch));
+  if (char_get_suppression(ch) > 0) {
+   send_to_char(ch, "@WYou currently have your powerlevel suppressed to %" I64T " percent.@n", char_get_suppression(ch));
    return;
   }
   if (char_plr_flagged(ch, PLR_POWERUP)) {
    send_to_char(ch, "@WYou stop powering up.@n");
-   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
+   REMOVE_BIT_AR(char_get_act(ch), PLR_POWERUP);
    return;
    }
   if (GET_HIT(ch) >= GET_MAX_HIT(ch)) {
@@ -13454,7 +13454,7 @@ ACMD(do_powerup)
      act("@RYou begin to powerup, and the very air around you begins to burn!@n", TRUE, ch, 0, 0, TO_CHAR);
      act("@R$n begins to powerup, and the very air around $m begins to burn!@n", TRUE, ch, 0, 0, TO_ROOM);
     }
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
+    SET_BIT_AR(char_get_act(ch), PLR_POWERUP);
     return;
    }
 }
@@ -13473,12 +13473,12 @@ ACMD(do_rescue)
   send_to_char(ch, "%s", CONFIG_NOPERSON);
  else if (helpee == ch)
   send_to_char(ch, "You can't help yourself any more than this!\r\n");
- else if (!FIGHTING(helpee))
+ else if (!char_get_fighting(helpee))
   send_to_char(ch, "They are not fighting anyone!\r\n");
- else if (FIGHTING(ch) && !char_is_npc(ch))
+ else if (char_get_fighting(ch) && !char_is_npc(ch))
     send_to_char(ch, "You are a little too busy fighting for yourself!\r\n");
  else {
-  opponent = FIGHTING(helpee);
+  opponent = char_get_fighting(helpee);
   int mobbonus = 0;
 
   if (char_is_npc(ch)) {
@@ -13505,7 +13505,7 @@ ACMD(do_assist)
   char arg[MAX_INPUT_LENGTH];
   struct char_data *helpee, *opponent;
 
-  if (FIGHTING(ch)) {
+  if (char_get_fighting(ch)) {
     send_to_char(ch, "You're already fighting!  How can you assist someone else?\r\n");
     return;
   }
@@ -13521,11 +13521,11 @@ ACMD(do_assist)
     /*
      * Hit the same enemy the person you're helping is.
      */
-    if (FIGHTING(helpee))
-      opponent = FIGHTING(helpee);
+    if (char_get_fighting(helpee))
+      opponent = char_get_fighting(helpee);
     else
-      for (opponent = world[IN_ROOM(ch)].people;
-	   opponent && (FIGHTING(opponent) != helpee);
+      for (opponent = world[char_get_in_room(ch)].people;
+	   opponent && (char_get_fighting(opponent) != helpee);
 	   opponent = opponent->next_in_room)
 		;
 
@@ -13539,10 +13539,10 @@ ACMD(do_assist)
       send_to_char(ch, "You join the fight!\r\n");
       act("$N assists you!", 0, helpee, 0, ch, TO_CHAR);
       act("$n assists $N.", TRUE, ch, 0, helpee, TO_NOTVICT);
-      if (!FIGHTING(ch)) {
+      if (!char_get_fighting(ch)) {
        set_fighting(ch, opponent);
       }
-      if (!FIGHTING(opponent)) {
+      if (!char_get_fighting(opponent)) {
        set_fighting(opponent, ch);
       }
     }
@@ -13583,27 +13583,27 @@ ACMD(do_flee)
  
   one_argument(argument, arg);
   
-  if (GET_POS(ch) < POS_RESTING) {
+  if (char_get_position(ch) < POS_RESTING) {
     send_to_char(ch, "You are in pretty bad shape, unable to flee!\r\n");
     return;
   }
 
-  if (GRAPPLING(ch)) {
+  if (char_get_grappling(ch)) {
     send_to_char(ch, "You are grappling with someone!\r\n");
     return;
   }
 
-  if (GRAPPLED(ch)) {
+  if (char_get_grappled(ch)) {
     send_to_char(ch, "You are grappling with someone!\r\n");
     return;
   }
 
-  if (ABSORBING(ch)) {
+  if (char_get_absorbing(ch)) {
     send_to_char(ch, "You are absorbing from someone!\r\n");
     return;
   }
 
-  if (ABSORBBY(ch)) {
+  if (char_get_absorbby(ch)) {
     send_to_char(ch, "You are being absorbed from by someone!\r\n");
     return;
   }
@@ -13611,9 +13611,9 @@ ACMD(do_flee)
   if (!char_is_npc(ch)) {
      int fail = FALSE;
      struct obj_data *obj, *next_obj;
-    for (obj = world[IN_ROOM(ch)].contents; obj; obj = next_obj) {
+    for (obj = world[char_get_in_room(ch)].contents; obj; obj = next_obj) {
       next_obj = obj->next_content;
-      if (KICHARGE(obj) > 0 && USER(obj) == ch) {
+      if (obj_get_kicharge(obj) > 0 && obj_get_user(obj) == ch) {
        fail = TRUE;
       }
     }
@@ -13639,17 +13639,17 @@ ACMD(do_flee)
     attempt = rand_number(0, NUM_OF_DIRS - 1);	/* Select a random direction */
    }
    if (char_can_go(ch, attempt) &&
-	!rroom_flagged(EXIT(ch, attempt)->to_room, ROOM_DEATH)) {
+	!rroom_flagged(char_get_exit(ch, attempt)->to_room, ROOM_DEATH)) {
       act("$n panics, and attempts to flee!", TRUE, ch, 0, 0, TO_ROOM);
-     if (char_is_npc(ch) && rroom_flagged(EXIT(ch, attempt)->to_room, ROOM_NOMOB)) {
+     if (char_is_npc(ch) && rroom_flagged(char_get_exit(ch, attempt)->to_room, ROOM_NOMOB)) {
       return;
      }
-      was_fighting = FIGHTING(ch);
+      was_fighting = char_get_fighting(ch);
 
     struct obj_data *wall;
-    for (wall = world[IN_ROOM(ch)].contents; wall;wall=wall->next_content) {
+    for (wall = world[char_get_in_room(ch)].contents; wall;wall=wall->next_content) {
      if(obj_get_vnum(wall) == 79) {
-      if (GET_OBJ_COST(wall) == attempt) {
+      if (obj_get_cost(wall) == attempt) {
        send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");
        return;
       }
@@ -13660,23 +13660,23 @@ ACMD(do_flee)
      return;
     }
 
-     if (ABSORBING(ch)) {
-      send_to_char(ch, "You are busy absorbing from %s!\r\n", char_get_name(ABSORBING(ch)));
+     if (char_get_absorbing(ch)) {
+      send_to_char(ch, "You are busy absorbing from %s!\r\n", char_get_name(char_get_absorbing(ch)));
       return;
      }
-     if (ABSORBBY(ch)) {
-      if (axion_dice(0) < char_get_skill(ABSORBING(ch), SKILL_ABSORB)) {
-       send_to_char(ch, "You are being held by %s, they are absorbing you!\r\n", char_get_name(ABSORBBY(ch)));
-       send_to_char(ABSORBBY(ch), "%s struggles in your grasp!\r\n", char_get_name(ch));
+     if (char_get_absorbby(ch)) {
+      if (axion_dice(0) < char_get_skill(char_get_absorbing(ch), SKILL_ABSORB)) {
+       send_to_char(ch, "You are being held by %s, they are absorbing you!\r\n", char_get_name(char_get_absorbby(ch)));
+       send_to_char(char_get_absorbby(ch), "%s struggles in your grasp!\r\n", char_get_name(ch));
        WAIT_STATE(ch, PULSE_2SEC);       
        return;
        }
        else {
-        act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_NOTVICT);
-        act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_VICT);
-        act("@c$N@W manages to break loose of your hold!@n", TRUE, ABSORBBY(ch), 0, ch, TO_CHAR);
-        ABSORBING(ABSORBBY(ch)) = NULL;
-        ABSORBBY(ch) = NULL;
+        act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, char_get_absorbby(ch), 0, ch, TO_NOTVICT);
+        act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, char_get_absorbby(ch), 0, ch, TO_VICT);
+        act("@c$N@W manages to break loose of your hold!@n", TRUE, char_get_absorbby(ch), 0, ch, TO_CHAR);
+        char_set_absorbing(char_get_absorbby(ch), NULL);
+        char_set_absorbby(ch, NULL);
        }
       }
       if (do_simple_move(ch, attempt, TRUE)) {

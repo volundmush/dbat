@@ -258,7 +258,7 @@ int Valid_Name(char *newname)
    */
   for (dt = descriptor_list; dt; dt = dt->next)
     if (dt->character && char_get_name(dt->character) && !strcasecmp(char_get_name(dt->character), newname))
-      if (GET_IDNUM(dt->character) == -1)
+      if (char_get_idnum(dt->character) == -1)
         return (desc_is_playing(dt));
 
   /* count wovels */

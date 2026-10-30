@@ -182,13 +182,13 @@ void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
     }
   }
 
-  if (tch != NULL && IN_ROOM(tch) == IN_ROOM(ch)) {
+  if (tch != NULL && char_get_in_room(tch) == char_get_in_room(ch)) {
     if (tch == ch)
       format = "$n closes $s eyes and utters the words, '%s'.";
     else
       format = "$n stares at $N and utters the words, '%s'.";
   } else if (tobj != NULL &&
-	     ((IN_ROOM(tobj) == IN_ROOM(ch)) || (tobj->carried_by == ch)))
+	     ((obj_get_in_room(tobj) == char_get_in_room(ch)) || (tobj->carried_by == ch)))
     format = "$n stares at $p and utters the words, '%s'.";
   else
     format = "$n utters the words, '%s'.";
@@ -196,17 +196,17 @@ void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
   snprintf(buf1, sizeof(buf1), format, skill_name(spellnum));
   snprintf(buf2, sizeof(buf2), format, buf);
 
-  for (i = world[IN_ROOM(ch)].people; i; i = i->next_in_room) {
+  for (i = world[char_get_in_room(ch)].people; i; i = i->next_in_room) {
     if (i == ch || i == tch || !i->desc || !char_is_awake(i))
       continue;
     /* This should really check spell type vs. target ranks */
-    if (char_get_class_ranks(i, char_get_class(ch)) || GET_ADMLEVEL(i) >= ADMLVL_IMMORT)
+    if (char_get_class_ranks(i, char_get_class(ch)) || char_get_admlevel(i) >= ADMLVL_IMMORT)
       perform_act(buf1, ch, tobj, tch, i);
     else
       perform_act(buf2, ch, tobj, tch, i);
   }
 
-  if (tch != NULL && tch != ch && IN_ROOM(tch) == IN_ROOM(ch)) {
+  if (tch != NULL && tch != ch && char_get_in_room(tch) == char_get_in_room(ch)) {
     snprintf(buf1, sizeof(buf1), "$n stares at you and utters the words, '%s'.",
 	    char_get_class_ranks(tch, char_get_class(ch)) ? skill_name(spellnum) : buf);
     act(buf1, FALSE, ch, NULL, tch, TO_VICT);
@@ -279,7 +279,7 @@ int call_magic(struct char_data *caster, struct char_data *cvict,
   if (!cast_mtrigger(caster, cvict, spellnum))
     return 0;
 
-  if (rroom_flagged(IN_ROOM(caster), ROOM_PEACEFUL) && GET_ADMLEVEL(caster) < ADMLVL_IMPL && 
+  if (rroom_flagged(char_get_in_room(caster), ROOM_PEACEFUL) && char_get_admlevel(caster) < ADMLVL_IMPL && 
       (SINFO.violent || IS_SET(SINFO.routines, MAG_DAMAGE))) {
     send_to_char(caster, "A flash of white light fills the room, dispelling your violent magic!\r\n");
     act("White light from no particular source suddenly fills the room, then vanishes.", FALSE, caster, 0, 0, TO_ROOM);
@@ -371,7 +371,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
   k = generic_find(arg, FIND_CHAR_ROOM | FIND_OBJ_INV | FIND_OBJ_ROOM |
 		   FIND_OBJ_EQUIP, ch, &tch, &tobj);
 
-  switch (GET_OBJ_TYPE(obj)) {
+  switch (obj_get_type_flag(obj)) {
   case ITEM_STAFF:
     act("You tap $p three times on the ground.", FALSE, ch, obj, 0, TO_CHAR);
     if (obj->action_description)
@@ -379,14 +379,14 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
     else
       act("$n taps $p three times on the ground.", FALSE, ch, obj, 0, TO_ROOM);
 
-    if (GET_OBJ_VAL(obj, VAL_STAFF_CHARGES) <= 0) {
+    if (obj_get_value(obj, VAL_STAFF_CHARGES) <= 0) {
       send_to_char(ch, "It seems powerless.\r\n");
       act("Nothing seems to happen.", FALSE, ch, obj, 0, TO_ROOM);
     } else {
-      GET_OBJ_VAL(obj, VAL_STAFF_CHARGES)--;
-      SET_BIT_AR(AFF_FLAGS(ch), AFF_NEXTNOACTION);
+      obj_set_value(obj, VAL_STAFF_CHARGES, obj_get_value(obj, VAL_STAFF_CHARGES) - 1);
+      SET_BIT_AR(char_get_affected_by(ch), AFF_NEXTNOACTION);
       /* Level to cast spell at. */
-      k = GET_OBJ_VAL(obj, VAL_STAFF_LEVEL) ? GET_OBJ_VAL(obj, VAL_STAFF_LEVEL) : DEFAULT_STAFF_LVL;
+      k = obj_get_value(obj, VAL_STAFF_LEVEL) ? obj_get_value(obj, VAL_STAFF_LEVEL) : DEFAULT_STAFF_LVL;
 
       /*
        * Problem : Area/mass spells on staves can cause crashes.
@@ -394,16 +394,16 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
        * Problem : People like that behavior.
        * Solution: We special case the area/mass spells here.
        */
-      if (HAS_SPELL_ROUTINE(GET_OBJ_VAL(obj, VAL_STAFF_SPELL), MAG_MASSES | MAG_AREAS)) {
-        for (i = 0, tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room)
+      if (HAS_SPELL_ROUTINE(obj_get_value(obj, VAL_STAFF_SPELL), MAG_MASSES | MAG_AREAS)) {
+        for (i = 0, tch = world[char_get_in_room(ch)].people; tch; tch = tch->next_in_room)
 	  i++;
 	while (i-- > 0)
-	  call_magic(ch, NULL, NULL, GET_OBJ_VAL(obj, VAL_STAFF_SPELL), k, CAST_STAFF, NULL);
+	  call_magic(ch, NULL, NULL, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF, NULL);
       } else {
-	for (tch = world[IN_ROOM(ch)].people; tch; tch = next_tch) {
+	for (tch = world[char_get_in_room(ch)].people; tch; tch = next_tch) {
 	  next_tch = tch->next_in_room;
 	  if (ch != tch)
-	    call_magic(ch, tch, NULL, GET_OBJ_VAL(obj, VAL_STAFF_SPELL), k, CAST_STAFF, NULL);
+	    call_magic(ch, tch, NULL, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF, NULL);
 	}
       }
     }
@@ -426,7 +426,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
 	act(obj->action_description, FALSE, ch, obj, tobj, TO_ROOM);
       else
 	act("$n points $p at $P.", TRUE, ch, obj, tobj, TO_ROOM);
-    } else if (IS_SET(spell_info[GET_OBJ_VAL(obj, VAL_WAND_SPELL)].routines, MAG_AREAS | MAG_MASSES)) {
+    } else if (IS_SET(spell_info[obj_get_value(obj, VAL_WAND_SPELL)].routines, MAG_AREAS | MAG_MASSES)) {
       /* Wands with area spells don't need to be pointed. */
       act("You point $p outward.", FALSE, ch, obj, NULL, TO_CHAR);
       act("$n points $p outward.", TRUE, ch, obj, NULL, TO_ROOM);
@@ -435,18 +435,18 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
       return;
     }
 
-    if (GET_OBJ_VAL(obj, VAL_WAND_CHARGES) <= 0) {
+    if (obj_get_value(obj, VAL_WAND_CHARGES) <= 0) {
       send_to_char(ch, "It seems powerless.\r\n");
       act("Nothing seems to happen.", FALSE, ch, obj, 0, TO_ROOM);
       return;
     }
-    GET_OBJ_VAL(obj, VAL_WAND_CHARGES)--;
-    SET_BIT_AR(AFF_FLAGS(ch), AFF_NEXTNOACTION);
-    if (GET_OBJ_VAL(obj, VAL_WAND_LEVEL))
-      call_magic(ch, tch, tobj, GET_OBJ_VAL(obj, VAL_WAND_SPELL),
-		 GET_OBJ_VAL(obj, VAL_WAND_LEVEL), CAST_WAND, NULL);
+    obj_set_value(obj, VAL_WAND_CHARGES, obj_get_value(obj, VAL_WAND_CHARGES) - 1);
+    SET_BIT_AR(char_get_affected_by(ch), AFF_NEXTNOACTION);
+    if (obj_get_value(obj, VAL_WAND_LEVEL))
+      call_magic(ch, tch, tobj, obj_get_value(obj, VAL_WAND_SPELL),
+		 obj_get_value(obj, VAL_WAND_LEVEL), CAST_WAND, NULL);
     else
-      call_magic(ch, tch, tobj, GET_OBJ_VAL(obj, VAL_WAND_SPELL),
+      call_magic(ch, tch, tobj, obj_get_value(obj, VAL_WAND_SPELL),
 		 DEFAULT_WAND_LVL, CAST_WAND, NULL);
     break;
   case ITEM_SCROLL:
@@ -465,10 +465,10 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
     else
       act("$n recites $p.", FALSE, ch, obj, NULL, TO_ROOM);
 
-    SET_BIT_AR(AFF_FLAGS(ch), AFF_NEXTNOACTION);
+    SET_BIT_AR(char_get_affected_by(ch), AFF_NEXTNOACTION);
     for (i = 1; i <= 3; i++)
-      if (call_magic(ch, tch, tobj, GET_OBJ_VAL(obj, i),
-		       GET_OBJ_VAL(obj, VAL_SCROLL_LEVEL), CAST_SCROLL, NULL) <= 0)
+      if (call_magic(ch, tch, tobj, obj_get_value(obj, i),
+		       obj_get_value(obj, VAL_SCROLL_LEVEL), CAST_SCROLL, NULL) <= 0)
 	break;
 
     if (obj != NULL)
@@ -486,10 +486,10 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
     else
       act("$n swallows $p.", TRUE, ch, obj, NULL, TO_ROOM);
 
-    SET_BIT_AR(AFF_FLAGS(ch), AFF_NEXTNOACTION);
+    SET_BIT_AR(char_get_affected_by(ch), AFF_NEXTNOACTION);
     for (i = 1; i <= 3; i++)
-      if (call_magic(ch, ch, NULL, GET_OBJ_VAL(obj, i),
-		       GET_OBJ_VAL(obj, VAL_POTION_LEVEL), CAST_POTION, NULL) <= 0)
+      if (call_magic(ch, ch, NULL, obj_get_value(obj, i),
+		       obj_get_value(obj, VAL_POTION_LEVEL), CAST_POTION, NULL) <= 0)
 	break;
 
     if (obj != NULL)
@@ -497,7 +497,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
     break;
   default:
     log("SYSERR: Unknown object_type %d in mag_objectmagic.",
-	GET_OBJ_TYPE(obj));
+	obj_get_type_flag(obj));
     break;
   }
 }
@@ -528,8 +528,8 @@ int cast_spell(struct char_data *ch, struct char_data *tch,
     return (0);
   }
     
-  if (GET_POS(ch) < SINFO.min_position) {
-    switch (GET_POS(ch)) {
+  if (char_get_position(ch) < SINFO.min_position) {
+    switch (char_get_position(ch)) {
       case POS_SLEEPING:
       send_to_char(ch, "You dream about great magical powers.\r\n");
       break;
@@ -631,7 +631,7 @@ ACMD(do_cast)
   sprintf(buffer, "%d", spellnum);
 
   if (subcmd == SCMD_ART) {
-    if (!char_is_kabito(ch) && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
+    if (!char_is_kabito(ch) && char_get_admlevel(ch) < ADMLVL_IMMORT) {
       send_to_char(ch, "You are not trained in that.\r\n");
       return;
     }
@@ -646,7 +646,7 @@ ACMD(do_cast)
       return;
     }
   } else {
-    if (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
+    if (char_get_admlevel(ch) < ADMLVL_IMMORT) {
       send_to_char(ch, "You are not able to cast spells.\r\n");
       return;
     }
@@ -661,7 +661,7 @@ ACMD(do_cast)
 
   if (subcmd == SCMD_ART) {
     ki = mag_kicost(ch, spellnum);
-    if ((ki > 0) && (GET_KI(ch) < ki) && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT)) {
+    if ((ki > 0) && (char_get_ki(ch) < ki) && (char_get_admlevel(ch) < ADMLVL_IMMORT)) {
       send_to_char(ch, "You haven't the energy to cast that spell!\r\n");
       return;
     }
@@ -692,13 +692,13 @@ ACMD(do_cast)
 
     if (!target && IS_SET(SINFO.targets, TAR_OBJ_EQUIP)) {
       for (i = 0; !target && i < NUM_WEARS; i++)
-	if (GET_EQ(ch, i) && isname(t, GET_EQ(ch, i)->name)) {
-	  tobj = GET_EQ(ch, i);
+	if (char_get_equipment(ch, i) && isname(t, char_get_equipment(ch, i)->name)) {
+	  tobj = char_get_equipment(ch, i);
 	  target = TRUE;
 	}
     }
     if (!target && IS_SET(SINFO.targets, TAR_OBJ_ROOM))
-      if ((tobj = get_obj_in_list_vis(ch, t, NULL, world[IN_ROOM(ch)].contents)) != NULL)
+      if ((tobj = get_obj_in_list_vis(ch, t, NULL, world[char_get_in_room(ch)].contents)) != NULL)
 	target = TRUE;
 
     if (!target && IS_SET(SINFO.targets, TAR_OBJ_WORLD))
@@ -707,13 +707,13 @@ ACMD(do_cast)
 
   } else {			/* if target string is empty */
     if (!target && IS_SET(SINFO.targets, TAR_FIGHT_SELF))
-      if (FIGHTING(ch) != NULL) {
+      if (char_get_fighting(ch) != NULL) {
 	tch = ch;
 	target = TRUE;
       }
     if (!target && IS_SET(SINFO.targets, TAR_FIGHT_VICT))
-      if (FIGHTING(ch) != NULL) {
-	tch = FIGHTING(ch);
+      if (char_get_fighting(ch) != NULL) {
+	tch = char_get_fighting(ch);
 	target = TRUE;
       }
     /* if no target specified, and the spell isn't violent, default to self */
@@ -743,26 +743,26 @@ ACMD(do_cast)
     innate = TRUE;
 
   if (SINFO.violent && tch && char_is_npc(tch)) {
-    if (!FIGHTING(tch))
+    if (!char_get_fighting(tch))
       set_fighting(tch, ch);
-    if (!FIGHTING(ch))
+    if (!char_get_fighting(ch))
       set_fighting(ch, tch);
   }
 
-  if (IS_SET(SINFO.comp_flags, MAGCOMP_SOMATIC) && rand_number(1, 100) <= GET_SPELLFAIL(ch)) {
+  if (IS_SET(SINFO.comp_flags, MAGCOMP_SOMATIC) && rand_number(1, 100) <= char_get_spellfail(ch)) {
     if (IS_SET(SINFO.routines, MAG_ACTION_FULL | MAG_ACTION_PARTIAL))
-      SET_BIT_AR(AFF_FLAGS(ch), AFF_NEXTPARTIAL);
+      SET_BIT_AR(char_get_affected_by(ch), AFF_NEXTPARTIAL);
     else if (IS_SET(SINFO.routines, MAG_ACTION_FULL | MAG_ACTION_FULL))
-      SET_BIT_AR(AFF_FLAGS(ch), AFF_NEXTNOACTION);
+      SET_BIT_AR(char_get_affected_by(ch), AFF_NEXTNOACTION);
     send_to_char(ch, "Your armor interferes with your casting, and you fail!\r\n");
   } else {
     if (ki > 0)
-      GET_KI(ch) = MAX(0, MIN(GET_MAX_KI(ch), GET_KI(ch) - ki));
-    if (cast_spell(ch, tch, tobj, spellnum, t) && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
+      char_set_ki(ch, MAX(0, MIN(char_get_max_ki(ch), char_get_ki(ch) - ki)));
+    if (cast_spell(ch, tch, tobj, spellnum, t) && char_get_admlevel(ch) < ADMLVL_IMMORT) {
       if (IS_SET(SINFO.routines, MAG_ACTION_FULL | MAG_ACTION_PARTIAL))
-        SET_BIT_AR(AFF_FLAGS(ch), AFF_NEXTPARTIAL);
+        SET_BIT_AR(char_get_affected_by(ch), AFF_NEXTPARTIAL);
       else if (IS_SET(SINFO.routines, MAG_ACTION_FULL | MAG_ACTION_FULL))
-        SET_BIT_AR(AFF_FLAGS(ch), AFF_NEXTNOACTION);
+        SET_BIT_AR(char_get_affected_by(ch), AFF_NEXTNOACTION);
       if (subcmd == SCMD_CAST) {
         send_to_char(ch, "The magical energy from the spell leaves your mind.\r\n");
         if (char_prf_flagged(ch, PRF_AUTOMEM)) {

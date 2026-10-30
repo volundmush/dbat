@@ -23,7 +23,7 @@ char *context_help_list[NUM_CONTEXTS];
 
 int find_context(struct descriptor_data *d)
 {
-  switch(STATE(d)) {
+  switch(desc_get_connected(d)) {
     case CON_TRIGEDIT: return find_context_trigedit(d);
     case CON_REDIT:    return find_context_redit(d);
     case CON_MEDIT:    return find_context_medit(d);

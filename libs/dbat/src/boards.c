@@ -143,9 +143,9 @@ struct board_info *create_new_board(obj_vnum board_vnum) {
     REMOVE_LVL(temp)=CONFIG_LEVEL_CAP;
     } else {
       obj = &(obj_proto[real_object(board_vnum)]);
-      READ_LVL(temp)=GET_OBJ_VAL(obj, VAL_BOARD_READ);
-      WRITE_LVL(temp)=GET_OBJ_VAL(obj, VAL_BOARD_WRITE);
-      REMOVE_LVL(temp)=GET_OBJ_VAL(obj, VAL_BOARD_ERASE);
+      READ_LVL(temp)=obj_get_value(obj, VAL_BOARD_READ);
+      WRITE_LVL(temp)=obj_get_value(obj, VAL_BOARD_WRITE);
+      REMOVE_LVL(temp)=obj_get_value(obj, VAL_BOARD_ERASE);
     }
   BOARD_VNUM(temp)=board_vnum;
   BOARD_MNUM(temp)=0;
@@ -270,14 +270,14 @@ struct board_info *load_board(obj_vnum board_vnum) {
   } else {
     obj = &(obj_proto[real_object(board_vnum)]);
     /* double check one or two things */
-    if(t[0] != GET_OBJ_VAL(obj,VAL_BOARD_READ) ||
-       t[1] != GET_OBJ_VAL(obj,VAL_BOARD_WRITE) ||
-       t[2] != GET_OBJ_VAL(obj,VAL_BOARD_ERASE)) {
+    if(t[0] != obj_get_value(obj, VAL_BOARD_READ) ||
+       t[1] != obj_get_value(obj, VAL_BOARD_WRITE) ||
+       t[2] != obj_get_value(obj, VAL_BOARD_ERASE)) {
       log("Mismatch in board <-> object read/write/remove settings for board [vnum: %d]. Correcting.", board_vnum);
     }
-    READ_LVL(temp_board)=GET_OBJ_VAL(obj, VAL_BOARD_READ);
-    WRITE_LVL(temp_board)=GET_OBJ_VAL(obj, VAL_BOARD_WRITE);
-    REMOVE_LVL(temp_board)=GET_OBJ_VAL(obj, VAL_BOARD_ERASE);
+    READ_LVL(temp_board)=obj_get_value(obj, VAL_BOARD_READ);
+    WRITE_LVL(temp_board)=obj_get_value(obj, VAL_BOARD_WRITE);
+    REMOVE_LVL(temp_board)=obj_get_value(obj, VAL_BOARD_ERASE);
     BOARD_MNUM(temp_board)=t[3];
     BOARD_VERSION(temp_board)=t[4]; 
   }
@@ -483,7 +483,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
     thisboard->next = bboards;
     bboards = thisboard;
   }
-  if (GET_ADMLEVEL(ch) < READ_LVL(thisboard)) {
+  if (char_get_admlevel(ch) < READ_LVL(thisboard)) {
     send_to_char(ch,"You try but fail to understand the holy words.\r\n");
     return;
   }
@@ -504,8 +504,8 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
   bnum = obj_get_vnum(obj);
   char clan[120];
    if (obj_flagged(obj, ITEM_CBOARD)) {
-    if (GET_CLAN(ch) != NULL) {
-      sprintf(clan, "%s", GET_CLAN(ch));
+    if (char_get_clan(ch) != NULL) {
+      sprintf(clan, "%s", char_get_clan(ch));
     }
     if (!strstr(obj->action_description, clan)) {
       send_to_char(ch, "You are incapable of reading this board!\r\n");
@@ -562,19 +562,19 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
   strcpy(buf2, buf);
   page_string(ch->desc, buf2, 1);
   if (bnum == 3092) {
-   GET_BOARD(ch, 0) = time(0);
+   char_set_lboard(ch, 0, time(0));
    /* Mort board */
   }
   if (bnum == 3099) {
-   GET_BOARD(ch, 3) = time(0);
+   char_set_lboard(ch, 3, time(0));
    /* Duo's board */
   }
   if (bnum == 3098) {
-   GET_BOARD(ch, 1) = time(0);
+   char_set_lboard(ch, 1, time(0));
    /* Imm board */
   }
   if (bnum == 3090) {
-   GET_BOARD(ch, 4) = time(0);
+   char_set_lboard(ch, 4, time(0));
    /* Builder board */
   }
   save_char(ch);
@@ -602,7 +602,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
     thisboard=create_new_board(board_vnum);
     }
 
-  if (GET_ADMLEVEL(ch) < READ_LVL(thisboard)) {
+  if (char_get_admlevel(ch) < READ_LVL(thisboard)) {
     send_to_char(ch,"You try but fail to understand the holy words.\r\n");
     return;
     
@@ -623,8 +623,8 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
   bnum = obj_get_vnum(obj);
    char clan[200];
    if (obj_flagged(obj, ITEM_CBOARD)) {
-    if (GET_CLAN(ch) != NULL) {
-      sprintf(clan, "%s", GET_CLAN(ch));
+    if (char_get_clan(ch) != NULL) {
+      sprintf(clan, "%s", char_get_clan(ch));
     }
     if (!strstr(obj->action_description, clan)) {
       send_to_char(ch, "You are incapable of reading this board!\r\n");
@@ -669,7 +669,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
   /*make the new node */
   CREATE(mboard_type, struct board_memory, 1);
   if (BOARD_VERSION(thisboard) != CURRENT_BOARD_VER)
-   MEMORY_READER(mboard_type) = GET_IDNUM(ch);
+   MEMORY_READER(mboard_type) = char_get_idnum(ch);
   else
    MEMORY_READER_NAME(mboard_type) = strdup(char_get_name(ch)); 
   MEMORY_TIMESTAMP(mboard_type)=MESG_TIMESTAMP(message);
@@ -720,19 +720,19 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
 	  MESG_DATA(message) ? MESG_DATA(message) : "Looks like this message is empty.");
   page_string(ch->desc, buf, 1);
   if (bnum == 3092) {
-   GET_BOARD(ch, 0) = time(0);
+   char_set_lboard(ch, 0, time(0));
    /* Mort board */
   }
   if (bnum == 3099) {
-   GET_BOARD(ch, 3) = time(0);
+   char_set_lboard(ch, 3, time(0));
    /* Duo's board */
   }
   if (bnum == 3098) {
-   GET_BOARD(ch, 1) = time(0);
+   char_set_lboard(ch, 1, time(0));
    /* Imm board */
   }
   if (bnum == 3090) {
-   GET_BOARD(ch, 4) = time(0);
+   char_set_lboard(ch, 4, time(0));
    /* Builder board */
   }
   /* really it's not so important to save after each view even if something WAS updated */
@@ -762,7 +762,7 @@ int mesglookup(struct board_msg *message,struct char_data *ch, struct board_info
 
   mboard_type=BOARD_MEMORY(board,mem);
   while(mboard_type && BOARD_VERSION(board) != CURRENT_BOARD_VER) {
-    if(MEMORY_READER(mboard_type)==GET_IDNUM(ch) &&
+    if(MEMORY_READER(mboard_type)==char_get_idnum(ch) &&
        MEMORY_TIMESTAMP(mboard_type)==MESG_TIMESTAMP(message)) {
       return 1;
     } else {
@@ -801,7 +801,7 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg)
     return;
   }
 
-  if (GET_ADMLEVEL(ch) < WRITE_LVL(thisboard)) {
+  if (char_get_admlevel(ch) < WRITE_LVL(thisboard)) {
     send_to_char(ch,"You are not holy enough to write on this board.\r\n");
 
     return;
@@ -837,7 +837,7 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg)
   BOARD_MESSAGES(thisboard) = message;
   send_to_char(ch,"Write your message.  (/s saves /h for help)\r\n");
 
-  SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
   string_write(ch->desc, &(MESG_DATA(message)), MAX_MESSAGE_LENGTH, board_vnum + BOARD_MAGIC, NULL);
   if (board_vnum == 3092) {
    BOARDNEWMORT = time(0);
@@ -859,13 +859,13 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg)
     continue;
   if (char_plr_flagged(d->character, PLR_WRITING))
     continue;
-  if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWIMM > GET_BOARD(d->character, 1) && board_vnum == 3098)
+  if (char_get_admlevel(d->character) >= 1 && BOARDNEWIMM > char_get_lboard(d->character, 1) && board_vnum == 3098)
     send_to_char(d->character, "\r\n@GThere is a new Immortal Board Post.@n\r\n");
-  if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWBUI > GET_BOARD(d->character, 4) && board_vnum == 3090)
+  if (char_get_admlevel(d->character) >= 1 && BOARDNEWBUI > char_get_lboard(d->character, 4) && board_vnum == 3090)
     send_to_char(d->character, "\r\n@GThere is a new Builder Board Post.@n\r\n");
-  if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWDUO > GET_BOARD(d->character, 3) && board_vnum == 3099)
+  if (char_get_admlevel(d->character) >= 1 && BOARDNEWDUO > char_get_lboard(d->character, 3) && board_vnum == 3099)
     send_to_char(d->character, "\r\n@GThere is a new Punishment Board Post.@n\r\n");
-  if (BOARDNEWMORT > GET_BOARD(d->character, 0) && board_vnum == 3092)
+  if (BOARDNEWMORT > char_get_lboard(d->character, 0) && board_vnum == 3092)
     send_to_char(d->character, "\r\n@GThere is a new Mortal Board Post.@n\r\n");
   }
 
@@ -886,12 +886,12 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum){
     log("Error in board_respond - board #%ld", board_vnum);
     return;
   }
-  if (GET_ADMLEVEL(ch) < WRITE_LVL(thisboard)) {
+  if (char_get_admlevel(ch) < WRITE_LVL(thisboard)) {
     send_to_char(ch,"You are not holy enough to write on this board.\r\n");
     return;
   }
   
-  if (GET_ADMLEVEL(ch) < READ_LVL(thisboard)) {
+  if (char_get_admlevel(ch) < READ_LVL(thisboard)) {
     send_to_char(ch,"You are not holy enough to respond to this board.\r\n");
       return;
     }
@@ -928,7 +928,7 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum){
   act("@C$n@w starts writing on the board.@n", TRUE, ch, 0, 0, TO_ROOM);
 
   if (!char_is_npc(ch)) {
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+    SET_BIT_AR(char_get_act(ch), PLR_WRITING);
   }
 
   /* don't need number anymore, so we'll reuse it. */
@@ -958,13 +958,13 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum){
     continue;
   if (char_plr_flagged(d->character, PLR_WRITING))
     continue;
-  if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWIMM > GET_BOARD(d->character, 1) && board_vnum == 3098)
+  if (char_get_admlevel(d->character) >= 1 && BOARDNEWIMM > char_get_lboard(d->character, 1) && board_vnum == 3098)
     send_to_char(d->character, "\r\n@GThere is a new Immortal Board Post.@n\r\n");
-  if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWBUI > GET_BOARD(d->character, 4) && board_vnum == 3090)
+  if (char_get_admlevel(d->character) >= 1 && BOARDNEWBUI > char_get_lboard(d->character, 4) && board_vnum == 3090)
     send_to_char(d->character, "\r\n@GThere is a new Builder Board Post.@n\r\n");
-  if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWDUO > GET_BOARD(d->character, 3) && board_vnum == 3099)
+  if (char_get_admlevel(d->character) >= 1 && BOARDNEWDUO > char_get_lboard(d->character, 3) && board_vnum == 3099)
     send_to_char(d->character, "\r\n@GThere is a new Punishment Board Post.@n\r\n");
-  if (BOARDNEWMORT > GET_BOARD(d->character, 0) && board_vnum == 3092)
+  if (BOARDNEWMORT > char_get_lboard(d->character, 0) && board_vnum == 3092)
     send_to_char(d->character, "\r\n@GThere is a new Mortal Board Post.@n\r\n");
   }
 
@@ -1034,20 +1034,20 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg)
    char clan[120];
    obj = read_object(board_vnum, REAL);
    if (obj_flagged(obj, ITEM_CBOARD)) {
-    if (GET_CLAN(ch) != NULL) {
-      sprintf(clan, "%s", GET_CLAN(ch));
+    if (char_get_clan(ch) != NULL) {
+      sprintf(clan, "%s", char_get_clan(ch));
     }
     if (clanIsModerator(clan, ch) && strstr(obj->action_description, clan)) {
      send_to_char(ch, "Exercising your clan leader powers....\r\n");
     }
-    else if (GET_ADMLEVEL(ch) < REMOVE_LVL(thisboard) && strcmp(char_get_name(ch), MESG_POSTER_NAME(cur))) {
+    else if (char_get_admlevel(ch) < REMOVE_LVL(thisboard) && strcmp(char_get_name(ch), MESG_POSTER_NAME(cur))) {
           send_to_char(ch, "You can't remove other people's messages.\r\n");
           extract_obj(obj);
           return;
     }
    }
    else if (!obj_flagged(obj, ITEM_CBOARD)) {
-     if (GET_ADMLEVEL(ch) < REMOVE_LVL(thisboard) && strcmp(char_get_name(ch), MESG_POSTER_NAME(cur))) {
+     if (char_get_admlevel(ch) < REMOVE_LVL(thisboard) && strcmp(char_get_name(ch), MESG_POSTER_NAME(cur))) {
 	  send_to_char(ch, "You can't remove other people's messages.\r\n");
           extract_obj(obj);
 	  return;

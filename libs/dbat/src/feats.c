@@ -198,55 +198,55 @@ int feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg)
   if (featnum > NUM_FEATS_DEFINED)
     return FALSE;
 
-  if (HAS_FEAT(ch, featnum) && !feat_list[featnum].can_stack)
+  if (char_get_feats(ch, featnum) && !feat_list[featnum].can_stack)
     return FALSE;
 
   switch (featnum) {
 
   case FEAT_ARMOR_PROFICIENCY_HEAVY:
-    if (HAS_FEAT(ch, FEAT_ARMOR_PROFICIENCY_MEDIUM))
+    if (char_get_feats(ch, FEAT_ARMOR_PROFICIENCY_MEDIUM))
       return TRUE;
     return FALSE;
 
   case FEAT_ARMOR_PROFICIENCY_MEDIUM:
-    if (HAS_FEAT(ch, FEAT_ARMOR_PROFICIENCY_LIGHT))
+    if (char_get_feats(ch, FEAT_ARMOR_PROFICIENCY_LIGHT))
       return TRUE;
     return FALSE;
 
   case FEAT_AUGMENT_SUMMONING:
-    if (HAS_FEAT(ch, FEAT_SPELL_FOCUS))
+    if (char_get_feats(ch, FEAT_SPELL_FOCUS))
       return TRUE;
     return FALSE;
 
   case FEAT_IMPROVED_SHIELD_BASH:
-    if (HAS_FEAT(ch, FEAT_ARMOR_PROFICIENCY_SHIELD))
+    if (char_get_feats(ch, FEAT_ARMOR_PROFICIENCY_SHIELD))
       return TRUE;
     return FALSE;    
   
   case FEAT_DODGE:
-    if (GET_DEX(ch) >= 13)
+    if (char_get_aff_abils_dex(ch) >= 13)
       return TRUE;
     return FALSE;
 
   case FEAT_COMBAT_EXPERTISE:
-    if (GET_INT(ch) >= 13)
+    if (char_get_aff_abils_intel(ch) >= 13)
       return TRUE;
    return FALSE;
    
   case FEAT_DIEHARD:
-    if (HAS_FEAT(ch, FEAT_ENDURANCE))
+    if (char_get_feats(ch, FEAT_ENDURANCE))
       return TRUE;
     return FALSE; 
   
   case FEAT_SUNDER:
   case FEAT_IMPROVED_OVERRUN: 
   case FEAT_IMPROVED_BULL_RUSH:
-    if (HAS_FEAT(ch, FEAT_POWER_ATTACK))
+    if (char_get_feats(ch, FEAT_POWER_ATTACK))
       return TRUE;
     return FALSE; 
    
   case FEAT_MOBILITY:
-    if (HAS_FEAT(ch, FEAT_DODGE))
+    if (char_get_feats(ch, FEAT_DODGE))
       return TRUE;
     return FALSE;
 
@@ -263,49 +263,49 @@ int feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg)
   case FEAT_IMPROVED_FEINT:
   case FEAT_IMPROVED_DISARM:
   case FEAT_IMPROVED_TRIP:
-   if (HAS_FEAT(ch, FEAT_COMBAT_EXPERTISE))
+   if (char_get_feats(ch, FEAT_COMBAT_EXPERTISE))
     return TRUE;
    return FALSE;
 
   case FEAT_IMPROVED_GRAPPLE:
   case FEAT_DEFLECT_ARROWS:
-    if (HAS_FEAT(ch, FEAT_IMPROVED_UNARMED_STRIKE))
-      if (GET_DEX(ch) >= 13) 
+    if (char_get_feats(ch, FEAT_IMPROVED_UNARMED_STRIKE))
+      if (char_get_aff_abils_dex(ch) >= 13) 
         return TRUE;
     return FALSE;
 
   case FEAT_STUNNING_FIST:
-    if (GET_DEX(ch) >= 13)
-      if (GET_WIS(ch) >= 13)
-        if (HAS_FEAT(ch, FEAT_IMPROVED_UNARMED_STRIKE))
+    if (char_get_aff_abils_dex(ch) >= 13)
+      if (char_get_aff_abils_wis(ch) >= 13)
+        if (char_get_feats(ch, FEAT_IMPROVED_UNARMED_STRIKE))
           if (GET_BAB(ch) >= 8)
             return TRUE;
     return FALSE;
   
   case FEAT_POWER_ATTACK:
-    if (GET_STR(ch) >= 13)
+    if (char_get_aff_abils_str(ch) >= 13)
       return TRUE;
     return FALSE;
 
   case FEAT_IMPROVED_PRECISE_SHOT:
-    if (GET_DEX(ch) >= 19)
-      if (HAS_FEAT(ch, FEAT_POINT_BLANK_SHOT))
+    if (char_get_aff_abils_dex(ch) >= 19)
+      if (char_get_feats(ch, FEAT_POINT_BLANK_SHOT))
         if (GET_BAB(ch) >= 11)
       return TRUE;
     return FALSE;
 
   case FEAT_CLEAVE:
-    if (HAS_FEAT(ch, FEAT_POWER_ATTACK))
+    if (char_get_feats(ch, FEAT_POWER_ATTACK))
       return TRUE;
     return FALSE;
 
   case FEAT_TWO_WEAPON_FIGHTING:
-    if (GET_DEX(ch) >= 15)
+    if (char_get_aff_abils_dex(ch) >= 15)
       return TRUE;
     return FALSE;
 
   case FEAT_IMPROVED_TWO_WEAPON_FIGHTING:
-    if (GET_DEX(ch) >= 17 && HAS_FEAT(ch, FEAT_TWO_WEAPON_FIGHTING) && GET_BAB(ch) >= 6)
+    if (char_get_aff_abils_dex(ch) >= 17 && char_get_feats(ch, FEAT_TWO_WEAPON_FIGHTING) && GET_BAB(ch) >= 6)
       return TRUE;
     return FALSE;
 
@@ -317,7 +317,7 @@ int feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg)
     return FALSE;
 
   case FEAT_FAR_SHOT:
-    if (HAS_FEAT(ch, FEAT_POINT_BLANK_SHOT))
+    if (char_get_feats(ch, FEAT_POINT_BLANK_SHOT))
       return TRUE;
    return FALSE;
 
@@ -346,10 +346,10 @@ int feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg)
     return FALSE;
 
   case FEAT_WHIRLWIND_ATTACK:
-     if (HAS_FEAT(ch, FEAT_COMBAT_EXPERTISE))
-       if (HAS_FEAT(ch, FEAT_DODGE))
-         if (HAS_FEAT(ch, FEAT_MOBILITY))
-            if (HAS_FEAT(ch, FEAT_SPRING_ATTACK))
+     if (char_get_feats(ch, FEAT_COMBAT_EXPERTISE))
+       if (char_get_feats(ch, FEAT_DODGE))
+         if (char_get_feats(ch, FEAT_MOBILITY))
+            if (char_get_feats(ch, FEAT_SPRING_ATTACK))
                if (GET_BAB(ch) >= 4)
                   return TRUE;
     return FALSE;
@@ -466,19 +466,19 @@ int is_proficient_with_armor(const struct char_data *ch, int cmarmor_type)
 {
   switch (cmarmor_type) {
     case ARMOR_TYPE_LIGHT:
-      if (HAS_FEAT(ch, FEAT_ARMOR_PROFICIENCY_LIGHT))
+      if (char_get_feats(ch, FEAT_ARMOR_PROFICIENCY_LIGHT))
         return TRUE;
     break;
     case ARMOR_TYPE_MEDIUM:
-      if (HAS_FEAT(ch, FEAT_ARMOR_PROFICIENCY_MEDIUM))
+      if (char_get_feats(ch, FEAT_ARMOR_PROFICIENCY_MEDIUM))
         return TRUE;
     break;
     case ARMOR_TYPE_HEAVY:
-      if (HAS_FEAT(ch, FEAT_ARMOR_PROFICIENCY_HEAVY))
+      if (char_get_feats(ch, FEAT_ARMOR_PROFICIENCY_HEAVY))
         return TRUE;
     break;
     case ARMOR_TYPE_SHIELD:
-      if (HAS_FEAT(ch, FEAT_ARMOR_PROFICIENCY_SHIELD))
+      if (char_get_feats(ch, FEAT_ARMOR_PROFICIENCY_SHIELD))
         return TRUE;
     break;
   }
@@ -499,7 +499,7 @@ int is_proficient_with_weapon(const struct char_data *ch, int cmweapon_type)
   case WEAPON_TYPE_SLING:
   case WEAPON_TYPE_THROWN:
   case WEAPON_TYPE_CLUB:
-    if (HAS_FEAT(ch, FEAT_SIMPLE_WEAPON_PROFICIENCY))
+    if (char_get_feats(ch, FEAT_SIMPLE_WEAPON_PROFICIENCY))
       return TRUE;
     break;
   case WEAPON_TYPE_SHORTBOW:
@@ -515,7 +515,7 @@ int is_proficient_with_weapon(const struct char_data *ch, int cmweapon_type)
   case WEAPON_TYPE_POLEARM:
   case WEAPON_TYPE_BASTARD_SWORD:
   case WEAPON_TYPE_AXE:
-    if (HAS_FEAT(ch, FEAT_MARTIAL_WEAPON_PROFICIENCY))
+    if (char_get_feats(ch, FEAT_MARTIAL_WEAPON_PROFICIENCY))
       return TRUE;
     break;
   default:
@@ -573,15 +573,15 @@ void list_feats_known(struct char_data *ch)
       break;
 
     i = feat_sort_info[sortpos];
-    if (HAS_FEAT(ch, i)  && feat_list[i].in_game) {
+    if (char_get_feats(ch, i)  && feat_list[i].in_game) {
       switch (i) {
         case FEAT_SKILL_FOCUS:
-        sprintf(buf, "%-20s (+%d points overall)\r\n", feat_list[i].name, HAS_FEAT(ch, i) * 2);
+        sprintf(buf, "%-20s (+%d points overall)\r\n", feat_list[i].name, char_get_feats(ch, i) * 2);
         strcat(buf2, buf);
         none_shown = FALSE;
         break;
         case FEAT_TOUGHNESS:
-      temp_value = HAS_FEAT(ch, FEAT_TOUGHNESS);
+      temp_value = char_get_feats(ch, FEAT_TOUGHNESS);
       added_hp = temp_value * 3;
       sprintf(buf, "%-20s (+%d hp)\r\n", feat_list[i].name, added_hp);
       strcat(buf2, buf);  

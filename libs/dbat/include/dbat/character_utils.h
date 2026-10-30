@@ -37,11 +37,10 @@
 #define CHECK_PLAYER_SPECIAL(ch, var)	(var)
 #endif
 
-#define MOB_FLAGS(ch)	((ch)->act)
-#define PLR_FLAGS(ch)	((ch)->act)
+bitvector_t *char_get_act(const struct char_data *ch);
 #define PRF_FLAGS(ch) CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->pref))
-#define AFF_FLAGS(ch)	((ch)->affected_by)
-#define ADM_FLAGS(ch)	((ch)->admflags)
+bitvector_t *char_get_affected_by(const struct char_data *ch);
+bitvector_t *char_get_admflags(const struct char_data *ch);
 
 /* Return the gauntlet highest room for ch */ 
 #define GET_GAUNTLET(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->gauntlet))
@@ -65,60 +64,95 @@ bool char_aff_toggle(struct char_data *ch, int flag);
 bool char_is_dead(const struct char_data *ch);
 
 
-#define IN_ROOM(ch)	((ch)->in_room)
+room_rnum char_get_in_room(const struct char_data *ch);
+void char_set_in_room(struct char_data *ch, room_rnum v);
 zone_vnum char_in_zone(const struct char_data *ch);
-#define GET_WAS_IN(ch)	((ch)->was_in_room)
+room_rnum char_get_was_in_room(const struct char_data *ch);
+void char_set_was_in_room(struct char_data *ch, room_rnum v);
 #define GET_AGE(ch)     (age(ch)->year)
 
-#define GET_PC_NAME(ch)	((ch)->name)
+char *char_get_pc_name(const struct char_data *ch);
+void char_set_pc_name(struct char_data *ch, char *v);
 char *char_get_name(const struct char_data *ch);
 char *char_get_title(const struct char_data *ch);
-#define GET_USER_TITLE(d) ((d)->title)
-#define GET_PHASE(ch)   ((ch)->starphase)
-#define GET_MIMIC(ch)   ((ch)->mimic)
-#define GET_VOICE(ch)   ((ch)->voice)
-#define GET_CLAN(ch)    ((ch)->clan)
-#define GET_TRANSCLASS(ch) ((ch)->transclass)
-#define GET_FEATURE(ch) ((ch)->feature)
+int char_get_starphase(const struct char_data *ch);
+void char_set_starphase(struct char_data *ch, int v);
+int char_get_mimic(const struct char_data *ch);
+void char_set_mimic(struct char_data *ch, int v);
+char *char_get_voice(const struct char_data *ch);
+void char_set_voice(struct char_data *ch, char *v);
+char *char_get_clan(const struct char_data *ch);
+void char_set_clan(struct char_data *ch, char *v);
+int char_get_transclass(const struct char_data *ch);
+void char_set_transclass(struct char_data *ch, int v);
+char *char_get_feature(const struct char_data *ch);
+void char_set_feature(struct char_data *ch, char *v);
 char *char_get_user(const struct char_data *ch);
-#define GET_LOG_USER(ch) ((ch)->loguser)
-#define GET_CRANK(ch)   ((ch)->crank)
-#define GET_ADMLEVEL(ch)	((ch)->admlevel)
-#define GET_CLASS_LEVEL(ch)	((ch)->level)
-#define GET_LEVEL_ADJ(ch)	((ch)->level_adj)
-#define GET_HITDICE(ch)		((ch)->race_level)
+char *char_get_loguser(const struct char_data *ch);
+void char_set_loguser(struct char_data *ch, char *v);
+int char_get_crank(const struct char_data *ch);
+void char_set_crank(struct char_data *ch, int v);
+int char_get_admlevel(const struct char_data *ch);
+void char_set_admlevel(struct char_data *ch, int v);
+int char_get_class_level(const struct char_data *ch);
+void char_set_class_level(struct char_data *ch, int v);
+int char_get_level_adj(const struct char_data *ch);
+void char_set_level_adj(struct char_data *ch, int v);
+int char_get_race_level(const struct char_data *ch);
+void char_set_race_level(struct char_data *ch, int v);
 int char_get_level(const struct char_data *ch);
-#define GET_PFILEPOS(ch)((ch)->pfilepos)
+int char_get_pfilepos(const struct char_data *ch);
+void char_set_pfilepos(struct char_data *ch, int v);
 
 int char_get_class(const struct char_data *ch);
-#define GET_CLASS_NONEPIC(ch, whichclass) ((ch)->chclasses[whichclass])
-#define GET_CLASS_EPIC(ch, whichclass) ((ch)->epicclasses[whichclass])
+int char_get_chclasses(const struct char_data *ch, int i);
+void char_set_chclasses(struct char_data *ch, int i, int v);
+int char_get_epicclasses(const struct char_data *ch, int i);
+void char_set_epicclasses(struct char_data *ch, int i, int v);
 int char_get_class_ranks(const struct char_data *ch, int whichclass);
-#define GET_RACE(ch)    ((ch)->race)
-#define GET_HAIRL(ch)   ((ch)->hairl)
-#define GET_HAIRC(ch)   ((ch)->hairc)
-#define GET_HAIRS(ch)   ((ch)->hairs)
-#define GET_SKIN(ch)    ((ch)->skin)
-#define GET_EYE(ch)     ((ch)->eye)
-#define GET_DISTFEA(ch) ((ch)->distfea)
-#define GET_HOME(ch)	((ch)->hometown)
-#define GET_WEIGHT(ch)  ((ch)->weight)
-#define GET_HEIGHT(ch)  ((ch)->height)
+int char_get_race(const struct char_data *ch);
+void char_set_race(struct char_data *ch, int v);
+int8_t char_get_hairl(const struct char_data *ch);
+void char_set_hairl(struct char_data *ch, int8_t v);
+int8_t char_get_hairc(const struct char_data *ch);
+void char_set_hairc(struct char_data *ch, int8_t v);
+int8_t char_get_hairs(const struct char_data *ch);
+void char_set_hairs(struct char_data *ch, int8_t v);
+int8_t char_get_skin(const struct char_data *ch);
+void char_set_skin(struct char_data *ch, int8_t v);
+int8_t char_get_eye(const struct char_data *ch);
+void char_set_eye(struct char_data *ch, int8_t v);
+int8_t char_get_distfea(const struct char_data *ch);
+void char_set_distfea(struct char_data *ch, int8_t v);
+room_vnum char_get_hometown(const struct char_data *ch);
+void char_set_hometown(struct char_data *ch, room_vnum v);
+uint8_t char_get_weight(const struct char_data *ch);
+void char_set_weight(struct char_data *ch, uint8_t v);
+uint8_t char_get_height(const struct char_data *ch);
+void char_set_height(struct char_data *ch, uint8_t v);
 int char_get_pc_height(struct char_data *ch);
 int char_get_pc_weight(struct char_data *ch);
-#define GET_SEX(ch)	((ch)->sex)
+int8_t char_get_sex(const struct char_data *ch);
+void char_set_sex(struct char_data *ch, int8_t v);
 #define GET_TLEVEL(ch)	((ch)->player_specials->tlevel)
 #define CARRYING(ch)    ((ch)->player_specials->carrying)
 #define CARRIED_BY(ch)  ((ch)->player_specials->carried_by)
 #define RACIAL_PREF(ch) ((ch)->player_specials->racial_pref)
-#define GET_RP(ch)      ((ch)->rp)
-#define GET_RBANK(ch)   ((ch)->rbank)
-#define GET_TRP(ch)     ((ch)->trp)
-#define GET_SUPPRESS(ch) ((ch)->suppression)
-#define GET_SUPP(ch)    ((ch)->suppressed)
-#define GET_RDISPLAY(ch) ((ch)->rdisplay)
+int char_get_rp(const struct char_data *ch);
+void char_set_rp(struct char_data *ch, int v);
+int char_get_rbank(const struct char_data *ch);
+void char_set_rbank(struct char_data *ch, int v);
+int char_get_trp(const struct char_data *ch);
+void char_set_trp(struct char_data *ch, int v);
+int64_t char_get_suppression(const struct char_data *ch);
+void char_set_suppression(struct char_data *ch, int64_t v);
+int64_t char_get_suppressed(const struct char_data *ch);
+void char_set_suppressed(struct char_data *ch, int64_t v);
+char *char_get_rdisplay(const struct char_data *ch);
+void char_set_rdisplay(struct char_data *ch, char *v);
 
-#define GET_STR(ch)     ((ch)->aff_abils.str)
+int8_t char_get_aff_abils_str(const struct char_data *ch);
+void char_set_aff_abils_str(struct char_data *ch, int8_t v);
 /*
  * We could define GET_ADD to be ((GET_STR(ch) > 18) ?
  *                                ((GET_STR(ch) - 18) * 10) : 0)
@@ -128,11 +162,16 @@ int char_get_pc_weight(struct char_data *ch);
  */
 /* The old define: */
 /* #define GET_ADD(ch)     ((ch)->aff_abils.str_add) */
-#define GET_DEX(ch)     ((ch)->aff_abils.dex)
-#define GET_INT(ch)     ((ch)->aff_abils.intel)
-#define GET_WIS(ch)     ((ch)->aff_abils.wis)
-#define GET_CON(ch)     ((ch)->aff_abils.con)
-#define GET_CHA(ch)     ((ch)->aff_abils.cha)
+int8_t char_get_aff_abils_dex(const struct char_data *ch);
+void char_set_aff_abils_dex(struct char_data *ch, int8_t v);
+int8_t char_get_aff_abils_intel(const struct char_data *ch);
+void char_set_aff_abils_intel(struct char_data *ch, int8_t v);
+int8_t char_get_aff_abils_wis(const struct char_data *ch);
+void char_set_aff_abils_wis(struct char_data *ch, int8_t v);
+int8_t char_get_aff_abils_con(const struct char_data *ch);
+void char_set_aff_abils_con(struct char_data *ch, int8_t v);
+int8_t char_get_aff_abils_cha(const struct char_data *ch);
+void char_set_aff_abils_cha(struct char_data *ch, int8_t v);
 
 double char_get_mutboost(struct char_data *ch);
 double char_get_speedi(struct char_data *ch);
@@ -146,129 +185,227 @@ bool char_is_inferior(const struct char_data *ch);
 bool char_is_weighted(struct char_data *ch);
 
 
-#define GET_EXP(ch)	  ((ch)->exp)
+int64_t char_get_exp(const struct char_data *ch);
+void char_set_exp(struct char_data *ch, int64_t v);
 /*
  * Changed GET_AC to GET_ARMOR so that code with GET_AC will need to be
  * looked at to see if it needs to change before being converted to use
  * GET_ARMOR
  */
 bool char_is_spoiled(const struct char_data *ch);
-#define GET_DEATH_TYPE(ch) ((ch)->death_type)
-#define GET_SLEEPT(ch)    ((ch)->sleeptime)
-#define GET_FOODR(ch)     ((ch)->foodr)
-#define GET_ALT(ch)       ((ch)->altitude)
-#define GET_CHARGE(ch)    ((ch)->charge)
-#define GET_CHARGETO(ch)  ((ch)->chargeto)
-#define GET_ARMOR(ch)     ((ch)->armor)
-#define GET_ARMOR_LAST(ch) ((ch)->armor_last)
+int char_get_death_type(const struct char_data *ch);
+void char_set_death_type(struct char_data *ch, int v);
+int char_get_sleeptime(const struct char_data *ch);
+void char_set_sleeptime(struct char_data *ch, int v);
+int char_get_foodr(const struct char_data *ch);
+void char_set_foodr(struct char_data *ch, int v);
+int char_get_altitude(const struct char_data *ch);
+void char_set_altitude(struct char_data *ch, int v);
+int64_t char_get_charge(const struct char_data *ch);
+void char_set_charge(struct char_data *ch, int64_t v);
+int64_t char_get_chargeto(const struct char_data *ch);
+void char_set_chargeto(struct char_data *ch, int64_t v);
+int char_get_armor(const struct char_data *ch);
+void char_set_armor(struct char_data *ch, int v);
 #define GET_HIT(ch)	      (getCurPL(ch))
 #define GET_MAX_HIT(ch)	  (getEffMaxPL(ch))
 #define GET_MAX_MOVE(ch)  (getMaxST(ch))
 #define GET_MAX_MANA(ch)  (getMaxKI(ch))
-#define GET_KI(ch)	  ((ch)->ki)
-#define GET_MAX_KI(ch)    ((ch)->max_ki)
-#define GET_DROOM(ch)     ((ch)->droom)
-#define GET_OVERFLOW(ch)  ((ch)->overf)
-#define GET_SPAM(ch)      ((ch)->spam)
-#define GET_LPLAY(ch)     ((ch)->lastpl)
-#define GET_DTIME(ch)     ((ch)->deathtime)
-#define GET_RTIME(ch)     ((ch)->rewtime)
-#define GET_DCOUNT(ch)    ((ch)->dcount)
-#define GET_BOARD(ch, i)  ((ch)->lboard[i])
-#define GET_LIMBS(ch, i)  ((ch)->limbs[i])
+int64_t char_get_ki(const struct char_data *ch);
+void char_set_ki(struct char_data *ch, int64_t v);
+int64_t char_get_max_ki(const struct char_data *ch);
+void char_set_max_ki(struct char_data *ch, int64_t v);
+room_vnum char_get_droom(const struct char_data *ch);
+void char_set_droom(struct char_data *ch, room_vnum v);
+int char_get_overf(const struct char_data *ch);
+void char_set_overf(struct char_data *ch, int v);
+int char_get_spam(const struct char_data *ch);
+void char_set_spam(struct char_data *ch, int v);
+time_t char_get_lastpl(const struct char_data *ch);
+void char_set_lastpl(struct char_data *ch, time_t v);
+time_t char_get_deathtime(const struct char_data *ch);
+void char_set_deathtime(struct char_data *ch, time_t v);
+time_t char_get_rewtime(const struct char_data *ch);
+void char_set_rewtime(struct char_data *ch, time_t v);
+int char_get_dcount(const struct char_data *ch);
+void char_set_dcount(struct char_data *ch, int v);
+time_t char_get_lboard(const struct char_data *ch, int i);
+void char_set_lboard(struct char_data *ch, int i, time_t v);
 // why is this i-1? Because whoever wrote it didn't know how C arrays work.
 // We'll be replacing the limb system anyways so fuck this macro.
-#define GET_LIMBCOND(ch, i) ((ch)->limb_condition[i-1])
-#define GET_SONG(ch)      ((ch)->powerattack)
-#define GET_BONUS(ch, i)  ((ch)->bonuses[i])
-#define GET_TRANSCOST(ch, i) ((ch)->transcost[i-1])
-#define GET_CCPOINTS(ch)  ((ch)->ccpoints)
-#define GET_NEGCOUNT(ch)  ((ch)->negcount)
-#define GET_GENOME(ch, i)    ((ch)->genome[i])
+int char_get_limb_condition(const struct char_data *ch, int i);
+void char_set_limb_condition(struct char_data *ch, int i, int v);
+int char_get_powerattack(const struct char_data *ch);
+void char_set_powerattack(struct char_data *ch, int v);
+int char_get_bonuses(const struct char_data *ch, int i);
+void char_set_bonuses(struct char_data *ch, int i, int v);
+int char_get_transcost(const struct char_data *ch, int i);
+void char_set_transcost(struct char_data *ch, int i, int v);
+int char_get_ccpoints(const struct char_data *ch);
+void char_set_ccpoints(struct char_data *ch, int v);
+int char_get_negcount(const struct char_data *ch);
+void char_set_negcount(struct char_data *ch, int v);
+int char_get_genome(const struct char_data *ch, int i);
+void char_set_genome(struct char_data *ch, int i, int v);
 bool char_has_genome(const struct char_data *ch, int i);
-#define COMBO(ch)         ((ch)->combo)
-#define LASTATK(ch)       ((ch)->lastattack)
-#define COMBHITS(ch)      ((ch)->combhits)
-#define GET_AURA(ch)      ((ch)->aura)
-#define GET_RADAR1(ch)    ((ch)->radar1)
-#define GET_RADAR2(ch)    ((ch)->radar2)
-#define GET_RADAR3(ch)    ((ch)->radar3)
-#define GET_PING(ch)      ((ch)->ping)
-#define GET_SLOTS(ch)     ((ch)->skill_slots)
-#define GET_TGROWTH(ch)   ((ch)->tail_growth)
-#define GET_RMETER(ch)    ((ch)->rage_meter)
-#define GET_PERSONALITY(ch) ((ch)->personality)
-#define GET_COMBINE(ch)   ((ch)->combine)
-#define GET_PREFERENCE(ch) ((ch)->preference)
-#define GET_RELAXCOUNT(ch) ((ch)->relax_count)
-#define GET_BLESSLVL(ch)  ((ch)->blesslvl)
-#define GET_ASB(ch)       ((ch)->asb)
-#define GET_REGEN(ch)     ((ch)->regen)
+int char_get_combo(const struct char_data *ch);
+void char_set_combo(struct char_data *ch, int v);
+int char_get_lastattack(const struct char_data *ch);
+void char_set_lastattack(struct char_data *ch, int v);
+int char_get_combhits(const struct char_data *ch);
+void char_set_combhits(struct char_data *ch, int v);
+int char_get_aura(const struct char_data *ch);
+void char_set_aura(struct char_data *ch, int v);
+room_vnum char_get_radar1(const struct char_data *ch);
+void char_set_radar1(struct char_data *ch, room_vnum v);
+room_vnum char_get_radar2(const struct char_data *ch);
+void char_set_radar2(struct char_data *ch, room_vnum v);
+room_vnum char_get_radar3(const struct char_data *ch);
+void char_set_radar3(struct char_data *ch, room_vnum v);
+int char_get_ping(const struct char_data *ch);
+void char_set_ping(struct char_data *ch, int v);
+int char_get_skill_slots(const struct char_data *ch);
+void char_set_skill_slots(struct char_data *ch, int v);
+int char_get_tail_growth(const struct char_data *ch);
+void char_set_tail_growth(struct char_data *ch, int v);
+int char_get_rage_meter(const struct char_data *ch);
+void char_set_rage_meter(struct char_data *ch, int v);
+int char_get_personality(const struct char_data *ch);
+void char_set_personality(struct char_data *ch, int v);
+int char_get_combine(const struct char_data *ch);
+void char_set_combine(struct char_data *ch, int v);
+int char_get_preference(const struct char_data *ch);
+void char_set_preference(struct char_data *ch, int v);
+int char_get_relax_count(const struct char_data *ch);
+void char_set_relax_count(struct char_data *ch, int v);
+int char_get_blesslvl(const struct char_data *ch);
+void char_set_blesslvl(struct char_data *ch, int v);
+int char_get_asb(const struct char_data *ch);
+void char_set_asb(struct char_data *ch, int v);
+int char_get_regen(const struct char_data *ch);
+void char_set_regen(struct char_data *ch, int v);
 double char_get_blessbonus(struct char_data *ch);
 double char_get_poself(struct char_data *ch);
 double char_get_posebonus(struct char_data *ch);
 double char_get_lifebonus(struct char_data *ch);
 double char_get_lifebonuses(struct char_data *ch);
-#define GET_LIFEPERC(ch)  ((ch)->lifeperc)
-#define GET_STUPIDKISS(ch) ((ch)->stupidkiss)
-#define GET_SPEEDBOOST(ch) ((ch)->speedboost)
-#define GET_BACKSTAB_COOL(ch) ((ch)->backstabcool)
-#define GET_COOLDOWN(ch)  ((ch)->con_cooldown)
-#define GET_BARRIER(ch)   ((ch)->barrier)
-#define GET_GOLD(ch)	  ((ch)->gold)
-#define GET_KAIOKEN(ch)   ((ch)->kaioken)
-#define GET_BOOSTS(ch)    ((ch)->boosts)
-#define MAJINIZED(ch)     ((ch)->majinize)
-#define GET_MAJINIZED(ch) ((ch)->majinizer)
-#define GET_FURY(ch)      ((ch)->fury)
-#define GET_UP(ch)        ((ch)->upgrade)
-#define GET_FORGETING(ch) ((ch)->forgeting)
-#define GET_FORGET_COUNT(ch) ((ch)->forgetcount)
-#define GET_BANK_GOLD(ch) ((ch)->bank_gold)
-#define GET_POLE_BONUS(ch) ((ch)->accuracy)
-#define GET_FISHSTATE(ch)  ((ch)->fishstate)
-#define GET_FISHD(ch)     ((ch)->accuracy_mod)
-#define GET_SPELLFAIL(ch) ((ch)->spellfail)
-#define GET_ARMORCHECK(ch) ((ch)->armorcheck)
-#define GET_ARMORCHECKALL(ch) ((ch)->armorcheckall)
-#define GET_MOLT_EXP(ch)  ((ch)->moltexp)
-#define GET_MOLT_LEVEL(ch) ((ch)->moltlevel)
-#define GET_SDCOOLDOWN(ch) ((ch)->con_sdcooldown)
-#define GET_INGESTLEARNED(ch) ((ch)->ingestLearned)
-#define GET_POS(ch)		((ch)->position)
-#define GET_IDNUM(ch)		((ch)->idnum)
-#define GET_ID(x)		((x)->id)
-#define IS_CARRYING_W(ch)	((ch)->carry_weight)
-#define IS_CARRYING_N(ch)	((ch)->carry_items)
-#define FIGHTING(ch)		((ch)->fighting)
-#define GET_POWERATTACK(ch)	((ch)->powerattack)
-#define GET_GROUPKILLS(ch)	((ch)->combatexpertise)
-#define GET_SAVE_BASE(ch, i)	((ch)->saving_throw[i])
-#define GET_SAVE_MOD(ch, i)	((ch)->apply_saving_throw[i])
+int char_get_lifeperc(const struct char_data *ch);
+void char_set_lifeperc(struct char_data *ch, int v);
+short char_get_stupidkiss(const struct char_data *ch);
+void char_set_stupidkiss(struct char_data *ch, short v);
+int char_get_speedboost(const struct char_data *ch);
+void char_set_speedboost(struct char_data *ch, int v);
+int char_get_backstabcool(const struct char_data *ch);
+void char_set_backstabcool(struct char_data *ch, int v);
+int char_get_con_cooldown(const struct char_data *ch);
+void char_set_con_cooldown(struct char_data *ch, int v);
+int64_t char_get_barrier(const struct char_data *ch);
+void char_set_barrier(struct char_data *ch, int64_t v);
+int char_get_gold(const struct char_data *ch);
+void char_set_gold(struct char_data *ch, int v);
+int char_get_kaioken(const struct char_data *ch);
+void char_set_kaioken(struct char_data *ch, int v);
+int char_get_boosts(const struct char_data *ch);
+void char_set_boosts(struct char_data *ch, int v);
+int char_get_majinize(const struct char_data *ch);
+void char_set_majinize(struct char_data *ch, int v);
+int64_t char_get_majinizer(const struct char_data *ch);
+void char_set_majinizer(struct char_data *ch, int64_t v);
+short char_get_fury(const struct char_data *ch);
+void char_set_fury(struct char_data *ch, short v);
+int char_get_upgrade(const struct char_data *ch);
+void char_set_upgrade(struct char_data *ch, int v);
+int char_get_forgeting(const struct char_data *ch);
+void char_set_forgeting(struct char_data *ch, int v);
+int char_get_forgetcount(const struct char_data *ch);
+void char_set_forgetcount(struct char_data *ch, int v);
+int char_get_bank_gold(const struct char_data *ch);
+void char_set_bank_gold(struct char_data *ch, int v);
+int char_get_accuracy(const struct char_data *ch);
+void char_set_accuracy(struct char_data *ch, int v);
+int char_get_fishstate(const struct char_data *ch);
+void char_set_fishstate(struct char_data *ch, int v);
+int char_get_accuracy_mod(const struct char_data *ch);
+void char_set_accuracy_mod(struct char_data *ch, int v);
+int16_t char_get_spellfail(const struct char_data *ch);
+void char_set_spellfail(struct char_data *ch, int16_t v);
+int16_t char_get_armorcheck(const struct char_data *ch);
+void char_set_armorcheck(struct char_data *ch, int16_t v);
+int16_t char_get_armorcheckall(const struct char_data *ch);
+void char_set_armorcheckall(struct char_data *ch, int16_t v);
+int64_t char_get_moltexp(const struct char_data *ch);
+void char_set_moltexp(struct char_data *ch, int64_t v);
+int char_get_moltlevel(const struct char_data *ch);
+void char_set_moltlevel(struct char_data *ch, int v);
+int char_get_con_sdcooldown(const struct char_data *ch);
+void char_set_con_sdcooldown(struct char_data *ch, int v);
+int char_get_ingestLearned(const struct char_data *ch);
+void char_set_ingestLearned(struct char_data *ch, int v);
+int8_t char_get_position(const struct char_data *ch);
+void char_set_position(struct char_data *ch, int8_t v);
+int32_t char_get_idnum(const struct char_data *ch);
+void char_set_idnum(struct char_data *ch, int32_t v);
+int32_t char_get_id(const struct char_data *ch);
+void char_set_id(struct char_data *ch, int32_t v);
+int char_get_carry_weight(const struct char_data *ch);
+void char_set_carry_weight(struct char_data *ch, int v);
+int8_t char_get_carry_items(const struct char_data *ch);
+void char_set_carry_items(struct char_data *ch, int8_t v);
+struct char_data *char_get_fighting(const struct char_data *ch);
+void char_set_fighting(struct char_data *ch, struct char_data *v);
+int char_get_combatexpertise(const struct char_data *ch);
+void char_set_combatexpertise(struct char_data *ch, int v);
+int16_t char_get_saving_throw(const struct char_data *ch, int i);
+void char_set_saving_throw(struct char_data *ch, int i, int16_t v);
+int16_t char_get_apply_saving_throw(const struct char_data *ch, int i);
+void char_set_apply_saving_throw(struct char_data *ch, int i, int16_t v);
 int char_get_save(const struct char_data *ch, int i);
-#define GET_ALIGNMENT(ch)	((ch)->alignment)
-#define GET_ETHIC_ALIGNMENT(ch)	((ch)->alignment_ethic)
-#define SITS(ch)                ((ch)->sits)
-#define MINDLINK(ch)            ((ch)->mindlink)
-#define LINKER(ch)              ((ch)->linker)
-#define LASTHIT(ch)             ((ch)->lasthit)
-#define DRAGGING(ch)            ((ch)->drag)
-#define DRAGGED(ch)             ((ch)->dragged)
-#define GRAPPLING(ch)           ((ch)->grappling)
-#define GRAPPLED(ch)            ((ch)->grappled)
-#define GRAPTYPE(ch)            ((ch)->grap)
-#define GET_ORIGINAL(ch)        ((ch)->original)
-#define GET_CLONES(ch)          ((ch)->clones)
-#define GET_DEFENDER(ch)        ((ch)->defender)
-#define GET_DEFENDING(ch)       ((ch)->defending)
-#define BLOCKS(ch)              ((ch)->blocks)
-#define BLOCKED(ch)             ((ch)->blocked)
-#define ABSORBING(ch)           ((ch)->absorbing)
-#define ABSORBBY(ch)            ((ch)->absorbby)
-#define GET_EAVESDROP(ch)       ((ch)->listenroom)
-#define GET_EAVESDIR(ch)        ((ch)->eavesdir)
-#define GET_ABSORBS(ch)         ((ch)->absorbs)
-#define GET_LINTEREST(ch)       ((ch)->lastint)
+int char_get_alignment(const struct char_data *ch);
+void char_set_alignment(struct char_data *ch, int v);
+int char_get_alignment_ethic(const struct char_data *ch);
+void char_set_alignment_ethic(struct char_data *ch, int v);
+struct obj_data *char_get_sits(const struct char_data *ch);
+void char_set_sits(struct char_data *ch, struct obj_data *v);
+struct char_data *char_get_mindlink(const struct char_data *ch);
+void char_set_mindlink(struct char_data *ch, struct char_data *v);
+int char_get_linker(const struct char_data *ch);
+void char_set_linker(struct char_data *ch, int v);
+int char_get_lasthit(const struct char_data *ch);
+void char_set_lasthit(struct char_data *ch, int v);
+struct char_data *char_get_drag(const struct char_data *ch);
+void char_set_drag(struct char_data *ch, struct char_data *v);
+struct char_data *char_get_dragged(const struct char_data *ch);
+void char_set_dragged(struct char_data *ch, struct char_data *v);
+struct char_data *char_get_grappling(const struct char_data *ch);
+void char_set_grappling(struct char_data *ch, struct char_data *v);
+struct char_data *char_get_grappled(const struct char_data *ch);
+void char_set_grappled(struct char_data *ch, struct char_data *v);
+int char_get_grap(const struct char_data *ch);
+void char_set_grap(struct char_data *ch, int v);
+struct char_data *char_get_original(const struct char_data *ch);
+void char_set_original(struct char_data *ch, struct char_data *v);
+short char_get_clones(const struct char_data *ch);
+void char_set_clones(struct char_data *ch, short v);
+struct char_data *char_get_defender(const struct char_data *ch);
+void char_set_defender(struct char_data *ch, struct char_data *v);
+struct char_data *char_get_defending(const struct char_data *ch);
+void char_set_defending(struct char_data *ch, struct char_data *v);
+struct char_data *char_get_blocks(const struct char_data *ch);
+void char_set_blocks(struct char_data *ch, struct char_data *v);
+struct char_data *char_get_blocked(const struct char_data *ch);
+void char_set_blocked(struct char_data *ch, struct char_data *v);
+struct char_data *char_get_absorbing(const struct char_data *ch);
+void char_set_absorbing(struct char_data *ch, struct char_data *v);
+struct char_data *char_get_absorbby(const struct char_data *ch);
+void char_set_absorbby(struct char_data *ch, struct char_data *v);
+room_vnum char_get_listenroom(const struct char_data *ch);
+void char_set_listenroom(struct char_data *ch, room_vnum v);
+int char_get_eavesdir(const struct char_data *ch);
+void char_set_eavesdir(struct char_data *ch, int v);
+int char_get_absorbs(const struct char_data *ch);
+void char_set_absorbs(struct char_data *ch, int v);
+time_t char_get_lastint(const struct char_data *ch);
+void char_set_lastint(struct char_data *ch, time_t v);
 
 #define GET_COND(ch, i)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->conditions[(i)]))
 #define GET_LOADROOM(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->load_room))
@@ -295,24 +432,32 @@ int char_get_save(const struct char_data *ch, int i);
 #define GET_HOST(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->host))
 #define GET_HISTORY(ch, i)      CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->comm_hist[i]))
 
-#define GET_SKILL_BONUS(ch, i)		(ch->skills[i].mod)
-#define GET_SKILL_PERF(ch, i)           (ch->skills[i].perf)
+int8_t char_get_skills_mod(const struct char_data *ch, int i);
+void char_set_skills_mod(struct char_data *ch, int i, int8_t v);
+int8_t char_get_skills_perf(const struct char_data *ch, int i);
+void char_set_skills_perf(struct char_data *ch, int i, int8_t v);
 #define SET_SKILL_BONUS(ch, i, value)	do { (ch)->skills[i].mod = value; } while (0)
 #define SET_SKILL_PERF(ch, i, value)    do { (ch)->skills[i].perf = value; } while (0)
-#define GET_SKILL_BASE(ch, i)		(ch->skills[i].base)
+int8_t char_get_skills_base(const struct char_data *ch, int i);
+void char_set_skills_base(struct char_data *ch, int i, int8_t v);
 int char_get_skill(const struct char_data *ch, int i);
 #define SET_SKILL(ch, i, val)		do { (ch)->skills[i].base = val; } while(0)
-#define BODY_PARTS(ch)  ((ch)->bodyparts)
+bitvector_t *char_get_bodyparts(const struct char_data *ch);
 
-#define GET_EQ(ch, i)		((ch)->equipment[i])
+struct obj_data *char_get_equipment(const struct char_data *ch, int i);
+void char_set_equipment(struct char_data *ch, int i, struct obj_data *v);
 
 spec_proc_func char_get_mob_spec(const struct char_data *ch);
-#define GET_MOB_RNUM(mob)	((mob)->nr)
+mob_rnum char_get_nr(const struct char_data *ch);
+void char_set_nr(struct char_data *ch, mob_rnum v);
 mob_vnum char_get_mob_vnum(const struct char_data *mob);
 
-#define GET_DEFAULT_POS(ch)	((ch)->mob_specials.default_pos)
-#define MEMORY(ch)		((ch)->mob_specials.memory)
-#define MOB_COOLDOWN(ch)        ((ch)->cooldown)
+int8_t char_get_mob_specials_default_pos(const struct char_data *ch);
+void char_set_mob_specials_default_pos(struct char_data *ch, int8_t v);
+memory_rec *char_get_mob_specials_memory(const struct char_data *ch);
+void char_set_mob_specials_memory(struct char_data *ch, memory_rec *v);
+int char_get_cooldown(const struct char_data *ch);
+void char_set_cooldown(struct char_data *ch, int v);
 
 /* STRENGTH_APPLY_INDEX is no longer needed with the death of GET_ADD */
 /* #define STRENGTH_APPLY_INDEX(ch) \
@@ -336,12 +481,14 @@ bool char_is_neutral(const struct char_data *ch);
 int char_align_type(const struct char_data *ch);
 
 bool char_in_arena(const struct char_data *ch);
-#define ARENA_IDNUM(ch) ((ch)->arenawatch)
+int char_get_arenawatch(const struct char_data *ch);
+void char_set_arenawatch(struct char_data *ch, int v);
 
 /* These three deprecated. */
-#define WAIT_STATE(ch, cycle) do { GET_WAIT_STATE(ch) = (cycle); } while(0)
+#define WAIT_STATE(ch, cycle) do { char_set_wait(ch, (cycle)); } while(0)
 /* New, preferred macro. */
-#define GET_WAIT_STATE(ch)    ((ch)->wait)
+int char_get_wait(const struct char_data *ch);
+void char_set_wait(struct char_data *ch, int v);
 
 #define SENDOK(ch)    (((ch)->desc || SCRIPT_CHECK((ch), MTRIG_ACT)) && \
                       (to_sleeping || char_is_awake(ch)) && \
@@ -390,9 +537,10 @@ char *obj_shortdesc_for(const struct obj_data *obj, const struct char_data *vict
 
 char *obj_fname_for(const struct obj_data *obj, const struct char_data *vict);
 
-#define EXIT(ch, door)  (world[IN_ROOM(ch)].dir_option[door])
-#define _2ND_EXIT(ch, door) (world[EXIT(ch, door)->to_room].dir_option[door]) 
-#define _3RD_EXIT(ch, door) (world[_2ND_EXIT(ch, door)->to_room].dir_option[door])
+struct room_direction_data * char_get_exit(const struct char_data *ch, int door);
+void char_set_exit(struct char_data *ch, int door, struct room_direction_data * v);
+struct room_direction_data * char_get_exit2(const struct char_data *ch, int door);
+void char_set_exit2(struct char_data *ch, int door, struct room_direction_data * v);
 
 
 bool char_can_go(const struct char_data *ch, int door);
@@ -511,16 +659,16 @@ char *char_mafe(const struct char_data *ch);
 
 /* returns the number of spells per slot */
 #define GET_SPELL_LEVEL(ch, i)	((ch)->player_specials->spell_level[i])
-#define HAS_FEAT(ch, i)		((ch)->feats[i])
+int8_t char_get_feats(const struct char_data *ch, int i);
+void char_set_feats(struct char_data *ch, int i, int8_t v);
 bool char_has_combat_feat(const struct char_data *ch, int i, int j);
 #define SET_COMBAT_FEAT(ch,i,j)	SET_BIT_AR((ch)->combat_feats[(i)], (j))
 bool char_has_school_feat(const struct char_data *ch, int i, bitvector_t j);
 #define SET_SCHOOL_FEAT(ch,i,j)	SET_BIT((ch)->school_feats[(i)], (j))
-#define GET_BAB(ch)		GET_POLE_BONUS(ch)
+#define GET_BAB(ch)		char_get_accuracy(ch)
 #define SET_FEAT(ch, i, value)	do { CHECK_PLAYER_SPECIAL((ch), (ch)->feats[i]) = value; } while(0)
 #define GET_FEAT_POINTS(ch)	(ch->player_specials->feat_points)
 
-#define MOB_LOADROOM(ch)      ((ch)->hometown)  /*hometown not used for mobs*/
 #define GET_MURDER(ch)          CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->murder))
 
 #define GET_PAGE_LENGTH(ch)         CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->page_length))

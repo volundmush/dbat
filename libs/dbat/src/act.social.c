@@ -68,7 +68,7 @@ ACMD(do_action)
   if (!vict) {
     if (action->char_obj_found) {
       targ = get_obj_in_list_vis(ch, arg, NULL, ch->carrying);
-      if (!targ) targ = get_obj_in_list_vis(ch, arg, NULL, world[IN_ROOM(ch)].contents);
+      if (!targ) targ = get_obj_in_list_vis(ch, arg, NULL, world[char_get_in_room(ch)].contents);
       if (targ) {
         act(action->char_obj_found, action->hide, ch, targ, 0, TO_CHAR);
         act(action->others_obj_found, action->hide, ch, targ, 0, TO_ROOM);
@@ -91,7 +91,7 @@ ACMD(do_action)
     return;
   } 
   
-    if (GET_POS(vict) < action->min_victim_position)
+    if (char_get_position(vict) < action->min_victim_position)
       act("$N is not in a proper position for that.", FALSE, ch, 0, vict, TO_CHAR | TO_SLEEP);
     else {
     if (*part) {
@@ -122,13 +122,13 @@ ACMD(do_insult)
 
 	switch (rand_number(0, 2)) {
 	case 0:
-	  if (GET_SEX(ch) == SEX_MALE) {
-	    if (GET_SEX(victim) == SEX_MALE)
+	  if (char_get_sex(ch) == SEX_MALE) {
+	    if (char_get_sex(victim) == SEX_MALE)
 	      act("$n accuses you of fighting like a woman!", FALSE, ch, 0, victim, TO_VICT);
 	    else
 	      act("$n says that women can't fight.", FALSE, ch, 0, victim, TO_VICT);
 	  } else {		/* Ch == Woman */
-	    if (GET_SEX(victim) == SEX_MALE)
+	    if (char_get_sex(victim) == SEX_MALE)
 	      act("$n accuses you of having the smallest... (brain?)",
 		  FALSE, ch, 0, victim, TO_VICT);
 	    else
@@ -447,12 +447,12 @@ ACMD(do_gmote)
         break; 
 
   if ((act_nr = find_action(cmd)) < 0) { 
-    snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s %s@n@D]", GET_ADMLEVEL(ch) < 1 ? ch->desc->user : char_get_name(ch), argument);
+    snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s %s@n@D]", char_get_admlevel(ch) < 1 ? ch->desc->user : char_get_name(ch), argument);
     act(buf, FALSE, ch, 0, vict, TO_GMOTE);
     return;
   }
 
-  if (rroom_flagged(IN_ROOM(ch), ROOM_SOUNDPROOF)) {
+  if (rroom_flagged(char_get_in_room(ch), ROOM_SOUNDPROOF)) {
     send_to_char(ch, "The walls seem to absorb your actions.\r\n");
     return;
   }
@@ -478,7 +478,7 @@ action = &soc_mess_list[act_nr];
     }
     snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s@D]@n", action->others_auto);
   } else {
-    if (GET_POS(vict) < action->min_victim_position) {
+    if (char_get_position(vict) < action->min_victim_position) {
       act("$N is not in a proper position for that.",
            FALSE, ch, 0, vict, TO_CHAR | TO_SLEEP);
       return;

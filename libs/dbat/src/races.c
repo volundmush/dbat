@@ -97,10 +97,10 @@ int racial_ability_mods[][6] = {
 
 void racial_ability_modifiers(struct char_data *ch) {
     int chrace = 0;
-    if (GET_RACE(ch) >= NUM_RACES || GET_RACE(ch) < 0) {
-        log("SYSERR: Unknown race %d in racial_ability_modifiers", GET_RACE(ch));
+    if (char_get_race(ch) >= NUM_RACES || char_get_race(ch) < 0) {
+        log("SYSERR: Unknown race %d in racial_ability_modifiers", char_get_race(ch));
     } else {
-        chrace = GET_RACE(ch);
+        chrace = char_get_race(ch);
     }
 
     /*ch->real_abils.str += racial_ability_mods[chrace][0];
@@ -175,27 +175,27 @@ void set_height_and_weight_by_race(struct char_data *ch) {
         return;
     }
 
-    race = GET_RACE(ch);
-    sex = GET_SEX(ch);
+    race = char_get_race(ch);
+    sex = char_get_sex(ch);
     if (sex < SEX_NEUTRAL || sex >= NUM_SEX) {
         log("Invalid gender in set_height_and_weight_by_race: %d", sex);
         sex = SEX_NEUTRAL;
     }
     if (race <= RACE_UNDEFINED || race >= NUM_RACES) {
-        log("Invalid gender in set_height_and_weight_by_race: %d", GET_SEX(ch));
+        log("Invalid gender in set_height_and_weight_by_race: %d", char_get_sex(ch));
         race = RACE_UNDEFINED + 1; /* first defined race */
     }
 
     mod = dice(2, hw_info[race].heightdie);
-    GET_HEIGHT(ch) = hw_info[race].height[sex] + mod;
+    char_set_height(ch, hw_info[race].height[sex] + mod);
     mod *= hw_info[race].weightfac;
     mod /= 100;
-    GET_WEIGHT(ch) = hw_info[race].weight[sex] + mod;
+    char_set_weight(ch, hw_info[race].weight[sex] + mod);
 }
 
 
 int invalid_race(struct char_data *ch, struct obj_data *obj) {
-    if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
+    if (char_get_admlevel(ch) >= ADMLVL_IMMORT)
         return FALSE;
 
     if (obj_flagged(obj, ITEM_ANTI_HUMAN) && char_is_human(ch))
@@ -255,17 +255,17 @@ int get_size_bonus(int sz) {
 
 
 int wield_type(int chsize, const struct obj_data *weap) {
-    if (GET_OBJ_TYPE(weap) != ITEM_WEAPON)
+    if (obj_get_type_flag(weap) != ITEM_WEAPON)
         return obj_flagged(weap, ITEM_2H) ? WIELD_TWOHAND : WIELD_ONEHAND;
 
-    if (chsize > GET_OBJ_SIZE(weap)) {
+    if (chsize > obj_get_size(weap)) {
         return WIELD_LIGHT;
-    } else if (chsize >= GET_OBJ_SIZE(weap) - 1) {
+    } else if (chsize >= obj_get_size(weap) - 1) {
         return WIELD_ONEHAND;
-    } else if (chsize < GET_OBJ_SIZE(weap) - 1) {
+    } else if (chsize < obj_get_size(weap) - 1) {
         return WIELD_TWOHAND;
     } else {
-        log("unknown size vector in wield_type: chsize=%d, weapsize=%d", chsize, GET_OBJ_SIZE(weap));
+        log("unknown size vector in wield_type: chsize=%d, weapsize=%d", chsize, obj_get_size(weap));
         return WIELD_NONE;
     }
 }
@@ -326,11 +326,11 @@ void racial_body_parts(struct char_data *ch) {
     int i;
 
     for (i = 1; i < NUM_WEARS; i++) {
-        if (race_bodyparts[GET_RACE(ch)][i]) {
-            SET_BIT_AR(BODY_PARTS(ch), i);
+        if (race_bodyparts[char_get_race(ch)][i]) {
+            SET_BIT_AR(char_get_bodyparts(ch), i);
         } else {
             if (char_body_flagged(ch, i))
-                REMOVE_BIT_AR(BODY_PARTS(ch), i);
+                REMOVE_BIT_AR(char_get_bodyparts(ch), i);
         }
     }
 }
@@ -477,7 +477,7 @@ bool race_check_can_transform(char_data *ch) {
         return false;
     }
 
-    if (GET_KAIOKEN(ch) > 0) {
+    if (char_get_kaioken(ch) > 0) {
         send_to_char(ch, "You are in kaioken right now and can't transform!\r\n");
         return false;
     }
@@ -727,7 +727,7 @@ transform_bonus race_current_form(char_data *ch) {
     if (char_is_hoshijin(ch)) {
         transform_bonus hoshi_form;
         double bon_mult = 0;
-        switch (GET_PHASE(ch)) {
+        switch (char_get_starphase(ch)) {
             case 0: // death phase
                 return base_form;
             case 1: // birth phase
@@ -775,7 +775,7 @@ bool race_check_trans_unlock(char_data *ch, int tier) {
     // First, check for special requirements which are not 'paid'.
     switch (ch->race) {
         case RACE_BIO:
-            if(tier > 3-GET_ABSORBS(ch)) {
+            if(tier > 3-char_get_absorbs(ch)) {
                 send_to_char(ch, "You need to absorb something to transform!\r\n");
                 return false;
             }
@@ -783,7 +783,7 @@ bool race_check_trans_unlock(char_data *ch, int tier) {
         case RACE_MAJIN:
             switch (tier) {
                 case 2:
-                    if (GET_ABSORBS(ch) > 0) {
+                    if (char_get_absorbs(ch) > 0) {
                         send_to_char(ch, "You need to ingest someone before you can use that form.\r\n");
                         return false;
                     }
@@ -831,13 +831,13 @@ bool race_check_trans_unlock(char_data *ch, int tier) {
     }
 
     if (rpp_cost) {
-        if (GET_TRANSCOST(ch, tier) == FALSE) {
-            if (GET_RP(ch) < rpp_cost) {
+        if (char_get_transcost(ch, (tier)-1) == FALSE) {
+            if (char_get_rp(ch) < rpp_cost) {
                 send_to_char(ch, "You need %i RPP in order to unlock this transformation.\r\n", rpp_cost);
                 return false;
             } else {
-                GET_RP(ch) -= rpp_cost;
-                GET_TRANSCOST(ch, tier) = TRUE;
+                char_set_rp(ch, char_get_rp(ch) - (rpp_cost));
+                char_set_transcost(ch, (tier)-1, TRUE);
                 send_to_char(ch, "You pay %i RPP to permanently unlock this transformation!\r\n", rpp_cost);
             }
         }
@@ -855,7 +855,7 @@ bool race_check_trans_unlock(char_data *ch, int tier) {
     }
 
     if (ps_cost) {
-        if (GET_TRANSCOST(ch, tier) == FALSE) {
+        if (char_get_transcost(ch, (tier)-1) == FALSE) {
             if (GET_PRACTICES(ch, char_get_class(ch)) < 50) {
                 send_to_char(ch,
                              "You need %i practice points in order to obtain a transformation for the first time.\r\n",
@@ -863,7 +863,7 @@ bool race_check_trans_unlock(char_data *ch, int tier) {
                 return false;
             } else {
                 GET_PRACTICES(ch, char_get_class(ch)) -= 50;
-                GET_TRANSCOST(ch, tier) = TRUE;
+                char_set_transcost(ch, (tier)-1, TRUE);
                 send_to_char(ch, "You pay %i PS to permanently unlock this transformation!\r\n", ps_cost);
             }
         }
@@ -1089,7 +1089,7 @@ void race_display_forms(char_data *ch) {
 
 void race_display_trans_req(char_data *ch) {
 
-    switch (GET_TRANSCLASS(ch)) {
+    switch (char_get_transclass(ch)) {
         case 1:
             send_to_char(ch, "\r\n@RYou have @rterrible@R transformation BPL Requirements.@n\r\n");
             break;

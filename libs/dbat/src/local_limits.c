@@ -99,18 +99,18 @@ static void barrier_shed(struct char_data *ch)
     rate = 0.29;
   }
 
-  int64_t loss = (long double)(GET_BARRIER(ch)) * rate, recharge = 0;
+  int64_t loss = (long double)(char_get_barrier(ch)) * rate, recharge = 0;
 
   if (concentrate >= chance)
   {
     recharge = loss * 0.5;
   }
 
-  GET_BARRIER(ch) -= loss;
+  char_set_barrier(ch, char_get_barrier(ch) - (loss));
 
-  if (GET_BARRIER(ch) <= 0)
+  if (char_get_barrier(ch) <= 0)
   {
-    GET_BARRIER(ch) = 0;
+    char_set_barrier(ch, 0);
     act("@cYour barrier disappears.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@c$n@c's barrier disappears.@n", TRUE, ch, 0, 0, TO_ROOM);
   }
@@ -132,7 +132,7 @@ static void barrier_shed(struct char_data *ch)
 static void healthy_check(struct char_data *ch)
 {
 
-  if (!GET_BONUS(ch, BONUS_HEALTHY) || GET_POS(ch) != POS_SLEEPING)
+  if (!char_get_bonuses(ch, BONUS_HEALTHY) || char_get_position(ch) != POS_SLEEPING)
   {
     return;
   }
@@ -141,12 +141,12 @@ static void healthy_check(struct char_data *ch)
 
   if (char_aff_flagged(ch, AFF_SHOCKED) && roll >= chance)
   {
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SHOCKED);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_SHOCKED);
     change = TRUE;
   }
   if (char_aff_flagged(ch, AFF_MBREAK) && roll >= chance)
   {
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_MBREAK);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_MBREAK);
     change = TRUE;
   }
   if (is_affected(ch, AFF_WITHER) && roll >= chance)
@@ -157,7 +157,7 @@ static void healthy_check(struct char_data *ch)
   }
   if (char_aff_flagged(ch, AFF_CURSE) && roll >= chance)
   {
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_CURSE);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_CURSE);
     change = TRUE;
   }
   if (char_aff_flagged(ch, AFF_POISON) && roll >= chance)
@@ -188,8 +188,8 @@ static void healthy_check(struct char_data *ch)
   }
   if (char_aff_flagged(ch, AFF_KNOCKED) && roll >= chance)
   {
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_KNOCKED);
-    GET_POS(ch) = POS_SITTING;
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_KNOCKED);
+    char_set_position(ch, POS_SITTING);
     change = TRUE;
   }
   if (change == TRUE)
@@ -206,9 +206,9 @@ static int wearing_stardust(struct char_data *ch)
 
   for (i = 1; i < NUM_WEARS; i++)
   {
-    if (GET_EQ(ch, i))
+    if (char_get_equipment(ch, i))
     {
-      struct obj_data *obj = GET_EQ(ch, i);
+      struct obj_data *obj = char_get_equipment(ch, i);
       switch (obj_get_vnum(obj))
       {
       case 1110:
@@ -254,7 +254,7 @@ static int64_t mana_gain(struct char_data *ch)
   }
   else
   {
-    if (rroom_flagged(IN_ROOM(ch), ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75))
+    if (rroom_flagged(char_get_in_room(ch), ROOM_REGEN) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && rroom_get_dmg(char_get_in_room(ch)) >= 75))
     {
       if (char_is_konatsu(ch))
       {
@@ -273,7 +273,7 @@ static int64_t mana_gain(struct char_data *ch)
         gain = GET_MAX_MANA(ch) / 10;
       }
     }
-    else if (!rroom_flagged(IN_ROOM(ch), ROOM_REGEN))
+    else if (!rroom_flagged(char_get_in_room(ch), ROOM_REGEN))
     {
       if (char_is_konatsu(ch))
       {
@@ -287,7 +287,7 @@ static int64_t mana_gain(struct char_data *ch)
       {
         gain = GET_MAX_MANA(ch) / 12;
       }
-      if (rroom_flagged(IN_ROOM(ch), ROOM_BEDROOM))
+      if (rroom_flagged(char_get_in_room(ch), ROOM_BEDROOM))
       {
         gain += gain * 0.25;
       }
@@ -297,10 +297,10 @@ static int64_t mana_gain(struct char_data *ch)
       }
     }
     /* Position calculations    */
-    switch (GET_POS(ch))
+    switch (char_get_position(ch))
     {
     case POS_STANDING:
-      if (!char_is_hoshijin(ch) || (char_is_hoshijin(ch) && GET_PHASE(ch) <= 0))
+      if (!char_is_hoshijin(ch) || (char_is_hoshijin(ch) && char_get_starphase(ch) <= 0))
       {
         gain = gain / 4;
       }
@@ -313,59 +313,59 @@ static int64_t mana_gain(struct char_data *ch)
       gain = gain / 4;
       break;
     case POS_SLEEPING:
-      if (!SITS(ch))
+      if (!char_get_sits(ch))
       {
         gain *= 2;
       }
-      else if (obj_get_vnum(SITS(ch)) == 19090)
+      else if (obj_get_vnum(char_get_sits(ch)) == 19090)
       {
         gain *= 3;
         gain += gain * 0.1;
       }
-      else if (obj_get_vnum(SITS(ch)) == 19092)
+      else if (obj_get_vnum(char_get_sits(ch)) == 19092)
       {
         gain *= 3;
         gain += gain * 0.3;
       }
-      else if (SITS(ch) || char_is_arlian(ch))
+      else if (char_get_sits(ch) || char_is_arlian(ch))
       {
         gain *= 3;
       }
       break;
     case POS_RESTING:
-      if (!SITS(ch))
+      if (!char_get_sits(ch))
       {
         gain += (gain / 2);
       }
-      else if (obj_get_vnum(SITS(ch)) == 19090 && !char_is_arlian(ch))
+      else if (obj_get_vnum(char_get_sits(ch)) == 19090 && !char_is_arlian(ch))
       {
         gain *= 2;
         gain += gain * 0.1;
       }
-      else if (obj_get_vnum(SITS(ch)) == 19092 && !char_is_arlian(ch))
+      else if (obj_get_vnum(char_get_sits(ch)) == 19092 && !char_is_arlian(ch))
       {
         gain *= 2;
         gain += gain * 0.3;
       }
-      else if (SITS(ch) || char_is_arlian(ch))
+      else if (char_get_sits(ch) || char_is_arlian(ch))
       {
         gain *= 2;
       }
       break;
     case POS_SITTING:
-      if (!SITS(ch))
+      if (!char_get_sits(ch))
       {
         gain += (gain / 4);
       }
-      else if (obj_get_vnum(SITS(ch)) == 19090)
+      else if (obj_get_vnum(char_get_sits(ch)) == 19090)
       {
         gain += gain * 0.6;
       }
-      else if (obj_get_vnum(SITS(ch)) == 19092)
+      else if (obj_get_vnum(char_get_sits(ch)) == 19092)
       {
         gain += gain * 0.8;
       }
-      else if (SITS(ch) || char_is_arlian(ch))
+      else if (char_get_sits(ch) || char_is_arlian(ch))
       {
         gain += gain * 0.5;
       }
@@ -373,9 +373,9 @@ static int64_t mana_gain(struct char_data *ch)
     }
   }
 
-  if (IN_ROOM(ch) != NOWHERE)
+  if (char_get_in_room(ch) != NOWHERE)
   {
-    if (cook_element(IN_ROOM(ch)) == 1)
+    if (cook_element(char_get_in_room(ch)) == 1)
     {
       gain += (gain * 0.2);
     }
@@ -390,17 +390,17 @@ static int64_t mana_gain(struct char_data *ch)
   {
     gain += gain * 0.1;
   }
-  if (char_is_kanassan(ch) && rroom_sunken(IN_ROOM(ch)))
+  if (char_is_kanassan(ch) && rroom_sunken(char_get_in_room(ch)))
   {
     gain *= 16;
   }
 
-  if (char_is_hoshijin(ch) && GET_PHASE(ch) > 0)
+  if (char_is_hoshijin(ch) && char_get_starphase(ch) > 0)
   {
     gain *= 2;
   }
 
-  if (char_plr_flagged(ch, PLR_HEALT) && SITS(ch) != NULL)
+  if (char_plr_flagged(ch, PLR_HEALT) && char_get_sits(ch) != NULL)
   {
     gain *= 20;
   }
@@ -446,9 +446,9 @@ static int64_t mana_gain(struct char_data *ch)
     gain /= 5;
   }
 
-  if (GET_FOODR(ch) > 0 && rand_number(1, 2) == 2)
+  if (char_get_foodr(ch) > 0 && rand_number(1, 2) == 2)
   {
-    GET_FOODR(ch) -= 1;
+    char_set_foodr(ch, char_get_foodr(ch) - (1));
   }
 
   if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_HINTS) && rand_number(1, 5) == 5)
@@ -459,7 +459,7 @@ static int64_t mana_gain(struct char_data *ch)
   if (char_aff_flagged(ch, AFF_POISON))
     gain /= 4;
 
-  if (cook_element(IN_ROOM(ch)) == 1)
+  if (cook_element(char_get_in_room(ch)) == 1)
     gain *= 2;
 
   return (gain);
@@ -477,7 +477,7 @@ int64_t hit_gain(struct char_data *ch)
   }
   else
   {
-    if (rroom_flagged(IN_ROOM(ch), ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75))
+    if (rroom_flagged(char_get_in_room(ch), ROOM_REGEN) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && rroom_get_dmg(char_get_in_room(ch)) >= 75))
     {
       if (char_is_human(ch))
       {
@@ -500,7 +500,7 @@ int64_t hit_gain(struct char_data *ch)
         gain = GET_MAX_HIT(ch) / 10;
       }
     }
-    else if (!rroom_flagged(IN_ROOM(ch), ROOM_REGEN))
+    else if (!rroom_flagged(char_get_in_room(ch), ROOM_REGEN))
     {
       if (char_is_human(ch))
       {
@@ -522,17 +522,17 @@ int64_t hit_gain(struct char_data *ch)
       {
         gain = GET_MAX_HIT(ch) / 15;
       }
-      if (rroom_flagged(IN_ROOM(ch), ROOM_BEDROOM))
+      if (rroom_flagged(char_get_in_room(ch), ROOM_BEDROOM))
       {
         gain += gain * 0.25;
       }
     }
 
     /* Position calculations    */
-    switch (GET_POS(ch))
+    switch (char_get_position(ch))
     {
     case POS_STANDING:
-      if (!char_is_hoshijin(ch) || (char_is_hoshijin(ch) && GET_PHASE(ch) <= 0))
+      if (!char_is_hoshijin(ch) || (char_is_hoshijin(ch) && char_get_starphase(ch) <= 0))
       {
         gain = gain / 4;
       }
@@ -553,22 +553,22 @@ int64_t hit_gain(struct char_data *ch)
       {
         gain *= 3;
       }
-      else if (!SITS(ch))
+      else if (!char_get_sits(ch))
       {
         gain *= 2;
       }
-      else if (obj_get_vnum(SITS(ch)) == 19090)
+      else if (obj_get_vnum(char_get_sits(ch)) == 19090)
       {
         gain *= 3;
         gain += gain * 0.1;
       }
-      else if (SITS(ch))
+      else if (char_get_sits(ch))
       {
         gain *= 3;
       }
       break;
     case POS_RESTING:
-      if (!SITS(ch))
+      if (!char_get_sits(ch))
       {
         gain += (gain / 2);
       }
@@ -576,17 +576,17 @@ int64_t hit_gain(struct char_data *ch)
       {
         gain = gain * 1.5;
       }
-      else if (obj_get_vnum(SITS(ch)) == 19090 && !char_is_arlian(ch))
+      else if (obj_get_vnum(char_get_sits(ch)) == 19090 && !char_is_arlian(ch))
       {
         gain += gain * 1.1;
       }
-      else if (SITS(ch) || char_is_arlian(ch))
+      else if (char_get_sits(ch) || char_is_arlian(ch))
       {
         gain *= 2;
       }
       break;
     case POS_SITTING:
-      if (!SITS(ch))
+      if (!char_get_sits(ch))
       {
         gain += (gain / 4);
       }
@@ -594,11 +594,11 @@ int64_t hit_gain(struct char_data *ch)
       {
         gain = gain * 0.5;
       }
-      else if (obj_get_vnum(SITS(ch)) == 19090 && !char_is_arlian(ch))
+      else if (obj_get_vnum(char_get_sits(ch)) == 19090 && !char_is_arlian(ch))
       {
         gain += gain * 0.6;
       }
-      else if (SITS(ch) || char_is_arlian(ch))
+      else if (char_get_sits(ch) || char_is_arlian(ch))
       {
         gain += (gain * 0.5);
       }
@@ -615,16 +615,16 @@ int64_t hit_gain(struct char_data *ch)
   {
     gain += gain * 0.1;
   }
-  if (char_is_kanassan(ch) && rroom_sunken(IN_ROOM(ch)))
+  if (char_is_kanassan(ch) && rroom_sunken(char_get_in_room(ch)))
   {
     gain *= 16;
   }
 
-  if (char_is_hoshijin(ch) && GET_PHASE(ch) > 0)
+  if (char_is_hoshijin(ch) && char_get_starphase(ch) > 0)
   {
     gain *= 2;
   }
-  if (char_plr_flagged(ch, PLR_HEALT) && SITS(ch) != NULL)
+  if (char_plr_flagged(ch, PLR_HEALT) && char_get_sits(ch) != NULL)
   {
     gain *= 20;
   }
@@ -643,14 +643,14 @@ int64_t hit_gain(struct char_data *ch)
   if (char_plr_flagged(ch, PLR_FURY))
   {
     send_to_char(ch, "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_FURY);
+    REMOVE_BIT_AR(char_get_act(ch), PLR_FURY);
   }
 
   /* Fury Mode Loss for halfbreeds */
 
   if (char_aff_flagged(ch, AFF_POISON))
     gain /= 4;
-  if (cook_element(IN_ROOM(ch)) == 1)
+  if (cook_element(char_get_in_room(ch)) == 1)
     gain *= 2;
 
   if (!char_is_npc(ch))
@@ -661,9 +661,9 @@ int64_t hit_gain(struct char_data *ch)
     }
   }
 
-  if (GET_REGEN(ch) > 0)
+  if (char_get_regen(ch) > 0)
   {
-    gain += (gain * 0.01) * GET_REGEN(ch);
+    gain += (gain * 0.01) * char_get_regen(ch);
   }
 
   return (gain);
@@ -681,7 +681,7 @@ static int64_t move_gain(struct char_data *ch)
   }
   else
   {
-    if (rroom_flagged(IN_ROOM(ch), ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75))
+    if (rroom_flagged(char_get_in_room(ch), ROOM_REGEN) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && rroom_get_dmg(char_get_in_room(ch)) >= 75))
     {
       if (char_is_mutant(ch))
       {
@@ -696,7 +696,7 @@ static int64_t move_gain(struct char_data *ch)
         gain = GET_MAX_MOVE(ch) / 6;
       }
     }
-    else if (!rroom_flagged(IN_ROOM(ch), ROOM_REGEN))
+    else if (!rroom_flagged(char_get_in_room(ch), ROOM_REGEN))
     {
       if (char_is_mutant(ch))
       {
@@ -706,17 +706,17 @@ static int64_t move_gain(struct char_data *ch)
       {
         gain = GET_MAX_MOVE(ch) / 8;
       }
-      if (rroom_flagged(IN_ROOM(ch), ROOM_BEDROOM))
+      if (rroom_flagged(char_get_in_room(ch), ROOM_BEDROOM))
       {
         gain += gain * 0.25;
       }
     }
 
     /* Position calculations    */
-    switch (GET_POS(ch))
+    switch (char_get_position(ch))
     {
     case POS_STANDING:
-      if (!char_is_hoshijin(ch) || (char_is_hoshijin(ch) && GET_PHASE(ch) <= 0))
+      if (!char_is_hoshijin(ch) || (char_is_hoshijin(ch) && char_get_starphase(ch) <= 0))
       {
         gain = gain / 4;
       }
@@ -729,57 +729,57 @@ static int64_t move_gain(struct char_data *ch)
       gain = gain / 4;
       break;
     case POS_SLEEPING:
-      if (!SITS(ch))
+      if (!char_get_sits(ch))
       {
         gain *= 2;
       }
-      else if (obj_get_vnum(SITS(ch)) == 19090 && !char_is_arlian(ch))
+      else if (obj_get_vnum(char_get_sits(ch)) == 19090 && !char_is_arlian(ch))
       {
         gain *= 3;
         gain += gain * 0.1;
       }
-      else if (obj_get_vnum(SITS(ch)) == 19091 && !char_is_arlian(ch))
+      else if (obj_get_vnum(char_get_sits(ch)) == 19091 && !char_is_arlian(ch))
       {
         gain *= 3;
         gain += gain * 0.3;
       }
-      else if (SITS(ch) || char_is_arlian(ch))
+      else if (char_get_sits(ch) || char_is_arlian(ch))
       {
         gain *= 3;
       }
       break;
     case POS_RESTING:
-      if (!SITS(ch))
+      if (!char_get_sits(ch))
       {
         gain += (gain / 2);
       }
-      else if (obj_get_vnum(SITS(ch)) == 19090 && !char_is_arlian(ch))
+      else if (obj_get_vnum(char_get_sits(ch)) == 19090 && !char_is_arlian(ch))
       {
         gain += gain * 1.1;
       }
-      else if (obj_get_vnum(SITS(ch)) == 19091 && !char_is_arlian(ch))
+      else if (obj_get_vnum(char_get_sits(ch)) == 19091 && !char_is_arlian(ch))
       {
         gain += gain * 1.3;
       }
-      else if (SITS(ch) || char_is_arlian(ch))
+      else if (char_get_sits(ch) || char_is_arlian(ch))
       {
         gain += gain;
       }
       break;
     case POS_SITTING:
-      if (!SITS(ch))
+      if (!char_get_sits(ch))
       {
         gain += (gain / 4);
       }
-      else if (obj_get_vnum(SITS(ch)) == 19090 && !char_is_arlian(ch))
+      else if (obj_get_vnum(char_get_sits(ch)) == 19090 && !char_is_arlian(ch))
       {
         gain += gain * 0.6;
       }
-      else if (obj_get_vnum(SITS(ch)) == 19091 && !char_is_arlian(ch))
+      else if (obj_get_vnum(char_get_sits(ch)) == 19091 && !char_is_arlian(ch))
       {
         gain += gain * 0.8;
       }
-      else if (SITS(ch) || char_is_arlian(ch))
+      else if (char_get_sits(ch) || char_is_arlian(ch))
       {
         gain += (gain / 2);
       }
@@ -800,16 +800,16 @@ static int64_t move_gain(struct char_data *ch)
   {
     gain += gain * 0.1;
   }
-  if (char_is_kanassan(ch) && rroom_sunken(IN_ROOM(ch)))
+  if (char_is_kanassan(ch) && rroom_sunken(char_get_in_room(ch)))
   {
     gain *= 16;
   }
 
-  if (char_is_hoshijin(ch) && GET_PHASE(ch) > 0)
+  if (char_is_hoshijin(ch) && char_get_starphase(ch) > 0)
   {
     gain *= 2;
   }
-  if (char_plr_flagged(ch, PLR_HEALT) && SITS(ch) != NULL)
+  if (char_plr_flagged(ch, PLR_HEALT) && char_get_sits(ch) != NULL)
   {
     gain *= 20;
   }
@@ -832,16 +832,16 @@ static int64_t move_gain(struct char_data *ch)
     gain /= 4;
   }
 
-  if (rroom_flagged(IN_ROOM(ch), ROOM_AURA))
+  if (rroom_flagged(char_get_in_room(ch), ROOM_AURA))
   {
     gain = GET_MAX_MOVE(ch) - (getCurST(ch));
   }
-  if (cook_element(IN_ROOM(ch)) == 1)
+  if (cook_element(char_get_in_room(ch)) == 1)
     gain *= 2;
 
-  if (GET_REGEN(ch) > 0)
+  if (char_get_regen(ch) > 0)
   {
-    gain += (gain * 0.01) * GET_REGEN(ch);
+    gain += (gain * 0.01) * char_get_regen(ch);
   }
 
   return (gain);
@@ -855,47 +855,47 @@ static void update_flags(struct char_data *ch)
     return;
   }
 
-  if (GET_BONUS(ch, BONUS_LATE) && GET_POS(ch) == POS_SLEEPING && rand_number(1, 3) == 3)
+  if (char_get_bonuses(ch, BONUS_LATE) && char_get_position(ch) == POS_SLEEPING && rand_number(1, 3) == 3)
   {
     if (GET_HIT(ch) >= (getEffMaxPL(ch)) && (getCurST(ch)) >= GET_MAX_MOVE(ch) && (getCurKI(ch)) >= GET_MAX_MANA(ch))
     {
       send_to_char(ch, "You FINALLY wake up.\r\n");
       act("$n wakes up.", TRUE, ch, 0, 0, TO_ROOM);
-      GET_POS(ch) = POS_SITTING;
+      char_set_position(ch, POS_SITTING);
     }
   }
 
-  if (char_aff_flagged(ch, AFF_KNOCKED) && !FIGHTING(ch))
+  if (char_aff_flagged(ch, AFF_KNOCKED) && !char_get_fighting(ch))
   {
     cureStatusKnockedOut(ch, true);
   }
 
   barrier_shed(ch);
 
-  if (char_aff_flagged(ch, AFF_FIRESHIELD) && !FIGHTING(ch) && rand_number(1, 101) > char_get_skill(ch, SKILL_FIRESHIELD))
+  if (char_aff_flagged(ch, AFF_FIRESHIELD) && !char_get_fighting(ch) && rand_number(1, 101) > char_get_skill(ch, SKILL_FIRESHIELD))
   {
     send_to_char(ch, "Your fireshield disappears.\r\n");
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FIRESHIELD);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_FIRESHIELD);
   }
-  if (char_aff_flagged(ch, AFF_ZANZOKEN) && !FIGHTING(ch) && rand_number(1, 3) == 2)
+  if (char_aff_flagged(ch, AFF_ZANZOKEN) && !char_get_fighting(ch) && rand_number(1, 3) == 2)
   {
     send_to_char(ch, "You lose concentration and no longer are ready to zanzoken.\r\n");
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ZANZOKEN);
   }
   if (char_aff_flagged(ch, AFF_ENSNARED) && rand_number(1, 3) == 2)
   {
     send_to_char(ch, "The silk ensnaring your arms disolves enough for you to break it!\r\n");
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ENSNARED);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_ENSNARED);
   }
 
   if ((char_is_saiyan(ch) || char_is_halfbreed(ch)) && char_plr_flagged(ch, PLR_TRANS1) && !char_plr_flagged(ch, PLR_FPSSJ))
   {
-    GET_ABSORBS(ch) += 1;
-    if (GET_ABSORBS(ch) >= 300)
+    char_set_absorbs(ch, char_get_absorbs(ch) + (1));
+    if (char_get_absorbs(ch) >= 300)
     {
       send_to_char(ch, "You have mastered the base Super Saiyan transformation and achieved Full Power Super Saiyan! Super Saiyan First can now be maintained effortlessly.\r\n");
-      SET_BIT_AR(PLR_FLAGS(ch), PLR_FPSSJ);
-      GET_ABSORBS(ch) = 0;
+      SET_BIT_AR(char_get_act(ch), PLR_FPSSJ);
+      char_set_absorbs(ch, 0);
     }
   }
 
@@ -903,35 +903,35 @@ static void update_flags(struct char_data *ch)
   {
     if (RACIAL_PREF(ch) == 1 && rand_number(1, 50) >= 40)
     {
-      GET_TGROWTH(ch) += 1;
+      char_set_tail_growth(ch, char_get_tail_growth(ch) + (1));
     }
     else if (RACIAL_PREF(ch) != 1 || char_is_saiyan(ch))
     {
-      GET_TGROWTH(ch) += 1;
+      char_set_tail_growth(ch, char_get_tail_growth(ch) + (1));
     }
-    if (GET_TGROWTH(ch) >= 10)
+    if (char_get_tail_growth(ch) >= 10)
     {
       send_to_char(ch, "@wYour tail grows back.@n\r\n");
       act("$n@w's tail grows back.@n", TRUE, ch, 0, 0, TO_ROOM);
       char_gain_tail(ch, true);
-      GET_TGROWTH(ch) = 0;
+      char_set_tail_growth(ch, 0);
     }
   }
   if (!char_is_npc(ch) && !char_plr_flagged(ch, PLR_TAIL) && (char_is_icer(ch) || char_is_bio(ch)))
   {
-    GET_TGROWTH(ch) += 1;
-    if (GET_TGROWTH(ch) >= 10)
+    char_set_tail_growth(ch, char_get_tail_growth(ch) + (1));
+    if (char_get_tail_growth(ch) >= 10)
     {
       send_to_char(ch, "@wYour tail grows back.@n\r\n");
       act("$n@w's tail grows back.@n", TRUE, ch, 0, 0, TO_ROOM);
       char_gain_tail(ch, true);
-      GET_TGROWTH(ch) = 0;
+      char_set_tail_growth(ch, 0);
     }
   }
   if (char_aff_flagged(ch, AFF_MBREAK) && rand_number(1, 3 + sick_fail) == 2)
   {
     send_to_char(ch, "@wYour mind is no longer in turmoil, you can charge ki again.@n\r\n");
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_MBREAK);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_MBREAK);
     if (char_get_skill(ch, SKILL_TELEPATHY) <= 0 && rand_number(1, 2) == 2)
     {
       ch->real_abils.intel -= 1;
@@ -970,13 +970,13 @@ static void update_flags(struct char_data *ch)
       if (skill < char_get_skill(ch, SKILL_TELEPATHY))
         send_to_char(ch, "Your mental damage and recovery has taught you things about your own mind.\r\n");
     }
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SHOCKED);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_SHOCKED);
   }
   if (char_aff_flagged(ch, AFF_FROZEN) && rand_number(1, 2) == 2)
   {
     send_to_char(ch, "@wYou realize you have thawed enough and break out of the ice holding you prisoner!\r\n");
     act("$n@W breaks out of the ice holding $m prisoner!", TRUE, ch, 0, 0, TO_ROOM);
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FROZEN);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_FROZEN);
   }
   if (is_affected(ch, AFF_WITHER) && rand_number(1, 6 + sick_fail) == 2)
   {
@@ -987,7 +987,7 @@ static void update_flags(struct char_data *ch)
   }
   if (wearing_stardust(ch) == 1)
   {
-    SET_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
+    SET_BIT_AR(char_get_affected_by(ch), AFF_ZANZOKEN);
     send_to_char(ch, "The stardust armor blesses you with a free zanzoken when you next need it.\r\n");
   }
 }
@@ -1004,14 +1004,14 @@ static int ki_gain(struct char_data *ch)
   }
   else
   {
-    gain = GET_MAX_KI(ch) / 12;
+    gain = char_get_max_ki(ch) / 12;
 
     /* Class calculations */
 
     /* Skill/Spell calculations */
 
     /* Position calculations    */
-    switch (GET_POS(ch))
+    switch (char_get_position(ch))
     {
     case POS_SLEEPING:
       gain *= 2;
@@ -1028,9 +1028,9 @@ static int ki_gain(struct char_data *ch)
   if (char_aff_flagged(ch, AFF_POISON))
     gain /= 4;
 
-  if (GET_REGEN(ch) > 0)
+  if (char_get_regen(ch) > 0)
   {
-    gain += (gain * 0.01) * GET_REGEN(ch);
+    gain += (gain * 0.01) * char_get_regen(ch);
   }
 
   return (gain);
@@ -1062,15 +1062,15 @@ void gain_level(struct char_data *ch, int whichclass)
 {
   if (whichclass < 0)
     whichclass = char_get_class(ch);
-  if (char_get_level(ch) < 100 && GET_EXP(ch) >= level_exp(ch, char_get_level(ch) + 1))
+  if (char_get_level(ch) < 100 && char_get_exp(ch) >= level_exp(ch, char_get_level(ch) + 1))
   {
-    GET_CLASS_LEVEL(ch) += 1;
+    char_set_class_level(ch, char_get_class_level(ch) + (1));
     // GET_CLASS(ch) = whichclass; /* Now tracks latest class instead of highest */
     advance_level(ch, whichclass);
     mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s advanced level to level %d.",
            char_get_name(ch), char_get_level(ch));
     send_to_char(ch, "You rise a level!\r\n");
-    GET_EXP(ch) -= level_exp(ch, char_get_level(ch));
+    char_set_exp(ch, char_get_exp(ch) - (level_exp(ch, char_get_level(ch))));
     /*set_title(ch, NULL);*/
     write_aliases(ch);
     save_char(ch);
@@ -1136,16 +1136,16 @@ void gain_exp(struct char_data *ch, int64_t gain)
 
   if (char_is_npc(ch))
   {
-    GET_EXP(ch) += gain;
+    char_set_exp(ch, char_get_exp(ch) + (gain));
     return;
   }
 
   if (gain > 0)
   {
     gain = MIN(CONFIG_MAX_EXP_GAIN, gain); /* put a cap on the max gain per kill */
-    if (GET_EQ(ch, WEAR_SH))
+    if (char_get_equipment(ch, WEAR_SH))
     {
-      struct obj_data *obj = GET_EQ(ch, WEAR_SH);
+      struct obj_data *obj = char_get_equipment(ch, WEAR_SH);
       if (obj_get_vnum(obj) == 1127)
       {
         int64_t spar = gain;
@@ -1156,41 +1156,41 @@ void gain_exp(struct char_data *ch, int64_t gain)
     }
     if (char_get_level(ch) < 100)
     {
-      if (MINDLINK(ch) && gain > 0 && LINKER(ch) == 0)
+      if (char_get_mindlink(ch) && gain > 0 && char_get_linker(ch) == 0)
       {
-        if (char_get_level(ch) + 20 < char_get_level(MINDLINK(ch)) || char_get_level(ch) - 20 > char_get_level(MINDLINK(ch)))
+        if (char_get_level(ch) + 20 < char_get_level(char_get_mindlink(ch)) || char_get_level(ch) - 20 > char_get_level(char_get_mindlink(ch)))
         {
-          send_to_char(MINDLINK(ch), "The level difference between the two of you is too great to gain from mind read.\r\n");
+          send_to_char(char_get_mindlink(ch), "The level difference between the two of you is too great to gain from mind read.\r\n");
         }
         else
         {
-          act("@GYou've absorbed some new experiences from @W$n@G!@n", FALSE, ch, 0, MINDLINK(ch), TO_VICT);
+          act("@GYou've absorbed some new experiences from @W$n@G!@n", FALSE, ch, 0, char_get_mindlink(ch), TO_VICT);
           int read = gain * 0.12;
           gain -= read;
           if (read == 0)
             read = 1;
-          gain_exp(MINDLINK(ch), read);
-          act("@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", FALSE, ch, 0, MINDLINK(ch), TO_CHAR);
+          gain_exp(char_get_mindlink(ch), read);
+          act("@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", FALSE, ch, 0, char_get_mindlink(ch), TO_CHAR);
         }
       }
       int64_t difff = level_exp(ch, char_get_level(ch) + 1) * 5;
-      if (char_get_level(ch) <= 90 && (level_exp(ch, char_get_level(ch) + 1) - (GET_EXP(ch) + gain) <= (level_exp(ch, char_get_level(ch) + 1) - difff)))
+      if (char_get_level(ch) <= 90 && (level_exp(ch, char_get_level(ch) + 1) - (char_get_exp(ch) + gain) <= (level_exp(ch, char_get_level(ch) + 1) - difff)))
       {
         send_to_char(ch, "@WYou -@RNEED@W- to @ylevel@W you can't hold any more experience.@n\r\n");
       }
-      else if (char_get_level(ch) >= 91 && level_exp(ch, char_get_level(ch) + 1) - GET_EXP(ch) <= -1)
+      else if (char_get_level(ch) >= 91 && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) <= -1)
       {
         send_to_char(ch, "@WYou -@RNEED@W- to @ylevel@W you can't hold any more experience.@n\r\n");
       }
       else
       {
-        GET_EXP(ch) += gain;
+        char_set_exp(ch, char_get_exp(ch) + (gain));
       }
     }
-    if (char_get_level(ch) < 100 && GET_EXP(ch) >= level_exp(ch, char_get_level(ch) + 1))
+    if (char_get_level(ch) < 100 && char_get_exp(ch) >= level_exp(ch, char_get_level(ch) + 1))
       send_to_char(ch, "@rYou have earned enough experience to gain a @ylevel@r.@n\r\n");
 
-    if (char_get_level(ch) == 100 && GET_ADMLEVEL(ch) < 1)
+    if (char_get_level(ch) == 100 && char_get_admlevel(ch) < 1)
     {
       if (char_is_kanassan(ch) || char_is_demon(ch))
       {
@@ -1200,22 +1200,22 @@ void gain_exp(struct char_data *ch, int64_t gain)
       {
         diff = diff * 1.2;
       }
-      if (MINDLINK(ch) && gain > 0 && LINKER(ch) == 0)
+      if (char_get_mindlink(ch) && gain > 0 && char_get_linker(ch) == 0)
       {
-        if (char_get_level(ch) + 20 < char_get_level(MINDLINK(ch)) || char_get_level(ch) - 20 > char_get_level(MINDLINK(ch)))
+        if (char_get_level(ch) + 20 < char_get_level(char_get_mindlink(ch)) || char_get_level(ch) - 20 > char_get_level(char_get_mindlink(ch)))
         {
-          send_to_char(MINDLINK(ch), "The level difference between the two of you is too great to gain from mind read.\r\n");
+          send_to_char(char_get_mindlink(ch), "The level difference between the two of you is too great to gain from mind read.\r\n");
         }
         else
         {
-          act("@GYou've absorbed some new experiences from @W$n@G!@n", FALSE, ch, 0, MINDLINK(ch), TO_VICT);
+          act("@GYou've absorbed some new experiences from @W$n@G!@n", FALSE, ch, 0, char_get_mindlink(ch), TO_VICT);
           int64_t read = gain * 0.12;
           diff -= (read * 0.15);
           gain -= read;
           if (read == 0)
             read = 1;
-          gain_exp(MINDLINK(ch), read);
-          act("@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", FALSE, ch, 0, MINDLINK(ch), TO_CHAR);
+          gain_exp(char_get_mindlink(ch), read);
+          act("@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", FALSE, ch, 0, char_get_mindlink(ch), TO_CHAR);
         }
       }
       if (rand_number(1, 5) >= 2)
@@ -1252,9 +1252,9 @@ void gain_exp(struct char_data *ch, int64_t gain)
   else if (gain < 0)
   {
     gain = MAX(-CONFIG_MAX_EXP_LOSS, gain); /* Cap max exp lost per death */
-    GET_EXP(ch) += gain;
-    if (GET_EXP(ch) < 0)
-      GET_EXP(ch) = 0;
+    char_set_exp(ch, char_get_exp(ch) + (gain));
+    if (char_get_exp(ch) < 0)
+      char_set_exp(ch, 0);
   }
 }
 
@@ -1265,15 +1265,15 @@ void gain_exp_regardless(struct char_data *ch, int gain)
 
   gain = (gain * CONFIG_EXP_MULTIPLIER);
 
-  GET_EXP(ch) += gain;
-  if (GET_EXP(ch) < 0)
-    GET_EXP(ch) = 0;
+  char_set_exp(ch, char_get_exp(ch) + (gain));
+  if (char_get_exp(ch) < 0)
+    char_set_exp(ch, 0);
 
   if (!char_is_npc(ch))
   {
-    while (char_get_level(ch) < CONFIG_LEVEL_CAP - 1 && GET_EXP(ch) >= level_exp(ch, char_get_level(ch) + 1))
+    while (char_get_level(ch) < CONFIG_LEVEL_CAP - 1 && char_get_exp(ch) >= level_exp(ch, char_get_level(ch) + 1))
     {
-      GET_CLASS_LEVEL(ch) += 1;
+      char_set_class_level(ch, char_get_class_level(ch) + (1));
       num_levels++;
       advance_level(ch, char_get_class(ch));
       is_altered = TRUE;
@@ -1310,7 +1310,7 @@ void gain_condition(struct char_data *ch, int condition, int value)
     return;
   }
 
-  if (rroom_get_vnum(IN_ROOM(ch)) <= 1)
+  if (rroom_get_vnum(char_get_in_room(ch)) <= 1)
   {
     return;
   }
@@ -1430,44 +1430,44 @@ static void check_idling(struct char_data *ch)
   }
   if (++(ch->timer) > CONFIG_IDLE_VOID)
   {
-    if (GET_WAS_IN(ch) == NOWHERE && IN_ROOM(ch) != NOWHERE)
+    if (char_get_was_in_room(ch) == NOWHERE && char_get_in_room(ch) != NOWHERE)
     {
-      GET_WAS_IN(ch) = IN_ROOM(ch);
-      if (FIGHTING(ch))
+      char_set_was_in_room(ch, char_get_in_room(ch));
+      if (char_get_fighting(ch))
       {
-        stop_fighting(FIGHTING(ch));
+        stop_fighting(char_get_fighting(ch));
         stop_fighting(ch);
       }
-      if (IN_ROOM(ch) == 0 || IN_ROOM(ch) == 1)
+      if (char_get_in_room(ch) == 0 || char_get_in_room(ch) == 1)
       {
         GET_LOADROOM(ch) = GET_LOADROOM(ch);
       }
-      if (!rroom_flagged(IN_ROOM(ch), ROOM_PAST) && (rroom_get_vnum(IN_ROOM(ch)) < 19800 || rroom_get_vnum(IN_ROOM(ch)) > 19899))
+      if (!rroom_flagged(char_get_in_room(ch), ROOM_PAST) && (rroom_get_vnum(char_get_in_room(ch)) < 19800 || rroom_get_vnum(char_get_in_room(ch)) > 19899))
       {
-        GET_LOADROOM(ch) = rroom_get_vnum(IN_ROOM(ch));
+        GET_LOADROOM(ch) = rroom_get_vnum(char_get_in_room(ch));
       }
-      if (rroom_flagged(IN_ROOM(ch), ROOM_PAST))
+      if (rroom_flagged(char_get_in_room(ch), ROOM_PAST))
       {
         GET_LOADROOM(ch) = rroom_get_vnum(real_room(1561));
       }
-      if (rroom_get_vnum(IN_ROOM(ch)) >= 2002 && rroom_get_vnum(IN_ROOM(ch)) <= 2011)
+      if (rroom_get_vnum(char_get_in_room(ch)) >= 2002 && rroom_get_vnum(char_get_in_room(ch)) <= 2011)
       {
         GET_LOADROOM(ch) = rroom_get_vnum(real_room(1960));
       }
-      if (rroom_get_vnum(IN_ROOM(ch)) == 2069)
+      if (rroom_get_vnum(char_get_in_room(ch)) == 2069)
       {
         GET_LOADROOM(ch) = rroom_get_vnum(real_room(2017));
       }
-      if (rroom_get_vnum(IN_ROOM(ch)) == 2070)
+      if (rroom_get_vnum(char_get_in_room(ch)) == 2070)
       {
         GET_LOADROOM(ch) = rroom_get_vnum(real_room(2046));
       }
-      if (rroom_get_vnum(IN_ROOM(ch)) >= 101 && rroom_get_vnum(IN_ROOM(ch)) <= 139)
+      if (rroom_get_vnum(char_get_in_room(ch)) >= 101 && rroom_get_vnum(char_get_in_room(ch)) <= 139)
       {
         if (char_get_level(ch) == 1)
         {
           GET_LOADROOM(ch) = rroom_get_vnum(real_room(100));
-          GET_EXP(ch) = 0;
+          char_set_exp(ch, 0);
         }
         else
         {
@@ -1525,7 +1525,7 @@ static void check_idling(struct char_data *ch)
     }
     else if (ch->timer > CONFIG_IDLE_RENT_TIME)
     {
-      if (IN_ROOM(ch) != NOWHERE)
+      if (char_get_in_room(ch) != NOWHERE)
       {
         char_from_room(ch);
         char_to_room(ch, 3);
@@ -1533,7 +1533,7 @@ static void check_idling(struct char_data *ch)
       if (ch->desc)
       {
         send_to_char(ch, "You are idle and are extracted safely from the game.\r\n");
-        STATE(ch->desc) = CON_DISCONNECT;
+        desc_set_connected(ch->desc, CON_DISCONNECT);
         /*
          * For the 'if (d->character)' test in close().
          * -gg 3/1/98 (Happy anniversary.)
@@ -1557,128 +1557,128 @@ static void heal_limb(struct char_data *ch)
     healrate += 10;
   }
 
-  if (GET_POS(ch) == POS_SITTING)
+  if (char_get_position(ch) == POS_SITTING)
   {
     healrate += 1;
   }
-  else if (GET_POS(ch) == POS_RESTING)
+  else if (char_get_position(ch) == POS_RESTING)
   {
     healrate += 3;
   }
-  else if (GET_POS(ch) == POS_SLEEPING)
+  else if (char_get_position(ch) == POS_SLEEPING)
   {
     healrate += 5;
   }
 
   if (healrate > 0)
   {
-    if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50)
+    if (char_get_limb_condition(ch, (1)-1) > 0 && char_get_limb_condition(ch, (1)-1) < 50)
     {
-      if (GET_LIMBCOND(ch, 1) + healrate >= 50)
+      if (char_get_limb_condition(ch, (1)-1) + healrate >= 50)
       {
         act("You realize your right arm is no longer broken.", TRUE, ch, 0, 0, TO_CHAR);
         act("$n starts moving $s right arm gingerly for a moment.", TRUE, ch, 0, 0, TO_ROOM);
-        GET_LIMBCOND(ch, 1) += healrate;
+        char_set_limb_condition(ch, (1)-1, char_get_limb_condition(ch, (1)-1) + (healrate));
         recovered = TRUE;
       }
       else
       {
-        GET_LIMBCOND(ch, 1) += healrate;
-        send_to_char(ch, "Your right arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 1), "%", "%");
+        char_set_limb_condition(ch, (1)-1, char_get_limb_condition(ch, (1)-1) + (healrate));
+        send_to_char(ch, "Your right arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", char_get_limb_condition(ch, (1)-1), "%", "%");
       }
     }
-    else if (GET_LIMBCOND(ch, 1) + healrate < 100)
+    else if (char_get_limb_condition(ch, (1)-1) + healrate < 100)
     {
-      GET_LIMBCOND(ch, 1) += healrate;
-      send_to_char(ch, "Your right arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 1), "%", "%");
+      char_set_limb_condition(ch, (1)-1, char_get_limb_condition(ch, (1)-1) + (healrate));
+      send_to_char(ch, "Your right arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", char_get_limb_condition(ch, (1)-1), "%", "%");
     }
-    else if (GET_LIMBCOND(ch, 1) < 100 && GET_LIMBCOND(ch, 1) + healrate >= 100)
+    else if (char_get_limb_condition(ch, (1)-1) < 100 && char_get_limb_condition(ch, (1)-1) + healrate >= 100)
     {
-      GET_LIMBCOND(ch, 1) = 100;
+      char_set_limb_condition(ch, (1)-1, 100);
       send_to_char(ch, "Your right arm has fully recovered.\r\n");
     }
 
-    if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50)
+    if (char_get_limb_condition(ch, (2)-1) > 0 && char_get_limb_condition(ch, (2)-1) < 50)
     {
-      if (GET_LIMBCOND(ch, 2) + healrate >= 50)
+      if (char_get_limb_condition(ch, (2)-1) + healrate >= 50)
       {
         act("You realize your left arm is no longer broken.", TRUE, ch, 0, 0, TO_CHAR);
         act("$n starts moving $s left arm gingerly for a moment.", TRUE, ch, 0, 0, TO_ROOM);
-        GET_LIMBCOND(ch, 2) += healrate;
+        char_set_limb_condition(ch, (2)-1, char_get_limb_condition(ch, (2)-1) + (healrate));
         recovered = TRUE;
       }
       else
       {
-        GET_LIMBCOND(ch, 2) += healrate;
-        send_to_char(ch, "Your left arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 1), "%", "%");
+        char_set_limb_condition(ch, (2)-1, char_get_limb_condition(ch, (2)-1) + (healrate));
+        send_to_char(ch, "Your left arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", char_get_limb_condition(ch, (1)-1), "%", "%");
       }
     }
-    else if (GET_LIMBCOND(ch, 2) + healrate < 100)
+    else if (char_get_limb_condition(ch, (2)-1) + healrate < 100)
     {
-      GET_LIMBCOND(ch, 2) += healrate;
-      send_to_char(ch, "Your left arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 2), "%", "%");
+      char_set_limb_condition(ch, (2)-1, char_get_limb_condition(ch, (2)-1) + (healrate));
+      send_to_char(ch, "Your left arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", char_get_limb_condition(ch, (2)-1), "%", "%");
     }
-    else if (GET_LIMBCOND(ch, 2) < 100 && GET_LIMBCOND(ch, 2) + healrate >= 100)
+    else if (char_get_limb_condition(ch, (2)-1) < 100 && char_get_limb_condition(ch, (2)-1) + healrate >= 100)
     {
-      GET_LIMBCOND(ch, 2) = 100;
+      char_set_limb_condition(ch, (2)-1, 100);
       send_to_char(ch, "Your left arm has fully recovered.\r\n");
     }
 
-    if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50)
+    if (char_get_limb_condition(ch, (3)-1) > 0 && char_get_limb_condition(ch, (3)-1) < 50)
     {
-      if (GET_LIMBCOND(ch, 3) + healrate >= 50)
+      if (char_get_limb_condition(ch, (3)-1) + healrate >= 50)
       {
         act("You realize your right leg is no longer broken.", TRUE, ch, 0, 0, TO_CHAR);
         act("$n starts moving $s right leg gingerly for a moment.", TRUE, ch, 0, 0, TO_ROOM);
-        GET_LIMBCOND(ch, 3) += healrate;
+        char_set_limb_condition(ch, (3)-1, char_get_limb_condition(ch, (3)-1) + (healrate));
         recovered = TRUE;
       }
       else
       {
-        GET_LIMBCOND(ch, 3) += healrate;
-        send_to_char(ch, "Your right leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 1), "%", "%");
+        char_set_limb_condition(ch, (3)-1, char_get_limb_condition(ch, (3)-1) + (healrate));
+        send_to_char(ch, "Your right leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", char_get_limb_condition(ch, (1)-1), "%", "%");
       }
     }
-    else if (GET_LIMBCOND(ch, 3) + healrate < 100)
+    else if (char_get_limb_condition(ch, (3)-1) + healrate < 100)
     {
-      GET_LIMBCOND(ch, 3) += healrate;
-      send_to_char(ch, "Your right leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 3), "%", "%");
+      char_set_limb_condition(ch, (3)-1, char_get_limb_condition(ch, (3)-1) + (healrate));
+      send_to_char(ch, "Your right leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", char_get_limb_condition(ch, (3)-1), "%", "%");
     }
-    else if (GET_LIMBCOND(ch, 3) < 100 && GET_LIMBCOND(ch, 3) + healrate >= 100)
+    else if (char_get_limb_condition(ch, (3)-1) < 100 && char_get_limb_condition(ch, (3)-1) + healrate >= 100)
     {
-      GET_LIMBCOND(ch, 3) = 100;
+      char_set_limb_condition(ch, (3)-1, 100);
       send_to_char(ch, "Your right leg has fully recovered.\r\n");
     }
 
-    if (GET_LIMBCOND(ch, 4) > 0 && GET_LIMBCOND(ch, 4) < 50)
+    if (char_get_limb_condition(ch, (4)-1) > 0 && char_get_limb_condition(ch, (4)-1) < 50)
     {
-      if (GET_LIMBCOND(ch, 4) + healrate >= 50)
+      if (char_get_limb_condition(ch, (4)-1) + healrate >= 50)
       {
         act("You realize your left leg is no longer broken.", TRUE, ch, 0, 0, TO_CHAR);
         act("$n starts moving $s left leg gingerly for a moment.", TRUE, ch, 0, 0, TO_ROOM);
-        GET_LIMBCOND(ch, 4) += healrate;
+        char_set_limb_condition(ch, (4)-1, char_get_limb_condition(ch, (4)-1) + (healrate));
         recovered = TRUE;
       }
       else
       {
-        GET_LIMBCOND(ch, 4) += healrate;
-        send_to_char(ch, "Your left leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 1), "%", "%");
+        char_set_limb_condition(ch, (4)-1, char_get_limb_condition(ch, (4)-1) + (healrate));
+        send_to_char(ch, "Your left leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", char_get_limb_condition(ch, (1)-1), "%", "%");
       }
     }
-    else if (GET_LIMBCOND(ch, 4) + healrate < 100)
+    else if (char_get_limb_condition(ch, (4)-1) + healrate < 100)
     {
-      GET_LIMBCOND(ch, 4) += healrate;
-      send_to_char(ch, "Your left leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 4), "%", "%");
+      char_set_limb_condition(ch, (4)-1, char_get_limb_condition(ch, (4)-1) + (healrate));
+      send_to_char(ch, "Your left leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", char_get_limb_condition(ch, (4)-1), "%", "%");
     }
-    else if (GET_LIMBCOND(ch, 4) < 100 && GET_LIMBCOND(ch, 4) + healrate >= 100)
+    else if (char_get_limb_condition(ch, (4)-1) < 100 && char_get_limb_condition(ch, (4)-1) + healrate >= 100)
     {
-      GET_LIMBCOND(ch, 4) = 100;
+      char_set_limb_condition(ch, (4)-1, 100);
       send_to_char(ch, "Your left leg as fully recovered.\r\n");
     }
 
     if (!char_plr_flagged(ch, PLR_BANDAGED) && recovered == TRUE)
     {
-      if (axion_dice(-10) > GET_CON(ch))
+      if (axion_dice(-10) > char_get_aff_abils_con(ch))
       {
         ch->real_abils.str -= 1;
         ch->real_abils.dex -= 1;
@@ -1707,7 +1707,7 @@ static void heal_limb(struct char_data *ch)
 
   if (char_plr_flagged(ch, PLR_BANDAGED) && recovered == TRUE)
   {
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_BANDAGED);
+    REMOVE_BIT_AR(char_get_act(ch), PLR_BANDAGED);
     send_to_char(ch, "You remove your bandages.\r\n");
     return;
   }
@@ -1722,32 +1722,32 @@ static void point_update_characters(void)
   {
     next_char = i->next;
 
-    if (!char_is_npc(i) && IN_ROOM(i) != NOWHERE)
+    if (!char_is_npc(i) && char_get_in_room(i) != NOWHERE)
     {
-      if (rroom_flagged(IN_ROOM(i), ROOM_HOUSE))
+      if (rroom_flagged(char_get_in_room(i), ROOM_HOUSE))
       {
-        GET_RELAXCOUNT(i) += 1;
+        char_set_relax_count(i, char_get_relax_count(i) + (1));
       }
-      else if (GET_RELAXCOUNT(i) >= 464)
+      else if (char_get_relax_count(i) >= 464)
       {
-        GET_RELAXCOUNT(i) -= 4;
+        char_set_relax_count(i, char_get_relax_count(i) - (4));
       }
-      else if (GET_RELAXCOUNT(i) >= 232)
+      else if (char_get_relax_count(i) >= 232)
       {
-        GET_RELAXCOUNT(i) -= 3;
+        char_set_relax_count(i, char_get_relax_count(i) - (3));
       }
-      else if (GET_RELAXCOUNT(i) > 0 && rand_number(1, 3) == 3)
+      else if (char_get_relax_count(i) > 0 && rand_number(1, 3) == 3)
       {
-        GET_RELAXCOUNT(i) -= 2;
+        char_set_relax_count(i, char_get_relax_count(i) - (2));
       }
       else
       {
-        GET_RELAXCOUNT(i) -= 1;
+        char_set_relax_count(i, char_get_relax_count(i) - (1));
       }
 
-      if (GET_RELAXCOUNT(i) < 0)
+      if (char_get_relax_count(i) < 0)
       {
-        GET_RELAXCOUNT(i) = 0;
+        char_set_relax_count(i, 0);
       }
     }
     if (rand_number(1, 2) == 2)
@@ -1767,7 +1767,7 @@ static void point_update_characters(void)
       i->aggtimer = 0;
     }
 
-    if (GET_POS(i) >= POS_STUNNED)
+    if (char_get_position(i) >= POS_STUNNED)
     {
       change = FALSE;
       update_flags(i);
@@ -1790,31 +1790,31 @@ static void point_update_characters(void)
         {
           send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
           act("$n's aura slowly stops shining and fades.\r\n", TRUE, i, nullptr, nullptr, TO_ROOM);
-          REMOVE_BIT_AR(PLR_FLAGS(i), PLR_AURALIGHT);
-          world[IN_ROOM(i)].light--;
+          REMOVE_BIT_AR(char_get_act(i), PLR_AURALIGHT);
+          world[char_get_in_room(i)].light--;
         }
       }
-      if (char_is_mutant(i) && (GET_GENOME(i, 0) == 6 || GET_GENOME(i, 1) == 6))
+      if (char_is_mutant(i) && (char_get_genome(i, 0) == 6 || char_get_genome(i, 1) == 6))
       {
         mutant_limb_regen(i);
       }
 
-      int x = (GET_KAIOKEN(i) * 5) + 5;
+      int x = (char_get_kaioken(i) * 5) + 5;
 
-      if (GET_SLEEPT(i) > 0 && GET_POS(i) != POS_SLEEPING)
+      if (char_get_sleeptime(i) > 0 && char_get_position(i) != POS_SLEEPING)
       {
-        GET_SLEEPT(i) -= 1;
+        char_set_sleeptime(i, char_get_sleeptime(i) - (1));
       }
-      if (GET_SLEEPT(i) < 8 && GET_POS(i) == POS_SLEEPING)
+      if (char_get_sleeptime(i) < 8 && char_get_position(i) == POS_SLEEPING)
       {
-        GET_SLEEPT(i) += rand_number(2, 4);
-        if (GET_SLEEPT(i) > 8)
+        char_set_sleeptime(i, char_get_sleeptime(i) + (rand_number(2, 4)));
+        if (char_get_sleeptime(i) > 8)
         {
-          GET_SLEEPT(i) = 8;
+          char_set_sleeptime(i, 8);
         }
       }
 
-      if (GET_KAIOKEN(i) > 0)
+      if (char_get_kaioken(i) > 0)
       {
         improve_skill(i, SKILL_KAIOKEN, -1);
         if ((char_get_skill(i, SKILL_KAIOKEN) < rand_number(1, x) || (getCurST(i)) <= GET_MAX_MOVE(i) / 10))
@@ -1827,7 +1827,7 @@ static void point_update_characters(void)
         {
           send_to_char(i, "Your burns are healed now.\r\n");
           act("$n@w's burns are now healed.@n", TRUE, i, 0, 0, TO_ROOM);
-          REMOVE_BIT_AR(AFF_FLAGS(i), AFF_BURNED);
+          REMOVE_BIT_AR(char_get_affected_by(i), AFF_BURNED);
         }
       }
 
@@ -1840,7 +1840,7 @@ static void point_update_characters(void)
         heal_limb(i);
       }
 
-      if (rroom_sect(IN_ROOM(i)) == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !char_is_kanassan(i))
+      if (rroom_sect(char_get_in_room(i)) == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !char_is_kanassan(i))
       {
         if ((getCurST(i)) >= (getCurCarriedWeight(i)))
         {
@@ -1865,7 +1865,7 @@ static void point_update_characters(void)
           }
         }
       }
-      if (!has_o2(i) && rroom_sunken(IN_ROOM(i)) && !rroom_flagged(IN_ROOM(i), ROOM_SPACE))
+      if (!has_o2(i) && rroom_sunken(char_get_in_room(i)) && !rroom_flagged(char_get_in_room(i), ROOM_SPACE))
       {
         if (((getCurKI(i)) - mana_gain(i)) > GET_MAX_MANA(i) / 200)
         {
@@ -1887,7 +1887,7 @@ static void point_update_characters(void)
           }
         }
       }
-      if (!has_o2(i) && rroom_flagged(IN_ROOM(i), ROOM_SPACE))
+      if (!has_o2(i) && rroom_flagged(char_get_in_room(i), ROOM_SPACE))
       {
         if (((getCurKI(i)) - mana_gain(i)) > GET_MAX_MANA(i) * 0.005)
         {
@@ -1910,7 +1910,7 @@ static void point_update_characters(void)
           }
         }
       }
-      if (!char_aff_flagged(i, AFF_FLYING) && ROOM_EFFECT(IN_ROOM(i)) == 6 && !char_mob_flagged(i, MOB_NOKILL) && !char_is_demon(i))
+      if (!char_aff_flagged(i, AFF_FLYING) && rroom_get_geffect(char_get_in_room(i)) == 6 && !char_mob_flagged(i, MOB_NOKILL) && !char_is_demon(i))
       {
         act("@rYour legs are burned by the lava!@n", TRUE, i, 0, 0, TO_CHAR);
         act("@R$n@r's legs are burned by the lava!@n", TRUE, i, 0, 0, TO_ROOM);
@@ -1928,52 +1928,52 @@ static void point_update_characters(void)
       }
       if (change && !char_aff_flagged(i, AFF_POISON))
       {
-        if (char_plr_flagged(i, PLR_HEALT) && SITS(i) != NULL)
+        if (char_plr_flagged(i, PLR_HEALT) && char_get_sits(i) != NULL)
         {
           send_to_char(i, "@wThe healing tank works wonders on your injuries.@n\r\n");
-          HCHARGE(SITS(i)) -= rand_number(1, 2);
-          if (HCHARGE(SITS(i)) == 0)
+          obj_set_healcharge(char_get_sits(i), obj_get_healcharge(char_get_sits(i)) - (rand_number(1, 2)));
+          if (obj_get_healcharge(char_get_sits(i)) == 0)
           {
             send_to_char(i, "@wThe healing tank is now too low on energy to heal you.\r\n");
             act("You step out of the now empty healing tank.", TRUE, i, 0, 0, TO_CHAR);
             act("@C$n@w steps out of the now empty healing tank.@n", TRUE, i, 0, 0, TO_ROOM);
-            REMOVE_BIT_AR(PLR_FLAGS(i), PLR_HEALT);
-            SITTING(SITS(i)) = NULL;
-            SITS(i) = NULL;
+            REMOVE_BIT_AR(char_get_act(i), PLR_HEALT);
+            obj_set_sitting(char_get_sits(i), NULL);
+            char_set_sits(i, NULL);
           }
           else if (isFullVitals(i))
           {
             send_to_char(i, "@wYou are fully recovered now.\r\n");
             act("You step out of the now empty healing tank.", TRUE, i, 0, 0, TO_CHAR);
             act("@C$n@w steps out of the now empty healing tank.@n", TRUE, i, 0, 0, TO_ROOM);
-            REMOVE_BIT_AR(PLR_FLAGS(i), PLR_HEALT);
-            SITTING(SITS(i)) = NULL;
-            SITS(i) = NULL;
+            REMOVE_BIT_AR(char_get_act(i), PLR_HEALT);
+            obj_set_sitting(char_get_sits(i), NULL);
+            char_set_sits(i, NULL);
           }
         }
-        else if (char_plr_flagged(i, PLR_HEALT) && SITS(i) == NULL)
+        else if (char_plr_flagged(i, PLR_HEALT) && char_get_sits(i) == NULL)
         {
-          REMOVE_BIT_AR(PLR_FLAGS(i), PLR_HEALT);
+          REMOVE_BIT_AR(char_get_act(i), PLR_HEALT);
         }
-        else if (GET_POS(i) == POS_SLEEPING)
+        else if (char_get_position(i) == POS_SLEEPING)
         {
           send_to_char(i, "@wYour sleep does you some good.@n\r\n");
-          if (!char_is_android(i) && !FIGHTING(i))
+          if (!char_is_android(i) && !char_get_fighting(i))
             restoreLF(i, false);
         }
-        else if (GET_POS(i) == POS_RESTING)
+        else if (char_get_position(i) == POS_RESTING)
         {
           send_to_char(i, "@wYou feel relaxed and better.@n\r\n");
           if (!isFullLF(i))
           {
-            if (!char_is_android(i) && !FIGHTING(i) && GET_SUPPRESS(i) <= 0 && GET_HIT(i) != (getEffMaxPL(i)))
+            if (!char_is_android(i) && !char_get_fighting(i) && char_get_suppression(i) <= 0 && GET_HIT(i) != (getEffMaxPL(i)))
             {
               incCurLFPercent(i, .15, true);
               send_to_char(i, "@CYou feel more lively.@n\r\n");
             }
           }
         }
-        else if (GET_POS(i) == POS_SITTING)
+        else if (char_get_position(i) == POS_SITTING)
           send_to_char(i, "@wYou feel rested and better.@n\r\n");
         else
           send_to_char(i, "You feel slightly better.\r\n");
@@ -1981,23 +1981,23 @@ static void point_update_characters(void)
       if (char_aff_flagged(i, AFF_POISON))
       {
         double cost = 0.0;
-        if (GET_CON(i) >= 100)
+        if (char_get_aff_abils_con(i) >= 100)
         {
           cost = 0.01;
         }
-        else if (GET_CON(i) >= 80)
+        else if (char_get_aff_abils_con(i) >= 80)
         {
           cost = 0.02;
         }
-        else if (GET_CON(i) >= 50)
+        else if (char_get_aff_abils_con(i) >= 50)
         {
           cost = 0.03;
         }
-        else if (GET_CON(i) >= 30)
+        else if (char_get_aff_abils_con(i) >= 30)
         {
           cost = 0.04;
         }
-        else if (GET_CON(i) >= 20)
+        else if (char_get_aff_abils_con(i) >= 20)
         {
           cost = 0.05;
         }
@@ -2033,26 +2033,26 @@ static void point_update_characters(void)
           }
         }
       }
-      if (GET_POS(i) <= POS_STUNNED)
+      if (char_get_position(i) <= POS_STUNNED)
         update_pos(i);
     }
-    else if (GET_POS(i) == POS_INCAP)
+    else if (char_get_position(i) == POS_INCAP)
     {
       continue;
     }
-    else if (GET_POS(i) == POS_MORTALLYW)
+    else if (char_get_position(i) == POS_MORTALLYW)
     {
       continue;
     }
-    if ((getCurKI(i)) >= GET_MAX_MANA(i) * 0.5 && GET_CHARGE(i) < GET_MAX_MANA(i) * 0.1 && GET_PREFERENCE(i) == PREFERENCE_KI && !char_plr_flagged(i, PLR_AURALIGHT))
+    if ((getCurKI(i)) >= GET_MAX_MANA(i) * 0.5 && char_get_charge(i) < GET_MAX_MANA(i) * 0.1 && char_get_preference(i) == PREFERENCE_KI && !char_plr_flagged(i, PLR_AURALIGHT))
     {
-      GET_CHARGE(i) = GET_MAX_MANA(i) * 0.1;
+      char_set_charge(i, GET_MAX_MANA(i) * 0.1);
     }
     if (!char_is_npc(i))
     {
       update_char_objects(i);
       update_innate(i);
-      if (GET_ADMLEVEL(i) < CONFIG_IDLE_MAX_LEVEL)
+      if (char_get_admlevel(i) < CONFIG_IDLE_MAX_LEVEL)
         check_idling(i);
       else
         (i->timer)++;
@@ -2076,20 +2076,20 @@ static void point_update_objects(void)
     {
       time_t diff = 0;
 
-      diff = time(0) - GET_LAST_LOAD(j);
-      if (diff > 240 && GET_LAST_LOAD(j) > 0)
+      diff = time(0) - obj_get_lload(j);
+      if (diff > 240 && obj_get_lload(j) > 0)
       {
-        log("No rent object (%s) extracted from room (%d)", j->short_description, rroom_get_vnum(IN_ROOM(j)));
+        log("No rent object (%s) extracted from room (%d)", j->short_description, rroom_get_vnum(obj_get_in_room(j)));
         extract_obj(j);
         continue;
       }
     }
 
-    if (GET_OBJ_TYPE(j) == ITEM_HATCH)
+    if (obj_get_type_flag(j) == ITEM_HATCH)
     {
-      if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(j, VAL_HATCH_DEST))))
+      if ((vehicle = find_vehicle_by_vnum(obj_get_value(j, VAL_HATCH_DEST))))
       {
-        GET_OBJ_VAL(j, 3) = rroom_get_vnum(IN_ROOM(vehicle));
+        obj_set_value(j, 3, rroom_get_vnum(obj_get_in_room(vehicle)));
       }
     }
 
@@ -2097,45 +2097,44 @@ static void point_update_objects(void)
     if (obj_is_corpse(j))
     {
       /* timer count down */
-      if (GET_OBJ_TIMER(j) > 0)
-        GET_OBJ_TIMER(j)
-        --;
+      if (obj_get_timer(j) > 0)
+        obj_set_timer(j, obj_get_timer(j) - 1);
       if (!strstr(j->name, "android") && !strstr(j->name, "Android") && !obj_flagged(j, ITEM_BURIED))
       {
-        if (GET_OBJ_TIMER(j) == 5)
+        if (obj_get_timer(j) == 5)
         {
-          if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people))
+          if ((obj_get_in_room(j) != NOWHERE) && (world[obj_get_in_room(j)].people))
           {
-            act("@DFlies start to gather around $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
-            act("@DFlies start to gather around $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+            act("@DFlies start to gather around $p@D.@n", TRUE, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
+            act("@DFlies start to gather around $p@D.@n", TRUE, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
           }
         }
-        if (GET_OBJ_TIMER(j) == 3)
+        if (obj_get_timer(j) == 3)
         {
-          if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people))
+          if ((obj_get_in_room(j) != NOWHERE) && (world[obj_get_in_room(j)].people))
           {
-            act("@DA cloud of flies has formed over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
-            act("@DA cloud of flies has formed over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+            act("@DA cloud of flies has formed over $p@D.@n", TRUE, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
+            act("@DA cloud of flies has formed over $p@D.@n", TRUE, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
           }
         }
-        if (GET_OBJ_TIMER(j) == 2)
+        if (obj_get_timer(j) == 2)
         {
-          if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people))
+          if ((obj_get_in_room(j) != NOWHERE) && (world[obj_get_in_room(j)].people))
           {
-            act("@DMaggots can be seen crawling all over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
-            act("@DMaggots can be seen crawling all over $p@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+            act("@DMaggots can be seen crawling all over $p@D.@n", TRUE, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
+            act("@DMaggots can be seen crawling all over $p@D.@n", TRUE, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
           }
         }
-        if (GET_OBJ_TIMER(j) == 1)
+        if (obj_get_timer(j) == 1)
         {
-          if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people))
+          if ((obj_get_in_room(j) != NOWHERE) && (world[obj_get_in_room(j)].people))
           {
-            act("@DMaggots have nearly stripped $p of all its flesh@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
-            act("@DMaggots have nearly stripped $p of all its flesh@D.@n", TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+            act("@DMaggots have nearly stripped $p of all its flesh@D.@n", TRUE, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
+            act("@DMaggots have nearly stripped $p of all its flesh@D.@n", TRUE, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
           }
         }
       }
-      if (!GET_OBJ_TIMER(j))
+      if (!obj_get_timer(j))
       {
 
         if (j->carried_by)
@@ -2143,23 +2142,23 @@ static void point_update_objects(void)
           if (!strstr(j->name, "android"))
           {
             act("$p decays in your hands.", FALSE, j->carried_by, j, 0, TO_CHAR);
-            if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people))
+            if ((obj_get_in_room(j) != NOWHERE) && (world[obj_get_in_room(j)].people))
             {
               act("A quivering horde of maggots consumes $p.",
-                  TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+                  TRUE, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
               act("A quivering horde of maggots consumes $p.",
-                  TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
+                  TRUE, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
             }
           }
           else
           {
             act("$p decays in your hands.", FALSE, j->carried_by, j, 0, TO_CHAR);
-            if ((IN_ROOM(j) != NOWHERE) && (world[IN_ROOM(j)].people))
+            if ((obj_get_in_room(j) != NOWHERE) && (world[obj_get_in_room(j)].people))
             {
               act("$p breaks down completely into a pile of junk.",
-                  TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+                  TRUE, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
               act("$p breaks down completely into a pile of junk.",
-                  TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
+                  TRUE, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
             }
           }
         }
@@ -2171,9 +2170,9 @@ static void point_update_objects(void)
           if (j->in_obj)
             obj_to_obj(jj, j->in_obj);
           else if (j->carried_by)
-            obj_to_room(jj, IN_ROOM(j->carried_by));
-          else if (IN_ROOM(j) != NOWHERE)
-            obj_to_room(jj, IN_ROOM(j));
+            obj_to_room(jj, char_get_in_room(j->carried_by));
+          else if (obj_get_in_room(j) != NOWHERE)
+            obj_to_room(jj, obj_get_in_room(j));
           else
             core_dump();
         }
@@ -2184,39 +2183,37 @@ static void point_update_objects(void)
 
     if (obj_get_vnum(j) == 65)
     {
-      if (HCHARGE(j) < 20 && !SITTING(j))
+      if (obj_get_healcharge(j) < 20 && !obj_get_sitting(j))
       {
-        HCHARGE(j) += rand_number(0, 1);
+        obj_set_healcharge(j, obj_get_healcharge(j) + (rand_number(0, 1)));
       }
     }
-    if (GET_OBJ_TYPE(j) == ITEM_PORTAL)
+    if (obj_get_type_flag(j) == ITEM_PORTAL)
     {
-      if (GET_OBJ_TIMER(j) > 0)
-        GET_OBJ_TIMER(j)
-        --;
+      if (obj_get_timer(j) > 0)
+        obj_set_timer(j, obj_get_timer(j) - 1);
 
-      if (GET_OBJ_TIMER(j) == 0)
+      if (obj_get_timer(j) == 0)
       {
         act("A glowing portal fades from existence.",
-            TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+            TRUE, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
         act("A glowing portal fades from existence.",
-            TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
+            TRUE, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
         extract_obj(j);
         continue;
       }
     }
     else if (obj_get_vnum(j) == 1306)
     {
-      if (GET_OBJ_TIMER(j) > 0)
-        GET_OBJ_TIMER(j)
-        --;
+      if (obj_get_timer(j) > 0)
+        obj_set_timer(j, obj_get_timer(j) - 1);
 
-      if (GET_OBJ_TIMER(j) == 0)
+      if (obj_get_timer(j) == 0)
       {
         act("The $p@n settles to the ground and goes out.",
-            TRUE, world[IN_ROOM(j)].people, j, 0, TO_ROOM);
+            TRUE, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
         act("A $p@n settles to the ground and goes out.",
-            TRUE, world[IN_ROOM(j)].people, j, 0, TO_CHAR);
+            TRUE, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
         extract_obj(j);
         continue;
       }
@@ -2225,29 +2222,29 @@ static void point_update_objects(void)
     {
       if (obj_get_vnum(j) == 79 && rand_number(1, 2) == 2)
       {
-        if (ROOM_EFFECT(IN_ROOM(j)) >= 1 && ROOM_EFFECT(IN_ROOM(j)) <= 5)
+        if (rroom_get_geffect(obj_get_in_room(j)) >= 1 && rroom_get_geffect(obj_get_in_room(j)) <= 5)
         {
-          send_to_room(IN_ROOM(j), "The heat from the lava melts a great deal of the glacial wall and the lava cools a bit in turn.\r\n");
-          ROOM_EFFECT(IN_ROOM(j)) -= 1;
-          if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0)
+          send_to_room(obj_get_in_room(j), "The heat from the lava melts a great deal of the glacial wall and the lava cools a bit in turn.\r\n");
+          rroom_set_geffect(obj_get_in_room(j), rroom_get_geffect(obj_get_in_room(j)) - (1));
+          if (obj_get_weight(j) - (5 + (obj_get_weight(j) * 0.025)) > 0)
           {
-            GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.025);
+            obj_set_weight(j, obj_get_weight(j) - (5 + (obj_get_weight(j) * 0.025)));
           }
           else
           {
-            send_to_room(IN_ROOM(j), "The glacial wall blocking off the %s direction melts completely away.\r\n", dirs[GET_OBJ_COST(j)]);
+            send_to_room(obj_get_in_room(j), "The glacial wall blocking off the %s direction melts completely away.\r\n", dirs[obj_get_cost(j)]);
             extract_obj(j);
             continue;
           }
         }
-        else if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0)
+        else if (obj_get_weight(j) - (5 + (obj_get_weight(j) * 0.025)) > 0)
         {
-          GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.025);
-          send_to_room(IN_ROOM(j), "The glacial wall blocking off the %s direction melts some what.\r\n", dirs[GET_OBJ_COST(j)]);
+          obj_set_weight(j, obj_get_weight(j) - (5 + (obj_get_weight(j) * 0.025)));
+          send_to_room(obj_get_in_room(j), "The glacial wall blocking off the %s direction melts some what.\r\n", dirs[obj_get_cost(j)]);
         }
         else
         {
-          send_to_room(IN_ROOM(j), "The glacial wall blocking off the %s direction melts completely away.\r\n", dirs[GET_OBJ_COST(j)]);
+          send_to_room(obj_get_in_room(j), "The glacial wall blocking off the %s direction melts completely away.\r\n", dirs[obj_get_cost(j)]);
           extract_obj(j);
           continue;
         }
@@ -2256,32 +2253,32 @@ static void point_update_objects(void)
       {
         if (j->carried_by && !j->in_obj)
         {
-          int melt = 5 + (GET_OBJ_WEIGHT(j) * 0.02);
-          if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0)
+          int melt = 5 + (obj_get_weight(j) * 0.02);
+          if (obj_get_weight(j) - (5 + (obj_get_weight(j) * 0.02)) > 0)
           {
-            GET_OBJ_WEIGHT(j) -= melt;
+            obj_set_weight(j, obj_get_weight(j) - (melt));
             send_to_char(j->carried_by, "%s @wmelts a little.\r\n", j->short_description);
-            IS_CARRYING_W(j->carried_by) -= melt;
+            char_set_carry_weight(j->carried_by, char_get_carry_weight(j->carried_by) - (melt));
           }
           else
           {
             send_to_char(j->carried_by, "%s @wmelts completely away.\r\n", j->short_description);
-            int remainder = melt - GET_OBJ_WEIGHT(j);
-            IS_CARRYING_W(j->carried_by) -= (melt - remainder);
+            int remainder = melt - obj_get_weight(j);
+            char_set_carry_weight(j->carried_by, char_get_carry_weight(j->carried_by) - ((melt - remainder)));
             extract_obj(j);
             continue;
           }
         }
-        else if (IN_ROOM(j) != NOWHERE)
+        else if (obj_get_in_room(j) != NOWHERE)
         {
-          if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0)
+          if (obj_get_weight(j) - (5 + (obj_get_weight(j) * 0.02)) > 0)
           {
-            GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.02);
-            send_to_room(IN_ROOM(j), "%s @wmelts a little.\r\n", j->short_description);
+            obj_set_weight(j, obj_get_weight(j) - (5 + (obj_get_weight(j) * 0.02)));
+            send_to_room(obj_get_in_room(j), "%s @wmelts a little.\r\n", j->short_description);
           }
           else
           {
-            send_to_room(IN_ROOM(j), "%s @wmelts completely away.\r\n", j->short_description);
+            send_to_room(obj_get_in_room(j), "%s @wmelts completely away.\r\n", j->short_description);
             extract_obj(j);
             continue;
           }
@@ -2291,11 +2288,10 @@ static void point_update_objects(void)
 
     /* If the timer is set, count it down and at 0, try the trigger */
     /* note to .rej hand-patchers: make this last in your point-update() */
-    else if (GET_OBJ_TIMER(j) > 0)
+    else if (obj_get_timer(j) > 0)
     {
-      GET_OBJ_TIMER(j)
-      --;
-      if (!GET_OBJ_TIMER(j))
+      obj_set_timer(j, obj_get_timer(j) - 1);
+      if (!obj_get_timer(j))
         timer_otrigger(j);
     }
   }
@@ -2327,10 +2323,10 @@ void timed_dt(struct char_data *ch)
       if (char_is_npc(vict))
         continue;
 
-      if (IN_ROOM(vict) == NOWHERE)
+      if (char_get_in_room(vict) == NOWHERE)
         continue;
 
-      if (!rroom_flagged(IN_ROOM(vict), ROOM_TIMED_DT))
+      if (!rroom_flagged(char_get_in_room(vict), ROOM_TIMED_DT))
         continue;
 
       timed_dt(vict);
@@ -2344,22 +2340,22 @@ void timed_dt(struct char_data *ch)
     and return again.
   */
 
-  if (world[IN_ROOM(ch)].timed < 0)
+  if (world[char_get_in_room(ch)].timed < 0)
   {
-    world[IN_ROOM(ch)].timed = rand_number(2, 5);
+    world[char_get_in_room(ch)].timed = rand_number(2, 5);
     return;
   }
 
   /* We know ch is in a dt room with timed >= 0 - see if its the end.
    *
    */
-  if (world[IN_ROOM(ch)].timed == 0)
+  if (world[char_get_in_room(ch)].timed == 0)
   {
-    for (vict = world[IN_ROOM(ch)].people; vict; vict = vict->next_in_room)
+    for (vict = world[char_get_in_room(ch)].people; vict; vict = vict->next_in_room)
     {
       if (char_is_npc(vict))
         continue;
-      if (GET_ADMLEVEL(vict) >= ADMLVL_IMMORT)
+      if (char_get_admlevel(vict) >= ADMLVL_IMMORT)
         continue;
 
       /* Skip those alread dead people */

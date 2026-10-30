@@ -55,7 +55,7 @@ ACMD(do_oasis_cedit)
   /****************************************************************************/
   one_argument(argument, buf1);
   
-  if (GET_ADMLEVEL(ch) < 5) {
+  if (char_get_admlevel(ch) < 5) {
     send_to_char(ch, "You can't modify the game configuration.\r\n");
     return;
   }
@@ -66,9 +66,9 @@ ACMD(do_oasis_cedit)
     CREATE(d->olc, struct oasis_olc_data, 1);
     OLC_ZONE(d) = 0;
     cedit_setup(d);
-    STATE(d) = CON_CEDIT;
+    desc_set_connected(d, CON_CEDIT);
     act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+    SET_BIT_AR(char_get_act(ch), PLR_WRITING);
     
     mudlog(BRF, ADMLVL_IMMORT, TRUE, 
       "OLC: %s starts editing the game configuration.", char_get_name(ch));

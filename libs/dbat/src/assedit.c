@@ -141,9 +141,9 @@ void assedit_setup(struct descriptor_data *d, int number)
        return;
       }
 
- STATE(d) = CON_ASSEDIT;
+ desc_set_connected(d, CON_ASSEDIT);
  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
- SET_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
+ SET_BIT_AR(char_get_act(d->character), PLR_WRITING);
  assedit_disp_menu(d);
 
 }
@@ -406,7 +406,7 @@ send_to_char(d->character, "%c[H%c[J", 27, 27);
                                  /* we should never get here */
  mudlog(BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC assedit_parse(): Reached default case!");
  send_to_char(d->character, "Opps...\r\n");
- STATE(d) = CON_PLAYING;
+ desc_set_connected(d, CON_PLAYING);
  break;
  }
 }

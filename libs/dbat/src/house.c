@@ -70,7 +70,7 @@ int House_save(struct obj_data *obj, FILE *fp, int location)
       return (0);
 
     for (tmp = obj->in_obj; tmp; tmp = tmp->in_obj)
-      GET_OBJ_WEIGHT(tmp) -= GET_OBJ_WEIGHT(obj);
+      obj_set_weight(tmp, obj_get_weight(tmp) - (obj_get_weight(obj)));
   }
   return (1);
 }
@@ -83,7 +83,7 @@ void House_restore_weight(struct obj_data *obj)
     House_restore_weight(obj->contains);
     House_restore_weight(obj->next_content);
     if (obj->in_obj)
-      GET_OBJ_WEIGHT(obj->in_obj) += GET_OBJ_WEIGHT(obj);
+      obj_set_weight(obj->in_obj, obj_get_weight(obj->in_obj) + (obj_get_weight(obj)));
   }
 }
 
@@ -109,7 +109,7 @@ void House_crashsave(room_vnum vnum)
   }
   fclose(fp);
   House_restore_weight(world[rnum].contents);
-  REMOVE_BIT_AR(ROOM_FLAGS(rnum), ROOM_HOUSE_CRASH);
+  REMOVE_BIT_AR(rroom_get_room_flags(rnum), ROOM_HOUSE_CRASH);
 }
 
 
@@ -202,7 +202,7 @@ void House_boot(void)
 
     house_control[num_of_houses++] = temp_house;
 
-    SET_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE); 
+    SET_BIT_AR(rroom_get_room_flags(real_house), ROOM_HOUSE); 
     House_load(temp_house.vnum);
   }
 
@@ -333,7 +333,7 @@ void hcontrol_build_house(struct char_data *ch, char *arg)
 
   house_control[num_of_houses++] = temp_house;
 
-  SET_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE);
+  SET_BIT_AR(rroom_get_room_flags(real_house), ROOM_HOUSE);
   House_crashsave(virt_house);
 
   send_to_char(ch, "House built.  Mazel tov!\r\n");
@@ -358,13 +358,13 @@ void hcontrol_destroy_house(struct char_data *ch, char *arg)
   if ((real_atrium = real_room(house_control[i].atrium)) == NOWHERE)
     log("SYSERR: House %d had invalid atrium %d!", atoi(arg), house_control[i].atrium);
   else
-    REMOVE_BIT_AR(ROOM_FLAGS(real_atrium), ROOM_ATRIUM);
+    REMOVE_BIT_AR(rroom_get_room_flags(real_atrium), ROOM_ATRIUM);
 
   if ((real_house = real_room(house_control[i].vnum)) == NOWHERE)
     log("SYSERR: House %d had invalid vnum %d!", atoi(arg), house_control[i].vnum);
   else {
-    REMOVE_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE); 
-    REMOVE_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE_CRASH); 
+    REMOVE_BIT_AR(rroom_get_room_flags(real_house), ROOM_HOUSE); 
+    REMOVE_BIT_AR(rroom_get_room_flags(real_house), ROOM_HOUSE_CRASH); 
   }
   
   House_delete_file(house_control[i].vnum);
@@ -384,7 +384,7 @@ void hcontrol_destroy_house(struct char_data *ch, char *arg)
    */
   for (i = 0; i < num_of_houses; i++)
     if ((real_atrium = real_room(house_control[i].atrium)) != NOWHERE)
-      SET_BIT_AR(ROOM_FLAGS(real_atrium), ROOM_ATRIUM);
+      SET_BIT_AR(rroom_get_room_flags(real_atrium), ROOM_ATRIUM);
 }
 
 
@@ -434,17 +434,17 @@ ACMD(do_house)
 
   one_argument(argument, arg);
 
-  if (!rroom_flagged(IN_ROOM(ch), ROOM_HOUSE))
+  if (!rroom_flagged(char_get_in_room(ch), ROOM_HOUSE))
     send_to_char(ch, "You must be in your house to set guests.\r\n");
-  else if ((i = find_house(rroom_get_vnum(IN_ROOM(ch)))) == NOWHERE)
+  else if ((i = find_house(rroom_get_vnum(char_get_in_room(ch)))) == NOWHERE)
     send_to_char(ch, "Um.. this house seems to be screwed up.\r\n");
-  else if (GET_IDNUM(ch) != house_control[i].owner)
+  else if (char_get_idnum(ch) != house_control[i].owner)
     send_to_char(ch, "Only the primary owner can set guests.\r\n");
   else if (!*arg)
     House_list_guests(ch, i, FALSE);
   else if ((id = get_id_by_name(arg)) < 0)
     send_to_char(ch, "No such player.\r\n");
-  else if (id == GET_IDNUM(ch))
+  else if (id == char_get_idnum(ch))
     send_to_char(ch, "It's your house!\r\n");
   else {
     for (j = 0; j < house_control[i].num_of_guests; j++)
@@ -497,10 +497,10 @@ int House_can_enter(struct char_data *ch, room_vnum house)
   case HOUSE_UNOWNED:
     return (1);
   case HOUSE_PRIVATE:
-    if (GET_IDNUM(ch) == house_control[i].owner)
+    if (char_get_idnum(ch) == house_control[i].owner)
       return (1);
     for (j = 0; j < house_control[i].num_of_guests; j++)
-      if (GET_IDNUM(ch) == house_control[i].guests[j])
+      if (char_get_idnum(ch) == house_control[i].guests[j])
 	return (1);
   }
 
@@ -596,28 +596,28 @@ int House_load(room_vnum rvnum)
       get_line(fl,line);
       sscanf(line,"%d %d %d %d %d %d %d %d %d %s %s %s %s %d %d %d %d %d %d %d %d",t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7, t + 8, f1, f2, f3, f4, t + 13,t + 14, t + 15, t + 16, t + 17, t + 18, t + 19, t + 20 );
       locate=t[0];
-      GET_OBJ_VAL(temp,0) = t[1];
-      GET_OBJ_VAL(temp,1) = t[2];
-      GET_OBJ_VAL(temp,2) = t[3];
-      GET_OBJ_VAL(temp,3) = t[4];
-      GET_OBJ_VAL(temp,4) = t[5];
-      GET_OBJ_VAL(temp,5) = t[6];
-      GET_OBJ_VAL(temp,6) = t[7];
-      GET_OBJ_VAL(temp,7) = t[8];
-      GET_OBJ_EXTRA(temp)[0] = asciiflag_conv(f1); 
-      GET_OBJ_EXTRA(temp)[1] = asciiflag_conv(f2); 
-      GET_OBJ_EXTRA(temp)[2] = asciiflag_conv(f3); 
-      GET_OBJ_EXTRA(temp)[3] = asciiflag_conv(f3); 
-      GET_OBJ_VAL(temp, 8) = t[13]; 
-      GET_OBJ_VAL(temp, 9) = t[14]; 
-      GET_OBJ_VAL(temp, 10) = t[15]; 
-      GET_OBJ_VAL(temp, 11) = t[16]; 
-      GET_OBJ_VAL(temp, 12) = t[17]; 
-      GET_OBJ_VAL(temp, 13) = t[18]; 
-      GET_OBJ_VAL(temp, 14) = t[19]; 
-      GET_OBJ_VAL(temp, 15) = t[20];
-      GET_OBJ_POSTED(temp) = NULL;
-      GET_OBJ_POSTTYPE(temp) = 0;
+      obj_set_value(temp, 0, t[1]);
+      obj_set_value(temp, 1, t[2]);
+      obj_set_value(temp, 2, t[3]);
+      obj_set_value(temp, 3, t[4]);
+      obj_set_value(temp, 4, t[5]);
+      obj_set_value(temp, 5, t[6]);
+      obj_set_value(temp, 6, t[7]);
+      obj_set_value(temp, 7, t[8]);
+      obj_get_extra_flags(temp)[0] = asciiflag_conv(f1); 
+      obj_get_extra_flags(temp)[1] = asciiflag_conv(f2); 
+      obj_get_extra_flags(temp)[2] = asciiflag_conv(f3); 
+      obj_get_extra_flags(temp)[3] = asciiflag_conv(f3); 
+      obj_set_value(temp, 8, t[13]); 
+      obj_set_value(temp, 9, t[14]); 
+      obj_set_value(temp, 10, t[15]); 
+      obj_set_value(temp, 11, t[16]); 
+      obj_set_value(temp, 12, t[17]); 
+      obj_set_value(temp, 13, t[18]); 
+      obj_set_value(temp, 14, t[19]); 
+      obj_set_value(temp, 15, t[20]);
+      obj_set_posted_to(temp, NULL);
+      obj_set_posttype(temp, 0);
 
       get_line(fl,line);
        /* read line check for xap. */
@@ -722,7 +722,11 @@ int House_load(room_vnum rvnum)
               break;
             case 'Z':
               get_line(fl, line);
-              sscanf(line, "%d", &GET_OBJ_SIZE(temp));
+              {
+                int size = obj_get_size(temp);
+                sscanf(line, "%d", &size);
+                obj_set_size(temp, size);
+              }
               get_line(fl, line);
               break;
             case '$':
@@ -753,7 +757,7 @@ int House_load(room_vnum rvnum)
             }
 
           if (j == -locate && cont_row[j]) { /* content list existing */
-            if (GET_OBJ_TYPE(temp) == ITEM_CONTAINER) {
+            if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
               /* take item ; fill ; give to char again */
               obj_from_room(temp);
               temp->contains = NULL;

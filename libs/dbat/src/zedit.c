@@ -46,7 +46,7 @@ ACMD(do_oasis_zedit)
   /** If no argument was given, use the zone the builder is standing in.     **/
   /****************************************************************************/
   if (!*buf1)
-    number = rroom_get_vnum(IN_ROOM(ch));
+    number = rroom_get_vnum(char_get_in_room(ch));
   else if (!isdigit(*buf1)) {
     if (strcasecmp("save", buf1) == 0) {
       save = TRUE;
@@ -66,7 +66,7 @@ ACMD(do_oasis_zedit)
         send_to_char(ch, "Save which zone?\r\n");
         return;
       }
-    } else if (GET_ADMLEVEL(ch) >= ADMLVL_IMPL) {
+    } else if (char_get_admlevel(ch) >= ADMLVL_IMPL) {
       if (strcasecmp("new", buf1) || !buf3 || !*buf3)
         send_to_char(ch, "Format: zedit new <zone number> <bottom-room> "
            "<upper-room>\r\n");
@@ -110,7 +110,7 @@ ACMD(do_oasis_zedit)
   /** Check that nobody is currently editing this zone.                      **/
   /****************************************************************************/
   for (d = descriptor_list; d; d = d->next) {
-    if (STATE(d) == CON_ZEDIT) {
+    if (desc_get_connected(d) == CON_ZEDIT) {
       if (d->olc && OLC_NUM(d) == number) {
         send_to_char(ch, "That zone is currently being edited by %s.\r\n",
           char_pers(d->character, ch));
@@ -197,10 +197,10 @@ ACMD(do_oasis_zedit)
   }
 
   zedit_setup(d, real_num);
-  STATE(d) = CON_ZEDIT;
+  desc_set_connected(d, CON_ZEDIT);
   
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
-  SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
   
   mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
     char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
@@ -310,7 +310,7 @@ void zedit_new_zone(struct char_data *ch, zone_vnum vzone_num, room_vnum bottom,
   }
 
   for (dsc = descriptor_list; dsc; dsc = dsc->next) {
-    switch (STATE(dsc)) {
+    switch (desc_get_connected(dsc)) {
       case CON_REDIT:
         OLC_ROOM(dsc)->zone += (OLC_ZNUM(dsc) >= result);
         /* Fall through. */
@@ -913,7 +913,7 @@ void zedit_parse(struct descriptor_data *d, char *arg)
        * Edit zone builders.
        * We do not want to allow baby builders to tweak this.
        */
-      if (GET_ADMLEVEL(d->character) <= ADMLVL_BUILDER) {
+      if (char_get_admlevel(d->character) <= ADMLVL_BUILDER) {
        OLC_MODE(d) = ZEDIT_MAIN_MENU;
        write_to_output(d, "Access Denied.\r\n");
       }
@@ -927,7 +927,7 @@ void zedit_parse(struct descriptor_data *d, char *arg)
       /*
        * Edit bottom of zone.
        */
-      if (GET_ADMLEVEL(d->character) < ADMLVL_IMPL)
+      if (char_get_admlevel(d->character) < ADMLVL_IMPL)
 	zedit_disp_menu(d);
       else {
 	write_to_output(d, "Enter new bottom of zone : ");
@@ -939,7 +939,7 @@ void zedit_parse(struct descriptor_data *d, char *arg)
       /*
        * Edit top of zone.
        */
-      if (GET_ADMLEVEL(d->character) < ADMLVL_IMPL)
+      if (char_get_admlevel(d->character) < ADMLVL_IMPL)
 	zedit_disp_menu(d);
       else {
 	write_to_output(d, "Enter new top of zone : ");

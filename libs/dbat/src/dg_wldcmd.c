@@ -116,7 +116,7 @@ WCMD(do_weffect)
     wld_log(room, "weffect setting out of bounds, 0 - 10000 only.");
     return;
    } else {
-    ROOM_GRAVITY(real_room(room->number)) = num;
+    rroom_set_gravity(real_room(room->number), num);
    }
   } else if (!strcasecmp(arg, "light")) {
    if (target == NOWHERE) {
@@ -124,9 +124,9 @@ WCMD(do_weffect)
     return;
    } else {
     if (!rroom_flagged(target, ROOM_INDOORS)) {
-     SET_BIT_AR(ROOM_FLAGS(target), ROOM_INDOORS);
+     SET_BIT_AR(rroom_get_room_flags(target), ROOM_INDOORS);
     } else {
-     REMOVE_BIT_AR(ROOM_FLAGS(target), ROOM_INDOORS);
+     REMOVE_BIT_AR(rroom_get_room_flags(target), ROOM_INDOORS);
     }
    }
   } else if (!strcasecmp(arg, "lava")) {
@@ -134,8 +134,8 @@ WCMD(do_weffect)
     wld_log(room, "weffect target is NOWHERE.");
     return;
    } else {
-    if (ROOM_EFFECT(target) != 0) {
-     ROOM_EFFECT(target) = 5;
+    if (rroom_get_geffect(target) != 0) {
+     rroom_set_geffect(target, 5);
     } else {
      wld_log(room, "weffect target already has lava.");
      return;
@@ -380,7 +380,7 @@ WCMD(do_wteleport)
               continue;
             char_from_room(ch);
             char_to_room(ch, target);
-            enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+            enter_wtrigger(&world[char_get_in_room(ch)], ch, -1);
         }
     }
 
@@ -390,7 +390,7 @@ WCMD(do_wteleport)
           if (valid_dg_target(ch, DG_ALLOW_GODS)) {
             char_from_room(ch);
             char_to_room(ch, target);
-            enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+            enter_wtrigger(&world[char_get_in_room(ch)], ch, -1);
           }
         }
 
@@ -531,7 +531,7 @@ WCMD(do_wload)
       char_to_room(mob, rnum);
       if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
         char buf[MAX_INPUT_LENGTH];
-        sprintf(buf, "%c%d", UID_CHAR, GET_ID(mob));
+        sprintf(buf, "%c%d", UID_CHAR, char_get_id(mob));
         add_var(&(SCRIPT(room)->global_vars), "lastloaded", buf, 0);
       }
       load_mtrigger(mob);
@@ -548,7 +548,7 @@ WCMD(do_wload)
         obj_to_room(object, real_room(room->number));
         if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
           char buf[MAX_INPUT_LENGTH];
-          sprintf(buf, "%c%d", UID_CHAR, GET_ID(object));
+          sprintf(buf, "%c%d", UID_CHAR, obj_get_id(object));
           add_var(&(SCRIPT(room)->global_vars), "lastloaded", buf, 0);
         }
         load_otrigger(object);
@@ -560,7 +560,7 @@ WCMD(do_wload)
       if (tch) {
         if (arg2 != NULL && *arg2 &&
             (pos = find_eq_pos_script(arg2)) >= 0 &&
-            !GET_EQ(tch, pos) &&
+            !char_get_equipment(tch, pos) &&
             can_wear_on_pos(object, pos)) {
           equip_char(tch, object, pos);
           load_otrigger(object);
@@ -571,7 +571,7 @@ WCMD(do_wload)
         return;
       }
       cnt = get_obj_in_room(room, arg1);
-      if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
+      if (cnt && obj_get_type_flag(cnt) == ITEM_CONTAINER) {
       	obj_to_obj(object, cnt);
         load_otrigger(object);
       	return;
@@ -634,7 +634,7 @@ WCMD(do_wat)
   if (isdigit(*arg)) {
     loc = real_room(atoi(arg));
   } else if ((ch = get_char_by_room(room, arg))) {
-    loc = IN_ROOM(ch);
+    loc = char_get_in_room(ch);
   }
 
   if (loc == NOWHERE) {

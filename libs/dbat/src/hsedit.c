@@ -130,10 +130,10 @@ void hsedit_save_internally(struct descriptor_data *d)
   } 
   /* The new house is stored - now to ensure the roomsflags are correct */ 
   if (real_room(OLC_HOUSE(d)->vnum) != NOWHERE) 
-    SET_BIT_AR(ROOM_FLAGS(real_room(OLC_HOUSE(d)->vnum)), ROOM_HOUSE);
+    SET_BIT_AR(rroom_get_room_flags(real_room(OLC_HOUSE(d)->vnum)), ROOM_HOUSE);
 
   if (real_room(OLC_HOUSE(d)->atrium) != NOWHERE) 
-    SET_BIT_AR(ROOM_FLAGS(real_room(OLC_HOUSE(d)->atrium)), ROOM_ATRIUM); 
+    SET_BIT_AR(rroom_get_room_flags(real_room(OLC_HOUSE(d)->atrium)), ROOM_ATRIUM); 
 
 //  olc_add_to_save_list(zone_table[OLC_ZNUM(d)].number, OLC_SAVE_HOUSE); 
 } 
@@ -171,7 +171,7 @@ void hedit_delete_house(struct descriptor_data *d, int house_vnum)
   if ((real_house = real_room(house_control[i].vnum)) == NOWHERE) 
     log("SYSERR: House %d had invalid vnum %d!", house_vnum, house_control[i].vnum); 
   else 
-    REMOVE_BIT_AR(ROOM_FLAGS(real_house), ROOM_HOUSE | ROOM_HOUSE_CRASH); 
+    REMOVE_BIT_AR(rroom_get_room_flags(real_house), ROOM_HOUSE | ROOM_HOUSE_CRASH); 
 
   House_delete_file(house_control[i].vnum); 
 
@@ -844,7 +844,7 @@ void hsedit_parse(struct descriptor_data * d, char *arg)
       hsedit_disp_guest_menu(d); 
       return; 
     } 
-    else if (id == GET_IDNUM(d->character)) 
+    else if (id == char_get_idnum(d->character)) 
     { 
       send_to_char(d->character, "House owner should not be in the guest list!\r\n"); 
       hsedit_disp_guest_menu(d); 
@@ -875,7 +875,7 @@ void hsedit_parse(struct descriptor_data * d, char *arg)
       hsedit_disp_guest_menu(d); 
       return; 
     } 
-    else if (id == GET_IDNUM(d->character)) 
+    else if (id == char_get_idnum(d->character)) 
     { 
       send_to_char(d->character, "House owner should not be in the guest list!\r\n"); 
       hsedit_disp_guest_menu(d); 
@@ -1015,7 +1015,7 @@ ACMD(do_oasis_hsedit)
   
 /****************************************************************************/ 
   if (!*buf1) { 
-    number = rroom_get_vnum(IN_ROOM(ch)); 
+    number = rroom_get_vnum(char_get_in_room(ch)); 
   } else if (!isdigit(*buf1)) { 
     if (strcasecmp("save", buf1) != 0) {
       send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n"); 
@@ -1054,7 +1054,7 @@ ACMD(do_oasis_hsedit)
   
 /****************************************************************************/ 
   for (d = descriptor_list; d; d = d->next) { 
-    if (STATE(d) == CON_HSEDIT) { 
+    if (desc_get_connected(d) == CON_HSEDIT) { 
       if (d->olc && OLC_NUM(d) == number) { 
         send_to_char(ch, "That house is currently being edited by %s.\r\n", 
           char_pers(d->character, ch)); 
@@ -1178,7 +1178,7 @@ ACMD(do_oasis_hsedit)
     hsedit_setup_existing(d, real_num); 
   } 
     
-  STATE(d) = CON_HSEDIT; 
+  desc_set_connected(d, CON_HSEDIT); 
   
   
 /****************************************************************************/ 
@@ -1186,7 +1186,7 @@ ACMD(do_oasis_hsedit)
   
 /****************************************************************************/ 
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM); 
-  SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING); 
+  SET_BIT_AR(char_get_act(ch), PLR_WRITING); 
   
   
 /****************************************************************************/ 

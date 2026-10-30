@@ -34,7 +34,7 @@ void ping_ship(int vnum, int vnum2)
     if (!(obj = find_control(tch))) {
      continue;
     } else {
-     if (GET_OBJ_VAL(obj, 0) == vnum && vnum != vnum2) {
+     if (obj_get_value(obj, 0) == vnum && vnum != vnum2) {
       controls = obj;
       found = TRUE;
      }
@@ -43,7 +43,7 @@ void ping_ship(int vnum, int vnum2)
   }
 
   if (found == TRUE) {
-   send_to_room(IN_ROOM(controls), "@D[@RALERT@D: @YAn unknown radar signal has been detected!@D]@n");
+   send_to_room(obj_get_in_room(controls), "@D[@RALERT@D: @YAn unknown radar signal has been detected!@D]@n");
   }
 }
 
@@ -54,7 +54,7 @@ int checkship(int rnum, int vnum)
 
  for (i = world[rnum].contents; i; i = i->next_content) {
   if (!rroom_flagged(rnum, ROOM_NEBULA)) {
-   if (GET_OBJ_TYPE(i) == ITEM_VEHICLE && there != TRUE) {
+   if (obj_get_type_flag(i) == ITEM_VEHICLE && there != TRUE) {
     there = TRUE;
     ping_ship(obj_get_vnum(i), vnum);
    } 
@@ -77,7 +77,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
    enemy = TRUE;
   }
 
-  if (rnum == real_room(GET_RADAR1(ch)) || rnum == real_room(GET_RADAR2(ch)) || rnum == real_room(GET_RADAR3(ch))) {
+  if (rnum == real_room(char_get_radar1(ch)) || rnum == real_room(char_get_radar2(ch)) || rnum == real_room(char_get_radar3(ch))) {
    if (there) {
     sprintf(mapchar, "@WB@RX");
    } else if (enemy == TRUE) {
@@ -353,23 +353,23 @@ void printmap(int rnum, struct char_data * ch, int type, int vnum) {
       strcat(buf, "      @RCompass@n           ");
      }
      else if (count == 2) {
-      sprintf(buf2, "@w       @w|%s@w|            ", (W_EXIT(rnum, 0) ? " @CN " : "   "));
+      sprintf(buf2, "@w       @w|%s@w|            ", (rroom_get_dir_option(rnum, 0) ? " @CN " : "   "));
       strcat(buf, buf2);
      }
      else if (count == 3) {
-      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (W_EXIT(rnum, 6) ? " @CNW" : "   "), (W_EXIT(rnum, 4) ? " @YU " : "   "), (W_EXIT(rnum, 7) ? "@CNE " : "   "));
+      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (rroom_get_dir_option(rnum, 6) ? " @CNW" : "   "), (rroom_get_dir_option(rnum, 4) ? " @YU " : "   "), (rroom_get_dir_option(rnum, 7) ? "@CNE " : "   "));
       strcat(buf, buf2);
      }
      else if (count == 4) {
-      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (W_EXIT(rnum, 3) ? "  @CW" : "   "), (W_EXIT(rnum, 10) ? "@m I " : (W_EXIT(rnum, 11) ? "@mOUT" : "   ")), (W_EXIT(rnum, 1) ? "@CE  " : "   "));
+      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (rroom_get_dir_option(rnum, 3) ? "  @CW" : "   "), (rroom_get_dir_option(rnum, 10) ? "@m I " : (rroom_get_dir_option(rnum, 11) ? "@mOUT" : "   ")), (rroom_get_dir_option(rnum, 1) ? "@CE  " : "   "));
       strcat(buf, buf2);
      }
      else if (count == 5) {
-      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (W_EXIT(rnum, 9) ? " @CSW" : "   "), (W_EXIT(rnum, 5) ? " @YD " : "   "), (W_EXIT(rnum, 8) ? "@CSE " : "   "));
+      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (rroom_get_dir_option(rnum, 9) ? " @CSW" : "   "), (rroom_get_dir_option(rnum, 5) ? " @YD " : "   "), (rroom_get_dir_option(rnum, 8) ? "@CSE " : "   "));
       strcat(buf, buf2);
      }
      else if (count == 6) {
-      sprintf(buf2, "@w       @w|%s@w|            ", (W_EXIT(rnum, 2) ? " @CS " : "   "));
+      sprintf(buf2, "@w       @w|%s@w|            ", (rroom_get_dir_option(rnum, 2) ? " @CS " : "   "));
       strcat(buf, buf2);
      } else {
       strcat(buf, "                        ");

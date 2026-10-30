@@ -90,7 +90,7 @@ ACMD(do_oasis_medit)
   /** Check that whatever it is isn't already being edited.                  **/
   /****************************************************************************/
   for (d = descriptor_list; d; d = d->next) {
-    if (STATE(d) == CON_MEDIT) {
+    if (desc_get_connected(d) == CON_MEDIT) {
       if (d->olc && OLC_NUM(d) == number) {
         send_to_char(ch, "That mobile is currently being edited by %s.\r\n",
           char_get_name(d->character));
@@ -168,14 +168,14 @@ ACMD(do_oasis_medit)
     medit_setup_existing(d, real_num);
  
   medit_disp_menu(d); 
-  STATE(d) = CON_MEDIT;
+  desc_set_connected(d, CON_MEDIT);
   
   /****************************************************************************/
   /** Display the OLC messages to the players in the same room as the        **/
   /** builder and also log it.                                               **/
   /****************************************************************************/
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
-  SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE,"OLC: %s starts editing zone %d allowed zone %d",
     char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
@@ -197,7 +197,7 @@ void medit_setup_new(struct descriptor_data *d)
 
   init_mobile(mob);
 
-  GET_MOB_RNUM(mob) = NOBODY;
+  char_set_nr(mob, NOBODY);
   /*
    * Set up some default strings.
    */
@@ -252,18 +252,18 @@ void init_mobile(struct char_data *mob)
   //GET_HIT(mob) = 0;
   //GET_MAX_MANA(mob) = 0;
   GET_NDD(mob) = 0;
-  GET_SEX(mob) = SEX_MALE;
-  GET_HITDICE(mob) = 0;
+  char_set_sex(mob, SEX_MALE);
+  char_set_race_level(mob, 0);
   mob->chclass = CLASS_NPC_COMMONER;
 
-  GET_WEIGHT(mob) = rand_number(100, 200);
-  GET_HEIGHT(mob) = rand_number(100, 200);
+  char_set_weight(mob, rand_number(100, 200));
+  char_set_height(mob, rand_number(100, 200));
 
   mob->real_abils.str = mob->real_abils.intel = mob->real_abils.wis = rand_number(8, 16);
   mob->real_abils.dex = mob->real_abils.con = mob->real_abils.cha = rand_number(8, 16);
   mob->aff_abils = mob->real_abils;
 
-  SET_BIT_AR(MOB_FLAGS(mob), MOB_ISNPC);
+  SET_BIT_AR(char_get_act(mob), MOB_ISNPC);
   mob->player_specials = &dummy_mob;
 }
 
@@ -298,7 +298,7 @@ void medit_save_internally(struct descriptor_data *d)
 
   /* this takes care of the mobs currently in-game */
   for (mob = character_list; mob; mob = mob->next) {
-    if (GET_MOB_RNUM(mob) != new_rnum) 
+    if (char_get_nr(mob) != new_rnum) 
       continue;
     
     /* remove any old scripts */
@@ -318,17 +318,17 @@ void medit_save_internally(struct descriptor_data *d)
    * Update keepers in shops being edited and other mobs being edited.
    */
   for (dsc = descriptor_list; dsc; dsc = dsc->next) {
-    if (STATE(dsc) == CON_SEDIT)
+    if (desc_get_connected(dsc) == CON_SEDIT)
       S_KEEPER(OLC_SHOP(dsc)) += (S_KEEPER(OLC_SHOP(dsc)) != NOTHING && S_KEEPER(OLC_SHOP(dsc)) >= new_rnum);
-    else if (STATE(dsc) == CON_MEDIT)
-      GET_MOB_RNUM(OLC_MOB(dsc)) += (GET_MOB_RNUM(OLC_MOB(dsc)) != NOTHING && GET_MOB_RNUM(OLC_MOB(dsc)) >= new_rnum);
+    else if (desc_get_connected(dsc) == CON_MEDIT)
+      char_set_nr(OLC_MOB(dsc), char_get_nr(OLC_MOB(dsc)) + ((char_get_nr(OLC_MOB(dsc)) != NOTHING && char_get_nr(OLC_MOB(dsc)) >= new_rnum)));
   }
 
   /*
    * Update other people in zedit too. From: C.Raehl 4/27/99
    */
   for (dsc = descriptor_list; dsc; dsc = dsc->next)
-    if (STATE(dsc) == CON_ZEDIT)
+    if (desc_get_connected(dsc) == CON_ZEDIT)
       for (i = 0; OLC_ZONE(dsc)->cmd[i].command != 'S'; i++)
         if (OLC_ZONE(dsc)->cmd[i].command == 'M')
           if (OLC_ZONE(dsc)->cmd[i].arg1 >= new_rnum)
@@ -386,7 +386,7 @@ void medit_disp_mob_flags(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, action_bits[i],
 		!(++columns % 2) ? "\r\n" : "");
   }
-  sprintbitarray(MOB_FLAGS(OLC_MOB(d)), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
+  sprintbitarray(char_get_act(OLC_MOB(d)), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
   write_to_output(d, "\r\nCurrent flags : @c%s@n\r\nEnter mob flags (0 to quit) : ",
 		  flags);
 }
@@ -419,7 +419,7 @@ void medit_disp_aff_flags(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, affected_bits[i+1],
                     !(++columns % 2) ? "\r\n" : "");
   }
-  sprintbitarray(AFF_FLAGS(OLC_MOB(d)), affected_bits, AF_ARRAY_MAX, flags, sizeof(flags));
+  sprintbitarray(char_get_affected_by(OLC_MOB(d)), affected_bits, AF_ARRAY_MAX, flags, sizeof(flags));
   write_to_output(d, "\r\nCurrent flags   : @c%s@n\r\nEnter aff flags (0 to quit) : ",
                   flags);
 }
@@ -505,14 +505,14 @@ void medit_disp_menu(struct descriptor_data *d)
   "@gC@n) Num HP Dice: [@c%4" I64T "@n],  @gD@n) Size HP Dice: [@c%5" I64T "@n],  @gE@n) HP Bonus: [@c%5" I64T "@n]\r\n"
   "@gF@n) Armor Class: [@c%4d@n],  @gG@n) Exp:      [@c%" I64T "@n],  @gH@n) Gold:  [@c%8d@n]\r\n",
 
-	  OLC_NUM(d), genders[(int)GET_SEX(mob)], GET_ALIAS(mob),
-	  GET_SDESC(mob), GET_LDESC(mob), GET_DDESC(mob), GET_HITDICE(mob),
-	  GET_ALIGNMENT(mob), GET_FISHD(mob), 0 /* damage mod: unused */,
+	  OLC_NUM(d), genders[(int)char_get_sex(mob)], GET_ALIAS(mob),
+	  GET_SDESC(mob), GET_LDESC(mob), GET_DDESC(mob), char_get_race_level(mob),
+	  char_get_alignment(mob), char_get_accuracy_mod(mob), 0 /* damage mod: unused */,
 	  GET_NDD(mob), GET_SDD(mob), GET_HIT(mob), (getCurKI(mob)),
-                  (getCurST(mob)), GET_ARMOR(mob), GET_EXP(mob), GET_GOLD(mob)
+                  (getCurST(mob)), char_get_armor(mob), char_get_exp(mob), char_get_gold(mob)
 	  );
-  sprintbitarray(MOB_FLAGS(mob), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
-  sprintbitarray(AFF_FLAGS(mob), affected_bits, AF_ARRAY_MAX, flag2, sizeof(flag2));
+  sprintbitarray(char_get_act(mob), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
+  sprintbitarray(char_get_affected_by(mob), affected_bits, AF_ARRAY_MAX, flag2, sizeof(flag2));
   write_to_output(d,
 	  "@gI@n) Position   : @y%-10s@n,	 @gJ@n) Default   : @y%-10s\r\n"
 	  "@gK@n) Personality: @Y%s@n\r\n"
@@ -526,9 +526,9 @@ void medit_disp_menu(struct descriptor_data *d)
 	  "@gQ@n) Quit\r\n"
 	  "Enter choice : ",
 
-	  position_types[(int)GET_POS(mob)],
-	  position_types[(int)GET_DEFAULT_POS(mob)],
-          npc_personality[GET_PERSONALITY(mob)],
+	  position_types[(int)char_get_position(mob)],
+	  position_types[(int)char_get_mob_specials_default_pos(mob)],
+          npc_personality[char_get_personality(mob)],
 	  flags, flag2, SENSEI_NAME(mob),
           TRUE_RACE(mob),
           OLC_SCRIPT(d) ?"Set.":"Not Set.", size_names[get_size(mob)]
@@ -563,7 +563,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
     /*
      * Ensure mob has MOB_ISNPC set or things will go pear shaped.
      */
-    SET_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_ISNPC);
+    SET_BIT_AR(char_get_act(OLC_MOB(d)), MOB_ISNPC);
     switch (*arg) {
     case 'y':
     case 'Y':
@@ -808,7 +808,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
     if ((i = atoi(arg)) <= 0)
       break;
     else if (i <= NUM_MOB_FLAGS)
-      TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), i - 1);
+      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), i - 1);
     medit_disp_mob_flags(d);
     return;
 /*-------------------------------------------------------------------*/
@@ -816,7 +816,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
      if ((i = atoi(arg)) <= 0)
       break;
     else if (i <= MAX_PERSONALITIES)
-     GET_PERSONALITY(OLC_MOB(d)) = i;
+     char_set_personality(OLC_MOB(d), i);
     medit_disp_personality(d);
     return;
 /*-------------------------------------------------------------------*/
@@ -824,9 +824,9 @@ void medit_parse(struct descriptor_data *d, char *arg)
     if ((i = atoi(arg)) <= 0)
       break;
     else if (i <= NUM_AFF_FLAGS)
-      TOGGLE_BIT_AR(AFF_FLAGS(OLC_MOB(d)), i);
+      TOGGLE_BIT_AR(char_get_affected_by(OLC_MOB(d)), i);
     /* Remove unwanted bits right away. */
-    REMOVE_BIT_AR(AFF_FLAGS(OLC_MOB(d)),
+    REMOVE_BIT_AR(char_get_affected_by(OLC_MOB(d)),
        AFF_CHARM | AFF_POISON | AFF_GROUP | AFF_SLEEP);
     medit_disp_aff_flags(d);
     return;
@@ -837,81 +837,81 @@ void medit_parse(struct descriptor_data *d, char *arg)
  */
 
   case MEDIT_SEX:
-    GET_SEX(OLC_MOB(d)) = LIMIT(i, 0, NUM_GENDERS - 1);
+    char_set_sex(OLC_MOB(d), LIMIT(i, 0, NUM_GENDERS - 1));
     break;
 
   case MEDIT_ACCURACY:
-    GET_FISHD(OLC_MOB(d)) = LIMIT(i, 0, 50);
+    char_set_accuracy_mod(OLC_MOB(d), LIMIT(i, 0, 50));
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
+      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_DAMAGE: /* damage mod no longer exists; input is ignored */
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
+      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_NDD:
     GET_NDD(OLC_MOB(d)) = LIMIT(i, 0, 30);
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
+      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_SDD:
     GET_SDD(OLC_MOB(d)) = LIMIT(i, 0, 127);
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
+      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_NUM_HP_DICE:
     //GET_HIT(OLC_MOB(d)) = LIMIT(i, 0, CONFIG_LEVEL_CAP);
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
+      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_SIZE_HP_DICE:
     //GET_MANA(OLC_MOB(d)) = LIMIT(i, 0, 1000);
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
+      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_ADD_HP:
     //GET_MOVE(OLC_MOB(d)) = LIMIT(i, 0, 30000);
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
+      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_AC:
-    GET_ARMOR(OLC_MOB(d)) = LIMIT(i, 10, 200000);
+    char_set_armor(OLC_MOB(d), LIMIT(i, 10, 200000));
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
+      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_EXP:
-    GET_EXP(OLC_MOB(d)) = LIMIT(i, 0, MAX_MOB_EXP);
+    char_set_exp(OLC_MOB(d), LIMIT(i, 0, MAX_MOB_EXP));
     if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
-      TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
+      TOGGLE_BIT_AR(char_get_act(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_GOLD:
-    GET_GOLD(OLC_MOB(d)) = LIMIT(i, 0, MAX_MOB_GOLD);
+    char_set_gold(OLC_MOB(d), LIMIT(i, 0, MAX_MOB_GOLD));
     break;
 
   case MEDIT_POS:
-    GET_POS(OLC_MOB(d)) = LIMIT(i, 0, NUM_POSITIONS - 1);
+    char_set_position(OLC_MOB(d), LIMIT(i, 0, NUM_POSITIONS - 1));
     break;
 
   case MEDIT_DEFAULT_POS:
-    GET_DEFAULT_POS(OLC_MOB(d)) = LIMIT(i, 0, NUM_POSITIONS - 1);
+    char_set_mob_specials_default_pos(OLC_MOB(d), LIMIT(i, 0, NUM_POSITIONS - 1));
     break;
 
   case MEDIT_ATTACK:
@@ -919,12 +919,12 @@ void medit_parse(struct descriptor_data *d, char *arg)
     break;
 
   case MEDIT_LEVEL:
-    GET_HITDICE(OLC_MOB(d)) = LIMIT(i, 1, 150);
+    char_set_race_level(OLC_MOB(d), LIMIT(i, 1, 150));
     /* Try to add some baseline defaults based on level choice. */
     break;
 
   case MEDIT_ALIGNMENT:
-    GET_ALIGNMENT(OLC_MOB(d)) = LIMIT(i, -1000, 1000);
+    char_set_alignment(OLC_MOB(d), LIMIT(i, -1000, 1000));
     break;
 
   case MEDIT_CLASS:
@@ -944,7 +944,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
 
   case MEDIT_DELETE:
     if (*arg == 'y' || *arg == 'Y') {
-      if (delete_mobile(GET_MOB_RNUM(OLC_MOB(d))) != NOBODY)
+      if (delete_mobile(char_get_nr(OLC_MOB(d))) != NOBODY)
         write_to_output(d, "Mobile deleted.\r\n");
       else
         write_to_output(d, "Couldn't delete the mobile!\r\n");

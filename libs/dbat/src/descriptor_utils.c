@@ -146,19 +146,29 @@ void customCreate(struct descriptor_data *d)
 /* Formerly macros in descriptor_utils.h. */
 
 bool desc_is_playing(const struct descriptor_data *d) {
-    return (STATE(d) == CON_TEDIT
-           || STATE(d) == CON_REDIT
-           || STATE(d) == CON_MEDIT
-           || STATE(d) == CON_OEDIT
-           || STATE(d) == CON_ZEDIT
-           || STATE(d) == CON_SEDIT
-           || STATE(d) == CON_CEDIT
-           || STATE(d) == CON_PLAYING
-           || STATE(d) == CON_TRIGEDIT
-           || STATE(d) == CON_AEDIT
-           || STATE(d) == CON_GEDIT
-           || STATE(d) == CON_IEDIT
-           || STATE(d) == CON_HEDIT
-           || STATE(d) == CON_NEWSEDIT
-           || STATE(d) == CON_POBJ);
+    return (desc_get_connected(d) == CON_TEDIT
+           || desc_get_connected(d) == CON_REDIT
+           || desc_get_connected(d) == CON_MEDIT
+           || desc_get_connected(d) == CON_OEDIT
+           || desc_get_connected(d) == CON_ZEDIT
+           || desc_get_connected(d) == CON_SEDIT
+           || desc_get_connected(d) == CON_CEDIT
+           || desc_get_connected(d) == CON_PLAYING
+           || desc_get_connected(d) == CON_TRIGEDIT
+           || desc_get_connected(d) == CON_AEDIT
+           || desc_get_connected(d) == CON_GEDIT
+           || desc_get_connected(d) == CON_IEDIT
+           || desc_get_connected(d) == CON_HEDIT
+           || desc_get_connected(d) == CON_NEWSEDIT
+           || desc_get_connected(d) == CON_POBJ);
+}
+
+/* Field accessors (formerly accessor macros). */
+
+int desc_get_connected(const struct descriptor_data *d) {
+    return d->connected;
+}
+
+void desc_set_connected(struct descriptor_data *d, int v) {
+    d->connected = v;
 }

@@ -109,8 +109,8 @@ ACMD(do_olc)
 	return;
       }
     } else {
-      rnum = IN_ROOM(ch);
-      vnum = rroom_get_vnum(IN_ROOM(ch));
+      rnum = char_get_in_room(ch);
+      vnum = rroom_get_vnum(char_get_in_room(ch));
       send_to_char(ch, "(Using current room %d)\r\n", vnum);
     }
 

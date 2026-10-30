@@ -159,11 +159,11 @@ void copyover_recover()
     d->character->desc = d;
 
     if ((player_i = load_char(name, d->character)) >= 0) {
-     GET_PFILEPOS(d->character) = player_i;
+     char_set_pfilepos(d->character, player_i);
      if (!char_plr_flagged(d->character, PLR_DELETED)) {
-        REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
-        REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_MAILING);
-        REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_CRYO);
+        REMOVE_BIT_AR(char_get_act(d->character), PLR_WRITING);
+        REMOVE_BIT_AR(char_get_act(d->character), PLR_MAILING);
+        REMOVE_BIT_AR(char_get_act(d->character), PLR_CRYO);
         userLoad(d, username);
      }
      /*else
@@ -182,9 +182,9 @@ void copyover_recover()
        enter_player_game(d);
        GET_LOADROOM(d->character) = set_loadroom;
        d->connected = CON_PLAYING;
-       look_at_room(IN_ROOM(d->character), d->character, 0);
+       look_at_room(char_get_in_room(d->character), d->character, 0);
        if (char_aff_flagged(d->character, AFF_HAYASA)) {
-        GET_SPEEDBOOST(d->character) = char_get_speedcalc(d->character) * 0.5;
+        char_set_speedboost(d->character, char_get_speedcalc(d->character) * 0.5);
        }
      }
   }
@@ -505,9 +505,9 @@ void game_loop(socklen_t cmmother_desc)
        */
 
       if (d->character) {
-        GET_WAIT_STATE(d->character) -= (GET_WAIT_STATE(d->character) > 0);
+        char_set_wait(d->character, char_get_wait(d->character) - ((char_get_wait(d->character) > 0)));
 
-        if (GET_WAIT_STATE(d->character)) {
+        if (char_get_wait(d->character)) {
           continue;
         }
       }
@@ -518,14 +518,14 @@ void game_loop(socklen_t cmmother_desc)
       if (d->character) {
 	/* Reset the idle timer & pull char back from void if necessary */
 	d->character->timer = 0;
-	if (STATE(d) == CON_PLAYING && GET_WAS_IN(d->character) != NOWHERE) {
-	  if (IN_ROOM(d->character) != NOWHERE)
+	if (desc_get_connected(d) == CON_PLAYING && char_get_was_in_room(d->character) != NOWHERE) {
+	  if (char_get_in_room(d->character) != NOWHERE)
 	    char_from_room(d->character);
-	  char_to_room(d->character, GET_WAS_IN(d->character));
-	  GET_WAS_IN(d->character) = NOWHERE;
+	  char_to_room(d->character, char_get_was_in_room(d->character));
+	  char_set_was_in_room(d->character, NOWHERE);
 	  act("$n has returned.", TRUE, d->character, 0, 0, TO_ROOM);
 	}
-        GET_WAIT_STATE(d->character) = 1;
+        char_set_wait(d->character, 1);
       }
       d->has_prompt = FALSE;
 
@@ -533,7 +533,7 @@ void game_loop(socklen_t cmmother_desc)
 	show_string(d, comm);
       else if (d->str)		/* Writing boards, mail, etc. */
 	string_add(d, comm);
-      else if (STATE(d) != CON_PLAYING) /* In menus, etc. */
+      else if (desc_get_connected(d) != CON_PLAYING) /* In menus, etc. */
 	nanny(d, comm);
       else {			/* else: we're playing normally. */
 	if (aliased)		/* To prevent recursive aliases. */
@@ -571,7 +571,7 @@ void game_loop(socklen_t cmmother_desc)
     /* Kick out folks in the CON_CLOSE or CON_DISCONNECT state */
     for (d = descriptor_list; d; d = next_d) {
       next_d = d->next;
-      if (STATE(d) == CON_CLOSE || STATE(d) == CON_DISCONNECT)
+      if (desc_get_connected(d) == CON_CLOSE || desc_get_connected(d) == CON_DISCONNECT)
           close_socket(d);
     }
 
@@ -794,7 +794,7 @@ char *make_prompt(struct descriptor_data *d)
 	    "\r\n[ Return to continue, (q)uit, (r)efresh, (b)ack, or page number (%d/%d) ]",
 	    d->showstr_page, d->showstr_count);
   } else if (d->str) {
-     if (STATE(d) == CON_EXDESC) {
+     if (desc_get_connected(d) == CON_EXDESC) {
      strcpy(prompt, "Enter Description(/h for editor help)> ");
      }
      else if (char_plr_flagged(d->character, PLR_WRITING) && !char_plr_flagged(d->character, PLR_MAILING)) {
@@ -807,7 +807,7 @@ char *make_prompt(struct descriptor_data *d)
      strcpy(prompt, "Enter Message> ");
      }
     }
-  else if (STATE(d) == CON_PLAYING && !char_is_npc(d->character)) {
+  else if (desc_get_connected(d) == CON_PLAYING && !char_is_npc(d->character)) {
     int count;
     size_t len = 0;
 
@@ -831,8 +831,8 @@ char *make_prompt(struct descriptor_data *d)
         if (count >= 0)
           len += count;
       }
-      if (GET_KI(ch) << 2 < GET_MAX_KI(ch) && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "KI: %" I64T " ", GET_KI(ch));
+      if (char_get_ki(ch) << 2 < char_get_max_ki(ch) && len < sizeof(prompt)) {
+        count = snprintf(prompt + len, sizeof(prompt) - len, "KI: %" I64T " ", char_get_ki(ch));
         if (count >= 0)
           len += count;
       }
@@ -849,7 +849,7 @@ char *make_prompt(struct descriptor_data *d)
           len += count;
       }
       if (char_is_halfbreed(d->character) && !char_plr_flagged(d->character, PLR_FURY) && char_prf_flagged(d->character, PRF_FURY)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mFury@W: @r%d@D]@w", GET_FURY(d->character));
+        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mFury@W: @r%d@D]@w", char_get_fury(d->character));
         flagged = TRUE;
         if (count >= 0)
           len += count;
@@ -860,31 +860,31 @@ char *make_prompt(struct descriptor_data *d)
         if (count >= 0)
           len += count;
       }
-      if (has_mail(GET_IDNUM(d->character)) && !char_prf_flagged(d->character, PRF_NMWARN) && (GET_ADMLEVEL(d->character) > 0) && len < sizeof(prompt)) {
+      if (has_mail(char_get_idnum(d->character)) && !char_prf_flagged(d->character, PRF_NMWARN) && (char_get_admlevel(d->character) > 0) && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "CHECK MAIL - ");
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (GET_KAIOKEN(d->character) > 0 && GET_ADMLEVEL(d->character) > 0) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "KAIOKEN X%d - ", GET_KAIOKEN(d->character));
+      if (char_get_kaioken(d->character) > 0 && char_get_admlevel(d->character) > 0) {
+        count = snprintf(prompt + len, sizeof(prompt) - len, "KAIOKEN X%d - ", char_get_kaioken(d->character));
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (GET_SONG(d->character) > 0) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "%s - ", song_types[GET_SONG(d->character)]);
+      if (char_get_powerattack(d->character) > 0) {
+        count = snprintf(prompt + len, sizeof(prompt) - len, "%s - ", song_types[char_get_powerattack(d->character)]);
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (GET_KAIOKEN(d->character) > 0 && GET_ADMLEVEL(d->character) <= 0) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "KAIOKEN X%d - ", GET_KAIOKEN(d->character));
+      if (char_get_kaioken(d->character) > 0 && char_get_admlevel(d->character) <= 0) {
+        count = snprintf(prompt + len, sizeof(prompt) - len, "KAIOKEN X%d - ", char_get_kaioken(d->character));
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (has_mail(GET_IDNUM(d->character)) && (GET_ADMLEVEL(d->character) <= 0) && !char_prf_flagged(d->character, PRF_NMWARN) && len < sizeof(prompt)) {
+      if (has_mail(char_get_idnum(d->character)) && (char_get_admlevel(d->character) <= 0) && !char_prf_flagged(d->character, PRF_NMWARN) && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "CHECK MAIL - ");
         flagged = TRUE;
         if (count >= 0)
@@ -896,8 +896,8 @@ char *make_prompt(struct descriptor_data *d)
         if (count >= 0)
           len += count;
       }
-      if (DRAGGING(d->character) && DRAGGING(d->character) != NULL && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "Dragging: (%s) - ", char_get_name(DRAGGING(d->character)));
+      if (char_get_drag(d->character) && char_get_drag(d->character) != NULL && len < sizeof(prompt)) {
+        count = snprintf(prompt + len, sizeof(prompt) - len, "Dragging: (%s) - ", char_get_name(char_get_drag(d->character)));
         flagged = TRUE;
         if (count >= 0)
           len += count;
@@ -932,67 +932,67 @@ char *make_prompt(struct descriptor_data *d)
         if (count >= 0)
           len += count;
       }
-      if (COMBO(d->character) == 51 && len < sizeof(prompt)) {
+      if (char_get_combo(d->character) == 51 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Bash) - ");
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (COMBO(d->character) == 52 && len < sizeof(prompt)) {
+      if (char_get_combo(d->character) == 52 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Headbutt) - ");
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (COMBO(d->character) == 56 && len < sizeof(prompt)) {
+      if (char_get_combo(d->character) == 56 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Tailwhip) - ");
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (COMBO(d->character) == 0 && len < sizeof(prompt)) {
+      if (char_get_combo(d->character) == 0 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Punch) - ");
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (COMBO(d->character) == 1 && len < sizeof(prompt)) {
+      if (char_get_combo(d->character) == 1 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Kick) - ");
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (COMBO(d->character) == 2 && len < sizeof(prompt)) {
+      if (char_get_combo(d->character) == 2 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Elbow) - ");
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (COMBO(d->character) == 3 && len < sizeof(prompt)) {
+      if (char_get_combo(d->character) == 3 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Knee) - ");
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (COMBO(d->character) == 4 && len < sizeof(prompt)) {
+      if (char_get_combo(d->character) == 4 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Roundhouse) - ");
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (COMBO(d->character) == 5 && len < sizeof(prompt)) {
+      if (char_get_combo(d->character) == 5 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Uppercut) - ");
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (COMBO(d->character) == 6 && len < sizeof(prompt)) {
+      if (char_get_combo(d->character) == 6 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Slam) - ");
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (COMBO(d->character) == 8 && len < sizeof(prompt)) {
+      if (char_get_combo(d->character) == 8 && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Heeldrop) - ");
         flagged = TRUE;
         if (count >= 0)
@@ -1015,46 +1015,46 @@ char *make_prompt(struct descriptor_data *d)
         if (count >= 0)
           len += count;
       }
-      if ((SITS(d->character) && char_plr_flagged(d->character, PLR_HEALT)) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
-        chair = SITS(d->character);
+      if ((char_get_sits(d->character) && char_plr_flagged(d->character, PLR_HEALT)) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
+        chair = char_get_sits(d->character);
         count = snprintf(prompt + len, sizeof(prompt) - len, "@c<@CFloating inside a healing tank@c>@n\r\n");
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if ((SITS(d->character) && GET_POS(d->character) == POS_SITTING) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
-        chair = SITS(d->character);
+      if ((char_get_sits(d->character) && char_get_position(d->character) == POS_SITTING) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
+        chair = char_get_sits(d->character);
         count = snprintf(prompt + len, sizeof(prompt) - len, "Sitting on: %s\r\n", chair->short_description);
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if ((SITS(d->character) && GET_POS(d->character) == POS_RESTING) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
-        chair = SITS(d->character);
+      if ((char_get_sits(d->character) && char_get_position(d->character) == POS_RESTING) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
+        chair = char_get_sits(d->character);
         count = snprintf(prompt + len, sizeof(prompt) - len, "Resting on: %s\r\n", chair->short_description);
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if ((SITS(d->character) && GET_POS(d->character) == POS_SLEEPING) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
-        chair = SITS(d->character);
+      if ((char_get_sits(d->character) && char_get_position(d->character) == POS_SLEEPING) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
+        chair = char_get_sits(d->character);
         count = snprintf(prompt + len, sizeof(prompt) - len, "Sleeping on: %s\r\n", chair->short_description);
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
       if (char_aff_flagged(d->character, AFF_POSITION) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
-        chair = SITS(d->character);
+        chair = char_get_sits(d->character);
         count = snprintf(prompt + len, sizeof(prompt) - len, "(Best Position)\r\n");
         flagged = TRUE;
         if (count >= 0)
           len += count;
       }
-      if (GET_CHARGE(d->character) < GET_MAX_MANA(d->character) * .01 && GET_CHARGE(d->character) > 0) {
-       GET_CHARGE(d->character) = 0;
+      if (char_get_charge(d->character) < GET_MAX_MANA(d->character) * .01 && char_get_charge(d->character) > 0) {
+       char_set_charge(d->character, 0);
       }
-    if (GET_CHARGE(d->character) > 0) {
-     int64_t charge = GET_CHARGE(d->character);
+    if (char_get_charge(d->character) > 0) {
+     int64_t charge = char_get_charge(d->character);
      if (!char_prf_flagged(d->character, PRF_NODEC) && !char_prf_flagged(d->character, PRF_DISPERC)) {
       if (charge >= GET_MAX_MANA(d->character)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G==@D<@RMAX@D>@G===@D]@n\n");
@@ -1168,8 +1168,8 @@ char *make_prompt(struct descriptor_data *d)
       }
      }
      if (char_prf_flagged(d->character, PRF_DISPERC) && !char_prf_flagged(d->character, PRF_NODEC)) {
-      if (GET_CHARGE(d->character) > 0) {
-        int64_t perc = (GET_CHARGE(d->character) * 100) / GET_MAX_MANA(d->character);
+      if (char_get_charge(d->character) > 0) {
+        int64_t perc = (char_get_charge(d->character) * 100) / GET_MAX_MANA(d->character);
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@BCharge@Y: @C%" I64T "%s@D]@n\n", perc, "%");
         if (count >= 0)
           len += count;
@@ -1191,8 +1191,8 @@ char *make_prompt(struct descriptor_data *d)
       }
       if (char_aff_flagged(d->character, AFF_SANCTUARY)) {
        if (char_prf_flagged(d->character, PRF_DISPERC) && !char_prf_flagged(d->character, PRF_NODEC)) {
-        if (GET_BARRIER(d->character) > 0) {
-         int64_t perc = (GET_BARRIER(d->character) * 100) / GET_MAX_MANA(d->character);
+        if (char_get_barrier(d->character) > 0) {
+         int64_t perc = (char_get_barrier(d->character) * 100) / GET_MAX_MANA(d->character);
          count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GBarrier@Y: @B%" I64T "%s@D]@n\n", perc, "%");
          if (count >= 0)
           len += count;
@@ -1200,90 +1200,90 @@ char *make_prompt(struct descriptor_data *d)
        }
 
       if(!char_prf_flagged(d->character, PRF_NODEC) && !char_prf_flagged(d->character, PRF_DISPERC)) {
-       if (GET_BARRIER(d->character) >= GET_MAX_MANA(d->character) * .75) {
+       if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .75) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C==MAX==@D]@n\n");
         if (count >= 0)
           len += count;
        }
-       else if (GET_BARRIER(d->character) >= GET_MAX_MANA(d->character) * .70) {
+       else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .70) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=======@D]@n\n");
         if (count >= 0)
           len += count;
        }
-       else if (GET_BARRIER(d->character) >= GET_MAX_MANA(d->character) * .65) {
+       else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .65) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C======-@D]@n\n");
         if (count >= 0)
           len += count;
        }
-       else if (GET_BARRIER(d->character) >= GET_MAX_MANA(d->character) * .60) {
+       else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .60) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C======@c-@D]@n\n");
         if (count >= 0)
           len += count;
        }
-       else if (GET_BARRIER(d->character) >= GET_MAX_MANA(d->character) * .55) {
+       else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .55) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=====-@c-@D]@n\n");
         if (count >= 0)
           len += count;
        }
-       else if (GET_BARRIER(d->character) >= GET_MAX_MANA(d->character) * .50) {
+       else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .50) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=====@c--@D]@n\n");
         if (count >= 0)
           len += count;
        }
-       else if (GET_BARRIER(d->character) >= GET_MAX_MANA(d->character) * .45) {
+       else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .45) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C====-@c--@D]@n\n");
         if (count >= 0)
           len += count;
        }
-       else if (GET_BARRIER(d->character) >= GET_MAX_MANA(d->character) * .40) {
+       else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .40) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C====@c---@D]@n\n");
         if (count >= 0)
           len += count;
        }
-       else if (GET_BARRIER(d->character) >= GET_MAX_MANA(d->character) * .35) {
+       else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .35) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C===-@c---@D]@n\n");
         if (count >= 0)
           len += count;
        }
-       else if (GET_BARRIER(d->character) >= GET_MAX_MANA(d->character) * .30) {
+       else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .30) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C===@c----@D]@n\n");
         if (count >= 0)
           len += count;
        }
-       else if (GET_BARRIER(d->character) >= GET_MAX_MANA(d->character) * .25) {
+       else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .25) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C==-@c----@D]@n\n");
         if (count >= 0)
           len += count;
        }
-       else if (GET_BARRIER(d->character) >= GET_MAX_MANA(d->character) * .20) {
+       else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .20) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C==@c-----@D]@n\n");
         if (count >= 0)
           len += count;
        }
-       else if (GET_BARRIER(d->character) >= GET_MAX_MANA(d->character) * .15) {
+       else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .15) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=-@c-----@D]@n\n");
         if (count >= 0)
           len += count;
        }
-       else if (GET_BARRIER(d->character) >= GET_MAX_MANA(d->character) * .10) {
+       else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .10) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=@c------@D]@n\n");
         if (count >= 0)
           len += count;
        }
-       else if (GET_BARRIER(d->character) >= GET_MAX_MANA(d->character) * .05) {
+       else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .05) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C-@c------@D]@n\n");
         if (count >= 0)
           len += count;
        }
-       else if (GET_BARRIER(d->character) < GET_MAX_MANA(d->character) * .05) {
+       else if (char_get_barrier(d->character) < GET_MAX_MANA(d->character) * .05) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C--Low-@D]@n\n");
         if (count >= 0)
           len += count;
        }
        }
        if(char_prf_flagged(d->character, PRF_NODEC)) {
-        if (GET_BARRIER(d->character) > 0) {
-         int64_t perc = (GET_BARRIER(d->character) * 100) / GET_MAX_MANA(d->character);
+        if (char_get_barrier(d->character) > 0) {
+         int64_t perc = (char_get_barrier(d->character) * 100) / GET_MAX_MANA(d->character);
          count = snprintf(prompt + len, sizeof(prompt) - len, "A barrier charged to %" I64T " percent surrounds you.@n\n", perc);
          if (count >= 0)
           len += count;
@@ -1434,7 +1434,7 @@ char *make_prompt(struct descriptor_data *d)
        }
       }
       if (char_prf_flagged(d->character, PRF_DISPTNL) && len < sizeof(prompt) && char_get_level(d->character) < 100) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@yTNL@Y: @W%s@D]@n", add_commas(level_exp(d->character, char_get_level(d->character) + 1) - GET_EXP(d->character)));
+        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@yTNL@Y: @W%s@D]@n", add_commas(level_exp(d->character, char_get_level(d->character) + 1) - char_get_exp(d->character)));
         if (count >= 0)
           len += count;
       }
@@ -1444,7 +1444,7 @@ char *make_prompt(struct descriptor_data *d)
           len += count;
       }
       if (char_prf_flagged(d->character, PRF_DISGOLD) && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@YZen@y: @W%s@D]@n", add_commas(GET_GOLD(d->character)));
+        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@YZen@y: @W%s@D]@n", add_commas(char_get_gold(d->character)));
         if (count >= 0)
           len += count;
       }
@@ -1514,7 +1514,7 @@ char *make_prompt(struct descriptor_data *d)
     if (len < sizeof(prompt) && len < 5)
       strncat(prompt, ">\n", sizeof(prompt) - len - 1);	/* strncat: OK */
 
-  } else if (STATE(d) == CON_PLAYING && char_is_npc(d->character))
+  } else if (desc_get_connected(d) == CON_PLAYING && char_is_npc(d->character))
     snprintf(prompt, sizeof(prompt), "%s>\n", CAP(char_get_name(d->character)));
   else
     *prompt = '\0';
@@ -1792,7 +1792,7 @@ size_t vwrite_to_output(struct descriptor_data *t, const char *format, va_list a
   if (size + t->bufptr + 1 > LARGE_BUFSIZE) {
     size = LARGE_BUFSIZE - t->bufptr - 1;
     txt[size] = '\0';
-    GET_OVERFLOW(t->character) = TRUE;
+    char_set_overf(t->character, TRUE);
     buf_overflows++;
   }
 
@@ -1912,7 +1912,7 @@ void init_descriptor (struct descriptor_data *newd, int desc)
   *newd->output = '\0';
   newd->bufptr = 0;
   newd->has_prompt = 1;  /* prompt is part of greetings */
-  STATE(newd) = CON_GET_USER;
+  desc_set_connected(newd, CON_GET_USER);
   CREATE(newd->history, char *, HISTORY_SIZE);
   if (++last_desc == 1000)
     last_desc = 1;
@@ -2043,13 +2043,13 @@ int process_output(struct descriptor_data *t)
     strcat(osb, "**OVERFLOW**\r\n");    /* strcpy: OK (osb:MAX_SOCK_BUF-2 reserves space) */
 
   /* add the extra CRLF if the person isn't in compact mode */
-  if (STATE(t) == CON_PLAYING && t->character && !char_is_npc(t->character) && !char_prf_flagged(t->character, PRF_COMPACT)) 
+  if (desc_get_connected(t) == CON_PLAYING && t->character && !char_is_npc(t->character) && !char_prf_flagged(t->character, PRF_COMPACT)) 
     strcat(osb, "\r\n");	/* strcpy: OK (osb:MAX_SOCK_BUF-2 reserves space) */
 
   /* add a prompt */
 
   strcat(i, make_prompt(t));    /* strcpy: OK (i:MAX_SOCK_BUF reserves space) */
-  if (STATE(t) == CON_PLAYING) {
+  if (desc_get_connected(t) == CON_PLAYING) {
   proc_colors(i, sizeof(i), COLOR_ON(t->character), COLOR_CHOICES(t->character));
   }
 
@@ -2540,7 +2540,7 @@ void close_socket(struct descriptor_data *d)
       free(d->backstr);      /* editing description ... not olc */
       d->backstr = NULL;
     }
-    if (desc_is_playing(d) || STATE(d) == CON_DISCONNECT) {
+    if (desc_is_playing(d) || desc_get_connected(d) == CON_DISCONNECT) {
       struct char_data *link_challenged = d->original ? d->original : d->character;
 
       /* We are guaranteed to have a person. */
@@ -2605,14 +2605,14 @@ void check_idle_passwords(void)
 
   for (d = descriptor_list; d; d = next_d) {
     next_d = d->next;
-    if (STATE(d) != CON_PASSWORD && STATE(d) != CON_GET_EMAIL && STATE(d) != CON_NEWPASSWD)
+    if (desc_get_connected(d) != CON_PASSWORD && desc_get_connected(d) != CON_GET_EMAIL && desc_get_connected(d) != CON_NEWPASSWD)
       continue;
     if (!d->idle_tics) {
       d->idle_tics++;
       continue;
     } else {
       write_to_output(d, "\r\nTimed out... goodbye.\r\n");
-      STATE(d) = CON_CLOSE;
+      desc_set_connected(d, CON_CLOSE);
     }
   }
 }
@@ -2623,7 +2623,7 @@ void check_idle_menu(void)
 
   for (d = descriptor_list; d; d = next_d) {
     next_d = d->next;
-    if (STATE(d) != CON_MENU && STATE(d) != CON_GET_USER && STATE(d) != CON_UMENU)
+    if (desc_get_connected(d) != CON_MENU && desc_get_connected(d) != CON_GET_USER && desc_get_connected(d) != CON_UMENU)
       continue;
     if (!d->idle_tics) {
       d->idle_tics++;
@@ -2631,7 +2631,7 @@ void check_idle_menu(void)
       continue;
     } else {
       write_to_output(d, "\r\nTimed out... goodbye.\r\n");
-      STATE(d) = CON_CLOSE;
+      desc_set_connected(d, CON_CLOSE);
     }
   }
 }
@@ -2762,20 +2762,20 @@ int arena_watch(struct char_data *ch)
  int found = FALSE, room = NOWHERE;
 
  for (d = descriptor_list; d; d = d->next) {
-  if (STATE(d) != CON_PLAYING)
+  if (desc_get_connected(d) != CON_PLAYING)
    continue;
 
   if (char_in_arena(d->character)) {
-   if (ARENA_IDNUM(ch) == GET_IDNUM(d->character)) {
+   if (char_get_arenawatch(ch) == char_get_idnum(d->character)) {
     found = TRUE;
-    room = rroom_get_vnum(IN_ROOM(d->character));
+    room = rroom_get_vnum(char_get_in_room(d->character));
    }
   }
  }
 
  if (found == FALSE) {
   REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
-  ARENA_IDNUM(ch) = -1;
+  char_set_arenawatch(ch, -1);
   return (NOWHERE);
  } else {
   return (room);
@@ -2789,11 +2789,11 @@ void send_to_eaves(const char *messg, struct char_data *tch, ...)
 
 
  for (d = descriptor_list; d; d = d->next) {
-     if(STATE(d) != CON_PLAYING)
+     if(desc_get_connected(d) != CON_PLAYING)
       continue;
 
      int roll = rand_number(1, 101);
-     if (GET_EAVESDROP(d->character) == rroom_get_vnum(IN_ROOM(tch)) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
+     if (char_get_listenroom(d->character) == rroom_get_vnum(char_get_in_room(tch)) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
       char buf[1000];
       char buf2[1000];
       *buf = '\0';
@@ -2813,7 +2813,7 @@ void send_to_all(const char *messg, ...)
     return;
 
   for (i = descriptor_list; i; i = i->next) {
-    if (STATE(i) != CON_PLAYING)
+    if (desc_get_connected(i) != CON_PLAYING)
       continue;
 
     va_start(args, messg);
@@ -2833,7 +2833,7 @@ void send_to_outdoor(const char *messg, ...)
   for (i = descriptor_list; i; i = i->next) {
     va_list args;
 
-    if (STATE(i) != CON_PLAYING || i->character == NULL)
+    if (desc_get_connected(i) != CON_PLAYING || i->character == NULL)
       continue;
     if (!char_is_awake(i->character) || !char_is_outside(i->character))
       continue;
@@ -2854,7 +2854,7 @@ void send_to_moon(const char *messg, ...)
   for (i = descriptor_list; i; i = i->next) {
     va_list args;
 
-    if (STATE(i) != CON_PLAYING || i->character == NULL)
+    if (desc_get_connected(i) != CON_PLAYING || i->character == NULL)
       continue;
     if (!char_is_awake(i->character) || !char_has_moon(i->character))
       continue;
@@ -2875,9 +2875,9 @@ void send_to_planet(int type, int planet, const char *messg, ...)
   for (i = descriptor_list; i; i = i->next) {
     va_list args;
 
-    if (STATE(i) != CON_PLAYING || i->character == NULL)
+    if (desc_get_connected(i) != CON_PLAYING || i->character == NULL)
       continue;
-    if (!char_is_awake(i->character) || !rroom_flagged(IN_ROOM(i->character), planet))
+    if (!char_is_awake(i->character) || !rroom_flagged(char_get_in_room(i->character), planet))
       continue;
     else {
      if (type == 0) {
@@ -2914,7 +2914,7 @@ void send_to_room(room_rnum room, const char *messg, ...)
  struct descriptor_data *d;
 
  for (d = descriptor_list; d; d = d->next) {
-     if(STATE(d) != CON_PLAYING)
+     if(desc_get_connected(d) != CON_PLAYING)
       continue;
 
      if (char_prf_flagged(d->character, PRF_ARENAWATCH)) {
@@ -2927,9 +2927,9 @@ void send_to_room(room_rnum room, const char *messg, ...)
        va_end(args);
       }     
      }
-     if (GET_EAVESDROP(d->character) > 0) {
+     if (char_get_listenroom(d->character) > 0) {
        int roll = rand_number(1, 101);
-       if (GET_EAVESDROP(d->character) == room && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
+       if (char_get_listenroom(d->character) == room && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
         char buf[1000];
         *buf = '\0';
         sprintf(buf, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", messg);
@@ -3109,7 +3109,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
     dcval = roll_skill(ch, SKILL_MOVE_SILENTLY); /* How difficult to counter? */
     if (char_get_skill(ch, SKILL_BALANCE))
      dcval += char_get_skill(ch, SKILL_BALANCE) / 10;
-    if (char_is_mutant(ch) && (GET_GENOME(ch, 0) == 5 || GET_GENOME(ch, 1) == 5)) {
+    if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 5 || char_get_genome(ch, 1) == 5)) {
      dcval += 10;
     }
     resskill = SKILL_SPOT;             /* Skill used to resist      */
@@ -3148,7 +3148,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
       if (!i->connected && i->character && 
          !char_prf_flagged(i->character, PRF_NOGOSS) && 
          !char_plr_flagged(i->character, PLR_WRITING) && 
-         !rroom_flagged(IN_ROOM(i->character), ROOM_SOUNDPROOF)) { 
+         !rroom_flagged(char_get_in_room(i->character), ROOM_SOUNDPROOF)) { 
 
         sprintf(buf, "@y%s@n", str);
         perform_act(buf, ch, obj, vict_obj, i->character);
@@ -3162,10 +3162,10 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
 
   /* ASSUMPTION: at this point we know type must be TO_NOTVICT or TO_ROOM */
 
-  if (ch && IN_ROOM(ch) != NOWHERE)
-    to = world[IN_ROOM(ch)].people;
-  else if (obj && IN_ROOM(obj) != NOWHERE)
-    to = world[IN_ROOM(obj)].people;
+  if (ch && char_get_in_room(ch) != NOWHERE)
+    to = world[char_get_in_room(ch)].people;
+  else if (obj && obj_get_in_room(obj) != NOWHERE)
+    to = world[obj_get_in_room(obj)].people;
   else {
     return NULL;
   }
@@ -3174,13 +3174,13 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
    struct descriptor_data *d;
 
    for (d = descriptor_list; d; d = d->next) {
-     if(STATE(d) != CON_PLAYING)
+     if(desc_get_connected(d) != CON_PLAYING)
       continue;
 
      if (ch != NULL) {
       if (char_in_arena(ch)) {
        if (char_prf_flagged(d->character, PRF_ARENAWATCH)) {
-        if (arena_watch(d->character) == rroom_get_vnum(IN_ROOM(ch))) {
+        if (arena_watch(d->character) == rroom_get_vnum(char_get_in_room(ch))) {
           char buf3[2000];
           *buf3 = '\0';
           sprintf(buf3, "@c-----@CArena@c-----@n\r\n%s\r\n@c-----@CArena@c-----@n\r\n", str);
@@ -3188,16 +3188,16 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
         }
        }
       }
-     } if (GET_EAVESDROP(d->character) > 0) {
+     } if (char_get_listenroom(d->character) > 0) {
        int roll = rand_number(1, 101);
        if (!resskill || (roll_skill(d->character, resskill) >= dcval)) {
-        if (ch != NULL && GET_EAVESDROP(d->character) == rroom_get_vnum(IN_ROOM(ch)) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
+        if (ch != NULL && char_get_listenroom(d->character) == rroom_get_vnum(char_get_in_room(ch)) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
          char buf3[1000];
          *buf3 = '\0';
          sprintf(buf3, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", str);
          perform_act(buf3, ch, obj, vict_obj, d->character);
         }
-        else if (obj != NULL && GET_EAVESDROP(d->character) == rroom_get_vnum(IN_ROOM(obj)) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
+        else if (obj != NULL && char_get_listenroom(d->character) == rroom_get_vnum(obj_get_in_room(obj)) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
          char buf3[1000];
          *buf3 = '\0';
          sprintf(buf3, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", str);

@@ -1,7 +1,8 @@
 #pragma once
 #include "dbat/consts/types.h"
 
-#define STATE(d)	((d)->connected)
+int desc_get_connected(const struct descriptor_data *d);
+void desc_set_connected(struct descriptor_data *d, int v);
 
 bool desc_is_playing(const struct descriptor_data *d);
 

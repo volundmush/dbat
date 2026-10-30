@@ -85,12 +85,12 @@ void obj_log(obj_data *obj, const char *format, ...)
 /* returns the real room number that the object or object's carrier is in */
 room_rnum obj_room(obj_data *obj)
 {
-    if (IN_ROOM(obj) != NOWHERE)
-        return IN_ROOM(obj);
+    if (obj_get_in_room(obj) != NOWHERE)
+        return obj_get_in_room(obj);
     else if (obj->carried_by)
-        return IN_ROOM(obj->carried_by);
+        return char_get_in_room(obj->carried_by);
     else if (obj->worn_by)
-        return IN_ROOM(obj->worn_by);
+        return char_get_in_room(obj->worn_by);
     else if (obj->in_obj)
         return obj_room(obj->in_obj);
     else
@@ -120,11 +120,11 @@ room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr)
     }
 
     else if ((target_mob = get_char_by_obj(obj, roomstr)))
-        location = IN_ROOM(target_mob);
+        location = char_get_in_room(target_mob);
     else if ((target_obj = get_obj_by_obj(obj, roomstr)))
     {
-        if (IN_ROOM(target_obj) != NOWHERE)
-            location = IN_ROOM(target_obj);
+        if (obj_get_in_room(target_obj) != NOWHERE)
+            location = obj_get_in_room(target_obj);
         else
             return NOWHERE;
     }
@@ -303,7 +303,7 @@ OCMD(do_otimer)
   else if (!isdigit(*arg))
     obj_log(obj, "otimer: bad argument");
   else
-    GET_OBJ_TIMER(obj) = atoi(arg);
+    obj_set_timer(obj, atoi(arg));
 }
 
 
@@ -338,7 +338,7 @@ OCMD(do_otransform)
 
     /* move new obj info over to old object and delete new obj */
     memcpy(&tmpobj, o, sizeof(*o));
-    IN_ROOM(&tmpobj) = IN_ROOM(obj);
+    obj_set_in_room(&tmpobj, obj_get_in_room(obj));
     tmpobj.carried_by = obj->carried_by;
     tmpobj.worn_by = obj->worn_by;
     tmpobj.worn_on = obj->worn_on;
@@ -362,7 +362,7 @@ OCMD(do_otransform)
 OCMD(do_dupe)
 {
 
- SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_DUPLICATE);
+ SET_BIT_AR(obj_get_extra_flags(obj), ITEM_DUPLICATE);
 
 }
 
@@ -437,7 +437,7 @@ OCMD(do_ogoto)
  if (target == NOWHERE) {
   obj_log(obj, "ogoto target is an invalid room");
  }
- else if (IN_ROOM(obj) == NOWHERE) {
+ else if (obj_get_in_room(obj) == NOWHERE) {
   obj_log(obj, "ogoto tried to leave nowhere");
  }
  else {
@@ -478,7 +478,7 @@ OCMD(do_oteleport)
               continue;
             char_from_room(ch);
             char_to_room(ch, target);
-            enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+            enter_wtrigger(&world[char_get_in_room(ch)], ch, -1);
         }
     }
 
@@ -488,7 +488,7 @@ OCMD(do_oteleport)
           if (valid_dg_target(ch, DG_ALLOW_GODS)) {
             char_from_room(ch);
             char_to_room(ch, target);
-            enter_wtrigger(&world[IN_ROOM(ch)], ch, -1);
+            enter_wtrigger(&world[char_get_in_room(ch)], ch, -1);
           }
         }
 
@@ -543,7 +543,7 @@ OCMD(do_dgoload)
 
       if (SCRIPT(obj)) { /* It _should_ have, but it might be detached. */
         char buf[MAX_INPUT_LENGTH];
-        sprintf(buf, "%c%d", UID_CHAR, GET_ID(mob));
+        sprintf(buf, "%c%d", UID_CHAR, char_get_id(mob));
         add_var(&(SCRIPT(obj)->global_vars), "lastloaded", buf, 0);
       }
 
@@ -558,7 +558,7 @@ OCMD(do_dgoload)
 
       if (SCRIPT(obj)) { /* It _should_ have, but it might be detached. */
         char buf[MAX_INPUT_LENGTH];
-        sprintf(buf, "%c%d", UID_CHAR, GET_ID(object));
+        sprintf(buf, "%c%d", UID_CHAR, obj_get_id(object));
         add_var(&(SCRIPT(obj)->global_vars), "lastloaded", buf, 0);
       }
 
@@ -574,7 +574,7 @@ OCMD(do_dgoload)
       if (tch) {
         if (arg2 != NULL && *arg2 &&
             (pos = find_eq_pos_script(arg2)) >= 0 &&
-            !GET_EQ(tch, pos) &&
+            !char_get_equipment(tch, pos) &&
             can_wear_on_pos(object, pos)) {
           equip_char(tch, object, pos);
           load_otrigger(object);
@@ -585,7 +585,7 @@ OCMD(do_dgoload)
         return;
       }
       cnt = get_obj_near_obj(obj, arg1);
-      if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
+      if (cnt && obj_get_type_flag(cnt) == ITEM_CONTAINER) {
       	obj_to_obj(object, cnt);
         load_otrigger(object);
       	return;
@@ -764,7 +764,7 @@ OCMD(do_osetval)
   position = atoi(arg1);
   new_value = atoi(arg2);
   if (position>=0 && position<NUM_OBJ_VAL_POSITIONS)
-    GET_OBJ_VAL(obj, position) = new_value;
+    obj_set_value(obj, position, new_value);
   else
     obj_log(obj, "osetval: position out of bounds!");
 }
@@ -794,7 +794,7 @@ OCMD(do_oat)
   if (isdigit(*arg)) 
     loc = real_room(atoi(arg));
   else if ((ch = get_char_by_obj(obj, arg))) 
-    loc = IN_ROOM(ch);
+    loc = char_get_in_room(ch);
 
   if (loc == NOWHERE) {
     obj_log(obj, "oat: location not found (%s)", arg);
@@ -808,7 +808,7 @@ OCMD(do_oat)
   obj_to_room(object, loc);
   obj_command_interpreter(object, command);
 
-  if (IN_ROOM(object) == loc)
+  if (obj_get_in_room(object) == loc)
     extract_obj(object);
 }
 

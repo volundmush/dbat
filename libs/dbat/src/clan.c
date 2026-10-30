@@ -579,7 +579,7 @@ void clanINFOW(char *name, struct char_data *ch) {
   else {
   char *backstr = NULL;
   act("$n begins to edit a clan's info.", TRUE, ch, 0, 0, TO_ROOM);
-  SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
   send_editor_help(ch->desc);
   write_to_output(ch->desc, "@rYou are limited to 1000 characters for the clan info.@n\r\n");
   backstr = strdup(S->info);
@@ -624,16 +624,16 @@ bool clanApply(const char *name, struct char_data *ch) {
   if(S == NULL || char_is_npc(ch))
     return FALSE;
 
-  if(clanMemberFromList(GET_IDNUM(ch), S->moderators) ||
-     clanMemberFromList(GET_IDNUM(ch), S->members))
+  if(clanMemberFromList(char_get_idnum(ch), S->moderators) ||
+     clanMemberFromList(char_get_idnum(ch), S->members))
     return FALSE;
 
-  if(clanMemberFromList(GET_IDNUM(ch), S->applicants))
+  if(clanMemberFromList(char_get_idnum(ch), S->applicants))
     return TRUE;
 
   struct clan_member *new_member;
   CREATE(new_member, struct clan_member, 1);
-    new_member->id = GET_IDNUM(ch);
+    new_member->id = char_get_idnum(ch);
   
   sprintf(buf, "Applying for %s", S->name);
   set_clan(ch, buf);
@@ -676,7 +676,7 @@ bool clanRANK(const char *name, const struct char_data *ch, struct char_data *vi
     return FALSE;
   }
   else {
-   GET_CRANK(vict) = num;
+   char_set_crank(vict, num);
    return TRUE;
   }
 }
@@ -689,13 +689,13 @@ bool clanRANKD(const char *name, struct char_data *ch, struct char_data *vict) {
   }
   else {
    send_to_char(ch, "@cClan Rank@D: @w");
-   if (GET_CRANK(vict) == 0 && !clanMemberFromList(GET_IDNUM(vict), S->moderators)) {
+   if (char_get_crank(vict) == 0 && !clanMemberFromList(char_get_idnum(vict), S->moderators)) {
     send_to_char(ch, "Member@n\r\n");
    }
-   else if (GET_CRANK(vict) == 1 && !clanMemberFromList(GET_IDNUM(vict), S->moderators)) {
+   else if (char_get_crank(vict) == 1 && !clanMemberFromList(char_get_idnum(vict), S->moderators)) {
     send_to_char(ch, "%s@n\r\n", S->midrank);
    }
-   else if (GET_CRANK(vict) == 2 && !clanMemberFromList(GET_IDNUM(vict), S->moderators)) {
+   else if (char_get_crank(vict) == 2 && !clanMemberFromList(char_get_idnum(vict), S->moderators)) {
     send_to_char(ch, "%s@n\r\n", S->highrank);
    }
    else {
@@ -791,18 +791,18 @@ bool clanInduct(const char *name, struct char_data *ch) {
   if(S == NULL || char_is_npc(ch))
     return FALSE;
 
-  if(clanMemberFromList(GET_IDNUM(ch), S->moderators) ||
-     clanMemberFromList(GET_IDNUM(ch), S->members))
+  if(clanMemberFromList(char_get_idnum(ch), S->moderators) ||
+     clanMemberFromList(char_get_idnum(ch), S->members))
     return TRUE;
 
-  if( (m = clanMemberFromList(GET_IDNUM(ch), S->applicants)) ) {
+  if( (m = clanMemberFromList(char_get_idnum(ch), S->applicants)) ) {
     REMOVE_FROM_LIST(m, S->applicants, next, temp);
     free(m);
   }
   sprintf(buf, "%s", S->name);
   set_clan(ch, buf);
   CREATE(m, struct clan_member, 1);
-  m->id = GET_IDNUM(ch);
+  m->id = char_get_idnum(ch);
   m->next = S->members;
   S->members = m;
   clanSave(S, clanFilename(S));
@@ -812,17 +812,17 @@ bool clanInduct(const char *name, struct char_data *ch) {
 
 void set_clan(struct char_data *ch, char *clan)
 {
-  if (GET_CLAN(ch) != NULL)
-    free(GET_CLAN(ch));
-  GET_CLAN(ch) = strdup(clan);
-  GET_CRANK(ch) = 0;
+  if (char_get_clan(ch) != NULL)
+    free(char_get_clan(ch));
+  char_set_clan(ch, strdup(clan));
+  char_set_crank(ch, 0);
 }
 
 void remove_clan(struct char_data *ch)
 {
- if (GET_CLAN(ch) != NULL)
-   free(GET_CLAN(ch));
- GET_CLAN(ch) = strdup("None.");
+ if (char_get_clan(ch) != NULL)
+   free(char_get_clan(ch));
+ char_set_clan(ch, strdup("None."));
 }
 
 bool clanMakeModerator(const char *name, struct char_data *ch) 
@@ -835,14 +835,14 @@ bool clanMakeModerator(const char *name, struct char_data *ch)
   if(S == NULL || char_is_npc(ch))
     return FALSE;
 
-  if(clanMemberFromList(GET_IDNUM(ch), S->moderators))
+  if(clanMemberFromList(char_get_idnum(ch), S->moderators))
     return TRUE;
 
-  if( (m = clanMemberFromList(GET_IDNUM(ch), S->members)) ) {
+  if( (m = clanMemberFromList(char_get_idnum(ch), S->members)) ) {
     REMOVE_FROM_LIST(m, S->members, next, temp);
     free(m);
   }
-  else if( (m = clanMemberFromList(GET_IDNUM(ch), S->applicants)) ) {
+  else if( (m = clanMemberFromList(char_get_idnum(ch), S->applicants)) ) {
     REMOVE_FROM_LIST(m, S->applicants, next, temp);
     free(m);
   }
@@ -850,7 +850,7 @@ bool clanMakeModerator(const char *name, struct char_data *ch)
   sprintf(buf, "%s", S->name);
   CREATE(m, struct clan_member, 1);
   set_clan(ch, buf);
-  m->id = GET_IDNUM(ch);
+  m->id = char_get_idnum(ch);
   m->next = S->moderators;
   S->moderators = m;
   clanSave(S, clanFilename(S));
@@ -866,11 +866,11 @@ void clanExpel(const char *name, struct char_data *ch) {
   if(S == NULL || char_is_npc(ch))
     return;
   remove_clan(ch);
-  if( (m = clanMemberFromList(GET_IDNUM(ch), S->moderators)) ) {
+  if( (m = clanMemberFromList(char_get_idnum(ch), S->moderators)) ) {
     REMOVE_FROM_LIST(m, S->moderators, next, temp);
     free(m);
   }
-  else if( (m = clanMemberFromList(GET_IDNUM(ch), S->members)) ) {
+  else if( (m = clanMemberFromList(char_get_idnum(ch), S->members)) ) {
     REMOVE_FROM_LIST(m, S->members, next, temp);
     free(m);
   }
@@ -887,7 +887,7 @@ void clanDecline(const char *name, const struct char_data *ch) {
   if(S == NULL || char_is_npc(ch))
     return;
 
-  if( (m = clanMemberFromList(GET_IDNUM(ch), S->applicants)) ) {
+  if( (m = clanMemberFromList(char_get_idnum(ch), S->applicants)) ) {
     REMOVE_FROM_LIST(m, S->applicants, next, temp);
     free(m);
   }
@@ -900,13 +900,13 @@ void handle_clan_member_list(struct char_data *ch)
  if (char_is_npc(ch))
   return;
 
- if (!GET_CLAN(ch) || GET_CLAN(ch) == NULL)
+ if (!char_get_clan(ch) || char_get_clan(ch) == NULL)
   return;
 
- if (strstr(GET_CLAN(ch), "None"))
+ if (strstr(char_get_clan(ch), "None"))
   return;
 
- struct clan_data *S = clanGet(GET_CLAN(ch));
+ struct clan_data *S = clanGet(char_get_clan(ch));
 
  if(S == NULL)
   return;
@@ -924,8 +924,8 @@ bool clanIsMember(const char *name, const struct char_data *ch) {
   if(S == NULL || char_is_npc(ch))
     return FALSE;
 
-  if(clanMemberFromList(GET_IDNUM(ch), S->moderators) ||
-     clanMemberFromList(GET_IDNUM(ch), S->members))
+  if(clanMemberFromList(char_get_idnum(ch), S->moderators) ||
+     clanMemberFromList(char_get_idnum(ch), S->members))
     return TRUE;
   else
     return FALSE;
@@ -939,7 +939,7 @@ bool clanIsModerator(const char *name, const struct char_data *ch) {
   if(S == NULL || char_is_npc(ch))
     return FALSE;
 
-  return (clanMemberFromList(GET_IDNUM(ch), S->moderators) != NULL);
+  return (clanMemberFromList(char_get_idnum(ch), S->moderators) != NULL);
 }
 
 
@@ -950,7 +950,7 @@ bool clanIsApplicant(const char *name, const struct char_data *ch) {
   if(S == NULL || char_is_npc(ch))
     return FALSE;
 
-  return (clanMemberFromList(GET_IDNUM(ch), S->applicants) != NULL);
+  return (clanMemberFromList(char_get_idnum(ch), S->applicants) != NULL);
 }
 
 
@@ -1033,8 +1033,8 @@ char_data *ch) {
   if(!char_is_npc(vict)) {
     for(i = 0; i < num_clans; i++) {
 
-      if(clanMemberFromList(GET_IDNUM(vict), clan[i]->moderators) ||
-	 clanMemberFromList(GET_IDNUM(vict), clan[i]->members)) {
+      if(clanMemberFromList(char_get_idnum(vict), clan[i]->moderators) ||
+	 clanMemberFromList(char_get_idnum(vict), clan[i]->members)) {
 
 	if(clan_found == FALSE) {
 	  clan_found = TRUE;
@@ -1071,11 +1071,11 @@ int checkCLAN(struct char_data *ch) {
  if(num_clans < 1) {
     return FALSE;
  }
- if (GET_CLAN(ch) == NULL) {
+ if (char_get_clan(ch) == NULL) {
   return FALSE;
  }
  for(i = 0; i < num_clans; i++) {
-  if (strstr(GET_CLAN(ch), clan[i]->name)) {
+  if (strstr(char_get_clan(ch), clan[i]->name)) {
    return TRUE;
   }
  }
@@ -1089,8 +1089,8 @@ void checkAPP(struct char_data *ch) {
     return;
   }
   for(i = 0; i < num_clans; i++) {
-   if (strstr(GET_CLAN(ch), clan[i]->name)) {
-    GET_CLAN(ch) = strdup(clan[i]->name);
+   if (strstr(char_get_clan(ch), clan[i]->name)) {
+    char_set_clan(ch, strdup(clan[i]->name));
     return;
    }
   }

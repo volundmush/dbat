@@ -144,41 +144,41 @@ int group_bonus(struct char_data *ch, int type)
 
 void mutant_limb_regen(struct char_data *ch)
 {
- if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50) {
+ if (char_get_limb_condition(ch, (1)-1) > 0 && char_get_limb_condition(ch, (1)-1) < 50) {
    act("The bones in your right arm have mended them selves.", TRUE, ch, 0, 0, TO_CHAR);
    act("$n starts moving $s right arm gingerly for a moment.", TRUE, ch, 0, 0, TO_ROOM);
-   GET_LIMBCOND(ch, 1) = 100;
- } else if (GET_LIMBCOND(ch, 1) <= 0) {
+   char_set_limb_condition(ch, (1)-1, 100);
+ } else if (char_get_limb_condition(ch, (1)-1) <= 0) {
    act("Your right arm begins to grow back very quickly. Within moments it is whole again!", TRUE, ch, 0, 0, TO_CHAR);
    act("$n's right arm starts to regrow! Within moments the arm is whole again!.", TRUE, ch, 0, 0, TO_ROOM);
-   GET_LIMBCOND(ch, 1) = 100;
+   char_set_limb_condition(ch, (1)-1, 100);
  }
- if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50) {
+ if (char_get_limb_condition(ch, (2)-1) > 0 && char_get_limb_condition(ch, (2)-1) < 50) {
    act("The bones in your left arm have mended them selves.", TRUE, ch, 0, 0, TO_CHAR);
    act("$n starts moving $s left arm gingerly for a moment.", TRUE, ch, 0, 0, TO_ROOM);
-   GET_LIMBCOND(ch, 2) = 100;
- } else if (GET_LIMBCOND(ch, 2) <= 0) {
+   char_set_limb_condition(ch, (2)-1, 100);
+ } else if (char_get_limb_condition(ch, (2)-1) <= 0) {
    act("Your right arm begins to grow back very quickly. Within moments it is whole again!", TRUE, ch, 0, 0, TO_CHAR);
    act("$n's right arm starts to regrow! Within moments the arm is whole again!.", TRUE, ch, 0, 0, TO_ROOM);
-   GET_LIMBCOND(ch, 2) = 100;
+   char_set_limb_condition(ch, (2)-1, 100);
  }
- if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50) {
+ if (char_get_limb_condition(ch, (3)-1) > 0 && char_get_limb_condition(ch, (3)-1) < 50) {
    act("The bones in your right leg have mended them selves.", TRUE, ch, 0, 0, TO_CHAR);
    act("$n starts moving $s right leg gingerly for a moment.", TRUE, ch, 0, 0, TO_ROOM);
-   GET_LIMBCOND(ch, 3) = 100;
- } else if (GET_LIMBCOND(ch, 3) <= 0) {
+   char_set_limb_condition(ch, (3)-1, 100);
+ } else if (char_get_limb_condition(ch, (3)-1) <= 0) {
    act("Your right arm begins to grow back very quickly. Within moments it is whole again!", TRUE, ch, 0, 0, TO_CHAR);
    act("$n's right arm starts to regrow! Within moments the arm is whole again!.", TRUE, ch, 0, 0, TO_ROOM);
-   GET_LIMBCOND(ch, 3) = 100;
+   char_set_limb_condition(ch, (3)-1, 100);
  }
- if (GET_LIMBCOND(ch, 4) > 0 && GET_LIMBCOND(ch, 4) < 50) {
+ if (char_get_limb_condition(ch, (4)-1) > 0 && char_get_limb_condition(ch, (4)-1) < 50) {
    act("The bones in your left leg have mended them selves.", TRUE, ch, 0, 0, TO_CHAR);
    act("$n starts moving $s left leg gingerly for a moment.", TRUE, ch, 0, 0, TO_ROOM);
-   GET_LIMBCOND(ch, 4) = 100;
- } else if (GET_LIMBCOND(ch, 4) <= 0) {
+   char_set_limb_condition(ch, (4)-1, 100);
+ } else if (char_get_limb_condition(ch, (4)-1) <= 0) {
    act("Your right arm begins to grow back very quickly. Within moments it is whole again!", TRUE, ch, 0, 0, TO_CHAR);
    act("$n's right arm starts to regrow! Within moments the arm is whole again!.", TRUE, ch, 0, 0, TO_ROOM);
-   GET_LIMBCOND(ch, 4) = 100;
+   char_set_limb_condition(ch, (4)-1, 100);
  }
 }
 
@@ -192,8 +192,8 @@ static int pick_n_throw(struct char_data *ch, char *buf)
  }
 
 
- for (cont = world[IN_ROOM(ch)].contents; cont; cont = cont->next_content) {
-  if (GET_OBJ_WEIGHT(cont) <= CAN_CARRY_W(ch) + IS_CARRYING_W(ch)) {
+ for (cont = world[char_get_in_room(ch)].contents; cont; cont = cont->next_content) {
+  if (obj_get_weight(cont) <= CAN_CARRY_W(ch) + char_get_carry_weight(ch)) {
    sprintf(buf2, "%s", cont->name);
    do_get(ch, buf2, 0, 0);
    sprintf(buf3, "%s %s", buf2, buf);
@@ -295,7 +295,7 @@ static void mob_attack(struct char_data *ch, char *buf)
 	case 3:
 	case 4:
 	case 5:
-	 if (GET_EQ(ch, WEAR_WIELD1))
+	 if (char_get_equipment(ch, WEAR_WIELD1))
 	  do_attack(ch, buf, 0, 0);
          else if (rand_number(1, 5) == 5)
           do_kick(ch, buf, 0, 0);
@@ -307,7 +307,7 @@ static void mob_attack(struct char_data *ch, char *buf)
 	case 6:
 	case 7:
 	case 8:
-	 if (GET_EQ(ch, WEAR_WIELD1))
+	 if (char_get_equipment(ch, WEAR_WIELD1))
 	  do_attack(ch, buf, 0, 0);
          else if (rand_number(1, 5) == 5)
           do_punch(ch, buf, 0, 0);
@@ -636,13 +636,13 @@ static void cleanup_arena_watch(struct char_data *ch)
  
  for (d = descriptor_list; d; d = d->next) {
 
-  if(STATE(d) != CON_PLAYING)
+  if(desc_get_connected(d) != CON_PLAYING)
    continue;
 
   if (char_prf_flagged(d->character, PRF_ARENAWATCH)) {
-   if (ARENA_IDNUM(d->character) == GET_IDNUM(ch)) {
+   if (char_get_arenawatch(d->character) == char_get_idnum(ch)) {
     REMOVE_BIT_AR(PRF_FLAGS(d->character), PRF_ARENAWATCH);
-    ARENA_IDNUM(d->character) = -1;
+    char_set_arenawatch(d->character, -1);
    }
   }
  }
@@ -667,7 +667,7 @@ void impact_sound(struct char_data *ch, char *mssg)
   int door;
   for (door = 0; door < NUM_OF_DIRS; door++)
     if (char_can_go(ch, door))
-      send_to_room(world[IN_ROOM(ch)].dir_option[door]->to_room, "%s", mssg);
+      send_to_room(world[char_get_in_room(ch)].dir_option[door]->to_room, "%s", mssg);
 }
 
 /* For removing body parts */
@@ -682,7 +682,7 @@ void remove_limb(struct char_data *vict, int num)
 
         body_part = create_obj();
         body_part->item_number = NOTHING;
-        IN_ROOM(body_part) = NOWHERE;
+        obj_set_in_room(body_part, NOWHERE);
 
         switch (num) {
          case 0:
@@ -693,28 +693,28 @@ void remove_limb(struct char_data *vict, int num)
           snprintf(part, sizeof(part), "@w%s right arm@n", TRUE_RACE(vict));
           snprintf(buf, sizeof(buf), "right arm");
           if (char_plr_flagged(vict, PLR_CRARM)) {
-           REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CRARM);
+           REMOVE_BIT_AR(char_get_act(vict), PLR_CRARM);
           }
           break;
          case 2:
           snprintf(part, sizeof(part), "@w%s left arm@n", TRUE_RACE(vict));
           snprintf(buf, sizeof(buf), "left arm");
           if (char_plr_flagged(vict, PLR_CLARM)) {
-           REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CLARM);
+           REMOVE_BIT_AR(char_get_act(vict), PLR_CLARM);
           }
           break;
          case 3:
           snprintf(part, sizeof(part), "@w%s right leg@n", TRUE_RACE(vict));
           snprintf(buf, sizeof(buf), "right leg");
           if (char_plr_flagged(vict, PLR_CRLEG)) {
-           REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CRLEG);
+           REMOVE_BIT_AR(char_get_act(vict), PLR_CRLEG);
           }
           break;
          case 4:
           snprintf(part, sizeof(part), "@w%s left leg@n", TRUE_RACE(vict));
           snprintf(buf, sizeof(buf), "left leg");
           if (char_plr_flagged(vict, PLR_CLLEG)) {
-           REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_CLLEG);
+           REMOVE_BIT_AR(char_get_act(vict), PLR_CLLEG);
           }
           break;
          case 5:
@@ -740,19 +740,19 @@ void remove_limb(struct char_data *vict, int num)
         body_part->description = strdup(buf2);
         body_part->short_description = strdup(part);
 
-        GET_OBJ_TYPE(body_part) = ITEM_OTHER;
-        SET_BIT_AR(GET_OBJ_WEAR(body_part), ITEM_WEAR_TAKE);
-        SET_BIT_AR(GET_OBJ_EXTRA(body_part), ITEM_UNIQUE_SAVE);
-        GET_OBJ_VAL(body_part, 0) = 0;
-        GET_OBJ_VAL(body_part, 1) = 0;
-        GET_OBJ_VAL(body_part, 2) = 0;
-        GET_OBJ_VAL(body_part, 3) = 0;
-        GET_OBJ_VAL(body_part, 4) = 1;
-        GET_OBJ_VAL(body_part, 5) = 1;
-        GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);
-        GET_OBJ_RENT(body_part) = 0;
+        obj_set_type_flag(body_part, ITEM_OTHER);
+        SET_BIT_AR(obj_get_wear_flags(body_part), ITEM_WEAR_TAKE);
+        SET_BIT_AR(obj_get_extra_flags(body_part), ITEM_UNIQUE_SAVE);
+        obj_set_value(body_part, 0, 0);
+        obj_set_value(body_part, 1, 0);
+        obj_set_value(body_part, 2, 0);
+        obj_set_value(body_part, 3, 0);
+        obj_set_value(body_part, 4, 1);
+        obj_set_value(body_part, 5, 1);
+        obj_set_weight(body_part, rand_number(4, 10));
+        obj_set_cost_per_day(body_part, 0);
         add_unique_id(body_part);
-        obj_to_room(body_part, IN_ROOM(vict));
+        obj_to_room(body_part, char_get_in_room(vict));
 }
 
 /* Weapon attack texts */
@@ -788,18 +788,18 @@ void fight_stack()
     for (tch = character_list; tch; tch = tch->next) {
       ch = tch;
       
-      if (GET_POS(ch) == POS_FIGHTING) {
-       GET_POS(ch) = POS_STANDING;
+      if (char_get_position(ch) == POS_FIGHTING) {
+       char_set_position(ch, POS_STANDING);
       }
       if (char_plr_flagged(ch, PLR_SPIRAL)) {
        handle_spiral(ch, NULL, char_get_skill(ch, SKILL_SPIRAL), FALSE);
       }
-      if (char_is_npc(ch) && MOB_COOLDOWN(ch) > 0) {
-       MOB_COOLDOWN(ch) -= 1;
-       if (rand_number(1, 2) == 2 && MOB_COOLDOWN(ch) > 0) {
-        MOB_COOLDOWN(ch) -= 1;
+      if (char_is_npc(ch) && char_get_cooldown(ch) > 0) {
+       char_set_cooldown(ch, char_get_cooldown(ch) - (1));
+       if (rand_number(1, 2) == 2 && char_get_cooldown(ch) > 0) {
+        char_set_cooldown(ch, char_get_cooldown(ch) - (1));
        }
-       if (MOB_COOLDOWN(ch) > 0) {      
+       if (char_get_cooldown(ch) > 0) {      
         continue;
        }
       }
@@ -807,7 +807,7 @@ void fight_stack()
         if (GET_HIT(ch) >= GET_MAX_HIT(ch)) {
          act("@g$n@ finishes powering up as $s aura flashes brightly filling the entire area briefly with its light!@n", TRUE, ch, 0, 0, TO_ROOM);
          restoreHealth(ch, false);
-         REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_POWERUP);
+         REMOVE_BIT_AR(char_get_act(ch), MOB_POWERUP);
         } else if (GET_HIT(ch) >= GET_MAX_HIT(ch) / 2) {
          act("@g$n@G continues powering up as torrents of energy crackle within $s aura.@n", TRUE, ch, 0, 0, TO_ROOM);
          incCurHealthPercent(ch, .1, true);
@@ -822,31 +822,31 @@ void fight_stack()
       if (char_is_npc(ch) && char_is_affected(ch, AFF_FROZEN)) {
        continue;
       }
-      if (!GRAPPLING(ch) && !GRAPPLED(ch) && !FIGHTING(ch) && !char_plr_flagged(ch, PLR_CHARGE) && !char_plr_flagged(ch, PLR_POWERUP) && GET_CHARGE(ch) <= 0 && !char_is_transformed(ch)) {
+      if (!char_get_grappling(ch) && !char_get_grappled(ch) && !char_get_fighting(ch) && !char_plr_flagged(ch, PLR_CHARGE) && !char_plr_flagged(ch, PLR_POWERUP) && char_get_charge(ch) <= 0 && !char_is_transformed(ch)) {
        continue;
       }
-      if (FIGHTING(ch) && (IN_ROOM(FIGHTING(ch)) != IN_ROOM(ch))) {
-       wch = FIGHTING(ch);
+      if (char_get_fighting(ch) && (char_get_in_room(char_get_fighting(ch)) != char_get_in_room(ch))) {
+       wch = char_get_fighting(ch);
        stop_fighting(wch);
        stop_fighting(ch);
       }
-      if (FIGHTING(ch) && DRAGGING(ch)) {
-       act("@WYou are forced to stop dragging @C$N@W!@n", TRUE, ch, 0, DRAGGING(ch), TO_CHAR);
-       act("@C$n@W is forced to stop dragging @c$N@W!@n", TRUE, ch, 0, DRAGGING(ch), TO_ROOM);
-       DRAGGED(DRAGGING(ch)) = NULL;
-       DRAGGING(ch) = NULL;
+      if (char_get_fighting(ch) && char_get_drag(ch)) {
+       act("@WYou are forced to stop dragging @C$N@W!@n", TRUE, ch, 0, char_get_drag(ch), TO_CHAR);
+       act("@C$n@W is forced to stop dragging @c$N@W!@n", TRUE, ch, 0, char_get_drag(ch), TO_ROOM);
+       char_set_dragged(char_get_drag(ch), NULL);
+       char_set_drag(ch, NULL);
       }
 
-      if (GET_LIFEPERC(ch) > 0 && ch->health < (double)GET_LIFEPERC(ch)/100 && (getCurLF(ch)) > 0 && !char_is_android(ch)) {
+      if (char_get_lifeperc(ch) > 0 && ch->health < (double)char_get_lifeperc(ch)/100 && (getCurLF(ch)) > 0 && !char_is_android(ch)) {
        if (rand_number(1, 15) >= 14) {
         if ((getCurLF(ch)) >= (getMaxLF(ch)) * 0.05 || char_aff_flagged(ch, AFF_HEALGLOW) || (char_is_kanassan(ch) &&
                 (getCurLF(ch)) >= (getMaxLF(ch)) * 0.03)) {
          int64_t refill = 0, lfcost = (getMaxLF(ch)) * 0.05;
-         if (GET_BONUS(ch, BONUS_DIEHARD) > 0 && (!char_is_mutant(ch) || (GET_GENOME(ch, 0) != 2 && GET_GENOME(ch, 1) != 2))) {
+         if (char_get_bonuses(ch, BONUS_DIEHARD) > 0 && (!char_is_mutant(ch) || (char_get_genome(ch, 0) != 2 && char_get_genome(ch, 1) != 2))) {
           refill = (getMaxLF(ch)) * 0.1;
-         } else if (GET_BONUS(ch, BONUS_DIEHARD) > 0 && char_is_mutant(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2)) {
+         } else if (char_get_bonuses(ch, BONUS_DIEHARD) > 0 && char_is_mutant(ch) && (char_get_genome(ch, 0) == 2 || char_get_genome(ch, 1) == 2)) {
           refill = (getMaxLF(ch)) * 0.17;
-         } else if (char_is_mutant(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2)) {
+         } else if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 2 || char_get_genome(ch, 1) == 2)) {
           refill = (getMaxLF(ch)) * 0.12;
          } else if (char_is_kanassan(ch)) {
           lfcost = (getMaxLF(ch)) * 0.03;
@@ -869,60 +869,60 @@ void fight_stack()
 
       if (!char_aff_flagged(ch, AFF_POSITION)) {
        if (roll_balance(ch) > axion_dice(0) && rand_number(1, 10) >= 7) {
-        if (FIGHTING(ch)) {
-         if (!char_aff_flagged(FIGHTING(ch), AFF_POSITION)) {
+        if (char_get_fighting(ch)) {
+         if (!char_aff_flagged(char_get_fighting(ch), AFF_POSITION)) {
          act("@YYou manage to move into an advantageous position!@n", TRUE, ch, 0, 0, TO_CHAR);
          act("@y$n@Y manages to move into an advantageous position!@n", TRUE, ch, 0, 0, TO_ROOM);
-         SET_BIT_AR(AFF_FLAGS(ch), AFF_POSITION);
+         SET_BIT_AR(char_get_affected_by(ch), AFF_POSITION);
          } else {
-         struct char_data *vict = FIGHTING(ch);
+         struct char_data *vict = char_get_fighting(ch);
          if (roll_balance(ch) > roll_balance(vict)) {
           act("@YYou struggle to gain a better position than @y$N@Y and succeed!@n", TRUE, ch, 0, vict, TO_CHAR);
           act("@y$n@Y struggles to gain a better position than you and succeeds!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@y$n@Y struggles to gain a better position than @y$N@Y and succeeds!@n", TRUE, ch, 0, vict, TO_NOTVICT); 
-          REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_POSITION);
-          SET_BIT_AR(AFF_FLAGS(ch), AFF_POSITION);
+          REMOVE_BIT_AR(char_get_affected_by(vict), AFF_POSITION);
+          SET_BIT_AR(char_get_affected_by(ch), AFF_POSITION);
          }
          }
         }
        }
       } else {
-       if (roll_balance(ch) < axion_dice(-30) || GET_POS(ch) < POS_STANDING) {
+       if (roll_balance(ch) < axion_dice(-30) || char_get_position(ch) < POS_STANDING) {
         act("@YYou are moved out of your position!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@y$n@Y is moved out of $s position!@n", TRUE, ch, 0, 0, TO_ROOM);
-        REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_POSITION);
+        REMOVE_BIT_AR(char_get_affected_by(ch), AFF_POSITION);
        }
       }
-      if (GRAPPLING(ch) && GRAPTYPE(ch) == 2 && rand_number(1, 11) >= 8) {
-       if ((getCurST((ch)->grappling)) >= GET_MAX_MOVE(GRAPPLING(ch)) / 8) {
-        act("@WYou choke @C$N@W!@n", TRUE, ch, 0, GRAPPLING(ch), TO_CHAR);
-        act("@C$n@W chokes YOU@W!@n", TRUE, ch, 0, GRAPPLING(ch), TO_VICT);
-        act("@C$n@W chokes @c$N@W!@n", TRUE, ch, 0, GRAPPLING(ch), TO_NOTVICT);
-        decCurST(GRAPPLING(ch), (getMaxST(GRAPPLING(ch)) / 8), 0);
+      if (char_get_grappling(ch) && char_get_grap(ch) == 2 && rand_number(1, 11) >= 8) {
+       if ((getCurST((ch)->grappling)) >= GET_MAX_MOVE(char_get_grappling(ch)) / 8) {
+        act("@WYou choke @C$N@W!@n", TRUE, ch, 0, char_get_grappling(ch), TO_CHAR);
+        act("@C$n@W chokes YOU@W!@n", TRUE, ch, 0, char_get_grappling(ch), TO_VICT);
+        act("@C$n@W chokes @c$N@W!@n", TRUE, ch, 0, char_get_grappling(ch), TO_NOTVICT);
+        decCurST(char_get_grappling(ch), (getMaxST(char_get_grappling(ch)) / 8), 0);
        } else {
-        act("@WYou choke @C$N@W, and $E passes out!@n", TRUE, ch, 0, GRAPPLING(ch), TO_CHAR);
-        act("@C$n@W chokes YOU@W, and you pass out!@n", TRUE, ch, 0, GRAPPLING(ch), TO_VICT);
-        act("@C$n@W chokes @c$N@W, and $E passes out!@n", TRUE, ch, 0, GRAPPLING(ch), TO_NOTVICT);
-        SET_BIT_AR(AFF_FLAGS(GRAPPLING(ch)), AFF_KNOCKED);
-        GET_POS(GRAPPLING(ch)) = POS_SLEEPING;
-        GRAPTYPE(GRAPPLING(ch)) = -1;
-        GRAPPLED(GRAPPLING(ch)) = NULL;
-        GRAPPLING(ch) = NULL;
-        GRAPTYPE(ch) = -1;
+        act("@WYou choke @C$N@W, and $E passes out!@n", TRUE, ch, 0, char_get_grappling(ch), TO_CHAR);
+        act("@C$n@W chokes YOU@W, and you pass out!@n", TRUE, ch, 0, char_get_grappling(ch), TO_VICT);
+        act("@C$n@W chokes @c$N@W, and $E passes out!@n", TRUE, ch, 0, char_get_grappling(ch), TO_NOTVICT);
+        SET_BIT_AR(char_get_affected_by(char_get_grappling(ch)), AFF_KNOCKED);
+        char_set_position(char_get_grappling(ch), POS_SLEEPING);
+        char_set_grap(char_get_grappling(ch), -1);
+        char_set_grappled(char_get_grappling(ch), NULL);
+        char_set_grappling(ch, NULL);
+        char_set_grap(ch, -1);
        }
-      } else if (GRAPPLING(ch) && GRAPTYPE(ch) == 4 && rand_number(1, 12) >= 8) {
-        act("@WYou crush @C$N@W some more!@n", TRUE, ch, 0, GRAPPLING(ch), TO_CHAR);
-        act("@C$n@W crushes YOU@W some more!@n", TRUE, ch, 0, GRAPPLING(ch), TO_VICT);
-        act("@C$n@W crushes @c$N@W some more!@n", TRUE, ch, 0, GRAPPLING(ch), TO_NOTVICT);
-        int64_t damg = GET_STR(ch) * (10 + (GET_MAX_HIT(ch) * 0.005));
-        hurt(0, 0, ch, GRAPPLING(ch), NULL, damg, 0);
+      } else if (char_get_grappling(ch) && char_get_grap(ch) == 4 && rand_number(1, 12) >= 8) {
+        act("@WYou crush @C$N@W some more!@n", TRUE, ch, 0, char_get_grappling(ch), TO_CHAR);
+        act("@C$n@W crushes YOU@W some more!@n", TRUE, ch, 0, char_get_grappling(ch), TO_VICT);
+        act("@C$n@W crushes @c$N@W some more!@n", TRUE, ch, 0, char_get_grappling(ch), TO_NOTVICT);
+        int64_t damg = char_get_aff_abils_str(ch) * (10 + (GET_MAX_HIT(ch) * 0.005));
+        hurt(0, 0, ch, char_get_grappling(ch), NULL, damg, 0);
       }
-      if (GRAPPLED(ch) && rand_number(1, 2) == 2) {
+      if (char_get_grappled(ch) && rand_number(1, 2) == 2) {
        send_to_char(ch, "@CTry 'escape' to break free from the hold!@n\r\n");
       }
       if (char_is_halfbreed(ch) && char_plr_flagged(ch, PLR_FURY)) {
-       GET_RMETER(ch) += 1;
-       if (GET_RMETER(ch) >= 1000) {
+       char_set_rage_meter(ch, char_get_rage_meter(ch) + (1));
+       if (char_get_rage_meter(ch) >= 1000) {
 
            incCurHealthPercent(ch, .15, true);
            incCurKIPercent(ch, .15, true);
@@ -938,7 +938,7 @@ void fight_stack()
               if(!(tier == 1 && char_plr_flagged(ch, PLR_FPSSJ))) {
                   act("@mExhausted of stamina, your body forcibly reverts from its form.@n", TRUE, ch, 0, 0, TO_CHAR);
                   act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n", TRUE, ch, 0, 0, TO_ROOM);
-                  if (GET_KAIOKEN(ch) < 1)
+                  if (char_get_kaioken(ch) < 1)
                       do_kaioken(ch, "0", 0, 0);
                   do_transform(ch, "revert", 0, 0);
               }
@@ -982,60 +982,60 @@ void fight_stack()
 
       }
 
-      if (!char_is_npc(ch) && GET_WIMP_LEV(ch) && GET_HIT(ch) < GET_WIMP_LEV(ch) && GET_HIT(ch) > 0 && FIGHTING(ch)) {
+      if (!char_is_npc(ch) && GET_WIMP_LEV(ch) && GET_HIT(ch) < GET_WIMP_LEV(ch) && GET_HIT(ch) > 0 && char_get_fighting(ch)) {
         send_to_char(ch, "You wimp out, and attempt to flee!\r\n");
         do_flee(ch, NULL, 0, 0);
       }
-      if (char_is_npc(ch) && GET_HIT(ch) < GET_MAX_HIT(ch) / 10 && GET_HIT(ch) > 0 && FIGHTING(ch) && !char_mob_flagged(ch, MOB_SENTINEL)) {
-       if (rand_number(1, 30) >= 25 && GET_POS(ch) > POS_SITTING) {
+      if (char_is_npc(ch) && GET_HIT(ch) < GET_MAX_HIT(ch) / 10 && GET_HIT(ch) > 0 && char_get_fighting(ch) && !char_mob_flagged(ch, MOB_SENTINEL)) {
+       if (rand_number(1, 30) >= 25 && char_get_position(ch) > POS_SITTING) {
         do_flee(ch, NULL, 0, 0);
        }
       }
-      if (char_is_mutant(ch) && (GET_GENOME(ch, 0) == 6 || GET_GENOME(ch, 1) == 6) && rand_number(1, 200) >= 175) {
+      if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 6 || char_get_genome(ch, 1) == 6) && rand_number(1, 200) >= 175) {
        mutant_limb_regen(ch);
       }
       if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_DISGUISED) && char_get_skill(ch, SKILL_DISGUISE) < rand_number(1, 125)) {
         send_to_char(ch, "Your disguise comes off because of your swift movements!\r\n");
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_DISGUISED);
+        REMOVE_BIT_AR(char_get_act(ch), PLR_DISGUISED);
         act("@W$n's@W disguise comes off because of $s swift movements!@n", FALSE, ch, 0, 0, TO_ROOM);
       }
       if (char_is_npc(ch) && char_aff_flagged(ch, AFF_BLIND) && rand_number(1, 200) >= 190) {
         act("@W$n@W is no longer blind.@n", FALSE, ch, 0, 0, TO_ROOM);
-         REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_BLIND);
+         REMOVE_BIT_AR(char_get_affected_by(ch), AFF_BLIND);
       }
 
       if (char_aff_flagged(ch, AFF_KNOCKED) && rand_number(1, 200) >= 195) {
          cureStatusKnockedOut(ch, true);
          if (char_is_npc(ch) && rand_number(1, 20) >= 12) {
          act("@W$n@W stands up.@n", FALSE, ch, 0, 0, TO_ROOM);
-          GET_POS(ch) = POS_STANDING;
+          char_set_position(ch, POS_STANDING);
 	 }
       }
 
-      if (!char_is_npc(ch) && !(ch->desc) && GET_POS(ch) > POS_STUNNED && !char_is_affected(ch, AFF_FROZEN)) {
-       if (FIGHTING(ch)) {
+      if (!char_is_npc(ch) && !(ch->desc) && char_get_position(ch) > POS_STUNNED && !char_is_affected(ch, AFF_FROZEN)) {
+       if (char_get_fighting(ch)) {
         do_flee(ch, NULL, 0, 0);
        }
       }
       /* Mobile Defense System */
-        if (char_is_npc(ch) && GRAPPLED(ch) && !char_mob_flagged(ch, MOB_DUMMY) && rand_number(1, 5) >= 4) {
+        if (char_is_npc(ch) && char_get_grappled(ch) && !char_mob_flagged(ch, MOB_DUMMY) && rand_number(1, 5) >= 4) {
          do_escape(ch, 0, 0, 0);
          continue;
         }
-       if (FIGHTING(ch) && char_is_npc(ch) && !char_mob_flagged(ch, MOB_DUMMY)) {
-        if (char_aff_flagged(FIGHTING(ch), AFF_FLYING) && !char_aff_flagged(ch, AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) > 10) {
+       if (char_get_fighting(ch) && char_is_npc(ch) && !char_mob_flagged(ch, MOB_DUMMY)) {
+        if (char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && !char_aff_flagged(ch, AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) > 10) {
          do_fly(ch, 0, 0, 0);
          continue;
         }
-        if (!char_aff_flagged(FIGHTING(ch), AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING)) {
+        if (!char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING)) {
          do_fly(ch, 0, 0, 0);
          continue;
         }
-        if (char_aff_flagged(FIGHTING(ch), AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING) && GET_ALT(ch) < GET_ALT(FIGHTING(ch))) {
+        if (char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING) && char_get_altitude(ch) < char_get_altitude(char_get_fighting(ch))) {
          do_fly(ch, "high", 0, 0);
          continue;
         }
-        if (char_aff_flagged(FIGHTING(ch), AFF_FLYING) && !char_is_humanoid(ch) && !char_aff_flagged(ch, AFF_FLYING) && GET_POS(ch) > POS_RESTING) {
+        if (char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && !char_is_humanoid(ch) && !char_aff_flagged(ch, AFF_FLYING) && char_get_position(ch) > POS_RESTING) {
          if (rand_number(1, 30) >= 22 && !block_calc(ch)) {
           act("$n@G flees in terror and you lose sight of $m!", TRUE, ch, 0, 0, TO_ROOM);
           while (ch->carrying)
@@ -1045,7 +1045,7 @@ void fight_stack()
           continue;
          }
         }
-        if (char_aff_flagged(FIGHTING(ch), AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) <= 10) {
+        if (char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) <= 10) {
          if (rand_number(1, 30) >= 22 && !block_calc(ch)) {
           act("$n@G turns and runs away. You lose sight of $m!", TRUE, ch, 0, 0, TO_ROOM);
           while (ch->carrying)
@@ -1054,20 +1054,20 @@ void fight_stack()
           continue;
          }
         }
-        if (GET_POS(ch) == POS_SITTING && sec_roll_check(ch) == 1) {
+        if (char_get_position(ch) == POS_SITTING && sec_roll_check(ch) == 1) {
          do_stand(ch, 0, 0, 0);
          continue;
         }
-        if (GET_POS(ch) == POS_RESTING && sec_roll_check(ch) == 1) {
+        if (char_get_position(ch) == POS_RESTING && sec_roll_check(ch) == 1) {
          do_stand(ch, 0, 0, 0);
          continue;
         }
-        if (char_is_affected(ch, AFF_PARA) && char_is_npc(ch) && GET_INT(ch) + 10 < rand_number(1, 60)) {
+        if (char_is_affected(ch, AFF_PARA) && char_is_npc(ch) && char_get_aff_abils_intel(ch) + 10 < rand_number(1, 60)) {
          act("@yYou fail to overcome your paralysis!@n", TRUE, ch, 0, 0, TO_CHAR);
          act("@Y$n @ystruggles with $s paralysis!@n", TRUE, ch, 0, 0, TO_ROOM);
          continue;
         }
-        if (GET_POS(ch) == POS_SLEEPING && !char_aff_flagged(ch, AFF_KNOCKED) && sec_roll_check(ch) == 1) {
+        if (char_get_position(ch) == POS_SLEEPING && !char_aff_flagged(ch, AFF_KNOCKED) && sec_roll_check(ch) == 1) {
          do_wake(ch, 0, 0, 0);
          do_stand(ch, 0, 0, 0);
          continue;
@@ -1075,9 +1075,9 @@ void fight_stack()
         struct char_data *vict;
         char buf[100];
 
-        vict = FIGHTING(ch);
+        vict = char_get_fighting(ch);
         sprintf(buf, "%s", char_get_name(vict));
-        if (IN_ROOM(ch) == IN_ROOM(vict) && !char_mob_flagged(ch, MOB_DUMMY) && !char_aff_flagged(ch, AFF_KNOCKED) && GET_POS(ch) != POS_SITTING && GET_POS(ch) != POS_RESTING && GET_POS(ch) != POS_SLEEPING) {
+        if (char_get_in_room(ch) == char_get_in_room(vict) && !char_mob_flagged(ch, MOB_DUMMY) && !char_aff_flagged(ch, AFF_KNOCKED) && char_get_position(ch) != POS_SITTING && char_get_position(ch) != POS_RESTING && char_get_position(ch) != POS_SLEEPING) {
 
          if (char_is_npc(ch) && rand_number(1, 30) <= 12)
           continue;
@@ -1089,11 +1089,11 @@ void fight_stack()
          continue;
          }
        }
-      if (GET_POS(ch) <= POS_RESTING && char_plr_flagged(ch, PLR_POWERUP)) {
-       REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
+      if (char_get_position(ch) <= POS_RESTING && char_plr_flagged(ch, PLR_POWERUP)) {
+       REMOVE_BIT_AR(char_get_act(ch), PLR_POWERUP);
       }
 
-      if(GET_BARRIER(ch) > 0) {
+      if(char_get_barrier(ch) > 0) {
           improve_skill(ch, SKILL_BARRIER, 0);
       }
 
@@ -1104,7 +1104,7 @@ void fight_stack()
         int64_t gki = getCurKI(ch);
         int64_t gmaxki = GET_MAX_MANA(ch);
 
-       if (ghit >= gmaxhit && gki >= (gmaxki / 20) && GET_PREFERENCE(ch) != PREFERENCE_KI) {
+       if (ghit >= gmaxhit && gki >= (gmaxki / 20) && char_get_preference(ch) != PREFERENCE_KI) {
         if (gki >= gmaxki * 0.5) {
          int64_t raise = GET_MAX_MOVE(ch) * 0.02;
          incCurST(ch, raise, true);
@@ -1117,8 +1117,8 @@ void fight_stack()
         send_to_sense(0, "You sense someone stop powering up", ch);
         sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
         send_to_scouter(buf3, ch, 1, 0);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
-       } else if (ghit >= gmaxhit && gki >= (gmaxki * 0.0375) + 1 && GET_PREFERENCE(ch) == PREFERENCE_KI) {
+        REMOVE_BIT_AR(char_get_act(ch), PLR_POWERUP);
+       } else if (ghit >= gmaxhit && gki >= (gmaxki * 0.0375) + 1 && char_get_preference(ch) == PREFERENCE_KI) {
         if (gki >= (gmaxki * 0.0375) + 1) {
          int64_t raise = GET_MAX_MOVE(ch) * 0.02;
          incCurST(ch, raise, true);
@@ -1131,7 +1131,7 @@ void fight_stack()
         send_to_sense(0, "You sense someone stop powering up", ch);
         sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
         send_to_scouter(buf3, ch, 1, 0);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
+        REMOVE_BIT_AR(char_get_act(ch), PLR_POWERUP);
        }
        
        ghit = GET_HIT(ch);
@@ -1139,22 +1139,22 @@ void fight_stack()
         gki = getCurKI(ch);
         gmaxki = GET_MAX_MANA(ch);
 
-       if (gki < (gmaxki / 20) && GET_PREFERENCE(ch) != PREFERENCE_KI) {
+       if (gki < (gmaxki / 20) && char_get_preference(ch) != PREFERENCE_KI) {
            decCurKI(ch, gmaxki / 20, 0);
         act("@RYou have run out of ki.@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@R$n stops powering up in a flash of light!@n", TRUE, ch, 0, 0, TO_ROOM);
         send_to_sense(0, "You sense someone stop powering up", ch);
         sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
         send_to_scouter(buf3, ch, 1, 0);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
-       } else if (gki < (gmaxki * 0.0375) + 1 && GET_PREFERENCE(ch) == PREFERENCE_KI) {
+        REMOVE_BIT_AR(char_get_act(ch), PLR_POWERUP);
+       } else if (gki < (gmaxki * 0.0375) + 1 && char_get_preference(ch) == PREFERENCE_KI) {
            decCurKI(ch, (gmaxki * 0.0375) + 1, 0);
         act("@RYou have run out of ki.@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@R$n stops powering up in a flash of light!@n", TRUE, ch, 0, 0, TO_ROOM);
         send_to_sense(0, "You sense someone stop powering up", ch);
         sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)));
         send_to_scouter(buf3, ch, 1, 0);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
+        REMOVE_BIT_AR(char_get_act(ch), PLR_POWERUP);
        }
 
        ghit = GET_HIT(ch);
@@ -1162,11 +1162,11 @@ void fight_stack()
         gki = getCurKI(ch);
         gmaxki = GET_MAX_MANA(ch);
 
-       if (ghit < gmaxhit && ((GET_PREFERENCE(ch) != PREFERENCE_KI &&
-               (gki) >= gmaxki / 20) || (GET_PREFERENCE(ch) == PREFERENCE_KI &&
+       if (ghit < gmaxhit && ((char_get_preference(ch) != PREFERENCE_KI &&
+               (gki) >= gmaxki / 20) || (char_get_preference(ch) == PREFERENCE_KI &&
                (gki) >= (gmaxki * 0.0375) + 1))) {
         incCurHealthPercent(ch, .1, true);
-        if (GET_PREFERENCE(ch) != PREFERENCE_KI) {
+        if (char_get_preference(ch) != PREFERENCE_KI) {
          decCurKI(ch, gmaxki / 20, 0);
         } else {
          decCurKI(ch, gmaxki * .0375, 0);
@@ -1207,7 +1207,7 @@ void fight_stack()
         dispel_ash(ch);
        }
       }
-      if ((GET_POS(ch) == POS_SLEEPING || GET_POS(ch) == POS_RESTING) && (char_plr_flagged(ch, PLR_CHARGE) || GET_CHARGE(ch) >= 1)) {
+      if ((char_get_position(ch) == POS_SLEEPING || char_get_position(ch) == POS_RESTING) && (char_plr_flagged(ch, PLR_CHARGE) || char_get_charge(ch) >= 1)) {
         send_to_char(ch, "You stop charging and release all your pent up energy!\r\n");
         switch (rand_number(1, 3)) {
          case 1:
@@ -1223,12 +1223,12 @@ void fight_stack()
           act("$n@w's aura disappears.@n", TRUE, ch, 0, 0, TO_ROOM);
           break;
         }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
-            incCurKI(ch, GET_CHARGE(ch), true);
-          GET_CHARGE(ch) = 0;
-          GET_CHARGETO(ch) = 0;
+        REMOVE_BIT_AR(char_get_act(ch), PLR_CHARGE);
+            incCurKI(ch, char_get_charge(ch), true);
+          char_set_charge(ch, 0);
+          char_set_chargeto(ch, 0);
        }
-      if (char_plr_flagged(ch, PLR_CHARGE) && GET_BONUS(ch, BONUS_UNFOCUSED) > 0 && rand_number(1, 80) >= 70) {
+      if (char_plr_flagged(ch, PLR_CHARGE) && char_get_bonuses(ch, BONUS_UNFOCUSED) > 0 && rand_number(1, 80) >= 70) {
        send_to_char(ch, "You lose concentration due to your unfocused mind and release your charged energy!\r\n");
         switch (rand_number(1, 3)) {
          case 1:
@@ -1244,16 +1244,16 @@ void fight_stack()
           act("$n@w's aura disappears.@n", TRUE, ch, 0, 0, TO_ROOM);
           break;
         }
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
-          incCurKI(ch, GET_CHARGE(ch), true);
-          GET_CHARGE(ch) = 0;
-          GET_CHARGETO(ch) = 0;
+        REMOVE_BIT_AR(char_get_act(ch), PLR_CHARGE);
+          incCurKI(ch, char_get_charge(ch), true);
+          char_set_charge(ch, 0);
+          char_set_chargeto(ch, 0);
       }
-      if(GET_CHARGE(ch) >= getMaxKI(ch) / 2) {
+      if(char_get_charge(ch) >= getMaxKI(ch) / 2) {
           improve_skill(ch, SKILL_CONCENTRATION, 1);
       }
-      if (!char_plr_flagged(ch, PLR_CHARGE) && rand_number(1, 40) >= 38 && !FIGHTING(ch) && (GET_PREFERENCE(ch) != PREFERENCE_KI || GET_CHARGE(ch) > GET_MAX_MANA(ch) * 0.1)) {
-        if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) / 100) {
+      if (!char_plr_flagged(ch, PLR_CHARGE) && rand_number(1, 40) >= 38 && !char_get_fighting(ch) && (char_get_preference(ch) != PREFERENCE_KI || char_get_charge(ch) > GET_MAX_MANA(ch) * 0.1)) {
+        if (char_get_charge(ch) >= GET_MAX_MANA(ch) / 100) {
 	int64_t loss = 0;
         send_to_char(ch, "You lose some of your energy slowly.\r\n");
         switch (rand_number(1, 3)) {
@@ -1270,13 +1270,13 @@ void fight_stack()
           act("$n@w's aura shrinks some.@n", TRUE, ch, 0, 0, TO_ROOM);
           break;
         }
-	  loss = GET_CHARGE(ch) / 20;
-          GET_CHARGE(ch) -= loss;
+	  loss = char_get_charge(ch) / 20;
+          char_set_charge(ch, char_get_charge(ch) - (loss));
        }
-       else if (GET_CHARGE(ch) < GET_MAX_MANA(ch) / 100 && GET_CHARGE(ch) != 0) {
+       else if (char_get_charge(ch) < GET_MAX_MANA(ch) / 100 && char_get_charge(ch) != 0) {
         send_to_char(ch, "Your charged energy is completely gone as your aura fades.\r\n");
         act("$n@w's aura fades away dimmly.@n", TRUE, ch, 0, 0, TO_ROOM);
-        GET_CHARGE(ch) = 0;
+        char_set_charge(ch, 0);
        }
       }
       if (char_plr_flagged(ch, PLR_CHARGE)) {
@@ -1304,7 +1304,7 @@ void fight_stack()
 			if (char_is_truffle(ch) && perc == 1) {
 				perc += 1;
 			}
-			if (perc > 1 && GET_PREFERENCE(ch) == PREFERENCE_H2H) {
+			if (perc > 1 && char_get_preference(ch) == PREFERENCE_H2H) {
 				perc = perc * 0.5;
 			}
     }
@@ -1330,38 +1330,38 @@ void fight_stack()
 			if (char_is_mutant(ch) && perc == 2) {
 				perc -= 1;
       }
-			if (perc > 1 && GET_PREFERENCE(ch) == PREFERENCE_H2H) {
+			if (perc > 1 && char_get_preference(ch) == PREFERENCE_H2H) {
 				perc = perc * 0.5;
 			}
        if ((getCurKI(ch)) <= 0) {
         send_to_char(ch, "You can not charge anymore, you have charged all your energy!\r\n");
         act("$n@w's aura grows calm.@n", TRUE, ch, 0, 0, TO_ROOM);
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+        REMOVE_BIT_AR(char_get_act(ch), PLR_CHARGE);
        }
        else if (((GET_MAX_MANA(ch) * 0.01) * perc) >= (getCurKI(ch))) {
           send_to_char(ch, "You have charged the last that you can.\r\n");
           act("$n@w's aura @Yflashes@w spectacularly, rushing upwards in torrents!@n", TRUE, ch, 0, 0, TO_ROOM);
-          GET_CHARGE(ch) += (getCurKI(ch));
+          char_set_charge(ch, char_get_charge(ch) + ((getCurKI(ch))));
           decCurKIPercent(ch, 1, 0);
-          GET_CHARGETO(ch) = 0;
-          REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+          char_set_chargeto(ch, 0);
+          REMOVE_BIT_AR(char_get_act(ch), PLR_CHARGE);
        }
        else {
-       if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
+       if (char_get_charge(ch) >= char_get_chargeto(ch)) {
         send_to_char(ch, "You have already reached the maximum that you wished to charge.\r\n");
         act("$n@w's aura burns steadily.@n", TRUE, ch, 0, 0, TO_ROOM);
-        GET_CHARGETO(ch) = 0;
-        REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
-       } else if (GET_CHARGE(ch) + (((GET_MAX_MANA(ch) * 0.01) * perc) + 1) >= GET_CHARGETO(ch)) {
-         decCurKI(ch, GET_CHARGETO(ch) - GET_CHARGE(ch), 0);
-         GET_CHARGE(ch) = GET_CHARGETO(ch);
+        char_set_chargeto(ch, 0);
+        REMOVE_BIT_AR(char_get_act(ch), PLR_CHARGE);
+       } else if (char_get_charge(ch) + (((GET_MAX_MANA(ch) * 0.01) * perc) + 1) >= char_get_chargeto(ch)) {
+         decCurKI(ch, char_get_chargeto(ch) - char_get_charge(ch), 0);
+         char_set_charge(ch, char_get_chargeto(ch));
          send_to_char(ch, "You stop charging as you reach the maximum that you wished to charge.\r\n");
          act("$n@w's aura flares up brightly and then burns steadily.@n", TRUE, ch, 0, 0, TO_ROOM);
-         GET_CHARGETO(ch) = 0;
-         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
+         char_set_chargeto(ch, 0);
+         REMOVE_BIT_AR(char_get_act(ch), PLR_CHARGE);
        } else {
            decCurKI(ch, ((GET_MAX_MANA(ch) * 0.01) * perc) + 1, 0);
-         GET_CHARGE(ch) += ((GET_MAX_MANA(ch) * 0.01) * perc) + 1;
+         char_set_charge(ch, char_get_charge(ch) + (((GET_MAX_MANA(ch) * 0.01) * perc) + 1));
          switch (rand_number(1, 3)) {
           case 1:
            act("$n@w's aura ripples magnificantly while growing brighter!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -1378,13 +1378,13 @@ void fight_stack()
           default:
            break;
          }
-        if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
-          GET_CHARGE(ch) = GET_CHARGETO(ch);
-          GET_CHARGE(ch) += char_get_level(ch);
+        if (char_get_charge(ch) >= char_get_chargeto(ch)) {
+          char_set_charge(ch, char_get_chargeto(ch));
+          char_set_charge(ch, char_get_charge(ch) + (char_get_level(ch)));
           send_to_char(ch, "You have finished charging!\r\n");
           act("$n@w's aura burns brightly and then evens out.@n", TRUE, ch, 0, 0, TO_ROOM);
-          REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
-          GET_CHARGETO(ch) = 0;
+          REMOVE_BIT_AR(char_get_act(ch), PLR_CHARGE);
+          char_set_chargeto(ch, 0);
          }
         }
         if (char_get_skill(ch, SKILL_CONCENTRATION)) {
@@ -1401,10 +1401,10 @@ void appear(struct char_data *ch)
     affect_from_char(ch, SPELL_INVISIBLE);
 
   if (char_aff_flagged(ch, AFF_INVISIBLE))
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_INVISIBLE);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_INVISIBLE);
 
   if (char_aff_flagged(ch, AFF_HIDE))
-    REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_HIDE);
+    REMOVE_BIT_AR(char_get_affected_by(ch), AFF_HIDE);
 
   act("$n slowly fades into existence.", FALSE, ch, 0, 0, TO_ROOM);
 }
@@ -1414,22 +1414,22 @@ void update_pos(struct char_data *victim)
   if (char_aff_flagged(victim, AFF_KNOCKED)) {
    return;
   }
-  if ((GET_HIT(victim) > 0) && (GET_POS(victim) > POS_STUNNED))
+  if ((GET_HIT(victim) > 0) && (char_get_position(victim) > POS_STUNNED))
     return;
-  else if (GET_POS(victim) == POS_SITTING && FIGHTING(victim))
+  else if (char_get_position(victim) == POS_SITTING && char_get_fighting(victim))
     return;
-  else if (GET_POS(victim) == POS_SITTING && FIGHTING(victim))
+  else if (char_get_position(victim) == POS_SITTING && char_get_fighting(victim))
     return;
   else if (GET_HIT(victim) > 0)
-    GET_POS(victim) = POS_STANDING;
+    char_set_position(victim, POS_STANDING);
   else if (GET_HIT(victim) <= -11)
-    GET_POS(victim) = POS_DEAD;
+    char_set_position(victim, POS_DEAD);
   else if (GET_HIT(victim) <= -6)
-    GET_POS(victim) = POS_MORTALLYW;
+    char_set_position(victim, POS_MORTALLYW);
   else if (GET_HIT(victim) <= -3)
-    GET_POS(victim) = POS_INCAP;
+    char_set_position(victim, POS_INCAP);
   else
-    GET_POS(victim) = POS_STUNNED;
+    char_set_position(victim, POS_STUNNED);
 }
 
 
@@ -1449,7 +1449,7 @@ void set_fighting(struct char_data *ch, struct char_data *vict)
   if (ch == vict)
     return;
 
-  if (FIGHTING(ch)) {
+  if (char_get_fighting(ch)) {
     core_dump();
     return;
   }
@@ -1457,13 +1457,13 @@ void set_fighting(struct char_data *ch, struct char_data *vict)
   ch->next_fighting = combat_list;
   combat_list = ch;
 
-  FIGHTING(ch) = vict;
+  char_set_fighting(ch, vict);
 
-  if (GET_POS(ch) == POS_SITTING) {
-   GET_POS(ch) = POS_SITTING;
+  if (char_get_position(ch) == POS_SITTING) {
+   char_set_position(ch, POS_SITTING);
   }
-  else if (GET_POS(ch) == POS_SLEEPING) {
-   GET_POS(ch) = POS_SLEEPING;
+  else if (char_get_position(ch) == POS_SLEEPING) {
+   char_set_position(ch, POS_SLEEPING);
   }
 
   if (!CONFIG_PK_ALLOWED)
@@ -1481,14 +1481,14 @@ void stop_fighting(struct char_data *ch)
     next_combat_list = ch->next_fighting;
 
   if (char_is_npc(ch)) {
-   COMBO(ch) = -1;
-   COMBHITS(ch) = 0;
+   char_set_combo(ch, -1);
+   char_set_combhits(ch, 0);
   }
   REMOVE_FROM_LIST(ch, combat_list, next_fighting, temp);
   ch->next_fighting = NULL;
-  FIGHTING(ch) = NULL;
+  char_set_fighting(ch, NULL);
   if (char_aff_flagged(ch, AFF_POSITION)) {
-   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_POSITION);
+   REMOVE_BIT_AR(char_get_affected_by(ch), AFF_POSITION);
   }
   update_pos(ch);
 }
@@ -1504,7 +1504,7 @@ static void make_pcorpse(struct char_data *ch)
   corpse = create_obj();
 
   corpse->item_number = NOTHING;
-  IN_ROOM(corpse) = NOWHERE;
+  obj_set_in_room(corpse, NOWHERE);
 
   /* This handles how the corpse is viewed - Iovan */
   handle_corpse_condition(corpse, ch);
@@ -1514,40 +1514,40 @@ static void make_pcorpse(struct char_data *ch)
    struct obj_data *ashes;
    if (rand_number(1, 3) == 2) {
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_get_in_room(ch));
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_get_in_room(ch));
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_get_in_room(ch));
    } else if (rand_number(1, 2) == 2) {
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_get_in_room(ch));
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_get_in_room(ch));
    } else {
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_get_in_room(ch));
    }
   }
 
-  GET_OBJ_TYPE(corpse) = ITEM_CONTAINER;
-  GET_OBJ_SIZE(corpse) = get_size(ch);
+  obj_set_type_flag(corpse, ITEM_CONTAINER);
+  obj_set_size(corpse, get_size(ch));
   for(x = y = 0; x < EF_ARRAY_MAX || y < TW_ARRAY_MAX; x++, y++) {
     if (x < EF_ARRAY_MAX)
-      GET_OBJ_EXTRA_AR(corpse, x) = 0;
+      obj_get_extra_flags(corpse)[x] = 0;
     if (y < TW_ARRAY_MAX)
       corpse->wear_flags[y] = 0;
   }
 
-  SET_BIT_AR(GET_OBJ_WEAR(corpse), ITEM_WEAR_TAKE);
-  SET_BIT_AR(GET_OBJ_EXTRA(corpse), ITEM_NODONATE);
-  GET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY) = 0;      /* You can't store stuff in a corpse */
-  GET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE) = 1;        /* corpse identifier */
-  GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = GET_PFILEPOS(ch);  /* corpse identifier */
-  GET_OBJ_WEIGHT(corpse) = char_get_pc_weight(ch) + IS_CARRYING_W(ch);
-  GET_OBJ_RENT(corpse) = 100000;
-  GET_OBJ_TIMER(corpse) = CONFIG_MAX_PC_CORPSE_TIME;
-  SET_BIT_AR(GET_OBJ_EXTRA(corpse), ITEM_UNIQUE_SAVE);
+  SET_BIT_AR(obj_get_wear_flags(corpse), ITEM_WEAR_TAKE);
+  SET_BIT_AR(obj_get_extra_flags(corpse), ITEM_NODONATE);
+  obj_set_value(corpse, VAL_CONTAINER_CAPACITY, 0);      /* You can't store stuff in a corpse */
+  obj_set_value(corpse, VAL_CONTAINER_CORPSE, 1);        /* corpse identifier */
+  obj_set_value(corpse, VAL_CONTAINER_OWNER, char_get_pfilepos(ch));  /* corpse identifier */
+  obj_set_weight(corpse, char_get_pc_weight(ch) + char_get_carry_weight(ch));
+  obj_set_cost_per_day(corpse, 100000);
+  obj_set_timer(corpse, CONFIG_MAX_PC_CORPSE_TIME);
+  SET_BIT_AR(obj_get_extra_flags(corpse), ITEM_UNIQUE_SAVE);
 
 
   struct obj_data *obj, *next_obj;
@@ -1569,7 +1569,7 @@ static void make_pcorpse(struct char_data *ch)
    }
 
   /* transfer gold */
-  if (GET_GOLD(ch) > 0) {
+  if (char_get_gold(ch) > 0) {
     /*
      * following 'if' clause added to fix gold duplication loophole
      * The above line apparently refers to the old "partially log in,
@@ -1578,13 +1578,13 @@ static void make_pcorpse(struct char_data *ch)
      * test below shall live on, for a while. -gg 3/3/2002
      */
     if (char_is_npc(ch) || ch->desc) {
-      money = create_money(GET_GOLD(ch));
+      money = create_money(char_get_gold(ch));
       obj_to_obj(money, corpse);
     }
-    GET_GOLD(ch) = 0;
+    char_set_gold(ch, 0);
   }
 
-  obj_to_room(corpse, IN_ROOM(ch));
+  obj_to_room(corpse, char_get_in_room(ch));
 }
 
 /* This handles how corpses are viewed. How many limbs they have. If they were *
@@ -1595,13 +1595,13 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
   char buf2[MAX_NAME_LENGTH + 128];
   char descBuf[512];
 
-  GET_OBJ_VAL(corpse, VAL_CORPSE_HEAD) = 1;
-  GET_OBJ_VAL(corpse, VAL_CORPSE_RARM) = 1;
-  GET_OBJ_VAL(corpse, VAL_CORPSE_LARM) = 1;
-  GET_OBJ_VAL(corpse, VAL_CORPSE_RLEG) = 1;
-  GET_OBJ_VAL(corpse, VAL_CORPSE_LLEG) = 1;
+  obj_set_value(corpse, VAL_CORPSE_HEAD, 1);
+  obj_set_value(corpse, VAL_CORPSE_RARM, 1);
+  obj_set_value(corpse, VAL_CORPSE_LARM, 1);
+  obj_set_value(corpse, VAL_CORPSE_RLEG, 1);
+  obj_set_value(corpse, VAL_CORPSE_LLEG, 1);
 
-  switch(GET_DEATH_TYPE(ch)) {
+  switch(char_get_death_type(ch)) {
    case DTYPE_HEAD:
      *buf2 = '\0';
      snprintf(buf2, sizeof(buf2), "headless corpse %s", char_get_name(ch));
@@ -1614,7 +1614,7 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
      *descBuf = '\0';
      snprintf(descBuf, sizeof(descBuf), "The headless remains of %s's corpse", char_get_name(ch));
      corpse->short_description = strdup(descBuf);
-     GET_OBJ_VAL(corpse, VAL_CORPSE_HEAD) = 0;
+     obj_set_value(corpse, VAL_CORPSE_HEAD, 0);
     break;
    case DTYPE_HALF:
      *buf2 = '\0';
@@ -1670,29 +1670,29 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
   }
 
  if (!char_is_npc(ch)) { /* Let's set the corpse's limbs */
-  if (GET_LIMBCOND(ch, 1) <= 0) {
-   GET_OBJ_VAL(corpse, VAL_CORPSE_RARM) = 0;
+  if (char_get_limb_condition(ch, (1)-1) <= 0) {
+   obj_set_value(corpse, VAL_CORPSE_RARM, 0);
   }
-  else if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50) {
-   GET_OBJ_VAL(corpse, VAL_CORPSE_RARM) = 2;
+  else if (char_get_limb_condition(ch, (1)-1) > 0 && char_get_limb_condition(ch, (1)-1) < 50) {
+   obj_set_value(corpse, VAL_CORPSE_RARM, 2);
   }
-  if (GET_LIMBCOND(ch, 2) <= 0) {
-   GET_OBJ_VAL(corpse, VAL_CORPSE_LARM) = 0;
+  if (char_get_limb_condition(ch, (2)-1) <= 0) {
+   obj_set_value(corpse, VAL_CORPSE_LARM, 0);
   }
-  else if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50) {
-   GET_OBJ_VAL(corpse, VAL_CORPSE_LARM) = 2;
+  else if (char_get_limb_condition(ch, (2)-1) > 0 && char_get_limb_condition(ch, (2)-1) < 50) {
+   obj_set_value(corpse, VAL_CORPSE_LARM, 2);
   }
-  if (GET_LIMBCOND(ch, 3) <= 0) {
-   GET_OBJ_VAL(corpse, VAL_CORPSE_RLEG) = 0;
+  if (char_get_limb_condition(ch, (3)-1) <= 0) {
+   obj_set_value(corpse, VAL_CORPSE_RLEG, 0);
   }
-  else if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50) {
-   GET_OBJ_VAL(corpse, VAL_CORPSE_RLEG) = 2;
+  else if (char_get_limb_condition(ch, (3)-1) > 0 && char_get_limb_condition(ch, (3)-1) < 50) {
+   obj_set_value(corpse, VAL_CORPSE_RLEG, 2);
   }
-  if (GET_LIMBCOND(ch, 4) <= 0) {
-   GET_OBJ_VAL(corpse, VAL_CORPSE_LLEG) = 0;
+  if (char_get_limb_condition(ch, (4)-1) <= 0) {
+   obj_set_value(corpse, VAL_CORPSE_LLEG, 0);
   }
-  else if (GET_LIMBCOND(ch, 4) > 0 && GET_LIMBCOND(ch, 4) < 50) {
-   GET_OBJ_VAL(corpse, VAL_CORPSE_LLEG) = 2;
+  else if (char_get_limb_condition(ch, (4)-1) > 0 && char_get_limb_condition(ch, (4)-1) < 50) {
+   obj_set_value(corpse, VAL_CORPSE_LLEG, 2);
   }
   return;
  } else { /* Do nothing else! */
@@ -1710,7 +1710,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch)
   corpse = create_obj();
 
   corpse->item_number = NOTHING;
-  IN_ROOM(corpse) = NOWHERE;
+  obj_set_in_room(corpse, NOWHERE);
 
   /* This handles how the corpse is viewed - Iovan */
   handle_corpse_condition(corpse, ch);
@@ -1720,19 +1720,19 @@ static void make_corpse(struct char_data *ch, struct char_data *tch)
    struct obj_data *ashes;
    if (rand_number(1, 3) == 2) {   
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_get_in_room(ch));
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_get_in_room(ch));
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_get_in_room(ch));
    } else if (rand_number(1, 2) == 2) {
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_get_in_room(ch));
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_get_in_room(ch));
    } else {
     ashes = read_object(1305, VIRTUAL);
-    obj_to_room(ashes, IN_ROOM(ch));
+    obj_to_room(ashes, char_get_in_room(ch));
    }
   }
 
@@ -1751,31 +1751,31 @@ static void make_corpse(struct char_data *ch, struct char_data *tch)
      meat->short_description = strdup(nick);
      meat->name = strdup(nick2);
      meat->description = strdup(nick3);
-     GET_OBJ_MATERIAL(meat) = 14;
+     obj_set_value(meat, 7, 14);
     }
    }
   }
 
-  GET_OBJ_TYPE(corpse) = ITEM_CONTAINER;
-  GET_OBJ_SIZE(corpse) = get_size(ch);
+  obj_set_type_flag(corpse, ITEM_CONTAINER);
+  obj_set_size(corpse, get_size(ch));
   for(x = y = 0; x < EF_ARRAY_MAX || y < TW_ARRAY_MAX; x++, y++) {
     if (x < EF_ARRAY_MAX)
-      GET_OBJ_EXTRA_AR(corpse, x) = 0;
+      obj_get_extra_flags(corpse)[x] = 0;
     if (y < TW_ARRAY_MAX)
       corpse->wear_flags[y] = 0;
   }
-  SET_BIT_AR(GET_OBJ_WEAR(corpse), ITEM_WEAR_TAKE);
-  SET_BIT_AR(GET_OBJ_EXTRA(corpse), ITEM_NODONATE);
-  GET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY) = 0;	/* You can't store stuff in a corpse */
-  GET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE) = 1;	/* corpse identifier */
-  GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = GET_PFILEPOS(ch);	/* corpse identifier */
-  GET_OBJ_WEIGHT(corpse) = char_get_pc_weight(ch) + IS_CARRYING_W(ch);
-  GET_OBJ_RENT(corpse) = 100000;
+  SET_BIT_AR(obj_get_wear_flags(corpse), ITEM_WEAR_TAKE);
+  SET_BIT_AR(obj_get_extra_flags(corpse), ITEM_NODONATE);
+  obj_set_value(corpse, VAL_CONTAINER_CAPACITY, 0);	/* You can't store stuff in a corpse */
+  obj_set_value(corpse, VAL_CONTAINER_CORPSE, 1);	/* corpse identifier */
+  obj_set_value(corpse, VAL_CONTAINER_OWNER, char_get_pfilepos(ch));	/* corpse identifier */
+  obj_set_weight(corpse, char_get_pc_weight(ch) + char_get_carry_weight(ch));
+  obj_set_cost_per_day(corpse, 100000);
   if (char_is_npc(ch))
-    GET_OBJ_TIMER(corpse) = CONFIG_MAX_NPC_CORPSE_TIME;
+    obj_set_timer(corpse, CONFIG_MAX_NPC_CORPSE_TIME);
   else
-    GET_OBJ_TIMER(corpse) = rand_number(CONFIG_MAX_PC_CORPSE_TIME / 2, CONFIG_MAX_PC_CORPSE_TIME);
-  SET_BIT_AR(GET_OBJ_EXTRA(corpse), ITEM_UNIQUE_SAVE);
+    obj_set_timer(corpse, rand_number(CONFIG_MAX_PC_CORPSE_TIME / 2, CONFIG_MAX_PC_CORPSE_TIME));
+  SET_BIT_AR(obj_get_extra_flags(corpse), ITEM_UNIQUE_SAVE);
 
   if (char_mob_flagged(ch, MOB_HUSK)) {
    for (obj = ch->carrying; obj; obj = next_obj) {
@@ -1796,14 +1796,14 @@ static void make_corpse(struct char_data *ch, struct char_data *tch)
   /* transfer character's equipment to the corpse */
   int eqdrop = FALSE;
   for (i = 0; i < NUM_WEARS; i++)
-    if (GET_EQ(ch, i)) {
-      remove_otrigger(GET_EQ(ch, i), ch);
+    if (char_get_equipment(ch, i)) {
+      remove_otrigger(char_get_equipment(ch, i), ch);
       obj_to_obj(unequip_char(ch, i), corpse);
       eqdrop = TRUE;
     }
   }
   /* transfer gold */
-  if (GET_GOLD(ch) > 0 && !char_mob_flagged(ch, MOB_HUSK)) {
+  if (char_get_gold(ch) > 0 && !char_mob_flagged(ch, MOB_HUSK)) {
     /*
      * following 'if' clause added to fix gold duplication loophole
      * The above line apparently refers to the old "partially log in,
@@ -1812,17 +1812,17 @@ static void make_corpse(struct char_data *ch, struct char_data *tch)
      * test below shall live on, for a while. -gg 3/3/2002
      */
     if (char_is_npc(ch) || ch->desc) {
-      money = create_money(GET_GOLD(ch));
+      money = create_money(char_get_gold(ch));
       obj_to_obj(money, corpse);
     }
-    GET_GOLD(ch) = 0;
+    char_set_gold(ch, 0);
   }
  if (!char_mob_flagged(ch, MOB_HUSK)) {
   ch->carrying = NULL;
-  IS_CARRYING_N(ch) = 0;
-  IS_CARRYING_W(ch) = 0;
+  char_set_carry_items(ch, 0);
+  char_set_carry_weight(ch, 0);
  }
-  obj_to_room(corpse, IN_ROOM(ch));
+  obj_to_room(corpse, char_get_in_room(ch));
   
   if (!char_is_npc(ch))
     Crash_rentsave(ch, 0);
@@ -1863,7 +1863,7 @@ void death_cry(struct char_data *ch)
   int door;
   for (door = 0; door < NUM_OF_DIRS; door++)
     if (char_can_go(ch, door))
-      send_to_room(world[IN_ROOM(ch)].dir_option[door]->to_room, "Your blood freezes as you hear someone's death cry.\r\n");
+      send_to_room(world[char_get_in_room(ch)].dir_option[door]->to_room, "Your blood freezes as you hear someone's death cry.\r\n");
 }
 
 /* Let's clean up necessary things after "death" */
@@ -1871,17 +1871,17 @@ static void final_combat_resolve(struct char_data *ch)
 {
     struct obj_data *chair;
 
-    if (SITS(ch)) {
-     chair = SITS(ch);
-     SITS(ch) = NULL;
-     SITTING(chair) = NULL;
+    if (char_get_sits(ch)) {
+     chair = char_get_sits(ch);
+     char_set_sits(ch, NULL);
+     obj_set_sitting(chair, NULL);
     }
-    if (!char_is_npc(ch) && GET_CLONES(ch) > 0) {
+    if (!char_is_npc(ch) && char_get_clones(ch) > 0) {
      struct char_data *clone = NULL;
      for (clone = character_list; clone; clone = clone->next) {
        if (char_is_npc(clone)) {
         if (char_get_mob_vnum(clone) == 25) {
-         if (GET_ORIGINAL(clone) == ch) {
+         if (char_get_original(clone) == ch) {
           handle_multi_merge(clone);
          }
         }
@@ -1894,41 +1894,41 @@ static void final_combat_resolve(struct char_data *ch)
     if (CARRIED_BY(ch)) {
      carry_drop(CARRIED_BY(ch), 2);
     }
-    if (DRAGGING(ch)) {
-     DRAGGED(DRAGGING(ch)) = NULL;
-     DRAGGING(ch) = NULL;
+    if (char_get_drag(ch)) {
+     char_set_dragged(char_get_drag(ch), NULL);
+     char_set_drag(ch, NULL);
     }
-    if (DRAGGED(ch)) {
-     DRAGGING(DRAGGED(ch)) = NULL;
-     DRAGGED(ch) = NULL;
+    if (char_get_dragged(ch)) {
+     char_set_drag(char_get_dragged(ch), NULL);
+     char_set_dragged(ch, NULL);
     }
-    if (GRAPPLING(ch)) {
-     GRAPTYPE(GRAPPLING(ch)) = -1;
-     GRAPPLED(GRAPPLING(ch)) = NULL;
-     GRAPPLING(ch) = NULL;
-     GRAPTYPE(ch) = -1;
+    if (char_get_grappling(ch)) {
+     char_set_grap(char_get_grappling(ch), -1);
+     char_set_grappled(char_get_grappling(ch), NULL);
+     char_set_grappling(ch, NULL);
+     char_set_grap(ch, -1);
     }
-    if (GRAPPLED(ch)) {
-     GRAPTYPE(GRAPPLED(ch)) = -1;
-     GRAPPLING(GRAPPLED(ch)) = NULL;
-     GRAPPLED(ch) = NULL;
-     GRAPTYPE(ch) = -1;
+    if (char_get_grappled(ch)) {
+     char_set_grap(char_get_grappled(ch), -1);
+     char_set_grappling(char_get_grappled(ch), NULL);
+     char_set_grappled(ch, NULL);
+     char_set_grap(ch, -1);
     }
-    if (BLOCKED(ch)) {
-     BLOCKS(BLOCKED(ch)) = NULL;
-     BLOCKED(ch) = NULL;
+    if (char_get_blocked(ch)) {
+     char_set_blocks(char_get_blocked(ch), NULL);
+     char_set_blocked(ch, NULL);
     }
-    if (BLOCKS(ch)) {
-     BLOCKED(BLOCKS(ch)) = NULL;
-     BLOCKS(ch) = NULL;
+    if (char_get_blocks(ch)) {
+     char_set_blocked(char_get_blocks(ch), NULL);
+     char_set_blocks(ch, NULL);
     }
-    if (ABSORBING(ch)) {
-     ABSORBBY(ABSORBING(ch)) = NULL;
-     ABSORBING(ch) = NULL;
+    if (char_get_absorbing(ch)) {
+     char_set_absorbby(char_get_absorbing(ch), NULL);
+     char_set_absorbing(ch, NULL);
     }
-    if (ABSORBBY(ch)) {
-     ABSORBING(ABSORBBY(ch)) = NULL;
-     ABSORBBY(ch) = NULL;
+    if (char_get_absorbby(ch)) {
+     char_set_absorbing(char_get_absorbby(ch), NULL);
+     char_set_absorbby(ch, NULL);
     }
 
 }
@@ -1944,7 +1944,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
 {
   struct char_data *k, *temp;
 
-  if (FIGHTING(ch))
+  if (char_get_fighting(ch))
     stop_fighting(ch);
 
   while (ch->affected)
@@ -1954,22 +1954,22 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
     affectv_remove(ch, ch->affectedv);
 
   /* To make ordinary commands work in scripts.  welcor*/  
-  if (GET_POS(ch) != POS_SITTING && GET_POS(ch) != POS_SLEEPING && GET_POS(ch) != POS_RESTING) 
-   GET_POS(ch) = POS_STANDING; 
+  if (char_get_position(ch) != POS_SITTING && char_get_position(ch) != POS_SLEEPING && char_get_position(ch) != POS_RESTING) 
+   char_set_position(ch, POS_STANDING); 
   
   if (killer && !char_is_npc(killer)) {
   if (!char_is_npc(killer) && !char_is_npc(ch)) {
-   send_to_imm("[PK] %s killed %s at room [%d]\r\n", char_get_name(killer), char_get_name(ch), rroom_get_vnum(IN_ROOM(killer)));
+   send_to_imm("[PK] %s killed %s at room [%d]\r\n", char_get_name(killer), char_get_name(ch), rroom_get_vnum(char_get_in_room(killer)));
   }
    if ((char_is_saiyan(killer) && rand_number(1, 2) == 2) || !char_is_saiyan(killer)) {
-    if (rand_number(1, 6) >= 5 && (level_exp(killer, char_get_level(killer) + 1) - GET_EXP(killer) > 0 || char_get_level(killer) == 100)) {
-      int psreward = GET_WIS(killer) * 0.35;
+    if (rand_number(1, 6) >= 5 && (level_exp(killer, char_get_level(killer) + 1) - char_get_exp(killer) > 0 || char_get_level(killer) == 100)) {
+      int psreward = char_get_aff_abils_wis(killer) * 0.35;
       if (char_get_level(killer) > char_get_level(ch) + 5) {
        psreward *= 0.2;
       } else if (char_get_level(killer) > char_get_level(ch) + 2) {
        psreward *= 0.5;
       }
-      if (char_is_human(killer) || (char_is_bio(killer) && (GET_GENOME(killer, 0) == 1 || GET_GENOME(killer, 1) == 1))) {
+      if (char_is_human(killer) || (char_is_bio(killer) && (char_get_genome(killer, 0) == 1 || char_get_genome(killer, 1) == 1))) {
        psreward *= 1.25;
       }
       if (char_is_halfbreed(ch)) {
@@ -1990,23 +1990,23 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
       send_to_char(killer, "@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
     }
     else if (char_get_level(killer) > char_get_level(ch) + 10) {
-      GET_UP(killer) += 3;
+      char_set_upgrade(killer, char_get_upgrade(killer) + (3));
       send_to_char(killer, "@D[@G+3 @mUpgrade Point@D]@n\r\n");
     }
     else if (char_get_level(killer) > char_get_level(ch) + 8) {
-      GET_UP(killer) += 6;
+      char_set_upgrade(killer, char_get_upgrade(killer) + (6));
       send_to_char(killer, "@D[@G+6 @mUpgrade Points@D]@n\r\n");
     }
     else if (char_get_level(killer) > char_get_level(ch) + 4) {
-      GET_UP(killer) += 12;
+      char_set_upgrade(killer, char_get_upgrade(killer) + (12));
       send_to_char(killer, "@D[@G+12 @mUpgrade Points@D]@n\r\n");
     }
     else if (char_get_level(killer) > char_get_level(ch) + 2) {
-      GET_UP(killer) += 16;
+      char_set_upgrade(killer, char_get_upgrade(killer) + (16));
       send_to_char(killer, "@D[@G+16 @mUpgrade Points@D]@n\r\n");
     }
      else {
-       GET_UP(killer) += 28;
+       char_set_upgrade(killer, char_get_upgrade(killer) + (28));
       send_to_char(killer, "@D[@G+28 @mUpgrade Points@D]@n\r\n");
      }
     }
@@ -2015,23 +2015,23 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
       send_to_char(killer, "@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
     }
     else if (char_get_level(killer) > char_get_level(ch) + 10) {
-      GET_UP(killer) += 5;
+      char_set_upgrade(killer, char_get_upgrade(killer) + (5));
       send_to_char(killer, "@D[@G+5 @mUpgrade Point@D]@n\r\n");
     }
     else if (char_get_level(killer) > char_get_level(ch) + 6) {
-      GET_UP(killer) += 12;
+      char_set_upgrade(killer, char_get_upgrade(killer) + (12));
       send_to_char(killer, "@D[@G+12 @mUpgrade Points@D]@n\r\n");
     }
     else if (char_get_level(killer) > char_get_level(ch) + 4) {
-      GET_UP(killer) += 18;
+      char_set_upgrade(killer, char_get_upgrade(killer) + (18));
       send_to_char(killer, "@D[@G+18 @mUpgrade Points@D]@n\r\n");
     }
     else if (char_get_level(killer) > char_get_level(ch) + 2) {
-      GET_UP(killer) += 28;
+      char_set_upgrade(killer, char_get_upgrade(killer) + (28));
       send_to_char(killer, "@D[@G+28 @mUpgrade Points@D]@n\r\n");
     }
      else {
-       GET_UP(killer) += 36;
+       char_set_upgrade(killer, char_get_upgrade(killer) + (36));
       send_to_char(killer, "@D[@G+36 @mUpgrade Points@D]@n\r\n");
      }
     }
@@ -2049,58 +2049,58 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
     if (char_is_shadow_dragon1(ch)) {
      struct obj_data *obj = NULL;
      SHADOW_DRAGON1 = -1;
-     send_to_room(IN_ROOM(ch), "@YThe one star dragon ball falls to the ground!@n\r\n");
+     send_to_room(char_get_in_room(ch), "@YThe one star dragon ball falls to the ground!@n\r\n");
      
      obj = read_object(20, VIRTUAL);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_get_in_room(ch));
      shadowed = TRUE;
     } else if (char_is_shadow_dragon2(ch)) {
      struct obj_data *obj = NULL;
      SHADOW_DRAGON2 = -1;
-     send_to_room(IN_ROOM(ch), "@YThe two star dragon ball falls to the ground!@n\r\n");
+     send_to_room(char_get_in_room(ch), "@YThe two star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(21, VIRTUAL);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_get_in_room(ch));
      shadowed = TRUE;
     } else if (char_is_shadow_dragon3(ch)) {
      struct obj_data *obj = NULL;
      SHADOW_DRAGON3 = -1;
-     send_to_room(IN_ROOM(ch), "@YThe three star dragon ball falls to the ground!@n\r\n");
+     send_to_room(char_get_in_room(ch), "@YThe three star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(22, VIRTUAL);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_get_in_room(ch));
      shadowed = TRUE;
     } else if (char_is_shadow_dragon4(ch)) {
      struct obj_data *obj = NULL;
      SHADOW_DRAGON4 = -1;
-     send_to_room(IN_ROOM(ch), "@YThe four star dragon ball falls to the ground!@n\r\n");
+     send_to_room(char_get_in_room(ch), "@YThe four star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(23, VIRTUAL);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_get_in_room(ch));
      shadowed = TRUE;
     } else if (char_is_shadow_dragon5(ch)) {
      struct obj_data *obj = NULL;
      SHADOW_DRAGON5 = -1;
-     send_to_room(IN_ROOM(ch), "@YThe five star dragon ball falls to the ground!@n\r\n");
+     send_to_room(char_get_in_room(ch), "@YThe five star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(24, VIRTUAL);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_get_in_room(ch));
      shadowed = TRUE;
     } else if (char_is_shadow_dragon6(ch)) {
      struct obj_data *obj = NULL;
      SHADOW_DRAGON6 = -1;
-     send_to_room(IN_ROOM(ch), "@YThe six star dragon ball falls to the ground!@n\r\n");
+     send_to_room(char_get_in_room(ch), "@YThe six star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(25, VIRTUAL);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_get_in_room(ch));
      shadowed = TRUE;
     } else if (char_is_shadow_dragon7(ch)) {
      struct obj_data *obj = NULL;
      SHADOW_DRAGON7 = -1;
-     send_to_room(IN_ROOM(ch), "@YThe seven star dragon ball falls to the ground!@n\r\n");
+     send_to_room(char_get_in_room(ch), "@YThe seven star dragon ball falls to the ground!@n\r\n");
 
      obj = read_object(26, VIRTUAL);
-     obj_to_room(obj, IN_ROOM(ch));
+     obj_to_room(obj, char_get_in_room(ch));
      shadowed = TRUE;
     }
     make_corpse(ch, killer);
@@ -2113,22 +2113,22 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
       decCurHealthPercent(ch, 1, 0);
     extract_char(ch);
   } else {
-    if (!char_aff_flagged(ch, AFF_SPIRIT) && !rroom_flagged(IN_ROOM(ch), ROOM_PAST) && (rroom_get_vnum(IN_ROOM(ch)) < 17900 || rroom_get_vnum(IN_ROOM(ch)) > 17999)) {
+    if (!char_aff_flagged(ch, AFF_SPIRIT) && !rroom_flagged(char_get_in_room(ch), ROOM_PAST) && (rroom_get_vnum(char_get_in_room(ch)) < 17900 || rroom_get_vnum(char_get_in_room(ch)) > 17999)) {
      if (!char_plr_flagged(ch, PLR_ABSORBED)) {
      make_pcorpse(ch);
      loadmap(ch);
      }
      else {
-      REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_ABSORBED);
+      REMOVE_BIT_AR(char_get_act(ch), PLR_ABSORBED);
      }
     }
     final_combat_resolve(ch);
-    if (FIGHTING(ch))
+    if (char_get_fighting(ch))
       stop_fighting(ch);
 
     for (k = combat_list; k; k = temp) {
       temp = k->next_fighting;
-      if (FIGHTING(k) == ch)
+      if (char_get_fighting(k) == ch)
         stop_fighting(k);
     }
 
@@ -2179,9 +2179,9 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
     }
 
     if(!char_is_npc(ch)) {
-        if (char_is_android(ch) && !char_plr_flagged(ch, PLR_ABSORB) && android_lose && GET_UP(ch) > 5) {
-            int loss = GET_UP(ch) / 5;
-            GET_UP(ch) -= loss;
+        if (char_is_android(ch) && !char_plr_flagged(ch, PLR_ABSORB) && android_lose && char_get_upgrade(ch) > 5) {
+            int loss = char_get_upgrade(ch) / 5;
+            char_set_upgrade(ch, char_get_upgrade(ch) - (loss));
             send_to_char(ch, "@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss));
         }
         Crash_delete_crashfile(ch);
@@ -2205,7 +2205,7 @@ void die(struct char_data *ch, struct char_data *killer)
   // Clear healing tank usage. How did you die while inside a healing tank though?
   if (char_plr_flagged(ch, PLR_HEALT))
   {
-    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_HEALT);
+    REMOVE_BIT_AR(char_get_act(ch), PLR_HEALT);
   }
 
   // First there are a few mechanics which can prevent death. They are checked first.
@@ -2214,7 +2214,7 @@ void die(struct char_data *ch, struct char_data *killer)
   // this is implemented by setting PLR_GOOP with gooptime 0
   if (char_is_saiyan(ch) && (getCurLFPercent(ch) >= 0.75) && rand_number(1, 4) == 4)
   {
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
+    SET_BIT_AR(char_get_act(ch), PLR_GOOP);
     ch->gooptime = 0;
     decCurLFPercent(ch, 0.5, 0);
     return;
@@ -2226,7 +2226,7 @@ void die(struct char_data *ch, struct char_data *killer)
   {
     decCurLFPercent(ch, 2, -1);
     decCurHealthPercent(ch, 1, 1);
-    SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
+    SET_BIT_AR(char_get_act(ch), PLR_GOOP);
     ch->gooptime = 32;
     return;
   }
@@ -2248,21 +2248,21 @@ void die(struct char_data *ch, struct char_data *killer)
     {
       GET_COND(ch, THIRST) = 48;
     }
-    if (FIGHTING(ch))
+    if (char_get_fighting(ch))
     {
       stop_fighting(ch);
     }
-    GET_POS(ch) = POS_SITTING;
+    char_set_position(ch, POS_SITTING);
     teleport_to(ch, sensei_start_room(ch->chclass));
     return;
   }
 
   // Removing some consequences that might happen.
-  REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_KILLER);
-  REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_THIEF);
-  REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_KNOCKED);
-  REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SLEEP);
-  REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_PARALYZE);
+  REMOVE_BIT_AR(char_get_act(ch), PLR_KILLER);
+  REMOVE_BIT_AR(char_get_act(ch), PLR_THIEF);
+  REMOVE_BIT_AR(char_get_affected_by(ch), AFF_KNOCKED);
+  REMOVE_BIT_AR(char_get_affected_by(ch), AFF_SLEEP);
+  REMOVE_BIT_AR(char_get_affected_by(ch), AFF_PARALYZE);
 
   // those who die in the arena don't actually die. They get returned to the waiting room.
   if (char_in_arena(ch))
@@ -2283,7 +2283,7 @@ void die(struct char_data *ch, struct char_data *killer)
     char_from_room(ch);
     char_to_room(ch, real_room(17875));
     decCurHealthPercent(ch, 1, 1);
-    look_at_room(IN_ROOM(ch), ch, 0);
+    look_at_room(char_get_in_room(ch), ch, 0);
     final_combat_resolve(ch);
     return;
   }
@@ -2291,13 +2291,13 @@ void die(struct char_data *ch, struct char_data *killer)
   // For code below this, some kind of 'death' is performed.
   // it will leave a corpse.
 
-  if (!char_aff_flagged(ch, AFF_SPIRIT) && !rroom_flagged(IN_ROOM(ch), ROOM_PAST) && char_get_level(ch) > 8)
+  if (!char_aff_flagged(ch, AFF_SPIRIT) && !rroom_flagged(char_get_in_room(ch), ROOM_PAST) && char_get_level(ch) > 8)
   {
-    if (rroom_get_vnum(IN_ROOM(ch)) >= 2002 && rroom_get_vnum(IN_ROOM(ch)) <= 2011)
+    if (rroom_get_vnum(char_get_in_room(ch)) >= 2002 && rroom_get_vnum(char_get_in_room(ch)) <= 2011)
     {
-      GET_DTIME(ch) = time(0);
+      char_set_deathtime(ch, time(0));
     }
-    else if (rroom_flagged(IN_ROOM(ch), ROOM_AL) || rroom_flagged(IN_ROOM(ch), ROOM_HELL))
+    else if (rroom_flagged(char_get_in_room(ch), ROOM_AL) || rroom_flagged(char_get_in_room(ch), ROOM_HELL))
     {
       send_to_char(ch, "Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
     }
@@ -2305,19 +2305,19 @@ void die(struct char_data *ch, struct char_data *killer)
     {
       if (killer != NULL && char_is_npc(killer))
       {
-        GET_DTIME(ch) = time(0) + 7200;
-        GET_DCOUNT(ch) += 1;
+        char_set_deathtime(ch, time(0) + 7200);
+        char_set_dcount(ch, char_get_dcount(ch) + (1));
       }
       else if (killer != NULL && !char_is_npc(killer))
       {
-        GET_DTIME(ch) = time(0) + 345600;
-        SET_BIT_AR(PLR_FLAGS(ch), PLR_PDEATH);
-        GET_DCOUNT(ch) += 1;
+        char_set_deathtime(ch, time(0) + 345600);
+        SET_BIT_AR(char_get_act(ch), PLR_PDEATH);
+        char_set_dcount(ch, char_get_dcount(ch) + (1));
       }
       else
       {
-        GET_DTIME(ch) = time(0) + 7200;
-        GET_DCOUNT(ch) += 1;
+        char_set_deathtime(ch, time(0) + 7200);
+        char_set_dcount(ch, char_get_dcount(ch) + (1));
       }
     }
     if (GET_COND(ch, HUNGER) >= 0)
@@ -2365,22 +2365,22 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
        share *= .7;
       }
    }
-  if (LASTHIT(victim) != 0 && LASTHIT(victim) != GET_IDNUM(ch)) {
+  if (char_get_lasthit(victim) != 0 && char_get_lasthit(victim) != char_get_idnum(ch)) {
    struct follow_type *f;
    int checkit = FALSE;
     for (f = ch->followers; f; f = f->next) {
-     if (char_aff_flagged(f->follower, AFF_GROUP) && LASTHIT(victim) == GET_IDNUM(f->follower)) {
+     if (char_aff_flagged(f->follower, AFF_GROUP) && char_get_lasthit(victim) == char_get_idnum(f->follower)) {
       checkit = TRUE;
      }
     }
-   if (checkit == FALSE && ch->master != NULL && GET_IDNUM(ch->master) == LASTHIT(victim)) {
+   if (checkit == FALSE && ch->master != NULL && char_get_idnum(ch->master) == char_get_lasthit(victim)) {
     checkit = TRUE;
    }
    if (checkit == FALSE && ch->master != NULL) {
     struct char_data *master = ch->master;
     for (f = master->followers; f; f = f->next) {
      if (f->follower != ch) {
-      if (char_aff_flagged(f->follower, AFF_GROUP) && LASTHIT(victim) == GET_IDNUM(f->follower)) {
+      if (char_aff_flagged(f->follower, AFF_GROUP) && char_get_lasthit(victim) == char_get_idnum(f->follower)) {
        checkit = TRUE;
       }
      }
@@ -2394,7 +2394,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
   if (char_is_npc(victim) && char_mob_flagged(victim, MOB_HUSK)) {
    share /= 10;
   }
-  if (GET_BONUS(ch, BONUS_PRODIGY) > 0) {
+  if (char_get_bonuses(ch, BONUS_PRODIGY) > 0) {
    share = share + (share * .25);
   }
   if (char_is_saiyan(ch)) {
@@ -2406,7 +2406,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
   if (char_is_icer(ch)) {
    share = share - (share * .20);
   }
-  if (GET_BONUS(ch, BONUS_LOYAL) > 0 && ch->master != NULL) {
+  if (char_get_bonuses(ch, BONUS_LOYAL) > 0 && ch->master != NULL) {
    share += share * 0.2;
   }
   if (ch->master != NULL && ch->master != ch) {
@@ -2415,11 +2415,11 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
   if (char_mob_flagged(victim, MOB_KNOWKAIO)) {
    share += share * .25;
   }
-  GET_GROUPKILLS(ch) += 1;
-  if ((GET_GROUPKILLS(ch) + 1) / 20 > share * 0.16) {
+  char_set_combatexpertise(ch, char_get_combatexpertise(ch) + (1));
+  if ((char_get_combatexpertise(ch) + 1) / 20 > share * 0.16) {
    share += share * 0.16;
   } else {
-   share += (share * 0.02) * ((GET_GROUPKILLS(ch) + 1) / 20);
+   share += (share * 0.02) * ((char_get_combatexpertise(ch) + 1) / 20);
   }
   if (group_bonus(ch, 2) == 2) {
    send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+2 PS!@D]@n\r\n");
@@ -2445,7 +2445,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
            incCurHealthPercent(ch, .02, true);
            send_to_char(ch, "You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
        } else if (char_plr_flagged(leader, PLR_SENSEM) && !char_plr_flagged(ch, PLR_ABSORB)) {
-           GET_UP(ch) += 5;
+           char_set_upgrade(ch, char_get_upgrade(ch) + (5));
            send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
        }
    } else {
@@ -2457,10 +2457,10 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
       incCurSTPercent(ch, .04, true);
     send_to_char(ch, "You receive a bonus from your group's leader! @D[@G4%s ST Regenerated!@D]@n\r\n", "%");
   } else if (group_bonus(ch, 2) == 13) {
-   if (GET_PHASE(leader) == 1) {
+   if (char_get_starphase(leader) == 1) {
     share += share * 0.05;
     send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
-   } else if (GET_PHASE(leader) == 2) {
+   } else if (char_get_starphase(leader) == 2) {
     share += share * 0.1;
     send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+10%s Exp!@D]@n\r\n", "%");
    }
@@ -2485,7 +2485,7 @@ void group_gain(struct char_data *ch, struct char_data *victim)
   if (!(k = ch->master))
     k = ch;
 
-  if (char_aff_flagged(k, AFF_GROUP) && (IN_ROOM(k) == IN_ROOM(ch))) {
+  if (char_aff_flagged(k, AFF_GROUP) && (char_get_in_room(k) == char_get_in_room(ch))) {
     tot_levels = char_get_level(k);
     tot_members = 1;
   } else {
@@ -2494,7 +2494,7 @@ void group_gain(struct char_data *ch, struct char_data *victim)
   }
 
   for (f = k->followers; f; f = f->next)
-    if (char_aff_flagged(f->follower, AFF_GROUP) && IN_ROOM(f->follower) == IN_ROOM(ch)) {
+    if (char_aff_flagged(f->follower, AFF_GROUP) && char_get_in_room(f->follower) == char_get_in_room(ch)) {
      if (!char_is_weighted(f->follower)) {
       tot_levels += char_get_level(f->follower);
       tot_members++;
@@ -2510,7 +2510,7 @@ void group_gain(struct char_data *ch, struct char_data *victim)
   }
 
   /* round up to the next highest tot_members */
-  tot_gain = (GET_EXP(victim)) + tot_members - 1;
+  tot_gain = (char_get_exp(victim)) + tot_members - 1;
 
   /* prevent illegal xp creation when killing players */
   if (!char_is_npc(victim))
@@ -2548,7 +2548,7 @@ void group_gain(struct char_data *ch, struct char_data *victim)
   perform_group_gain(k, base, victim);
 
   for (f = k->followers; f; f = f->next) {
-    if (char_aff_flagged(f->follower, AFF_GROUP) && IN_ROOM(f->follower) == IN_ROOM(ch)) {
+    if (char_aff_flagged(f->follower, AFF_GROUP) && char_get_in_room(f->follower) == char_get_in_room(ch)) {
      //if ((getEffMaxPL(f->follower)()) >= GET_MAX_HIT(ch) * 0.5)
       perform_group_gain(f->follower, base, victim);
     }
@@ -2560,13 +2560,13 @@ void solo_gain(struct char_data *ch, struct char_data *victim)
 {
 
   if (char_is_npc(ch)) {
-   if (GET_ORIGINAL(ch)) {
-    ch = GET_ORIGINAL(ch);
+   if (char_get_original(ch)) {
+    ch = char_get_original(ch);
    }
   }
   int64_t exp;
 
-  exp = MIN(2000000, GET_EXP(victim));
+  exp = MIN(2000000, char_get_exp(victim));
 
     /* Calculate level-difference penalty */
     if (!char_is_npc(ch)) {
@@ -2586,14 +2586,14 @@ void solo_gain(struct char_data *ch, struct char_data *victim)
        exp *= .5;
       }
   }
-  if (LASTHIT(victim) != 0 && LASTHIT(victim) != GET_IDNUM(ch)) {
+  if (char_get_lasthit(victim) != 0 && char_get_lasthit(victim) != char_get_idnum(ch)) {
    send_to_char(ch, "@RYou didn't do most of the work for this victory.@n\r\n");
    exp = 1;
   }
   if (char_is_npc(victim) && char_mob_flagged(victim, MOB_HUSK)) {
    exp /= 10;
   }
-  if (GET_BONUS(ch, BONUS_PRODIGY) > 0) {
+  if (char_get_bonuses(ch, BONUS_PRODIGY) > 0) {
    exp = exp + (exp * .25);
   }
   if (char_is_saiyan(ch)) {

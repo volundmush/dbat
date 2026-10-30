@@ -62,11 +62,11 @@ room_rnum add_room(struct room_data *room)
 
       /* People in this room must have their in_rooms moved up one. */
       for (tch = world[i].people; tch; tch = tch->next_in_room)
-	IN_ROOM(tch) += (IN_ROOM(tch) != NOWHERE);
+	char_set_in_room(tch, char_get_in_room(tch) + ((char_get_in_room(tch) != NOWHERE)));
 
       /* Move objects too. */
       for (tobj = world[i].contents; tobj; tobj = tobj->next_content)
-	IN_ROOM(tobj) += (IN_ROOM(tobj) != NOWHERE);
+	obj_set_in_room(tobj, obj_get_in_room(tobj) + ((obj_get_in_room(tobj) != NOWHERE)));
     }
     htree_add(room_htree, world[i].number, i);
   }
@@ -118,8 +118,8 @@ room_rnum add_room(struct room_data *room)
   do {
     i--;
     for (j = 0; j < NUM_OF_DIRS; j++)
-      if (W_EXIT(i, j) && W_EXIT(i, j)->to_room != NOWHERE)
-	W_EXIT(i, j)->to_room += (W_EXIT(i, j)->to_room >= found);
+      if (rroom_get_dir_option(i, j) && rroom_get_dir_option(i, j)->to_room != NOWHERE)
+	rroom_get_dir_option(i, j)->to_room += (rroom_get_dir_option(i, j)->to_room >= found);
   } while (i > 0);
 
   add_to_save_list(zone_table[room->zone].number, SL_WLD);
@@ -194,23 +194,23 @@ int delete_room(room_rnum rnum)
   do {
     i--;
     for (j = 0; j < NUM_OF_DIRS; j++)
-      if (W_EXIT(i, j) == NULL)
+      if (rroom_get_dir_option(i, j) == NULL)
         continue;
-      else if (W_EXIT(i, j)->to_room > rnum)
-        W_EXIT(i, j)->to_room -= (W_EXIT(i, j)->to_room != NOWHERE); /* with unsigned NOWHERE > any rnum */
-      else if (W_EXIT(i, j)->to_room == rnum) {
-      	if ((!W_EXIT(i, j)->keyword || !*W_EXIT(i, j)->keyword) &&
-      	    (!W_EXIT(i, j)->general_description || !*W_EXIT(i, j)->general_description)) {
+      else if (rroom_get_dir_option(i, j)->to_room > rnum)
+        rroom_get_dir_option(i, j)->to_room -= (rroom_get_dir_option(i, j)->to_room != NOWHERE); /* with unsigned NOWHERE > any rnum */
+      else if (rroom_get_dir_option(i, j)->to_room == rnum) {
+      	if ((!rroom_get_dir_option(i, j)->keyword || !*rroom_get_dir_option(i, j)->keyword) &&
+      	    (!rroom_get_dir_option(i, j)->general_description || !*rroom_get_dir_option(i, j)->general_description)) {
           /* no description, remove exit completely */
-          if (W_EXIT(i, j)->keyword)
-            free(W_EXIT(i, j)->keyword);
-          if (W_EXIT(i, j)->general_description)
-            free(W_EXIT(i, j)->general_description);
-          free(W_EXIT(i, j));
-          W_EXIT(i, j) = NULL;
+          if (rroom_get_dir_option(i, j)->keyword)
+            free(rroom_get_dir_option(i, j)->keyword);
+          if (rroom_get_dir_option(i, j)->general_description)
+            free(rroom_get_dir_option(i, j)->general_description);
+          free(rroom_get_dir_option(i, j));
+          rroom_set_dir_option(i, j, NULL);
         } else { 
           /* description is set, just point to nowhere */
-          W_EXIT(i, j)->to_room = NOWHERE;
+          rroom_get_dir_option(i, j)->to_room = NOWHERE;
         }
       }
   } while (i > 0);
@@ -266,10 +266,10 @@ int delete_room(room_rnum rnum)
     update_wait_events(&world[i], &world[i+1]);
 
     for (ppl = world[i].people; ppl; ppl = ppl->next_in_room)
-      IN_ROOM(ppl) -= (IN_ROOM(ppl) != NOWHERE);	/* Redundant check? */
+      char_set_in_room(ppl, char_get_in_room(ppl) - ((char_get_in_room(ppl) != NOWHERE)));	/* Redundant check? */
 
     for (obj = world[i].contents; obj; obj = obj->next_content)
-      IN_ROOM(obj) -= (IN_ROOM(obj) != NOWHERE);	/* Redundant check? */
+      obj_set_in_room(obj, obj_get_in_room(obj) - ((obj_get_in_room(obj) != NOWHERE)));	/* Redundant check? */
   }
 
   top_of_world--;
@@ -343,10 +343,10 @@ int save_rooms(zone_rnum zone_num)
        * Now you write out the exits for the room.
        */
       for (j = 0; j < NUM_OF_DIRS; j++) {
-	if (R_EXIT(room, j)) {
+	if (room_get_dir_option(room, j)) {
 	  int dflag;
-	  if (R_EXIT(room, j)->general_description) {
-	    strncpy(buf, R_EXIT(room, j)->general_description, sizeof(buf)-1);
+	  if (room_get_dir_option(room, j)->general_description) {
+	    strncpy(buf, room_get_dir_option(room, j)->general_description, sizeof(buf)-1);
 	    strip_cr(buf);
 	  } else
 	    *buf = '\0';
@@ -354,21 +354,21 @@ int save_rooms(zone_rnum zone_num)
 	  /*
 	   * Figure out door flag.
 	   */
-	  if (IS_SET(R_EXIT(room, j)->exit_info, EX_ISDOOR)) {
-            if (IS_SET(R_EXIT(room, j)->exit_info, EX_SECRET) &&
-                IS_SET(R_EXIT(room, j)->exit_info, EX_PICKPROOF))
+	  if (IS_SET(room_get_dir_option(room, j)->exit_info, EX_ISDOOR)) {
+            if (IS_SET(room_get_dir_option(room, j)->exit_info, EX_SECRET) &&
+                IS_SET(room_get_dir_option(room, j)->exit_info, EX_PICKPROOF))
               dflag = 4;
-	    else if (IS_SET(R_EXIT(room, j)->exit_info, EX_SECRET))
+	    else if (IS_SET(room_get_dir_option(room, j)->exit_info, EX_SECRET))
               dflag = 3;
-	    else if (IS_SET(R_EXIT(room, j)->exit_info, EX_PICKPROOF)) 
+	    else if (IS_SET(room_get_dir_option(room, j)->exit_info, EX_PICKPROOF)) 
 	      dflag = 2;
 	    else
 	      dflag = 1;
 	  } else
 	    dflag = 0;
 
-	  if (R_EXIT(room, j)->keyword)
-	    strncpy(buf1, R_EXIT(room, j)->keyword, sizeof(buf1)-1 );
+	  if (room_get_dir_option(room, j)->keyword)
+	    strncpy(buf1, room_get_dir_option(room, j)->keyword, sizeof(buf1)-1 );
 	  else
 	    *buf1 = '\0';
 
@@ -379,12 +379,12 @@ int save_rooms(zone_rnum zone_num)
 			"%s~\n"
 			"%s~\n"
 			"%d %d %d %d %d %d %d %d %d %d %d\n", j, buf, buf1, dflag,
-		R_EXIT(room, j)->key != NOTHING ? R_EXIT(room, j)->key : -1,
-		R_EXIT(room, j)->to_room != NOWHERE ? world[R_EXIT(room, j)->to_room].number : -1, 
-		R_EXIT(room, j)->dclock, R_EXIT(room, j)->dchide,
-		R_EXIT(room, j)->dcskill, R_EXIT(room, j)->dcmove,
-		R_EXIT(room, j)->failsavetype, R_EXIT(room, j)->dcfailsave,
-		R_EXIT(room, j)->failroom, R_EXIT(room, j)->totalfailroom);
+		room_get_dir_option(room, j)->key != NOTHING ? room_get_dir_option(room, j)->key : -1,
+		room_get_dir_option(room, j)->to_room != NOWHERE ? world[room_get_dir_option(room, j)->to_room].number : -1, 
+		room_get_dir_option(room, j)->dclock, room_get_dir_option(room, j)->dchide,
+		room_get_dir_option(room, j)->dcskill, room_get_dir_option(room, j)->dcmove,
+		room_get_dir_option(room, j)->failsavetype, room_get_dir_option(room, j)->dcfailsave,
+		room_get_dir_option(room, j)->failroom, room_get_dir_option(room, j)->totalfailroom);
 
 	}
       }
@@ -460,15 +460,19 @@ int copy_room_strings(struct room_data *dest, struct room_data *source)
   dest->name = str_udup(source->name);
 
   for (i = 0; i < NUM_OF_DIRS; i++) {
-    if (!R_EXIT(source, i))
+    if (!room_get_dir_option(source, i))
       continue;
 
-    CREATE(R_EXIT(dest, i), struct room_direction_data, 1);
-    *R_EXIT(dest, i) = *R_EXIT(source, i);
-    if (R_EXIT(source, i)->general_description)
-      R_EXIT(dest, i)->general_description = strdup(R_EXIT(source, i)->general_description);
-    if (R_EXIT(source, i)->keyword)
-      R_EXIT(dest, i)->keyword = strdup(R_EXIT(source, i)->keyword);
+    {
+      struct room_direction_data *new_exit;
+      CREATE(new_exit, struct room_direction_data, 1);
+      room_set_dir_option(dest, i, new_exit);
+    }
+    *room_get_dir_option(dest, i) = *room_get_dir_option(source, i);
+    if (room_get_dir_option(source, i)->general_description)
+      room_get_dir_option(dest, i)->general_description = strdup(room_get_dir_option(source, i)->general_description);
+    if (room_get_dir_option(source, i)->keyword)
+      room_get_dir_option(dest, i)->keyword = strdup(room_get_dir_option(source, i)->keyword);
   }
 
   if (source->ex_description)

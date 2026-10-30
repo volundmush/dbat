@@ -38,13 +38,13 @@ ACMD(do_oasis_aedit)
     return;
   }
 
-  if (GET_OLC_ZONE(ch) != AEDIT_PERMISSION && GET_ADMLEVEL(ch) < ADMLVL_BUILDER) {
+  if (GET_OLC_ZONE(ch) != AEDIT_PERMISSION && char_get_admlevel(ch) < ADMLVL_BUILDER) {
     send_to_char(ch, "You don't have access to editing socials.\r\n");
     return;
   }
 
   for (d = descriptor_list; d; d = d->next)
-    if (STATE(d) == CON_AEDIT) {
+    if (desc_get_connected(d) == CON_AEDIT) {
       send_to_char(ch, "Sorry, only one can edit socials at a time.\r\n");
       return;
     }
@@ -94,9 +94,9 @@ ACMD(do_oasis_aedit)
     send_to_char(ch, "Do you wish to edit the '%s' action? ", soc_mess_list[OLC_ZNUM(d)].command);
     OLC_MODE(d) = AEDIT_CONFIRM_EDIT;
   }
-  STATE(d) = CON_AEDIT;
+  desc_set_connected(d, CON_AEDIT);
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
-  SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
+  SET_BIT_AR(char_get_act(ch), PLR_WRITING);
   mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing actions.", char_get_name(ch));
 }
 

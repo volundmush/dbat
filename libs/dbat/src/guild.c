@@ -42,13 +42,13 @@ int calculate_skill_cost(struct char_data *ch, int skill)
  } else if (IS_SET(spell_info[skill].flags, SKFLAG_TIER3)) {
   cost = 15;
  } else if (IS_SET(spell_info[skill].flags, SKFLAG_TIER4)) {
-  if (GET_SKILL_BASE(ch, skill) == 0) {
+  if (char_get_skills_base(ch, skill) == 0) {
    cost = 200;
   } else {
    cost = 25;
   }
  } else if (IS_SET(spell_info[skill].flags, SKFLAG_TIER5)) {
-  if (GET_SKILL_BASE(ch, skill) == 0) {
+  if (char_get_skills_base(ch, skill) == 0) {
    cost = 300;
   } else {
    cost = 40;
@@ -57,20 +57,20 @@ int calculate_skill_cost(struct char_data *ch, int skill)
   cost = 4;
  }
 
- if (GET_SKILL_BASE(ch, skill) > 90)
+ if (char_get_skills_base(ch, skill) > 90)
   cost += 12;
- else if (GET_SKILL_BASE(ch, skill) > 80)
+ else if (char_get_skills_base(ch, skill) > 80)
   cost += 10;
- else if (GET_SKILL_BASE(ch, skill) > 70)
+ else if (char_get_skills_base(ch, skill) > 70)
   cost += 8;
- else if (GET_SKILL_BASE(ch, skill) > 50)
+ else if (char_get_skills_base(ch, skill) > 50)
   cost += 6;
- else if (GET_SKILL_BASE(ch, skill) > 40)
+ else if (char_get_skills_base(ch, skill) > 40)
   cost += 2;
- else if (GET_SKILL_BASE(ch, skill) > 30)
+ else if (char_get_skills_base(ch, skill) > 30)
   cost += 1;
 
- if (GET_FORGETING(ch) != 0)
+ if (char_get_forgeting(ch) != 0)
   cost += 6;
 
  if (skill == SKILL_RUNIC)
@@ -83,7 +83,7 @@ int calculate_skill_cost(struct char_data *ch, int skill)
  }
 
  if (skill == SKILL_INSTANTT) {
-   if (GET_SKILL_BASE(ch, skill) == 0) {
+   if (char_get_skills_base(ch, skill) == 0) {
     cost = 2000;
    }  else {
     cost = 50;
@@ -105,30 +105,30 @@ void handle_ingest_learn(struct char_data *ch, struct char_data *vict)
 	for (i = 0; i < SKILL_TABLE_SIZE; i++) 
 	{
 		
-		if (GET_SKILL_BASE(ch, i) > 0 && GET_SKILL_BASE(vict, i) > 0 && i != 141)
+		if (char_get_skills_base(ch, i) > 0 && char_get_skills_base(vict, i) > 0 && i != 141)
 		{
 			send_to_char(ch, "@YYou gained a lot of new knowledge about @y%s@Y!@n\r\n", spell_info[i].name);
 
-			if (GET_SKILL_BASE(ch, i) + 10 < 100)
+			if (char_get_skills_base(ch, i) + 10 < 100)
 			{
-				GET_SKILL_BASE(ch, i) += 10;
+				char_set_skills_base(ch, i, char_get_skills_base(ch, i) + (10));
 			}
-			else if (GET_SKILL_BASE(ch, i) > 0 && GET_SKILL_BASE(ch, i) < 100)
+			else if (char_get_skills_base(ch, i) > 0 && char_get_skills_base(ch, i) < 100)
 			{
-				GET_SKILL_BASE(ch, i) += 1;
+				char_set_skills_base(ch, i, char_get_skills_base(ch, i) + (1));
 			}
 			else
 			{
-				GET_SKILL_BASE(ch, i) = 100;
+				char_set_skills_base(ch, i, 100);
 			}
 			
 		}
-		if (((i >= 481 && i <= 489) || i == 517 || i == 535) && ((GET_SKILL_BASE(ch, i) <= 0) && GET_SKILL_BASE(vict, i) > 0))
+		if (((i >= 481 && i <= 489) || i == 517 || i == 535) && ((char_get_skills_base(ch, i) <= 0) && char_get_skills_base(vict, i) > 0))
 		{
-			SET_SKILL(ch, i, GET_SKILL_BASE(ch, i) + rand_number(10, 25));
+			SET_SKILL(ch, i, char_get_skills_base(ch, i) + rand_number(10, 25));
 			send_to_char(ch, "@YYou learned @y%s@Y from ingesting your target!@n\r\n", spell_info[i].name);
-			GET_SLOTS(ch) += 1;
-			GET_INGESTLEARNED(ch) = 1;
+			char_set_skill_slots(ch, char_get_skill_slots(ch) + (1));
+			char_set_ingestLearned(ch, 1);
 
 		}
 		
@@ -160,7 +160,7 @@ ACMD(do_teach)
   return;
  }
 
- if (GET_SKILL_BASE(ch, skill) < 101) {
+ if (char_get_skills_base(ch, skill) < 101) {
   send_to_char(ch, "You are not a Grand Master in that skill!\r\n");
   send_to_char(ch, "@wSyntax: teach (skill) (target)@n\r\n");
   return;
@@ -180,12 +180,12 @@ ACMD(do_teach)
 
  int cost = calculate_skill_cost(vict, skill), free = FALSE;
  
- if (GET_SKILL_BASE(ch, skill) >= 103) {
+ if (char_get_skills_base(ch, skill) >= 103) {
   cost = cost * 0.5;
   if (rand_number(1, 4) == 4) {
    free = TRUE;
   }
- } else if (GET_SKILL_BASE(ch, skill) == 102) {
+ } else if (char_get_skills_base(ch, skill) == 102) {
   cost = cost * 0.5;
  } else {
   cost = cost * 0.75;
@@ -200,16 +200,16 @@ ACMD(do_teach)
  } else if (vict->master != ch) {
   send_to_char(ch, "They must be following you in order for you to teach them.\r\n");
   return;
- } else if (GET_FORGETING(vict) == skill) {
+ } else if (char_get_forgeting(vict) == skill) {
   send_to_char(ch, "They are trying to forget that skill!\r\n");
   return;
  } else if (GET_PRACTICES(vict, char_get_class(vict)) < cost) {
   send_to_char(ch, "They do not have enough practice sessions for you to teach them.\r\n");
   return;
- } else if (GET_SKILL_BASE(vict, skill) >= 80) {
+ } else if (char_get_skills_base(vict, skill) >= 80) {
   send_to_char(ch, "You can not teach them anymore.\r\n");
   return;
- } else if (GET_SKILL_BASE(vict, skill) > 0) {
+ } else if (char_get_skills_base(vict, skill) > 0) {
   char tochar[MAX_STRING_LENGTH], tovict[MAX_STRING_LENGTH], toother[MAX_STRING_LENGTH];
   sprintf(tochar, "@YYou instruct @y$N@Y in the finer points of @C%s@Y.@n\r\n", spell_info[skill].name);
   sprintf(tovict, "@y$n@Y instructs you in the finer points of @C%s@Y.@n\r\n", spell_info[skill].name);
@@ -217,7 +217,7 @@ ACMD(do_teach)
   act(tochar, TRUE, ch, 0, vict, TO_CHAR);
   act(tovict, TRUE, ch, 0, vict, TO_VICT);
   act(toother, TRUE, ch, 0, vict, TO_NOTVICT);
-  SET_SKILL(vict, skill, GET_SKILL_BASE(vict, skill) + 1);
+  SET_SKILL(vict, skill, char_get_skills_base(vict, skill) + 1);
   if (free == FALSE) {
    GET_PRACTICES(vict, char_get_class(vict)) -= cost;
   } else {
@@ -299,16 +299,16 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
 
     if (t & SKTYPE_LANG) {
 	    nlen = snprintf(buf + len, maxsz - len, "%-20s  (%s)\r\n",
-                        spell_info[i].name, GET_SKILL_BASE(ch, i) ? "known" : "unknown");
+                        spell_info[i].name, char_get_skills_base(ch, i) ? "known" : "unknown");
       } else if (t & SKTYPE_SKILL) {
-        if (GET_SKILL_BONUS(ch, i))
-          snprintf(buf2, sizeof(buf2), " (base %d + bonus %d)", GET_SKILL_BASE(ch, i), GET_SKILL_BONUS(ch, i));
+        if (char_get_skills_mod(ch, i))
+          snprintf(buf2, sizeof(buf2), " (base %d + bonus %d)", char_get_skills_base(ch, i), char_get_skills_mod(ch, i));
         else
           buf2[0] = 0;
         count++;
          canknow = highest_skill_value(char_get_level(ch), char_get_skill(ch, i));
          nlen = snprintf(buf + len, maxsz - len, "@y(@Y%2d@y) @W%-30s  @y(@Y%2d@y) @C%3d@D/@c%3d   %s@n%s%s\r\n", count,
-                          spell_info[i].name, count, char_get_skill(ch, i), canknow, GET_SKILL_PERF(ch, i) > 0 ? (GET_SKILL_PERF(ch, i) == 1 ? "@ROver Charge" : (GET_SKILL_PERF(ch, i) == 2 ? "@BAccurate" : "@GEfficient")) : "", GET_SKILL_BASE(ch, i) > 100 ? " @D(@YGrand Master@D)@n" : "", buf2);
+                          spell_info[i].name, count, char_get_skill(ch, i), canknow, char_get_skills_perf(ch, i) > 0 ? (char_get_skills_perf(ch, i) == 1 ? "@ROver Charge" : (char_get_skills_perf(ch, i) == 2 ? "@BAccurate" : "@GEfficient")) : "", char_get_skills_base(ch, i) > 100 ? " @D(@YGrand Master@D)@n" : "", buf2);
       }
       if (len + nlen >= maxsz || nlen < 0)
         break;
@@ -419,7 +419,7 @@ void list_skills(struct char_data *ch, char *arg)
   len += print_skills_by_type(ch, buf2 + len, sizeof(buf2) - len, SKTYPE_SKILL, arg);
 
   if (slots == FALSE) {
-   len += snprintf(buf2 + len, sizeof(buf2) - len, "\r\n@DSkill Slots@W: @M%d@W/@m%d", slot_count(ch), GET_SLOTS(ch));
+   len += snprintf(buf2 + len, sizeof(buf2) - len, "\r\n@DSkill Slots@W: @M%d@W/@m%d", slot_count(ch), char_get_skill_slots(ch));
   }
 
   if (len >= sizeof(buf2))
@@ -634,19 +634,19 @@ void what_does_guild_know(int guild_nr, struct char_data * ch)
         count++;
         cost = calculate_skill_cost(ch, i);
         if (k == SKLEARN_CLASS) {
-          if (GET_SKILL_BASE(ch, i) < canknow) {
-            nlen = snprintf(buf2 + len, sizeof(buf2) - len, "@y(@Y%2d@y) @W%-30s @y(@Y%2d@y) @C%d@D/@c%3d        @g%d%s@n\r\n", count, spell_info[i].name, count, GET_SKILL_BASE(ch, i), canknow, cost, GET_SKILL_BASE(ch, i) > 100 ? "  @D(@YGrand Master@D)@n" : "");
+          if (char_get_skills_base(ch, i) < canknow) {
+            nlen = snprintf(buf2 + len, sizeof(buf2) - len, "@y(@Y%2d@y) @W%-30s @y(@Y%2d@y) @C%d@D/@c%3d        @g%d%s@n\r\n", count, spell_info[i].name, count, char_get_skills_base(ch, i), canknow, cost, char_get_skills_base(ch, i) > 100 ? "  @D(@YGrand Master@D)@n" : "");
             if (len + nlen >= sizeof(buf2) || nlen < 0)
               break;
             len += nlen;
           } else {
-            nlen = snprintf(buf2 + len, sizeof(buf2) - len, "@y(@Y%2d@y) @W%-30s @y(@Y%2d@y) @C%d@D/@c%3d        @g%d%s@n\r\n", count, spell_info[i].name, count, GET_SKILL_BASE(ch, i), canknow, cost, GET_SKILL_BASE(ch, i) > 100 ? "  @D(@YGrand Master@D)@n" : "");
+            nlen = snprintf(buf2 + len, sizeof(buf2) - len, "@y(@Y%2d@y) @W%-30s @y(@Y%2d@y) @C%d@D/@c%3d        @g%d%s@n\r\n", count, spell_info[i].name, count, char_get_skills_base(ch, i), canknow, cost, char_get_skills_base(ch, i) > 100 ? "  @D(@YGrand Master@D)@n" : "");
           if (len + nlen >= sizeof(buf2) || nlen < 0)
             break;
           len += nlen;
           }
         } else {
-            nlen = snprintf(buf2 + len, sizeof(buf2) - len, "@y(@Y%2d@y) @W%-30s @y(@Y%2d@y) @C%d@D/@c%3d        @g%d%s@n\r\n", count, spell_info[i].name, count, GET_SKILL_BASE(ch, i), canknow, cost, GET_SKILL_BASE(ch, i) > 100 ? "  @D(@YGrand Master@D)@n" : "");
+            nlen = snprintf(buf2 + len, sizeof(buf2) - len, "@y(@Y%2d@y) @W%-30s @y(@Y%2d@y) @C%d@D/@c%3d        @g%d%s@n\r\n", count, spell_info[i].name, count, char_get_skills_base(ch, i), canknow, cost, char_get_skills_base(ch, i) > 100 ? "  @D(@YGrand Master@D)@n" : "");
           if (len + nlen >= sizeof(buf2) || nlen < 0)
             break;
           len += nlen;
@@ -675,8 +675,8 @@ void what_does_guild_know(int guild_nr, struct char_data * ch)
 	  if (spell_info[i].can_learn_skill[j] > canknow)
 	    canknow = spell_info[i].can_learn_skill[j];
         canknow = highest_skill_value(char_get_level(ch), canknow);
-        if (GET_SKILL_BASE(ch, i) < canknow) {
-          nlen = snprintf(buf2 + len, sizeof(buf2) - len, "%-20s %s\r\n", spell_info[i].name, GET_SKILL_BASE(ch, i) ? "known" : "unknown");
+        if (char_get_skills_base(ch, i) < canknow) {
+          nlen = snprintf(buf2 + len, sizeof(buf2) - len, "%-20s %s\r\n", spell_info[i].name, char_get_skills_base(ch, i) ? "known" : "unknown");
           if (len + nlen >= sizeof(buf2) || nlen < 0)
             break;
           len += nlen;
@@ -694,90 +694,90 @@ void what_does_guild_know(int guild_nr, struct char_data * ch)
 int prereq_pass(struct char_data *ch, int snum)
 {
  if (snum == SKILL_KOUSENGAN || snum == SKILL_TSUIHIDAN || snum == SKILL_RENZO || snum == SKILL_SHOGEKIHA) {
-  if (GET_SKILL_BASE(ch, SKILL_KIBALL) < 40 || GET_SKILL_BASE(ch, SKILL_KIBLAST) < 40 || GET_SKILL_BASE(ch, SKILL_BEAM) < 40) {
+  if (char_get_skills_base(ch, SKILL_KIBALL) < 40 || char_get_skills_base(ch, SKILL_KIBLAST) < 40 || char_get_skills_base(ch, SKILL_BEAM) < 40) {
    send_to_char(ch, "You can not train that skill until you at least have trained Kiball, Kiblast, and Beam to Skill LVL 40.");
    return 0;
   }
  } else if (snum == SKILL_INSTANTT) {
-  if (GET_SKILL_BASE(ch, SKILL_FOCUS) < 90 || GET_SKILL_BASE(ch, SKILL_CONCENTRATION) < 90 || GET_SKILL_BASE(ch, SKILL_ZANZOKEN) < 90) {
+  if (char_get_skills_base(ch, SKILL_FOCUS) < 90 || char_get_skills_base(ch, SKILL_CONCENTRATION) < 90 || char_get_skills_base(ch, SKILL_ZANZOKEN) < 90) {
    send_to_char(ch, "You can not train instant transmission until you have Focus, Concentration, and Zanzoken up to Skill LVL 90.");
    return 0;
   }
  } else if (snum == SKILL_SLAM) {
-  if (GET_SKILL_BASE(ch, SKILL_UPPERCUT) < 50) {
+  if (char_get_skills_base(ch, SKILL_UPPERCUT) < 50) {
    send_to_char(ch, "You can not train that skill until you at least have trained uppercut to Skill LVL 50.");
    return 0;
   }
  } else if (snum == SKILL_UPPERCUT) {
-  if (GET_SKILL_BASE(ch, SKILL_ELBOW) < 40) {
+  if (char_get_skills_base(ch, SKILL_ELBOW) < 40) {
    send_to_char(ch, "You can not train that skill until you at least have trained elbow to Skill LVL 40.");
    return 0;
   }
  } else if (snum == SKILL_HEELDROP) {
-  if (GET_SKILL_BASE(ch, SKILL_ROUNDHOUSE) < 50) {
+  if (char_get_skills_base(ch, SKILL_ROUNDHOUSE) < 50) {
    send_to_char(ch, "You can not train that skill until you at least have trained roundhouse to Skill LVL 50.");
    return 0;
   }
  } else if (snum == SKILL_ROUNDHOUSE) {
-  if (GET_SKILL_BASE(ch, SKILL_KNEE) < 40) {
+  if (char_get_skills_base(ch, SKILL_KNEE) < 40) {
    send_to_char(ch, "You can not train that skill until you at least have trained knee to Skill LVL 40.");
    return 0;
   }
  } else if (snum == SKILL_KIBALL || snum == SKILL_KIBLAST || snum == SKILL_BEAM) {
-  if (GET_SKILL_BASE(ch, SKILL_FOCUS) < 30) {
+  if (char_get_skills_base(ch, SKILL_FOCUS) < 30) {
    send_to_char(ch, "You can not train that skill until you at least have trained focus to Skill LVL 30.");
    return 0;
   }
  } else if (IS_SET(spell_info[snum].flags, SKFLAG_TIER2) || IS_SET(spell_info[snum].flags, SKFLAG_TIER3)) {
   if (snum != 530 && snum != 531) {
-   if (GET_SKILL_BASE(ch, SKILL_TSUIHIDAN) < 40 || GET_SKILL_BASE(ch, SKILL_RENZO) < 40 || GET_SKILL_BASE(ch, SKILL_SHOGEKIHA) < 40) {
+   if (char_get_skills_base(ch, SKILL_TSUIHIDAN) < 40 || char_get_skills_base(ch, SKILL_RENZO) < 40 || char_get_skills_base(ch, SKILL_SHOGEKIHA) < 40) {
     send_to_char(ch, "You can not train that skill until you at least have trained Tsuihidan, Renzokou Energy Dan, and Shogekiha to Skill LVL 40.");
     return 0;
    }
   }
  } else if (IS_SET(spell_info[snum].flags, SKFLAG_TIER4)) {
-  if (char_is_roshi(ch) && (GET_SKILL_BASE(ch, SKILL_KAMEHAMEHA) < 40 || GET_SKILL_BASE(ch, SKILL_KIENZAN) < 40)) {
+  if (char_is_roshi(ch) && (char_get_skills_base(ch, SKILL_KAMEHAMEHA) < 40 || char_get_skills_base(ch, SKILL_KIENZAN) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Kamehameha and Kienzan to Skill LVL 40.");
    return 0;
   }
-  if (char_is_tsuna(ch) && (GET_SKILL_BASE(ch, SKILL_WRAZOR) < 40 || GET_SKILL_BASE(ch, SKILL_WSPIKE) < 40)) {
+  if (char_is_tsuna(ch) && (char_get_skills_base(ch, SKILL_WRAZOR) < 40 || char_get_skills_base(ch, SKILL_WSPIKE) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Water Razor and Water Spikes to Skill LVL 40.");
    return 0;
   }
-  if (char_is_piccolo(ch) && (GET_SKILL_BASE(ch, SKILL_MASENKO) < 40 || GET_SKILL_BASE(ch, SKILL_SBC) < 40)) {
+  if (char_is_piccolo(ch) && (char_get_skills_base(ch, SKILL_MASENKO) < 40 || char_get_skills_base(ch, SKILL_SBC) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Masenko and Special Beam Cannon to Skill LVL 40.");
    return 0;
   }
-  if (char_is_frieza(ch) && (GET_SKILL_BASE(ch, SKILL_DEATHBEAM) < 40 || GET_SKILL_BASE(ch, SKILL_KIENZAN) < 40)) {
+  if (char_is_frieza(ch) && (char_get_skills_base(ch, SKILL_DEATHBEAM) < 40 || char_get_skills_base(ch, SKILL_KIENZAN) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Deathbeam and Kienzan to Skill LVL 40.");
    return 0;
   }
-  if (char_is_ginyu(ch) && (GET_SKILL_BASE(ch, SKILL_CRUSHER) < 40 || GET_SKILL_BASE(ch, SKILL_ERASER) < 40)) {
+  if (char_is_ginyu(ch) && (char_get_skills_base(ch, SKILL_CRUSHER) < 40 || char_get_skills_base(ch, SKILL_ERASER) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Crusher Ball and Eraser Cannon to Skill LVL 40.");
    return 0;
   }
-  if (char_is_bardock(ch) && (GET_SKILL_BASE(ch, SKILL_GALIKGUN) < 40 || GET_SKILL_BASE(ch, SKILL_FINALFLASH) < 40)) {
+  if (char_is_bardock(ch) && (char_get_skills_base(ch, SKILL_GALIKGUN) < 40 || char_get_skills_base(ch, SKILL_FINALFLASH) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Galik Gun and Final Flash to Skill LVL 40.");
    return 0;
   }
-  if (char_is_tapion(ch) && (GET_SKILL_BASE(ch, SKILL_TSLASH) < 40 || GET_SKILL_BASE(ch, SKILL_DDSLASH) < 40)) {
+  if (char_is_tapion(ch) && (char_get_skills_base(ch, SKILL_TSLASH) < 40 || char_get_skills_base(ch, SKILL_DDSLASH) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Twin Slash and Darkness Dragon Slash to Skill LVL 40.");
    return 0;
   }
-  if (char_is_nail(ch) && (GET_SKILL_BASE(ch, SKILL_MASENKO) < 40 || GET_SKILL_BASE(ch, SKILL_KOUSENGAN) < 40)) {
+  if (char_is_nail(ch) && (char_get_skills_base(ch, SKILL_MASENKO) < 40 || char_get_skills_base(ch, SKILL_KOUSENGAN) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Masenko and Kousengan to Skill LVL 40.");
    return 0;
   }
-  if (char_is_android(ch) && (GET_SKILL_BASE(ch, SKILL_DUALBEAM) < 40 || GET_SKILL_BASE(ch, SKILL_HELLFLASH) < 40)) {
+  if (char_is_android(ch) && (char_get_skills_base(ch, SKILL_DUALBEAM) < 40 || char_get_skills_base(ch, SKILL_HELLFLASH) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Dual Beam and Hell Flash to Skill LVL 40.");
    return 0;
   }
-  if (char_is_jinto(ch) && GET_SKILL_BASE(ch, SKILL_BREAKER) < 40) {
+  if (char_is_jinto(ch) && char_get_skills_base(ch, SKILL_BREAKER) < 40) {
    send_to_char(ch, "You can not train that skill until you at least have trained Star Breaker to Skill LVL 40.");
    return 0;
   }
  } else if (IS_SET(spell_info[snum].flags, SKFLAG_TIER5)) {
-  if (GET_SKILL_BASE(ch, SKILL_FOCUS) < 60 || GET_SKILL_BASE(ch, SKILL_CONCENTRATION) < 80 ) {
+  if (char_get_skills_base(ch, SKILL_FOCUS) < 60 || char_get_skills_base(ch, SKILL_CONCENTRATION) < 80 ) {
    send_to_char(ch, "You can not train that skill until you at least have trained focus to Skill LVL 60 and concentration to Skill LVL 80.");
    return 0;
   }  
@@ -805,27 +805,27 @@ void handle_forget(struct char_data *keeper, int guild_nr, struct char_data *ch,
   return;
  }
 
- if (GET_SKILL_BASE(ch, skill_num) > 30) {
+ if (char_get_skills_base(ch, skill_num) > 30) {
   send_to_char(ch, "@MYou can not forget that skill, you know too much about it.@n\r\n");
   return;
- } else if (skill_num == SKILL_MIMIC && GET_MIMIC(ch) > 0) {
+ } else if (skill_num == SKILL_MIMIC && char_get_mimic(ch) > 0) {
   send_to_char(ch, "@MYou can not forget mimic while you are using it!\r\n");
  } else if (skill_num == SKILL_FOCUS) {
   send_to_char(ch, "@MYou can not forget such a fundamental skill!@n\r\n");
- } else if (GET_SKILL_BASE(ch, skill_num) <= 0) {
+ } else if (char_get_skills_base(ch, skill_num) <= 0) {
   send_to_char(ch, "@MYou can not forget a skill you don't know!@n\r\n");
- } else if (GET_FORGETING(ch) == skill_num) {
+ } else if (char_get_forgeting(ch) == skill_num) {
   send_to_char(ch, "@MYou stop forgetting %s@n\r\n", spell_info[skill_num].name);
-  GET_FORGET_COUNT(ch) = 0;
-  GET_FORGETING(ch) = 0;
- } else if (GET_FORGETING(ch) != 0) {
-  send_to_char(ch, "@MYou stop forgetting %s, and start trying to forget %s.@n\r\n", spell_info[GET_FORGETING(ch)].name, spell_info[skill_num].name); 
-  GET_FORGET_COUNT(ch) = 0;
-  GET_FORGETING(ch) = skill_num;
+  char_set_forgetcount(ch, 0);
+  char_set_forgeting(ch, 0);
+ } else if (char_get_forgeting(ch) != 0) {
+  send_to_char(ch, "@MYou stop forgetting %s, and start trying to forget %s.@n\r\n", spell_info[char_get_forgeting(ch)].name, spell_info[skill_num].name); 
+  char_set_forgetcount(ch, 0);
+  char_set_forgeting(ch, skill_num);
  } else {
   send_to_char(ch, "@MYou start trying to forget %s.@n\r\n", spell_info[skill_num].name);
-  GET_FORGET_COUNT(ch) = 0;
-  GET_FORGETING(ch) = skill_num;
+  char_set_forgetcount(ch, 0);
+  char_set_forgeting(ch, skill_num);
  }
 
 }
@@ -861,25 +861,25 @@ void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, 
  }
 
 
- if (GET_SKILL_BASE(ch, skill_num) <= 0) {
+ if (char_get_skills_base(ch, skill_num) <= 0) {
   send_to_char(ch, "You do not know that skill!\r\n");
   return;
- } else if (GET_SKILL_BASE(ch, skill_num) < 100) {
+ } else if (char_get_skills_base(ch, skill_num) < 100) {
   send_to_char(ch, "You haven't even mastered that skill. How can you become a Grand Master in it?\r\n");
   return;
- } else if (GET_SKILL_BASE(ch, skill_num) >= 103) {
+ } else if (char_get_skills_base(ch, skill_num) >= 103) {
   send_to_char(ch, "You have already become a Grand Master in that skill and have progessed as far as possible in it.\r\n");
   return;
  } else if (GET_PRACTICES(ch, char_get_class(ch)) < 1000) {
   send_to_char(ch, "You need at least 1,000 practice sessions to rank up beyond 100 in a skill.\r\n");
   return;
  } else {
-  if (GET_SKILL_BASE(ch, skill_num) == 100) {
+  if (char_get_skills_base(ch, skill_num) == 100) {
    send_to_char(ch, "@YYou have ascended to Grand Master in the skill, @C%s@Y.\r\n", spell_info[skill_num].name);
   } else {
    send_to_char(ch, "@YYou have ranked up in your Grand Mastery of the skill, @C%s@Y.\r\n", spell_info[skill_num].name);
   }
-  SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + 1);
+  SET_SKILL(ch, skill_num, char_get_skills_base(ch, skill_num) + 1);
   GET_PRACTICES(ch, char_get_class(ch)) -= 1000;
  }
 
@@ -918,7 +918,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
    skill_num = 539;
   }
 
-  if (skill_num == GET_FORGETING(ch)) {
+  if (skill_num == char_get_forgeting(ch)) {
    send_to_char(ch, "You can't practice that! You are trying to forget it!@n\r\n");
    return;
   }
@@ -953,64 +953,64 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
     if (GET_PRACTICES(ch, char_get_class(ch)) >= pointcost) {
       if (!prereq_pass(ch, skill_num)) {
         return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= highest) {
+      } if (char_get_skills_base(ch, skill_num) >= highest) {
         send_to_char(ch, "You cannot increase that skill again until you progress further.\r\n");
         return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 75 && GET_BONUS(ch, BONUS_MASOCHISTIC) > 0) {
+      } if (char_get_skills_base(ch, skill_num) >= 75 && char_get_bonuses(ch, BONUS_MASOCHISTIC) > 0) {
        if (skill_num == SKILL_PARRY || skill_num == SKILL_ZANZOKEN || skill_num == SKILL_DODGE || skill_num == SKILL_BARRIER || skill_num == SKILL_BLOCK || skill_num == SKILL_TSKIN) {
          send_to_char(ch, "You cannot increase that skill again because it would deny you the pain you enjoy.\r\n");
          return;
        }
-      } if (GET_SKILL_BASE(ch, skill_num) >= 75 && char_is_tapion(ch) && skill_num == SKILL_SENSE) {
+      } if (char_get_skills_base(ch, skill_num) >= 75 && char_is_tapion(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 75 && char_is_dabura(ch) && skill_num == SKILL_SENSE) {
+      } if (char_get_skills_base(ch, skill_num) >= 75 && char_is_dabura(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 75 && char_is_jinto(ch) && skill_num == SKILL_SENSE) {
+      } if (char_get_skills_base(ch, skill_num) >= 75 && char_is_jinto(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 75 && char_is_tsuna(ch) && skill_num == SKILL_SENSE) {
+      } if (char_get_skills_base(ch, skill_num) >= 75 && char_is_tsuna(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 50 && char_is_frieza(ch) && skill_num == SKILL_SENSE) {
+      } if (char_get_skills_base(ch, skill_num) >= 50 && char_is_frieza(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 50 && char_is_andsix(ch) && skill_num == SKILL_SENSE) {
+      } if (char_get_skills_base(ch, skill_num) >= 50 && char_is_andsix(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 50 && char_is_kurzak(ch) && skill_num == SKILL_SENSE) {
+      } if (char_get_skills_base(ch, skill_num) >= 50 && char_is_kurzak(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 50 && char_is_ginyu(ch) && skill_num == SKILL_SENSE) {
+      } if (char_get_skills_base(ch, skill_num) >= 50 && char_is_ginyu(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 50 && char_is_bardock(ch) && skill_num == SKILL_SENSE) {
+      } if (char_get_skills_base(ch, skill_num) >= 50 && char_is_bardock(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 100) {
+      } if (char_get_skills_base(ch, skill_num) >= 100) {
         send_to_char(ch, "You know everything about that skill.\r\n");
         return;
       } else {
-        if (GET_SKILL_BASE(ch, skill_num) == 0) {
-         if (slot_count(ch) < GET_SLOTS(ch)) {
+        if (char_get_skills_base(ch, skill_num) == 0) {
+         if (slot_count(ch) < char_get_skill_slots(ch)) {
           if (skill_num != 539)
            send_to_char(ch, "You practice and master the basics!\r\n");
           else
            send_to_char(ch, "You practice the basics of %s\r\n", sensei_style[char_get_class(ch)]);
-          SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + rand_number(10, 25));
+          SET_SKILL(ch, skill_num, char_get_skills_base(ch, skill_num) + rand_number(10, 25));
           GET_PRACTICES(ch, char_get_class(ch)) -= pointcost;
-          if (GET_FORGETING(ch) != 0 && GET_SKILL_BASE(ch, GET_FORGETING(ch)) < 30) {
-           GET_FORGET_COUNT(ch) += 1;
-           if (GET_FORGET_COUNT(ch) >= 5) {
-            SET_SKILL(ch, GET_FORGETING(ch), 0);
-            send_to_char(ch, "@MYou have finally forgotten what little you knew of %s@n\r\n", spell_info[GET_FORGETING(ch)].name);
-            GET_FORGETING(ch) = 0;
-            GET_FORGET_COUNT(ch) = 0;
+          if (char_get_forgeting(ch) != 0 && char_get_skills_base(ch, char_get_forgeting(ch)) < 30) {
+           char_set_forgetcount(ch, char_get_forgetcount(ch) + (1));
+           if (char_get_forgetcount(ch) >= 5) {
+            SET_SKILL(ch, char_get_forgeting(ch), 0);
+            send_to_char(ch, "@MYou have finally forgotten what little you knew of %s@n\r\n", spell_info[char_get_forgeting(ch)].name);
+            char_set_forgeting(ch, 0);
+            char_set_forgetcount(ch, 0);
             save_char(ch);
            }
-          } else if (GET_SKILL_BASE(ch, GET_FORGETING(ch)) < 30) {
-           GET_FORGETING(ch) = 0;
+          } else if (char_get_skills_base(ch, char_get_forgeting(ch)) < 30) {
+           char_set_forgeting(ch, 0);
           }
          } else {
           send_to_char(ch, "You already know the maximum number of skills you can for the time being!\r\n");
@@ -1019,25 +1019,25 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
         }
         else {
           if (skill_num != 539)
-           send_to_char(ch, "You practice for a while and manage to advance your technique. (%d)\r\n", GET_SKILL_BASE(ch, skill_num) + 1);
+           send_to_char(ch, "You practice for a while and manage to advance your technique. (%d)\r\n", char_get_skills_base(ch, skill_num) + 1);
           else
-           send_to_char(ch, "You practice the basics of %s. (%d)\r\n", sensei_style[char_get_class(ch)], GET_SKILL_BASE(ch, skill_num) + 1);
-         SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + 1);
+           send_to_char(ch, "You practice the basics of %s. (%d)\r\n", sensei_style[char_get_class(ch)], char_get_skills_base(ch, skill_num) + 1);
+         SET_SKILL(ch, skill_num, char_get_skills_base(ch, skill_num) + 1);
          GET_PRACTICES(ch, char_get_class(ch)) -= pointcost;
-         if (GET_SKILL_BASE(ch, skill_num) >= 100) {
+         if (char_get_skills_base(ch, skill_num) >= 100) {
           send_to_char(ch, "You learned a lot by mastering that skill.\r\n");
           if (char_is_konatsu(ch) && skill_num == SKILL_PARRY) {
-           SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + 5);
+           SET_SKILL(ch, skill_num, char_get_skills_base(ch, skill_num) + 5);
           }
           gain_exp(ch, level_exp(ch, char_get_level(ch) + 1) / 20);
          }
-          if (GET_FORGETING(ch) != 0) {
-           GET_FORGET_COUNT(ch) += 1;
-           if (GET_FORGET_COUNT(ch) >= 5) {
-            SET_SKILL(ch, GET_FORGETING(ch), 0);
-            send_to_char(ch, "@MYou have finally forgotten what little you knew of %s@n\r\n", spell_info[GET_FORGETING(ch)].name);
-            GET_FORGETING(ch) = 0;
-            GET_FORGET_COUNT(ch) = 0;
+          if (char_get_forgeting(ch) != 0) {
+           char_set_forgetcount(ch, char_get_forgetcount(ch) + (1));
+           if (char_get_forgetcount(ch) >= 5) {
+            SET_SKILL(ch, char_get_forgeting(ch), 0);
+            send_to_char(ch, "@MYou have finally forgotten what little you knew of %s@n\r\n", spell_info[char_get_forgeting(ch)].name);
+            char_set_forgeting(ch, 0);
+            char_set_forgetcount(ch, 0);
             save_char(ch);
            }
           }
@@ -1107,13 +1107,13 @@ void handle_gain(struct char_data *keeper, int guild_nr, struct char_data *ch, c
   skip_spaces(&argument);
   int rpp_cost = rpp_to_level(ch);
 
-  if (char_get_level(ch) < 100 && GET_EXP(ch) >= level_exp(ch, char_get_level(ch) + 1)) {
-    if (GET_RP(ch) < rpp_cost) {
+  if (char_get_level(ch) < 100 && char_get_exp(ch) >= level_exp(ch, char_get_level(ch) + 1)) {
+    if (char_get_rp(ch) < rpp_cost) {
      send_to_char(ch, "You need at least %d RPP to gain the next level.\r\n", rpp_cost);
     }
-    else if (rpp_cost <= GET_RP(ch)) {
-     GET_RP(ch) -= rpp_cost;
-     ch->desc->rpp = GET_RP(ch);
+    else if (rpp_cost <= char_get_rp(ch)) {
+     char_set_rp(ch, char_get_rp(ch) - (rpp_cost));
+     ch->desc->rpp = char_get_rp(ch);
      userWrite(ch->desc, 0, 0, 0, "index");
      send_to_char(ch, "@D(@cRPP@W: @w-%d@D)@n\n\n", rpp_cost);
      gain_level(ch, whichclass);
@@ -1155,7 +1155,7 @@ void handle_exp(struct char_data *keeper, int guild_nr, struct char_data *ch, ch
     send_to_char(ch, "You need at least 25 practice sessions to learn.\r\n");
     return;
  }
- if (GET_EXP(ch) > level_exp(ch, char_get_level(ch) + 1) && char_get_level(ch) != 100) {
+ if (char_get_exp(ch) > level_exp(ch, char_get_level(ch) + 1) && char_get_level(ch) != 100) {
     send_to_char(ch, "You can't learn with negative TNL.\r\n");
     return;
  }
@@ -1216,12 +1216,12 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
  goldcost += goldadjust;
  expcost += expadjust;
 
- if (GET_EXP(ch) < expcost) {
+ if (char_get_exp(ch) < expcost) {
   send_to_char(ch, "You do not have enough experience to study. @D[@wCost@W: @G%s@D]@n\r\n", add_commas(expcost));
   fail = TRUE;
  }
 
- if (GET_GOLD(ch) < goldcost) {
+ if (char_get_gold(ch) < goldcost) {
   send_to_char(ch, "You do not have enough zenni to study. @D[@wCost@W: @Y%s@D]@n\r\n", add_commas(goldcost));
   fail = TRUE;
  }
@@ -1229,8 +1229,8 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
  if (fail == TRUE)
   return;
 
- GET_EXP(ch) -= expcost;
- GET_GOLD(ch) -= goldcost;
+ char_set_exp(ch, char_get_exp(ch) - (expcost));
+ char_set_gold(ch, char_get_gold(ch) - (goldcost));
  GET_PRACTICES(ch, char_get_class(ch)) += 25;
  
  act("@c$N@W spends time lecturing you on various subjects.@n", TRUE, ch, 0, keeper, TO_CHAR);
@@ -1269,7 +1269,7 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
     return;
   }
 
-  if (HAS_FEAT(ch, feat_num) && !feat_list[feat_num].can_stack) {
+  if (char_get_feats(ch, feat_num) && !feat_list[feat_num].can_stack) {
     send_to_char(ch, "You already know the %s feat.\r\n", feat_list[feat_num].name);
     return;
   }
@@ -1379,22 +1379,22 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
       send_to_char(ch, "That feat is not yet ready for use.\r\n");
       return;
     }
-    SET_FEAT(ch, feat_num, HAS_FEAT(ch, feat_num) + 1);
+    SET_FEAT(ch, feat_num, char_get_feats(ch, feat_num) + 1);
     break;
   case FEAT_GREAT_FORTITUDE:
     SET_FEAT(ch, feat_num, 1);
-    GET_SAVE_MOD(ch, SAVING_FORTITUDE) += 2;
+    char_set_apply_saving_throw(ch, SAVING_FORTITUDE, char_get_apply_saving_throw(ch, SAVING_FORTITUDE) + (2));
     break;
   case FEAT_IRON_WILL:
     SET_FEAT(ch, feat_num, 1);
-    GET_SAVE_MOD(ch, SAVING_WILL) += 2;
+    char_set_apply_saving_throw(ch, SAVING_WILL, char_get_apply_saving_throw(ch, SAVING_WILL) + (2));
     break;
   case FEAT_LIGHTNING_REFLEXES:
     SET_FEAT(ch, feat_num, 1);
-    GET_SAVE_MOD(ch, SAVING_REFLEX) += 2;
+    char_set_apply_saving_throw(ch, SAVING_REFLEX, char_get_apply_saving_throw(ch, SAVING_REFLEX) + (2));
     break;
   case FEAT_TOUGHNESS:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
     //GET_MAX_HIT(ch) += 3;
     break;
@@ -1423,87 +1423,87 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
       send_to_char(ch, "You have already focused that skill as high as possible.\r\n");
       return;
     }
-    SET_SKILL_BONUS(ch, subval, GET_SKILL_BONUS(ch, subval) + 5);
-    SET_FEAT(ch, feat_num, HAS_FEAT(ch, feat_num) + 1);
+    SET_SKILL_BONUS(ch, subval, char_get_skills_mod(ch, subval) + 5);
+    SET_FEAT(ch, feat_num, char_get_feats(ch, feat_num) + 1);
     break;
   case FEAT_SPELL_MASTERY:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
     break;
   case FEAT_ACROBATIC:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
     break;
   case FEAT_AGILE:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
-    SET_SKILL_BONUS(ch, SKILL_BALANCE, GET_SKILL_BONUS(ch, SKILL_BALANCE) + 2);
-    SET_SKILL_BONUS(ch, SKILL_ESCAPE_ARTIST, GET_SKILL_BONUS(ch, SKILL_ESCAPE_ARTIST) + 2);
+    SET_SKILL_BONUS(ch, SKILL_BALANCE, char_get_skills_mod(ch, SKILL_BALANCE) + 2);
+    SET_SKILL_BONUS(ch, SKILL_ESCAPE_ARTIST, char_get_skills_mod(ch, SKILL_ESCAPE_ARTIST) + 2);
     break;
   case FEAT_ALERTNESS:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
-    SET_SKILL_BONUS(ch, SKILL_LISTEN, GET_SKILL_BONUS(ch, SKILL_LISTEN) + 2);
-    SET_SKILL_BONUS(ch, SKILL_SPOT, GET_SKILL_BONUS(ch, SKILL_SPOT) + 2);
+    SET_SKILL_BONUS(ch, SKILL_LISTEN, char_get_skills_mod(ch, SKILL_LISTEN) + 2);
+    SET_SKILL_BONUS(ch, SKILL_SPOT, char_get_skills_mod(ch, SKILL_SPOT) + 2);
     break;
   case FEAT_ANIMAL_AFFINITY:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
     break;
   case FEAT_ATHLETIC:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
     break;
   case FEAT_DECEITFUL:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
-    SET_SKILL_BONUS(ch, SKILL_DISGUISE, GET_SKILL_BONUS(ch, SKILL_DISGUISE) + 2);
-    SET_SKILL_BONUS(ch, SKILL_FORGERY, GET_SKILL_BONUS(ch, SKILL_FORGERY) + 2);
+    SET_SKILL_BONUS(ch, SKILL_DISGUISE, char_get_skills_mod(ch, SKILL_DISGUISE) + 2);
+    SET_SKILL_BONUS(ch, SKILL_FORGERY, char_get_skills_mod(ch, SKILL_FORGERY) + 2);
     break;
   case FEAT_DEFT_HANDS:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
-    SET_SKILL_BONUS(ch, SKILL_SLEIGHT_OF_HAND, GET_SKILL_BONUS(ch, SKILL_SLEIGHT_OF_HAND) + 2);
+    SET_SKILL_BONUS(ch, SKILL_SLEIGHT_OF_HAND, char_get_skills_mod(ch, SKILL_SLEIGHT_OF_HAND) + 2);
     break;
   case FEAT_DILIGENT:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
-    SET_SKILL_BONUS(ch, SKILL_APPRAISE, GET_SKILL_BONUS(ch, SKILL_APPRAISE) + 2);
+    SET_SKILL_BONUS(ch, SKILL_APPRAISE, char_get_skills_mod(ch, SKILL_APPRAISE) + 2);
     break;
   case FEAT_INVESTIGATOR:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
-    SET_SKILL_BONUS(ch, SKILL_EAVESDROP, GET_SKILL_BONUS(ch, SKILL_EAVESDROP) + 2);
-    SET_SKILL_BONUS(ch, SKILL_SEARCH, GET_SKILL_BONUS(ch, SKILL_SEARCH) + 2);
+    SET_SKILL_BONUS(ch, SKILL_EAVESDROP, char_get_skills_mod(ch, SKILL_EAVESDROP) + 2);
+    SET_SKILL_BONUS(ch, SKILL_SEARCH, char_get_skills_mod(ch, SKILL_SEARCH) + 2);
     break;
   case FEAT_MAGICAL_APTITUDE:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
     break;
   case FEAT_NEGOTIATOR:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
     break;
   case FEAT_NIMBLE_FINGERS:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
-    SET_SKILL_BONUS(ch, SKILL_OPEN_LOCK, GET_SKILL_BONUS(ch, SKILL_OPEN_LOCK) + 2);
+    SET_SKILL_BONUS(ch, SKILL_OPEN_LOCK, char_get_skills_mod(ch, SKILL_OPEN_LOCK) + 2);
     break;
   case FEAT_PERSUASIVE:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
     break;
   case FEAT_SELF_SUFFICIENT:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
-    SET_SKILL_BONUS(ch, SKILL_HEAL, GET_SKILL_BONUS(ch, SKILL_HEAL) + 2);
-    SET_SKILL_BONUS(ch, SKILL_SURVIVAL, GET_SKILL_BONUS(ch, SKILL_SURVIVAL) + 2);
+    SET_SKILL_BONUS(ch, SKILL_HEAL, char_get_skills_mod(ch, SKILL_HEAL) + 2);
+    SET_SKILL_BONUS(ch, SKILL_SURVIVAL, char_get_skills_mod(ch, SKILL_SURVIVAL) + 2);
     break;
   case FEAT_STEALTHY:
-    subval = HAS_FEAT(ch, feat_num) + 1;
+    subval = char_get_feats(ch, feat_num) + 1;
     SET_FEAT(ch, feat_num, subval);
-    SET_SKILL_BONUS(ch, SKILL_HIDE, GET_SKILL_BONUS(ch, SKILL_HIDE) + 2);
-    SET_SKILL_BONUS(ch, SKILL_MOVE_SILENTLY, GET_SKILL_BONUS(ch, SKILL_MOVE_SILENTLY) + 2);
+    SET_SKILL_BONUS(ch, SKILL_HIDE, char_get_skills_mod(ch, SKILL_HIDE) + 2);
+    SET_SKILL_BONUS(ch, SKILL_MOVE_SILENTLY, char_get_skills_mod(ch, SKILL_MOVE_SILENTLY) + 2);
     break;
   default:
     SET_FEAT(ch, feat_num, TRUE);

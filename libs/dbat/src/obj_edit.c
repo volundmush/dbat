@@ -217,15 +217,15 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
      d->obj_editflag = EDIT_NONE;
      d->obj_editval = EDIT_NONE;
      d->character->gold -= 5000;
-     SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_RESTRING);
+     SET_BIT_AR(obj_get_extra_flags(obj), ITEM_RESTRING);
      write_to_output(d, "Purchase complete.");
      send_to_imm("Restring Eq: %s has bought: %s, which was %s.", char_get_name(d->character), obj->short_description, d->obj_was);
-     STATE(d) = CON_PLAYING;
+     desc_set_connected(d, CON_PLAYING);
     } else if (!strcasecmp(arg, "No") || !strcasecmp(arg, "no") || !strcasecmp(arg, "n") || !strcasecmp(arg, "N")) {
      write_to_output(d, "Canceling purchase at no cost.\r\n");
      send_to_imm("Restring Eq: %s has canceled their equipment restring.", char_get_name(d->character));
      d->obj_editval = EDIT_NONE;
-     STATE(d) = CON_PLAYING;
+     desc_set_connected(d, CON_PLAYING);
     } else {
      write_to_output(d, "Save current changes and be charged?\r\nYes or No\r\n");
      return;      
@@ -412,55 +412,55 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
       return;
     } else if (!strcasecmp(arg, "y") || !strcasecmp(arg, "Y")) {
      write_to_output(d, "@wPurchase complete.@n\r\n");
-     STATE(d) = CON_PLAYING;
+     desc_set_connected(d, CON_PLAYING);
      if (d->obj_weapon == 0) {
       obj = read_object(20099, VIRTUAL);
       obj_to_char(obj, d->character);
       switch(d->obj_type) {
        case 1:
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_BODY);
+        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_BODY);
         break;
        case 2:
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_ABOUT);
+        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_ABOUT);
         break;
        case 3:
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_WRIST);
+        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_WRIST);
         break;
        case 4:
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_EAR);
+        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_EAR);
         break;
        case 5:
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_FINGER);
+        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_FINGER);
         break;
        case 6:
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_EYE);
+        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_EYE);
         break;
        case 7:
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_HANDS);
+        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_HANDS);
        break;
        case 8:
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_FEET);
+        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_FEET);
         break;
        case 9:
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_WAIST);
+        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_WAIST);
         break;
        case 10:
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_LEGS);
+        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_LEGS);
         break;
        case 11:
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_ARMS);
+        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_ARMS);
         break;
        case 12:
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_HEAD);
+        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_HEAD);
         break;
        case 13:
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_NECK);
+        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_NECK);
         break;
        case 14:
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_PACK);
+        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_PACK);
         break;
        case 15:
-        SET_BIT_AR(GET_OBJ_WEAR(obj), ITEM_WEAR_SH);
+        SET_BIT_AR(obj_get_wear_flags(obj), ITEM_WEAR_SH);
         break;
       }
       *buf = '\0';
@@ -486,35 +486,35 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
       obj->description = strdup(buf3);
       switch(d->obj_weapon) {
        case 1:
-        GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) = TYPE_SLASH - TYPE_HIT;
+        obj_set_value(obj, VAL_WEAPON_DAMTYPE, TYPE_SLASH - TYPE_HIT);
         break;
        case 2:
-        GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) = TYPE_PIERCE - TYPE_HIT;
+        obj_set_value(obj, VAL_WEAPON_DAMTYPE, TYPE_PIERCE - TYPE_HIT);
         break;
        case 3:
-        GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) = TYPE_STAB - TYPE_HIT;
+        obj_set_value(obj, VAL_WEAPON_DAMTYPE, TYPE_STAB - TYPE_HIT);
         break;
        case 4:
-        GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) = TYPE_CRUSH - TYPE_HIT;
+        obj_set_value(obj, VAL_WEAPON_DAMTYPE, TYPE_CRUSH - TYPE_HIT);
         break;
        case 5:
-        GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) = TYPE_BLAST - TYPE_HIT;
+        obj_set_value(obj, VAL_WEAPON_DAMTYPE, TYPE_BLAST - TYPE_HIT);
         break;
        case 6:
-        GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) = TYPE_POUND - TYPE_HIT;
+        obj_set_value(obj, VAL_WEAPON_DAMTYPE, TYPE_POUND - TYPE_HIT);
         break;
       }
-      GET_OBJ_LEVEL(obj) = 20;
+      obj_set_level(obj, 20);
      }
-     SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_SLOT2);
+     SET_BIT_AR(obj_get_extra_flags(obj), ITEM_SLOT2);
      d->obj_editflag = EDIT_NONE;
      d->obj_editval = EDIT_NONE;
      d->character->rp -= 20;
-     GET_RP(d->character) = d->character->rp;
+     char_set_rp(d->character, d->character->rp);
      d->rpp -= 20;
      userWrite(d, 0, 0, 0, "index");
-     GET_OBJ_SIZE(obj) = get_size(d->character);
-     SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_CUSTOM);
+     obj_set_size(obj, get_size(d->character));
+     SET_BIT_AR(obj_get_extra_flags(obj), ITEM_CUSTOM);
      send_to_imm("Custom Eq: %s has bought: %s.", char_get_name(d->character), obj->short_description);
      customWrite(d->character, obj);
      log_custom(d, obj);
@@ -523,7 +523,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
      send_to_imm("Custom Eq: %s has canceled their custom eq construction.", char_get_name(d->character));
      d->obj_editval = EDIT_NONE;
 
-     STATE(d) = CON_PLAYING;
+     desc_set_connected(d, CON_PLAYING);
     }
     break;
 

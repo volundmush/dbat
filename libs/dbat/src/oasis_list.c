@@ -54,7 +54,7 @@ ACMD(do_oasis_list)
     }
     
   if (!*smin || *smin == '.') {
-    rzone = world[IN_ROOM(ch)].zone;
+    rzone = world[char_get_in_room(ch)].zone;
   } else if (!*smax) {
     rzone = real_zone(atoi(smin));
     
@@ -103,7 +103,7 @@ ACMD(do_oasis_links)
   one_argument(argument, arg);
 
   if (!strcmp(arg, ".") || (arg == NULL || !*arg)) {
-    zrnum = world[IN_ROOM(ch)].zone;
+    zrnum = world[char_get_in_room(ch)].zone;
     zvnum = zone_table[zrnum].number;
   } else {
     zvnum = atoi(arg);
@@ -175,13 +175,13 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
                           world[i].name, world[i].proto_script ? "[TRIG] " : "");
 
       for (j = 0; j < NUM_OF_DIRS; j++) {
-        if (W_EXIT(i, j) == NULL)
+        if (rroom_get_dir_option(i, j) == NULL)
           continue;
-        if (W_EXIT(i, j)->to_room == NOWHERE)
+        if (rroom_get_dir_option(i, j)->to_room == NOWHERE)
           continue;
           
-        if (world[W_EXIT(i, j)->to_room].zone != world[i].zone) 
-          send_to_char(ch, "(@y%d@n)", world[W_EXIT(i, j)->to_room].number);
+        if (world[rroom_get_dir_option(i, j)->to_room].zone != world[i].zone) 
+          send_to_char(ch, "(@y%d@n)", world[rroom_get_dir_option(i, j)->to_room].number);
      
       }
     

@@ -69,7 +69,7 @@
 static void display_races_sub(descriptor_data *d) {
     int i = 0;
     for (int r = 0; r < NUM_RACES; r++) {
-        if (!race_is_playable(r) || !race_valid_sex(r, GET_SEX(d->character)))
+        if (!race_is_playable(r) || !race_valid_sex(r, char_get_sex(d->character)))
             continue;
         send_to_char(d->character, "@C%-15s@D[@R%i RPP@D]@n%s", race_name(r), race_rpp_cost(r), !(++i %2) ? "\r\n" : "   ");
     }
@@ -164,7 +164,7 @@ int perform_dupe_check(struct descriptor_data *d)
   struct char_data *target = NULL, *ch, *next_ch;
   int mode = 0;
   int count = 0, oldcount = HIGHPCOUNT;
-  int id = GET_IDNUM(d->character);
+  int id = char_get_idnum(d->character);
 
   /*
    * Now that this descriptor has successfully logged in, disconnect all
@@ -177,11 +177,11 @@ int perform_dupe_check(struct descriptor_data *d)
     if (k == d)
       continue;
 
-    if (k->original && (GET_IDNUM(k->original) == id)) {
+    if (k->original && (char_get_idnum(k->original) == id)) {
       /* Original descriptor was switched, booting it and restoring normal body control. */
 
       write_to_output(d, "\r\nMultiple login detected -- disconnecting.\r\n");
-      STATE(k) = CON_CLOSE;
+      desc_set_connected(k, CON_CLOSE);
       if (!target) {
 	target = k->original;
 	mode = UNSWITCH;
@@ -190,14 +190,14 @@ int perform_dupe_check(struct descriptor_data *d)
 	k->character->desc = NULL;
       k->character = NULL;
       k->original = NULL;
-    } else if (k->character && GET_IDNUM(k->character) == id && k->original) {
+    } else if (k->character && char_get_idnum(k->character) == id && k->original) {
       /* Character taking over their own body, while an immortal was switched to it. */
 
       do_return(k->character, NULL, 0, 0);
-    } else if (k->character && GET_IDNUM(k->character) == id) {
+    } else if (k->character && char_get_idnum(k->character) == id) {
       /* Character taking over their own body. */
 
-      if (!target && STATE(k) == CON_PLAYING) {
+      if (!target && desc_get_connected(k) == CON_PLAYING) {
 	write_to_output(k, "\r\nThis body has been usurped!\r\n");
         if (k->snoop_by) {
          k->snoop_by->snooping = d;
@@ -211,7 +211,7 @@ int perform_dupe_check(struct descriptor_data *d)
       k->character = NULL;
       k->original = NULL;
       write_to_output(k, "\r\nMultiple login detected -- disconnecting.\r\n");
-      STATE(k) = CON_CLOSE;
+      desc_set_connected(k, CON_CLOSE);
     }
   }
 
@@ -229,7 +229,7 @@ int perform_dupe_check(struct descriptor_data *d)
 
     if (char_is_npc(ch))
       continue;
-    if (GET_IDNUM(ch) != id)
+    if (char_get_idnum(ch) != id)
       continue;
 
     /* ignore chars with descriptors (already handled by above step) */
@@ -248,7 +248,7 @@ int perform_dupe_check(struct descriptor_data *d)
     }
 
     /* we've found a duplicate - blow him away, dumping his eq in limbo. */
-    if (IN_ROOM(ch) != NOWHERE)
+    if (char_get_in_room(ch) != NOWHERE)
       char_from_room(ch);
     char_to_room(ch, 1);
     extract_char(ch);
@@ -264,10 +264,10 @@ int perform_dupe_check(struct descriptor_data *d)
   d->character->desc = d;
   d->original = NULL;
   d->character->timer = 0;
-  REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_MAILING);
-  REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
-  REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_GROUP);
-  STATE(d) = CON_PLAYING;
+  REMOVE_BIT_AR(char_get_act(d->character), PLR_MAILING);
+  REMOVE_BIT_AR(char_get_act(d->character), PLR_WRITING);
+  REMOVE_BIT_AR(char_get_affected_by(d->character), AFF_GROUP);
+  desc_set_connected(d, CON_PLAYING);
 
   switch (mode) {
   case RECON:
@@ -309,30 +309,30 @@ int perform_dupe_check(struct descriptor_data *d)
     act("$n has reconnected.", TRUE, d->character, 0, 0, TO_ROOM);
     mudlog(NRM, MAX(ADMLVL_NONE, GET_INVIS_LEV(d->character)), TRUE, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
     d->character->rp = d->rpp;
-    if (has_mail(GET_IDNUM(d->character)))
+    if (has_mail(char_get_idnum(d->character)))
       write_to_output(d, "You have mail waiting.\r\n");
-    if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWIMM > GET_BOARD(d->character, 1))
+    if (char_get_admlevel(d->character) >= 1 && BOARDNEWIMM > char_get_lboard(d->character, 1))
       send_to_char(d->character, "\r\n@GMake sure to check the immortal board, there is a new post there.@n\r\n");
-    if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWCOD > GET_BOARD(d->character, 2))
+    if (char_get_admlevel(d->character) >= 1 && BOARDNEWCOD > char_get_lboard(d->character, 2))
       send_to_char(d->character, "\r\n@GMake sure to check the request file, it has been updated.@n\r\n");
-    if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWBUI > GET_BOARD(d->character, 4))
+    if (char_get_admlevel(d->character) >= 1 && BOARDNEWBUI > char_get_lboard(d->character, 4))
       send_to_char(d->character, "\r\n@GMake sure to check the builder board, there is a new post there.@n\r\n");
-    if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWDUO > GET_BOARD(d->character, 3))
+    if (char_get_admlevel(d->character) >= 1 && BOARDNEWDUO > char_get_lboard(d->character, 3))
       send_to_char(d->character, "\r\n@GMake sure to check punishment board, there is a new post there.@n\r\n");
-    if (BOARDNEWMORT > GET_BOARD(d->character, 0))
+    if (BOARDNEWMORT > char_get_lboard(d->character, 0))
       send_to_char(d->character, "\r\n@GThere is a new bulletin board post.@n\r\n");
-    if (NEWSUPDATE > GET_LPLAY(d->character))
+    if (NEWSUPDATE > char_get_lastpl(d->character))
       send_to_char(d->character, "\r\n@GThe NEWS file has been updated, type 'news %d' to see the latest entry or 'news list' to see available entries.@n\r\n", LASTNEWS);
     
-    if (LASTINTEREST != 0 && LASTINTEREST > GET_LINTEREST(d->character)) {
-      int diff = (LASTINTEREST - GET_LINTEREST(d->character));
+    if (LASTINTEREST != 0 && LASTINTEREST > char_get_lastint(d->character)) {
+      int diff = (LASTINTEREST - char_get_lastint(d->character));
       int mult = 0;
       int days = MAX(3, diff / 86400);
-      GET_LINTEREST(d->character) = LASTINTEREST;
+      char_set_lastint(d->character, LASTINTEREST);
       int base_interest = char_get_bank_interest(d->character);
       if (base_interest) {
         int total_interest = base_interest * days;
-       GET_BANK_GOLD(d->character) += total_interest;
+       char_set_bank_gold(d->character, char_get_bank_gold(d->character) + (total_interest));
        send_to_char(d->character, "Interest happened while you were away, %d times.\r\n"
                                   "@cBank Interest@D: @Y%s@n\r\n", days, add_commas(total_interest));
       }
@@ -382,7 +382,7 @@ int enter_player_game (struct descriptor_data *d)
 
       /* If char was saved with NOWHERE, or real_room above failed... */
       if (load_room == NOWHERE) {
-	if (GET_ADMLEVEL(d->character))
+	if (char_get_admlevel(d->character))
 	  load_room = real_room(CONFIG_IMMORTAL_START);
 	else
 	  load_room = real_room(CONFIG_MORTAL_START);
@@ -400,13 +400,13 @@ int enter_player_game (struct descriptor_data *d)
         d->character->player_specials->host = NULL;
       }
       d->character->player_specials->host = strdup(d->host);
-      GET_ID(d->character) = GET_IDNUM(d->character);
+      char_set_id(d->character, char_get_idnum(d->character));
       /* find_char helper */
-      add_to_lookup_table(GET_ID(d->character), MOB_TRIGGER, (void *)d->character);
+      add_to_lookup_table(char_get_id(d->character), MOB_TRIGGER, (void *)d->character);
       read_saved_vars(d->character);
       /*load_char_pets(d->character);*/
       for (check = character_list; check; check = check->next)
-        if (!check->master && char_is_npc(check) && check->master_id == GET_IDNUM(d->character) &&
+        if (!check->master && char_is_npc(check) && check->master_id == char_get_idnum(d->character) &&
             char_aff_flagged(check, AFF_CHARM) && !circle_follow(check, d->character))
           add_follower(check, d->character);
       save_char(d->character);
@@ -418,64 +418,64 @@ int enter_player_game (struct descriptor_data *d)
 
 
     if (char_plr_flagged(d->character, PLR_RARM)) {
-     GET_LIMBCOND(d->character, 1) = 100;
-     REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_RARM);
+     char_set_limb_condition(d->character, (1)-1, 100);
+     REMOVE_BIT_AR(char_get_act(d->character), PLR_RARM);
     }
     if (char_plr_flagged(d->character, PLR_LARM)) {
-     GET_LIMBCOND(d->character, 2) = 100;
-     REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_LARM);
+     char_set_limb_condition(d->character, (2)-1, 100);
+     REMOVE_BIT_AR(char_get_act(d->character), PLR_LARM);
     }
     if (char_plr_flagged(d->character, PLR_LLEG)) {
-     GET_LIMBCOND(d->character, 4) = 100;
-     REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_LLEG);
+     char_set_limb_condition(d->character, (4)-1, 100);
+     REMOVE_BIT_AR(char_get_act(d->character), PLR_LLEG);
     }
     if (char_plr_flagged(d->character, PLR_RLEG)) {
-     GET_LIMBCOND(d->character, 3) = 100;
-     REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_RLEG);
+     char_set_limb_condition(d->character, (3)-1, 100);
+     REMOVE_BIT_AR(char_get_act(d->character), PLR_RLEG);
     }
-    GET_COMBINE(d->character) = -1;
-    GET_SLEEPT(d->character) = 8;
-    GET_FOODR(d->character) = 2;
+    char_set_combine(d->character, -1);
+    char_set_sleeptime(d->character, 8);
+    char_set_foodr(d->character, 2);
     if (char_aff_flagged(d->character, AFF_FLYING)) {
-     GET_ALT(d->character) = 1;
+     char_set_altitude(d->character, 1);
     } else {
-     GET_ALT(d->character) = 0;
+     char_set_altitude(d->character, 0);
     }
     if (char_aff_flagged(d->character, AFF_POSITION)) {
-     REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_POSITION);
+     REMOVE_BIT_AR(char_get_affected_by(d->character), AFF_POSITION);
     }
     if (char_aff_flagged(d->character, AFF_SANCTUARY)) {
-     REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_SANCTUARY);
+     REMOVE_BIT_AR(char_get_affected_by(d->character), AFF_SANCTUARY);
     }
     if (char_aff_flagged(d->character, AFF_ZANZOKEN)) {
-     REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_ZANZOKEN);
+     REMOVE_BIT_AR(char_get_affected_by(d->character), AFF_ZANZOKEN);
     }
     if (char_plr_flagged(d->character, PLR_KNOCKED)) {
-     REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_KNOCKED);
+     REMOVE_BIT_AR(char_get_act(d->character), PLR_KNOCKED);
     }
     if (char_is_android(d->character) && !char_aff_flagged(d->character, AFF_INFRAVISION)) {
-     SET_BIT_AR(AFF_FLAGS(d->character), AFF_INFRAVISION);
+     SET_BIT_AR(char_get_affected_by(d->character), AFF_INFRAVISION);
     }
-    ABSORBING(d->character) = NULL;
-    ABSORBBY(d->character) = NULL;
-    SITS(d->character) = NULL;
-    BLOCKED(d->character) = NULL;
-    BLOCKS(d->character) = NULL;
-    GET_OVERFLOW(d->character) = FALSE;
-    GET_SPAM(d->character) = 0;
-    GET_RMETER(d->character) = 0;
+    char_set_absorbing(d->character, NULL);
+    char_set_absorbby(d->character, NULL);
+    char_set_sits(d->character, NULL);
+    char_set_blocked(d->character, NULL);
+    char_set_blocks(d->character, NULL);
+    char_set_overf(d->character, FALSE);
+    char_set_spam(d->character, 0);
+    char_set_rage_meter(d->character, 0);
     if (!d->character->affected) {
      if (char_aff_flagged(d->character, AFF_HEALGLOW)) {
-      REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_HEALGLOW);
+      REMOVE_BIT_AR(char_get_affected_by(d->character), AFF_HEALGLOW);
      }
     }
     if (char_aff_flagged(d->character, AFF_HAYASA)) {
-     GET_SPEEDBOOST(d->character) = char_get_speedcalc(d->character) * 0.5;
+     char_set_speedboost(d->character, char_get_speedcalc(d->character) * 0.5);
     } else {
-     GET_SPEEDBOOST(d->character) = 0;
+     char_set_speedboost(d->character, 0);
     }
-    if (GET_TRP(d->character) < GET_RP(d->character)) {
-     GET_TRP(d->character) = GET_RP(d->character);
+    if (char_get_trp(d->character) < char_get_rp(d->character)) {
+     char_set_trp(d->character, char_get_rp(d->character));
     }
 
     if (char_is_namek(d->character) && GET_COND(d->character, HUNGER) >= 0) {
@@ -483,7 +483,7 @@ int enter_player_game (struct descriptor_data *d)
     }
 
     if (char_plr_flagged(d->character, PLR_HEALT)) {
-     REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_HEALT);
+     REMOVE_BIT_AR(char_get_act(d->character), PLR_HEALT);
     }
 
     if (readIntro(d->character, d->character) == 2) {
@@ -492,16 +492,16 @@ int enter_player_game (struct descriptor_data *d)
     if (read_sense_memory(d->character, d->character) == 2) {
      senseCreate(d->character);
     }
-    if (GET_ADMLEVEL(d->character) > 0) {
+    if (char_get_admlevel(d->character) > 0) {
      d->level = 1;
     }
 
-    if (GET_CLAN(d->character) != NULL && !strstr(GET_CLAN(d->character), "None")) {
-     if(!clanIsMember(GET_CLAN(d->character), d->character)) {
-       if (!clanIsModerator(GET_CLAN(d->character), d->character)) {
+    if (char_get_clan(d->character) != NULL && !strstr(char_get_clan(d->character), "None")) {
+     if(!clanIsMember(char_get_clan(d->character), d->character)) {
+       if (!clanIsModerator(char_get_clan(d->character), d->character)) {
         if (!checkCLAN(d->character)) {
          write_to_output(d, "Your clan no longer exists.\r\n");
-         GET_CLAN(d->character) = strdup("None.");
+         char_set_clan(d->character, strdup("None."));
        }
       }
      }
@@ -531,16 +531,16 @@ int enter_player_game (struct descriptor_data *d)
      SET_SKILL(d->character, SKILL_TAILWHIP, 0);
     }
 	
-	if (char_is_mutant(d->character) && (GET_GENOME(d->character, 0) == 9 || GET_GENOME(d->character, 1) == 9) && !char_get_skill(d->character, SKILL_TELEPATHY)) {
+	if (char_is_mutant(d->character) && (char_get_genome(d->character, 0) == 9 || char_get_genome(d->character, 1) == 9) && !char_get_skill(d->character, SKILL_TELEPATHY)) {
 	 SET_SKILL(d->character, SKILL_TELEPATHY, 50);
 	}
 	
-	if (char_is_bio(d->character) && (GET_GENOME(d->character, 0) == 7 || GET_GENOME(d->character, 1) == 7) && !char_get_skill(d->character, SKILL_TELEPATHY) && !char_get_skill(d->character, SKILL_FOCUS)) {
+	if (char_is_bio(d->character) && (char_get_genome(d->character, 0) == 7 || char_get_genome(d->character, 1) == 7) && !char_get_skill(d->character, SKILL_TELEPATHY) && !char_get_skill(d->character, SKILL_FOCUS)) {
 	 SET_SKILL(d->character, SKILL_TELEPATHY, 30);
 	 SET_SKILL(d->character, SKILL_FOCUS, 30);
 	}
 	
-    COMBO(d->character) = -1;
+    char_set_combo(d->character, -1);
     return load_result;
 }
 
@@ -576,27 +576,27 @@ void payout(int num)
    LASTPAYTYPE = num;
   }
   for (k = descriptor_list; k; k = k->next) {
-    if (GET_ADMLEVEL(k->character) <= 0 && desc_is_playing(k) && GET_RTIME(k->character) < LASTPAYOUT) {
+    if (char_get_admlevel(k->character) <= 0 && desc_is_playing(k) && char_get_rewtime(k->character) < LASTPAYOUT) {
      if (num == 0) {
       k->rpp += 1;
-      GET_RP(k->character) = k->rpp;
-      GET_TRP(k->character) += 1;
+      char_set_rp(k->character, k->rpp);
+      char_set_trp(k->character, char_get_trp(k->character) + (1));
       userWrite(k, 0, 0, 0, "index");
       send_to_char(k->character, "@D[@G+ 1 RPP@D] @cA total logon count within 4 of the highest has been achieved.@n\r\n");
      } else if (num == 1) {
       k->rpp += 2;
-      GET_RP(k->character) = k->rpp;
-      GET_TRP(k->character) += 2;
+      char_set_rp(k->character, k->rpp);
+      char_set_trp(k->character, char_get_trp(k->character) + (2));
       userWrite(k, 0, 0, 0, "index");
       send_to_char(k->character, "@D[@G+ 2 RPP@D] @cThe total logon count has tied with the highest ever.@n\r\n");
      } else {
       k->rpp += 3;
-      GET_RP(k->character) = k->rpp;
-      GET_TRP(k->character) += 3;
+      char_set_rp(k->character, k->rpp);
+      char_set_trp(k->character, char_get_trp(k->character) + (3));
       userWrite(k, 0, 0, 0, "index");
       send_to_char(k->character, "@D[@G+ 3 RPP@D] @cA new logon count record has been achieved!@n\r\n");
      }
-     GET_RTIME(k->character) = LASTPAYOUT;
+     char_set_rewtime(k->character, LASTPAYOUT);
     }
  }
 }
@@ -1159,16 +1159,16 @@ void fingerUser(struct char_data *ch, char *name)
 
   send_to_char(ch, "@D[@gUsername   @D: @w%-30s@D]@n\r\n", uname);
   send_to_char(ch, "@D[@gEmail      @D: @w%-30s@D]@n\r\n", email);
-  if (GET_ADMLEVEL(ch) > 4) {
+  if (char_get_admlevel(ch) > 4) {
    send_to_char(ch, "@D[@gPass       @D: @w%-30s@D]@n\r\n", pass);
   }
-  else if (GET_ADMLEVEL(ch) > 0) {
+  else if (char_get_admlevel(ch) > 0) {
    send_to_char(ch, "@D[@gPass       @D: @w%-30s@D]@n\r\n", "??????????");
   }
   send_to_char(ch, "@D[@gTotal Slots@D: @w%-30d@D]@n\r\n", total);
   send_to_char(ch, "@D[@gRP Points  @D: @w%-30d@D]@n\r\n", rpp);
   send_to_char(ch, "@D[@gRP Bank    @D: @w%-30d@D]@n\r\n", rbank);
-  if (GET_ADMLEVEL(ch) > 0) {
+  if (char_get_admlevel(ch) > 0) {
    send_to_char(ch, "@D[@gCh. Slot 1 @D: @w%-30s@D]@n\r\n", tmp1);
    send_to_char(ch, "@D[@gCh. Slot 2 @D: @w%-30s@D]@n\r\n", tmp2);
    send_to_char(ch, "@D[@gCh. Slot 3 @D: @w%-30s@D]@n\r\n", tmp3);
@@ -1274,7 +1274,7 @@ void display_bonus_menu(struct char_data *ch, int type)
  if (type == 0) {
   send_to_char(ch, "\r\n@YBonus Trait SELECTION menu:\r\n@D---------------------------------------\r\n@n");
   for (x = 0; x < BonusCount; x++) {
-    send_to_char(ch, "@C%-2d@D)@c %s <@g%s@D>\n", x + 1, bonus[x], GET_BONUS(ch, x) > 0 ? "X" : " ");
+    send_to_char(ch, "@C%-2d@D)@c %s <@g%s@D>\n", x + 1, bonus[x], char_get_bonuses(ch, x) > 0 ? "X" : " ");
   }
   send_to_char(ch, "\n");
  }
@@ -1283,7 +1283,7 @@ void display_bonus_menu(struct char_data *ch, int type)
    y = BonusCount;
    send_to_char(ch, "@YNegative Trait SELECTION menu:\r\n@D---------------------------------------\r\n@n");
    while (y < NegCount) {
-    send_to_char(ch, "@R%-2d@D)@r %s <@g%s@D>\n", y - 14, bonus[y], GET_BONUS(ch, y) > 0 ? "X" : " ");
+    send_to_char(ch, "@R%-2d@D)@r %s <@g%s@D>\n", y - 14, bonus[y], char_get_bonuses(ch, y) > 0 ? "X" : " ");
     y += 1;
    }
  }
@@ -1294,7 +1294,7 @@ void display_bonus_menu(struct char_data *ch, int type)
    send_to_char(ch, "\n@CB@D)@c Show Bonuses@n\n");
  }
   send_to_char(ch, "@CX@D)@c Exit Traits Section and complete your character@n\n");
-  send_to_char(ch, "@D---------------------------------------\n[@WCurrent Points Pool@W: @y%d@D] [@WPTS From Neg@W: @y%d@D]@w\n", GET_CCPOINTS(ch), GET_NEGCOUNT(ch));
+  send_to_char(ch, "@D---------------------------------------\n[@WCurrent Points Pool@W: @y%d@D] [@WPTS From Neg@W: @y%d@D]@w\n", char_get_ccpoints(ch), char_get_negcount(ch));
 }
 
  /* Return -1 if not an acceptable menu option *
@@ -1507,14 +1507,14 @@ int opp_bonus(struct char_data *ch, int value, int type)
 
  switch (value) {
   case 0:
-   if (GET_BONUS(ch, BONUS_IMPULSE)) {
+   if (char_get_bonuses(ch, BONUS_IMPULSE)) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_IMPULSE], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 2:
-   if (GET_BONUS(ch, 40) > 0) {
+   if (char_get_bonuses(ch, 40) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[40], list_bonus[value]);
     give = FALSE;
@@ -1528,63 +1528,63 @@ int opp_bonus(struct char_data *ch, int value, int type)
    }
    break;
   case 6:
-   if (GET_BONUS(ch, 39) > 0) {
+   if (char_get_bonuses(ch, 39) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[39], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 8:
-   if (GET_BONUS(ch, 50) > 0) {
+   if (char_get_bonuses(ch, 50) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[50], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 9:
-   if (GET_BONUS(ch, 43) > 0) {
+   if (char_get_bonuses(ch, 43) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[43], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 10:
-   if (GET_BONUS(ch, 44) > 0) {
+   if (char_get_bonuses(ch, 44) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[44], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 11:
-   if (GET_BONUS(ch, 45) > 0) {
+   if (char_get_bonuses(ch, 45) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[45], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 12:
-   if (GET_BONUS(ch, 46) > 0) {
+   if (char_get_bonuses(ch, 46) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[46], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 13:
-   if (GET_BONUS(ch, 47) > 0) {
+   if (char_get_bonuses(ch, 47) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[47], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 14:
-   if (GET_BONUS(ch, 48) > 0) {
+   if (char_get_bonuses(ch, 48) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[48], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 15:
-   if (GET_BONUS(ch, 33) > 0) {
+   if (char_get_bonuses(ch, 33) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[33], list_bonus[value]);
     give = FALSE;
@@ -1602,28 +1602,28 @@ int opp_bonus(struct char_data *ch, int value, int type)
     display_bonus_menu(ch, type);
     send_to_char(ch, "As a demon you are already fireproof.\r\n");
     give = FALSE;
-   } else if (GET_BONUS(ch, 34) > 0) {
+   } else if (char_get_bonuses(ch, 34) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[34], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 18:
-   if (GET_BONUS(ch, 26) > 0) {
+   if (char_get_bonuses(ch, 26) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[26], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 19:
-   if (GET_BONUS(ch, 29) > 0) {
+   if (char_get_bonuses(ch, 29) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[29], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 20:
-   if (GET_BONUS(ch, 27) > 0) {
+   if (char_get_bonuses(ch, 27) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
     give = FALSE;
@@ -1634,49 +1634,49 @@ int opp_bonus(struct char_data *ch, int value, int type)
    }
    break;
   case 21:
-   if (GET_BONUS(ch, 30) > 0) {
+   if (char_get_bonuses(ch, 30) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[30], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 22:
-   if (GET_BONUS(ch, 31) > 0) {
+   if (char_get_bonuses(ch, 31) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[31], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 23:
-   if (GET_BONUS(ch, 32) > 0) {
+   if (char_get_bonuses(ch, 32) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[32], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 24:
-   if (GET_BONUS(ch, 35) > 0) {
+   if (char_get_bonuses(ch, 35) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[35], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 25:
-   if (GET_BONUS(ch, 51) > 0) {
+   if (char_get_bonuses(ch, 51) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[51], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 26:
-   if (GET_BONUS(ch, 18) > 0) {
+   if (char_get_bonuses(ch, 18) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[18], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 27:
-   if (GET_BONUS(ch, 20) > 0) {
+   if (char_get_bonuses(ch, 20) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
     give = FALSE;
@@ -1687,119 +1687,119 @@ int opp_bonus(struct char_data *ch, int value, int type)
    }
    break;
   case 29:
-   if (GET_BONUS(ch, 19) > 0) {
+   if (char_get_bonuses(ch, 19) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[19], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 30:
-   if (GET_BONUS(ch, 21) > 0) {
+   if (char_get_bonuses(ch, 21) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[21], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 31:
-   if (GET_BONUS(ch, 22) > 0) {
+   if (char_get_bonuses(ch, 22) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[22], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 32:
-   if (GET_BONUS(ch, 23) > 0) {
+   if (char_get_bonuses(ch, 23) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[23], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 33:
-   if (GET_BONUS(ch, 15) > 0) {
+   if (char_get_bonuses(ch, 15) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[15], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 34:
-   if (GET_BONUS(ch, 17) > 0) {
+   if (char_get_bonuses(ch, 17) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[17], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 35:
-   if (GET_BONUS(ch, 24) > 0) {
+   if (char_get_bonuses(ch, 24) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[24], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 39:
-   if (GET_BONUS(ch, 6) > 0) {
+   if (char_get_bonuses(ch, 6) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[6], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 40:
-   if (GET_BONUS(ch, 2) > 0) {
+   if (char_get_bonuses(ch, 2) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[2], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 43:
-   if (GET_BONUS(ch, 9) > 0) {
+   if (char_get_bonuses(ch, 9) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[9], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 44:
-   if (GET_BONUS(ch, 10) > 0) {
+   if (char_get_bonuses(ch, 10) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[10], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 45:
-   if (GET_BONUS(ch, 11) > 0) {
+   if (char_get_bonuses(ch, 11) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[11], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 46:
-   if (GET_BONUS(ch, 12) > 0) {
+   if (char_get_bonuses(ch, 12) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[12], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 47:
-   if (GET_BONUS(ch, 13) > 0) {
+   if (char_get_bonuses(ch, 13) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[13], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 48:
-   if (GET_BONUS(ch, 14) > 0) {
+   if (char_get_bonuses(ch, 14) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[14], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 50:
-   if (GET_BONUS(ch, 8) > 0) {
+   if (char_get_bonuses(ch, 8) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[8], list_bonus[value]);
     give = FALSE;
    }
    break;
   case 51:
-   if (GET_BONUS(ch, 25) > 0) {
+   if (char_get_bonuses(ch, 25) > 0) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[25], list_bonus[value]);
     give = FALSE;
@@ -1816,24 +1816,24 @@ void exchange_ccpoints(struct char_data *ch, int value)
 {
  int type = 0;
 
- if (STATE(ch->desc) == CON_BONUS) {
+ if (desc_get_connected(ch->desc) == CON_BONUS) {
   type = 0;
  } else {
   type = 1;
  }
 
 
- if (GET_BONUS(ch, value) > 0 && GET_CCPOINTS(ch) - list_bonus_cost[value] < 0) {
+ if (char_get_bonuses(ch, value) > 0 && char_get_ccpoints(ch) - list_bonus_cost[value] < 0) {
    display_bonus_menu(ch, type);
    send_to_char(ch, "@RYou must unselect some bonus traits first.\r\n");
    return;
  }
- else if (GET_BONUS(ch, value) > 0 && GET_CCPOINTS(ch) - list_bonus_cost[value] >= 0) {
-  GET_CCPOINTS(ch) -= list_bonus_cost[value];
+ else if (char_get_bonuses(ch, value) > 0 && char_get_ccpoints(ch) - list_bonus_cost[value] >= 0) {
+  char_set_ccpoints(ch, char_get_ccpoints(ch) - (list_bonus_cost[value]));
   if (list_bonus_cost[value] > 0) {
-   GET_NEGCOUNT(ch) -= list_bonus_cost[value];
+   char_set_negcount(ch, char_get_negcount(ch) - (list_bonus_cost[value]));
   }
-  GET_BONUS(ch, value) = 0;
+  char_set_bonuses(ch, value, 0);
   display_bonus_menu(ch, type);
   send_to_char(ch, "@GYou cancel your selection of %s.\r\n", list_bonus[value]);
   return;
@@ -1843,15 +1843,15 @@ void exchange_ccpoints(struct char_data *ch, int value)
    display_bonus_menu(ch, type);
    send_to_char(ch, "@RYou are not in the negatives menu, enter B to switch.\r\n");
    return;
-  } else if (GET_CCPOINTS(ch) + list_bonus_cost[value] < 0) {
+  } else if (char_get_ccpoints(ch) + list_bonus_cost[value] < 0) {
    display_bonus_menu(ch, type);
    send_to_char(ch, "@RYou do not have enough points for %s.\r\n", list_bonus[value]);
    return;
   } else if (!opp_bonus(ch, value, type)) {
    return;
   } else if (list_bonus_cost[value] < 0) {
-   GET_CCPOINTS(ch) += list_bonus_cost[value];
-   GET_BONUS(ch, value) = 1;
+   char_set_ccpoints(ch, char_get_ccpoints(ch) + (list_bonus_cost[value]));
+   char_set_bonuses(ch, value, 1);
    display_bonus_menu(ch, type);
    send_to_char(ch, "@GYou select the bonus %s\r\n", list_bonus[value]);
    return;
@@ -1867,7 +1867,7 @@ void exchange_ccpoints(struct char_data *ch, int value)
    int x, count = 0;
  
    for (x = 14; x < 52; x++) {
-    if (GET_BONUS(ch, x) > 1) {
+    if (char_get_bonuses(ch, x) > 1) {
      count += list_bonus_cost[x];
     }
    }
@@ -1879,9 +1879,9 @@ void exchange_ccpoints(struct char_data *ch, int value)
   } else if (!opp_bonus(ch, value, type)) {
    return;
   } else {
-   GET_CCPOINTS(ch) += list_bonus_cost[value];
-   GET_NEGCOUNT(ch) += list_bonus_cost[value];
-   GET_BONUS(ch, value) = 2;
+   char_set_ccpoints(ch, char_get_ccpoints(ch) + (list_bonus_cost[value]));
+   char_set_negcount(ch, char_get_negcount(ch) + (list_bonus_cost[value]));
+   char_set_bonuses(ch, value, 2);
    display_bonus_menu(ch, type);
    send_to_char(ch, "@GYou select the negative %s\r\n", list_bonus[value]);
    return;
@@ -1937,7 +1937,7 @@ void nanny(struct descriptor_data *d, char *arg)
    * Quick check for the OLC states.
    */
   for (player_i = 0; olc_functions[player_i].state >= 0; player_i++)
-    if (STATE(d) == olc_functions[player_i].state) {
+    if (desc_get_connected(d) == olc_functions[player_i].state) {
       /* send context-sensitive help if need be */
       if (context_help(d, arg)) return;
       (*olc_functions[player_i].func)(d, arg);
@@ -1945,7 +1945,7 @@ void nanny(struct descriptor_data *d, char *arg)
     }
 
   /* Not in OLC. */
-  switch (STATE(d)) {
+  switch (desc_get_connected(d)) {
   case CON_GET_NAME:		/* wait for input of name */
     if (d->character) {
      free_char(d->character);
@@ -1977,7 +1977,7 @@ void nanny(struct descriptor_data *d, char *arg)
           userRead(d);
           write_to_output(d, "That character is already taken.\r\n");
           d->writenew = 0;
-          STATE(d) = CON_UMENU;
+          desc_set_connected(d, CON_UMENU);
           return;
      }
     else {
@@ -1985,10 +1985,10 @@ void nanny(struct descriptor_data *d, char *arg)
         if (d->writenew > 0) {
           write_to_output(d, "That character is already taken.\r\n");
           userRead(d);
-          STATE(d) = CON_UMENU;
+          desc_set_connected(d, CON_UMENU);
           return;
         }
-	GET_PFILEPOS(d->character) = player_i;
+	char_set_pfilepos(d->character, player_i);
 	if (char_plr_flagged(d->character, PLR_DELETED)) {
 
 	  /* make sure old files are removed so the new player doesn't get
@@ -2011,28 +2011,28 @@ void nanny(struct descriptor_data *d, char *arg)
 	  d->character->desc = d;
 	  CREATE(d->character->name, char, strlen(tmp_name) + 1);
 	  strcpy(d->character->name, CAP(tmp_name));	/* strcpy: OK (size checked above) */
-	  GET_PFILEPOS(d->character) = player_i;
+	  char_set_pfilepos(d->character, player_i);
           SET_BIT_AR(PRF_FLAGS(d->character), PRF_COLOR);
           display_races(d);
           d->character->rp = d->rpp;
-          STATE(d) = CON_QRACE;
+          desc_set_connected(d, CON_QRACE);
 	} else {
 	  /* undo it just in case they are set */
-	  REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
-	  REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_MAILING);
-	  REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_CRYO);
-	  REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_GROUP);
+	  REMOVE_BIT_AR(char_get_act(d->character), PLR_WRITING);
+	  REMOVE_BIT_AR(char_get_act(d->character), PLR_MAILING);
+	  REMOVE_BIT_AR(char_get_act(d->character), PLR_CRYO);
+	  REMOVE_BIT_AR(char_get_affected_by(d->character), AFF_GROUP);
           if (isbanned(d->host) == BAN_SELECT &&
            !char_plr_flagged(d->character, PLR_SITEOK)) {
            write_to_output(d, "Sorry, this char has not been cleared for login from your site!\r\n");
            mudlog(NRM, ADMLVL_GOD, TRUE, "Connection attempt for %s denied from %s", char_get_name(d->character), d->host);
-           STATE(d) = CON_CLOSE;
+           desc_set_connected(d, CON_CLOSE);
            return;
           }
           else if (char_get_level(d->character) < circle_restrict && circle_restrict < 101) {
            userRead(d);
            write_to_output(d, "The game is temporarily restricted to at least %d level.\r\n", circle_restrict);
-           STATE(d) = CON_UMENU;
+           desc_set_connected(d, CON_UMENU);
            mudlog(NRM, ADMLVL_GOD, TRUE, "Request for character load denied for %s [%s] (wizlock)", char_get_name(d->character), d->host);
            return;
           }
@@ -2044,7 +2044,7 @@ void nanny(struct descriptor_data *d, char *arg)
 	  d->idle_tics = 0;
           write_to_output(d, "\r\n%s\r\n%s", motd, CONFIG_MENU);
           d->character->rp = d->rpp;
-          STATE(d) = CON_MENU;
+          desc_set_connected(d, CON_MENU);
          }
 	}
       } else {
@@ -2087,7 +2087,7 @@ void nanny(struct descriptor_data *d, char *arg)
          userWrite(d, 0, 0, 0, "index");
          userRead(d);
          write_to_output(d, "Character missing. Emptying slot.\r\n");
-         STATE(d) = CON_UMENU;
+         desc_set_connected(d, CON_UMENU);
         }
         else {
 	/* player unknown -- make new character */
@@ -2144,7 +2144,7 @@ void nanny(struct descriptor_data *d, char *arg)
             userWrite(d, 0, 0, 0, "index");
             break;
           }
-          STATE(d) = CON_QRACE;
+          desc_set_connected(d, CON_QRACE);
         }
       }
     }
@@ -2153,25 +2153,25 @@ void nanny(struct descriptor_data *d, char *arg)
   case CON_NAME_CNFRM:		/* wait for conf. of new name    */
     if (toupper(*arg) == 'Y') {
       if (isbanned(d->host) >= BAN_NEW) {
-	mudlog(NRM, ADMLVL_GOD, TRUE, "Request for new char %s denied from [%s] (siteban)", GET_PC_NAME(d->character), d->host);
+	mudlog(NRM, ADMLVL_GOD, TRUE, "Request for new char %s denied from [%s] (siteban)", char_get_pc_name(d->character), d->host);
 	write_to_output(d, "Sorry, new characters are not allowed from your site!\r\n");
-	STATE(d) = CON_CLOSE;
+	desc_set_connected(d, CON_CLOSE);
 	return;
       }
       if (circle_restrict) {
 	write_to_output(d, "Sorry, new players can't be created at the moment.\r\n");
-	mudlog(NRM, ADMLVL_GOD, TRUE, "Request for new char %s denied from [%s] (wizlock)", GET_PC_NAME(d->character), d->host);
-	STATE(d) = CON_CLOSE;
+	mudlog(NRM, ADMLVL_GOD, TRUE, "Request for new char %s denied from [%s] (wizlock)", char_get_pc_name(d->character), d->host);
+	desc_set_connected(d, CON_CLOSE);
 	return;
       }
       d->idle_tics = 0;
-      write_to_output(d, "@MNew character.@n\r\nGive me a @gpassword@n for @C%s@n: ", GET_PC_NAME(d->character));
-      STATE(d) = CON_NEWPASSWD;
+      write_to_output(d, "@MNew character.@n\r\nGive me a @gpassword@n for @C%s@n: ", char_get_pc_name(d->character));
+      desc_set_connected(d, CON_NEWPASSWD);
     } else if (*arg == 'n' || *arg == 'N') {
       write_to_output(d, "Okay, what IS it, then? ");
       free(d->character->name);
       d->character->name = NULL;
-      STATE(d) = CON_GET_NAME;
+      desc_set_connected(d, CON_GET_NAME);
     } else
       write_to_output(d, "Please type Yes or No: ");
     break;
@@ -2179,7 +2179,7 @@ void nanny(struct descriptor_data *d, char *arg)
  case CON_GET_USER:
   if (isbanned(d->host)) {
    write_to_output(d, "You have been banned. Have a nice day.\r\n");
-   STATE(d) = CON_CLOSE;
+   desc_set_connected(d, CON_CLOSE);
   }
   if (!*arg) {
    write_to_output(d, "Enter your desired username or the username you have already made.\nUsername?\r\n");
@@ -2219,7 +2219,7 @@ void nanny(struct descriptor_data *d, char *arg)
        write_to_output(d, "The mud is locked for mortals at this time.\r\n");
        write_to_output(d, "Please check: www.advent-truth.com/forum for further details.\r\n");
        send_to_imm("%s rejected by wizlock", CAP(arg));
-       STATE(d) = CON_CLOSE;
+       desc_set_connected(d, CON_CLOSE);
      }
      else {
       if (d->user) {
@@ -2229,7 +2229,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->user = strdup(arg);
       write_to_output(d, "You want you user name to be, %s?\r\n", d->user);
       write_to_output(d, "Yes or no: \n");
-      STATE(d) = CON_USER_CONF;
+      desc_set_connected(d, CON_USER_CONF);
      }
    }
    else {
@@ -2243,12 +2243,12 @@ void nanny(struct descriptor_data *d, char *arg)
      if (d->level == 0) {
       write_to_output(d, "The mud is locked for mortals at this time.\r\n");
       send_to_imm("%s rejected by wizlock", d->user);
-      STATE(d) = CON_CLOSE;
+      desc_set_connected(d, CON_CLOSE);
      }
      else {
       write_to_output(d, "Password: \r\n");
       send_to_imm("Username, %s, logging in.", CAP(arg));
-      STATE(d) = CON_PASSWORD;
+      desc_set_connected(d, CON_PASSWORD);
      }
     }
     else {
@@ -2259,7 +2259,7 @@ void nanny(struct descriptor_data *d, char *arg)
      userLoad(d, arg);
      write_to_output(d, "Password: \r\n");
      send_to_imm("Username, %s, logging in.", CAP(arg));
-     STATE(d) = CON_PASSWORD;
+     desc_set_connected(d, CON_PASSWORD);
     }
    }
   }
@@ -2276,7 +2276,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "Remember your email must be valid and matching the example given.\n");
      write_to_output(d, "[Example: iovan@@advent-truth.com]\n");
      send_to_imm("Username, %s, creating.", CAP(d->user));
-     STATE(d) = CON_GET_EMAIL;
+     desc_set_connected(d, CON_GET_EMAIL);
     }
     else if (!strcasecmp(arg, "no") || !strcasecmp(arg, "n")) {
       if (d->user) {
@@ -2285,7 +2285,7 @@ void nanny(struct descriptor_data *d, char *arg)
       }
       d->user = strdup("Empty");
      write_to_output(d, "Enter Username: \n");
-     STATE(d) = CON_GET_USER;
+     desc_set_connected(d, CON_GET_USER);
     }
     else {
      write_to_output(d, "You want you user name to be, %s?\r\n", d->user);
@@ -2305,7 +2305,7 @@ void nanny(struct descriptor_data *d, char *arg)
   }
   else if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
    userRead(d);
-   STATE(d) = CON_UMENU;
+   desc_set_connected(d, CON_UMENU);
   }
   else if (!strstr(arg, ".com") && !strstr(arg, ".net") && !strstr(arg, ".org")) {
    write_to_output(d, "Improper email format missing '.com' or '.net' or '.org'. Email?\r\n");
@@ -2322,7 +2322,7 @@ void nanny(struct descriptor_data *d, char *arg)
    d->email = strdup(arg);
    userWrite(d, 0, 0, 0, "index");
    userRead(d);
-   STATE(d) = CON_UMENU;
+   desc_set_connected(d, CON_UMENU);
   }
   else {
    if (strstr(arg, "@")) {
@@ -2335,7 +2335,7 @@ void nanny(struct descriptor_data *d, char *arg)
    }
    d->email = strdup(arg);
    write_to_output(d, "Password: \r\n");
-   STATE(d) = CON_NEWPASSWD;
+   desc_set_connected(d, CON_NEWPASSWD);
   }
   break;
 
@@ -2350,7 +2350,7 @@ void nanny(struct descriptor_data *d, char *arg)
   }
   else if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
    userRead(d);
-   STATE(d) = CON_UMENU;
+   desc_set_connected(d, CON_UMENU);
   }
   else if (strlen(arg) > MAX_PWD_LENGTH && readUserIndex(d->user)) {
    write_to_output(d, "Password is too long. Password, or M for menu?\r\n");
@@ -2369,7 +2369,7 @@ void nanny(struct descriptor_data *d, char *arg)
    d->pass = strdup(arg);
    userWrite(d, 0, 0, 0, "index");
    userRead(d);
-   STATE(d) = CON_UMENU;
+   desc_set_connected(d, CON_UMENU);
   }
   else {
    write_to_output(d, "Your password and user account have been fully saved.\r\n");
@@ -2380,7 +2380,7 @@ void nanny(struct descriptor_data *d, char *arg)
    d->pass = strdup(arg);
    userCreate(d);
    userRead(d);
-   STATE(d) = CON_UMENU;
+   desc_set_connected(d, CON_UMENU);
   }
   break;
 
@@ -2397,7 +2397,7 @@ void nanny(struct descriptor_data *d, char *arg)
    }
    d->user = strdup("Empty");
    write_to_output(d, "Username?\r\n");
-   STATE(d) = CON_GET_USER;
+   desc_set_connected(d, CON_GET_USER);
   }
   if (!strcasecmp(d->pass, arg)) {
    for (k = descriptor_list; k; k = k->next) {
@@ -2408,18 +2408,18 @@ void nanny(struct descriptor_data *d, char *arg)
      if (!d->user || d->user == NULL)
       continue;
      if (!strcasecmp(k->user, d->user)) {
-      if (STATE(k) == CON_PLAYING) {
-       STATE(k) = CON_DISCONNECT;
+      if (desc_get_connected(k) == CON_PLAYING) {
+       desc_set_connected(k, CON_DISCONNECT);
        write_to_output(k, "Your account has been usurped by someone who knows its password!@n");
       } 
       else {
-       STATE(k) = CON_CLOSE;
+       desc_set_connected(k, CON_CLOSE);
        write_to_output(k, "Your account has been usurped by someone who knows its password!@n");
       }
      }
    }
    userRead(d);
-   STATE(d) = CON_UMENU;   
+   desc_set_connected(d, CON_UMENU);   
   }
   else {
    write_to_output(d, "Password is wrong. Password or Return?\r\n");
@@ -2437,11 +2437,11 @@ void nanny(struct descriptor_data *d, char *arg)
   }
   if (!strcasecmp(arg, "Q")) {
    write_to_output(d, "Thanks for visiting!\n");
-   STATE(d) = CON_CLOSE;
+   desc_set_connected(d, CON_CLOSE);
   }
   else if (!strcasecmp(arg, "P")) {
    write_to_output(d, "Enter New Password, or M for menu::\n");
-   STATE(d) = CON_NEWPASSWD;
+   desc_set_connected(d, CON_NEWPASSWD);
   }
   else if (!strcasecmp(arg, "C")) {
    write_to_output(d, "\n");
@@ -2451,11 +2451,11 @@ void nanny(struct descriptor_data *d, char *arg)
   }
   else if (!strcasecmp(arg, "E")) {
    write_to_output(d, "Enter New Email, or M for menu:\n");
-   STATE(d) = CON_GET_EMAIL;
+   desc_set_connected(d, CON_GET_EMAIL);
   }
   else if (!strcasecmp(arg, "D")) {
    write_to_output(d, "Are you sure you want to delete your user file and all its characters? Yes or no:\n");
-   STATE(d) = CON_DELCNF1;
+   desc_set_connected(d, CON_DELCNF1);
   }
   else if (!strcasecmp(arg, "B")) {
    if (d->total == 3 && d->rpp >= 15) {
@@ -2496,7 +2496,7 @@ void nanny(struct descriptor_data *d, char *arg)
      if (!strcasecmp(d->tmp1, "Empty")) {
      write_to_output(d, "Enter New Character Name: \n");
      d->writenew = 1;
-     STATE(d) = CON_GET_NAME;
+     desc_set_connected(d, CON_GET_NAME);
     }
     else {
      if (lockRead(d->tmp1) && d->level <= 0) {
@@ -2506,7 +2506,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "Loading character, %s.\r\n***Press Return***\n", d->tmp1);
      d->loadplay = d->tmp1;
      d->writenew = 0;
-     STATE(d) = CON_GET_NAME;
+     desc_set_connected(d, CON_GET_NAME);
      }
     }
     break;
@@ -2514,7 +2514,7 @@ void nanny(struct descriptor_data *d, char *arg)
     if (!strcasecmp(d->tmp2, "Empty")) {
      write_to_output(d, "Enter New Character Name: \n");
      d->writenew = 2;
-     STATE(d) = CON_GET_NAME;
+     desc_set_connected(d, CON_GET_NAME);
     }
     else {
      if (lockRead(d->tmp2) && d->level <= 0) {
@@ -2524,7 +2524,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "Loading character, %s.\r\n***Press Return***\n", d->tmp2);
      d->loadplay = d->tmp2;
      d->writenew = 0;
-     STATE(d) = CON_GET_NAME;
+     desc_set_connected(d, CON_GET_NAME);
      }
     }
     break;
@@ -2532,7 +2532,7 @@ void nanny(struct descriptor_data *d, char *arg)
     if (!strcasecmp(d->tmp3, "Empty")) {
      write_to_output(d, "Enter New Character Name: \n");
      d->writenew = 3;
-     STATE(d) = CON_GET_NAME;
+     desc_set_connected(d, CON_GET_NAME);
     }
     else {
      if (lockRead(d->tmp3) && d->level <= 0) {
@@ -2542,7 +2542,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "Loading character, %s.\r\n***Press Return***\n", d->tmp3);
      d->loadplay = d->tmp3;
      d->writenew = 0;
-     STATE(d) = CON_GET_NAME;
+     desc_set_connected(d, CON_GET_NAME);
      }
     }
     break;
@@ -2555,7 +2555,7 @@ void nanny(struct descriptor_data *d, char *arg)
     if (!strcasecmp(d->tmp4, "Empty")) {
      write_to_output(d, "Enter New Character Name: \n");
      d->writenew = 4;
-     STATE(d) = CON_GET_NAME;
+     desc_set_connected(d, CON_GET_NAME);
     }
     else {
      if (lockRead(d->tmp4) && d->level <= 0) {
@@ -2565,7 +2565,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "Loading character, %s.\r\n***Press Return***\n", d->tmp4);
      d->loadplay = d->tmp4;
      d->writenew = 0;
-     STATE(d) = CON_GET_NAME;
+     desc_set_connected(d, CON_GET_NAME);
      }
     }
     break;
@@ -2578,7 +2578,7 @@ void nanny(struct descriptor_data *d, char *arg)
     if (!strcasecmp(d->tmp5, "Empty")) {
      write_to_output(d, "Enter New Character Name: \n");
      d->writenew = 5;
-     STATE(d) = CON_GET_NAME;
+     desc_set_connected(d, CON_GET_NAME);
     }
     else {
      if (lockRead(d->tmp5) && d->level <= 0) {
@@ -2588,7 +2588,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "Loading character, %s.\r\n***Press Return***\n", d->tmp5);
      d->loadplay = d->tmp5;
      d->writenew = 0;
-     STATE(d) = CON_GET_NAME;
+     desc_set_connected(d, CON_GET_NAME);
      }
     }
     break;
@@ -2628,7 +2628,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@B1@W)@C Bald  @B2@W)@C Short  @B3@W)@C Medium\r\n");
      write_to_output(d, "@B4@W)@C Long  @B5@W)@C Really Long@n\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-    STATE(d) = CON_HAIRL;
+    desc_set_connected(d, CON_HAIRL);
     }
     else if (char_is_demon(d->character) || char_is_icer(d->character)) {
      write_to_output(d, "@YHorn Length SELECTION menu:\r\n");
@@ -2636,7 +2636,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@B1@W)@C None  @B2@W)@C Short  @B3@W)@C Medium\r\n");
      write_to_output(d, "@B4@W)@C Long  @B5@W)@C Really Long@n\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-    STATE(d) = CON_HAIRL;
+    desc_set_connected(d, CON_HAIRL);
     }
     else if (char_is_majin(d->character)) {
      write_to_output(d, "@YForelock Length SELECTION menu:\r\n");
@@ -2644,7 +2644,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@B1@W)@C Tiny  @B2@W)@C Short  @B3@W)@C Medium\r\n");
      write_to_output(d, "@B4@W)@C Long  @B5@W)@C Really Long@n\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-    STATE(d) = CON_HAIRL;
+    desc_set_connected(d, CON_HAIRL);
     }
     else if (char_is_namek(d->character) || char_is_arlian(d->character)) {
      write_to_output(d, "@YAntenae Length SELECTION menu:\r\n");
@@ -2652,7 +2652,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@B1@W)@C Tiny  @B2@W)@C Short  @B3@W)@C Medium\r\n");
      write_to_output(d, "@B4@W)@C Long  @B5@W)@C Really Long@n\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-    STATE(d) = CON_HAIRL;
+    desc_set_connected(d, CON_HAIRL);
     }
     else {
      write_to_output(d, "@YSkin color SELECTION menu:\r\n");
@@ -2662,7 +2662,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@B7@W)@C Grey   @B8@W)@C Blue   @B9@W)@C Aqua\r\n");
      write_to_output(d, "@BA@W)@C Pink   @BB@W)@C Purple @BC@W)@C Tan@n\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-     STATE(d) = CON_SKIN;
+     desc_set_connected(d, CON_SKIN);
     }
     break;
 
@@ -2676,14 +2676,14 @@ void nanny(struct descriptor_data *d, char *arg)
                 switch(*arg) {
                     case 't':
                     case 'T':
-                        switch(STATE(d)) {
+                        switch(desc_get_connected(d)) {
                             case CON_QRACE:
                                 display_races_help(d);
-                                STATE(d) = CON_RACE_HELP;
+                                desc_set_connected(d, CON_RACE_HELP);
                                 break;
                             case CON_RACE_HELP:
                                 display_races(d);
-                                STATE(d) = CON_QRACE;
+                                desc_set_connected(d, CON_QRACE);
                                 break;
                         }
                         return;
@@ -2693,13 +2693,13 @@ void nanny(struct descriptor_data *d, char *arg)
                 }
                 break;
             default:
-                chosen_race = race_find(arg, GET_SEX(d->character), true);
+                chosen_race = race_find(arg, char_get_sex(d->character), true);
                 if(chosen_race == RACE_UNDEFINED) {
                     write_to_output(d, "\r\nThat's not a race.\r\nRace: ");
                     return;
                 }
 
-                switch(STATE(d)) {
+                switch(desc_get_connected(d)) {
                     case CON_QRACE:
                         if(race_rpp_cost(chosen_race)) {
                             write_to_output(d, "\r\n%i RPP will be paid upon your first level up.\r\n", race_rpp_cost(chosen_race));
@@ -2719,19 +2719,19 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@D---------------------------------------@n\r\n");
      write_to_output(d, "@B1@W)@C Human\n@B2@W)@C Saiyan\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-     STATE(d) = CON_RACIAL;
+     desc_set_connected(d, CON_RACIAL);
     } else if (char_is_android(d->character)) {
      write_to_output(d, "@YWhat do you want to be identified as at first glance?\r\n");
      write_to_output(d, "@D---------------------------------------@n\r\n");
      write_to_output(d, "@B1@W)@C Android\n@B2@W)@C Human\n@B3@W)@C Robotic Humanoid\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-     STATE(d) = CON_RACIAL;
+     desc_set_connected(d, CON_RACIAL);
     } else if (char_is_namek(d->character)) {
-     GET_SEX(d->character) = SEX_NEUTRAL;
-     STATE(d) = CON_QSEX;
+     char_set_sex(d->character, SEX_NEUTRAL);
+     desc_set_connected(d, CON_QSEX);
     } else {
      write_to_output(d, "\r\n@wWhat is your sex @W(@BM@W/@MF@W/@GN@W)@w?@n");
-     STATE(d) = CON_QSEX;
+     desc_set_connected(d, CON_QSEX);
     }
     break;
 
@@ -2756,7 +2756,7 @@ void nanny(struct descriptor_data *d, char *arg)
       return;
      }
      write_to_output(d, "\r\n@wWhat is your sex @W(@BM@W/@MF@W/@GN@W)@w?@n");
-     STATE(d) = CON_QSEX;
+     desc_set_connected(d, CON_QSEX);
    break;
 
   case CON_HAIRL:                /* query hair length */
@@ -2791,7 +2791,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@B7@W)@C Grey   @B8@W)@C Blue   @B9@W)@C Aqua\r\n");
      write_to_output(d, "@BA@W)@C Pink   @BB@W)@C Purple @BC@W)@C Tan@n\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-      STATE(d) = CON_SKIN;
+      desc_set_connected(d, CON_SKIN);
      }
      else {
      write_to_output(d, "@YHair color SELECTION menu:\r\n");
@@ -2802,7 +2802,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@BA@W)@C Purple @BB@W)@C Silver @BC@W)@C Crimson@n\r\n");
      write_to_output(d, "@BD@W)@C White@n\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-     STATE(d) = CON_HAIRC;
+     desc_set_connected(d, CON_HAIRC);
      }
     }
     else {
@@ -2836,7 +2836,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@B7@W)@C Grey   @B8@W)@C Blue   @B9@W)@C Aqua\r\n");
      write_to_output(d, "@BA@W)@C Pink   @BB@W)@C Purple @BC@W)@C Tan@n\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-      STATE(d) = CON_SKIN;
+      desc_set_connected(d, CON_SKIN);
     }
     if (char_is_majin(d->character) || char_is_namek(d->character) || char_is_arlian(d->character)) {
       switch (*arg) {
@@ -2868,7 +2868,7 @@ void nanny(struct descriptor_data *d, char *arg)
       write_to_output(d, "@BA@W)@C Purple @BB@W)@C Silver @BC@W)@C Crimson@n\r\n");
       write_to_output(d, "@BD@W)@C White@n\r\n");
       write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-      STATE(d) = CON_HAIRC;
+      desc_set_connected(d, CON_HAIRC);
      } else {
        d->character->hairc = HAIRC_NONE;
        d->character->hairs = HAIRS_NONE;
@@ -2879,13 +2879,13 @@ void nanny(struct descriptor_data *d, char *arg)
        write_to_output(d, "@B7@W)@C Grey   @B8@W)@C Blue   @B9@W)@C Aqua\r\n");
        write_to_output(d, "@BA@W)@C Pink   @BB@W)@C Purple @BC@W)@C Tan@n\r\n");
        write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-       STATE(d) = CON_SKIN;
+       desc_set_connected(d, CON_SKIN);
       }
      }
      else {
      d->character->hairc = HAIRC_NONE;
      d->character->hairs = HAIRS_NONE;
-     STATE(d) = CON_SKIN;
+     desc_set_connected(d, CON_SKIN);
      }
     }
    break;
@@ -2956,7 +2956,7 @@ void nanny(struct descriptor_data *d, char *arg)
       write_to_output(d, "@B7@W)@C Grey   @B8@W)@C Blue   @B9@W)@C Aqua\r\n");
       write_to_output(d, "@BA@W)@C Pink   @BB@W)@C Purple @BC@W)@C Tan@n\r\n");
       write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-      STATE(d) = CON_SKIN;
+      desc_set_connected(d, CON_SKIN);
      } else {
       write_to_output(d, "@YHair style SELECTION menu:\r\n");
       write_to_output(d, "@D---------------------------------------@n\r\n");
@@ -2965,7 +2965,7 @@ void nanny(struct descriptor_data *d, char *arg)
       write_to_output(d, "@B7@W)@C Afro      @B8@W)@C Fade      @B9@W)@C Crew Cut\r\n");
       write_to_output(d, "@BA@W)@C Feathered @BB@W)@C Dred Locks@n\r\n");
       write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-      STATE(d) = CON_HAIRS;
+      desc_set_connected(d, CON_HAIRS);
      }
     break;
 
@@ -3021,7 +3021,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@B7@W)@C Grey   @B8@W)@C Blue   @B9@W)@C Aqua\r\n");
      write_to_output(d, "@BA@W)@C Pink   @BB@W)@C Purple @BC@W)@C Tan@n\r\n");      
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-     STATE(d) = CON_SKIN;
+     desc_set_connected(d, CON_SKIN);
     break;
 
     case CON_SKIN:
@@ -3082,7 +3082,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@B7@W)@C Pink  @B8@W)@C Purple @B9@W)@C Crimson\r\n");
      write_to_output(d, "@BA@W)@C Gold  @BB@W)@C Amber  @BC@W)@C Emerald@n\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-     STATE(d) = CON_EYE;
+     desc_set_connected(d, CON_EYE);
      break;
 
    case CON_EYE:
@@ -3150,7 +3150,7 @@ void nanny(struct descriptor_data *d, char *arg)
       else if (char_is_icer(d->character) || char_is_demon(d->character)) {
        write_to_output(d, "@B2@W)@C My Horns@n\r\n");
       }
-      else if (GET_HAIRL(d->character) == HAIRL_BALD) {
+      else if (char_get_hairl(d->character) == HAIRL_BALD) {
        write_to_output(d, "@B2@W)@C My Baldness@n\r\n");
       }
       else {
@@ -3161,7 +3161,7 @@ void nanny(struct descriptor_data *d, char *arg)
       write_to_output(d, "@B5@W)@C My Weight@n\r\n");
       write_to_output(d, "@w\r\nMake a selection:@n\r\n");
 
-     STATE(d) = CON_DISTFEA;
+     desc_set_connected(d, CON_DISTFEA);
      break;
 
     case CON_DISTFEA:
@@ -3207,7 +3207,7 @@ void nanny(struct descriptor_data *d, char *arg)
       write_to_output(d, "@B5@W)@C 60-70cm, 15-18kg@n\r\n");
      }
      write_to_output(d, "\n@WMake a selection:@n ");
-     STATE(d) = CON_HW;
+     desc_set_connected(d, CON_HW);
      break;
 
      case CON_HW:
@@ -3294,7 +3294,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@B7@W)@C Yellow @B8@W)@C Black@n\r\n");
      write_to_output(d, "@B9@W)@C Orange@n\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-     STATE(d) = CON_AURA;
+     desc_set_connected(d, CON_AURA);
      break;
 
      case CON_AURA:
@@ -3333,7 +3333,7 @@ void nanny(struct descriptor_data *d, char *arg)
       }
     
      display_classes(d);
-     STATE(d) = CON_QCLASS;
+     desc_set_connected(d, CON_QCLASS);
      break;
 
     case CON_Q1:
@@ -3489,7 +3489,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->basepl += roll_stats(d->character, 5, 65);
       d->character->basest += roll_stats(d->character, 8, 65);
       d->character->baseki += roll_stats(d->character, 6, 65);
-      SET_BIT_AR(PLR_FLAGS(d->character), PLR_SKILLP);
+      SET_BIT_AR(char_get_act(d->character), PLR_SKILLP);
       break;
       case '5':
       d->character->basepl += roll_stats(d->character, 5, 75);
@@ -3510,7 +3510,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@B4@W)@C Try to evade my opponent till I can get away.@n\r\n");
      write_to_output(d, "@B5@W)@C Take their head clean off and bathe in their blood!@n\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-     STATE(d) = CON_Q2;
+     desc_set_connected(d, CON_Q2);
      break;
 
      case CON_Q2:
@@ -3543,7 +3543,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@B3@W)@C I refuse to gain strength at the cost of the innocent.@n\r\n");
      write_to_output(d, "@B4@W)@C I kill that many innocents before breakfast anyway...@n\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-     STATE(d) = CON_Q3;
+     desc_set_connected(d, CON_Q3);
      break;
      case CON_Q3:
     switch (*arg) {
@@ -3584,7 +3584,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@B3@W)@C Hmm. With more money I can live better, certainly that is worth the time.@n\r\n");
      write_to_output(d, "@B4@W)@C I choose to earn a little money while still training instead.@n\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-     STATE(d) = CON_Q4;
+     desc_set_connected(d, CON_Q4);
      break;
 
      case CON_Q4:
@@ -3626,7 +3626,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@B3@W)@C I will at least try it, for a little while.@n\r\n");
      write_to_output(d, "@B4@W)@C No way is superior to eating spinach everyday...@n\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-      STATE(d) = CON_Q5;
+      desc_set_connected(d, CON_Q5);
       break;
 
    case CON_Q5:
@@ -3657,7 +3657,7 @@ void nanny(struct descriptor_data *d, char *arg)
          write_to_output(d, "@B4@W)@C I prefer to smash them with a two-handed slam!@n\r\n");
          write_to_output(d, "@B5@W)@C I prefer to throw one of my many energy attacks!@n\r\n");
          write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-         STATE(d) = CON_Q6;
+         desc_set_connected(d, CON_Q6);
       break;
 
 
@@ -3698,7 +3698,7 @@ void nanny(struct descriptor_data *d, char *arg)
          write_to_output(d, "@B3@W)@C Those stars hold greater meaning to you than just planets, they dictate\r\nyour life or guide you and those arround you in one form or another.@n\r\n");
          write_to_output(d, "@B4@W)@C You'd very much like to travel into space to get to one of these stars to study all that it holds.@n\r\n");
          write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-         STATE(d) = CON_Q7;
+         desc_set_connected(d, CON_Q7);
     break;
 
     case CON_Q7:
@@ -3730,7 +3730,7 @@ void nanny(struct descriptor_data *d, char *arg)
          write_to_output(d, "@B3@W)@C Pick the one you like the most and help them to win.@n\r\n");
          write_to_output(d, "@B4@W)@C You try to sneak past them, reckoning no matter what you do there its a no win situation, so long as they don't see you.@n\r\n");
          write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-         STATE(d) = CON_Q8;
+         desc_set_connected(d, CON_Q8);
     break;
 
     case CON_Q8:
@@ -3764,7 +3764,7 @@ void nanny(struct descriptor_data *d, char *arg)
          write_to_output(d, "@B3@W)@C Give him the donut, then return to the baker. You tell him a sob story and convince him to give you a replacement donut.@n\r\n");
          write_to_output(d, "@B4@W)@C It's better just to do as he says and leave it to that. After all its only a donut.@n\r\n");
          write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-         STATE(d) = CON_Q9;
+         desc_set_connected(d, CON_Q9);
     break;
 
     case CON_Q9:
@@ -3808,7 +3808,7 @@ void nanny(struct descriptor_data *d, char *arg)
           write_to_output(d, "@BH@W)@C 70@n    @BI@W)@C 75@n\r\n");
          }
          write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-         STATE(d) = CON_QX;
+         desc_set_connected(d, CON_QX);
     break;
 
     case CON_QX:
@@ -3894,15 +3894,15 @@ void nanny(struct descriptor_data *d, char *arg)
     }
 
     if (!char_is_hoshijin(d->character)) {
-     GET_CCPOINTS(d->character) = 5;
+     char_set_ccpoints(d->character, 5);
     } else if (char_is_bio(d->character)) {
-     GET_CCPOINTS(d->character) = 3;
+     char_set_ccpoints(d->character, 3);
     } else {
-     GET_CCPOINTS(d->character) = 10;
+     char_set_ccpoints(d->character, 10);
     }
     write_to_output(d, "@C             Alignment Menu@n\r\n");
     write_to_output(d, "@D---------------------------------------@n\r\n");
-    write_to_output(d, "@cCurrent Alignment@D: %s%s@n\r\n", GET_ALIGNMENT(d->character) < -50 ? "@R" : (GET_ALIGNMENT(d->character) > 50 ? "@C" : "@G"), disp_align(d->character));
+    write_to_output(d, "@cCurrent Alignment@D: %s%s@n\r\n", char_get_alignment(d->character) < -50 ? "@R" : (char_get_alignment(d->character) > 50 ? "@C" : "@G"), disp_align(d->character));
     write_to_output(d, "@YThis is the alignment your character has based on your choices.\r\n");
     write_to_output(d, "Choose to keep this alignment with no penalty, or choose new\r\n");
     write_to_output(d, "alignment and suffer a -5%s PL and -1 stat (random) penalty.\r\n@n", "%");
@@ -3919,7 +3919,7 @@ void nanny(struct descriptor_data *d, char *arg)
     write_to_output(d, "@B9@W) @wHorribly Evil@n\r\n");
     write_to_output(d, "Choose: \r\n");
 
-    STATE(d) = CON_ALIGN;
+    desc_set_connected(d, CON_ALIGN);
     break;
 
     case CON_ALIGN:
@@ -3930,39 +3930,39 @@ void nanny(struct descriptor_data *d, char *arg)
         moveon = TRUE;
         break;
       case '1':
-        GET_ALIGNMENT(d->character) = 1000;
+        char_set_alignment(d->character, 1000);
         penalty = TRUE;
         break;
       case '2':
-        GET_ALIGNMENT(d->character) = 799;
+        char_set_alignment(d->character, 799);
         penalty = TRUE;
         break;
       case '3':
-        GET_ALIGNMENT(d->character) = 599;
+        char_set_alignment(d->character, 599);
         penalty = TRUE;
         break;
       case '4':
-        GET_ALIGNMENT(d->character) = 299;
+        char_set_alignment(d->character, 299);
         penalty = TRUE;
         break;
       case '5':
-        GET_ALIGNMENT(d->character) = 0;
+        char_set_alignment(d->character, 0);
         penalty = TRUE;
         break;
       case '6':
-        GET_ALIGNMENT(d->character) = -299;
+        char_set_alignment(d->character, -299);
         penalty = TRUE;
         break;
       case '7':
-        GET_ALIGNMENT(d->character) = -599;
+        char_set_alignment(d->character, -599);
         penalty = TRUE;
         break;
       case '8':
-        GET_ALIGNMENT(d->character) = -799;
+        char_set_alignment(d->character, -799);
         penalty = TRUE;
         break;
       case '9':
-        GET_ALIGNMENT(d->character) = -1000;
+        char_set_alignment(d->character, -1000);
         penalty = TRUE;
         break;
       default:
@@ -3972,7 +3972,7 @@ void nanny(struct descriptor_data *d, char *arg)
      if (moveon == TRUE) {
        write_to_output(d, "@CWould you like to keep skills gained from your sensei/race combo (skills, not abilities)\r\nor would you prefer to keep those skill slots empty? If you choose\r\nto forget then you will receive 200 PS in exchange.@n\r\n");
        write_to_output(d, "keep or forget: \r\n");
-       STATE(d) = CON_SKILLS;
+       desc_set_connected(d, CON_SKILLS);
      } else if (penalty == TRUE) {
          loseBasePLPercent(d->character, .2, false);
 
@@ -3993,7 +3993,7 @@ void nanny(struct descriptor_data *d, char *arg)
         }
       write_to_output(d, "@CWould you like to keep skills gained from your sensei/race combo (skills, not abilities)\r\nor would you prefer to keep those skill slots empty? If you choose\r\nto forget then you get 200 PS in exchange.@n\r\n");
       write_to_output(d, "keep or forget: \r\n");
-      STATE(d) = CON_SKILLS;
+      desc_set_connected(d, CON_SKILLS);
      } else {
       return;
      }
@@ -4008,7 +4008,7 @@ void nanny(struct descriptor_data *d, char *arg)
         display_bonus_menu(d->character, 0);
         write_to_output(d, "@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
         write_to_output(d, "@wChoose: ");
-        STATE(d) = CON_BONUS;
+        desc_set_connected(d, CON_BONUS);
        } else if (char_is_mutant(d->character)) {
         write_to_output(d, "\n@RSelect a mutation. A second will be chosen automatically..\n");
         write_to_output(d, "@D--------------------------------------------------------@n\n");
@@ -4025,7 +4025,7 @@ void nanny(struct descriptor_data *d, char *arg)
         write_to_output(d, "@wChoose: ");
         d->character->genome[0] = 0;
         d->character->genome[1] = 0;
-        STATE(d) = CON_GENOME;
+        desc_set_connected(d, CON_GENOME);
        } else {
         write_to_output(d, "\n@RSelect two genomes to be your primary DNA strains.\n");
         write_to_output(d, "@D--------------------------------------------------------@n\n");
@@ -4040,19 +4040,19 @@ void nanny(struct descriptor_data *d, char *arg)
         write_to_output(d, "@wChoose: ");
         d->character->genome[0] = 0;
         d->character->genome[1] = 0;
-        STATE(d) = CON_GENOME;
+        desc_set_connected(d, CON_GENOME);
        }
       } else if (!strcasecmp(arg, "forget")) {
        if (!char_is_bio(d->character) && !char_is_mutant(d->character)) {
         GET_PRACTICES(d->character, char_get_class(d->character)) += 200;
-        SET_BIT_AR(PLR_FLAGS(d->character), PLR_FORGET);
+        SET_BIT_AR(char_get_act(d->character), PLR_FORGET);
         display_bonus_menu(d->character, 0);
         write_to_output(d, "@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
         write_to_output(d, "@wChoose: ");
-        STATE(d) = CON_BONUS;
+        desc_set_connected(d, CON_BONUS);
        } else if (char_is_mutant(d->character)) {
         GET_PRACTICES(d->character, char_get_class(d->character)) += 200;
-        SET_BIT_AR(PLR_FLAGS(d->character), PLR_FORGET);
+        SET_BIT_AR(char_get_act(d->character), PLR_FORGET);
         write_to_output(d, "\n@RSelect a mutation. A second will be chosen automatically..\n");
         write_to_output(d, "@D--------------------------------------------------------@n\n");
         write_to_output(d, "@B 1@W) @CExtreme Speed       @c-+30%s to Speed Index @C@n\n", "%");
@@ -4068,10 +4068,10 @@ void nanny(struct descriptor_data *d, char *arg)
         write_to_output(d, "@wChoose: ");
         d->character->genome[0] = 0;
         d->character->genome[1] = 0;
-        STATE(d) = CON_GENOME;
+        desc_set_connected(d, CON_GENOME);
        } else {
         GET_PRACTICES(d->character, char_get_class(d->character)) += 200;
-        SET_BIT_AR(PLR_FLAGS(d->character), PLR_FORGET);
+        SET_BIT_AR(char_get_act(d->character), PLR_FORGET);
         write_to_output(d, "\n@RSelect two genomes to be your primary DNA strains.\n");
         write_to_output(d, "@D--------------------------------------------------------@n\n");
         write_to_output(d, "@B1@W) @CHuman   @c- @CHigher PS gains from fighting@n\n");
@@ -4085,7 +4085,7 @@ void nanny(struct descriptor_data *d, char *arg)
         write_to_output(d, "@wChoose: ");
         d->character->genome[0] = 0;
         d->character->genome[1] = 0;
-        STATE(d) = CON_GENOME;
+        desc_set_connected(d, CON_GENOME);
        }
       } else {
        write_to_output(d, "keep or forget: \r\n");
@@ -4140,7 +4140,7 @@ void nanny(struct descriptor_data *d, char *arg)
         display_bonus_menu(d->character, 0);
         write_to_output(d, "@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
         write_to_output(d, "\n@wChoose: ");
-        STATE(d) = CON_BONUS;
+        desc_set_connected(d, CON_BONUS);
        } else if (!*arg) {
         write_to_output(d, "That is not an acceptable choice!\r\n");
         write_to_output(d, "\n@wChoose: ");
@@ -4165,7 +4165,7 @@ void nanny(struct descriptor_data *d, char *arg)
         display_bonus_menu(d->character, 0);
         write_to_output(d, "@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
         write_to_output(d, "@wChoose: ");
-        STATE(d) = CON_BONUS;
+        desc_set_connected(d, CON_BONUS);
       } else if (!*arg) {
         const char *display_genome[9] = { "Unselected", /* 0 */
                                          "Human", /* 1 */
@@ -4266,16 +4266,16 @@ void nanny(struct descriptor_data *d, char *arg)
          } else if (!strcasecmp(arg, "N") || !strcasecmp(arg, "n")) {
            display_bonus_menu(d->character, 1);
            send_to_char(d->character, "@wChoose: ");
-           STATE(d) = CON_NEGATIVE;
+           desc_set_connected(d, CON_NEGATIVE);
          } else if (!strcasecmp(arg, "x") || !strcasecmp(arg, "X")) {
-          GET_NEGCOUNT(d->character) = 0;
+          char_set_negcount(d->character, 0);
            write_to_output(d, "\r\n@wTo check the bonuses/negatives you have in game use the status command");
-           if (GET_CCPOINTS(d->character) > 0) {
+           if (char_get_ccpoints(d->character) > 0) {
             write_to_output(d, "\r\n@GYour left over points were spent on Practice Sessions@w");
-            GET_PRACTICES(d->character, char_get_class(d->character)) += (100 * GET_CCPOINTS(d->character));
+            GET_PRACTICES(d->character, char_get_class(d->character)) += (100 * char_get_ccpoints(d->character));
            }
            write_to_output(d, "\r\n*** PRESS RETURN: ");
-           STATE(d) = CON_QROLLSTATS;
+           desc_set_connected(d, CON_QROLLSTATS);
          } else if ((value = parse_bonuses(arg)) != 1337) {
          if (value == -1) {
 	   display_bonus_menu(d->character, 0);
@@ -4307,9 +4307,9 @@ void nanny(struct descriptor_data *d, char *arg)
         } else if (!strcasecmp(arg, "b") || !strcasecmp(arg, "B")) {
            display_bonus_menu(d->character, 0);
            send_to_char(d->character, "@wChoose: ");
-           STATE(d) = CON_BONUS;
+           desc_set_connected(d, CON_BONUS);
          } else if (!strcasecmp(arg, "x") || !strcasecmp(arg, "X")) {
-          GET_NEGCOUNT(d->character) = 0;
+          char_set_negcount(d->character, 0);
           if (d->character->basepl <= 0) {
            d->character->basepl = 90;
           }
@@ -4320,12 +4320,12 @@ void nanny(struct descriptor_data *d, char *arg)
            d->character->basest = 90;
           }
            write_to_output(d, "\r\n@wTo check the bonuses/negatives you have in game use the status command");
-           if (GET_CCPOINTS(d->character) > 0) {
+           if (char_get_ccpoints(d->character) > 0) {
             write_to_output(d, "\r\n@GYour left over points were spent on Practice Sessions@w");
-            GET_PRACTICES(d->character, char_get_class(d->character)) += (100 * GET_CCPOINTS(d->character));
+            GET_PRACTICES(d->character, char_get_class(d->character)) += (100 * char_get_ccpoints(d->character));
            }
            write_to_output(d, "\r\n*** PRESS RETURN: ");
-           STATE(d) = CON_QROLLSTATS;
+           desc_set_connected(d, CON_QROLLSTATS);
         } else if ((value = parse_bonuses(arg)) != 1337) {
          if (value == -1) {
            display_bonus_menu(d->character, 1);
@@ -4352,14 +4352,14 @@ void nanny(struct descriptor_data *d, char *arg)
               switch(*arg) {
                   case 't':
                   case 'T':
-                      switch(STATE(d)) {
+                      switch(desc_get_connected(d)) {
                           case CON_CLASS_HELP:
-                              STATE(d) = CON_QCLASS;
+                              desc_set_connected(d, CON_QCLASS);
                               display_classes(d);
                               return;
                           case CON_QCLASS:
                               display_classes_help(d);
-                              STATE(d) = CON_CLASS_HELP;
+                              desc_set_connected(d, CON_CLASS_HELP);
                               return;
                       }
                       break;
@@ -4375,7 +4375,7 @@ void nanny(struct descriptor_data *d, char *arg)
                   return;
               }
 
-              switch(STATE(d)) {
+              switch(desc_get_connected(d)) {
                   case CON_CLASS_HELP:
                       show_help(d, sensei_name(chosen_sensei));
                       chosen_sensei = CLASS_UNDEFINED;
@@ -4393,7 +4393,7 @@ void nanny(struct descriptor_data *d, char *arg)
          write_to_output(d, "@B2@W)@C Repair Model@n\r\n");
          write_to_output(d, "@B3@W)@C Sense, Powersense Model@n\r\n");
          write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-         STATE(d) = CON_ANDROID;
+         desc_set_connected(d, CON_ANDROID);
         }
     else {
      write_to_output(d, "\r\n@RAnswer The following questions carefully, they construct your alignment\r\nand affect your stats.\r\n\r\n");
@@ -4407,14 +4407,14 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@B4@W)@C Practice my favorite skills instead of working just on my body.@n\r\n");
      write_to_output(d, "@B5@W)@C Spar with a friend so we can both improve our abilities.@n\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-     STATE(d) = CON_Q1;
+     desc_set_connected(d, CON_Q1);
     }
     break;
 
     case CON_ANDROID:
     switch (*arg) {
       case '1':
-         SET_BIT_AR(PLR_FLAGS(d->character), PLR_ABSORB);
+         SET_BIT_AR(char_get_act(d->character), PLR_ABSORB);
          write_to_output(d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer, or your stats contrary to your liking.\r\n\r\n");
          write_to_output(d, "\r\n@WQuestion (@G1@W out of @g10@W)");
          write_to_output(d, "@YAnswer the following question:\r\n");
@@ -4426,10 +4426,10 @@ void nanny(struct descriptor_data *d, char *arg)
          write_to_output(d, "@B4@W)@C Practice my favorite skills instead of working just on my body.@n\r\n");
          write_to_output(d, "@B5@W)@C Spar with a friend so we can both improve our abilities.@n\r\n");
          write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-         STATE(d) = CON_Q1;
+         desc_set_connected(d, CON_Q1);
         break;
       case '2':
-         SET_BIT_AR(PLR_FLAGS(d->character), PLR_REPAIR);
+         SET_BIT_AR(char_get_act(d->character), PLR_REPAIR);
          write_to_output(d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer, or your stats contrary to your linking.\r\n\r\n");
          write_to_output(d, "@YAnswer the following question:\r\n");
          write_to_output(d, "@wYou go to train one day, but do not know the best\r\nway to approach it, What do you do?\r\n");
@@ -4440,10 +4440,10 @@ void nanny(struct descriptor_data *d, char *arg)
          write_to_output(d, "@B4@W)@C Practice my favorite skills instead of working just on my body.@n\r\n");
          write_to_output(d, "@B5@W)@C Spar with a friend so we can both improve our abilities.@n\r\n");
          write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-         STATE(d) = CON_Q1;
+         desc_set_connected(d, CON_Q1);
         break;
       case '3':
-         SET_BIT_AR(PLR_FLAGS(d->character), PLR_SENSEM);
+         SET_BIT_AR(char_get_act(d->character), PLR_SENSEM);
          write_to_output(d, "\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer or your stats contrary to your liking.\r\n\r\n");
          write_to_output(d, "@YAnswer the following question:\r\n");
          write_to_output(d, "@wYou go to train one day, but do not know the best\r\nway to approach it, What do you do?\r\n");
@@ -4454,7 +4454,7 @@ void nanny(struct descriptor_data *d, char *arg)
          write_to_output(d, "@B4@W)@C Practice my favorite skills instead of working just on my body.@n\r\n");
          write_to_output(d, "@B5@W)@C Spar with a friend so we can both improve our abilities.@n\r\n");
          write_to_output(d, "@w\r\nMake a selection:@n\r\n");
-         STATE(d) = CON_Q1;
+         desc_set_connected(d, CON_Q1);
         break;
       default:
        write_to_output(d, "@wThat is not a correct selection, try again.@n\r\n");
@@ -4476,9 +4476,9 @@ void nanny(struct descriptor_data *d, char *arg)
         write_to_output(d, "\r\n@rStr@w: [@m%2d@w] @rDex@w: [@m%2d@w]\r\n"
                               "@rCon@w: [@m%2d@w] @rInt@w: [@m%2d@w]\r\n"
                               "@rWis@w: [@m%2d@w] @rCha@w: [@m%2d@w]@n",
-           GET_STR(d->character), GET_DEX(d->character), 
-           GET_CON(d->character), GET_INT(d->character), 
-           GET_WIS(d->character), GET_CHA(d->character));
+           char_get_aff_abils_str(d->character), char_get_aff_abils_dex(d->character), 
+           char_get_aff_abils_con(d->character), char_get_aff_abils_intel(d->character), 
+           char_get_aff_abils_wis(d->character), char_get_aff_abils_cha(d->character));
         write_to_output(d, "\r\n\r\nKeep these stats? (y/N)");
         return;
       }
@@ -4497,9 +4497,9 @@ void nanny(struct descriptor_data *d, char *arg)
               write_to_output(d, "\r\n@rStr@w: [@m%2d@w] @rDex@w: [@m%2d@w]\r\n"
                                     "@rCon@w: [@m%2d@w] @rInt@w: [@m%2d@w]\r\n"
                                     "@rWis@w: [@m%2d@w] @rCha@w: [@m%2d@w]@n",
-                 GET_STR(d->character), GET_DEX(d->character),
-                 GET_CON(d->character), GET_INT(d->character),
-                 GET_WIS(d->character), GET_CHA(d->character));
+                 char_get_aff_abils_str(d->character), char_get_aff_abils_dex(d->character),
+                 char_get_aff_abils_con(d->character), char_get_aff_abils_intel(d->character),
+                 char_get_aff_abils_wis(d->character), char_get_aff_abils_cha(d->character));
 	      write_to_output(d, "Initial statistics, you may reassign individual numbers\r\n");
 	      write_to_output(d, "between statistics after choosing yes.\r\n");
               write_to_output(d, "\r\n\r\nKeep these stats? (y/N)");
@@ -4516,25 +4516,25 @@ void nanny(struct descriptor_data *d, char *arg)
       else
         OLC_VAL(d) = 0;
 
-      STATE(d) = CON_QSTATS;
+      desc_set_connected(d, CON_QSTATS);
       stats_disp_menu(d);
       break;
     } else {
       cedit_creation(d->character);
     }
 
-    if (GET_PFILEPOS(d->character) < 0)
-      GET_PFILEPOS(d->character) = create_entry(GET_PC_NAME(d->character));
+    if (char_get_pfilepos(d->character) < 0)
+      char_set_pfilepos(d->character, create_entry(char_get_pc_name(d->character)));
     /* Now GET_NAME() will work properly. */
     init_char(d->character);
 
     save_char(d->character);
     save_player_index();
     write_to_output(d, "%s\r\n*** PRESS RETURN: ", motd);
-    STATE(d) = CON_RMOTD;
-    total = GET_STR(d->character) / 2 + GET_CON(d->character) / 2 + 
-            GET_WIS(d->character) / 2 + GET_INT(d->character) / 2 + 
-            GET_DEX(d->character) / 2 + GET_CHA(d->character) / 2;
+    desc_set_connected(d, CON_RMOTD);
+    total = char_get_aff_abils_str(d->character) / 2 + char_get_aff_abils_con(d->character) / 2 + 
+            char_get_aff_abils_wis(d->character) / 2 + char_get_aff_abils_intel(d->character) / 2 + 
+            char_get_aff_abils_dex(d->character) / 2 + char_get_aff_abils_cha(d->character) / 2;
     total -= 30;
     mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
            char_get_name(d->character), TRUE_RACE(d->character),
@@ -4548,8 +4548,8 @@ void nanny(struct descriptor_data *d, char *arg)
         free(d->olc);
         d->olc = NULL;
       }
-      if (GET_PFILEPOS(d->character) < 0) {
-        GET_PFILEPOS(d->character) = create_entry(GET_PC_NAME(d->character));
+      if (char_get_pfilepos(d->character) < 0) {
+        char_set_pfilepos(d->character, create_entry(char_get_pc_name(d->character)));
       }
       /* Now GET_NAME() will work properly. */
       init_char(d->character);
@@ -4557,24 +4557,24 @@ void nanny(struct descriptor_data *d, char *arg)
       save_player_index();
       write_to_output(d, "%s\r\n*** PRESS RETURN: ", motd);
       d->character->rp = d->rpp;
-      STATE(d) = CON_RMOTD;
-    total = GET_STR(d->character) / 2 + GET_CON(d->character) / 2 + 
-            GET_WIS(d->character) / 2 + GET_INT(d->character) / 2 + 
-            GET_DEX(d->character) / 2 + GET_CHA(d->character) / 2;
+      desc_set_connected(d, CON_RMOTD);
+    total = char_get_aff_abils_str(d->character) / 2 + char_get_aff_abils_con(d->character) / 2 + 
+            char_get_aff_abils_wis(d->character) / 2 + char_get_aff_abils_intel(d->character) / 2 + 
+            char_get_aff_abils_dex(d->character) / 2 + char_get_aff_abils_cha(d->character) / 2;
     total -= 30;
     mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
            char_get_name(d->character), TRUE_RACE(d->character),
            SENSEI_NAME(d->character));
     mudlog(CMP, ADMLVL_GOD, TRUE, "Str: %2d Dex: %2d Con: %2d Int: %2d "
-           "Wis:  %2d Cha: %2d mod total: %2d", GET_STR(d->character), 
-           GET_DEX(d->character), GET_CON(d->character), GET_INT(d->character),
-           GET_WIS(d->character), GET_CHA(d->character), total);
+           "Wis:  %2d Cha: %2d mod total: %2d", char_get_aff_abils_str(d->character), 
+           char_get_aff_abils_dex(d->character), char_get_aff_abils_con(d->character), char_get_aff_abils_intel(d->character),
+           char_get_aff_abils_wis(d->character), char_get_aff_abils_cha(d->character), total);
     } 
     break;
 
   case CON_RMOTD:		/* read CR after printing motd   */
     write_to_output(d, "%s", CONFIG_MENU);
-    STATE(d) = CON_MENU;
+    desc_set_connected(d, CON_MENU);
     break;
 
   case CON_MENU: {		/* get selection from main menu  */
@@ -4582,7 +4582,7 @@ void nanny(struct descriptor_data *d, char *arg)
     switch (*arg) {
     case '0':
       write_to_output(d, "Goodbye.\r\n");
-      STATE(d) = CON_CLOSE;
+      desc_set_connected(d, CON_CLOSE);
       break;
 
     case '1':
@@ -4623,7 +4623,7 @@ void nanny(struct descriptor_data *d, char *arg)
       greet_mtrigger(d->character, -1);
       greet_memory_mtrigger(d->character);
 
-      STATE(d) = CON_PLAYING;
+      desc_set_connected(d, CON_PLAYING);
       if (PCOUNT < HIGHPCOUNT && PCOUNT >= HIGHPCOUNT - 4) {
        payout(0);
       }
@@ -4639,31 +4639,31 @@ void nanny(struct descriptor_data *d, char *arg)
 	do_start(d->character);
 	send_to_char(d->character, "%s", CONFIG_START_MESSG);
       }
-      if (rroom_get_vnum(IN_ROOM(d->character)) <= 1 && GET_LOADROOM(d->character) != NOWHERE) {
+      if (rroom_get_vnum(char_get_in_room(d->character)) <= 1 && GET_LOADROOM(d->character) != NOWHERE) {
        char_from_room(d->character);
        char_to_room(d->character, real_room(real_room(GET_LOADROOM(d->character))));
-      } else if (rroom_get_vnum(IN_ROOM(d->character)) <= 1) {
+      } else if (rroom_get_vnum(char_get_in_room(d->character)) <= 1) {
        char_from_room(d->character);
        char_to_room(d->character, real_room(real_room(300)));
       } else {
-       look_at_room(IN_ROOM(d->character), d->character, 0);
+       look_at_room(char_get_in_room(d->character), d->character, 0);
       }
-      if (has_mail(GET_IDNUM(d->character)))
+      if (has_mail(char_get_idnum(d->character)))
 	send_to_char(d->character, "\r\nYou have mail waiting.\r\n");
-      if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWIMM > GET_BOARD(d->character, 1))
+      if (char_get_admlevel(d->character) >= 1 && BOARDNEWIMM > char_get_lboard(d->character, 1))
        send_to_char(d->character, "\r\n@GMake sure to check the immortal board, there is a new post there.@n\r\n");
-      if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWCOD > GET_BOARD(d->character, 2))
+      if (char_get_admlevel(d->character) >= 1 && BOARDNEWCOD > char_get_lboard(d->character, 2))
        send_to_char(d->character, "\r\n@GMake sure to check the request file, it has been updated.@n\r\n");
-      if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWBUI > GET_BOARD(d->character, 4))
+      if (char_get_admlevel(d->character) >= 1 && BOARDNEWBUI > char_get_lboard(d->character, 4))
        send_to_char(d->character, "\r\n@GMake sure to check the builder board, there is a new post there.@n\r\n");
-      if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWDUO > GET_BOARD(d->character, 3))
+      if (char_get_admlevel(d->character) >= 1 && BOARDNEWDUO > char_get_lboard(d->character, 3))
        send_to_char(d->character, "\r\n@GMake sure to check punishment board, there is a new post there.@n\r\n");
-      if (BOARDNEWMORT > GET_BOARD(d->character, 0))
+      if (BOARDNEWMORT > char_get_lboard(d->character, 0))
        send_to_char(d->character, "\r\n@GThere is a new bulletin board post.@n\r\n");
-      if (NEWSUPDATE > GET_LPLAY(d->character))
+      if (NEWSUPDATE > char_get_lastpl(d->character))
        send_to_char(d->character, "\r\n@GThe NEWS file has been updated, type 'news %d' to see the latest entry or 'news list' to see available entries.@n\r\n", LASTNEWS);
-      if (LASTINTEREST != 0 && LASTINTEREST > GET_LINTEREST(d->character)) {
-       int diff = (LASTINTEREST - GET_LINTEREST(d->character));
+      if (LASTINTEREST != 0 && LASTINTEREST > char_get_lastint(d->character)) {
+       int diff = (LASTINTEREST - char_get_lastint(d->character));
        int mult = 0;
        while (diff > 0) {
         if ((diff - 86400) < 0 && mult == 0) {
@@ -4680,14 +4680,14 @@ void nanny(struct descriptor_data *d, char *arg)
         if (mult > 3) {
          mult = 3;
         }
-       GET_LINTEREST(d->character) = LASTINTEREST;
-       if (GET_BANK_GOLD(d->character) > 0) {
-        int inc = ((GET_BANK_GOLD(d->character) / 100) * 2);
+       char_set_lastint(d->character, LASTINTEREST);
+       if (char_get_bank_gold(d->character) > 0) {
+        int inc = ((char_get_bank_gold(d->character) / 100) * 2);
         if (inc >= 7500) {
          inc = 7500;
         }
         inc *= mult;
-        GET_BANK_GOLD(d->character) += inc;
+        char_set_bank_gold(d->character, char_get_bank_gold(d->character) + (inc));
         send_to_char(d->character, "Interest happened while you were away, %d times.\r\n"
                                    "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc));
        }
@@ -4706,8 +4706,8 @@ void nanny(struct descriptor_data *d, char *arg)
       d->has_prompt = 0;
       /* We've updated to 3.1 - some bits might be set wrongly: */
       REMOVE_BIT_AR(PRF_FLAGS(d->character), PRF_BUILDWALK);
-      if (!GET_EQ(d->character, WEAR_WIELD1) && char_plr_flagged(d->character, PLR_THANDW)) {
-       REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_THANDW);
+      if (!char_get_equipment(d->character, WEAR_WIELD1) && char_plr_flagged(d->character, PLR_THANDW)) {
+       REMOVE_BIT_AR(char_get_act(d->character), PLR_THANDW);
       }
       break;
 
@@ -4728,19 +4728,19 @@ void nanny(struct descriptor_data *d, char *arg)
       send_editor_help(d);
       d->str = &d->character->description;
       d->max_str = EXDSCR_LENGTH;
-      STATE(d) = CON_EXDESC;
+      desc_set_connected(d, CON_EXDESC);
       break;
 
     case '3':
       userRead(d);
-      STATE(d) = CON_UMENU;
+      desc_set_connected(d, CON_UMENU);
       break;
 
     case '4':
       write_to_output(d, "\r\nYOU ARE ABOUT TO DELETE THIS CHARACTER PERMANENTLY.\r\n"
                 "ARE YOU ABSOLUTELY SURE?\r\n\r\n"
                 "Please type \"yes\" to confirm: ");
-      STATE(d) = CON_DELCNF2;
+      desc_set_connected(d, CON_DELCNF2);
       break;
 
     default:
@@ -4754,12 +4754,12 @@ void nanny(struct descriptor_data *d, char *arg)
     if (!strcmp(arg, "yes") || !strcmp(arg, "YES")) {
      write_to_output(d, "Your user and character files have been deleted. Good bye.\n");
      userDelete(d);
-     STATE(d) = CON_CLOSE;
+     desc_set_connected(d, CON_CLOSE);
     }
     else if (!strcmp(arg, "no") || !strcmp(arg, "NO")) {
      userRead(d);
      write_to_output(d, "Nothing was deleted. Phew.\n");
-     STATE(d) = CON_UMENU;
+     desc_set_connected(d, CON_UMENU);
     }
     else {
      write_to_output(d, "Clearly type yes or no. Yes to delete and no to return to the menu.\nYes or no:\n");
@@ -4772,11 +4772,11 @@ void nanny(struct descriptor_data *d, char *arg)
       if (char_plr_flagged(d->character, PLR_FROZEN)) {
 	write_to_output(d, "You try to kill yourself, but the ice stops you.\r\n"
 		"Character not deleted.\r\n\r\n");
-	STATE(d) = CON_CLOSE;
+	desc_set_connected(d, CON_CLOSE);
 	return;
       }
-      if (GET_ADMLEVEL(d->character) < ADMLVL_GRGOD)
-	SET_BIT_AR(PLR_FLAGS(d->character), PLR_DELETED);
+      if (char_get_admlevel(d->character) < ADMLVL_GRGOD)
+	SET_BIT_AR(char_get_act(d->character), PLR_DELETED);
       save_char(d->character);
       Crash_delete_file(char_get_name(d->character));
       /* If the selfdelete_fastwipe flag is set (in config.c), remove all
@@ -4850,11 +4850,11 @@ void nanny(struct descriptor_data *d, char *arg)
       }
       userWrite(d, 0, 0, 0, "index");
       userRead(d);
-      STATE(d) = CON_UMENU;
+      desc_set_connected(d, CON_UMENU);
       return;
     } else {
       write_to_output(d, "\r\nCharacter not deleted.\r\n%s\r\n%s", motd, CONFIG_MENU);
-      STATE(d) = CON_MENU;
+      desc_set_connected(d, CON_MENU);
     }
     break;
 
@@ -4876,8 +4876,8 @@ void nanny(struct descriptor_data *d, char *arg)
 
   default:
     log("SYSERR: Nanny: illegal state of con'ness (%d) for '%s'; closing connection.",
-	STATE(d), d->character ? char_get_name(d->character) : "<unknown>");
-    STATE(d) = CON_DISCONNECT;	/* Safest to do. */
+	desc_get_connected(d), d->character ? char_get_name(d->character) : "<unknown>");
+    desc_set_connected(d, CON_DISCONNECT);	/* Safest to do. */
     break;
   }
 }

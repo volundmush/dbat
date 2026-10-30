@@ -53,7 +53,7 @@ ACMD(do_disable)
   if (p) { /* this command is disabled */
 
     /* Was it disabled by a higher level imm? */
-    if (GET_ADMLEVEL(ch) < p->level) {
+    if (char_get_admlevel(ch) < p->level) {
       send_to_char(ch, "This command was disabled by a higher power.\r\n");
       return;
     }
@@ -71,7 +71,7 @@ ACMD(do_disable)
     for (length = strlen(argument), i = 0; *cmd_info[i].command != '\n'; i++)
       if (!strncmp(cmd_info[i].command, argument, length))
         if (char_get_level(ch) >= cmd_info[i].minimum_level &&
-            GET_ADMLEVEL(ch) >= cmd_info[i].minimum_admlevel)
+            char_get_admlevel(ch) >= cmd_info[i].minimum_admlevel)
           break;
 
     /*  Found?     */            
@@ -89,7 +89,7 @@ ACMD(do_disable)
     CREATE(p, struct disabled_data, 1);
     p->command = &cmd_info[i];
     p->disabled_by = strdup(char_get_name(ch)); /* save name of disabler  */
-    p->level = GET_ADMLEVEL(ch);           /* save level of disabler */    
+    p->level = char_get_admlevel(ch);           /* save level of disabler */    
     p->subcmd = cmd_info[i].subcmd;       /* the subcommand if any  */    
     p->next = disabled_first;
     disabled_first = p; /* add before the current first element */
