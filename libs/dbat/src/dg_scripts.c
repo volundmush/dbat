@@ -156,7 +156,7 @@ obj_data *get_object_in_equip(char_data * ch, char *name)
     obj_vnum ovnum = atoi(name);
     for (j = 0; j < NUM_WEARS; j++)
       if ((obj = GET_EQ(ch, j)))
-        if (GET_OBJ_VNUM(obj) == ovnum)
+        if (obj_get_vnum(obj) == ovnum)
           return (obj);
   } else {
     snprintf(tmpname, sizeof(tmpname), "%s", name);
@@ -222,27 +222,27 @@ int find_eq_pos_script(char *arg)
 int can_wear_on_pos(struct obj_data *obj, int pos)
 {
   switch (pos) {
-    case WEAR_WIELD1:   return CAN_WEAR(obj, ITEM_WEAR_WIELD);
-    case WEAR_WIELD2:   return CAN_WEAR(obj, ITEM_WEAR_TAKE);
+    case WEAR_WIELD1:   return obj_can_wear(obj, ITEM_WEAR_WIELD);
+    case WEAR_WIELD2:   return obj_can_wear(obj, ITEM_WEAR_TAKE);
     case WEAR_FINGER_R:
-    case WEAR_FINGER_L: return CAN_WEAR(obj, ITEM_WEAR_FINGER);
+    case WEAR_FINGER_L: return obj_can_wear(obj, ITEM_WEAR_FINGER);
     case WEAR_NECK_1:
-    case WEAR_NECK_2:   return CAN_WEAR(obj, ITEM_WEAR_NECK);
-    case WEAR_BODY:     return CAN_WEAR(obj, ITEM_WEAR_BODY);
-    case WEAR_HEAD:     return CAN_WEAR(obj, ITEM_WEAR_HEAD);
-    case WEAR_LEGS:     return CAN_WEAR(obj, ITEM_WEAR_LEGS);
-    case WEAR_FEET:     return CAN_WEAR(obj, ITEM_WEAR_FEET);
-    case WEAR_HANDS:    return CAN_WEAR(obj, ITEM_WEAR_HANDS);
-    case WEAR_ARMS:     return CAN_WEAR(obj, ITEM_WEAR_ARMS);
-    case WEAR_ABOUT:    return CAN_WEAR(obj, ITEM_WEAR_ABOUT);
-    case WEAR_WAIST:    return CAN_WEAR(obj, ITEM_WEAR_WAIST);
+    case WEAR_NECK_2:   return obj_can_wear(obj, ITEM_WEAR_NECK);
+    case WEAR_BODY:     return obj_can_wear(obj, ITEM_WEAR_BODY);
+    case WEAR_HEAD:     return obj_can_wear(obj, ITEM_WEAR_HEAD);
+    case WEAR_LEGS:     return obj_can_wear(obj, ITEM_WEAR_LEGS);
+    case WEAR_FEET:     return obj_can_wear(obj, ITEM_WEAR_FEET);
+    case WEAR_HANDS:    return obj_can_wear(obj, ITEM_WEAR_HANDS);
+    case WEAR_ARMS:     return obj_can_wear(obj, ITEM_WEAR_ARMS);
+    case WEAR_ABOUT:    return obj_can_wear(obj, ITEM_WEAR_ABOUT);
+    case WEAR_WAIST:    return obj_can_wear(obj, ITEM_WEAR_WAIST);
     case WEAR_WRIST_R:
-    case WEAR_WRIST_L:  return CAN_WEAR(obj, ITEM_WEAR_WRIST);
-    case WEAR_BACKPACK: return CAN_WEAR(obj, ITEM_WEAR_PACK);
+    case WEAR_WRIST_L:  return obj_can_wear(obj, ITEM_WEAR_WRIST);
+    case WEAR_BACKPACK: return obj_can_wear(obj, ITEM_WEAR_PACK);
     case WEAR_EAR_R:
-    case WEAR_EAR_L:    return CAN_WEAR(obj, ITEM_WEAR_EAR);
-    case WEAR_SH:       return CAN_WEAR(obj, ITEM_WEAR_SH);
-    case WEAR_EYE:      return CAN_WEAR(obj, ITEM_WEAR_EYE);
+    case WEAR_EAR_L:    return obj_can_wear(obj, ITEM_WEAR_EAR);
+    case WEAR_SH:       return obj_can_wear(obj, ITEM_WEAR_SH);
+    case WEAR_EYE:      return obj_can_wear(obj, ITEM_WEAR_EYE);
     default: return FALSE;
   }
 }
@@ -920,7 +920,7 @@ ACMD(do_attach)
     victim = get_char_vis(ch, targ_name, NULL, FIND_CHAR_WORLD);
     if (!victim) { /* search room for one with this vnum */
       for (victim = world[IN_ROOM(ch)].people;victim;victim=victim->next_in_room)
-        if (GET_MOB_VNUM(victim) == num_arg)
+        if (char_get_mob_vnum(victim) == num_arg)
           break;
 
       if (!victim) {
@@ -928,7 +928,7 @@ ACMD(do_attach)
         return;
       }
     }
-    if (!IS_NPC(victim))  {
+    if (!char_is_npc(victim))  {
       send_to_char(ch, "Players can't have scripts.\r\n");
       return;
     }
@@ -948,19 +948,19 @@ ACMD(do_attach)
     add_trigger(SCRIPT(victim), trig, loc);
 
     send_to_char(ch, "Trigger %d (%s) attached to %s [%d].\r\n",
-                 tn, GET_TRIG_NAME(trig), GET_SHORT(victim), GET_MOB_VNUM(victim));
+                 tn, GET_TRIG_NAME(trig), GET_SHORT(victim), char_get_mob_vnum(victim));
   }
 
   else if (is_abbrev(arg, "object") || is_abbrev(arg, "otr")) {
     object = get_obj_vis(ch, targ_name, NULL);
     if (!object) { /* search room for one with this vnum */
       for (object = world[IN_ROOM(ch)].contents;object;object=object->next_content)
-        if (GET_OBJ_VNUM(object) == num_arg)
+        if (obj_get_vnum(object) == num_arg)
           break;
 
       if (!object) { /* search inventory for one with this vnum */
         for (object = ch->carrying;object;object=object->next_content)
-          if (GET_OBJ_VNUM(object) == num_arg)
+          if (obj_get_vnum(object) == num_arg)
             break;
 
         if (!object) {
@@ -989,7 +989,7 @@ ACMD(do_attach)
                  tn, GET_TRIG_NAME(trig),
                  (object->short_description ?
                   object->short_description : object->name),
-                  GET_OBJ_VNUM(object));
+                  obj_get_vnum(object));
   }
 
   else if (is_abbrev(arg, "room") || is_abbrev(arg, "wtr")) {
@@ -1143,7 +1143,7 @@ ACMD(do_detach)
       victim = get_char_vis(ch, arg2, NULL, FIND_CHAR_WORLD);
       if (!victim) { /* search room for one with this vnum */
         for (victim = world[IN_ROOM(ch)].people;victim;victim=victim->next_in_room)
-          if (GET_MOB_VNUM(victim) == num_arg)
+          if (char_get_mob_vnum(victim) == num_arg)
             break;
 
         if (!victim) {
@@ -1162,12 +1162,12 @@ ACMD(do_detach)
       object = get_obj_vis(ch, arg2, NULL);
       if (!object) { /* search room for one with this vnum */
         for (object = world[IN_ROOM(ch)].contents;object;object=object->next_content)
-          if (GET_OBJ_VNUM(object) == num_arg)
+          if (obj_get_vnum(object) == num_arg)
             break;
 
         if (!object) { /* search inventory for one with this vnum */
           for (object = ch->carrying;object;object=object->next_content)
-            if (GET_OBJ_VNUM(object) == num_arg)
+            if (obj_get_vnum(object) == num_arg)
               break;
 
           if (!object) { /* give up */
@@ -1197,12 +1197,12 @@ ACMD(do_detach)
     }
 
     if (victim) {
-      if (!IS_NPC(victim))
+      if (!char_is_npc(victim))
         send_to_char(ch, "Players don't have triggers.\r\n");
 
       else if (!SCRIPT(victim))
         send_to_char(ch, "That mob doesn't have any triggers.\r\n");
-      else if (!can_edit_zone(ch, real_zone_by_thing(GET_MOB_VNUM(victim)))) {
+      else if (!can_edit_zone(ch, real_zone_by_thing(char_get_mob_vnum(victim)))) {
         send_to_char(ch, "You can only detach triggers in your own zone\r\n");
         return;
       }
@@ -1224,7 +1224,7 @@ ACMD(do_detach)
       if (!SCRIPT(object))
         send_to_char(ch, "That object doesn't have any triggers.\r\n");
 
-      else if (!can_edit_zone(ch, real_zone_by_thing(GET_OBJ_VNUM(object)))) {
+      else if (!can_edit_zone(ch, real_zone_by_thing(obj_get_vnum(object)))) {
         send_to_char(ch, "You can only detach triggers in your own zone\r\n");
         return;
       }
@@ -1280,14 +1280,14 @@ static void dg_ctx_begin(void *go, trig_data *trig, int type)
 
   switch (type) {
     case MOB_TRIGGER:
-      snprintf(dg_ctx.owner_name, sizeof(dg_ctx.owner_name), "%s", GET_NAME((char_data *)go) ? GET_NAME((char_data *)go) : "");
-      dg_ctx.owner_vnum = (long long)GET_MOB_VNUM((char_data *)go);
+      snprintf(dg_ctx.owner_name, sizeof(dg_ctx.owner_name), "%s", char_get_name((char_data *)go) ? char_get_name((char_data *)go) : "");
+      dg_ctx.owner_vnum = (long long)char_get_mob_vnum((char_data *)go);
       dg_ctx.owner_uid = GET_ID((char_data *)go);
       room = IN_ROOM((char_data *)go);
       break;
     case OBJ_TRIGGER:
       snprintf(dg_ctx.owner_name, sizeof(dg_ctx.owner_name), "%s", ((obj_data *)go)->short_description ? ((obj_data *)go)->short_description : "");
-      dg_ctx.owner_vnum = (long long)GET_OBJ_VNUM((obj_data *)go);
+      dg_ctx.owner_vnum = (long long)obj_get_vnum((obj_data *)go);
       dg_ctx.owner_uid = GET_ID((obj_data *)go);
       room = obj_room((obj_data *)go);
       break;
@@ -1345,13 +1345,13 @@ void script_vlog(const char *format, va_list args)
   snprintf(output, sizeof(output), "[ %s%s ]\r\n", print_to, ctx);
 
   for (i = descriptor_list; i; i = i->next) {
-    if (STATE(i) != CON_PLAYING || IS_NPC(i->character)) /* switch */
+    if (STATE(i) != CON_PLAYING || char_is_npc(i->character)) /* switch */
       continue;
     if (GET_ADMLEVEL(i->character) < ADMLVL_BUILDER)
       continue;
-    if (PLR_FLAGGED(i->character, PLR_WRITING))
+    if (char_plr_flagged(i->character, PLR_WRITING))
       continue;
-    if (NRM > (PRF_FLAGGED(i->character, PRF_LOG1) ? 1 : 0) + (PRF_FLAGGED(i->character, PRF_LOG2) ? 2 : 0))
+    if (NRM > (char_prf_flagged(i->character, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(i->character, PRF_LOG2) ? 2 : 0))
       continue;
 
     send_to_char(i->character, "@g%s@n", output);
@@ -1886,9 +1886,9 @@ void process_attach(void *go, struct script_data *sc, trig_data *trig,
   }
 
   if (c) {
-    if (!IS_NPC(c)) {
+    if (!char_is_npc(c)) {
       script_log("Trigger: %s, VNum %d. attach invalid target: '%s'",
-              GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), GET_NAME(c));
+              GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), char_get_name(c));
       return;
     }
     if (!SCRIPT(c))
@@ -2215,7 +2215,7 @@ void process_remote(struct script_data *sc, trig_data *trig, char *cmd)
     sc_remote = SCRIPT(room);
   } else if ((mob = find_char(uid))) {
     sc_remote = SCRIPT(mob);
-    if (!IS_NPC(mob)) context = 0;
+    if (!char_is_npc(mob)) context = 0;
   } else if ((obj = find_obj(uid))) {
     sc_remote = SCRIPT(obj);
   } else {
@@ -2270,7 +2270,7 @@ ACMD(do_vdelete)
     sc_remote = SCRIPT(room);
   } else if ((mob = find_char(uid))) {
     sc_remote = SCRIPT(mob);
-    if (!IS_NPC(mob)) context = 0;
+    if (!char_is_npc(mob)) context = 0;
   } else if ((obj = find_obj(uid))) {
     sc_remote = SCRIPT(obj);
   } else {
@@ -2387,7 +2387,7 @@ void process_rdelete(struct script_data *sc, trig_data *trig, char *cmd)
     sc_remote = SCRIPT(room);
   } else if ((mob = find_char(uid))) {
     sc_remote = SCRIPT(mob);
-    if (!IS_NPC(mob)) context = 0;
+    if (!char_is_npc(mob)) context = 0;
   } else if ((obj = find_obj(uid))) {
     sc_remote = SCRIPT(obj);
   } else {
@@ -2613,11 +2613,11 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
     switch (type) {
       case MOB_TRIGGER:
         script_log("It was attached to %s [%d]",
-           GET_NAME((char_data *) go), GET_MOB_VNUM((char_data *) go));
+           char_get_name((char_data *) go), char_get_mob_vnum((char_data *) go));
         break;
       case OBJ_TRIGGER:
         script_log("It was attached to %s [%d]",
-           ((obj_data *) go)->short_description, GET_OBJ_VNUM((obj_data *) go));
+           ((obj_data *) go)->short_description, obj_get_vnum((obj_data *) go));
         break;
       case WLD_TRIGGER:
         script_log("It was attached to %s [%d]",
@@ -2985,12 +2985,12 @@ void read_saved_vars(struct char_data *ch)
   CREATE(SCRIPT(ch), struct script_data, 1);
 
   /* find the file that holds the saved variables and open it*/
-  get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, GET_NAME(ch));
+  get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, char_get_name(ch));
   file = fopen(fn,"r");
 
   /* if we failed to open the file, return */
   if( !file ) {
-    log("%s had no variable file", GET_NAME(ch));
+    log("%s had no variable file", char_get_name(ch));
     return;
   }
   /* walk through each line in the file parsing variables */
@@ -3023,9 +3023,9 @@ void save_char_vars(struct char_data *ch)
   if (SCRIPT(ch) == NULL) return;
 
   /* we should never be called for an NPC, but just in case... */
-  if (IS_NPC(ch)) return;
+  if (char_is_npc(ch)) return;
 
-  get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, GET_NAME(ch));
+  get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, char_get_name(ch));
   unlink(fn);
 
   /* make sure this char has global variables to save */
@@ -3097,7 +3097,7 @@ void save_char_vars_ascii(FILE *file, struct char_data *ch)
   if (SCRIPT(ch) == NULL) return;
 
   /* we should never be called for an NPC, but just in case... */
-  if (IS_NPC(ch)) return;
+  if (char_is_npc(ch)) return;
 
   /* make sure this char has global variables to save */
   if (ch->script->global_vars == NULL) return;

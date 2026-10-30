@@ -253,7 +253,7 @@ int save_objects(zone_rnum zone_num)
               "%s~\n"
               "%s~\n",
 
-              GET_OBJ_VNUM(obj),
+              obj_get_vnum(obj),
               (obj->name && *obj->name) ? obj->name : "undefined",
               (obj->short_description && *obj->short_description) ? obj->short_description : "undefined",
               (obj->description && *obj->description) ? obj->description : "undefined",
@@ -483,13 +483,13 @@ int delete_object(obj_rnum rnum)
 
   obj = &obj_proto[rnum];
 
-  zrnum = real_zone_by_thing(GET_OBJ_VNUM(obj));
+  zrnum = real_zone_by_thing(obj_get_vnum(obj));
   add_to_save_list(zone_table[zrnum].number, SL_OBJ);
 
   htree_del(obj_htree, obj->item_number);
 
   /* This is something you might want to read about in the logs. */
-  log("GenOLC: delete_object: Deleting object #%d (%s).", GET_OBJ_VNUM(obj), obj->short_description);
+  log("GenOLC: delete_object: Deleting object #%d (%s).", obj_get_vnum(obj), obj->short_description);
 
   for (tmp = object_list; tmp; tmp = tmp->next)
   {

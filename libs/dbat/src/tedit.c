@@ -35,7 +35,7 @@ void news_string_cleanup(struct descriptor_data *d, int terminator)
          tmstr = (char *) asctime(localtime(&mytime));
          *(tmstr + strlen(tmstr) - 1) = '\0';
 
-     fprintf(fl, "#%d %s\n@cUpdated By@D: @C%-13s @cDate@D: @Y%s@n\n", TOP_OF_NEWS, d->newsbuf, GET_NAME(d->character), tmstr);
+     fprintf(fl, "#%d %s\n@cUpdated By@D: @C%-13s @cDate@D: @Y%s@n\n", TOP_OF_NEWS, d->newsbuf, char_get_name(d->character), tmstr);
      free(d->newsbuf);
      d->newsbuf = NULL;
      strip_cr(*d->str);
@@ -48,12 +48,12 @@ void news_string_cleanup(struct descriptor_data *d, int terminator)
      struct descriptor_data *i;
 
      for (i = descriptor_list; i; i = i->next) {
-      if (!IS_PLAYING(i))
+      if (!desc_is_playing(i))
        continue;
-      if (PLR_FLAGGED(i->character, PLR_WRITING))
+      if (char_plr_flagged(i->character, PLR_WRITING))
        continue;
       if (NEWSUPDATE > GET_LPLAY(i->character))
-       send_to_char(i->character, "\r\n@GA news entry has been made by %s, type 'news %d' to see it.@n\r\n", GET_NAME(d->character), TOP_OF_NEWS);
+       send_to_char(i->character, "\r\n@GA news entry has been made by %s, type 'news %d' to see it.@n\r\n", char_get_name(d->character), TOP_OF_NEWS);
      }
      do_reboot(d->character, "news", 0, 0);
     }
@@ -91,14 +91,14 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator)
          *(tmstr + strlen(tmstr) - 1) = '\0';
 
         strip_cr(*d->str);
-        fprintf(fl, "\n-----------------------------------------------\n@Y%s @cUpdated By@D: @C%s@n\r\n-----------------------------------------------\n%s\n", tmstr, GET_NAME(d->character), *d->str);
+        fprintf(fl, "\n-----------------------------------------------\n@Y%s @cUpdated By@D: @C%s@n\r\n-----------------------------------------------\n%s\n", tmstr, char_get_name(d->character), *d->str);
       }
       else if (*d->str) {
         strip_cr(*d->str);
         fputs(*d->str, fl);
       }
       fclose(fl);
-      mudlog(CMP, ADMLVL_GOD, TRUE, "OLC: %s saves '%s'.", GET_NAME(d->character), storage);
+      mudlog(CMP, ADMLVL_GOD, TRUE, "OLC: %s saves '%s'.", char_get_name(d->character), storage);
       write_to_output(d, "Saved.\r\n");
 
       if (!(strcmp(storage, "text/news"))) {
@@ -107,9 +107,9 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator)
        struct descriptor_data *i;
 
        for (i = descriptor_list; i; i = i->next) {
-        if (!IS_PLAYING(i))
+        if (!desc_is_playing(i))
          continue;
-        if (PLR_FLAGGED(i->character, PLR_WRITING))
+        if (char_plr_flagged(i->character, PLR_WRITING))
          continue;
         if (NEWSUPDATE > GET_LPLAY(i->character))
          send_to_char(i->character, "\r\n@GThe NEWS file has been updated, type 'news' to see it.@n\r\n");

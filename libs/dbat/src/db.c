@@ -177,8 +177,8 @@ static void dragon_level(struct char_data *ch)
  int level = 0, count = 0;
   
  for (d = descriptor_list; d; d = d->next) {
-  if (IS_PLAYING(d) && GET_ADMLEVEL(d->character) < 1) {
-   level += GET_LEVEL(d->character);
+  if (desc_is_playing(d) && GET_ADMLEVEL(d->character) < 1) {
+   level += char_get_level(d->character);
    count += 1;
   }
  }
@@ -199,12 +199,12 @@ static void dragon_level(struct char_data *ch)
 
 static void mob_stats(struct char_data *mob)
 {
-  int start = GET_LEVEL(mob) * 0.5, finish = GET_LEVEL(mob);
+  int start = char_get_level(mob) * 0.5, finish = char_get_level(mob);
   
   if (finish < 20)
    finish = 20;
 
-  if (!IS_HUMANOID(mob)) {
+  if (!char_is_humanoid(mob)) {
    mob->real_abils.str = rand_number(start, finish);
    mob->real_abils.intel = rand_number(start, finish) - 30;
    mob->real_abils.wis = rand_number(start, finish) - 30;
@@ -212,42 +212,42 @@ static void mob_stats(struct char_data *mob)
    mob->real_abils.con = rand_number(start + 5, finish);
    mob->real_abils.cha = rand_number(start, finish);
   } else {
-   if (IS_SAIYAN(mob)) {
+   if (char_is_saiyan(mob)) {
     mob->real_abils.str = rand_number(start + 10, finish);
     mob->real_abils.intel = rand_number(start, finish - 10);
     mob->real_abils.wis = rand_number(start, finish - 5);
     mob->real_abils.dex = rand_number(start, finish);
     mob->real_abils.con = rand_number(start + 5, finish);
     mob->real_abils.cha = rand_number(start + 5, finish);
-   } else if (IS_KONATSU(mob)) {
+   } else if (char_is_konatsu(mob)) {
     mob->real_abils.str = rand_number(start, finish - 10);
     mob->real_abils.intel = rand_number(start, finish);
     mob->real_abils.wis = rand_number(start, finish);
     mob->real_abils.dex = rand_number(start + 10, finish);
     mob->real_abils.con = rand_number(start, finish);
     mob->real_abils.cha = rand_number(start, finish);
-   } else if (IS_ANDROID(mob)) {
+   } else if (char_is_android(mob)) {
     mob->real_abils.str = rand_number(start, finish);
     mob->real_abils.intel = rand_number(start, finish);
     mob->real_abils.wis = rand_number(start, finish - 10);
     mob->real_abils.dex = rand_number(start, finish);
     mob->real_abils.con = rand_number(start, finish);
     mob->real_abils.cha = rand_number(start, finish);
-   } else if (IS_MAJIN(mob)) {
+   } else if (char_is_majin(mob)) {
     mob->real_abils.str = rand_number(start, finish);
     mob->real_abils.intel = rand_number(start, finish - 10);
     mob->real_abils.wis = rand_number(start, finish - 5);
     mob->real_abils.dex = rand_number(start, finish);
     mob->real_abils.con = rand_number(start + 15, finish);
     mob->real_abils.cha = rand_number(start, finish);
-   } else if (IS_TRUFFLE(mob)) {
+   } else if (char_is_truffle(mob)) {
     mob->real_abils.str = rand_number(start, finish - 10);
     mob->real_abils.intel = rand_number(start + 15, finish);
     mob->real_abils.wis = rand_number(start, finish);
     mob->real_abils.dex = rand_number(start, finish);
     mob->real_abils.con = rand_number(start, finish);
     mob->real_abils.cha = rand_number(start, finish);
-   } else if (IS_ICER(mob)) {
+   } else if (char_is_icer(mob)) {
     mob->real_abils.str = rand_number(start + 5, finish);
     mob->real_abils.intel = rand_number(start, finish);
     mob->real_abils.wis = rand_number(start, finish);
@@ -333,7 +333,7 @@ static int suntzu_armor_convert(struct obj_data *obj)
 
   i = MAX(0, MIN(8, i));
 
-  if (CAN_WEAR(obj, ITEM_WEAR_SHIELD)) {
+  if (obj_can_wear(obj, ITEM_WEAR_SHIELD)) {
     if (GET_OBJ_VAL(obj, 6))
       return conv;
     GET_OBJ_VAL(obj, 1) = ARMOR_TYPE_SHIELD;
@@ -341,7 +341,7 @@ static int suntzu_armor_convert(struct obj_data *obj)
     GET_OBJ_VAL(obj, 3) = shield_table[i][0];
     GET_OBJ_VAL(obj, 6) = shield_table[i][1];
     conv = 1;
-  } else if (CAN_WEAR(obj, ITEM_WEAR_BODY)) {
+  } else if (obj_can_wear(obj, ITEM_WEAR_BODY)) {
     if (GET_OBJ_VAL(obj, 6))
       return conv;
     GET_OBJ_VAL(obj, 2) = conv_table[i][0];
@@ -1546,7 +1546,7 @@ static void parse_room(FILE *fl, int virtual_nr)
   world[room_nr].dmg = 0;
   world[room_nr].gravity = 0;
 
-  if (ROOM_FLAGGED(room_nr, ROOM_VEGETA) || ROOM_FLAGGED(room_nr, ROOM_GRAVITYX10)) {
+  if (rroom_flagged(room_nr, ROOM_VEGETA) || rroom_flagged(room_nr, ROOM_GRAVITYX10)) {
      world[room_nr].gravity = 10;
   }
   if (world[room_nr].number >= 19800 && world[room_nr].number <= 19899) {
@@ -1633,7 +1633,7 @@ static void setup_dir(FILE *fl, int room, int dir)
   int t[11], retval;
   char line[READ_SIZE], buf2[128];
 
-  snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", GET_ROOM_VNUM(room)+1, dir);
+  snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", rroom_get_vnum(room)+1, dir);
 
   CREATE(world[room].dir_option[dir], struct room_direction_data, 1);
   world[room].dir_option[dir]->general_description = fread_string(fl, buf2);
@@ -1903,8 +1903,8 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
 
   /* GET_CLASS_RANKS(ch, t[3]) = GET_LEVEL(ch); */
  
-  if (!IS_HUMAN(ch))
-    if (!AFF_FLAGGED(ch, AFF_INFRAVISION))
+  if (!char_is_human(ch))
+    if (!char_aff_flagged(ch, AFF_INFRAVISION))
       SET_BIT_AR(AFF_FLAGS(ch), AFF_INFRAVISION);
  
   SPEAKING(ch) = SKILL_LANG_COMMON;
@@ -1931,7 +1931,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
   for (j = 0; j < 3; j++)
     GET_SAVE_MOD(ch, j) = 0;
  
-  if (MOB_FLAGGED(ch, MOB_AUTOBALANCE)) {
+  if (char_mob_flagged(ch, MOB_AUTOBALANCE)) {
     mob_autobalance(ch); 
  }
 
@@ -1988,7 +1988,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
   CASE("StrAdd") {
     log("mob #%d trying to set StrAdd, rebalance its strength.",
-        GET_MOB_VNUM(ch));
+        char_get_mob_vnum(ch));
   }
 
   CASE("Int") {
@@ -2200,11 +2200,11 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_POISON);
     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_GROUP);
     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_SLEEP);
-    if (MOB_FLAGGED(ch, MOB_AGGRESSIVE) && MOB_FLAGGED(ch, MOB_AGGR_GOOD))
+    if (char_mob_flagged(ch, MOB_AGGRESSIVE) && char_mob_flagged(ch, MOB_AGGR_GOOD))
       REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_AGGR_GOOD);
-    if (MOB_FLAGGED(ch, MOB_AGGRESSIVE) && MOB_FLAGGED(ch, MOB_AGGR_NEUTRAL))
+    if (char_mob_flagged(ch, MOB_AGGRESSIVE) && char_mob_flagged(ch, MOB_AGGR_NEUTRAL))
       REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_AGGR_NEUTRAL);
-    if (MOB_FLAGGED(ch, MOB_AGGRESSIVE) && MOB_FLAGGED(ch, MOB_AGGR_EVIL))
+    if (char_mob_flagged(ch, MOB_AGGRESSIVE) && char_mob_flagged(ch, MOB_AGGR_EVIL))
       REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_AGGR_EVIL);
 
     /* 
@@ -2243,7 +2243,7 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
   }
 
   SET_BIT_AR(MOB_FLAGS(ch), MOB_ISNPC);
-  if (MOB_FLAGGED(ch, MOB_NOTDEADYET)) {
+  if (char_mob_flagged(ch, MOB_NOTDEADYET)) {
     /* Rather bad to load mobiles with this bit already set. */
     log("SYSERR: Mob #%d has reserved bit MOB_NOTDEADYET set.", nr);
     REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_NOTDEADYET);
@@ -2601,7 +2601,7 @@ static char *parse_object(FILE *obj_f, int nr)
     case '$':
     case '#':
       /* Objects that set CHARM on players are bad. */
-      if (OBJAFF_FLAGGED(obj_proto + i, AFF_CHARM)) {
+      if (obj_aff_flagged(obj_proto + i, AFF_CHARM)) {
         log("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
         REMOVE_BIT_AR(GET_OBJ_PERM(obj_proto + i), AFF_CHARM);
       }
@@ -3020,7 +3020,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   mob->next_affect = NULL;
   mob->next_affectv = NULL;
 
-  if (IS_HOSHIJIN(mob) && GET_SEX(mob) == SEX_MALE) {
+  if (char_is_hoshijin(mob) && GET_SEX(mob) == SEX_MALE) {
    mob->hairl = 0;
    mob->hairc = 0;
    mob->hairs = 0;
@@ -3039,13 +3039,13 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   BLOCKED(mob) = NULL;
   BLOCKS(mob) = NULL;
 
-  if (!IS_HUMAN(mob) && !IS_SAIYAN(mob) && !IS_HALFBREED(mob) && !IS_NAMEK(mob)) {
+  if (!char_is_human(mob) && !char_is_saiyan(mob) && !char_is_halfbreed(mob) && !char_is_namek(mob)) {
   mob->skin = rand_number(0, 11);
   }
-  if (IS_NAMEK(mob)) {
+  if (char_is_namek(mob)) {
    mob->skin = 2;
   }
-  if (IS_HUMAN(mob) || IS_SAIYAN(mob) || IS_HALFBREED(mob)) {
+  if (char_is_human(mob) || char_is_saiyan(mob) || char_is_halfbreed(mob)) {
    if (rand_number(1, 5) <= 2) {
     mob->skin = rand_number(0, 1);
    }
@@ -3056,18 +3056,18 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     mob->skin = rand_number(9, 10);
    }
   }
-  if (IS_SAIYAN(mob)) {
+  if (char_is_saiyan(mob)) {
    mob->hairc = rand_number(1, 2);
    mob->eye = 1;
   }
 
-  if (GET_MOB_VNUM(mob) >= 81 && GET_MOB_VNUM(mob) <= 87) {
+  if (char_get_mob_vnum(mob) >= 81 && char_get_mob_vnum(mob) <= 87) {
    dragon_level(mob);
   }
  
   int64_t mult = 0;
 
-  switch (GET_LEVEL(mob))
+  switch (char_get_level(mob))
   {
    case 1:
     mult = rand_number(50, 80);
@@ -3260,7 +3260,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     mult = rand_number(800000000, 900000000);
     break;
    default:
-    if (GET_LEVEL(mob) >= 150) {
+    if (char_get_level(mob) >= 150) {
      mult = rand_number(1500000000, 2000000000);
     } else {
      mult = rand_number(1250000000, 1500000000);
@@ -3272,49 +3272,49 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
  bool autoset = false;
   if (mob->basepl <= 1) {
       autoset = true;
-      mob->basepl = GET_LEVEL(mob) * mult;
-   if (GET_LEVEL(mob) > 140) {
+      mob->basepl = char_get_level(mob) * mult;
+   if (char_get_level(mob) > 140) {
        mob->basepl *= 8;
-   } else if (GET_LEVEL(mob) > 130) {
+   } else if (char_get_level(mob) > 130) {
        mob->basepl *= 6;
-   } else if (GET_LEVEL(mob) > 120) {
+   } else if (char_get_level(mob) > 120) {
        mob->basepl *= 3;
-   } else if (GET_LEVEL(mob) > 110) {
+   } else if (char_get_level(mob) > 110) {
        mob->basepl *= 2;
    }
   }
   if (autoset) {
-      mob->baseki = GET_LEVEL(mob) * mult;
-   if (GET_LEVEL(mob) > 140) {
+      mob->baseki = char_get_level(mob) * mult;
+   if (char_get_level(mob) > 140) {
        mob->baseki *= 8;
-   } else if (GET_LEVEL(mob) > 130) {
+   } else if (char_get_level(mob) > 130) {
        mob->baseki *= 6;
-   } else if (GET_LEVEL(mob) > 120) {
+   } else if (char_get_level(mob) > 120) {
        mob->baseki *= 3;
-   } else if (GET_LEVEL(mob) > 110) {
+   } else if (char_get_level(mob) > 110) {
        mob->baseki *= 2;
    }
   }
   if (autoset) {
-      mob->basest = GET_LEVEL(mob) * mult;
-   if (GET_LEVEL(mob) > 140) {
+      mob->basest = char_get_level(mob) * mult;
+   if (char_get_level(mob) > 140) {
        mob->basest *= 8;
-   } else if (GET_LEVEL(mob) > 130) {
+   } else if (char_get_level(mob) > 130) {
        mob->basest *= 6;
-   } else if (GET_LEVEL(mob) > 120) {
+   } else if (char_get_level(mob) > 120) {
        mob->basest *= 3;
-   } else if (GET_LEVEL(mob) > 110) {
+   } else if (char_get_level(mob) > 110) {
        mob->basest *= 2;
    }
   }
-  if (GET_MOB_VNUM(mob) == 2245) {
+  if (char_get_mob_vnum(mob) == 2245) {
    mob->basepl = rand_number(1, 4);
    mob->baseki = rand_number(1, 4);
    mob->basest = rand_number(1, 4);
   }
 
   int base = 0;
-  switch (GET_LEVEL(mob))
+  switch (char_get_level(mob))
   {
    case 1:
    case 2:
@@ -3486,78 +3486,78 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     break;
   }
   MOB_COOLDOWN(mob) = 0;
-  if (GET_GOLD(mob) <= 0 && !MOB_FLAGGED(mob, MOB_DUMMY)) {
-   if (GET_LEVEL(mob) < 4) {
-    GET_GOLD(mob) = GET_LEVEL(mob) * rand_number(1, 2);
-   } else if (GET_LEVEL(mob) < 10) {
-    GET_GOLD(mob) = (GET_LEVEL(mob) * rand_number(1, 2)) - 1;
-   } else if (GET_LEVEL(mob) < 20) {
-    GET_GOLD(mob) = (GET_LEVEL(mob) * rand_number(1, 3)) - 2;
-   } else if (GET_LEVEL(mob) < 30) {
-    GET_GOLD(mob) = (GET_LEVEL(mob) * rand_number(1, 3)) - 4;
-   } else if (GET_LEVEL(mob) < 40) {
-    GET_GOLD(mob) = (GET_LEVEL(mob) * rand_number(1, 3)) - 6;
-   } else if (GET_LEVEL(mob) < 50) {
-    GET_GOLD(mob) = (GET_LEVEL(mob) * rand_number(2, 3)) - 25;
-   } else if (GET_LEVEL(mob) < 60) {
-    GET_GOLD(mob) = (GET_LEVEL(mob) * rand_number(2, 3)) - 40;
-   } else if (GET_LEVEL(mob) < 70) {
-    GET_GOLD(mob) = (GET_LEVEL(mob) * rand_number(2, 3)) - 50;
-   } else if (GET_LEVEL(mob) < 80) {
-    GET_GOLD(mob) = (GET_LEVEL(mob) * rand_number(2, 4)) - 60;
-   } else if (GET_LEVEL(mob) < 90) {
-    GET_GOLD(mob) = (GET_LEVEL(mob) * rand_number(2, 4)) - 70;
+  if (GET_GOLD(mob) <= 0 && !char_mob_flagged(mob, MOB_DUMMY)) {
+   if (char_get_level(mob) < 4) {
+    GET_GOLD(mob) = char_get_level(mob) * rand_number(1, 2);
+   } else if (char_get_level(mob) < 10) {
+    GET_GOLD(mob) = (char_get_level(mob) * rand_number(1, 2)) - 1;
+   } else if (char_get_level(mob) < 20) {
+    GET_GOLD(mob) = (char_get_level(mob) * rand_number(1, 3)) - 2;
+   } else if (char_get_level(mob) < 30) {
+    GET_GOLD(mob) = (char_get_level(mob) * rand_number(1, 3)) - 4;
+   } else if (char_get_level(mob) < 40) {
+    GET_GOLD(mob) = (char_get_level(mob) * rand_number(1, 3)) - 6;
+   } else if (char_get_level(mob) < 50) {
+    GET_GOLD(mob) = (char_get_level(mob) * rand_number(2, 3)) - 25;
+   } else if (char_get_level(mob) < 60) {
+    GET_GOLD(mob) = (char_get_level(mob) * rand_number(2, 3)) - 40;
+   } else if (char_get_level(mob) < 70) {
+    GET_GOLD(mob) = (char_get_level(mob) * rand_number(2, 3)) - 50;
+   } else if (char_get_level(mob) < 80) {
+    GET_GOLD(mob) = (char_get_level(mob) * rand_number(2, 4)) - 60;
+   } else if (char_get_level(mob) < 90) {
+    GET_GOLD(mob) = (char_get_level(mob) * rand_number(2, 4)) - 70;
    } else {
-    GET_GOLD(mob) = (GET_LEVEL(mob) * rand_number(3, 4)) - 85;
+    GET_GOLD(mob) = (char_get_level(mob) * rand_number(3, 4)) - 85;
    }
-   if (!IS_HUMANOID(mob)) {
+   if (!char_is_humanoid(mob)) {
     GET_GOLD(mob) = GET_GOLD(mob) * 0.5;
     if (GET_GOLD(mob) <= 0)
      GET_GOLD(mob) = 1;
    }
   }
-  if (GET_EXP(mob) <= 0 && !MOB_FLAGGED(mob, MOB_DUMMY)) {
-   GET_EXP(mob) = GET_LEVEL(mob) * base;
+  if (GET_EXP(mob) <= 0 && !char_mob_flagged(mob, MOB_DUMMY)) {
+   GET_EXP(mob) = char_get_level(mob) * base;
    GET_EXP(mob) = GET_EXP(mob) * .9;
-   GET_EXP(mob) += GET_LEVEL(mob) / 2;
-   GET_EXP(mob) += GET_LEVEL(mob) / 3;
-   if (IS_DRAGON(mob)) {
+   GET_EXP(mob) += char_get_level(mob) / 2;
+   GET_EXP(mob) += char_get_level(mob) / 3;
+   if (char_is_dragon(mob)) {
     GET_EXP(mob) *= 1.4;
-   } else if (IS_ANDROID(mob)) {
+   } else if (char_is_android(mob)) {
     GET_EXP(mob) *= 1.25;
-   } else if (IS_SAIYAN(mob)) {
+   } else if (char_is_saiyan(mob)) {
     GET_EXP(mob) *= 1.1;
-   } else if (IS_BIO(mob)) {
+   } else if (char_is_bio(mob)) {
     GET_EXP(mob) *= 1.2;
-   } else if (IS_MAJIN(mob)) {
+   } else if (char_is_majin(mob)) {
     GET_EXP(mob) *= 1.25;
-   } else if (IS_DEMON(mob)) {
+   } else if (char_is_demon(mob)) {
     GET_EXP(mob) *= 1.1;
-   } else if (GET_CLASS(mob) == CLASS_SHADOWDANCER) {
+   } else if (char_get_class(mob) == CLASS_SHADOWDANCER) {
     GET_EXP(mob) *= 2;
    }
-   if (GET_CLASS(mob) == CLASS_NPC_COMMONER && IS_HUMANOID(mob) && !IS_DRAGON(mob)) {
-    if (!IS_ANDROID(mob) && !IS_SAIYAN(mob) && !IS_BIO(mob) && !IS_MAJIN(mob)) {
+   if (char_get_class(mob) == CLASS_NPC_COMMONER && char_is_humanoid(mob) && !char_is_dragon(mob)) {
+    if (!char_is_android(mob) && !char_is_saiyan(mob) && !char_is_bio(mob) && !char_is_majin(mob)) {
      GET_EXP(mob) *= 0.75;
     }
    }
 
-   if (GET_LEVEL(mob) > 90) {
+   if (char_get_level(mob) > 90) {
     GET_EXP(mob) = GET_EXP(mob) * .7;
    }
-   else if (GET_LEVEL(mob) > 80) {
+   else if (char_get_level(mob) > 80) {
     GET_EXP(mob) = GET_EXP(mob) * .75;
    }
-   else if (GET_LEVEL(mob) > 70) {
+   else if (char_get_level(mob) > 70) {
     GET_EXP(mob) = GET_EXP(mob) * .8;
    }
-   else if (GET_LEVEL(mob) > 60) {
+   else if (char_get_level(mob) > 60) {
     GET_EXP(mob) = GET_EXP(mob) * .85;
    }
-   else if (GET_LEVEL(mob) > 40) {
+   else if (char_get_level(mob) > 40) {
     GET_EXP(mob) = GET_EXP(mob) * .9;
    }
-   else if (GET_LEVEL(mob) > 30) {
+   else if (char_get_level(mob) > 30) {
     GET_EXP(mob) = GET_EXP(mob) * .95;
    }
   
@@ -3573,7 +3573,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   mob->time.logon = time(0);
   MOB_LOADROOM(mob) = NOWHERE;
 
-  if (IS_HUMANOID(mob)) {
+  if (char_is_humanoid(mob)) {
    SET_BIT_AR(MOB_FLAGS(mob), MOB_RARM);
    SET_BIT_AR(MOB_FLAGS(mob), MOB_LARM);
    SET_BIT_AR(MOB_FLAGS(mob), MOB_RLEG);
@@ -3590,7 +3590,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   assign_triggers(mob, MOB_TRIGGER);
   racial_body_parts(mob); 
 
-  if (GET_MOB_VNUM(mob) >= 800 && GET_MOB_VNUM(mob) <= 805) {
+  if (char_get_mob_vnum(mob) >= 800 && char_get_mob_vnum(mob) <= 805) {
    number_of_assassins += 1;
   }
 
@@ -3679,21 +3679,21 @@ void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2)
 {
   mudlog(BRF, ADMLVL_GOD, TRUE, "DUPE: Dupe object found: %s [%d] [%" TMT ":%" I64T "]",
         obj1->short_description ? obj1->short_description : "<No name>",
-        GET_OBJ_VNUM(obj1), obj1->generation, obj1->unique_id);
+        obj_get_vnum(obj1), obj1->generation, obj1->unique_id);
   mudlog(BRF, ADMLVL_GOD, TRUE, "DUPE: First: In room: %d (%s), "
                              "In object: %s, Carried by: %s, Worn by: %s",
-        GET_ROOM_VNUM(IN_ROOM(obj1)),
+        rroom_get_vnum(IN_ROOM(obj1)),
         IN_ROOM(obj1) == NOWHERE ? "Nowhere" : world[IN_ROOM(obj1)].name,
         obj1->in_obj ? obj1->in_obj->short_description : "None",
-        obj1->carried_by ? GET_NAME(obj1->carried_by) : "Nobody",
-        obj1->worn_by ? GET_NAME(obj1->worn_by) : "Nobody");
+        obj1->carried_by ? char_get_name(obj1->carried_by) : "Nobody",
+        obj1->worn_by ? char_get_name(obj1->worn_by) : "Nobody");
   mudlog(BRF, ADMLVL_GOD, TRUE, "DUPE: Newer: In room: %d (%s), "
                              "In object: %s, Carried by: %s, Worn by: %s",
-        GET_ROOM_VNUM(IN_ROOM(obj2)),
+        rroom_get_vnum(IN_ROOM(obj2)),
         IN_ROOM(obj2) == NOWHERE ? "Nowhere" : world[IN_ROOM(obj2)].name,
         obj2->in_obj ? obj2->in_obj->short_description : "None",
-        obj2->carried_by ? GET_NAME(obj2->carried_by) : "Nobody",
-        obj2->worn_by ? GET_NAME(obj2->worn_by) : "Nobody");
+        obj2->carried_by ? char_get_name(obj2->carried_by) : "Nobody",
+        obj2->worn_by ? char_get_name(obj2->worn_by) : "Nobody");
 }
 
 void check_unique_id(struct obj_data *obj)
@@ -3742,7 +3742,7 @@ char *sprintuniques(int low, int high)
     header = 0;
     q = obj_unique_hash_pools[i];
     while (q) {
-      if (GET_OBJ_VNUM(q->obj) >= low && GET_OBJ_VNUM(q->obj) <= high) {
+      if (obj_get_vnum(q->obj) >= low && obj_get_vnum(q->obj) <= high) {
         if (!header) {
           header = 1;
           count = snprintf(ptr, remain, "|-Hash %d\r\n", i);
@@ -3750,7 +3750,7 @@ char *sprintuniques(int low, int high)
           remain -= count;
         }
         count = snprintf(ptr, remain, "| |- [@g%6d@n] - [@y%10" TMT ":%-19" I64T "@n] - %s\r\n",
-                GET_OBJ_VNUM(q->obj), q->generation, q->unique_id,
+                obj_get_vnum(q->obj), q->generation, q->unique_id,
                 q->obj->short_description ? q->obj->short_description : "<Unknown>");
         ptr += count;
         remain -= count;
@@ -3822,7 +3822,7 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
   }
   copy_proto_script(&obj_proto[i], obj, OBJ_TRIGGER);
   assign_triggers(obj, OBJ_TRIGGER);
-  if (GET_OBJ_VNUM(obj) == 65) {
+  if (obj_get_vnum(obj) == 65) {
    HCHARGE(obj) = 20;
   }
   if (GET_OBJ_TYPE(obj) == ITEM_FOOD) {
@@ -3833,8 +3833,6 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
   }
   return (obj);
 }
-
-
 
 #define ZO_DEAD  999
 
@@ -3967,8 +3965,8 @@ void reset_zone(zone_rnum zone)
 
         if (ZCMD2.arg4 > 0) {
           for (i = character_list; i; i = i->next) {
-            if ((MOB_LOADROOM(i) == GET_ROOM_VNUM(ZCMD2.arg3)) 
-               && (GET_MOB_VNUM(i) == GET_MOB_VNUM(mob))) {
+            if ((MOB_LOADROOM(i) == rroom_get_vnum(ZCMD2.arg3)) 
+               && (char_get_mob_vnum(i) == char_get_mob_vnum(mob))) {
   	      room_max++;
             }
 	  }
@@ -3984,7 +3982,7 @@ void reset_zone(zone_rnum zone)
 	   }
 	
 	   /*  Set the mobs loadroom for room_max checks. */
-	MOB_LOADROOM(mob) = GET_ROOM_VNUM(ZCMD2.arg3);
+	MOB_LOADROOM(mob) = rroom_get_vnum(ZCMD2.arg3);
 	
         load_mtrigger(mob);
         tmob = mob;
@@ -4009,12 +4007,12 @@ void reset_zone(zone_rnum zone)
 
         if (ZCMD2.arg4 > 0) {
           for (k = object_list; k; k = k->next) {
-            if (((OBJ_LOADROOM(k)==GET_ROOM_VNUM(ZCMD2.arg3)) 
-                && (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj))) || (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj) && GET_ROOM_VNUM(ZCMD2.arg3) ==  GET_ROOM_VNUM(IN_ROOM(k)))) {
+            if (((OBJ_LOADROOM(k)==rroom_get_vnum(ZCMD2.arg3)) 
+                && (obj_get_vnum(k) == obj_get_vnum(obj))) || (obj_get_vnum(k) == obj_get_vnum(obj) && rroom_get_vnum(ZCMD2.arg3) ==  rroom_get_vnum(IN_ROOM(k)))) {
               /*  For objects, lets not count them if they've been removed from the room */
               /*  We'll let max_in_mud handle those. */
-               if (IN_ROOM(k) == NOWHERE || GET_ROOM_VNUM(IN_ROOM(k)) 
-                   != GET_ROOM_VNUM(ZCMD2.arg3)) {
+               if (IN_ROOM(k) == NOWHERE || rroom_get_vnum(IN_ROOM(k)) 
+                   != rroom_get_vnum(ZCMD2.arg3)) {
                  continue;
                }
 	       room_max++;
@@ -4034,7 +4032,7 @@ void reset_zone(zone_rnum zone)
 	  
 	  /* Set the loadroom for room_max checks */
 
-	  OBJ_LOADROOM(obj) = GET_ROOM_VNUM(ZCMD2.arg3);
+	  OBJ_LOADROOM(obj) = rroom_get_vnum(ZCMD2.arg3);
 	
 	  last_cmd = 1;
           load_otrigger(obj);
@@ -4083,7 +4081,7 @@ void reset_zone(zone_rnum zone)
 	obj = read_object(ZCMD2.arg1, REAL);
         add_unique_id(obj);
 	obj_to_char(obj, mob);
-        if (GET_MOB_SPEC(mob) != shop_keeper) {
+        if (char_get_mob_spec(mob) != shop_keeper) {
          randomize_eq(obj);
         }
 	last_cmd = 1;
@@ -4229,11 +4227,11 @@ void reset_zone(zone_rnum zone)
     rrnum = real_room(rvnum);
     if (rrnum != NOWHERE) {
      reset_wtrigger(&world[rrnum]);
-     if (ROOM_FLAGGED(rrnum, ROOM_AURA) && rand_number(1, 5) >= 4) {
+     if (rroom_flagged(rrnum, ROOM_AURA) && rand_number(1, 5) >= 4) {
       send_to_room(rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
       REMOVE_BIT_AR(ROOM_FLAGS(rrnum), ROOM_AURA);
      }
-     if (SECT(rrnum) == SECT_LAVA) {
+     if (rroom_sect(rrnum) == SECT_LAVA) {
       ROOM_EFFECT(rrnum) = 5;
      }
      if (ROOM_EFFECT(rrnum) < -1) {
@@ -4264,10 +4262,10 @@ void reset_zone(zone_rnum zone)
       send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
       ROOM_DAMAGE(rrnum)--;
      }
-     if (ROOM_EFFECT(rrnum) >= 1 && rand_number(1, 4) == 4 && !SUNKEN(rrnum) && SECT(rrnum) != SECT_LAVA) {
+     if (ROOM_EFFECT(rrnum) >= 1 && rand_number(1, 4) == 4 && !rroom_sunken(rrnum) && rroom_sect(rrnum) != SECT_LAVA) {
       send_to_room(rrnum, "The lava has cooled and become solid rock.\r\n");
       ROOM_EFFECT(rrnum) = 0;
-     } else if (ROOM_EFFECT(rrnum) >= 1 && rand_number(1, 2) == 2 && SUNKEN(rrnum) && SECT(rrnum) != SECT_LAVA) {
+     } else if (ROOM_EFFECT(rrnum) >= 1 && rand_number(1, 2) == 2 && rroom_sunken(rrnum) && rroom_sect(rrnum) != SECT_LAVA) {
       send_to_room(rrnum, "The water has cooled the lava and it has become solid rock.\r\n");
       ROOM_EFFECT(rrnum) = 0;
      }
@@ -4301,10 +4299,10 @@ int is_empty(zone_rnum zone_nr)
      * if an immortal has nohassle off, he counts as present 
      * added for testing zone reset triggers - Welcor 
      */
-    if (IS_NPC(i->character))
+    if (char_is_npc(i->character))
       continue; /* immortal switched into a mob */
 
-    if ((GET_ADMLEVEL(i->character) >= ADMLVL_IMMORT) && (PRF_FLAGGED(i->character, PRF_NOHASSLE)))
+    if ((GET_ADMLEVEL(i->character) >= ADMLVL_IMMORT) && (char_prf_flagged(i->character, PRF_NOHASSLE)))
       continue;
 
     return (0);
@@ -4398,13 +4396,13 @@ void free_char(struct char_data *ch)
     for (i = 0; i < NUM_COLOR; i++)
       if (ch->player_specials->color_choices[i])
         free(ch->player_specials->color_choices[i]);
-    if (IS_NPC(ch))
-      log("SYSERR: Mob %s (#%d) had player_specials allocated!", GET_NAME(ch), GET_MOB_VNUM(ch));
+    if (char_is_npc(ch))
+      log("SYSERR: Mob %s (#%d) had player_specials allocated!", char_get_name(ch), char_get_mob_vnum(ch));
   }
-  if (!IS_NPC(ch) || (IS_NPC(ch) && GET_MOB_RNUM(ch) == NOBODY)) {
+  if (!char_is_npc(ch) || (char_is_npc(ch) && GET_MOB_RNUM(ch) == NOBODY)) {
     /* if this is a player, or a non-prototyped non-player, free all */
-    if (GET_NAME(ch))
-      free(GET_NAME(ch));
+    if (char_get_name(ch))
+      free(char_get_name(ch));
     if (GET_VOICE(ch))
       free(GET_VOICE(ch));
     if (GET_CLAN(ch))
@@ -4691,7 +4689,7 @@ void init_char(struct char_data *ch)
   /* If this is our first player make him LVL_IMPL. */
   if (top_of_p_table == 0) {
     admin_set(ch, ADMLVL_IMPL);
-    GET_CLASS_NONEPIC(ch, GET_CLASS(ch)) = GET_LEVEL(ch);
+    GET_CLASS_NONEPIC(ch, char_get_class(ch)) = char_get_level(ch);
 
     /* The implementor never goes through do_start(). */
     ch->baseki = 1000;
@@ -4714,10 +4712,10 @@ void init_char(struct char_data *ch)
 
   set_height_and_weight_by_race(ch);
 
-  if ((i = get_ptable_by_name(GET_NAME(ch))) != -1)
+  if ((i = get_ptable_by_name(char_get_name(ch))) != -1)
     player_table[i].id = GET_IDNUM(ch) = ++top_idnum;
   else
-    log("SYSERR: init_char: Character '%s' not found in player table.", GET_NAME(ch));
+    log("SYSERR: init_char: Character '%s' not found in player table.", char_get_name(ch));
 
   for (i = 0; i < SKILL_TABLE_SIZE; i++) {
     if (GET_ADMLEVEL(ch) < ADMLVL_IMPL)
@@ -4898,13 +4896,13 @@ static int check_object(struct obj_data *obj)
 
   if (GET_OBJ_WEIGHT(obj) < 0 && (error = TRUE))
     log("SYSERR: Object #%d (%s) has negative weight (%" I64T ").",
-	GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_WEIGHT(obj));
+	obj_get_vnum(obj), obj->short_description, GET_OBJ_WEIGHT(obj));
 
   if (GET_OBJ_RENT(obj) < 0 && (error = TRUE))
     log("SYSERR: Object #%d (%s) has negative cost/day (%d).",
-	GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_RENT(obj));
+	obj_get_vnum(obj), obj->short_description, GET_OBJ_RENT(obj));
 
-  snprintf(objname, sizeof(objname), "Object #%d (%s)", GET_OBJ_VNUM(obj), obj->short_description);
+  snprintf(objname, sizeof(objname), "Object #%d (%s)", obj_get_vnum(obj), obj->short_description);
 
   switch (GET_OBJ_TYPE(obj)) {
   case ITEM_DRINKCON:
@@ -4920,7 +4918,7 @@ static int check_object(struct obj_data *obj)
   case ITEM_FOUNTAIN:
     if ((GET_OBJ_VAL(obj,0) > 0) && (GET_OBJ_VAL(obj, 1) > GET_OBJ_VAL(obj, 0) && (error = TRUE)))
       log("SYSERR: Object #%d (%s) contains (%d) more than maximum (%d).",
-		GET_OBJ_VNUM(obj), obj->short_description,
+		obj_get_vnum(obj), obj->short_description,
 		GET_OBJ_VAL(obj, 1), GET_OBJ_VAL(obj, 0));
     break;
   case ITEM_SCROLL:
@@ -4936,7 +4934,7 @@ static int check_object(struct obj_data *obj)
     error |= check_object_spell_number(obj, 3);
     if (GET_OBJ_VAL(obj, 2) > GET_OBJ_VAL(obj, 1) && (error = TRUE))
       log("SYSERR: Object #%d (%s) has more charges (%d) than maximum (%d).",
-		GET_OBJ_VNUM(obj), obj->short_description,
+		obj_get_vnum(obj), obj->short_description,
 		GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 1));
     break;
  }
@@ -4966,7 +4964,7 @@ static int check_object_spell_number(struct obj_data *obj, int val)
     error = TRUE;
   if (error)
     log("SYSERR: Object #%d (%s) has out of range spell #%d.",
-	GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_VAL(obj, val));
+	obj_get_vnum(obj), obj->short_description, GET_OBJ_VAL(obj, val));
 
   /*
    * This bug has been fixed, but if you don't like the special behavior...
@@ -4975,7 +4973,7 @@ static int check_object_spell_number(struct obj_data *obj, int val)
   if (GET_OBJ_TYPE(obj) == ITEM_STAFF &&
 	HAS_SPELL_ROUTINE(GET_OBJ_VAL(obj, val), MAG_AREAS | MAG_MASSES))
     log("... '%s' (#%d) uses %s spell '%s'.",
-	obj->short_description,	GET_OBJ_VNUM(obj),
+	obj->short_description,	obj_get_vnum(obj),
 	HAS_SPELL_ROUTINE(GET_OBJ_VAL(obj, val), MAG_AREAS) ? "area" : "mass",
 	skill_name(GET_OBJ_VAL(obj, val)));
 #endif
@@ -4988,7 +4986,7 @@ static int check_object_spell_number(struct obj_data *obj, int val)
 
   if ((spellname == unused_spellname || !strcasecmp("UNDEFINED", spellname)) && (error = TRUE))
     log("SYSERR: Object #%d (%s) uses '%s' spell #%d.",
-		GET_OBJ_VNUM(obj), obj->short_description, spellname,
+		obj_get_vnum(obj), obj->short_description, spellname,
 		GET_OBJ_VAL(obj, val));
 
   return (error);
@@ -5000,7 +4998,7 @@ static int check_object_level(struct obj_data *obj, int val)
 
   if ((GET_OBJ_VAL(obj, val) < 0) && (error = TRUE))
     log("SYSERR: Object #%d (%s) has out of range level #%d.",
-	GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_VAL(obj, val));
+	obj_get_vnum(obj), obj->short_description, GET_OBJ_VAL(obj, val));
 
   return (error);
 }
@@ -5036,7 +5034,7 @@ static int obj_save_fprintf(FILE *fp, struct obj_data *obj, const char *context,
   if (result < 0 || ferror(fp)) {
     int saved_errno = errno;
     basic_mud_log("SYSERR: %s:%d: fprintf failed saving object #%d (%s): %s",
-                  file, line, GET_OBJ_VNUM(obj), context,
+                  file, line, obj_get_vnum(obj), context,
                   saved_errno ? strerror(saved_errno) : "stream error");
     return 0;
   }
@@ -5070,7 +5068,7 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
     if (!OBJ_SAVE_FPRINTF(fp, obj, "base object data",
       "#%d\n"
       "%d %d %d %d %d %d %d %d %d %s %s %s %s %d %d %d %d %d %d %d %d\n",
-      GET_OBJ_VNUM(obj), locate, GET_OBJ_VAL(obj, 0), GET_OBJ_VAL(obj, 1),
+      obj_get_vnum(obj), locate, GET_OBJ_VAL(obj, 0), GET_OBJ_VAL(obj, 1),
       GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 3), GET_OBJ_VAL(obj, 4), 
       GET_OBJ_VAL(obj, 5), GET_OBJ_VAL(obj, 6), GET_OBJ_VAL(obj, 7),
       ebuf0, ebuf1, ebuf2, ebuf3,
@@ -5079,7 +5077,7 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
       GET_OBJ_VAL(obj, 13), GET_OBJ_VAL(obj, 14), GET_OBJ_VAL(obj, 15)))
       return 0;
 
-  if (!(OBJ_FLAGGED(obj,ITEM_UNIQUE_SAVE)) && !GET_OBJ_TYPE(obj) == ITEM_SPELLBOOK) {
+  if (!(obj_flagged(obj,ITEM_UNIQUE_SAVE)) && !GET_OBJ_TYPE(obj) == ITEM_SPELLBOOK) {
     return 1;
   }
 
@@ -5591,7 +5589,7 @@ void read_level_data(struct char_data *ch, FILE *fl)
   while (!feof(fl)) {
     i++;
     if (!get_line(fl, buf)) {
-      log("read_level_data: get_line() failed reading level data line %d for %s", i, GET_NAME(ch));
+      log("read_level_data: get_line() failed reading level data line %d for %s", i, char_get_name(ch));
       return;
     }
     for (p = buf; *p && *p != ' '; p++);
@@ -5599,14 +5597,14 @@ void read_level_data(struct char_data *ch, FILE *fl)
       return;
     }
     if (!*p) {
-      log("read_level_data: malformed line reading level data line %d for %s: %s", i, GET_NAME(ch), buf);
+      log("read_level_data: malformed line reading level data line %d for %s: %s", i, char_get_name(ch), buf);
       return;
     }
     *(p++) = 0;
     if (!strcmp(buf, "level")) {
       if (sscanf(p, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", t,t+1,t+2,t+3,
                  t+4,t+5,t+6,t+7,t+8,t+9,t+10,t+11,t+12,t+13,t+14,t+15) != 16) {
-        log("read_level_data: missing fields on level_data line %d for %s", i, GET_NAME(ch));
+        log("read_level_data: missing fields on level_data line %d for %s", i, char_get_name(ch));
         curr = NULL;
         continue;
       }
@@ -5636,11 +5634,11 @@ void read_level_data(struct char_data *ch, FILE *fl)
       continue;
     }
     if (!curr) {
-      log("read_level_data: found continuation entry without current level for %s", GET_NAME(ch));
+      log("read_level_data: found continuation entry without current level for %s", char_get_name(ch));
       continue;
     }
     if (sscanf(p, "%d %d %d", t, t+1, t+2) != 3) {
-      log("read_level_data: missing fields on level_data %s line %d for %s", buf, i, GET_NAME(ch));
+      log("read_level_data: missing fields on level_data %s line %d for %s", buf, i, char_get_name(ch));
       continue;
     }
     CREATE(learn, struct level_learn_entry, 1);
@@ -5655,7 +5653,7 @@ void read_level_data(struct char_data *ch, FILE *fl)
       curr->feats = learn;
     }
   }
-  log("read_level_data: EOF reached reading level_data for %s", GET_NAME(ch));
+  log("read_level_data: EOF reached reading level_data for %s", char_get_name(ch));
   return;
 }
 

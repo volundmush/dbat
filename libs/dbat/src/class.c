@@ -228,18 +228,18 @@ void do_start(struct char_data *ch)
   GET_CLASS_LEVEL(ch) = 1;
   GET_HITDICE(ch) = 0;
   GET_LEVEL_ADJ(ch) = 0;
-  GET_CLASS_NONEPIC(ch, GET_CLASS(ch)) = 1;
+  GET_CLASS_NONEPIC(ch, char_get_class(ch)) = 1;
   GET_EXP(ch) = 1;
  
-  if (IS_ANDROID(ch)) {
+  if (char_is_android(ch)) {
    GET_COND(ch, HUNGER) = -1;
    GET_COND(ch, THIRST) = -1;
    GET_COND(ch, DRUNK) = -1;
-  } else if (IS_BIO(ch) && HAS_GENOME(ch, 3)) {
+  } else if (char_is_bio(ch) && char_has_genome(ch, 3)) {
    GET_COND(ch, HUNGER) = -1;
    GET_COND(ch, DRUNK) = 0;
    GET_COND(ch, THIRST) = 48;
-  }else if (IS_NAMEK(ch)) {
+  }else if (char_is_namek(ch)) {
    GET_COND(ch, HUNGER) = -1;
    GET_COND(ch, DRUNK) = 0;
    GET_COND(ch, THIRST) = 48;
@@ -276,7 +276,7 @@ void do_start(struct char_data *ch)
   }
   
 
-  if (IS_TSUNA(ch) || IS_KABITO(ch) || IS_NAIL(ch))
+  if (char_is_tsuna(ch) || char_is_kabito(ch) || char_is_nail(ch))
    GET_SLOTS(ch) += 5;
 
   if (GET_BONUS(ch, BONUS_GMEMORY))
@@ -307,7 +307,7 @@ void do_start(struct char_data *ch)
     SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPEXP);
     SET_BIT_AR(PRF_FLAGS(ch), PRF_DISPTNL);
 
-  if (!PLR_FLAGGED(ch, PLR_FORGET)) {
+  if (!char_plr_flagged(ch, PLR_FORGET)) {
    if (ch->choice == 1) {
     punch = rand_number(30, 40);
     SET_SKILL(ch, SKILL_BLOCK, punch);
@@ -328,15 +328,15 @@ void do_start(struct char_data *ch)
     punch = rand_number(20, 30);
     SET_SKILL(ch, SKILL_FOCUS, punch);
    }
-   if (IS_HUMAN(ch)) {
+   if (char_is_human(ch)) {
     punch = rand_number(5, 15);
     SET_SKILL(ch, SKILL_BUILD, punch);
    }
-   if (IS_TRUFFLE(ch)) {
+   if (char_is_truffle(ch)) {
     punch = rand_number(15, 25);
     SET_SKILL(ch, SKILL_BUILD, punch);
    }
-   if (IS_KONATSU(ch)) {
+   if (char_is_konatsu(ch)) {
     punch = rand_number(50, 60);
     SET_SKILL(ch, SKILL_SWORD, punch);
     punch = rand_number(10, 30);
@@ -344,26 +344,26 @@ void do_start(struct char_data *ch)
     punch = rand_number(10, 30);
     SET_SKILL(ch, SKILL_HIDE, punch);
    }
-   if (IS_TAPION(ch) || IS_GINYU(ch) || IS_DABURA(ch) || IS_KURZAK(ch)) {
+   if (char_is_tapion(ch) || char_is_ginyu(ch) || char_is_dabura(ch) || char_is_kurzak(ch)) {
     punch = rand_number(30, 40);
-    if (IS_KURZAK(ch) || IS_TAPION(ch)) {
+    if (char_is_kurzak(ch) || char_is_tapion(ch)) {
      punch += rand_number(5, 10);
     }
     SET_SKILL(ch, SKILL_THROW, punch);
    }
-   if (IS_KAI(ch) || IS_KANASSAN(ch)) {
+   if (char_is_kai(ch) || char_is_kanassan(ch)) {
     punch = rand_number(40, 60);
     SET_SKILL(ch, SKILL_FOCUS, punch);
    }
-   if (IS_KANASSAN(ch)) {
+   if (char_is_kanassan(ch)) {
     punch = rand_number(40, 60);
     SET_SKILL(ch, SKILL_CONCENTRATION, punch);
    }
-   if (IS_KAI(ch)) {
+   if (char_is_kai(ch)) {
     punch = rand_number(30, 50);
     SET_SKILL(ch, SKILL_HEAL, punch);
    }
-   if (IS_DEMON(ch)) {
+   if (char_is_demon(ch)) {
     punch = rand_number(50, 60);
     SET_SKILL(ch, SKILL_SPEAR, punch);
     SET_SKILL(ch, SKILL_HONOO, punch);
@@ -377,43 +377,43 @@ void do_start(struct char_data *ch)
    REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_FORGET);
   }
 
-   if (IS_KAI(ch) || IS_KANASSAN(ch)) {
+   if (char_is_kai(ch) || char_is_kanassan(ch)) {
     punch = rand_number(15, 30);
     SET_SKILL(ch, SKILL_TELEPATHY, punch);
    }
 
  
 
-   if (IS_MAJIN(ch) || IS_NAMEK(ch) || IS_BIO(ch)) {
+   if (char_is_majin(ch) || char_is_namek(ch) || char_is_bio(ch)) {
     punch = rand_number(10, 16);
     SET_SKILL(ch, SKILL_REGENERATE, punch);
    }
-   if (IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_ABSORB)) {
+   if (char_is_android(ch) && char_plr_flagged(ch, PLR_ABSORB)) {
     punch = rand_number(25, 35);
     SET_SKILL(ch, SKILL_ABSORB, punch);
    }
-   if (IS_BIO(ch)) {
+   if (char_is_bio(ch)) {
     punch = rand_number(15, 25);
     SET_SKILL(ch, SKILL_ABSORB, punch);
 
       // Kai Genome bioandroids.
-    if(HAS_GENOME(ch, 7)) {
+    if(char_has_genome(ch, 7)) {
       SET_SKILL(ch, SKILL_TELEPATHY, 30);
       SET_SKILL(ch, SKILL_FOCUS, 30);
     }
 
    }
-   if (IS_ARLIAN(ch)) {
+   if (char_is_arlian(ch)) {
     punch = rand_number(30, 50);
     SET_SKILL(ch, SKILL_SEISHOU, punch);
    }
-   if (IS_ICER(ch)) {
+   if (char_is_icer(ch)) {
     punch = rand_number(20, 30);
     SET_SKILL(ch, SKILL_TAILWHIP, punch);
    }
 
-  if (GET_CLASS(ch) < 0 || GET_CLASS(ch) > NUM_CLASSES) {
-    log("Unknown character class %d in do_start, resetting.", GET_CLASS(ch));
+  if (char_get_class(ch) < 0 || char_get_class(ch) > NUM_CLASSES) {
+    log("Unknown character class %d in do_start, resetting.", char_get_class(ch));
     //GET_CLASS(ch) = 0;
   }
   if (GET_ALIGNMENT(ch) < 51 && GET_ALIGNMENT(ch) > -51) {
@@ -469,7 +469,7 @@ void do_start(struct char_data *ch)
   /* assign starting items etc...*/
   obj = read_object(17, VIRTUAL);
   obj_to_char(obj, ch);
-  if (IS_HOSHIJIN(ch)) {
+  if (char_is_hoshijin(ch)) {
    obj = read_object(3428, VIRTUAL);
    obj_to_char(obj, ch);
   }
@@ -477,7 +477,7 @@ void do_start(struct char_data *ch)
   obj2 = read_object(17998, VIRTUAL);
   obj_to_char(obj2, ch);
 
-      if (IS_TAPION(ch) || IS_GINYU(ch)) {
+      if (char_is_tapion(ch) || char_is_ginyu(ch)) {
        struct obj_data *throw_obj;
           throw_obj = read_object(19050, VIRTUAL);
        obj_to_char(throw_obj, ch);
@@ -492,7 +492,7 @@ void do_start(struct char_data *ch)
         obj_to_char(throw_obj, ch);
        }
 
-      } else if (IS_DABURA(ch)) {
+      } else if (char_is_dabura(ch)) {
        struct obj_data *throw_obj;
           throw_obj = read_object(19055, VIRTUAL);
        obj_to_char(throw_obj, ch);
@@ -501,15 +501,15 @@ void do_start(struct char_data *ch)
        obj_to_char(throw_obj, ch);
       }
 
-  send_to_imm("New character created, %s, by user, %s.", GET_NAME(ch), GET_USER(ch));
-  advance_level(ch, GET_CLASS(ch));
+  send_to_imm("New character created, %s, by user, %s.", char_get_name(ch), char_get_user(ch));
+  advance_level(ch, char_get_class(ch));
   /*mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s advanced to level %d", GET_NAME(ch), GET_LEVEL(ch));*/
 
   ch->basepl = MAX(ch->basepl, 100L);
   ch->baseki = MAX(ch->baseki, 100L);
   ch->basest = MAX(ch->basest, 100L);
 
-  if (IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_SENSEM)) {
+  if (char_is_android(ch) && char_plr_flagged(ch, PLR_SENSEM)) {
    SET_SKILL(ch, SKILL_SENSE, 100);
    gainBasePL(ch, rand_number(400, 500), false);
    gainBaseST(ch, rand_number(400, 500), false);
@@ -715,11 +715,11 @@ void advance_level(struct char_data *ch, int whichclass)
     whichclass = 0;
   }
 
-  if (!CONFIG_ALLOW_MULTICLASS && whichclass != GET_CLASS(ch)) {
-    log("Attempt to gain a second class without multiclass enabled for %s", GET_NAME(ch));
-    whichclass = GET_CLASS(ch);
+  if (!CONFIG_ALLOW_MULTICLASS && whichclass != char_get_class(ch)) {
+    log("Attempt to gain a second class without multiclass enabled for %s", char_get_name(ch));
+    whichclass = char_get_class(ch);
   }
-  ranks = GET_CLASS_RANKS(ch, whichclass);
+  ranks = char_get_class_ranks(ch, whichclass);
 
   CREATE(llog, struct levelup_data, 1);
   llog->next = ch->level_info;
@@ -731,7 +731,7 @@ void advance_level(struct char_data *ch, int whichclass)
   llog->skills = llog->feats = NULL;
   llog->type = LEVELTYPE_CLASS;
   llog->spec = whichclass;
-  llog->level = GET_LEVEL(ch);
+  llog->level = char_get_level(ch);
 
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
   switch (ranks) {
@@ -825,46 +825,46 @@ void advance_level(struct char_data *ch, int whichclass)
   }
 
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-  if (GET_LEVEL(ch) >= 1) {
+  if (char_get_level(ch) >= 1) {
   double pl_percent = 10, ki_percent = 10, st_percent = 10, prac_reward = GET_WIS(ch);
   
   if (prac_reward < 10) {
    prac_reward = 10;
   }
 
-  if (GET_LEVEL(ch) >= 91) {
+  if (char_get_level(ch) >= 91) {
    pl_percent -= 7.2;
    ki_percent -= 7.2;
    st_percent -= 7.2;
-  } else if (GET_LEVEL(ch) >= 81) {
+  } else if (char_get_level(ch) >= 81) {
    pl_percent -= 5.8;
    ki_percent -= 5.8;
    st_percent -= 5.8; 
-  } else if (GET_LEVEL(ch) >= 71) {
+  } else if (char_get_level(ch) >= 71) {
    pl_percent -= 5;
    ki_percent -= 5;
    st_percent -= 5; 
-  } else if (GET_LEVEL(ch) >= 61) {
+  } else if (char_get_level(ch) >= 61) {
    pl_percent -= 4;
    ki_percent -= 4;
    st_percent -= 4; 
-  } else if (GET_LEVEL(ch) >= 51) {
+  } else if (char_get_level(ch) >= 51) {
    pl_percent -= 3;
    ki_percent -= 3;
    st_percent -= 3; 
-  } else if (GET_LEVEL(ch) >= 41) {
+  } else if (char_get_level(ch) >= 41) {
    pl_percent -= 1.7;
    ki_percent -= 1.7;
    st_percent -= 1.7; 
-  } else if (GET_LEVEL(ch) >= 31) {
+  } else if (char_get_level(ch) >= 31) {
    pl_percent -= 0.8;
    ki_percent -= 0.8;
    st_percent -= 0.8; 
-  } else if (GET_LEVEL(ch) >= 21) {
+  } else if (char_get_level(ch) >= 21) {
    pl_percent -= 0.35;
    ki_percent -= 0.35;
    st_percent -= 0.35; 
-  } else if (GET_LEVEL(ch) >= 11) {
+  } else if (char_get_level(ch) >= 11) {
    pl_percent -= 0.15;
    ki_percent -= 0.15;
    st_percent -= 0.15;
@@ -891,9 +891,9 @@ void advance_level(struct char_data *ch, int whichclass)
      break;
    }
 
-   if (!IS_HUMAN(ch)) {
+   if (!char_is_human(ch)) {
     add_hp = ((getBasePL(ch)) * 0.01) * pl_percent;
-   } else if (IS_HUMAN(ch)) {
+   } else if (char_is_human(ch)) {
     add_hp = (((getBasePL(ch)) * 0.01) * pl_percent) * 0.8;
    }
    add_mana = ((getBaseKI(ch)) * 0.01) * ki_percent;
@@ -981,7 +981,7 @@ void advance_level(struct char_data *ch, int whichclass)
   if (add_mana >= 15000000) {
    add_mana = 15000000;
   }
-  switch (GET_LEVEL(ch)) {
+  switch (char_get_level(ch)) {
    case 5:
     add_hp += rand_number(600, 1000);
     add_move += rand_number(600, 1000);
@@ -1044,7 +1044,7 @@ void advance_level(struct char_data *ch, int whichclass)
     break;
   }
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-  if (GET_LEVEL(ch) == 1 || !(GET_LEVEL(ch) % 3)) {
+  if (char_get_level(ch) == 1 || !(char_get_level(ch) % 3)) {
     add_gen_feats += 1;
   }
 
@@ -1054,7 +1054,7 @@ void advance_level(struct char_data *ch, int whichclass)
 
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
   i = ability_mod_value(GET_CON(ch));
-  if (GET_LEVEL(ch) > 1) {
+  if (char_get_level(ch) > 1) {
     /* blah */
   } else {
       gainBasePL(ch, rand_number(1, 20), false);
@@ -1063,7 +1063,7 @@ void advance_level(struct char_data *ch, int whichclass)
       ch->basest = MAX(ch->basest, 250L);
 
     add_prac = 5;
-    if (PLR_FLAGGED(ch, PLR_SKILLP)) {
+    if (char_plr_flagged(ch, PLR_SKILLP)) {
     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SKILLP);
     add_prac *= 5;
     }
@@ -1085,23 +1085,23 @@ void advance_level(struct char_data *ch, int whichclass)
   add_prac += rand_number(4, 12);
   }
 
-  if ((IS_DEMON(ch) || IS_KANASSAN(ch)) && GET_LEVEL(ch) > 80) {
+  if ((char_is_demon(ch) || char_is_kanassan(ch)) && char_get_level(ch) > 80) {
    add_hp *= 2;
    add_mana *= 2;
    add_move *= 2;
   }
-  else if ((IS_DEMON(ch) || IS_KANASSAN(ch)) && GET_LEVEL(ch) > 60) {
+  else if ((char_is_demon(ch) || char_is_kanassan(ch)) && char_get_level(ch) > 60) {
    add_hp *= 1.75;
    add_mana *= 1.75;
    add_move *= 1.75;
   }
-  else if ((IS_DEMON(ch) || IS_KANASSAN(ch)) && GET_LEVEL(ch) > 50) {
+  else if ((char_is_demon(ch) || char_is_kanassan(ch)) && char_get_level(ch) > 50) {
    add_hp *= 1.5;
    add_mana *= 1.5;
    add_move *= 1.5;
   }
   /* Rillao: transloc, add new transes here */
-  else if ((IS_DEMON(ch) || IS_KANASSAN(ch)) && GET_LEVEL(ch) > 40) {
+  else if ((char_is_demon(ch) || char_is_kanassan(ch)) && char_get_level(ch) > 40) {
    add_hp *= 1.25;
    add_mana *= 1.25;
    add_move *= 1.25;
@@ -1139,22 +1139,22 @@ void advance_level(struct char_data *ch, int whichclass)
   }
 
   sprintf(buf, "@D[@YGain@D: @RPl@D(@G%s@D) @gSt@D(@G%s@D) @CKi@D(@G%s@D) @bPS@D(@G%s@D)]", add_commas(add_hp), add_commas(add_move), add_commas(add_mana), add_commas(add_prac));
-  if (GET_BONUS(ch, BONUS_GMEMORY) && (GET_LEVEL(ch) == 20 || GET_LEVEL(ch) == 40 || GET_LEVEL(ch) == 60 || GET_LEVEL(ch) == 80 || GET_LEVEL(ch) == 100)) {
+  if (GET_BONUS(ch, BONUS_GMEMORY) && (char_get_level(ch) == 20 || char_get_level(ch) == 40 || char_get_level(ch) == 60 || char_get_level(ch) == 80 || char_get_level(ch) == 100)) {
    GET_SLOTS(ch) += 1;
    send_to_char(ch, "@CYou feel like you could remember a new skill!@n\r\n");
   }
-  if (IS_NAMEK(ch) && rand_number(1, 100) <= 5) {
+  if (char_is_namek(ch) && rand_number(1, 100) <= 5) {
    GET_SLOTS(ch) += 1;
    send_to_char(ch, "@CYou feel as though you could learn another skill.@n\r\n");
   }
-  if (IS_ICER(ch) && rand_number(1, 100) <= 25) {
+  if (char_is_icer(ch) && rand_number(1, 100) <= 25) {
    bring_to_cap(ch);
    send_to_char(ch, "@GYou feel your body obtain its current optimal strength!@n\r\n");
   }
 
   int gain_stat = FALSE;
 
-  switch (GET_LEVEL(ch)) {
+  switch (char_get_level(ch)) {
    case 10:
    case 20:
    case 30:
@@ -1171,7 +1171,7 @@ void advance_level(struct char_data *ch, int whichclass)
 
   if (gain_stat == TRUE) {
    int raise = FALSE, stat_fail = 0;
-   if (IS_KONATSU(ch)) {
+   if (char_is_konatsu(ch)) {
     while (raise == FALSE) {
      if (ch->real_abils.dex < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
       if (ch->real_abils.dex < 45 || GET_BONUS(ch, BONUS_CLUMSY) <= 0) { 
@@ -1196,7 +1196,7 @@ void advance_level(struct char_data *ch, int whichclass)
     } // End while
    } // End Konatsu
 
-   else if (IS_MUTANT(ch)) {
+   else if (char_is_mutant(ch)) {
     while (raise == FALSE) {
      if (ch->real_abils.con < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
       if (ch->real_abils.con < 45 || GET_BONUS(ch, BONUS_FRAIL) <= 0) { 
@@ -1221,7 +1221,7 @@ void advance_level(struct char_data *ch, int whichclass)
     } // End while
    } // End Mutant
 
-   else if (IS_HOSHIJIN(ch)) {
+   else if (char_is_hoshijin(ch)) {
     while (raise == FALSE) {
      if (ch->real_abils.str < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
       if (ch->real_abils.str < 45 || GET_BONUS(ch, BONUS_WIMP) <= 0) { 
@@ -1251,28 +1251,28 @@ void advance_level(struct char_data *ch, int whichclass)
   strcat(buf, ".\r\n");
   send_to_char(ch, "%s", buf);
 
-  if (GET_SKILL(ch, SKILL_POTENTIAL) && rand_number(1, 4) == 4) {
+  if (char_get_skill(ch, SKILL_POTENTIAL) && rand_number(1, 4) == 4) {
    send_to_char(ch, "You can now perform another Potential Release.\r\n");
    GET_BOOSTS(ch) += 1;   
   }
-  if (IS_MAJIN(ch) && GET_LEVEL(ch) == 25) {
+  if (char_is_majin(ch) && char_get_level(ch) == 25) {
    send_to_char(ch, "You can now perform another Majinization.\r\n");
    GET_BOOSTS(ch) += 1;
   }
-  if (IS_MAJIN(ch) && GET_LEVEL(ch) == 50) {
+  if (char_is_majin(ch) && char_get_level(ch) == 50) {
    send_to_char(ch, "You can now perform another Majinization.\r\n");
    GET_BOOSTS(ch) += 1;
   }
-  if (IS_MAJIN(ch) && GET_LEVEL(ch) == 75) {
+  if (char_is_majin(ch) && char_get_level(ch) == 75) {
    send_to_char(ch, "You can now perform another Majinization.\r\n");
    GET_BOOSTS(ch) += 1;
   }
-  if (IS_MAJIN(ch) && GET_LEVEL(ch) == 100) {
+  if (char_is_majin(ch) && char_get_level(ch) == 100) {
    send_to_char(ch, "You can now perform another Majinization.\r\n");
    GET_BOOSTS(ch) += 1;
   }
 
-   switch (GET_LEVEL(ch)) {
+   switch (char_get_level(ch)) {
     case 10:
     case 20:
     case 30:
@@ -1310,10 +1310,10 @@ void advance_level(struct char_data *ch, int whichclass)
      break;
    }
 
-  if (GET_LEVEL(ch) == 1) {
+  if (char_get_level(ch) == 1) {
    GET_ARMOR(ch) = 0;
   }
-  if (GET_LEVEL(ch) == 2) {
+  if (char_get_level(ch) == 2) {
    ERAPLAYERS += 1;
   }
   snoop_check(ch);
@@ -1326,106 +1326,106 @@ void advance_level(struct char_data *ch, int whichclass)
  */
 int invalid_class(struct char_data *ch, struct obj_data *obj)
 {
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_WIZARD) && IS_ROSHI(ch))
+  if (obj_flagged(obj, ITEM_ANTI_WIZARD) && char_is_roshi(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_CLERIC) && IS_PICCOLO(ch))
+  if (obj_flagged(obj, ITEM_ANTI_CLERIC) && char_is_piccolo(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_FIGHTER) && IS_NAIL(ch))
+  if (obj_flagged(obj, ITEM_ANTI_FIGHTER) && char_is_nail(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_ROGUE) && IS_KRANE(ch))
+  if (obj_flagged(obj, ITEM_ANTI_ROGUE) && char_is_krane(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_MONK) && IS_BARDOCK(ch))
+  if (obj_flagged(obj, ITEM_ANTI_MONK) && char_is_bardock(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ONLY_MONK) && !IS_BARDOCK(ch))
+  if (obj_flagged(obj, ITEM_ONLY_MONK) && !char_is_bardock(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ONLY_WIZARD) && !IS_ROSHI(ch))
+  if (obj_flagged(obj, ITEM_ONLY_WIZARD) && !char_is_roshi(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ONLY_JINTO) && !IS_JINTO(ch))
+  if (obj_flagged(obj, ITEM_ONLY_JINTO) && !char_is_jinto(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ONLY_CLERIC) && !IS_PICCOLO(ch))
+  if (obj_flagged(obj, ITEM_ONLY_CLERIC) && !char_is_piccolo(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ONLY_ROGUE) && !IS_KRANE(ch))
+  if (obj_flagged(obj, ITEM_ONLY_ROGUE) && !char_is_krane(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_ASSASSIN) && !IS_KURZAK(ch))
+  if (obj_flagged(obj, ITEM_ANTI_ASSASSIN) && !char_is_kurzak(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ONLY_FIGHTER) && !IS_NAIL(ch))
+  if (obj_flagged(obj, ITEM_ONLY_FIGHTER) && !char_is_nail(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ONLY_PALADIN) && !IS_GINYU(ch))
+  if (obj_flagged(obj, ITEM_ONLY_PALADIN) && !char_is_ginyu(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_WIZARD) && IS_ROSHI(ch))
+  if (obj_flagged(obj, ITEM_ANTI_WIZARD) && char_is_roshi(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_PALADIN) && IS_GINYU(ch))
+  if (obj_flagged(obj, ITEM_ANTI_PALADIN) && char_is_ginyu(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_BARBARIAN) && IS_KABITO(ch))
+  if (obj_flagged(obj, ITEM_ANTI_BARBARIAN) && char_is_kabito(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_BARD) && IS_ANDSIX(ch))
+  if (obj_flagged(obj, ITEM_ANTI_BARD) && char_is_andsix(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ONLY_BARD) && !IS_ANDSIX(ch))
+  if (obj_flagged(obj, ITEM_ONLY_BARD) && !char_is_andsix(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_RANGER) && IS_DABURA(ch))
+  if (obj_flagged(obj, ITEM_ANTI_RANGER) && char_is_dabura(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_DRUID) && IS_TAPION(ch))
+  if (obj_flagged(obj, ITEM_ANTI_DRUID) && char_is_tapion(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_ARCANE_ARCHER) && IS_JINTO(ch))
+  if (obj_flagged(obj, ITEM_ANTI_ARCANE_ARCHER) && char_is_jinto(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_ARCANE_TRICKSTER) && IS_TSUNA(ch))
+  if (obj_flagged(obj, ITEM_ANTI_ARCANE_TRICKSTER) && char_is_tsuna(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_ARCHMAGE) && IS_KURZAK(ch))
+  if (obj_flagged(obj, ITEM_ANTI_ARCHMAGE) && char_is_kurzak(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_BLACKGUARD) && IS_BLACKGUARD(ch))
+  if (obj_flagged(obj, ITEM_ANTI_BLACKGUARD) && char_is_blackguard(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_DRAGON_DISCIPLE) && IS_DRAGON_DISCIPLE(ch))
+  if (obj_flagged(obj, ITEM_ANTI_DRAGON_DISCIPLE) && char_is_dragon_disciple(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_DUELIST) && IS_DUELIST(ch))
+  if (obj_flagged(obj, ITEM_ANTI_DUELIST) && char_is_duelist(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_DWARVEN_DEFENDER) && IS_DWARVEN_DEFENDER(ch))
+  if (obj_flagged(obj, ITEM_ANTI_DWARVEN_DEFENDER) && char_is_dwarven_defender(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_ELDRITCH_KNIGHT) && IS_ELDRITCH_KNIGHT(ch))
+  if (obj_flagged(obj, ITEM_ANTI_ELDRITCH_KNIGHT) && char_is_eldritch_knight(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT) && IS_HIEROPHANT(ch))
+  if (obj_flagged(obj, ITEM_ANTI_HIEROPHANT) && char_is_hierophant(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_HORIZON_WALKER) && IS_HORIZON_WALKER(ch))
+  if (obj_flagged(obj, ITEM_ANTI_HORIZON_WALKER) && char_is_horizon_walker(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_LOREMASTER) && IS_LOREMASTER(ch))
+  if (obj_flagged(obj, ITEM_ANTI_LOREMASTER) && char_is_loremaster(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_MYSTIC_THEURGE) && IS_MYSTIC_THEURGE(ch))
+  if (obj_flagged(obj, ITEM_ANTI_MYSTIC_THEURGE) && char_is_mystic_theurge(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_SHADOWDANCER) && IS_SHADOWDANCER(ch))
+  if (obj_flagged(obj, ITEM_ANTI_SHADOWDANCER) && char_is_shadowdancer(ch))
     return TRUE;
 
-  if (OBJ_FLAGGED(obj, ITEM_ANTI_THAUMATURGIST) && IS_THAUMATURGIST(ch))
+  if (obj_flagged(obj, ITEM_ANTI_THAUMATURGIST) && char_is_thaumaturgist(ch))
     return TRUE;
 
 
@@ -1750,7 +1750,7 @@ int level_exp(struct char_data *ch, int level)
     break;
  }
 
- if (IS_KAI(ch)) {
+ if (char_is_kai(ch)) {
   req += req * 0.15;
  }
 
@@ -1796,8 +1796,8 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
   int rankorder[NUM_CLASSES];
   char *buf, *buf2, *buf3;
 
-  if (IS_NPC(ch)) {
-    snprintf(ptr, sizeof(str) - (ptr - str), "%s%d", CLASS_ABBR(ch), GET_LEVEL(ch) );
+  if (char_is_npc(ch)) {
+    snprintf(ptr, sizeof(str) - (ptr - str), "%s%d", CLASS_ABBR(ch), char_get_level(ch) );
     return str;
   }
 
@@ -1812,11 +1812,11 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
         ptr += sprintf(ptr, "Epic ");
     }
     for (i = 0; i < NUM_CLASSES; i++) {
-      cabbr_ranktable[i] = GET_CLASS_RANKS(ch, i);
+      cabbr_ranktable[i] = char_get_class_ranks(ch, i);
       rankorder[i] = i;
     }
-    rankorder[0] = GET_CLASS(ch); /* we always want primary class first */
-    rankorder[GET_CLASS(ch)] = 0;
+    rankorder[0] = char_get_class(ch); /* we always want primary class first */
+    rankorder[char_get_class(ch)] = 0;
     qsort((void *)rankorder, NUM_CLASSES, sizeof(int), comp_rank);
     for (int sen = 0; sen < NUM_CLASSES; sen++) {
       if (!sensei_exists(sen))
@@ -1830,16 +1830,16 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
     }
     return str;
   } else {
-    rank = GET_CLASS_RANKS(ch, GET_CLASS(ch));
-    j = GET_CLASS(ch);
+    rank = char_get_class_ranks(ch, char_get_class(ch));
+    j = char_get_class(ch);
     for (i = 0; i < NUM_CLASSES; i++)
-      if (GET_CLASS_RANKS(ch, i) > rank) {
+      if (char_get_class_ranks(ch, i) > rank) {
         j = i;
-        rank = GET_CLASS_RANKS(ch, j);
+        rank = char_get_class_ranks(ch, j);
       }
-    rank = GET_CLASS_RANKS(ch, GET_CLASS(ch));
+    rank = char_get_class_ranks(ch, char_get_class(ch));
     snprintf(ptr, sizeof(str) - (ptr - str), "%s%d%s", SENSEI_NAME_LOWER(ch),
-             rank, GET_LEVEL(ch) == rank ? "" : "+");
+             rank, char_get_level(ch) == rank ? "" : "+");
     return str;
   }
 }
@@ -1848,7 +1848,7 @@ int total_skill_levels(struct char_data *ch, int skill)
 {
   int i = 0, j, total = 0;
   for (i = 0; i < NUM_CLASSES; i++) {
-    j = 1 + GET_CLASS_RANKS(ch, i) - spell_info[skill].min_level[i];
+    j = 1 + char_get_class_ranks(ch, i) - spell_info[skill].min_level[i];
     if (j > 0)
      total += j;
   }

@@ -56,7 +56,7 @@ ACMD(do_oasis_trigedit)
     if (STATE(d) == CON_TRIGEDIT) {
       if (d->olc && OLC_NUM(d) == number) {
         send_to_char(ch, "That trigger is currently being edited by %s.\r\n",
-          GET_NAME(d->character));
+          char_get_name(d->character));
         return;
       }
     }
@@ -112,7 +112,7 @@ ACMD(do_oasis_trigedit)
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
 
   mudlog(CMP, ADMLVL_IMMORT, TRUE,"OLC: %s starts editing zone %d [trigger](allowed zone %d)",
-         GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+         char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
 }
 
 /* called when a mob or object is being saved to disk, so its script can */
@@ -345,7 +345,7 @@ void trigedit_parse(struct descriptor_data *d, char *arg)
         case 'y':
           trigedit_save(d);
           mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
-                 "OLC: %s edits trigger %d", GET_NAME(d->character),
+                 "OLC: %s edits trigger %d", char_get_name(d->character),
                  OLC_NUM(d));
           /* fall through */
         case 'n':

@@ -123,7 +123,7 @@ WCMD(do_weffect)
     wld_log(room, "weffect target is NOWHERE.");
     return;
    } else {
-    if (!ROOM_FLAGGED(target, ROOM_INDOORS)) {
+    if (!rroom_flagged(target, ROOM_INDOORS)) {
      SET_BIT_AR(ROOM_FLAGS(target), ROOM_INDOORS);
     } else {
      REMOVE_BIT_AR(ROOM_FLAGS(target), ROOM_INDOORS);
@@ -454,7 +454,7 @@ WCMD(do_wpurge)
     /* purge all */
     for (ch = room->people; ch; ch = next_ch ) {
       next_ch = ch->next_in_room;
-      if (IS_NPC(ch))
+      if (char_is_npc(ch))
         extract_char(ch);
     }
 
@@ -485,7 +485,7 @@ WCMD(do_wpurge)
     return;
   }
 
-  if (!IS_NPC(ch)) {
+  if (!char_is_npc(ch)) {
     wld_log(room, "wpurge: purging a PC");
     return;
   }

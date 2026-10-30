@@ -67,7 +67,7 @@ ACMD(do_lightgrenade)
    return;
   }
 
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+   if (rroom_flagged(IN_ROOM(ch), ROOM_PEACEFUL)) {
     send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
    }
@@ -109,10 +109,10 @@ ACMD(do_lightgrenade)
       if (vict == ch) {
        continue;
       }
-      if (MOB_FLAGGED(vict, MOB_NOKILL)) {
+      if (char_mob_flagged(vict, MOB_NOKILL)) {
        continue;
       }
-      if (AFF_FLAGGED(vict, AFF_GROUP)) {
+      if (char_aff_flagged(vict, AFF_GROUP)) {
        if (vict->master == ch || ch->master == vict || ch->master == vict->master) {
         if (vict == targ) {
          send_to_char(ch, "Leave the group if you want to murder them.\r\n");
@@ -120,14 +120,14 @@ ACMD(do_lightgrenade)
         continue;
        } 
       }
-      if (AFF_FLAGGED(vict, AFF_SPIRIT) && !IS_NPC(vict)) {
+      if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
        continue;
       }
-      if (GET_LEVEL(vict) <= 8 && !IS_NPC(vict)){
+      if (char_get_level(vict) <= 8 && !char_is_npc(vict)){
        continue;
        }
       dge = handle_dodge(vict);
-      if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
+      if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
               (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -162,7 +162,7 @@ ACMD(do_lightgrenade)
        act("@R$N@r is hit by the light grenade which explodes all around $m!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@RYou are hit by the light grenade which explodes all around you!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@R$N@r is hit by the light grenade which explodes all around $m!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       if (!AFF_FLAGGED(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING && rand_number(1, 4) == 4) {
+       if (!char_aff_flagged(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING && rand_number(1, 4) == 4) {
         handle_knockdown(vict);
        }
        hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -172,7 +172,7 @@ ACMD(do_lightgrenade)
        act("@R$N@r is caught by the light grenade's explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@RYou are caught by the light grenade's explosion!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@R$N@r is caught by the light grenade's explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       if (!AFF_FLAGGED(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING && rand_number(1, 4) == 4) {
+       if (!char_aff_flagged(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING && rand_number(1, 4) == 4) {
         handle_knockdown(vict);
        }
        hurt(0, 0, ch, vict, NULL, dmg * 0.5, 1);
@@ -188,7 +188,7 @@ ACMD(do_lightgrenade)
 ACMD(do_energize)
 {
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
 
  if (GET_PREFERENCE(ch) != PREFERENCE_THROWING) {
@@ -196,8 +196,8 @@ ACMD(do_energize)
   return;
  }
 
- if (!GET_SKILL(ch, SKILL_ENERGIZE)) {
-  if (GET_SKILL(ch, SKILL_FOCUS) >= 30) {
+ if (!char_get_skill(ch, SKILL_ENERGIZE)) {
+  if (char_get_skill(ch, SKILL_FOCUS) >= 30) {
    int result = rand_number(10, 14);
    SET_SKILL(ch, SKILL_ENERGIZE, result);
    send_to_char(ch, "You learn the basics for energizing thrown weapons! Now use the energize command again.\r\n");
@@ -207,7 +207,7 @@ ACMD(do_energize)
    return;
   }
  } else {
-  if (PRF_FLAGGED(ch, PRF_ENERGIZE)) {
+  if (char_prf_flagged(ch, PRF_ENERGIZE)) {
     send_to_char(ch, "You stop focusing ki into your fingertips.\r\n");
 	REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ENERGIZE);
 	return;
@@ -230,7 +230,7 @@ ACMD(do_breath)
 
   one_argument(argument, arg);
 
- if (!IS_NPC(ch)) {
+ if (!char_is_npc(ch)) {
   return;
  }
  if (!can_grav(ch)) {
@@ -295,11 +295,11 @@ ACMD(do_breath)
      pcost(vict, 0, GET_MAX_HIT(vict) / 500);
      dmg = damtype(ch, 6, skill, attperc);
      dmg = dmg * 0.8;
-     if (!AFF_FLAGGED(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(vict) && !GET_BONUS(vict, BONUS_FIREPROOF)) {
+     if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !char_is_demon(vict) && !GET_BONUS(vict, BONUS_FIREPROOF)) {
       send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
       SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
-     } else if (GET_BONUS(vict, BONUS_FIREPROOF) || IS_DEMON(vict)) {
+     } else if (GET_BONUS(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
       send_to_char(ch, "@RThey appear to be fireproof!@n\r\n");
      } else if (GET_BONUS(vict, BONUS_FIREPRONE)) {
       send_to_char(vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
@@ -385,11 +385,11 @@ ACMD(do_breath)
      break;
    }
    pcost(ch, 0, stcost);
-     if (!AFF_FLAGGED(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(vict) && !GET_BONUS(vict, BONUS_FIREPROOF)) {
+     if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !char_is_demon(vict) && !GET_BONUS(vict, BONUS_FIREPROOF)) {
       send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
       SET_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
-     } else if (GET_BONUS(vict, BONUS_FIREPROOF) || IS_DEMON(vict)) {
+     } else if (GET_BONUS(vict, BONUS_FIREPROOF) || char_is_demon(vict)) {
       send_to_char(ch, "@RThey appear to be fireproof!@n\r\n");
      } else if (GET_BONUS(vict, BONUS_FIREPRONE)) {
       send_to_char(vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
@@ -402,7 +402,7 @@ ACMD(do_breath)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+   if (obj_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -428,7 +428,7 @@ ACMD(do_ram)
 
   one_argument(argument, arg);
 
- if (!IS_NPC(ch)) {
+ if (!char_is_npc(ch)) {
   return;
  }
  if (!can_grav(ch)) {
@@ -579,7 +579,7 @@ ACMD(do_ram)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+   if (obj_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -605,7 +605,7 @@ ACMD(do_strike)
 
   one_argument(argument, arg);
 
- if (!IS_NPC(ch)) {
+ if (!char_is_npc(ch)) {
   return;
  }
  if (!can_grav(ch)) {
@@ -662,7 +662,7 @@ ACMD(do_strike)
 
   if (prob < perc - 20) {
    if ((getCurST(vict)) > 0) {
-    if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
+    if (pry > rand_number(1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
      act("@WYou parry @C$n's@W fang strike with a punch of your own!@n", TRUE, ch, 0, vict, TO_VICT);
      act("@C$N@W parries @c$n's@W fang strike with a punch of $S own!@n", TRUE, ch, 0, vict, TO_NOTVICT);
      improve_skill(vict, SKILL_PARRY, 0);
@@ -767,7 +767,7 @@ ACMD(do_strike)
   if (!can_kill(ch, NULL, obj, 0)) {
    return;
   }
-   if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+   if (obj_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -846,10 +846,10 @@ ACMD(do_combine)
    send_to_char(ch, "Leader Syntax: combine (attack) (target)\r\n");
    send_to_char(ch, "Follower Cancel Syntax: combine stop\r\n");      
    return;
-  } else if (!GET_SKILL(ch, attack_skills[temp])) {
+  } else if (!char_get_skill(ch, attack_skills[temp])) {
    send_to_char(ch, "You do not know that skill.\r\n");
    return;
-  } else if (attack_skills[temp] == 440 && !IS_NAIL(ch)) {
+  } else if (attack_skills[temp] == 440 && !char_is_nail(ch)) {
    send_to_char(ch, "Only students of Nail know how to combine that attack effectively.\r\n");
    return;
   } else if (GET_CHARGE(ch) < GET_MAX_MANA(ch) * 0.05) {
@@ -865,7 +865,7 @@ ACMD(do_combine)
    }
    GET_COMBINE(ch) = temp;
    for (f = ch->followers; f; f = f->next) {
-    if (!AFF_FLAGGED(f->follower, AFF_GROUP)) {
+    if (!char_aff_flagged(f->follower, AFF_GROUP)) {
      continue;
     } else if (GET_COMBINE(f->follower) != -1 && GET_CHARGE(f->follower) >= GET_MAX_MANA(f->follower) * 0.05) {
      fire = TRUE;
@@ -1079,7 +1079,7 @@ ACMD(do_sunder)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+   if (obj_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -1117,7 +1117,7 @@ ACMD(do_zen)
    return;
   }
 
-  if (!HAS_ARMS(ch)) {
+  if (!char_has_arms(ch)) {
    send_to_char(ch, "You have no available arms!\r\n");
    return;
   } else if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50 && GET_LIMBCOND(ch, 2) < 0) {
@@ -1311,28 +1311,28 @@ ACMD(do_zen)
       act("@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past YOUR body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across YOUR head!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past @g$N's@C body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across @g$N's@C head!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       dmg *= calc_critical(ch, 0);
-      if (dmg > GET_MAX_HIT(vict) / 5 && (!IS_MAJIN(vict) && !IS_BIO(vict))) {
+      if (dmg > GET_MAX_HIT(vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
        act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@rYou have your head cut off by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
        GET_DEATH_TYPE(vict) = DTYPE_HEAD;
        remove_limb(vict, 0);
        die(vict, ch);
-       if (AFF_FLAGGED(ch, AFF_GROUP)) {
+       if (char_aff_flagged(ch, AFF_GROUP)) {
         group_gain(ch, vict);
        }
        else {
         solo_gain(ch, vict);
        }
-       if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOGOLD)) {
+       if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOGOLD)) {
         do_get(ch, "all.zenni corpse", 0, 0);
        }
-       if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOLOOT)) {
+       if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOLOOT)) {
         do_get(ch, "all corpse", 0, 0);
        }
       }
-      else if (dmg > GET_MAX_HIT(vict) / 5 && (IS_MAJIN(vict) || IS_BIO(vict))) {
-       if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= GET_MAX_MANA(vict) / 40) {
+      else if (dmg > GET_MAX_HIT(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
+       if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= GET_MAX_MANA(vict) / 40) {
         act("@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@rYou have your head cut off by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -1345,16 +1345,16 @@ ACMD(do_zen)
        act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
        GET_DEATH_TYPE(vict) = DTYPE_HEAD;
        die(vict, ch);
-       if (AFF_FLAGGED(ch, AFF_GROUP)) {
+       if (char_aff_flagged(ch, AFF_GROUP)) {
         group_gain(ch, vict);
        }
        else {
         solo_gain(ch, vict);
        }
-       if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOGOLD)) {
+       if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOGOLD)) {
         do_get(ch, "all.zenni corpse", 0, 0);
        }
-       if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOLOOT)) {
+       if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOLOOT)) {
         do_get(ch, "all corpse", 0, 0);
        }
        }
@@ -1382,7 +1382,7 @@ ACMD(do_zen)
       act("@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past YOUR body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across YOUR arm!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past @g$N's@C body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across @g$N's@C arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       dmg *= calc_critical(ch, 1);
-      if (rand_number(1, 100) >= 80 && !IS_NPC(vict) && !AFF_FLAGGED(vict, AFF_SANCTUARY)) {
+      if (rand_number(1, 100) >= 80 && !char_is_npc(vict) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
         if (GET_LIMBCOND(vict, 2) > 0 && !is_sparring(ch) && rand_number(1, 2) == 2) {
          act("@RYour attack severs $N's left arm!@n", TRUE, ch, 0, vict, TO_CHAR);
          act("@R$n's attack severs your left arm!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -1407,7 +1407,7 @@ ACMD(do_zen)
       act("@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past YOUR body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across YOUR leg!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past @g$N's@C body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across @g$N's@C leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       dmg *= calc_critical(ch, 1);
-      if (rand_number(1, 100) >= 80 && !IS_NPC(vict) && !AFF_FLAGGED(vict, AFF_SANCTUARY)) {
+      if (rand_number(1, 100) >= 80 && !char_is_npc(vict) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
         if (GET_LIMBCOND(vict, 4) > 0 && !is_sparring(ch) && rand_number(1, 2) == 2) {
          act("@RYour attack severs $N's left leg!@n", TRUE, ch, 0, vict, TO_CHAR);
          act("@R$n's attack severs your left leg!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -1441,7 +1441,7 @@ ACMD(do_zen)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+   if (obj_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -1665,7 +1665,7 @@ ACMD(do_malice)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+   if (obj_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -1726,7 +1726,7 @@ ACMD(do_nova)
    return;
   }
 
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+   if (rroom_flagged(IN_ROOM(ch), ROOM_PEACEFUL)) {
     send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
    }
@@ -1743,16 +1743,16 @@ ACMD(do_nova)
    if (vict == ch) {
     continue;
    }
-   if (AFF_FLAGGED(vict, AFF_SPIRIT) && !IS_NPC(vict)) {
+   if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
     continue;
    }
-   if (AFF_FLAGGED(vict, AFF_GROUP) && (vict->master == ch || ch->master == vict)) {
+   if (char_aff_flagged(vict, AFF_GROUP) && (vict->master == ch || ch->master == vict)) {
     continue;
    }
-   if (GET_LEVEL(vict) <= 8 && !IS_NPC(vict)){
+   if (char_get_level(vict) <= 8 && !char_is_npc(vict)){
     continue;
    }
-   if (MOB_FLAGGED(vict, MOB_NOKILL)) {
+   if (char_mob_flagged(vict, MOB_NOKILL)) {
     continue;
    }
    else {
@@ -1798,20 +1798,20 @@ ACMD(do_nova)
       if (vict == ch) {
        continue;
       }
-      if (AFF_FLAGGED(vict, AFF_SPIRIT) && !IS_NPC(vict)) {
+      if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
        continue;
       }
-      if (AFF_FLAGGED(vict, AFF_GROUP) && (vict->master == ch || ch->master == vict)) {
+      if (char_aff_flagged(vict, AFF_GROUP) && (vict->master == ch || ch->master == vict)) {
        continue;
       }
-      if (GET_LEVEL(vict) <= 8 && !IS_NPC(vict)){
+      if (char_get_level(vict) <= 8 && !char_is_npc(vict)){
        continue;
       }
-      if (MOB_FLAGGED(vict, MOB_NOKILL)) {
+      if (char_mob_flagged(vict, MOB_NOKILL)) {
        continue;
       }
       dge = handle_dodge(vict);
-      if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
+      if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
               (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
        act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_CHAR);
        act("@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_VICT);
@@ -1833,7 +1833,7 @@ ACMD(do_nova)
        act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@RYou are caught by the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       if (!AFF_FLAGGED(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING) {
+       if (!char_aff_flagged(vict, AFF_FLYING) && GET_POS(vict) == POS_STANDING) {
         handle_knockdown(vict);
        }
        hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -1885,9 +1885,9 @@ ACMD(do_head)
 
  if(!tech_handle_targeting(ch, arg, &vict, &obj)) return;
 
- if (!IS_KURZAK(ch) || GET_SKILL(ch, SKILL_HEADBUTT) < 100) {
+ if (!char_is_kurzak(ch) || char_get_skill(ch, SKILL_HEADBUTT) < 100) {
   handle_cooldown(ch, 6);
- } else if (GET_SKILL(ch, SKILL_HEADBUTT) >= 100) {
+ } else if (char_get_skill(ch, SKILL_HEADBUTT) >= 100) {
   handle_cooldown(ch, 5);
  }
  if (vict) {
@@ -1903,7 +1903,7 @@ ACMD(do_head)
   prob = roll_accuracy(ch, skill, FALSE);
   perc = chance_to_hit(ch);
 
-  if (IS_KABITO(ch) && !IS_NPC(ch)) {
+  if (char_is_kabito(ch) && !char_is_npc(ch)) {
    if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
     perc -= perc * 0.2;
   }
@@ -1926,7 +1926,7 @@ ACMD(do_head)
 
   if (prob < perc - 20) {
    if ((getCurST(vict)) > 0) {
-    if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
+    if (pry > rand_number(1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
      act("@C$N@W parries your headbutt with an attack of $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@WYou parry @C$n's@W headbutt with an attack of your own!@n", TRUE, ch, 0, vict, TO_VICT);
      act("@C$N@W parries @c$n's@W headbutt with an attack of $S own!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -1985,10 +1985,10 @@ ACMD(do_head)
   else {
      dmg = damtype(ch, 52, skill, attperc);
 
-    if (IS_KURZAK(ch)) {
-     if (GET_SKILL(ch, SKILL_HEADBUTT) >= 60) {
+    if (char_is_kurzak(ch)) {
+     if (char_get_skill(ch, SKILL_HEADBUTT) >= 60) {
       dmg += dmg * 0.1;
-     } else if (GET_SKILL(ch, SKILL_HEADBUTT) >= 40) {
+     } else if (char_get_skill(ch, SKILL_HEADBUTT) >= 40) {
       dmg += dmg * 0.05;
      }
     }
@@ -2010,14 +2010,14 @@ ACMD(do_head)
       act("@WYou grab @c$N@W by the shoulders and slam your head into $S face!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W grabs YOU by the shoulders and slams $s head into YOUR face!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W grabs @c$N@W by the shoulders and slams $s head into @c$N's@W face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-       if (!AFF_FLAGGED(vict, AFF_KNOCKED) && (rand_number(1, 7) >= 4 && (GET_HIT(vict) > GET_HIT(ch) / 5) && !AFF_FLAGGED(vict, AFF_SANCTUARY))) {
+       if (!char_aff_flagged(vict, AFF_KNOCKED) && (rand_number(1, 7) >= 4 && (GET_HIT(vict) > GET_HIT(ch) / 5) && !char_aff_flagged(vict, AFF_SANCTUARY))) {
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@WYou are knocked out!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
         setStatusKnockedOut(vict);
        }
       mult = calc_critical(ch, 0);
-      if (IS_KURZAK(ch) && !IS_NPC(ch)) {
+      if (char_is_kurzak(ch) && !char_is_npc(ch)) {
        if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
         mult += 1;
       }
@@ -2127,7 +2127,7 @@ ACMD(do_bash)
   prob = roll_accuracy(ch, skill, FALSE);
   perc = chance_to_hit(ch);
 
-  if (IS_KABITO(ch) && !IS_NPC(ch)) {
+  if (char_is_kabito(ch) && !char_is_npc(ch)) {
    if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 75)
     perc -= perc * 0.2;
   }
@@ -2150,7 +2150,7 @@ ACMD(do_bash)
 
   if (prob < perc - 20) {
    if ((getCurST(vict)) > 0) {
-    if (pry > rand_number(1, 140) && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
+    if (pry > rand_number(1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
      act("@C$N@W parries your bash with an attack of $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@WYou parry @C$n's@W bash with an attack of your own!@n", TRUE, ch, 0, vict, TO_VICT);
      act("@C$N@W parries @c$n's@W bash with an attack of $S own!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -2462,7 +2462,7 @@ ACMD(do_seishou)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+   if (obj_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -2544,7 +2544,7 @@ ACMD(do_throw)
     send_to_char(ch, "You do not have enough stamina to do it...\r\n");
     return;
    }
-   if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+   if (obj_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "That is broken and useless to throw!\r\n");
     return;
    }
@@ -2563,19 +2563,19 @@ ACMD(do_throw)
      chance -= chance * 0.25;
     }
 
-    if (OBJ_FLAGGED(obj, ITEM_WEAPLVL1)) {
+    if (obj_flagged(obj, ITEM_WEAPLVL1)) {
      damage += damage * 0.1;
      wlvl = 1;
-    } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL2)) {
+    } else if (obj_flagged(obj, ITEM_WEAPLVL2)) {
      damage += damage * 0.2;
      wlvl = 2;
-    } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL3)) {
+    } else if (obj_flagged(obj, ITEM_WEAPLVL3)) {
      damage += damage * 0.3;
      wlvl = 3;
-    } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL4)) {
+    } else if (obj_flagged(obj, ITEM_WEAPLVL4)) {
      damage += damage * 0.4;
      wlvl = 4;
-    } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL5)) {
+    } else if (obj_flagged(obj, ITEM_WEAPLVL5)) {
      damage += damage * 0.5;
      wlvl = 5;
     }
@@ -2617,7 +2617,7 @@ ACMD(do_throw)
     } else {
      odam = rand_number(90, 100);
     }
-    if (!OBJ_FLAGGED(obj, ITEM_THROW)) {
+    if (!obj_flagged(obj, ITEM_THROW)) {
      penalty = 15;
      multithrow = FALSE;
      damage = damage * 0.45;
@@ -2640,7 +2640,7 @@ ACMD(do_throw)
     }    
 
     int hot = FALSE;
-    if (OBJ_FLAGGED(obj, ITEM_HOT)) {
+    if (obj_flagged(obj, ITEM_HOT)) {
      hot = TRUE;
     }
 
@@ -2673,7 +2673,7 @@ ACMD(do_throw)
     }
 
     if (perc - (perc2 / 10) < prob) {
-     if (OBJ_FLAGGED(obj, ITEM_ICE) && IS_DEMON(vict)) {
+     if (obj_flagged(obj, ITEM_ICE) && char_is_demon(vict)) {
       act("You throw $p at $N@n, but it melts before touching $M!", TRUE, ch, obj, vict, TO_CHAR);
       act("$n@n throws $p at $N@n, but it melts before touching $M!", TRUE, ch, obj, vict, TO_NOTVICT);
       act("$n@n throws $p at you, but it melts before touching you!", TRUE, ch, obj, vict, TO_VICT);
@@ -2690,7 +2690,7 @@ ACMD(do_throw)
       act("$n@n throws $p at you, but thankfully misses you.", TRUE, ch, obj, vict, TO_VICT);
      }
         decCurST(ch, ((GET_MAX_HIT(ch) / 100) + GET_OBJ_WEIGHT(obj)), 0);
-     if (!OBJ_FLAGGED(obj, ITEM_UNBREAKABLE)) {
+     if (!obj_flagged(obj, ITEM_UNBREAKABLE)) {
       GET_OBJ_VAL(obj, VAL_ALL_HEALTH) -= odam / 2;
      }
       LASTATK(ch) = -50;
@@ -2715,8 +2715,8 @@ ACMD(do_throw)
     else if (perc - (perc2 / 10) > prob) {
      miss = FALSE;
     }
-     if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ENERGIZE) && (getCurKI(ch)) >= GET_MAX_MANA(ch) * 0.02) {
-      damage += (damage * (0.0016 * GET_SKILL(ch, SKILL_ENERGIZE)));
+     if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_ENERGIZE) && (getCurKI(ch)) >= GET_MAX_MANA(ch) * 0.02) {
+      damage += (damage * (0.0016 * char_get_skill(ch, SKILL_ENERGIZE)));
       act("You charge $p with the energy in your fingertips! As it begins to @Yglow a bright hot @Rred@n you throw $p at $N@n full speed, and watch it smash into $M!", TRUE, ch, obj, vict, TO_CHAR);
       act("$n@n charges $p with the energy in $s fingertips! As it begins to @Yglow a bright hot @Rred@n $e throws $p at $N@n full speed, and watches it smash into $M!", TRUE, ch, obj, vict, TO_NOTVICT);
       act("$n@n charges $p with the energy in $s fingertips! As it begins to @Yglow a bright hot @Rred@n $e throws $p at YOU@n full speed, and watches it smash into YOU!!", TRUE, ch, obj, vict, TO_VICT);
@@ -2747,21 +2747,21 @@ ACMD(do_throw)
       act("$n@n pulls out and throws $p at $N@n full speed, and watches it hit $M!", TRUE, ch, obj, vict, TO_NOTVICT);
       act("$n@n pulls out and throws $p at you full speed. You reel as it hits your body!", TRUE, ch, obj, vict, TO_VICT);
      }
-     if (!OBJ_FLAGGED(obj, ITEM_UNBREAKABLE)) {
+     if (!obj_flagged(obj, ITEM_UNBREAKABLE)) {
       GET_OBJ_VAL(obj, VAL_ALL_HEALTH) -= odam;
      }
      LASTATK(ch) = -50;
-    if ((GET_OBJ_VAL(obj, VAL_ALL_HEALTH) - odam) <= 0 && !OBJ_FLAGGED(obj, ITEM_UNBREAKABLE)) {
+    if ((GET_OBJ_VAL(obj, VAL_ALL_HEALTH) - odam) <= 0 && !obj_flagged(obj, ITEM_UNBREAKABLE)) {
      act("You smile as $p breaks on $N's@n face!", TRUE, ch, obj, vict, TO_CHAR);
      act("$n@n smiles as $p breaks on $N's@n face!", TRUE, ch, obj, vict, TO_NOTVICT);
      act("$n@n smiles as $p breaks on your face!", TRUE, ch, obj, vict, TO_VICT);
      TOGGLE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BROKEN);
     } else if (GET_DEX(ch) >= axion_dice(0)) {
-      if (IS_ANDROID(vict) || IS_MECHANICAL(vict)) {
+      if (char_is_android(vict) || char_is_mechanical(vict)) {
        act("@RSome pieces of metal are sent flying!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@RSome pieces of metal are sent flying!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@RSome pieces of metal are sent flying!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      } else if (IS_MAJIN(vict)) {
+      } else if (char_is_majin(vict)) {
        act("@RA wide hole is left in $S gooey flesh!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@RA wide hole is left is your gooey flesh!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@RA wide hole is left in $N@R's gooey flesh@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -2770,8 +2770,8 @@ ACMD(do_throw)
        act("@RBlood flies out from the impact!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@RBlood flies out from the impact!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       }
-     if (OBJ_FLAGGED(obj, ITEM_ICE)) {
-      if (!IS_ANDROID(vict) && !IS_ICER(vict)) {
+     if (obj_flagged(obj, ITEM_ICE)) {
+      if (!char_is_android(vict) && !char_is_icer(vict)) {
           decCurST(vict, (getMaxST(vict) * .005) + GET_OBJ_WEIGHT(obj), 0);
        act("@mYou lose some stamina to the @ccold@m!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@C$N@m loses some stamina to the @ccold@m!@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -2781,7 +2781,7 @@ ACMD(do_throw)
      damage *= calc_critical(ch, 0);
     }
     if (hot == TRUE) {
-     if (!IS_DEMON(vict) && !GET_BONUS(vict, BONUS_FIREPROOF)) {
+     if (!char_is_demon(vict) && !GET_BONUS(vict, BONUS_FIREPROOF)) {
       act("@R$N@R is burned by it!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@RYou are burned by it!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@R$N@R is burned by it!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -2792,7 +2792,7 @@ ACMD(do_throw)
     if (GET_PREFERENCE(ch) == PREFERENCE_KI) {
      damage -= damage * 0.20;
     }
-	if (GET_OBJ_VNUM(obj) == 5899 || GET_OBJ_VNUM(obj) == 5898) {
+	if (obj_get_vnum(obj) == 5899 || obj_get_vnum(obj) == 5898) {
 	 damage *=  0.35;
 	}
     hurt(0, 0, ch, vict, NULL, damage, 0);
@@ -2828,15 +2828,15 @@ ACMD(do_throw)
     return;
    }
 
-   if (GET_SPEEDI(tch) < GET_SPEEDI(ch) && rand_number(1, 106) < GET_SKILL(ch, SKILL_THROW)) {
+   if (char_get_speedi(tch) < char_get_speedi(ch) && rand_number(1, 106) < char_get_skill(ch, SKILL_THROW)) {
     grab = TRUE;
    }
 
-   if ((getCurST(ch)) < ((GET_MAX_HIT(ch) / 100) + GET_PC_WEIGHT(tch))) {
+   if ((getCurST(ch)) < ((GET_MAX_HIT(ch) / 100) + char_get_pc_weight(tch))) {
     send_to_char(ch, "You do not have enough stamina to do it...\r\n");
     return;
    }
-   if (GET_PC_WEIGHT(tch) + ROOM_GRAVITY(IN_ROOM(ch)) > CAN_CARRY_W(ch)) {
+   if (char_get_pc_weight(tch) + ROOM_GRAVITY(IN_ROOM(ch)) > CAN_CARRY_W(ch)) {
     send_to_char(ch, "The gravity has made them too heavy for you to throw!\r\n");
     return;
    }
@@ -2846,13 +2846,13 @@ ACMD(do_throw)
     act("@C$n@W tries to @RGRAB@W @c$N@W and @RTHROW@W $M, but $E manages to dodge the attempt!@n", TRUE, ch, 0, tch, TO_NOTVICT);
     hurt(0, 0, ch, tch, NULL, 0, 0);
     handle_cooldown(ch, 5);
-    decCurST(ch, (GET_MAX_HIT(ch) / 200) + GET_PC_WEIGHT(tch), 0);
+    decCurST(ch, (GET_MAX_HIT(ch) / 200) + char_get_pc_weight(tch), 0);
     return;
    }
    else {
     handle_cooldown(ch, 5);
     improve_skill(ch, SKILL_THROW, 0);
-    damage = ((GET_PC_WEIGHT(tch) * GET_STR(ch)) * (GET_CHA(ch) / 3)) + (GET_MAX_HIT(ch) / 100);
+    damage = ((char_get_pc_weight(tch) * GET_STR(ch)) * (GET_CHA(ch) / 3)) + (GET_MAX_HIT(ch) / 100);
     damage += ROOM_GRAVITY(IN_ROOM(ch)) * (ROOM_GRAVITY(IN_ROOM(ch)) / 2);
     perc = init_skill(ch, SKILL_THROW);
     perc2 = init_skill(vict, SKILL_DODGE);
@@ -2874,7 +2874,7 @@ ACMD(do_throw)
       act("@WThrown through the air, @C$n@W flies at YOU, but the throw is a miss! @C$n@W recovers $s bearings a moment later!@n", TRUE, tch, 0, vict, TO_VICT);
       act("@WThrown through the air, @C$n@W flies at @c$N@W, but the throw is a miss! @C$n@W recovers $s bearingsa moment later!@n", TRUE, tch, 0, vict, TO_NOTVICT);
      }
-     decCurST(ch, ((GET_MAX_HIT(ch) / 100) + GET_PC_WEIGHT(tch)), 0);
+     decCurST(ch, ((GET_MAX_HIT(ch) / 100) + char_get_pc_weight(tch)), 0);
       act("@W--@R$N@W--@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@W--@R$N@W--@n", TRUE, tch, 0, vict, TO_CHAR);
       act("@W--@RYOU@W--@n", TRUE, vict, 0, 0, TO_CHAR);
@@ -2906,7 +2906,7 @@ ACMD(do_throw)
       act("@W--@RYOU@W--@n", TRUE, tch, 0, 0, TO_CHAR);
       hurt(0, 0, ch, tch, NULL, damage, 0);
     }
-    decCurST(ch, ((GET_MAX_HIT(ch) / 200) + GET_PC_WEIGHT(tch)), 0);
+    decCurST(ch, ((GET_MAX_HIT(ch) / 200) + char_get_pc_weight(tch)), 0);
 	WAIT_STATE(ch, PULSE_3SEC);
    }
  } /* End throwing character. */
@@ -2924,20 +2924,20 @@ ACMD(do_selfd)
  struct char_data *tch = NULL, *next_v = NULL;
  int64_t dmg = 0;
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
 
- if (IN_ARENA(ch)) {
+ if (char_in_arena(ch)) {
   send_to_char(ch, "You can not use self destruct in the arena.\r\n");
   return;
  }
 
- if (AFF_FLAGGED(ch, AFF_SPIRIT)) {
+ if (char_aff_flagged(ch, AFF_SPIRIT)) {
   send_to_char(ch, "You are already dead!\r\n");
   return;
  }
 
- if (GET_LEVEL(ch) < 9) {
+ if (char_get_level(ch) < 9) {
   send_to_char(ch, "You can't self destruct while protected by the newbie shield!\r\n");
   return;
  }
@@ -2949,17 +2949,17 @@ ACMD(do_selfd)
   } /*Andros End*/
  
 
- if (!GET_SKILL(ch, SKILL_SELFD)) {
+ if (!char_get_skill(ch, SKILL_SELFD)) {
   int num = rand_number(10, 20);
   SET_SKILL(ch, SKILL_SELFD, num);
  }
 
- if (!PLR_FLAGGED(ch, PLR_SELFD)) {
+ if (!char_plr_flagged(ch, PLR_SELFD)) {
   act("@RYour body starts to glow @wwhite@R and flash. The flashes start out slowly but steadilly increase in speed. Your aura begins to burn around your body at the same time in a violent fashion!@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@R$n's body starts to glow @wwhite@R and flash. The flashes start out slowly but steadilly increase in speed. $n's aura begins to burn around $s body at the same time in a violent fashion!@n", TRUE, ch, 0, 0, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_SELFD);
   return;
- } else if (!PLR_FLAGGED(ch, PLR_SELFD2)) {
+ } else if (!char_plr_flagged(ch, PLR_SELFD2)) {
   act("@wYour body slowly stops flashing. Steam rises from your skin as you slowly let off the energy you built up in a safe manner.@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n", TRUE, ch, 0, 0, TO_ROOM);
   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD);
@@ -2985,18 +2985,18 @@ ACMD(do_selfd)
   hurt(0, 0, ch, tch, NULL, dmg, 1);
   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD);
   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD2);
-  if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
+  if (char_plr_flagged(ch, PLR_IMMORTAL)) {
     GET_SDCOOLDOWN(ch) = 600;
   }
-  if ((IS_MAJIN(ch) || IS_BIO(ch)) && getCurLFPercent(ch) > 0.5) {
+  if ((char_is_majin(ch) || char_is_bio(ch)) && getCurLFPercent(ch) > 0.5) {
    decCurLFPercent(ch, 2,-1);
    SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
    ch->gooptime = 70;
   } else {
    die(ch, NULL);
   }
-  int num = rand_number(10, 20) + GET_SKILL(ch, SKILL_SELFD);
-  if (GET_SKILL(ch, SKILL_SELFD) + num <= 100) {
+  int num = rand_number(10, 20) + char_get_skill(ch, SKILL_SELFD);
+  if (char_get_skill(ch, SKILL_SELFD) + num <= 100) {
    SET_SKILL(ch, SKILL_SELFD, num);
   } else {
    SET_SKILL(ch, SKILL_SELFD, 100);
@@ -3021,7 +3021,7 @@ ACMD(do_selfd)
    if (!can_kill(ch, tch, NULL, 3)){
       continue;
    }
-   if (MOB_FLAGGED(tch, MOB_NOKILL)) {
+   if (char_mob_flagged(tch, MOB_NOKILL)) {
     continue;
    }
    else {
@@ -3031,14 +3031,14 @@ ACMD(do_selfd)
     hurt(0, 0, ch, tch, NULL, dmg, 1);
    }
   }
-  if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
+  if (char_plr_flagged(ch, PLR_IMMORTAL)) {
     GET_SDCOOLDOWN(ch) = 600;
   }
   die(ch, NULL);
   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD);
   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_SELFD2);
-  int num = rand_number(10, 20) + GET_SKILL(ch, SKILL_SELFD);
-  if (GET_SKILL(ch, SKILL_SELFD) + num <= 100) {
+  int num = rand_number(10, 20) + char_get_skill(ch, SKILL_SELFD);
+  if (char_get_skill(ch, SKILL_SELFD) + num <= 100) {
    SET_SKILL(ch, SKILL_SELFD, num);
   } else {
    SET_SKILL(ch, SKILL_SELFD, 100);
@@ -3096,7 +3096,7 @@ ACMD(do_razor)
  handle_cooldown(ch, 6);
  /* There is a player/mob targeted */
  if (vict) {
-  if (IS_ANDROID(vict)) {
+  if (char_is_android(vict)) {
    send_to_char(ch, "There is not a necessary amount of water in cybernetic creatures.\r\n");
    return;
   }
@@ -3160,12 +3160,12 @@ ACMD(do_razor)
   else {
    int64_t reduction = GET_HIT(vict);
    dmg = damtype(ch, 47, skill, attperc);
-   if (AFF_FLAGGED(ch, AFF_SANCTUARY)) {
-    if (GET_SKILL(ch, SKILL_AQUA_BARRIER) >= 100) {
+   if (char_aff_flagged(ch, AFF_SANCTUARY)) {
+    if (char_get_skill(ch, SKILL_AQUA_BARRIER) >= 100) {
      GET_BARRIER(ch) += dmg * 0.1;
-    } else if (GET_SKILL(ch, SKILL_AQUA_BARRIER) >= 60) {
+    } else if (char_get_skill(ch, SKILL_AQUA_BARRIER) >= 60) {
      GET_BARRIER(ch) += dmg * 0.05;
-    } else if (GET_SKILL(ch, SKILL_AQUA_BARRIER) >= 40) {
+    } else if (char_get_skill(ch, SKILL_AQUA_BARRIER) >= 40) {
      GET_BARRIER(ch) += dmg * 0.02;
     }
     if (GET_BARRIER(ch) > GET_MAX_MANA(ch)) {
@@ -3219,7 +3219,7 @@ ACMD(do_razor)
      if (vict) {
       reduction = reduction - GET_HIT(vict);
 
-      if ((!IS_NPC(vict) && !AFF_FLAGGED(vict, AFF_SPIRIT)) || (IS_NPC(vict) && GET_HIT(vict) > 0)) {
+      if ((!char_is_npc(vict) && !char_aff_flagged(vict, AFF_SPIRIT)) || (char_is_npc(vict) && GET_HIT(vict) > 0)) {
           decCurKI(vict, reduction, 0);
           decCurST(vict, reduction, 0);
       }
@@ -3327,11 +3327,11 @@ ACMD(do_spike)
       } else {
           pcost(ch, attperc, 0);
       }
-      if (GET_SKILL(ch, SKILL_WSPIKE) >= 100) {
+      if (char_get_skill(ch, SKILL_WSPIKE) >= 100) {
           incCurKI(ch, (getMaxKI(ch) * attperc) * .3, true);
-      } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 60) {
+      } else if (char_get_skill(ch, SKILL_WSPIKE) >= 60) {
           incCurKI(ch, (getMaxKI(ch) * attperc) * .1, true);
-      } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 40) {
+      } else if (char_get_skill(ch, SKILL_WSPIKE) >= 40) {
           incCurKI(ch, (getMaxKI(ch) * attperc) * .05, true);
       }
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
@@ -3353,11 +3353,11 @@ ACMD(do_spike)
       } else {
        pcost(ch, attperc, 0);
       }
-        if (GET_SKILL(ch, SKILL_WSPIKE) >= 100) {
+        if (char_get_skill(ch, SKILL_WSPIKE) >= 100) {
             incCurKI(ch, (getMaxKI(ch) * attperc) * .3, true);
-        } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 60) {
+        } else if (char_get_skill(ch, SKILL_WSPIKE) >= 60) {
             incCurKI(ch, (getMaxKI(ch) * attperc) * .1, true);
-        } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 40) {
+        } else if (char_get_skill(ch, SKILL_WSPIKE) >= 40) {
             incCurKI(ch, (getMaxKI(ch) * attperc) * .05, true);
         }
      dmg = damtype(ch, 10, skill, attperc);
@@ -3386,11 +3386,11 @@ ACMD(do_spike)
       } else {
        pcost(ch, attperc, 0);
       }
-        if (GET_SKILL(ch, SKILL_WSPIKE) >= 100) {
+        if (char_get_skill(ch, SKILL_WSPIKE) >= 100) {
             incCurKI(ch, (getMaxKI(ch) * attperc) * .3, true);
-        } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 60) {
+        } else if (char_get_skill(ch, SKILL_WSPIKE) >= 60) {
             incCurKI(ch, (getMaxKI(ch) * attperc) * .1, true);
-        } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 40) {
+        } else if (char_get_skill(ch, SKILL_WSPIKE) >= 40) {
             incCurKI(ch, (getMaxKI(ch) * attperc) * .05, true);
         }
 	 if (GET_SKILL_PERF(ch, SKILL_WSPIKE) == 3) {
@@ -3408,11 +3408,11 @@ ACMD(do_spike)
       } else {
        pcost(ch, attperc, 0);
       }
-        if (GET_SKILL(ch, SKILL_WSPIKE) >= 100) {
+        if (char_get_skill(ch, SKILL_WSPIKE) >= 100) {
             incCurKI(ch, (getMaxKI(ch) * attperc) * .3, true);
-        } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 60) {
+        } else if (char_get_skill(ch, SKILL_WSPIKE) >= 60) {
             incCurKI(ch, (getMaxKI(ch) * attperc) * .1, true);
-        } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 40) {
+        } else if (char_get_skill(ch, SKILL_WSPIKE) >= 40) {
             incCurKI(ch, (getMaxKI(ch) * attperc) * .05, true);
         }
 	 if (GET_SKILL_PERF(ch, SKILL_WSPIKE) == 3) {
@@ -3431,11 +3431,11 @@ ACMD(do_spike)
       } else {
        pcost(ch, attperc, 0);
       }
-       if (GET_SKILL(ch, SKILL_WSPIKE) >= 100) {
+       if (char_get_skill(ch, SKILL_WSPIKE) >= 100) {
            incCurKI(ch, (getMaxKI(ch) * attperc) * .3, true);
-       } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 60) {
+       } else if (char_get_skill(ch, SKILL_WSPIKE) >= 60) {
            incCurKI(ch, (getMaxKI(ch) * attperc) * .1, true);
-       } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 40) {
+       } else if (char_get_skill(ch, SKILL_WSPIKE) >= 40) {
            incCurKI(ch, (getMaxKI(ch) * attperc) * .05, true);
        }
    }
@@ -3447,12 +3447,12 @@ ACMD(do_spike)
   }
   else {
    dmg = damtype(ch, 43, skill, attperc);
-   if (AFF_FLAGGED(ch, AFF_SANCTUARY)) {
-    if (GET_SKILL(ch, SKILL_AQUA_BARRIER) >= 100) {
+   if (char_aff_flagged(ch, AFF_SANCTUARY)) {
+    if (char_get_skill(ch, SKILL_AQUA_BARRIER) >= 100) {
      GET_BARRIER(ch) += dmg * 0.1;
-    } else if (GET_SKILL(ch, SKILL_AQUA_BARRIER) >= 60) {
+    } else if (char_get_skill(ch, SKILL_AQUA_BARRIER) >= 60) {
      GET_BARRIER(ch) += dmg * 0.05;
-    } else if (GET_SKILL(ch, SKILL_AQUA_BARRIER) >= 40) {
+    } else if (char_get_skill(ch, SKILL_AQUA_BARRIER) >= 40) {
      GET_BARRIER(ch) += dmg * 0.02;
     }
     if (GET_BARRIER(ch) > GET_MAX_MANA(ch)) {
@@ -3485,7 +3485,7 @@ ACMD(do_spike)
 	  }
       hurt(0, 0, ch, vict, NULL, dmg, 1);
       dam_eq_loc(vict, 3);
-      if (!AFF_FLAGGED(vict, AFF_KNOCKED) && (rand_number(1, 3) >= 2 && (GET_HIT(vict) > GET_HIT(ch) / 5) && !AFF_FLAGGED(vict, AFF_SANCTUARY))) {
+      if (!char_aff_flagged(vict, AFF_KNOCKED) && (rand_number(1, 3) >= 2 && (GET_HIT(vict) > GET_HIT(ch) / 5) && !char_aff_flagged(vict, AFF_SANCTUARY))) {
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@WYou are knocked out!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -3528,11 +3528,11 @@ ACMD(do_spike)
       } else {
        pcost(ch, attperc, 0);
       }
-      if (GET_SKILL(ch, SKILL_WSPIKE) >= 100) {
+      if (char_get_skill(ch, SKILL_WSPIKE) >= 100) {
           incCurKI(ch, (getMaxKI(ch) * attperc) * .3, true);
-      } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 60) {
+      } else if (char_get_skill(ch, SKILL_WSPIKE) >= 60) {
           incCurKI(ch, (getMaxKI(ch) * attperc) * .1, true);
-      } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 40) {
+      } else if (char_get_skill(ch, SKILL_WSPIKE) >= 40) {
           incCurKI(ch, (getMaxKI(ch) * attperc) * .05, true);
       }
     return;
@@ -3542,7 +3542,7 @@ ACMD(do_spike)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+   if (obj_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -3555,11 +3555,11 @@ ACMD(do_spike)
 	  }
    hurt(0, 0, ch, NULL, obj, dmg, 0);
    pcost(ch, attperc, 0);
-     if (GET_SKILL(ch, SKILL_WSPIKE) >= 100) {
+     if (char_get_skill(ch, SKILL_WSPIKE) >= 100) {
          incCurKI(ch, (getMaxKI(ch) * attperc) * .3, true);
-     } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 60) {
+     } else if (char_get_skill(ch, SKILL_WSPIKE) >= 60) {
          incCurKI(ch, (getMaxKI(ch) * attperc) * .1, true);
-     } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 40) {
+     } else if (char_get_skill(ch, SKILL_WSPIKE) >= 40) {
          incCurKI(ch, (getMaxKI(ch) * attperc) * .05, true);
      }
  }
@@ -3677,12 +3677,12 @@ ACMD(do_koteiru)
   }
   else {
    dmg = damtype(ch, 48, skill, attperc);
-   if (AFF_FLAGGED(ch, AFF_SANCTUARY)) {
-    if (GET_SKILL(ch, SKILL_AQUA_BARRIER) >= 100) {
+   if (char_aff_flagged(ch, AFF_SANCTUARY)) {
+    if (char_get_skill(ch, SKILL_AQUA_BARRIER) >= 100) {
      GET_BARRIER(ch) += dmg * 0.1;
-    } else if (GET_SKILL(ch, SKILL_AQUA_BARRIER) >= 60) {
+    } else if (char_get_skill(ch, SKILL_AQUA_BARRIER) >= 60) {
      GET_BARRIER(ch) += dmg * 0.05;
-    } else if (GET_SKILL(ch, SKILL_AQUA_BARRIER) >= 40) {
+    } else if (char_get_skill(ch, SKILL_AQUA_BARRIER) >= 40) {
      GET_BARRIER(ch) += dmg * 0.02;
     }
     if (GET_BARRIER(ch) > GET_MAX_MANA(ch)) {
@@ -3740,7 +3740,7 @@ ACMD(do_koteiru)
      pcost(ch, attperc, 0);
     if (vict) {
      if (GET_HIT(vict) > 1) {
-      if (rand_number(1, 4) == 1 && !AFF_FLAGGED(vict, AFF_FROZEN) && !IS_DEMON(vict)) {
+      if (rand_number(1, 4) == 1 && !char_aff_flagged(vict, AFF_FROZEN) && !char_is_demon(vict)) {
        act("@CYour body completely freezes!@n", TRUE, vict, 0, 0, TO_CHAR);
        act("@c$n's@C body completely freezes!@n", TRUE, vict, 0, 0, TO_ROOM);
        SET_BIT_AR(AFF_FLAGS(vict), AFF_FROZEN);
@@ -3754,7 +3754,7 @@ ACMD(do_koteiru)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+   if (obj_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -3935,7 +3935,7 @@ ACMD(do_hspiral)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+   if (obj_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }
@@ -4144,22 +4144,22 @@ ACMD(do_breaker)
   else {
    dmg = damtype(ch, 46, skill, attperc);
    int64_t theft = 0;
-   if (GET_LEVEL(ch) - 30 > GET_LEVEL(vict)) {
+   if (char_get_level(ch) - 30 > char_get_level(vict)) {
     theft = 1;
     GET_EXP(vict) -= theft;
-   } else if (GET_LEVEL(ch) - 20 > GET_LEVEL(vict)) {
+   } else if (char_get_level(ch) - 20 > char_get_level(vict)) {
     theft = GET_EXP(vict) / 1000;
     GET_EXP(vict) -= theft;
-   } else if (GET_LEVEL(ch) - 10 > GET_LEVEL(vict)) {
+   } else if (char_get_level(ch) - 10 > char_get_level(vict)) {
     theft = GET_EXP(vict) / 100;
     GET_EXP(vict) -= theft;
-   } else if (GET_LEVEL(ch) >= GET_LEVEL(vict)) {
+   } else if (char_get_level(ch) >= char_get_level(vict)) {
     theft = GET_EXP(vict) / 50;
     GET_EXP(vict) -= theft;
-   } else if (GET_LEVEL(ch) + 10 >= GET_LEVEL(vict)) {
+   } else if (char_get_level(ch) + 10 >= char_get_level(vict)) {
     theft = GET_EXP(vict) / 500;
     GET_EXP(vict) -= theft;
-   } else if (GET_LEVEL(ch) + 20 >= GET_LEVEL(vict)) {
+   } else if (char_get_level(ch) + 20 >= char_get_level(vict)) {
     theft = GET_EXP(vict) / 1000;
     GET_EXP(vict) -= theft;
    } else {
@@ -4215,7 +4215,7 @@ ACMD(do_breaker)
      break;
    }
 
-     if (level_exp(ch, GET_LEVEL(ch) + 1) - (GET_EXP(ch)) > 0 || GET_LEVEL(ch) >= 100) {
+     if (level_exp(ch, char_get_level(ch) + 1) - (GET_EXP(ch)) > 0 || char_get_level(ch) >= 100) {
        send_to_char(ch, "The returning Eldritch energy blesses you with some experience. @D[@G%s@D]@n\r\n", add_commas(theft));
        GET_EXP(ch) += theft * 2;
      }
@@ -4228,7 +4228,7 @@ ACMD(do_breaker)
   if (!can_kill(ch, NULL, obj, 1)) {
    return;
   }
-   if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+   if (obj_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It is broken already!\r\n");
     return;
    }

@@ -10,7 +10,7 @@
 void customWrite(struct char_data *ch, struct obj_data *obj)
 {
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
 
  char fname[40], line[256], prev[256];
@@ -141,4 +141,24 @@ void customCreate(struct descriptor_data *d)
  d->customfile = 1;
 
  fclose(fl);
+}
+
+/* Formerly macros in descriptor_utils.h. */
+
+bool desc_is_playing(const struct descriptor_data *d) {
+    return (STATE(d) == CON_TEDIT
+           || STATE(d) == CON_REDIT
+           || STATE(d) == CON_MEDIT
+           || STATE(d) == CON_OEDIT
+           || STATE(d) == CON_ZEDIT
+           || STATE(d) == CON_SEDIT
+           || STATE(d) == CON_CEDIT
+           || STATE(d) == CON_PLAYING
+           || STATE(d) == CON_TRIGEDIT
+           || STATE(d) == CON_AEDIT
+           || STATE(d) == CON_GEDIT
+           || STATE(d) == CON_IEDIT
+           || STATE(d) == CON_HEDIT
+           || STATE(d) == CON_NEWSEDIT
+           || STATE(d) == CON_POBJ);
 }

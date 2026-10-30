@@ -616,22 +616,22 @@ const struct command_info cmd_info[] = {
 int command_pass(char *cmd, struct char_data *ch)
 {
 
- if (AFF_FLAGGED(ch, AFF_LIQUEFIED)) {
+ if (char_aff_flagged(ch, AFF_LIQUEFIED)) {
   if (strcasecmp(cmd, "liquefy") && strcasecmp(cmd, "ingest") && strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
    send_to_char(ch, "You are not capable of performing that action while liquefied!\r\n");
    return (FALSE);
   }
- } else if (IS_AFFECTED(ch, AFF_PARALYZE)) {
+ } else if (char_is_affected(ch, AFF_PARALYZE)) {
   if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
    send_to_char(ch, "You are not capable of performing that action while petrified!\r\n");
    return (FALSE);
   }
- } else if (IS_AFFECTED(ch, AFF_FROZEN)) {
+ } else if (char_is_affected(ch, AFF_FROZEN)) {
   if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
    send_to_char(ch, "You are not capable of performing that action while a frozen block of ice!\r\n");
    return (FALSE);
   }
- } else if (IS_AFFECTED(ch, AFF_PARA) && GET_INT(ch) < rand_number(1, 60)) {
+ } else if (char_is_affected(ch, AFF_PARA) && GET_INT(ch) < rand_number(1, 60)) {
   if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
    act("@yYou fail to overcome your paralysis!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@Y$n @ystruggles with $s paralysis!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -649,32 +649,32 @@ int special(struct char_data *ch, int cmd, char *arg)
   int j;
 
   /* special in room? */
-  if (GET_ROOM_SPEC(IN_ROOM(ch)) != NULL)
-    if (GET_ROOM_SPEC(IN_ROOM(ch)) (ch, world + IN_ROOM(ch), cmd, arg))
+  if (rroom_get_spec(IN_ROOM(ch)) != NULL)
+    if (rroom_get_spec(IN_ROOM(ch)) (ch, world + IN_ROOM(ch), cmd, arg))
       return (1);
 
   /* special in equipment list? */
   for (j = 0; j < NUM_WEARS; j++)
-    if (GET_EQ(ch, j) && GET_OBJ_SPEC(GET_EQ(ch, j)) != NULL)
-      if (GET_OBJ_SPEC(GET_EQ(ch, j)) (ch, GET_EQ(ch, j), cmd, arg))
+    if (GET_EQ(ch, j) && obj_get_spec(GET_EQ(ch, j)) != NULL)
+      if (obj_get_spec(GET_EQ(ch, j)) (ch, GET_EQ(ch, j), cmd, arg))
 	return (1);
 
   /* special in inventory? */
   for (i = ch->carrying; i; i = i->next_content)
-    if (GET_OBJ_SPEC(i) != NULL)
-      if (GET_OBJ_SPEC(i) (ch, i, cmd, arg))
+    if (obj_get_spec(i) != NULL)
+      if (obj_get_spec(i) (ch, i, cmd, arg))
 	return (1);
 
   /* special in mobile present? */
   for (k = world[IN_ROOM(ch)].people; k; k = k->next_in_room)
-    if (!MOB_FLAGGED(k, MOB_NOTDEADYET))
-      if (GET_MOB_SPEC(k) && GET_MOB_SPEC(k) (ch, k, cmd, arg))
+    if (!char_mob_flagged(k, MOB_NOTDEADYET))
+      if (char_get_mob_spec(k) && char_get_mob_spec(k) (ch, k, cmd, arg))
 	return (1);
 
   /* special in object present? */
   for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content)
-    if (GET_OBJ_SPEC(i) != NULL)
-      if (GET_OBJ_SPEC(i) (ch, i, cmd, arg))
+    if (obj_get_spec(i) != NULL)
+      if (obj_get_spec(i) (ch, i, cmd, arg))
 	return (1);
 
   return (0);
@@ -735,7 +735,7 @@ void command_interpreter(struct char_data *ch, char *argument)
   }
   for (length = strlen(arg), cmd = 0; *complete_cmd_info[cmd].command != '\n'; cmd++) {
     if (!strncmp(complete_cmd_info[cmd].command, arg, length))
-      if (GET_LEVEL(ch) >= complete_cmd_info[cmd].minimum_level &&
+      if (char_get_level(ch) >= complete_cmd_info[cmd].minimum_level &&
           GET_ADMLEVEL(ch) >= complete_cmd_info[cmd].minimum_admlevel)
 	break;
   }
@@ -756,15 +756,15 @@ void command_interpreter(struct char_data *ch, char *argument)
       send_to_char(ch, "It's unfortunate...\r\n");
   else if (check_disabled(&complete_cmd_info[cmd]))    /* is it disabled? */
       send_to_char(ch, "This command has been temporarily disabled.\r\n");
-  else if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_GOOP) && GET_ADMLEVEL(ch) < ADMLVL_IMPL)
+  else if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_GOOP) && GET_ADMLEVEL(ch) < ADMLVL_IMPL)
     send_to_char(ch, "You only have your internal thoughts until your body has finished regenerating!\r\n");
-  else if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_FROZEN) && GET_ADMLEVEL(ch) < ADMLVL_IMPL)
+  else if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_FROZEN) && GET_ADMLEVEL(ch) < ADMLVL_IMPL)
     send_to_char(ch, "You try, but the mind-numbing cold prevents you...\r\n");
-  else if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_SPIRAL))
+  else if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_SPIRAL))
     send_to_char(ch, "You are occupied with your Spiral Comet attack!\r\n");
   else if (complete_cmd_info[cmd].command_pointer == NULL)
     send_to_char(ch, "Sorry, that command hasn't been implemented yet.\r\n");
-  else if (IS_NPC(ch) && complete_cmd_info[cmd].minimum_admlevel >= ADMLVL_IMMORT)
+  else if (char_is_npc(ch) && complete_cmd_info[cmd].minimum_admlevel >= ADMLVL_IMMORT)
     send_to_char(ch, "You can't use immortal commands while switched.\r\n");
   else if (GET_POS(ch) < complete_cmd_info[cmd].minimum_position && GET_POS(ch) != POS_FIGHTING) {
     switch (GET_POS(ch)) {

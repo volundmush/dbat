@@ -165,12 +165,12 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
       case MOB_TRIGGER:
         mudlog(BRF, ADMLVL_BUILDER, TRUE,
                "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (mob: %s - %d)",
-               vnum, GET_NAME((char_data *)proto), GET_MOB_VNUM((char_data *)proto));
+               vnum, char_get_name((char_data *)proto), char_get_mob_vnum((char_data *)proto));
         break;
       case WLD_TRIGGER:
         mudlog(BRF, ADMLVL_BUILDER, TRUE,
                "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (room:%d)",
-               vnum, GET_ROOM_VNUM( ((room_data *)proto)->number ));
+               vnum, rroom_get_vnum( ((room_data *)proto)->number ));
         break;
       default:
         mudlog(BRF, ADMLVL_BUILDER, TRUE,
@@ -244,7 +244,7 @@ void dg_obj_trigger(char *line, struct obj_data *obj)
   if (rnum==NOTHING) {
     mudlog(BRF, ADMLVL_BUILDER, TRUE,
            "SYSERR: Trigger vnum #%d asked for but non-existant! (Object: %s - %d)",
-            vnum, obj->short_description, GET_OBJ_VNUM(obj));
+            vnum, obj->short_description, obj_get_vnum(obj));
     return;
   }
 

@@ -150,7 +150,7 @@ void log_custom(struct descriptor_data *d, struct obj_data *obj)
       return;
      }
 
-    fprintf(fl, "@D[@cUser@W: @R%-20s @cName@W: @C%-20s @cCustom@W: @Y%s@D]\n", GET_USER(d->character), GET_NAME(d->character), obj->short_description);
+    fprintf(fl, "@D[@cUser@W: @R%-20s @cName@W: @C%-20s @cCustom@W: @Y%s@D]\n", char_get_user(d->character), char_get_name(d->character), obj->short_description);
     fclose(fl);
 }
 
@@ -183,12 +183,12 @@ ACMD(do_rpp)
  
  half_chop(argument, arg, arg2);
  
- if (IS_NPC(ch)) {
+ if (char_is_npc(ch)) {
   return;
  }
  
- revcost = revcost * (GET_LEVEL(ch) / 15);
- tnlcost = 1 + (tnlcost * (GET_LEVEL(ch) / 40));
+ revcost = revcost * (char_get_level(ch) / 15);
+ tnlcost = 1 + (tnlcost * (char_get_level(ch) / 40));
  
  if (revcost < 1) {
   revcost = 1;
@@ -196,7 +196,7 @@ ACMD(do_rpp)
   tnlcost = 1;
  }
 
- if (PLR_FLAGGED(ch, PLR_PDEATH)) {
+ if (char_plr_flagged(ch, PLR_PDEATH)) {
   revcost *= 6;
  }
  
@@ -375,7 +375,7 @@ ACMD(do_rpp)
 	 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
 	 return;
 	} else {
-     GET_PRACTICES(ch, GET_CLASS(ch)) += 750;
+     GET_PRACTICES(ch, char_get_class(ch)) += 750;
      send_to_char(ch, "Your practices have been increased by 750\r\n");
     } /* Can pay for it */
    } /* End Simple Zenni Reward */
@@ -399,14 +399,14 @@ ACMD(do_rpp)
     if (GET_RP(ch) < pay) {
 	 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
 	 return;
-    } else if (GET_LEVEL(ch) >= 100) {
+    } else if (char_get_level(ch) >= 100) {
      send_to_char(ch, "You can not buy experience anymore at your level. I think you know why.\r\n");
      return;
-    } else if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0) {
+    } else if (level_exp(ch, char_get_level(ch) + 1) - GET_EXP(ch) < 0) {
      send_to_char(ch, "You can not buy experience anymore UNTIL you level.\r\n");
      return;
 	} else {
-     GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * .52;
+     GET_EXP(ch) += level_exp(ch, char_get_level(ch) + 1) * .52;
      send_to_char(ch, "You gained 50%s of the entire experience needed for your next level.\r\n", "%");
     } /* Can pay for it */
    } /* End Simple Exp Reward */
@@ -461,10 +461,10 @@ ACMD(do_rpp)
     if (GET_RP(ch) < pay) {
 	 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
 	 return;
-    } else if (GET_LEVEL(ch) >= 100) {
+    } else if (char_get_level(ch) >= 100) {
          send_to_char(ch, "You can't use this at level 100.\r\n");
          return;
-    } else if (IS_ARLIAN(ch)) {
+    } else if (char_is_arlian(ch)) {
          send_to_char(ch, "This is not available to bugs.\r\n");
          return;
     } else {
@@ -504,7 +504,7 @@ ACMD(do_rpp)
      send_to_char(ch, "You don't have a that equipment to restring in your inventory.\r\n");
      send_to_char(ch, "Syntax: rpp 14 (obj name)\r\n");
      return;
-    } else if (OBJ_FLAGGED(obj, ITEM_CUSTOM)) {
+    } else if (obj_flagged(obj, ITEM_CUSTOM)) {
      send_to_char(ch, "You can not restring a custom piece. Why? Cause I say so. :P\r\n");
      return;
     } else {
@@ -558,28 +558,28 @@ ACMD(do_rpp)
      int found = FALSE;
      struct obj_data *k = NULL;
      for (k = object_list; k; k = k->next) {
-      if (OBJ_FLAGGED(k, ITEM_FORGED)) {
+      if (obj_flagged(k, ITEM_FORGED)) {
        continue;
       }
-      if (GET_OBJ_VNUM(k) == 20) {
+      if (obj_get_vnum(k) == 20) {
        found = TRUE;
-      } else if (GET_OBJ_VNUM(k) == 21) {
+      } else if (obj_get_vnum(k) == 21) {
        found = TRUE;
-      } else if (GET_OBJ_VNUM(k) == 22) {
+      } else if (obj_get_vnum(k) == 22) {
        found = TRUE;
-      } else if (GET_OBJ_VNUM(k) == 23) {
+      } else if (obj_get_vnum(k) == 23) {
        found = TRUE;
-      } else if (GET_OBJ_VNUM(k) == 24) {
+      } else if (obj_get_vnum(k) == 24) {
        found = TRUE;
-      } else if (GET_OBJ_VNUM(k) == 25) {
+      } else if (obj_get_vnum(k) == 25) {
        found = TRUE;
-      } else if (GET_OBJ_VNUM(k) == 26) {
+      } else if (obj_get_vnum(k) == 26) {
        found = TRUE;
       }
      }
      if (found == FALSE) {
       send_to_char(ch, "You have reduced the Dragon Ball wait by a whole real life day!\r\n");
-      send_to_all("%s has just reduced the Dragon Ball wait by a whole real life day!\r\n", GET_NAME(ch));
+      send_to_all("%s has just reduced the Dragon Ball wait by a whole real life day!\r\n", char_get_name(ch));
       dballtime -= 86400;
       if (dballtime <= 0) {
        dballtime = 1;
@@ -618,7 +618,7 @@ ACMD(do_rpp)
       userWrite(ch->desc, 0, 0, 0, "index");
       save_char(ch);
       send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
-      send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
+      send_to_imm("RPP Purchase: %s %d", char_get_name(ch), pay);
       return;
     }    
    } else if (selection == 2) {
@@ -656,13 +656,13 @@ ACMD(do_rpp)
       return;
      }
    if (selection == 1) {
-      fprintf(fl, "@D[@cName@W: @C%-20s @cRequest@W: @Y%-20s@D]\n", GET_NAME(ch), "House");
-      send_to_imm("RPP Request: %s paid for house", GET_NAME(ch));
+      fprintf(fl, "@D[@cName@W: @C%-20s @cRequest@W: @Y%-20s@D]\n", char_get_name(ch), "House");
+      send_to_imm("RPP Request: %s paid for house", char_get_name(ch));
       BOARDNEWCOD = time(0);
       save_mud_time(&time_info);
    } else if (selection == 2) {
-      fprintf(fl, "@D[@cName@W: @C%-20s @cRequest@W: @Y%-20s@D]\n", GET_NAME(ch), "Custom Skill");
-      send_to_imm("RPP Request: %s paid for Custom Skill, uhoh spaggettios", GET_NAME(ch));
+      fprintf(fl, "@D[@cName@W: @C%-20s @cRequest@W: @Y%-20s@D]\n", char_get_name(ch), "Custom Skill");
+      send_to_imm("RPP Request: %s paid for Custom Skill, uhoh spaggettios", char_get_name(ch));
       BOARDNEWCOD = time(0);
       save_mud_time(&time_info);
    }
@@ -682,7 +682,7 @@ ACMD(do_rpp)
      userWrite(ch->desc, 0, 0, 0, "index");
      save_char(ch);
       send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
-      send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
+      send_to_imm("RPP Purchase: %s %d", char_get_name(ch), pay);
   }
   
     if (selection > 12 && pay > 0) {
@@ -691,7 +691,7 @@ ACMD(do_rpp)
      userWrite(ch->desc, 0, 0, 0, "index");
      save_char(ch);
       send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
-      send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
+      send_to_imm("RPP Purchase: %s %d", char_get_name(ch), pay);
   }
     
 }
@@ -699,7 +699,7 @@ ACMD(do_rpp)
 ACMD(do_commune)
 {
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
   
  if (!know_skill(ch, SKILL_COMMUNE)) {
@@ -711,7 +711,7 @@ ACMD(do_commune)
   return;
  }
  
- int prob = GET_SKILL(ch, SKILL_COMMUNE), perc = axion_dice(0);
+ int prob = char_get_skill(ch, SKILL_COMMUNE), perc = axion_dice(0);
  int64_t cost = GET_MAX_MOVE(ch) * .05;
  
  if ((getCurKI(ch)) < cost) {
@@ -742,7 +742,7 @@ ACMD(do_willpower)
 
  int fail = FALSE;
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
 
  if (MAJINIZED(ch) <= 0) {
@@ -750,15 +750,15 @@ ACMD(do_willpower)
   return;
  }
  else {
-  if (GET_PRACTICES(ch, GET_CLASS(ch)) < 100 && GET_LEVEL(ch) < 100) {
+  if (GET_PRACTICES(ch, char_get_class(ch)) < 100 && char_get_level(ch) < 100) {
    send_to_char(ch, "You do not have enough PS to focus your attempt to break free.\r\n");
    fail = TRUE;
   }
-  if (GET_PRACTICES(ch, GET_CLASS(ch)) < 200 && GET_LEVEL(ch) >= 100) {
+  if (GET_PRACTICES(ch, char_get_class(ch)) < 200 && char_get_level(ch) >= 100) {
    send_to_char(ch, "You do not have enough PS to focus your attempt to break free.\r\n");
    fail = TRUE;
   }
-  if (GET_EXP(ch) < level_exp(ch, GET_LEVEL(ch) + 1) && GET_LEVEL(ch) < 100) {
+  if (GET_EXP(ch) < level_exp(ch, char_get_level(ch) + 1) && char_get_level(ch) < 100) {
    send_to_char(ch, "You need a full level's worth of experience stored up to try and break free.\r\n");
    fail = TRUE;
   }
@@ -767,9 +767,9 @@ ACMD(do_willpower)
   }
   else {
    GET_EXP(ch) = 0;
-   GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
-   if (GET_LEVEL(ch) >= 100) {
-      GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
+   GET_PRACTICES(ch, char_get_class(ch)) -= 100;
+   if (char_get_level(ch) >= 100) {
+      GET_PRACTICES(ch, char_get_class(ch)) -= 100;
    }
    if (rand_number(10, 100) - GET_INT(ch) > 60) {
           reveal_hiding(ch, 0);
@@ -779,9 +779,9 @@ ACMD(do_willpower)
    }
    else {
    GET_EXP(ch) = 0;
-   GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
-   if (GET_LEVEL(ch) >= 100) {
-      GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
+   GET_PRACTICES(ch, char_get_class(ch)) -= 100;
+   if (char_get_level(ch) >= 100) {
+      GET_PRACTICES(ch, char_get_class(ch)) -= 100;
    }
           reveal_hiding(ch, 0);
     act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments the ground splits beneath you and while letting out a piercing scream the M disappears from your forehead! You are free while still keeping the boost you had recieved from the majinization!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -803,7 +803,7 @@ ACMD(do_grapple)
   return;
  }
 
- if (PLR_FLAGGED(ch, PLR_THANDW)) {
+ if (char_plr_flagged(ch, PLR_THANDW)) {
   send_to_char(ch, "Your are too busy wielding your weapon with two hands!\r\n");
   return;
  }
@@ -833,7 +833,7 @@ ACMD(do_grapple)
   return;
  }
 
- if (!HAS_ARMS(ch)) {
+ if (!char_has_arms(ch)) {
   send_to_char(ch, "You have no available arms!\r\n");
   return;
  }
@@ -861,7 +861,7 @@ ACMD(do_grapple)
   return;
  }
 
- if (AFF_FLAGGED(vict, AFF_KNOCKED)) {
+ if (char_aff_flagged(vict, AFF_KNOCKED)) {
   send_to_char(ch, "They are unconcious. What would be the point?\r\n");
   return;
  }
@@ -886,21 +886,21 @@ ACMD(do_grapple)
 
  if (!strcasecmp("hold", arg2) || !strcasecmp("choke", arg2) || !strcasecmp("grab", arg2) || !strcasecmp("wrap", arg2)) {
   pass = TRUE;
-  int perc = GET_SKILL(ch, SKILL_GRAPPLE), prob = axion_dice(0), cost = GET_MAX_MOVE(ch) / 100;
+  int perc = char_get_skill(ch, SKILL_GRAPPLE), prob = axion_dice(0), cost = GET_MAX_MOVE(ch) / 100;
 
   if ((getCurST(ch)) < cost) {
    send_to_char(ch, "You do not have enough stamina to grapple!\r\n");
    return;
   }
 
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
+  if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
           (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
+   if (!char_aff_flagged(ch, AFF_ZANZOKEN) || (char_aff_flagged(ch, AFF_ZANZOKEN) && char_get_speedi(ch) + rand_number(1, 5) < char_get_speedi(vict) + rand_number(1, 5))) {
            reveal_hiding(ch, 0);
      act("@C$N@c disappears, avoiding your grapple attempt before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@cYou disappear, avoiding @C$n's@c grapple attempt before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@c disappears, avoiding @C$n's@c grapple attempt before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
+     if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
       REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
      }
      REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
@@ -918,13 +918,13 @@ ACMD(do_grapple)
    }
   }
 
-  if (GET_SPEEDI(ch) > GET_SPEEDI(vict) * 2) {
+  if (char_get_speedi(ch) > char_get_speedi(vict) * 2) {
    perc += 5;
-  } else if (GET_SPEEDI(ch) > GET_SPEEDI(vict)) {
+  } else if (char_get_speedi(ch) > char_get_speedi(vict)) {
    perc += 2;
-  } else if (GET_SPEEDI(ch) * 2 < GET_SPEEDI(vict)) {
+  } else if (char_get_speedi(ch) * 2 < char_get_speedi(vict)) {
    perc -= 5;
-  } else if (GET_SPEEDI(ch) < GET_SPEEDI(vict)) {
+  } else if (char_get_speedi(ch) < char_get_speedi(vict)) {
    perc -= 2;
   }
 
@@ -955,7 +955,7 @@ ACMD(do_grapple)
    improve_skill(ch, SKILL_GRAPPLE, 1);
    WAIT_STATE(ch, PULSE_4SEC);
    return;
-  } else if (!HAS_ARMS(vict) && !strcasecmp("grab", arg2)) {
+  } else if (!char_has_arms(vict) && !strcasecmp("grab", arg2)) {
     send_to_char(ch, "They don't even have an arm to grab onto!\r\n");
     return;
   } else if (!strcasecmp("hold", arg2)) {
@@ -993,7 +993,7 @@ ACMD(do_grapple)
    WAIT_STATE(ch, PULSE_4SEC);
    return;
   } else if (!strcasecmp("wrap", arg2)) {
-   if (!IS_MAJIN(ch)) {
+   if (!char_is_majin(ch)) {
     send_to_char(ch, "Your body is not flexible enough to wrap around a target!\r\n");
     return;
    }
@@ -1026,7 +1026,7 @@ ACMD(do_grapple)
    GRAPTYPE(vict) = 3;
    /* Let's grapple! */
 
-   if (!PLR_FLAGGED(vict, PLR_THANDW)) {
+   if (!char_plr_flagged(vict, PLR_THANDW)) {
     REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_THANDW);
    }
 
@@ -1050,7 +1050,7 @@ ACMD(do_trip)
  
  one_argument(argument, arg);
 
- if (!check_skill(ch, SKILL_TRIP) && !IS_NPC(ch)) {
+ if (!check_skill(ch, SKILL_TRIP) && !char_is_npc(ch)) {
   return;
  }
 
@@ -1064,7 +1064,7 @@ ACMD(do_trip)
  int perc = init_skill(ch, SKILL_TRIP), prob = rand_number(1, 114);
 
  if (perc == 0) {
-  perc = GET_LEVEL(ch) + rand_number(1, 10);
+  perc = char_get_level(ch) + rand_number(1, 10);
  }
 
  vict = NULL; vict = NULL;
@@ -1082,7 +1082,7 @@ ACMD(do_trip)
  }
 
  if (vict != NULL) {
-  if (AFF_FLAGGED(vict, AFF_FLYING)) {
+  if (char_aff_flagged(vict, AFF_FLYING)) {
    send_to_char(ch, "They are flying and are not on their feet!\r\n");
    return;
   }
@@ -1090,29 +1090,29 @@ ACMD(do_trip)
    send_to_char(ch, "They are not on their feet!\r\n");
    return;
   }
-  if (PLR_FLAGGED(vict, PLR_HEALT)) {
+  if (char_plr_flagged(vict, PLR_HEALT)) {
    send_to_char(ch, "They are inside a healing tank!\r\n");
    return;
   }
 
-  if (GET_SPEEDI(ch) > GET_SPEEDI(vict) * 2) {
+  if (char_get_speedi(ch) > char_get_speedi(vict) * 2) {
    perc += 5;
-  } else if (GET_SPEEDI(ch) > GET_SPEEDI(vict)) {
+  } else if (char_get_speedi(ch) > char_get_speedi(vict)) {
    perc += 2;
-  } else if (GET_SPEEDI(ch) * 2 < GET_SPEEDI(vict)) {
+  } else if (char_get_speedi(ch) * 2 < char_get_speedi(vict)) {
    perc -= 5;
-  } else if (GET_SPEEDI(ch) < GET_SPEEDI(vict)) {
+  } else if (char_get_speedi(ch) < char_get_speedi(vict)) {
    perc -= 2;
   }
 
-  if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
+  if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
           (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-   if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
+   if (!char_aff_flagged(ch, AFF_ZANZOKEN) || (char_aff_flagged(ch, AFF_ZANZOKEN) && char_get_speedi(ch) + rand_number(1, 5) < char_get_speedi(vict) + rand_number(1, 5))) {
           reveal_hiding(ch, 0);
      act("@C$N@c disappears, avoiding your trip before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@cYou disappear, avoiding @C$n's@c trip before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@c disappears, avoiding @C$n's@c trip before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
+     if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
       REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
      }
      REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
@@ -1176,7 +1176,7 @@ ACMD(do_trip)
 ACMD(do_train)
 {
 
- if (IS_NPC(ch)) {
+ if (char_is_npc(ch)) {
   return;
  }
 
@@ -1202,17 +1202,17 @@ ACMD(do_train)
  concap += 500 * ch->real_abils.con;
  aglcap += 500 * ch->real_abils.dex;
 
- if (IS_HUMAN(ch)) {
+ if (char_is_human(ch)) {
   intcap = intcap * 0.75;
   wiscap = wiscap * 0.75;
- } else if (IS_KANASSAN(ch)) {
+ } else if (char_is_kanassan(ch)) {
   intcap = intcap * 0.4;
   wiscap = wiscap * 0.4;
   aglcap = aglcap * 0.4;
- } else if (IS_HALFBREED(ch)) {
+ } else if (char_is_halfbreed(ch)) {
   intcap = intcap * 0.75;
   strcap = strcap * 0.75;
- } else if (IS_TRUFFLE(ch)) {
+ } else if (char_is_truffle(ch)) {
   strcap = strcap * 1.5;
   concap = concap * 1.5;
  }
@@ -1248,27 +1248,27 @@ ACMD(do_train)
  /* Figure up the weight bonus */
  total = weight * (ROOM_GRAVITY(IN_ROOM(ch)) + 1);
  total += (ROOM_GRAVITY(IN_ROOM(ch)) + 1) ^ 2;
- if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 6100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 6135) {
+ if (rroom_get_vnum(IN_ROOM(ch)) >= 6100 && rroom_get_vnum(IN_ROOM(ch)) <= 6135) {
   total += total * 0.15;
  }
 
  int sensei = -1;
 
-   if(GET_ROOM_VNUM(IN_ROOM(ch)) == sensei_location_id(ch->chclass)) {
-       if(!(GET_GOLD(ch) >= 8 && GET_PRACTICES(ch, GET_CLASS(ch)) >= 1)) {
+   if(rroom_get_vnum(IN_ROOM(ch)) == sensei_location_id(ch->chclass)) {
+       if(!(GET_GOLD(ch) >= 8 && GET_PRACTICES(ch, char_get_class(ch)) >= 1)) {
            send_to_char(ch, "It costs 8 Zenni and 1 PS to train with your sensei.\r\n");
            return;
        }
        total += total * 0.85;
-       if (GET_LEVEL(ch) >= 100)
+       if (char_get_level(ch) >= 100)
            total *= 15000;
-       else if (GET_LEVEL(ch) >= 80)
+       else if (char_get_level(ch) >= 80)
            total *= 1500;
-       else if (GET_LEVEL(ch) >= 40)
+       else if (char_get_level(ch) >= 40)
            total *= 600;
-       else if (GET_LEVEL(ch) >= 20)
+       else if (char_get_level(ch) >= 20)
            total *= 300;
-       else if (GET_LEVEL(ch) >= 10)
+       else if (char_get_level(ch) >= 10)
            total *= 150;
        sensei = ch->chclass;
        send_to_char(ch, "@G%s begins to instruct you in training technique.@n\r\n", SENSEI_NAME(ch));
@@ -1376,11 +1376,11 @@ ACMD(do_train)
   }
 
   int stat_cap = 20;
-  if(GET_LEVEL(ch) >= 61)
+  if(char_get_level(ch) >= 61)
       stat_cap = 80;
-  else if (GET_LEVEL(ch) > 40)
+  else if (char_get_level(ch) > 40)
       stat_cap = 60;
-  else if (GET_LEVEL(ch) > 20)
+  else if (char_get_level(ch) > 20)
       stat_cap = 40;
 
   if(*stat_val >= stat_cap) {
@@ -1527,10 +1527,10 @@ ACMD(do_train)
 
     plus *= 2;
 
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+    if (rroom_get_vnum(IN_ROOM(ch)) >= 19800 && rroom_get_vnum(IN_ROOM(ch)) <= 19899) {
         plus *= 4;
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_HBTC)) {
         plus *= 3;
     }
     if (GET_BONUS(ch, BONUS_HARDWORKER)) {
@@ -1581,15 +1581,15 @@ ACMD(do_train)
 
     if(sensei > -1) {
         GET_GOLD(ch) -= 8;
-        GET_PRACTICES(ch, GET_CLASS(ch)) -= 1;
+        GET_PRACTICES(ch, char_get_class(ch)) -= 1;
     }
 
     if (*stat_train >= needed) {
         *stat_train -= needed;
         send_to_char(ch, "You feel your %s improve!@n\r\n", stat_name);
         *stat_val += 1;
-        if (IS_PICCOLO(ch) && IS_NAMEK(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0) {
-            GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.25;
+        if (char_is_piccolo(ch) && char_is_namek(ch) && level_exp(ch, char_get_level(ch) + 1) - GET_EXP(ch) > 0) {
+            GET_EXP(ch) += level_exp(ch, char_get_level(ch) + 1) * 0.25;
             send_to_char(ch, "You gained quite a bit of experience from that!\r\n");
         }
         save_char(ch);
@@ -1603,7 +1603,7 @@ ACMD(do_rip)
 
  one_argument(argument, arg);
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
 
  if (!*arg) {
@@ -1616,7 +1616,7 @@ ACMD(do_rip)
   return;
  }
 
- if (!PLR_FLAGGED(vict, PLR_TAIL) && !PLR_FLAGGED(vict, PLR_STAIL)) {
+ if (!char_plr_flagged(vict, PLR_TAIL) && !char_plr_flagged(vict, PLR_STAIL)) {
   send_to_char(ch, "They do not have a tail to rip off!\r\n");
   return;
  }
@@ -1625,7 +1625,7 @@ ACMD(do_rip)
   if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 20) {
    send_to_char(ch, "You are too tired to manage to grab their tail!\r\n");
    return;
-  } else if (GET_SPEEDI(ch) > GET_SPEEDI(vict)) {
+  } else if (char_get_speedi(ch) > char_get_speedi(vict)) {
       decCurST(ch, getMaxST(ch) / 20, 0);
    if (GET_HIT(ch) > GET_HIT(vict) * 2) {
           reveal_hiding(ch, 0);
@@ -1676,7 +1676,7 @@ ACMD(do_infuse)
   return;
  }
 
- if (AFF_FLAGGED(ch, AFF_INFUSE)) {
+ if (char_aff_flagged(ch, AFF_INFUSE)) {
   act("You stop infusing ki into your attacks.", TRUE, ch, 0, 0, TO_CHAR);
   act("$n stops infusing ki into $s attacks.", TRUE, ch, 0, 0, TO_ROOM);
   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_INFUSE);
@@ -1721,7 +1721,7 @@ ACMD(do_paralyze)
  if (!can_kill(ch, vict, NULL, 0)) {
   return;
  } 
- if (AFF_FLAGGED(vict, AFF_PARA)) {
+ if (char_aff_flagged(vict, AFF_PARA)) {
   send_to_char(ch, "They are already partially paralyzed!\r\n");
   return;
  }
@@ -1731,12 +1731,12 @@ ACMD(do_paralyze)
   return;
  }
 
- int prob = GET_SKILL(ch, SKILL_PARALYZE), perc = axion_dice(0);
+ int prob = char_get_skill(ch, SKILL_PARALYZE), perc = axion_dice(0);
 
- if (GET_SPEEDI(ch) * 2 < GET_SPEEDI(vict)) {
+ if (char_get_speedi(ch) * 2 < char_get_speedi(vict)) {
   prob -= 10;
  }
- if (GET_SPEEDI(ch) + (GET_SPEEDI(ch) / 2) < GET_SPEEDI(vict)) {
+ if (char_get_speedi(ch) + (char_get_speedi(ch) / 2) < char_get_speedi(vict)) {
   prob -= 5;
  }
 
@@ -1768,14 +1768,14 @@ ACMD(do_paralyze)
 ACMD(do_taisha)
 {
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
  
  if (!know_skill(ch, SKILL_TAISHA)) {
   return;
  }
 
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+ if (rroom_flagged(IN_ROOM(ch), ROOM_AURA)) {
   send_to_char(ch, "This area already has an aura of regeneration around it.\r\n");
   return;
  }
@@ -1790,7 +1790,7 @@ ACMD(do_taisha)
   return;
  }
 
- int prob = GET_SKILL(ch, SKILL_TAISHA), perc = axion_dice(0);
+ int prob = char_get_skill(ch, SKILL_TAISHA), perc = axion_dice(0);
 
  decCurKI(ch, getMaxKI(ch) / 3, 0);
  if (prob < perc) {
@@ -1830,7 +1830,7 @@ ACMD(do_kura)
  }
 
  int num = atoi(arg);
- int skill = GET_SKILL(ch, SKILL_KURA);
+ int skill = char_get_skill(ch, SKILL_KURA);
  int64_t cost = 0, bonus = 0;
 
  if (num > skill) {
@@ -1881,7 +1881,7 @@ ACMD(do_candy)
 
     one_argument(argument, arg);
 
-    if (!IS_MAJIN(ch)) {
+    if (!char_is_majin(ch)) {
         send_to_char(ch, "You are not a majin, how can you do that?\r\n");
         return;
     }
@@ -1901,7 +1901,7 @@ ACMD(do_candy)
     int64_t ch_max = getMaxPLTrans(ch);
     int64_t vict_max = getMaxPLTrans(vict);
 
-    if (!IS_NPC(vict)) {
+    if (!char_is_npc(vict)) {
         send_to_char(ch, "You can't turn them into candy.\r\n");
         return;
     }
@@ -1909,11 +1909,11 @@ ACMD(do_candy)
         send_to_char(ch, "They are too powerful.\r\n");
         return;
     }
-    if (vict_max < ch_max * .25 && GET_LEVEL(ch) < 100) {
+    if (vict_max < ch_max * .25 && char_get_level(ch) < 100) {
         send_to_char(ch, "They are too weak.\r\n");
         return;
     }
-    if (vict_max < ch_max * .09 && GET_LEVEL(ch) == 100) {
+    if (vict_max < ch_max * .09 && char_get_level(ch) == 100) {
         send_to_char(ch, "They are too weak.\r\n");
         return;
     }
@@ -1950,12 +1950,12 @@ ACMD(do_candy)
             obj = read_object(94, VIRTUAL);
             obj_to_char(obj, ch);
         }
-        else if (vict_max < ch_max && (((vict_max >= ch_max * .5) && GET_LEVEL(ch) < 100) || ((vict_max >= ch_max * .1) && GET_LEVEL(ch) >= 100))) {
+        else if (vict_max < ch_max && (((vict_max >= ch_max * .5) && char_get_level(ch) < 100) || ((vict_max >= ch_max * .1) && char_get_level(ch) >= 100))) {
             send_to_char(ch, "You grab the candy as it falls.\r\n");
             obj = read_object(93, VIRTUAL);
             obj_to_char(obj, ch);
         }
-        else if (vict_max < ch_max && (((vict_max < ch_max * .5) && GET_LEVEL(ch) < 100) || ((vict_max < ch_max * .1) && GET_LEVEL(ch) >= 100))) {
+        else if (vict_max < ch_max && (((vict_max < ch_max * .5) && char_get_level(ch) < 100) || ((vict_max < ch_max * .1) && char_get_level(ch) >= 100))) {
             send_to_char(ch, "You grab the candy as it falls.\r\n");
             obj = read_object(53, VIRTUAL);
             obj_to_char(obj, ch);
@@ -1972,7 +1972,7 @@ ACMD(do_future)
  struct char_data *vict = NULL;
  one_argument(argument, arg);
 
- if (IS_NPC(ch) || !IS_KANASSAN(ch)) {
+ if (char_is_npc(ch) || !char_is_kanassan(ch)) {
   send_to_char(ch, "You are incapable of this ability.\r\n");
   return;
  }
@@ -1987,12 +1987,12 @@ ACMD(do_future)
   return;
  }
 
- if (AFF_FLAGGED(vict, AFF_FUTURE)) {
+ if (char_aff_flagged(vict, AFF_FUTURE)) {
   send_to_char(ch, "They already can see the future.\r\n");
   return;
  }
 
- if (IS_NPC(vict)) {
+ if (char_is_npc(vict)) {
   send_to_char(ch, "You can't target them, there would be no point.\r\n");
   return;
  }
@@ -2002,7 +2002,7 @@ ACMD(do_future)
   return;
  }
 
- if (GET_PRACTICES(ch, GET_CLASS(ch)) < 100) {
+ if (GET_PRACTICES(ch, char_get_class(ch)) < 100) {
   send_to_char(ch, "You do not have enough PS to activate or pass on this ability.\r\n");
   return;
  }
@@ -2017,7 +2017,7 @@ ACMD(do_future)
    return;
   }
      decCurKI(ch, getMaxKI(ch) / 40, 0);
-  GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
+  GET_PRACTICES(ch, char_get_class(ch)) -= 100;
         reveal_hiding(ch, 0);
   act("@CYou focus your energy into your fingers before stabbing your claws into $N and bestowing the power of Future Sight upon $M. Shortly after $E passes out.@n", TRUE, ch, 0, vict, TO_CHAR);
   act("@C$n focuses $s energy into $s fingers before stabbing $s claws into YOUR neck and bestowing the power of Future Sight upon you! Soon after you pass out!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -2038,7 +2038,7 @@ ACMD(do_future)
    return;
   }
      decCurKI(ch, getMaxKI(ch) / 40, 0);
-  GET_PRACTICES(ch, GET_CLASS(ch)) -= 100;
+  GET_PRACTICES(ch, char_get_class(ch)) -= 100;
         reveal_hiding(ch, 0);
   act("@CYou focus your energy into your mind and awaken your latent Future Sight powers!@n", TRUE, ch, 0, vict, TO_CHAR);
   act("@C$n focuses $s energy while closing $s eyes for a moment.@n", TRUE, ch, 0, vict, TO_VICT);
@@ -2060,7 +2060,7 @@ ACMD(do_drag)
 
  one_argument(argument, arg);
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
 
  if (DRAGGING(ch)) {
@@ -2072,7 +2072,7 @@ ACMD(do_drag)
   return;
  }
 
- if (PLR_FLAGGED(ch, PLR_PILOTING)) {
+ if (char_plr_flagged(ch, PLR_PILOTING)) {
    send_to_char(ch, "You are busy piloting a ship!\r\n");
    return;
  }
@@ -2092,7 +2092,7 @@ ACMD(do_drag)
   return;
  }
 
- if (SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM || SECT(IN_ROOM(ch)) == SECT_WATER_SWIM) {
+ if (rroom_sect(IN_ROOM(ch)) == SECT_WATER_NOSWIM || rroom_sect(IN_ROOM(ch)) == SECT_WATER_SWIM) {
   send_to_char(ch, "You decide to not be a tugboat instead.\r\n");
   return;
  }
@@ -2112,7 +2112,7 @@ ACMD(do_drag)
   return;
  }
 
- if (IS_NPC(vict) && MOB_FLAGGED(vict, MOB_NOKILL)) {
+ if (char_is_npc(vict) && char_mob_flagged(vict, MOB_NOKILL)) {
   send_to_char(ch, "They are not to be touched!\r\n");
   return;
  }
@@ -2123,12 +2123,12 @@ ACMD(do_drag)
   act("@wYou try to grab and pull @C$N@W with you, but $E resists!@n", TRUE, ch, 0, vict, TO_CHAR);
   act("@C$n@W tries to grab and pull you! However you resist!@n", TRUE, ch, 0, vict, TO_VICT);
   act("@C$n@W tries to grab and pull @c$N@W but $E resists!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-  if (IS_NPC(vict) && !FIGHTING(vict)) {
+  if (char_is_npc(vict) && !FIGHTING(vict)) {
    set_fighting(vict, ch);
   }
   return;
  }
- else if (GET_PC_WEIGHT(vict) + IS_CARRYING_W(vict) > CAN_CARRY_W(ch)) {
+ else if (char_get_pc_weight(vict) + IS_CARRYING_W(vict) > CAN_CARRY_W(ch)) {
         reveal_hiding(ch, 0);
   act("@wYou try to grab and pull @C$N@W with you, but $E is too heavy!@n", TRUE, ch, 0, vict, TO_CHAR);
   act("@C$n@W tries to grab and pull @c$N@W but $E is too heavy!@n", TRUE, ch, 0, vict, TO_ROOM);
@@ -2140,9 +2140,9 @@ ACMD(do_drag)
   act("@C$n@W grabs and starts dragging @c$N@W.@n", TRUE, ch, 0, vict, TO_NOTVICT);
   DRAGGING(ch) = vict;
   DRAGGED(vict) = ch;
-  if (!AFF_FLAGGED(vict, AFF_KNOCKED) && !AFF_FLAGGED(vict, AFF_SLEEP) && rand_number(1, 3)) {
+  if (!char_aff_flagged(vict, AFF_KNOCKED) && !char_aff_flagged(vict, AFF_SLEEP) && rand_number(1, 3)) {
    send_to_char(vict, "You feel your sleeping body being moved.\r\n");
-   if (IS_NPC(vict) && !FIGHTING(vict)) {
+   if (char_is_npc(vict) && !FIGHTING(vict)) {
     set_fighting(vict, ch);
    }
   }
@@ -2152,7 +2152,7 @@ ACMD(do_drag)
 ACMD(do_stop)
 {
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
 
  if (!FIGHTING(ch)) {
@@ -2173,10 +2173,10 @@ ACMD(do_suppress)
  char arg[MAX_INPUT_LENGTH];
  one_argument(argument, arg);
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
 
- if (IS_ANDROID(ch)) {
+ if (char_is_android(ch)) {
   send_to_char(ch, "You are unable to suppress your powerlevel.\r\n");
   return;
  }
@@ -2184,7 +2184,7 @@ ACMD(do_suppress)
   send_to_char(ch, "You are far too arrogant to hide your strength.\r\n");
   return;
  }
- if (PLR_FLAGGED(ch, PLR_POWERUP)) {
+ if (char_plr_flagged(ch, PLR_POWERUP)) {
   send_to_char(ch, "You are currently powering up, can't suppress.\r\n");
   return;
  }
@@ -2301,7 +2301,7 @@ ACMD(do_implant)
 
  for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
-   if (found == FALSE && GET_OBJ_VNUM(obj) == 66 && (!OBJ_FLAGGED(obj, ITEM_BROKEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))) {
+   if (found == FALSE && obj_get_vnum(obj) == 66 && (!obj_flagged(obj, ITEM_BROKEN) && !obj_flagged(obj, ITEM_FORGED))) {
     found = TRUE;
     limb = obj;
    }
@@ -2451,7 +2451,7 @@ ACMD(do_pose)
   return;
  }
 
- int prob = GET_SKILL(ch, SKILL_POSE);
+ int prob = char_get_skill(ch, SKILL_POSE);
  int perc = rand_number(1, 70);
 
   if (ch->real_abils.str + 8 > 70 && GET_BONUS(ch, BONUS_WIMP) > 0) {
@@ -2511,12 +2511,12 @@ ACMD(do_fury) {
 
   one_argument(argument, arg);
 
-  if (!IS_HALFBREED(ch) || IS_NPC(ch)) {
+  if (!char_is_halfbreed(ch) || char_is_npc(ch)) {
    send_to_char(ch, "You are furious, but you'll get over it.\r\n");
    return;
   }
 
-  if (PLR_FLAGGED(ch, PLR_FURY)) {
+  if (char_plr_flagged(ch, PLR_FURY)) {
    send_to_char(ch, "You are already furious, your next attack will devestate, hurry use it!\r\n");
    return;
   }
@@ -2581,7 +2581,7 @@ void hint_system(struct char_data *ch, int num)
   num = rand_number(0, 21);
  }
  
- if (!IS_ANDROID(ch) && !IS_NAMEK(ch)) {
+ if (!char_is_android(ch) && !char_is_namek(ch)) {
   send_to_char(ch, "@D[@GHint@D] @G%s@n\r\n", hints[num]);
  } 
  else {
@@ -2597,14 +2597,14 @@ ACMD(do_think)
 {
  skip_spaces(&argument);
 
- if (IS_NPC(ch)) {
+ if (char_is_npc(ch)) {
   return;
  }
- if (IN_ARENA(ch)) {
+ if (char_in_arena(ch)) {
   send_to_char(ch, "Lol, no.\r\n");
   return;
  }
- if (GET_SKILL(ch, SKILL_TELEPATHY)) {
+ if (char_get_skill(ch, SKILL_TELEPATHY)) {
   send_to_char(ch, "You can just use telepathy.\r\n");
   return;
  }
@@ -2619,9 +2619,9 @@ ACMD(do_think)
  else {
   struct char_data *tch;
   tch = MINDLINK(ch);
-  send_to_char(ch, "@c%s@w reads your thoughts, '@C%s@w'@n\r\n", GET_NAME(tch), argument);
-  send_to_char(tch, "@c%s@w thinks, '@C%s@w'@n\r\n", GET_NAME(ch), argument);
-  send_to_imm("@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : GET_USER(ch),  GET_ADMLEVEL(tch) > 0 ? GET_NAME(tch) : GET_USER(tch), argument);
+  send_to_char(ch, "@c%s@w reads your thoughts, '@C%s@w'@n\r\n", char_get_name(tch), argument);
+  send_to_char(tch, "@c%s@w thinks, '@C%s@w'@n\r\n", char_get_name(ch), argument);
+  send_to_imm("@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", GET_ADMLEVEL(ch) > 0 ? char_get_name(ch) : char_get_user(ch),  GET_ADMLEVEL(tch) > 0 ? char_get_name(tch) : char_get_user(tch), argument);
   return;
  }
 }
@@ -2638,7 +2638,7 @@ ACMD(do_telepathy)
   return;
  }
 
- if (IN_ARENA(ch)) {
+ if (char_in_arena(ch)) {
   send_to_char(ch, "Lol, no.\r\n");
   return;
  }
@@ -2656,7 +2656,7 @@ ACMD(do_telepathy)
   return;
  }
  if (!(strcmp(arg, "far"))) {
-  if (IS_NPC(ch)) {
+  if (char_is_npc(ch)) {
    return;
   } else if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_WORLD))) {
    send_to_char(ch, "Look through who's eyes?\r\n");
@@ -2664,28 +2664,28 @@ ACMD(do_telepathy)
   } else if (vict == ch) {
    send_to_char(ch, "Oh that makes a lot of sense...\r\n");
    return;
-  } else if (IS_NPC(vict)) {
+  } else if (char_is_npc(vict)) {
    send_to_char(ch, "You can't touch the mind of such a thing.\r\n");
    return;
   } else if (GET_ADMLEVEL(vict) > GET_ADMLEVEL(ch)) {
    send_to_char(ch, "Their mental power oustrips your's by unfathomable measurements!\r\n");
    return;
-  } else if (AFF_FLAGGED(ch, AFF_SHOCKED)) {
+  } else if (char_aff_flagged(ch, AFF_SHOCKED)) {
    send_to_char(ch, "Your mind has been shocked by telepathic feedback! You are not able to use telepathy right now.\r\n");
    return;
-  } else if (IS_ANDROID(vict)) {
+  } else if (char_is_android(vict)) {
    send_to_char(ch, "You can't touch the mind of such an artificial being.\r\n");
    return;
-  } else if (GET_SKILL(vict, SKILL_TELEPATHY) + GET_INT(vict) > GET_SKILL(ch, SKILL_TELEPATHY) + GET_INT(ch)) {
+  } else if (char_get_skill(vict, SKILL_TELEPATHY) + GET_INT(vict) > char_get_skill(ch, SKILL_TELEPATHY) + GET_INT(ch)) {
    send_to_char(ch, "They throw off your attempt with their own telepathic abilities!\r\n");
    return;
   } else if (IN_ROOM(ch) == IN_ROOM(vict)) {
    send_to_char(ch, "They are in the same room as you!\r\n");
    return;
-  } else if (AFF_FLAGGED(vict, AFF_BLIND)) {
+  } else if (char_aff_flagged(vict, AFF_BLIND)) {
    send_to_char(ch, "They are blind!\r\n");
    return;
-  } else if (PLR_FLAGGED(vict, PLR_EYEC)) {
+  } else if (char_plr_flagged(vict, PLR_EYEC)) {
    send_to_char(ch, "Their eyes are closed!\r\n");
    return;
   } else {
@@ -2699,7 +2699,7 @@ ACMD(do_telepathy)
   }
  }
  if (!(strcmp(arg, "link"))) {
-  if (IS_NPC(ch)) {
+  if (char_is_npc(ch)) {
    return;
   }
   if (MINDLINK(ch)) {
@@ -2715,19 +2715,19 @@ ACMD(do_telepathy)
   } else if (vict == ch) {
    send_to_char(ch, "Oh that makes a lot of sense...\r\n");
    return;
-  } else if (IS_NPC(vict)) {
+  } else if (char_is_npc(vict)) {
    send_to_char(ch, "You can't touch the mind of such a thing.\r\n");
    return;
-  } else if (IS_ANDROID(vict)) {
+  } else if (char_is_android(vict)) {
    send_to_char(ch, "You can't touch the mind of such an artificial being.\r\n");
    return;
-  } else if (GET_SKILL(vict, SKILL_TELEPATHY)) {
+  } else if (char_get_skill(vict, SKILL_TELEPATHY)) {
    send_to_char(ch, "Kinda pointless when you are both telepathic huh?\r\n");
    return;
   } else if (MINDLINK(vict)) {
    send_to_char(ch, "Someone else is already telepathically linked with them.\r\n");
    return;
-  } else if (GET_SKILL(ch, SKILL_TELEPATHY) < axion_dice(GET_INT(vict) * 0.1)) {
+  } else if (char_get_skill(ch, SKILL_TELEPATHY) < axion_dice(GET_INT(vict) * 0.1)) {
    act("@R$n@r tried to link $s mind with yours, but you manage to force a break in the link!@n", FALSE, ch, 0, vict, TO_VICT);
    act("@R$N@r manages to sense the intrusion and with $S intelligence push you out!@n", FALSE, ch, 0, vict, TO_CHAR);
    return;
@@ -2750,15 +2750,15 @@ ACMD(do_telepathy)
    send_to_char(ch, "Oh that makes a lot of sense...\r\n");
    return;
   }
-  else if (IS_ANDROID(vict)) {
+  else if (char_is_android(vict)) {
    send_to_char(ch, "You can't touch the mind of such an artificial being.\r\n");
    return;
   }
   else {
-   if (axion_dice(0) > GET_SKILL(ch, SKILL_TELEPATHY)) {
+   if (axion_dice(0) > char_get_skill(ch, SKILL_TELEPATHY)) {
        decCurKI(ch, getMaxKI(ch) / 40, 0);
     act("@wYou attempt to read $N's@w mind, but fail to see it clearly.@n", TRUE, ch, 0, vict, TO_CHAR);
-    if (rand_number(1, 15) >= 14 && !AFF_FLAGGED(ch, AFF_SHOCKED)) {
+    if (rand_number(1, 15) >= 14 && !char_aff_flagged(ch, AFF_SHOCKED)) {
      act("@MYour mind has been shocked!@n", TRUE, ch, 0, 0, TO_CHAR);
      SET_BIT_AR(AFF_FLAGS(ch), AFF_SHOCKED);
     } else {
@@ -2766,7 +2766,7 @@ ACMD(do_telepathy)
     }
     return;
    }
-   else if (GET_SKILL(vict, SKILL_TELEPATHY) >= GET_SKILL(ch, SKILL_TELEPATHY) && rand_number(1, 2) == 2) {
+   else if (char_get_skill(vict, SKILL_TELEPATHY) >= char_get_skill(ch, SKILL_TELEPATHY) && rand_number(1, 2) == 2) {
        decCurKI(ch, getMaxKI(ch) / 40, 0);
     act("@wYou fail to read @c$N's@w mind and they seemed to have noticed the attempt!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@C$n@w attempts to read your mind, but you resist and force $m out!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -2776,7 +2776,7 @@ ACMD(do_telepathy)
    else {
     send_to_char(ch, "@wYou peer into their mind:\r\n");
        decCurKI(ch, getMaxKI(ch) / 40, 0);
-    send_to_char(ch, "@GName      @D: @W%s@n\r\n", GET_NAME(vict));
+    send_to_char(ch, "@GName      @D: @W%s@n\r\n", char_get_name(vict));
     send_to_char(ch, "@GRace      @D: @W%s@n\r\n", TRUE_RACE(vict));
     send_to_char(ch, "@GSensei    @D: @W%s@n\r\n", SENSEI_NAME(vict));
     send_to_char(ch, "@GStr       @D: @W%d@n\r\n", GET_STR(vict));
@@ -2844,20 +2844,20 @@ ACMD(do_telepathy)
    send_to_char(ch, "Oh that makes a lot of sense...\r\n");
    return;
   }
-  else if (IS_ANDROID(vict)) {
+  else if (char_is_android(vict)) {
    send_to_char(ch, "You can't touch the mind of such an artificial being.\r\n");
    return;
   }
   else {
    if (!MINDLINK(ch)) {
-    send_to_char(ch, "@WYou tell @c%s@W telepathically, @w'@C%s@w'@n\r\n", GET_NAME(vict), arg2);
-    send_to_char(vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", GET_NAME(ch), arg2);
-    send_to_imm("@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : GET_USER(ch),  GET_ADMLEVEL(vict) > 0 ? GET_NAME(vict) : GET_USER(vict), arg2);
+    send_to_char(ch, "@WYou tell @c%s@W telepathically, @w'@C%s@w'@n\r\n", char_get_name(vict), arg2);
+    send_to_char(vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", char_get_name(ch), arg2);
+    send_to_imm("@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", GET_ADMLEVEL(ch) > 0 ? char_get_name(ch) : char_get_user(ch),  GET_ADMLEVEL(vict) > 0 ? char_get_name(vict) : char_get_user(vict), arg2);
    }
    else {
-    send_to_char(ch, "@WYou tell @c%s@W telepathically, @w'@C%s@w'@n\r\n", GET_NAME(vict), argument);
-    send_to_char(vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", GET_NAME(ch), argument);
-    send_to_imm("@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", GET_ADMLEVEL(ch) > 0 ? GET_NAME(ch) : GET_USER(ch),  GET_ADMLEVEL(vict) > 0 ? GET_NAME(vict) : GET_USER(vict), argument);
+    send_to_char(ch, "@WYou tell @c%s@W telepathically, @w'@C%s@w'@n\r\n", char_get_name(vict), argument);
+    send_to_char(vict, "@c%s@W talks to you telepathically, @w'@C%s@w'@n\r\n", char_get_name(ch), argument);
+    send_to_imm("@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", GET_ADMLEVEL(ch) > 0 ? char_get_name(ch) : char_get_user(ch),  GET_ADMLEVEL(vict) > 0 ? char_get_name(vict) : char_get_user(vict), argument);
    }
       decCurKI(ch, getMaxKI(ch) / 40, 0);
   } // End of vict is here
@@ -2889,7 +2889,7 @@ ACMD(do_potential)
   return;
  }
 
- if (IS_NPC(vict)) {
+ if (char_is_npc(vict)) {
   send_to_char(ch, "Why would you waste your time releasing their potential?\r\n");
   return;
  }
@@ -2901,11 +2901,11 @@ ACMD(do_potential)
    send_to_char(ch, "You have no potential releases to perform.\r\n");
    return;
  }
- if (PLR_FLAGGED(vict, PLR_PR)) {
+ if (char_plr_flagged(vict, PLR_PR)) {
   send_to_char(ch, "Their potential has already been released\r\n");
   return;
  }
- if (IS_ANDROID(vict)) {
+ if (char_is_android(vict)) {
   send_to_char(ch, "They are a machine and have no potential to release.\r\n");
   return;
  }
@@ -2913,18 +2913,18 @@ ACMD(do_potential)
   send_to_char(ch, "They are already majinized and have no potential to release.\r\n");
   return;
  }
- if (IS_MAJIN(vict)) {
+ if (char_is_majin(vict)) {
   send_to_char(ch, "They have no potential to release...\r\n");
   return;
  }
  /* Rillao: transloc, add new transes here */
  else {
-  boost = GET_SKILL(ch, SKILL_POTENTIAL) / 2;
+  boost = char_get_skill(ch, SKILL_POTENTIAL) / 2;
 
   SET_BIT_AR(PLR_FLAGS(vict), PLR_PR);
 
   gainBasePL(vict, (getBasePL(vict) / 100) * boost, false);
-  if (IS_HALFBREED(vict)) {
+  if (char_is_halfbreed(vict)) {
       gainBaseKI(vict, (getBaseKI(vict) / 100) * boost, false);
       gainBaseST(vict, (getBaseST(vict) / 100) * boost, false);
   }
@@ -2949,7 +2949,7 @@ ACMD(do_majinize)
 
 	one_argument(argument, arg);
 
-	if (!IS_MAJIN(ch))
+	if (!char_is_majin(ch))
 	{
 		send_to_char(ch, "You are not a majin and can not majinize anyone.\r\n");
 		return;
@@ -2967,7 +2967,7 @@ ACMD(do_majinize)
 		return;
 	}
 
-	if (IS_NPC(vict))
+	if (char_is_npc(vict))
 	{
 		send_to_char(ch, "Why would you waste your time majinizing them?\r\n");
 		return;
@@ -2977,7 +2977,7 @@ ACMD(do_majinize)
 		send_to_char(ch, "You can't majinize yourself.\r\n");
 		return;
 	}
-	if (PLR_FLAGGED(vict, PLR_PR))
+	if (char_plr_flagged(vict, PLR_PR))
 	{
 		send_to_char(ch, "You can't majinize them their potential has been released!\r\n");
 		return;
@@ -3023,20 +3023,20 @@ ACMD(do_majinize)
 	}
 	else if (GET_BOOSTS(ch) == 0)
 	{
-		send_to_char(ch, "You are incapable of majinizing%s.\r\n", GET_LEVEL(ch) < 100 ? " right now" : " anymore");
-		if (GET_LEVEL(ch) < 25)
+		send_to_char(ch, "You are incapable of majinizing%s.\r\n", char_get_level(ch) < 100 ? " right now" : " anymore");
+		if (char_get_level(ch) < 25)
 		{
 			send_to_char(ch, "Your next available majinize will be at level 25\r\n");
 		}
-		else if (GET_LEVEL(ch) < 50)
+		else if (char_get_level(ch) < 50)
 		{
 			send_to_char(ch, "Your next available majinize will be at level 50\r\n");
 		}
-		else if (GET_LEVEL(ch) < 75)
+		else if (char_get_level(ch) < 75)
 		{
 			send_to_char(ch, "Your next available majinize will be at level 75\r\n");
 		}
-		else if (GET_LEVEL(ch) < 100)
+		else if (char_get_level(ch) < 100)
 		{
 			send_to_char(ch, "Your next available majinize will be at level 100\r\n");
 		}
@@ -3087,7 +3087,7 @@ ACMD(do_spit)
   if (!can_kill(ch, vict, NULL, 0)) {
    return;
   }
- if (AFF_FLAGGED(vict, AFF_PARALYZE)) {
+ if (char_aff_flagged(vict, AFF_PARALYZE)) {
   act("$N has already been turned to stone.", TRUE, ch, 0, vict, TO_CHAR);
   return;
  }
@@ -3096,14 +3096,14 @@ ACMD(do_spit)
   return;
  }
 
- cost = ((GET_MAX_MANA(ch) / (GET_SKILL(ch, SKILL_SPIT) / 4)) + GET_MAX_MANA(ch) / 100);
+ cost = ((GET_MAX_MANA(ch) / (char_get_skill(ch, SKILL_SPIT) / 4)) + GET_MAX_MANA(ch) / 100);
 
  if ((getCurKI(ch)) < cost) {
   send_to_char(ch, "You do not have enough ki to petrifiy with your spit!\r\n");
   return;
  }
 
- if (GET_SKILL(ch, SKILL_SPIT) < axion_dice(0)) {
+ if (char_get_skill(ch, SKILL_SPIT) < axion_dice(0)) {
   decCurKI(ch, cost, 0);
         reveal_hiding(ch, 0);
   act("@WGathering spit you concentrate ki into a wicked loogie and let it loose, but it falls short of hitting @c$N@W!@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -3113,7 +3113,7 @@ ACMD(do_spit)
   WAIT_STATE(ch, PULSE_2SEC);
   return;
  }
- else if (AFF_FLAGGED(vict, AFF_ZANZOKEN) && (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+ else if (char_aff_flagged(vict, AFF_ZANZOKEN) && (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
      decCurKI(ch, cost, 0);
            reveal_hiding(ch, 0);
      act("@C$N@c disappears, avoiding your spit before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
@@ -3154,21 +3154,21 @@ static void boost_obj(struct obj_data *obj, struct char_data *ch, int type)
 
  int boost = 0;
 
- if (GET_LEVEL(ch) >= 100) {
+ if (char_get_level(ch) >= 100) {
   boost = 100;
- } else if (GET_LEVEL(ch) >= 90) {
+ } else if (char_get_level(ch) >= 90) {
   boost = 90;
- } else if (GET_LEVEL(ch) >= 80) {
+ } else if (char_get_level(ch) >= 80) {
   boost = 80;
- } else if (GET_LEVEL(ch) >= 70) {
+ } else if (char_get_level(ch) >= 70) {
   boost = 70;
- } else if (GET_LEVEL(ch) >= 60) {
+ } else if (char_get_level(ch) >= 60) {
   boost = 60;
- } else if (GET_LEVEL(ch) >= 50) {
+ } else if (char_get_level(ch) >= 50) {
   boost = 50;
- } else if (GET_LEVEL(ch) >= 40) {
+ } else if (char_get_level(ch) >= 40) {
   boost = 40;
- } else if (GET_LEVEL(ch) >= 30) {
+ } else if (char_get_level(ch) >= 30) {
   boost = 30;
  }
 
@@ -3177,8 +3177,8 @@ static void boost_obj(struct obj_data *obj, struct char_data *ch, int type)
    if (boost != 0) { /* Change it if it qualifies */
     GET_OBJ_LEVEL(obj) = boost;
     obj->affected[0].location = 17;
-    obj->affected[0].modifier += (boost * GET_LEVEL(ch));
-    if (GET_OBJ_VNUM(obj) == 91) {
+    obj->affected[0].modifier += (boost * char_get_level(ch));
+    if (obj_get_vnum(obj) == 91) {
      obj->affected[1].location = 1;
      obj->affected[1].modifier = (boost / 20);
     } else {
@@ -3243,7 +3243,7 @@ ACMD(do_form)
   }
    */
 
- skill = GET_SKILL(ch, SKILL_CREATE);
+ skill = char_get_skill(ch, SKILL_CREATE);
 
  if (skill >= 100) {
   boost = TRUE;
@@ -3277,24 +3277,24 @@ ACMD(do_form)
   light = TRUE;
  }
 
- if (GET_SKILL(ch, SKILL_CONCENTRATION)) {
-  if (GET_SKILL(ch, SKILL_CONCENTRATION) >= 100) {
+ if (char_get_skill(ch, SKILL_CONCENTRATION)) {
+  if (char_get_skill(ch, SKILL_CONCENTRATION) >= 100) {
    discount = 0.5;
-  } else if (GET_SKILL(ch, SKILL_CONCENTRATION) >= 90) {
+  } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 90) {
    discount = 0.6;
-  } else if (GET_SKILL(ch, SKILL_CONCENTRATION) >= 80) {
+  } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 80) {
    discount = 0.65;
-  } else if (GET_SKILL(ch, SKILL_CONCENTRATION) >= 70) {
+  } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 70) {
    discount = 0.7;
-  } else if (GET_SKILL(ch, SKILL_CONCENTRATION) >= 60) {
+  } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 60) {
    discount = 0.75;
-  } else if (GET_SKILL(ch, SKILL_CONCENTRATION) >= 50) {
+  } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 50) {
    discount = 0.8;
-  } else if (GET_SKILL(ch, SKILL_CONCENTRATION) >= 40) {
+  } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 40) {
    discount = 0.85;
-  } else if (GET_SKILL(ch, SKILL_CONCENTRATION) >= 30) {
+  } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 30) {
    discount = 0.9;
-  } else if (GET_SKILL(ch, SKILL_CONCENTRATION) >= 20) {
+  } else if (char_get_skill(ch, SKILL_CONCENTRATION) >= 20) {
    discount = 0.95;
   }
  }
@@ -3826,7 +3826,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    send_to_char(ch, "You need to be at full powerlevel to create %s\r\n", arg);
    return;
   }
-  else if (GET_PRACTICES(ch, GET_CLASS(ch)) < 10) {
+  else if (GET_PRACTICES(ch, char_get_class(ch)) < 10) {
    send_to_char(ch, "You do not have enough PS to create %s, you need at least 10.\r\n", arg);
    return;
   }
@@ -3840,7 +3840,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
       decCurKI(ch, cost, 0);
    decCurHealthPercent(ch, 1, 1);
-   GET_PRACTICES(ch, GET_CLASS(ch)) -= 10;   
+   GET_PRACTICES(ch, char_get_class(ch)) -= 10;   
    return;
   }
  }
@@ -3864,7 +3864,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
    send_to_char(ch, "You do not have enough stamina to create %s, you need to be at full.\r\n", arg);
    return;
   }
-  else if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
+  else if (GET_PRACTICES(ch, char_get_class(ch)) < 50) {
    send_to_char(ch, "You do not have enough PS to create %s, you need at least 50.\r\n", arg);
    return;
   }
@@ -3878,7 +3878,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
       decCurKI(ch, cost, 0);
       decCurHealth(ch, cost2, 0);
       decCurSTPercent(ch, 1, 1);
-   GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
+   GET_PRACTICES(ch, char_get_class(ch)) -= 50;
    return;
   }
  }
@@ -3892,7 +3892,7 @@ kachin ? "create kachin\r\n" : "",  boost ? "create elixir\r\n" : "");
 ACMD(do_recharge)
 {
 
- if (IS_NPC(ch) || !IS_ANDROID(ch)) {
+ if (char_is_npc(ch) || !char_is_android(ch)) {
   send_to_char(ch, "Only androids can use recharge\r\n");
   return;
  }
@@ -3902,7 +3902,7 @@ ACMD(do_recharge)
 	return;
 }
  
- if (!PLR_FLAGGED(ch, PLR_REPAIR)) {
+ if (!char_plr_flagged(ch, PLR_REPAIR)) {
   send_to_char(ch, "You are not a repair model android.\r\n");
   return;
  }
@@ -3940,7 +3940,7 @@ ACMD(do_srepair)
 {
  int i;
 
- if (!IS_ANDROID(ch)) {
+ if (!char_is_android(ch)) {
   send_to_char(ch, "Only androids can use repair, maybe you want 'fix' instead?\r\n");
   return;
  }
@@ -3950,7 +3950,7 @@ ACMD(do_srepair)
 	return;
 }
  
- if (!IS_NPC(ch) && !PLR_FLAGGED(ch, PLR_REPAIR)) {
+ if (!char_is_npc(ch) && !char_plr_flagged(ch, PLR_REPAIR)) {
   send_to_char(ch, "You are not a repair model android.\r\n");
   return;
  }
@@ -3973,7 +3973,7 @@ ACMD(do_srepair)
    act("$n stops a moment as small glowing particles move across $s body.", TRUE, ch, 0, 0, TO_ROOM);
 
    int repaired = FALSE;
-   if (!IS_NPC(ch)) {
+   if (!char_is_npc(ch)) {
     for (i = 0; i < NUM_WEARS; i++) {
      if (GET_EQ(ch, i)) {
       if (GET_OBJ_VAL(GET_EQ(ch, i), VAL_ALL_HEALTH) < 100) {
@@ -3981,7 +3981,7 @@ ACMD(do_srepair)
        if (GET_OBJ_VAL(GET_EQ(ch, i), VAL_ALL_HEALTH) > 100) {
         GET_OBJ_VAL(GET_EQ(ch, i), VAL_ALL_HEALTH) = 100;
        }
-       if (OBJ_FLAGGED(GET_EQ(ch, i), ITEM_BROKEN)) {
+       if (obj_flagged(GET_EQ(ch, i), ITEM_BROKEN)) {
         REMOVE_BIT_AR(GET_OBJ_EXTRA(GET_EQ(ch, i)), ITEM_BROKEN);
        }
        repaired = TRUE;
@@ -4003,7 +4003,7 @@ ACMD(do_srepair)
        send_to_char(ch, "You are fully repaired now.\r\n");
    }
 
-   if (!IS_NPC(ch) && rand_number(1, 3) == 2 && (getCurKI(ch)) < GET_MAX_MANA(ch)) {
+   if (!char_is_npc(ch) && rand_number(1, 3) == 2 && (getCurKI(ch)) < GET_MAX_MANA(ch)) {
     send_to_char(ch, "@GThe repairs have managed to relink power reserves and boost your current energy level.@n\r\n");
     incCurKI(ch, cost, true);
    }
@@ -4020,13 +4020,13 @@ ACMD(do_upgrade)
  
  two_arguments(argument, arg, arg2);
 
- if (IS_NPC(ch) || !IS_ANDROID(ch)) {
+ if (char_is_npc(ch) || !char_is_android(ch)) {
   send_to_char(ch, "You are not an android!\r\n");
   return;
  }
 
  if (!*arg) {
-  if (!PLR_FLAGGED(ch, PLR_ABSORB)) {
+  if (!char_plr_flagged(ch, PLR_ABSORB)) {
   send_to_char(ch, "@c--------@D[@rUpgrade Menu@D]@c--------\r\n"
                    "@cUpgrade @RPowerlevel@D: @Y75 @WPoints\r\n"
                    "@cUpgrade @CKi        @D: @Y40 @WPoints\r\n"
@@ -4043,7 +4043,7 @@ ACMD(do_upgrade)
  if (!strcasecmp("augment", arg)) {
    struct obj_data *obj = NULL;
    int64_t gain = 0;
-  if (GET_LEVEL(ch) < 80) {
+  if (char_get_level(ch) < 80) {
    send_to_char(ch, "You need to be at least level 80 to use these kits.\r\n");
    return;
   }
@@ -4051,7 +4051,7 @@ ACMD(do_upgrade)
    send_to_char(ch, "You don't have a Circuit Augmentation Kit.\r\n");
    return;
   } else {
-   switch (GET_LEVEL(ch)) { /* R: Original was GET_LEVEL(ch) */
+   switch (char_get_level(ch)) { /* R: Original was GET_LEVEL(ch) */
     case 80:
     gain = GET_MAX_HIT(ch) * 0.005;
     break;
@@ -4116,7 +4116,7 @@ ACMD(do_upgrade)
   }
  }
 
- if (PLR_FLAGGED(ch, PLR_ABSORB)) {
+ if (char_plr_flagged(ch, PLR_ABSORB)) {
   send_to_char(ch, "You are an absorb model and can only upgrade with augmentation kits.\r\n");
   return;
  }
@@ -4144,29 +4144,29 @@ ACMD(do_upgrade)
  if (!strcasecmp("powerlevel", arg)) {
   count = atoi(arg2);
   while (count > 0) {
-   if (GET_LEVEL(ch) >= 90) {
-    bonus += GET_LEVEL(ch) * 5000;
+   if (char_get_level(ch) >= 90) {
+    bonus += char_get_level(ch) * 5000;
    }
-   else if (GET_LEVEL(ch) >= 80) {
-    bonus += GET_LEVEL(ch) * 2500;
+   else if (char_get_level(ch) >= 80) {
+    bonus += char_get_level(ch) * 2500;
    }
-   else if (GET_LEVEL(ch) >= 70) {
-    bonus += GET_LEVEL(ch) * 2000;
+   else if (char_get_level(ch) >= 70) {
+    bonus += char_get_level(ch) * 2000;
    }
-   else if (GET_LEVEL(ch) >= 60) {
-    bonus += GET_LEVEL(ch) * 1300;
+   else if (char_get_level(ch) >= 60) {
+    bonus += char_get_level(ch) * 1300;
    }
-   else if (GET_LEVEL(ch) >= 60) {
-    bonus += GET_LEVEL(ch) * 1200;
+   else if (char_get_level(ch) >= 60) {
+    bonus += char_get_level(ch) * 1200;
    }
-   else if (GET_LEVEL(ch) >= 50) {
-    bonus += GET_LEVEL(ch) * 500;
+   else if (char_get_level(ch) >= 50) {
+    bonus += char_get_level(ch) * 500;
    }
-   else if (GET_LEVEL(ch) >= 25) {
-    bonus += GET_LEVEL(ch) * 250;
+   else if (char_get_level(ch) >= 25) {
+    bonus += char_get_level(ch) * 250;
    }
    else {
-    bonus += GET_LEVEL(ch) * 150;
+    bonus += char_get_level(ch) * 150;
    }
    cost += 75;
    count--;
@@ -4188,29 +4188,29 @@ ACMD(do_upgrade)
  else if (!strcasecmp("ki", arg)) {
   count = atoi(arg2);
   while (count > 0) {
-   if (GET_LEVEL(ch) >= 90) {
-    bonus += GET_LEVEL(ch) * 3650;
+   if (char_get_level(ch) >= 90) {
+    bonus += char_get_level(ch) * 3650;
    }
-   else if (GET_LEVEL(ch) >= 80) {
-    bonus += GET_LEVEL(ch) * 2450;
+   else if (char_get_level(ch) >= 80) {
+    bonus += char_get_level(ch) * 2450;
    }
-   else if (GET_LEVEL(ch) >= 70) {
-    bonus += GET_LEVEL(ch) * 1800;
+   else if (char_get_level(ch) >= 70) {
+    bonus += char_get_level(ch) * 1800;
    }
-   else if (GET_LEVEL(ch) >= 60) {
-    bonus += GET_LEVEL(ch) * 1250;
+   else if (char_get_level(ch) >= 60) {
+    bonus += char_get_level(ch) * 1250;
    }
-   else if (GET_LEVEL(ch) >= 60) {
-    bonus += GET_LEVEL(ch) * 1150;
+   else if (char_get_level(ch) >= 60) {
+    bonus += char_get_level(ch) * 1150;
    }
-   else if (GET_LEVEL(ch) >= 50) {
-    bonus += GET_LEVEL(ch) * 400;
+   else if (char_get_level(ch) >= 50) {
+    bonus += char_get_level(ch) * 400;
    }
-   else if (GET_LEVEL(ch) >= 25) {
-    bonus += GET_LEVEL(ch) * 200;
+   else if (char_get_level(ch) >= 25) {
+    bonus += char_get_level(ch) * 200;
    }
    else {
-    bonus += GET_LEVEL(ch) * 120;
+    bonus += char_get_level(ch) * 120;
    }
    cost += 40;
    count--;
@@ -4232,29 +4232,29 @@ ACMD(do_upgrade)
  else if (!strcasecmp("stamina", arg)) {
   count = atoi(arg2);
   while (count > 0) {
-   if (GET_LEVEL(ch) >= 90) {
-    bonus += GET_LEVEL(ch) * 3650;
+   if (char_get_level(ch) >= 90) {
+    bonus += char_get_level(ch) * 3650;
    }
-   else if (GET_LEVEL(ch) >= 80) {
-    bonus += GET_LEVEL(ch) * 2450;
+   else if (char_get_level(ch) >= 80) {
+    bonus += char_get_level(ch) * 2450;
    }
-   else if (GET_LEVEL(ch) >= 70) {
-    bonus += GET_LEVEL(ch) * 1800;
+   else if (char_get_level(ch) >= 70) {
+    bonus += char_get_level(ch) * 1800;
    }
-   else if (GET_LEVEL(ch) >= 60) {
-    bonus += GET_LEVEL(ch) * 1250;
+   else if (char_get_level(ch) >= 60) {
+    bonus += char_get_level(ch) * 1250;
    }
-   else if (GET_LEVEL(ch) >= 60) {
-    bonus += GET_LEVEL(ch) * 1150;
+   else if (char_get_level(ch) >= 60) {
+    bonus += char_get_level(ch) * 1150;
    }
-   else if (GET_LEVEL(ch) >= 50) {
-    bonus += GET_LEVEL(ch) * 500;
+   else if (char_get_level(ch) >= 50) {
+    bonus += char_get_level(ch) * 500;
    }
-   else if (GET_LEVEL(ch) >= 25) {
-    bonus += GET_LEVEL(ch) * 200;
+   else if (char_get_level(ch) >= 25) {
+    bonus += char_get_level(ch) * 200;
    }
    else {
-    bonus += GET_LEVEL(ch) * 120;
+    bonus += char_get_level(ch) * 120;
    }
    cost += 50;
    count--;
@@ -4283,7 +4283,7 @@ ACMD(do_upgrade)
 ACMD(do_ingest)
 {
  
- if (IS_MAJIN(ch)) {
+ if (char_is_majin(ch)) {
   struct char_data *vict;
   char arg[MAX_INPUT_LENGTH];
   
@@ -4302,26 +4302,26 @@ ACMD(do_ingest)
    return;
   }
   if (ABSORBBY(vict)) {
-    send_to_char(ch, "%s is already absorbing from them!", GET_NAME(ABSORBBY(vict)));
+    send_to_char(ch, "%s is already absorbing from them!", char_get_name(ABSORBBY(vict)));
     return;
   }
   if (GET_ABSORBS(ch) > 3) {
     send_to_char(ch, "You already have already ingested 4 people.\r\n");
     return;
   }
-  if (GET_LEVEL(ch) < 25) {
+  if (char_get_level(ch) < 25) {
    send_to_char(ch, "You can't ingest yet.\r\n");
    return;
   }
-  if (GET_LEVEL(ch) < 100 && GET_LEVEL(ch) >= 75 && GET_ABSORBS(ch) == 3) {
+  if (char_get_level(ch) < 100 && char_get_level(ch) >= 75 && GET_ABSORBS(ch) == 3) {
    send_to_char(ch, "You already have ingested as much as you can. You'll have to get more experienced.\r\n");
    return;
   }
-  if (GET_LEVEL(ch) < 75 && GET_LEVEL(ch) >= 50 && GET_ABSORBS(ch) == 2) {
+  if (char_get_level(ch) < 75 && char_get_level(ch) >= 50 && GET_ABSORBS(ch) == 2) {
    send_to_char(ch, "You already have ingested as much as you can. You'll have to get more experienced.\r\n");
    return;
   }
-  if (GET_LEVEL(ch) < 50 && GET_LEVEL(ch) >= 25 && GET_ABSORBS(ch) == 1) {
+  if (char_get_level(ch) < 50 && char_get_level(ch) >= 25 && GET_ABSORBS(ch) == 1) {
    send_to_char(ch, "You already have ingested as much as you can. You'll have to get more experienced.\r\n");
    return;
   }
@@ -4330,12 +4330,12 @@ ACMD(do_ingest)
    send_to_char(ch, "You are too weak to ingest them into your body!\r\n");
    return;
   }
-  if (AFF_FLAGGED(vict, AFF_SANCTUARY)) {
+  if (char_aff_flagged(vict, AFF_SANCTUARY)) {
    send_to_char(ch, "You can't ingest them, they have a barrier!\r\n");
    return;
   }
    reveal_hiding(ch, 0);
-  if (AFF_FLAGGED(vict, AFF_ZANZOKEN) && (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
+  if (char_aff_flagged(vict, AFF_ZANZOKEN) && (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
      act("@C$N@c disappears, avoiding your attempted ingestion!@n", FALSE, ch, 0, vict, TO_CHAR);
      act("@cYou disappear, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
      act("@C$N@c disappears, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
@@ -4343,7 +4343,7 @@ ACMD(do_ingest)
      WAIT_STATE(ch, PULSE_3SEC);
      return;
   }
-  if (GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(ch) + rand_number(1, 5)) {
+  if (char_get_speedi(ch) + rand_number(1, 5) < char_get_speedi(ch) + rand_number(1, 5)) {
    act("@WYou fling a piece of goo at @c$N@W, and try to ingest $M! $E manages to avoid your blob of goo though!@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@C$n@W flings a piece of goo at you, you manage to avoid it though!@n", TRUE, ch, 0, vict, TO_VICT);
    act("@C$n@w flings a piece of goo at @c$N@W, but the goo misses $M@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -4361,41 +4361,41 @@ ACMD(do_ingest)
     gainBasePL(ch, pl, true);
     gainBaseST(ch, stam, true);
     gainBaseKI(ch, ki, true);
-    if (!IS_NPC(vict) && !IS_NPC(ch)) {
-     send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict), GET_ROOM_VNUM(IN_ROOM(vict)));
+    if (!char_is_npc(vict) && !char_is_npc(ch)) {
+     send_to_imm("[PK] %s killed %s at room [%d]\r\n", char_get_name(ch), char_get_name(vict), rroom_get_vnum(IN_ROOM(vict)));
      SET_BIT_AR(PLR_FLAGS(vict), PLR_ABSORBED);
     }
     send_to_char(ch, "@D[@mINGEST@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n", add_commas(pl), add_commas(ki), add_commas(stam));
     if (rand_number(1, 3) == 3) {
-     send_to_char(ch, "You get %s's eye color.\r\n", GET_NAME(vict));
+     send_to_char(ch, "You get %s's eye color.\r\n", char_get_name(vict));
      GET_EYE(ch) = GET_EYE(vict);      
     }
     else if (rand_number(1, 3) == 3) {
-     send_to_char(ch, "%s changes your height.\r\n", GET_NAME(vict));
-     if (GET_PC_HEIGHT(ch) > GET_PC_HEIGHT(vict)) {
-      GET_HEIGHT(ch) -= ((GET_PC_HEIGHT(ch) - GET_PC_HEIGHT(vict)) / 2);
+     send_to_char(ch, "%s changes your height.\r\n", char_get_name(vict));
+     if (char_get_pc_height(ch) > char_get_pc_height(vict)) {
+      GET_HEIGHT(ch) -= ((char_get_pc_height(ch) - char_get_pc_height(vict)) / 2);
      }
-     else if (GET_PC_HEIGHT(ch) < GET_PC_HEIGHT(vict)) {
-      GET_HEIGHT(ch) += ((GET_PC_HEIGHT(vict) - GET_PC_HEIGHT(ch)) / 2);
+     else if (char_get_pc_height(ch) < char_get_pc_height(vict)) {
+      GET_HEIGHT(ch) += ((char_get_pc_height(vict) - char_get_pc_height(ch)) / 2);
      }
      else {
-      GET_HEIGHT(ch) = GET_PC_HEIGHT(vict);
+      GET_HEIGHT(ch) = char_get_pc_height(vict);
      }
     }
     else if (rand_number(1, 3) == 3) {
-     send_to_char(ch, "%s changes your weight.\r\n", GET_NAME(vict));
-     if (GET_PC_WEIGHT(ch) > GET_PC_WEIGHT(vict)) {
-      GET_WEIGHT(ch) -= ((GET_PC_WEIGHT(ch) - GET_PC_WEIGHT(vict)) / 2);
+     send_to_char(ch, "%s changes your weight.\r\n", char_get_name(vict));
+     if (char_get_pc_weight(ch) > char_get_pc_weight(vict)) {
+      GET_WEIGHT(ch) -= ((char_get_pc_weight(ch) - char_get_pc_weight(vict)) / 2);
      }
-     else if (GET_PC_WEIGHT(ch) < GET_PC_WEIGHT(vict)) {
-      GET_WEIGHT(ch) += ((GET_PC_WEIGHT(vict) - GET_PC_WEIGHT(ch)) / 2);
+     else if (char_get_pc_weight(ch) < char_get_pc_weight(vict)) {
+      GET_WEIGHT(ch) += ((char_get_pc_weight(vict) - char_get_pc_weight(ch)) / 2);
      }
      else {
-      GET_WEIGHT(ch) = GET_PC_WEIGHT(vict);
+      GET_WEIGHT(ch) = char_get_pc_weight(vict);
      }
     }
     else {
-     send_to_char(ch, "Your forelock length changes because of %s.\r\n", GET_NAME(vict));
+     send_to_char(ch, "Your forelock length changes because of %s.\r\n", char_get_name(vict));
      GET_HAIRL(ch) = GET_HAIRL(vict);
     }
     handle_ingest_learn(ch, vict);
@@ -4422,25 +4422,25 @@ ACMD(do_absorb)
   return;
  }
 
- if (IS_ANDROID(ch)) {
+ if (char_is_android(ch)) {
   if (!limb_ok(ch, 0)) {
    return;
   }
  }
- if (!IS_NPC(ch)) {
-  if (IS_BIO(ch) && !PLR_FLAGGED(ch, PLR_TAIL)) {
+ if (!char_is_npc(ch)) {
+  if (char_is_bio(ch) && !char_plr_flagged(ch, PLR_TAIL)) {
    send_to_char(ch, "You have no tail!\r\n");
    return;
   }
  }
 
- if (!IS_ANDROID(ch) && !IS_BIO(ch)) {
+ if (!char_is_android(ch) && !char_is_bio(ch)) {
   send_to_char(ch, "You shouldn't have this skill, you are incapable of absorbing.\r\n");
-  send_to_imm("ERROR: Absorb skill on %s when they are not a bio or android.", GET_NAME(ch));
+  send_to_imm("ERROR: Absorb skill on %s when they are not a bio or android.", char_get_name(ch));
   return;
  }
 
- if (FIGHTING(ch) && !IS_ANDROID(ch)) {
+ if (FIGHTING(ch) && !char_is_android(ch)) {
   send_to_char(ch, "You are too busy fighting!\r\n");
   return;
  }
@@ -4458,25 +4458,25 @@ ACMD(do_absorb)
   act("@WYou stop absorbing from @c$N@W!@n", TRUE, ch, 0, ABSORBING(ch), TO_CHAR);
   act("$n stops absorbing from you!", TRUE, ch, 0, ABSORBING(ch), TO_VICT);
   act("$n stops absorbing from $N!", TRUE, ch, 0, ABSORBING(ch), TO_NOTVICT);
-  if (IS_NPC(ABSORBING(ch)) && !FIGHTING(ABSORBING(ch))) {
+  if (char_is_npc(ABSORBING(ch)) && !FIGHTING(ABSORBING(ch))) {
   set_fighting(ABSORBING(ch), ch);
   }
   ABSORBBY(ABSORBING(ch)) = NULL;
   ABSORBING(ch) = NULL;
  }
 
- if (!*arg && IS_ANDROID(ch)) {
+ if (!*arg && char_is_android(ch)) {
   send_to_char(ch, "Who do you want to absorb?\r\n");
   return;
  }
 
- if (IS_ANDROID(ch)) {
+ if (char_is_android(ch)) {
   if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-   send_to_char(ch, "Absorb %s?\r\n", IS_ANDROID(ch) ? "from who" : "who");
+   send_to_char(ch, "Absorb %s?\r\n", char_is_android(ch) ? "from who" : "who");
    return;
   }
  }
- if (IS_BIO(ch)) {
+ if (char_is_bio(ch)) {
   if (!*arg) {
    send_to_char(ch, "Syntax: absorb (swallow | extract) (target)\r\n");
    return;
@@ -4486,14 +4486,14 @@ ACMD(do_absorb)
    return;
   }
  }
-  if (AFF_FLAGGED(vict, AFF_SANCTUARY)) {
+  if (char_aff_flagged(vict, AFF_SANCTUARY)) {
    send_to_char(ch, "You can't absorb them, they have a barrier!\r\n");
    return;
   }
 
- if (IS_ANDROID(ch)) {
-   if (!IS_NPC(ch)) {
-    if (!PLR_FLAGGED(ch, PLR_ABSORB)) {
+ if (char_is_android(ch)) {
+   if (!char_is_npc(ch)) {
+    if (!char_plr_flagged(ch, PLR_ABSORB)) {
      send_to_char(ch, "You are not an absorbtion model.\r\n");
      return;
     }
@@ -4502,7 +4502,7 @@ ACMD(do_absorb)
     return;
    }
    if (ABSORBBY(vict)) {
-    send_to_char(ch, "%s is already absorbing from them!", GET_NAME(ABSORBBY(vict)));
+    send_to_char(ch, "%s is already absorbing from them!", char_get_name(ABSORBBY(vict)));
     return;
    }
    if (GET_MAX_HIT(vict) > GET_MAX_HIT(ch) * 2) {
@@ -4523,7 +4523,7 @@ ACMD(do_absorb)
     act("@C$n@W rushes at you and tries to grab you, but you manage to avoid $m!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@C$n@w rushes at @c$N@W and tries to grab $M, but @c$N@W manages to avoid @c$n@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
     improve_skill(ch, SKILL_ABSORB, 1);
-    if (IS_NPC(vict) && IS_HUMANOID(vict) && rand_number(1, 3) == 3) {
+    if (char_is_npc(vict) && char_is_humanoid(vict) && rand_number(1, 3) == 3) {
       if (FIGHTING(ch) == NULL) {
        set_fighting(ch, vict);
       }
@@ -4546,9 +4546,9 @@ ACMD(do_absorb)
    }
  } // End of android absorb
 
- else if (IS_BIO(ch) && !(strcmp(arg, "swallow"))) {
+ else if (char_is_bio(ch) && !(strcmp(arg, "swallow"))) {
   if (ABSORBBY(vict)) {
-    send_to_char(ch, "%s is already absorbing from them!", GET_NAME(ABSORBBY(vict)));
+    send_to_char(ch, "%s is already absorbing from them!", char_get_name(ABSORBBY(vict)));
     return;
   }
   if (!can_kill(ch, vict, NULL, 0)) {
@@ -4563,7 +4563,7 @@ ACMD(do_absorb)
    return;
   }
    reveal_hiding(ch, 0);
-  if (GET_SKILL(ch, SKILL_ABSORB) < axion_dice(0)) {
+  if (char_get_skill(ch, SKILL_ABSORB) < axion_dice(0)) {
    act("@WYou rush at @c$N@W and try to absorb from them, but $E manages to avoid you!@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@C$n@W rushes at you and tries to grab you, but you manage to avoid $m!@n", TRUE, ch, 0, vict, TO_VICT);
    act("@C$n@w rushes at @c$N@W and tries to grab $M, but @c$N@W manages to avoid @c$n@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -4590,8 +4590,8 @@ ACMD(do_absorb)
       gainBaseST(ch, stam, true);
       gainBaseKI(ch, ki, true);
 
-    if (!IS_NPC(vict) && !IS_NPC(ch)) {
-     send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict), GET_ROOM_VNUM(IN_ROOM(vict)));
+    if (!char_is_npc(vict) && !char_is_npc(ch)) {
+     send_to_imm("[PK] %s killed %s at room [%d]\r\n", char_get_name(ch), char_get_name(vict), rroom_get_vnum(IN_ROOM(vict)));
      SET_BIT_AR(PLR_FLAGS(vict), PLR_ABSORBED);
     }
 
@@ -4600,13 +4600,13 @@ ACMD(do_absorb)
     die(vict, NULL);
   }
  } // End of bio absorb
- else if (IS_BIO(ch) && !(strcmp(arg, "extract"))) {
+ else if (char_is_bio(ch) && !(strcmp(arg, "extract"))) {
   int failthresh = rand_number(1, 125);
-  if (GET_LEVEL(vict) > 99) {
-   failthresh += (GET_LEVEL(vict) - 95) * 2;
+  if (char_get_level(vict) > 99) {
+   failthresh += (char_get_level(vict) - 95) * 2;
   }
   if (ABSORBBY(vict)) {
-    send_to_char(ch, "%s is already absorbing from them!", GET_NAME(ABSORBBY(vict)));
+    send_to_char(ch, "%s is already absorbing from them!", char_get_name(ABSORBBY(vict)));
     return;
   }
   if (!can_kill(ch, vict, NULL, 0)) {
@@ -4620,7 +4620,7 @@ ACMD(do_absorb)
    send_to_char(ch, "They would be worthless to you at your strength!\r\n");
    return;
   }
-  if (!IS_NPC(vict)) {
+  if (!char_is_npc(vict)) {
    send_to_char(ch, "You can't absorb their bio extract, you need to swallow them with your tail!\r\n");
    return;
   }
@@ -4628,7 +4628,7 @@ ACMD(do_absorb)
     send_to_char(ch, "You can not handle any more bio extract at your current level.\r\n");
     return;
   }
-  if (GET_SKILL(ch, SKILL_ABSORB) < failthresh) {
+  if (char_get_skill(ch, SKILL_ABSORB) < failthresh) {
    act("@WYou rush at @c$N@W and try to absorb from them, but $E manages to avoid you!@n", TRUE, ch, 0, vict, TO_CHAR);
    act("@C$n@W rushes at you and tries to grab you, but you manage to avoid $m!@n", TRUE, ch, 0, vict, TO_VICT);
    act("@C$n@w rushes at @c$N@W and tries to grab $M, but @c$N@W manages to avoid @c$n@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -4648,9 +4648,9 @@ ACMD(do_absorb)
    int64_t stam = (getBaseST(vict)) / 2000;
    int64_t ki = (getBaseKI(vict)) / 2000;
    int64_t pl = (getBasePL(vict)) / 2000;
-   stam += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-   pl += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
-   ki += rand_number(GET_LEVEL(ch), GET_LEVEL(ch) * 2);
+   stam += rand_number(char_get_level(ch), char_get_level(ch) * 2);
+   pl += rand_number(char_get_level(ch), char_get_level(ch) * 2);
+   ki += rand_number(char_get_level(ch), char_get_level(ch) * 2);
    stam = MIN(stam, 1500000L);
    ki = MIN(ki, 1500000L);
    pl = MIN(pl, 1500000L);
@@ -4668,9 +4668,9 @@ ACMD(do_absorb)
  }
 
  else {
-  if (!IS_BIO(ch) && !IS_ANDROID(ch)) {
+  if (!char_is_bio(ch) && !char_is_android(ch)) {
   send_to_char(ch, "You have the absorb skill but are incapable of absorbing. This error has been reported.\r\n");
-  send_to_imm("ERROR: Absorb attempted by %s even though they are not bio or android.", GET_NAME(ch));
+  send_to_imm("ERROR: Absorb attempted by %s even though they are not bio or android.", char_get_name(ch));
   }
   else {
   send_to_char(ch, "Syntax: absorb (extract | swallow) (target)\r\n");
@@ -4692,7 +4692,7 @@ ACMD(do_escape)
   struct char_data *offender = ABSORBBY(ch) ? ABSORBBY(ch) : GRAPPLED(ch);
   int64_t opl = GET_HIT(offender);
   int64_t dpl = GET_HIT(ch);
-  int skill = ABSORBBY(ch) ? GET_SKILL(ABSORBBY(ch), SKILL_ABSORB) : GET_SKILL(GRAPPLED(ch), SKILL_GRAPPLE);
+  int skill = ABSORBBY(ch) ? char_get_skill(ABSORBBY(ch), SKILL_ABSORB) : char_get_skill(GRAPPLED(ch), SKILL_GRAPPLE);
 
   if (dpl > opl * 10)
   {
@@ -4887,23 +4887,23 @@ ACMD(do_regenerate) {
  if (amt > 1)
   amt /= 2;
 
- if (IS_BIO(ch)) {
+ if (char_is_bio(ch)) {
   amt = amt * 0.9;
  }
 
  int64_t life = ((getCurLF(ch)) - amt * 0.8), energy = ((getCurKI(ch)) - amt * 0.2);
 
- if ((life <= 0 || energy <= 0) && !IS_NPC(ch)) {
+ if ((life <= 0 || energy <= 0) && !char_is_npc(ch)) {
   send_to_char(ch, "Your life force or ki are too low to regenerate that much.\r\n");
   send_to_char(ch, "@YLF Needed@D: @C%s@w, @YKi Needed@D: @C%s@w.@n\r\n", add_commas(amt * 0.8), add_commas(amt * 0.2));
   return;
- } else if (IS_NPC(ch) && energy <= 0) {
+ } else if (char_is_npc(ch) && energy <= 0) {
   return;
  }
 
  incCurHealth(ch, amt * 2, true);
 
- if (!IS_NPC(ch))
+ if (!char_is_npc(ch))
      decCurLF(ch, amt * .8, 0);
 
  decCurKI(ch, amt * .2, 0);
@@ -4931,13 +4931,13 @@ ACMD(do_regenerate) {
  act("$n concentrates and regenerates $s body nearly completely.", TRUE, ch, 0, 0, TO_ROOM);
  }
  improve_skill(ch, SKILL_REGENERATE, 0);
- if (AFF_FLAGGED(ch, AFF_BURNED)) {
+ if (char_aff_flagged(ch, AFF_BURNED)) {
   send_to_char(ch, "Your burns are healed now.\r\n");
   act("$n@w's burns are now healed.@n", TRUE, ch, 0, 0, TO_ROOM);
   null_affect(ch, AFF_BURNED);
  }
 
- if (!IS_NPC(ch)) {
+ if (!char_is_npc(ch)) {
   if (GET_LIMBCOND(ch, 1) <= 0) {
    act("You regrow your right arm!", TRUE, ch, 0, 0, TO_CHAR);
    act("$n regrows $s right arm!", TRUE, ch, 0, 0, TO_ROOM);
@@ -4974,7 +4974,7 @@ ACMD(do_regenerate) {
    act("Your broken right leg mends itself!", TRUE, ch, 0, 0, TO_CHAR);
    act("$n regenerates $s broken right leg!", TRUE, ch, 0, 0, TO_ROOM);
   }
-  if (!PLR_FLAGGED(ch, PLR_TAIL) && IS_BIO(ch)) {
+  if (!char_plr_flagged(ch, PLR_TAIL) && char_is_bio(ch)) {
    SET_BIT_AR(PLR_FLAGS(ch), PLR_TAIL);
    act("You regrow your tail!", TRUE, ch, 0, 0, TO_CHAR);
    act("$n regrows $s tail!", TRUE, ch, 0, 0, TO_ROOM);
@@ -4998,11 +4998,11 @@ ACMD(do_focus)
   send_to_char(ch, "Yes but what do you want to focus?\r\n");
   return;
  }
- if (PLR_FLAGGED(ch, PLR_HEALT)) {
+ if (char_plr_flagged(ch, PLR_HEALT)) {
    send_to_char(ch, "You are inside a healing tank!\r\n");
    return;
  }
- if (AFF_FLAGGED(ch, AFF_CURSE)) {
+ if (char_aff_flagged(ch, AFF_CURSE)) {
   send_to_char(ch, "You are cursed and can't focus!\r\n");
   return;
  }
@@ -5011,7 +5011,7 @@ ACMD(do_focus)
    return;
   }
   if (!*name) {
-   if (AFF_FLAGGED(ch, AFF_STONESKIN)) {
+   if (char_aff_flagged(ch, AFF_STONESKIN)) {
     send_to_char(ch, "You already have tough skin!\r\n");
     return;
    }
@@ -5019,7 +5019,7 @@ ACMD(do_focus)
     send_to_char(ch, "You do not have enough ki to infuse into your skin.\r\n");
     return;
    }
-   else if (GET_SKILL(ch, SKILL_TSKIN) < axion_dice(0)) {
+   else if (char_get_skill(ch, SKILL_TSKIN) < axion_dice(0)) {
     decCurKI(ch, getMaxKI(ch) / 20, 0);
     reveal_hiding(ch, 0);
     act("You focus ki into your skin, but fail in making it tough!", TRUE, ch, 0, 0, TO_CHAR);
@@ -5047,14 +5047,14 @@ ACMD(do_focus)
    }
    else {
     if (ch == vict) {
-     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, GET_NAME(vict));
+     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
      return;
     }
-    if (AFF_FLAGGED(vict, AFF_STONESKIN)) {
+    if (char_aff_flagged(vict, AFF_STONESKIN)) {
      send_to_char(ch, "They already have tough skin!\r\n");
      return;
     }
-    else if (IS_NPC(vict)) {
+    else if (char_is_npc(vict)) {
      send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
      return;
     }
@@ -5062,7 +5062,7 @@ ACMD(do_focus)
      send_to_char(ch, "You do not have enough ki to infuse into their skin.\r\n");
      return;
     }
-    else if (GET_SKILL(ch, SKILL_TSKIN) < axion_dice(0)) {
+    else if (char_get_skill(ch, SKILL_TSKIN) < axion_dice(0)) {
         decCurKI(ch, getMaxKI(ch) / 20, 0);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's skin, but fail in making it tough!", TRUE, ch, 0, vict, TO_CHAR);
@@ -5090,7 +5090,7 @@ ACMD(do_focus)
    return;
   }
   if (!*name) {
-   if (AFF_FLAGGED(ch, AFF_MIGHT)) {
+   if (char_aff_flagged(ch, AFF_MIGHT)) {
     send_to_char(ch, "You already have mighty muscles!\r\n");
     return;
    } else if (GET_BONUS(ch, BONUS_WIMP) > 0 && GET_STR(ch) + 10 > 70) {
@@ -5102,7 +5102,7 @@ ACMD(do_focus)
    } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
     send_to_char(ch, "You do not have enough ki to infuse into your muscles.\r\n");
     return;
-   } else if (GET_SKILL(ch, SKILL_MIGHT) < axion_dice(0)) {
+   } else if (char_get_skill(ch, SKILL_MIGHT) < axion_dice(0)) {
        decCurKI(ch, getMaxKI(ch) / 20, 0);
     reveal_hiding(ch, 0);
     act("You focus ki into your muscles, but fail in making them mighty!", TRUE, ch, 0, 0, TO_CHAR);
@@ -5131,10 +5131,10 @@ ACMD(do_focus)
    }
    else {
     if (ch == vict) {
-     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, GET_NAME(vict));
+     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
      return;
     }
-    if (AFF_FLAGGED(vict, AFF_MIGHT)) {
+    if (char_aff_flagged(vict, AFF_MIGHT)) {
      send_to_char(ch, "They already have mighty muscles!\r\n");
      return;
     } else if (GET_BONUS(vict, BONUS_WIMP) > 0 && GET_STR(vict) + 10 > 70) {
@@ -5143,13 +5143,13 @@ ACMD(do_focus)
     } else if (GET_BONUS(vict, BONUS_FRAIL) > 0 && GET_CON(vict) + 2 > 70) {
      send_to_char(ch, "Their body is not able to withstand increasing its constitution beyond 70.\r\n");
      return;
-    } else if (IS_NPC(vict)) {
+    } else if (char_is_npc(vict)) {
      send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
      return;
     } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
      send_to_char(ch, "You do not have enough ki to infuse into their muscles.\r\n");
      return;
-    } else if (GET_SKILL(ch, SKILL_MIGHT) < axion_dice(0)) {
+    } else if (char_get_skill(ch, SKILL_MIGHT) < axion_dice(0)) {
         decCurKI(ch, getMaxKI(ch) / 20, 0);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's muscles, but fail in making them mighty!", TRUE, ch, 0, vict, TO_CHAR);
@@ -5193,7 +5193,7 @@ ACMD(do_focus)
     } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
      send_to_char(ch, "You do not have enough ki to wither them.\r\n");
      return;
-    } else if (GET_SKILL(ch, SKILL_WITHER) < axion_dice(0)) {
+    } else if (char_get_skill(ch, SKILL_WITHER) < axion_dice(0)) {
         decCurKI(ch, getMaxKI(ch) / 20, 0);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's body, but fail in withering it!", TRUE, ch, 0, vict, TO_CHAR);
@@ -5217,7 +5217,7 @@ ACMD(do_focus)
    return;
   }
   if (!*name) {
-   if (AFF_FLAGGED(ch, AFF_ENLIGHTEN)) {
+   if (char_aff_flagged(ch, AFF_ENLIGHTEN)) {
     send_to_char(ch, "You already have superior wisdom!\r\n");
     return;
    }
@@ -5229,7 +5229,7 @@ ACMD(do_focus)
     send_to_char(ch, "You do not have enough ki to use this skill.\r\n");
     return;
    }
-   else if (GET_SKILL(ch, SKILL_ENLIGHTEN) < axion_dice(0)) {
+   else if (char_get_skill(ch, SKILL_ENLIGHTEN) < axion_dice(0)) {
        decCurKI(ch, getMaxKI(ch) / 20, 0);
     reveal_hiding(ch, 0);
     act("You focus ki into your mind, but fail in awakening it to cosmic wisdom!", TRUE, ch, 0, 0, TO_CHAR);
@@ -5244,19 +5244,19 @@ ACMD(do_focus)
     reveal_hiding(ch, 0);
     act("You focus ki into your mind, awakening it to cosmic wisdom!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki into $s mind, awakening it to cosmic wisdom!", TRUE, ch, 0, 0, TO_ROOM);
-    if (IS_JINTO(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 && GET_PRACTICES(ch, GET_CLASS(ch)) >= 15 && rand_number(1, 4) >= 3) {
+    if (char_is_jinto(ch) && level_exp(ch, char_get_level(ch) + 1) - GET_EXP(ch) > 0 && GET_PRACTICES(ch, char_get_class(ch)) >= 15 && rand_number(1, 4) >= 3) {
      int64_t gain = 0;
-     GET_PRACTICES(ch, GET_CLASS(ch)) -= 15;
-     if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 100) {
-      gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.15;
+     GET_PRACTICES(ch, char_get_class(ch)) -= 15;
+     if (char_get_skill(ch, SKILL_ENLIGHTEN) >= 100) {
+      gain = level_exp(ch, char_get_level(ch) + 1) * 0.15;
       GET_EXP(ch) += gain;
       send_to_char(ch, "@GYou gain @g%s@G experience due to your excellence with this skill.@n\r\n", add_commas(gain));
-     } else if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 60) {
-      gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.10;
+     } else if (char_get_skill(ch, SKILL_ENLIGHTEN) >= 60) {
+      gain = level_exp(ch, char_get_level(ch) + 1) * 0.10;
       GET_EXP(ch) += gain;
       send_to_char(ch, "@GYou gain @g%s@G experience due to your excellence with this skill.@n\r\n", add_commas(gain));
-     } else if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 40) {
-      gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.05;
+     } else if (char_get_skill(ch, SKILL_ENLIGHTEN) >= 40) {
+      gain = level_exp(ch, char_get_level(ch) + 1) * 0.05;
       GET_EXP(ch) += gain;
       send_to_char(ch, "@GYou gain @g%s@G experience due to your excellence with this skill.@n\r\n", add_commas(gain));
      }
@@ -5275,10 +5275,10 @@ ACMD(do_focus)
    }
    else {
     if (ch == vict) {
-     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, GET_NAME(vict));
+     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
      return;
     }
-    if (AFF_FLAGGED(vict, AFF_ENLIGHTEN)) {
+    if (char_aff_flagged(vict, AFF_ENLIGHTEN)) {
      send_to_char(ch, "They already have superior wisdom!\r\n");
      return;
     }
@@ -5286,7 +5286,7 @@ ACMD(do_focus)
      send_to_char(ch, "They're not able to withstand increasing their wisdom beyond 70.\r\n");
      return;
     }
-    else if (IS_NPC(vict)) {
+    else if (char_is_npc(vict)) {
      send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
      return;
     }
@@ -5294,7 +5294,7 @@ ACMD(do_focus)
      send_to_char(ch, "You do not have enough ki to use this skill.\r\n");
      return;
     }
-    else if (GET_SKILL(ch, SKILL_ENLIGHTEN) < axion_dice(0)) {
+    else if (char_get_skill(ch, SKILL_ENLIGHTEN) < axion_dice(0)) {
         decCurKI(ch, getMaxKI(ch) / 20, 0);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's mind, but fail in awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_CHAR);
@@ -5311,19 +5311,19 @@ ACMD(do_focus)
      act("You focus ki into $N's mind, awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki into your mind, awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_VICT);
      act("$n focuses ki into $N's mind, awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_NOTVICT);
-    if (IS_JINTO(ch) && level_exp(vict, GET_LEVEL(vict) + 1) - GET_EXP(vict) > 0 && GET_PRACTICES(ch, GET_CLASS(ch)) >= 15 && rand_number(1, 4) >= 3) {
+    if (char_is_jinto(ch) && level_exp(vict, char_get_level(vict) + 1) - GET_EXP(vict) > 0 && GET_PRACTICES(ch, char_get_class(ch)) >= 15 && rand_number(1, 4) >= 3) {
      int64_t gain = 0;
-     GET_PRACTICES(ch, GET_CLASS(ch)) -= 15;
-     if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 100) {
-      gain = level_exp(vict, GET_LEVEL(vict) + 1) * 0.15;
+     GET_PRACTICES(ch, char_get_class(ch)) -= 15;
+     if (char_get_skill(ch, SKILL_ENLIGHTEN) >= 100) {
+      gain = level_exp(vict, char_get_level(vict) + 1) * 0.15;
       GET_EXP(vict) += gain;
       send_to_char(vict, "@GYou gain @g%s@G experience due to the level of enlightenment you have received!@n\r\n", add_commas(gain));
-     } else if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 60) {
-      gain = level_exp(vict, GET_LEVEL(vict) + 1) * 0.10;
+     } else if (char_get_skill(ch, SKILL_ENLIGHTEN) >= 60) {
+      gain = level_exp(vict, char_get_level(vict) + 1) * 0.10;
       GET_EXP(vict) += gain;
       send_to_char(vict, "@GYou gain @g%s@G experience due to the level of enlightenment you have received!@n\r\n", add_commas(gain));
-     } else if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 40) {
-      gain = level_exp(vict, GET_LEVEL(vict) + 1) * 0.05;
+     } else if (char_get_skill(ch, SKILL_ENLIGHTEN) >= 40) {
+      gain = level_exp(vict, char_get_level(vict) + 1) * 0.05;
       GET_EXP(vict) += gain;
       send_to_char(vict, "@GYou gain @g%s@G experience due to the level of enlightenment you have received!@n\r\n", add_commas(gain));
      }
@@ -5340,7 +5340,7 @@ ACMD(do_focus)
    return;
   }
   if (!*name) {
-   if (AFF_FLAGGED(ch, AFF_GENIUS)) {
+   if (char_aff_flagged(ch, AFF_GENIUS)) {
     send_to_char(ch, "You already have superior intelligence!\r\n");
     return;
    }
@@ -5352,7 +5352,7 @@ ACMD(do_focus)
     send_to_char(ch, "You do not have enough ki to infuse into your mind.\r\n");
     return;
    }
-   else if (GET_SKILL(ch, SKILL_GENIUS) < axion_dice(0)) {
+   else if (char_get_skill(ch, SKILL_GENIUS) < axion_dice(0)) {
        decCurKI(ch, getMaxKI(ch) / 20, 0);
     reveal_hiding(ch, 0);
     act("You focus ki into your mind, but fail in making it work faster!", TRUE, ch, 0, 0, TO_CHAR);
@@ -5381,10 +5381,10 @@ ACMD(do_focus)
    }
    else {
     if (ch == vict) {
-     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, GET_NAME(vict));
+     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
      return;
     }
-    if (AFF_FLAGGED(vict, AFF_GENIUS)) {
+    if (char_aff_flagged(vict, AFF_GENIUS)) {
      send_to_char(ch, "They already have superior intelligence!\r\n");
      return;
     }
@@ -5392,7 +5392,7 @@ ACMD(do_focus)
      send_to_char(ch, "They're not able to withstand increasing their intelligence beyond 70.\r\n");
      return;
     }
-    else if (IS_NPC(vict)) {
+    else if (char_is_npc(vict)) {
      send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
      return;
     }
@@ -5400,7 +5400,7 @@ ACMD(do_focus)
      send_to_char(ch, "You do not have enough ki to infuse into their mind.\r\n");
      return;
     }
-    else if (GET_SKILL(ch, SKILL_GENIUS) < axion_dice(0)) {
+    else if (char_get_skill(ch, SKILL_GENIUS) < axion_dice(0)) {
         decCurKI(ch, getMaxKI(ch) / 20, 0);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's mind, but fail in making it work faster!", TRUE, ch, 0, vict, TO_CHAR);
@@ -5417,9 +5417,9 @@ ACMD(do_focus)
      act("You focus ki into $N's mind, making it work faster!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki into your mind, making it work faster!", TRUE, ch, 0, vict, TO_VICT);
      act("$n focuses ki into $N's mind, making it work faster!", TRUE, ch, 0, vict, TO_NOTVICT);
-     if ((vict->master == ch || ch->master == vict || ch->master == vict->master) && AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
-      if (IS_KAI(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 && rand_number(1, 3) == 3) {
-       GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.05;
+     if ((vict->master == ch || ch->master == vict || ch->master == vict->master) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+      if (char_is_kai(ch) && level_exp(ch, char_get_level(ch) + 1) - GET_EXP(ch) > 0 && rand_number(1, 3) == 3) {
+       GET_EXP(ch) += level_exp(ch, char_get_level(ch) + 1) * 0.05;
       }
      }
      return;
@@ -5434,7 +5434,7 @@ ACMD(do_focus)
    return;
   }
   if (!*name) {
-   if (AFF_FLAGGED(ch, AFF_FLEX)) {
+   if (char_aff_flagged(ch, AFF_FLEX)) {
     send_to_char(ch, "You already have superior agility!\r\n");
     return;
    }
@@ -5446,7 +5446,7 @@ ACMD(do_focus)
     send_to_char(ch, "You do not have enough ki to infuse into your limbs.\r\n");
     return;
    }
-   else if (GET_SKILL(ch, SKILL_FLEX) < axion_dice(0)) {
+   else if (char_get_skill(ch, SKILL_FLEX) < axion_dice(0)) {
        decCurKI(ch, getMaxKI(ch) / 20, 0);
     reveal_hiding(ch, 0);
     act("You focus ki into your limbs, but fail in making them more flexible!", TRUE, ch, 0, 0, TO_CHAR);
@@ -5475,10 +5475,10 @@ ACMD(do_focus)
    }
    else {
     if (ch == vict) {
-     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, GET_NAME(vict));
+     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
      return;
     }
-    if (AFF_FLAGGED(vict, AFF_FLEX)) {
+    if (char_aff_flagged(vict, AFF_FLEX)) {
      send_to_char(ch, "They already have superior agility!\r\n");
      return;
     }
@@ -5486,7 +5486,7 @@ ACMD(do_focus)
     send_to_char(ch, "They're not able to withstand increasing their agility beyond 70.\r\n");
     return;
    }
-    else if (IS_NPC(vict)) {
+    else if (char_is_npc(vict)) {
      send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
      return;
     }
@@ -5494,7 +5494,7 @@ ACMD(do_focus)
      send_to_char(ch, "You do not have enough ki to infuse into their limbs.\r\n");
      return;
     }
-    else if (GET_SKILL(ch, SKILL_FLEX) < axion_dice(0)) {
+    else if (char_get_skill(ch, SKILL_FLEX) < axion_dice(0)) {
         decCurKI(ch, getMaxKI(ch) / 20, 0);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's limbs, but fail in making them more flexible!", TRUE, ch, 0, vict, TO_CHAR);
@@ -5511,9 +5511,9 @@ ACMD(do_focus)
      act("You focus ki into $N's limbs, making them more flexible!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki into your limbs, making them more flexible!", TRUE, ch, 0, vict, TO_VICT);
      act("$n focuses ki into $N's limbs, making them more flexible!", TRUE, ch, 0, vict, TO_NOTVICT);
-     if ((vict->master == ch || ch->master == vict || ch->master == vict->master) && AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
-      if (IS_KAI(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 && rand_number(1, 3) == 3) {
-       GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.05;
+     if ((vict->master == ch || ch->master == vict || ch->master == vict->master) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+      if (char_is_kai(ch) && level_exp(ch, char_get_level(ch) + 1) - GET_EXP(ch) > 0 && rand_number(1, 3) == 3) {
+       GET_EXP(ch) += level_exp(ch, char_get_level(ch) + 1) * 0.05;
       }
      }
      return;
@@ -5528,7 +5528,7 @@ ACMD(do_focus)
    return;
   }
   if (!*name) {
-   if (AFF_FLAGGED(ch, AFF_BLESS)) {
+   if (char_aff_flagged(ch, AFF_BLESS)) {
     send_to_char(ch, "You already are blessed!\r\n");
     return;
    }
@@ -5536,7 +5536,7 @@ ACMD(do_focus)
     send_to_char(ch, "You do not have enough ki to bless.\r\n");
     return;
    }
-   else if (GET_SKILL(ch, SKILL_BLESS) < axion_dice(0)) {
+   else if (char_get_skill(ch, SKILL_BLESS) < axion_dice(0)) {
        decCurKI(ch, getMaxKI(ch) / 20, 0);
     reveal_hiding(ch, 0);
     act("You focus ki while chanting spiritual words. Your blessing does nothing though, you must have messed up!", TRUE, ch, 0, 0, TO_CHAR);
@@ -5549,14 +5549,14 @@ ACMD(do_focus)
     assign_affect(ch, AFF_BLESS, SKILL_BLESS, duration, 0, 0, 0, 0, 0, 0);
        decCurKI(ch, getMaxKI(ch) / 20, 0);
     reveal_hiding(ch, 0);
-    if (IS_KABITO(ch)) {
-     GET_BLESSLVL(ch) = GET_SKILL(ch, SKILL_BLESS);
+    if (char_is_kabito(ch)) {
+     GET_BLESSLVL(ch) = char_get_skill(ch, SKILL_BLESS);
     } else {
      GET_BLESSLVL(ch) = 0;
     }
     act("You focus ki while chanting spiritual words. You feel your body recovering at above normal speed!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki while chanting spiritual words. $n smiles after finishing $s chant.", TRUE, ch, 0, 0, TO_ROOM);
-    if (AFF_FLAGGED(ch, AFF_CURSE)) {
+    if (char_aff_flagged(ch, AFF_CURSE)) {
      send_to_char(ch, "Your cursing was nullified!\r\n");
      null_affect(ch, AFF_CURSE);
     }
@@ -5574,14 +5574,14 @@ ACMD(do_focus)
    }
    else {
     if (ch == vict) {
-     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, GET_NAME(vict));
+     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
      return;
     }
-    if (AFF_FLAGGED(vict, AFF_BLESS)) {
+    if (char_aff_flagged(vict, AFF_BLESS)) {
      send_to_char(ch, "They already have been blessed!\r\n");
      return;
     }
-    else if (IS_NPC(vict)) {
+    else if (char_is_npc(vict)) {
      send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
      return;
     }
@@ -5589,7 +5589,7 @@ ACMD(do_focus)
      send_to_char(ch, "You do not have enough ki to bless.\r\n");
      return;
     }
-    else if (GET_SKILL(ch, SKILL_BLESS) < axion_dice(0)) {
+    else if (char_get_skill(ch, SKILL_BLESS) < axion_dice(0)) {
         decCurKI(ch, getMaxKI(ch) / 20, 0);
      reveal_hiding(ch, 0);
      act("You focus ki while chanting spiritual words. Your blessing fails!", TRUE, ch, 0, 0, TO_CHAR);
@@ -5603,20 +5603,20 @@ ACMD(do_focus)
      assign_affect(vict, AFF_BLESS, SKILL_BLESS, duration, 0, 0, 0, 0, 0, 0);
         decCurKI(ch, getMaxKI(ch) / 20, 0);
      reveal_hiding(ch, 0);
-     if (IS_KAI(ch)) {
-      GET_BLESSLVL(vict) = GET_SKILL(ch, SKILL_BLESS);
+     if (char_is_kai(ch)) {
+      GET_BLESSLVL(vict) = char_get_skill(ch, SKILL_BLESS);
      } else {
       GET_BLESSLVL(vict) = 0;
      }
      act("You focus ki while chanting spiritual words. Blessing $N with faster regeneration!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki while chanting spiritual words. $n then places a hand on your head, blessing you!", TRUE, ch, 0, vict, TO_VICT);
      act("$n focuses ki while chanting spiritual words. $n then places a hand on $N's head, blessing them!", TRUE, ch, 0, vict, TO_NOTVICT);
-     if ((vict->master == ch || ch->master == vict || ch->master == vict->master) && AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
-      if (IS_KAI(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 && rand_number(1, 3) == 3) {
-       GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.05;
+     if ((vict->master == ch || ch->master == vict || ch->master == vict->master) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+      if (char_is_kai(ch) && level_exp(ch, char_get_level(ch) + 1) - GET_EXP(ch) > 0 && rand_number(1, 3) == 3) {
+       GET_EXP(ch) += level_exp(ch, char_get_level(ch) + 1) * 0.05;
       }
      }
-     if (AFF_FLAGGED(vict, AFF_CURSE)) {
+     if (char_aff_flagged(vict, AFF_CURSE)) {
       send_to_char(vict, "Your cursing was nullified!\r\n");
       null_affect(vict, AFF_CURSE);
      }
@@ -5632,11 +5632,11 @@ ACMD(do_focus)
    return;
   }
   if (!*name) {
-   if (AFF_FLAGGED(ch, AFF_CURSE)) {
+   if (char_aff_flagged(ch, AFF_CURSE)) {
     send_to_char(ch, "You already are cursed!\r\n");
     return;
    }
-   else if (IS_DEMON(ch)) {
+   else if (char_is_demon(ch)) {
     send_to_char(ch, "You are immune to curses!\r\n");
     return;
    }
@@ -5644,7 +5644,7 @@ ACMD(do_focus)
     send_to_char(ch, "You do not have enough ki to CURSE.\r\n");
     return;
    }
-   else if (GET_SKILL(ch, SKILL_CURSE) < axion_dice(0)) {
+   else if (char_get_skill(ch, SKILL_CURSE) < axion_dice(0)) {
        decCurKI(ch, getMaxKI(ch) / 20, 0);
     reveal_hiding(ch, 0);
     act("You focus ki while chanting demonic words. Your cursing does nothing though, you must have messed up!", TRUE, ch, 0, 0, TO_CHAR);
@@ -5659,7 +5659,7 @@ ACMD(do_focus)
     reveal_hiding(ch, 0);
     act("You focus ki while chanting demonic words. You feel your body recovering at below normal speed!", TRUE, ch, 0, 0, TO_CHAR);
     act("$n focuses ki while chanting demonic words. $n grins after finishing $s chant.", TRUE, ch, 0, 0, TO_ROOM);
-    if (AFF_FLAGGED(ch, AFF_BLESS)) {
+    if (char_aff_flagged(ch, AFF_BLESS)) {
      send_to_char(ch, "Your blessing was nullified!\r\n");
      null_affect(ch, AFF_BLESS);
     }
@@ -5677,18 +5677,18 @@ ACMD(do_focus)
    }
    else {
     if (ch == vict) {
-     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, GET_NAME(vict));
+     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
      return;
     }
-    if (AFF_FLAGGED(vict, AFF_CURSE)) {
+    if (char_aff_flagged(vict, AFF_CURSE)) {
      send_to_char(ch, "They already have been cursed!\r\n");
      return;
     }
-    else if (IS_NPC(vict)) {
+    else if (char_is_npc(vict)) {
      send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
      return;
     }
-    else if (IS_DEMON(vict)) {
+    else if (char_is_demon(vict)) {
      send_to_char(ch, "They are immune to curses!\r\n");
      return;
     }
@@ -5696,7 +5696,7 @@ ACMD(do_focus)
      send_to_char(ch, "You do not have enough ki to CURSE.\r\n");
      return;
     }
-    else if (GET_SKILL(ch, SKILL_CURSE) < axion_dice(0)) {
+    else if (char_get_skill(ch, SKILL_CURSE) < axion_dice(0)) {
         decCurKI(ch, getMaxKI(ch) / 20, 0);
      reveal_hiding(ch, 0);
      act("You focus ki while chanting demonic words. Your cursing fails!", TRUE, ch, 0, 0, TO_CHAR);
@@ -5713,7 +5713,7 @@ ACMD(do_focus)
      act("You focus ki while chanting demonic words. cursing $N with slower regeneration!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki while chanting demonic words. $n then places a hand on your head, cursing you!", TRUE, ch, 0, vict, TO_VICT);
      act("$n focuses ki while chanting demonic words. $n then places a hand on $N's head, cursing them!", TRUE, ch, 0, vict, TO_NOTVICT);
-     if (AFF_FLAGGED(vict, AFF_BLESS)) {
+     if (char_aff_flagged(vict, AFF_BLESS)) {
       send_to_char(vict, "Your blessing was nullified!\r\n");
       null_affect(vict, AFF_BLESS);
      }
@@ -5736,13 +5736,13 @@ ACMD(do_focus)
     return;
    }
    else {
-    if (AFF_FLAGGED(vict, AFF_SLEEP)) {
+    if (char_aff_flagged(vict, AFF_SLEEP)) {
      send_to_char(ch, "They already have been put to sleep!\r\n");
      return;
-    } else if (PLR_FLAGGED(vict, PLR_EYEC)) {
+    } else if (char_plr_flagged(vict, PLR_EYEC)) {
      send_to_char(ch, "Their eyes are closed!\r\n");
      return;
-    } else if (AFF_FLAGGED(vict, AFF_BLIND)) {
+    } else if (char_aff_flagged(vict, AFF_BLIND)) {
      send_to_char(ch, "They appear to be blind!\r\n");
      return;
     } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
@@ -5755,7 +5755,7 @@ ACMD(do_focus)
      act("$n focuses ki while moving $s hands in a lulling pattern, but you just don't feel tired.", TRUE, ch, 0, vict, TO_VICT);
      act("$n focuses ki while moving $s hands in a lulling pattern, but $N doesn't look the least bit sleepy!", TRUE, ch, 0, vict, TO_NOTVICT);
      return;
-    } else if (GET_SKILL(ch, SKILL_YOIK) < axion_dice(0) || (GET_INT(ch) + rand_number(1, 3) < GET_INT(vict) + rand_number(1, 5))) {
+    } else if (char_get_skill(ch, SKILL_YOIK) < axion_dice(0) || (GET_INT(ch) + rand_number(1, 3) < GET_INT(vict) + rand_number(1, 5))) {
         decCurKI(ch, getMaxKI(ch) / 20, 0);
      reveal_hiding(ch, 0);
      act("You focus ki while moving your hands in lulling patterns, but fail to put $N to sleep!", TRUE, ch, 0, vict, TO_CHAR);
@@ -5772,7 +5772,7 @@ ACMD(do_focus)
      act("$n focuses ki while moving $s hands in a lulling pattern, before you realise it you are asleep!", TRUE, ch, 0, vict, TO_VICT);
      act("$n focuses ki while moving $s hands in a lulling pattern, putting $N to sleep!", TRUE, ch, 0, vict, TO_NOTVICT);
      GET_POS(vict) = POS_SLEEPING;
-     if (AFF_FLAGGED(vict, AFF_FLYING)) {
+     if (char_aff_flagged(vict, AFF_FLYING)) {
       REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_FLYING);
       GET_ALT(vict) = 0;
      }
@@ -5790,7 +5790,7 @@ ACMD(do_focus)
     send_to_char(ch, "You do not have enough ki to use vigor.\r\n");
     return;
    }
-   else if (GET_SKILL(ch, SKILL_VIGOR) < axion_dice(0)) {
+   else if (char_get_skill(ch, SKILL_VIGOR) < axion_dice(0)) {
        decCurKI(ch, getMaxKI(ch) / 10, 0);
     reveal_hiding(ch, 0);
     act("You focus ki into your very cells, but fail at re-engerizing them!", TRUE, ch, 0, 0, TO_CHAR);
@@ -5828,7 +5828,7 @@ ACMD(do_focus)
     return;
    }
    else {
-    if (IS_NPC(vict)) {
+    if (char_is_npc(vict)) {
      send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
      return;
     }
@@ -5840,7 +5840,7 @@ ACMD(do_focus)
     send_to_char(ch, "They already have full stamina.\r\n");
     return;
    }
-    else if (GET_SKILL(ch, SKILL_VIGOR) < axion_dice(0)) {
+    else if (char_get_skill(ch, SKILL_VIGOR) < axion_dice(0)) {
         decCurKI(ch, getMaxKI(ch) / 10, 0);
      reveal_hiding(ch, 0);
      act("You focus ki into $N's very cells, and fail at re-energizing them!", TRUE, ch, 0, vict, TO_CHAR);
@@ -5874,7 +5874,7 @@ ACMD(do_focus)
    return;
   }
   if (!*name) {
-   if (!AFF_FLAGGED(ch, AFF_POISON)) {
+   if (!char_aff_flagged(ch, AFF_POISON)) {
     send_to_char(ch, "You are not poisoned!\r\n");
     return;
    }
@@ -5882,7 +5882,7 @@ ACMD(do_focus)
     send_to_char(ch, "You do not have enough ki to cure.\r\n");
     return;
    }
-   else if (GET_SKILL(ch, SKILL_CURE) < axion_dice(0)) {
+   else if (char_get_skill(ch, SKILL_CURE) < axion_dice(0)) {
        decCurKI(ch, getMaxKI(ch) / 20, 0);
     reveal_hiding(ch, 0);
     act("You focus ki and aim a pulsing light at your body. Nothing happens!", TRUE, ch, 0, 0, TO_CHAR);
@@ -5910,10 +5910,10 @@ ACMD(do_focus)
    }
    else {
     if (ch == vict) {
-     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, GET_NAME(vict));
+     send_to_char(ch, "Use focus %s, not focus %s %s.\r\n", arg, arg, char_get_name(vict));
      return;
     }
-    if (!AFF_FLAGGED(vict, AFF_POISON)) {
+    if (!char_aff_flagged(vict, AFF_POISON)) {
      send_to_char(ch, "They are not poisoned!\r\n");
      return;
     }
@@ -5921,7 +5921,7 @@ ACMD(do_focus)
      send_to_char(ch, "You do not have enough ki to cure.\r\n");
      return;
     }
-    else if (GET_SKILL(ch, SKILL_CURE) < axion_dice(0)) {
+    else if (char_get_skill(ch, SKILL_CURE) < axion_dice(0)) {
         decCurKI(ch, getMaxKI(ch) / 20, 0);
      reveal_hiding(ch, 0);
      act("You focus ki and aim a pulsing light at $N's body. Nothing happens.", TRUE, ch, 0, vict, TO_CHAR);
@@ -5961,13 +5961,13 @@ ACMD(do_focus)
      send_to_char(ch, "Why poison yourself?\r\n");
      return;
     }
-    if (IS_NPC(vict)) {
-     if (MOB_FLAGGED(vict, MOB_NOPOISON)) {
+    if (char_is_npc(vict)) {
+     if (char_mob_flagged(vict, MOB_NOPOISON)) {
       send_to_char(ch, "You get the feeling that this being is immune to poison.\r\n");
       return;
      }
     }
-    if (AFF_FLAGGED(vict, AFF_POISON)) {
+    if (char_aff_flagged(vict, AFF_POISON)) {
      send_to_char(ch, "They already have been poisoned!\r\n");
      return;
     }
@@ -5975,7 +5975,7 @@ ACMD(do_focus)
      send_to_char(ch, "You do not have enough ki to poison.\r\n");
      return;
     }
-    else if (GET_SKILL(ch, SKILL_POISON) < axion_dice(0)) {
+    else if (char_get_skill(ch, SKILL_POISON) < axion_dice(0)) {
         decCurKI(ch, getMaxKI(ch) / 20, 0);
      reveal_hiding(ch, 0);
      act("You focus ki and fling poison at $N. You missed!", TRUE, ch, 0, vict, TO_CHAR);
@@ -5989,10 +5989,10 @@ ACMD(do_focus)
      act("You focus ki and fling poison at $N! The poison burns into $s skin!", TRUE, ch, 0, vict, TO_CHAR);
      act("$n focuses ki and flings poison at you! The poison burns into your skin!", TRUE, ch, 0, vict, TO_VICT);
      act("$n focuses ki and flings poison at $N! The poison burns into $s skin!", TRUE, ch, 0, vict, TO_NOTVICT);
-     if (IS_NPC(vict)) {
+     if (char_is_npc(vict)) {
       set_fighting(vict, ch);
      }
-     if (IS_MUTANT(vict) && (GET_GENOME(vict, 0) == 7 || GET_GENOME(vict, 1) == 7)) {
+     if (char_is_mutant(vict) && (GET_GENOME(vict, 0) == 7 || GET_GENOME(vict, 1) == 7)) {
       act("However $N seems unaffected by the poison.", TRUE, ch, 0, vict, TO_CHAR);
       act("Your natural immunity to poison prevents it from affecting you.", TRUE, ch, 0, vict, TO_VICT);
       act("However $N seems unaffected by the poison.", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -6054,8 +6054,8 @@ ACMD(do_kaioken)
         send_to_char(ch, "Your heart is too corrupt to use that technique!\r\n");
         return;
     }
-    if (!IS_NPC(ch)) {
-        if (PLR_FLAGGED(ch, PLR_HEALT)) {
+    if (!char_is_npc(ch)) {
+        if (char_plr_flagged(ch, PLR_HEALT)) {
             send_to_char(ch, "You are inside a healing tank!\r\n");
             return;
         }
@@ -6090,8 +6090,8 @@ ACMD(do_kaioken)
         return;
     }
 
-    if (!IS_NPC(ch)) {
-        if ((IS_TRANSFORMED(ch) || (IS_HOSHIJIN(ch) && GET_PHASE(ch) > 0)) && x > 5) {
+    if (!char_is_npc(ch)) {
+        if ((char_is_transformed(ch) || (char_is_hoshijin(ch) && GET_PHASE(ch) > 0)) && x > 5) {
             send_to_char(ch, "You can not manage a kaioken level higher than 5 when transformed.\r\n");
             return;
         }
@@ -6143,7 +6143,7 @@ ACMD(do_plant)
   char vict_name[100], obj_name[100];
   int roll = 0, detect = 0, fail = 0;
 
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+  if (rroom_flagged(IN_ROOM(ch), ROOM_PEACEFUL)) {
     send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
     return;
   }
@@ -6157,7 +6157,7 @@ ACMD(do_plant)
     send_to_char(ch, "Come on now, that's rather stupid!\r\n");
     return;
   }
-  if (MOB_FLAGGED(vict, MOB_NOKILL) && GET_ADMLEVEL(ch) == ADMLVL_NONE) {
+  if (char_mob_flagged(vict, MOB_NOKILL) && GET_ADMLEVEL(ch) == ADMLVL_NONE) {
     send_to_char(ch, "That isn't such a good idea...\r\n");
     return;
   }
@@ -6174,7 +6174,7 @@ ACMD(do_plant)
     detect = (roll_skill(vict, SKILL_SPOT) + rand_number(1, 3));
 
   /* NO NO With Imp's and Shopkeepers, and if player planting is not allowed */
-  if ((ADM_FLAGGED(vict, ADM_NOSTEAL) || GET_MOB_SPEC(vict) == shop_keeper) && GET_ADMLEVEL(ch) < 5)
+  if ((char_adm_flagged(vict, ADM_NOSTEAL) || char_get_mob_spec(vict) == shop_keeper) && GET_ADMLEVEL(ch) < 5)
     roll = -10;         /* Failure */
 
 
@@ -6225,7 +6225,7 @@ ACMD(do_forgery) {
  
   one_argument(argument, arg);
 
-  if (IS_NPC(ch)) {
+  if (char_is_npc(ch)) {
    return;
   }
 
@@ -6245,7 +6245,7 @@ ACMD(do_forgery) {
 
   for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
-   if (found == FALSE && GET_OBJ_VNUM(obj) == 19 && (!OBJ_FLAGGED(obj, ITEM_BROKEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))) {
+   if (found == FALSE && obj_get_vnum(obj) == 19 && (!obj_flagged(obj, ITEM_BROKEN) && !obj_flagged(obj, ITEM_FORGED))) {
     found = TRUE;
     obj4 = obj;
    }
@@ -6256,41 +6256,41 @@ ACMD(do_forgery) {
    return;
   }
 
-  if (GET_OBJ_VNUM(obj2) == 19) {
+  if (obj_get_vnum(obj2) == 19) {
    send_to_char(ch, "You can't duplicate a forgery kit.\r\n");
    return;
   }
 
-  if (OBJ_FLAGGED(obj2, ITEM_FORGED)) {
+  if (obj_flagged(obj2, ITEM_FORGED)) {
    send_to_char(ch, "%s is forgery, there is no reason to make a fake of a fake!\r\n", obj2->short_description);
    WAIT_STATE(ch, PULSE_2SEC);
    return;
   }
 
-  if (OBJ_FLAGGED(obj2, ITEM_BROKEN)) {
+  if (obj_flagged(obj2, ITEM_BROKEN)) {
    send_to_char(ch, "%s is broken, there is no reason to make a fake of this mess!\r\n", obj2->short_description);
    WAIT_STATE(ch, PULSE_2SEC);
    return;
   }  
 
-  if (GET_OBJ_VNUM(obj2) >= 60000 || GET_OBJ_VNUM(obj2) == 0) {
+  if (obj_get_vnum(obj2) >= 60000 || obj_get_vnum(obj2) == 0) {
    send_to_char(ch, "You can not make a forgery of that! It's far too squishy....");
    return;
   }
-  if (GET_OBJ_VNUM(obj2) >= 18800 && GET_OBJ_VNUM(obj2) <= 18999) {
+  if (obj_get_vnum(obj2) >= 18800 && obj_get_vnum(obj2) <= 18999) {
    send_to_char(ch, "You can not make a forgery of that!\r\n");
    return;
   }
-  if (GET_OBJ_VNUM(obj2) >= 19080 && GET_OBJ_VNUM(obj2) <= 19199) {
+  if (obj_get_vnum(obj2) >= 19080 && obj_get_vnum(obj2) <= 19199) {
    send_to_char(ch, "You can not make a forgery of that!\r\n");
    return;
   }
-  if (GET_OBJ_VNUM(obj2) >= 4 && GET_OBJ_VNUM(obj2) <= 6) {
+  if (obj_get_vnum(obj2) >= 4 && obj_get_vnum(obj2) <= 6) {
 	send_to_char(ch, "You can not make a forgery of that!\r\n");
 	return;
   }
 
-  if (OBJ_FLAGGED(obj2, ITEM_PROTECTED)) {
+  if (obj_flagged(obj2, ITEM_PROTECTED)) {
    send_to_char(ch, "You don't know where to begin with this work of ART.\r\n");
    return;
   }
@@ -6298,7 +6298,7 @@ ACMD(do_forgery) {
   reveal_hiding(ch, 0);
   act("@c$n@w looks at $p, begins to work on forging a fake copy of it.@n", TRUE, ch, obj2, 0, TO_ROOM);
   improve_skill(ch, SKILL_FORGERY, 1);
-  if (GET_SKILL(ch, SKILL_FORGERY) < axion_dice(0)) {
+  if (char_get_skill(ch, SKILL_FORGERY) < axion_dice(0)) {
    if (rand_number(1, 10) >= 9) { /* Uh oh */
     send_to_char(ch, "In the middle of creating a forgery of %s you screw up. The fabrication unit built into the forgery kit melts and bonds with the original. You clumsy mistake with the Estex Titanium drill has broken both.\r\n", obj2->short_description);
     extract_obj(obj4);
@@ -6313,7 +6313,7 @@ ACMD(do_forgery) {
    return;
   }
 
-  int loadn = GET_OBJ_VNUM(obj2);
+  int loadn = obj_get_vnum(obj2);
 
   obj3 = read_object(loadn, VIRTUAL);
   add_unique_id(obj3);
@@ -6338,7 +6338,7 @@ ACMD(do_appraise) {
 
   one_argument(argument, arg);
 
-  if (IS_NPC(ch)) {
+  if (char_is_npc(ch)) {
    return;
   }
 
@@ -6359,21 +6359,21 @@ ACMD(do_appraise) {
   reveal_hiding(ch, 0);
   act("@c$n@w looks at $p, turning it over in $s hands.@n", TRUE, ch, obj, 0, TO_ROOM);
   improve_skill(ch, SKILL_APPRAISE, 1);
-  if (GET_SKILL(ch, SKILL_APPRAISE) < axion_dice(-10)) {
+  if (char_get_skill(ch, SKILL_APPRAISE) < axion_dice(-10)) {
    send_to_char(ch, "You fail to perceive the worth of %s..\r\n", obj->short_description);
    act("@c$n@w looks stumped about $p.@n", TRUE, ch, obj, 0, TO_ROOM);
    WAIT_STATE(ch, PULSE_2SEC);
    return;
   }
 
-  if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+  if (obj_flagged(obj, ITEM_BROKEN)) {
    send_to_char(ch, "%s is broken!\r\n", obj->short_description);
    act("@c$n@w looks at $p and frowns.@n", TRUE, ch, obj, 0, TO_ROOM);
    WAIT_STATE(ch, PULSE_2SEC);
    return;
   }
 
-  if (OBJ_FLAGGED(obj, ITEM_FORGED)) {
+  if (obj_flagged(obj, ITEM_FORGED)) {
    send_to_char(ch, "%s is fake and worthless!\r\n", obj->short_description);
    act("@c$n@w looks at $p with an angry face.@n", TRUE, ch, obj, 0, TO_ROOM);
    WAIT_STATE(ch, PULSE_2SEC);
@@ -6382,37 +6382,37 @@ ACMD(do_appraise) {
   found = FALSE;
   int displevel = GET_OBJ_LEVEL(obj);
 
-   if (GET_OBJ_TYPE(obj) == ITEM_WEAPON && OBJ_FLAGGED(obj, ITEM_CUSTOM))
+   if (GET_OBJ_TYPE(obj) == ITEM_WEAPON && obj_flagged(obj, ITEM_CUSTOM))
     displevel = 20;
 
   send_to_char(ch, "%s is worth: %s\r\nMin Lvl: %d\r\n", obj->short_description, add_commas(GET_OBJ_COST(obj)), displevel);
   if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
-     if (OBJ_FLAGGED(obj, ITEM_WEAPLVL1)) {
+     if (obj_flagged(obj, ITEM_WEAPLVL1)) {
       send_to_char(ch, "Weapon Level: 1\nDamage Bonus: 5%s\r\n", "%");
      }
-     else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL2)) {
+     else if (obj_flagged(obj, ITEM_WEAPLVL2)) {
       send_to_char(ch, "Weapon Level: 2\nDamage Bonus: 10%s\r\n", "%");
      }
-     else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL3)) {
+     else if (obj_flagged(obj, ITEM_WEAPLVL3)) {
       send_to_char(ch, "Weapon Level: 3\nDamage Bonus: 20%s\r\n", "%");
      }
-     else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL4)) {
+     else if (obj_flagged(obj, ITEM_WEAPLVL4)) {
       send_to_char(ch, "Weapon Level: 4\nDamage Bonus: 30%s\r\n", "%");
      }
-     else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL5)) {
+     else if (obj_flagged(obj, ITEM_WEAPLVL5)) {
       send_to_char(ch, "Weapon Level: 5\nDamage Bonus: 50%s\r\n", "%");
      }
   }
   send_to_char(ch, "Size: %s\r\n", size_names[GET_OBJ_SIZE(obj)]);
-  if (OBJ_FLAGGED(obj, ITEM_SLOT1) && !OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED)) {
+  if (obj_flagged(obj, ITEM_SLOT1) && !obj_flagged(obj, ITEM_SLOTS_FILLED)) {
    send_to_char(ch, "Token Slots  : @m0/1@n\n");
-  } else if (OBJ_FLAGGED(obj, ITEM_SLOT1) && OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED)) {
+  } else if (obj_flagged(obj, ITEM_SLOT1) && obj_flagged(obj, ITEM_SLOTS_FILLED)) {
    send_to_char(ch, "Token Slots  : @m1/1@n\n");
-  } else if (OBJ_FLAGGED(obj, ITEM_SLOT2) && !OBJ_FLAGGED(obj, ITEM_SLOT_ONE) && !OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED)) {
+  } else if (obj_flagged(obj, ITEM_SLOT2) && !obj_flagged(obj, ITEM_SLOT_ONE) && !obj_flagged(obj, ITEM_SLOTS_FILLED)) {
    send_to_char(ch, "Token Slots  : @m0/2@n\n");
-  } else if (OBJ_FLAGGED(obj, ITEM_SLOT2) && OBJ_FLAGGED(obj, ITEM_SLOT_ONE) && !OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED)) {
+  } else if (obj_flagged(obj, ITEM_SLOT2) && obj_flagged(obj, ITEM_SLOT_ONE) && !obj_flagged(obj, ITEM_SLOTS_FILLED)) {
    send_to_char(ch, "Token Slots  : @m1/2@n\n");
-  } else if (OBJ_FLAGGED(obj, ITEM_SLOT2) && !OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED)) {
+  } else if (obj_flagged(obj, ITEM_SLOT2) && !obj_flagged(obj, ITEM_SLOTS_FILLED)) {
    send_to_char(ch, "Token Slots  : @m2/2@n\n");
   }
   send_to_char(ch, "Bonuses:");
@@ -6448,12 +6448,12 @@ ACMD(do_appraise) {
 ACMD(do_disguise) {
  int skill = 0, roll = 0;
 
- if (IS_NPC(ch)) {
+ if (char_is_npc(ch)) {
   send_to_char(ch, "You forgot your disguise off in mobland.\r\n");
   return;
  }
  
- if (PLR_FLAGGED(ch, PLR_DISGUISED)) {
+ if (char_plr_flagged(ch, PLR_DISGUISED)) {
   send_to_char(ch, "You stop disguising yourself.\r\n");
   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_DISGUISED);
   act("@C$n @wpulls off $s disguise and reveals $mself!", TRUE, ch, 0, 0, TO_ROOM);
@@ -6474,7 +6474,7 @@ ACMD(do_disguise) {
   return;
  }
  
- skill = GET_SKILL(ch, SKILL_DISGUISE);
+ skill = char_get_skill(ch, SKILL_DISGUISE);
  roll = axion_dice(-10);
  
  if (skill > roll) {
@@ -6519,7 +6519,7 @@ ACMD(do_eavesdrop) {
       sprintf(buf, "The %s is closed.\r\n", fname(EXIT(ch, dir)->keyword));
       send_to_char(ch, buf);
     } else {
-      GET_EAVESDROP(ch) = GET_ROOM_VNUM(EXIT(ch, dir)->to_room);
+      GET_EAVESDROP(ch) = rroom_get_vnum(EXIT(ch, dir)->to_room);
       GET_EAVESDIR(ch) = dir;
       send_to_char(ch, "Okay.\r\n");
     }
@@ -6534,11 +6534,11 @@ ACMD(do_zanzoken)
  int64_t cost = 0;
  
 
- if (!know_skill(ch, SKILL_ZANZOKEN) && !IS_NPC(ch)) {
+ if (!know_skill(ch, SKILL_ZANZOKEN) && !char_is_npc(ch)) {
   return;
  }
 
- if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
+ if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
   REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
   send_to_char(ch, "You release the ki you had prepared for a zanzoken.\r\n");
   return;
@@ -6549,8 +6549,8 @@ ACMD(do_zanzoken)
   return;
  }
 
- if (!IS_NPC(ch)) {
-  prob = GET_SKILL(ch, SKILL_ZANZOKEN);
+ if (!char_is_npc(ch)) {
+  prob = char_get_skill(ch, SKILL_ZANZOKEN);
  } else {
   prob = rand_number(80, 90);
  }
@@ -6594,7 +6594,7 @@ ACMD(do_block)
 
   one_argument(argument, arg);
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
    return;
 
   if (!*arg) {
@@ -6662,16 +6662,16 @@ ACMD(do_block)
 ACMD(do_eyec)
 {
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
 
- if (PLR_FLAGGED(ch, PLR_EYEC)) {
+ if (char_plr_flagged(ch, PLR_EYEC)) {
   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_EYEC);  
   act("@wYou open your eyes.@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@C$n@w opens $s eyes.@n", TRUE, ch, 0, 0, TO_ROOM);
  }
 
- else if (!PLR_FLAGGED(ch, PLR_EYEC)) {
+ else if (!char_plr_flagged(ch, PLR_EYEC)) {
   SET_BIT_AR(PLR_FLAGS(ch), PLR_EYEC);
   act("@wYou close your eyes.@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@C$n@w closes $s eyes.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -6694,7 +6694,7 @@ ACMD(do_solar)
    return;
   }
 
- prob = GET_SKILL(ch, SKILL_SOLARF);
+ prob = char_get_skill(ch, SKILL_SOLARF);
  perc = rand_number(0, 101);
  
  if (prob >= 75) {
@@ -6735,9 +6735,9 @@ ACMD(do_solar)
    
    if (vict == ch)
     continue;
-   else if (PLR_FLAGGED(vict, PLR_EYEC))
+   else if (char_plr_flagged(vict, PLR_EYEC))
     continue;
-   else if (AFF_FLAGGED(vict, AFF_BLIND))
+   else if (char_aff_flagged(vict, AFF_BLIND))
     continue;
    else if (GET_POS(vict) == POS_SLEEPING)
     continue;
@@ -6868,14 +6868,14 @@ ACMD(do_heal)
       decCurKI(ch, cost, 0);
       incCurHealth(vict, heal, true);
 
-   if (IS_NAIL(ch)) {
-    if (GET_SKILL(ch, SKILL_HEAL) >= 100) {
+   if (char_is_nail(ch)) {
+    if (char_get_skill(ch, SKILL_HEAL) >= 100) {
      incCurST(ch, heal * .4, true);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
-    } else if (GET_SKILL(ch, SKILL_HEAL) >= 60) {
+    } else if (char_get_skill(ch, SKILL_HEAL) >= 60) {
         incCurST(ch, heal * .2, true);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
-    } else if (GET_SKILL(ch, SKILL_HEAL) >= 40) {
+    } else if (char_get_skill(ch, SKILL_HEAL) >= 40) {
         incCurST(ch, heal * .1, true);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
     }
@@ -6883,7 +6883,7 @@ ACMD(do_heal)
 
    null_affect(ch, AFF_POISON);
    null_affect(ch, AFF_BLIND);
-    if (AFF_FLAGGED(vict, AFF_BURNED)) {
+    if (char_aff_flagged(vict, AFF_BURNED)) {
         send_to_char(vict, "Your burns are healed now.\r\n");
         act("$n@w's burns are now healed.@n", TRUE, vict, 0, 0, TO_ROOM);
         REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_BURNED);
@@ -6897,15 +6897,15 @@ ACMD(do_heal)
    GET_LIMBCOND(vict, 2) = 100;
    GET_LIMBCOND(vict, 3) = 100;
    GET_LIMBCOND(vict, 4) = 100;
-   if(getCurLF(vict) <= getMaxLF(vict) * 0.5 && !IS_ANDROID(vict)) {
+   if(getCurLF(vict) <= getMaxLF(vict) * 0.5 && !char_is_android(vict)) {
        incCurLF(vict, (getMaxLF(ch)) * .35, true);
     send_to_char(vict, "You feel that your lifeforce has recovered some!\r\n");
    }
    improve_skill(ch, SKILL_HEAL, 0);
    if (vict->master == ch || ch->master == vict || ch->master == vict->master) {
-    if (IS_NAIL(ch) && IS_NAMEK(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 && GET_HIT(vict) <=
+    if (char_is_nail(ch) && char_is_namek(ch) && level_exp(ch, char_get_level(ch) + 1) - GET_EXP(ch) > 0 && GET_HIT(vict) <=
                                                                                                      getEffMaxPL(vict) * 0.85 && rand_number(1, 3) == 3) {
-     GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.005;
+     GET_EXP(ch) += level_exp(ch, char_get_level(ch) + 1) * 0.005;
     }
    }
 
@@ -6921,14 +6921,14 @@ ACMD(do_heal)
       decCurKI(ch, cost, 0);
       incCurHealth(vict, heal, true);
 
-   if (IS_NAIL(ch)) {
-    if (GET_SKILL(ch, SKILL_HEAL) >= 100) {
+   if (char_is_nail(ch)) {
+    if (char_get_skill(ch, SKILL_HEAL) >= 100) {
         incCurST(ch, heal * .4, true);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
-    } else if (GET_SKILL(ch, SKILL_HEAL) >= 60) {
+    } else if (char_get_skill(ch, SKILL_HEAL) >= 60) {
         incCurST(ch, heal * .2, true);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
-    } else if (GET_SKILL(ch, SKILL_HEAL) >= 40) {
+    } else if (char_get_skill(ch, SKILL_HEAL) >= 40) {
         incCurST(ch, heal * .1, true);
      send_to_char(vict, "@GYou feel some of your stamina return as well!@n\r\n");
     }
@@ -6938,10 +6938,10 @@ ACMD(do_heal)
    GET_LIMBCOND(vict, 2) = 100;
    GET_LIMBCOND(vict, 3) = 100;
    GET_LIMBCOND(vict, 4) = 100;
-   if (!PLR_FLAGGED(vict, PLR_TAIL) && (IS_BIO(vict) || IS_ICER(vict))) {
+   if (!char_plr_flagged(vict, PLR_TAIL) && (char_is_bio(vict) || char_is_icer(vict))) {
     SET_BIT_AR(PLR_FLAGS(vict), PLR_TAIL);
    }
-   if (!PLR_FLAGGED(vict, PLR_STAIL) && (IS_SAIYAN(vict) || IS_HALFBREED(vict))) {
+   if (!char_plr_flagged(vict, PLR_STAIL) && (char_is_saiyan(vict) || char_is_halfbreed(vict))) {
     SET_BIT_AR(PLR_FLAGS(vict), PLR_STAIL);
    }
    improve_skill(ch, SKILL_HEAL, 0);
@@ -6958,7 +6958,7 @@ ACMD(do_barrier)
 
   one_argument(argument, arg);
 
-  if (!know_skill(ch, SKILL_BARRIER) && !GET_SKILL(ch, SKILL_AQUA_BARRIER)) {
+  if (!know_skill(ch, SKILL_BARRIER) && !char_get_skill(ch, SKILL_AQUA_BARRIER)) {
    return;
   }
 
@@ -6967,7 +6967,7 @@ ACMD(do_barrier)
    return;
   }
 
-  if (AFF_FLAGGED(ch, AFF_SANCTUARY) && !strcasecmp("release", arg)) {
+  if (char_aff_flagged(ch, AFF_SANCTUARY) && !strcasecmp("release", arg)) {
    act("@BYou dispel your barrier, releasing its energy.@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@B$n@B dispels $s barrier, releasing its energy.@n", TRUE, ch, 0, 0, TO_ROOM);
    GET_BARRIER(ch) = 0;
@@ -6979,7 +6979,7 @@ ACMD(do_barrier)
   }
 
 
-  if (AFF_FLAGGED(ch, AFF_SANCTUARY)) {
+  if (char_aff_flagged(ch, AFF_SANCTUARY)) {
    send_to_char(ch, "You already have a barrier, try releasing it.\r\n");
    return;
   }
@@ -6992,10 +6992,10 @@ ACMD(do_barrier)
   size = atoi(arg);
   int64_t cost = 0;
   prob = 0;
-  if (GET_SKILL(ch, SKILL_BARRIER)) {
+  if (char_get_skill(ch, SKILL_BARRIER)) {
    prob = init_skill(ch, SKILL_BARRIER);
   } else {
-   prob = GET_SKILL(ch, SKILL_AQUA_BARRIER);
+   prob = char_get_skill(ch, SKILL_AQUA_BARRIER);
   }
   perc = axion_dice(0);
 
@@ -7021,7 +7021,7 @@ ACMD(do_barrier)
    act("@BYou shout as you form a barrier of ki around your body, but you imbalance it and it explodes outward!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@B$n@B shouts as $e forms a barrier of ki around $s body, but it becomes imbalanced and explodes outward!@n", TRUE, ch, 0, 0, TO_ROOM);
    GET_CHARGE(ch) -= cost;
-   if (GET_SKILL(ch, SKILL_BARRIER)) {
+   if (char_get_skill(ch, SKILL_BARRIER)) {
     improve_skill(ch, SKILL_BARRIER, 2);
    } else {
     improve_skill(ch, SKILL_AQUA_BARRIER, 2);
@@ -7030,7 +7030,7 @@ ACMD(do_barrier)
    return;
   }
   else {
-   if (GET_SKILL(ch, SKILL_BARRIER)) {
+   if (char_get_skill(ch, SKILL_BARRIER)) {
     act("@BYou shout as you form a barrier of ki around your body!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@B$n@B shouts as $e forms a barrier of ki around $s body!@n", TRUE, ch, 0, 0, TO_ROOM);
    } else {
@@ -7039,7 +7039,7 @@ ACMD(do_barrier)
    }
    GET_BARRIER(ch) = (GET_MAX_MANA(ch) / 100) * size;
    GET_CHARGE(ch) -= cost;
-   if (GET_SKILL(ch, SKILL_BARRIER)) {
+   if (char_get_skill(ch, SKILL_BARRIER)) {
     improve_skill(ch, SKILL_BARRIER, 2);
    } else {
     improve_skill(ch, SKILL_AQUA_BARRIER, 2);
@@ -7061,8 +7061,8 @@ ACMD(do_instant)
 
   one_argument(argument, arg);
 
-  if (!IS_NPC(ch)) {
-   if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
+  if (!char_is_npc(ch)) {
+   if (char_prf_flagged(ch, PRF_ARENAWATCH)) {
     REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_ARENAWATCH);
     ARENA_IDNUM(ch) = -1;
     send_to_char(ch, "You stop watching the arena action.\r\n");
@@ -7070,19 +7070,19 @@ ACMD(do_instant)
   }
   if (!know_skill(ch, SKILL_INSTANTT)) {
     return;
-  } else if (!GET_SKILL(ch, SKILL_SENSE) && !PLR_FLAGGED(ch, PLR_SENSEM)) {
+  } else if (!char_get_skill(ch, SKILL_SENSE) && !char_plr_flagged(ch, PLR_SENSEM)) {
     send_to_char(ch, "You can't sense them to go to there!\r\n");
     return;
-  } else if (PLR_FLAGGED(ch, PLR_PILOTING)) {
+  } else if (char_plr_flagged(ch, PLR_PILOTING)) {
    send_to_char(ch, "You are busy piloting a ship!\r\n");
    return;
-  } else if (PLR_FLAGGED(ch, PLR_HEALT)) {
+  } else if (char_plr_flagged(ch, PLR_HEALT)) {
    send_to_char(ch, "You are inside a healing tank!\r\n");
    return;
-  } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+  } else if (rroom_get_vnum(IN_ROOM(ch)) >= 19800 && rroom_get_vnum(IN_ROOM(ch)) <= 19899) {
    send_to_char(ch, "@rYou are in a pocket dimension!@n\r\n");
    return;
-  } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
+  } else if (rroom_flagged(IN_ROOM(ch), ROOM_RHELL) || rroom_flagged(IN_ROOM(ch), ROOM_AL) || rroom_flagged(IN_ROOM(ch), ROOM_HELL)) {
    send_to_char(ch, "You can not leave where you are at!\r\n");
    return;
   } else if (!*arg) {
@@ -7091,13 +7091,13 @@ ACMD(do_instant)
    return;
   }
 
-  if (GET_SKILL(ch, SKILL_INSTANTT) > 75) {
+  if (char_get_skill(ch, SKILL_INSTANTT) > 75) {
    cost = GET_MAX_MANA(ch) / 40;
-  } else if (GET_SKILL(ch, SKILL_INSTANTT) > 50) {
+  } else if (char_get_skill(ch, SKILL_INSTANTT) > 50) {
    cost = GET_MAX_MANA(ch) / 20;
-  } else if (GET_SKILL(ch, SKILL_INSTANTT) > 25) {
+  } else if (char_get_skill(ch, SKILL_INSTANTT) > 25) {
    cost = GET_MAX_MANA(ch) / 15;
-  } else if (GET_SKILL(ch, SKILL_INSTANTT) < 25) {
+  } else if (char_get_skill(ch, SKILL_INSTANTT) < 25) {
    cost = GET_MAX_MANA(ch) / 10;
   }
 
@@ -7107,7 +7107,7 @@ ACMD(do_instant)
   }
 
   perc = axion_dice(0);
-  skill = GET_SKILL(ch, SKILL_INSTANTT);
+  skill = char_get_skill(ch, SKILL_INSTANTT);
   skill_num = SKILL_INSTANTT;
 
   if (!strcasecmp(arg, "planet-earth")) {
@@ -7165,16 +7165,16 @@ ACMD(do_instant)
   } else if (GET_ADMLEVEL(tar) > 0 && GET_ADMLEVEL(ch) < 1) {
    send_to_char(ch, "That immortal prevents you from reaching them.\r\n");
    return;
-  } else if (IS_ANDROID(tar) || GET_HIT(tar) < (GET_HIT(ch) * 0.001) + 1) {
+  } else if (char_is_android(tar) || GET_HIT(tar) < (GET_HIT(ch) * 0.001) + 1) {
    send_to_char(ch, "You can't sense them well enough.\r\n");
    return;
-  } else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) && ROOM_FLAGGED(IN_ROOM(tar), ROOM_AL)) {
+  } else if (!rroom_flagged(IN_ROOM(ch), ROOM_AL) && rroom_flagged(IN_ROOM(tar), ROOM_AL)) {
    send_to_char(ch, "They are dead and can't be reached.\r\n");
    return;
-  } else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) && ROOM_FLAGGED(IN_ROOM(tar), ROOM_RHELL)) {
+  } else if (!rroom_flagged(IN_ROOM(ch), ROOM_RHELL) && rroom_flagged(IN_ROOM(tar), ROOM_RHELL)) {
    send_to_char(ch, "They are dead and can't be reached.\r\n");
    return;
-  } else if (ROOM_FLAGGED(IN_ROOM(tar), ROOM_NOINSTANT)) {
+  } else if (rroom_flagged(IN_ROOM(tar), ROOM_NOINSTANT)) {
    send_to_char(ch, "You can not go there as it is a protected area!\r\n");
    return;
   }
@@ -7324,7 +7324,7 @@ void wishSYS(void)
      switch (place) {
       case 1:
        if (real_room(num) != NOWHERE) {
-        if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+        if (rroom_flagged(real_room(num), ROOM_EARTH) || rroom_flagged(real_room(num), ROOM_VEGETA) || rroom_flagged(real_room(num), ROOM_FRIGID) || rroom_flagged(real_room(num), ROOM_AETHER) || rroom_flagged(real_room(num), ROOM_NAMEK) || rroom_flagged(real_room(num), ROOM_KONACK) || rroom_flagged(real_room(num), ROOM_YARDRAT) || rroom_flagged(real_room(num), ROOM_YARDRAT)) {
          SHADOW_DRAGON1 = num;
          place = 2;
          num = rand_number(200, 20000);
@@ -7337,7 +7337,7 @@ void wishSYS(void)
       break;
       case 2:
        if (real_room(num) != NOWHERE) {
-        if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) ||  ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+        if (rroom_flagged(real_room(num), ROOM_EARTH) ||  rroom_flagged(real_room(num), ROOM_VEGETA) || rroom_flagged(real_room(num), ROOM_FRIGID) || rroom_flagged(real_room(num), ROOM_AETHER) || rroom_flagged(real_room(num), ROOM_NAMEK) || rroom_flagged(real_room(num), ROOM_KONACK) || rroom_flagged(real_room(num), ROOM_YARDRAT) || rroom_flagged(real_room(num), ROOM_YARDRAT)) {
          SHADOW_DRAGON2 = num;
          place = 3;
          num = rand_number(200, 20000);
@@ -7350,7 +7350,7 @@ void wishSYS(void)
       break;
       case 3:
        if (real_room(num) != NOWHERE) {
-        if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+        if (rroom_flagged(real_room(num), ROOM_EARTH) || rroom_flagged(real_room(num), ROOM_VEGETA) || rroom_flagged(real_room(num), ROOM_FRIGID) || rroom_flagged(real_room(num), ROOM_AETHER) || rroom_flagged(real_room(num), ROOM_NAMEK) || rroom_flagged(real_room(num), ROOM_KONACK) || rroom_flagged(real_room(num), ROOM_YARDRAT) || rroom_flagged(real_room(num), ROOM_YARDRAT)) {
          SHADOW_DRAGON3 = num;
          place = 4;
          num = rand_number(200, 20000);
@@ -7363,7 +7363,7 @@ void wishSYS(void)
       break;
       case 4:
        if (real_room(num) != NOWHERE) {
-        if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+        if (rroom_flagged(real_room(num), ROOM_EARTH) || rroom_flagged(real_room(num), ROOM_VEGETA) || rroom_flagged(real_room(num), ROOM_FRIGID) || rroom_flagged(real_room(num), ROOM_AETHER) || rroom_flagged(real_room(num), ROOM_NAMEK) || rroom_flagged(real_room(num), ROOM_KONACK) || rroom_flagged(real_room(num), ROOM_YARDRAT) || rroom_flagged(real_room(num), ROOM_YARDRAT)) {
          SHADOW_DRAGON4 = num;
          place = 5;
          num = rand_number(200, 20000);
@@ -7376,7 +7376,7 @@ void wishSYS(void)
       break;
       case 5:
        if (real_room(num) != NOWHERE) {
-        if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) ||  ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+        if (rroom_flagged(real_room(num), ROOM_EARTH) ||  rroom_flagged(real_room(num), ROOM_VEGETA) || rroom_flagged(real_room(num), ROOM_FRIGID) || rroom_flagged(real_room(num), ROOM_AETHER) || rroom_flagged(real_room(num), ROOM_NAMEK) || rroom_flagged(real_room(num), ROOM_KONACK) || rroom_flagged(real_room(num), ROOM_YARDRAT) || rroom_flagged(real_room(num), ROOM_YARDRAT)) {
          SHADOW_DRAGON5 = num;
          place = 6;
          num = rand_number(200, 20000);
@@ -7389,7 +7389,7 @@ void wishSYS(void)
       break;
       case 6:
        if (real_room(num) != NOWHERE) {
-        if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+        if (rroom_flagged(real_room(num), ROOM_EARTH) || rroom_flagged(real_room(num), ROOM_VEGETA) || rroom_flagged(real_room(num), ROOM_FRIGID) || rroom_flagged(real_room(num), ROOM_AETHER) || rroom_flagged(real_room(num), ROOM_NAMEK) || rroom_flagged(real_room(num), ROOM_KONACK) || rroom_flagged(real_room(num), ROOM_YARDRAT) || rroom_flagged(real_room(num), ROOM_YARDRAT)) {
          SHADOW_DRAGON6 = num;
          place = 7;
          num = rand_number(200, 20000);
@@ -7402,7 +7402,7 @@ void wishSYS(void)
       break;
       case 7:
        if (real_room(num) != NOWHERE) {
-        if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) || ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) || ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+        if (rroom_flagged(real_room(num), ROOM_EARTH) || rroom_flagged(real_room(num), ROOM_VEGETA) || rroom_flagged(real_room(num), ROOM_FRIGID) || rroom_flagged(real_room(num), ROOM_AETHER) || rroom_flagged(real_room(num), ROOM_NAMEK) || rroom_flagged(real_room(num), ROOM_KONACK) || rroom_flagged(real_room(num), ROOM_YARDRAT) || rroom_flagged(real_room(num), ROOM_YARDRAT)) {
          SHADOW_DRAGON7 = num;
          done = TRUE;
          num = rand_number(200, 20000);
@@ -7472,56 +7472,56 @@ ACMD(do_summon)
    mob_rnum r_num;
 
 
-    if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {
+    if (!rroom_flagged(IN_ROOM(ch), ROOM_EARTH)) {
      send_to_char(ch, "@wYou can not summon Shenron when you are not on earth.@n\r\n");
      return;
     } // are they on earth?
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NOINSTANT) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_NOINSTANT) || rroom_flagged(IN_ROOM(ch), ROOM_PEACEFUL)) {
      send_to_char(ch, "You can not summon shenron in this protected area!\r\n");
      return;
     }
-    if (SECT(IN_ROOM(ch)) == SECT_INSIDE) {
+    if (rroom_sect(IN_ROOM(ch)) == SECT_INSIDE) {
      send_to_char(ch, "Go outside to summon Shenron!\r\n");
      return;
     }
 
     for (obj = ch->carrying; obj; obj = next_obj) {
      next_obj = obj->next_content;
-     if (OBJ_FLAGGED(obj, ITEM_FORGED)) {
+     if (obj_flagged(obj, ITEM_FORGED)) {
       continue;
      }
-     if (GET_OBJ_VNUM(obj) == dball[0]) {
+     if (obj_get_vnum(obj) == dball[0]) {
       dball[0] = -1;
       count++;
       continue;
      }
-     else if (GET_OBJ_VNUM(obj) == dball[1]) {
+     else if (obj_get_vnum(obj) == dball[1]) {
       dball[1] = -1;
       count++;
       continue;
      }
-     else if (GET_OBJ_VNUM(obj) == dball[2]) {
+     else if (obj_get_vnum(obj) == dball[2]) {
       dball[2] = -1;
       count++;
       continue;
      }
-     else if (GET_OBJ_VNUM(obj) == dball[3]) {
+     else if (obj_get_vnum(obj) == dball[3]) {
       dball[3] = -1;
       count++;
       continue;
      }
-     else if (GET_OBJ_VNUM(obj) == dball[4]) {
+     else if (obj_get_vnum(obj) == dball[4]) {
       dball[4] = -1;
       count++;
       continue;
      }
-     else if (GET_OBJ_VNUM(obj) == dball[5]) {
+     else if (obj_get_vnum(obj) == dball[5]) {
       dball[5] = -1;
       count++;
       continue;
      }
-     else if (GET_OBJ_VNUM(obj) == dball[6]) {
+     else if (obj_get_vnum(obj) == dball[6]) {
       dball[6] = -1;
       count++;
       continue;
@@ -7541,9 +7541,9 @@ ACMD(do_summon)
      act("@W$n places the dragon balls on the ground and with both hands outstretched towards them $e says '@CArise Eternal Dragon Shenron!@W'@n", TRUE, ch, 0, 0, TO_ROOM);
      SHENRON = TRUE;
      DRAGONC = 300;
-     DRAGONR = GET_ROOM_VNUM(IN_ROOM(ch));
+     DRAGONR = rroom_get_vnum(IN_ROOM(ch));
      if (real_room(DRAGONR) == NOWHERE) {
-      DRAGONR = GET_ROOM_VNUM(IN_ROOM(ch));
+      DRAGONR = rroom_get_vnum(IN_ROOM(ch));
      }
      send_to_imm("Shenron summoned to room: %d\r\n", DRAGONR);
 
@@ -7554,43 +7554,43 @@ ACMD(do_summon)
      for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
 
-      if (GET_OBJ_VNUM(obj) == dball2[0]) {
+      if (obj_get_vnum(obj) == dball2[0]) {
        obj_from_char(obj);
        extract_obj(obj);
        dball2[0] = -1;
        continue;
       }
-      else if (GET_OBJ_VNUM(obj) == dball2[1]) {
+      else if (obj_get_vnum(obj) == dball2[1]) {
        obj_from_char(obj);
        extract_obj(obj);
        dball2[1] = -1;
        continue;
       }
-      else if (GET_OBJ_VNUM(obj) == dball2[2]) {
+      else if (obj_get_vnum(obj) == dball2[2]) {
        obj_from_char(obj);
        extract_obj(obj);
        dball2[2] = -1;
        continue;
       }
-      else if (GET_OBJ_VNUM(obj) == dball2[3]) {
+      else if (obj_get_vnum(obj) == dball2[3]) {
        obj_from_char(obj);
        extract_obj(obj);
        dball2[3] = -1;
        continue;
       }
-      else if (GET_OBJ_VNUM(obj) == dball2[4]) {
+      else if (obj_get_vnum(obj) == dball2[4]) {
        obj_from_char(obj);
        extract_obj(obj);
        dball2[4] = -1;
        continue;
       }
-      else if (GET_OBJ_VNUM(obj) == dball2[5]) {
+      else if (obj_get_vnum(obj) == dball2[5]) {
        obj_from_char(obj);
        extract_obj(obj);
        dball2[5] = -1;
        continue;
       }
-      else if (GET_OBJ_VNUM(obj) == dball2[6]) {
+      else if (obj_get_vnum(obj) == dball2[6]) {
        obj_from_char(obj);
        extract_obj(obj);
        dball2[6] = -1;
@@ -7627,7 +7627,7 @@ ACMD(do_transform)
         return;
     }
 
-    bool npc = IS_NPC(ch);
+    bool npc = char_is_npc(ch);
 
 	/*R: Hidden transformation stuff following this*/
 	if (!npc && (getBasePL(ch)) < 50000) {
@@ -7687,7 +7687,7 @@ ACMD(do_transform)
 
     int to_tier = race_flag_to_tier(trans.flag);
 
-    if (PLR_FLAGGED(ch, trans.flag)) {
+    if (char_plr_flagged(ch, trans.flag)) {
         send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
         return;
     }
@@ -7743,11 +7743,11 @@ ACMD(do_situp)
 
  int cost = 1, bonus = 0;
 
- if (IS_NPC(ch)) {
+ if (char_is_npc(ch)) {
    send_to_char(ch, "You are a mob fool!\r\n");
    return;
   }
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
+  if (rroom_flagged(IN_ROOM(ch), ROOM_HELL)) {
     send_to_char(ch, "The fire makes it too hot!\r\n");
     return;
   }
@@ -7755,7 +7755,7 @@ ACMD(do_situp)
     send_to_char(ch, "You are dragging someone!\r\n");
     return;
   }
-  if (PLR_FLAGGED(ch, PLR_FISHING)) {
+  if (char_plr_flagged(ch, PLR_FISHING)) {
     send_to_char(ch, "Stop fishing first.\r\n");
     return;
   }
@@ -7764,10 +7764,10 @@ ACMD(do_situp)
     return;
   }
 
- if ((ROOM_GRAVITY(IN_ROOM(ch)) != 10 && IS_BARDOCK(ch)) || !IS_BARDOCK(ch)) {
-  cost += ROOM_GRAVITY(IN_ROOM(ch)) * ((ROOM_GRAVITY(IN_ROOM(ch)) * 2) + GET_LEVEL(ch));
- } else if (IS_BARDOCK(ch)) {
-  cost += ROOM_GRAVITY(IN_ROOM(ch)) * GET_LEVEL(ch);
+ if ((ROOM_GRAVITY(IN_ROOM(ch)) != 10 && char_is_bardock(ch)) || !char_is_bardock(ch)) {
+  cost += ROOM_GRAVITY(IN_ROOM(ch)) * ((ROOM_GRAVITY(IN_ROOM(ch)) * 2) + char_get_level(ch));
+ } else if (char_is_bardock(ch)) {
+  cost += ROOM_GRAVITY(IN_ROOM(ch)) * char_get_level(ch);
  }
 
  if (ROOM_GRAVITY(IN_ROOM(ch)) == 300) {
@@ -7806,7 +7806,7 @@ ACMD(do_situp)
    cost *= 4;
   }
 
- if (IS_ANDROID(ch) || IS_BIO(ch) || IS_MAJIN(ch) || IS_ARLIAN(ch)) {
+ if (char_is_android(ch) || char_is_bio(ch) || char_is_majin(ch) || char_is_arlian(ch)) {
    send_to_char(ch, "You will gain nothing from exercising!\r\n");
    return;
  }
@@ -7819,7 +7819,7 @@ ACMD(do_situp)
    send_to_char(ch, "You are too tired!\r\n");
    return;
   }
- if (PLR_FLAGGED(ch, PLR_SPAR)) {
+ if (char_plr_flagged(ch, PLR_SPAR)) {
    send_to_char(ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
    return;
  }
@@ -7827,7 +7827,7 @@ ACMD(do_situp)
    send_to_char(ch, "You are fighting you moron!\r\n");
    return;
  }
- if (AFF_FLAGGED(ch, AFF_FLYING)) {
+ if (char_aff_flagged(ch, AFF_FLYING)) {
    send_to_char(ch, "You can't do situps in midair!\r\n");
    return;
  }
@@ -7941,35 +7941,35 @@ ACMD(do_situp)
    if (is_soft_cap(ch, 2, 1.0)) {
     bonus = 0;
    }
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (rroom_flagged(IN_ROOM(ch), ROOM_HBTC)) {
     send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
     bonus *= 10;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+   } else if (rroom_flagged(IN_ROOM(ch), ROOM_WORKOUT)) {
+    if (rroom_get_vnum(IN_ROOM(ch)) >= 19100 && rroom_get_vnum(IN_ROOM(ch)) <= 19199) {
      bonus *= 10;
     } else {
      bonus *= 5;
     }
-   } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+   } else if (rroom_get_vnum(IN_ROOM(ch)) >= 19800 && rroom_get_vnum(IN_ROOM(ch)) <= 19899) {
     send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
     bonus *= 20;
    }
-   if (bonus <= 0 && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (bonus <= 0 && !rroom_flagged(IN_ROOM(ch), ROOM_HBTC)) {
     bonus = 1;
    }
-   if (bonus <= 0 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (bonus <= 0 && rroom_flagged(IN_ROOM(ch), ROOM_HBTC)) {
     bonus = 15;
    }
-   if (bonus <= 0 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+   if (bonus <= 0 && rroom_flagged(IN_ROOM(ch), ROOM_WORKOUT)) {
+    if (rroom_get_vnum(IN_ROOM(ch)) >= 19100 && rroom_get_vnum(IN_ROOM(ch)) <= 19199) {
      bonus = 12;
     } else {
      bonus = 6;
     }
    }
    /* Rillao: transloc, add new transes here */
-    bonus += GET_LEVEL(ch) / 20;
-    if (IS_NAMEK(ch)) {
+    bonus += char_get_level(ch) / 20;
+    if (char_is_namek(ch)) {
     bonus -= bonus / 4;
     }
     if (GET_BONUS(ch, BONUS_HARDWORKER)) {
@@ -8012,20 +8012,20 @@ ACMD(do_meditate)
   two_arguments(argument, arg, arg2);
 
 
-  if (IS_NPC(ch)) {
+  if (char_is_npc(ch)) {
    send_to_char(ch, "You are a mob fool!\r\n");
    return;
   }
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
+  if (rroom_flagged(IN_ROOM(ch), ROOM_HELL)) {
     send_to_char(ch, "The fire makes it too hot!\r\n");
     return;
   }
-  if (PLR_FLAGGED(ch, PLR_FISHING)) {
+  if (char_plr_flagged(ch, PLR_FISHING)) {
     send_to_char(ch, "Stop fishing first.\r\n");
     return;
   }
 
- if (IS_ANDROID(ch) || IS_BIO(ch) || IS_MAJIN(ch) || IS_ARLIAN(ch)) {
+ if (char_is_android(ch) || char_is_bio(ch) || char_is_majin(ch) || char_is_arlian(ch)) {
    send_to_char(ch, "You will gain nothing from exercising!\r\n");
    return;
  }
@@ -8040,7 +8040,7 @@ ACMD(do_meditate)
     return;
   }
 
- if (PLR_FLAGGED(ch, PLR_SPAR)) {
+ if (char_plr_flagged(ch, PLR_SPAR)) {
    send_to_char(ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
    return;
  }
@@ -8063,10 +8063,10 @@ ACMD(do_meditate)
 
  if (!strcasecmp(arg, "expand")) {
   int cost = 3500;
-  if (IS_SAIYAN(ch)) {
+  if (char_is_saiyan(ch)) {
    cost = 7000;
   }
-  if (GET_PRACTICES(ch, GET_CLASS(ch)) < cost) {
+  if (GET_PRACTICES(ch, char_get_class(ch)) < cost) {
    send_to_char(ch, "You do not have enough practice sessions to expand your mind and ability to remember skills.\r\n");
    send_to_char(ch, "%s needed.\r\n", add_commas(cost));
   } else if (GET_SLOTS(ch) >= 60 && GET_BONUS(ch, BONUS_GMEMORY) == 0) {
@@ -8076,7 +8076,7 @@ ACMD(do_meditate)
   } else {
    send_to_char(ch, "During your meditation you manage to expand your mind and get the feeling you could learn some new skills.\r\n");
    GET_SLOTS(ch) += 1;
-   GET_PRACTICES(ch, GET_CLASS(ch)) -= cost;
+   GET_PRACTICES(ch, char_get_class(ch)) -= cost;
    return;
   }
   return;
@@ -8090,11 +8090,11 @@ ACMD(do_meditate)
   } else if ((getCurKI(ch)) < GET_MAX_MANA(MINDLINK(ch)) * 0.05) {
    send_to_char(ch, "You do not have enough ki to manage a break.\r\n");
    return;
-  } else if (GET_INT(ch) + rand_number(-5, 10) >= GET_INT(MINDLINK(ch)) + (GET_SKILL(MINDLINK(ch), SKILL_TELEPATHY) * 0.1)) {
+  } else if (GET_INT(ch) + rand_number(-5, 10) >= GET_INT(MINDLINK(ch)) + (char_get_skill(MINDLINK(ch), SKILL_TELEPATHY) * 0.1)) {
    act("@rYou manage to break the mind link between you and @R$N@r!@n", FALSE, ch, 0, MINDLINK(ch), TO_CHAR);
    act("$n closes their eyes for a few seconds.", FALSE, ch, 0, MINDLINK(ch), TO_ROOM);
    send_to_char(MINDLINK(ch), "@rYour mind linked target manages to push you out!@n\r\n");
-   if (GET_INT(MINDLINK(ch)) < axion_dice(-10) && !AFF_FLAGGED(MINDLINK(ch), AFF_SHOCKED)) {
+   if (GET_INT(MINDLINK(ch)) < axion_dice(-10) && !char_aff_flagged(MINDLINK(ch), AFF_SHOCKED)) {
     send_to_char(MINDLINK(ch), "Your mind is shocked by the flood of mental energy that pushed it out!@n\r\n");
     REMOVE_BIT_AR(AFF_FLAGS(MINDLINK(ch)), AFF_SHOCKED);
    }
@@ -8116,7 +8116,7 @@ ACMD(do_meditate)
    return;
  }
 
- if (GET_OBJ_VNUM(obj) == 79) {
+ if (obj_get_vnum(obj) == 79) {
   send_to_char(ch, "It's frozen to the surface.\r\n");
   return;
  }
@@ -8127,10 +8127,10 @@ ACMD(do_meditate)
   weight += GET_WEIGHT(SITTING(obj));
  }
 
- if ((ROOM_GRAVITY(IN_ROOM(ch)) != 10 && IS_BARDOCK(ch)) || !IS_BARDOCK(ch)) {
-  cost += ROOM_GRAVITY(IN_ROOM(ch)) * ((ROOM_GRAVITY(IN_ROOM(ch)) * 2) + GET_LEVEL(ch));
- } else if (IS_BARDOCK(ch)) {
-  cost += ROOM_GRAVITY(IN_ROOM(ch)) * GET_LEVEL(ch);
+ if ((ROOM_GRAVITY(IN_ROOM(ch)) != 10 && char_is_bardock(ch)) || !char_is_bardock(ch)) {
+  cost += ROOM_GRAVITY(IN_ROOM(ch)) * ((ROOM_GRAVITY(IN_ROOM(ch)) * 2) + char_get_level(ch));
+ } else if (char_is_bardock(ch)) {
+  cost += ROOM_GRAVITY(IN_ROOM(ch)) * char_get_level(ch);
  }
  cost += weight * ((ROOM_GRAVITY(IN_ROOM(ch)) + 1) / 5);
 
@@ -8268,39 +8268,39 @@ ACMD(do_meditate)
     if (is_soft_cap(ch, 1, 1.0)) {
      bonus = 0;
     }
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (rroom_flagged(IN_ROOM(ch), ROOM_HBTC)) {
     send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
     bonus *= 10;
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+   } else if (rroom_flagged(IN_ROOM(ch), ROOM_WORKOUT)) {
+    if (rroom_get_vnum(IN_ROOM(ch)) >= 19100 && rroom_get_vnum(IN_ROOM(ch)) <= 19199) {
      bonus *= 10;
     } else {
      bonus *= 5;
     }
-   } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+   } else if (rroom_get_vnum(IN_ROOM(ch)) >= 19800 && rroom_get_vnum(IN_ROOM(ch)) <= 19899) {
     send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
     bonus *= 20;
    }
-   if (bonus <= 0 && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (bonus <= 0 && !rroom_flagged(IN_ROOM(ch), ROOM_HBTC)) {
     bonus = 1;
    }
-   if (bonus <= 0 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (bonus <= 0 && rroom_flagged(IN_ROOM(ch), ROOM_HBTC)) {
     bonus = 15;
    }
-   if (bonus <= 1 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+   if (bonus <= 1 && rroom_flagged(IN_ROOM(ch), ROOM_WORKOUT)) {
+    if (rroom_get_vnum(IN_ROOM(ch)) >= 19100 && rroom_get_vnum(IN_ROOM(ch)) <= 19199) {
      bonus = 12;
     } else {
      bonus = 6;
     }
    }
-   if (bonus != 1 && IS_DEMON(ch) && rand_number(1, 100) >= 80) {
+   if (bonus != 1 && char_is_demon(ch) && rand_number(1, 100) >= 80) {
     send_to_char(ch, "Your spirit magnifies the strength of your body! @D[@G+%s@D]@n\r\n", add_commas(bonus / 2));
     gainBasePL(ch, bonus / 2, false);
     }
 
-    bonus += GET_LEVEL(ch) / 20;
-    if (IS_NAMEK(ch)) {
+    bonus += char_get_level(ch) / 20;
+    if (char_is_namek(ch)) {
      bonus += bonus / 2;
     }
     if (GET_BONUS(ch, BONUS_LONER)) {
@@ -8337,12 +8337,12 @@ ACMD(do_pushup)
 
  int cost = 1, bonus = 0;
 
- if (IS_NPC(ch)) {
+ if (char_is_npc(ch)) {
    send_to_char(ch, "You are a mob fool!\r\n");
    return;
   }
  
-  if (PLR_FLAGGED(ch, PLR_FISHING)) {
+  if (char_plr_flagged(ch, PLR_FISHING)) {
     send_to_char(ch, "Stop fishing first.\r\n");
     return;
   }
@@ -8355,10 +8355,10 @@ ACMD(do_pushup)
     return;
   }
 
- if ((ROOM_GRAVITY(IN_ROOM(ch)) != 10 && IS_BARDOCK(ch)) || !IS_BARDOCK(ch)) {
-  cost += ROOM_GRAVITY(IN_ROOM(ch)) * ((ROOM_GRAVITY(IN_ROOM(ch)) * 2) + GET_LEVEL(ch));
- } else if (IS_BARDOCK(ch)) {
-  cost += ROOM_GRAVITY(IN_ROOM(ch)) * GET_LEVEL(ch);
+ if ((ROOM_GRAVITY(IN_ROOM(ch)) != 10 && char_is_bardock(ch)) || !char_is_bardock(ch)) {
+  cost += ROOM_GRAVITY(IN_ROOM(ch)) * ((ROOM_GRAVITY(IN_ROOM(ch)) * 2) + char_get_level(ch));
+ } else if (char_is_bardock(ch)) {
+  cost += ROOM_GRAVITY(IN_ROOM(ch)) * char_get_level(ch);
  }
 
  if (ROOM_GRAVITY(IN_ROOM(ch)) == 300) {
@@ -8398,7 +8398,7 @@ ACMD(do_pushup)
    cost *= 4;
   }
 
- if (IS_ANDROID(ch) || IS_BIO(ch) || IS_MAJIN(ch) || IS_ARLIAN(ch)) {
+ if (char_is_android(ch) || char_is_bio(ch) || char_is_majin(ch) || char_is_arlian(ch)) {
    send_to_char(ch, "You will gain nothing from exercising!\r\n");
    return;
  }
@@ -8411,7 +8411,7 @@ ACMD(do_pushup)
    send_to_char(ch, "You are too tired!\r\n");
    return;
   }
- if (PLR_FLAGGED(ch, PLR_SPAR)) {
+ if (char_plr_flagged(ch, PLR_SPAR)) {
    send_to_char(ch, "You shouldn't be sparring if you want to work out, it could be dangerous.\r\n");
    return;
  }
@@ -8419,7 +8419,7 @@ ACMD(do_pushup)
    send_to_char(ch, "You are fighting you moron!\r\n");
    return;
  }
- if (AFF_FLAGGED(ch, AFF_FLYING)) {
+ if (char_aff_flagged(ch, AFF_FLYING)) {
    send_to_char(ch, "You can't do pushups in midair!\r\n");
    return;
  }
@@ -8534,34 +8534,34 @@ ACMD(do_pushup)
    if (is_soft_cap(ch, 0, 1.0)) {
     bonus = 0;
    }
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (rroom_flagged(IN_ROOM(ch), ROOM_HBTC)) {
     send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
     bonus *= 10; 
-   } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+   } else if (rroom_flagged(IN_ROOM(ch), ROOM_WORKOUT)) {
+    if (rroom_get_vnum(IN_ROOM(ch)) >= 19100 && rroom_get_vnum(IN_ROOM(ch)) <= 19199) {
      bonus *= 10;
     } else {
      bonus *= 5;
     }
-   } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+   } else if (rroom_get_vnum(IN_ROOM(ch)) >= 19800 && rroom_get_vnum(IN_ROOM(ch)) <= 19899) {
     send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
     bonus *= 20;
    }
-   if (bonus <= 0 && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (bonus <= 0 && !rroom_flagged(IN_ROOM(ch), ROOM_HBTC)) {
     bonus = 1;
    }
-   if (bonus <= 0 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+   if (bonus <= 0 && rroom_flagged(IN_ROOM(ch), ROOM_HBTC)) {
     bonus = 15;
    }
-   if (bonus <= 1 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+   if (bonus <= 1 && rroom_flagged(IN_ROOM(ch), ROOM_WORKOUT)) {
+    if (rroom_get_vnum(IN_ROOM(ch)) >= 19100 && rroom_get_vnum(IN_ROOM(ch)) <= 19199) {
      bonus = 12;
     } else {
      bonus = 6;
     }
    }
-    bonus += GET_LEVEL(ch) / 20;
-    if (IS_NAMEK(ch)) {
+    bonus += char_get_level(ch) / 20;
+    if (char_is_namek(ch)) {
      bonus -= bonus / 4;
     }
     if (GET_BONUS(ch, BONUS_HARDWORKER)) {
@@ -8573,7 +8573,7 @@ ACMD(do_pushup)
     /* Rillao: transloc, add new transes here */
     send_to_char(ch, "You feel slightly stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus));
 
-     if (IS_HUMAN(ch)) {
+     if (char_is_human(ch)) {
          bonus = bonus * 0.8;
      }
      gainBasePL(ch, bonus, true);
@@ -8601,15 +8601,15 @@ ACMD(do_pushup)
 
 ACMD(do_spar)
 {
- if (IS_NPC(ch)) {
+ if (char_is_npc(ch)) {
   return;
  }
  else {
-  if (PLR_FLAGGED(ch, PLR_SPAR)) {
+  if (char_plr_flagged(ch, PLR_SPAR)) {
    act("@wYou cease your sparring stance.@n", FALSE, ch, 0, 0, TO_CHAR);
    act("@C$n@w ceases $s sparring stance.@n", FALSE, ch, 0, 0, TO_ROOM);
   }
-  if (!PLR_FLAGGED(ch, PLR_SPAR)) {
+  if (!char_plr_flagged(ch, PLR_SPAR)) {
    act("@wYou move into your sparring stance.@n", FALSE, ch, 0, 0, TO_CHAR);
    act("@C$n@w moves into $s sparring stance.@n", FALSE, ch, 0, 0, TO_ROOM);
   }
@@ -8624,7 +8624,7 @@ static void check_eq(struct char_data *ch)
   for (i = 0; i < NUM_WEARS; i++) {
    if (GET_EQ(ch, i)) {
       obj = GET_EQ(ch, i);
-    if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+    if (obj_flagged(obj, ITEM_BROKEN)) {
      act("@W$p@W falls apart and you remove it.@n", FALSE, ch, obj, 0, TO_CHAR);
      act("@W$p@W falls apart and @C$n@W remove it.@n", FALSE, ch, obj, 0, TO_ROOM);
      perform_remove(ch, i);
@@ -8666,15 +8666,15 @@ void base_update(void)
 	}
 
 	for (d = descriptor_list; d; d = d->next) {
-		if (!IS_PLAYING(d))
+		if (!desc_is_playing(d))
 			continue;
-		if (IS_NPC(d->character)) {
+		if (char_is_npc(d->character)) {
 			if (ABSORBING(d->character) && IN_ROOM(d->character) != IN_ROOM(ABSORBING(d->character))) {
-				send_to_char(d->character, "You stop absorbing %s!\r\n", GET_NAME(ABSORBING(d->character)));
+				send_to_char(d->character, "You stop absorbing %s!\r\n", char_get_name(ABSORBING(d->character)));
 				ABSORBBY(ABSORBING(d->character)) = NULL;
 				ABSORBING(d->character) = NULL;
 			}
-			if (IS_ANDROID(d->character) && ABSORBING(d->character) && rand_number(1, 10) >= 7) {
+			if (char_is_android(d->character) && ABSORBING(d->character) && rand_number(1, 10) >= 7) {
 				int64_t drain1 = GET_MAX_MANA(d->character) * 0.01, drain2 = GET_MAX_MOVE(d->character) * 0.01;
 				struct char_data *drained = ABSORBING(d->character);
 				if ((getCurST(drained)) - drain2 < 0) {
@@ -8696,11 +8696,11 @@ void base_update(void)
 		if (countch == TRUE) {
 			pcoun += 1;
 		}
-		if (!IS_NPC(d->character) && rand_number(1, 15) >= 14) {
+		if (!char_is_npc(d->character) && rand_number(1, 15) >= 14) {
 			ash_burn(d->character);
 		}
         int64_t forty_lf = getMaxLF(d->character) * 0.4;
-		if (AFF_FLAGGED(d->character, AFF_CURSE) && getCurLF(d->character) > forty_lf) {
+		if (char_aff_flagged(d->character, AFF_CURSE) && getCurLF(d->character) > forty_lf) {
 			decCurLFPercent(d->character, .01, 0);
 			demon_refill_lf(d->character, getMaxLF(d->character) * 0.01);
 
@@ -8711,8 +8711,8 @@ void base_update(void)
 		if (GET_BACKSTAB_COOL(d->character) > 0) {
 			GET_BACKSTAB_COOL(d->character) -= 1;
 		}
-		if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 60) {
-			if (IS_BIO(d->character)) {
+		if (char_plr_flagged(d->character, PLR_GOOP) && d->character->gooptime == 60) {
+			if (char_is_bio(d->character)) {
 				act("@GConciousness slowly returns to you. You realize quickly that some of your cells have survived. You take control of your regenerative processes and focus on growing a new body!@n", TRUE, d->character, 0, 0, TO_CHAR);
 			}
 			else {
@@ -8721,8 +8721,8 @@ void base_update(void)
 			}
 			d->character->gooptime -= 1;
 		}
-		else if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 30) {
-			if (IS_BIO(d->character)) {
+		else if (char_plr_flagged(d->character, PLR_GOOP) && d->character->gooptime == 30) {
+			if (char_is_bio(d->character)) {
 				act("@GFrom the collection of cells growing a crude form of your body starts to take shape!@n", TRUE, d->character, 0, 0, TO_CHAR);
 				act("@GYou start to notice a large mass of pulsing flesh growing before you!@n", TRUE, d->character, 0, 0, TO_ROOM);
 			}
@@ -8732,8 +8732,8 @@ void base_update(void)
 			}
 			d->character->gooptime -= 1;
 		}
-		else if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 15) {
-			if (IS_BIO(d->character)) {
+		else if (char_plr_flagged(d->character, PLR_GOOP) && d->character->gooptime == 15) {
+			if (char_is_bio(d->character)) {
 				act("@GYour body has almost reached its previous form! Only a little more regenerating is needed!@n", TRUE, d->character, 0, 0, TO_CHAR);
 				act("@GThe lump of flesh has now grown to the size where the likeness of @g$n@G can be seen of it! It appears that $e is regenerating $s body from what was only a few cells!@n", TRUE, d->character, 0, 0, TO_ROOM);
 			}
@@ -8743,16 +8743,16 @@ void base_update(void)
 			}
 			d->character->gooptime -= 1;
 		}
-		else if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 0)
+		else if (char_plr_flagged(d->character, PLR_GOOP) && d->character->gooptime == 0)
 		{
-			if (IS_BIO(d->character))
+			if (char_is_bio(d->character))
 			{
                 restoreHealth(d->character, true);
 				act("@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n", TRUE, d->character, 0, 0, TO_CHAR);
 				act("@g$n@G's body has fully regenerated! Suddenly $e flexes $s arms and legs and a rush of power erupts from off of $s body!@n", TRUE, d->character, 0, 0, TO_ROOM);
 			}
 			//Zenkai Boost
-			else if (IS_SAIYAN(d->character))
+			else if (char_is_saiyan(d->character))
 			{
 
 				setCurHealthPercent(d->character, 0.5);
@@ -8767,7 +8767,7 @@ void base_update(void)
           setCurSTPercent(d->character, 0.25);
         }
 
-				if (!IN_ARENA(d->character))
+				if (!char_in_arena(d->character))
 				{
           int64_t zenkaiPL, zenkaiKi, zenkaiSt;
           zenkaiPL = getBasePL(d->character) * 0.03;
@@ -8826,10 +8826,10 @@ void base_update(void)
 				GET_DEFENDING(d->character) = NULL;
 			}
 		}
-		if (PLR_FLAGGED(d->character, PLR_TRANSMISSION)) {
+		if (char_plr_flagged(d->character, PLR_TRANSMISSION)) {
 			REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_TRANSMISSION);
 		}
-		if (!FIGHTING(d->character) && AFF_FLAGGED(d->character, AFF_POSITION)) {
+		if (!FIGHTING(d->character) && char_aff_flagged(d->character, AFF_POSITION)) {
 			REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_POSITION);
 		}
 		if (SITS(d->character)) {
@@ -8841,15 +8841,15 @@ void base_update(void)
 		}
 		if (GET_PING(d->character) >= 1) {
 			GET_PING(d->character) -= 1;
-			if (PLR_FLAGGED(d->character, PLR_PILOTING) && GET_PING(d->character) == 0) {
+			if (char_plr_flagged(d->character, PLR_PILOTING) && GET_PING(d->character) == 0) {
 				send_to_char(d->character, "Your radar is ready to calculate the direction of another destination.\r\n");
 			}
 		}
-		if (GET_ADMLEVEL(d->character) < 1 && TOPCOUNTDOWN <= 0 && GET_LEVEL(d->character) > 0) {
+		if (GET_ADMLEVEL(d->character) < 1 && TOPCOUNTDOWN <= 0 && char_get_level(d->character) > 0) {
 			topWrite(d->character);
 		}
-		if (PLR_FLAGGED(d->character, PLR_SELFD) && !PLR_FLAGGED(d->character, PLR_SELFD2)) {
-			if (rand_number(4, 100) < GET_SKILL(d->character, SKILL_SELFD)) {
+		if (char_plr_flagged(d->character, PLR_SELFD) && !char_plr_flagged(d->character, PLR_SELFD2)) {
+			if (rand_number(4, 100) < char_get_skill(d->character, SKILL_SELFD)) {
 				send_to_char(d->character, "You feel you are ready to self destruct!\r\n");
 				SET_BIT_AR(PLR_FLAGS(d->character), PLR_SELFD2);
 			}
@@ -8858,19 +8858,19 @@ void base_update(void)
 			COMBO(d->character) = -1;
 			COMBHITS(d->character) = 0;
 		}
-		if (MOON_OK(d->character)) {
+		if (char_moon_ok(d->character)) {
 			oozaru_transform(d->character);
 		}
 		if (cash == TRUE && GET_BANK_GOLD(d->character) > 0) {
-			inc = GET_BANK_INTEREST(d->character);
+			inc = char_get_bank_interest(d->character);
 			GET_LINTEREST(d->character) = LASTINTEREST;
 			GET_BANK_GOLD(d->character) += inc;
 			send_to_char(d->character, "@cBank Interest@D: @Y%s@n\r\n", add_commas(inc));
 		}
-		if (!IS_NPC(d->character)) {
+		if (!char_is_npc(d->character)) {
 			check_eq(d->character);
 		}
-		if (!IS_NPC(d->character) && ROOM_EFFECT(IN_ROOM(d->character)) >= 1 && rand_number(1, 100) >= 96) {
+		if (!char_is_npc(d->character) && ROOM_EFFECT(IN_ROOM(d->character)) >= 1 && rand_number(1, 100) >= 96) {
 			if (ROOM_EFFECT(IN_ROOM(d->character)) <= 4) {
 				switch (rand_number(1, 4)) {
 				case 1:
@@ -8899,11 +8899,11 @@ void base_update(void)
 			}
 		}
 		if (ABSORBING(d->character) && IN_ROOM(d->character) != IN_ROOM(ABSORBING(d->character))) {
-			send_to_char(d->character, "You stop absorbing %s!\r\n", GET_NAME(ABSORBING(d->character)));
+			send_to_char(d->character, "You stop absorbing %s!\r\n", char_get_name(ABSORBING(d->character)));
 			ABSORBBY(ABSORBING(d->character)) = NULL;
 			ABSORBING(d->character) = NULL;
 		}
-		if (IS_ANDROID(d->character) && ABSORBING(d->character)) {
+		if (char_is_android(d->character) && ABSORBING(d->character)) {
 			if (getCurST(ABSORBING(d->character)) < (GET_MAX_MOVE(d->character) / 15) &&
                     getCurKI(ABSORBING(d->character)) < (GET_MAX_MANA(d->character) / 15)) {
 				act("@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n", TRUE, d->character, 0, ABSORBING(d->character), TO_CHAR);
@@ -8919,7 +8919,7 @@ void base_update(void)
 				ABSORBING(d->character) = NULL;
 			}
 		}
-		if (IS_ANDROID(d->character) && ABSORBING(d->character) && rand_number(1, 9) >= 6) {
+		if (char_is_android(d->character) && ABSORBING(d->character) && rand_number(1, 9) >= 6) {
 			if (getCurST(ABSORBING(d->character)) > (GET_MAX_MOVE(d->character) / 15) ||
                     getCurKI(ABSORBING(d->character)) > (GET_MAX_MANA(d->character) / 15)) {
 
@@ -8958,21 +8958,21 @@ void base_update(void)
                 struct char_data* leader = d->character->master ? d->character->master : d->character;
 				if (sum) {
 					if (rand_number(1, 8) >= 6) {
-						int gain = rand_number(GET_LEVEL(d->character) / 2, GET_LEVEL(d->character) * 3) + (GET_LEVEL(d->character) * 18);
-						if (GET_LEVEL(d->character) > 30) {
-							gain += rand_number(GET_LEVEL(d->character) * 2, GET_LEVEL(d->character) * 4) + (GET_LEVEL(d->character) * 50);
+						int gain = rand_number(char_get_level(d->character) / 2, char_get_level(d->character) * 3) + (char_get_level(d->character) * 18);
+						if (char_get_level(d->character) > 30) {
+							gain += rand_number(char_get_level(d->character) * 2, char_get_level(d->character) * 4) + (char_get_level(d->character) * 50);
 						}
-						if (GET_LEVEL(d->character) > 60) {
+						if (char_get_level(d->character) > 60) {
 							gain *= 2;
 						}
-						if (GET_LEVEL(d->character) > 80) {
+						if (char_get_level(d->character) > 80) {
 							gain *= 3;
 						}
-						if (GET_LEVEL(d->character) > 90) {
+						if (char_get_level(d->character) > 90) {
 							gain *= 4;
 						}
 						send_to_char(d->character, "@gYou gain +@G%d@g permanent powerlevel!@n\r\n", gain);
-						if (group_bonus(d->character, 2) == 7) {if (PLR_FLAGGED(leader, PLR_SENSEM)) {
+						if (group_bonus(d->character, 2) == 7) {if (char_plr_flagged(leader, PLR_SENSEM)) {
 								int gbonus = gain * 0.15;
 								gain += gbonus;
 								send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
@@ -8983,22 +8983,22 @@ void base_update(void)
 				}
 				if (mum) {
 					if (rand_number(1, 8) >= 6) {
-						int gain = rand_number(GET_LEVEL(d->character) / 2, GET_LEVEL(d->character) * 3) + (GET_LEVEL(d->character) * 18);
-						if (GET_LEVEL(d->character) > 30) {
-							gain += rand_number(GET_LEVEL(d->character) * 2, GET_LEVEL(d->character) * 4) + (GET_LEVEL(d->character) * 50);
+						int gain = rand_number(char_get_level(d->character) / 2, char_get_level(d->character) * 3) + (char_get_level(d->character) * 18);
+						if (char_get_level(d->character) > 30) {
+							gain += rand_number(char_get_level(d->character) * 2, char_get_level(d->character) * 4) + (char_get_level(d->character) * 50);
 						}
-						if (GET_LEVEL(d->character) > 60) {
+						if (char_get_level(d->character) > 60) {
 							gain *= 2;
 						}
-						if (GET_LEVEL(d->character) > 80) {
+						if (char_get_level(d->character) > 80) {
 							gain *= 3;
 						}
-						if (GET_LEVEL(d->character) > 90) {
+						if (char_get_level(d->character) > 90) {
 							gain *= 4;
 						}
 						send_to_char(d->character, "@gYou gain +@G%d@g permanent stamina!@n\r\n", gain);
 						if (group_bonus(d->character, 2) == 7) {
-							if (PLR_FLAGGED(leader, PLR_SENSEM)) {
+							if (char_plr_flagged(leader, PLR_SENSEM)) {
 								int gbonus = gain * 0.15;
 								gain += gbonus;
 								send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
@@ -9009,22 +9009,22 @@ void base_update(void)
 				}
 				if (ium) {
 					if (rand_number(1, 8) >= 6) {
-						int gain = rand_number(GET_LEVEL(d->character) / 2, GET_LEVEL(d->character) * 3) + (GET_LEVEL(d->character) * 18);
-						if (GET_LEVEL(d->character) > 30) {
-							gain += rand_number(GET_LEVEL(d->character) * 2, GET_LEVEL(d->character) * 4) + (GET_LEVEL(d->character) * 50);
+						int gain = rand_number(char_get_level(d->character) / 2, char_get_level(d->character) * 3) + (char_get_level(d->character) * 18);
+						if (char_get_level(d->character) > 30) {
+							gain += rand_number(char_get_level(d->character) * 2, char_get_level(d->character) * 4) + (char_get_level(d->character) * 50);
 						}
-						if (GET_LEVEL(d->character) > 60) {
+						if (char_get_level(d->character) > 60) {
 							gain *= 2;
 						}
-						if (GET_LEVEL(d->character) > 80) {
+						if (char_get_level(d->character) > 80) {
 							gain *= 3;
 						}
-						if (GET_LEVEL(d->character) > 90) {
+						if (char_get_level(d->character) > 90) {
 							gain *= 4;
 						}
 						send_to_char(d->character, "@gYou gain +@G%d@g permanent ki!@n\r\n", gain);
 						if (d->character->master && group_bonus(d->character, 2) == 7) {
-							if (PLR_FLAGGED(leader, PLR_SENSEM)) {
+							if (char_plr_flagged(leader, PLR_SENSEM)) {
 								int gbonus = gain * 0.15;
 								gain += gbonus;
 								send_to_char(d->character, "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n", add_commas(gbonus));
@@ -9064,7 +9064,7 @@ void base_update(void)
 			}
 		}
 		if (GET_OVERFLOW(d->character) == TRUE) {
-			mudlog(NRM, ADMLVL_GOD, TRUE, "OVERFLOW: %s has caused an overflow, check for illegal activity.", GET_NAME(d->character));
+			mudlog(NRM, ADMLVL_GOD, TRUE, "OVERFLOW: %s has caused an overflow, check for illegal activity.", char_get_name(d->character));
 			GET_OVERFLOW(d->character) = FALSE;
 		}
 		if (GET_SPAM(d->character) > 0) {
@@ -9093,7 +9093,7 @@ static int has_scanner(struct char_data *ch)
 
 	for (obj = ch->carrying; obj; obj = next_obj) {
 		next_obj = obj->next_content;
-		if (obj && GET_OBJ_VNUM(obj) == 13600) {
+		if (obj && obj_get_vnum(obj) == 13600) {
 			success = 1;
 		}
 	}
@@ -9113,28 +9113,28 @@ ACMD(do_snet)
  struct obj_data *obj = NULL;
  struct obj_data *obj2 = NULL;
 
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+ if (rroom_flagged(IN_ROOM(ch), ROOM_HBTC)) {
    send_to_char(ch, "This is a different dimension!\r\n");
    return;
  }
- if (IN_ARENA(ch)) {
+ if (char_in_arena(ch)) {
   send_to_char(ch, "Lol, no.\r\n");
   return;
  }
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST)) {
+ if (rroom_flagged(IN_ROOM(ch), ROOM_PAST)) {
    send_to_char(ch, "This is the past, you can't talk on scouter net!\r\n");
    return;
  }
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
+ if (rroom_flagged(IN_ROOM(ch), ROOM_HELL)) {
    send_to_char(ch, "The fire eats your transmission!\r\n");
    return;
  }
- if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+ if (rroom_get_vnum(IN_ROOM(ch)) >= 19800 && rroom_get_vnum(IN_ROOM(ch)) <= 19899) {
   send_to_char(ch, "Your signal will not be able to escape the walls of the pocket dimension.\r\n");
   return;
  }
 
- if (!IS_NPC(ch)) {
+ if (!char_is_npc(ch)) {
   if (GET_EQ(ch, WEAR_EYE)) {
    obj = GET_EQ(ch, WEAR_EYE);
   } else {
@@ -9202,22 +9202,22 @@ ACMD(do_snet)
    if (IN_ROOM(i->character) == IN_ROOM(ch)) {
     continue;
    }
-   if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_HBTC)) {
+   if (rroom_flagged(IN_ROOM(i->character), ROOM_HBTC)) {
     continue;
    }
-   if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_PAST)) {
+   if (rroom_flagged(IN_ROOM(i->character), ROOM_PAST)) {
     continue;
    }
-   if ((ROOM_FLAGGED(IN_ROOM(i->character), ROOM_RHELL) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL)) || (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_AL) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL))) {
+   if ((rroom_flagged(IN_ROOM(i->character), ROOM_RHELL) && !rroom_flagged(IN_ROOM(ch), ROOM_RHELL)) || (rroom_flagged(IN_ROOM(i->character), ROOM_AL) && !rroom_flagged(IN_ROOM(ch), ROOM_AL))) {
     continue;
    }
-   if ((!ROOM_FLAGGED(IN_ROOM(i->character), ROOM_RHELL) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL)) || (!ROOM_FLAGGED(IN_ROOM(i->character), ROOM_AL) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL))) {
+   if ((!rroom_flagged(IN_ROOM(i->character), ROOM_RHELL) && rroom_flagged(IN_ROOM(ch), ROOM_RHELL)) || (!rroom_flagged(IN_ROOM(i->character), ROOM_AL) && rroom_flagged(IN_ROOM(ch), ROOM_AL))) {
     continue;
    }
    if (GET_POS(i->character) == POS_SLEEPING) {
     continue;
    }
-   if (GET_ROOM_VNUM(IN_ROOM(i->character)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(i->character)) <= 19899) {
+   if (rroom_get_vnum(IN_ROOM(i->character)) >= 19800 && rroom_get_vnum(IN_ROOM(i->character)) <= 19899) {
     continue;
    }
    if (GET_EQ(i->character, WEAR_EYE)) {
@@ -9263,10 +9263,10 @@ ACMD(do_snet)
     }
    } /* They have a scouter */
    if (GET_ADMLEVEL(i->character) > 0 && call <= -1) {
-     send_to_char(i->character, "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, GET_NAME(ch), SFREQ(obj), CAP(arg), !*arg2 ? "" : arg2);
+     send_to_char(i->character, "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, char_get_name(ch), SFREQ(obj), CAP(arg), !*arg2 ? "" : arg2);
      continue;
    } else if (GET_ADMLEVEL(i->character) > 0) {
-     send_to_char(i->character, "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice, GET_NAME(ch), call, !*arg2 ? "" : CAP(arg2));
+     send_to_char(i->character, "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice, char_get_name(ch), call, !*arg2 ? "" : CAP(arg2));
      continue;
    }
   } /* End switch */
@@ -9280,7 +9280,7 @@ ACMD(do_snet)
     char over[MAX_STRING_LENGTH];
     sprintf(over, "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg), !*arg2 ? "" : arg2);
     act(over, TRUE, ch, 0, 0, TO_ROOM);
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL)) {
+   if (rroom_flagged(IN_ROOM(ch), ROOM_RHELL) || rroom_flagged(IN_ROOM(ch), ROOM_AL)) {
     send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
    }
   }
@@ -9293,7 +9293,7 @@ ACMD(do_snet)
     char over[MAX_STRING_LENGTH];
     sprintf(over, "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
     act(over, TRUE, ch, 0, 0, TO_ROOM);
-   if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL)) {
+   if (rroom_flagged(IN_ROOM(ch), ROOM_RHELL) || rroom_flagged(IN_ROOM(ch), ROOM_AL)) {
     send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
    }
    }
@@ -9322,7 +9322,7 @@ ACMD(do_scouter)
 
      one_argument(argument, arg);
 
-    if (!HAS_ARMS(ch)) {
+    if (!char_has_arms(ch)) {
      send_to_char(ch, "You have no available arms!\r\n");
      return;
     }
@@ -9347,7 +9347,7 @@ ACMD(do_scouter)
          else if (i->character == ch) {
            continue;
          }
-         else if (IS_ANDROID(i->character)) {
+         else if (char_is_android(i->character)) {
            continue;
          }
          else if (planet_check(ch, i->character)) {
@@ -9355,7 +9355,7 @@ ACMD(do_scouter)
           int same = FALSE;
           char pathway[MAX_STRING_LENGTH];
          
-          if (IN_ZONE(ch) == IN_ZONE(i->character))
+          if (char_in_zone(ch) == char_in_zone(i->character))
            same = TRUE;
 
           switch (dir) {
@@ -9374,13 +9374,13 @@ ACMD(do_scouter)
           }
 
           char *blah = sense_location(i->character);
-          if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(i->character) >= 150000) {
+          if (obj_flagged(obj, ITEM_BSCOUTER) && GET_HIT(i->character) >= 150000) {
            send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == TRUE ? pathway : blah);
           }
-          else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(i->character) >= 5000000) {
+          else if (obj_flagged(obj, ITEM_MSCOUTER) && GET_HIT(i->character) >= 5000000) {
            send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == TRUE ? pathway : blah);
           }
-          else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(i->character) >= 15000000) {
+          else if (obj_flagged(obj, ITEM_ASCOUTER) && GET_HIT(i->character) >= 15000000) {
            send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == TRUE ? pathway : blah);
           }
           else {
@@ -9403,7 +9403,7 @@ ACMD(do_scouter)
       send_to_char(ch, "They don't seem to be here.\r\n");
       return;
      }
-     if (IS_ANDROID(vict)) {
+     if (char_is_android(vict)) {
        act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
        act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
 	   send_to_char(ch, "@D,==================================|@n\r\n");
@@ -9420,7 +9420,7 @@ ACMD(do_scouter)
       return;
      }
      else {
-      if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
+      if (obj_flagged(obj, ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
        act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
        act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
        perform_remove(ch, WEAR_EYE);
@@ -9430,7 +9430,7 @@ ACMD(do_scouter)
        save_char(ch);
        return;
       }
-      else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
+      else if (obj_flagged(obj, ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
        act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
        act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
        perform_remove(ch, WEAR_EYE);
@@ -9440,7 +9440,7 @@ ACMD(do_scouter)
        save_char(ch);
        return;
       }
-      else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
+      else if (obj_flagged(obj, ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
        act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
        act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
        perform_remove(ch, WEAR_EYE);
@@ -9469,10 +9469,10 @@ ACMD(do_scouter)
        send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
        send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D: @Y%21s@n@D|@n\r\n", add_commas(GET_HIT(vict)));
-       if (!IS_NPC(vict)) {
+       if (!char_is_npc(vict)) {
         send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(GET_CHARGE(vict)));
-       } else if (IS_NPC(vict)) {
-        send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(vict->mobcharge * rand_number(GET_LEVEL(ch) * 50, GET_LEVEL(ch) * 200)));
+       } else if (char_is_npc(vict)) {
+        send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(vict->mobcharge * rand_number(char_get_level(ch) * 50, char_get_level(ch) * 200)));
        }
        if (percent < 10)
         send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Exhausted");
@@ -9491,19 +9491,19 @@ ACMD(do_scouter)
        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
        int check = FALSE;
        send_to_char(ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D: ");
-       if (AFF_FLAGGED(vict, AFF_ZANZOKEN)) {
+       if (char_aff_flagged(vict, AFF_ZANZOKEN)) {
          send_to_char(ch, "@Y%21s@n@D|@n\n", "Zanzoken Prepared");
          check = TRUE;
-       } if (AFF_FLAGGED(vict, AFF_HASS)) {
+       } if (char_aff_flagged(vict, AFF_HASS)) {
          send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == TRUE ? "@D|@1             " : "", "Accelerated Arms");
          check = TRUE;
-       } if (AFF_FLAGGED(vict, AFF_HEALGLOW)) {
+       } if (char_aff_flagged(vict, AFF_HEALGLOW)) {
          send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == TRUE ? "@D|@1             " : "", "Healing Glow Prepared");
          check = TRUE;
-       } if (AFF_FLAGGED(vict, AFF_POISON)) {
+       } if (char_aff_flagged(vict, AFF_POISON)) {
          send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == TRUE ? "@D|@1             " : "", "Poisoned");
          check = TRUE;
-       } if (PLR_FLAGGED(vict, PLR_SELFD)) {
+       } if (char_plr_flagged(vict, PLR_SELFD)) {
          send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == TRUE ? "@D|@1             " : "", "Explosive Energy");
          check = TRUE;
        } if (check == FALSE) {
@@ -9524,37 +9524,37 @@ int dball_count(struct char_data *ch) {
 
     for (obj = ch->carrying; obj; obj = next_obj) {
      next_obj = obj->next_content;
-     if (GET_OBJ_VNUM(obj) == dball[0]) {
+     if (obj_get_vnum(obj) == dball[0]) {
       dball[0] = -1;
       count++;
       continue;
      }
-     else if (GET_OBJ_VNUM(obj) == dball[1]) {
+     else if (obj_get_vnum(obj) == dball[1]) {
       dball[1] = -1;
       count++;
       continue;
      }
-     else if (GET_OBJ_VNUM(obj) == dball[2]) {
+     else if (obj_get_vnum(obj) == dball[2]) {
       dball[2] = -1;
       count++;
       continue;
      }
-     else if (GET_OBJ_VNUM(obj) == dball[3]) {
+     else if (obj_get_vnum(obj) == dball[3]) {
       dball[3] = -1;
       count++;
       continue;
      }
-     else if (GET_OBJ_VNUM(obj) == dball[4]) {
+     else if (obj_get_vnum(obj) == dball[4]) {
       dball[4] = -1;
       count++;
       continue;
      }
-     else if (GET_OBJ_VNUM(obj) == dball[5]) {
+     else if (obj_get_vnum(obj) == dball[5]) {
       dball[5] = -1;
       count++;
       continue;
      }
-     else if (GET_OBJ_VNUM(obj) == dball[6]) {
+     else if (obj_get_vnum(obj) == dball[6]) {
       dball[6] = -1;
       count++;
       continue;
@@ -9574,27 +9574,27 @@ int dball_count(struct char_data *ch) {
 
 ACMD(do_quit)
 {
-    if (IS_NPC(ch) || !ch->desc)
+    if (char_is_npc(ch) || !ch->desc)
      return;
 
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_PAST)) {
       send_to_char(ch, "This is the past, you can't quit here!\r\n");
       return;
     }
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 2002 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 2011) {
+    if (rroom_get_vnum(IN_ROOM(ch)) >= 2002 && rroom_get_vnum(IN_ROOM(ch)) <= 2011) {
       send_to_char(ch, "You can't quit in the arena!\r\n");
       return;
     }
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 101 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 139) {
+    if (rroom_get_vnum(IN_ROOM(ch)) >= 101 && rroom_get_vnum(IN_ROOM(ch)) <= 139) {
       send_to_char(ch, "You can't quit in the mud school!\r\n");
       return;
     }
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+    if (rroom_get_vnum(IN_ROOM(ch)) >= 19800 && rroom_get_vnum(IN_ROOM(ch)) <= 19899) {
       send_to_char(ch, "You can't quit in a pocket dimension!\r\n");
       return;
     }
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) == 2069) {
+    if (rroom_get_vnum(IN_ROOM(ch)) == 2069) {
       send_to_char(ch, "You can't quit here!\r\n");
       return;
     }
@@ -9606,7 +9606,7 @@ ACMD(do_quit)
      }
      return;
     }
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) == 2070) {
+    if (rroom_get_vnum(IN_ROOM(ch)) == 2070) {
       send_to_char(ch, "You can't quit here!\r\n");
       return;
     }
@@ -9624,7 +9624,7 @@ ACMD(do_quit)
     die(ch, NULL);
   } else {
     act("$n has left the game.", TRUE, ch, 0, 0, TO_ROOM);
-    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has quit the game.", GET_NAME(ch));
+    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has quit the game.", char_get_name(ch));
     send_to_char(ch, "Goodbye, friend.. Come back soon!\r\n");
     if (ch->followers || ch->master)
      die_follower(ch);
@@ -9638,14 +9638,14 @@ ACMD(do_quit)
      */
 
     /* If someone is quitting in their house, let them load back here. */
-    if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) && (GET_ROOM_VNUM(IN_ROOM(ch)) < 19800 || GET_ROOM_VNUM(IN_ROOM(ch)) > 19899)) {
-     if (GET_ROOM_VNUM(IN_ROOM(ch)) != NOWHERE && GET_ROOM_VNUM(IN_ROOM(ch)) != 0 && GET_ROOM_VNUM(IN_ROOM(ch)) != 1) {
-      GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
+    if (!rroom_flagged(IN_ROOM(ch), ROOM_PAST) && (rroom_get_vnum(IN_ROOM(ch)) < 19800 || rroom_get_vnum(IN_ROOM(ch)) > 19899)) {
+     if (rroom_get_vnum(IN_ROOM(ch)) != NOWHERE && rroom_get_vnum(IN_ROOM(ch)) != 0 && rroom_get_vnum(IN_ROOM(ch)) != 1) {
+      GET_LOADROOM(ch) = rroom_get_vnum(IN_ROOM(ch));
      }
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST)) {
-     if (GET_ROOM_VNUM(IN_ROOM(ch)) != NOWHERE && GET_ROOM_VNUM(IN_ROOM(ch)) != 0 && GET_ROOM_VNUM(IN_ROOM(ch)) != 1) {
-       GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1561));
+    if (rroom_flagged(IN_ROOM(ch), ROOM_PAST)) {
+     if (rroom_get_vnum(IN_ROOM(ch)) != NOWHERE && rroom_get_vnum(IN_ROOM(ch)) != 0 && rroom_get_vnum(IN_ROOM(ch)) != 1) {
+       GET_LOADROOM(ch) = rroom_get_vnum(real_room(1561));
      }
     }
 
@@ -9663,7 +9663,7 @@ ACMD(do_quit)
 
 ACMD(do_save)
 {
-  if (IS_NPC(ch) || !ch->desc)
+  if (char_is_npc(ch) || !ch->desc)
     return;
 
   /* Only tell the char we're saving if they actually typed "save" */
@@ -9680,9 +9680,9 @@ ACMD(do_save)
       write_aliases(ch);
       save_char(ch);
       Crash_crashsave(ch);
-      if (GET_ROOM_VNUM(IN_ROOM(ch)) < 19800 || GET_ROOM_VNUM(IN_ROOM(ch)) > 19899) {
-       if (GET_ROOM_VNUM(IN_ROOM(ch)) != NOWHERE && GET_ROOM_VNUM(IN_ROOM(ch)) != 0 && GET_ROOM_VNUM(IN_ROOM(ch)) != 1) {
-        GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
+      if (rroom_get_vnum(IN_ROOM(ch)) < 19800 || rroom_get_vnum(IN_ROOM(ch)) > 19899) {
+       if (rroom_get_vnum(IN_ROOM(ch)) != NOWHERE && rroom_get_vnum(IN_ROOM(ch)) != 0 && rroom_get_vnum(IN_ROOM(ch)) != 1) {
+        GET_LOADROOM(ch) = rroom_get_vnum(IN_ROOM(ch));
  
        }
       }
@@ -9692,9 +9692,9 @@ ACMD(do_save)
   }
 
   write_aliases(ch);
-  if (GET_ROOM_VNUM(IN_ROOM(ch)) < 19800 || GET_ROOM_VNUM(IN_ROOM(ch)) > 19899) {
-   if (GET_ROOM_VNUM(IN_ROOM(ch)) != NOWHERE && GET_ROOM_VNUM(IN_ROOM(ch)) != 0 && GET_ROOM_VNUM(IN_ROOM(ch)) != 1) {
-    GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
+  if (rroom_get_vnum(IN_ROOM(ch)) < 19800 || rroom_get_vnum(IN_ROOM(ch)) > 19899) {
+   if (rroom_get_vnum(IN_ROOM(ch)) != NOWHERE && rroom_get_vnum(IN_ROOM(ch)) != 0 && rroom_get_vnum(IN_ROOM(ch)) != 1) {
+    GET_LOADROOM(ch) = rroom_get_vnum(IN_ROOM(ch));
    }
   }
   save_char(ch);
@@ -9712,10 +9712,10 @@ ACMD(do_not_here)
 ACMD(do_steal)
 {
 
- if (!GET_SKILL(ch, SKILL_SLEIGHT_OF_HAND) && slot_count(ch) + 1 <= GET_SLOTS(ch)) {
+ if (!char_get_skill(ch, SKILL_SLEIGHT_OF_HAND) && slot_count(ch) + 1 <= GET_SLOTS(ch)) {
   send_to_char(ch, "You learn the very veeeery basics of theft. Which is don't get caught.\r\n");
   SET_SKILL(ch, SKILL_SLEIGHT_OF_HAND, 1);
- } else if (!GET_SKILL(ch, SKILL_SLEIGHT_OF_HAND) && slot_count(ch) + 1 > GET_SLOTS(ch)) {
+ } else if (!char_get_skill(ch, SKILL_SLEIGHT_OF_HAND) && slot_count(ch) + 1 > GET_SLOTS(ch)) {
   send_to_char(ch, "You can't learn any more skills and thus can not steal right now!\r\n");
   return;
  }
@@ -9724,7 +9724,7 @@ ACMD(do_steal)
  struct char_data *vict;
  struct obj_data *obj;
  char arg[500], arg2[500];
- int gold = 0, prob = GET_SKILL(ch, SKILL_SLEIGHT_OF_HAND), perc = 0, eq_pos;
+ int gold = 0, prob = char_get_skill(ch, SKILL_SLEIGHT_OF_HAND), perc = 0, eq_pos;
 
  two_arguments(argument, arg, arg2);
 
@@ -9741,10 +9741,10 @@ ACMD(do_steal)
   return;
  } else if (!can_kill(ch, vict, NULL, 0)) {
   return;
- } else if (GET_LEVEL(ch) <= 8) {
+ } else if (char_get_level(ch) <= 8) {
   send_to_char(ch, "You are trapped inside the newbie shield until level 9 and can't piss off those bigger and better than you. Awww...\r\n");
   return;
- } else if (MOB_FLAGGED(vict, MOB_NOKILL) && GET_ADMLEVEL(ch) == ADMLVL_NONE) {
+ } else if (char_mob_flagged(vict, MOB_NOKILL) && GET_ADMLEVEL(ch) == ADMLVL_NONE) {
   send_to_char(ch, "That isn't such a good idea...\r\n");
   return;
  }
@@ -9754,13 +9754,13 @@ ACMD(do_steal)
   return;
  }
 
- if (!IS_NPC(vict) && GET_SKILL(vict, SKILL_SPOT)) {
-  perc = GET_SKILL(vict, SKILL_SPOT);
+ if (!char_is_npc(vict) && char_get_skill(vict, SKILL_SPOT)) {
+  perc = char_get_skill(vict, SKILL_SPOT);
   perc += GET_INT(vict);
  } else {
   perc = rand_number(GET_INT(vict), GET_INT(vict) + 10);
-  if (IS_NPC(vict))
-   perc += GET_LEVEL(vict) * 0.25;
+  if (char_is_npc(vict))
+   perc += char_get_level(vict) * 0.25;
  }
 
  if (GET_POS(vict) == POS_SITTING)
@@ -9789,7 +9789,7 @@ ACMD(do_steal)
   act("@rYou catch @R$n@r trying to rummage through your possessions!@n", TRUE, ch, 0, vict, TO_VICT);
   act("@R$n@R is caught by @R$N@r as $e sticks $s hand in @R$N's@r possessions!@n", TRUE, ch, 0, vict, TO_NOTVICT);
   WAIT_STATE(ch, PULSE_3SEC);
-  if (IS_NPC(vict)) {
+  if (char_is_npc(vict)) {
    set_fighting(vict, ch);
   }
   improve_skill(vict, SKILL_SPOT, 1);
@@ -9802,15 +9802,15 @@ ACMD(do_steal)
      } else {
       gold = GET_GOLD(vict);
      }
-     if (gold + GET_GOLD(ch) > GOLD_CARRY(ch)) {
+     if (gold + GET_GOLD(ch) > char_gold_carry(ch)) {
       send_to_char(ch, "You can't hold that much more zenni on your person!\r\n");
       return;
      }
      GET_GOLD(vict) -= gold;
      GET_GOLD(ch) += gold;
-     if (!IS_NPC(vict)) {
+     if (!char_is_npc(vict)) {
       SET_BIT_AR(PLR_FLAGS(vict), PLR_STOLEN);
-      mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "THEFT: %s has stolen %s zenni@n from %s", GET_NAME(ch), add_commas(gold), GET_NAME(vict));
+      mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "THEFT: %s has stolen %s zenni@n from %s", char_get_name(ch), add_commas(gold), char_get_name(vict));
      }
      if (gold > 1)
       send_to_char(ch, "Bingo!  You got %d zenni.\r\n", gold);
@@ -9821,7 +9821,7 @@ ACMD(do_steal)
        reveal_hiding(ch, 0);
        act("@R$n@r just stole zenni from @R$N@r!@n", TRUE, ch, 0, vict, TO_ROOM);
        send_to_char(vict, "You feel like something may be missing...\r\n");
-       if (IS_NPC(vict) && rand_number(1, 3) == 3) {
+       if (char_is_npc(vict) && rand_number(1, 3) == 3) {
         set_fighting(vict, ch);
        }
        improve_skill(vict, SKILL_SPOT, 1);
@@ -9838,7 +9838,7 @@ ACMD(do_steal)
     act("@rYou catch @R$n's@r hand trying to snatch your zenni!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@R$N@r catches @R$n's@r hand trying to snatch $S zenni!@n", TRUE, ch, 0, vict, TO_NOTVICT);
     WAIT_STATE(ch, PULSE_3SEC);
-    if (IS_NPC(vict)) {
+    if (char_is_npc(vict)) {
      set_fighting(vict, ch);
     }
     improve_skill(ch, SKILL_SLEIGHT_OF_HAND, 2);
@@ -9848,7 +9848,7 @@ ACMD(do_steal)
   } else { /* It's an object... */
    if (!(obj = get_obj_in_list_vis(ch, arg, NULL, vict->carrying))) {
       for (eq_pos = 0; eq_pos < NUM_WEARS; eq_pos++)
-        if (GET_EQ(vict, eq_pos) && (isname(arg, GET_EQ(vict, eq_pos)->name)) && CAN_SEE_OBJ(ch, GET_EQ(vict, eq_pos))) {
+        if (GET_EQ(vict, eq_pos) && (isname(arg, GET_EQ(vict, eq_pos)->name)) && char_can_see_obj(ch, GET_EQ(vict, eq_pos))) {
           obj = GET_EQ(vict, eq_pos);
           break;
         }
@@ -9861,19 +9861,19 @@ ACMD(do_steal)
      } else if (!give_otrigger(obj, vict, ch) || !receive_mtrigger(ch, vict, obj) ) {
       send_to_char(ch, "Impossible!\r\n");
       return;
-     } else if (GET_OBJ_VNUM(obj) >= 20000) {
+     } else if (obj_get_vnum(obj) >= 20000) {
       send_to_char(ch, "You can't steal that!\r\n");
       return;
-     } else if (GET_OBJ_VNUM(obj) >= 18800 && GET_OBJ_VNUM(obj) <= 18999) {
+     } else if (obj_get_vnum(obj) >= 18800 && obj_get_vnum(obj) <= 18999) {
       send_to_char(ch, "You can't steal that!\r\n");
       return;
-     } else if (GET_OBJ_VNUM(obj) >= 19100 && GET_OBJ_VNUM(obj) <= 19199) {
+     } else if (obj_get_vnum(obj) >= 19100 && obj_get_vnum(obj) <= 19199) {
       send_to_char(ch, "You can't steal that!\r\n");
       return;
 	 } else if (GET_OBJ_TYPE(obj) == ITEM_KEY) {
       send_to_char(ch, "No stealing keys!\r\n");
       return;
-	  } else if (OBJ_FLAGGED(obj, ITEM_NOSTEAL)) {
+	  } else if (obj_flagged(obj, ITEM_NOSTEAL)) {
 	   send_to_char(ch, "You can't steal that!\r\n");
 	   return;
      } else if (GET_OBJ_WEIGHT(obj) + (getCurCarriedWeight(ch)) > CAN_CARRY_W(ch)) {
@@ -9901,7 +9901,7 @@ ACMD(do_steal)
       act("@rYou feel your body being shifted while you sleep and wake up to find @R$n@r trying to steal $p@r from you!@n", TRUE, ch, obj, vict, TO_VICT);
       act("@R$N@r catches @R$n's@r trying to $p@r from $M during $S sleep!@n", TRUE, ch, obj, vict, TO_NOTVICT);
       WAIT_STATE(ch, PULSE_3SEC);
-      if (IS_NPC(vict)) {
+      if (char_is_npc(vict)) {
        GET_POS(vict) = POS_STANDING;
        set_fighting(vict, ch);
       }
@@ -9913,10 +9913,10 @@ ACMD(do_steal)
      if (!give_otrigger(obj, vict, ch) || !receive_mtrigger(ch, vict, obj) ) {
       send_to_char(ch, "Impossible!\r\n");
       return;
-     } else if (GET_OBJ_VNUM(obj) >= 20000) {
+     } else if (obj_get_vnum(obj) >= 20000) {
       send_to_char(ch, "You can't steal that!\r\n");
       return;
-     } else if (OBJ_FLAGGED(obj, ITEM_NOSTEAL)) {
+     } else if (obj_flagged(obj, ITEM_NOSTEAL)) {
 	   send_to_char(ch, "You can't steal that!\r\n");
 	   return;
 	  } else if (GET_OBJ_TYPE(obj) == ITEM_KEY) {
@@ -9932,16 +9932,16 @@ ACMD(do_steal)
       act("You steal $p from $N.", FALSE, ch, obj, vict, TO_CHAR);
       obj_from_char(obj);
       obj_to_char(obj, ch);
-      if (!IS_NPC(vict)) {
+      if (!char_is_npc(vict)) {
        SET_BIT_AR(PLR_FLAGS(vict), PLR_STOLEN);
-       mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "THEFT: %s has stolen %s@n from %s", GET_NAME(ch), obj->short_description, GET_NAME(vict));
+       mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "THEFT: %s has stolen %s@n from %s", char_get_name(ch), obj->short_description, char_get_name(vict));
       }
       if (axion_dice(0) > prob) {
        reveal_hiding(ch, 0);
        send_to_char(ch, "You think that your movements might have been a bit obvious.\r\n");
        act("@R$n@r just stole $p@r from @R$N@r!@n", TRUE, ch, obj, vict, TO_ROOM);
        send_to_char(vict, "You feel like something may be missing...\r\n");
-       if (IS_NPC(vict) && rand_number(1, 3) == 3) {
+       if (char_is_npc(vict) && rand_number(1, 3) == 3) {
         set_fighting(vict, ch);
        }
        improve_skill(vict, SKILL_SPOT, 1);
@@ -9954,7 +9954,7 @@ ACMD(do_steal)
       act("@rYou catch @R$n@r trying to steal $p@r from you!@n", TRUE, ch, obj, vict, TO_VICT);
       act("@R$N@r catches @R$n's@r trying to $p@r!@n", TRUE, ch, obj, vict, TO_NOTVICT);
       WAIT_STATE(ch, PULSE_3SEC);
-      if (IS_NPC(vict)) {
+      if (char_is_npc(vict)) {
        GET_POS(vict) = POS_STANDING;
        set_fighting(vict, ch);
       }
@@ -9986,7 +9986,7 @@ ACMD(do_skills)
 {
     char arg[1000];
     one_argument(argument, arg);
-    if (IS_NPC(ch)) {
+    if (char_is_npc(ch)) {
      return;
     }
     list_skills(ch, arg);
@@ -10001,15 +10001,15 @@ ACMD(do_visible)
     return;
   }
 
-  if AFF_FLAGGED(ch, AFF_INVISIBLE) {
+  if (char_aff_flagged(ch, AFF_INVISIBLE)) {
     appear(ch);
     appeared = 1;
     send_to_char(ch, "You break the spell of invisibility.\r\n");
   }
 
-  if (AFF_FLAGGED(ch, AFF_ETHEREAL) && affectedv_by_spell(ch, ART_EMPTY_BODY)) {
+  if (char_aff_flagged(ch, AFF_ETHEREAL) && affectedv_by_spell(ch, ART_EMPTY_BODY)) {
     affectv_from_char(ch, ART_EMPTY_BODY);
-    if (AFF_FLAGGED(ch, AFF_ETHEREAL)) {
+    if (char_aff_flagged(ch, AFF_ETHEREAL)) {
       send_to_char(ch, "Returning to the material plane will not be so easy.\r\n");
     } else {
       send_to_char(ch, "You return to the material plane.\r\n");
@@ -10028,9 +10028,9 @@ ACMD(do_title)
   skip_spaces(&argument);
   delete_doubledollar(argument);
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     send_to_char(ch, "Your title is fine... go away.\r\n");
-  else if (PLR_FLAGGED(ch, PLR_NOTITLE))
+  else if (char_plr_flagged(ch, PLR_NOTITLE))
     send_to_char(ch, "You can't title yourself -- you shouldn't have abused it!\r\n");
   else if (strstr(argument, "(") || strstr(argument, ")"))
     send_to_char(ch, "Titles can't contain the ( or ) characters.\r\n");
@@ -10038,13 +10038,13 @@ ACMD(do_title)
     send_to_char(ch, "Sorry, titles can't be longer than %d characters.\r\n", MAX_TITLE_LENGTH);
   else {
     set_title(ch, argument);
-    send_to_char(ch, "Okay, you're now %s %s.\r\n", GET_NAME(ch), GET_TITLE(ch));
+    send_to_char(ch, "Okay, you're now %s %s.\r\n", char_get_name(ch), char_get_title(ch));
   }
 }
 
 static int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl)
 {
-  if (AFF_FLAGGED(vict, AFF_GROUP) || !CAN_SEE(ch, vict))
+  if (char_aff_flagged(vict, AFF_GROUP) || !char_can_see(ch, vict))
     return (0);
 
   if (GET_BONUS(vict, BONUS_LONER) > 0) {
@@ -10089,7 +10089,7 @@ static void print_group(struct char_data *ch)
   struct char_data *k;
   struct follow_type *f;
 
-  if (!AFF_FLAGGED(ch, AFF_GROUP))
+  if (!char_aff_flagged(ch, AFF_GROUP))
     send_to_char(ch, "But you are not the member of a group!\r\n");
   else {
     char buf[MAX_STRING_LENGTH];
@@ -10098,36 +10098,36 @@ static void print_group(struct char_data *ch)
 
     k = (ch->master ? ch->master : ch);
 
-    if (AFF_FLAGGED(k, AFF_GROUP)) {
+    if (char_aff_flagged(k, AFF_GROUP)) {
       send_to_char(ch, "@D----------------@n\r\n");
       if (GET_HIT(k) > GET_MAX_HIT(k) / 10) {
       snprintf(buf, sizeof(buf), "@gL@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
-	      add_commas(GET_HIT(k)), add_commas((getCurKI(k))), add_commas((getCurST(k))), GET_LEVEL(k),
+	      add_commas(GET_HIT(k)), add_commas((getCurKI(k))), add_commas((getCurST(k))), char_get_level(k),
               CLASS_ABBR(k), RACE_ABBR(k));
       }
       if (GET_HIT(k) <= (GET_MAX_HIT(k) - (getCurCarriedWeight(k))) / 10) {
       snprintf(buf, sizeof(buf), "@gL@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
-              add_commas(GET_HIT(k)), add_commas((getCurKI(k))), add_commas((getCurST(k))), GET_LEVEL(k),
+              add_commas(GET_HIT(k)), add_commas((getCurKI(k))), add_commas((getCurST(k))), char_get_level(k),
               CLASS_ABBR(k), RACE_ABBR(k));
       }
       act(buf, FALSE, ch, 0, k, TO_CHAR);
     }
 
     for (f = k->followers; f; f = f->next) {
-      if (!AFF_FLAGGED(f->follower, AFF_GROUP))
+      if (!char_aff_flagged(f->follower, AFF_GROUP))
 	continue;
       send_to_char(ch, "@D----------------@n\r\n");
       if (GET_HIT(f->follower) > (GET_MAX_HIT(f->follower) - (getCurCarriedWeight(f->follower))) / 10) {
       snprintf(buf, sizeof(buf), "@gF@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
               add_commas(GET_HIT(f->follower)), add_commas((getCurKI(f->follower))), add_commas(
                       (getCurST(f->follower))),
-	      GET_LEVEL(f->follower), CLASS_ABBR(f->follower), RACE_ABBR(f->follower));
+	      char_get_level(f->follower), CLASS_ABBR(f->follower), RACE_ABBR(f->follower));
       }
       if (GET_HIT(f->follower) <= (GET_MAX_HIT(f->follower) - (getCurCarriedWeight(f->follower))) / 10) {
       snprintf(buf, sizeof(buf), "@gF@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
               add_commas(GET_HIT(f->follower)), add_commas((getCurKI(f->follower))), add_commas(
                       (getCurST(f->follower))),
-              GET_LEVEL(f->follower), CLASS_ABBR(f->follower), RACE_ABBR(f->follower));
+              char_get_level(f->follower), CLASS_ABBR(f->follower), RACE_ABBR(f->follower));
       }
       act(buf, FALSE, ch, 0, f->follower, TO_CHAR);
     }
@@ -10162,18 +10162,18 @@ ACMD(do_group)
     return;
   }
 
-  highlvl = GET_LEVEL(ch);
-  lowlvl = GET_LEVEL(ch);
+  highlvl = char_get_level(ch);
+  lowlvl = char_get_level(ch);
   highpl = getEffMaxPL(ch);
   lowpl = getEffMaxPL(ch);
 
   for (found = 0, f = ch->followers; f; f = f->next) {
-   if (AFF_FLAGGED(f->follower, AFF_GROUP)) {
-    if (GET_LEVEL(f->follower) > highlvl) {
-     highlvl = GET_LEVEL(f->follower);
+   if (char_aff_flagged(f->follower, AFF_GROUP)) {
+    if (char_get_level(f->follower) > highlvl) {
+     highlvl = char_get_level(f->follower);
     }
-    if (GET_LEVEL(f->follower) < lowlvl) {
-     lowlvl = GET_LEVEL(f->follower);
+    if (char_get_level(f->follower) < lowlvl) {
+     lowlvl = char_get_level(f->follower);
     }
    }
   }
@@ -10181,15 +10181,15 @@ ACMD(do_group)
   int foundwas = 0;  
 
   if (!strcasecmp(buf, "all")) {
-    perform_group(ch, ch, GET_LEVEL(ch), GET_LEVEL(ch), highpl, lowpl);
+    perform_group(ch, ch, char_get_level(ch), char_get_level(ch), highpl, lowpl);
     for (found = 0, f = ch->followers; f; f = f->next) {
       foundwas = found;
       found += perform_group(ch, f->follower, highlvl, lowlvl, highpl, lowpl);
       if (found > foundwas) {
-        if (GET_LEVEL(f->follower) > highlvl)
-         highlvl = GET_LEVEL(f->follower);
-        else if (GET_LEVEL(f->follower) < lowlvl)
-         lowlvl = GET_LEVEL(f->follower);
+        if (char_get_level(f->follower) > highlvl)
+         highlvl = char_get_level(f->follower);
+        else if (char_get_level(f->follower) < lowlvl)
+         lowlvl = char_get_level(f->follower);
       }
     }
      if (!found)
@@ -10202,8 +10202,8 @@ ACMD(do_group)
   else if ((vict->master != ch) && (vict != ch))
     act("$N must follow you to enter your group.", FALSE, ch, 0, vict, TO_CHAR);
   else {
-    if (!AFF_FLAGGED(vict, AFF_GROUP)) {
-     if (!AFF_FLAGGED(ch, AFF_GROUP)) {
+    if (!char_aff_flagged(vict, AFF_GROUP)) {
+     if (!char_aff_flagged(ch, AFF_GROUP)) {
       send_to_char(ch, "You form a group, with you as leader.\r\n");
       SET_BIT_AR(AFF_FLAGS(ch), AFF_GROUP);
      }
@@ -10228,18 +10228,18 @@ ACMD(do_ungroup)
   one_argument(argument, buf);
 
   if (!*buf) {
-    if (ch->master || !(AFF_FLAGGED(ch, AFF_GROUP))) {
+    if (ch->master || !(char_aff_flagged(ch, AFF_GROUP))) {
       send_to_char(ch, "But you lead no group!\r\n");
       return;
     }
 
     for (f = ch->followers; f; f = next_fol) {
       next_fol = f->next;
-      if (AFF_FLAGGED(f->follower, AFF_GROUP)) {
+      if (char_aff_flagged(f->follower, AFF_GROUP)) {
 	REMOVE_BIT_AR(AFF_FLAGS(f->follower), AFF_GROUP);
         act("$N has disbanded the group.", TRUE, f->follower, NULL, ch, TO_CHAR);
         GET_GROUPKILLS(f->follower) = 0;
-        if (!AFF_FLAGGED(f->follower, AFF_CHARM))
+        if (!char_aff_flagged(f->follower, AFF_CHARM))
 	  stop_follower(f->follower);
       }
     }
@@ -10258,7 +10258,7 @@ ACMD(do_ungroup)
     return;
   }
 
-  if (!AFF_FLAGGED(tch, AFF_GROUP)) {
+  if (!char_aff_flagged(tch, AFF_GROUP)) {
     send_to_char(ch, "That person isn't in your group.\r\n");
     return;
   }
@@ -10270,7 +10270,7 @@ ACMD(do_ungroup)
   act("You have been kicked out of $n's group!", FALSE, ch, 0, tch, TO_VICT);
   act("$N has been kicked out of $n's group!", FALSE, ch, 0, tch, TO_NOTVICT);
  
-  if (!AFF_FLAGGED(tch, AFF_CHARM))
+  if (!char_aff_flagged(tch, AFF_CHARM))
     stop_follower(tch);
 }
 
@@ -10280,7 +10280,7 @@ ACMD(do_report)
   struct char_data *k;
   struct follow_type *f;
 
-  if (!AFF_FLAGGED(ch, AFF_GROUP)) {
+  if (!char_aff_flagged(ch, AFF_GROUP)) {
     send_to_char(ch, "But you are not a member of any group!\r\n");
     return;
   }
@@ -10293,7 +10293,7 @@ ACMD(do_report)
   k = (ch->master ? ch->master : ch);
 
   for (f = k->followers; f; f = f->next)
-    if (AFF_FLAGGED(f->follower, AFF_GROUP) && f->follower != ch)
+    if (char_aff_flagged(f->follower, AFF_GROUP) && f->follower != ch)
       act(buf, TRUE, ch, NULL, f->follower, TO_VICT);
 
   if (k != ch)
@@ -10310,7 +10310,7 @@ ACMD(do_split)
   struct char_data *k;
   struct follow_type *f;
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return;
 
   one_argument(argument, buf);
@@ -10328,18 +10328,18 @@ ACMD(do_split)
     GET_GOLD(ch) -= amount;
     k = (ch->master ? ch->master : ch);
 
-    if (AFF_FLAGGED(k, AFF_GROUP) && (IN_ROOM(k) == IN_ROOM(ch)))
+    if (char_aff_flagged(k, AFF_GROUP) && (IN_ROOM(k) == IN_ROOM(ch)))
       num = 1;
     else
       num = 0;
 
     for (f = k->followers; f; f = f->next)
-      if (AFF_FLAGGED(f->follower, AFF_GROUP) &&
-	  (!IS_NPC(f->follower)) && f->follower != ch &&
+      if (char_aff_flagged(f->follower, AFF_GROUP) &&
+	  (!char_is_npc(f->follower)) && f->follower != ch &&
 	  (IN_ROOM(f->follower) == IN_ROOM(ch)))
 	num++;
 
-    if (num > 0 && AFF_FLAGGED(ch, AFF_GROUP)) {
+    if (num > 0 && char_aff_flagged(ch, AFF_GROUP)) {
       share = amount / num;
       rest = amount % num;
     } else {
@@ -10351,20 +10351,20 @@ ACMD(do_split)
 
     /* Abusing signed/unsigned to make sizeof work. */
     len = snprintf(buf, sizeof(buf), "%s splits %d zenni; you receive %d.\r\n",
-		GET_NAME(ch), amount, share);
+		char_get_name(ch), amount, share);
     if (rest && len < sizeof(buf)) {
       snprintf(buf + len, sizeof(buf) - len,
-		"%d zenni %s not splitable, so %s keeps the money.\r\n", rest, (rest == 1) ? "was" : "were", GET_NAME(ch));
+		"%d zenni %s not splitable, so %s keeps the money.\r\n", rest, (rest == 1) ? "was" : "were", char_get_name(ch));
     }
-    if (AFF_FLAGGED(k, AFF_GROUP) && IN_ROOM(k) == IN_ROOM(ch) &&
-		!IS_NPC(k) && k != ch) {
+    if (char_aff_flagged(k, AFF_GROUP) && IN_ROOM(k) == IN_ROOM(ch) &&
+		!char_is_npc(k) && k != ch) {
       GET_GOLD(k) += share;
       send_to_char(k, "%s", buf);
     }
 
     for (f = k->followers; f; f = f->next) {
-      if (AFF_FLAGGED(f->follower, AFF_GROUP) &&
-	  (!IS_NPC(f->follower)) &&
+      if (char_aff_flagged(f->follower, AFF_GROUP) &&
+	  (!char_is_npc(f->follower)) &&
 	  (IN_ROOM(f->follower) == IN_ROOM(ch)) &&
 	  f->follower != ch) {
 
@@ -10428,15 +10428,15 @@ ACMD(do_use)
       send_to_char(ch, "You can only swallow beans.\r\n");
       return;
     }
-    if (IS_ANDROID(ch)) {
+    if (char_is_android(ch)) {
       send_to_char(ch, "You can't swallow beans, you are an android.\r\n");
       return;
     }
-    if (OBJ_FLAGGED(mag_item, ITEM_FORGED)) {
+    if (obj_flagged(mag_item, ITEM_FORGED)) {
      send_to_char(ch, "You can't swallow that, it is fake!\r\n");
      return;
     }
-    if (OBJ_FLAGGED(mag_item, ITEM_BROKEN)) {
+    if (obj_flagged(mag_item, ITEM_BROKEN)) {
      send_to_char(ch, "You can't swallow that, it is broken!\r\n");
      return;
     }
@@ -10448,11 +10448,11 @@ ACMD(do_use)
     }
     break;
   case SCMD_USE:
-    if (IS_ANDROID(ch)) {
+    if (char_is_android(ch)) {
       send_to_char(ch, "You are not biological enough to use these, Tincan.\r\n");
       return;
     } else {
-     switch (GET_OBJ_VNUM(mag_item))
+     switch (obj_get_vnum(mag_item))
      {
       case 381:
        if ((getCurST(ch)) >= GET_MAX_MOVE(ch)) {
@@ -10461,7 +10461,7 @@ ACMD(do_use)
        }
        act("@WYou place the $p@W against your chest and feel a rush of stamina as it automatically administers the dose.@n", TRUE, ch, mag_item, 0, TO_CHAR);
        act("@C$n@W places an $p@W against $s chest and a loud click is heard.@n", TRUE, ch, mag_item, 0, TO_ROOM);
-       if (GET_SKILL(ch, SKILL_FIRST_AID) > 0) {
+       if (char_get_skill(ch, SKILL_FIRST_AID) > 0) {
         send_to_char(ch, "@CYour skill in First Aid has helped increase the use of the injector. You gain more stamina as a result.@n\r\n");
         incCurST(ch, getMaxST(ch) * .25, true);
        } else {
@@ -10470,7 +10470,7 @@ ACMD(do_use)
        extract_obj(mag_item);
        return;
       case 382:
-       if (AFF_FLAGGED(ch, AFF_BURNED)) {
+       if (char_aff_flagged(ch, AFF_BURNED)) {
         act("@WYou gently apply the salve to your burns.@n", TRUE, ch, mag_item, 0, TO_CHAR);
         act("@C$n@W gently applies a burn salve to $s burns.@n", TRUE, ch, mag_item, 0, TO_ROOM);
         REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
@@ -10480,7 +10480,7 @@ ACMD(do_use)
        }
        return;
       case 383:
-       if (AFF_FLAGGED(ch, AFF_POISON)) {
+       if (char_aff_flagged(ch, AFF_POISON)) {
         act("@WYou place the $p@W against your neck and feel a rush of relief as the antitoxiin enters your bloodstream.@n", TRUE, ch, mag_item, 0, TO_CHAR);
         act("@C$n@W places an $p@W against $s neck and a loud click is heard.@n", TRUE, ch, mag_item, 0, TO_ROOM);
         null_affect(ch, AFF_POISON);
@@ -10492,7 +10492,7 @@ ACMD(do_use)
       case 385:
         act("@WYou drink the contents of the vial before disposing of it.@n", TRUE, ch, mag_item, 0, TO_CHAR);
         act("@C$n@W dinks a $p and then disposes of it.@n", TRUE, ch, mag_item, 0, TO_ROOM);
-       if (AFF_FLAGGED(ch, AFF_BLIND)) {
+       if (char_aff_flagged(ch, AFF_BLIND)) {
         act("@WYour eyesight has returned!@n", TRUE, ch, mag_item, 0, TO_CHAR);
         act("@C$n@W eyesight seems to have returned.@n", TRUE, ch, mag_item, 0, TO_ROOM);
         null_affect(ch, AFF_BLIND);
@@ -10550,7 +10550,7 @@ ACMD(do_value)
     switch (subcmd) {
     case SCMD_WIMPY:
       /* 'wimp_level' is a player_special. -gg 2/25/98 */
-      if (IS_NPC(ch))
+      if (char_is_npc(ch))
         return;
       if ((value_lev = atoi(arg)) != 0) {
         if (value_lev < 0)
@@ -10569,7 +10569,7 @@ ACMD(do_value)
       }
       break;
     default:
-      log("Unknown subcmd to do_value %d called by %s", subcmd, GET_NAME(ch));
+      log("Unknown subcmd to do_value %d called by %s", subcmd, char_get_name(ch));
       break;
     }
   } else
@@ -10580,7 +10580,7 @@ ACMD(do_display)
 {
   size_t i;
 
-  if (IS_NPC(ch)) {
+  if (char_is_npc(ch)) {
     send_to_char(ch, "Mosters don't need displays.  Go away.\r\n");
     return;
   }
@@ -10649,7 +10649,7 @@ ACMD(do_display)
         TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_DISHUTH);
         break;
       case 'f':
-        if (!IS_HALFBREED(ch)) {
+        if (!char_is_halfbreed(ch)) {
          send_to_char(ch, "Only halfbreeds use fury.\r\n");
         }
         TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_FURY);
@@ -10689,7 +10689,7 @@ ACMD(do_gen_write)
   ct = time(0);
   tmp = asctime(localtime(&ct));
 
-  if (IS_NPC(ch)) {
+  if (char_is_npc(ch)) {
     send_to_char(ch, "Monsters can't have ideas - Go away.\r\n");
     return;
   }
@@ -10701,7 +10701,7 @@ ACMD(do_gen_write)
     send_to_char(ch, "That must be a mistake...\r\n");
     return;
   }
-  send_to_imm("[A new %s has been filed by: %s]\r\n", CMD_NAME, GET_NAME(ch));
+  send_to_imm("[A new %s has been filed by: %s]\r\n", CMD_NAME, char_get_name(ch));
 
   if (stat(filename, &fbuf) < 0) {
     perror("SYSERR: Can't stat() file");
@@ -10727,7 +10727,7 @@ ACMD(do_gen_write)
     send_to_char(ch, "Could not open the file.  Sorry.\r\n");
     return;
   }
-  fprintf(fl, "@D[@WUser: @c%-10s@D] [@WChar: @C%-10s@D] [@WRoom: @G%-4d@D] [@WDate: @Y%6.6s@D]@b \n-----------@w\n%s\n", GET_USER(ch) ? GET_USER(ch) : "ERR", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)), (tmp + 4), argument);
+  fprintf(fl, "@D[@WUser: @c%-10s@D] [@WChar: @C%-10s@D] [@WRoom: @G%-4d@D] [@WDate: @Y%6.6s@D]@b \n-----------@w\n%s\n", char_get_user(ch) ? char_get_user(ch) : "ERR", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)), (tmp + 4), argument);
   fprintf(fl, "@D-------------------------------@n\n");
   fclose(fl);
   send_to_char(ch, "Okay.  Thanks!\r\n");
@@ -10832,64 +10832,64 @@ ACMD(do_gen_tog)
   };
 
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return;
 
   switch (subcmd) {
   case SCMD_NOSUMMON:
-    result = PRF_TOG_CHK(ch, PRF_SUMMONABLE);
+    result = char_prf_toggle(ch, PRF_SUMMONABLE);
     break;
   case SCMD_NOHASSLE:
-    result = PRF_TOG_CHK(ch, PRF_NOHASSLE);
+    result = char_prf_toggle(ch, PRF_NOHASSLE);
     break;
   case SCMD_BRIEF:
-    result = PRF_TOG_CHK(ch, PRF_BRIEF);
+    result = char_prf_toggle(ch, PRF_BRIEF);
     break;
   case SCMD_COMPACT:
-    result = PRF_TOG_CHK(ch, PRF_COMPACT);
+    result = char_prf_toggle(ch, PRF_COMPACT);
     break;
   case SCMD_NOTELL:
-    result = PRF_TOG_CHK(ch, PRF_NOTELL);
+    result = char_prf_toggle(ch, PRF_NOTELL);
     break;
   case SCMD_NOAUCTION:
-    result = PRF_TOG_CHK(ch, PRF_NOAUCT);
+    result = char_prf_toggle(ch, PRF_NOAUCT);
     break;
   case SCMD_DEAF:
-    result = PRF_TOG_CHK(ch, PRF_DEAF);
+    result = char_prf_toggle(ch, PRF_DEAF);
     break;
   case SCMD_NOGOSSIP:
-    result = PRF_TOG_CHK(ch, PRF_NOGOSS);
+    result = char_prf_toggle(ch, PRF_NOGOSS);
     break;
   case SCMD_NOGRATZ:
-    result = PRF_TOG_CHK(ch, PRF_NOGRATZ);
+    result = char_prf_toggle(ch, PRF_NOGRATZ);
     break;
   case SCMD_NOWIZ:
-    result = PRF_TOG_CHK(ch, PRF_NOWIZ);
+    result = char_prf_toggle(ch, PRF_NOWIZ);
     break;
   case SCMD_QUEST:
-    result = PRF_TOG_CHK(ch, PRF_QUEST);
+    result = char_prf_toggle(ch, PRF_QUEST);
     break;
   case SCMD_ROOMFLAGS:
-    result = PRF_TOG_CHK(ch, PRF_ROOMFLAGS);
+    result = char_prf_toggle(ch, PRF_ROOMFLAGS);
     break;
   case SCMD_NOREPEAT:
-    result = PRF_TOG_CHK(ch, PRF_NOREPEAT);
+    result = char_prf_toggle(ch, PRF_NOREPEAT);
     break;
   case SCMD_HOLYLIGHT:
-    result = PRF_TOG_CHK(ch, PRF_HOLYLIGHT);
+    result = char_prf_toggle(ch, PRF_HOLYLIGHT);
     break;
   case SCMD_SLOWNS:
     result = (CONFIG_NS_IS_SLOW = !CONFIG_NS_IS_SLOW);
     break;
   case SCMD_AUTOEXIT:
-    result = PRF_TOG_CHK(ch, PRF_AUTOEXIT);
+    result = char_prf_toggle(ch, PRF_AUTOEXIT);
     break;
   case SCMD_TRACK:
     result = (CONFIG_TRACK_T_DOORS = !CONFIG_TRACK_T_DOORS);
     break;
   case SCMD_AFK:
-    result = PRF_TOG_CHK(ch, PRF_AFK);
-    if (PRF_FLAGGED(ch, PRF_AFK))
+    result = char_prf_toggle(ch, PRF_AFK);
+    if (char_prf_flagged(ch, PRF_AFK))
       act("$n has gone AFK.", TRUE, ch, 0, 0, TO_ROOM);
     else {
       act("$n has come back from AFK.", TRUE, ch, 0, 0, TO_ROOM);
@@ -10898,64 +10898,64 @@ ACMD(do_gen_tog)
     }
     break;
   case SCMD_AUTOLOOT:
-    result = PRF_TOG_CHK(ch, PRF_AUTOLOOT);
+    result = char_prf_toggle(ch, PRF_AUTOLOOT);
     break;
   case SCMD_AUTOGOLD:
-    result = PRF_TOG_CHK(ch, PRF_AUTOGOLD);
+    result = char_prf_toggle(ch, PRF_AUTOGOLD);
     break;
   case SCMD_CLS:
-    result = PRF_TOG_CHK(ch, PRF_CLS);
+    result = char_prf_toggle(ch, PRF_CLS);
     break;
   case SCMD_BUILDWALK:
     if (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
       send_to_char(ch, "Immortals only, sorry.\r\n");  	
       return;
     }
-    result = PRF_TOG_CHK(ch, PRF_BUILDWALK);
-    if (PRF_FLAGGED(ch, PRF_BUILDWALK))
-      mudlog(CMP, GET_LEVEL(ch), TRUE, 
-             "OLC: %s turned buildwalk on. Allowed zone %d", GET_NAME(ch), GET_OLC_ZONE(ch));
+    result = char_prf_toggle(ch, PRF_BUILDWALK);
+    if (char_prf_flagged(ch, PRF_BUILDWALK))
+      mudlog(CMP, char_get_level(ch), TRUE, 
+             "OLC: %s turned buildwalk on. Allowed zone %d", char_get_name(ch), GET_OLC_ZONE(ch));
     else
-      mudlog(CMP, GET_LEVEL(ch), TRUE,
-             "OLC: %s turned buildwalk off. Allowed zone %d", GET_NAME(ch), GET_OLC_ZONE(ch));
+      mudlog(CMP, char_get_level(ch), TRUE,
+             "OLC: %s turned buildwalk off. Allowed zone %d", char_get_name(ch), GET_OLC_ZONE(ch));
     break;
   case SCMD_AUTOSPLIT:
-    result = PRF_TOG_CHK(ch, PRF_AUTOSPLIT);
+    result = char_prf_toggle(ch, PRF_AUTOSPLIT);
     break;
   case SCMD_AUTOSAC: 
-    result = PRF_TOG_CHK(ch, PRF_AUTOSAC); 
+    result = char_prf_toggle(ch, PRF_AUTOSAC); 
     break; 
   case SCMD_SNEAK:
-    result = AFF_TOG_CHK(ch, AFF_SNEAK);
+    result = char_aff_toggle(ch, AFF_SNEAK);
     break;
   case SCMD_HIDE:
-    if ((GET_CHARGE(ch) > 0 && GET_PREFERENCE(ch) != PREFERENCE_KI) || (GET_CHARGE(ch) > GET_MAX_MANA(ch) * 0.1 && GET_PREFERENCE(ch) == PREFERENCE_KI) || PLR_FLAGGED(ch, PLR_POWERUP) || AFF_FLAGGED(ch, AFF_FLYING)) {
+    if ((GET_CHARGE(ch) > 0 && GET_PREFERENCE(ch) != PREFERENCE_KI) || (GET_CHARGE(ch) > GET_MAX_MANA(ch) * 0.1 && GET_PREFERENCE(ch) == PREFERENCE_KI) || char_plr_flagged(ch, PLR_POWERUP) || char_aff_flagged(ch, AFF_FLYING)) {
      send_to_char(ch, "You stand out too much to hide right now!\r\n");
      return;
-    } else if (PLR_FLAGGED(ch, PLR_HEALT)) {
+    } else if (char_plr_flagged(ch, PLR_HEALT)) {
       send_to_char(ch, "You are inside a healing tank!\r\n");
       return;
 	}
-    if (!GET_SKILL(ch, SKILL_HIDE) && slot_count(ch) + 1 <= GET_SLOTS(ch)) {
+    if (!char_get_skill(ch, SKILL_HIDE) && slot_count(ch) + 1 <= GET_SLOTS(ch)) {
      send_to_char(ch, "@GYou learn the very minimal basics to hiding.@n\r\n");
      SET_SKILL(ch, SKILL_HIDE, rand_number(1, 5));
-    } else if (!GET_SKILL(ch, SKILL_HIDE) && slot_count(ch) + 1 > GET_SLOTS(ch)) {
+    } else if (!char_get_skill(ch, SKILL_HIDE) && slot_count(ch) + 1 > GET_SLOTS(ch)) {
      send_to_char(ch, "@RYou need more skill slots in order to learn this skill.@n\r\n");
      return;
     }
-    result = AFF_TOG_CHK(ch, AFF_HIDE);
+    result = char_aff_toggle(ch, AFF_HIDE);
     break;
   case SCMD_AUTOMEM: 
-    result = PRF_TOG_CHK(ch, PRF_AUTOMEM); 
+    result = char_prf_toggle(ch, PRF_AUTOMEM); 
     break; 
   case SCMD_VIEWORDER:
-    result = PRF_TOG_CHK(ch, PRF_VIEWORDER);
+    result = char_prf_toggle(ch, PRF_VIEWORDER);
     break;
   case SCMD_TEST:
     if (GET_ADMLEVEL(ch) >= 1) {
      TOGGLE_BIT_AR(PRF_FLAGS(ch), PRF_TEST);
-     send_to_char(ch, "Okay. Testing is now: %s\r\n", PRF_FLAGGED(ch, PRF_TEST) ? "On" : "Off");
-     if (PRF_FLAGGED(ch, PRF_TEST)) {
+     send_to_char(ch, "Okay. Testing is now: %s\r\n", char_prf_flagged(ch, PRF_TEST) ? "On" : "Off");
+     if (char_prf_flagged(ch, PRF_TEST)) {
       send_to_char(ch, "Make sure to remove nohassle as well.\r\n");
      }
      return;
@@ -10967,52 +10967,52 @@ ACMD(do_gen_tog)
     break;
   case SCMD_NOCOMPRESS:
     if (CONFIG_ENABLE_COMPRESSION) {
-      result = PRF_TOG_CHK(ch, PRF_NOCOMPRESS);
+      result = char_prf_toggle(ch, PRF_NOCOMPRESS);
       break;
     } else {
       send_to_char(ch, "Sorry, compression is globally disabled.\r\n");
     }
   case SCMD_AUTOASSIST:
-    result = PRF_TOG_CHK(ch, PRF_AUTOASSIST);
+    result = char_prf_toggle(ch, PRF_AUTOASSIST);
     break;
   case SCMD_WHOHIDE:
-    result = PRF_TOG_CHK(ch, PRF_HIDE);
+    result = char_prf_toggle(ch, PRF_HIDE);
     break;
   case SCMD_NMWARN:
-    result = PRF_TOG_CHK(ch, PRF_NMWARN);
+    result = char_prf_toggle(ch, PRF_NMWARN);
     break;
   case SCMD_HINTS:
-    result = PRF_TOG_CHK(ch, PRF_HINTS);
+    result = char_prf_toggle(ch, PRF_HINTS);
     break;
   case SCMD_NODEC:
-    result = PRF_TOG_CHK(ch, PRF_NODEC);
+    result = char_prf_toggle(ch, PRF_NODEC);
     break;
   case SCMD_NOEQSEE:
-    result = PRF_TOG_CHK(ch, PRF_NOEQSEE);
+    result = char_prf_toggle(ch, PRF_NOEQSEE);
     break;
   case SCMD_NOMUSIC:
-    result = PRF_TOG_CHK(ch, PRF_NOMUSIC);
+    result = char_prf_toggle(ch, PRF_NOMUSIC);
     break;
   case SCMD_NOPARRY:
-    result = PRF_TOG_CHK(ch, PRF_NOPARRY);
+    result = char_prf_toggle(ch, PRF_NOPARRY);
     break;
   case SCMD_LKEEP:
-    result = PRF_TOG_CHK(ch, PRF_LKEEP);
+    result = char_prf_toggle(ch, PRF_LKEEP);
     break;
   case SCMD_CARVE:
-    result = PRF_TOG_CHK(ch, PRF_CARVE);
+    result = char_prf_toggle(ch, PRF_CARVE);
     break;
   case SCMD_NOGIVE:
-    result = PRF_TOG_CHK(ch, PRF_NOGIVE);
+    result = char_prf_toggle(ch, PRF_NOGIVE);
     break;
   case SCMD_INSTRUCT:
-    result = PRF_TOG_CHK(ch, PRF_INSTRUCT);
+    result = char_prf_toggle(ch, PRF_INSTRUCT);
     break;
   case SCMD_GHEALTH:
-    result = PRF_TOG_CHK(ch, PRF_GHEALTH);
+    result = char_prf_toggle(ch, PRF_GHEALTH);
     break;
   case SCMD_IHEALTH:
-    result = PRF_TOG_CHK(ch, PRF_IHEALTH);
+    result = char_prf_toggle(ch, PRF_IHEALTH);
     break;
   default:
     log("SYSERR: Unknown subcmd %d in do_gen_toggle.", subcmd);
@@ -11072,7 +11072,7 @@ ACMD(do_file)
    if (!*argument) {
      strcpy(buf, "USAGE: file <option> <num lines>\r\n\r\nFile options:\r\n");
      for (j = 0, i = 1; fields[i].level; i++)
-       if (fields[i].level <= GET_LEVEL(ch))
+       if (fields[i].level <= char_get_level(ch))
          sprintf(buf+strlen(buf), "%-15s%s\r\n", fields[i].cmd, fields[i].file);
      send_to_char(ch, buf);
      return;
@@ -11211,7 +11211,7 @@ ACMD(do_break)
   }
 
 
-  if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+  if (obj_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "Seems like it's already broken!\r\n");
     return;
   }
@@ -11244,7 +11244,7 @@ ACMD(do_fix)
   }
 
   if (!strcasecmp("self", arg)) {
-   if (!IS_ANDROID(ch)) {
+   if (!char_is_android(ch)) {
     send_to_char(ch, "Only androids can fix their bodies with repair kits.\r\n");
     return;
    } else {
@@ -11263,7 +11263,7 @@ ACMD(do_fix)
     return;
    }
 
-   if (OBJ_FLAGGED(obj, ITEM_FORGED)) {
+   if (obj_flagged(obj, ITEM_FORGED)) {
     send_to_char(ch, "That is fake, why bother fixing it?\r\n");
     return;
    }
@@ -11278,7 +11278,7 @@ ACMD(do_fix)
      break;
    }
 
-   if (GET_OBJ_VNUM(obj) == 20099 || GET_OBJ_VNUM(obj) == 20098) {
+   if (obj_get_vnum(obj) == 20099 || obj_get_vnum(obj) == 20098) {
     custom = TRUE;
    }
   }
@@ -11287,12 +11287,12 @@ ACMD(do_fix)
   for (rep = ch->carrying; rep; rep = next_obj) {
        next_obj = rep->next_content;
    if (custom == FALSE) {
-    if (found == FALSE && GET_OBJ_VNUM(rep) == 48 && (!OBJ_FLAGGED(rep, ITEM_BROKEN) && !OBJ_FLAGGED(rep, ITEM_FORGED))) {
+    if (found == FALSE && obj_get_vnum(rep) == 48 && (!obj_flagged(rep, ITEM_BROKEN) && !obj_flagged(rep, ITEM_FORGED))) {
      found = TRUE;
      obj4 = rep;
     }
    } else {
-    if (found == FALSE && GET_OBJ_VNUM(rep) == 13593 && (!OBJ_FLAGGED(rep, ITEM_BROKEN) && !OBJ_FLAGGED(rep, ITEM_FORGED))) {
+    if (found == FALSE && obj_get_vnum(rep) == 13593 && (!obj_flagged(rep, ITEM_BROKEN) && !obj_flagged(rep, ITEM_FORGED))) {
      found = TRUE;
      obj4 = rep;
     }
@@ -11308,7 +11308,7 @@ ACMD(do_fix)
   }
 
   if (self == FALSE) {
-   if (GET_SKILL(ch, SKILL_REPAIR) < axion_dice(0)) {
+   if (char_get_skill(ch, SKILL_REPAIR) < axion_dice(0)) {
     act("You try to repair $p but screw up..", TRUE, ch, obj, 0, TO_CHAR);
     act("$n tries to repair $p but screws up..", TRUE, ch, obj, 0, TO_ROOM);
     extract_obj(obj4);
@@ -11318,10 +11318,10 @@ ACMD(do_fix)
    }
 
   
-   if (GET_OBJ_VAL(obj, VAL_ALL_HEALTH) + GET_SKILL(ch, SKILL_REPAIR) < 100) {
+   if (GET_OBJ_VAL(obj, VAL_ALL_HEALTH) + char_get_skill(ch, SKILL_REPAIR) < 100) {
     send_to_char(ch, "You repair %s a bit.\r\n", obj->short_description);
     act("$n repairs $p a bit.", FALSE, ch, obj, 0, TO_ROOM);
-    GET_OBJ_VAL(obj, VAL_ALL_HEALTH) += GET_SKILL(ch, SKILL_REPAIR);
+    GET_OBJ_VAL(obj, VAL_ALL_HEALTH) += char_get_skill(ch, SKILL_REPAIR);
     REMOVE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BROKEN);
    }
    else {
@@ -11330,12 +11330,12 @@ ACMD(do_fix)
     GET_OBJ_VAL(obj, VAL_ALL_HEALTH) = 100;
     REMOVE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BROKEN);
    }
-   if (obj->carried_by == NULL && !PLR_FLAGGED(ch, PLR_REPLEARN) && (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 || GET_LEVEL(ch) >= 100)) {
-    int64_t gain = (level_exp(ch, GET_LEVEL(ch) + 1) * 0.0003) * GET_SKILL(ch, SKILL_REPAIR);
+   if (obj->carried_by == NULL && !char_plr_flagged(ch, PLR_REPLEARN) && (level_exp(ch, char_get_level(ch) + 1) - GET_EXP(ch) > 0 || char_get_level(ch) >= 100)) {
+    int64_t gain = (level_exp(ch, char_get_level(ch) + 1) * 0.0003) * char_get_skill(ch, SKILL_REPAIR);
     send_to_char(ch, "@mYou've learned a bit from repairing it. @D[@gEXP@W: @G+%s@D]@n\r\n", add_commas(gain));
     SET_BIT_AR(PLR_FLAGS(ch), PLR_REPLEARN);
     gain_exp(ch, gain);
-   } else if (rand_number(2, 12) >= 10 && PLR_FLAGGED(ch, PLR_REPLEARN)) {
+   } else if (rand_number(2, 12) >= 10 && char_plr_flagged(ch, PLR_REPLEARN)) {
     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_REPLEARN);
     send_to_char(ch, "@mYou think you might be on to something...@n\r\n");
    }
@@ -11348,7 +11348,7 @@ ACMD(do_fix)
    if (GET_HIT(ch) >= getEffMaxPL(ch)) {
     send_to_char(ch, "Your body is already in peak condition.\r\n");
     return; 
-   } else if (GET_SKILL(ch, SKILL_REPAIR) < axion_dice(0)) {
+   } else if (char_get_skill(ch, SKILL_REPAIR) < axion_dice(0)) {
     act("You try to repair your body but screw up..", TRUE, ch, 0, 0, TO_CHAR);
     act("$n tries to repair $s body but screws up..", TRUE, ch, 0, 0, TO_ROOM);
     extract_obj(obj4);
@@ -11358,7 +11358,7 @@ ACMD(do_fix)
    } else {
     act("You use the repair kit to fix part of your body...", TRUE, ch, 0, 0, TO_CHAR);
     act("$n works on their body with a repair kit.", TRUE, ch, 0, 0, TO_ROOM);
-    int64_t mult = GET_SKILL(ch, SKILL_REPAIR);
+    int64_t mult = char_get_skill(ch, SKILL_REPAIR);
     int64_t add = (getEffMaxPL(ch) * 0.005 + 10) * mult;
 
     extract_obj(obj4);
@@ -11551,18 +11551,18 @@ ACMD(do_resurrect)
   room_rnum rm;
   struct affected_type *af, *next_af;
 
-  if (IS_NPC(ch)) {
+  if (char_is_npc(ch)) {
     send_to_char(ch, "Sorry, only players get spirits.\r\n");
     return;
   }
 
-  if (!AFF_FLAGGED(ch, AFF_SPIRIT)) {
+  if (!char_aff_flagged(ch, AFF_SPIRIT)) {
     send_to_char(ch, "But you're not even dead!\r\n");
     return;
   }
 
   send_to_char(ch, "You take an experience penalty and pray for charity resurrection.\r\n");
-  gain_exp(ch, -(level_exp(ch, GET_LEVEL(ch)) - level_exp(ch, GET_LEVEL(ch) - 1)));
+  gain_exp(ch, -(level_exp(ch, char_get_level(ch)) - level_exp(ch, char_get_level(ch) - 1)));
 
   for (af = ch->affected; af; af = next_af) {
     next_af = af->next;
@@ -11571,7 +11571,7 @@ ACMD(do_resurrect)
       affect_remove(ch, af);
   }
 
-  if ((rm = real_room(freeres[ALIGN_TYPE(ch)])) == NOWHERE)
+  if ((rm = real_room(freeres[char_align_type(ch)])) == NOWHERE)
     rm = real_room(CONFIG_MORTAL_START);
 
   if (rm != NOWHERE) {
@@ -11627,7 +11627,7 @@ ACMD(do_clan) {
   char arg1[100];
   char arg2[MAX_INPUT_LENGTH];
 
-  if(ch == NULL || IS_NPC(ch))
+  if(ch == NULL || char_is_npc(ch))
     return;
 
   half_chop(argument, arg1, arg2);
@@ -11649,7 +11649,7 @@ ACMD(do_clan) {
       else {
 	send_to_char(ch, "You create a clan with the name, %s.\r\n", arg2);
 	clanCreate(arg2);
-        mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s has created a clan named %s.", GET_NAME(ch), arg2);
+        mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s has created a clan named %s.", char_get_name(ch), arg2);
       }
       return;
     }
@@ -11789,7 +11789,7 @@ ACMD(do_clan) {
      send_to_char(ch, "You are not in a clan.\r\n");
      return;
     }
-    else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_CBANK) && clanBANY(GET_CLAN(ch), ch) == FALSE) {
+    else if (!rroom_flagged(IN_ROOM(ch), ROOM_CBANK) && clanBANY(GET_CLAN(ch), ch) == FALSE) {
      send_to_char(ch, "You are not in your clan bank and your clan doesn't have bank anywhere.\r\n");
      return;
     }
@@ -11926,12 +11926,12 @@ ACMD(do_clan) {
      clanRANK(GET_CLAN(ch), ch, vict, num);
      switch (num) {
       case 0:
-       send_to_char(ch, "You demote %s.\r\n", GET_NAME(vict));
-       send_to_char(vict, "%s has demoted your clan rank to member!\r\n", GET_NAME(ch));
+       send_to_char(ch, "You demote %s.\r\n", char_get_name(vict));
+       send_to_char(vict, "%s has demoted your clan rank to member!\r\n", char_get_name(ch));
        break;
       case 1:
-       send_to_char(ch, "You demote %s.\r\n", GET_NAME(vict));
-       send_to_char(vict, "%s has demoted your clan rank to midrank!\r\n", GET_NAME(ch));
+       send_to_char(ch, "You demote %s.\r\n", char_get_name(vict));
+       send_to_char(vict, "%s has demoted your clan rank to midrank!\r\n", char_get_name(ch));
        break;
      }
      return;
@@ -11940,12 +11940,12 @@ ACMD(do_clan) {
      clanRANK(GET_CLAN(ch), ch, vict, num);
      switch (num) {
       case 1:
-       send_to_char(ch, "You promote %s.\r\n", GET_NAME(vict));
-       send_to_char(vict, "%s has promoted your clan rank to midrank!\r\n", GET_NAME(ch));
+       send_to_char(ch, "You promote %s.\r\n", char_get_name(vict));
+       send_to_char(vict, "%s has promoted your clan rank to midrank!\r\n", char_get_name(ch));
        break;
       case 2:
-       send_to_char(ch, "You promote %s.\r\n", GET_NAME(vict));
-       send_to_char(vict, "%s has promoted your clan rank to highrank!\r\n", GET_NAME(ch));
+       send_to_char(ch, "You promote %s.\r\n", char_get_name(vict));
+       send_to_char(vict, "%s has promoted your clan rank to highrank!\r\n", char_get_name(ch));
        break;
      }
      return;
@@ -11977,7 +11977,7 @@ ACMD(do_clan) {
      send_to_char(ch, "It needs to be a value higher than 0...\r\n");
      return;
     }
-    else if (GET_GOLD(ch) + atoi(arg2) > GOLD_CARRY(ch)) {
+    else if (GET_GOLD(ch) + atoi(arg2) > char_gold_carry(ch)) {
      send_to_char(ch, "You can not hold that much zenni!\r\n");
      return;
     }
@@ -12044,21 +12044,21 @@ ACMD(do_clan) {
        if ((player_i = load_char(name, vict)) > -1) {
         is_file = TRUE;
         if (!clanIsMember(arg3, vict)) {
-         send_to_char(ch, "%s isn't even a member of %s.\r\n", GET_NAME(vict), arg3);
+         send_to_char(ch, "%s isn't even a member of %s.\r\n", char_get_name(vict), arg3);
         } else if (clanIsModerator(arg3, vict) && GET_ADMLEVEL(ch) < ADMLVL_IMPL) {
          send_to_char(ch, "You do not have the power to kick a leader out of %s.\r\n", arg3);
         } else {
-         send_to_char(ch, "You expel %s from %s.\r\n", GET_NAME(vict), arg3);
+         send_to_char(ch, "You expel %s from %s.\r\n", char_get_name(vict), arg3);
          clanExpel(arg3, vict);
         }
        } else if ((player_i = load_char(name1, vict)) > -1) {
         is_file = TRUE;
         if (!clanIsMember(arg3, vict)) {
-         send_to_char(ch, "%s isn't even a member of %s.\r\n", GET_NAME(vict), arg3);
+         send_to_char(ch, "%s isn't even a member of %s.\r\n", char_get_name(vict), arg3);
         } else if (clanIsModerator(arg3, vict) && GET_ADMLEVEL(ch) < ADMLVL_IMPL) {
          send_to_char(ch, "You do not have the power to kick a leader out of %s.\r\n", arg3);
         } else {
-         send_to_char(ch, "You expel %s from %s.\r\n", GET_NAME(vict), arg3);
+         send_to_char(ch, "You expel %s from %s.\r\n", char_get_name(vict), arg3);
          clanExpel(arg3, vict);
         }
        } else {
@@ -12071,11 +12071,11 @@ ACMD(do_clan) {
        }
        return;
     } else if(!clanIsMember(arg3, vict)) {
-      send_to_char(ch, "%s isn't even a member of %s.\r\n", GET_NAME(vict), arg3);
+      send_to_char(ch, "%s isn't even a member of %s.\r\n", char_get_name(vict), arg3);
     } else if(clanIsModerator(arg3, vict) && GET_ADMLEVEL(ch) < ADMLVL_IMPL) {
       send_to_char(ch, "You do not have the power to kick a leader out of %s.\r\n", arg3);
     } else {
-      send_to_char(ch, "You expel %s from %s.\r\n", GET_NAME(vict), arg3);
+      send_to_char(ch, "You expel %s from %s.\r\n", char_get_name(vict), arg3);
       send_to_char(vict, "You have been expelled from %s.\r\n", arg3);
       clanExpel(arg3, vict);
       return;
@@ -12097,9 +12097,9 @@ ACMD(do_clan) {
     else if(!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_WORLD)))
       send_to_char(ch, "%s is not around at the moment.\r\n", name);
     else if(!clanIsApplicant(arg3, vict))
-      send_to_char(ch, "%s isn't applying to join %s.\r\n", GET_NAME(vict), arg3);
+      send_to_char(ch, "%s isn't applying to join %s.\r\n", char_get_name(vict), arg3);
     else {
-      send_to_char(ch, "You decline %s enterance to %s.\r\n", GET_NAME(vict), arg3);
+      send_to_char(ch, "You decline %s enterance to %s.\r\n", char_get_name(vict), arg3);
       send_to_char(vict, "You have been declined enterance to %s.\r\n", arg3);
       clanDecline(arg3, vict);
     }
@@ -12122,11 +12122,11 @@ ACMD(do_clan) {
     else if(!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_WORLD)))
       send_to_char(ch, "%s is not around at the moment.\r\n", name);
     else if(!clanIsApplicant(arg3, vict))
-      send_to_char(ch, "%s isn't applying to join %s.\r\n", GET_NAME(vict), arg3);
+      send_to_char(ch, "%s isn't applying to join %s.\r\n", char_get_name(vict), arg3);
     else if (GET_TRP(vict) < 5)
-      send_to_char(ch, "%s needs to have at least earned 5 RPP at some point to join a clan.\r\n", GET_NAME(vict));
+      send_to_char(ch, "%s needs to have at least earned 5 RPP at some point to join a clan.\r\n", char_get_name(vict));
     else {
-      send_to_char(ch, "You enroll %s into %s.\r\n", GET_NAME(vict), arg3);
+      send_to_char(ch, "You enroll %s into %s.\r\n", char_get_name(vict), arg3);
       send_to_char(vict, "You have been enrolled into %s.\r\n", arg3);
       clanInduct(arg3, vict);
     }
@@ -12147,7 +12147,7 @@ ACMD(do_clan) {
     else if(!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_WORLD)))
       send_to_char(ch, "%s is not around at the moment.\r\n", name);
     else {
-      send_to_char(ch, "You make %s a leader of %s.\r\n", GET_NAME(vict), arg3);
+      send_to_char(ch, "You make %s a leader of %s.\r\n", char_get_name(vict), arg3);
       send_to_char(vict, "You have been made a leader of %s.\r\n", arg3);
       clanMakeModerator(arg3, vict);
     }
@@ -12217,7 +12217,7 @@ ACMD(do_pagelength)
 {
   char arg[MAX_INPUT_LENGTH];
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return;
 
   one_argument(argument, arg);
@@ -12241,10 +12241,10 @@ ACMD(do_aid)
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   int dc = 0, found = FALSE, num = 47, num2 = 0, survival = 0;
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return;
 
-  if (GET_SKILL(ch, SKILL_SURVIVAL)) {
+  if (char_get_skill(ch, SKILL_SURVIVAL)) {
    survival = 1;
   }
 
@@ -12275,7 +12275,7 @@ ACMD(do_aid)
 
   for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
-   if (found == FALSE && GET_OBJ_VNUM(obj) == num && (!OBJ_FLAGGED(obj, ITEM_BROKEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))) {
+   if (found == FALSE && obj_get_vnum(obj) == num && (!obj_flagged(obj, ITEM_BROKEN) && !obj_flagged(obj, ITEM_FORGED))) {
     found = TRUE;
     aid_obj = obj;
    }
@@ -12293,29 +12293,29 @@ ACMD(do_aid)
    if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
     send_to_char(ch, "Apply first aid to who?\r\n");
     return;
-   } else if (IS_NPC(vict)) {
+   } else if (char_is_npc(vict)) {
     send_to_char(ch, "What ever for?\r\n");
     return;
-   } else if (IS_ANDROID(vict)) {
+   } else if (char_is_android(vict)) {
     send_to_char(ch, "They are an android!\r\n");
     return;
    }
 
-  if (!AFF_FLAGGED(vict, AFF_SPIRIT) && !PLR_FLAGGED(vict, PLR_BANDAGED)) {
+  if (!char_aff_flagged(vict, AFF_SPIRIT) && !char_plr_flagged(vict, PLR_BANDAGED)) {
     if (vict != ch) {
-     send_to_char(ch, "You attempt to lend first aid to %s.\r\n", GET_NAME(vict));
+     send_to_char(ch, "You attempt to lend first aid to %s.\r\n", char_get_name(vict));
     }
     act("$n attempts to bandage $N's wounds.", TRUE, ch, 0, vict, TO_ROOM);
     dc = axion_dice(0);
-    if ((GET_SKILL(ch, SKILL_FIRST_AID) + 1) > dc) {
-      send_to_char(ch, "You bandage %s's wounds.\r\n", GET_NAME(vict));
+    if ((char_get_skill(ch, SKILL_FIRST_AID) + 1) > dc) {
+      send_to_char(ch, "You bandage %s's wounds.\r\n", char_get_name(vict));
       int64_t roll = (getEffMaxPL(vict) / 100) * (GET_WIS(ch) / 4) + getEffMaxPL(vict) * 0.25;
       if (GET_BONUS(ch, BONUS_HEALER) > 0) {
        roll += roll * .1;
       }
       incCurHealth(vict, roll, true);
 
-      send_to_char(vict, "Your wounds are bandaged by %s!\r\n", GET_NAME(ch));
+      send_to_char(vict, "Your wounds are bandaged by %s!\r\n", char_get_name(ch));
       act("$n's wounds are stablized by $N!", TRUE, vict, 0, ch, TO_NOTVICT);
       SET_BIT_AR(PLR_FLAGS(vict), PLR_BANDAGED);
       extract_obj(aid_obj);
@@ -12332,19 +12332,19 @@ ACMD(do_aid)
       extract_obj(aid_obj);
     }
     improve_skill(ch, SKILL_FIRST_AID, 1);
-  } else if (PLR_FLAGGED(vict, PLR_BANDAGED)) {
+  } else if (char_plr_flagged(vict, PLR_BANDAGED)) {
     send_to_char(ch, "They are already bandaged!\r\n");
-  } else if (AFF_FLAGGED(vict, AFF_SPIRIT)) {
+  } else if (char_aff_flagged(vict, AFF_SPIRIT)) {
     send_to_char(ch, "The dead don't need first aid.\r\n");
   } else {
     send_to_char(ch, "They apparently do not need bandaging.\r\n");
   }
  } else if (num2 == 381) {
-    if (GET_SKILL(ch, SKILL_FIRST_AID) < 65) {
+    if (char_get_skill(ch, SKILL_FIRST_AID) < 65) {
      send_to_char(ch, "You need at least a skill level of 65 in First Aid.\r\n");
      return;
     } else {
-     if (GET_SKILL(ch, SKILL_FIRST_AID) < axion_dice(15)) {
+     if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(15)) {
       act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you begin to construct an Andrenex Adreneline Injector you screw up and end up breaking the water tight seal. The adreneline leaks out and is wasted.@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
       extract_obj(aid_obj);
@@ -12359,11 +12359,11 @@ ACMD(do_aid)
      }
     }  
  } else if (num2 == 382) {
-    if (GET_SKILL(ch, SKILL_FIRST_AID) < 50) {
+    if (char_get_skill(ch, SKILL_FIRST_AID) < 50) {
      send_to_char(ch, "You need at least a skill level of 50 in First Aid.\r\n");
      return;
     } else {
-     if (GET_SKILL(ch, SKILL_FIRST_AID) < axion_dice(10)) {
+     if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(10)) {
       act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you go to put the salve ingredients into the kit's salve compartment and set the temperature you accidentally set it too high. The salve is burned and ruined. Yes you managed to burn a burn salve.@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
       extract_obj(aid_obj);
@@ -12378,11 +12378,11 @@ ACMD(do_aid)
      }
     }
  } else if (num2 == 383) {
-    if (GET_SKILL(ch, SKILL_FIRST_AID) < 40) {
+    if (char_get_skill(ch, SKILL_FIRST_AID) < 40) {
      send_to_char(ch, "You need at least a skill level of 40 in First Aid.\r\n");
      return;
     } else {
-     if (GET_SKILL(ch, SKILL_FIRST_AID) < axion_dice(5)) {
+     if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(5)) {
       act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you complete the Antitoxin Injector you notice that you didn't seal the syringe properly and it all leaks out.@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
       extract_obj(aid_obj);
@@ -12397,11 +12397,11 @@ ACMD(do_aid)
      }
     }
  } else if (num2 == 385) {
-    if (GET_SKILL(ch, SKILL_FIRST_AID) < 40) {
+    if (char_get_skill(ch, SKILL_FIRST_AID) < 40) {
      send_to_char(ch, "You need at least a skill level of 40 in First Aid.\r\n");
      return;
     } else {
-     if (GET_SKILL(ch, SKILL_FIRST_AID) < axion_dice(15)) {
+     if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(15)) {
       act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you complete a vial of Formula 82 you notice that you read the mixture measurements wrong. You dispose of the vile vial immediately.@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
       extract_obj(aid_obj);
@@ -12435,17 +12435,17 @@ ACMD(do_aura) {
    return;
   }
   
- if (PLR_FLAGGED(ch, PLR_POWERUP)) {
+ if (char_plr_flagged(ch, PLR_POWERUP)) {
    send_to_char(ch, "You are busy powering up!\r\n");
    return;
   }
    
  if (!strcasecmp(arg, "light")) {
-  if (GET_SKILL(ch, SKILL_FOCUS) < 75 || GET_SKILL(ch, SKILL_CONCENTRATION) < 75) {
+  if (char_get_skill(ch, SKILL_FOCUS) < 75 || char_get_skill(ch, SKILL_CONCENTRATION) < 75) {
     send_to_char(ch, "You need at least a skill level of 75 in Focus and Concentration to use this.\r\n");
 	return;
   } else {
-     if (PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+     if (char_plr_flagged(ch, PLR_AURALIGHT)) {
 	   send_to_char(ch, "Your aura fades as you stop shining light.\r\n");
 	   act("$n's aura fades as they stop shining light on the area.", TRUE, ch, 0, 0, TO_ROOM);
 	   REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_AURALIGHT);

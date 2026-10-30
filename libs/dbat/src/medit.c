@@ -93,7 +93,7 @@ ACMD(do_oasis_medit)
     if (STATE(d) == CON_MEDIT) {
       if (d->olc && OLC_NUM(d) == number) {
         send_to_char(ch, "That mobile is currently being edited by %s.\r\n",
-          GET_NAME(d->character));
+          char_get_name(d->character));
         return;
       }
     }
@@ -141,7 +141,7 @@ ACMD(do_oasis_medit)
       zone_table[OLC_ZNUM(d)].number);
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE,
       "OLC: %s saves mobile info for zone %d.",
-      GET_NAME(ch), zone_table[OLC_ZNUM(d)].number);
+      char_get_name(ch), zone_table[OLC_ZNUM(d)].number);
     
     /**************************************************************************/
     /** Save the mobiles.                                                    **/
@@ -178,7 +178,7 @@ ACMD(do_oasis_medit)
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE,"OLC: %s starts editing zone %d allowed zone %d",
-    GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+    char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
 }
 
 void medit_save_to_disk(zone_vnum foo)
@@ -572,7 +572,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
        */
       medit_save_internally(d);
       mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
-	"OLC: %s edits mob %d", GET_NAME(d->character), OLC_NUM(d));
+	"OLC: %s edits mob %d", char_get_name(d->character), OLC_NUM(d));
       if (CONFIG_OLC_SAVE) {
 	medit_save_to_disk(zone_table[real_zone_by_thing(OLC_NUM(d))].number);
 	write_to_output(d, "Mobile saved to disk.\r\n");
@@ -842,63 +842,63 @@ void medit_parse(struct descriptor_data *d, char *arg)
 
   case MEDIT_ACCURACY:
     GET_FISHD(OLC_MOB(d)) = LIMIT(i, 0, 50);
-    if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
+    if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
       TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_DAMAGE:
     GET_DAMAGE_MOD(OLC_MOB(d)) = LIMIT(i, 0, 50);
-    if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
+    if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
       TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_NDD:
     GET_NDD(OLC_MOB(d)) = LIMIT(i, 0, 30);
-    if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
+    if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
       TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_SDD:
     GET_SDD(OLC_MOB(d)) = LIMIT(i, 0, 127);
-    if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
+    if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
       TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_NUM_HP_DICE:
     //GET_HIT(OLC_MOB(d)) = LIMIT(i, 0, CONFIG_LEVEL_CAP);
-    if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
+    if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
       TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_SIZE_HP_DICE:
     //GET_MANA(OLC_MOB(d)) = LIMIT(i, 0, 1000);
-    if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
+    if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
       TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_ADD_HP:
     //GET_MOVE(OLC_MOB(d)) = LIMIT(i, 0, 30000);
-    if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
+    if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
       TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_AC:
     GET_ARMOR(OLC_MOB(d)) = LIMIT(i, 10, 200000);
-    if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
+    if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
       TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;
 
   case MEDIT_EXP:
     GET_EXP(OLC_MOB(d)) = LIMIT(i, 0, MAX_MOB_EXP);
-    if (MOB_FLAGGED(OLC_MOB(d), MOB_AUTOBALANCE)) {
+    if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
       TOGGLE_BIT_AR(MOB_FLAGS(OLC_MOB(d)), MOB_AUTOBALANCE);
     }
     break;

@@ -80,7 +80,7 @@ ACMD(do_oasis_copy)
     return;
 
   /* No copying as a mob or while being forced. */
-  if (IS_NPC(ch) || !ch->desc || STATE(ch->desc) != CON_PLAYING)
+  if (char_is_npc(ch) || !ch->desc || STATE(ch->desc) != CON_PLAYING)
     return;
 
   /* We need two arguments. */
@@ -115,7 +115,7 @@ ACMD(do_oasis_copy)
     if (STATE(d) == subcmd) {
       if (d->olc && OLC_NUM(d) == dst_vnum) {
        send_to_char(ch, "The target %s (#%d) is currently being edited by %s.\r\n",
-       oasis_copy_info[i].text, dst_vnum, GET_NAME(d->character));
+       oasis_copy_info[i].text, dst_vnum, char_get_name(d->character));
         return;
       }
     }
@@ -345,7 +345,7 @@ ACMD(do_rcopy)
 
   if (!arg2 || !*arg2) {
      tvnum = atoi(arg);
-     rvnum = GET_ROOM_VNUM(IN_ROOM(ch));
+     rvnum = rroom_get_vnum(IN_ROOM(ch));
   }
   else if (arg2 || *arg2) {
   rvnum = atoi(arg2); 
@@ -403,7 +403,7 @@ ACMD(do_rcopy)
   for(i=0; i < AF_ARRAY_MAX; i++)  {
    world[rrnum].room_flags[i] = world[trnum].room_flags[i]; 
   }
-  send_to_imm("Log: %s has copied room [%d] to room [%d].", GET_NAME(ch), tvnum, rvnum);
+  send_to_imm("Log: %s has copied room [%d] to room [%d].", char_get_name(ch), tvnum, rvnum);
   add_to_save_list(zone_table[world[rrnum].zone].number, SL_WLD);
   save_rooms(zone_table[world[rrnum].zone].number);
   send_to_char(ch, "Room [%d] copied to room [%d].\r\n", tvnum, rvnum); 
@@ -439,7 +439,7 @@ int buildwalk(struct char_data *ch, int dir)
   room_vnum vnum;
   room_rnum rnum;
 
-  if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_BUILDWALK) &&
+  if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_BUILDWALK) &&
       GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
 
     if (!can_edit_zone(ch, world[IN_ROOM(ch)].zone)) {
@@ -463,7 +463,7 @@ int buildwalk(struct char_data *ch, int dir)
 
       OLC_ROOM(d)->name = strdup("New BuildWalk Room");
 
-      sprintf(buf, "This unfinished room was created by %s.\r\n", GET_NAME(ch));
+      sprintf(buf, "This unfinished room was created by %s.\r\n", char_get_name(ch));
       OLC_ROOM(d)->description = strdup(buf);
       OLC_ROOM(d)->zone = OLC_ZNUM(d);
       OLC_ROOM(d)->number = NOWHERE;

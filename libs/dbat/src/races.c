@@ -171,7 +171,7 @@ struct {
 void set_height_and_weight_by_race(struct char_data *ch) {
     int race, sex, mod;
 
-    if (!IS_NPC(ch)) {
+    if (!char_is_npc(ch)) {
         return;
     }
 
@@ -198,28 +198,28 @@ int invalid_race(struct char_data *ch, struct obj_data *obj) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
         return FALSE;
 
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_HUMAN) && IS_HUMAN(ch))
+    if (obj_flagged(obj, ITEM_ANTI_HUMAN) && char_is_human(ch))
         return TRUE;
 
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_SAIYAN) && IS_SAIYAN(ch))
+    if (obj_flagged(obj, ITEM_ANTI_SAIYAN) && char_is_saiyan(ch))
         return TRUE;
 
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_ICER) && IS_ICER(ch))
+    if (obj_flagged(obj, ITEM_ANTI_ICER) && char_is_icer(ch))
         return TRUE;
 
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_KONATSU) && IS_KONATSU(ch))
+    if (obj_flagged(obj, ITEM_ANTI_KONATSU) && char_is_konatsu(ch))
         return TRUE;
 
-    if (OBJ_FLAGGED(obj, ITEM_ONLY_HUMAN) && !IS_HUMAN(ch))
+    if (obj_flagged(obj, ITEM_ONLY_HUMAN) && !char_is_human(ch))
         return TRUE;
 
-    if (OBJ_FLAGGED(obj, ITEM_ONLY_ICER) && !IS_ICER(ch))
+    if (obj_flagged(obj, ITEM_ONLY_ICER) && !char_is_icer(ch))
         return TRUE;
 
-    if (OBJ_FLAGGED(obj, ITEM_ONLY_SAIYAN) && !IS_SAIYAN(ch))
+    if (obj_flagged(obj, ITEM_ONLY_SAIYAN) && !char_is_saiyan(ch))
         return TRUE;
 
-    if (OBJ_FLAGGED(obj, ITEM_ONLY_KONATSU) && !IS_KONATSU(ch))
+    if (obj_flagged(obj, ITEM_ONLY_KONATSU) && !char_is_konatsu(ch))
         return TRUE;
 
     return FALSE;
@@ -256,7 +256,7 @@ int get_size_bonus(int sz) {
 
 int wield_type(int chsize, const struct obj_data *weap) {
     if (GET_OBJ_TYPE(weap) != ITEM_WEAPON)
-        return OBJ_FLAGGED(weap, ITEM_2H) ? WIELD_TWOHAND : WIELD_ONEHAND;
+        return obj_flagged(weap, ITEM_2H) ? WIELD_TWOHAND : WIELD_ONEHAND;
 
     if (chsize > GET_OBJ_SIZE(weap)) {
         return WIELD_LIGHT;
@@ -329,7 +329,7 @@ void racial_body_parts(struct char_data *ch) {
         if (race_bodyparts[GET_RACE(ch)][i]) {
             SET_BIT_AR(BODY_PARTS(ch), i);
         } else {
-            if (BODY_FLAGGED(ch, i))
+            if (char_body_flagged(ch, i))
                 REMOVE_BIT_AR(BODY_PARTS(ch), i);
         }
     }
@@ -472,7 +472,7 @@ bool race_has_noisy_transformations(int r) {
 bool race_check_can_transform(char_data *ch) {
     // No point checking for Saiyan/Halfbreed because it's just as expensive to check for
     // the Oozaru flag.
-    if (PLR_FLAGGED(ch, PLR_OOZARU)) {
+    if (char_plr_flagged(ch, PLR_OOZARU)) {
         send_to_char(ch, "You are the great Oozaru right now and can't transform!\r\n");
         return false;
     }
@@ -488,7 +488,7 @@ bool race_check_can_transform(char_data *ch) {
 int race_max_transform_tier(char_data *ch) {
     switch (ch->race) {
         case RACE_SAIYAN:
-            if (PLR_FLAGGED(ch, PLR_LSSJ)) {
+            if (char_plr_flagged(ch, PLR_LSSJ)) {
                 return 2;
             } else {
                 return 4;
@@ -657,13 +657,13 @@ static const transform_bonus hoshi_life = {
 static const transform_bonus *race_trans_table(const char_data *ch) {
     switch (ch->race) {
         case RACE_ANDROID:
-            if (PLR_FLAGGED(ch, PLR_SENSEM)) {
+            if (char_plr_flagged(ch, PLR_SENSEM)) {
                 return android_trans_bonus_sense;
             } else {
                 return android_trans_bonus;
             }
         case RACE_SAIYAN:
-            if (PLR_FLAGGED(ch, PLR_LSSJ)) {
+            if (char_plr_flagged(ch, PLR_LSSJ)) {
                 return saiyan_trans_bonus_legendary;
             } else {
                 return saiyan_trans_bonus;
@@ -716,15 +716,15 @@ int race_flag_to_tier(int flag) {
 int race_current_trans_tier(const char_data *ch) {
     static const int flags[] = {PLR_TRANS1, PLR_TRANS2, PLR_TRANS3, PLR_TRANS4, PLR_TRANS5, PLR_TRANS6};
     for (int i = 0; i < 6; i++) {
-        if (PLR_FLAGGED(ch, flags[i]))
+        if (char_plr_flagged(ch, flags[i]))
             return i + 1;
     }
     return 0;
 }
 
 transform_bonus race_current_form(char_data *ch) {
-    if (PLR_FLAGGED(ch, PLR_OOZARU)) return oozaru;
-    if (IS_HOSHIJIN(ch)) {
+    if (char_plr_flagged(ch, PLR_OOZARU)) return oozaru;
+    if (char_is_hoshijin(ch)) {
         transform_bonus hoshi_form;
         double bon_mult = 0;
         switch (GET_PHASE(ch)) {
@@ -741,7 +741,7 @@ transform_bonus race_current_form(char_data *ch) {
             default:
                 return base_form;
         }
-        if (ETHER_STREAM(ch))
+        if (char_ether_stream(ch))
             bon_mult += .5;
         hoshi_form.bonus = (getBasePL(ch) * .1) * bon_mult;
         return hoshi_form;
@@ -787,7 +787,7 @@ bool race_check_trans_unlock(char_data *ch, int tier) {
                         send_to_char(ch, "You need to ingest someone before you can use that form.\r\n");
                         return false;
                     }
-                    if(GET_LEVEL(ch) < 50) {
+                    if(char_get_level(ch) < 50) {
                         send_to_char(ch, "You must be at least level 50 to reach that form.\r\n");
                         return false;
                     }
@@ -856,13 +856,13 @@ bool race_check_trans_unlock(char_data *ch, int tier) {
 
     if (ps_cost) {
         if (GET_TRANSCOST(ch, tier) == FALSE) {
-            if (GET_PRACTICES(ch, GET_CLASS(ch)) < 50) {
+            if (GET_PRACTICES(ch, char_get_class(ch)) < 50) {
                 send_to_char(ch,
                              "You need %i practice points in order to obtain a transformation for the first time.\r\n",
                              ps_cost);
                 return false;
             } else {
-                GET_PRACTICES(ch, GET_CLASS(ch)) -= 50;
+                GET_PRACTICES(ch, char_get_class(ch)) -= 50;
                 GET_TRANSCOST(ch, tier) = TRUE;
                 send_to_char(ch, "You pay %i PS to permanently unlock this transformation!\r\n", ps_cost);
             }
@@ -895,7 +895,7 @@ void race_display_forms(char_data *ch) {
             send_to_char(ch, "@b------------------------------------------------@n\r\n");
             break;
         case RACE_SAIYAN:
-            if (PLR_FLAGGED(ch, PLR_LSSJ)) {
+            if (char_plr_flagged(ch, PLR_LSSJ)) {
                 send_to_char(ch, "                @YSuper @CSaiyan@n\r\n");
                 send_to_char(ch, "@b-------------------------------------------------@n\r\n");
                 send_to_char(ch, "@YSuper @CSaiyan @WFirst   @R-@G %s BPL Req\r\n",
@@ -1239,7 +1239,7 @@ void race_echo_transform(char_data *ch, int tier) {
                         TRUE, ch, 0, 0, TO_ROOM);
                     return;
                 case 2:
-                    if (PLR_FLAGGED(ch, PLR_LSSJ)) {
+                    if (char_plr_flagged(ch, PLR_LSSJ)) {
                         act("@WYou roar and then stand at your full height. You flex every muscle in your body as you feel your strength grow! Your eyes begin to glow @wwhite@W with energy, your hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around your body! You release your @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n",
                             TRUE, ch, 0, 0, TO_CHAR);
                         act("@C$n @Wroars and then stands at $s full height. Then $s muscles start to buldge and grow as $e flexes them! Suddenly $s eyes begin to glow @wwhite@W with energy, $s hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around $s body! @C$n@W releases $s @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n",
@@ -1435,7 +1435,7 @@ void race_echo_revert(char_data *ch, int tier) {
                     act("@w$n@w reverts from @CSuper @cSaiyan @GThird@w.@n", TRUE, ch, 0, 0, TO_ROOM);
                     return;
                 case 2:
-                    if (PLR_FLAGGED(ch, PLR_LSSJ)) {
+                    if (char_plr_flagged(ch, PLR_LSSJ)) {
                         act("@wYou revert from your @YLegendary @CSuper Saiyan@w form.@n", TRUE, ch, 0, 0, TO_CHAR);
                         act("@w$n@w reverts from $s @YLegendary @CSuper Saiyan@w form@w.@n", TRUE, ch, 0, 0,
                             TO_ROOM);
@@ -1548,7 +1548,7 @@ const int64_t *race_soft_cap_table(const char_data *ch) {
         case RACE_KANASSAN:
             return soft_cap_demon;
         case RACE_ANDROID:
-            if (PLR_FLAGGED(ch, PLR_ABSORB)) {
+            if (char_plr_flagged(ch, PLR_ABSORB)) {
                 return soft_cap_fixed;
             } else {
                 return soft_cap_variable;
@@ -1567,7 +1567,7 @@ softcap_type race_soft_cap_type(const char_data *ch) {
         case RACE_MAJIN:
             return SOFTCAP_VARIABLE;
         case RACE_ANDROID:
-            if (PLR_FLAGGED(ch, PLR_ABSORB)) {
+            if (char_plr_flagged(ch, PLR_ABSORB)) {
                 return SOFTCAP_FIXED;
             } else {
                 return SOFTCAP_VARIABLE;

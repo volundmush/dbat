@@ -22,7 +22,7 @@ void extract_char_final(struct char_data *ch)
 
   if (IN_ROOM(ch) == NOWHERE) {
     log("SYSERR: NOWHERE extracting char %s. (%s, extract_char_final)",
-        GET_NAME(ch), __FILE__);
+        char_get_name(ch), __FILE__);
     exit(1);
   }
 
@@ -31,7 +31,7 @@ void extract_char_final(struct char_data *ch)
    * need to stuff them back into their own body.  This will set ch->desc
    * we're checking below this loop to the proper value.
    */
-  if (!IS_NPC(ch) && !ch->desc) {
+  if (!char_is_npc(ch) && !ch->desc) {
     for (d = descriptor_list; d; d = d->next)
       if (d->original == ch) {
 	      do_return(d->character, NULL, 0, 0);
@@ -79,17 +79,17 @@ void extract_char_final(struct char_data *ch)
    SITS(ch) = NULL;
   }
 
-  if (IS_NPC(ch) && GET_MOB_VNUM(ch) == 25) {
+  if (char_is_npc(ch) && char_get_mob_vnum(ch) == 25) {
    if (GET_ORIGINAL(ch)) {
     handle_multi_merge(ch);
    }
   }
 
-  if (!IS_NPC(ch) && GET_CLONES(ch) > 0) {
+  if (!char_is_npc(ch) && GET_CLONES(ch) > 0) {
    struct char_data *clone = NULL;
     for (clone = character_list; clone; clone = clone->next) {
-     if (IS_NPC(clone)) {
-      if (GET_MOB_VNUM(clone) == 25) {
+     if (char_is_npc(clone)) {
+      if (char_get_mob_vnum(clone) == 25) {
        if (GET_ORIGINAL(clone) == ch) {
         handle_multi_merge(clone);
        }
@@ -196,7 +196,7 @@ void extract_char_final(struct char_data *ch)
 
   char_from_room(ch);
 
-  if (IS_NPC(ch)) {
+  if (char_is_npc(ch)) {
     if (GET_MOB_RNUM(ch) != NOTHING)	/* prototyped */
       mob_index[GET_MOB_RNUM(ch)].number--;
     clearMemory(ch);
@@ -210,7 +210,7 @@ void extract_char_final(struct char_data *ch)
   }
 
   /* If there's a descriptor, they're in the menu now. */
-  if (IS_NPC(ch) || !ch->desc)
+  if (char_is_npc(ch) || !ch->desc)
     free_char(ch);
 }
 
@@ -234,7 +234,7 @@ void extract_char(struct char_data *ch)
   int i;
   struct obj_data *obj;
 
-  if (IS_NPC(ch)) {
+  if (char_is_npc(ch)) {
     if (!IS_SET_AR(MOB_FLAGS(ch), MOB_NOTDEADYET))
       SET_BIT_AR(MOB_FLAGS(ch), MOB_NOTDEADYET);
     else
@@ -249,7 +249,7 @@ void extract_char(struct char_data *ch)
   /*save_char_pets(ch);*/
 
   for (foll = ch->followers; foll; foll = foll->next) {
-    if (IS_NPC(foll->follower) && AFF_FLAGGED(foll->follower, AFF_CHARM) &&
+    if (char_is_npc(foll->follower) && char_aff_flagged(foll->follower, AFF_CHARM) &&
         (IN_ROOM(foll->follower) == IN_ROOM(ch) || IN_ROOM(ch) == 1)) {
       /* transfer objects to char, if any */
       while (foll->follower->carrying) {
@@ -290,7 +290,7 @@ void extract_obj(struct obj_data *obj)
     obj_from_obj(obj);
 
   /* Get rid of the contents of the object, as well. */
-  if (GET_FELLOW_WALL(obj) && GET_OBJ_VNUM(obj) == 79) {
+  if (GET_FELLOW_WALL(obj) && obj_get_vnum(obj) == 79) {
    struct obj_data *trash;
    trash = GET_FELLOW_WALL(obj);
    GET_FELLOW_WALL(obj) = NULL;
@@ -326,7 +326,7 @@ void extract_obj(struct obj_data *obj)
   if (SCRIPT(obj))
      extract_script(obj, OBJ_TRIGGER);
 
-  if (GET_OBJ_VNUM(obj) != 80 && GET_OBJ_VNUM(obj) != 81) {
+  if (obj_get_vnum(obj) != 80 && obj_get_vnum(obj) != 81) {
    if (GET_OBJ_RNUM(obj) == NOTHING || obj->proto_script != obj_proto[GET_OBJ_RNUM(obj)].proto_script)
      free_proto_script(obj, OBJ_TRIGGER);
   }
@@ -346,9 +346,9 @@ void extract_pending_chars(void)
   for (vict = character_list, prev_vict = NULL; vict && extractions_pending; vict = next_vict) {
     next_vict = vict->next;
 
-    if (MOB_FLAGGED(vict, MOB_NOTDEADYET))
+    if (char_mob_flagged(vict, MOB_NOTDEADYET))
       REMOVE_BIT_AR(MOB_FLAGS(vict), MOB_NOTDEADYET);
-    else if (PLR_FLAGGED(vict, PLR_NOTDEADYET))
+    else if (char_plr_flagged(vict, PLR_NOTDEADYET))
       REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_NOTDEADYET);
     else {
       /* Last non-free'd character to continue chain from. */

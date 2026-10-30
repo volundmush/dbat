@@ -58,7 +58,7 @@ int House_save(struct obj_data *obj, FILE *fp, int location)
   struct obj_data *tmp;
   int result;
   if (obj) {
-   if (OBJ_FLAGGED(obj, ITEM_NORENT)) {
+   if (obj_flagged(obj, ITEM_NORENT)) {
     obj = obj->next_content;
    }
   }
@@ -397,7 +397,7 @@ void hcontrol_pay_house(struct char_data *ch, char *arg)
   else if ((i = find_house(atoi(arg))) == NOWHERE)
     send_to_char(ch, "Unknown house.\r\n");
   else {
-    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "Payment for house %s collected by %s.", arg, GET_NAME(ch));
+    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "Payment for house %s collected by %s.", arg, char_get_name(ch));
 
     house_control[i].last_payment = time(0);
     House_save_control();
@@ -434,9 +434,9 @@ ACMD(do_house)
 
   one_argument(argument, arg);
 
-  if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_HOUSE))
+  if (!rroom_flagged(IN_ROOM(ch), ROOM_HOUSE))
     send_to_char(ch, "You must be in your house to set guests.\r\n");
-  else if ((i = find_house(GET_ROOM_VNUM(IN_ROOM(ch)))) == NOWHERE)
+  else if ((i = find_house(rroom_get_vnum(IN_ROOM(ch)))) == NOWHERE)
     send_to_char(ch, "Um.. this house seems to be screwed up.\r\n");
   else if (GET_IDNUM(ch) != house_control[i].owner)
     send_to_char(ch, "Only the primary owner can set guests.\r\n");
@@ -489,7 +489,7 @@ int House_can_enter(struct char_data *ch, room_vnum house)
 {
   int i, j;
 
-  if (ADM_FLAGGED(ch, ADM_ALLHOUSES) || (i = find_house(house)) == NOWHERE)
+  if (char_adm_flagged(ch, ADM_ALLHOUSES) || (i = find_house(house)) == NOWHERE)
     return (1);
 
   switch (house_control[i].mode) {

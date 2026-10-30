@@ -74,7 +74,7 @@ void sub_write_to_char(struct char_data *ch, char *tokens[],
 	    else if ((struct char_data *)otokens[i] == ch)
 		strcat(sb,"you");
 	    else
-		strcat(sb, PERS(((struct char_data *)otokens[i]), ch));
+		strcat(sb, char_pers(((struct char_data *)otokens[i]), ch));
 	    break;
 
 	case '|':
@@ -84,43 +84,43 @@ void sub_write_to_char(struct char_data *ch, char *tokens[],
 		strcat(sb,"your");
 	    else
 	    {
-		strcat(sb,PERS(((struct char_data *) otokens[i]), ch));
+		strcat(sb,char_pers(((struct char_data *) otokens[i]), ch));
 		strcat(sb,"'s");
 	    }
 	    break;
 
 	case '^':
-	    if (!otokens[i] || !CAN_SEE(ch, (struct char_data *) otokens[i]))
+	    if (!otokens[i] || !char_can_see(ch, (struct char_data *) otokens[i]))
 		strcat(sb,"its");
 	    else if (otokens[i] == ch)
 		strcat(sb,"your");
 	    else
-		strcat(sb,HSHR((struct char_data *) otokens[i]));
+		strcat(sb,char_hshr((struct char_data *) otokens[i]));
 	    break;
 
 	case '&':
-	    if (!otokens[i] || !CAN_SEE(ch, (struct char_data *) otokens[i]))
+	    if (!otokens[i] || !char_can_see(ch, (struct char_data *) otokens[i]))
 		strcat(sb,"it");
 	    else if (otokens[i] == ch)
 		strcat(sb,"you");
 	    else
-		strcat(sb,HSSH((struct char_data *) otokens[i]));
+		strcat(sb,char_hssh((struct char_data *) otokens[i]));
 	    break;
 
 	case '*':
-	    if (!otokens[i] || !CAN_SEE(ch, (struct char_data *) otokens[i]))
+	    if (!otokens[i] || !char_can_see(ch, (struct char_data *) otokens[i]))
 		strcat(sb,"it");
 	    else if (otokens[i] == ch)
 		strcat(sb,"you");
 	    else
-		strcat(sb,HMHR((struct char_data *) otokens[i]));
+		strcat(sb,char_hmhr((struct char_data *) otokens[i]));
 	    break;
 
 	case '_':
 	    if (!otokens[i])
 		strcat(sb,"something");
 	    else
-		strcat(sb,OBJS(((struct obj_data *) otokens[i]), ch));
+		strcat(sb,obj_shortdesc_for(((struct obj_data *) otokens[i]), ch));
 	    break;
 	}
     }
@@ -213,7 +213,7 @@ void send_to_zone(char *messg, zone_rnum zone)
     return;
 
   for (i = descriptor_list; i; i = i->next)
-    if (!i->connected && i->character && AWAKE(i->character) &&
+    if (!i->connected && i->character && char_is_awake(i->character) &&
         (IN_ROOM(i->character) != NOWHERE) &&
         (world[IN_ROOM(i->character)].zone == zone))
       write_to_output(i, "%s", messg);
@@ -227,8 +227,8 @@ void fly_zone(zone_rnum zone, char *messg, struct char_data *ch)
     return;
 
   for (i = descriptor_list; i; i = i->next) {
-    if (!i->connected && i->character && AWAKE(i->character) && OUTSIDE(i->character) && (IN_ROOM(i->character) != NOWHERE) && (world[IN_ROOM(i->character)].zone == zone) && i->character != ch) {
-       if (PLR_FLAGGED(i->character, PLR_DISGUISED)) {
+    if (!i->connected && i->character && char_is_awake(i->character) && char_is_outside(i->character) && (IN_ROOM(i->character) != NOWHERE) && (world[IN_ROOM(i->character)].zone == zone) && i->character != ch) {
+       if (char_plr_flagged(i->character, PLR_DISGUISED)) {
          write_to_output(i, "A disguised figure %s", messg);
        } else {
          write_to_output(i, "%s%s %s", readIntro(i->character, ch) == 1 ? "" : "A ", get_i_name(i->character, ch), messg);
@@ -255,19 +255,19 @@ void send_to_sense(int type, char *messg, struct char_data *ch)
     if (tch == ch) {
       continue;
     }
-    if (!GET_SKILL(tch, SKILL_SENSE)) {
+    if (!char_get_skill(tch, SKILL_SENSE)) {
       continue;
     }
-    if (((world[IN_ROOM(ch)].zone != world[IN_ROOM(tch)].zone && type == 0) || !AWAKE(tch))) {
+    if (((world[IN_ROOM(ch)].zone != world[IN_ROOM(tch)].zone && type == 0) || !char_is_awake(tch))) {
       continue;
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SHIP)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_SHIP)) {
       continue;
     }
     if (obj && type == 0) {
      continue;
     }
-    if (IS_ANDROID(ch)) {
+    if (char_is_android(ch)) {
      continue;
     }
     if (IN_ROOM(ch) == IN_ROOM(tch)) {
@@ -362,40 +362,40 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type)
       continue;
     }
     else {
-    if ((((world[IN_ROOM(ch)].zone != world[IN_ROOM(tch)].zone) && type == 0) || !AWAKE(tch))) {
+    if ((((world[IN_ROOM(ch)].zone != world[IN_ROOM(tch)].zone) && type == 0) || !char_is_awake(tch))) {
       continue;
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SHIP)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_SHIP)) {
       continue;
     }
     if (GET_INVIS_LEV(ch) > GET_ADMLEVEL(tch)) {
      continue;
     }
-    if (IS_ANDROID(ch)) {
+    if (char_is_android(ch)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_EARTH)) {
+    } else if (rroom_flagged(IN_ROOM(ch), ROOM_EARTH) && !rroom_flagged(IN_ROOM(tch), ROOM_EARTH)) {
      continue;
-    } else if (PLANET_ZENITH(IN_ROOM(ch)) && !PLANET_ZENITH(IN_ROOM(tch))) {
+    } else if (rroom_planet_zenith(IN_ROOM(ch)) && !rroom_planet_zenith(IN_ROOM(tch))) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_FRIGID)) {
+    } else if (rroom_flagged(IN_ROOM(ch), ROOM_FRIGID) && !rroom_flagged(IN_ROOM(tch), ROOM_FRIGID)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_NAMEK)) {
+    } else if (rroom_flagged(IN_ROOM(ch), ROOM_NAMEK) && !rroom_flagged(IN_ROOM(tch), ROOM_NAMEK)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_AL)) {
+    } else if (rroom_flagged(IN_ROOM(ch), ROOM_AL) && !rroom_flagged(IN_ROOM(tch), ROOM_AL)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_VEGETA)) {
+    } else if (rroom_flagged(IN_ROOM(ch), ROOM_VEGETA) && !rroom_flagged(IN_ROOM(tch), ROOM_VEGETA)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_KONACK)) {
+    } else if (rroom_flagged(IN_ROOM(ch), ROOM_KONACK) && !rroom_flagged(IN_ROOM(tch), ROOM_KONACK)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NEO) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_NEO)) {
+    } else if (rroom_flagged(IN_ROOM(ch), ROOM_NEO) && !rroom_flagged(IN_ROOM(tch), ROOM_NEO)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_YARDRAT) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_YARDRAT)) {
+    } else if (rroom_flagged(IN_ROOM(ch), ROOM_YARDRAT) && !rroom_flagged(IN_ROOM(tch), ROOM_YARDRAT)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_KANASSA)) {
+    } else if (rroom_flagged(IN_ROOM(ch), ROOM_KANASSA) && !rroom_flagged(IN_ROOM(tch), ROOM_KANASSA)) {
      continue;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_ARLIA)) {
+    } else if (rroom_flagged(IN_ROOM(ch), ROOM_ARLIA) && !rroom_flagged(IN_ROOM(tch), ROOM_ARLIA)) {
      continue;
-    }  else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER) && !ROOM_FLAGGED(IN_ROOM(tch), ROOM_AETHER)) {
+    }  else if (rroom_flagged(IN_ROOM(ch), ROOM_AETHER) && !rroom_flagged(IN_ROOM(tch), ROOM_AETHER)) {
      continue;
     }
     if (!obj) {
@@ -405,49 +405,49 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type)
     } else if (type == 0) {
         if (num == 1) {
          struct obj_data *obj = GET_EQ(tch, WEAR_EYE);        
-          if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
+          if (obj_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
           write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
           }
-          else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
+          else if (obj_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
           write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
           }
-          else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
+          else if (obj_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
           write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
           }
           else {
           write_to_output(i, "%s@n", messg);
          }
         } else {
-          if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
+          if (obj_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
            write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
           }
-          else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
+          else if (obj_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
            write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
           }
-          else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
+          else if (obj_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
            write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
           }
           else {
            write_to_output(i, "%s\r\n", messg);
           }
         }
-       } else if (type == 1 && GET_SKILL(tch, SKILL_SENSE) < 20) {
-          if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
+       } else if (type == 1 && char_get_skill(tch, SKILL_SENSE) < 20) {
+          if (obj_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
            write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
-          } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
+          } else if (obj_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
            write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
-          } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
+          } else if (obj_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
            write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
           } else {
            write_to_output(i, "@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(GET_HIT(ch)));
           }
-       }  else if (type == 2 && GET_SKILL(tch, SKILL_SENSE) < 20) {
+       }  else if (type == 2 && char_get_skill(tch, SKILL_SENSE) < 20) {
           char *blah = sense_location(ch);
-          if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
+          if (obj_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
            write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
-          } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
+          } else if (obj_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
            write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
-          } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
+          } else if (obj_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
            write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
           } else {
            write_to_output(i, "@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, blah, add_commas(GET_HIT(ch)));
@@ -480,25 +480,25 @@ void send_to_worlds(struct char_data *ch)
     if (STATE(i) != CON_PLAYING) {
      continue;
     }
-    if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_EARTH) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {   
+    if (rroom_flagged(IN_ROOM(i->character), ROOM_EARTH) && rroom_flagged(IN_ROOM(ch), ROOM_EARTH)) {   
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_VEGETA) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA)) {
+    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_VEGETA) && rroom_flagged(IN_ROOM(ch), ROOM_VEGETA)) {
      send_to_char(i->character, "%s", message);
-    } else if (PLANET_ZENITH(IN_ROOM(i->character)) && PLANET_ZENITH(IN_ROOM(ch))) {
+    } else if (rroom_planet_zenith(IN_ROOM(i->character)) && rroom_planet_zenith(IN_ROOM(ch))) {
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_NAMEK) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) {
+    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_NAMEK) && rroom_flagged(IN_ROOM(ch), ROOM_NAMEK)) {
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_KONACK) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK)) {
+    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_KONACK) && rroom_flagged(IN_ROOM(ch), ROOM_KONACK)) {
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_YARDRAT) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_YARDRAT)) {
+    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_YARDRAT) && rroom_flagged(IN_ROOM(ch), ROOM_YARDRAT)) {
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_FRIGID) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID)) {
+    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_FRIGID) && rroom_flagged(IN_ROOM(ch), ROOM_FRIGID)) {
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_KANASSA) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) {
+    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_KANASSA) && rroom_flagged(IN_ROOM(ch), ROOM_KANASSA)) {
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_ARLIA) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA)) {
+    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_ARLIA) && rroom_flagged(IN_ROOM(ch), ROOM_ARLIA)) {
      send_to_char(i->character, "%s", message);
-    } else if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_AETHER) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) {
+    } else if (rroom_flagged(IN_ROOM(i->character), ROOM_AETHER) && rroom_flagged(IN_ROOM(ch), ROOM_AETHER)) {
      send_to_char(i->character, "%s", message);
     }
   }
@@ -518,10 +518,10 @@ void send_to_imm(char *messg, ...)
     else if (GET_ADMLEVEL(i->character) == 0) {
     continue;
     }
-    else if (!PRF_FLAGGED(i->character, PRF_LOG2)) {
+    else if (!char_prf_flagged(i->character, PRF_LOG2)) {
     continue;
     }
-    else if (PLR_FLAGGED(i->character, PLR_WRITING)) {
+    else if (char_plr_flagged(i->character, PLR_WRITING)) {
      continue;
     }
     else {

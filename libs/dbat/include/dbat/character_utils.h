@@ -38,36 +38,33 @@
 /* Return the gauntlet highest room for ch */ 
 #define GET_GAUNTLET(ch)    CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->gauntlet))
 
-#define IS_NPC(ch)	(IS_SET_AR(MOB_FLAGS(ch), MOB_ISNPC))
-#define IS_MOB(ch)	(IS_NPC(ch) && GET_MOB_RNUM(ch) <= top_of_mobt && \
-				GET_MOB_RNUM(ch) != NOBODY)
+bool char_is_npc(const struct char_data *ch);
+bool char_is_mob(const struct char_data *ch);
 
-#define MOB_FLAGGED(ch, flag) (IS_NPC(ch) && IS_SET_AR(MOB_FLAGS(ch), (flag)))
-#define PLR_FLAGGED(ch, flag) (!IS_NPC(ch) && IS_SET_AR(PLR_FLAGS(ch), (flag)))
-#define AFF_FLAGGED(ch, flag) (IS_SET_AR(AFF_FLAGS(ch), (flag)))
-#define PRF_FLAGGED(ch, flag) (IS_SET_AR(PRF_FLAGS(ch), (flag)))
-#define ADM_FLAGGED(ch, flag) (IS_SET_AR(ADM_FLAGS(ch), (flag)))
-#define BODY_FLAGGED(ch, flag) (IS_SET_AR(BODY_PARTS(ch), (flag)))
-#define IS_AFFECTED(ch, skill) (AFF_FLAGGED((ch), (skill)))
+bool char_mob_flagged(const struct char_data *ch, int flag);
+bool char_plr_flagged(const struct char_data *ch, int flag);
+bool char_aff_flagged(const struct char_data *ch, int flag);
+bool char_prf_flagged(const struct char_data *ch, int flag);
+bool char_adm_flagged(const struct char_data *ch, int flag);
+bool char_body_flagged(const struct char_data *ch, int flag);
+bool char_is_affected(const struct char_data *ch, int skill);
 
-#define PLR_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(PLR_FLAGS(ch), (flag))) & Q_BIT(flag))
-#define PRF_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(PRF_FLAGS(ch), (flag))) & Q_BIT(flag))
-#define ADM_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(ADM_FLAGS(ch), (flag))) & Q_BIT(flag))
-#define AFF_TOG_CHK(ch,flag) ((TOGGLE_BIT_AR(AFF_FLAGS(ch), (flag))) & Q_BIT(flag))
+bool char_plr_toggle(struct char_data *ch, int flag);
+bool char_prf_toggle(struct char_data *ch, int flag);
+bool char_aff_toggle(struct char_data *ch, int flag);
 
 /* new define for quick check */
-#define DEAD(ch) (PLR_FLAGGED((ch), PLR_NOTDEADYET) || MOB_FLAGGED((ch), MOB_NOTDEADYET))
+bool char_is_dead(const struct char_data *ch);
 
 
 #define IN_ROOM(ch)	((ch)->in_room)
-#define IN_ZONE(ch)   (zone_table[(world[(IN_ROOM(ch))].zone)].number)
+zone_vnum char_in_zone(const struct char_data *ch);
 #define GET_WAS_IN(ch)	((ch)->was_in_room)
 #define GET_AGE(ch)     (age(ch)->year)
 
 #define GET_PC_NAME(ch)	((ch)->name)
-#define GET_NAME(ch)    (IS_NPC(ch) ? \
-			 (ch)->short_descr : GET_PC_NAME(ch))
-#define GET_TITLE(ch)   ((ch)->desc ? ((ch)->desc->title ? (ch)->desc->title : "[Unset Title]") : "@D[@GNew User@D]")
+char *char_get_name(const struct char_data *ch);
+char *char_get_title(const struct char_data *ch);
 #define GET_USER_TITLE(d) ((d)->title)
 #define GET_PHASE(ch)   ((ch)->starphase)
 #define GET_MIMIC(ch)   ((ch)->mimic)
@@ -75,21 +72,20 @@
 #define GET_CLAN(ch)    ((ch)->clan)
 #define GET_TRANSCLASS(ch) ((ch)->transclass)
 #define GET_FEATURE(ch) ((ch)->feature)
-#define GET_USER(ch)    ((ch)->desc ? ((ch)->desc->user ? (ch)->desc->user : "NOUSER") : "NOUSER")
+char *char_get_user(const struct char_data *ch);
 #define GET_LOG_USER(ch) ((ch)->loguser)
 #define GET_CRANK(ch)   ((ch)->crank)
 #define GET_ADMLEVEL(ch)	((ch)->admlevel)
 #define GET_CLASS_LEVEL(ch)	((ch)->level)
 #define GET_LEVEL_ADJ(ch)	((ch)->level_adj)
 #define GET_HITDICE(ch)		((ch)->race_level)
-#define GET_LEVEL(ch)	(GET_CLASS_LEVEL(ch) + GET_LEVEL_ADJ(ch) + GET_HITDICE(ch))
+int char_get_level(const struct char_data *ch);
 #define GET_PFILEPOS(ch)((ch)->pfilepos)
 
-#define GET_CLASS(ch)   ((ch)->chclass ? (ch)->chclass : 0)
+int char_get_class(const struct char_data *ch);
 #define GET_CLASS_NONEPIC(ch, whichclass) ((ch)->chclasses[whichclass])
 #define GET_CLASS_EPIC(ch, whichclass) ((ch)->epicclasses[whichclass])
-#define GET_CLASS_RANKS(ch, whichclass) (GET_CLASS_NONEPIC(ch, whichclass) + \
-                                         GET_CLASS_EPIC(ch, whichclass))
+int char_get_class_ranks(const struct char_data *ch, int whichclass);
 #define GET_RACE(ch)    ((ch)->race)
 #define GET_HAIRL(ch)   ((ch)->hairl)
 #define GET_HAIRC(ch)   ((ch)->hairc)
@@ -100,8 +96,8 @@
 #define GET_HOME(ch)	((ch)->hometown)
 #define GET_WEIGHT(ch)  ((ch)->weight)
 #define GET_HEIGHT(ch)  ((ch)->height)
-#define GET_PC_HEIGHT(ch)	(!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)((ch)->height * 0.68) : age(ch)->year <= 12 ? (int)((ch)->height * 0.72) : age(ch)->year <= 14 ? (int)((ch)->height * 0.85) : age(ch)->year <= 16 ? (int)((ch)->height * 0.92) : (ch)->height : (ch)->height)
-#define GET_PC_WEIGHT(ch)	(!IS_NPC(ch) ? age(ch)->year <= 10 ? (int)((ch)->weight * 0.48) : age(ch)->year <= 12 ? (int)((ch)->weight * 0.55) : age(ch)->year <= 14 ? (int)((ch)->weight * 0.7) : age(ch)->year <= 16 ? (int)((ch)->weight * 0.85) : (ch)->weight : (ch)->weight)
+int char_get_pc_height(struct char_data *ch);
+int char_get_pc_weight(struct char_data *ch);
 #define GET_SEX(ch)	((ch)->sex)
 #define GET_TLEVEL(ch)	((ch)->player_specials->tlevel)
 #define CARRYING(ch)    ((ch)->player_specials->carrying)
@@ -130,16 +126,16 @@
 #define GET_CON(ch)     ((ch)->aff_abils.con)
 #define GET_CHA(ch)     ((ch)->aff_abils.cha)
 
-#define GET_MUTBOOST(ch) (IS_MUTANT(ch) ? ((GET_GENOME(ch, 0) == 1 || GET_GENOME(ch, 1) == 1) ? (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch)) * 0.3 : 0) : 0)
-#define GET_SPEEDI(ch)  (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch) + GET_MUTBOOST(ch))
-#define GET_SPEEDCALC(ch) (IS_GRAP(ch) ? GET_CHA(ch) : (IS_INFERIOR(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 1.25) : GET_SPEEDVAR(ch)) : GET_SPEEDVAR(ch)))
-#define GET_SPEEDBONUS(ch) (IS_ARLIAN(ch) ? AFF_FLAGGED(ch, AFF_SHELL) ? GET_SPEEDVAR(ch) * -0.5 : (IS_MALE(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 0.5) : 0) : 0) : 0)
-#define GET_SPEEDVAR(ch) (GET_SPEEDVEM(ch) > GET_CHA(ch) ? GET_SPEEDVEM(ch) : GET_CHA(ch))
-#define GET_SPEEDVEM(ch) (GET_SPEEDINT(ch) - (GET_SPEEDINT(ch) * speednar(ch)))
-#define IS_GRAP(ch)     (GRAPPLING(ch) || GRAPPLED(ch))
-#define GET_SPEEDINT(ch) (IS_BIO(ch) ? ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1200) / 1200) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)) : ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1000) / 1000) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)))
-#define IS_INFERIOR(ch) (IS_KONATSU(ch) || IS_DEMON(ch))
-#define IS_WEIGHTED(ch) (getEffMaxPL(ch) < GET_MAX_HIT(ch))
+double char_get_mutboost(struct char_data *ch);
+double char_get_speedi(struct char_data *ch);
+double char_get_speedcalc(struct char_data *ch);
+double char_get_speedbonus(struct char_data *ch);
+double char_get_speedvar(struct char_data *ch);
+double char_get_speedvem(struct char_data *ch);
+bool char_is_grap(const struct char_data *ch);
+long char_get_speedint(struct char_data *ch);
+bool char_is_inferior(const struct char_data *ch);
+bool char_is_weighted(struct char_data *ch);
 
 
 #define GET_EXP(ch)	  ((ch)->exp)
@@ -148,7 +144,7 @@
  * looked at to see if it needs to change before being converted to use
  * GET_ARMOR
  */
-#define SPOILED(ch)       ((ch)->time.played > 86400)
+bool char_is_spoiled(const struct char_data *ch);
 #define GET_DEATH_TYPE(ch) ((ch)->death_type)
 #define GET_SLEEPT(ch)    ((ch)->sleeptime)
 #define GET_FOODR(ch)     ((ch)->foodr)
@@ -183,7 +179,7 @@
 #define GET_CCPOINTS(ch)  ((ch)->ccpoints)
 #define GET_NEGCOUNT(ch)  ((ch)->negcount)
 #define GET_GENOME(ch, i)    ((ch)->genome[i])
-#define HAS_GENOME(ch, i) ((ch)->genome[0] == (i) || (ch)->genome[1] == (i))
+bool char_has_genome(const struct char_data *ch, int i);
 #define COMBO(ch)         ((ch)->combo)
 #define LASTATK(ch)       ((ch)->lastattack)
 #define COMBHITS(ch)      ((ch)->combhits)
@@ -202,11 +198,11 @@
 #define GET_BLESSLVL(ch)  ((ch)->blesslvl)
 #define GET_ASB(ch)       ((ch)->asb)
 #define GET_REGEN(ch)     ((ch)->regen)
-#define GET_BLESSBONUS(ch) (AFF_FLAGGED(ch, AFF_BLESS) ? (GET_BLESSLVL(ch) >= 100 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.1 : GET_BLESSLVL(ch) >= 60 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.05 : GET_BLESSLVL(ch) >= 40 ? ((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * 0.02 : 0) : 0) 
-#define GET_POSELF(ch)    (!IS_NPC(ch) ? is_affected(ch, AFF_SPECIAL_POSE) ? GET_SKILL(ch, SKILL_POSE) >= 100 ? 0.15 : GET_SKILL(ch, SKILL_POSE) >= 60 ? 0.1 : GET_SKILL(ch, SKILL_POSE) >= 40 ? 0.05 : 0 : 0 : 0)
-#define GET_POSEBONUS(ch) (((GET_MAX_MANA(ch) * 0.5) + (GET_MAX_MOVE(ch) * 0.5)) * GET_POSELF(ch))
-#define GET_LIFEBONUS(ch) (IS_ARLIAN(ch) ? ((GET_MAX_MANA(ch) * 0.01) * (GET_MOLT_LEVEL(ch) / 100)) + ((GET_MAX_MOVE(ch) * 0.01) * (GET_MOLT_LEVEL(ch) / 100)) : 0)
-#define GET_LIFEBONUSES(ch) ((ch)->lifebonus > 0 ? (GET_LIFEBONUS(ch) + GET_BLESSBONUS(ch) + GET_POSEBONUS(ch)) * (((ch)->lifebonus + 100) * 0.01) : (GET_LIFEBONUS(ch) + GET_BLESSBONUS(ch) + GET_POSEBONUS(ch)))
+double char_get_blessbonus(struct char_data *ch);
+double char_get_poself(struct char_data *ch);
+double char_get_posebonus(struct char_data *ch);
+double char_get_lifebonus(struct char_data *ch);
+double char_get_lifebonuses(struct char_data *ch);
 #define GET_LIFEPERC(ch)  ((ch)->lifeperc)
 #define GET_STUPIDKISS(ch) ((ch)->stupidkiss)
 #define GET_SPEEDBOOST(ch) ((ch)->speedboost)
@@ -245,7 +241,7 @@
 #define GET_GROUPKILLS(ch)	((ch)->combatexpertise)
 #define GET_SAVE_BASE(ch, i)	((ch)->saving_throw[i])
 #define GET_SAVE_MOD(ch, i)	((ch)->apply_saving_throw[i])
-#define GET_SAVE(ch, i)		(GET_SAVE_BASE(ch, i) + GET_SAVE_MOD(ch, i))
+int char_get_save(const struct char_data *ch, int i);
 #define GET_ALIGNMENT(ch)	((ch)->alignment)
 #define GET_ETHIC_ALIGNMENT(ch)	((ch)->alignment_ethic)
 #define SITS(ch)                ((ch)->sits)
@@ -301,16 +297,15 @@
 #define SET_SKILL_BONUS(ch, i, value)	do { (ch)->skills[i].mod = value; } while (0)
 #define SET_SKILL_PERF(ch, i, value)    do { (ch)->skills[i].perf = value; } while (0)
 #define GET_SKILL_BASE(ch, i)		(ch->skills[i].base)
-#define GET_SKILL(ch, i)		((ch)->skills[i].base + GET_SKILL_BONUS(ch, i))
+int char_get_skill(const struct char_data *ch, int i);
 #define SET_SKILL(ch, i, val)		do { (ch)->skills[i].base = val; } while(0)
 #define BODY_PARTS(ch)  ((ch)->bodyparts)
 
 #define GET_EQ(ch, i)		((ch)->equipment[i])
 
-#define GET_MOB_SPEC(ch)	(IS_MOB(ch) ? mob_index[(ch)->nr].func : NULL)
+spec_proc_func char_get_mob_spec(const struct char_data *ch);
 #define GET_MOB_RNUM(mob)	((mob)->nr)
-#define GET_MOB_VNUM(mob)	(IS_MOB(mob) ? \
-				 mob_index[GET_MOB_RNUM(mob)].vnum : NOBODY)
+mob_vnum char_get_mob_vnum(const struct char_data *mob);
 
 #define GET_DEFAULT_POS(ch)	((ch)->mob_specials.default_pos)
 #define MEMORY(ch)		((ch)->mob_specials.memory)
@@ -327,103 +322,77 @@
 
 #define CAN_CARRY_W(ch) (getMaxCarryWeight(ch))
 #define CAN_CARRY_N(ch) (50)
-#define AWAKE(ch) (GET_POS(ch) > POS_SLEEPING)
-#define CAN_SEE_IN_DARK(ch) \
-   (AFF_FLAGGED(ch, AFF_INFRAVISION) || (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_HOLYLIGHT)) || (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4)) || PLR_FLAGGED(ch, PLR_AURALIGHT))
+bool char_is_awake(const struct char_data *ch);
+bool char_can_see_in_dark(const struct char_data *ch);
 
-#define IS_GOOD(ch)    (GET_ALIGNMENT(ch) >= 50)
-#define IS_EVIL(ch)    (GET_ALIGNMENT(ch) <= -50)
-#define IS_LAWFUL(ch)   (GET_ETHIC_ALIGNMENT(ch) >= 350)
-#define IS_CHAOTIC(ch)  (GET_ETHIC_ALIGNMENT(ch) <= -350)
-#define IS_NEUTRAL(ch) (!IS_GOOD(ch) && !IS_EVIL(ch))
-#define IS_ENEUTRAL(ch) (!IS_LAWFUL(ch) && !IS_CHAOTIC(ch))
-#define ALIGN_TYPE(ch)	((IS_GOOD(ch) ? 0 : (IS_EVIL(ch) ? 6 : 3)) + \
-                         (IS_LAWFUL(ch) ? 0 : (IS_CHAOTIC(ch) ? 2 : 1)))
+bool char_is_good(const struct char_data *ch);
+bool char_is_evil(const struct char_data *ch);
+bool char_is_lawful(const struct char_data *ch);
+bool char_is_chaotic(const struct char_data *ch);
+bool char_is_neutral(const struct char_data *ch);
+int char_align_type(const struct char_data *ch);
 
-#define IN_ARENA(ch)   (GET_ROOM_VNUM(IN_ROOM(ch)) >= 17800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 17874)
+bool char_in_arena(const struct char_data *ch);
 #define ARENA_IDNUM(ch) ((ch)->arenawatch)
 
 /* These three deprecated. */
 #define WAIT_STATE(ch, cycle) do { GET_WAIT_STATE(ch) = (cycle); } while(0)
-#define CHECK_WAIT(ch)                ((ch)->wait > 0)
-#define GET_MOB_WAIT(ch)      GET_WAIT_STATE(ch)
 /* New, preferred macro. */
 #define GET_WAIT_STATE(ch)    ((ch)->wait)
 
 #define SENDOK(ch)    (((ch)->desc || SCRIPT_CHECK((ch), MTRIG_ACT)) && \
-                      (to_sleeping || AWAKE(ch)) && \
-                      !PLR_FLAGGED((ch), PLR_WRITING))
+                      (to_sleeping || char_is_awake(ch)) && \
+                      !char_plr_flagged((ch), PLR_WRITING))
 
 
-#define LIGHT_OK(sub)	(!AFF_FLAGGED(sub, AFF_BLIND) && !PLR_FLAGGED(sub, PLR_EYEC) && \
-   (IS_LIGHT(IN_ROOM(sub)) || AFF_FLAGGED((sub), AFF_INFRAVISION) || (IS_MUTANT(sub) && (GET_GENOME(sub, 0) == 4 || GET_GENOME(sub, 1) == 4)) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
+bool char_light_ok(const struct char_data *sub);
 
-#define INVIS_OK(sub, obj) \
- (!AFF_FLAGGED((obj),AFF_INVISIBLE) || AFF_FLAGGED(sub,AFF_DETECT_INVIS))
+bool char_invis_ok(const struct char_data *sub, const struct char_data *obj);
 
-#define MORT_CAN_SEE(sub, obj) (LIGHT_OK(sub) && INVIS_OK(sub, obj))
+bool char_mort_can_see(const struct char_data *sub, const struct char_data *obj);
 
-#define IMM_CAN_SEE(sub, obj) \
-   (MORT_CAN_SEE(sub, obj) || (!IS_NPC(sub) && PRF_FLAGGED(sub, PRF_HOLYLIGHT)))
+bool char_imm_can_see(const struct char_data *sub, const struct char_data *obj);
 
-#define SELF(sub, obj)  ((sub) == (obj))
+bool char_is_self(const struct char_data *sub, const struct char_data *obj);
 
 /* Can subject see character "obj"? */
-#define CAN_SEE(sub, obj) (SELF(sub, obj) || \
-   ((GET_ADMLEVEL(sub) >= (IS_NPC(obj) ? 0 : GET_INVIS_LEV(obj))) && \
-   IMM_CAN_SEE(sub, obj) && (NOT_HIDDEN(obj) || GET_ADMLEVEL(sub) > 0)))
+bool char_can_see(const struct char_data *sub, const struct char_data *obj);
 
-#define NOT_HIDDEN(ch) (!AFF_FLAGGED(ch, AFF_HIDE))
+bool char_not_hidden(const struct char_data *ch);
 /* End of CAN_SEE */
 
 
-#define INVIS_OK_OBJ(sub, obj) \
-  (!OBJ_FLAGGED((obj), ITEM_INVISIBLE) || AFF_FLAGGED((sub), AFF_DETECT_INVIS))
+bool char_invis_ok_obj(const struct char_data *sub, const struct obj_data *obj);
 
 /* Is anyone carrying this object and if so, are they visible? */
-#define CAN_SEE_OBJ_CARRIER(sub, obj) \
-  ((!obj->carried_by || CAN_SEE(sub, obj->carried_by)) &&	\
-   (!obj->worn_by || CAN_SEE(sub, obj->worn_by)))
+bool char_can_see_obj_carrier(const struct char_data *sub, const struct obj_data *obj);
 
-#define MORT_CAN_SEE_OBJ(sub, obj) \
-  ((LIGHT_OK(sub) || obj->carried_by == sub || obj->worn_by) && INVIS_OK_OBJ(sub, obj) && CAN_SEE_OBJ_CARRIER(sub, obj))
+bool char_mort_can_see_obj(const struct char_data *sub, const struct obj_data *obj);
 
-#define CAN_SEE_OBJ(sub, obj) \
-   (MORT_CAN_SEE_OBJ(sub, obj) || (!IS_NPC(sub) && PRF_FLAGGED((sub), PRF_HOLYLIGHT)))
+bool char_can_see_obj(const struct char_data *sub, const struct obj_data *obj);
 
-#define CAN_CARRY_OBJ(ch,obj)  \
-   (((IS_CARRYING_W(ch) + GET_OBJ_WEIGHT(obj)) <= CAN_CARRY_W(ch)) &&   \
-    ((IS_CARRYING_N(ch) + 1) <= CAN_CARRY_N(ch)))
+bool char_can_carry_obj(struct char_data *ch, struct obj_data *obj);
 
-#define CAN_GET_OBJ(ch, obj)   \
-   (CAN_WEAR((obj), ITEM_WEAR_TAKE) && !SITTING(obj) && CAN_CARRY_OBJ((ch),(obj)) && \
-    CAN_SEE_OBJ((ch),(obj)))
+bool char_can_get_obj(struct char_data *ch, struct obj_data *obj);
 
-#define DISG(ch, vict) ((!PLR_FLAGGED(ch, PLR_DISGUISED)) || \
-   (PLR_FLAGGED(ch, PLR_DISGUISED) && (GET_ADMLEVEL(vict) > 0 || IS_NPC(vict))))
+bool char_disg(const struct char_data *ch, const struct char_data *vict);
 
-#define INTROD(ch, vict) (ch == vict || readIntro(ch, vict) == 1 || (IS_NPC(vict) || IS_NPC(ch) || (GET_ADMLEVEL(ch) > 0 || GET_ADMLEVEL(vict) > 0)))
+bool char_introd(struct char_data *ch, struct char_data *vict);
 
-#define ISWIZ(ch, vict) (ch == vict || GET_ADMLEVEL(ch) > 0 || GET_ADMLEVEL(vict) > 0 || IS_NPC(vict) || IS_NPC(ch))
+bool char_iswiz(const struct char_data *ch, const struct char_data *vict);
 
-#define PERS(ch, vict) ((DISG(ch, vict) ? (CAN_SEE(vict, ch) ? (INTROD(vict, ch) ? (ISWIZ(ch, vict) ? GET_NAME(ch) :\
-                        get_i_name(vict, ch)) : introd_calc(ch)) : "Someone") :\
-                        TRUE_RACE(ch)))
+const char *char_pers(struct char_data *ch, struct char_data *vict);
 
-#define OBJS(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
-	(obj)->short_description  : "something")
+char *obj_shortdesc_for(const struct obj_data *obj, const struct char_data *vict);
 
-#define OBJN(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
-	fname((obj)->name) : "something")
+char *obj_fname_for(const struct obj_data *obj, const struct char_data *vict);
 
 #define EXIT(ch, door)  (world[IN_ROOM(ch)].dir_option[door])
 #define _2ND_EXIT(ch, door) (world[EXIT(ch, door)->to_room].dir_option[door]) 
 #define _3RD_EXIT(ch, door) (world[_2ND_EXIT(ch, door)->to_room].dir_option[door])
 
 
-#define CAN_GO(ch, door) (EXIT(ch,door) && \
-			 (EXIT(ch,door)->to_room != NOWHERE) && \
-			 !IS_SET(EXIT(ch, door)->exit_info, EX_CLOSED))
+bool char_can_go(const struct char_data *ch, int door);
 
 #define RACE(ch)      (juggleRaceName(ch, true))
 #define LRACE(ch)     (juggleRaceName(ch, false))
@@ -435,151 +404,116 @@
 #define CLASS_ABBR(ch) (class_abbrevs[ch->chclass])
 #define RACE_ABBR(ch) (race_abbrevs[ch->race])
 
-#define IS_ROSHI(ch)            (GET_CLASS(ch) == CLASS_ROSHI)
-#define IS_PICCOLO(ch)          (GET_CLASS(ch) == CLASS_PICCOLO)
-#define IS_KRANE(ch)            (GET_CLASS(ch) == CLASS_KRANE)
-#define IS_NAIL(ch)             (GET_CLASS(ch) == CLASS_NAIL)
-#define IS_BARDOCK(ch)          (GET_CLASS(ch) == CLASS_BARDOCK)
-#define IS_GINYU(ch)            (GET_CLASS(ch) == CLASS_GINYU)
-#define IS_FRIEZA(ch)           (GET_CLASS(ch) == CLASS_FRIEZA)
-#define IS_TAPION(ch)           (GET_CLASS(ch) == CLASS_TAPION)
-#define IS_ANDSIX(ch)           (GET_CLASS(ch) == CLASS_ANDSIX)
-#define IS_DABURA(ch)           (GET_CLASS(ch) == CLASS_DABURA)
-#define IS_KABITO(ch)           (GET_CLASS(ch) == CLASS_KABITO)
-#define IS_JINTO(ch)            (GET_CLASS(ch) == CLASS_JINTO)
-#define IS_TSUNA(ch)            (GET_CLASS(ch) == CLASS_TSUNA)
-#define IS_KURZAK(ch)           (GET_CLASS(ch) == CLASS_KURZAK)
+bool char_is_roshi(const struct char_data *ch);
+bool char_is_piccolo(const struct char_data *ch);
+bool char_is_krane(const struct char_data *ch);
+bool char_is_nail(const struct char_data *ch);
+bool char_is_bardock(const struct char_data *ch);
+bool char_is_ginyu(const struct char_data *ch);
+bool char_is_frieza(const struct char_data *ch);
+bool char_is_tapion(const struct char_data *ch);
+bool char_is_andsix(const struct char_data *ch);
+bool char_is_dabura(const struct char_data *ch);
+bool char_is_kabito(const struct char_data *ch);
+bool char_is_jinto(const struct char_data *ch);
+bool char_is_tsuna(const struct char_data *ch);
+bool char_is_kurzak(const struct char_data *ch);
 
-#define IS_ASSASSIN(ch)         (GET_CLASS_RANKS(ch, CLASS_ASSASSIN) > 0)
-#define IS_BLACKGUARD(ch)       (GET_CLASS_RANKS(ch, CLASS_BLACKGUARD) > 0)
-#define IS_DRAGON_DISCIPLE(ch)  (GET_CLASS_RANKS(ch, CLASS_DRAGON_DISCIPLE) > 0)
-#define IS_DUELIST(ch)          (GET_CLASS_RANKS(ch, CLASS_DUELIST) > 0)
-#define IS_DWARVEN_DEFENDER(ch) (GET_CLASS_RANKS(ch, CLASS_DWARVEN_DEFENDER) > 0)
-#define IS_ELDRITCH_KNIGHT(ch)  (GET_CLASS_RANKS(ch, CLASS_ELDRITCH_KNIGHT) > 0)
-#define IS_HIEROPHANT(ch)       (GET_CLASS_RANKS(ch, CLASS_HIEROPHANT) > 0)
-#define IS_HORIZON_WALKER(ch)   (GET_CLASS_RANKS(ch, CLASS_HORIZON_WALKER) > 0)
-#define IS_LOREMASTER(ch)       (GET_CLASS_RANKS(ch, CLASS_LOREMASTER) > 0)
-#define IS_MYSTIC_THEURGE(ch)   (GET_CLASS_RANKS(ch, CLASS_MYSTIC_THEURGE) > 0)
-#define IS_SHADOWDANCER(ch)     (GET_CLASS_RANKS(ch, CLASS_SHADOWDANCER) > 0)
-#define IS_THAUMATURGIST(ch)    (GET_CLASS_RANKS(ch, CLASS_THAUMATURGIST) > 0)
+bool char_is_assassin(const struct char_data *ch);
+bool char_is_blackguard(const struct char_data *ch);
+bool char_is_dragon_disciple(const struct char_data *ch);
+bool char_is_duelist(const struct char_data *ch);
+bool char_is_dwarven_defender(const struct char_data *ch);
+bool char_is_eldritch_knight(const struct char_data *ch);
+bool char_is_hierophant(const struct char_data *ch);
+bool char_is_horizon_walker(const struct char_data *ch);
+bool char_is_loremaster(const struct char_data *ch);
+bool char_is_mystic_theurge(const struct char_data *ch);
+bool char_is_shadowdancer(const struct char_data *ch);
+bool char_is_thaumaturgist(const struct char_data *ch);
 
 
-#define GOLD_CARRY(ch)		(GET_LEVEL(ch) < 100 ? (GET_LEVEL(ch) < 50 ? GET_LEVEL(ch) * 10000 : 500000) : 50000000)
-#define IS_SHADOW_DRAGON1(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON1_VNUM)
-#define IS_SHADOW_DRAGON2(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON2_VNUM)
-#define IS_SHADOW_DRAGON3(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON3_VNUM)
-#define IS_SHADOW_DRAGON4(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON4_VNUM)
-#define IS_SHADOW_DRAGON5(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON5_VNUM)
-#define IS_SHADOW_DRAGON6(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON6_VNUM)
-#define IS_SHADOW_DRAGON7(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON7_VNUM)
-#define CAN_GRAND_MASTER(ch)    (IS_HUMAN(ch))
-#define IS_HUMANOID(ch)         (!IS_SERPENT(ch) && !IS_ANIMAL(ch))
-#define IS_ROBOT(ch)            (IS_ANDROID(ch) || IS_MECHANICAL(ch))
-#define RESTRICTED_RACE(ch)     (IS_MAJIN(ch) || IS_SAIYAN(ch) || IS_BIO(ch) || IS_HOSHIJIN(ch))
-#define CHEAP_RACE(ch)          (IS_TRUFFLE(ch) || IS_MUTANT(ch) || IS_KONATSU(ch) || IS_DEMON(ch) || IS_KANASSAN(ch))
-#define SPAR_TRAIN(ch)          (FIGHTING(ch) && !IS_NPC(ch) && PLR_FLAGGED(ch, PLR_SPAR) &&\
-                                 !IS_NPC(FIGHTING(ch)) && PLR_FLAGGED(FIGHTING(ch), PLR_SPAR))
-#define IS_NONPTRANS(ch)        (IS_HUMAN(ch) || ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !IS_FULLPSSJ(ch) && !PLR_FLAGGED(ch, PLR_LSSJ) && !PLR_FLAGGED(ch, PLR_OOZARU)) ||\
-                                 IS_NAMEK(ch) || IS_MUTANT(ch) || IS_ICER(ch) ||\
-                                 IS_KAI(ch) || IS_KONATSU(ch) || IS_DEMON(ch) || IS_KANASSAN(ch))
-#define IS_FULLPSSJ(ch)             ((IS_SAIYAN(ch) && PLR_FLAGGED(ch, PLR_FPSSJ) && PLR_FLAGGED(ch, PLR_TRANS1)) ||\
-                                 (IS_HALFBREED(ch) && PLR_FLAGGED(ch, PLR_FPSSJ) && PLR_FLAGGED(ch, PLR_TRANS1)))
-#define IS_TRANSFORMED(ch)      (PLR_FLAGGED(ch, PLR_TRANS1) || PLR_FLAGGED(ch, PLR_TRANS2) ||\
-                                 PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4) ||\
-                                 PLR_FLAGGED(ch, PLR_TRANS5) || PLR_FLAGGED(ch, PLR_TRANS6) ||\
-                                 PLR_FLAGGED(ch, PLR_OOZARU))
+int char_gold_carry(const struct char_data *ch);
+bool char_is_shadow_dragon1(const struct char_data *ch);
+bool char_is_shadow_dragon2(const struct char_data *ch);
+bool char_is_shadow_dragon3(const struct char_data *ch);
+bool char_is_shadow_dragon4(const struct char_data *ch);
+bool char_is_shadow_dragon5(const struct char_data *ch);
+bool char_is_shadow_dragon6(const struct char_data *ch);
+bool char_is_shadow_dragon7(const struct char_data *ch);
+bool char_can_grand_master(const struct char_data *ch);
+bool char_is_humanoid(const struct char_data *ch);
+bool char_is_restricted_race(const struct char_data *ch);
+bool char_is_cheap_race(const struct char_data *ch);
+bool char_spar_train(const struct char_data *ch);
+bool char_is_nonptrans(const struct char_data *ch);
+bool char_is_fullpssj(const struct char_data *ch);
+bool char_is_transformed(const struct char_data *ch);
 #define BIRTH_PHASE             (time_info.day <= 15)
 #define LIFE_PHASE              (!BIRTH_PHASE && time_info.day <= 22)
 #define DEATH_PHASE             (!BIRTH_PHASE && !LIFE_PHASE)
-#define MOON_OK(ch)             (HAS_MOON(ch) && MOON_TIMECHECK() && OOZARU_OK(ch))
-#define OOZARU_OK(ch)           (OOZARU_RACE(ch) && PLR_FLAGGED(ch, PLR_STAIL) && !IS_TRANSFORMED(ch))
-#define OOZARU_RACE(ch)         (IS_SAIYAN(ch) || IS_HALFBREED(ch))
+bool char_moon_ok(const struct char_data *ch);
+bool char_oozaru_ok(const struct char_data *ch);
+bool char_is_oozaru_race(const struct char_data *ch);
 #define MOON_TIME               (time_info.hours >= 21 || time_info.hours <= 4)
 #define MOON_DATE               (time_info.day == 19 || time_info.day == 20 || time_info.day == 21)
 bool MOON_TIMECHECK();
-#define ETHER_STREAM(ch)        (ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK) || PLANET_ZENITH(IN_ROOM(ch)))
-#define HAS_MOON(ch)            (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH) ||\
-                                 ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER))
-#define HAS_ARMS(ch)            (((IS_NPC(ch) && (MOB_FLAGGED(ch, MOB_LARM) || \
-                                 MOB_FLAGGED(ch, MOB_RARM))) || GET_LIMBCOND(ch, 1) > 0 || \
-                                 GET_LIMBCOND(ch, 2) > 0 || \
-                                 PLR_FLAGGED(ch, PLR_CRARM) || \
-                                 PLR_FLAGGED(ch, PLR_CLARM)) && \
-                                 ((!GRAPPLING(ch) && !GRAPPLED(ch)) || \
-                                 (GRAPPLING(ch) && GRAPTYPE(ch) == 3) || \
-                                 (GRAPPLED(ch) && GRAPTYPE(ch) != 1 && GRAPTYPE(ch) != 4)))
-#define HAS_LEGS(ch)            (((IS_NPC(ch) && (MOB_FLAGGED(ch, MOB_LLEG) || \
-                                 MOB_FLAGGED(ch, MOB_RLEG))) || GET_LIMBCOND(ch, 3) > 0 || \
-                                 GET_LIMBCOND(ch, 4) > 0 || \
-                                 PLR_FLAGGED(ch, PLR_CRLEG) || \
-                                 PLR_FLAGGED(ch, PLR_CLLEG)) && \
-                                 ((!GRAPPLING(ch) && !GRAPPLED(ch)) || \
-                                 (GRAPPLING(ch) && GRAPTYPE(ch) == 3) || \
-                                 (GRAPPLED(ch) && GRAPTYPE(ch) != 1)))
+bool char_ether_stream(const struct char_data *ch);
+bool char_has_moon(const struct char_data *ch);
+bool char_has_arms(const struct char_data *ch);
+bool char_has_legs(const struct char_data *ch);
 
-#define IS_HUMAN(ch)            (GET_RACE(ch) == RACE_HUMAN)
-#define IS_SAIYAN(ch)           (GET_RACE(ch) == RACE_SAIYAN)
-#define IS_ICER(ch)             (GET_RACE(ch) == RACE_ICER)
-#define IS_KONATSU(ch)          (GET_RACE(ch) == RACE_KONATSU)
-#define IS_NAMEK(ch)            (GET_RACE(ch) == RACE_NAMEK)
-#define IS_MUTANT(ch)           (GET_RACE(ch) == RACE_MUTANT)
-#define IS_KANASSAN(ch)         (GET_RACE(ch) == RACE_KANASSAN)
-#define IS_HALFBREED(ch)        (GET_RACE(ch) == RACE_HALFBREED)
-#define IS_BIO(ch)              (GET_RACE(ch) == RACE_BIO)
-#define IS_ANDROID(ch)          (GET_RACE(ch) == RACE_ANDROID)
-#define IS_DEMON(ch)            (GET_RACE(ch) == RACE_DEMON)
-#define IS_MAJIN(ch)            (GET_RACE(ch) == RACE_MAJIN)
-#define IS_KAI(ch)              (GET_RACE(ch) == RACE_KAI)
-#define IS_TRUFFLE(ch)          (GET_RACE(ch) == RACE_TRUFFLE)
-#define IS_HOSHIJIN(ch)         (GET_RACE(ch) == RACE_HOSHIJIN)
-#define IS_ANIMAL(ch)           (GET_RACE(ch) == RACE_ANIMAL)
-#define IS_SAIBA(ch)              (GET_RACE(ch) == RACE_SAIBA)
-#define IS_SERPENT(ch)            (GET_RACE(ch) == RACE_SERPENT)
-#define IS_OGRE(ch)            (GET_RACE(ch) == RACE_OGRE)
-#define IS_YARDRATIAN(ch)         (GET_RACE(ch) == RACE_YARDRATIAN)
-#define IS_ARLIAN(ch)           (GET_RACE(ch) == RACE_ARLIAN)
-#define IS_DRAGON(ch)           (GET_RACE(ch) == RACE_DRAGON)
-#define IS_MECHANICAL(ch)          (GET_RACE(ch) == RACE_MECHANICAL)
-#define IS_SPIRIT(ch)           (GET_RACE(ch) == RACE_SPIRIT)
-#define IS_UNDEAD(ch)           (IS_AFFECTED(ch, AFF_UNDEAD))
+bool char_is_human(const struct char_data *ch);
+bool char_is_saiyan(const struct char_data *ch);
+bool char_is_icer(const struct char_data *ch);
+bool char_is_konatsu(const struct char_data *ch);
+bool char_is_namek(const struct char_data *ch);
+bool char_is_mutant(const struct char_data *ch);
+bool char_is_kanassan(const struct char_data *ch);
+bool char_is_halfbreed(const struct char_data *ch);
+bool char_is_bio(const struct char_data *ch);
+bool char_is_android(const struct char_data *ch);
+bool char_is_demon(const struct char_data *ch);
+bool char_is_majin(const struct char_data *ch);
+bool char_is_kai(const struct char_data *ch);
+bool char_is_truffle(const struct char_data *ch);
+bool char_is_hoshijin(const struct char_data *ch);
+bool char_is_animal(const struct char_data *ch);
+bool char_is_saiba(const struct char_data *ch);
+bool char_is_serpent(const struct char_data *ch);
+bool char_is_ogre(const struct char_data *ch);
+bool char_is_yardratian(const struct char_data *ch);
+bool char_is_arlian(const struct char_data *ch);
+bool char_is_dragon(const struct char_data *ch);
+bool char_is_mechanical(const struct char_data *ch);
+bool char_is_undead(const struct char_data *ch);
 
-#define IS_MALE(ch)             (GET_SEX(ch) == SEX_MALE)
-#define IS_FEMALE(ch)           (GET_SEX(ch) == SEX_FEMALE)
-#define IS_NEUTER(ch)           (!IS_MALE(ch) && !IS_FEMALE(ch))
+bool char_is_male(const struct char_data *ch);
+bool char_is_female(const struct char_data *ch);
 
-#define OUTSIDE(ch)	(OUTSIDE_ROOMFLAG(ch) && OUTSIDE_SECTTYPE(ch))
+bool char_is_outside(const struct char_data *ch);
 
-#define OUTSIDE_ROOMFLAG(ch)	(!ROOM_FLAGGED(IN_ROOM(ch), ROOM_INDOORS) && \
-			 !ROOM_FLAGGED(IN_ROOM(ch), ROOM_UNDERGROUND) && \
-                          !ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE))
+bool char_outside_roomflag(const struct char_data *ch);
 
-#define OUTSIDE_SECTTYPE(ch)	((SECT(IN_ROOM(ch)) != SECT_INSIDE) && \
-                         (SECT(IN_ROOM(ch)) != SECT_UNDERWATER) && \
-                          (SECT(IN_ROOM(ch)) != SECT_IMPORTANT) && \
-                           (SECT(IN_ROOM(ch)) != SECT_SHOP) && \
-                            (SECT(IN_ROOM(ch)) != SECT_SPACE))
+bool char_outside_secttype(const struct char_data *ch);
 
-#define DIRT_ROOM(ch) (OUTSIDE_SECTTYPE(ch) && ((SECT(IN_ROOM(ch)) != SECT_WATER_NOSWIM) && \
-                       (SECT(IN_ROOM(ch)) != SECT_WATER_SWIM)))
 
 #define SPEAKING(ch)     ((ch)->player_specials->speaking)
 
-#define HSHR(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "his":"her") :"its")
-#define HSSH(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "he" :"she") : "it")
-#define HMHR(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "him":"her") : "it")
-#define MAFE(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "male":"female") : "questionably gendered")
+char *char_hshr(const struct char_data *ch);
+char *char_hssh(const struct char_data *ch);
+char *char_hmhr(const struct char_data *ch);
+char *char_mafe(const struct char_data *ch);
 
 
 #define GET_SPELLMEM(ch, i)	((ch->player_specials->spellmem[i]))
 #define GET_MEMCURSOR(ch)	((ch->player_specials->memcursor))
 /* returns the number of spells per slot */
 #define GET_SPELL_LEVEL(ch, i)	((ch)->player_specials->spell_level[i])
-#define IS_ARCANE(ch)		(IS_WIZARD(ch))
-#define IS_DIVINE(ch)		(IS_CLERIC(ch))
 #define HAS_FEAT(ch, i)		((ch)->feats[i])
-#define HAS_COMBAT_FEAT(ch,i,j)	IS_SET_AR((ch)->combat_feats[(i)], (j))
+bool char_has_combat_feat(const struct char_data *ch, int i, int j);
 #define SET_COMBAT_FEAT(ch,i,j)	SET_BIT_AR((ch)->combat_feats[(i)], (j))
-#define HAS_SCHOOL_FEAT(ch,i,j)	IS_SET((ch)->school_feats[(i)], (j))
+bool char_has_school_feat(const struct char_data *ch, int i, bitvector_t j);
 #define SET_SCHOOL_FEAT(ch,i,j)	SET_BIT((ch)->school_feats[(i)], (j))
 #define GET_BAB(ch)		GET_POLE_BONUS(ch)
 #define SET_FEAT(ch, i, value)	do { CHECK_PLAYER_SPECIAL((ch), (ch)->feats[i]) = value; } while(0)
@@ -591,13 +525,6 @@ bool MOON_TIMECHECK();
 #define GET_CLASS_FEATS(ch,cl)	(ch->player_specials->class_feat_points[cl])
 #define GET_EPIC_CLASS_FEATS(ch,cl) \
 				(ch->player_specials->epic_class_feat_points[cl])
-#define IS_EPIC_LEVEL(ch)	(GET_CLASS_LEVEL(ch) >= 20)
-#define HAS_CRAFT_SKILL(ch,i,j)	IS_SET_AR((ch)->craft_skill[(i)], (j))
-#define SET_CRAFT_SKILL(ch,i,j)	SET_BIT_AR((ch)->craft_skill[(i)], (j))
-#define HAS_KNOWLEDGE_SKILL(ch,i,j)	IS_SET_AR((ch)->knowledge_skill[(i)], (j))
-#define SET_KNOWLEDGE_SKILL(ch,i,j)	SET_BIT_AR((ch)->knowledge_skill[(i)], (j))
-#define HAS_PROFESSION_SKILL(ch,i,j)	IS_SET_AR((ch)->profession_skill[(i)], (j))
-#define SET_PROFESSION_SKILL(ch,i,j)	SET_BIT_AR((ch)->profession_skill[(i)], (j))
 
 #define MOB_LOADROOM(ch)      ((ch)->hometown)  /*hometown not used for mobs*/
 #define GET_MURDER(ch)          CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->murder))
@@ -817,10 +744,9 @@ int planet_check(struct char_data *ch, struct char_data *vict);
 #define EXIT_NA         2       /* Not implemented - do not use     */
 #define EXIT_COMPLETE   3       /* Full display                     */
 
-#define _exitlevel(ch) (!IS_NPC(ch) ? (PRF_FLAGGED((ch),PRF_AUTOEXIT) ? 1 : 0 ) + (PRF_FLAGGED((ch),PRF_FULL_EXIT) ? 2 : 0 ) : 0 )
-#define EXIT_LEV(ch) (_exitlevel(ch))
+int char_exit_level(const struct char_data *ch);
 
-#define GET_BANK_INTEREST(ch) MIN(25000, (int)(((double)GET_BANK_GOLD((ch)) * 0.04)))
+int char_get_bank_interest(const struct char_data *ch);
 
 bool race_has_tail(int r_id);
 void char_lose_tail(char_data *ch);

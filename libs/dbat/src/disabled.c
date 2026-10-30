@@ -24,7 +24,7 @@ ACMD(do_disable)
   int i, length;
   DISABLED_DATA *p, *temp;
 
-  if (IS_NPC(ch)) {
+  if (char_is_npc(ch)) {
     send_to_char(ch, "Monsters can't disable commands, silly.\r\n");
     return;
   }
@@ -61,7 +61,7 @@ ACMD(do_disable)
     REMOVE_FROM_LIST(p, disabled_first, next, temp);
     send_to_char(ch, "Command '%s' enabled.\r\n", p->command->command);
     mudlog(BRF, ADMLVL_IMMORT, TRUE, "(GC) %s has enabled the command '%s'.",
-      GET_NAME(ch), p->command->command);
+      char_get_name(ch), p->command->command);
     free(p->disabled_by);
     free(p);
     save_disabled(); /* save to disk */
@@ -70,7 +70,7 @@ ACMD(do_disable)
 
     for (length = strlen(argument), i = 0; *cmd_info[i].command != '\n'; i++)
       if (!strncmp(cmd_info[i].command, argument, length))
-        if (GET_LEVEL(ch) >= cmd_info[i].minimum_level &&
+        if (char_get_level(ch) >= cmd_info[i].minimum_level &&
             GET_ADMLEVEL(ch) >= cmd_info[i].minimum_admlevel)
           break;
 
@@ -88,14 +88,14 @@ ACMD(do_disable)
     /* Disable the command */
     CREATE(p, struct disabled_data, 1);
     p->command = &cmd_info[i];
-    p->disabled_by = strdup(GET_NAME(ch)); /* save name of disabler  */
+    p->disabled_by = strdup(char_get_name(ch)); /* save name of disabler  */
     p->level = GET_ADMLEVEL(ch);           /* save level of disabler */    
     p->subcmd = cmd_info[i].subcmd;       /* the subcommand if any  */    
     p->next = disabled_first;
     disabled_first = p; /* add before the current first element */
     send_to_char(ch, "Command '%s' disabled.\r\n", p->command->command);
     mudlog(BRF, ADMLVL_IMMORT, TRUE, "(GC) %s has disabled the command '%s'.",
-      GET_NAME(ch), p->command->command);
+      char_get_name(ch), p->command->command);
     save_disabled(); /* save to disk */
   }
 }

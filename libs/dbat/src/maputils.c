@@ -53,10 +53,10 @@ int checkship(int rnum, int vnum)
  int there = FALSE;
 
  for (i = world[rnum].contents; i; i = i->next_content) {
-  if (!ROOM_FLAGGED(rnum, ROOM_NEBULA)) {
+  if (!rroom_flagged(rnum, ROOM_NEBULA)) {
    if (GET_OBJ_TYPE(i) == ITEM_VEHICLE && there != TRUE) {
     there = TRUE;
-    ping_ship(GET_OBJ_VNUM(i), vnum);
+    ping_ship(obj_get_vnum(i), vnum);
    } 
   }
  }
@@ -86,7 +86,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@WBB");
    }
   } /* End Buoy */ 
-  else if (ROOM_FLAGGED(rnum, ROOM_EORBIT)) {
+  else if (rroom_flagged(rnum, ROOM_EORBIT)) {
    if (there) {
     sprintf(mapchar, "@GE@RX");
    } else if (enemy == TRUE) {
@@ -95,7 +95,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@GEE");
    }
   } /* End Earth Character */
-  else if (ROOM_FLAGGED(rnum, ROOM_CORBIT)) {
+  else if (rroom_flagged(rnum, ROOM_CORBIT)) {
    if (there) {
     sprintf(mapchar, "@MC@RX");
    } else if (enemy == TRUE) {
@@ -104,7 +104,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@MCC");
    }
   } /* End Cerria Character */
-  else if (ROOM_FLAGGED(rnum, ROOM_FORBIT)) {
+  else if (rroom_flagged(rnum, ROOM_FORBIT)) {
    if (there) {
     sprintf(mapchar, "@CF@RX");
    } else if (enemy == TRUE) {
@@ -113,7 +113,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@CFF");
    }
   } /* End Frigid Character */
-  else if (ROOM_FLAGGED(rnum, ROOM_KORBIT)) {
+  else if (rroom_flagged(rnum, ROOM_KORBIT)) {
    if (there) {
     sprintf(mapchar, "@mK@RX");
    } else if (enemy == TRUE) {
@@ -122,7 +122,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@mKK");
    }
   } /* End Konack Character */
-  else if (ROOM_FLAGGED(rnum, ROOM_NORBIT)) {
+  else if (rroom_flagged(rnum, ROOM_NORBIT)) {
    if (there) {
     sprintf(mapchar, "@gN@RX");
    } else if (enemy == TRUE) {
@@ -131,7 +131,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@gNN");
    }
   } /* End Namek Character */
-  else if (GET_ROOM_VNUM(rnum) == 50772) {
+  else if (rroom_get_vnum(rnum) == 50772) {
    if (there) {
     sprintf(mapchar, "@cZ@RX");
    } else if (enemy == TRUE) {
@@ -140,7 +140,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@cZZ");
    }
   } /* End Zenith Character */
-  else if (ROOM_FLAGGED(rnum, ROOM_VORBIT)) {
+  else if (rroom_flagged(rnum, ROOM_VORBIT)) {
    if (there) {
     sprintf(mapchar, "@YV@RX");
    } else if (enemy == TRUE) {
@@ -149,7 +149,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@YVV");
    }
   } /* End Vegeta Character */
-  else if (ROOM_FLAGGED(rnum, ROOM_AORBIT)) {
+  else if (rroom_flagged(rnum, ROOM_AORBIT)) {
    if (there) {
     sprintf(mapchar, "@BA@RX");
    } else if (enemy == TRUE) {
@@ -158,7 +158,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@BAA");
    }
   } /* End Aether Character */
-  else if (ROOM_FLAGGED(rnum, ROOM_YORBIT)) {
+  else if (rroom_flagged(rnum, ROOM_YORBIT)) {
    if (there) {
     sprintf(mapchar, "@MY@RX");
    } else if (enemy == TRUE) {
@@ -167,7 +167,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@MYY");
    }
   } /* End Yardrat Character */
-  else if (ROOM_FLAGGED(rnum, ROOM_KANORB)) {
+  else if (rroom_flagged(rnum, ROOM_KANORB)) {
    if (there) {
     sprintf(mapchar, "@CK@RX");
    } else if (enemy == TRUE) {
@@ -176,7 +176,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@CKK");
    }
   } /* End Kanassa Character */
-  else if (ROOM_FLAGGED(rnum, ROOM_ARLORB)) {
+  else if (rroom_flagged(rnum, ROOM_ARLORB)) {
    if (there) {
     sprintf(mapchar, "@mA@RX");
    } else if (enemy == TRUE) {
@@ -185,7 +185,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@mAA");
    }
   } /* End Arlia Character */
-  else if (ROOM_FLAGGED(rnum, ROOM_NEBULA)) {
+  else if (rroom_flagged(rnum, ROOM_NEBULA)) {
    if (there) {
     sprintf(mapchar, "@m&@RX");
    } else if (enemy == TRUE) {
@@ -194,7 +194,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@m&&");
    }
   } /* End Nebula Character */
-  else if (GET_ROOM_VNUM(rnum) == 38028) {
+  else if (rroom_get_vnum(rnum) == 38028) {
    if (there) {
     sprintf(mapchar, "@yQ@RX");
    } else if (enemy == TRUE) {
@@ -203,7 +203,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@yQQ");
    }
   } /* End Namek Character */
-  else if (ROOM_FLAGGED(rnum, ROOM_ASTERO)) {
+  else if (rroom_flagged(rnum, ROOM_ASTERO)) {
    if (there) {
     sprintf(mapchar, "@y:@RX");
    } else if (enemy == TRUE) {
@@ -212,7 +212,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@y::");
    }
   } /* End Asteroid Character */
-  else if (ROOM_FLAGGED(rnum, ROOM_WORMHO)) {
+  else if (rroom_flagged(rnum, ROOM_WORMHO)) {
    if (there) {
     sprintf(mapchar, "@b@1*@RX@n");
    } else if (enemy == TRUE) {
@@ -221,7 +221,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@b@1**@n");
    }
   } /* End Wormhole Character */
-  else if (ROOM_FLAGGED(rnum, ROOM_STATION)) {
+  else if (rroom_flagged(rnum, ROOM_STATION)) {
    if (there) {
     sprintf(mapchar, "@DS@RX");
    } else if (enemy == TRUE) {
@@ -230,7 +230,7 @@ char *getmapchar(int rnum, struct char_data * ch, int start, int vnum) {
     sprintf(mapchar, "@DSS");
    }
   } /* End Station Character */
-  else if (ROOM_FLAGGED(rnum, ROOM_STAR)) {
+  else if (rroom_flagged(rnum, ROOM_STAR)) {
    if (there) {
     sprintf(mapchar, "@6 @RX@n");
    } else if (enemy == TRUE) {

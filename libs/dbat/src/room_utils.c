@@ -10,7 +10,7 @@ int num_pc_in_room(struct room_data *room)
   struct char_data *ch;
 
   for (ch = room->people; ch != NULL; ch = ch->next_in_room)
-    if (!IS_NPC(ch))
+    if (!char_is_npc(ch))
       i++;
 
   return (i);
@@ -25,7 +25,7 @@ int cook_element(room_rnum room) {
   next_obj = obj->next_content;
   if (GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE) {
    found = 1;
-  } else if (GET_OBJ_VNUM(obj) == 19093) {
+  } else if (obj_get_vnum(obj) == 19093) {
    found = 2;
   }
  }
@@ -38,7 +38,7 @@ int cook_element(room_rnum room) {
  * Outside rooms are dark at sunset and night.  */
 int room_is_dark(room_rnum room)
 {
-  if (!VALID_ROOM_RNUM(room)) {
+  if (!rroom_is_valid(room)) {
     log("room_is_dark: Invalid room rnum %d. (0-%d)", room, top_of_world);
     return (FALSE);
   }
@@ -49,23 +49,23 @@ int room_is_dark(room_rnum room)
   if (cook_element(room))
    return (FALSE);
 
-  if (ROOM_FLAGGED(room, ROOM_NOINSTANT) && ROOM_FLAGGED(room, ROOM_DARK)) {
+  if (rroom_flagged(room, ROOM_NOINSTANT) && rroom_flagged(room, ROOM_DARK)) {
    return (TRUE);
   }
-  if (ROOM_FLAGGED(room, ROOM_NOINSTANT) && !ROOM_FLAGGED(room, ROOM_DARK)) {
+  if (rroom_flagged(room, ROOM_NOINSTANT) && !rroom_flagged(room, ROOM_DARK)) {
 	return (FALSE);
  }
 
-  if (ROOM_FLAGGED(room, ROOM_DARK))
+  if (rroom_flagged(room, ROOM_DARK))
     return (TRUE);
 
-  if (ROOM_FLAGGED(room, ROOM_INDOORS))
+  if (rroom_flagged(room, ROOM_INDOORS))
     return (FALSE);
 
-  if (SECT(room) == SECT_INSIDE || SECT(room) == SECT_CITY || SECT(room) == SECT_IMPORTANT || SECT(room) == SECT_SHOP)
+  if (rroom_sect(room) == SECT_INSIDE || rroom_sect(room) == SECT_CITY || rroom_sect(room) == SECT_IMPORTANT || rroom_sect(room) == SECT_SHOP)
     return (FALSE);
 
-  if (SECT(room) == SECT_SPACE)
+  if (rroom_sect(room) == SECT_SPACE)
     return (FALSE);
 
   if (weather_info.sunlight == SUN_SET)
@@ -230,4 +230,44 @@ int room_get_geffect(const struct room_data *room) {
 void room_set_geffect(struct room_data *room, int geffect) {
     if (!room_is_valid(room)) return;
     room->geffect = geffect;
+}
+
+/* Formerly macros in room_utils.h. */
+
+int rroom_sect(room_rnum room) {
+    return (rroom_is_valid(room) ? world[(room)].sector_type : SECT_INSIDE);
+}
+
+bool rroom_sunken(room_rnum room) {
+    return (ROOM_EFFECT(room) < 0 || rroom_sect(room) == SECT_UNDERWATER);
+}
+
+bool rroom_is_light(room_rnum room) {
+    return (!room_is_dark(room));
+}
+
+bool rroom_is_valid(room_rnum rnum) {
+    return ((rnum) != NOWHERE && (rnum) <= top_of_world);
+}
+
+room_vnum rroom_get_vnum(room_rnum rnum) {
+    return ((room_vnum)(rroom_is_valid(rnum) ? world[(rnum)].number : NOWHERE));
+}
+
+spec_proc_func rroom_get_spec(room_rnum room) {
+    return (rroom_is_valid(room) ? world[(room)].func : NULL);
+}
+
+bool rroom_planet_zenith(room_rnum room) {
+    return ((rroom_get_vnum(room) >= 3400 && rroom_get_vnum(room) <= 3599)
+           || (rroom_get_vnum(room) >= 62900 && rroom_get_vnum(room) <= 62999)
+           || (rroom_get_vnum(room) == 19600));
+}
+
+bool rroom_flagged(room_rnum loc, int flag) {
+    return (IS_SET_AR(ROOM_FLAGS(loc), (flag)));
+}
+
+bool room_exit_flagged(const struct room_direction_data *ex, bitvector_t flag) {
+    return (IS_SET((ex)->exit_info, (flag)));
 }

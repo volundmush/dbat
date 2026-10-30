@@ -73,7 +73,7 @@ void item_check(struct obj_data *object, struct char_data *ch)
 {
   int where=0;
 
-  if (IS_HUMANOID(ch) && !(mob_index[GET_MOB_RNUM(ch)].func == shop_keeper)) {
+  if (char_is_humanoid(ch) && !(mob_index[GET_MOB_RNUM(ch)].func == shop_keeper)) {
     if (invalid_align(ch, object) || invalid_class(ch, object))
       return;
 

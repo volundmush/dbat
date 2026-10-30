@@ -229,7 +229,7 @@ if (vzone_num < 0) {
     if (world[i].zone < real_zone(rznum))
       break;
     else
-      world[i].zone = real_zone_by_thing(GET_ROOM_VNUM(i)); 
+      world[i].zone = real_zone_by_thing(rroom_get_vnum(i)); 
 
   add_to_save_list(zone->number, SL_ZON);
   return rznum;

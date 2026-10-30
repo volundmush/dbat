@@ -68,13 +68,13 @@ int mag_materials(struct char_data *ch, int item0, int item1, int item2,
   struct obj_data *obj0 = NULL, *obj1 = NULL, *obj2 = NULL;
 
   for (tobj = ch->carrying; tobj; tobj = tobj->next_content) {
-    if ((item0 > 0) && (GET_OBJ_VNUM(tobj) == item0)) {
+    if ((item0 > 0) && (obj_get_vnum(tobj) == item0)) {
       obj0 = tobj;
       item0 = -1;
-    } else if ((item1 > 0) && (GET_OBJ_VNUM(tobj) == item1)) {
+    } else if ((item1 > 0) && (obj_get_vnum(tobj) == item1)) {
       obj1 = tobj;
       item1 = -1;
-    } else if ((item2 > 0) && (GET_OBJ_VNUM(tobj) == item2)) {
+    } else if ((item2 > 0) && (obj_get_vnum(tobj) == item2)) {
       obj2 = tobj;
       item2 = -1;
     }
@@ -125,12 +125,12 @@ int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum, i
     stype = SAVING_WILL;
   else
     return FALSE;
-  total = GET_SAVE(victim, stype) + rand_number(1, 20);
+  total = char_get_save(victim, stype) + rand_number(1, 20);
   dc = spell_info[spellnum].spell_level + level + ability_mod_value(cast_stat);
   if (ch) {
-    if (HAS_SCHOOL_FEAT(ch, CFEAT_SPELL_FOCUS, spell_info[spellnum].school))
+    if (char_has_school_feat(ch, CFEAT_SPELL_FOCUS, spell_info[spellnum].school))
       dc++;
-    if (HAS_SCHOOL_FEAT(ch, CFEAT_GREATER_SPELL_FOCUS, spell_info[spellnum].school))
+    if (char_has_school_feat(ch, CFEAT_GREATER_SPELL_FOCUS, spell_info[spellnum].school))
       dc++;
   }
   if (total >= dc)
@@ -184,10 +184,10 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
     /* Mostly clerics */
   case SPELL_DISPEL_EVIL:
     dam = dice(6, 8) + 6;
-    if (IS_EVIL(ch)) {
+    if (char_is_evil(ch)) {
       victim = ch;
       dam = GET_HIT(ch) - 1;
-    } else if (IS_GOOD(victim)) {
+    } else if (char_is_good(victim)) {
       act("The gods protect $N.", FALSE, ch, 0, victim, TO_CHAR);
       return (0);
     }
@@ -195,10 +195,10 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
 
   case SPELL_DISPEL_GOOD:
     dam = dice(6, 8) + 6;
-    if (IS_GOOD(ch)) {
+    if (char_is_good(ch)) {
       victim = ch;
       dam = GET_HIT(ch) - 1;
-    } else if (IS_EVIL(victim)) {
+    } else if (char_is_evil(victim)) {
       act("The gods protect $N.", FALSE, ch, 0, victim, TO_CHAR);
       return (0);
     }
@@ -213,7 +213,7 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
     break;
 
   case SPELL_ENERGY_DRAIN:
-    if (GET_LEVEL(victim) <= 2)
+    if (char_get_level(victim) <= 2)
       dam = 100;
     else
       dam = dice(1, 10);
@@ -237,7 +237,7 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
     break;
 
   case SPELL_DISRUPT_UNDEAD:
-    if (AFF_FLAGGED(victim, AFF_UNDEAD))
+    if (char_aff_flagged(victim, AFF_UNDEAD))
       dam = dice(1, 6);
     else {
       send_to_char(ch, "This magic only affects the undead!\r\n");
@@ -337,7 +337,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
   case SPELL_MAGE_ARMOR:
     af[0].location = APPLY_AC;
     af[0].modifier = 40;
-    af[0].duration = 1 * GET_LEVEL(ch);
+    af[0].duration = 1 * char_get_level(ch);
     accum_duration = FALSE;
     to_vict = "You feel someone protecting you.";
     break;
@@ -356,7 +356,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
     break;
 
   case SPELL_BLINDNESS:
-    if (MOB_FLAGGED(victim,MOB_NOBLIND)) {
+    if (char_mob_flagged(victim,MOB_NOBLIND)) {
       send_to_char(ch, "You fail.\r\n");
       return;
     }
@@ -487,9 +487,9 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
     break;
 
   case SPELL_SLEEP:
-    if (!CONFIG_PK_ALLOWED && !IS_NPC(ch) && !IS_NPC(victim))
+    if (!CONFIG_PK_ALLOWED && !char_is_npc(ch) && !char_is_npc(victim))
       return;
-    if (MOB_FLAGGED(victim, MOB_NOSLEEP))
+    if (char_mob_flagged(victim, MOB_NOSLEEP))
       return;
 
     af[0].duration = 4 + (level / 4);
@@ -503,9 +503,9 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
     break;
 
  case SPELL_HAYASA:
-    if (!CONFIG_PK_ALLOWED && !IS_NPC(ch) && !IS_NPC(victim))
+    if (!CONFIG_PK_ALLOWED && !char_is_npc(ch) && !char_is_npc(victim))
       return;
-    if (MOB_FLAGGED(victim, MOB_NOSLEEP))
+    if (char_mob_flagged(victim, MOB_NOSLEEP))
       return;
 
     af[0].duration = 4 + (level / 4);
@@ -542,7 +542,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
     break;
 
   case SPELL_STONESKIN:
-    af[0].duration = 1 * GET_LEVEL(ch);
+    af[0].duration = 1 * char_get_level(ch);
     accum_duration = FALSE;
     to_vict = "Your skin hardens into stone!";
     break;
@@ -554,9 +554,9 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
    * perform the affect.  This prevents people from un-sancting mobs
    * by sancting them and waiting for it to fade, for example.
    */
-  if (IS_NPC(victim) && !affected_by_spell(victim, spellnum))
+  if (char_is_npc(victim) && !affected_by_spell(victim, spellnum))
     for (i = 0; i < MAX_SPELL_AFFECTS; i++)
-      if (AFF_FLAGGED(victim, af[i].bitvector)) {
+      if (char_aff_flagged(victim, af[i].bitvector)) {
 	send_to_char(ch, "%s", CONFIG_NOEFFECT);
 	return;
       }
@@ -621,7 +621,7 @@ void mag_groups(int level, struct char_data *ch, int spellnum)
   if (ch == NULL)
     return;
 
-  if (!AFF_FLAGGED(ch, AFF_GROUP))
+  if (!char_aff_flagged(ch, AFF_GROUP))
     return;
   if (ch->master != NULL)
     k = ch->master;
@@ -632,14 +632,14 @@ void mag_groups(int level, struct char_data *ch, int spellnum)
     tch = f->follower;
     if (IN_ROOM(tch) != IN_ROOM(ch))
       continue;
-    if (!AFF_FLAGGED(tch, AFF_GROUP))
+    if (!char_aff_flagged(tch, AFF_GROUP))
       continue;
     if (ch == tch)
       continue;
     perform_mag_groups(level, ch, tch, spellnum);
   }
 
-  if ((k != ch) && AFF_FLAGGED(k, AFF_GROUP))
+  if ((k != ch) && char_aff_flagged(k, AFF_GROUP))
     perform_mag_groups(level, ch, k, spellnum);
   perform_mag_groups(level, ch, ch, spellnum);
 }
@@ -710,11 +710,11 @@ void mag_areas(int level, struct char_data *ch, int spellnum)
 
     if (tch == ch)
       continue;
-    if (ADM_FLAGGED(tch, ADM_NODAMAGE))
+    if (char_adm_flagged(tch, ADM_NODAMAGE))
       continue;
-    if (!CONFIG_PK_ALLOWED && !IS_NPC(ch) && !IS_NPC(tch))
+    if (!CONFIG_PK_ALLOWED && !char_is_npc(ch) && !char_is_npc(tch))
       continue;
-    if (!IS_NPC(ch) && IS_NPC(tch) && AFF_FLAGGED(tch, AFF_CHARM))
+    if (!char_is_npc(ch) && char_is_npc(tch) && char_aff_flagged(tch, AFF_CHARM))
       continue;
 
     /* Doesn't matter if they die here so we don't check. -gg 6/24/98 */
@@ -882,7 +882,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
       send_to_char(ch, "With what corpse?\r\n");
       return;
     }
-    if (!IS_CORPSE(obj)) {
+    if (!obj_is_corpse(obj)) {
       send_to_char(ch, "That's not a corpse!\r\n");
       return;
     }
@@ -909,7 +909,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
       if (!*buf)
         buf = NULL;
     }
-    j = ALIGN_TYPE(ch);
+    j = char_align_type(ch);
     if (buf) {
       buf = any_one_arg(buf, buf2);
       for (i = lev - 1; i >= 0; i--) {
@@ -958,7 +958,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
     return;
   }
 
-  if (AFF_FLAGGED(ch, AFF_CHARM)) {
+  if (char_aff_flagged(ch, AFF_CHARM)) {
     send_to_char(ch, "You are too giddy to have any followers!\r\n");
     return;
   }
@@ -1015,7 +1015,7 @@ void mag_points(int level, struct char_data *ch, struct char_data *victim,
   case SPELL_HEAL:
     healing = 100 + dice(3, 8);
     send_to_char(victim, "A warm feeling floods your body.\r\n");
-    if (AFF_FLAGGED(ch, AFF_CDEATH)) {
+    if (char_aff_flagged(ch, AFF_CDEATH)) {
       affectv_from_char(ch, ART_QUIVERING_PALM);
       send_to_char(ch, "Your nerves settle slightly\r\n");
     }
@@ -1103,14 +1103,14 @@ void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
 
   switch (spellnum) {
     case SPELL_BLESS:
-      if (!OBJ_FLAGGED(obj, ITEM_BLESS) &&
+      if (!obj_flagged(obj, ITEM_BLESS) &&
 	  (GET_OBJ_WEIGHT(obj) <= 5 * level)) {
 	SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BLESS);
 	to_char = "$p glows briefly.";
       }
       break;
     case SPELL_INVISIBLE:
-      if (!OBJ_FLAGGED(obj, ITEM_NOINVIS | ITEM_INVISIBLE)) {
+      if (!obj_flagged(obj, ITEM_NOINVIS | ITEM_INVISIBLE)) {
         SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_INVISIBLE);
         to_char = "$p vanishes.";
       }
@@ -1124,7 +1124,7 @@ void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
       }
       break;
     case SPELL_REMOVE_CURSE:
-      if (OBJ_FLAGGED(obj, ITEM_NODROP)) {
+      if (obj_flagged(obj, ITEM_NODROP)) {
         REMOVE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_NODROP);
         if (GET_OBJ_TYPE(obj) == ITEM_WEAPON)
           GET_OBJ_VAL(obj, VAL_WEAPON_DAMSIZE)++;
@@ -1218,7 +1218,7 @@ void affect_update_violence(void)
               send_to_char(i, "%s\r\n", spell_info[af->type].wear_off_msg);
           if (af->bitvector == AFF_SUMMONED) {
             stop_follower(i);
-            if (!DEAD(i))
+            if (!char_is_dead(i))
               extract_char(i);
           }
           if (af->type == ART_QUIVERING_PALM) {
@@ -1283,7 +1283,7 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
     to_room = "$n disappears.";
     break;
   case ART_QUIVERING_PALM:
-    if (GET_LEVEL(ch) <= GET_LEVEL(victim)) {
+    if (char_get_level(ch) <= char_get_level(victim)) {
       send_to_char(ch, "They are too high level for that.\r\n");
       return;
     }
@@ -1324,7 +1324,7 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
     break;
 
   case SPELL_FLARE:
-    if (MOB_FLAGGED(victim,MOB_NOBLIND)) {
+    if (char_mob_flagged(victim,MOB_NOBLIND)) {
       send_to_char(ch, "You fail.\r\n");
       return;
     }
@@ -1351,9 +1351,9 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
    * perform the affect.  This prevents people from un-sancting mobs
    * by sancting them and waiting for it to fade, for example.
    */
-  if (IS_NPC(victim) && !affected_by_spell(victim, spellnum))
+  if (char_is_npc(victim) && !affected_by_spell(victim, spellnum))
     for (i = 0; i < MAX_SPELL_AFFECTS; i++)
-      if (AFF_FLAGGED(victim, af[i].bitvector)) {
+      if (char_aff_flagged(victim, af[i].bitvector)) {
         send_to_char(ch, "%s", CONFIG_NOEFFECT);
         return;
       }

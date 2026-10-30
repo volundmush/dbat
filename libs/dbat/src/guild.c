@@ -78,7 +78,7 @@ int calculate_skill_cost(struct char_data *ch, int skill)
  if (skill == SKILL_EXTRACT)
   cost += 3;
 
- if (IS_HOSHIJIN(ch) && (skill == SKILL_PUNCH || skill == SKILL_KICK || skill == SKILL_KNEE || skill == SKILL_ELBOW || skill == SKILL_UPPERCUT || skill == SKILL_ROUNDHOUSE || skill == SKILL_SLAM || skill == SKILL_HEELDROP || skill == SKILL_DAGGER || skill == SKILL_SWORD || skill == SKILL_CLUB || skill == SKILL_GUN || skill == SKILL_SPEAR || skill == SKILL_BRAWL)) {
+ if (char_is_hoshijin(ch) && (skill == SKILL_PUNCH || skill == SKILL_KICK || skill == SKILL_KNEE || skill == SKILL_ELBOW || skill == SKILL_UPPERCUT || skill == SKILL_ROUNDHOUSE || skill == SKILL_SLAM || skill == SKILL_HEELDROP || skill == SKILL_DAGGER || skill == SKILL_SWORD || skill == SKILL_CLUB || skill == SKILL_GUN || skill == SKILL_SPEAR || skill == SKILL_BRAWL)) {
   cost += 5;
  }
 
@@ -139,7 +139,7 @@ void handle_ingest_learn(struct char_data *ch, struct char_data *vict)
 ACMD(do_teach)
 {
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
 
  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -203,7 +203,7 @@ ACMD(do_teach)
  } else if (GET_FORGETING(vict) == skill) {
   send_to_char(ch, "They are trying to forget that skill!\r\n");
   return;
- } else if (GET_PRACTICES(vict, GET_CLASS(vict)) < cost) {
+ } else if (GET_PRACTICES(vict, char_get_class(vict)) < cost) {
   send_to_char(ch, "They do not have enough practice sessions for you to teach them.\r\n");
   return;
  } else if (GET_SKILL_BASE(vict, skill) >= 80) {
@@ -219,7 +219,7 @@ ACMD(do_teach)
   act(toother, TRUE, ch, 0, vict, TO_NOTVICT);
   SET_SKILL(vict, skill, GET_SKILL_BASE(vict, skill) + 1);
   if (free == FALSE) {
-   GET_PRACTICES(vict, GET_CLASS(vict)) -= cost;
+   GET_PRACTICES(vict, char_get_class(vict)) -= cost;
   } else {
    send_to_char(ch, "@GYou teach your lesson so well that it cost them nothing to learn from you!@n\r\n");
    send_to_char(vict, "@GYour teacher taught you the lesson so well that it cost you nothing!@n\r\n");
@@ -286,11 +286,11 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
     if (t != sktype)
       continue;
 
-    known = GET_SKILL(ch, i);
+    known = char_get_skill(ch, i);
     if (*arg) {
      if (atoi(arg) <= 0 && !strstr(spell_info[i].name, arg)) {
       known = 0;
-     } else if (atoi(arg) > GET_SKILL(ch, i)) {
+     } else if (atoi(arg) > char_get_skill(ch, i)) {
       known = 0;
      }
     }
@@ -306,9 +306,9 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
         else
           buf2[0] = 0;
         count++;
-         canknow = highest_skill_value(GET_LEVEL(ch), GET_SKILL(ch, i));
+         canknow = highest_skill_value(char_get_level(ch), char_get_skill(ch, i));
          nlen = snprintf(buf + len, maxsz - len, "@y(@Y%2d@y) @W%-30s  @y(@Y%2d@y) @C%3d@D/@c%3d   %s@n%s%s\r\n", count,
-                          spell_info[i].name, count, GET_SKILL(ch, i), canknow, GET_SKILL_PERF(ch, i) > 0 ? (GET_SKILL_PERF(ch, i) == 1 ? "@ROver Charge" : (GET_SKILL_PERF(ch, i) == 2 ? "@BAccurate" : "@GEfficient")) : "", GET_SKILL_BASE(ch, i) > 100 ? " @D(@YGrand Master@D)@n" : "", buf2);
+                          spell_info[i].name, count, char_get_skill(ch, i), canknow, GET_SKILL_PERF(ch, i) > 0 ? (GET_SKILL_PERF(ch, i) == 1 ? "@ROver Charge" : (GET_SKILL_PERF(ch, i) == 2 ? "@BAccurate" : "@GEfficient")) : "", GET_SKILL_BASE(ch, i) > 100 ? " @D(@YGrand Master@D)@n" : "", buf2);
       }
       if (len + nlen >= maxsz || nlen < 0)
         break;
@@ -324,7 +324,7 @@ int slot_count(struct char_data *ch)
    int punch = FALSE, kick = FALSE, knee = FALSE, elbow = FALSE, kiball = FALSE, kiblast = FALSE, beam = FALSE, renzo = FALSE, shogekiha = FALSE;
 
    for (i = 0; i < SKILL_TABLE_SIZE; i++) {
-    if (GET_SKILL(ch, i) > 0) {
+    if (char_get_skill(ch, i) > 0) {
      switch (i) {
       case SKILL_PUNCH:
        fail = TRUE;
@@ -363,27 +363,27 @@ int slot_count(struct char_data *ch)
        renzo = TRUE;
       break;
       case SKILL_TELEPATHY:
-       if (IS_KANASSAN(ch) || IS_KAI(ch)) {
+       if (char_is_kanassan(ch) || char_is_kai(ch)) {
         fail = TRUE;
        }
        break;
       case SKILL_ABSORB:
-       if (IS_BIO(ch) || IS_ANDROID(ch)) {
+       if (char_is_bio(ch) || char_is_android(ch)) {
         fail = TRUE;
        }
        break;
       case SKILL_TAILWHIP:
-       if (IS_ICER(ch)) {
+       if (char_is_icer(ch)) {
         fail = TRUE;
        }
        break;
       case SKILL_SEISHOU:
-       if (IS_ARLIAN(ch)) {
+       if (char_is_arlian(ch)) {
         fail = TRUE;
        }
        break;
       case SKILL_REGENERATE:
-       if (IS_MAJIN(ch) || IS_NAMEK(ch) || IS_BIO(ch)) {
+       if (char_is_majin(ch) || char_is_namek(ch) || char_is_bio(ch)) {
         fail = TRUE;
        }
        break;
@@ -412,7 +412,7 @@ void list_skills(struct char_data *ch, char *arg)
   int slots = FALSE;
   char buf2[MAX_STRING_LENGTH];
 
-  len = snprintf(buf2, sizeof(buf2), "You have %d practice session%s remaining.\r\n", GET_PRACTICES(ch, GET_CLASS(ch)), GET_PRACTICES(ch, GET_CLASS(ch)) == 1 ? "" : "s");
+  len = snprintf(buf2, sizeof(buf2), "You have %d practice session%s remaining.\r\n", GET_PRACTICES(ch, char_get_class(ch)), GET_PRACTICES(ch, char_get_class(ch)) == 1 ? "" : "s");
 
   len += snprintf(buf2 + len, sizeof(buf2) - len, "\r\nYou know the following skills:     @CKnown@D/@cPrac. Max@n\r\n@w-------------------------------------------------------@n\r\n");
 
@@ -451,120 +451,120 @@ int is_guild_ok_char(struct char_data * keeper, struct char_data * ch, int guild
 {
 	char buf[200];
 
-	if (!(CAN_SEE(keeper, ch))) {
+	if (!(char_can_see(keeper, ch))) {
 		do_say(keeper, MSG_TRAINER_NO_SEE_CH, cmd_say, 0);
 		return (FALSE);
 	}
 
 	
-	if (GET_LEVEL(ch) < GM_MINLVL(guild_nr)) {
+	if (char_get_level(ch) < GM_MINLVL(guild_nr)) {
 				snprintf(buf, sizeof(buf), "%s %s", 
-					GET_NAME(ch), MSG_TRAINER_MINLVL);
+					char_get_name(ch), MSG_TRAINER_MINLVL);
 		do_tell(keeper, buf, cmd_tell, 0); 
 		return (FALSE);
 	}
 
 
-	if ((IS_GOOD(ch) && NOTRAIN_GOOD(guild_nr)) ||
-		 (IS_EVIL(ch) && NOTRAIN_EVIL(guild_nr)) ||
-		 (IS_NEUTRAL(ch) && NOTRAIN_NEUTRAL(guild_nr))) {
+	if ((char_is_good(ch) && NOTRAIN_GOOD(guild_nr)) ||
+		 (char_is_evil(ch) && NOTRAIN_EVIL(guild_nr)) ||
+		 (char_is_neutral(ch) && NOTRAIN_NEUTRAL(guild_nr))) {
 		snprintf(buf, sizeof(buf), "%s %s", 
-					GET_NAME(ch), MSG_TRAINER_DISLIKE_ALIGN);
+					char_get_name(ch), MSG_TRAINER_DISLIKE_ALIGN);
 		do_tell(keeper, buf, cmd_tell, 0);
 		return (FALSE);
 	}
 
-	if (IS_NPC(ch))
+	if (char_is_npc(ch))
 		return (FALSE);
 
-	if ((IS_ROSHI(ch) && NOTRAIN_WIZARD(guild_nr)) ||
-		(IS_PICCOLO(ch) && NOTRAIN_CLERIC(guild_nr)) ||
-		(IS_KRANE(ch) && NOTRAIN_ROGUE(guild_nr)) ||
-		(IS_NAIL(ch) && NOTRAIN_FIGHTER(guild_nr)) ||
-		(IS_GINYU(ch) && NOTRAIN_PALADIN(guild_nr)) ||
-		(IS_FRIEZA(ch) && NOTRAIN_SORCERER(guild_nr)) ||
-		(IS_TAPION(ch) && NOTRAIN_DRUID(guild_nr)) ||
-		(IS_ANDSIX(ch) && NOTRAIN_BARD(guild_nr)) ||
-		(IS_DABURA(ch) && NOTRAIN_RANGER(guild_nr)) ||
-		(IS_BARDOCK(ch) && NOTRAIN_MONK(guild_nr)) ||
-		(IS_KABITO(ch) && NOTRAIN_BARBARIAN(guild_nr)) ||
-        	(IS_JINTO(ch) && NOTRAIN_ARCANE_ARCHER(guild_nr)) ||
-		(IS_TSUNA(ch) && NOTRAIN_ARCANE_TRICKSTER(guild_nr)) ||
-		(IS_KURZAK(ch) && NOTRAIN_ARCHMAGE(guild_nr)) ||
-		(IS_ASSASSIN(ch) && NOTRAIN_ASSASSIN(guild_nr)) ||
-		(IS_BLACKGUARD(ch) && NOTRAIN_BLACKGUARD(guild_nr)) ||
-		(IS_DRAGON_DISCIPLE(ch) && NOTRAIN_DRAGON_DISCIPLE(guild_nr)) ||
-		(IS_DUELIST(ch) && NOTRAIN_DUELIST(guild_nr)) ||
-		(IS_DWARVEN_DEFENDER(ch) && NOTRAIN_DWARVEN_DEFENDER(guild_nr)) ||
-		(IS_ELDRITCH_KNIGHT(ch) && NOTRAIN_ELDRITCH_KNIGHT(guild_nr)) ||
-		(IS_HIEROPHANT(ch) && NOTRAIN_HIEROPHANT(guild_nr)) ||
-        	(IS_HORIZON_WALKER(ch) && NOTRAIN_HORIZON_WALKER(guild_nr)) ||
-        	(IS_LOREMASTER(ch) && NOTRAIN_LOREMASTER(guild_nr)) ||
-		(IS_MYSTIC_THEURGE(ch) && NOTRAIN_MYSTIC_THEURGE(guild_nr)) ||
-		(IS_SHADOWDANCER(ch) && NOTRAIN_SHADOWDANCER(guild_nr)) ||
-        	(IS_THAUMATURGIST(ch) && NOTRAIN_THAUMATURGIST(guild_nr))) {
+	if ((char_is_roshi(ch) && NOTRAIN_WIZARD(guild_nr)) ||
+		(char_is_piccolo(ch) && NOTRAIN_CLERIC(guild_nr)) ||
+		(char_is_krane(ch) && NOTRAIN_ROGUE(guild_nr)) ||
+		(char_is_nail(ch) && NOTRAIN_FIGHTER(guild_nr)) ||
+		(char_is_ginyu(ch) && NOTRAIN_PALADIN(guild_nr)) ||
+		(char_is_frieza(ch) && NOTRAIN_SORCERER(guild_nr)) ||
+		(char_is_tapion(ch) && NOTRAIN_DRUID(guild_nr)) ||
+		(char_is_andsix(ch) && NOTRAIN_BARD(guild_nr)) ||
+		(char_is_dabura(ch) && NOTRAIN_RANGER(guild_nr)) ||
+		(char_is_bardock(ch) && NOTRAIN_MONK(guild_nr)) ||
+		(char_is_kabito(ch) && NOTRAIN_BARBARIAN(guild_nr)) ||
+        	(char_is_jinto(ch) && NOTRAIN_ARCANE_ARCHER(guild_nr)) ||
+		(char_is_tsuna(ch) && NOTRAIN_ARCANE_TRICKSTER(guild_nr)) ||
+		(char_is_kurzak(ch) && NOTRAIN_ARCHMAGE(guild_nr)) ||
+		(char_is_assassin(ch) && NOTRAIN_ASSASSIN(guild_nr)) ||
+		(char_is_blackguard(ch) && NOTRAIN_BLACKGUARD(guild_nr)) ||
+		(char_is_dragon_disciple(ch) && NOTRAIN_DRAGON_DISCIPLE(guild_nr)) ||
+		(char_is_duelist(ch) && NOTRAIN_DUELIST(guild_nr)) ||
+		(char_is_dwarven_defender(ch) && NOTRAIN_DWARVEN_DEFENDER(guild_nr)) ||
+		(char_is_eldritch_knight(ch) && NOTRAIN_ELDRITCH_KNIGHT(guild_nr)) ||
+		(char_is_hierophant(ch) && NOTRAIN_HIEROPHANT(guild_nr)) ||
+        	(char_is_horizon_walker(ch) && NOTRAIN_HORIZON_WALKER(guild_nr)) ||
+        	(char_is_loremaster(ch) && NOTRAIN_LOREMASTER(guild_nr)) ||
+		(char_is_mystic_theurge(ch) && NOTRAIN_MYSTIC_THEURGE(guild_nr)) ||
+		(char_is_shadowdancer(ch) && NOTRAIN_SHADOWDANCER(guild_nr)) ||
+        	(char_is_thaumaturgist(ch) && NOTRAIN_THAUMATURGIST(guild_nr))) {
 
 		snprintf(buf, sizeof(buf), "%s %s", 
-					GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
+					char_get_name(ch), MSG_TRAINER_DISLIKE_CLASS);
 		do_tell(keeper, buf, cmd_tell, 0);
 		return (FALSE);
 	}
 
-	if ((!IS_ROSHI(ch) && TRAIN_WIZARD(guild_nr)) ||
-	    (!IS_PICCOLO(ch) && TRAIN_CLERIC(guild_nr)) ||
-	    (!IS_KRANE(ch) && TRAIN_ROGUE(guild_nr)) ||
-	    (!IS_BARDOCK(ch) && TRAIN_MONK(guild_nr)) ||
-	    (!IS_GINYU(ch) && TRAIN_PALADIN(guild_nr)) ||
-	    (!IS_NAIL(ch) && TRAIN_FIGHTER(guild_nr)) ||
-	    (!IS_FRIEZA(ch) && TRAIN_SORCERER(guild_nr)) ||
-	    (!IS_TAPION(ch) && TRAIN_DRUID(guild_nr)) ||
-	    (!IS_ANDSIX(ch) && TRAIN_BARD(guild_nr)) ||
-	    (!IS_DABURA(ch) && TRAIN_RANGER(guild_nr)) ||
-	    (!IS_KABITO(ch) && TRAIN_BARBARIAN(guild_nr)) ||
-            (!IS_JINTO(ch) && TRAIN_ARCANE_ARCHER(guild_nr)) ||
-	    (!IS_TSUNA(ch) && TRAIN_ARCANE_TRICKSTER(guild_nr)) ||
-	    (!IS_KURZAK(ch) && TRAIN_ARCHMAGE(guild_nr)) ||
-            (!IS_ASSASSIN(ch) && TRAIN_ASSASSIN(guild_nr)) ||
-            (!IS_BLACKGUARD(ch) && TRAIN_BLACKGUARD(guild_nr)) ||
-            (!IS_DRAGON_DISCIPLE(ch) && TRAIN_DRAGON_DISCIPLE(guild_nr)) ||
-            (!IS_DUELIST(ch) && TRAIN_DUELIST(guild_nr)) ||
-            (!IS_DWARVEN_DEFENDER(ch) && TRAIN_DWARVEN_DEFENDER(guild_nr)) ||
-            (!IS_ELDRITCH_KNIGHT(ch) && TRAIN_ELDRITCH_KNIGHT(guild_nr)) ||
-            (!IS_HIEROPHANT(ch) && TRAIN_HIEROPHANT(guild_nr)) ||
-            (!IS_HORIZON_WALKER(ch) && TRAIN_HORIZON_WALKER(guild_nr)) ||
-            (!IS_LOREMASTER(ch) && TRAIN_LOREMASTER(guild_nr)) ||
-            (!IS_MYSTIC_THEURGE(ch) && TRAIN_MYSTIC_THEURGE(guild_nr)) ||
-            (!IS_SHADOWDANCER(ch) && TRAIN_SHADOWDANCER(guild_nr)) ||
-            (!IS_THAUMATURGIST(ch) && TRAIN_THAUMATURGIST(guild_nr))) {
+	if ((!char_is_roshi(ch) && TRAIN_WIZARD(guild_nr)) ||
+	    (!char_is_piccolo(ch) && TRAIN_CLERIC(guild_nr)) ||
+	    (!char_is_krane(ch) && TRAIN_ROGUE(guild_nr)) ||
+	    (!char_is_bardock(ch) && TRAIN_MONK(guild_nr)) ||
+	    (!char_is_ginyu(ch) && TRAIN_PALADIN(guild_nr)) ||
+	    (!char_is_nail(ch) && TRAIN_FIGHTER(guild_nr)) ||
+	    (!char_is_frieza(ch) && TRAIN_SORCERER(guild_nr)) ||
+	    (!char_is_tapion(ch) && TRAIN_DRUID(guild_nr)) ||
+	    (!char_is_andsix(ch) && TRAIN_BARD(guild_nr)) ||
+	    (!char_is_dabura(ch) && TRAIN_RANGER(guild_nr)) ||
+	    (!char_is_kabito(ch) && TRAIN_BARBARIAN(guild_nr)) ||
+            (!char_is_jinto(ch) && TRAIN_ARCANE_ARCHER(guild_nr)) ||
+	    (!char_is_tsuna(ch) && TRAIN_ARCANE_TRICKSTER(guild_nr)) ||
+	    (!char_is_kurzak(ch) && TRAIN_ARCHMAGE(guild_nr)) ||
+            (!char_is_assassin(ch) && TRAIN_ASSASSIN(guild_nr)) ||
+            (!char_is_blackguard(ch) && TRAIN_BLACKGUARD(guild_nr)) ||
+            (!char_is_dragon_disciple(ch) && TRAIN_DRAGON_DISCIPLE(guild_nr)) ||
+            (!char_is_duelist(ch) && TRAIN_DUELIST(guild_nr)) ||
+            (!char_is_dwarven_defender(ch) && TRAIN_DWARVEN_DEFENDER(guild_nr)) ||
+            (!char_is_eldritch_knight(ch) && TRAIN_ELDRITCH_KNIGHT(guild_nr)) ||
+            (!char_is_hierophant(ch) && TRAIN_HIEROPHANT(guild_nr)) ||
+            (!char_is_horizon_walker(ch) && TRAIN_HORIZON_WALKER(guild_nr)) ||
+            (!char_is_loremaster(ch) && TRAIN_LOREMASTER(guild_nr)) ||
+            (!char_is_mystic_theurge(ch) && TRAIN_MYSTIC_THEURGE(guild_nr)) ||
+            (!char_is_shadowdancer(ch) && TRAIN_SHADOWDANCER(guild_nr)) ||
+            (!char_is_thaumaturgist(ch) && TRAIN_THAUMATURGIST(guild_nr))) {
 		snprintf(buf, sizeof(buf), "%s %s", 
-					GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
+					char_get_name(ch), MSG_TRAINER_DISLIKE_CLASS);
 		do_tell(keeper, buf, cmd_tell, 0);
 		return (FALSE);
 	}
 
-	if ((IS_HUMAN(ch) && NOTRAIN_HUMAN(guild_nr)) ||
-		 (IS_SAIYAN(ch)   && NOTRAIN_SAIYAN(guild_nr)) ||
-		 (IS_ICER(ch) && NOTRAIN_ICER(guild_nr)) ||
-		 (IS_KONATSU(ch) && NOTRAIN_KONATSU(guild_nr)) ||
-		 (IS_NAMEK(ch) && NOTRAIN_NAMEK(guild_nr)) ||
-		 (IS_MUTANT(ch) && NOTRAIN_MUTANT(guild_nr)) ||
-		 (IS_KANASSAN(ch) && NOTRAIN_KANASSAN(guild_nr)) ||
- 		 (IS_ANDROID(ch) && NOTRAIN_ANDROID(guild_nr)) ||
-		 (IS_BIO(ch) && NOTRAIN_BIO(guild_nr)) ||
-		 (IS_DEMON(ch) && NOTRAIN_DEMON(guild_nr)) ||
- 		 (IS_MAJIN(ch) && NOTRAIN_MAJIN(guild_nr)) ||
- 		 (IS_KAI(ch) && NOTRAIN_KAI(guild_nr)) ||
- 		 (IS_TRUFFLE(ch) && NOTRAIN_TRUFFLE(guild_nr)) ||
- 		 (IS_HOSHIJIN(ch) && NOTRAIN_GOBLIN(guild_nr)) ||
- 		 (IS_ANIMAL(ch) && NOTRAIN_ANIMAL(guild_nr)) ||
- 		 (IS_SAIBA(ch) && NOTRAIN_ORC(guild_nr)) ||
- 		 (IS_SERPENT(ch) && NOTRAIN_SNAKE(guild_nr)) ||
-		 (IS_OGRE(ch) && NOTRAIN_TROLL(guild_nr)) ||
- 		 (IS_HALFBREED(ch) && NOTRAIN_HALFBREED(guild_nr)) ||
- 		 (IS_YARDRATIAN(ch) && NOTRAIN_MINOTAUR(guild_nr)) ||
- 		 (IS_ARLIAN(ch) && NOTRAIN_KOBOLD(guild_nr))) {
+	if ((char_is_human(ch) && NOTRAIN_HUMAN(guild_nr)) ||
+		 (char_is_saiyan(ch)   && NOTRAIN_SAIYAN(guild_nr)) ||
+		 (char_is_icer(ch) && NOTRAIN_ICER(guild_nr)) ||
+		 (char_is_konatsu(ch) && NOTRAIN_KONATSU(guild_nr)) ||
+		 (char_is_namek(ch) && NOTRAIN_NAMEK(guild_nr)) ||
+		 (char_is_mutant(ch) && NOTRAIN_MUTANT(guild_nr)) ||
+		 (char_is_kanassan(ch) && NOTRAIN_KANASSAN(guild_nr)) ||
+ 		 (char_is_android(ch) && NOTRAIN_ANDROID(guild_nr)) ||
+		 (char_is_bio(ch) && NOTRAIN_BIO(guild_nr)) ||
+		 (char_is_demon(ch) && NOTRAIN_DEMON(guild_nr)) ||
+ 		 (char_is_majin(ch) && NOTRAIN_MAJIN(guild_nr)) ||
+ 		 (char_is_kai(ch) && NOTRAIN_KAI(guild_nr)) ||
+ 		 (char_is_truffle(ch) && NOTRAIN_TRUFFLE(guild_nr)) ||
+ 		 (char_is_hoshijin(ch) && NOTRAIN_GOBLIN(guild_nr)) ||
+ 		 (char_is_animal(ch) && NOTRAIN_ANIMAL(guild_nr)) ||
+ 		 (char_is_saiba(ch) && NOTRAIN_ORC(guild_nr)) ||
+ 		 (char_is_serpent(ch) && NOTRAIN_SNAKE(guild_nr)) ||
+		 (char_is_ogre(ch) && NOTRAIN_TROLL(guild_nr)) ||
+ 		 (char_is_halfbreed(ch) && NOTRAIN_HALFBREED(guild_nr)) ||
+ 		 (char_is_yardratian(ch) && NOTRAIN_MINOTAUR(guild_nr)) ||
+ 		 (char_is_arlian(ch) && NOTRAIN_KOBOLD(guild_nr))) {
 		snprintf(buf, sizeof(buf), "%s %s", 
-					GET_NAME(ch), MSG_TRAINER_DISLIKE_RACE);
+					char_get_name(ch), MSG_TRAINER_DISLIKE_RACE);
 		do_tell(keeper, buf, cmd_tell, 0);
 		return (FALSE);
 	}
@@ -617,7 +617,7 @@ void what_does_guild_know(int guild_nr, struct char_data * ch)
   int i, sortpos, canknow, j, k, count = 0, cost = 0;
   size_t nlen = 0, len = 0;
 
-  len = snprintf(buf2, sizeof(buf2), "You have %d practice session%s remaining.\r\n", GET_PRACTICES(ch, GET_CLASS(ch)), GET_PRACTICES(ch, GET_CLASS(ch)) == 1 ? "" : "s"); // ???
+  len = snprintf(buf2, sizeof(buf2), "You have %d practice session%s remaining.\r\n", GET_PRACTICES(ch, char_get_class(ch)), GET_PRACTICES(ch, char_get_class(ch)) == 1 ? "" : "s"); // ???
 
   nlen = snprintf(buf2 + len, sizeof(buf2) - len, "You can practice these skills:     @CKnown@D/@cPrac. Max    @GPS Cost@n\r\n@w-------------------------------------------------------------@n\r\n");
   len += nlen;
@@ -627,10 +627,10 @@ void what_does_guild_know(int guild_nr, struct char_data * ch)
     i = sortpos; /* spell_sort_info[sortpos]; */
     if (does_guild_know(guild_nr, i) && skill_type(i) == SKTYPE_SKILL) {
       for (canknow = 0, k = 0, j = 0; j < NUM_CLASSES; j++)
-        if (GET_CLASS_RANKS(ch, j) > 0 && (spell_info[i].can_learn_skill[j] > SKLEARN_CANT)) {
+        if (char_get_class_ranks(ch, j) > 0 && (spell_info[i].can_learn_skill[j] > SKLEARN_CANT)) {
           k = spell_info[i].can_learn_skill[j];
         }
-        canknow = highest_skill_value(GET_LEVEL(ch), k);
+        canknow = highest_skill_value(char_get_level(ch), k);
         count++;
         cost = calculate_skill_cost(ch, i);
         if (k == SKLEARN_CLASS) {
@@ -674,7 +674,7 @@ void what_does_guild_know(int guild_nr, struct char_data * ch)
         for (canknow = 0, j = 0; j < NUM_CLASSES; j++)
 	  if (spell_info[i].can_learn_skill[j] > canknow)
 	    canknow = spell_info[i].can_learn_skill[j];
-        canknow = highest_skill_value(GET_LEVEL(ch), canknow);
+        canknow = highest_skill_value(char_get_level(ch), canknow);
         if (GET_SKILL_BASE(ch, i) < canknow) {
           nlen = snprintf(buf2 + len, sizeof(buf2) - len, "%-20s %s\r\n", spell_info[i].name, GET_SKILL_BASE(ch, i) ? "known" : "unknown");
           if (len + nlen >= sizeof(buf2) || nlen < 0)
@@ -736,43 +736,43 @@ int prereq_pass(struct char_data *ch, int snum)
    }
   }
  } else if (IS_SET(spell_info[snum].flags, SKFLAG_TIER4)) {
-  if (IS_ROSHI(ch) && (GET_SKILL_BASE(ch, SKILL_KAMEHAMEHA) < 40 || GET_SKILL_BASE(ch, SKILL_KIENZAN) < 40)) {
+  if (char_is_roshi(ch) && (GET_SKILL_BASE(ch, SKILL_KAMEHAMEHA) < 40 || GET_SKILL_BASE(ch, SKILL_KIENZAN) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Kamehameha and Kienzan to Skill LVL 40.");
    return 0;
   }
-  if (IS_TSUNA(ch) && (GET_SKILL_BASE(ch, SKILL_WRAZOR) < 40 || GET_SKILL_BASE(ch, SKILL_WSPIKE) < 40)) {
+  if (char_is_tsuna(ch) && (GET_SKILL_BASE(ch, SKILL_WRAZOR) < 40 || GET_SKILL_BASE(ch, SKILL_WSPIKE) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Water Razor and Water Spikes to Skill LVL 40.");
    return 0;
   }
-  if (IS_PICCOLO(ch) && (GET_SKILL_BASE(ch, SKILL_MASENKO) < 40 || GET_SKILL_BASE(ch, SKILL_SBC) < 40)) {
+  if (char_is_piccolo(ch) && (GET_SKILL_BASE(ch, SKILL_MASENKO) < 40 || GET_SKILL_BASE(ch, SKILL_SBC) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Masenko and Special Beam Cannon to Skill LVL 40.");
    return 0;
   }
-  if (IS_FRIEZA(ch) && (GET_SKILL_BASE(ch, SKILL_DEATHBEAM) < 40 || GET_SKILL_BASE(ch, SKILL_KIENZAN) < 40)) {
+  if (char_is_frieza(ch) && (GET_SKILL_BASE(ch, SKILL_DEATHBEAM) < 40 || GET_SKILL_BASE(ch, SKILL_KIENZAN) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Deathbeam and Kienzan to Skill LVL 40.");
    return 0;
   }
-  if (IS_GINYU(ch) && (GET_SKILL_BASE(ch, SKILL_CRUSHER) < 40 || GET_SKILL_BASE(ch, SKILL_ERASER) < 40)) {
+  if (char_is_ginyu(ch) && (GET_SKILL_BASE(ch, SKILL_CRUSHER) < 40 || GET_SKILL_BASE(ch, SKILL_ERASER) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Crusher Ball and Eraser Cannon to Skill LVL 40.");
    return 0;
   }
-  if (IS_BARDOCK(ch) && (GET_SKILL_BASE(ch, SKILL_GALIKGUN) < 40 || GET_SKILL_BASE(ch, SKILL_FINALFLASH) < 40)) {
+  if (char_is_bardock(ch) && (GET_SKILL_BASE(ch, SKILL_GALIKGUN) < 40 || GET_SKILL_BASE(ch, SKILL_FINALFLASH) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Galik Gun and Final Flash to Skill LVL 40.");
    return 0;
   }
-  if (IS_TAPION(ch) && (GET_SKILL_BASE(ch, SKILL_TSLASH) < 40 || GET_SKILL_BASE(ch, SKILL_DDSLASH) < 40)) {
+  if (char_is_tapion(ch) && (GET_SKILL_BASE(ch, SKILL_TSLASH) < 40 || GET_SKILL_BASE(ch, SKILL_DDSLASH) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Twin Slash and Darkness Dragon Slash to Skill LVL 40.");
    return 0;
   }
-  if (IS_NAIL(ch) && (GET_SKILL_BASE(ch, SKILL_MASENKO) < 40 || GET_SKILL_BASE(ch, SKILL_KOUSENGAN) < 40)) {
+  if (char_is_nail(ch) && (GET_SKILL_BASE(ch, SKILL_MASENKO) < 40 || GET_SKILL_BASE(ch, SKILL_KOUSENGAN) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Masenko and Kousengan to Skill LVL 40.");
    return 0;
   }
-  if (IS_ANDROID(ch) && (GET_SKILL_BASE(ch, SKILL_DUALBEAM) < 40 || GET_SKILL_BASE(ch, SKILL_HELLFLASH) < 40)) {
+  if (char_is_android(ch) && (GET_SKILL_BASE(ch, SKILL_DUALBEAM) < 40 || GET_SKILL_BASE(ch, SKILL_HELLFLASH) < 40)) {
    send_to_char(ch, "You can not train that skill until you at least have trained Dual Beam and Hell Flash to Skill LVL 40.");
    return 0;
   }
-  if (IS_JINTO(ch) && GET_SKILL_BASE(ch, SKILL_BREAKER) < 40) {
+  if (char_is_jinto(ch) && GET_SKILL_BASE(ch, SKILL_BREAKER) < 40) {
    send_to_char(ch, "You can not train that skill until you at least have trained Star Breaker to Skill LVL 40.");
    return 0;
   }
@@ -837,7 +837,7 @@ void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, 
 
  skip_spaces(&argument);
 
- if (!CAN_GRAND_MASTER(ch)) {
+ if (!char_can_grand_master(ch)) {
   send_to_char(ch, "Your race can not become a Grand Master in a skill through this process.\r\n");
   return;
  }
@@ -855,7 +855,7 @@ void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, 
  char buf[MAX_STRING_LENGTH];
 
  if (!(does_guild_know(guild_nr, skill_num))) {
-   snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, GET_NAME(ch));
+   snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, char_get_name(ch));
    do_tell(keeper, buf, cmd_tell, 0);
    return;
  }
@@ -870,7 +870,7 @@ void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, 
  } else if (GET_SKILL_BASE(ch, skill_num) >= 103) {
   send_to_char(ch, "You have already become a Grand Master in that skill and have progessed as far as possible in it.\r\n");
   return;
- } else if (GET_PRACTICES(ch, GET_CLASS(ch)) < 1000) {
+ } else if (GET_PRACTICES(ch, char_get_class(ch)) < 1000) {
   send_to_char(ch, "You need at least 1,000 practice sessions to rank up beyond 100 in a skill.\r\n");
   return;
  } else {
@@ -880,7 +880,7 @@ void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, 
    send_to_char(ch, "@YYou have ranked up in your Grand Mastery of the skill, @C%s@Y.\r\n", spell_info[skill_num].name);
   }
   SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + 1);
-  GET_PRACTICES(ch, GET_CLASS(ch)) -= 1000;
+  GET_PRACTICES(ch, char_get_class(ch)) -= 1000;
  }
 
 }
@@ -898,12 +898,12 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
     return;
   }
 
-  if (GET_PRACTICES(ch, GET_CLASS(ch)) <= 0) {
+  if (GET_PRACTICES(ch, char_get_class(ch)) <= 0) {
     send_to_char(ch, "You do not seem to be able to practice now.\r\n");
     return;
   }
 
-  if (AFF_FLAGGED(ch, AFF_SHOCKED)) {
+  if (char_aff_flagged(ch, AFF_SHOCKED)) {
    send_to_char(ch, "You can not practice while your mind is shocked!\r\n");
    return;
   }
@@ -914,7 +914,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
    return;
   }
 
-  if (strstr(sensei_style[GET_CLASS(ch)], argument)) {
+  if (strstr(sensei_style[char_get_class(ch)], argument)) {
    skill_num = 539;
   }
 
@@ -925,7 +925,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
 
   /****  Does the GM know the skill the player wants to learn?  ****/
   if (!(does_guild_know(guild_nr, skill_num))) {
-    snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, GET_NAME(ch));
+    snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, char_get_name(ch));
     do_tell(keeper, buf, cmd_tell, 0);
     return;
   }
@@ -937,12 +937,12 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
         learntype = spell_info[skill_num].can_learn_skill[i];
     switch (learntype) {
     case SKLEARN_CANT:
-      snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, GET_NAME(ch));
+      snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, char_get_name(ch));
       do_tell(keeper, buf, cmd_tell, 0);
       return;
     case SKLEARN_CROSSCLASS:
     case SKLEARN_CLASS:
-      highest = highest_skill_value(GET_LEVEL(ch), learntype);
+      highest = highest_skill_value(char_get_level(ch), learntype);
       break;
     default:
       log("Unknown SKLEARN type for skill %d in practice", skill_num);
@@ -950,7 +950,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
       return;
     }
     pointcost = calculate_skill_cost(ch, skill_num);
-    if (GET_PRACTICES(ch, GET_CLASS(ch)) >= pointcost) {
+    if (GET_PRACTICES(ch, char_get_class(ch)) >= pointcost) {
       if (!prereq_pass(ch, skill_num)) {
         return;
       } if (GET_SKILL_BASE(ch, skill_num) >= highest) {
@@ -961,31 +961,31 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
          send_to_char(ch, "You cannot increase that skill again because it would deny you the pain you enjoy.\r\n");
          return;
        }
-      } if (GET_SKILL_BASE(ch, skill_num) >= 75 && IS_TAPION(ch) && skill_num == SKILL_SENSE) {
+      } if (GET_SKILL_BASE(ch, skill_num) >= 75 && char_is_tapion(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 75 && IS_DABURA(ch) && skill_num == SKILL_SENSE) {
+      } if (GET_SKILL_BASE(ch, skill_num) >= 75 && char_is_dabura(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 75 && IS_JINTO(ch) && skill_num == SKILL_SENSE) {
+      } if (GET_SKILL_BASE(ch, skill_num) >= 75 && char_is_jinto(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 75 && IS_TSUNA(ch) && skill_num == SKILL_SENSE) {
+      } if (GET_SKILL_BASE(ch, skill_num) >= 75 && char_is_tsuna(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 50 && IS_FRIEZA(ch) && skill_num == SKILL_SENSE) {
+      } if (GET_SKILL_BASE(ch, skill_num) >= 50 && char_is_frieza(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 50 && IS_ANDSIX(ch) && skill_num == SKILL_SENSE) {
+      } if (GET_SKILL_BASE(ch, skill_num) >= 50 && char_is_andsix(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 50 && IS_KURZAK(ch) && skill_num == SKILL_SENSE) {
+      } if (GET_SKILL_BASE(ch, skill_num) >= 50 && char_is_kurzak(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 50 && IS_GINYU(ch) && skill_num == SKILL_SENSE) {
+      } if (GET_SKILL_BASE(ch, skill_num) >= 50 && char_is_ginyu(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
-      } if (GET_SKILL_BASE(ch, skill_num) >= 50 && IS_BARDOCK(ch) && skill_num == SKILL_SENSE) {
+      } if (GET_SKILL_BASE(ch, skill_num) >= 50 && char_is_bardock(ch) && skill_num == SKILL_SENSE) {
           send_to_char(ch, "You cannot practice that anymore.\r\n");
             return;
       } if (GET_SKILL_BASE(ch, skill_num) >= 100) {
@@ -997,9 +997,9 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
           if (skill_num != 539)
            send_to_char(ch, "You practice and master the basics!\r\n");
           else
-           send_to_char(ch, "You practice the basics of %s\r\n", sensei_style[GET_CLASS(ch)]);
+           send_to_char(ch, "You practice the basics of %s\r\n", sensei_style[char_get_class(ch)]);
           SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + rand_number(10, 25));
-          GET_PRACTICES(ch, GET_CLASS(ch)) -= pointcost;
+          GET_PRACTICES(ch, char_get_class(ch)) -= pointcost;
           if (GET_FORGETING(ch) != 0 && GET_SKILL_BASE(ch, GET_FORGETING(ch)) < 30) {
            GET_FORGET_COUNT(ch) += 1;
            if (GET_FORGET_COUNT(ch) >= 5) {
@@ -1021,15 +1021,15 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
           if (skill_num != 539)
            send_to_char(ch, "You practice for a while and manage to advance your technique. (%d)\r\n", GET_SKILL_BASE(ch, skill_num) + 1);
           else
-           send_to_char(ch, "You practice the basics of %s. (%d)\r\n", sensei_style[GET_CLASS(ch)], GET_SKILL_BASE(ch, skill_num) + 1);
+           send_to_char(ch, "You practice the basics of %s. (%d)\r\n", sensei_style[char_get_class(ch)], GET_SKILL_BASE(ch, skill_num) + 1);
          SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + 1);
-         GET_PRACTICES(ch, GET_CLASS(ch)) -= pointcost;
+         GET_PRACTICES(ch, char_get_class(ch)) -= pointcost;
          if (GET_SKILL_BASE(ch, skill_num) >= 100) {
           send_to_char(ch, "You learned a lot by mastering that skill.\r\n");
-          if (IS_KONATSU(ch) && skill_num == SKILL_PARRY) {
+          if (char_is_konatsu(ch) && skill_num == SKILL_PARRY) {
            SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + 5);
           }
-          gain_exp(ch, level_exp(ch, GET_LEVEL(ch) + 1) / 20);
+          gain_exp(ch, level_exp(ch, char_get_level(ch) + 1) / 20);
          }
           if (GET_FORGETING(ch) != 0) {
            GET_FORGET_COUNT(ch) += 1;
@@ -1048,7 +1048,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
              pointcost, (pointcost == 1) ? "" : "s");
     }
   } else {
-    snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, GET_NAME(ch));
+    snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, char_get_name(ch));
     do_tell(keeper, buf, cmd_tell, 0);
   }
 }
@@ -1083,7 +1083,7 @@ void handle_train(struct char_data *keeper, int guild_nr, struct char_data *ch, 
     ch->real_abils.intel += 1;
     /* Give extra skill practice, but only for this level */
     if (! (ch->real_abils.intel % 2))
-      GET_PRACTICES(ch, GET_CLASS(ch)) += 1;
+      GET_PRACTICES(ch, char_get_class(ch)) += 1;
     GET_TRAINS(ch) -= 1;
   } else if (!strncasecmp("wisdom", argument, strlen(argument))) {
     send_to_char(ch, CONFIG_OK);
@@ -1102,12 +1102,12 @@ void handle_train(struct char_data *keeper, int guild_nr, struct char_data *ch, 
 
 void handle_gain(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
 {
-  int whichclass = GET_CLASS(ch);
+  int whichclass = char_get_class(ch);
 
   skip_spaces(&argument);
   int rpp_cost = rpp_to_level(ch);
 
-  if (GET_LEVEL(ch) < 100 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1)) {
+  if (char_get_level(ch) < 100 && GET_EXP(ch) >= level_exp(ch, char_get_level(ch) + 1)) {
     if (GET_RP(ch) < rpp_cost) {
      send_to_char(ch, "You need at least %d RPP to gain the next level.\r\n", rpp_cost);
     }
@@ -1128,7 +1128,7 @@ void handle_gain(struct char_data *keeper, int guild_nr, struct char_data *ch, c
 
 int rpp_to_level(struct char_data *ch) {
 
-    switch (GET_LEVEL(ch)) {
+    switch (char_get_level(ch)) {
         case 2:
             // charge the RPP races to level for the first time.
             return race_rpp_cost(ch->race);
@@ -1151,27 +1151,27 @@ int rpp_to_level(struct char_data *ch) {
 
 void handle_exp(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
 {
- if (GET_PRACTICES(ch, GET_CLASS(ch)) < 25) {
+ if (GET_PRACTICES(ch, char_get_class(ch)) < 25) {
     send_to_char(ch, "You need at least 25 practice sessions to learn.\r\n");
     return;
  }
- if (GET_EXP(ch) > level_exp(ch, GET_LEVEL(ch) + 1) && GET_LEVEL(ch) != 100) {
+ if (GET_EXP(ch) > level_exp(ch, char_get_level(ch) + 1) && char_get_level(ch) != 100) {
     send_to_char(ch, "You can't learn with negative TNL.\r\n");
     return;
  }
  else {
-  int64_t amt = level_exp(ch, GET_LEVEL(ch) + 1) / 100;
-  if (GET_LEVEL(ch) == 100) {
+  int64_t amt = level_exp(ch, char_get_level(ch) + 1) / 100;
+  if (char_get_level(ch) == 100) {
    amt = 400000;
   }
   act("@c$n@W spends time training you in $s fighting style.@n", TRUE, keeper, 0, ch, TO_VICT);
   act("@c$n@W spends time training @C$N@W in $s fighting style.@n", TRUE, keeper, 0, ch, TO_NOTVICT);
   send_to_char(ch, "@wExperience Gained: @C%s@n\r\n", add_commas(amt));
-  GET_PRACTICES(ch, GET_CLASS(ch)) -= 25;
-  if (IS_SAIYAN(ch) || IS_HALFBREED(ch)) {
+  GET_PRACTICES(ch, char_get_class(ch)) -= 25;
+  if (char_is_saiyan(ch) || char_is_halfbreed(ch)) {
    amt = amt + (amt * .30);
   }
-  if (IS_ICER(ch)) {
+  if (char_is_icer(ch)) {
    amt = amt - (amt * .10);
   }
   gain_exp(ch, amt); 
@@ -1184,32 +1184,32 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
 
  int expcost = 25000, goldcost = 750, fail = FALSE, reward = 25, goldadjust = 0, expadjust = 0;
 
- if (GET_LEVEL(ch) >= 100) {
+ if (char_get_level(ch) >= 100) {
   goldadjust = 500;
   //expadjust = 15000;
   expcost = 0;
- } else if (GET_LEVEL(ch) >= 91) {
+ } else if (char_get_level(ch) >= 91) {
   goldadjust = 450;
   expadjust = 12500;
- } else if (GET_LEVEL(ch) >= 81) {
+ } else if (char_get_level(ch) >= 81) {
   goldadjust = 400;
   expadjust = 10000;
- } else if (GET_LEVEL(ch) >= 71) {
+ } else if (char_get_level(ch) >= 71) {
   goldadjust = 350;
   expadjust = 7500;
- } else if (GET_LEVEL(ch) >= 61) {
+ } else if (char_get_level(ch) >= 61) {
   goldadjust = 300;
   expadjust = 5000;
- } else if (GET_LEVEL(ch) >= 51) {
+ } else if (char_get_level(ch) >= 51) {
   goldadjust = 250;
   expadjust = 2500;
- } else if (GET_LEVEL(ch) >= 41) {
+ } else if (char_get_level(ch) >= 41) {
   goldadjust = 200;
- } else if (GET_LEVEL(ch) >= 31) {
+ } else if (char_get_level(ch) >= 31) {
   goldadjust = 150;
- } else if (GET_LEVEL(ch) >= 21) {
+ } else if (char_get_level(ch) >= 21) {
   goldadjust = 100;
- } else if (GET_LEVEL(ch) >= 11) {
+ } else if (char_get_level(ch) >= 11) {
   goldadjust = 50;
  }
 
@@ -1231,7 +1231,7 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
 
  GET_EXP(ch) -= expcost;
  GET_GOLD(ch) -= goldcost;
- GET_PRACTICES(ch, GET_CLASS(ch)) += 25;
+ GET_PRACTICES(ch, char_get_class(ch)) += 25;
  
  act("@c$N@W spends time lecturing you on various subjects.@n", TRUE, ch, 0, keeper, TO_CHAR);
  act("@c$N@W spends time lecturing @C$n@W on various subjects.@n", TRUE, ch, 0, keeper, TO_ROOM);
@@ -1264,7 +1264,7 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
     *ptr = ':';
 
   if (!(does_guild_know_feat(guild_nr, feat_num))) {
-    snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, GET_NAME(ch));
+    snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill, char_get_name(ch));
     do_tell(keeper, buf, cmd_tell, 0);
     return;
   }
@@ -1363,13 +1363,13 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
       return;
     }
     if (sftype == 1) {
-      if (HAS_COMBAT_FEAT(ch, subfeat, subval)) {
+      if (char_has_combat_feat(ch, subfeat, subval)) {
         send_to_char(ch, "You already have that weapon feat.\r\n");
         return;
       }
       SET_COMBAT_FEAT(ch, subfeat, subval);
     } else if (sftype == 2) {
-      if (HAS_SCHOOL_FEAT(ch, subfeat, subval)) {
+      if (char_has_school_feat(ch, subfeat, subval)) {
         send_to_char(ch, "You already have that spell school feat.\r\n");
         return;
       }
@@ -1409,7 +1409,7 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
       send_to_char(ch, "You must specify a skill to improve. Syntax:\r\n  learn skill focus: skill\r\n");
       return;
     }
-    if (GET_LEVEL(ch) <= 49) {
+    if (char_get_level(ch) <= 49) {
       send_to_char(ch, "You must be at least level 50 to gain this feat on a skill.\r\n");
       return;
     }
@@ -1418,7 +1418,7 @@ void handle_learn(struct char_data *keeper, int guild_nr, struct char_data *ch, 
       send_to_char(ch, "I don't recognize that skill.\r\n");
       return;
     }
-    snum = GET_SKILL(ch, subval);
+    snum = char_get_skill(ch, subval);
     if (snum > 100) {
       send_to_char(ch, "You have already focused that skill as high as possible.\r\n");
       return;
@@ -1548,7 +1548,7 @@ SPECIAL(guild)
       return (TRUE);
 
   /*** Is the GM able to train?    ****/
-  if (!AWAKE(keeper))
+  if (!char_is_awake(keeper))
     return (FALSE);
 
   for (i = 0; guild_cmd_tab[i].cmd; i++)

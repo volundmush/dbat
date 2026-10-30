@@ -4,7 +4,7 @@
 /* log a death trap hit */
 void log_death_trap(struct char_data *ch)
 {
-  mudlog(BRF, ADMLVL_IMMORT, TRUE, "%s hit death trap #%d (%s)", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)), world[IN_ROOM(ch)].name);
+  mudlog(BRF, ADMLVL_IMMORT, TRUE, "%s hit death trap #%d (%s)", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)), world[IN_ROOM(ch)].name);
 }
 
 
@@ -70,13 +70,13 @@ void mudlog(int type, int level, int file, const char *str, ...)
   strcat(buf, " ]\r\n");	/* strcat: OK */
 
   for (i = descriptor_list; i; i = i->next) {
-    if (STATE(i) != CON_PLAYING || IS_NPC(i->character)) /* switch */
+    if (STATE(i) != CON_PLAYING || char_is_npc(i->character)) /* switch */
       continue;
     if (GET_ADMLEVEL(i->character) < level)
       continue;
-    if (PLR_FLAGGED(i->character, PLR_WRITING))
+    if (char_plr_flagged(i->character, PLR_WRITING))
       continue;
-    if (type > (PRF_FLAGGED(i->character, PRF_LOG1) ? 1 : 0) + (PRF_FLAGGED(i->character, PRF_LOG2) ? 2 : 0))
+    if (type > (char_prf_flagged(i->character, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(i->character, PRF_LOG2) ? 2 : 0))
       continue;
 
     send_to_char(i->character, "@g%s@n", buf);

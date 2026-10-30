@@ -46,12 +46,12 @@ void mob_absorb(struct char_data *ch, struct char_data *vict)
   return;
  }
  
- int zanzo = FALSE, roll = 0, chance = GET_LEVEL(ch) * 0.5, chance2 = GET_LEVEL(ch) + 10;
+ int zanzo = FALSE, roll = 0, chance = char_get_level(ch) * 0.5, chance2 = char_get_level(ch) + 10;
 
   if (chance2 > 118)
    chance2 = 118;
 
-  if (GET_LEVEL(ch) < 2)
+  if (char_get_level(ch) < 2)
     return;
   else
    roll = rand_number(chance, chance2);
@@ -59,12 +59,12 @@ void mob_absorb(struct char_data *ch, struct char_data *vict)
   if (!vict)
    return;
 
-  if (IS_ANDROID(vict))
+  if (char_is_android(vict))
    return;
 
-  if (AFF_FLAGGED(vict, AFF_ZANZOKEN)) {
-   if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-    if (GET_SPEEDI(ch) < GET_SPEEDI(vict)) {
+  if (char_aff_flagged(vict, AFF_ZANZOKEN)) {
+   if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
+    if (char_get_speedi(ch) < char_get_speedi(vict)) {
      zanzo = TRUE;
     } else {
      REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
@@ -110,7 +110,7 @@ int player_present(struct char_data *ch)
 
   for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
    next_v = vict->next_in_room; 
-   if (!IS_NPC(vict)) {
+   if (!char_is_npc(vict)) {
     found = TRUE;
    }
   }
@@ -128,14 +128,14 @@ void mobile_activity(void)
   for (ch = character_list; ch; ch = next_ch) {
     next_ch = ch->next;
 
-    if (!IS_MOB(ch))
+    if (!char_is_mob(ch))
       continue;
 
     /* Examine call for special procedure */
-    if (MOB_FLAGGED(ch, MOB_SPEC) && !no_specials) {
+    if (char_mob_flagged(ch, MOB_SPEC) && !no_specials) {
       if (mob_index[GET_MOB_RNUM(ch)].func == NULL) {
 	log("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
-		GET_NAME(ch), GET_MOB_VNUM(ch));
+		char_get_name(ch), char_get_mob_vnum(ch));
 	REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_SPEC);
       } else {
         char actbuf[MAX_INPUT_LENGTH] = "";
@@ -145,20 +145,20 @@ void mobile_activity(void)
     }
 
     /* If the mob has no specproc, do the default actions */
-    if (!AWAKE(ch))
+    if (!char_is_awake(ch))
       continue;
 
     /* Scavenger (picking up objects) */
-    if (IS_HUMANOID(ch) && !FIGHTING(ch) && AWAKE(ch) && !MOB_FLAGGED(ch, MOB_NOSCAVENGER) && !MOB_FLAGGED(ch, MOB_NOKILL) && (!player_present(ch) || axion_dice(0) > 118))
+    if (char_is_humanoid(ch) && !FIGHTING(ch) && char_is_awake(ch) && !char_mob_flagged(ch, MOB_NOSCAVENGER) && !char_mob_flagged(ch, MOB_NOKILL) && (!player_present(ch) || axion_dice(0) > 118))
       if (world[IN_ROOM(ch)].contents && rand_number(1, 100) >= 95) {
 	max = 1;
 	best_obj = NULL;
 	for (obj = world[IN_ROOM(ch)].contents; obj; obj = obj->next_content)
-	  if (CAN_GET_OBJ(ch, obj) && GET_OBJ_COST(obj) > max) {          
+	  if (char_can_get_obj(ch, obj) && GET_OBJ_COST(obj) > max) {          
 	    best_obj = obj;
 	    max = GET_OBJ_COST(obj);
 	  }
-	if (best_obj != NULL && CAN_GET_OBJ(ch, best_obj) && GET_OBJ_TYPE(best_obj) != ITEM_BED && !GET_OBJ_POSTED(best_obj) && !OBJ_FLAGGED(best_obj, ITEM_NOPICKUP)) {
+	if (best_obj != NULL && char_can_get_obj(ch, best_obj) && GET_OBJ_TYPE(best_obj) != ITEM_BED && !GET_OBJ_POSTED(best_obj) && !obj_flagged(best_obj, ITEM_NOPICKUP)) {
           switch (rand_number(1, 5)) {
            case 1:
             act("$n@W says, '@CFinders keepers, losers weepers.@W'@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -181,14 +181,14 @@ void mobile_activity(void)
       }
 
     /* Mob Movement */
-    if (!MOB_FLAGGED(ch, MOB_SENTINEL) && (GET_POS(ch) == POS_STANDING) && !FIGHTING(ch) &&
-        (!AFF_FLAGGED(ch, AFF_TAMED)) && !ABSORBBY(ch) &&
-	((door = rand_number(0, 18)) < NUM_OF_DIRS) && CAN_GO(ch, door) &&
-	!ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_NOMOB) &&
-	!ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_DEATH) &&
-	(!MOB_FLAGGED(ch, MOB_STAY_ZONE) ||
+    if (!char_mob_flagged(ch, MOB_SENTINEL) && (GET_POS(ch) == POS_STANDING) && !FIGHTING(ch) &&
+        (!char_aff_flagged(ch, AFF_TAMED)) && !ABSORBBY(ch) &&
+	((door = rand_number(0, 18)) < NUM_OF_DIRS) && char_can_go(ch, door) &&
+	!rroom_flagged(EXIT(ch, door)->to_room, ROOM_NOMOB) &&
+	!rroom_flagged(EXIT(ch, door)->to_room, ROOM_DEATH) &&
+	(!char_mob_flagged(ch, MOB_STAY_ZONE) ||
 	 (world[EXIT(ch, door)->to_room].zone == world[IN_ROOM(ch)].zone))) {
-     if (rand_number(1, 2) == 2 && !IS_AFFECTED(ch, AFF_PARALYZE) && block_calc(ch)) {
+     if (rand_number(1, 2) == 2 && !char_is_affected(ch, AFF_PARALYZE) && block_calc(ch)) {
       perform_move(ch, door, 1);
      }
     }
@@ -200,20 +200,20 @@ void mobile_activity(void)
       if (FIGHTING(ch)) {
        continue;
       }
-      if (MOB_FLAGGED(ch, MOB_NOKILL)) {
+      if (char_mob_flagged(ch, MOB_NOKILL)) {
        continue;
       }
-      if (GET_OBJ_VNUM(hugeatk) == 82 || GET_OBJ_VNUM(hugeatk) == 83) {
+      if (obj_get_vnum(hugeatk) == 82 || obj_get_vnum(hugeatk) == 83) {
        if (USER(hugeatk) != NULL) {
         act("@W$n@R leaps at @C$N@R desperately!@n", TRUE, ch, 0, USER(hugeatk), TO_ROOM);
         act("@W$n@R leaps at YOU desperately!@n", TRUE, ch, 0, USER(hugeatk), TO_VICT);
-        if (IS_HUMANOID(ch)) {
+        if (char_is_humanoid(ch)) {
          char tar[MAX_INPUT_LENGTH];
-         sprintf(tar, "%s", GET_NAME(USER(hugeatk)));
+         sprintf(tar, "%s", char_get_name(USER(hugeatk)));
          do_punch(ch, tar, 0, 0);
         } else {
          char tar[MAX_INPUT_LENGTH];
-         sprintf(tar, "%s", GET_NAME(USER(hugeatk)));
+         sprintf(tar, "%s", char_get_name(USER(hugeatk)));
          do_bite(ch, tar, 0, 0);
         }
        }
@@ -221,29 +221,29 @@ void mobile_activity(void)
      }
 
     /* Aggressive Mobs */
-    if (MOB_FLAGGED(ch, MOB_AGGRESSIVE) && !IS_AFFECTED(ch, AFF_PARALYZE)) {
-      int spot_roll = rand_number(1, GET_LEVEL(ch) + 10);
+    if (char_mob_flagged(ch, MOB_AGGRESSIVE) && !char_is_affected(ch, AFF_PARALYZE)) {
+      int spot_roll = rand_number(1, char_get_level(ch) + 10);
       found = FALSE;
       for (vict = world[IN_ROOM(ch)].people; vict && !found; vict = vict->next_in_room) {
         if (vict == ch)
           continue;
         else if (FIGHTING(ch))
           continue;
-	else if (!CAN_SEE(ch, vict))
+	else if (!char_can_see(ch, vict))
           continue;
-        else if (IS_NPC(vict))
+        else if (char_is_npc(vict))
           continue;
-        else if (PRF_FLAGGED(vict, PRF_NOHASSLE))
+        else if (char_prf_flagged(vict, PRF_NOHASSLE))
 	  continue;
-        else if (MOB_FLAGGED(ch, MOB_AGGR_EVIL) && GET_ALIGNMENT(vict) < 50)
+        else if (char_mob_flagged(ch, MOB_AGGR_EVIL) && GET_ALIGNMENT(vict) < 50)
           continue;
-        else if (MOB_FLAGGED(ch, MOB_AGGR_GOOD) && GET_ALIGNMENT(vict) > -50)
+        else if (char_mob_flagged(ch, MOB_AGGR_GOOD) && GET_ALIGNMENT(vict) > -50)
           continue;
-        else if (GET_LEVEL(vict) < 5)
+        else if (char_get_level(vict) < 5)
           continue;
-        else if (AFF_FLAGGED(vict, AFF_HIDE) && GET_SKILL(vict, SKILL_HIDE) > spot_roll)
+        else if (char_aff_flagged(vict, AFF_HIDE) && char_get_skill(vict, SKILL_HIDE) > spot_roll)
           continue;
-        else if (AFF_FLAGGED(vict, AFF_SNEAK) && GET_SKILL(vict, SKILL_MOVE_SILENTLY) > spot_roll)
+        else if (char_aff_flagged(vict, AFF_SNEAK) && char_get_skill(vict, SKILL_MOVE_SILENTLY) > spot_roll)
           continue;
         else if (ch->aggtimer < 8)
          ch->aggtimer += 1;
@@ -251,35 +251,35 @@ void mobile_activity(void)
           ch->aggtimer = 0;
           char tar[MAX_INPUT_LENGTH];
 
-          sprintf(tar, "%s", GET_NAME(vict));
-          if (IS_HUMANOID(ch)) {
-           if (!AFF_FLAGGED(vict, AFF_HIDE) && !AFF_FLAGGED(vict, AFF_SNEAK)) {
+          sprintf(tar, "%s", char_get_name(vict));
+          if (char_is_humanoid(ch)) {
+           if (!char_aff_flagged(vict, AFF_HIDE) && !char_aff_flagged(vict, AFF_SNEAK)) {
             act("@w'I am going to get you!' @C$n@w shouts at you!@n", TRUE, ch, 0, vict, TO_VICT);
             act("@w'I am going to get you!' @C$n@w shouts at @c$N@w!@n", TRUE, ch, 0, vict, TO_NOTVICT);
            } else {
             act("@C$n@w notices YOU.\n@w'I am going to get you!' @C$n@w shouts at you!@n", TRUE, ch, 0, vict, TO_VICT);
             act("@C$n@w notices @c$N@w.\n@w'I am going to get you!' @C$n@w shouts at @c$N@w!@n", TRUE, ch, 0, vict, TO_NOTVICT);
            }
-          if (AFF_FLAGGED(vict, AFF_FLYING) && !AFF_FLAGGED(ch, AFF_FLYING) && IS_HUMANOID(ch) && GET_LEVEL(ch) > 10) {
+          if (char_aff_flagged(vict, AFF_FLYING) && !char_aff_flagged(ch, AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) > 10) {
             do_fly(ch, 0, 0, 0);
             continue;
            }
-           if (!AFF_FLAGGED(vict, AFF_FLYING) && AFF_FLAGGED(ch, AFF_FLYING)) {
+           if (!char_aff_flagged(vict, AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING)) {
             do_fly(ch, 0, 0, 0);
             continue;
            }
            do_punch(ch, tar, 0, 0);
           }
-          if (!IS_HUMANOID(ch)) {
-          if (AFF_FLAGGED(vict, AFF_FLYING) && !AFF_FLAGGED(ch, AFF_FLYING) && IS_HUMANOID(ch) && GET_LEVEL(ch) > 10) {
+          if (!char_is_humanoid(ch)) {
+          if (char_aff_flagged(vict, AFF_FLYING) && !char_aff_flagged(ch, AFF_FLYING) && char_is_humanoid(ch) && char_get_level(ch) > 10) {
             do_fly(ch, 0, 0, 0);
             continue;
            }
-           if (!AFF_FLAGGED(vict, AFF_FLYING) && AFF_FLAGGED(ch, AFF_FLYING)) {
+           if (!char_aff_flagged(vict, AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING)) {
             do_fly(ch, 0, 0, 0);
             continue;
            }
-           if (!AFF_FLAGGED(vict, AFF_HIDE) && !AFF_FLAGGED(vict, AFF_SNEAK)) {
+           if (!char_aff_flagged(vict, AFF_HIDE) && !char_aff_flagged(vict, AFF_SNEAK)) {
             act("@C$n @wgrowls viciously at you!@n", TRUE, ch, 0, vict, TO_VICT);
             act("@C$n @wgrowls viciously at @c$N@w!@n", TRUE, ch, 0, vict, TO_NOTVICT);
            } else {
@@ -313,33 +313,33 @@ void mobile_activity(void)
     }
 
     /* Be helpful */ /* - temporarily disabled by the first false check */
-    if (false && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
+    if (false && char_is_humanoid(ch) && !char_mob_flagged(ch, MOB_NOKILL)) {
      struct char_data *vict, *next_v;
      int done = FALSE;
      for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
       next_v = vict->next_in_room;
       if (vict == ch)
        continue;
-      if (IS_NPC(vict) && race_is_people(vict->race) && FIGHTING(vict) && done == FALSE) {
+      if (char_is_npc(vict) && race_is_people(vict->race) && FIGHTING(vict) && done == FALSE) {
        if (!is_sparring(vict) && !is_sparring(ch) && GET_HIT(vict) < GET_HIT(ch) * 0.6 && axion_dice(0) >= 90) {
         act("@c$n@C rushes to @c$N's@C aid!@n", TRUE, ch, 0, vict, TO_ROOM);
         char buf[MAX_INPUT_LENGTH];
-        sprintf(buf, "%s", GET_NAME(vict));
-        if (GET_CLASS(ch) == CLASS_KABITO || GET_CLASS(ch) == CLASS_NAIL) {
+        sprintf(buf, "%s", char_get_name(vict));
+        if (char_get_class(ch) == CLASS_KABITO || char_get_class(ch) == CLASS_NAIL) {
          do_heal(ch, buf, 0, 0);
         } else {
          do_rescue(ch, buf, 0, 0);
          if (rand_number(1, 6) == 2) {
           char tar[MAX_INPUT_LENGTH];
-          sprintf(tar, "%s", GET_NAME(FIGHTING(vict)));
+          sprintf(tar, "%s", char_get_name(FIGHTING(vict)));
           do_kiblast(ch, tar, 0, 0);
          } else if (rand_number(1, 6) >= 4) {
           char tar[MAX_INPUT_LENGTH];
-          sprintf(tar, "%s", GET_NAME(FIGHTING(vict)));
+          sprintf(tar, "%s", char_get_name(FIGHTING(vict)));
           do_slam(ch, tar, 0, 0);
          } else {
           char tar[MAX_INPUT_LENGTH];
-          sprintf(tar, "%s", GET_NAME(FIGHTING(vict)));
+          sprintf(tar, "%s", char_get_name(FIGHTING(vict)));
           do_punch(ch, tar, 0, 0);
          }
         }
@@ -349,19 +349,19 @@ void mobile_activity(void)
     }
 
     /* Help those under attack! */ /* - temporarily disabled by the first false check */
-    if (false && !FIGHTING(ch) && rand_number(1, 20) >= 14 && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
+    if (false && !FIGHTING(ch) && rand_number(1, 20) >= 14 && char_is_humanoid(ch) && !char_mob_flagged(ch, MOB_NOKILL)) {
           struct char_data *vict, *next_v;
      int done = FALSE;
      for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
       next_v = vict->next_in_room;
       if (vict == ch)
        continue;
-      if (IS_NPC(vict) && race_is_people(vict->race) && FIGHTING(vict) && done == FALSE) {
+      if (char_is_npc(vict) && race_is_people(vict->race) && FIGHTING(vict) && done == FALSE) {
        if (!is_sparring(vict) && !is_sparring(ch) && GET_HIT(vict) < GET_HIT(ch) * 0.6 && axion_dice(0) >= 70) {
         act("@c$n@C rushes to @c$N's@C aid!@n", TRUE, ch, 0, vict, TO_ROOM);
         char buf[MAX_INPUT_LENGTH];
-        sprintf(buf, "%s", GET_NAME(vict));
-        if (GET_CLASS(ch) == CLASS_KABITO || GET_CLASS(ch) == CLASS_NAIL) {
+        sprintf(buf, "%s", char_get_name(vict));
+        if (char_get_class(ch) == CLASS_KABITO || char_get_class(ch) == CLASS_NAIL) {
          do_heal(ch, buf, 0, 0);
          done = TRUE;
         } else {
@@ -381,7 +381,7 @@ void mobile_activity(void)
      do_wake(ch, 0, 0, 0);
     }
     /* Shopkeep 24-hour Purge */
-    if (GET_MOB_SPEC(ch) == shop_keeper) {
+    if (char_get_mob_spec(ch) == shop_keeper) {
      time_t diff = 0;
 
      diff = time(0) - GET_LPLAY(ch);
@@ -408,10 +408,10 @@ void mobile_activity(void)
 
 
     /* Mob Memory */
-    if (IS_HUMANOID(ch) && MEMORY(ch) && !MOB_FLAGGED(ch, MOB_DUMMY) && !IS_AFFECTED(ch, AFF_PARALYZE)) {
+    if (char_is_humanoid(ch) && MEMORY(ch) && !char_mob_flagged(ch, MOB_DUMMY) && !char_is_affected(ch, AFF_PARALYZE)) {
       found = FALSE;
       for (vict = world[IN_ROOM(ch)].people; vict && !found; vict = vict->next_in_room) {
-	if (IS_NPC(vict) || !CAN_SEE(ch, vict) || PRF_FLAGGED(vict, PRF_NOHASSLE))
+	if (char_is_npc(vict) || !char_can_see(ch, vict) || char_prf_flagged(vict, PRF_NOHASSLE))
 	  continue;
         if (FIGHTING(ch))
          continue;
@@ -426,7 +426,7 @@ void mobile_activity(void)
           act("'Hey!  You're the fiend that attacked me!!!', exclaims $n.", FALSE, ch, 0, 0, TO_ROOM);
           char tar[MAX_INPUT_LENGTH];
  
-          sprintf(tar, "%s", GET_NAME(vict));
+          sprintf(tar, "%s", char_get_name(vict));
           do_punch(ch, tar, 0, 0);
         }
       }
@@ -437,21 +437,21 @@ void mobile_activity(void)
     }
 
     /* Helper Mobs */
-    if (MOB_FLAGGED(ch, MOB_HELPER) && 
-        !AFF_FLAGGED(ch, AFF_BLIND) &&
-        !AFF_FLAGGED(ch, AFF_CHARM)) {
+    if (char_mob_flagged(ch, MOB_HELPER) && 
+        !char_aff_flagged(ch, AFF_BLIND) &&
+        !char_aff_flagged(ch, AFF_CHARM)) {
       found = FALSE;
       for (vict = world[IN_ROOM(ch)].people; vict && !found; vict = vict->next_in_room) {
-	if (ch == vict || !IS_NPC(vict) || !FIGHTING(vict))
+	if (ch == vict || !char_is_npc(vict) || !FIGHTING(vict))
 	  continue;
-	if (IS_NPC(FIGHTING(vict)) || ch == FIGHTING(vict))
+	if (char_is_npc(FIGHTING(vict)) || ch == FIGHTING(vict))
 	  continue;
 
-        if (IS_HUMANOID(vict)) {
+        if (char_is_humanoid(vict)) {
 	act("$n jumps to the aid of $N!", FALSE, ch, 0, vict, TO_ROOM);
         char tar[MAX_INPUT_LENGTH];
 
-        sprintf(tar, "%s", GET_NAME(FIGHTING(vict)));
+        sprintf(tar, "%s", char_get_name(FIGHTING(vict)));
         do_punch(ch, tar, 0, 0);
 	found = TRUE;
         }
@@ -460,12 +460,12 @@ void mobile_activity(void)
 
     /* Add new mobile actions here */
 
-    if (IS_KABITO(ch)) {
+    if (char_is_kabito(ch)) {
       int shop_nr;
       found = FALSE;
       /* Is there a shopkeeper around? */
       for (vict = world[IN_ROOM(ch)].people; vict && !found; vict = vict->next_in_room) {
-        if (GET_MOB_SPEC(vict) == shop_keeper) {
+        if (char_get_mob_spec(vict) == shop_keeper) {
           /* Ok, vict is a shop keeper.  Which shop is his? */
           for (shop_nr = 0; shop_nr <= top_shop; shop_nr++)
             if (SHOP_KEEPER(shop_nr) == vict->nr)
@@ -485,15 +485,15 @@ void mobile_activity(void)
       for (vict = world[IN_ROOM(ch)].people; vict && !found; vict = vict->next_in_room) {
         if (vict == ch)
           continue;
-        if (MOB_FLAGGED(ch, MOB_WIMPY) && AWAKE(vict))
+        if (char_mob_flagged(ch, MOB_WIMPY) && char_is_awake(vict))
           continue;
-        if (!IS_HUMANOID(vict))
+        if (!char_is_humanoid(vict))
           continue;
-        if (IS_NPC(vict) && MOB_FLAGGED(vict, MOB_NOKILL))
+        if (char_is_npc(vict) && char_mob_flagged(vict, MOB_NOKILL))
           continue;
-        if (GET_MOB_VNUM(ch) == GET_MOB_VNUM(vict))
+        if (char_get_mob_vnum(ch) == char_get_mob_vnum(vict))
           continue;
-        if (GET_LEVEL(ch) >= GET_LEVEL(vict)) {
+        if (char_get_level(ch) >= char_get_level(vict)) {
           if (roll_skill(ch, SKILL_SLEIGHT_OF_HAND)) {
             npc_steal(ch, vict);
             found = TRUE;
@@ -511,7 +511,7 @@ void mob_taunt(struct char_data *ch)
 
  int message = 1;
 
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) { /* In space.... nobody cares. */
+ if (rroom_flagged(IN_ROOM(ch), ROOM_SPACE)) { /* In space.... nobody cares. */
   return;
  }
 
@@ -525,7 +525,7 @@ void mob_taunt(struct char_data *ch)
   return;
  }
 
- if (!IS_HUMANOID(ch) && !SUNKEN(IN_ROOM(ch))) { /* They are an animal and they are not in the water. */
+ if (!char_is_humanoid(ch) && !rroom_sunken(IN_ROOM(ch))) { /* They are an animal and they are not in the water. */
   message = rand_number(1, 12);
   switch (message) { /* Display the appropriate message. */
    case 1:
@@ -576,7 +576,7 @@ void mob_taunt(struct char_data *ch)
     act("@C$n@W watches you with a threatening gaze while $e looks for a weakness!@n", TRUE, ch, 0, vict, TO_VICT);
     break;
   }
- } else if (!IS_HUMANOID(ch)) { /* Animal under water */
+ } else if (!char_is_humanoid(ch)) { /* Animal under water */
   message = rand_number(1, 7);
   switch (message) {
    case 1:
@@ -608,10 +608,10 @@ void mob_taunt(struct char_data *ch)
     act("@C$n@W swims upward before darting down past you!@n", TRUE, ch, 0, vict, TO_VICT);
     break;
   }
- } else if (!MOB_FLAGGED(ch, MOB_DUMMY)) { /* They are intelligent */
+ } else if (!char_mob_flagged(ch, MOB_DUMMY)) { /* They are intelligent */
   message = rand_number(1, 10);
-  if (!SUNKEN(IN_ROOM(ch))) {
-   if (AFF_FLAGGED(ch, AFF_FLYING)) { /* They are flying */
+  if (!rroom_sunken(IN_ROOM(ch))) {
+   if (char_aff_flagged(ch, AFF_FLYING)) { /* They are flying */
     switch (message) {
      case 1:
       act("@C$n@W flies around @c$N@W slowly while looking for an opening!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -667,7 +667,7 @@ void mob_taunt(struct char_data *ch)
       act("@C$n@W scowls at you!@n", TRUE, ch, 0, vict, TO_VICT);
       break;
      case 3:
-		if (IS_ANDROID(ch)) {
+		if (char_is_android(ch)) {
 		  act("@C$n@W has sparks come off them that land on @c$N@W!@n@n", TRUE, ch, 0, vict, TO_NOTVICT);
 		  act("@C$n@W has sparks come off them that land on you!@n", TRUE, ch, 0, vict, TO_VICT);
 		} else {
@@ -729,14 +729,14 @@ void remember(struct char_data *ch, struct char_data *victim)
   memory_rec *tmp;
   bool present = FALSE;
 
-  if (!IS_NPC(ch) || IS_NPC(victim) || PRF_FLAGGED(victim, PRF_NOHASSLE))
+  if (!char_is_npc(ch) || char_is_npc(victim) || char_prf_flagged(victim, PRF_NOHASSLE))
     return;
 
   for (tmp = MEMORY(ch); tmp && !present; tmp = tmp->next)
     if (tmp->id == GET_IDNUM(victim))
       present = TRUE;
 
-  if (!present && !MOB_FLAGGED(ch, MOB_SPAR) && !PLR_FLAGGED(victim, PLR_SPAR)) {
+  if (!present && !char_mob_flagged(ch, MOB_SPAR) && !char_plr_flagged(victim, PLR_SPAR)) {
     CREATE(tmp, memory_rec, 1);
     tmp->next = MEMORY(ch);
     tmp->id = GET_IDNUM(victim);
@@ -798,7 +798,7 @@ bool aggressive_mob_on_a_leash(struct char_data *slave, struct char_data *master
   static int snarl_cmd;
   int dieroll;
 
-  if (!master || !AFF_FLAGGED(slave, AFF_CHARM))
+  if (!master || !char_aff_flagged(slave, AFF_CHARM))
     return (FALSE);
 
   if (!snarl_cmd)
@@ -810,7 +810,7 @@ bool aggressive_mob_on_a_leash(struct char_data *slave, struct char_data *master
     if (snarl_cmd > 0 && attack && !rand_number(0, 3)) {
       char victbuf[MAX_NAME_LENGTH + 1];
 
-      strncpy(victbuf, GET_NAME(attack), sizeof(victbuf));	/* strncpy: OK */
+      strncpy(victbuf, char_get_name(attack), sizeof(victbuf));	/* strncpy: OK */
       victbuf[sizeof(victbuf) - 1] = '\0';
 
       do_action(slave, victbuf, snarl_cmd, 0);

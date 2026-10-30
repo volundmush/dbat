@@ -136,7 +136,7 @@ void extract_mobile_all(mob_vnum vnum)
 
   for (ch = character_list; ch; ch = next) {
     next = ch->next;
-    if (GET_MOB_VNUM(ch) == vnum)
+    if (char_get_mob_vnum(ch) == vnum)
       extract_char(ch);
   }
 }
@@ -486,7 +486,7 @@ int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
   );
   fprintf(fd, 	"%d 0 %d %d\n"
 		"%d %d %d\n",
-		GET_GOLD(mob), GET_RACE(mob), GET_CLASS(mob),
+		GET_GOLD(mob), GET_RACE(mob), char_get_class(mob),
 		GET_POS(mob), GET_DEFAULT_POS(mob), GET_SEX(mob)
   );
 

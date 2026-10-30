@@ -472,7 +472,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
   *name = '\0';
   
   /* board locate */
-  if(IS_NPC(ch)) {
+  if(char_is_npc(ch)) {
     send_to_char(ch,"Gosh.. now .. if only mobs could read.. you'd be doing good.\r\n");
     return;
   }
@@ -501,9 +501,9 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
   }
   else {
   obj = read_object(board_vnum, REAL);
-  bnum = GET_OBJ_VNUM(obj);
+  bnum = obj_get_vnum(obj);
   char clan[120];
-   if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
+   if (obj_flagged(obj, ITEM_CBOARD)) {
     if (GET_CLAN(ch) != NULL) {
       sprintf(clan, "%s", GET_CLAN(ch));
     }
@@ -530,7 +530,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
 
   }
   message=BOARD_MESSAGES(thisboard);
-  if(PRF_FLAGGED(ch,PRF_VIEWORDER)) 
+  if(char_prf_flagged(ch,PRF_VIEWORDER)) 
   {
     while(MESG_NEXT(message)) 
 	{
@@ -552,7 +552,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
     else {
     sprintf(buf+strlen(buf), "@D[%s] (@C%2d@D) : @W%6.10s @D(@G%-10s@D) ::@w %-45s\r\n", yesno ? "@GX@D" : "@RX@D", ++msgcount, tmstr, CAP(name), MESG_SUBJECT(message) ? MESG_SUBJECT(message) : "No Subject");    
     }
-    if(PRF_FLAGGED(ch,PRF_VIEWORDER)) {
+    if(char_prf_flagged(ch,PRF_VIEWORDER)) {
       message=MESG_PREV(message);
     } else {
       message=MESG_NEXT(message);
@@ -591,7 +591,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
   struct board_memory *mboard_type, *list;
   char buf[MAX_STRING_LENGTH+1];
 
-  if(IS_NPC(ch)) {
+  if(char_is_npc(ch)) {
     send_to_char(ch,"Silly mob - reading is for pcs!\r\n");
     return;
   }
@@ -620,9 +620,9 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
   }
   else {
   obj = read_object(board_vnum, REAL);
-  bnum = GET_OBJ_VNUM(obj);
+  bnum = obj_get_vnum(obj);
    char clan[200];
-   if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
+   if (obj_flagged(obj, ITEM_CBOARD)) {
     if (GET_CLAN(ch) != NULL) {
       sprintf(clan, "%s", GET_CLAN(ch));
     }
@@ -641,7 +641,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
     return;
   }
 
-  if(PRF_FLAGGED(ch,PRF_VIEWORDER)) 
+  if(char_prf_flagged(ch,PRF_VIEWORDER)) 
   {
     while(MESG_NEXT(message)) 
 	{
@@ -650,7 +650,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
   }
 
   for(msgcount=arg;message && msgcount!=1;msgcount--) {
-    if(PRF_FLAGGED(ch,PRF_VIEWORDER)) {
+    if(char_prf_flagged(ch,PRF_VIEWORDER)) {
       message=MESG_PREV(message);
     } else {
     message=MESG_NEXT(message);
@@ -671,7 +671,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
   if (BOARD_VERSION(thisboard) != CURRENT_BOARD_VER)
    MEMORY_READER(mboard_type) = GET_IDNUM(ch);
   else
-   MEMORY_READER_NAME(mboard_type) = strdup(GET_NAME(ch)); 
+   MEMORY_READER_NAME(mboard_type) = strdup(char_get_name(ch)); 
   MEMORY_TIMESTAMP(mboard_type)=MESG_TIMESTAMP(message);
   MEMORY_NEXT(mboard_type)=NULL;
   /* Let's make sure that we don't already have this memory recorded */
@@ -770,7 +770,7 @@ int mesglookup(struct board_msg *message,struct char_data *ch, struct board_info
     }
   }
 
-  tempname = strdup(GET_NAME(ch));
+  tempname = strdup(char_get_name(ch));
   while(mboard_type && BOARD_VERSION(board) == CURRENT_BOARD_VER) {
     if (!strcmp(MEMORY_READER_NAME(mboard_type), tempname) &&  
         MEMORY_TIMESTAMP(mboard_type) == MESG_TIMESTAMP(message)) {
@@ -789,7 +789,7 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg)
   struct board_info *thisboard=bboards;
   struct board_msg *message;
 
-  if(IS_NPC(ch)) {
+  if(char_is_npc(ch)) {
     send_to_char(ch,"Orwellian police thwart your attempt at free speech.\r\n");
     return;
   }
@@ -820,7 +820,7 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg)
 
 
   CREATE(message, struct board_msg, 1);
-  MESG_POSTER_NAME(message) = strdup(GET_NAME(ch));
+  MESG_POSTER_NAME(message) = strdup(char_get_name(ch));
   MESG_TIMESTAMP(message)=time(0);
   MESG_SUBJECT(message) = strdup(arg);
   MESG_NEXT(message)=NULL;
@@ -855,9 +855,9 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg)
   struct descriptor_data *d;
 
  for (d = descriptor_list; d; d = d->next) {
-  if (!IS_PLAYING(d))
+  if (!desc_is_playing(d))
     continue;
-  if (PLR_FLAGGED(d->character, PLR_WRITING))
+  if (char_plr_flagged(d->character, PLR_WRITING))
     continue;
   if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWIMM > GET_BOARD(d->character, 1) && board_vnum == 3098)
     send_to_char(d->character, "\r\n@GThere is a new Immortal Board Post.@n\r\n");
@@ -895,7 +895,7 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum){
     send_to_char(ch,"You are not holy enough to respond to this board.\r\n");
       return;
     }
-  if(PRF_FLAGGED(ch,PRF_VIEWORDER)) {
+  if(char_prf_flagged(ch,PRF_VIEWORDER)) {
    mnum = (BOARD_MNUM(thisboard) - mnum) + 1;
   }
   if (mnum < 0 || mnum > BOARD_MNUM(thisboard)) {
@@ -911,7 +911,7 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum){
     other=MESG_NEXT(other);
   
   CREATE(message, struct board_msg, 1);
-  MESG_POSTER_NAME(message) = strdup(GET_NAME(ch));
+  MESG_POSTER_NAME(message) = strdup(char_get_name(ch));
   MESG_TIMESTAMP(message)=time(0);
   sprintf(buf,"Re: %s",MESG_SUBJECT(other));
   MESG_SUBJECT(message)=strdup(buf);
@@ -927,7 +927,7 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum){
   send_to_char(ch,"Write your message.  (/s saves /h for help)\r\n\r\n");
   act("@C$n@w starts writing on the board.@n", TRUE, ch, 0, 0, TO_ROOM);
 
-  if (!IS_NPC(ch)) {
+  if (!char_is_npc(ch)) {
     SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   }
 
@@ -954,9 +954,9 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum){
   struct descriptor_data *d;
 
  for (d = descriptor_list; d; d = d->next) {
-  if (!IS_PLAYING(d))
+  if (!desc_is_playing(d))
     continue;
-  if (PLR_FLAGGED(d->character, PLR_WRITING))
+  if (char_plr_flagged(d->character, PLR_WRITING))
     continue;
   if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWIMM > GET_BOARD(d->character, 1) && board_vnum == 3098)
     send_to_char(d->character, "\r\n@GThere is a new Immortal Board Post.@n\r\n");
@@ -994,7 +994,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg)
   int msgcount;
   char buf[MAX_STRING_LENGTH+1];
   
-  if(IS_NPC(ch)) {
+  if(char_is_npc(ch)) {
     send_to_char(ch,"Nuts.. looks like you forgot your eraser back in mobland...\r\n");
     return;
   }
@@ -1013,7 +1013,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg)
     return;
   }
 
-  if(PRF_FLAGGED(ch,PRF_VIEWORDER)) {
+  if(char_prf_flagged(ch,PRF_VIEWORDER)) {
     arg = BOARD_MNUM(thisboard) - arg + 1;
   }
   for(msgcount=arg;cur && msgcount!=1;msgcount--) {
@@ -1033,21 +1033,21 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg)
   else {
    char clan[120];
    obj = read_object(board_vnum, REAL);
-   if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
+   if (obj_flagged(obj, ITEM_CBOARD)) {
     if (GET_CLAN(ch) != NULL) {
       sprintf(clan, "%s", GET_CLAN(ch));
     }
     if (clanIsModerator(clan, ch) && strstr(obj->action_description, clan)) {
      send_to_char(ch, "Exercising your clan leader powers....\r\n");
     }
-    else if (GET_ADMLEVEL(ch) < REMOVE_LVL(thisboard) && strcmp(GET_NAME(ch), MESG_POSTER_NAME(cur))) {
+    else if (GET_ADMLEVEL(ch) < REMOVE_LVL(thisboard) && strcmp(char_get_name(ch), MESG_POSTER_NAME(cur))) {
           send_to_char(ch, "You can't remove other people's messages.\r\n");
           extract_obj(obj);
           return;
     }
    }
-   else if (!OBJ_FLAGGED(obj, ITEM_CBOARD)) {
-     if (GET_ADMLEVEL(ch) < REMOVE_LVL(thisboard) && strcmp(GET_NAME(ch), MESG_POSTER_NAME(cur))) {
+   else if (!obj_flagged(obj, ITEM_CBOARD)) {
+     if (GET_ADMLEVEL(ch) < REMOVE_LVL(thisboard) && strcmp(char_get_name(ch), MESG_POSTER_NAME(cur))) {
 	  send_to_char(ch, "You can't remove other people's messages.\r\n");
           extract_obj(obj);
 	  return;

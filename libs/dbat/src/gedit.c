@@ -98,7 +98,7 @@ ACMD(do_oasis_gedit)
     if (STATE(d) == CON_GEDIT) {
       if (d->olc && OLC_NUM(d) == number) {
         send_to_char(ch, "That guild is currently being edited by %s.\r\n",
-          PERS(d->character, ch));
+          char_pers(d->character, ch));
         return;
       }
     }
@@ -149,7 +149,7 @@ ACMD(do_oasis_gedit)
       zone_table[OLC_ZNUM(d)].number);
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE,
       "OLC: %s saves guild info for zone %d.",
-      GET_NAME(ch), zone_table[OLC_ZNUM(d)].number);
+      char_get_name(ch), zone_table[OLC_ZNUM(d)].number);
     
     /**************************************************************************/
     /** Save the guild to the guild file.                                    **/
@@ -177,7 +177,7 @@ ACMD(do_oasis_gedit)
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
-    GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+    char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
 }
 
 void gedit_setup_new(struct descriptor_data *d)
@@ -474,7 +474,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
 					send_to_char(d->character, "Saving Guild to memory.\r\n");
 					gedit_save_internally(d);
 					mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
-						  "OLC: %s edits guild %d", GET_NAME(d->character), OLC_NUM(d));
+						  "OLC: %s edits guild %d", char_get_name(d->character), OLC_NUM(d));
 					if (CONFIG_OLC_SAVE) {
 						gedit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
 						write_to_output(d, "Guild %d saved to disk.\r\n", OLC_NUM(d));

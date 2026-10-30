@@ -89,7 +89,7 @@ void mob_log(char_data *mob, const char *format, ...)
   char output[MAX_STRING_LENGTH];
 
   snprintf(output, sizeof(output), "Mob (%s, VNum %d):: %s",
-                   GET_SHORT(mob), GET_MOB_VNUM(mob), format);
+                   GET_SHORT(mob), char_get_mob_vnum(mob), format);
 
   va_start(args, format);
   script_vlog(output, args);
@@ -100,7 +100,7 @@ void mob_log(char_data *mob, const char *format, ...)
 ** macro to determine if a mob is permitted to use these commands
 */
 #define MOB_OR_IMPL(ch) \
-  (IS_NPC(ch) && (!(ch)->desc || GET_ADMLEVEL((ch)->desc->original)>=ADMLVL_IMPL))
+  (char_is_npc(ch) && (!(ch)->desc || GET_ADMLEVEL((ch)->desc->original)>=ADMLVL_IMPL))
 
 /* mob commands */
 
@@ -116,7 +116,7 @@ ACMD(do_masound)
         return;
     }
 
-    if (AFF_FLAGGED(ch, AFF_CHARM))
+    if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
     if (!*argument)
@@ -190,7 +190,7 @@ ACMD(do_mkill)
         return;
     }
 
-    if (AFF_FLAGGED(ch, AFF_CHARM))
+    if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
     one_argument(argument, arg);
@@ -215,13 +215,13 @@ ACMD(do_mkill)
         return;
     }
 
-    if (!IS_NPC(victim) && PRF_FLAGGED(victim, PRF_NOHASSLE)) {
+    if (!char_is_npc(victim) && char_prf_flagged(victim, PRF_NOHASSLE)) {
         mob_log(ch, "mkill: target has nohassle on");
         return;
     }
 
-        sprintf(buf, "%s", GET_NAME(victim));
-        if (IS_HUMANOID(ch)) {
+        sprintf(buf, "%s", char_get_name(victim));
+        if (char_is_humanoid(ch)) {
          switch (rand_number(1, 7)) {
           case 1:
            do_punch(ch, buf, 0, 0);
@@ -267,7 +267,7 @@ ACMD(do_mjunk)
         return;
     }
 
-    if (AFF_FLAGGED(ch, AFF_CHARM))
+    if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
     one_argument(argument, arg);
@@ -315,7 +315,7 @@ ACMD(do_mechoaround)
         return;
     }
 
-    if (AFF_FLAGGED(ch, AFF_CHARM))
+    if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
     p = one_argument(argument, arg);
@@ -339,7 +339,7 @@ ACMD(do_mechoaround)
     char buf[MAX_STRING_LENGTH];
 
     sprintf(buf, p);
-    search_replace(buf, GET_NAME(victim), "$n");
+    search_replace(buf, char_get_name(victim), "$n");
     act(buf, TRUE, victim, 0, 0, TO_ROOM);
     /*sub_write(p, victim, TRUE, TO_ROOM);*/
 }
@@ -357,7 +357,7 @@ ACMD(do_msend)
         return;
     }
 
-    if (AFF_FLAGGED(ch, AFF_CHARM))
+    if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
     p = one_argument(argument, arg);
@@ -392,7 +392,7 @@ ACMD(do_mecho)
         return;
     }
 
-    if (AFF_FLAGGED(ch, AFF_CHARM))
+    if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
     if (!*argument) {
@@ -445,7 +445,7 @@ ACMD(do_mload)
         return;
     }
 
-    if (AFF_FLAGGED(ch, AFF_CHARM))
+    if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
     if( ch->desc && GET_ADMLEVEL(ch->desc->original) < ADMLVL_IMPL)
@@ -497,7 +497,7 @@ ACMD(do_mload)
       /* special handling to make objects able to load on a person/in a container/worn etc. */
       if (!target || !*target) {
         add_unique_id(object);
-        if (CAN_WEAR(object, ITEM_WEAR_TAKE)) {
+        if (obj_can_wear(object, ITEM_WEAR_TAKE)) {
             obj_to_char(object, ch);
         } else {
             obj_to_room(object, IN_ROOM(ch));
@@ -554,7 +554,7 @@ ACMD(do_mpurge)
     return;
   }
 
-  if (AFF_FLAGGED(ch, AFF_CHARM))
+  if (char_aff_flagged(ch, AFF_CHARM))
     return;
 
   if (ch->desc && (GET_ADMLEVEL(ch->desc->original) < ADMLVL_IMPL))
@@ -569,7 +569,7 @@ ACMD(do_mpurge)
 
     for (victim = world[IN_ROOM(ch)].people; victim; victim = vnext) {
       vnext = victim->next_in_room;
-      if (IS_NPC(victim) && victim != ch)
+      if (char_is_npc(victim) && victim != ch)
         extract_char(victim);
     }
 
@@ -600,7 +600,7 @@ ACMD(do_mpurge)
     return;
   }
 
-  if (!IS_NPC(victim)) {
+  if (!char_is_npc(victim)) {
       mob_log(ch, "mpurge: purging a PC");
       return;
   }
@@ -622,7 +622,7 @@ ACMD(do_mgoto)
         return;
     }
 
-    if (AFF_FLAGGED(ch, AFF_CHARM))
+    if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
     one_argument(argument, arg);
@@ -632,7 +632,7 @@ ACMD(do_mgoto)
         return;
     }
 
-    if ((location = find_target_room(ch, arg)) == NOWHERE && GET_MOB_VNUM(ch) != 3) {
+    if ((location = find_target_room(ch, arg)) == NOWHERE && char_get_mob_vnum(ch) != 3) {
         mob_log(ch, "mgoto: invalid location");
         return;
     } else if ((location = find_target_room(ch, arg)) == NOWHERE) {
@@ -659,7 +659,7 @@ ACMD(do_mat)
         return;
     }
 
-    if (AFF_FLAGGED(ch, AFF_CHARM))
+    if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
     argument = one_argument( argument, arg );
@@ -702,7 +702,7 @@ ACMD(do_mteleport)
     return;
   }
 
-  if (AFF_FLAGGED(ch, AFF_CHARM))
+  if (char_aff_flagged(ch, AFF_CHARM))
     return;
 
   argument = two_arguments(argument, arg1, arg2);
@@ -764,7 +764,7 @@ ACMD(do_mdamage) {
     return;
   }
 
-  if (AFF_FLAGGED(ch, AFF_CHARM))
+  if (char_aff_flagged(ch, AFF_CHARM))
     return;
 
   two_arguments(argument, name, amount);
@@ -801,7 +801,7 @@ ACMD(do_mforce)
         return;
     }
 
-    if (AFF_FLAGGED(ch, AFF_CHARM))
+    if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
     if (ch->desc && (GET_ADMLEVEL(ch->desc->original) < ADMLVL_IMPL))
@@ -824,7 +824,7 @@ ACMD(do_mforce)
             if ((i->character != ch) && !i->connected &&
                 (IN_ROOM(i->character) == IN_ROOM(ch))) {
                 vch = i->character;
-                if (GET_LEVEL(vch) < GET_LEVEL(ch) && CAN_SEE(ch, vch) &&
+                if (char_get_level(vch) < char_get_level(ch) && char_can_see(ch, vch) &&
                     valid_dg_target(vch, 0)) {
                     command_interpreter(vch, argument);
                 }
@@ -866,7 +866,7 @@ ACMD(do_mremember)
         return;
     }
 
-    if (AFF_FLAGGED(ch, AFF_CHARM))
+    if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
     if (ch->desc && (GET_ADMLEVEL(ch->desc->original) < ADMLVL_IMPL))
@@ -918,7 +918,7 @@ ACMD(do_mforget)
         return;
     }
 
-    if (AFF_FLAGGED(ch, AFF_CHARM))
+    if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
     if (ch->desc && (GET_ADMLEVEL(ch->desc->original) < ADMLVL_IMPL))
@@ -977,7 +977,7 @@ ACMD(do_mtransform)
         return;
     }
 
-    if (AFF_FLAGGED(ch, AFF_CHARM))
+    if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
     if (ch->desc) {
@@ -1085,7 +1085,7 @@ ACMD(do_mdoor)
         return;
     }
 
-    if (AFF_FLAGGED(ch, AFF_CHARM))
+    if (char_aff_flagged(ch, AFF_CHARM))
         return;
 
     argument = two_arguments(argument, target, direction);
@@ -1173,7 +1173,7 @@ ACMD(do_mfollow)
     return;
   }
 
-  if (AFF_FLAGGED(ch, AFF_CHARM))
+  if (char_aff_flagged(ch, AFF_CHARM))
     return;
 
   one_argument(argument, buf);
@@ -1196,7 +1196,7 @@ ACMD(do_mfollow)
   if (ch->master == leader) /* already following */
     return;
 
-  if (AFF_FLAGGED(ch, AFF_CHARM) && (ch->master))  /* can't override charm */
+  if (char_aff_flagged(ch, AFF_CHARM) && (ch->master))  /* can't override charm */
     return;
 
 

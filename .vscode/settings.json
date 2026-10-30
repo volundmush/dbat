@@ -1,0 +1,26 @@
+{
+  // Hide from Explorer, search and quick-open
+  "files.exclude": {
+    "**/build": true,
+    "**/zig-out": true,
+    "**/zig-pkg": true,
+    "**/.zig-cache": true
+  },
+  "search.exclude": {
+    "**/build": true,
+    "**/zig-out": true,
+    "**/zig-pkg": true,
+    "**/.zig-cache": true
+  },
+  // Stop the C/C++ extension's tag parser indexing these folders,
+  // which is where "Find All References" gets its candidates
+  "C_Cpp.files.exclude": {
+    "**/build": true,
+    "**/zig-out": true,
+    "**/zig-pkg": true,
+    "**/.zig-cache": true,
+    "**/.vscode": true
+  },
+  // Use the up-to-date CMake compile database for IntelliSense
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json"
+}

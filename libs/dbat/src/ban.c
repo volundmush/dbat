@@ -176,7 +176,7 @@ ACMD(do_ban)
   for (nextchar = ban_node->site; *nextchar; nextchar++)
     *nextchar = tolower(*nextchar);
   ban_node->site[BANNED_SITE_LENGTH] = '\0';
-  strncpy(ban_node->name, GET_NAME(ch), MAX_NAME_LENGTH);	/* strncpy: OK (b_n->size:MAX_NAME_LENGTH+1) */
+  strncpy(ban_node->name, char_get_name(ch), MAX_NAME_LENGTH);	/* strncpy: OK (b_n->size:MAX_NAME_LENGTH+1) */
   ban_node->name[MAX_NAME_LENGTH] = '\0';
   ban_node->date = time(0);
 
@@ -188,7 +188,7 @@ ACMD(do_ban)
   ban_list = ban_node;
 
   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "%s has banned %s for %s players.",
-	GET_NAME(ch), site, ban_types[ban_node->type]);
+	char_get_name(ch), site, ban_types[ban_node->type]);
   send_to_char(ch, "Site banned.\r\n");
   write_ban_list();
 }
@@ -221,7 +221,7 @@ ACMD(do_unban)
   REMOVE_FROM_LIST(ban_node, ban_list, next, temp);
   send_to_char(ch, "Site unbanned.\r\n");
   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "%s removed the %s-player ban on %s.",
-	GET_NAME(ch), ban_types[ban_node->type], ban_node->site);
+	char_get_name(ch), ban_types[ban_node->type], ban_node->site);
 
   free(ban_node);
   write_ban_list();
@@ -257,9 +257,9 @@ int Valid_Name(char *newname)
    * THIS SHOULD FIX THE 'invalid name' if disconnected from OLC-bug - WELCOR 9/00
    */
   for (dt = descriptor_list; dt; dt = dt->next)
-    if (dt->character && GET_NAME(dt->character) && !strcasecmp(GET_NAME(dt->character), newname))
+    if (dt->character && char_get_name(dt->character) && !strcasecmp(char_get_name(dt->character), newname))
       if (GET_IDNUM(dt->character) == -1)
-        return (IS_PLAYING(dt));
+        return (desc_is_playing(dt));
 
   /* count wovels */
   for (i = 0; newname[i]; i++) {

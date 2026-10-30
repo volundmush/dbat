@@ -88,7 +88,7 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
 ACMD(do_evolve)
 {
 
- if (!IS_ARLIAN(ch) || IS_NPC(ch)) {
+ if (!char_is_arlian(ch) || char_is_npc(ch)) {
   send_to_char(ch, "You are not an arlian!\r\n");
   return;
  }
@@ -96,7 +96,7 @@ ACMD(do_evolve)
  char arg[MAX_INPUT_LENGTH];
  one_argument(argument, arg);
 
- int64_t plcost = GET_LEVEL(ch), stcost = GET_LEVEL(ch), kicost = GET_LEVEL(ch);
+ int64_t plcost = char_get_level(ch), stcost = char_get_level(ch), kicost = char_get_level(ch);
 
  plcost += molt_threshold(ch) * 0.65 + (getBasePL(ch) * 0.15);
  kicost += (molt_threshold(ch) * 0.50) + (getBaseKI(ch) * 0.22);
@@ -219,7 +219,7 @@ static double terrain_bonus(struct char_data *ch)
 
  double bonus = 0.0;
 
- switch (SECT(IN_ROOM(ch))) {
+ switch (rroom_sect(IN_ROOM(ch))) {
   case SECT_FOREST:
    bonus += 0.5;
    break;
@@ -237,7 +237,7 @@ static double terrain_bonus(struct char_data *ch)
    break;
  }
 
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
+ if (rroom_flagged(IN_ROOM(ch), ROOM_SPACE)) {
   bonus += -0.5;
  }
 
@@ -251,7 +251,7 @@ static void search_room(struct char_data *ch)
 {
 
  struct char_data *vict, *next_v;
- int perc = (GET_INT(ch) * 0.6) + GET_SKILL(ch, SKILL_SPOT) + GET_SKILL(ch, SKILL_SEARCH) + GET_SKILL(ch, SKILL_LISTEN);
+ int perc = (GET_INT(ch) * 0.6) + char_get_skill(ch, SKILL_SPOT) + char_get_skill(ch, SKILL_SEARCH) + char_get_skill(ch, SKILL_LISTEN);
  int prob = 0, found = 0;
  double bonus = 1.0, terrain = 1.0;
 
@@ -260,8 +260,8 @@ static void search_room(struct char_data *ch)
   return;
  }
 
- if (GET_SKILL(ch, SKILL_SENSE)) {
-   bonus += (GET_SKILL(ch, SKILL_SENSE) * 0.01);
+ if (char_get_skill(ch, SKILL_SENSE)) {
+   bonus += (char_get_skill(ch, SKILL_SENSE) * 0.01);
  }
 
  reveal_hiding(ch, 0);
@@ -270,19 +270,19 @@ static void search_room(struct char_data *ch)
 
  for (vict = world[IN_ROOM(ch)].people; vict; vict = next_v) {
   next_v = vict->next_in_room;
-  if (AFF_FLAGGED(vict, AFF_HIDE) && vict != ch) {
+  if (char_aff_flagged(vict, AFF_HIDE) && vict != ch) {
    if (GET_SUPPRESS(vict) >= 1) {
     perc *= (GET_SUPPRESS(vict) * 0.01);
    }
-   prob = GET_DEX(vict) + (GET_INT(vict) * 0.6) + GET_SKILL(vict, SKILL_HIDE) + GET_SKILL(vict, SKILL_MOVE_SILENTLY);
+   prob = GET_DEX(vict) + (GET_INT(vict) * 0.6) + char_get_skill(vict, SKILL_HIDE) + char_get_skill(vict, SKILL_MOVE_SILENTLY);
 
-   if (AFF_FLAGGED(vict, AFF_LIQUEFIED)) {
+   if (char_aff_flagged(vict, AFF_LIQUEFIED)) {
     prob *= 1.5;
    }
-   if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4)) {
+   if (char_is_mutant(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4)) {
     perc += 5;
    }
-   if (IS_MUTANT(vict) && (GET_GENOME(vict, 0) == 5 || GET_GENOME(vict, 1) == 5)) {
+   if (char_is_mutant(vict) && (GET_GENOME(vict, 0) == 5 || GET_GENOME(vict, 1) == 5)) {
     prob += 10;
    }
    terrain += terrain_bonus(vict);
@@ -299,7 +299,7 @@ static void search_room(struct char_data *ch)
  struct obj_data *obj = NULL;
 
  for (obj = world[IN_ROOM(ch)].contents; obj;obj=obj->next_content) {
-  if (OBJ_FLAGGED(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200)) {
+  if (obj_flagged(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200)) {
    act("@YYou uncover @y$p@Y, which had been burried here.@n", TRUE, ch, obj, 0, TO_CHAR);
    act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", TRUE, ch, obj, 0, TO_ROOM);
    REMOVE_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_BURIED);
@@ -328,14 +328,14 @@ static const char *weapon_disp[6] = {
 ACMD(do_mimic)
 {
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
 
  char arg[MAX_INPUT_LENGTH];
  
  one_argument(argument, arg);
  
- if (!GET_SKILL(ch, SKILL_MIMIC)) {
+ if (!char_get_skill(ch, SKILL_MIMIC)) {
   send_to_char(ch, "You do not know how to mimic the appearance of other races.\r\n");
   return;
  }
@@ -391,7 +391,7 @@ ACMD(do_mimic)
       return;
   }
 
-  int prob = GET_SKILL(ch, SKILL_MIMIC), perc = axion_dice(0);
+  int prob = char_get_skill(ch, SKILL_MIMIC), perc = axion_dice(0);
   double mult = 1 / prob;
   int64_t cost = GET_MAX_MANA(ch) * mult;
 
@@ -420,11 +420,11 @@ ACMD(do_mimic)
 ACMD(do_kyodaika)
 {
 
- if (IS_NPC(ch)) {
+ if (char_is_npc(ch)) {
   return;
  }
 
- if (!IS_NAMEK(ch)) {
+ if (!char_is_namek(ch)) {
   send_to_char(ch, "You are not a namek!\r\n");
   return;
  }
@@ -483,7 +483,7 @@ ACMD(do_draw)
   return;
  }
 
- if (GET_OBJ_VNUM(SITS(ch)) < 604 || GET_OBJ_VNUM(SITS(ch)) > 607) {
+ if (obj_get_vnum(SITS(ch)) < 604 || obj_get_vnum(SITS(ch)) > 607) {
   send_to_char(ch, "You need to be sitting at an official table to play.\r\n");
   return;
  }
@@ -524,7 +524,7 @@ ACMD(do_shuffle)
   return;
  }
 
- if (GET_OBJ_VNUM(SITS(ch)) < 604 || GET_OBJ_VNUM(SITS(ch)) > 607) {
+ if (obj_get_vnum(SITS(ch)) < 604 || obj_get_vnum(SITS(ch)) > 607) {
   send_to_char(ch, "You need to be sitting at an official table to play.\r\n");
   return;
  }
@@ -539,7 +539,7 @@ ACMD(do_shuffle)
 
  for (obj2 = obj->contains; obj2; obj2 = next_obj) {
   next_obj = obj2->next_content;
-  if (!OBJ_FLAGGED(obj2, ITEM_ANTI_HIEROPHANT)) {
+  if (!obj_flagged(obj2, ITEM_ANTI_HIEROPHANT)) {
    continue;
   }
   count += 1;
@@ -557,7 +557,7 @@ ACMD(do_shuffle)
  while (count > 0) {
  for (obj2 = world[real_room(48)].contents; obj2; obj2 = next_obj) {
     next_obj = obj2->next_content;
-   if (!OBJ_FLAGGED(obj2, ITEM_ANTI_HIEROPHANT)) {
+   if (!obj_flagged(obj2, ITEM_ANTI_HIEROPHANT)) {
     continue;
    }
    if (obj2 && count > 1 && rand_number(1, 4) == 3) {
@@ -594,7 +594,7 @@ ACMD(do_hand)
    send_to_char(ch, "@CYour hand contains:\r\n@D---------------------------@n\r\n");
    for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
-     if (obj && !OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT)) {
+     if (obj && !obj_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
       continue;
      }
      if (obj) {
@@ -621,7 +621,7 @@ ACMD(do_hand)
    act("@C$n's hand contains:\r\n@D---------------------------@n", TRUE, ch, 0, 0, TO_ROOM);
    for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
-     if (obj && !OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT)) {
+     if (obj && !obj_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
       continue;
      }
      if (obj) {
@@ -668,13 +668,13 @@ ACMD(do_post)
   return;
  }
 
- if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN2)) {
+ if (rroom_flagged(IN_ROOM(ch), ROOM_GARDEN1) || rroom_flagged(IN_ROOM(ch), ROOM_GARDEN2)) {
   send_to_char(ch, "You can not post on things in a garden.\r\n");
   return;
  }
 
  if (!*arg2) {
-  if (SECT(IN_ROOM(ch)) != SECT_INSIDE && SECT(IN_ROOM(ch)) != SECT_CITY) {
+  if (rroom_sect(IN_ROOM(ch)) != SECT_INSIDE && rroom_sect(IN_ROOM(ch)) != SECT_CITY) {
    send_to_char(ch, "You are not near any general structure you can post it on.\r\n");
    return;
   }
@@ -723,7 +723,7 @@ ACMD(do_play)
   return;
  }
 
- if (GET_OBJ_VNUM(SITS(ch)) < 604 || GET_OBJ_VNUM(SITS(ch)) > 607) {
+ if (obj_get_vnum(SITS(ch)) < 604 || obj_get_vnum(SITS(ch)) > 607) {
   send_to_char(ch, "You need to be sitting at an official table to play.\r\n");
   return;
  }
@@ -744,7 +744,7 @@ ACMD(do_play)
 
  for (obj3 = world[IN_ROOM(ch)].contents; obj3; obj3 = next_obj) {
      next_obj = obj3->next_content;
-  if (GET_OBJ_VNUM(obj3) == GET_OBJ_VNUM(SITS(ch)) - 4) {
+  if (obj_get_vnum(obj3) == obj_get_vnum(SITS(ch)) - 4) {
    obj2 = obj3;
   }
  }
@@ -790,7 +790,7 @@ ACMD(do_nickname)
    int found = FALSE;
    for (ship = world[IN_ROOM(ch)].contents; ship; ship = next_obj) {
     next_obj = ship->next_content;
-    if (GET_OBJ_VNUM(ship) >= 45000 && GET_OBJ_VNUM(ship) <= 45999 && found == FALSE) {
+    if (obj_get_vnum(ship) >= 45000 && obj_get_vnum(ship) <= 45999 && found == FALSE) {
      found = TRUE;
      ship2 = ship;
     }
@@ -805,9 +805,9 @@ ACMD(do_nickname)
      ship2->action_description = strdup(nick);
      struct obj_data *k;
      for (k = object_list; k; k = k->next) {
-      if (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(ship2) + 1000) {
+      if (obj_get_vnum(k) == obj_get_vnum(ship2) + 1000) {
        extract_obj(k);
-       int was_in = GET_ROOM_VNUM(IN_ROOM(ship2));
+       int was_in = rroom_get_vnum(IN_ROOM(ship2));
        obj_from_room(ship2);
        obj_to_room(ship2, real_room(was_in));
       }
@@ -887,11 +887,11 @@ void introCreate(struct char_data *ch)
   char fname[40];
   FILE *fl;
   /* Write Introduction File */
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, GET_NAME(ch)))
+  if (!get_filename(fname, sizeof(fname), INTRO_FILE, char_get_name(ch)))
     return;
 
   if( !(fl = fopen(fname, "w")) ) {
-    log("ERROR: could not save user, %s, to filename, %s.", GET_NAME(ch), fname);
+    log("ERROR: could not save user, %s, to filename, %s.", char_get_name(ch), fname);
     return;
   }
 
@@ -911,11 +911,11 @@ int readIntro(struct char_data *ch, struct char_data *vict) {
     return 0;
   }
 
-  if (IS_NPC(ch) || IS_NPC(vict)) {
+  if (char_is_npc(ch) || char_is_npc(vict)) {
    return 1;
   }
 
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, GET_NAME(ch))) {
+  if (!get_filename(fname, sizeof(fname), INTRO_FILE, char_get_name(ch))) {
     introCreate(ch);
   }
   if (!(fl = fopen(fname, "r"))) {
@@ -929,7 +929,7 @@ int readIntro(struct char_data *ch, struct char_data *vict) {
   while (!feof(fl)) {
     get_line(fl, line);
     sscanf(line, "%s %s\n", filler, scrap);
-    if (!strcasecmp(GET_NAME(vict), filler)) {
+    if (!strcasecmp(char_get_name(vict), filler)) {
      known = TRUE;
     }
   }
@@ -950,7 +950,7 @@ void introWrite(struct char_data *ch, struct char_data *vict, char *name)
   int count = 0, x = 0;
 
   /* Read Introduction File */
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, GET_NAME(ch))) {
+  if (!get_filename(fname, sizeof(fname), INTRO_FILE, char_get_name(ch))) {
     introCreate(ch);
   }
   if (!(file = fopen(fname, "r"))) {
@@ -969,17 +969,17 @@ void introWrite(struct char_data *ch, struct char_data *vict, char *name)
 
   /* Write Introduction File */
 
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, GET_NAME(ch)))
+  if (!get_filename(fname, sizeof(fname), INTRO_FILE, char_get_name(ch)))
     return;
 
   if( !(fl = fopen(fname, "w")) ) {
-    log("ERROR: could not save intro file, %s, to filename, %s.", GET_NAME(ch), fname);
+    log("ERROR: could not save intro file, %s, to filename, %s.", char_get_name(ch), fname);
     return;
   }
 
   while(x < count) {
     if (x == 0 || strcasecmp(names[x-1], names[x])) {
-     if (strcasecmp(names[x], GET_NAME(vict))) {
+     if (strcasecmp(names[x], char_get_name(vict))) {
       fprintf(fl, "%s %s\n", names[x], alias[x]);
      }
     }
@@ -996,7 +996,7 @@ void introWrite(struct char_data *ch, struct char_data *vict, char *name)
    x++;
   }
 
-  fprintf(fl, "%s %s\n", GET_NAME(vict), CAP(name));
+  fprintf(fl, "%s %s\n", char_get_name(vict), CAP(name));
 
   fclose(fl);
   return;
@@ -1005,7 +1005,7 @@ void introWrite(struct char_data *ch, struct char_data *vict, char *name)
 ACMD(do_intro)
 {
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
 
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -1047,7 +1047,7 @@ ACMD(do_intro)
    return;
   }
 
-  if (IS_NPC(vict)) {
+  if (char_is_npc(vict)) {
    send_to_char(ch, "That seems rather unwise.\r\n");
    return;
   }
@@ -1073,9 +1073,9 @@ ACMD(do_intro)
 static void bringdesc(struct char_data *ch, struct char_data *tch)
 {
 
-  if (ch != NULL &&  tch != NULL && IS_HUMANOID(tch)) {
+  if (ch != NULL &&  tch != NULL && char_is_humanoid(tch)) {
 
-  if (ch != tch && PLR_FLAGGED(tch, PLR_DISGUISED)) {
+  if (ch != tch && char_plr_flagged(tch, PLR_DISGUISED)) {
    send_to_char(ch, "            @D[@cHair Length @D: @WHidden.         @D]@n\r\n");
    send_to_char(ch, "            @D[@cHair Color  @D: @WHidden.         @D]@n\r\n");
    send_to_char(ch, "            @D[@cHair Style  @D: @WHidden.         @D]@n\r\n");
@@ -1119,8 +1119,8 @@ static void bringdesc(struct char_data *ch, struct char_data *tch)
    return;
   }
 
-  if (IS_HUMAN(tch) || IS_SAIYAN(tch) || IS_KONATSU(tch) || IS_MUTANT(tch) || IS_ANDROID(tch) || IS_KAI(tch) || IS_HALFBREED(tch) || IS_TRUFFLE(tch) || IS_HOSHIJIN(tch)) {
-  if ((!IS_SAIYAN(tch) && !IS_HALFBREED(tch)) || ((IS_SAIYAN(tch) || IS_HALFBREED(tch)) && !IS_TRANSFORMED(tch))) {
+  if (char_is_human(tch) || char_is_saiyan(tch) || char_is_konatsu(tch) || char_is_mutant(tch) || char_is_android(tch) || char_is_kai(tch) || char_is_halfbreed(tch) || char_is_truffle(tch) || char_is_hoshijin(tch)) {
+  if ((!char_is_saiyan(tch) && !char_is_halfbreed(tch)) || ((char_is_saiyan(tch) || char_is_halfbreed(tch)) && !char_is_transformed(tch))) {
    if (GET_HAIRL(tch) == HAIRL_LONG) {
     send_to_char(ch, "            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
    }
@@ -1209,8 +1209,8 @@ static void bringdesc(struct char_data *ch, struct char_data *tch)
     send_to_char(ch, "            @D[@cHair Color  @D: @WWhite.        @D]@n\r\n");
     }
    }
-    else if (IS_SAIYAN(tch) || IS_HALFBREED(tch)) {
-     if (PLR_FLAGGED(tch, PLR_TRANS1)) {
+    else if (char_is_saiyan(tch) || char_is_halfbreed(tch)) {
+     if (char_plr_flagged(tch, PLR_TRANS1)) {
       if (GET_HAIRL(tch) == HAIRL_LONG) {
        send_to_char(ch, "            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
       }
@@ -1230,7 +1230,7 @@ static void bringdesc(struct char_data *ch, struct char_data *tch)
       send_to_char(ch, "            @D[@cHair Color  @D: @WGolden.       @D]@n\r\n");
       send_to_char(ch, "            @D[@cEye Color   @D: @WEmerald.      @D]@n\r\n");
      }
-     else if (PLR_FLAGGED(tch, PLR_TRANS2)) {
+     else if (char_plr_flagged(tch, PLR_TRANS2)) {
       if (GET_HAIRL(tch) == HAIRL_LONG) {
        send_to_char(ch, "            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
       }
@@ -1250,13 +1250,13 @@ static void bringdesc(struct char_data *ch, struct char_data *tch)
       send_to_char(ch, "            @D[@cHair Color  @D: @WGolden.       @D]@n\r\n");
       send_to_char(ch, "            @D[@cEye Color   @D: @WEmerald.      @D]@n\r\n");
      }
-     else if (PLR_FLAGGED(tch, PLR_TRANS3)) {
+     else if (char_plr_flagged(tch, PLR_TRANS3)) {
       send_to_char(ch, "            @D[@cHair Length @D: @WReally Long.  @D]@n\r\n");
       send_to_char(ch, "            @D[@cHair Style  @D: @WSpiky.        @D]@n\r\n");
       send_to_char(ch, "            @D[@cHair Color  @D: @WGolden.       @D]@n\r\n");
       send_to_char(ch, "            @D[@cEye Color   @D: @WAqua Green.   @D]@n\r\n");
      }
-     else if (PLR_FLAGGED(tch, PLR_TRANS4)) {
+     else if (char_plr_flagged(tch, PLR_TRANS4)) {
       send_to_char(ch, "            @D[@cHair Length @D: @WLong.        @D]@n\r\n");
       send_to_char(ch, "            @D[@cHair Style  @D: @WSoft Spikes. @D]@n\r\n");
       send_to_char(ch, "            @D[@cHair Color  @D: @WBlack.       @D]@n\r\n");
@@ -1264,7 +1264,7 @@ static void bringdesc(struct char_data *ch, struct char_data *tch)
      }
     }
    }
-   if (IS_DEMON(tch) || IS_ICER(tch)) {
+   if (char_is_demon(tch) || char_is_icer(tch)) {
     if (GET_HAIRL(tch) == HAIRL_BALD) {
      send_to_char(ch, "            @D[@cHorn Length @D: @WNone.         @D]@n\r\n");
     }
@@ -1281,7 +1281,7 @@ static void bringdesc(struct char_data *ch, struct char_data *tch)
      send_to_char(ch, "            @D[@cHorn Length @D: @WReally Long.  @D]@n\r\n");
     }
    }
-   if (IS_NAMEK(tch) || IS_ARLIAN(tch)) {
+   if (char_is_namek(tch) || char_is_arlian(tch)) {
     if (GET_HAIRL(tch) == HAIRL_BALD) {
      send_to_char(ch, "            @D[@cAnt. Length @D: @WTiny.        @D]@n\r\n");
     }
@@ -1298,7 +1298,7 @@ static void bringdesc(struct char_data *ch, struct char_data *tch)
      send_to_char(ch, "            @D[@cAnt. Length @D: @WR. Long.     @D]@n\r\n");
     }
    }
-   if (IS_ARLIAN(tch) && IS_FEMALE(tch)) {
+   if (char_is_arlian(tch) && char_is_female(tch)) {
     if (GET_HAIRC(tch) == HAIRC_BLACK) {
      send_to_char(ch, "            @D[@cWing Color  @D: @WBlack.        @D]@n\r\n");
     }
@@ -1338,10 +1338,10 @@ static void bringdesc(struct char_data *ch, struct char_data *tch)
     else if (GET_HAIRC(tch) == HAIRC_WHITE) {
      send_to_char(ch, "            @D[@cWing Color  @D: @WWhite.        @D]@n\r\n");
     }    
-   } else if (IS_ARLIAN(tch) && !IS_FEMALE(tch)) {
+   } else if (char_is_arlian(tch) && !char_is_female(tch)) {
     send_to_char(ch, "            @D[@cWing Color  @D: @WWhite.        @D]@n\r\n");
    }
-   if (IS_MAJIN(tch)) {
+   if (char_is_majin(tch)) {
     if (GET_HAIRL(tch) == HAIRL_BALD) {
      send_to_char(ch, "            @D[@cFor. Length @D: @WTiny.         @D]@n\r\n");
     }
@@ -1358,7 +1358,7 @@ static void bringdesc(struct char_data *ch, struct char_data *tch)
      send_to_char(ch, "            @D[@cFor. Length @D: @WR. Long.      @D]@n\r\n");
     }
    }
-  if ((!IS_SAIYAN(tch) && !IS_HALFBREED(tch)) || ((IS_SAIYAN(tch) || IS_HALFBREED(tch)) && !IS_TRANSFORMED(tch))) {
+  if ((!char_is_saiyan(tch) && !char_is_halfbreed(tch)) || ((char_is_saiyan(tch) || char_is_halfbreed(tch)) && !char_is_transformed(tch))) {
    if (GET_EYE(tch) == EYE_BLUE) {
     send_to_char(ch, "            @D[@cEye Color   @D: @WBlue.         @D]@n\r\n");
    }
@@ -1436,7 +1436,7 @@ static void bringdesc(struct char_data *ch, struct char_data *tch)
     send_to_char(ch, "            @D[@cForehead    @D: @mMajin Symbol  @D]@n\r\n");
   }
   }
-  else if (!IS_HUMANOID(tch)) {
+  else if (!char_is_humanoid(tch)) {
     /* Display nothing */
     return;
    }
@@ -1451,7 +1451,7 @@ struct char_data *ch)
   int door;
 
   for (door = 0; door < NUM_OF_DIRS; door++) {
-    if (world[rnum].dir_option[door] && world[rnum].dir_option[door]->to_room != NOWHERE && (EXIT_FLAGGED(world[rnum].dir_option[door], EX_CLOSED) && !EXIT_FLAGGED(world[rnum].dir_option[door], EX_SECRET))) {
+    if (world[rnum].dir_option[door] && world[rnum].dir_option[door]->to_room != NOWHERE && (room_exit_flagged(world[rnum].dir_option[door], EX_CLOSED) && !room_exit_flagged(world[rnum].dir_option[door], EX_SECRET))) {
      switch (door) {
       case NORTH:
        map[y-1][x] = '8';
@@ -1478,74 +1478,74 @@ struct char_data *ch)
        map[y+1][x-1] = '8';
       break;
      }
-    } else if (world[rnum].dir_option[door] && world[rnum].dir_option[door]->to_room != NOWHERE && !EXIT_FLAGGED(world[rnum].dir_option[door], EX_CLOSED)) {
+    } else if (world[rnum].dir_option[door] && world[rnum].dir_option[door]->to_room != NOWHERE && !room_exit_flagged(world[rnum].dir_option[door], EX_CLOSED)) {
       switch (door) {
         case NORTH:
-          if (SUNKEN(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
            map[y-1][x] = '=';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x] = '2';
            } else {
             map[y-1][x] = 'i';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x] = '2';
            } else {
             map[y-1][x] = 'p';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x] = '7';
            } else {
             map[y-1][x] = '!';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x] = '1';
            } else {
             map[y-1][x] = '(';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x] = '6';
            } else {
             map[y-1][x] = 'f';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x] = '5';
            } else {
             map[y-1][x] = '^';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x] = '3';
            } else {
             map[y-1][x] = 'h';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
            map[y-1][x] = 's';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
            map[y-1][x] = '`';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
            map[y-1][x] = '+';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
            map[y-1][x] = '&';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
            map[y-1][x] = '*';
           }
           else {
@@ -1553,71 +1553,71 @@ struct char_data *ch)
           }
          break;
         case EAST:
-          if (SUNKEN(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
            map[y][x+1] = '=';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x+1] = '2';
            } else {
             map[y][x+1] = 'i';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x+1] = '2';
            } else {
             map[y][x+1] = 'p';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x+1] = '7';
            } else {
             map[y][x+1] = '!';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x+1] = '1';
            } else {
             map[y][x+1] = '(';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x+1] = '6';
            } else {
             map[y][x+1] = 'f';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x+1] = '5';
            } else {
             map[y][x+1] = '^';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x+1] = '3';
            } else {
             map[y][x+1] = 'h';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
            map[y][x+1] = 's';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
            map[y][x+1] = '`';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
            map[y][x+1] = '+';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
            map[y][x+1] = '&';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
            map[y][x+1] = '*';
           }
           else {
@@ -1625,71 +1625,71 @@ struct char_data *ch)
           }
          break;
         case SOUTH:
-          if (SUNKEN(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
            map[y+1][x] = '=';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '2';
            } else {
             map[y+1][x] = 'i';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '2';
            } else {
             map[y+1][x] = 'p';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '7';
            } else {
             map[y+1][x] = '!';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '1';
            } else {
             map[y+1][x] = '(';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '6';
            } else {
             map[y+1][x] = 'f';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '5';
            } else {
             map[y+1][x] = '^';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '3';
            } else {
             map[y+1][x] = 'h';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
            map[y+1][x] = 's';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
            map[y+1][x] = '`';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
            map[y+1][x] = '+';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
            map[y+1][x] = '&';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
            map[y+1][x] = '*';
           }
           else {
@@ -1697,71 +1697,71 @@ struct char_data *ch)
           }
          break;
         case WEST:
-          if (SUNKEN(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
            map[y][x-1] = '=';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x] = '2';
            } else {
             map[y][x-1] = 'i';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x-1] = '2';
            } else {
             map[y][x-1] = 'p';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x-1] = '7';
            } else {
             map[y][x-1] = '!';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x-1] = '1';
            } else {
             map[y][x-1] = '(';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x-1] = '6';
            } else {
             map[y][x-1] = 'f';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x-1] = '5';
            } else {
             map[y][x-1] = '^';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y][x-1] = '3';
            } else {
             map[y][x-1] = 'h';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
            map[y][x-1] = 's';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
            map[y][x-1] = '`';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
            map[y][x-1] = '+';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
            map[y][x-1] = '&';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
            map[y][x-1] = '*';
           }
           else {
@@ -1769,71 +1769,71 @@ struct char_data *ch)
           }
          break;
         case NORTHEAST:
-          if (SUNKEN(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
            map[y-1][x+1] = '=';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x+1] = '2';
            } else {
             map[y-1][x+1] = 'i';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x+1] = '2';
            } else {
             map[y-1][x+1] = 'p';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x+1] = '7';
            } else {
             map[y-1][x+1] = '!';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x+1] = '1';
            } else {
             map[y-1][x+1] = '(';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x+1] = '6';
            } else {
             map[y-1][x+1] = 'f';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x+1] = '5';
            } else {
             map[y-1][x+1] = '^';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x+1] = '3';
            } else {
             map[y-1][x+1] = 'h';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
            map[y-1][x+1] = 's';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
            map[y-1][x+1] = '`';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
            map[y-1][x+1] = '+';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
            map[y-1][x+1] = '&';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
            map[y-1][x+1] = '*';
           }
           else {
@@ -1841,71 +1841,71 @@ struct char_data *ch)
           }
          break;
         case NORTHWEST:
-          if (SUNKEN(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
            map[y-1][x-1] = '=';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x-1] = '2';
            } else {
             map[y-1][x-1] = 'i';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x-1] = '2';
            } else {
             map[y-1][x-1] = 'p';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x-1] = '7';
            } else {
             map[y-1][x-1] = '!';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x-1] = '1';
            } else {
             map[y-1][x-1] = '(';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x-1] = '6';
            } else {
             map[y-1][x-1] = 'f';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x-1] = '5';
            } else {
             map[y-1][x-1] = '^';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y-1][x-1] = '3';
            } else {
             map[y-1][x-1] = 'h';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
            map[y-1][x-1] = 's';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
            map[y-1][x-1] = '`';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
            map[y-1][x-1] = '+';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
            map[y-1][x-1] = '&';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
            map[y-1][x-1] = '*';
           }
           else {
@@ -1913,71 +1913,71 @@ struct char_data *ch)
           }
          break;
         case SOUTHEAST:
-          if (SUNKEN(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
            map[y+1][x+1] = '=';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x+1] = '2';
            } else {
             map[y+1][x+1] = 'i';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x+1] = '2';
            } else {
             map[y+1][x+1] = 'p';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x+1] = '7';
            } else {
             map[y+1][x+1] = '!';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x+1] = '1';
            } else {
             map[y+1][x+1] = '(';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x+1] = '6';
            } else {
             map[y+1][x+1] = 'f';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x+1] = '5';
            } else {
             map[y+1][x+1] = '^';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x+1] = '3';
            } else {
             map[y+1][x+1] = 'h';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
            map[y+1][x+1] = 's';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
            map[y+1][x+1] = '`';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
            map[y+1][x+1] = '+';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
            map[y+1][x+1] = '&';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
            map[y+1][x+1] = '*';
           }
           else {
@@ -1985,71 +1985,71 @@ struct char_data *ch)
           }
          break;
         case SOUTHWEST:
-          if (SUNKEN(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
            map[y+1][x-1] = '=';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x-1] = '2';
            } else {
             map[y+1][x-1] = 'i';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x-1] = '2';
            } else {
             map[y+1][x-1] = 'p';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x-1] = '7';
            } else {
             map[y+1][x-1] = '!';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x-1] = '1';
            } else {
             map[y+1][x-1] = '(';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x-1] = '6';
            } else {
             map[y+1][x-1] = 'f';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x-1] = '5';
            } else {
             map[y+1][x-1] = '^';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
            if (ROOM_EFFECT(world[rnum].dir_option[door]->to_room) >= 1) {
             map[y+1][x-1] = '3';
            } else {
             map[y+1][x-1] = 'h';
            }
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
            map[y+1][x-1] = 's';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
            map[y+1][x-1] = '`';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
            map[y+1][x-1] = '+';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
            map[y+1][x-1] = '&';
           }
-          else if (SECT(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
            map[y+1][x-1] = '*';
           }
           else {
@@ -2098,7 +2098,7 @@ static void gen_map(struct char_data *ch, int num)
   /* print out exits */
   map_draw_room(map, 4, 4, ch->in_room, ch);
   for (door = 0; door < NUM_OF_DIRS; door++) {
-    if (EXIT(ch, door) && EXIT(ch, door)->to_room != NOWHERE && !EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED)) {
+    if (EXIT(ch, door) && EXIT(ch, door)->to_room != NOWHERE && !room_exit_flagged(EXIT(ch, door), EX_CLOSED)) {
       switch (door) {
         case NORTH:
           map_draw_room(map, 4, 3,EXIT(ch,door)->to_room, ch);
@@ -2143,19 +2143,19 @@ static void gen_map(struct char_data *ch, int num)
     }
     else {
      if (i == 2) {
-      sprintf(buf2, "@w       @w|%s@w|           %s", (EXIT(ch, 0) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 0), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 0), EX_CLOSED) ? " @rN " : " @CN ") : "   ", map[i]);
+      sprintf(buf2, "@w       @w|%s@w|           %s", (EXIT(ch, 0) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 0), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 0), EX_CLOSED) ? " @rN " : " @CN ") : "   ", map[i]);
      }
      if (i == 3) {
-      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (EXIT(ch, 6) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 6), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 6), EX_CLOSED) ? " @rNW" : " @CNW") : "   ", (EXIT(ch, 4) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 4), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 4), EX_CLOSED) ? " @yU " : " @YU ") : "   ", (EXIT(ch, 7) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 7), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 7), EX_SECRET) ? "@rNE " : "@CNE ") : "   ", map[i]);
+      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (EXIT(ch, 6) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 6), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 6), EX_CLOSED) ? " @rNW" : " @CNW") : "   ", (EXIT(ch, 4) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 4), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 4), EX_CLOSED) ? " @yU " : " @YU ") : "   ", (EXIT(ch, 7) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 7), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 7), EX_SECRET) ? "@rNE " : "@CNE ") : "   ", map[i]);
      }
      if (i == 4) {
-      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (EXIT(ch, 3) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 3), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 3), EX_CLOSED) ? "  @rW" : "  @CW") : "   ", (EXIT(ch, 10) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 10), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 10), EX_CLOSED) ? " @rI " : " @mI ") : ((EXIT(ch, 11) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 11), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 11), EX_CLOSED) ? "@rOUT" : "@mOUT") : "@r{ }"), (EXIT(ch, 1) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 1), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 1), EX_CLOSED) ? "@rE  " : "@CE  ") : "   ", map[i]);
+      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (EXIT(ch, 3) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 3), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 3), EX_CLOSED) ? "  @rW" : "  @CW") : "   ", (EXIT(ch, 10) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 10), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 10), EX_CLOSED) ? " @rI " : " @mI ") : ((EXIT(ch, 11) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 11), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 11), EX_CLOSED) ? "@rOUT" : "@mOUT") : "@r{ }"), (EXIT(ch, 1) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 1), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 1), EX_CLOSED) ? "@rE  " : "@CE  ") : "   ", map[i]);
      }
      if (i == 5) {
-      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (EXIT(ch, 9) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 9), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 9), EX_CLOSED) ? " @rSW" : " @CSW") : "   ", (EXIT(ch, 5) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 5), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 5), EX_CLOSED) ? " @yD " : " @YD ") : "   ", (EXIT(ch, 8) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 8), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 8), EX_SECRET) ? "@rSE " : "@CSE ") : "   ", map[i]);
+      sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s", (EXIT(ch, 9) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 9), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 9), EX_CLOSED) ? " @rSW" : " @CSW") : "   ", (EXIT(ch, 5) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 5), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 5), EX_CLOSED) ? " @yD " : " @YD ") : "   ", (EXIT(ch, 8) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 8), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 8), EX_SECRET) ? "@rSE " : "@CSE ") : "   ", map[i]);
      }
      if (i == 6) {
-      sprintf(buf2, "@w       @w|%s@w|           %s", (EXIT(ch, 2) && !EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 2), EX_SECRET)) ? (EXIT_FLAGGED(W_EXIT(IN_ROOM(ch), 2), EX_CLOSED) ? " @rS " : " @CS ") : "   ", map[i]);
+      sprintf(buf2, "@w       @w|%s@w|           %s", (EXIT(ch, 2) && !room_exit_flagged(W_EXIT(IN_ROOM(ch), 2), EX_SECRET)) ? (room_exit_flagged(W_EXIT(IN_ROOM(ch), 2), EX_CLOSED) ? " @rS " : " @CS ") : "   ", map[i]);
      }
     }
      search_replace(buf2, "x", "@RX");
@@ -2255,7 +2255,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
 
   int spotted = FALSE;
 
-  if (GET_SKILL(ch, SKILL_SPOT) > rand_number(20, 110)) {
+  if (char_get_skill(ch, SKILL_SPOT) > rand_number(20, 110)) {
    spotted = TRUE;
   }
 
@@ -2265,9 +2265,9 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      * hide objects starting with . from non-holylighted people 
      * Idea from Elaseth of TBA 
      */
-    if (*obj->description == '.' && (IS_NPC(ch) || !PRF_FLAGGED(ch, PRF_HOLYLIGHT))) 
+    if (*obj->description == '.' && (char_is_npc(ch) || !char_prf_flagged(ch, PRF_HOLYLIGHT))) 
       return;
-    if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && GET_ROOM_VNUM(IN_ROOM(ch)) == GET_OBJ_VAL(obj, 0)) {
+    if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && rroom_get_vnum(IN_ROOM(ch)) == GET_OBJ_VAL(obj, 0)) {
       return;
     }
     if (SITTING(obj) && GET_ADMLEVEL(ch) < 1) {
@@ -2276,13 +2276,13 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
     if (SITTING(obj) && GET_ADMLEVEL(ch) >= 1) {
       send_to_char(ch, "@D(@YBeing Used@D)@w");
     }
-    if (GET_OBJ_TYPE(obj) == ITEM_PLANT && (ROOM_FLAGGED(IN_ROOM(obj), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(obj), ROOM_GARDEN2))) {
+    if (GET_OBJ_TYPE(obj) == ITEM_PLANT && (rroom_flagged(IN_ROOM(obj), ROOM_GARDEN1) || rroom_flagged(IN_ROOM(obj), ROOM_GARDEN2))) {
       see_plant(obj, ch);
       return;
     }
-    if (OBJ_FLAGGED(obj, ITEM_BURIED)) {
+    if (obj_flagged(obj, ITEM_BURIED)) {
      char bury[MAX_INPUT_LENGTH];
-     if (!IS_CORPSE(obj)) {
+     if (!obj_is_corpse(obj)) {
       if (GET_OBJ_WEIGHT(obj) < 10) {
        sprintf(bury, "small mound of");
       } else if (GET_OBJ_WEIGHT(obj) < 50) {
@@ -2295,31 +2295,31 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      } else {
       sprintf(bury, "recent grave covered by");
      }
-     if (spotted == TRUE && SECT(IN_ROOM(obj)) != SECT_DESERT) {
+     if (spotted == TRUE && rroom_sect(IN_ROOM(obj)) != SECT_DESERT) {
       send_to_char(ch, "@yA %s soft dirt is here.@n\r\n", bury);
       return;
-     } else if (spotted == TRUE && SECT(IN_ROOM(obj)) == SECT_DESERT) {
+     } else if (spotted == TRUE && rroom_sect(IN_ROOM(obj)) == SECT_DESERT) {
       send_to_char(ch, "@YA %s soft sand is here.@n\r\n", bury);
       return;
      } else {
       return;
      }
     }
-    if (GET_OBJ_VNUM(obj) == 11) {
+    if (obj_get_vnum(obj) == 11) {
      send_to_char(ch, "@wA gravity generator, set to %sx gravity, is built here", add_commas(GET_OBJ_WEIGHT(obj)));
-    } else if (GET_OBJ_VNUM(obj) == 79) {
+    } else if (obj_get_vnum(obj) == 79) {
      send_to_char(ch, "@wA @cG@Cl@wa@cc@Ci@wa@cl @wW@ca@Cl@wl @D[@C%s@D]@w is blocking access to the @G%s@w direction", add_commas(GET_OBJ_WEIGHT(obj)), dirs[GET_OBJ_COST(obj)]);
     }
     else {
     send_to_char(ch, "@w");
-    if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS))  {
+    if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_ROOMFLAGS))  {
      if (GET_OBJ_POSTED(obj) == NULL) {
-      send_to_char(ch, "@D[@G%d@D]@w ", GET_OBJ_VNUM(obj));
+      send_to_char(ch, "@D[@G%d@D]@w ", obj_get_vnum(obj));
       if (SCRIPT(obj))
         send_to_char(ch, "@D[@wT%d@D]@w ", obj->proto_script->vnum);
      } else {
       if (GET_OBJ_POSTTYPE(obj) <= 0) {
-       send_to_char(ch, "@D[@G%d@D]@w ", GET_OBJ_VNUM(obj));
+       send_to_char(ch, "@D[@G%d@D]@w ", obj_get_vnum(obj));
        if (SCRIPT(obj))
          send_to_char(ch, "@D[@wT%d@D]@w ", obj->proto_script->vnum);
       }
@@ -2333,29 +2333,29 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
       send_to_char(ch, "%s@w, has been posted here.@n", obj->short_description);
      }
     } else {
-     if (!OBJ_FLAGGED(obj, ITEM_BURIED)) {
+     if (!obj_flagged(obj, ITEM_BURIED)) {
       send_to_char(ch, "%s@n", obj->description);
      }
     }
 
      if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
-      if (!OBJVAL_FLAGGED(obj, CONT_CLOSED) && GET_OBJ_VNUM(obj) > 19199)
+      if (!obj_val_flagged(obj, CONT_CLOSED) && obj_get_vnum(obj) > 19199)
        send_to_char(ch, "\r\n@c...its outer hatch is open@n");
-      else if (!OBJVAL_FLAGGED(obj, CONT_CLOSED) && GET_OBJ_VNUM(obj) <= 19199)
+      else if (!obj_val_flagged(obj, CONT_CLOSED) && obj_get_vnum(obj) <= 19199)
        send_to_char(ch, "\r\n@c...its door is open@n");
      }
-     if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && !IS_CORPSE(obj)) {
-      if (!OBJVAL_FLAGGED(obj, CONT_CLOSED) && !OBJ_FLAGGED(obj, ITEM_SHEATH))
+     if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && !obj_is_corpse(obj)) {
+      if (!obj_val_flagged(obj, CONT_CLOSED) && !obj_flagged(obj, ITEM_SHEATH))
        send_to_char(ch, ". @D[@G-open-@D]@n");
-      else if (!OBJ_FLAGGED(obj, ITEM_SHEATH))
+      else if (!obj_flagged(obj, ITEM_SHEATH))
        send_to_char(ch, ". @D[@rclosed@D]@n");
      }
      if (GET_OBJ_TYPE(obj) == ITEM_HATCH) {
-      if (!OBJVAL_FLAGGED(obj, CONT_CLOSED))
+      if (!obj_val_flagged(obj, CONT_CLOSED))
        send_to_char(ch, ", it is open");
-      else if (OBJVAL_FLAGGED(obj, CONT_CLOSED))
+      else if (obj_val_flagged(obj, CONT_CLOSED))
        send_to_char(ch, ", it is closed");
-      if (OBJVAL_FLAGGED(obj, CONT_LOCKED))
+      if (obj_val_flagged(obj, CONT_LOCKED))
        send_to_char(ch, " and locked@n");
       else
        send_to_char(ch, "@n");
@@ -2369,13 +2369,13 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
     break;
 
   case SHOW_OBJ_SHORT:
-    if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS))  {
-      send_to_char(ch, "[%d] ", GET_OBJ_VNUM(obj));
+    if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_ROOMFLAGS))  {
+      send_to_char(ch, "[%d] ", obj_get_vnum(obj));
       if (SCRIPT(obj))
         send_to_char(ch, "[T%d] ", obj->proto_script->vnum);
     }
  
-    if (PRF_FLAGGED(ch, PRF_IHEALTH)) {   
+    if (char_prf_flagged(ch, PRF_IHEALTH)) {   
      send_to_char(ch, "@D<@gH@D: @C%d@D>@w %s", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), obj->short_description);
     } else {
      send_to_char(ch, "%s", obj->short_description);
@@ -2385,7 +2385,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
        send_to_char(ch, ", and it has been ate on.@n");
       }
      }
-     if (GET_OBJ_VNUM(obj) == 255) {
+     if (obj_get_vnum(obj) == 255) {
       switch (GET_OBJ_VAL(obj, 0)) {
        case 0:
        case 1:
@@ -2415,16 +2415,16 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
       }
      }
      
-     if (GET_OBJ_VNUM(obj) == 3424) {
+     if (obj_get_vnum(obj) == 3424) {
       send_to_char(ch, " @D[@bInk Remaining@D: @w%d@D]@n", GET_OBJ_VAL(obj, 6));
      }
-     if (GET_OBJ_VNUM(obj) == 3423) {
+     if (obj_get_vnum(obj) == 3423) {
       send_to_char(ch, " @D[@B%d@D/@B24 Inks@D]@n", GET_OBJ_VAL(obj, 6));
      }
-     if (OBJ_FLAGGED(obj, ITEM_THROW)) {
+     if (obj_flagged(obj, ITEM_THROW)) {
        send_to_char(ch, " @D[@RThrow Only@D]@n");
      }
-     if (GET_OBJ_TYPE(obj) == ITEM_PLANT && !OBJ_FLAGGED(obj, ITEM_MATURE)) {
+     if (GET_OBJ_TYPE(obj) == ITEM_PLANT && !obj_flagged(obj, ITEM_MATURE)) {
       if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) < -9) {
        send_to_char(ch, "@D[@RDead@D]@n");
       } else {
@@ -2453,13 +2453,13 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
        }
       }
      }
-     if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && !IS_CORPSE(obj)) {
-      if (!OBJVAL_FLAGGED(obj, CONT_CLOSED) && !OBJ_FLAGGED(obj, ITEM_SHEATH))
+     if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && !obj_is_corpse(obj)) {
+      if (!obj_val_flagged(obj, CONT_CLOSED) && !obj_flagged(obj, ITEM_SHEATH))
        send_to_char(ch, " @D[@G-open-@D]@n");
-      else if (!OBJ_FLAGGED(obj, ITEM_SHEATH))
+      else if (!obj_flagged(obj, ITEM_SHEATH))
        send_to_char(ch, " @D[@rclosed@D]@n");
      }
-     if (OBJ_FLAGGED(obj, ITEM_DUPLICATE)) {
+     if (obj_flagged(obj, ITEM_DUPLICATE)) {
       send_to_char(ch, " @D[@YDuplicate@D]@n");
      }
     break;
@@ -2477,7 +2477,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
       return;
 
     case ITEM_BOARD:
-      show_board(GET_OBJ_VNUM(obj),ch);
+      show_board(obj_get_vnum(obj),ch);
       break;
   
     case ITEM_CONTROL:
@@ -2534,7 +2534,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
       break;
 
     case ITEM_VEHICLE:
-     if (GET_OBJ_VNUM(obj) > 19199) {
+     if (obj_get_vnum(obj) > 19199) {
       send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
       send_to_char(ch, "@YSyntax@D: @COpen hatch\r\n");
       send_to_char(ch, "@YSyntax@D: @CClose hatch\r\n");
@@ -2548,7 +2548,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      break;
 
     case ITEM_HATCH:
-     if (GET_OBJ_VNUM(obj) > 19199) {
+     if (obj_get_vnum(obj) > 19199) {
       send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
       send_to_char(ch, "@YSyntax@D: @COpen hatch\r\n");
       send_to_char(ch, "@YSyntax@D: @CClose hatch\r\n");
@@ -2567,7 +2567,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      break;
 
     default:
-      if (!IS_CORPSE(obj)) {
+      if (!obj_is_corpse(obj)) {
        send_to_char(ch, "You see nothing special..\r\n");
       } else {
        int mention = FALSE;
@@ -2663,41 +2663,41 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
 {
   int found = FALSE;
 
-  if (OBJ_FLAGGED(obj, ITEM_INVISIBLE)) {
+  if (obj_flagged(obj, ITEM_INVISIBLE)) {
     send_to_char(ch, " (invisible)");
     found++;
   }
-  if (OBJ_FLAGGED(obj, ITEM_BLESS) && AFF_FLAGGED(ch, AFF_DETECT_ALIGN)) {
+  if (obj_flagged(obj, ITEM_BLESS) && char_aff_flagged(ch, AFF_DETECT_ALIGN)) {
     send_to_char(ch, " ..It glows blue!");
     found++;
   }
-  if (OBJ_FLAGGED(obj, ITEM_MAGIC) && AFF_FLAGGED(ch, AFF_DETECT_MAGIC)) {
+  if (obj_flagged(obj, ITEM_MAGIC) && char_aff_flagged(ch, AFF_DETECT_MAGIC)) {
     send_to_char(ch, " ..It glows yellow!");
     found++;
   }
-  if (OBJ_FLAGGED(obj, ITEM_GLOW)) {
+  if (obj_flagged(obj, ITEM_GLOW)) {
     send_to_char(ch, " @D(@GGlowing@D)@n");
     found++;
   }
-  if (OBJ_FLAGGED(obj, ITEM_HOT)) {
+  if (obj_flagged(obj, ITEM_HOT)) {
    send_to_char(ch, " @D(@RHOT@D)@n");
    found++;
   }
-  if (OBJ_FLAGGED(obj, ITEM_HUM)) {
+  if (obj_flagged(obj, ITEM_HUM)) {
     send_to_char(ch, " @D(@RHumming@D)@n");
     found++;
   }
-  if (OBJ_FLAGGED(obj, ITEM_SLOT2)) {
-   if (OBJ_FLAGGED(obj, ITEM_SLOT_ONE) && !OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED))
+  if (obj_flagged(obj, ITEM_SLOT2)) {
+   if (obj_flagged(obj, ITEM_SLOT_ONE) && !obj_flagged(obj, ITEM_SLOTS_FILLED))
     send_to_char(ch, " @D[@m1/2 Tokens@D]@n");
-   else if (OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED))
+   else if (obj_flagged(obj, ITEM_SLOTS_FILLED))
     send_to_char(ch, " @D[@m2/2 Tokens@D]@n");
    else
     send_to_char(ch, " @D[@m0/2 Tokens@D]@n");
    found++;
   }
-  if (OBJ_FLAGGED(obj, ITEM_SLOT1)) {
-   if (OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED))
+  if (obj_flagged(obj, ITEM_SLOT1)) {
+   if (obj_flagged(obj, ITEM_SLOTS_FILLED))
     send_to_char(ch, " @D[@m1/1 Tokens@D]@n");
    else
     send_to_char(ch, " @D[@m0/1 Tokens@D]@n");
@@ -2708,13 +2708,13 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
     send_to_char(ch, " %d meters away", num);
     found++;
   }
-  if (OBJ_FLAGGED(obj, ITEM_CUSTOM)) {
+  if (obj_flagged(obj, ITEM_CUSTOM)) {
    send_to_char(ch, " @D(@YCUSTOM@D)@n");
   }
-  if (OBJ_FLAGGED(obj, ITEM_RESTRING)) {
+  if (obj_flagged(obj, ITEM_RESTRING)) {
    send_to_char(ch, " @D(@R%s@D)@n", GET_ADMLEVEL(ch) > 0 ? obj->name : "*");
   }
-  if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+  if (obj_flagged(obj, ITEM_BROKEN)) {
    if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_STEEL || GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_MITHRIL || GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_METAL) {
     send_to_char(ch, ", and appears to be twisted and broken.");
    }
@@ -2737,12 +2737,12 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
      if (GET_OBJ_TYPE(obj) != ITEM_CONTAINER) {
       send_to_char(ch, ".");
      }
-     if (!IS_NPC(ch) && GET_OBJ_POSTED(obj) && GET_OBJ_POSTTYPE(obj) <= 0) {
+     if (!char_is_npc(ch) && GET_OBJ_POSTED(obj) && GET_OBJ_POSTTYPE(obj) <= 0) {
       struct obj_data *obj2 = GET_OBJ_POSTED(obj);
       char dvnum[200];
       *dvnum = '\0';
-      sprintf(dvnum, "@D[@G%d@D] @w", GET_OBJ_VNUM(obj2));
-      send_to_char(ch, "\n...%s%s has been posted to it.", PRF_FLAGGED(ch, PRF_ROOMFLAGS) ? dvnum : "", obj2->short_description);
+      sprintf(dvnum, "@D[@G%d@D] @w", obj_get_vnum(obj2));
+      send_to_char(ch, "\n...%s%s has been posted to it.", char_prf_flagged(ch, PRF_ROOMFLAGS) ? dvnum : "", obj2->short_description);
      }
     }
     found++;
@@ -2767,34 +2767,34 @@ static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mo
     if (CONFIG_STACK_OBJS) {
       for (j = list; j != i; j = j->next_content)
        if ((!strcasecmp(j->short_description, i->short_description) && !strcasecmp(j->description, i->description)) &&
-            (j->item_number == i->item_number) && ((OBJ_FLAGGED(j, ITEM_BROKEN) && OBJ_FLAGGED(i, ITEM_BROKEN)) || (!OBJ_FLAGGED(j, ITEM_BROKEN) && !OBJ_FLAGGED(i, ITEM_BROKEN))))
+            (j->item_number == i->item_number) && ((obj_flagged(j, ITEM_BROKEN) && obj_flagged(i, ITEM_BROKEN)) || (!obj_flagged(j, ITEM_BROKEN) && !obj_flagged(i, ITEM_BROKEN))))
          if ((!SITTING(j) && !SITTING(i)))
           if (GET_OBJ_VAL(j, 6) == GET_OBJ_VAL(i, 6))
             if ((GET_OBJ_TYPE(j) != ITEM_PLANT && GET_OBJ_TYPE(i) != ITEM_PLANT) || (GET_OBJ_TYPE(j) == ITEM_PLANT && GET_OBJ_TYPE(i) == ITEM_PLANT && GET_OBJ_VAL(j, VAL_MATURITY) == GET_OBJ_VAL(i, VAL_MATURITY) && GET_OBJ_VAL(j, VAL_WATERLEVEL) == GET_OBJ_VAL(i, VAL_WATERLEVEL)))
-            if ((!OBJ_FLAGGED(j, ITEM_DUPLICATE) && !OBJ_FLAGGED(i, ITEM_DUPLICATE)) || (OBJ_FLAGGED(j, ITEM_DUPLICATE) && OBJ_FLAGGED(i, ITEM_DUPLICATE)))
+            if ((!obj_flagged(j, ITEM_DUPLICATE) && !obj_flagged(i, ITEM_DUPLICATE)) || (obj_flagged(j, ITEM_DUPLICATE) && obj_flagged(i, ITEM_DUPLICATE)))
              if (GET_OBJ_POSTTYPE(j) == 0 && GET_OBJ_POSTTYPE(i) == 0)
               if (!GET_FELLOW_WALL(j) && !GET_FELLOW_WALL(i))
-               if ((GET_OBJ_VAL(j, 0) == GET_OBJ_VAL(i, 0) && GET_OBJ_VNUM(j) == 255 && GET_OBJ_VNUM(i) == 255) || (GET_OBJ_VNUM(j) != 255 && GET_OBJ_VNUM(i) != 255))
+               if ((GET_OBJ_VAL(j, 0) == GET_OBJ_VAL(i, 0) && obj_get_vnum(j) == 255 && obj_get_vnum(i) == 255) || (obj_get_vnum(j) != 255 && obj_get_vnum(i) != 255))
                break;
       if (j!=i)
         continue;
       for (d = j = i; j; j = j->next_content)
        if ((!strcasecmp(j->short_description, i->short_description) && !strcasecmp(j->description, i->description)) &&
-            (j->item_number == i->item_number) && ((OBJ_FLAGGED(j, ITEM_BROKEN) && OBJ_FLAGGED(i, ITEM_BROKEN)) || (!OBJ_FLAGGED(j, ITEM_BROKEN) && !OBJ_FLAGGED(i, ITEM_BROKEN))))
+            (j->item_number == i->item_number) && ((obj_flagged(j, ITEM_BROKEN) && obj_flagged(i, ITEM_BROKEN)) || (!obj_flagged(j, ITEM_BROKEN) && !obj_flagged(i, ITEM_BROKEN))))
          if ((!SITTING(j) && !SITTING(i)))
           if (GET_OBJ_POSTTYPE(j) == 0 && GET_OBJ_POSTTYPE(i) == 0)
            if (GET_OBJ_VAL(j, 6) == GET_OBJ_VAL(i, 6))
             if ((GET_OBJ_TYPE(j) != ITEM_PLANT && GET_OBJ_TYPE(i) != ITEM_PLANT) || (GET_OBJ_TYPE(j) == ITEM_PLANT && GET_OBJ_TYPE(i) == ITEM_PLANT && GET_OBJ_VAL(j, VAL_MATURITY) == GET_OBJ_VAL(i, VAL_MATURITY) && GET_OBJ_VAL(j, VAL_WATERLEVEL) == GET_OBJ_VAL(i, VAL_WATERLEVEL)))
-             if ((!OBJ_FLAGGED(j, ITEM_DUPLICATE) && !OBJ_FLAGGED(i, ITEM_DUPLICATE)) || (OBJ_FLAGGED(j, ITEM_DUPLICATE) && OBJ_FLAGGED(i, ITEM_DUPLICATE)))
+             if ((!obj_flagged(j, ITEM_DUPLICATE) && !obj_flagged(i, ITEM_DUPLICATE)) || (obj_flagged(j, ITEM_DUPLICATE) && obj_flagged(i, ITEM_DUPLICATE)))
               if (!GET_FELLOW_WALL(j) && !GET_FELLOW_WALL(i))
-               if ((GET_OBJ_VAL(j, 0) == GET_OBJ_VAL(i, 0) && GET_OBJ_VNUM(i) == 255 && GET_OBJ_VNUM(j) == 255) || (GET_OBJ_VNUM(j) != 255 && GET_OBJ_VNUM(i) != 255))
-               if (CAN_SEE_OBJ(ch, j)) {
+               if ((GET_OBJ_VAL(j, 0) == GET_OBJ_VAL(i, 0) && obj_get_vnum(i) == 255 && obj_get_vnum(j) == 255) || (obj_get_vnum(j) != 255 && obj_get_vnum(i) != 255))
+               if (char_can_see_obj(ch, j)) {
                 num++;
-          if (d == i && !CAN_SEE_OBJ(ch, d))
+          if (d == i && !char_can_see_obj(ch, d))
             d = j;
           }
     }
-    if ((CAN_SEE_OBJ(ch, d) && ((*d->description != '.' && *d->short_description != '.' )|| PRF_FLAGGED(ch, PRF_HOLYLIGHT))) || (GET_OBJ_TYPE(d) == ITEM_LIGHT)) {
+    if ((char_can_see_obj(ch, d) && ((*d->description != '.' && *d->short_description != '.' )|| char_prf_flagged(ch, PRF_HOLYLIGHT))) || (GET_OBJ_TYPE(d) == ITEM_LIGHT)) {
       if (num > 1)
         send_to_char(ch, "@D(@Rx@Y%2i@D)@n ", num);
       show_obj_to_char(d, ch, mode);
@@ -2821,7 +2821,7 @@ static void diag_obj_to_char(struct obj_data *obj, struct char_data *ch)
     {  -1, "is in need of repair."                      },
   };
   int percent, ar_index;
-  const char *objs = OBJS(obj, ch);
+  const char *objs = obj_shortdesc_for(obj, ch);
 
   if (GET_OBJ_VAL(obj, VAL_ALL_MAXHEALTH) > 0)
     percent = (100 * GET_OBJ_VAL(obj, VAL_ALL_HEALTH)) / GET_OBJ_VAL(obj, VAL_ALL_MAXHEALTH);
@@ -2877,75 +2877,75 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 	if (i->description) {
 		send_to_char(ch, "%s", i->description);
 	}
-	if (!MOB_FLAGGED(i, MOB_JUSTDESC)) {
+	if (!char_mob_flagged(i, MOB_JUSTDESC)) {
 		bringdesc(ch, i);
 	}
 	send_to_char(ch, "\r\n");
-	if (!IS_NPC(i)) {
-		if (GET_LIMBCOND(i, 1) >= 50 && !PLR_FLAGGED(i, PLR_CRARM)) {
+	if (!char_is_npc(i)) {
+		if (GET_LIMBCOND(i, 1) >= 50 && !char_plr_flagged(i, PLR_CRARM)) {
 			send_to_char(ch, "            @D[@cRight Arm   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 1), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 1) > 0 && !PLR_FLAGGED(i, PLR_CRARM)) {
+		else if (GET_LIMBCOND(i, 1) > 0 && !char_plr_flagged(i, PLR_CRARM)) {
 			send_to_char(ch, "            @D[@cRight Arm   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 1), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 1) > 0 && PLR_FLAGGED(i, PLR_CRARM)) {
+		else if (GET_LIMBCOND(i, 1) > 0 && char_plr_flagged(i, PLR_CRARM)) {
 			send_to_char(ch, "            @D[@cRight Arm   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 1), "%", "%");
 		}
 		else if (GET_LIMBCOND(i, 1) <= 0) {
 			send_to_char(ch, "            @D[@cRight Arm   @D: @rMissing.            @D]@n\r\n");
 		}
-		if (GET_LIMBCOND(i, 2) >= 50 && !PLR_FLAGGED(i, PLR_CLARM)) {
+		if (GET_LIMBCOND(i, 2) >= 50 && !char_plr_flagged(i, PLR_CLARM)) {
 			send_to_char(ch, "            @D[@cLeft Arm    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 2), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 2) > 0 && !PLR_FLAGGED(i, PLR_CLARM)) {
+		else if (GET_LIMBCOND(i, 2) > 0 && !char_plr_flagged(i, PLR_CLARM)) {
 			send_to_char(ch, "            @D[@cLeft Arm    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 2), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 2) > 0 && PLR_FLAGGED(i, PLR_CLARM)) {
+		else if (GET_LIMBCOND(i, 2) > 0 && char_plr_flagged(i, PLR_CLARM)) {
 			send_to_char(ch, "            @D[@cLeft Arm    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 2), "%", "%");
 		}
 		else if (GET_LIMBCOND(i, 2) <= 0) {
 			send_to_char(ch, "            @D[@cLeft Arm    @D: @rMissing.            @D]@n\r\n");
 		}
-		if (GET_LIMBCOND(i, 3) >= 50 && !PLR_FLAGGED(i, PLR_CLARM)) {
+		if (GET_LIMBCOND(i, 3) >= 50 && !char_plr_flagged(i, PLR_CLARM)) {
 			send_to_char(ch, "            @D[@cRight Leg   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 3), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 3) > 0 && !PLR_FLAGGED(i, PLR_CRLEG)) {
+		else if (GET_LIMBCOND(i, 3) > 0 && !char_plr_flagged(i, PLR_CRLEG)) {
 			send_to_char(ch, "            @D[@cRight Leg   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 3), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 3) > 0 && PLR_FLAGGED(i, PLR_CRLEG)) {
+		else if (GET_LIMBCOND(i, 3) > 0 && char_plr_flagged(i, PLR_CRLEG)) {
 			send_to_char(ch, "            @D[@cRight Leg   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 3), "%", "%");
 		}
 		else if (GET_LIMBCOND(i, 3) <= 0) {
 			send_to_char(ch, "            @D[@cRight Leg   @D: @rMissing.            @D]@n\r\n");
 		}
-		if (GET_LIMBCOND(i, 4) >= 50 && !PLR_FLAGGED(i, PLR_CLLEG)) {
+		if (GET_LIMBCOND(i, 4) >= 50 && !char_plr_flagged(i, PLR_CLLEG)) {
 			send_to_char(ch, "            @D[@cLeft Leg    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 4), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 4) > 0 && !PLR_FLAGGED(i, PLR_CLLEG)) {
+		else if (GET_LIMBCOND(i, 4) > 0 && !char_plr_flagged(i, PLR_CLLEG)) {
 			send_to_char(ch, "            @D[@cLeft Leg    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(i, 4), "%", "%");
 		}
-		else if (GET_LIMBCOND(i, 4) > 0 && PLR_FLAGGED(i, PLR_CLLEG)) {
+		else if (GET_LIMBCOND(i, 4) > 0 && char_plr_flagged(i, PLR_CLLEG)) {
 			send_to_char(ch, "            @D[@cLeft Leg    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(i, 4), "%", "%");
 		}
 		else if (GET_LIMBCOND(i, 4) <= 0) {
 			send_to_char(ch, "            @D[@cLeft Leg    @D: @rMissing.             @D]@n\r\n");
 		}
-		if (PLR_FLAGGED(i, PLR_HEAD)) {
+		if (char_plr_flagged(i, PLR_HEAD)) {
 			send_to_char(ch, "            @D[@cHead        @D: @GHas.                 @D]@n\r\n");
 		}
-		if (!PLR_FLAGGED(i, PLR_HEAD)) {
+		if (!char_plr_flagged(i, PLR_HEAD)) {
 			send_to_char(ch, "            @D[@cHead        @D: @rMissing.             @D]@n\r\n");
 		}
-		if (((IS_SAIYAN(i) || IS_HALFBREED(i)) && PLR_FLAGGED(i, PLR_STAIL)) && !PLR_FLAGGED(i, PLR_TAILHIDE)) {
+		if (((char_is_saiyan(i) || char_is_halfbreed(i)) && char_plr_flagged(i, PLR_STAIL)) && !char_plr_flagged(i, PLR_TAILHIDE)) {
 			send_to_char(ch, "            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
 		}
-		if ((IS_SAIYAN(i) || IS_HALFBREED(i)) && (!PLR_FLAGGED(i, PLR_STAIL)) && (!PLR_FLAGGED(i, PLR_TAILHIDE))) {
+		if ((char_is_saiyan(i) || char_is_halfbreed(i)) && (!char_plr_flagged(i, PLR_STAIL)) && (!char_plr_flagged(i, PLR_TAILHIDE))) {
 			send_to_char(ch, "            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
 		}
-		if ((IS_ICER(i) || IS_BIO(i)) && PLR_FLAGGED(i, PLR_TAIL)) {
+		if ((char_is_icer(i) || char_is_bio(i)) && char_plr_flagged(i, PLR_TAIL)) {
 			send_to_char(ch, "            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
 		}
-		if ((IS_ICER(i) || IS_BIO(i)) && !PLR_FLAGGED(i, PLR_TAIL)) {
+		if ((char_is_icer(i) || char_is_bio(i)) && !char_plr_flagged(i, PLR_TAIL)) {
 			send_to_char(ch, "            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
 		}
 	}
@@ -2957,65 +2957,65 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 	if (GET_CLAN(i) == NULL) {
 		clan = FALSE;
 	}
-	if (!IS_NPC(i)) {
+	if (!char_is_npc(i)) {
 		send_to_char(ch, "            @D[@mClan        @D: @W%-20s@D]@n\r\n", clan ? buf : "None.");
 	}
-	if (!IS_NPC(i)) {
+	if (!char_is_npc(i)) {
 		send_to_char(ch, "\r\n         @D----------------------------------------@n\r\n");
 		trans_check(ch, i);
 		send_to_char(ch, "         @D----------------------------------------@n\r\n");
 	}
 	send_to_char(ch, "\r\n");
 
-	if ((!PLR_FLAGGED(i, PLR_DISGUISED) && (readIntro(ch, i) == 1 && !IS_NPC(i)))) {
+	if ((!char_plr_flagged(i, PLR_DISGUISED) && (readIntro(ch, i) == 1 && !char_is_npc(i)))) {
 		if (GET_SEX(i) == SEX_NEUTRAL)
 			send_to_char(ch, "%s appears to be %s %s, ", get_i_name(ch, i), AN(RACE(i)), LRACE(i));
 		else
-			send_to_char(ch, "%s appears to be %s %s %s, ", get_i_name(ch, i), AN(MAFE(i)), MAFE(i), LRACE(i));
+			send_to_char(ch, "%s appears to be %s %s %s, ", get_i_name(ch, i), AN(char_mafe(i)), char_mafe(i), LRACE(i));
 	}
-	else if (ch == i || IS_NPC(i)) {
+	else if (ch == i || char_is_npc(i)) {
 		if (GET_SEX(i) == SEX_NEUTRAL)
-			send_to_char(ch, "%c%s appears to be %s %s, ", toupper(*GET_NAME(i)), GET_NAME(i) + 1, AN(RACE(i)), LRACE(i));
+			send_to_char(ch, "%c%s appears to be %s %s, ", toupper(*char_get_name(i)), char_get_name(i) + 1, AN(RACE(i)), LRACE(i));
 		else
-			send_to_char(ch, "%c%s appears to be %s %s %s, ", toupper(*GET_NAME(i)), GET_NAME(i) + 1, AN(MAFE(i)), MAFE(i), LRACE(i));
+			send_to_char(ch, "%c%s appears to be %s %s %s, ", toupper(*char_get_name(i)), char_get_name(i) + 1, AN(char_mafe(i)), char_mafe(i), LRACE(i));
 	}
 	else {
 		if (GET_SEX(i) == SEX_NEUTRAL)
 			send_to_char(ch, "Appears to be %s %s, ", AN(RACE(i)), LRACE(i));
 		else
-			send_to_char(ch, "Appears to be %s %s %s, ", AN(MAFE(i)), MAFE(i), LRACE(i));
+			send_to_char(ch, "Appears to be %s %s %s, ", AN(char_mafe(i)), char_mafe(i), LRACE(i));
 	}
 
-	if (IS_NPC(i)) {
+	if (char_is_npc(i)) {
 		send_to_char(ch, "is %s sized, and\r\n", size_names[get_size(i)]);
 	}
-	if (!IS_NPC(i)) {
-		if (!PLR_FLAGGED(i, PLR_OOZARU) && (!IS_ICER(i) || !IS_TRANSFORMED(i)) && GET_GENOME(i, 0) < 11) {
-			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], GET_PC_HEIGHT(i), GET_PC_WEIGHT(i));
+	if (!char_is_npc(i)) {
+		if (!char_plr_flagged(i, PLR_OOZARU) && (!char_is_icer(i) || !char_is_transformed(i)) && GET_GENOME(i, 0) < 11) {
+			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], char_get_pc_height(i), char_get_pc_weight(i));
 		}
-		else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS1)) {
-			int num1 = GET_PC_HEIGHT(i) * 3;
-			int num2 = GET_PC_WEIGHT(i) * 4;
+		else if (char_is_icer(i) && char_plr_flagged(i, PLR_TRANS1)) {
+			int num1 = char_get_pc_height(i) * 3;
+			int num2 = char_get_pc_weight(i) * 4;
 			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
 		}
-		else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS2)) {
-			int num1 = GET_PC_HEIGHT(i) * 3;
-			int num2 = GET_PC_WEIGHT(i) * 4;
+		else if (char_is_icer(i) && char_plr_flagged(i, PLR_TRANS2)) {
+			int num1 = char_get_pc_height(i) * 3;
+			int num2 = char_get_pc_weight(i) * 4;
 			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
 		}
-		else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS3)) {
-			int num1 = GET_PC_HEIGHT(i) * 1.5;
-			int num2 = GET_PC_WEIGHT(i) * 2;
+		else if (char_is_icer(i) && char_plr_flagged(i, PLR_TRANS3)) {
+			int num1 = char_get_pc_height(i) * 1.5;
+			int num2 = char_get_pc_weight(i) * 2;
 			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
 		}
-		else if (IS_ICER(i) && PLR_FLAGGED(i, PLR_TRANS4)) {
-			int num1 = GET_PC_HEIGHT(i) * 2;
-			int num2 = GET_PC_WEIGHT(i) * 3;
+		else if (char_is_icer(i) && char_plr_flagged(i, PLR_TRANS4)) {
+			int num1 = char_get_pc_height(i) * 2;
+			int num2 = char_get_pc_weight(i) * 3;
 			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
 		}
-		else if (PLR_FLAGGED(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
-			int num1 = GET_PC_HEIGHT(i) * 10;
-			int num2 = GET_PC_WEIGHT(i) * 50;
+		else if (char_plr_flagged(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
+			int num1 = char_get_pc_height(i) * 10;
+			int num2 = char_get_pc_weight(i) * 50;
 			send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %dkg heavy,", size_names[get_size(i)], num1, num2);
 		}
 		if (i == ch) {
@@ -3070,22 +3070,22 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 	diag_char_to_char(i, ch);
 	found = FALSE;
 	for (j = 0; !found && j < NUM_WEARS; j++)
-		if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)))
+		if (GET_EQ(i, j) && char_can_see_obj(ch, GET_EQ(i, j)))
 			found = TRUE;
 
-	if (found && (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NOEQSEE))) {
+	if (found && (!char_is_npc(ch) && !char_prf_flagged(ch, PRF_NOEQSEE))) {
 		send_to_char(ch, "\r\n");	/* act() does capitalization. */
-		if (!PLR_FLAGGED(i, PLR_DISGUISED)) {
+		if (!char_plr_flagged(i, PLR_DISGUISED)) {
 			act("$n is using:", FALSE, i, 0, ch, TO_VICT);
 		}
 		else {
 			act("The disguised person is using:", FALSE, i, 0, ch, TO_VICT);
 		}
 		for (j = 0; j < NUM_WEARS; j++)
-			if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)) && (j != WEAR_WIELD1 && j != WEAR_WIELD2)) {
+			if (GET_EQ(i, j) && char_can_see_obj(ch, GET_EQ(i, j)) && (j != WEAR_WIELD1 && j != WEAR_WIELD2)) {
 				send_to_char(ch, "%s", wear_where[j]);
 				show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
-				if (OBJ_FLAGGED(GET_EQ(i, j), ITEM_SHEATH)) {
+				if (obj_flagged(GET_EQ(i, j), ITEM_SHEATH)) {
 					struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = GET_EQ(i, j);
 					for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
 						next_obj = obj2->next_content;
@@ -3097,10 +3097,10 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 					obj2 = NULL;
 				}
 			}
-			else if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)) && (!PLR_FLAGGED(i, PLR_THANDW))) {
+			else if (GET_EQ(i, j) && char_can_see_obj(ch, GET_EQ(i, j)) && (!char_plr_flagged(i, PLR_THANDW))) {
 				send_to_char(ch, "%s", wear_where[j]);
 				show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
-				if (OBJ_FLAGGED(GET_EQ(i, j), ITEM_SHEATH)) {
+				if (obj_flagged(GET_EQ(i, j), ITEM_SHEATH)) {
 					struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = GET_EQ(i, j);
 					for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
 						next_obj = obj2->next_content;
@@ -3113,32 +3113,32 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 					obj2 = NULL;
 				}
 			}
-			else if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)) && (PLR_FLAGGED(i, PLR_THANDW))) {
+			else if (GET_EQ(i, j) && char_can_see_obj(ch, GET_EQ(i, j)) && (char_plr_flagged(i, PLR_THANDW))) {
 				send_to_char(ch, "@c<@CWielded by B. Hands@c>@n ");
 				show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
 			}
 	}
-	if (ch != i && ((GET_SKILL(ch, SKILL_KEEN) && AFF_FLAGGED(ch, AFF_SNEAK)) || GET_ADMLEVEL(ch))) {
+	if (ch != i && ((char_get_skill(ch, SKILL_KEEN) && char_aff_flagged(ch, AFF_SNEAK)) || GET_ADMLEVEL(ch))) {
 		found = FALSE;
 		act("\r\nYou attempt to peek at $s inventory:", FALSE, i, 0, ch, TO_VICT);
-		if (CAN_SEE(i, ch))
+		if (char_can_see(i, ch))
 			act("$n tries to evaluate what you have in your inventory.", TRUE, ch, 0, i, TO_VICT);
-		if (GET_SKILL(ch, SKILL_KEEN) > axion_dice(0) && (!IS_NPC(i) || GET_ADMLEVEL(ch) > 1)) {
+		if (char_get_skill(ch, SKILL_KEEN) > axion_dice(0) && (!char_is_npc(i) || GET_ADMLEVEL(ch) > 1)) {
 			for (tmp_obj = i->carrying; tmp_obj; tmp_obj = tmp_obj->next_content) {
-				if (CAN_SEE_OBJ(ch, tmp_obj) &&
-					(ADM_FLAGGED(ch, ADM_SEEINV) || (rand_number(0, 20) < GET_LEVEL(ch)))) {
+				if (char_can_see_obj(ch, tmp_obj) &&
+					(char_adm_flagged(ch, ADM_SEEINV) || (rand_number(0, 20) < char_get_level(ch)))) {
 					show_obj_to_char(tmp_obj, ch, SHOW_OBJ_SHORT);
 					found = TRUE;
 				}
 			}
 			improve_skill(ch, SKILL_KEEN, 1);
 		}
-		else if (IS_NPC(i) && GET_ADMLEVEL(ch) < 2) {
+		else if (char_is_npc(i) && GET_ADMLEVEL(ch) < 2) {
 			return;
 		}
 		else {
 			act("You are unsure about $s inventory.", FALSE, i, 0, ch, TO_VICT);
-			if (CAN_SEE(i, ch))
+			if (char_can_see(i, ch))
 				act("$n didn't seem to get a good enough look.", TRUE, ch, 0, i, TO_VICT);
 			improve_skill(ch, SKILL_KEEN, 1);
 			return;
@@ -3166,13 +3166,13 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
     " is standing here"
   };
 
-  if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS) && IS_NPC(i)) 
-     send_to_char(ch, "@D[@G%d@D]@w %s", GET_MOB_VNUM(i), SCRIPT(i) ? "[TRIG] " : "");
+  if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_ROOMFLAGS) && char_is_npc(i)) 
+     send_to_char(ch, "@D[@G%d@D]@w %s", char_get_mob_vnum(i), SCRIPT(i) ? "[TRIG] " : "");
   
-  if (IS_NPC(i) && i->long_descr && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
+  if (char_is_npc(i) && i->long_descr && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
     send_to_char(ch, "%s", i->long_descr);
 
-    if(IS_NPC(i)) {
+    if(char_is_npc(i)) {
       double health = i->health;
       if(health <= 0.1) {
         act("@R...Should be DEAD soon.@w", TRUE, i, 0, ch, TO_VICT);
@@ -3203,25 +3203,25 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
      sprintf(eaves, "@w...$e is spying on everything to the @c%s@w.", dirs[GET_EAVESDIR(i)]);
      act(eaves, TRUE, i, 0, ch, TO_VICT);
     }
-    if (AFF_FLAGGED(i, AFF_FLYING) && GET_ALT(i) == 1)
+    if (char_aff_flagged(i, AFF_FLYING) && GET_ALT(i) == 1)
       act("...$e is in the air!", FALSE, i, 0, ch, TO_VICT);
-    if (AFF_FLAGGED(i, AFF_FLYING) && GET_ALT(i) == 2)
+    if (char_aff_flagged(i, AFF_FLYING) && GET_ALT(i) == 2)
       act("...$e is high in the air!", FALSE, i, 0, ch, TO_VICT);
-    if (AFF_FLAGGED(i, AFF_SANCTUARY) && !GET_SKILL(i, SKILL_AQUA_BARRIER))
+    if (char_aff_flagged(i, AFF_SANCTUARY) && !char_get_skill(i, SKILL_AQUA_BARRIER))
       act("...$e has a barrier around $s body!", FALSE, i, 0, ch, TO_VICT);
-    if (AFF_FLAGGED(i, AFF_FIRESHIELD))
+    if (char_aff_flagged(i, AFF_FIRESHIELD))
       act("...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", FALSE, i, 0, ch, TO_VICT);
-    if (AFF_FLAGGED(i, AFF_SANCTUARY) && GET_SKILL(i, SKILL_AQUA_BARRIER))
+    if (char_aff_flagged(i, AFF_SANCTUARY) && char_get_skill(i, SKILL_AQUA_BARRIER))
       act("...$e has a @Gbarrier@w of @cwater@w and @Cki@w around $s body!", FALSE, i, 0, ch, TO_VICT);
-    if (!IS_NPC(i) && PLR_FLAGGED(i, PLR_SPIRAL))
+    if (!char_is_npc(i) && char_plr_flagged(i, PLR_SPIRAL))
       act("...$e is spinning in a vortex!", FALSE, i, 0, ch, TO_VICT);
     if (GET_CHARGE(i))
       act("...$e has a bright %s aura around $s body!", FALSE, i, 0, ch, TO_VICT);
-    if (AFF_FLAGGED(i, AFF_METAMORPH))
+    if (char_aff_flagged(i, AFF_METAMORPH))
       act("@w...$e has a dark, @rred@w aura and menacing presence.", FALSE, i, 0, ch, TO_VICT);
-    if (AFF_FLAGGED(i, AFF_HAYASA))
+    if (char_aff_flagged(i, AFF_HAYASA))
       act("@w...$e has a soft @cblue@w glow around $s body!", FALSE, i, 0, ch, TO_VICT);
-    if (AFF_FLAGGED(i, AFF_BLIND))
+    if (char_aff_flagged(i, AFF_BLIND))
       act("...$e is groping around blindly!", FALSE, i, 0, ch, TO_VICT);
     if (affected_by_spell(i, SPELL_FAERIE_FIRE))
       act("@m...$e @mis outlined with purple fire!@m", FALSE, i, 0, ch, TO_VICT);
@@ -3234,91 +3234,91 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
     return;
   }
 
-  if (IS_NPC(i) && !FIGHTING(i) && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
+  if (char_is_npc(i) && !FIGHTING(i) && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
     send_to_char(ch, "@w%c%s", toupper(*i->short_descr), i->short_descr + 1);
-  else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) == ch)
+  else if (char_is_npc(i) && GRAPPLED(i) && GRAPPLED(i) == ch)
     send_to_char(ch, "@w%c%s is being grappled with by YOU!", toupper(*i->short_descr), i->short_descr + 1);
-  else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) != ch)
+  else if (char_is_npc(i) && GRAPPLED(i) && GRAPPLED(i) != ch)
     send_to_char(ch, "@w%c%s is being absorbed from by %s!", toupper(*i->short_descr), i->short_descr + 1, readIntro(ch, GRAPPLED(i)) == 1 ? get_i_name(ch, GRAPPLED(i)) : AN(RACE(GRAPPLED(i))));
-  else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) == ch)
+  else if (char_is_npc(i) && ABSORBBY(i) && ABSORBBY(i) == ch)
     send_to_char(ch, "@w%c%s is being absorbed from by YOU!", toupper(*i->short_descr), i->short_descr + 1);
-  else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) != ch)
+  else if (char_is_npc(i) && ABSORBBY(i) && ABSORBBY(i) != ch)
     send_to_char(ch, "@w%c%s is being absorbed from by %s!", toupper(*i->short_descr), i->short_descr + 1, readIntro(ch, ABSORBBY(i)) == 1 ? get_i_name(ch, ABSORBBY(i)) : AN(RACE(ABSORBBY(i))));
-  else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING && is_sparring(i))
-    send_to_char(ch, "@w%c%s is sparring with %s!", toupper(*i->short_descr), i->short_descr + 1, GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
-  else if (IS_NPC(i) && FIGHTING(i) && is_sparring(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
+  else if (char_is_npc(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING && is_sparring(i))
+    send_to_char(ch, "@w%c%s is sparring with %s!", toupper(*i->short_descr), i->short_descr + 1, GET_ADMLEVEL(ch) ? char_get_name(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
+  else if (char_is_npc(i) && FIGHTING(i) && is_sparring(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
     send_to_char(ch, "@w%c%s is sparring with you!", toupper(*i->short_descr), i->short_descr + 1);
-  else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-    send_to_char(ch, "@w%c%s is fighting %s!", toupper(*i->short_descr), i->short_descr + 1, GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
-  else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
+  else if (char_is_npc(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
+    send_to_char(ch, "@w%c%s is fighting %s!", toupper(*i->short_descr), i->short_descr + 1, GET_ADMLEVEL(ch) ? char_get_name(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
+  else if (char_is_npc(i) && FIGHTING(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
     send_to_char(ch, "@w%c%s is fighting YOU!", toupper(*i->short_descr), i->short_descr + 1);
-  else if (IS_NPC(i) && FIGHTING(i) && GET_POS(i) == POS_SITTING)
+  else if (char_is_npc(i) && FIGHTING(i) && GET_POS(i) == POS_SITTING)
     send_to_char(ch, "@w%c%s is sitting here.", toupper(*i->short_descr), i->short_descr + 1);
-  else if (IS_NPC(i) && FIGHTING(i) && GET_POS(i) == POS_SLEEPING)
+  else if (char_is_npc(i) && FIGHTING(i) && GET_POS(i) == POS_SLEEPING)
     send_to_char(ch, "@w%c%s is sleeping here.", toupper(*i->short_descr), i->short_descr + 1);
-  else if (IS_NPC(i))
+  else if (char_is_npc(i))
     send_to_char(ch, "@w%c%s", toupper(*i->short_descr), i->short_descr + 1);
-  else if (!IS_NPC(i)) {
-   if (IS_MAJIN(i) && AFF_FLAGGED(i, AFF_LIQUEFIED)) {
+  else if (!char_is_npc(i)) {
+   if (char_is_majin(i) && char_aff_flagged(i, AFF_LIQUEFIED)) {
     send_to_char(ch, "@wSeveral blobs of %s colored goo spread out here.@n\n", skin_types[(int)GET_SKIN(i)]);
     return;
    }
-   if ((GET_ADMLEVEL(ch) > 0 || GET_ADMLEVEL(i) > 0) || IS_NPC(ch)) {
+   if ((GET_ADMLEVEL(ch) > 0 || GET_ADMLEVEL(i) > 0) || char_is_npc(ch)) {
      send_to_char(ch, "@w%s", i->name);
    }
-   else if ((!PLR_FLAGGED(i, PLR_DISGUISED) && readIntro(ch, i) == 1)) {
+   else if ((!char_plr_flagged(i, PLR_DISGUISED) && readIntro(ch, i) == 1)) {
     send_to_char(ch, "@w%s", get_i_name(ch, i));
    }
-   else if (!PLR_FLAGGED(i, PLR_DISGUISED) && readIntro(ch, i) != 1) {
+   else if (!char_plr_flagged(i, PLR_DISGUISED) && readIntro(ch, i) != 1) {
     if (GET_DISTFEA(i) == DISTFEA_EYE) {
-      send_to_char(ch, "@wA %s eyed %s %s", eye_types[(int)GET_EYE(i)], MAFE(i), LRACE(i));
+      send_to_char(ch, "@wA %s eyed %s %s", eye_types[(int)GET_EYE(i)], char_mafe(i), LRACE(i));
     }
     else if (GET_DISTFEA(i) == DISTFEA_HAIR) {
-     if (IS_MAJIN(i)) {
-       send_to_char(ch, "@wA %s majin, with a %s forelock,", MAFE(i), FHA_types[(int)GET_HAIRL(i)]);
+     if (char_is_majin(i)) {
+       send_to_char(ch, "@wA %s majin, with a %s forelock,", char_mafe(i), FHA_types[(int)GET_HAIRL(i)]);
      }
-     else if (IS_NAMEK(i)) {
+     else if (char_is_namek(i)) {
        send_to_char(ch, "@wA namek, with %s antennae,", FHA_types[(int)GET_HAIRL(i)]);
      }
-     else if (IS_ARLIAN(i)) {
+     else if (char_is_arlian(i)) {
        send_to_char(ch, "@wA arlian, with %s antennae,", FHA_types[(int)GET_HAIRL(i)]);
      }
-     else if (IS_ICER(i) || IS_DEMON(i)) {
-       send_to_char(ch, "@wA %s %s, with %s horns", MAFE(i), LRACE(i), FHA_types[(int)GET_HAIRL(i)]);
+     else if (char_is_icer(i) || char_is_demon(i)) {
+       send_to_char(ch, "@wA %s %s, with %s horns", char_mafe(i), LRACE(i), FHA_types[(int)GET_HAIRL(i)]);
      }
      else {
        char blarg[MAX_INPUT_LENGTH];
        sprintf(blarg, "%s %s hair %s", hairl_types[(int)GET_HAIRL(i)], hairc_types[(int)GET_HAIRC(i)], hairs_types[(int)GET_HAIRS(i)]);
-       send_to_char(ch, "@wA %s %s, with %s", MAFE(i), LRACE(i), GET_HAIRL(i) == 0 ? "a bald head" : (blarg));
+       send_to_char(ch, "@wA %s %s, with %s", char_mafe(i), LRACE(i), GET_HAIRL(i) == 0 ? "a bald head" : (blarg));
      }
     }
     else if (GET_DISTFEA(i) == DISTFEA_SKIN) {
-      send_to_char(ch, "@wA %s skinned %s %s", skin_types[(int)GET_SKIN(i)], MAFE(i), LRACE(i));
+      send_to_char(ch, "@wA %s skinned %s %s", skin_types[(int)GET_SKIN(i)], char_mafe(i), LRACE(i));
     }
     else if (GET_DISTFEA(i) == DISTFEA_HEIGHT) {
       char *height;
-      if (IS_TRUFFLE(i)) {
-       if (GET_PC_HEIGHT(i) > 70) {
+      if (char_is_truffle(i)) {
+       if (char_get_pc_height(i) > 70) {
         height = strdup("very tall");
        }
-       else if (GET_PC_HEIGHT(i) > 55) {
+       else if (char_get_pc_height(i) > 55) {
         height = strdup("tall");
        }
-       else if (GET_PC_HEIGHT(i) > 35) {
+       else if (char_get_pc_height(i) > 35) {
         height = strdup("average height");
        }
        else {
         height = strdup("short");
        }
       }
-      else if (PLR_FLAGGED(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
-       if (GET_PC_HEIGHT(i) * 10 > 2000) {
+      else if (char_plr_flagged(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
+       if (char_get_pc_height(i) * 10 > 2000) {
         height = strdup("very tall");
        }
-       else if (GET_PC_HEIGHT(i) * 10 > 1800) {
+       else if (char_get_pc_height(i) * 10 > 1800) {
         height = strdup("tall");
        }
-       else if (GET_PC_HEIGHT(i) * 10 > 1500) {
+       else if (char_get_pc_height(i) * 10 > 1500) {
         height = strdup("average height");
        }
        else {
@@ -3326,54 +3326,54 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
        }
       }
       else {
-       if (GET_PC_HEIGHT(i) > 200) {
+       if (char_get_pc_height(i) > 200) {
         height = strdup("very tall");
        }
-       else if (GET_PC_HEIGHT(i) > 180) {
+       else if (char_get_pc_height(i) > 180) {
         height = strdup("tall");
        }
-       else if (GET_PC_HEIGHT(i) > 150) {
+       else if (char_get_pc_height(i) > 150) {
         height = strdup("average height");
        }
-       else if (GET_PC_HEIGHT(i) > 120) {
+       else if (char_get_pc_height(i) > 120) {
         height = strdup("short");
        }
        else {
         height = strdup("very short");
        }
       }
-      send_to_char(ch, "@wA %s %s %s", height, MAFE(i), LRACE(i));
+      send_to_char(ch, "@wA %s %s %s", height, char_mafe(i), LRACE(i));
       if (height) {
        free(height);
       }
     }
     else if (GET_DISTFEA(i) == DISTFEA_WEIGHT) {
       char *height;
-      if (IS_TRUFFLE(i)) {
-       if (GET_PC_WEIGHT(i) > 35) {
+      if (char_is_truffle(i)) {
+       if (char_get_pc_weight(i) > 35) {
         height = strdup("very heavy");
        }
-       else if (GET_PC_WEIGHT(i) > 25) {
+       else if (char_get_pc_weight(i) > 25) {
         height = strdup("heavy");
        }
-       else if (GET_PC_WEIGHT(i) > 15) {
+       else if (char_get_pc_weight(i) > 15) {
         height = strdup("average weight");
        }
        else {
         height = strdup("welterweight");
        }
       }
-      else if (PLR_FLAGGED(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
-       if (GET_PC_WEIGHT(i) * 50 > 6000) {
+      else if (char_plr_flagged(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
+       if (char_get_pc_weight(i) * 50 > 6000) {
         height = strdup("very heavy");
        }
-       else if (GET_PC_WEIGHT(i) * 50 > 5000) {
+       else if (char_get_pc_weight(i) * 50 > 5000) {
         height = strdup("heavy");
        }
-       else if (GET_PC_WEIGHT(i) * 50 > 4000) {
+       else if (char_get_pc_weight(i) * 50 > 4000) {
         height = strdup("average weight");
        }
-       else if (GET_PC_WEIGHT(i) * 50 > 3000) {
+       else if (char_get_pc_weight(i) * 50 > 3000) {
         height = strdup("lightweight");
        }
        else {
@@ -3381,102 +3381,102 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
        }
       }
       else {
-       if (GET_PC_WEIGHT(i) > 120) {
+       if (char_get_pc_weight(i) > 120) {
         height = strdup("very heavy");
        }
-       else if (GET_PC_WEIGHT(i) > 100) {
+       else if (char_get_pc_weight(i) > 100) {
         height = strdup("heavy");
        }
-       else if (GET_PC_WEIGHT(i) > 80) {
+       else if (char_get_pc_weight(i) > 80) {
         height = strdup("average weight");
        }
-       else if (GET_PC_WEIGHT(i) > 60) {
+       else if (char_get_pc_weight(i) > 60) {
         height = strdup("lightweight");
        }
        else {
         height = strdup("welterweight");
        }
       }
-      send_to_char(ch, "@wA %s %s %s", height, MAFE(i), LRACE(i));
+      send_to_char(ch, "@wA %s %s %s", height, char_mafe(i), LRACE(i));
       if (height) {
        free(height);
       }
     }
    }
    else {
-    send_to_char(ch, "@wA disguised %s %s", MAFE(i), LRACE(i));
+    send_to_char(ch, "@wA disguised %s %s", char_mafe(i), LRACE(i));
    }
   }
 
- if (!IS_NPC(i) || !FIGHTING(i)) {
-  if (AFF_FLAGGED(i, AFF_INVISIBLE)) {
+ if (!char_is_npc(i) || !FIGHTING(i)) {
+  if (char_aff_flagged(i, AFF_INVISIBLE)) {
     send_to_char(ch, ", is invisible");
     count = TRUE;
   }
-  if (AFF_FLAGGED(i, AFF_ETHEREAL)) {
+  if (char_aff_flagged(i, AFF_ETHEREAL)) {
     send_to_char(ch, ", has a halo");
     count = TRUE;
   }
-  if (AFF_FLAGGED(i, AFF_HIDE) && i != ch) {
+  if (char_aff_flagged(i, AFF_HIDE) && i != ch) {
     send_to_char(ch, ", is hiding");
-    if (GET_SKILL(i, SKILL_HIDE) && !IS_NPC(ch) && i != ch) {
+    if (char_get_skill(i, SKILL_HIDE) && !char_is_npc(ch) && i != ch) {
      improve_skill(i, SKILL_HIDE, 1);
     }
     count = TRUE;
   }
-  if (!IS_NPC(i) && !i->desc) {
+  if (!char_is_npc(i) && !i->desc) {
     send_to_char(ch, ", has a blank stare");
     count = TRUE;
   }
-  if (!IS_NPC(i) && PLR_FLAGGED(i, PLR_WRITING)) {
+  if (!char_is_npc(i) && char_plr_flagged(i, PLR_WRITING)) {
     send_to_char(ch, ", is writing");
     count = TRUE;
   }
-  if (!IS_NPC(i) && PRF_FLAGGED(i, PRF_BUILDWALK)) {
+  if (!char_is_npc(i) && char_prf_flagged(i, PRF_BUILDWALK)) {
     send_to_char(ch, ", is buildwalking");
     count = TRUE;
   }
-  if (!IS_NPC(i) && ABSORBING(i) && ABSORBING(i) != ch) {
-    send_to_char(ch, ", is absorbing from %s", GET_NAME(ABSORBING(i)));
+  if (!char_is_npc(i) && ABSORBING(i) && ABSORBING(i) != ch) {
+    send_to_char(ch, ", is absorbing from %s", char_get_name(ABSORBING(i)));
     count = TRUE;
   }
-  if (!IS_NPC(i) && GRAPPLING(i) && GRAPPLING(i) != ch) {
+  if (!char_is_npc(i) && GRAPPLING(i) && GRAPPLING(i) != ch) {
     send_to_char(ch, ", is grappling with %s", readIntro(ch, GRAPPLING(i)) == 1 ? get_i_name(ch, GRAPPLING(i)) : introd_calc(GRAPPLING(i)));
     count = TRUE;
   }
-  if (!IS_NPC(i) && CARRYING(i) && CARRYING(i) != ch) {
+  if (!char_is_npc(i) && CARRYING(i) && CARRYING(i) != ch) {
     send_to_char(ch, ", is carrying %s", readIntro(ch, CARRYING(i)) == 1 ? get_i_name(ch, CARRYING(i)) : introd_calc(CARRYING(i)));
     count = TRUE;
   }
-  if (!IS_NPC(i) && CARRIED_BY(i) && CARRIED_BY(i) != ch) {
+  if (!char_is_npc(i) && CARRIED_BY(i) && CARRIED_BY(i) != ch) {
     send_to_char(ch, ", is being carried by %s", readIntro(ch, CARRIED_BY(i)) == 1 ? get_i_name(ch, CARRIED_BY(i)) : introd_calc(CARRIED_BY(i)));
     count = TRUE;
   }
-  if (!IS_NPC(i) && GRAPPLING(i) && GRAPPLING(i) == ch) {
+  if (!char_is_npc(i) && GRAPPLING(i) && GRAPPLING(i) == ch) {
     send_to_char(ch, ", is grappling with YOU");
     count = TRUE;
   }
-  if (!IS_NPC(i) && ABSORBING(i) && ABSORBING(i) == ch) {
+  if (!char_is_npc(i) && ABSORBING(i) && ABSORBING(i) == ch) {
     send_to_char(ch, ", is absorbing from YOU");
     count = TRUE;
   }
-  if (!IS_NPC(i) && ABSORBING(ch) && ABSORBING(ch) == i) {
+  if (!char_is_npc(i) && ABSORBING(ch) && ABSORBING(ch) == i) {
     send_to_char(ch, ", is being absorbed from by YOU");
     count = TRUE;
   }
-  if (!IS_NPC(i) && GRAPPLING(ch) && GRAPPLING(ch) == i) {
+  if (!char_is_npc(i) && GRAPPLING(ch) && GRAPPLING(ch) == i) {
     send_to_char(ch, ", is being grappled with by YOU");
     count = TRUE;
   }
-  if (!IS_NPC(i) && CARRYING(ch) && CARRYING(ch) == i) {
+  if (!char_is_npc(i) && CARRYING(ch) && CARRYING(ch) == i) {
     send_to_char(ch, ", is being carried by you");
     count = TRUE;
   }
-  if (!IS_NPC(ch) && !IS_NPC(i) && FIGHTING(i)) {
-   if (!PLR_FLAGGED(i, PLR_SPAR) || (PLR_FLAGGED(i, PLR_SPAR) && (!PLR_FLAGGED(FIGHTING(i), PLR_SPAR) || IS_NPC(FIGHTING(i))))) {
+  if (!char_is_npc(ch) && !char_is_npc(i) && FIGHTING(i)) {
+   if (!char_plr_flagged(i, PLR_SPAR) || (char_plr_flagged(i, PLR_SPAR) && (!char_plr_flagged(FIGHTING(i), PLR_SPAR) || char_is_npc(FIGHTING(i))))) {
    send_to_char(ch, ", is here fighting ");
    }
-   if (PLR_FLAGGED(i, PLR_SPAR) && PLR_FLAGGED(FIGHTING(i), PLR_SPAR)) {
+   if (char_plr_flagged(i, PLR_SPAR) && char_plr_flagged(FIGHTING(i), PLR_SPAR)) {
    send_to_char(ch, ", is here sparring ");
    }
      if (FIGHTING(i) == ch) {
@@ -3485,7 +3485,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
      }
      else {
       if (IN_ROOM(i) == IN_ROOM(FIGHTING(i))) {
-       send_to_char(ch, "%s", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
+       send_to_char(ch, "%s", GET_ADMLEVEL(ch) ? char_get_name(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
        count = TRUE;
       }
       else {
@@ -3496,7 +3496,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
  }
   if (SITS(i)) {
        chair = SITS(i);
-       if (PLR_FLAGGED(i, PLR_HEALT)) {
+       if (char_plr_flagged(i, PLR_HEALT)) {
         send_to_char(ch, "@w is floating inside a healing tank.");
        }
        else if (count == TRUE) {
@@ -3506,7 +3506,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
        send_to_char(ch, "@w%s on %s.", positions[(int) GET_POS(i)], chair->short_description);
        }
   }
-  else if (!PLR_FLAGGED(i, PLR_PILOTING) && !SITS(i) && (!IS_NPC(i) || !FIGHTING(i))) {
+  else if (!char_plr_flagged(i, PLR_PILOTING) && !SITS(i) && (!char_is_npc(i) || !FIGHTING(i))) {
    if (count == TRUE) {
     send_to_char(ch, "@w, and%s.", positions[(int) GET_POS(i)]);
    }
@@ -3514,41 +3514,41 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
     send_to_char(ch, "@w%s.", positions[(int) GET_POS(i)]);
    }
   }
-   else if (PLR_FLAGGED(i, PLR_PILOTING)) {
+   else if (char_plr_flagged(i, PLR_PILOTING)) {
    send_to_char(ch, "@w, is sitting in the pilot's chair.\r\n");
    }
     else {
    
-    if (FIGHTING(i) && !IS_NPC(ch) && !IS_NPC(i)) {
-      if (!PLR_FLAGGED(i, PLR_SPAR)) {
+    if (FIGHTING(i) && !char_is_npc(ch) && !char_is_npc(i)) {
+      if (!char_plr_flagged(i, PLR_SPAR)) {
        send_to_char(ch, ", is here fighting ");
       }
-      if (PLR_FLAGGED(i, PLR_SPAR)) {
+      if (char_plr_flagged(i, PLR_SPAR)) {
        send_to_char(ch, ", is here sparring ");
       }
       if (FIGHTING(i) == ch)
 	send_to_char(ch, "@rYOU@w!");
       else {
 	if (IN_ROOM(i) == IN_ROOM(FIGHTING(i)))
-	  send_to_char(ch, "%s!", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
+	  send_to_char(ch, "%s!", GET_ADMLEVEL(ch) ? char_get_name(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch, FIGHTING(i)) : LRACE(FIGHTING(i))));
 	else
 	  send_to_char(ch,  "someone who has already left!");
       }
-    } else if (!IS_NPC(i)) {			/* NIL fighting pointer */
+    } else if (!char_is_npc(i)) {			/* NIL fighting pointer */
       send_to_char(ch, " is here struggling with thin air.");
     }
   }
   
 
-  if (AFF_FLAGGED(ch, AFF_DETECT_ALIGN)) {
-    if (IS_EVIL(i))
+  if (char_aff_flagged(ch, AFF_DETECT_ALIGN)) {
+    if (char_is_evil(i))
       send_to_char(ch, " (@rRed@[3] Aura)");
-    else if (IS_GOOD(i))
+    else if (char_is_good(i))
       send_to_char(ch, " (@bBlue@[3] Aura)");
   }
-  if (!IS_NPC(i) && PRF_FLAGGED(i, PRF_AFK))
+  if (!char_is_npc(i) && char_prf_flagged(i, PRF_AFK))
    send_to_char(ch, " @D(@RAFK@D)");
-  else if (!IS_NPC(i) && i->timer > 3)
+  else if (!char_is_npc(i) && i->timer > 3)
    send_to_char(ch, " @D(@RIDLE@D)");
   send_to_char(ch, "@n\r\n");
 
@@ -3557,57 +3557,57 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
     sprintf(eaves, "@w...$e is spying on everything to the @c%s@w.", dirs[GET_EAVESDIR(i)]);
     act(eaves, TRUE, i, 0, ch, TO_VICT);
   }
-  if (!IS_NPC(i)) {
-   if (PLR_FLAGGED(i, PLR_FISHING)) {
+  if (!char_is_npc(i)) {
+   if (char_plr_flagged(i, PLR_FISHING)) {
     act("@w...$e is @Cfishing@w.@n", TRUE, i, 0, ch, TO_VICT);
    }
   }
-  if (PLR_FLAGGED(i, PLR_AURALIGHT)) {
+  if (char_plr_flagged(i, PLR_AURALIGHT)) {
 	  char bloom[MAX_INPUT_LENGTH];
       sprintf(bloom, "...is surrounded by a bright %s aura.@n", aura_types[GET_AURA(i)]);
       act(bloom, TRUE, i, 0, ch, TO_VICT);
 	}
-  if (AFF_FLAGGED(i, AFF_SANCTUARY) && !GET_SKILL(i, SKILL_AQUA_BARRIER))
+  if (char_aff_flagged(i, AFF_SANCTUARY) && !char_get_skill(i, SKILL_AQUA_BARRIER))
     act("@w...$e has a @bbarrier@w around $s body!", TRUE, i, 0, ch, TO_VICT);
-  if (AFF_FLAGGED(i, AFF_FIRESHIELD))
+  if (char_aff_flagged(i, AFF_FIRESHIELD))
       act("@w...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", FALSE, i, 0, ch, TO_VICT);
-  if (AFF_FLAGGED(i, AFF_HEALGLOW))
+  if (char_aff_flagged(i, AFF_HEALGLOW))
       act("@w...$e has a serene @Cblue@Y glow@w around $s body.", TRUE, i, 0, ch, TO_VICT);
-  if (AFF_FLAGGED(i, AFF_EARMOR))
+  if (char_aff_flagged(i, AFF_EARMOR))
       act("@w...$e has ghostly @Ggreen@w ethereal armor around $s body.", TRUE, i, 0, ch, TO_VICT);
-  if (AFF_FLAGGED(i, AFF_SANCTUARY) && GET_SKILL(i, SKILL_AQUA_BARRIER))
+  if (char_aff_flagged(i, AFF_SANCTUARY) && char_get_skill(i, SKILL_AQUA_BARRIER))
     act("@w...$e has a @bbarrier@w of @cwater@w and @CKi@w around $s body!", TRUE, i, 0, ch, TO_VICT);
-  if (AFF_FLAGGED(i, AFF_FLYING) && GET_ALT(i) == 1)
+  if (char_aff_flagged(i, AFF_FLYING) && GET_ALT(i) == 1)
     act("@w...$e is in the air!", TRUE, i, 0, ch, TO_VICT);
-  if (AFF_FLAGGED(i, AFF_FLYING) && GET_ALT(i) == 2)
+  if (char_aff_flagged(i, AFF_FLYING) && GET_ALT(i) == 2)
     act("@w...$e is high in the air!", TRUE, i, 0, ch, TO_VICT);
   if (GET_KAIOKEN(i) > 0)
     act("@w...@r$e has a red aura around $s body!", TRUE, i, 0, ch, TO_VICT);
-  if (!IS_NPC(i) && PLR_FLAGGED(i, PLR_SPIRAL))
+  if (!char_is_npc(i) && char_plr_flagged(i, PLR_SPIRAL))
       act("@w...$e is spinning in a vortex!", FALSE, i, 0, ch, TO_VICT);
-  if (IS_TRANSFORMED(i) && !IS_ANDROID(i) && !IS_SAIYAN(i) && !IS_HALFBREED(i))
+  if (char_is_transformed(i) && !char_is_android(i) && !char_is_saiyan(i) && !char_is_halfbreed(i))
     act("@w...$e has energy crackling around $s body!", TRUE, i, 0, ch, TO_VICT);
-  if (GET_CHARGE(i) && !IS_SAIYAN(i) && !IS_HALFBREED(i)) {
+  if (GET_CHARGE(i) && !char_is_saiyan(i) && !char_is_halfbreed(i)) {
     char aura[MAX_INPUT_LENGTH];
     sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
     act(aura, TRUE, i, 0, ch, TO_VICT);
   }
-  if (!PLR_FLAGGED(i, PLR_OOZARU) && GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+  if (!char_plr_flagged(i, PLR_OOZARU) && GET_CHARGE(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act("@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", TRUE, i, 0, ch, TO_VICT);
-  if (!PLR_FLAGGED(i, PLR_OOZARU) && GET_CHARGE(i) && !IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i))) {
+  if (!char_plr_flagged(i, PLR_OOZARU) && GET_CHARGE(i) && !char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i))) {
     char aura[MAX_INPUT_LENGTH];
     sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
     act(aura, TRUE, i, 0, ch, TO_VICT);
   }
-  if (!PLR_FLAGGED(i, PLR_OOZARU) && !GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+  if (!char_plr_flagged(i, PLR_OOZARU) && !GET_CHARGE(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act("@w...$e has energy crackling around $s body!", TRUE, i, 0, ch, TO_VICT);
-  if (PLR_FLAGGED(i, PLR_OOZARU) && GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+  if (char_plr_flagged(i, PLR_OOZARU) && GET_CHARGE(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act("@w...$e is in the form of a @rgreat ape@w!", TRUE, i, 0, ch, TO_VICT);
   if (is_affected(i, AFF_KYODAIKA))
     act("@w...$e has expanded $s body size@w!", TRUE, i, 0, ch, TO_VICT);
-  if (AFF_FLAGGED(i, AFF_HAYASA))
+  if (char_aff_flagged(i, AFF_HAYASA))
       act("@w...$e has a soft @cblue@w glow around $s body!", FALSE, i, 0, ch, TO_VICT);
-  if (PLR_FLAGGED(i, PLR_OOZARU) && !GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+  if (char_plr_flagged(i, PLR_OOZARU) && !GET_CHARGE(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act("@w...$e has energy crackling around $s @rgreat ape@w body!", TRUE, i, 0, ch, TO_VICT);
   if (GET_FEATURE(i)) {
    char woo[MAX_STRING_LENGTH];
@@ -3637,8 +3637,8 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch)
   hideinfo = lasthide = NULL;
   
   for (i = list; i; i = i->next_in_room) {
-    if (AFF_FLAGGED(i, AFF_HIDE) && roll_resisted(i, SKILL_HIDE, ch, SKILL_SPOT)) {
-     if (GET_SKILL(i, SKILL_HIDE) && !IS_NPC(ch) && i != ch) {
+    if (char_aff_flagged(i, AFF_HIDE) && roll_resisted(i, SKILL_HIDE, ch, SKILL_SPOT)) {
+     if (char_get_skill(i, SKILL_HIDE) && !char_is_npc(ch) && i != ch) {
       improve_skill(i, SKILL_HIDE, 1);
      }
       CREATE(tmphide, struct hide_node, 1);
@@ -3657,7 +3657,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch)
   for (i = list; i; i = i->next_in_room) {
     /* hide npcs whose description starts with a '.' from non-holylighted people
     - Idea from Elaseth of TBA */
-    if ((ch == i) || (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_HOLYLIGHT) && IS_NPC(i)
+    if ((ch == i) || (!char_is_npc(ch) && !char_prf_flagged(ch, PRF_HOLYLIGHT) && char_is_npc(i)
     && i->long_descr && *i->long_descr == '.')) 
       continue;
 
@@ -3667,7 +3667,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch)
     if (tmphide)
       continue;
 
-    if (CAN_SEE(ch, i)) {
+    if (char_can_see(ch, i)) {
       num = 0;
       if (CONFIG_STACK_MOBS) {
         /* How many other occurences of this mob are there? */
@@ -3680,7 +3680,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch)
                (AFF_FLAGS(i)[3]    == AFF_FLAGS(j)[3]     ) &&
                (!FIGHTING(i) && !FIGHTING(j)) &&
                (GET_HIT(i) == getEffMaxPL(i) && GET_HIT(j) == getEffMaxPL(j)) &&
-               !strcmp(GET_NAME(i), GET_NAME(j))         ) {
+               !strcmp(char_get_name(i), char_get_name(j))         ) {
             for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
               if (tmphide->hidden == j)
                 break;
@@ -3702,7 +3702,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch)
                (AFF_FLAGS(i)[3]    == AFF_FLAGS(j)[3]     ) &&
                (!FIGHTING(i) && !FIGHTING(j)) &&
                (GET_HIT(i) == GET_MAX_HIT(i) && GET_HIT(j) == GET_MAX_HIT(j)) &&
-               !strcmp(GET_NAME(i), GET_NAME(j))         ) {
+               !strcmp(char_get_name(i), char_get_name(j))         ) {
             for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
               if (tmphide->hidden == j)
                 break;
@@ -3717,8 +3717,8 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch)
       list_one_char(i, ch);
       send_to_char(ch, "@n");
     } /* processed a character we can see */
-    else if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) &&
-           AFF_FLAGGED(i, AFF_INFRAVISION))
+    else if (room_is_dark(IN_ROOM(ch)) && !char_can_see_in_dark(ch) &&
+           char_aff_flagged(i, AFF_INFRAVISION))
       send_to_char(ch, "@wYou see a pair of glowing red eyes looking your way.@n\r\n");
   } /* loop through all characters in room */
 }
@@ -3756,7 +3756,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
    send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
   }
   int space = FALSE;
-  if (SECT(target_room) == SECT_SPACE && GET_ROOM_VNUM(target_room) >= 20000) {
+  if (rroom_sect(target_room) == SECT_SPACE && rroom_get_vnum(target_room) >= 20000) {
    space = TRUE;
   }
   if (exit_mode == EXIT_NORMAL && space == FALSE && IN_ROOM(ch) == target_room) {
@@ -3776,15 +3776,15 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
   }
   if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && space == FALSE && IN_ROOM(ch) != target_room)) {
     send_to_char(ch, "@D----------------------------[@gObvious Exits@D]-----------------------------@n\r\n");
-    if (IS_AFFECTED(ch, AFF_BLIND)) {
+    if (char_is_affected(ch, AFF_BLIND)) {
       send_to_char(ch, "You can't see a damned thing, you're blind!\r\n");
       return;
     }
-    if (PLR_FLAGGED(ch, PLR_EYEC)) {
+    if (char_plr_flagged(ch, PLR_EYEC)) {
       send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
       return;
     }
-    if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+    if (room_is_dark(IN_ROOM(ch)) && !char_can_see_in_dark(ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
       send_to_char(ch, "It is pitch black...\r\n");
       return;
     }
@@ -3796,7 +3796,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
           if (GET_OBJ_VAL(GET_EQ(ch, i),VAL_LIGHT_HOURS))
             has_light = TRUE;
 			
-	  if (PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+	  if (char_plr_flagged(ch, PLR_AURALIGHT)) {
 	    has_light = TRUE;
 	  }
 
@@ -3804,7 +3804,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
       if (W_EXIT(target_room, door) &&
           W_EXIT(target_room, door)->to_room != NOWHERE) {
         /* We have a door that leads somewhere */
-        if (ADM_FLAGGED(ch, ADM_SEESECRET) || GET_ADMLEVEL(ch) > 4) {
+        if (char_adm_flagged(ch, ADM_SEESECRET) || GET_ADMLEVEL(ch) > 4) {
           /* Immortals see everything */
           door_found++;
           char blam[9];
@@ -3818,7 +3818,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             char argh[100];
             if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTHWEST@n\r\n");
-             log("ERROR: %s found error direction NORTHWEST at room %d", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)));
+             log("ERROR: %s found error direction NORTHWEST at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
              return;
             }
             sprintf(argh, "%s ", strcasecmp(fname(W_EXIT(target_room, door)->keyword), "undefined") ? fname(W_EXIT(target_room, door)->keyword) : "opening");
@@ -3844,7 +3844,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             /* This exit has a door - tell all about it */
             if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTH@n\r\n");
-             log("ERROR: %s found error direction NORTH at room %d", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)));
+             log("ERROR: %s found error direction NORTH at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
              return;
             }
             char argh[200];
@@ -3871,7 +3871,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             /* This exit has a door - tell all about it */
             if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTHEAST@n\r\n");
-             log("ERROR: %s found error direction NORTHEAST at room %d", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)));
+             log("ERROR: %s found error direction NORTHEAST at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
              return;
             }
             char argh[100];
@@ -3898,7 +3898,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             /* This exit has a door - tell all about it */
             if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION EAST@n\r\n");
-             log("ERROR: %s found error direction EAST at room %d", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)));
+             log("ERROR: %s found error direction EAST at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
              return;
             }
             char argh[100];
@@ -3925,7 +3925,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             /* This exit has a door - tell all about it */
             if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION SOUTHEAST@n\r\n");
-             log("ERROR: %s found error direction SOUTHEAST at room %d", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)));
+             log("ERROR: %s found error direction SOUTHEAST at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
              return;
             }
             char argh[100];
@@ -3952,7 +3952,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             /* This exit has a door - tell all about it */
             if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION SOUTH@n\r\n");
-             log("ERROR: %s found error direction SOUTH at room %d", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)));
+             log("ERROR: %s found error direction SOUTH at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
              return;
             }
             char argh[100];
@@ -3979,7 +3979,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             /* This exit has a door - tell all about it */
             if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION SOUTHWEST@n\r\n");
-             log("ERROR: %s found error direction SOUTHWEST at room %d", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)));
+             log("ERROR: %s found error direction SOUTHWEST at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
              return;
             }
             char argh[100];
@@ -4006,7 +4006,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             /* This exit has a door - tell all about it */
             if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION WEST@n\r\n");
-             log("ERROR: %s found error direction WEST at room %d", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)));
+             log("ERROR: %s found error direction WEST at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
              return;
             }
             char argh[100];
@@ -4033,7 +4033,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             /* This exit has a door - tell all about it */
             if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION UP@n\r\n");
-             log("ERROR: %s found error direction UP at room %d", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)));
+             log("ERROR: %s found error direction UP at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
              return;
             }
             char argh[100];
@@ -4060,7 +4060,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             /* This exit has a door - tell all about it */
             if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION DOWN@n\r\n");
-             log("ERROR: %s found error direction DOWN at room %d", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)));
+             log("ERROR: %s found error direction DOWN at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
              return;
             }
             char argh[100];
@@ -4087,7 +4087,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             /* This exit has a door - tell all about it */
             if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION INSIDE@n\r\n");
-             log("ERROR: %s found error direction INSIDE at room %d", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)));
+             log("ERROR: %s found error direction INSIDE at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
              return;
             }
             char argh[100];
@@ -4114,7 +4114,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             /* This exit has a door - tell all about it */
             if (fname(W_EXIT(target_room, door)->keyword) == NULL) {
              send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION OUTSIDE@n\r\n");
-             log("ERROR: %s found error direction OUTSIDE at room %d", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)));
+             log("ERROR: %s found error direction OUTSIDE at room %d", char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)));
              return;
             }
             char argh[100];
@@ -4143,40 +4143,40 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             sprintf(blam, "%s", dirs[door]);
             *blam = toupper(*blam);
           if (door == 6) {
-           sprintf(dlist1, "@c%-9s @D-@w %s\r\n", blam, IS_DARK(W_EXIT(target_room, door)->to_room) && !CAN_SEE_IN_DARK(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist1, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
           }
           if (door == 0) {
-           sprintf(dlist2, "@c%-9s @D-@w %s\r\n", blam, IS_DARK(W_EXIT(target_room, door)->to_room) && !CAN_SEE_IN_DARK(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist2, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
           }
           if (door == 7) {
-           sprintf(dlist3, "@c%-9s @D-@w %s\r\n", blam, IS_DARK(W_EXIT(target_room, door)->to_room) && !CAN_SEE_IN_DARK(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist3, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
           }
           if (door == 1) {
-           sprintf(dlist4, "@c%-9s @D-@w %s\r\n", blam, IS_DARK(W_EXIT(target_room, door)->to_room) && !CAN_SEE_IN_DARK(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist4, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
           }
           if (door == 8) {
-           sprintf(dlist5, "@c%-9s @D-@w %s\r\n", blam, IS_DARK(W_EXIT(target_room, door)->to_room) && !CAN_SEE_IN_DARK(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist5, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
           }
           if (door == 2) {
-           sprintf(dlist6, "@c%-9s @D-@w %s\r\n", blam, IS_DARK(W_EXIT(target_room, door)->to_room) && !CAN_SEE_IN_DARK(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist6, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
           }
           if (door == 9) {
-           sprintf(dlist7, "@c%-9s @D-@w %s\r\n", blam, IS_DARK(W_EXIT(target_room, door)->to_room) && !CAN_SEE_IN_DARK(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist7, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
           }
           if (door == 3) {
-           sprintf(dlist8, "@c%-9s @D-@w %s\r\n", blam, IS_DARK(W_EXIT(target_room, door)->to_room) && !CAN_SEE_IN_DARK(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist8, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
           }
           if (door == 4) {
-           sprintf(dlist9, "@c%-9s @D-@w %s\r\n", blam, IS_DARK(W_EXIT(target_room, door)->to_room) && !CAN_SEE_IN_DARK(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist9, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
           }
           if (door == 5) {
-           sprintf(dlist10, "@c%-9s @D-@w %s\r\n", blam, IS_DARK(W_EXIT(target_room, door)->to_room) && !CAN_SEE_IN_DARK(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist10, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
           }
           if (door == 10) {
-           sprintf(dlist11, "@c%-9s @D-@w %s\r\n", blam, IS_DARK(W_EXIT(target_room, door)->to_room) && !CAN_SEE_IN_DARK(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist11, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
           }
           if (door == 11) {
-           sprintf(dlist12, "@c%-9s @D-@w %s\r\n", blam, IS_DARK(W_EXIT(target_room, door)->to_room) && !CAN_SEE_IN_DARK(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
+           sprintf(dlist12, "@c%-9s @D-@w %s\r\n", blam, room_is_dark(W_EXIT(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[W_EXIT(target_room, door)->to_room].name);
           }
 
           } else if (CONFIG_DISP_CLOSED_DOORS &&
@@ -4277,34 +4277,34 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
     *dlist12 = '\0';
    }
    send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
-   if (ROOM_FLAGGED(target_room, ROOM_HOUSE) && !ROOM_FLAGGED(target_room, ROOM_GARDEN1) && !ROOM_FLAGGED(target_room, ROOM_GARDEN2)) {
+   if (rroom_flagged(target_room, ROOM_HOUSE) && !rroom_flagged(target_room, ROOM_GARDEN1) && !rroom_flagged(target_room, ROOM_GARDEN2)) {
     send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, NULL));
    }
-   if (ROOM_FLAGGED(target_room, ROOM_HOUSE) && ROOM_FLAGGED(target_room, ROOM_GARDEN1) && !ROOM_FLAGGED(target_room, ROOM_GARDEN2)) {
+   if (rroom_flagged(target_room, ROOM_HOUSE) && rroom_flagged(target_room, ROOM_GARDEN1) && !rroom_flagged(target_room, ROOM_GARDEN2)) {
     send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, NULL));
    }
-   if (ROOM_FLAGGED(target_room, ROOM_HOUSE) && !ROOM_FLAGGED(target_room, ROOM_GARDEN1) && ROOM_FLAGGED(target_room, ROOM_GARDEN2)) {
+   if (rroom_flagged(target_room, ROOM_HOUSE) && !rroom_flagged(target_room, ROOM_GARDEN1) && rroom_flagged(target_room, ROOM_GARDEN2)) {
     send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, NULL));
    }
-   if (GET_RADAR1(ch) == GET_ROOM_VNUM(target_room) && GET_RADAR2(ch) == GET_ROOM_VNUM(target_room) && GET_RADAR3(ch) !=  GET_ROOM_VNUM(target_room)) {
+   if (GET_RADAR1(ch) == rroom_get_vnum(target_room) && GET_RADAR2(ch) == rroom_get_vnum(target_room) && GET_RADAR3(ch) !=  rroom_get_vnum(target_room)) {
     send_to_char(ch, "@CTwo of your buoys are floating here.@n\r\n");
    }
-   else if (GET_RADAR1(ch) == GET_ROOM_VNUM(target_room) && GET_RADAR2(ch) != GET_ROOM_VNUM(target_room) && GET_RADAR3(ch) == GET_ROOM_VNUM(target_room)) {
+   else if (GET_RADAR1(ch) == rroom_get_vnum(target_room) && GET_RADAR2(ch) != rroom_get_vnum(target_room) && GET_RADAR3(ch) == rroom_get_vnum(target_room)) {
     send_to_char(ch, "@CTwo of your buoys are floating here.@n\r\n");
    }
-   else if (GET_RADAR1(ch) != GET_ROOM_VNUM(target_room) && GET_RADAR2(ch) == GET_ROOM_VNUM(target_room) && GET_RADAR3(ch) == GET_ROOM_VNUM(target_room)) {
+   else if (GET_RADAR1(ch) != rroom_get_vnum(target_room) && GET_RADAR2(ch) == rroom_get_vnum(target_room) && GET_RADAR3(ch) == rroom_get_vnum(target_room)) {
     send_to_char(ch, "@CTwo of your buoys are floating here.@n\r\n");
    }
-   else if (GET_RADAR1(ch) == GET_ROOM_VNUM(target_room) && GET_RADAR2(ch) == GET_ROOM_VNUM(target_room) && GET_RADAR3(ch) == GET_ROOM_VNUM(target_room) && target_room != 0) {
+   else if (GET_RADAR1(ch) == rroom_get_vnum(target_room) && GET_RADAR2(ch) == rroom_get_vnum(target_room) && GET_RADAR3(ch) == rroom_get_vnum(target_room) && target_room != 0) {
     send_to_char(ch, "@CAll three of your buoys are floating here. Why?@n\r\n");
    }
-   else if (GET_RADAR1(ch) == GET_ROOM_VNUM(target_room)) {
+   else if (GET_RADAR1(ch) == rroom_get_vnum(target_room)) {
     send_to_char(ch, "@CYour @cBuoy #1@C is floating here.@n\r\n");
    }
-   else if (GET_RADAR2(ch) == GET_ROOM_VNUM(target_room)) {
+   else if (GET_RADAR2(ch) == rroom_get_vnum(target_room)) {
     send_to_char(ch, "@CYour @cBuoy #2@C is floating here.@n\r\n");
    }
-   else if (GET_RADAR3(ch) == GET_ROOM_VNUM(target_room)) {
+   else if (GET_RADAR3(ch) == rroom_get_vnum(target_room)) {
     send_to_char(ch, "@CYour @cBuoy #3@C is floating here.@n\r\n");
    }
   }
@@ -4319,7 +4319,7 @@ static void do_auto_exits2(room_rnum target_room, struct char_data *ch)
   for (door = 0; door < NUM_OF_DIRS; door++) {
     if (!W_EXIT(target_room, door) || W_EXIT(target_room, door)->to_room == NOWHERE)
       continue;
-    if (EXIT_FLAGGED(W_EXIT(target_room, door), EX_CLOSED))
+    if (room_exit_flagged(W_EXIT(target_room, door), EX_CLOSED))
       continue;
 
     send_to_char(ch, "%s ", abbr_dirs[door]);
@@ -4332,7 +4332,7 @@ static void do_auto_exits2(room_rnum target_room, struct char_data *ch)
 ACMD(do_exits)
 {
   /* Why duplicate code? */
-  if (!PRF_FLAGGED(ch, PRF_NODEC)) {
+  if (!char_prf_flagged(ch, PRF_NODEC)) {
    do_auto_exits(IN_ROOM(ch), ch, EXIT_COMPLETE);
   } else {
    do_auto_exits2(IN_ROOM(ch), ch);
@@ -4347,14 +4347,14 @@ ACMD(do_autoexit)
   char arg[MAX_INPUT_LENGTH];
   int tp;
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return;
 
   one_argument(argument, arg);
 
 
   if (!*arg) {
-    send_to_char(ch, "Your current autoexit level is %s.\r\n", exitlevels[EXIT_LEV(ch)]);
+    send_to_char(ch, "Your current autoexit level is %s.\r\n", exitlevels[char_exit_level(ch)]);
     return;
   }
   if (((tp = search_block(arg, exitlevels, FALSE)) == -1)) {
@@ -4375,7 +4375,7 @@ ACMD(do_autoexit)
       SET_BIT_AR(PRF_FLAGS(ch), PRF_FULL_EXIT);
       break;
   }
-  send_to_char(ch, "Your @rautoexit level@n is now %s.\r\n", exitlevels[EXIT_LEV(ch)]);
+  send_to_char(ch, "Your @rautoexit level@n is now %s.\r\n", exitlevels[char_exit_level(ch)]);
 }
 
 void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
@@ -4386,24 +4386,24 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
   if (!ch->desc)
     return;
 
-  if (IS_DARK(target_room) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+  if (room_is_dark(target_room) && !char_can_see_in_dark(ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
     send_to_char(ch, "It is pitch black...\r\n");
     return;
-  } else if (AFF_FLAGGED(ch, AFF_BLIND)) {
+  } else if (char_aff_flagged(ch, AFF_BLIND)) {
     send_to_char(ch, "You see nothing but infinite darkness...\r\n");
     return;
-  } else if (PLR_FLAGGED(ch, PLR_EYEC)) {
+  } else if (char_plr_flagged(ch, PLR_EYEC)) {
       send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
       return;
     }
-  if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
+  if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_ROOMFLAGS)) {
     char buf[MAX_STRING_LENGTH];
     char buf2[MAX_STRING_LENGTH];
     char buf3[MAX_STRING_LENGTH];
 
     sprintbitarray(ROOM_FLAGS(target_room), room_bits, RF_ARRAY_MAX, buf, sizeof(buf));
     sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
-    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
+    if (!char_is_npc(ch) && !char_prf_flagged(ch, PRF_NODEC)) {
       send_to_char(ch, "\r\n@wO----------------------------------------------------------------------O@n\r\n");
     }
 
@@ -4414,62 +4414,62 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
         send_to_char(ch, " %d", GET_TRIG_VNUM(t));
       send_to_char(ch, "@D] ");
     }
-    sprintf(buf3, "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n", buf, buf2, GET_ROOM_VNUM(target_room));
+    sprintf(buf3, "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n", buf, buf2, rroom_get_vnum(target_room));
     send_to_char(ch, "@wFlags: %-70s@w\r\n", buf3);
-   if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
+   if (!char_is_npc(ch) && !char_prf_flagged(ch, PRF_NODEC)) {
     send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
    }
   } else {
-     if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
+     if (!char_is_npc(ch) && !char_prf_flagged(ch, PRF_NODEC)) {
       send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
      }
      send_to_char(ch, "@wLocation: %-70s@n\r\n", world[target_room].name);
-     if (ROOM_FLAGGED(target_room, ROOM_EARTH)) {
+     if (rroom_flagged(target_room, ROOM_EARTH)) {
       send_to_char(ch, "@wPlanet: @GEarth@n\r\n");
      }
-     else if (ROOM_FLAGGED(target_room, ROOM_CERRIA)) {
+     else if (rroom_flagged(target_room, ROOM_CERRIA)) {
       send_to_char(ch, "@wPlanet: @RCerria@n\r\n");
      }
-     else if (PLANET_ZENITH(target_room)) {
+     else if (rroom_planet_zenith(target_room)) {
       send_to_char(ch, "@wPlanet: @BZenith@n\r\n");
      }
-     else if (ROOM_FLAGGED(target_room, ROOM_AETHER)) {
+     else if (rroom_flagged(target_room, ROOM_AETHER)) {
       send_to_char(ch, "@wPlanet: @MAether@n\r\n");
      }
-     else if (ROOM_FLAGGED(target_room, ROOM_FRIGID)) {
+     else if (rroom_flagged(target_room, ROOM_FRIGID)) {
       send_to_char(ch, "@wPlanet: @CFrigid@n\r\n");
      }
-     else if (ROOM_FLAGGED(target_room, ROOM_SPACE)) {
+     else if (rroom_flagged(target_room, ROOM_SPACE)) {
       send_to_char(ch, "@wPlanet: @DNone@n\r\n");
      }
-     else if (ROOM_FLAGGED(target_room, ROOM_VEGETA)) {
+     else if (rroom_flagged(target_room, ROOM_VEGETA)) {
       send_to_char(ch, "@wPlanet: @YVegeta@n\r\n");
      }
-     else if (ROOM_FLAGGED(target_room, ROOM_NAMEK)) {
+     else if (rroom_flagged(target_room, ROOM_NAMEK)) {
       send_to_char(ch, "@wPlanet: @gNamek@n\r\n");
      }
-     else if (ROOM_FLAGGED(target_room, ROOM_KONACK)) {
+     else if (rroom_flagged(target_room, ROOM_KONACK)) {
       send_to_char(ch, "@wPlanet: @MKonack@n\r\n");
      }
-     else if (ROOM_FLAGGED(target_room, ROOM_NEO)) {
+     else if (rroom_flagged(target_room, ROOM_NEO)) {
       send_to_char(ch, "@wPlanet: @WNeo Nirvana@n\r\n");
      }
-     else if (ROOM_FLAGGED(target_room, ROOM_AL)) {
+     else if (rroom_flagged(target_room, ROOM_AL)) {
       send_to_char(ch, "@wDimension: @yA@Yf@yt@Ye@yr@Yl@yi@Yf@ye@n\r\n");
      }
-     else if (ROOM_FLAGGED(target_room, ROOM_HELL)) {
+     else if (rroom_flagged(target_room, ROOM_HELL)) {
       send_to_char(ch, "@wDimension: @RPunishment Hell@n\r\n");
      }
-     else if (ROOM_FLAGGED(target_room, ROOM_RHELL)) {
+     else if (rroom_flagged(target_room, ROOM_RHELL)) {
       send_to_char(ch, "@wDimension: @RH@re@Dl@Rl@n\r\n");
      }
-     else if (ROOM_FLAGGED(target_room, ROOM_YARDRAT)) {
+     else if (rroom_flagged(target_room, ROOM_YARDRAT)) {
       send_to_char(ch, "@wPlanet: @mYardrat@n\r\n");
      }
-     else if (ROOM_FLAGGED(target_room, ROOM_KANASSA)) {
+     else if (rroom_flagged(target_room, ROOM_KANASSA)) {
       send_to_char(ch, "@wPlanet: @BKanassa@n\r\n");
      }
-     else if (ROOM_FLAGGED(target_room, ROOM_ARLIA)) {
+     else if (rroom_flagged(target_room, ROOM_ARLIA)) {
       send_to_char(ch, "@wPlanet: @GArlia@n\r\n");
      }
 
@@ -4518,28 +4518,28 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
      else if (ROOM_GRAVITY(target_room) == 10000) {
       send_to_char(ch, "@wGravity: @W10,000x@n\r\n");
      }
-     if (ROOM_FLAGGED(target_room, ROOM_REGEN)) {
+     if (rroom_flagged(target_room, ROOM_REGEN)) {
       send_to_char(ch, "@CA feeling of calm and relaxation fills this room.@n\r\n");
      }
-     if (ROOM_FLAGGED(target_room, ROOM_AURA)) {
+     if (rroom_flagged(target_room, ROOM_AURA)) {
       send_to_char(ch, "@GAn aura of @gregeneration@G surrounds this area.@n\r\n");
      }
-     if (ROOM_FLAGGED(target_room, ROOM_HBTC)) {
+     if (rroom_flagged(target_room, ROOM_HBTC)) {
       send_to_char(ch, "@rThis room feels like it opperates in a different time frame.@n\r\n");
      }
-     if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
+     if (!char_is_npc(ch) && !char_prf_flagged(ch, PRF_NODEC)) {
       send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
      }
     }
 
-  if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || ROOM_FLAGGED(target_room, ROOM_DEATH)) {
+  if ((!char_is_npc(ch) && !char_prf_flagged(ch, PRF_BRIEF)) || rroom_flagged(target_room, ROOM_DEATH)) {
     if (ROOM_DAMAGE(target_room) <= 99) {
     send_to_char(ch, "@w%s@n", world[target_room].description);
     }
-    if (ROOM_DAMAGE(target_room) == 100 && (SECT(target_room) == SECT_WATER_SWIM || SUNKEN(target_room) || SECT(target_room) == SECT_FLYING || SECT(target_room) == SECT_SHOP || SECT(target_room) == SECT_IMPORTANT)) {
+    if (ROOM_DAMAGE(target_room) == 100 && (rroom_sect(target_room) == SECT_WATER_SWIM || rroom_sunken(target_room) || rroom_sect(target_room) == SECT_FLYING || rroom_sect(target_room) == SECT_SHOP || rroom_sect(target_room) == SECT_IMPORTANT)) {
     send_to_char(ch, "@w%s@n", world[target_room].description);
     }
-    if (SECT(target_room) == SECT_INSIDE && ROOM_DAMAGE(target_room) > 0) {
+    if (rroom_sect(target_room) == SECT_INSIDE && ROOM_DAMAGE(target_room) > 0) {
       send_to_char(ch, "\r\n");
      if (ROOM_DAMAGE(target_room) <= 2) {
       send_to_char(ch, "@wA small hole with chunks of debris that can be seen scarring the floor.@n");
@@ -4573,7 +4573,7 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
      }
       send_to_char(ch, "\r\n");
     }
-    else if ((SECT(target_room) == SECT_CITY || SECT(target_room) == SECT_FIELD || SECT(target_room) == SECT_HILLS || SECT(target_room) == SECT_IMPORTANT) && ROOM_DAMAGE(target_room) > 0) {
+    else if ((rroom_sect(target_room) == SECT_CITY || rroom_sect(target_room) == SECT_FIELD || rroom_sect(target_room) == SECT_HILLS || rroom_sect(target_room) == SECT_IMPORTANT) && ROOM_DAMAGE(target_room) > 0) {
       send_to_char(ch, "\r\n");
      if (ROOM_DAMAGE(target_room) <= 2) {
       send_to_char(ch, "@wA small hole with chunks of debris that can be seen scarring the ground.@n");
@@ -4607,7 +4607,7 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
      }
       send_to_char(ch, "\r\n");
     }
-    else if (SECT(target_room) == SECT_FOREST && ROOM_DAMAGE(target_room) > 0) {
+    else if (rroom_sect(target_room) == SECT_FOREST && ROOM_DAMAGE(target_room) > 0) {
       send_to_char(ch, "\r\n");
      if (ROOM_DAMAGE(target_room) <= 2) {
       send_to_char(ch, "@wA small tree sits in a little crater here.@n");
@@ -4641,7 +4641,7 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
      }
       send_to_char(ch, "\r\n");
     }
-    else if (SECT(target_room) == SECT_MOUNTAIN && ROOM_DAMAGE(target_room) > 0) {
+    else if (rroom_sect(target_room) == SECT_MOUNTAIN && ROOM_DAMAGE(target_room) > 0) {
       send_to_char(ch, "\r\n");
      if (ROOM_DAMAGE(target_room) <= 2) {
       send_to_char(ch, "@wA small crater has been burned into the side of this mountain.@n");
@@ -4686,17 +4686,17 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
     }
   }
   /* autoexits */
-  if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_NODEC))
+  if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_NODEC))
     do_auto_exits2(target_room, ch);
-  if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))
-   do_auto_exits(target_room, ch, EXIT_LEV(ch));
+  if (!char_is_npc(ch) && !char_prf_flagged(ch, PRF_NODEC))
+   do_auto_exits(target_room, ch, char_exit_level(ch));
 
   /* now list characters & objects */
-   if (ROOM_FLAGGED(target_room, ROOM_GARDEN1)) {
+   if (rroom_flagged(target_room, ROOM_GARDEN1)) {
     send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, NULL));
-   } else if (ROOM_FLAGGED(target_room, ROOM_GARDEN2)) {
+   } else if (rroom_flagged(target_room, ROOM_GARDEN2)) {
     send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, NULL));
-   } else if (ROOM_FLAGGED(target_room, ROOM_HOUSE)) {
+   } else if (rroom_flagged(target_room, ROOM_HOUSE)) {
     send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, NULL));
    }
   list_obj_to_char(world[target_room].contents, ch, SHOW_OBJ_LONG, FALSE);
@@ -4713,7 +4713,7 @@ static void look_in_direction(struct char_data *ch, int dir)
      int founded = FALSE;
      for (obj = ch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
-       if (GET_OBJ_VNUM(obj) == 17) {
+       if (obj_get_vnum(obj) == 17) {
         founded = TRUE;
        }
      }
@@ -4725,11 +4725,11 @@ static void look_in_direction(struct char_data *ch, int dir)
      }
     }
 
-    if (EXIT_FLAGGED(EXIT(ch, dir), EX_ISDOOR) && EXIT(ch, dir)->keyword) {
-      if (!EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET) &&
-           EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED) )
+    if (room_exit_flagged(EXIT(ch, dir), EX_ISDOOR) && EXIT(ch, dir)->keyword) {
+      if (!room_exit_flagged(EXIT(ch, dir), EX_SECRET) &&
+           room_exit_flagged(EXIT(ch, dir), EX_CLOSED) )
         send_to_char(ch, "The %s is closed.\r\n", fname(EXIT(ch, dir)->keyword));
-      else if (!EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED))
+      else if (!room_exit_flagged(EXIT(ch, dir), EX_CLOSED))
         send_to_char(ch, "The %s is open.\r\n", fname(EXIT(ch, dir)->keyword));
     }
   } else
@@ -4748,14 +4748,14 @@ static void look_in_obj(struct char_data *ch, char *arg)
     send_to_char(ch, "There doesn't seem to be %s %s here.\r\n", AN(arg), arg);
   } else if (find_exdesc(arg, obj->ex_description) != NULL && !bits)
       send_to_char(ch, "There's nothing inside that!\r\n");
-    else if ((GET_OBJ_TYPE(obj) == ITEM_PORTAL) && !OBJVAL_FLAGGED(obj, CONT_CLOSEABLE)) { 
+    else if ((GET_OBJ_TYPE(obj) == ITEM_PORTAL) && !obj_val_flagged(obj, CONT_CLOSEABLE)) { 
     if (GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR) < 0) {
       /* You can look through the portal to the destination */
       /* where does this lead to? */
       room_rnum portal_dest = real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST)); 
       if (portal_dest == NOWHERE) {
         send_to_char(ch, "You see nothing but infinite darkness...\r\n");
-      } else if (IS_DARK(portal_dest) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+      } else if (room_is_dark(portal_dest) && !char_can_see_in_dark(ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
         send_to_char(ch, "You see nothing but infinite darkness...\r\n");
       } else {
        send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n", world[portal_dest].name);
@@ -4769,7 +4769,7 @@ static void look_in_obj(struct char_data *ch, char *arg)
       send_to_char(ch, "All you can see is the glow of the portal.\r\n");
     }
   } else if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
-    if (OBJVAL_FLAGGED(obj, CONT_CLOSED))
+    if (obj_val_flagged(obj, CONT_CLOSED))
       send_to_char(ch, "It is closed.\r\n");
     else if (GET_OBJ_VAL(obj, VAL_VEHICLE_APPEAR) < 0) {
       /* You can look inside the vehicle */
@@ -4777,7 +4777,7 @@ static void look_in_obj(struct char_data *ch, char *arg)
       room_rnum vehicle_inside = real_room(GET_OBJ_VAL(obj, VAL_VEHICLE_ROOM)); 
       if (vehicle_inside == NOWHERE) {
         send_to_char(ch, "You cannot see inside that.\r\n");
-      } else if (IS_DARK(vehicle_inside) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+      } else if (room_is_dark(vehicle_inside) && !char_can_see_in_dark(ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
         send_to_char(ch, "It is pitch black...\r\n");
       } else {
         send_to_char(ch, "You look inside and see:\r\n");
@@ -4795,11 +4795,11 @@ static void look_in_obj(struct char_data *ch, char *arg)
     send_to_char(ch, "There's nothing inside that!\r\n");
   } else if ((GET_OBJ_TYPE(obj) == ITEM_CONTAINER) || 
              (GET_OBJ_TYPE(obj) == ITEM_PORTAL)) {
-      if (OBJVAL_FLAGGED(obj, CONT_CLOSED))
+      if (obj_val_flagged(obj, CONT_CLOSED))
 	send_to_char(ch, "It is closed.\r\n");
       else {
 	send_to_char(ch, "%s", obj->short_description);
-        if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && (GET_OBJ_VNUM(obj) == 697 || GET_OBJ_VNUM(obj) == 698 || GET_OBJ_VNUM(obj) == 682 || GET_OBJ_VNUM(obj) == 683 || GET_OBJ_VNUM(obj) == 684)) {
+        if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && (obj_get_vnum(obj) == 697 || obj_get_vnum(obj) == 698 || obj_get_vnum(obj) == 682 || obj_get_vnum(obj) == 683 || obj_get_vnum(obj) == 684)) {
          act("$n looks in $p.", TRUE, ch, obj, 0, TO_ROOM);
         }
 	switch (bits) {
@@ -4916,13 +4916,13 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
 	 so, we'll just stick with that basic difference */
       
       if (isname(number, obj->name)) {
-	show_board(GET_OBJ_VNUM(obj), ch);
+	show_board(obj_get_vnum(obj), ch);
       } else if ((!isdigit(*number) || (!(msg = atoi(number)))) ||
 		 (strchr(number,'.'))) {
 	sprintf(arg,"%s %s", number,arg);
 	look_at_target(ch, arg, 0);
       } else {
-	board_display_msg(GET_OBJ_VNUM(obj), ch, msg);
+	board_display_msg(obj_get_vnum(obj), ch, msg);
       }
     }
   } else {
@@ -4933,7 +4933,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
   if (found_char != NULL) {
     look_at_char(found_char, ch);
     if (ch != found_char) {
-      if (!AFF_FLAGGED(ch, AFF_HIDE)) {
+      if (!char_aff_flagged(ch, AFF_HIDE)) {
 	    act("$n looks at you.", TRUE, ch, 0, found_char, TO_VICT);
         act("$n looks at $N.", TRUE, ch, 0, found_char, TO_NOTVICT);
       }
@@ -4955,7 +4955,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
 
   /* Does the argument match an extra desc in the char's equipment? */
   for (j = 0; j < NUM_WEARS && !found; j++)
-    if (GET_EQ(ch, j) && CAN_SEE_OBJ(ch, GET_EQ(ch, j)))
+    if (GET_EQ(ch, j) && char_can_see_obj(ch, GET_EQ(ch, j)))
       if ((desc = find_exdesc(arg, GET_EQ(ch, j)->ex_description)) != NULL && ++i == fnum) {
 	send_to_char(ch, "%s", desc);
         if (isname(arg, GET_EQ(ch, j)->name)) {
@@ -4978,10 +4978,10 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
 
   /* Does the argument match an extra desc in the char's inventory? */
   for (obj = ch->carrying; obj && !found; obj = obj->next_content) {
-    if (CAN_SEE_OBJ(ch, obj))
+    if (char_can_see_obj(ch, obj))
       if ((desc = find_exdesc(arg, obj->ex_description)) != NULL && ++i == fnum) {
 	if (GET_OBJ_TYPE(obj) == ITEM_BOARD) {
-	  show_board(GET_OBJ_VNUM(obj), ch);
+	  show_board(obj_get_vnum(obj), ch);
 	} else {
 	  send_to_char(ch, "%s", desc);
           if (isname(arg, obj->name)) {
@@ -5006,10 +5006,10 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
 
   /* Does the argument match an extra desc of an object in the room? */
   for (obj = world[IN_ROOM(ch)].contents; obj && !found; obj = obj->next_content)
-    if (CAN_SEE_OBJ(ch, obj))
+    if (char_can_see_obj(ch, obj))
       if ((desc = find_exdesc(arg, obj->ex_description)) != NULL && ++i == fnum) {
 	if(GET_OBJ_TYPE(obj) == ITEM_BOARD) {
-	  show_board(GET_OBJ_VNUM(obj), ch);
+	  show_board(obj_get_vnum(obj), ch);
 	} else {
 	send_to_char(ch, "%s", desc);
         if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
@@ -5072,7 +5072,7 @@ static void look_out_window(struct char_data *ch, char *arg)
       send_to_char(ch, "You can't look out that!\r\n");
     return;
   }
-  } else if (OUTSIDE(ch)) {
+  } else if (char_is_outside(ch)) {
       /* yeah, sure stupid */
       send_to_char(ch, "But you are already outside.\r\n");
     return;
@@ -5088,8 +5088,8 @@ static void look_out_window(struct char_data *ch, char *arg)
   if (!viewport) {
     /* Nothing suitable to look through */
     send_to_char(ch, "You don't seem to be able to see outside.\r\n");
-  } else if (OBJVAL_FLAGGED(viewport, CONT_CLOSEABLE) &&
-             OBJVAL_FLAGGED(viewport, CONT_CLOSED)) {
+  } else if (obj_val_flagged(viewport, CONT_CLOSEABLE) &&
+             obj_val_flagged(viewport, CONT_CLOSED)) {
     /* The window is closed */
     send_to_char(ch, "It is closed.\r\n");
   } else {
@@ -5100,7 +5100,7 @@ static void look_out_window(struct char_data *ch, char *arg)
         for (door = 0; door < NUM_OF_DIRS; door++)
           if (EXIT(ch, door))
             if (EXIT(ch, door)->to_room != NOWHERE)
-              if (!ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_INDOORS)) {
+              if (!rroom_flagged(EXIT(ch, door)->to_room, ROOM_INDOORS)) {
                 target_room = EXIT(ch, door)->to_room;
                 continue;
               }
@@ -5178,7 +5178,7 @@ ACMD(do_rptrans)
     }
 
     for (k = descriptor_list; k; k = k->next) {
-     if (IS_NPC(k->character))
+     if (char_is_npc(k->character))
       continue;
      if (STATE(k) != CON_PLAYING)
       continue;
@@ -5194,13 +5194,13 @@ ACMD(do_rptrans)
      userWrite(vict->desc, 0, 0, 0, "index");
      GET_TRP(vict) += amt;
      save_char(vict);
-     send_to_char(vict, "@W%s gives @C%d@W of their RPP to you. How nice!\r\n", GET_NAME(ch), amt);
+     send_to_char(vict, "@W%s gives @C%d@W of their RPP to you. How nice!\r\n", char_get_name(ch), amt);
     }
     GET_RP(ch) -= amt;
     ch->desc->rpp -= amt;
     userWrite(ch->desc, 0, 0, 0, "index");          
     send_to_char(ch, "@WYou exchange @C%d@W RPP to user @c%s@W for a warm fuzzy feeling.\r\n", amt, CAP(arg));
-    mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "EXCHANGE: %s gave %d RPP to user %s", GET_NAME(ch), amt, arg);
+    mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "EXCHANGE: %s gave %d RPP to user %s", char_get_name(ch), amt, arg);
     save_char(ch);
 }
 
@@ -5235,7 +5235,7 @@ ACMD(do_rpbank)
 	GET_RBANK(ch) += amt;
 	ch->desc->rbank += amt;
 	send_to_char(ch, "You send %d to your RPP Bank. Your total is now %d.\r\n", amt, GET_RBANK(ch));
-	mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "RPP Bank: %s has put %d RPP into their bank", GET_NAME(ch), amt);
+	mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "RPP Bank: %s has put %d RPP into their bank", char_get_name(ch), amt);
 	
 }
 
@@ -5272,7 +5272,7 @@ ACMD(do_rbanktrans)
     }
 
     for (k = descriptor_list; k; k = k->next) {
-     if (IS_NPC(k->character))
+     if (char_is_npc(k->character))
       continue;
      if (STATE(k) != CON_PLAYING)
       continue;
@@ -5287,13 +5287,13 @@ ACMD(do_rbanktrans)
      vict->desc->rbank += amt;
      userWrite(vict->desc, 0, 0, 0, "index");
      save_char(vict);
-     send_to_char(vict, "@W%s gives @C%d@W of their Banked RPP to you. How nice!\r\n", GET_NAME(ch), amt);
+     send_to_char(vict, "@W%s gives @C%d@W of their Banked RPP to you. How nice!\r\n", char_get_name(ch), amt);
     }
     GET_RBANK(ch) -= amt;
     ch->desc->rbank -= amt;
     userWrite(ch->desc, 0, 0, 0, "index");          
     send_to_char(ch, "@wWELL @xGOLLY @xGEE @xWILLICKERS@x! @wYOU @RZ@YIM @RZ@YAMMED @C%d @wRIPROOZLES TO @C%s!@n\r\n", amt, CAP(arg));
-    mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "EXCHANGE: %s gave %d Banked RPP to user %s", GET_NAME(ch), amt, arg);
+    mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "EXCHANGE: %s gave %d Banked RPP to user %s", char_get_name(ch), amt, arg);
     save_char(ch);
 }
 
@@ -5301,7 +5301,7 @@ ACMD(do_rdisplay)
 {
 	skip_spaces(&argument);
 	
-	if (IS_NPC(ch)) {
+	if (char_is_npc(ch)) {
 		return;
 	}
 	
@@ -5376,7 +5376,7 @@ ACMD(do_perf)
 
  two_arguments(argument, arg, arg2);
 
- if (IS_NPC(ch) || GET_ADMLEVEL(ch) > 0) {
+ if (char_is_npc(ch) || GET_ADMLEVEL(ch) > 0) {
   send_to_char(ch, "I don't think so.\r\n");
   return;
  }
@@ -5408,11 +5408,11 @@ ACMD(do_perf)
   send_to_char(ch, "The skill %s doesn't exist.\r\n", arg);
   return;
  }
- if (!GET_SKILL(ch, skill)) {
+ if (!char_get_skill(ch, skill)) {
   send_to_char(ch, "You don't know %s.\r\n", arg);
   return;
  }
- if (GET_SKILL(ch, skill) < 100) {
+ if (char_get_skill(ch, skill) < 100) {
   send_to_char(ch, "You have not mastered the skill %s and thus can't perfect it.\r\n", arg);
   return;
  }
@@ -5459,11 +5459,11 @@ ACMD(do_look)
     return;
   if (GET_POS(ch) < POS_SLEEPING)
     send_to_char(ch, "You can't see anything but stars!\r\n");
-  else if (AFF_FLAGGED(ch, AFF_BLIND))
+  else if (char_aff_flagged(ch, AFF_BLIND))
     send_to_char(ch, "You can't see a damned thing, you're blind!\r\n");
-  else if (PLR_FLAGGED(ch, PLR_EYEC))
+  else if (char_plr_flagged(ch, PLR_EYEC))
       send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
-  else if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+  else if (room_is_dark(IN_ROOM(ch)) && !char_can_see_in_dark(ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
     send_to_char(ch, "It is pitch black...\r\n");
     list_char_to_char(world[IN_ROOM(ch)].people, ch);	/* glowing red eyes */
   } else {
@@ -5484,7 +5484,7 @@ ACMD(do_look)
        search_room(ch);
       } else {
        look_at_room(IN_ROOM(ch), ch, 1);
-       if (GET_ADMLEVEL(ch) < 1 && !AFF_FLAGGED(ch, AFF_HIDE)) {
+       if (GET_ADMLEVEL(ch) < 1 && !char_aff_flagged(ch, AFF_HIDE)) {
         //act("@w$n@w looks around the room.@n", TRUE, ch, 0, 0, TO_ROOM);
        }
       }
@@ -5590,7 +5590,7 @@ ACMD(do_gold)
 ACMD(do_score)
 {
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return;
 
  int view = 0, full = 5, personal = 1, health = 2, stats = 3, other = 4;
@@ -5616,28 +5616,28 @@ ACMD(do_score)
 
  if (view == full || view == personal) {
  send_to_char(ch, "  @cO@D-----------------------------[  @cPersonal  @D]-----------------------------@cO@n\n");
- send_to_char(ch, "  @D|  @CName@D: @W%15s@D,   @CTitle@D: @W%-38s@D|@n\n", GET_NAME(ch), GET_TITLE(ch));
-  if (IS_ANDROID(ch)) {
+ send_to_char(ch, "  @D|  @CName@D: @W%15s@D,   @CTitle@D: @W%-38s@D|@n\n", char_get_name(ch), char_get_title(ch));
+  if (char_is_android(ch)) {
    char model[100], version[100];
    int absorb = 0;
-    if (PLR_FLAGGED(ch, PLR_ABSORB)) {
+    if (char_plr_flagged(ch, PLR_ABSORB)) {
      sprintf(model, "@CAbsorption");
-    } else if (PLR_FLAGGED(ch, PLR_REPAIR)) {
+    } else if (char_plr_flagged(ch, PLR_REPAIR)) {
      sprintf(model, "@GSelf Repairing");
-    } else if (PLR_FLAGGED(ch, PLR_SENSEM)) {
+    } else if (char_plr_flagged(ch, PLR_SENSEM)) {
      sprintf(model, "@RSensor Equiped");
     }
-   if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+   if (char_plr_flagged(ch, PLR_TRANS1)) {
      sprintf(version, "Beta 1.0");
-   } else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+   } else if (char_plr_flagged(ch, PLR_TRANS2)) {
      sprintf(version, "ANS 2.0");
-   } else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+   } else if (char_plr_flagged(ch, PLR_TRANS3)) {
      sprintf(version, "ANS 3.0");
-   } else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+   } else if (char_plr_flagged(ch, PLR_TRANS4)) {
      sprintf(version, "ANS 4.0");
-   } else if (PLR_FLAGGED(ch, PLR_TRANS5)) {
+   } else if (char_plr_flagged(ch, PLR_TRANS5)) {
      sprintf(version, "ANS 5.0");
-   } else if (PLR_FLAGGED(ch, PLR_TRANS6)) {
+   } else if (char_plr_flagged(ch, PLR_TRANS6)) {
      sprintf(version, "ANS 6.0");
    } else {
      sprintf(version, "Alpha 0.5");
@@ -5649,8 +5649,8 @@ ACMD(do_score)
   }
  send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", TRUE_RACE(ch), SENSEI_NAME(ch), SENSEI_STYLE(ch));
   char hei[300], wei[300];
-  sprintf(hei, "%dcm", get_measure(ch, GET_PC_HEIGHT(ch), 0));
-  sprintf(wei, "%dkg", get_measure(ch, 0, GET_PC_WEIGHT(ch)));
+  sprintf(hei, "%dcm", get_measure(ch, char_get_pc_height(ch), 0));
+  sprintf(wei, "%dkg", get_measure(ch, 0, char_get_pc_weight(ch)));
  send_to_char(ch, "  @D|   @CAge@D: @W%10s@D,  @CHeight@D: @W%15s@D,  @CWeight@D: @W%-17s@D|@n\n", add_commas(GET_AGE(ch)), hei, wei);
  send_to_char(ch, "  @D|@CGender@D: @W%10s@D,  @C  Size@D: @W%15s@D,  @C Align@D: @W%-17s@D|@n\n", genders[(int)GET_SEX(ch)], size_names[get_size(ch)], disp_align(ch));
  }
@@ -5662,18 +5662,18 @@ ACMD(do_score)
  send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(getEffMaxPL(ch)), add_commas(GET_MAX_MANA(ch)), add_commas(GET_MAX_MOVE(ch)));
  send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas((getEffBasePL(ch))), add_commas(
          (getEffBaseKI(ch))), add_commas((getEffBaseST(ch))));
-  if (!IS_ANDROID(ch) && (getCurLF(ch)) > 0) {
+  if (!char_is_android(ch) && (getCurLF(ch)) > 0) {
    send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(
            (getCurLF(ch))), "/", add_commas((getMaxLF(ch))), GET_LIFEPERC(ch), "%");
-  } else if (!IS_ANDROID(ch)) {
+  } else if (!char_is_android(ch)) {
    send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(0), "/", add_commas(
            (getMaxLF(ch))), GET_LIFEPERC(ch), "%");
   }
  }
  if (view == full || view == stats) {
  send_to_char(ch, "  @cO@D-----------------------------@D[ @cStatistics @D]-----------------------------@cO@n\n");
- send_to_char(ch, "      @D<@wCharacter Level@D: @w%-3d@D> <@wRPP@D: @w%-3d@D> <@wRPP Bank@D: @w%-3d@D>@n\n", GET_LEVEL(ch), GET_RP(ch), GET_RBANK(ch));
- send_to_char(ch, "      @D<@wSpeed Index@D: @w%-15s@D> <@wArmor Index@D: @w%-15s@D>@n\n", add_commas(GET_SPEEDI(ch)), add_commas(GET_ARMOR(ch)));
+ send_to_char(ch, "      @D<@wCharacter Level@D: @w%-3d@D> <@wRPP@D: @w%-3d@D> <@wRPP Bank@D: @w%-3d@D>@n\n", char_get_level(ch), GET_RP(ch), GET_RBANK(ch));
+ send_to_char(ch, "      @D<@wSpeed Index@D: @w%-15s@D> <@wArmor Index@D: @w%-15s@D>@n\n", add_commas(char_get_speedi(ch)), add_commas(GET_ARMOR(ch)));
  send_to_char(ch, "    @D[    @RStrength@D|@G%2d (%3d)@D] [     @YAgility@D|@G%2d (%3d)@D] [      @BSpeed@D|@G%2d (%3d)@D]@n\n", ch->real_abils.str, GET_STR(ch), ch->real_abils.dex, GET_DEX(ch), ch->real_abils.cha, GET_CHA(ch));
  send_to_char(ch, "    @D[@gConstitution@D|@G%2d (%3d)@D] [@CIntelligence@D|@G%2d (%3d)@D] [     @MWisdom@D|@G%2d (%3d)@D]@n\n", ch->real_abils.con, GET_CON(ch), ch->real_abils.intel, GET_INT(ch), ch->real_abils.wis, GET_WIS(ch));
  }
@@ -5683,19 +5683,19 @@ ACMD(do_score)
  send_to_char(ch, "      @D[   @CCarried@D| @W%-15s@D] [   @CCarried@D| @W%-15s@D]@n\n", add_commas(GET_GOLD(ch)), add_commas(
          (getCurCarriedWeight(ch))));
  send_to_char(ch, "      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n\n", add_commas(GET_BANK_GOLD(ch)), add_commas(CAN_CARRY_W(ch)));
- send_to_char(ch, "      @D[ @CMax Carry@D| @W%-15s@D]@n\n", add_commas(GOLD_CARRY(ch)));
-  int numb = GET_BANK_INTEREST(ch);
+ send_to_char(ch, "      @D[ @CMax Carry@D| @W%-15s@D]@n\n", add_commas(char_gold_carry(ch)));
+  int numb = char_get_bank_interest(ch);
  send_to_char(ch, "      @D[  @CInterest@D| @W%-15s@D]\n", add_commas(numb));
-  if (IS_ARLIAN(ch)) {
+  if (char_is_arlian(ch)) {
    send_to_char(ch, "                             @D<@GEvolution @D>@n\n");
    send_to_char(ch, "      @D[ @CEvo Level@D| @W%-15d@D] [   @CEvo Exp@D| @W%-15s@D]\n",GET_MOLT_LEVEL(ch), add_commas(GET_MOLT_EXP(ch)));
    send_to_char(ch, "      @D[ @CThreshold@D| @W%-15s@D]@n\n", add_commas(molt_threshold(ch)));
   }
-  if (GET_LEVEL(ch) < 100) {
+  if (char_get_level(ch) < 100) {
    send_to_char(ch, "                             @D<@gAdvancement@D>@n\n");
   }
-  if (GET_LEVEL(ch) < 100) {
-   send_to_char(ch, "      @D[@CExperience@D| @W%-15s@D] [@CNext Level@D| @W%-15s@D]@n\n", add_commas(GET_EXP(ch)), add_commas(level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch)));
+  if (char_get_level(ch) < 100) {
+   send_to_char(ch, "      @D[@CExperience@D| @W%-15s@D] [@CNext Level@D| @W%-15s@D]@n\n", add_commas(GET_EXP(ch)), add_commas(level_exp(ch, char_get_level(ch) + 1) - GET_EXP(ch)));
    send_to_char(ch, "      @D[  @CRpp Cost@D| @W%-15d@D]@n\n", rpp_to_level(ch));
   }
 
@@ -5708,24 +5708,24 @@ ACMD(do_score)
 static void trans_check(struct char_data *ch, struct char_data *vict)
 {
 /* Rillao: transloc, add new transes here */
- if (IS_HUMAN(vict)) {
-  if (PLR_FLAGGED(vict, PLR_TRANS1)) {
+ if (char_is_human(vict)) {
+  if (char_plr_flagged(vict, PLR_TRANS1)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Human First@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
+  else if (char_plr_flagged(vict, PLR_TRANS2)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Human Second@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
+  else if (char_plr_flagged(vict, PLR_TRANS3)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Human Third@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
+  else if (char_plr_flagged(vict, PLR_TRANS4)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Human Fourth@n\r\n");
   }
   else {
    send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
   }
  }
- else if (IS_HOSHIJIN(vict)) {
+ else if (char_is_hoshijin(vict)) {
   if (GET_MIMIC(vict) == 0 || vict == ch) {
    if (GET_PHASE(vict) == 1) {
     send_to_char(ch, "         @cCurrent Transformation@D: @CBirth Phase@n\r\n");
@@ -5739,187 +5739,187 @@ static void trans_check(struct char_data *ch, struct char_data *vict)
     send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
   }
  }
- else if ((IS_SAIYAN(vict) || IS_HALFBREED(vict)) && !PLR_FLAGGED(vict, PLR_LSSJ)) {
-  if (PLR_FLAGGED(vict, PLR_TRANS1) && !PLR_FLAGGED(vict, PLR_FPSSJ)) {
+ else if ((char_is_saiyan(vict) || char_is_halfbreed(vict)) && !char_plr_flagged(vict, PLR_LSSJ)) {
+  if (char_plr_flagged(vict, PLR_TRANS1) && !char_plr_flagged(vict, PLR_FPSSJ)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan First@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS1) && PLR_FLAGGED(vict, PLR_FPSSJ)) {
+  else if (char_plr_flagged(vict, PLR_TRANS1) && char_plr_flagged(vict, PLR_FPSSJ)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @YFull Powered @CSuper Saiyan@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
+  else if (char_plr_flagged(vict, PLR_TRANS2)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan Second@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
+  else if (char_plr_flagged(vict, PLR_TRANS3)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan Third@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
+  else if (char_plr_flagged(vict, PLR_TRANS4)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan Fourth@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_OOZARU)) {
+  else if (char_plr_flagged(vict, PLR_OOZARU)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @COozaru@n\r\n");
    }
   else {
    send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
   }
  }
- else if (IS_SAIYAN(vict) && PLR_FLAGGED(vict, PLR_LSSJ)) {
-     if (PLR_FLAGGED(vict, PLR_TRANS1) && !PLR_FLAGGED(vict, PLR_FPSSJ)) {
+ else if (char_is_saiyan(vict) && char_plr_flagged(vict, PLR_LSSJ)) {
+     if (char_plr_flagged(vict, PLR_TRANS1) && !char_plr_flagged(vict, PLR_FPSSJ)) {
          send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan First@n\r\n");
      }
-     else if (PLR_FLAGGED(vict, PLR_TRANS1) && PLR_FLAGGED(vict, PLR_FPSSJ)) {
+     else if (char_plr_flagged(vict, PLR_TRANS1) && char_plr_flagged(vict, PLR_FPSSJ)) {
          send_to_char(ch, "         @cCurrent Transformation@D: @YFull Powered @CSuper Saiyan@n\r\n");
      }
-  else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
+  else if (char_plr_flagged(vict, PLR_TRANS2)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @YLegendary @CSuper Saiyan@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_OOZARU)) {
+  else if (char_plr_flagged(vict, PLR_OOZARU)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @COozaru@n\r\n");
    }
   else {
    send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
   }
  }
- else if (IS_NAMEK(vict)) {
-  if (PLR_FLAGGED(vict, PLR_TRANS1)) {
+ else if (char_is_namek(vict)) {
+  if (char_plr_flagged(vict, PLR_TRANS1)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Namek First@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
+  else if (char_plr_flagged(vict, PLR_TRANS2)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Namek Second@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
+  else if (char_plr_flagged(vict, PLR_TRANS3)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Namek Third@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
+  else if (char_plr_flagged(vict, PLR_TRANS4)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Namek Fourth@n\r\n");
   }
   else {
    send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
   }
  }
- else if (IS_ICER(vict)) {
-  if (PLR_FLAGGED(vict, PLR_TRANS1)) {
+ else if (char_is_icer(vict)) {
+  if (char_plr_flagged(vict, PLR_TRANS1)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CTransform First@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
+  else if (char_plr_flagged(vict, PLR_TRANS2)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CTransform Second@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
+  else if (char_plr_flagged(vict, PLR_TRANS3)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CTransform Third@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
+  else if (char_plr_flagged(vict, PLR_TRANS4)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CTransform Fourth@n\r\n");
   }
   else {
    send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
   }
  }
- else if (IS_KONATSU(vict)) {
-  if (PLR_FLAGGED(vict, PLR_TRANS1)) {
+ else if (char_is_konatsu(vict)) {
+  if (char_plr_flagged(vict, PLR_TRANS1)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CShadow First@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
+  else if (char_plr_flagged(vict, PLR_TRANS2)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CShadow Second@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
+  else if (char_plr_flagged(vict, PLR_TRANS3)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CShadow Third@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
+  else if (char_plr_flagged(vict, PLR_TRANS4)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CShadow Fourth@n\r\n");
   }
   else {
    send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
   }
  }
- else if (IS_MUTANT(vict)) {
-  if (PLR_FLAGGED(vict, PLR_TRANS1)) {
+ else if (char_is_mutant(vict)) {
+  if (char_plr_flagged(vict, PLR_TRANS1)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CMutate First@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
+  else if (char_plr_flagged(vict, PLR_TRANS2)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CMutate Second@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
+  else if (char_plr_flagged(vict, PLR_TRANS3)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CMutate Third@n\r\n");
   }
   else {
    send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
   }
  }
- else if (IS_BIO(vict)) {
-  if (PLR_FLAGGED(vict, PLR_TRANS1)) {
+ else if (char_is_bio(vict)) {
+  if (char_plr_flagged(vict, PLR_TRANS1)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CMature@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
+  else if (char_plr_flagged(vict, PLR_TRANS2)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSemi-perfect@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
+  else if (char_plr_flagged(vict, PLR_TRANS3)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CPerfect@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
+  else if (char_plr_flagged(vict, PLR_TRANS4)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Perfect@n\r\n");
   }
   else {
    send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
   }
  }
- else if (IS_ANDROID(vict)) {
-  if (PLR_FLAGGED(vict, PLR_TRANS1)) {
+ else if (char_is_android(vict)) {
+  if (char_plr_flagged(vict, PLR_TRANS1)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 1.0@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
+  else if (char_plr_flagged(vict, PLR_TRANS2)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 2.0@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
+  else if (char_plr_flagged(vict, PLR_TRANS3)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 3.0@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
+  else if (char_plr_flagged(vict, PLR_TRANS4)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 4.0@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS5)) {
+  else if (char_plr_flagged(vict, PLR_TRANS5)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 5.0@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS6)) {
+  else if (char_plr_flagged(vict, PLR_TRANS6)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 6.0@n\r\n");
   }
   else {
    send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
   }
  }
- else if (IS_MAJIN(vict)) {
-  if (PLR_FLAGGED(vict, PLR_TRANS1)) {
+ else if (char_is_majin(vict)) {
+  if (char_plr_flagged(vict, PLR_TRANS1)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CAffinity@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
+  else if (char_plr_flagged(vict, PLR_TRANS2)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CSuper@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
+  else if (char_plr_flagged(vict, PLR_TRANS3)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CTrue@n\r\n");
   }
   else {
    send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
   }
  }
- else if (IS_TRUFFLE(vict)) {
-  if (PLR_FLAGGED(vict, PLR_TRANS1)) {
+ else if (char_is_truffle(vict)) {
+  if (char_plr_flagged(vict, PLR_TRANS1)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CAscend First@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
+  else if (char_plr_flagged(vict, PLR_TRANS2)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CAscend Second@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
+  else if (char_plr_flagged(vict, PLR_TRANS3)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CAscend Third@n\r\n");
   }
   else {
    send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
   }
  }
- else if (IS_KAI(vict)) {
-  if (PLR_FLAGGED(vict, PLR_TRANS1)) {
+ else if (char_is_kai(vict)) {
+  if (char_plr_flagged(vict, PLR_TRANS1)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CMystic First@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
+  else if (char_plr_flagged(vict, PLR_TRANS2)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CMystic Second@n\r\n");
   }
-  else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
+  else if (char_plr_flagged(vict, PLR_TRANS3)) {
    send_to_char(ch, "         @cCurrent Transformation@D: @CMystic Third@n\r\n");
   }
   else {
@@ -5955,71 +5955,71 @@ ACMD(do_status)
         bringdesc(ch, ch);
         send_to_char(ch, "            @D---------------@RAppendages@D---------------\n");
 
-        if (PLR_FLAGGED(ch, PLR_HEAD)) {
+        if (char_plr_flagged(ch, PLR_HEAD)) {
             send_to_char(ch, "            @D[@cHead        @D: @GHave.          @D]@n\r\n");
         }
-        if (!PLR_FLAGGED(ch, PLR_HEAD)) {
+        if (!char_plr_flagged(ch, PLR_HEAD)) {
             send_to_char(ch, "            @D[@cHead        @D: @rMissing.         @D]@n\r\n");
         }
-        if (GET_LIMBCOND(ch, 1) >= 50 && !PLR_FLAGGED(ch, PLR_CRARM)) {
+        if (GET_LIMBCOND(ch, 1) >= 50 && !char_plr_flagged(ch, PLR_CRARM)) {
             send_to_char(ch, "            @D[@cRight Arm   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 1), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 1) > 0 && !PLR_FLAGGED(ch, PLR_CRARM)) {
+        else if (GET_LIMBCOND(ch, 1) > 0 && !char_plr_flagged(ch, PLR_CRARM)) {
             send_to_char(ch, "            @D[@cRight Arm   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 1), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 1) > 0 && PLR_FLAGGED(ch, PLR_CRARM)) {
+        else if (GET_LIMBCOND(ch, 1) > 0 && char_plr_flagged(ch, PLR_CRARM)) {
             send_to_char(ch, "            @D[@cRight Arm   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 1), "%", "%");
         }
         else if (GET_LIMBCOND(ch, 1) <= 0) {
             send_to_char(ch, "            @D[@cRight Arm   @D: @rMissing.         @D]@n\r\n");
         }
-        if (GET_LIMBCOND(ch, 2) >= 50 && !PLR_FLAGGED(ch, PLR_CLARM)) {
+        if (GET_LIMBCOND(ch, 2) >= 50 && !char_plr_flagged(ch, PLR_CLARM)) {
             send_to_char(ch, "            @D[@cLeft Arm    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 2), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 2) > 0 && !PLR_FLAGGED(ch, PLR_CLARM)) {
+        else if (GET_LIMBCOND(ch, 2) > 0 && !char_plr_flagged(ch, PLR_CLARM)) {
             send_to_char(ch, "            @D[@cLeft Arm    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 2), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 2) > 0 && PLR_FLAGGED(ch, PLR_CLARM)) {
+        else if (GET_LIMBCOND(ch, 2) > 0 && char_plr_flagged(ch, PLR_CLARM)) {
             send_to_char(ch, "            @D[@cLeft Arm    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 2), "%", "%");
         }
         else if (GET_LIMBCOND(ch, 2) <= 0) {
             send_to_char(ch, "            @D[@cLeft Arm    @D: @rMissing.         @D]@n\r\n");
         }
-        if (GET_LIMBCOND(ch, 3) >= 50 && !PLR_FLAGGED(ch, PLR_CLARM)) {
+        if (GET_LIMBCOND(ch, 3) >= 50 && !char_plr_flagged(ch, PLR_CLARM)) {
             send_to_char(ch, "            @D[@cRight Leg   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 3), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 3) > 0 && !PLR_FLAGGED(ch, PLR_CRLEG)) {
+        else if (GET_LIMBCOND(ch, 3) > 0 && !char_plr_flagged(ch, PLR_CRLEG)) {
             send_to_char(ch, "            @D[@cRight Leg   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 3), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 3) > 0 && PLR_FLAGGED(ch, PLR_CRLEG)) {
+        else if (GET_LIMBCOND(ch, 3) > 0 && char_plr_flagged(ch, PLR_CRLEG)) {
             send_to_char(ch, "            @D[@cRight Leg   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 3), "%", "%");
         }
         else if (GET_LIMBCOND(ch, 3) <= 0) {
             send_to_char(ch, "            @D[@cRight Leg   @D: @rMissing.         @D]@n\r\n");
         }
-        if (GET_LIMBCOND(ch, 4) >= 50 && !PLR_FLAGGED(ch, PLR_CLLEG)) {
+        if (GET_LIMBCOND(ch, 4) >= 50 && !char_plr_flagged(ch, PLR_CLLEG)) {
             send_to_char(ch, "            @D[@cLeft Leg    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 4), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 4) > 0 && !PLR_FLAGGED(ch, PLR_CLLEG)) {
+        else if (GET_LIMBCOND(ch, 4) > 0 && !char_plr_flagged(ch, PLR_CLLEG)) {
             send_to_char(ch, "            @D[@cLeft Leg    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n", GET_LIMBCOND(ch, 4), "%", "%");
         }
-        else if (GET_LIMBCOND(ch, 4) > 0 && PLR_FLAGGED(ch, PLR_CLLEG)) {
+        else if (GET_LIMBCOND(ch, 4) > 0 && char_plr_flagged(ch, PLR_CLLEG)) {
             send_to_char(ch, "            @D[@cLeft Leg    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n", GET_LIMBCOND(ch, 4), "%", "%");
         }
         else if (GET_LIMBCOND(ch, 4) <= 0) {
             send_to_char(ch, "            @D[@cLeft Leg    @D: @rMissing.         @D]@n\r\n");
         }
 
-        if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_STAIL)) {
+        if ((char_is_saiyan(ch) || char_is_halfbreed(ch)) && char_plr_flagged(ch, PLR_STAIL)) {
             send_to_char(ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
         }
-        if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !PLR_FLAGGED(ch, PLR_STAIL)) {
+        if ((char_is_saiyan(ch) || char_is_halfbreed(ch)) && !char_plr_flagged(ch, PLR_STAIL)) {
             send_to_char(ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
         }
-        if ((IS_ICER(ch) || IS_BIO(ch)) && PLR_FLAGGED(ch, PLR_TAIL)) {
+        if ((char_is_icer(ch) || char_is_bio(ch)) && char_plr_flagged(ch, PLR_TAIL)) {
             send_to_char(ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
         }
-        if ((IS_ICER(ch) || IS_BIO(ch)) && !PLR_FLAGGED(ch, PLR_TAIL)) {
+        if ((char_is_icer(ch) || char_is_bio(ch)) && !char_plr_flagged(ch, PLR_TAIL)) {
             send_to_char(ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
         }
         send_to_char(ch, "\r\n");
@@ -6088,13 +6088,13 @@ ACMD(do_status)
         send_to_char(ch, "         @D--------------------@D[@GInfo@D]---------------------@n\r\n");
         trans_check(ch, ch);
         send_to_char(ch, "         You have died %d times.\r\n", GET_DCOUNT(ch));
-        if (PLR_FLAGGED(ch, PLR_NOSHOUT)) {
+        if (char_plr_flagged(ch, PLR_NOSHOUT)) {
             send_to_char(ch, "         You have been @rmuted@n on public channels.\r\n");
         }
         if (IN_ROOM(ch) == real_room(9)) {
             send_to_char(ch, "         You are in punishment hell, so sad....\r\n");
         }
-        if (!PRF_FLAGGED(ch, PRF_HINTS)) {
+        if (!char_prf_flagged(ch, PRF_HINTS)) {
             send_to_char(ch, "         You have hints turned off.\r\n");
         }
         if (NEWSUPDATE > GET_LPLAY(ch)) {
@@ -6103,7 +6103,7 @@ ACMD(do_status)
         if (has_mail(GET_IDNUM(ch))) {
             send_to_char(ch, "         Check your mail at the nearest postmaster.\r\n");
         }
-        if (PRF_FLAGGED(ch, PRF_HIDE)) {
+        if (char_prf_flagged(ch, PRF_HIDE)) {
             send_to_char(ch, "         You are hidden from who and ooc.\r\n");
         }
         if (GET_VOICE(ch) != NULL) {
@@ -6123,15 +6123,15 @@ ACMD(do_status)
         } else if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
             send_to_char(ch, "         You preferred a throwing dominate form of fighting.\r\n");
         }
-        if (GET_DISTFEA(ch) == DISTFEA_HAIR && !IS_DEMON(ch) && !IS_MAJIN(ch) && !IS_ICER(ch) && !IS_NAMEK(ch)) {
+        if (GET_DISTFEA(ch) == DISTFEA_HAIR && !char_is_demon(ch) && !char_is_majin(ch) && !char_is_icer(ch) && !char_is_namek(ch)) {
             send_to_char(ch, "         Your hair is your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_DEMON(ch)) {
+        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && char_is_demon(ch)) {
             send_to_char(ch, "         Your horns are your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_MAJIN(ch)) {
+        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && char_is_majin(ch)) {
             send_to_char(ch, "         Your forelock is your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_ICER(ch)) {
+        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && char_is_icer(ch)) {
             send_to_char(ch, "         Your horns are your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_NAMEK(ch)) {
+        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && char_is_namek(ch)) {
             send_to_char(ch, "         Your antennae are your most distinctive feature.\r\n");
         }
 
@@ -6158,25 +6158,25 @@ ACMD(do_status)
         if (GET_KAIOKEN(ch) > 0) {
             send_to_char(ch, "         You are focusing Kaioken x %d.\r\n", GET_KAIOKEN(ch));
         }
-        if (AFF_FLAGGED(ch, AFF_SANCTUARY)) {
+        if (char_aff_flagged(ch, AFF_SANCTUARY)) {
             send_to_char(ch, "         You are surrounded by a barrier @D(@Y%s@D)@n\r\n", add_commas(GET_BARRIER(ch)));
         }
-        if (AFF_FLAGGED(ch, AFF_FIRESHIELD)) {
+        if (char_aff_flagged(ch, AFF_FIRESHIELD)) {
             send_to_char(ch, "         You are surrounded by flames!@n\r\n");
         }
         if (GET_SUPPRESS(ch) > 0) {
             send_to_char(ch, "         You are suppressing current PL to %" I64T ".\r\n", GET_SUPPRESS(ch));
         }
-        if (IS_MAJIN(ch)) {
+        if (char_is_majin(ch)) {
             send_to_char(ch, "         You have ingested %d people.\r\n", GET_ABSORBS(ch));
         }
-        if (IS_BIO(ch)) {
+        if (char_is_bio(ch)) {
             send_to_char(ch, "         You have %d absorbs left.\r\n", GET_ABSORBS(ch));
         }
         send_to_char(ch, "         You have %s colored aura.\r\n", aura_types[GET_AURA(ch)]);
 
-        if (GET_LEVEL(ch) < 100) {
-            if ((IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_ABSORB)) || (!IS_ANDROID(ch) && !IS_BIO(ch) && !IS_MAJIN(ch))) {
+        if (char_get_level(ch) < 100) {
+            if ((char_is_android(ch) && char_plr_flagged(ch, PLR_ABSORB)) || (!char_is_android(ch) && !char_is_bio(ch) && !char_is_majin(ch))) {
                 send_to_char(ch, "         @R%s@n to SC a stat this level.\r\n", add_commas(calc_soft_cap(ch)));
             } else {
                 send_to_char(ch, "         @R%s@n in PL/KI/ST combined to SC this level.\r\n", add_commas(calc_soft_cap(ch)));
@@ -6191,7 +6191,7 @@ ACMD(do_status)
             send_to_char(ch, "         @MForgetting @D[@mNothing.@D]@n\r\n");
         }
 
-        if (GET_SKILL(ch, SKILL_DAGGER) > 0) {
+        if (char_get_skill(ch, SKILL_DAGGER) > 0) {
             if (GET_BACKSTAB_COOL(ch) > 0) {
                 send_to_char(ch, "         @yYou can't preform a backstab yet.@n\r\n");
             } else {
@@ -6246,7 +6246,7 @@ ACMD(do_status)
         if (GET_MIMIC(ch) > 0) {
             send_to_char(ch, "You are mimicing the general appearance of %s %s\r\n", AN(LRACE(ch)), LRACE(ch));
         }
-        if (IS_MUTANT(ch)) {
+        if (char_is_mutant(ch)) {
             send_to_char(ch, "Your Mutations:\r\n");
             if (GET_GENOME(ch, 0) == 1) {
                 send_to_char(ch, "  Extreme Speed.\r\n");
@@ -6309,7 +6309,7 @@ ACMD(do_status)
                 send_to_char(ch, "  Natural Energy.\r\n");
             }
         }
-        if (IS_BIO(ch)) {
+        if (char_is_bio(ch)) {
             send_to_char(ch, "Your genes carry:\r\n");
             if (GET_GENOME(ch, 0) == 1) {
                 send_to_char(ch, "  Human DNA.\r\n");
@@ -6363,7 +6363,7 @@ ACMD(do_status)
         if (GET_GENOME(ch, 0) == 11) {
             send_to_char(ch, "You have used kyodaika.\r\n");
         }
-        if (PRF_FLAGGED(ch, PRF_NOPARRY)) {
+        if (char_prf_flagged(ch, PRF_NOPARRY)) {
             send_to_char(ch, "You have decided not to parry attacks.\r\n");
         }
         switch (GET_POS(ch)) {
@@ -6389,7 +6389,7 @@ ACMD(do_status)
                 send_to_char(ch, "You are sitting.\r\n");
                 break;
             case POS_FIGHTING:
-                send_to_char(ch, "You are fighting %s.\r\n", FIGHTING(ch) ? PERS(FIGHTING(ch), ch) : "thin air");
+                send_to_char(ch, "You are fighting %s.\r\n", FIGHTING(ch) ? char_pers(FIGHTING(ch), ch) : "thin air");
                 break;
             case POS_STANDING:
                 send_to_char(ch, "You are standing.\r\n");
@@ -6403,38 +6403,38 @@ ACMD(do_status)
             send_to_char(ch, "@GGroup Victories@D: @w%s@n\r\n", add_commas(GET_GROUPKILLS(ch)));
         }
 
-        if (PLR_FLAGGED(ch, PLR_EYEC)) {
+        if (char_plr_flagged(ch, PLR_EYEC)) {
             send_to_char(ch, "Your eyes are closed.\r\n");
         }
-        if (AFF_FLAGGED(ch, AFF_SNEAK)) {
+        if (char_aff_flagged(ch, AFF_SNEAK)) {
             send_to_char(ch, "You are prepared to sneak where ever you go.\r\n");
         }
-        if (PLR_FLAGGED(ch, PLR_DISGUISED)) {
+        if (char_plr_flagged(ch, PLR_DISGUISED)) {
             send_to_char(ch, "You have disguised your facial features.\r\n");
         }
-        if (AFF_FLAGGED(ch, AFF_FLYING)) {
+        if (char_aff_flagged(ch, AFF_FLYING)) {
             send_to_char(ch, "You are flying.\r\n");
         }
-        if (PLR_FLAGGED(ch, PLR_PILOTING)) {
+        if (char_plr_flagged(ch, PLR_PILOTING)) {
             send_to_char(ch, "You are busy piloting a ship.\r\n");
         }
         if (GET_SONG(ch) > 0) {
             send_to_char(ch, "You are playing @y'@Y%s@y'@n.\r\n", song_types[GET_SONG(ch)]);
         }
 
-        if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
+        if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
             send_to_char(ch, "You are prepared to zanzoken.\r\n");
         }
-        if (AFF_FLAGGED(ch, AFF_HASS)) {
+        if (char_aff_flagged(ch, AFF_HASS)) {
             send_to_char(ch, "Your arms are moving fast.\r\n");
         }
-        if (AFF_FLAGGED(ch, AFF_INFUSE)) {
+        if (char_aff_flagged(ch, AFF_INFUSE)) {
             send_to_char(ch, "Your ki will be infused in your next physical attack.\r\n");
         }
-        if (PLR_FLAGGED(ch, PLR_TAILHIDE)) {
+        if (char_plr_flagged(ch, PLR_TAILHIDE)) {
             send_to_char(ch, "Your tail is hidden!\r\n");
         }
-        if (PLR_FLAGGED(ch, PLR_NOGROW)) {
+        if (char_plr_flagged(ch, PLR_NOGROW)) {
             send_to_char(ch, "Your tail is no longer regrowing!\r\n");
         }
         if (is_affected(ch, AFF_SPECIAL_POSE)) {
@@ -6546,49 +6546,49 @@ ACMD(do_status)
             }
         }
 
-        if (AFF_FLAGGED(ch, AFF_KNOCKED))
+        if (char_aff_flagged(ch, AFF_KNOCKED))
             send_to_char(ch, "You have been knocked unconcious!\r\n");
 
-        if (AFF_FLAGGED(ch, AFF_INVISIBLE))
+        if (char_aff_flagged(ch, AFF_INVISIBLE))
             send_to_char(ch, "You are invisible.\r\n");
 
-        if (AFF_FLAGGED(ch, AFF_DETECT_INVIS))
+        if (char_aff_flagged(ch, AFF_DETECT_INVIS))
             send_to_char(ch, "You are sensitive to the presence of invisible things.\r\n");
 
-        if (AFF_FLAGGED(ch, AFF_MBREAK))
+        if (char_aff_flagged(ch, AFF_MBREAK))
             send_to_char(ch, "Your mind has been broken!\r\n");
 
-        if (AFF_FLAGGED(ch, AFF_WITHER))
+        if (char_aff_flagged(ch, AFF_WITHER))
             send_to_char(ch, "You've been withered! You feel so weak...\r\n");
 
-        if (AFF_FLAGGED(ch, AFF_SHOCKED))
+        if (char_aff_flagged(ch, AFF_SHOCKED))
             send_to_char(ch, "Your mind has been shocked!\r\n");
 
-        if (AFF_FLAGGED(ch, AFF_CHARM))
+        if (char_aff_flagged(ch, AFF_CHARM))
             send_to_char(ch, "You have been charmed!\r\n");
 
         if (affected_by_spell(ch, SPELL_MAGE_ARMOR))
             send_to_char(ch, "You feel protected.\r\n");
 
-        if (AFF_FLAGGED(ch, AFF_INFRAVISION))
+        if (char_aff_flagged(ch, AFF_INFRAVISION))
             send_to_char(ch, "You can see in darkness with infravision.\r\n");
 
-        if (PRF_FLAGGED(ch, PRF_SUMMONABLE))
+        if (char_prf_flagged(ch, PRF_SUMMONABLE))
             send_to_char(ch, "You are summonable by other players.\r\n");
 
-        if (AFF_FLAGGED(ch, AFF_DETECT_ALIGN))
+        if (char_aff_flagged(ch, AFF_DETECT_ALIGN))
             send_to_char(ch, "You see into the hearts of others.\r\n");
 
-        if (AFF_FLAGGED(ch, AFF_DETECT_MAGIC))
+        if (char_aff_flagged(ch, AFF_DETECT_MAGIC))
             send_to_char(ch, "You are sensitive to the magical nature of things.\r\n");
 
-        if (AFF_FLAGGED(ch, AFF_SPIRIT))
+        if (char_aff_flagged(ch, AFF_SPIRIT))
             send_to_char(ch, "You have died and are part of the SPIRIT world!\r\n");
 
-        if (PRF_FLAGGED(ch, PRF_NOGIVE))
+        if (char_prf_flagged(ch, PRF_NOGIVE))
             send_to_char(ch, "You are not accepting items being handed to you right now.\r\n");
 
-        if (AFF_FLAGGED(ch, AFF_ETHEREAL))
+        if (char_aff_flagged(ch, AFF_ETHEREAL))
             send_to_char(ch, "You are ethereal and cannot interact with normal space!\r\n");
 
         if (GET_REGEN(ch) > 0) {
@@ -6603,10 +6603,10 @@ ACMD(do_status)
             send_to_char(ch, "Something is augmenting your Life Force Max by %s%d%s!\r\n", ch->lifebonus > 0 ? "+" : "-", ch->lifebonus, "%");
         }
 
-        if (PLR_FLAGGED(ch, PLR_FISHING))
+        if (char_plr_flagged(ch, PLR_FISHING))
             send_to_char(ch, "Current Fishing Pole Bonus @D[@C%d@D]@n\r\n", GET_POLE_BONUS(ch));
 
-        if (PLR_FLAGGED(ch, PLR_AURALIGHT))
+        if (char_plr_flagged(ch, PLR_AURALIGHT))
             send_to_char(ch, "Aura Light is active.\r\n");
         send_to_char(ch, "@D<@b--------------------------------------------------------------@D>@n\r\n");
         send_to_char(ch, "To view your bonus/negative traits enter: status traits\r\n");
@@ -6676,7 +6676,7 @@ static void bonus_status(struct char_data *ch)
 {
  int i, max = 52, count = 0;
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
  
  send_to_char(ch, "@CYour Traits@n\n@D-----------------------------@w\n");
@@ -6706,8 +6706,8 @@ static void bonus_status(struct char_data *ch)
 ACMD(do_inventory)
 {
   send_to_char(ch, "@w              @YInventory\r\n@D-------------------------------------@w\r\n");
-  if (!IS_NPC(ch)) {
-   if (PLR_FLAGGED(ch, PLR_STOLEN)) {
+  if (!char_is_npc(ch)) {
+   if (char_plr_flagged(ch, PLR_STOLEN)) {
     REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_STOLEN);
     send_to_char(ch, "@r   --------------------------------------------------@n\n");
     send_to_char(ch, "@R    You notice that you have been robbed sometime recently!\n");
@@ -6726,11 +6726,11 @@ ACMD(do_equipment)
   send_to_char(ch, "        @YEquipment Being Worn\r\n@D-------------------------------------@w\r\n");
   for (i = 1; i < NUM_WEARS; i++) {
     if (GET_EQ(ch, i)) {
-      if (CAN_SEE_OBJ(ch, GET_EQ(ch, i)) && (i != WEAR_WIELD1 && i != WEAR_WIELD2)) {
+      if (char_can_see_obj(ch, GET_EQ(ch, i)) && (i != WEAR_WIELD1 && i != WEAR_WIELD2)) {
 	send_to_char(ch, "%s", wear_where[i]);
 	show_obj_to_char(GET_EQ(ch, i), ch, SHOW_OBJ_SHORT);
 
-       if (OBJ_FLAGGED(GET_EQ(ch, i), ITEM_SHEATH)) {
+       if (obj_flagged(GET_EQ(ch, i), ITEM_SHEATH)) {
          struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = GET_EQ(ch, i);
          for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
          next_obj = obj2->next_content;
@@ -6742,10 +6742,10 @@ ACMD(do_equipment)
         }
         obj2 = NULL;
        }
-      } else if (CAN_SEE_OBJ(ch, GET_EQ(ch, i)) && (!PLR_FLAGGED(ch, PLR_THANDW))) {
+      } else if (char_can_see_obj(ch, GET_EQ(ch, i)) && (!char_plr_flagged(ch, PLR_THANDW))) {
         send_to_char(ch, "%s", wear_where[i]);
         show_obj_to_char(GET_EQ(ch, i), ch, SHOW_OBJ_SHORT);
-        if (OBJ_FLAGGED(GET_EQ(ch, i), ITEM_SHEATH)) {
+        if (obj_flagged(GET_EQ(ch, i), ITEM_SHEATH)) {
          struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = GET_EQ(ch, i);
          for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
          next_obj = obj2->next_content;
@@ -6757,7 +6757,7 @@ ACMD(do_equipment)
         }
         obj2 = NULL;
        }
-      } else if (CAN_SEE_OBJ(ch, GET_EQ(ch, i)) && (PLR_FLAGGED(ch, PLR_THANDW))) {
+      } else if (char_can_see_obj(ch, GET_EQ(ch, i)) && (char_plr_flagged(ch, PLR_THANDW))) {
         send_to_char(ch, "@c<@CWielded by B. Hands@c>@n ");
         show_obj_to_char(GET_EQ(ch, i), ch, SHOW_OBJ_SHORT);
       } else {
@@ -6765,10 +6765,10 @@ ACMD(do_equipment)
 	send_to_char(ch, "Something.\r\n");
       }
     } else {
-      if (BODY_FLAGGED(ch, i) && (i != WEAR_WIELD2)) {
+      if (char_body_flagged(ch, i) && (i != WEAR_WIELD2)) {
         send_to_char(ch, "%s@wNothing.@n\r\n", wear_where[i]);
       }
-      else if (BODY_FLAGGED(ch, i) && (i == WEAR_WIELD2 && !PLR_FLAGGED(ch, PLR_THANDW))) {
+      else if (char_body_flagged(ch, i) && (i == WEAR_WIELD2 && !char_plr_flagged(ch, PLR_THANDW))) {
         send_to_char(ch, "%s@wNothing.@n\r\n", wear_where[i]);
       }
     }
@@ -6827,12 +6827,12 @@ ACMD(do_weather)
     "lit by flashes of lightning"
   };
 
-  if (OUTSIDE(ch))
+  if (char_is_outside(ch))
     {
     send_to_char(ch, "The sky is %s and %s.\r\n", sky_look[weather_info.sky],
 	    weather_info.change >= 0 ? "you feel a warm wind from south" :
 	     "your foot tells you bad weather is due");
-    if (ADM_FLAGGED(ch, ADM_KNOWWEATHER))
+    if (char_adm_flagged(ch, ADM_KNOWWEATHER))
       send_to_char(ch, "Pressure: %d (change: %d), Sky: %d (%s)\r\n",
                  weather_info.pressure,
                  weather_info.change,
@@ -6910,7 +6910,7 @@ ACMD(do_help)
     int i, found = 0;
     send_to_char(ch, "There is no help on that word.\r\n");
     if (GET_ADMLEVEL(ch) < 3) {
-    mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "%s tried to get help on %s", GET_NAME(ch), argument);
+    mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "%s tried to get help on %s", char_get_name(ch), argument);
     }
     for (i = 0; i <= top_of_helpt; i++)  {
       if (help_table[i].min_level > GET_ADMLEVEL(ch))
@@ -6980,7 +6980,7 @@ ACMD(do_who)
   int num_ranks = sizeof(rank)/sizeof(rank[0]);
   send_to_char(ch, "\r\n      @r{@b===============  @D[  @DD@wr@ca@Cg@Y(@R*@Y)@Wn@cB@Da@cl@Cl @DA@wd@cv@Ce@Wnt @DT@wr@cu@Ct@Wh@n  @D]  @b===============@r}      @n\r\n");
   for (d = descriptor_list; d && !short_list; d = d->next) {
-    if (!IS_PLAYING(d))
+    if (!desc_is_playing(d))
      continue;
     if (d->original)
       tch = d->original;
@@ -6992,27 +6992,27 @@ ACMD(do_who)
     else
       line_color = "@w";
 
-    if (CAN_SEE(ch, tch) && IS_PLAYING(d)) {
-    if (*name_search && strcasecmp(GET_NAME(tch), name_search) &&
-	!strstr(GET_TITLE(tch), name_search))
+    if (char_can_see(ch, tch) && desc_is_playing(d)) {
+    if (*name_search && strcasecmp(char_get_name(tch), name_search) &&
+	!strstr(char_get_title(tch), name_search))
       continue;
-    if (!CAN_SEE(ch, tch) || GET_LEVEL(tch) < low || GET_LEVEL(tch) > high)
+    if (!char_can_see(ch, tch) || char_get_level(tch) < low || char_get_level(tch) > high)
       continue;
-      if (outlaws && !PLR_FLAGGED(tch, PLR_KILLER) && !PLR_FLAGGED(tch, PLR_THIEF))
+      if (outlaws && !char_plr_flagged(tch, PLR_KILLER) && !char_plr_flagged(tch, PLR_THIEF))
       continue;
-    if (questwho && !PRF_FLAGGED(tch, PRF_QUEST))
+    if (questwho && !char_prf_flagged(tch, PRF_QUEST))
       continue;
     if (localwho && world[IN_ROOM(ch)].zone != world[IN_ROOM(tch)].zone)
       continue;
-    if (PRF_FLAGGED(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
+    if (char_prf_flagged(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
        hide += 1;
        continue;
     }
     if (who_room && (IN_ROOM(tch) != IN_ROOM(ch)))
       continue;
-    if (showclass && !(showclass & (1U << GET_CLASS(tch))))
+    if (showclass && !(showclass & (1U << char_get_class(tch))))
       continue;
-      if (showgroup && (!tch->master || !AFF_FLAGGED(tch, AFF_GROUP)))
+      if (showgroup && (!tch->master || !char_aff_flagged(tch, AFF_GROUP)))
         continue;
       for (i = 0; i < num_ranks; i++)
         if (GET_ADMLEVEL(tch) >= rank[i].min_level && GET_ADMLEVEL(tch) <= rank[i].max_level)
@@ -7030,7 +7030,7 @@ ACMD(do_who)
       send_to_char(ch, rank[i].disp);
 
     for (d = descriptor_list; d; d = d->next) {
-      if (!IS_PLAYING(d))
+      if (!desc_is_playing(d))
        continue;
       if (d->original)
         tch = d->original;
@@ -7039,57 +7039,57 @@ ACMD(do_who)
 
       if ((GET_ADMLEVEL(tch) < rank[i].min_level || GET_ADMLEVEL(tch) > rank[i].max_level) && !short_list)
         continue;
-      if (!IS_PLAYING(d))
+      if (!desc_is_playing(d))
         continue;
-      if (*name_search && strcasecmp(GET_NAME(tch), name_search) &&
-          !strstr(GET_TITLE(tch), name_search))
+      if (*name_search && strcasecmp(char_get_name(tch), name_search) &&
+          !strstr(char_get_title(tch), name_search))
        continue;
-      if (!CAN_SEE(ch, tch) || GET_LEVEL(tch) < low || GET_LEVEL(tch) > high)
+      if (!char_can_see(ch, tch) || char_get_level(tch) < low || char_get_level(tch) > high)
         continue;
-      if (outlaws && !PLR_FLAGGED(tch, PLR_KILLER) && !PLR_FLAGGED(tch, PLR_THIEF))
+      if (outlaws && !char_plr_flagged(tch, PLR_KILLER) && !char_plr_flagged(tch, PLR_THIEF))
         continue;
-      if (questwho && !PRF_FLAGGED(tch, PRF_QUEST))
+      if (questwho && !char_prf_flagged(tch, PRF_QUEST))
         continue;
       if (localwho && world[IN_ROOM(ch)].zone != world[IN_ROOM(tch)].zone)
         continue;
       if (who_room && (IN_ROOM(tch) != IN_ROOM(ch)))
         continue;
-      if (PRF_FLAGGED(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
+      if (char_prf_flagged(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
         continue;
-      if (showclass && !(showclass & (1U << GET_CLASS(tch))))
+      if (showclass && !(showclass & (1U << char_get_class(tch))))
         continue;
-      if (showgroup && (!tch->master || !AFF_FLAGGED(tch, AFF_GROUP)))
+      if (showgroup && (!tch->master || !char_aff_flagged(tch, AFF_GROUP)))
         continue;
-      if (showleader && (!tch->followers || !AFF_FLAGGED(tch, AFF_GROUP)))
+      if (showleader && (!tch->followers || !char_aff_flagged(tch, AFF_GROUP)))
         continue;
 
     if (short_list) {
         send_to_char(ch, "               @B[@W%3d @Y%s @C%s@B]@W %-12.12s@n%s@n",
-          GET_LEVEL(tch), RACE_ABBR(tch), CLASS_ABBR(tch), GET_NAME(tch),
+          char_get_level(tch), RACE_ABBR(tch), CLASS_ABBR(tch), char_get_name(tch),
 	  ((!(++num_can_see % 4)) ? "\r\n" : ""));
     } else {
        num_can_see++;
 
        char usr[100];
-       sprintf(usr, "@W(@R%s@W)%s", tch->desc->user, PLR_FLAGGED(tch, PLR_BIOGR) ? "" : (SPOILED(tch) ? " @R*@n" : ""));
-       send_to_char(ch, "%s               @D<@C%-12s@D> %s@w%s", line_color, GET_ADMLEVEL(ch) > 0 ? GET_NAME(tch) : (GET_ADMLEVEL(tch) > 0 ? GET_NAME(tch) : (GET_USER(tch) ? GET_USER(tch) : "NULL")), GET_ADMLEVEL(ch) > 0 ? usr : "", line_color);
+       sprintf(usr, "@W(@R%s@W)%s", tch->desc->user, char_plr_flagged(tch, PLR_BIOGR) ? "" : (char_is_spoiled(tch) ? " @R*@n" : ""));
+       send_to_char(ch, "%s               @D<@C%-12s@D> %s@w%s", line_color, GET_ADMLEVEL(ch) > 0 ? char_get_name(tch) : (GET_ADMLEVEL(tch) > 0 ? char_get_name(tch) : (char_get_user(tch) ? char_get_user(tch) : "NULL")), GET_ADMLEVEL(ch) > 0 ? usr : "", line_color);
 
       if (GET_ADMLEVEL(tch)) {
         send_to_char(ch, " (%s)", admin_level_names[GET_ADMLEVEL(tch)]);
       }
 
       if (d->snooping && d->snooping->character != ch && GET_ADMLEVEL(ch) >= 3)
-        send_to_char(ch, " (Snoop: %s)", GET_NAME(d->snooping->character));
+        send_to_char(ch, " (Snoop: %s)", char_get_name(d->snooping->character));
       if (GET_INVIS_LEV(tch))
         send_to_char(ch, " (i%d)", GET_INVIS_LEV(tch));
-      else if (AFF_FLAGGED(tch, AFF_INVISIBLE))
+      else if (char_aff_flagged(tch, AFF_INVISIBLE))
 	send_to_char(ch, " (invis)");
 
-      if (PLR_FLAGGED(tch, PLR_MAILING))
+      if (char_plr_flagged(tch, PLR_MAILING))
 	send_to_char(ch, " (mailing)");
       else if (d->olc)
         send_to_char(ch, " (OLC)");
-      else if (PLR_FLAGGED(tch, PLR_WRITING))
+      else if (char_plr_flagged(tch, PLR_WRITING))
 	send_to_char(ch, " (writing)");
 
       if (d->original)
@@ -7115,23 +7115,23 @@ ACMD(do_who)
         send_to_char(ch, " (C Edit)");
       if (d->connected == CON_HEDIT)
           send_to_char(ch, " (H Edit)");
-      if (PRF_FLAGGED(tch, PRF_DEAF))
+      if (char_prf_flagged(tch, PRF_DEAF))
 	send_to_char(ch, " (DEAF)");
-      if (PRF_FLAGGED(tch, PRF_NOTELL))
+      if (char_prf_flagged(tch, PRF_NOTELL))
 	send_to_char(ch, " (NO TELL)");
-      if (PRF_FLAGGED(tch, PRF_NOGOSS))
+      if (char_prf_flagged(tch, PRF_NOGOSS))
         send_to_char(ch, " (NO OOC)");
-      if (PLR_FLAGGED(tch, PLR_NOSHOUT))
+      if (char_plr_flagged(tch, PLR_NOSHOUT))
         send_to_char(ch, " (MUTED)");
-      if (PRF_FLAGGED(tch, PRF_HIDE))
+      if (char_prf_flagged(tch, PRF_HIDE))
         send_to_char(ch, " (WH)");
-      if (PRF_FLAGGED(tch, PRF_BUILDWALK))
+      if (char_prf_flagged(tch, PRF_BUILDWALK))
 	send_to_char(ch, " (Buildwalking)");
-      if (PRF_FLAGGED(tch, PRF_AFK))
+      if (char_prf_flagged(tch, PRF_AFK))
         send_to_char(ch, " (AFK)");
-      if (PLR_FLAGGED(tch, PLR_FISHING) && GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
+      if (char_plr_flagged(tch, PLR_FISHING) && GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
         send_to_char(ch, " (@BFISHING@n)");
-      if (PRF_FLAGGED(tch, PRF_NOWIZ))
+      if (char_prf_flagged(tch, PRF_NOWIZ))
         send_to_char(ch, " (NO WIZ)");
       send_to_char(ch, "@n\r\n");
       }
@@ -7239,7 +7239,7 @@ ACMD(do_users)
       continue;
     if (STATE(d) == CON_PLAYING && deadweight)
       continue;
-    if (IS_PLAYING(d)) {
+    if (desc_is_playing(d)) {
       if (d->original)
 	tch = d->original;
       else if (!(tch = d->character))
@@ -7247,17 +7247,17 @@ ACMD(do_users)
 
       if (*host_search && !strstr(d->host, host_search))
 	continue;
-      if (*name_search && strcasecmp(GET_NAME(tch), name_search))
+      if (*name_search && strcasecmp(char_get_name(tch), name_search))
 	continue;
-      if (!CAN_SEE(ch, tch) || GET_LEVEL(tch) < low || GET_LEVEL(tch) > high)
+      if (!char_can_see(ch, tch) || char_get_level(tch) < low || char_get_level(tch) > high)
 	continue;
-      if (PRF_FLAGGED(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
+      if (char_prf_flagged(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
         continue;
       }
-      if (outlaws && !PLR_FLAGGED(tch, PLR_KILLER) &&
-	  !PLR_FLAGGED(tch, PLR_THIEF))
+      if (outlaws && !char_plr_flagged(tch, PLR_KILLER) &&
+	  !char_plr_flagged(tch, PLR_THIEF))
 	continue;
-      if (showclass && !(showclass & (1U << GET_CLASS(tch))))
+      if (showclass && !(showclass & (1U << char_get_class(tch))))
 	continue;
       if (showrace && !(showrace & (1U << GET_RACE(tch))))
         continue;
@@ -7295,7 +7295,7 @@ ACMD(do_users)
       strcpy(line, line2);
     }
     if (STATE(d) != CON_PLAYING ||
-		(STATE(d) == CON_PLAYING && CAN_SEE(ch, d->character))) {
+		(STATE(d) == CON_PLAYING && char_can_see(ch, d->character))) {
       send_to_char(ch, "%s", line);
       num_can_see++;
     }
@@ -7347,7 +7347,7 @@ ACMD(do_gen_ps)
   case SCMD_VERSION:
     break;
   case SCMD_WHOAMI:
-    send_to_char(ch, "%s\r\n", GET_NAME(ch));
+    send_to_char(ch, "%s\r\n", char_get_name(ch));
     break;
   default:
     log("SYSERR: Unhandled case in do_gen_ps. (%d)", subcmd);
@@ -7375,21 +7375,21 @@ static void perform_mortal_where(struct char_data *ch, char *arg)
 	continue;
       if ((i = (d->original ? d->original : d->character)) == NULL)
 	continue;
-      if (IN_ROOM(i) == NOWHERE || !CAN_SEE(ch, i))
+      if (IN_ROOM(i) == NOWHERE || !char_can_see(ch, i))
 	continue;
       if (world[IN_ROOM(ch)].zone != world[IN_ROOM(i)].zone)
 	continue;
-      send_to_char(ch, "%-20s - %s\r\n", GET_NAME(i), world[IN_ROOM(i)].name);
+      send_to_char(ch, "%-20s - %s\r\n", char_get_name(i), world[IN_ROOM(i)].name);
     }
   } else {			/* print only FIRST char, not all. */
     for (i = character_list; i; i = i->next) {
       if (IN_ROOM(i) == NOWHERE || i == ch)
 	continue;
-      if (!CAN_SEE(ch, i) || world[IN_ROOM(i)].zone != world[IN_ROOM(ch)].zone)
+      if (!char_can_see(ch, i) || world[IN_ROOM(i)].zone != world[IN_ROOM(ch)].zone)
 	continue;
       if (!isname(arg, i->name))
 	continue;
-      send_to_char(ch, "%-25s - %s\r\n", GET_NAME(i), world[IN_ROOM(i)].name);
+      send_to_char(ch, "%-25s - %s\r\n", char_get_name(i), world[IN_ROOM(i)].name);
       return;
     }
     send_to_char(ch, "Nobody around by that name.\r\n");
@@ -7408,11 +7408,11 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
     send_to_char(ch, "[T%d]", obj->proto_script->vnum);
 
   if (IN_ROOM(obj) != NOWHERE)
-    send_to_char(ch, "[%5d] %s\r\n", GET_ROOM_VNUM(IN_ROOM(obj)), world[IN_ROOM(obj)].name);
+    send_to_char(ch, "[%5d] %s\r\n", rroom_get_vnum(IN_ROOM(obj)), world[IN_ROOM(obj)].name);
   else if (obj->carried_by)
-    send_to_char(ch, "carried by %s in room [%d]\r\n", PERS(obj->carried_by, ch), GET_ROOM_VNUM(IN_ROOM(obj->carried_by)));
+    send_to_char(ch, "carried by %s in room [%d]\r\n", char_pers(obj->carried_by, ch), rroom_get_vnum(IN_ROOM(obj->carried_by)));
   else if (obj->worn_by)
-    send_to_char(ch, "worn by %s in room [%d]\r\n", PERS(obj->worn_by, ch), GET_ROOM_VNUM(IN_ROOM(obj->worn_by)));
+    send_to_char(ch, "worn by %s in room [%d]\r\n", char_pers(obj->worn_by, ch), rroom_get_vnum(IN_ROOM(obj->worn_by)));
   else if (obj->in_obj) {
     send_to_char(ch, "inside %s%s\r\n", obj->in_obj->short_description, (recur ? ", which is" : " "));
     if (recur)
@@ -7443,55 +7443,55 @@ static void perform_immort_where(struct char_data *ch, char *arg)
 
 
   if (!*arg) {
-    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "GODCMD: %s has checked where to check player locations", GET_NAME(ch));
+    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "GODCMD: %s has checked where to check player locations", char_get_name(ch));
     send_to_char(ch, "Players                  Vnum    Planet        Location\r\n-------                 ------   ----------    ----------------\r\n");
     for (d = descriptor_list; d; d = d->next)
-      if (IS_PLAYING(d)) {
+      if (desc_is_playing(d)) {
         if (IN_ROOM(d->character) != NOWHERE) {
-         if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_EARTH)) {
+         if (rroom_flagged(IN_ROOM(d->character), ROOM_EARTH)) {
           num2 = 0;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_FRIGID)) {
+         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_FRIGID)) {
           num2 = 1;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_VEGETA)) {
+         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_VEGETA)) {
           num2 = 2;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_KONACK)) {
+         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_KONACK)) {
           num2 = 3;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_NAMEK)) {
+         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_NAMEK)) {
           num2 = 4;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_AETHER)) {
+         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_AETHER)) {
           num2 = 5;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_ARLIA)) {
+         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_ARLIA)) {
           num2 = 6;
-         } else if (PLANET_ZENITH(IN_ROOM(d->character))) {
+         } else if (rroom_planet_zenith(IN_ROOM(d->character))) {
           num2 = 7;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_YARDRAT)) {
+         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_YARDRAT)) {
           num2 = 8;
-         } else if (ROOM_FLAGGED(IN_ROOM(d->character), ROOM_KANASSA)) {
+         } else if (rroom_flagged(IN_ROOM(d->character), ROOM_KANASSA)) {
           num2 = 9;
          } else {
           num2 = 10;
          }
         }
 	i = (d->original ? d->original : d->character);
-	if (i && CAN_SEE(ch, i) && (IN_ROOM(i) != NOWHERE)) {
+	if (i && char_can_see(ch, i) && (IN_ROOM(i) != NOWHERE)) {
 	  if (d->original)
 	    send_to_char(ch, "%-20s - [%5d]   %s (in %s)\r\n",
-		GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(d->character)),
-		world[IN_ROOM(d->character)].name, GET_NAME(d->character));
+		char_get_name(i), rroom_get_vnum(IN_ROOM(d->character)),
+		world[IN_ROOM(d->character)].name, char_get_name(d->character));
 	  else {
-	    send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(i)), planet[num2], world[IN_ROOM(i)].name);
+	    send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", char_get_name(i), rroom_get_vnum(IN_ROOM(i)), planet[num2], world[IN_ROOM(i)].name);
           }
            
 	}
       }
   } else {
-    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "GODCMD: %s has checked where for the location of %s", GET_NAME(ch), arg);
+    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "GODCMD: %s has checked where for the location of %s", char_get_name(ch), arg);
     for (i = character_list; i; i = i->next) {
-      if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->name)) {
+      if (char_can_see(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->name)) {
 	found = 1;
-	send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
-		GET_ROOM_VNUM(IN_ROOM(i)), world[IN_ROOM(i)].name);
-        if (IS_NPC(i) && SCRIPT(i)) { 
+	send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, char_get_name(i),
+		rroom_get_vnum(IN_ROOM(i)), world[IN_ROOM(i)].name);
+        if (char_is_npc(i) && SCRIPT(i)) { 
           if (!TRIGGERS(SCRIPT(i))->next) 
             send_to_char(ch, "[T%5d] ", GET_TRIG_VNUM(TRIGGERS(SCRIPT(i)))); 
           else 
@@ -7501,7 +7501,7 @@ static void perform_immort_where(struct char_data *ch, char *arg)
       }
     }
     for (k = object_list; k; k = k->next)
-      if (CAN_SEE_OBJ(ch, k) && isname(arg, k->name)) {
+      if (char_can_see_obj(ch, k) && isname(arg, k->name)) {
 	found = 1;
 	print_object_location(++num, k, ch, TRUE);
       }
@@ -7519,7 +7519,7 @@ ACMD(do_where)
 
   one_argument(argument, arg);
 
-  if (ADM_FLAGGED(ch, ADM_FULLWHERE) || GET_ADMLEVEL(ch) > 4)
+  if (char_adm_flagged(ch, ADM_FULLWHERE) || GET_ADMLEVEL(ch) > 4)
     perform_immort_where(ch, arg);
   else
     perform_mortal_where(ch, arg);
@@ -7530,7 +7530,7 @@ ACMD(do_levels)
   char buf[MAX_STRING_LENGTH];
   size_t i, len = 0, nlen;
 
-  if (IS_NPC(ch)) {
+  if (char_is_npc(ch)) {
     send_to_char(ch, "You ain't nothin' but a hound-dog.\r\n");
     return;
   }
@@ -7565,7 +7565,7 @@ ACMD(do_consider)
     send_to_char(ch, "Easy!  Very easy indeed!\r\n");
     return;
   }
-  diff = (GET_LEVEL(victim) - GET_LEVEL(ch));
+  diff = (char_get_level(victim) - char_get_level(ch));
 
   if (diff <= -10)
     send_to_char(ch, "Now where did that chicken go?\r\n");
@@ -7919,7 +7919,7 @@ ACMD(do_toggle)
 {
   char buf2[4];
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return;
 
   if (GET_WIMP_LEV(ch) == 0)
@@ -7931,16 +7931,16 @@ ACMD(do_toggle)
     send_to_char(ch,
           "      Buildwalk: %-3s    "
           "Clear Screen in OLC: %-3s\r\n",
-        ONOFF(PRF_FLAGGED(ch, PRF_BUILDWALK)),
-        ONOFF(PRF_FLAGGED(ch, PRF_CLS)));
+        ONOFF(char_prf_flagged(ch, PRF_BUILDWALK)),
+        ONOFF(char_prf_flagged(ch, PRF_CLS)));
 
     send_to_char(ch,
 	  "      No Hassle: %-3s    "
 	  "      Holylight: %-3s    "
 	  "     Room Flags: %-3s\r\n",
-	ONOFF(PRF_FLAGGED(ch, PRF_NOHASSLE)),
-	ONOFF(PRF_FLAGGED(ch, PRF_HOLYLIGHT)),
-	ONOFF(PRF_FLAGGED(ch, PRF_ROOMFLAGS))
+	ONOFF(char_prf_flagged(ch, PRF_NOHASSLE)),
+	ONOFF(char_prf_flagged(ch, PRF_HOLYLIGHT)),
+	ONOFF(char_prf_flagged(ch, PRF_ROOMFLAGS))
     );
   }
 
@@ -7979,42 +7979,42 @@ ACMD(do_toggle)
 
 	  "    TNL Display: %-3s    ",
 
-	  ONOFF(PRF_FLAGGED(ch, PRF_DISPHP)),
-	  ONOFF(PRF_FLAGGED(ch, PRF_BRIEF)),
-	  ONOFF(!PRF_FLAGGED(ch, PRF_SUMMONABLE)),
+	  ONOFF(char_prf_flagged(ch, PRF_DISPHP)),
+	  ONOFF(char_prf_flagged(ch, PRF_BRIEF)),
+	  ONOFF(!char_prf_flagged(ch, PRF_SUMMONABLE)),
 
-	  ONOFF(PRF_FLAGGED(ch, PRF_DISPMOVE)),
-	  ONOFF(PRF_FLAGGED(ch, PRF_COMPACT)),
-	  YESNO(PRF_FLAGGED(ch, PRF_QUEST)),
+	  ONOFF(char_prf_flagged(ch, PRF_DISPMOVE)),
+	  ONOFF(char_prf_flagged(ch, PRF_COMPACT)),
+	  YESNO(char_prf_flagged(ch, PRF_QUEST)),
 
-	  ONOFF(PRF_FLAGGED(ch, PRF_DISPEXP)),
-	  ONOFF(PRF_FLAGGED(ch, PRF_NOTELL)),
-	  YESNO(!PRF_FLAGGED(ch, PRF_NOREPEAT)),
+	  ONOFF(char_prf_flagged(ch, PRF_DISPEXP)),
+	  ONOFF(char_prf_flagged(ch, PRF_NOTELL)),
+	  YESNO(!char_prf_flagged(ch, PRF_NOREPEAT)),
 
-	  ONOFF(PRF_FLAGGED(ch, PRF_DISPKI)),
-	  YESNO(PRF_FLAGGED(ch, PRF_DEAF)),
+	  ONOFF(char_prf_flagged(ch, PRF_DISPKI)),
+	  YESNO(char_prf_flagged(ch, PRF_DEAF)),
 	  buf2,
 
-	  ONOFF(!PRF_FLAGGED(ch, PRF_NOGOSS)),
-	  ONOFF(!PRF_FLAGGED(ch, PRF_NOAUCT)),
-	  ONOFF(!PRF_FLAGGED(ch, PRF_NOGRATZ)),
+	  ONOFF(!char_prf_flagged(ch, PRF_NOGOSS)),
+	  ONOFF(!char_prf_flagged(ch, PRF_NOAUCT)),
+	  ONOFF(!char_prf_flagged(ch, PRF_NOGRATZ)),
 
-          ONOFF(PRF_FLAGGED(ch, PRF_AUTOLOOT)),
-          ONOFF(PRF_FLAGGED(ch, PRF_AUTOGOLD)),
+          ONOFF(char_prf_flagged(ch, PRF_AUTOLOOT)),
+          ONOFF(char_prf_flagged(ch, PRF_AUTOGOLD)),
 	  ctypes[COLOR_LEV(ch)],
 
-          ONOFF(PRF_FLAGGED(ch, PRF_AUTOSPLIT)),
-          ONOFF(PRF_FLAGGED(ch, PRF_AUTOSAC)),
-          ONOFF(PRF_FLAGGED(ch, PRF_AUTOMEM)),
+          ONOFF(char_prf_flagged(ch, PRF_AUTOSPLIT)),
+          ONOFF(char_prf_flagged(ch, PRF_AUTOSAC)),
+          ONOFF(char_prf_flagged(ch, PRF_AUTOMEM)),
 
-          ONOFF(PRF_FLAGGED(ch, PRF_VIEWORDER)),
-          ONOFF(PRF_FLAGGED(ch, PRF_AUTOASSIST)),
-	  ONOFF(PRF_FLAGGED(ch, PRF_AUTOEXIT)),
+          ONOFF(char_prf_flagged(ch, PRF_VIEWORDER)),
+          ONOFF(char_prf_flagged(ch, PRF_AUTOASSIST)),
+	  ONOFF(char_prf_flagged(ch, PRF_AUTOEXIT)),
 
-	  ONOFF(PRF_FLAGGED(ch, PRF_DISPTNL)));
+	  ONOFF(char_prf_flagged(ch, PRF_DISPTNL)));
 
           if (CONFIG_ENABLE_COMPRESSION) {
-            send_to_char(ch, "    Compression: %-3s\r\n", ONOFF(!PRF_FLAGGED(ch, PRF_NOCOMPRESS)));
+            send_to_char(ch, "    Compression: %-3s\r\n", ONOFF(!char_prf_flagged(ch, PRF_NOCOMPRESS)));
           }
 }
 
@@ -8051,11 +8051,11 @@ ACMD(do_commands)
   one_argument(argument, arg);
 
   if (*arg) {
-    if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)) || IS_NPC(vict)) {
+    if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)) || char_is_npc(vict)) {
       send_to_char(ch, "Who is that?\r\n");
       return;
     }
-    if (GET_LEVEL(ch) < GET_LEVEL(vict)) {
+    if (char_get_level(ch) < char_get_level(vict)) {
       send_to_char(ch, "You can't see the commands of people above your level.\r\n");
       return;
     }
@@ -8070,14 +8070,14 @@ ACMD(do_commands)
   send_to_char(ch, "The following %s%s are available to %s:\r\n",
 	  wizhelp ? "privileged " : "",
 	  socials ? "socials" : "commands",
-	  vict == ch ? "you" : GET_NAME(vict));
+	  vict == ch ? "you" : char_get_name(vict));
 
   /* cmd_num starts at 1, not 0, to remove 'RESERVED' */
   for (no = 1, cmd_num = 1; complete_cmd_info[cmd_sort_info[cmd_num]].command[0] != '\n'; cmd_num++) {
     i = cmd_sort_info[cmd_num];
 
     if (complete_cmd_info[i].minimum_level < 0 ||
-        GET_LEVEL(vict) < complete_cmd_info[i].minimum_level)
+        char_get_level(vict) < complete_cmd_info[i].minimum_level)
       continue;
 
     if (complete_cmd_info[i].minimum_admlevel < 0 ||
@@ -8164,7 +8164,7 @@ void add_history(struct char_data *ch, char *str, int type)
   struct txt_block *tmp;
   time_t ct;
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return;
 
   tmp = GET_HISTORY(ch, type);      
@@ -8208,26 +8208,26 @@ ACMD(do_scan)
     send_to_char(ch, "You can't see anything but stars!\n\r"); 
     return; 
   } 
-  if(!AWAKE(ch)){ 
+  if(!char_is_awake(ch)){ 
     send_to_char(ch, "You must be dreaming.\n\r"); 
     return; 
   } 
-  if(AFF_FLAGGED(ch, AFF_BLIND)){ 
+  if(char_aff_flagged(ch, AFF_BLIND)){ 
     send_to_char(ch, "You can't see a damn thing, you're blind!\n\r"); 
     return; 
   } 
-    if (PLR_FLAGGED(ch, PLR_EYEC)) {
+    if (char_plr_flagged(ch, PLR_EYEC)) {
       send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
       return;
     }
   for(i=0;i<10;i++){ 
     if(EXIT(ch, i)) { 
-      if(IS_DARK(ch->in_room) && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && 
-          (!AFF_FLAGGED(ch, AFF_INFRAVISION))){ 
+      if(room_is_dark(ch->in_room) && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && 
+          (!char_aff_flagged(ch, AFF_INFRAVISION))){ 
         send_to_char(ch,"%s: DARK\n\r",dirnames[i]); 
         continue; 
       } 
-      if(CAN_GO(ch,i)) { 
+      if(char_can_go(ch,i)) { 
         newroom=world[ch->in_room].dir_option[i]->to_room; 
         send_to_char(ch, "@w-----------------------------------------@n\r\n");
         send_to_char(ch,"          %s%s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i], world[newroom].name ? world[newroom].name : "You don't think you saw what you just saw.", CCNRM(ch, C_NRM)); 
@@ -8246,7 +8246,7 @@ ACMD(do_scan)
           newroom = _2ND_EXIT(ch, i)->to_room; 
 
           if ((newroom != NOWHERE) && (!IS_SET(_2ND_EXIT(ch, i)->exit_info, EX_CLOSED)) ) { 
-            if (!IS_DARK(_2ND_EXIT(ch, i)->to_room)) { 
+            if (!room_is_dark(_2ND_EXIT(ch, i)->to_room)) { 
               send_to_char(ch, "@w-----------------------------------------@n\r\n");
               send_to_char(ch,"          %sFar %s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i], world[newroom].name ? world[newroom].name : "You don't think you saw what you just saw.", CCNRM(ch, C_NRM) ); 
               send_to_char(ch, "@W          -----------------          @n\r\n");
@@ -8273,7 +8273,7 @@ ACMD(do_scan)
 
 ACMD(do_toplist)
 {
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
    return;
 
   FILE *file;
@@ -8462,12 +8462,12 @@ ACMD(do_whois)
     }
     send_to_char(ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
     if (GET_ADMLEVEL(victim) >= ADMLVL_IMMORT) {
-      send_to_char(ch, "@cName     @D: @G%s\r\n", GET_NAME(victim));
+      send_to_char(ch, "@cName     @D: @G%s\r\n", char_get_name(victim));
       send_to_char(ch, "@cImm Level@D: @G%s\r\n", immlevels[GET_ADMLEVEL(victim)]);
-      send_to_char(ch, "@cTitle    @D: @G%s\r\n", GET_TITLE(victim));
+      send_to_char(ch, "@cTitle    @D: @G%s\r\n", char_get_title(victim));
     }
     else {
-      send_to_char(ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", GET_NAME(victim), SENSEI_NAME(victim), TRUE_RACE(victim), GET_TITLE(victim), clan ? buf : "None.");
+      send_to_char(ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", char_get_name(victim), SENSEI_NAME(victim), TRUE_RACE(victim), char_get_title(victim), clan ? buf : "None.");
       if (clan == TRUE && !strstr(GET_CLAN(victim), "Applying")) {
        if (checkCLAN(victim) == TRUE) {
         clanRANKD(GET_CLAN(victim), ch, victim);
@@ -8492,10 +8492,10 @@ static void search_in_direction(struct char_data * ch, int dir)
   act("$n searches the area intently.", TRUE, ch, 0, 0, TO_ROOM);
 
   /* SEARCHING is allowed untrained */
-  skill_lvl = GET_SKILL(ch, SKILL_SEARCH);
-  if (IS_TRUFFLE(ch) || IS_HUMAN(ch)) 
+  skill_lvl = char_get_skill(ch, SKILL_SEARCH);
+  if (char_is_truffle(ch) || char_is_human(ch)) 
     skill_lvl = skill_lvl + 2;
-  if (IS_HALFBREED(ch))
+  if (char_is_halfbreed(ch))
     skill_lvl = skill_lvl + 1;
 
   if (EXIT(ch, dir))
@@ -8506,16 +8506,16 @@ static void search_in_direction(struct char_data * ch, int dir)
 
   if (EXIT(ch, dir)) {
     if (EXIT(ch, dir)->general_description &&
-        !EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET))
+        !room_exit_flagged(EXIT(ch, dir), EX_SECRET))
       send_to_char(ch, EXIT(ch, dir)->general_description);
-    else if (!EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET))
+    else if (!room_exit_flagged(EXIT(ch, dir), EX_SECRET))
       send_to_char(ch, "There is a normal exit there.\r\n");
-    else if (EXIT_FLAGGED(EXIT(ch, dir), EX_ISDOOR) &&
-             EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET) &&
+    else if (room_exit_flagged(EXIT(ch, dir), EX_ISDOOR) &&
+             room_exit_flagged(EXIT(ch, dir), EX_SECRET) &&
              EXIT(ch, dir)->keyword && (check == TRUE)  )
       send_to_char(ch, "There is a hidden door keyword: '%s' %sthere.\r\n",
                    fname (EXIT(ch, dir)->keyword),
-                   (EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED)) ? "" : "open ");
+                   (room_exit_flagged(EXIT(ch, dir), EX_CLOSED)) ? "" : "open ");
     else
       send_to_char(ch, "There is no exit there.\r\n");
   } else

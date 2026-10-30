@@ -116,52 +116,52 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
     break;
 
   case APPLY_SPELL_LVL_0:
-    if(!IS_NPC(ch))
+    if(!char_is_npc(ch))
       GET_SPELL_LEVEL(ch, SPELL_LEVEL_0) += mod;
     break;
 
   case APPLY_SPELL_LVL_1:
-    if(!IS_NPC(ch))
+    if(!char_is_npc(ch))
       GET_SPELL_LEVEL(ch, SPELL_LEVEL_1) += mod;
     break;
 
   case APPLY_SPELL_LVL_2:
-    if(!IS_NPC(ch))
+    if(!char_is_npc(ch))
       GET_SPELL_LEVEL(ch, SPELL_LEVEL_2) += mod;
     break;
 
   case APPLY_SPELL_LVL_3:
-    if(!IS_NPC(ch))
+    if(!char_is_npc(ch))
       GET_SPELL_LEVEL(ch, SPELL_LEVEL_3) += mod;
     break;
 
   case APPLY_SPELL_LVL_4:
-    if(!IS_NPC(ch))
+    if(!char_is_npc(ch))
       GET_SPELL_LEVEL(ch, SPELL_LEVEL_4) += mod;
     break;
 
   case APPLY_SPELL_LVL_5:
-    if(!IS_NPC(ch))
+    if(!char_is_npc(ch))
       GET_SPELL_LEVEL(ch, SPELL_LEVEL_5) += mod;
     break;
 
   case APPLY_SPELL_LVL_6:
-    if(!IS_NPC(ch))
+    if(!char_is_npc(ch))
       GET_SPELL_LEVEL(ch, SPELL_LEVEL_6) += mod;
     break;
 
   case APPLY_SPELL_LVL_7:
-    if(!IS_NPC(ch))
+    if(!char_is_npc(ch))
       GET_SPELL_LEVEL(ch, SPELL_LEVEL_7) += mod;
     break;
 
   case APPLY_SPELL_LVL_8:
-    if(!IS_NPC(ch))
+    if(!char_is_npc(ch))
       GET_SPELL_LEVEL(ch, SPELL_LEVEL_8) += mod;
     break;
 
   case APPLY_SPELL_LVL_9:
-    if(!IS_NPC(ch))
+    if(!char_is_npc(ch))
       GET_SPELL_LEVEL(ch, SPELL_LEVEL_9) += mod;
     break;
 
@@ -214,11 +214,11 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
 void affect_modify(struct char_data * ch, int loc, int mod, int spec, long bitv, bool add)
 {
   if (add) {
-   if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch)) {
+   if (bitv != AFF_INFRAVISION || !char_is_android(ch)) {
     SET_BIT_AR(AFF_FLAGS(ch), bitv);
    }
   } else {
-   if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch)) {
+   if (bitv != AFF_INFRAVISION || !char_is_android(ch)) {
     REMOVE_BIT_AR(AFF_FLAGS(ch), bitv);
     mod = -mod;
    }
@@ -236,7 +236,7 @@ void affect_modify_ar(struct char_data * ch, int loc, int mod, int spec, bitvect
     for(i = 0; i < AF_ARRAY_MAX; i++)
       for(j = 0; j < 32; j++)
         if(IS_SET_AR(bitv, (i*32)+j)) {
-         if ((i*32)+j != AFF_INFRAVISION || !IS_ANDROID(ch)) {
+         if ((i*32)+j != AFF_INFRAVISION || !char_is_android(ch)) {
           SET_BIT_AR(AFF_FLAGS(ch), (i*32)+j);
          }
         }
@@ -244,7 +244,7 @@ void affect_modify_ar(struct char_data * ch, int loc, int mod, int spec, bitvect
     for(i = 0; i < AF_ARRAY_MAX; i++)
       for(j = 0; j < 32; j++)
         if(IS_SET_AR(bitv, (i*32)+j)) {
-         if ((i*32)+j != AFF_INFRAVISION || !IS_ANDROID(ch)) {
+         if ((i*32)+j != AFF_INFRAVISION || !char_is_android(ch)) {
           REMOVE_BIT_AR(AFF_FLAGS(ch), (i*32)+j);
          }
         }

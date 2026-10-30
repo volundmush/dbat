@@ -33,7 +33,7 @@ static void grow_plants(void)
    continue;
   } else if (k->carried_by || k->in_obj) {
    continue;
-  } else if (ROOM_FLAGGED(IN_ROOM(k), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(k), ROOM_GARDEN2)) {
+  } else if (rroom_flagged(IN_ROOM(k), ROOM_GARDEN1) || rroom_flagged(IN_ROOM(k), ROOM_GARDEN2)) {
    if (GET_OBJ_VAL(k, VAL_WATERLEVEL) < 0 && GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {
     GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
     if (GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {
@@ -242,7 +242,7 @@ static void weather_change(void)
 
 
 void oozaru_transform(char_data *ch) {
-    if (PLR_FLAGGED(ch, PLR_OOZARU))
+    if (char_plr_flagged(ch, PLR_OOZARU))
         return;
 
     act("@rLooking up at the moon your heart begins to beat loudly. Sudden rage begins to fill your mind while your body begins to grow. Hair sprouts  all over your body and your teeth become sharp as your body takes on the Oozaru form!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -253,10 +253,10 @@ void oozaru_transform(char_data *ch) {
 void oozaru_add()
 {
     for (descriptor_data *d = descriptor_list; d; d = d->next) {
-        if (!IS_PLAYING(d)) {
+        if (!desc_is_playing(d)) {
             continue;
         }
-        if(MOON_OK(d->character) && !PLR_FLAGGED(d->character, PLR_OOZARU)) {
+        if(char_moon_ok(d->character) && !char_plr_flagged(d->character, PLR_OOZARU)) {
             oozaru_transform(d->character);
         }
 
@@ -264,7 +264,7 @@ void oozaru_add()
 }
 
 void oozaru_revert(char_data *ch) {
-    if (!PLR_FLAGGED(ch, PLR_OOZARU))
+    if (!char_plr_flagged(ch, PLR_OOZARU))
         return;
 
     act("@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -277,7 +277,7 @@ void oozaru_revert(char_data *ch) {
 void oozaru_drop()
 {
     for (descriptor_data *d = descriptor_list; d; d = d->next) {
-        if (!IS_PLAYING(d))
+        if (!desc_is_playing(d))
             continue;
         oozaru_revert(d->character);
     }
@@ -285,9 +285,9 @@ void oozaru_drop()
 
 
 static void check_hoshi_phase(struct char_data *ch, int type) {
-  if(IS_NPC(ch)) return;
-  if(GET_LEVEL(ch) < 2) return;
-  if(!IS_HOSHIJIN(ch)) return;
+  if(char_is_npc(ch)) return;
+  if(char_get_level(ch) < 2) return;
+  if(!char_is_hoshijin(ch)) return;
     switch (type) {
 	  case 0:
 	     if (GET_PHASE(ch) > 0) {
@@ -311,7 +311,7 @@ static void check_hoshi_phase(struct char_data *ch, int type) {
 		 }
 	   break; // Powerup Phase 2
 	  default:
-	    send_to_imm("Strange Error in star_phase by: %s", GET_NAME(ch));
+	    send_to_imm("Strange Error in star_phase by: %s", char_get_name(ch));
 	   break; // Error
 	 }
 }
@@ -327,7 +327,7 @@ void star_phase(struct char_data *ch, int type)
  }
 
 for (d = descriptor_list; d; d = d->next) {
-   if (!IS_PLAYING(d)) {
+   if (!desc_is_playing(d)) {
     continue;
    }
    check_hoshi_phase(d->character, type);
@@ -336,7 +336,7 @@ for (d = descriptor_list; d; d = d->next) {
 }
 
 static void phase_powerup(struct char_data *ch, int phase) {
-    if (IS_NPC(ch)) {
+    if (char_is_npc(ch)) {
         return;
     }
 
@@ -355,7 +355,7 @@ static void phase_powerup(struct char_data *ch, int phase) {
             bonus = 8;
             break;
         default:
-            send_to_imm("Error: phase_powerup called with GET_PHASE equal to zero by: %s", GET_NAME(ch));
+            send_to_imm("Error: phase_powerup called with GET_PHASE equal to zero by: %s", char_get_name(ch));
             return;
     }
 

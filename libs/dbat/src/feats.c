@@ -330,18 +330,18 @@ int feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg)
     return FALSE;
 
   case FEAT_WEAPON_SPECIALIZATION:
-    if (GET_CLASS_RANKS(ch, CLASS_NAIL) < 4)
+    if (char_get_class_ranks(ch, CLASS_NAIL) < 4)
       return FALSE;
     if (!iarg || is_proficient_with_weapon(ch, iarg))
       return TRUE;
     return FALSE;
 
   case FEAT_GREATER_WEAPON_FOCUS:
-    if (GET_CLASS_RANKS(ch, CLASS_NAIL) < 8)
+    if (char_get_class_ranks(ch, CLASS_NAIL) < 8)
       return FALSE;
     if (!iarg)
       return TRUE;
-    if (is_proficient_with_weapon(ch, iarg) && HAS_COMBAT_FEAT(ch, CFEAT_WEAPON_FOCUS, iarg))
+    if (is_proficient_with_weapon(ch, iarg) && char_has_combat_feat(ch, CFEAT_WEAPON_FOCUS, iarg))
       return TRUE;
     return FALSE;
 
@@ -355,104 +355,104 @@ int feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg)
     return FALSE;
 
   case FEAT_GREATER_WEAPON_SPECIALIZATION:
-    if (GET_CLASS_RANKS(ch, CLASS_NAIL) < 12)
+    if (char_get_class_ranks(ch, CLASS_NAIL) < 12)
       return FALSE;
     if (!iarg)
       return TRUE;
     if (is_proficient_with_weapon(ch, iarg) &&
-        HAS_COMBAT_FEAT(ch, CFEAT_GREATER_WEAPON_FOCUS, iarg) &&
-        HAS_COMBAT_FEAT(ch, CFEAT_WEAPON_SPECIALIZATION, iarg) &&
-        HAS_COMBAT_FEAT(ch, CFEAT_WEAPON_FOCUS, iarg))
+        char_has_combat_feat(ch, CFEAT_GREATER_WEAPON_FOCUS, iarg) &&
+        char_has_combat_feat(ch, CFEAT_WEAPON_SPECIALIZATION, iarg) &&
+        char_has_combat_feat(ch, CFEAT_WEAPON_FOCUS, iarg))
       return TRUE;
     return FALSE;
 
   case FEAT_SPELL_FOCUS:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
+    if (char_get_class_ranks(ch, CLASS_ROSHI))
       return TRUE;
     return FALSE;
 
   case FEAT_SPELL_PENETRATION:
-    if (GET_LEVEL(ch))
+    if (char_get_level(ch))
       return TRUE;
     return FALSE;
 
   case FEAT_BREW_POTION:
-    if (GET_LEVEL(ch) >= 3)
+    if (char_get_level(ch) >= 3)
       return TRUE;
     return FALSE;
 
   case FEAT_CRAFT_MAGICAL_ARMS_AND_ARMOR:
-    if (GET_LEVEL(ch) >= 5)
+    if (char_get_level(ch) >= 5)
       return TRUE;
     return FALSE;
 
   case FEAT_CRAFT_ROD:
-    if (GET_LEVEL(ch) >= 9)
+    if (char_get_level(ch) >= 9)
       return TRUE;
     return FALSE;
 
   case FEAT_CRAFT_STAFF:
-    if (GET_LEVEL(ch) >= 12)
+    if (char_get_level(ch) >= 12)
       return TRUE;
     return FALSE;
 
   case FEAT_CRAFT_WAND:
-    if (GET_LEVEL(ch) >= 5)
+    if (char_get_level(ch) >= 5)
       return TRUE;
     return FALSE;
 
   case FEAT_FORGE_RING:
-    if (GET_LEVEL(ch) >= 5)
+    if (char_get_level(ch) >= 5)
       return TRUE;
     return FALSE;
 
   case FEAT_SCRIBE_SCROLL:
-    if (GET_LEVEL(ch) >= 1)
+    if (char_get_level(ch) >= 1)
       return TRUE;
     return FALSE;
 
   case FEAT_EMPOWER_SPELL:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
+    if (char_get_class_ranks(ch, CLASS_ROSHI))
       return TRUE;
     return FALSE;
 
   case FEAT_EXTEND_SPELL:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
+    if (char_get_class_ranks(ch, CLASS_ROSHI))
       return TRUE;
     return FALSE;
 
   case FEAT_HEIGHTEN_SPELL:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
+    if (char_get_class_ranks(ch, CLASS_ROSHI))
       return TRUE;
     return FALSE;
 
   case FEAT_MAXIMIZE_SPELL:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
+    if (char_get_class_ranks(ch, CLASS_ROSHI))
       return TRUE;
     return FALSE;
 
   case FEAT_QUICKEN_SPELL:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
+    if (char_get_class_ranks(ch, CLASS_ROSHI))
       return TRUE;
     return FALSE;
 
   case FEAT_SILENT_SPELL:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
+    if (char_get_class_ranks(ch, CLASS_ROSHI))
       return TRUE;
     return FALSE;
 
   case FEAT_STILL_SPELL:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
+    if (char_get_class_ranks(ch, CLASS_ROSHI))
       return TRUE;
     return FALSE;
 
   case FEAT_EXTRA_TURNING:
-    if (GET_CLASS_RANKS(ch, CLASS_PICCOLO))
+    if (char_get_class_ranks(ch, CLASS_PICCOLO))
       return TRUE;
     return FALSE;
 
   case FEAT_SPELL_MASTERY:
-    if (GET_CLASS_RANKS(ch, CLASS_ROSHI))
+    if (char_get_class_ranks(ch, CLASS_ROSHI))
       return TRUE;
     return FALSE;
 
@@ -594,7 +594,7 @@ void list_feats_known(struct char_data *ch)
         case FEAT_GREATER_WEAPON_FOCUS:
         case FEAT_GREATER_WEAPON_SPECIALIZATION:
       for (j = 0; j <= MAX_WEAPON_TYPES; j++) {
-        if (HAS_COMBAT_FEAT(ch, feat_to_subfeat(i), j)) {
+        if (char_has_combat_feat(ch, feat_to_subfeat(i), j)) {
           sprintf(buf, "%-20s (%s)\r\n", feat_list[i].name, weapon_type[j]);
           strcat(buf2, buf);
           none_shown = FALSE;

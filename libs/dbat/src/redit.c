@@ -50,7 +50,7 @@ ACMD(do_oasis_redit)
    buf3 = two_arguments(argument, buf1, buf2);
   }
 
-  if (GET_ADMLEVEL(ch) < 1 && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_CANREMODEL)) {
+  if (GET_ADMLEVEL(ch) < 1 && !rroom_flagged(IN_ROOM(ch), ROOM_CANREMODEL)) {
    send_to_char(ch, "You can not remodel this room.\r\n");
    return;
   }
@@ -62,7 +62,7 @@ ACMD(do_oasis_redit)
        next_obj = capsule->next_content;
     if (remove != NULL) {
      continue;
-    } else if (GET_OBJ_VNUM(capsule) == 19094) {
+    } else if (obj_get_vnum(capsule) == 19094) {
      remove = capsule;    
     }
   }
@@ -78,7 +78,7 @@ ACMD(do_oasis_redit)
   }
   
   if (!*buf1 || GET_ADMLEVEL(ch) < 1)
-    number = GET_ROOM_VNUM(IN_ROOM(ch));
+    number = rroom_get_vnum(IN_ROOM(ch));
   else if (!isdigit(*buf1)) {
     if (strcasecmp("save", buf1) != 0) {
       send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
@@ -115,7 +115,7 @@ ACMD(do_oasis_redit)
     if (STATE(d) == CON_REDIT) {
       if (d->olc && OLC_NUM(d) == number) {
         send_to_char(ch, "That room is currently being edited by %s.\r\n", 
-          PERS(d->character, ch));
+          char_pers(d->character, ch));
         return;
       }
     }
@@ -152,7 +152,7 @@ ACMD(do_oasis_redit)
   
   if (save) {
     send_to_char(ch, "Saving all rooms in zone %d.\r\n", zone_table[OLC_ZNUM(d)].number);
-    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s saves room info for zone %d.", GET_NAME(ch), zone_table[OLC_ZNUM(d)].number);
+    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s saves room info for zone %d.", char_get_name(ch), zone_table[OLC_ZNUM(d)].number);
     
     /* Save the rooms. */
     save_rooms(OLC_ZNUM(d));
@@ -176,7 +176,7 @@ ACMD(do_oasis_redit)
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
-    GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+    char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
 }
 
 void redit_setup_new(struct descriptor_data *d)
@@ -574,7 +574,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
     case 'Y':
       redit_save_internally(d);
       mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
-	"OLC: %s edits room %d.", GET_NAME(d->character), OLC_NUM(d));
+	"OLC: %s edits room %d.", char_get_name(d->character), OLC_NUM(d));
       if (CONFIG_OLC_SAVE) {
 	redit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
         if (GET_ADMLEVEL(d->character) < 1) {

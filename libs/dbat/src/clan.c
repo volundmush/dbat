@@ -574,7 +574,7 @@ bool clanCreate(const char *name) {
 void clanINFOW(char *name, struct char_data *ch) {
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch))
+  if(S == NULL || char_is_npc(ch))
    return;
   else {
   char *backstr = NULL;
@@ -621,7 +621,7 @@ bool clanApply(const char *name, struct char_data *ch) {
   char buf[MAX_INPUT_LENGTH];
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch))
+  if(S == NULL || char_is_npc(ch))
     return FALSE;
 
   if(clanMemberFromList(GET_IDNUM(ch), S->moderators) ||
@@ -647,7 +647,7 @@ bool clanApply(const char *name, struct char_data *ch) {
 bool clanHIGHRANK(const char *name, const struct char_data *ch, const char *rank) {
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch)) {
+  if(S == NULL || char_is_npc(ch)) {
     return FALSE;
   }
   else {
@@ -659,7 +659,7 @@ bool clanHIGHRANK(const char *name, const struct char_data *ch, const char *rank
 bool clanMIDRANK(const char *name, const struct char_data *ch, const char *rank) {
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch)) {
+  if(S == NULL || char_is_npc(ch)) {
     return FALSE;
   }
   else {
@@ -672,7 +672,7 @@ bool clanMIDRANK(const char *name, const struct char_data *ch, const char *rank)
 bool clanRANK(const char *name, const struct char_data *ch, struct char_data *vict, int num) {
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch)) {
+  if(S == NULL || char_is_npc(ch)) {
     return FALSE;
   }
   else {
@@ -684,7 +684,7 @@ bool clanRANK(const char *name, const struct char_data *ch, struct char_data *vi
 bool clanRANKD(const char *name, struct char_data *ch, struct char_data *vict) {
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch)) {
+  if(S == NULL || char_is_npc(ch)) {
     return FALSE;
   }
   else {
@@ -708,7 +708,7 @@ bool clanRANKD(const char *name, struct char_data *ch, struct char_data *vict) {
 bool clanBANY(const char *name, const struct char_data *ch) {
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch)) {
+  if(S == NULL || char_is_npc(ch)) {
     return FALSE;
   }
   if (S->bany <= 0) {
@@ -722,7 +722,7 @@ bool clanBANY(const char *name, const struct char_data *ch) {
 bool clanBSET(const char *name, struct char_data *ch) {
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch)) {
+  if(S == NULL || char_is_npc(ch)) {
     return FALSE;
   }
   if (S->bany > 0) {
@@ -743,7 +743,7 @@ bool clanBANKADD(const char *name, const struct char_data *ch, long amt) {
 
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch)) {
+  if(S == NULL || char_is_npc(ch)) {
     return FALSE;
   }
   else {
@@ -756,7 +756,7 @@ bool clanBANKADD(const char *name, const struct char_data *ch, long amt) {
 long clanBANK(const char *name, const struct char_data *ch) {
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch)) {
+  if(S == NULL || char_is_npc(ch)) {
     return FALSE;
   }
   else {
@@ -770,7 +770,7 @@ bool clanBANKSUB(const char *name, const struct char_data *ch, long amt) {
 
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch)) {
+  if(S == NULL || char_is_npc(ch)) {
     return FALSE;
   }
   if (S->bank - amt < 0) {
@@ -788,7 +788,7 @@ bool clanInduct(const char *name, struct char_data *ch) {
   struct clan_data *S = clanGet(name);
   char buf[MAX_INPUT_LENGTH];
 
-  if(S == NULL || IS_NPC(ch))
+  if(S == NULL || char_is_npc(ch))
     return FALSE;
 
   if(clanMemberFromList(GET_IDNUM(ch), S->moderators) ||
@@ -832,7 +832,7 @@ bool clanMakeModerator(const char *name, struct char_data *ch)
   struct clan_data *S = clanGet(name);
   char buf[MAX_INPUT_LENGTH];
 
-  if(S == NULL || IS_NPC(ch))
+  if(S == NULL || char_is_npc(ch))
     return FALSE;
 
   if(clanMemberFromList(GET_IDNUM(ch), S->moderators))
@@ -863,7 +863,7 @@ void clanExpel(const char *name, struct char_data *ch) {
   struct clan_member *m, *temp;
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch))
+  if(S == NULL || char_is_npc(ch))
     return;
   remove_clan(ch);
   if( (m = clanMemberFromList(GET_IDNUM(ch), S->moderators)) ) {
@@ -884,7 +884,7 @@ void clanDecline(const char *name, const struct char_data *ch) {
   struct clan_member *m, *temp;
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch))
+  if(S == NULL || char_is_npc(ch))
     return;
 
   if( (m = clanMemberFromList(GET_IDNUM(ch), S->applicants)) ) {
@@ -897,7 +897,7 @@ void clanDecline(const char *name, const struct char_data *ch) {
 void handle_clan_member_list(struct char_data *ch)
 {
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
   return;
 
  if (!GET_CLAN(ch) || GET_CLAN(ch) == NULL)
@@ -921,7 +921,7 @@ bool clanIsMember(const char *name, const struct char_data *ch) {
 
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch))
+  if(S == NULL || char_is_npc(ch))
     return FALSE;
 
   if(clanMemberFromList(GET_IDNUM(ch), S->moderators) ||
@@ -936,7 +936,7 @@ bool clanIsModerator(const char *name, const struct char_data *ch) {
 
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch))
+  if(S == NULL || char_is_npc(ch))
     return FALSE;
 
   return (clanMemberFromList(GET_IDNUM(ch), S->moderators) != NULL);
@@ -947,7 +947,7 @@ bool clanIsApplicant(const char *name, const struct char_data *ch) {
 
   struct clan_data *S = clanGet(name);
 
-  if(S == NULL || IS_NPC(ch))
+  if(S == NULL || char_is_npc(ch))
     return FALSE;
 
   return (clanMemberFromList(GET_IDNUM(ch), S->applicants) != NULL);
@@ -1030,7 +1030,7 @@ char_data *ch) {
   int i;
   bool clan_found = FALSE;
 
-  if(!IS_NPC(vict)) {
+  if(!char_is_npc(vict)) {
     for(i = 0; i < num_clans; i++) {
 
       if(clanMemberFromList(GET_IDNUM(vict), clan[i]->moderators) ||
@@ -1038,7 +1038,7 @@ char_data *ch) {
 
 	if(clan_found == FALSE) {
 	  clan_found = TRUE;
-	  send_to_char(ch, "Clans %s belongs to:\r\n", GET_NAME(vict));
+	  send_to_char(ch, "Clans %s belongs to:\r\n", char_get_name(vict));
 	}
 	send_to_char(ch, "  %s\r\n", clan[i]->name);
       }
@@ -1046,7 +1046,7 @@ char_data *ch) {
   }
 
   if(!clan_found)
-    send_to_char(ch, "%s does not belong to any clans.\r\n", GET_NAME(vict));
+    send_to_char(ch, "%s does not belong to any clans.\r\n", char_get_name(vict));
 }
 
 

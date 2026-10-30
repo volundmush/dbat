@@ -36,9 +36,9 @@ static struct bfs_queue_struct *bfs_queue_head = 0, *bfs_queue_tail = 0;
 /* Utility macros */
 #define MARK(room)	(SET_BIT_AR(ROOM_FLAGS(room), ROOM_BFS_MARK))
 #define UNMARK(room)	(REMOVE_BIT_AR(ROOM_FLAGS(room), ROOM_BFS_MARK))
-#define IS_MARKED(room)	(ROOM_FLAGGED(room, ROOM_BFS_MARK))
+#define IS_MARKED(room)	(rroom_flagged(room, ROOM_BFS_MARK))
 #define TOROOM(x, y)	(world[(x)].dir_option[(y)]->to_room)
-#define IS_CLOSED(x, y)	(EXIT_FLAGGED(world[(x)].dir_option[(y)], EX_CLOSED))
+#define IS_CLOSED(x, y)	(room_exit_flagged(world[(x)].dir_option[(y)], EX_CLOSED))
 
 int VALID_EDGE(room_rnum x, int y)
 {
@@ -46,7 +46,7 @@ int VALID_EDGE(room_rnum x, int y)
     return 0;
   if (CONFIG_TRACK_T_DOORS == FALSE && IS_CLOSED(x, y))
     return 0;
-  if (ROOM_FLAGGED(TOROOM(x, y), ROOM_NOTRACK) || IS_MARKED(TOROOM(x, y)))
+  if (rroom_flagged(TOROOM(x, y), ROOM_NOTRACK) || IS_MARKED(TOROOM(x, y)))
     return 0;
 
   return 1;
@@ -152,7 +152,7 @@ ACMD(do_sradar)
 
   one_argument(argument, arg);
 
-  if (!PLR_FLAGGED(ch, PLR_PILOTING) && GET_ADMLEVEL(ch) < 1) {
+  if (!char_plr_flagged(ch, PLR_PILOTING) && GET_ADMLEVEL(ch) < 1) {
    send_to_char(ch, "You are not flying a ship, maybe you want detect?\r\n");
    return;
   }
@@ -162,7 +162,7 @@ ACMD(do_sradar)
     return;
   }
 
-  if (!PLR_FLAGGED(ch, PLR_PILOTING) && GET_ADMLEVEL(ch) >= 1) {
+  if (!char_plr_flagged(ch, PLR_PILOTING) && GET_ADMLEVEL(ch) >= 1) {
    noship = TRUE;
   }
   else if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, 0))) ) {
@@ -170,10 +170,10 @@ ACMD(do_sradar)
     return;
   }
 
-  if (noship == FALSE && SECT(IN_ROOM(vehicle)) != SECT_SPACE) {
+  if (noship == FALSE && rroom_sect(IN_ROOM(vehicle)) != SECT_SPACE) {
     send_to_char(ch, "@wYour ship is not in space!\r\n");
     return;
-  } if (noship == TRUE && SECT(IN_ROOM(ch)) != SECT_SPACE) {
+  } if (noship == TRUE && rroom_sect(IN_ROOM(ch)) != SECT_SPACE) {
     send_to_char(ch, "@wYou are not even in space!\r\n");
     return;
   } 
@@ -182,7 +182,7 @@ ACMD(do_sradar)
    if (GET_ADMLEVEL(ch) >= 1 && noship == TRUE) {
     printmap(ch->in_room, ch, 0, -1);
    } else {
-    printmap(IN_ROOM(vehicle), ch, 0, GET_OBJ_VNUM(vehicle));
+    printmap(IN_ROOM(vehicle), ch, 0, obj_get_vnum(vehicle));
    }
   /*
    send_to_char(ch, "     @D----------------[@C Radar @D]-----------------@n\r\n");
@@ -318,7 +318,7 @@ ACMD(do_radar)
 
   for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
        next_obj = obj2->next_content;
-   if (GET_OBJ_VNUM(obj2) == 12 && (!OBJ_FLAGGED(obj2, ITEM_BROKEN)) && (!OBJ_FLAGGED(obj2, ITEM_FORGED))) {
+   if (obj_get_vnum(obj2) == 12 && (!obj_flagged(obj2, ITEM_BROKEN)) && (!obj_flagged(obj2, ITEM_FORGED))) {
     found2 = TRUE;
    }
   }
@@ -327,7 +327,7 @@ ACMD(do_radar)
    return;
   }
 
-  if (IS_NPC(ch)) {
+  if (char_is_npc(ch)) {
    send_to_char(ch, "You are a freaking mob!\r\n");
    return;
   }
@@ -339,9 +339,9 @@ ACMD(do_radar)
  if (real_room(room) != NOWHERE) {
  for (obj = world[real_room(room)].contents; obj; obj = next_obj) {
       next_obj = obj->next_content;
-  if (OBJ_FLAGGED(obj, ITEM_FORGED)) {
+  if (obj_flagged(obj, ITEM_FORGED)) {
    continue;
-  } else if (GET_OBJ_VNUM(obj) == 20 || GET_OBJ_VNUM(obj) == 21 || GET_OBJ_VNUM(obj) == 22 || GET_OBJ_VNUM(obj) == 23 || GET_OBJ_VNUM(obj) == 24 || GET_OBJ_VNUM(obj) == 25 || GET_OBJ_VNUM(obj) == 26) {
+  } else if (obj_get_vnum(obj) == 20 || obj_get_vnum(obj) == 21 || obj_get_vnum(obj) == 22 || obj_get_vnum(obj) == 23 || obj_get_vnum(obj) == 24 || obj_get_vnum(obj) == 25 || obj_get_vnum(obj) == 26) {
    dir = find_first_step(IN_ROOM(ch), IN_ROOM(obj));
    fcount += 1;
   switch (dir) {
@@ -367,9 +367,9 @@ ACMD(do_radar)
   }
   for (obj = tch->carrying; obj; obj = next_obj) {
        next_obj = obj->next_content;
-   if (OBJ_FLAGGED(obj, ITEM_FORGED)) {
+   if (obj_flagged(obj, ITEM_FORGED)) {
     continue;
-   } else if (GET_OBJ_VNUM(obj) == 20 || GET_OBJ_VNUM(obj) == 21 || GET_OBJ_VNUM(obj) == 22 || GET_OBJ_VNUM(obj) == 23 || GET_OBJ_VNUM(obj) == 24 || GET_OBJ_VNUM(obj) == 25 || GET_OBJ_VNUM(obj) == 26) {
+   } else if (obj_get_vnum(obj) == 20 || obj_get_vnum(obj) == 21 || obj_get_vnum(obj) == 22 || obj_get_vnum(obj) == 23 || obj_get_vnum(obj) == 24 || obj_get_vnum(obj) == 25 || obj_get_vnum(obj) == 26) {
       dir = find_first_step(IN_ROOM(ch), IN_ROOM(tch));
       fcount += 1;
   switch (dir) {
@@ -409,7 +409,7 @@ ACMD(do_track)
 	int count = 0, dir;
 
 	/* The character must have the track skill. */
-	if (IS_NPC(ch) || !GET_SKILL(ch, SKILL_SENSE)) {
+	if (char_is_npc(ch) || !char_get_skill(ch, SKILL_SENSE)) {
 		send_to_char(ch, "You have no idea how.\r\n");
 		return;
 	}
@@ -426,7 +426,7 @@ ACMD(do_track)
 	else if (!*arg && FIGHTING(ch)) {
 		vict = FIGHTING(ch);
 		send_to_char(ch, "You focus on the one your are fighting.\r\n");
-		if (AFF_FLAGGED(vict, AFF_NOTRACK) || IS_ANDROID(vict)) {
+		if (char_aff_flagged(vict, AFF_NOTRACK) || char_is_android(vict)) {
 			send_to_char(ch, "You can't sense them.\r\n");
 			return;
 		}
@@ -437,7 +437,7 @@ ACMD(do_track)
 		act("You look at $N@n intently for a moment.", TRUE, ch, 0, vict, TO_CHAR);
 		act("$n looks at you intently for a moment.", TRUE, ch, 0, vict, TO_VICT);
 		act("$n looks at $N@n intently for a moment.", TRUE, ch, 0, vict, TO_NOTVICT);
-		if (!IS_ANDROID(vict)) {
+		if (!char_is_android(vict)) {
 			if (GET_ALIGNMENT(vict) > 50 && GET_ALIGNMENT(vict) < 200) {
 				send_to_char(ch, "You sense slightly pure and good ki from them.\r\n");
 			}
@@ -511,7 +511,7 @@ ACMD(do_track)
 			if (STATE(i) != CON_PLAYING) {
 				continue;
 			}
-			else if (IS_ANDROID(i->character)) {
+			else if (char_is_android(i->character)) {
 				continue;
 			}
 			else if (i->character == ch) {
@@ -612,7 +612,7 @@ ACMD(do_track)
 	}
 
 	/* We can't track the victim. */
-	if (AFF_FLAGGED(vict, AFF_NOTRACK) || IS_ANDROID(vict)) {
+	if (char_aff_flagged(vict, AFF_NOTRACK) || char_is_android(vict)) {
 		send_to_char(ch, "You can't sense them.\r\n");
 		return;
 	}
@@ -633,7 +633,7 @@ ACMD(do_track)
 		return;
 	}
 
-	if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_YARDRAT)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_YARDRAT))))
+	if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_YARDRAT)) && (rroom_flagged(IN_ROOM(vict), ROOM_YARDRAT))))
 	{
 		send_to_char(ch, "@WSense@D: @YYardrat@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -643,7 +643,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_EARTH))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_EARTH)) && (rroom_flagged(IN_ROOM(vict), ROOM_EARTH))))
 	{
 		send_to_char(ch, "@WSense@D: @GEarth@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -653,7 +653,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_VEGETA))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_VEGETA)) && (rroom_flagged(IN_ROOM(vict), ROOM_VEGETA))))
 	{
 		send_to_char(ch, "@WSense@D: @YVegeta@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -663,7 +663,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_NAMEK))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_NAMEK)) && (rroom_flagged(IN_ROOM(vict), ROOM_NAMEK))))
 	{
 		send_to_char(ch, "@WSense@D: @gNamek@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -673,7 +673,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_FRIGID))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_FRIGID)) && (rroom_flagged(IN_ROOM(vict), ROOM_FRIGID))))
 	{
 		send_to_char(ch, "@WSense@D: @CFrigid@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -683,7 +683,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_AETHER))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_AETHER)) && (rroom_flagged(IN_ROOM(vict), ROOM_AETHER))))
 	{
 		send_to_char(ch, "@WSense@D: @mAetherh@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -693,7 +693,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_KONACK)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_KONACK))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_KONACK)) && (rroom_flagged(IN_ROOM(vict), ROOM_KONACK))))
 	{
 		send_to_char(ch, "@WSense@D: @MKonack@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -703,7 +703,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_KANASSA))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_KANASSA)) && (rroom_flagged(IN_ROOM(vict), ROOM_KANASSA))))
 	{
 		send_to_char(ch, "@WSense@D: @cKanassa@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -713,7 +713,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(ROOM_FLAGGED(IN_ROOM(ch), ROOM_ARLIA)) && (ROOM_FLAGGED(IN_ROOM(vict), ROOM_ARLIA))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(IN_ROOM(ch), ROOM_ARLIA)) && (rroom_flagged(IN_ROOM(vict), ROOM_ARLIA))))
 	{
 		send_to_char(ch, "@WSense@D: @yArlia@n\r\n");
 		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -723,7 +723,7 @@ ACMD(do_track)
 			free(blah);
 		}
 	}
-	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(PLANET_ZENITH(IN_ROOM(ch))) && (PLANET_ZENITH(IN_ROOM(vict)))))
+	else if ((GET_SKILL_BASE(ch, SKILL_SENSE) == 100) && (!(rroom_planet_zenith(IN_ROOM(ch))) && (rroom_planet_zenith(IN_ROOM(vict)))))
    {
 	send_to_char(ch, "@WSense@D: @CZenith@n\r\n");
 	if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
@@ -738,12 +738,12 @@ ACMD(do_track)
 
 
 
-		if (GET_SKILL(ch, SKILL_SENSE) < rand_number(1, 101)) {
+		if (char_get_skill(ch, SKILL_SENSE) < rand_number(1, 101)) {
 			int tries = 10;
 			/* Find a random direction. :) */
 			do {
 				dir = rand_number(0, NUM_OF_DIRS - 1);
-			} while (!CAN_GO(ch, dir) && --tries);
+			} while (!char_can_go(ch, dir) && --tries);
 			send_to_char(ch, "You sense them %s faintly from here, but are unsure....\r\n", dirs[dir]);
 			improve_skill(ch, SKILL_SENSE, 1);
 			improve_skill(ch, SKILL_SENSE, 1);
@@ -762,7 +762,7 @@ ACMD(do_track)
 			act("You look at $N@n intently for a moment.", TRUE, ch, 0, vict, TO_CHAR);
 			act("$n looks at you intently for a moment.", TRUE, ch, 0, vict, TO_VICT);
 			act("$n looks at $N intently for a moment.", TRUE, ch, 0, vict, TO_NOTVICT);
-			if (!IS_ANDROID(vict)) {
+			if (!char_is_android(vict)) {
 				if (GET_ALIGNMENT(vict) > 50 && GET_ALIGNMENT(vict) < 200) {
 					send_to_char(ch, "You sense slightly pure and good ki from them.\r\n");
 				}
@@ -785,7 +785,7 @@ ACMD(do_track)
 					send_to_char(ch, "You sense slightly mild indefinable ki from them.\r\n");
 				}
 			}
-			if (!IS_ANDROID(vict)) {
+			if (!char_is_android(vict)) {
 				if (GET_HIT(vict) > GET_HIT(ch) * 50) {
 					send_to_char(ch, "Their power is so huge it boggles your mind and crushes your spirit to fight!\n");
 				}
@@ -835,10 +835,10 @@ ACMD(do_track)
 			}
 			break;
 		case BFS_TO_FAR:
-			send_to_char(ch, "You are too far to sense %s accurately from here.\r\n", HMHR(vict));
+			send_to_char(ch, "You are too far to sense %s accurately from here.\r\n", char_hmhr(vict));
 			break;
 		case BFS_NO_PATH:
-			send_to_char(ch, "You can't sense %s from here.\r\n", HMHR(vict));
+			send_to_char(ch, "You can't sense %s from here.\r\n", char_hmhr(vict));
 			break;
 		default:	/* Success! */
 			if ((GET_SKILL_BASE(ch, SKILL_SENSE) >= 75)) {

@@ -97,7 +97,7 @@ ACMD(do_oasis_oedit)
     if (STATE(d) == CON_OEDIT) {
       if (d->olc && OLC_NUM(d) == number) {
         send_to_char(ch, "That object is currently being edited by %s.\r\n",
-          PERS(d->character, ch));
+          char_pers(d->character, ch));
         return;
       }
     }
@@ -155,7 +155,7 @@ ACMD(do_oasis_oedit)
     send_to_char(ch, "Saving all objects in zone %d.\r\n",
       zone_table[OLC_ZNUM(d)].number);
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE,
-      "OLC: %s saves object info for zone %d.", GET_NAME(ch),
+      "OLC: %s saves object info for zone %d.", char_get_name(ch),
       zone_table[OLC_ZNUM(d)].number);
     
     /**************************************************************************/
@@ -195,7 +195,7 @@ ACMD(do_oasis_oedit)
   /** Log the OLC message.                                                   **/
   /****************************************************************************/
   mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
-    GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+    char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
 }
 
 void oedit_setup_new(struct descriptor_data *d)
@@ -1032,17 +1032,17 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     case 'Y':
       oedit_save_internally(d);
       mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
-	"OLC: %s edits obj %d", GET_NAME(d->character), OLC_NUM(d));
+	"OLC: %s edits obj %d", char_get_name(d->character), OLC_NUM(d));
       if (CONFIG_OLC_SAVE) {
 	oedit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
 	write_to_output(d, "Object saved to disk.\r\n");
       } else
         write_to_output(d, "Object saved to memory.\r\n");
       if(GET_OBJ_TYPE(OLC_OBJ(d)) == ITEM_BOARD) {
-	if((tmp=locate_board(GET_OBJ_VNUM(OLC_OBJ(d)))) != NULL) {
+	if((tmp=locate_board(obj_get_vnum(OLC_OBJ(d)))) != NULL) {
 	  save_board(tmp);
 	} else {
-	  tmp = create_new_board(GET_OBJ_VNUM(OLC_OBJ(d)));
+	  tmp = create_new_board(obj_get_vnum(OLC_OBJ(d)));
 	  BOARD_NEXT(tmp) = bboards;
 	  bboards = tmp;
 	}
@@ -1110,7 +1110,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
         GET_ID(obj) = dg_new_obj_uid();
         /* find_obj helper */
         add_to_lookup_table(GET_ID(obj), OBJ_TRIGGER, (void *)obj);
-        if (GET_OBJ_VNUM(obj) != NOTHING) {
+        if (obj_get_vnum(obj) != NOTHING) {
           /* remove any old scripts */
           if (SCRIPT(obj)) {
             extract_script(obj, OBJ_TRIGGER);
@@ -1118,14 +1118,14 @@ void oedit_parse(struct descriptor_data *d, char *arg)
           }
 
           free_proto_script(obj, OBJ_TRIGGER);
-          robj = real_object(GET_OBJ_VNUM(obj));
+          robj = real_object(obj_get_vnum(obj));
           copy_proto_script(&obj_proto[robj], obj, OBJ_TRIGGER);
           assign_triggers(obj, OBJ_TRIGGER);
         }
         SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE);
   /* Xap - ought to save the old pointer, free after assignment I suppose */
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
-               "OLC: %s iedit a unique #%d", GET_NAME(d->character), GET_OBJ_VNUM(obj));
+               "OLC: %s iedit a unique #%d", char_get_name(d->character), obj_get_vnum(obj));
         if (d->character) {
           REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
           STATE(d) = CON_PLAYING;
@@ -1735,7 +1735,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       int counter;
 
       /* add in check here if already applied.. deny builders another */
-      if (GET_LEVEL(d->character) < ADMLVL_IMPL) {
+      if (char_get_level(d->character) < ADMLVL_IMPL) {
         for (counter = 0; counter < SKILL_TABLE_SIZE; counter++) {
           if (OLC_OBJ(d)->sbinfo && OLC_OBJ(d)->sbinfo[counter].spellname == number) {
             write_to_output(d, "Object already has that spell.");

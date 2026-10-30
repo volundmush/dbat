@@ -22,7 +22,7 @@ void broken_update()
 
   health = GET_OBJ_VAL(k, VAL_ALL_HEALTH); // Indicated the health of the object in question
 
-  if (GET_OBJ_VNUM(k) == 11) { /* Gravity Generator */
+  if (obj_get_vnum(k) == 11) { /* Gravity Generator */
    grav_roll = rand_number(0, 13);
    if (health <= 10) {
     grav_change = TRUE;
@@ -40,7 +40,7 @@ void broken_update()
    }
   } /* End Gravity Section */
 
-  if (GET_OBJ_VNUM(k) == 3034) { /* ATM */
+  if (obj_get_vnum(k) == 3034) { /* ATM */
    if (health <= 10) {
     send_to_room(IN_ROOM(k), "@RThe ATM machine shoots smoking bills from its money slot. The bills burn up as they float through the air!@n\r\n");
    } else if (health <= 40 && dice <= 8) {

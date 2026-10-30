@@ -54,7 +54,7 @@ void free_config(struct config_data *data);
  */
 void clear_screen(struct descriptor_data *d)
 {
-  if (PRF_FLAGGED(d->character, PRF_CLS))
+  if (char_prf_flagged(d->character, PRF_CLS))
     write_to_output(d, "[H[J");
 }
 
@@ -78,7 +78,7 @@ ACMD(do_oasis)
   /*
    * No screwing around as a mobile.
    */
-  if (IS_NPC(ch) || !ch->desc)
+  if (char_is_npc(ch) || !ch->desc)
      return;
    
   /*
@@ -330,13 +330,13 @@ if(OLC_HOUSE(d))
     act("$n stops using OLC.", TRUE, d->character, NULL, NULL, TO_ROOM);
     
     if (cleanup_type == CLEANUP_CONFIG)
-      mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing the game configuration", GET_NAME(d->character));
+      mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing the game configuration", char_get_name(d->character));
     else if (STATE(d) == CON_TEDIT)
-      mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing text files.", GET_NAME(d->character));
+      mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing text files.", char_get_name(d->character));
     else if (STATE(d) == CON_HEDIT)
-      mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing help files.", GET_NAME(d->character));
+      mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing help files.", char_get_name(d->character));
     else
-      mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing zone %d allowed zone %d", GET_NAME(d->character), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(d->character));
+      mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing zone %d allowed zone %d", char_get_name(d->character), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(d->character));
 
     STATE(d) = CON_PLAYING;
   }
@@ -405,7 +405,7 @@ void free_config(struct config_data *data)
 int can_edit_zone(struct char_data *ch, zone_rnum rnum)
 {
   /* no access if called with bad arguments */
-  if (!ch->desc || IS_NPC(ch) || rnum == NOWHERE)
+  if (!ch->desc || char_is_npc(ch) || rnum == NOWHERE)
     return FALSE;
 
   if (rnum == HEDIT_PERMISSION)
@@ -416,7 +416,7 @@ int can_edit_zone(struct char_data *ch, zone_rnum rnum)
     return (TRUE);
   
   /* always access if a player helped build the zone in the first place */ 
-  if (is_name(GET_NAME(ch), zone_table[rnum].builders))
+  if (is_name(char_get_name(ch), zone_table[rnum].builders))
     return (TRUE);
   
   /* no access if you haven't been assigned a zone */
@@ -441,7 +441,7 @@ void send_cannot_edit(struct char_data *ch, zone_vnum zone)
     send_to_char(ch, "  Try zone %d.", GET_OLC_ZONE(ch));
   send_to_char(ch, "\r\n");
   mudlog(BRF, ADMLVL_IMPL, TRUE, "OLC: %s tried to edit zone %d allowed zone %d",
-    GET_NAME(ch), zone, GET_OLC_ZONE(ch));
+    char_get_name(ch), zone, GET_OLC_ZONE(ch));
 
 }
 

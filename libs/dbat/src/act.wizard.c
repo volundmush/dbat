@@ -98,7 +98,7 @@ ACMD(do_lag)
   if(!d->character) {
    continue;
   }
-  if (!strcasecmp(CAP(GET_NAME(d->character)), CAP(arg))) {
+  if (!strcasecmp(CAP(char_get_name(d->character)), CAP(arg))) {
    if (GET_ADMLEVEL(d->character) > GET_ADMLEVEL(ch)) {
     send_to_char(ch, "Sorry, you've been outranked.\r\n");
     continue;
@@ -157,7 +157,7 @@ void update_space(void)
 ACMD(do_news)
 {
 
- if(IS_NPC(ch)) {
+ if(char_is_npc(ch)) {
    return;
  }
 
@@ -277,7 +277,7 @@ ACMD(do_news)
 ACMD(do_newsedit)
 {
 
- if(GET_ADMLEVEL(ch) < 1 || IS_NPC(ch)) {
+ if(GET_ADMLEVEL(ch) < 1 || char_is_npc(ch)) {
    return;
  }
 
@@ -368,7 +368,7 @@ ACMD(do_newsedit)
 
 static void print_lockout(struct char_data *ch)
 {
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
    return;
 
   FILE *file;
@@ -431,7 +431,7 @@ ACMD(do_approve)
   return;
  }
  
- if (PLR_FLAGGED(vict, PLR_BIOGR)) {
+ if (char_plr_flagged(vict, PLR_BIOGR)) {
   send_to_char(ch, "They have already been approved. If this was made in error inform Iovan.\r\n");
   return;
  } else {
@@ -490,13 +490,13 @@ static void lockWrite(struct char_data *ch, char *name)
   }
   if (found == FALSE) {
    fprintf(fl, "%s\n", CAP(name));
-   send_to_all("@rLOCKOUT@D: @WThe character, @C%s@W, was locked out of the MUD by @c%s@W.@n\r\n", CAP(name), GET_NAME(ch));
-   log("LOCKOUT: %s sentenced by %s.", CAP(name), GET_NAME(ch));
-   log_imm_action("LOCKOUT: %s sentenced by %s.", CAP(name), GET_NAME(ch));
+   send_to_all("@rLOCKOUT@D: @WThe character, @C%s@W, was locked out of the MUD by @c%s@W.@n\r\n", CAP(name), char_get_name(ch));
+   log("LOCKOUT: %s sentenced by %s.", CAP(name), char_get_name(ch));
+   log_imm_action("LOCKOUT: %s sentenced by %s.", CAP(name), char_get_name(ch));
   } else {
-   send_to_all("@rLOCKOUT@D: @WThe character, @C%s@W, has had lockout removed by @c%s@W.@n\r\n", CAP(name), GET_NAME(ch));
-   log("LOCKOUT: %s sentenced by %s.", CAP(name), GET_NAME(ch));
-   log_imm_action("LOCKOUT: %s sentenced by %s.", CAP(name), GET_NAME(ch));
+   send_to_all("@rLOCKOUT@D: @WThe character, @C%s@W, has had lockout removed by @c%s@W.@n\r\n", CAP(name), char_get_name(ch));
+   log("LOCKOUT: %s sentenced by %s.", CAP(name), char_get_name(ch));
+   log_imm_action("LOCKOUT: %s sentenced by %s.", CAP(name), char_get_name(ch));
   }
 
   fclose(fl);
@@ -532,7 +532,7 @@ ACMD(do_reward)
  }
  
   for (k = descriptor_list; k; k = k->next) {
-   if (IS_NPC(k->character))
+   if (char_is_npc(k->character))
     continue;
    if (STATE(k) != CON_PLAYING)
     continue;
@@ -542,10 +542,10 @@ ACMD(do_reward)
 
  if (amt > 0) {
   if (vict != NULL) {
-   send_to_char(ch, "@WYou award @C%s @D(@G%d@D)@W RP points.@n\r\n", GET_NAME(vict), amt);
-   send_to_char(vict, "@D[@YROLEPLAY@D] @WYou have been awarded @D(@G%d@D)@W RP points by @C%s@W.@n\r\n", amt, GET_NAME(ch));
-   send_to_imm("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
-   log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
+   send_to_char(ch, "@WYou award @C%s @D(@G%d@D)@W RP points.@n\r\n", char_get_name(vict), amt);
+   send_to_char(vict, "@D[@YROLEPLAY@D] @WYou have been awarded @D(@G%d@D)@W RP points by @C%s@W.@n\r\n", amt, char_get_name(ch));
+   send_to_imm("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, char_get_name(ch));
+   log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, char_get_name(ch));
    vict->rp += amt;
    GET_RP(vict) = vict->rp;
    if (amt <= 29) {
@@ -556,17 +556,17 @@ ACMD(do_reward)
   }
   else {
    send_to_char(ch, "@WYou award user @C%s @D(@G%d@D)@W RP points.@n\r\n", arg, amt);
-   send_to_imm("ROLEPLAY: User %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
-   log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
+   send_to_imm("ROLEPLAY: User %s has been awarded %d RP points by %s.", arg, amt, char_get_name(ch));
+   log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, char_get_name(ch));
    userWrite(NULL, 0, amt, 0, arg);
   }
  }
  else {
   if (vict != NULL) {
-   send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from @C%s@W.@n\r\n", amt, GET_NAME(vict));
-   send_to_char(vict, "@D[@YROLEPLAY@D] @C%s@W deducts @D(@G%d@D)@W RP points from you.@n\r\n", GET_NAME(ch), amt);
-   send_to_imm("ROLEPLAY: %s has had %d RP points deducted by %s.", GET_NAME(vict), amt, GET_NAME(ch));
-   log_imm_action("ROLEPLAY: %s has had %d RP points deducted by %s.", GET_NAME(vict), amt, GET_NAME(ch));
+   send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from @C%s@W.@n\r\n", amt, char_get_name(vict));
+   send_to_char(vict, "@D[@YROLEPLAY@D] @C%s@W deducts @D(@G%d@D)@W RP points from you.@n\r\n", char_get_name(ch), amt);
+   send_to_imm("ROLEPLAY: %s has had %d RP points deducted by %s.", char_get_name(vict), amt, char_get_name(ch));
+   log_imm_action("ROLEPLAY: %s has had %d RP points deducted by %s.", char_get_name(vict), amt, char_get_name(ch));
    vict->rp += amt;
    GET_RP(vict) = vict->rp;
    vict->desc->rpp += amt;
@@ -574,8 +574,8 @@ ACMD(do_reward)
   }
   else {
    send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from user @C%s@W.@n\r\n", amt, arg);
-   send_to_imm("ROLEPLAY: User %s has had %d RP points deducted by %s.", arg, amt, GET_NAME(ch));
-   log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, GET_NAME(ch));
+   send_to_imm("ROLEPLAY: User %s has had %d RP points deducted by %s.", arg, amt, char_get_name(ch));
+   log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, char_get_name(ch));
    userWrite(NULL, 0, amt, 0, arg);
   }
  }
@@ -611,7 +611,7 @@ ACMD(do_rbank)
  }
  
   for (k = descriptor_list; k; k = k->next) {
-   if (IS_NPC(k->character))
+   if (char_is_npc(k->character))
     continue;
    if (STATE(k) != CON_PLAYING)
     continue;
@@ -621,10 +621,10 @@ ACMD(do_rbank)
 
  if (amt > 0) {
   if (vict != NULL) {
-   send_to_char(ch, "@WYou put @D(@G%d@D)@W RP points into @C%s@W's Bank.@n\r\n", amt, GET_NAME(vict));
-   send_to_char(vict, "@D[@YROLEPLAY@D] @WYou have had @D(@G%d@D)@W RP points added to your RPP Bank by @C%s@W.@n\r\n", amt, GET_NAME(ch));
-   send_to_imm("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, GET_NAME(ch));
-   log_imm_action("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, GET_NAME(ch));
+   send_to_char(ch, "@WYou put @D(@G%d@D)@W RP points into @C%s@W's Bank.@n\r\n", amt, char_get_name(vict));
+   send_to_char(vict, "@D[@YROLEPLAY@D] @WYou have had @D(@G%d@D)@W RP points added to your RPP Bank by @C%s@W.@n\r\n", amt, char_get_name(ch));
+   send_to_imm("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, char_get_name(ch));
+   log_imm_action("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, char_get_name(ch));
    vict->rbank += amt;
    GET_RBANK(vict) = vict->rbank;
    if (amt <= 29) {
@@ -635,17 +635,17 @@ ACMD(do_rbank)
   }
   else {
    send_to_char(ch, "@WYou put @D(@G%d@D)@W RP points into @C%s@W's Bank.@n\r\n", amt, arg);
-   send_to_imm("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, GET_NAME(ch));
-   log_imm_action("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, GET_NAME(ch));
+   send_to_imm("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, char_get_name(ch));
+   log_imm_action("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, char_get_name(ch));
    userWrite(NULL, 0, 0, amt, arg);
   }
  }
  else {
   if (vict != NULL) {
-   send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from @C%s@W's Bank.@n\r\n", amt, GET_NAME(vict));
-   send_to_char(vict, "@D[@YROLEPLAY@D] @C%s@W deducts @D(@G%d@D)@W RP points from your RPP Bank.@n\r\n", GET_NAME(ch), amt);
-   send_to_imm("ROLEPLAY: %s has had %d RP points deducted from their RPP Bank by %s.", GET_NAME(vict), amt, GET_NAME(ch));
-   log_imm_action("ROLEPLAY: %s has had %d RP points deducted from their RPP Bank by %s.", GET_NAME(vict), amt, GET_NAME(ch));
+   send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from @C%s@W's Bank.@n\r\n", amt, char_get_name(vict));
+   send_to_char(vict, "@D[@YROLEPLAY@D] @C%s@W deducts @D(@G%d@D)@W RP points from your RPP Bank.@n\r\n", char_get_name(ch), amt);
+   send_to_imm("ROLEPLAY: %s has had %d RP points deducted from their RPP Bank by %s.", char_get_name(vict), amt, char_get_name(ch));
+   log_imm_action("ROLEPLAY: %s has had %d RP points deducted from their RPP Bank by %s.", char_get_name(vict), amt, char_get_name(ch));
    vict->rbank += amt;
    GET_RBANK(vict) = vict->rbank;
    vict->desc->rbank += amt;
@@ -653,8 +653,8 @@ ACMD(do_rbank)
   }
   else {
    send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from @C%s@W's Bank.@n\r\n", amt, arg);
-   send_to_imm("ROLEPLAY: %s has had %d RP points deducted from their RPP Bank by %s.", arg, amt, GET_NAME(ch));
-   log_imm_action("ROLEPLAY: %s has had %d RP points put deducted from RPP Bank by %s.", arg, amt, GET_NAME(ch));
+   send_to_imm("ROLEPLAY: %s has had %d RP points deducted from their RPP Bank by %s.", arg, amt, char_get_name(ch));
+   log_imm_action("ROLEPLAY: %s has had %d RP points put deducted from RPP Bank by %s.", arg, amt, char_get_name(ch));
    userWrite(NULL, 0, 0, amt, arg);
   }
  }
@@ -680,12 +680,12 @@ ACMD(do_permission)
  if (!strcasecmp("unrestrict", arg)) {
   if (!strcasecmp("saiyan", arg2)) {
    send_to_char(ch, "You have unrestricted saiyans for the very next character creation.\r\n");
-   send_to_imm("PERMISSION: %s unrestricted saiyans.", GET_NAME(ch));
+   send_to_imm("PERMISSION: %s unrestricted saiyans.", char_get_name(ch));
    SAIYAN_ALLOWED = TRUE;
   }
   else if (!strcasecmp("majin", arg2)) {
    send_to_char(ch, "You have unrestricted majins for the very next character creation.\r\n");
-   send_to_imm("PERMISSION: %s unrestricted majins.", GET_NAME(ch));
+   send_to_imm("PERMISSION: %s unrestricted majins.", char_get_name(ch));
    MAJIN_ALLOWED = TRUE;
   }
   else {
@@ -695,7 +695,7 @@ ACMD(do_permission)
  }
  else if (!strcasecmp("restrict", arg)) {
   send_to_char(ch, "You have restricted character creation to standard race slection.\r\n");
-  send_to_imm("PERMISSION: %s restricted races again.", GET_NAME(ch));
+  send_to_imm("PERMISSION: %s restricted races again.", char_get_name(ch));
   MAJIN_ALLOWED = FALSE;
  }
  else {
@@ -715,7 +715,7 @@ ACMD(do_transobj)
  
  two_arguments(argument, arg, arg2);
 
- if (!IS_NPC(ch) && GET_ADMLEVEL(ch) < 1) {
+ if (!char_is_npc(ch) && GET_ADMLEVEL(ch) < 1) {
   send_to_char(ch, "Huh!?");
   return;
  }
@@ -730,15 +730,15 @@ ACMD(do_transobj)
   return;
  }
  else if (!strcasecmp("all", arg2)) {
-  int num = GET_OBJ_VNUM(obj);
+  int num = obj_get_vnum(obj);
   struct obj_data *obj2 = NULL;
 
   act("You send $p to everyone in the game.", TRUE, ch, obj, 0, TO_CHAR);
 
   for (d = descriptor_list; d; d = d->next) {
-   if (IS_NPC(d->character))
+   if (char_is_npc(d->character))
     continue;
-   else if (!IS_PLAYING(d))
+   else if (!desc_is_playing(d))
     continue;
    else if (d->character == ch)
     continue;
@@ -836,7 +836,7 @@ ACMD(do_finddoor)
     if (!obj) 
       send_to_char(ch, "What key do you want to find a door for?\r\n"); 
     else 
-      vnum = GET_OBJ_VNUM(obj); 
+      vnum = obj_get_vnum(obj); 
   } 
   if (vnum != NOTHING) { 
       len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n", 
@@ -875,7 +875,7 @@ ACMD(do_recall)
   char_from_room(ch);
   char_to_room(ch, real_room(2));
   look_at_room(IN_ROOM(ch), ch, 0);
-  GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
+  GET_LOADROOM(ch) = rroom_get_vnum(IN_ROOM(ch));
   }
  }
 
@@ -911,7 +911,7 @@ ACMD(do_hell)
   struct descriptor_data *d = vict->desc;
   Crash_rentsave(vict, 0);
   extract_char(vict);
-  lockWrite(ch, GET_NAME(vict));
+  lockWrite(ch, char_get_name(vict));
   if (d && STATE(d) != CON_PLAYING) {
    STATE(d) = CON_CLOSE;
    vict->desc->character = NULL;
@@ -942,12 +942,12 @@ ACMD(do_echo)
      if (vict == ch)
       continue;
      if (found == FALSE) {
-      sprintf(name, "*%s", GET_NAME(vict));
+      sprintf(name, "*%s", char_get_name(vict));
       if (strstr(argument, CAP(name))) {
        found = TRUE;
        tch = vict;
       }
-      if (found == FALSE && !IS_NPC(vict)) {
+      if (found == FALSE && !char_is_npc(vict)) {
        if (readIntro(ch, vict) == 1) {
         sprintf(name, "*%s", get_i_name(ch, vict));
         if (strstr(argument, CAP(name))) {
@@ -986,12 +986,12 @@ ACMD(do_echo)
     else {
      snprintf(buf, sizeof(buf), "%s", argument);
     }
-    if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_NOREPEAT)) {
+    if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_NOREPEAT)) {
       send_to_char(ch, "%s", CONFIG_OK);
     }
     if (NoName == TRUE) {
      char blom[MAX_INPUT_LENGTH];
-     sprintf(blom, "@D(@GOOC@W: @gSmote by user %s@D)@n", IS_NPC(ch) ? GET_NAME(ch) : (ch->desc->user == NULL ? "ERROR REPORT" : ch->desc->user));
+     sprintf(blom, "@D(@GOOC@W: @gSmote by user %s@D)@n", char_is_npc(ch) ? char_get_name(ch) : (ch->desc->user == NULL ? "ERROR REPORT" : ch->desc->user));
      act(blom, FALSE, ch, 0, 0, TO_ROOM);
     }
     if (found == FALSE) {
@@ -1023,10 +1023,10 @@ ACMD(do_send)
     return;
   }
   send_to_char(vict, "%s\r\n", buf);
-  if (PRF_FLAGGED(ch, PRF_NOREPEAT))
+  if (char_prf_flagged(ch, PRF_NOREPEAT))
     send_to_char(ch, "Sent.\r\n");
   else
-    send_to_char(ch, "You send '%s' to %s.\r\n", buf, GET_NAME(vict));
+    send_to_char(ch, "You send '%s' to %s.\r\n", buf, char_get_name(vict));
 }
 
 /* take a string, and return an rnum.. used for goto, at, etc.  -je 4/6/93 */
@@ -1087,17 +1087,17 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr)
   rm = &world[location];
 
   if ((!can_edit_zone(ch, rm->zone) && GET_ADMLEVEL(ch) < ADMLVL_GOD)
-       && ZONE_FLAGGED(rm->zone, ZONE_QUEST)) {
+       && zone_flagged(rm->zone, ZONE_QUEST)) {
        send_to_char(ch, "This target is in a quest zone.\r\n");
        return (NOWHERE);
        }
 
-  if ((GET_ADMLEVEL(ch) < ADMLVL_VICE) && ZONE_FLAGGED(rm->zone, ZONE_NOIMMORT)){
+  if ((GET_ADMLEVEL(ch) < ADMLVL_VICE) && zone_flagged(rm->zone, ZONE_NOIMMORT)){
        send_to_char(ch, "This target is in a zone closed to all.\r\n");
        return (NOWHERE);
       }
 
-  if (ROOM_FLAGGED(location, ROOM_GODROOM))
+  if (rroom_flagged(location, ROOM_GODROOM))
     send_to_char(ch, "You are not godly enough to use that room!\r\n");
   else
     return (location);
@@ -1144,7 +1144,7 @@ ACMD(do_goto)
 
   if ((location = find_target_room(ch, argument)) == NOWHERE)
     return;
-  if (PLR_FLAGGED(ch, PLR_HEALT)) {
+  if (char_plr_flagged(ch, PLR_HEALT)) {
    send_to_char(ch, "They are inside a healing tank!\r\n");
    return;
   }
@@ -1177,11 +1177,11 @@ ACMD(do_trans)
     else if (victim == ch)
       send_to_char(ch, "That doesn't make much sense, does it?\r\n");
     else {
-      if ((GET_ADMLEVEL(ch) < GET_ADMLEVEL(victim)) && !IS_NPC(victim)) {
+      if ((GET_ADMLEVEL(ch) < GET_ADMLEVEL(victim)) && !char_is_npc(victim)) {
 	send_to_char(ch, "Go transfer someone your own size.\r\n");
 	return;
       }
-      if (PLR_FLAGGED(victim, PLR_HEALT)) {
+      if (char_plr_flagged(victim, PLR_HEALT)) {
        send_to_char(ch, "They are inside a healing tank!\r\n");
        return;
       }
@@ -1194,7 +1194,7 @@ ACMD(do_trans)
       enter_wtrigger(&world[IN_ROOM(victim)], victim, -1);
     }
   } else {			/* Trans All */
-    if (!ADM_FLAGGED(ch, ADM_TRANSALL)) {
+    if (!char_adm_flagged(ch, ADM_TRANSALL)) {
       send_to_char(ch, "I think not.\r\n");
       return;
     }
@@ -1235,7 +1235,7 @@ ACMD(do_teleport)
   else if (!*buf2)
     send_to_char(ch, "Where do you wish to send this person?\r\n");
   else if ((target = find_target_room(ch, buf2)) != NOWHERE) {
-    if (PLR_FLAGGED(victim, PLR_HEALT)) {
+    if (char_plr_flagged(victim, PLR_HEALT)) {
      send_to_char(ch, "They are inside a healing tank!\r\n");
      return;
     }
@@ -1437,11 +1437,11 @@ static void do_stat_room(struct char_data *ch)
   send_to_char(ch, "Chars present:");
   column = 14;	/* ^^^ strlen ^^^ */
   for (found = FALSE, k = rm->people; k; k = k->next_in_room) {
-    if (!CAN_SEE(ch, k))
+    if (!char_can_see(ch, k))
       continue;
 
-    column += send_to_char(ch, "%s @y%s@n(%s)", found++ ? "," : "", GET_NAME(k),
-		!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB"));
+    column += send_to_char(ch, "%s @y%s@n(%s)", found++ ? "," : "", char_get_name(k),
+		!char_is_npc(k) ? "PC" : (!char_is_mob(k) ? "NPC" : "MOB"));
     if (column >= 62) {
       send_to_char(ch, "%s\r\n", k->next_in_room ? "," : "");
       found = FALSE;
@@ -1454,7 +1454,7 @@ static void do_stat_room(struct char_data *ch)
     column = 9;	/* ^^^ strlen ^^^ */
 
     for (found = 0, j = rm->contents; j; j = j->next_content) {
-      if (!CAN_SEE_OBJ(ch, j))
+      if (!char_can_see_obj(ch, j))
 	continue;
 
       column += send_to_char(ch, "%s %s", found++ ? "," : "", j->short_description);
@@ -1476,7 +1476,7 @@ static void do_stat_room(struct char_data *ch)
     if (rm->dir_option[i]->to_room == NOWHERE)
       snprintf(buf1, sizeof(buf1), " @cNONE@n");
     else
-      snprintf(buf1, sizeof(buf1), "@c%5d@n", GET_ROOM_VNUM(rm->dir_option[i]->to_room));
+      snprintf(buf1, sizeof(buf1), "@c%5d@n", rroom_get_vnum(rm->dir_option[i]->to_room));
 
     sprintbit(rm->dir_option[i]->exit_info, exit_bits, buf2, sizeof(buf2));
 
@@ -1504,14 +1504,14 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
   struct extra_descr_data *desc;
   char buf[MAX_STRING_LENGTH];
 
-  vnum = GET_OBJ_VNUM(j);
+  vnum = obj_get_vnum(j);
   if (GET_LAST_LOAD(j) > 0) {
   char *tmstr;
   tmstr = (char *) asctime(localtime(&GET_LAST_LOAD(j)));
   *(tmstr + strlen(tmstr) - 1) = '\0';
   send_to_char(ch, "LOADED DROPPED: [%s]\r\n", tmstr);
   }
-  if (GET_OBJ_VNUM(j) == 65) {
+  if (obj_get_vnum(j) == 65) {
    send_to_char(ch, "Healing Tank Charge Level: [%d]\r\n", HCHARGE(j));
   }
   send_to_char(ch, "Name: '%s', Keywords: %s, Size: %s\r\n",
@@ -1520,7 +1520,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
 
   sprinttype(GET_OBJ_TYPE(j), item_types, buf, sizeof(buf));
   send_to_char(ch, "VNum: [@g%5d@n], RNum: [%5d], Idnum: [%5d], Type: %s, SpecProc: %s\r\n",
-	vnum, GET_OBJ_RNUM(j), GET_ID(j), buf, GET_OBJ_SPEC(j) ? "Exists" : "None");
+	vnum, GET_OBJ_RNUM(j), GET_ID(j), buf, obj_get_spec(j) ? "Exists" : "None");
 
   send_to_char(ch, "Generation time: @g%s@nUnique ID: @g%" I64T "@n\r\n",
     ctime(&j->generation), j->unique_id);
@@ -1536,7 +1536,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
 
   if (SITTING(j)) {
    sitter = SITTING(j);
-   send_to_char(ch, "HOLDING: %s\r\n", GET_NAME(sitter));
+   send_to_char(ch, "HOLDING: %s\r\n", char_get_name(sitter));
   }
 
   if (j->ex_description) {
@@ -1558,7 +1558,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
   send_to_char(ch, "Weight: %" I64T ", Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n",
      GET_OBJ_WEIGHT(j), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
 
-  send_to_char(ch, "In room: %d (%s), ", GET_ROOM_VNUM(IN_ROOM(j)),
+  send_to_char(ch, "In room: %d (%s), ", rroom_get_vnum(IN_ROOM(j)),
 	IN_ROOM(j) == NOWHERE ? "Nowhere" : world[IN_ROOM(j)].name);
 
   /*
@@ -1566,8 +1566,8 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
    *       character holding the object. Therefore, we do not need CAN_SEE().
    */
   send_to_char(ch, "In object: %s, ", j->in_obj ? j->in_obj->short_description : "None");
-  send_to_char(ch, "Carried by: %s, ", j->carried_by ? GET_NAME(j->carried_by) : "Nobody");
-  send_to_char(ch, "Worn by: %s\r\n", j->worn_by ? GET_NAME(j->worn_by) : "Nobody");
+  send_to_char(ch, "Carried by: %s, ", j->carried_by ? char_get_name(j->carried_by) : "Nobody");
+  send_to_char(ch, "Worn by: %s\r\n", j->worn_by ? char_get_name(j->worn_by) : "Nobody");
 
   switch (GET_OBJ_TYPE(j)) {
   case ITEM_LIGHT:
@@ -1702,7 +1702,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   struct affected_type *aff;
 
 
-  if (IS_NPC(k)) {
+  if (char_is_npc(k)) {
    char *tmstr;
    tmstr = (char *) asctime(localtime(&GET_LPLAY(k)));
    *(tmstr + strlen(tmstr) - 1) = '\0';
@@ -1710,17 +1710,17 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   }
   sprinttype(GET_SEX(k), genders, buf, sizeof(buf));
   send_to_char(ch, "%s %s '%s'  IDNum: [%5d], In room [%5d], Loadroom : [%5d]\r\n",
-	  buf, (!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB")),
-	  GET_NAME(k), IS_NPC(k) ? GET_ID(k) : GET_IDNUM(k), GET_ROOM_VNUM(IN_ROOM(k)), IS_NPC(k) ? MOB_LOADROOM(k) : GET_LOADROOM(k));
+	  buf, (!char_is_npc(k) ? "PC" : (!char_is_mob(k) ? "NPC" : "MOB")),
+	  char_get_name(k), char_is_npc(k) ? GET_ID(k) : GET_IDNUM(k), rroom_get_vnum(IN_ROOM(k)), char_is_npc(k) ? MOB_LOADROOM(k) : GET_LOADROOM(k));
 
   send_to_char(ch, "DROOM: [%5d]\r\n", GET_DROOM(k));
-  if (IS_MOB(k)) {
+  if (char_is_mob(k)) {
     if (k->master_id > -1)
       sprintf(buf, ", Master: %s", get_name_by_id(k->master_id));
     else
       buf[0] = 0;
     send_to_char(ch, "Keyword: %s, VNum: [%5d], RNum: [%5d]%s\r\n", k->name,
-                 GET_MOB_VNUM(k), GET_MOB_RNUM(k), buf);
+                 char_get_mob_vnum(k), GET_MOB_RNUM(k), buf);
   } else
 
   send_to_char(ch, "Title: %s\r\n", k->title ? k->title : "<None>");
@@ -1733,10 +1733,10 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   }
     snprintf(buf2, sizeof(buf2), "%s", TRUE_RACE(k));
   send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d(%dHD+%dcl+%d)@n], XP: [@y%" I64T "@n]\r\n",
-                   buf, buf2, GET_LEVEL(k), GET_HITDICE(k),
+                   buf, buf2, char_get_level(k), GET_HITDICE(k),
                    GET_CLASS_LEVEL(k), GET_LEVEL_ADJ(k), GET_EXP(k));
 
-  if (!IS_NPC(k)) {
+  if (!char_is_npc(k)) {
     char buf1[64], cmbuf2[64];
 
     strlcpy(buf1, asctime(localtime(&(k->time.created))), sizeof(buf1));
@@ -1748,11 +1748,11 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
 	    (int)((k->time.played % 3600) / 60), age(k)->year);
 
     if (k->desc != NULL) {
-     send_to_char(ch, "@YOwned by User@D: [@C%s@D]@n\r\n", GET_USER(k));
+     send_to_char(ch, "@YOwned by User@D: [@C%s@D]@n\r\n", char_get_user(k));
     } else {
      send_to_char(ch, "@YOwned by User@D: [@C%s@D]@n\r\n", GET_LOG_USER(k));
     }
-    if (!IS_NPC(k)) {
+    if (!char_is_npc(k)) {
      send_to_char(ch, "@RCharacter Deaths@D: @r%d@n\r\n", GET_DCOUNT(k));
     }
 
@@ -1796,14 +1796,14 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
           GET_SAVE_MOD(k, 1), GET_SAVE_MOD(k, 2));
 
   sprinttype(GET_POS(k), position_types, buf, sizeof(buf));
-  send_to_char(ch, "Pos: %s, Fighting: %s", buf, FIGHTING(k) ? GET_NAME(FIGHTING(k)) : "Nobody");
+  send_to_char(ch, "Pos: %s, Fighting: %s", buf, FIGHTING(k) ? char_get_name(FIGHTING(k)) : "Nobody");
 
   if (k->desc) {
     sprinttype(STATE(k->desc), connected_types, buf, sizeof(buf));
     send_to_char(ch, ", Connected: %s", buf);
   }
 
-  if (IS_NPC(k)) {
+  if (char_is_npc(k)) {
     sprinttype(k->mob_specials.default_pos, position_types, buf, sizeof(buf));
     send_to_char(ch, ", Default position: %s\r\n", buf);
     sprintbitarray(MOB_FLAGS(k), action_bits, PM_ARRAY_MAX, buf, sizeof(buf));
@@ -1818,7 +1818,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
     send_to_char(ch, "PRF: @g%s@n\r\n", buf);
   }
 
-  if (IS_MOB(k)) {
+  if (char_is_mob(k)) {
     send_to_char(ch, "Mob Spec-Proc: %s, NPC Bare Hand Dam: %dd%d\r\n",
 	    (mob_index[GET_MOB_RNUM(k)].func ? "Exists" : "None"),
 	    k->mob_specials.damnodice, k->mob_specials.damsizedice);
@@ -1841,15 +1841,15 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
 
   
 
-  if (!IS_NPC(k))
+  if (!char_is_npc(k))
     send_to_char(ch, "Hunger: %d, Thirst: %d, Drunk: %d\r\n", GET_COND(k, HUNGER), GET_COND(k, THIRST), GET_COND(k, DRUNK));
 
-  column = send_to_char(ch, "Master is: %s, Followers are:", k->master ? GET_NAME(k->master) : "<none>");
+  column = send_to_char(ch, "Master is: %s, Followers are:", k->master ? char_get_name(k->master) : "<none>");
   if (!k->followers)
     send_to_char(ch, " <none>\r\n");
   else {
     for (fol = k->followers; fol; fol = fol->next) {
-      column += send_to_char(ch, "%s %s", found++ ? "," : "", PERS(fol->follower, ch));
+      column += send_to_char(ch, "%s %s", found++ ? "," : "", char_pers(fol->follower, ch));
       if (column >= 62) {
         send_to_char(ch, "%s\r\n", fol->next ? "," : "");
         found = FALSE;
@@ -1908,7 +1908,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   }
 
  /* check mobiles for a script */
- if (IS_NPC(k)) {
+ if (char_is_npc(k)) {
    do_sstat_character(ch, k);
    if (SCRIPT_MEM(k)) {
      struct script_memory *mem = SCRIPT_MEM(k);
@@ -1919,9 +1919,9 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
          send_to_char(ch, "  ** Corrupted!\r\n");
        else {
          if (mem->cmd)
-           send_to_char(ch, "  %-20.20s%s\r\n",GET_NAME(mc),mem->cmd);
+           send_to_char(ch, "  %-20.20s%s\r\n",char_get_name(mc),mem->cmd);
          else
-           send_to_char(ch, "  %-20.20s <default>\r\n",GET_NAME(mc));
+           send_to_char(ch, "  %-20.20s <default>\r\n",char_get_name(mc));
        }
      mem = mem->next;
      }
@@ -1961,7 +1961,7 @@ ACMD(do_varstat)
  if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
   send_to_char(ch, "That player is not in the game.\r\n");
   return;
- } else if (IS_NPC(vict)) {
+ } else if (char_is_npc(vict)) {
   send_to_char(ch, "Just use stat for an NPC\r\n");
   return;
  } else {
@@ -1971,7 +1971,7 @@ ACMD(do_varstat)
      char uname[MAX_INPUT_LENGTH];
      void find_uid_name(char *uid, char *name, size_t nlen);
 
-     send_to_char(ch, "%s's Global Variables:\r\n", GET_NAME(vict));
+     send_to_char(ch, "%s's Global Variables:\r\n", char_get_name(vict));
 
      /* currently, variable context for players is always 0, so it is */
      /* not displayed here. in the future, this might change */
@@ -2088,26 +2088,26 @@ ACMD(do_shutdown)
   one_argument(argument, arg);
 
   if (!*arg) {
-    log("(GC) Shutdown by %s.", GET_NAME(ch));
+    log("(GC) Shutdown by %s.", char_get_name(ch));
     send_to_all("Shutting down.\r\n");
     circle_shutdown = 1;
   } else if (!strcasecmp(arg, "reboot")) {
-    log("(GC) Reboot by %s.", GET_NAME(ch));
+    log("(GC) Reboot by %s.", char_get_name(ch));
     send_to_all("Rebooting.. come back in a minute or two.\r\n");
     touch(FASTBOOT_FILE);
     circle_shutdown = circle_reboot = 1;
   } else if (!strcasecmp(arg, "die")) {
-    log("(GC) Shutdown by %s.", GET_NAME(ch));
+    log("(GC) Shutdown by %s.", char_get_name(ch));
     send_to_all("Shutting down for maintenance.\r\n");
     touch(KILLSCRIPT_FILE);
     circle_shutdown = 1;
   } else if (!strcasecmp(arg, "now")) {
-    log("(GC) Shutdown NOW by %s.", GET_NAME(ch));
+    log("(GC) Shutdown NOW by %s.", char_get_name(ch));
     send_to_all("Rebooting.. come back in a minute or two.\r\n");
     circle_shutdown = 1;
     circle_reboot = 2; /* do not autosave olc */
   } else if (!strcasecmp(arg, "pause")) {
-    log("(GC) Shutdown by %s.", GET_NAME(ch));
+    log("(GC) Shutdown by %s.", char_get_name(ch));
     send_to_all("Shutting down for maintenance.\r\n");
     touch(PAUSE_FILE);
     circle_shutdown = 1;
@@ -2207,9 +2207,9 @@ ACMD(do_switch)
     send_to_char(ch, "Hee hee... we are jolly funny today, eh?\r\n");
   else if (victim->desc)
     send_to_char(ch, "You can't do that, the body is already in use!\r\n");
-  else if (!(IS_NPC(victim) || ADM_FLAGGED(ch, ADM_SWITCHMORTAL)))
+  else if (!(char_is_npc(victim) || char_adm_flagged(ch, ADM_SWITCHMORTAL)))
     send_to_char(ch, "You aren't holy enough to use a mortal's body.\r\n");
-  else if (GET_ADMLEVEL(ch) < ADMLVL_VICE && ROOM_FLAGGED(IN_ROOM(victim), ROOM_GODROOM))
+  else if (GET_ADMLEVEL(ch) < ADMLVL_VICE && rroom_flagged(IN_ROOM(victim), ROOM_GODROOM))
     send_to_char(ch, "You are not godly enough to use that room!\r\n");
   else {
     send_to_char(ch, "%s", CONFIG_OK);
@@ -2307,8 +2307,8 @@ ACMD(do_load)
     obj = read_object(r_num, REAL);
     add_unique_id(obj);
     if (GET_ADMLEVEL(ch) > 0) {
-     send_to_imm("LOAD: %s has loaded a %s", GET_NAME(ch), obj->short_description);
-     log_imm_action("LOAD: %s has loaded a %s", GET_NAME(ch), obj->short_description);
+     send_to_imm("LOAD: %s has loaded a %s", char_get_name(ch), obj->short_description);
+     log_imm_action("LOAD: %s has loaded a %s", char_get_name(ch), obj->short_description);
     }
     if (CONFIG_LOAD_INVENTORY)
       obj_to_char(obj, ch);
@@ -2377,19 +2377,19 @@ ACMD(do_purge)
   /* argument supplied. destroy single object or char */
   if (*buf) {
     if ((vict = get_char_vis(ch, buf, NULL, FIND_CHAR_WORLD)) != NULL) {
-      if (!IS_NPC(vict) && (GET_ADMLEVEL(ch) <= GET_ADMLEVEL(vict))) {
+      if (!char_is_npc(vict) && (GET_ADMLEVEL(ch) <= GET_ADMLEVEL(vict))) {
 	send_to_char(ch, "Fuuuuuuuuu!\r\n");
 	return;
       }
       act("$n disintegrates $N.", FALSE, ch, 0, vict, TO_NOTVICT);
-      if (!IS_NPC(vict)) {
-       send_to_all("@R%s@r purges @R%s's@r sorry ass right off the MUD!@n\r\n", GET_NAME(ch), GET_NAME(vict));
+      if (!char_is_npc(vict)) {
+       send_to_all("@R%s@r purges @R%s's@r sorry ass right off the MUD!@n\r\n", char_get_name(ch), char_get_name(vict));
       }
 
 
-      if (!IS_NPC(vict)) {
-	mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s has purged %s.", GET_NAME(ch), GET_NAME(vict));
-        log_imm_action("PURGED: %s burned %s's sorry ass off the MUD!", GET_NAME(ch), GET_NAME(vict));
+      if (!char_is_npc(vict)) {
+	mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s has purged %s.", char_get_name(ch), char_get_name(vict));
+        log_imm_action("PURGED: %s burned %s's sorry ass off the MUD!", char_get_name(ch), char_get_name(vict));
 	if (vict->desc) {
 	  STATE(vict->desc) = CON_CLOSE;
 	  vict->desc->character = NULL;
@@ -2414,7 +2414,7 @@ ACMD(do_purge)
     send_to_room(IN_ROOM(ch), "The world seems a little cleaner.\r\n");
 
     for (vict = world[IN_ROOM(ch)].people; vict; vict = vict->next_in_room) {
-      if (!IS_NPC(vict))
+      if (!char_is_npc(vict))
         continue;
 		
 	  delete_inv_backup(vict);
@@ -2450,7 +2450,7 @@ ACMD(do_syslog)
   one_argument(argument, arg);
   if (!*arg) {
     send_to_char(ch, "Your syslog is currently %s.\r\n",
-	logtypes[(PRF_FLAGGED(ch, PRF_LOG1) ? 1 : 0) + (PRF_FLAGGED(ch, PRF_LOG2) ? 2 : 0)]);
+	logtypes[(char_prf_flagged(ch, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(ch, PRF_LOG2) ? 2 : 0)]);
     return;
   }
   if (((tp = search_block(arg, logtypes, FALSE)) == -1)) {
@@ -2524,7 +2524,7 @@ ACMD(do_copyover)
       send_to_char(ch, "Type @ycopyover help@n for usage info."); 
     } else { 
       copyover_timer = secs; 
-      log("-- Timed Copyover started by %s - %d seconds until copyover --", GET_NAME(ch), secs); 
+      log("-- Timed Copyover started by %s - %d seconds until copyover --", char_get_name(ch), secs); 
       if (secs >= 60) { 
         if (secs%60) { 
           game_info("A copyover will be performed in %d minutes and %d seconds.", (copyover_timer/60), (copyover_timer%60)); 
@@ -2564,12 +2564,12 @@ static void execute_copyover(void)
       write_to_descriptor (d->descriptor, "\n\rSorry, we are rebooting. Come back in a few seconds.\n\r");
       close_socket(d); /* throw'em out */
     } else {
-      if (GET_ROOM_VNUM(IN_ROOM(och)) > 1) {
-       fprintf (fp, "%d %s %s %d %s\n", d->descriptor, GET_NAME(och), d->host, GET_ROOM_VNUM(IN_ROOM(och)), d->user);
-      } else if (GET_ROOM_VNUM(IN_ROOM(och)) <= 1 && GET_ROOM_VNUM(GET_WAS_IN(och)) > 1) {
-       fprintf (fp, "%d %s %s %d %s\n", d->descriptor, GET_NAME(och), d->host, GET_ROOM_VNUM(GET_WAS_IN(och)), d->user);
+      if (rroom_get_vnum(IN_ROOM(och)) > 1) {
+       fprintf (fp, "%d %s %s %d %s\n", d->descriptor, char_get_name(och), d->host, rroom_get_vnum(IN_ROOM(och)), d->user);
+      } else if (rroom_get_vnum(IN_ROOM(och)) <= 1 && rroom_get_vnum(GET_WAS_IN(och)) > 1) {
+       fprintf (fp, "%d %s %s %d %s\n", d->descriptor, char_get_name(och), d->host, rroom_get_vnum(GET_WAS_IN(och)), d->user);
       } else {
-       fprintf (fp, "%d %s %s 300 %s\n", d->descriptor, GET_NAME(och), d->host, d->user);
+       fprintf (fp, "%d %s %s 300 %s\n", d->descriptor, char_get_name(och), d->host, d->user);
       }
       log("printing descriptor name and host of connected players");
       /* save och */
@@ -2642,7 +2642,7 @@ ACMD(do_advance)
     return;
   }
 
-  if (IS_NPC(victim)) {
+  if (char_is_npc(victim)) {
     send_to_char(ch, "NO!  Not on NPC's.\r\n");
     return;
   }
@@ -2669,12 +2669,12 @@ ACMD(do_advance)
     send_to_char(ch, "100 is the highest possible level.\r\n");
     return;
   }
-  if (newlevel == GET_LEVEL(victim)) {
+  if (newlevel == char_get_level(victim)) {
     send_to_char(ch, "They are already at that level.\r\n");
     return;
   }
-  oldlevel = GET_LEVEL(victim);
-  if (newlevel < GET_LEVEL(victim)) {
+  oldlevel = char_get_level(victim);
+  if (newlevel < char_get_level(victim)) {
     send_to_char(ch, "You cannot demote a player.\r\n");
   } else {
     act("$n makes some strange gestures.\r\n"
@@ -2691,10 +2691,10 @@ ACMD(do_advance)
 
   if (newlevel < oldlevel)
     log("(GC) %s demoted %s from level %d to %d.",
-		GET_NAME(ch), GET_NAME(victim), oldlevel, newlevel);
+		char_get_name(ch), char_get_name(victim), oldlevel, newlevel);
   else
     log("(GC) %s has advanced %s to level %d (from %d)",
-		GET_NAME(ch), GET_NAME(victim), newlevel, oldlevel);
+		char_get_name(ch), char_get_name(victim), newlevel, oldlevel);
 
   gain_exp_regardless(victim,
 	 level_exp(victim, newlevel) - GET_EXP(victim));
@@ -2711,18 +2711,18 @@ ACMD(do_handout)
  }
 
   for (j = descriptor_list; j; j = j->next) {
-    if (!IS_PLAYING(j) || ch == j->character || GET_ADMLEVEL(j->character) > 0)
+    if (!desc_is_playing(j) || ch == j->character || GET_ADMLEVEL(j->character) > 0)
      continue;
-    if (IS_NPC(j->character))
+    if (char_is_npc(j->character))
      continue;
     else {
-     GET_PRACTICES(j->character, GET_CLASS(j->character)) += 10;
+     GET_PRACTICES(j->character, char_get_class(j->character)) += 10;
     }
   }
   
-  send_to_all("@g%s@G hands out 10 practice sessions to everyone!@n\r\n", GET_NAME(ch));
-  log("%s gave a handout of 10 PS to everyone.", GET_NAME(ch));
-  log_imm_action("HANDOUT: %s has handed out 10 PS to everyone.", GET_NAME(ch));
+  send_to_all("@g%s@G hands out 10 practice sessions to everyone!@n\r\n", char_get_name(ch));
+  log("%s gave a handout of 10 PS to everyone.", char_get_name(ch));
+  log_imm_action("HANDOUT: %s has handed out 10 PS to everyone.", char_get_name(ch));
 }
 
 ACMD(do_restore)
@@ -2737,11 +2737,11 @@ ACMD(do_restore)
     send_to_char(ch, "Whom do you wish to restore?\r\n");
   else if (is_abbrev(buf, "all")) 
    { 
-     send_to_imm("[Log: %s restored all.]", GET_NAME(ch));
-     log_imm_action("RESTORE: %s has restored all players.", GET_NAME(ch));
+     send_to_imm("[Log: %s restored all.]", char_get_name(ch));
+     log_imm_action("RESTORE: %s has restored all players.", char_get_name(ch));
      for (j = descriptor_list; j; j = j->next) 
     { 
-      if (!IS_PLAYING(j) || !(vict = j->character)) 
+      if (!desc_is_playing(j) || !(vict = j->character)) 
        continue;
       restore_by(vict, ch);
     }
@@ -2749,13 +2749,13 @@ ACMD(do_restore)
   }
   else if (!(vict = get_char_vis(ch, buf, NULL, FIND_CHAR_WORLD)))
     send_to_char(ch, "%s", CONFIG_NOPERSON);
-  else if (!IS_NPC(vict) && ch != vict && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch))
+  else if (!char_is_npc(vict) && ch != vict && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch))
     send_to_char(ch, "They don't need your help.\r\n");
   else {
       restore_by(vict, ch);
     send_to_char(ch, "%s", CONFIG_OK);
-    send_to_imm("[Log: %s restored %s.]", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("RESTORE: %s has restored %s.", GET_NAME(ch), GET_NAME(vict));
+    send_to_imm("[Log: %s restored %s.]", char_get_name(ch), char_get_name(vict));
+    log_imm_action("RESTORE: %s has restored %s.", char_get_name(ch), char_get_name(vict));
   }
 }
 
@@ -2788,7 +2788,7 @@ ACMD(do_invis)
   char arg[MAX_INPUT_LENGTH];
   int level;
 
-  if (IS_NPC(ch)) {
+  if (char_is_npc(ch)) {
     send_to_char(ch, "You can't do that!\r\n");
     return;
   }
@@ -2821,10 +2821,10 @@ ACMD(do_gecho)
     send_to_char(ch, "That must be a mistake...\r\n");
   else {
     for (pt = descriptor_list; pt; pt = pt->next)
-      if (IS_PLAYING(pt) && pt->character && pt->character != ch)
+      if (desc_is_playing(pt) && pt->character && pt->character != ch)
 	send_to_char(pt->character, "%s\r\n", argument);
 
-    if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_NOREPEAT))
+    if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_NOREPEAT))
       send_to_char(ch, "%s", CONFIG_OK);
     else
       send_to_char(ch, "%s\r\n", argument);
@@ -2842,10 +2842,10 @@ ACMD(do_ginfo)
     send_to_char(ch, "That must be a mistake...\r\n");
   else {
     for (pt = descriptor_list; pt; pt = pt->next)
-      if (IS_PLAYING(pt) && pt->character && pt->character != ch)
+      if (desc_is_playing(pt) && pt->character && pt->character != ch)
         send_to_char(pt->character, "@D[@GINFO@D] @g%s@n\r\n", argument);
 
-    if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_NOREPEAT))
+    if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_NOREPEAT))
       send_to_char(ch, "%s", CONFIG_OK);
     else
       send_to_char(ch, "@D[@GINFO@D] @g%s@n\r\n", argument);
@@ -2893,7 +2893,7 @@ ACMD(do_dc)
     return;
   }
   if (d->character && GET_ADMLEVEL(d->character) >= GET_ADMLEVEL(ch)) {
-    if (!CAN_SEE(ch, d->character))
+    if (!char_can_see(ch, d->character))
       send_to_char(ch, "No such connection.\r\n");
     else
       send_to_char(ch, "Umm.. maybe that's not such a good idea...\r\n");
@@ -2929,7 +2929,7 @@ ACMD(do_dc)
       STATE(d) = CON_CLOSE;
 
     send_to_char(ch, "Connection #%d closed.\r\n", num_to_dc);
-    log("(GC) Connection closed by %s.", GET_NAME(ch));
+    log("(GC) Connection closed by %s.", char_get_name(ch));
   }
 }
 
@@ -2955,23 +2955,23 @@ ACMD(do_wizlock)
   switch (circle_restrict) {
   case 0:
     send_to_char(ch, "The game is %s completely open.\r\n", when);
-    send_to_all("@RWIZLOCK@D: @WThe game has been completely opened by @C%s@W.@n", GET_NAME(ch));
-    log("WIZLOCK: The game has been completely opened by %s.", GET_NAME(ch));
+    send_to_all("@RWIZLOCK@D: @WThe game has been completely opened by @C%s@W.@n", char_get_name(ch));
+    log("WIZLOCK: The game has been completely opened by %s.", char_get_name(ch));
     break;
   case 1:
     send_to_char(ch, "The game is %s closed to new players.\r\n", when);
-    send_to_all("@RWIZLOCK@D: @WThe game is %s closed to new players by @C%s@W.@n", when, GET_NAME(ch));
-    log("WIZLOCK: The game is %s closed to new players by %s.", when, GET_NAME(ch));
+    send_to_all("@RWIZLOCK@D: @WThe game is %s closed to new players by @C%s@W.@n", when, char_get_name(ch));
+    log("WIZLOCK: The game is %s closed to new players by %s.", when, char_get_name(ch));
     break;
   case 101:
     send_to_char(ch, "The game is %s closed to non-imms.\r\n", when);
-    send_to_all("@RWIZLOCK@D: @WThe game is %s closed to non-imms by @C%s@W.@n", when, GET_NAME(ch));
-    log("WIZLOCK: The game is %s closed to non-imms by %s.", when, GET_NAME(ch));
+    send_to_all("@RWIZLOCK@D: @WThe game is %s closed to non-imms by @C%s@W.@n", when, char_get_name(ch));
+    log("WIZLOCK: The game is %s closed to non-imms by %s.", when, char_get_name(ch));
     break;
   default:
     send_to_char(ch, "Only level %d+ may enter the game %s.\r\n", circle_restrict, when);
-    send_to_all("@RWIZLOCK@D: @WLevel %d+ only can enter the game %s, thanks to @C%s@W.@n", circle_restrict, when, GET_NAME(ch));
-    log("WIZLOCK: Level %d+ only can enter the game %s, thanks to %s.", circle_restrict, when, GET_NAME(ch));
+    send_to_all("@RWIZLOCK@D: @WLevel %d+ only can enter the game %s, thanks to @C%s@W.@n", circle_restrict, when, char_get_name(ch));
+    log("WIZLOCK: Level %d+ only can enter the game %s, thanks to %s.", circle_restrict, when, char_get_name(ch));
     break;
   }
  }
@@ -3040,9 +3040,9 @@ ACMD(do_last)
   }
 
   send_to_char(ch, "[%5d] [%2d %s %s] %-12s : %-18s : %-20s\r\n",
-    GET_IDNUM(vict), (int) GET_LEVEL(vict),
+    GET_IDNUM(vict), (int) char_get_level(vict),
                RACE_ABBR(vict), CLASS_ABBR(vict),
-    GET_NAME(vict), vict->player_specials->host && *vict->player_specials->host
+    char_get_name(vict), vict->player_specials->host && *vict->player_specials->host
     ? vict->player_specials->host : "(NOHOST)",
     ctime(&vict->time.logon));
   free_char(vict);
@@ -3060,37 +3060,37 @@ ACMD(do_force)
 
   if (!*arg || !*to_force)
     send_to_char(ch, "Whom do you wish to force do what?\r\n");
-  else if (!ADM_FLAGGED(ch, ADM_FORCEMASS) || (strcasecmp("all", arg) && strcasecmp("room", arg))) {
+  else if (!char_adm_flagged(ch, ADM_FORCEMASS) || (strcasecmp("all", arg) && strcasecmp("room", arg))) {
     if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
       send_to_char(ch, "%s", CONFIG_NOPERSON);
-    else if (!IS_NPC(vict) && GET_ADMLEVEL(ch) <= GET_ADMLEVEL(vict))
+    else if (!char_is_npc(vict) && GET_ADMLEVEL(ch) <= GET_ADMLEVEL(vict))
       send_to_char(ch, "No, no, no!\r\n");
     else {
       send_to_char(ch, "%s", CONFIG_OK);
       act(buf1, TRUE, ch, NULL, vict, TO_VICT);
-      mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s forced %s to %s", GET_NAME(ch), GET_NAME(vict), to_force);
+      mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s forced %s to %s", char_get_name(ch), char_get_name(vict), to_force);
       command_interpreter(vict, to_force);
     }
   } else if (!strcasecmp("room", arg)) {
     send_to_char(ch, "%s", CONFIG_OK);
     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s forced room %d to %s",
-		GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)), to_force);
+		char_get_name(ch), rroom_get_vnum(IN_ROOM(ch)), to_force);
 
     for (vict = world[IN_ROOM(ch)].people; vict; vict = next_force) {
       next_force = vict->next_in_room;
-      if (!IS_NPC(vict) && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch))
+      if (!char_is_npc(vict) && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch))
 	continue;
       act(buf1, TRUE, ch, NULL, vict, TO_VICT);
       command_interpreter(vict, to_force);
     }
   } else { /* force all */
     send_to_char(ch, "%s", CONFIG_OK);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s forced all to %s", GET_NAME(ch), to_force);
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s forced all to %s", char_get_name(ch), to_force);
 
     for (i = descriptor_list; i; i = next_desc) {
       next_desc = i->next;
 
-      if (STATE(i) != CON_PLAYING || !(vict = i->character) || (!IS_NPC(vict) && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch)))
+      if (STATE(i) != CON_PLAYING || !(vict = i->character) || (!char_is_npc(vict) && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch)))
 	continue;
       act(buf1, TRUE, ch, NULL, vict, TO_VICT);
       command_interpreter(vict, to_force);
@@ -3135,13 +3135,13 @@ ACMD(do_wiznet)
     for (any = 0, d = descriptor_list; d; d = d->next) {
       if (STATE(d) != CON_PLAYING || GET_ADMLEVEL(d->character) < ADMLVL_IMMORT)
         continue;
-      if (!CAN_SEE(ch, d->character))
+      if (!char_can_see(ch, d->character))
         continue;
 
-      send_to_char(ch, "  %-*s%s%s%s\r\n", MAX_NAME_LENGTH, GET_NAME(d->character),
-		PLR_FLAGGED(d->character, PLR_WRITING) ? " (Writing)" : "",
-		PLR_FLAGGED(d->character, PLR_MAILING) ? " (Writing mail)" : "",
-		PRF_FLAGGED(d->character, PRF_NOWIZ) ? " (Offline)" : "");
+      send_to_char(ch, "  %-*s%s%s%s\r\n", MAX_NAME_LENGTH, char_get_name(d->character),
+		char_plr_flagged(d->character, PLR_WRITING) ? " (Writing)" : "",
+		char_plr_flagged(d->character, PLR_MAILING) ? " (Writing mail)" : "",
+		char_prf_flagged(d->character, PRF_NOWIZ) ? " (Offline)" : "");
     }
     return;
 
@@ -3151,7 +3151,7 @@ ACMD(do_wiznet)
   default:
     break;
   }
-  if (PRF_FLAGGED(ch, PRF_NOWIZ)) {
+  if (char_prf_flagged(ch, PRF_NOWIZ)) {
     send_to_char(ch, "You are offline!\r\n");
     return;
   }
@@ -3162,19 +3162,19 @@ ACMD(do_wiznet)
     return;
   }
   if (level > ADMLVL_IMMORT) {
-    snprintf(buf1, sizeof(buf1), "@c%s@D: <@C%d@D> @G%s%s@n\r\n", GET_NAME(ch), level, emote ? "<--- " : "", argument);
+    snprintf(buf1, sizeof(buf1), "@c%s@D: <@C%d@D> @G%s%s@n\r\n", char_get_name(ch), level, emote ? "<--- " : "", argument);
     snprintf(buf2, sizeof(buf1), "@cSomeone@D: <@C%d@D> @G%s%s@n\r\n", level, emote ? "<--- " : "", argument);
   } else {
-    snprintf(buf1, sizeof(buf1), "@c%s@D: @G%s%s@n\r\n", GET_NAME(ch), emote ? "<--- " : "", argument);
+    snprintf(buf1, sizeof(buf1), "@c%s@D: @G%s%s@n\r\n", char_get_name(ch), emote ? "<--- " : "", argument);
     snprintf(buf2, sizeof(buf1), "@cSomeone@D: @G%s%s@n\r\n", emote ? "<--- " : "", argument);
   }
 
   for (d = descriptor_list; d; d = d->next) {
-    if (IS_PLAYING(d) && (GET_ADMLEVEL(d->character) >= level) &&
-	(!PRF_FLAGGED(d->character, PRF_NOWIZ)) &&
-	(!PLR_FLAGGED(d->character, PLR_WRITING | PLR_MAILING))
-	&& (d != ch->desc || !(PRF_FLAGGED(d->character, PRF_NOREPEAT)))) {
-      if (CAN_SEE(d->character, ch)) {
+    if (desc_is_playing(d) && (GET_ADMLEVEL(d->character) >= level) &&
+	(!char_prf_flagged(d->character, PRF_NOWIZ)) &&
+	(!char_plr_flagged(d->character, PLR_WRITING | PLR_MAILING))
+	&& (d != ch->desc || !(char_prf_flagged(d->character, PRF_NOREPEAT)))) {
+      if (char_can_see(d->character, ch)) {
         msg = strdup(buf1);
 	send_to_char(d->character, "%s", buf1);
       } else {
@@ -3185,7 +3185,7 @@ ACMD(do_wiznet)
     }
   }
 
-  if (PRF_FLAGGED(ch, PRF_NOREPEAT))
+  if (char_prf_flagged(ch, PRF_NOREPEAT))
     send_to_char(ch, "%s", CONFIG_OK);
 }
 
@@ -3208,8 +3208,8 @@ ACMD(do_zreset)
      }
     }
     send_to_char(ch, "Reset world.\r\n");
-    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s reset all MUD zones.", GET_NAME(ch));
-    log_imm_action("RESET: %s has reset all MUD zones.", GET_NAME(ch));
+    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s reset all MUD zones.", char_get_name(ch));
+    log_imm_action("RESET: %s has reset all MUD zones.", char_get_name(ch));
     return; 
      }
   } else if (*arg == '.' || !*arg)
@@ -3223,8 +3223,8 @@ ACMD(do_zreset)
   if (i <= top_of_zone_table && (can_edit_zone(ch, i) || GET_ADMLEVEL(ch) > ADMLVL_IMMORT)) {
     reset_zone(i);
     send_to_char(ch, "Reset zone #%d: %s.\r\n", zone_table[i].number, zone_table[i].name);
-    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s reset zone %d (%s)", GET_NAME(ch), zone_table[i].number, zone_table[i].name);
-    log_imm_action("RESET: %s has reset zone #%d: %s.", GET_NAME(ch), zone_table[i].number, zone_table[i].name);
+    mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s reset zone %d (%s)", char_get_name(ch), zone_table[i].number, zone_table[i].name);
+    log_imm_action("RESET: %s has reset zone #%d: %s.", char_get_name(ch), zone_table[i].number, zone_table[i].name);
   } else
     send_to_char(ch, "You do not have permission to reset this zone. Try %d.\r\n", GET_OLC_ZONE(ch));
 }
@@ -3245,7 +3245,7 @@ ACMD(do_wizutil)
     send_to_char(ch, "Yes, but for whom?!?\r\n");
   else if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
     send_to_char(ch, "There is no such player.\r\n");
-  else if (IS_NPC(vict))
+  else if (char_is_npc(vict))
     send_to_char(ch, "You can't do that to a mob!\r\n");
   else if (GET_ADMLEVEL(vict) > GET_ADMLEVEL(ch))
     send_to_char(ch, "Hmmm...you'd better not.\r\n");
@@ -3253,13 +3253,13 @@ ACMD(do_wizutil)
     switch (subcmd) {
     case SCMD_REROLL:
       send_to_char(ch, "Rerolling is not possible at this time, bug Iovan about it...\r\n");
-      log("(GC) %s has rerolled %s.", GET_NAME(ch), GET_NAME(vict));
+      log("(GC) %s has rerolled %s.", char_get_name(ch), char_get_name(vict));
       send_to_char(ch, "New stats: Str %d, Int %d, Wis %d, Dex %d, Con %d, Cha %d\r\n",
 	      GET_STR(vict), GET_INT(vict), GET_WIS(vict),
 	      GET_DEX(vict), GET_CON(vict), GET_CHA(vict));
       break;
     case SCMD_PARDON:
-      if (!PLR_FLAGGED(vict, PLR_THIEF) &&  !PLR_FLAGGED(vict, PLR_KILLER)) {
+      if (!char_plr_flagged(vict, PLR_THIEF) &&  !char_plr_flagged(vict, PLR_KILLER)) {
 	send_to_char(ch, "Your victim is not flagged.\r\n");
 	return;
       }
@@ -3267,20 +3267,20 @@ ACMD(do_wizutil)
       REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_KILLER);
       send_to_char(ch, "Pardoned.\r\n");
       send_to_char(vict, "You have been pardoned by the Gods!\r\n");
-      mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s pardoned by %s", GET_NAME(vict), GET_NAME(ch));
+      mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s pardoned by %s", char_get_name(vict), char_get_name(ch));
       break;
     case SCMD_NOTITLE:
-      result = PLR_TOG_CHK(vict, PLR_NOTITLE);
+      result = char_plr_toggle(vict, PLR_NOTITLE);
       mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) Notitle %s for %s by %s.",
-		ONOFF(result), GET_NAME(vict), GET_NAME(ch));
-      send_to_char(ch, "(GC) Notitle %s for %s by %s.\r\n", ONOFF(result), GET_NAME(vict), GET_NAME(ch));
+		ONOFF(result), char_get_name(vict), char_get_name(ch));
+      send_to_char(ch, "(GC) Notitle %s for %s by %s.\r\n", ONOFF(result), char_get_name(vict), char_get_name(ch));
       break;
     case SCMD_SQUELCH:
-      result = PLR_TOG_CHK(vict, PLR_NOSHOUT);
+      result = char_plr_toggle(vict, PLR_NOSHOUT);
       mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) Squelch %s for %s by %s.",
-		ONOFF(result), GET_NAME(vict), GET_NAME(ch));
-      send_to_char(ch, "(GC) Mute turned %s for %s by %s.\r\n", ONOFF(result), GET_NAME(vict), GET_NAME(ch));
-      send_to_all("@D[@RMUTE@D] @C%s@W has had mute turned @r%s@W by @C%s@W.\r\n", GET_NAME(vict), ONOFF(result), GET_NAME(ch));
+		ONOFF(result), char_get_name(vict), char_get_name(ch));
+      send_to_char(ch, "(GC) Mute turned %s for %s by %s.\r\n", ONOFF(result), char_get_name(vict), char_get_name(ch));
+      send_to_all("@D[@RMUTE@D] @C%s@W has had mute turned @r%s@W by @C%s@W.\r\n", char_get_name(vict), ONOFF(result), char_get_name(ch));
       break;
     case SCMD_FREEZE:
       if (ch == vict) {
@@ -3291,7 +3291,7 @@ ACMD(do_wizutil)
         send_to_char(ch, "Pfft...\r\n");
         return;
       }
-      if (PLR_FLAGGED(vict, PLR_FROZEN)) {
+      if (char_plr_flagged(vict, PLR_FROZEN)) {
 	send_to_char(ch, "Your victim is already pretty cold.\r\n");
 	return;
       }
@@ -3300,19 +3300,19 @@ ACMD(do_wizutil)
       send_to_char(vict, "A bitter wind suddenly rises and drains every erg of heat from your body!\r\nYou feel frozen!\r\n");
       send_to_char(ch, "Frozen.\r\n");
       act("A sudden cold wind conjured from nowhere freezes $n!", FALSE, vict, 0, 0, TO_ROOM);
-      mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s frozen by %s.", GET_NAME(vict), GET_NAME(ch));
+      mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s frozen by %s.", char_get_name(vict), char_get_name(ch));
       break;
     case SCMD_THAW:
-      if (!PLR_FLAGGED(vict, PLR_FROZEN)) {
+      if (!char_plr_flagged(vict, PLR_FROZEN)) {
 	send_to_char(ch, "Sorry, your victim is not morbidly encased in ice at the moment.\r\n");
 	return;
       }
       if (GET_FREEZE_LEV(vict) > GET_ADMLEVEL(ch)) {
 	send_to_char(ch, "Sorry, a level %d God froze %s... you can't unfreeze %s.\r\n",
-		GET_FREEZE_LEV(vict), GET_NAME(vict), HMHR(vict));
+		GET_FREEZE_LEV(vict), char_get_name(vict), char_hmhr(vict));
 	return;
       }
-      mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s un-frozen by %s.", GET_NAME(vict), GET_NAME(ch));
+      mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s un-frozen by %s.", char_get_name(vict), char_get_name(ch));
       REMOVE_BIT_AR(PLR_FLAGS(vict), PLR_FROZEN);
       send_to_char(vict, "A fireball suddenly explodes in front of you, melting the ice!\r\nYou feel thawed.\r\n");
       send_to_char(ch, "Thawed.\r\n");
@@ -3515,8 +3515,8 @@ ACMD(do_show)
       free_char(vict);
       return;
     }
-    send_to_char(ch, "Player: %-12s (%s) [%2d %s %s]\r\n", GET_NAME(vict),
-      genders[(int) GET_SEX(vict)], GET_LEVEL(vict), CLASS_ABBR(vict), RACE_ABBR(vict));
+    send_to_char(ch, "Player: %-12s (%s) [%2d %s %s]\r\n", char_get_name(vict),
+      genders[(int) GET_SEX(vict)], char_get_level(vict), CLASS_ABBR(vict), RACE_ABBR(vict));
     send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %" I64T "  Align: %-5d  Ethic: %-5d\r\n",
                  GET_GOLD(vict), GET_BANK_GOLD(vict), GET_EXP(vict),
                  GET_ALIGNMENT(vict), GET_ETHIC_ALIGNMENT(vict));
@@ -3548,9 +3548,9 @@ ACMD(do_show)
     k = 0;
     con = 0;
     for (vict = character_list; vict; vict = vict->next) {
-      if (IS_NPC(vict))
+      if (char_is_npc(vict))
 	j++;
-      else if (CAN_SEE(ch, vict)) {
+      else if (char_can_see(ch, vict)) {
 	i++;
 	if (vict->desc)
 	  con++;
@@ -3594,13 +3594,13 @@ ACMD(do_show)
       	if (!W_EXIT(i,j))
       	  continue;
         if (W_EXIT(i,j)->to_room == 0) {
-            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k, GET_ROOM_VNUM(i), count_color_chars(world[i].name)+40, world[i].name, QNRM, dirs[j]);
+            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k, rroom_get_vnum(i), count_color_chars(world[i].name)+40, world[i].name, QNRM, dirs[j]);
           if (len + nlen >= sizeof(buf) || nlen < 0)
             break;
           len += nlen;
         }
         if (W_EXIT(i,j)->to_room == NOWHERE && !W_EXIT(i,j)->general_description) {
-            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k, GET_ROOM_VNUM(i), count_color_chars(world[i].name)+ 40, world[i].name, QNRM, dirs[j]);
+            nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k, rroom_get_vnum(i), count_color_chars(world[i].name)+ 40, world[i].name, QNRM, dirs[j]);
           if (len + nlen >= sizeof(buf) || nlen < 0)
             break;
           len += nlen;
@@ -3613,8 +3613,8 @@ ACMD(do_show)
   case 6:
     len = strlcpy(buf, "Death Traps\r\n-----------\r\n", sizeof(buf));
     for (i = 0, j = 0; i <= top_of_world; i++)
-      if (ROOM_FLAGGED(i, ROOM_DEATH)) {
-        nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, GET_ROOM_VNUM(i), world[i].name);
+      if (rroom_flagged(i, ROOM_DEATH)) {
+        nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, rroom_get_vnum(i), world[i].name);
         if (len + nlen >= sizeof(buf) || nlen < 0)
           break;
         len += nlen;
@@ -3626,8 +3626,8 @@ ACMD(do_show)
   case 7:
     len = strlcpy(buf, "Godrooms\r\n--------------------------\r\n", sizeof(buf));
     for (i = 0, j = 0; i <= top_of_world; i++)
-      if (ROOM_FLAGGED(i, ROOM_GODROOM)) {
-        nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, GET_ROOM_VNUM(i), world[i].name);
+      if (rroom_flagged(i, ROOM_GODROOM)) {
+        nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, rroom_get_vnum(i), world[i].name);
         if (len + nlen >= sizeof(buf) || nlen < 0)
           break;
         len += nlen;
@@ -3654,10 +3654,10 @@ ACMD(do_show)
 	continue;
       if (STATE(d) != CON_PLAYING || GET_ADMLEVEL(ch) < GET_ADMLEVEL(d->character))
 	continue;
-      if (!CAN_SEE(ch, d->character) || IN_ROOM(d->character) == NOWHERE)
+      if (!char_can_see(ch, d->character) || IN_ROOM(d->character) == NOWHERE)
 	continue;
       i++;
-      send_to_char(ch, "%-10s - snooped by %s.\r\n", GET_NAME(d->snooping->character), GET_NAME(d->character));
+      send_to_char(ch, "%-10s - snooped by %s.\r\n", char_get_name(d->snooping->character), char_get_name(d->character));
     }
     if (i == 0)
       send_to_char(ch, "No one is currently snooping.\r\n");
@@ -3719,7 +3719,7 @@ ACMD(do_show)
         k *= 2;
         RECREATE(strp, char, k);
       }
-      j += snprintf(strp + j, k - j, "Name: %s\r\n", GET_NAME(vict));
+      j += snprintf(strp + j, k - j, "Name: %s\r\n", char_get_name(vict));
       if (l == 15)
         aff = vict->affected;
       else
@@ -3879,7 +3879,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
   /* Check to make sure all the levels are correct */
   if (GET_ADMLEVEL(ch) != ADMLVL_IMPL) {
-    if (!IS_NPC(vict) && GET_ADMLEVEL(ch) <= GET_ADMLEVEL(vict) && vict != ch) {
+    if (!char_is_npc(vict) && GET_ADMLEVEL(ch) <= GET_ADMLEVEL(vict) && vict != ch) {
       send_to_char(ch, "Maybe that's not such a great idea...\r\n");
       return (0);
     }
@@ -3890,10 +3890,10 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   }
 
   /* Make sure the PC/NPC is correct */
-  if (IS_NPC(vict) && !(set_fields[mode].pcnpc & NPC)) {
+  if (char_is_npc(vict) && !(set_fields[mode].pcnpc & NPC)) {
     send_to_char(ch, "You can't do that to a beast!\r\n");
     return (0);
-  } else if (!IS_NPC(vict) && !(set_fields[mode].pcnpc & PC)) {
+  } else if (!char_is_npc(vict) && !(set_fields[mode].pcnpc & PC)) {
     send_to_char(ch, "That can only be done to a beast!\r\n");
     return (0);
   }
@@ -3908,13 +3908,13 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
       send_to_char(ch, "Value must be 'on' or 'off'.\r\n");
       return (0);
     }
-    send_to_char(ch, "%s %s for %s.\r\n", set_fields[mode].cmd, ONOFF(on), GET_NAME(vict));
+    send_to_char(ch, "%s %s for %s.\r\n", set_fields[mode].cmd, ONOFF(on), char_get_name(vict));
   } else if (set_fields[mode].type == NUMBER) {
     char *ptr;
 
     value = strtoll(val_arg, &ptr, 10);
   /*    value = atoi(val_arg); */
-    send_to_char(ch, "%s's %s set to %" I64T ".\r\n", GET_NAME(vict), set_fields[mode].cmd, value);
+    send_to_char(ch, "%s's %s set to %" I64T ".\r\n", char_get_name(vict), set_fields[mode].cmd, value);
   } else
     send_to_char(ch, "%s", CONFIG_OK);
 
@@ -3927,54 +3927,54 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     break;
   case 2:
     set_title(vict, val_arg);
-    send_to_char(ch, "%s's title is now: %s\r\n", GET_NAME(vict), GET_TITLE(vict));
+    send_to_char(ch, "%s's title is now: %s\r\n", char_get_name(vict), char_get_title(vict));
     break;
   case 3:
     SET_OR_REMOVE(PRF_FLAGS(vict), PRF_SUMMONABLE);
-    send_to_char(ch, "Nosummon %s for %s.\r\n", ONOFF(!on), GET_NAME(vict));
+    send_to_char(ch, "Nosummon %s for %s.\r\n", ONOFF(!on), char_get_name(vict));
     break;
   case 4:
     vict->max_hit = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxpl for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set maxpl for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxpl for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set maxpl for %s.", char_get_name(ch), char_get_name(vict));
     break;
   case 5:
     vict->max_mana = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxki for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set maxki for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxki for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set maxki for %s.", char_get_name(ch), char_get_name(vict));
     break;
   case 6:
     vict->max_move = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxsta for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set maxsta for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set maxsta for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set maxsta for %s.", char_get_name(ch), char_get_name(vict));
     break;
   case 7:
     vict->hit = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set pl for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set pl for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set pl for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set pl for %s.", char_get_name(ch), char_get_name(vict));
     break;
   case 8:
     vict->mana = value;
     affect_total(vict);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set ki for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set ki for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set ki for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set ki for %s.", char_get_name(ch), char_get_name(vict));
     break;
   case 9:
     vict->move = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set st for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set st for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set st for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set st for %s.", char_get_name(ch), char_get_name(vict));
     break;
   case 10:
     GET_ALIGNMENT(vict) = RANGE(-1000, 1000);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set align for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set align for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set align for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set align for %s.", char_get_name(ch), char_get_name(vict));
     affect_total(vict);
     break;
   case 11:
     RANGE(0, 100);
     vict->real_abils.str = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set str for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set str for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set str for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set str for %s.", char_get_name(ch), char_get_name(vict));
     affect_total(vict);
     break;
   case 12:
@@ -3987,58 +3987,58 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   case 13:
     RANGE(0, 100);
     vict->real_abils.intel = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set intel for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set intel for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set intel for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set intel for %s.", char_get_name(ch), char_get_name(vict));
     affect_total(vict);
     break;
   case 14:
     RANGE(0, 100);
     vict->real_abils.wis = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set wis for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set wis for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set wis for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set wis for %s.", char_get_name(ch), char_get_name(vict));
     affect_total(vict);
     break;
   case 15:
     RANGE(0, 100);
     vict->real_abils.dex = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set dex for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set dex for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set dex for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set dex for %s.", char_get_name(ch), char_get_name(vict));
     affect_total(vict);
     break;
   case 16:
     RANGE(0, 100);
     vict->real_abils.con = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set con for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set con for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set con for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set con for %s.", char_get_name(ch), char_get_name(vict));
     affect_total(vict);
     break;
   case 17:
     RANGE(0, 100);
     vict->real_abils.cha = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set speed for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set speed for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set speed for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set speed for %s.", char_get_name(ch), char_get_name(vict));
     affect_total(vict);
     break;
   case 18:
     vict->armor = RANGE(-100, 500);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set armor index for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set armor index for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set armor index for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set armor index for %s.", char_get_name(ch), char_get_name(vict));
     affect_total(vict);
     break;
   case 19:
     GET_GOLD(vict) = RANGE(0, 100000000);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set zenni for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set zenni for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set zenni for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set zenni for %s.", char_get_name(ch), char_get_name(vict));
     break;
   case 20:
     GET_BANK_GOLD(vict) = RANGE(0, 100000000);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set bank for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set bank for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set bank for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set bank for %s.", char_get_name(ch), char_get_name(vict));
     break;
   case 21:
     vict->exp = RANGE(0, 50000000);
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set exp for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set exp for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set exp for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set exp for %s.", char_get_name(ch), char_get_name(vict));
     break;
   case 22:
     send_to_char(ch, "This does nothing at the moment.\r\n");
@@ -4071,14 +4071,14 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   case 27:
   case 28:
     if (GET_CLASS_LEVEL(vict)) {
-      GET_PRACTICES(vict, GET_CLASS(vict)) = RANGE(0, 10000);
-     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
+      GET_PRACTICES(vict, char_get_class(vict)) = RANGE(0, 10000);
+     mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set PS for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set PS for %s.", char_get_name(ch), char_get_name(vict));
     }
     else {
       GET_RACE_PRACTICES(vict) = RANGE(0, 10000);
-      mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
-     log_imm_action("SET: %s has set PS for %s.", GET_NAME(ch), GET_NAME(vict));
+      mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set PS for %s.", char_get_name(ch), char_get_name(vict));
+     log_imm_action("SET: %s has set PS for %s.", char_get_name(ch), char_get_name(vict));
     }
     break;
   case 29:
@@ -4086,12 +4086,12 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   case 31:
     if (!strcasecmp(val_arg, "off")) {
       GET_COND(vict, (mode - 29)) = -1; /* warning: magic number here */
-      send_to_char(ch, "%s's %s now off.\r\n", GET_NAME(vict), set_fields[mode].cmd);
+      send_to_char(ch, "%s's %s now off.\r\n", char_get_name(vict), set_fields[mode].cmd);
     } else if (is_number(val_arg)) {
       value = atoi(val_arg);
       RANGE(0, 48);
       GET_COND(vict, (mode - 29)) = value; /* and here too */
-      send_to_char(ch, "%s's %s set to %" I64T ".\r\n", GET_NAME(vict), set_fields[mode].cmd, value);
+      send_to_char(ch, "%s's %s set to %" I64T ".\r\n", char_get_name(vict), set_fields[mode].cmd, value);
     } else {
       send_to_char(ch, "Must be 'off' or a value from 0 to 48.\r\n");
       return (0);
@@ -4104,7 +4104,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     SET_OR_REMOVE(PLR_FLAGS(vict), PLR_THIEF);
     break;
   case 34:
-    if (!IS_NPC(vict) && value > 100) {
+    if (!char_is_npc(vict) && value > 100) {
       send_to_char(ch, "You can't do that.\r\n");
       return (0);
     }
@@ -4134,7 +4134,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
       send_to_char(ch, "That is not a class.\r\n");
       return (0);
     }
-    value = GET_CLASS_RANKS(vict, GET_CLASS(vict));
+    value = char_get_class_ranks(vict, char_get_class(vict));
     vict->chclass = chosen_sensei;
     break;
   case 40:
@@ -4152,7 +4152,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
       if (real_room(rvnum) != NOWHERE) {
         SET_BIT_AR(PLR_FLAGS(vict), PLR_LOADROOM);
 	GET_LOADROOM(vict) = rvnum;
-	send_to_char(ch, "%s will enter at room #%d.\r\n", GET_NAME(vict), GET_LOADROOM(vict));
+	send_to_char(ch, "%s will enter at room #%d.\r\n", char_get_name(vict), GET_LOADROOM(vict));
       } else {
 	send_to_char(ch, "That room does not exist!\r\n");
 	return (0);
@@ -4166,7 +4166,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     SET_OR_REMOVE(PRF_FLAGS(vict), PRF_COLOR);
     break;
   case 44:
-    if (GET_IDNUM(ch) == 0 || IS_NPC(vict))
+    if (GET_IDNUM(ch) == 0 || char_is_npc(vict))
       return (0);
     GET_IDNUM(vict) = value;
     break;
@@ -4228,7 +4228,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     break;
 
   case 52:
-      if(IS_NPC(vict)) {
+      if(char_is_npc(vict)) {
           chosen_race = race_find(val_arg, GET_SEX(ch), false);
       } else {
           chosen_race = race_find(val_arg, GET_SEX(ch), true);
@@ -4325,20 +4325,20 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
   case 64:
     vict->basepl = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set basepl for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set basepl for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set basepl for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set basepl for %s.", char_get_name(ch), char_get_name(vict));
     break;
 
   case 65:
       vict->baseki = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set baseki for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set baseki for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set baseki for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set baseki for %s.", char_get_name(ch), char_get_name(vict));
     break;
 
   case 66:
       vict->basest = value;
-    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set basest for %s.", GET_NAME(ch), GET_NAME(vict));
-    log_imm_action("SET: %s has set basest for %s.", GET_NAME(ch), GET_NAME(vict));
+    mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set basest for %s.", char_get_name(ch), char_get_name(vict));
+    log_imm_action("SET: %s has set basest for %s.", char_get_name(ch), char_get_name(vict));
     break;
 
   case 67:
@@ -4347,20 +4347,20 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
   case 68:
    GET_ABSORBS(vict) = RANGE(0, 3);
-   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set absorbs for %s.", GET_NAME(ch), GET_NAME(vict));
-   log_imm_action("SET: %s has set absorbs for %s.", GET_NAME(ch), GET_NAME(vict));
+   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set absorbs for %s.", char_get_name(ch), char_get_name(vict));
+   log_imm_action("SET: %s has set absorbs for %s.", char_get_name(ch), char_get_name(vict));
    break;
 
   case 69:
    GET_UP(vict) += RANGE(1, 1000);
-   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set upgrade points for %s.", GET_NAME(ch), GET_NAME(vict));
-   log_imm_action("SET: %s has set upgrade points for %s.", GET_NAME(ch), GET_NAME(vict));
+   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set upgrade points for %s.", char_get_name(ch), char_get_name(vict));
+   log_imm_action("SET: %s has set upgrade points for %s.", char_get_name(ch), char_get_name(vict));
    break;
 
   case 70:
    GET_AURA(vict) = RANGE(0, 8);
-   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set aura for %s.", GET_NAME(ch), GET_NAME(vict));
-   log_imm_action("SET: %s has set aura for %s.", GET_NAME(ch), GET_NAME(vict));
+   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set aura for %s.", char_get_name(ch), char_get_name(vict));
+   log_imm_action("SET: %s has set aura for %s.", char_get_name(ch), char_get_name(vict));
    break;
   case 71:
    send_to_char(ch, "Use the reward command.\r\n");
@@ -4373,8 +4373,8 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     break;
   case 74:
    GET_DCOUNT(vict) = RANGE(-1000, 1000);
-   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set death count for %s.", GET_NAME(ch), GET_NAME(vict));
-   log_imm_action("SET: %s has set death count for %s.", GET_NAME(ch), GET_NAME(vict));
+   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set death count for %s.", char_get_name(ch), char_get_name(vict));
+   log_imm_action("SET: %s has set death count for %s.", char_get_name(ch), char_get_name(vict));
    break;
   case 75:
     send_to_char(ch, "No.");
@@ -4392,8 +4392,8 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   
   case 78:
    GET_SLOTS(vict) = RANGE(1, 1000);
-   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set skill slots for %s.", GET_NAME(ch), GET_NAME(vict));
-   log_imm_action("SET: %s has set skill slots for %s.", GET_NAME(ch), GET_NAME(vict));
+   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set skill slots for %s.", char_get_name(ch), char_get_name(vict));
+   log_imm_action("SET: %s has set skill slots for %s.", char_get_name(ch), char_get_name(vict));
    break;
 
   case 79:
@@ -4402,8 +4402,8 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
   case 80:
    GET_TRANSCLASS(vict) = RANGE(1, 3);
-   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set transformation class for %s.", GET_NAME(ch), GET_NAME(vict));
-   log_imm_action("SET: %s has set transformation class for %s.", GET_NAME(ch), GET_NAME(vict));
+   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "SET: %s has set transformation class for %s.", char_get_name(ch), char_get_name(vict));
+   log_imm_action("SET: %s has set transformation class for %s.", char_get_name(ch), char_get_name(vict));
    break;
 
   case 81:
@@ -4497,7 +4497,7 @@ ACMD(do_set)
 
   /* save the character if a change was made */
   if (retval) {
-    if (!is_file && !IS_NPC(vict))
+    if (!is_file && !char_is_npc(vict))
       save_char(vict);
     if (is_file) {
       GET_PFILEPOS(cbuf) = player_i;
@@ -4648,7 +4648,7 @@ ACMD(do_raise)
 
   one_argument(argument, name);
 
-  if (GET_ADMLEVEL(ch) < ADMLVL_BUILDER && !IS_NPC(ch)) {
+  if (GET_ADMLEVEL(ch) < ADMLVL_BUILDER && !char_is_npc(ch)) {
    return;
   }
 
@@ -4657,12 +4657,12 @@ ACMD(do_raise)
     return;
   }
 
-  if (IS_NPC(vict)) {
+  if (char_is_npc(vict)) {
     send_to_char(ch, "Sorry, only players get spirits.\r\n");
     return;
   }
 
-  if (!AFF_FLAGGED(vict, AFF_SPIRIT)) {
+  if (!char_aff_flagged(vict, AFF_SPIRIT)) {
     send_to_char(ch, "But they aren't even dead!\r\n");
     return;
   }
@@ -4673,11 +4673,11 @@ ACMD(do_raise)
         resurrect(vict, 1);
     }
 
-  send_to_char(ch, "@wYou return %s from the @Bspirit@w world, to the world of the living!@n\r\n", GET_NAME(vict));
-  send_to_char(vict, "@wYour @Bspirit@w has been returned to the world of the living by %s!@n\r\n", GET_NAME(ch));
+  send_to_char(ch, "@wYou return %s from the @Bspirit@w world, to the world of the living!@n\r\n", char_get_name(vict));
+  send_to_char(vict, "@wYour @Bspirit@w has been returned to the world of the living by %s!@n\r\n", char_get_name(ch));
 
-  send_to_imm("Log: %s has raised %s from the dead.", GET_NAME(ch), GET_NAME(vict));
-  log_imm_action("RAISE: %s has raised %s from the dead.", GET_NAME(ch), GET_NAME(vict));
+  send_to_imm("Log: %s has raised %s from the dead.", char_get_name(ch), char_get_name(vict));
+  log_imm_action("RAISE: %s has raised %s from the dead.", char_get_name(ch), char_get_name(vict));
 
 
 }
@@ -4698,13 +4698,13 @@ ACMD(do_chown)
    send_to_char(ch, "No one by that name here.\r\n");
  else if (victim == ch)
    send_to_char(ch, "Are you sure you're feeling ok?\r\n");
- else if (GET_LEVEL(victim) >= GET_LEVEL(ch))
+ else if (char_get_level(victim) >= char_get_level(ch))
    send_to_char(ch, "That's really not such a good idea.\r\n");
  else if (!*buf3)
    send_to_char(ch, "Syntax: chown <object> <character>.\r\n");
  else {
    for (i = 0; i < NUM_WEARS; i++) {
-     if (GET_EQ(victim, i) && CAN_SEE_OBJ(ch, GET_EQ(victim, i)) &&
+     if (GET_EQ(victim, i) && char_can_see_obj(ch, GET_EQ(victim, i)) &&
         isname(buf2, GET_EQ(victim, i)->name)) {
        obj_to_char(unequip_char(victim, i), victim);
        k = 1;
@@ -4713,7 +4713,7 @@ ACMD(do_chown)
 
  if (!(obj = get_obj_in_list_vis(victim, buf2, NULL, victim->carrying))) {
    if (!k && !(obj = get_obj_in_list_vis(victim, buf2, NULL, victim->carrying))) {
-     send_to_char(ch, "%s does not appear to have the %s.\r\n", GET_NAME(victim), buf2);
+     send_to_char(ch, "%s does not appear to have the %s.\r\n", char_get_name(victim), buf2);
      return;
    }
  }
@@ -4761,7 +4761,7 @@ ACMD(do_zpurge)
      if ((i = real_room(room)) != NOWHERE) {
        for (mob = world[i].people; mob; mob = next_mob) {
          next_mob = mob->next_in_room;
-         if (IS_NPC(mob)) {
+         if (char_is_npc(mob)) {
            extract_char(mob);
          }
         }
@@ -4774,7 +4774,7 @@ ACMD(do_zpurge)
    }
 
    send_to_char(ch, "All mobiles and objects in zone %d purged.\r\n", zone);
-   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s has purged zone %d.", GET_NAME(ch), zone);
+   mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s has purged zone %d.", char_get_name(ch), zone);
 } 
 
 /******************************************************************************/
@@ -4782,9 +4782,9 @@ ACMD(do_zpurge)
 /******************************************************************************/
 
 /*mob limits*/
-#define MAX_DAMAGE_MOD_ALLOWED   MAX(GET_LEVEL(mob)/5, 2)
-#define MAX_GOLD_ALLOWED         GET_LEVEL(mob)*3000
-#define MAX_EXP_ALLOWED          GET_LEVEL(mob)*GET_LEVEL(mob) * 120
+#define MAX_DAMAGE_MOD_ALLOWED   MAX(char_get_level(mob)/5, 2)
+#define MAX_GOLD_ALLOWED         char_get_level(mob)*3000
+#define MAX_EXP_ALLOWED          char_get_level(mob)*char_get_level(mob) * 120
 #define MAX_LEVEL_ALLOWED        (100)
 #define GET_OBJ_AVG_DAM(obj)     (((GET_OBJ_VAL(obj, 2) + 1) / 2.0) * GET_OBJ_VAL(obj, 1))
 /* arbitrary limit for per round dam */
@@ -4952,10 +4952,10 @@ ACMD (do_zcheck)
                             "- Description hasn't been formatted. (/fi)\r\n");
         }
        
-        if (GET_LEVEL(mob)>MAX_LEVEL_ALLOWED && (found=1))
+        if (char_get_level(mob)>MAX_LEVEL_ALLOWED && (found=1))
           len += snprintf(buf + len, sizeof(buf) - len,
                           "- Is level %d (limit: 1-%d)\r\n",
-                          GET_LEVEL(mob), MAX_LEVEL_ALLOWED);
+                          char_get_level(mob), MAX_LEVEL_ALLOWED);
 
         if (GET_DAMAGE_MOD(mob)>MAX_DAMAGE_MOD_ALLOWED && (found=1))
           len += snprintf(buf + len, sizeof(buf) - len,
@@ -4971,13 +4971,13 @@ ACMD (do_zcheck)
 
         if (mob->mob_specials.damsizedice == 1 &&
             mob->mob_specials.damnodice == 1 &&
-            GET_LEVEL(mob) == 0 &&
+            char_get_level(mob) == 0 &&
             (found=1))
           len += snprintf(buf + len, sizeof(buf) - len,
                           "- Needs to be fixed - %sAutogenerate!%s\r\n", CCYEL(ch, C_NRM), CCNRM(ch, C_NRM));
        
-        if (MOB_FLAGGED(mob, MOB_AGGRESSIVE) &&
-            MOB_FLAGGED(mob, MOB_AGGR_GOOD | MOB_AGGR_EVIL | MOB_AGGR_NEUTRAL) && (found=1))
+        if (char_mob_flagged(mob, MOB_AGGRESSIVE) &&
+            char_mob_flagged(mob, MOB_AGGR_GOOD | MOB_AGGR_EVIL | MOB_AGGR_NEUTRAL) && (found=1))
           len += snprintf(buf + len, sizeof(buf) - len,
           "- Both aggresive and agressive to align.\r\n");
        
@@ -4991,19 +4991,19 @@ ACMD (do_zcheck)
           len += snprintf(buf + len, sizeof(buf) - len,
                           "- Has %" I64T " experience (limit: %d)\r\n",
                               GET_EXP(mob), MAX_EXP_ALLOWED);
-        if (AFF_FLAGGED(mob, AFF_GROUP | AFF_CHARM | AFF_POISON) && (found = 1))
+        if (char_aff_flagged(mob, AFF_GROUP | AFF_CHARM | AFF_POISON) && (found = 1))
           len += snprintf(buf + len, sizeof(buf) - len,
                           "- Has illegal affection bits set (%s %s %s)\r\n",
-                              AFF_FLAGGED(mob, AFF_GROUP) ? "GROUP" : "",
-                              AFF_FLAGGED(mob, AFF_CHARM) ? "CHARM" : "",
-                              AFF_FLAGGED(mob, AFF_POISON) ? "POISON" : "");
+                              char_aff_flagged(mob, AFF_GROUP) ? "GROUP" : "",
+                              char_aff_flagged(mob, AFF_CHARM) ? "CHARM" : "",
+                              char_aff_flagged(mob, AFF_POISON) ? "POISON" : "");
          
 
         /*if (!MOB_FLAGGED(mob, MOB_SENTINEL) && !MOB_FLAGGED(mob, MOB_STAY_ZONE) && (found = 1))
           len += snprintf(buf + len, sizeof(buf) - len,
                             "- Neither SENTINEL nor STAY_ZONE bits set.\r\n");*/
 
-        if (MOB_FLAGGED(mob, MOB_SPEC) && (found = 1))
+        if (char_mob_flagged(mob, MOB_SPEC) && (found = 1))
           len += snprintf(buf + len, sizeof(buf) - len,
                             "- SPEC flag needs to be removed.\r\n");
 
@@ -5011,8 +5011,8 @@ ACMD (do_zcheck)
           if (found) {
             send_to_char(ch,
                     "%s[%5d]%s %-30s: %s\r\n%s",
-                    CCCYN(ch, C_NRM), GET_MOB_VNUM(mob),
-                    CCYEL(ch, C_NRM), GET_NAME(mob),
+                    CCCYN(ch, C_NRM), char_get_mob_vnum(mob),
+                    CCYEL(ch, C_NRM), char_get_name(mob),
                     CCNRM(ch, C_NRM), buf);
           }
           /* reset buffers and found flag */
@@ -5048,7 +5048,7 @@ ACMD (do_zcheck)
         case ITEM_ARMOR:
           ac=GET_OBJ_VAL(obj,0);
           for (j=0; j<TOTAL_WEAR_CHECKS;j++) {
-            if (CAN_WEAR(obj,zarmor[j].bitvector) && (ac>zarmor[j].ac_allowed) && (found=1))
+            if (obj_can_wear(obj,zarmor[j].bitvector) && (ac>zarmor[j].ac_allowed) && (found=1))
               len += snprintf(buf + len, sizeof(buf) - len,
                                    "- Has AC %d (%s limit is %d)\r\n",
                                    ac, zarmor[j].message, zarmor[j].ac_allowed);
@@ -5057,7 +5057,7 @@ ACMD (do_zcheck)
      
       }  /*switch on Item_Type*/
 
-      if (!CAN_WEAR(obj, ITEM_WEAR_TAKE)) {
+      if (!obj_can_wear(obj, ITEM_WEAR_TAKE)) {
         if ((GET_OBJ_COST(obj) || (GET_OBJ_WEIGHT(obj) && GET_OBJ_TYPE(obj) != ITEM_FOUNTAIN) ||
            GET_OBJ_RENT(obj)) && (found = 1))
           len += snprintf(buf + len, sizeof(buf) - len,
@@ -5143,7 +5143,7 @@ ACMD (do_zcheck)
                        "- has unformatted extra description\r\n");
      /*****ADDITIONAL OBJ CHECKS HERE*****/
      if (found) {
-        send_to_char(ch, "[%5d] %-30s: \r\n%s", GET_OBJ_VNUM(obj), obj->short_description, buf);
+        send_to_char(ch, "[%5d] %-30s: \r\n%s", obj_get_vnum(obj), obj->short_description, buf);
       }
       strcpy(buf, "");
       len = 0;
@@ -5175,14 +5175,14 @@ ACMD (do_zcheck)
         } /* for (k.. */
       } /* cycle directions */         
 
-     if (ROOM_FLAGGED(i, ROOM_ATRIUM | ROOM_HOUSE | ROOM_HOUSE_CRASH | ROOM_OLC | ROOM_BFS_MARK))
+     if (rroom_flagged(i, ROOM_ATRIUM | ROOM_HOUSE | ROOM_HOUSE_CRASH | ROOM_OLC | ROOM_BFS_MARK))
          len += snprintf(buf + len, sizeof(buf) - len,
          "- Has illegal affection bits set (%s %s %s %s %s)\r\n",
-                            ROOM_FLAGGED(i, ROOM_ATRIUM) ? "ATRIUM" : "",
-                            ROOM_FLAGGED(i, ROOM_HOUSE) ? "HOUSE" : "",
-                            ROOM_FLAGGED(i, ROOM_HOUSE_CRASH) ? "HCRSH" : "",
-                            ROOM_FLAGGED(i, ROOM_OLC) ? "OLC" : "",
-                            ROOM_FLAGGED(i, ROOM_BFS_MARK) ? "*" : "");
+                            rroom_flagged(i, ROOM_ATRIUM) ? "ATRIUM" : "",
+                            rroom_flagged(i, ROOM_HOUSE) ? "HOUSE" : "",
+                            rroom_flagged(i, ROOM_HOUSE_CRASH) ? "HCRSH" : "",
+                            rroom_flagged(i, ROOM_OLC) ? "OLC" : "",
+                            rroom_flagged(i, ROOM_BFS_MARK) ? "*" : "");
 
       if ((MIN_ROOM_DESC_LENGTH) && strlen(world[i].description)<MIN_ROOM_DESC_LENGTH && (found=1))
         len += snprintf(buf + len, sizeof(buf) - len,
@@ -5555,5 +5555,5 @@ ACMD(do_boom)
     return;
   }
 
-  send_to_outdoor("%s shakes the world with a mighty boom!\r\n", GET_NAME(ch));
+  send_to_outdoor("%s shakes the world with a mighty boom!\r\n", char_get_name(ch));
 }

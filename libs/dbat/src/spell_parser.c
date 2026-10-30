@@ -89,14 +89,14 @@ int mag_manacost(struct char_data *ch, int spellnum)
   if (CONFIG_ALLOW_MULTICLASS) {
     /* find the cheapest class to cast it */
     min = MAX(SINFO.mana_max - (SINFO.mana_change *
-	      (GET_LEVEL(ch) - SINFO.min_level[(int) GET_CLASS_RANKS(ch, GET_CLASS(ch))])),
+	      (char_get_level(ch) - SINFO.min_level[(int) char_get_class_ranks(ch, char_get_class(ch))])),
 	     SINFO.mana_min);
-    whichclass = GET_CLASS(ch);
+    whichclass = char_get_class(ch);
     for (i = 0; i < NUM_CLASSES; i++) {
-      if (GET_CLASS_RANKS(ch, i) == 0)
+      if (char_get_class_ranks(ch, i) == 0)
         continue;
       tval = MAX(SINFO.mana_max - (SINFO.mana_change *
-	         (GET_CLASS_RANKS(ch, i) - SINFO.min_level[i])),
+	         (char_get_class_ranks(ch, i) - SINFO.min_level[i])),
 	         SINFO.mana_min);
       if (tval < min) {
         min = tval;
@@ -106,7 +106,7 @@ int mag_manacost(struct char_data *ch, int spellnum)
     return min;
   } else {
   return MAX(SINFO.mana_max - (SINFO.mana_change *
-		    (GET_LEVEL(ch) - SINFO.min_level[(int) GET_CLASS(ch)])),
+		    (char_get_level(ch) - SINFO.min_level[(int) char_get_class(ch)])),
 	     SINFO.mana_min);
   }
 }
@@ -118,14 +118,14 @@ int mag_kicost(struct char_data *ch, int spellnum)
   if (CONFIG_ALLOW_MULTICLASS) {
     /* find the cheapest class to cast it */
     min = MAX(SINFO.ki_max - (SINFO.ki_change *
-              (GET_LEVEL(ch) - SINFO.min_level[(int) GET_CLASS_RANKS(ch, GET_CLASS(ch))])),
+              (char_get_level(ch) - SINFO.min_level[(int) char_get_class_ranks(ch, char_get_class(ch))])),
              SINFO.ki_min);
-    whichclass = GET_CLASS(ch);
+    whichclass = char_get_class(ch);
     for (i = 0; i < NUM_CLASSES; i++) {
-      if (GET_CLASS_RANKS(ch, i) == 0)
+      if (char_get_class_ranks(ch, i) == 0)
         continue;
       tval = MAX(SINFO.ki_max - (SINFO.ki_change *
-                 (GET_CLASS_RANKS(ch, i) - SINFO.min_level[i])),
+                 (char_get_class_ranks(ch, i) - SINFO.min_level[i])),
                  SINFO.ki_min);
       if (tval < min) {
         min = tval;
@@ -135,7 +135,7 @@ int mag_kicost(struct char_data *ch, int spellnum)
     return min;
   } else {
   return MAX(SINFO.ki_max - (SINFO.ki_change *
-                    (GET_LEVEL(ch) - SINFO.min_level[(int) GET_CLASS(ch)])),
+                    (char_get_level(ch) - SINFO.min_level[(int) char_get_class(ch)])),
              SINFO.ki_min);
   }
 }
@@ -197,10 +197,10 @@ void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
   snprintf(buf2, sizeof(buf2), format, buf);
 
   for (i = world[IN_ROOM(ch)].people; i; i = i->next_in_room) {
-    if (i == ch || i == tch || !i->desc || !AWAKE(i))
+    if (i == ch || i == tch || !i->desc || !char_is_awake(i))
       continue;
     /* This should really check spell type vs. target ranks */
-    if (GET_CLASS_RANKS(i, GET_CLASS(ch)) || GET_ADMLEVEL(i) >= ADMLVL_IMMORT)
+    if (char_get_class_ranks(i, char_get_class(ch)) || GET_ADMLEVEL(i) >= ADMLVL_IMMORT)
       perform_act(buf1, ch, tobj, tch, i);
     else
       perform_act(buf2, ch, tobj, tch, i);
@@ -208,7 +208,7 @@ void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
 
   if (tch != NULL && tch != ch && IN_ROOM(tch) == IN_ROOM(ch)) {
     snprintf(buf1, sizeof(buf1), "$n stares at you and utters the words, '%s'.",
-	    GET_CLASS_RANKS(tch, GET_CLASS(ch)) ? skill_name(spellnum) : buf);
+	    char_get_class_ranks(tch, char_get_class(ch)) ? skill_name(spellnum) : buf);
     act(buf1, FALSE, ch, NULL, tch, TO_VICT);
   }
 }
@@ -279,7 +279,7 @@ int call_magic(struct char_data *caster, struct char_data *cvict,
   if (!cast_mtrigger(caster, cvict, spellnum))
     return 0;
 
-  if (ROOM_FLAGGED(IN_ROOM(caster), ROOM_PEACEFUL) && GET_ADMLEVEL(caster) < ADMLVL_IMPL && 
+  if (rroom_flagged(IN_ROOM(caster), ROOM_PEACEFUL) && GET_ADMLEVEL(caster) < ADMLVL_IMPL && 
       (SINFO.violent || IS_SET(SINFO.routines, MAG_DAMAGE))) {
     send_to_char(caster, "A flash of white light fills the room, dispelling your violent magic!\r\n");
     act("White light from no particular source suddenly fills the room, then vanishes.", FALSE, caster, 0, 0, TO_ROOM);
@@ -548,7 +548,7 @@ int cast_spell(struct char_data *ch, struct char_data *tch,
     }
     return (0);
   }
-  if (AFF_FLAGGED(ch, AFF_CHARM) && (ch->master == tch)) {
+  if (char_aff_flagged(ch, AFF_CHARM) && (ch->master == tch)) {
     send_to_char(ch, "You are afraid you might hurt your master!\r\n");
     return (0);
   }
@@ -560,24 +560,24 @@ int cast_spell(struct char_data *ch, struct char_data *tch,
     send_to_char(ch, "You cannot cast this spell upon yourself!\r\n");
     return (0);
   }
-  if (IS_SET(SINFO.routines, MAG_GROUPS) && !AFF_FLAGGED(ch, AFF_GROUP)) {
+  if (IS_SET(SINFO.routines, MAG_GROUPS) && !char_aff_flagged(ch, AFF_GROUP)) {
     send_to_char(ch, "You can't cast this spell if you're not in a group!\r\n");
     return (0);
   }
 
   if (IS_SET(SINFO.skilltype, SKTYPE_SPELL)) {
     for (i = 0; i < NUM_CLASSES; i++) {
-      j = GET_CLASS_RANKS(ch, i) - spell_info[spellnum].min_level[i];
+      j = char_get_class_ranks(ch, i) - spell_info[spellnum].min_level[i];
       if (j > diff) {
         whichclass = i;
         diff = j;
-        lvl = GET_CLASS_RANKS(ch, i);
+        lvl = char_get_class_ranks(ch, i);
       }
     }
   } else if (IS_SET(SINFO.skilltype, SKTYPE_ART))
-    lvl = GET_CLASS_RANKS(ch, CLASS_KABITO) / 2;
+    lvl = char_get_class_ranks(ch, CLASS_KABITO) / 2;
   else
-    lvl = GET_LEVEL(ch);
+    lvl = char_get_level(ch);
 
   send_to_char(ch, "%s", CONFIG_OK);
   if (IS_SET(SINFO.skilltype, SKTYPE_SPELL)) {
@@ -631,7 +631,7 @@ ACMD(do_cast)
   sprintf(buffer, "%d", spellnum);
 
   if (subcmd == SCMD_ART) {
-    if (!IS_KABITO(ch) && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
+    if (!char_is_kabito(ch) && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
       send_to_char(ch, "You are not trained in that.\r\n");
       return;
     }
@@ -641,7 +641,7 @@ ACMD(do_cast)
       return;
     }
 
-    if (!GET_SKILL(ch, spellnum)) {
+    if (!char_get_skill(ch, spellnum)) {
       send_to_char(ch, "You do not have that ability.\r\n");
       return;
     }
@@ -742,7 +742,7 @@ ACMD(do_cast)
   if(is_innate(ch, spellnum))
     innate = TRUE;
 
-  if (SINFO.violent && tch && IS_NPC(tch)) {
+  if (SINFO.violent && tch && char_is_npc(tch)) {
     if (!FIGHTING(tch))
       set_fighting(tch, ch);
     if (!FIGHTING(ch))
@@ -765,7 +765,7 @@ ACMD(do_cast)
         SET_BIT_AR(AFF_FLAGS(ch), AFF_NEXTNOACTION);
       if (subcmd == SCMD_CAST) {
         send_to_char(ch, "The magical energy from the spell leaves your mind.\r\n");
-        if (PRF_FLAGGED(ch, PRF_AUTOMEM)) {
+        if (char_prf_flagged(ch, PRF_AUTOMEM)) {
           send_to_char(ch, "You begin to commit the spell again to your mind.\r\n");
         }
       }

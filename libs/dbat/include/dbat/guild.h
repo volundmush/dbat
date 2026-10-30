@@ -13,7 +13,7 @@ ACMD(do_teach);
 #define GM_WITH_WHO(i) (guild_index[i].with_who)
 #define GM_NO_SKILL(i)	 (guild_index[i].no_such_skill)
 #define GM_NO_GOLD(i)	 (guild_index[i].not_enough_gold)
-#define GM_COST(i,j,k) (int) (GM_CHARGE(i)*spell_info[j].min_level[(int)GET_CLASS(k)])
+#define GM_COST(i,j,k) (int) (GM_CHARGE(i)*spell_info[j].min_level[(int)char_get_class(k)])
 #define GM_FUNC(i) (guild_index[i].func)
 
 #define NOTRAIN_GOOD(i)		(IS_SET_AR((GM_WITH_WHO(i)),TRADE_NOGOOD))

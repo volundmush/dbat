@@ -165,11 +165,11 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
   }
 
   for (i = character_list; i; i = i->next) {
-    if (IS_NPC(i))
+    if (char_is_npc(i))
       continue;
     if (inroom == FIND_CHAR_ROOM && IN_ROOM(i) != IN_ROOM(ch))
       continue;
-    if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
+    if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !char_is_npc(ch) && !char_is_npc(i)) {
      if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
       if (readIntro(ch, i) == 1) {
        if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
@@ -181,10 +181,10 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
       }
      }
     }
-    if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || IS_NPC(ch) || IS_NPC(i))) {
+    if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || char_is_npc(ch) || char_is_npc(i))) {
      if (strcasecmp(i->name, name) && !strstr(i->name, name)) {
       if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
-        if (!IS_NPC(ch) && !IS_NPC(i) && readIntro(ch, i) == 1) {
+        if (!char_is_npc(ch) && !char_is_npc(i) && readIntro(ch, i) == 1) {
          if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
           continue;
          }
@@ -195,7 +195,7 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
       }
      }
     }
-    if (!CAN_SEE(ch, i))
+    if (!char_can_see(ch, i))
       continue;
     if (--(*number) != 0)
       continue;
@@ -226,47 +226,47 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
 
   for (i = world[IN_ROOM(ch)].people; i && *number; i = i->next_in_room) {
     if (!strcasecmp(name, "last") && LASTHIT(i) != 0 && LASTHIT(i) == GET_IDNUM(ch)) {
-      if (CAN_SEE(ch, i))
+      if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
     }
-    else if (isname(name, i->name) && (IS_NPC(i) || IS_NPC(ch) || GET_ADMLEVEL(i) > 0 || GET_ADMLEVEL(ch) > 0) && i != ch) {
-      if (CAN_SEE(ch, i))
+    else if (isname(name, i->name) && (char_is_npc(i) || char_is_npc(ch) || GET_ADMLEVEL(i) > 0 || GET_ADMLEVEL(ch) > 0) && i != ch) {
+      if (char_can_see(ch, i))
 	if (--(*number) == 0)
 	  return (i);
     }
     else if (isname(name, i->name) && i == ch) {
-      if (CAN_SEE(ch, i))
+      if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
     }
-    else if (!IS_NPC(i) && !IS_NPC(ch) && !strcasecmp(get_i_name(ch, i), CAP(name)) && i != ch) {
-      if (CAN_SEE(ch, i))
+    else if (!char_is_npc(i) && !char_is_npc(ch) && !strcasecmp(get_i_name(ch, i), CAP(name)) && i != ch) {
+      if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
     }
-    else if (!IS_NPC(i) && !IS_NPC(ch) && strstr(get_i_name(ch, i), CAP(name)) && i != ch) {
-      if (CAN_SEE(ch, i))
+    else if (!char_is_npc(i) && !char_is_npc(ch) && strstr(get_i_name(ch, i), CAP(name)) && i != ch) {
+      if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
     }
-    else if (!IS_NPC(i) && !(strcmp(RACE(i), CAP(name))) && i != ch) {
-      if (CAN_SEE(ch, i))
+    else if (!char_is_npc(i) && !(strcmp(RACE(i), CAP(name))) && i != ch) {
+      if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
     }
-    else if (!IS_NPC(i) && strstr(RACE(i), CAP(name)) && i != ch) {
-      if (CAN_SEE(ch, i))
+    else if (!char_is_npc(i) && strstr(RACE(i), CAP(name)) && i != ch) {
+      if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
     }
-    else if (!IS_NPC(i) && !(strcmp(RACE(i), name)) && i != ch) {
-      if (CAN_SEE(ch, i))
+    else if (!char_is_npc(i) && !(strcmp(RACE(i), name)) && i != ch) {
+      if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
     }
-    else if (!IS_NPC(i) && strstr(RACE(i), name) && i != ch) {
-      if (CAN_SEE(ch, i))
+    else if (!char_is_npc(i) && strstr(RACE(i), name) && i != ch) {
+      if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
     }
@@ -294,7 +294,7 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
   for (i = character_list; i && *number; i = i->next) {
     if (IN_ROOM(ch) == IN_ROOM(i))
       continue;
-    if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
+    if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !char_is_npc(ch) && !char_is_npc(i)) {
      if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
       if (readIntro(ch, i) == 1) {
        if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
@@ -306,10 +306,10 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
       }
      }
     }
-    if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || IS_NPC(ch) || IS_NPC(i))) {
+    if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || char_is_npc(ch) || char_is_npc(i))) {
      if (strcasecmp(i->name, name) && !strstr(i->name, name)) {
       if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
-        if (!IS_NPC(ch) && !IS_NPC(i) && readIntro(ch, i) == 1) {
+        if (!char_is_npc(ch) && !char_is_npc(i) && readIntro(ch, i) == 1) {
          if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
           continue;
          }
@@ -357,7 +357,7 @@ struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *numb
 
   for (i = list; i && *number; i = i->next_content)
     if (isname(name, i->name))
-      if (CAN_SEE_OBJ(ch, i) || (GET_OBJ_TYPE(i) == ITEM_LIGHT))
+      if (char_can_see_obj(ch, i) || (GET_OBJ_TYPE(i) == ITEM_LIGHT))
 	if (--(*number) == 0)
 	  return (i);
 
@@ -390,7 +390,7 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number)
   /* ok.. no luck yet. scan the entire obj list   */
   for (i = object_list; i && *number; i = i->next)
     if (isname(name, i->name))
-      if (CAN_SEE_OBJ(ch, i))
+      if (char_can_see_obj(ch, i))
 	if (--(*number) == 0)
 	  return (i);
 
@@ -411,7 +411,7 @@ struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *numb
     return (NULL);
 
   for (j = 0; j < NUM_WEARS; j++)
-    if (equipment[j] && CAN_SEE_OBJ(ch, equipment[j]) && isname(arg, equipment[j]->name))
+    if (equipment[j] && char_can_see_obj(ch, equipment[j]) && isname(arg, equipment[j]->name))
       if (--(*number) == 0)
         return (equipment[j]);
 
@@ -432,7 +432,7 @@ int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *number, struc
     return (-1);
 
   for (j = 0; j < NUM_WEARS; j++)
-    if (equipment[j] && CAN_SEE_OBJ(ch, equipment[j]) && isname(arg, equipment[j]->name))
+    if (equipment[j] && char_can_see_obj(ch, equipment[j]) && isname(arg, equipment[j]->name))
       if (--(*number) == 0)
         return (j);
 

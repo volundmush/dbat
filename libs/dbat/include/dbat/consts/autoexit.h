@@ -5,5 +5,5 @@
 #define EXIT_NA         2       /* Not implemented - do not use     */
 #define EXIT_COMPLETE   3       /* Full display                     */
 
-#define _exitlevel(ch) (!IS_NPC(ch) ? (PRF_FLAGGED((ch),PRF_AUTOEXIT) ? 1 : 0 ) + (PRF_FLAGGED((ch),PRF_FULL_EXIT) ? 2 : 0 ) : 0 )
-#define EXIT_LEV(ch) (_exitlevel(ch))
+#define char_exit_level(ch) (!char_is_npc(ch) ? (char_prf_flagged((ch),PRF_AUTOEXIT) ? 1 : 0 ) + (char_prf_flagged((ch),PRF_FULL_EXIT) ? 2 : 0 ) : 0 )
+#define char_exit_level(ch) (char_exit_level(ch))

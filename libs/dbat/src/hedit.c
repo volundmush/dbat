@@ -38,7 +38,7 @@ ACMD(do_oasis_hedit)
   struct descriptor_data *d;
 
   /* No building as a mob or while being forced. */
-  if (IS_NPC(ch) || !ch->desc || STATE(ch->desc) != CON_PLAYING)
+  if (char_is_npc(ch) || !ch->desc || STATE(ch->desc) != CON_PLAYING)
     return;
 
   if (HEDITS == TRUE) {
@@ -46,7 +46,7 @@ ACMD(do_oasis_hedit)
    return;
   }
   
-  if (GET_ADMLEVEL(ch) < 4 && (!strcasecmp("Tepsih", GET_NAME(ch)) && !strcasecmp("Rogoshen", GET_NAME(ch)))) {
+  if (GET_ADMLEVEL(ch) < 4 && (!strcasecmp("Tepsih", char_get_name(ch)) && !strcasecmp("Rogoshen", char_get_name(ch)))) {
    send_to_char(ch, "Sorry you are incapable of editing help files at this time.\r\n");
    return;
   }
@@ -62,7 +62,7 @@ ACMD(do_oasis_hedit)
 
   if (!strcasecmp("save", arg)) {
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s saves help files.",
-           GET_NAME(ch));
+           char_get_name(ch));
     hedit_save_to_disk(d);
     send_to_char(ch, "Saving help files.\r\n");
     return;
@@ -92,7 +92,7 @@ ACMD(do_oasis_hedit)
   act("$n starts using OLC.", TRUE, ch, 0, 0, TO_ROOM);
   HEDITS = TRUE;
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
-  mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing help files.", GET_NAME(ch));
+  mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing help files.", char_get_name(ch));
 }
 
 static void hedit_setup_new(struct descriptor_data *d)

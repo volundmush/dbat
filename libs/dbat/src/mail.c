@@ -522,7 +522,7 @@ char *read_delete(long recipient, char **from)
 
 SPECIAL(postmaster)
 {
-  if (!ch->desc || IS_NPC(ch))
+  if (!ch->desc || char_is_npc(ch))
     return (0);			/* so mobs don't get caught here */
 
   if (!(CMD_IS("mail") || CMD_IS("check") || CMD_IS("receive")))
@@ -553,7 +553,7 @@ void postmaster_send_mail(struct char_data *ch, struct char_data *mailman,
   long recipient;
   char buf[MAX_INPUT_LENGTH], **mailwrite;
 
-  if (GET_LEVEL(ch) < MIN_MAIL_LEVEL && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
+  if (char_get_level(ch) < MIN_MAIL_LEVEL && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
     snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, you have to be level %d to send mail!'", MIN_MAIL_LEVEL);
     act(buf, FALSE, mailman, 0, ch, TO_VICT);
     return;
@@ -565,7 +565,7 @@ void postmaster_send_mail(struct char_data *ch, struct char_data *mailman,
 	FALSE, mailman, 0, ch, TO_VICT);
     return;
   }
-  if (GET_GOLD(ch) < STAMP_PRICE && !ADM_FLAGGED(ch, ADM_MONEY)) {
+  if (GET_GOLD(ch) < STAMP_PRICE && !char_adm_flagged(ch, ADM_MONEY)) {
     snprintf(buf, sizeof(buf), "$n tells you, 'A stamp costs %d zenni.'\r\n"
 	    "$n tells you, '...which I see you can't afford.'", STAMP_PRICE);
     act(buf, FALSE, mailman, 0, ch, TO_VICT);
@@ -650,7 +650,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
 	       /* so it saves */
     SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE);
 
-    if (IS_PLAYING(ch->desc) && mailman != NULL) {
+    if (desc_is_playing(ch->desc) && mailman != NULL) {
      obj_to_char(obj, ch);
      act("$n gives you a piece of mail.", FALSE, mailman, 0, ch, TO_VICT);
      act("$N gives $n a piece of mail.", FALSE, ch, 0, mailman, TO_ROOM);
@@ -667,9 +667,9 @@ void notify_if_playing(struct char_data *from, int recipient_id)
 
   for (d = descriptor_list; d; d = d->next)
   {
-    if ((IS_PLAYING(d)) && (GET_IDNUM(d->character) == recipient_id) && (has_mail(GET_IDNUM(d->character))))
+    if ((desc_is_playing(d)) && (GET_IDNUM(d->character) == recipient_id) && (has_mail(GET_IDNUM(d->character))))
     {
-      send_to_char(d->character, "\r\n\007\007\007@G@lYou have new mudmail from %s.@n\r\n", GET_NAME(from));
+      send_to_char(d->character, "\r\n\007\007\007@G@lYou have new mudmail from %s.@n\r\n", char_get_name(from));
     }
   }
 } 

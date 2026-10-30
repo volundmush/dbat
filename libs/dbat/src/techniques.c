@@ -10,9 +10,9 @@
 #include "dbat/character_utils.h"
 
 bool tech_handle_zanzoken(char_data *ch, char_data *vict, const char* name) {
-    if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
+    if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
             (getCurST(vict)) >= 1 && GET_POS(vict) != POS_SLEEPING) {
-        if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) < GET_SPEEDI(vict) + rand_number(1, 5))) {
+        if (!char_aff_flagged(ch, AFF_ZANZOKEN) || (char_aff_flagged(ch, AFF_ZANZOKEN) && char_get_speedi(ch) + rand_number(1, 5) < char_get_speedi(vict) + rand_number(1, 5))) {
             char msg[MAX_INPUT_LENGTH];
             snprintf(msg, sizeof(msg), "@C$N@c disappears, avoiding your %s before reappearing!@n", name);
             act(msg, TRUE, ch, nullptr, vict, TO_CHAR);
@@ -20,7 +20,7 @@ bool tech_handle_zanzoken(char_data *ch, char_data *vict, const char* name) {
             act(msg, TRUE, ch, nullptr, vict, TO_VICT);
             snprintf(msg, sizeof(msg), "@C$N@c disappears, avoiding @C$n's@c %s before reappearing!@n", name);
             act(msg, TRUE, ch, nullptr, vict, TO_NOTVICT);
-            if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
+            if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
                 REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_ZANZOKEN);
             }
             REMOVE_BIT_AR(AFF_FLAGS(vict), AFF_ZANZOKEN);
@@ -91,7 +91,7 @@ bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, obj_data 
 void tech_handle_fireshield(char_data *ch, char_data *vict, const char* part) {
 
     const char *msg = part ? part : "body";
-    if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !IS_DEMON(ch)) {
+    if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !GET_BONUS(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
         char msg[MAX_INPUT_LENGTH];
         snprintf(msg, sizeof(msg), "@c$N's@W fireshield burns your %s!@n", msg);
         act(msg, TRUE, ch, nullptr, vict, TO_CHAR);
@@ -111,18 +111,18 @@ void tech_handle_fireshield(char_data *ch, char_data *vict, const char* part) {
             send_to_char(vict, "@RThey are burned!@n\r\n");
             SET_BIT_AR(AFF_FLAGS(ch), AFF_BURNED);
         }
-    } else if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) && (GET_BONUS(ch, BONUS_FIREPROOF) || IS_DEMON(ch))) {
+    } else if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (GET_BONUS(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
         send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
     }
 }
 
 bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
-    if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
+    if (char_is_android(vict) && char_has_arms(vict) && char_get_skill(vict, SKILL_ABSORB) > rand_number(1, 140)) {
         act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, nullptr, vict, TO_CHAR);
         act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, nullptr, vict, TO_VICT);
         act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
         int amot = GET_CHARGE(ch);
-        if (IS_NPC(ch)) {
+        if (char_is_npc(ch)) {
             amot = GET_MAX_MANA(ch) / 20;
         }
         if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
@@ -138,7 +138,7 @@ bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
 }
 
 void tech_handle_crashdown(char_data *ch, char_data *vict) {
-    if (AFF_FLAGGED(vict, AFF_FLYING)) {
+    if (char_aff_flagged(vict, AFF_FLYING)) {
         act("@w$N@w is knocked out of the air!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@wYou are knocked out of the air!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@w$N@w is knocked out of the air!@n", TRUE, ch, 0, vict, TO_NOTVICT);

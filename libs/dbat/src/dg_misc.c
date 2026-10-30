@@ -144,7 +144,7 @@ void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
     call_magic(caster, tch, tobj, spellnum, DG_SPELL_LEVEL, CAST_SPELL, t);
     extract_char(caster);
   } else
-    call_magic(caster, tch, tobj, spellnum, GET_LEVEL(caster), CAST_SPELL, t);
+    call_magic(caster, tch, tobj, spellnum, char_get_level(caster), CAST_SPELL, t);
 }
 
 
@@ -281,14 +281,14 @@ void send_char_pos(struct char_data *ch, int dam)
  */
 int valid_dg_target(struct char_data *ch, int bitvector)
 {
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return TRUE;  /* all npcs are allowed as targets */
   else if (GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
     return TRUE;  /* as well as all mortals */
   else if (!IS_SET(bitvector, DG_ALLOW_GODS) &&
-     (GET_ADMLEVEL(ch) >= 2 && !PRF_FLAGGED(ch, PRF_TEST))) /* LVL_GOD has the advance command. Can't allow them to be forced. */
+     (GET_ADMLEVEL(ch) >= 2 && !char_prf_flagged(ch, PRF_TEST))) /* LVL_GOD has the advance command. Can't allow them to be forced. */
     return FALSE; /* but not always the highest gods */
-  else if (!PRF_FLAGGED(ch, PRF_NOHASSLE) || PRF_FLAGGED(ch, PRF_TEST))
+  else if (!char_prf_flagged(ch, PRF_NOHASSLE) || char_prf_flagged(ch, PRF_TEST))
     return TRUE;  /* the ones in between as allowed as long as they have no-hassle off.   */
   else
     return FALSE;  /* The rest are gods with nohassle on... */
@@ -297,7 +297,7 @@ int valid_dg_target(struct char_data *ch, int bitvector)
 
 void script_damage(struct char_data *vict, int dam)
 {
-  if (ADM_FLAGGED(vict, ADM_NODAMAGE) && (dam > 0)) {
+  if (char_adm_flagged(vict, ADM_NODAMAGE) && (dam > 0)) {
     send_to_char(vict, "Being the cool immortal you are, you sidestep a trap, "
                        "obviously placed to kill you.\r\n");
     return;
@@ -309,9 +309,9 @@ void script_damage(struct char_data *vict, int dam)
   send_char_pos(vict, dam);
 
   if (GET_POS(vict) == POS_DEAD) {
-    if (!IS_NPC(vict))
+    if (!char_is_npc(vict))
       mudlog( BRF, 0, TRUE, "%s killed by script at %s",
-                            GET_NAME(vict), world[IN_ROOM(vict)].name);
+                            char_get_name(vict), world[IN_ROOM(vict)].name);
     die(vict, NULL);
   }
 }

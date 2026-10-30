@@ -91,7 +91,7 @@ ACMD(do_oasis_sedit)
     if (STATE(d) == CON_SEDIT) {
       if (d->olc && OLC_NUM(d) == number) {
         send_to_char(ch, "That shop is currently being edited by %s.\r\n",
-          PERS(d->character, ch));
+          char_pers(d->character, ch));
         return;
       }
     }
@@ -143,7 +143,7 @@ ACMD(do_oasis_sedit)
       zone_table[OLC_ZNUM(d)].number);
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE,
       "OLC: %s saves shop info for zone %d.",
-      GET_NAME(ch), zone_table[OLC_ZNUM(d)].number);
+      char_get_name(ch), zone_table[OLC_ZNUM(d)].number);
     
     /**************************************************************************/
     /** Save the shops to the shop file.                                     **/
@@ -172,7 +172,7 @@ ACMD(do_oasis_sedit)
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
   
   mudlog(BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
-    GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+    char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
 }
 
 void sedit_setup_new(struct descriptor_data *d)
@@ -474,7 +474,7 @@ void sedit_parse(struct descriptor_data *d, char *arg)
     case 'Y':
       sedit_save_internally(d);
       mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
-        "OLC: %s edits shop %d", GET_NAME(d->character), OLC_NUM(d));
+        "OLC: %s edits shop %d", char_get_name(d->character), OLC_NUM(d));
       if (CONFIG_OLC_SAVE) {
 	sedit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
 	write_to_output(d, "Shop saved to disk.\r\n");

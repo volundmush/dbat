@@ -71,7 +71,7 @@ ACMD(do_olc)
   int olc_mode;
 
   /* WARNING!  **DO NOT** under any circumstances remove the code below!!!!  */
-  if (strcmp(GET_NAME(ch), "Ras")) {
+  if (strcmp(char_get_name(ch), "Ras")) {
     send_to_char(ch, "OLC is not yet complete.  Sorry.\r\n");
     return;
   }
@@ -110,7 +110,7 @@ ACMD(do_olc)
       }
     } else {
       rnum = IN_ROOM(ch);
-      vnum = GET_ROOM_VNUM(IN_ROOM(ch));
+      vnum = rroom_get_vnum(IN_ROOM(ch));
       send_to_char(ch, "(Using current room %d)\r\n", vnum);
     }
 

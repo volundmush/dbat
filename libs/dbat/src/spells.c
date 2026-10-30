@@ -61,7 +61,7 @@ ASPELL(spell_create_water)
 
 ASPELL(spell_recall)
 {
-  if (victim == NULL || IS_NPC(victim))
+  if (victim == NULL || char_is_npc(victim))
     return;
 
   act("$n disappears.", TRUE, victim, 0, 0, TO_ROOM);
@@ -79,12 +79,12 @@ ASPELL(spell_teleport)
 {
   room_rnum to_room;
 
-  if (victim == NULL || IS_NPC(victim))
+  if (victim == NULL || char_is_npc(victim))
     return;
 
   do {
     to_room = rand_number(0, top_of_world);
-  } while (ROOM_FLAGGED(to_room, ROOM_PRIVATE | ROOM_DEATH | ROOM_GODROOM));
+  } while (rroom_flagged(to_room, ROOM_PRIVATE | ROOM_DEATH | ROOM_GODROOM));
 
   act("$n slowly fades out of existence and is gone.",
       FALSE, victim, 0, 0, TO_ROOM);
@@ -105,35 +105,35 @@ ASPELL(spell_summon)
   if (ch == NULL || victim == NULL)
     return;
 
-  if (GET_LEVEL(victim) > level + 3) {
+  if (char_get_level(victim) > level + 3) {
     send_to_char(ch, "%s", SUMMON_FAIL);
     return;
   }
 
   if (!CONFIG_PK_ALLOWED) {
-    if (MOB_FLAGGED(victim, MOB_AGGRESSIVE)) {
+    if (char_mob_flagged(victim, MOB_AGGRESSIVE)) {
       act("As the words escape your lips and $N travels\r\n"
 	  "through time and space towards you, you realize that $E is\r\n"
 	  "aggressive and might harm you, so you wisely send $M back.",
 	  FALSE, ch, 0, victim, TO_CHAR);
       return;
     }
-    if (!IS_NPC(victim) && !PRF_FLAGGED(victim, PRF_SUMMONABLE) &&
-	!PLR_FLAGGED(victim, PLR_KILLER)) {
+    if (!char_is_npc(victim) && !char_prf_flagged(victim, PRF_SUMMONABLE) &&
+	!char_plr_flagged(victim, PLR_KILLER)) {
       send_to_char(victim, "%s just tried to summon you to: %s.\r\n"
 	      "%s failed because you have summon protection on.\r\n"
 	      "Type NOSUMMON to allow other players to summon you.\r\n",
-	      GET_NAME(ch), world[IN_ROOM(ch)].name,
+	      char_get_name(ch), world[IN_ROOM(ch)].name,
 	      (ch->sex == SEX_MALE) ? "He" : "She");
 
-      send_to_char(ch, "You failed because %s has summon protection on.\r\n", GET_NAME(victim));
-      mudlog(BRF, ADMLVL_IMMORT, TRUE, "%s failed summoning %s to %s.", GET_NAME(ch), GET_NAME(victim), world[IN_ROOM(ch)].name);
+      send_to_char(ch, "You failed because %s has summon protection on.\r\n", char_get_name(victim));
+      mudlog(BRF, ADMLVL_IMMORT, TRUE, "%s failed summoning %s to %s.", char_get_name(ch), char_get_name(victim), world[IN_ROOM(ch)].name);
       return;
     }
   }
 
-  if (MOB_FLAGGED(victim, MOB_NOSUMMON) ||
-      (IS_NPC(victim) && mag_newsaves(ch, victim, SPELL_SUMMON, level, GET_INT(ch)))) {
+  if (char_mob_flagged(victim, MOB_NOSUMMON) ||
+      (char_is_npc(victim) && mag_newsaves(ch, victim, SPELL_SUMMON, level, GET_INT(ch)))) {
     send_to_char(ch, "%s", SUMMON_FAIL);
     return;
   }
@@ -181,13 +181,13 @@ ASPELL(spell_locate_object)
     send_to_char(ch, "%c%s", toupper(*i->short_description), (i->short_description)+1);
 
     if (i->carried_by)
-      send_to_char(ch, " is being carried by %s.\r\n", PERS(i->carried_by, ch));
+      send_to_char(ch, " is being carried by %s.\r\n", char_pers(i->carried_by, ch));
     else if (IN_ROOM(i) != NOWHERE)
       send_to_char(ch, " is in %s.\r\n", world[IN_ROOM(i)].name);
     else if (i->in_obj)
       send_to_char(ch, " is in %s.\r\n", i->in_obj->short_description);
     else if (i->worn_by)
-      send_to_char(ch, " is being worn by %s.\r\n", PERS(i->worn_by, ch));
+      send_to_char(ch, " is being worn by %s.\r\n", char_pers(i->worn_by, ch));
     else
       send_to_char(ch, "'s location is uncertain.\r\n");
 
@@ -209,20 +209,20 @@ ASPELL(spell_charm)
 
   if (victim == ch)
     send_to_char(ch, "You like yourself even better!\r\n");
-  else if (!IS_NPC(victim) && !PRF_FLAGGED(victim, PRF_SUMMONABLE))
+  else if (!char_is_npc(victim) && !char_prf_flagged(victim, PRF_SUMMONABLE))
     send_to_char(ch, "You fail because SUMMON protection is on!\r\n");
-  else if (AFF_FLAGGED(victim, AFF_SANCTUARY))
+  else if (char_aff_flagged(victim, AFF_SANCTUARY))
     send_to_char(ch, "Your victim is protected by sanctuary!\r\n");
-  else if (MOB_FLAGGED(victim, MOB_NOCHARM))
+  else if (char_mob_flagged(victim, MOB_NOCHARM))
     send_to_char(ch, "Your victim resists!\r\n");
-  else if (AFF_FLAGGED(ch, AFF_CHARM))
+  else if (char_aff_flagged(ch, AFF_CHARM))
     send_to_char(ch, "You can't have any followers of your own!\r\n");
-  else if (AFF_FLAGGED(victim, AFF_CHARM) || level < GET_LEVEL(victim))
+  else if (char_aff_flagged(victim, AFF_CHARM) || level < char_get_level(victim))
     send_to_char(ch, "You fail.\r\n");
   /* player charming another player - no legal reason for this */
-  else if (!CONFIG_PK_ALLOWED && !IS_NPC(victim))
+  else if (!CONFIG_PK_ALLOWED && !char_is_npc(victim))
     send_to_char(ch, "You fail - shouldn't be doing it anyway.\r\n");
-  else if (IS_SAIYAN(victim) && rand_number(1, 100) <= 90)
+  else if (char_is_saiyan(victim) && rand_number(1, 100) <= 90)
     send_to_char(ch, "Your victim resists!\r\n");
   else if (circle_follow(victim, ch))
     send_to_char(ch, "Sorry, following in circles cannot be allowed.\r\n");
@@ -247,7 +247,7 @@ ASPELL(spell_charm)
     affect_to_char(victim, &af);
 
     act("Isn't $n just such a nice fellow?", FALSE, ch, 0, victim, TO_VICT);
-    if (IS_NPC(victim))
+    if (char_is_npc(victim))
       REMOVE_BIT_AR(MOB_FLAGS(victim), MOB_SPEC);
   }
 }
@@ -356,7 +356,7 @@ ASPELL(spell_enchant_weapon)
     return;
 
   /* Either already enchanted or not a weapon. */
-  if (GET_OBJ_TYPE(obj) != ITEM_WEAPON || OBJ_FLAGGED(obj, ITEM_MAGIC))
+  if (GET_OBJ_TYPE(obj) != ITEM_WEAPON || obj_flagged(obj, ITEM_MAGIC))
     return;
 
   /* Make sure no other affections. */
@@ -382,10 +382,10 @@ ASPELL(spell_enchant_weapon)
     }
   }
 
-  if (IS_GOOD(ch)) {
+  if (char_is_good(ch)) {
     SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_ANTI_EVIL);
     act("$p glows blue.", FALSE, ch, obj, 0, TO_CHAR);
-  } else if (IS_EVIL(ch)) {
+  } else if (char_is_evil(ch)) {
     SET_BIT_AR(GET_OBJ_EXTRA(obj), ITEM_ANTI_GOOD);
     act("$p glows red.", FALSE, ch, obj, 0, TO_CHAR);
   } else
@@ -397,12 +397,12 @@ ASPELL(spell_detect_poison)
 {
   if (victim) {
     if (victim == ch) {
-      if (AFF_FLAGGED(victim, AFF_POISON))
+      if (char_aff_flagged(victim, AFF_POISON))
         send_to_char(ch, "You can sense poison in your blood.\r\n");
       else
         send_to_char(ch, "You feel healthy.\r\n");
     } else {
-      if (AFF_FLAGGED(victim, AFF_POISON))
+      if (char_aff_flagged(victim, AFF_POISON))
         act("You sense that $E is poisoned.", FALSE, ch, 0, victim, TO_CHAR);
       else
         act("You sense that $E is healthy.", FALSE, ch, 0, victim, TO_CHAR);
@@ -435,24 +435,24 @@ ASPELL(spell_portal)
   if (ch == NULL || victim == NULL)
     return;
 
-  if (!can_edit_zone(ch, rm->zone) && ZONE_FLAGGED(rm->zone, ZONE_QUEST)) {
+  if (!can_edit_zone(ch, rm->zone) && zone_flagged(rm->zone, ZONE_QUEST)) {
     send_to_char(ch, "That target is in a quest zone.\r\n");
     return;
   }
 
-  if (ZONE_FLAGGED(rm->zone, ZONE_CLOSED) && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
+  if (zone_flagged(rm->zone, ZONE_CLOSED) && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
     send_to_char(ch, "That target is in a closed zone.\r\n");
     return;
   }
 
-  if (ZONE_FLAGGED(rm->zone, ZONE_NOIMMORT) && GET_ADMLEVEL(ch) < ADMLVL_GRGOD) {
+  if (zone_flagged(rm->zone, ZONE_NOIMMORT) && GET_ADMLEVEL(ch) < ADMLVL_GRGOD) {
     send_to_char(ch, "That target is in a zone closed to all.\r\n");
     return;
   }
 
   /* create the portal */
   portal = read_object(portal_object, VIRTUAL);
-  GET_OBJ_VAL(portal, VAL_PORTAL_DEST) = GET_ROOM_VNUM(IN_ROOM(victim));
+  GET_OBJ_VAL(portal, VAL_PORTAL_DEST) = rroom_get_vnum(IN_ROOM(victim));
   GET_OBJ_VAL(portal, VAL_PORTAL_HEALTH) = 100;
   GET_OBJ_VAL(portal, VAL_PORTAL_MAXHEALTH) = 100;
   GET_OBJ_TIMER(portal) = (int) (level / 10);
@@ -464,7 +464,7 @@ ASPELL(spell_portal)
        TRUE, ch, 0, 0, TO_CHAR);
   /* create the portal at the other end */
   tportal = read_object(portal_object, VIRTUAL);
-  GET_OBJ_VAL(tportal, VAL_PORTAL_DEST) = GET_ROOM_VNUM(IN_ROOM(ch));
+  GET_OBJ_VAL(tportal, VAL_PORTAL_DEST) = rroom_get_vnum(IN_ROOM(ch));
   GET_OBJ_VAL(tportal, VAL_PORTAL_HEALTH) = 100;
   GET_OBJ_VAL(tportal, VAL_PORTAL_MAXHEALTH) = 100;
   GET_OBJ_TIMER(tportal) = (int) (level / 10);
@@ -487,7 +487,7 @@ ASPELL(art_abundant_step)
   steps = 0;
   r = IN_ROOM(ch);
   p = arg;
-  max = 10 + GET_CLASS_RANKS(ch, CLASS_KABITO) / 2;
+  max = 10 + char_get_class_ranks(ch, CLASS_KABITO) / 2;
 
   while (p && *p && !isdigit(*p) && !isalpha(*p)) p++;
 
@@ -550,47 +550,47 @@ ASPELL(art_abundant_step)
 int roll_skill(const struct char_data *ch, int snum)
 {
   int roll, skval, i;
-  if (!IS_NPC(ch)) {
-   skval = GET_SKILL(ch, snum);
+  if (!char_is_npc(ch)) {
+   skval = char_get_skill(ch, snum);
    if (SKILL_SPOT == snum) {
-    if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4)) {
+    if (char_is_mutant(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4)) {
      skval += 5;
     }
    } else if (SKILL_HIDE == snum) {
-    if (AFF_FLAGGED(ch, AFF_LIQUEFIED)) {
+    if (char_aff_flagged(ch, AFF_LIQUEFIED)) {
      skval += 5;
-    } else if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 5 || GET_GENOME(ch, 1) == 5)) {
+    } else if (char_is_mutant(ch) && (GET_GENOME(ch, 0) == 5 || GET_GENOME(ch, 1) == 5)) {
      skval += 10;
     }
    }
   }
-  else if (IS_NPC(ch)) {
+  else if (char_is_npc(ch)) {
    int numb = 0;
-   if (GET_LEVEL(ch) <= 10) {
+   if (char_get_level(ch) <= 10) {
     numb = rand_number(15, 30);
    }
-   if (GET_LEVEL(ch) <= 20) {
+   if (char_get_level(ch) <= 20) {
     numb = rand_number(20, 40);
    }
-   if (GET_LEVEL(ch) <= 30) {
+   if (char_get_level(ch) <= 30) {
     numb = rand_number(40, 60);
    }
-   if (GET_LEVEL(ch) <= 60) {
+   if (char_get_level(ch) <= 60) {
     numb = rand_number(60, 80);
    }
-   if (GET_LEVEL(ch) <= 80) {
+   if (char_get_level(ch) <= 80) {
     numb = rand_number(70, 90);
    }
-   if (GET_LEVEL(ch) <= 90) {
+   if (char_get_level(ch) <= 90) {
     numb = rand_number(80, 95);
    }
-   if (GET_LEVEL(ch) <= 100) {
+   if (char_get_level(ch) <= 100) {
     numb = rand_number(90, 100);
    }
    skval = numb;
   }
-  if (snum == SKILL_SPOT && GET_SKILL(ch, SKILL_LISTEN)) {
-   skval += GET_SKILL(ch, SKILL_LISTEN) / 10;
+  if (snum == SKILL_SPOT && char_get_skill(ch, SKILL_LISTEN)) {
+   skval += char_get_skill(ch, SKILL_LISTEN) / 10;
   }
   if (snum < 0 || snum >= SKILL_TABLE_SIZE)
     return 0;
@@ -602,9 +602,9 @@ int roll_skill(const struct char_data *ch, int snum)
      * kind of save called after roll_skill.
      */
       for (i = 0, roll = 0; i < NUM_CLASSES; i++)
-        if (GET_CLASS_RANKS(ch, i) &&
-            (spell_info[snum].min_level[i] < GET_CLASS_RANKS(ch, i)))
-          roll += GET_CLASS_RANKS(ch, i); /* Caster level for eligable classes */
+        if (char_get_class_ranks(ch, i) &&
+            (spell_info[snum].min_level[i] < char_get_class_ranks(ch, i)))
+          roll += char_get_class_ranks(ch, i); /* Caster level for eligable classes */
       return roll + rand_number(1, 20);
   } else if (IS_SET(spell_info[snum].skilltype, SKTYPE_SKILL)) {
       if (!skval && IS_SET(spell_info[snum].flags, SKFLAG_NEEDTRAIN)) {
@@ -630,7 +630,7 @@ int roll_skill(const struct char_data *ch, int snum)
         return roll + rand_number(1, 20);
       }
   } else {
-      log("Trying to roll uncategorized skill/spell #%d for %s", snum, GET_NAME(ch));
+      log("Trying to roll uncategorized skill/spell #%d for %s", snum, char_get_name(ch));
       return 0;
   }
 }

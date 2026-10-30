@@ -71,7 +71,7 @@ ACMD(do_oasis_cedit)
     SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
     
     mudlog(BRF, ADMLVL_IMMORT, TRUE, 
-      "OLC: %s starts editing the game configuration.", GET_NAME(ch));
+      "OLC: %s starts editing the game configuration.", char_get_name(ch));
     return;
   } else if (strcasecmp("save", buf1) != 0) {
     send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
@@ -80,7 +80,7 @@ ACMD(do_oasis_cedit)
   
   send_to_char(ch, "Saving the game configuration.\r\n");
   mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, 
-    "OLC: %s saves the game configuration.", GET_NAME(ch));
+    "OLC: %s saves the game configuration.", char_get_name(ch));
   
   cedit_save_to_disk();
 }
@@ -1043,7 +1043,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
         case 'y':
         case 'Y':
           cedit_save_internally(d);
-          mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE, "OLC: %s modifies the game configuration.", GET_NAME(d->character));
+          mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE, "OLC: %s modifies the game configuration.", char_get_name(d->character));
           cleanup_olc(d, CLEANUP_CONFIG);
 	  if (CONFIG_AUTO_SAVE) {
 	    cedit_save_to_disk();

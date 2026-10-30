@@ -224,13 +224,11 @@ void obj_set_fellow_wall(struct obj_data *obj, struct obj_data *fellow);
 
 
 
-#define OBJAFF_FLAGGED(obj, flag) (IS_SET_AR(GET_OBJ_PERM(obj), (flag)))
-#define OBJVAL_FLAGGED(obj, flag) (IS_SET(GET_OBJ_VAL((obj), VAL_CONTAINER_FLAGS), (flag)))
-#define OBJWEAR_FLAGGED(obj, flag) (IS_SET_AR(GET_OBJ_WEAR(obj), (flag)))
-#define OBJ_FLAGGED(obj, flag) (IS_SET_AR(GET_OBJ_EXTRA(obj), (flag)))
+bool obj_aff_flagged(const struct obj_data *obj, int flag);
+bool obj_val_flagged(const struct obj_data *obj, bitvector_t flag);
+bool obj_flagged(const struct obj_data *obj, int flag);
 
-#define VALID_OBJ_RNUM(obj)	(GET_OBJ_RNUM(obj) <= top_of_objt && \
-				 GET_OBJ_RNUM(obj) != NOTHING)
+bool obj_valid_rnum(const struct obj_data *obj);
 
 #define GET_OBJ_LEVEL(obj)      ((obj)->level)
 #define GET_OBJ_PERM(obj)       ((obj)->bitvector)
@@ -266,23 +264,18 @@ void obj_set_fellow_wall(struct obj_data *obj, struct obj_data *fellow);
 #define GET_LAST_LOAD(obj)      ((obj)->lload)
 #define GET_OBJ_SIZE(obj)	((obj)->size)
 #define GET_OBJ_RNUM(obj)	((obj)->item_number)
-#define GET_OBJ_VNUM(obj)	(VALID_OBJ_RNUM(obj) ? \
-				obj_index[GET_OBJ_RNUM(obj)].vnum : NOTHING)
-#define GET_OBJ_SPEC(obj)	(VALID_OBJ_RNUM(obj) ? \
-				obj_index[GET_OBJ_RNUM(obj)].func : NULL)
+spec_proc_func obj_get_spec(const struct obj_data *obj);
 #define GET_FUEL(obj)           (GET_OBJ_VAL((obj), 2))
 #define GET_FUELCOUNT(obj)      (GET_OBJ_VAL((obj), 3))
 
-#define IS_CORPSE(obj)		(GET_OBJ_TYPE(obj) == ITEM_CONTAINER && \
-					GET_OBJ_VAL((obj), VAL_CONTAINER_CORPSE) == 1)
+bool obj_is_corpse(const struct obj_data *obj);
 
-#define CAN_WEAR(obj, part)	OBJWEAR_FLAGGED((obj), (part))
+bool obj_can_wear(const struct obj_data *obj, int part);
 #define GET_OBJ_MATERIAL(obj)   ((obj)->value[7])
 #define GET_OBJ_SHORT(obj)	((obj)->short_description)
 
 
-#define ANA(obj) (strchr("aeiouAEIOU", *(obj)->name) ? "An" : "A")
-#define SANA(obj) (strchr("aeiouAEIOU", *(obj)->name) ? "an" : "a")
+char *obj_sana(const struct obj_data *obj);
 #define OBJ_LOADROOM(obj)     ((obj)->room_loaded)
 
 #include "dbat/objects.h"

@@ -103,25 +103,23 @@ struct player_special_data
 
    int racial_pref;
 
-   // ALL STUFF BELOW THIS IN player_special_data IS UNUSED.
-   int gauntlet;          /* Highest Gauntlet Position */
-   int skill_points;      /* Skill points earned from race HD	*/
-   int tlevel;            /* Turning level			*/
-   int ability_trains;    /* How many stat points can you train?	*/
-   int spellmem[MAX_MEM]; /* Spell slots				*/
-   int feat_points;       /* How many general feats you can take	*/
-   int epic_feat_points;  /* How many epic feats you can take	*/
+   // UNUSED
+   int gauntlet;
+   int skill_points;
+   int tlevel;
+   int ability_trains;
+   int spellmem[MAX_MEM];
+   int feat_points;
+   int epic_feat_points;
    int class_feat_points[NUM_CLASSES];
-   /* How many class feats you can take	*/
    int epic_class_feat_points[NUM_CLASSES];
-   /* How many epic class feats 		*/
    int domain[NUM_DOMAINS];
    int school[NUM_SCHOOLS];
    int deity;
    int spell_mastery_points;
    int spell_level[MAX_SPELL_LEVEL];
-   /* bonus to number of spells memorized */
-   int memcursor; /* points to the next free slot in spellmem */
+   int memcursor;
+   // END UNUSED
 };
 
 // UNUSED

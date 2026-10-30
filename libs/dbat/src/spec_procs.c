@@ -58,7 +58,7 @@ SPECIAL(dump)
     send_to_char(ch, "You are awarded for outstanding performance.\r\n");
     act("$n has been awarded for being a good citizen.", TRUE, ch, 0, 0, TO_ROOM);
 
-    if (GET_LEVEL(ch) < 3)
+    if (char_get_level(ch) < 3)
       gain_exp(ch, value);
     else
       GET_GOLD(ch) += value;
@@ -179,7 +179,7 @@ int num_players_in_room(room_vnum room)
       continue; 
     if (world[IN_ROOM(i->character)].number != room) 
       continue; 
-    if ((GET_ADMLEVEL(i->character) >= ADMLVL_IMMORT) && (PRF_FLAGGED(i->character, PRF_NOHASSLE))) /* Ignore Imms */ 
+    if ((GET_ADMLEVEL(i->character) >= ADMLVL_IMMORT) && (char_prf_flagged(i->character, PRF_NOHASSLE))) /* Ignore Imms */ 
       continue; 
 
     num_players++; 
@@ -194,7 +194,7 @@ bool check_mob_in_room(mob_vnum mob, room_vnum room)
   bool found = FALSE; 
 
   for (i = character_list; i; i = i->next) 
-    if (GET_MOB_VNUM(i) == mob) 
+    if (char_get_mob_vnum(i) == mob) 
       if (world[i->in_room].number == room) found=TRUE; 
 
   return found; 
@@ -212,7 +212,7 @@ bool check_obj_in_room(obj_vnum obj, room_vnum room)
 
   for (i = list; i; i = i->next_content) 
   { 
-    if (GET_OBJ_VNUM(i) == obj) found = TRUE; 
+    if (obj_get_vnum(i) == obj) found = TRUE; 
   } 
   return found; 
 } 
@@ -277,7 +277,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
   /* give player credit for making it this far */ 
   for (i = 0; gauntlet_info[i][0] != -1; i++) 
   { 
-    if ((!IS_NPC(ch)) && (world[IN_ROOM(ch)].number == gauntlet_info[i][1])) 
+    if ((!char_is_npc(ch)) && (world[IN_ROOM(ch)].number == gauntlet_info[i][1])) 
     { 
       /* Check not overwriting gauntlet rank with lower value (Jamdog - 20th July 2006) */ 
       if (GET_GAUNTLET(ch) < (gauntlet_info[i][0])) 
@@ -300,7 +300,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
   if (!IS_MOVE(cmd) && !CMD_IS("surrender") ) /* Only movement commands need to be checked     */ 
     return FALSE; 
 
-  if (IS_NPC(ch))                  /* Mobs can move about - Jamdog 20th July 2006   */ 
+  if (char_is_npc(ch))                  /* Mobs can move about - Jamdog 20th July 2006   */ 
     return FALSE;                  /* This also allows following pets!              */ 
 
   if (CMD_IS("surrender")) 
@@ -347,10 +347,10 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
         //don't let him proceed if mob is still alive 
         for (tch = world[ch->in_room].people; tch; tch = tch->next_in_room) 
         { 
-          if (IS_NPC(tch) && i > 0)  /* Ignore mobs in the waiting room */ 
+          if (char_is_npc(tch) && i > 0)  /* Ignore mobs in the waiting room */ 
           { 
             proceed = 0; 
-            sprintf(buf,"%s wants to teach you a lesson first.\r\n", GET_NAME(tch)); 
+            sprintf(buf,"%s wants to teach you a lesson first.\r\n", char_get_name(tch)); 
           } 
         } 
         /* In the case of the phoenix room, don't progress if there is 1st or 2nd ashes */ 
@@ -362,10 +362,10 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
           /* Check the next room for players and ensure mob is waiting */ 
           for (tch = world[real_room(gauntlet_info[i+1][1])].people; tch; tch = tch->next_in_room) 
           { 
-            if (!IS_NPC(tch)) 
+            if (!char_is_npc(tch)) 
             { 
               proceed=0;  /* There is a player there */ 
-              sprintf(buf,"%s is in the next room.  You must wait for them to finish.\r\n", GET_NAME(tch)); 
+              sprintf(buf,"%s is in the next room.  You must wait for them to finish.\r\n", char_get_name(tch)); 
             } 
             else 
             { 
@@ -396,7 +396,7 @@ SPECIAL(gauntlet_end)  /* Jamdog - 20th Feb 2007 */
   int i=0; 
 
   /* give player credit for making it this far */ 
-  if (!IS_NPC(ch)) 
+  if (!char_is_npc(ch)) 
   { 
     /* Check not overwriting gauntlet rank with lower value (Jamdog - 20th July 2006) */ 
     if (GET_GAUNTLET(ch) < GAUNTLET_END) 
@@ -432,12 +432,12 @@ SPECIAL(gauntlet_end)  /* Jamdog - 20th Feb 2007 */
   if (!IS_MOVE(cmd)) /* Only movement commands need to be checked     */ 
     return FALSE; 
 
-  if (IS_NPC(ch))                  /* Mobs can move about - Jamdog 20th July 2006   */ 
+  if (char_is_npc(ch))                  /* Mobs can move about - Jamdog 20th July 2006   */ 
     return FALSE;                  /* This also allows following pets!              */ 
 
   if (!EXIT(ch, cmd-1) || EXIT(ch, cmd-1)->to_room == NOWHERE) 
     return FALSE; 
-  if (EXIT_FLAGGED(EXIT(ch, cmd-1), EX_CLOSED)) 
+  if (room_exit_flagged(EXIT(ch, cmd-1), EX_CLOSED)) 
     return FALSE; 
 
   for (i = 0; gauntlet_info[i][0] != -1; i++) 
@@ -478,7 +478,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
   if (!IS_MOVE(cmd)) /* Only movement commands need to be checked     */ 
     return FALSE; 
 
-  if (IS_NPC(ch))                  /* Mobs can move about - Jamdog 20th July 2006   */ 
+  if (char_is_npc(ch))                  /* Mobs can move about - Jamdog 20th July 2006   */ 
     return FALSE;                  /* This also allows following pets!              */ 
 
   if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) /* Imms can walk through the gauntlet unhindered */ 
@@ -490,7 +490,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
     { 
       if (!EXIT(ch, door) || EXIT(ch, door)->to_room == NOWHERE) 
         continue; 
-      if (EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED)) 
+      if (room_exit_flagged(EXIT(ch, door), EX_CLOSED)) 
         continue; 
 
       if ((world[EXIT(ch, door)->to_room].number == gauntlet_info[i][1]) && (door == (cmd-1))) 
@@ -500,10 +500,10 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
         /* Check the next room for players and ensure mob is waiting */ 
         for (tch = world[real_room(gauntlet_info[i][1])].people; tch; tch = tch->next_in_room) 
         { 
-          if (!IS_NPC(tch)) 
+          if (!char_is_npc(tch)) 
           { 
             proceed=0;  /* There is a player there */ 
-            sprintf(buf,"%s has moved into the next room.  You must wait for them to finish.\r\n", GET_NAME(tch)); 
+            sprintf(buf,"%s has moved into the next room.  You must wait for them to finish.\r\n", char_get_name(tch)); 
           } 
           else 
           { 
@@ -533,16 +533,16 @@ void npc_steal(struct char_data *ch, struct char_data *victim)
 {
   int gold;
 
-  if (IS_NPC(victim))
+  if (char_is_npc(victim))
     return;
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return;
-  if (ADM_FLAGGED(victim, ADM_NOSTEAL))
+  if (char_adm_flagged(victim, ADM_NOSTEAL))
     return;
-  if (!CAN_SEE(ch, victim))
+  if (!char_can_see(ch, victim))
     return;
 
-  if (AWAKE(victim) && (rand_number(0, GET_LEVEL(ch)) == 0)) {
+  if (char_is_awake(victim) && (rand_number(0, char_get_level(ch)) == 0)) {
     act("You discover that $n has $s hands in your wallet.", FALSE, ch, 0, victim, TO_VICT);
     act("$n tries to steal zenni from $N.", TRUE, ch, 0, victim, TO_NOTVICT);
   } else {
@@ -564,12 +564,12 @@ SPECIAL(snake)
   if (cmd || GET_POS(ch) != POS_FIGHTING || !FIGHTING(ch))
     return (FALSE);
 
-  if (IN_ROOM(FIGHTING(ch)) != IN_ROOM(ch) || rand_number(0, GET_LEVEL(ch)) != 0)
+  if (IN_ROOM(FIGHTING(ch)) != IN_ROOM(ch) || rand_number(0, char_get_level(ch)) != 0)
     return (FALSE);
 
   act("$n bites $N!", 1, ch, 0, FIGHTING(ch), TO_NOTVICT);
   act("$n bites you!", 1, ch, 0, FIGHTING(ch), TO_VICT);
-  call_magic(ch, FIGHTING(ch), 0, SPELL_POISON, GET_LEVEL(ch), CAST_SPELL, NULL);
+  call_magic(ch, FIGHTING(ch), 0, SPELL_POISON, char_get_level(ch), CAST_SPELL, NULL);
   return (TRUE);
 }
 
@@ -578,14 +578,14 @@ SPECIAL(thief)
 {
   struct char_data *cons;
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
    return (FALSE);
 
   if (cmd || GET_POS(ch) != POS_STANDING)
     return (FALSE);
 
   for (cons = world[IN_ROOM(ch)].people; cons; cons = cons->next_in_room)
-    if (!IS_NPC(cons) && !ADM_FLAGGED(cons, ADM_NOSTEAL) && !rand_number(0, 4)) {
+    if (!char_is_npc(cons) && !char_adm_flagged(cons, ADM_NOSTEAL) && !rand_number(0, 4)) {
       npc_steal(ch, cons);
       return (TRUE);
     }
@@ -614,23 +614,23 @@ SPECIAL(magic_user_orig)
   if (vict == NULL)
     return (TRUE);
 
-  if (GET_LEVEL(ch) > 13 && rand_number(0, 10) == 0)
+  if (char_get_level(ch) > 13 && rand_number(0, 10) == 0)
     cast_spell(ch, vict, NULL, SPELL_POISON, NULL);
 
-  if (GET_LEVEL(ch) > 7 && rand_number(0, 8) == 0)
+  if (char_get_level(ch) > 7 && rand_number(0, 8) == 0)
     cast_spell(ch, vict, NULL, SPELL_BLINDNESS, NULL);
 
-  if (GET_LEVEL(ch) > 12 && rand_number(0, 12) == 0) {
-    if (IS_EVIL(ch))
+  if (char_get_level(ch) > 12 && rand_number(0, 12) == 0) {
+    if (char_is_evil(ch))
       cast_spell(ch, vict, NULL, SPELL_ENERGY_DRAIN, NULL);
-    else if (IS_GOOD(ch))
+    else if (char_is_good(ch))
       cast_spell(ch, vict, NULL, SPELL_DISPEL_EVIL, NULL);
   }
 
   if (rand_number(0, 4))
     return (TRUE);
 
-  switch (GET_LEVEL(ch)) {
+  switch (char_get_level(ch)) {
   case 4:
   case 5:
     cast_spell(ch, vict, NULL, SPELL_MAGIC_MISSILE, NULL);
@@ -700,11 +700,11 @@ SPECIAL(fido)
 {
   struct obj_data *i, *temp, *next_obj;
 
-  if (cmd || !AWAKE(ch))
+  if (cmd || !char_is_awake(ch))
     return (FALSE);
 
   for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content) {
-    if (!IS_CORPSE(i))
+    if (!obj_is_corpse(i))
       continue;
 
     act("$n savagely devours a corpse.", FALSE, ch, 0, 0, TO_ROOM);
@@ -724,11 +724,11 @@ SPECIAL(janitor)
 {
   struct obj_data *i;
 
-  if (cmd || !AWAKE(ch))
+  if (cmd || !char_is_awake(ch))
     return (FALSE);
 
   for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content) {
-    if (!CAN_WEAR(i, ITEM_WEAR_TAKE))
+    if (!obj_can_wear(i, ITEM_WEAR_TAKE))
       continue;
     if (GET_OBJ_TYPE(i) == ITEM_DRINKCON || GET_OBJ_COST(i) >= 100)
       continue;
@@ -746,7 +746,7 @@ SPECIAL(cityguard)
   struct char_data *tch, *evil, *spittle;
   int max_evil, min_cha;
 
-  if (cmd || !AWAKE(ch) || FIGHTING(ch))
+  if (cmd || !char_is_awake(ch) || FIGHTING(ch))
     return (FALSE);
 
   max_evil = 1000;
@@ -754,20 +754,20 @@ SPECIAL(cityguard)
   spittle = evil = NULL;
 
   for (tch = world[IN_ROOM(ch)].people; tch; tch = tch->next_in_room) {
-    if (!CAN_SEE(ch, tch))
+    if (!char_can_see(ch, tch))
       continue;
 
-    if (!IS_NPC(tch) && PLR_FLAGGED(tch, PLR_KILLER)) {
+    if (!char_is_npc(tch) && char_plr_flagged(tch, PLR_KILLER)) {
       act("$n screams 'HEY!!!  You're one of those PLAYER KILLERS!!!!!!'", FALSE, ch, 0, 0, TO_ROOM);
       return (TRUE);
     }
 
-    if (!IS_NPC(tch) && PLR_FLAGGED(tch, PLR_THIEF)) {
+    if (!char_is_npc(tch) && char_plr_flagged(tch, PLR_THIEF)) {
       act("$n screams 'HEY!!!  You're one of those PLAYER THIEVES!!!!!!'", FALSE, ch, 0, 0, TO_ROOM);
       return (TRUE);
     }
 
-    if (FIGHTING(tch) && GET_ALIGNMENT(tch) < max_evil && (IS_NPC(tch) || IS_NPC(FIGHTING(tch)))) {
+    if (FIGHTING(tch) && GET_ALIGNMENT(tch) < max_evil && (char_is_npc(tch) || char_is_npc(FIGHTING(tch)))) {
       max_evil = GET_ALIGNMENT(tch);
       evil = tch;
     }
@@ -793,7 +793,7 @@ SPECIAL(cityguard)
     if (spit_social > 0) {
       char spitbuf[MAX_NAME_LENGTH + 1];
 
-      strncpy(spitbuf, GET_NAME(spittle), sizeof(spitbuf));	/* strncpy: OK */
+      strncpy(spitbuf, char_get_name(spittle), sizeof(spitbuf));	/* strncpy: OK */
       spitbuf[sizeof(spitbuf) - 1] = '\0';
 
       do_action(ch, spitbuf, spit_social, 0);
@@ -804,7 +804,7 @@ SPECIAL(cityguard)
   return (FALSE);
 }
 
-#define PET_PRICE(pet) (GET_LEVEL(pet) * 300)
+#define PET_PRICE(pet) (char_get_level(pet) * 300)
 
 SPECIAL(pet_shops)
 {
@@ -819,16 +819,16 @@ SPECIAL(pet_shops)
     send_to_char(ch, "Available pets are:\r\n");
     for (pet = world[pet_room].people; pet; pet = pet->next_in_room) {
       /* No, you can't have the Implementor as a pet if he's in there. */
-      if (!IS_NPC(pet))
+      if (!char_is_npc(pet))
         continue;
-      send_to_char(ch, "%8d - %s\r\n", PET_PRICE(pet), GET_NAME(pet));
+      send_to_char(ch, "%8d - %s\r\n", PET_PRICE(pet), char_get_name(pet));
     }
     return (TRUE);
   } else if (CMD_IS("buy")) {
 
     two_arguments(argument, buf, pet_name);
 
-    if (!(pet = get_char_room(buf, NULL, pet_room)) || !IS_NPC(pet)) {
+    if (!(pet = get_char_room(buf, NULL, pet_room)) || !char_is_npc(pet)) {
       send_to_char(ch, "There is no such pet!\r\n");
       return (TRUE);
     }
@@ -901,7 +901,7 @@ SPECIAL(auction)
       struct descriptor_data *d;
 
       for (d = descriptor_list; d; d = d->next) {
-       if (STATE(d) != CON_PLAYING || IS_NPC(d->character))
+       if (STATE(d) != CON_PLAYING || char_is_npc(d->character))
          continue;
        if (d->character == ch)
          continue;
@@ -955,7 +955,7 @@ SPECIAL(auction)
       auc_save();
 
       for (d = descriptor_list; d; d = d->next) {
-        if (STATE(d) != CON_PLAYING || IS_NPC(d->character))
+        if (STATE(d) != CON_PLAYING || char_is_npc(d->character))
           continue;
         if (d->character == ch)
           continue;
@@ -1024,12 +1024,12 @@ SPECIAL(auction)
      return (TRUE);
     }
 
-    if (OBJ_FLAGGED(obj2, ITEM_BROKEN)) {
+    if (obj_flagged(obj2, ITEM_BROKEN)) {
      act("$P is broken and we will not accept it.", FALSE, ch, 0, obj2, TO_CHAR);
      return (TRUE);
     }
 
-    if (OBJ_FLAGGED(obj2, ITEM_NODONATE)) {
+    if (obj_flagged(obj2, ITEM_NODONATE)) {
      act("$P is junk and we will not accept it.", FALSE, ch, 0, obj2, TO_CHAR);
      return (TRUE);
     }
@@ -1044,17 +1044,17 @@ SPECIAL(auction)
     GET_BID(obj2) = value;
     GET_STARTBID(obj2) = GET_BID(obj2);
     GET_AUCTER(obj2) = GET_ID(ch);
-    GET_AUCTERN(obj2) = strdup(GET_NAME(ch));
+    GET_AUCTERN(obj2) = strdup(char_get_name(ch));
     GET_AUCTIME(obj2) = time(0);
     GET_CURBID(obj2) = -1;
     obj_from_char(obj2);
     obj_to_room(obj2, auct_room);
     auc_save();
     send_to_char(ch, "You place %s on auction for %s zenni.\r\n", obj2->short_description, add_commas(GET_BID(obj2)));
-    log("AUCTION: %s places %s on auction for %s", GET_NAME(ch), obj2->short_description, add_commas(GET_BID(obj2)));
+    log("AUCTION: %s places %s on auction for %s", char_get_name(ch), obj2->short_description, add_commas(GET_BID(obj2)));
 
     for (d = descriptor_list; d; d = d->next) {
-      if (STATE(d) != CON_PLAYING || IS_NPC(d->character))
+      if (STATE(d) != CON_PLAYING || char_is_npc(d->character))
         continue;
       if (d->character == ch)
         continue;
@@ -1080,7 +1080,7 @@ SPECIAL(healtank)
    one_argument(argument, arg);
 
    for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content) {
-    if (GET_OBJ_VNUM(i) == 65) {
+    if (obj_get_vnum(i) == 65) {
      htank = i;
     }
     else {
@@ -1100,20 +1100,20 @@ SPECIAL(healtank)
    }
 
    if (!strcasecmp("enter", arg)) {
-    if (PLR_FLAGGED(ch, PLR_HEALT)) {
+    if (char_plr_flagged(ch, PLR_HEALT)) {
      send_to_char(ch, "You are already inside a healing tank!\r\n");
      return (TRUE);
     }
     if (ch->master && ch->master != ch) {
      send_to_char(ch, "You can't enter it while following someone!\r\n");
      return (TRUE);
-    } else if (IS_ANDROID(ch)) {
+    } else if (char_is_android(ch)) {
      send_to_char(ch, "A healing tank will have no effect on you.\r\n");
      return (TRUE);
     } else if (HCHARGE(htank) <= 0) {
      send_to_char(ch, "That healing tank needs to recharge, wait a while.\r\n");
      return (TRUE);
-    } else if (OBJ_FLAGGED(htank, ITEM_BROKEN)) {
+    } else if (obj_flagged(htank, ITEM_BROKEN)) {
      send_to_char(ch, "It is broken! You will need to fix it yourself or wait for someone else to fix it.\r\n");
      return (TRUE);
     } else if (SITS(ch)) {
@@ -1138,7 +1138,7 @@ SPECIAL(healtank)
    } // End of Enter argument
   
   else if (!strcasecmp("exit", arg)) {
-   if (!PLR_FLAGGED(ch, PLR_HEALT)) {
+   if (!char_plr_flagged(ch, PLR_HEALT)) {
     send_to_char(ch, "You are not inside a healing tank.\r\n");
     return (TRUE);
    }
@@ -1300,7 +1300,7 @@ SPECIAL(gravity)
 
    one_argument(argument, arg);
    for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content) {
-    if (GET_OBJ_VNUM(i) == 11) {
+    if (obj_get_vnum(i) == 11) {
      obj = i;
     }
     else {
@@ -1314,7 +1314,7 @@ SPECIAL(gravity)
                     "          [  300 | 400 | 500 | 1,000 | 5,000 | 10,000  ]@n\r\n");
     return (TRUE);
    }
-   if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+   if (obj_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "It's broken!\r\n");
     return (TRUE);
    }
@@ -1325,7 +1325,7 @@ SPECIAL(gravity)
    else if (!strcasecmp("N", arg) || !strcasecmp("n", arg) || !strcasecmp("0", arg)) {
     send_to_char(ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GRAVITYX10)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_VEGETA) || rroom_flagged(IN_ROOM(ch), ROOM_GRAVITYX10)) {
      ROOM_GRAVITY(IN_ROOM(ch)) = 10;
      GET_OBJ_WEIGHT(obj) = 0;
     }
@@ -1339,14 +1339,14 @@ SPECIAL(gravity)
     send_to_char(ch, "The gravity generator is already set to that.\r\n");
     return (TRUE);
    }
-   else if (!strcasecmp("10", arg) && ROOM_GRAVITY(IN_ROOM(ch)) == 10 && (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GRAVITYX10))) {
+   else if (!strcasecmp("10", arg) && ROOM_GRAVITY(IN_ROOM(ch)) == 10 && (rroom_flagged(IN_ROOM(ch), ROOM_VEGETA) || rroom_flagged(IN_ROOM(ch), ROOM_GRAVITYX10))) {
     send_to_char(ch, "The gravity around you is already at that.\r\n");
     return (TRUE);
    }
-   else if (!strcasecmp("10", arg) && ROOM_GRAVITY(IN_ROOM(ch)) != 10 && (ROOM_FLAGGED(IN_ROOM(ch), ROOM_VEGETA) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GRAVITYX10))) {
+   else if (!strcasecmp("10", arg) && ROOM_GRAVITY(IN_ROOM(ch)) != 10 && (rroom_flagged(IN_ROOM(ch), ROOM_VEGETA) || rroom_flagged(IN_ROOM(ch), ROOM_GRAVITYX10))) {
     send_to_char(ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
@@ -1368,7 +1368,7 @@ SPECIAL(gravity)
    else if (!strcasecmp("20", arg)) {
     send_to_char(ch, "You punch in twenty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
@@ -1383,7 +1383,7 @@ SPECIAL(gravity)
    else if (!strcasecmp("30", arg)) {
     send_to_char(ch, "You punch in thirty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
@@ -1398,7 +1398,7 @@ SPECIAL(gravity)
    else if (!strcasecmp("40", arg)) {
     send_to_char(ch, "You punch in fourty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
@@ -1413,7 +1413,7 @@ SPECIAL(gravity)
    else if (!strcasecmp("50", arg)) {
     send_to_char(ch, "You punch in fifty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
@@ -1428,7 +1428,7 @@ SPECIAL(gravity)
    else if (!strcasecmp("100", arg)) {
     send_to_char(ch, "You punch in one hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
@@ -1443,7 +1443,7 @@ SPECIAL(gravity)
    else if (!strcasecmp("200", arg)) {
     send_to_char(ch, "You punch in two hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
@@ -1458,7 +1458,7 @@ SPECIAL(gravity)
    else if (!strcasecmp("300", arg)) {
     send_to_char(ch, "You punch in three hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
@@ -1473,7 +1473,7 @@ SPECIAL(gravity)
    else if (!strcasecmp("400", arg)) {
     send_to_char(ch, "You punch in four hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
@@ -1488,7 +1488,7 @@ SPECIAL(gravity)
    else if (!strcasecmp("500", arg)) {
     send_to_char(ch, "You punch in five hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
@@ -1503,7 +1503,7 @@ SPECIAL(gravity)
    else if (!strcasecmp("1000", arg)) {
     send_to_char(ch, "You punch in one thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
@@ -1518,7 +1518,7 @@ SPECIAL(gravity)
    else if (!strcasecmp("5000", arg)) {
     send_to_char(ch, "You punch in five thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
@@ -1533,7 +1533,7 @@ SPECIAL(gravity)
    else if (!strcasecmp("10000", arg)) {
     send_to_char(ch, "You punch in ten thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
     act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+    if (rroom_flagged(IN_ROOM(ch), ROOM_AURA)) {
      REMOVE_BIT_AR(ROOM_FLAGS(IN_ROOM(ch)), ROOM_AURA);
      send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
     }
@@ -1562,7 +1562,7 @@ SPECIAL(bank)
    struct obj_data *i, *obj = NULL;
 
    for (i = world[IN_ROOM(ch)].contents; i; i = i->next_content) {
-    if (GET_OBJ_VNUM(i) == 3034) {
+    if (obj_get_vnum(i) == 3034) {
      obj = i;
     }
     else {
@@ -1571,7 +1571,7 @@ SPECIAL(bank)
    }
 
   if (CMD_IS("balance")) {
-    if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+    if (obj_flagged(obj, ITEM_BROKEN)) {
      send_to_char(ch, "The ATM is broken!\r\n");
      return (TRUE);
     }
@@ -1587,7 +1587,7 @@ SPECIAL(bank)
 
     two_arguments(argument, arg, arg2);
 
-    if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+    if (obj_flagged(obj, ITEM_BROKEN)) {
      send_to_char(ch, "The ATM is broken!\r\n");
      return (TRUE);
     }
@@ -1625,7 +1625,7 @@ SPECIAL(bank)
         send_to_char(ch, "There is an error. Report to Iovan.");
         return (TRUE);
        }
-       if (!strcasecmp(GET_NAME(vict), ch->desc->tmp1) || !strcasecmp(GET_NAME(vict), ch->desc->tmp2) || !strcasecmp(GET_NAME(vict), ch->desc->tmp3) || !strcasecmp(GET_NAME(vict), ch->desc->tmp4) || !strcasecmp(GET_NAME(vict), ch->desc->tmp5)) {
+       if (!strcasecmp(char_get_name(vict), ch->desc->tmp1) || !strcasecmp(char_get_name(vict), ch->desc->tmp2) || !strcasecmp(char_get_name(vict), ch->desc->tmp3) || !strcasecmp(char_get_name(vict), ch->desc->tmp4) || !strcasecmp(char_get_name(vict), ch->desc->tmp5)) {
         send_to_char(ch, "You can not transfer money to your own offline characters...");
         if (is_file == TRUE)
          free_char(vict);
@@ -1634,7 +1634,7 @@ SPECIAL(bank)
        GET_BANK_GOLD(vict) += amount;
        GET_BANK_GOLD(ch) -= amount + (amount / 100);
        GET_PFILEPOS(vict) = player_i;
-       mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "EXCHANGE: %s gave %s zenni to user %s", GET_NAME(ch), add_commas(amount), GET_NAME(vict));
+       mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "EXCHANGE: %s gave %s zenni to user %s", char_get_name(ch), add_commas(amount), char_get_name(vict));
        save_char(vict);
        if (is_file == TRUE)
         free_char(vict);
@@ -1648,7 +1648,7 @@ SPECIAL(bank)
     return (TRUE);
   } else if (CMD_IS("deposit")) {
 
-    if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+    if (obj_flagged(obj, ITEM_BROKEN)) {
      send_to_char(ch, "The ATM is broken!\r\n");
      return (TRUE);
     }
@@ -1668,7 +1668,7 @@ SPECIAL(bank)
     return (TRUE);
   } else if (CMD_IS("withdraw")) {
 
-    if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
+    if (obj_flagged(obj, ITEM_BROKEN)) {
      send_to_char(ch, "The ATM is broken!\r\n");
      return (TRUE);
     }
@@ -1691,10 +1691,10 @@ SPECIAL(bank)
       send_to_char(ch, "You need at least %s in the bank with the 1 percent withdraw fee.\r\n", add_commas(amount));
       return (TRUE);
     }
-    if (GET_GOLD(ch) + amount > GOLD_CARRY(ch)) {
-      send_to_char(ch, "You can only carry %s zenni, you left the rest.\r\n", add_commas(GOLD_CARRY(ch)));
-      int diff = (GET_GOLD(ch) + amount) - GOLD_CARRY(ch);
-      GET_GOLD(ch) = GOLD_CARRY(ch);
+    if (GET_GOLD(ch) + amount > char_gold_carry(ch)) {
+      send_to_char(ch, "You can only carry %s zenni, you left the rest.\r\n", add_commas(char_gold_carry(ch)));
+      int diff = (GET_GOLD(ch) + amount) - char_gold_carry(ch);
+      GET_GOLD(ch) = char_gold_carry(ch);
       amount -= diff;
       if (amount >= 100) {
        num = amount / 100;
@@ -1745,27 +1745,27 @@ SPECIAL(cleric_marduk)
 
   if ( (tmp == 7 ) || (tmp == 8) || (tmp == 9) || (tmp == 10)) {
     tmp = rand_number(1, num_used);
-      if ((tmp == 1) && (GET_LEVEL(ch) > 13)) {
+      if ((tmp == 1) && (char_get_level(ch) > 13)) {
         cast_spell(ch, vict, NULL, SPELL_EARTHQUAKE, NULL);
         return TRUE;
       }
-      if ((tmp == 2) && ( (GET_LEVEL(ch) > 8) && (IS_EVIL(vict)))) {
+      if ((tmp == 2) && ( (char_get_level(ch) > 8) && (char_is_evil(vict)))) {
         cast_spell(ch, vict, NULL, SPELL_DISPEL_EVIL, NULL);
         return TRUE;
       }
-      if ((tmp == 3) && (GET_LEVEL(ch) > 4 )) {
+      if ((tmp == 3) && (char_get_level(ch) > 4 )) {
         cast_spell(ch, vict, NULL, SPELL_BESTOW_CURSE, NULL);
         return TRUE;
       }
-      if ((tmp == 4) && ((GET_LEVEL(ch) > 8) && (IS_GOOD(vict)))) {
+      if ((tmp == 4) && ((char_get_level(ch) > 8) && (char_is_good(vict)))) {
         cast_spell(ch, vict, NULL, SPELL_DISPEL_GOOD, NULL);
         return TRUE;
       }
-      if ((tmp == 5) && (GET_LEVEL(ch) > 4 && affected_by_spell(ch, SPELL_BESTOW_CURSE))) {
+      if ((tmp == 5) && (char_get_level(ch) > 4 && affected_by_spell(ch, SPELL_BESTOW_CURSE))) {
         cast_spell(ch, ch, NULL, SPELL_REMOVE_CURSE, NULL);
         return TRUE;
       }
-      if ((tmp == 6) && (GET_LEVEL(ch) > 6 && affected_by_spell(ch, SPELL_POISON))) {
+      if ((tmp == 6) && (char_get_level(ch) > 6 && affected_by_spell(ch, SPELL_POISON))) {
         cast_spell(ch, ch, NULL, SPELL_NEUTRALIZE_POISON, NULL);
         return TRUE;
       }
@@ -1773,15 +1773,15 @@ SPECIAL(cleric_marduk)
         cast_spell(ch, ch, NULL, SPELL_CURE_LIGHT, NULL);
         return TRUE;
       }
-      if ((tmp == 8) && (GET_LEVEL(ch) > 6 ) && (!IS_UNDEAD(vict))) {
+      if ((tmp == 8) && (char_get_level(ch) > 6 ) && (!char_is_undead(vict))) {
         cast_spell(ch, vict, NULL, SPELL_POISON, NULL);
         return TRUE;
       }
-      if (tmp == 9 && GET_LEVEL(ch) > 8) {
+      if (tmp == 9 && char_get_level(ch) > 8) {
         cast_spell(ch, ch, NULL, SPELL_CURE_CRITIC, NULL);
         return TRUE;
       }
-      if ((tmp == 10) && (GET_LEVEL(ch) > 10)) {
+      if ((tmp == 10) && (char_get_level(ch) > 10)) {
         cast_spell(ch, vict, NULL, SPELL_HARM, NULL);
         return TRUE;
       }
@@ -1789,7 +1789,7 @@ SPECIAL(cleric_marduk)
         cast_spell(ch, vict, NULL, SPELL_INFLICT_LIGHT, NULL);
         return TRUE;
       }
-      if (tmp == 12 && GET_LEVEL(ch) > 8) {
+      if (tmp == 12 && char_get_level(ch) > 8) {
         cast_spell(ch, vict, NULL, SPELL_INFLICT_CRITIC, NULL);
         return TRUE;
       }
@@ -1819,23 +1819,23 @@ SPECIAL(cleric_ao)
 
   if ( (tmp == 7 ) || (tmp == 8) || (tmp == 9) || (tmp == 10)) {
     tmp = rand_number(1, num_used);
-    if ((tmp == 1) && (GET_LEVEL(ch) > 13)) {
+    if ((tmp == 1) && (char_get_level(ch) > 13)) {
       cast_spell(ch, vict, NULL, SPELL_EARTHQUAKE, NULL);
       return TRUE;
     }
-    if ((tmp == 2) && ( (GET_LEVEL(ch) > 8) && (IS_EVIL(vict)))) {
+    if ((tmp == 2) && ( (char_get_level(ch) > 8) && (char_is_evil(vict)))) {
       cast_spell(ch, vict, NULL, SPELL_DISPEL_EVIL, NULL);
       return TRUE;
     }
-    if ((tmp == 3) && ((GET_LEVEL(ch) > 8) && (IS_GOOD(vict)))) {
+    if ((tmp == 3) && ((char_get_level(ch) > 8) && (char_is_good(vict)))) {
       cast_spell(ch, vict, NULL, SPELL_DISPEL_GOOD, NULL);
       return TRUE;
     }
-    if ((tmp == 4) && (GET_LEVEL(ch) > 4 && affected_by_spell(ch, SPELL_BESTOW_CURSE))) {
+    if ((tmp == 4) && (char_get_level(ch) > 4 && affected_by_spell(ch, SPELL_BESTOW_CURSE))) {
       cast_spell(ch, ch, NULL, SPELL_REMOVE_CURSE, NULL);
       return TRUE;
     }
-    if ((tmp == 5) && (GET_LEVEL(ch) > 6 && affected_by_spell(ch, SPELL_POISON))) {
+    if ((tmp == 5) && (char_get_level(ch) > 6 && affected_by_spell(ch, SPELL_POISON))) {
       cast_spell(ch, ch, NULL, SPELL_NEUTRALIZE_POISON, NULL);
       return TRUE;
     }
@@ -1843,11 +1843,11 @@ SPECIAL(cleric_ao)
       cast_spell(ch, ch, NULL, SPELL_CURE_LIGHT, NULL);
       return TRUE;
     }
-    if (tmp == 7 && GET_LEVEL(ch) > 8) {
+    if (tmp == 7 && char_get_level(ch) > 8) {
       cast_spell(ch, ch, NULL, SPELL_CURE_CRITIC, NULL);
       return TRUE;
     }
-    if (tmp == 8 && GET_LEVEL(ch) > 10) {
+    if (tmp == 8 && char_get_level(ch) > 10) {
       cast_spell(ch, ch, NULL, SPELL_HEAL, NULL);
       return TRUE;
     }
@@ -1855,7 +1855,7 @@ SPECIAL(cleric_ao)
       cast_spell(ch, vict, NULL, SPELL_INFLICT_LIGHT, NULL);
       return TRUE;
     }
-    if (tmp == 10 && GET_LEVEL(ch) > 8) {
+    if (tmp == 10 && char_get_level(ch) > 8) {
       cast_spell(ch, vict, NULL, SPELL_INFLICT_CRITIC, NULL);
       return TRUE;
     }
@@ -1910,7 +1910,7 @@ SPECIAL(dziak)
       cast_spell(ch, vict, NULL, SPELL_INFLICT_CRITIC, NULL);
       return TRUE;
     }
-    if ((tmp == 8) && (IS_GOOD(vict))) {
+    if ((tmp == 8) && (char_is_good(vict))) {
       cast_spell(ch, vict, NULL, SPELL_DISPEL_GOOD, NULL);
       return TRUE;
     }
@@ -1970,7 +1970,7 @@ SPECIAL(azimer)
       cast_spell(ch, vict, NULL, SPELL_INFLICT_CRITIC, NULL);
       return TRUE;
     }
-    if ((tmp == 8) && (IS_GOOD(vict))) {
+    if ((tmp == 8) && (char_is_good(vict))) {
       cast_spell(ch, vict, NULL, SPELL_DISPEL_GOOD, NULL);
       return TRUE;
     }
@@ -2026,7 +2026,7 @@ SPECIAL(lyrzaxyn)
       cast_spell(ch, vict, NULL, SPELL_INFLICT_CRITIC, NULL);
       return TRUE;
     }
-    if ((tmp == 8) && (IS_GOOD(vict))) {
+    if ((tmp == 8) && (char_is_good(vict))) {
       cast_spell(ch, vict, NULL, SPELL_DISPEL_GOOD, NULL);
       return TRUE;
     }
@@ -2039,7 +2039,7 @@ SPECIAL(magic_user)
   int tmp, num_used = 0;
   struct char_data *vict;
 
-  if (IS_NPC(ch) && GET_POS(ch) > POS_SITTING && GET_CLASS(ch) == CLASS_KABITO) {
+  if (char_is_npc(ch) && GET_POS(ch) > POS_SITTING && char_get_class(ch) == CLASS_KABITO) {
     if (!affected_by_spell(ch, SPELL_MAGE_ARMOR)) {
       cast_spell(ch, ch, NULL, SPELL_MAGE_ARMOR, NULL);
       return TRUE;
@@ -2065,7 +2065,7 @@ SPECIAL(magic_user)
   if ( (tmp == 8) || (tmp == 9) || (tmp == 10)) {
     tmp = rand_number(1, num_used);
 
-    if ((tmp == 1) && GET_LEVEL(ch) > 1) {
+    if ((tmp == 1) && char_get_level(ch) > 1) {
       cast_spell(ch, vict, NULL, SPELL_CHILL_TOUCH, NULL);
       return TRUE;
     }
@@ -2073,19 +2073,19 @@ SPECIAL(magic_user)
       cast_spell(ch, ch, NULL, SPELL_MAGE_ARMOR, NULL);
       return TRUE;
     }
-    if ((tmp == 3) && GET_LEVEL(ch) > 1) {
+    if ((tmp == 3) && char_get_level(ch) > 1) {
       cast_spell(ch, vict, NULL, SPELL_BURNING_HANDS, NULL);
       return TRUE;
     }
-    if ((tmp == 4) && GET_LEVEL(ch) > 1) {
+    if ((tmp == 4) && char_get_level(ch) > 1) {
       cast_spell(ch, vict, NULL, SPELL_MAGIC_MISSILE, NULL);
       return TRUE;
     }
-    if ((tmp == 5) && GET_LEVEL(ch) > 5) {
+    if ((tmp == 5) && char_get_level(ch) > 5) {
       cast_spell(ch, vict, NULL, SPELL_SHOCKING_GRASP, NULL);
       return TRUE;
     }
-    if ((tmp == 6) && GET_LEVEL(ch) > 9) {
+    if ((tmp == 6) && char_get_level(ch) > 9) {
       cast_spell(ch, vict, NULL, SPELL_LIGHTNING_BOLT, NULL);
       return TRUE;
     }

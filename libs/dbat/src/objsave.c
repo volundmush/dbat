@@ -94,9 +94,9 @@ static int Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, c
   int j;
   FILE *fp;
 
-  if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, GET_NAME(ch)))
+  if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, char_get_name(ch)))
   {
-    basic_mud_log("SYSERR: %s:%d: get_filename failed for %s of %s", __FILE__, __LINE__, save_type, GET_NAME(ch));
+    basic_mud_log("SYSERR: %s:%d: get_filename failed for %s of %s", __FILE__, __LINE__, save_type, char_get_name(ch));
     return FALSE;
   }
 
@@ -125,7 +125,7 @@ static int Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, c
       if (!Crash_save(GET_EQ(ch, j), fp, j + 1))
       {
         Crash_restore_weight(GET_EQ(ch, j));
-        basic_mud_log("SYSERR: %s:%d: Crash_save failed for %s of %s equipment position %d", __FILE__, __LINE__, save_type, GET_NAME(ch), j);
+        basic_mud_log("SYSERR: %s:%d: Crash_save failed for %s of %s equipment position %d", __FILE__, __LINE__, save_type, char_get_name(ch), j);
         fclose(fp);
         remove(tmpfile);
         return FALSE;
@@ -144,7 +144,7 @@ static int Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, c
   if (!Crash_save(ch->carrying, fp, 0))
   {
     Crash_restore_weight(ch->carrying);
-    basic_mud_log("SYSERR: %s:%d: Crash_save failed for %s of %s inventory", __FILE__, __LINE__, save_type, GET_NAME(ch));
+    basic_mud_log("SYSERR: %s:%d: Crash_save failed for %s of %s inventory", __FILE__, __LINE__, save_type, char_get_name(ch));
     fclose(fp);
     remove(tmpfile);
     return FALSE;
@@ -191,7 +191,7 @@ void delete_inv_backup(struct char_data *ch)
   char source_file[20480], filename[20480];
   char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
 
-  if (!get_filename(source_file, sizeof(source_file), NEW_OBJ_FILES, GET_NAME(ch)))
+  if (!get_filename(source_file, sizeof(source_file), NEW_OBJ_FILES, char_get_name(ch)))
   {
     return;
   }
@@ -238,77 +238,77 @@ static void auto_equip(struct char_data *ch, struct obj_data *obj, int location)
       break;
     case WEAR_FINGER_R:
     case WEAR_FINGER_L:
-      if (!CAN_WEAR(obj, ITEM_WEAR_FINGER)) /* not fitting :( */
+      if (!obj_can_wear(obj, ITEM_WEAR_FINGER)) /* not fitting :( */
         location = LOC_INVENTORY;
       break;
     case WEAR_NECK_1:
     case WEAR_NECK_2:
-      if (!CAN_WEAR(obj, ITEM_WEAR_NECK))
+      if (!obj_can_wear(obj, ITEM_WEAR_NECK))
         location = LOC_INVENTORY;
       break;
     case WEAR_BODY:
-      if (!CAN_WEAR(obj, ITEM_WEAR_BODY))
+      if (!obj_can_wear(obj, ITEM_WEAR_BODY))
         location = LOC_INVENTORY;
       break;
     case WEAR_HEAD:
-      if (!CAN_WEAR(obj, ITEM_WEAR_HEAD))
+      if (!obj_can_wear(obj, ITEM_WEAR_HEAD))
         location = LOC_INVENTORY;
       break;
     case WEAR_LEGS:
-      if (!CAN_WEAR(obj, ITEM_WEAR_LEGS))
+      if (!obj_can_wear(obj, ITEM_WEAR_LEGS))
         location = LOC_INVENTORY;
       break;
     case WEAR_FEET:
-      if (!CAN_WEAR(obj, ITEM_WEAR_FEET))
+      if (!obj_can_wear(obj, ITEM_WEAR_FEET))
         location = LOC_INVENTORY;
       break;
     case WEAR_HANDS:
-      if (!CAN_WEAR(obj, ITEM_WEAR_HANDS))
+      if (!obj_can_wear(obj, ITEM_WEAR_HANDS))
         location = LOC_INVENTORY;
       break;
     case WEAR_ARMS:
-      if (!CAN_WEAR(obj, ITEM_WEAR_ARMS))
+      if (!obj_can_wear(obj, ITEM_WEAR_ARMS))
         location = LOC_INVENTORY;
       break;
     case WEAR_UNUSED1:
-      if (!CAN_WEAR(obj, ITEM_WEAR_SHIELD))
+      if (!obj_can_wear(obj, ITEM_WEAR_SHIELD))
         location = LOC_INVENTORY;
       j = WEAR_WIELD2;
       break;
     case WEAR_ABOUT:
-      if (!CAN_WEAR(obj, ITEM_WEAR_ABOUT))
+      if (!obj_can_wear(obj, ITEM_WEAR_ABOUT))
         location = LOC_INVENTORY;
       break;
     case WEAR_WAIST:
-      if (!CAN_WEAR(obj, ITEM_WEAR_WAIST))
+      if (!obj_can_wear(obj, ITEM_WEAR_WAIST))
         location = LOC_INVENTORY;
       break;
     case WEAR_WRIST_R:
     case WEAR_WRIST_L:
-      if (!CAN_WEAR(obj, ITEM_WEAR_WRIST))
+      if (!obj_can_wear(obj, ITEM_WEAR_WRIST))
         location = LOC_INVENTORY;
       break;
     case WEAR_WIELD1:
-      if (!CAN_WEAR(obj, ITEM_WEAR_WIELD))
+      if (!obj_can_wear(obj, ITEM_WEAR_WIELD))
         location = LOC_INVENTORY;
       break;
     case WEAR_WIELD2:
       break;
     case WEAR_EYE:
-      if (!CAN_WEAR(obj, ITEM_WEAR_EYE))
+      if (!obj_can_wear(obj, ITEM_WEAR_EYE))
         location = LOC_INVENTORY;
       break;
     case WEAR_BACKPACK:
-      if (!CAN_WEAR(obj, ITEM_WEAR_PACK))
+      if (!obj_can_wear(obj, ITEM_WEAR_PACK))
         location = LOC_INVENTORY;
       break;
     case WEAR_SH:
-      if (!CAN_WEAR(obj, ITEM_WEAR_SH))
+      if (!obj_can_wear(obj, ITEM_WEAR_SH))
         location = LOC_INVENTORY;
       break;
     case WEAR_EAR_R:
     case WEAR_EAR_L:
-      if (!CAN_WEAR(obj, ITEM_WEAR_EAR))
+      if (!obj_can_wear(obj, ITEM_WEAR_EAR))
         location = LOC_INVENTORY;
       break;
     default:
@@ -330,7 +330,7 @@ static void auto_equip(struct char_data *ch, struct obj_data *obj, int location)
       }
       else
       { /* Oops, saved a player with double equipment? */
-        mudlog(BRF, ADMLVL_IMMORT, TRUE, "SYSERR: autoeq: '%s' already equipped in position %d.", GET_NAME(ch), location);
+        mudlog(BRF, ADMLVL_IMMORT, TRUE, "SYSERR: autoeq: '%s' already equipped in position %d.", char_get_name(ch), location);
         location = LOC_INVENTORY;
       }
     }
@@ -374,7 +374,7 @@ int Crash_delete_crashfile(struct char_data *ch)
   int rentcode, timed, netcost, gold, account, nitems;
   char line[MAX_INPUT_LENGTH];
 
-  if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, GET_NAME(ch)))
+  if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, char_get_name(ch)))
     return (0);
 
   if (!(fl = fopen(filename, "rb")))
@@ -391,7 +391,7 @@ int Crash_delete_crashfile(struct char_data *ch)
   fclose(fl);
 
   if (rentcode == RENT_CRASH)
-    Crash_delete_file(GET_NAME(ch));
+    Crash_delete_file(char_get_name(ch));
 
   return (1);
 }
@@ -653,13 +653,13 @@ static int Crash_is_unrentable(struct obj_data *obj)
   if (!obj)
     return (0);
 #if CIRCLE_UNSIGNED_INDEX
-  if (OBJ_FLAGGED(obj, ITEM_NORENT) || GET_OBJ_RENT(obj) < 0 ||
+  if (obj_flagged(obj, ITEM_NORENT) || GET_OBJ_RENT(obj) < 0 ||
       (GET_OBJ_RNUM(obj) == NOTHING &&
        !IS_SET_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE)))
   {
     return (1);
 #else
-  if (OBJ_FLAGGED(obj, ITEM_NORENT) || GET_OBJ_RENT(obj) < 0 ||
+  if (obj_flagged(obj, ITEM_NORENT) || GET_OBJ_RENT(obj) < 0 ||
       (GET_OBJ_RNUM(obj) <= NOTHING &&
        !IS_SET_AR(GET_OBJ_EXTRA(obj), ITEM_UNIQUE_SAVE)))
   {
@@ -703,7 +703,7 @@ static void Crash_calculate_rent(struct obj_data *obj, int *cost)
 
 void Crash_crashsave(struct char_data *ch)
 {
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return;
 
   if (Crash_write_safe_file(ch, RENT_CRASH, 0, "crashsave"))
@@ -717,10 +717,10 @@ void Crash_idlesave(struct char_data *ch)
   int cost, cost_eq;
   FILE *fp;
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return;
 
-  if (!get_filename(buf, sizeof(buf), NEW_OBJ_FILES, GET_NAME(ch)))
+  if (!get_filename(buf, sizeof(buf), NEW_OBJ_FILES, char_get_name(ch)))
     return;
 
   if (!(fp = fopen(buf, "wb")))
@@ -761,7 +761,7 @@ void Crash_idlesave(struct char_data *ch)
     if (j == NUM_WEARS)
     { /* No equipment or inventory. */
       fclose(fp);
-      Crash_delete_file(GET_NAME(ch));
+      Crash_delete_file(char_get_name(ch));
       return;
     }
   }
@@ -796,7 +796,7 @@ void Crash_rentsave(struct char_data *ch, int cost)
 {
   int j;
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return;
 
   Crash_extract_norent_eq(ch);
@@ -818,10 +818,10 @@ static void Crash_cryosave(struct char_data *ch, int cost)
   int j;
   FILE *fp;
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return;
 
-  if (!get_filename(buf, sizeof(buf), CRASH_FILE, GET_NAME(ch)))
+  if (!get_filename(buf, sizeof(buf), CRASH_FILE, char_get_name(ch)))
     return;
   if (!(fp = fopen(buf, "wb")))
     return;
@@ -888,7 +888,7 @@ static int Crash_report_unrentables(struct char_data *ch, struct char_data *rece
       char buf[128];
 
       has_norents = 1;
-      snprintf(buf, sizeof(buf), "$n tells you, 'You cannot store %s.'", OBJS(obj, ch));
+      snprintf(buf, sizeof(buf), "$n tells you, 'You cannot store %s.'", obj_shortdesc_for(obj, ch));
       act(buf, FALSE, recep, 0, ch, TO_VICT);
     }
     has_norents += Crash_report_unrentables(ch, recep, obj->contains);
@@ -910,7 +910,7 @@ static void Crash_report_rent(struct char_data *ch, struct char_data *recep,
       {
         char buf[256];
 
-        snprintf(buf, sizeof(buf), "$n tells you, '%5d zenni for %s..'", GET_OBJ_RENT(obj) * factor, OBJS(obj, ch));
+        snprintf(buf, sizeof(buf), "$n tells you, '%5d zenni for %s..'", GET_OBJ_RENT(obj) * factor, obj_shortdesc_for(obj, ch));
         act(buf, FALSE, recep, 0, ch, TO_VICT);
       }
     }
@@ -987,19 +987,19 @@ static int gen_receptionist(struct char_data *ch, struct char_data *recep,
     return (FALSE);
   }
 
-  if (!ch->desc || IS_NPC(ch))
+  if (!ch->desc || char_is_npc(ch))
     return (FALSE);
 
   if (!CMD_IS("offer") && !CMD_IS("rent"))
     return (FALSE);
 
-  if (!AWAKE(recep))
+  if (!char_is_awake(recep))
   {
-    send_to_char(ch, "%s is unable to talk to you...\r\n", HSSH(recep));
+    send_to_char(ch, "%s is unable to talk to you...\r\n", char_hssh(recep));
     return (TRUE);
   }
 
-  if (!CAN_SEE(recep, ch))
+  if (!char_can_see(recep, ch))
   {
     act("$n says, 'I don't deal with people I can't see!'", FALSE, recep, 0, 0, TO_ROOM);
     return (TRUE);
@@ -1038,7 +1038,7 @@ static int gen_receptionist(struct char_data *ch, struct char_data *recep,
       act("$n stores your belongings and helps you into your private chamber.", FALSE, recep, 0, ch, TO_VICT);
       Crash_rentsave(ch, cost);
       mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has rented (%d/day, %d tot.)",
-             GET_NAME(ch), cost, GET_GOLD(ch) + GET_BANK_GOLD(ch));
+             char_get_name(ch), cost, GET_GOLD(ch) + GET_BANK_GOLD(ch));
     }
     else
     { /* cryo */
@@ -1047,7 +1047,7 @@ static int gen_receptionist(struct char_data *ch, struct char_data *recep,
           "You begin to lose consciousness...",
           FALSE, recep, 0, ch, TO_VICT);
       Crash_cryosave(ch, cost);
-      mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has cryo-rented.", GET_NAME(ch));
+      mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has cryo-rented.", char_get_name(ch));
       SET_BIT_AR(PLR_FLAGS(ch), PLR_CRYO);
     }
 
@@ -1078,9 +1078,9 @@ void Crash_save_all(void)
   struct descriptor_data *d;
   for (d = descriptor_list; d; d = d->next)
   {
-    if ((STATE(d) == CON_PLAYING) && !IS_NPC(d->character))
+    if ((STATE(d) == CON_PLAYING) && !char_is_npc(d->character))
     {
-      if (PLR_FLAGGED(d->character, PLR_CRASH))
+      if (char_plr_flagged(d->character, PLR_CRASH))
       {
         Crash_crashsave(d->character);
         save_char(d->character);
@@ -1095,7 +1095,7 @@ int Crash_load(struct char_data *ch)
   FILE *fl;
   char cmfname[MAX_STRING_LENGTH], cmfnamebak[MAX_STRING_LENGTH], buf1[MAX_STRING_LENGTH];
 
-  if (!get_filename(cmfname, sizeof(cmfname), NEW_OBJ_FILES, GET_NAME(ch)))
+  if (!get_filename(cmfname, sizeof(cmfname), NEW_OBJ_FILES, char_get_name(ch)))
     return 1;
 
   if (!Crash_build_save_filename(cmfnamebak, sizeof(cmfnamebak), cmfname, ".bak", __FILE__, __LINE__))
@@ -1113,12 +1113,12 @@ int Crash_load(struct char_data *ch)
 
   if ((fl = fopen(cmfnamebak, "r+b")))
   {
-    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s loading backup object file %s.", GET_NAME(ch), cmfnamebak);
+    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s loading backup object file %s.", char_get_name(ch), cmfnamebak);
     return Crash_load_file(ch, fl, cmfnamebak);
   }
 
   Crash_log_file_error("fopen backup object file", cmfnamebak, __FILE__, __LINE__);
-    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s entering game with no equipment. Loading backup failed.", GET_NAME(ch));
+    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s entering game with no equipment. Loading backup failed.", char_get_name(ch));
     send_to_char(ch,
                      "\r\n********************* NOTICE *********************\r\n"
                      "There was a problem loading your objects from backup.\r\n"
@@ -1156,20 +1156,20 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
   switch (orig_rent_code = rentcode)
   {
   case RENT_RENTED:
-    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s un-renting and entering game.", GET_NAME(ch));
+    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s un-renting and entering game.", char_get_name(ch));
     break;
   case RENT_CRASH:
-    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s retrieving crash-saved items and entering game.", GET_NAME(ch));
+    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s retrieving crash-saved items and entering game.", char_get_name(ch));
     break;
   case RENT_CRYO:
-    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s un-cryo'ing and entering game.", GET_NAME(ch));
+    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s un-cryo'ing and entering game.", char_get_name(ch));
     break;
   case RENT_FORCED:
   case RENT_TIMEDOUT:
-    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s retrieving force-saved items and entering game.", GET_NAME(ch));
+    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s retrieving force-saved items and entering game.", char_get_name(ch));
     break;
   default:
-    mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "WARNING: %s entering game with undefined rent code.", GET_NAME(ch));
+    mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "WARNING: %s entering game with undefined rent code.", char_get_name(ch));
     break;
   }
 
@@ -1372,8 +1372,8 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
           if (GET_OBJ_VAL(temp, 1) != 0)
             name_to_drinkcon(temp, GET_OBJ_VAL(temp, 2));
         }
-        if (GET_OBJ_VNUM(temp) == 20099 || GET_OBJ_VNUM(temp) == 20098)
-          if (OBJ_FLAGGED(temp, ITEM_UNBREAKABLE))
+        if (obj_get_vnum(temp) == 20099 || obj_get_vnum(temp) == 20098)
+          if (obj_flagged(temp, ITEM_UNBREAKABLE))
             REMOVE_BIT_AR(GET_OBJ_EXTRA(temp), ITEM_UNBREAKABLE);
         auto_equip(ch, temp, locate);
       }
@@ -1504,7 +1504,7 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
 
   /* Little hoarding check. -gg 3/1/98 */
   mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s (level %d) has %d objects (max %d).",
-         GET_NAME(ch), GET_LEVEL(ch), num_objs, CONFIG_MAX_OBJ_SAVE);
+         char_get_name(ch), char_get_level(ch), num_objs, CONFIG_MAX_OBJ_SAVE);
 
   fclose(fl);
 

@@ -119,8 +119,8 @@ ACMD(do_oasis_links)
   first = zone_table[zrnum].bot;
 
   send_to_char(ch, "Zone %d is linked to the following zones:\r\n", zvnum);
-  for (nr = 0; nr <= top_of_world && (GET_ROOM_VNUM(nr) <= last); nr++) {
-    if (GET_ROOM_VNUM(nr) >= first) {
+  for (nr = 0; nr <= top_of_world && (rroom_get_vnum(nr) <= last); nr++) {
+    if (rroom_get_vnum(nr) >= first) {
       for (j = 0; j < NUM_OF_DIRS; j++) {
       if (world[nr].dir_option[j]) {
         to_room = world[nr].dir_option[j]->to_room;
@@ -128,7 +128,7 @@ ACMD(do_oasis_links)
           send_to_char(ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
             zone_table[world[to_room].zone].number,
             zone_table[world[to_room].zone].name,
-            GET_ROOM_VNUM(nr), dirs[j], world[to_room].number);
+            rroom_get_vnum(nr), dirs[j], world[to_room].number);
       }
       }
     }

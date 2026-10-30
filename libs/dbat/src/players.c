@@ -563,7 +563,7 @@ int load_char(const char *name, struct char_data *ch)
 
       case 'L':
              if (!strcmp(tag, "Last"))  ch->time.logon          = atol(line);
-        else if (!strcmp(tag, "Lern"))  GET_PRACTICES(ch, GET_CLASS(ch)) = atoi(line);
+        else if (!strcmp(tag, "Lern"))  GET_PRACTICES(ch, char_get_class(ch)) = atoi(line);
         else if (!strcmp(tag, "Levl"))  GET_CLASS_LEVEL(ch)     = atoi(line);
        /* else if (!strcmp(tag, "LevD"))  read_level_data(ch, fl);*/
         else if (!strcmp(tag, "LF  "))  load_BASE(ch, line, LOAD_LIFE);
@@ -707,17 +707,17 @@ int load_char(const char *name, struct char_data *ch)
   }
 
   if (! ch->time.created) {
-    log("No creation timestamp for user %s, using current time", GET_NAME(ch));
+    log("No creation timestamp for user %s, using current time", char_get_name(ch));
     ch->time.created = time(0);
   }
 
   if (! ch->time.birth) {
-    log("No birthday for user %s, using standard starting age determination", GET_NAME(ch));
+    log("No birthday for user %s, using standard starting age determination", char_get_name(ch));
     ch->time.birth = time(0) - birth_age(ch);
   }
 
   if (! ch->time.maxage) {
-    log("No max age for user %s, using standard max age determination", GET_NAME(ch));
+    log("No max age for user %s, using standard max age determination", char_get_name(ch));
     ch->time.maxage = ch->time.birth + max_age(ch);
   }
 
@@ -732,7 +732,7 @@ int load_char(const char *name, struct char_data *ch)
     GET_COND(ch, DRUNK) = -1;
   }
 
-  if (IS_ANDROID(ch)) {
+  if (char_is_android(ch)) {
     GET_COND(ch, HUNGER) = -1;
     GET_COND(ch, THIRST) = -1;
     GET_COND(ch, DRUNK) = -1;
@@ -771,10 +771,10 @@ void save_char_pets(struct char_data *ch)
   char fname[40];
   FILE *fl;
 
-  if (IS_NPC(ch) || GET_PFILEPOS(ch) < 0)
+  if (char_is_npc(ch) || GET_PFILEPOS(ch) < 0)
     return;
 
-  if (!get_filename(fname, sizeof(fname), PET_FILE, GET_NAME(ch)))
+  if (!get_filename(fname, sizeof(fname), PET_FILE, char_get_name(ch)))
     return;
 
   if (!(fl = fopen(fname, "w"))) {
@@ -783,7 +783,7 @@ void save_char_pets(struct char_data *ch)
   }
 
   for (foll = ch->followers; foll; foll = foll->next) {
-        write_mobile_record(GET_MOB_VNUM(foll->follower), foll->follower, fl);
+        write_mobile_record(char_get_mob_vnum(foll->follower), foll->follower, fl);
   }
 
   fclose(fl);
@@ -797,10 +797,10 @@ void load_char_pets(struct char_data *ch)
   IDXTYPE load_room;
   struct follow_type *foll;
 
-  if (IS_NPC(ch) || GET_PFILEPOS(ch) < 0)
+  if (char_is_npc(ch) || GET_PFILEPOS(ch) < 0)
     return;
 
-  if (!get_filename(fname, sizeof(fname), PET_FILE, GET_NAME(ch)))
+  if (!get_filename(fname, sizeof(fname), PET_FILE, char_get_name(ch)))
     return;
 
   if (!(fl = fopen(fname, "r")))
@@ -837,7 +837,7 @@ void save_char(struct char_data * ch)
   char fbuf1[MAX_STRING_LENGTH], fbuf2[MAX_STRING_LENGTH];
   char fbuf3[MAX_STRING_LENGTH], fbuf4[MAX_STRING_LENGTH];
 
-  if (IS_NPC(ch) || GET_PFILEPOS(ch) < 0)
+  if (char_is_npc(ch) || GET_PFILEPOS(ch) < 0)
     return;
 
   /*
@@ -864,7 +864,7 @@ void save_char(struct char_data * ch)
     }
   }
 
-  if (!get_filename(fname, sizeof(fname), PLR_FILE, GET_NAME(ch)))
+  if (!get_filename(fname, sizeof(fname), PLR_FILE, char_get_name(ch)))
     return;
   if (!(fl = fopen(fname, "w"))) {
     mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: Couldn't open player file %s for write", fname);
@@ -943,8 +943,8 @@ void save_char(struct char_data * ch)
 
   /* end char_to_store code */
 
-  if (GET_NAME(ch))				fprintf(fl, "Name: %s\n", GET_NAME(ch));
-  if (GET_USER(ch))                             fprintf(fl, "User: %s\n", GET_USER(ch));
+  if (char_get_name(ch))				fprintf(fl, "Name: %s\n", char_get_name(ch));
+  if (char_get_user(ch))                             fprintf(fl, "User: %s\n", char_get_user(ch));
   if (GET_VOICE(ch))                            fprintf(fl, "Voic: %s\n", GET_VOICE(ch));
   if (GET_CLAN(ch))                             fprintf(fl, "Clan: %s\n", GET_CLAN(ch));
   if (GET_FEATURE(ch))                          fprintf(fl, "RPfe: %s\n", GET_FEATURE(ch));
@@ -960,7 +960,7 @@ void save_char(struct char_data * ch)
 #endif
   if (GET_SEX(ch)	   != PFDEF_SEX)	fprintf(fl, "Sex : %d\n", GET_SEX(ch)); 
   if (ch->size		   != PFDEF_SIZE)	fprintf(fl, "Size: %d\n", ch->size); 
-  if (GET_CLASS(ch)	   != PFDEF_CLASS)	fprintf(fl, "Clas: %d\n", GET_CLASS(ch)); 
+  if (char_get_class(ch)	   != PFDEF_CLASS)	fprintf(fl, "Clas: %d\n", char_get_class(ch)); 
   if (GET_RACE(ch)	   != PFDEF_RACE)	fprintf(fl, "Race: %d\n", GET_RACE(ch));
   if (RACIAL_PREF(ch)      != PFDEF_BANK)       fprintf(fl, "Raci: %d\n", RACIAL_PREF(ch));
   if (GET_ADMLEVEL(ch)	   != PFDEF_LEVEL)	fprintf(fl, "AdmL: %d\n", GET_ADMLEVEL(ch));
@@ -969,7 +969,7 @@ void save_char(struct char_data * ch)
   if (GET_LEVEL_ADJ(ch)    != PFDEF_LEVEL)	fprintf(fl, "LvlA: %d\n", GET_LEVEL_ADJ(ch));
   if (GET_HOME(ch)	   != PFDEF_HOMETOWN)	fprintf(fl, "Home: %d\n", GET_HOME(ch));
   for (i = 0; i < NUM_CLASSES; i++) {
-    if(GET_CLASS_RANKS(ch, i))	fprintf(fl, "Mcls: %d=%d\n", i, GET_CLASS_NONEPIC(ch, i));
+    if(char_get_class_ranks(ch, i))	fprintf(fl, "Mcls: %d=%d\n", i, GET_CLASS_NONEPIC(ch, i));
     if(GET_CLASS_EPIC(ch, i))	fprintf(fl, "Ecls: %d=%d\n", i, GET_CLASS_EPIC(ch, i));
   }
   fprintf(fl, "Id  : %d\n", GET_IDNUM(ch));
@@ -1236,13 +1236,13 @@ void save_char(struct char_data * ch)
 
   /* end char_to_store code */
  
-  if ((id = get_ptable_by_name(GET_NAME(ch))) < 0)
+  if ((id = get_ptable_by_name(char_get_name(ch))) < 0)
     return;
 
   /* update the player in the player index */
-  if (player_table[id].level != GET_LEVEL(ch)) {
+  if (player_table[id].level != char_get_level(ch)) {
     save_index = TRUE;
-    player_table[id].level = GET_LEVEL(ch);
+    player_table[id].level = char_get_level(ch);
   }
   if (player_table[id].admlevel != GET_ADMLEVEL(ch)) {
     save_index = TRUE;
@@ -1273,16 +1273,16 @@ void save_char(struct char_data * ch)
     player_table[id].shiproom = GET_SHIPROOM(ch);
   }
   i = player_table[id].flags;
-  if (PLR_FLAGGED(ch, PLR_DELETED))
+  if (char_plr_flagged(ch, PLR_DELETED))
     SET_BIT(player_table[id].flags, PINDEX_DELETED);
   else
     REMOVE_BIT(player_table[id].flags, PINDEX_DELETED);
-  if (PLR_FLAGGED(ch, PLR_NODELETE) || PLR_FLAGGED(ch, PLR_CRYO))
+  if (char_plr_flagged(ch, PLR_NODELETE) || char_plr_flagged(ch, PLR_CRYO))
     SET_BIT(player_table[id].flags, PINDEX_NODELETE);
   else
     REMOVE_BIT(player_table[id].flags, PINDEX_NODELETE);
 
-  if (PLR_FLAGGED(ch, PLR_FROZEN) || PLR_FLAGGED(ch, PLR_NOWIZLIST))
+  if (char_plr_flagged(ch, PLR_FROZEN) || char_plr_flagged(ch, PLR_NOWIZLIST))
     SET_BIT(player_table[id].flags, PINDEX_NOWIZLIST);
   else
     REMOVE_BIT(player_table[id].flags, PINDEX_NOWIZLIST);

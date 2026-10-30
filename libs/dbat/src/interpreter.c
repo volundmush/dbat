@@ -227,7 +227,7 @@ int perform_dupe_check(struct descriptor_data *d)
   for (ch = character_list; ch; ch = next_ch) {
     next_ch = ch->next;
 
-    if (IS_NPC(ch))
+    if (char_is_npc(ch))
       continue;
     if (GET_IDNUM(ch) != id)
       continue;
@@ -280,7 +280,7 @@ int perform_dupe_check(struct descriptor_data *d)
         if(!k->character) {
          continue;
         }
-       if (!IS_NPC(k->character) && GET_LEVEL(k->character) > 3) {
+       if (!char_is_npc(k->character) && char_get_level(k->character) > 3) {
         count += 1;
        }
 
@@ -307,7 +307,7 @@ int perform_dupe_check(struct descriptor_data *d)
       /*~~~ End PCOUNT and HIGHPCOUNT ~~~*/
     d->character->time.logon = time(0);
     act("$n has reconnected.", TRUE, d->character, 0, 0, TO_ROOM);
-    mudlog(NRM, MAX(ADMLVL_NONE, GET_INVIS_LEV(d->character)), TRUE, "%s [%s] has reconnected.", GET_NAME(d->character), d->host);
+    mudlog(NRM, MAX(ADMLVL_NONE, GET_INVIS_LEV(d->character)), TRUE, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
     d->character->rp = d->rpp;
     if (has_mail(GET_IDNUM(d->character)))
       write_to_output(d, "You have mail waiting.\r\n");
@@ -329,7 +329,7 @@ int perform_dupe_check(struct descriptor_data *d)
       int mult = 0;
       int days = MAX(3, diff / 86400);
       GET_LINTEREST(d->character) = LASTINTEREST;
-      int base_interest = GET_BANK_INTEREST(d->character);
+      int base_interest = char_get_bank_interest(d->character);
       if (base_interest) {
         int total_interest = base_interest * days;
        GET_BANK_GOLD(d->character) += total_interest;
@@ -345,11 +345,11 @@ int perform_dupe_check(struct descriptor_data *d)
         TRUE, d->character, 0, 0, TO_ROOM);
     d->character->rp = d->rpp;
     mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(d->character)), TRUE,
-	"%s has re-logged in ... disconnecting old socket.", GET_NAME(d->character));
+	"%s has re-logged in ... disconnecting old socket.", char_get_name(d->character));
     break;
   case UNSWITCH:
     write_to_output(d, "Reconnecting to unswitched char.");
-    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(d->character)), TRUE, "%s [%s] has reconnected.", GET_NAME(d->character), d->host);
+    mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(d->character)), TRUE, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
     break;
   }
 
@@ -369,8 +369,8 @@ int enter_player_game (struct descriptor_data *d)
 
       racial_body_parts(d->character);
 
-      if (PLR_FLAGGED(d->character, PLR_INVSTART))
-	GET_INVIS_LEV(d->character) = GET_LEVEL(d->character);
+      if (char_plr_flagged(d->character, PLR_INVSTART))
+	GET_INVIS_LEV(d->character) = char_get_level(d->character);
 
       /*
        * We have to place the character in a room before equipping them
@@ -388,7 +388,7 @@ int enter_player_game (struct descriptor_data *d)
 	  load_room = real_room(CONFIG_MORTAL_START);
       }
 
-      if (PLR_FLAGGED(d->character, PLR_FROZEN))
+      if (char_plr_flagged(d->character, PLR_FROZEN))
 	load_room = real_room(CONFIG_FROZEN_START);
 
       d->character->next = character_list;
@@ -406,8 +406,8 @@ int enter_player_game (struct descriptor_data *d)
       read_saved_vars(d->character);
       /*load_char_pets(d->character);*/
       for (check = character_list; check; check = check->next)
-        if (!check->master && IS_NPC(check) && check->master_id == GET_IDNUM(d->character) &&
-            AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, d->character))
+        if (!check->master && char_is_npc(check) && check->master_id == GET_IDNUM(d->character) &&
+            char_aff_flagged(check, AFF_CHARM) && !circle_follow(check, d->character))
           add_follower(check, d->character);
       save_char(d->character);
 
@@ -417,43 +417,43 @@ int enter_player_game (struct descriptor_data *d)
     }
 
 
-    if (PLR_FLAGGED(d->character, PLR_RARM)) {
+    if (char_plr_flagged(d->character, PLR_RARM)) {
      GET_LIMBCOND(d->character, 1) = 100;
      REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_RARM);
     }
-    if (PLR_FLAGGED(d->character, PLR_LARM)) {
+    if (char_plr_flagged(d->character, PLR_LARM)) {
      GET_LIMBCOND(d->character, 2) = 100;
      REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_LARM);
     }
-    if (PLR_FLAGGED(d->character, PLR_LLEG)) {
+    if (char_plr_flagged(d->character, PLR_LLEG)) {
      GET_LIMBCOND(d->character, 4) = 100;
      REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_LLEG);
     }
-    if (PLR_FLAGGED(d->character, PLR_RLEG)) {
+    if (char_plr_flagged(d->character, PLR_RLEG)) {
      GET_LIMBCOND(d->character, 3) = 100;
      REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_RLEG);
     }
     GET_COMBINE(d->character) = -1;
     GET_SLEEPT(d->character) = 8;
     GET_FOODR(d->character) = 2;
-    if (AFF_FLAGGED(d->character, AFF_FLYING)) {
+    if (char_aff_flagged(d->character, AFF_FLYING)) {
      GET_ALT(d->character) = 1;
     } else {
      GET_ALT(d->character) = 0;
     }
-    if (AFF_FLAGGED(d->character, AFF_POSITION)) {
+    if (char_aff_flagged(d->character, AFF_POSITION)) {
      REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_POSITION);
     }
-    if (AFF_FLAGGED(d->character, AFF_SANCTUARY)) {
+    if (char_aff_flagged(d->character, AFF_SANCTUARY)) {
      REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_SANCTUARY);
     }
-    if (AFF_FLAGGED(d->character, AFF_ZANZOKEN)) {
+    if (char_aff_flagged(d->character, AFF_ZANZOKEN)) {
      REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_ZANZOKEN);
     }
-    if (PLR_FLAGGED(d->character, PLR_KNOCKED)) {
+    if (char_plr_flagged(d->character, PLR_KNOCKED)) {
      REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_KNOCKED);
     }
-    if (IS_ANDROID(d->character) && !AFF_FLAGGED(d->character, AFF_INFRAVISION)) {
+    if (char_is_android(d->character) && !char_aff_flagged(d->character, AFF_INFRAVISION)) {
      SET_BIT_AR(AFF_FLAGS(d->character), AFF_INFRAVISION);
     }
     ABSORBING(d->character) = NULL;
@@ -465,12 +465,12 @@ int enter_player_game (struct descriptor_data *d)
     GET_SPAM(d->character) = 0;
     GET_RMETER(d->character) = 0;
     if (!d->character->affected) {
-     if (AFF_FLAGGED(d->character, AFF_HEALGLOW)) {
+     if (char_aff_flagged(d->character, AFF_HEALGLOW)) {
       REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_HEALGLOW);
      }
     }
-    if (AFF_FLAGGED(d->character, AFF_HAYASA)) {
-     GET_SPEEDBOOST(d->character) = GET_SPEEDCALC(d->character) * 0.5;
+    if (char_aff_flagged(d->character, AFF_HAYASA)) {
+     GET_SPEEDBOOST(d->character) = char_get_speedcalc(d->character) * 0.5;
     } else {
      GET_SPEEDBOOST(d->character) = 0;
     }
@@ -478,11 +478,11 @@ int enter_player_game (struct descriptor_data *d)
      GET_TRP(d->character) = GET_RP(d->character);
     }
 
-    if (IS_NAMEK(d->character) && GET_COND(d->character, HUNGER) >= 0) {
+    if (char_is_namek(d->character) && GET_COND(d->character, HUNGER) >= 0) {
      GET_COND(d->character, HUNGER) = -1;
     }
 
-    if (PLR_FLAGGED(d->character, PLR_HEALT)) {
+    if (char_plr_flagged(d->character, PLR_HEALT)) {
      REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_HEALT);
     }
 
@@ -508,12 +508,12 @@ int enter_player_game (struct descriptor_data *d)
     }
     d->character->rp = d->rpp;
 	d->character->rbank = d->rbank;
-    if(MOON_OK(d->character)) {
+    if(char_moon_ok(d->character)) {
         oozaru_transform(d->character);
     } else {
         oozaru_revert(d->character);
     }
-    if (IS_HOSHIJIN(d->character)) {
+    if (char_is_hoshijin(d->character)) {
        if (time_info.day <= 14) {
         star_phase(d->character, 1);
        } else if (time_info.day <= 21) {
@@ -523,19 +523,19 @@ int enter_player_game (struct descriptor_data *d)
        }
     }
 
-    if (IS_ICER(d->character) && !GET_SKILL(d->character, SKILL_TAILWHIP)) {
+    if (char_is_icer(d->character) && !char_get_skill(d->character, SKILL_TAILWHIP)) {
      int numb = rand_number(20, 30);
      SET_SKILL(d->character, SKILL_TAILWHIP, numb);
     }
-    else if (!IS_ICER(d->character) && GET_SKILL(d->character, SKILL_TAILWHIP)) {
+    else if (!char_is_icer(d->character) && char_get_skill(d->character, SKILL_TAILWHIP)) {
      SET_SKILL(d->character, SKILL_TAILWHIP, 0);
     }
 	
-	if (IS_MUTANT(d->character) && (GET_GENOME(d->character, 0) == 9 || GET_GENOME(d->character, 1) == 9) && !GET_SKILL(d->character, SKILL_TELEPATHY)) {
+	if (char_is_mutant(d->character) && (GET_GENOME(d->character, 0) == 9 || GET_GENOME(d->character, 1) == 9) && !char_get_skill(d->character, SKILL_TELEPATHY)) {
 	 SET_SKILL(d->character, SKILL_TELEPATHY, 50);
 	}
 	
-	if (IS_BIO(d->character) && (GET_GENOME(d->character, 0) == 7 || GET_GENOME(d->character, 1) == 7) && !GET_SKILL(d->character, SKILL_TELEPATHY) && !GET_SKILL(d->character, SKILL_FOCUS)) {
+	if (char_is_bio(d->character) && (GET_GENOME(d->character, 0) == 7 || GET_GENOME(d->character, 1) == 7) && !char_get_skill(d->character, SKILL_TELEPATHY) && !char_get_skill(d->character, SKILL_FOCUS)) {
 	 SET_SKILL(d->character, SKILL_TELEPATHY, 30);
 	 SET_SKILL(d->character, SKILL_FOCUS, 30);
 	}
@@ -576,7 +576,7 @@ void payout(int num)
    LASTPAYTYPE = num;
   }
   for (k = descriptor_list; k; k = k->next) {
-    if (GET_ADMLEVEL(k->character) <= 0 && IS_PLAYING(k) && GET_RTIME(k->character) < LASTPAYOUT) {
+    if (GET_ADMLEVEL(k->character) <= 0 && desc_is_playing(k) && GET_RTIME(k->character) < LASTPAYOUT) {
      if (num == 0) {
       k->rpp += 1;
       GET_RP(k->character) = k->rpp;
@@ -852,11 +852,11 @@ char *rIntro(struct char_data *ch, char *arg) {
   FILE *fl;
 
   /* Read Introduction File */
-  if (IS_NPC(ch)) {
+  if (char_is_npc(ch)) {
    return "NOTHING";
   }
 
-  if (!get_filename(fname, sizeof(fname), INTRO_FILE, GET_NAME(ch))) {
+  if (!get_filename(fname, sizeof(fname), INTRO_FILE, char_get_name(ch))) {
     return "NOTHING";
   }
   else if (!(fl = fopen(fname, "r"))) {
@@ -1521,7 +1521,7 @@ int opp_bonus(struct char_data *ch, int value, int type)
    }
    break;
   case 3:
-   if (IS_ANDROID(ch)) {
+   if (char_is_android(ch)) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "You can not take %s as an android!@n\r\n", list_bonus[3]);
     give = FALSE;
@@ -1591,14 +1591,14 @@ int opp_bonus(struct char_data *ch, int value, int type)
    }
    break;
   case 16:
-   if (IS_ANDROID(ch)) {
+   if (char_is_android(ch)) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "You are an android and can not suppress anyway.\n\n");
     give = FALSE;
    }
    break;
   case 17:
-   if (IS_DEMON(ch)) {
+   if (char_is_demon(ch)) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "As a demon you are already fireproof.\r\n");
     give = FALSE;
@@ -1627,7 +1627,7 @@ int opp_bonus(struct char_data *ch, int value, int type)
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
     give = FALSE;
-   } else if (IS_ANDROID(ch)) {
+   } else if (char_is_android(ch)) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "You can not take %s as an android!@n\r\n", list_bonus[value]);
     give = FALSE;
@@ -1680,7 +1680,7 @@ int opp_bonus(struct char_data *ch, int value, int type)
     display_bonus_menu(ch, type);
     send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
     give = FALSE;
-   } else if (IS_ANDROID(ch)) {
+   } else if (char_is_android(ch)) {
     display_bonus_menu(ch, type);
     send_to_char(ch, "You can not take %s as an android!@n\r\n", list_bonus[value]);
     give = FALSE;
@@ -1989,7 +1989,7 @@ void nanny(struct descriptor_data *d, char *arg)
           return;
         }
 	GET_PFILEPOS(d->character) = player_i;
-	if (PLR_FLAGGED(d->character, PLR_DELETED)) {
+	if (char_plr_flagged(d->character, PLR_DELETED)) {
 
 	  /* make sure old files are removed so the new player doesn't get
 	     the deleted player's equipment (this should probably be a
@@ -2023,17 +2023,17 @@ void nanny(struct descriptor_data *d, char *arg)
 	  REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_CRYO);
 	  REMOVE_BIT_AR(AFF_FLAGS(d->character), AFF_GROUP);
           if (isbanned(d->host) == BAN_SELECT &&
-           !PLR_FLAGGED(d->character, PLR_SITEOK)) {
+           !char_plr_flagged(d->character, PLR_SITEOK)) {
            write_to_output(d, "Sorry, this char has not been cleared for login from your site!\r\n");
-           mudlog(NRM, ADMLVL_GOD, TRUE, "Connection attempt for %s denied from %s", GET_NAME(d->character), d->host);
+           mudlog(NRM, ADMLVL_GOD, TRUE, "Connection attempt for %s denied from %s", char_get_name(d->character), d->host);
            STATE(d) = CON_CLOSE;
            return;
           }
-          else if (GET_LEVEL(d->character) < circle_restrict && circle_restrict < 101) {
+          else if (char_get_level(d->character) < circle_restrict && circle_restrict < 101) {
            userRead(d);
            write_to_output(d, "The game is temporarily restricted to at least %d level.\r\n", circle_restrict);
            STATE(d) = CON_UMENU;
-           mudlog(NRM, ADMLVL_GOD, TRUE, "Request for character load denied for %s [%s] (wizlock)", GET_NAME(d->character), d->host);
+           mudlog(NRM, ADMLVL_GOD, TRUE, "Request for character load denied for %s [%s] (wizlock)", char_get_name(d->character), d->host);
            return;
           }
           /* check and make sure no other copies of this player are logged in */
@@ -2602,7 +2602,7 @@ void nanny(struct descriptor_data *d, char *arg)
   break;
 
   case CON_QSEX:		/* query sex of new user         */
-   if (!IS_NAMEK(d->character)) {
+   if (!char_is_namek(d->character)) {
     switch (*arg) {
     case 'm':
     case 'M':
@@ -2622,7 +2622,7 @@ void nanny(struct descriptor_data *d, char *arg)
       return;
     }
    }
-    if (IS_HUMAN(d->character) || IS_SAIYAN(d->character) || IS_KONATSU(d->character) || IS_MUTANT(d->character) || IS_ANDROID(d->character) || IS_KAI(d->character) || IS_HALFBREED(d->character) || IS_TRUFFLE(d->character) || (IS_HOSHIJIN(d->character) && IS_FEMALE(d->character))) {
+    if (char_is_human(d->character) || char_is_saiyan(d->character) || char_is_konatsu(d->character) || char_is_mutant(d->character) || char_is_android(d->character) || char_is_kai(d->character) || char_is_halfbreed(d->character) || char_is_truffle(d->character) || (char_is_hoshijin(d->character) && char_is_female(d->character))) {
      write_to_output(d, "@YHair Length SELECTION menu:\r\n");
      write_to_output(d, "@D---------------------------------------@n\r\n");
      write_to_output(d, "@B1@W)@C Bald  @B2@W)@C Short  @B3@W)@C Medium\r\n");
@@ -2630,7 +2630,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
     STATE(d) = CON_HAIRL;
     }
-    else if (IS_DEMON(d->character) || IS_ICER(d->character)) {
+    else if (char_is_demon(d->character) || char_is_icer(d->character)) {
      write_to_output(d, "@YHorn Length SELECTION menu:\r\n");
      write_to_output(d, "@D---------------------------------------@n\r\n");
      write_to_output(d, "@B1@W)@C None  @B2@W)@C Short  @B3@W)@C Medium\r\n");
@@ -2638,7 +2638,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
     STATE(d) = CON_HAIRL;
     }
-    else if (IS_MAJIN(d->character)) {
+    else if (char_is_majin(d->character)) {
      write_to_output(d, "@YForelock Length SELECTION menu:\r\n");
      write_to_output(d, "@D---------------------------------------@n\r\n");
      write_to_output(d, "@B1@W)@C Tiny  @B2@W)@C Short  @B3@W)@C Medium\r\n");
@@ -2646,7 +2646,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
     STATE(d) = CON_HAIRL;
     }
-    else if (IS_NAMEK(d->character) || IS_ARLIAN(d->character)) {
+    else if (char_is_namek(d->character) || char_is_arlian(d->character)) {
      write_to_output(d, "@YAntenae Length SELECTION menu:\r\n");
      write_to_output(d, "@D---------------------------------------@n\r\n");
      write_to_output(d, "@B1@W)@C Tiny  @B2@W)@C Short  @B3@W)@C Medium\r\n");
@@ -2713,20 +2713,20 @@ void nanny(struct descriptor_data *d, char *arg)
                 }
         }
 
-    if (IS_HALFBREED(d->character)) {
+    if (char_is_halfbreed(d->character)) {
      write_to_output(d, "@YWhat race do you prefer to by identified with?\r\n");
      write_to_output(d, "@cThis controls how others first view you and whether you start with\na tail and how fast it regrows when missing.\r\n");
      write_to_output(d, "@D---------------------------------------@n\r\n");
      write_to_output(d, "@B1@W)@C Human\n@B2@W)@C Saiyan\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
      STATE(d) = CON_RACIAL;
-    } else if (IS_ANDROID(d->character)) {
+    } else if (char_is_android(d->character)) {
      write_to_output(d, "@YWhat do you want to be identified as at first glance?\r\n");
      write_to_output(d, "@D---------------------------------------@n\r\n");
      write_to_output(d, "@B1@W)@C Android\n@B2@W)@C Human\n@B3@W)@C Robotic Humanoid\r\n");
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
      STATE(d) = CON_RACIAL;
-    } else if (IS_NAMEK(d->character)) {
+    } else if (char_is_namek(d->character)) {
      GET_SEX(d->character) = SEX_NEUTRAL;
      STATE(d) = CON_QSEX;
     } else {
@@ -2744,7 +2744,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->player_specials->racial_pref = 2;
       break;
       case '3':
-      if (IS_HALFBREED(d->character)) {
+      if (char_is_halfbreed(d->character)) {
        write_to_output(d, "That is not an acceptable option.\r\n");
        return;
       } else {
@@ -2760,7 +2760,7 @@ void nanny(struct descriptor_data *d, char *arg)
    break;
 
   case CON_HAIRL:                /* query hair length */
-    if (IS_HUMAN(d->character) || IS_SAIYAN(d->character) || IS_KONATSU(d->character) || IS_MUTANT(d->character) || IS_ANDROID(d->character) || IS_KAI(d->character) || IS_HALFBREED(d->character) || IS_TRUFFLE(d->character) || (IS_HOSHIJIN(d->character) && IS_FEMALE(d->character))) {
+    if (char_is_human(d->character) || char_is_saiyan(d->character) || char_is_konatsu(d->character) || char_is_mutant(d->character) || char_is_android(d->character) || char_is_kai(d->character) || char_is_halfbreed(d->character) || char_is_truffle(d->character) || (char_is_hoshijin(d->character) && char_is_female(d->character))) {
     switch (*arg) {
       case '1':
       d->character->hairl = HAIRL_BALD;
@@ -2806,7 +2806,7 @@ void nanny(struct descriptor_data *d, char *arg)
      }
     }
     else {
-    if (IS_DEMON(d->character) || IS_ICER(d->character)) {
+    if (char_is_demon(d->character) || char_is_icer(d->character)) {
     switch (*arg) {
       case '1':
       d->character->hairl = HAIRL_BALD;
@@ -2838,7 +2838,7 @@ void nanny(struct descriptor_data *d, char *arg)
      write_to_output(d, "@w\r\nMake a selection:@n\r\n");
       STATE(d) = CON_SKIN;
     }
-    if (IS_MAJIN(d->character) || IS_NAMEK(d->character) || IS_ARLIAN(d->character)) {
+    if (char_is_majin(d->character) || char_is_namek(d->character) || char_is_arlian(d->character)) {
       switch (*arg) {
       case '1':
       d->character->hairl = HAIRL_BALD;
@@ -2859,7 +2859,7 @@ void nanny(struct descriptor_data *d, char *arg)
       write_to_output(d, "That is not an acceptable option.\r\n");
       return;
       }
-     if (IS_ARLIAN(d->character) && IS_FEMALE(d->character)) {
+     if (char_is_arlian(d->character) && char_is_female(d->character)) {
       write_to_output(d, "@YWing color SELECTION menu:\r\n");
       write_to_output(d, "@D---------------------------------------@n\r\n");
       write_to_output(d, "@B1@W)@C Black  @B2@W)@C Brown  @B3@W)@C Blonde\r\n");
@@ -2947,7 +2947,7 @@ void nanny(struct descriptor_data *d, char *arg)
       write_to_output(d, "That is not an acceptable option.\r\n");
       return;
      }
-     if (IS_ARLIAN(d->character)) {
+     if (char_is_arlian(d->character)) {
       d->character->hairs = HAIRS_NONE;
       write_to_output(d, "@YSkin color SELECTION menu:\r\n");
       write_to_output(d, "@D---------------------------------------@n\r\n");
@@ -3141,13 +3141,13 @@ void nanny(struct descriptor_data *d, char *arg)
       write_to_output(d, "@YWhat do you want to be your most distinguishing feature:\r\n");
       write_to_output(d, "@D---------------------------------------@n\r\n");
       write_to_output(d, "@B1@W)@C My Eyes@n\r\n");
-      if (IS_MAJIN(d->character)) {
+      if (char_is_majin(d->character)) {
        write_to_output(d, "@B2@W)@C My Forelock@n\r\n");
       }
-      else if (IS_NAMEK(d->character) || IS_ARLIAN(d->character)) {
+      else if (char_is_namek(d->character) || char_is_arlian(d->character)) {
        write_to_output(d, "@B2@W)@C My Antennae@n\r\n");
       }
-      else if (IS_ICER(d->character) || IS_DEMON(d->character)) {
+      else if (char_is_icer(d->character) || char_is_demon(d->character)) {
        write_to_output(d, "@B2@W)@C My Horns@n\r\n");
       }
       else if (GET_HAIRL(d->character) == HAIRL_BALD) {
@@ -3188,14 +3188,14 @@ void nanny(struct descriptor_data *d, char *arg)
      }
      write_to_output(d, "@YWhat Height/Weight Range do you prefer:\r\n");
      write_to_output(d, "@D---------------------------------------@n\r\n");
-     if (!IS_TRUFFLE(d->character) && !IS_ICER(d->character)) {
+     if (!char_is_truffle(d->character) && !char_is_icer(d->character)) {
       write_to_output(d, "@B1@W)@C 100-120cm, 25-30kg@n\r\n");
       write_to_output(d, "@B2@W)@C 120-140cm, 30-35kg@n\r\n");
       write_to_output(d, "@B3@W)@C 140-160cm, 35-45kg@n\r\n");
       write_to_output(d, "@B4@W)@C 160-180cm, 45-60kg@n\r\n");
       write_to_output(d, "@B5@W)@C 180-200cm, 60-80kg@n\r\n");
       write_to_output(d, "@B6@W)@C 200-220cm, 80-100kg@n\r\n");
-     } else if (IS_ICER(d->character)) {
+     } else if (char_is_icer(d->character)) {
       write_to_output(d, "@B1@W)@C 100-120cm, 25-30kg@n\r\n");
       write_to_output(d, "@B2@W)@C 120-140cm, 30-35kg@n\r\n");
       write_to_output(d, "@B3@W)@C 140-160cm, 35-45kg@n\r\n");
@@ -3213,10 +3213,10 @@ void nanny(struct descriptor_data *d, char *arg)
      case CON_HW:
      switch (*arg) {
       case '1':
-       if (!IS_TRUFFLE(d->character) && !IS_ICER(d->character)) {
+       if (!char_is_truffle(d->character) && !char_is_icer(d->character)) {
         d->character->height = rand_number(100, 120); 
         d->character->weight = rand_number(25, 30);
-       } else if (IS_ICER(d->character)) {
+       } else if (char_is_icer(d->character)) {
         d->character->height = rand_number(100, 120);
         d->character->weight = rand_number(25, 30);
        } else {
@@ -3225,10 +3225,10 @@ void nanny(struct descriptor_data *d, char *arg)
        }
       break;
       case '2':
-       if (!IS_TRUFFLE(d->character) && !IS_ICER(d->character)) {
+       if (!char_is_truffle(d->character) && !char_is_icer(d->character)) {
         d->character->height = rand_number(120, 140);
         d->character->weight = rand_number(30, 35);
-       } else if (IS_ICER(d->character)) {
+       } else if (char_is_icer(d->character)) {
         d->character->height = rand_number(120, 140);
         d->character->weight = rand_number(30, 35);
        } else {
@@ -3237,10 +3237,10 @@ void nanny(struct descriptor_data *d, char *arg)
        }
       break;
       case '3':
-       if (!IS_TRUFFLE(d->character) && !IS_ICER(d->character)) {
+       if (!char_is_truffle(d->character) && !char_is_icer(d->character)) {
         d->character->height = rand_number(140, 160);
         d->character->weight = rand_number(35, 45);
-       } else if (IS_ICER(d->character)) {
+       } else if (char_is_icer(d->character)) {
         d->character->height = rand_number(140, 160);
         d->character->weight = rand_number(35, 45);
        } else {
@@ -3249,10 +3249,10 @@ void nanny(struct descriptor_data *d, char *arg)
        }
       break;
       case '4':
-       if (!IS_TRUFFLE(d->character) && !IS_ICER(d->character)) {
+       if (!char_is_truffle(d->character) && !char_is_icer(d->character)) {
         d->character->height = rand_number(160, 180);
         d->character->weight = rand_number(45, 60);
-       } else if (IS_ICER(d->character)) {
+       } else if (char_is_icer(d->character)) {
          write_to_output(d, "That is not an acceptable option.\r\n");
          return;
        } else {
@@ -3261,10 +3261,10 @@ void nanny(struct descriptor_data *d, char *arg)
        }
       break;
       case '5':
-       if (!IS_TRUFFLE(d->character) && !IS_ICER(d->character)) {
+       if (!char_is_truffle(d->character) && !char_is_icer(d->character)) {
         d->character->height = rand_number(180, 200);
         d->character->weight = rand_number(60, 80);
-       } else if (IS_ICER(d->character)) {
+       } else if (char_is_icer(d->character)) {
          write_to_output(d, "That is not an acceptable option.\r\n");
          return;
        } else {
@@ -3273,7 +3273,7 @@ void nanny(struct descriptor_data *d, char *arg)
        }
       break;
       case '6':
-       if (!IS_TRUFFLE(d->character) && !IS_ICER(d->character)) {
+       if (!char_is_truffle(d->character) && !char_is_icer(d->character)) {
         d->character->height = rand_number(200, 220);
         d->character->weight = rand_number(80, 100);
        } else {
@@ -3340,7 +3340,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->basepl = rand_number(30, 50);
       d->character->basest = rand_number(30, 50);
       d->character->baseki = rand_number(30, 50);
-     if (IS_SAIYAN(d->character)) {
+     if (char_is_saiyan(d->character)) {
       d->character->real_abils.str = rand_number(12, 18);
       d->character->real_abils.con = rand_number(12, 18);
       d->character->real_abils.wis = rand_number(8, 16);
@@ -3348,7 +3348,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->real_abils.cha = rand_number(8, 18);
       d->character->real_abils.dex = rand_number(8, 16);
      }
-     else if (IS_HALFBREED(d->character)) {
+     else if (char_is_halfbreed(d->character)) {
       d->character->real_abils.str = rand_number(10, 18);
       d->character->real_abils.con = rand_number(10, 18);
       d->character->real_abils.wis = rand_number(8, 18);
@@ -3356,7 +3356,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->real_abils.cha = rand_number(8, 18);
       d->character->real_abils.dex = rand_number(8, 18);
      }
-     else if (IS_HUMAN(d->character)) {
+     else if (char_is_human(d->character)) {
       d->character->real_abils.str = rand_number(8, 18);
       d->character->real_abils.con = rand_number(8, 18);
       d->character->real_abils.wis = rand_number(10, 18);
@@ -3364,7 +3364,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->real_abils.cha = rand_number(8, 18);
       d->character->real_abils.dex = rand_number(8, 18);
      }
-     else if (IS_HOSHIJIN(d->character)) {
+     else if (char_is_hoshijin(d->character)) {
       d->character->real_abils.str = rand_number(10, 18);
       d->character->real_abils.con = rand_number(9, 18);
       d->character->real_abils.wis = rand_number(9, 18);
@@ -3372,7 +3372,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->real_abils.cha = rand_number(10, 18);
       d->character->real_abils.dex = rand_number(9, 18);
      }
-     else if (IS_NAMEK(d->character)) {
+     else if (char_is_namek(d->character)) {
       d->character->real_abils.str = rand_number(9, 18);
       d->character->real_abils.con = rand_number(9, 18);
       d->character->real_abils.wis = rand_number(12, 18);
@@ -3380,7 +3380,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->real_abils.cha = rand_number(8, 18);
       d->character->real_abils.dex = rand_number(8, 18);
      }
-     else if (IS_ARLIAN(d->character)) {
+     else if (char_is_arlian(d->character)) {
       d->character->real_abils.str = rand_number(15, 20);
       d->character->real_abils.con = rand_number(15, 20);
       d->character->real_abils.wis = rand_number(8, 16);
@@ -3388,7 +3388,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->real_abils.cha = rand_number(8, 18);
       d->character->real_abils.dex = rand_number(8, 18);
      }
-     else if (IS_ANDROID(d->character)) {
+     else if (char_is_android(d->character)) {
       d->character->real_abils.str = rand_number(12, 18);
       d->character->real_abils.con = rand_number(8, 18);
       d->character->real_abils.wis = rand_number(8, 16);
@@ -3396,7 +3396,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->real_abils.cha = rand_number(8, 18);
       d->character->real_abils.dex = rand_number(8, 18);
      }
-     else if (IS_BIO(d->character)) {
+     else if (char_is_bio(d->character)) {
       d->character->real_abils.str = rand_number(14, 18);
       d->character->real_abils.con = rand_number(8, 18);
       d->character->real_abils.wis = rand_number(8, 18);
@@ -3404,7 +3404,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->real_abils.cha = rand_number(8, 18);
       d->character->real_abils.dex = rand_number(8, 14);
      }
-     else if (IS_MAJIN(d->character)) {
+     else if (char_is_majin(d->character)) {
       d->character->real_abils.str = rand_number(11, 18);
       d->character->real_abils.con = rand_number(14, 18);
       d->character->real_abils.wis = rand_number(8, 14);
@@ -3412,7 +3412,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->real_abils.cha = rand_number(8, 18);
       d->character->real_abils.dex = rand_number(8, 17);
      }
-     else if (IS_TRUFFLE(d->character)) {
+     else if (char_is_truffle(d->character)) {
       d->character->real_abils.str = rand_number(8, 14);
       d->character->real_abils.con = rand_number(8, 14);
       d->character->real_abils.wis = rand_number(8, 18);
@@ -3420,7 +3420,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->real_abils.cha = rand_number(8, 18);
       d->character->real_abils.dex = rand_number(8, 18);
      }
-     else if (IS_KAI(d->character)) {
+     else if (char_is_kai(d->character)) {
       d->character->real_abils.str = rand_number(9, 18);
       d->character->real_abils.con = rand_number(8, 18);
       d->character->real_abils.wis = rand_number(14, 18);
@@ -3428,7 +3428,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->real_abils.cha = rand_number(8, 18);
       d->character->real_abils.dex = rand_number(8, 18);
      }
-     else if (IS_ICER(d->character)) {
+     else if (char_is_icer(d->character)) {
       d->character->real_abils.str = rand_number(10, 18);
       d->character->real_abils.con = rand_number(12, 18);
       d->character->real_abils.wis = rand_number(8, 18);
@@ -3436,7 +3436,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->real_abils.cha = rand_number(8, 15);
       d->character->real_abils.dex = rand_number(8, 18);
      }
-     else if (IS_MUTANT(d->character)) {
+     else if (char_is_mutant(d->character)) {
       d->character->real_abils.str = rand_number(9, 18);
       d->character->real_abils.con = rand_number(9, 18);
       d->character->real_abils.wis = rand_number(9, 18);
@@ -3444,7 +3444,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->real_abils.cha = rand_number(9, 18);
       d->character->real_abils.dex = rand_number(9, 18);
      }
-     else if (IS_KANASSAN(d->character)) {
+     else if (char_is_kanassan(d->character)) {
       d->character->real_abils.str = rand_number(8, 16);
       d->character->real_abils.con = rand_number(8, 16);
       d->character->real_abils.wis = rand_number(12, 18);
@@ -3452,7 +3452,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->real_abils.cha = rand_number(8, 18);
       d->character->real_abils.dex = rand_number(8, 18);
      }
-     else if (IS_DEMON(d->character)) {
+     else if (char_is_demon(d->character)) {
       d->character->real_abils.str = rand_number(11, 18);
       d->character->real_abils.con = rand_number(8, 18);
       d->character->real_abils.wis = rand_number(10, 18);
@@ -3460,7 +3460,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->character->real_abils.cha = rand_number(8, 18);
       d->character->real_abils.dex = rand_number(8, 18);
      }
-     else if (IS_KONATSU(d->character)) {
+     else if (char_is_konatsu(d->character)) {
       d->character->real_abils.str = rand_number(10, 14);
       d->character->real_abils.con = rand_number(10, 14);
       d->character->real_abils.wis = rand_number(10, 16);
@@ -3800,9 +3800,9 @@ void nanny(struct descriptor_data *d, char *arg)
          write_to_output(d, "@BB@W)@C 28@n    @BC@W)@C 30@n\r\n");
          write_to_output(d, "@BD@W)@C 40@n    @BE@W)@C 50@n\r\n");
          write_to_output(d, "@BF@W)@C 60@n    @BG@W)@C 65@n\r\n");
-         if (IS_KAI(d->character) || IS_DEMON(d->character) || IS_MAJIN(d->character)) {
+         if (char_is_kai(d->character) || char_is_demon(d->character) || char_is_majin(d->character)) {
           write_to_output(d, "@BH@W)@C 500@n   @BI@W)@C 800@n\r\n");
-         } else if (IS_NAMEK(d->character)) {
+         } else if (char_is_namek(d->character)) {
           write_to_output(d, "@BH@W)@C 250@n   @BI@W)@C 400@n\r\n");
          } else {
           write_to_output(d, "@BH@W)@C 70@n    @BI@W)@C 75@n\r\n");
@@ -3870,9 +3870,9 @@ void nanny(struct descriptor_data *d, char *arg)
         break;
       case 'H':
       case 'h':
-         if (IS_KAI(d->character) || IS_DEMON(d->character) || IS_MAJIN(d->character)) {
+         if (char_is_kai(d->character) || char_is_demon(d->character) || char_is_majin(d->character)) {
           d->character->time.birth = time(0) - (500 * SECS_PER_MUD_YEAR);
-         } else if (IS_NAMEK(d->character)) {
+         } else if (char_is_namek(d->character)) {
           d->character->time.birth = time(0) - (250 * SECS_PER_MUD_YEAR);
          } else {
           d->character->time.birth = time(0) - (70 * SECS_PER_MUD_YEAR);
@@ -3880,9 +3880,9 @@ void nanny(struct descriptor_data *d, char *arg)
         break;
       case 'I':
       case 'i':
-         if (IS_KAI(d->character) || IS_DEMON(d->character) || IS_MAJIN(d->character)) {
+         if (char_is_kai(d->character) || char_is_demon(d->character) || char_is_majin(d->character)) {
           d->character->time.birth = time(0) - (800 * SECS_PER_MUD_YEAR);
-         } else if (IS_NAMEK(d->character)) {
+         } else if (char_is_namek(d->character)) {
           d->character->time.birth = time(0) - (400 * SECS_PER_MUD_YEAR);
          } else {
           d->character->time.birth = time(0) - (75 * SECS_PER_MUD_YEAR);
@@ -3893,9 +3893,9 @@ void nanny(struct descriptor_data *d, char *arg)
       return;
     }
 
-    if (!IS_HOSHIJIN(d->character)) {
+    if (!char_is_hoshijin(d->character)) {
      GET_CCPOINTS(d->character) = 5;
-    } else if (IS_BIO(d->character)) {
+    } else if (char_is_bio(d->character)) {
      GET_CCPOINTS(d->character) = 3;
     } else {
      GET_CCPOINTS(d->character) = 10;
@@ -4004,12 +4004,12 @@ void nanny(struct descriptor_data *d, char *arg)
        write_to_output(d, "keep or forget: \r\n");
        return;
       } else if (!strcasecmp(arg, "keep")) {
-       if (!IS_BIO(d->character) && !IS_MUTANT(d->character)) {
+       if (!char_is_bio(d->character) && !char_is_mutant(d->character)) {
         display_bonus_menu(d->character, 0);
         write_to_output(d, "@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
         write_to_output(d, "@wChoose: ");
         STATE(d) = CON_BONUS;
-       } else if (IS_MUTANT(d->character)) {
+       } else if (char_is_mutant(d->character)) {
         write_to_output(d, "\n@RSelect a mutation. A second will be chosen automatically..\n");
         write_to_output(d, "@D--------------------------------------------------------@n\n");
         write_to_output(d, "@B 1@W) @CExtreme Speed       @c-+30%s to Speed Index @C@n\n", "%");
@@ -4043,15 +4043,15 @@ void nanny(struct descriptor_data *d, char *arg)
         STATE(d) = CON_GENOME;
        }
       } else if (!strcasecmp(arg, "forget")) {
-       if (!IS_BIO(d->character) && !IS_MUTANT(d->character)) {
-        GET_PRACTICES(d->character, GET_CLASS(d->character)) += 200;
+       if (!char_is_bio(d->character) && !char_is_mutant(d->character)) {
+        GET_PRACTICES(d->character, char_get_class(d->character)) += 200;
         SET_BIT_AR(PLR_FLAGS(d->character), PLR_FORGET);
         display_bonus_menu(d->character, 0);
         write_to_output(d, "@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
         write_to_output(d, "@wChoose: ");
         STATE(d) = CON_BONUS;
-       } else if (IS_MUTANT(d->character)) {
-        GET_PRACTICES(d->character, GET_CLASS(d->character)) += 200;
+       } else if (char_is_mutant(d->character)) {
+        GET_PRACTICES(d->character, char_get_class(d->character)) += 200;
         SET_BIT_AR(PLR_FLAGS(d->character), PLR_FORGET);
         write_to_output(d, "\n@RSelect a mutation. A second will be chosen automatically..\n");
         write_to_output(d, "@D--------------------------------------------------------@n\n");
@@ -4070,7 +4070,7 @@ void nanny(struct descriptor_data *d, char *arg)
         d->character->genome[1] = 0;
         STATE(d) = CON_GENOME;
        } else {
-        GET_PRACTICES(d->character, GET_CLASS(d->character)) += 200;
+        GET_PRACTICES(d->character, char_get_class(d->character)) += 200;
         SET_BIT_AR(PLR_FLAGS(d->character), PLR_FORGET);
         write_to_output(d, "\n@RSelect two genomes to be your primary DNA strains.\n");
         write_to_output(d, "@D--------------------------------------------------------@n\n");
@@ -4094,7 +4094,7 @@ void nanny(struct descriptor_data *d, char *arg)
      break;
 
     case CON_GENOME:
-      if (IS_MUTANT(d->character)) {
+      if (char_is_mutant(d->character)) {
         const char *display_genome[11] = { "Unselected", /* 0 */
                                          "Extreme Speed", /* 1 */
                                          "Increased Cell Regen", /* 2 */
@@ -4272,7 +4272,7 @@ void nanny(struct descriptor_data *d, char *arg)
            write_to_output(d, "\r\n@wTo check the bonuses/negatives you have in game use the status command");
            if (GET_CCPOINTS(d->character) > 0) {
             write_to_output(d, "\r\n@GYour left over points were spent on Practice Sessions@w");
-            GET_PRACTICES(d->character, GET_CLASS(d->character)) += (100 * GET_CCPOINTS(d->character));
+            GET_PRACTICES(d->character, char_get_class(d->character)) += (100 * GET_CCPOINTS(d->character));
            }
            write_to_output(d, "\r\n*** PRESS RETURN: ");
            STATE(d) = CON_QROLLSTATS;
@@ -4322,7 +4322,7 @@ void nanny(struct descriptor_data *d, char *arg)
            write_to_output(d, "\r\n@wTo check the bonuses/negatives you have in game use the status command");
            if (GET_CCPOINTS(d->character) > 0) {
             write_to_output(d, "\r\n@GYour left over points were spent on Practice Sessions@w");
-            GET_PRACTICES(d->character, GET_CLASS(d->character)) += (100 * GET_CCPOINTS(d->character));
+            GET_PRACTICES(d->character, char_get_class(d->character)) += (100 * GET_CCPOINTS(d->character));
            }
            write_to_output(d, "\r\n*** PRESS RETURN: ");
            STATE(d) = CON_QROLLSTATS;
@@ -4386,7 +4386,7 @@ void nanny(struct descriptor_data *d, char *arg)
               }
       }
 
-    if (IS_ANDROID(d->character)) {
+    if (char_is_android(d->character)) {
          write_to_output(d, "\r\n@YChoose your model type.\r\n");
          write_to_output(d, "@D---------------------------------------@n\r\n");
          write_to_output(d, "@B1@W)@C Absorbtion Model@n\r\n");
@@ -4537,7 +4537,7 @@ void nanny(struct descriptor_data *d, char *arg)
             GET_DEX(d->character) / 2 + GET_CHA(d->character) / 2;
     total -= 30;
     mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
-           GET_NAME(d->character), TRUE_RACE(d->character),
+           char_get_name(d->character), TRUE_RACE(d->character),
            SENSEI_NAME(d->character));
     break;
 
@@ -4563,7 +4563,7 @@ void nanny(struct descriptor_data *d, char *arg)
             GET_DEX(d->character) / 2 + GET_CHA(d->character) / 2;
     total -= 30;
     mudlog(CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]", 
-           GET_NAME(d->character), TRUE_RACE(d->character),
+           char_get_name(d->character), TRUE_RACE(d->character),
            SENSEI_NAME(d->character));
     mudlog(CMP, ADMLVL_GOD, TRUE, "Str: %2d Dex: %2d Con: %2d Int: %2d "
            "Wis:  %2d Cha: %2d mod total: %2d", GET_STR(d->character), 
@@ -4586,7 +4586,7 @@ void nanny(struct descriptor_data *d, char *arg)
       break;
 
     case '1':
-     if (lockRead(GET_NAME(d->character)) && d->level <= 0) {
+     if (lockRead(char_get_name(d->character)) && d->level <= 0) {
       write_to_output(d, "That character has been locked out for rule violations. Play another character.\n");
       return;
      } else {
@@ -4603,7 +4603,7 @@ void nanny(struct descriptor_data *d, char *arg)
         if(!k->character) {
          continue;
         }
-       if (!IS_NPC(k->character) && GET_LEVEL(k->character) > 3) {
+       if (!char_is_npc(k->character) && char_get_level(k->character) > 3) {
         count += 1;
        }
 
@@ -4635,14 +4635,14 @@ void nanny(struct descriptor_data *d, char *arg)
       }
 
       /*~~~ End PCOUNT and HIGHPCOUNT ~~~*/
-      if (GET_LEVEL(d->character) == 0) {
+      if (char_get_level(d->character) == 0) {
 	do_start(d->character);
 	send_to_char(d->character, "%s", CONFIG_START_MESSG);
       }
-      if (GET_ROOM_VNUM(IN_ROOM(d->character)) <= 1 && GET_LOADROOM(d->character) != NOWHERE) {
+      if (rroom_get_vnum(IN_ROOM(d->character)) <= 1 && GET_LOADROOM(d->character) != NOWHERE) {
        char_from_room(d->character);
        char_to_room(d->character, real_room(real_room(GET_LOADROOM(d->character))));
-      } else if (GET_ROOM_VNUM(IN_ROOM(d->character)) <= 1) {
+      } else if (rroom_get_vnum(IN_ROOM(d->character)) <= 1) {
        char_from_room(d->character);
        char_to_room(d->character, real_room(real_room(300)));
       } else {
@@ -4692,7 +4692,7 @@ void nanny(struct descriptor_data *d, char *arg)
                                    "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc));
        }
       }
-      if(!IS_ANDROID(d->character)) {
+      if(!char_is_android(d->character)) {
        char buf3[MAX_INPUT_LENGTH];
        send_to_sense(0, "You sense someone appear suddenly", d->character);
        sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has suddenly entered your scouter detection range!@n.", 
@@ -4706,7 +4706,7 @@ void nanny(struct descriptor_data *d, char *arg)
       d->has_prompt = 0;
       /* We've updated to 3.1 - some bits might be set wrongly: */
       REMOVE_BIT_AR(PRF_FLAGS(d->character), PRF_BUILDWALK);
-      if (!GET_EQ(d->character, WEAR_WIELD1) && PLR_FLAGGED(d->character, PLR_THANDW)) {
+      if (!GET_EQ(d->character, WEAR_WIELD1) && char_plr_flagged(d->character, PLR_THANDW)) {
        REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_THANDW);
       }
       break;
@@ -4769,7 +4769,7 @@ void nanny(struct descriptor_data *d, char *arg)
 
   case CON_DELCNF2:
     if (!strcmp(arg, "yes") || !strcmp(arg, "YES")) {
-      if (PLR_FLAGGED(d->character, PLR_FROZEN)) {
+      if (char_plr_flagged(d->character, PLR_FROZEN)) {
 	write_to_output(d, "You try to kill yourself, but the ice stops you.\r\n"
 		"Character not deleted.\r\n\r\n");
 	STATE(d) = CON_CLOSE;
@@ -4778,70 +4778,70 @@ void nanny(struct descriptor_data *d, char *arg)
       if (GET_ADMLEVEL(d->character) < ADMLVL_GRGOD)
 	SET_BIT_AR(PLR_FLAGS(d->character), PLR_DELETED);
       save_char(d->character);
-      Crash_delete_file(GET_NAME(d->character));
+      Crash_delete_file(char_get_name(d->character));
       /* If the selfdelete_fastwipe flag is set (in config.c), remove all
          the player's immediately
       */
       if (selfdelete_fastwipe)
-        if ((player_i = get_ptable_by_name(GET_NAME(d->character))) >= 0) {
+        if ((player_i = get_ptable_by_name(char_get_name(d->character))) >= 0) {
           SET_BIT(player_table[player_i].flags, PINDEX_SELFDELETE);
           remove_player(player_i);
         }
-      delete_aliases(GET_NAME(d->character));
-      delete_variables(GET_NAME(d->character));
+      delete_aliases(char_get_name(d->character));
+      delete_variables(char_get_name(d->character));
       delete_inv_backup(d->character);
-      write_to_output(d, "Character '%s' deleted!\r\n", GET_NAME(d->character));
-      if (GET_LEVEL(d->character) > 19 && !RESTRICTED_RACE(d->character) && !CHEAP_RACE(d->character)) {
-       int refund = GET_LEVEL(d->character) / 10;
+      write_to_output(d, "Character '%s' deleted!\r\n", char_get_name(d->character));
+      if (char_get_level(d->character) > 19 && !char_is_restricted_race(d->character) && !char_is_cheap_race(d->character)) {
+       int refund = char_get_level(d->character) / 10;
        refund *= 2;
        write_to_output(d, "@D[@g%d RPP refunded to your account for your character's levels.@D]@n\r\n", refund);
        d->rpp += refund;
       }
-      if (GET_LEVEL(d->character) > 40 && CHEAP_RACE(d->character)) {
-       int refund = GET_LEVEL(d->character) / 10;
+      if (char_get_level(d->character) > 40 && char_is_cheap_race(d->character)) {
+       int refund = char_get_level(d->character) / 10;
        refund *= 2;
        write_to_output(d, "@D[@g%d RPP refunded to your account for your character's levels.@D]@n\r\n", refund);
        d->rpp += refund;
       }
-      if (GET_LEVEL(d->character) <= 40 && CHEAP_RACE(d->character)) {
+      if (char_get_level(d->character) <= 40 && char_is_cheap_race(d->character)) {
        write_to_output(d, "@D[@gSince your race doesn't cost RPP to level before 40 you are refunded 0 RPP.@D]@n\r\n");
       }
       int refund = race_rpp_refund(d->character->race);
-      if(refund && GET_LEVEL(d->character) > 1) {
+      if(refund && char_get_level(d->character) > 1) {
           write_to_output(d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, TRUE_RACE(d->character));
           d->rpp += refund;
       }
-      mudlog(NRM, ADMLVL_GOD, TRUE, "User %s has deleted character %s (lev %d).", d->user, GET_NAME(d->character), GET_LEVEL(d->character));
+      mudlog(NRM, ADMLVL_GOD, TRUE, "User %s has deleted character %s (lev %d).", d->user, char_get_name(d->character), char_get_level(d->character));
       
-      if (!strcasecmp(d->tmp1, GET_NAME(d->character))) {
+      if (!strcasecmp(d->tmp1, char_get_name(d->character))) {
             if (d->tmp1) {
              free(d->tmp1);
              d->tmp1 = NULL;
             }
        d->tmp1 = strdup("Empty");
       }
-      if (!strcasecmp(d->tmp2, GET_NAME(d->character))) {
+      if (!strcasecmp(d->tmp2, char_get_name(d->character))) {
             if (d->tmp2) {
              free(d->tmp2);
              d->tmp2 = NULL;
             }
        d->tmp2 = strdup("Empty");
       }
-      if (!strcasecmp(d->tmp3, GET_NAME(d->character))) {
+      if (!strcasecmp(d->tmp3, char_get_name(d->character))) {
             if (d->tmp3) {
              free(d->tmp3);
              d->tmp3 = NULL;
             }
        d->tmp3 = strdup("Empty");
       }
-      if (!strcasecmp(d->tmp4, GET_NAME(d->character))) {
+      if (!strcasecmp(d->tmp4, char_get_name(d->character))) {
             if (d->tmp4) {
              free(d->tmp4);
              d->tmp4 = NULL;
             }
        d->tmp4 = strdup("Empty");
       }
-      if (!strcasecmp(d->tmp5, GET_NAME(d->character))) {
+      if (!strcasecmp(d->tmp5, char_get_name(d->character))) {
             if (d->tmp5) {
              free(d->tmp5);
              d->tmp5 = NULL;
@@ -4876,7 +4876,7 @@ void nanny(struct descriptor_data *d, char *arg)
 
   default:
     log("SYSERR: Nanny: illegal state of con'ness (%d) for '%s'; closing connection.",
-	STATE(d), d->character ? GET_NAME(d->character) : "<unknown>");
+	STATE(d), d->character ? char_get_name(d->character) : "<unknown>");
     STATE(d) = CON_DISCONNECT;	/* Safest to do. */
     break;
   }

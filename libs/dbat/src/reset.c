@@ -106,7 +106,7 @@ bool prereset_gauntlet_zone(void)
           { 
             /* And put it in the room */ 
             char_to_room(mob, real_room(gauntlet_mobs[i].vroom)); 
-            log("Special Reset: zone %d: Gauntlet mob reset (%d, %s)", RESET_GAUNTLET, gauntlet_mobs[i].vmob, GET_NAME(mob)); 
+            log("Special Reset: zone %d: Gauntlet mob reset (%d, %s)", RESET_GAUNTLET, gauntlet_mobs[i].vmob, char_get_name(mob)); 
 
           } 
         } 

@@ -118,7 +118,7 @@ ACMD(do_insult)
       send_to_char(ch, "Can't hear you!\r\n");
     else {
       if (victim != ch) {
-	send_to_char(ch, "You insult %s.\r\n", GET_NAME(victim));
+	send_to_char(ch, "You insult %s.\r\n", char_get_name(victim));
 
 	switch (rand_number(0, 2)) {
 	case 0:
@@ -447,12 +447,12 @@ ACMD(do_gmote)
         break; 
 
   if ((act_nr = find_action(cmd)) < 0) { 
-    snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s %s@n@D]", GET_ADMLEVEL(ch) < 1 ? ch->desc->user : GET_NAME(ch), argument);
+    snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s %s@n@D]", GET_ADMLEVEL(ch) < 1 ? ch->desc->user : char_get_name(ch), argument);
     act(buf, FALSE, ch, 0, vict, TO_GMOTE);
     return;
   }
 
-  if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SOUNDPROOF)) {
+  if (rroom_flagged(IN_ROOM(ch), ROOM_SOUNDPROOF)) {
     send_to_char(ch, "The walls seem to absorb your actions.\r\n");
     return;
   }

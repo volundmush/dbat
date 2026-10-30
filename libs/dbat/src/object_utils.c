@@ -12,39 +12,39 @@ int wearable_obj(struct obj_data *obj)
 {
   int pass = FALSE;
 
-    if (CAN_WEAR(obj, ITEM_WEAR_FINGER))
+    if (obj_can_wear(obj, ITEM_WEAR_FINGER))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_NECK))
+    if (obj_can_wear(obj, ITEM_WEAR_NECK))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_BODY))
+    if (obj_can_wear(obj, ITEM_WEAR_BODY))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_HEAD))
+    if (obj_can_wear(obj, ITEM_WEAR_HEAD))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_LEGS))
+    if (obj_can_wear(obj, ITEM_WEAR_LEGS))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_FEET))
+    if (obj_can_wear(obj, ITEM_WEAR_FEET))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_HANDS))
+    if (obj_can_wear(obj, ITEM_WEAR_HANDS))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_ARMS))
+    if (obj_can_wear(obj, ITEM_WEAR_ARMS))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_SHIELD))
+    if (obj_can_wear(obj, ITEM_WEAR_SHIELD))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_ABOUT))
+    if (obj_can_wear(obj, ITEM_WEAR_ABOUT))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_WAIST))
+    if (obj_can_wear(obj, ITEM_WEAR_WAIST))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_WRIST))
+    if (obj_can_wear(obj, ITEM_WEAR_WRIST))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_WIELD))
+    if (obj_can_wear(obj, ITEM_WEAR_WIELD))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_EYE))
+    if (obj_can_wear(obj, ITEM_WEAR_EYE))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_PACK))
+    if (obj_can_wear(obj, ITEM_WEAR_PACK))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_SH))
+    if (obj_can_wear(obj, ITEM_WEAR_SH))
      pass = TRUE;
-    if (CAN_WEAR(obj, ITEM_WEAR_EAR))
+    if (obj_can_wear(obj, ITEM_WEAR_EAR))
      pass = TRUE;
   
   if (pass == TRUE)
@@ -55,7 +55,7 @@ int wearable_obj(struct obj_data *obj)
 
 void randomize_eq(struct obj_data *obj)
 {
-    if (wearable_obj(obj) && !OBJ_FLAGGED(obj, ITEM_NORANDOM)) {
+    if (wearable_obj(obj) && !obj_flagged(obj, ITEM_NORANDOM)) {
      int value = 0, slot = 0, roll = rand_number(2, 12), slot1 = 1, slot2 = 1, slot3 = 1, slot4 = 1, slot5 = 1, slot6 = 1;
      int stat = 0;
      int strength = FALSE, wisdom = FALSE, intelligence = FALSE, dexterity = FALSE, speed = FALSE, constitution = FALSE;
@@ -952,4 +952,38 @@ struct obj_data *obj_get_fellow_wall(const struct obj_data *obj) {
 void obj_set_fellow_wall(struct obj_data *obj, struct obj_data *fellow) {
     if (!obj_is_valid(obj)) return;
     obj->fellow_wall = fellow;
+}
+
+/* Formerly macros in object_utils.h. */
+
+bool obj_aff_flagged(const struct obj_data *obj, int flag) {
+    return (IS_SET_AR(GET_OBJ_PERM(obj), (flag)));
+}
+
+bool obj_val_flagged(const struct obj_data *obj, bitvector_t flag) {
+    return (IS_SET(GET_OBJ_VAL((obj), VAL_CONTAINER_FLAGS), (flag)));
+}
+
+bool obj_flagged(const struct obj_data *obj, int flag) {
+    return (IS_SET_AR(GET_OBJ_EXTRA(obj), (flag)));
+}
+
+bool obj_valid_rnum(const struct obj_data *obj) {
+    return (GET_OBJ_RNUM(obj) <= top_of_objt && GET_OBJ_RNUM(obj) != NOTHING);
+}
+
+spec_proc_func obj_get_spec(const struct obj_data *obj) {
+    return (obj_valid_rnum(obj) ? obj_index[GET_OBJ_RNUM(obj)].func : NULL);
+}
+
+bool obj_is_corpse(const struct obj_data *obj) {
+    return (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && GET_OBJ_VAL((obj), VAL_CONTAINER_CORPSE) == 1);
+}
+
+bool obj_can_wear(const struct obj_data *obj, int part) {
+    return (IS_SET_AR(GET_OBJ_WEAR(obj), (part)));
+}
+
+char *obj_sana(const struct obj_data *obj) {
+    return (strchr("aeiouAEIOU", *(obj)->name) ? "an" : "a");
 }

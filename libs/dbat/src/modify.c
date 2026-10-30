@@ -125,7 +125,7 @@ static void smash_numb(char *str)
  */
 void string_write(struct descriptor_data *d, char **writeto, size_t len, long mailto, void *data)
 {
-  if (d->character && !IS_NPC(d->character))
+  if (d->character && !char_is_npc(d->character))
     SET_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
 
   if (using_improved_editor)
@@ -259,7 +259,7 @@ void string_add(struct descriptor_data *d, char *str)
     d->str = NULL;
       d->mail_to = 0;
     d->max_str = 0;
-    if (d->character && !IS_NPC(d->character)) {
+    if (d->character && !char_is_npc(d->character)) {
       REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_MAILING);
 	  REMOVE_BIT_AR(PLR_FLAGS(d->character), PLR_WRITING);
 	}
@@ -272,7 +272,7 @@ static void playing_string_cleanup(struct descriptor_data *d, int action)
   struct board_info *board;
   struct board_msg *fore,*cur,*aft;
   
-  if (PLR_FLAGGED(d->character, PLR_MAILING)) {
+  if (char_plr_flagged(d->character, PLR_MAILING)) {
     if (action == STRINGADD_SAVE && *d->str) {
       store_mail(d->mail_to, GET_IDNUM(d->character), *d->str);
       write_to_output(d, "Message sent!\r\n");
@@ -284,7 +284,7 @@ static void playing_string_cleanup(struct descriptor_data *d, int action)
     }
   }
 
-  if(PLR_FLAGGED(d->character,PLR_WRITING)) {
+  if(char_plr_flagged(d->character,PLR_WRITING)) {
     if (d->mail_to >= BOARD_MAGIC) {
       if (action == STRINGADD_ABORT) {
 	/* find the message */
@@ -423,8 +423,8 @@ ACMD(do_skillset)
    * checked for the -1 above so we are safe here.
    */
   SET_SKILL(vict, skill, value);
-  mudlog(BRF, ADMLVL_IMMORT, TRUE, "skillset: %s changed %s's '%s' to %d.", GET_NAME(ch), GET_NAME(vict), spell_info[skill].name, value);
-  send_to_char(ch, "You change %s's %s to %d.\r\n", GET_NAME(vict), spell_info[skill].name, value);
+  mudlog(BRF, ADMLVL_IMMORT, TRUE, "skillset: %s changed %s's '%s' to %d.", char_get_name(ch), char_get_name(vict), spell_info[skill].name, value);
+  send_to_char(ch, "You change %s's %s to %d.\r\n", char_get_name(vict), spell_info[skill].name, value);
 }
 
 
@@ -449,7 +449,7 @@ static char *next_page(char *str, struct char_data *ch)
       return (NULL); 
 
     /* If we're at the start of the next page, return this fact. */ 
-    else if (line > (GET_PAGE_LENGTH(ch) - (PRF_FLAGGED(ch, PRF_COMPACT) ? 1 : 2)))
+    else if (line > (GET_PAGE_LENGTH(ch) - (char_prf_flagged(ch, PRF_COMPACT) ? 1 : 2)))
       return (str);
 
     /* Check for the begining of an ANSI color code block. */ 

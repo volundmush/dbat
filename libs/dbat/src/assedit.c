@@ -41,7 +41,7 @@ ACMD (do_assedit)
  *buf = '\0';  /* If I run into problems then take this sucker out */
  *buf2 = '\0';
 
- if (IS_NPC(ch))
+ if (char_is_npc(ch))
       return;
 
  for (d = descriptor_list; d; d = d->next) {

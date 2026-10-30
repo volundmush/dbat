@@ -30,14 +30,14 @@ void write_aliases(struct char_data *ch)
   char fn[MAX_STRING_LENGTH];
   struct alias_data *temp;
 
-  get_filename(fn, sizeof(fn), ALIAS_FILE, GET_NAME(ch));
+  get_filename(fn, sizeof(fn), ALIAS_FILE, char_get_name(ch));
   remove(fn);
 
   if (GET_ALIASES(ch) == NULL)
     return;
 
   if ((file = fopen(fn, "w")) == NULL) {
-    log("SYSERR: Couldn't save aliases for %s in '%s': %s", GET_NAME(ch), fn, strerror(errno));
+    log("SYSERR: Couldn't save aliases for %s in '%s': %s", char_get_name(ch), fn, strerror(errno));
     /*  SYSERR_DESC:
      *  This error occurs when the server fails to open the relevant alias
      *  file for writing.  The text at the end of the error should give a
@@ -68,11 +68,11 @@ void read_aliases(struct char_data *ch)
   struct alias_data *t2, *prev = NULL;
   int length;
 
-  get_filename(xbuf, sizeof(xbuf), ALIAS_FILE, GET_NAME(ch));
+  get_filename(xbuf, sizeof(xbuf), ALIAS_FILE, char_get_name(ch));
 
   if ((file = fopen(xbuf, "r")) == NULL) {
     if (errno != ENOENT) {
-      log("SYSERR: Couldn't open alias file '%s' for %s: %s", xbuf, GET_NAME(ch), strerror(errno));
+      log("SYSERR: Couldn't open alias file '%s' for %s: %s", xbuf, char_get_name(ch), strerror(errno));
       /*  SYSERR_DESC:
        *  This error occurs when the server fails to open the relevant alias
        *  file for reading.  The text at the end version should give a valid
@@ -151,7 +151,7 @@ ACMD(do_alias)
   char *repl;
   struct alias_data *a, *temp;
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return;
 
   repl = any_one_arg(argument, arg);
@@ -274,7 +274,7 @@ int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen)
   struct alias_data *a, *tmp;
 
   /* Mobs don't have alaises. */
-  if (IS_NPC(d->character))
+  if (char_is_npc(d->character))
     return (0);
 
   /* bail out immediately if the guy doesn't have any aliases */

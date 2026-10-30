@@ -59,7 +59,7 @@ ACMD(do_oasis_aedit)
   d = ch->desc;
 
   if (!strcasecmp("save", arg)) {
-    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s saves socials.", GET_NAME(ch));
+    mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s saves socials.", char_get_name(ch));
     send_to_char(ch, "Writing social file..\r\n");
     aedit_save_to_disk(d);
     send_to_char(ch, "Done.\r\n");
@@ -97,7 +97,7 @@ ACMD(do_oasis_aedit)
   STATE(d) = CON_AEDIT;
   act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
   SET_BIT_AR(PLR_FLAGS(ch), PLR_WRITING);
-  mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing actions.", GET_NAME(ch));
+  mudlog(CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing actions.", char_get_name(ch));
 }
 
 
@@ -307,7 +307,7 @@ void aedit_parse(struct descriptor_data * d, char *arg) {
        case 'y': case 'Y':
          aedit_save_internally(d);
          mudlog (CMP, ADMLVL_IMPL, TRUE, "OLC: %s edits action %s", 
-                 GET_NAME(d->character), OLC_ACTION(d)->command);
+                 char_get_name(d->character), OLC_ACTION(d)->command);
 
          /* do not free the strings.. just the structure */
          cleanup_olc(d, CLEANUP_STRUCTS);
@@ -725,7 +725,7 @@ ACMD(do_astat)
   int i, real = FALSE;
   char arg[MAX_INPUT_LENGTH];
 
-  if (IS_NPC(ch))
+  if (char_is_npc(ch))
     return;
 
   one_argument(argument, arg);

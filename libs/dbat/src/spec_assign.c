@@ -96,6 +96,6 @@ void assign_rooms(void)
 
   if (CONFIG_DTS_ARE_DUMPS)
     for (i = 0; i <= top_of_world; i++)
-      if (ROOM_FLAGGED(i, ROOM_DEATH))
+      if (rroom_flagged(i, ROOM_DEATH))
 	world[i].func = dump;
 }

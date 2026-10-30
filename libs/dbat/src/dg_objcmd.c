@@ -75,7 +75,7 @@ void obj_log(obj_data *obj, const char *format, ...)
   va_list args;
   char output[MAX_STRING_LENGTH];
 
-  snprintf(output, sizeof(output), "Obj (%s, VNum %d):: %s", obj->short_description, GET_OBJ_VNUM(obj), format);
+  snprintf(output, sizeof(output), "Obj (%s, VNum %d):: %s", obj->short_description, obj_get_vnum(obj), format);
 
   va_start(args, format);
   script_vlog(output, args);
@@ -132,11 +132,11 @@ room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr)
         return NOWHERE;
 
     /* a room has been found.  Check for permission */
-    if (ROOM_FLAGGED(location, ROOM_GODROOM) ||
+    if (rroom_flagged(location, ROOM_GODROOM) ||
 #ifdef ROOM_IMPROOM
-        ROOM_FLAGGED(location, ROOM_IMPROOM) ||
+        rroom_flagged(location, ROOM_IMPROOM) ||
 #endif
-        ROOM_FLAGGED(location, ROOM_PRIVATE))
+        rroom_flagged(location, ROOM_PRIVATE))
         return NOWHERE;
 
     return location;
@@ -263,7 +263,7 @@ OCMD(do_osend)
          char buf[MAX_STRING_LENGTH];
  
          sprintf(buf, msg);
-         search_replace(buf, GET_NAME(ch), "$n");
+         search_replace(buf, char_get_name(ch), "$n");
          act(buf, TRUE, ch, 0, 0, TO_ROOM);
          /*sub_write(msg, ch, TRUE, TO_ROOM);*/
         }
@@ -381,7 +381,7 @@ OCMD(do_opurge)
       if ((rm = obj_room(obj)) != NOWHERE) {
         for (ch = world[rm].people; ch; ch = next_ch ) {
            next_ch = ch->next_in_room;
-           if (IS_NPC(ch))
+           if (char_is_npc(ch))
              extract_char(ch);
         }
 
@@ -408,7 +408,7 @@ OCMD(do_opurge)
       return;
     }
 
-    if (!IS_NPC(ch)) {
+    if (!char_is_npc(ch)) {
       obj_log(obj, "opurge: purging a PC");
       return;
     }
@@ -801,7 +801,7 @@ OCMD(do_oat)
     return;
   }
 
-  if (!(object = read_object(GET_OBJ_VNUM(obj), VIRTUAL)))
+  if (!(object = read_object(obj_get_vnum(obj), VIRTUAL)))
     return;
 
   add_unique_id(object);
