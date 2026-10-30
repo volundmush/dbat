@@ -117,7 +117,7 @@ char *CAP(char *txt)
   int i;
   for (i = 0; txt[i] != '\0' && (txt[i] == '@' && IS_COLOR_CHAR(txt[i + 1])); i += 2);
 
-  txt[i] = UPPER(txt[i]);
+  txt[i] = toupper(txt[i]);
   return (txt);
 }
 
@@ -128,7 +128,7 @@ char *strlwr(char *s)
       char *p; 
 
       for (p = s; *p; ++p) 
-         *p = LOWER(*p); 
+         *p = tolower(*p); 
    } 
    return s; 
 }
@@ -156,7 +156,7 @@ char *one_argument(char *argument, char *first_arg)
 
     first_arg = begin;
     while (*argument && !isspace(*argument)) {
-      *(first_arg++) = LOWER(*argument);
+      *(first_arg++) = tolower(*argument);
       argument++;
     }
 
@@ -180,13 +180,13 @@ char *one_word(char *argument, char *first_arg)
     if (*argument == '\"') {
       argument++;
       while (*argument && *argument != '\"') {
-        *(first_arg++) = LOWER(*argument);
+        *(first_arg++) = tolower(*argument);
         argument++;
       }
       argument++;
     } else {
       while (*argument && !isspace(*argument)) {
-        *(first_arg++) = LOWER(*argument);
+        *(first_arg++) = tolower(*argument);
         argument++;
       }
     }
@@ -202,7 +202,7 @@ char *any_one_arg(char *argument, char *first_arg)
   skip_spaces(&argument);
 
   while (*argument && !isspace(*argument)) {
-    *(first_arg++) = LOWER(*argument);
+    *(first_arg++) = tolower(*argument);
     argument++;
   }
 
@@ -235,7 +235,7 @@ int is_abbrev(const char *arg1, const char *arg2)
     return (0);
 
   for (; *arg1 && *arg2; arg1++, arg2++)
-    if (LOWER(*arg1) != LOWER(*arg2))
+    if (tolower(*arg1) != tolower(*arg2))
       return (0);
 
   if (!*arg1)
@@ -318,7 +318,7 @@ int search_block(char *arg, const char **list, int exact)
 
   /* Make into lower case, and get length of string */
   for (l = 0; *(arg + l); l++)
-    *(arg + l) = LOWER(*(arg + l));
+    *(arg + l) = tolower(*(arg + l));
 
   if (exact) {
     for (i = 0; **(list + i) != '\n'; i++)

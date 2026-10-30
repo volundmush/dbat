@@ -101,9 +101,9 @@ int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_nam
 
   strlcpy(name, orig_name, sizeof(name));
   for (ptr = name; *ptr; ptr++)
-    *ptr = LOWER(*ptr);
+    *ptr = tolower(*ptr);
 
-  switch (LOWER(*name)) {
+  switch (tolower(*name)) {
   case 'a':  case 'b':  case 'c':  case 'd':  case 'e':
     middle = "A-E";
     break;

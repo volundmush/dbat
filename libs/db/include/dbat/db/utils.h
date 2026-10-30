@@ -5,9 +5,6 @@
 #define YESNO(a) ((a) ? "YES" : "NO")
 #define ONOFF(a) ((a) ? "ON" : "OFF")
 
-#define LOWER(c)   (((c)>='A'  && (c) <= 'Z') ? ((c)+('a'-'A')) : (c))
-#define UPPER(c)   (((c)>='a'  && (c) <= 'z') ? ((c)+('A'-'a')) : (c) )
-
 #define ISNEWL(ch) ((ch) == '\n' || (ch) == '\r') 
 
 /* See also: ANA, SANA */
@@ -35,15 +32,8 @@ static inline double fixnan(double val) {
     return (val != val) ? 0.0 : val;  // NaN check
 }
 
-#define YESNO(a) ((a) ? "YES" : "NO")
-#define ONOFF(a) ((a) ? "ON" : "OFF")
-
 
 /* memory utils **********************************************************/
-
-
-
-
 
 /*
  * the source previously used the same code in many places to remove an item

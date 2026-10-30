@@ -566,7 +566,7 @@ in the vault (vnum: 453) now and then. you can just use
       /* set str to some 'non-text' first */
       *str = '\x1';
 
-      switch (LOWER(*field)) {
+      switch (tolower(*field)) {
         case 'a':
           if (!strcasecmp(field, "aaaaa")) {
                strcpy(str, "0");
@@ -1145,7 +1145,7 @@ in the vault (vnum: 453) now and then. you can just use
       if (text_processed(field, subfield, vd, str, slen)) return;
 
       *str = '\x1';
-      switch (LOWER(*field)) {
+      switch (tolower(*field)) {
         case 'a':
           if (!strcasecmp(field, "affects")) {
             if (subfield && *subfield) {

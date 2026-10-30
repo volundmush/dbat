@@ -2159,7 +2159,7 @@ void nanny(struct descriptor_data *d, char *arg)
     break;
 
   case CON_NAME_CNFRM:		/* wait for conf. of new name    */
-    if (UPPER(*arg) == 'Y') {
+    if (toupper(*arg) == 'Y') {
       if (isbanned(d->host) >= BAN_NEW) {
 	mudlog(NRM, ADMLVL_GOD, TRUE, "Request for new char %s denied from [%s] (siteban)", GET_PC_NAME(d->character), d->host);
 	write_to_output(d, "Sorry, new characters are not allowed from your site!\r\n");
