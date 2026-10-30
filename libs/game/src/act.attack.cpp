@@ -275,7 +275,7 @@ ACMD(do_breath)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
   prob += 15;
 
   if(!tech_handle_zanzoken(ch, vict, "breath")) {
@@ -473,7 +473,7 @@ ACMD(do_ram)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
   
   prob -= 5;
 
@@ -650,7 +650,7 @@ ACMD(do_strike)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
   
   prob += 5;
 
@@ -760,7 +760,7 @@ ACMD(do_strike)
      break;
    }
    pcost(ch, 0, stcost);
-   decCurST(vict, dmg * .25);
+   decCurST(vict, dmg * .25, 0);
    return;
   }
  } else if (obj) {
@@ -967,7 +967,7 @@ ACMD(do_sunder)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Sundering Force")) {
       pcost(ch, attperc, 0);
@@ -1202,7 +1202,7 @@ ACMD(do_zen)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Zen Blade Strike")) {
       if (GET_SKILL_PERF(ch, SKILL_ZEN) == 3 && attperc > minimum) {
@@ -1336,7 +1336,7 @@ ACMD(do_zen)
         act("@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@rYou have your head cut off by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        decCurKI(vict, getMaxKI(vict) / 40);
+        decCurKI(vict, getMaxKI(vict) / 40, 0);
         hurt(0, 0, ch, vict, NULL, dmg, 1);
        }
        else {
@@ -1530,7 +1530,7 @@ ACMD(do_malice)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
    if (time_info.hours <= 15 || time_info.hours > 22) {
     prob += 5;
@@ -1914,7 +1914,7 @@ ACMD(do_head)
 
   handle_defense(vict, &pry, &blk, &dge);
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "headbutt")) {
       COMBO(ch) = -1;
@@ -2138,7 +2138,7 @@ ACMD(do_bash)
 
   handle_defense(vict, &pry, &blk, &dge);
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "bash")) {
       COMBO(ch) = -1;
@@ -2360,7 +2360,7 @@ ACMD(do_seishou)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Seishou Enko")) {
       pcost(ch, attperc / 4, 0);
@@ -2677,7 +2677,7 @@ ACMD(do_throw)
       act("You throw $p at $N@n, but it melts before touching $M!", TRUE, ch, obj, vict, TO_CHAR);
       act("$n@n throws $p at $N@n, but it melts before touching $M!", TRUE, ch, obj, vict, TO_NOTVICT);
       act("$n@n throws $p at you, but it melts before touching you!", TRUE, ch, obj, vict, TO_VICT);
-      decCurST(ch, ((GET_MAX_HIT(ch) / 100) + GET_OBJ_WEIGHT(obj)));
+      decCurST(ch, ((GET_MAX_HIT(ch) / 100) + GET_OBJ_WEIGHT(obj)), 0);
       extract_obj(obj);
       return;
      } if (perc2 > 0) {
@@ -2689,7 +2689,7 @@ ACMD(do_throw)
       act("$n@n throws $p at $N@n, but unfortunatly misses!", TRUE, ch, obj, vict, TO_NOTVICT);
       act("$n@n throws $p at you, but thankfully misses you.", TRUE, ch, obj, vict, TO_VICT);
      }
-        decCurST(ch, ((GET_MAX_HIT(ch) / 100) + GET_OBJ_WEIGHT(obj)));
+        decCurST(ch, ((GET_MAX_HIT(ch) / 100) + GET_OBJ_WEIGHT(obj)), 0);
      if (!OBJ_FLAGGED(obj, ITEM_UNBREAKABLE)) {
       GET_OBJ_VAL(obj, VAL_ALL_HEALTH) -= odam / 2;
      }
@@ -2697,7 +2697,7 @@ ACMD(do_throw)
       hurt(0, 0, ch, vict, NULL, 0, 0);
       obj_from_char(obj);
       obj_to_room(obj, IN_ROOM(vict));
-        decCurST(ch, ((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj)));
+        decCurST(ch, ((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj)), 0);
       if (!GET_EQ(ch, WEAR_WIELD1) && !GET_EQ(ch, WEAR_WIELD2))
        perc += 20;
       if (perc + GET_CHA(ch) >= chance + penalty && multithrow == TRUE && GET_HIT(vict) > 1 && ch->throws > 1) {
@@ -2721,9 +2721,9 @@ ACMD(do_throw)
       act("$n@n charges $p with the energy in $s fingertips! As it begins to @Yglow a bright hot @Rred@n $e throws $p at $N@n full speed, and watches it smash into $M!", TRUE, ch, obj, vict, TO_NOTVICT);
       act("$n@n charges $p with the energy in $s fingertips! As it begins to @Yglow a bright hot @Rred@n $e throws $p at YOU@n full speed, and watches it smash into YOU!!", TRUE, ch, obj, vict, TO_VICT);
       if (GET_MAX_MANA(ch) * 0.02 > 0) {
-          decCurKI(ch, getMaxKI(ch) * .02);
+          decCurKI(ch, getMaxKI(ch) * .02, 0);
       } else {
-          decCurKI(ch, 1);
+          decCurKI(ch, 1, 0);
       }
       improve_skill(ch, SKILL_ENERGIZE, 0);
      } else if (wtype == 0) {
@@ -2772,7 +2772,7 @@ ACMD(do_throw)
       }
      if (OBJ_FLAGGED(obj, ITEM_ICE)) {
       if (!IS_ANDROID(vict) && !IS_ICER(vict)) {
-          decCurST(vict, (getMaxST(vict) * .005) + GET_OBJ_WEIGHT(obj));
+          decCurST(vict, (getMaxST(vict) * .005) + GET_OBJ_WEIGHT(obj), 0);
        act("@mYou lose some stamina to the @ccold@m!@n", TRUE, ch, 0, vict, TO_VICT);
        act("@C$N@m loses some stamina to the @ccold@m!@n", TRUE, ch, 0, vict, TO_CHAR);
        act("@C$N@m loses some stamina to the @ccold@m!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -2799,7 +2799,7 @@ ACMD(do_throw)
     obj_from_char(obj);
     obj_to_room(obj, IN_ROOM(vict));
 
-    decCurST(ch, ((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj)));
+    decCurST(ch, ((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj)), 0);
     if (!GET_EQ(ch, WEAR_WIELD1) && !GET_EQ(ch, WEAR_WIELD2))
      perc += 12;
     if (perc + GET_CHA(ch) >= chance + penalty && multithrow == TRUE && GET_HIT(vict) > 1 && ch->throws > 1) {
@@ -2846,7 +2846,7 @@ ACMD(do_throw)
     act("@C$n@W tries to @RGRAB@W @c$N@W and @RTHROW@W $M, but $E manages to dodge the attempt!@n", TRUE, ch, 0, tch, TO_NOTVICT);
     hurt(0, 0, ch, tch, NULL, 0, 0);
     handle_cooldown(ch, 5);
-    decCurST(ch, (GET_MAX_HIT(ch) / 200) + GET_PC_WEIGHT(tch));
+    decCurST(ch, (GET_MAX_HIT(ch) / 200) + GET_PC_WEIGHT(tch), 0);
     return;
    }
    else {
@@ -2874,7 +2874,7 @@ ACMD(do_throw)
       act("@WThrown through the air, @C$n@W flies at YOU, but the throw is a miss! @C$n@W recovers $s bearings a moment later!@n", TRUE, tch, 0, vict, TO_VICT);
       act("@WThrown through the air, @C$n@W flies at @c$N@W, but the throw is a miss! @C$n@W recovers $s bearingsa moment later!@n", TRUE, tch, 0, vict, TO_NOTVICT);
      }
-     decCurST(ch, ((GET_MAX_HIT(ch) / 100) + GET_PC_WEIGHT(tch)));
+     decCurST(ch, ((GET_MAX_HIT(ch) / 100) + GET_PC_WEIGHT(tch)), 0);
       act("@W--@R$N@W--@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@W--@R$N@W--@n", TRUE, tch, 0, vict, TO_CHAR);
       act("@W--@RYOU@W--@n", TRUE, vict, 0, 0, TO_CHAR);
@@ -2906,7 +2906,7 @@ ACMD(do_throw)
       act("@W--@RYOU@W--@n", TRUE, tch, 0, 0, TO_CHAR);
       hurt(0, 0, ch, tch, NULL, damage, 0);
     }
-    decCurST(ch, ((GET_MAX_HIT(ch) / 200) + GET_PC_WEIGHT(tch)));
+    decCurST(ch, ((GET_MAX_HIT(ch) / 200) + GET_PC_WEIGHT(tch)), 0);
 	WAIT_STATE(ch, PULSE_3SEC);
    }
  } /* End throwing character. */
@@ -3121,7 +3121,7 @@ ACMD(do_razor)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Water Razor")) {
       pcost(ch, attperc, 0);
@@ -3220,8 +3220,8 @@ ACMD(do_razor)
       reduction = reduction - GET_HIT(vict);
 
       if ((!IS_NPC(vict) && !AFF_FLAGGED(vict, AFF_SPIRIT)) || (IS_NPC(vict) && GET_HIT(vict) > 0)) {
-          decCurKI(vict, reduction);
-          decCurST(vict, reduction);
+          decCurKI(vict, reduction, 0);
+          decCurST(vict, reduction, 0);
       }
      }
     return;
@@ -3319,7 +3319,7 @@ ACMD(do_spike)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "attack")) {
       if (GET_SKILL_PERF(ch, SKILL_WSPIKE) == 3 && attperc > minimum) {
@@ -3328,11 +3328,11 @@ ACMD(do_spike)
           pcost(ch, attperc, 0);
       }
       if (GET_SKILL(ch, SKILL_WSPIKE) >= 100) {
-          incCurKI(ch, (getMaxKI(ch) * attperc) * .3);
+          incCurKI(ch, (getMaxKI(ch) * attperc) * .3, true);
       } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 60) {
-          incCurKI(ch, (getMaxKI(ch) * attperc) * .1);
+          incCurKI(ch, (getMaxKI(ch) * attperc) * .1, true);
       } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 40) {
-          incCurKI(ch, (getMaxKI(ch) * attperc) * .05);
+          incCurKI(ch, (getMaxKI(ch) * attperc) * .05, true);
       }
       pcost(vict, 0, GET_MAX_HIT(vict) / 200);
       if (GET_SKILL_PERF(ch, SKILL_WSPIKE) == 3) {
@@ -3354,11 +3354,11 @@ ACMD(do_spike)
        pcost(ch, attperc, 0);
       }
         if (GET_SKILL(ch, SKILL_WSPIKE) >= 100) {
-            incCurKI(ch, (getMaxKI(ch) * attperc) * .3);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * .3, true);
         } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 60) {
-            incCurKI(ch, (getMaxKI(ch) * attperc) * .1);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * .1, true);
         } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 40) {
-            incCurKI(ch, (getMaxKI(ch) * attperc) * .05);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * .05, true);
         }
      dmg = damtype(ch, 10, skill, attperc);
      dmg /= 4;
@@ -3387,11 +3387,11 @@ ACMD(do_spike)
        pcost(ch, attperc, 0);
       }
         if (GET_SKILL(ch, SKILL_WSPIKE) >= 100) {
-            incCurKI(ch, (getMaxKI(ch) * attperc) * .3);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * .3, true);
         } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 60) {
-            incCurKI(ch, (getMaxKI(ch) * attperc) * .1);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * .1, true);
         } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 40) {
-            incCurKI(ch, (getMaxKI(ch) * attperc) * .05);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * .05, true);
         }
 	 if (GET_SKILL_PERF(ch, SKILL_WSPIKE) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
@@ -3409,11 +3409,11 @@ ACMD(do_spike)
        pcost(ch, attperc, 0);
       }
         if (GET_SKILL(ch, SKILL_WSPIKE) >= 100) {
-            incCurKI(ch, (getMaxKI(ch) * attperc) * .3);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * .3, true);
         } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 60) {
-            incCurKI(ch, (getMaxKI(ch) * attperc) * .1);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * .1, true);
         } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 40) {
-            incCurKI(ch, (getMaxKI(ch) * attperc) * .05);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * .05, true);
         }
 	 if (GET_SKILL_PERF(ch, SKILL_WSPIKE) == 3) {
 		WAIT_STATE(ch, PULSE_3SEC);
@@ -3432,11 +3432,11 @@ ACMD(do_spike)
        pcost(ch, attperc, 0);
       }
        if (GET_SKILL(ch, SKILL_WSPIKE) >= 100) {
-           incCurKI(ch, (getMaxKI(ch) * attperc) * .3);
+           incCurKI(ch, (getMaxKI(ch) * attperc) * .3, true);
        } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 60) {
-           incCurKI(ch, (getMaxKI(ch) * attperc) * .1);
+           incCurKI(ch, (getMaxKI(ch) * attperc) * .1, true);
        } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 40) {
-           incCurKI(ch, (getMaxKI(ch) * attperc) * .05);
+           incCurKI(ch, (getMaxKI(ch) * attperc) * .05, true);
        }
    }
    if (GET_SKILL_PERF(ch, SKILL_WSPIKE) == 3) {
@@ -3529,11 +3529,11 @@ ACMD(do_spike)
        pcost(ch, attperc, 0);
       }
       if (GET_SKILL(ch, SKILL_WSPIKE) >= 100) {
-          incCurKI(ch, (getMaxKI(ch) * attperc) * .3);
+          incCurKI(ch, (getMaxKI(ch) * attperc) * .3, true);
       } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 60) {
-          incCurKI(ch, (getMaxKI(ch) * attperc) * .1);
+          incCurKI(ch, (getMaxKI(ch) * attperc) * .1, true);
       } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 40) {
-          incCurKI(ch, (getMaxKI(ch) * attperc) * .05);
+          incCurKI(ch, (getMaxKI(ch) * attperc) * .05, true);
       }
     return;
   }
@@ -3556,11 +3556,11 @@ ACMD(do_spike)
    hurt(0, 0, ch, NULL, obj, dmg, 0);
    pcost(ch, attperc, 0);
      if (GET_SKILL(ch, SKILL_WSPIKE) >= 100) {
-         incCurKI(ch, (getMaxKI(ch) * attperc) * .3);
+         incCurKI(ch, (getMaxKI(ch) * attperc) * .3, true);
      } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 60) {
-         incCurKI(ch, (getMaxKI(ch) * attperc) * .1);
+         incCurKI(ch, (getMaxKI(ch) * attperc) * .1, true);
      } else if (GET_SKILL(ch, SKILL_WSPIKE) >= 40) {
-         incCurKI(ch, (getMaxKI(ch) * attperc) * .05);
+         incCurKI(ch, (getMaxKI(ch) * attperc) * .05, true);
      }
  }
  else {
@@ -3639,7 +3639,7 @@ ACMD(do_koteiru)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Koteiru Bakuha")) {
       pcost(ch, attperc, 0);
@@ -3841,7 +3841,7 @@ ACMD(do_hspiral)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Hell Spiral")) {
       pcost(ch, attperc, 0);
@@ -4085,7 +4085,7 @@ ACMD(do_breaker)
   handle_defense(vict, &pry, &blk, &dge);
 
   prob -= avo;
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Star Breaker")) {
       pcost(ch, attperc, 0);

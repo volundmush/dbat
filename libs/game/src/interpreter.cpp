@@ -3983,7 +3983,7 @@ void nanny(struct descriptor_data *d, char *arg)
        write_to_output(d, "keep or forget: \r\n");
        STATE(d) = CON_SKILLS;
      } else if (penalty == TRUE) {
-         loseBasePLPercent(d->character, .2);
+         loseBasePLPercent(d->character, .2, false);
 
         switch (roll) {
          case 1:

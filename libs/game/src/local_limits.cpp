@@ -123,7 +123,7 @@ static void barrier_shed(struct char_data *ch)
 
   if (recharge > 0 && (getCurKI(ch)) < GET_MAX_MANA(ch))
   {
-    incCurKI(ch, recharge);
+    incCurKI(ch, recharge, true);
     send_to_char(ch, "@CYou reabsorb some of the energy lost into your body!@n\r\n");
   }
 }
@@ -1222,11 +1222,11 @@ void gain_exp(struct char_data *ch, int64_t gain)
       {
         if (IS_HUMAN(ch))
         {
-          gainBasePL(ch, diff * 0.8);
+          gainBasePL(ch, diff * 0.8, false);
         }
         else
         {
-          gainBasePL(ch, diff);
+          gainBasePL(ch, diff, false);
         }
         send_to_char(ch, "@D[@G+@Y%s @RPL@D]@n ", add_commas(diff));
       }
@@ -1234,17 +1234,17 @@ void gain_exp(struct char_data *ch, int64_t gain)
       {
         if (IS_HALFBREED(ch))
         {
-          gainBaseST(ch, diff * 0.85);
+          gainBaseST(ch, diff * 0.85, false);
         }
         else
         {
-          gainBaseST(ch, diff);
+          gainBaseST(ch, diff, false);
         }
         send_to_char(ch, "@D[@G+@Y%s @gSTA@D]@n ", add_commas(diff));
       }
       if (rand_number(1, 5) >= 2)
       {
-        gainBaseKI(ch, diff);
+        gainBaseKI(ch, diff, false);
         send_to_char(ch, "@D[@G+@Y%s @CKi@D]@n", add_commas(diff));
       }
     }
@@ -1784,7 +1784,7 @@ static void point_update_characters(void)
         if ((getCurKI(i)) > (mana_gain(i) + getPercentOfMaxKI(i, .05)))
         {
           send_to_char(i, "You send more energy into your aura to keep the light active.\r\n");
-          decCurKI(i, mana_gain(i) + getPercentOfMaxKI(i, .05));
+          decCurKI(i, mana_gain(i) + getPercentOfMaxKI(i, .05), 0);
         }
         else
         {
@@ -1831,9 +1831,9 @@ static void point_update_characters(void)
         }
       }
 
-      incCurHealth(i, hit_gain(i));
-      incCurST(i, move_gain(i));
-      incCurKI(i, mana_gain(i));
+      incCurHealth(i, hit_gain(i), true);
+      incCurST(i, move_gain(i), true);
+      incCurKI(i, mana_gain(i), true);
 
       if (!IS_NPC(i))
       {
@@ -1846,11 +1846,11 @@ static void point_update_characters(void)
         {
           act("@bYou swim in place.@n", TRUE, i, 0, 0, TO_CHAR);
           act("@C$n@b swims in place.@n", TRUE, i, 0, 0, TO_ROOM);
-          decCurST(i, getCurCarriedWeight(i));
+          decCurST(i, getCurCarriedWeight(i), 0);
         }
         else
         {
-          decCurST(i, getCurCarriedWeight(i));
+          decCurST(i, getCurCarriedWeight(i), 0);
           act("@RYou are drowning!@n", TRUE, i, 0, 0, TO_CHAR);
           act("@C$n@b gulps water as $e struggles to stay above the water line.@n", TRUE, i, 0, 0, TO_ROOM);
           if (GET_HIT(i) - ((getEffMaxPL(i)) / 3) <= 0)
@@ -1861,7 +1861,7 @@ static void point_update_characters(void)
           }
           else
           {
-            decCurHealth(i, (getEffMaxPL(i)) / 3);
+            decCurHealth(i, (getEffMaxPL(i)) / 3, 0);
           }
         }
       }
@@ -1870,14 +1870,14 @@ static void point_update_characters(void)
         if (((getCurKI(i)) - mana_gain(i)) > GET_MAX_MANA(i) / 200)
         {
           send_to_char(i, "Your ki holds an atmosphere around you.\r\n");
-          decCurKI(i, mana_gain(i) + getPercentOfMaxKI(i, .005));
+          decCurKI(i, mana_gain(i) + getPercentOfMaxKI(i, .005), 0);
         }
         else
         {
           if ((GET_HIT(i) - hit_gain(i)) > (getEffMaxPL(i)) * 0.05)
           {
             send_to_char(i, "You struggle trying to hold your breath!\r\n");
-            decCurHealth(i, hit_gain(i) + getPercentOfMaxHealth(i, .05));
+            decCurHealth(i, hit_gain(i) + getPercentOfMaxHealth(i, .05), 0);
           }
           else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20)
           {
@@ -1892,14 +1892,14 @@ static void point_update_characters(void)
         if (((getCurKI(i)) - mana_gain(i)) > GET_MAX_MANA(i) * 0.005)
         {
           send_to_char(i, "Your ki holds an atmosphere around you.\r\n");
-          decCurKI(i, mana_gain(i) + getPercentOfMaxKI(i, .005));
+          decCurKI(i, mana_gain(i) + getPercentOfMaxKI(i, .005), 0);
         }
         else
         {
           if ((GET_HIT(i) - hit_gain(i)) > (getEffMaxPL(i)) * 0.05)
           {
             send_to_char(i, "You struggle trying to hold your breath!\r\n");
-            decCurHealth(i, hit_gain(i) + getPercentOfMaxHealth(i, .05));
+            decCurHealth(i, hit_gain(i) + getPercentOfMaxHealth(i, .05), 0);
           }
           else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20)
           {
@@ -1918,7 +1918,7 @@ static void point_update_characters(void)
         {
           do_fly(i, 0, 0, 0);
         }
-        decCurHealthPercent(i, .05);
+        decCurHealthPercent(i, .05, 0);
         if (GET_HIT(i) < 0)
         {
           act("@rYou have burned to death!@n", TRUE, i, 0, 0, TO_CHAR);
@@ -1968,7 +1968,7 @@ static void point_update_characters(void)
           {
             if (!IS_ANDROID(i) && !FIGHTING(i) && GET_SUPPRESS(i) <= 0 && GET_HIT(i) != (getEffMaxPL(i)))
             {
-              incCurLFPercent(i, .15);
+              incCurLFPercent(i, .15, true);
               send_to_char(i, "@CYou feel more lively.@n\r\n");
             }
           }
@@ -2009,7 +2009,7 @@ static void point_update_characters(void)
         {
           send_to_char(i, "You puke as the poison burns through your blood.\r\n");
           act("$n shivers and then pukes.", TRUE, i, 0, 0, TO_ROOM);
-          decCurHealth(i, getEffMaxPL(i) * cost);
+          decCurHealth(i, getEffMaxPL(i) * cost, 0);
         }
         else
         {

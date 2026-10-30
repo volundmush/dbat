@@ -514,9 +514,9 @@ void do_start(struct char_data *ch)
 
   if (IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_SENSEM)) {
    SET_SKILL(ch, SKILL_SENSE, 100);
-   gainBasePL(ch, rand_number(400, 500));
-   gainBaseST(ch, rand_number(400, 500));
-   gainBaseKI(ch, rand_number(400, 500));
+   gainBasePL(ch, rand_number(400, 500), false);
+   gainBaseST(ch, rand_number(400, 500), false);
+   gainBaseKI(ch, rand_number(400, 500), false);
   }
 
      if (ch->real_abils.str > 20) {
@@ -565,7 +565,7 @@ void do_start(struct char_data *ch)
      SET_BIT_AR(PLR_FLAGS(ch), PLR_LSSJ);
      write_to_output(ch->desc, "@GYou were one of the few born a Legendary Super Saiyan!@n\r\n");
   }
-  restoreVitals(ch);
+  restoreVitals(ch, true);
 
   ch->player_specials->olc_zone = NOWHERE;
   save_char(ch);
@@ -1060,7 +1060,7 @@ void advance_level(struct char_data *ch, int whichclass)
   if (GET_LEVEL(ch) > 1) {
     /* blah */
   } else {
-      gainBasePL(ch, rand_number(1, 20));
+      gainBasePL(ch, rand_number(1, 20), false);
       ch->basepl = MAX(ch->basepl, 250L);
       ch->baseki = MAX(ch->baseki, 250L);
       ch->basest = MAX(ch->basest, 250L);

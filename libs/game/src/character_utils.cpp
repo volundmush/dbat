@@ -190,7 +190,10 @@ bool in_northran(char_data *ch) {
     return in_room_range(ch, 17900, 17999);
 }
 
-static std::map<int, uint16_t> grav_threshold = {
+static const struct {
+    int grav;
+    int64_t threshold;
+} grav_threshold[] = {
         {10, 5000},
         {20, 20000},
         {30, 50000},
@@ -206,13 +209,22 @@ static std::map<int, uint16_t> grav_threshold = {
         {10000, 200000000}
 };
 
+/* NOTE: truncated to uint16_t to match the original std::map<int, uint16_t>;
+ * unknown gravities return 0 like std::map::operator[] did. */
+static uint16_t grav_threshold_for(int grav) {
+    for (size_t i = 0; i < sizeof(grav_threshold) / sizeof(grav_threshold[0]); i++)
+        if (grav_threshold[i].grav == grav)
+            return (uint16_t)grav_threshold[i].threshold;
+    return 0;
+}
+
 bool can_tolerate_gravity(char_data *ch, int grav) {
     if(IS_NPC(ch)) return true;
     int tolerance = 0;
     tolerance = MAX(tolerance, sensei_grav_tolerance(ch->chclass));
     if(tolerance >= grav)
         return true;
-    return getMaxPL(ch) >= grav_threshold[grav];
+    return getMaxPL(ch) >= grav_threshold_for(grav);
 }
 
 int calcTier(char_data *ch) {
@@ -228,10 +240,6 @@ int64_t calc_soft_cap(char_data *ch) {
     int tier = calcTier(ch);
     auto softmap = get_race(ch->race)->getSoftMap(ch);
     return ch->level * softmap[tier];
-}
-
-bool is_soft_cap(char_data *ch, int64_t type) {
-    return is_soft_cap(ch, type, 1.0);
 }
 
 bool is_soft_cap(char_data *ch, int64_t type, long double mult) {
@@ -295,11 +303,11 @@ int calcGravCost(char_data *ch, int64_t num) {
             send_to_char(ch, "You sweat bullets straining against the current gravity.\r\n");
         }
         if ((getCurST(ch)) > cost) {
-            decCurST(ch, cost);
+            decCurST(ch, cost, 0);
             return 1;
         }
         else {
-            decCurST(ch, cost);
+            decCurST(ch, cost, 0);
             return 0;
         }
     }
@@ -787,23 +795,24 @@ void cureStatusPoison(char_data *ch, bool announce) {
     affect_from_char(ch, SPELL_POISON);
 }
 
-static const std::map<int, std::string> limb_names = {
-        {1, "right arm"},
-        {2, "left arm"},
-        {3, "right leg"},
-        {4, "left leg"}
+static const char *limb_names[] = {
+        NULL,
+        "right arm",
+        "left arm",
+        "right leg",
+        "left leg"
 };
 
 void restoreLimbs(char_data *ch, bool announce) {
 
-    for(const auto& l : limb_names) {
+    for(int l = 1; l <= 4; l++) {
         if(announce) {
-            if(GET_LIMBCOND(ch, l.first) <= 0)
-                send_to_char(ch, "Your %s grows back!\r\n", l.second.c_str());
-            else if (GET_LIMBCOND(ch, l.first) < 50)
-                send_to_char(ch, "Your %s is no longer broken!\r\n", l.second.c_str());
+            if(GET_LIMBCOND(ch, l) <= 0)
+                send_to_char(ch, "Your %s grows back!\r\n", limb_names[l]);
+            else if (GET_LIMBCOND(ch, l) < 50)
+                send_to_char(ch, "Your %s is no longer broken!\r\n", limb_names[l]);
         }
-        GET_LIMBCOND(ch, l.first) = 100;
+        GET_LIMBCOND(ch, l) = 100;
     }
 
     char_gain_tail(ch, announce);
@@ -2968,8 +2977,8 @@ void handle_evolution(struct char_data *ch, int64_t dmg)
    int armorgain = 0;
    int64_t plgain = getBasePL(ch) * rand1, stamgain = getBaseST(ch) * rand2;
    armorgain = armor_evolve(ch);
-   gainBasePL(ch, plgain);
-   gainBaseST(ch, stamgain);
+   gainBasePL(ch, plgain, false);
+   gainBaseST(ch, stamgain, false);
    GET_ARMOR(ch) += armorgain;
    if (GET_ARMOR(ch) > 50000) {
     GET_ARMOR(ch) = 50000;
@@ -2994,7 +3003,7 @@ void demon_refill_lf(struct char_data *ch, int64_t num)
    if ((getCurLF(tch)) >= (getMaxLF(tch)))
     continue;
    else {
-       incCurLF(ch, num);
+       incCurLF(ch, num, true);
     act("@CYou feel the life energy from @c$N@C's cursed body flow out and you draw it into yourself!@n", TRUE, tch, 0, ch, TO_CHAR);
    }
   }
@@ -4326,11 +4335,11 @@ void pcost(struct char_data *ch, double ki, int64_t st)
     st -= st * 0.8;
    }
   }
-  decCurST(ch, st);
+  decCurST(ch, st, 0);
  }
  if (IS_NPC(ch)) {
-     decCurKI(ch, ki);
-     decCurST(ch, st);
+     decCurKI(ch, ki, 0);
+     decCurST(ch, st, 0);
  }
 }
 

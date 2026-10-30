@@ -780,7 +780,7 @@ void club_stamina(struct char_data *ch, struct char_data *vict, int wlvl, int64_
   drain += 0.05;
 
  drained = dmg * drain;
- decCurST(vict, drained);
+ decCurST(vict, drained, 0);
 
  send_to_char(ch, "@D[@YVictim's @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained));
  send_to_char(vict, "@D[@rYour @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained));
@@ -1644,14 +1644,14 @@ void update_mob_absorb()
      pl += pl * rand_number(2, 4);
     }
 
-    decCurHealth(vict, pl);
-    incCurHealth(i, pl);
+    decCurHealth(vict, pl, 0);
+    incCurHealth(i, pl, true);
 
-    decCurKI(vict, ki);
-    incCurKI(i, ki);
+    decCurKI(vict, ki, 0);
+    incCurKI(i, ki, true);
 
-    decCurST(vict, stam);
-    incCurST(i, stam);
+    decCurST(vict, stam, 0);
+    incCurST(i, stam, true);
 
     if (isFullHealth(i)) {
      maxed += 1;
@@ -1808,7 +1808,7 @@ void huge_update()
     act("@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", TRUE, TARGET(k), 0, 0, TO_CHAR);
     act("@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", TRUE, TARGET(k), 0, 0, TO_ROOM); 
     hurt(0, 0, ch, TARGET(k), NULL, 0, 1);
-    decCurST(TARGET(k), KICHARGE(k) / 4);
+    decCurST(TARGET(k), KICHARGE(k) / 4, 0);
     extract_obj(k);
     continue;
    }
@@ -1982,7 +1982,7 @@ void huge_update()
     act("@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", TRUE, TARGET(k), 0, 0, TO_CHAR);
     act("@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", TRUE, TARGET(k), 0, 0, TO_ROOM); 
     hurt(0, 0, ch, TARGET(k), NULL, 0, 1);
-       decCurST(TARGET(k), KICHARGE(k) / 4);
+       decCurST(TARGET(k), KICHARGE(k) / 4, 0);
     extract_obj(k);
     continue;
    }
@@ -2163,14 +2163,14 @@ void homing_update()
         act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@rYou are cut in half by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        decCurKI(vict, getMaxKI(vict) / 40);
+        decCurKI(vict, getMaxKI(vict) / 40, 0);
         hurt(0, 0, ch, vict, NULL, dmg, 1);
        } else if (dmg > GET_MAX_HIT(vict) / 5 && (IS_MAJIN(vict) || IS_BIO(vict))) {
        if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= GET_MAX_MANA(vict) / 40) {
         act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@rYou are cut in half by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-           decCurKI(vict, getMaxKI(vict) / 40);
+           decCurKI(vict, getMaxKI(vict) / 40, 0);
         hurt(0, 0, ch, vict, NULL, dmg, 1);
        }
        else {
@@ -3502,15 +3502,15 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict)
 
     switch (choice) {
      case 0:
-         gainBasePL(ch, gain);
+         gainBasePL(ch, gain, false);
        send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n", add_commas(gain));
       break;
      case 1:
-         gainBaseKI(ch, gain);
+         gainBaseKI(ch, gain, false);
        send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+%s@D]@n\r\n", add_commas(gain));
       break;
      case 2:
-         gainBaseST(ch, gain);
+         gainBaseST(ch, gain, false);
        send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly more vigorous. @D[@G+%s@D]@n\r\n", add_commas(gain));
       break;
     }
@@ -3667,11 +3667,11 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
     send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
     if (type == 0 && rand_number(1, 5) >= 4) {
      send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n ", pl > 0 ? add_commas(pl) : "SOFT-CAP");
-     gainBasePL(ch, pl);
+     gainBasePL(ch, pl, false);
     }
     else if (type == 1 && rand_number(1, 5) >= 4) {
      send_to_char(ch, "@D[@Y+ @C%s @cKi@D]@n ", ki > 0 ? add_commas(ki) : "SOFT-CAP");
-     gainBaseKI(ch, ki);
+     gainBaseKI(ch, ki, false);
     }
     send_to_char(ch, "@D[@R- @M%d @mPS@D]@n ", pscost);
     send_to_char(ch, "\r\n");
@@ -3782,7 +3782,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
     gain_exp(vict, gain);
     if (rand_number(1, 5) >= 4) {
      send_to_char(vict, "@D[@Y+ @G%s @gSt@D]@n ", st > 0 ? add_commas(st) : "SOFT-CAP");
-     gainBaseST(vict, st);
+     gainBaseST(vict, st, false);
     }
     send_to_char(vict, "@D[@R- @M%d @mPS@D]@n ", pscost);
     send_to_char(vict, "\r\n");
@@ -3839,7 +3839,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
      int64_t infuse_cost = getPercentOfMaxKI(ch, .005);
   if (dmg > 0) {
       if (getCurKI(ch) - infuse_cost) {
-          decCurKI(ch, infuse_cost);
+          decCurKI(ch, infuse_cost, 0);
           send_to_room(IN_ROOM(ch), "@CA swirl of ki explodes from the attack!@n\r\n");
       } else {
           act("@wYou can no longer infuse ki into your attacks!@n", TRUE, ch, 0, 0, TO_CHAR);
@@ -4161,7 +4161,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    act("@GYou roll to your feet in an agile fashion!@n", TRUE, vict, 0, 0, TO_CHAR);
    act("@G$n rolls to $s feet in an agile fashion!@n", TRUE, vict, 0, 0, TO_ROOM);
    do_stand(vict, 0, 0, 0);
-   decCurST(vict, rollcost);
+   decCurST(vict, rollcost, 0);
   }
  }
 
@@ -4384,14 +4384,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         act("@CYou barely cling to life!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@c$N@w barely clings to life!@n.", TRUE, ch, 0, vict, TO_NOTVICT);
         int64_t lifeloss = dmg - GET_HIT(vict);
-        decCurLF(vict, lifeloss);
+        decCurLF(vict, lifeloss, 0);
         send_to_char(vict, "@D[@CLifeforce@D: @R-%s@D]\n", add_commas(lifeloss));
       if ((getCurLF(vict)) >= (getMaxLF(vict)) * 0.05) {
         send_to_char(vict, "@YYou recover a bit thanks to your strong life force.@n\r\n");
-        incCurHealth(vict, (getMaxLF(vict)) * .05);
-        decCurLFPercent(vict, .05);
+        incCurHealth(vict, (getMaxLF(vict)) * .05, true);
+        decCurLFPercent(vict, .05, 0);
        } else {
-          incCurHealth(vict, GET_LEVEL(vict) * 100);
+          incCurHealth(vict, GET_LEVEL(vict) * 100, true);
        }
      return;
     }
@@ -4409,7 +4409,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    if (dmg > 1) {
      if (type <= 0 && GET_HIT(ch) >= getEffMaxPL(ch) * 0.5) {
      int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
-     incCurKI(ch, raise);
+     incCurKI(ch, raise, true);
     }
     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
     send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
@@ -4417,10 +4417,10 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     if (AFF_FLAGGED(ch, AFF_METAMORPH) && GET_HIT(ch) <= GET_MAX_HIT(ch)) {
      act("@RYour dark aura saps some of @r$N's@R life energy!@n", TRUE, ch, 0, vict, TO_CHAR);
      act("@r$n@R's dark aura saps some of your life energy!@n", TRUE, ch, 0, vict, TO_VICT);
-     incCurHealth(ch, healhp);
+     incCurHealth(ch, healhp, true);
     }
     if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 10 || GET_GENOME(ch, 1) == 10)) {
-        incCurKI(ch, dmg * .05);
+        incCurKI(ch, dmg * .05, true);
     }
     if (!is_sparring(ch) && IS_NPC(vict)) {
      if (type == 0 && rand_number(1, 100) >= 97) {
@@ -4462,7 +4462,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    }
   } else if (GET_HIT(vict) - dmg > 0 || suppresso == TRUE){
    if (suppresso == FALSE) {
-   decCurHealth(vict, dmg);
+   decCurHealth(vict, dmg, 0);
    }
    if (FIGHTING(ch) == NULL) {
     set_fighting(ch, vict);
@@ -4477,10 +4477,10 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
    if (dmg > 1 && suppresso == FALSE) {
      if (type == 0 && GET_HIT(ch) >= getEffMaxPL(ch) * 0.5) {
      int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
-     incCurKI(ch, raise);
+     incCurKI(ch, raise, true);
     }
     if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 10 || GET_GENOME(ch, 1) == 10)) {
-        incCurKI(ch, dmg * .05);
+        incCurKI(ch, dmg * .05, true);
     }
     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg));
     send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
@@ -5521,7 +5521,7 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
   else if (avo >= 70) {
    prob -= 69;
   }
-  tech_handle_posmodifier(vict, pry, blk, dge, prob);
+  tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
   if(!tech_handle_zanzoken(ch, vict, "Spiral Comet Blast")) {
       pcost(ch, amount, 0);

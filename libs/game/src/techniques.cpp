@@ -37,23 +37,23 @@ bool tech_handle_zanzoken(char_data *ch, char_data *vict, const char* name) {
     return true;
 }
 
-void tech_handle_posmodifier(char_data *vict, int &pry, int &blk, int &dge, int &prob) {
+void tech_handle_posmodifier(char_data *vict, int *pry, int *blk, int *dge, int *prob) {
     switch(GET_POS(vict)) {
         case POS_SLEEPING:
-            pry = 0;
-            blk = 0;
-            dge = 0;
-            prob += 50;
+            *pry = 0;
+            *blk = 0;
+            *dge = 0;
+            *prob += 50;
         case POS_RESTING:
-            pry /= 4;
-            blk /= 4;
-            dge /= 4;
-            prob += 25;
+            *pry /= 4;
+            *blk /= 4;
+            *dge /= 4;
+            *prob += 25;
         case POS_SITTING:
-            pry /= 2;
-            blk /= 2;
-            dge /= 2;
-            prob += 10;
+            *pry /= 2;
+            *blk /= 2;
+            *dge /= 2;
+            *prob += 10;
     }
 }
 
@@ -126,7 +126,7 @@ bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
             amot = GET_MAX_MANA(ch) / 20;
         }
         if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
-            incCurKI(vict, getMaxKI(vict) - GET_CHARGE(vict));
+            incCurKI(vict, getMaxKI(vict) - GET_CHARGE(vict), true);
             GET_CHARGE(vict) = GET_MAX_MANA(vict);
         }
         else {

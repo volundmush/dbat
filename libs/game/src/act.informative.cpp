@@ -127,7 +127,7 @@ ACMD(do_evolve)
    } else {
     plgain = rand_number(plgain, plgain * .5);
    }
-   gainBasePL(ch, plgain);
+   gainBasePL(ch, plgain, false);
    GET_MOLT_EXP(ch) -= plcost;
    send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your body has strengthened. @D[@RPL@D: @Y+%s@D]@n\r\n", add_commas(plgain));
   }
@@ -146,7 +146,7 @@ ACMD(do_evolve)
    } else {
     kigain = rand_number(kigain, kigain * .5);
    }
-   gainBaseKI(ch, kigain);
+   gainBaseKI(ch, kigain, false);
    GET_MOLT_EXP(ch) -= kicost;
    send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your spirit has strengthened. @D[@CKi@D: @Y+%s@D]@n\r\n", add_commas(kigain));
   }
@@ -165,7 +165,7 @@ ACMD(do_evolve)
    } else {
     stgain = rand_number(stgain, stgain * .5);
    }
-   gainBaseST(ch, stgain);
+   gainBaseST(ch, stgain, false);
    GET_MOLT_EXP(ch) -= stcost;
    send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your body has more stamina. @D[@GST@D: @Y+%s@D]@n\r\n", add_commas(stgain));
   }
@@ -308,7 +308,7 @@ static void search_room(struct char_data *ch)
    found++;
   }
  }
- decCurSTPercent(ch, .001);
+ decCurSTPercent(ch, .001, 0);
 
 
  if (found == 0) {
@@ -398,14 +398,14 @@ ACMD(do_mimic)
    send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
    return;
  } else if (race && prob < perc) {
-     decCurKI(ch, cost);
+     decCurKI(ch, cost, 0);
    act("@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n", TRUE, ch, 0, 0, TO_ROOM);
    return;
  } else {
 	char buf[MAX_STRING_LENGTH];
 	ch->mimic = race->getID();
-     decCurKI(ch, cost);
+     decCurKI(ch, cost, 0);
 	sprintf(buf, "@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be %s @M%s!@n", AN(RACE(ch)), LRACE(ch));
 	send_to_char(ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be %s %s.@n\r\n", AN(RACE(ch)), LRACE(ch));
 	act(buf, TRUE, ch, 0, 0, TO_ROOM);

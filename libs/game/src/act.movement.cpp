@@ -715,7 +715,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
             (getCurKI(ch)) < GET_MAX_MANA(ch) / 800))) {
       if (GET_HIT(ch) >= GET_MAX_HIT(ch) / 20) {
        send_to_char(ch, "@RYou struggle to breath!@n\r\n");
-       decCurHealth(ch, getMaxPL(ch) / 20);
+       decCurHealth(ch, getMaxPL(ch) / 20, 0);
       }
       if (GET_HIT(ch) < GET_MAX_HIT(ch) / 20) {
        send_to_char(ch, "@rYou drown!@n\r\n");
@@ -727,9 +727,9 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
             (getCurKI(ch)) >= GET_MAX_MANA(ch) / 800))) {
       send_to_char(ch, "@CYou hold your breath!@n\r\n");
       if (group_bonus(ch, 2) == 10) {
-          decCurKI(ch, getMaxKI(ch) / 800);
+          decCurKI(ch, getMaxKI(ch) / 800, 0);
       } else {
-          decCurKI(ch, getMaxKI(ch) / 200);
+          decCurKI(ch, getMaxKI(ch) / 200, 0);
       }
     }
   }
@@ -767,12 +767,12 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   }
 
   if (AFF_FLAGGED(ch, AFF_FLYING) && ((getCurKI(ch)) < flight_cost) && !IS_ANDROID(ch)) {
-      decCurKI(ch, flight_cost);
+      decCurKI(ch, flight_cost, 0);
     act("@WYou crash to the ground, too tired to fly anymore!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@W$n@W crashes to the ground!@n", TRUE, ch, 0, 0, TO_ROOM);
     REMOVE_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
   } else if (AFF_FLAGGED(ch, AFF_FLYING) && !IS_ANDROID(ch)) {
-      decCurKI(ch, flight_cost);
+      decCurKI(ch, flight_cost, 0);
   }
 
   if ((getCurST(ch)) < need_movement && !AFF_FLAGGED(ch, AFF_FLYING) && !IS_NPC(ch)) {
@@ -791,7 +791,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
       send_to_char(ch, "Your skill in %s isn't enough to move that way!\r\n", spell_info[EXIT(ch, dir)->dcskill].name);
       /* A failed skill check still spends the movement points! */
       if (!ADM_FLAGGED(ch, ADM_WALKANYWHERE) && !IS_NPC(ch) && !AFF_FLAGGED(ch, AFF_FLYING))
-      decCurST(ch, need_movement);
+      decCurST(ch, need_movement, 0);
       return (0);
     } else {
       send_to_char(ch, "Your skill in %s aids in your movement.\r\n", spell_info[EXIT(ch, dir)->dcskill].name);
@@ -855,7 +855,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
 
   /* Now we know we're allowed to go into the room. */
   if (!ADM_FLAGGED(ch, ADM_WALKANYWHERE) && !IS_NPC(ch) && !AFF_FLAGGED(ch, AFF_FLYING)) {
-    decCurST(ch, need_movement);
+    decCurST(ch, need_movement, 0);
   }
 
   if (AFF_FLAGGED(ch, AFF_SNEAK) && !IS_NPC(ch)) {
@@ -962,7 +962,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
        if (IS_NPC(ch) && IS_HUMANOID(ch) && rand_number(1, 2) == 2) {
         do_fly(ch, 0, 0, 0);
        }
-        decCurHealth(ch, getEffMaxPL(ch) / 20);
+        decCurHealth(ch, getEffMaxPL(ch) / 20, 0);
         if (GET_HIT(ch) <= 0) {
             act("@rYou have burned to death!@n", TRUE, ch, 0, 0, TO_CHAR);
             act("@R$n@r has burned to death!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -972,7 +972,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     if (DRAGGING(ch) && !IS_DEMON(DRAGGING(ch))) {
      act("@R$N@r gets burned!@n", TRUE, ch, 0, DRAGGING(ch), TO_CHAR);
      act("@R$N@r gets burned!@n", TRUE, ch, 0, DRAGGING(ch), TO_ROOM);
-     decCurHealth(DRAGGING(ch), getEffMaxPL(DRAGGING(ch)) / 20);
+     decCurHealth(DRAGGING(ch), getEffMaxPL(DRAGGING(ch)) / 20, 0);
        if (GET_HIT(DRAGGING(ch)) < 0) {
         act("@rYou have burned to death!@n", TRUE, DRAGGING(ch), 0, 0, TO_CHAR);
         act("@R$n@r has burned to death!@n", TRUE, DRAGGING(ch), 0, 0, TO_ROOM);
@@ -1744,10 +1744,10 @@ static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dcl
   else if (dclock > (skill_lvl - 2)) {
     send_to_char(ch, "You failed to pick the lock...\r\n");
     act("@c$n@w puts a set of lockpick tools away.@n" , TRUE, ch, 0, 0, TO_ROOM);
-    decCurST(ch, getCurST(ch) / 30);
+    decCurST(ch, getCurST(ch) / 30, 0);
   }
   else {
-      decCurST(ch, getCurST(ch) / 30);
+      decCurST(ch, getCurST(ch) / 30, 0);
     return (1);
   }
 
@@ -1898,7 +1898,7 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
   }
   /* Now we know we're allowed to go into the room. */
   if (!(IS_NPC(ch) || ADM_FLAGGED(ch, ADM_WALKANYWHERE)) && !AFF_FLAGGED(ch, AFF_FLYING))
-    decCurST(ch, need_movement);
+    decCurST(ch, need_movement, 0);
 
   act("$n enters $p.", TRUE, ch, obj, 0, TO_ROOM | TO_SNEAKRESIST);
 
@@ -2144,7 +2144,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
   }
   /* Now we know we're allowed to go into the room. */
   if (!(IS_NPC(ch) || ADM_FLAGGED(ch, ADM_WALKANYWHERE)) && !AFF_FLAGGED(ch, AFF_FLYING))
-      decCurST(ch, need_movement);
+      decCurST(ch, need_movement, 0);
 
   act("$n leaves $p.", TRUE, ch, vehicle, 0, TO_ROOM | TO_SNEAKRESIST);
 
@@ -2307,7 +2307,7 @@ static void handle_fall(struct char_data *ch)
   if ((getCurST(ch)) >= (getCurCarriedWeight(ch))) {
    act("@bYou swim in place.@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@C$n@b swims in place.@n", TRUE, ch, 0, 0, TO_ROOM);
-   decCurST(ch, getCurCarriedWeight(ch));
+   decCurST(ch, getCurCarriedWeight(ch), 0);
    act("@RYou are drowning!@n", TRUE, ch, 0, 0, TO_CHAR);
    act("@C$n@b gulps water as $e struggles to stay above the water line.@n", TRUE, ch, 0, 0, TO_ROOM);
    if (GET_HIT(ch) - ((getEffMaxPL(ch)) / 3) <= 0) {
@@ -2316,7 +2316,7 @@ static void handle_fall(struct char_data *ch)
     die(ch, NULL);
     decCurHealthPercent(ch, 1, 1);
    } else {
-       decCurHealthPercent(ch, .33);
+       decCurHealthPercent(ch, .33, 0);
    }
   }
  }
@@ -2330,14 +2330,14 @@ static int check_swim(struct char_data *ch) {
         int64_t space_cost = (GET_MAX_MANA(ch) / 1000) + ((getCurCarriedWeight(ch)) / 2);
         if (getCurKI(ch) >= space_cost)
             can = true;
-        decCurKI(ch, space_cost);
+        decCurKI(ch, space_cost, 0);
         if (!can) send_to_char(ch, "You do not have enough ki to fly through space. You are drifting helplessly.\r\n");
         return can;
     } else {
         int64_t swim_cost = (getCurCarriedWeight(ch)) - 1;
         if (getCurST(ch) >= swim_cost)
             can = true;
-        decCurST(ch, swim_cost);
+        decCurST(ch, swim_cost, 0);
         if (!can) send_to_char(ch, "You are too tired to swim!\r\n");
         return can;
     }
@@ -2415,7 +2415,7 @@ ACMD(do_fly)
    }
    SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
    GET_ALT(ch) = 1;
-   decCurKI(ch, getMaxKI(ch) / 100);
+   decCurKI(ch, getMaxKI(ch) / 100, 0);
  }
  }
  if (!strcasecmp("high", arg)) {
@@ -2436,7 +2436,7 @@ ACMD(do_fly)
    }
    SET_BIT_AR(AFF_FLAGS(ch), AFF_FLYING);
    GET_ALT(ch) = 2;
-      decCurKI(ch, getMaxKI(ch) / 100);
+      decCurKI(ch, getMaxKI(ch) / 100, 0);
   }
  }
  if (!strcasecmp("space", arg)) {
@@ -2474,7 +2474,7 @@ ACMD(do_fly)
    act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", TRUE, ch, 0, 0, TO_ROOM);
    send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
    if (!IS_ANDROID(ch)) {
-       decCurKI(ch, getMaxKI(ch) / 10);
+       decCurKI(ch, getMaxKI(ch) / 10, 0);
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
@@ -2502,7 +2502,7 @@ ACMD(do_fly)
    act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", TRUE, ch, 0, 0, TO_ROOM);
    send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
    if (!IS_ANDROID(ch)) {
-       decCurKI(ch, getMaxKI(ch) / 10);
+       decCurKI(ch, getMaxKI(ch) / 10, 0);
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
@@ -2528,7 +2528,7 @@ ACMD(do_fly)
    act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", TRUE, ch, 0, 0, TO_ROOM);
    send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
    if (!IS_ANDROID(ch)) {
-       decCurKI(ch, getMaxKI(ch) / 10);
+       decCurKI(ch, getMaxKI(ch) / 10, 0);
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
@@ -2555,7 +2555,7 @@ ACMD(do_fly)
     act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", TRUE, ch, 0, 0, TO_ROOM);
     send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
     if (!IS_ANDROID(ch)) {
-        decCurKI(ch, getMaxKI(ch) / 10);
+        decCurKI(ch, getMaxKI(ch) / 10, 0);
     }
     WAIT_STATE(ch, PULSE_3SEC);
    } else {
@@ -2584,7 +2584,7 @@ ACMD(do_fly)
    act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", TRUE, ch, 0, 0, TO_ROOM);
    send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
    if (!IS_ANDROID(ch)) {
-       decCurKI(ch, getMaxKI(ch) / 10);
+       decCurKI(ch, getMaxKI(ch) / 10, 0);
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
@@ -2610,7 +2610,7 @@ ACMD(do_fly)
    act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", TRUE, ch, 0, 0, TO_ROOM);
    send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
    if (!IS_ANDROID(ch)) {
-       decCurKI(ch, getMaxKI(ch) / 10);
+       decCurKI(ch, getMaxKI(ch) / 10, 0);
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
@@ -2636,7 +2636,7 @@ ACMD(do_fly)
    act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", TRUE, ch, 0, 0, TO_ROOM);
    send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
    if (!IS_ANDROID(ch)) {
-       decCurKI(ch, getMaxKI(ch) / 10);
+       decCurKI(ch, getMaxKI(ch) / 10, 0);
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
@@ -2662,7 +2662,7 @@ ACMD(do_fly)
    act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", TRUE, ch, 0, 0, TO_ROOM);
    send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
    if (!IS_ANDROID(ch)) {
-       decCurKI(ch, getMaxKI(ch) / 10);
+       decCurKI(ch, getMaxKI(ch) / 10, 0);
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
@@ -2688,7 +2688,7 @@ ACMD(do_fly)
    act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", TRUE, ch, 0, 0, TO_ROOM);
    send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
    if (!IS_ANDROID(ch)) {
-       decCurKI(ch, getMaxKI(ch) / 10);
+       decCurKI(ch, getMaxKI(ch) / 10, 0);
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
@@ -2714,7 +2714,7 @@ ACMD(do_fly)
    act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", TRUE, ch, 0, 0, TO_ROOM);
    send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
    if (!IS_ANDROID(ch)) {
-       decCurKI(ch, getMaxKI(ch) / 10);
+       decCurKI(ch, getMaxKI(ch) / 10, 0);
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;
@@ -2740,7 +2740,7 @@ ACMD(do_fly)
    act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", TRUE, ch, 0, 0, TO_ROOM);
    send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
    if (!IS_ANDROID(ch)) {
-       decCurKI(ch, getMaxKI(ch) / 10);
+       decCurKI(ch, getMaxKI(ch) / 10, 0);
    }
    WAIT_STATE(ch, PULSE_3SEC);
    return;

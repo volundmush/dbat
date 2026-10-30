@@ -760,9 +760,9 @@ in the vault (vnum: 453) now and then. you can just use
             if (subfield && *subfield) {
               int64_t addition = atoll(subfield);
               if(addition > 0 ) {
-                  incCurHealth(c, addition);
+                  incCurHealth(c, addition, true);
               } else {
-                  decCurHealth(c, addition);
+                  decCurHealth(c, addition, 0);
               }
 
               update_pos(c);
@@ -862,9 +862,9 @@ in the vault (vnum: 453) now and then. you can just use
             if (subfield && *subfield) {
               int64_t addition = atoll(subfield);
               if(addition > 0) {
-                  incCurKI(c, addition);
+                  incCurKI(c, addition, true);
               } else {
-                  decCurKI(c, addition);
+                  decCurKI(c, addition, 0);
               }
             }
             snprintf(str, slen, "%" I64T "", (getCurKI(c)));
@@ -881,9 +881,9 @@ in the vault (vnum: 453) now and then. you can just use
             if (subfield && *subfield) {
               int64_t addition = atoll(subfield);
               if(addition > 0) {
-                  incCurST(c, addition);
+                  incCurST(c, addition, true);
               } else {
-                  decCurST(c, addition);
+                  decCurST(c, addition, 0);
               }
 
             }

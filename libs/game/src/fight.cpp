@@ -62,11 +62,11 @@ int group_bonus(struct char_data *ch, int type)
     continue;
    } else {
     if (type == 0) {
-        incCurLFPercent(k->follower, .25);
+        incCurLFPercent(k->follower, .25, true);
       send_to_char(k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
      return (TRUE);
     } else if (type == 1) {
-        incCurLFPercent(k->follower, .4);
+        incCurLFPercent(k->follower, .4, true);
       send_to_char(k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
      return (TRUE);
     } else if (type == 2) {
@@ -810,13 +810,13 @@ void fight_stack()
          REMOVE_BIT_AR(MOB_FLAGS(ch), MOB_POWERUP);
         } else if (GET_HIT(ch) >= GET_MAX_HIT(ch) / 2) {
          act("@g$n@G continues powering up as torrents of energy crackle within $s aura.@n", TRUE, ch, 0, 0, TO_ROOM);
-         incCurHealthPercent(ch, .1);
+         incCurHealthPercent(ch, .1, true);
         } else if (GET_HIT(ch) > GET_MAX_HIT(ch) / 4) {
          act("@g$n@G powers up as a steady aura around $s body grow brighter.@n", TRUE, ch, 0, 0, TO_ROOM);
-            incCurHealthPercent(ch, .125);
+            incCurHealthPercent(ch, .125, true);
         } else if (GET_HIT(ch) > 0) {
          act("@g$n@G powers up, as a weak aura flickers around $s body.@n", TRUE, ch, 0, 0, TO_ROOM);
-            incCurHealthPercent(ch, .2);
+            incCurHealthPercent(ch, .2, true);
         }
       }
       if (IS_NPC(ch) && IS_AFFECTED(ch, AFF_FROZEN)) {
@@ -854,12 +854,12 @@ void fight_stack()
          } else {
           refill = (getMaxLF(ch)) * 0.05;
          }
-         incCurHealth(ch, refill);
+         incCurHealth(ch, refill, true);
          if (!AFF_FLAGGED(ch, AFF_HEALGLOW)) {
-          decCurLF(ch, lfcost);
+          decCurLF(ch, lfcost, 0);
          }
         } else {
-            incCurHealth(ch, (getCurLF(ch)));
+            incCurHealth(ch, (getCurLF(ch)), true);
             decCurLFPercent(ch, 2, -1);
         }
 
@@ -898,7 +898,7 @@ void fight_stack()
         act("@WYou choke @C$N@W!@n", TRUE, ch, 0, GRAPPLING(ch), TO_CHAR);
         act("@C$n@W chokes YOU@W!@n", TRUE, ch, 0, GRAPPLING(ch), TO_VICT);
         act("@C$n@W chokes @c$N@W!@n", TRUE, ch, 0, GRAPPLING(ch), TO_NOTVICT);
-        decCurST(GRAPPLING(ch), (getMaxST(GRAPPLING(ch)) / 8));
+        decCurST(GRAPPLING(ch), (getMaxST(GRAPPLING(ch)) / 8), 0);
        } else {
         act("@WYou choke @C$N@W, and $E passes out!@n", TRUE, ch, 0, GRAPPLING(ch), TO_CHAR);
         act("@C$n@W chokes YOU@W, and you pass out!@n", TRUE, ch, 0, GRAPPLING(ch), TO_VICT);
@@ -924,9 +924,9 @@ void fight_stack()
        GET_RMETER(ch) += 1;
        if (GET_RMETER(ch) >= 1000) {
 
-           incCurHealthPercent(ch, .15);
-           incCurKIPercent(ch, .15);
-           incCurSTPercent(ch, .15);
+           incCurHealthPercent(ch, .15, true);
+           incCurKIPercent(ch, .15, true);
+           incCurSTPercent(ch, .15, true);
         send_to_char(ch, "Your fury has called forth more of your hidden power and you feel better!\r\n");
        }
       }
@@ -947,37 +947,37 @@ void fight_stack()
           if (getCurST(ch) >= GET_MAX_MOVE(ch) / 800 && PLR_FLAGGED(ch, PLR_TRANS1)) {
               if(!PLR_FLAGGED(ch, PLR_FPSSJ)) {
                   if (IS_SAIYAN(ch) && (getCurLF(ch)) >= (getMaxLF(ch)) * 0.7) {
-                      decCurST(ch, getMaxST(ch) / 900);
+                      decCurST(ch, getMaxST(ch) / 900, 0);
                   } else
-                      decCurST(ch, getMaxST(ch) / 800);
+                      decCurST(ch, getMaxST(ch) / 800, 0);
               }
           }
           else if (getCurST(ch) >= GET_MAX_MOVE(ch) / 600 && PLR_FLAGGED(ch, PLR_TRANS2) && !IS_KONATSU(ch) && !IS_KAI(ch) && !IS_NAMEK(ch)) {
               if (IS_SAIYAN(ch) && (getCurLF(ch)) >= (getMaxLF(ch)) * 0.7) {
-                  decCurST(ch, getMaxST(ch) / 700);
+                  decCurST(ch, getMaxST(ch) / 700, 0);
               } else
-                  decCurST(ch, getMaxST(ch) / 600);
+                  decCurST(ch, getMaxST(ch) / 600, 0);
           }
           else if (getCurST(ch) >= GET_MAX_MOVE(ch) / 500 && PLR_FLAGGED(ch, PLR_TRANS2)) {
-              decCurST(ch, getMaxST(ch) / 500);
+              decCurST(ch, getMaxST(ch) / 500, 0);
           }
           else if (getCurST(ch) >= GET_MAX_MOVE(ch) / 400 && PLR_FLAGGED(ch, PLR_TRANS3) && !IS_SAIYAN(ch)) {
-              decCurST(ch, getMaxST(ch) / 400);
+              decCurST(ch, getMaxST(ch) / 400, 0);
           }
           else if (getCurST(ch) >= GET_MAX_MOVE(ch) / 250 && PLR_FLAGGED(ch, PLR_TRANS3)) {
               if (IS_SAIYAN(ch) && (getCurLF(ch)) >= (getMaxLF(ch)) * 0.7) {
-                  decCurST(ch, getMaxST(ch) / 300);
+                  decCurST(ch, getMaxST(ch) / 300, 0);
               } else
-                  decCurST(ch, getMaxST(ch) / 250);
+                  decCurST(ch, getMaxST(ch) / 250, 0);
           }
           else if (getCurST(ch) >= GET_MAX_MOVE(ch) / 200 && PLR_FLAGGED(ch, PLR_TRANS4) && !IS_SAIYAN(ch)) {
-              decCurST(ch, getMaxST(ch) / 200);
+              decCurST(ch, getMaxST(ch) / 200, 0);
           }
           else if (getCurST(ch) >= GET_MAX_MOVE(ch) / 170 && PLR_FLAGGED(ch, PLR_TRANS4)) {
               if (IS_SAIYAN(ch) && (getCurLF(ch)) >= (getMaxLF(ch)) * 0.7) {
-                  decCurST(ch, getMaxST(ch) / 240);
+                  decCurST(ch, getMaxST(ch) / 240, 0);
               } else
-                  decCurST(ch, getMaxST(ch) / 170);
+                  decCurST(ch, getMaxST(ch) / 170, 0);
           }
 
       }
@@ -1107,10 +1107,10 @@ void fight_stack()
        if (ghit >= gmaxhit && gki >= (gmaxki / 20) && GET_PREFERENCE(ch) != PREFERENCE_KI) {
         if (gki >= gmaxki * 0.5) {
          int64_t raise = GET_MAX_MOVE(ch) * 0.02;
-         incCurST(ch, raise);
+         incCurST(ch, raise, true);
         }
         restoreHealth(ch, false);
-        decCurKI(ch, getMaxKI(ch) / 20);
+        decCurKI(ch, getMaxKI(ch) / 20, 0);
         dispel_ash(ch);
         act("@RYou have reached your maximum!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@R$n stops powering up in a flash of light!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -1121,10 +1121,10 @@ void fight_stack()
        } else if (ghit >= gmaxhit && gki >= (gmaxki * 0.0375) + 1 && GET_PREFERENCE(ch) == PREFERENCE_KI) {
         if (gki >= (gmaxki * 0.0375) + 1) {
          int64_t raise = GET_MAX_MOVE(ch) * 0.02;
-         incCurST(ch, raise);
+         incCurST(ch, raise, true);
         }
         restoreHealth(ch, false);
-        decCurKI(ch, (gmaxki * 0.0375) + 1);
+        decCurKI(ch, (gmaxki * 0.0375) + 1, 0);
         dispel_ash(ch);
         act("@RYou have reached your maximum!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@R$n stops powering up in a flash of light!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -1140,7 +1140,7 @@ void fight_stack()
         gmaxki = GET_MAX_MANA(ch);
 
        if (gki < (gmaxki / 20) && GET_PREFERENCE(ch) != PREFERENCE_KI) {
-           decCurKI(ch, gmaxki / 20);
+           decCurKI(ch, gmaxki / 20, 0);
         act("@RYou have run out of ki.@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@R$n stops powering up in a flash of light!@n", TRUE, ch, 0, 0, TO_ROOM);
         send_to_sense(0, "You sense someone stop powering up", ch);
@@ -1148,7 +1148,7 @@ void fight_stack()
         send_to_scouter(buf3, ch, 1, 0);
         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_POWERUP);
        } else if (gki < (gmaxki * 0.0375) + 1 && GET_PREFERENCE(ch) == PREFERENCE_KI) {
-           decCurKI(ch, (gmaxki * 0.0375) + 1);
+           decCurKI(ch, (gmaxki * 0.0375) + 1, 0);
         act("@RYou have run out of ki.@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@R$n stops powering up in a flash of light!@n", TRUE, ch, 0, 0, TO_ROOM);
         send_to_sense(0, "You sense someone stop powering up", ch);
@@ -1165,15 +1165,15 @@ void fight_stack()
        if (ghit < gmaxhit && ((GET_PREFERENCE(ch) != PREFERENCE_KI &&
                (gki) >= gmaxki / 20) || (GET_PREFERENCE(ch) == PREFERENCE_KI &&
                (gki) >= (gmaxki * 0.0375) + 1))) {
-        incCurHealthPercent(ch, .1);
+        incCurHealthPercent(ch, .1, true);
         if (GET_PREFERENCE(ch) != PREFERENCE_KI) {
-         decCurKI(ch, gmaxki / 20);
+         decCurKI(ch, gmaxki / 20, 0);
         } else {
-         decCurKI(ch, gmaxki * .0375);
+         decCurKI(ch, gmaxki * .0375, 0);
         }
         if ((getCurKI(ch)) >= GET_MAX_MANA(ch) * 0.5) {
          int64_t raise = GET_MAX_MOVE(ch) * 0.02;
-         incCurST(ch, raise);
+         incCurST(ch, raise, true);
         }
 
         gmaxhit = getEffMaxPL(ch);
@@ -1224,7 +1224,7 @@ void fight_stack()
           break;
         }
         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
-            incCurKI(ch, GET_CHARGE(ch));
+            incCurKI(ch, GET_CHARGE(ch), true);
           GET_CHARGE(ch) = 0;
           GET_CHARGETO(ch) = 0;
        }
@@ -1245,7 +1245,7 @@ void fight_stack()
           break;
         }
         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
-          incCurKI(ch, GET_CHARGE(ch));
+          incCurKI(ch, GET_CHARGE(ch), true);
           GET_CHARGE(ch) = 0;
           GET_CHARGETO(ch) = 0;
       }
@@ -1342,7 +1342,7 @@ void fight_stack()
           send_to_char(ch, "You have charged the last that you can.\r\n");
           act("$n@w's aura @Yflashes@w spectacularly, rushing upwards in torrents!@n", TRUE, ch, 0, 0, TO_ROOM);
           GET_CHARGE(ch) += (getCurKI(ch));
-          decCurKIPercent(ch, 1);
+          decCurKIPercent(ch, 1, 0);
           GET_CHARGETO(ch) = 0;
           REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
        }
@@ -1353,14 +1353,14 @@ void fight_stack()
         GET_CHARGETO(ch) = 0;
         REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
        } else if (GET_CHARGE(ch) + (((GET_MAX_MANA(ch) * 0.01) * perc) + 1) >= GET_CHARGETO(ch)) {
-         decCurKI(ch, GET_CHARGETO(ch) - GET_CHARGE(ch));
+         decCurKI(ch, GET_CHARGETO(ch) - GET_CHARGE(ch), 0);
          GET_CHARGE(ch) = GET_CHARGETO(ch);
          send_to_char(ch, "You stop charging as you reach the maximum that you wished to charge.\r\n");
          act("$n@w's aura flares up brightly and then burns steadily.@n", TRUE, ch, 0, 0, TO_ROOM);
          GET_CHARGETO(ch) = 0;
          REMOVE_BIT_AR(PLR_FLAGS(ch), PLR_CHARGE);
        } else {
-           decCurKI(ch, ((GET_MAX_MANA(ch) * 0.01) * perc) + 1);
+           decCurKI(ch, ((GET_MAX_MANA(ch) * 0.01) * perc) + 1, 0);
          GET_CHARGE(ch) += ((GET_MAX_MANA(ch) * 0.01) * perc) + 1;
          switch (rand_number(1, 3)) {
           case 1:
@@ -1933,12 +1933,12 @@ static void final_combat_resolve(struct char_data *ch)
 
 }
 
-enum DeathType : uint8_t {
+typedef enum DeathType : uint8_t {
     Afterlife = 0,
     Northran = 1,
     Past = 2,
     Newbie = 3
-};
+} DeathType;
 
 void raw_kill(struct char_data * ch, struct char_data * killer)
 {
@@ -2045,7 +2045,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
 
   if (IS_NPC(ch) && !MOB_FLAGGED(ch, MOB_DUMMY)) {
     int shadowed = FALSE;
-    decCurHealthPercent(ch, 1);
+    decCurHealthPercent(ch, 1, 0);
     if (IS_SHADOW_DRAGON1(ch)) {
      struct obj_data *obj = NULL;
      SHADOW_DRAGON1 = -1;
@@ -2110,7 +2110,7 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
      shadow_dragons_live();
     }
   } else if (IS_NPC(ch) && MOB_FLAGGED(ch, MOB_DUMMY)) {
-      decCurHealthPercent(ch, 1);
+      decCurHealthPercent(ch, 1, 0);
     extract_char(ch);
   } else {
     if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) && (GET_ROOM_VNUM(IN_ROOM(ch)) < 17900 || GET_ROOM_VNUM(IN_ROOM(ch)) > 17999)) {
@@ -2216,7 +2216,7 @@ void die(struct char_data *ch, struct char_data *killer)
   {
     SET_BIT_AR(PLR_FLAGS(ch), PLR_GOOP);
     ch->gooptime = 0;
-    decCurLFPercent(ch, 0.5);
+    decCurLFPercent(ch, 0.5, 0);
     return;
   }
 
@@ -2428,33 +2428,33 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
    send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
    share += share * 0.05;
   } else if (group_bonus(ch, 2) == 5) {
-      incCurKIPercent(ch, .04);
+      incCurKIPercent(ch, .04, true);
    send_to_char(ch, "You receive a bonus from your group's leader! @D[@G4%s Ki Regenerated!@D]@n\r\n", "%");
   } else if (group_bonus(ch, 2) == 6) {
-      incCurKIPercent(ch, .02);
-      incCurSTPercent(ch, .02);
-      incCurHealthPercent(ch, .02);
+      incCurKIPercent(ch, .02, true);
+      incCurSTPercent(ch, .02, true);
+      incCurHealthPercent(ch, .02, true);
     send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Regenerated!@D]@n\r\n", "%");
   } else if (group_bonus(ch, 2) == 7) {
    if(IS_ANDROID(ch)) {
        if (PLR_FLAGGED(leader, PLR_ABSORB)) {
-           incCurKIPercent(ch, .02);
-           incCurSTPercent(ch, .02);
+           incCurKIPercent(ch, .02, true);
+           incCurSTPercent(ch, .02, true);
            send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Recovered!@D]@n\r\n", "%");
        } else if (PLR_FLAGGED(leader, PLR_REPAIR)) {
-           incCurHealthPercent(ch, .02);
+           incCurHealthPercent(ch, .02, true);
            send_to_char(ch, "You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
        } else if (PLR_FLAGGED(leader, PLR_SENSEM) && !PLR_FLAGGED(ch, PLR_ABSORB)) {
            GET_UP(ch) += 5;
            send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
        }
    } else {
-       incCurHealthPercent(ch, .01);
-       incCurKIPercent(ch, .01);
-       incCurSTPercent(ch, .01);
+       incCurHealthPercent(ch, .01, true);
+       incCurKIPercent(ch, .01, true);
+       incCurSTPercent(ch, .01, true);
    }
   } else if (group_bonus(ch, 2) == 11) {
-      incCurSTPercent(ch, .04);
+      incCurSTPercent(ch, .04, true);
     send_to_char(ch, "You receive a bonus from your group's leader! @D[@G4%s ST Regenerated!@D]@n\r\n", "%");
   } else if (group_bonus(ch, 2) == 13) {
    if (GET_PHASE(leader) == 1) {

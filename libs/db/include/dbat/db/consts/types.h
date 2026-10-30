@@ -74,6 +74,11 @@ struct weather_data;
 struct time_info_data;
 struct reset_com;
 struct innate_node;
+struct txt_q;
+struct skill_data;
+struct transform_bonus;
+struct transforms_available;
+struct pclean_criteria_data;
 
 typedef struct char_data char_data;
 typedef struct obj_data obj_data;
@@ -102,6 +107,11 @@ typedef struct weather_data weather_data;
 typedef struct time_info_data time_info_data;
 typedef struct reset_com reset_com;
 typedef struct innate_node innate_node;
+typedef struct txt_q txt_q;
+typedef struct skill_data skill_data;
+typedef struct transform_bonus transform_bonus;
+typedef struct transforms_available transforms_available;
+typedef struct pclean_criteria_data pclean_criteria_data;
 
 #define ACMD(name) void (name)(struct char_data *ch, char *argument, int cmd, int subcmd)
 #define SPECIAL(name) int (name)(struct char_data *ch, void *me, int cmd, char *argument)

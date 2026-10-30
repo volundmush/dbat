@@ -492,7 +492,7 @@ ACMD(do_garden)
     act("@GAs you go to water @g$p@G you end up sloppily wasting about half of it on the ground.@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@g$n@G takes a bottle of grow water and sloshes some of it on @g$p@G.@n", TRUE, ch, obj, 0, TO_ROOM);
 
-    decCurST(ch, cost);
+    decCurST(ch, cost, 0);
     GET_OBJ_VAL(obj, VAL_WATERLEVEL) += 40;
     if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) > 500) {
      GET_OBJ_VAL(obj, VAL_WATERLEVEL) = 500;
@@ -505,7 +505,7 @@ ACMD(do_garden)
    } else {
     act("@GYou calmly and expertly pour the grow water on @g$p@G.@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@g$n@G calmly and expertly pours some grow water on @g$p@G.@n", TRUE, ch, obj, 0, TO_ROOM);
-       decCurST(ch, cost);
+       decCurST(ch, cost, 0);
     GET_OBJ_VAL(obj, VAL_WATERLEVEL) += 225;
     if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) >= 500) {
      GET_OBJ_VAL(obj, VAL_WATERLEVEL) = 500;
@@ -542,7 +542,7 @@ ACMD(do_garden)
    } else if (skill < axion_dice(-5)) {
     act("@GAs you go to harvest @g$p@G you end up cutting it in half instead!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@g$n@G attempts to harvest @g$p@G with $s clippers, but accidently cuts the plant in half!@n", TRUE, ch, obj, 0, TO_ROOM);
-       decCurST(ch, cost);
+       decCurST(ch, cost, 0);
     extract_obj(obj);
     WAIT_STATE(ch, PULSE_3SEC);
     improve_skill(ch, SKILL_GARDENING, 0);
@@ -550,7 +550,7 @@ ACMD(do_garden)
    } else {
     act("@GYou calmly and expertly harvest @g$p@G.@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@g$n@G calmly and expertly harvests @g$p@G.@n", TRUE, ch, obj, 0, TO_ROOM);
-       decCurST(ch, cost);
+       decCurST(ch, cost, 0);
     GET_OBJ_VAL(clippers, VAL_ALL_HEALTH) -= 1;
     if (GET_OBJ_VAL(clippers, VAL_ALL_HEALTH) <= 0) {
      send_to_char(ch, "The clippers are now too dull to use.\r\n");
@@ -578,7 +578,7 @@ ACMD(do_garden)
    } else {
     act("@GYou calmly dig up @g$p@G.@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@g$n@G calmly digs up @g$p@G.@n", TRUE, ch, obj, 0, TO_ROOM);
-       decCurST(ch, cost);
+       decCurST(ch, cost, 0);
     obj_from_room(obj);
     obj_to_char(obj, ch);
     GET_OBJ_VAL(obj, VAL_SOILQ) = 0;
@@ -622,7 +622,7 @@ ACMD(do_garden)
    } else if (skill < axion_dice(-5)) {
     act("@GYou end up digging a hole too shallow to hold @g$p@G. Better try again.@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@g$n@G digs a very shallow hole in one of the planters and then realizes @g$p@G won't fit in it.@n", TRUE, ch, obj, 0, TO_ROOM);
-       decCurST(ch, cost);
+       decCurST(ch, cost, 0);
     WAIT_STATE(ch, PULSE_3SEC);
     improve_skill(ch, SKILL_GARDENING, 0);
     return;
@@ -631,7 +631,7 @@ ACMD(do_garden)
     act("@g$n@G digs a proper sized hole in a planter and plants @g$p@G in it.@n", TRUE, ch, obj, 0, TO_ROOM);
     obj_from_char(obj);
     obj_to_room(obj, IN_ROOM(ch));
-       decCurST(ch, cost);
+       decCurST(ch, cost, 0);
     GET_OBJ_VAL(obj, VAL_MAXMATURE) = 6;
     GET_OBJ_VAL(obj, VAL_MATGOAL) = 200;
     GET_OBJ_VAL(obj, VAL_SOILQ) = GET_OBJ_VAL(soil, 0);
@@ -681,7 +681,7 @@ ACMD(do_garden)
     act("@g$n@G grabs a hold of @g$p@G and carefully picks it out of the soil.@n", TRUE, ch, obj, 0, TO_ROOM);
     obj_from_room(obj);
     obj_to_char(obj, ch);
-       decCurST(ch, cost);
+       decCurST(ch, cost, 0);
     WAIT_STATE(ch, PULSE_3SEC);
     improve_skill(ch, SKILL_GARDENING, 0);
     return;
@@ -2525,7 +2525,7 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
       }
       if (OBJ_FLAGGED(obj, ITEM_HOT)) {
        if (GET_BONUS(ch, BONUS_FIREPROOF) <= 0 && !IS_DEMON(ch)) {
-           decCurHealthPercent(ch, .25);
+           decCurHealthPercent(ch, .25, 0);
         if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
             decCurHealthPercent(ch, 1, 1);
 
@@ -3431,7 +3431,7 @@ ACMD(do_drink)
         gain_condition(ch, THIRST, 1);
         if (GET_SKILL(ch, SKILL_WELLSPRING) && (getCurKI(ch)) < GET_MAX_MANA(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
 
-        incCurKI(ch, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) * GET_SKILL(ch, SKILL_WELLSPRING));
+        incCurKI(ch, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) * GET_SKILL(ch, SKILL_WELLSPRING), true);
 
          send_to_char(ch, "You feel your ki return to full strength.\r\n");
         }
@@ -3448,7 +3448,7 @@ ACMD(do_drink)
         send_to_char(ch, "You take a refreshing drink from the surrounding water.\r\n");
         gain_condition(ch, THIRST, 1);
         if (GET_SKILL(ch, SKILL_WELLSPRING) && !isFullKI(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
-         if(incCurKI(ch, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) * GET_SKILL(ch, SKILL_WELLSPRING)) == getMaxKI(ch)) {
+         if(incCurKI(ch, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) * GET_SKILL(ch, SKILL_WELLSPRING), true) == getMaxKI(ch)) {
              send_to_char(ch, "You feel your ki return to full strength.\r\n");
          } else {
              send_to_char(ch, "You feel your ki has rejuvenated.\r\n");
@@ -3474,7 +3474,7 @@ ACMD(do_drink)
      act("@C$n@w uncorks the $p and tips it to $s lips. Drinking it down and then smiling.@n", TRUE, ch, temp, 0, TO_ROOM);
      obj_from_char(temp);
      extract_obj(temp);
-      restoreKI(ch);
+      restoreKI(ch, true);
      GET_COND(ch, THIRST) += 8;
      return;
     } else if (GET_OBJ_VNUM(temp) == 86 && on_ground == 1) {
@@ -3560,13 +3560,13 @@ ACMD(do_drink)
   gain_condition(ch, HUNGER, drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][HUNGER] * amount);
   gain_condition(ch, THIRST, drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][THIRST] * amount);
   if (GET_FOODR(ch) == 0 && subcmd != SCMD_SIP) {
-      incCurST(ch, (getMaxST(ch) / 100) * amount);
+      incCurST(ch, (getMaxST(ch) / 100) * amount, true);
    GET_FOODR(ch) = 2;
    send_to_char(ch, "You feel rejuvinated by it.\r\n");
   } if (GET_SKILL(ch, SKILL_WELLSPRING) && (getCurKI(ch)) < GET_MAX_MANA(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
    if (GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID) == 0 || GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID) == 14 || GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID) == 15) {
 
-    if(incCurKI(ch, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) * GET_SKILL(ch, SKILL_WELLSPRING)) == getMaxKI(ch)) {
+    if(incCurKI(ch, ((GET_MAX_MANA(ch) * 0.005) + (GET_WIS(ch) * rand_number(80, 100))) * GET_SKILL(ch, SKILL_WELLSPRING), true) == getMaxKI(ch)) {
         send_to_char(ch, "You feel your ki return to full strength.\r\n");
     } else {
         send_to_char(ch, "You feel your ki has rejuvenated.\r\n");
@@ -3685,8 +3685,8 @@ ACMD(do_eat)
   }
 
   if(majin_gain_mode != -100) {
-      incCurLFPercent(ch, 0.01);
-      incCurSTPercent(ch, majin_st_recovery);
+      incCurLFPercent(ch, 0.01, true);
+      incCurSTPercent(ch, majin_st_recovery, true);
       if (OBJ_FLAGGED(food, ITEM_FORGED))
       {
         send_to_char(ch, "This is a forgery. You gain nothing!\r\n");
@@ -3738,11 +3738,11 @@ ACMD(do_eat)
   gain_condition(ch, HUNGER, amount);
   if (GET_FOODR(ch) == 0 && subcmd != SCMD_TASTE)
   {
-    incCurSTPercent(ch, 0.01 * (double)amount);
+    incCurSTPercent(ch, 0.01 * (double)amount, true);
     GET_FOODR(ch) = 2;
     if (OBJ_FLAGGED(food, ITEM_YUM))
     {
-      incCurSTPercent(ch, .25);
+      incCurSTPercent(ch, .25, true);
     }
     send_to_char(ch, "You feel rejuvinated by it.\r\n");
   }
@@ -3758,15 +3758,15 @@ ACMD(do_eat)
       {
         if (GET_WEIGHT(food) < 6)
         {
-          incCurHealthPercent(ch, .05);
+          incCurHealthPercent(ch, .05, true);
         }
         else
         {
-          incCurHealthPercent(ch, .1);
+          incCurHealthPercent(ch, .1, true);
         }
         if (OBJ_FLAGGED(food, ITEM_YUM))
         {
-          incCurHealthPercent(ch, .2);
+          incCurHealthPercent(ch, .2, true);
         }
 
         send_to_char(ch, "@MYou feel some of your strength return!@n\r\n");
@@ -3809,7 +3809,7 @@ static void majin_gain(struct char_data *ch, int type)
    return;
   }
 /* Rillao: transloc, add new transes here */
-  if (is_soft_cap(ch, 0)) {
+  if (is_soft_cap(ch, 0, 1.0)) {
     send_to_char(ch, "You can not gain anymore from candy consumption at your current level.\r\n");
     return;
   }

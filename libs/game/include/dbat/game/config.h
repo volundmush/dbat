@@ -2,6 +2,7 @@
 #include "dbat/db/consts/types.h"
 #include "dbat/db/consts/maximums.h"
 #include "dbat/db/config.h"
+#include "dbat/db/characters.h"
 
 /* GAME PLAY OPTIONS */
 #if !defined(NO)
