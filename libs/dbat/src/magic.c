@@ -114,27 +114,6 @@ int mag_materials(struct char_data *ch, int item0, int item1, int item2,
 
 int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum, int level, int cast_stat)
 {
-  int stype;
-  int dc;
-  int total;
-  if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_FORT))
-    stype = SAVING_FORTITUDE;
-  else if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_REFLEX))
-    stype = SAVING_REFLEX;
-  else if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_WILL))
-    stype = SAVING_WILL;
-  else
-    return FALSE;
-  total = char_get_save(victim, stype) + rand_number(1, 20);
-  dc = spell_info[spellnum].spell_level + level + ability_mod_value(cast_stat);
-  if (ch) {
-    if (char_has_school_feat(ch, CFEAT_SPELL_FOCUS, spell_info[spellnum].school))
-      dc++;
-    if (char_has_school_feat(ch, CFEAT_GREATER_SPELL_FOCUS, spell_info[spellnum].school))
-      dc++;
-  }
-  if (total >= dc)
-    return TRUE;
   return FALSE;
 }
 
@@ -149,142 +128,7 @@ int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum, i
 int mag_damage(int level, struct char_data *ch, struct char_data *victim,
 		     int spellnum)
 {
-  int dam = 0;
 
-  if (victim == NULL || ch == NULL)
-    return (0);
-
-  switch (spellnum) {
-    /* Mostly mages */
-  case SPELL_MAGIC_MISSILE:
-    dam = dice(MIN(level, 5), 4) + MIN(level, 5);
-    break;
-
-  case SPELL_CHILL_TOUCH:	/* chill touch also has an affect */
-    dam = dice(1, 6);
-    break;
-
-  case SPELL_BURNING_HANDS:
-    dam = dice(MIN(level, 5), 4);
-    break;
-
-  case SPELL_SHOCKING_GRASP:
-    dam = dice(1, 8) + MIN(level, 20);
-    break;
-
-  case SPELL_LIGHTNING_BOLT:
-  case SPELL_FIREBALL:
-    dam = dice(MIN(level, 10), 6);
-    break;
-
-  case SPELL_COLOR_SPRAY:
-    dam = dice(1, 1) + 1;
-    break;
-
-    /* Mostly clerics */
-  case SPELL_DISPEL_EVIL:
-    dam = dice(6, 8) + 6;
-    if (char_is_evil(ch)) {
-      victim = ch;
-      dam = GET_HIT(ch) - 1;
-    } else if (char_is_good(victim)) {
-      act("The gods protect $N.", FALSE, ch, 0, victim, TO_CHAR);
-      return (0);
-    }
-    break;
-
-  case SPELL_DISPEL_GOOD:
-    dam = dice(6, 8) + 6;
-    if (char_is_good(ch)) {
-      victim = ch;
-      dam = GET_HIT(ch) - 1;
-    } else if (char_is_evil(victim)) {
-      act("The gods protect $N.", FALSE, ch, 0, victim, TO_CHAR);
-      return (0);
-    }
-    break;
-
-  case SPELL_CALL_LIGHTNING:
-    dam = dice(MIN(level, 10), 10);
-    break;
-
-  case SPELL_HARM:
-    dam = dice(8, 8) + 8;
-    break;
-
-  case SPELL_ENERGY_DRAIN:
-    if (char_get_level(victim) <= 2)
-      dam = 100;
-    else
-      dam = dice(1, 10);
-    break;
-
-    /* Area spells */
-  case SPELL_EARTHQUAKE:
-    dam = dice(2, 8) + level;
-    break;
-
-  case SPELL_INFLICT_LIGHT:
-    dam = dice(1, 8) + MIN(level, 5);
-    break;
-  case SPELL_INFLICT_CRITIC:
-    dam = dice(4, 8) + MIN(level, 20);
-    break;
-
-  case SPELL_ACID_SPLASH:
-  case SPELL_RAY_OF_FROST:
-    dam = dice(1, 3);
-    break;
-
-  case SPELL_DISRUPT_UNDEAD:
-    if (char_aff_flagged(victim, AFF_UNDEAD))
-      dam = dice(1, 6);
-    else {
-      send_to_char(ch, "This magic only affects the undead!\r\n");
-      dam = 0;
-    }
-    break;
-
-  case SPELL_ICE_STORM:
-  case SPELL_SHOUT:
-    dam = dice(5, 6);
-    break;
-
-  case SPELL_CONE_OF_COLD:
-    dam = dice(MIN(level, 15), 6);
-    break;
-
-  } /* switch(spellnum) */
-
-  if (mag_newsaves(ch, victim, spellnum, level, char_get_aff_abils_intel(ch))) {
-    if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_NONE)) {
-      send_to_char(victim, "@g*save*@y You avoid any injury.@n\r\n");
-      dam = 0;
-    } else if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_HALF)) {
-      if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_REFLEX) &&
-          char_get_feats(victim, FEAT_EVASION) && 
-          (!char_get_equipment(victim, WEAR_BODY) ||
-          obj_get_type_flag(char_get_equipment(victim, WEAR_BODY)) != ITEM_ARMOR ||
-          obj_get_value(char_get_equipment(victim, WEAR_BODY), VAL_ARMOR_SKILL) < ARMOR_TYPE_MEDIUM)) {
-        send_to_char(victim, "@g*save*@y Your evasion ability allows you to avoid ANY injury.@n\r\n");
-        dam = 0;
-      } else {
-        send_to_char(victim, "@g*save*@y You take half damage.@n\r\n");
-        dam /= 2;
-      }
-    }
-  } else if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_HALF) &&
-             IS_SET(spell_info[spellnum].save_flags, MAGSAVE_REFLEX) &&
-             char_get_feats(victim, FEAT_IMPROVED_EVASION) && 
-             (!char_get_equipment(victim, WEAR_BODY) ||
-              obj_get_type_flag(char_get_equipment(victim, WEAR_BODY)) != ITEM_ARMOR ||
-              obj_get_value(char_get_equipment(victim, WEAR_BODY), VAL_ARMOR_SKILL) < ARMOR_TYPE_MEDIUM)) {
-    send_to_char(victim, "@r*save*@y Your improved evasion prevents full damage even on failure.@n\r\n");
-    dam /= 2;
-  }
-
-  /* and finally, inflict the damage */
-  return (1);
 }
 
 
@@ -863,134 +707,7 @@ const char *mag_summon_msgs[] = {
 
 void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spellnum, char *arg)
 {
-  struct char_data *mob = NULL;
-  struct obj_data *tobj, *next_obj;
-  int msg = 0, num = 1, handle_corpse = FALSE, affs = 0, affvs = 0, assist = 0, i, j, count;
-  char *buf = NULL;
-  char buf2[MAX_INPUT_LENGTH];
-  int lev;
-  mob_vnum mob_num;
 
-  if (ch == NULL)
-    return;
-
-  lev = spell_info[spellnum].spell_level;
-
-  switch (spellnum) {
-  case SPELL_ANIMATE_DEAD:
-    if (obj == NULL) {
-      send_to_char(ch, "With what corpse?\r\n");
-      return;
-    }
-    if (!obj_is_corpse(obj)) {
-      send_to_char(ch, "That's not a corpse!\r\n");
-      return;
-    }
-    handle_corpse = TRUE;
-    msg = 11;
-    mob_num = MOB_ZOMBIE;
-    break;
-
-  case SPELL_SUMMON_MONSTER_I:
-  case SPELL_SUMMON_MONSTER_II:
-  case SPELL_SUMMON_MONSTER_III:
-  case SPELL_SUMMON_MONSTER_IV:
-  case SPELL_SUMMON_MONSTER_V:
-  case SPELL_SUMMON_MONSTER_VI:
-  case SPELL_SUMMON_MONSTER_VII:
-  case SPELL_SUMMON_MONSTER_VIII:
-  case SPELL_SUMMON_MONSTER_IX:
-    mob_num = NOBODY;
-    affvs = 1;
-    assist = 1;
-    if (arg) {
-      buf = arg;
-      skip_spaces(&buf);
-      if (!*buf)
-        buf = NULL;
-    }
-    j = char_align_type(ch);
-    if (buf) {
-      buf = any_one_arg(buf, buf2);
-      for (i = lev - 1; i >= 0; i--) {
-        for (count = 0; monsum_list[i][j][count] != NOBODY; count++) {
-          mob_num = monsum_list[i][j][count];
-          if (real_mobile(mob_num) == NOBODY)
-            mob_num = NOBODY;
-          else if (!is_name(buf2, mob_proto[real_mobile(mob_num)].name))
-            mob_num = NOBODY;
-          else
-            break;
-        }
-        if (mob_num != NOBODY)
-          break;
-      }
-      if (mob_num == NOBODY) {
-        send_to_char(ch, "That's not a name for a monster you can summon. Summoning something else.\r\n");
-      } else {
-        log("lev=%d, i=%d, ngen=%d", lev, i, lev - i);
-        switch (lev - i) {
-        case 1:
-          num = 1;
-          break;
-        case 2:
-          num = rand_number(1, 3);
-          break;
-        default:
-          num = rand_number(1, 4) + 1;
-          break;
-        }
-      }
-    }
-    if (mob_num == NOBODY) {
-      num = 1;
-      for (count = 0; monsum_list[lev - 1][j][count] != NOBODY; count++);
-      if (!count) {
-        log("No monsums for spell level %d align %s", lev, alignments[j]);
-        return;
-      }
-      count--;
-      mob_num = monsum_list[lev - 1][j][rand_number(0, count)];
-    }
-    break;
-
-  default:
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM)) {
-    send_to_char(ch, "You are too giddy to have any followers!\r\n");
-    return;
-  }
-  for (i = 0; i < num; i++) {
-    if (!(mob = read_mobile(mob_num, VIRTUAL))) {
-      send_to_char(ch, "You don't quite remember how to summon that creature.\r\n");
-      return;
-    }
-    char_to_room(mob, char_get_in_room(ch));
-    if (affs)
-      mag_affects(level, ch, mob, spellnum);
-    if (affvs)
-      mag_affectsv(level, ch, mob, spellnum);
-    char_set_carry_weight(mob, 0);
-    char_set_carry_items(mob, 0);
-    char_aff_set(mob, AFF_CHARM, true);
-    act(mag_summon_msgs[msg], FALSE, ch, 0, mob, TO_ROOM);
-    load_mtrigger(mob);
-    add_follower(mob, ch);
-    if (assist && char_get_fighting(ch)) {
-      set_fighting(mob, char_get_fighting(ch));
-    }
-    mob->master_id = char_get_idnum(ch);
-  }
-  if (handle_corpse) {
-    for (tobj = obj->contains; tobj; tobj = next_obj) {
-      next_obj = tobj->next_content;
-      obj_from_obj(tobj);
-      obj_to_char(tobj, mob);
-    }
-    extract_obj(obj);
-  }
 }
 
 
@@ -1016,7 +733,6 @@ void mag_points(int level, struct char_data *ch, struct char_data *victim,
     healing = 100 + dice(3, 8);
     send_to_char(victim, "A warm feeling floods your body.\r\n");
     if (char_aff_flagged(ch, AFF_CDEATH)) {
-      affectv_from_char(ch, ART_QUIVERING_PALM);
       send_to_char(ch, "Your nerves settle slightly\r\n");
     }
     break;
@@ -1186,54 +902,6 @@ void mag_creations(int level, struct char_data *ch, int spellnum)
   load_otrigger(tobj);
 }
 
-/* affect_update_violence: called from fight.c (causes spells to wear off) */
-void affect_update_violence(void)
-{
-  struct affected_type *af, *next;
-  struct char_data *i;
-  int dam;
-  int maxdam;
-
-  for (i = affectv_list; i; i = i->next_affectv) {
-    for (af = i->affectedv; af; af = next) {
-      next = af->next;
-      if (af->duration >= 1) {
-        af->duration--;
-        switch (af->type) {
-        case ART_EMPTY_BODY:
-          if (char_get_ki(i) >= 10) {
-            char_set_ki(i, char_get_ki(i) - (10));
-          } else {
-            af->duration = 0; /* Wear it off immediately! No more ki */
-          }
-        }
-      } else if (af->duration == -1) {     /* No action */
-        continue;
-      }
-      if (!af->duration) {
-        if ((af->type > 0) && (af->type < SKILL_TABLE_SIZE))
-          if (!af->next || (af->next->type != af->type) ||
-              (af->next->duration > 0))
-            if (spell_info[af->type].wear_off_msg)
-              send_to_char(i, "%s\r\n", spell_info[af->type].wear_off_msg);
-          if (af->bitvector == AFF_SUMMONED) {
-            stop_follower(i);
-            if (!char_is_dead(i))
-              extract_char(i);
-          }
-          if (af->type == ART_QUIVERING_PALM) {
-            maxdam = GET_HIT(i) + 8;
-            dam = GET_MAX_HIT(i) * 3 / 4;
-            dam = MIN(dam, maxdam);
-            dam = MAX(0, dam);
-            log("Creeping death strike doing %d dam", dam);
-          }
-        affectv_remove(i, af);
-      }
-    }
-  }
-}
-
 void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
                       int spellnum)
 {
@@ -1365,10 +1033,6 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
     send_to_char(ch, "%s", CONFIG_NOEFFECT);
     return;
   }
-
-  for (i = 0; i < MAX_SPELL_AFFECTS; i++)
-    if (af[i].bitvector || (af[i].location != APPLY_NONE))
-      affectv_join(victim, af+i, accum_duration, FALSE, accum_affect, FALSE);
 
   if (to_vict != NULL)
     act(to_vict, FALSE, victim, 0, ch, TO_CHAR);

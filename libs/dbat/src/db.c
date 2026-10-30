@@ -48,7 +48,6 @@
 #include "dbat/shop.h"
 #include "dbat/handler.h"
 #include "dbat/mail.h"
-#include "dbat/clan.h"
 #include "dbat/boards.h"
 #include "dbat/log.h"
 #include "dbat/objsave.h"
@@ -886,9 +885,6 @@ void boot_db(void)
 
   log("Loading social messages.");
   boot_social_messages();
-
-  log("Loading Clans.");
-  clanBoot();
 
   log("Building command list.");
   create_command_list(); /* aedit patch -- M. Scott */
@@ -1896,9 +1892,6 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
     log("SYSERR: Invalid class %d for mob #%d", ch->chclass, nr);
     ch->chclass = 28; /* set to commoner */
   }
-  char_set_saving_throw(ch, SAVING_FORTITUDE, 0);
-  char_set_saving_throw(ch, SAVING_REFLEX, 0);
-  char_set_saving_throw(ch, SAVING_WILL, 0);
 
   /* GET_CLASS_RANKS(ch, t[3]) = GET_LEVEL(ch); */
  
@@ -1926,9 +1919,6 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
  
   SPEAKING(ch) = MIN_LANGUAGES;
   set_height_and_weight_by_race(ch);
- 
-  for (j = 0; j < 3; j++)
-    char_set_apply_saving_throw(ch, j, 0);
  
   if (char_mob_flagged(ch, MOB_AUTOBALANCE)) {
     mob_autobalance(ch); 
@@ -2069,13 +2059,11 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
       af.location = num4;
       af.bitvector = num5;
       af.specific = num6;
-      affectv_to_char(ch, &af);
     }
   }
 
   CASE("Feat") {
     sscanf(value, "%d %d", &num, &num2);
-    char_set_feats(ch, num, num2);
   }
 
   CASE("Skill") {
@@ -2984,7 +2972,6 @@ struct char_data *create_char(void)
   ch->next = character_list;
   character_list = ch;
   ch->next_affect = NULL;
-  ch->next_affectv = NULL;
   char_set_id(ch, dg_new_mob_uid());
   /* find_char helper */
   add_to_lookup_table(char_get_id(ch), MOB_TRIGGER, (void *)ch);
@@ -3013,7 +3000,6 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   mob->next = character_list;
   character_list = mob;
   mob->next_affect = NULL;
-  mob->next_affectv = NULL;
 
   if (char_is_hoshijin(mob) && char_get_sex(mob) == SEX_MALE) {
    mob->hairl = 0;
@@ -4398,8 +4384,6 @@ void free_char(struct char_data *ch)
       free(char_get_name(ch));
     if (char_get_voice(ch))
       free(char_get_voice(ch));
-    if (char_get_clan(ch))
-      free(char_get_clan(ch));
     if (ch->title)
       free(ch->title);
     if (ch->short_descr)
@@ -4654,8 +4638,6 @@ void init_char(struct char_data *ch)
   }
 
   char_set_admlevel(ch, ADMLVL_NONE);
-  char_set_crank(ch, 0);
-  char_set_clan(ch, strdup("None."));
   char_set_absorbs(ch, 0);
   char_set_absorbing(ch, NULL);
   char_set_absorbby(ch, NULL);
@@ -4666,7 +4648,6 @@ void init_char(struct char_data *ch)
   /* If this is our first player make him LVL_IMPL. */
   if (top_of_p_table == 0) {
     admin_set(ch, ADMLVL_IMPL);
-    char_set_chclasses(ch, char_get_class(ch), char_get_level(ch));
 
     /* The implementor never goes through do_start(). */
     ch->baseki = 1000;
@@ -4705,9 +4686,6 @@ void init_char(struct char_data *ch)
 
   for (i = 0; i < AF_ARRAY_MAX; i++)
     char_get_affected_by(ch)[i] = 0;
-
-  for (i = 0; i < 3; i++)
-    char_set_apply_saving_throw(ch, i, 0);
 
   for (i = 0; i < 3; i++)
     GET_COND(ch, i) = (char_get_admlevel(ch) == ADMLVL_IMPL ? -1 : 24);

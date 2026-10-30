@@ -13,7 +13,6 @@
 #include "dbat/config.h"
 #include "dbat/db.h"
 #include "dbat/act.informative.h"
-#include "dbat/clan.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/weather.h"
 #include "dbat/objsave.h"
@@ -496,16 +495,6 @@ int enter_player_game (struct descriptor_data *d)
      d->level = 1;
     }
 
-    if (char_get_clan(d->character) != NULL && !strstr(char_get_clan(d->character), "None")) {
-     if(!clanIsMember(char_get_clan(d->character), d->character)) {
-       if (!clanIsModerator(char_get_clan(d->character), d->character)) {
-        if (!checkCLAN(d->character)) {
-         write_to_output(d, "Your clan no longer exists.\r\n");
-         char_set_clan(d->character, strdup("None."));
-       }
-      }
-     }
-    }
     d->character->rp = d->rpp;
 	d->character->rbank = d->rbank;
     if(char_moon_ok(d->character)) {

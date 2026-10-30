@@ -80,7 +80,7 @@ struct player_special_data
    int8_t conditions[NUM_CONDITIONS]; /* Drunk, full, thirsty			*/
 
    // Only the character's own class in this array is used, to store PS/Practices.
-   int class_skill_points[NUM_CLASSES];   /* Skill points earned from a class	*/
+   int practice_points; /* Practice points available to the character */
    struct txt_block *comm_hist[NUM_HIST]; /* Player's communcations history     */
    int olc_zone;                          /* Zone where OLC is permitted		*/
    int speaking;                          /* Language currently speaking		*/
@@ -108,15 +108,7 @@ struct player_special_data
    int tlevel;
    int ability_trains;
    int feat_points;
-   int spell_level[MAX_SPELL_LEVEL];
    // END UNUSED
-};
-
-struct innate_node
-{
-   int timer;
-   int spellnum;
-   struct innate_node *next;
 };
 
 /* memory structure for characters */
@@ -139,13 +131,6 @@ struct mob_special_data
    int8_t default_pos; /* Default position for NPC                */
    int8_t damnodice;   /* The number of damage dice's	       */
    int8_t damsizedice; /* The size of the damage dice's           */
-};
-
-// Part of an unused system.
-struct queued_act
-{
-   int level;
-   int spellnum;
 };
 
 /* Structure used for chars following other chars */
@@ -456,36 +441,10 @@ struct char_data
    short clones;
 
    int relax_count;
-
-   // Legacy fields still read by gameplay code.
-   int chclasses[NUM_CLASSES];
-
-   // UNUSED
-   int epicclasses[NUM_CLASSES];
-   int16_t saving_throw[3];
-   int16_t apply_saving_throw[3];
-   int64_t ki;
-   int16_t spellfail;
-   int16_t armorcheck;
-   int16_t armorcheckall;
-   int crank;
-   int8_t feats[MAX_FEATS + 1];
-   int combat_feats[CFEAT_MAX + 1][FT_ARRAY_MAX];
-   bitvector_t school_feats[SFEAT_MAX + 1];
-   short stupidkiss;
-   int64_t suppressed;
-   char *clan;
-   int alignment_ethic;
-   struct innate_node *innate;
-   struct char_data *next_affectv;
-   struct affected_type *affectedv;
-   struct queued_act *actq;
-   // END UNUSED
 };
 
 extern struct char_data *character_list;
 extern struct char_data *affect_list;
-extern struct char_data *affectv_list;
 extern struct player_special_data dummy_mob;
 
 extern struct index_data *mob_index;

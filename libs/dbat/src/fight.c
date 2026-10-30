@@ -1950,9 +1950,6 @@ void raw_kill(struct char_data * ch, struct char_data * killer)
   while (ch->affected)
     affect_remove(ch, ch->affected);
 
-  while (ch->affectedv)
-    affectv_remove(ch, ch->affectedv);
-
   /* To make ordinary commands work in scripts.  welcor*/  
   if (char_get_position(ch) != POS_SITTING && char_get_position(ch) != POS_SLEEPING && char_get_position(ch) != POS_RESTING) 
    char_set_position(ch, POS_STANDING); 

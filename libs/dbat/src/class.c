@@ -228,7 +228,6 @@ void do_start(struct char_data *ch)
   char_set_class_level(ch, 1);
   char_set_race_level(ch, 0);
   char_set_level_adj(ch, 0);
-  char_set_chclasses(ch, char_get_class(ch), 1);
   char_set_exp(ch, 1);
  
   if (char_is_android(ch)) {
@@ -723,9 +722,6 @@ void advance_level(struct char_data *ch, int whichclass)
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
   switch (ranks) {
   case 1:
-    for (i = 0; (j = free_start_feats[whichclass][i]); i++) {
-      char_set_feats(ch, j, 1);
-    }
     break;
   case 2:
     switch (whichclass) {
@@ -751,9 +747,6 @@ void advance_level(struct char_data *ch, int whichclass)
 
   if (char_get_class_level(ch) == 1 && char_get_race_level(ch) < 2) { /* Filled in below */
       char_set_race_level(ch, 0);
-      char_set_saving_throw(ch, SAVING_FORTITUDE, 0);
-      char_set_saving_throw(ch, SAVING_REFLEX, 0);
-      char_set_saving_throw(ch, SAVING_WILL, 0);
   }
 
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */

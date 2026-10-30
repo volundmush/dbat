@@ -415,26 +415,13 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
       if (aff->type)
         fprintf(fd, "Affect: %d %d %d %d %d %d\n", aff->type, aff->duration,
                 aff->modifier, aff->location, (int)aff->bitvector, aff->specific);
-    for (aff = mob->affectedv; aff; aff = aff->next)
-      if (aff->type)
-        fprintf(fd, "AffectV: %d %d %d %d %d %d\n", aff->type, aff->duration,
-                aff->modifier, aff->location, (int)aff->bitvector, aff->specific);
   }
-  for (i = 0; i <= NUM_FEATS_DEFINED; i++)
-    if (char_get_feats(mob, i))
-      fprintf(fd, "Feat: %d %d\n", i, char_get_feats(mob, i));
   for (i = 0; i < SKILL_TABLE_SIZE; i++)
     if (char_get_skills_base(mob, i))
-      fprintf(fd, "Skill: %d %d\n", i, char_get_feats(mob, i));
-  for (i = 0; i <= NUM_FEATS_DEFINED; i++)
+      fprintf(fd, "Skill: %d %d\n", i, char_get_skills_base(mob, i));
+  for (i = 0; i <= SKILL_TABLE_SIZE; i++)
     if (char_get_skills_mod(mob, i))
-      fprintf(fd, "SkillMod: %d %d\n", i, char_get_feats(mob, i));
-  for (i = 0; i < NUM_CLASSES; i++) {
-    if (char_get_chclasses(mob, i))
-      fprintf(fd, "Class: %d %d\n", i, char_get_chclasses(mob, i));
-    if (char_get_epicclasses(mob, i))
-      fprintf(fd, "EpicClass: %d %d\n", i, char_get_epicclasses(mob, i));
-  }
+      fprintf(fd, "SkillMod: %d %d\n", i, char_get_skills_mod(mob, i));
   fputs("E\n", fd);
   return TRUE;
 }

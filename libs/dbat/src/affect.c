@@ -115,65 +115,24 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
     break;
 
   case APPLY_SPELL_LVL_0:
-    if(!char_is_npc(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_0) += mod;
-    break;
-
   case APPLY_SPELL_LVL_1:
-    if(!char_is_npc(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_1) += mod;
-    break;
-
   case APPLY_SPELL_LVL_2:
-    if(!char_is_npc(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_2) += mod;
-    break;
-
   case APPLY_SPELL_LVL_3:
-    if(!char_is_npc(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_3) += mod;
-    break;
-
   case APPLY_SPELL_LVL_4:
-    if(!char_is_npc(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_4) += mod;
-    break;
-
   case APPLY_SPELL_LVL_5:
-    if(!char_is_npc(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_5) += mod;
-    break;
-
   case APPLY_SPELL_LVL_6:
-    if(!char_is_npc(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_6) += mod;
-    break;
-
   case APPLY_SPELL_LVL_7:
-    if(!char_is_npc(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_7) += mod;
-    break;
-
   case APPLY_SPELL_LVL_8:
-    if(!char_is_npc(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_8) += mod;
-    break;
-
   case APPLY_SPELL_LVL_9:
-    if(!char_is_npc(ch))
-      GET_SPELL_LEVEL(ch, SPELL_LEVEL_9) += mod;
     break;
 
   case APPLY_FORTITUDE:
-    char_set_apply_saving_throw(ch, SAVING_FORTITUDE, char_get_apply_saving_throw(ch, SAVING_FORTITUDE) + (mod));
     break;
 
   case APPLY_REFLEX:
-    char_set_apply_saving_throw(ch, SAVING_REFLEX, char_get_apply_saving_throw(ch, SAVING_REFLEX) + (mod));
     break;
 
   case APPLY_WILL:
-    char_set_apply_saving_throw(ch, SAVING_WILL, char_get_apply_saving_throw(ch, SAVING_WILL) + (mod));
     break;
 
   case APPLY_SKILL:
@@ -181,13 +140,9 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
     break;
 
   case APPLY_FEAT:
-    char_set_feats(ch, spec, char_get_feats(ch, spec) + (mod));
     break;
 
   case APPLY_ALLSAVES:
-    char_set_apply_saving_throw(ch, SAVING_FORTITUDE, char_get_apply_saving_throw(ch, SAVING_FORTITUDE) + (mod));
-    char_set_apply_saving_throw(ch, SAVING_REFLEX, char_get_apply_saving_throw(ch, SAVING_REFLEX) + (mod));
-    char_set_apply_saving_throw(ch, SAVING_WILL, char_get_apply_saving_throw(ch, SAVING_WILL) + (mod));
     break;
 
   case APPLY_ALL_STATS:
@@ -261,10 +216,6 @@ void affect_total(struct char_data *ch)
   struct affected_type *af;
   int i, j;
 
-  char_set_armorcheckall(ch, 0);
-  char_set_armorcheck(ch, 0);
-  char_set_spellfail(ch, 0);
-
   for (i = 0; i < NUM_WEARS; i++) {
     if (char_get_equipment(ch, i))
       for (j = 0; j < MAX_OBJ_AFFECT; j++)
@@ -280,18 +231,8 @@ void affect_total(struct char_data *ch)
 
   ch->aff_abils = ch->real_abils;
 
-  char_set_apply_saving_throw(ch, SAVING_FORTITUDE, char_get_feats(ch, FEAT_GREAT_FORTITUDE) * 3);
-  char_set_apply_saving_throw(ch, SAVING_REFLEX, char_get_feats(ch, FEAT_LIGHTNING_REFLEXES) * 3);
-  char_set_apply_saving_throw(ch, SAVING_WILL, char_get_feats(ch, FEAT_IRON_WILL) * 3);
-
   for (i = 0; i < NUM_WEARS; i++) {
     if (char_get_equipment(ch, i)) {
-      if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_ARMOR) {
-        char_set_spellfail(ch, char_get_spellfail(ch) + (obj_get_value(char_get_equipment(ch, i), VAL_ARMOR_SPELLFAIL)));
-        char_set_armorcheckall(ch, char_get_armorcheckall(ch) + (obj_get_value(char_get_equipment(ch, i), VAL_ARMOR_CHECK)));
-        if (!is_proficient_with_armor(ch, obj_get_value(char_get_equipment(ch, i), VAL_ARMOR_SKILL)))
-          char_set_armorcheck(ch, char_get_armorcheck(ch) + (obj_get_value(char_get_equipment(ch, i), VAL_ARMOR_CHECK)));
-      }
       for (j = 0; j < MAX_OBJ_AFFECT; j++)
 	affect_modify_ar(ch, char_get_equipment(ch, i)->affected[j].location,
 		      char_get_equipment(ch, i)->affected[j].modifier,
@@ -399,22 +340,6 @@ void affect_from_char(struct char_data *ch, int type)
   }
 }
 
-
-
-/* Call affect_remove with every spell of spelltype "skill" */
-void affectv_from_char(struct char_data *ch, int type)
-{
-  struct affected_type *hjp, *next;
-
-  for (hjp = ch->affectedv; hjp; hjp = next) {
-    next = hjp->next;
-    if (hjp->type == type)
-      affectv_remove(ch, hjp);
-  }
-}
-
-
-
 /*
  * Return TRUE if a char is affected by a spell (SPELL_XXX),
  * FALSE indicates not affected.
@@ -429,24 +354,6 @@ bool affected_by_spell(struct char_data *ch, int type)
 
   return (FALSE);
 }
-
-
-
-/*
- * Return TRUE if a char is affected by a spell (SPELL_XXX),
- * FALSE indicates not affected.
- */
-bool affectedv_by_spell(struct char_data *ch, int type)
-{
-  struct affected_type *hjp;
-
-  for (hjp = ch->affectedv; hjp; hjp = hjp->next)
-    if (hjp->type == type)
-      return (TRUE);
-
-  return (FALSE);
-}
-
 
 
 void affect_join(struct char_data *ch, struct affected_type *af,
@@ -476,72 +383,4 @@ void affect_join(struct char_data *ch, struct affected_type *af,
   }
   if (!found)
     affect_to_char(ch, af);
-}
-
-
-void affectv_to_char(struct char_data *ch, struct affected_type *af)
-{
-  struct affected_type *affected_alloc;
-
-  CREATE(affected_alloc, struct affected_type, 1);
-
-  if (!ch->affectedv) {
-    ch->next_affectv = affectv_list;
-    affectv_list = ch;
-  }
-  *affected_alloc = *af;
-  affected_alloc->next = ch->affectedv;
-  ch->affectedv = affected_alloc;
-
-  affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, TRUE);
-  affect_total(ch);
-}
-
-void affectv_remove(struct char_data *ch, struct affected_type *af)
-{
-  struct affected_type *cmtemp;
-
-  if (ch->affectedv == NULL) {
-    core_dump();
-    return;
-  }
-
-  affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, FALSE);
-  REMOVE_FROM_LIST(af, ch->affectedv, next, cmtemp);
-  free(af);
-  affect_total(ch);
-  if (!ch->affectedv) {
-    struct char_data *temp;
-    REMOVE_FROM_LIST(ch, affectv_list, next_affectv, temp);
-    ch->next_affectv = NULL;
-  }
-}
-
-void affectv_join(struct char_data *ch, struct affected_type *af,
-                      bool add_dur, bool avg_dur, bool add_mod, bool avg_mod)
-{
-  struct affected_type *hjp, *next;
-  bool found = FALSE;
-
-  for (hjp = ch->affectedv; !found && hjp; hjp = next) {
-    next = hjp->next;
-
-    if ((hjp->type == af->type) && (hjp->location == af->location)) {
-      if (add_dur)
-        af->duration += hjp->duration;
-      if (avg_dur)
-        af->duration /= 2;
-
-      if (add_mod)
-        af->modifier += hjp->modifier;
-      if (avg_mod)
-        af->modifier /= 2;
-
-      affectv_remove(ch, hjp);
-      affectv_to_char(ch, af);
-      found = TRUE;
-    }
-  }
-  if (!found)
-    affectv_to_char(ch, af);
 }

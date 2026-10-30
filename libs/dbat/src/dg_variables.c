@@ -615,9 +615,6 @@ in the vault (vnum: 453) now and then. you can just use
              strcpy(str, "0");
           }
           else if (!strcasecmp(field, "clan")) {
-            if (char_get_clan(c) != NULL && strstr(char_get_clan(c), subfield))
-             strcpy(str, "1");
-            else
              strcpy(str, "0");
           }
           else if (!strcasecmp(field, "class")) {
@@ -967,12 +964,8 @@ in the vault (vnum: 453) now and then. you can just use
         case 'r':
           if (!strcasecmp(field, "room")) {  /* in NOWHERE, return the void */
 /* see note in dg_scripts.h */
-#ifdef ACTOR_ROOM_IS_UID
             snprintf(str, slen, "%c%d",UID_CHAR,
-               (char_get_in_room(c)!= NOWHERE) ? world[char_get_in_room(c)].number + ROOM_ID_BASE : ROOM_ID_BASE);
-#else
-            snprintf(str, slen, "%d", (char_get_in_room(c)!= NOWHERE) ? world[char_get_in_room(c)].number : 0);
-#endif
+               (char_get_in_room(c) != NOWHERE) ? world[char_get_in_room(c)].number + ROOM_ID_BASE : ROOM_ID_BASE);
           }
           else if (!strcasecmp(field, "race")) {
                 snprintf(str, slen, "%s", TRUE_RACE(c));
@@ -1029,27 +1022,6 @@ in the vault (vnum: 453) now and then. you can just use
               }
             }
             *str = '\0'; /* so the parser know we recognize 'skillset' as a field */
-          }
-          else if (!strcasecmp(field, "saving_fortitude")) {
-            if (subfield && *subfield) {
-              int addition = atoi(subfield);
-              char_set_apply_saving_throw(c, SAVING_FORTITUDE, char_get_apply_saving_throw(c, SAVING_FORTITUDE) + (addition));
-            }
-            snprintf(str, slen, "%d", char_get_apply_saving_throw(c, SAVING_FORTITUDE));
-          }
-          else if (!strcasecmp(field, "saving_reflex")) {
-            if (subfield && *subfield) {
-              int addition = atoi(subfield);
-              char_set_apply_saving_throw(c, SAVING_REFLEX, char_get_apply_saving_throw(c, SAVING_REFLEX) + (addition));
-            }
-            snprintf(str, slen, "%d", char_get_apply_saving_throw(c, SAVING_REFLEX));
-          }
-          else if (!strcasecmp(field, "saving_will")) {
-            if (subfield && *subfield) {
-              int addition = atoi(subfield);
-              char_set_apply_saving_throw(c, SAVING_WILL, char_get_apply_saving_throw(c, SAVING_WILL) + (addition));
-            }
-            snprintf(str, slen, "%d", char_get_apply_saving_throw(c, SAVING_WILL));
           }
 
           break;

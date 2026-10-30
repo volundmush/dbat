@@ -48,7 +48,6 @@
 #include "dbat/screen.h"
 #include "dbat/mail.h"
 #include "dbat/guild.h"
-#include "dbat/clan.h"
 
 /* local functions */
 static void gen_map(struct char_data *ch, int num);
@@ -2950,13 +2949,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch)
 		}
 	}
 	send_to_char(ch, "\r\n");
-	if (char_get_clan(i) != NULL && !strstr(char_get_clan(i), "None")) {
-		sprintf(buf, "%s", char_get_clan(i));
-		clan = TRUE;
-	}
-	if (char_get_clan(i) == NULL) {
-		clan = FALSE;
-	}
+	clan = FALSE;
 	if (!char_is_npc(i)) {
 		send_to_char(ch, "            @D[@mClan        @D: @W%-20s@D]@n\r\n", clan ? buf : "None.");
 	}
@@ -5642,9 +5635,6 @@ ACMD(do_score)
      sprintf(version, "Alpha 0.5");
    }
    send_to_char(ch, "  @D| @CModel@D: %15s@D,    @CUGP@D: @G%15s@D,  @CVersion@D: @r%-12s@D|@n\n", model, absorb > 0 ? "@RN/A" : add_commas(char_get_upgrade(ch)), version);
-  }
-  if (char_get_clan(ch) != NULL) {
-   send_to_char(ch, "  @D|  @CClan@D: @W%-64s@D|@n\n", char_get_clan(ch));
   }
  send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", TRUE_RACE(ch), SENSEI_NAME(ch), SENSEI_STYLE(ch));
   char hei[300], wei[300];
@@ -8446,19 +8436,7 @@ ACMD(do_whois)
   clear_char(victim);
   CREATE(victim->player_specials, struct player_special_data, 1);
   if (load_char(argument, victim) >= 0) {
-    if (char_get_clan(victim) != NULL) {
-     if (!strstr(char_get_clan(victim), "None")) {
-      sprintf(buf, "%s", char_get_clan(victim));
-      clan = TRUE;
-     }
-     if (strstr(char_get_clan(victim), "Applying")) {
-       sprintf(buf, "%s", char_get_clan(victim));
-      clan = TRUE;
-     }
-    }
-    if (char_get_clan(victim) == NULL || strstr(char_get_clan(victim), "None")) {
-     clan = FALSE;
-    }
+    clan = FALSE;
     send_to_char(ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
     if (char_get_admlevel(victim) >= ADMLVL_IMMORT) {
       send_to_char(ch, "@cName     @D: @G%s\r\n", char_get_name(victim));
@@ -8467,11 +8445,6 @@ ACMD(do_whois)
     }
     else {
       send_to_char(ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", char_get_name(victim), SENSEI_NAME(victim), TRUE_RACE(victim), char_get_title(victim), clan ? buf : "None.");
-      if (clan == TRUE && !strstr(char_get_clan(victim), "Applying")) {
-       if (checkCLAN(victim) == TRUE) {
-        clanRANKD(char_get_clan(victim), ch, victim);
-       }
-      }
      }
     send_to_char(ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
     } else {

@@ -51,7 +51,6 @@ it.
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
 #include "dbat/improved-edit.h"
-#include "dbat/clan.h"
 #include "dbat/dg_comm.h"
 #include "dbat/config.h"
 #include "dbat/xdir.h"
@@ -502,16 +501,6 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
   else {
   obj = read_object(board_vnum, REAL);
   bnum = obj_get_vnum(obj);
-  char clan[120];
-   if (obj_extra_flagged(obj, ITEM_CBOARD)) {
-    if (char_get_clan(ch) != NULL) {
-      sprintf(clan, "%s", char_get_clan(ch));
-    }
-    if (!strstr(obj->action_description, clan)) {
-      send_to_char(ch, "You are incapable of reading this board!\r\n");
-      return;
-    }
-   }
   send_to_char(ch, "@W                  This is the %20s\r\n", obj->short_description);
   send_to_char(ch, "@rO@b============================================================================@rO@n\n"
     "     @D[@GX@D] means you have read the message, @D[@RX@D] means you have not.\r\n"
@@ -621,16 +610,6 @@ void board_display_msg(obj_vnum board_vnum, struct char_data * ch, int arg) {
   else {
   obj = read_object(board_vnum, REAL);
   bnum = obj_get_vnum(obj);
-   char clan[200];
-   if (obj_extra_flagged(obj, ITEM_CBOARD)) {
-    if (char_get_clan(ch) != NULL) {
-      sprintf(clan, "%s", char_get_clan(ch));
-    }
-    if (!strstr(obj->action_description, clan)) {
-      send_to_char(ch, "You are incapable of reading this board!\r\n");
-      return;
-    }
-   }
    extract_obj(obj);
   }
 
@@ -1031,22 +1010,8 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data * ch, int arg)
    return;
   }
   else {
-   char clan[120];
    obj = read_object(board_vnum, REAL);
-   if (obj_extra_flagged(obj, ITEM_CBOARD)) {
-    if (char_get_clan(ch) != NULL) {
-      sprintf(clan, "%s", char_get_clan(ch));
-    }
-    if (clanIsModerator(clan, ch) && strstr(obj->action_description, clan)) {
-     send_to_char(ch, "Exercising your clan leader powers....\r\n");
-    }
-    else if (char_get_admlevel(ch) < REMOVE_LVL(thisboard) && strcmp(char_get_name(ch), MESG_POSTER_NAME(cur))) {
-          send_to_char(ch, "You can't remove other people's messages.\r\n");
-          extract_obj(obj);
-          return;
-    }
-   }
-   else if (!obj_extra_flagged(obj, ITEM_CBOARD)) {
+   if (!obj_extra_flagged(obj, ITEM_CBOARD)) {
      if (char_get_admlevel(ch) < REMOVE_LVL(thisboard) && strcmp(char_get_name(ch), MESG_POSTER_NAME(cur))) {
 	  send_to_char(ch, "You can't remove other people's messages.\r\n");
           extract_obj(obj);

@@ -272,7 +272,7 @@ int load_char(const char *name, struct char_data *ch)
     /* character initializations */
     /* initializations necessary to keep some things straight */
     ch->affected = NULL;
-    ch->affectedv = NULL;
+
     for (i = 0; i < SKILL_TABLE_SIZE; i++) {
       SET_SKILL(ch, i, 0);
       SET_SKILL_BONUS(ch, i, 0);
@@ -281,10 +281,6 @@ int load_char(const char *name, struct char_data *ch)
     char_set_sex(ch, PFDEF_SEX);
     ch->size = PFDEF_SIZE;
     ch->chclass = CLASS_ROSHI;
-    for (i = 0; i < NUM_CLASSES; i++) {
-      char_set_chclasses(ch, i, 0);
-      char_set_epicclasses(ch, i, 0);
-    }
     char_set_loguser(ch, strdup("NOUSER"));
     ch->race = PFDEF_RACE;
     char_set_admlevel(ch, PFDEF_LEVEL);
@@ -296,7 +292,6 @@ int load_char(const char *name, struct char_data *ch)
     char_set_suppression(ch, PFDEF_SKIN);
     char_set_suppressed(ch, PFDEF_SKIN);
     char_set_fury(ch, PFDEF_HAIRL);
-    char_set_clan(ch, strdup("None."));
     char_set_level_adj(ch, PFDEF_LEVEL);
     char_set_hometown(ch, PFDEF_HOMETOWN);
     char_set_height(ch, PFDEF_HEIGHT);
@@ -308,7 +303,6 @@ int load_char(const char *name, struct char_data *ch)
     ch->life = 1.0;
     // GET_LIFEFORCE(ch) = PFDEF_BASEPL;
     char_set_lifeperc(ch, PFDEF_WEIGHT);
-    char_set_stupidkiss(ch, 0);
     char_set_position(ch, POS_STANDING);
     char_set_majinizer(ch, PFDEF_BASEPL);
     GET_GAUNTLET(ch)   = PFDEF_GAUNTLET;
@@ -361,9 +355,7 @@ int load_char(const char *name, struct char_data *ch)
     char_set_radar2(ch, PFDEF_RADAR2);
     char_set_radar3(ch, PFDEF_RADAR3);
     char_set_droom(ch, PFDEF_DROOM);
-    char_set_crank(ch, PFDEF_CRANK);
     char_set_alignment(ch, PFDEF_ALIGNMENT);
-    char_set_alignment_ethic(ch, PFDEF_ETHIC_ALIGNMENT);
     for (i = 0; i < AF_ARRAY_MAX; i++)
       char_get_affected_by(ch)[i] = PFDEF_AFFFLAGS;
     for (i = 0; i < PM_ARRAY_MAX; i++)
@@ -372,10 +364,6 @@ int load_char(const char *name, struct char_data *ch)
       PRF_FLAGS(ch)[i] = PFDEF_PREFFLAGS;
     for (i = 0; i < AD_ARRAY_MAX; i++)
       char_get_admflags(ch)[i] = 0;
-    for (i = 0; i < NUM_OF_SAVE_THROWS; i++) {
-      char_set_apply_saving_throw(ch, i, PFDEF_SAVETHROW);
-      char_set_saving_throw(ch, i, PFDEF_SAVETHROW);
-    }
     GET_LOADROOM(ch) = PFDEF_LOADROOM;
     GET_INVIS_LEV(ch) = PFDEF_INVISLEV;
     GET_FREEZE_LEV(ch) = PFDEF_FREEZELEV;
@@ -422,8 +410,7 @@ int load_char(const char *name, struct char_data *ch)
     SPEAKING(ch) = PFDEF_SPEAKING;
     GET_OLC_ZONE(ch) = PFDEF_OLC;
     GET_HOST(ch) = NULL;
-    for(i = 0; i < MAX_SPELL_LEVEL; i++)
-      GET_SPELL_LEVEL(ch, i) = 0;
+
     ch->time.birth = ch->time.created = ch->time.maxage = 0;
     ch->followers = NULL;
     GET_PAGE_LENGTH(ch) = PFDEF_PAGELENGTH;
@@ -481,8 +468,8 @@ int load_char(const char *name, struct char_data *ch)
 
       case 'C':
              if (!strcmp(tag, "Cha "))  ch->real_abils.cha      = atoi(line);
-        else if (!strcmp(tag, "Clan"))  char_set_clan(ch, strdup(line));
-        else if (!strcmp(tag, "Clar"))  char_set_crank(ch, atoi(line));
+        else if (!strcmp(tag, "Clan")) ;
+        else if (!strcmp(tag, "Clar")) ;
 	else if (!strcmp(tag, "Clas"))  ch->chclass = atoi(line);
         else if (!strcmp(tag, "Colr"))  {
           sscanf(line, "%d %s", &num, buf2);
@@ -505,9 +492,8 @@ int load_char(const char *name, struct char_data *ch)
 
       case 'E':
              if (!strcmp(tag, "Exp "))  char_set_exp(ch, atoi(line));
-        else if (!strcmp(tag, "Eali"))  char_set_alignment_ethic(ch, atoi(line));
-        else if (!strcmp(tag, "Ecls"))  { sscanf(line, "%d=%d", &num, &num2);
-                                          char_set_epicclasses(ch, num, num2); }
+        else if (!strcmp(tag, "Eali"));
+        else if (!strcmp(tag, "Ecls"))  { sscanf(line, "%d=%d", &num, &num2); }
         else if (!strcmp(tag, "Eye "))  char_set_eye(ch, atoi(line));
       break;
 
@@ -575,8 +561,7 @@ int load_char(const char *name, struct char_data *ch)
         else if (!strcmp(tag, "Mexp"))  load_molt(ch, line);
         else if (!strcmp(tag, "Mlvl"))  char_set_moltlevel(ch, atoi(line));
         else if (!strcmp(tag, "Move"))  load_HMVS(ch, line, LOAD_MOVE);
-        else if (!strcmp(tag, "Mcls"))  { sscanf(line, "%d=%d", &num, &num2);
-                                          char_set_chclasses(ch, num, num2); }
+        else if (!strcmp(tag, "Mcls"))  { sscanf(line, "%d=%d", &num, &num2); }
         else if (!strcmp(tag, "Maji"))  char_set_majinize(ch, atoi(line));
         else if (!strcmp(tag, "Majm"))  load_majin(ch, line);
         else if (!strcmp(tag, "Mimi"))  ch->mimic = atoi(line);
@@ -645,7 +630,7 @@ int load_char(const char *name, struct char_data *ch)
         else if (!strcmp(tag, "Slot"))  ch->skill_slots         = atoi(line);
         else if (!strcmp(tag, "Spek"))  SPEAKING(ch)		= atoi(line);
         else if (!strcmp(tag, "Str "))  ch->real_abils.str	= atoi(line);
-        else if (!strcmp(tag, "Stuk"))  ch->stupidkiss          = atoi(line);
+        else if (!strcmp(tag, "Stuk"))  ;
         else if (!strcmp(tag, "Supp"))  char_set_suppression(ch, atoi(line));
         else if (!strcmp(tag, "Sups"))  char_set_suppressed(ch, atoi(line));
       break;
@@ -658,13 +643,13 @@ int load_char(const char *name, struct char_data *ch)
           ch->transcost[num2] = num3;
         }
         else if (!strcmp(tag, "Thir"))  GET_COND(ch, THIRST)    = atoi(line);
-        else if (!strcmp(tag, "Thr1"))  char_set_apply_saving_throw(ch, 0, atoi(line));
-        else if (!strcmp(tag, "Thr2"))  char_set_apply_saving_throw(ch, 1, atoi(line));
-        else if (!strcmp(tag, "Thr3"))  char_set_apply_saving_throw(ch, 2, atoi(line));
+        else if (!strcmp(tag, "Thr1"))  ;
+        else if (!strcmp(tag, "Thr2"))  ;
+        else if (!strcmp(tag, "Thr3"))  ;
         else if (!strcmp(tag, "Thr4") || !strcmp(tag, "Thr5")); /* Discard extra saves */
-        else if (!strcmp(tag, "ThB1"))  char_set_saving_throw(ch, 0, atoi(line));
-        else if (!strcmp(tag, "ThB2"))  char_set_saving_throw(ch, 1, atoi(line));
-        else if (!strcmp(tag, "ThB3"))  char_set_saving_throw(ch, 2, atoi(line));
+        else if (!strcmp(tag, "ThB1"));
+        else if (!strcmp(tag, "ThB2"));
+        else if (!strcmp(tag, "ThB3"));
         else if (!strcmp(tag, "Trns"))  GET_TRAINS(ch)          = atoi(line);
         else if (!strcmp(tag, "Trag"))  GET_TRAINAGL(ch)        = atoi(line);
         else if (!strcmp(tag, "Trco"))  GET_TRAINCON(ch)        = atoi(line);
@@ -900,22 +885,6 @@ void save_char(struct char_data * ch)
     }
   }
 
-  for (aff = ch->affectedv, i = 0; i < MAX_AFFECT; i++) {
-    if (aff) {
-      tmp_affv[i] = *aff;
-      tmp_affv[i].next = 0;
-      aff = aff->next;
-    } else {
-      tmp_affv[i].type = 0;      /* Zero signifies not used */
-      tmp_affv[i].duration = 0;
-      tmp_affv[i].modifier = 0;
-      tmp_affv[i].location = 0;
-      tmp_affv[i].specific = 0;
-      tmp_affv[i].bitvector = 0;
-      tmp_affv[i].next = 0;
-    }
-  }
-
   save_char_vars(ch);
 
   /*
@@ -925,9 +894,6 @@ void save_char(struct char_data * ch)
 
   while (ch->affected)
     affect_remove(ch, ch->affected);
-
-  while (ch->affectedv)
-    affectv_remove(ch, ch->affectedv);
 
   if ((i >= MAX_AFFECT) && aff && aff->next)
     log("SYSERR: WARNING: OUT OF STORE ROOM FOR AFFECTED TYPES!!!");
@@ -939,7 +905,6 @@ void save_char(struct char_data * ch)
   if (char_get_name(ch))				fprintf(fl, "Name: %s\n", char_get_name(ch));
   if (char_get_user(ch))                             fprintf(fl, "User: %s\n", char_get_user(ch));
   if (char_get_voice(ch))                            fprintf(fl, "Voic: %s\n", char_get_voice(ch));
-  if (char_get_clan(ch))                             fprintf(fl, "Clan: %s\n", char_get_clan(ch));
   if (char_get_feature(ch))                          fprintf(fl, "RPfe: %s\n", char_get_feature(ch));
   if (GET_TRAINS(ch))				fprintf(fl, "Trns: %d\n", GET_TRAINS(ch));
   if (ch->description && *ch->description) {
@@ -961,10 +926,6 @@ void save_char(struct char_data * ch)
   if (char_get_race_level(ch)      != PFDEF_LEVEL)	fprintf(fl, "HitD: %d\n", char_get_race_level(ch));
   if (char_get_level_adj(ch)    != PFDEF_LEVEL)	fprintf(fl, "LvlA: %d\n", char_get_level_adj(ch));
   if (char_get_hometown(ch)	   != PFDEF_HOMETOWN)	fprintf(fl, "Home: %d\n", char_get_hometown(ch));
-  for (i = 0; i < NUM_CLASSES; i++) {
-    if(char_get_class_ranks(ch, i))	fprintf(fl, "Mcls: %d=%d\n", i, char_get_chclasses(ch, i));
-    if(char_get_epicclasses(ch, i))	fprintf(fl, "Ecls: %d=%d\n", i, char_get_epicclasses(ch, i));
-  }
   fprintf(fl, "Id  : %d\n", char_get_idnum(ch));
   fprintf(fl, "Brth: %ld\n", ch->time.birth);
   fprintf(fl, "Crtd: %ld\n", ch->time.created);
@@ -977,7 +938,6 @@ void save_char(struct char_data * ch)
   if (char_get_weight(ch)	   != PFDEF_HEIGHT)	fprintf(fl, "Wate: %d\n", char_get_weight(ch));
   if (char_get_alignment(ch)	   != PFDEF_ALIGNMENT)	fprintf(fl, "Alin: %d\n", char_get_alignment(ch));
   if (char_get_aura(ch)         != PFDEF_SKIN)       fprintf(fl, "Aura: %d\n", char_get_aura(ch));
-  if (char_get_alignment_ethic(ch)	   != PFDEF_ETHIC_ALIGNMENT)	fprintf(fl, "Eali: %d\n", char_get_alignment_ethic(ch));
 
   sprintascii(fbuf1, char_get_act(ch)[0]);
   sprintascii(fbuf2, char_get_act(ch)[1]);
@@ -999,13 +959,6 @@ void save_char(struct char_data * ch)
   sprintascii(fbuf3, char_get_admflags(ch)[2]);
   sprintascii(fbuf4, char_get_admflags(ch)[3]);
   fprintf(fl, "AdmF: %s %s %s %s\n", fbuf1, fbuf2, fbuf3, fbuf4);
-
-  if (char_get_saving_throw(ch, 0)  != PFDEF_SAVETHROW)	fprintf(fl, "ThB1: %d\n", char_get_saving_throw(ch, 0));
-  if (char_get_saving_throw(ch, 1)  != PFDEF_SAVETHROW)	fprintf(fl, "ThB2: %d\n", char_get_saving_throw(ch, 1));
-  if (char_get_saving_throw(ch, 2)  != PFDEF_SAVETHROW)	fprintf(fl, "ThB3: %d\n", char_get_saving_throw(ch, 2));
-  if (char_get_apply_saving_throw(ch, 0)   != PFDEF_SAVETHROW)	fprintf(fl, "Thr1: %d\n", char_get_apply_saving_throw(ch, 0));
-  if (char_get_apply_saving_throw(ch, 1)   != PFDEF_SAVETHROW)	fprintf(fl, "Thr2: %d\n", char_get_apply_saving_throw(ch, 1));
-  if (char_get_apply_saving_throw(ch, 2)   != PFDEF_SAVETHROW)	fprintf(fl, "Thr3: %d\n", char_get_apply_saving_throw(ch, 2));
 
   if (GET_WIMP_LEV(ch)	   != PFDEF_WIMPLEV)	fprintf(fl, "Wimp: %d\n", GET_WIMP_LEV(ch));
   if (char_get_powerattack(ch)  != PFDEF_POWERATT)	fprintf(fl, "PwrA: %d\n", char_get_powerattack(ch));
@@ -1105,7 +1058,6 @@ void save_char(struct char_data * ch)
   if (char_get_limb_condition(ch, (2)-1)  != PFDEF_BOARD)      fprintf(fl, "Lila: %d\n", char_get_limb_condition(ch, (2)-1));
   if (char_get_limb_condition(ch, (3)-1)  != PFDEF_BOARD)      fprintf(fl, "Lirl: %d\n", char_get_limb_condition(ch, (3)-1));
   if (char_get_limb_condition(ch, (4)-1)  != PFDEF_BOARD)      fprintf(fl, "Lill: %d\n", char_get_limb_condition(ch, (4)-1));
-  if (char_get_crank(ch)        != PFDEF_CRANK)      fprintf(fl, "Clar: %d\n", char_get_crank(ch));
   if (char_get_rp(ch)           != PFDEF_SKIN)       fprintf(fl, "RPP : %d\n", char_get_rp(ch));
   if (char_get_rbank(ch)        != PFDEF_SKIN)       fprintf(fl, "RBan: %d\n", char_get_rbank(ch));
   if (char_get_suppression(ch)     != PFDEF_SKIN)       fprintf(fl, "Supp: %" I64T "\n", char_get_suppression(ch));
@@ -1122,7 +1074,6 @@ void save_char(struct char_data * ch)
   if (char_get_mimic(ch))        fprintf(fl, "Mimi: %d\n", char_get_mimic(ch));
   if (char_get_skill_slots(ch)        != PFDEF_EYE)        fprintf(fl, "Slot: %d\n", char_get_skill_slots(ch));
   if (char_get_tail_growth(ch)      != PFDEF_EYE)        fprintf(fl, "Tgro: %d\n", char_get_tail_growth(ch));
-  if (char_get_stupidkiss(ch)   != PFDEF_EYE)        fprintf(fl, "Stuk: %d\n", char_get_stupidkiss(ch));
   if (char_get_rdisplay(ch)     != PFDEF_EYE)        fprintf(fl, "rDis: %s\n", char_get_rdisplay(ch));
   if (char_get_relax_count(ch)   != PFDEF_EYE)        fprintf(fl, "Rela: %d\n", char_get_relax_count(ch));
 
@@ -1206,11 +1157,6 @@ void save_char(struct char_data * ch)
       affect_to_char(ch, &tmp_aff[i]);
   }
 
-  for (i = 0; i < MAX_AFFECT; i++) {
-    if (tmp_affv[i].type)
-      affectv_to_char(ch, &tmp_affv[i]);
-  }
-
   for (i = 0; i < NUM_WEARS; i++) {
     if (char_eq[i])
 #ifndef NO_EXTRANEOUS_TRIGGERS
@@ -1245,14 +1191,7 @@ void save_char(struct char_data * ch)
     save_index = TRUE;
     player_table[id].played = char_get_lastpl(ch);
   }
-  if (char_get_clan(ch) != NULL && player_table[id].clan != char_get_clan(ch)) {
-    save_index = TRUE;
-    player_table[id].clan = strdup(char_get_clan(ch));
-  }
-  if (char_get_clan(ch) == NULL) {
-    save_index = TRUE;
-    player_table[id].clan = strdup("None.");
-  }
+  player_table[id].clan = strdup("None.");
   i = player_table[id].flags;
   if (char_plr_flagged(ch, PLR_DELETED))
     SET_BIT(player_table[id].flags, PINDEX_DELETED);
@@ -1320,9 +1259,7 @@ void load_affects(FILE *fl, struct char_data *ch, int violence)
       af.location = num4;
       af.bitvector = num5;
       af.specific = num6;
-      if (violence)
-        affectv_to_char(ch, &af);
-      else
+      if (!violence)
         affect_to_char(ch, &af);
       i++;
     }
@@ -1372,8 +1309,7 @@ void load_feats(FILE *fl, struct char_data *ch)
   do {
     get_line(fl, line);
     sscanf(line, "%d %d", &num, &num2);
-      if (num != 0)
-	char_set_feats(ch, num, num2);
+
   } while (num != 0);
 }
 

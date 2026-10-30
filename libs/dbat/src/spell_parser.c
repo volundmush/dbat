@@ -143,15 +143,7 @@ int mag_kicost(struct char_data *ch, int spellnum)
 
 void mag_nextstrike(int level, struct char_data *caster, int spellnum)
 {
-  if (!caster)
-    return;
-  if (caster->actq) {
-    send_to_char(caster, "You can't perform more than one special attack at a time!");
-    return;
-  }
-  CREATE(caster->actq, struct queued_act, 1);
-  caster->actq->level = level;
-  caster->actq->spellnum = spellnum;
+
 }
 
 
@@ -749,7 +741,7 @@ ACMD(do_cast)
       set_fighting(ch, tch);
   }
 
-  if (IS_SET(SINFO.comp_flags, MAGCOMP_SOMATIC) && rand_number(1, 100) <= char_get_spellfail(ch)) {
+  if (IS_SET(SINFO.comp_flags, MAGCOMP_SOMATIC) && rand_number(1, 100) <= 0) {
     if (IS_SET(SINFO.routines, MAG_ACTION_FULL | MAG_ACTION_PARTIAL))
       char_aff_set(ch, AFF_NEXTPARTIAL, true);
     else if (IS_SET(SINFO.routines, MAG_ACTION_FULL | MAG_ACTION_FULL))

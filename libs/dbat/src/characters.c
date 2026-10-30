@@ -2,7 +2,6 @@
 #include "dbat/consts/triggers.h"
 struct char_data *character_list;
 struct char_data *affect_list;
-struct char_data *affectv_list;
 struct player_special_data dummy_mob;
 
 struct index_data *mob_index;

@@ -299,7 +299,6 @@ static void generate_multiform(struct char_data *ch, int count)
 
         // Not sure if these are actually used...
         clone->alignment = ch->alignment;
-        clone->alignment_ethic = ch->alignment_ethic;
 
         // Make the physical appearance match!
         clone->sex = ch->sex;
@@ -2429,59 +2428,6 @@ ACMD(do_healglow)
  }
 }
 
-/* Kay's lame skill */
-ACMD(do_amnisiac)
-{
-
- if (strcasecmp(char_get_name(ch), "Kanashimi")) {
-  send_to_char(ch, "You do not know how to perform that technique.\r\n");
-  return;
- }
-
- char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
- struct char_data *vict;
- int skill;
-
- two_arguments(argument, arg, arg2);
-
- if (!*arg || !*arg2) {
-  send_to_char(ch, "Syntax: amnesiac (target) (skill)\r\n");
-  return;
- }
-
- if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-  send_to_char(ch, "Perform amnesiac kiss on whom?\r\n");
-  return;
- }
-
- skill = find_skill_num(arg2, SKTYPE_SKILL);
-
- if (skill <= 0) {
-  send_to_char(ch, "That is not a skill\r\n");
-  return;
- }
-
- int chance = axion_dice(0), perc = 10 + char_get_aff_abils_intel(ch), cost = GET_MAX_MANA(ch) * 0.18;
-
- if (cost > (getCurKI(ch))) {
-  send_to_char(ch, "You do not have enough ki!\r\n");
-  return;
- } else if (perc < chance) {
-  act("@WYou attempt to grab @C$N@W to kiss $M, but $E evades!@n", TRUE, ch, 0, vict, TO_CHAR);
-  act("@M$n@W attempts to grab you and leans in with puckered lips, but you managed to evade!@n", TRUE, ch, 0, vict, TO_VICT);
-  act("@M$n@W attempts to grab @C$N@W and leans in with puckered lips, but $E manages to evade!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-     decCurKI(ch, cost, 0);
-  return;
- } else {
-  act("@WYou reach out quickly, grabbing @C$N@W and pulling them in close to you. Just as quick, you pull their head forcefully towards yours, planting a deep and heavy kiss. The fool wobbles a bit, shocked.  It is unlikely that @c$E@W will be able to focus very well on that skill, not with the thought of your lips on their mind.", TRUE, ch, 0, vict, TO_CHAR);
-  act("@M$n@W grabs you, giving you a deep, passionate kiss. Your mind is suddenly overwhelmed, and in your shock you seem to forget a few of your tricks.", TRUE, ch, 0, vict, TO_VICT);
-  act("@WYou see @C$n@W quickly grab @C$N@W, pulling them into a deep, almost passionate kiss. @C$N@W seems shocked, and wobbles a bit, grabbing at @c$s@W head once @C$n@W lets go.", TRUE, ch, 0, vict, TO_NOTVICT);
-     decCurKI(ch, cost, 0);
-  char_set_stupidkiss(vict, skill);
-  return;
- }
-
-}
 
 /* Demon's lame skill */
 ACMD(do_metamorph)

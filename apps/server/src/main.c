@@ -20,14 +20,6 @@ int main(int argc, char **argv)
     int pos = 1;
     const char *dir;
 
-#ifdef MEMORY_DEBUG
-    zmalloc_init();
-#endif
-
-#if CIRCLE_GNU_LIBC_MEMORY_TRACK
-    mtrace();	/* This must come before any use of malloc(). */
-#endif
-
     /****************************************************************************/
     /** Load the game configuration.                                           **/
     /** We must load BEFORE we use any of the constants stored in constants.c. **/
@@ -197,10 +189,6 @@ int main(int argc, char **argv)
     free(CONFIG_CONFFILE);
 
     log("Done.");
-
-#ifdef MEMORY_DEBUG
-    zmalloc_check();
-#endif
 
     return (0);
 }

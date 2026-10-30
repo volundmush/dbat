@@ -1758,8 +1758,8 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
      send_to_char(ch, "@RCharacter Deaths@D: @r%d@n\r\n", char_get_dcount(k));
     }
 
-    send_to_char(ch, "Hometown: [%d], Align: [%4d], Ethic: [%4d]", char_get_hometown(k),
-                 char_get_alignment(k), char_get_alignment_ethic(k));
+    send_to_char(ch, "Hometown: [%d], Align: [%4d]", char_get_hometown(k),
+                 char_get_alignment(k));
 
     /*. Display OLC zone for immorts .*/
     if (char_get_admlevel(k) >= ADMLVL_BUILDER) {
@@ -1793,9 +1793,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   send_to_char(ch, "Coins: [%9d], Bank: [%9d] (Total: %d)\r\n",
 	  char_get_gold(k), char_get_bank_gold(k), char_get_gold(k) + char_get_bank_gold(k));
 
-  send_to_char(ch, "Armor: [%d ], Saving throws: [%d/%d/%d]\r\n",
-	  char_get_armor(k), char_get_apply_saving_throw(k, 0),
-          char_get_apply_saving_throw(k, 1), char_get_apply_saving_throw(k, 2));
+  send_to_char(ch, "Armor: [%d ]\r\n", char_get_armor(k));
 
   sprinttype(char_get_position(k), position_types, buf, sizeof(buf));
   send_to_char(ch, "Pos: %s, Fighting: %s", buf, char_get_fighting(k) ? char_get_name(char_get_fighting(k)) : "Nobody");
@@ -1884,25 +1882,6 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
 	  send_to_char(ch, ", ");
 
 	strcpy(buf, affected_bits[aff->bitvector]);
-        send_to_char(ch, "sets %s", buf);
-      }
-      send_to_char(ch, "\r\n");
-    }
-  }
-
-  /* Routine to show what spells a char is affectedv by */
-  if (k->affectedv) {
-    for (aff = k->affectedv; aff; aff = aff->next) {
-      send_to_char(ch, "SPL: (%3d rounds) @c%-21s@n ", aff->duration + 1, skill_name(aff->type));
-
-      if (aff->modifier)
-        send_to_char(ch, "%+d to %s", aff->modifier, apply_types[(int) aff->location]);
-
-      if (aff->bitvector) {
-        if (aff->modifier)
-          send_to_char(ch, ", ");
-
-        strcpy(buf, affected_bits[aff->bitvector]);
         send_to_char(ch, "sets %s", buf);
       }
       send_to_char(ch, "\r\n");
@@ -2497,9 +2476,6 @@ void game_info(const char *format, ...)
 /* (c) 1996-97 Erwin S. Andreasen <erwin@pip.dknet.dk> */
 ACMD(do_copyover) 
 { 
-#ifdef CIRCLE_WINDOWS 
-  send_to_char(ch, "Copyover is not available for Windows.\r\n"); 
-#else 
   char arg[MAX_INPUT_LENGTH]; 
   int secs; 
 
@@ -2536,9 +2512,8 @@ ACMD(do_copyover)
       } else { 
         game_info("A copyover will be performed in %d seconds.", copyover_timer); 
       } 
-    } 
-  } 
-#endif 
+    }
+  }
 } 
 
 static void execute_copyover(void)
@@ -3321,13 +3296,9 @@ ACMD(do_wizutil)
       act("A sudden fireball conjured from nowhere thaws $n!", FALSE, vict, 0, 0, TO_ROOM);
       break;
     case SCMD_UNAFFECT:
-      if (vict->affected || char_get_affected_by(vict) || vict->affectedv) {
+      if (vict->affected || char_get_affected_by(vict)) {
         while (vict->affected)
           affect_remove(vict, vict->affected);
-          for(taeller=0; taeller < AF_ARRAY_MAX; taeller++)
-          char_get_affected_by(ch)[taeller] = 0;
-        while (vict->affectedv)
-          affectv_remove(vict, vict->affectedv);
           for(taeller=0; taeller < AF_ARRAY_MAX; taeller++)
           char_get_affected_by(ch)[taeller] = 0;
 	send_to_char(vict, "There is a brief flash of light!\r\nYou feel slightly different.\r\n");
@@ -3519,9 +3490,9 @@ ACMD(do_show)
     }
     send_to_char(ch, "Player: %-12s (%s) [%2d %s %s]\r\n", char_get_name(vict),
       genders[(int) char_get_sex(vict)], char_get_level(vict), CLASS_ABBR(vict), RACE_ABBR(vict));
-    send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %" I64T "  Align: %-5d  Ethic: %-5d\r\n",
+    send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %" I64T "  Align: %-5d\r\n",
                  char_get_gold(vict), char_get_bank_gold(vict), char_get_exp(vict),
-                 char_get_alignment(vict), char_get_alignment_ethic(vict));
+                 char_get_alignment(vict));
     if (CONFIG_ALLOW_MULTICLASS)
       send_to_char(ch, "Class ranks: %s\r\n", class_desc_str(vict, 1, 0));
 
@@ -3701,7 +3672,7 @@ ACMD(do_show)
   case 16:
     if (!*value) {
       low = 1;
-      vict = (l == 15) ? affect_list : affectv_list;
+      vict = (l == 15) ? affect_list : affect_list;
     } else {
       low = 0;
       if (! (vict = get_char_world_vis(ch, value, NULL))) {
@@ -3722,10 +3693,7 @@ ACMD(do_show)
         RECREATE(strp, char, k);
       }
       j += snprintf(strp + j, k - j, "Name: %s\r\n", char_get_name(vict));
-      if (l == 15)
-        aff = vict->affected;
-      else
-        aff = vict->affectedv;
+      aff = vict->affected;
       for (; aff; aff = aff->next) {
         j += snprintf(strp + j, k - j, "SPL: (%3d%s) @c%-21s@n ", aff->duration + 1,
                       (l == 15) ? "hr" : "rd", skill_name(aff->type));
@@ -3743,10 +3711,7 @@ ACMD(do_show)
         }
         j += snprintf(strp + j, k - j, "\r\n");
       }
-      if (l == 15)
-        vict = vict->next_affect;
-      else
-        vict = vict->next_affectv;
+      vict = vict->next_affect;
     } while (low && vict);
     page_string(ch->desc, strp, TRUE);
     free(strp);
@@ -4239,17 +4204,14 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     break;
 
   case 55:
-    char_set_alignment_ethic(vict, RANGE(-1000, 1000));
     affect_total(vict);
     break;
 
   case 56:
-    vict->max_ki = RANGE(1, 5000);
     affect_total(vict);
     break;
 
   case 57:
-    vict->ki = RANGE(0, vict->max_ki);
     affect_total(vict);
     break;
 

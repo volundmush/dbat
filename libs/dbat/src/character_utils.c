@@ -1381,15 +1381,9 @@ int know_skill(struct char_data *ch, int skill)
 
  if (char_get_skill(ch, skill) > 0)
   know = 1;
- if (char_get_stupidkiss(ch) == skill)
-  know = 2;
 
  if (know == 0) {
   send_to_char(ch, "You do not know how to perform %s.\r\n", spell_info[skill].name);
-  know = 0;
- } else if (know == 2) {
-  send_to_char(ch, "@WYou try to use @M%s@W but lingering thoughts of a certain kiss distracts you!@n\r\n", spell_info[skill].name);
-  send_to_char(ch, "You must sleep in order to cure this.\r\n");
   know = 0;
  }
 
@@ -3814,27 +3808,6 @@ int count_metamagic_feats(struct char_data *ch)
 {
   int count = 0;                /* Number of Metamagic Feats Known */
 
-  if (char_get_feats(ch, FEAT_STILL_SPELL))
-    count++;
-
-  if (char_get_feats(ch, FEAT_SILENT_SPELL))
-    count++;
-
-  if (char_get_feats(ch, FEAT_QUICKEN_SPELL))
-    count++;
-
-  if (char_get_feats(ch, FEAT_MAXIMIZE_SPELL))
-    count++;
-
-  if (char_get_feats(ch, FEAT_HEIGHTEN_SPELL))
-    count++;
-
-  if (char_get_feats(ch, FEAT_EXTEND_SPELL))
-    count++;
-
-  if (char_get_feats(ch, FEAT_EMPOWER_SPELL))
-    count++;
-
   return count;
 }
 
@@ -4796,7 +4769,7 @@ int char_get_class(const struct char_data *ch) {
 }
 
 int char_get_class_ranks(const struct char_data *ch, int whichclass) {
-    return (char_get_chclasses(ch, whichclass) + char_get_epicclasses(ch, whichclass));
+    return char_get_level(ch);
 }
 
 int char_get_pc_height(struct char_data *ch) {
@@ -4876,10 +4849,6 @@ double char_get_lifebonuses(struct char_data *ch) {
     return ((ch)->lifebonus > 0 ? (char_get_lifebonus(ch) + char_get_blessbonus(ch) + char_get_posebonus(ch)) * (((ch)->lifebonus + 100) * 0.01) : (char_get_lifebonus(ch) + char_get_blessbonus(ch) + char_get_posebonus(ch)));
 }
 
-int char_get_save(const struct char_data *ch, int i) {
-    return (char_get_saving_throw(ch, i) + char_get_apply_saving_throw(ch, i));
-}
-
 int char_get_skill(const struct char_data *ch, int i) {
     return ((ch)->skills[i].base + char_get_skills_mod(ch, i));
 }
@@ -4911,20 +4880,8 @@ bool char_is_evil(const struct char_data *ch) {
     return (char_get_alignment(ch) <= -50);
 }
 
-bool char_is_lawful(const struct char_data *ch) {
-    return (char_get_alignment_ethic(ch) >= 350);
-}
-
-bool char_is_chaotic(const struct char_data *ch) {
-    return (char_get_alignment_ethic(ch) <= -350);
-}
-
 bool char_is_neutral(const struct char_data *ch) {
     return (!char_is_good(ch) && !char_is_evil(ch));
-}
-
-int char_align_type(const struct char_data *ch) {
-    return ((char_is_good(ch) ? 0 : (char_is_evil(ch) ? 6 : 3)) + (char_is_lawful(ch) ? 0 : (char_is_chaotic(ch) ? 2 : 1)));
 }
 
 bool char_in_arena(const struct char_data *ch) {
@@ -5395,14 +5352,6 @@ char *char_mafe(const struct char_data *ch) {
     return (char_get_sex(ch) ? (char_get_sex(ch)==SEX_MALE ? "male":"female") : "questionably gendered");
 }
 
-bool char_has_combat_feat(const struct char_data *ch, int i, int j) {
-    return IS_SET_AR((ch)->combat_feats[(i)], (j));
-}
-
-bool char_has_school_feat(const struct char_data *ch, int i, bitvector_t j) {
-    return IS_SET((ch)->school_feats[(i)], (j));
-}
-
 int char_exit_level(const struct char_data *ch) {
     return (!char_is_npc(ch) ? (char_prf_flagged(ch,PRF_AUTOEXIT) ? 1 : 0) + (char_prf_flagged(ch, PRF_FULL_EXIT) ? 2 : 0) : 0);
 }
@@ -5473,14 +5422,6 @@ void char_set_voice(struct char_data *ch, char *v) {
     ch->voice = v;
 }
 
-char *char_get_clan(const struct char_data *ch) {
-    return ch->clan;
-}
-
-void char_set_clan(struct char_data *ch, char *v) {
-    ch->clan = v;
-}
-
 int char_get_transclass(const struct char_data *ch) {
     return ch->transclass;
 }
@@ -5503,14 +5444,6 @@ char *char_get_loguser(const struct char_data *ch) {
 
 void char_set_loguser(struct char_data *ch, char *v) {
     ch->loguser = v;
-}
-
-int char_get_crank(const struct char_data *ch) {
-    return ch->crank;
-}
-
-void char_set_crank(struct char_data *ch, int v) {
-    ch->crank = v;
 }
 
 int char_get_admlevel(const struct char_data *ch) {
@@ -5551,22 +5484,6 @@ int char_get_pfilepos(const struct char_data *ch) {
 
 void char_set_pfilepos(struct char_data *ch, int v) {
     ch->pfilepos = v;
-}
-
-int char_get_chclasses(const struct char_data *ch, int i) {
-    return ch->chclasses[i];
-}
-
-void char_set_chclasses(struct char_data *ch, int i, int v) {
-    ch->chclasses[i] = v;
-}
-
-int char_get_epicclasses(const struct char_data *ch, int i) {
-    return ch->epicclasses[i];
-}
-
-void char_set_epicclasses(struct char_data *ch, int i, int v) {
-    ch->epicclasses[i] = v;
 }
 
 int char_get_race(const struct char_data *ch) {
@@ -5690,11 +5607,11 @@ void char_set_suppression(struct char_data *ch, int64_t v) {
 }
 
 int64_t char_get_suppressed(const struct char_data *ch) {
-    return ch->suppressed;
+    return 0;
 }
 
 void char_set_suppressed(struct char_data *ch, int64_t v) {
-    ch->suppressed = v;
+
 }
 
 char *char_get_rdisplay(const struct char_data *ch) {
@@ -5818,11 +5735,11 @@ void char_set_armor(struct char_data *ch, int v) {
 }
 
 int64_t char_get_ki(const struct char_data *ch) {
-    return ch->ki;
+    return 0;
 }
 
 void char_set_ki(struct char_data *ch, int64_t v) {
-    ch->ki = v;
+    
 }
 
 int64_t char_get_max_ki(const struct char_data *ch) {
@@ -6105,14 +6022,6 @@ void char_set_lifeperc(struct char_data *ch, int v) {
     ch->lifeperc = v;
 }
 
-short char_get_stupidkiss(const struct char_data *ch) {
-    return ch->stupidkiss;
-}
-
-void char_set_stupidkiss(struct char_data *ch, short v) {
-    ch->stupidkiss = v;
-}
-
 int char_get_speedboost(const struct char_data *ch) {
     return ch->speedboost;
 }
@@ -6249,30 +6158,6 @@ void char_set_accuracy_mod(struct char_data *ch, int v) {
     ch->accuracy_mod = v;
 }
 
-int16_t char_get_spellfail(const struct char_data *ch) {
-    return ch->spellfail;
-}
-
-void char_set_spellfail(struct char_data *ch, int16_t v) {
-    ch->spellfail = v;
-}
-
-int16_t char_get_armorcheck(const struct char_data *ch) {
-    return ch->armorcheck;
-}
-
-void char_set_armorcheck(struct char_data *ch, int16_t v) {
-    ch->armorcheck = v;
-}
-
-int16_t char_get_armorcheckall(const struct char_data *ch) {
-    return ch->armorcheckall;
-}
-
-void char_set_armorcheckall(struct char_data *ch, int16_t v) {
-    ch->armorcheckall = v;
-}
-
 int64_t char_get_moltexp(const struct char_data *ch) {
     return ch->moltexp;
 }
@@ -6361,36 +6246,12 @@ void char_set_combatexpertise(struct char_data *ch, int v) {
     ch->combatexpertise = v;
 }
 
-int16_t char_get_saving_throw(const struct char_data *ch, int i) {
-    return ch->saving_throw[i];
-}
-
-void char_set_saving_throw(struct char_data *ch, int i, int16_t v) {
-    ch->saving_throw[i] = v;
-}
-
-int16_t char_get_apply_saving_throw(const struct char_data *ch, int i) {
-    return ch->apply_saving_throw[i];
-}
-
-void char_set_apply_saving_throw(struct char_data *ch, int i, int16_t v) {
-    ch->apply_saving_throw[i] = v;
-}
-
 int char_get_alignment(const struct char_data *ch) {
     return ch->alignment;
 }
 
 void char_set_alignment(struct char_data *ch, int v) {
     ch->alignment = v;
-}
-
-int char_get_alignment_ethic(const struct char_data *ch) {
-    return ch->alignment_ethic;
-}
-
-void char_set_alignment_ethic(struct char_data *ch, int v) {
-    ch->alignment_ethic = v;
 }
 
 struct obj_data *char_get_sits(const struct char_data *ch) {
@@ -6643,14 +6504,6 @@ int char_get_wait(const struct char_data *ch) {
 
 void char_set_wait(struct char_data *ch, int v) {
     ch->wait = v;
-}
-
-int8_t char_get_feats(const struct char_data *ch, int i) {
-    return ch->feats[i];
-}
-
-void char_set_feats(struct char_data *ch, int i, int8_t v) {
-    ch->feats[i] = v;
 }
 
 struct room_direction_data * char_get_exit(const struct char_data *ch, int door) {

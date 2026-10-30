@@ -94,8 +94,6 @@ int char_get_mimic(const struct char_data *ch);
 void char_set_mimic(struct char_data *ch, int v);
 char *char_get_voice(const struct char_data *ch);
 void char_set_voice(struct char_data *ch, char *v);
-char *char_get_clan(const struct char_data *ch);
-void char_set_clan(struct char_data *ch, char *v);
 int char_get_transclass(const struct char_data *ch);
 void char_set_transclass(struct char_data *ch, int v);
 char *char_get_feature(const struct char_data *ch);
@@ -103,8 +101,6 @@ void char_set_feature(struct char_data *ch, char *v);
 char *char_get_user(const struct char_data *ch);
 char *char_get_loguser(const struct char_data *ch);
 void char_set_loguser(struct char_data *ch, char *v);
-int char_get_crank(const struct char_data *ch);
-void char_set_crank(struct char_data *ch, int v);
 int char_get_admlevel(const struct char_data *ch);
 void char_set_admlevel(struct char_data *ch, int v);
 int char_get_class_level(const struct char_data *ch);
@@ -120,8 +116,6 @@ void char_set_pfilepos(struct char_data *ch, int v);
 int char_get_class(const struct char_data *ch);
 int char_get_chclasses(const struct char_data *ch, int i);
 void char_set_chclasses(struct char_data *ch, int i, int v);
-int char_get_epicclasses(const struct char_data *ch, int i);
-void char_set_epicclasses(struct char_data *ch, int i, int v);
 int char_get_class_ranks(const struct char_data *ch, int whichclass);
 int char_get_race(const struct char_data *ch);
 void char_set_race(struct char_data *ch, int v);
@@ -304,8 +298,6 @@ double char_get_lifebonus(struct char_data *ch);
 double char_get_lifebonuses(struct char_data *ch);
 int char_get_lifeperc(const struct char_data *ch);
 void char_set_lifeperc(struct char_data *ch, int v);
-short char_get_stupidkiss(const struct char_data *ch);
-void char_set_stupidkiss(struct char_data *ch, short v);
 int char_get_speedboost(const struct char_data *ch);
 void char_set_speedboost(struct char_data *ch, int v);
 int char_get_backstabcool(const struct char_data *ch);
@@ -340,8 +332,6 @@ int char_get_fishstate(const struct char_data *ch);
 void char_set_fishstate(struct char_data *ch, int v);
 int char_get_accuracy_mod(const struct char_data *ch);
 void char_set_accuracy_mod(struct char_data *ch, int v);
-int16_t char_get_spellfail(const struct char_data *ch);
-void char_set_spellfail(struct char_data *ch, int16_t v);
 int16_t char_get_armorcheck(const struct char_data *ch);
 void char_set_armorcheck(struct char_data *ch, int16_t v);
 int16_t char_get_armorcheckall(const struct char_data *ch);
@@ -368,15 +358,8 @@ struct char_data *char_get_fighting(const struct char_data *ch);
 void char_set_fighting(struct char_data *ch, struct char_data *v);
 int char_get_combatexpertise(const struct char_data *ch);
 void char_set_combatexpertise(struct char_data *ch, int v);
-int16_t char_get_saving_throw(const struct char_data *ch, int i);
-void char_set_saving_throw(struct char_data *ch, int i, int16_t v);
-int16_t char_get_apply_saving_throw(const struct char_data *ch, int i);
-void char_set_apply_saving_throw(struct char_data *ch, int i, int16_t v);
-int char_get_save(const struct char_data *ch, int i);
 int char_get_alignment(const struct char_data *ch);
 void char_set_alignment(struct char_data *ch, int v);
-int char_get_alignment_ethic(const struct char_data *ch);
-void char_set_alignment_ethic(struct char_data *ch, int v);
 struct obj_data *char_get_sits(const struct char_data *ch);
 void char_set_sits(struct char_data *ch, struct obj_data *v);
 struct char_data *char_get_mindlink(const struct char_data *ch);
@@ -422,7 +405,7 @@ void char_set_lastint(struct char_data *ch, time_t v);
 
 #define GET_COND(ch, i)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->conditions[(i)]))
 #define GET_LOADROOM(ch)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->load_room))
-#define GET_PRACTICES(ch,cl)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->class_skill_points[cl]))
+#define GET_PRACTICES(ch, ...)	CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->practice_points))
 #define GET_TRAINS(ch)		CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->ability_trains))
 #define GET_TRAINSTR(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainstr))
 #define GET_TRAININT(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainint))
@@ -481,8 +464,8 @@ void char_set_cooldown(struct char_data *ch, int v);
           (GET_ADD(ch) <= 99) ? 29 :  30 ) ) )                   \
         ) */
 
-#define CAN_CARRY_W(ch) (getMaxCarryWeight(ch))
-#define CAN_CARRY_N(ch) (50)
+#define CAN_CARRY_W(ch) getMaxCarryWeight(ch)
+#define CAN_CARRY_N(ch) 50
 bool char_is_awake(const struct char_data *ch);
 bool char_can_see_in_dark(const struct char_data *ch);
 
@@ -491,7 +474,6 @@ bool char_is_evil(const struct char_data *ch);
 bool char_is_lawful(const struct char_data *ch);
 bool char_is_chaotic(const struct char_data *ch);
 bool char_is_neutral(const struct char_data *ch);
-int char_align_type(const struct char_data *ch);
 
 bool char_in_arena(const struct char_data *ch);
 int char_get_arenawatch(const struct char_data *ch);
@@ -672,12 +654,7 @@ char *char_mafe(const struct char_data *ch);
 
 /* returns the number of spells per slot */
 #define GET_SPELL_LEVEL(ch, i)	((ch)->player_specials->spell_level[i])
-int8_t char_get_feats(const struct char_data *ch, int i);
-void char_set_feats(struct char_data *ch, int i, int8_t v);
-bool char_has_combat_feat(const struct char_data *ch, int i, int j);
-#define SET_COMBAT_FEAT(ch,i,j)	SET_BIT_AR((ch)->combat_feats[(i)], (j))
-bool char_has_school_feat(const struct char_data *ch, int i, bitvector_t j);
-#define SET_SCHOOL_FEAT(ch,i,j)	SET_BIT((ch)->school_feats[(i)], (j))
+
 #define GET_BAB(ch)		char_get_accuracy(ch)
 #define SET_FEAT(ch, i, value)	do { CHECK_PLAYER_SPECIAL((ch), (ch)->feats[i]) = value; } while(0)
 #define GET_FEAT_POINTS(ch)	(ch->player_specials->feat_points)

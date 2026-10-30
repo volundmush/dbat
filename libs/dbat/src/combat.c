@@ -4108,14 +4108,6 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
   dmg += (dmg / 100) * 20;
  }
 
- if (char_get_clan(vict) != NULL && !strcasecmp(char_get_clan(vict), "Heavenly Kaios")) {
-  if ((getCurKI(vict)) >= GET_MAX_MANA(vict) / 2) {
-   dmg -= (dmg / 100) * 20;
-   act("@wYou are covered in a pristine @Cglow@w.@n", TRUE, vict, 0, 0, TO_CHAR);
-   act("@w$n is covered in a pristine @Cglow@w!@n", TRUE, vict, 0, 0, TO_ROOM);
-  }
- }
-
  if (!char_is_npc(vict) && char_get_skill(vict, SKILL_ARMOR)) {
   int nanite = char_get_skill(vict, SKILL_ARMOR), perc = rand_number(1, 220);
   if (char_plr_flagged(vict, PLR_SENSEM)) {

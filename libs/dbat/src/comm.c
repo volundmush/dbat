@@ -48,7 +48,6 @@
 #include "dbat/modify.h"
 #include "dbat/fight.h"
 #include "dbat/local_limits.h"
-#include "dbat/clan.h"
 #include "dbat/mail.h"
 #include "dbat/races.h"
 #include "dbat/room_utils.h"
@@ -675,9 +674,6 @@ void heartbeat(int heart_pulse)
     copyover_check(); 
   }
 
-  if (!(heart_pulse % PULSE_VIOLENCE)) {
-    affect_update_violence();
-  }
 
   if (!(heart_pulse % (SECS_PER_MUD_HOUR * PASSES_PER_SEC))) {
     weather_and_time(1);
@@ -689,7 +685,6 @@ void heartbeat(int heart_pulse)
   }
 
   if (CONFIG_AUTO_SAVE && !(heart_pulse % PULSE_AUTOSAVE)) {	/* 1 minute */
-      clan_update();
     if (++mins_since_crashsave >= CONFIG_AUTOSAVE_TIME) {
       mins_since_crashsave = 0;
       Crash_save_all();

@@ -22,5 +22,7 @@
     "**/.vscode": true
   },
   // Use the up-to-date CMake compile database for IntelliSense
-  "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json"
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "clangd.arguments": ["--compile-commands-dir=${workspaceFolder}/build"]
 }

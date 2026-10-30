@@ -55,7 +55,6 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/objsave.h"
 #include "dbat/mail.h"
-#include "dbat/clan.h"
 
 /* local functions */
 
@@ -6165,9 +6164,6 @@ ACMD(do_plant)
   roll = roll_skill(ch, SKILL_SLEIGHT_OF_HAND) + rand_number(1, 3);
   fail = rand_number(1, 105);
 
-  if (char_get_feats(ch, FEAT_DEFT_HANDS))
-    roll += 2;
-
   if (char_get_position(vict) < POS_SLEEPING)
     detect = 0;
   else
@@ -10007,18 +10003,6 @@ ACMD(do_visible)
     send_to_char(ch, "You break the spell of invisibility.\r\n");
   }
 
-  if (char_aff_flagged(ch, AFF_ETHEREAL) && affectedv_by_spell(ch, ART_EMPTY_BODY)) {
-    affectv_from_char(ch, ART_EMPTY_BODY);
-    if (char_aff_flagged(ch, AFF_ETHEREAL)) {
-      send_to_char(ch, "Returning to the material plane will not be so easy.\r\n");
-    } else {
-      send_to_char(ch, "You return to the material plane.\r\n");
-      if (!appeared)
-        act("$n flashes into existence.", FALSE, ch, 0, 0, TO_ROOM);
-    }
-    appeared = 1;
-  }
-
   if (!appeared)
     send_to_char(ch, "You are already visible.\r\n");
 }
@@ -11377,26 +11361,12 @@ ACMD(do_fix)
 /* remove a spell from a character's innate linked list */
 void innate_remove(struct char_data * ch, struct innate_node * inn)
 {
-  struct innate_node *temp;
 
-  if (ch->innate == NULL) {
-    core_dump();
-    return;
-  }
-
-  REMOVE_FROM_LIST(inn, ch->innate, next, temp);
-  free(inn);
 }
 
 void innate_add(struct char_data * ch, int innate, int timer)
 {
-  struct innate_node * inn;
 
-  CREATE(inn, struct innate_node, 1);
-  inn->timer = timer;
-  inn->spellnum = innate;
-  inn->next = ch->innate;
-  ch->innate = inn;
 }
 
 /* Returns true if the spell/skillnum is innate to the character
@@ -11404,12 +11374,6 @@ void innate_add(struct char_data * ch, int innate, int timer)
  */
 int is_innate(struct char_data *ch, int spellnum) 
 {
-  switch(spellnum) {
-  case SPELL_FAERIE_FIRE:
-    if(char_get_race(ch) == RACE_ANIMAL)
-      return TRUE;
-    break;
-  }
   return FALSE;
 }
 
@@ -11419,14 +11383,7 @@ int is_innate(struct char_data *ch, int spellnum)
 */
 int is_innate_ready(struct char_data *ch, int spellnum)
 {
-  struct innate_node *inn, *next_inn;
-
-  for(inn = ch->innate; inn; inn = next_inn) {
-    next_inn = inn->next;
-    if(inn->spellnum == spellnum)
-      return FALSE;
-  }
-  return TRUE;
+  return FALSE;
 }
 
 /* Adds a node to the linked list with a timer which indicates
@@ -11437,21 +11394,6 @@ int is_innate_ready(struct char_data *ch, int spellnum)
 */
 void add_innate_timer(struct char_data *ch, int spellnum) 
 {
-  int timer = 6; /* number of ticks */
-
-  switch(spellnum) {
-    case SPELL_FAERIE_FIRE:
-      timer = 6;   
-      break;
-    case ABIL_LAY_HANDS:
-      timer = 12;
-      break;
-  }
-  if(is_innate_ready(ch, spellnum)) {
-    innate_add(ch, spellnum, timer);
-  } else {
-    send_to_char(ch, "BUG!\r\n");
-  }
 }
 
 
@@ -11475,24 +11417,7 @@ void add_innate_affects(struct char_data *ch)
 /* Called to update the innate timers */
 void update_innate(struct char_data *ch)
 {
-  struct innate_node *inn, *next_inn;
 
-  for (inn = ch->innate; inn; inn = next_inn) {
-    next_inn = inn->next;
-    if (inn->timer > 0) { 
-      inn->timer--;
-    } else {
-      switch(inn->spellnum) {
-      case ABIL_LAY_HANDS:
-        send_to_char(ch, "Your special healing abilities have returned.\r\n");
-        break;
-      default:
-        send_to_char(ch, "You are now able to use your innate %s again.\r\n", spell_info[inn->spellnum].name);
-        break;
-      }  
-      innate_remove(ch, inn);
-    }
-  } 
 }
 
 static int spell_in_book(struct obj_data *obj, int spellnum)
@@ -11571,9 +11496,6 @@ ACMD(do_resurrect)
       affect_remove(ch, af);
   }
 
-  if ((rm = real_room(freeres[char_align_type(ch)])) == NOWHERE)
-    rm = real_room(CONFIG_MORTAL_START);
-
   if (rm != NOWHERE) {
     char_from_room(ch);
     char_to_room(ch, rm);
@@ -11622,596 +11544,6 @@ static void show_clan_info(struct char_data *ch) {
 
 }
 
-ACMD(do_clan) {
-
-  char arg1[100];
-  char arg2[MAX_INPUT_LENGTH];
-
-  if(ch == NULL || char_is_npc(ch))
-    return;
-
-  half_chop(argument, arg1, arg2);
-
-  if(!*arg1) {
-    show_clan_info(ch);
-    return;
-  }
-
-
-  // immortal-only commands
-  if(char_get_admlevel(ch) >= ADMLVL_IMPL) {
-
-    if(!(strcmp(arg1, "create"))) {
-      if(!*arg2)
-	show_clan_info(ch);
-      else if(isClan(arg2))
-	send_to_char(ch, "There is already a clan with the name, %s.\r\n", arg2);
-      else {
-	send_to_char(ch, "You create a clan with the name, %s.\r\n", arg2);
-	clanCreate(arg2);
-        mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s has created a clan named %s.", char_get_name(ch), arg2);
-      }
-      return;
-    }
-    else if(!(strcmp(arg1, "destroy"))) {
-      if(!*arg2)
-	show_clan_info(ch);
-      else if(!isClan(arg2))
-	send_to_char(ch, "No clan with the name %s exists.\r\n", arg2);
-      else {
-	send_to_char(ch, "You destroy %s.\r\n", arg2);
-	clanDestroy(arg2);
-      }
-      return;
-    }
-    else if(!(strcmp(arg1, "bset"))) {
-      if(!*arg2)
-        show_clan_info(ch);
-      else if(!isClan(arg2))
-        send_to_char(ch, "No clan with the name %s exists.\r\n", arg2);
-      else if(char_get_admlevel(ch) < 5)
-        show_clan_info(ch);
-      else {
-        clanBSET(arg2, ch);
-      }
-      return;
-    }
-    else if(!(strcmp(arg1, "reload"))) {
-      if(!*arg2)
-	show_clan_info(ch);
-      else if(!isClan(arg2))
-	send_to_char(ch, "No clan with the name %s exists.\r\n", arg2);
-      else if(clanReload(arg2))
-	send_to_char(ch, "Data for %s has been reloaded.\r\n", arg2);
-      else
-	send_to_char(ch, "Failed to reload the data for %s.\r\n", arg2);
-      return;
-    }
-  }
-
-  // commands available to everybody
-  if(!(strcmp(arg1, "apply"))) {
-    if(!*arg2)
-      show_clan_info(ch);
-    else if(!isClan(arg2))
-      send_to_char(ch, "%s is not a valid clan.\r\n", arg2);
-    else if(char_get_clan(ch) != NULL && clanIsMember(char_get_clan(ch), ch))
-      send_to_char(ch, "You are already a member of %s.\r\n", char_get_clan(ch));
-    else if(clanOpenJoin(arg2)) {
-      send_to_char(ch, "You can just join %s, it is open.\r\n", arg2);
-      return;
-    }
-    else {
-      if (char_get_clan(ch) != NULL && checkCLAN(ch) == TRUE) {
-       checkAPP(ch);
-       send_to_char(ch, "You stop applying to %s\r\n", char_get_clan(ch));
-       clanDecline(char_get_clan(ch), ch);
-       if (char_get_clan(ch)) {
-        free(char_get_clan(ch));
-       }
-       char_set_clan(ch, strdup("None."));
-      }
-      send_to_char(ch, "You apply to become a member of %s.\r\n", arg2);
-      clanApply(arg2, ch);
-      return;
-    }
-   return;
-  }
-  if(!(strcmp(arg1, "join"))) {
-    if(!*arg2)
-      show_clan_info(ch);
-    else if(!isClan(arg2))
-      send_to_char(ch, "%s is not a valid clan.\r\n", arg2);
-    else if(clanIsMember(arg2, ch))
-      send_to_char(ch, "You are already a member of %s.\r\n", arg2);
-    else if(char_get_clan(ch) != NULL && checkCLAN(ch) == 1 && !strstr(char_get_clan(ch), "Applying"))
-      send_to_char(ch, "You are already a member of %s, you need to leave it first.\r\n", char_get_clan(ch));
-    else if(clanOpenJoin(arg2)) {
-      if (char_get_clan(ch) != NULL && checkCLAN(ch) == 1) {
-       checkAPP(ch);
-       send_to_char(ch, "You stop applying to %s\r\n", char_get_clan(ch));
-       clanDecline(char_get_clan(ch), ch);
-       if (char_get_clan(ch)) {
-        free(char_get_clan(ch));
-       }
-       char_set_clan(ch, strdup("None."));
-      }
-      send_to_char(ch, "You are now a member of %s.\r\n", arg2);
-      clanInduct(arg2, ch);
-      return;
-    }
-    else {
-      send_to_char(ch, "%s isn't open, you must apply instead.\r\n", arg2);
-      return;
-    }
-   return;
-  }
-  else if(!(strcmp(arg1, "leave"))) {
-    if(!*arg2)
-      show_clan_info(ch);
-    else if(!isClan(arg2))
-      send_to_char(ch, "%s is not a valid clan.\r\n", arg2);
-    else if(!clanIsMember(arg2, ch))
-      send_to_char(ch, "You aren't even a member of %s.\r\n", arg2);
-    else if(!(clanOpenLeave(arg2) || clanIsModerator(arg2, ch)))
-      send_to_char(ch, "You must be expelled from %s in order to leave it.\r\n", arg2);
-    else {
-      send_to_char(ch, "You are no longer a member of %s.\r\n", arg2);
-      clanExpel(arg2, ch);
-      return;
-    }
-   return;
-  }
-  else if(!(strcmp(arg1, "infow"))) {
-   if (char_get_clan(ch) == NULL || !(strcmp(char_get_clan(ch), "None."))) {
-     send_to_char(ch, "You are not in a clan.\r\n");
-     return;
-   }
-   else {
-      if(clanIsModerator(char_get_clan(ch), ch) == FALSE)
-       send_to_char(ch, "You must be a moderator to edit the clan's information.\r\n");
-      else {
-        clanINFOW(char_get_clan(ch), ch);
-        char_plr_set(ch, PLR_WRITING, false);
-      }
-     return;
-   }
-  }
-  else if (!(strcmp(arg1, "deposit"))) {
-   long bank = 0;
-
-   if (char_get_clan(ch) == NULL || !(strcmp(char_get_clan(ch), "None."))) {
-     send_to_char(ch, "You are not in a clan.\r\n");
-     return;
-   }
-   else {
-    if(!clanIsMember(char_get_clan(ch), ch) && !clanIsModerator(char_get_clan(ch), ch)) {
-     send_to_char(ch, "You are not in a clan.\r\n");
-     return;
-    }
-    else if (!rroom_flagged(char_get_in_room(ch), ROOM_CBANK) && clanBANY(char_get_clan(ch), ch) == FALSE) {
-     send_to_char(ch, "You are not in your clan bank and your clan doesn't have bank anywhere.\r\n");
-     return;
-    }
-    else if (!*arg2) {
-     send_to_char(ch, "How much do you want to deposit?\r\n");
-     return;
-    }
-    else if (atoi(arg2) <= 0) {
-     send_to_char(ch, "It needs to be a value higher than 0...\r\n");
-     return;
-    }
-    else if (char_get_gold(ch) < atoi(arg2)) {
-     send_to_char(ch, "You do not have that much to deposit!\r\n");
-     return;
-    }
-    else {
-     bank = atoi(arg2);
-     char_set_gold(ch, char_get_gold(ch) - (bank));
-     clanBANKADD(char_get_clan(ch), ch, bank);
-     send_to_char(ch, "You have deposited %s into the clan bank.\r\n", add_commas(bank));
-    }
-   }
-   return;
-  }
-  else if(!(strcmp(arg1, "highrank"))) {
-
-   if (char_get_clan(ch) == NULL || !(strcmp(char_get_clan(ch), "None."))) {
-     send_to_char(ch, "You are not in a clan.\r\n");
-     return;
-   }
-   else {
-    if(!clanIsModerator(char_get_clan(ch), ch)) {
-     send_to_char(ch, "You are not leading a clan.\r\n");
-     return;
-    }
-    else if (!*arg2) {
-     send_to_char(ch, "What name are you going to make the rank?\r\n");
-     return;
-    }
-    else if (strlen(arg2) > 20) {
-     send_to_char(ch, "The name length can't be longer than 20 characters.\r\n");
-     return;
-    }
-    else if (strstr(arg2, "@")) {
-     send_to_char(ch, "No colorcode allowed in the ranks.\r\n");
-     return;
-    }
-    else {
-     clanHIGHRANK(char_get_clan(ch), ch, arg2);
-     send_to_char(ch, "High rank set.\r\n");
-    }
-    return;
-   }
-  }
-  else if(!(strcmp(arg1, "midrank"))) {
-
-   if (char_get_clan(ch) == NULL || !(strcmp(char_get_clan(ch), "None."))) {
-     send_to_char(ch, "You are not in a clan.\r\n");
-     return;
-   }
-   else {
-    if(!clanIsModerator(char_get_clan(ch), ch)) {
-     send_to_char(ch, "You are not leading a clan.\r\n");
-     return;
-    }
-    else if (!*arg2) {
-     send_to_char(ch, "What name are you going to make the rank?\r\n");
-     return;
-    }
-    else if (strlen(arg2) > 20) {
-     send_to_char(ch, "The name length can't be longer than 20 characters.\r\n");
-     return;
-    }
-    else if (strstr(arg2, "@")) {
-     send_to_char(ch, "No colorcode allowed in the ranks.\r\n");
-     return;
-    }
-    else {
-     clanMIDRANK(char_get_clan(ch), ch, arg2);
-     send_to_char(ch, "Mid rank set.\r\n");
-    }
-    return;
-   }
-  }
-  else if(!(strcmp(arg1, "rank"))) {
-   struct char_data *vict = NULL;
-    char arg3[100];
-    char name[100];
-    half_chop(arg2, name, arg3);
-
-   if (char_get_clan(ch) == NULL || !(strcmp(char_get_clan(ch), "None."))) {
-     send_to_char(ch, "You are not in a clan.\r\n");
-     return;
-   }
-   else {
-    if(!clanIsModerator(char_get_clan(ch), ch)) {
-     send_to_char(ch, "You are not leading a clan.\r\n");
-     return;
-    }
-    else if (!*arg2) {
-     send_to_char(ch, "Who's rank do you want to change?\r\n");
-     return;
-    }
-    else if(!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_WORLD))) {
-     send_to_char(ch, "That person is no where to be found in the entire universe.\r\n");
-     return;
-    }
-    else if (char_get_clan(vict) == NULL || !(strcmp(char_get_clan(vict), "None."))) {
-     send_to_char(ch, "That person is not even in a clan, let alone your's.\r\n");
-     return;
-    }
-    else if (!clanIsMember(char_get_clan(ch), vict)) {
-     send_to_char(ch, "You can only rank those in your clan and only if below leader.\r\n");
-     return;
-    }
-    else if (clanIsModerator(char_get_clan(ch), vict)) {
-     send_to_char(ch, "You can't rank a fellow leader, you require imm assistance.\r\n");
-     return;
-    }
-    else if (!*arg3) {
-     send_to_char(ch, "What rank do you want to set them to?\r\n[ 0 = Member, 1 = Midrank, 2 = Highrank]\r\n");
-     return;
-    }    
-    int num = atoi(arg3);
-    if (num < 0 || num > 2) {
-     send_to_char(ch, "It must be above zero and lower than three...\r\n");
-     return;
-    }
-    else if (char_get_crank(vict) == num) {
-     send_to_char(ch, "They are already that rank!\r\n");
-     return;
-    }
-    else if (char_get_crank(vict) > num) {
-     clanRANK(char_get_clan(ch), ch, vict, num);
-     switch (num) {
-      case 0:
-       send_to_char(ch, "You demote %s.\r\n", char_get_name(vict));
-       send_to_char(vict, "%s has demoted your clan rank to member!\r\n", char_get_name(ch));
-       break;
-      case 1:
-       send_to_char(ch, "You demote %s.\r\n", char_get_name(vict));
-       send_to_char(vict, "%s has demoted your clan rank to midrank!\r\n", char_get_name(ch));
-       break;
-     }
-     return;
-    }
-    else if (char_get_crank(vict) < num) {
-     clanRANK(char_get_clan(ch), ch, vict, num);
-     switch (num) {
-      case 1:
-       send_to_char(ch, "You promote %s.\r\n", char_get_name(vict));
-       send_to_char(vict, "%s has promoted your clan rank to midrank!\r\n", char_get_name(ch));
-       break;
-      case 2:
-       send_to_char(ch, "You promote %s.\r\n", char_get_name(vict));
-       send_to_char(vict, "%s has promoted your clan rank to highrank!\r\n", char_get_name(ch));
-       break;
-     }
-     return;
-    }
-   }   
-  }
-  else if(!(strcmp(arg1, "withdraw"))) {
-   long bank = 0;
-
-   if (char_get_clan(ch) == NULL || !(strcmp(char_get_clan(ch), "None."))) {
-     send_to_char(ch, "You are not in a clan.\r\n");
-     return;
-   }
-
-   else {
-    if(!clanIsMember(char_get_clan(ch), ch) && !clanIsModerator(char_get_clan(ch), ch)) {
-     send_to_char(ch, "You are not in a clan.\r\n");
-     return;
-    }
-    else if (!*arg2) {
-     send_to_char(ch, "How much do you want to withdraw?\r\n");
-     return;
-    }
-    else if (!(clanIsModerator(char_get_clan(ch), ch) || char_get_admlevel(ch) >= ADMLVL_IMPL)) {
-      send_to_char(ch, "You do not have the power to withdraw from the clan bank.\r\n");
-      return;
-    }
-    else if (atoi(arg2) <= 0) {
-     send_to_char(ch, "It needs to be a value higher than 0...\r\n");
-     return;
-    }
-    else if (char_get_gold(ch) + atoi(arg2) > char_gold_carry(ch)) {
-     send_to_char(ch, "You can not hold that much zenni!\r\n");
-     return;
-    }
-    else {
-     bank = atoi(arg2);
-     if (clanBANKSUB(char_get_clan(ch), ch, bank)) {
-      send_to_char(ch, "You have withdrawn %s from the clan bank.\r\n", add_commas(bank));
-      char_set_gold(ch, char_get_gold(ch) + (bank));
-     }
-     else {
-      send_to_char(ch, "There isn't that much in the clan's bank!\r\n");
-     }
-    }
-   }
-   return;
-  }
-  else if(!(strcmp(arg1, "bank"))) {
-   long bank = 0;
-   if (char_get_clan(ch) == NULL || !(strcmp(char_get_clan(ch), "None."))) {
-     send_to_char(ch, "You are not in a clan.\r\n");
-     return;
-   }
-   else {
-    if(!clanIsMember(char_get_clan(ch), ch) && !clanIsModerator(char_get_clan(ch), ch)) {
-     send_to_char(ch, "You are not in a clan.\r\n");
-     return;
-    }
-    bank = clanBANK(char_get_clan(ch), ch);
-    send_to_char(ch, "@W[ @C%-20s @W]@w has @D(@Y%s@D)@w zenni in its clan bank.\r\n", char_get_clan(ch), add_commas(bank));
-   }
-   return;
-  }
-  else if(!(strcmp(arg1, "members"))) {
-   if (char_get_clan(ch) == NULL || !(strcmp(char_get_clan(ch), "None."))) {
-    send_to_char(ch, "You are not even in a clan.\r\n");
-    return;
-   } else {
-    handle_clan_member_list(ch);
-   }
-  }
-  else if(!(strcmp(arg1, "expel"))) {
-    int is_file = FALSE, player_i = 0;
-    struct char_data *vict;
-    char arg3[100];
-    char name[MAX_INPUT_LENGTH];
-    char name1[100];
-    half_chop(arg2, name1, arg3);
-
-    if(!*arg3 || !*name1) {
-      show_clan_info(ch);
-    } else if(!isClan(arg3)) {
-      send_to_char(ch, "%s is not a valid clan.\r\n", arg3);
-    } else if(!(clanIsModerator(arg3, ch) || char_get_admlevel(ch) >= ADMLVL_IMPL)) {
-      send_to_char(ch, "Only leaders can expel people from a clan.\r\n");
-    } else if(clanOpenJoin(arg3)) {
-      send_to_char(ch, "You can't kick someone out of an open-join clan.\r\n");
-    } else if(!(vict = get_char_vis(ch, name1, NULL, FIND_CHAR_WORLD))) {
-       CREATE(vict, struct char_data, 1);
-       clear_char(vict);
-       CREATE(vict->player_specials, struct player_special_data, 1);
-
-       sprintf(name, "%s", rIntro(ch, name1));
-
-       if ((player_i = load_char(name, vict)) > -1) {
-        is_file = TRUE;
-        if (!clanIsMember(arg3, vict)) {
-         send_to_char(ch, "%s isn't even a member of %s.\r\n", char_get_name(vict), arg3);
-        } else if (clanIsModerator(arg3, vict) && char_get_admlevel(ch) < ADMLVL_IMPL) {
-         send_to_char(ch, "You do not have the power to kick a leader out of %s.\r\n", arg3);
-        } else {
-         send_to_char(ch, "You expel %s from %s.\r\n", char_get_name(vict), arg3);
-         clanExpel(arg3, vict);
-        }
-       } else if ((player_i = load_char(name1, vict)) > -1) {
-        is_file = TRUE;
-        if (!clanIsMember(arg3, vict)) {
-         send_to_char(ch, "%s isn't even a member of %s.\r\n", char_get_name(vict), arg3);
-        } else if (clanIsModerator(arg3, vict) && char_get_admlevel(ch) < ADMLVL_IMPL) {
-         send_to_char(ch, "You do not have the power to kick a leader out of %s.\r\n", arg3);
-        } else {
-         send_to_char(ch, "You expel %s from %s.\r\n", char_get_name(vict), arg3);
-         clanExpel(arg3, vict);
-        }
-       } else {
-          free_char(vict);
-          send_to_char(ch, "%s does not seem to exist.\r\n", name1);
-          return;
-       }
-       if (is_file == TRUE) {
-        free_char(vict);
-       }
-       return;
-    } else if(!clanIsMember(arg3, vict)) {
-      send_to_char(ch, "%s isn't even a member of %s.\r\n", char_get_name(vict), arg3);
-    } else if(clanIsModerator(arg3, vict) && char_get_admlevel(ch) < ADMLVL_IMPL) {
-      send_to_char(ch, "You do not have the power to kick a leader out of %s.\r\n", arg3);
-    } else {
-      send_to_char(ch, "You expel %s from %s.\r\n", char_get_name(vict), arg3);
-      send_to_char(vict, "You have been expelled from %s.\r\n", arg3);
-      clanExpel(arg3, vict);
-      return;
-    }
-   return;
-  }
-  else if(!(strcmp(arg1, "decline"))) {
-    struct char_data *vict;
-    char arg3[100];
-    char name[100];
-    half_chop(arg2, name, arg3);
-
-    if(!*arg3 || !*name)
-      show_clan_info(ch);
-    else if(!isClan(arg3))
-      send_to_char(ch, "%s is not a valid clan.\r\n", arg3);
-    else if((clanIsModerator(arg3, ch) == FALSE && clanIsMember(arg3, ch) == FALSE && char_get_admlevel(ch) < ADMLVL_IMPL) || (char_get_crank(ch) < 2 && char_get_admlevel(ch) < ADMLVL_IMPL))
-      send_to_char(ch, "Only leaders or highrank can decline people from entering a clan.\r\n");
-    else if(!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_WORLD)))
-      send_to_char(ch, "%s is not around at the moment.\r\n", name);
-    else if(!clanIsApplicant(arg3, vict))
-      send_to_char(ch, "%s isn't applying to join %s.\r\n", char_get_name(vict), arg3);
-    else {
-      send_to_char(ch, "You decline %s enterance to %s.\r\n", char_get_name(vict), arg3);
-      send_to_char(vict, "You have been declined enterance to %s.\r\n", arg3);
-      clanDecline(arg3, vict);
-    }
-   return;
-  }
-  else if(!(strcmp(arg1, "enroll"))) {
-    struct char_data *vict;
-    char arg3[100];
-    char name[100];
-    half_chop(arg2, name, arg3);
-
-    if(!*arg3 || !*name)
-      show_clan_info(ch);
-    else if(!isClan(arg3))
-      send_to_char(ch, "%s is not a valid clan.\r\n", arg3);
-    else if (!clanIsMember(arg3, ch) && char_get_admlevel(ch) < 1)
-      send_to_char(ch, "You are not in that clan.\r\n");
-    else if(!(clanIsModerator(arg3, ch) || char_get_admlevel(ch) >= ADMLVL_IMPL) && char_get_crank(ch) < 2)
-      send_to_char(ch, "Only leaders or captains can enroll people into their clan.\r\n");
-    else if(!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_WORLD)))
-      send_to_char(ch, "%s is not around at the moment.\r\n", name);
-    else if(!clanIsApplicant(arg3, vict))
-      send_to_char(ch, "%s isn't applying to join %s.\r\n", char_get_name(vict), arg3);
-    else if (char_get_trp(vict) < 5)
-      send_to_char(ch, "%s needs to have at least earned 5 RPP at some point to join a clan.\r\n", char_get_name(vict));
-    else {
-      send_to_char(ch, "You enroll %s into %s.\r\n", char_get_name(vict), arg3);
-      send_to_char(vict, "You have been enrolled into %s.\r\n", arg3);
-      clanInduct(arg3, vict);
-    }
-   return;
-  }
-  else if(!(strcmp(arg1, "makemod"))) {
-    struct char_data *vict;
-    char arg3[100];
-    char name[100];
-    half_chop(arg2, name, arg3);
-
-    if(!*arg3 || !*name)
-      show_clan_info(ch);
-    else if(!isClan(arg3))
-      send_to_char(ch, "%s is not a valid clan.\r\n", arg3);
-    else if(!(clanIsModerator(arg3, ch) || char_get_admlevel(ch) >= ADMLVL_IMPL))
-      send_to_char(ch, "Only leaders can make other people in a clan a leader.\r\n");
-    else if(!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_WORLD)))
-      send_to_char(ch, "%s is not around at the moment.\r\n", name);
-    else {
-      send_to_char(ch, "You make %s a leader of %s.\r\n", char_get_name(vict), arg3);
-      send_to_char(vict, "You have been made a leader of %s.\r\n", arg3);
-      clanMakeModerator(arg3, vict);
-    }
-   return;
-  }
-  else if(!(strcmp(arg1, "setleave"))) {
-    char name[100];
-    char setting[100];
-    half_chop(arg2, setting, name);
-
-    if(!*name || !*setting)
-      show_clan_info(ch);
-    else if(!isClan(name))
-      send_to_char(ch, "%s is not a valid clan.\r\n", name);
-    else if(!(clanIsModerator(name, ch) || char_get_admlevel(ch) >= ADMLVL_IMPL))
-      send_to_char(ch, "Only leaders can change that.\r\n");
-    else if(!strcmp(setting, "free")) {
-      send_to_char(ch, "Members of %s are free to leave as they please.\r\n", name);
-      clanSetOpenLeave(name, TRUE);
-    }
-    else if(!strcmp(setting, "restricted")) {
-      send_to_char(ch, "Members of %s can no longer leave as they please.\r\n", name);
-      clanSetOpenLeave(name, FALSE);
-    }
-    else
-      send_to_char(ch, "Leave access may only be set to free or restricted.\r\n");
-   return;
-  }
-  else if(!(strcmp(arg1, "setjoin"))) {
-    char name[100];
-    char setting[100];
-    half_chop(arg2, setting, name);
-
-    if(!*name || !*setting)
-      show_clan_info(ch);
-    else if(!isClan(name))
-      send_to_char(ch, "%s is not a valid clan.\r\n", name);
-    else if(!(clanIsModerator(name, ch) || char_get_admlevel(ch) >= ADMLVL_IMPL))
-      send_to_char(ch, "Only leaders can change that.\r\n");
-    else if(!strcmp(setting, "free")) {
-      send_to_char(ch, "People may now freely join %s.\r\n", name);
-      clanSetOpenJoin(name, TRUE);
-    }
-    else if(!strcmp(setting, "restricted")) {
-      send_to_char(ch, "People must be enrolled into %s to join.\r\n", name);
-      clanSetOpenJoin(name, FALSE);
-    }
-    else
-      send_to_char(ch, "Leave access my only be set to free or restricted.\r\n");
-   return;
-  }
-  else if(!(strcmp(arg1, "list")))
-    listClans(ch);
-  else if(!(strcmp(arg1, "info"))) {
-    if(!*arg2)
-      show_clan_info(ch);
-    else
-      listClanInfo(arg2, ch);
-  }
-  else {
-    show_clan_info(ch);
-    send_to_char(ch, "These are viable options.\r\n");
-  }
-}
 
 ACMD(do_pagelength)
 {
