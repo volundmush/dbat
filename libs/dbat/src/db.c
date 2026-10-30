@@ -1410,16 +1410,23 @@ char fread_letter(FILE *fp)
 bitvector_t asciiflag_conv(char *flag)
 {
   bitvector_t flags = 0;
-  int is_num = TRUE;
+  int is_num = TRUE, warned = FALSE;
   char *p;
 
   for (p = flag; *p; p++) {
-    if (islower(*p))
-      flags |= 1U << (*p - 'a');
-    else if (isupper(*p))
-      flags |= 1U << (26 + (*p - 'A'));
+    unsigned char c = (unsigned char)*p;
 
-    if (!(isdigit(*p) || (*p == '-')))
+    if (islower(c))
+      flags |= 1U << (c - 'a');
+    else if (c >= 'A' && c <= 'F')
+      flags |= 1U << (26 + (c - 'A'));
+    else if (isupper(c) && !warned) {
+      /* Only a-z and A-F fit in a 32-bit bitvector_t; see sprintascii(). */
+      log("SYSERR: asciiflag_conv: ignoring out-of-range flag letter '%c' in \"%s\".", c, flag);
+      warned = TRUE;
+    }
+
+    if (!(isdigit(c) || (c == '-')))
       is_num = FALSE;
   }
 
@@ -1432,16 +1439,23 @@ bitvector_t asciiflag_conv(char *flag)
 static bitvector_t asciiflag_conv_aff(char *flag)
 {
   bitvector_t flags = 0;
-  int is_num = TRUE;
+  int is_num = TRUE, warned = FALSE;
   char *p;
 
   for (p = flag; *p; p++) {
-    if (islower(*p))
-      flags |= 1U << (1 + (*p - 'a'));
-    else if (isupper(*p))
-      flags |= 1U << (26 + (*p - 'A'));
+    unsigned char c = (unsigned char)*p;
 
-    if (!(isdigit(*p) || (*p == '-')))
+    if (islower(c))
+      flags |= 1U << (1 + (c - 'a'));
+    else if (c >= 'A' && c <= 'F')
+      flags |= 1U << (26 + (c - 'A'));
+    else if (isupper(c) && !warned) {
+      /* Only a-z and A-F fit in a 32-bit bitvector_t; see sprintascii(). */
+      log("SYSERR: asciiflag_conv_aff: ignoring out-of-range flag letter '%c' in \"%s\".", c, flag);
+      warned = TRUE;
+    }
+
+    if (!(isdigit(c) || (c == '-')))
       is_num = FALSE;
   }
 
