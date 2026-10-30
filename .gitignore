@@ -75,9 +75,11 @@ dependencies/
 syslog*
 .zig-cache/
 zig-out/
+zig-pkg/
 .killscript
 .pause
 coredumps
 __pycache__
 *.pyc
 .env
+compile_commands.json
