@@ -148,7 +148,11 @@ void process_eval(void *go, struct script_data *sc, trig_data *trig,
 void read_saved_vars(struct char_data *ch);
 void save_char_vars(struct char_data *ch);
 void init_lookup_table(void);
-void add_to_lookup_table(long uid, void *c);
+void add_to_lookup_table(long uid, int type, void *c);
+long dg_new_mob_uid(void);
+long dg_new_obj_uid(void);
+void dg_log_uid_stats(void);
+void dg_context_str(char *buf, size_t len);
 void remove_from_lookup_table(long uid);
 
 /* from dg_db_scripts.c */
@@ -223,10 +227,11 @@ room_rnum obj_room(obj_data *obj);
 #define GET_TRIG_DEPTH(t)         ((t)->depth)
 #define GET_TRIG_LOOPS(t)         ((t)->loops)
 
-/* player id's: 0 to MOB_ID_BASE - 1            */
-/* mob id's: MOB_ID_BASE to ROOM_ID_BASE - 1      */
-/* room id's: ROOM_ID_BASE to OBJ_ID_BASE - 1    */
-/* object id's: OBJ_ID_BASE and higher           */
+/* player id's: 0 to PLAYER_ID_MAX - 1            */
+/* room id's: ROOM_ID_BASE to OBJ_ID_BASE - 1      */
+/* object id's: OBJ_ID_BASE to OBJ_ID_MAX         */
+/* mob id's: MOB_ID_BASE to MOB_ID_MAX            */
+/* See consts/triggers.h; allocate with dg_new_mob_uid()/dg_new_obj_uid(). */
 
 
 #define SCRIPT(o)		  ((o)->script)

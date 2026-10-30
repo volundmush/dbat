@@ -254,7 +254,8 @@ int can_wear_on_pos(struct obj_data *obj, int pos)
 /* return char with UID n */
 struct char_data *find_char(long n)
 {
-  if (n>=ROOM_ID_BASE) /* See note in dg_scripts.h */
+  /* Players and legacy mobs live below ROOM_ID_BASE; mobs from MOB_ID_BASE. */
+  if (n < 0 || (n >= ROOM_ID_BASE && n < MOB_ID_BASE)) /* See note in dg_scripts.h */
     return NULL;
 
   return find_char_by_uid_in_lookup_table(n);
@@ -264,7 +265,7 @@ struct char_data *find_char(long n)
 /* return object with UID n */
 obj_data *find_obj(long n)
 {
-  if (n < OBJ_ID_BASE) /* see note in dg_scripts.h */
+  if (n < OBJ_ID_BASE || n > OBJ_ID_MAX) /* see note in dg_scripts.h */
     return NULL;
 
   return find_obj_by_uid_in_lookup_table(n);
@@ -1246,6 +1247,85 @@ ACMD(do_detach)
 }
 
 /*
+ * The trigger currently being run by script_driver(), so errors can say which
+ * trigger, which entity and which line caused them. Everything is copied in
+ * because the owner may be purged while its script is still running.
+ */
+struct dg_run_ctx {
+  bool active;
+  long long trig_vnum;
+  char trig_name[64];
+  int owner_type;
+  char owner_name[64];
+  long long owner_vnum;
+  long owner_uid;
+  long long room_vnum;
+  char line[256];
+};
+static struct dg_run_ctx dg_ctx;
+
+static void dg_ctx_begin(void *go, trig_data *trig, int type)
+{
+  room_rnum room = NOWHERE;
+
+  memset(&dg_ctx, 0, sizeof(dg_ctx));
+  dg_ctx.active = TRUE;
+  dg_ctx.owner_type = type;
+  dg_ctx.trig_vnum = (long long)GET_TRIG_VNUM(trig);
+  snprintf(dg_ctx.trig_name, sizeof(dg_ctx.trig_name), "%s", GET_TRIG_NAME(trig) ? GET_TRIG_NAME(trig) : "");
+  dg_ctx.room_vnum = -1;
+
+  if (!go)
+    return;
+
+  switch (type) {
+    case MOB_TRIGGER:
+      snprintf(dg_ctx.owner_name, sizeof(dg_ctx.owner_name), "%s", GET_NAME((char_data *)go) ? GET_NAME((char_data *)go) : "");
+      dg_ctx.owner_vnum = (long long)GET_MOB_VNUM((char_data *)go);
+      dg_ctx.owner_uid = GET_ID((char_data *)go);
+      room = IN_ROOM((char_data *)go);
+      break;
+    case OBJ_TRIGGER:
+      snprintf(dg_ctx.owner_name, sizeof(dg_ctx.owner_name), "%s", ((obj_data *)go)->short_description ? ((obj_data *)go)->short_description : "");
+      dg_ctx.owner_vnum = (long long)GET_OBJ_VNUM((obj_data *)go);
+      dg_ctx.owner_uid = GET_ID((obj_data *)go);
+      room = obj_room((obj_data *)go);
+      break;
+    case WLD_TRIGGER:
+      snprintf(dg_ctx.owner_name, sizeof(dg_ctx.owner_name), "%s", ((room_data *)go)->name ? ((room_data *)go)->name : "");
+      dg_ctx.owner_vnum = (long long)((room_data *)go)->number;
+      dg_ctx.owner_uid = ((room_data *)go)->number + ROOM_ID_BASE;
+      dg_ctx.room_vnum = dg_ctx.owner_vnum;
+      return;
+  }
+
+  if (room != NOWHERE && room >= 0 && room <= top_of_world)
+    dg_ctx.room_vnum = (long long)world[room].number;
+}
+
+static void dg_ctx_set_line(const char *cmd)
+{
+  snprintf(dg_ctx.line, sizeof(dg_ctx.line), "%s", cmd ? cmd : "");
+}
+
+/* Writes " [trig ... ]" describing the running trigger, or "" when none is. */
+void dg_context_str(char *buf, size_t len)
+{
+  static const char *owner_types[] = {"mob", "obj", "room"};
+
+  if (!dg_ctx.active) {
+    snprintf(buf, len, "%s", "");
+    return;
+  }
+
+  snprintf(buf, len, " [trig #%lld '%s' on %s '%s' #%lld uid %ld in room %lld; line: %s]",
+           dg_ctx.trig_vnum, dg_ctx.trig_name,
+           (dg_ctx.owner_type >= 0 && dg_ctx.owner_type <= 2) ? owner_types[dg_ctx.owner_type] : "?",
+           dg_ctx.owner_name, dg_ctx.owner_vnum, dg_ctx.owner_uid, dg_ctx.room_vnum,
+           *dg_ctx.line ? dg_ctx.line : "(none)");
+}
+
+/*
  *  Logs any errors caused by scripts to the system log.
  *  Will eventually allow on-line view of script errors.
  */
@@ -1253,23 +1333,16 @@ void script_vlog(const char *format, va_list args)
 {
   char output[MAX_STRING_LENGTH];
   char print_to[MAX_STRING_LENGTH];
+  char ctx[MAX_STRING_LENGTH];
   struct descriptor_data *i;
-  va_list args_copy;
 
-  va_copy(args_copy, args);
+  vsnprintf(print_to, sizeof(print_to), format, args);
+  dg_context_str(ctx, sizeof(ctx));
 
-  snprintf(output, sizeof(output), "SCRIPT ERR: %s", format);
-
-  basic_mud_vlog(output, args_copy);
-  va_end(args_copy);
+  log("SCRIPT ERR: %s%s", print_to, ctx);
 
   /* the rest is mostly a rip from basic_mud_log() */
-  strcpy(output, "[ ");            /* strcpy: OK */
-  //va_start(args, format);
-  vsnprintf(print_to, sizeof(print_to), format, args);
-
-  strcat(output, print_to);        /* strcat: OK */
-  strcat(output, " ]\r\n");        /* strcat: OK */
+  snprintf(output, sizeof(output), "[ %s%s ]\r\n", print_to, ctx);
 
   for (i = descriptor_list; i; i = i->next) {
     if (STATE(i) != CON_PLAYING || IS_NPC(i->character)) /* switch */
@@ -2491,7 +2564,22 @@ void dg_letter_value(struct script_data *sc, trig_data *trig, char *cmd)
       TRIG_NEW     just started from dg_triggers.c
       TRIG_RESTART restarted after a 'wait'
 */
+static int script_driver_body(void *go_adress, trig_data *trig, int type, int mode);
+
+/* Runs a trigger with dg_ctx describing it, restoring the caller's context after. */
 int script_driver(void *go_adress, trig_data *trig, int type, int mode)
+{
+  struct dg_run_ctx saved = dg_ctx;
+  void *go = go_adress ? *(void **)go_adress : NULL;
+  int ret;
+
+  dg_ctx_begin(go, trig, type);
+  ret = script_driver_body(go_adress, trig, type, mode);
+  dg_ctx = saved;
+  return ret;
+}
+
+static int script_driver_body(void *go_adress, trig_data *trig, int type, int mode)
 {
   static int depth = 0;
   int ret_val = 1;
@@ -2566,6 +2654,7 @@ int script_driver(void *go_adress, trig_data *trig, int type, int mode)
   for (cl = (mode == TRIG_NEW) ? trig->cmdlist : trig->curr_state;
        cl && GET_TRIG_DEPTH(trig); cl = cl->next) {
     for (p = cl->cmd; *p && isspace(*p); p++);
+    dg_ctx_set_line(p);
 
     if (*p == '*') /* comment */
       continue;
@@ -3031,75 +3120,124 @@ void save_char_vars_ascii(FILE *file, struct char_data *ch)
 /* find_char() helpers */
 
 // Must be power of 2
-#define BUCKET_COUNT 64
-// to recognize an empty bucket
-#define UID_OUT_OF_RANGE 1000000000
+#define BUCKET_COUNT 4096
+// to recognize an empty bucket head; real UIDs are never negative
+#define UID_OUT_OF_RANGE -1
 
 struct lookup_table_t {
   long uid;
+  int type;        /* MOB_TRIGGER for characters, OBJ_TRIGGER for objects */
   void * c;
   struct lookup_table_t *next;
 };
 struct lookup_table_t lookup_table[BUCKET_COUNT];
+static long lookup_table_entries = 0;
 
 void init_lookup_table(void)
 {
   int i;
   for (i = 0; i < BUCKET_COUNT; i++) {
     lookup_table[i].uid  = UID_OUT_OF_RANGE;
+    lookup_table[i].type = -1;
     lookup_table[i].c    = NULL;
     lookup_table[i].next = NULL;
   }
 }
 
+static struct lookup_table_t *lookup_table_find(long uid)
+{
+  struct lookup_table_t *lt;
+
+  if (uid < 0)
+    return NULL;
+
+  for (lt = lookup_table[uid & (BUCKET_COUNT - 1)].next; lt; lt = lt->next)
+    if (lt->uid == uid)
+      return lt;
+
+  return NULL;
+}
+
+static const char *uid_range_name(long uid)
+{
+  if (uid < 0)
+    return "invalid";
+  if (uid < PLAYER_ID_MAX)
+    return "player";
+  if (uid < ROOM_ID_BASE)
+    return "legacy mob";
+  if (uid < OBJ_ID_BASE)
+    return "room";
+  if (uid <= OBJ_ID_MAX)
+    return "object";
+  return "mob";
+}
+
+static void log_lookup_miss(const char *what, long uid, struct lookup_table_t *lt)
+{
+  char ctx[MAX_STRING_LENGTH];
+
+  dg_context_str(ctx, sizeof(ctx));
+  if (lt)
+    log("%s: uid %ld (%s range) belongs to a %s, not a %s%s",
+        what, uid, uid_range_name(uid), lt->type == OBJ_TRIGGER ? "object" : "character",
+        strcmp(what, "find_obj") ? "character" : "object", ctx);
+  else
+    log("%s: no entity with uid %ld (%s range; next mob uid %ld, next obj uid %ld)%s",
+        what, uid, uid_range_name(uid), max_mob_id, max_obj_id, ctx);
+}
+
 struct char_data *find_char_by_uid_in_lookup_table(long uid)
 {
-  int bucket = (int) (uid & (BUCKET_COUNT - 1));
-  struct lookup_table_t *lt = &lookup_table[bucket];
+  struct lookup_table_t *lt = lookup_table_find(uid);
 
-  for (;lt && lt->uid != uid ; lt = lt->next) ;
-
-  if (lt)
+  if (lt && lt->type == MOB_TRIGGER)
     return (struct char_data *)(lt->c);
 
-  log("find_char_by_uid_in_lookup_table : No entity with number %ld in lookup table", uid);
+  log_lookup_miss("find_char", uid, lt);
   return NULL;
 }
 
 struct obj_data *find_obj_by_uid_in_lookup_table(long uid)
 {
-  int bucket = (int) (uid & (BUCKET_COUNT - 1));
-  struct lookup_table_t *lt = &lookup_table[bucket];
+  struct lookup_table_t *lt = lookup_table_find(uid);
 
-  for (;lt && lt->uid != uid ; lt = lt->next) ;
-
-  if (lt)
+  if (lt && lt->type == OBJ_TRIGGER)
     return (struct obj_data *)(lt->c);
 
-  log("find_obj_by_uid_in_lookup_table : No entity with number %ld in lookup table", uid);
+  log_lookup_miss("find_obj", uid, lt);
   return NULL;
 }
 
-void add_to_lookup_table(long uid, void *c)
+void add_to_lookup_table(long uid, int type, void *c)
 {
-  int bucket = (int) (uid & (BUCKET_COUNT - 1));
-  struct lookup_table_t *lt = &lookup_table[bucket];
+  struct lookup_table_t *lt = lookup_table_find(uid), *head;
 
-  for (;lt->next; lt = lt->next)
-  if (lt->c == c && lt->uid == uid) {
-      log ("Add_to_lookup failed. Already there. (uid = %ld)", uid);
+  if (lt) {
+    if (lt->c == c && lt->type == type)
       return;
-    }
+    /* Never keep two entries for one UID: find and remove would disagree. */
+    log("SYSERR: add_to_lookup_table: uid %ld already maps to another %s; replacing it with this %s.",
+        uid, lt->type == OBJ_TRIGGER ? "object" : "character",
+        type == OBJ_TRIGGER ? "object" : "character");
+    lt->type = type;
+    lt->c = c;
+    return;
+  }
 
-  CREATE(lt->next, struct lookup_table_t, 1);
-  lt->next->uid = uid;
-  lt->next->c = c;
+  head = &lookup_table[uid & (BUCKET_COUNT - 1)];
+  CREATE(lt, struct lookup_table_t, 1);
+  lt->uid = uid;
+  lt->type = type;
+  lt->c = c;
+  lt->next = head->next;
+  head->next = lt;
+  lookup_table_entries++;
 }
 
 void remove_from_lookup_table(long uid)
 {
-  int bucket = (int) (uid & (BUCKET_COUNT - 1));
-  struct lookup_table_t *lt = &lookup_table[bucket], *flt = NULL;
+  struct lookup_table_t *lt, *prev;
 
   /*
    * This is not supposed to happen. UID 0 is not used.
@@ -3107,22 +3245,69 @@ void remove_from_lookup_table(long uid)
    *
    * Welcor 02/04
    */
-  if (uid == 0)
+  if (uid <= 0)
     return;
 
-  for (;lt;lt = lt->next)
-    if (lt->uid == uid)
-      flt = lt;
-
-  if (flt) {
-    for (lt = &lookup_table[bucket];lt->next != flt;lt = lt->next)
-      ;
-    lt->next = flt->next;
-    free(flt);
-    return;
-  }
+  prev = &lookup_table[uid & (BUCKET_COUNT - 1)];
+  for (lt = prev->next; lt; prev = lt, lt = lt->next)
+    if (lt->uid == uid) {
+      prev->next = lt->next;
+      free(lt);
+      lookup_table_entries--;
+      return;
+    }
 
   log("remove_from_lookup. UID %ld not found.", uid);
+}
+
+/*
+ * UID allocation. Each range is large enough to last years, but if one is
+ * ever exhausted we wrap and skip UIDs that are still in use rather than
+ * spilling into the next entity type's range.
+ */
+static long next_uid(long *counter, long base, long max, const char *what)
+{
+  static bool warned_mob = FALSE, warned_obj = FALSE;
+  bool *warned = (base == MOB_ID_BASE) ? &warned_mob : &warned_obj;
+  long tries;
+
+  if (!*warned && *counter - base >= (max - base) / 10 * 9) {
+    log("SYSERR: %s UIDs are 90%% used (next %ld of %ld..%ld).", what, *counter, base, max);
+    *warned = TRUE;
+  }
+
+  for (tries = 0; tries <= max - base; tries++) {
+    long uid;
+
+    if (*counter < base || *counter > max) {
+      log("SYSERR: %s UID range exhausted; wrapping to %ld and reusing free UIDs.", what, base);
+      *counter = base;
+    }
+    uid = (*counter)++;
+    if (!lookup_table_find(uid))
+      return uid;
+  }
+
+  log("SYSERR: no free %s UIDs left!", what);
+  return base;
+}
+
+long dg_new_mob_uid(void)
+{
+  return next_uid(&max_mob_id, MOB_ID_BASE, MOB_ID_MAX, "mob");
+}
+
+long dg_new_obj_uid(void)
+{
+  return next_uid(&max_obj_id, OBJ_ID_BASE, OBJ_ID_MAX, "object");
+}
+
+void dg_log_uid_stats(void)
+{
+  log("DG UIDs: next mob %ld (%.4f%% used), next obj %ld (%.4f%% used), lookup entries %ld",
+      max_mob_id, 100.0 * (max_mob_id - MOB_ID_BASE) / ((double)MOB_ID_MAX - MOB_ID_BASE),
+      max_obj_id, 100.0 * (max_obj_id - OBJ_ID_BASE) / ((double)OBJ_ID_MAX - OBJ_ID_BASE),
+      lookup_table_entries);
 }
 
 int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *namelist[])

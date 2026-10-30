@@ -1104,10 +1104,12 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       } else {
         send_to_char(d->character, "\r\nCommitting iedit changes.\r\n");
         obj = OLC_IOBJ(d);
+        /* obj gets a new UID below; drop its old lookup entry first */
+        remove_from_lookup_table(GET_ID(obj));
         *obj = *(OLC_OBJ(d));
-        GET_ID(obj) = max_obj_id++;
+        GET_ID(obj) = dg_new_obj_uid();
         /* find_obj helper */
-        add_to_lookup_table(GET_ID(obj), (void *)obj);
+        add_to_lookup_table(GET_ID(obj), OBJ_TRIGGER, (void *)obj);
         if (GET_OBJ_VNUM(obj) != NOTHING) {
           /* remove any old scripts */
           if (SCRIPT(obj)) {

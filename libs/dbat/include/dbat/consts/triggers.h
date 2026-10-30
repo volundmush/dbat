@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 #define    MOB_TRIGGER   0
 #define    OBJ_TRIGGER   1
@@ -83,6 +84,16 @@ extern const char *trig_types[NUM_MTRIG_TYPES+1];
 extern const char *otrig_types[NUM_OTRIG_TYPES+1];
 extern const char *wtrig_types[NUM_WTRIG_TYPES+1];
 
-#define MOB_ID_BASE	  50000  /* 50000 player IDNUMS should suffice */
-#define ROOM_ID_BASE    1050000 /* 1000000 Mobs */
-#define OBJ_ID_BASE     1300000 /* 250000 Rooms */
+/*
+ * DG Scripts UID ranges. The range a UID falls in tells scripts what kind of
+ * entity it refers to, so the ranges must never overlap. Room UIDs are saved
+ * in player variable files, so PLAYER/ROOM/OBJ bases must not move.
+ */
+#define PLAYER_ID_MAX     50000      /* 0 .. 49999: player idnums           */
+#define ROOM_ID_BASE      1050000    /* vnum + ROOM_ID_BASE (250000 rooms)  */
+#define OBJ_ID_BASE       1300000    /* objects                             */
+#define MOB_ID_BASE       (1 << 30)  /* mobs; objects end just below this   */
+#define OBJ_ID_MAX        (MOB_ID_BASE - 1)
+#define MOB_ID_MAX        INT32_MAX
+/* Mobs used 50000..1049999 before; find_char() still accepts that range. */
+#define LEGACY_MOB_ID_BASE 50000

@@ -635,6 +635,9 @@ void heartbeat(int heart_pulse)
   if (!(heart_pulse % (PULSE_1SEC * 60)))           /* 15 seconds */
     check_idle_menu();
 
+  if (!(heart_pulse % (PULSE_1SEC * 60 * 60)))      /* 1 hour */
+    dg_log_uid_stats();
+
   if (!(heart_pulse % (PULSE_IDLEPWD / 15))) {           /* 1 second */
     //dball_load();
   }
