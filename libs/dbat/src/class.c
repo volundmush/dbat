@@ -94,70 +94,12 @@ static int basehit_classes[NUM_CLASSES];
 #define SAVE_LOW 1
 #define SAVE_HIGH 2
 
-static const char *save_type_names[] = {
-  "manual",
-  "low",
-  "high"
-};
 
 #define BASEHIT_MANUAL 0
 #define BASEHIT_LOW     1
 #define BASEHIT_MEDIUM  2
 #define BASEHIT_HIGH    3
 
-static const char *basehit_type_names[] = {
-  "manual",
-  "low",
-  "medium",
-  "high"
-};
-
-/* Class Template Attribute values were created so all default PC classes would
-   total 80 before racial modifiers. Non defaults add up to 60. */
-static const int class_template[NUM_BASIC_CLASSES][6] = {
-/* 		      S,  D,  C,  I,  W,  C */
-/* Wizard 	*/ { 10, 13, 13, 18, 16, 10 },
-/* Cleric 	*/ { 13, 10, 13, 10, 18, 16 },
-/* Rogue 	*/ { 13, 18, 13, 16, 10, 10 },
-/* Fighter 	*/ { 18, 13, 16, 10, 13, 10 },
-/* Monk 	*/ { 13, 16, 13, 10, 18, 10 },
-/* Paladin 	*/ { 18, 10, 13, 10, 16, 13 },
-/* Sorcerer 	*/ { 10, 13, 13, 18, 16, 10 },
-/* Druid 	*/ { 13, 10, 13, 10, 18, 16 },
-/* Bard 	*/ { 13, 18, 13, 16, 10, 10 },
-/* Ranger 	*/ { 13, 13, 13, 10, 16, 10 },
-/* Barbarian 	*/ { 13, 12, 18, 10, 12, 10 }
-};
-
-/* Race Template Attribute values were created so all default PC races would
-   total 80 before racial modifiers. Non defaults add up to 60. */
-static const int race_template[NUM_RACES][6] = {
-/* 		      S,  D,  C,  I,  W,  C */
-/* Human 	*/ { 13, 13, 13, 13, 13, 13 },
-/* Saiyan  	*/ { 16, 12, 14, 10, 12, 12 },
-/* Icer 	*/ { 14, 14, 12, 12, 12, 12 },
-/* Konatsu 	*/ { 10, 16, 10, 13, 14, 14 },
-/* Namek 	*/ { 14, 12, 13, 12, 14, 12 },
-/* Mutant 	*/ { 12, 12, 15, 13, 13, 13 },
-/* Kanassan 	*/ { 10, 14, 10, 15, 13, 10 },
-/* Halfbreed 	*/ { 14, 13, 14, 12, 13, 12 },
-/* Bio  	*/ { 15, 10, 15, 12, 12, 10 },
-/* Android 	*/ { 14, 14, 14, 12, 10, 12 },
-/* Demon 	*/ { 14, 13, 14, 10, 12, 10 },
-/* Majin 	*/ { 15, 10, 15, 10, 12, 14 },
-/* Kai  	*/ { 11, 14, 10, 14, 14, 11 },
-/* Truffle 	*/ { 10, 14, 10, 16, 16, 12 },
-/* Goblin 	*/ { 13, 13, 13, 13, 13, 13 },
-/* Insect 	*/ { 10, 10, 10, 10, 10, 10 },
-/* Orc  	*/ { 10, 10, 10, 10, 10, 10 },
-/* Snake  	*/ { 10, 10, 10, 10, 10, 10 },
-/* Troll  	*/ { 10, 10, 10, 10, 10, 10 },
-/* Minotaur  	*/ { 10, 10, 10, 10, 10, 10 },
-/* Arlian  	*/ { 13, 13, 13, 12, 12, 14 },
-/* Lizardfolk  	*/ { 10, 10, 10, 10, 10, 10 },
-/* Warhost  	*/ { 10, 10, 10, 10, 10, 10 },
-/* Faerie 	*/ { 10, 10, 10, 10, 10, 10 }
-};
 
 void cedit_creation(struct char_data *ch)
 {
@@ -568,133 +510,28 @@ void do_start(struct char_data *ch)
 }
 
 
-static const int free_start_feats_wizard[] = {
-  FEAT_SIMPLE_WEAPON_PROFICIENCY,
-  FEAT_SCRIBE_SCROLL,
-  0
-};
 
-static const int free_start_feats_sorcerer[] = {
-  FEAT_SIMPLE_WEAPON_PROFICIENCY,
-  0
-};
 
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-static const int free_start_feats_cleric[] = {
-  FEAT_SIMPLE_WEAPON_PROFICIENCY,
-  FEAT_ARMOR_PROFICIENCY_HEAVY,
-  FEAT_ARMOR_PROFICIENCY_LIGHT,
-  FEAT_ARMOR_PROFICIENCY_MEDIUM,
-  FEAT_ARMOR_PROFICIENCY_SHIELD,
-  0
-};
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-static const int free_start_feats_rogue[] = {
-  FEAT_SIMPLE_WEAPON_PROFICIENCY,
-  FEAT_ARMOR_PROFICIENCY_LIGHT,
-  0
-};
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-static const int free_start_feats_fighter[] = {
-  FEAT_SIMPLE_WEAPON_PROFICIENCY,
-  FEAT_MARTIAL_WEAPON_PROFICIENCY,
-  FEAT_ARMOR_PROFICIENCY_HEAVY,
-  FEAT_ARMOR_PROFICIENCY_LIGHT,
-  FEAT_ARMOR_PROFICIENCY_MEDIUM,
-  FEAT_ARMOR_PROFICIENCY_SHIELD,
-  0
-};
-
-static const int free_start_feats_paladin[] = {
-  FEAT_SIMPLE_WEAPON_PROFICIENCY,
-  FEAT_MARTIAL_WEAPON_PROFICIENCY,
-  FEAT_ARMOR_PROFICIENCY_HEAVY,
-  FEAT_ARMOR_PROFICIENCY_LIGHT,
-  FEAT_ARMOR_PROFICIENCY_MEDIUM,
-  FEAT_ARMOR_PROFICIENCY_SHIELD,
-  0
-};
 
 
 
-static const int free_start_feats_barbarian[] = {
-  FEAT_SIMPLE_WEAPON_PROFICIENCY,
-  FEAT_MARTIAL_WEAPON_PROFICIENCY,
-  FEAT_ARMOR_PROFICIENCY_LIGHT,
-  FEAT_ARMOR_PROFICIENCY_MEDIUM,
-  FEAT_ARMOR_PROFICIENCY_SHIELD,
-  0
-};
 
-static const int free_start_feats_bard[] = {
-  FEAT_SIMPLE_WEAPON_PROFICIENCY,
-  FEAT_ARMOR_PROFICIENCY_LIGHT,
-  FEAT_ARMOR_PROFICIENCY_SHIELD,
-  0
-};
 
-static const int free_start_feats_ranger[] = {
-  FEAT_SIMPLE_WEAPON_PROFICIENCY,
-  FEAT_MARTIAL_WEAPON_PROFICIENCY,
-  FEAT_ARMOR_PROFICIENCY_LIGHT,
-  FEAT_ARMOR_PROFICIENCY_SHIELD,
-  0
-};
+
 
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-static const int free_start_feats_monk[] = {
-  FEAT_SIMPLE_WEAPON_PROFICIENCY,
-  FEAT_MARTIAL_WEAPON_PROFICIENCY,
-  FEAT_IMPROVED_GRAPPLE,
-  0
-};
 
-static const int free_start_feats_druid[] = {
-  FEAT_SIMPLE_WEAPON_PROFICIENCY,
-  FEAT_ARMOR_PROFICIENCY_LIGHT,
-  FEAT_ARMOR_PROFICIENCY_MEDIUM,
-  FEAT_ARMOR_PROFICIENCY_SHIELD,
-  0
-};
 
-static const int no_free_start_feats[] = {
- 0
-};
 
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-static const int *free_start_feats[] = {
- /* CLASS_ROSHI	*/ free_start_feats_wizard,
- /* CLASS_PICCOLO	*/ free_start_feats_cleric,
- /* CLASS_KRANE		*/ free_start_feats_rogue,
- /* CLASS_NAIL	*/ free_start_feats_fighter,
- /* CLASS_ANDSIX		*/ free_start_feats_monk,
- /* CLASS_GINYU	*/ free_start_feats_paladin,
- /* CLASS_FRIEZA      */ free_start_feats_sorcerer,
- /* CLASS_TAPION         */ free_start_feats_druid,
- /* CLASS_ANDSIX          */ free_start_feats_bard,
- /* CLASS_DABURA        */ free_start_feats_ranger,
- /* CLASS_KABITO     */ free_start_feats_barbarian,
- /* CLASS_ARCANE_AR	*/ no_free_start_feats,
- /* CLASS_ARCANE_TR	*/ no_free_start_feats,
- /* CLASS_ARCHMAGE	*/ free_start_feats_wizard,
- /* CLASS_ASSASSIN	*/ no_free_start_feats,
- /* CLASS_BLACKGUARD	*/ no_free_start_feats,
- /* CLASS_DRAGON_D 	*/ no_free_start_feats,
- /* CLASS_DUELIST       */ no_free_start_feats,
- /* CLASS_DWARVEN_DEF   */ no_free_start_feats,
- /* CLASS_ELDRITCH_KN   */ no_free_start_feats,
- /* CLASS_HIEROPHANT    */ no_free_start_feats,
- /* CLASS_HORIZON_WALK  */ no_free_start_feats,
- /* CLASS_LOREMASTER    */ no_free_start_feats,
- /* CLASS_MYSTIC_THEU   */ no_free_start_feats,
- /* CLASS_SHADOWDANCER  */ no_free_start_feats,
- /* CLASS_THAUMATURGIST */ no_free_start_feats
-};
 
 /*
  * This function controls the change to maxmove, maxmana, and maxhp for
@@ -1790,7 +1627,7 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
         continue;
       ptr += snprintf(ptr, sizeof(str) - (ptr - str), "%s%s%s%s%s%d", buf, buf2, buf,
                       (howlong == 2 ? sensei_name(sen) : sensei_abbr(sen)), buf3,
-                      cabbr_ranktable[rank]);
+                      cabbr_ranktable[sen]);
       buf2 = "/";
       if (howlong == 2)
         buf = " ";
@@ -1809,17 +1646,6 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
              rank, char_get_level(ch) == rank ? "" : "+");
     return str;
   }
-}
-
-int total_skill_levels(struct char_data *ch, int skill)
-{
-  int i = 0, j, total = 0;
-  for (i = 0; i < NUM_CLASSES; i++) {
-    j = 1 + char_get_class_ranks(ch, i) - spell_info[skill].min_level[i];
-    if (j > 0)
-     total += j;
-  }
-  return total;
 }
 
 int load_levels()
@@ -1935,24 +1761,6 @@ int highest_skill_value(int level, int type)
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
 /* Not anymore because for DBZ it was crap and unnecessary. */
-int calc_penalty_exp(struct char_data *ch, int gain)
-{
-  return gain;
-}
-
-static const int size_scaling_table[NUM_SIZES][4] = {
-/*                   str       dex     con  nat arm */
-/* Fine		*/ { -10,	-2,	-2,	0 },
-/* Diminutive	*/ { -10,	-2,	-2,	0 },
-/* Tiny		*/ { -8,	-2,	-2,	0 },
-/* Small	*/ { -4,	-2,	-2,	0 },
-/* Medium	*/ { 0,		0,	0,	0 },
-/* Large	*/ { 8,		-2,	4,	2 },
-/* Huge		*/ { 16,	-4,	8,	5 },
-/* Gargantuan	*/ { 24,	-4,	12,	9 },
-/* Colossal	*/ { 32,	-4,	16,	14 }
-};
-
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
 time_t birth_age(struct char_data *ch)
 {
@@ -1968,9 +1776,6 @@ time_t max_age(struct char_data *ch)
   return 120;
 }
 
-static const int class_feats_wizard[] = {
-  FEAT_UNDEFINED
-};
 
 /*
  * Rogues follow opposite logic - they can take any feat in place of these,
@@ -1978,31 +1783,9 @@ static const int class_feats_wizard[] = {
  * feats. Most classes can ONLY take from these lists for their class
  * feats.
  */
-static const int class_feats_rogue[] = {
-  FEAT_UNDEFINED
-};
 
-static const int class_feats_fighter[] = {
-  FEAT_UNDEFINED
-};
 
-static const int no_class_feats[] = {
-  FEAT_UNDEFINED
-};
 
-static const int *class_bonus_feats[NUM_CLASSES] = {
-/* WIZARD		*/ class_feats_wizard,
-/* CLERIC		*/ no_class_feats,
-/* ROGUE		*/ class_feats_rogue,
-/* FIGHTER		*/ class_feats_fighter,
-/* MONK			*/ no_class_feats,
-/* PALADIN		*/ no_class_feats,
-/* NPC_EXPERT		*/ no_class_feats,
-/* NPC_ADEPT		*/ no_class_feats,
-/* NPC_COMMONER		*/ no_class_feats,
-/* NPC_ARISTOCRAT	*/ no_class_feats,
-/* NPC_WARRIOR		*/ no_class_feats
-};
 
 
 /* Sensei behaviour. A sensei is identified by its CLASS_* constant (ch->chclass). */

@@ -7,7 +7,7 @@
  * ******************************************************************** */
 
 #include "dbat/assedit.h"
-#include "dbat/assembly.h"
+#include "dbat/assemblies.h"
 #include "dbat/consts/maximums.h"
 
 #include "dbat/character_utils.h"
@@ -20,7 +20,6 @@
 #include "dbat/handler.h"
 #include "dbat/interpreter.h"
 #include "dbat/oasis.h"
-#include "dbat/assemblies.h"
 
 
 /*-------------------------------------------------------------------*

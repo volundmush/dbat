@@ -13,7 +13,7 @@
 /* real zone of room/mobile/object/shop given */
 zone_rnum real_zone_by_thing(room_vnum vznum)
 {
-  zone_rnum bot, top, mid, last_top;
+  zone_rnum bot, top, mid;
   int low, high;
 
   bot = 0;
@@ -24,7 +24,6 @@ zone_rnum real_zone_by_thing(room_vnum vznum)
 
   /* perform binary search on zone-table */
   while (bot <= top) {
-    last_top = top;
     mid = (bot + top) / 2;
 
     /* Upper/lower bounds of the zone. */

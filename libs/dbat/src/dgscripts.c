@@ -1,4 +1,4 @@
-#include "dbat/dgscripts.h"
+#include "dbat/dg_scripts.h"
 
 struct index_data **trig_index;
 

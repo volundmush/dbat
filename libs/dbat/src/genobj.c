@@ -5,7 +5,7 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 #include "dbat/htree.h"
-#include "dbat/shops.h"
+#include "dbat/shop.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/genobj.h"
 #include "dbat/genolc.h"
@@ -13,7 +13,6 @@
 #include "dbat/utils.h"
 #include "dbat/handler.h"
 #include "dbat/dg_olc.h"
-#include "dbat/shop.h"
 
 static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
 

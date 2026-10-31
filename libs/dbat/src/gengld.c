@@ -3,10 +3,9 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include "dbat/guilds.h"
-#include "dbat/shops.h"
-#include "dbat/gengld.h"
+#include "dbat/guild.h"
 #include "dbat/shop.h"
+#include "dbat/gengld.h"
 #include "dbat/genolc.h"
 #include "dbat/genzon.h"
 #include "dbat/utils.h"

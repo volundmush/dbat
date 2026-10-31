@@ -25,7 +25,6 @@
 #include "dbat/act.wizard.h"
 #include "dbat/modify.h"
 #include "dbat/dg_scripts.h"
-#include "dbat/shops.h"
 #include "dbat/consts/npc.h"
 #include "dbat/config.h"
 

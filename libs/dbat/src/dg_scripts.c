@@ -63,7 +63,6 @@ struct cmdlist_element *
 find_case(struct trig_data *trig, struct cmdlist_element *cl,
           void *go, struct script_data *sc, int type, char *cond);
 struct cmdlist_element *find_done(struct cmdlist_element *cl);
-int fgetline(FILE *file, char *p);
 struct char_data *find_char_by_uid_in_lookup_table(long uid);
 struct obj_data *find_obj_by_uid_in_lookup_table(long uid);
 EVENTFUNC(trig_wait_event);
@@ -745,10 +744,10 @@ void do_stat_trigger(struct char_data *ch, trig_data *trig)
       if (cmd_list->cmd)
         len += snprintf(sb + len, sizeof(sb)-len, "%s\r\n", cmd_list->cmd);
 
-        if (len>MAX_STRING_LENGTH-80) {
-          len += snprintf(sb + len, sizeof(sb)-len, "*** Overflow - script too long! ***\r\n");
-          break;
-        }
+      if (len>MAX_STRING_LENGTH-80) {
+        len += snprintf(sb + len, sizeof(sb)-len, "*** Overflow - script too long! ***\r\n");
+        break;
+      }
       cmd_list = cmd_list->next;
     }
 
@@ -1401,10 +1400,11 @@ void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
   while (*rhs && isspace(*rhs))
     rhs++;
 
-  for (p = (unsigned char *) lhs; *p; p++);
-  for (--p; isspace(*p) && ((char *)p > lhs); *p-- = '\0');
-  for (p = (unsigned char *) rhs; *p; p++);
-  for (--p; isspace(*p) && ((char *)p > rhs); *p-- = '\0');
+  /* strip trailing spaces without stepping before the start of an empty operand */
+  for (p = (unsigned char *) lhs + strlen(lhs); (char *)p > lhs && isspace(p[-1]); )
+    *--p = '\0';
+  for (p = (unsigned char *) rhs + strlen(rhs); (char *)p > rhs && isspace(p[-1]); )
+    *--p = '\0';
 
 
   /* find the op, and figure out the value */
@@ -1447,7 +1447,7 @@ void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
     if (is_num(lhs) && is_num(rhs))
       sprintf(result, "%d", atoll(lhs) >= atoll(rhs));
     else
-      sprintf(result, "%d", strcasecmp(lhs, rhs) <= 0);
+      sprintf(result, "%d", strcasecmp(lhs, rhs) >= 0);
   }
 
   else if (!strcmp("<", op)) {
@@ -2327,23 +2327,6 @@ ACMD(do_vdelete)
  * Called from do_set - return 0 for failure, 1 for success.
  * ch and vict are verified
  */
-int perform_set_dg_var(struct char_data *ch, struct char_data *vict, char *val_arg)
-{
-	char var_name[MAX_INPUT_LENGTH], *var_value;
-
-	var_value = any_one_arg(val_arg, var_name);
-
-	if (!*var_name || var_value == NULL || !*var_value) {
-		send_to_char(ch, "Usage: set <char> <varname> <value>\r\n");
-		return 0;
-  }
-  if (!SCRIPT(vict))
-     CREATE(SCRIPT(vict), struct script_data, 1);
-
-  add_var(&(SCRIPT(vict)->global_vars), var_name, var_value, 0);
-  return 1;
-}
-
 /*
  * delete a variable from the globals of another script
  *     'rdelete <variable_name> <uid>'
@@ -2537,7 +2520,7 @@ void dg_letter_value(struct script_data *sc, trig_data *trig, char *cmd)
     return;
   }
 
-  if (num > strlen(string)) {
+  if ((size_t)num > strlen(string)) {
     script_log("Trigger #%d : dg_letter number > strlen!", GET_TRIG_VNUM(trig));
     return;
   }
@@ -2944,23 +2927,6 @@ struct cmdlist_element *find_done(struct cmdlist_element *cl)
 
 
 /* read a line in from a file, return the number of chars read */
-int fgetline(FILE *file, char *p)
-{
-  int count = 0;
-
-  do {
-    *p = fgetc(file);
-    if (*p != '\n' && !feof(file)) {
-      p++;
-      count++;
-    }
-  } while (*p != '\n' && !feof(file));
-
-  if (*p == '\n') *p = '\0';
-
-  return count;
-}
-
 
 /* load in a character's saved variables */
 void read_saved_vars(struct char_data *ch)
@@ -3051,72 +3017,7 @@ void save_char_vars(struct char_data *ch)
 }
 
 /* load in a character's saved variables from an ASCII pfile*/
-void read_saved_vars_ascii(FILE *file, struct char_data *ch, int count)
-{
-  long context;
-  char input_line[1024], *temp, *p;
-  char varname[READ_SIZE];
-  char context_str[READ_SIZE];
-	int i;
-
-  /*
-   * If getting to the menu from inside the game, the vars aren't removed.
-   * So let's not allocate them again.
-   */
-  if (SCRIPT(ch))
-    return;
-
-  /* create the space for the script structure which holds the vars */
-  /* We need to do this first, because later calls to 'remote' will need */
-  /* a script already assigned. */
-  CREATE(SCRIPT(ch), struct script_data, 1);
-
-  /* walk through each line in the file parsing variables */
-  for (i = 0; i < count; i++)
-  {
-    if (get_line(file, input_line)>0) {
-      p = temp = strdup(input_line);
-      temp = any_one_arg(temp, varname);
-      temp = any_one_arg(temp, context_str);
-      skip_spaces(&temp); /* temp now points to the rest of the line */
-
-      context = atol(context_str);
-      add_var(&(SCRIPT(ch)->global_vars), varname, temp, context);
-      free(p); /* plug memory hole */
-    }
-  }
-}
-
 /* save a characters variables out to an ASCII pfile */
-void save_char_vars_ascii(FILE *file, struct char_data *ch)
-{
-  struct trig_var_data *vars;
-  int count = 0;
-  /* immediate return if no script (and therefore no variables) structure */
-  /* has been created. this will happen when the player is logging in */
-  if (SCRIPT(ch) == NULL) return;
-
-  /* we should never be called for an NPC, but just in case... */
-  if (char_is_npc(ch)) return;
-
-  /* make sure this char has global variables to save */
-  if (ch->script->global_vars == NULL) return;
-
-  /* note that currently, context will always be zero. this may change */
-  /* in the future */
-  for (vars = ch->script->global_vars;vars;vars = vars->next)
-    if (*vars->name != '-')
-      count++;
-
-  if (count != 0) {
-	  fprintf(file, "Vars: %d\n", count);
-
-  for (vars = ch->script->global_vars;vars;vars = vars->next)
-    if (*vars->name != '-') /* don't save if it begins with - */
-      fprintf(file, "%s %ld %s\n", vars->name, vars->context, vars->value);
-  }
-}
-
 /* find_char() helpers */
 
 // Must be power of 2

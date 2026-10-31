@@ -4,15 +4,13 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 #include "dbat/htree.h"
-#include "dbat/shops.h"
-#include "dbat/guilds.h"
+#include "dbat/shop.h"
+#include "dbat/guild.h"
 #include "dbat/genmob.h"
 #include "dbat/utils.h"
 #include "dbat/db.h"
 #include "dbat/genolc.h"
-#include "dbat/shop.h"
 #include "dbat/genzon.h"
-#include "dbat/guild.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/handler.h"
 #include "dbat/dg_olc.h"
@@ -212,11 +210,10 @@ int delete_mobile(mob_rnum refpt)
       }
     }
   
-    last_saved_zone = NOTHING;
+  last_saved_zone = NOTHING;
   /* Update guild masters */
   if (guild_index)
     for (counter = 0; counter <= top_guild; counter++) {
-      zone_vnum zone = zone_table[real_zone_by_thing(counter)].number;
       /* Find the guild for this trainer and reset it's trainer to
        * -1 to keep the guild so it could be assigned to someone else */
       if (GM_TRAINER(counter) == refpt) {
@@ -419,7 +416,7 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
   for (i = 0; i < SKILL_TABLE_SIZE; i++)
     if (char_get_skills_base(mob, i))
       fprintf(fd, "Skill: %d %d\n", i, char_get_skills_base(mob, i));
-  for (i = 0; i <= SKILL_TABLE_SIZE; i++)
+  for (i = 0; i < SKILL_TABLE_SIZE; i++)
     if (char_get_skills_mod(mob, i))
       fprintf(fd, "SkillMod: %d %d\n", i, char_get_skills_mod(mob, i));
   fputs("E\n", fd);

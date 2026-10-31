@@ -160,7 +160,7 @@ void free_house(struct house_control_rec *house)
 void hedit_delete_house(struct descriptor_data *d, int house_vnum) 
 { 
   int i, j; 
-  room_rnum real_atrium, real_house; 
+  room_rnum real_house; 
 
   if ((i = find_house(house_vnum)) == NOWHERE) { 
     mudlog(BRF, ADMLVL_BUILDER, TRUE, "SYSERR: hsedit: Invalid house vnum in hedit_delete_house\r\n"); 
@@ -351,54 +351,6 @@ void hsedit_disp_guest_menu(struct descriptor_data *d)
   send_to_char(d->character, "%s", buf); 
 
   OLC_MODE(d) = HSEDIT_GUEST_MENU; 
-} 
-
-void hsedit_disp_val0_menu(struct descriptor_data *d) 
-{ 
-  OLC_MODE(d) = HSEDIT_VALUE_0; 
-  switch(OLC_HOUSE(d)->mode) { 
-    case HOUSE_CLAN: 
-      send_to_char(d->character, "Enter id of the clan: "); 
-      break; 
-    case HOUSE_UNOWNED:
-      send_to_char(d->character, "Done.");
-      break;
-    case HOUSE_GOD: 
-      hsedit_disp_val3_menu(d);  /* Skip to 4th variable */ 
-      break; 
-    default: 
-      hsedit_disp_menu(d); 
-  } 
-} 
-
-void hsedit_disp_val1_menu(struct descriptor_data *d) 
-{ 
-  OLC_MODE(d) = HSEDIT_VALUE_1; 
-  switch(OLC_HOUSE(d)->mode) { 
-    default: 
-      hsedit_disp_menu(d); 
-  } 
-} 
-
-void hsedit_disp_val2_menu(struct descriptor_data *d) 
-{ 
-  OLC_MODE(d) = HSEDIT_VALUE_2; 
-  switch(OLC_HOUSE(d)->mode) { 
-    default: 
-      hsedit_disp_menu(d); 
-  } 
-} 
-
-void hsedit_disp_val3_menu(struct descriptor_data *d) 
-{ 
-  OLC_MODE(d) = HSEDIT_VALUE_3; 
-  switch(OLC_HOUSE(d)->mode) { 
-    case HOUSE_GOD: 
-      send_to_char(d->character, "Enter minimum level of guests: "); 
-      break; 
-    default: 
-      hsedit_disp_menu(d); 
-  } 
 } 
 
 char *hsedit_list_guests(struct house_control_rec *thishouse, char *guestlist)
@@ -985,13 +937,6 @@ expansion
   /*. If we get this far, something has been changed .*/ 
   OLC_VAL(d) = 1; 
   hsedit_disp_menu(d); 
-} 
-
-void hsedit_string_cleanup(struct descriptor_data *d, int terminator) 
-{ 
-  switch (OLC_MODE(d)) { 
-    /* There are no strings to be edited in houses - if there are any added later, add them here */ 
-  } 
 } 
 
 ACMD(do_oasis_hsedit) 

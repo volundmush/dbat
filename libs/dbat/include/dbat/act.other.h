@@ -14,10 +14,6 @@ void wishSYS(void);
 void bring_to_cap(struct char_data *ch);
 void base_update(void);
 void load_shadow_dragons();
-int is_innate(struct char_data *ch, int spellnum);
-int is_innate_ready(struct char_data *ch, int spellnum);
-void add_innate_timer(struct char_data *ch, int spellnum);
-void add_innate_affects(struct char_data *ch);
 void update_innate(struct char_data *ch);
 
 // commands
@@ -35,7 +31,6 @@ ACMD(do_visible);
 ACMD(do_title);
 ACMD(do_group);
 ACMD(do_ungroup);
-ACMD(do_report);
 ACMD(do_split);
 ACMD(do_use);
 ACMD(do_value);
@@ -105,5 +100,4 @@ ACMD(do_visible);
 ACMD(do_compare);
 ACMD(do_break);
 ACMD(do_fix);
-ACMD(do_resurrect);
 ACMD(do_aid);

@@ -235,7 +235,6 @@ void cedit_setup(struct descriptor_data *d)
 
 void cedit_save_internally(struct descriptor_data *d)
 {
- bool copyover_needed = FALSE;
   /* see if we need to reassign spec procs on rooms */
   int reassign = (CONFIG_DTS_ARE_DUMPS != OLC_CONFIG(d)->play.dts_are_dumps);
   /****************************************************************************/

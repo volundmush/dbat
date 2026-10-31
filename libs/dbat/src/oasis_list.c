@@ -16,7 +16,6 @@
 #include "dbat/guild.h"
 #include "dbat/races.h"
 #include "dbat/class.h"
-#include "dbat/shops.h"
 
 
 /******************************************************************************/
@@ -50,7 +49,7 @@ ACMD(do_oasis_list)
       print_zone(ch, atoi(smin));
     else
       list_zones(ch);  
-      return;
+    return;
     }
     
   if (!*smin || *smin == '.') {

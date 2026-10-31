@@ -32,13 +32,11 @@
 
 /* local functions */
 void build_player_index(void);
-void save_etext(struct char_data *ch);
 int sprintascii(char *out, bitvector_t bits);
 void tag_argument(char *argument, char *tag);
 void load_affects(FILE *fl, struct char_data *ch, int violence);
 void load_bonuses(FILE *fl, struct char_data *ch, bool mods);
 void load_skills(FILE *fl, struct char_data *ch, bool mods);
-void load_feats(FILE *fl, struct char_data *ch);
 void load_HMVS(struct char_data *ch, const char *line, int mode);
 void load_BASE(struct char_data *ch, const char *line, int mode);
 void load_molt(struct char_data *ch, const char *line);
@@ -215,31 +213,6 @@ char *get_name_by_id(long id)
   return (NULL);
 }
 
-
-void load_follower_from_file(FILE *fl, struct char_data *ch)
-{
-  int nr;
-  char line[MAX_INPUT_LENGTH + 1];
-  struct char_data *newch;
-
-  if (!get_line(fl, line))
-    return;
-
-  if (line[0] != '#' || !line[1])
-    return;
-
-  nr = atoi(line + 1);
-  newch = create_char();
-  newch->nr = real_mobile(nr);
-
-  if (!parse_mobile_from_file(fl, newch)) {
-    free(newch);
-  } else {
-    add_follower(newch, ch);
-    newch->master_id = char_get_idnum(ch);
-    char_set_position(newch, POS_STANDING);
-  }
-}
 
 
 /*************************************************************************
@@ -728,9 +701,8 @@ int load_char(const char *name, struct char_data *ch)
 */
 void kill_ems(char *str)
 {
-  char *ptr1, *ptr2, *tmp;
+  char *ptr1, *ptr2;
 
-  tmp = str;
   ptr1 = str;
   ptr2 = str;
 
@@ -743,60 +715,6 @@ void kill_ems(char *str)
 }
 
 
-void save_char_pets(struct char_data *ch)
-{
-  struct follow_type *foll;
-  char fname[40];
-  FILE *fl;
-
-  if (char_is_npc(ch) || char_get_pfilepos(ch) < 0)
-    return;
-
-  if (!get_filename(fname, sizeof(fname), PET_FILE, char_get_name(ch)))
-    return;
-
-  if (!(fl = fopen(fname, "w"))) {
-    mudlog(NRM, ADMLVL_GOD, TRUE, "SYSERR: Couldn't open pet file %s for write", fname);
-    return;
-  }
-
-  for (foll = ch->followers; foll; foll = foll->next) {
-        write_mobile_record(char_get_mob_vnum(foll->follower), foll->follower, fl);
-  }
-
-  fclose(fl);
-}
-
-
-void load_char_pets(struct char_data *ch)
-{
-  char fname[40];
-  FILE *fl;
-  IDXTYPE load_room;
-  struct follow_type *foll;
-
-  if (char_is_npc(ch) || char_get_pfilepos(ch) < 0)
-    return;
-
-  if (!get_filename(fname, sizeof(fname), PET_FILE, char_get_name(ch)))
-    return;
-
-  if (!(fl = fopen(fname, "r")))
-    return;
-
-  while (!feof(fl))
-    load_follower_from_file(fl, ch);
-   /*load_room = IN_ROOM(ch);*/
- 
-  for (foll = ch->followers; foll; foll = foll->next) {
-       load_room = real_room(1);
-  if (load_room == NOWHERE) {
-       load_room = real_room(char_get_in_room(ch));
-  }
-    char_to_room(foll->follower, load_room);
-    act("You are joined by $N.", FALSE, ch, 0, foll->follower, TO_CHAR);
-  }
-}
 
 
 /*
@@ -1216,11 +1134,6 @@ void save_char(struct char_data * ch)
  * eat a single whitespace immediately after the word.
  */
 
-void save_etext(struct char_data *ch)
-{
-/* this will be really cool soon */
-}
-
 
 /* Separate a 4-character id tag from the data it precedes */
 void tag_argument(char *argument, char *tag)
@@ -1243,11 +1156,10 @@ void tag_argument(char *argument, char *tag)
 
 void load_affects(FILE *fl, struct char_data *ch, int violence)
 {
-  int num, num2, num3, num4, num5, num6, i;
+  int num, num2, num3, num4, num5, num6;
   char line[MAX_INPUT_LENGTH + 1];
   struct affected_type af;
 
-  i = 0;
   do {
     get_line(fl, line);
     num = num2 = num3 = num4 = num5 = num6 = 0;
@@ -1261,7 +1173,6 @@ void load_affects(FILE *fl, struct char_data *ch, int violence)
       af.specific = num6;
       if (!violence)
         affect_to_char(ch, &af);
-      i++;
     }
   } while (num != 0);
 }
@@ -1299,18 +1210,6 @@ void load_bonuses(FILE *fl, struct char_data *ch, bool mods)
     char_set_bonuses(ch, i, num[i]);
    }
   }
-}
-
-void load_feats(FILE *fl, struct char_data *ch)
-{
-  int num = 0, num2 = 0;
-  char line[MAX_INPUT_LENGTH + 1];
-
-  do {
-    get_line(fl, line);
-    sscanf(line, "%d %d", &num, &num2);
-
-  } while (num != 0);
 }
 
 void load_HMVS(struct char_data *ch, const char *line, int mode)

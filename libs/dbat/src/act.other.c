@@ -64,10 +64,6 @@ static void boost_obj(struct obj_data *obj, struct char_data *ch, int type);
 static int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
 static void print_group(struct char_data *ch);
 static void check_eq(struct char_data *ch);
-static int spell_in_book(struct obj_data *obj, int spellnum);
-static int spell_in_scroll(struct obj_data *obj, int spellnum);
-static int spell_in_domain(struct char_data *ch, int spellnum);
-static void show_clan_info(struct char_data *ch);
 
 // definitions
 void log_imm_action(char *messg, ...)
@@ -179,7 +175,7 @@ ACMD(do_rpp)
 {
 
  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
- int tnlcost = 1, revcost = 1, selection = 0, pay = 0, bpay = 0;
+ int tnlcost = 1, revcost = 1, selection = 0, pay = 0;
  int max_choice = 15; /* Controls the maximum number of menu choices */
  struct obj_data *obj;
  
@@ -884,10 +880,8 @@ ACMD(do_grapple)
  }
 
 
- int pass = FALSE;
 
  if (!strcasecmp("hold", arg2) || !strcasecmp("choke", arg2) || !strcasecmp("grab", arg2) || !strcasecmp("wrap", arg2)) {
-  pass = TRUE;
   int perc = char_get_skill(ch, SKILL_GRAPPLE), prob = axion_dice(0), cost = GET_MAX_MOVE(ch) / 100;
 
   if ((getCurST(ch)) < cost) {
@@ -1288,10 +1282,10 @@ ACMD(do_train)
   bonus = 1;
  }
 
- if (sensei < 0) 
-  cost = ((total / 20) + (GET_MAX_MOVE(ch) / 50));
- else
-  cost = ((total / 25) + (GET_MAX_MOVE(ch) / 60));
+  if (sensei < 0) 
+   cost = ((total / 20) + (GET_MAX_MOVE(ch) / 50));
+  else
+   cost = ((total / 25) + (GET_MAX_MOVE(ch) / 60));
 
 
   if (char_get_bonuses(ch, BONUS_HARDWORKER)) {
@@ -2220,8 +2214,6 @@ ACMD(do_suppress)
   return;
  }
 
-  int64_t max = getEffMaxPL(ch);
- int64_t amt = ((max * 0.01) * num);
 
     reveal_hiding(ch, 0);
 
@@ -6045,8 +6037,7 @@ static int64_t kaioken_levels[21] = {
 ACMD(do_kaioken)
 {
     char arg[MAX_INPUT_LENGTH];
-    int roll = axion_dice(0), x = 0, pass = FALSE;
-    int64_t boost = 0;
+    int roll = axion_dice(0), x = 0;
     one_argument(argument, arg);
 
     if (!check_skill(ch, SKILL_KAIOKEN)) {
@@ -10261,34 +10252,6 @@ ACMD(do_ungroup)
     stop_follower(tch);
 }
 
-ACMD(do_report)
-{
-  char buf[MAX_STRING_LENGTH];
-  struct char_data *k;
-  struct follow_type *f;
-
-  if (!char_aff_flagged(ch, AFF_GROUP)) {
-    send_to_char(ch, "But you are not a member of any group!\r\n");
-    return;
-  }
-
-  snprintf(buf, sizeof(buf), "$n reports: %" I64T "/%" I64T "H, %" I64T "/%" I64T "M, %" I64T "/%" I64T "V\r\n",
-	  GET_HIT(ch), GET_MAX_HIT(ch),
-           (getCurKI(ch)), GET_MAX_MANA(ch),
-           (getCurST(ch)), GET_MAX_MOVE(ch));
-
-  k = (ch->master ? ch->master : ch);
-
-  for (f = k->followers; f; f = f->next)
-    if (char_aff_flagged(f->follower, AFF_GROUP) && f->follower != ch)
-      act(buf, TRUE, ch, NULL, f->follower, TO_VICT);
-
-  if (k != ch)
-    act(buf, TRUE, ch, NULL, k, TO_VICT);
-
-  send_to_char(ch, "You report to the group.\r\n");
-}
-
 ACMD(do_split)
 {
   char buf[MAX_INPUT_LENGTH];
@@ -11364,89 +11327,25 @@ ACMD(do_fix)
 /* Returns true if the spell/skillnum is innate to the character
    (as opposed to just practiced).
  */
-int is_innate(struct char_data *ch, int spellnum) 
-{
-  return FALSE;
-}
-
 /* returns FALSE if the spell is found in the innate linked list. 
   This just means the ability is ready IF they can even get the
   ability. (see is_innate). 
 */
-int is_innate_ready(struct char_data *ch, int spellnum)
-{
-  return FALSE;
-}
-
 /* Adds a node to the linked list with a timer which indicates
    that the innate skill/spell is NOT ready to be used.
 
    is_innate_ready(...) should be called first to determine if
    there is already a timer set for the spellnum.
 */
-void add_innate_timer(struct char_data *ch, int spellnum) 
-{
-}
-
 
 /* called when a player enters the game to set permanent affects.
    Usually these will stay set, but certain circumstances will
    cause them to wear off (ie. removing eq with a perm affect).
 */
-void add_innate_affects(struct char_data *ch) 
-{
-  switch(char_get_race(ch)) {
-  case RACE_DEMON:
-  case RACE_ICER:
-  case RACE_ANDROID:
-  case RACE_BIO:
-    affect_modify(ch, APPLY_NONE, 0, 0, AFF_INFRAVISION, TRUE);
-    break;
-  }
-  affect_total(ch);
-}
-
 /* Called to update the innate timers */
 void update_innate(struct char_data *ch)
 {
 
-}
-
-static int spell_in_book(struct obj_data *obj, int spellnum)
-{
-  int i;
-  bool found = FALSE;
-
-  if (!obj->sbinfo)
-    return FALSE;
-
-  for (i=0; i < SPELLBOOK_SIZE; i++)
-    if (obj->sbinfo[i].spellname == spellnum) {
-      found = TRUE;
-      break;
-    }
-
-  if (found)
-    return 1;
-
-  return 0;
-}
-
-static int spell_in_scroll(struct obj_data *obj, int spellnum)
-{
-  if (obj_get_value(obj, VAL_SCROLL_SPELL1) == spellnum)
-    return TRUE;
-
-  return FALSE;
-}
-
-static int spell_in_domain(struct char_data *ch, int spellnum)
-{
-  if (spell_info[spellnum].domain == DOMAIN_UNDEFINED) {
-    return FALSE;
-  }
-
-  return TRUE;
 }
 
 
@@ -11462,79 +11361,6 @@ const room_vnum freeres[NUM_ALIGNS] = {
 /* CHAOTIC_EVIL */	1000
 };
 
-
-ACMD(do_resurrect)
-{
-  room_rnum rm;
-  struct affected_type *af, *next_af;
-
-  if (char_is_npc(ch)) {
-    send_to_char(ch, "Sorry, only players get spirits.\r\n");
-    return;
-  }
-
-  if (!char_aff_flagged(ch, AFF_SPIRIT)) {
-    send_to_char(ch, "But you're not even dead!\r\n");
-    return;
-  }
-
-  send_to_char(ch, "You take an experience penalty and pray for charity resurrection.\r\n");
-  gain_exp(ch, -(level_exp(ch, char_get_level(ch)) - level_exp(ch, char_get_level(ch) - 1)));
-
-  for (af = ch->affected; af; af = next_af) {
-    next_af = af->next;
-    if (af->location == APPLY_NONE && af->type == -1 &&
-        (af->bitvector == AFF_SPIRIT || af->bitvector == AFF_ETHEREAL))
-      affect_remove(ch, af);
-  }
-
-  if (rm != NOWHERE) {
-    char_from_room(ch);
-    char_to_room(ch, rm);
-    look_at_room(char_get_in_room(ch), ch, 0);
-  }
-
-  act("$n's body forms in a pool of @Bblue light@n.", TRUE, ch, 0, 0, TO_ROOM);
-}
-
-static void show_clan_info(struct char_data *ch) {
-
-  send_to_char(ch,   "@c----------------------------------------\r\n"
-                     "@c|@WProvided by@D: @YAlister of Aeonian Dreams@c|\r\n"
-                     "@c|@YWith many changes made by Iovan.      @c|\r\n"
-                     "@c----------------------------------------@w\r\n"
-                     "  Commands are:\r\n"
-                     "@c--@YClan Members Only@c-----@w\r\n"
-                     "  clan members\r\n"
-                     "  clan bank\r\n"
-                     "  clan deposit\r\n"
-                     "  clan leave    <clan>\r\n"
-                     "@c--@YClan Mod/Highrank@c-----@w\r\n"
-                     "  clan decline  <person> <clan>\r\n"
-                     "  clan enroll   <person> <clan>\r\n"
-                     "@c--@YClan Moderators Only@c--@w\r\n"
-                     "  clan withdraw\r\n"
-                     "  clan infow\r\n"
-                     "  clan setjoin  <free | restricted> <clan>\r\n"
-                     "  clan setleave <free | restricted> <clan>\r\n"
-                     "  clan expel    <person> <clan>\r\n"
-                     "  clan highrank <new highrank title>\r\n"
-                     "  clan midrank  <new midrank title>\r\n"
-                     "  clan rank     <person> < 0 / 1 / or 2>\r\n"
-                     "  clan makemod  <person> <clan>\r\n"
-                     "@c--@YAnyone@c----------------@w\r\n"
-                     "  clan list\r\n"
-		     "  clan info     <clan>\r\n"
-		     "  clan apply    <clan>\r\n"
-		     "  clan join     <clan>\r\n");
-  if(char_get_admlevel(ch) >= ADMLVL_IMPL)
-    send_to_char(ch, "@c--@YImmort@c----------------@w\r\n"
-                     "  clan create   <clan>\r\n"
-		     "  clan destroy  <clan>\r\n"
-		     "  clan reload   <clan>\r\n"
-                     "  clan bset     <clan>\n");
-
-}
 
 
 ACMD(do_pagelength)
@@ -11563,13 +11389,12 @@ ACMD(do_aid)
   struct char_data *vict;
   struct obj_data *obj = NULL, *aid_obj = NULL, *aid_prod = NULL, *next_obj;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-  int dc = 0, found = FALSE, num = 47, num2 = 0, survival = 0;
+  int dc = 0, found = FALSE, num = 47, num2 = 0;
 
   if (char_is_npc(ch))
     return;
 
   if (char_get_skill(ch, SKILL_SURVIVAL)) {
-   survival = 1;
   }
 
   two_arguments(argument, arg, arg2);

@@ -79,8 +79,6 @@ static void do_auto_exits2(room_rnum target_room, struct char_data *ch);
 static void display_spells(struct char_data *ch, struct obj_data *obj);
 static void display_scroll(struct char_data *ch, struct obj_data *obj);
 static void space_to_minus(char *str);
-static void free_history(struct char_data *ch, int type);
-static int yesrace(int num);
 static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
                           struct char_data *ch);
 // definitions
@@ -339,7 +337,7 @@ ACMD(do_mimic)
   return;
  }
 
- int count = 0, x = 0;
+ int count = 0;
 
  // generate a list of mimic'able races.
  bool can_mimic[NUM_RACES];
@@ -825,8 +823,8 @@ ACMD(do_nickname)
   } else {
    send_to_char(ch, "@wYou nickname %s@w as '@C%s@w'.@n\r\n", obj->short_description, arg2);
    char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH];
-   sprintf(nick, "%s @wnicknamed @D(@C%s@D)@n", obj->short_description, CAP(arg2));
-   sprintf(nick2, "%s %s", obj->name, arg2);
+   snprintf(nick, sizeof(nick), "%s @wnicknamed @D(@C%s@D)@n", obj->short_description, CAP(arg2));
+   snprintf(nick2, sizeof(nick2), "%s %s", obj->name, arg2);
    obj->short_description = strdup(nick);
    obj->name = strdup(nick2);
    return;
@@ -1007,65 +1005,65 @@ ACMD(do_intro)
  if (char_is_npc(ch))
   return;
 
-  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-  struct char_data *vict;
+ char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+ struct char_data *vict;
 
-  two_arguments(argument, arg, arg2);
+ two_arguments(argument, arg, arg2);
 
-  if (!*arg) {
-   send_to_char(ch, "Syntax: dub (target) (name)\r\nWho do you want to dub and what do you want to name them?\r\n");
-   return;
-  }
+ if (!*arg) {
+  send_to_char(ch, "Syntax: dub (target) (name)\r\nWho do you want to dub and what do you want to name them?\r\n");
+  return;
+ }
 
-  if (!*arg2) {
-   send_to_char(ch, "Syntax: dub (target) (name)\r\nWhat name do you wish to know them by?\r\n");
-   return;
-  }
+ if (!*arg2) {
+  send_to_char(ch, "Syntax: dub (target) (name)\r\nWhat name do you wish to know them by?\r\n");
+  return;
+ }
 
-  if (strlen(arg2) > 20) {
-   send_to_char(ch, "Limit the name to 20 characters.\r\n");
-   return;
-  }
-  if (strlen(arg2) < 3) {
-   send_to_char(ch, "Limit the name to at least 3 characters.\r\n");
-   return;
-  }
+ if (strlen(arg2) > 20) {
+  send_to_char(ch, "Limit the name to 20 characters.\r\n");
+  return;
+ }
+ if (strlen(arg2) < 3) {
+  send_to_char(ch, "Limit the name to at least 3 characters.\r\n");
+  return;
+ }
 
-  if (strstr(arg2, "$") || strstr(arg2, "@") || strstr(arg2, "%")) {
-   send_to_char(ch, "Illegal character. No symbols.\r\n");
-   return;
-  }
+ if (strstr(arg2, "$") || strstr(arg2, "@") || strstr(arg2, "%")) {
+  send_to_char(ch, "Illegal character. No symbols.\r\n");
+  return;
+ }
 
-  if (!(vict = get_player_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-   send_to_char(ch, "There is no such person.\r\n");
-   return;
-  }
+ if (!(vict = get_player_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+  send_to_char(ch, "There is no such person.\r\n");
+  return;
+ }
 
-  if (vict == ch) {
-   send_to_char(ch, "That seems rather odd.\r\n");
-   return;
-  }
+ if (vict == ch) {
+  send_to_char(ch, "That seems rather odd.\r\n");
+  return;
+ }
 
-  if (char_is_npc(vict)) {
-   send_to_char(ch, "That seems rather unwise.\r\n");
-   return;
-  }
+ if (char_is_npc(vict)) {
+  send_to_char(ch, "That seems rather unwise.\r\n");
+  return;
+ }
 
-  if (readIntro(vict, ch) == 2) {
-   send_to_char(ch, "There seems to have been an error, report this to Iovan.\r\n");
-   return;
-  }
-  else if (readIntro(ch, vict) == 1 && strstr(RACE(vict), arg)) {
-   send_to_char(ch, "You have already dubbed them a name. If you want to redub them target the name you know them by.\r\n");
-   return;
-  }
-  else {
-   introWrite(ch, vict, arg2);
-   act("You decide to call $M, $N.", TRUE, ch, 0, vict, TO_CHAR);
-   act("$n seems to decide something about you.", TRUE, ch, 0, vict, TO_VICT);
-   act("$n seems to decide something about $N.", TRUE, ch, 0, vict, TO_NOTVICT);
-   return;
-  }
+ if (readIntro(vict, ch) == 2) {
+  send_to_char(ch, "There seems to have been an error, report this to Iovan.\r\n");
+  return;
+ }
+ else if (readIntro(ch, vict) == 1 && strstr(RACE(vict), arg)) {
+  send_to_char(ch, "You have already dubbed them a name. If you want to redub them target the name you know them by.\r\n");
+  return;
+ }
+ else {
+  introWrite(ch, vict, arg2);
+  act("You decide to call $M, $N.", TRUE, ch, 0, vict, TO_CHAR);
+  act("$n seems to decide something about you.", TRUE, ch, 0, vict, TO_VICT);
+  act("$n seems to decide something about $N.", TRUE, ch, 0, vict, TO_NOTVICT);
+  return;
+ }
 }
 
 /* Used when checking status or looking at a character */
@@ -3788,10 +3786,10 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
         if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_LIGHT)
           if (obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS))
             has_light = TRUE;
-			
-	  if (char_plr_flagged(ch, PLR_AURALIGHT)) {
-	    has_light = TRUE;
-	  }
+
+    if (char_plr_flagged(ch, PLR_AURALIGHT)) {
+      has_light = TRUE;
+    }
 
     for (door = 0; door < NUM_OF_DIRS; door++) {
       if (rroom_get_dir_option(target_room, door) &&
@@ -4685,13 +4683,13 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
    do_auto_exits(target_room, ch, char_exit_level(ch));
 
   /* now list characters & objects */
-   if (rroom_flagged(target_room, ROOM_GARDEN1)) {
-    send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, NULL));
-   } else if (rroom_flagged(target_room, ROOM_GARDEN2)) {
-    send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, NULL));
-   } else if (rroom_flagged(target_room, ROOM_HOUSE)) {
-    send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, NULL));
-   }
+  if (rroom_flagged(target_room, ROOM_GARDEN1)) {
+   send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, NULL));
+  } else if (rroom_flagged(target_room, ROOM_GARDEN2)) {
+   send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, NULL));
+  } else if (rroom_flagged(target_room, ROOM_HOUSE)) {
+   send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, NULL));
+  }
   list_obj_to_char(world[target_room].contents, ch, SHOW_OBJ_LONG, FALSE);
   list_char_to_char(world[target_room].people, ch);
 }
@@ -5111,7 +5109,7 @@ static void look_out_window(struct char_data *ch, char *arg)
         act(viewport->action_description, TRUE, ch, viewport, 0, TO_CHAR);
       else
         act("$n looks out the window.", TRUE, ch, 0, 0, TO_ROOM);
-        send_to_char(ch, "You look outside and see:\r\n");
+      send_to_char(ch, "You look outside and see:\r\n");
       look_at_room(target_room, ch, 0);
     }
   }
@@ -6987,8 +6985,8 @@ ACMD(do_who)
       continue;
     if (!char_can_see(ch, tch) || char_get_level(tch) < low || char_get_level(tch) > high)
       continue;
-      if (outlaws && !char_plr_flagged(tch, PLR_KILLER) && !char_plr_flagged(tch, PLR_THIEF))
-      continue;
+    if (outlaws && !char_plr_flagged(tch, PLR_KILLER) && !char_plr_flagged(tch, PLR_THIEF))
+    continue;
     if (questwho && !char_prf_flagged(tch, PRF_QUEST))
       continue;
     if (localwho && world[char_get_in_room(ch)].zone != world[char_get_in_room(tch)].zone)
@@ -7001,11 +6999,11 @@ ACMD(do_who)
       continue;
     if (showclass && !(showclass & (1U << char_get_class(tch))))
       continue;
-      if (showgroup && (!tch->master || !char_aff_flagged(tch, AFF_GROUP)))
-        continue;
-      for (i = 0; i < num_ranks; i++)
-        if (char_get_admlevel(tch) >= rank[i].min_level && char_get_admlevel(tch) <= rank[i].max_level)
-          rank[i].count++;
+    if (showgroup && (!tch->master || !char_aff_flagged(tch, AFF_GROUP)))
+      continue;
+    for (i = 0; i < num_ranks; i++)
+      if (char_get_admlevel(tch) >= rank[i].min_level && char_get_admlevel(tch) <= rank[i].max_level)
+        rank[i].count++;
     }
   }
 
@@ -7611,249 +7609,6 @@ static const char *ctypes[] = {
   "off", "on", "\n"
 };
 
-char *cchoice_to_str(char *col)
-{
-  static char buf[READ_SIZE];
-  char *s = NULL;
-  int i = 0;
-  int fg = 0;
-  int needfg = 0;
-  int bold = 0;
-
-  if (!col) {
-    buf[0] = 0;
-    return buf;
-  }
-  while (*col) {
-    if (strchr(ANSISTART, *col)) {
-      col++;
-    } else {
-      switch (*col) {
-      case ANSISEP:
-      case ANSIEND:
-        s = NULL;
-        break;
-      case '0':
-        s = NULL;
-        break;
-      case '1':
-        bold = 1;
-        s = NULL;
-        break;
-      case '5':
-        s = "blinking";
-        break;
-      case '7':
-        s = "reverse";
-        break;
-      case '8':
-        s = "invisible";
-        break;
-      case '3':
-        col++;
-        fg = 1;
-        switch (*col) {
-        case '0':
-          s = bold ? (char*)"grey" : (char*)"black";
-          bold = 0;
-          fg = 1;
-          break;
-        case '1':
-          s = "red";
-          fg = 1;
-          break;
-        case '2':
-          s = "green";
-          fg = 1;
-          break;
-        case '3':
-          s = "yellow";
-          fg = 1;
-          break;
-        case '4':
-          s = "blue";
-          fg = 1;
-          break;
-        case '5':
-          s = "magenta";
-          fg = 1;
-          break;
-        case '6':
-          s = "cyan";
-          fg = 1;
-          break;
-        case '7':
-          s = "white";
-          fg = 1;
-          break;
-        case 0:
-          s = NULL;
-          break;
-        }
-        break;
-      case '4':
-        col++;
-        switch (*col) {
-        case '0':
-          s = "on black";
-          needfg = 1;
-          bold = 0;
-        case '1':
-          s = "on red";
-          needfg = 1;
-          bold = 0;
-        case '2':
-          s = "on green";
-          needfg = 1;
-          bold = 0;
-        case '3':
-          s = "on yellow";
-          needfg = 1;
-          bold = 0;
-        case '4':
-          s = "on blue";
-          needfg = 1;
-          bold = 0;
-        case '5':
-          s = "on magenta";
-          needfg = 1;
-          bold = 0;
-        case '6':
-          s = "on cyan";
-          needfg = 1;
-          bold = 0;
-        case '7':
-          s = "on white";
-          needfg = 1;
-          bold = 0;
-        default:
-          s = "underlined";
-          break;
-        }
-        break;
-      default:
-        s = NULL;
-        break;
-      }
-      if (s) {
-        if (needfg && !fg) {
-          i += snprintf(buf + i, sizeof(buf) - i, "%snormal", i ? " " : "");
-          fg = 1;
-        }
-        if (i)
-          i += snprintf(buf + i, sizeof(buf) - i, " ");
-        if (bold) {
-          i += snprintf(buf + i, sizeof(buf) - i, "bright ");
-          bold = 0;
-        }
-        i += snprintf(buf + i, sizeof(buf) - i, "%s", s ? s : "null 1");
-        s = NULL;
-      }
-      col++;
-    }
-  }
-  if (!fg)
-    i += snprintf(buf + i, sizeof(buf) - i, "%snormal", i ? " " : "");
-  return buf;
-}
-
-int str_to_cchoice(char *str, char *choice)
-{
-  char buf[MAX_STRING_LENGTH];
-  int bold = 0, blink = 0, uline = 0, rev = 0, invis = 0, fg = 0, bg = 0, error = 0;
-  int i, len = MAX_INPUT_LENGTH;
-  struct {
-    char *name; 
-    int *ptr;
-  } attribs[] = {
-    { "bright", &bold },
-    { "bold", &bold },
-    { "underlined", &uline },
-    { "reverse", &rev },
-    { "blinking", &blink },
-    { "invisible", &invis },
-    { NULL, NULL }
-  };
-  struct {
-    char *name;
-    int val;
-    int bold;
-  } colors[] = {
-    { "default", -1, 0 },
-    { "normal", -1, 0 },
-    { "black", 0, 0 },
-    { "red", 1, 0 },
-    { "green", 2, 0 },
-    { "yellow", 3, 0 },
-    { "blue", 4, 0 },
-    { "magenta", 5, 0 },
-    { "cyan", 6, 0 },
-    { "white", 7, 0 },
-    { "grey", 0, 1 },
-    { "gray", 0, 1 },
-    { NULL, 0, 0 }
-  };
-  skip_spaces(&str);
-  if (isdigit(*str)) { /* Accept a raw code */
-    strcpy(choice, str);
-    for (i = 0; choice[i] && (isdigit(choice[i]) || choice[i] == ';'); i++);
-    error = choice[i] != 0;
-    choice[i] = 0;
-    return error;
-  }
-  while (*str) {
-    str = any_one_arg(str, buf);
-    if (!strcmp(buf, "on")) {
-      bg = 1;
-      continue;
-    }
-    if (!fg) {
-      for (i = 0; attribs[i].name; i++)
-        if (!strncmp(attribs[i].name, buf, strlen(buf)))
-          break;
-      if (attribs[i].name) {
-        *(attribs[i].ptr) = 1;
-        continue;
-      }
-    }
-    for (i = 0; colors[i].name; i++)
-      if (!strncmp(colors[i].name, buf, strlen(buf)))
-        break;
-    if (!colors[i].name) {
-      error = 1;
-      continue;
-    }
-    if (colors[i].val != -1) {
-      if (bg == 1) {
-        bg = 40 + colors[i].val;
-      } else {
-        fg = 30 + colors[i].val;
-        if (colors[i].bold)
-          bold = 1;
-      }
-    }
-  }
-  choice[0] = i = 0;
-  if (bold)
-    i += snprintf(choice + i, len - i, "%s%s", i ? ANSISEPSTR : "" , AA_BOLD);
-  if (uline)
-    i += snprintf(choice + i, len - i, "%s%s", i ? ANSISEPSTR : "" , AA_UNDERLINE);
-  if (blink)
-    i += snprintf(choice + i, len - i, "%s%s", i ? ANSISEPSTR : "" , AA_BLINK);
-  if (rev)
-    i += snprintf(choice + i, len - i, "%s%s", i ? ANSISEPSTR : "" , AA_REVERSE);
-  if (invis)
-    i += snprintf(choice + i, len - i, "%s%s", i ? ANSISEPSTR : "" , AA_INVIS);
-  if (!i)
-    i += snprintf(choice + i, len - i, "%s%s", i ? ANSISEPSTR : "" , AA_NORMAL);
-  if (fg && fg != -1)
-    i += snprintf(choice + i, len - i, "%s%d", i ? ANSISEPSTR : "" , fg);
-  if (bg && bg != -1)
-    i += snprintf(choice + i, len - i, "%s%d", i ? ANSISEPSTR : "" , bg);
-
-  return error;
-}
-
 char *default_color_choices[NUM_COLOR+1] = {
 /* COLOR_NORMAL */	AA_NORMAL,
 /* COLOR_ROOMNAME */	AA_NORMAL ANSISEPSTR AF_CYAN,
@@ -8092,19 +7847,6 @@ ACMD(do_commands)
   if (no % 7 != 1)
     send_to_char(ch, "\r\n");
 }
-
-static void free_history(struct char_data *ch, int type)
-{ 
-  struct txt_block *tmp = GET_HISTORY(ch, type), *ftmp;      
- 
-  while ((ftmp = tmp)) { 
-    tmp = tmp->next; 
-    if (ftmp->text)    
-      free(ftmp->text); 
-    free(ftmp); 
-  } 
-  GET_HISTORY(ch, type) = NULL;        
-} 
 
 ACMD(do_history) 
 { 

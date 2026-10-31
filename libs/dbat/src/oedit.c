@@ -5,7 +5,7 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 
-#include "dbat/shops.h"
+#include "dbat/shop.h"
 #include "dbat/boards.h"
 #include "dbat/config.h"
 #include "dbat/dg_scripts.h"
@@ -15,7 +15,6 @@
 #include "dbat/utils.h"
 #include "dbat/db.h"
 #include "dbat/handler.h"
-#include "dbat/shop.h"
 #include "dbat/genolc.h"
 #include "dbat/genobj.h"
 #include "dbat/genzon.h"
@@ -1425,7 +1424,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
 	obj_set_value(OLC_OBJ(d), 1, -1);
       else
         obj_set_value(OLC_OBJ(d), 1, LIMIT(number, 1, SKILL_TABLE_SIZE));
-	oedit_disp_val3_menu(d);
+      oedit_disp_val3_menu(d);
       break;
     case ITEM_CONTROL:
       if (number <= 0)

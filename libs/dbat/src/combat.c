@@ -1608,75 +1608,6 @@ void damage_eq(struct char_data *vict, int location)
 }
 
 /* This is for updating MOB android absorb */
-void update_mob_absorb()
-{
-  int roll = 0;
-  struct char_data *i, *vict;
-
-  for (i = character_list; i; i = i->next) {
-   roll = axion_dice(0) + (char_get_level(i) * 0.25);
-
-   if (!char_is_npc(i))
-    continue;
-
-   if (!char_is_android(i))
-    continue;
-   
-   if (!char_mob_flagged(i, MOB_ABSORB))
-    continue;
-
-   if (char_get_absorbing(i) == NULL || !char_get_absorbing(i))
-    continue;
-   else if (char_get_level(i) < roll)
-    continue;
-   else if (char_get_absorbing(i)) {
-    vict = char_get_absorbing(i);
-
-    int ki = GET_MAX_MANA(vict) * 0.01;
-    int stam = GET_MAX_MOVE(vict) * 0.01;
-    int pl = GET_MAX_HIT(vict) * 0.01;
-    int maxed = 0;
-
-    if (roll < (char_get_level(i) + 1) * 0.75) {
-     ki += ki * rand_number(2, 4);
-     stam += stam * rand_number(2, 4);
-     pl += pl * rand_number(2, 4);
-    }
-
-    decCurHealth(vict, pl, 0);
-    incCurHealth(i, pl, true);
-
-    decCurKI(vict, ki, 0);
-    incCurKI(i, ki, true);
-
-    decCurST(vict, stam, 0);
-    incCurST(i, stam, true);
-
-    if (isFullHealth(i)) {
-     maxed += 1;
-    }
-    if (isFullST(i)) {
-     maxed += 1;
-    }
-    if (isFullKI(i)) {
-     maxed += 1;
-    }
-
-    if (GET_HIT(vict) <= 0) {
-     act("@R$n@r absorbs the last of YOUR energy and you die...@n", TRUE, i, 0, vict, TO_VICT);
-     act("@R$n@r absorbs the last of @R$N's@r energy and $E dies...@n", TRUE, i, 0, vict, TO_NOTVICT);
-     die(vict, i);
-    } else if (maxed >= 3) {
-     act("@R$n@r absorbs some of YOUR energy...but $e seems to be full now and releases YOU!@n", TRUE, i, 0, vict, TO_VICT);
-     act("@R$n@r absorbs some of @R$N's@r energy...but $e seems to be full now and lets go.@n", TRUE, i, 0, vict, TO_NOTVICT);
-    } else {
-     act("@R$n@r absorbs some of YOUR energy!@n", TRUE, i, 0, vict, TO_VICT);
-     act("@R$n@r absorbs some of @R$N's@r energy.@n", TRUE, i, 0, vict, TO_NOTVICT);
-    }
-   }
-  }
-}
-
 /* This is for huge attacks that are slowly descending on a room */
 void huge_update()
 {
@@ -3209,7 +3140,6 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
     if (!char_is_npc(ch) && percent > 0.15) {
      double hitperc = (percent - 0.15) * 5;
       int64_t amount = getEffMaxPL(ch) * hitperc;
-     int64_t difference = GET_HIT(ch) - amount;
 
      decCurHealth(ch, amount, 1);
 
@@ -3384,7 +3314,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
     dam = dam * 0.95;
    } else if (mobperc < 90 && mobperc >= 80) {
     dam = dam * 0.90;
-   } else if (mobperc < 80 && mobperc >= 790) {
+   } else if (mobperc < 80 && mobperc >= 70) {
     dam = dam * 0.85;
    } else if (mobperc < 70 && mobperc >= 50) {
     dam = dam * 0.80;

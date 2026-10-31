@@ -251,9 +251,9 @@ void char_to_room(struct char_data *ch, room_rnum room)
 	  if (obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS))
 	    world[room].light++;
 
-	if (char_plr_flagged(ch, PLR_AURALIGHT))
-       world[room].light++;	
-	   
+    if (char_plr_flagged(ch, PLR_AURALIGHT))
+      world[room].light++;	
+
     /* Stop fighting now, if we left. */
     if (char_get_fighting(ch) && char_get_in_room(ch) != char_get_in_room(char_get_fighting(ch)) && !char_aff_flagged(ch, AFF_PURSUIT)) {
       stop_fighting(char_get_fighting(ch));
@@ -317,7 +317,6 @@ void obj_from_char(struct obj_data *object)
   if (!char_is_npc(object->carried_by))
     char_plr_set(object->carried_by, PLR_CRASH, true);
  
-  int64_t previous = getEffMaxPL(object->carried_by);
 
   char_set_carry_weight(object->carried_by, char_get_carry_weight(object->carried_by) - (obj_get_weight(object)));
   char_set_carry_items(object->carried_by, char_get_carry_items(object->carried_by) - 1);

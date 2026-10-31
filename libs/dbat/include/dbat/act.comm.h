@@ -11,7 +11,6 @@ ACMD(do_spec_comm);
 ACMD(do_write);
 ACMD(do_page);
 ACMD(do_gen_comm);
-ACMD(do_qcomm);
 ACMD(do_voice);
 ACMD(do_languages);
 ACMD(do_osay);

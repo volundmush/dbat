@@ -1,4 +1,4 @@
-#include "dbat/assembly.h"
+#include "dbat/assemblies.h"
 #include <stdlib.h>
 
 void free_assembly(struct assembly_data *assembly)

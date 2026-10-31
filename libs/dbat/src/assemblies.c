@@ -5,10 +5,9 @@
  * -------------------------------------------------------------------- *
  * 1999 MAY 07 gdavis/azrael@laker.net Initial implementation.         *
  * ******************************************************************** */
-#include "dbat/assembly.h"
+#include "dbat/assemblies.h"
 #include "dbat/consts/maximums.h"
 #include "dbat/consts/assemblytypes.h"
-#include "dbat/assemblies.h"
 #include "dbat/comm.h"
 #include "dbat/handler.h"
 #include "dbat/fileop.h"

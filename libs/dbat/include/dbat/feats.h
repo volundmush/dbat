@@ -14,7 +14,6 @@
 int is_proficient_with_armor(const struct char_data *ch, int armor_type);
 int is_proficient_with_weapon(const struct char_data *ch, int weapon_type);
 int find_feat_num(char *name);
-int feat_to_subfeat(int feat);
 void assign_feats(void);
 void sort_feats(void);
 int feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg);

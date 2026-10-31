@@ -207,7 +207,7 @@ ACMD(do_say)
   struct descriptor_data *d;
   struct char_data *wch = NULL, *wch2 = NULL, *wch3 = NULL, *tch = NULL, *sch = NULL;
   struct obj_data *obj = NULL;
-  int granted = FALSE, found = FALSE;
+  int granted = FALSE;
   char buf2[MAX_INPUT_LENGTH];
   *buf2 = '\0';
 
@@ -294,7 +294,6 @@ ACMD(do_say)
 
            if (strstr(argument, char_get_name(d->character)) && wch == NULL) {
              wch = d->character;
-             found = TRUE;
            }
            else if (strstr(argument, char_get_name(d->character)) && wch2 == NULL) {
              wch2 = d->character;
@@ -1493,39 +1492,6 @@ ACMD(do_gen_comm)
       else if (char_get_spam(ch) < 3) {
        char_set_spam(ch, char_get_spam(ch) + (1));
       }
-}
-
-ACMD(do_qcomm)
-{
-  if (!char_prf_flagged(ch, PRF_QUEST)) {
-    send_to_char(ch, "You aren't even part of the quest!\r\n");
-    return;
-  }
-  skip_spaces(&argument);
-
-  if (!*argument)
-    send_to_char(ch, "%c%s?  Yes, fine, %s we must, but WHAT??\r\n", toupper(*CMD_NAME), CMD_NAME + 1, CMD_NAME);
-  else {
-    char buf[MAX_STRING_LENGTH];
-    struct descriptor_data *i;
-
-    if (char_prf_flagged(ch, PRF_NOREPEAT))
-      send_to_char(ch, "%s", CONFIG_OK);
-    else if (subcmd == SCMD_QSAY) {
-      snprintf(buf, sizeof(buf), "You quest-say, '%s'", argument);
-      act(buf, FALSE, ch, 0, argument, TO_CHAR);
-    } else
-      act(argument, FALSE, ch, 0, argument, TO_CHAR);
-
-    if (subcmd == SCMD_QSAY)
-      snprintf(buf, sizeof(buf), "$n quest-says, '%s'", argument);
-    else
-      strlcpy(buf, argument, sizeof(buf));
-
-    for (i = descriptor_list; i; i = i->next)
-      if (desc_get_connected(i) == CON_PLAYING && i != ch->desc && char_prf_flagged(i->character, PRF_QUEST))
-	act(buf, 0, ch, 0, i->character, TO_VICT | TO_SLEEP);
-  }
 }
 
 ACMD(do_respond) {

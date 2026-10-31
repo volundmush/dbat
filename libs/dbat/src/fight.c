@@ -40,7 +40,6 @@ static void check_killer(struct char_data *ch, struct char_data *vict);
 static void make_corpse(struct char_data *ch, struct char_data *tch);
 static void handle_corpse_condition(struct obj_data *corpse, struct char_data *ch);
 static void make_pcorpse(struct char_data *ch);
-static void change_alignment(struct char_data *ch, struct char_data *victim);
 static void final_combat_resolve(struct char_data *ch);
 static void shadow_dragons_live(void);
 static void cleanup_arena_watch(struct char_data *ch);
@@ -194,9 +193,9 @@ static int pick_n_throw(struct char_data *ch, char *buf)
 
  for (cont = world[char_get_in_room(ch)].contents; cont; cont = cont->next_content) {
   if (obj_get_weight(cont) <= CAN_CARRY_W(ch) + char_get_carry_weight(ch)) {
-   sprintf(buf2, "%s", cont->name);
+   snprintf(buf2, sizeof(buf2), "%s", cont->name);
    do_get(ch, buf2, 0, 0);
-   sprintf(buf3, "%s %s", buf2, buf);
+   snprintf(buf3, sizeof(buf3), "%s %s", buf2, buf);
    do_throw(ch, buf3, 0, 0);
    return (TRUE);
   }
@@ -1794,12 +1793,10 @@ static void make_corpse(struct char_data *ch, struct char_data *tch)
   object_list_new_owner(corpse, NULL);
 
   /* transfer character's equipment to the corpse */
-  int eqdrop = FALSE;
   for (i = 0; i < NUM_WEARS; i++)
     if (char_get_equipment(ch, i)) {
       remove_otrigger(char_get_equipment(ch, i), ch);
       obj_to_obj(unequip_char(ch, i), corpse);
-      eqdrop = TRUE;
     }
   }
   /* transfer gold */
@@ -1840,22 +1837,6 @@ void loadmap(struct char_data *ch)
 
 
 /* When ch kills victim */
-static void change_alignment(struct char_data *ch, struct char_data *victim)
-{
-  /*
-   * If you kill a monster with alignment A, you move 1/20th of the way to
-   * having alignment -A.
-   * Ethical alignments of killer and victim make this faster or slower.
-   */
-  
- /*if (GET_ALIGNMENT(ch) < -1000) {
-   GET_ALIGNMENT(ch) = -1000;
-  }
-  if (GET_ALIGNMENT(ch) > 1000) {
-   GET_ALIGNMENT(ch) = 1000;
-  }*/
-}
-
 
 
 void death_cry(struct char_data *ch)

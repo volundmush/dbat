@@ -29,6 +29,10 @@
 /* external functions */
 
 /* local functions */
+static void hedit_setup_new(struct descriptor_data *);
+static void hedit_setup_existing(struct descriptor_data *, int);
+static void hedit_save_to_disk(struct descriptor_data *);
+static void hedit_save_internally(struct descriptor_data *);
 
 static void hedit_disp_menu(struct descriptor_data *);
 

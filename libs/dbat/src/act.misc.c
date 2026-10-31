@@ -398,7 +398,6 @@ static void resolve_song(struct char_data *ch)
    int skill = char_get_skill(ch, SKILL_MYSTICMUSIC);
    int instrument = 0;
 
-   int stopplaying = FALSE;
    char buf[MAX_INPUT_LENGTH];
 
  if (char_get_powerattack(ch) <= 0) {
@@ -515,121 +514,121 @@ static void resolve_song(struct char_data *ch)
      case SONG_TELEPORT_EARTH:
       if (vict == ch)
        continue;
-       if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-        if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
-         if (skill > diceroll) {
-          act("@CYour Teleportation Melody has transported @c$N@C to Earth in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@c$n's@C Teleportation Melody has transported you to Earth in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          char_from_room(vict);
-          char_to_room(vict, real_room(300));
-         }
+      if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+       if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+        if (skill > diceroll) {
+         act("@CYour Teleportation Melody has transported @c$N@C to Earth in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
+         act("@c$n's@C Teleportation Melody has transported you to Earth in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
+         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+         char_from_room(vict);
+         char_to_room(vict, real_room(300));
         }
+       }
       }
       break;
      case SONG_TELEPORT_VEGETA:
       if (vict == ch)
        continue;
-       if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-        if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
-         if (skill > diceroll) {
-          act("@CYour Teleportation Melody has transported @c$N@C to Vegeta in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@c$n's@C Teleportation Melody has transported you to Vegeta in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          char_from_room(vict);
-          char_to_room(vict, real_room(2234));
-         }
+      if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+       if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+        if (skill > diceroll) {
+         act("@CYour Teleportation Melody has transported @c$N@C to Vegeta in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
+         act("@c$n's@C Teleportation Melody has transported you to Vegeta in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
+         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+         char_from_room(vict);
+         char_to_room(vict, real_room(2234));
         }
+       }
       }
       break;
      case SONG_TELEPORT_FRIGID:
       if (vict == ch)
        continue;
-       if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-        if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
-         if (skill > diceroll) {
-          act("@CYour Teleportation Melody has transported @c$N@C to Frigid in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@c$n's@C Teleportation Melody has transported you to Frigid in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          char_from_room(vict);
-          char_to_room(vict, real_room(4047));
-         }
+      if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+       if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+        if (skill > diceroll) {
+         act("@CYour Teleportation Melody has transported @c$N@C to Frigid in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
+         act("@c$n's@C Teleportation Melody has transported you to Frigid in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
+         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+         char_from_room(vict);
+         char_to_room(vict, real_room(4047));
         }
+       }
       }
       break;
      case SONG_TELEPORT_KONACK:
       if (vict == ch)
        continue;
-       if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-        if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
-         if (skill > diceroll) {
-          act("@CYour Teleportation Melody has transported @c$N@C to Konack in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@c$n's@C Teleportation Melody has transported you to Konack in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          char_from_room(vict);
-          char_to_room(vict, real_room(8003));
-         }
+      if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+       if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+        if (skill > diceroll) {
+         act("@CYour Teleportation Melody has transported @c$N@C to Konack in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
+         act("@c$n's@C Teleportation Melody has transported you to Konack in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
+         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+         char_from_room(vict);
+         char_to_room(vict, real_room(8003));
         }
+       }
       }
       break;
      case SONG_TELEPORT_NAMEK:
       if (vict == ch)
        continue;
-       if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-        if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
-         if (skill > diceroll) {
-          act("@CYour Teleportation Melody has transported @c$N@C to Namek in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@c$n's@C Teleportation Melody has transported you to Namek in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          char_from_room(vict);
-          char_to_room(vict, real_room(10182));
-         }
+      if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+       if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+        if (skill > diceroll) {
+         act("@CYour Teleportation Melody has transported @c$N@C to Namek in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
+         act("@c$n's@C Teleportation Melody has transported you to Namek in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
+         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+         char_from_room(vict);
+         char_to_room(vict, real_room(10182));
         }
+       }
       }
       break;
      case SONG_TELEPORT_ARLIA:
       if (vict == ch)
        continue;
-       if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-        if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
-         if (skill > diceroll) {
-          act("@CYour Teleportation Melody has transported @c$N@C to Arlia in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@c$n's@C Teleportation Melody has transported you to Arlia in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          char_from_room(vict);
-          char_to_room(vict, real_room(16087));
-         }
+      if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+       if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+        if (skill > diceroll) {
+         act("@CYour Teleportation Melody has transported @c$N@C to Arlia in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
+         act("@c$n's@C Teleportation Melody has transported you to Arlia in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
+         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+         char_from_room(vict);
+         char_to_room(vict, real_room(16087));
         }
+       }
       }
       break;
      case SONG_TELEPORT_AETHER:
       if (vict == ch)
        continue;
-       if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-        if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
-         if (skill > diceroll) {
-          act("@CYour Teleportation Melody has transported @c$N@C to Aether in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@c$n's@C Teleportation Melody has transported you to Aether in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          char_from_room(vict);
-          char_to_room(vict, real_room(12025));
-         }
+      if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+       if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+        if (skill > diceroll) {
+         act("@CYour Teleportation Melody has transported @c$N@C to Aether in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
+         act("@c$n's@C Teleportation Melody has transported you to Aether in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
+         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+         char_from_room(vict);
+         char_to_room(vict, real_room(12025));
         }
+       }
       }
       break;
      case SONG_TELEPORT_KANASSA:
       if (vict == ch)
        continue;
-       if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-        if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
-         if (skill > diceroll) {
-          act("@CYour Teleportation Melody has transported @c$N@C to Kanassa in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@c$n's@C Teleportation Melody has transported you to Kanassa in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          char_from_room(vict);
-          char_to_room(vict, real_room(14910));
-         }
+      if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+       if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+        if (skill > diceroll) {
+         act("@CYour Teleportation Melody has transported @c$N@C to Kanassa in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
+         act("@c$n's@C Teleportation Melody has transported you to Kanassa in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
+         act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+         char_from_room(vict);
+         char_to_room(vict, real_room(14910));
         }
+       }
       }
       break;
      case SONG_SHIELDING:
@@ -2724,7 +2723,7 @@ ACMD(do_hydromancy)
  int attempt = 0;
 
  if (!strcasecmp(arg, "spike")) {
-  struct obj_data *obj;
+  struct obj_data *obj = NULL;
 
   cost = 100 + (char_get_skill(ch, SKILL_STYLE) / (1 + (GET_MAX_MANA(ch) * 0.5)));
 
@@ -2747,6 +2746,11 @@ ACMD(do_hydromancy)
    obj = read_object(19057, VIRTUAL);
   } else if (skill >= 1) {
    obj = read_object(19056, VIRTUAL);
+  }
+
+  if (!obj) {
+   send_to_char(ch, "You fail to form an ice spike.\r\n");
+   return;
   }
 
      decCurKI(ch, cost, 0);

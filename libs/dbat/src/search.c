@@ -27,8 +27,8 @@ int is_name(const char *str, const char *namelist)
     /* skip to next name */
    for (; isalpha(*curname); curname++)
      ;
-     if (!*curname)
-       return (0);
+   if (!*curname)
+     return (0);
     curname++;                  /* first char of new name */
   }
 }

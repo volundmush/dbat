@@ -3,14 +3,13 @@
  * Copyright 1996 Harvey Gilpin						*
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include "dbat/shops.h"
+#include "dbat/shop.h"
 #include "dbat/config.h"
 #include "dbat/sedit.h"
 #include "dbat/utils.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/db.h"
-#include "dbat/shop.h"
 #include "dbat/genolc.h"
 #include "dbat/genshp.h"
 #include "dbat/genzon.h"

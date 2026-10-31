@@ -35,7 +35,7 @@
 
 ACMD(do_lightgrenade)
 {
- int perc, dge = 2, count = 0, skill;
+ int perc, dge = 2, skill;
  int64_t dmg;
  double attperc = .35, minimum = .15;
   struct char_data *vict = NULL, *targ = NULL, *next_v = NULL;
@@ -790,7 +790,7 @@ ACMD(do_combine)
  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
  struct char_data *vict;
  struct follow_type *f;
- int fire = FALSE, temp = -1, temp2 = -1;
+ int fire = FALSE, temp = -1;
 
  two_arguments(argument, arg, arg2);
 
@@ -1765,7 +1765,7 @@ ACMD(do_nova)
   } /* No one worth targeting */
   else {
      perc = chance_to_hit(ch);
-   if (time_info.hours <= 15 &&time_info.hours > 22) {
+   if (time_info.hours <= 15 || time_info.hours > 22) {
     skill += 5;
    }
      handle_cooldown(ch, 6);

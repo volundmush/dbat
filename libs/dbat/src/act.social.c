@@ -407,19 +407,6 @@ static int find_action(int cmd)
   }
 }
 
-struct social_messg *find_social( const char *name )
-{
-   int cmd, socidx;
-
-   if( ( cmd = find_command( name ) ) < 0 )
-      return NULL;
-
-   if( ( socidx = find_action( cmd ) ) < 0 )
-      return NULL;
-
-   return &soc_mess_list[socidx];
-}
-
 ACMD(do_gmote) 
 { 
   int act_nr, length; 

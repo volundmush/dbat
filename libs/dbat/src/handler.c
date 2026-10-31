@@ -16,7 +16,6 @@
 /* external vars */
 
 /* local functions */
-static int apply_ac(struct char_data *ch, int eq_pos);
 static void update_object(struct obj_data *obj, int use);
 
 

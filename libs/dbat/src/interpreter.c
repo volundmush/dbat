@@ -25,7 +25,6 @@
 #include "dbat/players.h"
 #include "dbat/assedit.h"
 #include "dbat/guild.h"
-#include "dbat/bans.h"
 #include "dbat/obj_edit.h"
 #include "dbat/improved-edit.h"
 #include "dbat/stringutils.h"
@@ -325,7 +324,6 @@ int perform_dupe_check(struct descriptor_data *d)
     
     if (LASTINTEREST != 0 && LASTINTEREST > char_get_lastint(d->character)) {
       int diff = (LASTINTEREST - char_get_lastint(d->character));
-      int mult = 0;
       int days = MAX(3, diff / 86400);
       char_set_lastint(d->character, LASTINTEREST);
       int base_interest = char_get_bank_interest(d->character);
@@ -1882,7 +1880,7 @@ void exchange_ccpoints(struct char_data *ch, int value)
 void nanny(struct descriptor_data *d, char *arg)
 {
   int load_result=-1;	/* Overloaded variable */
-  int total, rr, moveon = FALSE, penalty = FALSE;
+  int total, moveon = FALSE, penalty = FALSE;
   int player_i;
   int value, roll = rand_number(1, 6); /* For parse_bonuses */
   struct descriptor_data *k;
@@ -2038,35 +2036,39 @@ void nanny(struct descriptor_data *d, char *arg)
 	}
       } else {
         if (d->writenew <= 0) {
-         if (!strcasecmp(d->loadplay, d->tmp1)) {
+         /* loadplay aliases one of tmp1..tmp5, which is freed below, so compare against a copy. */
+         char missing[MAX_INPUT_LENGTH];
+         strlcpy(missing, d->loadplay, sizeof(missing));
+         d->loadplay = NULL;
+         if (!strcasecmp(missing, d->tmp1)) {
           if (d->tmp1) {
            free(d->tmp1);
            d->tmp1 = NULL;
           }
           d->tmp1 = strdup("Empty");
          }
-         if (!strcasecmp(d->loadplay, d->tmp2)) {
+         if (!strcasecmp(missing, d->tmp2)) {
           if (d->tmp2) {
            free(d->tmp2);
            d->tmp2 = NULL;
           }
           d->tmp2 = strdup("Empty");
          }
-         if (!strcasecmp(d->loadplay, d->tmp3)) {
+         if (!strcasecmp(missing, d->tmp3)) {
           if (d->tmp3) {
            free(d->tmp3);
            d->tmp3 = NULL;
           }
           d->tmp3 = strdup("Empty");
          }
-         if (!strcasecmp(d->loadplay, d->tmp4)) {
+         if (!strcasecmp(missing, d->tmp4)) {
           if (d->tmp4) {
            free(d->tmp4);
            d->tmp4 = NULL;
           }
           d->tmp4 = strdup("Empty");
          }
-         if (!strcasecmp(d->loadplay, d->tmp5)) {
+         if (!strcasecmp(missing, d->tmp5)) {
           if (d->tmp5) {
            free(d->tmp5);
            d->tmp5 = NULL;

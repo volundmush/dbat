@@ -6,11 +6,10 @@
  * Based on shop.c.  As such, the CircleMud License applies                *
  * Written by Jason Goodwin.   jgoodwin@expert.cc.purdue.edu               *
  ************************************************************************ */
-#include "dbat/guilds.h"
+#include "dbat/guild.h"
 #include "dbat/config.h"
 #include "dbat/affect.h"
 #include "dbat/fileop.h"
-#include "dbat/guild.h"
 #include "dbat/utils.h"
 #include "dbat/spells.h"
 #include "dbat/comm.h"
@@ -228,32 +227,6 @@ ACMD(do_teach)
   send_to_char(ch, "They do not even know the basics. It's a waste of your teaching skills.\r\n");
   return;
  }
-}
-
-const char *how_good(int percent)
-{
-  if (percent < 0)
-    return " error)";
-  if (percent == 0)
-    return "(@Mnot@n)";
-  if (percent <= 10)
-    return "(@rawful@n)";
-  if (percent <= 20)
-    return "(@Rbad@n)";
-  if (percent <= 40)
-    return "(@ypoor@n)";
-  if (percent <= 55)
-    return "(@Yaverage@n)";
-  if (percent <= 70)
-    return "(@gfair@n)";
-  if (percent <= 80)
-    return "(@Ggood@n)";
-  if (percent <= 85)
-    return "(@bgreat@n)";
-  if (percent <= 100)
-    return "(@Bsuperb@n)";
-
-  return "(@rinate@n)";
 }
 
 const char *prac_types[] = {
@@ -630,27 +603,27 @@ void what_does_guild_know(int guild_nr, struct char_data * ch)
         if (char_get_class_ranks(ch, j) > 0 && (spell_info[i].can_learn_skill[j] > SKLEARN_CANT)) {
           k = spell_info[i].can_learn_skill[j];
         }
-        canknow = highest_skill_value(char_get_level(ch), k);
-        count++;
-        cost = calculate_skill_cost(ch, i);
-        if (k == SKLEARN_CLASS) {
-          if (char_get_skills_base(ch, i) < canknow) {
-            nlen = snprintf(buf2 + len, sizeof(buf2) - len, "@y(@Y%2d@y) @W%-30s @y(@Y%2d@y) @C%d@D/@c%3d        @g%d%s@n\r\n", count, spell_info[i].name, count, char_get_skills_base(ch, i), canknow, cost, char_get_skills_base(ch, i) > 100 ? "  @D(@YGrand Master@D)@n" : "");
-            if (len + nlen >= sizeof(buf2) || nlen < 0)
-              break;
-            len += nlen;
-          } else {
-            nlen = snprintf(buf2 + len, sizeof(buf2) - len, "@y(@Y%2d@y) @W%-30s @y(@Y%2d@y) @C%d@D/@c%3d        @g%d%s@n\r\n", count, spell_info[i].name, count, char_get_skills_base(ch, i), canknow, cost, char_get_skills_base(ch, i) > 100 ? "  @D(@YGrand Master@D)@n" : "");
+      canknow = highest_skill_value(char_get_level(ch), k);
+      count++;
+      cost = calculate_skill_cost(ch, i);
+      if (k == SKLEARN_CLASS) {
+        if (char_get_skills_base(ch, i) < canknow) {
+          nlen = snprintf(buf2 + len, sizeof(buf2) - len, "@y(@Y%2d@y) @W%-30s @y(@Y%2d@y) @C%d@D/@c%3d        @g%d%s@n\r\n", count, spell_info[i].name, count, char_get_skills_base(ch, i), canknow, cost, char_get_skills_base(ch, i) > 100 ? "  @D(@YGrand Master@D)@n" : "");
           if (len + nlen >= sizeof(buf2) || nlen < 0)
             break;
           len += nlen;
-          }
         } else {
-            nlen = snprintf(buf2 + len, sizeof(buf2) - len, "@y(@Y%2d@y) @W%-30s @y(@Y%2d@y) @C%d@D/@c%3d        @g%d%s@n\r\n", count, spell_info[i].name, count, char_get_skills_base(ch, i), canknow, cost, char_get_skills_base(ch, i) > 100 ? "  @D(@YGrand Master@D)@n" : "");
-          if (len + nlen >= sizeof(buf2) || nlen < 0)
-            break;
-          len += nlen;
+          nlen = snprintf(buf2 + len, sizeof(buf2) - len, "@y(@Y%2d@y) @W%-30s @y(@Y%2d@y) @C%d@D/@c%3d        @g%d%s@n\r\n", count, spell_info[i].name, count, char_get_skills_base(ch, i), canknow, cost, char_get_skills_base(ch, i) > 100 ? "  @D(@YGrand Master@D)@n" : "");
+        if (len + nlen >= sizeof(buf2) || nlen < 0)
+          break;
+        len += nlen;
         }
+      } else {
+          nlen = snprintf(buf2 + len, sizeof(buf2) - len, "@y(@Y%2d@y) @W%-30s @y(@Y%2d@y) @C%d@D/@c%3d        @g%d%s@n\r\n", count, spell_info[i].name, count, char_get_skills_base(ch, i), canknow, cost, char_get_skills_base(ch, i) > 100 ? "  @D(@YGrand Master@D)@n" : "");
+        if (len + nlen >= sizeof(buf2) || nlen < 0)
+          break;
+        len += nlen;
+      }
     }
   }
 
@@ -1054,51 +1027,6 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
 }
 
 
-void handle_train(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
-{
-  skip_spaces(&argument);
-  if (!argument || !*argument)
-    send_to_char(ch, "Training sessions remaining: %d\r\n"
-                 "Stats: strength constitution agility intelligence wisdom speed\r\n",
-                 GET_TRAINS(ch));
-  else if (!GET_TRAINS(ch))
-    send_to_char(ch, "You have no ability training sessions.\r\n");
-  else if (!strncasecmp("strength", argument, strlen(argument))) {
-    send_to_char(ch, "%s", CONFIG_OK);
-    ch->real_abils.str += 1;
-    GET_TRAINS(ch) -= 1;
-  } else if (!strncasecmp("constitution", argument, strlen(argument))) {
-    send_to_char(ch, "%s", CONFIG_OK);
-    ch->real_abils.con += 1;
-    /* Give them retroactive hit points for constitution */
-    if (! (ch->real_abils.con % 2))
-      //GET_MAX_HIT(ch) += GET_LEVEL(ch);
-    GET_TRAINS(ch) -= 1;
-  } else if (!strncasecmp("agility", argument, strlen(argument))) {
-    send_to_char(ch, "%s", CONFIG_OK);
-    ch->real_abils.dex += 1;
-    GET_TRAINS(ch) -= 1;
-  } else if (!strncasecmp("intelligence", argument, strlen(argument))) {
-    send_to_char(ch, "%s", CONFIG_OK);
-    ch->real_abils.intel += 1;
-    /* Give extra skill practice, but only for this level */
-    if (! (ch->real_abils.intel % 2))
-      GET_PRACTICES(ch, char_get_class(ch)) += 1;
-    GET_TRAINS(ch) -= 1;
-  } else if (!strncasecmp("wisdom", argument, strlen(argument))) {
-    send_to_char(ch, "%s", CONFIG_OK);
-    ch->real_abils.wis += 1;
-    GET_TRAINS(ch) -= 1;
-  } else if (!strncasecmp("speed", argument, strlen(argument))) {
-    send_to_char(ch, "%s", CONFIG_OK);
-    ch->real_abils.cha += 1;
-    GET_TRAINS(ch) -= 1;
-  } else
-    send_to_char(ch, "Stats: strength constitution agility intelligence wisdom speed\r\n");
-  affect_total(ch);
-  return;
-}
-
 
 void handle_gain(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
 {
@@ -1147,36 +1075,6 @@ int rpp_to_level(struct char_data *ch) {
         default:
             return 0;
     }
-}
-
-void handle_exp(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
-{
- if (GET_PRACTICES(ch, char_get_class(ch)) < 25) {
-    send_to_char(ch, "You need at least 25 practice sessions to learn.\r\n");
-    return;
- }
- if (char_get_exp(ch) > level_exp(ch, char_get_level(ch) + 1) && char_get_level(ch) != 100) {
-    send_to_char(ch, "You can't learn with negative TNL.\r\n");
-    return;
- }
- else {
-  int64_t amt = level_exp(ch, char_get_level(ch) + 1) / 100;
-  if (char_get_level(ch) == 100) {
-   amt = 400000;
-  }
-  act("@c$n@W spends time training you in $s fighting style.@n", TRUE, keeper, 0, ch, TO_VICT);
-  act("@c$n@W spends time training @C$N@W in $s fighting style.@n", TRUE, keeper, 0, ch, TO_NOTVICT);
-  send_to_char(ch, "@wExperience Gained: @C%s@n\r\n", add_commas(amt));
-  GET_PRACTICES(ch, char_get_class(ch)) -= 25;
-  if (char_is_saiyan(ch) || char_is_halfbreed(ch)) {
-   amt = amt + (amt * .30);
-  }
-  if (char_is_icer(ch)) {
-   amt = amt - (amt * .10);
-  }
-  gain_exp(ch, amt); 
-  return;
- }
 }
 
 void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)

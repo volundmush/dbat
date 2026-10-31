@@ -44,7 +44,6 @@
 static void handle_fall(struct char_data *ch);
 static int check_swim(struct char_data *ch);
 static void disp_locations(struct char_data *ch);
-static int has_boat(struct char_data *ch);
 static int find_door(struct char_data *ch, const char *type, char *dir, const char *cmdname);
 static int has_key(struct char_data *ch, obj_vnum key);
 static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int scmd);
@@ -546,35 +545,6 @@ ACMD(do_land)
 
 
 /* simple function to determine if char can walk on water */
-static int has_boat(struct char_data *ch)
-{
-  struct obj_data *obj;
-  int i;
-
-/*
-  if (ROOM_IDENTITY(IN_ROOM(ch)) == DEAD_SEA)
-    return (1);
-*/
-
-  if (char_adm_flagged(ch, ADM_WALKANYWHERE) || char_get_admlevel(ch) > 4)
-    return (1);
-
-  if (char_aff_flagged(ch, AFF_WATERWALK))
-    return (1);
-
-  /* non-wearable boats in inventory will do it */
-  for (obj = ch->carrying; obj; obj = obj->next_content)
-    if (obj_get_type_flag(obj) == ITEM_BOAT && (find_eq_pos(ch, obj, NULL) < 0))
-      return (1);
-
-  /* and any boat you're wearing will do it too */
-  for (i = 0; i < NUM_WEARS; i++)
-    if (char_get_equipment(ch, i) && obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_BOAT)
-      return (1);
-
-  return (0);
-}
-
 /* simple function to determine if char can fly */
 static int has_flight(struct char_data *ch)
 {

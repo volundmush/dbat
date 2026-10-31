@@ -111,7 +111,6 @@ extern struct board_info *boards; /* our boards */
 /* local functions */
 static void mob_stats(struct char_data *mob);
 static void dragon_level(struct char_data *ch);
-static int check_bitvector_names(bitvector_t bits, size_t namecount, const char *whatami, const char *whatbits);
 static int check_object_spell_number(struct obj_data *obj, int val);
 static int check_object_level(struct obj_data *obj, int val);
 static void setup_dir(FILE *fl, int room, int dir);
@@ -136,7 +135,6 @@ static void renum_world(void);
 static void renum_zone_table(void);
 static void log_zone_error(zone_rnum zone, int cmd_no, const char *message);
 static void reset_time(void);
-static int suntzu_armor_convert(struct obj_data *obj);
 static int suntzu_weapon_convert(int wp_type);
 static void free_obj_unique_hash();
 static void mob_autobalance(struct char_data *ch);
@@ -295,71 +293,6 @@ static void mob_stats(struct char_data *mob)
 }
 
 /* Convert CWG-SunTzu armor objects to new armor types */
-
-static int suntzu_armor_convert(struct obj_data *obj)
-{
-  int i;
-  int conv = 0;
-  int conv_table[][3] = {
-    { 100, 0, 0 },
-    { 8, 0, 5 },
-    { 6, 0, 10 },
-    { 5, 1, 15 },
-    { 4, 2, 20 },
-    { 2, 5, 30 },
-    { 0, 7, 40 },
-    { 0, 7, 40 },
-    { 1, 6, 35 },
-  };
-  int shield_table[][2] = {
-    { 0, 0 },
-    { 1, 5 },
-    { 2, 15 },
-    { 3, 30 },
-    { 4, 40 },
-    { 5, 50 },
-    { 6, 60 },
-    { 7, 70 },
-    { 8, 80 },
-  };
-
-  i = obj_get_value(obj, 0);
-  if (i && i < 10) {
-    obj_set_value(obj, 0, 10 * i);
-    conv = 1;
-  } else
-    i /= 10;
-
-  i = MAX(0, MIN(8, i));
-
-  if (obj_wear_flagged(obj, ITEM_WEAR_SHIELD)) {
-    if (obj_get_value(obj, 6))
-      return conv;
-    obj_set_value(obj, 1, ARMOR_TYPE_SHIELD);
-    obj_set_value(obj, 2, 100);
-    obj_set_value(obj, 3, shield_table[i][0]);
-    obj_set_value(obj, 6, shield_table[i][1]);
-    conv = 1;
-  } else if (obj_wear_flagged(obj, ITEM_WEAR_BODY)) {
-    if (obj_get_value(obj, 6))
-      return conv;
-    obj_set_value(obj, 2, conv_table[i][0]);
-    obj_set_value(obj, 3, conv_table[i][1]);
-    obj_set_value(obj, 6, conv_table[i][2]);
-    conv = 1;
-  } else if (obj_get_value(obj, 2) || obj_get_value(obj, 3)) {
-    return conv;
-  } else {
-    obj_set_value(obj, 2, 100);
-    obj_set_value(obj, 3, 0);
-    obj_set_value(obj, 6, 0);
-    conv = 1;
-  }
-  log("Converted armor #%d [%s] armor=%d i=%d maxdex=%d acheck=%d sfail=%d",
-      obj_index[obj - obj_proto].vnum, obj_get_short_description(obj), obj_get_value(obj, 0),
-      i, obj_get_value(obj, 2), obj_get_value(obj, 3), obj_get_value(obj, 6));
-  return conv;
-}
 
 /* Convert CWG-SunTzu weapon objects to new weapon types */
 
@@ -1520,7 +1453,6 @@ static void parse_room(FILE *fl, int virtual_nr)
 
     log("   done.");
   } else if (retval == 6) {
-  int taeller;
   world[room_nr].room_flags[0] = asciiflag_conv(flags);
   world[room_nr].room_flags[1] = asciiflag_conv(flags2);
   world[room_nr].room_flags[2] = asciiflag_conv(flags3);
@@ -1832,7 +1764,7 @@ static void mob_autobalance(struct char_data *ch)
 
 static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
 {
-  int j, t[10];
+  int t[10];
   char line[READ_SIZE];
  
   ch->real_abils.str = 0;
@@ -2067,13 +1999,13 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
   }
 
   CASE("Skill") {
-    sscanf(value, "%d %d", &num, &num2);
-    SET_SKILL(ch, num, num2);
+    if (sscanf(value, "%d %d", &num, &num2) == 2 && num >= 0 && num < SKILL_TABLE_SIZE)
+      SET_SKILL(ch, num, num2);
   }
 
   CASE("SkillMod") {
-    sscanf(value, "%d %d", &num, &num2);
-    SET_SKILL_BONUS(ch, num, num2);
+    if (sscanf(value, "%d %d", &num, &num2) == 2 && num >= 0 && num < SKILL_TABLE_SIZE)
+      SET_SKILL_BONUS(ch, num, num2);
   }
 
   CASE("Class") {
@@ -2205,7 +2137,6 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
 
     log("   done.");
   } else if (retval == 10) {
-    int taeller;
 
     char_get_act(ch)[0] = asciiflag_conv(f1);
     char_get_act(ch)[1] = asciiflag_conv(f2);
@@ -2963,22 +2894,6 @@ int vnum_armortype(char *searchname, struct char_data *ch)
 }
 
 /* create a character, and add it to the char list */
-struct char_data *create_char(void)
-{
-  struct char_data *ch;
-
-  CREATE(ch, struct char_data, 1);
-  clear_char(ch);
-  ch->next = character_list;
-  character_list = ch;
-  ch->next_affect = NULL;
-  char_set_id(ch, dg_new_mob_uid());
-  /* find_char helper */
-  add_to_lookup_table(char_get_id(ch), MOB_TRIGGER, (void *)ch);
-  
-  return (ch);
-}
-
 
 /* create a new mobile from a prototype */
 struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
@@ -4104,9 +4019,9 @@ void reset_zone(zone_rnum zone)
     case 'R': /* rem obj from room */
       if ((obj = get_obj_in_list_num(ZCMD2.arg2, world[ZCMD2.arg1].contents)) != NULL)
         extract_obj(obj);
-        last_cmd = 1;
-        tmob = NULL;
-        tobj = NULL;
+      last_cmd = 1;
+      tmob = NULL;
+      tobj = NULL;
       break;
 
 
@@ -4848,7 +4763,7 @@ zone_rnum real_zone(zone_vnum vnum)
 static int check_object(struct obj_data *obj)
 {
   char objname[MAX_INPUT_LENGTH + 32];
-  int error = FALSE, y;
+  int error = FALSE;
 
   if (obj_get_weight(obj) < 0 && (error = TRUE))
     log("SYSERR: Object #%d (%s) has negative weight (%" I64T ").",
@@ -4959,24 +4874,6 @@ static int check_object_level(struct obj_data *obj, int val)
   return (error);
 }
 
-static int check_bitvector_names(bitvector_t bits, size_t namecount, const char *whatami, const char *whatbits)
-{
-  unsigned int flagnum;
-  bool error = FALSE;
-
-  /* See if any bits are set above the ones we know about. */
-  if (bits <= (~(bitvector_t)0 >> (sizeof(bitvector_t) * 8 - namecount)))
-    return (FALSE);
-
-  for (flagnum = namecount; flagnum < sizeof(bitvector_t) * 8; flagnum++)
-    if ((1U << flagnum) & bits) {
-      log("SYSERR: %s has unknown %s flag, bit %d (0 through %" SZT " known).", whatami, whatbits, flagnum, namecount - 1);
-      error = TRUE;
-    }
-
-  return (error);
-}
-
 static int obj_save_fprintf(FILE *fp, struct obj_data *obj, const char *context,
                             const char *file, int line, const char *format, ...)
 {
@@ -5070,22 +4967,22 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
         return 0;
 
   /* Do we have extra descriptions? */
-    if (obj->ex_description) {        /*. Yep, save them too . */
-      for (ex_desc = obj->ex_description; ex_desc; ex_desc = ex_desc->next) {
-        /*. Sanity check to prevent nasty protection faults . */
-        if (!*ex_desc->keyword || !*ex_desc->description) {
-          continue;
-        }
-        strcpy(buf1, ex_desc->description);
-        strip_string(buf1);
-        if (!OBJ_SAVE_FPRINTF(fp, obj, "extra description", "E\n"
-          "%s~\n"
-          "%s~\n",
-          ex_desc->keyword,
-          buf1))
-          return 0;
+  if (obj->ex_description) {        /*. Yep, save them too . */
+    for (ex_desc = obj->ex_description; ex_desc; ex_desc = ex_desc->next) {
+      /*. Sanity check to prevent nasty protection faults . */
+      if (!*ex_desc->keyword || !*ex_desc->description) {
+        continue;
       }
+      strcpy(buf1, ex_desc->description);
+      strip_string(buf1);
+      if (!OBJ_SAVE_FPRINTF(fp, obj, "extra description", "E\n"
+        "%s~\n"
+        "%s~\n",
+        ex_desc->keyword,
+        buf1))
+        return 0;
     }
+  }
 
   /* Do we have spells? */
     if (obj->sbinfo) {        /*. Yep, save them too . */

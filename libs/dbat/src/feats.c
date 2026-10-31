@@ -15,9 +15,6 @@
 /* Local Functions */
 
 void feato(int featnum, char *name, int in_game, int can_learn, int can_stack);
-void list_feats_known(struct char_data *ch); 
-void list_feats_available(struct char_data *ch); 
-void list_feats_complete(struct char_data *ch); 
 int compare_feats(const void *x, const void *y);
 
 
@@ -31,7 +28,6 @@ char buf4[MAX_STRING_LENGTH];
 extern int spell_sort_info[SKILL_TABLE_SIZE];
 
 /* External functions*/
-int count_metamagic_feats(struct char_data *ch);
 
 void feato(int featnum, char *name, int in_game, int can_learn, int can_stack)
 {
@@ -227,96 +223,6 @@ void sort_feats(void)
   qsort(&feat_sort_info[0], NUM_FEATS_DEFINED, sizeof(int), compare_feats);
 }
 
-void list_feats_known(struct char_data *ch) 
-{
-
-}
-
-void list_feats_available(struct char_data *ch) 
-{
-  char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
-  int i, sortpos;
-  int none_shown = TRUE;
-
-  if (!GET_FEAT_POINTS(ch))
-    strcpy(buf, "\r\nYou cannot learn any feats right now.\r\n");
-  else
-    sprintf(buf, "\r\nYou can learn %d feat%s right now.\r\n",
-            GET_FEAT_POINTS(ch), (GET_FEAT_POINTS(ch) == 1 ? "" : "s"));
-    
-    // Display Headings
-    sprintf(buf + strlen(buf), "\r\n");
-    sprintf(buf + strlen(buf), "@WFeats Available to Learn@n\r\n");
-    sprintf(buf + strlen(buf), "@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@n\r\n");
-    sprintf(buf + strlen(buf), "\r\n");
-
-  strcpy(buf2, buf);
-
-  for (sortpos = 1; sortpos <= NUM_FEATS_DEFINED; sortpos++) {
-    i = feat_sort_info[sortpos];
-    if (strlen(buf2) >= MAX_STRING_LENGTH - 32) {
-      strcat(buf2, "**OVERFLOW**\r\n"); 
-      break;   
-    }
-    if (feat_is_available(ch, i, 0, NULL) && feat_list[i].in_game && feat_list[i].can_learn) {
-      sprintf(buf, "%-20s\r\n", feat_list[i].name);
-      strcat(buf2, buf);        /* The above, @ should always be safe to do. */
-      none_shown = FALSE;
-    }
-  }
-
-  if (none_shown) {
-    sprintf(buf, "There are no feats available for you to learn at this point.\r\n");
-    strcat(buf2, buf);
-  }
-   
-  page_string(ch->desc, buf2, 1);
-}
-void list_feats_complete(struct char_data *ch) 
-{
-
-	char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
-  int i, sortpos;
-  int none_shown = TRUE;
-
-  if (!GET_FEAT_POINTS(ch))
-    strcpy(buf, "\r\nYou cannot learn any feats right now.\r\n");
-  else
-    sprintf(buf, "\r\nYou can learn %d feat%s right now.\r\n",
-            GET_FEAT_POINTS(ch), (GET_FEAT_POINTS(ch) == 1 ? "" : "s"));
-
-    
-    // Display Headings
-    sprintf(buf + strlen(buf), "\r\n");
-    sprintf(buf + strlen(buf), "@WComplete Feat List@n\r\n");
-    sprintf(buf + strlen(buf), "@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@n\r\n");
-    sprintf(buf + strlen(buf), "\r\n");
-
-  strcpy(buf2, buf);
-
-  for (sortpos = 1; sortpos <= NUM_FEATS_DEFINED; sortpos++) {
-    i = feat_sort_info[sortpos];
-    if (strlen(buf2) >= MAX_STRING_LENGTH - 32) {
-      strcat(buf2, "**OVERFLOW**\r\n"); 
-      break;   
-    }
-//	sprintf(buf, "%s : %s\r\n", feat_list[i].name, feat_list[i].in_game ? "In Game" : "Not In Game");
-//	strcat(buf2, buf);
-    if (feat_list[i].in_game) {
-      sprintf(buf, "%-20s\r\n", feat_list[i].name);
-      strcat(buf2, buf);        /* The above, @ should always be safe to do. */
-      none_shown = FALSE;
-    }
-  }
-
-  if (none_shown) {
-    sprintf(buf, "There are currently no feats in the game.\r\n");
-    strcat(buf2, buf);
-  }
-   
-  page_string(ch->desc, buf2, 1);
-}
-
 int find_feat_num(char *name)
 {  
   int ftindex, ok;
@@ -343,44 +249,4 @@ int find_feat_num(char *name)
   }
     
   return (-1);
-}
-
-ACMD(do_feats)
-{
-  char arg[80];
-
-  one_argument(argument, arg);
-
-  if (is_abbrev(arg, "known") || !*arg) {
-    send_to_char(ch, "Syntax is \"feats <available | complete | known>\".\r\n");
-    list_feats_known(ch);
-  } else if (is_abbrev(arg, "available")) {
-    list_feats_available(ch);
-  } else if (is_abbrev(arg, "complete")) {
-    list_feats_complete(ch);
-  }
-}
-
-int feat_to_subfeat(int feat)
-{
-  switch (feat) {
-  case FEAT_IMPROVED_CRITICAL:
-    return CFEAT_IMPROVED_CRITICAL;
-  case FEAT_WEAPON_FINESSE:
-    return CFEAT_WEAPON_FINESSE;
-  case FEAT_WEAPON_FOCUS:
-    return CFEAT_WEAPON_FOCUS;
-  case FEAT_WEAPON_SPECIALIZATION:
-    return CFEAT_WEAPON_SPECIALIZATION;
-  case FEAT_GREATER_WEAPON_FOCUS:
-    return CFEAT_GREATER_WEAPON_FOCUS;
-  case FEAT_GREATER_WEAPON_SPECIALIZATION:
-    return CFEAT_GREATER_WEAPON_SPECIALIZATION;
-  case FEAT_SPELL_FOCUS:
-    return CFEAT_SPELL_FOCUS;
-  case FEAT_GREATER_SPELL_FOCUS:
-    return CFEAT_GREATER_SPELL_FOCUS;
-  default:
-    return -1;
-  }
 }

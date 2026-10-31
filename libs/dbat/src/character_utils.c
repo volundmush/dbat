@@ -973,12 +973,10 @@ void remove_kaioken(char_data *ch, int8_t announce) {
 void dispel_ash(struct char_data *ch)
 {
  struct obj_data *obj, *next_obj, *ash = nullptr;
- int there = FALSE;
 
  for (obj = world[char_get_in_room(ch)].contents; obj; obj = next_obj) {
      next_obj = obj->next_content;
   if (obj_get_vnum(obj) == 1306) {
-   there = TRUE;
    ash = obj;
   }
  }
@@ -2766,7 +2764,7 @@ void reveal_hiding(struct char_data *ch, int type)
   for (d = descriptor_list; d; d = d->next) {
    if (desc_get_connected(d) != CON_PLAYING)
     continue;
-    tch = d->character;
+   tch = d->character;
 
    if (tch == ch)
     continue;
@@ -3201,7 +3199,7 @@ int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech
             if (names->id != char_get_idnum(ch))
              continue;
 
-             remember = TRUE;
+            remember = TRUE;
           }
           
          if (remember == TRUE) {
@@ -3804,13 +3802,6 @@ void add_follower(struct char_data *ch, struct char_data *leader)
   }
 }
 
-int count_metamagic_feats(struct char_data *ch)
-{
-  int count = 0;                /* Number of Metamagic Feats Known */
-
-  return count;
-}
-
 int default_admin_flags_mortal[] =
   { -1 };
 
@@ -3958,7 +3949,7 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict) {
     get_line(fl, line);
     sscanf(line, "%s %s\n", filler, scrap);
     if (!strcasecmp(char_get_name(vict), filler)) {
-     sprintf(name, "%s", scrap);
+     snprintf(name, sizeof(name), "%s", scrap);
      known = TRUE;
     }
   }

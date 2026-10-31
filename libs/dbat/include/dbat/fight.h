@@ -91,7 +91,6 @@ ACMD(do_wake);
 ACMD(do_flee);
 ACMD(do_get);
 ACMD(do_split);
-ACMD(do_sac);
 ACMD(do_transform);
 ACMD(do_kaioken);
 ACMD(do_escape);

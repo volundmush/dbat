@@ -11,12 +11,11 @@
 #include "dbat/consts/songs.h"
 #include "dbat/help.h"
 #include "dbat/utils.h"
-#include "dbat/bans.h"
+#include "dbat/ban.h"
 #include "dbat/stringutils.h"
 #include "dbat/comm.h"
 #include "dbat/config.h"
 #include "dbat/maputils.h"
-#include "dbat/ban.h"
 #include "dbat/weather.h"
 #include "dbat/act.wizard.h"
 #include "dbat/act.misc.h"
@@ -71,7 +70,6 @@
 /* externs */
 
 
-int passcomm(struct char_data *ch, char *comm);
 
 
 /* local globals */
@@ -2133,7 +2131,6 @@ ssize_t perform_socket_write(socklen_t desc, const char *txt, size_t length)
 {
   ssize_t result = 0;
 
-  int tmp, cnt, bytes_copied;
   
   result = write(desc, txt, length);
   
@@ -2777,28 +2774,6 @@ int arena_watch(struct char_data *ch)
  }
 }
 
-void send_to_eaves(const char *messg, struct char_data *tch, ...)
-{
- struct descriptor_data *d;
-
-
-
- for (d = descriptor_list; d; d = d->next) {
-     if(desc_get_connected(d) != CON_PLAYING)
-      continue;
-
-     int roll = rand_number(1, 101);
-     if (char_get_listenroom(d->character) == rroom_get_vnum(char_get_in_room(tch)) && char_get_skill(d->character, SKILL_EAVESDROP) > roll) {
-      char buf[1000];
-      char buf2[1000];
-      *buf = '\0';
-      sprintf(buf2, "@W%s %s\r\n", char_pers(d->character, tch), messg);
-      sprintf(buf, "-----Eavesdrop-----\r\n%s-----Eavesdrop-----\r\n", buf2);
-      send_to_char(d->character, "%s", buf);
-     }
-  }
-}
-
 void send_to_all(const char *messg, ...)
 {
   struct descriptor_data *i;
@@ -3340,58 +3315,4 @@ void send_to_range(room_vnum start, room_vnum finish, const char *messg, ...)
       }
     }
   }
-}
-
-int passcomm(struct char_data *ch, char *comm)
-{
-
- if (!strcasecmp(comm, "score")) {
-  return TRUE;
- }
- else if (!strcasecmp(comm, "sco")) {
-  return TRUE;
- }
- else if (!strcasecmp(comm, "ooc")) {
-  return TRUE;
- }
- else if (!strcasecmp(comm, "newbie")) {
-  return TRUE;
- }
- else if (!strcasecmp(comm, "newb")) {
-  return TRUE;
- }
- else if (!strcasecmp(comm, "look")) {
-  return TRUE;
- }
- else if (!strcasecmp(comm, "lo")) {
-  return TRUE;
- }
- else if (!strcasecmp(comm, "l")) {
-  return TRUE;
- }
- else if (!strcasecmp(comm, "status")) {
-  return TRUE;
- }
- else if (!strcasecmp(comm, "stat")) {
-  return TRUE;
- }
- else if (!strcasecmp(comm, "sta")) {
-  return TRUE;
- }
- else if (!strcasecmp(comm, "tell")) {
-  return TRUE;
- }
- else if (!strcasecmp(comm, "reply")) {
-  return TRUE;
- }
- else if (!strcasecmp(comm, "say")) {
-  return TRUE;
- }
- else if (!strcasecmp(comm, "osay")) {
-  return TRUE;
- }
- else {
-  return FALSE;
- }
-
 }

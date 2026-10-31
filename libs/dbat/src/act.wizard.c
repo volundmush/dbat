@@ -934,7 +934,7 @@ ACMD(do_echo)
   
     char buf[MAX_INPUT_LENGTH];
     char name[128];
-    int found = FALSE, trunc = 0;
+    int found = FALSE;
     struct char_data *vict = NULL, *next_v = NULL, *tch = NULL;
 
     for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
@@ -2707,7 +2707,6 @@ ACMD(do_restore)
   char buf[MAX_INPUT_LENGTH];
   struct char_data *vict;
   struct descriptor_data *j;
-  int i;
 
   one_argument(argument, buf);
   if (!*buf)
@@ -3299,8 +3298,8 @@ ACMD(do_wizutil)
       if (vict->affected || char_get_affected_by(vict)) {
         while (vict->affected)
           affect_remove(vict, vict->affected);
-          for(taeller=0; taeller < AF_ARRAY_MAX; taeller++)
-          char_get_affected_by(ch)[taeller] = 0;
+        for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
+          char_get_affected_by(vict)[taeller] = 0;
 	send_to_char(vict, "There is a brief flash of light!\r\nYou feel slightly different.\r\n");
 	send_to_char(ch, "All spells removed.\r\n");
       } else {
@@ -4953,18 +4952,18 @@ ACMD (do_zcheck)
           len += snprintf(buf + len, sizeof(buf) - len,
                             "- SPEC flag needs to be removed.\r\n");
 
-          /*****ADDITIONAL MOB CHECKS HERE*****/
-          if (found) {
-            send_to_char(ch,
-                    "%s[%5d]%s %-30s: %s\r\n%s",
-                    CCCYN(ch, C_NRM), char_get_mob_vnum(mob),
-                    CCYEL(ch, C_NRM), char_get_name(mob),
-                    CCNRM(ch, C_NRM), buf);
-          }
-          /* reset buffers and found flag */
-          strcpy(buf, "");
-          found = 0;
-          len = 0;
+        /*****ADDITIONAL MOB CHECKS HERE*****/
+        if (found) {
+          send_to_char(ch,
+                  "%s[%5d]%s %-30s: %s\r\n%s",
+                  CCCYN(ch, C_NRM), char_get_mob_vnum(mob),
+                  CCYEL(ch, C_NRM), char_get_name(mob),
+                  CCNRM(ch, C_NRM), buf);
+        }
+        /* reset buffers and found flag */
+        strcpy(buf, "");
+        found = 0;
+        len = 0;
         }   /*mob is in zone*/
     }  /*check mobs*/
 
@@ -5490,16 +5489,4 @@ ACMD(do_spells)
     send_to_char(ch, "\r\n");
   return;
 
-}
-
-ACMD(do_boom)
-{
-  /* Only IDNUM = 1 can cause a boom! Ideally for testing something that might
-   * cause a crash. Currently left over from testing changes to send_to_outdoor. */
-  if (char_get_idnum(ch) != 1) {
-    send_to_char(ch, "Sorry, only the Founder may use the boom command.\r\n");
-    return;
-  }
-
-  send_to_outdoor("%s shakes the world with a mighty boom!\r\n", char_get_name(ch));
 }

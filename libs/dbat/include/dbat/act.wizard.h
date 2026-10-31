@@ -72,4 +72,3 @@ ACMD(do_ginfo);
 ACMD(do_plist);
 ACMD(do_peace);
 ACMD(do_raise);
-ACMD(do_boom);

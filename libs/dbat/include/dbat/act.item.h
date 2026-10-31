@@ -9,7 +9,6 @@ extern struct char_data *ch_selling, *ch_buying;
 
 // functions
 int check_saveroom_count(struct char_data *ch, struct obj_data *cont);
-void dball_load(void);
 int check_insidebag(struct obj_data *cont, double mult);
 
 void weight_change_object(struct obj_data *obj, int weight);
@@ -42,4 +41,3 @@ ACMD(do_deploy);
 ACMD(do_pack);
 ACMD(do_garden);
 ACMD(do_refuel);
-ACMD(do_sac);

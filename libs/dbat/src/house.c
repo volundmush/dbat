@@ -543,9 +543,9 @@ int House_load(room_vnum rvnum)
   char buf1[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
   char line[256];
-  int t[21],danger,zwei=0;
+  int t[21],zwei=0;
   struct obj_data *temp;
-  int locate=0, j, nr,k,num_objs=0;
+  int locate=0, j, nr,k;
   struct obj_data *obj1;
   struct obj_data *cont_row[MAX_BAG_ROWS];
   struct extra_descr_data *new_descr;
@@ -682,7 +682,6 @@ int House_load(room_vnum rvnum)
             case 'A':
               if (j >= MAX_OBJ_AFFECT) {
                 log("SYSERR: Too many object affectations in loading house file");
-                danger=1;
               }
               get_line(fl, line);
               sscanf(line, "%d %d %d", t, t + 1, t + 2);
@@ -706,7 +705,6 @@ int House_load(room_vnum rvnum)
             case 'S': 
               if (j >= SPELLBOOK_SIZE) { 
                 log("SYSERR: Too many spells in spellbook loading rent file"); 
-                danger=1; 
               } 
               get_line(fl, line); 
               sscanf(line, "%d %d", t, t + 1); 
@@ -740,7 +738,6 @@ int House_load(room_vnum rvnum)
         }      /* exit our for loop */
       }   /* exit our xap loop */
       if(temp != NULL) {
-        num_objs++;
         obj_to_room(temp, rrnum);
       } else {
         continue;

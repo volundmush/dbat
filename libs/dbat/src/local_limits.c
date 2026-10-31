@@ -993,49 +993,6 @@ static void update_flags(struct char_data *ch)
 }
 
 /* ki gain pr. game hour */
-static int ki_gain(struct char_data *ch)
-{
-  int gain = 0;
-
-  if (char_is_npc(ch))
-  {
-    /* Neat and fast */
-    gain = char_get_level(ch);
-  }
-  else
-  {
-    gain = char_get_max_ki(ch) / 12;
-
-    /* Class calculations */
-
-    /* Skill/Spell calculations */
-
-    /* Position calculations    */
-    switch (char_get_position(ch))
-    {
-    case POS_SLEEPING:
-      gain *= 2;
-      break;
-    case POS_RESTING:
-      gain += (gain / 2); /* Divide by 2 */
-      break;
-    case POS_SITTING:
-      gain += (gain / 4); /* Divide by 4 */
-      break;
-    }
-  }
-
-  if (char_aff_flagged(ch, AFF_POISON))
-    gain /= 4;
-
-  if (char_get_regen(ch) > 0)
-  {
-    gain += (gain * 0.01) * char_get_regen(ch);
-  }
-
-  return (gain);
-}
-
 void set_title(struct char_data *ch, char *title)
 {
   if (ch)
@@ -1716,7 +1673,6 @@ static void heal_limb(struct char_data *ch)
 static void point_update_characters(void)
 {
   struct char_data *i, *next_char;
-  struct obj_data *j, *next_thing, *jj, *next_thing2, *vehicle = NULL;
   int change = FALSE;
   for (i = character_list; i; i = next_char)
   {
@@ -2062,9 +2018,7 @@ static void point_update_characters(void)
 
 static void point_update_objects(void)
 {
-  struct char_data *i, *next_char;
   struct obj_data *j, *next_thing, *jj, *next_thing2, *vehicle = NULL;
-  int change = FALSE;
 
   /* objects */
   for (j = object_list; j; j = next_thing)

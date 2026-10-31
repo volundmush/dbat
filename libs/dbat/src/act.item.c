@@ -562,14 +562,13 @@ ACMD(do_garden)
     return;
    }
   } else if (!strcasecmp(arg2, "dig")) {
-   struct obj_data *obj2, *shovel = NULL, *next_obj;
+   struct obj_data *obj2, *next_obj;
    int found = FALSE;
 
    for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
           next_obj = obj2->next_content;
      if (obj_get_vnum(obj2) == 254 && !obj_extra_flagged(obj2, ITEM_BROKEN) && !obj_extra_flagged(obj2, ITEM_FORGED)) {
       found = TRUE;
-      shovel = obj2;
      }
    }
    if (found == FALSE) {
@@ -587,14 +586,13 @@ ACMD(do_garden)
     return;
    }
   } else if (!strcasecmp(arg2, "plant")) {
-   struct obj_data *obj2, *shovel, *next_obj;
+   struct obj_data *obj2, *next_obj;
    int found = FALSE;
 
    for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
           next_obj = obj2->next_content;
      if (obj_get_vnum(obj2) == 254 && !obj_extra_flagged(obj2, ITEM_BROKEN) && !obj_extra_flagged(obj2, ITEM_FORGED)) {
       found = TRUE;
-      shovel = obj2;
      }
    }
    if (found == FALSE) {
@@ -759,7 +757,6 @@ ACMD(do_pack)
     send_to_char(ch, "You do not own this house.\r\n");
     return;
    } else {
-    struct obj_data *cont = NULL;
     act("@CYou push a hidden button on $p@C and a cloud of smoke erupts and covers it. As the smoke clears a pile of money can be seen on the ground!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@c$n@C pushes a hidden button on $p@C and a cloud of smokes erupts and covers it. As the smoke clears a pile of money can be seen on the ground!@n", TRUE, ch, obj, 0, TO_ROOM);
     int money = 0, count = 0, rnum = obj_get_vnum(obj);
@@ -847,7 +844,7 @@ int check_insidebag(struct obj_data *cont, double mult)
 int check_saveroom_count(struct char_data *ch, struct obj_data *cont)
 { 
  struct obj_data *obj, *next_obj = NULL;
- int count = 0, was = 0;
+ int count = 0;
 
  if (char_get_in_room(ch) == NOWHERE)
   return 0;
@@ -862,7 +859,6 @@ int check_saveroom_count(struct char_data *ch, struct obj_data *cont)
    }
  }
 
- was = count;
 
  if (cont != NULL) {
   if (!obj_extra_flagged(cont, ITEM_CARDCASE)) {
@@ -987,7 +983,6 @@ ACMD(do_deploy)
  } /* End while */
 
  if (cont == TRUE) {
-  int hnum = rroom_get_vnum(char_get_in_room(ch));
   struct obj_data *door = read_object(18801, VIRTUAL);
 
   obj_set_value(door, 6, rroom_get_vnum(char_get_in_room(ch)));
@@ -1195,413 +1190,6 @@ void check_auction(void)
 
 	}
 	}
-}
-
-void dball_load()
-{
- int found1 = FALSE, found2 = FALSE, found3 = FALSE;
- int found4 = FALSE, found5 = FALSE, load = FALSE, num = -1;
- int found6 = FALSE, found7 = FALSE, room = 0, loaded = FALSE;
- int hunter1 = FALSE, hunter2 = FALSE;
- struct obj_data *k;
-
- if (SELFISHMETER >= 10) {
-  return;
- }
-
-if (dballtime == 0) {
- struct char_data *hunter = NULL;
- mob_rnum r_num;
-
- WISHTIME = 0;
- for (k = object_list; k; k = k->next) {
-  if (obj_extra_flagged(k, ITEM_FORGED)) {
-   continue;
-  }
-  if (obj_get_vnum(k) == 20) {
-   found1 = TRUE;
-  }
-  else if (obj_get_vnum(k) == 21) {
-   found2 = TRUE;
-  }
-  else if (obj_get_vnum(k) == 22) {
-   found3 = TRUE;
-  }
-  else if (obj_get_vnum(k) == 23) {
-   found4 = TRUE;
-  }
-  else if (obj_get_vnum(k) == 24) {
-   found5 = TRUE;
-  }
-  else if (obj_get_vnum(k) == 25) {
-   found6 = TRUE;
-  }
-  else if (obj_get_vnum(k) == 26) {
-   found7 = TRUE;
-  }
-  else if (obj_get_in_room(k) != NOWHERE && rroom_get_geffect(obj_get_in_room(k)) == 6 && !obj_extra_flagged(k, ITEM_UNBREAKABLE)) {
-   send_to_room(obj_get_in_room(k), "@R%s@r melts in the lava!@n\r\n", k->short_description);
-   extract_obj(k);
-  }
-  else {
-   continue;
-  }
- }
-  if (found1 == FALSE) {
-   load = FALSE;
-   int zone = 0;
-   while (load == FALSE) {
-    if (real_room(num) != NOWHERE) {
-      if ((zone = real_zone_by_thing(real_room(num))) != NOWHERE) {
-       if (zone_flagged(zone, ZONE_DBALLS)) {
-        room = num;
-        load = TRUE;
-        num = rand_number(200, 20000);
-       } else {
-        num = rand_number(200, 20000);
-       }
-      } else {
-        num = rand_number(200, 20000);
-      }
-    }
-    else {
-     num = rand_number(200, 20000);
-    }
-   }
-   if (rand_number(1, 10) > 8) {
-    if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
-      return;
-     }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
-     hunter1 = TRUE;
-     DBALL_HUNTER1 = room;
-     k = read_object(20, VIRTUAL);
-     obj_to_char(k, hunter);
-    } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
-      return;
-     }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
-     hunter2 = TRUE;
-     DBALL_HUNTER2 = room;
-     k = read_object(20, VIRTUAL);
-     obj_to_char(k, hunter);
-    } else {
-     k = read_object(20, VIRTUAL);
-     obj_to_room(k, real_room(room));
-    }
-   } else {
-    k = read_object(20, VIRTUAL);
-    obj_to_room(k, real_room(room));
-   }
-   loaded = TRUE;
-  }
-  if (found2 == FALSE) {
-   load = FALSE;
-   while (load == FALSE) {
-    if (real_room(num) != NOWHERE) {
-     if (rroom_flagged(real_room(num), ROOM_EARTH) || rroom_flagged(real_room(num), ROOM_VEGETA) || rroom_flagged(real_room(num), ROOM_FRIGID) || rroom_flagged(real_room(num), ROOM_AETHER) || rroom_flagged(real_room(num), ROOM_NAMEK) || rroom_flagged(real_room(num), ROOM_KONACK) || rroom_flagged(real_room(num), ROOM_YARDRAT)) {
-       room = num;
-       load = TRUE;
-       num = rand_number(200, 20000);
-      }
-      else {
-       num = rand_number(200, 20000);
-      }
-    }
-    else {
-          num = rand_number(20, 20000);
-    }
-   }
-   if (rand_number(1, 10) > 8) {
-    if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
-      return;
-     }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
-     hunter1 = TRUE;
-     DBALL_HUNTER1 = room;
-     k = read_object(21, VIRTUAL);
-     obj_to_char(k, hunter);
-    } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
-      return;
-     }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
-     hunter2 = TRUE;
-     DBALL_HUNTER2 = room;
-     k = read_object(21, VIRTUAL);
-     obj_to_char(k, hunter);
-    } else {
-     k = read_object(21, VIRTUAL);
-     obj_to_room(k, real_room(room));
-    }
-   } else {
-    k = read_object(21, VIRTUAL);
-    obj_to_room(k, real_room(room));
-   }
-   loaded = TRUE;
-  }
-  if (found3 == FALSE) {
-   load = FALSE;
-   while (load == FALSE) {
-    if (real_room(num) != NOWHERE) {
-     if (rroom_flagged(real_room(num), ROOM_EARTH) || rroom_flagged(real_room(num), ROOM_VEGETA) || rroom_flagged(real_room(num), ROOM_FRIGID) || rroom_flagged(real_room(num), ROOM_AETHER) || rroom_flagged(real_room(num), ROOM_NAMEK) || rroom_flagged(real_room(num), ROOM_KONACK) || rroom_flagged(real_room(num), ROOM_YARDRAT)) {
-       room = num;
-       load = TRUE;
-       num = rand_number(200, 20000);
-      }
-      else {
-       num = rand_number(200, 20000);
-      }
-    }
-    else {
-          num = rand_number(20, 20000);
-    }
-   }
-   if (rand_number(1, 10) > 8) {
-    if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
-      return;
-     }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
-     hunter1 = TRUE;
-     DBALL_HUNTER1 = room;
-     k = read_object(22, VIRTUAL);
-     obj_to_char(k, hunter);
-    } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
-      return;
-     }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
-     hunter2 = TRUE;
-     DBALL_HUNTER2 = room;
-     k = read_object(22, VIRTUAL);
-     obj_to_char(k, hunter);
-    } else {
-     k = read_object(22, VIRTUAL);
-     obj_to_room(k, real_room(room));
-    }
-   } else {
-    k = read_object(22, VIRTUAL);
-    obj_to_room(k, real_room(room));
-   }
-   loaded = TRUE;
-  }
-  if (found4 == FALSE) {
-   load = FALSE;
-   while (load == FALSE) {
-    if (real_room(num) != NOWHERE) {
-     if (rroom_flagged(real_room(num), ROOM_EARTH) || rroom_flagged(real_room(num), ROOM_VEGETA) || rroom_flagged(real_room(num), ROOM_FRIGID) || rroom_flagged(real_room(num), ROOM_AETHER) || rroom_flagged(real_room(num), ROOM_NAMEK) || rroom_flagged(real_room(num), ROOM_KONACK) || rroom_flagged(real_room(num), ROOM_YARDRAT)) {
-       room = num;
-       load = TRUE;
-       num = rand_number(200, 20000);
-      }
-      else {
-       num = rand_number(200, 20000);
-      }
-    }
-    else {
-          num = rand_number(20, 20000);
-    }
-   }
-   if (rand_number(1, 10) > 8) {
-    if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
-      return;
-     }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
-     hunter1 = TRUE;
-     DBALL_HUNTER1 = room;
-     k = read_object(23, VIRTUAL);
-     obj_to_char(k, hunter);
-    } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
-      return;
-     }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
-     hunter2 = TRUE;
-     DBALL_HUNTER2 = room;
-     k = read_object(23, VIRTUAL);
-     obj_to_char(k, hunter);
-    } else {
-     k = read_object(23, VIRTUAL);
-     obj_to_room(k, real_room(room));
-    }
-   } else {
-    k = read_object(23, VIRTUAL);
-    obj_to_room(k, real_room(room));
-   }
-   loaded = TRUE;
-  }
-  if (found5 == FALSE) {
-   load = FALSE;
-   while (load == FALSE) {
-    if (real_room(num) != NOWHERE) {
-     if (rroom_flagged(real_room(num), ROOM_EARTH) || rroom_flagged(real_room(num), ROOM_VEGETA) || rroom_flagged(real_room(num), ROOM_FRIGID) || rroom_flagged(real_room(num), ROOM_AETHER) || rroom_flagged(real_room(num), ROOM_NAMEK) || rroom_flagged(real_room(num), ROOM_KONACK) || rroom_flagged(real_room(num), ROOM_YARDRAT)) {
-       room = num;
-       load = TRUE;
-       num = rand_number(200, 20000);
-      }
-      else {
-       num = rand_number(200, 20000);
-      }
-    }
-    else {
-          num = rand_number(20, 20000);
-    }
-   }
-   if (rand_number(1, 10) > 8) {
-    if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
-      return;
-     }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
-     hunter1 = TRUE;
-     DBALL_HUNTER1 = room;
-     k = read_object(24, VIRTUAL);
-     obj_to_char(k, hunter);
-    } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
-      return;
-     }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
-     hunter2 = TRUE;
-     DBALL_HUNTER2 = room;
-     k = read_object(24, VIRTUAL);
-     obj_to_char(k, hunter);
-    } else {
-     k = read_object(24, VIRTUAL);
-     obj_to_room(k, real_room(room));
-    }
-   } else {
-    k = read_object(24, VIRTUAL);
-    obj_to_room(k, real_room(room));
-   }
-   loaded = TRUE;
-  }
-  if (found6 == FALSE) {
-   load = FALSE;
-   while (load == FALSE) {
-    if (real_room(num) != NOWHERE) {
-     if (rroom_flagged(real_room(num), ROOM_EARTH) || rroom_flagged(real_room(num), ROOM_VEGETA) || rroom_flagged(real_room(num), ROOM_FRIGID) || rroom_flagged(real_room(num), ROOM_AETHER) || rroom_flagged(real_room(num), ROOM_NAMEK) || rroom_flagged(real_room(num), ROOM_KONACK) || rroom_flagged(real_room(num), ROOM_YARDRAT)) {
-       room = num;
-       load = TRUE;
-       num = rand_number(200, 20000);
-      }
-      else {
-       num = rand_number(200, 20000);
-      }
-    }
-    else {
-          num = rand_number(20, 20000);
-    }
-   }
-   if (rand_number(1, 10) > 8) {
-    if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
-      return;
-     }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
-     hunter1 = TRUE;
-     DBALL_HUNTER1 = room;
-     k = read_object(25, VIRTUAL);
-     obj_to_char(k, hunter);
-    } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
-      return;
-     }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
-     hunter2 = TRUE;
-     DBALL_HUNTER2 = room;
-     k = read_object(25, VIRTUAL);
-     obj_to_char(k, hunter);
-    } else {
-     k = read_object(25, VIRTUAL);
-     obj_to_room(k, real_room(room));
-    }
-   } else {
-    k = read_object(25, VIRTUAL);
-    obj_to_room(k, real_room(room));
-   }
-   loaded = TRUE;
-  }
-  if (found7 == FALSE) {
-   load = FALSE;
-   while (load == FALSE) {
-    if (real_room(num) != NOWHERE) {
-     if (rroom_flagged(real_room(num), ROOM_EARTH) || rroom_flagged(real_room(num), ROOM_VEGETA) || rroom_flagged(real_room(num), ROOM_FRIGID) || rroom_flagged(real_room(num), ROOM_AETHER) || rroom_flagged(real_room(num), ROOM_NAMEK) || rroom_flagged(real_room(num), ROOM_KONACK) || rroom_flagged(real_room(num), ROOM_YARDRAT)) {
-       room = num;
-       load = TRUE;
-       num = rand_number(200, 20000);
-      }
-      else {
-       num = rand_number(200, 20000);
-      }
-    }
-    else {
-     num = rand_number(20, 20000);
-    }
-   }
-   if (rand_number(1, 10) > 8) {
-    if (hunter1 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER1_VNUM)) == NOBODY) {
-      return;
-     }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
-     hunter1 = TRUE;
-     DBALL_HUNTER1 = room;
-     k = read_object(26, VIRTUAL);
-     obj_to_char(k, hunter);
-    } else if (hunter2 == FALSE) {
-     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
-      return;
-     }
-     hunter = read_mobile(r_num, REAL);
-     char_to_room(hunter, real_room(room));
-     hunter2 = TRUE;
-     DBALL_HUNTER2 = room;
-     k = read_object(26, VIRTUAL);
-     obj_to_char(k, hunter);
-    } else {
-     k = read_object(26, VIRTUAL);
-     obj_to_room(k, real_room(room));
-    }
-   } else {
-    k = read_object(26, VIRTUAL);
-    obj_to_room(k, real_room(room));
-   }
-   loaded = TRUE;
-  }
-  dballtime = 604800;
- }
- else if (dballtime == 518400 || dballtime == 432000 || dballtime == 345600 || dballtime == 259200 || dballtime == 172800 || dballtime == 86400) {
-  dballtime -= 1;
- }
- else {
-  if (WISHTIME == 0) {
-   WISHTIME = dballtime - 1;
-  }
-  else if (WISHTIME > 0 && dballtime != WISHTIME) {
-   dballtime = WISHTIME;
-  }
-  WISHTIME -= 1;
-  dballtime -= 1;
- }
 }
 
 ACMD(do_auction)
@@ -4520,72 +4108,6 @@ ACMD(do_remove)
   }
     }
   }
-}
-
-ACMD(do_sac) 
-{ 
-   char arg[MAX_INPUT_LENGTH]; 
-   struct obj_data *j;
-
-  one_argument(argument, arg); 
-
-  if (!*arg) { 
-     send_to_char(ch, "Sacrifice what?\n\r"); 
-     return; 
-   } 
-
-  if (!(j = get_obj_in_list_vis(ch, arg, NULL, world[char_get_in_room(ch)].contents)) && (!(j = get_obj_in_list_vis(ch, arg, NULL, ch->carrying)))) { 
-     send_to_char(ch, "It doesn't seem to be here.\n\r"); 
-     return; 
-   } 
-
-  if (!obj_wear_flagged(j, ITEM_WEAR_TAKE)) { 
-     send_to_char(ch, "You can't sacrifice that!\n\r"); 
-     return; 
-   } 
-
-   act("$n sacrifices $p.", FALSE, ch, j, 0, TO_ROOM); 
-
-  if (!obj_get_cost(j) && !obj_is_corpse(j)) {
-    send_to_char(ch, "Zizazat mocks your sacrifice. Try again, try harder.\r\n");
-    return;
-  }
-
-  if (!obj_is_corpse(j)) {
-  switch (rand_number(0, 5)) { 
-    case 0: 
-      send_to_char(ch, "You sacrifice %s to the Gods.\r\nYou receive one zenni for your humility.\r\n", obj_get_short_description(j));
-      char_set_gold(ch, char_get_gold(ch) + (1)); 
-    break; 
-    case 1: 
-      send_to_char(ch, "You sacrifice %s to the Gods.\r\nThe Gods ignore your sacrifice.\r\n", obj_get_short_description(j));
-    break; 
-    case 2: 
-      send_to_char(ch, "You sacrifice %s to the Gods.\r\nZizazat gives you %d experience points.\r\n", obj_get_short_description(j), (2*obj_get_cost(j)));
-      char_set_exp(ch, char_get_exp(ch) + ((2*obj_get_cost(j)))); 
-    break; 
-    case 3: 
-      send_to_char(ch, "You sacrifice %s to the Gods.\r\nYou receive %d experience points.\r\n", obj_get_short_description(j), obj_get_cost(j));
-      char_set_exp(ch, char_get_exp(ch) + (obj_get_cost(j))); 
-    break; 
-    case 4: 
-      send_to_char(ch, "Your sacrifice to the Gods is rewarded with %d zenni.\r\n", obj_get_cost(j)); 
-      char_set_gold(ch, char_get_gold(ch) + (obj_get_cost(j))); 
-    break; 
-    case 5: 
-      send_to_char(ch, "Your sacrifice to the Gods is rewarded with %d zenni\r\n", (2*obj_get_cost(j))); 
-      char_set_gold(ch, char_get_gold(ch) + ((2*obj_get_cost(j)))); 
-    break; 
-  default: 
-      send_to_char(ch, "You sacrifice %s to the Gods.\r\nYou receive one zenni for your humility.\r\n", obj_get_short_description(j));
-      char_set_gold(ch, char_get_gold(ch) + (1)); 
-    break; 
-  } 
-  } else {
-    /* No longer transfer corpse contents to room. Sac it, sac it all. */
-    send_to_char(ch, "You send the corpse on to the next life!\r\n");
-  }
-  extract_obj(j);
 }
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */

@@ -23,7 +23,6 @@
 #include "dbat/affect.h"
 
 /* local functions */
-int mag_materials(struct char_data *ch, int item0, int item1, int item2, int extract, int verbose);
 void perform_mag_groups(int level, struct char_data *ch, struct char_data *tch, int spellnum);
 
 /* affect_update: called from comm.c (causes spells to wear off) */
@@ -61,55 +60,6 @@ void affect_update(void)
  * it to implement your own spells which require ingredients (i.e., some
  * heal spell which requires a rare herb or some such.)
  */
-int mag_materials(struct char_data *ch, int item0, int item1, int item2,
-		      int extract, int verbose)
-{
-  struct obj_data *tobj;
-  struct obj_data *obj0 = NULL, *obj1 = NULL, *obj2 = NULL;
-
-  for (tobj = ch->carrying; tobj; tobj = tobj->next_content) {
-    if ((item0 > 0) && (obj_get_vnum(tobj) == item0)) {
-      obj0 = tobj;
-      item0 = -1;
-    } else if ((item1 > 0) && (obj_get_vnum(tobj) == item1)) {
-      obj1 = tobj;
-      item1 = -1;
-    } else if ((item2 > 0) && (obj_get_vnum(tobj) == item2)) {
-      obj2 = tobj;
-      item2 = -1;
-    }
-  }
-  if ((item0 > 0) || (item1 > 0) || (item2 > 0)) {
-    if (verbose) {
-      switch (rand_number(0, 2)) {
-      case 0:
-	send_to_char(ch, "A wart sprouts on your nose.\r\n");
-	break;
-      case 1:
-	send_to_char(ch, "Your hair falls out in clumps.\r\n");
-	break;
-      case 2:
-	send_to_char(ch, "A huge corn develops on your big toe.\r\n");
-	break;
-      }
-    }
-    return (FALSE);
-  }
-  if (extract) {
-    if (item0 < 0)
-      extract_obj(obj0);
-    if (item1 < 0)
-      extract_obj(obj1);
-    if (item2 < 0)
-      extract_obj(obj2);
-  }
-  if (verbose) {
-    send_to_char(ch, "A puff of smoke rises from your pack.\r\n");
-    act("A puff of smoke rises from $n's pack.", TRUE, ch, NULL, NULL, TO_ROOM);
-  }
-  return (TRUE);
-}
-
 
 
 int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum, int level, int cast_stat)
@@ -971,9 +921,9 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
   case SPELL_DAZE:
     if (char_get_race_level(victim) < 5)
       af[0].bitvector = AFF_NEXTNOACTION;
-      accum_duration = FALSE;
-      to_vict = "You are struck dumb by a flash of bright light!";
-      to_room = "$n is struck dumb by a flash of bright light!";
+    accum_duration = FALSE;
+    to_vict = "You are struck dumb by a flash of bright light!";
+    to_room = "$n is struck dumb by a flash of bright light!";
     break;
   case SPELL_SUMMON_MONSTER_I:
   case SPELL_SUMMON_MONSTER_II:

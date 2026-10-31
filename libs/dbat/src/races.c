@@ -95,21 +95,6 @@ int racial_ability_mods[][6] = {
                        {0,  0,  0,  0,  0}
 };
 
-void racial_ability_modifiers(struct char_data *ch) {
-    int chrace = 0;
-    if (char_get_race(ch) >= NUM_RACES || char_get_race(ch) < 0) {
-        log("SYSERR: Unknown race %d in racial_ability_modifiers", char_get_race(ch));
-    } else {
-        chrace = char_get_race(ch);
-    }
-
-    /*ch->real_abils.str += racial_ability_mods[chrace][0];
-    ch->real_abils.con += racial_ability_mods[chrace][1];
-    ch->real_abils.intel += racial_ability_mods[chrace][2];
-    ch->real_abils.wis += racial_ability_mods[chrace][3];
-    ch->real_abils.dex += racial_ability_mods[chrace][4];*/
-}
-
 
 /* Converted into metric units: cm and kg; SRD has english units. */
 struct {
@@ -246,12 +231,6 @@ const int size_bonus_table[NUM_SIZES] = {
 /* COLOSSAL */    -8
 };
 
-
-int get_size_bonus(int sz) {
-    if (sz < 0 || sz >= NUM_SIZES)
-        sz = SIZE_MEDIUM;
-    return size_bonus_table[sz];
-}
 
 
 int wield_type(int chsize, const struct obj_data *weap) {

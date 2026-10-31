@@ -57,26 +57,19 @@ int count_color_chars(char *string)
 /* Trims leading and trailing spaces from string */
 void trim(char *s)
 {
-	// Trim spaces and tabs from beginning:
-	int i=0,j;
-	while((s[i]==' ')||(s[i]=='\t')) {
-		i++;
-	}
-	if(i>0) {
-		for(j=0;j<strlen(s);j++) {
-			s[j]=s[j+i];
-		}
-	s[j]='\0';
-	}
+	size_t i = 0, len;
 
-	// Trim spaces and tabs from end:
-	i=strlen(s)-1;
-	while((s[i]==' ')||(s[i]=='\t')) {
-		i--;
-	}
-	if(i<(strlen(s)-1)) {
-		s[i+1]='\0';
-	}
+	// Trim spaces and tabs from beginning:
+	while (s[i] == ' ' || s[i] == '\t')
+		i++;
+	if (i > 0)
+		memmove(s, s + i, strlen(s + i) + 1);
+
+	// Trim spaces and tabs from end (an empty or all-blank string ends up empty):
+	len = strlen(s);
+	while (len > 0 && (s[len - 1] == ' ' || s[len - 1] == '\t'))
+		len--;
+	s[len] = '\0';
 }
 
 

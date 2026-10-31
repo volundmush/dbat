@@ -56,7 +56,7 @@ int wearable_obj(struct obj_data *obj)
 void randomize_eq(struct obj_data *obj)
 {
     if (wearable_obj(obj) && !obj_extra_flagged(obj, ITEM_NORANDOM)) {
-     int value = 0, slot = 0, roll = rand_number(2, 12), slot1 = 1, slot2 = 1, slot3 = 1, slot4 = 1, slot5 = 1, slot6 = 1;
+     int value = 0, slot = 0, roll = rand_number(2, 12), slot1 = 1, slot2 = 1;
      int stat = 0;
      int strength = FALSE, wisdom = FALSE, intelligence = FALSE, dexterity = FALSE, speed = FALSE, constitution = FALSE;
      // Setting the strength stats
@@ -241,16 +241,12 @@ void randomize_eq(struct obj_data *obj)
            slot2 = 0;
            break;
           case 3:
-           slot3 = 0;
            break;
           case 4:
-           slot4 = 0;
            break;
           case 5:
-           slot5 = 0;
            break;
           case 6:
-           slot6 = 0;
            break;
          }
        }

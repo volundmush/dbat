@@ -5,7 +5,7 @@
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
 #include "dbat/htree.h"
-#include "dbat/shops.h"
+#include "dbat/shop.h"
 #include "dbat/dg_scripts.h"
 
 #include "dbat/genwld.h"
@@ -15,7 +15,6 @@
 #include "dbat/comm.h"
 #include "dbat/genolc.h"
 #include "dbat/genzon.h"
-#include "dbat/shop.h"
 #include "dbat/dg_olc.h"
 
 

@@ -144,11 +144,8 @@ mob_rnum real_mobile(mob_vnum vnum);
 obj_rnum real_object(obj_vnum vnum);
 
 int	load_char(const char *name, struct char_data *ch);
-void	load_char_pets(struct char_data *ch);
 void	save_char(struct char_data *ch);
-void	save_char_pets(struct char_data *ch);
 void	init_char(struct char_data *ch);
-struct char_data* create_char(void);
 struct char_data *read_mobile(mob_vnum nr, int type);
 int	vnum_mobile(char *searchname, struct char_data *ch);
 void	clear_char(struct char_data *ch);

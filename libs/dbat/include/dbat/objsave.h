@@ -21,8 +21,6 @@ int	Crash_clean_file(char *name);
 void	Crash_listrent(struct char_data *ch, char *name);
 int	Crash_load(struct char_data *ch);
 void	Crash_crashsave(struct char_data *ch);
-void	Crash_idlesave(struct char_data *ch);
 void	Crash_save_all(void);
 int     Crash_load_xapobjs(struct char_data *ch);
 
-SPECIAL(receptionist);

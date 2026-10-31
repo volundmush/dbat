@@ -29,19 +29,11 @@
 /* local functions */
 
 static void auto_equip(struct char_data *ch, struct obj_data *obj, int location);
-static int Crash_offer_rent(struct char_data *ch, struct char_data *recep, int display, int factor);
-static int Crash_report_unrentables(struct char_data *ch, struct char_data *recep, struct obj_data *obj);
-static void Crash_report_rent(struct char_data *ch, struct char_data *recep, struct obj_data *obj, long *cost, long *nitems, int display, int factor);
-static int gen_receptionist(struct char_data *ch, struct char_data *recep, int cmd, char *arg, int mode);
 static int Crash_save(struct obj_data *obj, FILE *fp, int location);
-static void Crash_rent_deadline(struct char_data *ch, struct char_data *recep, long cost);
 static void Crash_restore_weight(struct obj_data *obj);
 static void Crash_extract_objs(struct obj_data *obj);
 static int Crash_is_unrentable(struct obj_data *obj);
 static void Crash_extract_norents(struct obj_data *obj);
-static void Crash_extract_expensive(struct obj_data *obj);
-static void Crash_calculate_rent(struct obj_data *obj, int *cost);
-static void Crash_cryosave(struct char_data *ch, int cost);
 static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename);
 
 static void Crash_log_file_error(const char *operation, const char *filename, const char *file, int line)
@@ -189,7 +181,6 @@ void delete_inv_backup(struct char_data *ch)
 {
   FILE *source;
   char source_file[20480], filename[20480];
-  char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
 
   if (!get_filename(source_file, sizeof(source_file), NEW_OBJ_FILES, char_get_name(ch)))
   {
@@ -474,7 +465,7 @@ void Crash_listrent(struct char_data *ch, char *name)
   char filename[MAX_STRING_LENGTH];
   char buf[MAX_STRING_LENGTH];
   struct obj_data *obj;
-  int rentcode, timed, netcost, gold, account, nitems, len;
+  int rentcode = -1, timed = 0, netcost = 0, gold = 0, account = 0, nitems = 0, len;
   int t[10], nr;
   char line[MAX_STRING_LENGTH];
   char *sdesc;
@@ -680,27 +671,6 @@ static void Crash_extract_norents(struct obj_data *obj)
   }
 }
 
-static void Crash_extract_expensive(struct obj_data *obj)
-{
-  struct obj_data *tobj, *max;
-
-  max = obj;
-  for (tobj = obj; tobj; tobj = tobj->next_content)
-    if (obj_get_cost_per_day(tobj) > obj_get_cost_per_day(max))
-      max = tobj;
-  extract_obj(max);
-}
-
-static void Crash_calculate_rent(struct obj_data *obj, int *cost)
-{
-  if (obj)
-  {
-    *cost += MAX(0, obj_get_cost_per_day(obj));
-    Crash_calculate_rent(obj->contains, cost);
-    Crash_calculate_rent(obj->next_content, cost);
-  }
-}
-
 void Crash_crashsave(struct char_data *ch)
 {
   if (char_is_npc(ch))
@@ -708,88 +678,6 @@ void Crash_crashsave(struct char_data *ch)
 
   if (Crash_write_safe_file(ch, RENT_CRASH, 0, "crashsave"))
     char_plr_set(ch, PLR_CRASH, false);
-}
-
-void Crash_idlesave(struct char_data *ch)
-{
-  char buf[MAX_INPUT_LENGTH];
-  int j;
-  int cost, cost_eq;
-  FILE *fp;
-
-  if (char_is_npc(ch))
-    return;
-
-  if (!get_filename(buf, sizeof(buf), NEW_OBJ_FILES, char_get_name(ch)))
-    return;
-
-  if (!(fp = fopen(buf, "wb")))
-    return;
-
-  Crash_extract_norent_eq(ch);
-  Crash_extract_norents(ch->carrying);
-
-  cost = 0;
-  Crash_calculate_rent(ch->carrying, &cost);
-
-  cost_eq = 0;
-  for (j = 0; j < NUM_WEARS; j++)
-    Crash_calculate_rent(char_get_equipment(ch, j), &cost_eq);
-
-  cost += cost_eq;
-  cost *= 2; /* forcerent cost is 2x normal rent */
-
-  if (cost > char_get_gold(ch) + char_get_bank_gold(ch))
-  {
-    for (j = 0; j < NUM_WEARS; j++) /* Unequip players with low gold. */
-      if (char_get_equipment(ch, j))
-        obj_to_char(unequip_char(ch, j), ch);
-
-    while ((cost > char_get_gold(ch) + char_get_bank_gold(ch)) && ch->carrying)
-    {
-      Crash_extract_expensive(ch->carrying);
-      cost = 0;
-      Crash_calculate_rent(ch->carrying, &cost);
-      cost *= 2;
-    }
-  }
-
-  if (ch->carrying == NULL)
-  {
-    for (j = 0; j < NUM_WEARS && char_get_equipment(ch, j) == NULL; j++) /* Nothing */
-      ;
-    if (j == NUM_WEARS)
-    { /* No equipment or inventory. */
-      fclose(fp);
-      Crash_delete_file(char_get_name(ch));
-      return;
-    }
-  }
-
-  fprintf(fp, "%d %d %d %d %d %d\r\n", RENT_TIMEDOUT, (int)time(0), cost,
-          char_get_gold(ch), char_get_bank_gold(ch), 0);
-
-  for (j = 0; j < NUM_WEARS; j++)
-  {
-    if (char_get_equipment(ch, j))
-    {
-      if (!Crash_save(char_get_equipment(ch, j), fp, j + 1))
-      {
-        fclose(fp);
-        return;
-      }
-      Crash_restore_weight(char_get_equipment(ch, j));
-      Crash_extract_objs(char_get_equipment(ch, j));
-    }
-  }
-  if (!Crash_save(ch->carrying, fp, 0))
-  {
-    fclose(fp);
-    return;
-  }
-  fclose(fp);
-
-  Crash_extract_objs(ch->carrying);
 }
 
 void Crash_rentsave(struct char_data *ch, int cost)
@@ -812,266 +700,9 @@ void Crash_rentsave(struct char_data *ch, int cost)
   Crash_extract_objs(ch->carrying);
 }
 
-static void Crash_cryosave(struct char_data *ch, int cost)
-{
-  char buf[MAX_INPUT_LENGTH];
-  int j;
-  FILE *fp;
-
-  if (char_is_npc(ch))
-    return;
-
-  if (!get_filename(buf, sizeof(buf), CRASH_FILE, char_get_name(ch)))
-    return;
-  if (!(fp = fopen(buf, "wb")))
-    return;
-
-  Crash_extract_norent_eq(ch);
-  Crash_extract_norents(ch->carrying);
-
-  char_set_gold(ch, MAX(0, char_get_gold(ch) - cost));
-
-  fprintf(fp, "%d %d %d %d %d %d\r\n", RENT_CRYO, (int)time(0), 0, char_get_gold(ch),
-          char_get_bank_gold(ch), 0);
-
-  for (j = 0; j < NUM_WEARS; j++)
-    if (char_get_equipment(ch, j))
-    {
-      if (!Crash_save(char_get_equipment(ch, j), fp, j + 1))
-      {
-        fclose(fp);
-        return;
-      }
-      Crash_restore_weight(char_get_equipment(ch, j));
-      Crash_extract_objs(char_get_equipment(ch, j));
-    }
-  if (!Crash_save(ch->carrying, fp, 0))
-  {
-    fclose(fp);
-    return;
-  }
-  fclose(fp);
-
-  Crash_extract_objs(ch->carrying);
-  char_plr_set(ch, PLR_CRYO, true);
-}
-
 /* ************************************************************************
  * Routines used for the receptionist					  *
  ************************************************************************* */
-
-static void Crash_rent_deadline(struct char_data *ch, struct char_data *recep,
-                                long cost)
-{
-  char buf[256];
-  long rent_deadline;
-
-  if (!cost)
-    return;
-
-  rent_deadline = ((char_get_gold(ch) + char_get_bank_gold(ch)) / cost);
-  snprintf(buf, sizeof(buf), "$n tells you, 'You can rent for %ld day%s with the gold you have\r\n"
-                             "on hand and in the bank.'\r\n",
-           rent_deadline, rent_deadline != 1 ? "s" : "");
-  act(buf, FALSE, recep, 0, ch, TO_VICT);
-}
-
-static int Crash_report_unrentables(struct char_data *ch, struct char_data *recep,
-                                    struct obj_data *obj)
-{
-  int has_norents = 0;
-
-  if (obj)
-  {
-    if (Crash_is_unrentable(obj))
-    {
-      char buf[128];
-
-      has_norents = 1;
-      snprintf(buf, sizeof(buf), "$n tells you, 'You cannot store %s.'", obj_shortdesc_for(obj, ch));
-      act(buf, FALSE, recep, 0, ch, TO_VICT);
-    }
-    has_norents += Crash_report_unrentables(ch, recep, obj->contains);
-    has_norents += Crash_report_unrentables(ch, recep, obj->next_content);
-  }
-  return (has_norents);
-}
-
-static void Crash_report_rent(struct char_data *ch, struct char_data *recep,
-                              struct obj_data *obj, long *cost, long *nitems, int display, int factor)
-{
-  if (obj)
-  {
-    if (!Crash_is_unrentable(obj))
-    {
-      (*nitems)++;
-      *cost += MAX(0, (obj_get_cost_per_day(obj) * factor));
-      if (display)
-      {
-        char buf[256];
-
-        snprintf(buf, sizeof(buf), "$n tells you, '%5d zenni for %s..'", obj_get_cost_per_day(obj) * factor, obj_shortdesc_for(obj, ch));
-        act(buf, FALSE, recep, 0, ch, TO_VICT);
-      }
-    }
-    Crash_report_rent(ch, recep, obj->contains, cost, nitems, display, factor);
-    Crash_report_rent(ch, recep, obj->next_content, cost, nitems, display, factor);
-  }
-}
-
-static int Crash_offer_rent(struct char_data *ch, struct char_data *recep,
-                            int display, int factor)
-{
-  int i;
-  long totalcost = 0, numitems = 0, norent;
-
-  norent = Crash_report_unrentables(ch, recep, ch->carrying);
-  for (i = 0; i < NUM_WEARS; i++)
-    norent += Crash_report_unrentables(ch, recep, char_get_equipment(ch, i));
-
-  if (norent)
-    return (0);
-
-  totalcost = CONFIG_MIN_RENT_COST * factor;
-
-  Crash_report_rent(ch, recep, ch->carrying, &totalcost, &numitems, display, factor);
-
-  for (i = 0; i < NUM_WEARS; i++)
-    Crash_report_rent(ch, recep, char_get_equipment(ch, i), &totalcost, &numitems, display, factor);
-
-  if (!numitems)
-  {
-    act("$n tells you, 'But you are not carrying anything!  Just quit!'",
-        FALSE, recep, 0, ch, TO_VICT);
-    return (0);
-  }
-  if (numitems > CONFIG_MAX_OBJ_SAVE)
-  {
-    char buf[256];
-
-    snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, but I cannot store more than %d items.'", CONFIG_MAX_OBJ_SAVE);
-    act(buf, FALSE, recep, 0, ch, TO_VICT);
-    return (0);
-  }
-  if (display)
-  {
-    char buf[256];
-
-    snprintf(buf, sizeof(buf), "$n tells you, 'Plus, my %d zenni fee..'", CONFIG_MIN_RENT_COST * factor);
-    act(buf, FALSE, recep, 0, ch, TO_VICT);
-
-    snprintf(buf, sizeof(buf), "$n tells you, 'For a total of %ld zenni.'", totalcost);
-    act(buf, FALSE, recep, 0, ch, TO_VICT);
-
-    if (totalcost > char_get_gold(ch) + char_get_bank_gold(ch))
-    {
-      act("$n tells you, '...which I see you can't afford.'", FALSE, recep, 0, ch, TO_VICT);
-      return (0);
-    }
-    else if (factor == RENT_FACTOR)
-      Crash_rent_deadline(ch, recep, totalcost);
-  }
-  return (totalcost);
-}
-
-static int gen_receptionist(struct char_data *ch, struct char_data *recep,
-                            int cmd, char *arg, int mode)
-{
-  int cost;
-  const char *action_table[] = {"smile", "dance", "sigh", "blush", "burp",
-                                "cough", "fart", "twiddle", "yawn"};
-
-  if (!cmd && !rand_number(0, 5))
-  {
-    do_action(recep, NULL, find_command(action_table[rand_number(0, 8)]), 0);
-    return (FALSE);
-  }
-
-  if (!ch->desc || char_is_npc(ch))
-    return (FALSE);
-
-  if (!CMD_IS("offer") && !CMD_IS("rent"))
-    return (FALSE);
-
-  if (!char_is_awake(recep))
-  {
-    send_to_char(ch, "%s is unable to talk to you...\r\n", char_hssh(recep));
-    return (TRUE);
-  }
-
-  if (!char_can_see(recep, ch))
-  {
-    act("$n says, 'I don't deal with people I can't see!'", FALSE, recep, 0, 0, TO_ROOM);
-    return (TRUE);
-  }
-
-  if (CONFIG_FREE_RENT)
-  {
-    act("$n tells you, 'Rent is free here.  Just quit, and your objects will be saved!'",
-        FALSE, recep, 0, ch, TO_VICT);
-    return (1);
-  }
-
-  if (CMD_IS("rent"))
-  {
-    char buf[128];
-
-    if (!(cost = Crash_offer_rent(ch, recep, FALSE, mode)))
-      return (TRUE);
-    if (mode == RENT_FACTOR)
-      snprintf(buf, sizeof(buf), "$n tells you, 'Rent will cost you %d zenni per day.'", cost);
-    else if (mode == CRYO_FACTOR)
-      snprintf(buf, sizeof(buf), "$n tells you, 'It will cost you %d zenni to be frozen.'", cost);
-    act(buf, FALSE, recep, 0, ch, TO_VICT);
-
-    if (cost > char_get_gold(ch) + char_get_bank_gold(ch))
-    {
-      act("$n tells you, '...which I see you can't afford.'",
-          FALSE, recep, 0, ch, TO_VICT);
-      return (TRUE);
-    }
-    if (cost && (mode == RENT_FACTOR))
-      Crash_rent_deadline(ch, recep, cost);
-
-    if (mode == RENT_FACTOR)
-    {
-      act("$n stores your belongings and helps you into your private chamber.", FALSE, recep, 0, ch, TO_VICT);
-      Crash_rentsave(ch, cost);
-      mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has rented (%d/day, %d tot.)",
-             char_get_name(ch), cost, char_get_gold(ch) + char_get_bank_gold(ch));
-    }
-    else
-    { /* cryo */
-      act("$n stores your belongings and helps you into your private chamber.\r\n"
-          "A white mist appears in the room, chilling you to the bone...\r\n"
-          "You begin to lose consciousness...",
-          FALSE, recep, 0, ch, TO_VICT);
-      Crash_cryosave(ch, cost);
-      mudlog(NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has cryo-rented.", char_get_name(ch));
-      char_plr_set(ch, PLR_CRYO, true);
-    }
-
-    act("$n helps $N into $S private chamber.", FALSE, recep, 0, ch, TO_NOTVICT);
-
-    extract_char(ch); /* It saves. */
-  }
-  else
-  {
-    Crash_offer_rent(ch, recep, TRUE, mode);
-    act("$N gives $n an offer.", FALSE, ch, 0, recep, TO_ROOM);
-  }
-  return (TRUE);
-}
-
-SPECIAL(receptionist)
-{
-  return (gen_receptionist(ch, (struct char_data *)me, cmd, argument, RENT_FACTOR));
-}
-
-SPECIAL(cryogenicist)
-{
-  return (gen_receptionist(ch, (struct char_data *)me, cmd, argument, CRYO_FACTOR));
-}
 
 void Crash_save_all(void)
 {
@@ -1131,7 +762,7 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
 {
   char buf2[MAX_STRING_LENGTH];
   char line[256];
-  int t[30], danger, zwei = 0, num_of_days;
+  int t[30], zwei = 0, num_of_days;
   int orig_rent_code;
   struct obj_data *temp;
   int locate = 0, j, nr, k, cost, num_objs = 0;
@@ -1313,7 +944,6 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
             if (j >= MAX_OBJ_AFFECT)
             {
               log("SYSERR: Too many object affectations in loading rent file");
-              danger = 1;
             }
             get_line(fl, line);
             sscanf(line, "%d %d %d", t, t + 1, t + 2);
@@ -1338,7 +968,6 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
             if (j >= SPELLBOOK_SIZE)
             {
               log("SYSERR: Too many spells in spellbook loading rent file");
-              danger = 1;
             }
             get_line(fl, line);
             sscanf(line, "%d %d", t, t + 1);

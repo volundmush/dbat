@@ -26,8 +26,6 @@
 struct spell_info_type spell_info[SKILL_TABLE_SIZE];
 
 /* local functions */
-void say_spell(struct char_data *ch, int spellnum, struct char_data *tch, struct obj_data *tobj);
-int mag_manacost(struct char_data *ch, int spellnum);
 void mag_nextstrike(int level, struct char_data *caster, int spellnum);
 
 void unused_spell(int spl);
@@ -83,62 +81,6 @@ struct syllable syls[] = {
 
 const char *unused_spellname = "!UNUSED!"; /* So we can get &unused_spellname */
 
-int mag_manacost(struct char_data *ch, int spellnum)
-{
-  int whichclass, i, min, tval;
-  if (CONFIG_ALLOW_MULTICLASS) {
-    /* find the cheapest class to cast it */
-    min = MAX(SINFO.mana_max - (SINFO.mana_change *
-	      (char_get_level(ch) - SINFO.min_level[(int) char_get_class_ranks(ch, char_get_class(ch))])),
-	     SINFO.mana_min);
-    whichclass = char_get_class(ch);
-    for (i = 0; i < NUM_CLASSES; i++) {
-      if (char_get_class_ranks(ch, i) == 0)
-        continue;
-      tval = MAX(SINFO.mana_max - (SINFO.mana_change *
-	         (char_get_class_ranks(ch, i) - SINFO.min_level[i])),
-	         SINFO.mana_min);
-      if (tval < min) {
-        min = tval;
-        whichclass = i;
-      }
-    }
-    return min;
-  } else {
-  return MAX(SINFO.mana_max - (SINFO.mana_change *
-		    (char_get_level(ch) - SINFO.min_level[(int) char_get_class(ch)])),
-	     SINFO.mana_min);
-  }
-}
-
-
-int mag_kicost(struct char_data *ch, int spellnum)
-{
-  int whichclass, i, min, tval;
-  if (CONFIG_ALLOW_MULTICLASS) {
-    /* find the cheapest class to cast it */
-    min = MAX(SINFO.ki_max - (SINFO.ki_change *
-              (char_get_level(ch) - SINFO.min_level[(int) char_get_class_ranks(ch, char_get_class(ch))])),
-             SINFO.ki_min);
-    whichclass = char_get_class(ch);
-    for (i = 0; i < NUM_CLASSES; i++) {
-      if (char_get_class_ranks(ch, i) == 0)
-        continue;
-      tval = MAX(SINFO.ki_max - (SINFO.ki_change *
-                 (char_get_class_ranks(ch, i) - SINFO.min_level[i])),
-                 SINFO.ki_min);
-      if (tval < min) {
-        min = tval;
-        whichclass = i;
-      }
-    }
-    return min;
-  } else {
-  return MAX(SINFO.ki_max - (SINFO.ki_change *
-                    (char_get_level(ch) - SINFO.min_level[(int) char_get_class(ch)])),
-             SINFO.ki_min);
-  }
-}
 
 
 void mag_nextstrike(int level, struct char_data *caster, int spellnum)
@@ -146,64 +88,6 @@ void mag_nextstrike(int level, struct char_data *caster, int spellnum)
 
 }
 
-
-void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
-	            struct obj_data *tobj)
-{
-  char lbuf[256], buf[256], buf1[256], buf2[256];	/* FIXME */
-  const char *format;
-
-  struct char_data *i;
-  int j, ofs = 0;
-
-  *buf = '\0';
-  strlcpy(lbuf, skill_name(spellnum), sizeof(lbuf));
-
-  while (lbuf[ofs]) {
-    for (j = 0; *(syls[j].org); j++) {
-      if (!strncmp(syls[j].org, lbuf + ofs, strlen(syls[j].org))) {
-	strcat(buf, syls[j].news);	/* strcat: BAD */
-	ofs += strlen(syls[j].org);
-        break;
-      }
-    }
-    /* i.e., we didn't find a match in syls[] */
-    if (!*syls[j].org) {
-      log("No entry in syllable table for substring of '%s'", lbuf);
-      ofs++;
-    }
-  }
-
-  if (tch != NULL && char_get_in_room(tch) == char_get_in_room(ch)) {
-    if (tch == ch)
-      format = "$n closes $s eyes and utters the words, '%s'.";
-    else
-      format = "$n stares at $N and utters the words, '%s'.";
-  } else if (tobj != NULL &&
-	     ((obj_get_in_room(tobj) == char_get_in_room(ch)) || (tobj->carried_by == ch)))
-    format = "$n stares at $p and utters the words, '%s'.";
-  else
-    format = "$n utters the words, '%s'.";
-
-  snprintf(buf1, sizeof(buf1), format, skill_name(spellnum));
-  snprintf(buf2, sizeof(buf2), format, buf);
-
-  for (i = world[char_get_in_room(ch)].people; i; i = i->next_in_room) {
-    if (i == ch || i == tch || !i->desc || !char_is_awake(i))
-      continue;
-    /* This should really check spell type vs. target ranks */
-    if (char_get_class_ranks(i, char_get_class(ch)) || char_get_admlevel(i) >= ADMLVL_IMMORT)
-      perform_act(buf1, ch, tobj, tch, i);
-    else
-      perform_act(buf2, ch, tobj, tch, i);
-  }
-
-  if (tch != NULL && tch != ch && char_get_in_room(tch) == char_get_in_room(ch)) {
-    snprintf(buf1, sizeof(buf1), "$n stares at you and utters the words, '%s'.",
-	    char_get_class_ranks(tch, char_get_class(ch)) ? skill_name(spellnum) : buf);
-    act(buf1, FALSE, ch, NULL, tch, TO_VICT);
-  }
-}
 
 /*
  * This function should be used anytime you are not 100% sure that you have
@@ -472,21 +356,21 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
   if (!consume_otrigger(obj, ch, OCMD_QUAFF))  /* check trigger */
     return;
  
-    act("You swallow $p.", FALSE, ch, obj, NULL, TO_CHAR);
-    if (obj->action_description)
-      act(obj->action_description, FALSE, ch, obj, NULL, TO_ROOM);
-    else
-      act("$n swallows $p.", TRUE, ch, obj, NULL, TO_ROOM);
+  act("You swallow $p.", FALSE, ch, obj, NULL, TO_CHAR);
+  if (obj->action_description)
+    act(obj->action_description, FALSE, ch, obj, NULL, TO_ROOM);
+  else
+    act("$n swallows $p.", TRUE, ch, obj, NULL, TO_ROOM);
 
-    char_aff_set(ch, AFF_NEXTNOACTION, true);
-    for (i = 1; i <= 3; i++)
-      if (call_magic(ch, ch, NULL, obj_get_value(obj, i),
-		       obj_get_value(obj, VAL_POTION_LEVEL), CAST_POTION, NULL) <= 0)
-	break;
+  char_aff_set(ch, AFF_NEXTNOACTION, true);
+  for (i = 1; i <= 3; i++)
+    if (call_magic(ch, ch, NULL, obj_get_value(obj, i),
+                     obj_get_value(obj, VAL_POTION_LEVEL), CAST_POTION, NULL) <= 0)
+      break;
 
-    if (obj != NULL)
-      extract_obj(obj);
-    break;
+  if (obj != NULL)
+    extract_obj(obj);
+  break;
   default:
     log("SYSERR: Unknown object_type %d in mag_objectmagic.",
 	obj_get_type_flag(obj));
@@ -503,82 +387,6 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
  * Entry point for NPC casts.  Recommended entry point for spells cast
  * by NPCs via specprocs.
  */
-int cast_spell(struct char_data *ch, struct char_data *tch,
-	           struct obj_data *tobj, int spellnum, char *arg)
-{
-  int whichclass = -1, i, j, diff = -1, lvl = 1;
-
-  if (spellnum < 0 || spellnum >= SKILL_TABLE_SIZE) {
-    log("SYSERR: cast_spell trying to call out of range spellnum %d/%d.", spellnum,
-	SKILL_TABLE_SIZE);
-    return (0);
-  }
-
-  if (!IS_SET(SINFO.skilltype, SKTYPE_SPELL | SKTYPE_ART)) {
-    log("SYSERR: cast_spell trying to call nonspell spellnum %d/%d.", spellnum,
-	SKILL_TABLE_SIZE);
-    return (0);
-  }
-    
-  if (char_get_position(ch) < SINFO.min_position) {
-    switch (char_get_position(ch)) {
-      case POS_SLEEPING:
-      send_to_char(ch, "You dream about great magical powers.\r\n");
-      break;
-    case POS_RESTING:
-      send_to_char(ch, "You cannot concentrate while resting.\r\n");
-      break;
-    case POS_SITTING:
-      send_to_char(ch, "You can't do this sitting!\r\n");
-      break;
-    case POS_FIGHTING:
-      send_to_char(ch, "Impossible!  You can't concentrate enough!\r\n");
-      break;
-    default:
-      send_to_char(ch, "You can't do much of anything like this!\r\n");
-      break;
-    }
-    return (0);
-  }
-  if (char_aff_flagged(ch, AFF_CHARM) && (ch->master == tch)) {
-    send_to_char(ch, "You are afraid you might hurt your master!\r\n");
-    return (0);
-  }
-  if ((tch != ch) && IS_SET(SINFO.targets, TAR_SELF_ONLY)) {
-    send_to_char(ch, "You can only cast this spell upon yourself!\r\n");
-    return (0);
-  }
-  if ((tch == ch) && IS_SET(SINFO.targets, TAR_NOT_SELF)) {
-    send_to_char(ch, "You cannot cast this spell upon yourself!\r\n");
-    return (0);
-  }
-  if (IS_SET(SINFO.routines, MAG_GROUPS) && !char_aff_flagged(ch, AFF_GROUP)) {
-    send_to_char(ch, "You can't cast this spell if you're not in a group!\r\n");
-    return (0);
-  }
-
-  if (IS_SET(SINFO.skilltype, SKTYPE_SPELL)) {
-    for (i = 0; i < NUM_CLASSES; i++) {
-      j = char_get_class_ranks(ch, i) - spell_info[spellnum].min_level[i];
-      if (j > diff) {
-        whichclass = i;
-        diff = j;
-        lvl = char_get_class_ranks(ch, i);
-      }
-    }
-  } else if (IS_SET(SINFO.skilltype, SKTYPE_ART))
-    lvl = char_get_class_ranks(ch, CLASS_KABITO) / 2;
-  else
-    lvl = char_get_level(ch);
-
-  send_to_char(ch, "%s", CONFIG_OK);
-  if (IS_SET(SINFO.skilltype, SKTYPE_SPELL)) {
-    say_spell(ch, spellnum, tch, tobj);
-  }
-
-  return (call_magic(ch, tch, tobj, spellnum, lvl, CAST_SPELL, arg));
-}
-
 
 /*
  * do_cast is the entry point for PC-casted spells.  It parses the arguments,
@@ -586,262 +394,9 @@ int cast_spell(struct char_data *ch, struct char_data *tch,
  * the spell can be cast, checks for sufficient mana and subtracts it, and
  * passes control to cast_spell().
  */
-ACMD(do_cast)
-{
-  struct char_data *tch = NULL;
-  struct obj_data *tobj = NULL;
-  char *s, *t, buffer[25];
-  /* char export[256];
-  int mana, percent; */
-  int ki = 0;
-  int spellnum, i, target = 0, innate = FALSE;
-
-
-  /* get: blank, spell name, target name */
-  s = strtok(argument, "'");
-
-  if (s == NULL) {
-    if (subcmd == SCMD_ART)
-      send_to_char(ch, "Use what ability?\r\n");
-    else
-      send_to_char(ch, "Cast what where?\r\n");
-    return;
-  }
-  s = strtok(NULL, "'");
-  if (s == NULL) {
-    if (subcmd == SCMD_ART)
-      send_to_char(ch, "You must enclose the ability name in quotes: '\r\n");
-    else
-      send_to_char(ch, "Spell names must be enclosed in the Holy Magic Symbols: '\r\n");
-    return;
-  }
-  t = strtok(NULL, "\0");
-
-  /* spellnum = search_block(s, spells, 0); */
-  spellnum = find_skill_num(s, SKTYPE_SPELL| SKTYPE_ART);
-
-  sprintf(buffer, "%d", spellnum);
-
-  if (subcmd == SCMD_ART) {
-    if (!char_is_kabito(ch) && char_get_admlevel(ch) < ADMLVL_IMMORT) {
-      send_to_char(ch, "You are not trained in that.\r\n");
-      return;
-    }
-
-    if ((spellnum < 0) || (spellnum >= SKILL_TABLE_SIZE) || !(SINFO.skilltype & SKTYPE_ART) || !*s) {
-      send_to_char(ch, "I don't recognize that martial art or ability.\r\n");
-      return;
-    }
-
-    if (!char_get_skill(ch, spellnum)) {
-      send_to_char(ch, "You do not have that ability.\r\n");
-      return;
-    }
-  } else {
-    if (char_get_admlevel(ch) < ADMLVL_IMMORT) {
-      send_to_char(ch, "You are not able to cast spells.\r\n");
-      return;
-    }
-
-    if ((spellnum < 0) || (spellnum >= SKILL_TABLE_SIZE) || !(SINFO.skilltype & SKTYPE_SPELL)) {
-      send_to_char(ch, "Cast what?!?\r\n");
-      return;
-    }
-
-    /* if spell NOT memorized */
-  }
-
-  if (subcmd == SCMD_ART) {
-    ki = mag_kicost(ch, spellnum);
-    if ((ki > 0) && (char_get_ki(ch) < ki) && (char_get_admlevel(ch) < ADMLVL_IMMORT)) {
-      send_to_char(ch, "You haven't the energy to cast that spell!\r\n");
-      return;
-    }
-  }
-
-  /* Find the target */
-  if (t != NULL) {
-    char arg[MAX_INPUT_LENGTH];
-
-    strlcpy(arg, t, sizeof(arg));
-    one_argument(arg, t);
-    skip_spaces(&t);
-  }
-  if (IS_SET(SINFO.targets, TAR_IGNORE)) {
-    target = TRUE;
-  } else if (t != NULL && *t) {
-    if (!target && (IS_SET(SINFO.targets, TAR_CHAR_ROOM))) {
-      if ((tch = get_char_vis(ch, t, NULL, FIND_CHAR_ROOM)) != NULL)
-	target = TRUE;
-    }
-    if (!target && IS_SET(SINFO.targets, TAR_CHAR_WORLD))
-      if ((tch = get_char_vis(ch, t, NULL, FIND_CHAR_WORLD)) != NULL)
-	target = TRUE;
-
-    if (!target && IS_SET(SINFO.targets, TAR_OBJ_INV))
-      if ((tobj = get_obj_in_list_vis(ch, t, NULL, ch->carrying)) != NULL)
-	target = TRUE;
-
-    if (!target && IS_SET(SINFO.targets, TAR_OBJ_EQUIP)) {
-      for (i = 0; !target && i < NUM_WEARS; i++)
-	if (char_get_equipment(ch, i) && isname(t, char_get_equipment(ch, i)->name)) {
-	  tobj = char_get_equipment(ch, i);
-	  target = TRUE;
-	}
-    }
-    if (!target && IS_SET(SINFO.targets, TAR_OBJ_ROOM))
-      if ((tobj = get_obj_in_list_vis(ch, t, NULL, world[char_get_in_room(ch)].contents)) != NULL)
-	target = TRUE;
-
-    if (!target && IS_SET(SINFO.targets, TAR_OBJ_WORLD))
-      if ((tobj = get_obj_vis(ch, t, NULL)) != NULL)
-	target = TRUE;
-
-  } else {			/* if target string is empty */
-    if (!target && IS_SET(SINFO.targets, TAR_FIGHT_SELF))
-      if (char_get_fighting(ch) != NULL) {
-	tch = ch;
-	target = TRUE;
-      }
-    if (!target && IS_SET(SINFO.targets, TAR_FIGHT_VICT))
-      if (char_get_fighting(ch) != NULL) {
-	tch = char_get_fighting(ch);
-	target = TRUE;
-      }
-    /* if no target specified, and the spell isn't violent, default to self */
-    if (!target && IS_SET(SINFO.targets, TAR_CHAR_ROOM) &&
-	!SINFO.violent) {
-      tch = ch;
-      target = TRUE;
-    }
-    if (!target) {
-      send_to_char(ch, "Upon %s should the spell be cast?\r\n",
-		IS_SET(SINFO.targets, TAR_OBJ_ROOM | TAR_OBJ_INV | TAR_OBJ_WORLD | TAR_OBJ_EQUIP) ? "what" : "who");
-      return;
-    }
-  }
-
-  if (target && (tch == ch) && SINFO.violent) {
-    send_to_char(ch, "You shouldn't cast that on yourself -- could be bad for your health!\r\n");
-    return;
-  }
-
-  if (!target) {
-    send_to_char(ch, "Cannot find the target of your spell!\r\n");
-    return;
-  }
-
-  if(is_innate(ch, spellnum))
-    innate = TRUE;
-
-  if (SINFO.violent && tch && char_is_npc(tch)) {
-    if (!char_get_fighting(tch))
-      set_fighting(tch, ch);
-    if (!char_get_fighting(ch))
-      set_fighting(ch, tch);
-  }
-
-  if (IS_SET(SINFO.comp_flags, MAGCOMP_SOMATIC) && rand_number(1, 100) <= 0) {
-    if (IS_SET(SINFO.routines, MAG_ACTION_FULL | MAG_ACTION_PARTIAL))
-      char_aff_set(ch, AFF_NEXTPARTIAL, true);
-    else if (IS_SET(SINFO.routines, MAG_ACTION_FULL | MAG_ACTION_FULL))
-      char_aff_set(ch, AFF_NEXTNOACTION, true);
-    send_to_char(ch, "Your armor interferes with your casting, and you fail!\r\n");
-  } else {
-    if (ki > 0)
-      char_set_ki(ch, MAX(0, MIN(char_get_max_ki(ch), char_get_ki(ch) - ki)));
-    if (cast_spell(ch, tch, tobj, spellnum, t) && char_get_admlevel(ch) < ADMLVL_IMMORT) {
-      if (IS_SET(SINFO.routines, MAG_ACTION_FULL | MAG_ACTION_PARTIAL))
-        char_aff_set(ch, AFF_NEXTPARTIAL, true);
-      else if (IS_SET(SINFO.routines, MAG_ACTION_FULL | MAG_ACTION_FULL))
-        char_aff_set(ch, AFF_NEXTNOACTION, true);
-      if (subcmd == SCMD_CAST) {
-        send_to_char(ch, "The magical energy from the spell leaves your mind.\r\n");
-        if (char_prf_flagged(ch, PRF_AUTOMEM)) {
-          send_to_char(ch, "You begin to commit the spell again to your mind.\r\n");
-        }
-      }
-    }
-  }
-}
-
-void skill_race_class(int spell, int race, int learntype)
-{
-  int bad = 0;
-
-  if (spell < 0 || spell >= SKILL_TABLE_SIZE) {
-    log("SYSERR: attempting assign to illegal spellnum %d/%d", spell, SKILL_TABLE_SIZE);
-    return;
-  }
-
-  if (race < 0 || race >= NUM_RACES) {
-    log("SYSERR: assigning '%s' to illegal race %d/%d.", skill_name(spell),
-                race, NUM_RACES - 1);
-    bad = 1;
-  }
-
-  if (!bad)
-    spell_info[spell].race_can_learn[race] = learntype;
-}
-
-void spell_level(int spell, int chclass, int level)
-{
-  int bad = 0;
-
-  if (spell < 0 || spell > SKILL_TABLE_SIZE) {
-    log("SYSERR: attempting assign to illegal spellnum %d/%d", spell, SKILL_TABLE_SIZE);
-    return;
-  }
-
-  if (chclass < 0 || chclass >= NUM_CLASSES) {
-    log("SYSERR: assigning '%s' to illegal class %d/%d.", skill_name(spell),
-		chclass, NUM_CLASSES - 1);
-    bad = 1;
-  }
-
-  if (level < 1) {
-    log("SYSERR: assigning '%s' to illegal level %d.", skill_name(spell),
-		level);
-    bad = 1;
-  }
-
-  if (!bad)    
-    spell_info[spell].min_level[chclass] = level;
-}
-
-void skill_class(int skill, int chclass, int learntype)
-{
-  int bad = 0;
-
-  if (skill < 0 || skill > SKILL_TABLE_SIZE) {
-    log("SYSERR: attempting assign to illegal skillnum %d/%d", skill, SKILL_TABLE_SIZE);
-    return;
-  }
-
-  if (chclass < 0 || chclass >= NUM_CLASSES) {
-    log("SYSERR: assigning '%s' to illegal class %d/%d.", skill_name(skill),
-                chclass, NUM_CLASSES - 1);
-    bad = 1;
-  }
-
-  if (learntype < 0 || learntype > SKLEARN_CLASS) {
-    log("SYSERR: assigning skill '%s' illegal learn type %d for class %d.", skill_name(skill),
-                learntype, chclass);
-    bad = 1;
-  }
-
-  if (!bad)
-    spell_info[skill].can_learn_skill[chclass] = learntype;
-}
-
 int skill_type(int snum)
 {
   return spell_info[snum].skilltype;
-}
-
-void set_skill_type(int snum, int sktype)
-{
-  spell_info[snum].skilltype = sktype;
 }
 
 
@@ -875,15 +430,6 @@ void spello(int spl, const char *name, int max_mana, int min_mana, int mana_chan
   spell_info[spl].domain = domain;
 }
 
-
-void arto(int spl, const char *name, int max_ki, int min_ki, int ki_change, int minpos, int targets, int violent, int routines, int save_flags, int comp_flags, const char *wearoff)
-{
-  spello(spl, name, 0, 0, 0, minpos, targets, violent, routines, save_flags, comp_flags, wearoff, 0, 0, 0);
-  set_skill_type(spl, SKTYPE_ART);
-  spell_info[spl].ki_max = max_ki;
-  spell_info[spl].ki_min = min_ki;
-  spell_info[spl].ki_change = ki_change;
-}
 
 
 void unused_spell(int spl)

@@ -339,19 +339,6 @@ struct obj_data *find_vehicle_by_vnum(int vnum)
   return 0;
 }
 
-struct obj_data *find_hatch_by_vnum(int vnum)
-{
-  extern struct obj_data * object_list;
-  struct obj_data * i;
-
-  for (i = object_list; i; i = i->next)
-    if (obj_get_type_flag(i) == ITEM_HATCH)
-      if (obj_get_vnum(i) == vnum)
-        return i;
-
-  return 0;
-}
-
 /* Search the given list for an object type, and return a ptr to that obj*/
 struct obj_data *get_obj_in_list_type(int type, struct obj_data *list)
 {
@@ -413,7 +400,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
     is_in = obj_get_in_room(vehicle);
     if (ch->desc != NULL)
           act("", TRUE, ch, 0, 0, TO_ROOM);
-          send_to_char(ch, "@wThe ship flies onward:\r\n");
+    send_to_char(ch, "@wThe ship flies onward:\r\n");
         look_at_room(obj_get_in_room(vehicle), ch, 0);
     sprintf(buf, "%s @wenters.\r\n", vehicle->short_description);
     send_to_room(is_in, "%s", buf);
@@ -441,9 +428,9 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle)
 		
         if (ch->desc != NULL)
           act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", TRUE, ch, 0, 0, TO_ROOM);
-          send_to_char(ch, "@wThe ship flies onward:\r\n");
-          look_at_room(obj_get_in_room(vehicle), ch, 0);
-          int door;
+        send_to_char(ch, "@wThe ship flies onward:\r\n");
+        look_at_room(obj_get_in_room(vehicle), ch, 0);
+        int door;
          for (door = 0; door < NUM_OF_DIRS; door++) {
           if (char_can_go(ch, door)) {
            send_to_room(world[char_get_in_room(ch)].dir_option[door]->to_room, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
@@ -994,7 +981,6 @@ ACMD(do_drive)
          }
         return;
        }
-       char blah[MAX_INPUT_LENGTH];
        int land_location = 50;
        if (obj_get_vnum(vehicle) > 46099) {
         if (strcasecmp(arg2, "1") && strcasecmp(arg2, "2") && strcasecmp(arg2, "3") && strcasecmp(arg2, "4")) {
@@ -1447,39 +1433,6 @@ ACMD(do_drive)
       send_to_char(ch, "[  southeast/se/southe  |  southwest/sw/southw]\r\n");
       send_to_char(ch, "[  into  |  onto  |  inside  |  outside  ]@n\r\n");
       send_to_char(ch, "[ land | launch ]@n\r\n");
-    }
-   }
-  }
-}
-
-ACMD(do_ship_fire)
-{
- struct obj_data *vehicle, *controls;
- char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-
- two_arguments(argument, arg1, arg2);
-
-  if (!(controls = find_control(ch))) {
-   send_to_char(ch,"@wYou must be near the comm station in the cockpit.\r\n");
-   return;
-  }
-
-  if (!(vehicle = find_vehicle_by_vnum(obj_get_value(controls, 0))) ) {
-   send_to_char(ch, "@wSomething cosmic is jamming your signal! Quick call Iovan to repair it!\r\n");
-   return;
-  }
-
-  struct obj_data *obj = NULL, *obj2 = NULL, *next_obj = NULL;
-  int shot = FALSE;
-
-  for (obj = world[char_get_in_room(ch)].contents; obj; obj = next_obj) {
-     next_obj = obj->next_content;
-   if (shot == FALSE) {
-    if (obj_get_type_flag(obj) == ITEM_VEHICLE && obj != vehicle) {
-     if (!strcasecmp(arg1, obj->name)) {
-      obj2 = obj;
-      shot = TRUE;
-     }
     }
    }
   }

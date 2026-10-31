@@ -24,80 +24,13 @@
 #include "dbat/act.social.h"
 #include "dbat/spec_procs.h"
 #include "dbat/class.h"
-#include "dbat/shops.h"
 
 
 /* local functions */
 int player_present(struct char_data *ch);
 
-bool aggressive_mob_on_a_leash(struct char_data *slave, struct char_data *master, struct char_data *attack);
-void mob_absorb(struct char_data *ch, struct char_data *vict);
 
 #define MOB_AGGR_TO_ALIGN (MOB_AGGR_EVIL | MOB_AGGR_NEUTRAL | MOB_AGGR_GOOD)
-
-void mob_absorb(struct char_data *ch, struct char_data *vict)
-{
-
- if (char_get_absorbing(ch)) {
-  act("@R$n@w releases YOU from $s grip!@n", TRUE, ch, 0, char_get_absorbing(ch), TO_VICT);
-  act("@R$n@w releases @R$N@w from $s grip!@n", TRUE, ch, 0, char_get_absorbing(ch), TO_NOTVICT);
-  char_set_absorbby(char_get_absorbing(ch), NULL);
-  char_set_absorbing(ch, NULL);
-  return;
- }
- 
- int zanzo = FALSE, roll = 0, chance = char_get_level(ch) * 0.5, chance2 = char_get_level(ch) + 10;
-
-  if (chance2 > 118)
-   chance2 = 118;
-
-  if (char_get_level(ch) < 2)
-    return;
-  else
-   roll = rand_number(chance, chance2);
-
-  if (!vict)
-   return;
-
-  if (char_is_android(vict))
-   return;
-
-  if (char_aff_flagged(vict, AFF_ZANZOKEN)) {
-   if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
-    if (char_get_speedi(ch) < char_get_speedi(vict)) {
-     zanzo = TRUE;
-    } else {
-     char_aff_set(ch, AFF_ZANZOKEN, false);
-    }
-   } else {
-    zanzo = TRUE;
-   }
-   if (zanzo == TRUE) {
-    act("@R$n@c tries to grab @RYOU@c but you @Czanzoken@c out of the way!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@R$n@ctries to grab @R$N@c but $E @Czanzokens@c out of the way!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    char_aff_set(ch, AFF_ZANZOKEN, false);
-    char_aff_set(vict, AFF_ZANZOKEN, false);
-    return;
-   } else {
-    act("@cYou try to @Czanzoken@c out of @R$n's@c reach, but $e is too fast!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@c$N tries to @Czanzoken@c out of @R$n's@c reach, but $e is too fast!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    char_aff_set(vict, AFF_ZANZOKEN, false);
-   }
-  }
-
-  if (roll < check_def(vict)) {
-   act("@R$n@r tries to grab YOU, but you manage to evade $s grasp!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@R$n@r tries to grab @R$N@r, but @R$N@r manages to evade!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-   return;
-  } else {
-   act("@R$n@r grabs onto YOU and starts to absorb your energy!@n", TRUE, ch, 0, vict, TO_VICT);
-   act("@R$n@r grabs onto @R$N@r and starts to absorb your energy!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-   char_set_absorbing(ch, vict);
-   char_set_absorbby(vict, ch);
-   return;
-  }
-
-}
 
 int player_present(struct char_data *ch)
 {
@@ -746,29 +679,6 @@ void remember(struct char_data *ch, struct char_data *victim)
 
 
 /* make ch forget victim */
-void forget(struct char_data *ch, struct char_data *victim)
-{
-  memory_rec *curr, *prev = NULL;
-
-  if (!(curr = char_get_mob_specials_memory(ch)))
-    return;
-
-  while (curr && curr->id != char_get_idnum(victim)) {
-    prev = curr;
-    curr = curr->next;
-  }
-
-  if (!curr)
-    return;			/* person wasn't there at all. */
-
-  if (curr == char_get_mob_specials_memory(ch))
-    char_set_mob_specials_memory(ch, curr->next);
-  else
-    prev->next = curr->next;
-
-  free(curr);
-}
-
 
 /* erase ch's memory */
 void clearMemory(struct char_data *ch)
@@ -793,34 +703,3 @@ void clearMemory(struct char_data *ch)
  * see if their master can talk them out of it, eye them
  * down, or otherwise intimidate the slave.
  */
-bool aggressive_mob_on_a_leash(struct char_data *slave, struct char_data *master, struct char_data *attack)
-{
-  static int snarl_cmd;
-  int dieroll;
-
-  if (!master || !char_aff_flagged(slave, AFF_CHARM))
-    return (FALSE);
-
-  if (!snarl_cmd)
-    snarl_cmd = find_command("snarl");
-
-  /* Sit. Down boy! HEEEEeeeel! */
-  dieroll = rand_number(1, 20);
-  if (dieroll != 1 && (dieroll == 20 || dieroll > 10 - char_get_aff_abils_cha(master) + char_get_aff_abils_intel(slave))) {
-    if (snarl_cmd > 0 && attack && !rand_number(0, 3)) {
-      char victbuf[MAX_NAME_LENGTH + 1];
-
-      strncpy(victbuf, char_get_name(attack), sizeof(victbuf));	/* strncpy: OK */
-      victbuf[sizeof(victbuf) - 1] = '\0';
-
-      do_action(slave, victbuf, snarl_cmd, 0);
-    }
-
-    /* Success! But for how long? Hehe. */
-    return (TRUE);
-  }
-
-  /* So sorry, now you're a player killer... Tsk tsk. */
-  return (FALSE);
-}
-

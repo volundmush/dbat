@@ -5561,8 +5561,7 @@ ACMD(do_baku)
      }
 
      switch (count) {
-       case 1:
-        dmg = dmg;
+       case 1: /* full damage */
         break;
        case 2:
         dmg = (dmg / 100) * 75;

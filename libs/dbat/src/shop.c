@@ -11,7 +11,6 @@
 /***
  * The entire shop rewrite for Circle 3.0 was done by Jeff Fink.  Thanks Jeff!
  ***/
-#include "dbat/shops.h"
 #include "dbat/shop.h"
 #include "dbat/comm.h"
 #include "dbat/handler.h"
@@ -1240,10 +1239,10 @@ static void shopping_list(char *arg, struct char_data *ch, struct char_data *kee
       if (len < sizeof(buf)) {
         strncat(buf, list_object(last_obj, cnt, lindex, shop_nr, keeper, ch), sizeof(buf) - len - 1);	/* strncat: OK */
       }
-      if (len < sizeof(buf)) {
-       sprintf(zen, "@W[@wYour Zenni@D: @Y%s@W]", add_commas(char_get_gold(ch)));
-       strncat(buf, zen, sizeof(buf) - len - 1);
-      }
+    if (len < sizeof(buf)) {
+     sprintf(zen, "@W[@wYour Zenni@D: @Y%s@W]", add_commas(char_get_gold(ch)));
+     strncat(buf, zen, sizeof(buf) - len - 1);
+    }
     page_string(ch->desc, buf, TRUE);
   }
 }
@@ -1317,31 +1316,6 @@ SPECIAL(shop_keeper)
     return (TRUE);
   }
   return (FALSE);
-}
-
-int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim)
-{
-  int sindex;
-
-  if (!char_is_mob(victim) || mob_index[char_get_nr(victim)].func != shop_keeper)
-    return (TRUE);
-
-  /* Prevent "invincible" shopkeepers if they're charmed. */
-  if (char_aff_flagged(victim, AFF_CHARM))
-    return (TRUE);
-
-  for (sindex = 0; sindex <= top_shop; sindex++)
-    if (char_get_nr(victim) == SHOP_KEEPER(sindex) && !SHOP_KILL_CHARS(sindex)) {
-      char buf[MAX_INPUT_LENGTH];
-
-      snprintf(buf, sizeof(buf), "%s %s", char_get_name(ch), MSG_CANT_KILL_KEEPER);
-      do_tell(victim, buf, cmd_tell, 0);
-
-      do_action(victim, char_get_name(ch), cmd_slap, 0);
-      return (FALSE);
-    }
-
-  return (TRUE);
 }
 
 /* val == obj_vnum and obj_rnum (?) */

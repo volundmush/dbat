@@ -6,7 +6,7 @@
  *  Made for Oasis OLC                                                   *
  *  Copyright 1996 Harvey Gilpin.                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#include "dbat/guilds.h"
+#include "dbat/guild.h"
 #include "dbat/config.h"
 
 #include "dbat/gedit.h"
@@ -480,7 +480,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
 						write_to_output(d, "Guild %d saved to disk.\r\n", OLC_NUM(d));
 					} else
 						write_to_output(d, "Guild %d saved to memory.\r\n", OLC_NUM(d));
-						cleanup_olc(d, CLEANUP_STRUCTS);
+                                        cleanup_olc(d, CLEANUP_STRUCTS);
 			        return;
 				case 'n':
 				case 'N':

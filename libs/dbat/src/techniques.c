@@ -90,7 +90,6 @@ bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, obj_data 
 
 void tech_handle_fireshield(char_data *ch, char_data *vict, const char* part) {
 
-    const char *msg = part ? part : "body";
     if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
         char msg[MAX_INPUT_LENGTH];
         snprintf(msg, sizeof(msg), "@c$N's@W fireshield burns your %s!@n", msg);
