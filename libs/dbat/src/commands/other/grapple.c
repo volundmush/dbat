@@ -793,7 +793,7 @@ ACMD(do_steal)
 
   if (!char_get_skill(ch, SKILL_SLEIGHT_OF_HAND) && slot_count(ch) + 1 <= char_get_skill_slots(ch)) {
     send_to_char(ch, "You learn the very veeeery basics of theft. Which is don't get caught.\r\n");
-    SET_SKILL(ch, SKILL_SLEIGHT_OF_HAND, 1);
+    char_set_skills_base(ch, SKILL_SLEIGHT_OF_HAND, 1);
   } else if (!char_get_skill(ch, SKILL_SLEIGHT_OF_HAND) && slot_count(ch) + 1 > char_get_skill_slots(ch)) {
     send_to_char(ch, "You can't learn any more skills and thus can not steal right now!\r\n");
     return;

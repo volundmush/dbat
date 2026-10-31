@@ -3582,7 +3582,7 @@ void improve_skill(struct char_data *ch, int skill, int num)
 
   newpercent = 1;
   percent += newpercent;
-  SET_SKILL(ch, skill, percent);
+  char_set_skills_base(ch, skill, percent);
   if (newpercent >= 1) {
     sprintf(skillbuf, "@WYou feel you have learned something new about @G%s@W.@n\r\n", spell_info[skill].name);
     send_to_char(ch, "%s", skillbuf);
@@ -3592,7 +3592,7 @@ void improve_skill(struct char_data *ch, int skill, int num)
         send_to_char(ch, "You can now choose a perfection for this skill (help perfection).\r\n");
       }
       if (char_is_konatsu(ch) && skill == SKILL_PARRY) {
-        SET_SKILL(ch, skill, char_get_skills_base(ch, skill) + 5);
+        char_set_skills_base(ch, skill, char_get_skills_base(ch, skill) + 5);
       }
       if (char_get_level(ch) < 100) {
         char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) / 20));
@@ -4732,7 +4732,7 @@ double char_get_lifebonuses(struct char_data *ch)
 
 int char_get_skill(const struct char_data *ch, int i)
 {
-  return ((ch)->skills[i].base + char_get_skills_mod(ch, i));
+  return char_get_skills_base(ch, i) + char_get_skills_mod(ch, i);
 }
 
 spec_proc_func char_get_mob_spec(const struct char_data *ch)
@@ -6605,29 +6605,54 @@ void char_set_lastint(struct char_data *ch, time_t v)
   ch->lastint = v;
 }
 
+/* The skills table lives in player_specials and covers ids SKILL_FIRST..SKILL_TABLE_SIZE-1. NPCs share the
+ * dummy player_specials and have no skills: reads give 0 and writes are ignored. */
+static struct skill_data *skill_slot(const struct char_data *ch, int i)
+{
+  if (char_is_npc(ch) || !ch->player_specials || ch->player_specials == &dummy_mob)
+    return NULL;
+  if (i < SKILL_FIRST || i >= SKILL_TABLE_SIZE)
+    return NULL;
+  return &ch->player_specials->skills[i - SKILL_FIRST];
+}
+
 int8_t char_get_skills_mod(const struct char_data *ch, int i)
 {
-  return ch->skills[i].mod;
+  struct skill_data *s = skill_slot(ch, i);
+  return s ? s->mod : 0;
+}
+
+void char_set_skills_mod(struct char_data *ch, int i, int8_t v)
+{
+  struct skill_data *s = skill_slot(ch, i);
+  if (s)
+    s->mod = v;
 }
 
 int8_t char_get_skills_perf(const struct char_data *ch, int i)
 {
-  return ch->skills[i].perf;
+  struct skill_data *s = skill_slot(ch, i);
+  return s ? s->perf : 0;
 }
 
 void char_set_skills_perf(struct char_data *ch, int i, int8_t v)
 {
-  ch->skills[i].perf = v;
+  struct skill_data *s = skill_slot(ch, i);
+  if (s)
+    s->perf = v;
 }
 
 int8_t char_get_skills_base(const struct char_data *ch, int i)
 {
-  return ch->skills[i].base;
+  struct skill_data *s = skill_slot(ch, i);
+  return s ? s->base : 0;
 }
 
 void char_set_skills_base(struct char_data *ch, int i, int8_t v)
 {
-  ch->skills[i].base = v;
+  struct skill_data *s = skill_slot(ch, i);
+  if (s)
+    s->base = v;
 }
 
 bitvector_t *char_get_bodyparts(const struct char_data *ch)

@@ -499,18 +499,18 @@ int enter_player_game(struct descriptor_data *d)
 
   if (char_is_icer(d->character) && !char_get_skill(d->character, SKILL_TAILWHIP)) {
     int numb = rand_number(20, 30);
-    SET_SKILL(d->character, SKILL_TAILWHIP, numb);
+    char_set_skills_base(d->character, SKILL_TAILWHIP, numb);
   } else if (!char_is_icer(d->character) && char_get_skill(d->character, SKILL_TAILWHIP)) {
-    SET_SKILL(d->character, SKILL_TAILWHIP, 0);
+    char_set_skills_base(d->character, SKILL_TAILWHIP, 0);
   }
 
   if (char_is_mutant(d->character) && (char_get_genome(d->character, 0) == 9 || char_get_genome(d->character, 1) == 9) && !char_get_skill(d->character, SKILL_TELEPATHY)) {
-    SET_SKILL(d->character, SKILL_TELEPATHY, 50);
+    char_set_skills_base(d->character, SKILL_TELEPATHY, 50);
   }
 
   if (char_is_bio(d->character) && (char_get_genome(d->character, 0) == 7 || char_get_genome(d->character, 1) == 7) && !char_get_skill(d->character, SKILL_TELEPATHY) && !char_get_skill(d->character, SKILL_FOCUS)) {
-    SET_SKILL(d->character, SKILL_TELEPATHY, 30);
-    SET_SKILL(d->character, SKILL_FOCUS, 30);
+    char_set_skills_base(d->character, SKILL_TELEPATHY, 30);
+    char_set_skills_base(d->character, SKILL_FOCUS, 30);
   }
 
   char_set_combo(d->character, -1);
@@ -4041,7 +4041,7 @@ void nanny(struct descriptor_data *d, char *arg)
             if (choice == 3) {
               d->character->real_abils.dex += 10;
             } else if (choice == 9) {
-              SET_SKILL(d->character, SKILL_TELEPATHY, 50);
+              char_set_skills_base(d->character, SKILL_TELEPATHY, 50);
             }
             return;
           }
@@ -4098,8 +4098,8 @@ void nanny(struct descriptor_data *d, char *arg)
           if (d->character->genome[0] == 0) {
             d->character->genome[0] = select;
             if (select == 7) {
-              SET_SKILL(d->character, SKILL_TELEPATHY, 30);
-              SET_SKILL(d->character, SKILL_FOCUS, 30);
+              char_set_skills_base(d->character, SKILL_TELEPATHY, 30);
+              char_set_skills_base(d->character, SKILL_FOCUS, 30);
             }
           } else if (d->character->genome[0] > 0 && d->character->genome[0] == select) {
             write_to_output(d, "You can't choose the same thing for both genomes!\r\n");
@@ -4108,8 +4108,8 @@ void nanny(struct descriptor_data *d, char *arg)
           } else if (d->character->genome[1] == 0) {
             d->character->genome[1] = select;
             if (select == 7) {
-              SET_SKILL(d->character, SKILL_TELEPATHY, 30);
-              SET_SKILL(d->character, SKILL_FOCUS, 30);
+              char_set_skills_base(d->character, SKILL_TELEPATHY, 30);
+              char_set_skills_base(d->character, SKILL_FOCUS, 30);
             }
           }
           const char *display_genome[9] = {

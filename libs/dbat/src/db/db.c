@@ -1993,17 +1993,10 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
     sscanf(value, "%d %d", &num, &num2);
   }
 
-  CASE("Skill")
-  {
-    if (sscanf(value, "%d %d", &num, &num2) == 2 && num >= 0 && num < SKILL_TABLE_SIZE)
-      SET_SKILL(ch, num, num2);
-  }
+  /* NPCs have no skill table; old mob files may still carry these lines, so accept and ignore them. */
+  CASE("Skill") {}
 
-  CASE("SkillMod")
-  {
-    if (sscanf(value, "%d %d", &num, &num2) == 2 && num >= 0 && num < SKILL_TABLE_SIZE)
-      SET_SKILL_BONUS(ch, num, num2);
-  }
+  CASE("SkillMod") {}
 
   CASE("Class")
   {
@@ -4538,10 +4531,10 @@ void init_char(struct char_data *ch)
 
   for (i = 0; i < SKILL_TABLE_SIZE; i++) {
     if (char_get_admlevel(ch) < ADMLVL_IMPL)
-      SET_SKILL(ch, i, 0);
+      char_set_skills_base(ch, i, 0);
     else
-      SET_SKILL(ch, i, 100);
-    SET_SKILL_BONUS(ch, i, 0);
+      char_set_skills_base(ch, i, 100);
+    char_set_skills_mod(ch, i, 0);
   }
 
   for (i = 0; i < AF_ARRAY_MAX; i++)

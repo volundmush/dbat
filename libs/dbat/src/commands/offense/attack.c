@@ -762,7 +762,7 @@ ACMD(do_attack)
       if (char_plr_flagged(ch, PLR_THANDW)) {
         if (!char_get_skill(ch, SKILL_TWOHAND) && slot_count(ch) + 1 <= char_get_skill_slots(ch)) {
           int numb = rand_number(10, 15);
-          SET_SKILL(ch, SKILL_TWOHAND, numb);
+          char_set_skills_base(ch, SKILL_TWOHAND, numb);
           send_to_char(ch, "@GYou learn the very basics of two-handing your weapon!@n\r\n");
         } else {
           improve_skill(ch, SKILL_TWOHAND, 0);
@@ -772,7 +772,7 @@ ACMD(do_attack)
     if (char_get_equipment(ch, WEAR_WIELD2)) {
       if (!char_get_skill(ch, SKILL_DUALWIELD) && slot_count(ch) + 1 <= char_get_skill_slots(ch) && (obj_get_type_flag(char_get_equipment(ch, WEAR_WIELD2)) != ITEM_LIGHT)) {
         int numb = rand_number(10, 15);
-        SET_SKILL(ch, SKILL_DUALWIELD, numb);
+        char_set_skills_base(ch, SKILL_DUALWIELD, numb);
         send_to_char(ch, "@GYou learn the very basics of dual-wielding!@n\r\n");
       } else {
         improve_skill(ch, SKILL_DUALWIELD, 0);

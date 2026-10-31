@@ -235,9 +235,9 @@ int load_char(const char *name, struct char_data *ch)
     ch->affected = NULL;
 
     for (i = 0; i < SKILL_TABLE_SIZE; i++) {
-      SET_SKILL(ch, i, 0);
-      SET_SKILL_BONUS(ch, i, 0);
-      SET_SKILL_PERF(ch, i, 0);
+      char_set_skills_base(ch, i, 0);
+      char_set_skills_mod(ch, i, 0);
+      char_set_skills_perf(ch, i, 0);
     }
     char_set_sex(ch, PFDEF_SEX);
     ch->size    = PFDEF_SIZE;
@@ -682,7 +682,7 @@ int load_char(const char *name, struct char_data *ch)
   /* initialization for imms */
   if (char_get_admlevel(ch) >= ADMLVL_IMMORT) {
     for (i = 0; i < SKILL_TABLE_SIZE; i++)
-      SET_SKILL(ch, i, 100);
+      char_set_skills_base(ch, i, 100);
     GET_COND(ch, HUNGER) = -1;
     GET_COND(ch, THIRST) = -1;
     GET_COND(ch, DRUNK)  = -1;
@@ -1176,11 +1176,11 @@ void load_skills(FILE *fl, struct char_data *ch, bool mods)
     sscanf(line, "%d %d %d", &num, &num2, &num3);
     if (num > -1 && num < SKILL_TABLE_SIZE) {
       if (mods) {
-        SET_SKILL_BONUS(ch, num, num2);
+        char_set_skills_mod(ch, num, num2);
       } else {
-        SET_SKILL(ch, num, num2);
+        char_set_skills_base(ch, num, num2);
       }
-      SET_SKILL_PERF(ch, num, num3);
+      char_set_skills_perf(ch, num, num3);
     }
   } while (num != 0);
 }

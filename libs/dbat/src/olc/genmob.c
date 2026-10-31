@@ -375,7 +375,6 @@ int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 {
   struct affected_type *aff;
-  int i;
 
   if (get_size(mob) != race_get_size(mob->race))
     fprintf(fd, "Size: %d\n", get_size(mob));
@@ -402,12 +401,6 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
         fprintf(fd, "Affect: %d %d %d %d %d %d\n", aff->type, aff->duration,
                 aff->modifier, aff->location, (int)aff->bitvector, aff->specific);
   }
-  for (i = 0; i < SKILL_TABLE_SIZE; i++)
-    if (char_get_skills_base(mob, i))
-      fprintf(fd, "Skill: %d %d\n", i, char_get_skills_base(mob, i));
-  for (i = 0; i < SKILL_TABLE_SIZE; i++)
-    if (char_get_skills_mod(mob, i))
-      fprintf(fd, "SkillMod: %d %d\n", i, char_get_skills_mod(mob, i));
   fputs("E\n", fd);
   return TRUE;
 }

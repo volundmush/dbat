@@ -136,7 +136,7 @@ static void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, c
       break;
 
     case APPLY_SKILL:
-      SET_SKILL_BONUS(ch, spec, char_get_skills_mod(ch, spec) + mod);
+      char_set_skills_mod(ch, spec, char_get_skills_mod(ch, spec) + mod);
       break;
 
     case APPLY_FEAT:

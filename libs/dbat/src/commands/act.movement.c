@@ -838,7 +838,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
       char_aff_set(ch, AFF_SNEAK, false);
     } else {
       send_to_char(ch, "@GYou learn the very basics of moving silently.@n\r\n");
-      SET_SKILL(ch, SKILL_MOVE_SILENTLY, rand_number(5, 10));
+      char_set_skills_base(ch, SKILL_MOVE_SILENTLY, rand_number(5, 10));
       act(buf2, TRUE, ch, 0, 0, TO_ROOM | TO_SNEAKRESIST);
       if (char_get_aff_abils_dex(ch) < rand_number(1, 30)) {
         WAIT_STATE(ch, PULSE_1SEC);

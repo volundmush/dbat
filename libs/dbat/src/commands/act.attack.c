@@ -198,7 +198,7 @@ ACMD(do_energize)
   if (!char_get_skill(ch, SKILL_ENERGIZE)) {
     if (char_get_skill(ch, SKILL_FOCUS) >= 30) {
       int result = rand_number(10, 14);
-      SET_SKILL(ch, SKILL_ENERGIZE, result);
+      char_set_skills_base(ch, SKILL_ENERGIZE, result);
       send_to_char(ch, "You learn the basics for energizing thrown weapons! Now use the energize command again.\r\n");
       return;
     } else {
@@ -2895,7 +2895,7 @@ ACMD(do_selfd)
 
   if (!char_get_skill(ch, SKILL_SELFD)) {
     int num = rand_number(10, 20);
-    SET_SKILL(ch, SKILL_SELFD, num);
+    char_set_skills_base(ch, SKILL_SELFD, num);
   }
 
   if (!char_plr_flagged(ch, PLR_SELFD)) {
@@ -2941,9 +2941,9 @@ ACMD(do_selfd)
     }
     int num = rand_number(10, 20) + char_get_skill(ch, SKILL_SELFD);
     if (char_get_skill(ch, SKILL_SELFD) + num <= 100) {
-      SET_SKILL(ch, SKILL_SELFD, num);
+      char_set_skills_base(ch, SKILL_SELFD, num);
     } else {
-      SET_SKILL(ch, SKILL_SELFD, 100);
+      char_set_skills_base(ch, SKILL_SELFD, 100);
     }
     return;
   } else {
@@ -2982,9 +2982,9 @@ ACMD(do_selfd)
     char_plr_set(ch, PLR_SELFD2, false);
     int num = rand_number(10, 20) + char_get_skill(ch, SKILL_SELFD);
     if (char_get_skill(ch, SKILL_SELFD) + num <= 100) {
-      SET_SKILL(ch, SKILL_SELFD, num);
+      char_set_skills_base(ch, SKILL_SELFD, num);
     } else {
-      SET_SKILL(ch, SKILL_SELFD, 100);
+      char_set_skills_base(ch, SKILL_SELFD, 100);
     }
     return;
   }

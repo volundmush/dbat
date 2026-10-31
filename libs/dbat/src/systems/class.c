@@ -243,68 +243,68 @@ void do_start(struct char_data *ch)
   if (!char_plr_flagged(ch, PLR_FORGET)) {
     if (ch->choice == 1) {
       punch = rand_number(30, 40);
-      SET_SKILL(ch, SKILL_BLOCK, punch);
+      char_set_skills_base(ch, SKILL_BLOCK, punch);
     }
     if (ch->choice == 2) {
       punch = rand_number(10, 20);
-      SET_SKILL(ch, SKILL_PUNCH, punch);
+      char_set_skills_base(ch, SKILL_PUNCH, punch);
     }
     if (ch->choice == 3) {
       punch = rand_number(30, 40);
-      SET_SKILL(ch, SKILL_KICK, punch);
+      char_set_skills_base(ch, SKILL_KICK, punch);
     }
     if (ch->choice == 4) {
       punch = rand_number(20, 30);
-      SET_SKILL(ch, SKILL_SLAM, punch);
+      char_set_skills_base(ch, SKILL_SLAM, punch);
     }
     if (ch->choice == 5) {
       punch = rand_number(20, 30);
-      SET_SKILL(ch, SKILL_FOCUS, punch);
+      char_set_skills_base(ch, SKILL_FOCUS, punch);
     }
     if (char_is_human(ch)) {
       punch = rand_number(5, 15);
-      SET_SKILL(ch, SKILL_BUILD, punch);
+      char_set_skills_base(ch, SKILL_BUILD, punch);
     }
     if (char_is_truffle(ch)) {
       punch = rand_number(15, 25);
-      SET_SKILL(ch, SKILL_BUILD, punch);
+      char_set_skills_base(ch, SKILL_BUILD, punch);
     }
     if (char_is_konatsu(ch)) {
       punch = rand_number(50, 60);
-      SET_SKILL(ch, SKILL_SWORD, punch);
+      char_set_skills_base(ch, SKILL_SWORD, punch);
       punch = rand_number(10, 30);
-      SET_SKILL(ch, SKILL_MOVE_SILENTLY, punch);
+      char_set_skills_base(ch, SKILL_MOVE_SILENTLY, punch);
       punch = rand_number(10, 30);
-      SET_SKILL(ch, SKILL_HIDE, punch);
+      char_set_skills_base(ch, SKILL_HIDE, punch);
     }
     if (char_is_tapion(ch) || char_is_ginyu(ch) || char_is_dabura(ch) || char_is_kurzak(ch)) {
       punch = rand_number(30, 40);
       if (char_is_kurzak(ch) || char_is_tapion(ch)) {
         punch += rand_number(5, 10);
       }
-      SET_SKILL(ch, SKILL_THROW, punch);
+      char_set_skills_base(ch, SKILL_THROW, punch);
     }
     if (char_is_kai(ch) || char_is_kanassan(ch)) {
       punch = rand_number(40, 60);
-      SET_SKILL(ch, SKILL_FOCUS, punch);
+      char_set_skills_base(ch, SKILL_FOCUS, punch);
     }
     if (char_is_kanassan(ch)) {
       punch = rand_number(40, 60);
-      SET_SKILL(ch, SKILL_CONCENTRATION, punch);
+      char_set_skills_base(ch, SKILL_CONCENTRATION, punch);
     }
     if (char_is_kai(ch)) {
       punch = rand_number(30, 50);
-      SET_SKILL(ch, SKILL_HEAL, punch);
+      char_set_skills_base(ch, SKILL_HEAL, punch);
     }
     if (char_is_demon(ch)) {
       punch = rand_number(50, 60);
-      SET_SKILL(ch, SKILL_SPEAR, punch);
-      SET_SKILL(ch, SKILL_HONOO, punch);
+      char_set_skills_base(ch, SKILL_SPEAR, punch);
+      char_set_skills_base(ch, SKILL_HONOO, punch);
     }
 
     punch = 0;
     punch = rand_number(50, 70);
-    SET_SKILL(ch, SKILL_PUNCH, char_get_skills_base(ch, SKILL_PUNCH) + punch);
+    char_set_skills_base(ch, SKILL_PUNCH, char_get_skills_base(ch, SKILL_PUNCH) + punch);
   } /* End CC skills */
   else {
     char_plr_set(ch, PLR_FORGET, false);
@@ -312,34 +312,34 @@ void do_start(struct char_data *ch)
 
   if (char_is_kai(ch) || char_is_kanassan(ch)) {
     punch = rand_number(15, 30);
-    SET_SKILL(ch, SKILL_TELEPATHY, punch);
+    char_set_skills_base(ch, SKILL_TELEPATHY, punch);
   }
 
   if (char_is_majin(ch) || char_is_namek(ch) || char_is_bio(ch)) {
     punch = rand_number(10, 16);
-    SET_SKILL(ch, SKILL_REGENERATE, punch);
+    char_set_skills_base(ch, SKILL_REGENERATE, punch);
   }
   if (char_is_android(ch) && char_plr_flagged(ch, PLR_ABSORB)) {
     punch = rand_number(25, 35);
-    SET_SKILL(ch, SKILL_ABSORB, punch);
+    char_set_skills_base(ch, SKILL_ABSORB, punch);
   }
   if (char_is_bio(ch)) {
     punch = rand_number(15, 25);
-    SET_SKILL(ch, SKILL_ABSORB, punch);
+    char_set_skills_base(ch, SKILL_ABSORB, punch);
 
     // Kai Genome bioandroids.
     if (char_has_genome(ch, 7)) {
-      SET_SKILL(ch, SKILL_TELEPATHY, 30);
-      SET_SKILL(ch, SKILL_FOCUS, 30);
+      char_set_skills_base(ch, SKILL_TELEPATHY, 30);
+      char_set_skills_base(ch, SKILL_FOCUS, 30);
     }
   }
   if (char_is_arlian(ch)) {
     punch = rand_number(30, 50);
-    SET_SKILL(ch, SKILL_SEISHOU, punch);
+    char_set_skills_base(ch, SKILL_SEISHOU, punch);
   }
   if (char_is_icer(ch)) {
     punch = rand_number(20, 30);
-    SET_SKILL(ch, SKILL_TAILWHIP, punch);
+    char_set_skills_base(ch, SKILL_TAILWHIP, punch);
   }
 
   if (char_get_class(ch) < 0 || char_get_class(ch) > NUM_CLASSES) {
@@ -363,32 +363,32 @@ void do_start(struct char_data *ch)
   /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
   switch (char_get_race(ch)) {
     case RACE_HUMAN:
-      SET_SKILL(ch, SKILL_LANG_COMMON, 1);
+      char_set_skills_base(ch, SKILL_LANG_COMMON, 1);
       break;
     case RACE_SAIYAN:
-      SET_SKILL(ch, SKILL_LANG_COMMON, 1);
+      char_set_skills_base(ch, SKILL_LANG_COMMON, 1);
       break;
     case RACE_HALFBREED:
-      SET_SKILL(ch, SKILL_LANG_COMMON, 1);
+      char_set_skills_base(ch, SKILL_LANG_COMMON, 1);
       break;
     case RACE_ICER:
-      SET_SKILL(ch, SKILL_LANG_COMMON, 1);
+      char_set_skills_base(ch, SKILL_LANG_COMMON, 1);
       break;
     case RACE_KONATSU:
-      SET_SKILL(ch, SKILL_LANG_COMMON, 1);
+      char_set_skills_base(ch, SKILL_LANG_COMMON, 1);
       break;
     case RACE_NAMEK:
-      SET_SKILL(ch, SKILL_LANG_COMMON, 1);
+      char_set_skills_base(ch, SKILL_LANG_COMMON, 1);
       break;
     case RACE_MUTANT:
-      SET_SKILL(ch, SKILL_LANG_COMMON, 1);
+      char_set_skills_base(ch, SKILL_LANG_COMMON, 1);
       break;
     case RACE_ANDROID:
       char_aff_set(ch, AFF_INFRAVISION, true);
-      SET_SKILL(ch, SKILL_LANG_COMMON, 1);
+      char_set_skills_base(ch, SKILL_LANG_COMMON, 1);
       break;
     default:
-      SET_SKILL(ch, SKILL_LANG_COMMON, 1);
+      char_set_skills_base(ch, SKILL_LANG_COMMON, 1);
       break;
   }
 
@@ -440,7 +440,7 @@ void do_start(struct char_data *ch)
   ch->basest = MAX(ch->basest, 100L);
 
   if (char_is_android(ch) && char_plr_flagged(ch, PLR_SENSEM)) {
-    SET_SKILL(ch, SKILL_SENSE, 100);
+    char_set_skills_base(ch, SKILL_SENSE, 100);
     gainBasePL(ch, rand_number(400, 500), false);
     gainBaseST(ch, rand_number(400, 500), false);
     gainBaseKI(ch, rand_number(400, 500), false);

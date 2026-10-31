@@ -938,7 +938,7 @@ ACMD(do_gen_tog)
       }
       if (!char_get_skill(ch, SKILL_HIDE) && slot_count(ch) + 1 <= char_get_skill_slots(ch)) {
         send_to_char(ch, "@GYou learn the very minimal basics to hiding.@n\r\n");
-        SET_SKILL(ch, SKILL_HIDE, rand_number(1, 5));
+        char_set_skills_base(ch, SKILL_HIDE, rand_number(1, 5));
       } else if (!char_get_skill(ch, SKILL_HIDE) && slot_count(ch) + 1 > char_get_skill_slots(ch)) {
         send_to_char(ch, "@RYou need more skill slots in order to learn this skill.@n\r\n");
         return;

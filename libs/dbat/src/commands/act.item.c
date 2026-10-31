@@ -371,7 +371,7 @@ ACMD(do_garden)
 
   if (!char_get_skill(ch, SKILL_GARDENING) && slot_count(ch) + 1 <= char_get_skill_slots(ch)) {
     int numb = rand_number(8, 16);
-    SET_SKILL(ch, SKILL_GARDENING, numb);
+    char_set_skills_base(ch, SKILL_GARDENING, numb);
     send_to_char(ch, "@GYou learn the very basics of gardening.\r\n");
   } else if (!char_get_skill(ch, SKILL_GARDENING) && slot_count(ch) + 1 > char_get_skill_slots(ch)) {
     send_to_char(ch, "You need additional skill slots to pick up the skill linked with this.\r\n");

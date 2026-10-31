@@ -992,7 +992,7 @@ in the vault (vnum: 453) now and then. you can just use
                 int skillnum = find_skill_num(skillname, SKTYPE_SKILL);
                 if (skillnum > 0) {
                   int new_value = MAX(0, MIN(100, atoi(amount)));
-                  SET_SKILL(c, skillnum, new_value);
+                  char_set_skills_base(c, skillnum, new_value);
                 }
               }
             }

@@ -423,23 +423,12 @@ void char_set_lastint(struct char_data *ch, time_t v);
 #define GET_HISTORY(ch, i)     CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->comm_hist[i]))
 
 int8_t char_get_skills_mod(const struct char_data *ch, int i);
+void char_set_skills_mod(struct char_data *ch, int i, int8_t v);
 int8_t char_get_skills_perf(const struct char_data *ch, int i);
 void char_set_skills_perf(struct char_data *ch, int i, int8_t v);
-#define SET_SKILL_BONUS(ch, i, value) \
-  do {                                \
-    (ch)->skills[i].mod = value;      \
-  } while (0)
-#define SET_SKILL_PERF(ch, i, value) \
-  do {                               \
-    (ch)->skills[i].perf = value;    \
-  } while (0)
 int8_t char_get_skills_base(const struct char_data *ch, int i);
 void char_set_skills_base(struct char_data *ch, int i, int8_t v);
 int char_get_skill(const struct char_data *ch, int i);
-#define SET_SKILL(ch, i, val)   \
-  do {                          \
-    (ch)->skills[i].base = val; \
-  } while (0)
 bitvector_t *char_get_bodyparts(const struct char_data *ch);
 
 struct obj_data *char_get_equipment(const struct char_data *ch, int i);

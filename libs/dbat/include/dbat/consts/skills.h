@@ -155,4 +155,6 @@ constexpr int SKILL_SPIRITCONTROL   = 555;
 constexpr int SKILL_BALEFIRE        = 556;
 constexpr int SKILL_BLESSEDHAMMER   = 557;
 
-constexpr int SKILL_TABLE_SIZE = 600;
+constexpr int SKILL_TABLE_SIZE = 600; /* skill ids are below this */
+constexpr int SKILL_FIRST      = 400; /* lowest skill id; player tables start here */
+constexpr int SKILL_SLOTS      = SKILL_TABLE_SIZE - SKILL_FIRST;

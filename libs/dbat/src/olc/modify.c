@@ -344,6 +344,10 @@ ACMD(do_skillset)
     send_to_char(ch, "%s", CONFIG_NOPERSON);
     return;
   }
+  if (char_is_npc(vict)) {
+    send_to_char(ch, "NPCs don't have skills.\r\n");
+    return;
+  }
   skip_spaces(&argument);
 
   /* If there is no chars in argument */
@@ -398,7 +402,7 @@ ACMD(do_skillset)
    * find_skill_num() guarantees a valid spell_info[] index, or -1, and we
    * checked for the -1 above so we are safe here.
    */
-  SET_SKILL(vict, skill, value);
+  char_set_skills_base(vict, skill, value);
   mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "skillset: %s changed %s's '%s' to %d.", char_get_name(ch), char_get_name(vict), spell_info[skill].name, value);
   send_to_char(ch, "You change %s's %s to %d.\r\n", char_get_name(vict), spell_info[skill].name, value);
 }

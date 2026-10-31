@@ -59,6 +59,12 @@ struct abil_data {
  * not allocated in memory for NPCs, but it is for PCs. This structure
  * can be changed freely.
  */
+struct skill_data {
+  int8_t base;
+  int8_t mod;
+  int8_t perf;
+};
+
 struct player_special_data {
   char *poofin;                      /* Description on arrival of a god.     */
   char *poofout;                     /* Description upon a god's exit.       */
@@ -71,6 +77,7 @@ struct player_special_data {
   int8_t freeze_level;               /* Level of god who froze char, if any	*/
   int16_t invis_level;               /* level of invisibility		*/
   room_vnum load_room;               /* Which room to place char in		*/
+  struct skill_data skills[SKILL_SLOTS]; /* slot k holds skill id SKILL_FIRST + k; NPCs have none */
   bitvector_t pref[PR_ARRAY_MAX];    /* preference flags for PC's.		*/
   uint8_t bad_pws;                   /* number of bad password attemps	*/
   int8_t conditions[NUM_CONDITIONS]; /* Drunk, full, thirsty			*/
@@ -133,11 +140,6 @@ struct follow_type {
   struct follow_type *next;
 };
 
-struct skill_data {
-  int8_t base;
-  int8_t mod;
-  int8_t perf;
-};
 
 struct char_data {
   int32_t id;    /* used by DG triggers			*/
@@ -250,7 +252,6 @@ struct char_data {
   int skill_slots;
   int forgeting;
   int forgetcount;
-  skill_data skills[SKILL_TABLE_SIZE];
 
   bitvector_t act[PM_ARRAY_MAX]; /* act flag for NPC's; player flag for PC's */
 

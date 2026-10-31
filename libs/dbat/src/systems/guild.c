@@ -114,7 +114,7 @@ void handle_ingest_learn(struct char_data *ch, struct char_data *vict)
       }
     }
     if (((i >= 481 && i <= 489) || i == 517 || i == 535) && ((char_get_skills_base(ch, i) <= 0) && char_get_skills_base(vict, i) > 0)) {
-      SET_SKILL(ch, i, char_get_skills_base(ch, i) + rand_number(10, 25));
+      char_set_skills_base(ch, i, char_get_skills_base(ch, i) + rand_number(10, 25));
       send_to_char(ch, "@YYou learned @y%s@Y from ingesting your target!@n\r\n", spell_info[i].name);
       char_set_skill_slots(ch, char_get_skill_slots(ch) + (1));
       char_set_ingestLearned(ch, 1);
@@ -203,7 +203,7 @@ ACMD(do_teach)
     act(tochar, TRUE, ch, 0, vict, TO_CHAR);
     act(tovict, TRUE, ch, 0, vict, TO_VICT);
     act(toother, TRUE, ch, 0, vict, TO_NOTVICT);
-    SET_SKILL(vict, skill, char_get_skills_base(vict, skill) + 1);
+    char_set_skills_base(vict, skill, char_get_skills_base(vict, skill) + 1);
     if (free == FALSE) {
       GET_PRACTICES(vict, char_get_class(vict)) -= cost;
     } else {
@@ -826,7 +826,7 @@ static void handle_grand(struct char_data *keeper, int guild_nr, struct char_dat
     } else {
       send_to_char(ch, "@YYou have ranked up in your Grand Mastery of the skill, @C%s@Y.\r\n", spell_info[skill_num].name);
     }
-    SET_SKILL(ch, skill_num, char_get_skills_base(ch, skill_num) + 1);
+    char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + 1);
     GET_PRACTICES(ch, char_get_class(ch)) -= 1000;
   }
 }
@@ -956,12 +956,12 @@ static void handle_practice(struct char_data *keeper, int guild_nr, struct char_
               send_to_char(ch, "You practice and master the basics!\r\n");
             else
               send_to_char(ch, "You practice the basics of %s\r\n", sensei_style[char_get_class(ch)]);
-            SET_SKILL(ch, skill_num, char_get_skills_base(ch, skill_num) + rand_number(10, 25));
+            char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + rand_number(10, 25));
             GET_PRACTICES(ch, char_get_class(ch)) -= pointcost;
             if (char_get_forgeting(ch) != 0 && char_get_skills_base(ch, char_get_forgeting(ch)) < 30) {
               char_set_forgetcount(ch, char_get_forgetcount(ch) + (1));
               if (char_get_forgetcount(ch) >= 5) {
-                SET_SKILL(ch, char_get_forgeting(ch), 0);
+                char_set_skills_base(ch, char_get_forgeting(ch), 0);
                 send_to_char(ch, "@MYou have finally forgotten what little you knew of %s@n\r\n", spell_info[char_get_forgeting(ch)].name);
                 char_set_forgeting(ch, 0);
                 char_set_forgetcount(ch, 0);
@@ -979,19 +979,19 @@ static void handle_practice(struct char_data *keeper, int guild_nr, struct char_
             send_to_char(ch, "You practice for a while and manage to advance your technique. (%d)\r\n", char_get_skills_base(ch, skill_num) + 1);
           else
             send_to_char(ch, "You practice the basics of %s. (%d)\r\n", sensei_style[char_get_class(ch)], char_get_skills_base(ch, skill_num) + 1);
-          SET_SKILL(ch, skill_num, char_get_skills_base(ch, skill_num) + 1);
+          char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + 1);
           GET_PRACTICES(ch, char_get_class(ch)) -= pointcost;
           if (char_get_skills_base(ch, skill_num) >= 100) {
             send_to_char(ch, "You learned a lot by mastering that skill.\r\n");
             if (char_is_konatsu(ch) && skill_num == SKILL_PARRY) {
-              SET_SKILL(ch, skill_num, char_get_skills_base(ch, skill_num) + 5);
+              char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + 5);
             }
             gain_exp(ch, level_exp(ch, char_get_level(ch) + 1) / 20);
           }
           if (char_get_forgeting(ch) != 0) {
             char_set_forgetcount(ch, char_get_forgetcount(ch) + (1));
             if (char_get_forgetcount(ch) >= 5) {
-              SET_SKILL(ch, char_get_forgeting(ch), 0);
+              char_set_skills_base(ch, char_get_forgeting(ch), 0);
               send_to_char(ch, "@MYou have finally forgotten what little you knew of %s@n\r\n", spell_info[char_get_forgeting(ch)].name);
               char_set_forgeting(ch, 0);
               char_set_forgetcount(ch, 0);
