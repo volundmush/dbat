@@ -285,22 +285,6 @@ bool is_soft_cap(char_data *ch, int64_t type, long double mult) {
     return against >= cur_cap;
 }
 
-int wearing_android_canister(char_data *ch) {
-    if(!char_is_android(ch))
-        return 0;
-    struct obj_data* obj = char_get_equipment(ch, WEAR_BACKPACK);
-    if(!obj)
-        return 0;
-    switch(obj_get_vnum(obj)) {
-        case 1806:
-            return 1;
-        case 1807:
-            return 2;
-        default:
-            return 0;
-    }
-}
-
 int calcGravCost(char_data *ch, int64_t num) {
     int cost = 0;
     if(!can_tolerate_gravity(ch, rroom_get_gravity(char_get_in_room(ch))))
@@ -334,10 +318,6 @@ int64_t getMaxHealth(char_data *ch) {
 
 double getCurHealthPercent(char_data *ch) {
     return getCurPLPercent(ch);
-}
-
-int64_t getPercentOfCurHealth(char_data *ch, double amt) {
-    return getPercentOfCurPL(ch, amt);
 }
 
 int64_t getPercentOfMaxHealth(char_data *ch, double amt) {
@@ -399,14 +379,6 @@ void restoreHealth(char_data *ch, bool announce) {
     if(!isFullHealth(ch)) ch->health = 1;
 }
 
-int64_t healCurHealth(char_data *ch, int64_t amt) {
-    return incCurHealth(ch, amt, true);
-}
-
-int64_t harmCurHealth(char_data *ch, int64_t amt) {
-    return decCurHealth(ch, amt, 0);
-}
-
 int64_t getMaxPLTrans(char_data *ch) {
     transform_bonus form = race_current_form(ch);
     int64_t total = 0;
@@ -456,10 +428,6 @@ double getCurPLPercent(char_data *ch) {
     return (double)getCurPL(ch) / (double)getMaxPL(ch);
 }
 
-int64_t getPercentOfCurPL(char_data *ch, double amt) {
-    return getCurPL(ch) * ABS(amt);
-}
-
 int64_t getPercentOfMaxPL(char_data *ch, double amt) {
     return getMaxPL(ch) * ABS(amt);
 }
@@ -501,23 +469,12 @@ double getCurKIPercent(char_data *ch) {
     return (double)getCurKI(ch) / (double)getMaxKI(ch);
 }
 
-int64_t getPercentOfCurKI(char_data *ch, double amt) {
-    return getCurKI(ch) * ABS(amt);
-}
-
 int64_t getPercentOfMaxKI(char_data *ch, double amt) {
     return getMaxKI(ch) * ABS(amt);
 }
 
 bool isFullKI(char_data *ch) {
     return ch->energy >= 1.0;
-}
-
-int64_t setCurKI(char_data *ch, int64_t amt) {
-    int64_t maxki = getMaxKI(ch);
-    // how much percent of maxki is amt? set energy to that.
-    ch->energy = safeDiv((double)ABS(amt), (double)maxki);
-    return getCurKI(ch);
 }
 
 int64_t setCurKIPercent(char_data *ch, double amt) {
@@ -603,21 +560,8 @@ double getCurSTPercent(char_data *ch) {
     return (double)getCurST(ch) / (double)getMaxST(ch);
 }
 
-int64_t getPercentOfCurST(char_data *ch, double amt) {
-    return getCurST(ch) * ABS(amt);
-}
-
-int64_t getPercentOfMaxST(char_data *ch, double amt) {
-    return getMaxST(ch) * ABS(amt);
-}
-
 bool isFullST(char_data *ch) {
     return ch->stamina >= 1;
-}
-
-int64_t setCurST(char_data *ch, int64_t amt) {
-    /* the legacy move field this stored into no longer exists */
-    return MAX(0L, ABS(amt));
 }
 
 int64_t setCurSTPercent(char_data *ch, double amt) {
@@ -679,26 +623,8 @@ double getCurLFPercent(char_data *ch) {
     return ch->life;
 }
 
-int64_t getPercentOfCurLF(char_data *ch, double amt) {
-    return getCurLF(ch) * ABS(amt);
-}
-
-int64_t getPercentOfMaxLF(char_data *ch, double amt) {
-    return getMaxLF(ch) * ABS(amt);
-}
-
 bool isFullLF(char_data *ch) {
     return ch->life >= 1.0;
-}
-
-int64_t setCurLF(char_data *ch, int64_t amt) {
-    ch->life = MAX(0L, ABS(amt));
-    return getCurLF(ch);
-}
-
-int64_t setCurLFPercent(char_data *ch, double amt) {
-    ch->life = MAX(0L, (int64_t)(getMaxLF(ch) * ABS(amt)));
-    return getCurLF(ch);
 }
 
 int64_t incCurLF(char_data *ch, int64_t amt, bool limit_max) {
@@ -841,31 +767,9 @@ int64_t gainBaseKI(char_data *ch, int64_t amt, bool trans_mult) {
     return ch->baseki;
 }
 
-void gainBaseAll(char_data *ch, int64_t amt, bool trans_mult) {
-    gainBasePL(ch, amt, trans_mult);
-    gainBaseKI(ch, amt, trans_mult);
-    gainBaseST(ch, amt, trans_mult);
-}
-
 int64_t loseBasePL(char_data *ch, int64_t amt, bool trans_mult) {
     ch->basepl = MAX(1L, ch->basepl-amt);
     return ch->basepl;
-}
-
-int64_t loseBaseST(char_data *ch, int64_t amt, bool trans_mult) {
-    ch->basest = MAX(1L, ch->basest-amt);
-    return ch->basest;
-}
-
-int64_t loseBaseKI(char_data *ch, int64_t amt, bool trans_mult) {
-    ch->baseki = MAX(1L, ch->baseki-amt);
-    return ch->baseki;
-}
-
-void loseBaseAll(char_data *ch, int64_t amt, bool trans_mult) {
-    loseBasePL(ch, amt, trans_mult);
-    loseBaseKI(ch, amt, trans_mult);
-    loseBaseST(ch, amt, trans_mult);
 }
 
 int64_t gainBasePLPercent(char_data *ch, double amt, bool trans_mult) {
@@ -884,24 +788,10 @@ int64_t loseBasePLPercent(char_data *ch, double amt, bool trans_mult) {
     return loseBasePL(ch, ch->basepl * amt, trans_mult);
 }
 
-int64_t loseBaseKIPercent(char_data *ch, double amt, bool trans_mult) {
-    return loseBaseKI(ch, ch->baseki * amt, trans_mult);
-}
-
-int64_t loseBaseSTPercent(char_data *ch, double amt, bool trans_mult) {
-    return loseBaseST(ch, ch->basest * amt, trans_mult);
-}
-
 void gainBaseAllPercent(char_data *ch, double amt, bool trans_mult) {
     gainBasePLPercent(ch, amt, trans_mult);
     gainBaseKIPercent(ch, amt, trans_mult);
     gainBaseSTPercent(ch, amt, trans_mult);
-}
-
-void loseBaseAllPercent(char_data *ch, double amt, bool trans_mult) {
-    loseBasePLPercent(ch, amt, trans_mult);
-    loseBaseKIPercent(ch, amt, trans_mult);
-    loseBaseSTPercent(ch, amt, trans_mult);
 }
 
 int64_t getMaxCarryWeight(char_data *ch) {
@@ -921,10 +811,6 @@ int64_t getCurGearWeight(char_data *ch) {
 
 int64_t getCurCarriedWeight(char_data *ch) {
     return getCurGearWeight(ch) + ch->carry_weight;
-}
-
-int64_t getAvailableCarryWeight(char_data *ch) {
-    return getMaxCarryWeight(ch) - getCurCarriedWeight(ch);
 }
 
 // speednar is in utils.cpp
@@ -1607,16 +1493,6 @@ int64_t physical_cost(struct char_data *ch, int skill)
  }
 
  return (result);
-}
-
-int trans_cost(struct char_data *ch, int trans)
-{
-
- if (char_get_transcost(ch, (trans)-1) == 0) {
-  return (50);
- } else {
-  return (0);
- }
 }
 
 /* This returns the trans requirement for the player based on their trans class */
@@ -3727,39 +3603,6 @@ void stop_follower(struct char_data *ch)
   ch->master = NULL;
 }
 
-int num_followers_charmed(struct char_data *ch)
-{
-  struct follow_type *lackey;
-  int total = 0;
-
-  /* Summoned creatures don't count against total */
-  for (lackey = ch->followers; lackey; lackey = lackey->next)
-    if (char_aff_flagged(lackey->follower, AFF_CHARM) &&
-        !char_aff_flagged(lackey->follower, AFF_SUMMONED) &&
-        lackey->follower->master == ch)
-      total++;
-
-  return (total);
-}
-
-void switch_leader(struct char_data *old, struct char_data *new_leader)
-{ 
-struct follow_type *f; 
-struct char_data *tch = NULL;
-
-  for (f = old->followers; f; f = f->next) { 
-    if (f->follower == new_leader) {
-      tch = new_leader;
-      stop_follower(tch);
-    }
-    if (f->follower != new_leader)
-    { 
-      tch = f->follower;
-      stop_follower(tch);
-      add_follower(tch, new_leader);
-    } 
-  } 
-}
 /* Called when a character that follows/is followed dies */
 void die_follower(struct char_data *ch)
 {
@@ -4610,19 +4453,6 @@ int sensei_grav_tolerance(int s_id) {
     }
 }
 
-int sensei_rpp_cost(int s_id, int r_id) {
-    switch(s_id) {
-        case CLASS_KABITO:
-            if(r_id != RACE_KAI) {
-                return 10;
-            } else {
-                return 0;
-            }
-        default:
-            return 0;
-    }
-}
-
 int race_get_size(int r_id) {
     switch(r_id) {
         case RACE_ANIMAL:
@@ -4647,18 +4477,6 @@ int race_is_playable(int r_id) {
         case RACE_OGRE:
         case RACE_YARDRATIAN:
         case RACE_DRAGON:
-        case RACE_MECHANICAL:
-        case RACE_SPIRIT:
-            return false;
-        default:
-            return true;
-    }
-}
-
-int race_is_people(int r_id) {
-    switch(r_id) {
-        case RACE_ANIMAL:
-        case RACE_SAIBA:
         case RACE_MECHANICAL:
         case RACE_SPIRIT:
             return false;
@@ -5297,10 +5115,6 @@ bool char_is_mechanical(const struct char_data *ch) {
     return (char_get_race(ch) == RACE_MECHANICAL);
 }
 
-bool char_is_undead(const struct char_data *ch) {
-    return (char_is_affected(ch, AFF_UNDEAD));
-}
-
 bool char_is_male(const struct char_data *ch) {
     return (char_get_sex(ch) == SEX_MALE);
 }
@@ -5401,10 +5215,6 @@ int char_get_mimic(const struct char_data *ch) {
     return ch->mimic;
 }
 
-void char_set_mimic(struct char_data *ch, int v) {
-    ch->mimic = v;
-}
-
 char *char_get_voice(const struct char_data *ch) {
     return ch->voice;
 }
@@ -5479,10 +5289,6 @@ void char_set_pfilepos(struct char_data *ch, int v) {
 
 int char_get_race(const struct char_data *ch) {
     return ch->race;
-}
-
-void char_set_race(struct char_data *ch, int v) {
-    ch->race = v;
 }
 
 int8_t char_get_hairl(const struct char_data *ch) {
@@ -6417,10 +6223,6 @@ int8_t char_get_skills_mod(const struct char_data *ch, int i) {
     return ch->skills[i].mod;
 }
 
-void char_set_skills_mod(struct char_data *ch, int i, int8_t v) {
-    ch->skills[i].mod = v;
-}
-
 int8_t char_get_skills_perf(const struct char_data *ch, int i) {
     return ch->skills[i].perf;
 }
@@ -6509,10 +6311,6 @@ struct room_direction_data * char_get_exit2(const struct char_data *ch, int door
     return world[char_get_exit(ch, door)->to_room].dir_option[door];
 }
 
-void char_set_exit2(struct char_data *ch, int door, struct room_direction_data * v) {
-    world[char_get_exit(ch, door)->to_room].dir_option[door] = v;
-}
-
 /* Flag setters and toggles. */
 
 static void flag_array_set(bitvector_t *array, int flag, bool on) {
@@ -6561,14 +6359,18 @@ void char_adm_set(struct char_data *ch, int flag, bool on) {
     flag_array_set(char_get_admflags(ch), flag, on);
 }
 
-bool char_adm_toggle(struct char_data *ch, int flag) {
-    return flag_array_toggle(char_get_admflags(ch), flag);
-}
-
 void char_body_set(struct char_data *ch, int flag, bool on) {
     flag_array_set(char_get_bodyparts(ch), flag, on);
 }
 
-bool char_body_toggle(struct char_data *ch, int flag) {
-    return flag_array_toggle(char_get_bodyparts(ch), flag);
+int race_is_people(int r_id) {
+    switch(r_id) {
+        case RACE_ANIMAL:
+        case RACE_SAIBA:
+        case RACE_MECHANICAL:
+        case RACE_SPIRIT:
+            return false;
+        default:
+            return true;
+    }
 }

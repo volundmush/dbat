@@ -234,6 +234,7 @@ const struct command_info cmd_info[] = {
   { "hellflash", "hellflas"     , POS_FIGHTING, do_hellflash, 0, ADMLVL_NONE     , 0 },
   { "hellspear", "hellspea"     , POS_FIGHTING, do_hellspear, 0, ADMLVL_NONE     , 0 },
   { "help"     , "h"            , POS_DEAD    , do_help     , 0, ADMLVL_NONE    , 0 },
+  { "hcontrol" , "hcontrol"     , POS_DEAD    , do_hcontrol , 0, ADMLVL_GRGOD   , 0 },
   { "hedit"    , "hedit"        , POS_DEAD    , do_oasis    , 0, ADMLVL_IMMORT  , SCMD_OASIS_HEDIT },
   { "hindex"   , "hind"         , POS_DEAD    , do_hindex   , 0, ADMLVL_NONE    , 0 },
   { "helpcheck", "helpch"       , POS_DEAD    , do_helpcheck, 0, ADMLVL_NONE    , 0 },
@@ -605,6 +606,7 @@ const struct command_info cmd_info[] = {
   { "mforget"  , "mforget"	, POS_DEAD    , do_mforget  , -1, ADMLVL_NONE	, 0 },
   { "mtransform", "mtransform"	, POS_DEAD    , do_mtransform, -1, ADMLVL_NONE	, 0 },
   { "mzoneecho", "mzoneecho"	, POS_DEAD    , do_mzoneecho, -1, ADMLVL_NONE	, 0 },
+  { "mrecho"   , "mrecho"	, POS_DEAD    , do_mrecho   , -1, ADMLVL_NONE	, 0 },
   { "vdelete"  , "vdelete"	, POS_DEAD    , do_vdelete  , 0, ADMLVL_BUILDER	, 0 },
   { "mfollow"  , "mfollow"	, POS_DEAD    , do_mfollow  , -1, ADMLVL_NONE	, 0 },
 

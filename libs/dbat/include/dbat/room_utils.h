@@ -23,7 +23,6 @@ bool rroom_planet_zenith(room_rnum room);
 bitvector_t *rroom_get_room_flags(room_rnum room);
 bool rroom_flagged(room_rnum loc, int flag);
 void rroom_set_flag(room_rnum room, int flag, bool on);
-bool rroom_toggle_flag(room_rnum room, int flag);
 bool room_flagged(const struct room_data *room, int flag);
 void room_set_flag(struct room_data *room, int flag, bool on);
 bool room_toggle_flag(struct room_data *room, int flag);

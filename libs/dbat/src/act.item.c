@@ -1195,7 +1195,7 @@ void check_auction(void)
 ACMD(do_auction)
 {
 	char arg1[MAX_INPUT_LENGTH];
-        char arg2[MAX_INPUT_LENGTH];
+  char arg2[MAX_INPUT_LENGTH];
 	struct obj_data *obj;
 	int bid = 0;
 	

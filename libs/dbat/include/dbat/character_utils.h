@@ -61,8 +61,6 @@ bool char_plr_toggle(struct char_data *ch, int flag);
 bool char_prf_toggle(struct char_data *ch, int flag);
 bool char_aff_toggle(struct char_data *ch, int flag);
 bool char_mob_toggle(struct char_data *ch, int flag);
-bool char_adm_toggle(struct char_data *ch, int flag);
-bool char_body_toggle(struct char_data *ch, int flag);
 
 /* Flag setters. PLR bits are ignored on NPCs, and MOB bits on PCs (except MOB_ISNPC);
  * both kinds share char_data::act. */
@@ -91,7 +89,6 @@ char *char_get_title(const struct char_data *ch);
 int char_get_starphase(const struct char_data *ch);
 void char_set_starphase(struct char_data *ch, int v);
 int char_get_mimic(const struct char_data *ch);
-void char_set_mimic(struct char_data *ch, int v);
 char *char_get_voice(const struct char_data *ch);
 void char_set_voice(struct char_data *ch, char *v);
 int char_get_transclass(const struct char_data *ch);
@@ -118,7 +115,6 @@ int char_get_chclasses(const struct char_data *ch, int i);
 void char_set_chclasses(struct char_data *ch, int i, int v);
 int char_get_class_ranks(const struct char_data *ch, int whichclass);
 int char_get_race(const struct char_data *ch);
-void char_set_race(struct char_data *ch, int v);
 int8_t char_get_hairl(const struct char_data *ch);
 void char_set_hairl(struct char_data *ch, int8_t v);
 int8_t char_get_hairc(const struct char_data *ch);
@@ -429,7 +425,6 @@ void char_set_lastint(struct char_data *ch, time_t v);
 #define GET_HISTORY(ch, i)      CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->comm_hist[i]))
 
 int8_t char_get_skills_mod(const struct char_data *ch, int i);
-void char_set_skills_mod(struct char_data *ch, int i, int8_t v);
 int8_t char_get_skills_perf(const struct char_data *ch, int i);
 void char_set_skills_perf(struct char_data *ch, int i, int8_t v);
 #define SET_SKILL_BONUS(ch, i, value)	do { (ch)->skills[i].mod = value; } while (0)
@@ -535,7 +530,6 @@ char *obj_fname_for(const struct obj_data *obj, const struct char_data *vict);
 struct room_direction_data * char_get_exit(const struct char_data *ch, int door);
 void char_set_exit(struct char_data *ch, int door, struct room_direction_data * v);
 struct room_direction_data * char_get_exit2(const struct char_data *ch, int door);
-void char_set_exit2(struct char_data *ch, int door, struct room_direction_data * v);
 
 
 bool char_can_go(const struct char_data *ch, int door);
@@ -632,7 +626,6 @@ bool char_is_yardratian(const struct char_data *ch);
 bool char_is_arlian(const struct char_data *ch);
 bool char_is_dragon(const struct char_data *ch);
 bool char_is_mechanical(const struct char_data *ch);
-bool char_is_undead(const struct char_data *ch);
 
 bool char_is_male(const struct char_data *ch);
 bool char_is_female(const struct char_data *ch);
@@ -678,13 +671,11 @@ bool can_tolerate_gravity(char_data *ch, int grav);
 int calcTier(char_data *ch);
 int64_t calc_soft_cap(char_data *ch);
 bool is_soft_cap(char_data *ch, int64_t type, long double mult);
-int wearing_android_canister(char_data *ch);
 int calcGravCost(char_data *ch, int64_t num);
 
 int64_t getCurHealth(char_data *ch);
 int64_t getMaxHealth(char_data *ch);
 double getCurHealthPercent(char_data *ch);
-int64_t getPercentOfCurHealth(char_data *ch, double amt);
 int64_t getPercentOfMaxHealth(char_data *ch, double amt);
 bool isFullHealth(char_data *ch);
 int64_t setCurHealth(char_data *ch, int64_t amt);
@@ -694,8 +685,6 @@ int64_t decCurHealth(char_data *ch, int64_t amt, int64_t floor);
 int64_t incCurHealthPercent(char_data *ch, double amt, bool limit_max);
 int64_t decCurHealthPercent(char_data *ch, double amt, int64_t floor);
 void restoreHealth(char_data *ch, bool announce);
-int64_t healCurHealth(char_data *ch, int64_t amt);
-int64_t harmCurHealth(char_data *ch, int64_t amt);
 
 int64_t getMaxPL(char_data *ch);
 int64_t getMaxPLTrans(char_data *ch);
@@ -703,7 +692,6 @@ int64_t getCurPL(char_data *ch);
 int64_t getBasePL(char_data *ch);
 int64_t getEffBasePL(char_data *ch);
 double getCurPLPercent(char_data *ch);
-int64_t getPercentOfCurPL(char_data *ch, double amt);
 int64_t getPercentOfMaxPL(char_data *ch, double amt);
 bool isFullPL(char_data *ch);
 
@@ -712,10 +700,8 @@ int64_t getMaxKI(char_data *ch);
 int64_t getBaseKI(char_data *ch);
 int64_t getEffBaseKI(char_data *ch);
 double getCurKIPercent(char_data *ch);
-int64_t getPercentOfCurKI(char_data *ch, double amt);
 int64_t getPercentOfMaxKI(char_data *ch, double amt);
 bool isFullKI(char_data *ch);
-int64_t setCurKI(char_data *ch, int64_t amt);
 int64_t setCurKIPercent(char_data *ch, double amt);
 int64_t incCurKI(char_data *ch, int64_t amt, bool limit_max);
 int64_t decCurKI(char_data *ch, int64_t amt, int64_t floor);
@@ -728,10 +714,7 @@ int64_t getMaxST(char_data *ch);
 int64_t getBaseST(char_data *ch);
 int64_t getEffBaseST(char_data *ch);
 double getCurSTPercent(char_data *ch);
-int64_t getPercentOfCurST(char_data *ch, double amt);
-int64_t getPercentOfMaxST(char_data *ch, double amt);
 bool isFullST(char_data *ch);
-int64_t setCurST(char_data *ch, int64_t amt);
 int64_t setCurSTPercent(char_data *ch, double amt);
 int64_t incCurST(char_data *ch, int64_t amt, bool limit_max);
 int64_t decCurST(char_data *ch, int64_t amt, int64_t floor);
@@ -742,11 +725,7 @@ void restoreST(char_data *ch, bool announce);
 int64_t getCurLF(char_data *ch);
 int64_t getMaxLF(char_data *ch);
 double getCurLFPercent(char_data *ch);
-int64_t getPercentOfCurLF(char_data *ch, double amt);
-int64_t getPercentOfMaxLF(char_data *ch, double amt);
 bool isFullLF(char_data *ch);
-int64_t setCurLF(char_data *ch, int64_t amt);
-int64_t setCurLFPercent(char_data *ch, double amt);
 int64_t incCurLF(char_data *ch, int64_t amt, bool limit_max);
 int64_t decCurLF(char_data *ch, int64_t amt, int64_t floor);
 int64_t incCurLFPercent(char_data *ch, double amt, bool limit_max);
@@ -761,12 +740,8 @@ void restoreLimbs(char_data *ch, bool announce);
 int64_t gainBasePL(char_data *ch, int64_t amt, bool trans_mult);
 int64_t gainBaseKI(char_data *ch, int64_t amt, bool trans_mult);
 int64_t gainBaseST(char_data *ch, int64_t amt, bool trans_mult);
-void gainBaseAll(char_data *ch, int64_t amt, bool trans_mult);
 
 int64_t loseBasePL(char_data *ch, int64_t amt, bool trans_mult);
-int64_t loseBaseKI(char_data *ch, int64_t amt, bool trans_mult);
-int64_t loseBaseST(char_data *ch, int64_t amt, bool trans_mult);
-void loseBaseAll(char_data *ch, int64_t amt, bool trans_mult);
 
 int64_t gainBasePLPercent(char_data *ch, double amt, bool trans_mult);
 int64_t gainBaseKIPercent(char_data *ch, double amt, bool trans_mult);
@@ -774,9 +749,6 @@ int64_t gainBaseSTPercent(char_data *ch, double amt, bool trans_mult);
 void gainBaseAllPercent(char_data *ch, double amt, bool trans_mult);
 
 int64_t loseBasePLPercent(char_data *ch, double amt, bool trans_mult);
-int64_t loseBaseKIPercent(char_data *ch, double amt, bool trans_mult);
-int64_t loseBaseSTPercent(char_data *ch, double amt, bool trans_mult);
-void loseBaseAllPercent(char_data *ch, double amt, bool trans_mult);
 
 void cureStatusKnockedOut(char_data *ch, bool announce);
 void cureStatusBurn(char_data *ch, bool announce);
@@ -786,7 +758,6 @@ void setStatusKnockedOut(char_data *ch);
 int64_t getMaxCarryWeight(char_data *ch);
 int64_t getCurGearWeight(char_data *ch);
 int64_t getCurCarriedWeight(char_data *ch);
-int64_t getAvailableCarryWeight(char_data *ch);
 
 double speednar(char_data *ch);
 int64_t getEffMaxPL(char_data *ch);
@@ -800,7 +771,6 @@ int has_group(struct char_data *ch);
 const char *report_party_health(struct char_data *ch);
 int sec_roll_check(struct char_data *ch);
 int get_measure(struct char_data *ch, int height, int weight);
-int trans_cost(struct char_data *ch, int trans);
 int trans_req(struct char_data *ch, int trans);
 const char *disp_align(struct char_data *ch);
 void senseCreate(struct char_data *ch);
@@ -821,8 +791,6 @@ int64_t gear_exp(struct char_data *ch, int64_t exp);
 void purge_homing(struct char_data *ch);
 void improve_skill(struct char_data *ch, int skill, int num);
 void stop_follower(struct char_data *ch);
-int num_followers_charmed(struct char_data *ch);
-void switch_leader(struct char_data *old, struct char_data *new_leader);
 void die_follower(struct char_data *ch);
 void add_follower(struct char_data *ch, struct char_data *leader);
 bool circle_follow(struct char_data *ch, struct char_data *victim);
@@ -877,7 +845,6 @@ void char_gain_tail(char_data *ch, bool announce);
 room_vnum sensei_start_room(int s_id);
 room_vnum sensei_location_id(int s_id);
 int sensei_grav_tolerance(int s_id);
-int sensei_rpp_cost(int s_id, int r_id);
 
 int race_get_size(int r_id);
 int race_is_playable(int r_id);

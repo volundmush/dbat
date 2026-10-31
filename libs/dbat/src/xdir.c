@@ -18,27 +18,6 @@ char *xdir_get_name(struct xap_dir *xd,int i) {
   return xd->namelist[i]->d_name;
 }
 
-char *xdir_get_next(struct xap_dir *xd) {
-  if(++(xd->current) >= xd->total) {
-    return NULL;
-  }
-  return xd->namelist[xd->current-1]->d_name;
-}
-
-
-void xdir_close(struct xap_dir *xd) {
-  int i;
-  for(i=0;i < xd->total;i++) {
-    free(xd->namelist[i]);
-  }
-  free(xd->namelist);
-  xd->namelist = NULL;
-  xd->current = xd->total = -1;
-}
-
-int xdir_get_total(struct xap_dir *xd) {
-  return xd->total;
-}
 
 int insure_directory(char *path, int isfile) {
   char *chopsuey = strdup(path);

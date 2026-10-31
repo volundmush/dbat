@@ -114,18 +114,6 @@ char *CAP(char *txt)
   return (txt);
 }
 
-char *strlwr(char *s) 
-{ 
-   if (s != NULL) 
-   { 
-      char *p; 
-
-      for (p = s; *p; ++p) 
-         *p = tolower(*p); 
-   } 
-   return s; 
-}
-
 /* Strips \r\n from end of string.  */
 void prune_crlf(char *txt)
 {
@@ -217,11 +205,6 @@ char *two_arguments(char *argument, char *first_arg, char *second_arg)
  * Same as two_arguments only, well you get the idea... - Iovan
  *
  */
-char *three_arguments(char *argument, char *first_arg, char *second_arg, char *third_arg)
-{
- return (one_argument(one_argument(one_argument(argument, first_arg), second_arg), third_arg)); /* >.> */
-}
-
 int is_abbrev(const char *arg1, const char *arg2)
 {
   if (!*arg1)

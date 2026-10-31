@@ -639,7 +639,6 @@ ACMD(do_oasis_aedit);
 
 void hedit_parse(struct descriptor_data *d, char *arg);
 void hedit_string_cleanup(struct descriptor_data *d, int terminator);
-void free_help(struct help_index_element *help);
 ACMD(do_oasis_hedit);
 
 void hsedit_save_to_disk( void );

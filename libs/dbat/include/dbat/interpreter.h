@@ -26,7 +26,6 @@ char	*one_argument(char *argument, char *first_arg);
 char	*one_word(char *argument, char *first_arg);
 char	*any_one_arg(char *argument, char *first_arg);
 char	*two_arguments(char *argument, char *first_arg, char *second_arg);
-char    *three_arguments(char *argument, char *first_arg, char *second_arg, char *third_arg);
 int	fill_word(char *argument);
 void	half_chop(char *string, char *arg1, char *arg2);
 void	nanny(struct descriptor_data *d, char *arg);

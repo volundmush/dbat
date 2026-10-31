@@ -1536,13 +1536,6 @@ bool guild_trade_flagged(const struct guild_data *rec, int flag) {
     return IS_SET_AR(rec->with_who, flag) != 0;
 }
 
-void guild_trade_set(struct guild_data *rec, int flag, bool on) {
-    if (on)
-        SET_BIT_AR(rec->with_who, flag);
-    else
-        REMOVE_BIT_AR(rec->with_who, flag);
-}
-
 bool guild_trade_toggle(struct guild_data *rec, int flag) {
     return (TOGGLE_BIT_AR(rec->with_who, flag) & Q_BIT(flag)) != 0;
 }

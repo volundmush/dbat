@@ -2711,16 +2711,6 @@ static void get_one_line(FILE *fl, char *buf)
   buf[strlen(buf) - 1] = '\0'; /* take off the trailing \n */
 }
 
-void free_help(struct help_index_element *cmhelp) 
-{
-  if (cmhelp->keywords)
-    free(cmhelp->keywords);
-  if (cmhelp->entry && !cmhelp->duplicate)
-    free(cmhelp->entry);
-
-  free(cmhelp);
-}
-
 void free_help_table(void)
 {
   if (help_table) {

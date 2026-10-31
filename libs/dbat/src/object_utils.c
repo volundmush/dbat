@@ -722,10 +722,6 @@ char *obj_get_short_description(const struct obj_data *obj) {
     return obj->short_description;
 }
 
-void obj_set_short_description(struct obj_data *obj, char *v) {
-    obj->short_description = v;
-}
-
 room_vnum obj_get_room_loaded(const struct obj_data *obj) {
     return obj->room_loaded;
 }

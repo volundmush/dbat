@@ -183,7 +183,3 @@ bool room_toggle_flag(struct room_data *room, int flag) {
 void rroom_set_flag(room_rnum room, int flag, bool on) {
     room_set_flag(&world[room], flag, on);
 }
-
-bool rroom_toggle_flag(room_rnum room, int flag) {
-    return room_toggle_flag(&world[room], flag);
-}

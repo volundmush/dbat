@@ -70,4 +70,3 @@ void *queue_head(struct queue *q);
 long queue_key(struct queue *q);
 long queue_elmt_key(struct q_element *qe);
 void queue_free(struct queue *q);
-int  event_is_queued(struct event *event);

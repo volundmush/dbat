@@ -411,13 +411,6 @@ send_to_char(d->character, "%c[H%c[J", 27, 27);
 }
 /* End of Assedit Parse */
 
-void assedit_delete(struct descriptor_data *d)
-{
- send_to_char(d->character, "Which item number do you wish to delete from this assembly?");
- OLC_MODE(d) = ASSEDIT_DELETE_COMPONENT;
- return;
-}
-
 
 void assedit_edit_extract(struct descriptor_data *d)
 {

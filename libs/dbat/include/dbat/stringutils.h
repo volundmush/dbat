@@ -8,7 +8,6 @@ int levenshtein_distance(char *s1, char *s2);
 void trim(char *s);
 char *add_commas(int64_t num);
 char *CAP(char *txt);
-char *strlwr(char *s);
 void prune_crlf(char *txt);
 
 #define IS_COLOR_CHAR(c)  (c == 'n' || c == 'b' || c == 'B' || c == 'c' || \
@@ -22,7 +21,6 @@ char *one_word(char *argument, char *first_arg);
 char *any_one_arg(char *argument, char *first_arg);
 char *one_argument(char *argument, char *first_arg);
 char *two_arguments(char *argument, char *first_arg, char *second_arg);
-char *three_arguments(char *argument, char *first_arg, char *second_arg, char *third_arg);
 int is_abbrev(const char *arg1, const char *arg2);
 void half_chop(char *string, char *arg1, char *arg2);
 void skip_spaces(char **string);

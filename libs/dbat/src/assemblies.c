@@ -415,59 +415,6 @@ bool assemblyDestroy( long lVnum )
   return (TRUE);
 }
 
-bool assemblyHasComponent( long lVnum, long lComponentVnum )
-{
-  ASSEMBLY     *pAssembly = NULL;
-
-  if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == NULL )
-  {
-    log( "SYSERR: assemblyHasComponent(): Invalid 'lVnum' #%ld.", lVnum );
-    return (FALSE);
-  }
-
-  return (assemblyGetComponentIndex( pAssembly, lComponentVnum ) >= 0);
-}
-
-bool assemblyRemoveComponent( long lVnum, long lComponentVnum )
-{
-  long         lIndex = 0;
-  ASSEMBLY     *pAssembly = NULL;
-  COMPONENT    *pNewComponents = NULL;
-
-  if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == NULL )
-  {
-    log( "SYSERR: assemblyRemoveComponent(): Invalid 'lVnum' #%ld.", lVnum );
-    return (FALSE);
-  }
-  else if( (lIndex = assemblyGetComponentIndex( pAssembly, lComponentVnum )) <
-0 )
-  {
-    log( "SYSERR: assemblyRemoveComponent(): Vnum #%ld is not a "
-      "component of assembled vnum #%ld.", lComponentVnum, lVnum );
-    return (FALSE);
-  }
-
-  if( pAssembly->pComponents != NULL && pAssembly->lNumComponents > 1 )
-  {
-    CREATE( pNewComponents, COMPONENT, pAssembly->lNumComponents - 1 );
-
-    if( lIndex > 0 )
-      memmove( pNewComponents, pAssembly->pComponents, lIndex * sizeof( COMPONENT ) );
-
-    if( lIndex < pAssembly->lNumComponents - 1 )
-    {
-      memmove( pNewComponents + lIndex, pAssembly->pComponents + lIndex + 1,
-       (pAssembly->lNumComponents - lIndex - 1) * sizeof( COMPONENT ) );
-    }
-  }
-
-  free( pAssembly->pComponents );
-  pAssembly->pComponents = pNewComponents;
-  pAssembly->lNumComponents -= 1;
-
-  return (TRUE);
-}
-
 int assemblyGetType( long lVnum )
 {
   ASSEMBLY     *pAssembly = NULL;
@@ -479,19 +426,6 @@ int assemblyGetType( long lVnum )
   }
 
   return ((int) pAssembly->uchAssemblyType);
-}
-
-long assemblyCountComponents( long lVnum )
-{
-  ASSEMBLY     *pAssembly = NULL;
-
-  if( (pAssembly = assemblyGetAssemblyPtr( lVnum )) == NULL )
-  {
-    log( "SYSERR: assemblyCountComponents(): Invalid 'lVnum' #%ld.", lVnum );
-    return (0);
-  }
-
-  return (pAssembly->lNumComponents);
 }
 
 long assemblyFindAssembly( const char *pszAssemblyName )
@@ -536,22 +470,6 @@ long assemblyGetAssemblyIndex( long lVnum )
     else
       lBottom = lMiddle + 1;
   }
-}
-
-long assemblyGetComponentIndex( ASSEMBLY *pAssembly, long lComponentVnum )
-{
-  long         i = 0;
-
-  if( pAssembly == NULL )
-    return (-1);
-
-  for( i = 0; i < pAssembly->lNumComponents; i++ )
-  {
-    if( pAssembly->pComponents[ i ].lVnum == lComponentVnum )
-      return (i);
-  }
-
-  return (-1);
 }
 
 ASSEMBLY* assemblyGetAssemblyPtr( long lVnum )

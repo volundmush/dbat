@@ -53,5 +53,4 @@ SPECIAL(guild);
 
 /* Trade restriction flags (TRADE_*) on a guild_data. */
 bool guild_trade_flagged(const struct guild_data *rec, int flag);
-void guild_trade_set(struct guild_data *rec, int flag, bool on);
 bool guild_trade_toggle(struct guild_data *rec, int flag);
