@@ -1,9 +1,7 @@
 #pragma once
 #include "dbat/consts/types.h"
 
-
 /* global variables */
-
 
 // functions
 void search_replace(char *string, const char *find, const char *replace);

@@ -1,0 +1,31 @@
+# Formatting for the DBAT C sources: CircleMUD-style 2-space indent, function braces on their own line,
+# control-statement braces on the same line. ColumnLimit 0 keeps existing line breaks (no re-wrapping).
+BasedOnStyle: LLVM
+Language: Cpp
+IndentWidth: 2
+ContinuationIndentWidth: 4
+UseTab: Never
+ColumnLimit: 0
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+  AfterControlStatement: Never
+  AfterStruct: false
+  AfterEnum: false
+  AfterUnion: false
+  BeforeElse: false
+  SplitEmptyFunction: false
+IndentCaseLabels: true
+PointerAlignment: Right
+SortIncludes: Never
+ReflowComments: false
+AllowShortBlocksOnASingleLine: Always
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLoopsOnASingleLine: true
+AlignArrayOfStructures: Left
+AlignConsecutiveMacros: Consecutive
+AlignConsecutiveAssignments: Consecutive
+AlignTrailingComments: true
+SpaceBeforeParens: ControlStatements

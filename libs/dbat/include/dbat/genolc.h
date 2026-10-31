@@ -2,9 +2,9 @@
 #include "dbat/consts/types.h"
 #include "db.h"
 
-#define STRING_TERMINATOR       '~'
+#define STRING_TERMINATOR '~'
 
-#define CONFIG_GENOLC_MOBPROG	0
+#define CONFIG_GENOLC_MOBPROG 0
 
 int genolc_checkstring(struct descriptor_data *d, char *arg);
 
@@ -28,20 +28,20 @@ struct save_list_data {
 extern struct save_list_data *save_list;
 
 /* save_list_data.type */
-#define SL_MOB	0
-#define SL_OBJ	1
-#define SL_SHP	2
-#define SL_WLD	3
-#define SL_ZON	4
-#define SL_CFG	5
-#define SL_GLD	6
-#define SL_MAX	SL_GLD
-#define SL_ACT  SL_MAX + 1 /* must be above MAX */
-#define SL_HLP  SL_MAX + 2 /* must be above MAX */
+#define SL_MOB 0
+#define SL_OBJ 1
+#define SL_SHP 2
+#define SL_WLD 3
+#define SL_ZON 4
+#define SL_CFG 5
+#define SL_GLD 6
+#define SL_MAX SL_GLD
+#define SL_ACT SL_MAX + 1 /* must be above MAX */
+#define SL_HLP SL_MAX + 2 /* must be above MAX */
 
-#define ZCMD(zon, cmds)	zone_table[(zon)].cmd[(cmds)]
+#define ZCMD(zon, cmds) zone_table[(zon)].cmd[(cmds)]
 
-#define LIMIT(var, low, high)	MIN(high, MAX(var, low))
+#define LIMIT(var, low, high) MIN(high, MAX(var, low))
 
 room_vnum genolc_zone_bottom(zone_rnum rznum);
 room_vnum genolc_zonep_bottom(struct zone_data *zone);

@@ -1,43 +1,43 @@
 #pragma once
 
 /* Modes of connectedness: used by descriptor_data.state */
-constexpr int CON_PLAYING	 = 0; /* Playing - Nominal state		*/
-constexpr int CON_CLOSE	 = 1; /* User disconnect, remove character.	*/
-constexpr int CON_GET_NAME	 = 2; /* By what name ..?			*/
-constexpr int CON_NAME_CNFRM	 = 3; /* Did I get that right, x?		*/
-constexpr int CON_PASSWORD	 = 4; /* Password:				*/
-constexpr int CON_NEWPASSWD	 = 5; /* Give me a password for x		*/
-constexpr int CON_CNFPASSWD	 = 6; /* Please retype password:		*/
-constexpr int CON_QSEX	 = 7; /* Sex?					*/
-constexpr int CON_QCLASS	 = 8; /* Class?				*/
-constexpr int CON_RMOTD	 = 9; /* PRESS RETURN after MOTD		*/
-constexpr int CON_MENU	 = 10; /* Your choice: (main menu)		*/
-constexpr int CON_EXDESC	 = 11; /* Enter a new description:		*/
+constexpr int CON_PLAYING      = 0;  /* Playing - Nominal state		*/
+constexpr int CON_CLOSE        = 1;  /* User disconnect, remove character.	*/
+constexpr int CON_GET_NAME     = 2;  /* By what name ..?			*/
+constexpr int CON_NAME_CNFRM   = 3;  /* Did I get that right, x?		*/
+constexpr int CON_PASSWORD     = 4;  /* Password:				*/
+constexpr int CON_NEWPASSWD    = 5;  /* Give me a password for x		*/
+constexpr int CON_CNFPASSWD    = 6;  /* Please retype password:		*/
+constexpr int CON_QSEX         = 7;  /* Sex?					*/
+constexpr int CON_QCLASS       = 8;  /* Class?				*/
+constexpr int CON_RMOTD        = 9;  /* PRESS RETURN after MOTD		*/
+constexpr int CON_MENU         = 10; /* Your choice: (main menu)		*/
+constexpr int CON_EXDESC       = 11; /* Enter a new description:		*/
 constexpr int CON_CHPWD_GETOLD = 12; /* Changing passwd: get old		*/
 constexpr int CON_CHPWD_GETNEW = 13; /* Changing passwd: get new		*/
 constexpr int CON_CHPWD_VRFY   = 14; /* Verify new password			*/
-constexpr int CON_DELCNF1	 = 15; /* Delete confirmation 1		*/
-constexpr int CON_DELCNF2	 = 16; /* Delete confirmation 2		*/
-constexpr int CON_DISCONNECT	 = 17; /* In-game link loss (leave character)	*/
-constexpr int CON_OEDIT	 = 18; /* OLC mode - object editor		*/
-constexpr int CON_REDIT	 = 19; /* OLC mode - room editor		*/
-constexpr int CON_ZEDIT	 = 20; /* OLC mode - zone info editor		*/
-constexpr int CON_MEDIT	 = 21; /* OLC mode - mobile editor		*/
-constexpr int CON_SEDIT	 = 22; /* OLC mode - shop editor		*/
-constexpr int CON_TEDIT	 = 23; /* OLC mode - text editor		*/
-constexpr int CON_CEDIT	 = 24; /* OLC mode - config editor		*/
+constexpr int CON_DELCNF1      = 15; /* Delete confirmation 1		*/
+constexpr int CON_DELCNF2      = 16; /* Delete confirmation 2		*/
+constexpr int CON_DISCONNECT   = 17; /* In-game link loss (leave character)	*/
+constexpr int CON_OEDIT        = 18; /* OLC mode - object editor		*/
+constexpr int CON_REDIT        = 19; /* OLC mode - room editor		*/
+constexpr int CON_ZEDIT        = 20; /* OLC mode - zone info editor		*/
+constexpr int CON_MEDIT        = 21; /* OLC mode - mobile editor		*/
+constexpr int CON_SEDIT        = 22; /* OLC mode - shop editor		*/
+constexpr int CON_TEDIT        = 23; /* OLC mode - text editor		*/
+constexpr int CON_CEDIT        = 24; /* OLC mode - config editor		*/
 constexpr int CON_QRACE        = 25; /* Race? 				*/
 constexpr int CON_ASSEDIT      = 26; /* OLC mode - Assemblies                */
 constexpr int CON_AEDIT        = 27; /* OLC mode - social (action) edit      */
 constexpr int CON_TRIGEDIT     = 28; /* OLC mode - trigger edit              */
 constexpr int CON_RACE_HELP    = 29; /* Race Help 				*/
 constexpr int CON_CLASS_HELP   = 30; /* Class Help 				*/
-constexpr int CON_QANSI	 = 31; /* Ask for ANSI support     */
-constexpr int CON_GEDIT	 = 32; /* OLC mode - guild editor 		*/
-constexpr int CON_QROLLSTATS	 = 33; /* Reroll stats 			*/
+constexpr int CON_QANSI        = 31; /* Ask for ANSI support     */
+constexpr int CON_GEDIT        = 32; /* OLC mode - guild editor 		*/
+constexpr int CON_QROLLSTATS   = 33; /* Reroll stats 			*/
 constexpr int CON_IEDIT        = 34; /* OLC mode - individual edit		*/
-constexpr int CON_LEVELUP	 = 35; /* Level up menu			*/
-constexpr int CON_QSTATS 	 = 36; /* Assign starting stats        	*/
+constexpr int CON_LEVELUP      = 35; /* Level up menu			*/
+constexpr int CON_QSTATS       = 36; /* Assign starting stats        	*/
 constexpr int CON_HAIRL        = 37; /* Choose your hair length        */
 constexpr int CON_HAIRS        = 38; /* Choose your hair style         */
 constexpr int CON_HAIRC        = 39; /* Choose your hair color         */
@@ -77,4 +77,4 @@ constexpr int CON_GENOME       = 72;
 
 constexpr int NUM_CON_TYPES = 73;
 
-extern const char *connected_types[NUM_CON_TYPES+1];
+extern const char *connected_types[NUM_CON_TYPES + 1];

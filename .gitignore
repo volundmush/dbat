@@ -64,6 +64,7 @@ config.status
 utils/Makefile
 bin/
 build/
+build-*/
 log/
 logs/
 *.log

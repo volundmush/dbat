@@ -19,7 +19,7 @@ spec_proc_func rroom_get_spec(room_rnum room);
 
 /* Minor Planet Defines */
 bool rroom_planet_zenith(room_rnum room);
-    
+
 bitvector_t *rroom_get_room_flags(room_rnum room);
 bool rroom_flagged(room_rnum loc, int flag);
 void rroom_set_flag(room_rnum room, int flag, bool on);
@@ -39,4 +39,3 @@ void room_set_dir_option(struct room_data *room, int i, struct room_direction_da
 int num_pc_in_room(struct room_data *room);
 int cook_element(room_rnum room);
 int room_is_dark(room_rnum room);
-

@@ -3,8 +3,6 @@
 #include "dbat/consts/races.h"
 #include "dbat/transformations.h"
 
-
-
 // global variables
 
 // functions
@@ -16,8 +14,8 @@ int invalid_race(struct char_data *ch, struct obj_data *obj);
 
 // Race behaviour. Races are identified by their RACE_* constant.
 typedef enum softcap_type {
-    SOFTCAP_FIXED = 0,
-    SOFTCAP_VARIABLE = 1
+  SOFTCAP_FIXED    = 0,
+  SOFTCAP_VARIABLE = 1
 } softcap_type;
 
 bool race_exists(int r);

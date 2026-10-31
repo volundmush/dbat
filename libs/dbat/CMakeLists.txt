@@ -2,7 +2,16 @@ add_library(dbat STATIC)
 add_library(dbat::dbat ALIAS dbat)
 
 target_compile_features(dbat PUBLIC c_std_23)
-target_compile_definitions(dbat PUBLIC USING_CMAKE=1 CIRCLE_UNIX=1 POSIX=1)
+
+# Flags shared by every C file in the server. Keep in sync with c_flags in build.zig.
+set(DBAT_C_FLAGS
+    -g -fno-omit-frame-pointer
+    -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wmissing-prototypes
+    -Wno-format-truncation  # snprintf truncating is the intended, bounded behaviour
+    -Wno-unused-result      # 45 unchecked fscanf/fgets/system results; tracked separately
+    -Werror=format-security -Werror=return-type -Werror=implicit-function-declaration
+    CACHE INTERNAL "")
+target_compile_options(dbat PRIVATE ${DBAT_C_FLAGS})
 
 target_include_directories(dbat
     PUBLIC

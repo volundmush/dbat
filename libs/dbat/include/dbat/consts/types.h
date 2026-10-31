@@ -3,23 +3,16 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define CIRCLE_UNSIGNED_INDEX 0	/* 0 = signed, 1 = unsigned */
-
-#if CIRCLE_UNSIGNED_INDEX
-#define IDXTYPE	uint16_t
-constexpr IDXTYPE NOTHING	= ((IDXTYPE)~0);
-#else
-#define IDXTYPE	int
-constexpr IDXTYPE NOTHING	= -1; /* nil reference for objects	*/
-#endif
+#define IDXTYPE int
+constexpr IDXTYPE NOTHING = -1; /* nil reference for objects	*/
 
 constexpr IDXTYPE NOWHERE = NOTHING;
-constexpr IDXTYPE NOBODY = NOTHING;
-constexpr IDXTYPE NOFLAG = NOTHING;
+constexpr IDXTYPE NOBODY  = NOTHING;
+constexpr IDXTYPE NOFLAG  = NOTHING;
 
 #define I64T "ld"
-#define SZT "ld"
-#define TMT "ld"
+#define SZT  "ld"
+#define TMT  "ld"
 
 /* Various virtual (human-reference) number types. */
 typedef IDXTYPE room_vnum;
@@ -45,7 +38,7 @@ typedef IDXTYPE guild_rnum;
 typedef uint32_t bitvector_t;
 
 #define FALSE false
-#define TRUE true
+#define TRUE  true
 
 struct char_data;
 struct obj_data;
@@ -111,6 +104,6 @@ typedef struct transform_bonus transform_bonus;
 typedef struct transforms_available transforms_available;
 typedef struct pclean_criteria_data pclean_criteria_data;
 
-#define ACMD(name) void (name)(struct char_data *ch, char *argument, int cmd, int subcmd)
-#define SPECIAL(name) int (name)(struct char_data *ch, void *me, int cmd, char *argument)
+#define ACMD(name)    void(name)(struct char_data * ch, char *argument, int cmd, int subcmd)
+#define SPECIAL(name) int(name)(struct char_data * ch, void *me, int cmd, char *argument)
 typedef SPECIAL((*spec_proc_func));

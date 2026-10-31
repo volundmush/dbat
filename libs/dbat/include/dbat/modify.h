@@ -1,7 +1,6 @@
 #pragma once
 #include "dbat/consts/types.h"
 
-
 // functions
 void paginate_string(char *str, struct descriptor_data *d);
 void smash_tilde(char *str);

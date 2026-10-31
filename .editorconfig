@@ -1,0 +1,19 @@
+# Matches .clang-format: 2-space indentation, no tabs, LF line endings.
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+
+[*.{c,h}]
+indent_style = space
+indent_size = 2
+
+[*.{zig,zon}]
+indent_style = space
+indent_size = 4
+
+[{CMakeLists.txt,*.cmake,*.json}]
+indent_style = space
+indent_size = 2

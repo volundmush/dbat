@@ -16,23 +16,17 @@
 
 /* linked list for mob/object prototype trigger lists */
 struct trig_proto_list {
-  int vnum;                             /* vnum of the trigger   */
-  struct trig_proto_list *next;         /* next trigger          */
+  int vnum;                     /* vnum of the trigger   */
+  struct trig_proto_list *next; /* next trigger          */
 };
 
 #define DG_SCRIPT_VERSION "DG Scripts 1.0.14"
 
-
 /* unless you change this, Puff casts all your dg spells */
 #define DG_CASTER_PROXY 1
 /* spells cast by objects and rooms use this level */
-#define DG_SPELL_LEVEL  25
+#define DG_SPELL_LEVEL 25
 
-/*
- * define this if you don't want wear/remove triggers to fire when
- * a player is saved.
- */
-#define NO_EXTRANEOUS_TRIGGERS
 /*
  * %actor.room% behaviour :
  * Until pl 7 %actor.room% returned a room vnum.
@@ -57,66 +51,62 @@ struct trig_proto_list {
  */
 #define ACTOR_ROOM_IS_UID 1
 
-
-
 /*
  * These are slightly off of PULSE_MOBILE so
  * everything isnt happening at the same time
  */
-#define PULSE_DG_SCRIPT         (13 RL_SEC)
+#define PULSE_DG_SCRIPT (13 RL_SEC)
 
-
-#define MAX_SCRIPT_DEPTH      10          /* maximum depth triggers can
+#define MAX_SCRIPT_DEPTH 10 /* maximum depth triggers can
 					     recurse into each other */
 
-#define SCRIPT_ERROR_CODE     -9999999   /* this shouldn't happen too often */
+#define SCRIPT_ERROR_CODE -9999999 /* this shouldn't happen too often */
 
 /* one line of the trigger */
 struct cmdlist_element {
-  char *cmd;				/* one line of a trigger */
+  char *cmd; /* one line of a trigger */
   struct cmdlist_element *original;
   struct cmdlist_element *next;
 };
 
 struct trig_var_data {
-  char *name;				/* name of variable  */
-  char *value;				/* value of variable */
-  long context;				/* 0: global context */
+  char *name;   /* name of variable  */
+  char *value;  /* value of variable */
+  long context; /* 0: global context */
 
   struct trig_var_data *next;
 };
 
 /* structure for triggers */
 struct trig_data {
-    IDXTYPE nr; 	                /* trigger's rnum                  */
-    uint8_t attach_type;			/* mob/obj/wld intentions          */
-    uint8_t data_type;		        /* type of game_data for trig      */
-    char *name;			        /* name of trigger                 */
-    bitvector_t trigger_type;			/* type of trigger (for bitvector) */
-    struct cmdlist_element *cmdlist;	/* top of command list             */
-    struct cmdlist_element *curr_state;	/* ptr to current line of trigger  */
-    int narg;				/* numerical argument              */
-    char *arglist;			/* argument list                   */
-    int depth;				/* depth into nest ifs/whiles/etc  */
-    int loops;				/* loop iteration counter          */
-    struct event *wait_event;   	/* event to pause the trigger      */
-    bool purged;			/* trigger is set to be purged     */
-    struct trig_var_data *var_list;	/* list of local vars for trigger  */
+  IDXTYPE nr;                         /* trigger's rnum                  */
+  uint8_t attach_type;                /* mob/obj/wld intentions          */
+  uint8_t data_type;                  /* type of game_data for trig      */
+  char *name;                         /* name of trigger                 */
+  bitvector_t trigger_type;           /* type of trigger (for bitvector) */
+  struct cmdlist_element *cmdlist;    /* top of command list             */
+  struct cmdlist_element *curr_state; /* ptr to current line of trigger  */
+  int narg;                           /* numerical argument              */
+  char *arglist;                      /* argument list                   */
+  int depth;                          /* depth into nest ifs/whiles/etc  */
+  int loops;                          /* loop iteration counter          */
+  struct event *wait_event;           /* event to pause the trigger      */
+  bool purged;                        /* trigger is set to be purged     */
+  struct trig_var_data *var_list;     /* list of local vars for trigger  */
 
-    struct trig_data *next;
-    struct trig_data *next_in_world;    /* next in the global trigger list */
+  struct trig_data *next;
+  struct trig_data *next_in_world; /* next in the global trigger list */
 };
-
 
 /* a complete script (composed of several triggers) */
 struct script_data {
-  bitvector_t types;			/* bitvector of trigger types */
-  struct trig_data *trig_list;	        /* list of triggers           */
-  struct trig_var_data *global_vars;	/* list of global variables   */
-  bool purged;				/* script is set to be purged */
-  long context;				/* current context for statics */
+  bitvector_t types;                 /* bitvector of trigger types */
+  struct trig_data *trig_list;       /* list of triggers           */
+  struct trig_var_data *global_vars; /* list of global variables   */
+  bool purged;                       /* script is set to be purged */
+  long context;                      /* current context for statics */
 
-  struct script_data *next;		/* used for purged_scripts    */
+  struct script_data *next; /* used for purged_scripts    */
 };
 
 /* The event data for the wait command */
@@ -135,11 +125,10 @@ typedef struct char_data char_data;
 
 /* used for actor memory triggers */
 struct script_memory {
-  long id;				/* id of who to remember */
-  char *cmd;				/* command, or NULL for generic */
+  long id;   /* id of who to remember */
+  char *cmd; /* command, or NULL for generic */
   struct script_memory *next;
 };
-
 
 extern struct index_data **trig_index;
 
@@ -151,11 +140,10 @@ extern int top_of_trigt;
 #include "genzon.h"
 #include "oasis.h"
 
-ACMD(do_attach) ;
+ACMD(do_attach);
 ACMD(do_detach);
 ACMD(do_vdelete);
 ACMD(do_tstat);
-
 
 ACMD(do_masound);
 ACMD(do_mkill);
@@ -179,8 +167,6 @@ ACMD(do_mdoor);
 ACMD(do_mfollow);
 ACMD(do_mrecho);
 
-
-
 /* function prototypes from dg_triggers.c */
 char *one_phrase(char *arg, char *first_arg);
 int is_substring(char *sub, char *string);
@@ -199,11 +185,11 @@ void timer_otrigger(obj_data *obj);
 int get_otrigger(obj_data *obj, char_data *actor);
 int drop_wtrigger(obj_data *obj, char_data *actor);
 int give_otrigger(obj_data *obj, char_data *actor,
-         char_data *victim);
+                  char_data *victim);
 int receive_mtrigger(char_data *ch, char_data *actor,
-         obj_data *obj);
+                     obj_data *obj);
 void bribe_mtrigger(char_data *ch, char_data *actor,
-         int amount);
+                    int amount);
 int wear_otrigger(obj_data *obj, char_data *actor, int where);
 int remove_otrigger(obj_data *obj, char_data *actor);
 
@@ -260,16 +246,16 @@ obj_data *get_obj_in_room(room_data *room, char *name);
 obj_data *get_obj_by_room(room_data *room, char *name);
 int trgvar_in_room(room_vnum vnum);
 obj_data *get_obj_in_list(char *name, obj_data *list);
-obj_data *get_object_in_equip(char_data * ch, char *name);
+obj_data *get_object_in_equip(char_data *ch, char *name);
 void script_trigger_check(void);
 void check_time_triggers(void);
 void find_uid_name(char *uid, char *name, size_t nlen);
-void do_sstat_room(struct char_data * ch, struct room_data *rm);
+void do_sstat_room(struct char_data *ch, struct room_data *rm);
 void do_sstat_object(char_data *ch, obj_data *j);
 void do_sstat_character(char_data *ch, char_data *k);
 void add_trigger(struct script_data *sc, trig_data *t, int loc);
 void script_vlog(const char *format, va_list args);
-void script_log(const char *format, ...) __attribute__ ((format (printf, 1, 2)));
+void script_log(const char *format, ...) __attribute__((format(printf, 1, 2)));
 char *matching_quote(char *p);
 struct room_data *dg_room_of_obj(struct obj_data *obj);
 
@@ -278,7 +264,7 @@ struct room_data *dg_room_of_obj(struct obj_data *obj);
 int script_driver(void *go_adress, trig_data *trig, int type, int mode);
 trig_rnum real_trigger(trig_vnum vnum);
 void process_eval(void *go, struct script_data *sc, trig_data *trig,
-                 int type, char *cmd);
+                  int type, char *cmd);
 void read_saved_vars(struct char_data *ch);
 void save_char_vars(struct char_data *ch);
 void init_lookup_table(void);
@@ -297,7 +283,6 @@ void dg_read_trigger(FILE *fp, void *proto, int type);
 void dg_obj_trigger(char *line, struct obj_data *obj);
 void assign_triggers(void *i, int type);
 
-
 /* From dg_variables.c */
 void add_var(struct trig_var_data **var_list, char *name, const char *value, long id);
 int item_in_list(char *item, obj_data *list);
@@ -308,8 +293,7 @@ void var_subst(void *go, struct script_data *sc, trig_data *trig,
 int text_processed(char *field, char *subfield, struct trig_var_data *vd,
                    char *str, size_t slen);
 void find_replacement(void *go, struct script_data *sc, trig_data *trig,
-                int type, char *var, char *field, char *subfield, char *str, size_t slen);
-
+                      int type, char *var, char *field, char *subfield, char *str, size_t slen);
 
 /* From dg_handler.c */
 void free_var_el(struct trig_var_data *var);
@@ -331,9 +315,9 @@ void send_to_zone(char *messg, zone_rnum zone);
 
 /* from dg_misc.c */
 void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
-    int type, char *cmd);
+                int type, char *cmd);
 void do_dg_affect(void *go, struct script_data *sc, trig_data *trig,
-    int type, char *cmd);
+                  int type, char *cmd);
 void send_char_pos(struct char_data *ch, int dam);
 int valid_dg_target(char_data *ch, int bitvector);
 void script_damage(char_data *vict, int dam);
@@ -344,22 +328,22 @@ int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const
 room_rnum obj_room(obj_data *obj);
 
 /* defines for valid_dg_target */
-#define DG_ALLOW_GODS (1<<0)
+#define DG_ALLOW_GODS (1 << 0)
 
 /* Macros for scripts */
 
-#define UID_CHAR   '}'
-#define GET_TRIG_NAME(t)          ((t)->name)
-#define GET_TRIG_RNUM(t)          ((t)->nr)
-#define GET_TRIG_VNUM(t)	  (trig_index[(t)->nr]->vnum)
-#define GET_TRIG_TYPE(t)          ((t)->trigger_type)
-#define GET_TRIG_DATA_TYPE(t)	  ((t)->data_type)
-#define GET_TRIG_NARG(t)          ((t)->narg)
-#define GET_TRIG_ARG(t)           ((t)->arglist)
-#define GET_TRIG_VARS(t)	  ((t)->var_list)
-#define GET_TRIG_WAIT(t)	  ((t)->wait_event)
-#define GET_TRIG_DEPTH(t)         ((t)->depth)
-#define GET_TRIG_LOOPS(t)         ((t)->loops)
+#define UID_CHAR              '}'
+#define GET_TRIG_NAME(t)      ((t)->name)
+#define GET_TRIG_RNUM(t)      ((t)->nr)
+#define GET_TRIG_VNUM(t)      (trig_index[(t)->nr]->vnum)
+#define GET_TRIG_TYPE(t)      ((t)->trigger_type)
+#define GET_TRIG_DATA_TYPE(t) ((t)->data_type)
+#define GET_TRIG_NARG(t)      ((t)->narg)
+#define GET_TRIG_ARG(t)       ((t)->arglist)
+#define GET_TRIG_VARS(t)      ((t)->var_list)
+#define GET_TRIG_WAIT(t)      ((t)->wait_event)
+#define GET_TRIG_DEPTH(t)     ((t)->depth)
+#define GET_TRIG_LOOPS(t)     ((t)->loops)
 
 /* player id's: 0 to PLAYER_ID_MAX - 1            */
 /* room id's: ROOM_ID_BASE to OBJ_ID_BASE - 1      */
@@ -367,23 +351,22 @@ room_rnum obj_room(obj_data *obj);
 /* mob id's: MOB_ID_BASE to MOB_ID_MAX            */
 /* See consts/triggers.h; allocate with dg_new_mob_uid()/dg_new_obj_uid(). */
 
+#define SCRIPT(o)     ((o)->script)
+#define SCRIPT_MEM(c) ((c)->memory)
 
-#define SCRIPT(o)		  ((o)->script)
-#define SCRIPT_MEM(c)             ((c)->memory)
+#define SCRIPT_TYPES(s) ((s)->types)
+#define TRIGGERS(s)     ((s)->trig_list)
 
-#define SCRIPT_TYPES(s)		  ((s)->types)
-#define TRIGGERS(s)		  ((s)->trig_list)
+#define GET_SHORT(ch) ((ch)->short_descr)
 
-#define GET_SHORT(ch)    ((ch)->short_descr)
+#define SCRIPT_CHECK(go, type) (SCRIPT(go) && \
+                                IS_SET(SCRIPT_TYPES(SCRIPT(go)), type))
+#define TRIGGER_CHECK(t, type) (IS_SET(GET_TRIG_TYPE(t), type) && \
+                                !GET_TRIG_DEPTH(t))
 
-
-#define SCRIPT_CHECK(go, type)   (SCRIPT(go) && \
-				  IS_SET(SCRIPT_TYPES(SCRIPT(go)), type))
-#define TRIGGER_CHECK(t, type)   (IS_SET(GET_TRIG_TYPE(t), type) && \
-				  !GET_TRIG_DEPTH(t))
-
-#define ADD_UID_VAR(buf, trig, go, name, context) do { \
-		         sprintf(buf, "%c%d", UID_CHAR, \
-		                 _Generic((go), struct char_data *: char_get_id, const struct char_data *: char_get_id, \
-		                          struct obj_data *: obj_get_id, const struct obj_data *: obj_get_id)(go)); \
-                         add_var(&GET_TRIG_VARS(trig), name, buf, context); } while (0)
+#define ADD_UID_VAR(buf, trig, go, name, context)                                                                                                                            \
+  do {                                                                                                                                                                       \
+    sprintf(buf, "%c%d", UID_CHAR,                                                                                                                                           \
+            _Generic((go), struct char_data *: char_get_id, const struct char_data *: char_get_id, struct obj_data *: obj_get_id, const struct obj_data *: obj_get_id)(go)); \
+    add_var(&GET_TRIG_VARS(trig), name, buf, context);                                                                                                                       \
+  } while (0)

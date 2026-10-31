@@ -1,7 +1,6 @@
 #pragma once
 #include "dbat/consts/types.h"
 
-
 /* act.item.c */
 // global variables
 extern struct obj_data *obj_selling;
@@ -15,9 +14,8 @@ void weight_change_object(struct obj_data *obj, int weight);
 void name_from_drinkcon(struct obj_data *obj);
 void name_to_drinkcon(struct obj_data *obj, int type);
 
-
 int64_t max_carry_weight(struct char_data *ch);
-void stop_auction(int type, struct char_data * ch);
+void stop_auction(int type, struct char_data *ch);
 void check_auction(void);
 
 // commands

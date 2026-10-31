@@ -18,10 +18,7 @@ void remove_limb(struct char_data *vict, int num);
 
 void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct obj_data *obj, int64_t dmg, int type);
 int64_t damtype(struct char_data *ch, int type, int skill, double percent);
-int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num);
 void huge_update(void);
-
-
 
 int check_def(struct char_data *vict);
 void dam_eq_loc(struct char_data *vict, int area);

@@ -111,3 +111,5 @@ void obj_set_id(struct obj_data *obj, int32_t v);
 room_rnum obj_get_in_room(const struct obj_data *obj);
 void obj_set_in_room(struct obj_data *obj, room_rnum v);
 struct room_direction_data *obj_get_exit(const struct obj_data *obj, int door);
+const char *money_desc(int amount);
+struct obj_data *create_money(int amount);

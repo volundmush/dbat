@@ -10,11 +10,11 @@ char *add_commas(int64_t num);
 char *CAP(char *txt);
 void prune_crlf(char *txt);
 
-#define IS_COLOR_CHAR(c)  (c == 'n' || c == 'b' || c == 'B' || c == 'c' || \
-   c == 'C' || c == 'g' || c == 'G' || c == 'm' || c == 'M' || c == 'r' || \
-   c == 'R' || c == 'y' || c == 'Y' || c == 'w' || c == 'W' || c == 'k' || \
-   c == 'K' || c == '0' || c == '2' || c == '3' || c == '4' || c == '5' || \
-   c == '6' || c == '7' || c == 'o' || c == 'e' || c == 'u' || c == 'l') 
+#define IS_COLOR_CHAR(c) (c == 'n' || c == 'b' || c == 'B' || c == 'c' ||                         \
+                          c == 'C' || c == 'g' || c == 'G' || c == 'm' || c == 'M' || c == 'r' || \
+                          c == 'R' || c == 'y' || c == 'Y' || c == 'w' || c == 'W' || c == 'k' || \
+                          c == 'K' || c == '0' || c == '2' || c == '3' || c == '4' || c == '5' || \
+                          c == '6' || c == '7' || c == 'o' || c == 'e' || c == 'u' || c == 'l')
 
 int count_color_chars(char *string);
 char *one_word(char *argument, char *first_arg);

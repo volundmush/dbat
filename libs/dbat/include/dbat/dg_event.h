@@ -15,17 +15,14 @@
 #pragma once
 #include "dbat/consts/types.h"
 
-
 /*
 ** how often will heartbeat() call the 'wait' event function?
 */
 #define PULSE_DG_EVENT 1
 
-
 /********** Event related section *********/
 
-#define EVENTFUNC(name) long (name)(void *event_obj)
-
+#define EVENTFUNC(name) long(name)(void *event_obj)
 
 /*
 ** define event related structures
@@ -41,7 +38,7 @@ struct event {
 /***** Queue related info ******/
 
 /* number of queues to use (reduces enqueue cost) */
-#define NUM_EVENT_QUEUES    10
+#define NUM_EVENT_QUEUES 10
 
 struct queue {
   struct q_element *head[NUM_EVENT_QUEUES], *tail[NUM_EVENT_QUEUES];

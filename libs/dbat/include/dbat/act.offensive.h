@@ -1,7 +1,6 @@
 #pragma once
 #include "dbat/consts/types.h"
 
-
 // commands
 ACMD(do_assist);
 ACMD(do_kill);

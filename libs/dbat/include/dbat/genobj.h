@@ -1,7 +1,6 @@
 #pragma once
 #include "dbat/consts/types.h"
 
-
 void copy_object_strings(struct obj_data *to, struct obj_data *from);
 void free_object_strings(struct obj_data *obj);
 void free_object_strings_proto(struct obj_data *obj);

@@ -4,7 +4,6 @@
 // functions
 void timed_dt(struct char_data *ch);
 void run_autowiz(void);
-void reboot_wizlists(void);
 void mutant_limb_regen(struct char_data *ch);
 void set_title(struct char_data *ch, char *title);
 void gain_level(struct char_data *ch, int whichclass);

@@ -57,25 +57,24 @@ constexpr int RECIPE_FBERRY_MUFFIN     = 17;
 constexpr int RECIPE_CARAMBOLA_BREAD   = 18;
 
 /* Completed Meal Object Vnums */
-constexpr int MEAL_START               = 1220;
-constexpr int MEAL_TOMATO_SOUP         = 1220;
-constexpr int MEAL_STEAK               = 1221;
-constexpr int MEAL_POTATO_SOUP         = 1222;
-constexpr int MEAL_VEGETABLE_SOUP      = 1223;
-constexpr int MEAL_MEAT_STEW           = 1224;
-constexpr int MEAL_ROAST               = 1225;
-constexpr int MEAL_CHILI_SOUP          = 1226;
-constexpr int MEAL_NORM_FISH           = 1227;
-constexpr int MEAL_GOOD_FISH           = 1228;
-constexpr int MEAL_GREAT_FISH          = 1229;
-constexpr int MEAL_BEST_FISH           = 1230;
-constexpr int MEAL_COOKED_RICE         = 1231;
-constexpr int MEAL_SUSHI               = 1232;
-constexpr int MEAL_BREAD               = 1233;
-constexpr int MEAL_SALAD               = 1234;
-constexpr int MEAL_APPLEPLUM           = 1235;
-constexpr int MEAL_FBERRY_MUFFIN       = 1236;
-constexpr int MEAL_CARAMBOLA_BREAD     = 1237;
+constexpr int MEAL_START           = 1220;
+constexpr int MEAL_TOMATO_SOUP     = 1220;
+constexpr int MEAL_STEAK           = 1221;
+constexpr int MEAL_POTATO_SOUP     = 1222;
+constexpr int MEAL_VEGETABLE_SOUP  = 1223;
+constexpr int MEAL_MEAT_STEW       = 1224;
+constexpr int MEAL_ROAST           = 1225;
+constexpr int MEAL_CHILI_SOUP      = 1226;
+constexpr int MEAL_NORM_FISH       = 1227;
+constexpr int MEAL_GOOD_FISH       = 1228;
+constexpr int MEAL_GREAT_FISH      = 1229;
+constexpr int MEAL_BEST_FISH       = 1230;
+constexpr int MEAL_COOKED_RICE     = 1231;
+constexpr int MEAL_SUSHI           = 1232;
+constexpr int MEAL_BREAD           = 1233;
+constexpr int MEAL_SALAD           = 1234;
+constexpr int MEAL_APPLEPLUM       = 1235;
+constexpr int MEAL_FBERRY_MUFFIN   = 1236;
+constexpr int MEAL_CARAMBOLA_BREAD = 1237;
 
-
-constexpr int MEAL_LAST                = 1234;
+constexpr int MEAL_LAST = 1234;
