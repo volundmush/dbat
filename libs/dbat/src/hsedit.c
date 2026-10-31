@@ -221,7 +221,7 @@ void hsedit_owner_menu(struct descriptor_data *d)
    "@g2@D)@g Owner ID   : @c%ld\r\n" 
    "@gQ@D)@g Back to main menu\r\n" 
    "@gEnter choice : @n", get_name_by_id(house->owner), house->owner); 
-   send_to_char(d->character, buf); 
+   send_to_char(d->character, "%s", buf); 
 
   OLC_MODE(d) = HSEDIT_OWNER_MENU; 
 } 
@@ -284,7 +284,7 @@ void hsedit_dir_menu(struct descriptor_data *d)
    newroom[11] == NOWHERE ? "NO ROOM" : world[(newroom[11])].name); 
     OLC_MODE(d) = HSEDIT_DIR_MENU; 
   } 
-  send_to_char(d->character, buf); 
+  send_to_char(d->character, "%s", buf); 
 
 } 
 
@@ -348,7 +348,7 @@ void hsedit_disp_guest_menu(struct descriptor_data *d)
      house->guests[8] < 1 ? 0 : house->guests[8],
      get_name_by_id(house->guests[9]) == NULL ? not_set : get_name_by_id(house->guests[9]), 
      house->guests[9] < 1 ? 0 : house->guests[9]); 
-  send_to_char(d->character, buf); 
+  send_to_char(d->character, "%s", buf); 
 
   OLC_MODE(d) = HSEDIT_GUEST_MENU; 
 } 
@@ -475,7 +475,7 @@ last_pay[128], buf2[MAX_STRING_LENGTH];
    house->owner, get_name_by_id(house->owner) == NULL ? no_name : get_name_by_id(house->owner), 
    house->atrium, ((house->exit_num >= 0) && (house->exit_num <= 11)) ? dirs[(house->exit_num)] : "NONE", 
    house_types[(house->mode)], built_on, last_pay, hsedit_list_guests(house, buf2), buf1); 
-  send_to_char(d->character, buf); 
+  send_to_char(d->character, "%s", buf); 
 
   OLC_MODE(d) = HSEDIT_MAIN_MENU; 
 } 

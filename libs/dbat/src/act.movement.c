@@ -1367,7 +1367,7 @@ ACMD(do_move)
   }
   perform_move(ch, subcmd - 1, 0);
   if (char_get_rdisplay(ch)) {
-     if (char_get_rdisplay(ch) != "Empty") {
+     if (strcmp(char_get_rdisplay(ch), "Empty")) {
 		char_set_rdisplay(ch, "Empty");
 	}
   }

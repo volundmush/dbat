@@ -228,7 +228,7 @@ void init_game(uint16_t cmport)
   
   for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
     for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
-      fscanf(mapfile, "%ld", &vnum_read);
+      fscanf(mapfile, "%d", &vnum_read);
       mapnums[rowcounter][colcounter] = real_room(vnum_read);
     }
   }
@@ -1923,7 +1923,7 @@ void set_color(struct descriptor_data *d)
       d->character->desc = d;
     }
   char_prf_set(d->character, PRF_COLOR, true);
-  write_to_output(d, GREETANSI);
+  write_to_output(d, "%s", GREETANSI);
   write_to_output(d, "\r\n@w                  Welcome to Dragonball Advent Truth\r\n");
   write_to_output(d, "@D                 ---(@CPeak Logon Count Today@W: @w%4d@D)---@n\r\n", PCOUNT);
   write_to_output(d, "@D                 ---(@CHighest Logon Count   @W: @w%4d@D)---@n\r\n", HIGHPCOUNT);
@@ -2794,7 +2794,7 @@ void send_to_eaves(const char *messg, struct char_data *tch, ...)
       *buf = '\0';
       sprintf(buf2, "@W%s %s\r\n", char_pers(d->character, tch), messg);
       sprintf(buf, "-----Eavesdrop-----\r\n%s-----Eavesdrop-----\r\n", buf2);
-      send_to_char(d->character, buf);
+      send_to_char(d->character, "%s", buf);
      }
   }
 }

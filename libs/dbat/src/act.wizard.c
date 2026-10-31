@@ -784,7 +784,7 @@ void search_replace(char *string, const char *find, const char *replace)
                         strcat(final, temp);
                 }
 
-                sprintf(string, final);
+                sprintf(string, "%s", final);
 
         }
         return;
@@ -2465,7 +2465,7 @@ void game_info(const char *format, ...)
     if (!(i->character)) 
       continue; 
 
-    write_to_output(i, messg); 
+    write_to_output(i, "%s", messg); 
     va_start(args, format); 
     vwrite_to_output(i, format, args); 
     va_end(args); 
@@ -3650,7 +3650,7 @@ ACMD(do_show)
     break;
 
   case 14:
-    if (value != NULL && *value) {
+    if (*value) {
       if (sscanf(value, "%d-%d", &low, &high) != 2) {
         if (sscanf(value, "%d", &low) != 1) {
           send_to_char(ch, "Usage: show uniques, show uniques [vnum], or show uniques [low-high]\r\n");
@@ -4864,7 +4864,7 @@ ACMD (do_zcheck)
   struct extra_descr_data *ext, *ext2;
   one_argument(argument, buf);
 
-  if (buf == NULL || !*buf || !strcmp(buf, "."))
+  if (!*buf || !strcmp(buf, "."))
     zrnum = world[char_get_in_room(ch)].zone;
   else 
     zrnum = real_zone(atoi(buf));

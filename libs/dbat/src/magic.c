@@ -128,7 +128,7 @@ int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum, i
 int mag_damage(int level, struct char_data *ch, struct char_data *victim,
 		     int spellnum)
 {
-
+  return 0;
 }
 
 

@@ -168,6 +168,9 @@ void bring_to_cap(struct char_data *ch)
              gainBaseKI(ch, cap - getBaseKI(ch)-1, p_trans);
          if(getBaseST(ch) < cap)
              gainBaseST(ch, cap - getBaseST(ch)-1, p_trans);
+         break;
+     default:
+         break;
  }
 }
 
@@ -6513,7 +6516,7 @@ ACMD(do_eavesdrop) {
   if (char_get_exit(ch, dir)) {
     if (IS_SET(char_get_exit(ch, dir)->exit_info, EX_CLOSED) && char_get_exit(ch, dir)->keyword) {
       sprintf(buf, "The %s is closed.\r\n", fname(char_get_exit(ch, dir)->keyword));
-      send_to_char(ch, buf);
+      send_to_char(ch, "%s", buf);
     } else {
       char_set_listenroom(ch, rroom_get_vnum(char_get_exit(ch, dir)->to_room));
       char_set_eavesdir(ch, dir);
@@ -11058,7 +11061,7 @@ ACMD(do_file)
      for (j = 0, i = 1; fields[i].level; i++)
        if (fields[i].level <= char_get_level(ch))
          sprintf(buf+strlen(buf), "%-15s%s\r\n", fields[i].cmd, fields[i].file);
-     send_to_char(ch, buf);
+     send_to_char(ch, "%s", buf);
      return;
    }
 
@@ -11357,17 +11360,6 @@ ACMD(do_fix)
  }
 }
 
-/* new spell memorization code */
-/* remove a spell from a character's innate linked list */
-void innate_remove(struct char_data * ch, struct innate_node * inn)
-{
-
-}
-
-void innate_add(struct char_data * ch, int innate, int timer)
-{
-
-}
 
 /* Returns true if the spell/skillnum is innate to the character
    (as opposed to just practiced).

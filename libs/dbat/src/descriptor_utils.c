@@ -32,7 +32,7 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
   if (strcasecmp(prev, line))
    sprintf(buf+strlen(buf), "%s\n", line);
   *prev = '\0';
-  sprintf(prev, line);
+  sprintf(prev, "%s", line);
  }
 
  fclose(file);
@@ -82,10 +82,10 @@ void customRead(struct descriptor_data *d, int type, char *name)
     sprintf(buf+strlen(buf), "%s\n", line);
    *filler = '\0';
    *line = '\0';
-   sprintf(filler, line);
+   sprintf(filler, "%s", line);
   }
 
-  send_to_char(d->character, buf);
+  send_to_char(d->character, "%s", buf);
 
   fclose(fl);    
   return;
@@ -106,10 +106,10 @@ void customRead(struct descriptor_data *d, int type, char *name)
    if (strcasecmp(filler, line))
     sprintf(buf+strlen(buf), "%s\n", line);
    *filler = '\0';
-   sprintf(filler, line);
+   sprintf(filler, "%s", line);
   }
 
-  write_to_output(d, buf);
+  write_to_output(d, "%s", buf);
 
   fclose(fl);
  }

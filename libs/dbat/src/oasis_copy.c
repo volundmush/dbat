@@ -346,16 +346,16 @@ ACMD(do_rcopy)
 
   two_arguments(argument, arg, arg2); 
 
-  if (!arg || !*arg) { 
+  if (!*arg) { 
     send_to_char(ch, "Syntax: rclone <base rnum> <target rnum>\r\nOr be in the room you wish to be the target and provide base vnum.\r\n"); 
     return; 
   } 
 
-  if (!arg2 || !*arg2) {
+  if (!*arg2) {
      tvnum = atoi(arg);
      rvnum = rroom_get_vnum(char_get_in_room(ch));
   }
-  else if (arg2 || *arg2) {
+  else {
   rvnum = atoi(arg2); 
   tvnum = atoi(arg);
   }

@@ -2645,7 +2645,7 @@ static void load_zones(FILE *fl, char *zonename)
     line_num+=get_line(fl,buf);
   }
 
-  if (sscanf(buf, "#%hd", &Z.number) != 1) {
+  if (sscanf(buf, "#%d", &Z.number) != 1) {
     log("SYSERR: Format error in %s, line %d", zname, line_num);
     exit(1);
   }
@@ -2669,7 +2669,7 @@ static void load_zones(FILE *fl, char *zonename)
     char zbuf3[MAX_STRING_LENGTH];
     char zbuf4[MAX_STRING_LENGTH];
 
-    if  (sscanf(buf, " %hd %hd %d %d %s %s %s %s %d %d", &Z.bot, &Z.top, &Z.lifespan,
+    if  (sscanf(buf, " %d %d %d %d %s %s %s %s %d %d", &Z.bot, &Z.top, &Z.lifespan,
       &Z.reset_mode, zbuf1, zbuf2, zbuf3, zbuf4, &Z.min_level, &Z.max_level) != 10) {
       log("SYSERR: Format error in 10-constant line of %s", zname);
       exit(1);
@@ -2680,14 +2680,14 @@ static void load_zones(FILE *fl, char *zonename)
     Z.zone_flags[2] = asciiflag_conv(zbuf3);
     Z.zone_flags[3] = asciiflag_conv(zbuf4);
 
-  } else if (sscanf(buf, " %hd %hd %d %d ", &Z.bot, &Z.top, &Z.lifespan, &Z.reset_mode) != 4) {
+  } else if (sscanf(buf, " %d %d %d %d ", &Z.bot, &Z.top, &Z.lifespan, &Z.reset_mode) != 4) {
     /*
      * This may be due to the fact that the zone has no builder.  So, we just attempt
      * to fix this by copying the previous 2 last reads into this variable and the
      * last one.
      */
     log("SYSERR: Format error in numeric constant line of %s, attempting to fix.", zname);
-    if (sscanf(Z.name, " %hd %hd %d %d ", &Z.bot, &Z.top, &Z.lifespan, &Z.reset_mode) != 4) {
+    if (sscanf(Z.name, " %d %d %d %d ", &Z.bot, &Z.top, &Z.lifespan, &Z.reset_mode) != 4) {
       log("SYSERR: Could not fix previous error, aborting game.");
     exit(1);
     } else {
@@ -5033,9 +5033,8 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
       obj_get_value(obj, 13), obj_get_value(obj, 14), obj_get_value(obj, 15)))
       return 0;
 
-  if (!(obj_extra_flagged(obj,ITEM_UNIQUE_SAVE)) && !obj_get_type_flag(obj) == ITEM_SPELLBOOK) {
-    return 1;
-  }
+  /* An early "return 1" for non-unique, non-spellbook objects used to sit here, but its
+   * condition (!type == ITEM_SPELLBOOK) was always false, so every object saves its XAP data. */
 
   if (!OBJ_SAVE_FPRINTF(fp, obj, "XAP object data",
     "XAP\n"
@@ -5321,14 +5320,14 @@ void load_config( void )
         else if (!strcasecmp(tag, "dflt_dir")) {
           if (CONFIG_DFLT_DIR)
             free(CONFIG_DFLT_DIR);
-          if (line != NULL && *line)
+          if (*line)
             CONFIG_DFLT_DIR = strdup(line);
           else
             CONFIG_DFLT_DIR = strdup(DFLT_DIR);
         } else if (!strcasecmp(tag, "dflt_ip")) {
           if (CONFIG_DFLT_IP)
             free(CONFIG_DFLT_IP);
-          if (line != NULL && *line)
+          if (*line)
             CONFIG_DFLT_IP = strdup(line);
           else
             CONFIG_DFLT_IP = NULL;
@@ -5382,7 +5381,7 @@ void load_config( void )
         else if (!strcasecmp(tag, "logname")) {
           if (CONFIG_LOGNAME)
             free(CONFIG_LOGNAME);
-          if (line != NULL && *line)
+          if (*line)
             CONFIG_LOGNAME = strdup(line);
           else
             CONFIG_LOGNAME = NULL;

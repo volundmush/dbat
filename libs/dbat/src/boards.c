@@ -303,8 +303,6 @@ struct board_info *load_board(obj_vnum board_vnum) {
 	   deletions, message deletions, etc.  'Failures' will not be logged */
        if ((get_name_by_id(poster) == NULL) && (BOARD_VERSION(temp_board) != CURRENT_BOARD_VER)) {
 	   free(memboard);
-       }else if ((poster_name == NULL) && (BOARD_VERSION(temp_board) == CURRENT_BOARD_VER)) {
-	  free(memboard);
 	} else {
 	  /* locate specific message this pertains to - therefore, messages MUST be loaded first! */
 
@@ -512,7 +510,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
 
   if (!BOARD_MNUM(thisboard) || !BOARD_MESSAGES(thisboard)) {
     sprintf(buf, "                  @WThe board is empty.@n\r\n");
-    send_to_char(ch,buf);
+    send_to_char(ch,"%s", buf);
     return;
   } else {
            send_to_char(ch, "                  @WThere %s %d %s on the board.@n\r\n", (BOARD_MNUM(thisboard) == 1) ? "is" : "are", BOARD_MNUM(thisboard),(BOARD_MNUM(thisboard) == 1) ? "message" : "messages");
@@ -914,7 +912,7 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum){
   sprintf(number,"\t@D------- @cQuoted message @D-------@w\r\n%s\t@D   ------- @cEnd Quote @D-------@w\r\n",MESG_DATA(other));
   MESG_DATA(message)=strdup(number);
   ch->desc->backstr = strdup(number);
-  write_to_output(ch->desc,number);
+  write_to_output(ch->desc,"%s", number);
 
   string_write(ch->desc, &(MESG_DATA(message)), MAX_MESSAGE_LENGTH, board_vnum + BOARD_MAGIC, NULL);
   if (board_vnum == 3092) {

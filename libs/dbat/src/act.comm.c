@@ -22,7 +22,7 @@
 #include "dbat/character_utils.h"
 #include "dbat/descriptor_utils.h"
 #include "dbat/object_utils.h"
-#include "dbat/room_utils.h"'
+#include "dbat/room_utils.h"
 #include "dbat/act.wizard.h"
 #include "dbat/act.informative.h"
 #include "dbat/dg_scripts.h"
@@ -508,7 +508,7 @@ ACMD(do_say)
 
          if (granted == FALSE && strstr(argument, "vitality")) {
           if (wch != NULL) {
-           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish cannot be granted, You might want to try something else instead, mortal!%s@w'@n\r\n");
+           send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish cannot be granted, You might want to try something else instead, mortal!@w'@n\r\n");
            /*send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now will never hunger or thirst again!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
            GET_COND(ch, HUNGER) = -1;
            GET_COND(ch, THIRST) = -1;

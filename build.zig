@@ -46,7 +46,7 @@ pub fn build(b: *std.Build) void {
     const mod_dbat = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
     mod_dbat.addIncludePath(b.path("libs/dbat/include"));
     const dbat_files = getSourceFiles(b, "libs/dbat/src", ".c");
-    mod_dbat.addCSourceFiles(.{ .files = dbat_files, .flags = &[_][]const u8{ "-std=gnu23", "-w", "-g", "-DPATH_MAX=4096" } });
+    mod_dbat.addCSourceFiles(.{ .files = dbat_files, .flags = &[_][]const u8{ "-std=gnu23", "-g", "-DPATH_MAX=4096" } });
 
     const dbat_lib = b.addLibrary(.{
         .name = "dbat",
@@ -57,7 +57,7 @@ pub fn build(b: *std.Build) void {
     // Executable - pure C app (circle)
     const circle_mod = b.createModule(.{ .target = target, .optimize = optimize, .link_libc = true });
     circle_mod.addIncludePath(b.path("libs/dbat/include"));
-    circle_mod.addCSourceFiles(.{ .files = &[_][]const u8{"apps/server/src/main.c"}, .flags = &[_][]const u8{ "-std=gnu23", "-w", "-g", "-DPATH_MAX=4096" } });
+    circle_mod.addCSourceFiles(.{ .files = &[_][]const u8{"apps/server/src/main.c"}, .flags = &[_][]const u8{ "-std=gnu23", "-g", "-DPATH_MAX=4096" } });
 
     const exe = b.addExecutable(.{
         .name = "dbat",

@@ -262,7 +262,7 @@ OCMD(do_osend)
         else if (subcmd == SCMD_OECHOAROUND) {
          char buf[MAX_STRING_LENGTH];
  
-         sprintf(buf, msg);
+         sprintf(buf, "%s", msg);
          search_replace(buf, char_get_name(ch), "$n");
          act(buf, TRUE, ch, 0, 0, TO_ROOM);
          /*sub_write(msg, ch, TRUE, TO_ROOM);*/
@@ -572,7 +572,7 @@ OCMD(do_dgoload)
       two_arguments(target, arg1, arg2); /* recycling ... */
       tch = get_char_near_obj(obj, arg1);
       if (tch) {
-        if (arg2 != NULL && *arg2 &&
+        if (*arg2 &&
             (pos = find_eq_pos_script(arg2)) >= 0 &&
             !char_get_equipment(tch, pos) &&
             can_wear_on_pos(object, pos)) {
@@ -755,7 +755,7 @@ OCMD(do_osetval)
   int position, new_value;
 
   two_arguments(argument, arg1, arg2);
-  if (arg1 == NULL || !*arg1 || arg2 == NULL || !*arg2 ||
+  if (!*arg1 || !*arg2 ||
       !is_number(arg1) || !is_number(arg2)) {
     obj_log(obj, "osetval: bad syntax");
     return;

@@ -636,7 +636,7 @@ ACMD(do_track)
 	if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_YARDRAT)) && (rroom_flagged(char_get_in_room(vict), ROOM_YARDRAT))))
 	{
 		send_to_char(ch, "@WSense@D: @YYardrat@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if ((vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -646,7 +646,7 @@ ACMD(do_track)
 	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_EARTH)) && (rroom_flagged(char_get_in_room(vict), ROOM_EARTH))))
 	{
 		send_to_char(ch, "@WSense@D: @GEarth@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if ((vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -656,7 +656,7 @@ ACMD(do_track)
 	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_VEGETA)) && (rroom_flagged(char_get_in_room(vict), ROOM_VEGETA))))
 	{
 		send_to_char(ch, "@WSense@D: @YVegeta@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if ((vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -666,7 +666,7 @@ ACMD(do_track)
 	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_NAMEK)) && (rroom_flagged(char_get_in_room(vict), ROOM_NAMEK))))
 	{
 		send_to_char(ch, "@WSense@D: @gNamek@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if ((vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -676,7 +676,7 @@ ACMD(do_track)
 	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_FRIGID)) && (rroom_flagged(char_get_in_room(vict), ROOM_FRIGID))))
 	{
 		send_to_char(ch, "@WSense@D: @CFrigid@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if ((vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -686,7 +686,7 @@ ACMD(do_track)
 	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_AETHER)) && (rroom_flagged(char_get_in_room(vict), ROOM_AETHER))))
 	{
 		send_to_char(ch, "@WSense@D: @mAetherh@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if ((vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -696,7 +696,7 @@ ACMD(do_track)
 	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_KONACK)) && (rroom_flagged(char_get_in_room(vict), ROOM_KONACK))))
 	{
 		send_to_char(ch, "@WSense@D: @MKonack@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if ((vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -706,7 +706,7 @@ ACMD(do_track)
 	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_KANASSA)) && (rroom_flagged(char_get_in_room(vict), ROOM_KANASSA))))
 	{
 		send_to_char(ch, "@WSense@D: @cKanassa@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if ((vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -716,7 +716,7 @@ ACMD(do_track)
 	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_flagged(char_get_in_room(ch), ROOM_ARLIA)) && (rroom_flagged(char_get_in_room(vict), ROOM_ARLIA))))
 	{
 		send_to_char(ch, "@WSense@D: @yArlia@n\r\n");
-		if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+		if ((vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
 		{
 			char *blah = sense_location(vict);
 			send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);
@@ -726,7 +726,7 @@ ACMD(do_track)
 	else if ((char_get_skills_base(ch, SKILL_SENSE) == 100) && (!(rroom_planet_zenith(char_get_in_room(ch))) && (rroom_planet_zenith(char_get_in_room(vict)))))
    {
 	send_to_char(ch, "@WSense@D: @CZenith@n\r\n");
-	if (vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))
+	if ((vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)))
 	{
 	 char *blah = sense_location(vict);
 	 send_to_char(ch, "@WSense@D: @Y%s@n\r\n", blah);

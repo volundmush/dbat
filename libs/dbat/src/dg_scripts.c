@@ -1152,7 +1152,7 @@ ACMD(do_detach)
         }
       }
 
-      if (arg3 == NULL || !*arg3)
+      if (!*arg3)
         send_to_char(ch, "You must specify a trigger to remove.\r\n");
       else
         trigger = arg3;
@@ -1177,7 +1177,7 @@ ACMD(do_detach)
         }
       }
 
-      if (arg3 == NULL || !*arg3)
+      if (!*arg3)
         send_to_char(ch, "You must specify a trigger to remove.\r\n");
       else
         trigger = arg3;
@@ -1424,42 +1424,42 @@ void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
 
   else if (!strcmp("==", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%lld", atoll(lhs) == atoll(rhs));
+      sprintf(result, "%d", atoll(lhs) == atoll(rhs));
     else
       sprintf(result, "%d", !strcasecmp(lhs, rhs));
   }
 
   else if (!strcmp("!=", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%lld", atoll(lhs) != atoll(rhs));
+      sprintf(result, "%d", atoll(lhs) != atoll(rhs));
     else
       sprintf(result, "%d", strcasecmp(lhs, rhs));
   }
 
   else if (!strcmp("<=", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%lld", atoll(lhs) <= atoll(rhs));
+      sprintf(result, "%d", atoll(lhs) <= atoll(rhs));
     else
-      sprintf(result, "%lld", strcasecmp(lhs, rhs) <= 0);
+      sprintf(result, "%d", strcasecmp(lhs, rhs) <= 0);
   }
 
   else if (!strcmp(">=", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%lld", atoll(lhs) >= atoll(rhs));
+      sprintf(result, "%d", atoll(lhs) >= atoll(rhs));
     else
-      sprintf(result, "%lld", strcasecmp(lhs, rhs) <= 0);
+      sprintf(result, "%d", strcasecmp(lhs, rhs) <= 0);
   }
 
   else if (!strcmp("<", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%lld", atoll(lhs) < atoll(rhs));
+      sprintf(result, "%d", atoll(lhs) < atoll(rhs));
     else
       sprintf(result, "%d", strcasecmp(lhs, rhs) < 0);
   }
 
   else if (!strcmp(">", op)) {
     if (is_num(lhs) && is_num(rhs))
-      sprintf(result, "%lld", atoll(lhs) > atoll(rhs));
+      sprintf(result, "%d", atoll(lhs) > atoll(rhs));
     else
       sprintf(result, "%d", strcasecmp(lhs, rhs) > 0);
   }
@@ -1655,7 +1655,7 @@ struct cmdlist_element *find_end(trig_data *trig, struct cmdlist_element *cl)
   char *p;
 
   if (!(cl->next)) { /* rryan: if this is the last line, theres no end. */
-    script_log("Trigger VNum %lld has 'if' without 'end'. (error 1)", GET_TRIG_VNUM(trig));
+    script_log("Trigger VNum %d has 'if' without 'end'. (error 1)", GET_TRIG_VNUM(trig));
     return cl;
   }
 
@@ -1669,13 +1669,13 @@ struct cmdlist_element *find_end(trig_data *trig, struct cmdlist_element *cl)
 
     /* thanks to Russell Ryan for this fix */
     if(!c->next) { /* rryan: this is the last line, we didn't find an end. */
-      script_log("Trigger VNum %lld has 'if' without 'end'. (error 2)", GET_TRIG_VNUM(trig));
+      script_log("Trigger VNum %d has 'if' without 'end'. (error 2)", GET_TRIG_VNUM(trig));
       return c;
     }
   }
 
   /* rryan: we didn't find an end. */
-  script_log("Trigger VNum %lld has 'if' without 'end'. (error 3)", GET_TRIG_VNUM(trig));
+  script_log("Trigger VNum %d has 'if' without 'end'. (error 3)", GET_TRIG_VNUM(trig));
   return c;
 }
 
@@ -1717,7 +1717,7 @@ struct cmdlist_element *find_else_end(trig_data *trig,
 
     /* thanks to Russell Ryan for this fix */
     if(!c->next) { /* rryan: this is the last line, return. */
-      script_log("Trigger VNum %lld has 'if' without 'end'. (error 4)", GET_TRIG_VNUM(trig));
+      script_log("Trigger VNum %d has 'if' without 'end'. (error 4)", GET_TRIG_VNUM(trig));
       return c;
     }
   }
@@ -1725,7 +1725,7 @@ struct cmdlist_element *find_else_end(trig_data *trig,
   /* rryan: if we got here, it's the last line, if its not an end, script_log it. */
   for (p = c->cmd; *p && isspace(*p); p++); /* skip spaces */
   if(strncasecmp("end", p, 3))
-    script_log("Trigger VNum %lld has 'if' without 'end'. (error 5)", GET_TRIG_VNUM(trig));
+    script_log("Trigger VNum %d has 'if' without 'end'. (error 5)", GET_TRIG_VNUM(trig));
   return c;
 }
 
@@ -2033,7 +2033,7 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
     return;
   }
 
-  if (arg == NULL || !*arg) {
+  if (!*arg) {
     script_log("Trigger: %s, VNum %d. makeuid invalid id arg: '%s'",
             GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), cmd);
     return;
@@ -2045,7 +2045,7 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
     eval_expr(arg, result, go, sc, trig, type);
     snprintf(uid, sizeof(uid), "%c%s", UID_CHAR, result);
   } else { /* a lot more work without it */
-    if (name == NULL || !*name) {
+    if (!*name) {
       script_log("Trigger: %s, VNum %d. makeuid needs name: '%s'",
             GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), cmd);
       return;
@@ -2333,7 +2333,7 @@ int perform_set_dg_var(struct char_data *ch, struct char_data *vict, char *val_a
 
 	var_value = any_one_arg(val_arg, var_name);
 
-	if (var_name == NULL || !*var_name || var_value == NULL || !*var_value) {
+	if (!*var_name || var_value == NULL || !*var_value) {
 		send_to_char(ch, "Usage: set <char> <varname> <value>\r\n");
 		return 0;
   }
@@ -2672,7 +2672,7 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
        * if not in an if-block, ignore the extra 'else[if]' and warn about it
        */
       if (GET_TRIG_DEPTH(trig) == 1) {
-        script_log("Trigger VNum %lld has 'else' without 'if'.",
+        script_log("Trigger VNum %d has 'else' without 'if'.",
                    GET_TRIG_VNUM(trig));
         continue;
       }
@@ -2681,7 +2681,7 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
     } else if (!strncasecmp("while ", p, 6)) {
       temp = find_done(cl);
       if (!temp) {
-        script_log("Trigger VNum %lld has 'while' without 'done'.",
+        script_log("Trigger VNum %d has 'while' without 'done'.",
                    GET_TRIG_VNUM(trig));
         return ret_val;
       }
@@ -2698,7 +2698,7 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
        * if not in an if-block, ignore the extra 'end' and warn about it.
        */
       if (GET_TRIG_DEPTH(trig) == 1) {
-        script_log("Trigger VNum %lld has 'end' without 'if'.",
+        script_log("Trigger VNum %d has 'end' without 'if'.",
                    GET_TRIG_VNUM(trig));
         continue;
       }

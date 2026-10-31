@@ -2943,7 +2943,7 @@ ACMD(do_selfd)
  }
  
   /*Andros Start*/
-   if (!char_get_con_sdcooldown(ch) <= 0) {
+   if (char_get_con_sdcooldown(ch) > 0) {
 	send_to_char(ch, "Your body is still recovering from the last self destruct!\r\n");
 	return;
   } /*Andros End*/

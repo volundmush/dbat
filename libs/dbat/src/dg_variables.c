@@ -1100,12 +1100,12 @@ in the vault (vnum: 453) now and then. you can just use
             snprintf(str, slen, "%s", vd->value);
           else {
             *str = '\0';
-            script_log("Trigger: %s, VNum %ld. unknown char field: '%s'",
+            script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
                        GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
           }
         } else {
           *str = '\0';
-          script_log("Trigger: %s, VNum %ld. unknown char field: '%s'",
+          script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
                      GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
         }
       }
@@ -1360,14 +1360,14 @@ in the vault (vnum: 453) now and then. you can just use
           else {
             *str = '\0';
             if (strcasecmp(GET_TRIG_NAME(trig), "Rename Object")) {
-            script_log("Trigger: %s, VNum %ld, type: %d. unknown object field: '%s'",
+            script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
                        GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
             }
           }
         } else {
           *str = '\0';
           if (strcasecmp(GET_TRIG_NAME(trig), "Rename Object")) {
-          script_log("Trigger: %s, VNum %ld, type: %d. unknown object field: '%s'",
+          script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
                      GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
           }
         }
@@ -1725,12 +1725,12 @@ in the vault (vnum: 453) now and then. you can just use
             snprintf(str, slen, "%s", vd->value);
           else {
             *str = '\0';
-            script_log("Trigger: %s, VNum %ld, type: %d. unknown room field: '%s'",
+            script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
                          GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
           }
         } else {
           *str = '\0';
-          script_log("Trigger: %s, VNum %ld, type: %d. unknown room field: '%s'",
+          script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
                      GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
         }
       }

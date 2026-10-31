@@ -338,7 +338,7 @@ ACMD(do_mechoaround)
     
     char buf[MAX_STRING_LENGTH];
 
-    sprintf(buf, p);
+    sprintf(buf, "%s", p);
     search_replace(buf, char_get_name(victim), "$n");
     act(buf, TRUE, victim, 0, 0, TO_ROOM);
     /*sub_write(p, victim, TRUE, TO_ROOM);*/
@@ -506,9 +506,9 @@ ACMD(do_mload)
         return;
       }
       two_arguments(target, arg1, arg2); /* recycling ... */
-      tch = (arg1 != NULL && *arg1 == UID_CHAR) ? get_char(arg1) : get_char_room_vis(ch, arg1, NULL);
+      tch = (*arg1 == UID_CHAR) ? get_char(arg1) : get_char_room_vis(ch, arg1, NULL);
       if (tch) {
-        if (arg2 != NULL && *arg2 &&
+        if (*arg2 &&
             (pos = find_eq_pos_script(arg2)) >= 0 &&
             !char_get_equipment(tch, pos) &&
             can_wear_on_pos(object, pos)) {
@@ -520,7 +520,7 @@ ACMD(do_mload)
         load_otrigger(object);
         return;
       }
-      cnt = (arg1 != NULL && *arg1 == UID_CHAR) ? get_obj(arg1) : get_obj_vis(ch, arg1, NULL);
+      cnt = (*arg1 == UID_CHAR) ? get_obj(arg1) : get_obj_vis(ch, arg1, NULL);
       if (cnt && obj_get_type_flag(cnt) == ITEM_CONTAINER) {
       	obj_to_obj(object, cnt);
         load_otrigger(object);

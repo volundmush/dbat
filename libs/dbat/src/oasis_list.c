@@ -46,7 +46,7 @@ ACMD(do_oasis_list)
   two_arguments(argument, smin, smax);
   
   if (subcmd == SCMD_OASIS_ZLIST) { /* special case */
-    if (smin != NULL && *smin && is_number(smin)) 
+    if (*smin && is_number(smin)) 
       print_zone(ch, atoi(smin));
     else
       list_zones(ch);  
@@ -102,7 +102,7 @@ ACMD(do_oasis_links)
   skip_spaces(&argument);
   one_argument(argument, arg);
 
-  if (!strcmp(arg, ".") || (arg == NULL || !*arg)) {
+  if (!strcmp(arg, ".") || !*arg) {
     zrnum = world[char_get_in_room(ch)].zone;
     zvnum = zone_table[zrnum].number;
   } else {

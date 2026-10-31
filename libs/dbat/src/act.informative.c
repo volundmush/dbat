@@ -2201,7 +2201,7 @@ static void gen_map(struct char_data *ch, int num)
      key += 1;
     }
     else {
-      send_to_char(ch, buf2);
+      send_to_char(ch, "%s", buf2);
     }
   }
   if (num == 1) {
@@ -3609,7 +3609,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
   }
   
     if (char_get_rdisplay(i)) {
-	 if (char_get_rdisplay(i) != "Empty") {
+	 if (strcmp(char_get_rdisplay(i), "Empty")) {
 		char rdis[MAX_STRING_LENGTH];
 		sprintf(rdis, "...%s", char_get_rdisplay(i));
 		act(rdis, FALSE, i, 0, ch, TO_VICT);
@@ -4810,7 +4810,7 @@ static void look_in_obj(struct char_data *ch, char *arg)
 	list_obj_to_char(obj->contains, ch, SHOW_OBJ_SHORT, TRUE);
       }
     } else {		/* item must be a fountain or drink container */
-      if (obj_get_value(obj, VAL_DRINKCON_HOWFULL) <= 0 && (!obj_get_value(obj, VAL_DRINKCON_CAPACITY) == 1))
+      if (obj_get_value(obj, VAL_DRINKCON_HOWFULL) <= 0 && (obj_get_value(obj, VAL_DRINKCON_CAPACITY) == 0))
 	send_to_char(ch, "It is empty.\r\n");
       else {
         if (obj_get_value(obj, VAL_DRINKCON_CAPACITY) < 0)
@@ -6193,7 +6193,7 @@ ACMD(do_status)
         }
 
         if (char_get_rdisplay(ch)) {
-            if (char_get_rdisplay(ch) != "Empty") {
+            if (strcmp(char_get_rdisplay(ch), "Empty")) {
                 send_to_char(ch, "         Room Display: @C...%s@n\r\n", char_get_rdisplay(ch));
             }
         }
@@ -7016,7 +7016,7 @@ ACMD(do_who)
     if (short_list)
       send_to_char(ch, "Players\r\n-------\r\n");
     else
-      send_to_char(ch, rank[i].disp);
+      send_to_char(ch, "%s", rank[i].disp);
 
     for (d = descriptor_list; d; d = d->next) {
       if (!desc_is_playing(d))
@@ -7274,7 +7274,7 @@ ACMD(do_users)
 	d->character && d->character->name ? d->character->name :
 	"UNDEFINED", d->user ? d->user : "UNKNOWN", state, idletime, timeptr,
         "N");
-    if (d->host && *d->host)
+    if (*d->host)
       sprintf(line + strlen(line), "\n%3d [%s Site: %s]\r\n", d->desc_num, d->user ? d->user : "UNKNOWN", d->host);
     else
       sprintf(line + strlen(line), "\n%3d [%s Site: Hostname unknown]\r\n", d->desc_num, d->user ? d->user : "UNKNOWN");
@@ -8479,7 +8479,7 @@ static void search_in_direction(struct char_data * ch, int dir)
   if (char_get_exit(ch, dir)) {
     if (char_get_exit(ch, dir)->general_description &&
         !room_exit_flagged(char_get_exit(ch, dir), EX_SECRET))
-      send_to_char(ch, char_get_exit(ch, dir)->general_description);
+      send_to_char(ch, "%s", char_get_exit(ch, dir)->general_description);
     else if (!room_exit_flagged(char_get_exit(ch, dir), EX_SECRET))
       send_to_char(ch, "There is a normal exit there.\r\n");
     else if (room_exit_flagged(char_get_exit(ch, dir), EX_ISDOOR) &&
