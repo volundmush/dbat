@@ -75,7 +75,7 @@ ACMD(do_train)
     return;
   }
 
-  if (char_get_carry_weight(ch) > CAN_CARRY_W(ch)) {
+  if (char_get_carry_weight(ch) > getMaxCarryWeight(ch)) {
     send_to_char(ch, "You are weighted down too much!\r\n");
     return;
   }
@@ -114,12 +114,12 @@ ACMD(do_train)
 
   if (!*arg) {
     send_to_char(ch, "@D-------------[ @GTraining Status @D]-------------@n\r\n");
-    send_to_char(ch, "  @mStrength Progress    @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINSTR(ch)), ch->real_abils.str >= 80 ? "@rCAPPED" : add_commas(strcap));
-    send_to_char(ch, "  @mSpeed Progress       @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINSPD(ch)), ch->real_abils.cha >= 80 ? "@rCAPPED" : add_commas(spdcap));
-    send_to_char(ch, "  @mConstitution Progress@D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINCON(ch)), ch->real_abils.con >= 80 ? "@rCAPPED" : add_commas(concap));
-    send_to_char(ch, "  @mIntelligence Progress@D: @R%6s/%6s@n\r\n", add_commas(GET_TRAININT(ch)), ch->real_abils.intel >= 80 ? "@rCAPPED" : add_commas(intcap));
-    send_to_char(ch, "  @mWisdom Progress      @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINWIS(ch)), ch->real_abils.wis >= 80 ? "@rCAPPED" : add_commas(wiscap));
-    send_to_char(ch, "  @mAgility Progress     @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINAGL(ch)), ch->real_abils.dex >= 80 ? "@rCAPPED" : add_commas(aglcap));
+    send_to_char(ch, "  @mStrength Progress    @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainstr(ch)), ch->real_abils.str >= 80 ? "@rCAPPED" : add_commas(strcap));
+    send_to_char(ch, "  @mSpeed Progress       @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainspd(ch)), ch->real_abils.cha >= 80 ? "@rCAPPED" : add_commas(spdcap));
+    send_to_char(ch, "  @mConstitution Progress@D: @R%6s/%6s@n\r\n", add_commas(char_get_traincon(ch)), ch->real_abils.con >= 80 ? "@rCAPPED" : add_commas(concap));
+    send_to_char(ch, "  @mIntelligence Progress@D: @R%6s/%6s@n\r\n", add_commas(char_get_trainint(ch)), ch->real_abils.intel >= 80 ? "@rCAPPED" : add_commas(intcap));
+    send_to_char(ch, "  @mWisdom Progress      @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainwis(ch)), ch->real_abils.wis >= 80 ? "@rCAPPED" : add_commas(wiscap));
+    send_to_char(ch, "  @mAgility Progress     @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainagl(ch)), ch->real_abils.dex >= 80 ? "@rCAPPED" : add_commas(aglcap));
     send_to_char(ch, "@D  -----------------------------------------  @n\r\n");
     send_to_char(ch, "  @CCurrent Weight Held  @D: @c%s@n\r\n", add_commas(weight));
     send_to_char(ch, "@D---------------------------------------------@n\r\n");
@@ -150,7 +150,7 @@ ACMD(do_train)
   int sensei = -1;
 
   if (rroom_get_vnum(char_get_in_room(ch)) == sensei_location_id(ch->chclass)) {
-    if (!(char_get_gold(ch) >= 8 && GET_PRACTICES(ch, char_get_class(ch)) >= 1)) {
+    if (!(char_get_gold(ch) >= 8 && char_get_practice_points(ch) >= 1)) {
       send_to_char(ch, "It costs 8 Zenni and 1 PS to train with your sensei.\r\n");
       return;
     }
@@ -166,25 +166,25 @@ ACMD(do_train)
     else if (char_get_level(ch) >= 10)
       total *= 150;
     sensei = ch->chclass;
-    send_to_char(ch, "@G%s begins to instruct you in training technique.@n\r\n", SENSEI_NAME(ch));
+    send_to_char(ch, "@G%s begins to instruct you in training technique.@n\r\n", char_sensei_name(ch));
   }
 
-  if (total > GET_MAX_HIT(ch) * 2) {
+  if (total > getEffMaxPL(ch) * 2) {
     bonus = 5;
-  } else if (total > GET_MAX_HIT(ch)) {
+  } else if (total > getEffMaxPL(ch)) {
     bonus = 4;
-  } else if (total > (GET_MAX_HIT(ch) / 2)) {
+  } else if (total > (getEffMaxPL(ch) / 2)) {
     bonus = 3;
-  } else if (total > (GET_MAX_HIT(ch) / 4)) {
+  } else if (total > (getEffMaxPL(ch) / 4)) {
     bonus = 2;
-  } else if (total > (GET_MAX_HIT(ch) / 8)) {
+  } else if (total > (getEffMaxPL(ch) / 8)) {
     bonus = 1;
   }
 
   if (sensei < 0)
-    cost = ((total / 20) + (GET_MAX_MOVE(ch) / 50));
+    cost = ((total / 20) + (getMaxST(ch) / 50));
   else
-    cost = ((total / 25) + (GET_MAX_MOVE(ch) / 60));
+    cost = ((total / 25) + (getMaxST(ch) / 60));
 
   if (char_get_bonuses(ch, BONUS_HARDWORKER)) {
     cost -= cost * 0.25;
@@ -291,7 +291,7 @@ ACMD(do_train)
         send_to_char(ch, "You do not have enough stamina with the current weight worn and gravity!\r\n");
         return;
       }
-      plus = (((total / 20) + (GET_MAX_MOVE(ch) / 50)) * 100) / GET_MAX_MOVE(ch);
+      plus = (((total / 20) + (getMaxST(ch) / 50)) * 100) / getMaxST(ch);
       decCurST(ch, cost, 0);
       break;
     case 5:
@@ -300,7 +300,7 @@ ACMD(do_train)
         send_to_char(ch, "You do not have enough ki with the current weight worn and gravity!\r\n");
         return;
       }
-      plus = (((total / 20) + (GET_MAX_MANA(ch) / 50)) * 100) / GET_MAX_MANA(ch);
+      plus = (((total / 20) + (getMaxKI(ch) / 50)) * 100) / getMaxKI(ch);
       decCurKI(ch, cost, 0);
       break;
   }
@@ -443,38 +443,38 @@ ACMD(do_train)
     case 1:
       *stat_train += 5 + plus;
       send_to_char(ch, "You feel slight improvement. @D[@G+%d@D]@n\r\n", (plus + 5));
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       break;
     case 2:
       *stat_train += 10 + plus;
       send_to_char(ch, "You feel some improvement. @D[@G+%d@D]@n\r\n", (plus + 10));
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       break;
     case 3:
       *stat_train += 25 + plus;
       send_to_char(ch, "You feel good improvement. @D[@G+%d@D]@n\r\n", (plus + 25));
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       break;
     case 4:
       *stat_train += 50 + plus;
       send_to_char(ch, "You feel great improvement! @D[@G+%d@D]@n\r\n", (plus + 50));
-      WAIT_STATE(ch, PULSE_5SEC);
+      char_set_wait(ch, PULSE_5SEC);
       break;
     case 5:
       *stat_train += 100 + plus;
       send_to_char(ch, "You feel awesome improvement! @D[@G+%d@D]@n\r\n", (plus + 100));
-      WAIT_STATE(ch, PULSE_5SEC);
+      char_set_wait(ch, PULSE_5SEC);
       break;
     default:
       *stat_train += 1;
       send_to_char(ch, "You barely feel any improvement. @D[@G+1@D]@n\r\n");
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       break;
   }
 
   if (sensei > -1) {
     char_set_gold(ch, char_get_gold(ch) - (8));
-    GET_PRACTICES(ch, char_get_class(ch)) -= 1;
+    char_set_practice_points(ch, char_get_practice_points(ch) - (1));
   }
 
   if (*stat_train >= needed) {
@@ -585,7 +585,7 @@ ACMD(do_situp)
     send_to_char(ch, "Stop fishing first.\r\n");
     return;
   }
-  if (CARRYING(ch)) {
+  if (char_get_carrying(ch)) {
     send_to_char(ch, "You are carrying someone!\r\n");
     return;
   }
@@ -709,28 +709,28 @@ ACMD(do_situp)
       act("@gYou do a situp, and it was a really hard one to finish.@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@g$n does a situp, while sweating profusely.@n", TRUE, ch, 0, 0, TO_ROOM);
     }
-    if (cost >= GET_MAX_MOVE(ch) / 2) {
+    if (cost >= getMaxST(ch) / 2) {
       send_to_char(ch, "This gravity is a great challenge for you!\r\n");
       bonus *= 10;
-    } else if (cost >= GET_MAX_MOVE(ch) / 4) {
+    } else if (cost >= getMaxST(ch) / 4) {
       send_to_char(ch, "This gravity is an awesome challenge for you!\r\n");
       bonus *= 8;
-    } else if (cost >= GET_MAX_MOVE(ch) / 10) {
+    } else if (cost >= getMaxST(ch) / 10) {
       send_to_char(ch, "This gravity is a good challenge for you!\r\n");
       bonus *= 6;
-    } else if (cost < GET_MAX_MOVE(ch) / 1000) {
+    } else if (cost < getMaxST(ch) / 1000) {
       send_to_char(ch, "This gravity is so easy to you, you could do it in your sleep...\r\n");
       bonus /= 8;
-    } else if (cost < GET_MAX_MOVE(ch) / 100) {
+    } else if (cost < getMaxST(ch) / 100) {
       send_to_char(ch, "This gravity is the opposite of a challenge for you...\r\n");
       bonus /= 5;
-    } else if (cost < GET_MAX_MOVE(ch) / 50) {
+    } else if (cost < getMaxST(ch) / 50) {
       send_to_char(ch, "This gravity is definitely not a challenge for you...\r\n");
       bonus /= 4;
-    } else if (cost < GET_MAX_MOVE(ch) / 30) {
+    } else if (cost < getMaxST(ch) / 30) {
       send_to_char(ch, "This gravity is barely a challenge for you...\r\n");
       bonus /= 3;
-    } else if (cost < GET_MAX_MOVE(ch) / 20) {
+    } else if (cost < getMaxST(ch) / 20) {
       send_to_char(ch, "This gravity is hardly a challenge for you...\r\n");
       bonus /= 2;
     } else {
@@ -780,17 +780,17 @@ ACMD(do_situp)
     send_to_char(ch, "You feel slightly more vigorous @D[@G+%s@D]@n.\r\n", add_commas(bonus));
     gainBaseST(ch, bonus, true);
     if (rroom_get_gravity(char_get_in_room(ch)) <= 50) {
-      WAIT_STATE(ch, PULSE_2SEC);
+      char_set_wait(ch, PULSE_2SEC);
     } else if (rroom_get_gravity(char_get_in_room(ch)) <= 200) {
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
     } else if (rroom_get_gravity(char_get_in_room(ch)) <= 500) {
-      WAIT_STATE(ch, PULSE_4SEC);
+      char_set_wait(ch, PULSE_4SEC);
     } else if (rroom_get_gravity(char_get_in_room(ch)) <= 1000) {
-      WAIT_STATE(ch, PULSE_5SEC);
+      char_set_wait(ch, PULSE_5SEC);
     } else if (rroom_get_gravity(char_get_in_room(ch)) <= 5000) {
-      WAIT_STATE(ch, PULSE_6SEC);
+      char_set_wait(ch, PULSE_6SEC);
     } else if (rroom_get_gravity(char_get_in_room(ch)) <= 10000) {
-      WAIT_STATE(ch, PULSE_7SEC);
+      char_set_wait(ch, PULSE_7SEC);
     }
     decCurST(ch, cost, 0);
   }
@@ -823,7 +823,7 @@ ACMD(do_meditate)
     return;
   }
 
-  if (CARRYING(ch)) {
+  if (char_get_carrying(ch)) {
     send_to_char(ch, "You are carrying someone!\r\n");
     return;
   }
@@ -858,7 +858,7 @@ ACMD(do_meditate)
     if (char_is_saiyan(ch)) {
       cost = 7000;
     }
-    if (GET_PRACTICES(ch, char_get_class(ch)) < cost) {
+    if (char_get_practice_points(ch) < cost) {
       send_to_char(ch, "You do not have enough practice sessions to expand your mind and ability to remember skills.\r\n");
       send_to_char(ch, "%s needed.\r\n", add_commas(cost));
     } else if (char_get_skill_slots(ch) >= 60 && char_get_bonuses(ch, BONUS_GMEMORY) == 0) {
@@ -868,7 +868,7 @@ ACMD(do_meditate)
     } else {
       send_to_char(ch, "During your meditation you manage to expand your mind and get the feeling you could learn some new skills.\r\n");
       char_set_skill_slots(ch, char_get_skill_slots(ch) + (1));
-      GET_PRACTICES(ch, char_get_class(ch)) -= cost;
+      char_set_practice_points(ch, char_get_practice_points(ch) - (cost));
       return;
     }
     return;
@@ -879,7 +879,7 @@ ACMD(do_meditate)
     } else if (char_get_linker(ch) == 1) {
       send_to_char(ch, "This is not how you break YOUR mind link.\r\n");
       return;
-    } else if ((getCurKI(ch)) < GET_MAX_MANA(char_get_mindlink(ch)) * 0.05) {
+    } else if ((getCurKI(ch)) < getMaxKI(char_get_mindlink(ch)) * 0.05) {
       send_to_char(ch, "You do not have enough ki to manage a break.\r\n");
       return;
     } else if (char_get_aff_abils_intel(ch) + rand_number(-5, 10) >= char_get_aff_abils_intel(char_get_mindlink(ch)) + (char_get_skill(char_get_mindlink(ch), SKILL_TELEPATHY) * 0.1)) {
@@ -900,7 +900,7 @@ ACMD(do_meditate)
       act("$n closes their eyes for a few seconds, and appears to struggle quite a bit.", FALSE, ch, 0, char_get_mindlink(ch), TO_ROOM);
       send_to_char(char_get_mindlink(ch), "@rYour mind linked target struggles to free their mind, but fails!@n\r\n");
 
-      decCurKI(ch, GET_MAX_MANA(char_get_mindlink(ch)) * .05, 0);
+      decCurKI(ch, getMaxKI(char_get_mindlink(ch)) * .05, 0);
       return;
     }
   } else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[char_get_in_room(ch)].contents))) {
@@ -1003,28 +1003,28 @@ ACMD(do_meditate)
 
     bonus += ((weight + 1) / 500) + 1;
 
-    if (cost >= GET_MAX_MANA(ch) / 2) {
+    if (cost >= getMaxKI(ch) / 2) {
       send_to_char(ch, "The object weight and gravity are a great challenge for you!\r\n");
       bonus *= 10;
-    } else if (cost >= GET_MAX_MANA(ch) / 4) {
+    } else if (cost >= getMaxKI(ch) / 4) {
       send_to_char(ch, "The object weight and gravity are an awesome challenge for you!\r\n");
       bonus *= 8;
-    } else if (cost >= GET_MAX_MANA(ch) / 10) {
+    } else if (cost >= getMaxKI(ch) / 10) {
       send_to_char(ch, "The object weight and gravity are a good challenge for you!\r\n");
       bonus *= 6;
-    } else if (cost < GET_MAX_MANA(ch) / 1000) {
+    } else if (cost < getMaxKI(ch) / 1000) {
       send_to_char(ch, "The object weight and gravity are so easy to you, you could do it in your sleep....\r\n");
       bonus /= 8;
-    } else if (cost < GET_MAX_MANA(ch) / 100) {
+    } else if (cost < getMaxKI(ch) / 100) {
       send_to_char(ch, "The object weight and gravity are the opposite of a challenge for you....\r\n");
       bonus /= 5;
-    } else if (cost < GET_MAX_MANA(ch) / 50) {
+    } else if (cost < getMaxKI(ch) / 50) {
       send_to_char(ch, "The object weight and gravity are definitely not a challenge for you....\r\n");
       bonus /= 4;
-    } else if (cost < GET_MAX_MANA(ch) / 30) {
+    } else if (cost < getMaxKI(ch) / 30) {
       send_to_char(ch, "The object weight and gravity are barely a challenge for you....\r\n");
       bonus /= 3;
-    } else if (cost < GET_MAX_MANA(ch) / 20) {
+    } else if (cost < getMaxKI(ch) / 20) {
       send_to_char(ch, "The object weight and gravity are hardly a challenge for you....\r\n");
       bonus /= 2;
     } else {
@@ -1076,17 +1076,17 @@ ACMD(do_meditate)
     send_to_char(ch, "You feel your spirit grow stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus));
     gainBaseKI(ch, bonus, true);
     if (rroom_get_gravity(char_get_in_room(ch)) <= 50) {
-      WAIT_STATE(ch, PULSE_2SEC);
+      char_set_wait(ch, PULSE_2SEC);
     } else if (rroom_get_gravity(char_get_in_room(ch)) <= 200) {
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
     } else if (rroom_get_gravity(char_get_in_room(ch)) <= 500) {
-      WAIT_STATE(ch, PULSE_4SEC);
+      char_set_wait(ch, PULSE_4SEC);
     } else if (rroom_get_gravity(char_get_in_room(ch)) <= 1000) {
-      WAIT_STATE(ch, PULSE_5SEC);
+      char_set_wait(ch, PULSE_5SEC);
     } else if (rroom_get_gravity(char_get_in_room(ch)) <= 5000) {
-      WAIT_STATE(ch, PULSE_6SEC);
+      char_set_wait(ch, PULSE_6SEC);
     } else if (rroom_get_gravity(char_get_in_room(ch)) <= 10000) {
-      WAIT_STATE(ch, PULSE_7SEC);
+      char_set_wait(ch, PULSE_7SEC);
     }
 
     decCurKI(ch, cost, 0);
@@ -1111,7 +1111,7 @@ ACMD(do_pushup)
     send_to_char(ch, "You are dragging someone!\r\n");
     return;
   }
-  if (CARRYING(ch)) {
+  if (char_get_carrying(ch)) {
     send_to_char(ch, "You are carrying someone!\r\n");
     return;
   }
@@ -1313,17 +1313,17 @@ ACMD(do_pushup)
     }
     gainBasePL(ch, bonus, true);
     if (rroom_get_gravity(char_get_in_room(ch)) <= 50) {
-      WAIT_STATE(ch, PULSE_2SEC);
+      char_set_wait(ch, PULSE_2SEC);
     } else if (rroom_get_gravity(char_get_in_room(ch)) <= 200) {
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
     } else if (rroom_get_gravity(char_get_in_room(ch)) <= 500) {
-      WAIT_STATE(ch, PULSE_4SEC);
+      char_set_wait(ch, PULSE_4SEC);
     } else if (rroom_get_gravity(char_get_in_room(ch)) <= 1000) {
-      WAIT_STATE(ch, PULSE_5SEC);
+      char_set_wait(ch, PULSE_5SEC);
     } else if (rroom_get_gravity(char_get_in_room(ch)) <= 5000) {
-      WAIT_STATE(ch, PULSE_6SEC);
+      char_set_wait(ch, PULSE_6SEC);
     } else if (rroom_get_gravity(char_get_in_room(ch)) <= 10000) {
-      WAIT_STATE(ch, PULSE_7SEC);
+      char_set_wait(ch, PULSE_7SEC);
     }
     decCurST(ch, cost, 0);
   }
@@ -1358,7 +1358,7 @@ void base_update(void)
         char_set_absorbing(d->character, NULL);
       }
       if (char_is_android(d->character) && char_get_absorbing(d->character) && rand_number(1, 10) >= 7) {
-        int64_t drain1 = GET_MAX_MANA(d->character) * 0.01, drain2 = GET_MAX_MOVE(d->character) * 0.01;
+        int64_t drain1 = getMaxKI(d->character) * 0.01, drain2 = getMaxST(d->character) * 0.01;
         struct char_data *drained = char_get_absorbing(d->character);
         if ((getCurST(drained)) - drain2 < 0) {
           drain2 = (getCurST(drained));
@@ -1480,8 +1480,8 @@ void base_update(void)
         send_to_char(d->character, "Your body has recovered from your last selfdestruct.\r\n");
       }
     } /* Andros End */
-    if (CARRYING(d->character)) {
-      if (char_get_in_room(CARRYING(d->character)) != char_get_in_room(d->character)) {
+    if (char_get_carrying(d->character)) {
+      if (char_get_in_room(char_get_carrying(d->character)) != char_get_in_room(d->character)) {
         carry_drop(d->character, 3);
       }
     }
@@ -1574,8 +1574,8 @@ void base_update(void)
       char_set_absorbing(d->character, NULL);
     }
     if (char_is_android(d->character) && char_get_absorbing(d->character)) {
-      if (getCurST(char_get_absorbing(d->character)) < (GET_MAX_MOVE(d->character) / 15) &&
-          getCurKI(char_get_absorbing(d->character)) < (GET_MAX_MANA(d->character) / 15)) {
+      if (getCurST(char_get_absorbing(d->character)) < (getMaxST(d->character) / 15) &&
+          getCurKI(char_get_absorbing(d->character)) < (getMaxKI(d->character) / 15)) {
         act("@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n", TRUE, d->character, 0, char_get_absorbing(d->character), TO_CHAR);
         act("@C$n@W stops absorbing stamina and ki from you!@n", TRUE, d->character, 0, char_get_absorbing(d->character), TO_VICT);
         act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", TRUE, d->character, 0, char_get_absorbing(d->character), TO_NOTVICT);
@@ -1590,8 +1590,8 @@ void base_update(void)
       }
     }
     if (char_is_android(d->character) && char_get_absorbing(d->character) && rand_number(1, 9) >= 6) {
-      if (getCurST(char_get_absorbing(d->character)) > (GET_MAX_MOVE(d->character) / 15) ||
-          getCurKI(char_get_absorbing(d->character)) > (GET_MAX_MANA(d->character) / 15)) {
+      if (getCurST(char_get_absorbing(d->character)) > (getMaxST(d->character) / 15) ||
+          getCurKI(char_get_absorbing(d->character)) > (getMaxKI(d->character) / 15)) {
 
         incCurKI(d->character, getMaxKI(d->character) * .08, true);
         incCurST(d->character, getMaxST(d->character) * .08, true);
@@ -1603,7 +1603,7 @@ void base_update(void)
         act("@C$n@W absorbs stamina and ki from you!@n", TRUE, d->character, 0, char_get_absorbing(d->character), TO_VICT);
         send_to_char(char_get_absorbing(d->character), "@wTry 'escape'!@n\r\n");
         act("@C$n@W absorbs stamina and ki from @c$N@w!@n", TRUE, d->character, 0, char_get_absorbing(d->character), TO_NOTVICT);
-        if (GET_HIT(d->character) < getEffMaxPL(d->character)) {
+        if (getCurPL(d->character) < getEffMaxPL(d->character)) {
           incCurHealth(d->character, getMaxKI(d->character) * .04, true);
           send_to_char(d->character, "@CYou convert a portion of the absorbed energy into refilling your powerlevel.@n\r\n");
         }

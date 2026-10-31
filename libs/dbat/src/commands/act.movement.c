@@ -81,10 +81,10 @@ void handle_teleport(struct char_data *ch, struct char_data *tar, int location)
       char_to_room(char_get_grappling(ch), char_get_in_room(ch));
       act("@w$n@w appears in an instant out of nowhere being grappled by $N!@n", TRUE, char_get_grappling(ch), 0, ch, TO_NOTVICT);
     }
-    if (CARRYING(ch)) {
-      char_from_room(CARRYING(ch));
-      char_to_room(CARRYING(ch), char_get_in_room(ch));
-      act("@w$n@w appears in an instant out of nowhere being carried by $N!@n", TRUE, CARRYING(ch), 0, ch, TO_NOTVICT);
+    if (char_get_carrying(ch)) {
+      char_from_room(char_get_carrying(ch));
+      char_to_room(char_get_carrying(ch), char_get_in_room(ch));
+      act("@w$n@w appears in an instant out of nowhere being carried by $N!@n", TRUE, char_get_carrying(ch), 0, ch, TO_NOTVICT);
     }
     if (char_get_grappled(ch) && !char_is_npc(char_get_grappled(ch))) {
       char_from_room(char_get_grappled(ch));
@@ -135,7 +135,7 @@ ACMD(do_carry)
     return;
   }
 
-  if (CARRYING(ch)) { /* Already carrying someone. Put them down. Simple and clean. */
+  if (char_get_carrying(ch)) { /* Already carrying someone. Put them down. Simple and clean. */
     if (char_get_alignment(ch) > 50) {
       carry_drop(ch, 0);
     } else {
@@ -160,7 +160,7 @@ ACMD(do_carry)
       return;
     }
 
-    if (CARRIED_BY(vict) != NULL) {
+    if (char_get_carried_by(vict) != NULL) {
       send_to_char(ch, "Someone is already carrying them!\r\n");
       return;
     }
@@ -170,10 +170,10 @@ ACMD(do_carry)
       return;
     }
 
-    if (char_get_pc_weight(vict) + char_get_carry_weight(vict) > CAN_CARRY_W(ch)) {
+    if (char_get_pc_weight(vict) + char_get_carry_weight(vict) > getMaxCarryWeight(ch)) {
       act("@WYou try to pick up @C$N@W but have to put them down. They are too heavy for you at the moment.@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W tries to pick up @c$N@W. After struggling for a moment $e has to put $M down.@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      WAIT_STATE(ch, PULSE_1SEC);
+      char_set_wait(ch, PULSE_1SEC);
       return;
     } else { /* Let's carry that mofo! */
       act("@WYou pick up @C$N@W and put $M over your shoulder.@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -183,9 +183,9 @@ ACMD(do_carry)
         obj_set_sitting(chair, NULL);
         char_set_sits(vict, NULL);
       }
-      CARRYING(ch)     = vict;
-      CARRIED_BY(vict) = ch;
-      WAIT_STATE(ch, PULSE_1SEC);
+      char_set_carrying(ch, vict);
+      char_set_carried_by(vict, ch);
+      char_set_wait(ch, PULSE_1SEC);
       return;
     }
 
@@ -198,7 +198,7 @@ void carry_drop(struct char_data *ch, int type)
 
   struct char_data *vict = NULL;
 
-  vict = CARRYING(ch);
+  vict = char_get_carrying(ch);
 
   switch (type) {
     case 0: /* Awww we were gentle >.> */
@@ -222,8 +222,8 @@ void carry_drop(struct char_data *ch, int type)
       act("@C$n @Wstops carrying @c$N@W for some reason.@n", TRUE, ch, 0, vict, TO_NOTVICT);
       break;
   }
-  CARRYING(ch)     = NULL;
-  CARRIED_BY(vict) = NULL;
+  char_set_carrying(ch, NULL);
+  char_set_carried_by(vict, NULL);
 }
 
 int land_location(struct char_data *ch, char *arg)
@@ -556,10 +556,10 @@ static int has_flight(struct char_data *ch)
   if (char_adm_flagged(ch, ADM_WALKANYWHERE))
     return (1);
 
-  if (char_aff_flagged(ch, AFF_FLYING) && (getCurKI(ch)) >= (char_get_level(ch) + (GET_MAX_MANA(ch) / (char_get_level(ch) * 30))) && !char_is_android(ch) && !char_is_npc(ch)) {
+  if (char_aff_flagged(ch, AFF_FLYING) && (getCurKI(ch)) >= (char_get_level(ch) + (getMaxKI(ch) / (char_get_level(ch) * 30))) && !char_is_android(ch) && !char_is_npc(ch)) {
     return (1);
   }
-  if (char_aff_flagged(ch, AFF_FLYING) && (getCurKI(ch)) < (char_get_level(ch) + (GET_MAX_MANA(ch) / (char_get_level(ch) * 30))) && !char_is_android(ch) && !char_is_npc(ch)) {
+  if (char_aff_flagged(ch, AFF_FLYING) && (getCurKI(ch)) < (char_get_level(ch) + (getMaxKI(ch) / (char_get_level(ch) * 30))) && !char_is_android(ch) && !char_is_npc(ch)) {
     act("@WYou crash to the ground, too tired to fly anymore!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@W$n@W crashes to the ground!@n", TRUE, ch, 0, 0, TO_ROOM);
     char_aff_set(ch, AFF_FLYING, false);
@@ -661,7 +661,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
       } else {
         act("@CYou swim through the cold water.@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@c$n@C swim through the cold water.@n", TRUE, ch, 0, 0, TO_ROOM);
-        WAIT_STATE(ch, PULSE_1SEC);
+        char_set_wait(ch, PULSE_1SEC);
       }
     }
   }
@@ -684,20 +684,20 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
 
   if (rroom_sunken(char_get_in_room(ch)) ||
       rroom_sunken(char_get_exit(ch, dir)->to_room)) {
-    if (!has_o2(ch) && ((group_bonus(ch, 2) != 10 && (getCurKI(ch)) < GET_MAX_MANA(ch) / 200) || (group_bonus(ch, 2) == 10 &&
-                                                                                                  (getCurKI(ch)) < GET_MAX_MANA(ch) / 800))) {
-      if (GET_HIT(ch) >= GET_MAX_HIT(ch) / 20) {
+    if (!has_o2(ch) && ((group_bonus(ch, 2) != 10 && (getCurKI(ch)) < getMaxKI(ch) / 200) || (group_bonus(ch, 2) == 10 &&
+                                                                                                  (getCurKI(ch)) < getMaxKI(ch) / 800))) {
+      if (getCurPL(ch) >= getEffMaxPL(ch) / 20) {
         send_to_char(ch, "@RYou struggle to breath!@n\r\n");
         decCurHealth(ch, getMaxPL(ch) / 20, 0);
       }
-      if (GET_HIT(ch) < GET_MAX_HIT(ch) / 20) {
+      if (getCurPL(ch) < getEffMaxPL(ch) / 20) {
         send_to_char(ch, "@rYou drown!@n\r\n");
         die(ch, NULL);
         return (0);
       }
     }
-    if (!has_o2(ch) && ((group_bonus(ch, 2) != 10 && (getCurKI(ch)) >= GET_MAX_MANA(ch) / 200) || (group_bonus(ch, 2) == 10 &&
-                                                                                                   (getCurKI(ch)) >= GET_MAX_MANA(ch) / 800))) {
+    if (!has_o2(ch) && ((group_bonus(ch, 2) != 10 && (getCurKI(ch)) >= getMaxKI(ch) / 200) || (group_bonus(ch, 2) == 10 &&
+                                                                                                   (getCurKI(ch)) >= getMaxKI(ch) / 800))) {
       send_to_char(ch, "@CYou hold your breath!@n\r\n");
       if (group_bonus(ch, 2) == 10) {
         decCurKI(ch, getMaxKI(ch) / 800, 0);
@@ -728,13 +728,13 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
 
   if (char_aff_flagged(ch, AFF_FLYING) && !char_is_android(ch)) {
     if (!char_get_skill(ch, SKILL_CONCENTRATION) && !char_get_skill(ch, SKILL_FOCUS)) {
-      flight_cost = GET_MAX_MANA(ch) / 100;
+      flight_cost = getMaxKI(ch) / 100;
     } else if (char_get_skill(ch, SKILL_CONCENTRATION) && !char_get_skill(ch, SKILL_FOCUS)) {
-      flight_cost = GET_MAX_MANA(ch) / (char_get_skill(ch, SKILL_CONCENTRATION) * 2);
+      flight_cost = getMaxKI(ch) / (char_get_skill(ch, SKILL_CONCENTRATION) * 2);
     } else if (!char_get_skill(ch, SKILL_CONCENTRATION) && char_get_skill(ch, SKILL_FOCUS)) {
-      flight_cost = GET_MAX_MANA(ch) / (char_get_skill(ch, SKILL_FOCUS) * 3);
+      flight_cost = getMaxKI(ch) / (char_get_skill(ch, SKILL_FOCUS) * 3);
     } else {
-      flight_cost = GET_MAX_MANA(ch) / ((char_get_skill(ch, SKILL_CONCENTRATION) * 2) + (char_get_skill(ch, SKILL_FOCUS) * 3));
+      flight_cost = getMaxKI(ch) / ((char_get_skill(ch, SKILL_CONCENTRATION) * 2) + (char_get_skill(ch, SKILL_FOCUS) * 3));
     }
   }
 
@@ -841,7 +841,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
       char_set_skills_base(ch, SKILL_MOVE_SILENTLY, rand_number(5, 10));
       act(buf2, TRUE, ch, 0, 0, TO_ROOM | TO_SNEAKRESIST);
       if (char_get_aff_abils_dex(ch) < rand_number(1, 30)) {
-        WAIT_STATE(ch, PULSE_1SEC);
+        char_set_wait(ch, PULSE_1SEC);
       }
     }
   }
@@ -859,15 +859,15 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   if (char_get_drag(ch)) {
     act("@C$n@w drags @c$N@w with $m.@n", TRUE, ch, 0, char_get_drag(ch), TO_ROOM);
   }
-  if (CARRYING(ch)) {
-    act("@C$n@w carries @c$N@w with $m.@n", TRUE, ch, 0, CARRYING(ch), TO_ROOM);
+  if (char_get_carrying(ch)) {
+    act("@C$n@w carries @c$N@w with $m.@n", TRUE, ch, 0, char_get_carrying(ch), TO_ROOM);
   }
   char_aff_set(ch, AFF_PURSUIT, true);
   char_from_room(ch);
   char_to_room(ch, world[was_in].dir_option[dir]->to_room);
   if ((world[char_get_in_room(ch)].zone != world[was_in].zone) && !char_is_npc(ch) && !char_is_android(ch)) {
     send_to_sense(0, "You sense someone", ch);
-    sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range@n.", add_commas(GET_HIT(ch)));
+    sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range@n.", add_commas(getCurPL(ch)));
     send_to_scouter(buf3, ch, 0, 0);
   }
   /* move them first, then move them back if they aren't allowed to go. */
@@ -906,13 +906,13 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
       }
     }
   }
-  if (CARRYING(ch)) {
-    act("@wYou carry @C$N@w with you.@n", TRUE, ch, 0, CARRYING(ch), TO_CHAR);
-    act("@C$n@w carries @c$N@w with $m.@n", TRUE, ch, 0, CARRYING(ch), TO_ROOM);
-    char_from_room(CARRYING(ch));
-    char_to_room(CARRYING(ch), char_get_in_room(ch));
-    if (!char_aff_flagged(CARRYING(ch), AFF_KNOCKED) && !char_aff_flagged(CARRYING(ch), AFF_SLEEP) && rand_number(1, 3)) {
-      send_to_char(CARRYING(ch), "You feel your sleeping body being moved.\r\n");
+  if (char_get_carrying(ch)) {
+    act("@wYou carry @C$N@w with you.@n", TRUE, ch, 0, char_get_carrying(ch), TO_CHAR);
+    act("@C$n@w carries @c$N@w with $m.@n", TRUE, ch, 0, char_get_carrying(ch), TO_ROOM);
+    char_from_room(char_get_carrying(ch));
+    char_to_room(char_get_carrying(ch), char_get_in_room(ch));
+    if (!char_aff_flagged(char_get_carrying(ch), AFF_KNOCKED) && !char_aff_flagged(char_get_carrying(ch), AFF_SLEEP) && rand_number(1, 3)) {
+      send_to_char(char_get_carrying(ch), "You feel your sleeping body being moved.\r\n");
     }
   }
 
@@ -934,7 +934,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
         do_fly(ch, 0, 0, 0);
       }
       decCurHealth(ch, getEffMaxPL(ch) / 20, 0);
-      if (GET_HIT(ch) <= 0) {
+      if (getCurPL(ch) <= 0) {
         act("@rYou have burned to death!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@R$n@r has burned to death!@n", TRUE, ch, 0, 0, TO_ROOM);
         die(ch, NULL);
@@ -944,7 +944,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
       act("@R$N@r gets burned!@n", TRUE, ch, 0, char_get_drag(ch), TO_CHAR);
       act("@R$N@r gets burned!@n", TRUE, ch, 0, char_get_drag(ch), TO_ROOM);
       decCurHealth(char_get_drag(ch), getEffMaxPL(char_get_drag(ch)) / 20, 0);
-      if (GET_HIT(char_get_drag(ch)) < 0) {
+      if (getCurPL(char_get_drag(ch)) < 0) {
         act("@rYou have burned to death!@n", TRUE, char_get_drag(ch), 0, 0, TO_CHAR);
         act("@R$n@r has burned to death!@n", TRUE, char_get_drag(ch), 0, 0, TO_ROOM);
         die(char_get_drag(ch), NULL);
@@ -1072,24 +1072,24 @@ ACMD(do_move)
     send_to_char(ch, "You are liquefied right now!\r\n");
     return;
   }
-  if (char_get_charge(ch) >= GET_MAX_MANA(ch) * .51) {
+  if (char_get_charge(ch) >= getMaxKI(ch) * .51) {
     send_to_char(ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
     return;
-  } else if ((char_get_charge(ch) >= GET_MAX_MANA(ch) * .5 && char_get_charge(ch) < GET_MAX_MANA(ch) * .51) && char_get_skill(ch, SKILL_CONCENTRATION) < 100) {
+  } else if ((char_get_charge(ch) >= getMaxKI(ch) * .5 && char_get_charge(ch) < getMaxKI(ch) * .51) && char_get_skill(ch, SKILL_CONCENTRATION) < 100) {
     send_to_char(ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
     return;
-  } else if ((char_get_charge(ch) >= GET_MAX_MANA(ch) * .4 && char_get_charge(ch) < GET_MAX_MANA(ch) * .5) && char_get_skill(ch, SKILL_CONCENTRATION) < 80) {
+  } else if ((char_get_charge(ch) >= getMaxKI(ch) * .4 && char_get_charge(ch) < getMaxKI(ch) * .5) && char_get_skill(ch, SKILL_CONCENTRATION) < 80) {
     send_to_char(ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
     return;
-  } else if ((char_get_charge(ch) >= GET_MAX_MANA(ch) * .3 && char_get_charge(ch) < GET_MAX_MANA(ch) * .4) && char_get_skill(ch, SKILL_CONCENTRATION) < 70) {
+  } else if ((char_get_charge(ch) >= getMaxKI(ch) * .3 && char_get_charge(ch) < getMaxKI(ch) * .4) && char_get_skill(ch, SKILL_CONCENTRATION) < 70) {
     send_to_char(ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
     return;
-  } else if ((char_get_charge(ch) >= GET_MAX_MANA(ch) * .2 && char_get_charge(ch) < GET_MAX_MANA(ch) * .3) && char_get_skill(ch, SKILL_CONCENTRATION) < 60) {
+  } else if ((char_get_charge(ch) >= getMaxKI(ch) * .2 && char_get_charge(ch) < getMaxKI(ch) * .3) && char_get_skill(ch, SKILL_CONCENTRATION) < 60) {
     send_to_char(ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
     return;
   }
 
-  if (GET_COND(ch, DRUNK) > 4 && (rand_number(1, 9) + GET_COND(ch, DRUNK)) >= rand_number(14, 20)) {
+  if (char_get_conditions(ch, DRUNK) > 4 && (rand_number(1, 9) + char_get_conditions(ch, DRUNK)) >= rand_number(14, 20)) {
     send_to_char(ch, "You wobble around and then fall on your ass.\r\n");
     act("@C$n@W wobbles around before falling on $s ass@n.", TRUE, ch, 0, 0, TO_ROOM);
     char_set_position(ch, POS_SITTING);
@@ -1126,9 +1126,9 @@ ACMD(do_move)
       }
       drive_in_direction(ch, vehicle, subcmd - 1);
       if (obj_get_value(controls, 1) == 1) {
-        WAIT_STATE(ch, PULSE_2SEC);
+        char_set_wait(ch, PULSE_2SEC);
       } else if (obj_get_value(controls, 1) == 2) {
-        WAIT_STATE(ch, PULSE_1SEC);
+        char_set_wait(ch, PULSE_1SEC);
       }
       controls = NULL;
       vehicle  = NULL;
@@ -1171,7 +1171,7 @@ ACMD(do_move)
     if (axion_dice(0) < char_get_skill(char_get_absorbby(ch), SKILL_ABSORB)) {
       send_to_char(ch, "You are being held by %s, they are absorbing you!\r\n", char_get_name(char_get_absorbby(ch)));
       send_to_char(char_get_absorbby(ch), "%s struggles in your grasp!\r\n", char_get_name(ch));
-      WAIT_STATE(ch, PULSE_2SEC);
+      char_set_wait(ch, PULSE_2SEC);
       return;
     } else {
       act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, char_get_absorbby(ch), 0, ch, TO_NOTVICT);
@@ -1194,63 +1194,63 @@ ACMD(do_move)
       char_set_arenawatch(ch, -1);
     }
     if (rroom_get_vnum(char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(char_get_in_room(ch)) != 0 && rroom_get_vnum(char_get_in_room(ch)) != 1) {
-      GET_LOADROOM(ch) = rroom_get_vnum(char_get_in_room(ch));
+      char_set_load_room(ch, rroom_get_vnum(char_get_in_room(ch)));
     }
-    if (rroom_get_gravity(char_get_in_room(ch)) == 10 && GET_MAX_HIT(ch) <= 10000 && !char_is_bardock(ch) && !char_is_npc(ch)) {
+    if (rroom_get_gravity(char_get_in_room(ch)) == 10 && getEffMaxPL(ch) <= 10000 && !char_is_bardock(ch) && !char_is_npc(ch)) {
       send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_1SEC);
+      char_set_wait(ch, PULSE_1SEC);
     }
-    if (rroom_get_gravity(char_get_in_room(ch)) == 20 && GET_MAX_HIT(ch) <= 30000) {
+    if (rroom_get_gravity(char_get_in_room(ch)) == 20 && getEffMaxPL(ch) <= 30000) {
       send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_2SEC);
+      char_set_wait(ch, PULSE_2SEC);
     }
-    if (rroom_get_gravity(char_get_in_room(ch)) == 30 && GET_MAX_HIT(ch) <= 100000) {
+    if (rroom_get_gravity(char_get_in_room(ch)) == 30 && getEffMaxPL(ch) <= 100000) {
       send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
     }
-    if (rroom_get_gravity(char_get_in_room(ch)) == 40 && GET_MAX_HIT(ch) <= 200000) {
+    if (rroom_get_gravity(char_get_in_room(ch)) == 40 && getEffMaxPL(ch) <= 200000) {
       send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
     }
-    if (rroom_get_gravity(char_get_in_room(ch)) == 50 && GET_MAX_HIT(ch) <= 300000) {
+    if (rroom_get_gravity(char_get_in_room(ch)) == 50 && getEffMaxPL(ch) <= 300000) {
       send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
     }
-    if (rroom_get_gravity(char_get_in_room(ch)) == 100 && GET_MAX_HIT(ch) <= 500000) {
+    if (rroom_get_gravity(char_get_in_room(ch)) == 100 && getEffMaxPL(ch) <= 500000) {
       send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
     }
-    if (rroom_get_gravity(char_get_in_room(ch)) == 200 && GET_MAX_HIT(ch) <= 1000000) {
+    if (rroom_get_gravity(char_get_in_room(ch)) == 200 && getEffMaxPL(ch) <= 1000000) {
       send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
     }
-    if (rroom_get_gravity(char_get_in_room(ch)) == 300 && GET_MAX_HIT(ch) <= 8000000) {
+    if (rroom_get_gravity(char_get_in_room(ch)) == 300 && getEffMaxPL(ch) <= 8000000) {
       send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
     }
-    if (rroom_get_gravity(char_get_in_room(ch)) == 400 && GET_MAX_HIT(ch) <= 15000000) {
+    if (rroom_get_gravity(char_get_in_room(ch)) == 400 && getEffMaxPL(ch) <= 15000000) {
       send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
     }
-    if (rroom_get_gravity(char_get_in_room(ch)) == 500 && GET_MAX_HIT(ch) <= 25000000) {
+    if (rroom_get_gravity(char_get_in_room(ch)) == 500 && getEffMaxPL(ch) <= 25000000) {
       send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_4SEC);
+      char_set_wait(ch, PULSE_4SEC);
     }
-    if (rroom_get_gravity(char_get_in_room(ch)) == 1000 && GET_MAX_HIT(ch) <= 35000000) {
+    if (rroom_get_gravity(char_get_in_room(ch)) == 1000 && getEffMaxPL(ch) <= 35000000) {
       send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_5SEC);
+      char_set_wait(ch, PULSE_5SEC);
     }
-    if (rroom_get_gravity(char_get_in_room(ch)) == 5000 && GET_MAX_HIT(ch) <= 100000000) {
+    if (rroom_get_gravity(char_get_in_room(ch)) == 5000 && getEffMaxPL(ch) <= 100000000) {
       send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_5SEC);
+      char_set_wait(ch, PULSE_5SEC);
     }
-    if (rroom_get_gravity(char_get_in_room(ch)) == 10000 && GET_MAX_HIT(ch) <= 200000000) {
+    if (rroom_get_gravity(char_get_in_room(ch)) == 10000 && getEffMaxPL(ch) <= 200000000) {
       send_to_char(ch, "The gravity slows you down some.\r\n");
-      WAIT_STATE(ch, PULSE_5SEC);
+      char_set_wait(ch, PULSE_5SEC);
     }
     if (rroom_flagged(char_get_in_room(ch), ROOM_SPACE) && char_get_admlevel(ch) < 1) {
       send_to_char(ch, "You struggle to cross the vast distance.\r\n");
-      WAIT_STATE(ch, PULSE_6SEC);
+      char_set_wait(ch, PULSE_6SEC);
     } else if ((char_get_limb_condition(ch, (3) - 1) <= 0 && char_get_limb_condition(ch, (4) - 1) <= 0) && char_get_limb_condition(ch, (1) - 1) <= 0 && !char_aff_flagged(ch, AFF_FLYING)) {
       act("@wYou slowly pull yourself along with your arm...@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@C$n@w slowly pulls $mself along with one arm...@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -1262,7 +1262,7 @@ ACMD(do_move)
           act("@r$n's@R left arm falls apart!@n", TRUE, ch, 0, 0, TO_ROOM);
         }
       }
-      WAIT_STATE(ch, PULSE_5SEC);
+      char_set_wait(ch, PULSE_5SEC);
     } else if ((char_get_limb_condition(ch, (3) - 1) <= 0 && char_get_limb_condition(ch, (4) - 1) <= 0) && char_get_limb_condition(ch, (2) - 1) <= 0 && !char_aff_flagged(ch, AFF_FLYING)) {
       act("@wYou slowly pull yourself along with your arm...@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@C$n@w slowly pulls $mself along with one arm...@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -1274,7 +1274,7 @@ ACMD(do_move)
           act("@r$n's@R right arm falls apart!@n", TRUE, ch, 0, 0, TO_ROOM);
         }
       }
-      WAIT_STATE(ch, PULSE_5SEC);
+      char_set_wait(ch, PULSE_5SEC);
     } else if ((char_get_limb_condition(ch, (3) - 1) <= 0 && char_get_limb_condition(ch, (4) - 1) <= 0) && !char_aff_flagged(ch, AFF_FLYING)) {
       act("@wYou slowly pull yourself along with your arms...@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@C$n@w slowly pulls $mself along with one arms...@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -1294,7 +1294,7 @@ ACMD(do_move)
           act("@r$n's@R right arm falls apart!@n", TRUE, ch, 0, 0, TO_ROOM);
         }
       }
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
     } else if (char_get_limb_condition(ch, (3) - 1) <= 0 && !char_aff_flagged(ch, AFF_FLYING)) {
       act("@wYou hop on one leg...@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@C$n@w hops on one leg...@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -1306,7 +1306,7 @@ ACMD(do_move)
           act("@r$n's@R left leg falls apart!@n", TRUE, ch, 0, 0, TO_ROOM);
         }
       }
-      WAIT_STATE(ch, PULSE_2SEC);
+      char_set_wait(ch, PULSE_2SEC);
     } else if (char_get_limb_condition(ch, (4) - 1) <= 0 && !char_aff_flagged(ch, AFF_FLYING)) {
       act("@wYou hop on one leg...@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@C$n@w hops on one leg...@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -1318,7 +1318,7 @@ ACMD(do_move)
           act("@r$n's@R right leg falls apart!@n", TRUE, ch, 0, 0, TO_ROOM);
         }
       }
-      WAIT_STATE(ch, PULSE_2SEC);
+      char_set_wait(ch, PULSE_2SEC);
     } else if (char_get_position(ch) == POS_RESTING) {
       act("@wYou crawl on your hands and knees.@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@C$n@w crawls on $s hands and knees.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -1327,7 +1327,7 @@ ACMD(do_move)
         obj_set_sitting(chair, NULL);
         char_set_sits(ch, NULL);
       }
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
     } else if (char_get_position(ch) == POS_SITTING) {
       act("@wYou shuffle on your hands and knees.@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@C$n@w shuffles on $s hands and knees.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -1336,7 +1336,7 @@ ACMD(do_move)
         obj_set_sitting(chair, NULL);
         char_set_sits(ch, NULL);
       }
-      WAIT_STATE(ch, PULSE_2SEC);
+      char_set_wait(ch, PULSE_2SEC);
     } else if (char_get_position(ch) < POS_RESTING) {
       send_to_char(ch, "You are in no condition to move! Try standing...\r\n");
       return;
@@ -1695,7 +1695,7 @@ static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dcl
    * thieves' tools. If the player has them, that modifier will be accounted
    * for in roll_skill, and negate (or surpass) this. 
    */
-  } else if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 30) {
+  } else if ((getCurST(ch)) < getMaxST(ch) / 30) {
     send_to_char(ch, "You don't have the stamina to try, it takes percision to pick locks."
                      "Not shaking tired hands.\r\n");
   } else if (dclock > (skill_lvl - 2)) {
@@ -1848,8 +1848,8 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
   if (char_get_drag(ch)) {
     act("@C$n@w drags @c$N@w with $m.@n", TRUE, ch, 0, char_get_drag(ch), TO_ROOM);
   }
-  if (CARRYING(ch)) {
-    act("@C$n@w carries @c$N@w with $m.@n", TRUE, ch, 0, CARRYING(ch), TO_ROOM);
+  if (char_get_carrying(ch)) {
+    act("@C$n@w carries @c$N@w with $m.@n", TRUE, ch, 0, char_get_carrying(ch), TO_ROOM);
   }
   char_from_room(ch);
   char_to_room(ch, dest_room);
@@ -1882,17 +1882,17 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
       obj_to_room(char_get_sits(char_get_drag(ch)), char_get_in_room(ch));
     }
   }
-  if (CARRYING(ch)) {
-    act("@wYou carry @C$N@w with you.@n", TRUE, ch, 0, CARRYING(ch), TO_CHAR);
-    act("@C$n@w carries @c$N@w with $m.@n", TRUE, ch, 0, CARRYING(ch), TO_ROOM);
-    if (!char_aff_flagged(CARRYING(ch), AFF_KNOCKED) && !char_aff_flagged(CARRYING(ch), AFF_SLEEP) && rand_number(1, 3)) {
-      send_to_char(CARRYING(ch), "You feel your sleeping body being moved.\r\n");
+  if (char_get_carrying(ch)) {
+    act("@wYou carry @C$N@w with you.@n", TRUE, ch, 0, char_get_carrying(ch), TO_CHAR);
+    act("@C$n@w carries @c$N@w with $m.@n", TRUE, ch, 0, char_get_carrying(ch), TO_ROOM);
+    if (!char_aff_flagged(char_get_carrying(ch), AFF_KNOCKED) && !char_aff_flagged(char_get_carrying(ch), AFF_SLEEP) && rand_number(1, 3)) {
+      send_to_char(char_get_carrying(ch), "You feel your sleeping body being moved.\r\n");
     }
-    char_from_room(CARRYING(ch));
-    char_to_room(CARRYING(ch), char_get_in_room(ch));
-    if (char_get_sits(CARRYING(ch))) {
-      obj_from_room(char_get_sits(CARRYING(ch)));
-      obj_to_room(char_get_sits(CARRYING(ch)), char_get_in_room(ch));
+    char_from_room(char_get_carrying(ch));
+    char_to_room(char_get_carrying(ch), char_get_in_room(ch));
+    if (char_get_sits(char_get_carrying(ch))) {
+      obj_from_room(char_get_sits(char_get_carrying(ch)));
+      obj_to_room(char_get_sits(char_get_carrying(ch)), char_get_in_room(ch));
     }
   }
 
@@ -2093,8 +2093,8 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
   if (char_get_drag(ch)) {
     act("@C$n@w drags @c$N@w with $m.@n", TRUE, ch, 0, char_get_drag(ch), TO_ROOM);
   }
-  if (CARRYING(ch)) {
-    act("@C$n@w carries @c$N@w with $m.@n", TRUE, ch, 0, CARRYING(ch), TO_ROOM);
+  if (char_get_carrying(ch)) {
+    act("@C$n@w carries @c$N@w with $m.@n", TRUE, ch, 0, char_get_carrying(ch), TO_ROOM);
   }
   char_from_room(ch);
   char_to_room(ch, dest_room);
@@ -2128,23 +2128,23 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
       }
     }
   }
-  if (CARRYING(ch)) {
-    act("@wYou carry @C$N@w with you.@n", TRUE, ch, 0, CARRYING(ch), TO_CHAR);
-    act("@C$n@w carries @c$N@w with $m.@n", TRUE, ch, 0, CARRYING(ch), TO_ROOM);
-    char_from_room(CARRYING(ch));
-    char_to_room(CARRYING(ch), char_get_in_room(ch));
-    if (char_get_sits(CARRYING(ch))) {
-      obj_from_room(char_get_sits(CARRYING(ch)));
-      obj_to_room(char_get_sits(CARRYING(ch)), char_get_in_room(ch));
+  if (char_get_carrying(ch)) {
+    act("@wYou carry @C$N@w with you.@n", TRUE, ch, 0, char_get_carrying(ch), TO_CHAR);
+    act("@C$n@w carries @c$N@w with $m.@n", TRUE, ch, 0, char_get_carrying(ch), TO_ROOM);
+    char_from_room(char_get_carrying(ch));
+    char_to_room(char_get_carrying(ch), char_get_in_room(ch));
+    if (char_get_sits(char_get_carrying(ch))) {
+      obj_from_room(char_get_sits(char_get_carrying(ch)));
+      obj_to_room(char_get_sits(char_get_carrying(ch)), char_get_in_room(ch));
     }
-    if (!char_aff_flagged(CARRYING(ch), AFF_KNOCKED) && !char_aff_flagged(CARRYING(ch), AFF_SLEEP) && rand_number(1, 3)) {
-      send_to_char(CARRYING(ch), "You feel your sleeping body being moved.\r\n");
+    if (!char_aff_flagged(char_get_carrying(ch), AFF_KNOCKED) && !char_aff_flagged(char_get_carrying(ch), AFF_SLEEP) && rand_number(1, 3)) {
+      send_to_char(char_get_carrying(ch), "You feel your sleeping body being moved.\r\n");
     }
   }
 
   char buf3[MAX_STRING_LENGTH];
   send_to_sense(0, "You sense someone ", ch);
-  sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range.@n", add_commas(GET_HIT(ch)));
+  sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range.@n", add_commas(getCurPL(ch)));
   send_to_scouter(buf3, ch, 0, 0);
 
   if (ch->desc != NULL) {
@@ -2230,9 +2230,9 @@ static void handle_fall(struct char_data *ch)
     room = rroom_get_vnum(char_get_exit(ch, 5)->to_room);
     char_from_room(ch);
     char_to_room(ch, real_room(room));
-    if (CARRYING(ch)) {
-      char_from_room(CARRYING(ch));
-      char_to_room(CARRYING(ch), real_room(room));
+    if (char_get_carrying(ch)) {
+      char_from_room(char_get_carrying(ch));
+      char_to_room(char_get_carrying(ch), real_room(room));
     }
     if (!char_get_exit(ch, 5) || rroom_sect(char_get_in_room(ch)) != SECT_FLYING) {
       act("@r$n slams into the ground!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -2244,14 +2244,14 @@ static void handle_fall(struct char_data *ch)
       act("@r$n pummets down toward the ground below!@n", TRUE, ch, 0, 0, TO_ROOM);
     }
   }
-  if (rroom_sect(char_get_in_room(ch)) == SECT_WATER_NOSWIM && !CARRIED_BY(ch) && !char_is_kanassan(ch)) {
+  if (rroom_sect(char_get_in_room(ch)) == SECT_WATER_NOSWIM && !char_get_carried_by(ch) && !char_is_kanassan(ch)) {
     if ((getCurST(ch)) >= (getCurCarriedWeight(ch))) {
       act("@bYou swim in place.@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@C$n@b swims in place.@n", TRUE, ch, 0, 0, TO_ROOM);
       decCurST(ch, getCurCarriedWeight(ch), 0);
       act("@RYou are drowning!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@C$n@b gulps water as $e struggles to stay above the water line.@n", TRUE, ch, 0, 0, TO_ROOM);
-      if (GET_HIT(ch) - ((getEffMaxPL(ch)) / 3) <= 0) {
+      if (getCurPL(ch) - ((getEffMaxPL(ch)) / 3) <= 0) {
         act("@rYou drown!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@R$n@r drowns!@n", TRUE, ch, 0, 0, TO_ROOM);
         die(ch, NULL);
@@ -2268,7 +2268,7 @@ static int check_swim(struct char_data *ch)
   bool can = false;
 
   if (rroom_flagged(char_get_in_room(ch), ROOM_SPACE)) {
-    int64_t space_cost = (GET_MAX_MANA(ch) / 1000) + ((getCurCarriedWeight(ch)) / 2);
+    int64_t space_cost = (getMaxKI(ch) / 1000) + ((getCurCarriedWeight(ch)) / 2);
     if (getCurKI(ch) >= space_cost)
       can = true;
     decCurKI(ch, space_cost, 0);
@@ -2339,7 +2339,7 @@ ACMD(do_fly)
       char_set_altitude(ch, 0);
       return;
     }
-    if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 100 && !char_is_android(ch)) {
+    if ((getCurKI(ch)) < getMaxKI(ch) / 100 && !char_is_android(ch)) {
       send_to_char(ch, "You do not have the ki to fly.");
       return;
     } else {
@@ -2359,7 +2359,7 @@ ACMD(do_fly)
     }
   }
   if (!strcasecmp("high", arg)) {
-    if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 100 && !char_is_android(ch)) {
+    if ((getCurKI(ch)) < getMaxKI(ch) / 100 && !char_is_android(ch)) {
       send_to_char(ch, "You do not have the ki to fly.");
       return;
     } else {
@@ -2383,7 +2383,7 @@ ACMD(do_fly)
       send_to_char(ch, "You are not outside!");
       return;
     }
-    if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 10 && !char_is_android(ch)) {
+    if ((getCurKI(ch)) < getMaxKI(ch) / 10 && !char_is_android(ch)) {
       send_to_char(ch, "You do not have the ki to fly to space.");
       return;
     }
@@ -2415,7 +2415,7 @@ ACMD(do_fly)
       if (!char_is_android(ch)) {
         decCurKI(ch, getMaxKI(ch) / 10, 0);
       }
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       return;
     } else if (rroom_flagged(char_get_in_room(ch), ROOM_CERRIA)) {
       reveal_hiding(ch, 0);
@@ -2443,7 +2443,7 @@ ACMD(do_fly)
       if (!char_is_android(ch)) {
         decCurKI(ch, getMaxKI(ch) / 10, 0);
       }
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       return;
     } else if (rroom_flagged(char_get_in_room(ch), ROOM_VEGETA)) {
       reveal_hiding(ch, 0);
@@ -2469,7 +2469,7 @@ ACMD(do_fly)
       if (!char_is_android(ch)) {
         decCurKI(ch, getMaxKI(ch) / 10, 0);
       }
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       return;
     } else if (rroom_flagged(char_get_in_room(ch), ROOM_KANASSA)) {
       if (rroom_get_vnum(char_get_in_room(ch)) == 14904) {
@@ -2496,7 +2496,7 @@ ACMD(do_fly)
         if (!char_is_android(ch)) {
           decCurKI(ch, getMaxKI(ch) / 10, 0);
         }
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
       } else {
         send_to_char(ch, "You can only fly off the planet from the launchpad of Aquis.\r\n");
       }
@@ -2525,7 +2525,7 @@ ACMD(do_fly)
       if (!char_is_android(ch)) {
         decCurKI(ch, getMaxKI(ch) / 10, 0);
       }
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       return;
     } else if (rroom_flagged(char_get_in_room(ch), ROOM_KONACK)) {
       reveal_hiding(ch, 0);
@@ -2551,7 +2551,7 @@ ACMD(do_fly)
       if (!char_is_android(ch)) {
         decCurKI(ch, getMaxKI(ch) / 10, 0);
       }
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       return;
     } else if (rroom_flagged(char_get_in_room(ch), ROOM_NAMEK)) {
       reveal_hiding(ch, 0);
@@ -2577,7 +2577,7 @@ ACMD(do_fly)
       if (!char_is_android(ch)) {
         decCurKI(ch, getMaxKI(ch) / 10, 0);
       }
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       return;
     } else if (rroom_flagged(char_get_in_room(ch), ROOM_AETHER)) {
       reveal_hiding(ch, 0);
@@ -2603,7 +2603,7 @@ ACMD(do_fly)
       if (!char_is_android(ch)) {
         decCurKI(ch, getMaxKI(ch) / 10, 0);
       }
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       return;
     } else if (rroom_flagged(char_get_in_room(ch), ROOM_YARDRAT)) {
       reveal_hiding(ch, 0);
@@ -2629,7 +2629,7 @@ ACMD(do_fly)
       if (!char_is_android(ch)) {
         decCurKI(ch, getMaxKI(ch) / 10, 0);
       }
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       return;
     } else if (rroom_flagged(char_get_in_room(ch), ROOM_ARLIA)) {
       reveal_hiding(ch, 0);
@@ -2655,7 +2655,7 @@ ACMD(do_fly)
       if (!char_is_android(ch)) {
         decCurKI(ch, getMaxKI(ch) / 10, 0);
       }
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       return;
     } else if (rroom_planet_zenith(char_get_in_room(ch))) {
       reveal_hiding(ch, 0);
@@ -2681,7 +2681,7 @@ ACMD(do_fly)
       if (!char_is_android(ch)) {
         decCurKI(ch, getMaxKI(ch) / 10, 0);
       }
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       return;
     } else {
       send_to_char(ch, "You are not on a planet.\r\n");
@@ -2714,7 +2714,7 @@ ACMD(do_stand)
       send_to_char(ch, "You stand up.\r\n");
       act("$n clambers to $s feet.", TRUE, ch, 0, 0, TO_ROOM);
       if (char_get_sits(ch)) {
-        if (obj_wear_flagged(char_get_sits(ch), ITEM_WEAR_TAKE) && obj_get_type_flag(char_get_sits(ch)) != ITEM_CHAIR && char_get_carry_weight(ch) + obj_get_weight(char_get_sits(ch)) <= CAN_CARRY_W(ch)) {
+        if (obj_wear_flagged(char_get_sits(ch), ITEM_WEAR_TAKE) && obj_get_type_flag(char_get_sits(ch)) != ITEM_CHAIR && char_get_carry_weight(ch) + obj_get_weight(char_get_sits(ch)) <= getMaxCarryWeight(ch)) {
           obj_from_room(char_get_sits(ch));
           obj_to_char(char_get_sits(ch), ch);
           act("You pick up $p.", TRUE, ch, char_get_sits(ch), 0, TO_CHAR);
@@ -2731,7 +2731,7 @@ ACMD(do_stand)
       send_to_char(ch, "You stop resting, and stand up.\r\n");
       act("$n stops resting, and clambers to $s feet.", TRUE, ch, 0, 0, TO_ROOM);
       if (char_get_sits(ch)) {
-        if (obj_wear_flagged(char_get_sits(ch), ITEM_WEAR_TAKE) && char_get_carry_weight(ch) + obj_get_weight(char_get_sits(ch)) <= CAN_CARRY_W(ch)) {
+        if (obj_wear_flagged(char_get_sits(ch), ITEM_WEAR_TAKE) && char_get_carry_weight(ch) + obj_get_weight(char_get_sits(ch)) <= getMaxCarryWeight(ch)) {
           obj_from_room(char_get_sits(ch));
           obj_to_char(char_get_sits(ch), ch);
           act("You pick up $p.", TRUE, ch, char_get_sits(ch), 0, TO_CHAR);
@@ -2776,7 +2776,7 @@ ACMD(do_sit)
     char_set_dragged(char_get_drag(ch), NULL);
     char_set_drag(ch, NULL);
   }
-  if (CARRYING(ch)) {
+  if (char_get_carrying(ch)) {
     send_to_char(ch, "You are busy carrying someone!\r\n");
     return;
   }
@@ -2912,7 +2912,7 @@ ACMD(do_rest)
     char_set_drag(ch, NULL);
   }
 
-  if (CARRYING(ch)) {
+  if (char_get_carrying(ch)) {
     send_to_char(ch, "You are carrying someone!\r\n");
     return;
   }
@@ -3074,7 +3074,7 @@ ACMD(do_sleep)
     char_set_dragged(char_get_drag(ch), NULL);
     char_set_drag(ch, NULL);
   }
-  if (CARRYING(ch)) {
+  if (char_get_carrying(ch)) {
     send_to_char(ch, "You are carrying someone!\r\n");
     return;
   }
@@ -3228,11 +3228,11 @@ ACMD(do_wake)
         char_set_drag(char_get_dragged(vict), NULL);
         char_set_dragged(vict, NULL);
       }
-      if (CARRIED_BY(vict)) {
-        if (char_get_alignment(CARRIED_BY(vict)) > 50) {
-          carry_drop(CARRIED_BY(vict), 0);
+      if (char_get_carried_by(vict)) {
+        if (char_get_alignment(char_get_carried_by(vict)) > 50) {
+          carry_drop(char_get_carried_by(vict), 0);
         } else {
-          carry_drop(CARRIED_BY(vict), 1);
+          carry_drop(char_get_carried_by(vict), 1);
         }
       }
     }
@@ -3253,11 +3253,11 @@ ACMD(do_wake)
       char_set_drag(char_get_dragged(ch), NULL);
       char_set_dragged(ch, NULL);
     }
-    if (CARRIED_BY(ch)) {
-      if (char_get_alignment(CARRIED_BY(ch)) > 50) {
-        carry_drop(CARRIED_BY(ch), 0);
+    if (char_get_carried_by(ch)) {
+      if (char_get_alignment(char_get_carried_by(ch)) > 50) {
+        carry_drop(char_get_carried_by(ch), 0);
       } else {
-        carry_drop(CARRIED_BY(ch), 1);
+        carry_drop(char_get_carried_by(ch), 1);
       }
     }
     char_set_position(ch, POS_SITTING);

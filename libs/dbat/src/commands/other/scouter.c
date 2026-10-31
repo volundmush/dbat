@@ -76,7 +76,7 @@ ACMD(do_telepathy)
     return;
   }
 
-  else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 40) {
+  else if ((getCurKI(ch)) < getMaxKI(ch) / 40) {
     send_to_char(ch, "You do not have enough ki to focus your mental abilities.\r\n");
     return;
   }
@@ -196,8 +196,8 @@ ACMD(do_telepathy)
         send_to_char(ch, "@wYou peer into their mind:\r\n");
         decCurKI(ch, getMaxKI(ch) / 40, 0);
         send_to_char(ch, "@GName      @D: @W%s@n\r\n", char_get_name(vict));
-        send_to_char(ch, "@GRace      @D: @W%s@n\r\n", TRUE_RACE(vict));
-        send_to_char(ch, "@GSensei    @D: @W%s@n\r\n", SENSEI_NAME(vict));
+        send_to_char(ch, "@GRace      @D: @W%s@n\r\n", char_true_race_name(vict));
+        send_to_char(ch, "@GSensei    @D: @W%s@n\r\n", char_sensei_name(vict));
         send_to_char(ch, "@GStr       @D: @W%d@n\r\n", char_get_aff_abils_str(vict));
         send_to_char(ch, "@GCon       @D: @W%d@n\r\n", char_get_aff_abils_con(vict));
         send_to_char(ch, "@GInt       @D: @W%d@n\r\n", char_get_aff_abils_intel(vict));
@@ -616,14 +616,14 @@ ACMD(do_scouter)
           }
 
           char *blah = sense_location(i->character);
-          if (obj_extra_flagged(obj, ITEM_BSCOUTER) && GET_HIT(i->character) >= 150000) {
+          if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(i->character) >= 150000) {
             send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == TRUE ? pathway : blah);
-          } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && GET_HIT(i->character) >= 5000000) {
+          } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(i->character) >= 5000000) {
             send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == TRUE ? pathway : blah);
-          } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && GET_HIT(i->character) >= 15000000) {
+          } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(i->character) >= 15000000) {
             send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == TRUE ? pathway : blah);
           } else {
-            send_to_char(ch, "@D<@GPowerlevel Detected@D: [@Y%s@D]@w ---> @C%s@n\r\n", add_commas(GET_HIT(i->character)), same == TRUE ? pathway : blah);
+            send_to_char(ch, "@D<@GPowerlevel Detected@D: [@Y%s@D]@w ---> @C%s@n\r\n", add_commas(getCurPL(i->character)), same == TRUE ? pathway : blah);
           }
           ++count;
           free(blah);
@@ -657,7 +657,7 @@ ACMD(do_scouter)
       send_to_char(ch, "@D`==================================|@n\r\n");
       return;
     } else {
-      if (obj_extra_flagged(obj, ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
+      if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(vict) >= 150000) {
         act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
         act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
         perform_remove(ch, WEAR_EYE);
@@ -666,7 +666,7 @@ ACMD(do_scouter)
         extract_obj(obj);
         save_char(ch);
         return;
-      } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
+      } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(vict) >= 5000000) {
         act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
         act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
         perform_remove(ch, WEAR_EYE);
@@ -675,7 +675,7 @@ ACMD(do_scouter)
         extract_obj(obj);
         save_char(ch);
         return;
-      } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
+      } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(vict) >= 15000000) {
         act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
         act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
         perform_remove(ch, WEAR_EYE);
@@ -686,7 +686,7 @@ ACMD(do_scouter)
         return;
       } else {
         long double percent = 0.0, cur = 0.0, max = 0.0;
-        int64_t stam = (getCurST(vict)), mstam = GET_MAX_MOVE(vict);
+        int64_t stam = (getCurST(vict)), mstam = getMaxST(vict);
         if (stam <= 0)
           stam = 1;
         if (mstam <= 0)
@@ -702,7 +702,7 @@ ACMD(do_scouter)
         send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
         send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
         send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-        send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D: @Y%21s@n@D|@n\r\n", add_commas(GET_HIT(vict)));
+        send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D: @Y%21s@n@D|@n\r\n", add_commas(getCurPL(vict)));
         if (!char_is_npc(vict)) {
           send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(char_get_charge(vict)));
         } else if (char_is_npc(vict)) {

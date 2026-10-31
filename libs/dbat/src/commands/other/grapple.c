@@ -136,7 +136,7 @@ ACMD(do_grapple)
   }
 
   if (!strcasecmp("hold", arg2) || !strcasecmp("choke", arg2) || !strcasecmp("grab", arg2) || !strcasecmp("wrap", arg2)) {
-    int perc = char_get_skill(ch, SKILL_GRAPPLE), prob = axion_dice(0), cost = GET_MAX_MOVE(ch) / 100;
+    int perc = char_get_skill(ch, SKILL_GRAPPLE), prob = axion_dice(0), cost = getMaxST(ch) / 100;
 
     if ((getCurST(ch)) < cost) {
       send_to_char(ch, "You do not have enough stamina to grapple!\r\n");
@@ -155,7 +155,7 @@ ACMD(do_grapple)
         }
         char_aff_set(vict, AFF_ZANZOKEN, false);
         decCurST(ch, cost, 0);
-        WAIT_STATE(ch, PULSE_4SEC);
+        char_set_wait(ch, PULSE_4SEC);
         return;
       } else {
         reveal_hiding(ch, 0);
@@ -177,23 +177,23 @@ ACMD(do_grapple)
       perc -= 2;
     }
 
-    if ((GET_HIT(ch) * 0.02) * char_get_aff_abils_str(ch) < (GET_HIT(vict) * 0.01) * char_get_aff_abils_str(vict)) {
+    if ((getCurPL(ch) * 0.02) * char_get_aff_abils_str(ch) < (getCurPL(vict) * 0.01) * char_get_aff_abils_str(vict)) {
       reveal_hiding(ch, 0);
       act("@RYou try to grapple with @r$N@R, but $E manages to overpower you!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@r$n@R tries to grapple with YOU, but you manage to overpower $m!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@r$n@R tries to grapple with @r$N@R, but $E manages to overpower @r$n@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       decCurST(ch, cost, 0);
       improve_skill(ch, SKILL_GRAPPLE, 1);
-      WAIT_STATE(ch, PULSE_4SEC);
+      char_set_wait(ch, PULSE_4SEC);
       return;
-    } else if ((GET_HIT(ch) * 0.01) * char_get_aff_abils_str(ch) < (GET_HIT(vict) * 0.01) * char_get_aff_abils_str(vict) && rand_number(1, 4) == 1) {
+    } else if ((getCurPL(ch) * 0.01) * char_get_aff_abils_str(ch) < (getCurPL(vict) * 0.01) * char_get_aff_abils_str(vict) && rand_number(1, 4) == 1) {
       reveal_hiding(ch, 0);
       act("@RYou try to grapple with @r$N@R, but $E manages to overpower you!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@r$n@R tries to grapple with YOU, but you manage to overpower $m!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@r$n@R tries to grapple with @r$N@R, but $E manages to overpower @r$n@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       decCurST(ch, cost, 0);
       improve_skill(ch, SKILL_GRAPPLE, 1);
-      WAIT_STATE(ch, PULSE_4SEC);
+      char_set_wait(ch, PULSE_4SEC);
       return;
     } else if (perc < prob) {
       reveal_hiding(ch, 0);
@@ -202,7 +202,7 @@ ACMD(do_grapple)
       act("@r$n@R tries to grapple with @r$N@R, but $E manages to avoid it!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       decCurST(ch, cost, 0);
       improve_skill(ch, SKILL_GRAPPLE, 1);
-      WAIT_STATE(ch, PULSE_4SEC);
+      char_set_wait(ch, PULSE_4SEC);
       return;
     } else if (!char_has_arms(vict) && !strcasecmp("grab", arg2)) {
       send_to_char(ch, "They don't even have an arm to grab onto!\r\n");
@@ -222,7 +222,7 @@ ACMD(do_grapple)
 
       decCurST(ch, cost, 0);
       improve_skill(ch, SKILL_GRAPPLE, 1);
-      WAIT_STATE(ch, PULSE_4SEC);
+      char_set_wait(ch, PULSE_4SEC);
       return;
     } else if (!strcasecmp("choke", arg2)) {
       reveal_hiding(ch, 0);
@@ -239,7 +239,7 @@ ACMD(do_grapple)
 
       decCurST(ch, cost, 0);
       improve_skill(ch, SKILL_GRAPPLE, 1);
-      WAIT_STATE(ch, PULSE_4SEC);
+      char_set_wait(ch, PULSE_4SEC);
       return;
     } else if (!strcasecmp("wrap", arg2)) {
       if (!char_is_majin(ch)) {
@@ -260,7 +260,7 @@ ACMD(do_grapple)
 
       decCurST(ch, cost, 0);
       improve_skill(ch, SKILL_GRAPPLE, 1);
-      WAIT_STATE(ch, PULSE_4SEC);
+      char_set_wait(ch, PULSE_4SEC);
       return;
     } else if (!strcasecmp("grab", arg2)) {
       reveal_hiding(ch, 0);
@@ -281,7 +281,7 @@ ACMD(do_grapple)
 
       decCurST(ch, cost, 0);
       improve_skill(ch, SKILL_GRAPPLE, 1);
-      WAIT_STATE(ch, PULSE_4SEC);
+      char_set_wait(ch, PULSE_4SEC);
       return;
     }
   } else { /* You need to learn proper syntax! */
@@ -302,7 +302,7 @@ ACMD(do_trip)
     return;
   }
 
-  int cost = GET_MAX_HIT(ch) / 200;
+  int cost = getEffMaxPL(ch) / 200;
 
   if (cost > (getCurST(ch))) {
     send_to_char(ch, "You don't have enough stamina.\r\n");
@@ -366,7 +366,7 @@ ACMD(do_trip)
         }
         char_aff_set(vict, AFF_ZANZOKEN, false);
         decCurST(ch, cost, 0);
-        WAIT_STATE(ch, PULSE_4SEC);
+        char_set_wait(ch, PULSE_4SEC);
         return;
       } else {
         reveal_hiding(ch, 0);
@@ -385,7 +385,7 @@ ACMD(do_trip)
       act("@m$n@m moves to trip $N@m, but $e screws up and $N@m manages to keep $S footing!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       improve_skill(ch, SKILL_TRIP, 0);
       decCurST(ch, cost, 0);
-      WAIT_STATE(ch, PULSE_4SEC);
+      char_set_wait(ch, PULSE_4SEC);
       if (char_get_fighting(ch) == NULL) {
         set_fighting(ch, vict);
       } else if (char_get_fighting(ch) != vict) {
@@ -405,7 +405,7 @@ ACMD(do_trip)
       improve_skill(ch, SKILL_TRIP, 0);
       decCurST(ch, cost, 0);
       char_set_position(vict, POS_SITTING);
-      WAIT_STATE(ch, PULSE_4SEC);
+      char_set_wait(ch, PULSE_4SEC);
       if (char_get_fighting(ch) == NULL) {
         set_fighting(ch, vict);
       }
@@ -446,12 +446,12 @@ ACMD(do_rip)
   }
 
   if (ch != vict && char_get_position(ch) > POS_SLEEPING) {
-    if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 20) {
+    if ((getCurST(ch)) < getMaxST(ch) / 20) {
       send_to_char(ch, "You are too tired to manage to grab their tail!\r\n");
       return;
     } else if (char_get_speedi(ch) > char_get_speedi(vict)) {
       decCurST(ch, getMaxST(ch) / 20, 0);
-      if (GET_HIT(ch) > GET_HIT(vict) * 2) {
+      if (getCurPL(ch) > getCurPL(vict) * 2) {
         reveal_hiding(ch, 0);
         act("@rYou rush at @R$N@r and grab $S tail! With a powerful tug you pull it off!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@R$n@r rushes at YOU and grabs your tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -479,7 +479,7 @@ ACMD(do_rip)
     act("@R$n@r grabs $s own tail and yanks it off!@n", TRUE, ch, 0, 0, TO_ROOM);
     char_lose_tail(vict);
   } else {
-    if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 20) {
+    if ((getCurST(ch)) < getMaxST(ch) / 20) {
       send_to_char(ch, "You are too tired to manage to grab their tail!\r\n");
       return;
     }
@@ -517,7 +517,7 @@ ACMD(do_drag)
     return;
   }
 
-  if (CARRYING(ch)) {
+  if (char_get_carrying(ch)) {
     send_to_char(ch, "You are busy carrying someone at the moment.\r\n");
     return;
   }
@@ -566,7 +566,7 @@ ACMD(do_drag)
       set_fighting(vict, ch);
     }
     return;
-  } else if (char_get_pc_weight(vict) + char_get_carry_weight(vict) > CAN_CARRY_W(ch)) {
+  } else if (char_get_pc_weight(vict) + char_get_carry_weight(vict) > getMaxCarryWeight(ch)) {
     reveal_hiding(ch, 0);
     act("@wYou try to grab and pull @C$N@W with you, but $E is too heavy!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@C$n@W tries to grab and pull @c$N@W but $E is too heavy!@n", TRUE, ch, 0, vict, TO_ROOM);
@@ -599,7 +599,7 @@ ACMD(do_stop)
     act("@CYou move out of your fighting posture.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@c$n@C moves out of $s fighting posture.@n", TRUE, ch, 0, 0, TO_ROOM);
     stop_fighting(ch);
-    WAIT_STATE(ch, PULSE_2SEC);
+    char_set_wait(ch, PULSE_2SEC);
     return;
   }
 }
@@ -614,8 +614,8 @@ ACMD(do_escape)
   int num = char_get_aff_abils_str(ch);
 
   struct char_data *offender = char_get_absorbby(ch) ? char_get_absorbby(ch) : char_get_grappled(ch);
-  int64_t opl                = GET_HIT(offender);
-  int64_t dpl                = GET_HIT(ch);
+  int64_t opl                = getCurPL(offender);
+  int64_t dpl                = getCurPL(ch);
   int skill                  = char_get_absorbby(ch) ? char_get_skill(char_get_absorbby(ch), SKILL_ABSORB) : char_get_skill(char_get_grappled(ch), SKILL_GRAPPLE);
 
   if (dpl > opl * 10) {
@@ -657,7 +657,7 @@ ACMD(do_escape)
       act("@WYou struggle to break loose of @C$n's@W hold!@n", TRUE, char_get_absorbby(ch), 0, ch, TO_VICT);
       act("@c$N@W struggles to break loose of your hold!@n", TRUE, char_get_absorbby(ch), 0, ch, TO_CHAR);
       if (rand_number(1, 3) == 3) {
-        int64_t dmg = GET_MAX_HIT(ch) * 0.025;
+        int64_t dmg = getEffMaxPL(ch) * 0.025;
         hurt(0, 0, ch, char_get_absorbby(ch), NULL, dmg, 0);
         if (char_get_position(char_get_absorbby(ch)) == POS_SLEEPING) {
           act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, char_get_absorbby(ch), 0, ch, TO_NOTVICT);
@@ -667,7 +667,7 @@ ACMD(do_escape)
           char_set_absorbby(ch, NULL);
         }
       }
-      WAIT_STATE(ch, PULSE_2SEC);
+      char_set_wait(ch, PULSE_2SEC);
     }
   }
 
@@ -701,7 +701,7 @@ ACMD(do_escape)
       act("@WYou struggle to break loose of @C$n's@W hold!@n", TRUE, char_get_grappled(ch), 0, ch, TO_VICT);
       act("@c$N@W struggles to break loose of your hold!@n", TRUE, char_get_grappled(ch), 0, ch, TO_CHAR);
       if (rand_number(1, 3) == 3) {
-        int64_t dmg = GET_MAX_HIT(ch) * 0.025;
+        int64_t dmg = getEffMaxPL(ch) * 0.025;
         hurt(0, 0, ch, char_get_grappled(ch), NULL, dmg, 0);
         if (char_get_position(char_get_grappled(ch)) == POS_SLEEPING) {
           act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, char_get_grappled(ch), 0, ch, TO_NOTVICT);
@@ -713,7 +713,7 @@ ACMD(do_escape)
           char_set_grap(ch, -1);
         }
       }
-      WAIT_STATE(ch, PULSE_2SEC);
+      char_set_wait(ch, PULSE_2SEC);
     }
   }
 }
@@ -827,7 +827,7 @@ ACMD(do_steal)
     return;
   }
 
-  if ((getCurST(ch)) < (GET_MAX_MOVE(ch) / 40) + char_get_carry_weight(ch)) {
+  if ((getCurST(ch)) < (getMaxST(ch) / 40) + char_get_carry_weight(ch)) {
     send_to_char(ch, "You do not have enough stamina.\r\n");
     return;
   }
@@ -866,7 +866,7 @@ ACMD(do_steal)
     act("@rYou are caught trying to stick your hand in @R$N's@r possessions!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@rYou catch @R$n@r trying to rummage through your possessions!@n", TRUE, ch, 0, vict, TO_VICT);
     act("@R$n@R is caught by @R$N@r as $e sticks $s hand in @R$N's@r possessions!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    WAIT_STATE(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
     if (char_is_npc(vict)) {
       set_fighting(vict, ch);
     }
@@ -888,7 +888,7 @@ ACMD(do_steal)
           char_set_gold(ch, char_get_gold(ch) + (gold));
           if (!char_is_npc(vict)) {
             char_plr_set(vict, PLR_STOLEN, true);
-            mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "THEFT: %s has stolen %s zenni@n from %s", char_get_name(ch), add_commas(gold), char_get_name(vict));
+            mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(ch)), TRUE, "THEFT: %s has stolen %s zenni@n from %s", char_get_name(ch), add_commas(gold), char_get_name(vict));
           }
           if (gold > 1)
             send_to_char(ch, "Bingo!  You got %d zenni.\r\n", gold);
@@ -915,7 +915,7 @@ ACMD(do_steal)
         act("@rYou are caught trying to steal zenni from @R$N@r!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@rYou catch @R$n's@r hand trying to snatch your zenni!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@R$N@r catches @R$n's@r hand trying to snatch $S zenni!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
         if (char_is_npc(vict)) {
           set_fighting(vict, ch);
         }
@@ -954,10 +954,10 @@ ACMD(do_steal)
         } else if (obj_extra_flagged(obj, ITEM_NOSTEAL)) {
           send_to_char(ch, "You can't steal that!\r\n");
           return;
-        } else if (obj_get_weight(obj) + (getCurCarriedWeight(ch)) > CAN_CARRY_W(ch)) {
+        } else if (obj_get_weight(obj) + (getCurCarriedWeight(ch)) > getMaxCarryWeight(ch)) {
           send_to_char(ch, "You can't carry that much weight.\r\n");
           return;
-        } else if (char_get_carry_items(ch) + 1 > CAN_CARRY_N(ch)) {
+        } else if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
           send_to_char(ch, "You don't have the room for it right now!\r\n");
           return;
         } else if (prob > perc) { /* Right off their back :) */
@@ -978,7 +978,7 @@ ACMD(do_steal)
           act("@rYou are caught trying to steal $p@r from @R$N@r!@n", TRUE, ch, obj, vict, TO_CHAR);
           act("@rYou feel your body being shifted while you sleep and wake up to find @R$n@r trying to steal $p@r from you!@n", TRUE, ch, obj, vict, TO_VICT);
           act("@R$N@r catches @R$n's@r trying to $p@r from $M during $S sleep!@n", TRUE, ch, obj, vict, TO_NOTVICT);
-          WAIT_STATE(ch, PULSE_3SEC);
+          char_set_wait(ch, PULSE_3SEC);
           if (char_is_npc(vict)) {
             char_set_position(vict, POS_STANDING);
             set_fighting(vict, ch);
@@ -1000,10 +1000,10 @@ ACMD(do_steal)
         } else if (obj_get_type_flag(obj) == ITEM_KEY) {
           send_to_char(ch, "No stealing keys!\r\n");
           return;
-        } else if (obj_get_weight(obj) + (getCurCarriedWeight(ch)) > CAN_CARRY_W(ch)) {
+        } else if (obj_get_weight(obj) + (getCurCarriedWeight(ch)) > getMaxCarryWeight(ch)) {
           send_to_char(ch, "You can't carry that much weight.\r\n");
           return;
-        } else if (char_get_carry_items(ch) + 1 > CAN_CARRY_N(ch)) {
+        } else if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
           send_to_char(ch, "You don't have the room for it right now!\r\n");
           return;
         } else if (prob > perc) { /* Right out of their pockets */
@@ -1012,7 +1012,7 @@ ACMD(do_steal)
           obj_to_char(obj, ch);
           if (!char_is_npc(vict)) {
             char_plr_set(vict, PLR_STOLEN, true);
-            mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "THEFT: %s has stolen %s@n from %s", char_get_name(ch), obj->short_description, char_get_name(vict));
+            mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(ch)), TRUE, "THEFT: %s has stolen %s@n from %s", char_get_name(ch), obj->short_description, char_get_name(vict));
           }
           if (axion_dice(0) > prob) {
             reveal_hiding(ch, 0);
@@ -1031,7 +1031,7 @@ ACMD(do_steal)
           act("@rYou are caught trying to steal $p@r from @R$N@r!@n", TRUE, ch, obj, vict, TO_CHAR);
           act("@rYou catch @R$n@r trying to steal $p@r from you!@n", TRUE, ch, obj, vict, TO_VICT);
           act("@R$N@r catches @R$n's@r trying to $p@r!@n", TRUE, ch, obj, vict, TO_NOTVICT);
-          WAIT_STATE(ch, PULSE_3SEC);
+          char_set_wait(ch, PULSE_3SEC);
           if (char_is_npc(vict)) {
             char_set_position(vict, POS_STANDING);
             set_fighting(vict, ch);

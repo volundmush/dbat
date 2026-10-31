@@ -427,7 +427,7 @@ static char *next_page(char *str, struct char_data *ch)
       return (NULL);
 
     /* If we're at the start of the next page, return this fact. */
-    else if (line > (GET_PAGE_LENGTH(ch) - (char_prf_flagged(ch, PRF_COMPACT) ? 1 : 2)))
+    else if (line > (char_get_page_length(ch) - (char_prf_flagged(ch, PRF_COMPACT) ? 1 : 2)))
       return (str);
 
     /* Check for the begining of an ANSI color code block. */
@@ -496,8 +496,8 @@ void page_string(struct descriptor_data *d, char *str, int keep_internal)
   if (!str || !*str)
     return;
 
-  if ((GET_PAGE_LENGTH(d->character) < 5 || GET_PAGE_LENGTH(d->character) > 50))
-    GET_PAGE_LENGTH(d->character) = PAGE_LENGTH;
+  if ((char_get_page_length(d->character) < 5 || char_get_page_length(d->character) > 50))
+    char_set_page_length(d->character, PAGE_LENGTH);
   d->showstr_count = count_pages(str, d->character);
   CREATE(d->showstr_vector, char *, d->showstr_count);
 

@@ -876,13 +876,13 @@ bool race_check_trans_unlock(char_data *ch, int tier)
 
   if (ps_cost) {
     if (char_get_transcost(ch, (tier)-1) == FALSE) {
-      if (GET_PRACTICES(ch, char_get_class(ch)) < 50) {
+      if (char_get_practice_points(ch) < 50) {
         send_to_char(ch,
                      "You need %i practice points in order to obtain a transformation for the first time.\r\n",
                      ps_cost);
         return false;
       } else {
-        GET_PRACTICES(ch, char_get_class(ch)) -= 50;
+        char_set_practice_points(ch, char_get_practice_points(ch) - (50));
         char_set_transcost(ch, (tier)-1, TRUE);
         send_to_char(ch, "You pay %i PS to permanently unlock this transformation!\r\n", ps_cost);
       }

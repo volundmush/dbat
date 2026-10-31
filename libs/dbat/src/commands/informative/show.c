@@ -822,19 +822,19 @@ void look_at_char(struct char_data *i, struct char_data *ch)
 
   if ((!char_plr_flagged(i, PLR_DISGUISED) && (readIntro(ch, i) == 1 && !char_is_npc(i)))) {
     if (char_get_sex(i) == SEX_NEUTRAL)
-      send_to_char(ch, "%s appears to be %s %s, ", get_i_name(ch, i), AN(RACE(i)), LRACE(i));
+      send_to_char(ch, "%s appears to be %s %s, ", get_i_name(ch, i), AN(juggleRaceName(i, true)), juggleRaceName(i, false));
     else
-      send_to_char(ch, "%s appears to be %s %s %s, ", get_i_name(ch, i), AN(char_mafe(i)), char_mafe(i), LRACE(i));
+      send_to_char(ch, "%s appears to be %s %s %s, ", get_i_name(ch, i), AN(char_mafe(i)), char_mafe(i), juggleRaceName(i, false));
   } else if (ch == i || char_is_npc(i)) {
     if (char_get_sex(i) == SEX_NEUTRAL)
-      send_to_char(ch, "%c%s appears to be %s %s, ", toupper(*char_get_name(i)), char_get_name(i) + 1, AN(RACE(i)), LRACE(i));
+      send_to_char(ch, "%c%s appears to be %s %s, ", toupper(*char_get_name(i)), char_get_name(i) + 1, AN(juggleRaceName(i, true)), juggleRaceName(i, false));
     else
-      send_to_char(ch, "%c%s appears to be %s %s %s, ", toupper(*char_get_name(i)), char_get_name(i) + 1, AN(char_mafe(i)), char_mafe(i), LRACE(i));
+      send_to_char(ch, "%c%s appears to be %s %s %s, ", toupper(*char_get_name(i)), char_get_name(i) + 1, AN(char_mafe(i)), char_mafe(i), juggleRaceName(i, false));
   } else {
     if (char_get_sex(i) == SEX_NEUTRAL)
-      send_to_char(ch, "Appears to be %s %s, ", AN(RACE(i)), LRACE(i));
+      send_to_char(ch, "Appears to be %s %s, ", AN(juggleRaceName(i, true)), juggleRaceName(i, false));
     else
-      send_to_char(ch, "Appears to be %s %s %s, ", AN(char_mafe(i)), char_mafe(i), LRACE(i));
+      send_to_char(ch, "Appears to be %s %s %s, ", AN(char_mafe(i)), char_mafe(i), juggleRaceName(i, false));
   }
 
   if (char_is_npc(i)) {
@@ -866,36 +866,36 @@ void look_at_char(struct char_data *i, struct char_data *ch)
     }
     if (i == ch) {
       send_to_char(ch, " and ");
-    } else if (GET_AGE(ch) >= GET_AGE(i) + 30) {
+    } else if (char_get_age_years(ch) >= char_get_age_years(i) + 30) {
       send_to_char(ch, " appears to be very much younger than you, and ");
-    } else if (GET_AGE(ch) >= GET_AGE(i) + 25) {
+    } else if (char_get_age_years(ch) >= char_get_age_years(i) + 25) {
       send_to_char(ch, " appears to be much younger than you, and ");
-    } else if (GET_AGE(ch) >= GET_AGE(i) + 15) {
+    } else if (char_get_age_years(ch) >= char_get_age_years(i) + 15) {
       send_to_char(ch, " appears to be a good amount younger than you, and ");
-    } else if (GET_AGE(ch) >= GET_AGE(i) + 10) {
+    } else if (char_get_age_years(ch) >= char_get_age_years(i) + 10) {
       send_to_char(ch, " appears to be about a decade younger than you, and ");
-    } else if (GET_AGE(ch) >= GET_AGE(i) + 5) {
+    } else if (char_get_age_years(ch) >= char_get_age_years(i) + 5) {
       send_to_char(ch, " appears to be several years younger than you, and ");
-    } else if (GET_AGE(ch) >= GET_AGE(i) + 2) {
+    } else if (char_get_age_years(ch) >= char_get_age_years(i) + 2) {
       send_to_char(ch, " appears to be a bit younger than you, and ");
-    } else if (GET_AGE(ch) > GET_AGE(i)) {
+    } else if (char_get_age_years(ch) > char_get_age_years(i)) {
       send_to_char(ch, " appears to be slightly younger than you, and ");
-    } else if (GET_AGE(ch) == GET_AGE(i)) {
+    } else if (char_get_age_years(ch) == char_get_age_years(i)) {
       send_to_char(ch, " appears to be the same age as you, and ");
     }
-    if (GET_AGE(i) >= GET_AGE(ch) + 30) {
+    if (char_get_age_years(i) >= char_get_age_years(ch) + 30) {
       send_to_char(ch, " appears to be very much older than you, and ");
-    } else if (GET_AGE(i) >= GET_AGE(ch) + 25) {
+    } else if (char_get_age_years(i) >= char_get_age_years(ch) + 25) {
       send_to_char(ch, " appears to be much older than you, and ");
-    } else if (GET_AGE(i) >= GET_AGE(ch) + 15) {
+    } else if (char_get_age_years(i) >= char_get_age_years(ch) + 15) {
       send_to_char(ch, " appears to be a good amount older than you, and ");
-    } else if (GET_AGE(i) >= GET_AGE(ch) + 10) {
+    } else if (char_get_age_years(i) >= char_get_age_years(ch) + 10) {
       send_to_char(ch, " appears to be about a decade older than you, and ");
-    } else if (GET_AGE(i) >= GET_AGE(ch) + 5) {
+    } else if (char_get_age_years(i) >= char_get_age_years(ch) + 5) {
       send_to_char(ch, " appears to be several years older than you, and ");
-    } else if (GET_AGE(i) >= GET_AGE(ch) + 2) {
+    } else if (char_get_age_years(i) >= char_get_age_years(ch) + 2) {
       send_to_char(ch, " appears to be a bit older than you, and ");
-    } else if (GET_AGE(i) > GET_AGE(ch)) {
+    } else if (char_get_age_years(i) > char_get_age_years(ch)) {
       send_to_char(ch, " appears to be slightly older than you, and ");
     }
   }
@@ -1063,17 +1063,17 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
   else if (char_is_npc(i) && char_get_grappled(i) && char_get_grappled(i) == ch)
     send_to_char(ch, "@w%c%s is being grappled with by YOU!", toupper(*i->short_descr), i->short_descr + 1);
   else if (char_is_npc(i) && char_get_grappled(i) && char_get_grappled(i) != ch)
-    send_to_char(ch, "@w%c%s is being absorbed from by %s!", toupper(*i->short_descr), i->short_descr + 1, readIntro(ch, char_get_grappled(i)) == 1 ? get_i_name(ch, char_get_grappled(i)) : AN(RACE(char_get_grappled(i))));
+    send_to_char(ch, "@w%c%s is being absorbed from by %s!", toupper(*i->short_descr), i->short_descr + 1, readIntro(ch, char_get_grappled(i)) == 1 ? get_i_name(ch, char_get_grappled(i)) : AN(juggleRaceName(char_get_grappled(i), true)));
   else if (char_is_npc(i) && char_get_absorbby(i) && char_get_absorbby(i) == ch)
     send_to_char(ch, "@w%c%s is being absorbed from by YOU!", toupper(*i->short_descr), i->short_descr + 1);
   else if (char_is_npc(i) && char_get_absorbby(i) && char_get_absorbby(i) != ch)
-    send_to_char(ch, "@w%c%s is being absorbed from by %s!", toupper(*i->short_descr), i->short_descr + 1, readIntro(ch, char_get_absorbby(i)) == 1 ? get_i_name(ch, char_get_absorbby(i)) : AN(RACE(char_get_absorbby(i))));
+    send_to_char(ch, "@w%c%s is being absorbed from by %s!", toupper(*i->short_descr), i->short_descr + 1, readIntro(ch, char_get_absorbby(i)) == 1 ? get_i_name(ch, char_get_absorbby(i)) : AN(juggleRaceName(char_get_absorbby(i), true)));
   else if (char_is_npc(i) && char_get_fighting(i) && char_get_fighting(i) != ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING && is_sparring(i))
-    send_to_char(ch, "@w%c%s is sparring with %s!", toupper(*i->short_descr), i->short_descr + 1, char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : LRACE(char_get_fighting(i))));
+    send_to_char(ch, "@w%c%s is sparring with %s!", toupper(*i->short_descr), i->short_descr + 1, char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : juggleRaceName(char_get_fighting(i), false)));
   else if (char_is_npc(i) && char_get_fighting(i) && is_sparring(i) && char_get_fighting(i) == ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
     send_to_char(ch, "@w%c%s is sparring with you!", toupper(*i->short_descr), i->short_descr + 1);
   else if (char_is_npc(i) && char_get_fighting(i) && char_get_fighting(i) != ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
-    send_to_char(ch, "@w%c%s is fighting %s!", toupper(*i->short_descr), i->short_descr + 1, char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : LRACE(char_get_fighting(i))));
+    send_to_char(ch, "@w%c%s is fighting %s!", toupper(*i->short_descr), i->short_descr + 1, char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : juggleRaceName(char_get_fighting(i), false)));
   else if (char_is_npc(i) && char_get_fighting(i) && char_get_fighting(i) == ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
     send_to_char(ch, "@w%c%s is fighting YOU!", toupper(*i->short_descr), i->short_descr + 1);
   else if (char_is_npc(i) && char_get_fighting(i) && char_get_position(i) == POS_SITTING)
@@ -1093,7 +1093,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
       send_to_char(ch, "@w%s", get_i_name(ch, i));
     } else if (!char_plr_flagged(i, PLR_DISGUISED) && readIntro(ch, i) != 1) {
       if (char_get_distfea(i) == DISTFEA_EYE) {
-        send_to_char(ch, "@wA %s eyed %s %s", eye_types[(int)char_get_eye(i)], char_mafe(i), LRACE(i));
+        send_to_char(ch, "@wA %s eyed %s %s", eye_types[(int)char_get_eye(i)], char_mafe(i), juggleRaceName(i, false));
       } else if (char_get_distfea(i) == DISTFEA_HAIR) {
         if (char_is_majin(i)) {
           send_to_char(ch, "@wA %s majin, with a %s forelock,", char_mafe(i), FHA_types[(int)char_get_hairl(i)]);
@@ -1102,14 +1102,14 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
         } else if (char_is_arlian(i)) {
           send_to_char(ch, "@wA arlian, with %s antennae,", FHA_types[(int)char_get_hairl(i)]);
         } else if (char_is_icer(i) || char_is_demon(i)) {
-          send_to_char(ch, "@wA %s %s, with %s horns", char_mafe(i), LRACE(i), FHA_types[(int)char_get_hairl(i)]);
+          send_to_char(ch, "@wA %s %s, with %s horns", char_mafe(i), juggleRaceName(i, false), FHA_types[(int)char_get_hairl(i)]);
         } else {
           char blarg[MAX_INPUT_LENGTH];
           sprintf(blarg, "%s %s hair %s", hairl_types[(int)char_get_hairl(i)], hairc_types[(int)char_get_hairc(i)], hairs_types[(int)char_get_hairs(i)]);
-          send_to_char(ch, "@wA %s %s, with %s", char_mafe(i), LRACE(i), char_get_hairl(i) == 0 ? "a bald head" : (blarg));
+          send_to_char(ch, "@wA %s %s, with %s", char_mafe(i), juggleRaceName(i, false), char_get_hairl(i) == 0 ? "a bald head" : (blarg));
         }
       } else if (char_get_distfea(i) == DISTFEA_SKIN) {
-        send_to_char(ch, "@wA %s skinned %s %s", skin_types[(int)char_get_skin(i)], char_mafe(i), LRACE(i));
+        send_to_char(ch, "@wA %s skinned %s %s", skin_types[(int)char_get_skin(i)], char_mafe(i), juggleRaceName(i, false));
       } else if (char_get_distfea(i) == DISTFEA_HEIGHT) {
         char *height;
         if (char_is_truffle(i)) {
@@ -1145,7 +1145,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
             height = strdup("very short");
           }
         }
-        send_to_char(ch, "@wA %s %s %s", height, char_mafe(i), LRACE(i));
+        send_to_char(ch, "@wA %s %s %s", height, char_mafe(i), juggleRaceName(i, false));
         if (height) {
           free(height);
         }
@@ -1186,13 +1186,13 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
             height = strdup("welterweight");
           }
         }
-        send_to_char(ch, "@wA %s %s %s", height, char_mafe(i), LRACE(i));
+        send_to_char(ch, "@wA %s %s %s", height, char_mafe(i), juggleRaceName(i, false));
         if (height) {
           free(height);
         }
       }
     } else {
-      send_to_char(ch, "@wA disguised %s %s", char_mafe(i), LRACE(i));
+      send_to_char(ch, "@wA disguised %s %s", char_mafe(i), juggleRaceName(i, false));
     }
   }
 
@@ -1232,12 +1232,12 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
       send_to_char(ch, ", is grappling with %s", readIntro(ch, char_get_grappling(i)) == 1 ? get_i_name(ch, char_get_grappling(i)) : introd_calc(char_get_grappling(i)));
       count = TRUE;
     }
-    if (!char_is_npc(i) && CARRYING(i) && CARRYING(i) != ch) {
-      send_to_char(ch, ", is carrying %s", readIntro(ch, CARRYING(i)) == 1 ? get_i_name(ch, CARRYING(i)) : introd_calc(CARRYING(i)));
+    if (!char_is_npc(i) && char_get_carrying(i) && char_get_carrying(i) != ch) {
+      send_to_char(ch, ", is carrying %s", readIntro(ch, char_get_carrying(i)) == 1 ? get_i_name(ch, char_get_carrying(i)) : introd_calc(char_get_carrying(i)));
       count = TRUE;
     }
-    if (!char_is_npc(i) && CARRIED_BY(i) && CARRIED_BY(i) != ch) {
-      send_to_char(ch, ", is being carried by %s", readIntro(ch, CARRIED_BY(i)) == 1 ? get_i_name(ch, CARRIED_BY(i)) : introd_calc(CARRIED_BY(i)));
+    if (!char_is_npc(i) && char_get_carried_by(i) && char_get_carried_by(i) != ch) {
+      send_to_char(ch, ", is being carried by %s", readIntro(ch, char_get_carried_by(i)) == 1 ? get_i_name(ch, char_get_carried_by(i)) : introd_calc(char_get_carried_by(i)));
       count = TRUE;
     }
     if (!char_is_npc(i) && char_get_grappling(i) && char_get_grappling(i) == ch) {
@@ -1256,7 +1256,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
       send_to_char(ch, ", is being grappled with by YOU");
       count = TRUE;
     }
-    if (!char_is_npc(i) && CARRYING(ch) && CARRYING(ch) == i) {
+    if (!char_is_npc(i) && char_get_carrying(ch) && char_get_carrying(ch) == i) {
       send_to_char(ch, ", is being carried by you");
       count = TRUE;
     }
@@ -1272,7 +1272,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
         count = TRUE;
       } else {
         if (char_get_in_room(i) == char_get_in_room(char_get_fighting(i))) {
-          send_to_char(ch, "%s", char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : LRACE(char_get_fighting(i))));
+          send_to_char(ch, "%s", char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : juggleRaceName(char_get_fighting(i), false)));
           count = TRUE;
         } else {
           send_to_char(ch, "someone who has already left!");
@@ -1311,7 +1311,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
         send_to_char(ch, "@rYOU@w!");
       else {
         if (char_get_in_room(i) == char_get_in_room(char_get_fighting(i)))
-          send_to_char(ch, "%s!", char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : LRACE(char_get_fighting(i))));
+          send_to_char(ch, "%s!", char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : juggleRaceName(char_get_fighting(i), false)));
         else
           send_to_char(ch, "someone who has already left!");
       }
@@ -1457,7 +1457,7 @@ void list_char_to_char(struct char_data *list, struct char_data *ch)
               (char_get_affected_by(i)[2] == char_get_affected_by(j)[2]) &&
               (char_get_affected_by(i)[3] == char_get_affected_by(j)[3]) &&
               (!char_get_fighting(i) && !char_get_fighting(j)) &&
-              (GET_HIT(i) == getEffMaxPL(i) && GET_HIT(j) == getEffMaxPL(j)) &&
+              (getCurPL(i) == getEffMaxPL(i) && getCurPL(j) == getEffMaxPL(j)) &&
               !strcmp(char_get_name(i), char_get_name(j))) {
             for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
               if (tmphide->hidden == j)
@@ -1479,7 +1479,7 @@ void list_char_to_char(struct char_data *list, struct char_data *ch)
               (char_get_affected_by(i)[2] == char_get_affected_by(j)[2]) &&
               (char_get_affected_by(i)[3] == char_get_affected_by(j)[3]) &&
               (!char_get_fighting(i) && !char_get_fighting(j)) &&
-              (GET_HIT(i) == GET_MAX_HIT(i) && GET_HIT(j) == GET_MAX_HIT(j)) &&
+              (getCurPL(i) == getEffMaxPL(i) && getCurPL(j) == getEffMaxPL(j)) &&
               !strcmp(char_get_name(i), char_get_name(j))) {
             for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
               if (tmphide->hidden == j)

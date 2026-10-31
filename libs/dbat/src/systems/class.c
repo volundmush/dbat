@@ -168,21 +168,21 @@ void do_start(struct char_data *ch)
   char_set_exp(ch, 1);
 
   if (char_is_android(ch)) {
-    GET_COND(ch, HUNGER) = -1;
-    GET_COND(ch, THIRST) = -1;
-    GET_COND(ch, DRUNK)  = -1;
+    char_set_conditions(ch, HUNGER, -1);
+    char_set_conditions(ch, THIRST, -1);
+    char_set_conditions(ch, DRUNK, -1);
   } else if (char_is_bio(ch) && char_has_genome(ch, 3)) {
-    GET_COND(ch, HUNGER) = -1;
-    GET_COND(ch, DRUNK)  = 0;
-    GET_COND(ch, THIRST) = 48;
+    char_set_conditions(ch, HUNGER, -1);
+    char_set_conditions(ch, DRUNK, 0);
+    char_set_conditions(ch, THIRST, 48);
   } else if (char_is_namek(ch)) {
-    GET_COND(ch, HUNGER) = -1;
-    GET_COND(ch, DRUNK)  = 0;
-    GET_COND(ch, THIRST) = 48;
+    char_set_conditions(ch, HUNGER, -1);
+    char_set_conditions(ch, DRUNK, 0);
+    char_set_conditions(ch, THIRST, 48);
   } else {
-    GET_COND(ch, THIRST) = 48;
-    GET_COND(ch, HUNGER) = 48;
-    GET_COND(ch, DRUNK)  = 0;
+    char_set_conditions(ch, THIRST, 48);
+    char_set_conditions(ch, HUNGER, 48);
+    char_set_conditions(ch, DRUNK, 0);
   }
 
   char_prf_set(ch, PRF_AUTOEXIT, true);
@@ -220,7 +220,7 @@ void do_start(struct char_data *ch)
     char_set_skill_slots(ch, char_get_skill_slots(ch) - (5));
 
   if (char_get_race(ch) == RACE_SAIYAN || char_get_race(ch) == RACE_HALFBREED) {
-    if (char_get_race(ch) != RACE_HALFBREED || (char_get_race(ch) == RACE_HALFBREED && RACIAL_PREF(ch) != 1)) {
+    if (char_get_race(ch) != RACE_HALFBREED || (char_get_race(ch) == RACE_HALFBREED && char_get_racial_pref(ch) != 1)) {
       char_plr_set(ch, PLR_STAIL, true);
     }
   }
@@ -392,7 +392,7 @@ void do_start(struct char_data *ch)
       break;
   }
 
-  SPEAKING(ch) = SKILL_LANG_COMMON;
+  char_set_speaking(ch, SKILL_LANG_COMMON);
 
   char_set_lifeperc(ch, 75);
 
@@ -803,7 +803,7 @@ void advance_level(struct char_data *ch, int whichclass)
   if (rand_number(1, 8) == 2) {
     add_train = 1;
     if (add_train) {
-      GET_TRAINS(ch) += add_train;
+      char_set_ability_trains(ch, char_get_ability_trains(ch) + (add_train));
     }
   }
   if (rand_number(1, 4) == 4) {
@@ -830,7 +830,7 @@ void advance_level(struct char_data *ch, int whichclass)
     add_mana *= 1.25;
     add_move *= 1.25;
   }
-  GET_PRACTICES(ch, whichclass) += add_prac;
+  char_set_practice_points(ch, char_get_practice_points(ch) + (add_prac));
   gainBasePL(ch, add_hp, true);
   gainBaseKI(ch, add_mana, true);
   gainBaseST(ch, add_move, true);
@@ -842,11 +842,11 @@ void advance_level(struct char_data *ch, int whichclass)
   add_move = nmo;
   /* epic and class feat points no longer exist; epic characters gained only those */
   if (char_get_class_level(ch) < LVL_EPICSTART)
-    GET_FEAT_POINTS(ch) += add_gen_feats;
+    char_set_feat_points(ch, char_get_feat_points(ch) + (add_gen_feats));
 
   if (char_get_admlevel(ch) >= ADMLVL_IMMORT) {
     for (i = 0; i < 3; i++)
-      GET_COND(ch, i) = (char)-1;
+      char_set_conditions(ch, i, (char)-1);
     char_prf_set(ch, PRF_HOLYLIGHT, true);
   }
 
@@ -1506,7 +1506,7 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
   char *buf, *buf2, *buf3;
 
   if (char_is_npc(ch)) {
-    snprintf(ptr, sizeof(str) - (ptr - str), "%s%d", CLASS_ABBR(ch), char_get_level(ch));
+    snprintf(ptr, sizeof(str) - (ptr - str), "%s%d", char_class_abbr(ch), char_get_level(ch));
     return str;
   }
 
@@ -1547,7 +1547,7 @@ char *class_desc_str(struct char_data *ch, int howlong, int wantthe)
         rank = char_get_class_ranks(ch, j);
       }
     rank = char_get_class_ranks(ch, char_get_class(ch));
-    snprintf(ptr, sizeof(str) - (ptr - str), "%s%d%s", SENSEI_NAME_LOWER(ch),
+    snprintf(ptr, sizeof(str) - (ptr - str), "%s%d%s", char_sensei_name_lower(ch),
              rank, char_get_level(ch) == rank ? "" : "+");
     return str;
   }

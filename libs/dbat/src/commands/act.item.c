@@ -403,7 +403,7 @@ ACMD(do_garden)
         act("@yYou sink your shovel into the soft ground and manage to dig up a pile of fertile soil!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of fertile soil!@n", TRUE, ch, 0, 0, TO_ROOM);
         obj_set_value(soil, 0, 8);
-        WAIT_STATE(ch, PULSE_4SEC);
+        char_set_wait(ch, PULSE_4SEC);
         return;
       } else if (rroom_flagged(char_get_in_room(ch), ROOM_FERTILE2)) {
         struct obj_data *soil = read_object(255, VIRTUAL);
@@ -411,7 +411,7 @@ ACMD(do_garden)
         act("@yYou sink your shovel into the soft ground and manage to dig up a pile of good soil!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of good soil!@n", TRUE, ch, 0, 0, TO_ROOM);
         obj_set_value(soil, 0, rand_number(5, 7));
-        WAIT_STATE(ch, PULSE_4SEC);
+        char_set_wait(ch, PULSE_4SEC);
         return;
       } else {
         struct obj_data *soil = read_object(255, VIRTUAL);
@@ -419,7 +419,7 @@ ACMD(do_garden)
         act("@yYou sink your shovel into the soft ground and manage to dig up a pile of soil!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of soil!@n", TRUE, ch, 0, 0, TO_ROOM);
         obj_set_value(soil, 0, rand_number(0, 4));
-        WAIT_STATE(ch, PULSE_4SEC);
+        char_set_wait(ch, PULSE_4SEC);
         return;
       }
     }
@@ -454,7 +454,7 @@ ACMD(do_garden)
     return;
   }
 
-  int64_t cost = (GET_MAX_MOVE(ch) * 0.005) + rand_number(50, 150);
+  int64_t cost = (getMaxST(ch) * 0.005) + rand_number(50, 150);
   int skill    = char_get_skill(ch, SKILL_GARDENING);
 
   if ((getCurST(ch)) < cost) {
@@ -492,7 +492,7 @@ ACMD(do_garden)
           send_to_char(ch, "@YThe plant is now at full water level.@n\r\n");
         }
         extract_obj(water);
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
         improve_skill(ch, SKILL_GARDENING, 0);
         return;
       } else {
@@ -505,7 +505,7 @@ ACMD(do_garden)
           send_to_char(ch, "@YThe plant is now at full water level.@n\r\n");
         }
         extract_obj(water);
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
         improve_skill(ch, SKILL_GARDENING, 0);
         return;
       }
@@ -537,7 +537,7 @@ ACMD(do_garden)
         act("@g$n@G attempts to harvest @g$p@G with $s clippers, but accidently cuts the plant in half!@n", TRUE, ch, obj, 0, TO_ROOM);
         decCurST(ch, cost, 0);
         extract_obj(obj);
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
         improve_skill(ch, SKILL_GARDENING, 0);
         return;
       } else {
@@ -550,7 +550,7 @@ ACMD(do_garden)
           return;
         }
         harvest_plant(ch, obj);
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
         improve_skill(ch, SKILL_GARDENING, 0);
         return;
       }
@@ -574,7 +574,7 @@ ACMD(do_garden)
         obj_from_room(obj);
         obj_to_char(obj, ch);
         obj_set_value(obj, VAL_SOILQ, 0);
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
         improve_skill(ch, SKILL_GARDENING, 0);
         return;
       }
@@ -614,7 +614,7 @@ ACMD(do_garden)
         act("@GYou end up digging a hole too shallow to hold @g$p@G. Better try again.@n", TRUE, ch, obj, 0, TO_CHAR);
         act("@g$n@G digs a very shallow hole in one of the planters and then realizes @g$p@G won't fit in it.@n", TRUE, ch, obj, 0, TO_ROOM);
         decCurST(ch, cost, 0);
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
         improve_skill(ch, SKILL_GARDENING, 0);
         return;
       } else {
@@ -653,7 +653,7 @@ ACMD(do_garden)
             break;
         }
         extract_obj(soil);
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
         improve_skill(ch, SKILL_GARDENING, 0);
       }
     } else if (!strcasecmp(arg2, "pick")) {
@@ -673,7 +673,7 @@ ACMD(do_garden)
         obj_from_room(obj);
         obj_to_char(obj, ch);
         decCurST(ch, cost, 0);
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
         improve_skill(ch, SKILL_GARDENING, 0);
         return;
       }
@@ -1338,7 +1338,7 @@ ACMD(do_bid)
       if (char_get_skill(ch, SKILL_APPRAISE) < rand_number(1, 101)) {
         send_to_char(ch, "You look at the images for %s and fail to perceive its worth..\r\n", obj2->short_description);
         act("@c$n@w looks stumped about something they viewed on their scouter screen.@n", TRUE, ch, 0, 0, TO_ROOM);
-        WAIT_STATE(ch, PULSE_2SEC);
+        char_set_wait(ch, PULSE_2SEC);
         return;
       } else {
         send_to_char(ch, "You look at images of the object on your scouter.\r\n");
@@ -1692,7 +1692,7 @@ ACMD(do_assemble)
 
     extract_obj(pObject);
     send_to_char(ch, "You start to %s %s %s, but forget a couple of steps. You take it apart and give up.\r\n", CMD_NAME, AN(argument), argument);
-    WAIT_STATE(ch, PULSE_6SEC);
+    char_set_wait(ch, PULSE_6SEC);
     return;
   } else if (rand_number(1, 100) >= 92) {
     if ((pObject = read_object(lVnum, VIRTUAL)) == NULL) {
@@ -1702,7 +1702,7 @@ ACMD(do_assemble)
 
     extract_obj(pObject);
     send_to_char(ch, "You start to %s %s %s, but put it together wrong and have to stop. You take it apart and give up.\r\n", CMD_NAME, AN(argument), argument);
-    WAIT_STATE(ch, PULSE_4SEC);
+    char_set_wait(ch, PULSE_4SEC);
     return;
   }
 
@@ -1968,13 +1968,13 @@ static int can_take_obj(struct char_data *ch, struct obj_data *obj)
   if (!(obj_wear_flagged(obj, ITEM_WEAR_TAKE))) {
     act("$p: you can't take that!", FALSE, ch, obj, 0, TO_CHAR);
     return (0);
-  } else if (char_get_carry_items(ch) >= CAN_CARRY_N(ch)) {
+  } else if (char_get_carry_items(ch) >= char_can_carry_n(ch)) {
     act("$p: your arms are full!", FALSE, ch, obj, 0, TO_CHAR);
     return (0);
-  } else if (((getCurCarriedWeight(ch)) + obj_get_weight(obj)) > CAN_CARRY_W(ch)) {
+  } else if (((getCurCarriedWeight(ch)) + obj_get_weight(obj)) > getMaxCarryWeight(ch)) {
     act("$p: you can't carry that much weight.", FALSE, ch, obj, 0, TO_CHAR);
     return (0);
-  } else if ((obj_get_weight(obj) + rroom_get_gravity(char_get_in_room(ch))) + (getCurCarriedWeight(ch)) > CAN_CARRY_W(ch)) {
+  } else if ((obj_get_weight(obj) + rroom_get_gravity(char_get_in_room(ch))) + (getCurCarriedWeight(ch)) > getMaxCarryWeight(ch)) {
     act("$p: you can't carry that much weight because of the gravity.", FALSE, ch, obj, 0, TO_CHAR);
     return (0);
   }
@@ -2019,7 +2019,7 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
                                        struct obj_data *cont, int mode)
 {
   if (mode == FIND_OBJ_INV || mode == FIND_OBJ_EQUIP || can_take_obj(ch, obj)) {
-    if (char_get_carry_items(ch) >= CAN_CARRY_N(ch)) {
+    if (char_get_carry_items(ch) >= char_can_carry_n(ch)) {
       act("$p: you can't hold any more items.", FALSE, ch, obj, 0, TO_CHAR);
       return;
     }
@@ -2298,7 +2298,7 @@ static void perform_drop_gold(struct char_data *ch, int amount,
     send_to_char(ch, "You don't have that many zenni!\r\n");
   else {
     if (mode != SCMD_JUNK) {
-      WAIT_STATE(ch, PULSE_1SEC); /* to prevent zenni-bombing */
+      char_set_wait(ch, PULSE_1SEC); /* to prevent zenni-bombing */
       obj = create_money(amount);
       if (mode == SCMD_DONATE) {
         send_to_char(ch, "You throw some zenni into the air where it disappears in a puff of smoke!\r\n");
@@ -2611,7 +2611,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
     act("You can't let go of $p!!  Yeech!", FALSE, ch, obj, 0, TO_CHAR);
     return;
   }
-  if (char_get_carry_items(vict) >= CAN_CARRY_N(vict)) {
+  if (char_get_carry_items(vict) >= char_can_carry_n(vict)) {
     act("$N seems to have $S hands full.", FALSE, ch, 0, vict, TO_CHAR);
     if (char_is_npc(ch)) {
       act("$n@n drops $p because you can't carry anymore.", TRUE, ch, obj, vict, TO_VICT);
@@ -2626,7 +2626,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
     do_say(vict, "I don't want that piece of junk.", 0, 0);
     return;
   }
-  if (obj_get_weight(obj) + (getCurCarriedWeight(vict)) > CAN_CARRY_W(vict)) {
+  if (obj_get_weight(obj) + (getCurCarriedWeight(vict)) > getMaxCarryWeight(vict)) {
     act("$E can't carry that much weight.", FALSE, ch, 0, vict, TO_CHAR);
     if (char_is_npc(ch)) {
       act("$n@n drops $p because you can't carry anymore.", TRUE, ch, obj, vict, TO_VICT);
@@ -2636,7 +2636,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
     }
     return;
   }
-  if ((obj_get_weight(obj) + rroom_get_gravity(char_get_in_room(vict))) + (getCurCarriedWeight(vict)) > CAN_CARRY_W(vict)) {
+  if ((obj_get_weight(obj) + rroom_get_gravity(char_get_in_room(vict))) + (getCurCarriedWeight(vict)) > getMaxCarryWeight(vict)) {
     act("$E can't carry that much weight because of the gravity.", FALSE, ch, 0, vict, TO_CHAR);
     if (char_is_npc(ch)) {
       act("$n@n drops $p because you can't carry anymore.", TRUE, ch, obj, vict, TO_VICT);
@@ -2911,7 +2911,7 @@ ACMD(do_drink)
   if (char_is_npc(ch)) {
     return;
   }
-  if (char_is_android(ch) || GET_COND(ch, THIRST) < 0) {
+  if (char_is_android(ch) || char_get_conditions(ch, THIRST) < 0) {
     send_to_char(ch, "You need not drink!\r\n");
     return;
   }
@@ -2919,11 +2919,11 @@ ACMD(do_drink)
     send_to_char(ch, "You are inside a healing tank!\r\n");
     return;
   }
-  if (GET_COND(ch, HUNGER) <= 1 && GET_COND(ch, THIRST) >= 2 && !char_is_namek(ch) && char_get_genome(ch, 0) != 3 && char_get_genome(ch, 1) != 3) {
+  if (char_get_conditions(ch, HUNGER) <= 1 && char_get_conditions(ch, THIRST) >= 2 && !char_is_namek(ch) && char_get_genome(ch, 0) != 3 && char_get_genome(ch, 1) != 3) {
     send_to_char(ch, "You need to eat first!\r\n");
     return;
   }
-  wasthirsty = GET_COND(ch, THIRST);
+  wasthirsty = char_get_conditions(ch, THIRST);
   if (!*arg && !char_is_npc(ch)) {
     char buf[MAX_STRING_LENGTH];
     switch (rroom_sect(char_get_in_room(ch))) {
@@ -2934,13 +2934,13 @@ ACMD(do_drink)
         act(buf, TRUE, ch, 0, 0, TO_ROOM);
         send_to_char(ch, "You take a refreshing drink from the surrounding water.\r\n");
         gain_condition(ch, THIRST, 1);
-        if (char_get_skill(ch, SKILL_WELLSPRING) && (getCurKI(ch)) < GET_MAX_MANA(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
+        if (char_get_skill(ch, SKILL_WELLSPRING) && (getCurKI(ch)) < getMaxKI(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
 
-          incCurKI(ch, ((GET_MAX_MANA(ch) * 0.005) + (char_get_aff_abils_wis(ch) * rand_number(80, 100))) * char_get_skill(ch, SKILL_WELLSPRING), true);
+          incCurKI(ch, ((getMaxKI(ch) * 0.005) + (char_get_aff_abils_wis(ch) * rand_number(80, 100))) * char_get_skill(ch, SKILL_WELLSPRING), true);
 
           send_to_char(ch, "You feel your ki return to full strength.\r\n");
         }
-        if (GET_COND(ch, THIRST) >= 48)
+        if (char_get_conditions(ch, THIRST) >= 48)
           send_to_char(ch, "You don't feel thirsty anymore.\r\n");
         return;
       default:
@@ -2953,13 +2953,13 @@ ACMD(do_drink)
           send_to_char(ch, "You take a refreshing drink from the surrounding water.\r\n");
           gain_condition(ch, THIRST, 1);
           if (char_get_skill(ch, SKILL_WELLSPRING) && !isFullKI(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
-            if (incCurKI(ch, ((GET_MAX_MANA(ch) * 0.005) + (char_get_aff_abils_wis(ch) * rand_number(80, 100))) * char_get_skill(ch, SKILL_WELLSPRING), true) == getMaxKI(ch)) {
+            if (incCurKI(ch, ((getMaxKI(ch) * 0.005) + (char_get_aff_abils_wis(ch) * rand_number(80, 100))) * char_get_skill(ch, SKILL_WELLSPRING), true) == getMaxKI(ch)) {
               send_to_char(ch, "You feel your ki return to full strength.\r\n");
             } else {
               send_to_char(ch, "You feel your ki has rejuvenated.\r\n");
             }
           }
-          if (GET_COND(ch, THIRST) >= 48)
+          if (char_get_conditions(ch, THIRST) >= 48)
             send_to_char(ch, "You don't feel thirsty anymore.\r\n");
         }
         return;
@@ -2981,7 +2981,7 @@ ACMD(do_drink)
       obj_from_char(temp);
       extract_obj(temp);
       restoreKI(ch, true);
-      GET_COND(ch, THIRST) += 8;
+      char_set_conditions(ch, THIRST, char_get_conditions(ch, THIRST) + (8));
       return;
     } else if (obj_get_vnum(temp) == 86 && on_ground == 1) {
       send_to_char(ch, "You need to pick that up first.\r\n");
@@ -3009,7 +3009,7 @@ ACMD(do_drink)
     extract_obj(temp);
     return;
   }
-  if ((GET_COND(ch, DRUNK) > 10) && (GET_COND(ch, THIRST) > 0)) {
+  if ((char_get_conditions(ch, DRUNK) > 10) && (char_get_conditions(ch, THIRST) > 0)) {
     /* The pig is drunk */
     send_to_char(ch, "You can't seem to get close enough to your mouth.\r\n");
     act("$n tries to drink but misses $s mouth!", TRUE, ch, 0, 0, TO_ROOM);
@@ -3068,10 +3068,10 @@ ACMD(do_drink)
     char_set_foodr(ch, 2);
     send_to_char(ch, "You feel rejuvinated by it.\r\n");
   }
-  if (char_get_skill(ch, SKILL_WELLSPRING) && (getCurKI(ch)) < GET_MAX_MANA(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
+  if (char_get_skill(ch, SKILL_WELLSPRING) && (getCurKI(ch)) < getMaxKI(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
     if (obj_get_value(temp, VAL_DRINKCON_LIQUID) == 0 || obj_get_value(temp, VAL_DRINKCON_LIQUID) == 14 || obj_get_value(temp, VAL_DRINKCON_LIQUID) == 15) {
 
-      if (incCurKI(ch, ((GET_MAX_MANA(ch) * 0.005) + (char_get_aff_abils_wis(ch) * rand_number(80, 100))) * char_get_skill(ch, SKILL_WELLSPRING), true) == getMaxKI(ch)) {
+      if (incCurKI(ch, ((getMaxKI(ch) * 0.005) + (char_get_aff_abils_wis(ch) * rand_number(80, 100))) * char_get_skill(ch, SKILL_WELLSPRING), true) == getMaxKI(ch)) {
         send_to_char(ch, "You feel your ki return to full strength.\r\n");
       } else {
         send_to_char(ch, "You feel your ki has rejuvenated.\r\n");
@@ -3079,10 +3079,10 @@ ACMD(do_drink)
     }
   }
 
-  if (GET_COND(ch, DRUNK) > 10)
+  if (char_get_conditions(ch, DRUNK) > 10)
     send_to_char(ch, "You feel drunk.\r\n");
 
-  if (GET_COND(ch, THIRST) >= 48)
+  if (char_get_conditions(ch, THIRST) >= 48)
     send_to_char(ch, "You don't feel thirsty anymore.\r\n");
 
   if (obj_get_value(temp, VAL_DRINKCON_POISON) && (!char_is_mutant(ch) || (char_get_genome(ch, 0) != 7 && char_get_genome(ch, 1) != 7))) { /* The crap was poisoned 
@@ -3121,7 +3121,7 @@ ACMD(do_eat)
   if (char_is_npc(ch)) /* Cannot use GET_COND() on mobs. */
     return;
 
-  if (char_is_android(ch) || GET_COND(ch, HUNGER) < 0) {
+  if (char_is_android(ch) || char_get_conditions(ch, HUNGER) < 0) {
     send_to_char(ch, "You need not eat!\r\n");
     return;
   }
@@ -3141,7 +3141,7 @@ ACMD(do_eat)
     send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
     return;
   }
-  if (GET_COND(ch, THIRST) <= 1 && GET_COND(ch, HUNGER) >= 2) {
+  if (char_get_conditions(ch, THIRST) <= 1 && char_get_conditions(ch, HUNGER) >= 2) {
     send_to_char(ch, "You need to drink first!\r\n");
     return;
   }
@@ -3193,7 +3193,7 @@ ACMD(do_eat)
     return;
   }
 
-  if (GET_COND(ch, HUNGER) >= 48) {
+  if (char_get_conditions(ch, HUNGER) >= 48) {
     if (char_is_majin(ch)) {
       send_to_char(ch, "You are full, but there's always room for candy!\r\n");
     } else {
@@ -3217,7 +3217,7 @@ ACMD(do_eat)
   }
 
   // available hunger
-  int foob    = 48 - GET_COND(ch, HUNGER);
+  int foob    = 48 - char_get_conditions(ch, HUNGER);
   int maxfval = MAX(1, obj_get_value(food, VAL_FOOD_MAXFOODVAL));
   // amount that can be eaten - tasting only consumes 1 point, eating consumes as much as possible
   // VAL_FOOD_FOODVAL is the amount of nutrition remaining, while value 1 is the max possible it once had.
@@ -3238,9 +3238,9 @@ ACMD(do_eat)
     int psbonus  = (int)((double)(maxfval + obj_get_value(food, VAL_FOOD_PSBONUS)) * percent_eaten);
     int expbonus = (int)((double)obj_get_value(food, VAL_FOOD_EXPBONUS) * ((char_get_level(ch) * 0.4) + 1) * percent_eaten);
     gain_exp(ch, expbonus);
-    GET_PRACTICES(ch, char_get_class(ch)) += psbonus;
+    char_set_practice_points(ch, char_get_practice_points(ch) + (psbonus));
     send_to_char(ch, "That was exceptionally delicious! @D[@mPS@D: @C+%d@D] [@gEXP@D: @G+%s@D]@n\r\n", psbonus, add_commas(expbonus));
-    if (!obj_get_value(food, VAL_FOOD_POISON) && GET_HIT(ch) < (getEffMaxPL(ch)) && subcmd != SCMD_TASTE) {
+    if (!obj_get_value(food, VAL_FOOD_POISON) && getCurPL(ch) < (getEffMaxPL(ch)) && subcmd != SCMD_TASTE) {
       if (obj_get_weight(food) < 6) {
         incCurHealthPercent(ch, .05, true);
       } else {
@@ -3254,7 +3254,7 @@ ACMD(do_eat)
     }
   }
 
-  if (GET_COND(ch, HUNGER) >= 48) {
+  if (char_get_conditions(ch, HUNGER) >= 48) {
     if (char_is_majin(ch)) {
       send_to_char(ch, "You are full, but there's always room for candy!\r\n");
     } else {
@@ -3880,7 +3880,7 @@ void perform_remove(struct char_data *ch, int pos)
 {
   struct obj_data *obj;
 
-  int64_t previous = GET_HIT(ch);
+  int64_t previous = getCurPL(ch);
 
   if (!(obj = char_get_equipment(ch, pos)))
     mud_log("SYSERR: perform_remove: bad pos %d passed.", pos);
@@ -3890,7 +3890,7 @@ void perform_remove(struct char_data *ch, int pos)
      */
   else if (obj_extra_flagged(obj, ITEM_NODROP) && char_get_admlevel(ch) < 1)
     act("You can't remove $p, it must be CURSED!", FALSE, ch, obj, 0, TO_CHAR);
-  else if (char_get_carry_items(ch) >= CAN_CARRY_N(ch))
+  else if (char_get_carry_items(ch) >= char_can_carry_n(ch))
     act("$p: your arms are full!", FALSE, ch, obj, 0, TO_CHAR);
   else {
     if (!remove_otrigger(obj, ch))
@@ -3902,9 +3902,9 @@ void perform_remove(struct char_data *ch, int pos)
     obj_to_char(unequip_char(ch, pos), ch);
     act("You stop using $p.", FALSE, ch, obj, 0, TO_CHAR);
     act("$n stops using $p.", TRUE, ch, obj, 0, TO_ROOM);
-    if (previous > GET_HIT(ch)) {
+    if (previous > getCurPL(ch)) {
       char drop[MAX_INPUT_LENGTH];
-      sprintf(drop, "@RYour powerlevel has dropped from removing $p@R! @D[@r-%s@D]\r\n", add_commas(previous - GET_HIT(ch)));
+      sprintf(drop, "@RYour powerlevel has dropped from removing $p@R! @D[@r-%s@D]\r\n", add_commas(previous - getCurPL(ch)));
       act(drop, FALSE, ch, obj, 0, TO_CHAR);
     }
   }
@@ -4032,7 +4032,7 @@ int64_t max_carry_weight(struct char_data *ch)
     total *= 4;
   }*/
 
-  abil  = (GET_MAX_HIT(ch) / 200) + (char_get_aff_abils_str(ch) * 50);
+  abil  = (getEffMaxPL(ch) / 200) + (char_get_aff_abils_str(ch) * 50);
   total = 1;
   return (total * abil);
 }

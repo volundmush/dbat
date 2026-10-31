@@ -323,18 +323,18 @@ ACMD(do_score)
       }
       send_to_char(ch, "  @D| @CModel@D: %15s@D,    @CUGP@D: @G%15s@D,  @CVersion@D: @r%-12s@D|@n\n", model, absorb > 0 ? "@RN/A" : add_commas(char_get_upgrade(ch)), version);
     }
-    send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", TRUE_RACE(ch), SENSEI_NAME(ch), SENSEI_STYLE(ch));
+    send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", char_true_race_name(ch), char_sensei_name(ch), char_sensei_style(ch));
     char hei[300], wei[300];
     sprintf(hei, "%dcm", get_measure(ch, char_get_pc_height(ch), 0));
     sprintf(wei, "%dkg", get_measure(ch, 0, char_get_pc_weight(ch)));
-    send_to_char(ch, "  @D|   @CAge@D: @W%10s@D,  @CHeight@D: @W%15s@D,  @CWeight@D: @W%-17s@D|@n\n", add_commas(GET_AGE(ch)), hei, wei);
+    send_to_char(ch, "  @D|   @CAge@D: @W%10s@D,  @CHeight@D: @W%15s@D,  @CWeight@D: @W%-17s@D|@n\n", add_commas(char_get_age_years(ch)), hei, wei);
     send_to_char(ch, "  @D|@CGender@D: @W%10s@D,  @C  Size@D: @W%15s@D,  @C Align@D: @W%-17s@D|@n\n", genders[(int)char_get_sex(ch)], size_names[get_size(ch)], disp_align(ch));
   }
   if (view == full || view == health) {
     send_to_char(ch, "  @cO@D-----------------------------@D[   @cHealth   @D]-----------------------------@cO@n\n");
     send_to_char(ch, "                 @D<@rPowerlevel@D>          <@BKi@D>             <@GStamina@D>@n\n");
     send_to_char(ch, "    @wCurrent   @D-[@R%-16s@D]-[@R%-16s@D]-[@R%-16s@D]@n\n", add_commas(getCurPL(ch)), add_commas((getCurKI(ch))), add_commas((getCurST(ch))));
-    send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(getEffMaxPL(ch)), add_commas(GET_MAX_MANA(ch)), add_commas(GET_MAX_MOVE(ch)));
+    send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(getEffMaxPL(ch)), add_commas(getMaxKI(ch)), add_commas(getMaxST(ch)));
     send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas((getEffBasePL(ch))), add_commas((getEffBaseKI(ch))), add_commas((getEffBaseST(ch))));
     if (!char_is_android(ch) && (getCurLF(ch)) > 0) {
       send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas((getCurLF(ch))), "/", add_commas((getMaxLF(ch))), char_get_lifeperc(ch), "%");
@@ -353,7 +353,7 @@ ACMD(do_score)
     send_to_char(ch, "  @cO@D-----------------------------@D[   @cOther    @D]-----------------------------@cO@n\n");
     send_to_char(ch, "                @D<@YZenni@D>                 <@rInventory Weight@D>@n\n");
     send_to_char(ch, "      @D[   @CCarried@D| @W%-15s@D] [   @CCarried@D| @W%-15s@D]@n\n", add_commas(char_get_gold(ch)), add_commas((getCurCarriedWeight(ch))));
-    send_to_char(ch, "      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n\n", add_commas(char_get_bank_gold(ch)), add_commas(CAN_CARRY_W(ch)));
+    send_to_char(ch, "      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n\n", add_commas(char_get_bank_gold(ch)), add_commas(getMaxCarryWeight(ch)));
     send_to_char(ch, "      @D[ @CMax Carry@D| @W%-15s@D]@n\n", add_commas(char_gold_carry(ch)));
     int numb = char_get_bank_interest(ch);
     send_to_char(ch, "      @D[  @CInterest@D| @W%-15s@D]\n", add_commas(numb));
@@ -620,46 +620,46 @@ ACMD(do_status)
     send_to_char(ch, "\r\n");
 
     send_to_char(ch, "         @D-----------------@YHunger@D/@yThirst@D-----------------@n\r\n");
-    if (GET_COND(ch, HUNGER) >= 48) {
+    if (char_get_conditions(ch, HUNGER) >= 48) {
       send_to_char(ch, "         You are full.\r\n");
-    } else if (GET_COND(ch, HUNGER) >= 40) {
+    } else if (char_get_conditions(ch, HUNGER) >= 40) {
       send_to_char(ch, "         You are nearly full.\r\n");
-    } else if (GET_COND(ch, HUNGER) >= 30) {
+    } else if (char_get_conditions(ch, HUNGER) >= 30) {
       send_to_char(ch, "         You are not hungry.\r\n");
-    } else if (GET_COND(ch, HUNGER) >= 21) {
+    } else if (char_get_conditions(ch, HUNGER) >= 21) {
       send_to_char(ch, "         You wouldn't mind a snack.\r\n");
-    } else if (GET_COND(ch, HUNGER) >= 15) {
+    } else if (char_get_conditions(ch, HUNGER) >= 15) {
       send_to_char(ch, "         You are slightly hungry.\r\n");
-    } else if (GET_COND(ch, HUNGER) >= 10) {
+    } else if (char_get_conditions(ch, HUNGER) >= 10) {
       send_to_char(ch, "         You are partially hungry.\r\n");
-    } else if (GET_COND(ch, HUNGER) >= 5) {
+    } else if (char_get_conditions(ch, HUNGER) >= 5) {
       send_to_char(ch, "         You are really hungry.\r\n");
-    } else if (GET_COND(ch, HUNGER) >= 2) {
+    } else if (char_get_conditions(ch, HUNGER) >= 2) {
       send_to_char(ch, "         You are extremely hungry.\r\n");
-    } else if (GET_COND(ch, HUNGER) >= 0) {
+    } else if (char_get_conditions(ch, HUNGER) >= 0) {
       send_to_char(ch, "         You are starving!\r\n");
-    } else if (GET_COND(ch, HUNGER) < 0) {
+    } else if (char_get_conditions(ch, HUNGER) < 0) {
       send_to_char(ch, "         You need not eat.\r\n");
     }
-    if (GET_COND(ch, THIRST) >= 48) {
+    if (char_get_conditions(ch, THIRST) >= 48) {
       send_to_char(ch, "         You are not thirsty.\r\n");
-    } else if (GET_COND(ch, THIRST) >= 40) {
+    } else if (char_get_conditions(ch, THIRST) >= 40) {
       send_to_char(ch, "         You are nearly quenched.\r\n");
-    } else if (GET_COND(ch, THIRST) >= 30) {
+    } else if (char_get_conditions(ch, THIRST) >= 30) {
       send_to_char(ch, "         You are not thirsty.\r\n");
-    } else if (GET_COND(ch, THIRST) >= 21) {
+    } else if (char_get_conditions(ch, THIRST) >= 21) {
       send_to_char(ch, "         You wouldn't mind a drink.\r\n");
-    } else if (GET_COND(ch, THIRST) >= 15) {
+    } else if (char_get_conditions(ch, THIRST) >= 15) {
       send_to_char(ch, "         You are slightly thirsty.\r\n");
-    } else if (GET_COND(ch, THIRST) >= 10) {
+    } else if (char_get_conditions(ch, THIRST) >= 10) {
       send_to_char(ch, "         You are partially thirsty.\r\n");
-    } else if (GET_COND(ch, THIRST) >= 5) {
+    } else if (char_get_conditions(ch, THIRST) >= 5) {
       send_to_char(ch, "         You are really thirsty.\r\n");
-    } else if (GET_COND(ch, THIRST) >= 2) {
+    } else if (char_get_conditions(ch, THIRST) >= 2) {
       send_to_char(ch, "         You are extremely thirsty.\r\n");
-    } else if (GET_COND(ch, THIRST) >= 0) {
+    } else if (char_get_conditions(ch, THIRST) >= 0) {
       send_to_char(ch, "         You are dehydrated!\r\n");
-    } else if (GET_COND(ch, THIRST) < 0) {
+    } else if (char_get_conditions(ch, THIRST) < 0) {
       send_to_char(ch, "         You need not drink.\r\n");
     }
     send_to_char(ch, "         @D--------------------@D[@GInfo@D]---------------------@n\r\n");
@@ -815,7 +815,7 @@ ACMD(do_status)
     }
 
     if (char_get_mimic(ch) > 0) {
-      send_to_char(ch, "You are mimicing the general appearance of %s %s\r\n", AN(LRACE(ch)), LRACE(ch));
+      send_to_char(ch, "You are mimicing the general appearance of %s %s\r\n", AN(juggleRaceName(ch, false)), juggleRaceName(ch, false));
     }
     if (char_is_mutant(ch)) {
       send_to_char(ch, "Your Mutations:\r\n");
@@ -1014,13 +1014,13 @@ ACMD(do_status)
     if (is_affected(ch, AFF_HYDROZAP)) {
       send_to_char(ch, "You are effected by Kanso Suru.\r\n");
     }
-    if (GET_COND(ch, DRUNK) > 15)
+    if (char_get_conditions(ch, DRUNK) > 15)
       send_to_char(ch, "You are extremely drunk.\r\n");
-    else if (GET_COND(ch, DRUNK) > 10)
+    else if (char_get_conditions(ch, DRUNK) > 10)
       send_to_char(ch, "You are pretty drunk.\r\n");
-    else if (GET_COND(ch, DRUNK) > 4)
+    else if (char_get_conditions(ch, DRUNK) > 4)
       send_to_char(ch, "You are drunk.\r\n");
-    else if (GET_COND(ch, DRUNK) > 0)
+    else if (char_get_conditions(ch, DRUNK) > 0)
       send_to_char(ch, "You have an alcoholic buzz.\r\n");
 
     if (ch->affected) {

@@ -160,7 +160,7 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
     if (inroom == FIND_CHAR_ROOM && char_get_in_room(i) != char_get_in_room(ch))
       continue;
     if (char_get_admlevel(ch) < 1 && char_get_admlevel(i) < 1 && !char_is_npc(ch) && !char_is_npc(i)) {
-      if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
+      if (strcasecmp(juggleRaceName(i, true), name) && !strstr(juggleRaceName(i, true), name)) {
         if (readIntro(ch, i) == 1) {
           if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
             continue;
@@ -172,7 +172,7 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
     }
     if ((char_get_admlevel(ch) >= 1 || char_get_admlevel(i) >= 1 || char_is_npc(ch) || char_is_npc(i))) {
       if (strcasecmp(i->name, name) && !strstr(i->name, name)) {
-        if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
+        if (strcasecmp(juggleRaceName(i, true), name) && !strstr(juggleRaceName(i, true), name)) {
           if (!char_is_npc(ch) && !char_is_npc(i) && readIntro(ch, i) == 1) {
             if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
               continue;
@@ -232,19 +232,19 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
       if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
-    } else if (!char_is_npc(i) && !(strcmp(RACE(i), CAP(name))) && i != ch) {
+    } else if (!char_is_npc(i) && !(strcmp(juggleRaceName(i, true), CAP(name))) && i != ch) {
       if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
-    } else if (!char_is_npc(i) && strstr(RACE(i), CAP(name)) && i != ch) {
+    } else if (!char_is_npc(i) && strstr(juggleRaceName(i, true), CAP(name)) && i != ch) {
       if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
-    } else if (!char_is_npc(i) && !(strcmp(RACE(i), name)) && i != ch) {
+    } else if (!char_is_npc(i) && !(strcmp(juggleRaceName(i, true), name)) && i != ch) {
       if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
-    } else if (!char_is_npc(i) && strstr(RACE(i), name) && i != ch) {
+    } else if (!char_is_npc(i) && strstr(juggleRaceName(i, true), name) && i != ch) {
       if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
@@ -273,7 +273,7 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
     if (char_get_in_room(ch) == char_get_in_room(i))
       continue;
     if (char_get_admlevel(ch) < 1 && char_get_admlevel(i) < 1 && !char_is_npc(ch) && !char_is_npc(i)) {
-      if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
+      if (strcasecmp(juggleRaceName(i, true), name) && !strstr(juggleRaceName(i, true), name)) {
         if (readIntro(ch, i) == 1) {
           if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
             continue;
@@ -285,7 +285,7 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
     }
     if ((char_get_admlevel(ch) >= 1 || char_get_admlevel(i) >= 1 || char_is_npc(ch) || char_is_npc(i))) {
       if (strcasecmp(i->name, name) && !strstr(i->name, name)) {
-        if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
+        if (strcasecmp(juggleRaceName(i, true), name) && !strstr(juggleRaceName(i, true), name)) {
           if (!char_is_npc(ch) && !char_is_npc(i) && readIntro(ch, i) == 1) {
             if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
               continue;

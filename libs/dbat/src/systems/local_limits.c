@@ -96,7 +96,7 @@ static void barrier_shed(struct char_data *ch)
     act("@c$n@c's barrier sends some sparks into the air as it seems to get a bit weaker.@n", TRUE, ch, 0, 0, TO_ROOM);
   }
 
-  if (recharge > 0 && (getCurKI(ch)) < GET_MAX_MANA(ch)) {
+  if (recharge > 0 && (getCurKI(ch)) < getMaxKI(ch)) {
     incCurKI(ch, recharge, true);
     send_to_char(ch, "@CYou reabsorb some of the energy lost into your body!@n\r\n");
   }
@@ -208,36 +208,36 @@ static int64_t mana_gain(struct char_data *ch)
 
   if (char_is_npc(ch)) {
     /* Neat and fast */
-    gain = GET_MAX_MANA(ch) / 70;
+    gain = getMaxKI(ch) / 70;
   } else {
     if (rroom_flagged(char_get_in_room(ch), ROOM_REGEN) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && rroom_get_dmg(char_get_in_room(ch)) >= 75)) {
       if (char_is_konatsu(ch)) {
-        gain = GET_MAX_MANA(ch) / 12;
+        gain = getMaxKI(ch) / 12;
       }
       if (char_is_mutant(ch)) {
-        gain = GET_MAX_MANA(ch) / 11;
+        gain = getMaxKI(ch) / 11;
       }
       if (char_is_arlian(ch)) {
-        gain = GET_MAX_MANA(ch) / 30;
+        gain = getMaxKI(ch) / 30;
       }
       if (!char_is_konatsu(ch) && !char_is_mutant(ch)) {
-        gain = GET_MAX_MANA(ch) / 10;
+        gain = getMaxKI(ch) / 10;
       }
     } else if (!rroom_flagged(char_get_in_room(ch), ROOM_REGEN)) {
       if (char_is_konatsu(ch)) {
-        gain = GET_MAX_MANA(ch) / 15;
+        gain = getMaxKI(ch) / 15;
       }
       if (char_is_mutant(ch)) {
-        gain = GET_MAX_MANA(ch) / 13;
+        gain = getMaxKI(ch) / 13;
       }
       if (!char_is_konatsu(ch) && !char_is_mutant(ch)) {
-        gain = GET_MAX_MANA(ch) / 12;
+        gain = getMaxKI(ch) / 12;
       }
       if (rroom_flagged(char_get_in_room(ch), ROOM_BEDROOM)) {
         gain += gain * 0.25;
       }
       if (char_is_arlian(ch)) {
-        gain = GET_MAX_MANA(ch) / 40;
+        gain = getMaxKI(ch) / 40;
       }
     }
     /* Position calculations    */
@@ -369,39 +369,39 @@ int64_t hit_gain(struct char_data *ch)
 
   if (char_is_npc(ch)) {
     /* Neat and fast */
-    gain = GET_MAX_HIT(ch) / 70;
+    gain = getEffMaxPL(ch) / 70;
   } else {
     if (rroom_flagged(char_get_in_room(ch), ROOM_REGEN) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && rroom_get_dmg(char_get_in_room(ch)) >= 75)) {
       if (char_is_human(ch)) {
-        gain = GET_MAX_HIT(ch) / 20;
+        gain = getEffMaxPL(ch) / 20;
       }
       if (char_is_arlian(ch)) {
-        gain = GET_MAX_HIT(ch) / 30;
+        gain = getEffMaxPL(ch) / 30;
       }
       if (char_is_namek(ch)) {
-        gain = GET_MAX_HIT(ch) / 2;
+        gain = getEffMaxPL(ch) / 2;
       }
       if (char_is_mutant(ch)) {
-        gain = GET_MAX_HIT(ch) / 11;
+        gain = getEffMaxPL(ch) / 11;
       }
       if (!char_is_human(ch) && !char_is_namek(ch) && !char_is_mutant(ch)) {
-        gain = GET_MAX_HIT(ch) / 10;
+        gain = getEffMaxPL(ch) / 10;
       }
     } else if (!rroom_flagged(char_get_in_room(ch), ROOM_REGEN)) {
       if (char_is_human(ch)) {
-        gain = GET_MAX_HIT(ch) / 30;
+        gain = getEffMaxPL(ch) / 30;
       }
       if (char_is_namek(ch)) {
-        gain = GET_MAX_HIT(ch) / 4;
+        gain = getEffMaxPL(ch) / 4;
       }
       if (char_is_mutant(ch)) {
-        gain = GET_MAX_HIT(ch) / 16;
+        gain = getEffMaxPL(ch) / 16;
       }
       if (char_is_arlian(ch)) {
-        gain = GET_MAX_HIT(ch) / 40;
+        gain = getEffMaxPL(ch) / 40;
       }
       if (!char_is_human(ch) && !char_is_namek(ch) && !char_is_mutant(ch)) {
-        gain = GET_MAX_HIT(ch) / 15;
+        gain = getEffMaxPL(ch) / 15;
       }
       if (rroom_flagged(char_get_in_room(ch), ROOM_BEDROOM)) {
         gain += gain * 0.25;
@@ -518,24 +518,24 @@ static int64_t move_gain(struct char_data *ch)
 
   if (char_is_npc(ch)) {
     /* Neat and fast */
-    gain = GET_MAX_MOVE(ch) / 70;
+    gain = getMaxST(ch) / 70;
   } else {
     if (rroom_flagged(char_get_in_room(ch), ROOM_REGEN) || (char_get_bonuses(ch, BONUS_DESTROYER) > 0 && rroom_get_dmg(char_get_in_room(ch)) >= 75)) {
       if (char_is_mutant(ch)) {
-        gain = GET_MAX_MOVE(ch) / 7;
+        gain = getMaxST(ch) / 7;
       }
       if (char_is_arlian(ch)) {
-        gain = GET_MAX_MOVE(ch) / 4;
+        gain = getMaxST(ch) / 4;
       }
       if (!char_is_mutant(ch)) {
-        gain = GET_MAX_MOVE(ch) / 6;
+        gain = getMaxST(ch) / 6;
       }
     } else if (!rroom_flagged(char_get_in_room(ch), ROOM_REGEN)) {
       if (char_is_mutant(ch)) {
-        gain = GET_MAX_MOVE(ch) / 9;
+        gain = getMaxST(ch) / 9;
       }
       if (!char_is_mutant(ch)) {
-        gain = GET_MAX_MOVE(ch) / 8;
+        gain = getMaxST(ch) / 8;
       }
       if (rroom_flagged(char_get_in_room(ch), ROOM_BEDROOM)) {
         gain += gain * 0.25;
@@ -629,7 +629,7 @@ static int64_t move_gain(struct char_data *ch)
   }
 
   if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
-    gain = GET_MAX_MOVE(ch) - (getCurST(ch));
+    gain = getMaxST(ch) - (getCurST(ch));
   }
   if (cook_element(char_get_in_room(ch)) == 1)
     gain *= 2;
@@ -649,7 +649,7 @@ static void update_flags(struct char_data *ch)
   }
 
   if (char_get_bonuses(ch, BONUS_LATE) && char_get_position(ch) == POS_SLEEPING && rand_number(1, 3) == 3) {
-    if (GET_HIT(ch) >= (getEffMaxPL(ch)) && (getCurST(ch)) >= GET_MAX_MOVE(ch) && (getCurKI(ch)) >= GET_MAX_MANA(ch)) {
+    if (getCurPL(ch) >= (getEffMaxPL(ch)) && (getCurST(ch)) >= getMaxST(ch) && (getCurKI(ch)) >= getMaxKI(ch)) {
       send_to_char(ch, "You FINALLY wake up.\r\n");
       act("$n wakes up.", TRUE, ch, 0, 0, TO_ROOM);
       char_set_position(ch, POS_SITTING);
@@ -685,9 +685,9 @@ static void update_flags(struct char_data *ch)
   }
 
   if (!char_is_npc(ch) && !char_plr_flagged(ch, PLR_STAIL) && !char_plr_flagged(ch, PLR_NOGROW) && (char_is_saiyan(ch) || char_is_halfbreed(ch))) {
-    if (RACIAL_PREF(ch) == 1 && rand_number(1, 50) >= 40) {
+    if (char_get_racial_pref(ch) == 1 && rand_number(1, 50) >= 40) {
       char_set_tail_growth(ch, char_get_tail_growth(ch) + (1));
-    } else if (RACIAL_PREF(ch) != 1 || char_is_saiyan(ch)) {
+    } else if (char_get_racial_pref(ch) != 1 || char_is_saiyan(ch)) {
       char_set_tail_growth(ch, char_get_tail_growth(ch) + (1));
     }
     if (char_get_tail_growth(ch) >= 10) {
@@ -790,7 +790,7 @@ void gain_level(struct char_data *ch, int whichclass)
     char_set_class_level(ch, char_get_class_level(ch) + (1));
     // GET_CLASS(ch) = whichclass; /* Now tracks latest class instead of highest */
     advance_level(ch, whichclass);
-    mudlog(LOG_BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s advanced level to level %d.",
+    mudlog(LOG_BRF, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s advanced level to level %d.",
            char_get_name(ch), char_get_level(ch));
     send_to_char(ch, "You rise a level!\r\n");
     char_set_exp(ch, char_get_exp(ch) - (level_exp(ch, char_get_level(ch))));
@@ -955,7 +955,7 @@ void gain_exp_regardless(struct char_data *ch, int gain)
     }
 
     if (is_altered) {
-      mudlog(LOG_BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE,
+      mudlog(LOG_BRF, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE,
              "%s advanced %d level%s to level %d.", char_get_name(ch), num_levels,
              num_levels == 1 ? "" : "s", char_get_level(ch));
       if (num_levels == 1)
@@ -978,7 +978,7 @@ void gain_condition(struct char_data *ch, int condition, int value)
     return;
   }
 
-  if (GET_COND(ch, condition) < 0) { /* No change */
+  if (char_get_conditions(ch, condition) < 0) { /* No change */
     return;
   }
 
@@ -989,27 +989,27 @@ void gain_condition(struct char_data *ch, int condition, int value)
   if (char_plr_flagged(ch, PLR_WRITING))
     return;
 
-  intoxicated = (GET_COND(ch, DRUNK) > 0);
+  intoxicated = (char_get_conditions(ch, DRUNK) > 0);
   if (value > 0) {
-    if (GET_COND(ch, condition) >= 0) {
-      if (GET_COND(ch, condition) + value > 48) {
-        GET_COND(ch, condition) = 48;
+    if (char_get_conditions(ch, condition) >= 0) {
+      if (char_get_conditions(ch, condition) + value > 48) {
+        char_set_conditions(ch, condition, 48);
       } else {
-        GET_COND(ch, condition) += value;
+        char_set_conditions(ch, condition, char_get_conditions(ch, condition) + (value));
       }
     }
   } else {
-    if (GET_COND(ch, condition) >= 0) {
-      if (GET_COND(ch, condition) + value < 0) {
-        GET_COND(ch, condition) = 0;
+    if (char_get_conditions(ch, condition) >= 0) {
+      if (char_get_conditions(ch, condition) + value < 0) {
+        char_set_conditions(ch, condition, 0);
       } else {
-        GET_COND(ch, condition) += value;
+        char_set_conditions(ch, condition, char_get_conditions(ch, condition) + (value));
       }
     }
   }
   switch (condition) {
     case HUNGER:
-      switch (GET_COND(ch, condition)) {
+      switch (char_get_conditions(ch, condition)) {
         case 0:
           //send_to_char(ch, "@RYou are feeling ravenous!@n\r\n");
           break;
@@ -1033,7 +1033,7 @@ void gain_condition(struct char_data *ch, int condition, int value)
       }
       break;
     case THIRST:
-      switch (GET_COND(ch, condition)) {
+      switch (char_get_conditions(ch, condition)) {
         case 0:
           //send_to_char(ch, "@RYou are dehydrated!@n\r\n");
           break;
@@ -1058,7 +1058,7 @@ void gain_condition(struct char_data *ch, int condition, int value)
       break;
     case DRUNK:
       if (intoxicated) {
-        if (GET_COND(ch, DRUNK) <= 0) {
+        if (char_get_conditions(ch, DRUNK) <= 0) {
           send_to_char(ch, "You are now sober.\r\n");
         }
       }
@@ -1081,60 +1081,60 @@ static void check_idling(struct char_data *ch)
         stop_fighting(ch);
       }
       if (char_get_in_room(ch) == 0 || char_get_in_room(ch) == 1) {
-        GET_LOADROOM(ch) = GET_LOADROOM(ch);
+        char_set_load_room(ch, char_get_load_room(ch));
       }
       if (!rroom_flagged(char_get_in_room(ch), ROOM_PAST) && (rroom_get_vnum(char_get_in_room(ch)) < 19800 || rroom_get_vnum(char_get_in_room(ch)) > 19899)) {
-        GET_LOADROOM(ch) = rroom_get_vnum(char_get_in_room(ch));
+        char_set_load_room(ch, rroom_get_vnum(char_get_in_room(ch)));
       }
       if (rroom_flagged(char_get_in_room(ch), ROOM_PAST)) {
-        GET_LOADROOM(ch) = rroom_get_vnum(real_room(1561));
+        char_set_load_room(ch, rroom_get_vnum(real_room(1561)));
       }
       if (rroom_get_vnum(char_get_in_room(ch)) >= 2002 && rroom_get_vnum(char_get_in_room(ch)) <= 2011) {
-        GET_LOADROOM(ch) = rroom_get_vnum(real_room(1960));
+        char_set_load_room(ch, rroom_get_vnum(real_room(1960)));
       }
       if (rroom_get_vnum(char_get_in_room(ch)) == 2069) {
-        GET_LOADROOM(ch) = rroom_get_vnum(real_room(2017));
+        char_set_load_room(ch, rroom_get_vnum(real_room(2017)));
       }
       if (rroom_get_vnum(char_get_in_room(ch)) == 2070) {
-        GET_LOADROOM(ch) = rroom_get_vnum(real_room(2046));
+        char_set_load_room(ch, rroom_get_vnum(real_room(2046)));
       }
       if (rroom_get_vnum(char_get_in_room(ch)) >= 101 && rroom_get_vnum(char_get_in_room(ch)) <= 139) {
         if (char_get_level(ch) == 1) {
-          GET_LOADROOM(ch) = rroom_get_vnum(real_room(100));
+          char_set_load_room(ch, rroom_get_vnum(real_room(100)));
           char_set_exp(ch, 0);
         } else {
           if (char_is_roshi(ch)) {
-            GET_LOADROOM(ch) = rroom_get_vnum(real_room(1130));
+            char_set_load_room(ch, rroom_get_vnum(real_room(1130)));
           }
           if (char_is_kabito(ch)) {
-            GET_LOADROOM(ch) = rroom_get_vnum(real_room(12098));
+            char_set_load_room(ch, rroom_get_vnum(real_room(12098)));
           }
           if (char_is_nail(ch)) {
-            GET_LOADROOM(ch) = rroom_get_vnum(real_room(11683));
+            char_set_load_room(ch, rroom_get_vnum(real_room(11683)));
           }
           if (char_is_bardock(ch)) {
-            GET_LOADROOM(ch) = rroom_get_vnum(real_room(2268));
+            char_set_load_room(ch, rroom_get_vnum(real_room(2268)));
           }
           if (char_is_krane(ch)) {
-            GET_LOADROOM(ch) = rroom_get_vnum(real_room(13009));
+            char_set_load_room(ch, rroom_get_vnum(real_room(13009)));
           }
           if (char_is_tapion(ch)) {
-            GET_LOADROOM(ch) = rroom_get_vnum(real_room(8231));
+            char_set_load_room(ch, rroom_get_vnum(real_room(8231)));
           }
           if (char_is_piccolo(ch)) {
-            GET_LOADROOM(ch) = rroom_get_vnum(real_room(1659));
+            char_set_load_room(ch, rroom_get_vnum(real_room(1659)));
           }
           if (char_is_andsix(ch)) {
-            GET_LOADROOM(ch) = rroom_get_vnum(real_room(1713));
+            char_set_load_room(ch, rroom_get_vnum(real_room(1713)));
           }
           if (char_is_dabura(ch)) {
-            GET_LOADROOM(ch) = rroom_get_vnum(real_room(6486));
+            char_set_load_room(ch, rroom_get_vnum(real_room(6486)));
           }
           if (char_is_frieza(ch)) {
-            GET_LOADROOM(ch) = rroom_get_vnum(real_room(4282));
+            char_set_load_room(ch, rroom_get_vnum(real_room(4282)));
           }
           if (char_is_ginyu(ch)) {
-            GET_LOADROOM(ch) = rroom_get_vnum(real_room(4289));
+            char_set_load_room(ch, rroom_get_vnum(real_room(4289)));
           }
         }
       }
@@ -1359,7 +1359,7 @@ static void point_update_characters(void)
 
       if (char_get_kaioken(i) > 0) {
         improve_skill(i, SKILL_KAIOKEN, -1);
-        if ((char_get_skill(i, SKILL_KAIOKEN) < rand_number(1, x) || (getCurST(i)) <= GET_MAX_MOVE(i) / 10))
+        if ((char_get_skill(i, SKILL_KAIOKEN) < rand_number(1, x) || (getCurST(i)) <= getMaxST(i) / 10))
           remove_kaioken(i, 2);
       }
 
@@ -1379,7 +1379,7 @@ static void point_update_characters(void)
         heal_limb(i);
       }
 
-      if (rroom_sect(char_get_in_room(i)) == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !char_is_kanassan(i)) {
+      if (rroom_sect(char_get_in_room(i)) == SECT_WATER_NOSWIM && !char_get_carried_by(i) && !char_is_kanassan(i)) {
         if ((getCurST(i)) >= (getCurCarriedWeight(i))) {
           act("@bYou swim in place.@n", TRUE, i, 0, 0, TO_CHAR);
           act("@C$n@b swims in place.@n", TRUE, i, 0, 0, TO_ROOM);
@@ -1388,7 +1388,7 @@ static void point_update_characters(void)
           decCurST(i, getCurCarriedWeight(i), 0);
           act("@RYou are drowning!@n", TRUE, i, 0, 0, TO_CHAR);
           act("@C$n@b gulps water as $e struggles to stay above the water line.@n", TRUE, i, 0, 0, TO_ROOM);
-          if (GET_HIT(i) - ((getEffMaxPL(i)) / 3) <= 0) {
+          if (getCurPL(i) - ((getEffMaxPL(i)) / 3) <= 0) {
             act("@rYou drown!@n", TRUE, i, 0, 0, TO_CHAR);
             act("@R$n@r drowns!@n", TRUE, i, 0, 0, TO_ROOM);
             die(i, NULL);
@@ -1398,14 +1398,14 @@ static void point_update_characters(void)
         }
       }
       if (!has_o2(i) && rroom_sunken(char_get_in_room(i)) && !rroom_flagged(char_get_in_room(i), ROOM_SPACE)) {
-        if (((getCurKI(i)) - mana_gain(i)) > GET_MAX_MANA(i) / 200) {
+        if (((getCurKI(i)) - mana_gain(i)) > getMaxKI(i) / 200) {
           send_to_char(i, "Your ki holds an atmosphere around you.\r\n");
           decCurKI(i, mana_gain(i) + getPercentOfMaxKI(i, .005), 0);
         } else {
-          if ((GET_HIT(i) - hit_gain(i)) > (getEffMaxPL(i)) * 0.05) {
+          if ((getCurPL(i) - hit_gain(i)) > (getEffMaxPL(i)) * 0.05) {
             send_to_char(i, "You struggle trying to hold your breath!\r\n");
             decCurHealth(i, hit_gain(i) + getPercentOfMaxHealth(i, .05), 0);
-          } else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20) {
+          } else if (getCurPL(i) <= getEffMaxPL(i) / 20) {
             send_to_char(i, "You have drowned!\r\n");
             act("@W$n@W drowns right in front of you.@n", FALSE, i, 0, 0, TO_ROOM);
             die(i, NULL);
@@ -1413,14 +1413,14 @@ static void point_update_characters(void)
         }
       }
       if (!has_o2(i) && rroom_flagged(char_get_in_room(i), ROOM_SPACE)) {
-        if (((getCurKI(i)) - mana_gain(i)) > GET_MAX_MANA(i) * 0.005) {
+        if (((getCurKI(i)) - mana_gain(i)) > getMaxKI(i) * 0.005) {
           send_to_char(i, "Your ki holds an atmosphere around you.\r\n");
           decCurKI(i, mana_gain(i) + getPercentOfMaxKI(i, .005), 0);
         } else {
-          if ((GET_HIT(i) - hit_gain(i)) > (getEffMaxPL(i)) * 0.05) {
+          if ((getCurPL(i) - hit_gain(i)) > (getEffMaxPL(i)) * 0.05) {
             send_to_char(i, "You struggle trying to hold your breath!\r\n");
             decCurHealth(i, hit_gain(i) + getPercentOfMaxHealth(i, .05), 0);
-          } else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20) {
+          } else if (getCurPL(i) <= getEffMaxPL(i) / 20) {
             send_to_char(i, "You have drowned!\r\n");
             decCurHealthPercent(i, 1, 1);
             act("@W$n@W drowns right in front of you.@n", FALSE, i, 0, 0, TO_ROOM);
@@ -1435,7 +1435,7 @@ static void point_update_characters(void)
           do_fly(i, 0, 0, 0);
         }
         decCurHealthPercent(i, .05, 0);
-        if (GET_HIT(i) < 0) {
+        if (getCurPL(i) < 0) {
           act("@rYou have burned to death!@n", TRUE, i, 0, 0, TO_CHAR);
           act("@R$n@r has burned to death!@n", TRUE, i, 0, 0, TO_ROOM);
           die(i, NULL);
@@ -1469,7 +1469,7 @@ static void point_update_characters(void)
         } else if (char_get_position(i) == POS_RESTING) {
           send_to_char(i, "@wYou feel relaxed and better.@n\r\n");
           if (!isFullLF(i)) {
-            if (!char_is_android(i) && !char_get_fighting(i) && char_get_suppression(i) <= 0 && GET_HIT(i) != (getEffMaxPL(i))) {
+            if (!char_is_android(i) && !char_get_fighting(i) && char_get_suppression(i) <= 0 && getCurPL(i) != (getEffMaxPL(i))) {
               incCurLFPercent(i, .15, true);
               send_to_char(i, "@CYou feel more lively.@n\r\n");
             }
@@ -1494,7 +1494,7 @@ static void point_update_characters(void)
         } else {
           cost = 0.06;
         }
-        if (GET_HIT(i) - GET_MAX_HIT(i) * cost > 0) {
+        if (getCurPL(i) - getEffMaxPL(i) * cost > 0) {
           send_to_char(i, "You puke as the poison burns through your blood.\r\n");
           act("$n shivers and then pukes.", TRUE, i, 0, 0, TO_ROOM);
           decCurHealth(i, getEffMaxPL(i) * cost, 0);
@@ -1520,8 +1520,8 @@ static void point_update_characters(void)
     } else if (char_get_position(i) == POS_MORTALLYW) {
       continue;
     }
-    if ((getCurKI(i)) >= GET_MAX_MANA(i) * 0.5 && char_get_charge(i) < GET_MAX_MANA(i) * 0.1 && char_get_preference(i) == PREFERENCE_KI && !char_plr_flagged(i, PLR_AURALIGHT)) {
-      char_set_charge(i, GET_MAX_MANA(i) * 0.1);
+    if ((getCurKI(i)) >= getMaxKI(i) * 0.5 && char_get_charge(i) < getMaxKI(i) * 0.1 && char_get_preference(i) == PREFERENCE_KI && !char_plr_flagged(i, PLR_AURALIGHT)) {
+      char_set_charge(i, getMaxKI(i) * 0.1);
     }
     if (!char_is_npc(i)) {
       update_char_objects(i);

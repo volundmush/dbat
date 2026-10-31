@@ -120,7 +120,7 @@ ACMD(do_charge)
   } else if (!strcasecmp("cancel", arg) && !char_plr_flagged(ch, PLR_CHARGE)) {
     send_to_char(ch, "You are not even charging!\r\n");
     return;
-  } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 100) {
+  } else if ((getCurKI(ch)) < getMaxKI(ch) / 100) {
     send_to_char(ch, "You don't even have enough ki!\r\n");
     return;
   } else if ((amt = atoi(arg)) > 0) {
@@ -129,8 +129,8 @@ ACMD(do_charge)
       return;
     } else if (char_aff_flagged(ch, AFF_SPIRITCONTROL)) {
       int64_t diff = 0;
-      if ((getCurKI(ch)) < ((GET_MAX_MANA(ch) * 0.01) * amt) + 1) {
-        diff = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - (getCurKI(ch));
+      if ((getCurKI(ch)) < ((getMaxKI(ch) * 0.01) * amt) + 1) {
+        diff = (((getMaxKI(ch) * 0.01) * amt) + 1) - (getCurKI(ch));
       }
       int chance = 15;
       chance -= char_get_skill(ch, SKILL_SPIRITCONTROL) / 10;
@@ -144,9 +144,9 @@ ACMD(do_charge)
         null_affect(ch, AFF_SPIRITCONTROL);
         return;
       } else {
-        int64_t spiritcost = GET_MAX_MANA(ch) * 0.05;
+        int64_t spiritcost = getMaxKI(ch) * 0.05;
         if (char_get_skill(ch, SKILL_SPIRITCONTROL) >= 100) {
-          spiritcost = GET_MAX_MANA(ch) * 0.01;
+          spiritcost = getMaxKI(ch) * 0.01;
         }
         reveal_hiding(ch, 0);
         send_to_char(ch, "Your %s colored aura flashes up around you as you instantly take control of the ki you needed!\r\n", aura_types[char_get_aura(ch)]);
@@ -154,8 +154,8 @@ ACMD(do_charge)
         char bloom[MAX_INPUT_LENGTH];
         sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
         act(bloom, TRUE, ch, 0, 0, TO_ROOM);
-        char_set_charge(ch, (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff);
-        decCurKI(ch, (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff + spiritcost, 0);
+        char_set_charge(ch, (((getMaxKI(ch) * 0.01) * amt) + 1) - diff);
+        decCurKI(ch, (((getMaxKI(ch) * 0.01) * amt) + 1) - diff + spiritcost, 0);
       }
     } else {
       reveal_hiding(ch, 0);
@@ -163,7 +163,7 @@ ACMD(do_charge)
       char bloom[MAX_INPUT_LENGTH];
       sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
       act(bloom, TRUE, ch, 0, 0, TO_ROOM);
-      char_set_chargeto(ch, (((GET_MAX_MANA(ch) * 0.01) * amt) + 1));
+      char_set_chargeto(ch, (((getMaxKI(ch) * 0.01) * amt) + 1));
       char_set_charge(ch, char_get_charge(ch) + (1));
       char_plr_set(ch, PLR_CHARGE, true);
     }
@@ -179,22 +179,22 @@ ACMD(do_powerup)
 {
   if (char_is_npc(ch)) {
     char_mob_set(ch, MOB_POWERUP, true);
-    if (GET_MAX_HIT(ch) < 50000) {
+    if (getEffMaxPL(ch) < 50000) {
       act("@RYou begin to powerup, and air billows outward around you!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@R$n begins to powerup, and air billows outward around $m!@n", TRUE, ch, 0, 0, TO_ROOM);
-    } else if (GET_MAX_HIT(ch) < 500000) {
+    } else if (getEffMaxPL(ch) < 500000) {
       act("@RYou begin to powerup, and loose objects are lifted into the air!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@R$n begins to powerup, and loose objects are lifted into the air!@n", TRUE, ch, 0, 0, TO_ROOM);
-    } else if (GET_MAX_HIT(ch) < 5000000) {
+    } else if (getEffMaxPL(ch) < 5000000) {
       act("@RYou begin to powerup, and torrents of energy crackle around you!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@R$n begins to powerup, and torrents of energy crackle around $m!@n", TRUE, ch, 0, 0, TO_ROOM);
-    } else if (GET_MAX_HIT(ch) < 50000000) {
+    } else if (getEffMaxPL(ch) < 50000000) {
       act("@RYou begin to powerup, and the entire area begins to shudder!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@R$n begins to powerup, and the entire area begins to shudder!@n", TRUE, ch, 0, 0, TO_ROOM);
-    } else if (GET_MAX_HIT(ch) < 100000000) {
+    } else if (getEffMaxPL(ch) < 100000000) {
       act("@RYou begin to powerup, and massive cracks begin to form beneath you!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@R$n begins to powerup, and massive cracks begin to form beneath $m!@n", TRUE, ch, 0, 0, TO_ROOM);
-    } else if (GET_MAX_HIT(ch) < 300000000) {
+    } else if (getEffMaxPL(ch) < 300000000) {
       act("@RYou begin to powerup, and everything around you shudders from the power!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@R$n begins to powerup, and everything around $m shudders from the power!@n", TRUE, ch, 0, 0, TO_ROOM);
     } else {
@@ -220,31 +220,31 @@ ACMD(do_powerup)
     char_plr_set(ch, PLR_POWERUP, false);
     return;
   }
-  if (GET_HIT(ch) >= GET_MAX_HIT(ch)) {
+  if (getCurPL(ch) >= getEffMaxPL(ch)) {
     send_to_char(ch, "@WYou are already at max!@n");
     return;
   }
-  if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+  if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
     send_to_char(ch, "@WYou do not have enough ki to powerup!@n");
     return;
   } else {
     reveal_hiding(ch, 0);
-    if (GET_MAX_HIT(ch) < 50000) {
+    if (getEffMaxPL(ch) < 50000) {
       act("@RYou begin to powerup, and air billows outward around you!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@R$n begins to powerup, and air billows outward around $m!@n", TRUE, ch, 0, 0, TO_ROOM);
-    } else if (GET_MAX_HIT(ch) < 500000) {
+    } else if (getEffMaxPL(ch) < 500000) {
       act("@RYou begin to powerup, and loose objects are lifted into the air!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@R$n begins to powerup, and loose objects are lifted into the air!@n", TRUE, ch, 0, 0, TO_ROOM);
-    } else if (GET_MAX_HIT(ch) < 5000000) {
+    } else if (getEffMaxPL(ch) < 5000000) {
       act("@RYou begin to powerup, and torrents of energy crackle around you!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@R$n begins to powerup, and torrents of energy crackle around $m!@n", TRUE, ch, 0, 0, TO_ROOM);
-    } else if (GET_MAX_HIT(ch) < 50000000) {
+    } else if (getEffMaxPL(ch) < 50000000) {
       act("@RYou begin to powerup, and the entire area begins to shudder!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@R$n begins to powerup, and the entire area begins to shudder!@n", TRUE, ch, 0, 0, TO_ROOM);
-    } else if (GET_MAX_HIT(ch) < 100000000) {
+    } else if (getEffMaxPL(ch) < 100000000) {
       act("@RYou begin to powerup, and massive cracks begin to form beneath you!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@R$n begins to powerup, and massive cracks begin to form beneath $m!@n", TRUE, ch, 0, 0, TO_ROOM);
-    } else if (GET_MAX_HIT(ch) < 300000000) {
+    } else if (getEffMaxPL(ch) < 300000000) {
       act("@RYou begin to powerup, and everything around you shudders from the power!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@R$n begins to powerup, and everything around $m shudders from the power!@n", TRUE, ch, 0, 0, TO_ROOM);
     } else {
@@ -460,7 +460,7 @@ ACMD(do_flee)
         if (axion_dice(0) < char_get_skill(char_get_absorbing(ch), SKILL_ABSORB)) {
           send_to_char(ch, "You are being held by %s, they are absorbing you!\r\n", char_get_name(char_get_absorbby(ch)));
           send_to_char(char_get_absorbby(ch), "%s struggles in your grasp!\r\n", char_get_name(ch));
-          WAIT_STATE(ch, PULSE_2SEC);
+          char_set_wait(ch, PULSE_2SEC);
           return;
         } else {
           act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, char_get_absorbby(ch), 0, ch, TO_NOTVICT);
@@ -472,10 +472,10 @@ ACMD(do_flee)
       }
       if (do_simple_move(ch, attempt, TRUE)) {
         send_to_char(ch, "You flee head over heels.\r\n");
-        WAIT_STATE(ch, PULSE_2SEC);
+        char_set_wait(ch, PULSE_2SEC);
       } else {
         act("$n tries to flee, but can't!", TRUE, ch, 0, 0, TO_ROOM);
-        WAIT_STATE(ch, PULSE_2SEC);
+        char_set_wait(ch, PULSE_2SEC);
       }
       return;
     }

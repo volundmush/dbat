@@ -111,7 +111,7 @@ static void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, c
       break;
 
     case APPLY_TURN_LEVEL:
-      GET_TLEVEL(ch) += mod;
+      char_set_tlevel(ch, char_get_tlevel(ch) + (mod));
       break;
 
     case APPLY_SPELL_LVL_0:

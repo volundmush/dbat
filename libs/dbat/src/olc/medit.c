@@ -63,10 +63,10 @@ ACMD(do_oasis_medit)
 
     if (is_number(buf2))
       number = atoi(buf2);
-    else if (GET_OLC_ZONE(ch) > 0) {
+    else if (char_get_olc_zone(ch) > 0) {
       zone_rnum zlok;
 
-      if ((zlok = real_zone(GET_OLC_ZONE(ch))) == NOWHERE)
+      if ((zlok = real_zone(char_get_olc_zone(ch))) == NOWHERE)
         number = NOWHERE;
       else
         number = genolc_zone_bottom(zlok);
@@ -137,7 +137,7 @@ ACMD(do_oasis_medit)
   if (save) {
     send_to_char(ch, "Saving all mobiles in zone %d.\r\n",
                  zone_table[OLC_ZNUM(d)].number);
-    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE,
+    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), TRUE,
            "OLC: %s saves mobile info for zone %d.",
            char_get_name(ch), zone_table[OLC_ZNUM(d)].number);
 
@@ -176,7 +176,7 @@ ACMD(do_oasis_medit)
   char_plr_set(ch, PLR_WRITING, true);
 
   mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
-         char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+         char_get_name(ch), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
 }
 
 void medit_save_to_disk(zone_vnum foo)
@@ -262,7 +262,7 @@ void init_mobile(struct char_data *mob)
   mob->aff_abils                                                  = mob->real_abils;
 
   char_mob_set(mob, MOB_ISNPC, true);
-  mob->player_specials = &dummy_mob;
+  mob->player_specials = NULL; /* NPC */
 }
 
 /*-------------------------------------------------------------------*/
@@ -503,7 +503,7 @@ void medit_disp_menu(struct descriptor_data *d)
                   OLC_NUM(d), genders[(int)char_get_sex(mob)], GET_ALIAS(mob),
                   GET_SDESC(mob), GET_LDESC(mob), GET_DDESC(mob), char_get_race_level(mob),
                   char_get_alignment(mob), char_get_accuracy_mod(mob), 0 /* damage mod: unused */,
-                  GET_NDD(mob), GET_SDD(mob), GET_HIT(mob), (getCurKI(mob)),
+                  GET_NDD(mob), GET_SDD(mob), getCurPL(mob), (getCurKI(mob)),
                   (getCurST(mob)), char_get_armor(mob), char_get_exp(mob), char_get_gold(mob));
   sprintbitarray(char_get_act(mob), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
   sprintbitarray(char_get_affected_by(mob), affected_bits, AF_ARRAY_MAX, flag2, sizeof(flag2));
@@ -523,8 +523,8 @@ void medit_disp_menu(struct descriptor_data *d)
                   position_types[(int)char_get_position(mob)],
                   position_types[(int)char_get_mob_specials_default_pos(mob)],
                   npc_personality[char_get_personality(mob)],
-                  flags, flag2, SENSEI_NAME(mob),
-                  TRUE_RACE(mob),
+                  flags, flag2, char_sensei_name(mob),
+                  char_true_race_name(mob),
                   OLC_SCRIPT(d) ? "Set." : "Not Set.", size_names[get_size(mob)]);
 
   OLC_MODE(d) = MEDIT_MAIN_MENU;
@@ -564,7 +564,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
        * Save the mob in memory and to disk.
        */
           medit_save_internally(d);
-          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
+          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(d->character)), TRUE,
                  "OLC: %s edits mob %d", char_get_name(d->character), OLC_NUM(d));
           if (CONFIG_OLC_SAVE) {
             medit_save_to_disk(zone_table[real_zone_by_thing(OLC_NUM(d))].number);

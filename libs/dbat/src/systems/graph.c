@@ -328,7 +328,7 @@ ACMD(do_radar)
   }
 
   else {
-    WAIT_STATE(ch, PULSE_2SEC);
+    char_set_wait(ch, PULSE_2SEC);
     act("$n holds up a dragon radar and pushes its button.", FALSE, ch, 0, 0, TO_ROOM);
     while (num < 20000) {
       if (real_room(room) != NOWHERE) {
@@ -447,31 +447,31 @@ ACMD(do_track)
       } else if (char_get_alignment(vict) > -50 && char_get_alignment(vict) < 50) {
         send_to_char(ch, "You sense slightly mild indefinable ki from them.\r\n");
       }
-      if (GET_HIT(vict) > GET_HIT(ch) * 50) {
+      if (getCurPL(vict) > getCurPL(ch) * 50) {
         send_to_char(ch, "Their power is so huge it boggles your mind and crushes your spirit to fight!\n");
-      } else if (GET_HIT(vict) > GET_HIT(ch) * 25) {
+      } else if (getCurPL(vict) > getCurPL(ch) * 25) {
         send_to_char(ch, "Their power is so much larger than you that you would die like an insect.\n");
-      } else if (GET_HIT(vict) > GET_HIT(ch) * 10) {
+      } else if (getCurPL(vict) > getCurPL(ch) * 10) {
         send_to_char(ch, "Their power is many times larger than your own.\n");
-      } else if (GET_HIT(vict) > GET_HIT(ch) * 5) {
+      } else if (getCurPL(vict) > getCurPL(ch) * 5) {
         send_to_char(ch, "Their power is a great deal larger than your own.\n");
-      } else if (GET_HIT(vict) > GET_HIT(ch) * 2) {
+      } else if (getCurPL(vict) > getCurPL(ch) * 2) {
         send_to_char(ch, "Their power is more than twice as large as your own.\n");
-      } else if (GET_HIT(vict) > GET_HIT(ch)) {
+      } else if (getCurPL(vict) > getCurPL(ch)) {
         send_to_char(ch, "Their power is about twice as large as your own.\n");
-      } else if (GET_HIT(vict) == GET_HIT(ch)) {
+      } else if (getCurPL(vict) == getCurPL(ch)) {
         send_to_char(ch, "Their power is exactly as strong as you.\n");
-      } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.75) {
+      } else if (getCurPL(vict) >= getCurPL(ch) * 0.75) {
         send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
-      } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.5) {
+      } else if (getCurPL(vict) >= getCurPL(ch) * 0.5) {
         send_to_char(ch, "Their power is about half of your own or larger.\n");
-      } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.25) {
+      } else if (getCurPL(vict) >= getCurPL(ch) * 0.25) {
         send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
-      } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.1) {
+      } else if (getCurPL(vict) >= getCurPL(ch) * 0.1) {
         send_to_char(ch, "Their power is about a tenth of your own or larger.\n");
-      } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.01) {
+      } else if (getCurPL(vict) >= getCurPL(ch) * 0.01) {
         send_to_char(ch, "Their power is less than a tenth of your own.\n");
-      } else if (GET_HIT(vict) < GET_HIT(ch) * 0.01) {
+      } else if (getCurPL(vict) < getCurPL(ch) * 0.01) {
         send_to_char(ch, "Their power is less than 1 percent of your own. What a weakling...\n");
       }
     } else {
@@ -489,7 +489,7 @@ ACMD(do_track)
         continue;
       } else if (i->character == ch) {
         continue;
-      } else if (GET_HIT(i->character) < (GET_HIT(ch) * 0.001) + 1) {
+      } else if (getCurPL(i->character) < (getCurPL(ch) * 0.001) + 1) {
         continue;
       } else if (planet_check(ch, i->character)) {
         if (readIntro(ch, i->character) == 1) {
@@ -498,31 +498,31 @@ ACMD(do_track)
           send_to_char(ch, "@D[@Y%d@D] @CYou sense ", (count + 1));
         }
         /* How strong is the one we sense? */
-        if (GET_HIT(i->character) > GET_HIT(ch) * 50) {
+        if (getCurPL(i->character) > getCurPL(ch) * 50) {
           send_to_char(ch, "a power so huge it boggles your mind and crushes your spirit to fight!\n");
-        } else if (GET_HIT(i->character) > GET_HIT(ch) * 25) {
+        } else if (getCurPL(i->character) > getCurPL(ch) * 25) {
           send_to_char(ch, "a power so much larger than you that you would die like an insect.\n");
-        } else if (GET_HIT(i->character) > GET_HIT(ch) * 10) {
+        } else if (getCurPL(i->character) > getCurPL(ch) * 10) {
           send_to_char(ch, "a power that is many times larger than your own.\n");
-        } else if (GET_HIT(i->character) > GET_HIT(ch) * 5) {
+        } else if (getCurPL(i->character) > getCurPL(ch) * 5) {
           send_to_char(ch, "a power that is a great deal larger than your own.\n");
-        } else if (GET_HIT(i->character) > GET_HIT(ch) * 2) {
+        } else if (getCurPL(i->character) > getCurPL(ch) * 2) {
           send_to_char(ch, "a power that is more than twice as large as your own.\n");
-        } else if (GET_HIT(i->character) > GET_HIT(ch)) {
+        } else if (getCurPL(i->character) > getCurPL(ch)) {
           send_to_char(ch, "a power that is about twice as large as your own.\n");
-        } else if (GET_HIT(i->character) == GET_HIT(ch)) {
+        } else if (getCurPL(i->character) == getCurPL(ch)) {
           send_to_char(ch, "a power that is exactly as strong as you.\n");
-        } else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.75) {
+        } else if (getCurPL(i->character) >= getCurPL(ch) * 0.75) {
           send_to_char(ch, "a power that is about a quarter of your own or larger.\n");
-        } else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.5) {
+        } else if (getCurPL(i->character) >= getCurPL(ch) * 0.5) {
           send_to_char(ch, "a power that is about half of your own or larger.\n");
-        } else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.25) {
+        } else if (getCurPL(i->character) >= getCurPL(ch) * 0.25) {
           send_to_char(ch, "a power that is about a quarter of your own or larger.\n");
-        } else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.1) {
+        } else if (getCurPL(i->character) >= getCurPL(ch) * 0.1) {
           send_to_char(ch, "a power that is about a tenth of your own or larger.\n");
-        } else if (GET_HIT(i->character) >= GET_HIT(ch) * 0.01) {
+        } else if (getCurPL(i->character) >= getCurPL(ch) * 0.01) {
           send_to_char(ch, "a power that is less than a tenth of your own.\n");
-        } else if (GET_HIT(i->character) < GET_HIT(ch) * 0.01) {
+        } else if (getCurPL(i->character) < getCurPL(ch) * 0.01) {
           send_to_char(ch, "a power that is less than 1 percent of your own. What a weakling...\n");
         }
 
@@ -569,7 +569,7 @@ ACMD(do_track)
     return;
   }
 
-  if (GET_HIT(vict) < (GET_HIT(ch) * 0.001) + 1) {
+  if (getCurPL(vict) < (getCurPL(ch) * 0.001) + 1) {
     if (char_get_in_room(ch) == char_get_in_room(vict)) {
       if (!read_sense_memory(ch, vict)) {
         send_to_char(ch, "Their powerlevel is too weak for you to sense properly, but you will recognise their ki signal from now on.\r\n");
@@ -697,31 +697,31 @@ ACMD(do_track)
           }
         }
         if (!char_is_android(vict)) {
-          if (GET_HIT(vict) > GET_HIT(ch) * 50) {
+          if (getCurPL(vict) > getCurPL(ch) * 50) {
             send_to_char(ch, "Their power is so huge it boggles your mind and crushes your spirit to fight!\n");
-          } else if (GET_HIT(vict) > GET_HIT(ch) * 25) {
+          } else if (getCurPL(vict) > getCurPL(ch) * 25) {
             send_to_char(ch, "Their power is so much larger than you that you would die like an insect.\n");
-          } else if (GET_HIT(vict) > GET_HIT(ch) * 10) {
+          } else if (getCurPL(vict) > getCurPL(ch) * 10) {
             send_to_char(ch, "Their power is many times larger than your own.\n");
-          } else if (GET_HIT(vict) > GET_HIT(ch) * 5) {
+          } else if (getCurPL(vict) > getCurPL(ch) * 5) {
             send_to_char(ch, "Their power is a great deal larger than your own.\n");
-          } else if (GET_HIT(vict) > GET_HIT(ch) * 2) {
+          } else if (getCurPL(vict) > getCurPL(ch) * 2) {
             send_to_char(ch, "Their power is more than twice as large as your own.\n");
-          } else if (GET_HIT(vict) > GET_HIT(ch)) {
+          } else if (getCurPL(vict) > getCurPL(ch)) {
             send_to_char(ch, "Their power is about twice as large as your own.\n");
-          } else if (GET_HIT(vict) == GET_HIT(ch)) {
+          } else if (getCurPL(vict) == getCurPL(ch)) {
             send_to_char(ch, "Their power is exactly as strong as you.\n");
-          } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.75) {
+          } else if (getCurPL(vict) >= getCurPL(ch) * 0.75) {
             send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
-          } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.5) {
+          } else if (getCurPL(vict) >= getCurPL(ch) * 0.5) {
             send_to_char(ch, "Their power is about half of your own or larger.\n");
-          } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.25) {
+          } else if (getCurPL(vict) >= getCurPL(ch) * 0.25) {
             send_to_char(ch, "Their power is about a quarter of your own or larger.\n");
-          } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.1) {
+          } else if (getCurPL(vict) >= getCurPL(ch) * 0.1) {
             send_to_char(ch, "Their power is about a tenth of your own or larger.\n");
-          } else if (GET_HIT(vict) >= GET_HIT(ch) * 0.01) {
+          } else if (getCurPL(vict) >= getCurPL(ch) * 0.01) {
             send_to_char(ch, "Their power is less than a tenth of your own.\n");
-          } else if (GET_HIT(vict) < GET_HIT(ch) * 0.01) {
+          } else if (getCurPL(vict) < getCurPL(ch) * 0.01) {
             send_to_char(ch, "Their power is less than 1 percent of your own. What a weakling...\n");
           }
           if (!read_sense_memory(ch, vict)) {
@@ -748,7 +748,7 @@ ACMD(do_track)
           send_to_char(ch, "You sense them %s from here!\r\n", dirs[dir]);
           break;
         }
-        WAIT_STATE(ch, PULSE_2SEC);
+        char_set_wait(ch, PULSE_2SEC);
         improve_skill(ch, SKILL_SENSE, 1);
         improve_skill(ch, SKILL_SENSE, 1);
         improve_skill(ch, SKILL_SENSE, 1);

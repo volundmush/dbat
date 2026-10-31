@@ -53,11 +53,11 @@ ACMD(do_eraser)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -95,14 +95,14 @@ ACMD(do_eraser)
 
     if (!tech_handle_zanzoken(ch, vict, "Eraser Cannon")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
 
       if (char_get_skill(ch, SKILL_ERASER) >= 100) {
-        decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.15, 0);
+        decCurKI(ch, (getMaxKI(ch) * attperc) * 0.15, 0);
       } else if (char_get_skill(ch, SKILL_ERASER) >= 60) {
-        decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1, 0);
+        decCurKI(ch, (getMaxKI(ch) * attperc) * 0.1, 0);
       } else if (char_get_skill(ch, SKILL_ERASER) >= 40) {
-        decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, 0);
+        decCurKI(ch, (getMaxKI(ch) * attperc) * 0.05, 0);
       }
 
       return;
@@ -118,13 +118,13 @@ ACMD(do_eraser)
           act("@WYou move quickly and block @C$n's@W eraser cannon!@n", FALSE, ch, 0, vict, TO_VICT);
           act("@C$N@W moves quickly and blocks @c$n's@W eraser cannon!@n", FALSE, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           if (char_get_skill(ch, SKILL_ERASER) >= 100) {
-            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.15, 0);
+            decCurKI(ch, (getMaxKI(ch) * attperc) * 0.15, 0);
           } else if (char_get_skill(ch, SKILL_ERASER) >= 60) {
-            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1, 0);
+            decCurKI(ch, (getMaxKI(ch) * attperc) * 0.1, 0);
           } else if (char_get_skill(ch, SKILL_ERASER) >= 40) {
-            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, 0);
+            decCurKI(ch, (getMaxKI(ch) * attperc) * 0.05, 0);
           }
           dmg = damtype(ch, 18, skill, attperc);
           dmg /= 4;
@@ -148,11 +148,11 @@ ACMD(do_eraser)
 
           pcost(ch, attperc, 0);
           if (char_get_skill(ch, SKILL_ERASER) >= 100) {
-            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.15, 0);
+            decCurKI(ch, (getMaxKI(ch) * attperc) * 0.15, 0);
           } else if (char_get_skill(ch, SKILL_ERASER) >= 60) {
-            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1, 0);
+            decCurKI(ch, (getMaxKI(ch) * attperc) * 0.1, 0);
           } else if (char_get_skill(ch, SKILL_ERASER) >= 40) {
-            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, 0);
+            decCurKI(ch, (getMaxKI(ch) * attperc) * 0.05, 0);
           }
           hurt(0, 0, ch, vict, NULL, 0, 1);
 
@@ -164,11 +164,11 @@ ACMD(do_eraser)
 
           pcost(ch, attperc, 0);
           if (char_get_skill(ch, SKILL_ERASER) >= 100) {
-            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.15, 0);
+            decCurKI(ch, (getMaxKI(ch) * attperc) * 0.15, 0);
           } else if (char_get_skill(ch, SKILL_ERASER) >= 60) {
-            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1, 0);
+            decCurKI(ch, (getMaxKI(ch) * attperc) * 0.1, 0);
           } else if (char_get_skill(ch, SKILL_ERASER) >= 40) {
-            decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, 0);
+            decCurKI(ch, (getMaxKI(ch) * attperc) * 0.05, 0);
           }
           hurt(0, 0, ch, vict, NULL, 0, 1);
 
@@ -180,11 +180,11 @@ ACMD(do_eraser)
         act("@c$n@W fires a eraser cannon at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
         pcost(ch, attperc, 0);
         if (char_get_skill(ch, SKILL_ERASER) >= 100) {
-          decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.15, 0);
+          decCurKI(ch, (getMaxKI(ch) * attperc) * 0.15, 0);
         } else if (char_get_skill(ch, SKILL_ERASER) >= 60) {
-          decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1, 0);
+          decCurKI(ch, (getMaxKI(ch) * attperc) * 0.1, 0);
         } else if (char_get_skill(ch, SKILL_ERASER) >= 40) {
-          decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, 0);
+          decCurKI(ch, (getMaxKI(ch) * attperc) * 0.05, 0);
         }
       }
       hurt(0, 0, ch, vict, NULL, 0, 1);
@@ -236,11 +236,11 @@ ACMD(do_eraser)
       }
       pcost(ch, attperc, 0);
       if (char_get_skill(ch, SKILL_ERASER) >= 100) {
-        decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.15, 0);
+        decCurKI(ch, (getMaxKI(ch) * attperc) * 0.15, 0);
       } else if (char_get_skill(ch, SKILL_ERASER) >= 60) {
-        decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1, 0);
+        decCurKI(ch, (getMaxKI(ch) * attperc) * 0.1, 0);
       } else if (char_get_skill(ch, SKILL_ERASER) >= 40) {
-        decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, 0);
+        decCurKI(ch, (getMaxKI(ch) * attperc) * 0.05, 0);
       }
 
       return;
@@ -260,11 +260,11 @@ ACMD(do_eraser)
     hurt(0, 0, ch, NULL, obj, dmg, 0);
     pcost(ch, attperc, 0);
     if (char_get_skill(ch, SKILL_ERASER) >= 100) {
-      decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.15, 0);
+      decCurKI(ch, (getMaxKI(ch) * attperc) * 0.15, 0);
     } else if (char_get_skill(ch, SKILL_ERASER) >= 60) {
-      decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1, 0);
+      decCurKI(ch, (getMaxKI(ch) * attperc) * 0.1, 0);
     } else if (char_get_skill(ch, SKILL_ERASER) >= 40) {
-      decCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, 0);
+      decCurKI(ch, (getMaxKI(ch) * attperc) * 0.05, 0);
     }
 
   } else {
@@ -305,11 +305,11 @@ ACMD(do_bigbang)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -347,7 +347,7 @@ ACMD(do_bigbang)
 
     if (!tech_handle_zanzoken(ch, vict, "Big Bang")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
 
       return;
     }
@@ -359,7 +359,7 @@ ACMD(do_bigbang)
           act("@WYou move quickly and block @C$n's@W Big Bang!@n", FALSE, ch, 0, vict, TO_VICT);
           act("@C$N@W moves quickly and blocks @c$n's@W Big Bang!@n", FALSE, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 36, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -513,11 +513,11 @@ ACMD(do_balefire)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -571,7 +571,7 @@ ACMD(do_balefire)
 
     if (!tech_handle_zanzoken(ch, vict, "Balefire")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
 
       return;
     }
@@ -583,7 +583,7 @@ ACMD(do_balefire)
           act("@WYou move quickly and block every kiball of @C$n's@W scatter shot!@n", FALSE, ch, 0, vict, TO_VICT);
           act("@C$N@W moves quickly and blocks every kiball of @c$n's@W scatter shot!@n", FALSE, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 35, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -747,11 +747,11 @@ ACMD(do_hellflash)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -796,7 +796,7 @@ ACMD(do_hellflash)
       } else {
         pcost(ch, attperc, 0);
       }
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
 
       return;
     }
@@ -812,7 +812,7 @@ ACMD(do_hellflash)
           } else {
             pcost(ch, attperc, 0);
           }
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 32, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -982,11 +982,11 @@ ACMD(do_baku)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -1041,11 +1041,11 @@ ACMD(do_baku)
     dmg = damtype(ch, 24, skill, attperc);
 
     if (char_get_skill(ch, SKILL_BAKUHATSUHA) >= 100) {
-      dmg += GET_MAX_HIT(ch) * 0.08;
+      dmg += getEffMaxPL(ch) * 0.08;
     } else if (char_get_skill(ch, SKILL_BAKUHATSUHA) >= 60) {
-      dmg += GET_MAX_HIT(ch) * 0.04;
+      dmg += getEffMaxPL(ch) * 0.04;
     } else if (char_get_skill(ch, SKILL_BAKUHATSUHA) >= 40) {
-      dmg += GET_MAX_HIT(ch) * 0.02;
+      dmg += getEffMaxPL(ch) * 0.02;
     }
 
     switch (count) {
@@ -1085,7 +1085,7 @@ ACMD(do_baku)
         act("@cYou disappear, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_VICT);
         act("@C$N@c disappears, avoiding the explosion before reappearing elsewhere!@n", FALSE, ch, 0, vict, TO_NOTVICT);
         char_aff_set(vict, AFF_ZANZOKEN, false);
-        pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+        pcost(vict, 0, getEffMaxPL(vict) / 200);
         hurt(0, 0, ch, vict, NULL, 0, 1);
         continue;
       } else if (dge + rand_number(-15, 5) > skill) {
@@ -1146,11 +1146,11 @@ ACMD(do_shogekiha)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -1210,7 +1210,7 @@ ACMD(do_shogekiha)
 
     if (!tech_handle_zanzoken(ch, vict, "Shogekiha")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -1221,7 +1221,7 @@ ACMD(do_shogekiha)
           act("@WYou move quickly and block @C$n's@W shogekiha!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@C$N@W moves quickly and blocks @c$n's@W shogekiha!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 10, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -1393,11 +1393,11 @@ ACMD(do_kiblast)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -1448,7 +1448,7 @@ ACMD(do_kiblast)
 
     if (!tech_handle_zanzoken(ch, vict, "kiblast")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -1461,7 +1461,7 @@ ACMD(do_kiblast)
           act("@C$N@W deflects your kiblast, sending it flying away!@n", TRUE, ch, 0, vict, TO_CHAR);
           act("@WYou deflect @C$n's@W kiblast sending it flying away!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@C$N@W deflects @c$n's@W kiblast sending it flying away!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+          pcost(vict, 0, getEffMaxPL(vict) / 200);
 
           parry_ki(attperc, ch, vict, "kiblast", prob, perc, skill, 9);
           /*      User/target/skill name/skill/hurt type */
@@ -1478,7 +1478,7 @@ ACMD(do_kiblast)
           act("@C$N@W moves quickly and blocks @c$n's@W kiblast!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_BLOCK, 0);
           pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 9, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -1529,7 +1529,7 @@ ACMD(do_kiblast)
           dmg += dmg * 0.05;
         }
       }
-      int64_t record = GET_HIT(vict);
+      int64_t record = getCurPL(vict);
       int hitspot    = 1;
       hitspot        = roll_hitloc(ch, vict, skill);
       switch (hitspot) {
@@ -1583,7 +1583,7 @@ ACMD(do_kiblast)
           /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
           break;
       }
-      if (master_pass == TRUE && record > GET_HIT(vict) && (record - GET_HIT(vict) > (getEffMaxPL(vict)) * 0.025)) {
+      if (master_pass == TRUE && record > getCurPL(vict) && (record - getCurPL(vict) > (getEffMaxPL(vict)) * 0.025)) {
         if (!char_aff_flagged(vict, AFF_KNOCKED) && !char_aff_flagged(vict, AFF_SANCTUARY)) {
           act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_CHAR);
           act("@WYou are knocked out!@n", TRUE, ch, 0, vict, TO_VICT);

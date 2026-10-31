@@ -175,7 +175,7 @@ ACMD(do_help)
     int i, found = 0;
     send_to_char(ch, "There is no help on that word.\r\n");
     if (char_get_admlevel(ch) < 3) {
-      mudlog(LOG_NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "%s tried to get help on %s", char_get_name(ch), argument);
+      mudlog(LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(ch)), TRUE, "%s tried to get help on %s", char_get_name(ch), argument);
     }
     for (i = 0; i <= top_of_helpt; i++) {
       if (help_table[i].min_level > char_get_admlevel(ch))
@@ -304,10 +304,10 @@ ACMD(do_toggle)
   if (char_is_npc(ch))
     return;
 
-  if (GET_WIMP_LEV(ch) == 0)
+  if (char_get_wimp_level(ch) == 0)
     strcpy(buf2, "OFF"); /* strcpy: OK */
   else
-    sprintf(buf2, "%-3.3d", GET_WIMP_LEV(ch)); /* sprintf: OK */
+    sprintf(buf2, "%-3.3d", char_get_wimp_level(ch)); /* sprintf: OK */
 
   if (char_get_admlevel(ch)) {
     send_to_char(ch,
@@ -511,9 +511,9 @@ ACMD(do_history)
     return;
   }
 
-  if (GET_HISTORY(ch, type) && GET_HISTORY(ch, type)->text && *GET_HISTORY(ch, type)->text) {
+  if (char_get_comm_hist(ch, type) && char_get_comm_hist(ch, type)->text && *char_get_comm_hist(ch, type)->text) {
     struct txt_block *tmp;
-    for (tmp = GET_HISTORY(ch, type); tmp; tmp = tmp->next)
+    for (tmp = char_get_comm_hist(ch, type); tmp; tmp = tmp->next)
       send_to_char(ch, "%s", tmp->text);
 /* Make this a 1 if you want history to cear after viewing */
 #if 0 
@@ -533,26 +533,28 @@ void add_history(struct char_data *ch, char *str, int type)
   if (char_is_npc(ch))
     return;
 
-  tmp = GET_HISTORY(ch, type);
+  tmp = char_get_comm_hist(ch, type);
   ct  = time(0);
   strftime(time_str, sizeof(time_str), "%H:%M ", localtime(&ct));
 
   sprintf(buf, "%s%s", time_str, str);
 
   if (!tmp) {
-    CREATE(GET_HISTORY(ch, type), struct txt_block, 1);
-    GET_HISTORY(ch, type)->text = strdup(buf);
+    struct txt_block *first;
+    CREATE(first, struct txt_block, 1);
+    first->text = strdup(buf);
+    char_set_comm_hist(ch, type, first);
   } else {
     while (tmp->next)
       tmp = tmp->next;
     CREATE(tmp->next, struct txt_block, 1);
     tmp->next->text = strdup(buf);
 
-    for (tmp = GET_HISTORY(ch, type); tmp; tmp = tmp->next, i++);
+    for (tmp = char_get_comm_hist(ch, type); tmp; tmp = tmp->next, i++);
 
-    for (; i > HIST_LENGTH && GET_HISTORY(ch, type); i--) {
-      tmp                   = GET_HISTORY(ch, type);
-      GET_HISTORY(ch, type) = tmp->next;
+    for (; i > HIST_LENGTH && char_get_comm_hist(ch, type); i--) {
+      tmp                   = char_get_comm_hist(ch, type);
+      char_set_comm_hist(ch, type, tmp->next);
       if (tmp->text)
         free(tmp->text);
       free(tmp);

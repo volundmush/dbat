@@ -188,13 +188,13 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
   *s          = '\0';
   tokens[++i] = NULL;
 
-  if (IS_SET(targets, TO_CHAR) && SENDOK(ch))
+  if (IS_SET(targets, TO_CHAR) && sendok(ch, to_sleeping))
     sub_write_to_char(ch, tokens, otokens, type);
 
   if (IS_SET(targets, TO_ROOM))
     for (to     = world[char_get_in_room(ch)].people;
          to; to = to->next_in_room)
-      if (to != ch && SENDOK(to))
+      if (to != ch && sendok(to, to_sleeping))
         sub_write_to_char(to, tokens, otokens, type);
 }
 
@@ -265,16 +265,16 @@ void send_to_sense(int type, char *messg, struct char_data *ch)
     }
     if (char_get_in_room(ch) == char_get_in_room(tch)) {
       continue;
-    } else if (GET_HIT(ch) < (GET_HIT(tch) * 0.001) + 1) {
+    } else if (getCurPL(ch) < (getCurPL(tch) * 0.001) + 1) {
       continue;
     } else if (type == 0) {
-      if (GET_MAX_HIT(ch) > GET_MAX_HIT(tch)) {
+      if (getEffMaxPL(ch) > getEffMaxPL(tch)) {
         write_to_output(i, "%s who is stronger than you. They are nearby.\r\n", messg);
-      } else if (GET_MAX_HIT(ch) >= GET_MAX_HIT(tch) * .9) {
+      } else if (getEffMaxPL(ch) >= getEffMaxPL(tch) * .9) {
         write_to_output(i, "%s who is near your strength. They are nearby.\r\n", messg);
-      } else if (GET_MAX_HIT(ch) >= GET_MAX_HIT(tch) * .6) {
+      } else if (getEffMaxPL(ch) >= getEffMaxPL(tch) * .6) {
         write_to_output(i, "%s who is a good bit weaker than you. They are nearby.\r\n", messg);
-      } else if (GET_MAX_HIT(ch) >= GET_MAX_HIT(tch) * .4) {
+      } else if (getEffMaxPL(ch) >= getEffMaxPL(tch) * .4) {
         write_to_output(i, "%s who is a lot weaker than you. They are nearby.\r\n", messg);
       } else {
         continue;
@@ -288,21 +288,21 @@ void send_to_sense(int type, char *messg, struct char_data *ch)
       char *blah = sense_location(ch);
       char power[MAX_INPUT_LENGTH];
       char align[MAX_INPUT_LENGTH];
-      if (GET_HIT(ch) > GET_HIT(tch) * 10) {
+      if (getCurPL(ch) > getCurPL(tch) * 10) {
         sprintf(power, ", who is @Runbelievably stronger@Y than you");
-      } else if (GET_HIT(ch) > GET_HIT(tch) * 5) {
+      } else if (getCurPL(ch) > getCurPL(tch) * 5) {
         sprintf(power, ", who is much @Rstronger@Y than you");
-      } else if (GET_HIT(ch) > GET_HIT(tch) * 2) {
+      } else if (getCurPL(ch) > getCurPL(tch) * 2) {
         sprintf(power, ", who is more than twice as @Rstrong@Y as you");
-      } else if (GET_HIT(ch) > GET_HIT(tch)) {
+      } else if (getCurPL(ch) > getCurPL(tch)) {
         sprintf(power, ", who is somewhat @mstronger@Y than you");
-      } else if (GET_HIT(ch) * 10 < GET_HIT(tch)) {
+      } else if (getCurPL(ch) * 10 < getCurPL(tch)) {
         sprintf(power, ", who is @Munbelievably weaker@Y than you");
-      } else if (GET_HIT(ch) * 5 < GET_HIT(tch)) {
+      } else if (getCurPL(ch) * 5 < getCurPL(tch)) {
         sprintf(power, ", who is much @Mweaker@Y than you");
-      } else if (GET_HIT(ch) * 2 < GET_HIT(tch)) {
+      } else if (getCurPL(ch) * 2 < getCurPL(tch)) {
         sprintf(power, ", who is more than twice as @Mweak@Y as you");
-      } else if (GET_HIT(ch) < GET_HIT(tch)) {
+      } else if (getCurPL(ch) < getCurPL(tch)) {
         sprintf(power, ", who is somewhat @Wweaker@Y than you");
       } else {
         sprintf(power, ", who is close to @Cequal@Y with you");
@@ -356,7 +356,7 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type)
       if (rroom_flagged(char_get_in_room(ch), ROOM_SHIP)) {
         continue;
       }
-      if (GET_INVIS_LEV(ch) > char_get_admlevel(tch)) {
+      if (char_get_invis_level(ch) > char_get_admlevel(tch)) {
         continue;
       }
       if (char_is_android(ch)) {
@@ -393,46 +393,46 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type)
       } else if (type == 0) {
         if (num == 1) {
           struct obj_data *obj = char_get_equipment(tch, WEAR_EYE);
-          if (obj_extra_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
+          if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(ch) >= 150000) {
             write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
-          } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
+          } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(ch) >= 5000000) {
             write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
-          } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
+          } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(ch) >= 15000000) {
             write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
           } else {
             write_to_output(i, "%s@n", messg);
           }
         } else {
-          if (obj_extra_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
+          if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(ch) >= 150000) {
             write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
-          } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
+          } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(ch) >= 5000000) {
             write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
-          } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
+          } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(ch) >= 15000000) {
             write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
           } else {
             write_to_output(i, "%s\r\n", messg);
           }
         }
       } else if (type == 1 && char_get_skill(tch, SKILL_SENSE) < 20) {
-        if (obj_extra_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
+        if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(ch) >= 150000) {
           write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
-        } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
+        } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(ch) >= 5000000) {
           write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
-        } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
+        } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(ch) >= 15000000) {
           write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
         } else {
-          write_to_output(i, "@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(GET_HIT(ch)));
+          write_to_output(i, "@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(getCurPL(ch)));
         }
       } else if (type == 2 && char_get_skill(tch, SKILL_SENSE) < 20) {
         char *blah = sense_location(ch);
-        if (obj_extra_flagged(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
+        if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(ch) >= 150000) {
           write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
-        } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && GET_HIT(ch) >= 5000000) {
+        } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(ch) >= 5000000) {
           write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
-        } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && GET_HIT(ch) >= 15000000) {
+        } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(ch) >= 15000000) {
           write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
         } else {
-          write_to_output(i, "@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, blah, add_commas(GET_HIT(ch)));
+          write_to_output(i, "@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, blah, add_commas(getCurPL(ch)));
         }
       }
     }
@@ -444,15 +444,15 @@ void send_to_worlds(struct char_data *ch)
   struct descriptor_data *i;
   char message[MAX_INPUT_LENGTH];
 
-  if (GET_MAX_HIT(ch) > 2000000000) {
+  if (getEffMaxPL(ch) > 2000000000) {
     sprintf(message, "@RThe whole planet begins to quake violently as if the world is ending!@n\r\n");
-  } else if (GET_MAX_HIT(ch) > 1000000000) {
+  } else if (getEffMaxPL(ch) > 1000000000) {
     sprintf(message, "@RThe whole planet begins to quake violently with a thunderous roar!@n\r\n");
-  } else if (GET_MAX_HIT(ch) > 500000000) {
+  } else if (getEffMaxPL(ch) > 500000000) {
     sprintf(message, "@RThe whole planet begins to quake violently!@n\r\n");
-  } else if (GET_MAX_HIT(ch) > 100000000) {
+  } else if (getEffMaxPL(ch) > 100000000) {
     sprintf(message, "@RThe whole planet rumbles and shakes!@n\r\n");
-  } else if (GET_MAX_HIT(ch) > 50000000) {
+  } else if (getEffMaxPL(ch) > 50000000) {
     sprintf(message, "@RThe whole planet rumbles faintly!@n\r\n");
   } else {
     return;

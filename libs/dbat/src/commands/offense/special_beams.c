@@ -62,11 +62,11 @@ ACMD(do_honoo)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
   /* Passed sanity checks for doing the technique */
@@ -110,7 +110,7 @@ ACMD(do_honoo)
       } else {
         pcost(ch, attperc, 0);
       }
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       if (rroom_get_geffect(char_get_in_room(ch)) < -1) {
         send_to_room(char_get_in_room(ch), "The water surrounding the area evaporates some!\r\n");
         rroom_set_geffect(char_get_in_room(ch), rroom_get_geffect(char_get_in_room(ch)) + (1));
@@ -135,7 +135,7 @@ ACMD(do_honoo)
           } else {
             pcost(ch, attperc, 0);
           }
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 21, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -373,11 +373,11 @@ ACMD(do_psyblast)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -422,7 +422,7 @@ ACMD(do_psyblast)
       } else {
         pcost(ch, attperc, 0);
       }
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -440,7 +440,7 @@ ACMD(do_psyblast)
           } else {
             pcost(ch, attperc, 0);
           }
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 20, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -624,11 +624,11 @@ ACMD(do_sbc)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -666,7 +666,7 @@ ACMD(do_sbc)
 
     if (!tech_handle_zanzoken(ch, vict, "Special Beam Cannon")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -819,11 +819,11 @@ ACMD(do_kousengan)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -861,7 +861,7 @@ ACMD(do_kousengan)
 
     if (!tech_handle_zanzoken(ch, vict, "kousengan")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -872,7 +872,7 @@ ACMD(do_kousengan)
           act("@WYou move quickly and block @C$n's@W kousengan!@n", FALSE, ch, 0, vict, TO_VICT);
           act("@C$N@W moves quickly and blocks @c$n's@W kousengan!@n", FALSE, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 42, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -1048,11 +1048,11 @@ ACMD(do_deathbeam)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -1099,9 +1099,9 @@ ACMD(do_deathbeam)
       } else {
         pcost(ch, attperc, 0);
       }
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
       }
 
       return;
@@ -1118,12 +1118,12 @@ ACMD(do_deathbeam)
           } else {
             pcost(ch, attperc, 0);
           }
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 17, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
           if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
 
           return;
@@ -1148,7 +1148,7 @@ ACMD(do_deathbeam)
           }
           hurt(0, 0, ch, vict, NULL, 0, 1);
           if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
 
           return;
@@ -1163,7 +1163,7 @@ ACMD(do_deathbeam)
           }
           hurt(0, 0, ch, vict, NULL, 0, 1);
           if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
 
           return;
@@ -1180,7 +1180,7 @@ ACMD(do_deathbeam)
       }
       hurt(0, 0, ch, vict, NULL, 0, 1);
       if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
       }
       return;
     } else {
@@ -1199,7 +1199,7 @@ ACMD(do_deathbeam)
           dam_eq_loc(vict, 4);
           /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
           if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
           break;
         case 2: /* Critical */
@@ -1211,7 +1211,7 @@ ACMD(do_deathbeam)
           dam_eq_loc(vict, 3);
           /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
           if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
           break;
         case 3:
@@ -1225,7 +1225,7 @@ ACMD(do_deathbeam)
           dam_eq_loc(vict, 4);
           /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
           if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
           break;
         case 4: /* Weak */
@@ -1237,7 +1237,7 @@ ACMD(do_deathbeam)
           dam_eq_loc(vict, 1);
           /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
           if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
           break;
         case 5: /* Weak 2 */
@@ -1249,15 +1249,15 @@ ACMD(do_deathbeam)
           dam_eq_loc(vict, 2);
           /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
           if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
           break;
       }
-      if (char_get_skill(ch, SKILL_DEATHBEAM) >= 100 && GET_HIT(vict) >= 2) {
+      if (char_get_skill(ch, SKILL_DEATHBEAM) >= 100 && getCurPL(vict) >= 2) {
         decCurLF(ch, dmg * .4, -1);
-      } else if (char_get_skill(ch, SKILL_DEATHBEAM) >= 60 && GET_HIT(vict) >= 2) {
+      } else if (char_get_skill(ch, SKILL_DEATHBEAM) >= 60 && getCurPL(vict) >= 2) {
         decCurLF(ch, dmg * .2, -1);
-      } else if (char_get_skill(ch, SKILL_DEATHBEAM) >= 40 && GET_HIT(vict) >= 2) {
+      } else if (char_get_skill(ch, SKILL_DEATHBEAM) >= 40 && getCurPL(vict) >= 2) {
         decCurLF(ch, dmg * .05, -1);
       }
       if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
@@ -1282,7 +1282,7 @@ ACMD(do_deathbeam)
     hurt(0, 0, ch, NULL, obj, dmg, 0);
     pcost(ch, attperc, 0);
     if (char_get_skills_perf(ch, SKILL_DEATHBEAM) == 3) {
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
     }
 
   } else {

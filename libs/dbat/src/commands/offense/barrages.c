@@ -57,11 +57,11 @@ ACMD(do_pbarrage)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -99,7 +99,7 @@ ACMD(do_pbarrage)
 
     if (!tech_handle_zanzoken(ch, vict, "Psychic Barrage")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
 
       return;
     }
@@ -111,7 +111,7 @@ ACMD(do_pbarrage)
           act("@WYou move quickly and block @C$n's@W psychic barrage!@n", FALSE, ch, 0, vict, TO_VICT);
           act("@C$N@W moves quickly and blocks @c$n's@W psychic barrage!@n", FALSE, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 31, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -275,11 +275,11 @@ ACMD(do_scatter)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -333,7 +333,7 @@ ACMD(do_scatter)
 
     if (!tech_handle_zanzoken(ch, vict, "Scatter Shot")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -344,7 +344,7 @@ ACMD(do_scatter)
           act("@WYou move quickly and block every kiball of @C$n's@W scatter shot!@n", FALSE, ch, 0, vict, TO_VICT);
           act("@C$N@W moves quickly and blocks every kiball of @c$n's@W scatter shot!@n", FALSE, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 35, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -494,11 +494,11 @@ ACMD(do_kakusanha)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -514,7 +514,7 @@ ACMD(do_kakusanha)
     if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
       continue;
     }
-    if (GET_HIT(vict) <= 0) {
+    if (getCurPL(vict) <= 0) {
       continue;
     }
     if (char_aff_flagged(vict, AFF_GROUP) && !char_is_npc(vict)) {
@@ -580,7 +580,7 @@ ACMD(do_kakusanha)
       if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
         continue;
       }
-      if (GET_HIT(vict) <= 0) {
+      if (getCurPL(vict) <= 0) {
         continue;
       }
       if (hits >= 5) {
@@ -594,7 +594,7 @@ ACMD(do_kakusanha)
         act("@cYou disappear, avoiding the beam chasing you!@n", FALSE, ch, 0, vict, TO_VICT);
         act("@C$N@c disappears, avoiding the beam chasing $M!@n", FALSE, ch, 0, vict, TO_NOTVICT);
         char_aff_set(vict, AFF_ZANZOKEN, false);
-        pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+        pcost(vict, 0, getEffMaxPL(vict) / 200);
         hurt(0, 0, ch, vict, NULL, 0, 1);
         continue;
       } else if (dge + rand_number(-10, 5) > skill) {
@@ -765,11 +765,11 @@ ACMD(do_renzo)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -837,7 +837,7 @@ ACMD(do_renzo)
         pcost(ch, attperc * 0.5, 0);
       else
         pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
 
       return;
     }
@@ -885,7 +885,7 @@ ACMD(do_renzo)
             pcost(ch, attperc * 0.5, 0);
           else
             pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+          pcost(vict, 0, getEffMaxPL(vict) / 200);
 
           return;
         } else if (blk > axion_dice(10)) {
@@ -898,7 +898,7 @@ ACMD(do_renzo)
             pcost(ch, attperc * 0.5, 0);
           else
             pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 12, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -1048,11 +1048,11 @@ ACMD(do_tsuihidan)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -1105,7 +1105,7 @@ ACMD(do_tsuihidan)
     /*===================*/
 
     if (!tech_handle_zanzoken(ch, vict, "Tsuihidan")) {
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       dodge_ki(ch, vict, 1, 11, skill, SKILL_TSUIHIDAN); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                                Num 2: [ Number of attack for damtype ]*/
@@ -1123,7 +1123,7 @@ ACMD(do_tsuihidan)
           act("@C$N@W deflects your tsuihidan, sending it flying away!@n", TRUE, ch, 0, vict, TO_CHAR);
           act("@WYou deflect @C$n's@W tsuihidan sending it flying away!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@C$N@W deflects @c$n's@W tsuihidan sending it flying away!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+          pcost(vict, 0, getEffMaxPL(vict) / 200);
 
           parry_ki(attperc, ch, vict, "tsuihidan", prob, perc, skill, 11);
           /*      User/target/skill name/skill/hurt type */
@@ -1135,7 +1135,7 @@ ACMD(do_tsuihidan)
           act("@WYou move quickly and block @C$n's@W tsuihidan!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@C$N@W moves quickly and blocks @c$n's@W tsuihidan!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 11, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);

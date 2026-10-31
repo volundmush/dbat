@@ -107,7 +107,7 @@ ACMD(do_mimic)
 
   int prob = char_get_skill(ch, SKILL_MIMIC), perc = axion_dice(0);
   double mult  = 1 / prob;
-  int64_t cost = GET_MAX_MANA(ch) * mult;
+  int64_t cost = getMaxKI(ch) * mult;
 
   if (race == ch->mimic) {
     send_to_char(ch, "You are already mimicing that race. To stop enter 'mimic stop'\r\n");
@@ -124,8 +124,8 @@ ACMD(do_mimic)
     char buf[MAX_STRING_LENGTH];
     ch->mimic = race;
     decCurKI(ch, cost, 0);
-    sprintf(buf, "@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be %s @M%s!@n", AN(RACE(ch)), LRACE(ch));
-    send_to_char(ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be %s %s.@n\r\n", AN(RACE(ch)), LRACE(ch));
+    sprintf(buf, "@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be %s @M%s!@n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
+    send_to_char(ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be %s %s.@n\r\n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
     act(buf, TRUE, ch, 0, 0, TO_ROOM);
     return;
   }
@@ -747,7 +747,7 @@ ACMD(do_intro)
   if (readIntro(vict, ch) == 2) {
     send_to_char(ch, "There seems to have been an error, report this to Iovan.\r\n");
     return;
-  } else if (readIntro(ch, vict) == 1 && strstr(RACE(vict), arg)) {
+  } else if (readIntro(ch, vict) == 1 && strstr(juggleRaceName(vict, true), arg)) {
     send_to_char(ch, "You have already dubbed them a name. If you want to redub them target the name you know them by.\r\n");
     return;
   } else {
@@ -812,7 +812,7 @@ ACMD(do_rptrans)
   ch->desc->rpp -= amt;
   userWrite(ch->desc, 0, 0, 0, "index");
   send_to_char(ch, "@WYou exchange @C%d@W RPP to user @c%s@W for a warm fuzzy feeling.\r\n", amt, CAP(arg));
-  mudlog(LOG_NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "EXCHANGE: %s gave %d RPP to user %s", char_get_name(ch), amt, arg);
+  mudlog(LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(ch)), TRUE, "EXCHANGE: %s gave %d RPP to user %s", char_get_name(ch), amt, arg);
   save_char(ch);
 }
 
@@ -847,7 +847,7 @@ ACMD(do_rpbank)
   char_set_rbank(ch, char_get_rbank(ch) + (amt));
   ch->desc->rbank += amt;
   send_to_char(ch, "You send %d to your RPP Bank. Your total is now %d.\r\n", amt, char_get_rbank(ch));
-  mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "RPP Bank: %s has put %d RPP into their bank", char_get_name(ch), amt);
+  mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "RPP Bank: %s has put %d RPP into their bank", char_get_name(ch), amt);
 }
 
 /* Rillao: An attempt was made. */
@@ -903,7 +903,7 @@ ACMD(do_rbanktrans)
   ch->desc->rbank -= amt;
   userWrite(ch->desc, 0, 0, 0, "index");
   send_to_char(ch, "@wWELL @xGOLLY @xGEE @xWILLICKERS@x! @wYOU @RZ@YIM @RZ@YAMMED @C%d @wRIPROOZLES TO @C%s!@n\r\n", amt, CAP(arg));
-  mudlog(LOG_NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "EXCHANGE: %s gave %d Banked RPP to user %s", char_get_name(ch), amt, arg);
+  mudlog(LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(ch)), TRUE, "EXCHANGE: %s gave %d Banked RPP to user %s", char_get_name(ch), amt, arg);
   save_char(ch);
 }
 

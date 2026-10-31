@@ -332,7 +332,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
     else if (desc_get_connected(d) == CON_HEDIT)
       mudlog(LOG_CMP, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing help files.", char_get_name(d->character));
     else
-      mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing zone %d allowed zone %d", char_get_name(d->character), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(d->character));
+      mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing zone %d allowed zone %d", char_get_name(d->character), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(d->character));
 
     desc_set_connected(d, CON_PLAYING);
   }
@@ -416,7 +416,7 @@ int can_edit_zone(struct char_data *ch, zone_rnum rnum)
     return (TRUE);
 
   /* no access if you haven't been assigned a zone */
-  if (GET_OLC_ZONE(ch) == NOWHERE)
+  if (char_get_olc_zone(ch) == NOWHERE)
     return FALSE;
 
   /* no access if you're not at least LVL_BUILDER */
@@ -424,7 +424,7 @@ int can_edit_zone(struct char_data *ch, zone_rnum rnum)
     return FALSE;
 
   /* always access if you're assigned to this zone */
-  if (real_zone(GET_OLC_ZONE(ch)) == rnum)
+  if (real_zone(char_get_olc_zone(ch)) == rnum)
     return TRUE;
 
   return (FALSE);
@@ -433,9 +433,9 @@ int can_edit_zone(struct char_data *ch, zone_rnum rnum)
 void send_cannot_edit(struct char_data *ch, zone_vnum zone)
 {
   send_to_char(ch, "You do not have permission to edit zone %d.", zone);
-  if (GET_OLC_ZONE(ch) != NOWHERE)
-    send_to_char(ch, "  Try zone %d.", GET_OLC_ZONE(ch));
+  if (char_get_olc_zone(ch) != NOWHERE)
+    send_to_char(ch, "  Try zone %d.", char_get_olc_zone(ch));
   send_to_char(ch, "\r\n");
   mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "OLC: %s tried to edit zone %d allowed zone %d",
-         char_get_name(ch), zone, GET_OLC_ZONE(ch));
+         char_get_name(ch), zone, char_get_olc_zone(ch));
 }

@@ -271,7 +271,7 @@ void obj_to_char(struct obj_data *object, struct char_data *ch)
     char_set_carry_items(ch, char_get_carry_items(ch) + 1);
     if ((char_get_kaioken(ch) <= 0 && !char_aff_flagged(ch, AFF_METAMORPH)) && !obj_extra_flagged(object, ITEM_THROW)) {
 
-    } else if (GET_HIT(ch) > getEffMaxPL(ch)) {
+    } else if (getCurPL(ch) > getEffMaxPL(ch)) {
       if (char_get_kaioken(ch) > 0) {
         send_to_char(ch, "@RThe strain of the weight has reduced your kaioken somewhat!@n\n");
       } else if (char_aff_flagged(ch, AFF_METAMORPH)) {

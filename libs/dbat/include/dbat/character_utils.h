@@ -21,30 +21,83 @@
 #include "class.h"
 #include "weather.h"
 
-// Legacy Macros
+/* Player-only data (player_specials). On an NPC these log the caller with a backtrace; reads then give
+ * 0/NULL and writes are ignored. */
+bitvector_t *char_get_pref(const struct char_data *ch);
+int char_get_gauntlet(const struct char_data *ch);
+void char_set_gauntlet(struct char_data *ch, int v);
+int char_get_tlevel(const struct char_data *ch);
+void char_set_tlevel(struct char_data *ch, int v);
+struct char_data *char_get_carrying(const struct char_data *ch);
+void char_set_carrying(struct char_data *ch, struct char_data *v);
+struct char_data *char_get_carried_by(const struct char_data *ch);
+void char_set_carried_by(struct char_data *ch, struct char_data *v);
+int char_get_racial_pref(const struct char_data *ch);
+void char_set_racial_pref(struct char_data *ch, int v);
+int8_t char_get_conditions(const struct char_data *ch, int i);
+void char_set_conditions(struct char_data *ch, int i, int8_t v);
+room_vnum char_get_load_room(const struct char_data *ch);
+void char_set_load_room(struct char_data *ch, room_vnum v);
+int char_get_practice_points(const struct char_data *ch);
+void char_set_practice_points(struct char_data *ch, int v);
+int char_get_ability_trains(const struct char_data *ch);
+void char_set_ability_trains(struct char_data *ch, int v);
+int char_get_trainstr(const struct char_data *ch);
+void char_set_trainstr(struct char_data *ch, int v);
+int char_get_trainint(const struct char_data *ch);
+void char_set_trainint(struct char_data *ch, int v);
+int char_get_traincon(const struct char_data *ch);
+void char_set_traincon(struct char_data *ch, int v);
+int char_get_trainwis(const struct char_data *ch);
+void char_set_trainwis(struct char_data *ch, int v);
+int char_get_trainagl(const struct char_data *ch);
+void char_set_trainagl(struct char_data *ch, int v);
+int char_get_trainspd(const struct char_data *ch);
+void char_set_trainspd(struct char_data *ch, int v);
+int16_t char_get_invis_level(const struct char_data *ch);
+void char_set_invis_level(struct char_data *ch, int16_t v);
+int char_get_wimp_level(const struct char_data *ch);
+void char_set_wimp_level(struct char_data *ch, int v);
+int8_t char_get_freeze_level(const struct char_data *ch);
+void char_set_freeze_level(struct char_data *ch, int8_t v);
+uint8_t char_get_bad_pws(const struct char_data *ch);
+void char_set_bad_pws(struct char_data *ch, uint8_t v);
+char *char_get_poofin(const struct char_data *ch);
+void char_set_poofin(struct char_data *ch, char *v);
+char *char_get_poofout(const struct char_data *ch);
+void char_set_poofout(struct char_data *ch, char *v);
+int char_get_olc_zone(const struct char_data *ch);
+void char_set_olc_zone(struct char_data *ch, int v);
+struct alias_data *char_get_aliases(const struct char_data *ch);
+void char_set_aliases(struct char_data *ch, struct alias_data *v);
+int32_t char_get_last_tell(const struct char_data *ch);
+void char_set_last_tell(struct char_data *ch, int32_t v);
+char *char_get_host(const struct char_data *ch);
+void char_set_host(struct char_data *ch, char *v);
+struct txt_block *char_get_comm_hist(const struct char_data *ch, int i);
+void char_set_comm_hist(struct char_data *ch, int i, struct txt_block *v);
+int char_get_speaking(const struct char_data *ch);
+void char_set_speaking(struct char_data *ch, int v);
+int char_get_feat_points(const struct char_data *ch);
+void char_set_feat_points(struct char_data *ch, int v);
+uint8_t char_get_page_length(const struct char_data *ch);
+void char_set_page_length(struct char_data *ch, uint8_t v);
 
-/*
- * Accessing player specific data structures on a mobile is a very bad thing
- * to do.  Consider that changing these variables for a single mob will change
- * it for every other single mob in the game.  If we didn't specifically check
- * for it, 'wimpy' would be an extremely bad thing for a mob to do, as an
- * example.  If you really couldn't care less, change this to a '#if 0'.
- */
-#if 1
-/* Subtle bug in the '#var', but works well for now. */
-#define CHECK_PLAYER_SPECIAL(ch, var) \
-  (*(((ch)->player_specials == &dummy_mob) ? (mud_log("OHNO: Mob using '" #var "' at %s:%d.", __FILE__, __LINE__), &(var)) : &(var)))
-#else
-#define CHECK_PLAYER_SPECIAL(ch, var) (var)
-#endif
+/* Derived character values that used to be macros. */
+int char_get_age_years(struct char_data *ch);
+int char_can_carry_n(const struct char_data *ch);
+const char *char_true_race_name(const struct char_data *ch);
+const char *char_sensei_name(const struct char_data *ch);
+const char *char_sensei_name_lower(const struct char_data *ch);
+const char *char_sensei_style(const struct char_data *ch);
+const char *char_class_abbr(const struct char_data *ch);
+const char *char_race_abbr(const struct char_data *ch);
 
 bitvector_t *char_get_act(const struct char_data *ch);
-#define PRF_FLAGS(ch) CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->pref))
 bitvector_t *char_get_affected_by(const struct char_data *ch);
 bitvector_t *char_get_admflags(const struct char_data *ch);
 
 /* Return the gauntlet highest room for ch */
-#define GET_GAUNTLET(ch) CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->gauntlet))
 
 bool char_is_npc(const struct char_data *ch);
 bool char_is_mob(const struct char_data *ch);
@@ -79,7 +132,6 @@ void char_set_in_room(struct char_data *ch, room_rnum v);
 zone_vnum char_in_zone(const struct char_data *ch);
 room_rnum char_get_was_in_room(const struct char_data *ch);
 void char_set_was_in_room(struct char_data *ch, room_rnum v);
-#define GET_AGE(ch) (age(ch)->year)
 
 char *char_get_pc_name(const struct char_data *ch);
 void char_set_pc_name(struct char_data *ch, char *v);
@@ -136,10 +188,6 @@ int char_get_pc_height(struct char_data *ch);
 int char_get_pc_weight(struct char_data *ch);
 int8_t char_get_sex(const struct char_data *ch);
 void char_set_sex(struct char_data *ch, int8_t v);
-#define GET_TLEVEL(ch)  ((ch)->player_specials->tlevel)
-#define CARRYING(ch)    ((ch)->player_specials->carrying)
-#define CARRIED_BY(ch)  ((ch)->player_specials->carried_by)
-#define RACIAL_PREF(ch) ((ch)->player_specials->racial_pref)
 int char_get_rp(const struct char_data *ch);
 void char_set_rp(struct char_data *ch, int v);
 int char_get_rbank(const struct char_data *ch);
@@ -208,10 +256,6 @@ int64_t char_get_chargeto(const struct char_data *ch);
 void char_set_chargeto(struct char_data *ch, int64_t v);
 int char_get_armor(const struct char_data *ch);
 void char_set_armor(struct char_data *ch, int v);
-#define GET_HIT(ch)      (getCurPL(ch))
-#define GET_MAX_HIT(ch)  (getEffMaxPL(ch))
-#define GET_MAX_MOVE(ch) (getMaxST(ch))
-#define GET_MAX_MANA(ch) (getMaxKI(ch))
 int64_t char_get_ki(const struct char_data *ch);
 void char_set_ki(struct char_data *ch, int64_t v);
 int64_t char_get_max_ki(const struct char_data *ch);
@@ -397,31 +441,6 @@ void char_set_absorbs(struct char_data *ch, int v);
 time_t char_get_lastint(const struct char_data *ch);
 void char_set_lastint(struct char_data *ch, time_t v);
 
-#define GET_COND(ch, i)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->conditions[(i)]))
-#define GET_LOADROOM(ch)       CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->load_room))
-#define GET_PRACTICES(ch, ...) CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->practice_points))
-#define GET_TRAINS(ch)         CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->ability_trains))
-#define GET_TRAINSTR(ch)       CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainstr))
-#define GET_TRAININT(ch)       CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainint))
-#define GET_TRAINCON(ch)       CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->traincon))
-#define GET_TRAINWIS(ch)       CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainwis))
-#define GET_TRAINAGL(ch)       CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainagl))
-#define GET_TRAINSPD(ch)       CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->trainspd))
-#define GET_INVIS_LEV(ch)      CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->invis_level))
-#define GET_WIMP_LEV(ch)       CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->wimp_level))
-#define GET_FREEZE_LEV(ch)     CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->freeze_level))
-#define GET_BAD_PWS(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->bad_pws))
-#define GET_TALK(ch, i)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->talks[i]))
-#define POOFIN(ch)             CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->poofin))
-#define POOFOUT(ch)            CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->poofout))
-#define GET_OLC_ZONE(ch)       CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->olc_zone))
-#define GET_LAST_OLC_TARG(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_olc_targ))
-#define GET_LAST_OLC_MODE(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_olc_mode))
-#define GET_ALIASES(ch)        CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->aliases))
-#define GET_LAST_TELL(ch)      CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_tell))
-#define GET_HOST(ch)           CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->host))
-#define GET_HISTORY(ch, i)     CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->comm_hist[i]))
-
 int8_t char_get_skills_mod(const struct char_data *ch, int i);
 void char_set_skills_mod(struct char_data *ch, int i, int8_t v);
 int8_t char_get_skills_perf(const struct char_data *ch, int i);
@@ -455,8 +474,6 @@ void char_set_cooldown(struct char_data *ch, int v);
           (GET_ADD(ch) <= 99) ? 29 :  30 ) ) )                   \
         ) */
 
-#define CAN_CARRY_W(ch) getMaxCarryWeight(ch)
-#define CAN_CARRY_N(ch) 50
 bool char_is_awake(const struct char_data *ch);
 bool char_can_see_in_dark(const struct char_data *ch);
 
@@ -471,17 +488,9 @@ int char_get_arenawatch(const struct char_data *ch);
 void char_set_arenawatch(struct char_data *ch, int v);
 
 /* These three deprecated. */
-#define WAIT_STATE(ch, cycle)   \
-  do {                          \
-    char_set_wait(ch, (cycle)); \
-  } while (0)
 /* New, preferred macro. */
 int char_get_wait(const struct char_data *ch);
 void char_set_wait(struct char_data *ch, int v);
-
-#define SENDOK(ch) (((ch)->desc || SCRIPT_CHECK((ch), MTRIG_ACT)) && \
-                    (to_sleeping || char_is_awake(ch)) &&            \
-                    !char_plr_flagged((ch), PLR_WRITING))
 
 bool char_light_ok(const struct char_data *sub);
 
@@ -529,16 +538,6 @@ void char_set_exit(struct char_data *ch, int door, struct room_direction_data *v
 struct room_direction_data *char_get_exit2(const struct char_data *ch, int door);
 
 bool char_can_go(const struct char_data *ch, int door);
-
-#define RACE(ch)              (juggleRaceName(ch, true))
-#define LRACE(ch)             (juggleRaceName(ch, false))
-#define TRUE_RACE(ch)         (pc_race_types[ch->race])
-#define SENSEI_NAME(ch)       (pc_class_types[ch->chclass])
-#define SENSEI_NAME_LOWER(ch) (class_names[ch->chclass])
-#define SENSEI_STYLE(ch)      (sensei_style[ch->chclass])
-
-#define CLASS_ABBR(ch) (class_abbrevs[ch->chclass])
-#define RACE_ABBR(ch)  (race_abbrevs[ch->race])
 
 bool char_is_roshi(const struct char_data *ch);
 bool char_is_piccolo(const struct char_data *ch);
@@ -631,26 +630,12 @@ bool char_outside_roomflag(const struct char_data *ch);
 
 bool char_outside_secttype(const struct char_data *ch);
 
-#define SPEAKING(ch) ((ch)->player_specials->speaking)
-
 char *char_hshr(const struct char_data *ch);
 char *char_hssh(const struct char_data *ch);
 char *char_hmhr(const struct char_data *ch);
 char *char_mafe(const struct char_data *ch);
 
 /* returns the number of spells per slot */
-#define GET_SPELL_LEVEL(ch, i) ((ch)->player_specials->spell_level[i])
-
-#define GET_BAB(ch) char_get_accuracy(ch)
-#define SET_FEAT(ch, i, value)                          \
-  do {                                                  \
-    CHECK_PLAYER_SPECIAL((ch), (ch)->feats[i]) = value; \
-  } while (0)
-#define GET_FEAT_POINTS(ch) (ch->player_specials->feat_points)
-
-#define GET_MURDER(ch) CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->murder))
-
-#define GET_PAGE_LENGTH(ch) CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->page_length))
 
 int roll_stats(struct char_data *ch, int type, int bonus);
 const char *juggleRaceName(char_data *ch, bool capitalized);

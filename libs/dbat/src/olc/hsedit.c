@@ -897,10 +897,10 @@ ACMD(do_oasis_hsedit)
 
     if (is_number(buf2))
       number = atoi(buf2);
-    else if (GET_OLC_ZONE(ch) > 0) {
+    else if (char_get_olc_zone(ch) > 0) {
       zone_rnum zlok;
 
-      if ((zlok = real_zone(GET_OLC_ZONE(ch))) == NOWHERE)
+      if ((zlok = real_zone(char_get_olc_zone(ch))) == NOWHERE)
         number = NOWHERE;
       else
         number = genolc_zone_bottom(zlok);
@@ -972,9 +972,9 @@ ACMD(do_oasis_hsedit)
 
   /****************************************************************************/
   if (!can_edit_zone(ch, OLC_ZNUM(d))) {
-    send_to_char(ch, " You do not have permission to edit zone %d. Try zone %d.\r\n", zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+    send_to_char(ch, " You do not have permission to edit zone %d. Try zone %d.\r\n", zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
     mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "OLC: %s tried to edit zone %d allowed zone %d",
-           char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+           char_get_name(ch), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
 
     /**************************************************************************/
     /** Free the descriptor's OLC structure.                                **/
@@ -992,7 +992,7 @@ ACMD(do_oasis_hsedit)
   if (save) {
     send_to_char(ch, "Saving all houses in zone %d.\r\n",
                  zone_table[OLC_ZNUM(d)].number);
-    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE,
+    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), TRUE,
            "OLC: %s saves house info for zone %d.", char_get_name(ch),
            zone_table[OLC_ZNUM(d)].number);
 
@@ -1046,5 +1046,5 @@ ACMD(do_oasis_hsedit)
 
   /****************************************************************************/
   mudlog(LOG_CMP, ADMLVL_BUILDER, TRUE, "OLC: (hsedit) %s starts editing zone %d allowed zone %d",
-         char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+         char_get_name(ch), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
 }

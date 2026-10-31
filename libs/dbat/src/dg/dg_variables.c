@@ -606,7 +606,7 @@ in the vault (vnum: 453) now and then. you can just use
             else
               strcpy(str, "1");
           } else if (!strcasecmp(field, "carry")) {
-            if (!char_is_npc(c) && CARRYING(c))
+            if (!char_is_npc(c) && char_get_carrying(c))
               strcpy(str, "1");
             else
               strcpy(str, "0");
@@ -614,7 +614,7 @@ in the vault (vnum: 453) now and then. you can just use
             strcpy(str, "0");
           } else if (!strcasecmp(field, "class")) {
             if (!char_is_npc(c))
-              snprintf(str, slen, "%s", SENSEI_NAME(c));
+              snprintf(str, slen, "%s", char_sensei_name(c));
             else
               snprintf(str, slen, "blank");
           }
@@ -664,9 +664,9 @@ in the vault (vnum: 453) now and then. you can just use
           } else if (!strcasecmp(field, "drunk")) {
             if (subfield && *subfield) {
               int addition       = atoi(subfield);
-              GET_COND(c, DRUNK) = MAX(-1, MIN(addition, 24));
+              char_set_conditions(c, DRUNK, MAX(-1, MIN(addition, 24)));
             }
-            snprintf(str, slen, "%d", GET_COND(c, DRUNK));
+            snprintf(str, slen, "%d", char_get_conditions(c, DRUNK));
           }
           break;
         case 'e':
@@ -751,13 +751,13 @@ in the vault (vnum: 453) now and then. you can just use
 
               update_pos(c);
             }
-            snprintf(str, slen, "%" I64T "", GET_HIT(c));
+            snprintf(str, slen, "%" I64T "", getCurPL(c));
           } else if (!strcasecmp(field, "hunger")) {
             if (subfield && *subfield) {
               int addition        = atoi(subfield);
-              GET_COND(c, HUNGER) = MAX(-1, MIN(addition, 24));
+              char_set_conditions(c, HUNGER, MAX(-1, MIN(addition, 24)));
             }
-            snprintf(str, slen, "%d", GET_COND(c, HUNGER));
+            snprintf(str, slen, "%d", char_get_conditions(c, HUNGER));
           }
           break;
         case 'i':
@@ -837,7 +837,7 @@ in the vault (vnum: 453) now and then. you can just use
             if (subfield && *subfield) {
               //GET_MAX_HIT(c) = MAX(GET_MAX_HIT(c) + addition, 1);
             }
-            snprintf(str, slen, "%" I64T "", GET_MAX_HIT(c));
+            snprintf(str, slen, "%" I64T "", getEffMaxPL(c));
           }
 
           else if (!strcasecmp(field, "mana")) {
@@ -854,7 +854,7 @@ in the vault (vnum: 453) now and then. you can just use
             if (subfield && *subfield) {
               //GET_MAX_MANA(c) = MAX(GET_MAX_MANA(c) + addition, 1);
             }
-            snprintf(str, slen, "%" I64T "", GET_MAX_MANA(c));
+            snprintf(str, slen, "%" I64T "", getMaxKI(c));
           }
 
           else if (!strcasecmp(field, "move")) {
@@ -873,7 +873,7 @@ in the vault (vnum: 453) now and then. you can just use
             if (subfield && *subfield) {
               //GET_MAX_MOVE(c) = MAX(GET_MAX_MOVE(c) + addition, 1);
             }
-            snprintf(str, slen, "%" I64T "", GET_MAX_MOVE(c));
+            snprintf(str, slen, "%" I64T "", getMaxST(c));
           }
 
           else if (!strcasecmp(field, "master")) {
@@ -915,9 +915,9 @@ in the vault (vnum: 453) now and then. you can just use
             }
             if (subfield && *subfield) {
               int addition                        = atoi(subfield);
-              GET_PRACTICES(c, char_get_class(c)) = MAX(0, GET_PRACTICES(c, char_get_class(c)) + addition);
+              char_set_practice_points(c, MAX(0, char_get_practice_points(c) + addition));
             }
-            snprintf(str, slen, "%d", GET_PRACTICES(c, char_get_class(c)));
+            snprintf(str, slen, "%d", char_get_practice_points(c));
           } else if (!strcasecmp(field, "plr")) {
             if (subfield && *subfield) {
               int plr = get_flag_by_name(player_bits, subfield);
@@ -944,7 +944,7 @@ in the vault (vnum: 453) now and then. you can just use
             snprintf(str, slen, "%c%d", UID_CHAR,
                      (char_get_in_room(c) != NOWHERE) ? world[char_get_in_room(c)].number + ROOM_ID_BASE : ROOM_ID_BASE);
           } else if (!strcasecmp(field, "race")) {
-            snprintf(str, slen, "%s", TRUE_RACE(c));
+            snprintf(str, slen, "%s", char_true_race_name(c));
           } else if (!strcasecmp(field, "rpp")) {
             if (subfield && *subfield) {
               int addition = atoi(subfield);
@@ -1004,9 +1004,9 @@ in the vault (vnum: 453) now and then. you can just use
           if (!strcasecmp(field, "thirst")) {
             if (subfield && *subfield) {
               int addition        = atoi(subfield);
-              GET_COND(c, THIRST) = MAX(-1, MIN(addition, 24));
+              char_set_conditions(c, THIRST, MAX(-1, MIN(addition, 24)));
             }
-            snprintf(str, slen, "%d", GET_COND(c, THIRST));
+            snprintf(str, slen, "%d", char_get_conditions(c, THIRST));
           } else if (!strcasecmp(field, "tnl")) {
             snprintf(str, slen, "%d", level_exp(c, char_get_level(c) + 1));
           }

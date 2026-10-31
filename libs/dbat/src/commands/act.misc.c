@@ -68,7 +68,7 @@ ACMD(do_spiritcontrol)
       send_to_char(ch, "You have already concentrated and have full control of your spirit.\r\n");
       return;
     } else {
-      int64_t cost = GET_MAX_MANA(ch) * 0.2;
+      int64_t cost = getMaxKI(ch) * 0.2;
       if ((getCurST(ch)) < cost) {
         send_to_char(ch, "You need at least 20%s of your max ki in stamina to prepare this skill.\r\n", "%");
         return;
@@ -213,7 +213,7 @@ ACMD(do_multiform)
   }
 
   if (!strcasecmp(arg, "split")) {
-    int64_t cost = (GET_MAX_MANA(ch) * 0.005) + (GET_MAX_MOVE(ch) * 0.005) + 2;
+    int64_t cost = (getMaxKI(ch) * 0.005) + (getMaxST(ch) * 0.005) + 2;
     int penalty  = 0;
 
     if (char_get_fighting(ch)) {
@@ -366,7 +366,7 @@ static void apply_shadow_sitch(struct char_data *ch, struct char_data *vict, int
   act("@c$n's@C forboding music has caused @c$N's@C shadows to stitch into $S body, slowing $S actions!@n", TRUE, ch, 0, vict, TO_NOTVICT);
   decCurKI(ch, getPercentOfMaxKI(ch, .001) + skill, 0);
   if (!char_is_npc(vict)) {
-    WAIT_STATE(vict, PULSE_2SEC);
+    char_set_wait(vict, PULSE_2SEC);
   } else {
     assign_affect(vict, AFF_SHADOW_STITCH, SKILL_MYSTICMUSIC, -1, 0, 0, 0, 0, 0, -2);
   }
@@ -419,7 +419,7 @@ static void resolve_song(struct char_data *ch)
           if ((char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) || vict == ch) {
             if (ch == vict->master || ch->master == vict || ch->master == vict->master || vict == ch) {
               if (skill > diceroll) {
-                int64_t restore = (10 * skill) + ((GET_MAX_MANA(ch) * 0.0004) * skill);
+                int64_t restore = (10 * skill) + ((getMaxKI(ch) * 0.0004) * skill);
                 if (vict != ch) {
                   act("@CYour skillfully playing of the Song of Safety has an effect on @c$N@C.@n", TRUE, ch, 0, vict, TO_CHAR);
                 } else {
@@ -625,9 +625,9 @@ static void resolve_song(struct char_data *ch)
                 act("@CYour triumphant and soaring music has powered a barrier around yourself@C!@n", TRUE, ch, 0, vict, TO_CHAR);
               }
               act("@c$n's@C triumphant and soaring music has powered a barrier around @c$N@C!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-              char_set_barrier(vict, char_get_barrier(vict) + (((GET_MAX_MANA(ch) * 0.005) * (skill * 0.25)) + skill));
-              if (char_get_barrier(vict) >= GET_MAX_MANA(vict) * 0.75) {
-                char_set_barrier(vict, GET_MAX_MANA(vict) * 0.75);
+              char_set_barrier(vict, char_get_barrier(vict) + (((getMaxKI(ch) * 0.005) * (skill * 0.25)) + skill));
+              if (char_get_barrier(vict) >= getMaxKI(vict) * 0.75) {
+                char_set_barrier(vict, getMaxKI(vict) * 0.75);
               }
               if (!char_aff_flagged(vict, AFF_SANCTUARY)) {
                 char_aff_set(vict, AFF_SANCTUARY, true);
@@ -740,7 +740,7 @@ ACMD(do_song)
       send_to_char(ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
       return;
     } else {
-      int64_t cost = GET_MAX_MANA(ch) * 0.01;
+      int64_t cost = getMaxKI(ch) * 0.01;
       int modifier = 1;
       if (!strcasecmp(arg, "shielding")) {
         modifier = 20;
@@ -887,7 +887,7 @@ ACMD(do_preference)
 
 ACMD(do_moondust)
 {
-  int64_t cost = GET_MAX_MOVE(ch) * 0.02, heal = 0;
+  int64_t cost = getMaxST(ch) * 0.02, heal = 0;
 
   /* Can they do the technique? */
 
@@ -904,7 +904,7 @@ ACMD(do_moondust)
   cost += (getMaxLF(ch)) * 0.02;
   heal = cost * 3;
 
-  if (GET_HIT(ch) >= (getEffMaxPL(ch)) * 0.8) {
+  if (getCurPL(ch) >= (getEffMaxPL(ch)) * 0.8) {
     cost = cost * 0.5;
   }
 
@@ -919,12 +919,12 @@ ACMD(do_moondust)
     act("@GYou spread your wings and begin to concentrate. Your wings begin to glow a soft sea green color. As you prepare to release a cloud of your charged wing dust you lose focus and the power you had begun to charge into your wings dissipates.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n@G spreads $s wings and seems to concentrate for a moment. Suddenly $s wings begin to glow a soft sea green color. This soft glow grows brighter for a second before fading completely.@n", TRUE, ch, 0, 0, TO_ROOM);
     decCurST(ch, cost, 0);
-    WAIT_STATE(ch, PULSE_1SEC);
+    char_set_wait(ch, PULSE_1SEC);
     return;
   }
   incCurHealth(ch, heal, true);
   decCurST(ch, cost, 0);
-  WAIT_STATE(ch, PULSE_1SEC);
+  char_set_wait(ch, PULSE_1SEC);
 
   act("@GYou spread your wings and begin to concentrate. Your wings begin to glow a soft sea green color. As your wings grow brighter you focus your charged bio energy in a shockwave the unleashes a cloud of glowing green dust. You breath in the dust and feel it rejuvinate your body's cells!@n", TRUE, ch, 0, 0, TO_CHAR);
   act("@g$n@G spreads $s wings and seems to concentrate for a moment. Suddenly $s wings begin to glow a soft sea green color. This soft glow grows brighter and as $e flexes $s wings to their full extent a shockwave of energy explodes outward. Carried on this shockwave is a cloud of glowing dust! You notice some of the dust being breathed in by $s!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -968,7 +968,7 @@ ACMD(do_shell)
     return;
   }
 
-  if ((getCurST(ch)) < GET_MAX_MOVE(ch) * 0.2) {
+  if ((getCurST(ch)) < getMaxST(ch) * 0.2) {
     send_to_char(ch, "You do not have enough stamina to grow your armored carapace.@n\r\n");
     return;
   } else if (axion_dice(0) > char_get_aff_abils_con(ch) + rand_number(1, 10)) {
@@ -996,11 +996,11 @@ ACMD(do_liquefy)
     act("@MSuddenly large chunks of goo start to hover up slowly. These very same chunks quickly begin to fly into each other, piling on as the ball of goo grows. Suddenly @m$n@M emerges as the ball of goo takes $s shape!@n", TRUE, ch, 0, 0, TO_ROOM);
     act("@MYou begin to pull the liquid chunks of your body together. Those chunks hover upward and merge into each other until a large ball of goo is formed. Slowly your body emerges as the pieces of your body take on their old form!@n", TRUE, ch, 0, 0, TO_CHAR);
     char_aff_set(ch, AFF_LIQUEFIED, false);
-    WAIT_STATE(ch, PULSE_3SEC);
-    WAIT_STATE(ch, PULSE_3SEC);
-    WAIT_STATE(ch, PULSE_3SEC);
-    WAIT_STATE(ch, PULSE_3SEC);
-    WAIT_STATE(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
     return;
   }
 
@@ -1013,7 +1013,7 @@ ACMD(do_liquefy)
     return;
   }
 
-  if ((getCurKI(ch)) < (GET_MAX_MANA(ch) * 0.002) + 150) {
+  if ((getCurKI(ch)) < (getMaxKI(ch) * 0.002) + 150) {
     send_to_char(ch, "You do not have enough ki to manage this level of body control!\r\n");
     return;
   }
@@ -1034,13 +1034,13 @@ ACMD(do_liquefy)
     if (axion_dice(0) > char_get_level(ch)) {
       act("@MYour body starts to become loose and sag, but you lose focus and it reverts to its original shape!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@m$n@M's body starts to become loose and sag, but $e seems to return normal a moment later.@n", TRUE, ch, 0, 0, TO_ROOM);
-      decCurKI(ch, (GET_MAX_MANA(ch) * .002) + 150, 0);
+      decCurKI(ch, (getMaxKI(ch) * .002) + 150, 0);
 
       return;
     } else {
       act("@MYour body starts to become loose and sag. It continues to droop down until it begins to run down like a river of goo flowing from where your body was.@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@m$n@M's body starts to become loose and sag. Much of $s body begins to pour down and scatter around as pools of goo.@n", TRUE, ch, 0, 0, TO_ROOM);
-      decCurKI(ch, (GET_MAX_MANA(ch) * .002) + 150, 0);
+      decCurKI(ch, (getMaxKI(ch) * .002) + 150, 0);
       char_aff_set(ch, AFF_LIQUEFIED, true);
       return;
     }
@@ -1061,7 +1061,7 @@ ACMD(do_liquefy)
     if (!*arg2) {
       send_to_char(ch, "Syntax: liquefy hide\nSyntax: liquefy explode (target)\r\n");
       return;
-    } else if ((getCurKI(ch)) < (GET_MAX_MANA(ch) * 0.10) + 150) {
+    } else if ((getCurKI(ch)) < (getMaxKI(ch) * 0.10) + 150) {
       send_to_char(ch, "You do not have enough ki for that action!@n\r\n");
       return;
     } else if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
@@ -1073,37 +1073,37 @@ ACMD(do_liquefy)
     } else if (axion_dice(0) > char_get_level(ch)) {
       act("@MYour body starts to become loose and sag, but you lose focus and it reverts to its original shape!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@m$n@M's body starts to become loose and sag, but $e seems to return normal a moment later.@n", TRUE, ch, 0, 0, TO_ROOM);
-      decCurKI(ch, (GET_MAX_MANA(ch) * .002) + 150, 0);
-      WAIT_STATE(ch, PULSE_3SEC);
+      decCurKI(ch, (getMaxKI(ch) * .002) + 150, 0);
+      char_set_wait(ch, PULSE_3SEC);
       return;
     } else if (char_get_speedi(ch) < char_get_speedi(vict)) {
       act("@MYour body rapidly turns to liquid and flies for @R$N's@M open mouth! However $E easily dodges and avoids your attempt!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! However you are faster and managed to dodge the attempt.@n", TRUE, ch, 0, vict, TO_VICT);
       act("@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! However $E easily dodges and avoids @m$n's@M attempt!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      decCurKI(ch, (GET_MAX_MANA(ch) * .002) + 150, 0);
+      decCurKI(ch, (getMaxKI(ch) * .002) + 150, 0);
       if (!char_get_fighting(ch)) {
         set_fighting(ch, vict);
       }
       if (!char_get_fighting(vict)) {
         set_fighting(vict, ch);
       }
-      WAIT_STATE(ch, PULSE_3SEC);
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       return;
-    } else if (GET_HIT(ch) < GET_HIT(vict) * 2) {
+    } else if (getCurPL(ch) < getCurPL(vict) * 2) {
       act("@MYour body rapidly turns to liquid and flies for @R$N's@M open mouth! However as you force yourself in through $S mouth $E successfully resists and forces your back out!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! However you think quickly and force $m out before $e has a chance to get fully into your body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! However as $e forces $mself in through @R$N's@M mouth $E manages to resist and force @m$n@M back out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      decCurKI(ch, (GET_MAX_MANA(ch) * .002) + 150, 0);
-      int64_t dmg = GET_MAX_HIT(ch) * 0.08;
+      decCurKI(ch, (getMaxKI(ch) * .002) + 150, 0);
+      int64_t dmg = getEffMaxPL(ch) * 0.08;
       hurt(0, 0, ch, vict, NULL, dmg, 0);
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       return;
     } else {
       act("@MYour body rapidly turns to liquid and flies for @R$N's@M open mouth! As you fill $S body you expand outward until $s body explodes into a gory mess!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! As $e fills your body it begins to expand until it is unable to take the strain any longer and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! As $e forces $mself in through @R$N's@M mouth $S body begins to expand until it can't take the strain any longer and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      decCurKI(ch, (GET_MAX_MANA(ch) * .002) + 150, 0);
+      decCurKI(ch, (getMaxKI(ch) * .002) + 150, 0);
       if (char_aff_flagged(ch, AFF_GROUP)) {
         group_gain(ch, vict);
       } else {
@@ -1111,9 +1111,9 @@ ACMD(do_liquefy)
       }
       die(vict, ch);
       char_aff_set(ch, AFF_LIQUEFIED, true);
-      WAIT_STATE(ch, PULSE_3SEC);
-      WAIT_STATE(ch, PULSE_3SEC);
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       handle_cooldown(ch, 9);
       return;
     }
@@ -1641,7 +1641,7 @@ ACMD(do_extract)
         }
       }
 
-      int64_t cost = ((GET_MAX_MANA(ch) * 0.35) + 500);
+      int64_t cost = ((getMaxKI(ch) * 0.35) + 500);
 
       if (found == FALSE) {
         send_to_char(ch, "You do not have an empty bottle to put the extracted ink in.\r\n");
@@ -1651,7 +1651,7 @@ ACMD(do_extract)
       int64_t extra = 0;
 
       if (obj_get_value(bottle, 6) + 4 >= 24)
-        extra = GET_MAX_MANA(ch) * 0.5;
+        extra = getMaxKI(ch) * 0.5;
 
       cost += extra;
 
@@ -1664,7 +1664,7 @@ ACMD(do_extract)
         act("@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze. A nasty explosion of a mess is all that follows!@n", TRUE, ch, obj, 0, TO_ROOM);
         improve_skill(ch, SKILL_EXTRACT, 0);
         extract_obj(obj);
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
         return;
       } else {
         decCurKI(ch, cost, 0);
@@ -1684,7 +1684,7 @@ ACMD(do_extract)
           send_to_char(ch, "You will need to fill the bottle before giving it a final infusion of ki to complete the process.\r\n");
         }
         improve_skill(ch, SKILL_EXTRACT, 0);
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
       }
     } else {
       send_to_char(ch, "That is not something you can extract from.\r\n");
@@ -1747,7 +1747,7 @@ ACMD(do_runic)
     return;
   }
 
-  int64_t cost = GET_MAX_MANA(ch) * 0.05;
+  int64_t cost = getMaxKI(ch) * 0.05;
   int inkcost  = 0;
 
   if (char_is_hoshijin(ch))
@@ -1769,7 +1769,7 @@ ACMD(do_runic)
     extract_obj(bottle);
     improve_skill(ch, SKILL_RUNIC, 1);
     decCurKI(ch, cost, 0);
-    WAIT_STATE(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
     return;
   } else if (skill + bonus < axion_dice(0)) {
     decCurKI(ch, cost, 0);
@@ -1779,7 +1779,7 @@ ACMD(do_runic)
     obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (rand_number(1, 3)));
     if (obj_get_value(bottle, 6) < 0)
       obj_set_value(bottle, 6, 0);
-    WAIT_STATE(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
     return;
   } else if (!strcasecmp(arg2, "kenaz") || !strcasecmp(arg2, "Kenaz")) {
     inkcost += 1;
@@ -1818,7 +1818,7 @@ ACMD(do_runic)
       }
     }
     improve_skill(ch, SKILL_RUNIC, 1);
-    WAIT_STATE(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
     return;
   } else if (!strcasecmp(arg2, "algiz") || !strcasecmp(arg2, "Algiz")) {
     inkcost += 2;
@@ -1860,7 +1860,7 @@ ACMD(do_runic)
       }
     }
     improve_skill(ch, SKILL_RUNIC, 1);
-    WAIT_STATE(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
     return;
   } else if (!strcasecmp(arg2, "oagaz") || !strcasecmp(arg2, "Oagaz")) {
     inkcost += 3;
@@ -1924,7 +1924,7 @@ ACMD(do_runic)
       }
     }
     improve_skill(ch, SKILL_RUNIC, 1);
-    WAIT_STATE(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
     return;
   } else if (!strcasecmp(arg2, "wunjo") || !strcasecmp(arg2, "Wunjo")) {
     inkcost += 4;
@@ -1966,7 +1966,7 @@ ACMD(do_runic)
       }
     }
     improve_skill(ch, SKILL_RUNIC, 1);
-    WAIT_STATE(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
     return;
   } else if (!strcasecmp(arg2, "purisaz") || !strcasecmp(arg2, "Purisaz")) {
     inkcost += 4;
@@ -2008,7 +2008,7 @@ ACMD(do_runic)
       }
     }
     improve_skill(ch, SKILL_RUNIC, 1);
-    WAIT_STATE(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
     return;
   } else if (!strcasecmp(arg2, "gebo") || !strcasecmp(arg2, "Gebo")) {
     inkcost += 10;
@@ -2020,7 +2020,7 @@ ACMD(do_runic)
       act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CGebo@D'@B rune on your skin! The rune flashes out of existence immediately!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on $s skin. The rune flashes out of existence immediately!@n", TRUE, ch, 0, 0, TO_ROOM);
       send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
-      GET_PRACTICES(vict, char_get_class(vict)) += 125;
+      char_set_practice_points(vict, char_get_practice_points(vict) + (125));
       send_to_char(vict, "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
       obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (inkcost));
       if (obj_get_value(bottle, 6) <= 0) {
@@ -2034,7 +2034,7 @@ ACMD(do_runic)
       act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on @RYOUR@B skin. The rune flashes out of existence immediately!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on @b$N's@B skin. The rune flashes out of existence immediately!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
-      GET_PRACTICES(vict, char_get_class(vict)) += 125;
+      char_set_practice_points(vict, char_get_practice_points(vict) + (125));
       send_to_char(vict, "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
       obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (inkcost));
       if (obj_get_value(bottle, 6) <= 0) {
@@ -2044,7 +2044,7 @@ ACMD(do_runic)
       }
     }
     improve_skill(ch, SKILL_RUNIC, 1);
-    WAIT_STATE(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
     return;
   } else {
     send_to_char(ch, "Syntax: runic (target) (skill)\r\n");
@@ -2090,7 +2090,7 @@ ACMD(do_scry)
 
   int cost = 2000;
 
-  if (GET_PRACTICES(ch, char_get_class(ch)) < cost) {
+  if (char_get_practice_points(ch) < cost) {
     send_to_char(ch, "You do not have enough PS to Oracle Scry!\r\n");
     return;
   } else {
@@ -2107,7 +2107,7 @@ ACMD(do_scry)
     send_to_char(vict, "Your Powerlevel, Ki, and Stamina have improved drastically! On top of that your Intelligence and Wisdom have improved permanantly!\r\n");
     vict->real_abils.intel += 2;
     vict->real_abils.wis += 2;
-    GET_PRACTICES(ch, char_get_class(ch)) -= 2000;
+    char_set_practice_points(ch, char_get_practice_points(ch) - (2000));
     if (char_get_level(ch) < 100) {
       send_to_char(ch, "@D[@mPractice Sessions@D:@R -2000@D]@n\r\n");
       if (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0) {
@@ -2134,7 +2134,7 @@ void ash_burn(struct char_data *ch)
         if (axion_dice(0) > char_get_aff_abils_con(ch)) {
           if (!char_is_android(ch) && !char_is_demon(ch) && !char_is_icer(ch)) {
             reveal_hiding(ch, 0);
-            decCurST(ch, ((GET_MAX_MOVE(ch) * 0.005) + 20) * obj_get_cost(obj), 0);
+            decCurST(ch, ((getMaxST(ch) * 0.005) + 20) * obj_get_cost(obj), 0);
             act("@RYou choke on the the burning hot @Da@Ws@wh@Dc@Wl@wo@Du@Wd@R!@n", TRUE, ch, 0, 0, TO_CHAR);
             act("@r$n@R chokes on the burning hot @Da@Ws@wh@Dc@Wl@wo@Du@Wd@R!@n", TRUE, ch, 0, 0, TO_ROOM);
           }
@@ -2221,7 +2221,7 @@ ACMD(do_ashcloud)
       return;
   }
 
-  int64_t cost = (GET_MAX_MANA(ch) * initial) + (char_get_aff_abils_intel(ch) * mult);
+  int64_t cost = (getMaxKI(ch) * initial) + (char_get_aff_abils_intel(ch) * mult);
 
   if ((getCurKI(ch)) < cost) {
     send_to_char(ch, "You do not have enough ki!\r\n");
@@ -2304,7 +2304,7 @@ ACMD(do_resize)
         send_to_char(ch, "That is not equipment! You can only resize equipment.\r\n");
         return;
       } else {
-        if ((getCurST(ch)) < obj_get_weight(obj) + (GET_MAX_MOVE(ch) / 40)) {
+        if ((getCurST(ch)) < obj_get_weight(obj) + (getMaxST(ch) / 40)) {
           send_to_char(ch, "You do not have enough stamina to resize this object at this time.\r\n");
           return;
         } else if (!strcasecmp(arg2, "small")) {
@@ -2315,7 +2315,7 @@ ACMD(do_resize)
             act("@WYou carefully adjust the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_CHAR);
             act("@C$n@W carefully adjusts the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_ROOM);
             obj_set_size(obj, SIZE_SMALL);
-            decCurST(ch, obj_get_weight(obj) + (GET_MAX_MOVE(ch) / 40), 0);
+            decCurST(ch, obj_get_weight(obj) + (getMaxST(ch) / 40), 0);
           }
         } else if (!strcasecmp(arg2, "medium")) {
           if (obj_get_size(obj) == SIZE_MEDIUM) {
@@ -2325,7 +2325,7 @@ ACMD(do_resize)
             act("@WYou carefully adjust the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_CHAR);
             act("@C$n@W carefully adjusts the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_ROOM);
             obj_set_size(obj, SIZE_MEDIUM);
-            decCurST(ch, obj_get_weight(obj) + (GET_MAX_MOVE(ch) / 40), 0);
+            decCurST(ch, obj_get_weight(obj) + (getMaxST(ch) / 40), 0);
           }
         } else {
           send_to_char(ch, "Syntax: resize (obj) (small | medium)\r\n");
@@ -2372,7 +2372,7 @@ ACMD(do_healglow)
     return;
   }
 
-  int64_t cost = GET_MAX_MANA(ch) * 0.5;
+  int64_t cost = getMaxKI(ch) * 0.5;
 
   if ((getCurKI(ch)) < cost) {
     send_to_char(ch, "You do not have enough ki. It requires at least 50%s of your ki in cost.\r\n", "%");
@@ -2417,7 +2417,7 @@ ACMD(do_metamorph)
     return;
   }
 
-  int64_t cost = (GET_MAX_MANA(ch) * 0.16);
+  int64_t cost = (getMaxKI(ch) * 0.16);
 
   if (char_aff_flagged(ch, AFF_METAMORPH)) {
     send_to_char(ch, "You are already surrounded by a dark aura!\r\n");
@@ -2489,7 +2489,7 @@ ACMD(do_shimmer)
     return;
   }
 
-  cost = GET_MAX_MANA(ch) / 40;
+  cost = getMaxKI(ch) / 40;
 
   if ((getCurKI(ch)) - cost < 0) {
     send_to_char(ch, "You do not have enough ki to instantaneously move.\r\n");
@@ -2525,7 +2525,7 @@ ACMD(do_shimmer)
       if (tar != ch) {
         send_to_char(ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
         decCurKI(ch, cost, 0);
-        WAIT_STATE(ch, PULSE_2SEC);
+        char_set_wait(ch, PULSE_2SEC);
         return;
       } else {
         send_to_char(ch, "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
@@ -2534,13 +2534,13 @@ ACMD(do_shimmer)
     } else {
       send_to_char(ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
       decCurKI(ch, cost, 0);
-      WAIT_STATE(ch, PULSE_2SEC);
+      char_set_wait(ch, PULSE_2SEC);
       return;
     }
   }
 
   reveal_hiding(ch, 0);
-  WAIT_STATE(ch, PULSE_2SEC);
+  char_set_wait(ch, PULSE_2SEC);
   if (tar != NULL) {
     if (tar == ch) {
       send_to_char(ch, "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
@@ -2592,7 +2592,7 @@ ACMD(do_channel)
     return;
   }
 
-  int64_t cost = GET_MAX_MANA(ch) * 0.15;
+  int64_t cost = getMaxKI(ch) * 0.15;
 
   int chance = axion_dice(0), skill = char_get_skill(ch, SKILL_STYLE);
 
@@ -2636,7 +2636,7 @@ ACMD(do_channel)
       obj_extra_set(ruby, ITEM_HOT, true);
     }
     decCurKI(ch, cost, 0);
-    WAIT_STATE(ch, PULSE_1SEC);
+    char_set_wait(ch, PULSE_1SEC);
   }
 }
 
@@ -2651,7 +2651,7 @@ ACMD(do_hydromancy)
   int skill = char_get_skills_base(ch, SKILL_STYLE), chance = axion_dice(0);
   int64_t cost = 0;
 
-  cost = (GET_MAX_MANA(ch) / 12) - (char_get_aff_abils_intel(ch) * char_get_level(ch));
+  cost = (getMaxKI(ch) / 12) - (char_get_aff_abils_intel(ch) * char_get_level(ch));
 
   if (rroom_get_geffect(char_get_in_room(ch)) >= 0 && rroom_sect(char_get_in_room(ch)) != SECT_WATER_SWIM && rroom_sect(char_get_in_room(ch)) != SECT_WATER_NOSWIM) {
     if (rroom_sect(char_get_in_room(ch)) != SECT_UNDERWATER) {
@@ -2692,7 +2692,7 @@ ACMD(do_hydromancy)
   if (!strcasecmp(arg, "spike")) {
     struct obj_data *obj = NULL;
 
-    cost = 100 + (char_get_skill(ch, SKILL_STYLE) / (1 + (GET_MAX_MANA(ch) * 0.5)));
+    cost = 100 + (char_get_skill(ch, SKILL_STYLE) / (1 + (getMaxKI(ch) * 0.5)));
 
     if ((getCurKI(ch)) < cost) {
       send_to_char(ch, "You do not have enough ki to form an ice spike.\r\n");
@@ -2723,7 +2723,7 @@ ACMD(do_hydromancy)
     decCurKI(ch, cost, 0);
     act("@CYou press your palms together in front of your body and focusing ki you force water up along your body. That water pools between your palms and as pull your palms apart a @c$p@C forms!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@c$n@C presses $s palms together in front of $s body and water begins to flow up $s body and pools between $s palms. Slowly pulling them apart reveals a @c$p@C as it forms between them!@n", TRUE, ch, obj, 0, TO_VICT);
-    if (obj_get_weight(obj) + (getCurCarriedWeight(ch)) <= CAN_CARRY_W(ch))
+    if (obj_get_weight(obj) + (getCurCarriedWeight(ch)) <= getMaxCarryWeight(ch))
       obj_to_char(obj, ch);
     else {
       send_to_char(ch, "You are unable to hold it and so let it go at your feet.\r\n");
@@ -2753,7 +2753,7 @@ ACMD(do_hydromancy)
         act("@BUsing your ki you attempt to create a rush of water! @RYou fail!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@b$n@B seems to attempt to create water with $s ki! @RHowever, $e fails!@n", TRUE, ch, 0, 0, TO_ROOM);
         decCurKI(ch, cost, 0);
-        WAIT_STATE(ch, PULSE_2SEC);
+        char_set_wait(ch, PULSE_2SEC);
       } else {
         decCurKI(ch, cost, 0);
         sprintf(bun, "@BUsing your ki you create a rush of water flooding away toward the @C%s@B!@n", dirs[attempt]);
@@ -2786,7 +2786,7 @@ ACMD(do_hydromancy)
         }
         rroom_set_geffect(char_get_exit(ch, attempt)->to_room, -3);
         char_set_lastattack(ch, last);
-        WAIT_STATE(ch, PULSE_2SEC);
+        char_set_wait(ch, PULSE_2SEC);
         char_set_con_cooldown(ch, 15);
       }
     } else {
@@ -2831,7 +2831,7 @@ ACMD(do_kanso)
     return;
   }
 
-  int64_t cost = GET_MAX_MANA(ch) / char_get_aff_abils_intel(ch);
+  int64_t cost = getMaxKI(ch) / char_get_aff_abils_intel(ch);
   int dice = axion_dice(-5), skill = char_get_aff_abils_intel(ch), pdice = axion_dice(0);
   int dam = rand_number(1, 4);
   struct affected_type af;
@@ -2850,7 +2850,7 @@ ACMD(do_kanso)
     act("$n closes $s eyes and bounds effortlessly towards you. Closing the distance, $e places $s hands on your chest but nothing happens!\r\n", TRUE, ch, 0, vict, TO_VICT);                   /* Message Vict $N Sees */
     act("$n closes $s eyes and bounds toward $N. Smirking, $e puts $m hands on $N's chest but nothing seems to happen.\r\n", TRUE, ch, 0, vict, TO_NOTVICT);                                     /* Message everyone else sees */
     decCurKI(ch, cost, 0);
-    WAIT_STATE(ch, PULSE_2SEC); /* 2 second lag for the technique */
+    char_set_wait(ch, PULSE_2SEC); /* 2 second lag for the technique */
     return;
   } else { /* Success! */
     /* Main Attack Success Messages */
@@ -2862,19 +2862,19 @@ ACMD(do_kanso)
     decCurKI(ch, cost, 0);
 
     /* Handle the thirst aspect */
-    if (GET_COND(vict, THIRST) - dam >= 0)
-      GET_COND(vict, THIRST) -= dam;
+    if (char_get_conditions(vict, THIRST) - dam >= 0)
+      char_set_conditions(vict, THIRST, char_get_conditions(vict, THIRST) - (dam));
     else
-      GET_COND(vict, THIRST) = 0;
-    if (GET_COND(ch, THIRST) + dam <= 48)
-      GET_COND(ch, THIRST) += dam;
+      char_set_conditions(vict, THIRST, 0);
+    if (char_get_conditions(ch, THIRST) + dam <= 48)
+      char_set_conditions(ch, THIRST, char_get_conditions(ch, THIRST) + (dam));
     else
-      GET_COND(ch, THIRST) = 48;
+      char_set_conditions(ch, THIRST, 48);
 
     /* Heal the user */
     incCurHealth(ch, (getEffMaxPL(ch) * .01) * dam, true);
 
-    WAIT_STATE(ch, PULSE_2SEC); /* 2 second lag for the technique */
+    char_set_wait(ch, PULSE_2SEC); /* 2 second lag for the technique */
 
     if (!is_affected(vict, AFF_HYDROZAP)) { /* Drop their AGL/CON if not already lowered */
       send_to_char(vict, "@RYou feel less agile and your muscles ache!@n\r\n");
@@ -3060,7 +3060,7 @@ ACMD(do_hayasa)
   }
 
   int skill = char_get_skill(ch, SKILL_HAYASA), prob = axion_dice(0);
-  int64_t cost = GET_MAX_MANA(ch) / (skill / 2);
+  int64_t cost = getMaxKI(ch) / (skill / 2);
   int duration = 1;
 
   if (skill >= 100) {
@@ -3083,7 +3083,7 @@ ACMD(do_hayasa)
     act("@CYou close your eyes for a brief moment and focus your ki around your body as a soft blue glow. The glow disappears though as you fail to maintain the effect...@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@c$n@C closes $s eyes for a brief moment and a soft blue glow begins to form around $s body. The glow disappears a second later though and $e frowns.@n", TRUE, ch, 0, 0, TO_ROOM);
     improve_skill(ch, SKILL_HAYASA, 1);
-    WAIT_STATE(ch, PULSE_2SEC);
+    char_set_wait(ch, PULSE_2SEC);
   } else {
     struct affected_type af;
 
@@ -3099,7 +3099,7 @@ ACMD(do_hayasa)
     act("@CYou close your eyes for a brief moment and focus your ki around your body as a soft blue glow. All your movements are faster now!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@c$n@C closes $s eyes for a brief moment and a soft blue glow begins to form around $s body. The glow pulsates gently as $e opens his eyes and smiles.@n", TRUE, ch, 0, 0, TO_ROOM);
     improve_skill(ch, SKILL_HAYASA, 1);
-    WAIT_STATE(ch, PULSE_2SEC);
+    char_set_wait(ch, PULSE_2SEC);
   }
 }
 
@@ -3323,14 +3323,14 @@ ACMD(do_ensnare)
       act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Fortunately $e misses and loses the bundle...@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Fortunately $e misses and loses the bundle...@n", TRUE, ch, 0, vict, TO_NOTVICT);
       extract_obj(obj);
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       improve_skill(ch, SKILL_ENSNARE, 0);
     } else if (char_aff_flagged(vict, AFF_ZANZOKEN) && !char_aff_flagged(ch, AFF_ZANZOKEN)) {
       act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Unfortunately @c$N@W zanzokens away avoiding it and you lose the bundle...@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Fortunately you zanzoken away avoiding it and @C$n@W loses the bundle...@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Fortunately @c$N@W zanzokens away avoiding it and @C$n@W loses the bundle...@n", TRUE, ch, 0, vict, TO_NOTVICT);
       extract_obj(obj);
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       improve_skill(ch, SKILL_ENSNARE, 0);
       char_aff_set(vict, AFF_ZANZOKEN, false);
     } else if (char_aff_flagged(vict, AFF_ZANZOKEN) && char_aff_flagged(ch, AFF_ZANZOKEN)) {
@@ -3339,7 +3339,7 @@ ACMD(do_ensnare)
         act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! You both zanzoken! Fortunately you manage to avoid it and @C$n@W loses the bundle...@n", TRUE, ch, 0, vict, TO_VICT);
         act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! They both zanzoken! Fortunately @c$N@W manages to avoid it and @C$n@W loses the bundle...@n", TRUE, ch, 0, vict, TO_NOTVICT);
         extract_obj(obj);
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
         improve_skill(ch, SKILL_ENSNARE, 0);
         char_aff_set(vict, AFF_ZANZOKEN, false);
         char_aff_set(ch, AFF_ZANZOKEN, false);
@@ -3349,7 +3349,7 @@ ACMD(do_ensnare)
         act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! They both zanzoken! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n", TRUE, ch, 0, vict, TO_NOTVICT);
         extract_obj(obj);
         char_aff_set(vict, AFF_ENSNARED, true);
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
         improve_skill(ch, SKILL_ENSNARE, 0);
         char_aff_set(vict, AFF_ZANZOKEN, false);
         char_aff_set(ch, AFF_ZANZOKEN, false);
@@ -3360,7 +3360,7 @@ ACMD(do_ensnare)
       act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e zanzokens and spins around @c$N@W and ensnares $S arms with the silk!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       extract_obj(obj);
       char_aff_set(vict, AFF_ENSNARED, true);
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       improve_skill(ch, SKILL_ENSNARE, 0);
       char_aff_set(ch, AFF_ZANZOKEN, false);
     } else if (char_get_speedi(ch) + rand_number(1, 100) < char_get_speedi(vict) + rand_number(1, 100)) {
@@ -3368,7 +3368,7 @@ ACMD(do_ensnare)
       act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Fortunately you manage to avoid it and @C$n@W loses the bundle...@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Fortunately @c$N@W manages to avoid it and @C$n@W loses the bundle...@n", TRUE, ch, 0, vict, TO_NOTVICT);
       extract_obj(obj);
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       improve_skill(ch, SKILL_ENSNARE, 0);
     } else {
       act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Fortunately you manage to hit $M! Quickly you spin around $M and ensnare $S arms with the silk!@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -3376,7 +3376,7 @@ ACMD(do_ensnare)
       act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       extract_obj(obj);
       char_aff_set(vict, AFF_ENSNARED, true);
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       improve_skill(ch, SKILL_ENSNARE, 0);
     }
   } /* Main else function */
@@ -3446,7 +3446,7 @@ ACMD(do_silk)
           act("@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_CHAR);
           act("@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_ROOM);
           extract_obj(obj);
-          WAIT_STATE(ch, PULSE_4SEC);
+          char_set_wait(ch, PULSE_4SEC);
           return;
         } else {
           weaved = read_object(16705, VIRTUAL);
@@ -3499,14 +3499,14 @@ ACMD(do_silk)
           act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", TRUE, ch, weaved, 0, TO_ROOM);
           do_get(ch, "headsash", 0, 0);
           extract_obj(obj);
-          WAIT_STATE(ch, PULSE_4SEC);
+          char_set_wait(ch, PULSE_4SEC);
         }
       } else if (!strcasecmp(arg2, "wrist")) {
         if (prob <= perc) {
           act("@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_CHAR);
           act("@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_ROOM);
           extract_obj(obj);
-          WAIT_STATE(ch, PULSE_4SEC);
+          char_set_wait(ch, PULSE_4SEC);
           return;
         } else {
           weaved = read_object(16706, VIRTUAL);
@@ -3559,14 +3559,14 @@ ACMD(do_silk)
           act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", TRUE, ch, weaved, 0, TO_ROOM);
           do_get(ch, "wristband", 0, 0);
           extract_obj(obj);
-          WAIT_STATE(ch, PULSE_4SEC);
+          char_set_wait(ch, PULSE_4SEC);
         }
       } else if (!strcasecmp(arg2, "belt")) {
         if (prob <= perc) {
           act("@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_CHAR);
           act("@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_ROOM);
           extract_obj(obj);
-          WAIT_STATE(ch, PULSE_4SEC);
+          char_set_wait(ch, PULSE_4SEC);
           return;
         } else {
           weaved = read_object(16707, VIRTUAL);
@@ -3619,7 +3619,7 @@ ACMD(do_silk)
           act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", TRUE, ch, weaved, 0, TO_ROOM);
           do_get(ch, "belt", 0, 0);
           extract_obj(obj);
-          WAIT_STATE(ch, PULSE_4SEC);
+          char_set_wait(ch, PULSE_4SEC);
         }
       } else {
         send_to_char(ch, "Syntax: silk weave (head | wrist | belt)");
@@ -3629,13 +3629,13 @@ ACMD(do_silk)
     } ////
 
   } else if (!strcasecmp(arg, "bundle")) {
-    int64_t cost = ((GET_MAX_MANA(ch) * 0.01) * (prob * 0.20)) + (char_get_aff_abils_intel(ch) * char_get_level(ch));
+    int64_t cost = ((getMaxKI(ch) * 0.01) * (prob * 0.20)) + (char_get_aff_abils_intel(ch) * char_get_level(ch));
 
     if ((getCurKI(ch)) < cost) {
       send_to_char(ch, "You do not have enough ki to weave any bundles of silk.\r\n");
       return;
     } else {
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
       int super = FALSE, superoll = rand_number(1, 100);
       if (char_is_kurzak(ch)) {
         if (char_get_skill(ch, SKILL_SILK) >= 100) {
@@ -3735,7 +3735,7 @@ ACMD(do_adrenaline)
         act("@GYou focus your mind and begin to overwork your powerful adrenal glands and your wounds begin to heal!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@g$n@G seems to concentrate and $s wounds begin to heal!@n", TRUE, ch, 0, 0, TO_ROOM);
 
-        if (GET_HIT(ch) + trade > getEffMaxPL(ch))
+        if (getCurPL(ch) + trade > getEffMaxPL(ch))
           send_to_char(ch, "Some of your stamina was wasted because your powerlevel maxed out.\r\n");
         incCurHealth(ch, trade, true);
         decCurST(ch, trade, 0);
@@ -3744,7 +3744,7 @@ ACMD(do_adrenaline)
         act("@GYou focus your mind and begin to overwork your powerful adrenal glands and you feel your ki replenish!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@g$n@G seems to concentrate and $e appears energized!@n", TRUE, ch, 0, 0, TO_ROOM);
 
-        if ((getCurKI(ch)) + trade > GET_MAX_MANA(ch))
+        if ((getCurKI(ch)) + trade > getMaxKI(ch))
           send_to_char(ch, "Some of your stamina was wasted because your ki maxed out.\r\n");
         incCurKI(ch, trade, true);
         decCurST(ch, trade, 0);
@@ -3810,9 +3810,9 @@ void handle_rpp_store(struct char_data *ch, int choice)
   } else { /* They can afford it. */
     switch (choice) {
       case 1:
-        if (char_get_carry_weight(ch) + 26 > CAN_CARRY_W(ch)) {
+        if (char_get_carry_weight(ch) + 26 > getMaxCarryWeight(ch)) {
           send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
-        } else if (char_get_carry_items(ch) + 13 > CAN_CARRY_N(ch)) {
+        } else if (char_get_carry_items(ch) + 13 > char_can_carry_n(ch)) {
           send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
         } else if (char_get_level(ch) < 50) {
           send_to_char(ch, "You are below the minimum level to equip it.\r\n");
@@ -3842,9 +3842,9 @@ void handle_rpp_store(struct char_data *ch, int choice)
         }
         break;
       case 2:
-        if (char_get_carry_weight(ch) + 2 > CAN_CARRY_W(ch)) {
+        if (char_get_carry_weight(ch) + 2 > getMaxCarryWeight(ch)) {
           send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
-        } else if (char_get_carry_items(ch) + 1 > CAN_CARRY_N(ch)) {
+        } else if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
           send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
         } else if (char_get_level(ch) < 40) {
           send_to_char(ch, "You are below the minimum level to equip it.\r\n");
@@ -3861,9 +3861,9 @@ void handle_rpp_store(struct char_data *ch, int choice)
         }
         break;
       case 3:
-        if (char_get_carry_weight(ch) + 2 > CAN_CARRY_W(ch)) {
+        if (char_get_carry_weight(ch) + 2 > getMaxCarryWeight(ch)) {
           send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
-        } else if (char_get_carry_items(ch) + 1 > CAN_CARRY_N(ch)) {
+        } else if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
           send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
         } else if (char_get_level(ch) < 40) {
           send_to_char(ch, "You are below the minimum level to equip it.\r\n");
@@ -3880,9 +3880,9 @@ void handle_rpp_store(struct char_data *ch, int choice)
         }
         break;
       case 4:
-        if (char_get_carry_weight(ch) + 2 > CAN_CARRY_W(ch)) {
+        if (char_get_carry_weight(ch) + 2 > getMaxCarryWeight(ch)) {
           send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
-        } else if (char_get_carry_items(ch) + 1 > CAN_CARRY_N(ch)) {
+        } else if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
           send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
         } else if (char_get_level(ch) < 40) {
           send_to_char(ch, "You are below the minimum level to equip it.\r\n");
@@ -3899,9 +3899,9 @@ void handle_rpp_store(struct char_data *ch, int choice)
         }
         break;
       case 5:
-        if (char_get_carry_weight(ch) + 2 > CAN_CARRY_W(ch)) {
+        if (char_get_carry_weight(ch) + 2 > getMaxCarryWeight(ch)) {
           send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
-        } else if (char_get_carry_items(ch) + 1 > CAN_CARRY_N(ch)) {
+        } else if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
           send_to_char(ch, "@R%d@W RPP from your Bank paid for your selection. Enjoy!@n\r\n", cost);
         } else if (char_get_level(ch) < 40) {
           send_to_char(ch, "You are below the minimum level to equip it.\r\n");
@@ -3918,9 +3918,9 @@ void handle_rpp_store(struct char_data *ch, int choice)
         }
         break;
       case 6:
-        if (char_get_carry_weight(ch) + 2 > CAN_CARRY_W(ch)) {
+        if (char_get_carry_weight(ch) + 2 > getMaxCarryWeight(ch)) {
           send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
-        } else if (char_get_carry_items(ch) + 1 > CAN_CARRY_N(ch)) {
+        } else if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
           send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
         } else if (char_get_level(ch) < 40) {
           send_to_char(ch, "You are below the minimum level to equip it.\r\n");
@@ -3937,9 +3937,9 @@ void handle_rpp_store(struct char_data *ch, int choice)
         }
         break;
       case 7:
-        if (char_get_carry_weight(ch) + 2 > CAN_CARRY_W(ch)) {
+        if (char_get_carry_weight(ch) + 2 > getMaxCarryWeight(ch)) {
           send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
-        } else if (char_get_carry_items(ch) + 1 > CAN_CARRY_N(ch)) {
+        } else if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
           send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
         } else if (char_get_level(ch) < 40) {
           send_to_char(ch, "You are below the minimum level to equip it.\r\n");
@@ -3956,9 +3956,9 @@ void handle_rpp_store(struct char_data *ch, int choice)
         }
         break;
       case 8:
-        if (char_get_carry_weight(ch) + 10000000 > CAN_CARRY_W(ch)) {
+        if (char_get_carry_weight(ch) + 10000000 > getMaxCarryWeight(ch)) {
           send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
-        } else if (char_get_carry_items(ch) + 1 > CAN_CARRY_N(ch)) {
+        } else if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
           send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
         } else {
           obj = read_object(1126, VIRTUAL);
@@ -3974,9 +3974,9 @@ void handle_rpp_store(struct char_data *ch, int choice)
         }
         break;
       case 9:
-        if (char_get_carry_weight(ch) + 2 > CAN_CARRY_W(ch)) {
+        if (char_get_carry_weight(ch) + 2 > getMaxCarryWeight(ch)) {
           send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
-        } else if (char_get_carry_items(ch) + 1 > CAN_CARRY_N(ch)) {
+        } else if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
           send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
         } else {
           obj = read_object(1127, VIRTUAL);
@@ -4639,7 +4639,7 @@ ACMD(do_cook)
         act("@wYou screw up the preparation of the recipe and end up wasting the ingredients!@n", TRUE, ch, 0, 0, TO_CHAR);
         act("@C$n@w starts to prepare some food, but ends up ruining the ingredients instead!@n", TRUE, ch, 0, 0, TO_ROOM);
         improve_skill(ch, SKILL_COOKING, 0);
-        WAIT_STATE(ch, PULSE_2SEC);
+        char_set_wait(ch, PULSE_2SEC);
         return;
       } /* End failed to cook it right */
 
@@ -4771,7 +4771,7 @@ ACMD(do_cook)
       obj_set_value(meal, VAL_FOOD_PSBONUS, psbonus);
       obj_set_value(meal, VAL_FOOD_EXPBONUS, expbonus);
 
-      WAIT_STATE(ch, PULSE_2SEC);
+      char_set_wait(ch, PULSE_2SEC);
     } /* End has ingredients */
   }
 }
@@ -4799,7 +4799,7 @@ ACMD(do_fireshield)
     return;
   }
 
-  int64_t cost = GET_MAX_MANA(ch) * 0.03;
+  int64_t cost = getMaxKI(ch) * 0.03;
 
   if ((getCurKI(ch)) < cost) {
     send_to_char(ch, "You do not have enough ki!\r\n");
@@ -4851,7 +4851,7 @@ ACMD(do_warppool)
   }
 
   int perc = char_get_skill(ch, SKILL_WARP);
-  int prob = axion_dice(0), cost = GET_MAX_MANA(ch) / 20, pass = FALSE;
+  int prob = axion_dice(0), cost = getMaxKI(ch) / 20, pass = FALSE;
   char arg[MAX_INPUT_LENGTH];
 
   one_argument(argument, arg);
@@ -5009,7 +5009,7 @@ ACMD(do_obstruct)
 
   char arg[MAX_INPUT_LENGTH];
   int skill = char_get_skill(ch, SKILL_HYOGA_KABE);
-  int prob = axion_dice(0), cost = ((GET_MAX_MANA(ch) / skill) * 2.5);
+  int prob = axion_dice(0), cost = ((getMaxKI(ch) / skill) * 2.5);
 
   one_argument(argument, arg);
 
@@ -5109,18 +5109,18 @@ ACMD(do_obstruct)
     obj3 = read_object(79, VIRTUAL);
     obj_to_room(obj3, char_get_in_room(ch));
 
-    int64_t strength = (((char_get_aff_abils_intel(ch) * skill) * char_get_aff_abils_wis(ch)) * 20) + (GET_MAX_MANA(ch) * 0.001);
+    int64_t strength = (((char_get_aff_abils_intel(ch) * skill) * char_get_aff_abils_wis(ch)) * 20) + (getMaxKI(ch) * 0.001);
 
-    if (strength > GET_MAX_HIT(ch) * 20) {
-      strength = GET_MAX_HIT(ch) + (strength / 20);
-    } else if (strength > GET_MAX_HIT(ch) * 15) {
-      strength = GET_MAX_HIT(ch) + (strength / 15);
-    } else if (strength > GET_MAX_HIT(ch) * 10) {
-      strength = GET_MAX_HIT(ch) + (strength / 10);
-    } else if (strength > GET_MAX_HIT(ch) * 5) {
-      strength = GET_MAX_HIT(ch) + (strength / 5);
-    } else if (strength > GET_MAX_HIT(ch) * 2) {
-      strength = GET_MAX_HIT(ch) + (strength / 2);
+    if (strength > getEffMaxPL(ch) * 20) {
+      strength = getEffMaxPL(ch) + (strength / 20);
+    } else if (strength > getEffMaxPL(ch) * 15) {
+      strength = getEffMaxPL(ch) + (strength / 15);
+    } else if (strength > getEffMaxPL(ch) * 10) {
+      strength = getEffMaxPL(ch) + (strength / 10);
+    } else if (strength > getEffMaxPL(ch) * 5) {
+      strength = getEffMaxPL(ch) + (strength / 5);
+    } else if (strength > getEffMaxPL(ch) * 2) {
+      strength = getEffMaxPL(ch) + (strength / 2);
     }
 
     obj_set_cost(obj2, dir2);
@@ -5156,7 +5156,7 @@ ACMD(do_dimizu)
     act("@CYou concentrate and distabilie the water, separating the hydrogen and oxygen. The gases dissipate quickly.", TRUE, ch, 0, 0, TO_CHAR);
     act("@c$n@C concentrates and the water filling the area seems to shudder. Suddenly the water begins to evaporate as the hydrogen and oxygen are separated.", TRUE, ch, 0, 0, TO_ROOM);
     rroom_set_geffect(char_get_in_room(ch), 0);
-    WAIT_STATE(ch, PULSE_1SEC);
+    char_set_wait(ch, PULSE_1SEC);
     return;
   } else if (rroom_sect(char_get_in_room(ch)) == SECT_UNDERWATER) {
     send_to_char(ch, "The area is already underwater!\r\n");
@@ -5164,7 +5164,7 @@ ACMD(do_dimizu)
   } else if (rroom_sect(char_get_in_room(ch)) == SECT_SPACE || rroom_flagged(char_get_in_room(ch), ROOM_SPACE)) {
     send_to_char(ch, "You can't flood space!\r\n");
     return;
-  } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 12) {
+  } else if ((getCurKI(ch)) < getMaxKI(ch) / 12) {
     send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
     return;
   } else if (skill < prob) {

@@ -334,7 +334,7 @@ ACMD(do_rpp)
         send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
         return;
       } else {
-        GET_PRACTICES(ch, char_get_class(ch)) += 750;
+        char_set_practice_points(ch, char_get_practice_points(ch) + (750));
         send_to_char(ch, "Your practices have been increased by 750\r\n");
       } /* Can pay for it */
     } /* End Simple Zenni Reward */
@@ -664,13 +664,13 @@ ACMD(do_commune)
     return;
   }
 
-  if ((getCurST(ch)) >= GET_MAX_MOVE(ch)) {
+  if ((getCurST(ch)) >= getMaxST(ch)) {
     send_to_char(ch, "Your stamina is already at full.\r\n");
     return;
   }
 
   int prob = char_get_skill(ch, SKILL_COMMUNE), perc = axion_dice(0);
-  int64_t cost = GET_MAX_MOVE(ch) * .05;
+  int64_t cost = getMaxST(ch) * .05;
 
   if ((getCurKI(ch)) < cost) {
     send_to_char(ch, "You do not have enough ki to commune with the Eldritch Star.\r\n");
@@ -681,7 +681,7 @@ ACMD(do_commune)
     reveal_hiding(ch, 0);
     act("@cYou close your eyes and try to commune with the Eldritch Star. You are unable to concentrate though.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@W$n closes $s eyes for a moment. Then $e reopens them and frowns.@n", TRUE, ch, 0, 0, TO_ROOM);
-    WAIT_STATE(ch, PULSE_2SEC);
+    char_set_wait(ch, PULSE_2SEC);
     return;
   } else {
     decCurKI(ch, cost, 0);
@@ -689,7 +689,7 @@ ACMD(do_commune)
     reveal_hiding(ch, 0);
     act("@cYou close your eyes and commune with the Eldritch Star spiritually. You feel your stamina replenish some.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@W$n closes $s eyes for a moment. Then $e reopens them and smiles.@n", TRUE, ch, 0, 0, TO_ROOM);
-    WAIT_STATE(ch, PULSE_2SEC);
+    char_set_wait(ch, PULSE_2SEC);
     return;
   }
 }
@@ -701,7 +701,7 @@ ACMD(do_pose)
     return;
   }
 
-  if ((getCurST(ch)) < GET_MAX_MOVE(ch) / 40) {
+  if ((getCurST(ch)) < getMaxST(ch) / 40) {
     send_to_char(ch, "You do not have enough stamina to pull off such an exciting pose!\r\n");
     return;
   }

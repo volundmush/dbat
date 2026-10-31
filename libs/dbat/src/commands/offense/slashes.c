@@ -104,11 +104,11 @@ ACMD(do_tslash)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -153,7 +153,7 @@ ACMD(do_tslash)
       } else {
         pcost(ch, attperc, 0);
       }
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
 
       return;
     }
@@ -169,7 +169,7 @@ ACMD(do_tslash)
           } else {
             pcost(ch, attperc, 0);
           }
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 19, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -258,7 +258,7 @@ ACMD(do_tslash)
           act("@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with YOUR face as $e flies past, leaving a green after-image behind!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@C$n @Wchannels $s charged ki into the blade of $s sword. @rF@Rl@Ya@rm@Ri@Yn@rg @gg@Gre@wen@W energy burns around the blade as $e draws it up to attack. Two blindingly quick slashes connect with @c$N@W's face as $e flies past, leaving a green after-image behind!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           dmg *= calc_critical(ch, 0);
-          if (dmg > GET_MAX_HIT(vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
+          if (dmg > getEffMaxPL(vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
             act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
             act("@rYou have your head cut off by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
             act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -276,8 +276,8 @@ ACMD(do_tslash)
             if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOLOOT)) {
               do_get(ch, "all corpse", 0, 0);
             }
-          } else if (dmg > GET_MAX_HIT(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
-            if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= GET_MAX_MANA(vict) / 40) {
+          } else if (dmg > getEffMaxPL(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
+            if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= getMaxKI(vict) / 40) {
               act("@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
               act("@rYou have your head cut off by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
               act("@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -444,11 +444,11 @@ ACMD(do_pslash)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
   if (!char_get_equipment(ch, WEAR_WIELD1)) {
@@ -494,7 +494,7 @@ ACMD(do_pslash)
 
     if (!tech_handle_zanzoken(ch, vict, "Phoenix Slash")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -505,7 +505,7 @@ ACMD(do_pslash)
           act("@WYou move quickly and block @C$n's@W Phoenix Slash!@n", FALSE, ch, 0, vict, TO_VICT);
           act("@C$N@W moves quickly and blocks @c$n's@W Phoenix Slash!@n", FALSE, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 37, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -687,11 +687,11 @@ ACMD(do_ddslash)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -738,7 +738,7 @@ ACMD(do_ddslash)
 
     if (!tech_handle_zanzoken(ch, vict, "Darkness Dragon Slash")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -749,7 +749,7 @@ ACMD(do_ddslash)
           act("@WYou move quickly and block @C$n's@W Darkness Dragon Slash!@n", FALSE, ch, 0, vict, TO_VICT);
           act("@C$N@W moves quickly and blocks @c$n's@W Darkness Dragon Slash!@n", FALSE, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 30, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -907,11 +907,11 @@ ACMD(do_kienzan)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -949,7 +949,7 @@ ACMD(do_kienzan)
 
     if (!tech_handle_zanzoken(ch, vict, "Kienzan")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -1017,7 +1017,7 @@ ACMD(do_kienzan)
           act("@WYou raise your hand above your head and pool your charged ki above your flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete you shout '@yK@Yi@we@yn@Yz@wa@yn@W!' and throw it! You watch as it slices into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_CHAR);
           act("@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          if (dmg > GET_MAX_HIT(vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
+          if (dmg > getEffMaxPL(vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
             act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
             act("@rYou are cut in half by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
             act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -1033,8 +1033,8 @@ ACMD(do_kienzan)
             if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOLOOT)) {
               do_get(ch, "all corpse", 0, 0);
             }
-          } else if (dmg > GET_MAX_HIT(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
-            if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= GET_MAX_MANA(vict) / 40) {
+          } else if (dmg > getEffMaxPL(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
+            if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= getMaxKI(vict) / 40) {
               act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
               act("@rYou are cut in half by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
               act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -1074,7 +1074,7 @@ ACMD(do_kienzan)
           act("@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into YOUR neck!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@C$n@W raises $s hand above $s head and pools $s charged ki above $s flattened palm. Slowly a golden spinning disk of energy grows from the ki. With the attack complete $e shouts '@yK@Yi@we@yn@Yz@wa@yn@W!' and throws it! @C$n@W watches as it slices into @c$N@W's neck!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           dmg *= calc_critical(ch, 0);
-          if (dmg > GET_MAX_HIT(vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
+          if (dmg > getEffMaxPL(vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
             act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
             act("@rYou have your head cut off by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
             act("@R$N@r has $S head cut off by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -1092,8 +1092,8 @@ ACMD(do_kienzan)
             if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOLOOT)) {
               do_get(ch, "all corpse", 0, 0);
             }
-          } else if (dmg > GET_MAX_HIT(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
-            if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= GET_MAX_MANA(vict) / 40) {
+          } else if (dmg > getEffMaxPL(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
+            if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= getMaxKI(vict) / 40) {
               act("@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
               act("@rYou have your head cut off by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
               act("@R$N@r has $S head cut off by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);

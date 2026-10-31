@@ -29,7 +29,7 @@ ACMD(do_attack)
 {
   int prob, perc, avo, index = 0, pry = 0, dge = 0, blk = 0, skill = 0, wtype = 0, gun = FALSE, gun2 = FALSE;
   int dualwield = 0, wielded = 0, guncost = 0;
-  int64_t stcost = (GET_MAX_HIT(ch) / 150);
+  int64_t stcost = (getEffMaxPL(ch) / 150);
   int64_t dmg;
   struct char_data *vict;
   struct obj_data *obj = NULL;
@@ -255,7 +255,7 @@ ACMD(do_attack)
     if (!tech_handle_zanzoken(ch, vict, "attack")) {
       if ((wielded == 2 && gun == FALSE) || (gun2 == FALSE && gun == FALSE))
         pcost(ch, 0, stcost / 3);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 150);
+      pcost(vict, 0, getEffMaxPL(vict) / 150);
       return;
     }
 
@@ -270,7 +270,7 @@ ACMD(do_attack)
           improve_skill(vict, SKILL_PARRY, 0);
           if ((wielded == 2 && gun == FALSE) || (gun2 == FALSE && gun == FALSE))
             pcost(ch, 0, stcost);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(vict, -2, skill, attperc);
           dmg *= calc_critical(ch, 1);
           hurt(0, 0, vict, ch, NULL, dmg, -1);
@@ -283,7 +283,7 @@ ACMD(do_attack)
           improve_skill(vict, SKILL_BLOCK, 0);
           if ((wielded == 2 && gun == FALSE) || (gun2 == FALSE && gun == FALSE))
             pcost(ch, 0, stcost);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, -1, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -386,7 +386,7 @@ ACMD(do_attack)
       if (gun == TRUE)
         dmg = gun_dam(ch, wlvl);
       hitspot          = roll_hitloc(ch, vict, skill);
-      int64_t beforepl = GET_HIT(vict);
+      int64_t beforepl = getCurPL(vict);
       switch (hitspot) {
         case 1:
           if (char_get_bonuses(ch, BONUS_SOFT)) {
@@ -476,13 +476,13 @@ ACMD(do_attack)
               /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
               break;
           } /* end slash switch*/
-          if (beforepl - GET_HIT(vict) >= (getEffMaxPL(vict)) * 0.025) {
+          if (beforepl - getCurPL(vict) >= (getEffMaxPL(vict)) * 0.025) {
             cut_limb(ch, vict, wlvl, hitspot);
           }
           break;
         case 1:
           if (!char_get_fighting(ch) && backstab(ch, vict, wlvl, dmg)) {
-            if (vict != NULL && GET_HIT(vict) > 1 && axion_dice(0) < (char_get_skill(ch, SKILL_DUALWIELD)) && char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
+            if (vict != NULL && getCurPL(vict) > 1 && axion_dice(0) < (char_get_skill(ch, SKILL_DUALWIELD)) && char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
               do_attack2(ch, 0, 0, 0);
             }
             pcost(ch, 0, stcost);
@@ -734,18 +734,18 @@ ACMD(do_attack)
     }
     if ((wielded == 2 && gun == FALSE) || (gun2 == FALSE && gun == FALSE)) {
       if (char_get_equipment(ch, WEAR_WIELD1)) {
-        if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
+        if (getCurPL(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
           act("@c$N's@W fireshield burns your weapon!@n", TRUE, ch, 0, vict, TO_CHAR);
           act("@C$n's@W weapon is burned by your fireshield!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@c$n's@W weapon is burned by @C$N's@W fireshield!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           int damdam = char_get_skill(vict, SKILL_FIRESHIELD) / 2;
           hurt(0, 0, vict, NULL, char_get_equipment(ch, WEAR_WIELD1), damdam, 0);
-        } else if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
+        } else if (getCurPL(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
           send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
         }
         pcost(ch, 0, stcost);
       } else {
-        if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
+        if (getCurPL(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
           act("@c$N's@W fireshield burns your weapon!@n", TRUE, ch, 0, vict, TO_CHAR);
           act("@C$n's@W weapon is burned by your fireshield!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@c$n's@W weapon is burned by @C$N's@W fireshield!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -777,7 +777,7 @@ ACMD(do_attack)
       } else {
         improve_skill(ch, SKILL_DUALWIELD, 0);
       }
-      if (vict != NULL && GET_HIT(vict) > 1 && axion_dice(0) < (char_get_skill(ch, SKILL_DUALWIELD)) && char_get_equipment(ch, WEAR_WIELD1)) {
+      if (vict != NULL && getCurPL(vict) > 1 && axion_dice(0) < (char_get_skill(ch, SKILL_DUALWIELD)) && char_get_equipment(ch, WEAR_WIELD1)) {
         do_attack2(ch, 0, 0, 0);
       }
     }
@@ -790,7 +790,7 @@ ACMD(do_attack)
       send_to_char(ch, "It is broken already!\r\n");
       return;
     }
-    dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
+    dmg = ((getCurPL(ch) / 10000) + (char_get_aff_abils_str(ch)));
     act("@WYou attack $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@C$n@W attacks $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
     hurt(0, 0, ch, NULL, obj, dmg, 0);
@@ -819,7 +819,7 @@ ACMD(do_attack2)
     return;
   }
 
-  int64_t stcost = ((GET_MAX_HIT(ch) / 150) + obj_get_weight(char_get_equipment(ch, WEAR_WIELD2)));
+  int64_t stcost = ((getEffMaxPL(ch) / 150) + obj_get_weight(char_get_equipment(ch, WEAR_WIELD2)));
 
   if (char_is_android(ch)) {
     stcost *= 0.25;
@@ -984,7 +984,7 @@ ACMD(do_attack2)
     if (!tech_handle_zanzoken(ch, vict, "attack")) {
       if (gun2 == FALSE)
         pcost(ch, 0, stcost / 3);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
 
       return;
     }
@@ -1000,7 +1000,7 @@ ACMD(do_attack2)
           improve_skill(vict, SKILL_PARRY, 0);
           if (gun2 == FALSE)
             pcost(ch, 0, stcost);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(vict, -2, skill, attperc);
           dmg *= calc_critical(ch, 1);
           hurt(0, 0, vict, ch, NULL, dmg, -1);
@@ -1013,7 +1013,7 @@ ACMD(do_attack2)
           improve_skill(vict, SKILL_BLOCK, 0);
           if (gun2 == FALSE)
             pcost(ch, 0, stcost);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, -1, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -1084,7 +1084,7 @@ ACMD(do_attack2)
       if (gun2 == TRUE)
         dmg = gun_dam(ch, wlvl);
       hitspot          = roll_hitloc(ch, vict, skill);
-      int64_t beforepl = GET_HIT(vict);
+      int64_t beforepl = getCurPL(vict);
       if (wtype == 3) {
         if (skill >= 100)
           dmg += dmg * 0.04;
@@ -1163,7 +1163,7 @@ ACMD(do_attack2)
               /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
               break;
           } /* end slash switch*/
-          if (beforepl - GET_HIT(vict) >= (getEffMaxPL(vict)) * 0.025) {
+          if (beforepl - getCurPL(vict) >= (getEffMaxPL(vict)) * 0.025) {
             cut_limb(ch, vict, wlvl, hitspot);
           }
           break;
@@ -1413,13 +1413,13 @@ ACMD(do_attack2)
       } /* end switch one*/
     }
     if (gun2 == FALSE) {
-      if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
+      if (getCurPL(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
         act("@c$N's@W fireshield burns your weapon!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@C$n's@W weapon is burned by your fireshield!@n", TRUE, ch, 0, vict, TO_VICT);
         act("@c$n's@W weapon is burned by @C$N's@W fireshield!@n", TRUE, ch, 0, vict, TO_NOTVICT);
         int damdam = char_get_skill(vict, SKILL_FIRESHIELD) / 2;
         hurt(0, 0, vict, NULL, char_get_equipment(ch, WEAR_WIELD2), damdam, 0);
-      } else if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
+      } else if (getCurPL(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
         send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
       }
       pcost(ch, 0, stcost);
@@ -1432,7 +1432,7 @@ ACMD(do_attack2)
       send_to_char(ch, "It is broken already!\r\n");
       return;
     }
-    dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
+    dmg = ((getCurPL(ch) / 10000) + (char_get_aff_abils_str(ch)));
     act("@WYou attack $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@C$n@W attacks $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
     hurt(0, 0, ch, NULL, obj, dmg, 0);

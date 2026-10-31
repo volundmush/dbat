@@ -37,7 +37,7 @@ ACMD(do_oasis_aedit)
     return;
   }
 
-  if (GET_OLC_ZONE(ch) != AEDIT_PERMISSION && char_get_admlevel(ch) < ADMLVL_BUILDER) {
+  if (char_get_olc_zone(ch) != AEDIT_PERMISSION && char_get_admlevel(ch) < ADMLVL_BUILDER) {
     send_to_char(ch, "You don't have access to editing socials.\r\n");
     return;
   }
@@ -58,7 +58,7 @@ ACMD(do_oasis_aedit)
   d = ch->desc;
 
   if (!strcasecmp("save", arg)) {
-    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s saves socials.", char_get_name(ch));
+    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), TRUE, "OLC: %s saves socials.", char_get_name(ch));
     send_to_char(ch, "Writing social file..\r\n");
     aedit_save_to_disk(d);
     send_to_char(ch, "Done.\r\n");

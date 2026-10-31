@@ -672,14 +672,14 @@ void mag_points(int level, struct char_data *ch, struct char_data *victim,
       }
       break;
     case SPELL_SENSU:
-      if (GET_COND(victim, HUNGER) > -1) {
-        GET_COND(victim, HUNGER) = 48;
+      if (char_get_conditions(victim, HUNGER) > -1) {
+        char_set_conditions(victim, HUNGER, 48);
       }
       restore(victim, true);
       break;
 
     case ART_WHOLENESS_OF_BODY:
-      healing = GET_MAX_HIT(victim) - GET_HIT(victim);
+      healing = getEffMaxPL(victim) - getCurPL(victim);
       healing = MAX(0, healing);
       tmp     = char_get_ki(ch) / 2;
       if (tmp > healing)

@@ -118,7 +118,7 @@ ACMD(do_quit)
     die(ch, NULL);
   } else {
     act("$n has left the game.", TRUE, ch, 0, 0, TO_ROOM);
-    mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has quit the game.", char_get_name(ch));
+    mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s has quit the game.", char_get_name(ch));
     send_to_char(ch, "Goodbye, friend.. Come back soon!\r\n");
     if (ch->followers || ch->master)
       die_follower(ch);
@@ -134,12 +134,12 @@ ACMD(do_quit)
     /* If someone is quitting in their house, let them load back here. */
     if (!rroom_flagged(char_get_in_room(ch), ROOM_PAST) && (rroom_get_vnum(char_get_in_room(ch)) < 19800 || rroom_get_vnum(char_get_in_room(ch)) > 19899)) {
       if (rroom_get_vnum(char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(char_get_in_room(ch)) != 0 && rroom_get_vnum(char_get_in_room(ch)) != 1) {
-        GET_LOADROOM(ch) = rroom_get_vnum(char_get_in_room(ch));
+        char_set_load_room(ch, rroom_get_vnum(char_get_in_room(ch)));
       }
     }
     if (rroom_flagged(char_get_in_room(ch), ROOM_PAST)) {
       if (rroom_get_vnum(char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(char_get_in_room(ch)) != 0 && rroom_get_vnum(char_get_in_room(ch)) != 1) {
-        GET_LOADROOM(ch) = rroom_get_vnum(real_room(1561));
+        char_set_load_room(ch, rroom_get_vnum(real_room(1561)));
       }
     }
 
@@ -176,7 +176,7 @@ ACMD(do_save)
       Crash_crashsave(ch);
       if (rroom_get_vnum(char_get_in_room(ch)) < 19800 || rroom_get_vnum(char_get_in_room(ch)) > 19899) {
         if (rroom_get_vnum(char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(char_get_in_room(ch)) != 0 && rroom_get_vnum(char_get_in_room(ch)) != 1) {
-          GET_LOADROOM(ch) = rroom_get_vnum(char_get_in_room(ch));
+          char_set_load_room(ch, rroom_get_vnum(char_get_in_room(ch)));
         }
       }
       return;
@@ -187,7 +187,7 @@ ACMD(do_save)
   write_aliases(ch);
   if (rroom_get_vnum(char_get_in_room(ch)) < 19800 || rroom_get_vnum(char_get_in_room(ch)) > 19899) {
     if (rroom_get_vnum(char_get_in_room(ch)) != NOWHERE && rroom_get_vnum(char_get_in_room(ch)) != 0 && rroom_get_vnum(char_get_in_room(ch)) != 1) {
-      GET_LOADROOM(ch) = rroom_get_vnum(char_get_in_room(ch));
+      char_set_load_room(ch, rroom_get_vnum(char_get_in_room(ch)));
     }
   }
   save_char(ch);
@@ -323,15 +323,15 @@ static void print_group(struct char_data *ch)
 
     if (char_aff_flagged(k, AFF_GROUP)) {
       send_to_char(ch, "@D----------------@n\r\n");
-      if (GET_HIT(k) > GET_MAX_HIT(k) / 10) {
+      if (getCurPL(k) > getEffMaxPL(k) / 10) {
         snprintf(buf, sizeof(buf), "@gL@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
-                 add_commas(GET_HIT(k)), add_commas((getCurKI(k))), add_commas((getCurST(k))), char_get_level(k),
-                 CLASS_ABBR(k), RACE_ABBR(k));
+                 add_commas(getCurPL(k)), add_commas((getCurKI(k))), add_commas((getCurST(k))), char_get_level(k),
+                 char_class_abbr(k), char_race_abbr(k));
       }
-      if (GET_HIT(k) <= (GET_MAX_HIT(k) - (getCurCarriedWeight(k))) / 10) {
+      if (getCurPL(k) <= (getEffMaxPL(k) - (getCurCarriedWeight(k))) / 10) {
         snprintf(buf, sizeof(buf), "@gL@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
-                 add_commas(GET_HIT(k)), add_commas((getCurKI(k))), add_commas((getCurST(k))), char_get_level(k),
-                 CLASS_ABBR(k), RACE_ABBR(k));
+                 add_commas(getCurPL(k)), add_commas((getCurKI(k))), add_commas((getCurST(k))), char_get_level(k),
+                 char_class_abbr(k), char_race_abbr(k));
       }
       act(buf, FALSE, ch, 0, k, TO_CHAR);
     }
@@ -340,15 +340,15 @@ static void print_group(struct char_data *ch)
       if (!char_aff_flagged(f->follower, AFF_GROUP))
         continue;
       send_to_char(ch, "@D----------------@n\r\n");
-      if (GET_HIT(f->follower) > (GET_MAX_HIT(f->follower) - (getCurCarriedWeight(f->follower))) / 10) {
+      if (getCurPL(f->follower) > (getEffMaxPL(f->follower) - (getCurCarriedWeight(f->follower))) / 10) {
         snprintf(buf, sizeof(buf), "@gF@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
-                 add_commas(GET_HIT(f->follower)), add_commas((getCurKI(f->follower))), add_commas((getCurST(f->follower))),
-                 char_get_level(f->follower), CLASS_ABBR(f->follower), RACE_ABBR(f->follower));
+                 add_commas(getCurPL(f->follower)), add_commas((getCurKI(f->follower))), add_commas((getCurST(f->follower))),
+                 char_get_level(f->follower), char_class_abbr(f->follower), char_race_abbr(f->follower));
       }
-      if (GET_HIT(f->follower) <= (GET_MAX_HIT(f->follower) - (getCurCarriedWeight(f->follower))) / 10) {
+      if (getCurPL(f->follower) <= (getEffMaxPL(f->follower) - (getCurCarriedWeight(f->follower))) / 10) {
         snprintf(buf, sizeof(buf), "@gF@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
-                 add_commas(GET_HIT(f->follower)), add_commas((getCurKI(f->follower))), add_commas((getCurST(f->follower))),
-                 char_get_level(f->follower), CLASS_ABBR(f->follower), RACE_ABBR(f->follower));
+                 add_commas(getCurPL(f->follower)), add_commas((getCurKI(f->follower))), add_commas((getCurST(f->follower))),
+                 char_get_level(f->follower), char_class_abbr(f->follower), char_race_abbr(f->follower));
       }
       act(buf, FALSE, ch, 0, f->follower, TO_CHAR);
     }
@@ -914,10 +914,10 @@ ACMD(do_gen_tog)
       result = char_prf_toggle(ch, PRF_BUILDWALK);
       if (char_prf_flagged(ch, PRF_BUILDWALK))
         mudlog(LOG_CMP, char_get_level(ch), TRUE,
-               "OLC: %s turned buildwalk on. Allowed zone %d", char_get_name(ch), GET_OLC_ZONE(ch));
+               "OLC: %s turned buildwalk on. Allowed zone %d", char_get_name(ch), char_get_olc_zone(ch));
       else
         mudlog(LOG_CMP, char_get_level(ch), TRUE,
-               "OLC: %s turned buildwalk off. Allowed zone %d", char_get_name(ch), GET_OLC_ZONE(ch));
+               "OLC: %s turned buildwalk off. Allowed zone %d", char_get_name(ch), char_get_olc_zone(ch));
       break;
     case SCMD_AUTOSPLIT:
       result = char_prf_toggle(ch, PRF_AUTOSPLIT);
@@ -929,7 +929,7 @@ ACMD(do_gen_tog)
       result = char_aff_toggle(ch, AFF_SNEAK);
       break;
     case SCMD_HIDE:
-      if ((char_get_charge(ch) > 0 && char_get_preference(ch) != PREFERENCE_KI) || (char_get_charge(ch) > GET_MAX_MANA(ch) * 0.1 && char_get_preference(ch) == PREFERENCE_KI) || char_plr_flagged(ch, PLR_POWERUP) || char_aff_flagged(ch, AFF_FLYING)) {
+      if ((char_get_charge(ch) > 0 && char_get_preference(ch) != PREFERENCE_KI) || (char_get_charge(ch) > getMaxKI(ch) * 0.1 && char_get_preference(ch) == PREFERENCE_KI) || char_plr_flagged(ch, PLR_POWERUP) || char_aff_flagged(ch, AFF_FLYING)) {
         send_to_char(ch, "You stand out too much to hide right now!\r\n");
         return;
       } else if (char_plr_flagged(ch, PLR_HEALT)) {
@@ -1178,11 +1178,11 @@ ACMD(do_pagelength)
 
   if (!*arg) {
     send_to_char(ch, "You current page length is set to %d lines.\r\n",
-                 GET_PAGE_LENGTH(ch));
+                 char_get_page_length(ch));
   } else if (is_number(arg)) {
-    GET_PAGE_LENGTH(ch) = MIN(MAX(atoi(arg), 5), 50);
+    char_set_page_length(ch, MIN(MAX(atoi(arg), 5), 50));
     send_to_char(ch, "Okay, your page length is now set to %d lines.\r\n",
-                 GET_PAGE_LENGTH(ch));
+                 char_get_page_length(ch));
   } else {
     send_to_char(ch, "Please specify a number of lines (5 - 50).\r\n");
   }

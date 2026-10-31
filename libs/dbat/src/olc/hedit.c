@@ -65,7 +65,7 @@ ACMD(do_oasis_hedit)
   d = ch->desc;
 
   if (!strcasecmp("save", arg)) {
-    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s saves help files.",
+    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), TRUE, "OLC: %s saves help files.",
            char_get_name(ch));
     hedit_save_to_disk(d);
     send_to_char(ch, "Saving help files.\r\n");

@@ -83,7 +83,7 @@ void search_room(struct char_data *ch)
   int prob = 0, found = 0;
   double bonus = 1.0, terrain = 1.0;
 
-  if ((getCurST(ch)) < GET_MAX_MOVE(ch) * 0.001) {
+  if ((getCurST(ch)) < getMaxST(ch) * 0.001) {
     send_to_char(ch, "You do not have enough stamina.\r\n");
     return;
   }
@@ -94,7 +94,7 @@ void search_room(struct char_data *ch)
 
   reveal_hiding(ch, 0);
   act("@y$n@Y begins searching the room carefully.@n", TRUE, ch, 0, 0, TO_ROOM);
-  WAIT_STATE(ch, PULSE_1SEC);
+  char_set_wait(ch, PULSE_1SEC);
 
   for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
     next_v = vict->next_in_room;

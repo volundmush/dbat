@@ -293,7 +293,7 @@ static int perform_dupe_check(struct descriptor_data *d)
       /*~~~ End PCOUNT and HIGHPCOUNT ~~~*/
       d->character->time.logon = time(0);
       act("$n has reconnected.", TRUE, d->character, 0, 0, TO_ROOM);
-      mudlog(LOG_NRM, MAX(ADMLVL_NONE, GET_INVIS_LEV(d->character)), TRUE, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
+      mudlog(LOG_NRM, MAX(ADMLVL_NONE, char_get_invis_level(d->character)), TRUE, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
       d->character->rp = d->rpp;
       if (has_mail(char_get_idnum(d->character)))
         write_to_output(d, "You have mail waiting.\r\n");
@@ -330,12 +330,12 @@ static int perform_dupe_check(struct descriptor_data *d)
           "$n's body has been taken over by a new spirit!",
           TRUE, d->character, 0, 0, TO_ROOM);
       d->character->rp = d->rpp;
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(d->character)), TRUE,
+      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(d->character)), TRUE,
              "%s has re-logged in ... disconnecting old socket.", char_get_name(d->character));
       break;
     case UNSWITCH:
       write_to_output(d, "Reconnecting to unswitched char.");
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(d->character)), TRUE, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
+      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(d->character)), TRUE, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
       break;
   }
 
@@ -355,14 +355,14 @@ int enter_player_game(struct descriptor_data *d)
   racial_body_parts(d->character);
 
   if (char_plr_flagged(d->character, PLR_INVSTART))
-    GET_INVIS_LEV(d->character) = char_get_level(d->character);
+    char_set_invis_level(d->character, char_get_level(d->character));
 
   /*
        * We have to place the character in a room before equipping them
        * or equip_char() will gripe about the person in NOWHERE.
        */
 
-  if ((load_room = GET_LOADROOM(d->character)) != NOWHERE)
+  if ((load_room = char_get_load_room(d->character)) != NOWHERE)
     load_room = real_room(load_room);
 
   /* If char was saved with NOWHERE, or real_room above failed... */
@@ -462,8 +462,8 @@ int enter_player_game(struct descriptor_data *d)
     char_set_trp(d->character, char_get_rp(d->character));
   }
 
-  if (char_is_namek(d->character) && GET_COND(d->character, HUNGER) >= 0) {
-    GET_COND(d->character, HUNGER) = -1;
+  if (char_is_namek(d->character) && char_get_conditions(d->character, HUNGER) >= 0) {
+    char_set_conditions(d->character, HUNGER, -1);
   }
 
   if (char_plr_flagged(d->character, PLR_HEALT)) {
@@ -3928,14 +3928,14 @@ void nanny(struct descriptor_data *d, char *arg)
         }
       } else if (!strcasecmp(arg, "forget")) {
         if (!char_is_bio(d->character) && !char_is_mutant(d->character)) {
-          GET_PRACTICES(d->character, char_get_class(d->character)) += 200;
+          char_set_practice_points(d->character, char_get_practice_points(d->character) + (200));
           char_plr_set(d->character, PLR_FORGET, true);
           display_bonus_menu(d->character, 0);
           write_to_output(d, "@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
           write_to_output(d, "@wChoose: ");
           desc_set_connected(d, CON_BONUS);
         } else if (char_is_mutant(d->character)) {
-          GET_PRACTICES(d->character, char_get_class(d->character)) += 200;
+          char_set_practice_points(d->character, char_get_practice_points(d->character) + (200));
           char_plr_set(d->character, PLR_FORGET, true);
           write_to_output(d, "\n@RSelect a mutation. A second will be chosen automatically..\n");
           write_to_output(d, "@D--------------------------------------------------------@n\n");
@@ -3954,7 +3954,7 @@ void nanny(struct descriptor_data *d, char *arg)
           d->character->genome[1] = 0;
           desc_set_connected(d, CON_GENOME);
         } else {
-          GET_PRACTICES(d->character, char_get_class(d->character)) += 200;
+          char_set_practice_points(d->character, char_get_practice_points(d->character) + (200));
           char_plr_set(d->character, PLR_FORGET, true);
           write_to_output(d, "\n@RSelect two genomes to be your primary DNA strains.\n");
           write_to_output(d, "@D--------------------------------------------------------@n\n");
@@ -4159,7 +4159,7 @@ void nanny(struct descriptor_data *d, char *arg)
         write_to_output(d, "\r\n@wTo check the bonuses/negatives you have in game use the status command");
         if (char_get_ccpoints(d->character) > 0) {
           write_to_output(d, "\r\n@GYour left over points were spent on Practice Sessions@w");
-          GET_PRACTICES(d->character, char_get_class(d->character)) += (100 * char_get_ccpoints(d->character));
+          char_set_practice_points(d->character, char_get_practice_points(d->character) + ((100 * char_get_ccpoints(d->character))));
         }
         write_to_output(d, "\r\n*** PRESS RETURN: ");
         desc_set_connected(d, CON_QROLLSTATS);
@@ -4209,7 +4209,7 @@ void nanny(struct descriptor_data *d, char *arg)
         write_to_output(d, "\r\n@wTo check the bonuses/negatives you have in game use the status command");
         if (char_get_ccpoints(d->character) > 0) {
           write_to_output(d, "\r\n@GYour left over points were spent on Practice Sessions@w");
-          GET_PRACTICES(d->character, char_get_class(d->character)) += (100 * char_get_ccpoints(d->character));
+          char_set_practice_points(d->character, char_get_practice_points(d->character) + ((100 * char_get_ccpoints(d->character))));
         }
         write_to_output(d, "\r\n*** PRESS RETURN: ");
         desc_set_connected(d, CON_QROLLSTATS);
@@ -4422,8 +4422,8 @@ void nanny(struct descriptor_data *d, char *arg)
               char_get_aff_abils_dex(d->character) / 2 + char_get_aff_abils_cha(d->character) / 2;
       total -= 30;
       mudlog(LOG_CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]",
-             char_get_name(d->character), TRUE_RACE(d->character),
-             SENSEI_NAME(d->character));
+             char_get_name(d->character), char_true_race_name(d->character),
+             char_sensei_name(d->character));
       break;
 
     case CON_QSTATS:
@@ -4448,8 +4448,8 @@ void nanny(struct descriptor_data *d, char *arg)
                 char_get_aff_abils_dex(d->character) / 2 + char_get_aff_abils_cha(d->character) / 2;
         total -= 30;
         mudlog(LOG_CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]",
-               char_get_name(d->character), TRUE_RACE(d->character),
-               SENSEI_NAME(d->character));
+               char_get_name(d->character), char_true_race_name(d->character),
+               char_sensei_name(d->character));
         mudlog(LOG_CMP, ADMLVL_GOD, TRUE, "Str: %2d Dex: %2d Con: %2d Int: %2d "
                                           "Wis:  %2d Cha: %2d mod total: %2d",
                char_get_aff_abils_str(d->character),
@@ -4524,9 +4524,9 @@ void nanny(struct descriptor_data *d, char *arg)
             do_start(d->character);
             send_to_char(d->character, "%s", CONFIG_START_MESSG);
           }
-          if (rroom_get_vnum(char_get_in_room(d->character)) <= 1 && GET_LOADROOM(d->character) != NOWHERE) {
+          if (rroom_get_vnum(char_get_in_room(d->character)) <= 1 && char_get_load_room(d->character) != NOWHERE) {
             char_from_room(d->character);
-            char_to_room(d->character, real_room(real_room(GET_LOADROOM(d->character))));
+            char_to_room(d->character, real_room(real_room(char_get_load_room(d->character))));
           } else if (rroom_get_vnum(char_get_in_room(d->character)) <= 1) {
             char_from_room(d->character);
             char_to_room(d->character, real_room(real_room(300)));
@@ -4580,7 +4580,7 @@ void nanny(struct descriptor_data *d, char *arg)
             char buf3[MAX_INPUT_LENGTH];
             send_to_sense(0, "You sense someone appear suddenly", d->character);
             sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has suddenly entered your scouter detection range!@n.",
-                    add_commas(GET_HIT(d->character)));
+                    add_commas(getCurPL(d->character)));
             send_to_scouter(buf3, d->character, 0, 0);
           }
           if (load_result == 2) { /* rented items lost */
@@ -4690,7 +4690,7 @@ void nanny(struct descriptor_data *d, char *arg)
         }
         int refund = race_rpp_refund(d->character->race);
         if (refund && char_get_level(d->character) > 1) {
-          write_to_output(d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, TRUE_RACE(d->character));
+          write_to_output(d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, char_true_race_name(d->character));
           d->rpp += refund;
         }
         mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "User %s has deleted character %s (lev %d).", d->user, char_get_name(d->character), char_get_level(d->character));

@@ -704,7 +704,7 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
   improve_skill(ch, SKILL_APPRAISE, 1);
   if (char_get_skill(ch, SKILL_APPRAISE) < rand_number(1, 101)) {
     send_to_char(ch, "@wYou were completely stumped about the worth of %s@n\r\n", obj->short_description);
-    WAIT_STATE(ch, PULSE_2SEC);
+    char_set_wait(ch, PULSE_2SEC);
     return;
   } else {
     int displevel = obj_get_level(obj);
@@ -828,15 +828,15 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
         return;
     }
   }
-  if (char_get_carry_items(ch) + 1 > CAN_CARRY_N(ch)) {
+  if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
     send_to_char(ch, "%s: You can't carry any more items.\r\n", fname(obj->name));
     return;
   }
-  if (char_get_carry_weight(ch) + obj_get_weight(obj) > CAN_CARRY_W(ch)) {
+  if (char_get_carry_weight(ch) + obj_get_weight(obj) > getMaxCarryWeight(ch)) {
     send_to_char(ch, "%s: You can't carry that much weight.\r\n", fname(obj->name));
     return;
   }
-  while (obj && (char_get_gold(ch) >= buy_price(obj, shop_nr, keeper, ch) || char_adm_flagged(ch, ADM_MONEY)) && char_get_carry_items(ch) < CAN_CARRY_N(ch) && bought < buynum && char_get_carry_weight(ch) + obj_get_weight(obj) <= CAN_CARRY_W(ch)) {
+  while (obj && (char_get_gold(ch) >= buy_price(obj, shop_nr, keeper, ch) || char_adm_flagged(ch, ADM_MONEY)) && char_get_carry_items(ch) < char_can_carry_n(ch) && bought < buynum && char_get_carry_weight(ch) + obj_get_weight(obj) <= getMaxCarryWeight(ch)) {
     int charged;
 
     bought++;
@@ -876,9 +876,9 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
       snprintf(buf, sizeof(buf), "%s I only have %d to sell you.", char_get_name(ch), bought);
     else if (char_get_gold(ch) < buy_price(obj, shop_nr, keeper, ch))
       snprintf(buf, sizeof(buf), "%s You can only afford %d.", char_get_name(ch), bought);
-    else if (char_get_carry_items(ch) >= CAN_CARRY_N(ch))
+    else if (char_get_carry_items(ch) >= char_can_carry_n(ch))
       snprintf(buf, sizeof(buf), "%s You can only hold %d.", char_get_name(ch), bought);
-    else if (char_get_carry_weight(ch) + obj_get_weight(obj) > CAN_CARRY_W(ch))
+    else if (char_get_carry_weight(ch) + obj_get_weight(obj) > getMaxCarryWeight(ch))
       snprintf(buf, sizeof(buf), "%s You can only carry %d.", char_get_name(ch), bought);
     else
       snprintf(buf, sizeof(buf), "%s Something screwy only gave you %d.", char_get_name(ch), bought);

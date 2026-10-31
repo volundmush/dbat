@@ -109,3 +109,4 @@ void free_bufpool(void);
 void setup_log(const char *filename, int fd);
 int open_logfile(const char *filename, FILE *stderr_fp);
 void init_descriptor(struct descriptor_data *newd, int desc);
+bool sendok(struct char_data *ch, int to_sleeping);

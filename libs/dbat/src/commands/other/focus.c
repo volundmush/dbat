@@ -77,7 +77,7 @@ ACMD(do_focus)
       if (char_aff_flagged(ch, AFF_STONESKIN)) {
         send_to_char(ch, "You already have tough skin!\r\n");
         return;
-      } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+      } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
         send_to_char(ch, "You do not have enough ki to infuse into your skin.\r\n");
         return;
       } else if (char_get_skill(ch, SKILL_TSKIN) < axion_dice(0)) {
@@ -115,7 +115,7 @@ ACMD(do_focus)
         } else if (char_is_npc(vict)) {
           send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
           return;
-        } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+        } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
           send_to_char(ch, "You do not have enough ki to infuse into their skin.\r\n");
           return;
         } else if (char_get_skill(ch, SKILL_TSKIN) < axion_dice(0)) {
@@ -154,7 +154,7 @@ ACMD(do_focus)
       } else if (char_get_bonuses(ch, BONUS_FRAIL) > 0 && char_get_aff_abils_str(ch) + 2 > 70) {
         send_to_char(ch, "Your body is not able to withstand increasing its strength beyond 70.\r\n");
         return;
-      } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+      } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
         send_to_char(ch, "You do not have enough ki to infuse into your muscles.\r\n");
         return;
       } else if (char_get_skill(ch, SKILL_MIGHT) < axion_dice(0)) {
@@ -200,7 +200,7 @@ ACMD(do_focus)
         } else if (char_is_npc(vict)) {
           send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
           return;
-        } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+        } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
           send_to_char(ch, "You do not have enough ki to infuse into their muscles.\r\n");
           return;
         } else if (char_get_skill(ch, SKILL_MIGHT) < axion_dice(0)) {
@@ -244,7 +244,7 @@ ACMD(do_focus)
     if (is_affected(vict, AFF_WITHER)) {
       send_to_char(ch, "They already have been withered!\r\n");
       return;
-    } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+    } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
       send_to_char(ch, "You do not have enough ki to wither them.\r\n");
       return;
     } else if (char_get_skill(ch, SKILL_WITHER) < axion_dice(0)) {
@@ -277,7 +277,7 @@ ACMD(do_focus)
       } else if (char_get_bonuses(ch, BONUS_FOOLISH) > 0 && char_get_aff_abils_wis(ch) + 10 > 70) {
         send_to_char(ch, "You're not able to withstand increasing your wisdom beyond 70.\r\n");
         return;
-      } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+      } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
         send_to_char(ch, "You do not have enough ki to use this skill.\r\n");
         return;
       } else if (char_get_skill(ch, SKILL_ENLIGHTEN) < axion_dice(0)) {
@@ -294,9 +294,9 @@ ACMD(do_focus)
         reveal_hiding(ch, 0);
         act("You focus ki into your mind, awakening it to cosmic wisdom!", TRUE, ch, 0, 0, TO_CHAR);
         act("$n focuses ki into $s mind, awakening it to cosmic wisdom!", TRUE, ch, 0, 0, TO_ROOM);
-        if (char_is_jinto(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 && GET_PRACTICES(ch, char_get_class(ch)) >= 15 && rand_number(1, 4) >= 3) {
+        if (char_is_jinto(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 && char_get_practice_points(ch) >= 15 && rand_number(1, 4) >= 3) {
           int64_t gain = 0;
-          GET_PRACTICES(ch, char_get_class(ch)) -= 15;
+          char_set_practice_points(ch, char_get_practice_points(ch) - (15));
           if (char_get_skill(ch, SKILL_ENLIGHTEN) >= 100) {
             gain = level_exp(ch, char_get_level(ch) + 1) * 0.15;
             char_set_exp(ch, char_get_exp(ch) + (gain));
@@ -336,7 +336,7 @@ ACMD(do_focus)
         } else if (char_is_npc(vict)) {
           send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
           return;
-        } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+        } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
           send_to_char(ch, "You do not have enough ki to use this skill.\r\n");
           return;
         } else if (char_get_skill(ch, SKILL_ENLIGHTEN) < axion_dice(0)) {
@@ -355,9 +355,9 @@ ACMD(do_focus)
           act("You focus ki into $N's mind, awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_CHAR);
           act("$n focuses ki into your mind, awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_VICT);
           act("$n focuses ki into $N's mind, awakening it to cosmic wisdom!", TRUE, ch, 0, vict, TO_NOTVICT);
-          if (char_is_jinto(ch) && level_exp(vict, char_get_level(vict) + 1) - char_get_exp(vict) > 0 && GET_PRACTICES(ch, char_get_class(ch)) >= 15 && rand_number(1, 4) >= 3) {
+          if (char_is_jinto(ch) && level_exp(vict, char_get_level(vict) + 1) - char_get_exp(vict) > 0 && char_get_practice_points(ch) >= 15 && rand_number(1, 4) >= 3) {
             int64_t gain = 0;
-            GET_PRACTICES(ch, char_get_class(ch)) -= 15;
+            char_set_practice_points(ch, char_get_practice_points(ch) - (15));
             if (char_get_skill(ch, SKILL_ENLIGHTEN) >= 100) {
               gain = level_exp(vict, char_get_level(vict) + 1) * 0.15;
               char_set_exp(vict, char_get_exp(vict) + (gain));
@@ -390,7 +390,7 @@ ACMD(do_focus)
       } else if (char_get_bonuses(ch, BONUS_DULL) > 0 && char_get_aff_abils_intel(ch) + 10 > 70) {
         send_to_char(ch, "You're not able to withstand increasing your intelligence beyond 70.\r\n");
         return;
-      } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+      } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
         send_to_char(ch, "You do not have enough ki to infuse into your mind.\r\n");
         return;
       } else if (char_get_skill(ch, SKILL_GENIUS) < axion_dice(0)) {
@@ -432,7 +432,7 @@ ACMD(do_focus)
         } else if (char_is_npc(vict)) {
           send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
           return;
-        } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+        } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
           send_to_char(ch, "You do not have enough ki to infuse into their mind.\r\n");
           return;
         } else if (char_get_skill(ch, SKILL_GENIUS) < axion_dice(0)) {
@@ -475,7 +475,7 @@ ACMD(do_focus)
       } else if (char_get_bonuses(ch, BONUS_CLUMSY) > 0 && char_get_aff_abils_dex(ch) + 10 > 70) {
         send_to_char(ch, "You're not able to withstand increasing your agility beyond 70.\r\n");
         return;
-      } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+      } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
         send_to_char(ch, "You do not have enough ki to infuse into your limbs.\r\n");
         return;
       } else if (char_get_skill(ch, SKILL_FLEX) < axion_dice(0)) {
@@ -518,7 +518,7 @@ ACMD(do_focus)
         } else if (char_is_npc(vict)) {
           send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
           return;
-        } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+        } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
           send_to_char(ch, "You do not have enough ki to infuse into their limbs.\r\n");
           return;
         } else if (char_get_skill(ch, SKILL_FLEX) < axion_dice(0)) {
@@ -558,7 +558,7 @@ ACMD(do_focus)
       if (char_aff_flagged(ch, AFF_BLESS)) {
         send_to_char(ch, "You already are blessed!\r\n");
         return;
-      } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+      } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
         send_to_char(ch, "You do not have enough ki to bless.\r\n");
         return;
       } else if (char_get_skill(ch, SKILL_BLESS) < axion_dice(0)) {
@@ -607,7 +607,7 @@ ACMD(do_focus)
         } else if (char_is_npc(vict)) {
           send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
           return;
-        } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+        } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
           send_to_char(ch, "You do not have enough ki to bless.\r\n");
           return;
         } else if (char_get_skill(ch, SKILL_BLESS) < axion_dice(0)) {
@@ -659,7 +659,7 @@ ACMD(do_focus)
       } else if (char_is_demon(ch)) {
         send_to_char(ch, "You are immune to curses!\r\n");
         return;
-      } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+      } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
         send_to_char(ch, "You do not have enough ki to CURSE.\r\n");
         return;
       } else if (char_get_skill(ch, SKILL_CURSE) < axion_dice(0)) {
@@ -706,7 +706,7 @@ ACMD(do_focus)
         } else if (char_is_demon(vict)) {
           send_to_char(ch, "They are immune to curses!\r\n");
           return;
-        } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+        } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
           send_to_char(ch, "You do not have enough ki to CURSE.\r\n");
           return;
         } else if (char_get_skill(ch, SKILL_CURSE) < axion_dice(0)) {
@@ -757,7 +757,7 @@ ACMD(do_focus)
       } else if (char_aff_flagged(vict, AFF_BLIND)) {
         send_to_char(ch, "They appear to be blind!\r\n");
         return;
-      } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+      } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
         send_to_char(ch, "You do not have enough ki to use Yoikominminken.\r\n");
         return;
       } else if (char_get_bonuses(vict, BONUS_INSOMNIAC)) {
@@ -798,7 +798,7 @@ ACMD(do_focus)
       return;
     }
     if (!*name) {
-      if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 10) {
+      if ((getCurKI(ch)) < getMaxKI(ch) / 10) {
         send_to_char(ch, "You do not have enough ki to use vigor.\r\n");
         return;
       } else if (char_get_skill(ch, SKILL_VIGOR) < axion_dice(0)) {
@@ -806,9 +806,9 @@ ACMD(do_focus)
         reveal_hiding(ch, 0);
         act("You focus ki into your very cells, but fail at re-engerizing them!", TRUE, ch, 0, 0, TO_CHAR);
         act("$n focuses ki and glows green for a moment, $e then frowns.", TRUE, ch, 0, 0, TO_ROOM);
-        WAIT_STATE(ch, PULSE_2SEC);
+        char_set_wait(ch, PULSE_2SEC);
         return;
-      } else if ((getCurST(ch)) >= GET_MAX_MOVE(ch)) {
+      } else if ((getCurST(ch)) >= getMaxST(ch)) {
         send_to_char(ch, "You already have full stamina.\r\n");
         return;
       } else {
@@ -823,7 +823,7 @@ ACMD(do_focus)
         reveal_hiding(ch, 0);
         act("You focus ki into your very cells, and manage to re-energize them!", TRUE, ch, 0, 0, TO_CHAR);
         act("$n focuses ki and glows green for a moment, $e then smiles.", TRUE, ch, 0, 0, TO_ROOM);
-        WAIT_STATE(ch, PULSE_2SEC);
+        char_set_wait(ch, PULSE_2SEC);
         return;
       }
     } // End of no vict VIGOR
@@ -839,10 +839,10 @@ ACMD(do_focus)
         if (char_is_npc(vict)) {
           send_to_char(ch, "Whatever would you waste your ki on them for?\r\n");
           return;
-        } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 10) {
+        } else if ((getCurKI(ch)) < getMaxKI(ch) / 10) {
           send_to_char(ch, "You do not have enough ki to use vigor.\r\n");
           return;
-        } else if ((getCurST(vict)) >= GET_MAX_MOVE(vict)) {
+        } else if ((getCurST(vict)) >= getMaxST(vict)) {
           send_to_char(ch, "They already have full stamina.\r\n");
           return;
         } else if (char_get_skill(ch, SKILL_VIGOR) < axion_dice(0)) {
@@ -851,7 +851,7 @@ ACMD(do_focus)
           act("You focus ki into $N's very cells, and fail at re-energizing them!", TRUE, ch, 0, vict, TO_CHAR);
           act("$n focuses ki into your very cells, but nothing happens!", TRUE, ch, 0, vict, TO_VICT);
           act("$n focuses ki and $N glows green for a moment, $N frowns.", TRUE, ch, 0, vict, TO_NOTVICT);
-          WAIT_STATE(ch, PULSE_2SEC);
+          char_set_wait(ch, PULSE_2SEC);
           return;
         } else {
           if (char_get_bonuses(ch, BONUS_HEALER) > 0) {
@@ -865,7 +865,7 @@ ACMD(do_focus)
           act("You focus ki into $N's very cells, and manage to re-energize them!", TRUE, ch, 0, vict, TO_CHAR);
           act("$n focuses ki into your very cells, and manages to re-energize them!", TRUE, ch, 0, vict, TO_VICT);
           act("$n focuses ki and $N glows green for a moment, $N smiles.", TRUE, ch, 0, vict, TO_NOTVICT);
-          WAIT_STATE(ch, PULSE_2SEC);
+          char_set_wait(ch, PULSE_2SEC);
           return;
         }
       }
@@ -881,7 +881,7 @@ ACMD(do_focus)
       if (!char_aff_flagged(ch, AFF_POISON)) {
         send_to_char(ch, "You are not poisoned!\r\n");
         return;
-      } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+      } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
         send_to_char(ch, "You do not have enough ki to cure.\r\n");
         return;
       } else if (char_get_skill(ch, SKILL_CURE) < axion_dice(0)) {
@@ -916,7 +916,7 @@ ACMD(do_focus)
         if (!char_aff_flagged(vict, AFF_POISON)) {
           send_to_char(ch, "They are not poisoned!\r\n");
           return;
-        } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+        } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
           send_to_char(ch, "You do not have enough ki to cure.\r\n");
           return;
         } else if (char_get_skill(ch, SKILL_CURE) < axion_dice(0)) {
@@ -966,7 +966,7 @@ ACMD(do_focus)
       if (char_aff_flagged(vict, AFF_POISON)) {
         send_to_char(ch, "They already have been poisoned!\r\n");
         return;
-      } else if ((getCurKI(ch)) < GET_MAX_MANA(ch) / 20) {
+      } else if ((getCurKI(ch)) < getMaxKI(ch) / 20) {
         send_to_char(ch, "You do not have enough ki to poison.\r\n");
         return;
       } else if (char_get_skill(ch, SKILL_POISON) < axion_dice(0)) {

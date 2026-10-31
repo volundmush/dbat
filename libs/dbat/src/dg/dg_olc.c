@@ -111,7 +111,7 @@ ACMD(do_oasis_trigedit)
   char_plr_set(ch, PLR_WRITING, true);
 
   mudlog(LOG_CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d [trigger](allowed zone %d)",
-         char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+         char_get_name(ch), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
 }
 
 /* called when a mob or object is being saved to disk, so its script can */
@@ -337,7 +337,7 @@ void trigedit_parse(struct descriptor_data *d, char *arg)
       switch (tolower(*arg)) {
         case 'y':
           trigedit_save(d);
-          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
+          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(d->character)), TRUE,
                  "OLC: %s edits trigger %d", char_get_name(d->character),
                  OLC_NUM(d));
           /* fall through */
@@ -597,7 +597,7 @@ void trigedit_save(struct descriptor_data *d)
   snprintf(fname, sizeof(fname), "%s/%i.new", TRG_PREFIX, zone);
 
   if (!(trig_file = fopen(fname, "w"))) {
-    mudlog(LOG_BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(d->character)), TRUE,
+    mudlog(LOG_BRF, MAX(ADMLVL_GOD, char_get_invis_level(d->character)), TRUE,
            "SYSERR: OLC: Can't open trig file \"%s\"", fname);
     return;
   }
@@ -607,7 +607,7 @@ void trigedit_save(struct descriptor_data *d)
       trig = trig_index[rnum]->proto;
 
       if (fprintf(trig_file, "#%d\n", i) < 0) {
-        mudlog(LOG_BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(d->character)), TRUE,
+        mudlog(LOG_BRF, MAX(ADMLVL_GOD, char_get_invis_level(d->character)), TRUE,
                "SYSERR: OLC: Can't write trig file!");
         fclose(trig_file);
         return;

@@ -96,7 +96,7 @@ bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, obj_data 
 void tech_handle_fireshield(char_data *ch, char_data *vict, const char *part)
 {
 
-  if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
+  if (getCurPL(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && !char_get_bonuses(ch, BONUS_FIREPROOF) && !char_is_demon(ch)) {
     const char *part_name = part ? part : "body";
     char msg[MAX_INPUT_LENGTH];
     snprintf(msg, sizeof(msg), "@c$N's@W fireshield burns your %s!@n", part_name);
@@ -105,7 +105,7 @@ void tech_handle_fireshield(char_data *ch, char_data *vict, const char *part)
     act(msg, TRUE, ch, nullptr, vict, TO_VICT);
     snprintf(msg, sizeof(msg), "@c$n's@W %s is burned by @C$N's@W fireshield!@n", part_name);
     act(msg, TRUE, ch, nullptr, vict, TO_NOTVICT);
-    int64_t dmg = GET_MAX_MANA(vict) * 0.02;
+    int64_t dmg = getMaxKI(vict) * 0.02;
     char_set_lastattack(vict, char_get_lastattack(vict) + (1000));
     hurt(0, 0, vict, ch, nullptr, dmg, 0);
     if (char_get_bonuses(ch, BONUS_FIREPRONE)) {
@@ -117,7 +117,7 @@ void tech_handle_fireshield(char_data *ch, char_data *vict, const char *part)
       send_to_char(vict, "@RThey are burned!@n\r\n");
       char_aff_set(ch, AFF_BURNED, true);
     }
-  } else if (GET_HIT(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
+  } else if (getCurPL(vict) > 0 && !char_aff_flagged(vict, AFF_SPIRIT) && char_aff_flagged(vict, AFF_FIRESHIELD) && (char_get_bonuses(ch, BONUS_FIREPROOF) || char_is_demon(ch))) {
     send_to_char(vict, "@RThey appear to be fireproof!@n\r\n");
   }
 }
@@ -130,11 +130,11 @@ bool tech_handle_android_absorb(char_data *ch, char_data *vict)
     act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
     int amot = char_get_charge(ch);
     if (char_is_npc(ch)) {
-      amot = GET_MAX_MANA(ch) / 20;
+      amot = getMaxKI(ch) / 20;
     }
-    if (char_get_charge(vict) + amot > GET_MAX_MANA(vict)) {
+    if (char_get_charge(vict) + amot > getMaxKI(vict)) {
       incCurKI(vict, getMaxKI(vict) - char_get_charge(vict), true);
-      char_set_charge(vict, GET_MAX_MANA(vict));
+      char_set_charge(vict, getMaxKI(vict));
     } else {
       char_set_charge(vict, char_get_charge(vict) + (amot));
     }

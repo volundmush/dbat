@@ -674,12 +674,12 @@ int Crash_load(struct char_data *ch)
                "Trying your backup object file.\r\n");
 
   if ((fl = fopen(cmfnamebak, "r+b"))) {
-    mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s loading backup object file %s.", char_get_name(ch), cmfnamebak);
+    mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s loading backup object file %s.", char_get_name(ch), cmfnamebak);
     return Crash_load_file(ch, fl, cmfnamebak);
   }
 
   Crash_log_file_error("fopen backup object file", cmfnamebak, __FILE__, __LINE__);
-  mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s entering game with no equipment. Loading backup failed.", char_get_name(ch));
+  mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s entering game with no equipment. Loading backup failed.", char_get_name(ch));
   send_to_char(ch,
                "\r\n********************* NOTICE *********************\r\n"
                "There was a problem loading your objects from backup.\r\n"
@@ -713,20 +713,20 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
   }
   switch (orig_rent_code = rentcode) {
     case RENT_RENTED:
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s un-renting and entering game.", char_get_name(ch));
+      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s un-renting and entering game.", char_get_name(ch));
       break;
     case RENT_CRASH:
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s retrieving crash-saved items and entering game.", char_get_name(ch));
+      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s retrieving crash-saved items and entering game.", char_get_name(ch));
       break;
     case RENT_CRYO:
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s un-cryo'ing and entering game.", char_get_name(ch));
+      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s un-cryo'ing and entering game.", char_get_name(ch));
       break;
     case RENT_FORCED:
     case RENT_TIMEDOUT:
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s retrieving force-saved items and entering game.", char_get_name(ch));
+      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s retrieving force-saved items and entering game.", char_get_name(ch));
       break;
     default:
-      mudlog(LOG_BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "WARNING: %s entering game with undefined rent code.", char_get_name(ch));
+      mudlog(LOG_BRF, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "WARNING: %s entering game with undefined rent code.", char_get_name(ch));
       break;
   }
 
@@ -1014,7 +1014,7 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
   }
 
   /* Little hoarding check. -gg 3/1/98 */
-  mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s (level %d) has %d objects (max %d).",
+  mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s (level %d) has %d objects (max %d).",
          char_get_name(ch), char_get_level(ch), num_objs, CONFIG_MAX_OBJ_SAVE);
 
   fclose(fl);

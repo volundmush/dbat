@@ -122,11 +122,11 @@ void extract_char_final(struct char_data *ch)
     char_set_grap(ch, -1);
   }
 
-  if (CARRYING(ch)) {
+  if (char_get_carrying(ch)) {
     carry_drop(ch, 3);
   }
-  if (CARRIED_BY(ch)) {
-    carry_drop(CARRIED_BY(ch), 3);
+  if (char_get_carried_by(ch)) {
+    carry_drop(char_get_carried_by(ch), 3);
   }
 
   if (ch->poisonby) {

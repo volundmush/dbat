@@ -226,9 +226,9 @@ void topWrite(struct char_data *ch)
   for (x = start; x < finish; x++) {                   /* Save the new spots */
     if (placed == FALSE) {                             /* They Haven't Placed */
       if (strcasecmp(topname[x], char_get_name(ch))) { /* Name doesn't match */
-        if (GET_MAX_HIT(ch) > toppoint[x]) {
+        if (getEffMaxPL(ch) > toppoint[x]) {
           free(topname[x]);
-          toppoint[x] = GET_MAX_HIT(ch);
+          toppoint[x] = getEffMaxPL(ch);
           topname[x]  = strdup(char_get_name(ch));
           placed      = TRUE;
           writeEm     = TRUE;
@@ -274,9 +274,9 @@ void topWrite(struct char_data *ch)
   for (x = start; x < finish; x++) {                   /* Save the new spots */
     if (placed == FALSE) {                             /* They Haven't Placed */
       if (strcasecmp(topname[x], char_get_name(ch))) { /* Name doesn't match */
-        if (GET_MAX_MANA(ch) > toppoint[x]) {
+        if (getMaxKI(ch) > toppoint[x]) {
           free(topname[x]);
-          toppoint[x] = GET_MAX_MANA(ch);
+          toppoint[x] = getMaxKI(ch);
           topname[x]  = strdup(char_get_name(ch));
           placed      = TRUE;
           writeEm     = TRUE;
@@ -323,9 +323,9 @@ void topWrite(struct char_data *ch)
   for (x = start; x < finish; x++) {                   /* Save the new spots */
     if (placed == FALSE) {                             /* They Haven't Placed */
       if (strcasecmp(topname[x], char_get_name(ch))) { /* Name doesn't match */
-        if (GET_MAX_MOVE(ch) > toppoint[x]) {
+        if (getMaxST(ch) > toppoint[x]) {
           free(topname[x]);
-          toppoint[x] = GET_MAX_MOVE(ch);
+          toppoint[x] = getMaxST(ch);
           topname[x]  = strdup(char_get_name(ch));
           placed      = TRUE;
           writeEm     = TRUE;

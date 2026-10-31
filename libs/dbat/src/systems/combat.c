@@ -49,25 +49,25 @@ void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data 
   PL9  = PL9 * 4;
   PL8  = PL8 * 2;
 
-  if (GET_HIT(vict) >= PL10) {
+  if (getCurPL(vict) >= PL10) {
     ranking = 10;
-  } else if (GET_HIT(vict) >= PL9) {
+  } else if (getCurPL(vict) >= PL9) {
     ranking = 9;
-  } else if (GET_HIT(vict) >= PL8) {
+  } else if (getCurPL(vict) >= PL8) {
     ranking = 8;
-  } else if (GET_HIT(vict) >= 2000000000) {
+  } else if (getCurPL(vict) >= 2000000000) {
     ranking = 7;
-  } else if (GET_HIT(vict) >= 500000000) {
+  } else if (getCurPL(vict) >= 500000000) {
     ranking = 6;
-  } else if (GET_HIT(vict) >= 250000000) {
+  } else if (getCurPL(vict) >= 250000000) {
     ranking = 5;
-  } else if (GET_HIT(vict) >= 100000000) {
+  } else if (getCurPL(vict) >= 100000000) {
     ranking = 4;
-  } else if (GET_HIT(vict) >= 50000000) {
+  } else if (getCurPL(vict) >= 50000000) {
     ranking = 3;
-  } else if (GET_HIT(vict) >= 25000000) {
+  } else if (getCurPL(vict) >= 25000000) {
     ranking = 2;
-  } else if (GET_HIT(vict) >= 1000000) {
+  } else if (getCurPL(vict) >= 1000000) {
     ranking = 1;
   }
 
@@ -388,7 +388,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
       sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W cups $s hands be $s side and chants @B'@CKaaaameeeehaaaameee@B'@W. A ball of energy forms in $s hands and he quickly brings them forward and fires a @RKamehameha @Wat @r$N@W while screaming @B'@CHAAAAAAAAAAAAAAAAAAAAA!@B'@n@n");
       maxki = 0.15;
       attspd += 2;
-      bonus += GET_MAX_MOVE(ch) * 0.02;
+      bonus += getMaxST(ch) * 0.02;
       break;
     case 1: /* Galik Gun */
       sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You throw your hands forward and launch a purple beam of energy at @r$N@n while shouting @B'@mGalik Gun!@B'@W");
@@ -396,7 +396,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
       sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W throws $s arms forward and launches a purple beam at @r$N@W while shouting @B'@mGalik Gun!@B'@n");
       maxki = 0.15;
       attspd += 1;
-      bonus += GET_MAX_MANA(ch) * 0.5;
+      bonus += getMaxKI(ch) * 0.5;
       break;
     case 2: /* Masenko */
       sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You raise your hands above your head with one resting atop the other and begin to pour your charged energy to that point. As soon as the energy is ready you shout @B'@RMasenko Ha!@B'@W and bringing your hands down you launch a bright reddish orange beam at @r$N@W!@n");
@@ -404,7 +404,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
       sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W raises $s hands above $s head and energy quicly pools there. Suddenly $e brings $s hands down and shouts @B'@RMasenko Ha!@B'@W as a bright reddish orange beam launches toward @r$N!@n");
       maxki = 0.15;
       attspd += 1;
-      bonus += GET_MAX_MANA(ch) * 0.5;
+      bonus += getMaxKI(ch) * 0.5;
       break;
     case 3: /* Deathbeam */
       sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! With a quick motion you point at @r$N@W and launch a lightning fast @MDeathbeam@W!@n");
@@ -462,14 +462,14 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
       sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W forms a triangle with $s hands and aims the center at @r$N@W! With the sudden shout @B'@YTribeam@B'@W a large beam of energy flashes toward @r$N!@n");
       maxki = 0.2;
       attspd += 2;
-      bonus += GET_MAX_HIT(ch) * 0.5;
+      bonus += getEffMaxPL(ch) * 0.5;
       break;
     case 11: /* Starbreaker */
       sprintf(chbuf, "@WPositioning yourself in the center of your group, you call out to your allies to launch a group attack! You raise your right hand above your head as dark red energy begins to pool in your slightly cupped hand, while purple arcs of electricity flow up your left arm. Slamming both hands together, you shout @B'@YStarbreaker@B'@W and release your prepared energy at $M in the form of a ball!@n");
       sprintf(victbuf, "@Y$n@W calls out to $s allies to launch a group attack against @rYOU@W! @Y$n@W raises $s right hand, pooling dark red energy in the palm. @Y$n@W slams both their hands together, shouting @B'@YStarbreaker@B'@W, a ball of energy flashes toward @rYOU!@n");
       sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! @Y$n@W raises their right hand above their head, pooling dark red energy. @Y$n@W slams both their hands together, shouting @B'@YStarbreaker@B'@W, a ball of energy flashes toward @r$N!@n");
       maxki = 0.2;
-      bonus += GET_MAX_MANA(ch) * 0.6;
+      bonus += getMaxKI(ch) * 0.6;
       break;
     case 12: /* Seishou Enko */
       sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You open your mouth and aim at @r$N@W. You grunt as you release your prepared energy at $M in the form of a beam!");
@@ -497,9 +497,9 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
   act(victbuf, TRUE, ch, 0, vict, TO_VICT);
   act(rmbuf, TRUE, ch, 0, vict, TO_NOTVICT);
 
-  if (char_get_charge(ch) >= GET_MAX_MANA(ch) * maxki) {
-    totki += GET_MAX_MANA(ch) * maxki;
-    char_set_charge(ch, char_get_charge(ch) - (GET_MAX_MANA(ch) * maxki));
+  if (char_get_charge(ch) >= getMaxKI(ch) * maxki) {
+    totki += getMaxKI(ch) * maxki;
+    char_set_charge(ch, char_get_charge(ch) - (getMaxKI(ch) * maxki));
   } else {
     totki += char_get_charge(ch);
     char_set_charge(ch, 0);
@@ -512,9 +512,9 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
       if (char_get_combine(f->follower) != char_get_combine(ch)) {
         same = FALSE;
       }
-      if (char_get_charge(f->follower) >= GET_MAX_MANA(f->follower) * maxki) {
-        totki += GET_MAX_MANA(f->follower) * maxki;
-        char_set_charge(f->follower, char_get_charge(f->follower) - (GET_MAX_MANA(f->follower) * maxki));
+      if (char_get_charge(f->follower) >= getMaxKI(f->follower) * maxki) {
+        totki += getMaxKI(f->follower) * maxki;
+        char_set_charge(f->follower, char_get_charge(f->follower) - (getMaxKI(f->follower) * maxki));
       } else {
         totki += char_get_charge(f->follower);
         char_set_charge(f->follower, 0);
@@ -734,10 +734,10 @@ int64_t gun_dam(struct char_data *ch, int wlvl)
 
   dmg_prior = (dmg * char_get_aff_abils_dex(ch)) * ((char_get_level(ch) / 5) + 1);
 
-  if (dmg_prior <= GET_MAX_HIT(ch) * 0.4)
+  if (dmg_prior <= getEffMaxPL(ch) * 0.4)
     dmg = dmg_prior;
   else
-    dmg = GET_MAX_HIT(ch) * 0.4;
+    dmg = getEffMaxPL(ch) * 0.4;
 
   return (dmg);
 }
@@ -873,7 +873,7 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
     return;
   }
 
-  if (GET_HIT(vict) <= 1) {
+  if (getCurPL(vict) <= 1) {
     return;
   }
 
@@ -1074,9 +1074,9 @@ int64_t advanced_energy(struct char_data *ch, int64_t dmg)
 
     if (rate > 0.00) {
       add = dmg * rate;
-      if (char_get_charge(ch) + add > GET_MAX_MANA(ch)) {
-        if (char_get_charge(ch) < GET_MAX_MANA(ch)) {
-          char_set_charge(ch, GET_MAX_MANA(ch));
+      if (char_get_charge(ch) + add > getMaxKI(ch)) {
+        if (char_get_charge(ch) < getMaxKI(ch)) {
+          char_set_charge(ch, getMaxKI(ch));
           act("@MYou leech some of the energy away!@n", TRUE, ch, 0, 0, TO_CHAR);
           act("@m$n@M leeches some of the energy away!@n", TRUE, ch, 0, 0, TO_ROOM);
         } else {
@@ -1465,7 +1465,7 @@ void dam_eq_loc(struct char_data *vict, int area)
   /* Area is 4 possible hit locations in an attack.
     1 Arms, 2 legs, 3 head, and 4 body. */
 
-  if (!vict || vict == NULL || GET_HIT(vict) <= 0) {
+  if (!vict || vict == NULL || getCurPL(vict) <= 0) {
     return;
   }
 
@@ -1647,7 +1647,7 @@ void huge_update()
           act("@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", TRUE, obj_get_target(k), 0, 0, TO_CHAR);
           act("@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", TRUE, obj_get_target(k), 0, 0, TO_ROOM);
           send_to_room(obj_get_in_room(k), "\r\n");
-          if (GET_HIT(obj_get_target(k)) * bonus < obj_get_kicharge(k) * 5) {
+          if (getCurPL(obj_get_target(k)) * bonus < obj_get_kicharge(k) * 5) {
 
             act("@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", TRUE, obj_get_target(k), 0, 0, TO_CHAR);
             act("@C$n@W's strength is no match for the power of the attack! It slowly grinds into $m before exploding into a massive blast!@n", TRUE, obj_get_target(k), 0, 0, TO_ROOM);
@@ -1691,7 +1691,7 @@ void huge_update()
                 act("@cYou disappear, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_VICT);
                 act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_NOTVICT);
                 char_aff_set(vict, AFF_ZANZOKEN, false);
-                pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+                pcost(vict, 0, getEffMaxPL(vict) / 200);
                 hurt(0, 0, ch, vict, NULL, 0, 1);
                 continue;
               } else if (dge + rand_number(-10, 5) > skill) {
@@ -1704,7 +1704,7 @@ void huge_update()
               } else {
                 count += 1;
                 if (char_is_npc(vict) && count > 10) {
-                  if (GET_HIT(vict) < dmg) {
+                  if (getCurPL(vict) < dmg) {
                     double loss = 0.0;
 
                     if (count >= 30) {
@@ -1778,7 +1778,7 @@ void huge_update()
               act("@cYou disappear, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_VICT);
               act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_NOTVICT);
               char_aff_set(vict, AFF_ZANZOKEN, false);
-              pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+              pcost(vict, 0, getEffMaxPL(vict) / 200);
               hurt(0, 0, ch, vict, NULL, 0, 1);
               continue;
             } else if (dge + rand_number(-10, 5) > skill) {
@@ -1817,7 +1817,7 @@ void huge_update()
           act("@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", TRUE, obj_get_target(k), 0, 0, TO_CHAR);
           act("@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", TRUE, obj_get_target(k), 0, 0, TO_ROOM);
           send_to_room(obj_get_in_room(k), "\r\n");
-          if (GET_HIT(obj_get_target(k)) * bonus < obj_get_kicharge(k) * 10) {
+          if (getCurPL(obj_get_target(k)) * bonus < obj_get_kicharge(k) * 10) {
 
             act("@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", TRUE, obj_get_target(k), 0, 0, TO_CHAR);
             act("@C$n@W's strength is no match for the power of the attack! It slowly grinds into $m before exploding into a massive blast!@n", TRUE, obj_get_target(k), 0, 0, TO_ROOM);
@@ -1861,7 +1861,7 @@ void huge_update()
                 act("@cYou disappear, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_VICT);
                 act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_NOTVICT);
                 char_aff_set(vict, AFF_ZANZOKEN, false);
-                pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+                pcost(vict, 0, getEffMaxPL(vict) / 200);
                 continue;
               } else if (dge + rand_number(-10, 5) > skill) {
                 act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -1873,7 +1873,7 @@ void huge_update()
               } else {
                 count += 1;
                 if (char_is_npc(vict) && count > 10) {
-                  if (GET_HIT(vict) < dmg) {
+                  if (getCurPL(vict) < dmg) {
                     double loss = 0.0;
 
                     if (count >= 30) {
@@ -1946,7 +1946,7 @@ void huge_update()
               act("@cYou disappear, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_VICT);
               act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_NOTVICT);
               char_aff_set(vict, AFF_ZANZOKEN, false);
-              pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+              pcost(vict, 0, getEffMaxPL(vict) / 200);
               continue;
             } else if (dge + rand_number(-10, 5) > skill) {
               act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -2060,7 +2060,7 @@ void homing_update()
               hurt(0, 0, ch, vict, NULL, dmg, 1);
             } else if (obj_get_vnum(k) == 84) {
               int64_t dmg = obj_get_kicharge(k);
-              if (dmg > GET_MAX_HIT(vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
+              if (dmg > getEffMaxPL(vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
                 act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
                 act("@rYou are cut in half by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
                 act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -2076,15 +2076,15 @@ void homing_update()
                 if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOLOOT)) {
                   do_get(ch, "all corpse", 0, 0);
                 }
-              } else if (dmg > GET_MAX_HIT(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
-                if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= GET_MAX_MANA(vict) / 40) {
+              } else if (dmg > getEffMaxPL(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
+                if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= getMaxKI(vict) / 40) {
                   act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
                   act("@rYou are cut in half by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
                   act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
                   decCurKI(vict, getMaxKI(vict) / 40, 0);
                   hurt(0, 0, ch, vict, NULL, dmg, 1);
-                } else if (dmg > GET_MAX_HIT(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
-                  if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= GET_MAX_MANA(vict) / 40) {
+                } else if (dmg > getEffMaxPL(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
+                  if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= getMaxKI(vict) / 40) {
                     act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
                     act("@rYou are cut in half by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
                     act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -2880,52 +2880,52 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
     switch (type) {
       // big list of h2h stuff for starters.
       case -1:
-        cou1 = 1 + ((skill / 4) * ((GET_HIT(ch) / 1200) + char_get_aff_abils_str(ch)));
-        cou2 = 1 + ((skill / 4) * ((GET_HIT(ch) / 1000) + char_get_aff_abils_str(ch)));
+        cou1 = 1 + ((skill / 4) * ((getCurPL(ch) / 1200) + char_get_aff_abils_str(ch)));
+        cou2 = 1 + ((skill / 4) * ((getCurPL(ch) / 1000) + char_get_aff_abils_str(ch)));
         break;
       case 0: /* Punch */
-        cou1 = 15 + ((skill / 4) * ((GET_HIT(ch) / 1600) + char_get_aff_abils_str(ch)));
-        cou2 = 15 + ((skill / 4) * ((GET_HIT(ch) / 1300) + char_get_aff_abils_str(ch)));
+        cou1 = 15 + ((skill / 4) * ((getCurPL(ch) / 1600) + char_get_aff_abils_str(ch)));
+        cou2 = 15 + ((skill / 4) * ((getCurPL(ch) / 1300) + char_get_aff_abils_str(ch)));
         break;
       case 1: /* Kick */
-        cou1 = 40 + ((skill / 4) * ((GET_HIT(ch) / 1200) + char_get_aff_abils_str(ch)));
-        cou2 = 40 + ((skill / 4) * ((GET_HIT(ch) / 1000) + char_get_aff_abils_str(ch)));
+        cou1 = 40 + ((skill / 4) * ((getCurPL(ch) / 1200) + char_get_aff_abils_str(ch)));
+        cou2 = 40 + ((skill / 4) * ((getCurPL(ch) / 1000) + char_get_aff_abils_str(ch)));
         break;
       case 2: /* Elbow */
-        cou1 = 100 + ((skill / 4) * ((GET_HIT(ch) / 1300) + char_get_aff_abils_str(ch)));
-        cou2 = 100 + ((skill / 4) * ((GET_HIT(ch) / 1050) + char_get_aff_abils_str(ch)));
+        cou1 = 100 + ((skill / 4) * ((getCurPL(ch) / 1300) + char_get_aff_abils_str(ch)));
+        cou2 = 100 + ((skill / 4) * ((getCurPL(ch) / 1050) + char_get_aff_abils_str(ch)));
         break;
       case 3: /* Knee */
-        cou1 = 150 + ((skill / 4) * ((GET_HIT(ch) / 1100) + char_get_aff_abils_str(ch)));
-        cou2 = 150 + ((skill / 4) * ((GET_HIT(ch) / 1000) + char_get_aff_abils_str(ch)));
+        cou1 = 150 + ((skill / 4) * ((getCurPL(ch) / 1100) + char_get_aff_abils_str(ch)));
+        cou2 = 150 + ((skill / 4) * ((getCurPL(ch) / 1000) + char_get_aff_abils_str(ch)));
         break;
       case 4: /* Roundhouse */
-        cou1 = 500 + ((skill / 4) * ((GET_HIT(ch) / 1000) + char_get_aff_abils_str(ch)));
-        cou2 = 500 + ((skill / 4) * ((GET_HIT(ch) / 800) + char_get_aff_abils_str(ch)));
+        cou1 = 500 + ((skill / 4) * ((getCurPL(ch) / 1000) + char_get_aff_abils_str(ch)));
+        cou2 = 500 + ((skill / 4) * ((getCurPL(ch) / 800) + char_get_aff_abils_str(ch)));
         break;
       case 5: /* Uppercut */
-        cou1 = 350 + ((skill / 4) * ((GET_HIT(ch) / 1100) + char_get_aff_abils_str(ch)));
-        cou2 = 350 + ((skill / 4) * ((GET_HIT(ch) / 900) + char_get_aff_abils_str(ch)));
+        cou1 = 350 + ((skill / 4) * ((getCurPL(ch) / 1100) + char_get_aff_abils_str(ch)));
+        cou2 = 350 + ((skill / 4) * ((getCurPL(ch) / 900) + char_get_aff_abils_str(ch)));
         break;
       case 6: /* Slam */
-        cou1 = 8000 + ((skill / 4) * ((GET_HIT(ch) / 800) + char_get_aff_abils_str(ch)));
-        cou2 = 8000 + ((skill / 4) * ((GET_HIT(ch) / 500) + char_get_aff_abils_str(ch)));
+        cou1 = 8000 + ((skill / 4) * ((getCurPL(ch) / 800) + char_get_aff_abils_str(ch)));
+        cou2 = 8000 + ((skill / 4) * ((getCurPL(ch) / 500) + char_get_aff_abils_str(ch)));
         break;
       case 8: /* Heeldrop */
-        cou1 = 12500 + ((skill / 4) * ((GET_HIT(ch) / 700) + char_get_aff_abils_str(ch)));
-        cou2 = 12500 + ((skill / 4) * ((GET_HIT(ch) / 400) + char_get_aff_abils_str(ch)));
+        cou1 = 12500 + ((skill / 4) * ((getCurPL(ch) / 700) + char_get_aff_abils_str(ch)));
+        cou2 = 12500 + ((skill / 4) * ((getCurPL(ch) / 400) + char_get_aff_abils_str(ch)));
         break;
       case 51: /* Bash */
-        cou1 = 1000 + ((skill / 4) * ((GET_HIT(ch) / 700) + char_get_aff_abils_str(ch)));
-        cou2 = 1000 + ((skill / 4) * ((GET_HIT(ch) / 550) + char_get_aff_abils_str(ch)));
+        cou1 = 1000 + ((skill / 4) * ((getCurPL(ch) / 700) + char_get_aff_abils_str(ch)));
+        cou2 = 1000 + ((skill / 4) * ((getCurPL(ch) / 550) + char_get_aff_abils_str(ch)));
         break;
       case 52: /* Headbutt */
-        cou1 = 800 + ((skill / 4) * ((GET_HIT(ch) / 900) + char_get_aff_abils_str(ch)));
-        cou2 = 800 + ((skill / 4) * ((GET_HIT(ch) / 650) + char_get_aff_abils_str(ch)));
+        cou1 = 800 + ((skill / 4) * ((getCurPL(ch) / 900) + char_get_aff_abils_str(ch)));
+        cou2 = 800 + ((skill / 4) * ((getCurPL(ch) / 650) + char_get_aff_abils_str(ch)));
         break;
       case 56: /* TAILWHIP */
-        cou1 = 400 + ((skill / 4) * ((GET_HIT(ch) / 1100) + char_get_aff_abils_str(ch)));
-        cou2 = 400 + ((skill / 4) * ((GET_HIT(ch) / 1000) + char_get_aff_abils_str(ch)));
+        cou1 = 400 + ((skill / 4) * ((getCurPL(ch) / 1100) + char_get_aff_abils_str(ch)));
+        cou2 = 400 + ((skill / 4) * ((getCurPL(ch) / 1000) + char_get_aff_abils_str(ch)));
         break;
     }
 
@@ -2953,7 +2953,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
         dam += char_get_aff_abils_str(ch) * (dam * 0.005);
         break;
       default: // all ki abilities.
-        dam = GET_MAX_MANA(ch) * percent;
+        dam = getMaxKI(ch) * percent;
         ki  = true;
     }
 
@@ -3052,9 +3052,9 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
         if (char_get_preference(ch) == PREFERENCE_KI) {
           dam -= dam * 0.20;
         }
-        if (char_get_preference(ch) == PREFERENCE_WEAPON && char_get_charge(ch) >= GET_MAX_MANA(ch) * 0.05) {
-          dam += GET_MAX_MANA(ch) * 0.05;
-          char_set_charge(ch, char_get_charge(ch) - (GET_MAX_MANA(ch) * 0.05));
+        if (char_get_preference(ch) == PREFERENCE_WEAPON && char_get_charge(ch) >= getMaxKI(ch) * 0.05) {
+          dam += getMaxKI(ch) * 0.05;
+          char_set_charge(ch, char_get_charge(ch) - (getMaxKI(ch) * 0.05));
         } else if (char_get_preference(ch) == PREFERENCE_WEAPON && char_get_charge(ch) > 0) {
           dam += char_get_charge(ch);
           char_set_charge(ch, char_get_charge(ch) - (0));
@@ -3282,7 +3282,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
         break;
     }
   } else {
-    dam = (GET_HIT(ch) * 0.05) + (GET_MAX_HIT(ch) * 0.025);
+    dam = (getCurPL(ch) * 0.05) + (getEffMaxPL(ch) * 0.025);
     dam += (dam * 0.005) * char_get_aff_abils_str(ch);
     if (char_get_level(ch) >= 120) {
       dam *= 0.25;
@@ -3301,8 +3301,8 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
       dam += char_get_aff_abils_intel(ch) * (dam * 0.005);
     }
 
-    int64_t mob_hit = GET_HIT(ch);
-    int64_t max_hit = GET_MAX_HIT(ch);
+    int64_t mob_hit = getCurPL(ch);
+    int64_t max_hit = getEffMaxPL(ch);
     int64_t mobperc = (mob_hit * 100) / max_hit;
     if (mobperc < 98 && mobperc >= 90) {
       dam = dam * 0.95;
@@ -3347,7 +3347,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
   if ((type == -1 || type == 0 || type == 1 || type == 2 || type == 3 || type == 4 || type == 5 || type == 6 || type == 8)) {
     if (!char_is_npc(ch))
       dam -= dam * 0.08;
-    if (!char_is_npc(ch) && dam > GET_MAX_HIT(ch) * 0.1)
+    if (!char_is_npc(ch) && dam > getEffMaxPL(ch) * 0.1)
       dam *= 0.6;
   } else {
     dam += (dam * 0.005) * char_get_aff_abils_intel(ch);
@@ -3372,7 +3372,7 @@ static void saiyan_gain(struct char_data *ch, struct char_data *vict)
   if (char_is_npc(ch))
     return;
 
-  if (GET_MAX_HIT(vict) < GET_MAX_HIT(ch) / 10) {
+  if (getEffMaxPL(vict) < getEffMaxPL(ch) / 10) {
     weak = TRUE;
   }
 
@@ -3439,9 +3439,9 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
   int64_t gain = 0, pl = 0, ki = 0, st = 0, gaincalc = 0;
 
   if (ch != NULL && !char_is_npc(ch)) {
-    if (dmg > GET_MAX_HIT(vict) / 10) {
+    if (dmg > getEffMaxPL(vict) / 10) {
       chance = rand_number(20, 100);
-    } else if (dmg <= GET_MAX_HIT(vict) / 10) {
+    } else if (dmg <= getEffMaxPL(vict) / 10) {
       chance = rand_number(1, 75);
     }
 
@@ -3544,10 +3544,10 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
         }
         if (!char_is_npc(vict)) {
           if (char_prf_flagged(vict, PRF_INSTRUCT)) {
-            if (GET_PRACTICES(vict, char_get_class(vict)) > 10) {
+            if (char_get_practice_points(vict) > 10) {
               send_to_char(vict, "You instruct them in proper fighting techniques and strategies.\r\n");
               act("You take $N's instruction to heart and gain more experience.\r\n", FALSE, ch, 0, vict, TO_CHAR);
-              GET_PRACTICES(vict, char_get_class(vict)) -= 10;
+              char_set_practice_points(vict, char_get_practice_points(vict) - (10));
               bonus = 2;
             }
           }
@@ -3571,8 +3571,8 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
         }
       }
       gain = gear_exp(ch, gaincalc);
-      if (GET_PRACTICES(ch, char_get_class(ch)) >= pscost) {
-        GET_PRACTICES(ch, char_get_class(ch)) -= pscost;
+      if (char_get_practice_points(ch) >= pscost) {
+        char_set_practice_points(ch, char_get_practice_points(ch) - (pscost));
         gain = gain * bonus;
         gain_exp(ch, gain);
         send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
@@ -3592,9 +3592,9 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
   }
 
   if (vict != NULL && !char_is_npc(vict) && !char_is_npc(ch)) {
-    if (dmg > GET_MAX_HIT(vict) / 4) {
+    if (dmg > getEffMaxPL(vict) / 4) {
       chance = rand_number(1, 100);
-    } else if (dmg <= GET_MAX_HIT(vict) / 4) {
+    } else if (dmg <= getEffMaxPL(vict) / 4) {
       chance = rand_number(1, 70);
     }
 
@@ -3684,8 +3684,8 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
           gain *= 1.25;
         }
       }
-      if (GET_PRACTICES(vict, char_get_class(vict)) >= pscost) {
-        GET_PRACTICES(vict, char_get_class(vict)) -= pscost;
+      if (char_get_practice_points(vict) >= pscost) {
+        char_set_practice_points(vict, char_get_practice_points(vict) - (pscost));
         send_to_char(vict, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain));
         gain = gear_exp(vict, gain);
         gain_exp(vict, gain);
@@ -3892,7 +3892,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     int64_t conlimit = 2000000000;
 
     if (type == 0) {
-      int64_t vpl = GET_MAX_HIT(vict);
+      int64_t vpl = getEffMaxPL(vict);
       int vcon    = char_get_aff_abils_con(vict);
 
       if (vpl < conlimit) {
@@ -3952,8 +3952,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
       dmg += (dmg * 0.01) * 20;
     }
 
-    if (!char_is_npc(vict) && GET_COND(vict, DRUNK) > 4) {
-      dmg -= (dmg * 0.001) * GET_COND(vict, DRUNK);
+    if (!char_is_npc(vict) && char_get_conditions(vict, DRUNK) > 4) {
+      dmg -= (dmg * 0.001) * char_get_conditions(vict, DRUNK);
     }
 
     if (char_aff_flagged(vict, AFF_EARMOR)) {
@@ -4060,7 +4060,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     if (char_is_humanoid(vict) && !char_is_npc(ch) && char_is_npc(vict) && (!is_sparring(ch) || !is_sparring(vict))) {
       remember(vict, ch);
     }
-    if (char_is_npc(vict) && GET_HIT(vict) > ((getEffMaxPL(vict))) / 4) {
+    if (char_is_npc(vict) && getCurPL(vict) > ((getEffMaxPL(vict))) / 4) {
       char_set_lasthit(vict, char_get_idnum(ch));
     }
     if (char_aff_flagged(vict, AFF_SLEEP) && rand_number(1, 2) == 2) {
@@ -4120,7 +4120,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
       char_set_exp(vict, char_get_exp(vict) / (2));
     }
 
-    if (CARRYING(vict) && dmg > (((getEffMaxPL(vict))) * 0.01) && rand_number(1, 10) >= 8) {
+    if (char_get_carrying(vict) && dmg > (((getEffMaxPL(vict))) * 0.01) && rand_number(1, 10) >= 8) {
       carry_drop(vict, 2);
     }
 
@@ -4169,7 +4169,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         extract_char(vict);
         return;
       }
-    } else if (is_sparring(ch) && (char_get_suppressed(vict) + GET_HIT(vict)) - dmg <= 0) {
+    } else if (is_sparring(ch) && (char_get_suppressed(vict) + getCurPL(vict)) - dmg <= 0) {
       act("@c$N@w falls down unconscious, and you spare $S life.@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@w spares your life as you fall unconscious.@n", TRUE, ch, 0, vict, TO_VICT);
       act("@c$N@w falls down unconscious, and @C$n@w spares $S life.@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -4253,15 +4253,15 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
       maindmg = maindmg / 2;
       hurt(0, 0, ch, char_get_grappled(vict), NULL, maindmg, 3);
     }
-    if (!is_sparring(ch) && !char_plr_flagged(vict, PLR_IMMORTAL) && GET_HIT(vict) - dmg <= 0) {
+    if (!is_sparring(ch) && !char_plr_flagged(vict, PLR_IMMORTAL) && getCurPL(vict) - dmg <= 0) {
 
-      if (GET_HIT(vict) - dmg <= 0 && suppresso == FALSE) {
+      if (getCurPL(vict) - dmg <= 0 && suppresso == FALSE) {
         decCurHealthPercent(vict, 1, 0);
-        if (!char_is_npc(vict) && vict->lifeperc > 0 && (getCurLF(vict)) - (dmg - GET_HIT(vict)) >= 0) {
+        if (!char_is_npc(vict) && vict->lifeperc > 0 && (getCurLF(vict)) - (dmg - getCurPL(vict)) >= 0) {
           act("@c$N@w barely clings to life!@n", TRUE, ch, 0, vict, TO_CHAR);
           act("@CYou barely cling to life!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@c$N@w barely clings to life!@n.", TRUE, ch, 0, vict, TO_NOTVICT);
-          int64_t lifeloss = dmg - GET_HIT(vict);
+          int64_t lifeloss = dmg - getCurPL(vict);
           decCurLF(vict, lifeloss, 0);
           send_to_char(vict, "@D[@CLifeforce@D: @R-%s@D]\n", add_commas(lifeloss));
           if ((getCurLF(vict)) >= (getMaxLF(vict)) * 0.05) {
@@ -4285,14 +4285,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
           act("@R$N@w self destructs with a mild explosion!@n", TRUE, ch, 0, vict, TO_ROOM);
         }
         if (dmg > 1) {
-          if (type <= 0 && GET_HIT(ch) >= getEffMaxPL(ch) * 0.5) {
-            int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
+          if (type <= 0 && getCurPL(ch) >= getEffMaxPL(ch) * 0.5) {
+            int64_t raise = (getMaxKI(ch) * 0.005) + 1;
             incCurKI(ch, raise, true);
           }
           send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
           send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
-          int64_t healhp = (long double)(GET_MAX_HIT(vict)) * 0.12;
-          if (char_aff_flagged(ch, AFF_METAMORPH) && GET_HIT(ch) <= GET_MAX_HIT(ch)) {
+          int64_t healhp = (long double)(getEffMaxPL(vict)) * 0.12;
+          if (char_aff_flagged(ch, AFF_METAMORPH) && getCurPL(ch) <= getEffMaxPL(ch)) {
             act("@RYour dark aura saps some of @r$N's@R life energy!@n", TRUE, ch, 0, vict, TO_CHAR);
             act("@r$n@R's dark aura saps some of your life energy!@n", TRUE, ch, 0, vict, TO_VICT);
             incCurHealth(ch, healhp, true);
@@ -4318,7 +4318,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             if (char_is_npc(ch))
               assign_affect(vict, AFF_ECHAINS, 0, -1, 0, 0, 0, 0, 0, -2);
             else
-              WAIT_STATE(ch, PULSE_3SEC);
+              char_set_wait(ch, PULSE_3SEC);
           }
         } else if (dmg <= 1) {
           send_to_char(ch, "@D[@GDamage@W: @BPitiful...@D]@n\r\n");
@@ -4338,7 +4338,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         die(vict, ch);
         dead = TRUE;
       }
-    } else if (GET_HIT(vict) - dmg > 0 || suppresso == TRUE) {
+    } else if (getCurPL(vict) - dmg > 0 || suppresso == TRUE) {
       if (suppresso == FALSE) {
         decCurHealth(vict, dmg, 0);
       }
@@ -4353,8 +4353,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         set_fighting(vict, ch);
       }
       if (dmg > 1 && suppresso == FALSE) {
-        if (type == 0 && GET_HIT(ch) >= getEffMaxPL(ch) * 0.5) {
-          int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
+        if (type == 0 && getCurPL(ch) >= getEffMaxPL(ch) * 0.5) {
+          int64_t raise = (getMaxKI(ch) * 0.005) + 1;
           incCurKI(ch, raise, true);
         }
         if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 10 || char_get_genome(ch, 1) == 10)) {
@@ -4366,14 +4366,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         if (char_get_equipment(ch, WEAR_EYE) && vict && !char_prf_flagged(ch, PRF_NODEC)) {
           if (char_is_android(vict)) {
             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-          } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
+          } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_BSCOUTER) && getCurPL(vict) >= 150000) {
             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-          } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
+          } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_MSCOUTER) && getCurPL(vict) >= 5000000) {
             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-          } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
+          } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_ASCOUTER) && getCurPL(vict) >= 15000000) {
             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
           } else {
-            send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)));
+            send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(getCurPL(vict)));
           }
         } else {
           send_to_char(ch, "\r\n");
@@ -4385,14 +4385,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
           if (char_get_equipment(ch, WEAR_EYE) && vict && !char_prf_flagged(ch, PRF_NODEC)) {
             if (char_is_android(vict)) {
               send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
+            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_BSCOUTER) && getCurPL(vict) >= 150000) {
               send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
+            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_MSCOUTER) && getCurPL(vict) >= 5000000) {
               send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
+            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_ASCOUTER) && getCurPL(vict) >= 15000000) {
               send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
             } else {
-              send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)));
+              send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(getCurPL(vict)));
             }
           } else {
             send_to_char(ch, "\r\n");
@@ -4405,14 +4405,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
           if (char_get_equipment(ch, WEAR_EYE) && vict && !char_prf_flagged(ch, PRF_NODEC)) {
             if (char_is_android(vict)) {
               send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
+            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_BSCOUTER) && getCurPL(vict) >= 150000) {
               send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
+            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_MSCOUTER) && getCurPL(vict) >= 5000000) {
               send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
+            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_ASCOUTER) && getCurPL(vict) >= 15000000) {
               send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
             } else {
-              send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)));
+              send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(getCurPL(vict)));
             }
           } else {
             send_to_char(ch, "\r\n");
@@ -4424,14 +4424,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
           if (char_get_equipment(ch, WEAR_EYE) && vict) {
             if (char_is_android(vict) && !char_prf_flagged(ch, PRF_NODEC)) {
               send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
+            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_BSCOUTER) && getCurPL(vict) >= 150000) {
               send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
+            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_MSCOUTER) && getCurPL(vict) >= 5000000) {
               send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
+            } else if (obj_extra_flagged(char_get_equipment(ch, WEAR_EYE), ITEM_ASCOUTER) && getCurPL(vict) >= 15000000) {
               send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
             } else {
-              send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)));
+              send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(getCurPL(vict)));
             }
           } else {
             send_to_char(ch, "\r\n");
@@ -4630,29 +4630,29 @@ void handle_cooldown(struct char_data *ch, int cooldown)
       cooldown = 10;
     }
     if (cooldown >= 120) {
-      WAIT_STATE(ch, PULSE_CD12);
+      char_set_wait(ch, PULSE_CD12);
     } else if (cooldown >= 110) {
-      WAIT_STATE(ch, PULSE_CD11);
+      char_set_wait(ch, PULSE_CD11);
     } else if (cooldown >= 100) {
-      WAIT_STATE(ch, PULSE_CD10);
+      char_set_wait(ch, PULSE_CD10);
     } else if (cooldown >= 90) {
-      WAIT_STATE(ch, PULSE_CD9);
+      char_set_wait(ch, PULSE_CD9);
     } else if (cooldown >= 80) {
-      WAIT_STATE(ch, PULSE_CD8);
+      char_set_wait(ch, PULSE_CD8);
     } else if (cooldown >= 70) {
-      WAIT_STATE(ch, PULSE_CD7);
+      char_set_wait(ch, PULSE_CD7);
     } else if (cooldown >= 60) {
-      WAIT_STATE(ch, PULSE_CD6);
+      char_set_wait(ch, PULSE_CD6);
     } else if (cooldown >= 50) {
-      WAIT_STATE(ch, PULSE_CD5);
+      char_set_wait(ch, PULSE_CD5);
     } else if (cooldown >= 40) {
-      WAIT_STATE(ch, PULSE_CD4);
+      char_set_wait(ch, PULSE_CD4);
     } else if (cooldown >= 30) {
-      WAIT_STATE(ch, PULSE_CD3);
+      char_set_wait(ch, PULSE_CD3);
     } else if (cooldown >= 20) {
-      WAIT_STATE(ch, PULSE_CD2);
+      char_set_wait(ch, PULSE_CD2);
     } else {
-      WAIT_STATE(ch, PULSE_CD1);
+      char_set_wait(ch, PULSE_CD1);
     }
 
   } else { /* We handle NPCs differently. */
@@ -5393,7 +5393,7 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
 
     if (!tech_handle_zanzoken(ch, vict, "Spiral Comet Blast")) {
       pcost(ch, amount, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 

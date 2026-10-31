@@ -939,7 +939,7 @@ SPECIAL(bank)
       char_set_bank_gold(vict, char_get_bank_gold(vict) + (amount));
       char_set_bank_gold(ch, char_get_bank_gold(ch) - (amount + (amount / 100)));
       char_set_pfilepos(vict, player_i);
-      mudlog(LOG_NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), TRUE, "EXCHANGE: %s gave %s zenni to user %s", char_get_name(ch), add_commas(amount), char_get_name(vict));
+      mudlog(LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(ch)), TRUE, "EXCHANGE: %s gave %s zenni to user %s", char_get_name(ch), add_commas(amount), char_get_name(vict));
       save_char(vict);
       if (is_file == TRUE)
         free_char(vict);

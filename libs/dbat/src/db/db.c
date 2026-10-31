@@ -1807,7 +1807,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
     if (!char_aff_flagged(ch, AFF_INFRAVISION))
       char_aff_set(ch, AFF_INFRAVISION, true);
 
-  SPEAKING(ch) = SKILL_LANG_COMMON;
+  char_set_speaking(ch, SKILL_LANG_COMMON);
 
   if (!get_line(mob_f, line)) {
     mud_log("SYSERR: Format error in last line of mob #%d\n"
@@ -1827,7 +1827,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
   char_set_mob_specials_default_pos(ch, t[1]);
   char_set_sex(ch, t[2]);
 
-  SPEAKING(ch) = MIN_LANGUAGES;
+  char_set_speaking(ch, MIN_LANGUAGES);
   set_height_and_weight_by_race(ch);
 
   if (char_mob_flagged(ch, MOB_AUTOBALANCE)) {
@@ -2058,12 +2058,8 @@ int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
   char f7[128], f8[128], buf2[128];
   mob_vnum nr = mob_index[ch->nr].vnum;
 
-  /*
-   * Mobiles should NEVER use anything in the 'player_specials' structure.
-   * The only reason we have every mob in the game share this copy of the
-   * structure is to save newbie coders from themselves. -gg 2/25/98
-   */
-  ch->player_specials = &dummy_mob;
+  /* Mobiles have no player_specials: that NULL is what makes a character an NPC (char_is_npc). */
+  ch->player_specials = NULL;
   sprintf(buf2, "mob vnum %d", nr); /* sprintf: OK (for 'buf2 >= 19') */
 
   /***** String data *****/
@@ -4228,10 +4224,10 @@ void free_char(struct char_data *ch)
   int i;
   struct alias_data *a;
 
-  if (ch->player_specials != NULL && ch->player_specials != &dummy_mob) {
+  if (ch->player_specials) {
 
-    while ((a = GET_ALIASES(ch)) != NULL) {
-      GET_ALIASES(ch) = (GET_ALIASES(ch))->next;
+    while ((a = char_get_aliases(ch)) != NULL) {
+      char_set_aliases(ch, (char_get_aliases(ch))->next);
       free_alias(a);
     }
     if (ch->player_specials->poofin)
@@ -4243,8 +4239,6 @@ void free_char(struct char_data *ch)
     for (i = 0; i < NUM_COLOR; i++)
       if (ch->player_specials->color_choices[i])
         free(ch->player_specials->color_choices[i]);
-    if (char_is_npc(ch))
-      mud_log("SYSERR: Mob %s (#%d) had player_specials allocated!", char_get_name(ch), char_get_mob_vnum(ch));
   }
   if (!char_is_npc(ch) || (char_is_npc(ch) && char_get_nr(ch) == NOBODY)) {
     /* if this is a player, or a non-prototyped non-player, free all */
@@ -4261,8 +4255,8 @@ void free_char(struct char_data *ch)
     if (ch->description)
       free(ch->description);
     for (i = 0; i < NUM_HIST; i++)
-      if (GET_HISTORY(ch, i))
-        free(GET_HISTORY(ch, i));
+      if (char_get_comm_hist(ch, i))
+        free(char_get_comm_hist(ch, i));
     if (ch->player_specials)
       free(ch->player_specials);
 
@@ -4447,7 +4441,7 @@ void reset_char(struct char_data *ch)
   ch->carry_items              = 0;
   ch->time.logon               = time(0);
 
-  GET_LAST_TELL(ch) = NOBODY;
+  char_set_last_tell(ch, NOBODY);
 }
 
 /* clear ALL the working variables of a char; do NOT free any space alloc'ed */
@@ -4541,11 +4535,11 @@ void init_char(struct char_data *ch)
     char_get_affected_by(ch)[i] = 0;
 
   for (i = 0; i < 3; i++)
-    GET_COND(ch, i) = (char_get_admlevel(ch) == ADMLVL_IMPL ? -1 : 24);
+    char_set_conditions(ch, i, (char_get_admlevel(ch) == ADMLVL_IMPL ? -1 : 24));
 
-  GET_LOADROOM(ch)    = NOWHERE;
-  SPEAKING(ch)        = SKILL_LANG_COMMON;
-  GET_FEAT_POINTS(ch) = 1;
+  char_set_load_room(ch, NOWHERE);
+  char_set_speaking(ch, SKILL_LANG_COMMON);
+  char_set_feat_points(ch, 1);
   // initialize plrobjs so it doesn't complain on startup.
   Crash_crashsave(ch);
 }

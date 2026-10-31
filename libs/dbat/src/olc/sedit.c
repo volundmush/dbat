@@ -61,10 +61,10 @@ ACMD(do_oasis_sedit)
 
     if (is_number(buf2))
       number = atoi(buf2);
-    else if (GET_OLC_ZONE(ch) > 0) {
+    else if (char_get_olc_zone(ch) > 0) {
       zone_rnum zlok;
 
-      if ((zlok = real_zone(GET_OLC_ZONE(ch))) == NOWHERE)
+      if ((zlok = real_zone(char_get_olc_zone(ch))) == NOWHERE)
         number = NOWHERE;
       else
         number = genolc_zone_bottom(zlok);
@@ -139,7 +139,7 @@ ACMD(do_oasis_sedit)
   if (save) {
     send_to_char(ch, "Saving all shops in zone %d.\r\n",
                  zone_table[OLC_ZNUM(d)].number);
-    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE,
+    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), TRUE,
            "OLC: %s saves shop info for zone %d.",
            char_get_name(ch), zone_table[OLC_ZNUM(d)].number);
 
@@ -170,7 +170,7 @@ ACMD(do_oasis_sedit)
   char_plr_set(ch, PLR_WRITING, true);
 
   mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
-         char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+         char_get_name(ch), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
 }
 
 void sedit_setup_new(struct descriptor_data *d)
@@ -468,7 +468,7 @@ void sedit_parse(struct descriptor_data *d, char *arg)
         case 'y':
         case 'Y':
           sedit_save_internally(d);
-          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
+          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(d->character)), TRUE,
                  "OLC: %s edits shop %d", char_get_name(d->character), OLC_NUM(d));
           if (CONFIG_OLC_SAVE) {
             sedit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));

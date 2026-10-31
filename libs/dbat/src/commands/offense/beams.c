@@ -68,11 +68,11 @@ ACMD(do_galikgun)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -116,7 +116,7 @@ ACMD(do_galikgun)
       } else {
         pcost(ch, attperc, 0);
       }
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -135,7 +135,7 @@ ACMD(do_galikgun)
             pcost(ch, attperc, 0);
           }
           improve_skill(vict, SKILL_BLOCK, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 16, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -303,11 +303,11 @@ ACMD(do_final)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -345,7 +345,7 @@ ACMD(do_final)
 
     if (!tech_handle_zanzoken(ch, vict, "Final Flash")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -356,7 +356,7 @@ ACMD(do_final)
           act("@WYou move quickly and block @C$n's@W final flash!@n", FALSE, ch, 0, vict, TO_VICT);
           act("@C$N@W moves quickly and blocks @c$n's@W final flash!@n", FALSE, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 28, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -515,11 +515,11 @@ ACMD(do_tribeam)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -557,7 +557,7 @@ ACMD(do_tribeam)
 
     if (!tech_handle_zanzoken(ch, vict, "Tribeam")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -568,7 +568,7 @@ ACMD(do_tribeam)
           act("@WYou move quickly and block @C$n's@W tribeam!@n", FALSE, ch, 0, vict, TO_VICT);
           act("@C$N@W moves quickly and blocks @c$n's@W tribeam!@n", FALSE, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 26, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -675,7 +675,7 @@ ACMD(do_tribeam)
           break;
       }
       if (!char_is_npc(vict)) {
-        WAIT_STATE(vict, PULSE_2SEC);
+        char_set_wait(vict, PULSE_2SEC);
       }
       pcost(ch, attperc, 0);
 
@@ -734,11 +734,11 @@ ACMD(do_dualbeam)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -776,7 +776,7 @@ ACMD(do_dualbeam)
 
     if (!tech_handle_zanzoken(ch, vict, "Dualbeam")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
 
       return;
     }
@@ -790,7 +790,7 @@ ACMD(do_dualbeam)
         return;
       } else if (!vict) {
         return;
-      } else if ((char_aff_flagged(vict, AFF_SPIRIT) || GET_HIT(vict) <= 0) && !char_is_npc(vict)) {
+      } else if ((char_aff_flagged(vict, AFF_SPIRIT) || getCurPL(vict) <= 0) && !char_is_npc(vict)) {
         return;
       }
       if (prob < perc - 20) {
@@ -802,7 +802,7 @@ ACMD(do_dualbeam)
             if (hits == 1) {
               pcost(ch, attperc, 0);
             }
-            pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+            pcost(vict, 0, getEffMaxPL(vict) / 500);
             dmg = damtype(ch, 22, skill, attperc);
             dmg /= 4;
             hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -921,7 +921,7 @@ ACMD(do_dualbeam)
         if (hits == 1) {
           pcost(ch, attperc, 0);
         }
-        if (GET_HIT(vict) <= 0) {
+        if (getCurPL(vict) <= 0) {
           if (hits == 2) {
             pcost(ch, attperc, 0);
           }
@@ -993,11 +993,11 @@ ACMD(do_dodonpa)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
   /* Passed sanity checks for doing the technique */
@@ -1036,7 +1036,7 @@ ACMD(do_dodonpa)
     tech_handle_posmodifier(vict, &pry, &blk, &dge, &prob);
 
     if (char_get_skills_perf(ch, SKILL_DODONPA) == 3) {
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
     }
 
     if (!tech_handle_zanzoken(ch, vict, "Dodonpa")) {
@@ -1045,7 +1045,7 @@ ACMD(do_dodonpa)
       } else {
         pcost(ch, attperc, 0);
       }
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -1060,7 +1060,7 @@ ACMD(do_dodonpa)
           } else {
             pcost(ch, attperc, 0);
           }
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 15, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -1241,11 +1241,11 @@ ACMD(do_masenko)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -1290,7 +1290,7 @@ ACMD(do_masenko)
       } else {
         pcost(ch, attperc, 0);
       }
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
 
       return;
     }
@@ -1313,7 +1313,7 @@ ACMD(do_masenko)
           } else {
             pcost(ch, attperc, 0);
           }
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 14, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -1380,11 +1380,11 @@ ACMD(do_masenko)
       hitspot     = roll_hitloc(ch, vict, skill);
       if (char_is_piccolo(ch)) {
         if (char_get_skills_base(ch, SKILL_STYLE) >= 100)
-          dmg += (GET_MAX_MANA(ch) * 0.08);
+          dmg += (getMaxKI(ch) * 0.08);
         else if (char_get_skills_base(ch, SKILL_STYLE) >= 60)
-          dmg += (GET_MAX_MANA(ch) * 0.05);
+          dmg += (getMaxKI(ch) * 0.05);
         else if (char_get_skills_base(ch, SKILL_STYLE) >= 40)
-          dmg += (GET_MAX_MANA(ch) * 0.03);
+          dmg += (getMaxKI(ch) * 0.03);
       }
       switch (hitspot) {
         case 1:
@@ -1510,11 +1510,11 @@ ACMD(do_kamehameha)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -1559,17 +1559,17 @@ ACMD(do_kamehameha)
       } else {
         pcost(ch, attperc, 0);
       }
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
 
       if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 100) {
-        incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.25, true);
+        incCurKI(ch, (getMaxKI(ch) * attperc) * 0.25, true);
       } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 60) {
-        incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1, true);
+        incCurKI(ch, (getMaxKI(ch) * attperc) * 0.1, true);
       } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 40) {
-        incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, true);
+        incCurKI(ch, (getMaxKI(ch) * attperc) * 0.05, true);
       }
       if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
       }
       return;
     }
@@ -1594,15 +1594,15 @@ ACMD(do_kamehameha)
             pcost(ch, attperc, 0);
           }
           if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 100) {
-            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.25, true);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * 0.25, true);
           } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 60) {
-            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1, true);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * 0.1, true);
           } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 40) {
-            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, true);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * 0.05, true);
           }
           dmg = damtype(ch, 13, skill, attperc);
           dmg /= 4;
@@ -1628,15 +1628,15 @@ ACMD(do_kamehameha)
             pcost(ch, attperc, 0);
           }
           if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 100) {
-            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.25, true);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * 0.25, true);
           } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 60) {
-            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1, true);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * 0.1, true);
           } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 40) {
-            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, true);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * 0.05, true);
           }
           improve_skill(vict, SKILL_DODGE, 0);
           if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
           hurt(0, 0, ch, vict, NULL, 0, 1);
 
@@ -1651,14 +1651,14 @@ ACMD(do_kamehameha)
             pcost(ch, attperc, 0);
           }
           if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 100) {
-            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.25, true);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * 0.25, true);
           } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 60) {
-            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1, true);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * 0.1, true);
           } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 40) {
-            incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, true);
+            incCurKI(ch, (getMaxKI(ch) * attperc) * 0.05, true);
           }
           if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
           hurt(0, 0, ch, vict, NULL, 0, 1);
 
@@ -1674,15 +1674,15 @@ ACMD(do_kamehameha)
           pcost(ch, attperc, 0);
         }
         if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 100) {
-          incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.25, true);
+          incCurKI(ch, (getMaxKI(ch) * attperc) * 0.25, true);
         } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 60) {
-          incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1, true);
+          incCurKI(ch, (getMaxKI(ch) * attperc) * 0.1, true);
         } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 40) {
-          incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, true);
+          incCurKI(ch, (getMaxKI(ch) * attperc) * 0.05, true);
         }
       }
       if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
-        WAIT_STATE(ch, PULSE_3SEC);
+        char_set_wait(ch, PULSE_3SEC);
       }
       hurt(0, 0, ch, vict, NULL, 0, 1);
       return;
@@ -1699,7 +1699,7 @@ ACMD(do_kamehameha)
             dmg *= calc_critical(ch, 2);
           }
           if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
           hurt(0, 0, ch, vict, NULL, dmg, 1);
           dam_eq_loc(vict, 4);
@@ -1711,7 +1711,7 @@ ACMD(do_kamehameha)
           act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S face and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           dmg *= calc_critical(ch, 0);
           if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
           hurt(0, 0, ch, vict, NULL, dmg, 1);
           dam_eq_loc(vict, 3);
@@ -1728,7 +1728,7 @@ ACMD(do_kamehameha)
           dam_eq_loc(vict, 4);
           /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
           if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
           break;
         case 4: /* Weak */
@@ -1737,7 +1737,7 @@ ACMD(do_kamehameha)
           act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S arm and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           dmg *= calc_critical(ch, 1);
           if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
           hurt(0, 190, ch, vict, NULL, dmg, 1);
           dam_eq_loc(vict, 1);
@@ -1752,7 +1752,7 @@ ACMD(do_kamehameha)
           dam_eq_loc(vict, 2);
           /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
           if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
-            WAIT_STATE(ch, PULSE_3SEC);
+            char_set_wait(ch, PULSE_3SEC);
           }
           break;
       }
@@ -1762,11 +1762,11 @@ ACMD(do_kamehameha)
         pcost(ch, attperc, 0);
       }
       if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 100) {
-        incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.25, true);
+        incCurKI(ch, (getMaxKI(ch) * attperc) * 0.25, true);
       } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 60) {
-        incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1, true);
+        incCurKI(ch, (getMaxKI(ch) * attperc) * 0.1, true);
       } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 40) {
-        incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, true);
+        incCurKI(ch, (getMaxKI(ch) * attperc) * 0.05, true);
       }
 
       return;
@@ -1784,16 +1784,16 @@ ACMD(do_kamehameha)
     act("@WYou fire a kamehameha at $p@W!@n", FALSE, ch, obj, 0, TO_CHAR);
     act("@C$n@W fires a kamehameha at $p@W!@n", FALSE, ch, obj, 0, TO_ROOM);
     if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
-      WAIT_STATE(ch, PULSE_3SEC);
+      char_set_wait(ch, PULSE_3SEC);
     }
     hurt(0, 0, ch, NULL, obj, dmg, 0);
     pcost(ch, attperc, 0);
     if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 100) {
-      incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.25, true);
+      incCurKI(ch, (getMaxKI(ch) * attperc) * 0.25, true);
     } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 60) {
-      incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.1, true);
+      incCurKI(ch, (getMaxKI(ch) * attperc) * 0.1, true);
     } else if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 40) {
-      incCurKI(ch, (GET_MAX_MANA(ch) * attperc) * 0.05, true);
+      incCurKI(ch, (getMaxKI(ch) * attperc) * 0.05, true);
     }
   } else {
     send_to_char(ch, "Error! Please report.\r\n");
@@ -1836,11 +1836,11 @@ ACMD(do_beam)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, 0)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, 0)) {
     return;
   }
 
@@ -1873,7 +1873,7 @@ ACMD(do_beam)
 
     if (!tech_handle_zanzoken(ch, vict, "beam")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -1886,7 +1886,7 @@ ACMD(do_beam)
           act("@C$N@W deflects your beam, sending it flying away!@n", TRUE, ch, 0, vict, TO_CHAR);
           act("@WYou deflect @C$n's@W beam sending it flying away!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@C$N@W deflects @c$n's@W beam sending it flying away!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+          pcost(vict, 0, getEffMaxPL(vict) / 200);
 
           parry_ki(attperc, ch, vict, "beam", prob, perc, skill, 10);
           /*      User/target/skill name/skill/hurt type */
@@ -1903,7 +1903,7 @@ ACMD(do_beam)
           act("@C$N@W moves quickly and blocks @c$n's@W beam!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_BLOCK, 0);
           pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 10, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -2012,7 +2012,7 @@ ACMD(do_beam)
       if (master_chance >= master_roll)
         master_pass = TRUE;
 
-      if (GET_HIT(vict) > 0 && dmg > GET_MAX_HIT(vict) / 4 && master_pass == TRUE) {
+      if (getCurPL(vict) > 0 && dmg > getEffMaxPL(vict) / 4 && master_pass == TRUE) {
         int attempt = rand_number(0, NUM_OF_DIRS); /* Select a random direction */
         int count   = 0;
         while (count < 12) {

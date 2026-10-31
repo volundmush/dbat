@@ -184,7 +184,7 @@ ACMD(do_who)
 
       if (short_list) {
         send_to_char(ch, "               @B[@W%3d @Y%s @C%s@B]@W %-12.12s@n%s@n",
-                     char_get_level(tch), RACE_ABBR(tch), CLASS_ABBR(tch), char_get_name(tch),
+                     char_get_level(tch), char_race_abbr(tch), char_class_abbr(tch), char_get_name(tch),
                      ((!(++num_can_see % 4)) ? "\r\n" : ""));
       } else {
         num_can_see++;
@@ -199,8 +199,8 @@ ACMD(do_who)
 
         if (d->snooping && d->snooping->character != ch && char_get_admlevel(ch) >= 3)
           send_to_char(ch, " (Snoop: %s)", char_get_name(d->snooping->character));
-        if (GET_INVIS_LEV(tch))
-          send_to_char(ch, " (i%d)", GET_INVIS_LEV(tch));
+        if (char_get_invis_level(tch))
+          send_to_char(ch, " (i%d)", char_get_invis_level(tch));
         else if (char_aff_flagged(tch, AFF_INVISIBLE))
           send_to_char(ch, " (invis)");
 
@@ -380,7 +380,7 @@ ACMD(do_users)
         continue;
       if (showrace && !(showrace & (1U << char_get_race(tch))))
         continue;
-      if (GET_INVIS_LEV(tch) > char_get_admlevel(ch))
+      if (char_get_invis_level(tch) > char_get_admlevel(ch))
         continue;
     }
 
@@ -500,7 +500,7 @@ static void perform_immort_where(struct char_data *ch, char *arg)
                             "@RUNKOWN@n"};
 
   if (!*arg) {
-    mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "GODCMD: %s has checked where to check player locations", char_get_name(ch));
+    mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(ch)), TRUE, "GODCMD: %s has checked where to check player locations", char_get_name(ch));
     send_to_char(ch, "Players                  Vnum    Planet        Location\r\n-------                 ------   ----------    ----------------\r\n");
     for (d = descriptor_list; d; d = d->next)
       if (desc_is_playing(d)) {
@@ -541,7 +541,7 @@ static void perform_immort_where(struct char_data *ch, char *arg)
         }
       }
   } else {
-    mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "GODCMD: %s has checked where for the location of %s", char_get_name(ch), arg);
+    mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(ch)), TRUE, "GODCMD: %s has checked where for the location of %s", char_get_name(ch), arg);
     for (i = character_list; i; i = i->next) {
       if (char_can_see(ch, i) && char_get_in_room(i) != NOWHERE && isname(arg, i->name)) {
         found = 1;
@@ -761,7 +761,7 @@ ACMD(do_whois)
         send_to_char(ch, "@cImm Level@D: @G%s\r\n", immlevels[char_get_admlevel(victim)]);
         send_to_char(ch, "@cTitle    @D: @G%s\r\n", char_get_title(victim));
       } else {
-        send_to_char(ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", char_get_name(victim), SENSEI_NAME(victim), TRUE_RACE(victim), char_get_title(victim), clan ? buf : "None.");
+        send_to_char(ch, "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n", char_get_name(victim), char_sensei_name(victim), char_true_race_name(victim), char_get_title(victim), clan ? buf : "None.");
       }
       send_to_char(ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
     } else {

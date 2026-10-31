@@ -711,7 +711,7 @@ ACMD(do_drive)
       send_to_char(ch, "@wYou are already piloting the ship, try [pilot unready].\r\n");
       return;
     }
-    if (CARRYING(ch)) {
+    if (char_get_carrying(ch)) {
       send_to_char(ch, "@wYou are busy carrying someone.\r\n");
       return;
     }
@@ -789,169 +789,169 @@ ACMD(do_drive)
         dir = 0;
         drive_in_direction(ch, vehicle, dir);
         if (obj_get_value(controls, 1) == 1) {
-          WAIT_STATE(ch, PULSE_2SEC * 1.5);
+          char_set_wait(ch, PULSE_2SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 2) {
-          WAIT_STATE(ch, PULSE_2SEC);
+          char_set_wait(ch, PULSE_2SEC);
         } else if (obj_get_value(controls, 1) == 3) {
-          WAIT_STATE(ch, PULSE_1SEC * 1.5);
+          char_set_wait(ch, PULSE_1SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 4) {
-          WAIT_STATE(ch, PULSE_1SEC);
+          char_set_wait(ch, PULSE_1SEC);
         } else if (obj_get_value(controls, 1) == 5) {
-          WAIT_STATE(ch, PULSE_1SEC * 0.5);
+          char_set_wait(ch, PULSE_1SEC * 0.5);
         }
       } else if (!strcasecmp(arg, "east") || !strcasecmp(arg, "e")) {
         dir = 1;
         drive_in_direction(ch, vehicle, dir);
         if (obj_get_value(controls, 1) == 1) {
-          WAIT_STATE(ch, PULSE_2SEC * 1.5);
+          char_set_wait(ch, PULSE_2SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 2) {
-          WAIT_STATE(ch, PULSE_2SEC);
+          char_set_wait(ch, PULSE_2SEC);
         } else if (obj_get_value(controls, 1) == 3) {
-          WAIT_STATE(ch, PULSE_1SEC * 1.5);
+          char_set_wait(ch, PULSE_1SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 4) {
-          WAIT_STATE(ch, PULSE_1SEC);
+          char_set_wait(ch, PULSE_1SEC);
         } else if (obj_get_value(controls, 1) == 5) {
-          WAIT_STATE(ch, PULSE_1SEC * 0.5);
+          char_set_wait(ch, PULSE_1SEC * 0.5);
         }
       } else if (!strcasecmp(arg, "south") || !strcasecmp(arg, "s")) {
         dir = 2;
         drive_in_direction(ch, vehicle, dir);
         if (obj_get_value(controls, 1) == 1) {
-          WAIT_STATE(ch, PULSE_2SEC * 1.5);
+          char_set_wait(ch, PULSE_2SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 2) {
-          WAIT_STATE(ch, PULSE_2SEC);
+          char_set_wait(ch, PULSE_2SEC);
         } else if (obj_get_value(controls, 1) == 3) {
-          WAIT_STATE(ch, PULSE_1SEC * 1.5);
+          char_set_wait(ch, PULSE_1SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 4) {
-          WAIT_STATE(ch, PULSE_1SEC);
+          char_set_wait(ch, PULSE_1SEC);
         } else if (obj_get_value(controls, 1) == 5) {
-          WAIT_STATE(ch, PULSE_1SEC * 0.5);
+          char_set_wait(ch, PULSE_1SEC * 0.5);
         }
       } else if (!strcasecmp(arg, "west") || !strcasecmp(arg, "w")) {
         dir = 3;
         drive_in_direction(ch, vehicle, dir);
         if (obj_get_value(controls, 1) == 1) {
-          WAIT_STATE(ch, PULSE_2SEC * 1.5);
+          char_set_wait(ch, PULSE_2SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 2) {
-          WAIT_STATE(ch, PULSE_2SEC);
+          char_set_wait(ch, PULSE_2SEC);
         } else if (obj_get_value(controls, 1) == 3) {
-          WAIT_STATE(ch, PULSE_1SEC * 1.5);
+          char_set_wait(ch, PULSE_1SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 4) {
-          WAIT_STATE(ch, PULSE_1SEC);
+          char_set_wait(ch, PULSE_1SEC);
         } else if (obj_get_value(controls, 1) == 5) {
-          WAIT_STATE(ch, PULSE_1SEC * 0.5);
+          char_set_wait(ch, PULSE_1SEC * 0.5);
         }
       } else if (!strcasecmp(arg, "up") || !strcasecmp(arg, "u")) {
         dir = 4;
         drive_in_direction(ch, vehicle, dir);
         if (obj_get_value(controls, 1) == 1) {
-          WAIT_STATE(ch, PULSE_2SEC * 1.5);
+          char_set_wait(ch, PULSE_2SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 2) {
-          WAIT_STATE(ch, PULSE_2SEC);
+          char_set_wait(ch, PULSE_2SEC);
         } else if (obj_get_value(controls, 1) == 3) {
-          WAIT_STATE(ch, PULSE_1SEC * 1.5);
+          char_set_wait(ch, PULSE_1SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 4) {
-          WAIT_STATE(ch, PULSE_1SEC);
+          char_set_wait(ch, PULSE_1SEC);
         } else if (obj_get_value(controls, 1) == 5) {
-          WAIT_STATE(ch, PULSE_1SEC * 0.5);
+          char_set_wait(ch, PULSE_1SEC * 0.5);
         }
       } else if (!strcasecmp(arg, "down") || !strcasecmp(arg, "d")) {
         dir = 5;
         drive_in_direction(ch, vehicle, dir);
         if (obj_get_value(controls, 1) == 1) {
-          WAIT_STATE(ch, PULSE_2SEC * 1.5);
+          char_set_wait(ch, PULSE_2SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 2) {
-          WAIT_STATE(ch, PULSE_2SEC);
+          char_set_wait(ch, PULSE_2SEC);
         } else if (obj_get_value(controls, 1) == 3) {
-          WAIT_STATE(ch, PULSE_1SEC * 1.5);
+          char_set_wait(ch, PULSE_1SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 4) {
-          WAIT_STATE(ch, PULSE_1SEC);
+          char_set_wait(ch, PULSE_1SEC);
         } else if (obj_get_value(controls, 1) == 5) {
-          WAIT_STATE(ch, PULSE_1SEC * 0.5);
+          char_set_wait(ch, PULSE_1SEC * 0.5);
         }
       } else if (!strcasecmp(arg, "northwest") || !strcasecmp(arg, "nw") || !strcasecmp(arg, "northw")) {
         dir = 6;
         drive_in_direction(ch, vehicle, dir);
         if (obj_get_value(controls, 1) == 1) {
-          WAIT_STATE(ch, PULSE_2SEC * 1.5);
+          char_set_wait(ch, PULSE_2SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 2) {
-          WAIT_STATE(ch, PULSE_2SEC);
+          char_set_wait(ch, PULSE_2SEC);
         } else if (obj_get_value(controls, 1) == 3) {
-          WAIT_STATE(ch, PULSE_1SEC * 1.5);
+          char_set_wait(ch, PULSE_1SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 4) {
-          WAIT_STATE(ch, PULSE_1SEC);
+          char_set_wait(ch, PULSE_1SEC);
         } else if (obj_get_value(controls, 1) == 5) {
-          WAIT_STATE(ch, PULSE_1SEC * 0.5);
+          char_set_wait(ch, PULSE_1SEC * 0.5);
         }
       } else if (!strcasecmp(arg, "northeast") || !strcasecmp(arg, "ne") || !strcasecmp(arg, "northe")) {
         dir = 7;
         drive_in_direction(ch, vehicle, dir);
         if (obj_get_value(controls, 1) == 1) {
-          WAIT_STATE(ch, PULSE_2SEC * 1.5);
+          char_set_wait(ch, PULSE_2SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 2) {
-          WAIT_STATE(ch, PULSE_2SEC);
+          char_set_wait(ch, PULSE_2SEC);
         } else if (obj_get_value(controls, 1) == 3) {
-          WAIT_STATE(ch, PULSE_1SEC * 1.5);
+          char_set_wait(ch, PULSE_1SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 4) {
-          WAIT_STATE(ch, PULSE_1SEC);
+          char_set_wait(ch, PULSE_1SEC);
         } else if (obj_get_value(controls, 1) == 5) {
-          WAIT_STATE(ch, PULSE_1SEC * 0.5);
+          char_set_wait(ch, PULSE_1SEC * 0.5);
         }
       } else if (!strcasecmp(arg, "southeast") || !strcasecmp(arg, "se") || !strcasecmp(arg, "southe")) {
         dir = 8;
         drive_in_direction(ch, vehicle, dir);
         if (obj_get_value(controls, 1) == 1) {
-          WAIT_STATE(ch, PULSE_2SEC * 1.5);
+          char_set_wait(ch, PULSE_2SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 2) {
-          WAIT_STATE(ch, PULSE_2SEC);
+          char_set_wait(ch, PULSE_2SEC);
         } else if (obj_get_value(controls, 1) == 3) {
-          WAIT_STATE(ch, PULSE_1SEC * 1.5);
+          char_set_wait(ch, PULSE_1SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 4) {
-          WAIT_STATE(ch, PULSE_1SEC);
+          char_set_wait(ch, PULSE_1SEC);
         } else if (obj_get_value(controls, 1) == 5) {
-          WAIT_STATE(ch, PULSE_1SEC * 0.5);
+          char_set_wait(ch, PULSE_1SEC * 0.5);
         }
       } else if (!strcasecmp(arg, "southwest") || !strcasecmp(arg, "sw") || !strcasecmp(arg, "southw")) {
         dir = 9;
         drive_in_direction(ch, vehicle, dir);
         if (obj_get_value(controls, 1) == 1) {
-          WAIT_STATE(ch, PULSE_2SEC * 1.5);
+          char_set_wait(ch, PULSE_2SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 2) {
-          WAIT_STATE(ch, PULSE_2SEC);
+          char_set_wait(ch, PULSE_2SEC);
         } else if (obj_get_value(controls, 1) == 3) {
-          WAIT_STATE(ch, PULSE_1SEC * 1.5);
+          char_set_wait(ch, PULSE_1SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 4) {
-          WAIT_STATE(ch, PULSE_1SEC);
+          char_set_wait(ch, PULSE_1SEC);
         } else if (obj_get_value(controls, 1) == 5) {
-          WAIT_STATE(ch, PULSE_1SEC * 0.5);
+          char_set_wait(ch, PULSE_1SEC * 0.5);
         }
       } else if (!strcasecmp(arg, "inside")) {
         dir = 10;
         drive_in_direction(ch, vehicle, dir);
         if (obj_get_value(controls, 1) == 1) {
-          WAIT_STATE(ch, PULSE_2SEC * 1.5);
+          char_set_wait(ch, PULSE_2SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 2) {
-          WAIT_STATE(ch, PULSE_2SEC);
+          char_set_wait(ch, PULSE_2SEC);
         } else if (obj_get_value(controls, 1) == 3) {
-          WAIT_STATE(ch, PULSE_1SEC * 1.5);
+          char_set_wait(ch, PULSE_1SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 4) {
-          WAIT_STATE(ch, PULSE_1SEC);
+          char_set_wait(ch, PULSE_1SEC);
         } else if (obj_get_value(controls, 1) == 5) {
-          WAIT_STATE(ch, PULSE_1SEC * 0.5);
+          char_set_wait(ch, PULSE_1SEC * 0.5);
         }
       } else if (!strcasecmp(arg, "outside")) {
         dir = 11;
         drive_in_direction(ch, vehicle, dir);
         if (obj_get_value(controls, 1) == 1) {
-          WAIT_STATE(ch, PULSE_2SEC * 1.5);
+          char_set_wait(ch, PULSE_2SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 2) {
-          WAIT_STATE(ch, PULSE_2SEC);
+          char_set_wait(ch, PULSE_2SEC);
         } else if (obj_get_value(controls, 1) == 3) {
-          WAIT_STATE(ch, PULSE_1SEC * 1.5);
+          char_set_wait(ch, PULSE_1SEC * 1.5);
         } else if (obj_get_value(controls, 1) == 4) {
-          WAIT_STATE(ch, PULSE_1SEC);
+          char_set_wait(ch, PULSE_1SEC);
         } else if (obj_get_value(controls, 1) == 5) {
-          WAIT_STATE(ch, PULSE_1SEC * 0.5);
+          char_set_wait(ch, PULSE_1SEC * 0.5);
         }
       }
       /*else if (dir = search_block(arg, dirs, FALSE) >= 0) {*/

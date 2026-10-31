@@ -52,10 +52,10 @@ ACMD(do_oasis_zedit)
 
       if (is_number(buf2))
         number = atoi(buf2);
-      else if (GET_OLC_ZONE(ch) > 0) {
+      else if (char_get_olc_zone(ch) > 0) {
         zone_rnum zlok;
 
-        if ((zlok = real_zone(GET_OLC_ZONE(ch))) == NOWHERE)
+        if ((zlok = real_zone(char_get_olc_zone(ch))) == NOWHERE)
           number = NOWHERE;
         else
           number = genolc_zone_bottom(zlok);
@@ -165,7 +165,7 @@ ACMD(do_oasis_zedit)
   if (save) {
     send_to_char(ch, "Saving all zone information for zone %d.\r\n",
                  zone_table[OLC_ZNUM(d)].number);
-    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE,
+    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), TRUE,
            "OLC: %s saves zone information for zone %d.", char_get_name(ch),
            zone_table[OLC_ZNUM(d)].number);
 
@@ -202,7 +202,7 @@ ACMD(do_oasis_zedit)
   char_plr_set(ch, PLR_WRITING, true);
 
   mudlog(LOG_CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
-         char_get_name(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
+         char_get_name(ch), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
 }
 
 void zedit_setup(struct descriptor_data *d, int room_num)
@@ -329,7 +329,7 @@ void zedit_new_zone(struct char_data *ch, zone_vnum vzone_num, room_vnum bottom,
 
   zedit_save_to_disk(result); /* save to disk .. */
 
-  mudlog(LOG_BRF, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s creates new zone #%d", char_get_name(ch), vzone_num);
+  mudlog(LOG_BRF, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), TRUE, "OLC: %s creates new zone #%d", char_get_name(ch), vzone_num);
   write_to_output(ch->desc, "Zone created successfully.\r\n");
 }
 
@@ -827,7 +827,7 @@ void zedit_parse(struct descriptor_data *d, char *arg)
           } else
             write_to_output(d, "Saving zone info in memory.\r\n");
 
-          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE, "OLC: %s edits zone info for room %d.", char_get_name(d->character), OLC_NUM(d));
+          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(d->character)), TRUE, "OLC: %s edits zone info for room %d.", char_get_name(d->character), OLC_NUM(d));
           /* FALL THROUGH */
         case 'n':
         case 'N':

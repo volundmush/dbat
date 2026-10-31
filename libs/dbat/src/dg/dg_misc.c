@@ -262,9 +262,9 @@ void send_char_pos(struct char_data *ch, int dam)
       send_to_char(ch, "You are dead!  Sorry...\r\n");
       break;
     default: /* >= POSITION SLEEPING */
-      if (dam > (GET_MAX_HIT(ch) >> 2))
+      if (dam > (getEffMaxPL(ch) >> 2))
         act("That really did HURT!", FALSE, ch, 0, 0, TO_CHAR);
-      if (GET_HIT(ch) < (GET_MAX_HIT(ch) >> 2))
+      if (getCurPL(ch) < (getEffMaxPL(ch) >> 2))
         send_to_char(ch, "@rYou wish that your wounds would stop BLEEDING so much!@n\r\n");
   }
 }

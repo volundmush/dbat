@@ -57,11 +57,11 @@ ACMD(do_rogafufuken)
 
   if (!tech_handle_charge(ch, arg2, minimum, &attperc)) return;
 
-  if (GET_MAX_MANA(ch) * attperc > char_get_charge(ch)) {
-    attperc = (long double)(char_get_charge(ch)) / (long double)(GET_MAX_MANA(ch));
+  if (getMaxKI(ch) * attperc > char_get_charge(ch)) {
+    attperc = (long double)(char_get_charge(ch)) / (long double)(getMaxKI(ch));
   }
 
-  if (!check_points(ch, GET_MAX_MANA(ch) * minimum, GET_MAX_HIT(ch) / 50)) {
+  if (!check_points(ch, getMaxKI(ch) * minimum, getEffMaxPL(ch) / 50)) {
     return;
   }
 
@@ -99,7 +99,7 @@ ACMD(do_rogafufuken)
 
     if (!tech_handle_zanzoken(ch, vict, "Rogafufuken")) {
       pcost(ch, attperc, 0);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -110,8 +110,8 @@ ACMD(do_rogafufuken)
           act("@WYou parry @C$n's@W rogafufuken with a punch of your own!@n", FALSE, ch, 0, vict, TO_VICT);
           act("@C$N@W parries @c$n's@W rogafufuken with a punch of $s own!@n", FALSE, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_PARRY, 0);
-          pcost(ch, 0, GET_MAX_HIT(vict) / 300);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(ch, 0, getEffMaxPL(vict) / 300);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(vict, -2, skill, attperc);
           dmg *= calc_critical(ch, 1);
           hurt(0, 0, vict, ch, NULL, dmg, -1);
@@ -122,7 +122,7 @@ ACMD(do_rogafufuken)
           act("@WYou move quickly and block @C$n's@W rogafufuken!@n", FALSE, ch, 0, vict, TO_VICT);
           act("@C$N@W moves quickly and blocks @c$n's@W rogafufuken!@n", FALSE, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 23, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
@@ -259,7 +259,7 @@ ACMD(do_heeldrop)
     return;
   }
 
-  if (!check_points(ch, 0, GET_MAX_HIT(ch) / 90)) {
+  if (!check_points(ch, 0, getEffMaxPL(ch) / 90)) {
     return;
   }
 
@@ -369,7 +369,7 @@ ACMD(do_heeldrop)
       char_set_combo(ch, -1);
       char_set_combhits(ch, 0);
       pcost(ch, 0, stcost / 2);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -381,7 +381,7 @@ ACMD(do_heeldrop)
           act("@C$N@W parries @c$n's@W heeldrop with a punch of $S own!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_PARRY, 0);
           pcost(ch, 0, stcost / 2);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(vict, -2, skill, attperc);
           dmg *= calc_critical(ch, 0);
           hurt(0, 0, vict, ch, NULL, dmg, -1);
@@ -393,7 +393,7 @@ ACMD(do_heeldrop)
           act("@C$N@W moves quickly and blocks @c$n's@W heeldrop!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_BLOCK, 0);
           pcost(ch, 0, stcost / 2);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 8, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -497,7 +497,7 @@ ACMD(do_heeldrop)
       send_to_char(ch, "It is broken already!\r\n");
       return;
     }
-    dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
+    dmg = ((getCurPL(ch) / 10000) + (char_get_aff_abils_str(ch)));
     act("@WYou heeldrop $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@C$n@W heeldrops $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
     hurt(0, 0, ch, NULL, obj, dmg, 0);
@@ -512,7 +512,7 @@ ACMD(do_heeldrop)
 ACMD(do_bite)
 {
   int prob, perc, avo, index = 0, pry = 2, dge = 2, blk = 2, skill = 0;
-  int64_t dmg, stcost = 20 + (GET_MAX_HIT(ch) / 500);
+  int64_t dmg, stcost = 20 + (getEffMaxPL(ch) / 500);
   struct char_data *vict;
   struct obj_data *obj;
   char arg[MAX_INPUT_LENGTH];
@@ -532,7 +532,7 @@ ACMD(do_bite)
     return;
   }
 
-  if (!check_points(ch, 0, GET_MAX_HIT(ch) / 200)) {
+  if (!check_points(ch, 0, getEffMaxPL(ch) / 200)) {
     return;
   }
 
@@ -575,7 +575,7 @@ ACMD(do_bite)
 
     if (!tech_handle_zanzoken(ch, vict, "bite")) {
       pcost(ch, 0, stcost / 2);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
 
       return;
     }
@@ -588,7 +588,7 @@ ACMD(do_bite)
           act("@C$N@W parries @c$n's@W bite with a punch of $S own!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_PARRY, 0);
           pcost(ch, 0, stcost / 2);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(vict, -1, skill, attperc);
           dmg *= calc_critical(ch, 1);
           hurt(0, 0, vict, ch, NULL, dmg, -1);
@@ -600,7 +600,7 @@ ACMD(do_bite)
           act("@C$N@W moves quickly and blocks @c$n's@W bite!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_BLOCK, 0);
           pcost(ch, 0, stcost / 2);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 6, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -711,7 +711,7 @@ ACMD(do_bite)
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
       return;
     }
-    dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
+    dmg = ((getCurPL(ch) / 10000) + (char_get_aff_abils_str(ch)));
     act("@C$n@W bites $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
     hurt(0, 0, ch, NULL, obj, dmg, 0);
     pcost(ch, 0, stcost);
@@ -754,7 +754,7 @@ ACMD(do_slam)
     send_to_char(ch, "Direct it at who?\r\n");
     return;
   }
-  if (!check_points(ch, 0, GET_MAX_HIT(ch) / 100)) {
+  if (!check_points(ch, 0, getEffMaxPL(ch) / 100)) {
     return;
   }
 
@@ -801,7 +801,7 @@ ACMD(do_slam)
       char_set_combo(ch, -1);
       char_set_combhits(ch, 0);
       pcost(ch, 0, stcost / 2);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -813,7 +813,7 @@ ACMD(do_slam)
           act("@C$N@W parries @c$n's@W slam with a punch of $S own!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_PARRY, 0);
           pcost(ch, 0, stcost / 2);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(vict, -2, skill, attperc);
           dmg *= calc_critical(ch, 1);
           hurt(0, 0, vict, ch, NULL, dmg, -1);
@@ -825,7 +825,7 @@ ACMD(do_slam)
           act("@C$N@W moves quickly and blocks @c$n's@W slam!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_BLOCK, 0);
           pcost(ch, 0, stcost / 2);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 6, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -878,7 +878,7 @@ ACMD(do_slam)
           act("@C$n@W disappears, reappearing in front of you, and $e grabs you! Spinning quickly $e sends you flying into the ground!@n", TRUE, ch, 0, vict, TO_VICT);
           act("@c$n@W disappears, reappearing in front of @C$N@W, and grabs $M! Spinning quickly $e sends $M flying into the ground!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           dmg *= calc_critical(ch, 0);
-          if (!char_aff_flagged(vict, AFF_KNOCKED) && (rand_number(1, 4) >= 3 && (GET_HIT(vict) > GET_HIT(ch) / 5) && !char_aff_flagged(vict, AFF_SANCTUARY))) {
+          if (!char_aff_flagged(vict, AFF_KNOCKED) && (rand_number(1, 4) >= 3 && (getCurPL(vict) > getCurPL(ch) / 5) && !char_aff_flagged(vict, AFF_SANCTUARY))) {
             act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_CHAR);
             act("@WYou are knocked out!@n", TRUE, ch, 0, vict, TO_VICT);
             act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -1038,7 +1038,7 @@ ACMD(do_slam)
       send_to_char(ch, "It is broken already!\r\n");
       return;
     }
-    dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
+    dmg = ((getCurPL(ch) / 10000) + (char_get_aff_abils_str(ch)));
     act("@WYou slam $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@C$n@W slams $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
     hurt(0, 0, ch, NULL, obj, dmg, 0);
@@ -1078,7 +1078,7 @@ ACMD(do_tailwhip)
     return;
   }
 
-  if (!check_points(ch, 0, GET_MAX_HIT(ch) / 120)) {
+  if (!check_points(ch, 0, getEffMaxPL(ch) / 120)) {
     return;
   }
 
@@ -1116,7 +1116,7 @@ ACMD(do_tailwhip)
 
     if (!tech_handle_zanzoken(ch, vict, "tailwhip")) {
       pcost(ch, 0, stcost / 2);
-      pcost(vict, 0, GET_MAX_HIT(vict) / 200);
+      pcost(vict, 0, getEffMaxPL(vict) / 200);
       return;
     }
 
@@ -1128,7 +1128,7 @@ ACMD(do_tailwhip)
           act("@C$N@W parries @c$n's@W tailwhip with a punch of $S own!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_PARRY, 0);
           pcost(ch, 0, stcost / 2);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(vict, -2, skill, attperc);
           dmg *= calc_critical(ch, 1);
           hurt(0, 0, vict, ch, NULL, dmg, -1);
@@ -1140,7 +1140,7 @@ ACMD(do_tailwhip)
           act("@C$N@W moves quickly and blocks @c$n's@W tailwhip!@n", TRUE, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_BLOCK, 0);
           pcost(ch, 0, stcost / 2);
-          pcost(vict, 0, GET_MAX_HIT(vict) / 500);
+          pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 3, skill, attperc);
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 0);
@@ -1250,7 +1250,7 @@ ACMD(do_tailwhip)
       send_to_char(ch, "It is broken already!\r\n");
       return;
     }
-    dmg = ((GET_HIT(ch) / 10000) + (char_get_aff_abils_str(ch)));
+    dmg = ((getCurPL(ch) / 10000) + (char_get_aff_abils_str(ch)));
     act("@WYou tailwhip $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
     act("@C$n@W tailwhips $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
     hurt(0, 0, ch, NULL, obj, dmg, 0);

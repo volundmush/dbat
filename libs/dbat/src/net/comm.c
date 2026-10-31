@@ -169,10 +169,10 @@ static void copyover_recover()
       close_socket(d);
     } else {
       write_to_descriptor(desc, "\n\rFolding complete.\n\r");
-      set_loadroom               = GET_LOADROOM(d->character);
-      GET_LOADROOM(d->character) = saved_loadroom;
+      set_loadroom               = char_get_load_room(d->character);
+      char_set_load_room(d->character, saved_loadroom);
       enter_player_game(d);
-      GET_LOADROOM(d->character) = set_loadroom;
+      char_set_load_room(d->character, set_loadroom);
       d->connected               = CON_PLAYING;
       look_at_room(char_get_in_room(d->character), d->character, 0);
       if (char_aff_flagged(d->character, AFF_HAYASA)) {
@@ -783,20 +783,20 @@ char *make_prompt(struct descriptor_data *d)
 
     *prompt = '\0';
 
-    if (GET_INVIS_LEV(d->character) && len < sizeof(prompt)) {
-      count = snprintf(prompt + len, sizeof(prompt) - len, "i%d ", GET_INVIS_LEV(d->character));
+    if (char_get_invis_level(d->character) && len < sizeof(prompt)) {
+      count = snprintf(prompt + len, sizeof(prompt) - len, "i%d ", char_get_invis_level(d->character));
       if (count >= 0)
         len += count;
     }
     /* show only when below 25% */
     if (char_prf_flagged(d->character, PRF_DISPAUTO) && char_get_level(d->character) >= 500 && len < sizeof(prompt)) {
       struct char_data *ch = d->character;
-      if (GET_HIT(ch) << 2 < GET_MAX_HIT(ch)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "PL: %" I64T " ", GET_HIT(ch));
+      if (getCurPL(ch) << 2 < getEffMaxPL(ch)) {
+        count = snprintf(prompt + len, sizeof(prompt) - len, "PL: %" I64T " ", getCurPL(ch));
         if (count >= 0)
           len += count;
       }
-      if ((getCurST(ch)) << 2 < GET_MAX_MOVE(ch) && len < sizeof(prompt)) {
+      if ((getCurST(ch)) << 2 < getMaxST(ch) && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "STA: %" I64T " ", (getCurST(ch)));
         if (count >= 0)
           len += count;
@@ -1020,93 +1020,93 @@ char *make_prompt(struct descriptor_data *d)
         if (count >= 0)
           len += count;
       }
-      if (char_get_charge(d->character) < GET_MAX_MANA(d->character) * .01 && char_get_charge(d->character) > 0) {
+      if (char_get_charge(d->character) < getMaxKI(d->character) * .01 && char_get_charge(d->character) > 0) {
         char_set_charge(d->character, 0);
       }
       if (char_get_charge(d->character) > 0) {
         int64_t charge = char_get_charge(d->character);
         if (!char_prf_flagged(d->character, PRF_NODEC) && !char_prf_flagged(d->character, PRF_DISPERC)) {
-          if (charge >= GET_MAX_MANA(d->character)) {
+          if (charge >= getMaxKI(d->character)) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G==@D<@RMAX@D>@G===@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .95) {
+          } else if (charge >= getMaxKI(d->character) * .95) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=========-@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .9) {
+          } else if (charge >= getMaxKI(d->character) * .9) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=========@g-@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .85) {
+          } else if (charge >= getMaxKI(d->character) * .85) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G========-@g-@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .80) {
+          } else if (charge >= getMaxKI(d->character) * .80) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G========@g--@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .75) {
+          } else if (charge >= getMaxKI(d->character) * .75) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=======-@g--@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .70) {
+          } else if (charge >= getMaxKI(d->character) * .70) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=======@g---@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .65) {
+          } else if (charge >= getMaxKI(d->character) * .65) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G======-@g---@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .60) {
+          } else if (charge >= getMaxKI(d->character) * .60) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G======@g----@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .55) {
+          } else if (charge >= getMaxKI(d->character) * .55) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=====-@g----@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .50) {
+          } else if (charge >= getMaxKI(d->character) * .50) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=====@g-----@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .45) {
+          } else if (charge >= getMaxKI(d->character) * .45) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G====-@g-----@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .40) {
+          } else if (charge >= getMaxKI(d->character) * .40) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G====@g------@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .35) {
+          } else if (charge >= getMaxKI(d->character) * .35) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G===-@g------@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .30) {
+          } else if (charge >= getMaxKI(d->character) * .30) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G===@g-------@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .25) {
+          } else if (charge >= getMaxKI(d->character) * .25) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G==-@g-------@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .20) {
+          } else if (charge >= getMaxKI(d->character) * .20) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G==@g--------@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .15) {
+          } else if (charge >= getMaxKI(d->character) * .15) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=-@g--------@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .10) {
+          } else if (charge >= getMaxKI(d->character) * .10) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=@g---------@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge >= GET_MAX_MANA(d->character) * .05) {
+          } else if (charge >= getMaxKI(d->character) * .05) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G-@g---------@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge < GET_MAX_MANA(d->character) * .05) {
+          } else if (charge < getMaxKI(d->character) * .05) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@g----------@D]@n\n");
             if (count >= 0)
               len += count;
@@ -1118,7 +1118,7 @@ char *make_prompt(struct descriptor_data *d)
         }
         if (char_prf_flagged(d->character, PRF_DISPERC) && !char_prf_flagged(d->character, PRF_NODEC)) {
           if (char_get_charge(d->character) > 0) {
-            int64_t perc = (char_get_charge(d->character) * 100) / GET_MAX_MANA(d->character);
+            int64_t perc = (char_get_charge(d->character) * 100) / getMaxKI(d->character);
             count        = snprintf(prompt + len, sizeof(prompt) - len, "@D[@BCharge@Y: @C%" I64T "%s@D]@n\n", perc, "%");
             if (count >= 0)
               len += count;
@@ -1126,7 +1126,7 @@ char *make_prompt(struct descriptor_data *d)
         }
         if (char_prf_flagged(d->character, PRF_NODEC)) {
           if (charge > 0) {
-            int64_t perc = (charge * 100) / GET_MAX_MANA(d->character);
+            int64_t perc = (charge * 100) / getMaxKI(d->character);
             count        = snprintf(prompt + len, sizeof(prompt) - len, "Ki is charged to %" I64T " percent.\n", perc);
             if (count >= 0)
               len += count;
@@ -1141,7 +1141,7 @@ char *make_prompt(struct descriptor_data *d)
       if (char_aff_flagged(d->character, AFF_SANCTUARY)) {
         if (char_prf_flagged(d->character, PRF_DISPERC) && !char_prf_flagged(d->character, PRF_NODEC)) {
           if (char_get_barrier(d->character) > 0) {
-            int64_t perc = (char_get_barrier(d->character) * 100) / GET_MAX_MANA(d->character);
+            int64_t perc = (char_get_barrier(d->character) * 100) / getMaxKI(d->character);
             count        = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GBarrier@Y: @B%" I64T "%s@D]@n\n", perc, "%");
             if (count >= 0)
               len += count;
@@ -1149,67 +1149,67 @@ char *make_prompt(struct descriptor_data *d)
         }
 
         if (!char_prf_flagged(d->character, PRF_NODEC) && !char_prf_flagged(d->character, PRF_DISPERC)) {
-          if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .75) {
+          if (char_get_barrier(d->character) >= getMaxKI(d->character) * .75) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C==MAX==@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .70) {
+          } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .70) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=======@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .65) {
+          } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .65) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C======-@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .60) {
+          } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .60) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C======@c-@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .55) {
+          } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .55) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=====-@c-@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .50) {
+          } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .50) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=====@c--@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .45) {
+          } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .45) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C====-@c--@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .40) {
+          } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .40) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C====@c---@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .35) {
+          } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .35) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C===-@c---@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .30) {
+          } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .30) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C===@c----@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .25) {
+          } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .25) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C==-@c----@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .20) {
+          } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .20) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C==@c-----@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .15) {
+          } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .15) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=-@c-----@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .10) {
+          } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .10) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=@c------@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (char_get_barrier(d->character) >= GET_MAX_MANA(d->character) * .05) {
+          } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .05) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C-@c------@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (char_get_barrier(d->character) < GET_MAX_MANA(d->character) * .05) {
+          } else if (char_get_barrier(d->character) < getMaxKI(d->character) * .05) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C--Low-@D]@n\n");
             if (count >= 0)
               len += count;
@@ -1217,7 +1217,7 @@ char *make_prompt(struct descriptor_data *d)
         }
         if (char_prf_flagged(d->character, PRF_NODEC)) {
           if (char_get_barrier(d->character) > 0) {
-            int64_t perc = (char_get_barrier(d->character) * 100) / GET_MAX_MANA(d->character);
+            int64_t perc = (char_get_barrier(d->character) * 100) / getMaxKI(d->character);
             count        = snprintf(prompt + len, sizeof(prompt) - len, "A barrier charged to %" I64T " percent surrounds you.@n\n", perc);
             if (count >= 0)
               len += count;
@@ -1263,23 +1263,23 @@ char *make_prompt(struct descriptor_data *d)
       }
       if (!char_prf_flagged(d->character, PRF_DISPERC)) {
         if (char_prf_flagged(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
-            (getCurKI(d->character)) > GET_MAX_MANA(d->character) / 2) {
+            (getCurKI(d->character)) > getMaxKI(d->character) / 2) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @c%s@D]@n", add_commas((getCurKI(d->character))));
           if (count >= 0)
             len += count;
         } else if (char_prf_flagged(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
-                   (getCurKI(d->character)) > GET_MAX_MANA(d->character) / 10) {
+                   (getCurKI(d->character)) > getMaxKI(d->character) / 10) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @y%s@D]@n", add_commas((getCurKI(d->character))));
           if (count >= 0)
             len += count;
         } else if (char_prf_flagged(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
-                   (getCurKI(d->character)) <= GET_MAX_MANA(d->character) / 10) {
+                   (getCurKI(d->character)) <= getMaxKI(d->character) / 10) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @r%s@D]@n", add_commas((getCurKI(d->character))));
           if (count >= 0)
             len += count;
         }
       } else if (char_prf_flagged(d->character, PRF_DISPKI)) {
-        int64_t power = (getCurKI(d->character)), maxpower = GET_MAX_MANA(d->character);
+        int64_t power = (getCurKI(d->character)), maxpower = getMaxKI(d->character);
         int perc = 0;
         if (power <= 0) {
           power = 1;
@@ -1312,23 +1312,23 @@ char *make_prompt(struct descriptor_data *d)
       }
       if (!char_prf_flagged(d->character, PRF_DISPERC)) {
         if (char_prf_flagged(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
-            (getCurST(d->character)) > GET_MAX_MOVE(d->character) / 2) {
+            (getCurST(d->character)) > getMaxST(d->character) / 2) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @c%s@D]@n", add_commas((getCurST(d->character))));
           if (count >= 0)
             len += count;
         } else if (char_prf_flagged(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
-                   (getCurST(d->character)) > GET_MAX_MOVE(d->character) / 10) {
+                   (getCurST(d->character)) > getMaxST(d->character) / 10) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @y%s@D]@n", add_commas((getCurST(d->character))));
           if (count >= 0)
             len += count;
         } else if (char_prf_flagged(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
-                   (getCurST(d->character)) <= GET_MAX_MOVE(d->character) / 10) {
+                   (getCurST(d->character)) <= getMaxST(d->character) / 10) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @r%s@D]@n", add_commas((getCurST(d->character))));
           if (count >= 0)
             len += count;
         }
       } else if (char_prf_flagged(d->character, PRF_DISPMOVE)) {
-        int64_t power = (getCurST(d->character)), maxpower = GET_MAX_MOVE(d->character);
+        int64_t power = (getCurST(d->character)), maxpower = getMaxST(d->character);
         int perc = 0;
         if (power <= 0) {
           power = 1;
@@ -1375,12 +1375,12 @@ char *make_prompt(struct descriptor_data *d)
           len += count;
       }
       if (char_prf_flagged(d->character, PRF_DISPRAC) && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mPS@y: @W%s@D]@n", add_commas(GET_PRACTICES(d->character, char_get_class(d->character))));
+        count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mPS@y: @W%s@D]@n", add_commas(char_get_practice_points(d->character)));
         if (count >= 0)
           len += count;
       }
       if (char_prf_flagged(d->character, PRF_DISHUTH) && len < sizeof(prompt)) {
-        int hun = GET_COND(d->character, HUNGER), thir = GET_COND(d->character, THIRST);
+        int hun = char_get_conditions(d->character, HUNGER), thir = char_get_conditions(d->character, THIRST);
         count = snprintf(prompt + len, sizeof(prompt) - len, "\n@D[@mHung@y:");
         if (count >= 0)
           len += count;
@@ -2456,7 +2456,7 @@ void close_socket(struct descriptor_data *d)
       /* We are guaranteed to have a person. */
       act("$n has lost $s link.", TRUE, link_challenged, 0, 0, TO_ROOM);
       save_char(link_challenged);
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(link_challenged)), TRUE, "Closing link to: %s.", char_get_name(link_challenged));
+      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(link_challenged)), TRUE, "Closing link to: %s.", char_get_name(link_challenged));
     } else {
       free_char(d->character);
     }
@@ -2995,6 +2995,12 @@ void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, c
   last_act_message = strdup(lbuf);
 }
 
+/* act()/sub_write(): should ch receive this message? (to_sleeping: deliver even to sleeping characters) */
+bool sendok(struct char_data *ch, int to_sleeping)
+{
+  return (ch->desc || SCRIPT_CHECK(ch, MTRIG_ACT)) && (to_sleeping || char_is_awake(ch)) && !char_plr_flagged(ch, PLR_WRITING);
+}
+
 char *act(const char *str, int hide_invisible, struct char_data *ch,
           struct obj_data *obj, const void *vict_obj, int type)
 {
@@ -3043,7 +3049,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
     REMOVE_BIT(type, DG_NO_TRIG);
 
   if (type == TO_CHAR) {
-    if (ch && SENDOK(ch) && (!resskill || (roll_skill(ch, resskill) >= dcval))) {
+    if (ch && sendok(ch, to_sleeping) && (!resskill || (roll_skill(ch, resskill) >= dcval))) {
       perform_act(str, ch, obj, vict_obj, ch);
       return last_act_message;
     }
@@ -3051,7 +3057,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
   }
 
   if (type == TO_VICT) {
-    if ((to = (struct char_data *)vict_obj) != NULL && SENDOK(to) && (!resskill || (roll_skill(to, resskill) >= dcval))) {
+    if ((to = (struct char_data *)vict_obj) != NULL && sendok(to, to_sleeping) && (!resskill || (roll_skill(to, resskill) >= dcval))) {
       perform_act(str, ch, obj, vict_obj, to);
       return last_act_message;
     }
@@ -3126,7 +3132,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
   }
 
   for (; to; to = to->next_in_room) {
-    if (!SENDOK(to) || (to == ch))
+    if (!sendok(to, to_sleeping) || (to == ch))
       continue;
     if (hide_invisible && ch && !char_can_see(to, ch))
       continue;

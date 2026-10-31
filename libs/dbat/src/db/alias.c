@@ -32,7 +32,7 @@ void write_aliases(struct char_data *ch)
   get_filename(fn, sizeof(fn), ALIAS_FILE, char_get_name(ch));
   remove(fn);
 
-  if (GET_ALIASES(ch) == NULL)
+  if (char_get_aliases(ch) == NULL)
     return;
 
   if ((file = fopen(fn, "w")) == NULL) {
@@ -45,7 +45,7 @@ void write_aliases(struct char_data *ch)
     return;
   }
 
-  for (temp = GET_ALIASES(ch); temp; temp = temp->next) {
+  for (temp = char_get_aliases(ch); temp; temp = temp->next) {
     int aliaslen = strlen(temp->alias);
     int repllen  = strlen(temp->replacement) - 1;
 
@@ -81,8 +81,8 @@ void read_aliases(struct char_data *ch)
     return;
   }
 
-  CREATE(GET_ALIASES(ch), struct alias_data, 1);
-  t2 = GET_ALIASES(ch);
+  CREATE(t2, struct alias_data, 1);
+  char_set_aliases(ch, t2);
 
   for (;;) {
     /* Read the aliased command. */
@@ -155,7 +155,7 @@ ACMD(do_alias)
 
   if (!*arg) { /* no argument specified -- list currently defined aliases */
     send_to_char(ch, "Currently defined aliases:\r\n");
-    if ((a = GET_ALIASES(ch)) == NULL)
+    if ((a = char_get_aliases(ch)) == NULL)
       send_to_char(ch, " None.\r\n");
     else {
       while (a != NULL) {
@@ -165,8 +165,10 @@ ACMD(do_alias)
     }
   } else { /* otherwise, add or remove aliases */
     /* is this an alias we've already defined? */
-    if ((a = find_alias(GET_ALIASES(ch), arg)) != NULL) {
-      REMOVE_FROM_LIST(a, GET_ALIASES(ch), next, temp);
+    if ((a = find_alias(char_get_aliases(ch), arg)) != NULL) {
+      struct alias_data *head = char_get_aliases(ch);
+      REMOVE_FROM_LIST(a, head, next, temp);
+      char_set_aliases(ch, head);
       free_alias(a);
     }
     /* if no replacement string is specified, assume we want to delete */
@@ -188,8 +190,8 @@ ACMD(do_alias)
         a->type = ALIAS_COMPLEX;
       else
         a->type = ALIAS_SIMPLE;
-      a->next         = GET_ALIASES(ch);
-      GET_ALIASES(ch) = a;
+      a->next         = char_get_aliases(ch);
+      char_set_aliases(ch, a);
       send_to_char(ch, "Alias added.\r\n");
     }
   }
@@ -274,7 +276,7 @@ int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen)
     return (0);
 
   /* bail out immediately if the guy doesn't have any aliases */
-  if ((tmp = GET_ALIASES(d->character)) == NULL)
+  if ((tmp = char_get_aliases(d->character)) == NULL)
     return (0);
 
   /* find the alias we're supposed to match */
