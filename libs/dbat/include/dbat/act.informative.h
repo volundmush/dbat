@@ -70,4 +70,4 @@ ACMD(do_intro);
 ACMD(do_scan);
 ACMD(do_toplist);
 ACMD(do_whois);
-extern char *default_color_choices[NUM_COLOR + 1];
+extern const char *default_color_choices[NUM_COLOR + 1];

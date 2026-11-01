@@ -198,13 +198,13 @@ ACMD(do_train)
     cost *= 2;
   }
 
-  int stat_id      = 0;
-  int8_t *stat_val = nullptr;
-  char *stat_name  = nullptr;
-  int bonus_trait  = -1;
-  int nega_trait   = -1;
-  int *stat_train  = nullptr;
-  int needed       = 0;
+  int stat_id           = 0;
+  int8_t *stat_val      = nullptr;
+  const char *stat_name = nullptr;
+  int bonus_trait       = -1;
+  int nega_trait        = -1;
+  int *stat_train       = nullptr;
+  int needed            = 0;
 
   if (!strcasecmp("str", arg)) {
     stat_id     = 1;
@@ -854,13 +854,13 @@ ACMD(do_meditate)
   }
 
   if (!strcasecmp(arg, "expand")) {
-    int cost = 3500;
+    int slot_cost = 3500;
     if (char_is_saiyan(ch)) {
-      cost = 7000;
+      slot_cost = 7000;
     }
-    if (char_get_practice_points(ch) < cost) {
+    if (char_get_practice_points(ch) < slot_cost) {
       send_to_char(ch, "You do not have enough practice sessions to expand your mind and ability to remember skills.\r\n");
-      send_to_char(ch, "%s needed.\r\n", add_commas(cost));
+      send_to_char(ch, "%s needed.\r\n", add_commas(slot_cost));
     } else if (char_get_skill_slots(ch) >= 60 && char_get_bonuses(ch, BONUS_GMEMORY) == 0) {
       send_to_char(ch, "You can not have any more slots through this process.\r\n");
     } else if (char_get_skill_slots(ch) >= 65 && char_get_bonuses(ch, BONUS_GMEMORY) == 1) {
@@ -868,7 +868,7 @@ ACMD(do_meditate)
     } else {
       send_to_char(ch, "During your meditation you manage to expand your mind and get the feeling you could learn some new skills.\r\n");
       char_set_skill_slots(ch, char_get_skill_slots(ch) + (1));
-      char_set_practice_points(ch, char_get_practice_points(ch) - (cost));
+      char_set_practice_points(ch, char_get_practice_points(ch) - (slot_cost));
       return;
     }
     return;

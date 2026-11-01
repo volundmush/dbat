@@ -40,7 +40,7 @@ static WCMD(do_weffect);
 void wld_command_interpreter(room_data *room, char *argument);
 
 struct wld_command_info {
-  char *command;
+  const char *command;
   void (*command_pointer)(room_data *room, char *argument, int cmd, int subcmd);
   int subcmd;
 };

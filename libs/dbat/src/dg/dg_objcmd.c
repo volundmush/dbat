@@ -55,7 +55,7 @@ static OCMD(do_oat);
 void obj_command_interpreter(obj_data *obj, char *argument);
 
 struct obj_command_info {
-  char *command;
+  const char *command;
   void (*command_pointer)(obj_data *obj, char *argument, int cmd, int subcmd);
   int subcmd;
 };
@@ -236,11 +236,11 @@ static OCMD(do_osend)
     if (subcmd == SCMD_OSEND)
       sub_write(msg, ch, TRUE, TO_CHAR);
     else if (subcmd == SCMD_OECHOAROUND) {
-      char buf[MAX_STRING_LENGTH];
+      char msgbuf[MAX_STRING_LENGTH];
 
-      sprintf(buf, "%s", msg);
-      search_replace(buf, char_get_name(ch), "$n");
-      act(buf, TRUE, ch, 0, 0, TO_ROOM);
+      sprintf(msgbuf, "%s", msg);
+      search_replace(msgbuf, char_get_name(ch), "$n");
+      act(msgbuf, TRUE, ch, 0, 0, TO_ROOM);
       /*sub_write(msg, ch, TRUE, TO_ROOM);*/
     }
   }

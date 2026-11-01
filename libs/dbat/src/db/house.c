@@ -29,9 +29,6 @@ static int House_get_filename(room_vnum vnum, char *filename, size_t maxlen);
 static int House_load(room_vnum vnum);
 static int House_save(struct obj_data *obj, FILE *fp, int location);
 static void House_restore_weight(struct obj_data *obj);
-void House_delete_file(room_vnum vnum);
-int find_house(room_vnum vnum);
-void House_save_control(void);
 
 static void hcontrol_build_house(struct char_data *ch, char *arg);
 static void hcontrol_destroy_house(struct char_data *ch, char *arg);
@@ -600,15 +597,15 @@ static int House_load(room_vnum rvnum)
       if (!strcmp("XAP", line)) { /* then this is a Xap Obj, requires
                                        special care */
         if ((temp->name = fread_string(fl, buf2)) == NULL) {
-          temp->name = "undefined";
+          temp->name = strdup("undefined");
         }
 
         if ((temp->short_description = fread_string(fl, buf2)) == NULL) {
-          temp->short_description = "undefined";
+          temp->short_description = strdup("undefined");
         }
 
         if ((temp->description = fread_string(fl, buf2)) == NULL) {
-          temp->description = "undefined";
+          temp->description = strdup("undefined");
         }
 
         if ((temp->action_description = fread_string(fl, buf2)) == NULL) {

@@ -73,14 +73,14 @@ ACMD(do_who)
   int low = 0, high = CONFIG_LEVEL_CAP, localwho = 0, questwho = 0, hide = 0;
   int showclass = 0, short_list = 0, outlaws = 0;
   int who_room = 0, showgroup = 0, showleader = 0;
-  char *line_color = "@n";
+  const char *line_color = "@n";
 
   skip_spaces(&argument);
   strcpy(buf, argument); /* strcpy: OK (sizeof: argument == buf) */
   name_search[0] = '\0';
 
   struct {
-    char *disp;
+    const char *disp;
     int min_level;
     int max_level;
     int count; /* must always start as 0 */
@@ -106,10 +106,7 @@ ACMD(do_who)
     else if (!(tch = d->character))
       continue;
 
-    if (char_get_admlevel(tch) >= ADMLVL_IMMORT)
-      line_color = "@w";
-    else
-      line_color = "@w";
+    line_color = "@w";
 
     if (char_can_see(ch, tch) && desc_is_playing(d)) {
       if (*name_search && strcasecmp(char_get_name(tch), name_search) &&
@@ -589,7 +586,7 @@ ACMD(do_toplist)
   FILE *file;
   char fname[40], filler[50], line[256];
   int64_t stats;
-  char *title[25] = {""};
+  char *title[25] = {NULL};
   int count = 0, x = 0;
 
   /* Read Introduction File */

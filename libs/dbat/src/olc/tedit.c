@@ -18,7 +18,7 @@
 void news_string_cleanup(struct descriptor_data *d, int terminator)
 {
   FILE *fl;
-  char *storage = NEWS_FILE;
+  const char *storage = NEWS_FILE;
 
   if (!storage)
     terminator = STRINGADD_ABORT;
@@ -55,7 +55,7 @@ void news_string_cleanup(struct descriptor_data *d, int terminator)
           if (NEWSUPDATE > char_get_lastpl(i->character))
             send_to_char(i->character, "\r\n@GA news entry has been made by %s, type 'news %d' to see it.@n\r\n", char_get_name(d->character), TOP_OF_NEWS);
         }
-        do_reboot(d->character, "news", 0, 0);
+        do_reboot(d->character, (char[]){"news"}, 0, 0);
       }
       break;
     case STRINGADD_ABORT:
@@ -113,7 +113,7 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator)
             if (NEWSUPDATE > char_get_lastpl(i->character))
               send_to_char(i->character, "\r\n@GThe NEWS file has been updated, type 'news' to see it.@n\r\n");
           }
-          do_reboot(d->character, "all", 0, 0);
+          do_reboot(d->character, (char[]){"all"}, 0, 0);
         }
       }
       break;
@@ -138,11 +138,11 @@ ACMD(do_tedit)
   char *backstr = NULL;
 
   struct {
-    char *cmd;
+    const char *cmd;
     char level;
     char **buffer;
     int size;
-    char *filename;
+    const char *filename;
   } fields[] = {
       /* edit the lvls to your own needs */
       {"credits",    ADMLVL_IMPL,  &credits,    24000, CREDITS_FILE   },

@@ -20,56 +20,27 @@ char *xdir_get_name(struct xap_dir *xd, int i)
   return xd->namelist[i]->d_name;
 }
 
-int insure_directory(char *path, int isfile)
+/* Like `mkdir -p`: creates each missing directory along path. Returns 1 if path ends up a directory, else 0. */
+int insure_directory(const char *path)
 {
-  char *chopsuey = strdup(path);
-  char *p;
-  char *temp;
+  char *dir = strdup(path);
   struct stat st;
 
-  /* if it's a file, remove that, we're only checking dirs; */
-  if (isfile) {
-    if (!(p = strrchr(path, '/'))) {
-      free(chopsuey);
-      return 1;
+  for (char *p = dir;; p++) {
+    if ((*p != '/' && *p != '\0') || (p == dir && *p == '/'))
+      continue;
+    char saved = *p;
+    *p         = '\0';
+    if (mkdir(dir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) < 0 && errno != EEXIST) {
+      free(dir);
+      return 0;
     }
-    *p = '\0';
+    if (saved == '\0')
+      break;
+    *p = saved;
   }
 
-  /* remove any trailing /'s */
-
-  while (chopsuey[strlen(chopsuey) - 1] == '/') {
-    chopsuey[strlen(chopsuey) - 1] = '\0';
-  }
-
-  /* check and see if it's already a dir */
-
-  if (!stat(chopsuey, &st) && S_ISDIR(st.st_mode)) {
-    free(chopsuey);
-    return 1;
-  }
-
-  temp = strdup(chopsuey);
-  if ((p = strrchr(temp, '/')) != NULL) {
-    *p = '\0';
-  }
-  if (insure_directory(temp, 0) &&
-
-      !mkdir(chopsuey, S_IRUSR | S_IWRITE | S_IEXEC | S_IRGRP | S_IXGRP |
-                           S_IROTH | S_IXOTH)) {
-    free(temp);
-    free(chopsuey);
-    return 1;
-  }
-
-  if (errno == EEXIST &&
-      !stat(temp, &st) && S_ISDIR(st.st_mode)) {
-    free(temp);
-    free(chopsuey);
-    return 1;
-  } else {
-    free(temp);
-    free(chopsuey);
-    return 1;
-  }
+  int ok = !stat(dir, &st) && S_ISDIR(st.st_mode);
+  free(dir);
+  return ok;
 }

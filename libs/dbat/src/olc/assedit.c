@@ -270,7 +270,7 @@ void assedit_parse(struct descriptor_data *d, char *arg)
     case ASSEDIT_EDIT_TYPES:
       if (isdigit(*arg)) {
         pos = atoi(arg) - 1;
-        if ((pos >= 0) || (pos < MAX_ASSM)) {
+        if ((pos >= 0) && (pos < MAX_ASSM)) {
           OLC_ASSEDIT(d)->uchAssemblyType = pos;
           assedit_disp_menu(d);
           break;

@@ -1315,10 +1315,10 @@ ACMD(do_zen)
               solo_gain(ch, vict);
             }
             if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOGOLD)) {
-              do_get(ch, "all.zenni corpse", 0, 0);
+              do_get(ch, (char[]){"all.zenni corpse"}, 0, 0);
             }
             if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOLOOT)) {
-              do_get(ch, "all corpse", 0, 0);
+              do_get(ch, (char[]){"all corpse"}, 0, 0);
             }
           } else if (dmg > getEffMaxPL(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
             if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= getMaxKI(vict) / 40) {
@@ -1339,10 +1339,10 @@ ACMD(do_zen)
                 solo_gain(ch, vict);
               }
               if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOGOLD)) {
-                do_get(ch, "all.zenni corpse", 0, 0);
+                do_get(ch, (char[]){"all.zenni corpse"}, 0, 0);
               }
               if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOLOOT)) {
-                do_get(ch, "all corpse", 0, 0);
+                do_get(ch, (char[]){"all corpse"}, 0, 0);
               }
             }
           } else {

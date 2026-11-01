@@ -135,7 +135,7 @@ void char_set_was_in_room(struct char_data *ch, room_rnum v);
 char *char_get_pc_name(const struct char_data *ch);
 void char_set_pc_name(struct char_data *ch, char *v);
 char *char_get_name(const struct char_data *ch);
-char *char_get_title(const struct char_data *ch);
+const char *char_get_title(const struct char_data *ch);
 int char_get_starphase(const struct char_data *ch);
 void char_set_starphase(struct char_data *ch, int v);
 int char_get_mimic(const struct char_data *ch);
@@ -143,9 +143,9 @@ char *char_get_voice(const struct char_data *ch);
 void char_set_voice(struct char_data *ch, char *v);
 int char_get_transclass(const struct char_data *ch);
 void char_set_transclass(struct char_data *ch, int v);
-char *char_get_feature(const struct char_data *ch);
-void char_set_feature(struct char_data *ch, char *v);
-char *char_get_user(const struct char_data *ch);
+const char *char_get_feature(const struct char_data *ch);
+void char_set_feature(struct char_data *ch, const char *v);
+const char *char_get_user(const struct char_data *ch);
 char *char_get_loguser(const struct char_data *ch);
 void char_set_loguser(struct char_data *ch, char *v);
 int char_get_admlevel(const struct char_data *ch);
@@ -195,8 +195,8 @@ int64_t char_get_suppression(const struct char_data *ch);
 void char_set_suppression(struct char_data *ch, int64_t v);
 int64_t char_get_suppressed(const struct char_data *ch);
 void char_set_suppressed(struct char_data *ch, int64_t v);
-char *char_get_rdisplay(const struct char_data *ch);
-void char_set_rdisplay(struct char_data *ch, char *v);
+const char *char_get_rdisplay(const struct char_data *ch);
+void char_set_rdisplay(struct char_data *ch, const char *v);
 
 int8_t char_get_aff_abils_str(const struct char_data *ch);
 void char_set_aff_abils_str(struct char_data *ch, int8_t v);
@@ -494,9 +494,9 @@ bool char_can_get_obj(struct char_data *ch, struct obj_data *obj);
 
 const char *char_pers(struct char_data *ch, struct char_data *vict);
 
-char *obj_shortdesc_for(const struct obj_data *obj, const struct char_data *vict);
+const char *obj_shortdesc_for(const struct obj_data *obj, const struct char_data *vict);
 
-char *obj_fname_for(const struct obj_data *obj, const struct char_data *vict);
+const char *obj_fname_for(const struct obj_data *obj, const struct char_data *vict);
 
 struct room_direction_data *char_get_exit(const struct char_data *ch, int door);
 void char_set_exit(struct char_data *ch, int door, struct room_direction_data *v);
@@ -585,10 +585,10 @@ bool char_is_female(const struct char_data *ch);
 
 bool char_is_outside(const struct char_data *ch);
 
-char *char_hshr(const struct char_data *ch);
-char *char_hssh(const struct char_data *ch);
-char *char_hmhr(const struct char_data *ch);
-char *char_mafe(const struct char_data *ch);
+const char *char_hshr(const struct char_data *ch);
+const char *char_hssh(const struct char_data *ch);
+const char *char_hmhr(const struct char_data *ch);
+const char *char_mafe(const struct char_data *ch);
 
 /* returns the number of spells per slot */
 
@@ -706,7 +706,7 @@ void handle_evolution(struct char_data *ch, int64_t dmg);
 void demon_refill_lf(struct char_data *ch, int64_t num);
 void mob_talk(struct char_data *ch, const char *speech);
 bool is_sparring(struct char_data *ch);
-char *introd_calc(struct char_data *ch);
+const char *introd_calc(struct char_data *ch);
 int64_t gear_exp(struct char_data *ch, int64_t exp);
 void purge_homing(struct char_data *ch);
 void improve_skill(struct char_data *ch, int skill, int num);

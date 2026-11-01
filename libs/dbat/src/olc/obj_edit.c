@@ -19,9 +19,6 @@
 #include "dbat/act.other.h"
 
 /* local functions  */
-void disp_custom_menu(struct descriptor_data *d);
-void pobj_edit_parse(struct descriptor_data *d, char *arg);
-void disp_custom_menu(struct descriptor_data *d);
 
 /* utility variables */
 

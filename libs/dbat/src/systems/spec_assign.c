@@ -23,32 +23,32 @@ static void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname));
 
 /* functions to perform assignments */
 
-static void ASSIGNMOB(mob_vnum mob, SPECIAL(fname))
+static void ASSIGNMOB(mob_vnum mob, SPECIAL(fn))
 {
   mob_rnum rnum;
 
   if ((rnum = real_mobile(mob)) != NOBODY)
-    mob_index[rnum].func = fname;
+    mob_index[rnum].func = fn;
   else if (!mini_mud)
     mud_log("SYSERR: Attempt to assign spec to non-existant mob #%d", mob);
 }
 
-static void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname))
+static void ASSIGNOBJ(obj_vnum obj, SPECIAL(fn))
 {
   obj_rnum rnum;
 
   if ((rnum = real_object(obj)) != NOTHING)
-    obj_index[rnum].func = fname;
+    obj_index[rnum].func = fn;
   else if (!mini_mud)
     mud_log("SYSERR: Attempt to assign spec to non-existant obj #%d", obj);
 }
 
-static void ASSIGNROOM(room_vnum room, SPECIAL(fname))
+static void ASSIGNROOM(room_vnum room, SPECIAL(fn))
 {
   room_rnum rnum;
 
   if ((rnum = real_room(room)) != NOWHERE)
-    world[rnum].func = fname;
+    world[rnum].func = fn;
   else if (!mini_mud)
     mud_log("SYSERR: Attempt to assign spec to non-existant room #%d", room);
 }

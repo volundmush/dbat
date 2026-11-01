@@ -7,4 +7,4 @@ struct xap_dir {
 
 int xdir_scan(char *dir_name, struct xap_dir *xapdirp);
 char *xdir_get_name(struct xap_dir *xd, int num);
-int insure_directory(char *path, int isfile);
+int insure_directory(const char *path);

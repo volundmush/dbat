@@ -82,7 +82,7 @@ void init_boards(void)
   struct board_info *tmp_board;
   char dir_name[128];
 
-  if (!insure_directory(BOARD_DIRECTORY, 0)) {
+  if (!insure_directory(BOARD_DIRECTORY)) {
     mud_log("Unable to open/create directory '%s' - Exiting", BOARD_DIRECTORY);
     exit(1);
   }
@@ -1030,5 +1030,3 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg)
   save_board(thisboard);
   return;
 }
-
-struct board_info *bboards;

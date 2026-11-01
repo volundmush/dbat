@@ -1343,6 +1343,3 @@ void clean_pfiles(void)
    * remove the entries of the players that were just deleted.
    */
 }
-
-int top_of_p_table;
-struct player_index_element *player_table;

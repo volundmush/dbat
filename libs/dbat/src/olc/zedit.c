@@ -1265,8 +1265,10 @@ void zedit_parse(struct descriptor_data *d, char *arg)
       /*
      * Parse the input for arg4, and goto next quiz.
      */
-      if (!*arg)
-        arg = "0";
+      if (!*arg) {
+        static char zero[] = "0";
+        arg                = zero;
+      }
 
       if (!isdigit(*arg)) {
         write_to_output(d, "Must be a numeric value, try again : ");

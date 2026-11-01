@@ -61,28 +61,6 @@
  */
 static void mob_log(char_data *mob, const char *format, ...) __attribute__((format(printf, 2, 3)));
 
-ACMD(do_masound);
-ACMD(do_mkill);
-ACMD(do_mheal);
-ACMD(do_mjunk);
-ACMD(do_mechoaround);
-ACMD(do_msend);
-ACMD(do_mecho);
-ACMD(do_mzoneecho);
-ACMD(do_mload);
-ACMD(do_mpurge);
-ACMD(do_mgoto);
-ACMD(do_mat);
-ACMD(do_mteleport);
-ACMD(do_mdamage);
-ACMD(do_mforce);
-ACMD(do_mremember);
-ACMD(do_mforget);
-ACMD(do_mtransform);
-ACMD(do_mdoor);
-ACMD(do_mfollow);
-ACMD(do_mrecho);
-
 /* attaches mob's name and vnum to msg and sends it to script_log */
 static void mob_log(char_data *mob, const char *format, ...)
 {

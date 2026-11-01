@@ -1231,7 +1231,6 @@ static void look_in_direction(struct char_data *ch, int dir)
       }
       if (founded == FALSE) {
         send_to_char(ch, "You were unable to discern anything about that direction. Try looking again...\r\n");
-        struct obj_data *obj;
         obj = read_object(17, VIRTUAL);
         obj_to_char(obj, ch);
       }
@@ -1763,7 +1762,7 @@ ACMD(do_examine)
 #define WHO_FORMAT \
   "Usage: who [minlev[-maxlev]] [-k] [-n name] [-q] [-r] [-s] [-z]\r\n"
 
-char *default_color_choices[NUM_COLOR + 1] = {
+const char *default_color_choices[NUM_COLOR + 1] = {
     /* COLOR_NORMAL */ AA_NORMAL,
     /* COLOR_ROOMNAME */ AA_NORMAL ANSISEPSTR AF_CYAN,
     /* COLOR_ROOMOBJS */ AA_NORMAL ANSISEPSTR AF_GREEN,

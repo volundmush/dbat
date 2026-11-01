@@ -14,7 +14,7 @@
 
 /* Local Functions */
 
-static void feato(int featnum, char *name, int in_game, int can_learn, int can_stack);
+static void feato(int featnum, const char *name, int in_game, int can_learn, int can_stack);
 static int compare_feats(const void *x, const void *y);
 
 /* Global Variables and Structures */
@@ -25,7 +25,7 @@ int feat_sort_info[MAX_FEATS];
 
 /* External functions*/
 
-static void feato(int featnum, char *name, int in_game, int can_learn, int can_stack)
+static void feato(int featnum, const char *name, int in_game, int can_learn, int can_stack)
 {
   feat_list[featnum].name      = name;
   feat_list[featnum].in_game   = in_game;

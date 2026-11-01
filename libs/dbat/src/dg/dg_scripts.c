@@ -28,7 +28,7 @@ static void do_stat_trigger(struct char_data *ch, trig_data *trig);
 static void script_stat(char_data *ch, struct script_data *sc);
 static int remove_trigger(struct script_data *sc, char *name);
 static int is_num(char *arg);
-static void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
+static void eval_op(const char *op, char *lhs, char *rhs, char *result, void *go,
                     struct script_data *sc, trig_data *trig);
 static char *matching_paren(char *p);
 static void eval_expr(char *line, char *result, void *go, struct script_data *sc,
@@ -65,10 +65,6 @@ static struct cmdlist_element *find_done(struct cmdlist_element *cl);
 static struct char_data *find_char_by_uid_in_lookup_table(long uid);
 static struct obj_data *find_obj_by_uid_in_lookup_table(long uid);
 static EVENTFUNC(trig_wait_event);
-ACMD(do_attach);
-ACMD(do_detach);
-ACMD(do_vdelete);
-ACMD(do_tstat);
 
 /* Return pointer to first occurrence of string ct in */
 /* cs, or NULL if not present.  Case insensitive */
@@ -1369,7 +1365,7 @@ static int is_num(char *arg)
 }
 
 /* evaluates 'lhs op rhs', and copies to result */
-static void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
+static void eval_op(const char *op, char *lhs, char *rhs, char *result, void *go,
                     struct script_data *sc, trig_data *trig)
 {
   unsigned char *p;
@@ -1545,7 +1541,7 @@ static int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_dat
    * valid operands, in order of priority
    * each must also be defined in eval_op()
    */
-  static char *ops[] = {
+  static const char *ops[] = {
       "||",
       "&&",
       "==",
@@ -2651,7 +2647,7 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
           GET_TRIG_LOOPS(trig)
           ++;
           if (loops == 40) {
-            process_wait(go, trig, type, "wait 1", cl);
+            process_wait(go, trig, type, (char[]){"wait 1"}, cl);
             depth--;
             return ret_val;
           }

@@ -697,8 +697,6 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
     sort_keeper_objs(keeper, shop_nr);
 
   if (!*arg) {
-    char buf[MAX_INPUT_LENGTH];
-
     snprintf(buf, sizeof(buf), "%s What do you want to appraise?", char_get_name(ch));
     do_tell(keeper, buf, cmd_tell, 0);
     return;

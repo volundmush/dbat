@@ -1179,7 +1179,7 @@ static void clear_skills(int gdindex)
 /****  This is ripped off of read_line from shop.c.  They could be
  *  combined. But why? ****/
 
-static void read_guild_line(FILE *gm_f, char *string, void *data, char *type)
+static void read_guild_line(FILE *gm_f, const char *string, void *data, const char *type)
 {
   char buf[MAX_STRING_LENGTH];
 

@@ -26,7 +26,6 @@ static void list_objects(struct char_data *ch, zone_rnum rnum, obj_vnum vmin, ob
 static void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax);
 static void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vnum vmax);
 static void list_zones(struct char_data *ch);
-void print_zone(struct char_data *ch, zone_vnum vnum);
 
 /******************************************************************************/
 /** Ingame Commands                                                          **/

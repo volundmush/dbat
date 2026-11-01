@@ -22,7 +22,6 @@
 #include "dbat/oasis.h"
 
 /* Internal Functions */
-int free_strings(void *data, int type);
 
 /************************************************************************\
  ** Description :                                                      **

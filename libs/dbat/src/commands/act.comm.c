@@ -37,7 +37,7 @@
 static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg);
 static int is_tell_ok(struct char_data *ch, struct char_data *vict);
 static void handle_whisper(char *buf, struct char_data *ch, struct char_data *vict);
-static char *overhear(char *buf, int type);
+static const char *overhear(char *buf, int type);
 static void list_languages(struct char_data *ch);
 static void garble_text(char *string, int known, int lang);
 
@@ -1060,7 +1060,7 @@ static void handle_whisper(char *buf, struct char_data *ch, struct char_data *vi
   }
 }
 
-static char *overhear(char *buf, int type)
+static const char *overhear(char *buf, int type)
 {
 
   switch (type) {

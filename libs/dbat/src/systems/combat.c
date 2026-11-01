@@ -152,7 +152,7 @@ void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data 
       act("@RYour @C$p@R loses a piece from striking @r$N's@R body!@n", TRUE, ch, obj, vict, TO_CHAR);
       act("@r$n's@R @C$p@R loses a piece from striking YOUR body!@n", TRUE, ch, obj, vict, TO_VICT);
       act("@r$n's@R @C$p@R loses a piece from striking @r$N's@R body!@n", TRUE, ch, obj, vict, TO_NOTVICT);
-    } else if (result >= 6) {
+    } else if (result >= 1) {
       act("@RYour @C$p@R has a nick in it from hitting @r$N's@R body!@n", TRUE, ch, obj, vict, TO_CHAR);
       act("@r$n's@R @C$p@R has a nick in it from hitting YOUR body!@n", TRUE, ch, obj, vict, TO_VICT);
       act("@r$n's@R @C$p@R has a nick in it from hitting @r$N's@R body!@n", TRUE, ch, obj, vict, TO_NOTVICT);
@@ -1471,7 +1471,7 @@ void dam_eq_loc(struct char_data *vict, int area)
   /* Area is 4 possible hit locations in an attack.
     1 Arms, 2 legs, 3 head, and 4 body. */
 
-  if (!vict || vict == NULL || getCurPL(vict) <= 0) {
+  if (!vict || getCurPL(vict) <= 0) {
     return;
   }
 
@@ -2077,10 +2077,10 @@ void homing_update()
                   solo_gain(ch, vict);
                 }
                 if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOGOLD)) {
-                  do_get(ch, "all.zenni corpse", 0, 0);
+                  do_get(ch, (char[]){"all.zenni corpse"}, 0, 0);
                 }
                 if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOLOOT)) {
-                  do_get(ch, "all corpse", 0, 0);
+                  do_get(ch, (char[]){"all corpse"}, 0, 0);
                 }
               } else if (dmg > getEffMaxPL(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
                 if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= getMaxKI(vict) / 40) {
@@ -2107,10 +2107,10 @@ void homing_update()
                       solo_gain(ch, vict);
                     }
                     if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOGOLD)) {
-                      do_get(ch, "all.zenni corpse", 0, 0);
+                      do_get(ch, (char[]){"all.zenni corpse"}, 0, 0);
                     }
                     if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOLOOT)) {
-                      do_get(ch, "all corpse", 0, 0);
+                      do_get(ch, (char[]){"all corpse"}, 0, 0);
                     }
                   }
                 }

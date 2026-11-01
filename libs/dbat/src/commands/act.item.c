@@ -88,7 +88,7 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
 static int hands(struct char_data *ch);
 static void start_auction(struct char_data *ch, struct obj_data *obj, int bid);
 static void auc_stat(struct char_data *ch, struct obj_data *obj);
-static void auc_send_to_all(char *messg, bool buyer);
+static void auc_send_to_all(const char *messg, bool buyer);
 static int has_housekey(struct char_data *ch, struct obj_data *obj);
 static void harvest_plant(struct char_data *ch, struct obj_data *plant);
 static int can_harvest(struct obj_data *plant);
@@ -1379,13 +1379,13 @@ ACMD(do_bid)
             send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w50%s@D]@n\r\n", "%");
           }
         }
-        int i, found = FALSE;
+        int i, found_bonus = FALSE;
         send_to_char(ch, "@GItem Size   @W:@w %s@n\r\n", size_names[obj_get_size(obj2)]);
         send_to_char(ch, "@GItem Bonuses@W:@w");
         for (i = 0; i < MAX_OBJ_AFFECT; i++) {
           if (obj2->affected[i].modifier) {
             sprinttype(obj2->affected[i].location, apply_types, buf, sizeof(buf));
-            send_to_char(ch, "%s %+d to %s", found++ ? "," : "", obj2->affected[i].modifier, buf);
+            send_to_char(ch, "%s %+d to %s", found_bonus++ ? "," : "", obj2->affected[i].modifier, buf);
             switch (obj2->affected[i].location) {
               case APPLY_FEAT:
                 send_to_char(ch, " (%s)", feat_list[obj2->affected[i].specific].name);
@@ -1396,7 +1396,7 @@ ACMD(do_bid)
             }
           }
         }
-        if (!found)
+        if (!found_bonus)
           send_to_char(ch, " None@n");
         else
           send_to_char(ch, "@n");
@@ -1557,7 +1557,7 @@ static void auc_stat(struct char_data *ch, struct obj_data *obj)
   }
 }
 
-static void auc_send_to_all(char *messg, bool buyer)
+static void auc_send_to_all(const char *messg, bool buyer)
 {
   struct descriptor_data *i;
 
@@ -1582,7 +1582,7 @@ ACMD(do_assemble)
 {
   long lVnum               = NOTHING;
   struct obj_data *pObject = NULL;
-  char buf[MAX_STRING_LENGTH];
+  char text[MAX_STRING_LENGTH];
 
   int roll = 0;
 
@@ -1758,12 +1758,12 @@ ACMD(do_assemble)
   }*/
 
   /* Tell the character they made something. */
-  sprintf(buf, "You %s $p.", CMD_NAME);
-  act(buf, FALSE, ch, pObject, NULL, TO_CHAR);
+  sprintf(text, "You %s $p.", CMD_NAME);
+  act(text, FALSE, ch, pObject, NULL, TO_CHAR);
 
   /* Tell the room the character made something. */
-  sprintf(buf, "$n %ss $p.", CMD_NAME);
-  act(buf, FALSE, ch, pObject, NULL, TO_ROOM);
+  sprintf(text, "$n %ss $p.", CMD_NAME);
+  act(text, FALSE, ch, pObject, NULL, TO_ROOM);
 
   if (assemblyCheckComponents(lVnum, ch, TRUE)) {
     roll = 9001; /* Just a place holder */
@@ -2070,10 +2070,10 @@ static void get_from_container(struct char_data *ch, struct obj_data *cont,
     act("$p is closed.", FALSE, ch, cont, 0, TO_CHAR);
   else if (obj_dotmode == FIND_INDIV) {
     if (!(obj = get_obj_in_list_vis(ch, arg, NULL, cont->contains))) {
-      char buf[MAX_STRING_LENGTH];
+      char out[MAX_STRING_LENGTH];
 
-      snprintf(buf, sizeof(buf), "There doesn't seem to be %s %s in $p.", AN(arg), arg);
-      act(buf, FALSE, ch, cont, 0, TO_CHAR);
+      snprintf(out, sizeof(out), "There doesn't seem to be %s %s in $p.", AN(arg), arg);
+      act(out, FALSE, ch, cont, 0, TO_CHAR);
     } else {
       struct obj_data *obj_next;
       while (obj && howmany--) {
@@ -2099,10 +2099,10 @@ static void get_from_container(struct char_data *ch, struct obj_data *cont,
       if (obj_dotmode == FIND_ALL)
         act("$p seems to be empty.", FALSE, ch, cont, 0, TO_CHAR);
       else {
-        char buf[MAX_STRING_LENGTH];
+        char out[MAX_STRING_LENGTH];
 
-        snprintf(buf, sizeof(buf), "You can't seem to find any %ss in $p.", arg);
-        act(buf, FALSE, ch, cont, 0, TO_CHAR);
+        snprintf(out, sizeof(out), "You can't seem to find any %ss in $p.", arg);
+        act(out, FALSE, ch, cont, 0, TO_CHAR);
       }
     }
   }
@@ -2310,7 +2310,7 @@ static void perform_drop_gold(struct char_data *ch, int amount,
         obj_to_room(obj, RDR);
         act("$p suddenly appears in a puff of orange smoke!", 0, 0, obj, 0, TO_ROOM);
       } else {
-        char buf[MAX_STRING_LENGTH];
+        char out[MAX_STRING_LENGTH];
 
         if (!drop_wtrigger(obj, ch)) {
           extract_obj(obj);
@@ -2322,8 +2322,8 @@ static void perform_drop_gold(struct char_data *ch, int amount,
           return;
         }
 
-        snprintf(buf, sizeof(buf), "$n drops %s.", money_desc(amount));
-        act(buf, TRUE, ch, 0, 0, TO_ROOM);
+        snprintf(out, sizeof(out), "$n drops %s.", money_desc(amount));
+        act(out, TRUE, ch, 0, 0, TO_ROOM);
 
         send_to_char(ch, "You drop some zenni.\r\n");
         obj_to_room(obj, char_get_in_room(ch));
@@ -2337,10 +2337,10 @@ static void perform_drop_gold(struct char_data *ch, int amount,
         }
       }
     } else {
-      char buf[MAX_STRING_LENGTH];
+      char out[MAX_STRING_LENGTH];
 
-      snprintf(buf, sizeof(buf), "$n drops %s which disappears in a puff of smoke!", money_desc(amount));
-      act(buf, FALSE, ch, 0, 0, TO_ROOM);
+      snprintf(out, sizeof(out), "$n drops %s which disappears in a puff of smoke!", money_desc(amount));
+      act(out, FALSE, ch, 0, 0, TO_ROOM);
 
       send_to_char(ch, "You drop some zenni which disappears in a puff of smoke!\r\n");
     }
@@ -2353,7 +2353,7 @@ static void perform_drop_gold(struct char_data *ch, int amount,
 static int perform_drop(struct char_data *ch, struct obj_data *obj,
                         int8_t mode, const char *sname, room_rnum RDR)
 {
-  char buf[MAX_STRING_LENGTH];
+  char out[MAX_STRING_LENGTH];
   int value;
 
   if (!drop_otrigger(obj, ch))
@@ -2363,60 +2363,60 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
     return 0;
 
   if (obj_get_vnum(obj) == 17 || obj_get_vnum(obj) == 17998) {
-    snprintf(buf, sizeof(buf), "You can't %s $p, it is grafted into your soul :P", sname);
-    act(buf, FALSE, ch, obj, 0, TO_CHAR);
+    snprintf(out, sizeof(out), "You can't %s $p, it is grafted into your soul :P", sname);
+    act(out, FALSE, ch, obj, 0, TO_CHAR);
     return (0);
   }
   if (obj_get_vnum(obj) == 20 || obj_get_vnum(obj) == 21 || obj_get_vnum(obj) == 22 || obj_get_vnum(obj) == 23 || obj_get_vnum(obj) == 24 || obj_get_vnum(obj) == 25 || obj_get_vnum(obj) == 26) {
     if (rroom_flagged(char_get_in_room(ch), ROOM_SPACE)) {
-      snprintf(buf, sizeof(buf), "You can't %s $p in space!", sname);
-      act(buf, FALSE, ch, obj, 0, TO_CHAR);
+      snprintf(out, sizeof(out), "You can't %s $p in space!", sname);
+      act(out, FALSE, ch, obj, 0, TO_CHAR);
       return (0);
     }
     if (rroom_flagged(char_get_in_room(ch), ROOM_GARDEN1) || rroom_flagged(char_get_in_room(ch), ROOM_GARDEN2)) {
-      snprintf(buf, sizeof(buf), "You can't %s $p in here. Read help garden.", sname);
-      act(buf, FALSE, ch, obj, 0, TO_CHAR);
+      snprintf(out, sizeof(out), "You can't %s $p in here. Read help garden.", sname);
+      act(out, FALSE, ch, obj, 0, TO_CHAR);
       return (0);
     }
     if ((mode == SCMD_DROP) && obj_extra_flagged(obj, ITEM_NORENT)) {
-      snprintf(buf, sizeof(buf), "You drop $p but it gets lost on the ground!");
-      act(buf, FALSE, ch, obj, 0, TO_CHAR);
+      snprintf(out, sizeof(out), "You drop $p but it gets lost on the ground!");
+      act(out, FALSE, ch, obj, 0, TO_CHAR);
       obj_from_char(obj);
       extract_obj(obj);
       return (0);
     }
     if (rroom_flagged(char_get_in_room(ch), ROOM_NOINSTANT)) {
-      snprintf(buf, sizeof(buf), "You can't %s $p in this protected area!", sname);
-      act(buf, FALSE, ch, obj, 0, TO_CHAR);
+      snprintf(out, sizeof(out), "You can't %s $p in this protected area!", sname);
+      act(out, FALSE, ch, obj, 0, TO_CHAR);
       return (0);
     }
     if (rroom_flagged(char_get_in_room(ch), ROOM_SHIP)) {
-      snprintf(buf, sizeof(buf), "You can't %s $p on a private ship!", sname);
-      act(buf, FALSE, ch, obj, 0, TO_CHAR);
+      snprintf(out, sizeof(out), "You can't %s $p on a private ship!", sname);
+      act(out, FALSE, ch, obj, 0, TO_CHAR);
       return (0);
     }
     if (rroom_flagged(char_get_in_room(ch), ROOM_HOUSE)) {
-      snprintf(buf, sizeof(buf), "You can't %s $p in a private house!", sname);
-      act(buf, FALSE, ch, obj, 0, TO_CHAR);
+      snprintf(out, sizeof(out), "You can't %s $p in a private house!", sname);
+      act(out, FALSE, ch, obj, 0, TO_CHAR);
       return (0);
     }
   }
   if (obj_extra_flagged(obj, ITEM_NODROP) && char_get_admlevel(ch) < 1) {
-    snprintf(buf, sizeof(buf), "You can't %s $p, it must be CURSED!", sname);
-    act(buf, FALSE, ch, obj, 0, TO_CHAR);
+    snprintf(out, sizeof(out), "You can't %s $p, it must be CURSED!", sname);
+    act(out, FALSE, ch, obj, 0, TO_CHAR);
     return (0);
   }
   if ((mode == SCMD_DONATE || mode == SCMD_JUNK) && obj_extra_flagged(obj, ITEM_NODONATE)) {
-    snprintf(buf, sizeof(buf), "You can't %s $p!", sname);
-    act(buf, FALSE, ch, obj, 0, TO_CHAR);
+    snprintf(out, sizeof(out), "You can't %s $p!", sname);
+    act(out, FALSE, ch, obj, 0, TO_CHAR);
     return (0);
   }
 
-  snprintf(buf, sizeof(buf), "You %s $p.", sname);
-  act(buf, FALSE, ch, obj, 0, TO_CHAR);
+  snprintf(out, sizeof(out), "You %s $p.", sname);
+  act(out, FALSE, ch, obj, 0, TO_CHAR);
 
-  snprintf(buf, sizeof(buf), "$n %ss $p.", sname);
-  act(buf, TRUE, ch, obj, 0, TO_ROOM);
+  snprintf(out, sizeof(out), "$n %ss $p.", sname);
+  act(out, TRUE, ch, obj, 0, TO_ROOM);
 
   obj_from_char(obj);
 
@@ -2626,7 +2626,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
   }
   if (char_is_npc(vict) && (obj_extra_flagged(obj, ITEM_FORGED) || obj_extra_flagged(obj, ITEM_FORGED))) {
     act("$n tries to hand $p to $N.", TRUE, ch, obj, vict, TO_NOTVICT);
-    do_say(vict, "I don't want that piece of junk.", 0, 0);
+    do_say(vict, (char[]){"I don't want that piece of junk."}, 0, 0);
     return;
   }
   if (obj_get_weight(obj) + (getCurCarriedWeight(vict)) > getMaxCarryWeight(vict)) {
@@ -2699,7 +2699,7 @@ static struct char_data *give_find_vict(struct char_data *ch, char *arg)
 static void perform_give_gold(struct char_data *ch, struct char_data *vict,
                               int amount)
 {
-  char buf[MAX_STRING_LENGTH];
+  char out[MAX_STRING_LENGTH];
 
   if (amount <= 0) {
     send_to_char(ch, "Heh heh heh ... we are jolly funny today, eh?\r\n");
@@ -2715,11 +2715,11 @@ static void perform_give_gold(struct char_data *ch, struct char_data *vict,
   }
   send_to_char(ch, "%s", CONFIG_OK);
 
-  snprintf(buf, sizeof(buf), "$n gives you %d zenni.", amount);
-  act(buf, FALSE, ch, 0, vict, TO_VICT);
+  snprintf(out, sizeof(out), "$n gives you %d zenni.", amount);
+  act(out, FALSE, ch, 0, vict, TO_VICT);
 
-  snprintf(buf, sizeof(buf), "$n gives %s to $N.", money_desc(amount));
-  act(buf, TRUE, ch, 0, vict, TO_NOTVICT);
+  snprintf(out, sizeof(out), "$n gives %s to $N.", money_desc(amount));
+  act(out, TRUE, ch, 0, vict, TO_NOTVICT);
 
   if (char_is_npc(ch) || !char_adm_flagged(ch, ADM_MONEY))
     char_set_gold(ch, char_get_gold(ch) - (amount));
@@ -2928,13 +2928,13 @@ ACMD(do_drink)
   }
   wasthirsty = char_get_conditions(ch, THIRST);
   if (!*arg && !char_is_npc(ch)) {
-    char buf[MAX_STRING_LENGTH];
+    char out[MAX_STRING_LENGTH];
     switch (rroom_sect(char_get_in_room(ch))) {
       case SECT_WATER_SWIM:
       case SECT_WATER_NOSWIM:
       case SECT_UNDERWATER:
-        snprintf(buf, sizeof(buf), "$n takes a refreshing drink from the surrounding water.");
-        act(buf, TRUE, ch, 0, 0, TO_ROOM);
+        snprintf(out, sizeof(out), "$n takes a refreshing drink from the surrounding water.");
+        act(out, TRUE, ch, 0, 0, TO_ROOM);
         send_to_char(ch, "You take a refreshing drink from the surrounding water.\r\n");
         gain_condition(ch, THIRST, 1);
         if (char_get_skill(ch, SKILL_WELLSPRING) && (getCurKI(ch)) < getMaxKI(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
@@ -2951,8 +2951,8 @@ ACMD(do_drink)
           send_to_char(ch, "Drink from what?\r\n");
           return;
         } else {
-          snprintf(buf, sizeof(buf), "$n takes a refreshing drink from the surrounding water.");
-          act(buf, TRUE, ch, 0, 0, TO_ROOM);
+          snprintf(out, sizeof(out), "$n takes a refreshing drink from the surrounding water.");
+          act(out, TRUE, ch, 0, 0, TO_ROOM);
           send_to_char(ch, "You take a refreshing drink from the surrounding water.\r\n");
           gain_condition(ch, THIRST, 1);
           if (char_get_skill(ch, SKILL_WELLSPRING) && !isFullKI(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
@@ -3027,10 +3027,10 @@ ACMD(do_drink)
     return;
 
   if (subcmd == SCMD_DRINK) {
-    char buf[MAX_STRING_LENGTH];
+    char out[MAX_STRING_LENGTH];
 
-    snprintf(buf, sizeof(buf), "$n drinks %s from $p.", drinks[obj_get_value(temp, VAL_DRINKCON_LIQUID)]);
-    act(buf, TRUE, ch, temp, 0, TO_ROOM);
+    snprintf(out, sizeof(out), "$n drinks %s from $p.", drinks[obj_get_value(temp, VAL_DRINKCON_LIQUID)]);
+    act(out, TRUE, ch, temp, 0, TO_ROOM);
 
     send_to_char(ch, "You drink the %s.\r\n", drinks[obj_get_value(temp, VAL_DRINKCON_LIQUID)]);
     if (temp->action_description)

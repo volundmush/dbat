@@ -7,7 +7,7 @@
 #include "dbat/spells.h"
 #include "dbat/feats.h"
 
-static void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *msg)
+static void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, const char *msg)
 {
   switch (loc) {
     case APPLY_NONE:

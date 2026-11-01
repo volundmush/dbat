@@ -268,13 +268,13 @@ static int perform_dupe_check(struct descriptor_data *d)
       write_to_output(d, "Reconnecting.\r\n");
       /*~~~ For PCOUNT and HIGHPCOUNT ~~~*/
       count = 0, oldcount = HIGHPCOUNT;
-      struct descriptor_data *k;
+      struct descriptor_data *kd;
 
-      for (k = descriptor_list; k; k = k->next) {
-        if (!k->character) {
+      for (kd = descriptor_list; kd; kd = kd->next) {
+        if (!kd->character) {
           continue;
         }
-        if (!char_is_npc(k->character) && char_get_level(k->character) > 3) {
+        if (!char_is_npc(kd->character) && char_get_level(kd->character) > 3) {
           count += 1;
         }
 
@@ -819,7 +819,7 @@ static void userDelete(struct descriptor_data *d)
 }
 
 /* For transfering money or doing things with an offline player */
-char *rIntro(struct char_data *ch, char *arg)
+const char *rIntro(struct char_data *ch, char *arg)
 {
   char fname[40], filler[50], scrap[100], line[256];
   static char name[80];
@@ -854,7 +854,7 @@ char *rIntro(struct char_data *ch, char *arg)
 }
 
 /* Update A User Account */
-void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name)
+void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, const char *name)
 {
   char fname[40];
   FILE *fl;
@@ -2334,9 +2334,9 @@ void nanny(struct descriptor_data *d, char *arg)
         for (k = descriptor_list; k; k = k->next) {
           if (k == d)
             continue;
-          if (!k->user || k->user == NULL)
+          if (!k->user)
             continue;
-          if (!d->user || d->user == NULL)
+          if (!d->user)
             continue;
           if (!strcasecmp(k->user, d->user)) {
             if (desc_get_connected(k) == CON_PLAYING) {
@@ -4490,13 +4490,13 @@ void nanny(struct descriptor_data *d, char *arg)
 
           /*~~~ For PCOUNT and HIGHPCOUNT ~~~*/
           count = 0, oldcount = HIGHPCOUNT;
-          struct descriptor_data *k;
+          struct descriptor_data *kd;
 
-          for (k = descriptor_list; k; k = k->next) {
-            if (!k->character) {
+          for (kd = descriptor_list; kd; kd = kd->next) {
+            if (!kd->character) {
               continue;
             }
-            if (!char_is_npc(k->character) && char_get_level(k->character) > 3) {
+            if (!char_is_npc(kd->character) && char_get_level(kd->character) > 3) {
               count += 1;
             }
 

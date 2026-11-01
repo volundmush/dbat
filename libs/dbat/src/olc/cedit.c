@@ -42,7 +42,6 @@
 static void cedit_disp_menu(struct descriptor_data *d);
 static void cedit_setup(struct descriptor_data *d);
 static void cedit_save_to_disk(void);
-int save_config(IDXTYPE nowhere);
 static void reassign_rooms(void);
 
 /******************************************************************************/

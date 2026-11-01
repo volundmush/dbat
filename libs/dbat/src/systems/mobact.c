@@ -247,32 +247,32 @@ void mobile_activity(void)
 
     /* Be helpful */ /* - temporarily disabled by the first false check */
     if (false && char_is_humanoid(ch) && !char_mob_flagged(ch, MOB_NOKILL)) {
-      struct char_data *vict, *next_v;
+      struct char_data *ally, *next_v;
       int done = FALSE;
-      for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-        next_v = vict->next_in_room;
-        if (vict == ch)
+      for (ally = world[char_get_in_room(ch)].people; ally; ally = next_v) {
+        next_v = ally->next_in_room;
+        if (ally == ch)
           continue;
-        if (char_is_npc(vict) && race_is_people(vict->race) && char_get_fighting(vict) && done == FALSE) {
-          if (!is_sparring(vict) && !is_sparring(ch) && getCurPL(vict) < getCurPL(ch) * 0.6 && axion_dice(0) >= 90) {
-            act("@c$n@C rushes to @c$N's@C aid!@n", TRUE, ch, 0, vict, TO_ROOM);
+        if (char_is_npc(ally) && race_is_people(ally->race) && char_get_fighting(ally) && done == FALSE) {
+          if (!is_sparring(ally) && !is_sparring(ch) && getCurPL(ally) < getCurPL(ch) * 0.6 && axion_dice(0) >= 90) {
+            act("@c$n@C rushes to @c$N's@C aid!@n", TRUE, ch, 0, ally, TO_ROOM);
             char buf[MAX_INPUT_LENGTH];
-            sprintf(buf, "%s", char_get_name(vict));
+            sprintf(buf, "%s", char_get_name(ally));
             if (char_get_class(ch) == CLASS_KABITO || char_get_class(ch) == CLASS_NAIL) {
               do_heal(ch, buf, 0, 0);
             } else {
               do_rescue(ch, buf, 0, 0);
               if (rand_number(1, 6) == 2) {
                 char tar[MAX_INPUT_LENGTH];
-                sprintf(tar, "%s", char_get_name(char_get_fighting(vict)));
+                sprintf(tar, "%s", char_get_name(char_get_fighting(ally)));
                 do_kiblast(ch, tar, 0, 0);
               } else if (rand_number(1, 6) >= 4) {
                 char tar[MAX_INPUT_LENGTH];
-                sprintf(tar, "%s", char_get_name(char_get_fighting(vict)));
+                sprintf(tar, "%s", char_get_name(char_get_fighting(ally)));
                 do_slam(ch, tar, 0, 0);
               } else {
                 char tar[MAX_INPUT_LENGTH];
-                sprintf(tar, "%s", char_get_name(char_get_fighting(vict)));
+                sprintf(tar, "%s", char_get_name(char_get_fighting(ally)));
                 do_punch(ch, tar, 0, 0);
               }
             }
@@ -283,17 +283,17 @@ void mobile_activity(void)
 
     /* Help those under attack! */ /* - temporarily disabled by the first false check */
     if (false && !char_get_fighting(ch) && rand_number(1, 20) >= 14 && char_is_humanoid(ch) && !char_mob_flagged(ch, MOB_NOKILL)) {
-      struct char_data *vict, *next_v;
+      struct char_data *ally, *next_v;
       int done = FALSE;
-      for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-        next_v = vict->next_in_room;
-        if (vict == ch)
+      for (ally = world[char_get_in_room(ch)].people; ally; ally = next_v) {
+        next_v = ally->next_in_room;
+        if (ally == ch)
           continue;
-        if (char_is_npc(vict) && race_is_people(vict->race) && char_get_fighting(vict) && done == FALSE) {
-          if (!is_sparring(vict) && !is_sparring(ch) && getCurPL(vict) < getCurPL(ch) * 0.6 && axion_dice(0) >= 70) {
-            act("@c$n@C rushes to @c$N's@C aid!@n", TRUE, ch, 0, vict, TO_ROOM);
+        if (char_is_npc(ally) && race_is_people(ally->race) && char_get_fighting(ally) && done == FALSE) {
+          if (!is_sparring(ally) && !is_sparring(ch) && getCurPL(ally) < getCurPL(ch) * 0.6 && axion_dice(0) >= 70) {
+            act("@c$n@C rushes to @c$N's@C aid!@n", TRUE, ch, 0, ally, TO_ROOM);
             char buf[MAX_INPUT_LENGTH];
-            sprintf(buf, "%s", char_get_name(vict));
+            sprintf(buf, "%s", char_get_name(ally));
             if (char_get_class(ch) == CLASS_KABITO || char_get_class(ch) == CLASS_NAIL) {
               do_heal(ch, buf, 0, 0);
               done = TRUE;

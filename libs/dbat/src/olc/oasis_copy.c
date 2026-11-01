@@ -28,8 +28,6 @@ static room_vnum redit_find_new_vnum(zone_rnum zone);
 
 /* External Functions */
 
-void redit_save_internally(struct descriptor_data *d);
-
 /***********************************************************
 * This function makes use of the high level OLC functions  *
 * to copy most types of mud objects. The type of data is   *

@@ -2110,7 +2110,7 @@ ACMD(do_transform)
     }
     // We are all clear to revert.
     if ((char_get_charge(ch) > 0)) {
-      do_charge(ch, "release", 0, 0);
+      do_charge(ch, (char[]){"release"}, 0, 0);
     }
     race_echo_revert(ch, race_flag_to_tier(cur_form.flag));
     char_plr_set(ch, cur_form.flag, false);

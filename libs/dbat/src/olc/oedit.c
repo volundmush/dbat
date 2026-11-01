@@ -447,7 +447,7 @@ static void oedit_disp_spellbook_menu(struct descriptor_data *d)
  */
 static void oedit_disp_apply_spec_menu(struct descriptor_data *d)
 {
-  char *buf;
+  const char *buf;
 
   switch (OLC_OBJ(d)->affected[OLC_VAL(d)].location) {
     case APPLY_FEAT:

@@ -336,7 +336,7 @@ static int get_max_players(void)
 {
 
   int max_descs = 0;
-  const char *method;
+  const char *how;
 
   /*
  * First, we'll try using getrlimit/setrlimit.  This will probably work
@@ -346,7 +346,7 @@ static int get_max_players(void)
     struct rlimit limit;
 
     /* find the limit of file descs */
-    method = "rlimit";
+    how = "rlimit";
     if (getrlimit(RLIMIT_NOFILE, &limit) < 0) {
       perror("SYSERR: calling getrlimit");
       exit(1);
@@ -369,10 +369,10 @@ static int get_max_players(void)
 
   if (max_descs <= 0) {
     mud_log("SYSERR: Non-positive max player limit!  (Set at %d using %s).",
-            max_descs, method);
+            max_descs, how);
     exit(1);
   }
-  mud_log("   Setting player limit to %d using %s.", max_descs, method);
+  mud_log("   Setting player limit to %d using %s.", max_descs, how);
   return (max_descs);
 }
 
@@ -1128,10 +1128,6 @@ static char *make_prompt(struct descriptor_data *d)
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G-@g---------@D]@n\n");
             if (count >= 0)
               len += count;
-          } else if (charge < getMaxKI(d->character) * .05) {
-            count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@g----------@D]@n\n");
-            if (count >= 0)
-              len += count;
           } else {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@g----------@D]@n\n");
             if (count >= 0)
@@ -1248,7 +1244,7 @@ static char *make_prompt(struct descriptor_data *d)
       }
       if (!char_prf_flagged(d->character, PRF_DISPERC)) {
         if (char_prf_flagged(d->character, PRF_DISPHP) && len < sizeof(prompt)) {
-          char *col            = "n";
+          const char *col      = "n";
           struct char_data *ch = d->character;
           if (getMaxPL(ch) > getMaxPLTrans(ch))
             col = "g";
@@ -1268,7 +1264,7 @@ static char *make_prompt(struct descriptor_data *d)
 
         struct char_data *ch = d->character;
         double perc          = ((double)getCurHealth(ch) / (double)getMaxPLTrans(ch)) * 100;
-        char *col            = "n";
+        const char *col      = "n";
         if (perc > 100)
           col = "g";
         else if (perc >= 70)
@@ -1414,7 +1410,7 @@ static char *make_prompt(struct descriptor_data *d)
           count = snprintf(prompt + len, sizeof(prompt) - len, " @WNeed Snack@D]@n");
         } else if (hun >= 20) {
           count = snprintf(prompt + len, sizeof(prompt) - len, " @WHungry@D]@n");
-        } else if (hun >= 20) {
+        } else if (hun >= 15) {
           count = snprintf(prompt + len, sizeof(prompt) - len, " @WVery Hungry@D]@n");
         } else if (hun >= 10) {
           count = snprintf(prompt + len, sizeof(prompt) - len, " @WAlmost Starving@D]@n");
@@ -1435,7 +1431,7 @@ static char *make_prompt(struct descriptor_data *d)
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mThir@y: @WNeed Drink@D]@n");
         } else if (thir >= 20) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mThir@y: @WThirsty@D]@n");
-        } else if (thir >= 20) {
+        } else if (thir >= 15) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mThir@y: @WVery Thirsty@D]@n");
         } else if (thir >= 10) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mThir@y: @WAlmost Dehydrated@D]@n");
@@ -1545,7 +1541,7 @@ size_t write_to_output(struct descriptor_data *t, const char *txt, ...)
 #define COLOR_ON(ch) (COLOR_LEV(ch) > 0)
 
 /* Color replacement arrays. Orig. Renx -- 011100, now modified */
-static char *ANSI[] = {
+static const char *ANSI[] = {
     "@",
     AA_NORMAL,
     AA_NORMAL ANSISEPSTR AF_BLACK,
@@ -1600,7 +1596,8 @@ static const char RANDOM_COLORS[] = "bgcrmywBGCRMWY";
 #define NEW_STRING_LENGTH (size_t)(dest_char - save_pos)
 static size_t proc_colors(char *txt, size_t maxlen, int parse, char **choices)
 {
-  char *dest_char, *source_char, *color_char, *save_pos, *replacement = NULL;
+  char *dest_char, *source_char, *save_pos;
+  const char *color_char, *replacement = NULL;
   int i, temp_color;
   size_t wanted;
 

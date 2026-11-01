@@ -93,7 +93,7 @@ bool obj_is_corpse(const struct obj_data *obj);
 bool obj_wear_flagged(const struct obj_data *obj, int part);
 char *obj_get_short_description(const struct obj_data *obj);
 
-char *obj_sana(const struct obj_data *obj);
+const char *obj_sana(const struct obj_data *obj);
 room_vnum obj_get_room_loaded(const struct obj_data *obj);
 void obj_set_room_loaded(struct obj_data *obj, room_vnum v);
 

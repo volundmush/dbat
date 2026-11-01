@@ -29,7 +29,7 @@
  * that used to be here.   -- Welcor
  */
 /* adds a variable with given name and value to trigger */
-void add_var(struct trig_var_data **var_list, char *name, const char *value, long id)
+void add_var(struct trig_var_data **var_list, const char *name, const char *value, long id)
 {
   struct trig_var_data *vd;
 
@@ -62,7 +62,7 @@ void add_var(struct trig_var_data **var_list, char *name, const char *value, lon
 }
 
 /* perhaps not the best place for this, but I didn't want a new file */
-static char *skill_percent(struct char_data *ch, char *skill)
+static const char *skill_percent(struct char_data *ch, char *skill)
 {
   static char retval[16];
   int skillnum;
@@ -227,22 +227,22 @@ static void find_replacement(void *go, struct script_data *sc, trig_data *trig, 
   char *name;
   int num, count, i, j, doors;
 
-  char *send_cmd[]       = {"msend ", "osend ", "wsend "};
-  char *echo_cmd[]       = {"mecho ", "oecho ", "wecho "};
-  char *echoaround_cmd[] = {"mechoaround ", "oechoaround ", "wechoaround "};
-  char *door[]           = {"mdoor ", "odoor ", "wdoor "};
-  char *force[]          = {"mforce ", "oforce ", "wforce "};
-  char *load[]           = {"mload ", "oload ", "wload "};
-  char *purge[]          = {"mpurge ", "opurge ", "wpurge "};
-  char *teleport[]       = {"mteleport ", "oteleport ", "wteleport "};
+  const char *send_cmd[]       = {"msend ", "osend ", "wsend "};
+  const char *echo_cmd[]       = {"mecho ", "oecho ", "wecho "};
+  const char *echoaround_cmd[] = {"mechoaround ", "oechoaround ", "wechoaround "};
+  const char *door[]           = {"mdoor ", "odoor ", "wdoor "};
+  const char *force[]          = {"mforce ", "oforce ", "wforce "};
+  const char *load[]           = {"mload ", "oload ", "wload "};
+  const char *purge[]          = {"mpurge ", "opurge ", "wpurge "};
+  const char *teleport[]       = {"mteleport ", "oteleport ", "wteleport "};
   /* the x kills a 'shadow' warning in gcc. */
-  char *xdamage[]  = {"mdamage ", "odamage ", "wdamage "};
-  char *zoneecho[] = {"mzoneecho ", "ozoneecho ", "wzoneecho "};
-  char *asound[]   = {"masound ", "oasound ", "wasound "};
-  char *at[]       = {"mat ", "oat ", "wat "};
+  const char *xdamage[]  = {"mdamage ", "odamage ", "wdamage "};
+  const char *zoneecho[] = {"mzoneecho ", "ozoneecho ", "wzoneecho "};
+  const char *asound[]   = {"masound ", "oasound ", "wasound "};
+  const char *at[]       = {"mat ", "oat ", "wat "};
   /* there is no such thing as wtransform, thus the wecho below  */
-  char *transform[] = {"mtransform ", "otransform ", "wecho "};
-  char *recho[]     = {"mrecho ", "orecho ", "wrecho "};
+  const char *transform[] = {"mtransform ", "otransform ", "wecho "};
+  const char *recho[]     = {"mrecho ", "orecho ", "wrecho "};
 
   *str = '\0';
 

@@ -428,7 +428,7 @@ static void hsedit_disp_menu(struct descriptor_data *d)
 
 void hsedit_parse(struct descriptor_data *d, char *arg)
 {
-  int number = 0, id = 0, i, room_rnum;
+  int number = 0, id = 0, i, rnum;
   char *tmp;
   bool found = FALSE;
 
@@ -580,14 +580,14 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
         hsedit_disp_menu(d);
         return;
       }
-      room_rnum = real_room(OLC_HOUSE(d)->vnum);
+      rnum = real_room(OLC_HOUSE(d)->vnum);
       if (real_room(number) == NOWHERE) {
         send_to_char(d->character, "Room VNUM does not exist.\r\nEnter a valid room VNUM for this atrium (0 to exit) : ");
         return;
       } else {
         for (i = 0; i < 12; i++) {
-          if (world[room_rnum].dir_option[i]) {
-            if (world[room_rnum].dir_option[i]->to_room == real_room(number)) {
+          if (world[rnum].dir_option[i]) {
+            if (world[rnum].dir_option[i]->to_room == real_room(number)) {
               found = TRUE;
               id    = i;
             }
@@ -628,8 +628,8 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
       } else {
         OLC_HOUSE(d)->exit_num = number;
 
-        room_rnum            = world[id].dir_option[number]->to_room;
-        OLC_HOUSE(d)->atrium = world[room_rnum].number;
+        rnum                 = world[id].dir_option[number]->to_room;
+        OLC_HOUSE(d)->atrium = world[rnum].number;
       }
       break;
 

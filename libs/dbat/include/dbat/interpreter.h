@@ -11,11 +11,11 @@ extern const struct command_info cmd_info[];
 
 void userLoad(struct descriptor_data *d, char *name);
 int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen);
-char *rIntro(struct char_data *ch, char *arg);
+const char *rIntro(struct char_data *ch, char *arg);
 int special(struct char_data *ch, int cmd, char *arg);
 void fingerUser(struct char_data *ch, char *name);
 int readUserIndex(char *name);
-void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);
+void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, const char *name);
 void command_interpreter(struct char_data *ch, char *argument);
 void nanny(struct descriptor_data *d, char *arg);
 

@@ -10,6 +10,9 @@ set(DBAT_C_FLAGS
     -Wno-format-truncation  # snprintf truncating is the intended, bounded behaviour
     -Wno-unused-result      # 45 unchecked fscanf/fgets/system results; tracked separately
     -Werror=format-security -Werror=return-type -Werror=implicit-function-declaration
+    -Wshadow -Wredundant-decls -Wwrite-strings
+    # GCC-only checks for conditions that are always true/false or branches that are identical
+    $<$<C_COMPILER_ID:GNU>:-Wlogical-op -Wduplicated-cond -Wduplicated-branches>
     CACHE INTERNAL "")
 target_compile_options(dbat PRIVATE ${DBAT_C_FLAGS})
 

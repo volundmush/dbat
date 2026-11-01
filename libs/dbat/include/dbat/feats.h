@@ -203,10 +203,10 @@ extern int feat_sort_info[MAX_FEATS];
 
 struct feat_info {
 
-  char *name;    /* The name of the feat to be displayed to players */
-  int in_game;   /* TRUE or FALSE, is the feat in the game yet? */
-  int can_learn; /* TRUE or FALSE, can the feat be learned or is it an automatic feat? */
-  int can_stack; /* TRUE or FALSE, can the feat be learned more than once? */
+  const char *name; /* The name of the feat to be displayed to players */
+  int in_game;      /* TRUE or FALSE, is the feat in the game yet? */
+  int can_learn;    /* TRUE or FALSE, can the feat be learned or is it an automatic feat? */
+  int can_stack;    /* TRUE or FALSE, can the feat be learned more than once? */
 };
 
 extern struct feat_info feat_list[NUM_FEATS_DEFINED];

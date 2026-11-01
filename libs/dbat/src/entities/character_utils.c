@@ -3300,7 +3300,7 @@ bool is_sparring(struct char_data *ch)
   return FALSE;
 }
 
-char *introd_calc(struct char_data *ch)
+const char *introd_calc(struct char_data *ch)
 {
   char *sex, *race;
   static char intro[100];
@@ -3745,7 +3745,6 @@ static int *default_admin_flags[ADMLVL_IMPL + 1] = {
 
 void admin_set(struct char_data *ch, int value)
 {
-  void run_autowiz(void);
   int i;
   int orig = char_get_admlevel(ch);
 
@@ -4621,12 +4620,12 @@ char *char_get_name(const struct char_data *ch)
   return (char_is_npc(ch) ? (ch)->short_descr : char_get_pc_name(ch));
 }
 
-char *char_get_title(const struct char_data *ch)
+const char *char_get_title(const struct char_data *ch)
 {
   return ((ch)->desc ? ((ch)->desc->title ? (ch)->desc->title : "[Unset Title]") : "@D[@GNew User@D]");
 }
 
-char *char_get_user(const struct char_data *ch)
+const char *char_get_user(const struct char_data *ch)
 {
   return ((ch)->desc ? ((ch)->desc->user ? (ch)->desc->user : "NOUSER") : "NOUSER");
 }
@@ -4886,12 +4885,12 @@ const char *char_pers(struct char_data *ch, struct char_data *vict)
   return ((char_disg(ch, vict) ? (char_can_see(vict, ch) ? (char_introd(vict, ch) ? (char_iswiz(ch, vict) ? char_get_name(ch) : get_i_name(vict, ch)) : introd_calc(ch)) : "Someone") : char_true_race_name(ch)));
 }
 
-char *obj_shortdesc_for(const struct obj_data *obj, const struct char_data *vict)
+const char *obj_shortdesc_for(const struct obj_data *obj, const struct char_data *vict)
 {
   return (char_can_see_obj((vict), (obj)) ? (obj)->short_description : "something");
 }
 
-char *obj_fname_for(const struct obj_data *obj, const struct char_data *vict)
+const char *obj_fname_for(const struct obj_data *obj, const struct char_data *vict)
 {
   return (char_can_see_obj((vict), (obj)) ? fname((obj)->name) : "something");
 }
@@ -5286,22 +5285,22 @@ static bool char_outside_secttype(const struct char_data *ch)
   return ((rroom_sect(char_get_in_room(ch)) != SECT_INSIDE) && (rroom_sect(char_get_in_room(ch)) != SECT_UNDERWATER) && (rroom_sect(char_get_in_room(ch)) != SECT_IMPORTANT) && (rroom_sect(char_get_in_room(ch)) != SECT_SHOP) && (rroom_sect(char_get_in_room(ch)) != SECT_SPACE));
 }
 
-char *char_hshr(const struct char_data *ch)
+const char *char_hshr(const struct char_data *ch)
 {
   return (char_get_sex(ch) ? (char_get_sex(ch) == SEX_MALE ? "his" : "her") : "its");
 }
 
-char *char_hssh(const struct char_data *ch)
+const char *char_hssh(const struct char_data *ch)
 {
   return (char_get_sex(ch) ? (char_get_sex(ch) == SEX_MALE ? "he" : "she") : "it");
 }
 
-char *char_hmhr(const struct char_data *ch)
+const char *char_hmhr(const struct char_data *ch)
 {
   return (char_get_sex(ch) ? (char_get_sex(ch) == SEX_MALE ? "him" : "her") : "it");
 }
 
-char *char_mafe(const struct char_data *ch)
+const char *char_mafe(const struct char_data *ch)
 {
   return (char_get_sex(ch) ? (char_get_sex(ch) == SEX_MALE ? "male" : "female") : "questionably gendered");
 }
@@ -5398,12 +5397,12 @@ void char_set_transclass(struct char_data *ch, int v)
   ch->transclass = v;
 }
 
-char *char_get_feature(const struct char_data *ch)
+const char *char_get_feature(const struct char_data *ch)
 {
   return ch->feature;
 }
 
-void char_set_feature(struct char_data *ch, char *v)
+void char_set_feature(struct char_data *ch, const char *v)
 {
   ch->feature = v;
 }
@@ -5622,12 +5621,12 @@ void char_set_suppressed(struct char_data *ch, int64_t v)
 {
 }
 
-char *char_get_rdisplay(const struct char_data *ch)
+const char *char_get_rdisplay(const struct char_data *ch)
 {
   return ch->rdisplay;
 }
 
-void char_set_rdisplay(struct char_data *ch, char *v)
+void char_set_rdisplay(struct char_data *ch, const char *v)
 {
   ch->rdisplay = v;
 }

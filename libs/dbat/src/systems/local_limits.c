@@ -761,7 +761,7 @@ static void update_flags(struct char_data *ch)
 }
 
 /* ki gain pr. game hour */
-void set_title(struct char_data *ch, char *title)
+void set_title(struct char_data *ch, const char *title)
 {
   if (ch) {
     send_to_char(ch, "Title is disabled for the time being while Iovan works on a brand new and fancier title system.\r\n");

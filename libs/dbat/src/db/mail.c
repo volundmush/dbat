@@ -263,9 +263,9 @@ int scan_file(void)
       total_messages++;
     } else if (next_block.block_type == DELETED_BLOCK) {
       push_free_list(block_num * BLOCK_SIZE);
-    } else {
-      push_free_list(block_num * BLOCK_SIZE);
     }
+    /* Anything else is a body block of a stored message (its type is the next block's position or LAST_BLOCK).
+     * It must not go on the free list, or new mail would overwrite messages that haven't been read yet. */
     block_num++;
   }
 

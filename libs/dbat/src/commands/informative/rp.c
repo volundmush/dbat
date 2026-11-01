@@ -203,7 +203,7 @@ ACMD(do_draw)
   struct obj_data *obj = NULL, *obj2 = NULL, *obj3 = NULL, *next_obj = NULL;
   int drawn = FALSE;
 
-  if (!(obj = get_obj_in_list_vis(ch, "case", NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, (char[]){"case"}, NULL, ch->carrying))) {
     send_to_char(ch, "You don't have a case.\r\n");
     return;
   }
@@ -242,7 +242,7 @@ ACMD(do_shuffle)
   struct obj_data *obj = NULL, *obj2 = NULL, *next_obj = NULL;
   int count = 0;
 
-  if (!(obj = get_obj_in_list_vis(ch, "case", NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, (char[]){"case"}, NULL, ch->carrying))) {
     send_to_char(ch, "You don't have a case.\r\n");
     return;
   }
@@ -636,7 +636,7 @@ static void introWrite(struct char_data *ch, struct char_data *vict, char *name)
 {
   FILE *file;
   char fname[40], filler[50], scrap[100], line[256];
-  char *names[500] = {""}, *alias[500] = {""};
+  char *names[500] = {NULL}, *alias[500] = {NULL};
   FILE *fl;
   int count = 0, x = 0;
 

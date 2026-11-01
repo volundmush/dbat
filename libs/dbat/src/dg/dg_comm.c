@@ -198,7 +198,7 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
         sub_write_to_char(to, tokens, otokens, type);
 }
 
-void send_to_zone(char *messg, zone_rnum zone)
+void send_to_zone(const char *messg, zone_rnum zone)
 {
   struct descriptor_data *i;
 
@@ -212,7 +212,7 @@ void send_to_zone(char *messg, zone_rnum zone)
       write_to_output(i, "%s", messg);
 }
 
-void fly_zone(zone_rnum zone, char *messg, struct char_data *ch)
+void fly_zone(zone_rnum zone, const char *messg, struct char_data *ch)
 {
   struct descriptor_data *i;
 
@@ -230,7 +230,7 @@ void fly_zone(zone_rnum zone, char *messg, struct char_data *ch)
   }
 }
 
-void send_to_sense(int type, char *messg, struct char_data *ch)
+void send_to_sense(int type, const char *messg, struct char_data *ch)
 {
   struct descriptor_data *i;
   struct char_data *tch;
@@ -332,7 +332,7 @@ void send_to_sense(int type, char *messg, struct char_data *ch)
   }
 }
 
-void send_to_scouter(char *messg, struct char_data *ch, int num, int type)
+void send_to_scouter(const char *messg, struct char_data *ch, int num, int type)
 {
   struct descriptor_data *i;
   struct char_data *tch;
@@ -392,7 +392,6 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type)
         continue;
       } else if (type == 0) {
         if (num == 1) {
-          struct obj_data *obj = char_get_equipment(tch, WEAR_EYE);
           if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(ch) >= 150000) {
             write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
           } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(ch) >= 5000000) {

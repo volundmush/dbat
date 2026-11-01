@@ -147,17 +147,12 @@ static void mob_autobalance(struct char_data *ch);
 
 void paginate_string(char *str, struct descriptor_data *d);
 
-void free_alias(struct alias_data *a);
 void mag_assign_spells(void);
-void create_command_list(void);
 void load_banned(void);
 void Read_Invalid_List(void);
 static int hsort(const void *a, const void *b);
-void prune_crlf(char *txt);
 void build_player_index(void);
 void memorize_add(struct char_data *ch, int spellnum, int timer);
-void assign_feats(void);
-void sort_feats(void);
 
 /* external vars */
 
@@ -788,7 +783,7 @@ void boot_db(void)
   if (ERAPLAYERS <= 0)
     ERAPLAYERS = top_of_p_table + 1;
 
-  insure_directory(LIB_PLROBJS "CRASH", 0);
+  insure_directory(LIB_PLROBJS "CRASH");
 
   mud_log("Booting mail system.");
   if (!scan_file()) {

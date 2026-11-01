@@ -15,6 +15,10 @@ const c_flags = [_][]const u8{
     "-Werror=format-security",
     "-Werror=return-type",
     "-Werror=implicit-function-declaration",
+    "-Wshadow",
+    "-Wredundant-decls",
+    "-Wwrite-strings",
+    // -Wlogical-op, -Wduplicated-cond and -Wduplicated-branches are GCC-only; the GCC CMake presets have them.
 };
 
 /// Collects every file under base_path ending in ext.

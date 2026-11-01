@@ -56,9 +56,9 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
 void customRead(struct descriptor_data *d, int type, char *name)
 {
 
-  char fname[40], line[256], filler[256];
+  char fname[40], line[256], filler[256] = "";
   FILE *fl;
-  char buf[MAX_STRING_LENGTH];
+  char buf[MAX_STRING_LENGTH] = "";
 
   if (type == 1) {
 
@@ -71,8 +71,6 @@ void customRead(struct descriptor_data *d, int type, char *name)
       mud_log("ERROR: Custom file unable to be read!");
       return;
     }
-
-    char buf[MAX_STRING_LENGTH];
 
     while (!feof(fl)) {
       get_line(fl, line);

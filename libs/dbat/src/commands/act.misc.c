@@ -1551,7 +1551,7 @@ static void catch_fish(struct char_data *ch, int quality)
 
   obj_set_value(pole, 0, 0);
   obj_to_room(fish, char_get_in_room(ch));
-  do_get(ch, "fish", 0, 0);
+  do_get(ch, (char[]){"fish"}, 0, 0);
   send_to_char(ch, "@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", obj_get_weight(fish));
   char_plr_set(ch, PLR_FISHING, false);
   char_set_accuracy_mod(ch, 0);
@@ -1631,13 +1631,13 @@ ACMD(do_extract)
         send_to_char(ch, "It's not mature enough to extract from!\r\n");
         return;
       }
-      struct obj_data *bottle = NULL, *next_obj, *obj2;
+      struct obj_data *bottle = NULL, *next_obj, *item;
       int found               = FALSE;
 
-      for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-        next_obj = obj2->next_content;
-        if (obj_get_vnum(obj2) == 3423) {
-          bottle = obj2;
+      for (item = ch->carrying; item; item = next_obj) {
+        next_obj = item->next_content;
+        if (obj_get_vnum(item) == 3423) {
+          bottle = item;
           found  = TRUE;
         }
       }
@@ -3498,7 +3498,7 @@ ACMD(do_silk)
           }
           act("@WYou attempt to weave the bundle and manage to create $p@W!@n", TRUE, ch, weaved, 0, TO_CHAR);
           act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", TRUE, ch, weaved, 0, TO_ROOM);
-          do_get(ch, "headsash", 0, 0);
+          do_get(ch, (char[]){"headsash"}, 0, 0);
           extract_obj(obj);
           char_set_wait(ch, PULSE_4SEC);
         }
@@ -3558,7 +3558,7 @@ ACMD(do_silk)
           }
           act("@WYou attempt to weave the bundle and manage to create $p@W!@n", TRUE, ch, weaved, 0, TO_CHAR);
           act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", TRUE, ch, weaved, 0, TO_ROOM);
-          do_get(ch, "wristband", 0, 0);
+          do_get(ch, (char[]){"wristband"}, 0, 0);
           extract_obj(obj);
           char_set_wait(ch, PULSE_4SEC);
         }
@@ -3618,7 +3618,7 @@ ACMD(do_silk)
           }
           act("@WYou attempt to weave the bundle and manage to create $p@W!@n", TRUE, ch, weaved, 0, TO_CHAR);
           act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", TRUE, ch, weaved, 0, TO_ROOM);
-          do_get(ch, "belt", 0, 0);
+          do_get(ch, (char[]){"belt"}, 0, 0);
           extract_obj(obj);
           char_set_wait(ch, PULSE_4SEC);
         }
@@ -5271,7 +5271,7 @@ ACMD(do_feed)
   act("@WYou take $p@W and pop it into @C$N@W's mouth!@n", TRUE, ch, obj, vict, TO_CHAR);
   act("@C$n@W takes $p@W and pops it into YOUR mouth!@n", TRUE, ch, obj, vict, TO_VICT);
   act("@C$n@W takes $p@W and pops it into @c$N@W's mouth!@n", TRUE, ch, obj, vict, TO_NOTVICT);
-  mag_objectmagic(vict, obj, "");
+  mag_objectmagic(vict, obj, (char[]){""});
 }
 
 /* This allows players to decapitate a corpse for a sick trophy. */

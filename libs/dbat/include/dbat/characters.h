@@ -66,21 +66,21 @@ struct skill_data {
 };
 
 struct player_special_data {
-  char *poofin;                      /* Description on arrival of a god.     */
-  char *poofout;                     /* Description upon a god's exit.       */
-  struct alias_data *aliases;        /* Character's aliases                  */
-  int32_t last_tell;                 /* idnum of last tell from              */
-  void *last_olc_targ;               /* olc control                          */
-  int last_olc_mode;                 /* olc control                          */
-  char *host;                        /* host of last logon                   */
-  int wimp_level;                    /* Below this # of hit points, flee!	*/
-  int8_t freeze_level;               /* Level of god who froze char, if any	*/
-  int16_t invis_level;               /* level of invisibility		*/
-  room_vnum load_room;               /* Which room to place char in		*/
+  char *poofin;                          /* Description on arrival of a god.     */
+  char *poofout;                         /* Description upon a god's exit.       */
+  struct alias_data *aliases;            /* Character's aliases                  */
+  int32_t last_tell;                     /* idnum of last tell from              */
+  void *last_olc_targ;                   /* olc control                          */
+  int last_olc_mode;                     /* olc control                          */
+  char *host;                            /* host of last logon                   */
+  int wimp_level;                        /* Below this # of hit points, flee!	*/
+  int8_t freeze_level;                   /* Level of god who froze char, if any	*/
+  int16_t invis_level;                   /* level of invisibility		*/
+  room_vnum load_room;                   /* Which room to place char in		*/
   struct skill_data skills[SKILL_SLOTS]; /* slot k holds skill id SKILL_FIRST + k; NPCs have none */
-  bitvector_t pref[PR_ARRAY_MAX];    /* preference flags for PC's.		*/
-  uint8_t bad_pws;                   /* number of bad password attemps	*/
-  int8_t conditions[NUM_CONDITIONS]; /* Drunk, full, thirsty			*/
+  bitvector_t pref[PR_ARRAY_MAX];        /* preference flags for PC's.		*/
+  uint8_t bad_pws;                       /* number of bad password attemps	*/
+  int8_t conditions[NUM_CONDITIONS];     /* Drunk, full, thirsty			*/
 
   // Only the character's own class in this array is used, to store PS/Practices.
   int practice_points;                   /* Practice points available to the character */
@@ -140,7 +140,6 @@ struct follow_type {
   struct follow_type *next;
 };
 
-
 struct char_data {
   int32_t id;    /* used by DG triggers			*/
   int32_t idnum; /* player's idnum; -1 for mobiles	*/
@@ -182,8 +181,8 @@ struct char_data {
   int8_t eye;     /* PC eye color                         */
   int8_t distfea; /* PC's Distinguishing Feature          */
   int aura;
-  char *feature;
-  char *rdisplay;
+  const char *feature;
+  const char *rdisplay;
   char *voice; /* PC's snet voice */
 
   struct abil_data real_abils; /* Abilities without modifiers   */

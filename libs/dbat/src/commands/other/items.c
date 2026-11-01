@@ -530,7 +530,7 @@ ACMD(do_form)
       boost_obj(obj, ch, 0);
       obj_to_char(obj, vict);
       obj_set_size(obj, get_size(vict));
-      do_wear(vict, "all", 0, 0);
+      do_wear(vict, (char[]){"all"}, 0, 0);
       reveal_hiding(ch, 0);
       char_set_con_cooldown(ch, 10);
       act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
@@ -930,7 +930,7 @@ ACMD(do_upgrade)
       send_to_char(ch, "You need to be at least level 80 to use these kits.\r\n");
       return;
     }
-    if (!(obj = get_obj_in_list_vis(ch, "Augmentation", NULL, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, (char[]){"Augmentation"}, NULL, ch->carrying))) {
       send_to_char(ch, "You don't have a Circuit Augmentation Kit.\r\n");
       return;
     } else {
@@ -1799,7 +1799,7 @@ ACMD(do_compare)
   struct obj_data *obj1, *obj2;
   struct char_data *tchar;
   int value1 = 0, value2 = 0, o1, o2;
-  char *msg = NULL;
+  const char *msg = NULL;
 
   two_arguments(argument, arg1, arg2);
 

@@ -321,7 +321,7 @@ ACMD(do_skillset)
 {
   struct char_data *vict;
   char name[MAX_INPUT_LENGTH];
-  char buf[MAX_INPUT_LENGTH], help[MAX_STRING_LENGTH];
+  char buf[MAX_INPUT_LENGTH], help_text[MAX_STRING_LENGTH];
   int skill, value, i = 0, qend;
 
   argument = one_argument(argument, name);
@@ -353,17 +353,17 @@ ACMD(do_skillset)
 
   /* If there is no chars in argument */
   if (!*argument) {
-    i = snprintf(help, sizeof(help) - i, "\r\nSkills:\r\n");
-    i += print_skills_by_type(vict, help + i, sizeof(help) - i, SKTYPE_SKILL, NULL);
-    i += snprintf(help + i, sizeof(help) - i, "\r\nSpells:\r\n");
-    i += print_skills_by_type(vict, help + i, sizeof(help) - i, SKTYPE_SPELL, NULL);
+    i = snprintf(help_text, sizeof(help_text) - i, "\r\nSkills:\r\n");
+    i += print_skills_by_type(vict, help_text + i, sizeof(help_text) - i, SKTYPE_SKILL, NULL);
+    i += snprintf(help_text + i, sizeof(help_text) - i, "\r\nSpells:\r\n");
+    i += print_skills_by_type(vict, help_text + i, sizeof(help_text) - i, SKTYPE_SPELL, NULL);
     if (CONFIG_ENABLE_LANGUAGES) {
-      i += snprintf(help + i, sizeof(help) - i, "\r\nLanguages:\r\n");
-      i += print_skills_by_type(vict, help + i, sizeof(help) - i, SKTYPE_SKILL | SKTYPE_LANG, NULL);
+      i += snprintf(help_text + i, sizeof(help_text) - i, "\r\nLanguages:\r\n");
+      i += print_skills_by_type(vict, help_text + i, sizeof(help_text) - i, SKTYPE_SKILL | SKTYPE_LANG, NULL);
     }
-    if (i >= sizeof(help))
-      strcpy(help + sizeof(help) - strlen("** OVERFLOW **") - 1, "** OVERFLOW **"); /* strcpy: OK */
-    page_string(ch->desc, help, TRUE);
+    if (i >= sizeof(help_text))
+      strcpy(help_text + sizeof(help_text) - strlen("** OVERFLOW **") - 1, "** OVERFLOW **"); /* strcpy: OK */
+    page_string(ch->desc, help_text, TRUE);
     return;
   }
 
@@ -380,9 +380,9 @@ ACMD(do_skillset)
     send_to_char(ch, "Skill must be enclosed in: ''\r\n");
     return;
   }
-  strcpy(help, (argument + 1)); /* strcpy: OK (MAX_INPUT_LENGTH <= MAX_STRING_LENGTH) */
-  help[qend - 1] = '\0';
-  if ((skill = find_skill_num(help, SKTYPE_SKILL)) <= 0) {
+  strcpy(help_text, (argument + 1)); /* strcpy: OK (MAX_INPUT_LENGTH <= MAX_STRING_LENGTH) */
+  help_text[qend - 1] = '\0';
+  if ((skill = find_skill_num(help_text, SKTYPE_SKILL)) <= 0) {
     send_to_char(ch, "Unrecognized skill.\r\n");
     return;
   }

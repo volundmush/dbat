@@ -242,7 +242,7 @@ static int find_context_gedit(struct descriptor_data *d)
   }
 }
 
-static char *NO_HELP = "No help available (yet)!\r\n";
+static char NO_HELP[] = "No help available (yet)!\r\n";
 #define FIND_HELP_CHAR '*'
 
 int context_help(struct descriptor_data *d, char *arg)

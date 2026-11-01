@@ -319,11 +319,11 @@ ACMD(do_newsedit)
 
   /* Time to write the entry */
   struct {
-    char *cmd;
+    const char *cmd;
     char level;
     char **buffer;
     int size;
-    char *filename;
+    const char *filename;
   } fields[] = {
       /* edit the lvls to your own needs */
       {"news", ADMLVL_IMMORT, &immlist, 2000, IMMLIST_FILE},
@@ -441,7 +441,7 @@ static void lockWrite(struct char_data *ch, char *name)
 {
   FILE *file;
   char fname[40], filler[50], line[256];
-  char *names[500] = {""};
+  char *names[500] = {NULL};
   FILE *fl;
   int count = 0, x = 0, found = FALSE;
 
@@ -1903,7 +1903,6 @@ ACMD(do_varstat)
     if (vict->script && vict->script->global_vars) {
       struct trig_var_data *tv;
       char uname[MAX_INPUT_LENGTH];
-      void find_uid_name(char *uid, char *name, size_t nlen);
 
       send_to_char(ch, "%s's Global Variables:\r\n", char_get_name(vict));
 
@@ -3292,8 +3291,6 @@ static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int l
 
   if (listall) {
     int i, j, k, l, m, n, o;
-    int count_shops(shop_vnum low, shop_vnum high);
-    int count_guilds(guild_vnum low, guild_vnum high);
 
     tmp = snprintf(bufptr, left,
                    "%3d %-30.30s By: %-10.10s Age: %3d; Reset: %3d (%1d); Range: %5d-%5d\r\n",
@@ -3630,7 +3627,7 @@ ACMD(do_show)
     case 16:
       if (!*value) {
         low  = 1;
-        vict = (l == 15) ? affect_list : affect_list;
+        vict = affect_list;
       } else {
         low = 0;
         if (!(vict = get_char_world_vis(ch, value, NULL))) {
@@ -4710,7 +4707,7 @@ ACMD(do_zpurge)
 static const struct zcheck_armor {
   bitvector_t bitvector; /* from Structs.h                       */
   int ac_allowed;        /* Max. AC allowed for this body part  */
-  char *message;         /* phrase for error message            */
+  const char *message;   /* phrase for error message            */
 } zarmor[] = {
     {ITEM_WEAR_FINGER, 10, "Ring"         },
     {ITEM_WEAR_NECK,   10, "Necklace"     },
@@ -4743,10 +4740,10 @@ static const struct zcheck_armor {
   These will be ignored if MAX_APPLIES_LIMIT = 0
 */
 static const struct zcheck_affs {
-  int aff_type;  /*from Structs.h*/
-  int min_aff;   /*min. allowed value*/
-  int max_aff;   /*max. allowed value*/
-  char *message; /*phrase for error message*/
+  int aff_type;        /*from Structs.h*/
+  int min_aff;         /*min. allowed value*/
+  int max_aff;         /*max. allowed value*/
+  const char *message; /*phrase for error message*/
 } zaffs[] = {
     {APPLY_NONE,        0,   -99, "unused0"         },
     {APPLY_STR,         -6,  6,   "strength"        },

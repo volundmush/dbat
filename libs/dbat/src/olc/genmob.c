@@ -196,14 +196,14 @@ int delete_mobile(mob_rnum refpt)
   /* Update shop keepers.  */
   if (shop_index)
     for (counter = 0; counter <= top_shop; counter++) {
-      zone_vnum zone = zone_table[real_zone_by_thing(counter)].number;
+      zone_vnum zvnum = zone_table[real_zone_by_thing(counter)].number;
       /* Find the shop for this keeper and reset it's keeper to
        * -1 to keep the shop so it could be assigned to someone else */
       if (SHOP_KEEPER(counter) == refpt) {
         SHOP_KEEPER(counter) = NOTHING;
-        if (zone != last_saved_zone) {
-          add_to_save_list(zone, SL_SHP);
-          last_saved_zone = zone;
+        if (zvnum != last_saved_zone) {
+          add_to_save_list(zvnum, SL_SHP);
+          last_saved_zone = zvnum;
         }
       }
     }
@@ -216,10 +216,10 @@ int delete_mobile(mob_rnum refpt)
        * -1 to keep the guild so it could be assigned to someone else */
       if (GM_TRAINER(counter) == refpt) {
         GM_TRAINER(counter) = NOTHING;
-        zone_vnum zone      = zone_table[real_zone_by_thing(counter)].number;
-        if (zone != last_saved_zone) {
-          add_to_save_list(zone, SL_GLD);
-          last_saved_zone = zone;
+        zone_vnum zvnum     = zone_table[real_zone_by_thing(counter)].number;
+        if (zvnum != last_saved_zone) {
+          add_to_save_list(zvnum, SL_GLD);
+          last_saved_zone = zvnum;
         }
       }
     }

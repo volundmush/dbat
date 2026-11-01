@@ -275,18 +275,18 @@ static void mob_attack(struct char_data *ch, char *buf)
       } else if (char_is_android(ch) && char_mob_flagged(ch, MOB_ABSORB) && rand_number(1, 20) >= 19) {
         do_absorb(ch, buf2, 0, 0);
       } else if ((char_is_bio(ch) || char_is_majin(ch)) && getCurPL(ch) <= (getEffMaxPL(ch)) * 0.5 && rand_number(1, 20) >= 17) {
-        do_regenerate(ch, "25", 0, 0);
+        do_regenerate(ch, (char[]){"25"}, 0, 0);
       } else if (char_is_namek(ch) && getCurPL(ch) <= (getEffMaxPL(ch)) * 0.5 && rand_number(1, 20) == 20) {
-        do_regenerate(ch, "25", 0, 0);
+        do_regenerate(ch, (char[]){"25"}, 0, 0);
       } else if (pick_n_throw(ch, buf)) {
         /* This determines if they throw and also handles it */
       } else if (char_mob_flagged(ch, MOB_KNOWKAIO) && rand_number(1, 50) >= 46) {
         if (rand_number(1, 10) == 10) {
-          do_kaioken(ch, "20", 0, 0);
+          do_kaioken(ch, (char[]){"20"}, 0, 0);
         } else if (rand_number(1, 10) >= 8) {
-          do_kaioken(ch, "10", 0, 0);
+          do_kaioken(ch, (char[]){"10"}, 0, 0);
         } else {
-          do_kaioken(ch, "5", 0, 0);
+          do_kaioken(ch, (char[]){"5"}, 0, 0);
         }
       } else {
         switch (power) {
@@ -459,9 +459,9 @@ static void mob_attack(struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_kamehameha(ch, buf, 0, 0);
                 else if (special >= 50)
-                  do_barrier(ch, "40", 0, 0);
+                  do_barrier(ch, (char[]){"40"}, 0, 0);
                 else
-                  do_barrier(ch, "25", 0, 0);
+                  do_barrier(ch, (char[]){"25"}, 0, 0);
                 break;
               case CLASS_FRIEZA:
                 if (special >= 100)
@@ -471,9 +471,9 @@ static void mob_attack(struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_deathbeam(ch, buf, 0, 0);
                 else if (special >= 50)
-                  do_barrier(ch, "40", 0, 0);
+                  do_barrier(ch, (char[]){"40"}, 0, 0);
                 else
-                  do_barrier(ch, "25", 0, 0);
+                  do_barrier(ch, (char[]){"25"}, 0, 0);
                 break;
               case CLASS_KRANE:
                 if (special >= 100)
@@ -483,9 +483,9 @@ static void mob_attack(struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_dodonpa(ch, buf, 0, 0);
                 else if (special >= 50)
-                  do_barrier(ch, "40", 0, 0);
+                  do_barrier(ch, (char[]){"40"}, 0, 0);
                 else
-                  do_barrier(ch, "25", 0, 0);
+                  do_barrier(ch, (char[]){"25"}, 0, 0);
                 break;
               case CLASS_PICCOLO:
                 if (special >= 100)
@@ -494,12 +494,12 @@ static void mob_attack(struct char_data *ch, char *buf)
                   do_sbc(ch, buf, 0, 0);
                 else if (special >= 70)
                   do_masenko(ch, buf, 0, 0);
-                else if (special >= 100)
+                else if (special >= 60)
                   do_balefire(ch, buf, 0, 0);
                 else if (special >= 50)
-                  do_barrier(ch, "40", 0, 0);
+                  do_barrier(ch, (char[]){"40"}, 0, 0);
                 else
-                  do_barrier(ch, "25", 0, 0);
+                  do_barrier(ch, (char[]){"25"}, 0, 0);
                 break;
               case CLASS_BARDOCK:
                 if (special >= 100)
@@ -509,9 +509,9 @@ static void mob_attack(struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_galikgun(ch, buf, 0, 0);
                 else if (special >= 50)
-                  do_barrier(ch, "40", 0, 0);
+                  do_barrier(ch, (char[]){"40"}, 0, 0);
                 else
-                  do_barrier(ch, "25", 0, 0);
+                  do_barrier(ch, (char[]){"25"}, 0, 0);
                 break;
               case CLASS_ANDSIX:
                 if (special >= 100)
@@ -521,15 +521,15 @@ static void mob_attack(struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_dualbeam(ch, buf, 0, 0);
                 else if (special >= 50)
-                  do_barrier(ch, "40", 0, 0);
+                  do_barrier(ch, (char[]){"40"}, 0, 0);
                 else
-                  do_barrier(ch, "25", 0, 0);
+                  do_barrier(ch, (char[]){"25"}, 0, 0);
                 break;
               case CLASS_NAIL:
                 if (special >= 100)
-                  do_regenerate(ch, "50", 0, 0);
+                  do_regenerate(ch, (char[]){"50"}, 0, 0);
                 else if (special >= 80)
-                  do_heal(ch, "self", 0, 0);
+                  do_heal(ch, (char[]){"self"}, 0, 0);
                 else if (special >= 70)
                   do_masenko(ch, buf, 0, 0);
                 else
@@ -543,9 +543,9 @@ static void mob_attack(struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_renzo(ch, buf, 0, 0);
                 else if (special >= 50)
-                  do_barrier(ch, "40", 0, 0);
+                  do_barrier(ch, (char[]){"40"}, 0, 0);
                 else
-                  do_barrier(ch, "25", 0, 0);
+                  do_barrier(ch, (char[]){"25"}, 0, 0);
                 break;
               case CLASS_JINTO:
                 if (special >= 100)
@@ -555,7 +555,7 @@ static void mob_attack(struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_trip(ch, buf, 0, 0);
                 else
-                  do_zanzoken(ch, "40", 0, 0);
+                  do_zanzoken(ch, (char[]){"40"}, 0, 0);
                 break;
               case CLASS_TSUNA:
                 if (special >= 100)
@@ -565,7 +565,7 @@ static void mob_attack(struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_spike(ch, buf, 0, 0);
                 else
-                  do_barrier(ch, "20", 0, 0);
+                  do_barrier(ch, (char[]){"20"}, 0, 0);
                 break;
               case CLASS_TAPION:
                 if (special >= 100)
@@ -575,7 +575,7 @@ static void mob_attack(struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_tslash(ch, buf, 0, 0);
                 else
-                  do_zanzoken(ch, "40", 0, 0);
+                  do_zanzoken(ch, (char[]){"40"}, 0, 0);
                 break;
               case CLASS_KABITO:
                 if (special >= 100)
@@ -585,7 +585,7 @@ static void mob_attack(struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_heal(ch, buf, 0, 0);
                 else
-                  do_zanzoken(ch, "40", 0, 0);
+                  do_zanzoken(ch, (char[]){"40"}, 0, 0);
                 break;
               case CLASS_DABURA:
                 if (special >= 100)
@@ -595,7 +595,7 @@ static void mob_attack(struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_fireshield(ch, buf, 0, 0);
                 else
-                  do_zanzoken(ch, "40", 0, 0);
+                  do_zanzoken(ch, (char[]){"40"}, 0, 0);
                 break;
               case CLASS_GINYU:
                 if (special >= 100)
@@ -605,7 +605,7 @@ static void mob_attack(struct char_data *ch, char *buf)
                 else if (special >= 70)
                   do_eraser(ch, buf, 0, 0);
                 else
-                  do_zanzoken(ch, "40", 0, 0);
+                  do_zanzoken(ch, (char[]){"40"}, 0, 0);
                 break;
             }
           }
@@ -662,7 +662,7 @@ static void shadow_dragons_live()
 }
 
 /* For announcing the sounds of battle to nearby rooms */
-void impact_sound(struct char_data *ch, char *mssg)
+void impact_sound(struct char_data *ch, const char *mssg)
 {
   int door;
   for (door = 0; door < NUM_OF_DIRS; door++)
@@ -937,8 +937,8 @@ void fight_stack()
           act("@mExhausted of stamina, your body forcibly reverts from its form.@n", TRUE, ch, 0, 0, TO_CHAR);
           act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n", TRUE, ch, 0, 0, TO_ROOM);
           if (char_get_kaioken(ch) < 1)
-            do_kaioken(ch, "0", 0, 0);
-          do_transform(ch, "revert", 0, 0);
+            do_kaioken(ch, (char[]){"0"}, 0, 0);
+          do_transform(ch, (char[]){"revert"}, 0, 0);
         }
       }
 
@@ -1023,7 +1023,7 @@ void fight_stack()
         continue;
       }
       if (char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && char_aff_flagged(ch, AFF_FLYING) && char_get_altitude(ch) < char_get_altitude(char_get_fighting(ch))) {
-        do_fly(ch, "high", 0, 0);
+        do_fly(ch, (char[]){"high"}, 0, 0);
         continue;
       }
       if (char_aff_flagged(char_get_fighting(ch), AFF_FLYING) && !char_is_humanoid(ch) && !char_aff_flagged(ch, AFF_FLYING) && char_get_position(ch) > POS_RESTING) {

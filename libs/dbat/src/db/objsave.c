@@ -795,15 +795,15 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
       if (!strcmp("XAP", line)) { /* then this is a Xap Obj, requires
               special care */
         if ((temp->name = fread_string(fl, "rented object name")) == NULL) {
-          temp->name = "undefined";
+          temp->name = strdup("undefined");
         }
 
         if ((temp->short_description = fread_string(fl, "rented object short desc")) == NULL) {
-          temp->short_description = "undefined";
+          temp->short_description = strdup("undefined");
         }
 
         if ((temp->description = fread_string(fl, "rented object desc")) == NULL) {
-          temp->description = "undefined";
+          temp->description = strdup("undefined");
         }
 
         if ((temp->action_description = fread_string(fl, "rented object adesc")) == NULL) {

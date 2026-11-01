@@ -201,7 +201,7 @@ static void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num)
 static void trigedit_disp_menu(struct descriptor_data *d)
 {
   struct trig_data *trig = OLC_TRIG(d);
-  char *attach_type;
+  const char *attach_type;
   char trgtypes[256];
 
   if (trig->attach_type == OBJ_TRIGGER) {

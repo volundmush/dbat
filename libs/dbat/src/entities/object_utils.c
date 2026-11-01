@@ -476,7 +476,7 @@ bool obj_wear_flagged(const struct obj_data *obj, int part)
   return (IS_SET_AR(obj_get_wear_flags(obj), (part)));
 }
 
-char *obj_sana(const struct obj_data *obj)
+const char *obj_sana(const struct obj_data *obj)
 {
   return (strchr("aeiouAEIOU", *(obj)->name) ? "an" : "a");
 }
