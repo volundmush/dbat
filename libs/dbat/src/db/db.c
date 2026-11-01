@@ -1026,10 +1026,14 @@ void save_mud_time(struct time_info_data *when)
 }
 
 /*
- * Thanks to Andrey (andrey@alex-ua.com) for this bit of code, although I
- * did add the 'goto' and changed some "while()" into "do { } while()".
- *	-gg 6/24/98 (technically 6/25/98, but I care not.)
+ * Thanks to Andrey (andrey@alex-ua.com) for this bit of code.
  */
+[[noreturn]] static void help_file_eof(void)
+{
+  mud_log("SYSERR: Unexpected end of help file.");
+  exit(1); /* Some day we hope to handle these things better... */
+}
+
 static int count_alias_records(FILE *fl)
 {
   char key[READ_SIZE], next_key[READ_SIZE];
@@ -1044,7 +1048,7 @@ static int count_alias_records(FILE *fl)
     do {
       get_one_line(fl, line);
       if (feof(fl))
-        goto ackeof;
+        help_file_eof();
     } while (*line != '#');
 
     /* now count keywords */
@@ -1059,15 +1063,10 @@ static int count_alias_records(FILE *fl)
     get_one_line(fl, key);
 
     if (feof(fl))
-      goto ackeof;
+      help_file_eof();
   }
 
   return (total_keywords);
-
-  /* No, they are not evil. -gg 6/24/98 */
-ackeof:
-  mud_log("SYSERR: Unexpected end of help file.");
-  exit(1); /* Some day we hope to handle these things better... */
 }
 
 /* function to count how many hash-mark delimited records exist in a file */

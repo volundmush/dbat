@@ -60,12 +60,40 @@ void write_aliases(struct char_data *ch)
   fclose(file);
 }
 
+/* Reads one alias record into a. Returns false if the file ends or is malformed partway through it. */
+static bool read_alias_record(FILE *file, struct alias_data *a)
+{
+  char xbuf[MAX_STRING_LENGTH];
+  int length;
+
+  /* Read the aliased command. */
+  if (fscanf(file, "%d\n", &length) != 1 || length < 0 || length >= (int)sizeof(xbuf) - 1)
+    return false;
+
+  fgets(xbuf, length + 1, file);
+  a->alias = strdup(xbuf);
+
+  /* Build the replacement. */
+  if (fscanf(file, "%d\n", &length) != 1 || length < 0 || length >= (int)sizeof(xbuf) - 1)
+    return false;
+
+  *xbuf = ' '; /* Doesn't need terminated, fgets() will. */
+  fgets(xbuf + 1, length + 1, file);
+  a->replacement = strdup(xbuf);
+
+  /* Figure out the alias type. */
+  if (fscanf(file, "%d\n", &length) != 1)
+    return false;
+
+  a->type = length;
+  return true;
+}
+
 void read_aliases(struct char_data *ch)
 {
   FILE *file;
   char xbuf[MAX_STRING_LENGTH];
-  struct alias_data *t2, *prev = NULL;
-  int length;
+  struct alias_data *head = NULL, **tail = &head;
 
   get_filename(xbuf, sizeof(xbuf), ALIAS_FILE, char_get_name(ch));
 
@@ -81,48 +109,25 @@ void read_aliases(struct char_data *ch)
     return;
   }
 
-  CREATE(t2, struct alias_data, 1);
-  char_set_aliases(ch, t2);
-
+  /* A malformed record is dropped along with everything after it; the records before it are kept. */
   for (;;) {
-    /* Read the aliased command. */
-    if (fscanf(file, "%d\n", &length) != 1)
-      goto read_alias_error;
+    struct alias_data *a;
 
-    fgets(xbuf, length + 1, file);
-    t2->alias = strdup(xbuf);
-
-    /* Build the replacement. */
-    if (fscanf(file, "%d\n", &length) != 1)
-      goto read_alias_error;
-
-    *xbuf = ' '; /* Doesn't need terminated, fgets() will. */
-    fgets(xbuf + 1, length + 1, file);
-    t2->replacement = strdup(xbuf);
-
-    /* Figure out the alias type. */
-    if (fscanf(file, "%d\n", &length) != 1)
-      goto read_alias_error;
-
-    t2->type = length;
+    CREATE(a, struct alias_data, 1);
+    if (!read_alias_record(file, a)) {
+      free(a->alias);
+      free(a->replacement);
+      free(a);
+      break;
+    }
+    *tail = a;
+    tail  = &a->next;
 
     if (feof(file))
       break;
+  }
 
-    CREATE(t2->next, struct alias_data, 1);
-    prev = t2;
-    t2   = t2->next;
-  };
-
-  fclose(file);
-  return;
-
-read_alias_error:
-  if (t2->alias)
-    free(t2->alias);
-  free(t2);
-  if (prev)
-    prev->next = NULL;
+  char_set_aliases(ch, head);
   fclose(file);
 }
 
