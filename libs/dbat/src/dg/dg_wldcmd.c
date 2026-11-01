@@ -37,7 +37,6 @@ static WCMD(do_wload);
 static WCMD(do_wdamage);
 static WCMD(do_wat);
 static WCMD(do_weffect);
-void wld_command_interpreter(room_data *room, char *argument);
 
 struct wld_command_info {
   const char *command;
@@ -55,11 +54,11 @@ static void wld_log(room_data *room, const char *format, ...)
   va_list args;
   char output[MAX_STRING_LENGTH];
 
-  snprintf(output, sizeof(output), "Room %d :: %s", room->number, format);
-
   va_start(args, format);
-  script_vlog(output, args);
+  vsnprintf(output, sizeof(output), format, args);
   va_end(args);
+
+  script_log("Room %d :: %s", room->number, output);
 }
 
 /* sends str to room */
@@ -240,17 +239,7 @@ static WCMD(do_wdoor)
   char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
   char field[MAX_INPUT_LENGTH], *value;
   room_data *rm;
-  struct room_direction_data *newexit;
-  int dir, fd, to_room;
-
-  const char *door_field[] = {
-      "purge",
-      "description",
-      "flags",
-      "key",
-      "name",
-      "room",
-      "\n"};
+  int dir, fd;
 
   argument = two_arguments(argument, target, direction);
   value    = one_argument(argument, field);
@@ -270,64 +259,14 @@ static WCMD(do_wdoor)
     wld_log(room, "wdoor: invalid direction");
     return;
   }
-  /*if ((dir = search_block(direction, dirs, FALSE)) < 0 && (dir = search_block(direction, abbr_dirs, FALSE)) < 0) {
-        wld_log(room, "wdoor: invalid direction %d %s", dir, direction);
-        return;
-    }*/
 
-  if ((fd = search_block(field, door_field, FALSE)) == -1) {
+  if ((fd = search_block(field, dg_door_fields, FALSE)) == -1) {
     wld_log(room, "wdoor: invalid field");
     return;
   }
 
-  newexit = rm->dir_option[dir];
-
-  /* purge exit */
-  if (fd == 0) {
-    if (newexit) {
-      if (newexit->general_description)
-        free(newexit->general_description);
-      if (newexit->keyword)
-        free(newexit->keyword);
-      free(newexit);
-      rm->dir_option[dir] = NULL;
-    }
-  }
-
-  else {
-    if (!newexit) {
-      CREATE(newexit, struct room_direction_data, 1);
-      rm->dir_option[dir] = newexit;
-    }
-
-    switch (fd) {
-      case 1: /* description */
-        if (newexit->general_description)
-          free(newexit->general_description);
-        CREATE(newexit->general_description, char, strlen(value) + 3);
-        strcpy(newexit->general_description, value);
-        strcat(newexit->general_description, "\r\n");
-        break;
-      case 2: /* flags       */
-        newexit->exit_info = (int16_t)asciiflag_conv(value);
-        break;
-      case 3: /* key         */
-        newexit->key = atoi(value);
-        break;
-      case 4: /* name        */
-        if (newexit->keyword)
-          free(newexit->keyword);
-        CREATE(newexit->keyword, char, strlen(value) + 1);
-        strcpy(newexit->keyword, value);
-        break;
-      case 5: /* room        */
-        if ((to_room = real_room(atoi(value))) != NOWHERE)
-          newexit->to_room = to_room;
-        else
-          wld_log(room, "wdoor: invalid door target");
-        break;
-    }
-  }
+  if (!dg_door_apply(rm, dir, fd, value))
+    wld_log(room, "wdoor: invalid door target");
 }
 
 static WCMD(do_wteleport)

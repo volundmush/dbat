@@ -13,7 +13,7 @@
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/db.h"
-#include "dbat/dg_comm.h"
+#include "dbat/broadcast.h"
 #include "dbat/act.other.h"
 #include "dbat/config.h"
 #include "dbat/races.h"

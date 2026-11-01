@@ -33,7 +33,7 @@
 #include "dbat/config.h"
 #include "dbat/act.other.h"
 #include "dbat/maputils.h"
-#include "dbat/dg_comm.h"
+#include "dbat/broadcast.h"
 #include "dbat/handler.h"
 #include "dbat/act.item.h"
 #include "dbat/act.informative.h"

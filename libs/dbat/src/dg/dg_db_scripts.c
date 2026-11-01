@@ -32,6 +32,97 @@
 /* local functions */
 static void trig_data_init(trig_data *this_data);
 
+/* the block a script line opens, for dg_lint_trigger() */
+struct dg_lint_block {
+  const char *kind; /* "if", "while" or "switch" */
+  int line;
+};
+
+static void dg_lint_warn(const trig_data *trig, struct descriptor_data *d, int line, const char *msg)
+{
+  mud_log("SCRIPT WARN: trig #%d '%s' line %d: %s", GET_TRIG_VNUM(trig),
+          GET_TRIG_NAME(trig) ? GET_TRIG_NAME(trig) : "", line, msg);
+  if (d)
+    write_to_output(d, "Warning: line %d: %s\r\n", line, msg);
+}
+
+/*
+ * Warns about control-flow mistakes in a trigger's script: a block that is never
+ * closed, a closer with nothing to close, and 'else if', which runs as a plain 'else'.
+ * Keywords are matched the way script_driver_body() matches them, so the warnings
+ * describe what will actually run. Warnings go to the syslog, and also to d if it is
+ * not NULL. Returns the number of warnings.
+ */
+int dg_lint_trigger(const trig_data *trig, struct descriptor_data *d)
+{
+  struct dg_lint_block open[64];
+  int depth = 0, line = 0, warnings = 0;
+  char msg[MAX_INPUT_LENGTH];
+
+  for (const struct cmdlist_element *cl = trig->cmdlist; cl; cl = cl->next) {
+    const char *p = cl->cmd;
+    line++;
+    while (*p && isspace(*p))
+      p++;
+
+    if (*p == '*') /* comment */
+      continue;
+
+    if (!strncasecmp(p, "if ", 3) || !strncasecmp("while ", p, 6) || !strncasecmp("switch ", p, 7)) {
+      if (depth == (int)(sizeof(open) / sizeof(open[0]))) {
+        dg_lint_warn(trig, d, line, "blocks nested too deeply to check the rest of the script");
+        return warnings + 1;
+      }
+      if (!strncasecmp(p, "if ", 3))
+        open[depth].kind = "if";
+      else if (!strncasecmp(p, "while ", 6))
+        open[depth].kind = "while";
+      else
+        open[depth].kind = "switch";
+      open[depth++].line = line;
+    } else if (!strncasecmp("elseif ", p, 7) || !strncasecmp("else", p, 4)) {
+      const char *q = p + 4;
+      while (*q && isspace(*q))
+        q++;
+      if (q > p + 4 && !strncasecmp(q, "if", 2) && (!q[2] || q[2] == '(' || isspace(q[2]))) {
+        dg_lint_warn(trig, d, line, "'else if' runs as a plain 'else' and its condition is ignored; write 'elseif'");
+        warnings++;
+      }
+      if (!depth || strcmp(open[depth - 1].kind, "if")) {
+        dg_lint_warn(trig, d, line, "'else' without 'if'");
+        warnings++;
+      }
+    } else if (!strncasecmp("end", p, 3)) {
+      if (depth && !strcmp(open[depth - 1].kind, "if"))
+        depth--;
+      else {
+        dg_lint_warn(trig, d, line, "'end' without 'if'");
+        warnings++;
+      }
+    } else if (!strncasecmp("done", p, 4)) {
+      while (depth && !strcmp(open[depth - 1].kind, "if")) {
+        snprintf(msg, sizeof(msg), "'if' has no 'end' before the 'done' at line %d", line);
+        dg_lint_warn(trig, d, open[--depth].line, msg);
+        warnings++;
+      }
+      if (depth)
+        depth--;
+      else {
+        dg_lint_warn(trig, d, line, "'done' without 'while' or 'switch'");
+        warnings++;
+      }
+    }
+  }
+
+  while (depth) {
+    depth--;
+    snprintf(msg, sizeof(msg), "'%s' has no '%s'", open[depth].kind, strcmp(open[depth].kind, "if") ? "done" : "end");
+    dg_lint_warn(trig, d, open[depth].line, msg);
+    warnings++;
+  }
+  return warnings;
+}
+
 void parse_trigger(FILE *trig_f, int nr)
 {
   int t[2], k, attach_type;
@@ -54,20 +145,22 @@ void parse_trigger(FILE *trig_f, int nr)
   trig->name = fread_string(trig_f, errors);
 
   get_line(trig_f, line);
-  k                  = sscanf(line, "%d %s %d", &attach_type, flags, t);
+  k                  = sscanf(line, "%d %255s %d", &attach_type, flags, t);
   trig->attach_type  = (int8_t)attach_type;
   trig->trigger_type = (long)asciiflag_conv(flags);
   trig->narg         = (k == 3) ? t[0] : 0;
 
   trig->arglist = fread_string(trig_f, errors);
 
-  cmds = s = fread_string(trig_f, errors);
+  /* an empty or blank script becomes the same placeholder trigedit saves */
+  cmds = fread_string(trig_f, errors);
+  s    = cmds ? strtok(cmds, "\n\r") : NULL;
 
   CREATE(trig->cmdlist, struct cmdlist_element, 1);
-  trig->cmdlist->cmd = strdup(strtok(s, "\n\r"));
+  trig->cmdlist->cmd = strdup(s ? s : "* Empty script");
   cle                = trig->cmdlist;
 
-  while ((s = strtok(NULL, "\n\r"))) {
+  while (s && (s = strtok(NULL, "\n\r"))) {
     CREATE(cle->next, struct cmdlist_element, 1);
     cle      = cle->next;
     cle->cmd = strdup(s);
@@ -76,6 +169,8 @@ void parse_trigger(FILE *trig_f, int nr)
   free(cmds);
 
   trig_index[top_of_trigt++] = t_index;
+
+  dg_lint_trigger(trig, NULL);
 }
 
 /*

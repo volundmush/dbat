@@ -7,7 +7,7 @@
 /******************************************************************************/
 
 #include "dbat/oasis_copy.h"
-#include "dbat/dg_comm.h"
+#include "dbat/broadcast.h"
 #include "dbat/dg_olc.h"
 #include "dbat/act.wizard.h"
 #include "dbat/utils.h"

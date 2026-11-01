@@ -11,7 +11,7 @@
 #include "dbat/consts/deathtype.h"
 #include "dbat/consts/shadowdragons.h"
 #include "dbat/fight.h"
-#include "dbat/dg_comm.h"
+#include "dbat/broadcast.h"
 #include "dbat/act.attack.h"
 #include "dbat/act.other.h"
 #include "dbat/act.misc.h"

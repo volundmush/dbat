@@ -14,7 +14,7 @@
 #include "dbat/command.h"
 
 #include "dbat/act.comm.h"
-#include "dbat/dg_comm.h"
+#include "dbat/broadcast.h"
 #include "dbat/stringutils.h"
 #include "dbat/comm.h"
 #include "dbat/spells.h"

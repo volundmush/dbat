@@ -24,7 +24,7 @@
 #include "dbat/fileop.h"
 #include "dbat/comm.h"
 #include "dbat/handler.h"
-#include "dbat/dg_comm.h"
+#include "dbat/broadcast.h"
 #include "dbat/combat.h"
 #include "dbat/act.misc.h"
 #include "dbat/weather.h"

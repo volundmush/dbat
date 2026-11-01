@@ -309,3 +309,71 @@ void script_damage(struct char_data *vict, int dam)
     die(vict, NULL);
   }
 }
+
+/* the fields a script's door command (mdoor, odoor, wdoor) can change, numbered as dg_door_apply() takes them */
+const char *dg_door_fields[] = {
+    "purge",
+    "description",
+    "flags",
+    "key",
+    "name",
+    "room",
+    "\n"};
+
+/*
+ * Sets field (an index into dg_door_fields) of exit dir of room rm to value, creating the
+ * exit first if needed; "purge" removes the exit. Returns false if field is "room" and
+ * value is not a room vnum, so the caller can log it.
+ */
+bool dg_door_apply(room_data *rm, int dir, int field, char *value)
+{
+  struct room_direction_data *newexit = rm->dir_option[dir];
+  int to_room;
+
+  /* purge exit */
+  if (field == 0) {
+    if (newexit) {
+      if (newexit->general_description)
+        free(newexit->general_description);
+      if (newexit->keyword)
+        free(newexit->keyword);
+      free(newexit);
+      rm->dir_option[dir] = NULL;
+    }
+    return true;
+  }
+
+  if (!newexit) {
+    CREATE(newexit, struct room_direction_data, 1);
+    rm->dir_option[dir] = newexit;
+  }
+
+  switch (field) {
+    case 1: /* description */
+      if (newexit->general_description)
+        free(newexit->general_description);
+      CREATE(newexit->general_description, char, strlen(value) + 3);
+      strcpy(newexit->general_description, value);
+      strcat(newexit->general_description, "\r\n");
+      break;
+    case 2: /* flags       */
+      newexit->exit_info = (int16_t)asciiflag_conv(value);
+      break;
+    case 3: /* key         */
+      newexit->key = atoi(value);
+      break;
+    case 4: /* name        */
+      if (newexit->keyword)
+        free(newexit->keyword);
+      CREATE(newexit->keyword, char, strlen(value) + 1);
+      strcpy(newexit->keyword, value);
+      break;
+    case 5: /* room        */
+      if ((to_room = real_room(atoi(value))) != NOWHERE)
+        newexit->to_room = to_room;
+      else
+        return false;
+      break;
+  }
+  return true;
+}

@@ -15,7 +15,7 @@
 #include "dbat/spells.h"
 #include "dbat/screen.h"
 
-#include "dbat/dg_comm.h"
+#include "dbat/broadcast.h"
 #include "dbat/act.other.h"
 
 /* local functions  */

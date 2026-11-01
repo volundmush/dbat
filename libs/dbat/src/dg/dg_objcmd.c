@@ -52,7 +52,6 @@ static OCMD(do_ogoto);
 static OCMD(do_odoor);
 static OCMD(do_osetval);
 static OCMD(do_oat);
-void obj_command_interpreter(obj_data *obj, char *argument);
 
 struct obj_command_info {
   const char *command;
@@ -70,11 +69,11 @@ static void obj_log(obj_data *obj, const char *format, ...)
   va_list args;
   char output[MAX_STRING_LENGTH];
 
-  snprintf(output, sizeof(output), "Obj (%s, VNum %d):: %s", obj->short_description, obj_get_vnum(obj), format);
-
   va_start(args, format);
-  script_vlog(output, args);
+  vsnprintf(output, sizeof(output), format, args);
   va_end(args);
+
+  script_log("Obj (%s, VNum %d):: %s", obj->short_description, obj_get_vnum(obj), output);
 }
 
 /* returns the real room number that the object or object's carrier is in */
@@ -621,17 +620,7 @@ static OCMD(do_odoor)
   char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
   char field[MAX_INPUT_LENGTH], *value;
   room_data *rm;
-  struct room_direction_data *newexit;
-  int dir, fd, to_room;
-
-  const char *door_field[] = {
-      "purge",
-      "description",
-      "flags",
-      "key",
-      "name",
-      "room",
-      "\n"};
+  int dir, fd;
 
   argument = two_arguments(argument, target, direction);
   value    = one_argument(argument, field);
@@ -652,59 +641,13 @@ static OCMD(do_odoor)
     return;
   }
 
-  if ((fd = search_block(field, door_field, FALSE)) == -1) {
+  if ((fd = search_block(field, dg_door_fields, FALSE)) == -1) {
     obj_log(obj, "odoor: invalid field");
     return;
   }
 
-  newexit = rm->dir_option[dir];
-
-  /* purge exit */
-  if (fd == 0) {
-    if (newexit) {
-      if (newexit->general_description)
-        free(newexit->general_description);
-      if (newexit->keyword)
-        free(newexit->keyword);
-      free(newexit);
-      rm->dir_option[dir] = NULL;
-    }
-  }
-
-  else {
-    if (!newexit) {
-      CREATE(newexit, struct room_direction_data, 1);
-      rm->dir_option[dir] = newexit;
-    }
-
-    switch (fd) {
-      case 1: /* description */
-        if (newexit->general_description)
-          free(newexit->general_description);
-        CREATE(newexit->general_description, char, strlen(value) + 3);
-        strcpy(newexit->general_description, value);
-        strcat(newexit->general_description, "\r\n"); /* strcat : OK */
-        break;
-      case 2: /* flags       */
-        newexit->exit_info = (int16_t)asciiflag_conv(value);
-        break;
-      case 3: /* key         */
-        newexit->key = atoi(value);
-        break;
-      case 4: /* name        */
-        if (newexit->keyword)
-          free(newexit->keyword);
-        CREATE(newexit->keyword, char, strlen(value) + 1);
-        strcpy(newexit->keyword, value);
-        break;
-      case 5: /* room        */
-        if ((to_room = real_room(atoi(value))) != NOWHERE)
-          newexit->to_room = to_room;
-        else
-          obj_log(obj, "odoor: invalid door target");
-        break;
-    }
-  }
+  if (!dg_door_apply(rm, dir, fd, value))
+    obj_log(obj, "odoor: invalid door target");
 }
 
 static OCMD(do_osetval)

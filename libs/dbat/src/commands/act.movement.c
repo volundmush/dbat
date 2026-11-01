@@ -24,7 +24,7 @@
 
 #include "dbat/act.informative.h"
 
-#include "dbat/dg_comm.h"
+#include "dbat/broadcast.h"
 #include "dbat/vehicles.h"
 #include "dbat/oasis_copy.h"
 #include "dbat/relocate.h"

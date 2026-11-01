@@ -50,7 +50,7 @@ it.
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
 #include "dbat/improved-edit.h"
-#include "dbat/dg_comm.h"
+#include "dbat/broadcast.h"
 #include "dbat/config.h"
 #include "dbat/xdir.h"
 #include "dbat/fileop.h"

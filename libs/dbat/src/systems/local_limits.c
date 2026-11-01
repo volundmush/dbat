@@ -12,7 +12,7 @@
 #include "dbat/utils.h"
 #include "dbat/spells.h"
 #include "dbat/comm.h"
-#include "dbat/dg_comm.h"
+#include "dbat/broadcast.h"
 #include "dbat/act.other.h"
 #include "dbat/alias.h"
 #include "dbat/act.item.h"

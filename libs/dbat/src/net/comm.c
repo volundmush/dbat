@@ -21,7 +21,7 @@
 #include "dbat/act.misc.h"
 #include "dbat/house.h"
 #include "dbat/act.other.h"
-#include "dbat/dg_comm.h"
+#include "dbat/broadcast.h"
 #include "dbat/handler.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/act.item.h"

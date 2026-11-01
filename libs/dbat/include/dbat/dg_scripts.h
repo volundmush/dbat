@@ -252,6 +252,8 @@ void script_vlog(const char *format, va_list args) __attribute__((format(printf,
 void script_log(const char *format, ...) __attribute__((format(printf, 1, 2)));
 char *matching_quote(char *p);
 struct room_data *dg_room_of_obj(struct obj_data *obj);
+void obj_command_interpreter(obj_data *obj, char *argument);
+void wld_command_interpreter(room_data *room, char *argument);
 
 /* To maintain strict-aliasing we'll have to do this trick with a union */
 /* Thanks to Chris Gilbert for reminding me that there are other options. */
@@ -270,6 +272,7 @@ void remove_from_lookup_table(long uid);
 
 /* from dg_db_scripts.c */
 void parse_trigger(FILE *trig_f, int nr);
+int dg_lint_trigger(const trig_data *trig, struct descriptor_data *d);
 trig_data *read_trigger(int nr);
 void trig_data_copy(trig_data *this_data, const trig_data *trg);
 void dg_read_trigger(FILE *fp, void *proto, int type);
@@ -304,6 +307,8 @@ void do_dg_affect(void *go, struct script_data *sc, trig_data *trig,
                   int type, char *cmd);
 int valid_dg_target(char_data *ch, int bitvector);
 void script_damage(char_data *vict, int dam);
+extern const char *dg_door_fields[];
+bool dg_door_apply(room_data *rm, int dir, int field, char *value);
 
 int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *namelist[]);
 

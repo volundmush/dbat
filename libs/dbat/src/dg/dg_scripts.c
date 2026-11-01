@@ -28,8 +28,7 @@ static void do_stat_trigger(struct char_data *ch, trig_data *trig);
 static void script_stat(char_data *ch, struct script_data *sc);
 static int remove_trigger(struct script_data *sc, char *name);
 static int is_num(char *arg);
-static void eval_op(const char *op, char *lhs, char *rhs, char *result, void *go,
-                    struct script_data *sc, trig_data *trig);
+static void eval_op(const char *op, char *lhs, char *rhs, char *result);
 static char *matching_paren(char *p);
 static void eval_expr(char *line, char *result, void *go, struct script_data *sc,
                       trig_data *trig, int type);
@@ -1365,11 +1364,10 @@ static int is_num(char *arg)
 }
 
 /* evaluates 'lhs op rhs', and copies to result */
-static void eval_op(const char *op, char *lhs, char *rhs, char *result, void *go,
-                    struct script_data *sc, trig_data *trig)
+static void eval_op(const char *op, char *lhs, char *rhs, char *result)
 {
   unsigned char *p;
-  int n;
+  long long n;
 
   /* strip off extra spaces at begin and end */
   while (*lhs && isspace(*lhs))
@@ -1589,7 +1587,7 @@ static int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_dat
 
         eval_expr(line, lhr, go, sc, trig, type);
         eval_expr(p, rhr, go, sc, trig, type);
-        eval_op(ops[i], lhr, rhr, result, go, sc, trig);
+        eval_op(ops[i], lhr, rhr, result);
 
         return 1;
       }
@@ -1671,15 +1669,13 @@ static struct cmdlist_element *find_else_end(trig_data *trig,
 
     else if (!strncasecmp("elseif ", p, 7)) {
       if (process_if(p + 7, go, sc, trig, type)) {
-        GET_TRIG_DEPTH(trig)
-        ++;
+        GET_TRIG_DEPTH(trig) += 1;
         return c;
       }
     }
 
     else if (!strncasecmp("else", p, 4)) {
-      GET_TRIG_DEPTH(trig)
-      ++;
+      GET_TRIG_DEPTH(trig) += 1;
       return c;
     }
 
@@ -2477,6 +2473,112 @@ static void dg_letter_value(struct script_data *sc, trig_data *trig, char *cmd)
   add_var(&GET_TRIG_VARS(trig), varname, junk, sc->context);
 }
 
+/* the script attached to go, a mob, object or room according to type */
+static struct script_data *script_of(void *go, int type)
+{
+  switch (type) {
+    case MOB_TRIGGER: return SCRIPT((char_data *)go);
+    case OBJ_TRIGGER: return SCRIPT((obj_data *)go);
+    case WLD_TRIGGER: return SCRIPT((room_data *)go);
+  }
+  return NULL;
+}
+
+/* What script_driver_body does after running one command line. */
+enum dg_line_result {
+  DG_LINE_NEXT, /* go on to the next line */
+  DG_LINE_HALT, /* 'halt': end the run normally */
+  DG_LINE_STOP, /* return at once: a 'wait' was scheduled, or the owner was purged */
+};
+
+/*
+ * Runs one command line of a trigger, after variable substitution: a DG built-in
+ * such as 'set' or 'wait', or else a mob, object or room command.
+ */
+static enum dg_line_result dg_run_command(void *go_adress, void *go, struct script_data *sc, trig_data *trig,
+                                          int type, char *cmd, struct cmdlist_element *cl, int *ret_val)
+{
+  if (!strncasecmp(cmd, "eval ", 5))
+    process_eval(go, sc, trig, type, cmd);
+
+  else if (!strncasecmp(cmd, "nop ", 4))
+    ; /* nop: do nothing */
+
+  else if (!strncasecmp(cmd, "extract ", 8))
+    extract_value(sc, trig, cmd);
+
+  else if (!strncasecmp(cmd, "dg_letter ", 10))
+    dg_letter_value(sc, trig, cmd);
+
+  else if (!strncasecmp(cmd, "makeuid ", 8))
+    makeuid_var(go, sc, trig, type, cmd);
+
+  else if (!strncasecmp(cmd, "halt", 4))
+    return DG_LINE_HALT;
+
+  else if (!strncasecmp(cmd, "dg_cast ", 8))
+    do_dg_cast(go, sc, trig, type, cmd);
+
+  else if (!strncasecmp(cmd, "dg_affect ", 10))
+    do_dg_affect(go, sc, trig, type, cmd);
+
+  else if (!strncasecmp(cmd, "global ", 7))
+    process_global(sc, trig, cmd, sc->context);
+
+  else if (!strncasecmp(cmd, "context ", 8))
+    process_context(sc, trig, cmd);
+
+  else if (!strncasecmp(cmd, "remote ", 7))
+    process_remote(sc, trig, cmd);
+
+  else if (!strncasecmp(cmd, "rdelete ", 8))
+    process_rdelete(sc, trig, cmd);
+
+  else if (!strncasecmp(cmd, "return ", 7))
+    *ret_val = process_return(trig, cmd);
+
+  else if (!strncasecmp(cmd, "set ", 4))
+    process_set(sc, trig, cmd);
+
+  else if (!strncasecmp(cmd, "unset ", 6))
+    process_unset(sc, trig, cmd);
+
+  else if (!strncasecmp(cmd, "wait ", 5)) {
+    process_wait(go, trig, type, cmd, cl);
+    return DG_LINE_STOP;
+  }
+
+  else if (!strncasecmp(cmd, "attach ", 7))
+    process_attach(go, sc, trig, type, cmd);
+
+  else if (!strncasecmp(cmd, "detach ", 7))
+    process_detach(go, sc, trig, type, cmd);
+
+  else if (!strncasecmp(cmd, "version", 7))
+    mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "%s", DG_SCRIPT_VERSION);
+
+  else {
+    switch (type) {
+      case MOB_TRIGGER:
+        command_interpreter((char_data *)go, cmd);
+        break;
+      case OBJ_TRIGGER:
+        obj_command_interpreter((obj_data *)go, cmd);
+        break;
+      case WLD_TRIGGER:
+        wld_command_interpreter((struct room_data *)go, cmd);
+        break;
+    }
+    if (dg_owner_purged) {
+      if (type == OBJ_TRIGGER)
+        *(obj_data **)go_adress = NULL;
+      return DG_LINE_STOP;
+    }
+  }
+
+  return DG_LINE_NEXT;
+}
+
 /*  This is the core driver for scripts. */
 /*  Arguments:
     void *go_adress
@@ -2518,25 +2620,9 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
   struct script_data *sc = 0;
   struct cmdlist_element *temp;
   unsigned long loops = 0;
-  void *go            = NULL;
+  void *go            = *(void **)go_adress;
 
-  void obj_command_interpreter(obj_data * obj, char *argument);
-  void wld_command_interpreter(struct room_data * room, char *argument);
-
-  switch (type) {
-    case MOB_TRIGGER:
-      go = *(char_data **)go_adress;
-      sc = SCRIPT((char_data *)go);
-      break;
-    case OBJ_TRIGGER:
-      go = *(obj_data **)go_adress;
-      sc = SCRIPT((obj_data *)go);
-      break;
-    case WLD_TRIGGER:
-      go = *(room_data **)go_adress;
-      sc = SCRIPT((room_data *)go);
-      break;
-  }
+  sc = script_of(go, type);
 
   if (depth > MAX_SCRIPT_DEPTH) {
     script_log("Trigger %d recursed beyond maximum allowed depth.", GET_TRIG_VNUM(trig));
@@ -2591,8 +2677,7 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
 
     else if (!strncasecmp(p, "if ", 3)) {
       if (process_if(p + 3, go, sc, trig, type))
-        GET_TRIG_DEPTH(trig)
-      ++;
+        GET_TRIG_DEPTH(trig) += 1;
       else cl = find_else_end(trig, cl, go, sc, type);
     }
 
@@ -2607,14 +2692,13 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
         continue;
       }
       cl = find_end(trig, cl);
-      GET_TRIG_DEPTH(trig)
-      --;
+      GET_TRIG_DEPTH(trig) -= 1;
     } else if (!strncasecmp("while ", p, 6)) {
       temp = find_done(cl);
       if (!temp) {
         script_log("Trigger VNum %d has 'while' without 'done'.",
                    GET_TRIG_VNUM(trig));
-        return ret_val;
+        break; /* end the run normally, so depth and the trigger's state are reset */
       }
       if (process_if(p + 6, go, sc, trig, type)) {
         temp->original = cl;
@@ -2633,8 +2717,7 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
                    GET_TRIG_VNUM(trig));
         continue;
       }
-      GET_TRIG_DEPTH(trig)
-      --;
+      GET_TRIG_DEPTH(trig) -= 1;
     } else if (!strncasecmp("done", p, 4)) {
       /* if in a while loop, cl->original is non-NULL */
       if (cl->original) {
@@ -2644,8 +2727,7 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
                                        type)) {
           cl = cl->original;
           loops++;
-          GET_TRIG_LOOPS(trig)
-          ++;
+          GET_TRIG_LOOPS(trig) += 1;
           if (loops == 40) {
             process_wait(go, trig, type, (char[]){"wait 1"}, cl);
             depth--;
@@ -2670,93 +2752,17 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
 
       var_subst(go, sc, trig, type, p, cmd);
 
-      if (!strncasecmp(cmd, "eval ", 5))
-        process_eval(go, sc, trig, type, cmd);
-
-      else if (!strncasecmp(cmd, "nop ", 4))
-        ; /* nop: do nothing */
-
-      else if (!strncasecmp(cmd, "extract ", 8))
-        extract_value(sc, trig, cmd);
-
-      else if (!strncasecmp(cmd, "dg_letter ", 10))
-        dg_letter_value(sc, trig, cmd);
-
-      else if (!strncasecmp(cmd, "makeuid ", 8))
-        makeuid_var(go, sc, trig, type, cmd);
-
-      else if (!strncasecmp(cmd, "halt", 4))
+      enum dg_line_result res = dg_run_command(go_adress, go, sc, trig, type, cmd, cl, &ret_val);
+      if (res == DG_LINE_HALT)
         break;
-
-      else if (!strncasecmp(cmd, "dg_cast ", 8))
-        do_dg_cast(go, sc, trig, type, cmd);
-
-      else if (!strncasecmp(cmd, "dg_affect ", 10))
-        do_dg_affect(go, sc, trig, type, cmd);
-
-      else if (!strncasecmp(cmd, "global ", 7))
-        process_global(sc, trig, cmd, sc->context);
-
-      else if (!strncasecmp(cmd, "context ", 8))
-        process_context(sc, trig, cmd);
-
-      else if (!strncasecmp(cmd, "remote ", 7))
-        process_remote(sc, trig, cmd);
-
-      else if (!strncasecmp(cmd, "rdelete ", 8))
-        process_rdelete(sc, trig, cmd);
-
-      else if (!strncasecmp(cmd, "return ", 7))
-        ret_val = process_return(trig, cmd);
-
-      else if (!strncasecmp(cmd, "set ", 4))
-        process_set(sc, trig, cmd);
-
-      else if (!strncasecmp(cmd, "unset ", 6))
-        process_unset(sc, trig, cmd);
-
-      else if (!strncasecmp(cmd, "wait ", 5)) {
-        process_wait(go, trig, type, cmd, cl);
+      if (res == DG_LINE_STOP) {
         depth--;
         return ret_val;
-      }
-
-      else if (!strncasecmp(cmd, "attach ", 7))
-        process_attach(go, sc, trig, type, cmd);
-
-      else if (!strncasecmp(cmd, "detach ", 7))
-        process_detach(go, sc, trig, type, cmd);
-
-      else if (!strncasecmp(cmd, "version", 7))
-        mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "%s", DG_SCRIPT_VERSION);
-
-      else {
-        switch (type) {
-          case MOB_TRIGGER:
-            command_interpreter((char_data *)go, cmd);
-            break;
-          case OBJ_TRIGGER:
-            obj_command_interpreter((obj_data *)go, cmd);
-            break;
-          case WLD_TRIGGER:
-            wld_command_interpreter((struct room_data *)go, cmd);
-            break;
-        }
-        if (dg_owner_purged) {
-          depth--;
-          if (type == OBJ_TRIGGER)
-            *(obj_data **)go_adress = NULL;
-          return ret_val;
-        }
       }
     }
   }
 
-  switch (type) { /* the script may have been detached */
-    case MOB_TRIGGER: sc = SCRIPT((char_data *)go); break;
-    case OBJ_TRIGGER: sc = SCRIPT((obj_data *)go); break;
-    case WLD_TRIGGER: sc = SCRIPT((room_data *)go); break;
-  }
+  sc = script_of(go, type); /* the script may have been detached */
   if (sc)
     free_varlist(GET_TRIG_VARS(trig));
   GET_TRIG_VARS(trig)  = NULL;
@@ -2834,7 +2840,7 @@ find_case(struct trig_data *trig, struct cmdlist_element *cl,
       c = find_done(c);
     else if (!strncasecmp("case ", p, 5)) {
       buf = (char *)malloc(MAX_STRING_LENGTH);
-      eval_op("==", result, p + 5, buf, go, sc, trig);
+      eval_op("==", result, p + 5, buf);
       if (*buf && *buf != '0') {
         free(buf);
         return c;

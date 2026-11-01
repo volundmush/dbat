@@ -23,7 +23,7 @@
 #include "dbat/handler.h"
 #include "dbat/improved-edit.h"
 #include "dbat/config.h"
-#include "dbat/dg_comm.h"
+#include "dbat/broadcast.h"
 #include "dbat/act.informative.h"
 
 /* external functions */

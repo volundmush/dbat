@@ -29,7 +29,7 @@
 #include "dbat/character_utils.h"
 #include "dbat/descriptor_utils.h"
 #include "dbat/object_utils.h"
-#include "dbat/dg_comm.h"
+#include "dbat/broadcast.h"
 #include "dbat/config.h"
 #include "dbat/act.other.h"
 #include "dbat/random.h"

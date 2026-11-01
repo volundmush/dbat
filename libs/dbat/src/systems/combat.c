@@ -18,7 +18,7 @@
 #include "dbat/mobact.h"
 #include "dbat/fight.h"
 #include "dbat/act.attack.h"
-#include "dbat/dg_comm.h"
+#include "dbat/broadcast.h"
 #include "dbat/comm.h"
 #include "dbat/handler.h"
 #include "dbat/genzon.h"

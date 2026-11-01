@@ -67,12 +67,11 @@ static void mob_log(char_data *mob, const char *format, ...)
   va_list args;
   char output[MAX_STRING_LENGTH];
 
-  snprintf(output, sizeof(output), "Mob (%s, VNum %d):: %s",
-           GET_SHORT(mob), char_get_mob_vnum(mob), format);
-
   va_start(args, format);
-  script_vlog(output, args);
+  vsnprintf(output, sizeof(output), format, args);
   va_end(args);
+
+  script_log("Mob (%s, VNum %d):: %s", GET_SHORT(mob), char_get_mob_vnum(mob), output);
 }
 
 /*
@@ -80,6 +79,22 @@ static void mob_log(char_data *mob, const char *format, ...)
 */
 #define MOB_OR_IMPL(ch) \
   (char_is_npc(ch) && (!(ch)->desc || char_get_admlevel((ch)->desc->original) >= ADMLVL_IMPL))
+
+/*
+ * The check every mob command starts with: only NPCs may use them, and a player switched
+ * into one only if an implementor. check_charm also refuses a charmed mob, so players
+ * can't order their followers to run these. Returns false if the command must not run.
+ */
+static bool mob_cmd_allowed(char_data *ch, bool check_charm)
+{
+  if (!MOB_OR_IMPL(ch)) {
+    send_to_char(ch, "Huh?!?\r\n");
+    return false;
+  }
+  if (check_charm && char_aff_flagged(ch, AFF_CHARM))
+    return false;
+  return true;
+}
 
 /* mob commands */
 
@@ -89,12 +104,7 @@ ACMD(do_masound)
   room_rnum was_in_room;
   int door;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   if (!*argument) {
@@ -123,10 +133,8 @@ ACMD(do_mheal)
 {
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
+  if (!mob_cmd_allowed(ch, false))
     return;
-  }
 
   two_arguments(argument, arg, arg2);
 
@@ -156,12 +164,7 @@ ACMD(do_mkill)
   char_data *victim;
   char buf[MAX_INPUT_LENGTH];
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   one_argument(argument, arg);
@@ -231,12 +234,7 @@ ACMD(do_mjunk)
   obj_data *obj;
   obj_data *obj_next;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   one_argument(argument, arg);
@@ -278,12 +276,7 @@ ACMD(do_mechoaround)
   char_data *victim;
   char *p;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   p = one_argument(argument, arg);
@@ -319,12 +312,7 @@ ACMD(do_msend)
   char_data *victim;
   char *p;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   p = one_argument(argument, arg);
@@ -353,12 +341,7 @@ ACMD(do_mecho)
 {
   char *p;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   if (!*argument) {
@@ -375,6 +358,9 @@ ACMD(do_mzoneecho)
 {
   int zone;
   char room_number[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
+
+  if (!mob_cmd_allowed(ch, true))
+    return;
 
   msg = any_one_arg(argument, room_number);
   skip_spaces(&msg);
@@ -406,15 +392,7 @@ ACMD(do_mload)
   obj_data *cnt;
   int pos;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
-    return;
-
-  if (ch->desc && char_get_admlevel(ch->desc->original) < ADMLVL_IMPL)
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   target = two_arguments(argument, arg1, arg2);
@@ -515,15 +493,7 @@ ACMD(do_mpurge)
   char_data *victim;
   obj_data *obj;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
-    return;
-
-  if (ch->desc && (char_get_admlevel(ch->desc->original) < ADMLVL_IMPL))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   one_argument(argument, arg);
@@ -582,12 +552,7 @@ ACMD(do_mgoto)
   char arg[MAX_INPUT_LENGTH];
   room_rnum location;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   one_argument(argument, arg);
@@ -618,12 +583,7 @@ ACMD(do_mat)
   char arg[MAX_INPUT_LENGTH];
   room_rnum location, original;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   argument = one_argument(argument, arg);
@@ -660,12 +620,7 @@ ACMD(do_mteleport)
   room_rnum target;
   char_data *vict, *next_ch;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   argument = two_arguments(argument, arg1, arg2);
@@ -722,12 +677,7 @@ ACMD(do_mdamage)
   int dam = 0;
   char_data *vict;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   two_arguments(argument, name, amount);
@@ -759,15 +709,7 @@ ACMD(do_mforce)
 {
   char arg[MAX_INPUT_LENGTH];
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
-    return;
-
-  if (ch->desc && (char_get_admlevel(ch->desc->original) < ADMLVL_IMPL))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   argument = one_argument(argument, arg);
@@ -823,15 +765,7 @@ ACMD(do_mremember)
   struct script_memory *mem;
   char arg[MAX_INPUT_LENGTH];
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
-    return;
-
-  if (ch->desc && (char_get_admlevel(ch->desc->original) < ADMLVL_IMPL))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   argument = one_argument(argument, arg);
@@ -874,15 +808,7 @@ ACMD(do_mforget)
   struct script_memory *mem, *prev;
   char arg[MAX_INPUT_LENGTH];
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
-    return;
-
-  if (ch->desc && (char_get_admlevel(ch->desc->original) < ADMLVL_IMPL))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   one_argument(argument, arg);
@@ -932,12 +858,7 @@ ACMD(do_mtransform)
   mob_rnum this_rnum = char_get_nr(ch);
   int pos;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   if (ch->desc) {
@@ -1024,24 +945,9 @@ ACMD(do_mdoor)
   char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
   char field[MAX_INPUT_LENGTH], *value;
   room_data *rm;
-  struct room_direction_data *newexit;
-  int dir, fd, to_room;
+  int dir, fd;
 
-  const char *door_field[] = {
-      "purge",
-      "description",
-      "flags",
-      "key",
-      "name",
-      "room",
-      "\n"};
-
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   argument = two_arguments(argument, target, direction);
@@ -1063,59 +969,13 @@ ACMD(do_mdoor)
     return;
   }
 
-  if ((fd = search_block(field, door_field, FALSE)) == -1) {
+  if ((fd = search_block(field, dg_door_fields, FALSE)) == -1) {
     mob_log(ch, "odoor: invalid field");
     return;
   }
 
-  newexit = rm->dir_option[dir];
-
-  /* purge exit */
-  if (fd == 0) {
-    if (newexit) {
-      if (newexit->general_description)
-        free(newexit->general_description);
-      if (newexit->keyword)
-        free(newexit->keyword);
-      free(newexit);
-      rm->dir_option[dir] = NULL;
-    }
-  }
-
-  else {
-    if (!newexit) {
-      CREATE(newexit, struct room_direction_data, 1);
-      rm->dir_option[dir] = newexit;
-    }
-
-    switch (fd) {
-      case 1: /* description */
-        if (newexit->general_description)
-          free(newexit->general_description);
-        CREATE(newexit->general_description, char, strlen(value) + 3);
-        strcpy(newexit->general_description, value);
-        strcat(newexit->general_description, "\r\n");
-        break;
-      case 2: /* flags       */
-        newexit->exit_info = (int16_t)asciiflag_conv(value);
-        break;
-      case 3: /* key         */
-        newexit->key = atoi(value);
-        break;
-      case 4: /* name        */
-        if (newexit->keyword)
-          free(newexit->keyword);
-        CREATE(newexit->keyword, char, strlen(value) + 1);
-        strcpy(newexit->keyword, value);
-        break;
-      case 5: /* room        */
-        if ((to_room = real_room(atoi(value))) != NOWHERE)
-          newexit->to_room = to_room;
-        else
-          mob_log(ch, "mdoor: invalid door target");
-        break;
-    }
-  }
+  if (!dg_door_apply(rm, dir, fd, value))
+    mob_log(ch, "mdoor: invalid door target");
 }
 
 ACMD(do_mfollow)
@@ -1124,12 +984,7 @@ ACMD(do_mfollow)
   struct char_data *leader;
   struct follow_type *j, *k;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
-    return;
-  }
-
-  if (char_aff_flagged(ch, AFF_CHARM))
+  if (!mob_cmd_allowed(ch, true))
     return;
 
   one_argument(argument, buf);
@@ -1194,10 +1049,8 @@ ACMD(do_mrecho)
 {
   char start[MAX_INPUT_LENGTH], finish[MAX_INPUT_LENGTH], *msg;
 
-  if (!MOB_OR_IMPL(ch)) {
-    send_to_char(ch, "Huh?!?\r\n");
+  if (!mob_cmd_allowed(ch, false))
     return;
-  }
   msg = two_arguments(argument, start, finish);
 
   skip_spaces(&msg);

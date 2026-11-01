@@ -179,16 +179,15 @@ static void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num)
 
   trig_data_copy(trig, trig_index[rtrg_num]->proto);
 
-  /* convert cmdlist to a char string */
-  c = trig->cmdlist;
-  CREATE(OLC_STORAGE(d), char, MAX_CMD_LENGTH);
-  strcpy(OLC_STORAGE(d), "");
+  /* convert cmdlist to a char string, sized to fit: some loaded scripts exceed MAX_CMD_LENGTH */
+  size_t len = 1;
+  for (c = trig->cmdlist; c; c = c->next)
+    len += strlen(c->cmd) + 2;
+  CREATE(OLC_STORAGE(d), char, MAX(len, (size_t)MAX_CMD_LENGTH));
 
-  while (c) {
-    strcat(OLC_STORAGE(d), c->cmd);
-    strcat(OLC_STORAGE(d), "\r\n");
-    c = c->next;
-  }
+  char *end = OLC_STORAGE(d);
+  for (c = trig->cmdlist; c; c = c->next)
+    end += sprintf(end, "%s\r\n", c->cmd);
   /* now trig->cmdlist is something to pass to the text editor */
   /* it will be converted back to a real cmdlist_element list later */
 
@@ -411,189 +410,186 @@ void trigedit_parse(struct descriptor_data *d, char *arg)
   trigedit_disp_menu(d);
 }
 
-/* save the zone's triggers to internal memory and to disk */
-static void trigedit_save(struct descriptor_data *d)
+/* Builds trig->cmdlist from the editor text s, one element per line. */
+static void trigedit_compile_script(trig_data *trig, char *s)
+{
+  struct cmdlist_element *cmd;
+
+  CREATE(trig->cmdlist, struct cmdlist_element, 1);
+  if (s) {
+    /* strtok returns NULL if s is "\r\n" */
+    char *t            = strtok(s, "\n\r");
+    trig->cmdlist->cmd = strdup(t ? t : "* No script");
+    cmd                = trig->cmdlist;
+
+    while ((s = strtok(NULL, "\n\r"))) {
+      CREATE(cmd->next, struct cmdlist_element, 1);
+      cmd      = cmd->next;
+      cmd->cmd = strdup(s);
+    }
+  } else
+    trig->cmdlist->cmd = strdup("* No Script");
+}
+
+/* Replaces prototype rnum with the edited trigger, and updates every live copy of it. */
+static void trigedit_replace_existing(struct descriptor_data *d, trig_rnum rnum)
+{
+  trig_data *trig  = OLC_TRIG(d);
+  trig_data *proto = trig_index[rnum]->proto;
+  trig_data *live_trig;
+  struct cmdlist_element *cmd, *next_cmd;
+
+  for (cmd = proto->cmdlist; cmd; cmd = next_cmd) {
+    next_cmd = cmd->next;
+    if (cmd->cmd)
+      free(cmd->cmd);
+    free(cmd);
+  }
+
+  free(proto->arglist);
+  free(proto->name);
+
+  /* Recompile the command list from the new script */
+  trigedit_compile_script(trig, OLC_STORAGE(d));
+
+  /* make the prorotype look like what we have */
+  trig_data_copy(proto, trig);
+
+  /* go through the mud and replace existing triggers         */
+  live_trig = trigger_list;
+  while (live_trig) {
+    if (GET_TRIG_RNUM(live_trig) == rnum) {
+      if (live_trig->arglist) {
+        free(live_trig->arglist);
+        live_trig->arglist = NULL;
+      }
+      if (live_trig->name) {
+        free(live_trig->name);
+        live_trig->name = NULL;
+      }
+
+      if (proto->arglist)
+        live_trig->arglist = strdup(proto->arglist);
+      if (proto->name)
+        live_trig->name = strdup(proto->name);
+
+      /* anything could have happened so we don't want to keep these */
+      if (GET_TRIG_WAIT(live_trig)) {
+        event_cancel(GET_TRIG_WAIT(live_trig));
+        GET_TRIG_WAIT(live_trig) = NULL;
+      }
+      if (live_trig->var_list) {
+        free_varlist(live_trig->var_list);
+        live_trig->var_list = NULL;
+      }
+
+      live_trig->cmdlist      = proto->cmdlist;
+      live_trig->curr_state   = live_trig->cmdlist;
+      live_trig->trigger_type = proto->trigger_type;
+      live_trig->attach_type  = proto->attach_type;
+      live_trig->narg         = proto->narg;
+      live_trig->data_type    = proto->data_type;
+      live_trig->depth        = 0;
+    }
+
+    live_trig = live_trig->next_in_world;
+  }
+}
+
+/* Inserts the edited trigger into trig_index in vnum order, renumbering everything after it. */
+static void trigedit_insert_new(struct descriptor_data *d)
 {
   int i;
-  trig_rnum rnum;
-  int found = 0;
-  char *s;
+  trig_rnum rnum = NOTHING;
+  int found      = 0;
   trig_data *proto;
   trig_data *trig = OLC_TRIG(d);
   trig_data *live_trig;
-  struct cmdlist_element *cmd, *next_cmd;
   struct index_data **new_index;
   struct descriptor_data *dsc;
-  FILE *trig_file;
-  int zone, top;
-  char buf[MAX_CMD_LENGTH];
-  char bitBuf[MAX_INPUT_LENGTH];
-  char fname[MAX_INPUT_LENGTH];
 
-  if ((rnum = real_trigger(OLC_NUM(d))) != NOTHING) {
-    proto = trig_index[rnum]->proto;
-    for (cmd = proto->cmdlist; cmd; cmd = next_cmd) {
-      next_cmd = cmd->next;
-      if (cmd->cmd)
-        free(cmd->cmd);
-      free(cmd);
-    }
+  CREATE(new_index, struct index_data *, top_of_trigt + 2);
 
-    free(proto->arglist);
-    free(proto->name);
+  /* Recompile the command list from the new script */
+  trigedit_compile_script(trig, OLC_STORAGE(d));
 
-    /* Recompile the command list from the new script */
-    s = OLC_STORAGE(d);
-
-    CREATE(trig->cmdlist, struct cmdlist_element, 1);
-    if (s) {
-      char *t = strtok(s, "\n\r"); /* strtok returns NULL if s is "\r\n" */
-      if (t)
-        trig->cmdlist->cmd = strdup(t);
-      else
-        trig->cmdlist->cmd = strdup("* No script");
-
-      cmd = trig->cmdlist;
-      while ((s = strtok(NULL, "\n\r"))) {
-        CREATE(cmd->next, struct cmdlist_element, 1);
-        cmd      = cmd->next;
-        cmd->cmd = strdup(s);
-      }
-    } else
-      trig->cmdlist->cmd = strdup("* No Script");
-
-    /* make the prorotype look like what we have */
-    trig_data_copy(proto, trig);
-
-    /* go through the mud and replace existing triggers         */
-    live_trig = trigger_list;
-    while (live_trig) {
-      if (GET_TRIG_RNUM(live_trig) == rnum) {
-        if (live_trig->arglist) {
-          free(live_trig->arglist);
-          live_trig->arglist = NULL;
-        }
-        if (live_trig->name) {
-          free(live_trig->name);
-          live_trig->name = NULL;
-        }
-
-        if (proto->arglist)
-          live_trig->arglist = strdup(proto->arglist);
-        if (proto->name)
-          live_trig->name = strdup(proto->name);
-
-        /* anything could have happened so we don't want to keep these */
-        if (GET_TRIG_WAIT(live_trig)) {
-          event_cancel(GET_TRIG_WAIT(live_trig));
-          GET_TRIG_WAIT(live_trig) = NULL;
-        }
-        if (live_trig->var_list) {
-          free_varlist(live_trig->var_list);
-          live_trig->var_list = NULL;
-        }
-
-        live_trig->cmdlist      = proto->cmdlist;
-        live_trig->curr_state   = live_trig->cmdlist;
-        live_trig->trigger_type = proto->trigger_type;
-        live_trig->attach_type  = proto->attach_type;
-        live_trig->narg         = proto->narg;
-        live_trig->data_type    = proto->data_type;
-        live_trig->depth        = 0;
-      }
-
-      live_trig = live_trig->next_in_world;
-    }
-  } else {
-    /* this is a new trigger */
-    CREATE(new_index, struct index_data *, top_of_trigt + 2);
-
-    /* Recompile the command list from the new script */
-
-    s = OLC_STORAGE(d);
-
-    CREATE(trig->cmdlist, struct cmdlist_element, 1);
-    if (s) {
-      /* strtok returns NULL if s is "\r\n" */
-      char *t            = strtok(s, "\n\r");
-      trig->cmdlist->cmd = strdup(t ? t : "* No script");
-      cmd                = trig->cmdlist;
-
-      while ((s = strtok(NULL, "\n\r"))) {
-        CREATE(cmd->next, struct cmdlist_element, 1);
-        cmd      = cmd->next;
-        cmd->cmd = strdup(s);
-      }
-    } else
-      trig->cmdlist->cmd = strdup("* No Script");
-
-    for (i = 0; i < top_of_trigt; i++) {
-      if (!found) {
-        if (trig_index[i]->vnum > OLC_NUM(d)) {
-          found = TRUE;
-          rnum  = i;
-
-          CREATE(new_index[rnum], struct index_data, 1);
-          GET_TRIG_RNUM(OLC_TRIG(d)) = rnum;
-          new_index[rnum]->vnum      = OLC_NUM(d);
-          new_index[rnum]->number    = 0;
-          new_index[rnum]->func      = NULL;
-          CREATE(proto, struct trig_data, 1);
-          new_index[rnum]->proto = proto;
-          trig_data_copy(proto, trig);
-
-          new_index[rnum + 1] = trig_index[rnum];
-
-          proto     = trig_index[rnum]->proto;
-          proto->nr = rnum + 1;
-        } else {
-          new_index[i] = trig_index[i];
-        }
-      } else {
-        new_index[i + 1] = trig_index[i];
-        proto            = trig_index[i]->proto;
-        proto->nr        = i + 1;
-      }
-    }
-
+  for (i = 0; i < top_of_trigt; i++) {
     if (!found) {
-      rnum = i;
-      CREATE(new_index[rnum], struct index_data, 1);
-      GET_TRIG_RNUM(OLC_TRIG(d)) = rnum;
-      new_index[rnum]->vnum      = OLC_NUM(d);
-      new_index[rnum]->number    = 0;
-      new_index[rnum]->func      = NULL;
+      if (trig_index[i]->vnum > OLC_NUM(d)) {
+        found = TRUE;
+        rnum  = i;
 
-      CREATE(proto, struct trig_data, 1);
-      new_index[rnum]->proto = proto;
-      trig_data_copy(proto, trig);
+        CREATE(new_index[rnum], struct index_data, 1);
+        GET_TRIG_RNUM(OLC_TRIG(d)) = rnum;
+        new_index[rnum]->vnum      = OLC_NUM(d);
+        new_index[rnum]->number    = 0;
+        new_index[rnum]->func      = NULL;
+        CREATE(proto, struct trig_data, 1);
+        new_index[rnum]->proto = proto;
+        trig_data_copy(proto, trig);
+
+        new_index[rnum + 1] = trig_index[rnum];
+
+        proto     = trig_index[rnum]->proto;
+        proto->nr = rnum + 1;
+      } else {
+        new_index[i] = trig_index[i];
+      }
+    } else {
+      new_index[i + 1] = trig_index[i];
+      proto            = trig_index[i]->proto;
+      proto->nr        = i + 1;
     }
-
-    free(trig_index);
-
-    trig_index = new_index;
-    top_of_trigt++;
-
-    /* HERE IT HAS TO GO THROUGH AND FIX ALL SCRIPTS/TRIGS OF HIGHER RNUM */
-    for (live_trig = trigger_list; live_trig; live_trig = live_trig->next_in_world)
-      GET_TRIG_RNUM(live_trig) += (GET_TRIG_RNUM(live_trig) != NOTHING && GET_TRIG_RNUM(live_trig) > rnum);
-
-    /*
-     * Update other trigs being edited.
-     */
-    for (dsc = descriptor_list; dsc; dsc = dsc->next)
-      if (desc_get_connected(dsc) == CON_TRIGEDIT)
-        if (GET_TRIG_RNUM(OLC_TRIG(dsc)) >= rnum)
-          GET_TRIG_RNUM(OLC_TRIG(dsc))
-    ++;
   }
 
-  /* now write the trigger out to disk, along with the rest of the  */
-  /* triggers for this zone, of course                              */
-  /* note: we write this to disk NOW instead of letting the builder */
-  /* have control because if we lose this after having assigned a   */
-  /* new trigger to an item, we will get SYSERR's upton reboot that */
-  /* could make things hard to debug.                               */
+  if (!found) {
+    rnum = i;
+    CREATE(new_index[rnum], struct index_data, 1);
+    GET_TRIG_RNUM(OLC_TRIG(d)) = rnum;
+    new_index[rnum]->vnum      = OLC_NUM(d);
+    new_index[rnum]->number    = 0;
+    new_index[rnum]->func      = NULL;
+
+    CREATE(proto, struct trig_data, 1);
+    new_index[rnum]->proto = proto;
+    trig_data_copy(proto, trig);
+  }
+
+  free(trig_index);
+
+  trig_index = new_index;
+  top_of_trigt++;
+
+  /* HERE IT HAS TO GO THROUGH AND FIX ALL SCRIPTS/TRIGS OF HIGHER RNUM */
+  for (live_trig = trigger_list; live_trig; live_trig = live_trig->next_in_world)
+    GET_TRIG_RNUM(live_trig) += (GET_TRIG_RNUM(live_trig) != NOTHING && GET_TRIG_RNUM(live_trig) > rnum);
+
+  /*
+   * Update other trigs being edited.
+   */
+  for (dsc = descriptor_list; dsc; dsc = dsc->next)
+    if (desc_get_connected(dsc) == CON_TRIGEDIT)
+      if (GET_TRIG_RNUM(OLC_TRIG(dsc)) >= rnum)
+        GET_TRIG_RNUM(OLC_TRIG(dsc)) += 1;
+}
+
+/*
+ * Writes every trigger of the editor's zone to <zone>.trg.
+ * note: we write this to disk NOW instead of letting the builder
+ * have control because if we lose this after having assigned a
+ * new trigger to an item, we will get SYSERR's upton reboot that
+ * could make things hard to debug.
+ */
+static void trigedit_write_zone_file(struct descriptor_data *d)
+{
+  int i;
+  trig_rnum rnum;
+  trig_data *trig;
+  struct cmdlist_element *cmd;
+  FILE *trig_file;
+  int zone, top;
+  char bitBuf[MAX_INPUT_LENGTH];
+  char fname[MAX_INPUT_LENGTH], final_name[MAX_INPUT_LENGTH];
 
   zone = zone_table[OLC_ZNUM(d)].number;
   top  = zone_table[OLC_ZNUM(d)].top;
@@ -625,31 +621,40 @@ static void trigedit_save(struct descriptor_data *d)
               *bitBuf ? bitBuf : "0", GET_TRIG_NARG(trig),
               GET_TRIG_ARG(trig) ? GET_TRIG_ARG(trig) : "", STRING_TERMINATOR);
 
-      /* Build the text for the script */
-      strcpy(buf, ""); /* strcpy OK for MAX_CMD_LENGTH > 0*/
-      for (cmd = trig->cmdlist; cmd; cmd = cmd->next) {
-        strcat(buf, cmd->cmd);
-        strcat(buf, "\n");
-      }
+      /* The script, one line per command. Written directly: scripts can exceed any fixed buffer. */
+      if (!trig->cmdlist)
+        fputs("* Empty script", trig_file);
+      for (cmd = trig->cmdlist; cmd; cmd = cmd->next)
+        fprintf(trig_file, "%s\n", cmd->cmd);
 
-      if (!buf[0])
-        strcpy(buf, "* Empty script");
-
-      fprintf(trig_file, "%s%c\n", buf, STRING_TERMINATOR);
-      *buf = '\0';
+      fprintf(trig_file, "%c\n", STRING_TERMINATOR);
     }
   }
 
   fprintf(trig_file, "$%c\n", STRING_TERMINATOR);
   fclose(trig_file);
 
-  snprintf(buf, sizeof(buf), "%s%d.trg", TRG_PREFIX, zone);
+  snprintf(final_name, sizeof(final_name), "%s%d.trg", TRG_PREFIX, zone);
 
-  remove(buf);
-  rename(fname, buf);
+  remove(final_name);
+  rename(fname, final_name);
 
   write_to_output(d, "Trigger saved to disk.\r\n");
   create_world_index(zone, "trg");
+}
+
+/* save the zone's triggers to internal memory and to disk */
+static void trigedit_save(struct descriptor_data *d)
+{
+  trig_rnum rnum;
+
+  if ((rnum = real_trigger(OLC_NUM(d))) != NOTHING)
+    trigedit_replace_existing(d, rnum);
+  else
+    trigedit_insert_new(d);
+
+  dg_lint_trigger(trig_index[real_trigger(OLC_NUM(d))]->proto, d);
+  trigedit_write_zone_file(d);
 }
 
 void dg_olc_script_copy(struct descriptor_data *d)
@@ -838,24 +843,6 @@ void trigedit_string_cleanup(struct descriptor_data *d, int terminator)
       break;
   }
 }
-
-#if 0 /* change to 1 if you get messages telling you you don't have strncasecmp() */
-int strncasecmp (const char *s1, const char *s2, int n)
-{
-	unsigned char c1, c2;
-	while(*s1 && *s2 && n--) {
-		c1 = ((*s1 >= 'A') && (*s1 <= 'Z')) ? (*s1++) + ('a' - 'A') : (*s1++);
-		c2 = ((*s2 >= 'A') && (*s2 <= 'Z')) ? (*s2++) + ('a' - 'A') : (*s2++);
-		if (c1 != c2)
-			return (c1 > c2) ? 1 : -1;
-	}
-	if (*s1 && !*s2)
-		return 1;
-	if (!*s1 && *s2)
-		return -1;
-	return 0;
-}
-#endif
 
 int format_script(struct descriptor_data *d)
 {

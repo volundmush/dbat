@@ -18,7 +18,7 @@
 #include "dbat/objsave.h"
 #include "dbat/fileop.h"
 #include "dbat/ban.h"
-#include "dbat/dg_comm.h"
+#include "dbat/broadcast.h"
 #include "dbat/act.wizard.h"
 #include "dbat/mail.h"
 #include "dbat/alias.h"
