@@ -4800,6 +4800,10 @@ static int check_object_level(struct obj_data *obj, int val)
 
 static int obj_save_fprintf(FILE *fp, struct obj_data *obj, const char *context,
                             const char *file, int line, const char *format, ...)
+    __attribute__((format(printf, 6, 7)));
+
+static int obj_save_fprintf(FILE *fp, struct obj_data *obj, const char *context,
+                            const char *file, int line, const char *format, ...)
 {
   va_list args;
   int result;

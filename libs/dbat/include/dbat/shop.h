@@ -10,6 +10,21 @@ struct shop_buy_data {
 
 #define SW_ARRAY_MAX 4
 
+/* The shop messages, in shop file order. */
+enum shop_message {
+  SHOP_MSG_NOITEM1,
+  SHOP_MSG_NOITEM2,
+  SHOP_MSG_NOBUY,
+  SHOP_MSG_NOCASH1,
+  SHOP_MSG_NOCASH2,
+  SHOP_MSG_BUY,
+  SHOP_MSG_SELL,
+  NUM_SHOP_MSGS
+};
+
+/* Default text for each shop message: used for new shops and in place of a missing or malformed message. */
+extern const char *const shop_default_msgs[NUM_SHOP_MSGS];
+
 struct shop_data {
   room_vnum vnum;                     /* Virtual number of this shop		*/
   obj_vnum *producing;                /* Which item to produce (virtual)	*/

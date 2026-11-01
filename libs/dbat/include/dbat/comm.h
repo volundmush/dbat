@@ -21,7 +21,6 @@
 
 /* comm.c */
 int arena_watch(struct char_data *ch);
-size_t send_to_char(struct char_data *ch, const char *messg, ...) __attribute__((format(printf, 2, 3)));
 void send_to_all(const char *messg, ...) __attribute__((format(printf, 1, 2)));
 void send_to_room(room_rnum room, const char *messg, ...) __attribute__((format(printf, 2, 3)));
 void send_to_outdoor(const char *messg, ...) __attribute__((format(printf, 1, 2)));
@@ -46,7 +45,7 @@ void close_socket(struct descriptor_data *d);
 void write_to_q(const char *txt, struct txt_q *queue, int aliased);
 int write_to_descriptor(int desc, const char *txt);
 size_t write_to_output(struct descriptor_data *d, const char *txt, ...) __attribute__((format(printf, 2, 3)));
-size_t vwrite_to_output(struct descriptor_data *d, const char *format, va_list args);
+size_t vwrite_to_output(struct descriptor_data *d, const char *format, va_list args) __attribute__((format(printf, 2, 0)));
 void string_add(struct descriptor_data *d, char *str);
 void string_write(struct descriptor_data *d, char **txt, size_t len, long mailto, void *data);
 

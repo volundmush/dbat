@@ -18,7 +18,7 @@ void log_backtrace(void);
   (((major) << 16) + ((minor) << 8) + (patchlevel))
 
 void log_death_trap(struct char_data *ch);
-void mud_vlog(const char *format, va_list args);
+void mud_vlog(const char *format, va_list args) __attribute__((format(printf, 1, 0)));
 void mud_log(const char *format, ...) __attribute__((format(printf, 1, 2)));
 void mudlog(int type, int level, int file, const char *str, ...) __attribute__((format(printf, 4, 5)));
 

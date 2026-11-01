@@ -8,6 +8,10 @@
 
 int genolc_checkstring(struct descriptor_data *d, char *arg);
 
+/* Shop and guild messages are builder text used as a printf format: one %s for the customer's name, plus one %d
+ * for the price when allow_int is set (shop buy/sell). Returns NULL if msg is safe to use that way, else why not. */
+const char *npc_msg_format_problem(const char *msg, bool allow_int);
+
 int remove_from_save_list(zone_vnum, int type);
 int add_to_save_list(zone_vnum, int type);
 int in_save_list(zone_vnum, int type);

@@ -486,7 +486,7 @@ void send_to_worlds(struct char_data *ch)
   }
 }
 
-void send_to_imm(char *messg, ...)
+void send_to_imm(const char *messg, ...)
 {
   struct descriptor_data *i;
 

@@ -22,7 +22,7 @@
 #define WCMD(name) \
   void(name)(room_data * room, char *argument, int cmd, int subcmd)
 
-void wld_log(room_data *room, const char *format, ...);
+static void wld_log(room_data *room, const char *format, ...) __attribute__((format(printf, 2, 3)));
 void act_to_room(char *str, room_data *room);
 WCMD(do_wasound);
 WCMD(do_wecho);
@@ -50,7 +50,7 @@ struct wld_command_info {
 #define SCMD_WECHOAROUND 1
 
 /* attaches room vnum to msg and sends it to script_log */
-void wld_log(room_data *room, const char *format, ...)
+static void wld_log(room_data *room, const char *format, ...)
 {
   va_list args;
   char output[MAX_STRING_LENGTH];

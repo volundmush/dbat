@@ -343,9 +343,10 @@ shop_rnum real_shop(shop_vnum vnum)
 /*-------------------------------------------------------------------*/
 
 /*
- * Generic string modifier for shop keeper messages.
+ * Generic string modifier for shop keeper messages. Returns NULL once stored, or why the message can't be used (the
+ * old one is then kept).
  */
-void modify_string(char **str, char *new_s)
+const char *modify_string(char **str, char *new_s, bool allow_int)
 {
 
   char buf[MAX_STRING_LENGTH];
@@ -360,9 +361,14 @@ void modify_string(char **str, char *new_s)
   } else
     pointer = new_s;
 
+  const char *problem = npc_msg_format_problem(pointer, allow_int);
+  if (problem)
+    return problem;
+
   if (*str)
     free(*str);
   *str = strdup(pointer);
+  return NULL;
 }
 
 /*-------------------------------------------------------------------*/

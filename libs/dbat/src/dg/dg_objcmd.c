@@ -33,7 +33,7 @@
 #define OCMD(name) \
   void(name)(obj_data * obj, char *argument, int cmd, int subcmd)
 
-void obj_log(obj_data *obj, const char *format, ...);
+static void obj_log(obj_data *obj, const char *format, ...) __attribute__((format(printf, 2, 3)));
 room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr);
 OCMD(do_oecho);
 OCMD(do_oforce);
@@ -65,7 +65,7 @@ struct obj_command_info {
 #define SCMD_OECHOAROUND 1
 
 /* attaches object name and vnum to msg and sends it to script_log */
-void obj_log(obj_data *obj, const char *format, ...)
+static void obj_log(obj_data *obj, const char *format, ...)
 {
   va_list args;
   char output[MAX_STRING_LENGTH];

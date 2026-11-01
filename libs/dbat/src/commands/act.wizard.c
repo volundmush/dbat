@@ -2411,6 +2411,8 @@ static bool copyover_exe_path(char *out, size_t size)
   return true;
 }
 
+static void game_info(const char *format, ...) __attribute__((format(printf, 1, 2)));
+
 static void game_info(const char *format, ...)
 {
   struct descriptor_data *i;

@@ -48,7 +48,7 @@
 #include "other_internal.h"
 
 // definitions
-void log_imm_action(char *messg, ...)
+void log_imm_action(const char *messg, ...)
 {
 
   FILE *fl;

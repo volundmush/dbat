@@ -45,6 +45,37 @@ int genolc_checkstring(struct descriptor_data *d, char *arg)
   return TRUE;
 }
 
+const char *npc_msg_format_problem(const char *msg, bool allow_int)
+{
+  static char why[64];
+  int ss = 0, ds = 0;
+
+  for (const char *p = msg; *p; p++) {
+    if (*p != '%')
+      continue;
+
+    p++;
+    if (*p == 's')
+      ss++;
+    else if (*p == 'd' && allow_int) {
+      if (ss == 0)
+        return "%d before %s";
+      ds++;
+    } else if (*p == '\0')
+      return "a '%' at the very end";
+    else if (*p != '%') {
+      snprintf(why, sizeof(why), "invalid format '%%%c'", *p);
+      return why;
+    }
+  }
+
+  if (ss > 1)
+    return "more than one %s";
+  if (ds > 1)
+    return "more than one %d";
+  return NULL;
+}
+
 char *str_udup(const char *txt)
 {
   return strdup((txt && *txt) ? txt : "undefined");

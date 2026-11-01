@@ -198,8 +198,8 @@ void gedit_setup_new(struct descriptor_data *d)
   G_MINLVL(guilddata) = 0;
 
   /*. Some default strings . */
-  G_NO_SKILL(guilddata) = strdup("%s Sorry, but I don't know that one.");
-  G_NO_GOLD(guilddata)  = strdup("%s Sorry, but I'm gonna need more zenni first.");
+  G_NO_SKILL(guilddata) = strdup(guild_default_no_skill);
+  G_NO_GOLD(guilddata)  = strdup(guild_default_no_gold);
 
   /* init the wasteful skills and spells table */
 
@@ -455,6 +455,18 @@ void gedit_disp_menu(struct descriptor_data *d)
   The GARGANTUAN event handler
 **************************************************************************/
 
+/* Stores a builder-written guild message, or tells the builder why it can't be used. */
+static void gedit_set_message(struct descriptor_data *d, char **msg, char *arg)
+{
+  const char *problem = gedit_modify_string(msg, arg);
+
+  if (problem)
+    write_to_output(d,
+                    "Invalid message: %s. It starts with %%s, the customer's name (added if you leave it off), "
+                    "and can have no other %% codes.\r\n",
+                    problem);
+}
+
 void gedit_parse(struct descriptor_data *d, char *arg)
 {
   int i;
@@ -574,10 +586,10 @@ void gedit_parse(struct descriptor_data *d, char *arg)
       /*-------------------------------------------------------------------*/
       /*. String edits . */
     case GEDIT_NO_SKILL:
-      gedit_modify_string(&G_NO_SKILL(OLC_GUILD(d)), arg);
+      gedit_set_message(d, &G_NO_SKILL(OLC_GUILD(d)), arg);
       break;
     case GEDIT_NO_CASH:
-      gedit_modify_string(&G_NO_GOLD(OLC_GUILD(d)), arg);
+      gedit_set_message(d, &G_NO_GOLD(OLC_GUILD(d)), arg);
       break;
 
       /*-------------------------------------------------------------------*/

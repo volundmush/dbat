@@ -6,6 +6,10 @@
 
 #define GW_ARRAY_MAX 4
 
+/* Default guild messages: used for new guilds and in place of a missing or malformed message. */
+extern const char *const guild_default_no_skill;
+extern const char *const guild_default_no_gold;
+
 struct guild_data {
   room_vnum vnum;                     /* number of the guild */
   int skills[SKILL_TABLE_SIZE];       /* array to keep track of which feats things we'll train */

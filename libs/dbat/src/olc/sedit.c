@@ -192,13 +192,13 @@ void sedit_setup_new(struct descriptor_data *d)
   /*
    * Add a spice of default strings.
    */
-  S_NOITEM1(shop) = strdup("%s Sorry, I don't stock that item.");
-  S_NOITEM2(shop) = strdup("%s You don't seem to have that.");
-  S_NOCASH1(shop) = strdup("%s I can't afford that!");
-  S_NOCASH2(shop) = strdup("%s You are too poor!");
-  S_NOBUY(shop)   = strdup("%s I don't trade in such items.");
-  S_BUY(shop)     = strdup("%s That'll be %d zenni, thanks.");
-  S_SELL(shop)    = strdup("%s I'll give you %d zenni for that.");
+  S_NOITEM1(shop) = strdup(shop_default_msgs[SHOP_MSG_NOITEM1]);
+  S_NOITEM2(shop) = strdup(shop_default_msgs[SHOP_MSG_NOITEM2]);
+  S_NOCASH1(shop) = strdup(shop_default_msgs[SHOP_MSG_NOCASH1]);
+  S_NOCASH2(shop) = strdup(shop_default_msgs[SHOP_MSG_NOCASH2]);
+  S_NOBUY(shop)   = strdup(shop_default_msgs[SHOP_MSG_NOBUY]);
+  S_BUY(shop)     = strdup(shop_default_msgs[SHOP_MSG_BUY]);
+  S_SELL(shop)    = strdup(shop_default_msgs[SHOP_MSG_SELL]);
   /*
    * Stir the lists lightly.
    */
@@ -451,6 +451,18 @@ void sedit_disp_menu(struct descriptor_data *d)
   The GARGANTUAN event handler
  **************************************************************************/
 
+/* Stores a builder-written shop message, or tells the builder why it can't be used. */
+static void sedit_set_message(struct descriptor_data *d, char **msg, char *arg, bool allow_int)
+{
+  const char *problem = modify_string(msg, arg, allow_int);
+
+  if (problem)
+    write_to_output(d,
+                    "Invalid message: %s. It starts with %%s, the customer's name (added if you leave it off)%s, "
+                    "and can have no other %% codes.\r\n",
+                    problem, allow_int ? ", may then use one %d for the price" : "");
+}
+
 void sedit_parse(struct descriptor_data *d, char *arg)
 {
   int i;
@@ -665,31 +677,31 @@ void sedit_parse(struct descriptor_data *d, char *arg)
      */
     case SEDIT_NOITEM1:
       if (genolc_checkstring(d, arg))
-        modify_string(&S_NOITEM1(OLC_SHOP(d)), arg);
+        sedit_set_message(d, &S_NOITEM1(OLC_SHOP(d)), arg, false);
       break;
     case SEDIT_NOITEM2:
       if (genolc_checkstring(d, arg))
-        modify_string(&S_NOITEM2(OLC_SHOP(d)), arg);
+        sedit_set_message(d, &S_NOITEM2(OLC_SHOP(d)), arg, false);
       break;
     case SEDIT_NOCASH1:
       if (genolc_checkstring(d, arg))
-        modify_string(&S_NOCASH1(OLC_SHOP(d)), arg);
+        sedit_set_message(d, &S_NOCASH1(OLC_SHOP(d)), arg, false);
       break;
     case SEDIT_NOCASH2:
       if (genolc_checkstring(d, arg))
-        modify_string(&S_NOCASH2(OLC_SHOP(d)), arg);
+        sedit_set_message(d, &S_NOCASH2(OLC_SHOP(d)), arg, false);
       break;
     case SEDIT_NOBUY:
       if (genolc_checkstring(d, arg))
-        modify_string(&S_NOBUY(OLC_SHOP(d)), arg);
+        sedit_set_message(d, &S_NOBUY(OLC_SHOP(d)), arg, false);
       break;
     case SEDIT_BUY:
       if (genolc_checkstring(d, arg))
-        modify_string(&S_BUY(OLC_SHOP(d)), arg);
+        sedit_set_message(d, &S_BUY(OLC_SHOP(d)), arg, true);
       break;
     case SEDIT_SELL:
       if (genolc_checkstring(d, arg))
-        modify_string(&S_SELL(OLC_SHOP(d)), arg);
+        sedit_set_message(d, &S_SELL(OLC_SHOP(d)), arg, true);
       break;
     case SEDIT_NAMELIST:
       if (genolc_checkstring(d, arg)) {

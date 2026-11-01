@@ -9,7 +9,6 @@ void add_to_int_list(IDXTYPE **tlist, IDXTYPE newi);
 void free_guild_string(struct guild_data *guild);
 void free_guild(struct guild_data *guild);
 void free_guild_strings(struct guild_data *guild);
-void modify_string(char **str, char *newstr);
 int add_guild(struct guild_data *guild);
 int save_guilds(zone_rnum zone_num);
 guild_rnum real_guild(guild_vnum vnum);
@@ -43,4 +42,4 @@ guild_rnum real_guild(guild_vnum vnum);
 #define MAX_PER_PRAC  1 /* max percent gain in skill per practice */
 #define MIN_PER_PRAC  2 /* min percent gain in skill per practice */
 #define PRAC_TYPE     3 /* should it say 'spell' or 'skill'?	 */
-void gedit_modify_string(char **str, char *new_g);
+const char *gedit_modify_string(char **str, char *new_g);

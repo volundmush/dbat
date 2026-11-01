@@ -58,7 +58,7 @@
 /*
  * Local functions.
  */
-void mob_log(char_data *mob, const char *format, ...);
+static void mob_log(char_data *mob, const char *format, ...) __attribute__((format(printf, 2, 3)));
 
 ACMD(do_masound);
 ACMD(do_mkill);
@@ -83,7 +83,7 @@ ACMD(do_mfollow);
 ACMD(do_mrecho);
 
 /* attaches mob's name and vnum to msg and sends it to script_log */
-void mob_log(char_data *mob, const char *format, ...)
+static void mob_log(char_data *mob, const char *format, ...)
 {
   va_list args;
   char output[MAX_STRING_LENGTH];

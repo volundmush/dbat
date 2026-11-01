@@ -13,7 +13,7 @@ void free_shop_string(struct shop_data *shop);
 void free_type_list(struct shop_buy_data **list);
 void free_shop(struct shop_data *shop);
 void free_shop_strings(struct shop_data *shop);
-void modify_string(char **str, char *newstr);
+const char *modify_string(char **str, char *newstr, bool allow_int);
 int add_shop(struct shop_data *shop);
 int save_shops(zone_rnum zone_num);
 shop_rnum real_shop(shop_vnum vnum);

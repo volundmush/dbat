@@ -16,12 +16,16 @@
 #include "dbat/db.h"
 #include "dbat/interpreter.h"
 #include "dbat/gengld.h"
+#include "dbat/genolc.h"
 #include "dbat/local_limits.h"
 #include "dbat/feats.h"
 #include "dbat/act.comm.h"
 #include "dbat/handler.h"
 #include "dbat/shop.h"
 #include "dbat/class.h"
+
+const char *const guild_default_no_skill = "%s Sorry, but I don't know that one.";
+const char *const guild_default_no_gold  = "%s Sorry, but I'm gonna need more zenni first.";
 
 /* Local variables */
 int spell_sort_info[SKILL_TABLE_SIZE];
@@ -1187,6 +1191,23 @@ static void read_guild_line(FILE *gm_f, char *string, void *data, char *type)
   }
 }
 
+/* An empty or malformed message would reach snprintf() as a NULL or unsafe format, so use the default. */
+static char *read_guild_message(FILE *gm_f, const char *why, const char *field, const char *fallback)
+{
+  const char *problem;
+  char *msg;
+
+  if (!(msg = fread_string(gm_f, why)))
+    return strdup(fallback);
+
+  if ((problem = npc_msg_format_problem(msg, false))) {
+    mud_log("SYSERR: Guild #%d %s: %s; using the default.", GM_NUM(top_guild), field, problem);
+    free(msg);
+    return strdup(fallback);
+  }
+  return msg;
+}
+
 void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
 {
   char *buf, buf2[256], *p, buf3[READ_SIZE];
@@ -1229,8 +1250,8 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
         rv = sscanf(buf3, "%d %d", &t1, &t2);
       }
       read_guild_line(gm_f, "%f", &GM_CHARGE(top_guild), "GM_CHARGE");
-      guild_index[top_guild].no_such_skill   = fread_string(gm_f, buf2);
-      guild_index[top_guild].not_enough_gold = fread_string(gm_f, buf2);
+      guild_index[top_guild].no_such_skill   = read_guild_message(gm_f, buf2, "no_such_skill", guild_default_no_skill);
+      guild_index[top_guild].not_enough_gold = read_guild_message(gm_f, buf2, "not_enough_gold", guild_default_no_gold);
 
       read_guild_line(gm_f, "%d", &GM_MINLVL(top_guild), "GM_MINLVL");
       read_guild_line(gm_f, "%d", &GM_TRAINER(top_guild), "GM_TRAINER");

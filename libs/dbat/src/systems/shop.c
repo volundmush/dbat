@@ -26,6 +26,17 @@
 #include "dbat/act.other.h"
 #include "dbat/class.h"
 #include "dbat/fileop.h"
+#include "dbat/genolc.h"
+
+const char *const shop_default_msgs[NUM_SHOP_MSGS] = {
+    [SHOP_MSG_NOITEM1] = "%s Sorry, I don't stock that item.",
+    [SHOP_MSG_NOITEM2] = "%s You don't seem to have that.",
+    [SHOP_MSG_NOBUY]   = "%s I don't trade in such items.",
+    [SHOP_MSG_NOCASH1] = "%s I can't afford that!",
+    [SHOP_MSG_NOCASH2] = "%s You are too poor!",
+    [SHOP_MSG_BUY]     = "%s That'll be %d zenni, thanks.",
+    [SHOP_MSG_SELL]    = "%s I'll give you %d zenni for that.",
+};
 
 /* Forward/External function declarations */
 static void sort_keeper_objs(struct char_data *keeper, int shop_nr);
@@ -34,7 +45,7 @@ static void sort_keeper_objs(struct char_data *keeper, int shop_nr);
 int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 
 /* local functions */
-static char *read_shop_message(int mnum, room_vnum shr, FILE *shop_f, const char *why);
+static char *read_shop_message(enum shop_message mnum, room_vnum shr, FILE *shop_f, const char *why);
 static int read_type_list(FILE *shop_f, struct shop_buy_data *list, int new_format, int max);
 static int read_list(FILE *shop_f, struct shop_buy_data *list, int new_format, int max, int type);
 static void shopping_list(char *arg, struct char_data *ch, struct char_data *keeper, int shop_nr);
@@ -1406,40 +1417,19 @@ static int read_type_list(FILE *shop_f, struct shop_buy_data *list,
   return (end_read_list(list, len, error));
 }
 
-static char *read_shop_message(int mnum, room_vnum shr, FILE *shop_f, const char *why)
+static char *read_shop_message(enum shop_message mnum, room_vnum shr, FILE *shop_f, const char *why)
 {
-  int cht, ss = 0, ds = 0, err = 0;
+  const char *problem;
   char *tbuf;
 
+  /* An empty or malformed message would reach snprintf() as a NULL or unsafe format, so use the default. */
   if (!(tbuf = fread_string(shop_f, why)))
-    return (NULL);
+    return strdup(shop_default_msgs[mnum]);
 
-  for (cht = 0; tbuf[cht]; cht++) {
-    if (tbuf[cht] != '%')
-      continue;
-
-    if (tbuf[cht + 1] == 's')
-      ss++;
-    else if (tbuf[cht + 1] == 'd' && (mnum == 5 || mnum == 6)) {
-      if (ss == 0) {
-        mud_log("SYSERR: Shop #%d has %%d before %%s, message #%d.", shr, mnum);
-        err++;
-      }
-      ds++;
-    } else if (tbuf[cht + 1] != '%') {
-      mud_log("SYSERR: Shop #%d has invalid format '%%%c' in message #%d.", shr, tbuf[cht + 1], mnum);
-      err++;
-    }
-  }
-
-  if (ss > 1 || ds > 1) {
-    mud_log("SYSERR: Shop #%d has too many specifiers for message #%d. %%s=%d %%d=%d", shr, mnum, ss, ds);
-    err++;
-  }
-
-  if (err) {
+  if ((problem = npc_msg_format_problem(tbuf, mnum == SHOP_MSG_BUY || mnum == SHOP_MSG_SELL))) {
+    mud_log("SYSERR: Shop #%d message #%d: %s; using the default.", shr, mnum, problem);
     free(tbuf);
-    return (NULL);
+    return strdup(shop_default_msgs[mnum]);
   }
   return (tbuf);
 }
@@ -1478,13 +1468,13 @@ void boot_the_shops(FILE *shop_f, char *filename, int rec_count)
         SHOP_BUYWORD(top_shop, count) = BUY_WORD(list[count]);
       }
 
-      shop_index[top_shop].no_such_item1 = read_shop_message(0, SHOP_NUM(top_shop), shop_f, buf2);
-      shop_index[top_shop].no_such_item2 = read_shop_message(1, SHOP_NUM(top_shop), shop_f, buf2);
-      shop_index[top_shop].do_not_buy    = read_shop_message(2, SHOP_NUM(top_shop), shop_f, buf2);
-      shop_index[top_shop].missing_cash1 = read_shop_message(3, SHOP_NUM(top_shop), shop_f, buf2);
-      shop_index[top_shop].missing_cash2 = read_shop_message(4, SHOP_NUM(top_shop), shop_f, buf2);
-      shop_index[top_shop].message_buy   = read_shop_message(5, SHOP_NUM(top_shop), shop_f, buf2);
-      shop_index[top_shop].message_sell  = read_shop_message(6, SHOP_NUM(top_shop), shop_f, buf2);
+      shop_index[top_shop].no_such_item1 = read_shop_message(SHOP_MSG_NOITEM1, SHOP_NUM(top_shop), shop_f, buf2);
+      shop_index[top_shop].no_such_item2 = read_shop_message(SHOP_MSG_NOITEM2, SHOP_NUM(top_shop), shop_f, buf2);
+      shop_index[top_shop].do_not_buy    = read_shop_message(SHOP_MSG_NOBUY, SHOP_NUM(top_shop), shop_f, buf2);
+      shop_index[top_shop].missing_cash1 = read_shop_message(SHOP_MSG_NOCASH1, SHOP_NUM(top_shop), shop_f, buf2);
+      shop_index[top_shop].missing_cash2 = read_shop_message(SHOP_MSG_NOCASH2, SHOP_NUM(top_shop), shop_f, buf2);
+      shop_index[top_shop].message_buy   = read_shop_message(SHOP_MSG_BUY, SHOP_NUM(top_shop), shop_f, buf2);
+      shop_index[top_shop].message_sell  = read_shop_message(SHOP_MSG_SELL, SHOP_NUM(top_shop), shop_f, buf2);
       read_line(shop_f, "%d", &SHOP_BROKE_TEMPER(top_shop));
       read_line(shop_f, "%ld", &SHOP_BITVECTOR(top_shop));
       read_line(shop_f, "%hd", &SHOP_KEEPER(top_shop));

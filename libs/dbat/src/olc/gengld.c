@@ -107,9 +107,9 @@ guild_rnum real_guild(guild_vnum vnum)
 
 /*-------------------------------------------------------------------*/
 
-/*. Generic string modifyer for guild master messages . */
-
-void gedit_modify_string(char **str, char *new_g)
+/* Generic string modifier for guild master messages. Returns NULL once stored, or why the message can't be used (the
+ * old one is then kept). */
+const char *gedit_modify_string(char **str, char *new_g)
 {
   char *pointer;
   char buf[MAX_STRING_LENGTH];
@@ -121,9 +121,14 @@ void gedit_modify_string(char **str, char *new_g)
   } else
     pointer = new_g;
 
+  const char *problem = npc_msg_format_problem(pointer, false);
+  if (problem)
+    return problem;
+
   if (*str)
     free(*str);
   *str = strdup(pointer);
+  return NULL;
 }
 
 /*-------------------------------------------------------------------*/
