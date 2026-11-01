@@ -1457,7 +1457,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
 
     /* Does the argument match an extra desc in the room? */
     if ((desc = find_exdesc(arg, world[char_get_in_room(ch)].ex_description)) != NULL && ++i == fnum) {
-      page_string(ch->desc, desc, FALSE);
+      send_to_char(ch, "%s", desc);
       return;
     }
 

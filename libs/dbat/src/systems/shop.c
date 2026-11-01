@@ -1238,7 +1238,7 @@ static void shopping_list(char *arg, struct char_data *ch, struct char_data *kee
       sprintf(zen, "@W[@wYour Zenni@D: @Y%s@W]", add_commas(char_get_gold(ch)));
       strncat(buf, zen, sizeof(buf) - len - 1);
     }
-    page_string(ch->desc, buf, TRUE);
+    send_to_char(ch, "%s", buf);
   }
 }
 
@@ -1589,23 +1589,11 @@ static void list_all_shops(struct char_data *ch)
       " ##   Virtual   Where    Keeper    Buy   Sell   Customers\r\n"
       "---------------------------------------------------------\r\n";
   int shop_nr, headerlen = strlen(list_all_shops_header);
-  size_t len = 0;
   char buf[MAX_STRING_LENGTH], buf1[16];
 
-  *buf = '\0';
+  strcpy(buf, list_all_shops_header); /* strcpy: OK (a short constant) */
+  size_t len = headerlen;
   for (shop_nr = 0; shop_nr <= top_shop && len < sizeof(buf); shop_nr++) {
-    /* New page in page_string() mechanism, print the header again. */
-    if (!(shop_nr % (PAGE_LENGTH - 2))) {
-      /*
-       * If we don't have enough room for the header, or all we have room left
-       * for is the header, then don't add it and just quit now.
-       */
-      if (len + headerlen + 1 >= sizeof(buf))
-        break;
-      strcpy(buf + len, list_all_shops_header); /* strcpy: OK (length checked above) */
-      len += headerlen;
-    }
-
     if (SHOP_KEEPER(shop_nr) == NOBODY)
       strcpy(buf1, "<NONE>"); /* strcpy: OK (for 'buf1 >= 7') */
     else
@@ -1618,7 +1606,7 @@ static void list_all_shops(struct char_data *ch)
                     customer_string(shop_nr, FALSE));
   }
 
-  page_string(ch->desc, buf, TRUE);
+  send_to_char(ch, "%s", buf);
 }
 
 static void list_detailed_shop(struct char_data *ch, int shop_nr)

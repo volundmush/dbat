@@ -384,7 +384,7 @@ void list_skills(struct char_data *ch, char *arg)
   if (len >= sizeof(buf2))
     strcpy(buf2 + sizeof(buf2) - strlen(overflow) - 1, overflow); /* strcpy: OK */
 
-  page_string(ch->desc, buf2, TRUE);
+  send_to_char(ch, "%s", buf2);
 }
 
 static int is_guild_open(struct char_data *keeper, int guild_nr, int msg)
@@ -640,7 +640,7 @@ static void what_does_guild_know(int guild_nr, struct char_data *ch)
   if (len >= sizeof(buf2))
     strcpy(buf2 + sizeof(buf2) - strlen(overflow) - 1, overflow); /* strcpy: OK */
 
-  page_string(ch->desc, buf2, TRUE);
+  send_to_char(ch, "%s", buf2);
 }
 
 static int prereq_pass(struct char_data *ch, int snum)
@@ -1351,23 +1351,11 @@ static void list_all_guilds(struct char_data *ch)
       "Virtual   G.Master	Charge   Members\r\n"
       "----------------------------------------------------------------------\r\n";
   int gm_nr, headerlen = strlen(list_all_guilds_header);
-  size_t len = 0;
   char buf[MAX_STRING_LENGTH], buf1[16];
 
-  *buf = '\0';
+  strcpy(buf, list_all_guilds_header); /* strcpy: OK (a short constant) */
+  size_t len = headerlen;
   for (gm_nr = 0; gm_nr <= top_guild && len < sizeof(buf); gm_nr++) {
-    /* New page in page_string() mechanism, print the header again. */
-    if (!(gm_nr % (PAGE_LENGTH - 2))) {
-      /*
-     * If we don't have enough room for the header, or all we have room left
-     * for is the header, then don't add it and just quit now.
-     */
-      if (len + headerlen + 1 >= sizeof(buf))
-        break;
-      strcpy(buf + len, list_all_guilds_header); /* strcpy: OK (length checked above) */
-      len += headerlen;
-    }
-
     if (GM_TRAINER(gm_nr) == NOBODY)
       strcpy(buf1, "<NONE>"); /* strcpy: OK (for 'buf1 >= 7') */
     else
@@ -1377,7 +1365,7 @@ static void list_all_guilds(struct char_data *ch)
                     GM_NUM(gm_nr), buf1, GM_CHARGE(gm_nr), guild_customer_string(gm_nr, FALSE));
   }
 
-  page_string(ch->desc, buf, TRUE);
+  send_to_char(ch, "%s", buf);
 }
 
 static void list_detailed_guild(struct char_data *ch, int gm_nr)
@@ -1409,7 +1397,7 @@ static void list_detailed_guild(struct char_data *ch, int gm_nr)
 
   snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s", buf2);
 
-  page_string(ch->desc, buf, 1);
+  send_to_char(ch, "%s", buf);
 }
 
 void show_guild(struct char_data *ch, char *arg)

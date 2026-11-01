@@ -145,8 +145,6 @@ static void mob_autobalance(struct char_data *ch);
 
 /* external functions */
 
-void paginate_string(char *str, struct descriptor_data *d);
-
 void mag_assign_spells(void);
 void load_banned(void);
 void Read_Invalid_List(void);
@@ -4334,47 +4332,14 @@ void free_obj(struct obj_data *obj)
   free(obj);
 }
 
-/*
- * Steps:
- *   1: Read contents of a text file.
- *   2: Make sure no one is using the pointer in paging.
- *   3: Allocate space.
- *   4: Point 'buf' to it.
- *
- * We don't want to free() the string that someone may be
- * viewing in the pager.  page_string() keeps the internal
- * strdup()'d copy on ->showstr_head and it won't care
- * if we delete the original.  Otherwise, strings are kept
- * on ->showstr_vector but we'll only match if the pointer
- * is to the string we're interested in and not a copy.
- *
- * If someone is reading a global copy we're trying to
- * replace, give everybody using it a different copy so
- * as to avoid special cases.
- */
+/* Read a text file into a freshly allocated string at *buf, replacing (and freeing) what was there. On failure
+ * *buf is left untouched. */
 static int file_to_string_alloc(const char *name, char **buf)
 {
-  int temppage;
   char temp[MAX_STRING_LENGTH];
-  struct descriptor_data *in_use;
 
-  for (in_use = descriptor_list; in_use; in_use = in_use->next)
-    if (in_use->showstr_vector && *in_use->showstr_vector == *buf)
-      return (-1);
-
-  /* Lets not free() what used to be there unless we succeeded. */
   if (file_to_string(name, temp) < 0)
     return (-1);
-
-  for (in_use = descriptor_list; in_use; in_use = in_use->next) {
-    if (!in_use->showstr_count || *in_use->showstr_vector != *buf)
-      continue;
-
-    /* Let's be nice and leave them at the page they were on. */
-    temppage = in_use->showstr_page;
-    paginate_string((in_use->showstr_head = strdup(*in_use->showstr_vector)), in_use);
-    in_use->showstr_page = temppage;
-  }
 
   if (*buf)
     free(*buf);

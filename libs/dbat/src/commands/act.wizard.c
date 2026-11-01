@@ -242,7 +242,7 @@ ACMD(do_news)
     if (entries > 0) {
       char_set_lastpl(ch, time(0));
       char_set_wait(ch, PULSE_1SEC);
-      page_string(ch->desc, buf, TRUE);
+      send_to_char(ch, "%s", buf);
     } else {
       send_to_char(ch, "The news file is empty right now.\r\n");
     }
@@ -404,7 +404,7 @@ static void print_lockout(struct char_data *ch)
   }
   sprintf(buf + strlen(buf), "@b------------------[ @RLOCKOUT @b]------------------@n\n");
 
-  page_string(ch->desc, buf, 0);
+  send_to_char(ch, "%s", buf);
 
   fclose(file);
 }
@@ -834,7 +834,7 @@ ACMD(do_finddoor)
       } /* for all directions */
     } /* for all rooms */
     if (num > 0)
-      page_string(ch->desc, buf, 1);
+      send_to_char(ch, "%s", buf);
     else
       send_to_char(ch, "No doors were found for key [%d] %s.\r\n",
                    vnum, obj_get_short_description(obj));
@@ -3426,7 +3426,7 @@ ACMD(do_show)
             break;
           len += nlen;
         }
-      page_string(ch->desc, buf, TRUE);
+      send_to_char(ch, "%s", buf);
       break;
 
     /* show player */
@@ -3534,7 +3534,7 @@ ACMD(do_show)
             len += nlen;
           }
         }
-      page_string(ch->desc, buf, TRUE);
+      send_to_char(ch, "%s", buf);
       break;
 
     /* show death */
@@ -3547,7 +3547,7 @@ ACMD(do_show)
             break;
           len += nlen;
         }
-      page_string(ch->desc, buf, TRUE);
+      send_to_char(ch, "%s", buf);
       break;
 
     /* show godrooms */
@@ -3560,7 +3560,7 @@ ACMD(do_show)
             break;
           len += nlen;
         }
-      page_string(ch->desc, buf, TRUE);
+      send_to_char(ch, "%s", buf);
       break;
 
     /* show shops */
@@ -3619,7 +3619,7 @@ ACMD(do_show)
         high = 9999999;
       }
       strp = sprintuniques(low, high);
-      page_string(ch->desc, strp, TRUE);
+      send_to_char(ch, "%s", strp);
       free(strp);
       break;
 
@@ -3668,7 +3668,7 @@ ACMD(do_show)
         }
         vict = vict->next_affect;
       } while (low && vict);
-      page_string(ch->desc, strp, TRUE);
+      send_to_char(ch, "%s", strp);
       free(strp);
       break;
 
@@ -4524,7 +4524,7 @@ ACMD(do_plist)
   snprintf(buf + len, sizeof(buf) - len, "%s-----------------------------------------------%s\r\n"
                                          "%d players listed.\r\n",
            CCCYN(ch, C_NRM), CCNRM(ch, C_NRM), count);
-  page_string(ch->desc, buf, TRUE);
+  send_to_char(ch, "%s", buf);
 }
 
 ACMD(do_peace)

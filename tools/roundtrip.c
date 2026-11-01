@@ -6,6 +6,7 @@
 #include "dbat/db.h"
 #include "dbat/handler.h"
 #include "dbat/players.h"
+#include "dbat/character_utils.h"
 #include "dbat/genmob.h"
 
 long roundtrip_dump(void)
@@ -17,8 +18,10 @@ long roundtrip_dump(void)
     CREATE(pc, struct char_data, 1);
     clear_char(pc);
     CREATE(pc->player_specials, struct player_special_data, 1);
-    if (load_char(player_table[i].name, pc) < 0)
+    int pos = load_char(player_table[i].name, pc);
+    if (pos < 0)
       continue;
+    char_set_pfilepos(pc, pos); /* save_char() silently skips characters without a player-file position */
     save_char(pc);
     players++;
   }

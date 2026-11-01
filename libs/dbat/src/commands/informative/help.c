@@ -163,9 +163,9 @@ ACMD(do_help)
 
   if (!*argument) {
     if (char_get_admlevel(ch) < ADMLVL_IMMORT)
-      page_string(ch->desc, help, 0);
+      send_to_char(ch, "%s", help);
     else
-      page_string(ch->desc, ihelp, 0);
+      send_to_char(ch, "%s", ihelp);
     return;
   }
 
@@ -203,10 +203,10 @@ ACMD(do_help)
   if (char_get_admlevel(ch) > 0) {
     sprintf(buf + strlen(buf), "@WHelp File Level@w: @D(@R%d@D)@n\n", help_table[mid].min_level);
   }
-  page_string(ch->desc, buf, 0);
+  send_to_char(ch, "%s", buf);
 }
 
-/* Generic page_string function for displaying text */
+/* Shows one of the fixed text files (credits, news, motd, ...) */
 ACMD(do_gen_ps)
 {
   char arg[MAX_INPUT_LENGTH];
@@ -215,33 +215,33 @@ ACMD(do_gen_ps)
 
   switch (subcmd) {
     case SCMD_CREDITS:
-      page_string(ch->desc, credits, 0);
+      send_to_char(ch, "%s", credits);
       break;
     case SCMD_NEWS:
-      page_string(ch->desc, news, 0);
+      send_to_char(ch, "%s", news);
       char_set_lastpl(ch, time(0));
       break;
     case SCMD_INFO:
-      page_string(ch->desc, info, 0);
+      send_to_char(ch, "%s", info);
       break;
     case SCMD_WIZLIST:
-      page_string(ch->desc, wizlist, 0);
+      send_to_char(ch, "%s", wizlist);
       break;
     case SCMD_IMMLIST:
-      page_string(ch->desc, immlist, 0);
+      send_to_char(ch, "%s", immlist);
       break;
     case SCMD_HANDBOOK:
-      page_string(ch->desc, handbook, 0);
+      send_to_char(ch, "%s", handbook);
       break;
     case SCMD_POLICIES:
       sprintf(bum, "--------------------\r\n%s\r\n--------------------\r\n", policies);
-      page_string(ch->desc, bum, 0);
+      send_to_char(ch, "%s", bum);
       break;
     case SCMD_MOTD:
-      page_string(ch->desc, motd, 0);
+      send_to_char(ch, "%s", motd);
       break;
     case SCMD_IMOTD:
-      page_string(ch->desc, imotd, 0);
+      send_to_char(ch, "%s", imotd);
       break;
     case SCMD_CLEAR:
       send_to_char(ch, "\033[H\033[J");
@@ -553,7 +553,7 @@ void add_history(struct char_data *ch, char *str, int type)
     for (tmp = char_get_comm_hist(ch, type); tmp; tmp = tmp->next, i++);
 
     for (; i > HIST_LENGTH && char_get_comm_hist(ch, type); i--) {
-      tmp                   = char_get_comm_hist(ch, type);
+      tmp = char_get_comm_hist(ch, type);
       char_set_comm_hist(ch, type, tmp->next);
       if (tmp->text)
         free(tmp->text);

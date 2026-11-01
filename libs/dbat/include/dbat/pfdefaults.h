@@ -78,5 +78,4 @@
 #define PFDEF_CRANK           0
 #define PFDEF_ETHIC_ALIGNMENT 0
 #define PFDEF_MURDER          0
-#define PFDEF_PAGELENGTH      50
 #define PFDEF_GAUNTLET        0

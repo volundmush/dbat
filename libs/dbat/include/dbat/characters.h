@@ -89,8 +89,7 @@ struct player_special_data {
   int speaking;                          /* Language currently speaking		*/
 
   char *color_choices[NUM_COLOR]; /* Choices for custom colors		*/
-  uint8_t page_length;
-  int murder; /* Murder of PC's count                 */
+  int murder;                     /* Murder of PC's count                 */
 
   // Attribute training
   int trainstr;

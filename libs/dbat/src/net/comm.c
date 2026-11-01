@@ -536,9 +536,7 @@ static void game_loop(int cmmother_desc)
       }
       d->has_prompt = FALSE;
 
-      if (d->showstr_count) /* Reading something w/ pager */
-        show_string(d, comm);
-      else if (d->str) /* Writing boards, mail, etc. */
+      if (d->str) /* Writing boards, mail, etc. */
         string_add(d, comm);
       else if (desc_get_connected(d) != CON_PLAYING) /* In menus, etc. */
         nanny(d, comm);
@@ -785,11 +783,7 @@ static char *make_prompt(struct descriptor_data *d)
 
   /* Note, prompt is truncated at MAX_PROMPT_LENGTH chars (structs.h) */
 
-  if (d->showstr_count) {
-    snprintf(prompt, sizeof(prompt),
-             "\r\n[ Return to continue, (q)uit, (r)efresh, (b)ack, or page number (%d/%d) ]",
-             d->showstr_page, d->showstr_count);
-  } else if (d->str) {
+  if (d->str) {
     if (desc_get_connected(d) == CON_EXDESC) {
       strcpy(prompt, "Enter Description(/h for editor help)> ");
     } else if (char_plr_flagged(d->character, PLR_WRITING) && !char_plr_flagged(d->character, PLR_MAILING)) {
@@ -1607,7 +1601,9 @@ static size_t proc_colors(char *txt, size_t maxlen, int parse, char **choices)
   source_char = txt;
   CREATE(dest_char, char, maxlen);
   save_pos = dest_char;
-  for (; *source_char && (NEW_STRING_LENGTH < maxlen);) {
+  /* Leave room for the terminating NUL: every step below writes at most one byte, except a color substitution,
+   * which checks its own length. */
+  for (; *source_char && (NEW_STRING_LENGTH + 1 < maxlen);) {
     /* no color code - just copy */
     if (*source_char != '@') {
       *dest_char++ = *source_char++;
@@ -1707,7 +1703,8 @@ static size_t proc_colors(char *txt, size_t maxlen, int parse, char **choices)
 /* Add a new string to a player's output queue. */
 size_t vwrite_to_output(struct descriptor_data *t, const char *format, va_list args)
 {
-  static char txt[MAX_STRING_LENGTH];
+  /* As big as a descriptor's whole output buffer, so one long text (help, lists) is never cut short here. */
+  static char txt[LARGE_BUFSIZE];
   size_t wantsize;
   int size;
 
@@ -2495,10 +2492,6 @@ void close_socket(struct descriptor_data *d)
     free(d->history);
   }
 
-  if (d->showstr_head)
-    free(d->showstr_head);
-  if (d->showstr_count)
-    free(d->showstr_vector);
   if (d->obj_name)
     free(d->obj_name);
   if (d->obj_short)
@@ -3229,7 +3222,6 @@ static void circle_sleep(struct timeval *timeout)
 void show_help(struct descriptor_data *t, const char *entry)
 {
   int chk, bot, top, mid, minlen;
-  char buf[MAX_STRING_LENGTH];
 
   if (!help_table) return;
 
@@ -3246,10 +3238,7 @@ void show_help(struct descriptor_data *t, const char *entry)
       while ((mid > 0) &&
              (!(chk = strncasecmp(entry, help_table[mid - 1].keywords, minlen))))
         mid--;
-      write_to_output(t, "\r\n");
-      snprintf(buf, sizeof(buf), "%s\r\n[ PRESS RETURN TO CONTINUE ]",
-               help_table[mid].entry);
-      page_string(t, buf, 0);
+      write_to_output(t, "\r\n%s\r\n", help_table[mid].entry);
       return;
     } else {
       if (chk > 0) bot = mid + 1;

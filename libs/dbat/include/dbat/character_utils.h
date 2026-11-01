@@ -80,8 +80,6 @@ int char_get_speaking(const struct char_data *ch);
 void char_set_speaking(struct char_data *ch, int v);
 int char_get_feat_points(const struct char_data *ch);
 void char_set_feat_points(struct char_data *ch, int v);
-uint8_t char_get_page_length(const struct char_data *ch);
-void char_set_page_length(struct char_data *ch, uint8_t v);
 
 /* Derived character values that used to be macros. */
 int char_get_age_years(struct char_data *ch);

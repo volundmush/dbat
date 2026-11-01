@@ -1131,7 +1131,7 @@ ACMD(do_file)
   }
   fclose(req_file);
 
-  page_string(ch->desc, buf, 1);
+  send_to_char(ch, "%s", buf);
 }
 
 /* Returns true if the spell/skillnum is innate to the character
@@ -1155,25 +1155,4 @@ ACMD(do_file)
 /* Called to update the innate timers */
 void update_innate(struct char_data *ch)
 {
-}
-
-ACMD(do_pagelength)
-{
-  char arg[MAX_INPUT_LENGTH];
-
-  if (char_is_npc(ch))
-    return;
-
-  one_argument(argument, arg);
-
-  if (!*arg) {
-    send_to_char(ch, "You current page length is set to %d lines.\r\n",
-                 char_get_page_length(ch));
-  } else if (is_number(arg)) {
-    char_set_page_length(ch, MIN(MAX(atoi(arg), 5), 50));
-    send_to_char(ch, "Okay, your page length is now set to %d lines.\r\n",
-                 char_get_page_length(ch));
-  } else {
-    send_to_char(ch, "Please specify a number of lines (5 - 50).\r\n");
-  }
 }

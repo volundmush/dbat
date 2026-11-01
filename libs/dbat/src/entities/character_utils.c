@@ -7232,19 +7232,6 @@ void char_set_feat_points(struct char_data *ch, int v)
     ps->feat_points = v;
 }
 
-uint8_t char_get_page_length(const struct char_data *ch)
-{
-  struct player_special_data *ps = ps_of(ch, "page_length");
-  return ps ? ps->page_length : 0;
-}
-
-void char_set_page_length(struct char_data *ch, uint8_t v)
-{
-  struct player_special_data *ps = ps_of(ch, "page_length");
-  if (ps)
-    ps->page_length = v;
-}
-
 int char_get_age_years(struct char_data *ch)
 {
   return age(ch)->year;

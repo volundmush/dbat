@@ -33,7 +33,6 @@ ACMD(do_display);
 ACMD(do_gen_write);
 ACMD(do_gen_tog);
 ACMD(do_file);
-ACMD(do_pagelength);
 ACMD(do_scouter);
 ACMD(do_snet);
 ACMD(do_spar);

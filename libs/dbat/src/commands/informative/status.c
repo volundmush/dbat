@@ -1365,7 +1365,7 @@ ACMD(do_levels)
     len += nlen;
   }
 
-  page_string(ch->desc, buf, TRUE);
+  send_to_char(ch, "%s", buf);
 }
 
 ACMD(do_consider)

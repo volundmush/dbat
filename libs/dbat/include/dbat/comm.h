@@ -48,9 +48,7 @@ size_t vwrite_to_output(struct descriptor_data *d, const char *format, va_list a
 void string_add(struct descriptor_data *d, char *str);
 void string_write(struct descriptor_data *d, char **txt, size_t len, long mailto, void *data);
 
-#define PAGE_LENGTH 22
-#define PAGE_WIDTH  79
-void page_string(struct descriptor_data *d, char *str, int keep_internal);
+#define PAGE_WIDTH 79 /* column at which the text editor wraps lines */
 
 void show_help(struct descriptor_data *t, const char *entry);
 

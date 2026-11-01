@@ -351,7 +351,7 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
             char notebuf[MAX_NOTE_LENGTH];
 
             snprintf(notebuf, sizeof(notebuf), "There is something written on it:\r\n\r\n%s", obj->action_description);
-            page_string(ch->desc, notebuf, TRUE);
+            send_to_char(ch, "%s", notebuf);
           } else
             send_to_char(ch, "There appears to be nothing written on it.\r\n");
           return;

@@ -375,7 +375,6 @@ int load_char(const char *name, struct char_data *ch)
 
     ch->time.birth = ch->time.created = ch->time.maxage = 0;
     ch->followers                                       = NULL;
-    char_set_page_length(ch, PFDEF_PAGELENGTH);
     for (i = 0; i < NUM_COLOR; i++)
       ch->player_specials->color_choices[i] = NULL;
 
@@ -543,8 +542,8 @@ int load_char(const char *name, struct char_data *ch)
           break;
 
         case 'P':
-          if (!strcmp(tag, "Page")) char_set_page_length(ch, atoi(line));
-          else if (!strcmp(tag, "Phas")) char_set_distfea(ch, atoi(line));
+          if (!strcmp(tag, "Page")) { /* old page-length setting: no longer used */
+          } else if (!strcmp(tag, "Phas")) char_set_distfea(ch, atoi(line));
           else if (!strcmp(tag, "Phse")) char_set_starphase(ch, atoi(line));
           else if (!strcmp(tag, "Plyd")) ch->time.played = atol(line);
 #ifdef ASCII_SAVE_POOFS
@@ -937,7 +936,6 @@ void save_char(struct char_data *ch)
   if (char_get_preference(ch) != PFDEF_EYE) fprintf(fl, "Prff: %d\n", char_get_preference(ch));
   if (char_get_speaking(ch) != PFDEF_SPEAKING) fprintf(fl, "Spek: %d\n", char_get_speaking(ch));
   if (char_get_olc_zone(ch) != PFDEF_OLC) fprintf(fl, "Olc : %d\n", char_get_olc_zone(ch));
-  if (char_get_page_length(ch) != PFDEF_PAGELENGTH) fprintf(fl, "Page: %d\n", char_get_page_length(ch));
   if (char_get_gauntlet(ch) != PFDEF_GAUNTLET) fprintf(fl, "Gaun: %d\n", char_get_gauntlet(ch));
   if (char_get_genome(ch, 0) != PFDEF_EYE) fprintf(fl, "Geno: %d\n", char_get_genome(ch, 0));
   if (char_get_genome(ch, 1) != PFDEF_EYE) fprintf(fl, "Gen1: %d\n", char_get_genome(ch, 1));

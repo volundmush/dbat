@@ -522,7 +522,7 @@ void Crash_listrent(struct char_data *ch, char *name)
     }
   }
 
-  page_string(ch->desc, buf, 0);
+  send_to_char(ch, "%s", buf);
   fclose(fl);
 }
 

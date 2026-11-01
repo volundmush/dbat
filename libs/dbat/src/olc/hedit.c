@@ -438,7 +438,7 @@ NOWHERE) {*/
     nlen = snprintf(buf + len, sizeof(buf) - len, "\r\n");
 
   if (ch->desc)
-    page_string(ch->desc, buf, TRUE);
+    send_to_char(ch, "%s", buf);
 
   *buf = '\0';
 }
@@ -478,5 +478,5 @@ ACMD(do_hindex)
   if (count > 0 && char_get_admlevel(ch) > 0) {
     len += snprintf(buf + len, sizeof(buf) - len, "  %d Help files in index.\r\n", count);
   }
-  page_string(ch->desc, buf, TRUE);
+  send_to_char(ch, "%s", buf);
 }
