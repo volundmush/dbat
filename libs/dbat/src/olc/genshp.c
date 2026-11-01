@@ -12,6 +12,11 @@
 #include "dbat/genolc.h"
 #include "dbat/genzon.h"
 
+static void copy_list(IDXTYPE **tlist, IDXTYPE *flist);
+static void copy_type_list(struct shop_buy_data **tlist, struct shop_buy_data *flist);
+static void free_shop_strings(struct shop_data *shop);
+static void free_type_list(struct shop_buy_data **list);
+
 /*
  * NOTE (gg): Didn't modify sedit much. Don't consider it as 'recent'
  * 	as the other editors with regard to updates or style.
@@ -37,7 +42,7 @@ void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_st
   S_BITVECTOR(tshop)    = S_BITVECTOR(fshop);
   for (i = 0; i < SW_ARRAY_MAX; i++)
     S_NOTRADE(tshop)
-    [i] = S_NOTRADE(fshop)[i];
+  [i]                 = S_NOTRADE(fshop)[i];
   S_SORT(tshop)       = S_SORT(fshop);
   S_BUYPROFIT(tshop)  = S_BUYPROFIT(fshop);
   S_SELLPROFIT(tshop) = S_SELLPROFIT(fshop);
@@ -69,7 +74,7 @@ void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_st
 /*
  * Copy a 'NOTHING' terminated integer array list.
  */
-void copy_list(IDXTYPE **tlist, IDXTYPE *flist)
+static void copy_list(IDXTYPE **tlist, IDXTYPE *flist)
 {
   int num_items, i;
 
@@ -100,7 +105,7 @@ void copy_list(IDXTYPE **tlist, IDXTYPE *flist)
  * Copy a -1 terminated (in the type field) shop_buy_data 
  * array list.
  */
-void copy_type_list(struct shop_buy_data **tlist, struct shop_buy_data *flist)
+static void copy_type_list(struct shop_buy_data **tlist, struct shop_buy_data *flist)
 {
   int num_items, i;
 
@@ -242,7 +247,7 @@ void remove_from_int_list(IDXTYPE **list, IDXTYPE num)
 /*
  * Free all the notice character strings in a shop structure.
  */
-void free_shop_strings(struct shop_data *shop)
+static void free_shop_strings(struct shop_data *shop)
 {
   if (S_NOITEM1(shop)) {
     free(S_NOITEM1(shop));
@@ -279,7 +284,7 @@ void free_shop_strings(struct shop_data *shop)
 /*
  * Free a type list and all the strings it contains.
  */
-void free_type_list(struct shop_buy_data **list)
+static void free_type_list(struct shop_buy_data **list)
 {
   int i;
 

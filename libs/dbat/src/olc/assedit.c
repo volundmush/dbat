@@ -21,10 +21,16 @@
 #include "dbat/interpreter.h"
 #include "dbat/oasis.h"
 
+static void assedit_disp_menu(struct descriptor_data *d);
+static void assedit_edit_extract(struct descriptor_data *d);
+static void assedit_edit_inroom(struct descriptor_data *d);
+static void assedit_setup(struct descriptor_data *d, int number);
+static void nodigit(struct descriptor_data *d);
+
 /*-------------------------------------------------------------------*
  * Nasty internal macros to clean up the code.
  *-------------------------------------------------------------------*/
-long lRnum = 0;
+static long lRnum = 0;
 
 /*-------------------------------------------------------------------*
  * Assedit command
@@ -96,7 +102,7 @@ ACMD(do_assedit)
  * Assedit Functions
  *-------------------------------------------------------------------*/
 
-void assedit_setup(struct descriptor_data *d, int number)
+static void assedit_setup(struct descriptor_data *d, int number)
 {
 
   ASSEMBLY *pOldAssembly = NULL;
@@ -136,7 +142,7 @@ void assedit_setup(struct descriptor_data *d, int number)
   assedit_disp_menu(d);
 }
 
-void assedit_disp_menu(struct descriptor_data *d)
+static void assedit_disp_menu(struct descriptor_data *d)
 {
   int i                             = 0;
   char szAssmType[MAX_INPUT_LENGTH] = {'\0'};
@@ -391,21 +397,21 @@ void assedit_parse(struct descriptor_data *d, char *arg)
 }
 /* End of Assedit Parse */
 
-void assedit_edit_extract(struct descriptor_data *d)
+static void assedit_edit_extract(struct descriptor_data *d)
 {
   send_to_char(d->character, "Is the item to be extracted when the assembly is created? (Y/N):");
   OLC_MODE(d) = ASSEDIT_EDIT_EXTRACT;
   return;
 }
 
-void assedit_edit_inroom(struct descriptor_data *d)
+static void assedit_edit_inroom(struct descriptor_data *d)
 {
   send_to_char(d->character, "Should the object be in the room when assembly is created (n = in inventory)?");
   OLC_MODE(d) = ASSEDIT_EDIT_INROOM;
   return;
 }
 
-void nodigit(struct descriptor_data *d)
+static void nodigit(struct descriptor_data *d)
 {
   send_to_char(d->character, "Usage: assedit <vnum>\r\n");
   send_to_char(d->character, "     : assedit new <vnum>\r\n");

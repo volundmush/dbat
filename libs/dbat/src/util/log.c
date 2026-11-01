@@ -84,7 +84,8 @@ void mudlog(int type, int level, int file, const char *str, ...)
 }
 
 /* Write the current call stack to the log. Uses only the file descriptor, so it is also usable from a
- * signal handler. Function names need the executable to be linked with -rdynamic. */
+ * signal handler. Only exported functions get names (the executable is linked with -rdynamic); static ones show
+ * as offsets, which tools/symbolize.sh resolves against the same binary. */
 void log_backtrace(void)
 {
   void *frames[64];

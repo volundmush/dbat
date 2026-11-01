@@ -9,7 +9,6 @@
 extern const char *list_bonus[];
 extern const struct command_info cmd_info[];
 
-void payout(int num);
 void userLoad(struct descriptor_data *d, char *name);
 int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen);
 char *rIntro(struct char_data *ch, char *arg);
@@ -18,20 +17,7 @@ void fingerUser(struct char_data *ch, char *name);
 int readUserIndex(char *name);
 void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, char *name);
 void command_interpreter(struct char_data *ch, char *argument);
-int search_block(char *arg, const char **list, int exact);
-char lower(char c);
-char *one_argument(char *argument, char *first_arg);
-char *one_word(char *argument, char *first_arg);
-char *any_one_arg(char *argument, char *first_arg);
-char *two_arguments(char *argument, char *first_arg, char *second_arg);
-int fill_word(char *argument);
-void half_chop(char *string, char *arg1, char *arg2);
 void nanny(struct descriptor_data *d, char *arg);
-int is_abbrev(const char *arg1, const char *arg2);
-int is_number(const char *str);
-int find_command(const char *command);
-void skip_spaces(char **string);
-char *delete_doubledollar(char *string);
 
 /* WARNING: if you have added diagonal directions and have them at the
  * beginning of the command list.. change this value to 11 or 15 (depending) */
@@ -46,7 +32,6 @@ char *delete_doubledollar(char *string);
  * Necessary for CMD_IS macro.  Borland needs the structure defined first
  * so it has been moved down here.
  */
-extern struct command_info *complete_cmd_info;
 
 /*
  * Alert! Changed from 'struct alias' to 'struct alias_data' in bpl15

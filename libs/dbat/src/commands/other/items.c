@@ -45,6 +45,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/objsave.h"
 #include "dbat/mail.h"
+#include "dbat/local_limits.h"
 #include "other_internal.h"
 
 static void boost_obj(struct obj_data *obj, struct char_data *ch, int type);

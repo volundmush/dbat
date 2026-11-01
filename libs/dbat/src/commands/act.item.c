@@ -43,11 +43,14 @@
 #include "dbat/genzon.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/boards.h"
+#include "dbat/local_limits.h"
+
+static int64_t max_carry_weight(struct char_data *ch);
 
 /* global variables */
-struct obj_data *obj_selling = NULL; /* current object for sale */
-struct char_data *ch_selling = NULL; /* current character selling obj */
-struct char_data *ch_buying  = NULL; /* current character buying the object */
+struct obj_data *obj_selling       = NULL; /* current object for sale */
+struct char_data *ch_selling       = NULL; /* current character selling obj */
+static struct char_data *ch_buying = NULL; /* current character buying the object */
 
 /* local vvariables  */
 static int curbid  = 0;              /* current bid on item being auctioned */
@@ -3986,42 +3989,9 @@ ACMD(do_remove)
 }
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-const int max_carry_load[] = {
-    0,
-    10,
-    20,
-    30,
-    40,
-    50,
-    60,
-    70,
-    80,
-    90,
-    100,
-    115,
-    130,
-    150,
-    175,
-    200,
-    230,
-    260,
-    300,
-    350,
-    400,
-    460,
-    520,
-    600,
-    700,
-    800,
-    920,
-    1040,
-    1200,
-    1400,
-    1640,
-};
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-int64_t max_carry_weight(struct char_data *ch)
+static int64_t max_carry_weight(struct char_data *ch)
 {
   int64_t abil;
   int total;

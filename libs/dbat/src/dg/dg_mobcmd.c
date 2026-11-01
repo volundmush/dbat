@@ -52,6 +52,7 @@
 #include "dbat/extract.h"
 #include "dbat/random.h"
 #include "dbat/stringutils.h"
+#include "dbat/act.offensive.h"
 
 #include <stdarg.h>
 #include <stdio.h>

@@ -164,7 +164,7 @@ static void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, c
   } /* switch */
 }
 
-void affect_modify(struct char_data *ch, int loc, int mod, int spec, long bitv, bool add)
+static void affect_modify(struct char_data *ch, int loc, int mod, int spec, long bitv, bool add)
 {
   if (add) {
     if (bitv != AFF_INFRAVISION || !char_is_android(ch)) {

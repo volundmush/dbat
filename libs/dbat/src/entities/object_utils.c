@@ -427,7 +427,7 @@ int is_better(struct obj_data *object, struct obj_data *object2)
     return 0;
 }
 
-bool obj_is_valid(const struct obj_data *obj)
+static bool obj_is_valid(const struct obj_data *obj)
 {
   return obj != NULL;
 }
@@ -456,7 +456,7 @@ bool obj_extra_flagged(const struct obj_data *obj, int flag)
   return (IS_SET_AR(obj_get_extra_flags(obj), (flag)));
 }
 
-bool obj_valid_rnum(const struct obj_data *obj)
+static bool obj_valid_rnum(const struct obj_data *obj)
 {
   return (obj_get_item_number(obj) <= top_of_objt && obj_get_item_number(obj) != NOTHING);
 }

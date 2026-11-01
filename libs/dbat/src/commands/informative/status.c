@@ -1187,7 +1187,7 @@ ACMD(do_status)
     send_to_char(ch, "The only argument status takes is 'traits'. If you just want your status do not use an argument.\r\n");
   }
 }
-const char *list_bonuses[] = {
+static const char *list_bonuses[] = {
     "Thrifty     - -10% Shop Buy Cost and +10% Shop Sell Cost          ",                                                                                                                                                              /* Bonus 0 */
     "Prodigy     - +25% Experience Gained Until Level 80               ",                                                                                                                                                              /* Bonus 1 */
     "Quick Study - Character auto-trains skills faster                 ",                                                                                                                                                              /* Bonus 2 */

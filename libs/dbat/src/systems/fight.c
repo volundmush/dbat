@@ -28,10 +28,13 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/objsave.h"
 #include "dbat/affect.h"
+#include "dbat/act.offensive.h"
+#include "dbat/act.item.h"
+#include "dbat/local_limits.h"
 
 /* Structures */
-struct char_data *combat_list      = NULL; /* head of l-list of fighting chars */
-struct char_data *next_combat_list = NULL;
+struct char_data *combat_list             = NULL; /* head of l-list of fighting chars */
+static struct char_data *next_combat_list = NULL;
 
 /* local functions */
 static void perform_group_gain(struct char_data *ch, int base, struct char_data *victim);

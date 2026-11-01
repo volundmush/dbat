@@ -17,6 +17,13 @@
 #include "dbat/act.wizard.h"
 #include "dbat/handler.h"
 
+static void zedit_disp_arg2(struct descriptor_data *d);
+static void zedit_disp_arg5(struct descriptor_data *d);
+static void zedit_disp_menu(struct descriptor_data *d);
+static void zedit_new_zone(struct char_data *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top);
+static void zedit_save_to_disk(int zone);
+static void zedit_setup(struct descriptor_data *d, int room_num);
+
 /*
  * Nasty internal macros to clean up the code.
  */
@@ -24,7 +31,7 @@
 #define OLC_CMD(d) (OLC_ZONE(d)->cmd[OLC_VAL(d)])
 
 /* Prototypes. */
-int start_change_command(struct descriptor_data *d, int pos);
+static int start_change_command(struct descriptor_data *d, int pos);
 
 /*-------------------------------------------------------------------*/
 
@@ -205,7 +212,7 @@ ACMD(do_oasis_zedit)
          char_get_name(ch), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
 }
 
-void zedit_setup(struct descriptor_data *d, int room_num)
+static void zedit_setup(struct descriptor_data *d, int room_num)
 {
   struct zone_data *zone;
   int subcmd = 0, count = 0, cmd_room = NOWHERE;
@@ -275,7 +282,7 @@ void zedit_setup(struct descriptor_data *d, int room_num)
   zedit_disp_menu(d);
 }
 /*------------------------------------------------------------------*/
-void zedit_disp_flag_menu(struct descriptor_data *d)
+static void zedit_disp_flag_menu(struct descriptor_data *d)
 {
   int counter, columns = 0;
   char bits[MAX_STRING_LENGTH];
@@ -298,7 +305,7 @@ void zedit_disp_flag_menu(struct descriptor_data *d)
 /*
  * Create a new zone.
  */
-void zedit_new_zone(struct char_data *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top)
+static void zedit_new_zone(struct char_data *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top)
 {
   int result;
   const char *error;
@@ -339,7 +346,7 @@ void zedit_new_zone(struct char_data *ch, zone_vnum vzone_num, room_vnum bottom,
  * Save all the information in the player's temporary buffer back into
  * the current zone table.
  */
-void zedit_save_internally(struct descriptor_data *d)
+static void zedit_save_internally(struct descriptor_data *d)
 {
   int mobloaded = FALSE,
       objloaded = FALSE,
@@ -418,7 +425,7 @@ void zedit_save_internally(struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-void zedit_save_to_disk(int zone)
+static void zedit_save_to_disk(int zone)
 {
   save_zone(zone);
 }
@@ -428,7 +435,7 @@ void zedit_save_to_disk(int zone)
 /*
  * Error check user input and then setup change  
  */
-int start_change_command(struct descriptor_data *d, int pos)
+static int start_change_command(struct descriptor_data *d, int pos)
 {
   if (pos < 0 || pos >= count_commands(OLC_ZONE(d)->cmd))
     return 0;
@@ -447,7 +454,7 @@ int start_change_command(struct descriptor_data *d, int pos)
 /*
  * the main menu 
  */
-void zedit_disp_menu(struct descriptor_data *d)
+static void zedit_disp_menu(struct descriptor_data *d)
 {
   int subcmd = 0, counter = 0;
   char buf1[MAX_STRING_LENGTH];
@@ -580,7 +587,7 @@ void zedit_disp_menu(struct descriptor_data *d)
 /*
  * Print the command type menu and setup response catch. 
  */
-void zedit_disp_comtype(struct descriptor_data *d)
+static void zedit_disp_comtype(struct descriptor_data *d)
 {
   clear_screen(d);
   write_to_output(d,
@@ -601,7 +608,7 @@ void zedit_disp_comtype(struct descriptor_data *d)
  * Print the appropriate message for the command type for arg1 and set
  * up the input catch clause  
  */
-void zedit_disp_arg1(struct descriptor_data *d)
+static void zedit_disp_arg1(struct descriptor_data *d)
 {
   write_to_output(d, "\r\n");
 
@@ -647,7 +654,7 @@ void zedit_disp_arg1(struct descriptor_data *d)
  * Print the appropriate message for the command type for arg2 and set
  * up the input catch clause.
  */
-void zedit_disp_arg2(struct descriptor_data *d)
+static void zedit_disp_arg2(struct descriptor_data *d)
 {
   int i;
 
@@ -692,7 +699,7 @@ void zedit_disp_arg2(struct descriptor_data *d)
  * Print the appropriate message for the command type for arg3 and set
  * up the input catch clause.
  */
-void zedit_disp_arg3(struct descriptor_data *d)
+static void zedit_disp_arg3(struct descriptor_data *d)
 {
   int i = 0;
 
@@ -742,7 +749,7 @@ void zedit_disp_arg3(struct descriptor_data *d)
  * Print the appropriate message for the command type for arg4 and set
  * up the input catch clause.
  */
-void zedit_disp_arg4(struct descriptor_data *d)
+static void zedit_disp_arg4(struct descriptor_data *d)
 {
   write_to_output(d, "\r\n");
 
@@ -776,7 +783,7 @@ void zedit_disp_arg4(struct descriptor_data *d)
  * Print the appropriate message for the command type for arg5 and set
  * up the input catch clause.
  */
-void zedit_disp_arg5(struct descriptor_data *d)
+static void zedit_disp_arg5(struct descriptor_data *d)
 {
   write_to_output(d, "\r\n");
 

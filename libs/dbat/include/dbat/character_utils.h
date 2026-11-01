@@ -121,7 +121,6 @@ void char_plr_set(struct char_data *ch, int flag, bool on);
 void char_mob_set(struct char_data *ch, int flag, bool on);
 void char_aff_set(struct char_data *ch, int flag, bool on);
 void char_prf_set(struct char_data *ch, int flag, bool on);
-void char_adm_set(struct char_data *ch, int flag, bool on);
 void char_body_set(struct char_data *ch, int flag, bool on);
 
 /* new define for quick check */
@@ -162,8 +161,6 @@ int char_get_pfilepos(const struct char_data *ch);
 void char_set_pfilepos(struct char_data *ch, int v);
 
 int char_get_class(const struct char_data *ch);
-int char_get_chclasses(const struct char_data *ch, int i);
-void char_set_chclasses(struct char_data *ch, int i, int v);
 int char_get_class_ranks(const struct char_data *ch, int whichclass);
 int char_get_race(const struct char_data *ch);
 int8_t char_get_hairl(const struct char_data *ch);
@@ -229,9 +226,7 @@ double char_get_speedcalc(struct char_data *ch);
 double char_get_speedbonus(struct char_data *ch);
 double char_get_speedvar(struct char_data *ch);
 double char_get_speedvem(struct char_data *ch);
-bool char_is_grap(const struct char_data *ch);
 long char_get_speedint(struct char_data *ch);
-bool char_is_inferior(const struct char_data *ch);
 bool char_is_weighted(struct char_data *ch);
 
 int64_t char_get_exp(const struct char_data *ch);
@@ -370,10 +365,6 @@ int char_get_fishstate(const struct char_data *ch);
 void char_set_fishstate(struct char_data *ch, int v);
 int char_get_accuracy_mod(const struct char_data *ch);
 void char_set_accuracy_mod(struct char_data *ch, int v);
-int16_t char_get_armorcheck(const struct char_data *ch);
-void char_set_armorcheck(struct char_data *ch, int16_t v);
-int16_t char_get_armorcheckall(const struct char_data *ch);
-void char_set_armorcheckall(struct char_data *ch, int16_t v);
 int64_t char_get_moltexp(const struct char_data *ch);
 void char_set_moltexp(struct char_data *ch, int64_t v);
 int char_get_moltlevel(const struct char_data *ch);
@@ -479,8 +470,6 @@ bool char_can_see_in_dark(const struct char_data *ch);
 
 bool char_is_good(const struct char_data *ch);
 bool char_is_evil(const struct char_data *ch);
-bool char_is_lawful(const struct char_data *ch);
-bool char_is_chaotic(const struct char_data *ch);
 bool char_is_neutral(const struct char_data *ch);
 
 bool char_in_arena(const struct char_data *ch);
@@ -492,40 +481,16 @@ void char_set_arenawatch(struct char_data *ch, int v);
 int char_get_wait(const struct char_data *ch);
 void char_set_wait(struct char_data *ch, int v);
 
-bool char_light_ok(const struct char_data *sub);
-
-bool char_invis_ok(const struct char_data *sub, const struct char_data *obj);
-
-bool char_mort_can_see(const struct char_data *sub, const struct char_data *obj);
-
-bool char_imm_can_see(const struct char_data *sub, const struct char_data *obj);
-
-bool char_is_self(const struct char_data *sub, const struct char_data *obj);
-
 /* Can subject see character "obj"? */
 bool char_can_see(const struct char_data *sub, const struct char_data *obj);
 
-bool char_not_hidden(const struct char_data *ch);
 /* End of CAN_SEE */
 
-bool char_invis_ok_obj(const struct char_data *sub, const struct obj_data *obj);
-
 /* Is anyone carrying this object and if so, are they visible? */
-bool char_can_see_obj_carrier(const struct char_data *sub, const struct obj_data *obj);
-
-bool char_mort_can_see_obj(const struct char_data *sub, const struct obj_data *obj);
 
 bool char_can_see_obj(const struct char_data *sub, const struct obj_data *obj);
 
-bool char_can_carry_obj(struct char_data *ch, struct obj_data *obj);
-
 bool char_can_get_obj(struct char_data *ch, struct obj_data *obj);
-
-bool char_disg(const struct char_data *ch, const struct char_data *vict);
-
-bool char_introd(struct char_data *ch, struct char_data *vict);
-
-bool char_iswiz(const struct char_data *ch, const struct char_data *vict);
 
 const char *char_pers(struct char_data *ch, struct char_data *vict);
 
@@ -579,23 +544,18 @@ bool char_can_grand_master(const struct char_data *ch);
 bool char_is_humanoid(const struct char_data *ch);
 bool char_is_restricted_race(const struct char_data *ch);
 bool char_is_cheap_race(const struct char_data *ch);
-bool char_spar_train(const struct char_data *ch);
 bool char_is_nonptrans(const struct char_data *ch);
-bool char_is_fullpssj(const struct char_data *ch);
 bool char_is_transformed(const struct char_data *ch);
 #define BIRTH_PHASE (time_info.day <= 15)
 #define LIFE_PHASE  (!BIRTH_PHASE && time_info.day <= 22)
 #define DEATH_PHASE (!BIRTH_PHASE && !LIFE_PHASE)
 bool char_moon_ok(const struct char_data *ch);
-bool char_oozaru_ok(const struct char_data *ch);
-bool char_is_oozaru_race(const struct char_data *ch);
 #define MOON_TIME (time_info.hours >= 21 || time_info.hours <= 4)
 #define MOON_DATE (time_info.day == 19 || time_info.day == 20 || time_info.day == 21)
 bool MOON_TIMECHECK();
 bool char_ether_stream(const struct char_data *ch);
 bool char_has_moon(const struct char_data *ch);
 bool char_has_arms(const struct char_data *ch);
-bool char_has_legs(const struct char_data *ch);
 
 bool char_is_human(const struct char_data *ch);
 bool char_is_saiyan(const struct char_data *ch);
@@ -621,14 +581,9 @@ bool char_is_arlian(const struct char_data *ch);
 bool char_is_dragon(const struct char_data *ch);
 bool char_is_mechanical(const struct char_data *ch);
 
-bool char_is_male(const struct char_data *ch);
 bool char_is_female(const struct char_data *ch);
 
 bool char_is_outside(const struct char_data *ch);
-
-bool char_outside_roomflag(const struct char_data *ch);
-
-bool char_outside_secttype(const struct char_data *ch);
 
 char *char_hshr(const struct char_data *ch);
 char *char_hssh(const struct char_data *ch);
@@ -644,12 +599,9 @@ void restore(char_data *ch, bool announce);
 void resurrect(char_data *ch, int mode);
 void ghostify(char_data *ch);
 void teleport_to(char_data *ch, IDXTYPE rnum);
-bool in_room_range(char_data *ch, IDXTYPE low_rnum, IDXTYPE high_rnum);
 bool in_past(char_data *ch);
 bool is_newbie(char_data *ch);
 bool in_northran(char_data *ch);
-bool can_tolerate_gravity(char_data *ch, int grav);
-int calcTier(char_data *ch);
 int64_t calc_soft_cap(char_data *ch);
 bool is_soft_cap(char_data *ch, int64_t type, long double mult);
 int calcGravCost(char_data *ch, int64_t num);
@@ -672,9 +624,6 @@ int64_t getMaxPLTrans(char_data *ch);
 int64_t getCurPL(char_data *ch);
 int64_t getBasePL(char_data *ch);
 int64_t getEffBasePL(char_data *ch);
-double getCurPLPercent(char_data *ch);
-int64_t getPercentOfMaxPL(char_data *ch, double amt);
-bool isFullPL(char_data *ch);
 
 int64_t getCurKI(char_data *ch);
 int64_t getMaxKI(char_data *ch);
@@ -715,8 +664,6 @@ void restoreLF(char_data *ch, bool announce);
 
 bool isFullVitals(char_data *ch);
 void restoreVitals(char_data *ch, bool announce);
-void restoreStatus(char_data *ch, bool announce);
-void restoreLimbs(char_data *ch, bool announce);
 
 int64_t gainBasePL(char_data *ch, int64_t amt, bool trans_mult);
 int64_t gainBaseKI(char_data *ch, int64_t amt, bool trans_mult);
@@ -725,22 +672,16 @@ int64_t gainBaseST(char_data *ch, int64_t amt, bool trans_mult);
 int64_t loseBasePL(char_data *ch, int64_t amt, bool trans_mult);
 
 int64_t gainBasePLPercent(char_data *ch, double amt, bool trans_mult);
-int64_t gainBaseKIPercent(char_data *ch, double amt, bool trans_mult);
-int64_t gainBaseSTPercent(char_data *ch, double amt, bool trans_mult);
 void gainBaseAllPercent(char_data *ch, double amt, bool trans_mult);
 
 int64_t loseBasePLPercent(char_data *ch, double amt, bool trans_mult);
 
 void cureStatusKnockedOut(char_data *ch, bool announce);
-void cureStatusBurn(char_data *ch, bool announce);
-void cureStatusPoison(char_data *ch, bool announce);
 void setStatusKnockedOut(char_data *ch);
 
 int64_t getMaxCarryWeight(char_data *ch);
-int64_t getCurGearWeight(char_data *ch);
 int64_t getCurCarriedWeight(char_data *ch);
 
-double speednar(char_data *ch);
 int64_t getEffMaxPL(char_data *ch);
 bool isWeightedPL(char_data *ch);
 
@@ -761,11 +702,9 @@ int roll_pursue(struct char_data *ch, struct char_data *vict);
 void reveal_hiding(struct char_data *ch, int type);
 int block_calc(struct char_data *ch);
 int64_t molt_threshold(struct char_data *ch);
-int armor_evolve(struct char_data *ch);
 void handle_evolution(struct char_data *ch, int64_t dmg);
 void demon_refill_lf(struct char_data *ch, int64_t num);
 void mob_talk(struct char_data *ch, const char *speech);
-int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech);
 bool is_sparring(struct char_data *ch);
 char *introd_calc(struct char_data *ch);
 int64_t gear_exp(struct char_data *ch, int64_t exp);
@@ -776,16 +715,10 @@ void die_follower(struct char_data *ch);
 void add_follower(struct char_data *ch, struct char_data *leader);
 bool circle_follow(struct char_data *ch, struct char_data *victim);
 
-void advance_level(struct char_data *ch, int whichclass);
-void set_title(struct char_data *ch, char *title);
-void gain_exp(struct char_data *ch, int64_t gain);
-void gain_exp_regardless(struct char_data *ch, int gain);
-void gain_condition(struct char_data *ch, int condition, int value);
 void update_pos(struct char_data *victim);
 
 int perform_get_from_room(struct char_data *ch, struct obj_data *obj);
 void perform_wear(struct char_data *ch, struct obj_data *obj, int where);
-int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg);
 void perform_remove(struct char_data *ch, int pos);
 
 int can_grav(struct char_data *ch);
@@ -817,14 +750,12 @@ int char_exit_level(const struct char_data *ch);
 
 int char_get_bank_interest(const struct char_data *ch);
 
-bool race_has_tail(int r_id);
 void char_lose_tail(char_data *ch);
 bool char_has_tail(char_data *ch);
 void char_gain_tail(char_data *ch, bool announce);
 
 room_vnum sensei_start_room(int s_id);
 room_vnum sensei_location_id(int s_id);
-int sensei_grav_tolerance(int s_id);
 
 int race_get_size(int r_id);
 int race_is_playable(int r_id);

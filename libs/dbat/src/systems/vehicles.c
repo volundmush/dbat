@@ -339,7 +339,7 @@ struct obj_data *find_vehicle_by_vnum(int vnum)
 }
 
 /* Search the given list for an object type, and return a ptr to that obj*/
-struct obj_data *get_obj_in_list_type(int type, struct obj_data *list)
+static struct obj_data *get_obj_in_list_type(int type, struct obj_data *list)
 {
   struct obj_data *i;
 

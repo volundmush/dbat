@@ -31,7 +31,7 @@
 /*
  * Copy first phrase into first_arg, returns rest of string
  */
-char *one_phrase(char *arg, char *first_arg)
+static char *one_phrase(char *arg, char *first_arg)
 {
   skip_spaces(&arg);
 
@@ -67,7 +67,7 @@ char *one_phrase(char *arg, char *first_arg)
   return arg;
 }
 
-int is_substring(char *sub, char *string)
+static int is_substring(char *sub, char *string)
 {
   char *s;
 
@@ -92,7 +92,7 @@ int is_substring(char *sub, char *string)
  * phrases are in double quotes (").
  * if wrdlist is NULL, then return 1, if str is NULL, return 0.
  */
-int word_check(char *str, char *wordlist)
+static int word_check(char *str, char *wordlist)
 {
   char words[MAX_INPUT_LENGTH], phrase[MAX_INPUT_LENGTH], *s;
 
@@ -701,8 +701,8 @@ int get_otrigger(obj_data *obj, char_data *actor)
 }
 
 /* checks for command trigger on specific object. assumes obj has cmd trig */
-int cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
-              char *argument, int type)
+static int cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
+                     char *argument, int type)
 {
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];

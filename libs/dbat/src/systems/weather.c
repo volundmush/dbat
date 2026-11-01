@@ -18,6 +18,9 @@
 #include "dbat/config.h"
 #include "dbat/races.h"
 
+static void oozaru_add();
+static void oozaru_drop();
+
 static void another_hour(int mode);
 static void weather_change(void);
 static void phase_powerup(struct char_data *ch, int phase);
@@ -245,7 +248,7 @@ void oozaru_transform(char_data *ch)
   char_plr_set(ch, oozaru.flag, true);
 }
 
-void oozaru_add()
+static void oozaru_add()
 {
   for (descriptor_data *d = descriptor_list; d; d = d->next) {
     if (!desc_is_playing(d)) {
@@ -269,7 +272,7 @@ void oozaru_revert(char_data *ch)
   char_plr_set(ch, PLR_OOZARU, false);
 }
 
-void oozaru_drop()
+static void oozaru_drop()
 {
   for (descriptor_data *d = descriptor_list; d; d = d->next) {
     if (!desc_is_playing(d))

@@ -30,7 +30,6 @@ bool race_can_transform(int r);
 bool race_can_revert(int r);
 bool race_has_noisy_transformations(int r);
 bool race_check_can_transform(char_data *ch);
-int race_max_transform_tier(char_data *ch);
 int race_flag_to_tier(int flag);
 int race_current_trans_tier(const char_data *ch);
 transform_bonus race_current_form(char_data *ch);

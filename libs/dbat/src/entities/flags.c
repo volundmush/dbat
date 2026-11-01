@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int flag_test(const bitvector_t bitvector[], int flag)
+static int flag_test(const bitvector_t bitvector[], int flag)
 {
   int array_pos = flag / 32;
   int bit_pos   = flag % 32;

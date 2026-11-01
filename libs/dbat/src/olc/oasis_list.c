@@ -20,12 +20,12 @@
 /******************************************************************************/
 /** Internal Functions                                                       **/
 /******************************************************************************/
-void list_rooms(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax);
-void list_mobiles(struct char_data *ch, zone_rnum rnum, mob_vnum vmin, mob_vnum vmax);
-void list_objects(struct char_data *ch, zone_rnum rnum, obj_vnum vmin, obj_vnum vmax);
-void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax);
-void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vnum vmax);
-void list_zones(struct char_data *ch);
+static void list_rooms(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax);
+static void list_mobiles(struct char_data *ch, zone_rnum rnum, mob_vnum vmin, mob_vnum vmax);
+static void list_objects(struct char_data *ch, zone_rnum rnum, obj_vnum vmin, obj_vnum vmax);
+static void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax);
+static void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vnum vmax);
+static void list_zones(struct char_data *ch);
 void print_zone(struct char_data *ch, zone_vnum vnum);
 
 /******************************************************************************/
@@ -138,7 +138,7 @@ ACMD(do_oasis_links)
 /*
  * List all rooms in a zone.                              
  */
-void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax)
+static void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax)
 {
   int i, j, bottom, top, counter = 0;
   /*
@@ -191,7 +191,7 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
 /*
  * List all mobiles in a zone.                              
  */
-void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax)
+static void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax)
 {
   int i, bottom, top, counter = 0;
 
@@ -228,7 +228,7 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
 /*
  * List all objects in a zone.                              
  */
-void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax)
+static void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax)
 {
   int i, bottom, top, counter = 0;
 
@@ -266,7 +266,7 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
 /*
  * List all shops in a zone.                              
  */
-void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax)
+static void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax)
 {
   int i, j, bottom, top, counter = 0;
 
@@ -313,7 +313,7 @@ void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum 
 /*
  * List all zones in the world (sort of like 'show zones').                              
  */
-void list_zones(struct char_data *ch)
+static void list_zones(struct char_data *ch)
 {
   int i;
 
@@ -425,7 +425,7 @@ void print_zone(struct char_data *ch, zone_vnum vnum)
 }
 
 /* List code by Ronald Evers - dlanor@xs4all.nl */
-void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vnum vmax)
+static void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vnum vmax)
 {
   int i, bottom, top, counter = 0;
   char trgtypes[256];

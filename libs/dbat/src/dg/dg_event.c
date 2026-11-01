@@ -32,6 +32,14 @@
 #include "dbat/comm.h"
 #include "dbat/log.h"
 
+static void queue_deq(struct queue *q, struct q_element *qe);
+static long queue_elmt_key(struct q_element *qe);
+static struct q_element *queue_enq(struct queue *q, void *data, long key);
+static void queue_free(struct queue *q);
+static void *queue_head(struct queue *q);
+static struct queue *queue_init(void);
+static long queue_key(struct queue *q);
+
 static struct queue *event_q; /* the event queue */
 
 /* initializes the event queue */
@@ -130,7 +138,7 @@ void event_free_all(void)
 ************************************************************************ */
 
 /* returns a new, initialized queue */
-struct queue *queue_init(void)
+static struct queue *queue_init(void)
 {
   struct queue *q;
 
@@ -140,7 +148,7 @@ struct queue *queue_init(void)
 }
 
 /* add data into the priority queue q with key */
-struct q_element *queue_enq(struct queue *q, void *data, long key)
+static struct q_element *queue_enq(struct queue *q, void *data, long key)
 {
   struct q_element *qe, *i;
   int bucket;
@@ -184,7 +192,7 @@ struct q_element *queue_enq(struct queue *q, void *data, long key)
 }
 
 /* remove queue element qe from the priority queue q */
-void queue_deq(struct queue *q, struct q_element *qe)
+static void queue_deq(struct queue *q, struct q_element *qe)
 {
   int i;
 
@@ -207,7 +215,7 @@ void queue_deq(struct queue *q, struct q_element *qe)
  * removes and returns the data of the
  * first element of the priority queue q
  */
-void *queue_head(struct queue *q)
+static void *queue_head(struct queue *q)
 {
   void *dg_data;
   int i;
@@ -226,7 +234,7 @@ void *queue_head(struct queue *q)
  * returns the key of the head element of the priority queue
  * if q is NULL, then return the largest unsigned number
  */
-long queue_key(struct queue *q)
+static long queue_key(struct queue *q)
 {
   int i;
 
@@ -239,13 +247,13 @@ long queue_key(struct queue *q)
 }
 
 /* returns the key of queue element qe */
-long queue_elmt_key(struct q_element *qe)
+static long queue_elmt_key(struct q_element *qe)
 {
   return qe->key;
 }
 
 /* free q and contents */
-void queue_free(struct queue *q)
+static void queue_free(struct queue *q)
 {
   int i;
   struct q_element *qe, *next_qe;

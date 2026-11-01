@@ -45,6 +45,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/objsave.h"
 #include "dbat/mail.h"
+#include "dbat/act.offensive.h"
 #include "other_internal.h"
 
 ACMD(do_willpower)

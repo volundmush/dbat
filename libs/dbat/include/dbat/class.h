@@ -6,9 +6,6 @@
 
 // global variables
 
-extern const char *config_sect[NUM_CONFIG_SECTIONS + 1];
-extern const int class_hit_die_size[NUM_CLASSES];
-
 // functions
 void do_start(struct char_data *ch);
 int invalid_class(struct char_data *ch, struct obj_data *obj);
@@ -26,7 +23,6 @@ time_t max_age(struct char_data *ch);
 // Sensei behaviour. Senseis are identified by their CLASS_* constant.
 bool sensei_exists(int s);
 const char *sensei_name(int s);
-const char *sensei_abbr(int s);
 bool sensei_is_pc_ok(int s);
 bool sensei_available_for_race(int s, int r);
 int sensei_find(const char *arg);

@@ -41,8 +41,6 @@ ACMD(do_teach);
 #define GM_COST(i, j, k) (int)(GM_CHARGE(i) * spell_info[j].min_level[(int)char_get_class(k)])
 #define GM_FUNC(i)       (guild_index[i].func)
 
-extern int spell_sort_info[SKILL_TABLE_SIZE];
-
 /* Functions defined in guild.c */
 int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype, char *argument);
 void levelup_parse(struct descriptor_data *d, char *arg);
@@ -57,7 +55,6 @@ int count_guilds(guild_vnum low, guild_vnum high);
 SPECIAL(guild);
 
 /* Trade restriction flags (TRADE_*) on a guild_data. */
-bool guild_trade_flagged(const struct guild_data *rec, int flag);
 bool guild_trade_toggle(struct guild_data *rec, int flag);
 void boot_the_guilds(FILE *gm_f, char *filename, int rec_count);
 void assign_the_guilds(void);

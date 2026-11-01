@@ -68,25 +68,47 @@
 #include <sys/signal.h>
 #include <sys/fcntl.h>
 
+static void check_idle_menu(void);
+static void check_idle_passwords(void);
+static void circle_sleep(struct timeval *timeout);
+static void game_loop(int cmmother_desc);
+static struct in_addr *get_bind_addr();
+static int get_from_q(struct txt_q *queue, char *dest, int *aliased);
+static int get_max_players(void);
+static void heartbeat(int heart_pulse);
+static void init_descriptor(struct descriptor_data *newd, int desc);
+static int init_socket(uint16_t cmport);
+static int new_descriptor(int s);
+static void nonblock(int s);
+static int open_logfile(const char *filename, FILE *stderr_fp);
+static int perform_subst(struct descriptor_data *t, char *orig, char *subst);
+static int process_input(struct descriptor_data *t);
+static int process_output(struct descriptor_data *t);
+static void record_usage(void);
+static int set_sendbuf(int s);
+static void signal_setup(void);
+static void timeadd(struct timeval *rslt, struct timeval *a, struct timeval *b);
+static void timediff(struct timeval *rslt, struct timeval *a, struct timeval *b);
+
 /* externs */
 
 /* local globals */
-struct txt_block *bufpool = 0;    /* pool of large output buffers */
-int buf_largecount        = 0;    /* # of large buffers which exist */
-int buf_overflows         = 0;    /* # of overflows of output */
-int buf_switches          = 0;    /* # of switches from small to large buf */
-int circle_shutdown       = 0;    /* clean shutdown */
-int circle_reboot         = 0;    /* reboot the game after a shutdown */
-int no_specials           = 0;    /* Suppress ass. of special routines */
-int max_players           = 0;    /* max descriptors available */
-int tics_passed           = 0;    /* for extern checkpointing */
-int scheck                = 0;    /* for syntax checking mode */
-struct timeval null_time;         /* zero-valued time structure */
-int8_t reread_wizlist;            /* signal: SIGUSR1 */
-int8_t emergency_unban;           /* signal: SIGUSR2 */
-FILE *logfile             = NULL; /* Where to send the log messages. */
-const char *text_overflow = "**OVERFLOW**\r\n";
-int dg_act_check;        /* toggle for act_trigger */
+static struct txt_block *bufpool = 0;    /* pool of large output buffers */
+int buf_largecount               = 0;    /* # of large buffers which exist */
+int buf_overflows                = 0;    /* # of overflows of output */
+int buf_switches                 = 0;    /* # of switches from small to large buf */
+int circle_shutdown              = 0;    /* clean shutdown */
+int circle_reboot                = 0;    /* reboot the game after a shutdown */
+int no_specials                  = 0;    /* Suppress ass. of special routines */
+static int max_players           = 0;    /* max descriptors available */
+static int tics_passed           = 0;    /* for extern checkpointing */
+int scheck                       = 0;    /* for syntax checking mode */
+static struct timeval null_time;         /* zero-valued time structure */
+static int8_t reread_wizlist;            /* signal: SIGUSR1 */
+static int8_t emergency_unban;           /* signal: SIGUSR2 */
+FILE *logfile                    = NULL; /* Where to send the log messages. */
+static const char *text_overflow = "**OVERFLOW**\r\n";
+static int dg_act_check; /* toggle for act_trigger */
 unsigned long pulse = 0; /* number of pulses since game start */
 bool fCopyOver;          /* Are we booting in copyover mode? */
 uint16_t port;
@@ -169,11 +191,11 @@ static void copyover_recover()
       close_socket(d);
     } else {
       write_to_descriptor(desc, "\n\rFolding complete.\n\r");
-      set_loadroom               = char_get_load_room(d->character);
+      set_loadroom = char_get_load_room(d->character);
       char_set_load_room(d->character, saved_loadroom);
       enter_player_game(d);
       char_set_load_room(d->character, set_loadroom);
-      d->connected               = CON_PLAYING;
+      d->connected = CON_PLAYING;
       look_at_room(char_get_in_room(d->character), d->character, 0);
       if (char_aff_flagged(d->character, AFF_HAYASA)) {
         char_set_speedboost(d->character, char_get_speedcalc(d->character) * 0.5);
@@ -265,7 +287,7 @@ void init_game(uint16_t cmport)
  * init_socket sets up the mother descriptor - creates the socket, sets
  * its options up, binds it, and listens.
  */
-int init_socket(uint16_t cmport)
+static int init_socket(uint16_t cmport)
 {
   int s;
   struct sockaddr_in sa;
@@ -310,7 +332,7 @@ int init_socket(uint16_t cmport)
   return (s);
 }
 
-int get_max_players(void)
+static int get_max_players(void)
 {
 
   int max_descs = 0;
@@ -361,7 +383,7 @@ int get_max_players(void)
  * output and sending it out to players, and calling "heartbeat" functions
  * such as mobile_activity().
  */
-void game_loop(int cmmother_desc)
+static void game_loop(int cmmother_desc)
 {
   fd_set input_set, output_set, exc_set, null_set;
   struct timeval last_time, opt_time, process_time, temp_time;
@@ -600,7 +622,7 @@ void game_loop(int cmmother_desc)
   }
 }
 
-void heartbeat(int heart_pulse)
+static void heartbeat(int heart_pulse)
 {
   static int mins_since_crashsave = 0;
 
@@ -703,7 +725,7 @@ void heartbeat(int heart_pulse)
  * code to return the time difference between a and b (a-b).
  * always returns a nonnegative value (floors at 0).
  */
-void timediff(struct timeval *rslt, struct timeval *a, struct timeval *b)
+static void timediff(struct timeval *rslt, struct timeval *a, struct timeval *b)
 {
   if (a->tv_sec < b->tv_sec)
     *rslt = null_time;
@@ -729,7 +751,7 @@ void timediff(struct timeval *rslt, struct timeval *a, struct timeval *b)
  *
  * Patch sent by "d. hall" <dhall@OOI.NET> to fix 'static' usage.
  */
-void timeadd(struct timeval *rslt, struct timeval *a, struct timeval *b)
+static void timeadd(struct timeval *rslt, struct timeval *a, struct timeval *b)
 {
   rslt->tv_sec  = a->tv_sec + b->tv_sec;
   rslt->tv_usec = a->tv_usec + b->tv_usec;
@@ -740,7 +762,7 @@ void timeadd(struct timeval *rslt, struct timeval *a, struct timeval *b)
   }
 }
 
-void record_usage(void)
+static void record_usage(void)
 {
   int sockets_connected = 0, sockets_playing = 0;
   struct descriptor_data *d;
@@ -755,7 +777,7 @@ void record_usage(void)
           sockets_connected, sockets_playing);
 }
 
-char *make_prompt(struct descriptor_data *d)
+static char *make_prompt(struct descriptor_data *d)
 {
   static char prompt[MAX_PROMPT_LENGTH];
   struct obj_data *chair = NULL;
@@ -1473,7 +1495,7 @@ void write_to_q(const char *txt, struct txt_q *queue, int aliased)
 /*
  * NOTE: 'dest' must be at least MAX_INPUT_LENGTH big.
  */
-int get_from_q(struct txt_q *queue, char *dest, int *aliased)
+static int get_from_q(struct txt_q *queue, char *dest, int *aliased)
 {
   struct txt_block *tmp;
 
@@ -1493,7 +1515,7 @@ int get_from_q(struct txt_q *queue, char *dest, int *aliased)
 }
 
 /* Empty the queues before closing connection */
-void flush_queues(struct descriptor_data *d)
+static void flush_queues(struct descriptor_data *d)
 {
   if (d->large_outbuf) {
     d->large_outbuf->next = bufpool;
@@ -1523,7 +1545,7 @@ size_t write_to_output(struct descriptor_data *t, const char *txt, ...)
 #define COLOR_ON(ch) (COLOR_LEV(ch) > 0)
 
 /* Color replacement arrays. Orig. Renx -- 011100, now modified */
-char *ANSI[] = {
+static char *ANSI[] = {
     "@",
     AA_NORMAL,
     AA_NORMAL ANSISEPSTR AF_BLACK,
@@ -1556,7 +1578,7 @@ char *ANSI[] = {
     AA_REVERSE,
     "!"};
 
-const char CCODE[] = "@ndbgcrmywDBGCRMYW01234567luoex!";
+static const char CCODE[] = "@ndbgcrmywDBGCRMYW01234567luoex!";
 /*
   Codes are:      @n - normal
   @d - black      @D - gray           @0 - background black
@@ -1573,7 +1595,7 @@ Extra codes:      @l - blink          @o - bold
 
   @[num] - user color choice num, [] are required
 */
-const char RANDOM_COLORS[] = "bgcrmywBGCRMWY";
+static const char RANDOM_COLORS[] = "bgcrmywBGCRMWY";
 
 #define NEW_STRING_LENGTH (size_t)(dest_char - save_pos)
 static size_t proc_colors(char *txt, size_t maxlen, int parse, char **choices)
@@ -1778,7 +1800,7 @@ void free_bufpool(void)
  * we can.  If neither is available, we always bind to INADDR_ANY.
  */
 
-struct in_addr *get_bind_addr()
+static struct in_addr *get_bind_addr()
 {
   static struct in_addr bind_addr;
 
@@ -1807,7 +1829,7 @@ struct in_addr *get_bind_addr()
 }
 
 /* Sets the kernel's send buffer size for the descriptor */
-int set_sendbuf(int s)
+static int set_sendbuf(int s)
 {
   int opt = MAX_SOCK_BUF;
 
@@ -1820,7 +1842,7 @@ int set_sendbuf(int s)
 }
 
 /* Initialize a descriptor */
-void init_descriptor(struct descriptor_data *newd, int desc)
+static void init_descriptor(struct descriptor_data *newd, int desc)
 {
   static int last_desc = 0; /* last descriptor number */
 
@@ -1865,7 +1887,7 @@ static void set_color(struct descriptor_data *d)
   return;
 }
 
-int new_descriptor(int s)
+static int new_descriptor(int s)
 {
   int desc;
   int sockets_connected = 0;
@@ -1946,7 +1968,7 @@ int new_descriptor(int s)
  *	 2 bytes: extra \r\n for non-comapct
  *      14 bytes: unused
  */
-int process_output(struct descriptor_data *t)
+static int process_output(struct descriptor_data *t)
 {
   char i[MAX_SOCK_BUF], *osb = i + 2;
   int result;
@@ -2052,7 +2074,7 @@ int process_output(struct descriptor_data *t)
  */
 
 /* perform_socket_write for all Non-Windows platforms */
-ssize_t perform_socket_write(int desc, const char *txt, size_t length)
+static ssize_t perform_socket_write(int desc, const char *txt, size_t length)
 {
   ssize_t result = 0;
 
@@ -2121,7 +2143,7 @@ int write_to_descriptor(int desc, const char *txt)
  * Same information about perform_socket_write applies here. I like
  * standards, there are so many of them. -gg 6/30/98
  */
-ssize_t perform_socket_read(int desc, char *read_point, size_t space_left)
+static ssize_t perform_socket_read(int desc, char *read_point, size_t space_left)
 {
   ssize_t ret;
 
@@ -2170,7 +2192,7 @@ ssize_t perform_socket_read(int desc, char *read_point, size_t space_left)
  * character. (Do you really need 256 characters on a line?)
  * -gg 1/21/2000
  */
-int process_input(struct descriptor_data *t)
+static int process_input(struct descriptor_data *t)
 {
   int buf_length, failed_subst;
   ssize_t bytes_read;
@@ -2328,7 +2350,7 @@ int process_input(struct descriptor_data *t)
  * orig string, i.e. the one being modified.  subst contains the
  * substition string, i.e. "^telm^tell"
  */
-int perform_subst(struct descriptor_data *t, char *orig, char *subst)
+static int perform_subst(struct descriptor_data *t, char *orig, char *subst)
 {
   char newsub[MAX_INPUT_LENGTH + 5];
 
@@ -2375,7 +2397,7 @@ int perform_subst(struct descriptor_data *t, char *orig, char *subst)
   return (0);
 }
 
-void free_user(struct descriptor_data *d)
+static void free_user(struct descriptor_data *d)
 {
   if (d->user_freed == 1) {
     return;
@@ -2509,7 +2531,7 @@ void close_socket(struct descriptor_data *d)
   free(d);
 }
 
-void check_idle_passwords(void)
+static void check_idle_passwords(void)
 {
   struct descriptor_data *d, *next_d;
 
@@ -2527,7 +2549,7 @@ void check_idle_passwords(void)
   }
 }
 
-void check_idle_menu(void)
+static void check_idle_menu(void)
 {
   struct descriptor_data *d, *next_d;
 
@@ -2554,7 +2576,7 @@ void check_idle_menu(void)
  * this and various other NeXT fixes.)
  */
 
-void nonblock(int s)
+static void nonblock(int s)
 {
   int flags;
 
@@ -2570,18 +2592,18 @@ void nonblock(int s)
 *  signal-handling functions (formerly signals.c).  UNIX only.      *
 ****************************************************************** */
 
-void reread_wizlists(int sig)
+static void reread_wizlists(int sig)
 {
   reread_wizlist = TRUE;
 }
 
-void unrestrict_game(int sig)
+static void unrestrict_game(int sig)
 {
   emergency_unban = TRUE;
 }
 
 /* clean up our zombie kids to avoid defunct processes */
-void reap(int sig)
+static void reap(int sig)
 {
   while (waitpid(-1, NULL, WNOHANG) > 0);
 
@@ -2589,7 +2611,7 @@ void reap(int sig)
 }
 
 /* Dying anyway... */
-void checkpointing(int sig)
+static void checkpointing(int sig)
 {
 #ifndef MEMORY_DEBUG
   if (!tics_passed) {
@@ -2626,7 +2648,7 @@ static void fatal_signal(int sig)
 }
 
 /* Dying anyway... */
-void hupsig(int sig)
+static void hupsig(int sig)
 {
   mud_log("SYSERR: Received SIGHUP, SIGINT, or SIGTERM.  Shutting down...");
   exit(1); /* perhaps something more elegant should
@@ -2647,7 +2669,7 @@ void hupsig(int sig)
  * SunOS Release 4.0.2 (sun386) needs this too, according to Tim Aldric.
  */
 
-void signal_setup(void)
+static void signal_setup(void)
 {
   struct itimerval itime;
   struct timeval interval;
@@ -2865,14 +2887,14 @@ void send_to_room(room_rnum room, const char *messg, ...)
   }
 }
 
-const char *ACTNULL = "<NULL>";
+static const char *ACTNULL = "<NULL>";
 
 #define CHECK_NULL(pointer, expression) \
   if ((pointer) == NULL) i = ACTNULL;   \
   else i = (expression);
 
 /* higher-level communication: the act() function */
-void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to)
+static void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to)
 {
   const char *i = NULL;
   char lbuf[MAX_STRING_LENGTH], *buf, *j;
@@ -3176,7 +3198,7 @@ void setup_log(const char *filename, int fd)
   exit(1);
 }
 
-int open_logfile(const char *filename, FILE *stderr_fp)
+static int open_logfile(const char *filename, FILE *stderr_fp)
 {
   if (stderr_fp) /* freopen() the descriptor. */
     logfile = freopen(filename, "w", stderr_fp);
@@ -3197,7 +3219,7 @@ int open_logfile(const char *filename, FILE *stderr_fp)
  * This may not be pretty but it keeps game_loop() neater than if it was inline.
  */
 
-void circle_sleep(struct timeval *timeout)
+static void circle_sleep(struct timeval *timeout)
 {
   if (select(0, (fd_set *)0, (fd_set *)0, (fd_set *)0, timeout) < 0) {
     if (errno != EINTR) {

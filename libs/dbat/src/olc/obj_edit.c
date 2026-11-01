@@ -26,7 +26,7 @@ void disp_custom_menu(struct descriptor_data *d);
 /* utility variables */
 
 /* This is what equipment type it is */
-const char *custom_types[17] = {
+static const char *custom_types[17] = {
     "Error",
     "Armor Slot",
     "Gi Slot",
@@ -46,7 +46,7 @@ const char *custom_types[17] = {
     "Weapon"};
 
 /* This shows what weapon type it is */
-const char *custom_weapon[7] = {
+static const char *custom_weapon[7] = {
     "Not A Weapon",
     "Sword",
     "Dagger",

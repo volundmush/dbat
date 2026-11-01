@@ -24,18 +24,20 @@
 #include "dbat/shop.h"
 #include "dbat/class.h"
 
+static bool guild_trade_flagged(const struct guild_data *rec, int flag);
+
 const char *const guild_default_no_skill = "%s Sorry, but I don't know that one.";
 const char *const guild_default_no_gold  = "%s Sorry, but I'm gonna need more zenni first.";
 
 /* Local variables */
-int spell_sort_info[SKILL_TABLE_SIZE];
+static int spell_sort_info[SKILL_TABLE_SIZE];
 int top_guild = -1;
 struct guild_data *guild_index;
 
-char *guild_customer_string(int guild_nr, int detailed);
-int calculate_skill_cost(struct char_data *ch, int skill);
+static char *guild_customer_string(int guild_nr, int detailed);
+static int calculate_skill_cost(struct char_data *ch, int skill);
 
-int calculate_skill_cost(struct char_data *ch, int skill)
+static int calculate_skill_cost(struct char_data *ch, int skill)
 {
   int cost = 0;
 
@@ -219,10 +221,6 @@ ACMD(do_teach)
     return;
   }
 }
-
-const char *prac_types[] = {
-    "spell",
-    "skill"};
 
 static int compare_spells(const void *x, const void *y)
 {
@@ -1285,7 +1283,7 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
         }
         while (temp < GW_ARRAY_MAX)
           GM_WITH_WHO(top_guild)
-          [temp++] = 0;
+        [temp++] = 0;
         free(buf);
         buf = fread_string(gm_f, buf2);
       }
@@ -1315,7 +1313,7 @@ void assign_the_guilds(void)
   }
 }
 
-char *guild_customer_string(int guild_nr, int detailed)
+static char *guild_customer_string(int guild_nr, int detailed)
 {
   int gindex = 0, flag = 0, nlen;
   size_t len = 0;
@@ -1394,22 +1392,22 @@ static void list_detailed_guild(struct char_data *ch, int gm_nr)
     sprintf(buf1, "%6d   ", mob_index[GM_TRAINER(gm_nr)].vnum);
 
   snprintf(buf, sizeof(buf), " Guild Master: %s\r\n", buf1);
-  sprintf(buf + strlen(buf), " Hours: %4d to %4d,  Surcharge: %5.2f\r\n",
-          GM_OPEN(gm_nr), GM_CLOSE(gm_nr), GM_CHARGE(gm_nr));
-  sprintf(buf + strlen(buf), " Min Level will train: %d\r\n", GM_MINLVL(gm_nr));
-  sprintf(buf + strlen(buf), " Whom will train: %s\r\n", guild_customer_string(gm_nr, TRUE));
+  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " Hours: %4d to %4d,  Surcharge: %5.2f\r\n",
+           GM_OPEN(gm_nr), GM_CLOSE(gm_nr), GM_CHARGE(gm_nr));
+  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " Min Level will train: %d\r\n", GM_MINLVL(gm_nr));
+  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " Whom will train: %s\r\n", guild_customer_string(gm_nr, TRUE));
 
   /* now for the REAL reason why someone would want to see a Guild :) */
 
-  sprintf(buf + strlen(buf), " The GM can teach the following:\r\n");
+  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " The GM can teach the following:\r\n");
 
   *buf2 = '\0';
   for (i = 0; i < SKILL_TABLE_SIZE; i++) {
     if (does_guild_know(gm_nr, i))
-      sprintf(buf2 + strlen(buf2), " %s \r\n", spell_info[i].name);
+      snprintf(buf2 + strlen(buf2), sizeof(buf2) - strlen(buf2), " %s \r\n", spell_info[i].name);
   }
 
-  strcat(buf, buf2);
+  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s", buf2);
 
   page_string(ch->desc, buf, 1);
 }
@@ -1524,7 +1522,7 @@ void levelup_parse(struct descriptor_data *d, char *arg)
 {
 }
 
-bool guild_trade_flagged(const struct guild_data *rec, int flag)
+static bool guild_trade_flagged(const struct guild_data *rec, int flag)
 {
   return IS_SET_AR(rec->with_who, flag) != 0;
 }

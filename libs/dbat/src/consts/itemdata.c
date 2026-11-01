@@ -368,11 +368,3 @@ const char *color_liquid[NUM_LIQ_TYPES + 1] =
  * level of fullness for drink containers
  * Not used in sprinttype() so no \n.
  */
-const char *fullness[NUM_FULLNESS + 1] =
-    {
-        "empty ",
-        "less than half ",
-        "half full ",
-        "more than half full ",
-        "full ",
-        ""};

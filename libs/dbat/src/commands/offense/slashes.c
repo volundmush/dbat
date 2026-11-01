@@ -24,6 +24,7 @@
 #include "dbat/guild.h"
 #include "dbat/class.h"
 #include "dbat/techniques.h"
+#include "dbat/act.item.h"
 
 ACMD(do_tslash)
 {

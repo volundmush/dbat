@@ -10,6 +10,8 @@
 #include "dbat/genzon.h"
 #include "dbat/utils.h"
 
+static void free_guild_strings(struct guild_data *guild);
+
 /*
  * NOTE (gg): Didn't modify sedit much. Don't consider it as 'recent'
  * 	as the other editors with regard to updates or style.
@@ -27,7 +29,7 @@ void copy_guild(struct guild_data *tgm, struct guild_data *fgm)
   G_TRAINER(tgm) = G_TRAINER(fgm);
   for (i = 0; i < SW_ARRAY_MAX; i++)
     G_WITH_WHO(tgm)
-    [i] = G_WITH_WHO(fgm)[i];
+  [i]           = G_WITH_WHO(fgm)[i];
   G_OPEN(tgm)   = G_OPEN(fgm);
   G_CLOSE(tgm)  = G_CLOSE(fgm);
   G_MINLVL(tgm) = G_MINLVL(fgm);
@@ -48,7 +50,7 @@ void copy_guild(struct guild_data *tgm, struct guild_data *fgm)
 /*-------------------------------------------------------------------*/
 /*. Free all the character strings in a guild structure . */
 
-void free_guild_strings(struct guild_data *guild)
+static void free_guild_strings(struct guild_data *guild)
 {
   if (G_NO_SKILL(guild)) {
     free(G_NO_SKILL(guild));

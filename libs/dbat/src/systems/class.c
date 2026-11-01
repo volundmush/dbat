@@ -35,8 +35,11 @@
 #include "dbat/random.h"
 #include "dbat/relocate.h"
 #include "dbat/stringutils.h"
+#include "dbat/local_limits.h"
 
 #include <errno.h>
+
+static const char *sensei_abbr(int s);
 
 /* Names first */
 
@@ -65,7 +68,7 @@
  * the end of this file reads in the actual values.
  */
 
-const char *config_sect[NUM_CONFIG_SECTIONS + 1] = {
+static const char *config_sect[NUM_CONFIG_SECTIONS + 1] = {
     "version",
     "experience",
     "vernum",
@@ -123,38 +126,6 @@ void cedit_creation(struct char_data *ch)
 /* This character creation method is original */
 
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
-const int class_hit_die_size[NUM_CLASSES] = {
-    /* Wi */ 4,
-    /* Cl */ 8,
-    /* Ro */ 6,
-    /* Fi */ 10,
-    /* Mo */ 8,
-    /* Pa */ 10,
-    /* So */ 4,
-    /* Dr */ 8,
-    /* Ba */ 6,
-    /* Ra */ 8,
-    /* Ba */ 12,
-    /* AA */ 8,
-    /* AT */ 4,
-    /* AM */ 4,
-    /* AS */ 6,
-    /* BG */ 10,
-    /* DD */ 12,
-    /* Du */ 10,
-    /* Dw */ 12,
-    /* EK */ 6,
-    /* HE */ 8,
-    /* HW */ 8,
-    /* LM */ 4,
-    /* MT */ 4,
-    /* SD */ 8,
-    /* TH */ 4,
-    /* Ex */ 6,
-    /* Ad */ 6,
-    /* Co */ 4,
-    /* Ar */ 8,
-    /* Wa */ 8};
 
 /* Some initializations for characters, including initial skills */
 void do_start(struct char_data *ch)
@@ -1751,7 +1722,7 @@ const char *sensei_name(int s)
   }
 }
 
-const char *sensei_abbr(int s)
+static const char *sensei_abbr(int s)
 {
   switch (s) {
     case CLASS_ROSHI:

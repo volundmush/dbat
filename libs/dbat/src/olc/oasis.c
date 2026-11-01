@@ -19,32 +19,18 @@
 #include "dbat/dg_olc.h"
 #include "dbat/handler.h"
 #include "dbat/guild.h"
-
-/******************************************************************************/
-/** Internal Data Structures                                                 **/
-/******************************************************************************/
-struct olc_scmd_info_t {
-  const char *text;
-  int con_type;
-} olc_scmd_info[] = {
-    {"room",    CON_REDIT   },
-    {"object",  CON_OEDIT   },
-    {"zone",    CON_ZEDIT   },
-    {"mobile",  CON_MEDIT   },
-    {"shop",    CON_SEDIT   },
-    {"config",  CON_CEDIT   },
-    {"trigger", CON_TRIGEDIT},
-    {"action",  CON_AEDIT   },
-    {"guild",   CON_GEDIT   },
-    {"help",    CON_HEDIT   },
-    {"house",   CON_HSEDIT  },
-    {"\n",      -1          }
-};
+#include "dbat/aedit.h"
+#include "dbat/hedit.h"
+#include "dbat/medit.h"
+#include "dbat/sedit.h"
+#include "dbat/act.social.h"
+#include "dbat/gengld.h"
+#include "dbat/hsedit.h"
 
 /******************************************************************************/
 /** Internal Functions                                                       **/
 /******************************************************************************/
-void free_config(struct config_data *data);
+static void free_config(struct config_data *data);
 
 /* -------------------------------------------------------------------------- */
 
@@ -368,7 +354,7 @@ void split_argument(char *argument, char *tag)
   *wrt = '\0';
 }
 
-void free_config(struct config_data *data)
+static void free_config(struct config_data *data)
 {
   /****************************************************************************/
   /** Free strings.                                                          **/

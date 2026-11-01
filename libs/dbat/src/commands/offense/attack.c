@@ -25,6 +25,8 @@
 #include "dbat/class.h"
 #include "dbat/techniques.h"
 
+static ACMD(do_attack2);
+
 ACMD(do_attack)
 {
   int prob, perc, avo, index = 0, pry = 0, dge = 0, blk = 0, skill = 0, wtype = 0, gun = FALSE, gun2 = FALSE;
@@ -803,7 +805,7 @@ ACMD(do_attack)
   }
 }
 
-ACMD(do_attack2)
+static ACMD(do_attack2)
 {
   int prob, perc, avo, index = 0, pry = 0, dge = 0, blk = 0, skill = 0, wtype = 0, gun2 = FALSE;
   int dualwield = 0;

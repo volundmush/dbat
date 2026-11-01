@@ -3,7 +3,6 @@
 #include "dbat/consts/aligns.h"
 
 // variables
-extern const room_vnum freeres[NUM_ALIGNS];
 
 // functions
 void log_imm_action(const char *messg, ...) __attribute__((format(printf, 1, 2)));
@@ -18,13 +17,9 @@ void update_innate(struct char_data *ch);
 
 // commands
 ACMD(do_skills);
-ACMD(do_gen_comm);
-ACMD(do_charge);
-ACMD(do_wear);
 ACMD(do_quit);
 ACMD(do_save);
 ACMD(do_not_here);
-ACMD(do_hide);
 ACMD(do_steal);
 ACMD(do_practice);
 ACMD(do_visible);
@@ -38,7 +33,6 @@ ACMD(do_display);
 ACMD(do_gen_write);
 ACMD(do_gen_tog);
 ACMD(do_file);
-ACMD(do_scribe);
 ACMD(do_pagelength);
 ACMD(do_scouter);
 ACMD(do_snet);
@@ -96,7 +90,6 @@ ACMD(do_meditate);
 ACMD(do_aura);
 ACMD(do_think);
 ACMD(do_block);
-ACMD(do_visible);
 ACMD(do_compare);
 ACMD(do_break);
 ACMD(do_fix);

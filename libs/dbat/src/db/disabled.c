@@ -7,6 +7,10 @@
 
 #include <unistd.h>
 
+static DISABLED_DATA *disabled_first = 0;
+
+static void save_disabled();
+
 /*
  * Code to disable or enable buggy commands on the run, saving
  * a list of disabled commands to disk. Originally created by
@@ -150,7 +154,7 @@ void load_disabled()
 }
 
 /* Save disabled commands */
-void save_disabled()
+static void save_disabled()
 {
   FILE *fp;
   DISABLED_DATA *p;
@@ -184,5 +188,3 @@ void free_disabled()
     free(p);
   }
 }
-
-DISABLED_DATA *disabled_first = 0;

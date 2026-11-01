@@ -5,9 +5,7 @@
 void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir);
 struct obj_data *find_control(struct char_data *ch);
 struct obj_data *find_vehicle_by_vnum(int vnum);
-struct obj_data *get_obj_in_list_type(int type, struct obj_data *list);
 
 // commands
 ACMD(do_warp);
 ACMD(do_drive);
-struct obj_data *find_control(struct char_data *ch);

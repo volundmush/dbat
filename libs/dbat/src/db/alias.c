@@ -195,7 +195,7 @@ ACMD(do_alias)
         a->type = ALIAS_COMPLEX;
       else
         a->type = ALIAS_SIMPLE;
-      a->next         = char_get_aliases(ch);
+      a->next = char_get_aliases(ch);
       char_set_aliases(ch, a);
       send_to_char(ch, "Alias added.\r\n");
     }
@@ -210,7 +210,7 @@ ACMD(do_alias)
  */
 #define NUM_TOKENS 9
 
-void perform_complex_alias(struct txt_q *input_q, char *orig, struct alias_data *a)
+static void perform_complex_alias(struct txt_q *input_q, char *orig, struct alias_data *a)
 {
   struct txt_q temp_queue;
   char *tokens[NUM_TOKENS], *temp, *write_point;

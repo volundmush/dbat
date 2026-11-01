@@ -25,12 +25,14 @@
 #include "dbat/spec_procs.h"
 #include "dbat/class.h"
 
+static void mob_taunt(struct char_data *ch);
+
 /* local functions */
-int player_present(struct char_data *ch);
+static int player_present(struct char_data *ch);
 
 #define MOB_AGGR_TO_ALIGN (MOB_AGGR_EVIL | MOB_AGGR_NEUTRAL | MOB_AGGR_GOOD)
 
-int player_present(struct char_data *ch)
+static int player_present(struct char_data *ch)
 {
 
   struct char_data *vict, *next_v;
@@ -436,7 +438,7 @@ void mobile_activity(void)
 }
 
 /* This handles NPCs taunting opponents or reacting to combat. */
-void mob_taunt(struct char_data *ch)
+static void mob_taunt(struct char_data *ch)
 {
 
   int message = 1;

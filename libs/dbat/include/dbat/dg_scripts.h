@@ -132,7 +132,6 @@ struct script_memory {
 
 extern struct index_data **trig_index;
 
-extern struct index_data **trig_index;
 extern struct trig_data *trigger_list;
 extern int top_of_trigt;
 
@@ -168,9 +167,6 @@ ACMD(do_mfollow);
 ACMD(do_mrecho);
 
 /* function prototypes from dg_triggers.c */
-char *one_phrase(char *arg, char *first_arg);
-int is_substring(char *sub, char *string);
-int word_check(char *str, char *wordlist);
 
 void act_mtrigger(const char_data *ch, char *str, char_data *actor, const char_data *victim, obj_data *object, const obj_data *target, const char *arg);
 void speech_mtrigger(char_data *actor, char *str);
@@ -193,8 +189,6 @@ void bribe_mtrigger(char_data *ch, char_data *actor,
 int wear_otrigger(obj_data *obj, char_data *actor, int where);
 int remove_otrigger(obj_data *obj, char_data *actor);
 
-int cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
-              char *argument, int type);
 int command_mtrigger(char_data *actor, char *cmd, char *argument);
 int command_otrigger(char_data *actor, char *cmd, char *argument);
 int command_wtrigger(char_data *actor, char *cmd, char *argument);
@@ -272,7 +266,6 @@ void add_to_lookup_table(long uid, int type, void *c);
 long dg_new_mob_uid(void);
 long dg_new_obj_uid(void);
 void dg_log_uid_stats(void);
-void dg_context_str(char *buf, size_t len);
 void remove_from_lookup_table(long uid);
 
 /* from dg_db_scripts.c */
@@ -285,18 +278,10 @@ void assign_triggers(void *i, int type);
 
 /* From dg_variables.c */
 void add_var(struct trig_var_data **var_list, char *name, const char *value, long id);
-int item_in_list(char *item, obj_data *list);
-char *skill_percent(struct char_data *ch, char *skill);
-int char_has_item(char *item, struct char_data *ch);
 void var_subst(void *go, struct script_data *sc, trig_data *trig,
                int type, char *line, char *buf);
-int text_processed(char *field, char *subfield, struct trig_var_data *vd,
-                   char *str, size_t slen);
-void find_replacement(void *go, struct script_data *sc, trig_data *trig,
-                      int type, char *var, char *field, char *subfield, char *str, size_t slen);
 
 /* From dg_handler.c */
-void free_var_el(struct trig_var_data *var);
 void free_varlist(struct trig_var_data *vd);
 int remove_var(struct trig_var_data **var_list, char *name);
 void free_trigger(trig_data *trig);
@@ -309,7 +294,6 @@ void delete_variables(const char *charname);
 void update_wait_events(struct room_data *to, struct room_data *from);
 
 /* from dg_comm.c */
-char *any_one_name(char *argument, char *first_arg);
 void sub_write(char *arg, char_data *ch, int8_t find_invis, int targets);
 void send_to_zone(char *messg, zone_rnum zone);
 
@@ -318,7 +302,6 @@ void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
                 int type, char *cmd);
 void do_dg_affect(void *go, struct script_data *sc, trig_data *trig,
                   int type, char *cmd);
-void send_char_pos(struct char_data *ch, int dam);
 int valid_dg_target(char_data *ch, int bitvector);
 void script_damage(char_data *vict, int dam);
 

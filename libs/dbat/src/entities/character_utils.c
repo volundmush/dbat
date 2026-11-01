@@ -33,6 +33,30 @@
 #include "dbat/consts/sex.h"
 #include "dbat/consts/races.h"
 #include "dbat/consts/shadowdragons.h"
+#include "dbat/local_limits.h"
+
+static void char_adm_set(struct char_data *ch, int flag, bool on);
+static bool char_has_legs(const struct char_data *ch);
+static bool char_is_fullpssj(const struct char_data *ch);
+static bool char_is_grap(const struct char_data *ch);
+static bool char_is_inferior(const struct char_data *ch);
+static bool char_is_male(const struct char_data *ch);
+static bool char_is_oozaru_race(const struct char_data *ch);
+static bool char_not_hidden(const struct char_data *ch);
+static bool char_oozaru_ok(const struct char_data *ch);
+static bool char_outside_roomflag(const struct char_data *ch);
+static bool char_outside_secttype(const struct char_data *ch);
+static bool char_spar_train(const struct char_data *ch);
+static void cureStatusBurn(char_data *ch, bool announce);
+static void cureStatusPoison(char_data *ch, bool announce);
+static double getCurPLPercent(char_data *ch);
+static int64_t getPercentOfMaxPL(char_data *ch, double amt);
+static bool isFullPL(char_data *ch);
+static int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech);
+static void restoreLimbs(char_data *ch, bool announce);
+static void restoreStatus(char_data *ch, bool announce);
+static int sensei_grav_tolerance(int s_id);
+static double speednar(struct char_data *ch);
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
@@ -186,7 +210,7 @@ void teleport_to(char_data *ch, IDXTYPE rnum)
   update_pos(ch);
 }
 
-bool in_room_range(char_data *ch, IDXTYPE low_rnum, IDXTYPE high_rnum)
+static bool in_room_range(char_data *ch, IDXTYPE low_rnum, IDXTYPE high_rnum)
 {
   return rroom_get_vnum(char_get_in_room(ch)) >= low_rnum && rroom_get_vnum(char_get_in_room(ch)) <= high_rnum;
 }
@@ -235,7 +259,7 @@ static uint16_t grav_threshold_for(int grav)
   return 0;
 }
 
-bool can_tolerate_gravity(char_data *ch, int grav)
+static bool can_tolerate_gravity(char_data *ch, int grav)
 {
   if (char_is_npc(ch)) return true;
   int tolerance = 0;
@@ -245,7 +269,7 @@ bool can_tolerate_gravity(char_data *ch, int grav)
   return getMaxPL(ch) >= grav_threshold_for(grav);
 }
 
-int calcTier(char_data *ch)
+static int calcTier(char_data *ch)
 {
   int tier = ch->level / 10;
   if ((ch->level % 10) == 0)
@@ -453,17 +477,17 @@ int64_t getBasePL(char_data *ch)
   return ch->basepl;
 }
 
-double getCurPLPercent(char_data *ch)
+static double getCurPLPercent(char_data *ch)
 {
   return (double)getCurPL(ch) / (double)getMaxPL(ch);
 }
 
-int64_t getPercentOfMaxPL(char_data *ch, double amt)
+static int64_t getPercentOfMaxPL(char_data *ch, double amt)
 {
   return getMaxPL(ch) * ABS(amt);
 }
 
-bool isFullPL(char_data *ch)
+static bool isFullPL(char_data *ch)
 {
   return ch->health >= 1.0;
 }
@@ -747,7 +771,7 @@ void restoreVitals(char_data *ch, bool announce)
   restoreST(ch, announce);
 }
 
-void restoreStatus(char_data *ch, bool announce)
+static void restoreStatus(char_data *ch, bool announce)
 {
   cureStatusKnockedOut(ch, announce);
   cureStatusBurn(ch, announce);
@@ -785,7 +809,7 @@ void cureStatusKnockedOut(char_data *ch, bool announce)
   }
 }
 
-void cureStatusBurn(char_data *ch, bool announce)
+static void cureStatusBurn(char_data *ch, bool announce)
 {
   if (char_aff_flagged(ch, AFF_BURNED)) {
     if (announce) {
@@ -796,7 +820,7 @@ void cureStatusBurn(char_data *ch, bool announce)
   }
 }
 
-void cureStatusPoison(char_data *ch, bool announce)
+static void cureStatusPoison(char_data *ch, bool announce)
 {
   act("@C$n@W suddenly looks a lot better!@b", FALSE, ch, 0, 0, TO_NOTVICT);
   affect_from_char(ch, SPELL_POISON);
@@ -809,7 +833,7 @@ static const char *limb_names[] = {
     "right leg",
     "left leg"};
 
-void restoreLimbs(char_data *ch, bool announce)
+static void restoreLimbs(char_data *ch, bool announce)
 {
 
   for (int l = 1; l <= 4; l++) {
@@ -854,12 +878,12 @@ int64_t gainBasePLPercent(char_data *ch, double amt, bool trans_mult)
   return gainBasePL(ch, ch->basepl * amt, trans_mult);
 }
 
-int64_t gainBaseKIPercent(char_data *ch, double amt, bool trans_mult)
+static int64_t gainBaseKIPercent(char_data *ch, double amt, bool trans_mult)
 {
   return gainBaseKI(ch, ch->baseki * amt, trans_mult);
 }
 
-int64_t gainBaseSTPercent(char_data *ch, double amt, bool trans_mult)
+static int64_t gainBaseSTPercent(char_data *ch, double amt, bool trans_mult)
 {
   return gainBaseST(ch, ch->basest * amt, trans_mult);
 }
@@ -881,7 +905,7 @@ int64_t getMaxCarryWeight(char_data *ch)
   return MAX(1L, (getMaxPL(ch) / 200) + (char_get_aff_abils_str(ch) * 50));
 }
 
-int64_t getCurGearWeight(char_data *ch)
+static int64_t getCurGearWeight(char_data *ch)
 {
   int64_t total_weight = 0;
 
@@ -2844,7 +2868,7 @@ int64_t molt_threshold(struct char_data *ch)
   return MIN(threshold, max);
 }
 
-int armor_evolve(struct char_data *ch)
+static int armor_evolve(struct char_data *ch)
 {
   int value = 0;
 
@@ -2977,7 +3001,7 @@ void mob_talk(struct char_data *ch, const char *speech)
   } /* End for loop */
 } /* End Mob Talk */
 
-int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech)
+static int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech)
 {
   if (ch != NULL && vict != NULL) {
     if (!char_is_npc(ch) && char_is_npc(vict)) {
@@ -3322,7 +3346,7 @@ char *introd_calc(struct char_data *ch)
   return (intro);
 }
 
-double speednar(struct char_data *ch)
+static double speednar(struct char_data *ch)
 {
 
   double result     = 0;
@@ -3691,27 +3715,27 @@ void add_follower(struct char_data *ch, struct char_data *leader)
   }
 }
 
-int default_admin_flags_mortal[] =
+static int default_admin_flags_mortal[] =
     {-1};
 
-int default_admin_flags_immortal[] =
+static int default_admin_flags_immortal[] =
     {ADM_SEEINV, ADM_SEESECRET, ADM_FULLWHERE, ADM_NOPOISON, ADM_WALKANYWHERE,
      ADM_NODAMAGE, ADM_NOSTEAL, -1};
 
-int default_admin_flags_builder[] =
+static int default_admin_flags_builder[] =
     {-1};
 
-int default_admin_flags_god[] =
+static int default_admin_flags_god[] =
     {ADM_ALLSHOPS, ADM_TELLALL, ADM_KNOWWEATHER, ADM_MONEY, ADM_EATANYTHING,
      ADM_NOKEYS, -1};
 
-int default_admin_flags_grgod[] =
+static int default_admin_flags_grgod[] =
     {ADM_TRANSALL, ADM_FORCEMASS, ADM_ALLHOUSES, -1};
 
-int default_admin_flags_impl[] =
+static int default_admin_flags_impl[] =
     {ADM_SWITCHMORTAL, ADM_INSTANTKILL, ADM_CEDIT, -1};
 
-int *default_admin_flags[ADMLVL_IMPL + 1] = {
+static int *default_admin_flags[ADMLVL_IMPL + 1] = {
     default_admin_flags_mortal,
     default_admin_flags_immortal,
     default_admin_flags_builder,
@@ -4318,7 +4342,7 @@ int handle_speed(struct char_data *ch, struct char_data *vict)
   return (0);
 }
 
-bool race_has_tail(int r_id)
+static bool race_has_tail(int r_id)
 {
   switch (r_id) {
     case RACE_ICER:
@@ -4459,7 +4483,7 @@ room_vnum sensei_start_room(int s_id)
   }
 }
 
-int sensei_grav_tolerance(int s_id)
+static int sensei_grav_tolerance(int s_id)
 {
   switch (s_id) {
     case CLASS_BARDOCK:
@@ -4670,7 +4694,7 @@ double char_get_speedvem(struct char_data *ch)
   return (char_get_speedint(ch) - (char_get_speedint(ch) * speednar(ch)));
 }
 
-bool char_is_grap(const struct char_data *ch)
+static bool char_is_grap(const struct char_data *ch)
 {
   return (char_get_grappling(ch) || char_get_grappled(ch));
 }
@@ -4680,7 +4704,7 @@ long char_get_speedint(struct char_data *ch)
   return (char_is_bio(ch) ? ((char_get_aff_abils_cha(ch) * char_get_aff_abils_dex(ch)) * (getEffMaxPL(ch) / 1200) / 1200) + (char_get_aff_abils_cha(ch) * (char_get_kaioken(ch) * 100)) : ((char_get_aff_abils_cha(ch) * char_get_aff_abils_dex(ch)) * (getEffMaxPL(ch) / 1000) / 1000) + (char_get_aff_abils_cha(ch) * (char_get_kaioken(ch) * 100)));
 }
 
-bool char_is_inferior(const struct char_data *ch)
+static bool char_is_inferior(const struct char_data *ch)
 {
   return (char_is_konatsu(ch) || char_is_demon(ch));
 }
@@ -4703,8 +4727,8 @@ bool char_has_genome(const struct char_data *ch, int i)
 double char_get_blessbonus(struct char_data *ch)
 {
   return (char_aff_flagged(ch, AFF_BLESS) ? (char_get_blesslvl(ch) >= 100 ? ((getMaxKI(ch) * 0.5) + (getMaxST(ch) * 0.5)) * 0.1 : char_get_blesslvl(ch) >= 60 ? ((getMaxKI(ch) * 0.5) + (getMaxST(ch) * 0.5)) * 0.05
-                                                                                                                                      : char_get_blesslvl(ch) >= 40   ? ((getMaxKI(ch) * 0.5) + (getMaxST(ch) * 0.5)) * 0.02
-                                                                                                                                                                      : 0)
+                                                                                                                              : char_get_blesslvl(ch) >= 40   ? ((getMaxKI(ch) * 0.5) + (getMaxST(ch) * 0.5)) * 0.02
+                                                                                                                                                              : 0)
                                           : 0);
 }
 
@@ -4777,27 +4801,27 @@ bool char_in_arena(const struct char_data *ch)
   return (rroom_get_vnum(char_get_in_room(ch)) >= 17800 && rroom_get_vnum(char_get_in_room(ch)) <= 17874);
 }
 
-bool char_light_ok(const struct char_data *sub)
+static bool char_light_ok(const struct char_data *sub)
 {
   return (!char_aff_flagged(sub, AFF_BLIND) && !char_plr_flagged(sub, PLR_EYEC) && (rroom_is_light(char_get_in_room(sub)) || char_aff_flagged((sub), AFF_INFRAVISION) || (char_is_mutant(sub) && (char_get_genome(sub, 0) == 4 || char_get_genome(sub, 1) == 4)) || char_plr_flagged(sub, PLR_AURALIGHT)));
 }
 
-bool char_invis_ok(const struct char_data *sub, const struct char_data *obj)
+static bool char_invis_ok(const struct char_data *sub, const struct char_data *obj)
 {
   return (!char_aff_flagged((obj), AFF_INVISIBLE) || char_aff_flagged(sub, AFF_DETECT_INVIS));
 }
 
-bool char_mort_can_see(const struct char_data *sub, const struct char_data *obj)
+static bool char_mort_can_see(const struct char_data *sub, const struct char_data *obj)
 {
   return (char_light_ok(sub) && char_invis_ok(sub, obj));
 }
 
-bool char_imm_can_see(const struct char_data *sub, const struct char_data *obj)
+static bool char_imm_can_see(const struct char_data *sub, const struct char_data *obj)
 {
   return (char_mort_can_see(sub, obj) || (!char_is_npc(sub) && char_prf_flagged(sub, PRF_HOLYLIGHT)));
 }
 
-bool char_is_self(const struct char_data *sub, const struct char_data *obj)
+static bool char_is_self(const struct char_data *sub, const struct char_data *obj)
 {
   return ((sub) == (obj));
 }
@@ -4807,22 +4831,22 @@ bool char_can_see(const struct char_data *sub, const struct char_data *obj)
   return (char_is_self(sub, obj) || ((char_get_admlevel(sub) >= (char_is_npc(obj) ? 0 : char_get_invis_level(obj))) && char_imm_can_see(sub, obj) && (char_not_hidden(obj) || char_get_admlevel(sub) > 0)));
 }
 
-bool char_not_hidden(const struct char_data *ch)
+static bool char_not_hidden(const struct char_data *ch)
 {
   return (!char_aff_flagged(ch, AFF_HIDE));
 }
 
-bool char_invis_ok_obj(const struct char_data *sub, const struct obj_data *obj)
+static bool char_invis_ok_obj(const struct char_data *sub, const struct obj_data *obj)
 {
   return (!obj_extra_flagged((obj), ITEM_INVISIBLE) || char_aff_flagged((sub), AFF_DETECT_INVIS));
 }
 
-bool char_can_see_obj_carrier(const struct char_data *sub, const struct obj_data *obj)
+static bool char_can_see_obj_carrier(const struct char_data *sub, const struct obj_data *obj)
 {
   return ((!obj->carried_by || char_can_see(sub, obj->carried_by)) && (!obj->worn_by || char_can_see(sub, obj->worn_by)));
 }
 
-bool char_mort_can_see_obj(const struct char_data *sub, const struct obj_data *obj)
+static bool char_mort_can_see_obj(const struct char_data *sub, const struct obj_data *obj)
 {
   return ((char_light_ok(sub) || obj->carried_by == sub || obj->worn_by) && char_invis_ok_obj(sub, obj) && char_can_see_obj_carrier(sub, obj));
 }
@@ -4832,7 +4856,7 @@ bool char_can_see_obj(const struct char_data *sub, const struct obj_data *obj)
   return (char_mort_can_see_obj(sub, obj) || (!char_is_npc(sub) && char_prf_flagged((sub), PRF_HOLYLIGHT)));
 }
 
-bool char_can_carry_obj(struct char_data *ch, struct obj_data *obj)
+static bool char_can_carry_obj(struct char_data *ch, struct obj_data *obj)
 {
   return (((char_get_carry_weight(ch) + obj_get_weight(obj)) <= getMaxCarryWeight(ch)) && ((char_get_carry_items(ch) + 1) <= char_can_carry_n(ch)));
 }
@@ -4842,17 +4866,17 @@ bool char_can_get_obj(struct char_data *ch, struct obj_data *obj)
   return (obj_wear_flagged((obj), ITEM_WEAR_TAKE) && !obj_get_sitting(obj) && char_can_carry_obj((ch), (obj)) && char_can_see_obj((ch), (obj)));
 }
 
-bool char_disg(const struct char_data *ch, const struct char_data *vict)
+static bool char_disg(const struct char_data *ch, const struct char_data *vict)
 {
   return ((!char_plr_flagged(ch, PLR_DISGUISED)) || (char_plr_flagged(ch, PLR_DISGUISED) && (char_get_admlevel(vict) > 0 || char_is_npc(vict))));
 }
 
-bool char_introd(struct char_data *ch, struct char_data *vict)
+static bool char_introd(struct char_data *ch, struct char_data *vict)
 {
   return (ch == vict || readIntro(ch, vict) == 1 || (char_is_npc(vict) || char_is_npc(ch) || (char_get_admlevel(ch) > 0 || char_get_admlevel(vict) > 0)));
 }
 
-bool char_iswiz(const struct char_data *ch, const struct char_data *vict)
+static bool char_iswiz(const struct char_data *ch, const struct char_data *vict)
 {
   return (ch == vict || char_get_admlevel(ch) > 0 || char_get_admlevel(vict) > 0 || char_is_npc(vict) || char_is_npc(ch));
 }
@@ -5067,7 +5091,7 @@ bool char_is_cheap_race(const struct char_data *ch)
   return (char_is_truffle(ch) || char_is_mutant(ch) || char_is_konatsu(ch) || char_is_demon(ch) || char_is_kanassan(ch));
 }
 
-bool char_spar_train(const struct char_data *ch)
+static bool char_spar_train(const struct char_data *ch)
 {
   return (char_get_fighting(ch) && !char_is_npc(ch) && char_plr_flagged(ch, PLR_SPAR) && !char_is_npc(char_get_fighting(ch)) && char_plr_flagged(char_get_fighting(ch), PLR_SPAR));
 }
@@ -5077,7 +5101,7 @@ bool char_is_nonptrans(const struct char_data *ch)
   return (char_is_human(ch) || ((char_is_saiyan(ch) || char_is_halfbreed(ch)) && !char_is_fullpssj(ch) && !char_plr_flagged(ch, PLR_LSSJ) && !char_plr_flagged(ch, PLR_OOZARU)) || char_is_namek(ch) || char_is_mutant(ch) || char_is_icer(ch) || char_is_kai(ch) || char_is_konatsu(ch) || char_is_demon(ch) || char_is_kanassan(ch));
 }
 
-bool char_is_fullpssj(const struct char_data *ch)
+static bool char_is_fullpssj(const struct char_data *ch)
 {
   return ((char_is_saiyan(ch) && char_plr_flagged(ch, PLR_FPSSJ) && char_plr_flagged(ch, PLR_TRANS1)) || (char_is_halfbreed(ch) && char_plr_flagged(ch, PLR_FPSSJ) && char_plr_flagged(ch, PLR_TRANS1)));
 }
@@ -5092,12 +5116,12 @@ bool char_moon_ok(const struct char_data *ch)
   return (char_has_moon(ch) && MOON_TIMECHECK() && char_oozaru_ok(ch));
 }
 
-bool char_oozaru_ok(const struct char_data *ch)
+static bool char_oozaru_ok(const struct char_data *ch)
 {
   return (char_is_oozaru_race(ch) && char_plr_flagged(ch, PLR_STAIL) && !char_is_transformed(ch));
 }
 
-bool char_is_oozaru_race(const struct char_data *ch)
+static bool char_is_oozaru_race(const struct char_data *ch)
 {
   return (char_is_saiyan(ch) || char_is_halfbreed(ch));
 }
@@ -5117,7 +5141,7 @@ bool char_has_arms(const struct char_data *ch)
   return (((char_is_npc(ch) && (char_mob_flagged(ch, MOB_LARM) || char_mob_flagged(ch, MOB_RARM))) || char_get_limb_condition(ch, (1) - 1) > 0 || char_get_limb_condition(ch, (2) - 1) > 0 || char_plr_flagged(ch, PLR_CRARM) || char_plr_flagged(ch, PLR_CLARM)) && ((!char_get_grappling(ch) && !char_get_grappled(ch)) || (char_get_grappling(ch) && char_get_grap(ch) == 3) || (char_get_grappled(ch) && char_get_grap(ch) != 1 && char_get_grap(ch) != 4)));
 }
 
-bool char_has_legs(const struct char_data *ch)
+static bool char_has_legs(const struct char_data *ch)
 {
   return (((char_is_npc(ch) && (char_mob_flagged(ch, MOB_LLEG) || char_mob_flagged(ch, MOB_RLEG))) || char_get_limb_condition(ch, (3) - 1) > 0 || char_get_limb_condition(ch, (4) - 1) > 0 || char_plr_flagged(ch, PLR_CRLEG) || char_plr_flagged(ch, PLR_CLLEG)) && ((!char_get_grappling(ch) && !char_get_grappled(ch)) || (char_get_grappling(ch) && char_get_grap(ch) == 3) || (char_get_grappled(ch) && char_get_grap(ch) != 1)));
 }
@@ -5237,7 +5261,7 @@ bool char_is_mechanical(const struct char_data *ch)
   return (char_get_race(ch) == RACE_MECHANICAL);
 }
 
-bool char_is_male(const struct char_data *ch)
+static bool char_is_male(const struct char_data *ch)
 {
   return (char_get_sex(ch) == SEX_MALE);
 }
@@ -5252,12 +5276,12 @@ bool char_is_outside(const struct char_data *ch)
   return (char_outside_roomflag(ch) && char_outside_secttype(ch));
 }
 
-bool char_outside_roomflag(const struct char_data *ch)
+static bool char_outside_roomflag(const struct char_data *ch)
 {
   return (!rroom_flagged(char_get_in_room(ch), ROOM_INDOORS) && !rroom_flagged(char_get_in_room(ch), ROOM_UNDERGROUND) && !rroom_flagged(char_get_in_room(ch), ROOM_SPACE));
 }
 
-bool char_outside_secttype(const struct char_data *ch)
+static bool char_outside_secttype(const struct char_data *ch)
 {
   return ((rroom_sect(char_get_in_room(ch)) != SECT_INSIDE) && (rroom_sect(char_get_in_room(ch)) != SECT_UNDERWATER) && (rroom_sect(char_get_in_room(ch)) != SECT_IMPORTANT) && (rroom_sect(char_get_in_room(ch)) != SECT_SHOP) && (rroom_sect(char_get_in_room(ch)) != SECT_SPACE));
 }
@@ -6799,7 +6823,7 @@ void char_prf_set(struct char_data *ch, int flag, bool on)
   flag_array_set(char_get_pref(ch), flag, on);
 }
 
-void char_adm_set(struct char_data *ch, int flag, bool on)
+static void char_adm_set(struct char_data *ch, int flag, bool on)
 {
   flag_array_set(char_get_admflags(ch), flag, on);
 }

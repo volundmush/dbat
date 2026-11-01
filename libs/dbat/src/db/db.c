@@ -61,6 +61,11 @@
 #include <stdlib.h>
 #include <linux/limits.h>
 #include "dbat/guild.h"
+#include "dbat/context_help.h"
+#include "dbat/local_limits.h"
+
+static void load_help(FILE *fl, char *name);
+static void strip_string(char *buffer);
 
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
@@ -83,23 +88,23 @@ struct char_data *EDRAGON = NULL;   /* This is Shenron when he is loaded */
 room_rnum r_mortal_start_room;      /* rnum of mortal start room	 */
 room_rnum r_immort_start_room;      /* rnum of immort start room	 */
 room_rnum r_frozen_start_room;      /* rnum of frozen start room	 */
-int xap_objs   = 0;                 /* Xap objs                      */
-int converting = FALSE;
+int xap_objs          = 0;          /* Xap objs                      */
+static int converting = FALSE;
 
-char *credits    = NULL; /* game credits			 */
-char *news       = NULL; /* mud news			 */
-char *motd       = NULL; /* message of the day - mortals  */
-char *imotd      = NULL; /* message of the day - immorts  */
-char *GREETINGS  = NULL; /* opening credits screen	 */
-char *GREETANSI  = NULL; /* ansi opening credits screen	 */
-char *help       = NULL; /* help screen			 */
-char *info       = NULL; /* info page			 */
-char *wizlist    = NULL; /* list of higher gods		 */
-char *immlist    = NULL; /* list of peon gods		 */
-char *background = NULL; /* background story		 */
-char *handbook   = NULL; /* handbook for new immortals	 */
-char *policies   = NULL; /* policies page		 */
-char *ihelp      = NULL; /* help screen (immortals)	 */
+char *credits          = NULL; /* game credits			 */
+char *news             = NULL; /* mud news			 */
+char *motd             = NULL; /* message of the day - mortals  */
+char *imotd            = NULL; /* message of the day - immorts  */
+static char *GREETINGS = NULL; /* opening credits screen	 */
+char *GREETANSI        = NULL; /* ansi opening credits screen	 */
+char *help             = NULL; /* help screen			 */
+char *info             = NULL; /* info page			 */
+char *wizlist          = NULL; /* list of higher gods		 */
+char *immlist          = NULL; /* list of peon gods		 */
+char *background       = NULL; /* background story		 */
+char *handbook         = NULL; /* handbook for new immortals	 */
+char *policies         = NULL; /* policies page		 */
+char *ihelp            = NULL; /* help screen (immortals)	 */
 
 struct help_index_element *help_table = NULL; /* the help table	 */
 int top_of_helpt                      = 0;
@@ -147,7 +152,7 @@ void mag_assign_spells(void);
 void create_command_list(void);
 void load_banned(void);
 void Read_Invalid_List(void);
-int hsort(const void *a, const void *b);
+static int hsort(const void *a, const void *b);
 void prune_crlf(char *txt);
 void build_player_index(void);
 void memorize_add(struct char_data *ch, int spellnum, int timer);
@@ -517,7 +522,7 @@ void boot_world(void)
   }
 }
 
-void free_extra_descriptions(struct extra_descr_data *edesc)
+static void free_extra_descriptions(struct extra_descr_data *edesc)
 {
   struct extra_descr_data *enext;
 
@@ -724,7 +729,7 @@ void destroy_db(void)
      - Elie Rosenblum Dec. 12 2003 */
 #define NUM_OBJ_UNIQUE_POOLS 5000
 
-struct obj_unique_hash_elem **obj_unique_hash_pools = NULL;
+static struct obj_unique_hash_elem **obj_unique_hash_pools = NULL;
 
 static void init_obj_unique_hash()
 {
@@ -2049,7 +2054,7 @@ static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr)
   return 0;
 }
 
-int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
+static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
 {
   int j, t[10], retval;
   char line[READ_SIZE], *tmpptr, letter;
@@ -2717,7 +2722,7 @@ void free_help_table(void)
   top_of_helpt = 0;
 }
 
-void load_help(FILE *fl, char *name)
+static void load_help(FILE *fl, char *name)
 {
   char key[READ_SIZE + 1], next_key[READ_SIZE + 1], entry[32384];
   size_t entrylen;
@@ -2778,7 +2783,7 @@ void load_help(FILE *fl, char *name)
   }
 }
 
-int hsort(const void *a, const void *b)
+static int hsort(const void *a, const void *b)
 {
   const struct help_index_element *a1, *b1;
 
@@ -4934,7 +4939,7 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
    saved to a file.  Use it only on buffers, not on the orginal
    strings. */
 
-void strip_string(char *buffer)
+static void strip_string(char *buffer)
 {
   char *ptr, *str;
 

@@ -17,6 +17,9 @@
 #include "dbat/genzon.h"
 #include "dbat/dg_olc.h"
 
+static int copy_room(struct room_data *to, struct room_data *from);
+static int copy_room_strings(struct room_data *dest, struct room_data *source);
+
 /*
  * This function will copy the strings so be sure you free your own
  * copies of the description, title, and such.
@@ -417,7 +420,7 @@ int save_rooms(zone_rnum zone_num)
   return TRUE;
 }
 
-int copy_room(struct room_data *to, struct room_data *from)
+static int copy_room(struct room_data *to, struct room_data *from)
 {
   free_room_strings(to);
   *to = *from;
@@ -439,7 +442,7 @@ int copy_room(struct room_data *to, struct room_data *from)
  * and we'd be freeing the very strings we're copying.  If this function
  * is used elsewhere, be sure to free_room_strings() the 'dest' room first.
  */
-int copy_room_strings(struct room_data *dest, struct room_data *source)
+static int copy_room_strings(struct room_data *dest, struct room_data *source)
 {
   int i;
 

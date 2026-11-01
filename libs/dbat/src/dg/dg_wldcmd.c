@@ -23,20 +23,20 @@
   void(name)(room_data * room, char *argument, int cmd, int subcmd)
 
 static void wld_log(room_data *room, const char *format, ...) __attribute__((format(printf, 2, 3)));
-void act_to_room(char *str, room_data *room);
-WCMD(do_wasound);
-WCMD(do_wecho);
-WCMD(do_wsend);
-WCMD(do_wzoneecho);
-WCMD(do_wrecho);
-WCMD(do_wdoor);
-WCMD(do_wteleport);
-WCMD(do_wforce);
-WCMD(do_wpurge);
-WCMD(do_wload);
-WCMD(do_wdamage);
-WCMD(do_wat);
-WCMD(do_weffect);
+static void act_to_room(char *str, room_data *room);
+static WCMD(do_wasound);
+static WCMD(do_wecho);
+static WCMD(do_wsend);
+static WCMD(do_wzoneecho);
+static WCMD(do_wrecho);
+static WCMD(do_wdoor);
+static WCMD(do_wteleport);
+static WCMD(do_wforce);
+static WCMD(do_wpurge);
+static WCMD(do_wload);
+static WCMD(do_wdamage);
+static WCMD(do_wat);
+static WCMD(do_weffect);
 void wld_command_interpreter(room_data *room, char *argument);
 
 struct wld_command_info {
@@ -63,7 +63,7 @@ static void wld_log(room_data *room, const char *format, ...)
 }
 
 /* sends str to room */
-void act_to_room(char *str, room_data *room)
+static void act_to_room(char *str, room_data *room)
 {
   /* no one is in the room */
   if (!room->people)
@@ -81,7 +81,7 @@ void act_to_room(char *str, room_data *room)
 /* World commands */
 
 /* changes gravity, light, or lava levels of a room. */
-WCMD(do_weffect)
+static WCMD(do_weffect)
 {
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   int num = 0;
@@ -138,7 +138,7 @@ WCMD(do_weffect)
 }
 
 /* prints the argument to all the rooms aroud the room */
-WCMD(do_wasound)
+static WCMD(do_wasound)
 {
   int door;
 
@@ -158,7 +158,7 @@ WCMD(do_wasound)
   }
 }
 
-WCMD(do_wecho)
+static WCMD(do_wecho)
 {
   skip_spaces(&argument);
 
@@ -169,7 +169,7 @@ WCMD(do_wecho)
     act_to_room(argument, room);
 }
 
-WCMD(do_wsend)
+static WCMD(do_wsend)
 {
   char buf[MAX_INPUT_LENGTH], *msg;
   char_data *ch;
@@ -199,7 +199,7 @@ WCMD(do_wsend)
     wld_log(room, "no target found for wsend");
 }
 
-WCMD(do_wzoneecho)
+static WCMD(do_wzoneecho)
 {
   zone_rnum zone;
   char room_num[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
@@ -221,7 +221,7 @@ WCMD(do_wzoneecho)
 
 /* prints the message to everyone in the range of numbers */
 /* Thx to Jamie Nelson of 4D for this contribution */
-WCMD(do_wrecho)
+static WCMD(do_wrecho)
 {
   char start[MAX_INPUT_LENGTH], finish[MAX_INPUT_LENGTH], *msg;
 
@@ -235,7 +235,7 @@ WCMD(do_wrecho)
     send_to_range(atoi(start), atoi(finish), "%s\r\n", msg);
 }
 
-WCMD(do_wdoor)
+static WCMD(do_wdoor)
 {
   char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
   char field[MAX_INPUT_LENGTH], *value;
@@ -330,7 +330,7 @@ WCMD(do_wdoor)
   }
 }
 
-WCMD(do_wteleport)
+static WCMD(do_wteleport)
 {
   char_data *ch, *next_ch;
   room_rnum target, nr;
@@ -379,7 +379,7 @@ WCMD(do_wteleport)
   }
 }
 
-WCMD(do_wforce)
+static WCMD(do_wforce)
 {
   char_data *ch, *next_ch;
   char arg1[MAX_INPUT_LENGTH], *line;
@@ -414,7 +414,7 @@ WCMD(do_wforce)
 }
 
 /* purge all objects an npcs in room, or specified object or mob */
-WCMD(do_wpurge)
+static WCMD(do_wpurge)
 {
   char arg[MAX_INPUT_LENGTH];
   char_data *ch, *next_ch;
@@ -466,7 +466,7 @@ WCMD(do_wpurge)
 }
 
 /* loads a mobile or object into the room */
-WCMD(do_wload)
+static WCMD(do_wload)
 {
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   int number = 0;
@@ -558,7 +558,7 @@ WCMD(do_wload)
     wld_log(room, "wload: bad type");
 }
 
-WCMD(do_wdamage)
+static WCMD(do_wdamage)
 {
   char name[MAX_INPUT_LENGTH], amount[MAX_INPUT_LENGTH];
   int dam = 0;
@@ -583,7 +583,7 @@ WCMD(do_wdamage)
   script_damage(ch, dam);
 }
 
-WCMD(do_wat)
+static WCMD(do_wat)
 {
   room_rnum loc = NOWHERE;
   struct char_data *ch;
@@ -617,7 +617,7 @@ WCMD(do_wat)
   wld_command_interpreter(&world[loc], command);
 }
 
-const struct wld_command_info wld_cmd_info[] = {
+static const struct wld_command_info wld_cmd_info[] = {
     {"RESERVED",     0,            0               }, /* this must be first -- for specprocs */
 
     {"wasound ",     do_wasound,   0               },

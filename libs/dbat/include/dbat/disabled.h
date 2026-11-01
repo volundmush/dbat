@@ -3,8 +3,6 @@
 
 typedef struct disabled_data DISABLED_DATA;
 
-extern DISABLED_DATA *disabled_first; /* interpreter.c */
-
 /* one disabled command */
 struct disabled_data {
   DISABLED_DATA *next;                /* pointer to next node          */

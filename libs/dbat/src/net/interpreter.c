@@ -28,8 +28,15 @@
 #include "dbat/obj_edit.h"
 #include "dbat/improved-edit.h"
 #include "dbat/stringutils.h"
+#include "dbat/aedit.h"
+#include "dbat/gedit.h"
+#include "dbat/hedit.h"
+#include "dbat/hsedit.h"
+#include "dbat/statedit.h"
 
 #include <unistd.h>
+
+static void payout(int num);
 
 /* local global variables */
 
@@ -532,7 +539,7 @@ int readUserIndex(char *name)
   return 1;
 }
 
-void payout(int num)
+static void payout(int num)
 {
 
   struct descriptor_data *k;
@@ -1399,7 +1406,7 @@ const char *list_bonus[] = {
 };
 
 /* List cost of bonus/negative */
-const int list_bonus_cost[] = {
+static const int list_bonus_cost[] = {
     -2, /* Bonus 0 */
     -5, /* Bonus 1 */
     -3, /* Bonus 2 */

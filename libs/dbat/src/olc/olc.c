@@ -30,27 +30,8 @@
 #define OLC_USAGE "Usage: olc { . | set | show | obj | mob | room} [args]\r\n"
 
 /* local globals */
-struct char_data *olc_ch;
 
 /* local functions */
-
-const char *olc_modes[] = {
-    "set",     /* set OLC characteristics */
-    "show",    /* show OLC characteristics */
-    ".",       /* repeat last modification command */
-    "room",    /* modify a room */
-    "mobile",  /* modify a mobile */
-    "object",  /* modify an object */
-    "assedit", /* assembly olc */
-    "\n"};
-
-const char *olc_commands[] = {
-    "copy",
-    "name",
-    "description",
-    "aliases",
-    "\n", /* many more to be added */
-};
 
 /* The actual do_olc command for the interpreter.  Determines the target
    entity, checks permissions, and passes control to olc_interpreter */

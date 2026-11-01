@@ -20,10 +20,10 @@
 #include "dbat/act.informative.h"
 
 /* local functions */
-int VALID_EDGE(room_rnum x, int y);
-void bfs_enqueue(room_rnum room, int dir);
-void bfs_dequeue(void);
-void bfs_clear_queue(void);
+static int VALID_EDGE(room_rnum x, int y);
+static void bfs_enqueue(room_rnum room, int dir);
+static void bfs_dequeue(void);
+static void bfs_clear_queue(void);
 
 struct bfs_queue_struct {
   room_rnum room;
@@ -40,7 +40,7 @@ static struct bfs_queue_struct *bfs_queue_head = 0, *bfs_queue_tail = 0;
 #define TOROOM(x, y)    (world[(x)].dir_option[(y)]->to_room)
 #define IS_CLOSED(x, y) (room_exit_flagged(world[(x)].dir_option[(y)], EX_CLOSED))
 
-int VALID_EDGE(room_rnum x, int y)
+static int VALID_EDGE(room_rnum x, int y)
 {
   if (world[x].dir_option[y] == NULL || TOROOM(x, y) == NOWHERE)
     return 0;
@@ -52,7 +52,7 @@ int VALID_EDGE(room_rnum x, int y)
   return 1;
 }
 
-void bfs_enqueue(room_rnum room, int dir)
+static void bfs_enqueue(room_rnum room, int dir)
 {
   struct bfs_queue_struct *curr;
 
@@ -68,7 +68,7 @@ void bfs_enqueue(room_rnum room, int dir)
     bfs_queue_head = bfs_queue_tail = curr;
 }
 
-void bfs_dequeue(void)
+static void bfs_dequeue(void)
 {
   struct bfs_queue_struct *curr;
 
@@ -79,7 +79,7 @@ void bfs_dequeue(void)
   free(curr);
 }
 
-void bfs_clear_queue(void)
+static void bfs_clear_queue(void)
 {
   while (bfs_queue_head)
     bfs_dequeue();

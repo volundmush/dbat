@@ -9,7 +9,7 @@
 #include "dbat/objsave.h"
 #include "dbat/act.misc.h"
 
-int extractions_pending = 0;
+static int extractions_pending = 0;
 
 /* Extract a ch completely from the world, and leave his stuff behind */
 void extract_char_final(struct char_data *ch)

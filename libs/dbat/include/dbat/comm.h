@@ -27,7 +27,6 @@ void send_to_outdoor(const char *messg, ...) __attribute__((format(printf, 1, 2)
 void send_to_moon(const char *messg, ...) __attribute__((format(printf, 1, 2)));
 void send_to_planet(int type, int planet, const char *messg, ...) __attribute__((format(printf, 3, 4)));
 void send_to_range(room_vnum start, room_vnum finish, const char *messg, ...) __attribute__((format(printf, 3, 4)));
-void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to);
 char *act(const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
 void close_socket(struct descriptor_data *d);
 
@@ -66,46 +65,10 @@ extern int no_specials, scheck;
 extern const char compress_offer[4];
 extern bool fCopyOver;
 extern char *last_act_message;
-extern const char RANDOM_COLORS[];
-extern const char CCODE[];
-extern char *ANSI[];
 
 // functions
-void free_user(struct descriptor_data *d);
-void reread_wizlists(int sig);
-void unrestrict_game(int sig);
-void reap(int sig);
-void checkpointing(int sig);
-void hupsig(int sig);
-ssize_t perform_socket_read(int desc, char *read_point, size_t space_left);
-ssize_t perform_socket_write(int desc, const char *txt, size_t length);
-void echo_off(struct descriptor_data *d);
-void echo_on(struct descriptor_data *d);
-void circle_sleep(struct timeval *timeout);
-int get_from_q(struct txt_q *queue, char *dest, int *aliased);
 void init_game(uint16_t port);
-void signal_setup(void);
-void game_loop(int mother_desc);
-int init_socket(uint16_t port);
-int new_descriptor(int s);
-int get_max_players(void);
-int process_output(struct descriptor_data *t);
-int process_input(struct descriptor_data *t);
-void timediff(struct timeval *diff, struct timeval *a, struct timeval *b);
-void timeadd(struct timeval *sum, struct timeval *a, struct timeval *b);
-void flush_queues(struct descriptor_data *d);
-void nonblock(int s);
-int perform_subst(struct descriptor_data *t, char *orig, char *subst);
-void record_usage(void);
-char *make_prompt(struct descriptor_data *point);
-void check_idle_passwords(void);
-void check_idle_menu(void);
-void heartbeat(int heart_pulse);
-struct in_addr *get_bind_addr(void);
 
-int set_sendbuf(int s);
 void free_bufpool(void);
 void setup_log(const char *filename, int fd);
-int open_logfile(const char *filename, FILE *stderr_fp);
-void init_descriptor(struct descriptor_data *newd, int desc);
 bool sendok(struct char_data *ch, int to_sleeping);

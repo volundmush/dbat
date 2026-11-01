@@ -9,6 +9,10 @@ improved-edit.c		Routines specific to the improved editor.
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 
+static int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high);
+static void parse_edit_action(int command, char *string, struct descriptor_data *d);
+static int replace_str(char **string, char *pattern, char *replacement, int rep_all, unsigned int max_size);
+
 int format_script(struct descriptor_data *d);
 
 void send_editor_help(struct descriptor_data *d)
@@ -91,7 +95,7 @@ int improved_editor_execute(struct descriptor_data *d, char *str)
 /*
  * Handle some editor commands.
  */
-void parse_edit_action(int command, char *string, struct descriptor_data *d)
+static void parse_edit_action(int command, char *string, struct descriptor_data *d)
 {
   int indent = 0, rep_all = 0, flags = 0, replaced, i, line_low, line_high, j = 0;
   unsigned int total_len;
@@ -524,7 +528,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d)
  * Re-formats message type formatted char *.
  * (for strings edited with d->str) (mostly olc and mail)
  */
-int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high)
+static int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high)
 {
   int line_chars, cap_next = TRUE, cap_next_next = FALSE, color_chars = 0, i, pass_line = 0;
   char *flow, *start = NULL, temp;
@@ -678,7 +682,7 @@ int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned
   return 1;
 }
 
-int replace_str(char **string, char *pattern, char *replacement, int rep_all, unsigned int max_size)
+static int replace_str(char **string, char *pattern, char *replacement, int rep_all, unsigned int max_size)
 {
   char *replace_buffer = NULL;
   char *flow, *jetsam, temp;

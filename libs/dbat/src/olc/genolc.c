@@ -19,10 +19,10 @@
 #include "dbat/comm.h"
 
 /* List of zones to be saved.  */
-struct save_list_data *save_list;
+static struct save_list_data *save_list;
 
 /* Structure defining all known save types.  */
-struct {
+static struct {
   int save_type;
   int (*func)(IDXTYPE rnum);
   const char *message;

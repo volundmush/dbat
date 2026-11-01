@@ -33,6 +33,12 @@
 #include "dbat/relocate.h"
 #include "dbat/stringutils.h"
 #include "dbat/affect.h"
+#include "dbat/act.offensive.h"
+#include "dbat/local_limits.h"
+
+static void damage_eq(struct char_data *vict, int location);
+static int handle_combo(struct char_data *ch, struct char_data *vict);
+static void handle_death_msg(struct char_data *ch, struct char_data *vict, int type);
 
 /* local functions */
 void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict)
@@ -601,7 +607,7 @@ int check_ruby(struct char_data *ch)
   }
 }
 
-int64_t combo_damage(struct char_data *ch, int64_t damage, int type)
+static int64_t combo_damage(struct char_data *ch, int64_t damage, int type)
 {
   int64_t bonus = 0;
 
@@ -976,7 +982,7 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
   }
 }
 
-int count_physical(struct char_data *ch)
+static int count_physical(struct char_data *ch)
 {
   int count = 0;
 
@@ -1014,7 +1020,7 @@ int count_physical(struct char_data *ch)
   return (count);
 }
 
-int physical_mastery(struct char_data *ch)
+static int physical_mastery(struct char_data *ch)
 {
 
   int count = 22;
@@ -1058,7 +1064,7 @@ int physical_mastery(struct char_data *ch)
   return (count);
 }
 
-int64_t advanced_energy(struct char_data *ch, int64_t dmg)
+static int64_t advanced_energy(struct char_data *ch, int64_t dmg)
 {
 
   if (ch == NULL) {
@@ -1227,7 +1233,7 @@ int roll_hitloc(struct char_data *ch, struct char_data *vict, int skill)
   return (location);
 }
 
-int64_t armor_calc(struct char_data *ch, int64_t dmg, int type)
+static int64_t armor_calc(struct char_data *ch, int64_t dmg, int type)
 {
   if (char_is_npc(ch))
     return (0);
@@ -1338,7 +1344,7 @@ int64_t armor_calc(struct char_data *ch, int64_t dmg, int type)
 }
 
 /* For Destroying or Breaking Limbs */
-void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int area, int64_t power)
+static void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int area, int64_t power)
 {
   if (!vict || char_is_npc(vict)) {
     return;
@@ -1556,7 +1562,7 @@ void dam_eq_loc(struct char_data *vict, int area)
   damage_eq(vict, location);
 }
 
-void damage_eq(struct char_data *vict, int location)
+static void damage_eq(struct char_data *vict, int location)
 {
 
   if (char_get_equipment(vict, location) && rand_number(1, 20) >= 19 && !char_aff_flagged(vict, AFF_SANCTUARY)) {
@@ -2140,7 +2146,7 @@ void homing_update()
   } // End for
 }
 
-int handle_block(struct char_data *ch)
+static int handle_block(struct char_data *ch)
 {
 
   if (axion_dice(0) <= 4) { /* Critical failure */
@@ -3433,7 +3439,7 @@ static void saiyan_gain(struct char_data *ch, struct char_data *vict)
   }
 }
 
-void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t dmg)
+static void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t dmg)
 {
   int chance = 0, gmult, gravity, bonus = 1, pscost = 2, difference = 0;
   int64_t gain = 0, pl = 0, ki = 0, st = 0, gaincalc = 0;
@@ -4744,7 +4750,7 @@ int handle_parry(struct char_data *ch)
 }
 
 /* This handles whether a step of the combo was preformed. */
-int handle_combo(struct char_data *ch, struct char_data *vict)
+static int handle_combo(struct char_data *ch, struct char_data *vict)
 {
   int success = FALSE, pass = FALSE;
 
@@ -5495,7 +5501,7 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
   }
 }
 
-void handle_death_msg(struct char_data *ch, struct char_data *vict, int type)
+static void handle_death_msg(struct char_data *ch, struct char_data *vict, int type)
 {
   if (type == 0) {
     if (!rroom_sunken(char_get_in_room(vict)) && rroom_sect(char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(char_get_in_room(vict)) != SECT_WATER_NOSWIM && !rroom_flagged(char_get_in_room(vict), ROOM_SPACE) && rroom_sect(char_get_in_room(vict)) != SECT_FLYING) {

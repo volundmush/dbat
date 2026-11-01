@@ -9,7 +9,6 @@
 // Object Classification
 // =============================================================================
 
-bool obj_is_valid(const struct obj_data *obj);
 obj_vnum obj_get_vnum(const struct obj_data *obj);
 
 // =============================================================================
@@ -25,8 +24,6 @@ void obj_aff_set(struct obj_data *obj, int flag, bool on);
 bool obj_aff_toggle(struct obj_data *obj, int flag);
 void obj_wear_set(struct obj_data *obj, int flag, bool on);
 bool obj_wear_toggle(struct obj_data *obj, int flag);
-
-bool obj_valid_rnum(const struct obj_data *obj);
 
 int obj_get_level(const struct obj_data *obj);
 void obj_set_level(struct obj_data *obj, int v);

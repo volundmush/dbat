@@ -242,7 +242,7 @@ void do_dg_affect(void *go, struct script_data *sc, trig_data *trig, int script_
   affect_to_char(ch, &af);
 }
 
-void send_char_pos(struct char_data *ch, int dam)
+static void send_char_pos(struct char_data *ch, int dam)
 {
   switch (char_get_position(ch)) {
     case POS_MORTALLYW:

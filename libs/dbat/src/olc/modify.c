@@ -25,6 +25,7 @@
 #include "dbat/spell_parser.h"
 #include "dbat/dg_olc.h"
 #include "dbat/config.h"
+#include "dbat/hedit.h"
 
 /* local functions */
 

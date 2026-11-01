@@ -14,20 +14,18 @@
 
 /* Local Functions */
 
-void feato(int featnum, char *name, int in_game, int can_learn, int can_stack);
-int compare_feats(const void *x, const void *y);
+static void feato(int featnum, char *name, int in_game, int can_learn, int can_stack);
+static int compare_feats(const void *x, const void *y);
 
 /* Global Variables and Structures */
 struct feat_info feat_list[NUM_FEATS_DEFINED];
 int feat_sort_info[MAX_FEATS];
-char buf3[MAX_STRING_LENGTH];
-char buf4[MAX_STRING_LENGTH];
 
 /* External variables and structures */
 
 /* External functions*/
 
-void feato(int featnum, char *name, int in_game, int can_learn, int can_stack)
+static void feato(int featnum, char *name, int in_game, int can_learn, int can_stack)
 {
   feat_list[featnum].name      = name;
   feat_list[featnum].in_game   = in_game;
@@ -202,7 +200,7 @@ int is_proficient_with_weapon(const struct char_data *ch, int cmweapon_type)
   return TRUE;
 }
 
-int compare_feats(const void *x, const void *y)
+static int compare_feats(const void *x, const void *y)
 {
   int a = *(const int *)x,
       b = *(const int *)y;

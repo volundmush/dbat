@@ -71,20 +71,17 @@ int CURRENT_ERA = 8;
 int mob_specials_used   = 0;
 int number_of_assassins = 0;
 
-char last_user_freed[MAX_INPUT_LENGTH];
-
 /* Toplist Data */
 int TOPLOADED = FALSE;
 char *topname[25];
 int64_t toppoint[25] = {0};
 /* End Top Data */
 
-int ERAPLAYERS   = 0;
-int TOPCOUNTDOWN = 60;
-int HEDITS       = FALSE;
-int WISHTIME     = 0;
-int TOP_OF_NEWS  = 0;
-char *NEWS_TITLE;
+int ERAPLAYERS      = 0;
+int TOPCOUNTDOWN    = 60;
+int HEDITS          = FALSE;
+int WISHTIME        = 0;
+int TOP_OF_NEWS     = 0;
 time_t BOARDNEWMORT = 0;
 time_t BOARDNEWIMM  = 0;
 time_t BOARDNEWCOD  = 0;
@@ -99,7 +96,6 @@ int LASTPAYTYPE     = 0;
 int SAIYAN_ALLOWED  = FALSE;
 int MAJIN_ALLOWED   = FALSE;
 int MOON_UP         = FALSE;
-int DEATHPHASE      = FALSE;
 int PCOUNT          = 0;
 int HIGHPCOUNT      = 0;
 time_t PCOUNTDATE   = 0;
@@ -114,15 +110,6 @@ int SHADOW_DRAGON5 = -1;
 int SHADOW_DRAGON6 = -1;
 int SHADOW_DRAGON7 = -1;
 
-int DBALL_HUNTER1 = -1;
-int DBALL_HUNTER2 = -1;
-int DBALL_HUNTER3 = -1;
-int DBALL_HUNTER4 = -1;
-
-int DBALL_HUNTER1_VNUM = 88;
-int DBALL_HUNTER2_VNUM = 89;
-int DBALL_HUNTER3_VNUM = 0;
-int DBALL_HUNTER4_VNUM = 0;
 /* End dragon ball system stuff       */
 
 /*  how many people can get into a tunnel?  The default is two, but there
@@ -302,7 +289,6 @@ int selfdelete_fastwipe = YES;
 /****************************************************************************/
 
 /* ROOM NUMBERS */
-room_vnum death_start_room = 6000;
 
 /* virtual number of room that mortals should enter at */
 room_vnum mortal_start_room = 2;
@@ -414,8 +400,6 @@ int siteok_everyone = TRUE;
 
 int nameserver_is_slow = NO;
 
-const char *ANSIQUESTION = "Do you support the ANSI color standard (Yn)? ";
-
 /*
  * Will changes save automaticaly in OLC ?
  */
@@ -505,7 +489,6 @@ int reroll_status = NO;
 
 int allow_multiclass = NO;
 int allow_prestige   = NO;
-int auto_level       = YES;
 
 /*
  * Do you want to enable MCCP2 stream compression? It is safe to enable

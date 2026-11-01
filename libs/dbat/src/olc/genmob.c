@@ -17,21 +17,24 @@
 #include "dbat/class.h"
 #include "dbat/affect.h"
 
+static int free_mobile_strings(struct char_data *mob);
+static int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd);
+
 /* From db.c */
 void init_mobile_skills(void);
 
-int update_mobile_strings(struct char_data *t, struct char_data *f);
-void check_mobile_strings(struct char_data *mob);
-void check_mobile_string(mob_vnum i, char **string, const char *dscr);
-int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd);
-int copy_mobile_strings(struct char_data *t, struct char_data *f);
+static int update_mobile_strings(struct char_data *t, struct char_data *f);
+static void check_mobile_strings(struct char_data *mob);
+static void check_mobile_string(mob_vnum i, char **string, const char *dscr);
+static int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd);
+static int copy_mobile_strings(struct char_data *t, struct char_data *f);
 
 #if CONFIG_GENOLC_MOBPROG
 int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd);
 #endif
 
 /* local functions */
-void extract_mobile_all(mob_vnum vnum);
+static void extract_mobile_all(mob_vnum vnum);
 
 int add_mobile(struct char_data *mob, mob_vnum vnum)
 {
@@ -127,7 +130,7 @@ int copy_mobile(struct char_data *to, struct char_data *from)
   return TRUE;
 }
 
-void extract_mobile_all(mob_vnum vnum)
+static void extract_mobile_all(mob_vnum vnum)
 {
   struct char_data *next, *ch;
 
@@ -224,7 +227,7 @@ int delete_mobile(mob_rnum refpt)
   return refpt;
 }
 
-int copy_mobile_strings(struct char_data *t, struct char_data *f)
+static int copy_mobile_strings(struct char_data *t, struct char_data *f)
 {
   if (f->name)
     t->name = strdup(f->name);
@@ -239,7 +242,7 @@ int copy_mobile_strings(struct char_data *t, struct char_data *f)
   return TRUE;
 }
 
-int update_mobile_strings(struct char_data *t, struct char_data *f)
+static int update_mobile_strings(struct char_data *t, struct char_data *f)
 {
   if (f->name)
     t->name = f->name;
@@ -254,7 +257,7 @@ int update_mobile_strings(struct char_data *t, struct char_data *f)
   return TRUE;
 }
 
-int free_mobile_strings(struct char_data *mob)
+static int free_mobile_strings(struct char_data *mob)
 {
   if (mob->name)
     free(mob->name);
@@ -372,7 +375,7 @@ int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 }
 #endif
 
-int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
+static int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 {
   struct affected_type *aff;
 
@@ -405,7 +408,7 @@ int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
   return TRUE;
 }
 
-int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
+static int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 {
 
   char ldesc[MAX_STRING_LENGTH], ddesc[MAX_STRING_LENGTH];
@@ -466,7 +469,7 @@ int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
   return TRUE;
 }
 
-void check_mobile_strings(struct char_data *mob)
+static void check_mobile_strings(struct char_data *mob)
 {
   mob_vnum mvnum = mob_index[mob->nr].vnum;
   check_mobile_string(mvnum, &GET_LDESC(mob), "long description");
@@ -475,7 +478,7 @@ void check_mobile_strings(struct char_data *mob)
   check_mobile_string(mvnum, &GET_SDESC(mob), "short description");
 }
 
-void check_mobile_string(mob_vnum i, char **string, const char *dscr)
+static void check_mobile_string(mob_vnum i, char **string, const char *dscr)
 {
   if (*string == NULL || **string == '\0') {
     char smbuf[128];

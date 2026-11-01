@@ -10,6 +10,8 @@
 #include "dbat/genolc.h"
 #include "dbat/dg_scripts.h"
 
+static void remove_cmd_from_list(struct reset_com **list, int pos);
+
 /* real zone of room/mobile/object/shop given */
 zone_rnum real_zone_by_thing(room_vnum vznum)
 {
@@ -581,7 +583,7 @@ void add_cmd_to_list(struct reset_com **list, struct reset_com *newcmd, int pos)
  * Remove a reset command from a list.	Takes a pointer to the list
  * so that it may play with the memory locations.
  */
-void remove_cmd_from_list(struct reset_com **list, int pos)
+static void remove_cmd_from_list(struct reset_com **list, int pos)
 {
   int count, i, l;
   struct reset_com *newlist;

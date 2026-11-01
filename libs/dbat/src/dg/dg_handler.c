@@ -28,7 +28,7 @@
 #include <errno.h>
 
 /* frees memory associated with var */
-void free_var_el(struct trig_var_data *var)
+static void free_var_el(struct trig_var_data *var)
 {
   if (var->name)
     free(var->name);

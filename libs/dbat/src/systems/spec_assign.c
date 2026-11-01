@@ -17,13 +17,13 @@
 #include "dbat/mail.h"
 
 /* local functions */
-void ASSIGNROOM(room_vnum room, SPECIAL(fname));
-void ASSIGNMOB(mob_vnum mob, SPECIAL(fname));
-void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname));
+static void ASSIGNROOM(room_vnum room, SPECIAL(fname));
+static void ASSIGNMOB(mob_vnum mob, SPECIAL(fname));
+static void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname));
 
 /* functions to perform assignments */
 
-void ASSIGNMOB(mob_vnum mob, SPECIAL(fname))
+static void ASSIGNMOB(mob_vnum mob, SPECIAL(fname))
 {
   mob_rnum rnum;
 
@@ -33,7 +33,7 @@ void ASSIGNMOB(mob_vnum mob, SPECIAL(fname))
     mud_log("SYSERR: Attempt to assign spec to non-existant mob #%d", mob);
 }
 
-void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname))
+static void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname))
 {
   obj_rnum rnum;
 
@@ -43,7 +43,7 @@ void ASSIGNOBJ(obj_vnum obj, SPECIAL(fname))
     mud_log("SYSERR: Attempt to assign spec to non-existant obj #%d", obj);
 }
 
-void ASSIGNROOM(room_vnum room, SPECIAL(fname))
+static void ASSIGNROOM(room_vnum room, SPECIAL(fname))
 {
   room_rnum rnum;
 

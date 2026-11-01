@@ -4,7 +4,7 @@
 /* act.item.c */
 // global variables
 extern struct obj_data *obj_selling;
-extern struct char_data *ch_selling, *ch_buying;
+extern struct char_data *ch_selling;
 
 // functions
 int check_saveroom_count(struct char_data *ch, struct obj_data *cont);
@@ -14,12 +14,10 @@ void weight_change_object(struct obj_data *obj, int weight);
 void name_from_drinkcon(struct obj_data *obj);
 void name_to_drinkcon(struct obj_data *obj, int type);
 
-int64_t max_carry_weight(struct char_data *ch);
 void stop_auction(int type, struct char_data *ch);
 void check_auction(void);
 
 // commands
-ACMD(do_split);
 ACMD(do_auction);
 ACMD(do_bid);
 ACMD(do_assemble);

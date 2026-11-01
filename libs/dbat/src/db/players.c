@@ -33,19 +33,19 @@
 /* local functions */
 void build_player_index(void);
 int sprintascii(char *out, bitvector_t bits);
-void tag_argument(char *argument, char *tag);
-void load_affects(FILE *fl, struct char_data *ch, int violence);
-void load_bonuses(FILE *fl, struct char_data *ch, bool mods);
-void load_skills(FILE *fl, struct char_data *ch, bool mods);
-void load_HMVS(struct char_data *ch, const char *line, int mode);
-void load_BASE(struct char_data *ch, const char *line, int mode);
-void load_molt(struct char_data *ch, const char *line);
-void load_majin(struct char_data *ch, const char *line);
+static void tag_argument(char *argument, char *tag);
+static void load_affects(FILE *fl, struct char_data *ch, int violence);
+static void load_bonuses(FILE *fl, struct char_data *ch, bool mods);
+static void load_skills(FILE *fl, struct char_data *ch, bool mods);
+static void load_HMVS(struct char_data *ch, const char *line, int mode);
+static void load_BASE(struct char_data *ch, const char *line, int mode);
+static void load_molt(struct char_data *ch, const char *line);
+static void load_majin(struct char_data *ch, const char *line);
 
 /* 'global' vars */
 struct player_index_element *player_table = NULL; /* index to plr file	 */
 int top_of_p_table                        = 0;    /* ref to top of table		 */
-int top_of_p_file                         = 0;    /* ref of size of p file	 */
+static int top_of_p_file                  = 0;    /* ref of size of p file	 */
 long top_idnum                            = 0;    /* highest idnum in use		 */
 
 /* external ASCII Player Files vars */
@@ -267,10 +267,10 @@ int load_char(const char *name, struct char_data *ch)
     char_set_position(ch, POS_STANDING);
     char_set_majinizer(ch, PFDEF_BASEPL);
     char_set_gauntlet(ch, PFDEF_GAUNTLET);
-    ch->baseki       = PFDEF_BASEKI;
-    ch->energy       = 1.0;
-    ch->basest       = PFDEF_BASEST;
-    ch->stamina      = 1.0;
+    ch->baseki  = PFDEF_BASEKI;
+    ch->energy  = 1.0;
+    ch->basest  = PFDEF_BASEST;
+    ch->stamina = 1.0;
     char_set_hairl(ch, PFDEF_HAIRL);
     char_set_hairc(ch, PFDEF_HAIRC);
     char_set_skin(ch, PFDEF_SKIN);
@@ -323,7 +323,7 @@ int load_char(const char *name, struct char_data *ch)
       char_get_act(ch)[i] = PFDEF_PLRFLAGS;
     for (i = 0; i < PR_ARRAY_MAX; i++)
       char_get_pref(ch)
-      [i] = PFDEF_PREFFLAGS;
+          [i] = PFDEF_PREFFLAGS;
     for (i = 0; i < AD_ARRAY_MAX; i++)
       char_get_admflags(ch)[i] = 0;
     char_set_load_room(ch, PFDEF_LOADROOM);
@@ -557,13 +557,13 @@ int load_char(const char *name, struct char_data *ch)
           else if (!strcmp(tag, "Pref")) {
             sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
             char_get_pref(ch)
-            [0] = asciiflag_conv(f1);
+                [0] = asciiflag_conv(f1);
             char_get_pref(ch)
-            [1] = asciiflag_conv(f2);
+                [1] = asciiflag_conv(f2);
             char_get_pref(ch)
-            [2] = asciiflag_conv(f3);
+                [2] = asciiflag_conv(f3);
             char_get_pref(ch)
-            [3] = asciiflag_conv(f4);
+                [3] = asciiflag_conv(f4);
           } else if (!strcmp(tag, "Prff")) char_set_preference(ch, atoi(line));
           break;
 
@@ -1126,7 +1126,7 @@ void save_char(struct char_data *ch)
  */
 
 /* Separate a 4-character id tag from the data it precedes */
-void tag_argument(char *argument, char *tag)
+static void tag_argument(char *argument, char *tag)
 {
   char *tmp = argument, *ttag = tag, *wrt = argument;
   int i;
@@ -1143,7 +1143,7 @@ void tag_argument(char *argument, char *tag)
   *wrt = '\0';
 }
 
-void load_affects(FILE *fl, struct char_data *ch, int violence)
+static void load_affects(FILE *fl, struct char_data *ch, int violence)
 {
   int num, num2, num3, num4, num5, num6;
   char line[MAX_INPUT_LENGTH + 1];
@@ -1166,7 +1166,7 @@ void load_affects(FILE *fl, struct char_data *ch, int violence)
   } while (num != 0);
 }
 
-void load_skills(FILE *fl, struct char_data *ch, bool mods)
+static void load_skills(FILE *fl, struct char_data *ch, bool mods)
 {
   int num = 0, num2 = 0, num3 = 0;
   char line[MAX_INPUT_LENGTH + 1];
@@ -1185,7 +1185,7 @@ void load_skills(FILE *fl, struct char_data *ch, bool mods)
   } while (num != 0);
 }
 
-void load_bonuses(FILE *fl, struct char_data *ch, bool mods)
+static void load_bonuses(FILE *fl, struct char_data *ch, bool mods)
 {
   int num[52] = {0}, i;
   char line[MAX_INPUT_LENGTH + 1];
@@ -1199,7 +1199,7 @@ void load_bonuses(FILE *fl, struct char_data *ch, bool mods)
   }
 }
 
-void load_HMVS(struct char_data *ch, const char *line, int mode)
+static void load_HMVS(struct char_data *ch, const char *line, int mode)
 {
   int64_t num = 0, num2 = 0;
 
@@ -1228,7 +1228,7 @@ void load_HMVS(struct char_data *ch, const char *line, int mode)
   }
 }
 
-void load_BASE(struct char_data *ch, const char *line, int mode)
+static void load_BASE(struct char_data *ch, const char *line, int mode)
 {
   int64_t num = 0;
 
@@ -1253,7 +1253,7 @@ void load_BASE(struct char_data *ch, const char *line, int mode)
   }
 }
 
-void load_majin(struct char_data *ch, const char *line)
+static void load_majin(struct char_data *ch, const char *line)
 {
   int64_t num = 0;
 
@@ -1261,7 +1261,7 @@ void load_majin(struct char_data *ch, const char *line)
   char_set_majinizer(ch, num);
 }
 
-void load_molt(struct char_data *ch, const char *line)
+static void load_molt(struct char_data *ch, const char *line)
 {
   int64_t num = 0;
 

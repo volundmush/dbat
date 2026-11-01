@@ -19,6 +19,3 @@ struct transforms_available {
 
 extern transform_bonus base_form;
 extern transform_bonus oozaru;
-
-transforms_available *get_transforms_available(char_data *ch);
-transform_bonus get_current_transform(char_data *ch);

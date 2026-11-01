@@ -39,6 +39,7 @@
 #include "dbat/local_limits.h"
 #include "dbat/house.h"
 #include "dbat/class.h"
+#include "dbat/act.offensive.h"
 
 /* local functions */
 static void handle_fall(struct char_data *ch);
@@ -226,7 +227,7 @@ void carry_drop(struct char_data *ch, int type)
   char_set_carried_by(vict, NULL);
 }
 
-int land_location(struct char_data *ch, char *arg)
+static int land_location(struct char_data *ch, char *arg)
 {
 
   if (rroom_get_vnum(char_get_in_room(ch)) == 50) { // Above Earth
@@ -685,7 +686,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   if (rroom_sunken(char_get_in_room(ch)) ||
       rroom_sunken(char_get_exit(ch, dir)->to_room)) {
     if (!has_o2(ch) && ((group_bonus(ch, 2) != 10 && (getCurKI(ch)) < getMaxKI(ch) / 200) || (group_bonus(ch, 2) == 10 &&
-                                                                                                  (getCurKI(ch)) < getMaxKI(ch) / 800))) {
+                                                                                              (getCurKI(ch)) < getMaxKI(ch) / 800))) {
       if (getCurPL(ch) >= getEffMaxPL(ch) / 20) {
         send_to_char(ch, "@RYou struggle to breath!@n\r\n");
         decCurHealth(ch, getMaxPL(ch) / 20, 0);
@@ -697,7 +698,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
       }
     }
     if (!has_o2(ch) && ((group_bonus(ch, 2) != 10 && (getCurKI(ch)) >= getMaxKI(ch) / 200) || (group_bonus(ch, 2) == 10 &&
-                                                                                                   (getCurKI(ch)) >= getMaxKI(ch) / 800))) {
+                                                                                               (getCurKI(ch)) >= getMaxKI(ch) / 800))) {
       send_to_char(ch, "@CYou hold your breath!@n\r\n");
       if (group_bonus(ch, 2) == 10) {
         decCurKI(ch, getMaxKI(ch) / 800, 0);

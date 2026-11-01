@@ -28,6 +28,8 @@
 #include "dbat/fileop.h"
 #include "dbat/genolc.h"
 
+static bool shop_trade_flagged(const struct shop_data *rec, int flag);
+
 const char *const shop_default_msgs[NUM_SHOP_MSGS] = {
     [SHOP_MSG_NOITEM1] = "%s Sorry, I don't stock that item.",
     [SHOP_MSG_NOITEM2] = "%s You don't seem to have that.",
@@ -42,7 +44,8 @@ const char *const shop_default_msgs[NUM_SHOP_MSGS] = {
 static void sort_keeper_objs(struct char_data *keeper, int shop_nr);
 
 /* Local variables */
-int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
+int cmd_say, cmd_tell;
+static int cmd_emote, cmd_slap, cmd_puke;
 
 /* local functions */
 static char *read_shop_message(enum shop_message mnum, room_vnum shr, FILE *shop_f, const char *why);
@@ -1502,7 +1505,7 @@ void boot_the_shops(FILE *shop_f, char *filename, int rec_count)
       free(buf);
       while (temp < SW_ARRAY_MAX)
         SHOP_TRADE_WITH(top_shop)
-        [temp++] = 0;
+      [temp++] = 0;
 
       temp = read_list(shop_f, list, new_format, 1, LIST_ROOM);
       CREATE(shop_index[top_shop].in_room, room_vnum, temp);
@@ -1825,7 +1828,7 @@ int count_shops(shop_vnum low, shop_vnum high)
   return j;
 }
 
-bool shop_trade_flagged(const struct shop_data *rec, int flag)
+static bool shop_trade_flagged(const struct shop_data *rec, int flag)
 {
   return IS_SET_AR(rec->with_who, flag) != 0;
 }

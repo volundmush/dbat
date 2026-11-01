@@ -40,7 +40,6 @@
 int scan_file(void);
 int has_mail(long recipient);
 void store_mail(long to, long from, char *message_pointer);
-char *read_delete(long recipient, char **from);
 void clear_free_list(void);
 void free_mail_index(void);
 

@@ -22,49 +22,49 @@
 #define PULSES_PER_MUD_HOUR (SECS_PER_MUD_HOUR * PASSES_PER_SEC)
 
 /* Local functions not used elsewhere */
-obj_data *find_obj(long n);
-room_data *find_room(long n);
-void do_stat_trigger(struct char_data *ch, trig_data *trig);
-void script_stat(char_data *ch, struct script_data *sc);
-int remove_trigger(struct script_data *sc, char *name);
-int is_num(char *arg);
-void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
-             struct script_data *sc, trig_data *trig);
-char *matching_paren(char *p);
-void eval_expr(char *line, char *result, void *go, struct script_data *sc,
-               trig_data *trig, int type);
-int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_data *sc,
-                    trig_data *trig, int type);
-int process_if(char *cond, void *go, struct script_data *sc,
-               trig_data *trig, int type);
-struct cmdlist_element *find_end(trig_data *trig, struct cmdlist_element *cl);
-struct cmdlist_element *find_else_end(trig_data *trig,
-                                      struct cmdlist_element *cl, void *go,
-                                      struct script_data *sc, int type);
-void process_wait(void *go, trig_data *trig, int type, char *cmd,
-                  struct cmdlist_element *cl);
-void process_set(struct script_data *sc, trig_data *trig, char *cmd);
-void process_attach(void *go, struct script_data *sc, trig_data *trig,
-                    int type, char *cmd);
-void process_detach(void *go, struct script_data *sc, trig_data *trig,
-                    int type, char *cmd);
-void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
-                 int type, char *cmd);
-int process_return(trig_data *trig, char *cmd);
-void process_unset(struct script_data *sc, trig_data *trig, char *cmd);
-void process_remote(struct script_data *sc, trig_data *trig, char *cmd);
-void process_rdelete(struct script_data *sc, trig_data *trig, char *cmd);
-void process_global(struct script_data *sc, trig_data *trig, char *cmd, long id);
-void process_context(struct script_data *sc, trig_data *trig, char *cmd);
-void extract_value(struct script_data *sc, trig_data *trig, char *cmd);
-void dg_letter_value(struct script_data *sc, trig_data *trig, char *cmd);
-struct cmdlist_element *
+static obj_data *find_obj(long n);
+static room_data *find_room(long n);
+static void do_stat_trigger(struct char_data *ch, trig_data *trig);
+static void script_stat(char_data *ch, struct script_data *sc);
+static int remove_trigger(struct script_data *sc, char *name);
+static int is_num(char *arg);
+static void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
+                    struct script_data *sc, trig_data *trig);
+static char *matching_paren(char *p);
+static void eval_expr(char *line, char *result, void *go, struct script_data *sc,
+                      trig_data *trig, int type);
+static int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_data *sc,
+                           trig_data *trig, int type);
+static int process_if(char *cond, void *go, struct script_data *sc,
+                      trig_data *trig, int type);
+static struct cmdlist_element *find_end(trig_data *trig, struct cmdlist_element *cl);
+static struct cmdlist_element *find_else_end(trig_data *trig,
+                                             struct cmdlist_element *cl, void *go,
+                                             struct script_data *sc, int type);
+static void process_wait(void *go, trig_data *trig, int type, char *cmd,
+                         struct cmdlist_element *cl);
+static void process_set(struct script_data *sc, trig_data *trig, char *cmd);
+static void process_attach(void *go, struct script_data *sc, trig_data *trig,
+                           int type, char *cmd);
+static void process_detach(void *go, struct script_data *sc, trig_data *trig,
+                           int type, char *cmd);
+static void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
+                        int type, char *cmd);
+static int process_return(trig_data *trig, char *cmd);
+static void process_unset(struct script_data *sc, trig_data *trig, char *cmd);
+static void process_remote(struct script_data *sc, trig_data *trig, char *cmd);
+static void process_rdelete(struct script_data *sc, trig_data *trig, char *cmd);
+static void process_global(struct script_data *sc, trig_data *trig, char *cmd, long id);
+static void process_context(struct script_data *sc, trig_data *trig, char *cmd);
+static void extract_value(struct script_data *sc, trig_data *trig, char *cmd);
+static void dg_letter_value(struct script_data *sc, trig_data *trig, char *cmd);
+static struct cmdlist_element *
 find_case(struct trig_data *trig, struct cmdlist_element *cl,
           void *go, struct script_data *sc, int type, char *cond);
-struct cmdlist_element *find_done(struct cmdlist_element *cl);
-struct char_data *find_char_by_uid_in_lookup_table(long uid);
-struct obj_data *find_obj_by_uid_in_lookup_table(long uid);
-EVENTFUNC(trig_wait_event);
+static struct cmdlist_element *find_done(struct cmdlist_element *cl);
+static struct char_data *find_char_by_uid_in_lookup_table(long uid);
+static struct obj_data *find_obj_by_uid_in_lookup_table(long uid);
+static EVENTFUNC(trig_wait_event);
 ACMD(do_attach);
 ACMD(do_detach);
 ACMD(do_vdelete);
@@ -260,7 +260,7 @@ struct char_data *find_char(long n)
 }
 
 /* return object with UID n */
-obj_data *find_obj(long n)
+static obj_data *find_obj(long n)
 {
   if (n < OBJ_ID_BASE || n > OBJ_ID_MAX) /* see note in dg_scripts.h */
     return NULL;
@@ -269,7 +269,7 @@ obj_data *find_obj(long n)
 }
 
 /* return room with UID n */
-room_data *find_room(long n)
+static room_data *find_room(long n)
 {
   room_rnum rnum;
 
@@ -648,7 +648,7 @@ void check_time_triggers(void)
   }
 }
 
-EVENTFUNC(trig_wait_event)
+static EVENTFUNC(trig_wait_event)
 {
   struct wait_event_data *wait_event_obj = (struct wait_event_data *)event_obj;
   trig_data *trig;
@@ -698,7 +698,7 @@ EVENTFUNC(trig_wait_event)
   return 0;
 }
 
-void do_stat_trigger(struct char_data *ch, trig_data *trig)
+static void do_stat_trigger(struct char_data *ch, trig_data *trig)
 {
   struct cmdlist_element *cmd_list;
   char sb[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
@@ -761,7 +761,7 @@ void find_uid_name(char *uid, char *name, size_t nlen)
 }
 
 /* general function to display stats on script sc */
-void script_stat(char_data *ch, struct script_data *sc)
+static void script_stat(char_data *ch, struct script_data *sc)
 {
   struct trig_var_data *tv;
   trig_data *t;
@@ -1021,7 +1021,7 @@ ACMD(do_attach)
  *  you might need to check to see if all the triggers were removed after
  *  this function returns, in order to remove the script.
  */
-int remove_trigger(struct script_data *sc, char *name)
+static int remove_trigger(struct script_data *sc, char *name)
 {
   trig_data *i, *j;
   int num = 0, string = FALSE, n;
@@ -1292,7 +1292,7 @@ static void dg_ctx_set_line(const char *cmd)
 }
 
 /* Writes " [trig ... ]" describing the running trigger, or "" when none is. */
-void dg_context_str(char *buf, size_t len)
+static void dg_context_str(char *buf, size_t len)
 {
   static const char *owner_types[] = {"mob", "obj", "room"};
 
@@ -1352,7 +1352,7 @@ void script_log(const char *format, ...)
 
 /* returns 1 if string is all digits, else 0 */
 /* bugfixed - would have returned true on num="------" */
-int is_num(char *arg)
+static int is_num(char *arg)
 {
   if (*arg == '\0')
     return FALSE;
@@ -1369,8 +1369,8 @@ int is_num(char *arg)
 }
 
 /* evaluates 'lhs op rhs', and copies to result */
-void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
-             struct script_data *sc, trig_data *trig)
+static void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
+                    struct script_data *sc, trig_data *trig)
 {
   unsigned char *p;
   int n;
@@ -1488,7 +1488,7 @@ char *matching_quote(char *p)
  * p points to the first paren.  returns a pointer to the
  * matching closing paren, or the last non-null char in p.
  */
-char *matching_paren(char *p)
+static char *matching_paren(char *p)
 {
   int i;
 
@@ -1505,8 +1505,8 @@ char *matching_paren(char *p)
 }
 
 /* evaluates line, and returns answer in result */
-void eval_expr(char *line, char *result, void *go, struct script_data *sc,
-               trig_data *trig, int type)
+static void eval_expr(char *line, char *result, void *go, struct script_data *sc,
+                      trig_data *trig, int type)
 {
   char expr[MAX_INPUT_LENGTH], *p;
 
@@ -1531,8 +1531,8 @@ void eval_expr(char *line, char *result, void *go, struct script_data *sc,
  * evaluates expr if it is in the form lhs op rhs, and copies
  * answer in result.  returns 1 if expr is evaluated, else 0
  */
-int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_data *sc,
-                    trig_data *trig, int type)
+static int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_data *sc,
+                           trig_data *trig, int type)
 {
   char *p, *tokens[MAX_INPUT_LENGTH];
   char line[MAX_INPUT_LENGTH], lhr[MAX_INPUT_LENGTH], rhr[MAX_INPUT_LENGTH];
@@ -1602,8 +1602,8 @@ int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_data *sc,
 }
 
 /* returns 1 if cond is true, else 0 */
-int process_if(char *cond, void *go, struct script_data *sc,
-               trig_data *trig, int type)
+static int process_if(char *cond, void *go, struct script_data *sc,
+                      trig_data *trig, int type)
 {
   char result[MAX_INPUT_LENGTH], *p;
 
@@ -1623,7 +1623,7 @@ int process_if(char *cond, void *go, struct script_data *sc,
  * returns the line containg 'end', or the last
  * line of the trigger if not found.
  */
-struct cmdlist_element *find_end(trig_data *trig, struct cmdlist_element *cl)
+static struct cmdlist_element *find_end(trig_data *trig, struct cmdlist_element *cl)
 {
   struct cmdlist_element *c;
   char *p;
@@ -1657,9 +1657,9 @@ struct cmdlist_element *find_end(trig_data *trig, struct cmdlist_element *cl)
  * searches for valid elseif, else, or end to continue execution at.
  * returns line of elseif, else, or end if found, or last line of trigger.
  */
-struct cmdlist_element *find_else_end(trig_data *trig,
-                                      struct cmdlist_element *cl, void *go,
-                                      struct script_data *sc, int type)
+static struct cmdlist_element *find_else_end(trig_data *trig,
+                                             struct cmdlist_element *cl, void *go,
+                                             struct script_data *sc, int type)
 {
   struct cmdlist_element *c;
   char *p;
@@ -1705,8 +1705,8 @@ struct cmdlist_element *find_else_end(trig_data *trig,
 }
 
 /* processes any 'wait' commands in a trigger */
-void process_wait(void *go, trig_data *trig, int type, char *cmd,
-                  struct cmdlist_element *cl)
+static void process_wait(void *go, trig_data *trig, int type, char *cmd,
+                         struct cmdlist_element *cl)
 {
   char buf[MAX_INPUT_LENGTH], *arg;
   struct wait_event_data *wait_event_obj;
@@ -1762,7 +1762,7 @@ void process_wait(void *go, trig_data *trig, int type, char *cmd,
 }
 
 /* processes a script set command */
-void process_set(struct script_data *sc, trig_data *trig, char *cmd)
+static void process_set(struct script_data *sc, trig_data *trig, char *cmd)
 {
   char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], *value;
 
@@ -1802,8 +1802,8 @@ void process_eval(void *go, struct script_data *sc, trig_data *trig,
 }
 
 /* script attaching a trigger to something */
-void process_attach(void *go, struct script_data *sc, trig_data *trig,
-                    int type, char *cmd)
+static void process_attach(void *go, struct script_data *sc, trig_data *trig,
+                           int type, char *cmd)
 {
   char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
   char result[MAX_INPUT_LENGTH], *id_p;
@@ -1884,8 +1884,8 @@ void process_attach(void *go, struct script_data *sc, trig_data *trig,
 }
 
 /* script detaching a trigger from something */
-void process_detach(void *go, struct script_data *sc, trig_data *trig,
-                    int type, char *cmd)
+static void process_detach(void *go, struct script_data *sc, trig_data *trig,
+                           int type, char *cmd)
 {
   char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
   char result[MAX_INPUT_LENGTH], *id_p;
@@ -1979,8 +1979,8 @@ struct room_data *dg_room_of_obj(struct obj_data *obj)
 }
 
 /* create a UID variable from the id number */
-void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
-                 int type, char *cmd)
+static void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
+                        int type, char *cmd)
 {
   char junk[MAX_INPUT_LENGTH], varname[MAX_INPUT_LENGTH];
   char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
@@ -2080,7 +2080,7 @@ void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
  * processes a script return command.
  * returns the new value for the script to return.
  */
-int process_return(trig_data *trig, char *cmd)
+static int process_return(trig_data *trig, char *cmd)
 {
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
@@ -2100,7 +2100,7 @@ int process_return(trig_data *trig, char *cmd)
  * removes a variable from the global vars of sc,
  * or the local vars of trig if not found in global list.
  */
-void process_unset(struct script_data *sc, trig_data *trig, char *cmd)
+static void process_unset(struct script_data *sc, trig_data *trig, char *cmd)
 {
   char arg[MAX_INPUT_LENGTH], *var;
 
@@ -2122,7 +2122,7 @@ void process_unset(struct script_data *sc, trig_data *trig, char *cmd)
  * copy a locally owned variable to the globals of another script
  *     'remote <variable_name> <uid>'
  */
-void process_remote(struct script_data *sc, trig_data *trig, char *cmd)
+static void process_remote(struct script_data *sc, trig_data *trig, char *cmd)
 {
   struct trig_var_data *vd;
   struct script_data *sc_remote = NULL;
@@ -2289,7 +2289,7 @@ ACMD(do_vdelete)
  * delete a variable from the globals of another script
  *     'rdelete <variable_name> <uid>'
  */
-void process_rdelete(struct script_data *sc, trig_data *trig, char *cmd)
+static void process_rdelete(struct script_data *sc, trig_data *trig, char *cmd)
 {
   struct trig_var_data *vd, *vd_prev = NULL;
   struct script_data *sc_remote = NULL;
@@ -2357,7 +2357,7 @@ void process_rdelete(struct script_data *sc, trig_data *trig, char *cmd)
 /*
  * makes a local variable into a global variable
  */
-void process_global(struct script_data *sc, trig_data *trig, char *cmd, long id)
+static void process_global(struct script_data *sc, trig_data *trig, char *cmd, long id)
 {
   struct trig_var_data *vd;
   char arg[MAX_INPUT_LENGTH], *var;
@@ -2387,7 +2387,7 @@ void process_global(struct script_data *sc, trig_data *trig, char *cmd, long id)
 }
 
 /* set the current context for a script */
-void process_context(struct script_data *sc, trig_data *trig, char *cmd)
+static void process_context(struct script_data *sc, trig_data *trig, char *cmd)
 {
   char arg[MAX_INPUT_LENGTH], *var;
 
@@ -2404,7 +2404,7 @@ void process_context(struct script_data *sc, trig_data *trig, char *cmd)
   sc->context = atol(var);
 }
 
-void extract_value(struct script_data *sc, trig_data *trig, char *cmd)
+static void extract_value(struct script_data *sc, trig_data *trig, char *cmd)
 {
   char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
   char *buf3;
@@ -2448,7 +2448,7 @@ void extract_value(struct script_data *sc, trig_data *trig, char *cmd)
 
 */
 
-void dg_letter_value(struct script_data *sc, trig_data *trig, char *cmd)
+static void dg_letter_value(struct script_data *sc, trig_data *trig, char *cmd)
 {
   //set the letter/number at position 'num' as the variable.
   char junk[MAX_INPUT_LENGTH];
@@ -2596,9 +2596,8 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
     else if (!strncasecmp(p, "if ", 3)) {
       if (process_if(p + 3, go, sc, trig, type))
         GET_TRIG_DEPTH(trig)
-        ++;
-      else
-        cl = find_else_end(trig, cl, go, sc, type);
+      ++;
+      else cl = find_else_end(trig, cl, go, sc, type);
     }
 
     else if (!strncasecmp("elseif ", p, 7) ||
@@ -2819,7 +2818,7 @@ ACMD(do_tstat)
 * returns the line containg the correct case instance, or the last
 * line of the trigger if not found.
 */
-struct cmdlist_element *
+static struct cmdlist_element *
 find_case(struct trig_data *trig, struct cmdlist_element *cl,
           void *go, struct script_data *sc, int type, char *cond)
 {
@@ -2859,7 +2858,7 @@ find_case(struct trig_data *trig, struct cmdlist_element *cl,
 * line of the trigger if not found.
 * Malformed scripts may cause NULL to be returned.
 */
-struct cmdlist_element *find_done(struct cmdlist_element *cl)
+static struct cmdlist_element *find_done(struct cmdlist_element *cl)
 {
   struct cmdlist_element *c;
   char *p;
@@ -2984,7 +2983,7 @@ struct lookup_table_t {
   void *c;
   struct lookup_table_t *next;
 };
-struct lookup_table_t lookup_table[BUCKET_COUNT];
+static struct lookup_table_t lookup_table[BUCKET_COUNT];
 static long lookup_table_entries = 0;
 
 void init_lookup_table(void)
@@ -3041,7 +3040,7 @@ static void log_lookup_miss(const char *what, long uid, struct lookup_table_t *l
             what, uid, uid_range_name(uid), max_mob_id, max_obj_id, ctx);
 }
 
-struct char_data *find_char_by_uid_in_lookup_table(long uid)
+static struct char_data *find_char_by_uid_in_lookup_table(long uid)
 {
   struct lookup_table_t *lt = lookup_table_find(uid);
 
@@ -3052,7 +3051,7 @@ struct char_data *find_char_by_uid_in_lookup_table(long uid)
   return NULL;
 }
 
-struct obj_data *find_obj_by_uid_in_lookup_table(long uid)
+static struct obj_data *find_obj_by_uid_in_lookup_table(long uid)
 {
   struct lookup_table_t *lt = lookup_table_find(uid);
 

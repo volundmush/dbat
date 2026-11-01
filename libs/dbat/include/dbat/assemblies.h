@@ -25,8 +25,6 @@ struct component_data {
   long lVnum;    /* Vnum of the component object. */
 };
 
-struct assembly_data alloc_assembly();
-
 void assemblyBootAssemblies(void);
 void assemblySaveAssemblies(void);
 void assemblyListToChar(struct char_data *pCharacter);
@@ -40,7 +38,6 @@ bool assemblyDestroy(long lVnum);
 int assemblyGetType(long lVnum);
 
 long assemblyFindAssembly(const char *pszAssemblyName);
-long assemblyGetAssemblyIndex(long lVnum);
 
 ASSEMBLY *assemblyGetAssemblyPtr(long lVnum);
 

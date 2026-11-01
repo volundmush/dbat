@@ -29,8 +29,6 @@ struct save_list_data {
   struct save_list_data *next;
 };
 
-extern struct save_list_data *save_list;
-
 /* save_list_data.type */
 #define SL_MOB 0
 #define SL_OBJ 1
@@ -50,4 +48,3 @@ extern struct save_list_data *save_list;
 room_vnum genolc_zone_bottom(zone_rnum rznum);
 room_vnum genolc_zonep_bottom(struct zone_data *zone);
 void create_world_index(int znum, const char *type);
-void free_save_list(void);

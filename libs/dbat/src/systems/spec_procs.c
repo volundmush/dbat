@@ -24,6 +24,7 @@
 #include "dbat/class.h"
 #include "dbat/affect.h"
 #include "dbat/act.informative.h"
+#include "dbat/local_limits.h"
 
 /* local functions */
 

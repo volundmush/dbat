@@ -22,6 +22,10 @@
 #include "dbat/oasis.h"
 #include "dbat/genolc.h"
 
+static void aedit_disp_menu(struct descriptor_data *d);
+static int aedit_find_command(const char *txt);
+static void aedit_save_to_disk(struct descriptor_data *d);
+
 /*------------------------------------------------------------------------*\
   Utils and exported functions.
 \*------------------------------------------------------------------------*/
@@ -99,7 +103,7 @@ ACMD(do_oasis_aedit)
   mudlog(LOG_CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing actions.", char_get_name(ch));
 }
 
-void aedit_setup_new(struct descriptor_data *d)
+static void aedit_setup_new(struct descriptor_data *d)
 {
   CREATE(OLC_ACTION(d), struct social_messg, 1);
   OLC_ACTION(d)->command             = strdup(OLC_STORAGE(d));
@@ -127,7 +131,7 @@ void aedit_setup_new(struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-void aedit_setup_existing(struct descriptor_data *d, int real_num)
+static void aedit_setup_existing(struct descriptor_data *d, int real_num)
 {
   CREATE(OLC_ACTION(d), struct social_messg, 1);
   OLC_ACTION(d)->command             = strdup(soc_mess_list[real_num].command);
@@ -166,7 +170,7 @@ void aedit_setup_existing(struct descriptor_data *d, int real_num)
   aedit_disp_menu(d);
 }
 
-void aedit_save_internally(struct descriptor_data *d)
+static void aedit_save_internally(struct descriptor_data *d)
 {
   struct social_messg *new_soc_mess_list = NULL;
   int i;
@@ -198,7 +202,7 @@ void aedit_save_internally(struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-void aedit_save_to_disk(struct descriptor_data *d)
+static void aedit_save_to_disk(struct descriptor_data *d)
 {
   FILE *fp;
   int i;
@@ -246,7 +250,7 @@ void aedit_save_to_disk(struct descriptor_data *d)
 /* Menu functions */
 
 /* the main menu */
-void aedit_disp_menu(struct descriptor_data *d)
+static void aedit_disp_menu(struct descriptor_data *d)
 {
   struct social_messg *action = OLC_ACTION(d);
 
@@ -809,7 +813,7 @@ ACMD(do_astat)
                soc_mess_list[i].others_obj_found ? soc_mess_list[i].others_obj_found : "");
 }
 
-int aedit_find_command(const char *txt)
+static int aedit_find_command(const char *txt)
 {
   int cmd;
 

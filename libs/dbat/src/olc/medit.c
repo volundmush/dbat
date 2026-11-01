@@ -28,6 +28,11 @@
 #include "dbat/consts/npc.h"
 #include "dbat/config.h"
 
+static void init_mobile(struct char_data *mob);
+static void medit_disp_menu(struct descriptor_data *d);
+static void medit_setup_existing(struct descriptor_data *d, int rmob_num);
+static void medit_setup_new(struct descriptor_data *d);
+
 /*-------------------------------------------------------------------*/
 
 /*
@@ -179,12 +184,12 @@ ACMD(do_oasis_medit)
          char_get_name(ch), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
 }
 
-void medit_save_to_disk(zone_vnum foo)
+static void medit_save_to_disk(zone_vnum foo)
 {
   save_mobiles(real_zone(foo));
 }
 
-void medit_setup_new(struct descriptor_data *d)
+static void medit_setup_new(struct descriptor_data *d)
 {
   struct char_data *mob;
 
@@ -215,7 +220,7 @@ void medit_setup_new(struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-void medit_setup_existing(struct descriptor_data *d, int rmob_num)
+static void medit_setup_existing(struct descriptor_data *d, int rmob_num)
 {
   struct char_data *mob;
 
@@ -243,7 +248,7 @@ void medit_setup_existing(struct descriptor_data *d, int rmob_num)
  * Ideally, this function should be in db.c, but I'll put it here for
  * portability.
  */
-void init_mobile(struct char_data *mob)
+static void init_mobile(struct char_data *mob)
 {
   clear_char(mob);
 
@@ -270,7 +275,7 @@ void init_mobile(struct char_data *mob)
 /*
  * Save new/edited mob to memory.
  */
-void medit_save_internally(struct descriptor_data *d)
+static void medit_save_internally(struct descriptor_data *d)
 {
   int i;
   mob_rnum new_rnum;
@@ -338,7 +343,7 @@ void medit_save_internally(struct descriptor_data *d)
 /*
  * Display positions. (sitting, standing, etc)
  */
-void medit_disp_positions(struct descriptor_data *d)
+static void medit_disp_positions(struct descriptor_data *d)
 {
   int i;
 
@@ -355,7 +360,7 @@ void medit_disp_positions(struct descriptor_data *d)
 /*
  * Display the gender of the mobile.
  */
-void medit_disp_sex(struct descriptor_data *d)
+static void medit_disp_sex(struct descriptor_data *d)
 {
   int i;
 
@@ -372,7 +377,7 @@ void medit_disp_sex(struct descriptor_data *d)
 /*
  * Display mob-flags menu.
  */
-void medit_disp_mob_flags(struct descriptor_data *d)
+static void medit_disp_mob_flags(struct descriptor_data *d)
 {
   int i, columns = 0;
   char flags[MAX_STRING_LENGTH];
@@ -404,7 +409,7 @@ static void medit_disp_personality(struct descriptor_data *d)
 /*
  * Display affection flags menu.
  */
-void medit_disp_aff_flags(struct descriptor_data *d)
+static void medit_disp_aff_flags(struct descriptor_data *d)
 {
   int i, columns = 0;
   char flags[MAX_STRING_LENGTH];
@@ -480,7 +485,7 @@ static void medit_disp_size(struct descriptor_data *d)
 /*
  * Display main menu.
  */
-void medit_disp_menu(struct descriptor_data *d)
+static void medit_disp_menu(struct descriptor_data *d)
 {
   struct char_data *mob;
   char flags[MAX_STRING_LENGTH], flag2[MAX_STRING_LENGTH];

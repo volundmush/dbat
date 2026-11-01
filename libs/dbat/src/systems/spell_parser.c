@@ -26,9 +26,9 @@
 struct spell_info_type spell_info[SKILL_TABLE_SIZE];
 
 /* local functions */
-void mag_nextstrike(int level, struct char_data *caster, int spellnum);
+static void mag_nextstrike(int level, struct char_data *caster, int spellnum);
 
-void unused_spell(int spl);
+static void unused_spell(int spl);
 void mag_assign_spells(void);
 
 /*
@@ -43,67 +43,9 @@ struct syllable {
   const char *news;
 };
 
-struct syllable syls[] = {
-    {" ",       " "     },
-    {"ar",      "abra"  },
-    {"ate",     "i"     },
-    {"cau",     "kada"  },
-    {"blind",   "nose"  },
-    {"bur",     "mosa"  },
-    {"cu",      "judi"  },
-    {"de",      "oculo" },
-    {"dis",     "mar"   },
-    {"ect",     "kamina"},
-    {"en",      "uns"   },
-    {"gro",     "cra"   },
-    {"light",   "dies"  },
-    {"lo",      "hi"    },
-    {"magi",    "kari"  },
-    {"mon",     "bar"   },
-    {"mor",     "zak"   },
-    {"move",    "sido"  },
-    {"ness",    "lacri" },
-    {"ning",    "illa"  },
-    {"per",     "duda"  },
-    {"ra",      "gru"   },
-    {"re",      "candus"},
-    {"son",     "sabru" },
-    {"tect",    "infra" },
-    {"tri",     "cula"  },
-    {"ven",     "nofo"  },
-    {"word of", "inset" },
-    {"a",       "i"     },
-    {"b",       "v"     },
-    {"c",       "q"     },
-    {"d",       "m"     },
-    {"e",       "o"     },
-    {"f",       "y"     },
-    {"g",       "t"     },
-    {"h",       "p"     },
-    {"i",       "u"     },
-    {"j",       "y"     },
-    {"k",       "t"     },
-    {"l",       "r"     },
-    {"m",       "w"     },
-    {"n",       "b"     },
-    {"o",       "a"     },
-    {"p",       "s"     },
-    {"q",       "d"     },
-    {"r",       "f"     },
-    {"s",       "g"     },
-    {"t",       "h"     },
-    {"u",       "e"     },
-    {"v",       "z"     },
-    {"w",       "x"     },
-    {"x",       "n"     },
-    {"y",       "l"     },
-    {"z",       "k"     },
-    {"",        ""      }
-};
-
 const char *unused_spellname = "!UNUSED!"; /* So we can get &unused_spellname */
 
-void mag_nextstrike(int level, struct char_data *caster, int spellnum)
+static void mag_nextstrike(int level, struct char_data *caster, int spellnum)
 {
 }
 
@@ -443,7 +385,7 @@ static void spello(int spl, const char *name, int max_mana, int min_mana, int ma
   spell_info[spl].domain       = domain;
 }
 
-void unused_spell(int spl)
+static void unused_spell(int spl)
 {
   int i;
 

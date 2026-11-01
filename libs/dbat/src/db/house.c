@@ -18,29 +18,31 @@
 
 #include <errno.h>
 
+static void House_list_guests(struct char_data *ch, int i, int quiet);
+
 /* local globals */
 struct house_control_rec house_control[MAX_HOUSES];
 int num_of_houses = 0;
 
 /* local functions */
-int House_get_filename(room_vnum vnum, char *filename, size_t maxlen);
-int House_load(room_vnum vnum);
-int House_save(struct obj_data *obj, FILE *fp, int location);
-void House_restore_weight(struct obj_data *obj);
+static int House_get_filename(room_vnum vnum, char *filename, size_t maxlen);
+static int House_load(room_vnum vnum);
+static int House_save(struct obj_data *obj, FILE *fp, int location);
+static void House_restore_weight(struct obj_data *obj);
 void House_delete_file(room_vnum vnum);
 int find_house(room_vnum vnum);
 void House_save_control(void);
 
-void hcontrol_build_house(struct char_data *ch, char *arg);
-void hcontrol_destroy_house(struct char_data *ch, char *arg);
-void hcontrol_pay_house(struct char_data *ch, char *arg);
+static void hcontrol_build_house(struct char_data *ch, char *arg);
+static void hcontrol_destroy_house(struct char_data *ch, char *arg);
+static void hcontrol_pay_house(struct char_data *ch, char *arg);
 
 #define MAX_BAG_ROWS 5
 
 /* First, the basics: finding the filename; loading/saving objects */
 
 /* Return a filename given a house vnum */
-int House_get_filename(room_vnum vnum, char *filename, size_t maxlen)
+static int House_get_filename(room_vnum vnum, char *filename, size_t maxlen)
 {
   if (vnum == NOWHERE)
     return (0);
@@ -51,7 +53,7 @@ int House_get_filename(room_vnum vnum, char *filename, size_t maxlen)
 
 /* Save all objects for a house (recursive; initial call must be followed
    by a call to House_restore_weight)  Assumes file is open already. */
-int House_save(struct obj_data *obj, FILE *fp, int location)
+static int House_save(struct obj_data *obj, FILE *fp, int location)
 {
   struct obj_data *tmp;
   int result;
@@ -74,7 +76,7 @@ int House_save(struct obj_data *obj, FILE *fp, int location)
 }
 
 /* restore weight of containers after House_save has changed them for saving */
-void House_restore_weight(struct obj_data *obj)
+static void House_restore_weight(struct obj_data *obj)
 {
   if (obj) {
     House_restore_weight(obj->contains);
@@ -85,7 +87,7 @@ void House_restore_weight(struct obj_data *obj)
 }
 
 /* Save all objects in a house */
-void House_crashsave(room_vnum vnum)
+static void House_crashsave(room_vnum vnum)
 {
   int rnum;
   char buf[MAX_STRING_LENGTH];
@@ -200,7 +202,7 @@ void House_boot(void)
 
 /* "House Control" functions */
 
-const char *HCONTROL_FORMAT =
+static const char *HCONTROL_FORMAT =
     "Usage: hcontrol build <house vnum> <exit direction> <player name>\r\n"
     "       hcontrol destroy <house vnum>\r\n"
     "       hcontrol pay <house vnum>\r\n"
@@ -249,7 +251,7 @@ void hcontrol_list_houses(struct char_data *ch)
   }
 }
 
-void hcontrol_build_house(struct char_data *ch, char *arg)
+static void hcontrol_build_house(struct char_data *ch, char *arg)
 {
   char arg1[MAX_INPUT_LENGTH];
   struct house_control_rec temp_house;
@@ -323,7 +325,7 @@ void hcontrol_build_house(struct char_data *ch, char *arg)
   House_save_control();
 }
 
-void hcontrol_destroy_house(struct char_data *ch, char *arg)
+static void hcontrol_destroy_house(struct char_data *ch, char *arg)
 {
   int i, j;
   room_rnum real_atrium, real_house;
@@ -368,7 +370,7 @@ void hcontrol_destroy_house(struct char_data *ch, char *arg)
       rroom_set_flag(real_atrium, ROOM_ATRIUM, true);
 }
 
-void hcontrol_pay_house(struct char_data *ch, char *arg)
+static void hcontrol_pay_house(struct char_data *ch, char *arg)
 {
   int i;
 
@@ -481,7 +483,7 @@ int House_can_enter(struct char_data *ch, room_vnum house)
   return (0);
 }
 
-void House_list_guests(struct char_data *ch, int i, int quiet)
+static void House_list_guests(struct char_data *ch, int i, int quiet)
 {
   int j, num_printed;
   char *temp;
@@ -509,7 +511,7 @@ void House_list_guests(struct char_data *ch, int i, int quiet)
   send_to_char(ch, "\r\n");
 }
 
-int House_load(room_vnum rvnum)
+static int House_load(room_vnum rvnum)
 {
   FILE *fl;
   char f1[READ_SIZE], f2[READ_SIZE], f3[READ_SIZE], f4[READ_SIZE];

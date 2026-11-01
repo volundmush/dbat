@@ -217,7 +217,7 @@ struct stack_data {
 // global variables
 extern const char *trade_letters[NUM_TRADERS + 1];
 extern const char *shop_bits[];
-extern int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
+extern int cmd_say, cmd_tell;
 
 // functions
 int shop_producing(struct obj_data *item, int shop_nr);
@@ -234,6 +234,5 @@ SPECIAL(shop_keeper);
 // commands
 
 /* Trade restriction flags (TRADE_*) on a shop_data. */
-bool shop_trade_flagged(const struct shop_data *rec, int flag);
 void shop_trade_set(struct shop_data *rec, int flag, bool on);
 bool shop_trade_toggle(struct shop_data *rec, int flag);

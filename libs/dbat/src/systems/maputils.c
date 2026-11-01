@@ -15,7 +15,7 @@
 
 room_vnum mapnums[MAP_ROWS + 1][MAP_COLS + 1];
 
-void ping_ship(int vnum, int vnum2)
+static void ping_ship(int vnum, int vnum2)
 {
 
   struct char_data *tch, *next_ch;
@@ -257,7 +257,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   return mapchar;
 }
 
-MapStruct findcoord(int rnum)
+static MapStruct findcoord(int rnum)
 {
   int x, y;
   MapStruct coords;

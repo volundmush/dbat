@@ -13,8 +13,6 @@ void ash_burn(struct char_data *ch);
 ACMD(do_restring);
 ACMD(do_tailhide);
 ACMD(do_nogrow);
-ACMD(do_transform);
-ACMD(do_follow);
 ACMD(do_spoil);
 ACMD(do_feed);
 ACMD(do_beacon);

@@ -66,6 +66,12 @@ it.
 #include <errno.h>
 #include <unistd.h>
 
+static void clear_one_board(struct board_info *tmp);
+static struct board_info *load_board(obj_vnum board_vnum);
+static void look_at_boards();
+static int mesglookup(struct board_msg *message, struct char_data *ch, struct board_info *board);
+static int parse_message(FILE *fl, struct board_info *temp_board);
+
 struct board_info *bboards = NULL; /* our global board structure */
 
 void init_boards(void)
@@ -203,7 +209,7 @@ int save_board(struct board_info *ts)
 /* a fairly messy function                         */
 /* see accompanying document for board file format */
 
-struct board_info *load_board(obj_vnum board_vnum)
+static struct board_info *load_board(obj_vnum board_vnum)
 {
   struct board_info *temp_board;
   struct board_msg *bmsg;
@@ -354,7 +360,7 @@ struct board_info *load_board(obj_vnum board_vnum)
   return temp_board;
 }
 
-int parse_message(FILE *fl, struct board_info *temp_board)
+static int parse_message(FILE *fl, struct board_info *temp_board)
 {
   struct board_msg *tmsg, *t2msg;
   char subject[81];
@@ -402,7 +408,7 @@ int parse_message(FILE *fl, struct board_info *temp_board)
   return 1;
 }
 
-void look_at_boards()
+static void look_at_boards()
 {
   int counter, messages = 0;
   struct board_info *tboard = bboards;
@@ -428,7 +434,7 @@ void clear_boards()
   }
 }
 
-void clear_one_board(struct board_info *tmp)
+static void clear_one_board(struct board_info *tmp)
 {
   struct board_msg *m1, *m2;
   struct board_memory *mem1, *mem2;
@@ -713,7 +719,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg)
   return;
 }
 
-int mesglookup(struct board_msg *message, struct char_data *ch, struct board_info *board)
+static int mesglookup(struct board_msg *message, struct char_data *ch, struct board_info *board)
 {
   int mem = 0;
   struct board_memory *mboard_type;

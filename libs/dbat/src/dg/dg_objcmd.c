@@ -34,24 +34,24 @@
   void(name)(obj_data * obj, char *argument, int cmd, int subcmd)
 
 static void obj_log(obj_data *obj, const char *format, ...) __attribute__((format(printf, 2, 3)));
-room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr);
-OCMD(do_oecho);
-OCMD(do_oforce);
-OCMD(do_ozoneecho);
-OCMD(do_osend);
-OCMD(do_orecho);
-OCMD(do_otimer);
-OCMD(do_otransform);
-OCMD(do_opurge);
-OCMD(do_dupe);
-OCMD(do_oteleport);
-OCMD(do_dgoload);
-OCMD(do_odamage);
-OCMD(do_oasound);
-OCMD(do_ogoto);
-OCMD(do_odoor);
-OCMD(do_osetval);
-OCMD(do_oat);
+static room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr);
+static OCMD(do_oecho);
+static OCMD(do_oforce);
+static OCMD(do_ozoneecho);
+static OCMD(do_osend);
+static OCMD(do_orecho);
+static OCMD(do_otimer);
+static OCMD(do_otransform);
+static OCMD(do_opurge);
+static OCMD(do_dupe);
+static OCMD(do_oteleport);
+static OCMD(do_dgoload);
+static OCMD(do_odamage);
+static OCMD(do_oasound);
+static OCMD(do_ogoto);
+static OCMD(do_odoor);
+static OCMD(do_osetval);
+static OCMD(do_oat);
 void obj_command_interpreter(obj_data *obj, char *argument);
 
 struct obj_command_info {
@@ -93,7 +93,7 @@ room_rnum obj_room(obj_data *obj)
 }
 
 /* returns the real room number, or NOWHERE if not found or invalid */
-room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr)
+static room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr)
 {
   int tmp;
   room_rnum location;
@@ -135,7 +135,7 @@ room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr)
 
 /* Object commands */
 
-OCMD(do_oecho)
+static OCMD(do_oecho)
 {
   int room;
 
@@ -155,7 +155,7 @@ OCMD(do_oecho)
     obj_log(obj, "oecho called by object in NOWHERE");
 }
 
-OCMD(do_oforce)
+static OCMD(do_oforce)
 {
   char_data *ch, *next_ch;
   int room;
@@ -193,7 +193,7 @@ OCMD(do_oforce)
   }
 }
 
-OCMD(do_ozoneecho)
+static OCMD(do_ozoneecho)
 {
   int zone;
   char room_number[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
@@ -213,7 +213,7 @@ OCMD(do_ozoneecho)
   }
 }
 
-OCMD(do_osend)
+static OCMD(do_osend)
 {
   char buf[MAX_INPUT_LENGTH], *msg;
   char_data *ch;
@@ -251,7 +251,7 @@ OCMD(do_osend)
 
 /* prints the message to everyone in the range of numbers */
 /* Thx to Jamie Nelson of 4D for this contribution */
-OCMD(do_orecho)
+static OCMD(do_orecho)
 {
   char start[MAX_INPUT_LENGTH], finish[MAX_INPUT_LENGTH], *msg;
 
@@ -266,7 +266,7 @@ OCMD(do_orecho)
 }
 
 /* set the object's timer value */
-OCMD(do_otimer)
+static OCMD(do_otimer)
 {
   char arg[MAX_INPUT_LENGTH];
 
@@ -283,7 +283,7 @@ OCMD(do_otimer)
 /* transform into a different object */
 /* note: this shouldn't be used with containers unless both objects */
 /* are containers! */
-OCMD(do_otransform)
+static OCMD(do_otransform)
 {
   char arg[MAX_INPUT_LENGTH];
   obj_data *o, tmpobj;
@@ -332,14 +332,14 @@ OCMD(do_otransform)
   }
 }
 
-OCMD(do_dupe)
+static OCMD(do_dupe)
 {
 
   obj_extra_set(obj, ITEM_DUPLICATE, true);
 }
 
 /* purge all objects an npcs in room, or specified object or mob */
-OCMD(do_opurge)
+static OCMD(do_opurge)
 {
   char arg[MAX_INPUT_LENGTH];
   char_data *ch, *next_ch;
@@ -391,7 +391,7 @@ OCMD(do_opurge)
 /* (ogoto) Written by Iovan -- 4/5/10 
    Allows objects to move into specific rooms
    on their own.                             */
-OCMD(do_ogoto)
+static OCMD(do_ogoto)
 {
   room_rnum target;
   char arg1[MAX_INPUT_LENGTH];
@@ -415,7 +415,7 @@ OCMD(do_ogoto)
   }
 }
 
-OCMD(do_oteleport)
+static OCMD(do_oteleport)
 {
   char_data *ch, *next_ch;
   room_rnum target, rm;
@@ -462,7 +462,7 @@ OCMD(do_oteleport)
   }
 }
 
-OCMD(do_dgoload)
+static OCMD(do_dgoload)
 {
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   int number = 0, room;
@@ -564,7 +564,7 @@ OCMD(do_dgoload)
     obj_log(obj, "oload: bad type");
 }
 
-OCMD(do_odamage)
+static OCMD(do_odamage)
 {
   char name[MAX_INPUT_LENGTH], amount[MAX_INPUT_LENGTH];
   int dam = 0;
@@ -588,7 +588,7 @@ OCMD(do_odamage)
   script_damage(ch, dam);
 }
 
-OCMD(do_oasound)
+static OCMD(do_oasound)
 {
   room_rnum room;
   int door;
@@ -616,7 +616,7 @@ OCMD(do_oasound)
   }
 }
 
-OCMD(do_odoor)
+static OCMD(do_odoor)
 {
   char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
   char field[MAX_INPUT_LENGTH], *value;
@@ -707,7 +707,7 @@ OCMD(do_odoor)
   }
 }
 
-OCMD(do_osetval)
+static OCMD(do_osetval)
 {
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   int position, new_value;
@@ -728,7 +728,7 @@ OCMD(do_osetval)
 }
 
 /* submitted by PurpleOnyx - tkhasi@shadowglen.com*/
-OCMD(do_oat)
+static OCMD(do_oat)
 {
   room_rnum loc = NOWHERE;
   struct char_data *ch;
@@ -770,7 +770,7 @@ OCMD(do_oat)
     extract_obj(object);
 }
 
-const struct obj_command_info obj_cmd_info[] = {
+static const struct obj_command_info obj_cmd_info[] = {
     {"RESERVED",     0,             0               }, /* this must be first -- for specprocs */
 
     {"oasound ",     do_oasound,    0               },

@@ -362,7 +362,7 @@ int Crash_delete_crashfile(struct char_data *ch)
   return (1);
 }
 
-int Crash_clean_file(char *name)
+static int Crash_clean_file(char *name)
 {
   char filename[MAX_STRING_LENGTH];
   FILE *fl;
@@ -559,7 +559,7 @@ static void Crash_restore_weight(struct obj_data *obj)
  * Get !RENT items from equipment to inventory and
  * extract !RENT out of worn containers.
  */
-void Crash_extract_norent_eq(struct char_data *ch)
+static void Crash_extract_norent_eq(struct char_data *ch)
 {
   int j;
 

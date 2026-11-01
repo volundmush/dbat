@@ -21,7 +21,6 @@
 /******************************************************************************/
 /** External Functions                                                       **/
 /******************************************************************************/
-void free_config(struct config_data *data);
 
 /******************************************************************************/
 /** Internal Macros                                                          **/
@@ -40,11 +39,11 @@ void free_config(struct config_data *data);
 /******************************************************************************/
 /** Internal Functions                                                       **/
 /******************************************************************************/
-void cedit_disp_menu(struct descriptor_data *d);
-void cedit_setup(struct descriptor_data *d);
-void cedit_save_to_disk(void);
+static void cedit_disp_menu(struct descriptor_data *d);
+static void cedit_setup(struct descriptor_data *d);
+static void cedit_save_to_disk(void);
 int save_config(IDXTYPE nowhere);
-void reassign_rooms(void);
+static void reassign_rooms(void);
 
 /******************************************************************************/
 /** Routines                                                                 **/
@@ -91,7 +90,7 @@ ACMD(do_oasis_cedit)
 
 /*-------------------------------------------------------------------*/
 
-void cedit_setup(struct descriptor_data *d)
+static void cedit_setup(struct descriptor_data *d)
 {
   /****************************************************************************/
   /** Create the config_data struct.                                         **/
@@ -402,7 +401,7 @@ static void cedit_save_internally(struct descriptor_data *d)
 
 /******************************************************************************/
 
-void cedit_save_to_disk(void)
+static void cedit_save_to_disk(void)
 {
   /****************************************************************************/
   /** Just call save_config and get it over with.                            **/
@@ -762,7 +761,7 @@ int save_config(IDXTYPE nowhere)
 /*
  * the main menu 
  */
-void cedit_disp_menu(struct descriptor_data *d)
+static void cedit_disp_menu(struct descriptor_data *d)
 {
   clear_screen(d);
 
@@ -2264,7 +2263,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
 /*
  * End of parse_cedit()  
  */
-void reassign_rooms(void)
+static void reassign_rooms(void)
 {
   void assign_rooms(void);
   int i;

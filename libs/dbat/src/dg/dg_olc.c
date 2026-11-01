@@ -24,6 +24,10 @@
 #include "dbat/modify.h"
 #include "dbat/genzon.h"
 
+static void trigedit_save(struct descriptor_data *d);
+static void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num);
+static void trigedit_setup_new(struct descriptor_data *d);
+
 /* local functions */
 static void trigedit_disp_menu(struct descriptor_data *d);
 static void trigedit_disp_types(struct descriptor_data *d);
@@ -137,7 +141,7 @@ void script_save_to_disk(FILE *fp, void *item, int type)
   }
 }
 
-void trigedit_setup_new(struct descriptor_data *d)
+static void trigedit_setup_new(struct descriptor_data *d)
 {
   struct trig_data *trig;
 
@@ -164,7 +168,7 @@ void trigedit_setup_new(struct descriptor_data *d)
   OLC_VAL(d)  = 0; /* Has changed flag. (It hasn't so far, we just made it.) */
 }
 
-void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num)
+static void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num)
 {
   struct trig_data *trig;
   struct cmdlist_element *c;
@@ -408,7 +412,7 @@ void trigedit_parse(struct descriptor_data *d, char *arg)
 }
 
 /* save the zone's triggers to internal memory and to disk */
-void trigedit_save(struct descriptor_data *d)
+static void trigedit_save(struct descriptor_data *d)
 {
   int i;
   trig_rnum rnum;
@@ -581,7 +585,7 @@ void trigedit_save(struct descriptor_data *d)
       if (desc_get_connected(dsc) == CON_TRIGEDIT)
         if (GET_TRIG_RNUM(OLC_TRIG(dsc)) >= rnum)
           GET_TRIG_RNUM(OLC_TRIG(dsc))
-          ++;
+    ++;
   }
 
   /* now write the trigger out to disk, along with the rest of the  */

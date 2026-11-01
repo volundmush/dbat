@@ -47,6 +47,7 @@
 #include "dbat/obj_edit.h"
 #include "dbat/fight.h"
 #include "dbat/class.h"
+#include "dbat/act.item.h"
 
 /* local functions  */
 static void generate_multiform(struct char_data *ch, int count);

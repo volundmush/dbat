@@ -106,7 +106,7 @@ extern int DRAGONR, DRAGONZ, DRAGONC, SHENRON;
 extern int circle_restrict;
 
 extern char *help, *ihelp, *credits, *news, *info, *wizlist, *immlist, *background;
-extern char *policies, *handbook, *motd, *imotd, *GREETINGS, *GREETANSI;
+extern char *policies, *handbook, *motd, *imotd, *GREETANSI;
 extern int dballtime;
 extern int mini_mud, no_rent_check, no_mail;
 extern room_rnum r_mortal_start_room; /* rnum of mortal start room	 */
@@ -126,14 +126,11 @@ char *fread_string(FILE *fl, const char *error);
 long get_id_by_name(const char *name);
 char *get_name_by_id(long id);
 void save_mud_time(struct time_info_data *when);
-void free_extra_descriptions(struct extra_descr_data *edesc);
 void free_text_files(void);
 void free_player_index(void);
 void load_disabled(void);
-void save_disabled(void);
 void free_disabled(void);
 void free_help_table(void);
-void load_help(FILE *fl, char *name);
 void auc_save(void);
 void load_config(void);
 
@@ -152,8 +149,6 @@ void reset_char(struct char_data *ch);
 void free_char(struct char_data *ch);
 void save_player_index(void);
 long get_ptable_by_name(const char *name);
-
-int parse_mobile_from_file(FILE *mob_f, struct char_data *ch);
 
 struct obj_data *create_obj(void);
 void clear_object(struct obj_data *obj);
@@ -177,8 +172,6 @@ extern time_t boot_time;
 extern int dg_owner_purged;
 extern int xap_objs;
 
-void strip_string(char *buffer);
-int read_xap_objects(FILE *fl, struct char_data *ch);
 bitvector_t asciiflag_conv(char *flag);
 void reset_zone(zone_rnum zone);
 

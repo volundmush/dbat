@@ -18,5 +18,3 @@ constexpr int COLOR_YOUSAY     = 14;
 constexpr int COLOR_ROOMSAY    = 15;
 
 constexpr int NUM_COLOR = 16;
-
-extern const char *cchoice_names[NUM_COLOR + 1];

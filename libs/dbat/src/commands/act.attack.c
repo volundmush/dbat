@@ -32,6 +32,7 @@
 #include "dbat/relocate.h"
 #include "dbat/extract.h"
 #include "dbat/dg_comm.h"
+#include "dbat/act.item.h"
 
 ACMD(do_lightgrenade)
 {

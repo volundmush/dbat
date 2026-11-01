@@ -19,9 +19,11 @@
 #include "dbat/house.h"
 #include "dbat/act.informative.h"
 
+static void hsedit_disp_menu(struct descriptor_data *d);
+
 /*------------------------------------------------------------------------*/
 /* internal globals */
-const char *house_flags[] = {
+static const char *house_flags[] = {
     "!GUEST",
     "FREE",
     "!IMM",
@@ -31,7 +33,7 @@ const char *house_flags[] = {
     "!SAVE",
     "\n"};
 
-const char *house_types[] = {
+static const char *house_types[] = {
     "PLAYER_OWNED",
     "IMM_OWNED",
     "CLAN_OWNED",
@@ -41,7 +43,7 @@ const char *house_types[] = {
   Utils and exported functions. 
 \*------------------------------------------------------------------------*/
 
-void hsedit_setup_new(struct descriptor_data *d)
+static void hsedit_setup_new(struct descriptor_data *d)
 {
   int i;
   CREATE(OLC_HOUSE(d), struct house_control_rec, 1);
@@ -63,7 +65,7 @@ void hsedit_setup_new(struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-void hsedit_setup_existing(struct descriptor_data *d, int real_num)
+static void hsedit_setup_existing(struct descriptor_data *d, int real_num)
 {
   struct house_control_rec *house;
   int i;
@@ -94,7 +96,7 @@ void hsedit_setup_existing(struct descriptor_data *d, int real_num)
 }
 
 /*-----------------------------------------------------------1-------------*/
-void hsedit_save_internally(struct descriptor_data *d)
+static void hsedit_save_internally(struct descriptor_data *d)
 {
   int house_rnum;
 
@@ -131,7 +133,7 @@ void hsedit_save_internally(struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-void hsedit_save_to_disk(void)
+static void hsedit_save_to_disk(void)
 {
   /* Why bother writing a new function when there is already one that does the job */
   House_save_control();
@@ -181,7 +183,7 @@ static void hedit_delete_house(struct descriptor_data *d, int house_vnum)
  
 **************************************************************************/
 
-void hsedit_disp_flags_menu(struct descriptor_data *d)
+static void hsedit_disp_flags_menu(struct descriptor_data *d)
 {
   int counter, columns = 0;
   char buf1[MAX_STRING_LENGTH];
@@ -275,7 +277,7 @@ static void hsedit_dir_menu(struct descriptor_data *d)
   send_to_char(d->character, "%s", buf);
 }
 
-void hsedit_disp_type_menu(struct descriptor_data *d)
+static void hsedit_disp_type_menu(struct descriptor_data *d)
 {
   int counter, columns = 0;
 
@@ -366,7 +368,7 @@ static char *hsedit_list_guests(struct house_control_rec *thishouse, char *guest
 }
 
 /* the main menu */
-void hsedit_disp_menu(struct descriptor_data *d)
+static void hsedit_disp_menu(struct descriptor_data *d)
 {
   char buf[MAX_STRING_LENGTH], buf1[MAX_STRING_LENGTH], built_on[128],
       last_pay[128], buf2[MAX_STRING_LENGTH];

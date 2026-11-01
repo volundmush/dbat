@@ -13,9 +13,9 @@
 
 #undef HTREE_TEST_CYCLES
 
-struct htree_node *HTREE_NULL = NULL;
-int htree_total_nodes         = 0;
-int htree_depth_used          = 0;
+static struct htree_node *HTREE_NULL = NULL;
+static int htree_total_nodes         = 0;
+static int htree_depth_used          = 0;
 
 void htree_shutdown()
 {

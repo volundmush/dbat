@@ -227,7 +227,7 @@ ACMD(do_unban)
 
 #define MAX_INVALID_NAMES 200
 
-char *invalid_list[MAX_INVALID_NAMES];
+static char *invalid_list[MAX_INVALID_NAMES];
 int num_invalid = 0;
 
 int Valid_Name(char *newname)

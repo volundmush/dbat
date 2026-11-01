@@ -12,88 +12,10 @@
 #define Y TRUE
 #define N FALSE
 
-const char *race_display[NUM_RACES] = {
-    "@B1@W) @cHuman\r\n",
-    "@B2@W) @cSaiyan\r\n",
-    "@B3@W) @cIcer\r\n",
-    "@B4@W) @cKonatsu\r\n",
-    "@B5@W) @cNamekian\r\n",
-    "@B6@W) @cMutant\r\n",
-    "@B7@W) @cKanassan\r\n",
-    "@B8@W) @cHalf Breed\r\n",
-    "@B9@W) @cBio-Android\r\n",
-    "@B10@W) @cAndroid\r\n",
-    "@B11@W) @cDemon\r\n",
-    "@B12@W) @cMajin\r\n",
-    "@B13@W) @cKai\r\n",
-    "@B14@W) @cTruffle\r\n",
-    "@B15@W) @cHoshijin\r\n",
-    "@B16@W) @YArlian\r\n",
-    "@B17@W) @GAnimal\r\n",
-    "@B18@W) @MSaiba\r\n",
-    "@B19@W) @BSerpent\r\n",
-    "@B20@W) @ROgre\r\n",
-    "@B21@W) @CYardratian\r\n",
-    "@B22@W) @GLizardfolk\r\n",
-    "@B23@W) @GMechanical\r\n",
-    "@B24@W) @MSpirit\r\n",
-};
-
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
-int racial_ability_mods[][6] = {
-    /*                      Str,Con,Int,Wis,Dex,Cha */
-    /* RACE_HUMAN       */ {0, 0, 0, 0, 0, 0},
-    /* RACE_SAIYAN      */
-    {0, -2, 0, 0, 2, 0},
-    /* RACE_ICER        */
-    {-2, 2, 0, 0, 0, 0},
-    /* RACE_KONATSU     */
-    {0, 2, 0, 0, 0, -2},
-    /* RACE_NAMEK       */
-    {0, 0, 0, 0, 0, 0},
-    /* RACE_MUTANT      */
-    {-2, 0, 0, 0, 2, 0},
-    /* RACE_KANASSAN    */
-    {0, -2, 2, 0, 2, 2},
-    /* RACE_HALFBREED   */
-    {2, 0, -2, 0, 0, -2},
-    /* RACE_BIO         */
-    {0, 0, 0, 0, 0, 0},
-    /* RACE_ANDROID     */
-    {0, 0, 0, 0, 0, 0},
-    /* RACE_DEMON       */
-    {0, 0, 0, 0, 0, 0},
-    /* RACE_MAJIN       */
-    {0, 0, 0, 0, 0, 0},
-    /* RACE_KAI         */
-    {0, 0, 0, 0, 0, 0},
-    /* RACE_TRUFFLE     */
-    {14, 8, -4, 0, -2, -4},
-    /* RACE_GOBLIN      */
-    {-2, 0, 0, 0, 2, -2},
-    /* RACE_ANIMAL      */
-    {0, 0, 0, 0, 0, 0},
-    /* RACE_ORC         */
-    {4, 0, -2, -2, 0, -2},
-    /* RACE_SNAKE       */
-    {0, 0, 0, 0, 0, 0},
-    /* RACE_TROLL       */
-    {12, 12, -4, -2, 4, -4},
-    /* RACE_MINOTAUR    */
-    {8, 4, -4, 0, 0, -2},
-    /* RACE_KOBOLD      */
-    {-4, -2, 0, 0, 2, 0},
-    /* RACE_LIZARDFOLK  */
-    {0, 0, 0, 0, 0, 0},
-    /* RACE_WARHOST     */
-    {0, 0, 0, 0, 0, 0},
-    /* RACE_FAERIE      */
-    {0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0}
-};
 
 /* Converted into metric units: cm and kg; SRD has english units. */
-struct {
+static struct {
   int height[NUM_SEX]; /* cm */
   int heightdie;       /* 2d(heightdie) added to height */
   int weight[NUM_SEX]; /* kg */
@@ -214,17 +136,6 @@ int get_size(struct char_data *ch)
   return ch->size;
 }
 
-const int size_bonus_table[NUM_SIZES] = {
-    /* XTINY */ 8,
-    /* TINY */ 4,
-    /* XSMALL */ 2,
-    /* SMALL */ 1,
-    /* MEDIUM */ 0,
-    /* LARGE */ -1,
-    /* HUGE */ -2,
-    /* GIGANTIC */ -4,
-    /* COLOSSAL */ -8};
-
 int wield_type(int chsize, const struct obj_data *weap)
 {
   if (obj_get_type_flag(weap) != ITEM_WEAPON)
@@ -242,7 +153,7 @@ int wield_type(int chsize, const struct obj_data *weap)
   }
 }
 
-int race_bodyparts[NUM_RACES][NUM_WEARS] = {
+static int race_bodyparts[NUM_RACES][NUM_WEARS] = {
     /* 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22 */
     /* U, F, F, N, N, B, H, L, F, H, A, U, A, W, W, W, W, W, B, E, E, W, M */
     /* RACE_HUMAN       */ {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -467,7 +378,7 @@ bool race_check_can_transform(char_data *ch)
   return true;
 }
 
-int race_max_transform_tier(char_data *ch)
+static int race_max_transform_tier(char_data *ch)
 {
   switch (ch->race) {
     case RACE_SAIYAN:

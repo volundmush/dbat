@@ -76,5 +76,3 @@ constexpr int CFEAT_SPELL_FOCUS         = 0;
 constexpr int CFEAT_GREATER_SPELL_FOCUS = 1;
 
 constexpr int SFEAT_MAX = 1;
-
-extern const char *spell_schools[NUM_SCHOOLS + 1];

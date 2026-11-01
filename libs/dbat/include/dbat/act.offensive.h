@@ -20,7 +20,6 @@ ACMD(do_beam);
 ACMD(do_bite);
 ACMD(do_heeldrop);
 ACMD(do_attack);
-ACMD(do_attack2);
 ACMD(do_renzo);
 ACMD(do_kamehameha);
 ACMD(do_masenko);

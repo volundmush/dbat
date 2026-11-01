@@ -20,6 +20,7 @@
 #include "dbat/oasis.h"
 #include "dbat/class.h"
 #include "dbat/races.h"
+#include "dbat/local_limits.h"
 
 /* Utility functions */
 
@@ -61,7 +62,7 @@ void add_var(struct trig_var_data **var_list, char *name, const char *value, lon
 }
 
 /* perhaps not the best place for this, but I didn't want a new file */
-char *skill_percent(struct char_data *ch, char *skill)
+static char *skill_percent(struct char_data *ch, char *skill)
 {
   static char retval[16];
   int skillnum;
@@ -83,7 +84,7 @@ char *skill_percent(struct char_data *ch, char *skill)
    Now returns the number of matching objects -- Welcor 02/04
 */
 
-int item_in_list(char *item, obj_data *list)
+static int item_in_list(char *item, obj_data *list)
 {
   obj_data *i;
   int count = 0;
@@ -130,7 +131,7 @@ int item_in_list(char *item, obj_data *list)
    MUD -- 4dimensions.org:6000
 */
 
-int char_has_item(char *item, struct char_data *ch)
+static int char_has_item(char *item, struct char_data *ch)
 {
 
   /* If this works, no more searching needed */
@@ -143,8 +144,8 @@ int char_has_item(char *item, struct char_data *ch)
     return 1;
 }
 
-int text_processed(char *field, char *subfield, struct trig_var_data *vd,
-                   char *str, size_t slen)
+static int text_processed(char *field, char *subfield, struct trig_var_data *vd,
+                          char *str, size_t slen)
 {
   char *p, *p2;
   char tmpvar[MAX_STRING_LENGTH];
@@ -217,7 +218,7 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
 }
 
 /* sets str to be the value of var.field */
-void find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, char *str, size_t slen)
+static void find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, char *str, size_t slen)
 {
   struct trig_var_data *vd = NULL;
   char_data *ch, *c          = NULL, *rndm;
@@ -663,7 +664,7 @@ in the vault (vnum: 453) now and then. you can just use
               strcpy(str, "0");
           } else if (!strcasecmp(field, "drunk")) {
             if (subfield && *subfield) {
-              int addition       = atoi(subfield);
+              int addition = atoi(subfield);
               char_set_conditions(c, DRUNK, MAX(-1, MIN(addition, 24)));
             }
             snprintf(str, slen, "%d", char_get_conditions(c, DRUNK));
@@ -754,7 +755,7 @@ in the vault (vnum: 453) now and then. you can just use
             snprintf(str, slen, "%" I64T "", getCurPL(c));
           } else if (!strcasecmp(field, "hunger")) {
             if (subfield && *subfield) {
-              int addition        = atoi(subfield);
+              int addition = atoi(subfield);
               char_set_conditions(c, HUNGER, MAX(-1, MIN(addition, 24)));
             }
             snprintf(str, slen, "%d", char_get_conditions(c, HUNGER));
@@ -914,7 +915,7 @@ in the vault (vnum: 453) now and then. you can just use
               }
             }
             if (subfield && *subfield) {
-              int addition                        = atoi(subfield);
+              int addition = atoi(subfield);
               char_set_practice_points(c, MAX(0, char_get_practice_points(c) + addition));
             }
             snprintf(str, slen, "%d", char_get_practice_points(c));
@@ -1003,7 +1004,7 @@ in the vault (vnum: 453) now and then. you can just use
         case 't':
           if (!strcasecmp(field, "thirst")) {
             if (subfield && *subfield) {
-              int addition        = atoi(subfield);
+              int addition = atoi(subfield);
               char_set_conditions(c, THIRST, MAX(-1, MIN(addition, 24)));
             }
             snprintf(str, slen, "%d", char_get_conditions(c, THIRST));

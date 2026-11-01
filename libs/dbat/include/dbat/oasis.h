@@ -504,156 +504,36 @@ ACMD(do_iedit);
 ACMD(do_show_save_list);
 ACMD(do_rcopy);
 
-void medit_free_mobile(struct char_data *mob);
-void medit_setup_new(struct descriptor_data *d);
-void medit_setup_existing(struct descriptor_data *d, int rmob_num);
-void init_mobile(struct char_data *mob);
-void medit_save_internally(struct descriptor_data *d);
-void medit_save_to_disk(zone_vnum zone_num);
-void medit_disp_positions(struct descriptor_data *d);
-void medit_disp_mprog(struct descriptor_data *d);
-void medit_change_mprog(struct descriptor_data *d);
-void medit_disp_mprog_types(struct descriptor_data *d);
-void medit_disp_sex(struct descriptor_data *d);
-void medit_disp_attack_types(struct descriptor_data *d);
-void medit_disp_mob_flags(struct descriptor_data *d);
-void medit_disp_aff_flags(struct descriptor_data *d);
-void medit_disp_menu(struct descriptor_data *d);
 void medit_parse(struct descriptor_data *d, char *arg);
 void medit_string_cleanup(struct descriptor_data *d, int terminator);
-ACMD(do_oasis_medit);
 
-void oedit_setup_new(struct descriptor_data *d);
-void oedit_setup_existing(struct descriptor_data *d, int real_num);
-void oedit_save_internally(struct descriptor_data *d);
-void oedit_save_to_disk(int zone_num);
-void oedit_disp_container_flags_menu(struct descriptor_data *d);
-void oedit_disp_extradesc_menu(struct descriptor_data *d);
-void oedit_disp_prompt_apply_menu(struct descriptor_data *d);
-void oedit_liquid_type(struct descriptor_data *d);
-void oedit_disp_apply_menu(struct descriptor_data *d);
-void oedit_disp_weapon_menu(struct descriptor_data *d);
-void oedit_disp_crittype_menu(struct descriptor_data *d);
-void oedit_disp_spells_menu(struct descriptor_data *d);
-void oedit_disp_val1_menu(struct descriptor_data *d);
-void oedit_disp_val2_menu(struct descriptor_data *d);
-void oedit_disp_val3_menu(struct descriptor_data *d);
-void oedit_disp_val4_menu(struct descriptor_data *d);
-void oedit_disp_val5_menu(struct descriptor_data *d);
-void oedit_disp_val7_menu(struct descriptor_data *d);
-void oedit_disp_val9_menu(struct descriptor_data *d);
-void oedit_disp_type_menu(struct descriptor_data *d);
-void oedit_disp_extra_menu(struct descriptor_data *d);
-void oedit_disp_wear_menu(struct descriptor_data *d);
-void oedit_disp_menu(struct descriptor_data *d);
 void oedit_parse(struct descriptor_data *d, char *arg);
-void oedit_disp_perm_menu(struct descriptor_data *d);
 void oedit_string_cleanup(struct descriptor_data *d, int terminator);
-void oedit_disp_prompt_spellbook_menu(struct descriptor_data *d);
-void oedit_disp_spellbook_menu(struct descriptor_data *d);
 ACMD(do_oasis_oedit);
-void oedit_disp_use_menu(struct descriptor_data *d);
-
-void iedit_setup_existing(struct descriptor_data *d, struct obj_data *obj);
-void iedit_parse(struct descriptor_data *d, char *arg);
 
 void redit_string_cleanup(struct descriptor_data *d, int terminator);
-void redit_setup_new(struct descriptor_data *d);
-void redit_setup_existing(struct descriptor_data *d, int real_num);
 void redit_save_internally(struct descriptor_data *d);
-void redit_save_to_disk(zone_vnum zone_num);
-void redit_disp_extradesc_menu(struct descriptor_data *d);
-void redit_disp_exit_menu(struct descriptor_data *d);
-void redit_disp_exit_flag_menu(struct descriptor_data *d);
-void redit_disp_flag_menu(struct descriptor_data *d);
-void redit_disp_sector_menu(struct descriptor_data *d);
-void redit_disp_menu(struct descriptor_data *d);
 void redit_parse(struct descriptor_data *d, char *arg);
 void free_room(struct room_data *room);
 ACMD(do_oasis_redit);
 
-void sedit_setup_new(struct descriptor_data *d);
-void sedit_setup_existing(struct descriptor_data *d, int rshop_num);
-void sedit_save_internally(struct descriptor_data *d);
-void sedit_save_to_disk(int zone_num);
-void sedit_products_menu(struct descriptor_data *d);
-void sedit_compact_rooms_menu(struct descriptor_data *d);
-void sedit_rooms_menu(struct descriptor_data *d);
-void sedit_namelist_menu(struct descriptor_data *d);
-void sedit_shop_flags_menu(struct descriptor_data *d);
-void sedit_no_trade_menu(struct descriptor_data *d);
-void sedit_types_menu(struct descriptor_data *d);
-void sedit_disp_menu(struct descriptor_data *d);
 void sedit_parse(struct descriptor_data *d, char *arg);
-ACMD(do_oasis_sedit);
-void gedit_setup_new(struct descriptor_data *d);
-void gedit_setup_existing(struct descriptor_data *d, int rgm_num);
-void gedit_parse(struct descriptor_data *d, char *arg);
-void gedit_disp_menu(struct descriptor_data *d);
-void gedit_no_train_menu(struct descriptor_data *d);
-void gedit_save_internally(struct descriptor_data *d);
-void gedit_save_to_disk(int num);
-void copy_guild(struct guild_data *tgm, struct guild_data *fgm);
-void free_guild_strings(struct guild_data *guild);
-void free_guild(struct guild_data *guild);
 ACMD(do_oasis_gedit);
 
-void zedit_setup(struct descriptor_data *d, int room_num);
-void zedit_new_zone(struct char_data *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top);
-void zedit_create_index(int znum, char *type);
-void zedit_save_internally(struct descriptor_data *d);
-void zedit_save_to_disk(int zone_num);
-void zedit_disp_menu(struct descriptor_data *d);
-void zedit_disp_comtype(struct descriptor_data *d);
-void zedit_disp_arg1(struct descriptor_data *d);
-void zedit_disp_arg2(struct descriptor_data *d);
-void zedit_disp_arg3(struct descriptor_data *d);
-void zedit_disp_arg4(struct descriptor_data *d);
-void zedit_disp_arg5(struct descriptor_data *d);
 void zedit_parse(struct descriptor_data *d, char *arg);
-void zedit_disp_flag_menu(struct descriptor_data *d);
 ACMD(do_oasis_zedit);
 
-void cedit_setup(struct descriptor_data *d);
 void cedit_parse(struct descriptor_data *d, char *arg);
-void cedit_save_to_disk(void);
 void cedit_string_cleanup(struct descriptor_data *d, int terminator);
 ACMD(do_oasis_cedit);
 
 void trigedit_parse(struct descriptor_data *d, char *arg);
-void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num);
-void trigedit_setup_new(struct descriptor_data *d);
-ACMD(do_oasis_trigedit);
 
-void aedit_disp_menu(struct descriptor_data *d);
-void aedit_parse(struct descriptor_data *d, char *arg);
-void aedit_setup_new(struct descriptor_data *d);
-void aedit_setup_existing(struct descriptor_data *d, int real_num);
-void aedit_save_to_disk(struct descriptor_data *d);
-void aedit_save_internally(struct descriptor_data *d);
-void free_action(struct social_messg *mess);
-ACMD(do_oasis_aedit);
-
-void hedit_parse(struct descriptor_data *d, char *arg);
-void hedit_string_cleanup(struct descriptor_data *d, int terminator);
-ACMD(do_oasis_hedit);
-
-void hsedit_save_to_disk(void);
-void hsedit_setup_new(struct descriptor_data *d);
-void hsedit_setup_existing(struct descriptor_data *d, int real_num);
-void hsedit_parse(struct descriptor_data *d, char *arg);
-void free_house(struct house_control_rec *house);
 ACMD(do_oasis_hsedit);
 
 int parse_stats(struct descriptor_data *d, char *arg);
-int stats_disp_menu(struct descriptor_data *d);
 
 int free_strings(void *data, int type);
-void list_rooms(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax);
-void list_mobiles(struct char_data *ch, zone_rnum rnum, mob_vnum vmin, mob_vnum vmax);
-void list_objects(struct char_data *ch, zone_rnum rnum, obj_vnum vmin, obj_vnum vmax);
-void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax);
-void list_zones(struct char_data *ch);
 void print_zone(struct char_data *ch, zone_vnum vnum);
 int can_edit_zone(struct char_data *ch, zone_rnum rnum);
 
@@ -803,18 +683,8 @@ int can_edit_zone(struct char_data *ch, zone_rnum rnum);
 #define NUM_CONTEXTS 140
 
 /* Prototypes for the context sensitive help system */
-int find_context(struct descriptor_data *d);
-int find_context_oedit(struct descriptor_data *d);
-int find_context_redit(struct descriptor_data *d);
-int find_context_zedit(struct descriptor_data *d);
-int find_context_medit(struct descriptor_data *d);
-int find_context_sedit(struct descriptor_data *d);
-int find_context_gedit(struct descriptor_data *d);
-int find_context_trigedit(struct descriptor_data *d);
-int find_context_script_edit(struct descriptor_data *d);
 int context_help(struct descriptor_data *d, char *arg);
 void boot_context_help(void);
-void free_context_help(void);
 #endif /* ifndef __GENOLC_C__ */
 
 /*. Submodes of GEDIT connectedness     . */

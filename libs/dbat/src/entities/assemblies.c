@@ -21,6 +21,8 @@
 #include "dbat/relocate.h"
 #include "dbat/search.h"
 
+static long assemblyGetAssemblyIndex(long lVnum);
+
 /* Local global variables. */
 static long g_lNumAssemblies      = 0;
 static ASSEMBLY *g_pAssemblyTable = NULL;
@@ -397,7 +399,7 @@ long assemblyFindAssembly(const char *pszAssemblyName)
   return (-1);
 }
 
-long assemblyGetAssemblyIndex(long lVnum)
+static long assemblyGetAssemblyIndex(long lVnum)
 {
   long lBottom = 0;
   long lMiddle = 0;

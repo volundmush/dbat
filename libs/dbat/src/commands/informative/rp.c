@@ -632,7 +632,7 @@ int readIntro(struct char_data *ch, struct char_data *vict)
     return 0;
 }
 
-void introWrite(struct char_data *ch, struct char_data *vict, char *name)
+static void introWrite(struct char_data *ch, struct char_data *vict, char *name)
 {
   FILE *file;
   char fname[40], filler[50], scrap[100], line[256];

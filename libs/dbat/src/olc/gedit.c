@@ -24,16 +24,20 @@
 #include "dbat/genolc.h"
 #include "dbat/shop.h"
 
+static void gedit_disp_menu(struct descriptor_data *d);
+static void gedit_setup_existing(struct descriptor_data *d, int rgm_num);
+static void gedit_setup_new(struct descriptor_data *d);
+
 /*
  * Should check more things.
  */
-void gedit_save_internally(struct descriptor_data *d)
+static void gedit_save_internally(struct descriptor_data *d)
 {
   OLC_GUILD(d)->vnum = OLC_NUM(d);
   add_guild(OLC_GUILD(d));
 }
 
-void gedit_save_to_disk(int num)
+static void gedit_save_to_disk(int num)
 {
   save_guilds(num);
 }
@@ -178,7 +182,7 @@ ACMD(do_oasis_gedit)
          char_get_name(ch), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
 }
 
-void gedit_setup_new(struct descriptor_data *d)
+static void gedit_setup_new(struct descriptor_data *d)
 {
   int i;
   struct guild_data *guilddata;
@@ -193,7 +197,7 @@ void gedit_setup_new(struct descriptor_data *d)
   G_CHARGE(guilddata)  = 1.0;
   for (i = 0; i < GW_ARRAY_MAX; i++)
     G_WITH_WHO(guilddata)
-    [i] = 0;
+  [i]                 = 0;
   G_FUNC(guilddata)   = NULL;
   G_MINLVL(guilddata) = 0;
 
@@ -221,7 +225,7 @@ void gedit_setup_new(struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-void gedit_setup_existing(struct descriptor_data *d, int rgm_num)
+static void gedit_setup_existing(struct descriptor_data *d, int rgm_num)
 {
   /*. Alloc some guild shaped space . */
   CREATE(OLC_GUILD(d), struct guild_data, 1);
@@ -386,7 +390,7 @@ static void gedit_select_wp_menu(struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-void gedit_no_train_menu(struct descriptor_data *d)
+static void gedit_no_train_menu(struct descriptor_data *d)
 {
   char bits[MAX_STRING_LENGTH];
   int i, count = 0;
@@ -410,7 +414,7 @@ void gedit_no_train_menu(struct descriptor_data *d)
 /*-------------------------------------------------------------------*/
 /*. Display main menu . */
 
-void gedit_disp_menu(struct descriptor_data *d)
+static void gedit_disp_menu(struct descriptor_data *d)
 {
   struct guild_data *guilddata;
   char buf1[MAX_STRING_LENGTH];

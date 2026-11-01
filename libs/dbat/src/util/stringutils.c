@@ -317,7 +317,7 @@ int is_number(const char *str)
   return (1);
 }
 
-const char *fill[] =
+static const char *fill[] =
     {
         "in",
         "into",
@@ -334,7 +334,7 @@ int fill_word(char *argument)
   return (search_block(argument, fill, TRUE) >= 0);
 }
 
-const char *reserved[] =
+static const char *reserved[] =
     {
         "a",
         "an",

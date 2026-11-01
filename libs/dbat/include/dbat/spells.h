@@ -298,7 +298,6 @@ ASPELL(spell_teleport);
 ASPELL(spell_summon);
 ASPELL(spell_locate_object);
 ASPELL(spell_charm);
-ASPELL(spell_information);
 ASPELL(spell_identify);
 ASPELL(spell_enchant_weapon);
 ASPELL(spell_detect_poison);
@@ -347,7 +346,6 @@ int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum,
                  int level, int cast_stat);
 
 /* other prototypes */
-void skill_level(int spell, int chclass, int level);
 const char *skill_name(int num);
 int roll_skill(const struct char_data *ch, int snum);
 int roll_resisted(const struct char_data *actor, int sact, const struct char_data *resistor, int sres);

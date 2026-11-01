@@ -23,7 +23,7 @@
 #include "dbat/affect.h"
 
 /* local functions */
-void perform_mag_groups(int level, struct char_data *ch, struct char_data *tch, int spellnum);
+static void perform_mag_groups(int level, struct char_data *ch, struct char_data *tch, int spellnum);
 
 /* affect_update: called from comm.c (causes spells to wear off) */
 void affect_update(void)
@@ -372,8 +372,8 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
  * This function is used to provide services to mag_groups.  This function
  * is the one you should change to add new group spells.
  */
-void perform_mag_groups(int level, struct char_data *ch,
-                        struct char_data *tch, int spellnum)
+static void perform_mag_groups(int level, struct char_data *ch,
+                               struct char_data *tch, int spellnum)
 {
   switch (spellnum) {
     case SPELL_MASS_HEAL:
@@ -508,134 +508,6 @@ void mag_areas(int level, struct char_data *ch, int spellnum)
 /*
  *  Every spell which summons/gates/conjours a mob comes through here.
  */
-
-mob_vnum monsum_list_lg_1[] = {300, 301, 302, NOBODY};
-mob_vnum monsum_list_ng_1[] = {300, 301, 302, 303, 304, NOBODY};
-mob_vnum monsum_list_cg_1[] = {302, 303, 304, NOBODY};
-mob_vnum monsum_list_ln_1[] = {300, 301, 305, 306, NOBODY};
-mob_vnum monsum_list_nn_1[] = {302, 307, 308, NOBODY};
-mob_vnum monsum_list_cn_1[] = {303, 304, 309, 310, 311, NOBODY};
-mob_vnum monsum_list_le_1[] = {305, 306, 307, 308, NOBODY};
-mob_vnum monsum_list_ne_1[] = {305, 306, 307, 308, 309, 310, 311, NOBODY};
-mob_vnum monsum_list_ce_1[] = {307, 308, 309, 310, 311, NOBODY};
-
-mob_vnum monsum_list_lg_2[] = {312, 313, 314, NOBODY};
-mob_vnum monsum_list_ng_2[] = {312, 313, 314, NOBODY};
-mob_vnum monsum_list_cg_2[] = {312, 313, 314, 315, NOBODY};
-mob_vnum monsum_list_ln_2[] = {312, 317, NOBODY};
-mob_vnum monsum_list_nn_2[] = {315, 316, 317, NOBODY};
-mob_vnum monsum_list_cn_2[] = {313, 316, 318, NOBODY};
-mob_vnum monsum_list_le_2[] = {316, 317, NOBODY};
-mob_vnum monsum_list_ne_2[] = {318, 319, NOBODY};
-mob_vnum monsum_list_ce_2[] = {320, 321, NOBODY};
-
-mob_vnum monsum_list_lg_3[] = {NOBODY};
-mob_vnum monsum_list_ng_3[] = {NOBODY};
-mob_vnum monsum_list_cg_3[] = {NOBODY};
-mob_vnum monsum_list_ln_3[] = {NOBODY};
-mob_vnum monsum_list_nn_3[] = {NOBODY};
-mob_vnum monsum_list_cn_3[] = {NOBODY};
-mob_vnum monsum_list_le_3[] = {NOBODY};
-mob_vnum monsum_list_ne_3[] = {NOBODY};
-mob_vnum monsum_list_ce_3[] = {NOBODY};
-
-mob_vnum monsum_list_lg_4[] = {NOBODY};
-mob_vnum monsum_list_ng_4[] = {NOBODY};
-mob_vnum monsum_list_cg_4[] = {NOBODY};
-mob_vnum monsum_list_ln_4[] = {NOBODY};
-mob_vnum monsum_list_nn_4[] = {NOBODY};
-mob_vnum monsum_list_cn_4[] = {NOBODY};
-mob_vnum monsum_list_le_4[] = {NOBODY};
-mob_vnum monsum_list_ne_4[] = {NOBODY};
-mob_vnum monsum_list_ce_4[] = {NOBODY};
-
-mob_vnum monsum_list_lg_5[] = {NOBODY};
-mob_vnum monsum_list_ng_5[] = {NOBODY};
-mob_vnum monsum_list_cg_5[] = {NOBODY};
-mob_vnum monsum_list_ln_5[] = {NOBODY};
-mob_vnum monsum_list_nn_5[] = {NOBODY};
-mob_vnum monsum_list_cn_5[] = {NOBODY};
-mob_vnum monsum_list_le_5[] = {NOBODY};
-mob_vnum monsum_list_ne_5[] = {NOBODY};
-mob_vnum monsum_list_ce_5[] = {NOBODY};
-
-mob_vnum monsum_list_lg_6[] = {NOBODY};
-mob_vnum monsum_list_ng_6[] = {NOBODY};
-mob_vnum monsum_list_cg_6[] = {NOBODY};
-mob_vnum monsum_list_ln_6[] = {NOBODY};
-mob_vnum monsum_list_nn_6[] = {NOBODY};
-mob_vnum monsum_list_cn_6[] = {NOBODY};
-mob_vnum monsum_list_le_6[] = {NOBODY};
-mob_vnum monsum_list_ne_6[] = {NOBODY};
-mob_vnum monsum_list_ce_6[] = {NOBODY};
-
-mob_vnum monsum_list_lg_7[] = {NOBODY};
-mob_vnum monsum_list_ng_7[] = {NOBODY};
-mob_vnum monsum_list_cg_7[] = {NOBODY};
-mob_vnum monsum_list_ln_7[] = {NOBODY};
-mob_vnum monsum_list_nn_7[] = {NOBODY};
-mob_vnum monsum_list_cn_7[] = {NOBODY};
-mob_vnum monsum_list_le_7[] = {NOBODY};
-mob_vnum monsum_list_ne_7[] = {NOBODY};
-mob_vnum monsum_list_ce_7[] = {NOBODY};
-
-mob_vnum monsum_list_lg_8[] = {NOBODY};
-mob_vnum monsum_list_ng_8[] = {NOBODY};
-mob_vnum monsum_list_cg_8[] = {NOBODY};
-mob_vnum monsum_list_ln_8[] = {NOBODY};
-mob_vnum monsum_list_nn_8[] = {NOBODY};
-mob_vnum monsum_list_cn_8[] = {NOBODY};
-mob_vnum monsum_list_le_8[] = {NOBODY};
-mob_vnum monsum_list_ne_8[] = {NOBODY};
-mob_vnum monsum_list_ce_8[] = {NOBODY};
-
-mob_vnum monsum_list_lg_9[] = {NOBODY};
-mob_vnum monsum_list_ng_9[] = {NOBODY};
-mob_vnum monsum_list_cg_9[] = {NOBODY};
-mob_vnum monsum_list_ln_9[] = {NOBODY};
-mob_vnum monsum_list_nn_9[] = {NOBODY};
-mob_vnum monsum_list_cn_9[] = {NOBODY};
-mob_vnum monsum_list_le_9[] = {NOBODY};
-mob_vnum monsum_list_ne_9[] = {NOBODY};
-mob_vnum monsum_list_ce_9[] = {NOBODY};
-
-mob_vnum *monsum_list[9][9] = {
-    {monsum_list_lg_1, monsum_list_ng_1, monsum_list_cg_1,
-     monsum_list_ln_1, monsum_list_nn_1, monsum_list_cn_1,
-     monsum_list_le_1, monsum_list_ne_1, monsum_list_ce_1},
-    {monsum_list_lg_2, monsum_list_ng_2, monsum_list_cg_2,
-     monsum_list_ln_2, monsum_list_nn_2, monsum_list_cn_2,
-     monsum_list_le_2, monsum_list_ne_2, monsum_list_ce_2},
-    {monsum_list_lg_3, monsum_list_ng_3, monsum_list_cg_3,
-     monsum_list_ln_3, monsum_list_nn_3, monsum_list_cn_3,
-     monsum_list_le_3, monsum_list_ne_3, monsum_list_ce_3},
-    {monsum_list_lg_4, monsum_list_ng_4, monsum_list_cg_4,
-     monsum_list_ln_4, monsum_list_nn_4, monsum_list_cn_4,
-     monsum_list_le_4, monsum_list_ne_4, monsum_list_ce_4},
-    {monsum_list_lg_5, monsum_list_ng_5, monsum_list_cg_5,
-     monsum_list_ln_5, monsum_list_nn_5, monsum_list_cn_5,
-     monsum_list_le_5, monsum_list_ne_5, monsum_list_ce_5},
-    {monsum_list_lg_6, monsum_list_ng_6, monsum_list_cg_6,
-     monsum_list_ln_6, monsum_list_nn_6, monsum_list_cn_6,
-     monsum_list_le_6, monsum_list_ne_6, monsum_list_ce_6},
-    {monsum_list_lg_7, monsum_list_ng_7, monsum_list_cg_7,
-     monsum_list_ln_7, monsum_list_nn_7, monsum_list_cn_7,
-     monsum_list_le_7, monsum_list_ne_7, monsum_list_ce_7},
-    {monsum_list_lg_8, monsum_list_ng_8, monsum_list_cg_8,
-     monsum_list_ln_8, monsum_list_nn_8, monsum_list_cn_8,
-     monsum_list_le_8, monsum_list_ne_8, monsum_list_ce_8},
-    {monsum_list_lg_9, monsum_list_ng_9, monsum_list_cg_9,
-     monsum_list_ln_9, monsum_list_nn_9, monsum_list_cn_9,
-     monsum_list_le_9, monsum_list_ne_9, monsum_list_ce_9}
-};
-
-/*
- * These use act(), don't put the \r\n.
- */
-const char *mag_summon_msgs[] = {
-    "\r\n",
-    "$n animates a corpse!",
-    "$n summons extraplanar assistance!"};
 
 /* Defined mobiles. */
 #define MOB_ELEMENTAL_BASE 20 /* Only one for now. */

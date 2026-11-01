@@ -482,5 +482,4 @@ extern const char *drinks[NUM_LIQ_TYPES + 1];
 extern const char *drinknames[NUM_LIQ_TYPES + 1];
 extern const char *color_liquid[NUM_LIQ_TYPES + 1];
 extern int drink_aff[NUM_LIQ_TYPES][NUM_CONDITIONS];
-extern const char *fullness[NUM_FULLNESS + 1];
 extern const char *material_names[NUM_MATERIALS + 1];

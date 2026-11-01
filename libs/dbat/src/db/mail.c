@@ -29,16 +29,16 @@ static position_list_type *free_list = NULL; /* list of free positions in file *
 static long file_end_pos             = 0;    /* length of file */
 
 /* local functions */
-void postmaster_send_mail(struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
-void postmaster_check_mail(struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
-void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
-void push_free_list(long pos);
-long pop_free_list(void);
-mail_index_type *find_char_in_index(long searchee);
-void write_to_file(void *buf, int size, long filepos);
-void read_from_file(void *buf, int size, long filepos);
-void index_mail(long id_to_index, long pos);
-int mail_recip_ok(const char *name);
+static void postmaster_send_mail(struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
+static void postmaster_check_mail(struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
+static void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
+static void push_free_list(long pos);
+static long pop_free_list(void);
+static mail_index_type *find_char_in_index(long searchee);
+static void write_to_file(void *buf, int size, long filepos);
+static void read_from_file(void *buf, int size, long filepos);
+static void index_mail(long id_to_index, long pos);
+static int mail_recip_ok(const char *name);
 
 /* -------------------------------------------------------------------------- */
 
@@ -69,7 +69,7 @@ void free_mail_index(void)
   }
 }
 
-int mail_recip_ok(const char *name)
+static int mail_recip_ok(const char *name)
 {
   int player_i, ret = FALSE;
 
@@ -88,7 +88,7 @@ int mail_recip_ok(const char *name)
  * list.  This is called when people receive their messages and at startup
  * when the list is created.
  */
-void push_free_list(long pos)
+static void push_free_list(long pos)
 {
   position_list_type *new_pos;
 
@@ -105,7 +105,7 @@ void push_free_list(long pos)
  * Typically used whenever a person mails a message.  The blocks are not
  * guaranteed to be sequential or in any order at all.
  */
-long pop_free_list(void)
+static long pop_free_list(void)
 {
   position_list_type *old_pos;
   long return_value;
@@ -139,7 +139,7 @@ void clear_free_list(void)
  *
  * Finds the first mail block for a specific person based on id number.
  */
-mail_index_type *find_char_in_index(long searchee)
+static mail_index_type *find_char_in_index(long searchee)
 {
   mail_index_type *tmp;
 
@@ -160,7 +160,7 @@ mail_index_type *find_char_in_index(long searchee)
  *
  * Writes a mail block back into the database at the given location.
  */
-void write_to_file(void *buf, int size, long filepos)
+static void write_to_file(void *buf, int size, long filepos)
 {
   FILE *mail_file;
 
@@ -192,7 +192,7 @@ void write_to_file(void *buf, int size, long filepos)
  *
  * This reads a block from the mail database file.
  */
-void read_from_file(void *buf, int size, long filepos)
+static void read_from_file(void *buf, int size, long filepos)
 {
   FILE *mail_file;
 
@@ -213,7 +213,7 @@ void read_from_file(void *buf, int size, long filepos)
   return;
 }
 
-void index_mail(long id_to_index, long pos)
+static void index_mail(long id_to_index, long pos)
 {
   mail_index_type *new_index;
   position_list_type *new_position;
@@ -397,7 +397,7 @@ void store_mail(long to, long from, char *message_pointer)
  * Retrieves one messsage for a player. The mail is then discarded from
  * the file and the mail index.
  */
-char *read_delete(long recipient, char **from)
+static char *read_delete(long recipient, char **from)
 {
   header_block_type header;
   data_block_type data;
@@ -531,8 +531,8 @@ SPECIAL(postmaster)
     return (0);
 }
 
-void postmaster_send_mail(struct char_data *ch, struct char_data *mailman,
-                          int cmd, char *arg)
+static void postmaster_send_mail(struct char_data *ch, struct char_data *mailman,
+                                 int cmd, char *arg)
 {
   long recipient;
   char buf[MAX_INPUT_LENGTH], **mailwrite;
@@ -576,8 +576,8 @@ void postmaster_send_mail(struct char_data *ch, struct char_data *mailman,
   string_write(ch->desc, mailwrite, MAX_MAIL_SIZE, recipient, NULL);
 }
 
-void postmaster_check_mail(struct char_data *ch, struct char_data *mailman,
-                           int cmd, char *arg)
+static void postmaster_check_mail(struct char_data *ch, struct char_data *mailman,
+                                  int cmd, char *arg)
 {
   if (has_mail(char_get_idnum(ch)))
     act("$n tells you, 'You have mail waiting.'", FALSE, mailman, 0, ch, TO_VICT);
@@ -585,8 +585,8 @@ void postmaster_check_mail(struct char_data *ch, struct char_data *mailman,
     act("$n tells you, 'Sorry, you don't have any mail waiting.'", FALSE, mailman, 0, ch, TO_VICT);
 }
 
-void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
-                             int cmd, char *arg)
+static void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
+                                    int cmd, char *arg)
 {
   char buf[256];
   struct obj_data *obj;

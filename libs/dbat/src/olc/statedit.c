@@ -16,8 +16,8 @@
 #include "dbat/db.h"
 #include "dbat/oasis.h"
 
-int parse_stat_menu(struct descriptor_data *d, char *arg);
-int stats_assign_stat(int abil, char *arg, struct descriptor_data *d);
+static int parse_stat_menu(struct descriptor_data *d, char *arg);
+static int stats_assign_stat(int abil, char *arg, struct descriptor_data *d);
 
 /* --relistan 2/22/99 for player configurable stats */
 int parse_stats(struct descriptor_data *d, char *arg)
@@ -95,7 +95,7 @@ int stats_disp_menu(struct descriptor_data *d)
   return 1;
 }
 
-int parse_stat_menu(struct descriptor_data *d, char *arg)
+static int parse_stat_menu(struct descriptor_data *d, char *arg)
 {
   /* Main parse loop */
   *arg = tolower(*arg);
@@ -133,7 +133,7 @@ int parse_stat_menu(struct descriptor_data *d, char *arg)
   return 0;
 }
 
-int stats_assign_stat(int abil, char *arg, struct descriptor_data *d)
+static int stats_assign_stat(int abil, char *arg, struct descriptor_data *d)
 {
   int temp;
 

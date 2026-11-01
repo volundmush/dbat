@@ -21,7 +21,6 @@ bool pre_reset(zone_vnum znum);
 void post_reset(zone_vnum znum);
 
 /* Zone pre-reset functions */
-bool prereset_gauntlet_zone(void);
 
 /* Zone post-reset functions */
 

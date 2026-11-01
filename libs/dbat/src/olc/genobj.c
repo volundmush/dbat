@@ -14,6 +14,12 @@
 #include "dbat/handler.h"
 #include "dbat/dg_olc.h"
 
+static obj_rnum adjust_objects(obj_rnum refpt);
+static int copy_object_preserve(struct obj_data *to, struct obj_data *from);
+static obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum);
+static obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum);
+static int update_objects(struct obj_data *refobj);
+
 static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
 
 obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum)
@@ -46,7 +52,7 @@ obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum)
  * if object is pointing to this prototype, then we need to replace it
  * with the new one.
  */
-int update_objects(struct obj_data *refobj)
+static int update_objects(struct obj_data *refobj)
 {
   struct obj_data *obj, swap;
   int count = 0;
@@ -81,7 +87,7 @@ int update_objects(struct obj_data *refobj)
  * Adjust the internal values of other objects as if something was inserted at the given array index.
  * Might also be useful to make 'holes' in the array for some reason.
  */
-obj_rnum adjust_objects(obj_rnum refpt)
+static obj_rnum adjust_objects(obj_rnum refpt)
 {
   int shop, i, zone, cmd_no;
   struct obj_data *obj;
@@ -135,7 +141,7 @@ obj_rnum adjust_objects(obj_rnum refpt)
  * Function handle the insertion of an object within the prototype framework.  Note that this does not adjust internal values
  * of other objects, use add_object() for that.
  */
-obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum)
+static obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum)
 {
   obj_rnum i;
 
@@ -166,7 +172,7 @@ obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum)
 
 /* ------------------------------------------------------------------------------------------------------------------------------ */
 
-obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum)
+static obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum)
 {
   if (obj == NULL || ovnum < 0 || ornum < 0 || ornum > top_of_objt)
     return NOWHERE;
@@ -404,7 +410,7 @@ void free_object_strings_proto(struct obj_data *obj)
   }
 }
 
-void copy_object_strings(struct obj_data *to, struct obj_data *from)
+static void copy_object_strings(struct obj_data *to, struct obj_data *from)
 {
   to->name               = from->name ? strdup(from->name) : NULL;
   to->description        = from->description ? strdup(from->description) : NULL;
@@ -423,7 +429,7 @@ int copy_object(struct obj_data *to, struct obj_data *from)
   return copy_object_main(to, from, TRUE);
 }
 
-int copy_object_preserve(struct obj_data *to, struct obj_data *from)
+static int copy_object_preserve(struct obj_data *to, struct obj_data *from)
 {
   return copy_object_main(to, from, FALSE);
 }

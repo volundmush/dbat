@@ -45,6 +45,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/objsave.h"
 #include "dbat/mail.h"
+#include "dbat/local_limits.h"
 #include "other_internal.h"
 
 static int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
@@ -1155,17 +1156,6 @@ ACMD(do_file)
 void update_innate(struct char_data *ch)
 {
 }
-
-const room_vnum freeres[NUM_ALIGNS] = {
-    /* LAWFUL_GOOD */ 1000,
-    /* NEUTRAL_GOOD */ 1000,
-    /* CHAOTIC_GOOD */ 1000,
-    /* LAWFUL_NEUTRAL */ 1000,
-    /* NEUTRAL_NEUTRAL */ 1000,
-    /* CHAOTIC_NEUTRAL */ 1000,
-    /* LAWFUL_EVIL */ 1000,
-    /* NEUTRAL_EVIL */ 1000,
-    /* CHAOTIC_EVIL */ 1000};
 
 ACMD(do_pagelength)
 {

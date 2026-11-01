@@ -15,6 +15,8 @@
 #include "dbat/reset.h"
 #include "dbat/spec_procs.h"
 
+static bool prereset_gauntlet_zone(void);
+
 /* pre_reset is called before a zone is reset - returns TRUE to prevent a normal reset of the zone */
 bool pre_reset(zone_vnum znum)
 {
@@ -43,7 +45,7 @@ void post_reset(zone_vnum znum)
   }
 }
 
-bool prereset_gauntlet_zone(void)
+static bool prereset_gauntlet_zone(void)
 {
   int i, gauntlet_players = 0;
   struct char_data *mob;

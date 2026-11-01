@@ -30,10 +30,10 @@
 #include "dbat/search.h"
 
 /* local functions */
-void sub_write_to_char(struct char_data *ch, char *tokens[], void *otokens[], char type[]);
+static void sub_write_to_char(struct char_data *ch, char *tokens[], void *otokens[], char type[]);
 
 /* same as any_one_arg except that it stops at punctuation */
-char *any_one_name(char *argument, char *first_arg)
+static char *any_one_name(char *argument, char *first_arg)
 {
   char *arg;
 
@@ -52,8 +52,8 @@ char *any_one_name(char *argument, char *first_arg)
   return argument;
 }
 
-void sub_write_to_char(struct char_data *ch, char *tokens[],
-                       void *otokens[], char type[])
+static void sub_write_to_char(struct char_data *ch, char *tokens[],
+                              void *otokens[], char type[])
 {
   char sb[MAX_STRING_LENGTH];
   int i;

@@ -13,7 +13,6 @@ bool rroom_sunken(room_rnum room);
 
 bool rroom_is_light(room_rnum room);
 
-bool rroom_is_valid(room_rnum rnum);
 room_vnum rroom_get_vnum(room_rnum rnum);
 spec_proc_func rroom_get_spec(room_rnum room);
 

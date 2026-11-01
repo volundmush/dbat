@@ -25,7 +25,7 @@
 #include "dbat/random.h"
 
 /* local functions */
-char *fread_action(FILE *fl, int nr);
+static char *fread_action(FILE *fl, int nr);
 static int find_action(int cmd);
 
 ACMD(do_action)
@@ -329,7 +329,7 @@ void free_command_list(void)
   complete_cmd_info = NULL;
 }
 
-char *fread_action(FILE *fl, int nr)
+static char *fread_action(FILE *fl, int nr)
 {
   char buf[MAX_STRING_LENGTH];
 

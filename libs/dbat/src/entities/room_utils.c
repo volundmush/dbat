@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+static bool rroom_is_valid(room_rnum rnum);
+
 int num_pc_in_room(struct room_data *room)
 {
   int i = 0;
@@ -95,7 +97,7 @@ bool rroom_is_light(room_rnum room)
   return (!room_is_dark(room));
 }
 
-bool rroom_is_valid(room_rnum rnum)
+static bool rroom_is_valid(room_rnum rnum)
 {
   return ((rnum) != NOWHERE && (rnum) <= top_of_world);
 }
