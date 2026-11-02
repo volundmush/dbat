@@ -16,7 +16,7 @@ char *str_str(char *cs, char *ct)
   char *s, *t;
 
   if (!cs || !ct || !*ct)
-    return NULL;
+    return nullptr;
 
   while (*cs) {
     t = ct;
@@ -35,7 +35,7 @@ char *str_str(char *cs, char *ct)
       return s;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 int trgvar_in_room(room_vnum vnum)
@@ -49,7 +49,7 @@ int trgvar_in_room(room_vnum vnum)
     return (-1);
   }
 
-  for (ch = world[rnum].people; ch != NULL; ch = ch->next_in_room)
+  for (ch = world[rnum].people; ch != nullptr; ch = ch->next_in_room)
     i++;
 
   return i;
@@ -71,7 +71,7 @@ obj_data *get_obj_in_list(char *name, obj_data *list)
         return i;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 obj_data *get_object_in_equip(char_data *ch, char *name)
@@ -98,7 +98,7 @@ obj_data *get_object_in_equip(char_data *ch, char *name)
   } else {
     snprintf(tmpname, sizeof(tmpname), "%s", name);
     if (!(number = get_number(&tmp)))
-      return NULL;
+      return nullptr;
 
     for (j = 0; (j < NUM_WEARS) && (n <= number); j++)
       if ((obj = char_get_equipment(ch, j)))
@@ -107,7 +107,7 @@ obj_data *get_object_in_equip(char_data *ch, char *name)
             return (obj);
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /* Handles 'held', 'light' and 'wield' positions - Welcor
@@ -193,7 +193,7 @@ struct char_data *find_char(long n)
 {
   /* Players and legacy mobs live below ROOM_ID_BASE; mobs from MOB_ID_BASE. */
   if (n < 0 || (n >= ROOM_ID_BASE && n < MOB_ID_BASE)) /* See note in dg_scripts.h */
-    return NULL;
+    return nullptr;
 
   return find_char_by_uid_in_lookup_table(n);
 }
@@ -202,7 +202,7 @@ struct char_data *find_char(long n)
 obj_data *find_obj(long n)
 {
   if (n < OBJ_ID_BASE || n > OBJ_ID_MAX) /* see note in dg_scripts.h */
-    return NULL;
+    return nullptr;
 
   return find_obj_by_uid_in_lookup_table(n);
 }
@@ -214,13 +214,13 @@ room_data *find_room(long n)
 
   n -= ROOM_ID_BASE;
   if (n < 0)
-    return NULL;
+    return nullptr;
   rnum = real_room((room_vnum)n);
 
   if (rnum != NOWHERE)
     return &world[rnum];
 
-  return NULL;
+  return nullptr;
 }
 
 /************************************************************
@@ -244,7 +244,7 @@ char_data *get_char(char *name)
         return i;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /*
@@ -268,7 +268,7 @@ char_data *get_char_near_obj(obj_data *obj, char *name)
           return ch;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /*
@@ -291,14 +291,14 @@ char_data *get_char_in_room(room_data *room, char *name)
         return ch;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /* searches the room with the object for an object with name 'name'*/
 
 obj_data *get_obj_near_obj(obj_data *obj, char *name)
 {
-  obj_data *i = NULL;
+  obj_data *i = nullptr;
   char_data *ch;
   int rm;
   long id;
@@ -337,7 +337,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name)
       if ((i = get_object_in_equip(ch, name)))
         return i;
   }
-  return NULL;
+  return nullptr;
 }
 
 /* returns the object in the world with name name, or NULL if not found */
@@ -353,7 +353,7 @@ obj_data *get_obj(char *name)
         return obj;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /* finds room by id or vnum.  returns NULL if not found */
@@ -364,7 +364,7 @@ room_data *get_room(char *name)
   if (*name == UID_CHAR)
     return find_room(atoi(name + 1));
   else if ((nr = real_room(atoi(name))) == NOWHERE)
-    return NULL;
+    return nullptr;
   else
     return &world[nr];
 }
@@ -399,7 +399,7 @@ char_data *get_char_by_obj(obj_data *obj, char *name)
         return ch;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /*
@@ -427,7 +427,7 @@ char_data *get_char_by_room(room_data *room, char *name)
         return ch;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /*
@@ -436,7 +436,7 @@ char_data *get_char_by_room(room_data *room, char *name)
  */
 obj_data *get_obj_by_obj(obj_data *obj, char *name)
 {
-  obj_data *i = NULL;
+  obj_data *i = nullptr;
   int rm;
 
   if (*name == UID_CHAR)
@@ -482,7 +482,7 @@ obj_data *get_obj_in_room(room_data *room, char *name)
         return obj;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /* returns obj with name - searches room, then world */
@@ -501,7 +501,7 @@ obj_data *get_obj_by_room(room_data *room, char *name)
     if (isname(name, obj->name))
       return obj;
 
-  return NULL;
+  return nullptr;
 }
 /* find_char() helpers */
 
@@ -525,8 +525,8 @@ void init_lookup_table(void)
   for (i = 0; i < BUCKET_COUNT; i++) {
     lookup_table[i].uid  = UID_OUT_OF_RANGE;
     lookup_table[i].type = -1;
-    lookup_table[i].c    = NULL;
-    lookup_table[i].next = NULL;
+    lookup_table[i].c    = nullptr;
+    lookup_table[i].next = nullptr;
   }
 }
 
@@ -535,13 +535,13 @@ static struct lookup_table_t *lookup_table_find(long uid)
   struct lookup_table_t *lt;
 
   if (uid < 0)
-    return NULL;
+    return nullptr;
 
   for (lt = lookup_table[uid & (BUCKET_COUNT - 1)].next; lt; lt = lt->next)
     if (lt->uid == uid)
       return lt;
 
-  return NULL;
+  return nullptr;
 }
 
 static const char *uid_range_name(long uid)
@@ -581,7 +581,7 @@ static struct char_data *find_char_by_uid_in_lookup_table(long uid)
     return (struct char_data *)(lt->c);
 
   log_lookup_miss("find_char", uid, lt);
-  return NULL;
+  return nullptr;
 }
 
 static struct obj_data *find_obj_by_uid_in_lookup_table(long uid)
@@ -592,7 +592,7 @@ static struct obj_data *find_obj_by_uid_in_lookup_table(long uid)
     return (struct obj_data *)(lt->c);
 
   log_lookup_miss("find_obj", uid, lt);
-  return NULL;
+  return nullptr;
 }
 
 void add_to_lookup_table(long uid, int type, void *c)
@@ -653,13 +653,13 @@ void remove_from_lookup_table(long uid)
  */
 static long next_uid(long *counter, long base, long max, const char *what)
 {
-  static bool warned_mob = FALSE, warned_obj = FALSE;
+  static bool warned_mob = false, warned_obj = false;
   bool *warned = (base == MOB_ID_BASE) ? &warned_mob : &warned_obj;
   long tries;
 
   if (!*warned && *counter - base >= (max - base) / 10 * 9) {
     mud_log("SYSERR: %s UIDs are 90%% used (next %ld of %ld..%ld).", what, *counter, base, max);
-    *warned = TRUE;
+    *warned = true;
   }
 
   for (tries = 0; tries <= max - base; tries++) {
@@ -705,10 +705,10 @@ int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const
       item = i;
 
   if (item < 0)
-    return FALSE;
+    return false;
 
   if (IS_SET_AR(array, item))
     return item;
 
-  return FALSE;
+  return false;
 }

@@ -126,8 +126,8 @@ static void boost_obj(struct obj_data *obj, struct char_data *ch, int type)
 
 ACMD(do_form)
 {
-  int skill = 0, senzu = FALSE, bag = FALSE, light = FALSE, sword = FALSE, mattress = FALSE, gi = FALSE, pants = FALSE, kachin = FALSE, boost = FALSE, shuriken = FALSE;
-  int clothes = FALSE, wrist = FALSE, boots = FALSE, level = 0;
+  int skill = 0, senzu = false, bag = false, light = false, sword = false, mattress = false, gi = false, pants = false, kachin = false, boost = false, shuriken = false;
+  int clothes = false, wrist = false, boots = false, level = 0;
   double discount = 1.0;
   int64_t cost    = 0;
   struct obj_data *obj;
@@ -151,35 +151,35 @@ ACMD(do_form)
   skill = char_get_skill(ch, SKILL_CREATE);
 
   if (skill >= 100) {
-    boost = TRUE;
+    boost = true;
   }
   if (skill >= 90) {
-    kachin = TRUE;
+    kachin = true;
   }
   if (skill >= 80) {
-    senzu = TRUE;
+    senzu = true;
   }
   if (skill >= 70) {
-    shuriken = TRUE;
+    shuriken = true;
   }
   if (skill >= 60) {
-    clothes = TRUE;
+    clothes = true;
   }
   if (skill >= 50) {
-    sword = TRUE;
-    gi    = TRUE;
-    pants = TRUE;
-    wrist = TRUE;
-    boots = TRUE;
+    sword = true;
+    gi    = true;
+    pants = true;
+    wrist = true;
+    boots = true;
   }
   if (skill >= 40) {
-    mattress = TRUE;
+    mattress = true;
   }
   if (skill >= 30) {
-    bag = TRUE;
+    bag = true;
   }
   if (skill >= 20) {
-    light = TRUE;
+    light = true;
   }
 
   if (char_get_skill(ch, SKILL_CONCENTRATION)) {
@@ -256,8 +256,8 @@ ACMD(do_form)
     obj_to_char(obj, ch);
     reveal_hiding(ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     return;
   }
@@ -299,8 +299,8 @@ ACMD(do_form)
     obj_to_char(obj, ch);
     reveal_hiding(ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     return;
   }
@@ -308,7 +308,7 @@ ACMD(do_form)
     cost = getMaxKI(ch) / (skill * 2);
     cost *= discount;
 
-    if (bag == FALSE) {
+    if (bag == false) {
       send_to_char(ch, "What do you want to create?\r\n");
       return;
     }
@@ -321,8 +321,8 @@ ACMD(do_form)
     obj_to_char(obj, ch);
     reveal_hiding(ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     return;
   }
@@ -330,7 +330,7 @@ ACMD(do_form)
     cost = getMaxKI(ch) / skill;
     cost *= discount;
 
-    if (mattress == FALSE) {
+    if (mattress == false) {
       send_to_char(ch, "What do you want to create?\r\n");
       return;
     }
@@ -342,8 +342,8 @@ ACMD(do_form)
     add_unique_id(obj);
     obj_to_char(obj, ch); // cooldown removed on 10/24/2021
     reveal_hiding(ch, 0); //GET_COOLDOWN(ch) = 10;
-    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     return;
   }
@@ -351,7 +351,7 @@ ACMD(do_form)
     cost = getMaxKI(ch) / 5;
     cost *= discount;
 
-    if (sword == FALSE) {
+    if (sword == false) {
       send_to_char(ch, "What do you want to create?\r\n");
       return;
     }
@@ -472,8 +472,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     return;
   }
@@ -481,7 +481,7 @@ ACMD(do_form)
     cost = getMaxKI(ch) / 2;
     cost *= discount;
 
-    if (clothes == FALSE) {
+    if (clothes == false) {
       send_to_char(ch, "What do you want to create?\r\n");
       return;
     }
@@ -494,9 +494,9 @@ ACMD(do_form)
       return;
     }
 
-    struct char_data *vict = NULL;
+    struct char_data *vict = nullptr;
 
-    if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
+    if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
       send_to_char(ch, "Clothesbeam who?\r\nSyntax: create clothesbeam (target)\r\n");
       return;
     }
@@ -533,15 +533,15 @@ ACMD(do_form)
     do_wear(vict, (char[]){"all"}, 0, 0);
     reveal_hiding(ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     return;
   }
   if (!(strcmp(arg, "gi"))) {
     cost = getMaxKI(ch) / 5;
     cost *= discount;
-    if (gi == FALSE) {
+    if (gi == false) {
       send_to_char(ch, "What do you want to create?\r\n");
       return;
     }
@@ -556,8 +556,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     return;
   }
@@ -565,7 +565,7 @@ ACMD(do_form)
     cost = getMaxKI(ch) / 4;
     cost *= discount;
 
-    if (shuriken == FALSE) {
+    if (shuriken == false) {
       send_to_char(ch, "What do you want to create?\r\n");
       return;
     }
@@ -581,8 +581,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     return;
   }
@@ -590,7 +590,7 @@ ACMD(do_form)
     cost = getMaxKI(ch) / 5;
     cost *= discount;
 
-    if (pants == FALSE) {
+    if (pants == false) {
       send_to_char(ch, "What do you want to create?\r\n");
       return;
     }
@@ -605,8 +605,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     return;
   }
@@ -614,7 +614,7 @@ ACMD(do_form)
     cost = getMaxKI(ch) / 5;
     cost *= discount;
 
-    if (wrist == FALSE) {
+    if (wrist == false) {
       send_to_char(ch, "What do you want to create?\r\n");
       return;
     }
@@ -629,8 +629,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     return;
   }
@@ -638,7 +638,7 @@ ACMD(do_form)
     cost = getMaxKI(ch) / 5;
     cost *= discount;
 
-    if (boots == FALSE) {
+    if (boots == false) {
       send_to_char(ch, "What do you want to create?\r\n");
       return;
     }
@@ -653,8 +653,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     return;
   }
@@ -662,7 +662,7 @@ ACMD(do_form)
     cost = getMaxKI(ch) / (skill * 2);
     cost *= discount;
 
-    if (light == FALSE) {
+    if (light == false) {
       send_to_char(ch, "What do you want to create?\r\n");
       return;
     }
@@ -676,8 +676,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     return;
   }
@@ -685,7 +685,7 @@ ACMD(do_form)
     cost = getMaxKI(ch) - 1;
     cost *= discount;
 
-    if (kachin == FALSE) {
+    if (kachin == false) {
       send_to_char(ch, "What do you want to create?\r\n");
       return;
     }
@@ -699,8 +699,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     return;
   }
@@ -708,7 +708,7 @@ ACMD(do_form)
     cost = getMaxKI(ch) - 1;
     cost *= discount;
 
-    if (boost == FALSE) {
+    if (boost == false) {
       send_to_char(ch, "What do you want to create?\r\n");
       return;
     }
@@ -730,8 +730,8 @@ ACMD(do_form)
     obj_set_size(obj, get_size(ch));
     reveal_hiding(ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     decCurHealthPercent(ch, 1, 1);
     char_set_practice_points(ch, char_get_practice_points(ch) - (10));
@@ -741,7 +741,7 @@ ACMD(do_form)
     cost          = getMaxKI(ch);
     int64_t cost2 = getEffMaxPL(ch) - 1;
 
-    if (senzu == FALSE) {
+    if (senzu == false) {
       send_to_char(ch, "What do you want to create?\r\n");
       return;
     }
@@ -766,8 +766,8 @@ ACMD(do_form)
     obj_to_char(obj, ch);
     reveal_hiding(ch, 0);
     char_set_con_cooldown(ch, 10);
-    act("You hold out your hand and create $p out of your ki!", TRUE, ch, obj, 0, TO_CHAR);
-    act("$n holds out $s hand and creates $p out of thin air!", TRUE, ch, obj, 0, TO_ROOM);
+    act("You hold out your hand and create $p out of your ki!", true, ch, obj, 0, TO_CHAR);
+    act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     decCurHealth(ch, cost2, 0);
     decCurSTPercent(ch, 1, 1);
@@ -809,8 +809,8 @@ ACMD(do_recharge)
   }
   reveal_hiding(ch, 0);
   char_set_con_cooldown(ch, 10);
-  act("You focus your ki into your energy reserves, recharging them some.", TRUE, ch, 0, 0, TO_CHAR);
-  act("$n stops and glows green briefly.", TRUE, ch, 0, 0, TO_ROOM);
+  act("You focus your ki into your energy reserves, recharging them some.", true, ch, 0, 0, TO_CHAR);
+  act("$n stops and glows green briefly.", true, ch, 0, 0, TO_ROOM);
   decCurKI(ch, cost, 0);
   if ((getCurST(ch)) + (cost * 2) < getMaxST(ch)) {
     incCurST(ch, cost * 2, true);
@@ -853,10 +853,10 @@ ACMD(do_srepair)
   }
   reveal_hiding(ch, 0);
   char_set_con_cooldown(ch, 10);
-  act("You repair some of your outer casings and internal systems, with the small nano-robots contained in your body.", TRUE, ch, 0, 0, TO_CHAR);
-  act("$n stops a moment as small glowing particles move across $s body.", TRUE, ch, 0, 0, TO_ROOM);
+  act("You repair some of your outer casings and internal systems, with the small nano-robots contained in your body.", true, ch, 0, 0, TO_CHAR);
+  act("$n stops a moment as small glowing particles move across $s body.", true, ch, 0, 0, TO_ROOM);
 
-  int repaired = FALSE;
+  int repaired = false;
   if (!char_is_npc(ch)) {
     for (i = 0; i < NUM_WEARS; i++) {
       if (char_get_equipment(ch, i)) {
@@ -868,13 +868,13 @@ ACMD(do_srepair)
           if (obj_extra_flagged(char_get_equipment(ch, i), ITEM_BROKEN)) {
             obj_extra_set(char_get_equipment(ch, i), ITEM_BROKEN, false);
           }
-          repaired = TRUE;
+          repaired = true;
         }
       }
     }
   }
 
-  if (repaired == TRUE) {
+  if (repaired == true) {
     send_to_char(ch, "@GYour nano-robots also repair all of your equipment a little bit.@n\r\n");
   }
   decCurST(ch, cost, 0);
@@ -924,13 +924,13 @@ ACMD(do_upgrade)
   }
 
   if (!strcasecmp("augment", arg)) {
-    struct obj_data *obj = NULL;
+    struct obj_data *obj = nullptr;
     int64_t gain         = 0;
     if (char_get_level(ch) < 80) {
       send_to_char(ch, "You need to be at least level 80 to use these kits.\r\n");
       return;
     }
-    if (!(obj = get_obj_in_list_vis(ch, (char[]){"Augmentation"}, NULL, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, (char[]){"Augmentation"}, nullptr, ch->carrying))) {
       send_to_char(ch, "You don't have a Circuit Augmentation Kit.\r\n");
       return;
     }
@@ -971,8 +971,8 @@ ACMD(do_upgrade)
     if (!strcasecmp("powerlevel", arg2)) {
       obj_from_char(obj);
       extract_obj(obj);
-      act("@WYou install the circuits and upgrade your maximum powerlevel.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WYou install the circuits and upgrade your maximum powerlevel.@n", true, ch, 0, 0, TO_CHAR);
+      act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, 0, 0, TO_ROOM);
       gainBasePL(ch, gain, true);
       send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
       return;
@@ -980,8 +980,8 @@ ACMD(do_upgrade)
     if (!strcasecmp("ki", arg2)) {
       obj_from_char(obj);
       extract_obj(obj);
-      act("@WYou install the circuits and upgrade your maximum ki.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WYou install the circuits and upgrade your maximum ki.@n", true, ch, 0, 0, TO_CHAR);
+      act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, 0, 0, TO_ROOM);
       gainBaseKI(ch, gain, true);
       send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
       return;
@@ -989,8 +989,8 @@ ACMD(do_upgrade)
     if (!strcasecmp("stamina", arg2)) {
       obj_from_char(obj);
       extract_obj(obj);
-      act("@WYou install the circuits and upgrade your maximum stamina.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@W installs some circuits and upgrades $s systems.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WYou install the circuits and upgrade your maximum stamina.@n", true, ch, 0, 0, TO_CHAR);
+      act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, 0, 0, TO_ROOM);
       gainBaseST(ch, gain, true);
       send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain));
       return;
@@ -1146,11 +1146,11 @@ ACMD(do_ingest)
       return;
     }
 
-    if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+    if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
       send_to_char(ch, "Ingest who?\r\n");
       return;
     }
-    if (!can_kill(ch, vict, NULL, 0)) {
+    if (!can_kill(ch, vict, nullptr, 0)) {
       return;
     }
     if (char_get_absorbby(vict)) {
@@ -1188,23 +1188,23 @@ ACMD(do_ingest)
     }
     reveal_hiding(ch, 0);
     if (char_aff_flagged(vict, AFF_ZANZOKEN) && (getCurST(vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-      act("@C$N@c disappears, avoiding your attempted ingestion!@n", FALSE, ch, 0, vict, TO_CHAR);
-      act("@cYou disappear, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", FALSE, ch, 0, vict, TO_VICT);
-      act("@C$N@c disappears, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+      act("@C$N@c disappears, avoiding your attempted ingestion!@n", false, ch, 0, vict, TO_CHAR);
+      act("@cYou disappear, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", false, ch, 0, vict, TO_VICT);
+      act("@C$N@c disappears, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", false, ch, 0, vict, TO_NOTVICT);
       char_aff_set(vict, AFF_ZANZOKEN, false);
       char_set_wait(ch, PULSE_3SEC);
       return;
     }
     if (char_get_speedi(ch) + rand_number(1, 5) < char_get_speedi(ch) + rand_number(1, 5)) {
-      act("@WYou fling a piece of goo at @c$N@W, and try to ingest $M! $E manages to avoid your blob of goo though!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W flings a piece of goo at you, you manage to avoid it though!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@C$n@w flings a piece of goo at @c$N@W, but the goo misses $M@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@WYou fling a piece of goo at @c$N@W, and try to ingest $M! $E manages to avoid your blob of goo though!@n", true, ch, 0, vict, TO_CHAR);
+      act("@C$n@W flings a piece of goo at you, you manage to avoid it though!@n", true, ch, 0, vict, TO_VICT);
+      act("@C$n@w flings a piece of goo at @c$N@W, but the goo misses $M@W!@n", true, ch, 0, vict, TO_NOTVICT);
       char_set_wait(ch, PULSE_3SEC);
       return;
     }
-    act("@WYou flings a piece of goo at @c$N@W! The goo engulfs $M and then returns to your body!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n@W flings a piece of goo at you! The goo engulfs your body and then returns to @C$n@W!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@C$n@w flings a piece of goo at @c$N@W! The goo engulfs $M and then return to @C$n@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@WYou flings a piece of goo at @c$N@W! The goo engulfs $M and then returns to your body!@n", true, ch, 0, vict, TO_CHAR);
+    act("@C$n@W flings a piece of goo at you! The goo engulfs your body and then returns to @C$n@W!@n", true, ch, 0, vict, TO_VICT);
+    act("@C$n@w flings a piece of goo at @c$N@W! The goo engulfs $M and then return to @C$n@W!@n", true, ch, 0, vict, TO_NOTVICT);
     char_set_absorbs(ch, char_get_absorbs(ch) + (1));
     int64_t pl   = (getBasePL(vict)) / 6;
     int64_t stam = (getBaseST(vict)) / 6;
@@ -1243,7 +1243,7 @@ ACMD(do_ingest)
       char_set_hairl(ch, char_get_hairl(vict));
     }
     handle_ingest_learn(ch, vict);
-    die(vict, NULL);
+    die(vict, nullptr);
     return;
   } // End of ingest
 
@@ -1267,7 +1267,7 @@ ACMD(do_plant)
 
   two_arguments(argument, obj_name, vict_name);
 
-  if (!(vict = get_char_vis(ch, vict_name, NULL, FIND_CHAR_ROOM))) {
+  if (!(vict = get_char_vis(ch, vict_name, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "Plant what on who?\r\n");
     return;
   }
@@ -1292,39 +1292,39 @@ ACMD(do_plant)
   if ((char_adm_flagged(vict, ADM_NOSTEAL) || char_get_mob_spec(vict) == shop_keeper) && char_get_admlevel(ch) < 5)
     roll = -10; /* Failure */
 
-  if (!(obj = get_obj_in_list_vis(ch, obj_name, NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, obj_name, nullptr, ch->carrying))) {
     send_to_char(ch, "You don't have that to plant on them.\r\n");
     return;
   }
   if (roll <= detect && roll <= fail) {
     reveal_hiding(ch, 0);
-    act("@C$n@w tries to plant $p@w on you!@n", TRUE, ch, obj, vict, TO_VICT);
-    act("@C$n@w tries to plant $p@w on @c$N@w!@n", TRUE, ch, obj, vict, TO_NOTVICT);
-    act("@wYou try and fail to plant $p@w on @c$N@w, and $E notices!@n", TRUE, ch, obj, vict, TO_CHAR);
+    act("@C$n@w tries to plant $p@w on you!@n", true, ch, obj, vict, TO_VICT);
+    act("@C$n@w tries to plant $p@w on @c$N@w!@n", true, ch, obj, vict, TO_NOTVICT);
+    act("@wYou try and fail to plant $p@w on @c$N@w, and $E notices!@n", true, ch, obj, vict, TO_CHAR);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
   if (roll <= fail) {
-    act("@wYou try and fail to plant $p@w on @c$N@w! However no one seemed to notice.@n", TRUE, ch, obj, vict, TO_CHAR);
+    act("@wYou try and fail to plant $p@w on @c$N@w! However no one seemed to notice.@n", true, ch, obj, vict, TO_CHAR);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
   if (obj_get_weight(obj) + (getCurCarriedWeight(vict)) > getMaxCarryWeight(vict)) {
     reveal_hiding(ch, 0);
-    act("@C$n@w tries to plant $p@w on you!@n", TRUE, ch, obj, vict, TO_VICT);
-    act("@C$n@w tries to plant $p@w on @c$N@w!@n", TRUE, ch, obj, vict, TO_NOTVICT);
-    act("@wYou try and fail to plant $p@w on @c$N@w because $E can't carry the weight. It seems $E noticed the attempt!@n", TRUE, ch, obj, vict, TO_CHAR);
+    act("@C$n@w tries to plant $p@w on you!@n", true, ch, obj, vict, TO_VICT);
+    act("@C$n@w tries to plant $p@w on @c$N@w!@n", true, ch, obj, vict, TO_NOTVICT);
+    act("@wYou try and fail to plant $p@w on @c$N@w because $E can't carry the weight. It seems $E noticed the attempt!@n", true, ch, obj, vict, TO_CHAR);
     char_set_wait(ch, PULSE_2SEC);
   } else if (roll <= detect) {
-    act("@cYou feel like the weight of your inventory has changed.@n", TRUE, ch, obj, vict, TO_VICT);
-    act("@c$N@w looks around after feeling $S pockets.@n", TRUE, ch, obj, vict, TO_NOTVICT);
-    act("@wYou plant $p@w on @c$N@w! @c$N @wseems to notice the change in weight in their inventory.@n", TRUE, ch, obj, vict, TO_CHAR);
+    act("@cYou feel like the weight of your inventory has changed.@n", true, ch, obj, vict, TO_VICT);
+    act("@c$N@w looks around after feeling $S pockets.@n", true, ch, obj, vict, TO_NOTVICT);
+    act("@wYou plant $p@w on @c$N@w! @c$N @wseems to notice the change in weight in their inventory.@n", true, ch, obj, vict, TO_CHAR);
     obj_from_char(obj);
     obj_to_char(obj, vict);
     char_set_wait(ch, PULSE_2SEC);
     return;
   } else {
-    act("@wYou plant $p@w on @c$N@w! No one noticed, whew....@n", TRUE, ch, obj, vict, TO_CHAR);
+    act("@wYou plant $p@w on @c$N@w! No one noticed, whew....@n", true, ch, obj, vict, TO_CHAR);
     obj_from_char(obj);
     obj_to_char(obj, vict);
     char_set_wait(ch, PULSE_2SEC);
@@ -1335,9 +1335,9 @@ ACMD(do_plant)
 ACMD(do_forgery)
 {
 
-  struct obj_data *obj2, *obj3 = NULL;
-  struct obj_data *obj, *obj4  = NULL, *next_obj;
-  int found = FALSE;
+  struct obj_data *obj2, *obj3 = nullptr;
+  struct obj_data *obj, *obj4  = nullptr, *next_obj;
+  int found = false;
   char arg[MAX_INPUT_LENGTH];
 
   one_argument(argument, arg);
@@ -1355,20 +1355,20 @@ ACMD(do_forgery)
     return;
   }
 
-  if (!(obj2 = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+  if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
     send_to_char(ch, "You want to make a fake copy of what?\r\n");
     return;
   }
 
   for (obj = ch->carrying; obj; obj = next_obj) {
     next_obj = obj->next_content;
-    if (found == FALSE && obj_get_vnum(obj) == 19 && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
-      found = TRUE;
+    if (found == false && obj_get_vnum(obj) == 19 && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
+      found = true;
       obj4  = obj;
     }
   }
 
-  if (found == FALSE || obj4 == NULL) {
+  if (found == false || obj4 == nullptr) {
     send_to_char(ch, "You need a forgery kit.\r\n");
     return;
   }
@@ -1413,7 +1413,7 @@ ACMD(do_forgery)
   }
 
   reveal_hiding(ch, 0);
-  act("@c$n@w looks at $p, begins to work on forging a fake copy of it.@n", TRUE, ch, obj2, 0, TO_ROOM);
+  act("@c$n@w looks at $p, begins to work on forging a fake copy of it.@n", true, ch, obj2, 0, TO_ROOM);
   improve_skill(ch, SKILL_FORGERY, 1);
   if (char_get_skill(ch, SKILL_FORGERY) < axion_dice(0)) {
     if (rand_number(1, 10) >= 9) { /* Uh oh */
@@ -1423,7 +1423,7 @@ ACMD(do_forgery)
       return;
     }
     send_to_char(ch, "You start to make a forgery of %s but screw up and waste your forgery kit..\r\n", obj2->short_description);
-    act("@c$n@w tried to duplicate $p but screws up somehow.@n", TRUE, ch, obj2, 0, TO_ROOM);
+    act("@c$n@w tried to duplicate $p but screws up somehow.@n", true, ch, obj2, 0, TO_ROOM);
     obj_from_char(obj4);
     extract_obj(obj4);
     char_set_wait(ch, PULSE_2SEC);
@@ -1443,7 +1443,7 @@ ACMD(do_forgery)
   obj_from_char(obj4);
   extract_obj(obj4);
   send_to_char(ch, "You make an excellent forgery of %s@n!\r\n", obj2->short_description);
-  act("@c$n@w makes a perfect forgery of $p.@n", TRUE, ch, obj2, 0, TO_ROOM);
+  act("@c$n@w makes a perfect forgery of $p.@n", true, ch, obj2, 0, TO_ROOM);
   char_set_wait(ch, PULSE_2SEC);
 }
 
@@ -1469,35 +1469,35 @@ ACMD(do_appraise)
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
     send_to_char(ch, "You want to appraise what?\r\n");
     return;
   }
 
   reveal_hiding(ch, 0);
-  act("@c$n@w looks at $p, turning it over in $s hands.@n", TRUE, ch, obj, 0, TO_ROOM);
+  act("@c$n@w looks at $p, turning it over in $s hands.@n", true, ch, obj, 0, TO_ROOM);
   improve_skill(ch, SKILL_APPRAISE, 1);
   if (char_get_skill(ch, SKILL_APPRAISE) < axion_dice(-10)) {
     send_to_char(ch, "You fail to perceive the worth of %s..\r\n", obj->short_description);
-    act("@c$n@w looks stumped about $p.@n", TRUE, ch, obj, 0, TO_ROOM);
+    act("@c$n@w looks stumped about $p.@n", true, ch, obj, 0, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
 
   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     send_to_char(ch, "%s is broken!\r\n", obj->short_description);
-    act("@c$n@w looks at $p and frowns.@n", TRUE, ch, obj, 0, TO_ROOM);
+    act("@c$n@w looks at $p and frowns.@n", true, ch, obj, 0, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
 
   if (obj_extra_flagged(obj, ITEM_FORGED)) {
     send_to_char(ch, "%s is fake and worthless!\r\n", obj->short_description);
-    act("@c$n@w looks at $p with an angry face.@n", TRUE, ch, obj, 0, TO_ROOM);
+    act("@c$n@w looks at $p with an angry face.@n", true, ch, obj, 0, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
-  found         = FALSE;
+  found         = false;
   int displevel = obj_get_level(obj);
 
   if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_extra_flagged(obj, ITEM_CUSTOM))
@@ -1530,16 +1530,16 @@ ACMD(do_appraise)
     send_to_char(ch, "Token Slots  : @m2/2@n\n");
   }
   send_to_char(ch, "Bonuses:");
-  act("@c$n@w looks at $p and nods, a satisfied look on $s face.@n", TRUE, ch, obj, 0, TO_ROOM);
-  int percent = FALSE;
+  act("@c$n@w looks at $p and nods, a satisfied look on $s face.@n", true, ch, obj, 0, TO_ROOM);
+  int percent = false;
   for (i = 0; i < MAX_OBJ_AFFECT; i++) {
     if (obj->affected[i].modifier) {
       if (obj->affected[i].location == APPLY_REGEN || obj->affected[i].location == APPLY_TRAIN || obj->affected[i].location == APPLY_LIFEMAX) {
-        percent = TRUE;
+        percent = true;
       }
       sprinttype(obj->affected[i].location, apply_types, buf, sizeof(buf));
-      send_to_char(ch, "%s %+d%s to %s", found++ ? "," : "", obj->affected[i].modifier, percent == TRUE ? "%" : "", buf);
-      percent = FALSE;
+      send_to_char(ch, "%s %+d%s to %s", found++ ? "," : "", obj->affected[i].modifier, percent == true ? "%" : "", buf);
+      percent = false;
       switch (obj->affected[i].location) {
         case APPLY_FEAT:
           send_to_char(ch, " (%s)", feat_list[obj->affected[i].specific].name);
@@ -1571,7 +1571,7 @@ ACMD(do_disguise)
   if (char_plr_flagged(ch, PLR_DISGUISED)) {
     send_to_char(ch, "You stop disguising yourself.\r\n");
     char_plr_set(ch, PLR_DISGUISED, false);
-    act("@C$n @wpulls off $s disguise and reveals $mself!", TRUE, ch, 0, 0, TO_ROOM);
+    act("@C$n @wpulls off $s disguise and reveals $mself!", true, ch, 0, 0, TO_ROOM);
     return;
   }
 
@@ -1594,12 +1594,12 @@ ACMD(do_disguise)
 
   if (skill > roll) {
     send_to_char(ch, "You managed to disguise yourself with some skilled manipulation of your headwear.\r\n");
-    act("@C$n @wmanages to disguise $mself with some skilled manipulation of $s headwear.", TRUE, ch, 0, 0, TO_ROOM);
+    act("@C$n @wmanages to disguise $mself with some skilled manipulation of $s headwear.", true, ch, 0, 0, TO_ROOM);
     char_plr_set(ch, PLR_DISGUISED, true);
     return;
   }
   send_to_char(ch, "You finish attempting to disguise yourself, but realize you failed and need to try again.\r\n");
-  act("@C$n @wattempts and fails to disguise $mself properly and must try again.", TRUE, ch, 0, 0, TO_ROOM);
+  act("@C$n @wattempts and fails to disguise $mself properly and must try again.", true, ch, 0, 0, TO_ROOM);
   decCurST(ch, getMaxST(ch) / 50, 0);
   return;
 }
@@ -1607,7 +1607,7 @@ ACMD(do_disguise)
 ACMD(do_use)
 {
   char buf[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
-  struct obj_data *mag_item = NULL;
+  struct obj_data *mag_item = nullptr;
 
   half_chop(argument, arg, buf);
   if (!*arg) {
@@ -1619,13 +1619,13 @@ ACMD(do_use)
     switch (subcmd) {
       case SCMD_RECITE:
       case SCMD_QUAFF:
-        if (!(mag_item = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+        if (!(mag_item = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
           send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
           return;
         }
         break;
       case SCMD_USE:
-        if (!(mag_item = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+        if (!(mag_item = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
           send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
           return;
         }
@@ -1676,8 +1676,8 @@ ACMD(do_use)
             send_to_char(ch, "Your stamina is full.\r\n");
             return;
           }
-          act("@WYou place the $p@W against your chest and feel a rush of stamina as it automatically administers the dose.@n", TRUE, ch, mag_item, 0, TO_CHAR);
-          act("@C$n@W places an $p@W against $s chest and a loud click is heard.@n", TRUE, ch, mag_item, 0, TO_ROOM);
+          act("@WYou place the $p@W against your chest and feel a rush of stamina as it automatically administers the dose.@n", true, ch, mag_item, 0, TO_CHAR);
+          act("@C$n@W places an $p@W against $s chest and a loud click is heard.@n", true, ch, mag_item, 0, TO_ROOM);
           if (char_get_skill(ch, SKILL_FIRST_AID) > 0) {
             send_to_char(ch, "@CYour skill in First Aid has helped increase the use of the injector. You gain more stamina as a result.@n\r\n");
             incCurST(ch, getMaxST(ch) * .25, true);
@@ -1688,8 +1688,8 @@ ACMD(do_use)
           return;
         case 382:
           if (char_aff_flagged(ch, AFF_BURNED)) {
-            act("@WYou gently apply the salve to your burns.@n", TRUE, ch, mag_item, 0, TO_CHAR);
-            act("@C$n@W gently applies a burn salve to $s burns.@n", TRUE, ch, mag_item, 0, TO_ROOM);
+            act("@WYou gently apply the salve to your burns.@n", true, ch, mag_item, 0, TO_CHAR);
+            act("@C$n@W gently applies a burn salve to $s burns.@n", true, ch, mag_item, 0, TO_ROOM);
             char_aff_set(ch, AFF_BURNED, false);
             extract_obj(mag_item);
           } else {
@@ -1698,8 +1698,8 @@ ACMD(do_use)
           return;
         case 383:
           if (char_aff_flagged(ch, AFF_POISON)) {
-            act("@WYou place the $p@W against your neck and feel a rush of relief as the antitoxiin enters your bloodstream.@n", TRUE, ch, mag_item, 0, TO_CHAR);
-            act("@C$n@W places an $p@W against $s neck and a loud click is heard.@n", TRUE, ch, mag_item, 0, TO_ROOM);
+            act("@WYou place the $p@W against your neck and feel a rush of relief as the antitoxiin enters your bloodstream.@n", true, ch, mag_item, 0, TO_CHAR);
+            act("@C$n@W places an $p@W against $s neck and a loud click is heard.@n", true, ch, mag_item, 0, TO_ROOM);
             null_affect(ch, AFF_POISON);
             extract_obj(mag_item);
           } else {
@@ -1707,26 +1707,26 @@ ACMD(do_use)
           }
           return;
         case 385:
-          act("@WYou drink the contents of the vial before disposing of it.@n", TRUE, ch, mag_item, 0, TO_CHAR);
-          act("@C$n@W dinks a $p and then disposes of it.@n", TRUE, ch, mag_item, 0, TO_ROOM);
+          act("@WYou drink the contents of the vial before disposing of it.@n", true, ch, mag_item, 0, TO_CHAR);
+          act("@C$n@W dinks a $p and then disposes of it.@n", true, ch, mag_item, 0, TO_ROOM);
           if (char_aff_flagged(ch, AFF_BLIND)) {
-            act("@WYour eyesight has returned!@n", TRUE, ch, mag_item, 0, TO_CHAR);
-            act("@C$n@W eyesight seems to have returned.@n", TRUE, ch, mag_item, 0, TO_ROOM);
+            act("@WYour eyesight has returned!@n", true, ch, mag_item, 0, TO_CHAR);
+            act("@C$n@W eyesight seems to have returned.@n", true, ch, mag_item, 0, TO_ROOM);
             null_affect(ch, AFF_BLIND);
           }
-          refreshed = FALSE;
+          refreshed = false;
 
           if (getCurPL(ch) <= getEffMaxPL(ch) * 0.99) {
             incCurHealth(ch, large_rand(getEffMaxPL(ch) * 0.08, getEffMaxPL(ch) * 0.16), true);
-            refreshed = TRUE;
+            refreshed = true;
           } else if ((getCurKI(ch)) <= getEffMaxPL(ch) * 0.99) {
             incCurKI(ch, large_rand(getMaxKI(ch) * 0.08, getMaxKI(ch) * 0.16), true);
-            refreshed = TRUE;
+            refreshed = true;
           } else if ((getCurST(ch)) <= getMaxST(ch) * 0.99) {
             incCurST(ch, large_rand(getMaxST(ch) * 0.08, getMaxST(ch) * 0.16), true);
-            refreshed = TRUE;
+            refreshed = true;
           }
-          if (refreshed == TRUE) {
+          if (refreshed == true) {
             send_to_char(ch, "@CYou feel refreshed!\r\n");
           }
           extract_obj(mag_item);
@@ -1798,7 +1798,7 @@ ACMD(do_compare)
   struct obj_data *obj1, *obj2;
   struct char_data *tchar;
   int value1 = 0, value2 = 0, o1, o2;
-  const char *msg = NULL;
+  const char *msg = nullptr;
 
   two_arguments(argument, arg1, arg2);
 
@@ -1834,7 +1834,7 @@ ACMD(do_compare)
     }
   }
 
-  if (msg == NULL) {
+  if (msg == nullptr) {
     if (value1 == value2)
       msg = "$p and $P look about the same.";
     else if (value1 > value2)
@@ -1843,7 +1843,7 @@ ACMD(do_compare)
       msg = "$p looks worse than $P.";
   }
 
-  act(msg, FALSE, ch, obj1, obj2, TO_CHAR);
+  act(msg, false, ch, obj1, obj2, TO_CHAR);
   return;
 }
 
@@ -1851,7 +1851,7 @@ ACMD(do_break)
 {
   char arg[MAX_INPUT_LENGTH];
   struct obj_data *obj;
-  struct char_data *dummy = NULL;
+  struct char_data *dummy = nullptr;
   int cmbrk;
 
   one_argument(argument, arg);
@@ -1873,7 +1873,7 @@ ACMD(do_break)
 
   /* Ok, break it! */
   send_to_char(ch, "You ruin %s.\r\n", obj->short_description);
-  act("$n ruins $p.", FALSE, ch, obj, 0, TO_ROOM);
+  act("$n ruins $p.", false, ch, obj, 0, TO_ROOM);
   obj_set_value(obj, VAL_ALL_HEALTH, 0);
   obj_extra_toggle(obj, ITEM_BROKEN);
 
@@ -1883,9 +1883,9 @@ ACMD(do_break)
 ACMD(do_fix)
 {
   char arg[MAX_INPUT_LENGTH];
-  struct obj_data *obj, *obj4 = NULL, *rep, *next_obj;
-  struct char_data *dummy = NULL;
-  int cmbrk, found = FALSE, self = FALSE, custom = FALSE;
+  struct obj_data *obj, *obj4 = nullptr, *rep, *next_obj;
+  struct char_data *dummy = nullptr;
+  int cmbrk, found = false, self = false, custom = false;
 
   one_argument(argument, arg);
 
@@ -1903,10 +1903,10 @@ ACMD(do_fix)
       send_to_char(ch, "Only androids can fix their bodies with repair kits.\r\n");
       return;
     }
-    self = TRUE;
+    self = true;
   }
 
-  if (self == FALSE) {
+  if (self == false) {
     if (!(cmbrk = generic_find(arg, FIND_OBJ_INV | FIND_OBJ_EQUIP | FIND_OBJ_ROOM, ch, &dummy, &obj))) {
       send_to_char(ch, "Can't seem to find what you want to fix!\r\n");
       return;
@@ -1933,38 +1933,38 @@ ACMD(do_fix)
     }
 
     if (obj_get_vnum(obj) == 20099 || obj_get_vnum(obj) == 20098) {
-      custom = TRUE;
+      custom = true;
     }
   }
 
   for (rep = ch->carrying; rep; rep = next_obj) {
     next_obj = rep->next_content;
-    if (custom == FALSE) {
-      if (found == FALSE && obj_get_vnum(rep) == 48 && (!obj_extra_flagged(rep, ITEM_BROKEN) && !obj_extra_flagged(rep, ITEM_FORGED))) {
-        found = TRUE;
+    if (custom == false) {
+      if (found == false && obj_get_vnum(rep) == 48 && (!obj_extra_flagged(rep, ITEM_BROKEN) && !obj_extra_flagged(rep, ITEM_FORGED))) {
+        found = true;
         obj4  = rep;
       }
     } else {
-      if (found == FALSE && obj_get_vnum(rep) == 13593 && (!obj_extra_flagged(rep, ITEM_BROKEN) && !obj_extra_flagged(rep, ITEM_FORGED))) {
-        found = TRUE;
+      if (found == false && obj_get_vnum(rep) == 13593 && (!obj_extra_flagged(rep, ITEM_BROKEN) && !obj_extra_flagged(rep, ITEM_FORGED))) {
+        found = true;
         obj4  = rep;
       }
     }
   }
 
-  if (found == FALSE && custom == FALSE) {
+  if (found == false && custom == false) {
     send_to_char(ch, "You do not even have a repair kit.\r\n");
     return;
   }
-  if (found == FALSE && custom == TRUE) {
+  if (found == false && custom == true) {
     send_to_char(ch, "You do not even have a Nano-tech Repair Orb.\r\n");
     return;
   }
 
-  if (self == FALSE) {
+  if (self == false) {
     if (char_get_skill(ch, SKILL_REPAIR) < axion_dice(0)) {
-      act("You try to repair $p but screw up..", TRUE, ch, obj, 0, TO_CHAR);
-      act("$n tries to repair $p but screws up..", TRUE, ch, obj, 0, TO_ROOM);
+      act("You try to repair $p but screw up..", true, ch, obj, 0, TO_CHAR);
+      act("$n tries to repair $p but screws up..", true, ch, obj, 0, TO_ROOM);
       extract_obj(obj4);
       improve_skill(ch, SKILL_REPAIR, 1);
       char_set_wait(ch, PULSE_2SEC);
@@ -1973,16 +1973,16 @@ ACMD(do_fix)
 
     if (obj_get_value(obj, VAL_ALL_HEALTH) + char_get_skill(ch, SKILL_REPAIR) < 100) {
       send_to_char(ch, "You repair %s a bit.\r\n", obj->short_description);
-      act("$n repairs $p a bit.", FALSE, ch, obj, 0, TO_ROOM);
+      act("$n repairs $p a bit.", false, ch, obj, 0, TO_ROOM);
       obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) + (char_get_skill(ch, SKILL_REPAIR)));
       obj_extra_set(obj, ITEM_BROKEN, false);
     } else {
       send_to_char(ch, "You repair %s completely.\r\n", obj->short_description);
-      act("$n repairs $p completely.", FALSE, ch, obj, 0, TO_ROOM);
+      act("$n repairs $p completely.", false, ch, obj, 0, TO_ROOM);
       obj_set_value(obj, VAL_ALL_HEALTH, 100);
       obj_extra_set(obj, ITEM_BROKEN, false);
     }
-    if (obj->carried_by == NULL && !char_plr_flagged(ch, PLR_REPLEARN) && (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 || char_get_level(ch) >= 100)) {
+    if (obj->carried_by == nullptr && !char_plr_flagged(ch, PLR_REPLEARN) && (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 || char_get_level(ch) >= 100)) {
       int64_t gain = (level_exp(ch, char_get_level(ch) + 1) * 0.0003) * char_get_skill(ch, SKILL_REPAIR);
       send_to_char(ch, "@mYou've learned a bit from repairing it. @D[@gEXP@W: @G+%s@D]@n\r\n", add_commas(gain));
       char_plr_set(ch, PLR_REPLEARN, true);
@@ -2002,15 +2002,15 @@ ACMD(do_fix)
       return;
     }
     if (char_get_skill(ch, SKILL_REPAIR) < axion_dice(0)) {
-      act("You try to repair your body but screw up..", TRUE, ch, 0, 0, TO_CHAR);
-      act("$n tries to repair $s body but screws up..", TRUE, ch, 0, 0, TO_ROOM);
+      act("You try to repair your body but screw up..", true, ch, 0, 0, TO_CHAR);
+      act("$n tries to repair $s body but screws up..", true, ch, 0, 0, TO_ROOM);
       extract_obj(obj4);
       improve_skill(ch, SKILL_REPAIR, 1);
       char_set_wait(ch, PULSE_5SEC);
       return;
     }
-    act("You use the repair kit to fix part of your body...", TRUE, ch, 0, 0, TO_CHAR);
-    act("$n works on their body with a repair kit.", TRUE, ch, 0, 0, TO_ROOM);
+    act("You use the repair kit to fix part of your body...", true, ch, 0, 0, TO_CHAR);
+    act("$n works on their body with a repair kit.", true, ch, 0, 0, TO_ROOM);
     int64_t mult = char_get_skill(ch, SKILL_REPAIR);
     int64_t add  = (getEffMaxPL(ch) * 0.005 + 10) * mult;
 

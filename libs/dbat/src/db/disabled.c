@@ -65,7 +65,7 @@ ACMD(do_disable)
 
     REMOVE_FROM_LIST(p, disabled_first, next, temp);
     send_to_char(ch, "Command '%s' enabled.\r\n", p->command->command);
-    mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "(GC) %s has enabled the command '%s'.",
+    mudlog(LOG_BRF, ADMLVL_IMMORT, true, "(GC) %s has enabled the command '%s'.",
            char_get_name(ch), p->command->command);
     free(p->disabled_by);
     free(p);
@@ -99,7 +99,7 @@ ACMD(do_disable)
     p->next        = disabled_first;
     disabled_first = p; /* add before the current first element */
     send_to_char(ch, "Command '%s' disabled.\r\n", p->command->command);
-    mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "(GC) %s has disabled the command '%s'.",
+    mudlog(LOG_BRF, ADMLVL_IMMORT, true, "(GC) %s has disabled the command '%s'.",
            char_get_name(ch), p->command->command);
     save_disabled(); /* save to disk */
   }
@@ -113,9 +113,9 @@ int check_disabled(const struct command_info *command)
   for (p = disabled_first; p; p = p->next)
     if (p->command->command_pointer == command->command_pointer)
       if (p->command->subcmd == command->subcmd)
-        return TRUE;
+        return true;
 
-  return FALSE;
+  return false;
 }
 
 /* Load disabled commands */
@@ -129,7 +129,7 @@ void load_disabled()
   if (disabled_first)
     free_disabled();
 
-  if ((fp = fopen(DISABLED_FILE, "r")) == NULL)
+  if ((fp = fopen(DISABLED_FILE, "r")) == nullptr)
     return; /* No disabled file.. no disabled commands. */
 
   while (get_line(fp, line)) {
@@ -167,7 +167,7 @@ static void save_disabled()
     return;
   }
 
-  if ((fp = atomic_open(&af, DISABLED_FILE, false)) == NULL) {
+  if ((fp = atomic_open(&af, DISABLED_FILE, false)) == nullptr) {
     mud_log("SYSERR: Could not open " DISABLED_FILE " for writing");
     return;
   }

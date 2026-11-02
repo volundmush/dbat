@@ -34,7 +34,7 @@ void extract_char_final(struct char_data *ch)
   if (!char_is_npc(ch) && !ch->desc) {
     for (d = descriptor_list; d; d = d->next)
       if (d->original == ch) {
-        do_return(d->character, NULL, 0, 0);
+        do_return(d->character, nullptr, 0, 0);
         break;
       }
   }
@@ -49,7 +49,7 @@ void extract_char_final(struct char_data *ch)
      * body after the removal so dump them to the main menu.
      */
     if (ch->desc->original)
-      do_return(ch, NULL, 0, 0);
+      do_return(ch, nullptr, 0, 0);
     else {
       /*
        * Now we boot anybody trying to log in with the same character, to
@@ -75,8 +75,8 @@ void extract_char_final(struct char_data *ch)
 
   if (char_get_sits(ch)) {
     chair = char_get_sits(ch);
-    obj_set_sitting(chair, NULL);
-    char_set_sits(ch, NULL);
+    obj_set_sitting(chair, nullptr);
+    char_set_sits(ch, nullptr);
   }
 
   if (char_is_npc(ch) && char_get_mob_vnum(ch) == 25) {
@@ -86,7 +86,7 @@ void extract_char_final(struct char_data *ch)
   }
 
   if (!char_is_npc(ch) && char_get_clones(ch) > 0) {
-    struct char_data *clone = NULL;
+    struct char_data *clone = nullptr;
     for (clone = character_list; clone; clone = clone->next) {
       if (char_is_npc(clone)) {
         if (char_get_mob_vnum(clone) == 25) {
@@ -101,24 +101,24 @@ void extract_char_final(struct char_data *ch)
   purge_homing(ch);
 
   if (char_get_mindlink(ch)) {
-    char_set_mindlink(char_get_mindlink(ch), NULL);
-    char_set_mindlink(ch, NULL);
+    char_set_mindlink(char_get_mindlink(ch), nullptr);
+    char_set_mindlink(ch, nullptr);
   }
 
   if (char_get_grappling(ch)) {
-    act("@WYou stop grappling with @C$N@W!@n", TRUE, ch, 0, char_get_grappling(ch), TO_CHAR);
-    act("@C$n@W stops grappling with @c$N@W!@n", TRUE, ch, 0, char_get_grappling(ch), TO_ROOM);
+    act("@WYou stop grappling with @C$N@W!@n", true, ch, 0, char_get_grappling(ch), TO_CHAR);
+    act("@C$n@W stops grappling with @c$N@W!@n", true, ch, 0, char_get_grappling(ch), TO_ROOM);
     char_set_grap(char_get_grappling(ch), -1);
-    char_set_grappled(char_get_grappling(ch), NULL);
-    char_set_grappling(ch, NULL);
+    char_set_grappled(char_get_grappling(ch), nullptr);
+    char_set_grappling(ch, nullptr);
     char_set_grap(ch, -1);
   }
   if (char_get_grappled(ch)) {
-    act("@WYou stop being grappled with by @C$N@W!@n", TRUE, ch, 0, char_get_grappled(ch), TO_CHAR);
-    act("@C$n@W stops being grappled with by @c$N@W!@n", TRUE, ch, 0, char_get_grappled(ch), TO_ROOM);
+    act("@WYou stop being grappled with by @C$N@W!@n", true, ch, 0, char_get_grappled(ch), TO_CHAR);
+    act("@C$n@W stops being grappled with by @c$N@W!@n", true, ch, 0, char_get_grappled(ch), TO_ROOM);
     char_set_grap(char_get_grappled(ch), -1);
-    char_set_grappling(char_get_grappled(ch), NULL);
-    char_set_grappled(ch, NULL);
+    char_set_grappling(char_get_grappled(ch), nullptr);
+    char_set_grappled(ch, nullptr);
     char_set_grap(ch, -1);
   }
 
@@ -130,47 +130,47 @@ void extract_char_final(struct char_data *ch)
   }
 
   if (ch->poisonby) {
-    ch->poisonby = NULL;
+    ch->poisonby = nullptr;
   }
 
   if (char_get_drag(ch)) {
-    act("@WYou stop dragging @C$N@W!@n", TRUE, ch, 0, char_get_drag(ch), TO_CHAR);
-    act("@C$n@W stops dragging @c$N@W!@n", TRUE, ch, 0, char_get_drag(ch), TO_ROOM);
-    char_set_dragged(char_get_drag(ch), NULL);
-    char_set_drag(ch, NULL);
+    act("@WYou stop dragging @C$N@W!@n", true, ch, 0, char_get_drag(ch), TO_CHAR);
+    act("@C$n@W stops dragging @c$N@W!@n", true, ch, 0, char_get_drag(ch), TO_ROOM);
+    char_set_dragged(char_get_drag(ch), nullptr);
+    char_set_drag(ch, nullptr);
   }
 
   if (char_get_dragged(ch)) {
-    act("@WYou stop being dragged by @C$N@W!@n", TRUE, ch, 0, char_get_dragged(ch), TO_CHAR);
-    act("@C$n@W stops being dragged by @c$N@W!@n", TRUE, ch, 0, char_get_dragged(ch), TO_ROOM);
-    char_set_drag(char_get_dragged(ch), NULL);
-    char_set_dragged(ch, NULL);
+    act("@WYou stop being dragged by @C$N@W!@n", true, ch, 0, char_get_dragged(ch), TO_CHAR);
+    act("@C$n@W stops being dragged by @c$N@W!@n", true, ch, 0, char_get_dragged(ch), TO_ROOM);
+    char_set_drag(char_get_dragged(ch), nullptr);
+    char_set_dragged(ch, nullptr);
   }
 
   if (char_get_defender(ch)) {
-    char_set_defending(char_get_defender(ch), NULL);
-    char_set_defender(ch, NULL);
+    char_set_defending(char_get_defender(ch), nullptr);
+    char_set_defender(ch, nullptr);
   }
   if (char_get_defending(ch)) {
-    char_set_defender(char_get_defending(ch), NULL);
-    char_set_defending(ch, NULL);
+    char_set_defender(char_get_defending(ch), nullptr);
+    char_set_defending(ch, nullptr);
   }
 
   if (char_get_blocked(ch)) {
-    char_set_blocks(char_get_blocked(ch), NULL);
-    char_set_blocked(ch, NULL);
+    char_set_blocks(char_get_blocked(ch), nullptr);
+    char_set_blocked(ch, nullptr);
   }
   if (char_get_blocks(ch)) {
-    char_set_blocked(char_get_blocks(ch), NULL);
-    char_set_blocks(ch, NULL);
+    char_set_blocked(char_get_blocks(ch), nullptr);
+    char_set_blocks(ch, nullptr);
   }
   if (char_get_absorbing(ch)) {
-    char_set_absorbby(char_get_absorbing(ch), NULL);
-    char_set_absorbing(ch, NULL);
+    char_set_absorbby(char_get_absorbing(ch), nullptr);
+    char_set_absorbing(ch, nullptr);
   }
   if (char_get_absorbby(ch)) {
-    char_set_absorbing(char_get_absorbby(ch), NULL);
-    char_set_absorbby(ch, NULL);
+    char_set_absorbing(char_get_absorbby(ch), nullptr);
+    char_set_absorbby(ch, nullptr);
   }
 
   /* transfer objects to room, if any */
@@ -277,7 +277,7 @@ void extract_obj(struct obj_data *obj)
   struct obj_data *temp;
   struct char_data *ch;
 
-  if (obj->worn_by != NULL)
+  if (obj->worn_by != nullptr)
     if (unequip_char(obj->worn_by, obj->worn_on) != obj)
       mud_log("SYSERR: Inconsistent worn_by and worn_on pointers!!");
   if (obj_get_in_room(obj) != NOWHERE)
@@ -291,26 +291,26 @@ void extract_obj(struct obj_data *obj)
   if (obj_get_fellow_wall(obj) && obj_get_vnum(obj) == 79) {
     struct obj_data *trash;
     trash = obj_get_fellow_wall(obj);
-    obj_set_fellow_wall(obj, NULL);
-    obj_set_fellow_wall(trash, NULL);
+    obj_set_fellow_wall(obj, nullptr);
+    obj_set_fellow_wall(trash, nullptr);
     extract_obj(trash);
   }
   if (obj_get_sitting(obj)) {
     ch = obj_get_sitting(obj);
-    obj_set_sitting(obj, NULL);
-    char_set_sits(ch, NULL);
+    obj_set_sitting(obj, nullptr);
+    char_set_sits(ch, nullptr);
   }
-  if (obj_get_posted_to(obj) && obj->in_obj == NULL) {
+  if (obj_get_posted_to(obj) && obj->in_obj == nullptr) {
     struct obj_data *obj2 = obj_get_posted_to(obj);
-    obj_set_posted_to(obj2, NULL);
+    obj_set_posted_to(obj2, nullptr);
     obj_set_posttype(obj2, 0);
-    obj_set_posted_to(obj, NULL);
+    obj_set_posted_to(obj, nullptr);
   }
   if (obj_get_target(obj)) {
-    obj_set_target(obj, NULL);
+    obj_set_target(obj, nullptr);
   }
   if (obj_get_user(obj)) {
-    obj_set_user(obj, NULL);
+    obj_set_user(obj, nullptr);
   }
 
   while (obj->contains)
@@ -339,7 +339,7 @@ void extract_pending_chars(void)
   if (extractions_pending < 0)
     mud_log("SYSERR: Negative (%d) extractions pending.", extractions_pending);
 
-  for (vict = character_list, prev_vict = NULL; vict && extractions_pending; vict = next_vict) {
+  for (vict = character_list, prev_vict = nullptr; vict && extractions_pending; vict = next_vict) {
     next_vict = vict->next;
 
     if (char_mob_flagged(vict, MOB_NOTDEADYET))

@@ -3,11 +3,11 @@
 #include <stdio.h>
 
 /* these factors should be unique integers */
-#define RENT_FACTOR 1
-#define CRYO_FACTOR 4
+constexpr int RENT_FACTOR = 1;
+constexpr int CRYO_FACTOR = 4;
 
-#define LOC_INVENTORY 0
-#define MAX_BAG_ROWS  5
+constexpr int LOC_INVENTORY = 0;
+#define MAX_BAG_ROWS 5
 
 // functions
 void Crash_rentsave(struct char_data *ch, int cost);

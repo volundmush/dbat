@@ -38,31 +38,31 @@ SPECIAL(dump)
   int value = 0;
 
   for (k = world[char_get_in_room(ch)].contents; k; k = world[char_get_in_room(ch)].contents) {
-    act("$p vanishes in a puff of smoke!", FALSE, 0, k, 0, TO_ROOM);
+    act("$p vanishes in a puff of smoke!", false, 0, k, 0, TO_ROOM);
     extract_obj(k);
   }
 
   if (!CMD_IS("drop"))
-    return (FALSE);
+    return (false);
 
   do_drop(ch, argument, cmd, SCMD_DROP);
 
   for (k = world[char_get_in_room(ch)].contents; k; k = world[char_get_in_room(ch)].contents) {
-    act("$p vanishes in a puff of smoke!", FALSE, 0, k, 0, TO_ROOM);
+    act("$p vanishes in a puff of smoke!", false, 0, k, 0, TO_ROOM);
     value += MAX(1, MIN(50, obj_get_cost(k) / 10));
     extract_obj(k);
   }
 
   if (value) {
     send_to_char(ch, "You are awarded for outstanding performance.\r\n");
-    act("$n has been awarded for being a good citizen.", TRUE, ch, 0, 0, TO_ROOM);
+    act("$n has been awarded for being a good citizen.", true, ch, 0, 0, TO_ROOM);
 
     if (char_get_level(ch) < 3)
       gain_exp(ch, value);
     else
       char_set_gold(ch, char_get_gold(ch) + (value));
   }
-  return (TRUE);
+  return (true);
 }
 
 /* ********************************************************************
@@ -95,11 +95,11 @@ int num_players_in_room(room_vnum room)
 bool check_mob_in_room(mob_vnum mob, room_vnum room)
 {
   struct char_data *i;
-  bool found = FALSE;
+  bool found = false;
 
   for (i = character_list; i; i = i->next)
     if (char_get_mob_vnum(i) == mob)
-      if (world[i->in_room].number == room) found = TRUE;
+      if (world[i->in_room].number == room) found = true;
 
   return found;
 }
@@ -118,8 +118,8 @@ void npc_steal(struct char_data *ch, struct char_data *victim)
     return;
 
   if (char_is_awake(victim) && (rand_number(0, char_get_level(ch)) == 0)) {
-    act("You discover that $n has $s hands in your wallet.", FALSE, ch, 0, victim, TO_VICT);
-    act("$n tries to steal zenni from $N.", TRUE, ch, 0, victim, TO_NOTVICT);
+    act("You discover that $n has $s hands in your wallet.", false, ch, 0, victim, TO_VICT);
+    act("$n tries to steal zenni from $N.", true, ch, 0, victim, TO_NOTVICT);
   } else {
     /* Steal some gold coins */
     gold = (char_get_gold(victim) * rand_number(1, 10)) / 100;
@@ -157,19 +157,19 @@ SPECIAL(pet_shops)
         continue;
       send_to_char(ch, "%8d - %s\r\n", PET_PRICE(pet), char_get_name(pet));
     }
-    return (TRUE);
+    return (true);
   }
   if (CMD_IS("buy")) {
 
     two_arguments(argument, buf, pet_name);
 
-    if (!(pet = get_char_room(buf, NULL, pet_room)) || !char_is_npc(pet)) {
+    if (!(pet = get_char_room(buf, nullptr, pet_room)) || !char_is_npc(pet)) {
       send_to_char(ch, "There is no such pet!\r\n");
-      return (TRUE);
+      return (true);
     }
     if (char_get_gold(ch) < PET_PRICE(pet)) {
       send_to_char(ch, "You don't have enough zenni!\r\n");
-      return (TRUE);
+      return (true);
     }
     char_set_gold(ch, char_get_gold(ch) - (PET_PRICE(pet)));
 
@@ -196,20 +196,20 @@ SPECIAL(pet_shops)
     char_set_carry_items(pet, 100);
 
     send_to_char(ch, "May you enjoy your pet.\r\n");
-    act("$n buys $N as a pet.", FALSE, ch, 0, pet, TO_ROOM);
+    act("$n buys $N as a pet.", false, ch, 0, pet, TO_ROOM);
 
-    return (TRUE);
+    return (true);
   }
 
   /* All commands except list and buy */
-  return (FALSE);
+  return (false);
 }
 
 SPECIAL(auction)
 {
   room_rnum auct_room;
-  struct obj_data *obj, *next_obj, *obj2 = NULL;
-  int found = FALSE;
+  struct obj_data *obj, *next_obj, *obj2 = nullptr;
+  int found = false;
 
   /* Gross. */
   auct_room = real_room(80);
@@ -220,7 +220,7 @@ SPECIAL(auction)
       next_obj = obj->next_content;
       if (obj && obj_get_aucter(obj) == char_get_id(ch)) {
         obj2  = obj;
-        found = TRUE;
+        found = true;
 
         if (obj_get_curBidder(obj2) != -1 && obj_get_aucTime(obj2) + 518400 > time(0)) {
           send_to_char(ch, "Unable to cancel. Someone has already bid on it and their bid license hasn't expired.\r\n");
@@ -251,21 +251,21 @@ SPECIAL(auction)
       }
     }
 
-    if (found == FALSE) {
+    if (found == false) {
       send_to_char(ch, "There are no items being auctioned by you.\r\n");
     }
 
-    return (TRUE);
+    return (true);
   }
   if (CMD_IS("pickup")) {
     struct descriptor_data *d;
-    int founded = FALSE;
+    int founded = false;
 
     for (obj = world[auct_room].contents; obj; obj = next_obj) {
       next_obj = obj->next_content;
       if (obj && obj_get_curBidder(obj) == char_get_id(ch)) {
         obj2  = obj;
-        found = TRUE;
+        found = true;
 
         if (obj_get_aucter(obj) <= 0) {
           continue;
@@ -296,7 +296,7 @@ SPECIAL(auction)
           if (d->character == ch)
             continue;
           if (char_get_idnum(d->character) == obj_get_aucter(obj2)) {
-            founded = TRUE;
+            founded = true;
             char_set_bank_gold(d->character, char_get_bank_gold(d->character) + (obj_get_bid(obj2)));
             if (char_get_equipment(d->character, WEAR_EYE)) {
               send_to_char(d->character, "@RScouter Auction News@D: @GSomeone has purchased your @w%s@G and you had the money put in your bank account.\r\n", obj2->short_description);
@@ -306,9 +306,9 @@ SPECIAL(auction)
           }
         }
 
-        if (founded == FALSE) {
-          struct char_data *vict = NULL;
-          int is_file = FALSE, player_i = 0;
+        if (founded == false) {
+          struct char_data *vict = nullptr;
+          int is_file = false, player_i = 0;
 
           CREATE(vict, struct char_data, 1);
           clear_char(vict);
@@ -316,7 +316,7 @@ SPECIAL(auction)
           char blam[50];
           sprintf(blam, "%s", obj_get_auctname(obj2));
           if ((player_i = load_char(blam, vict)) > -1) {
-            is_file = TRUE;
+            is_file = true;
           } else {
             free_char(vict);
             continue;
@@ -325,16 +325,16 @@ SPECIAL(auction)
 
           char_set_pfilepos(vict, player_i);
           save_char(vict);
-          if (is_file == TRUE)
+          if (is_file == true)
             free_char(vict);
         }
       }
     }
 
-    if (found == FALSE) {
+    if (found == false) {
       send_to_char(ch, "There are no items that you have bid on.\r\n");
     }
-    return (TRUE);
+    return (true);
   }
   if (CMD_IS("auction")) {
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -345,28 +345,28 @@ SPECIAL(auction)
 
     if (!*arg || !*arg2) {
       send_to_char(ch, "Auction what item and for how much?\r\n");
-      return (TRUE);
+      return (true);
     }
 
     value = atoi(arg2);
 
-    if (!(obj2 = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+    if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
       send_to_char(ch, "You don't have that item to auction.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (value <= 999) {
       send_to_char(ch, "Do not auction anything for less than 1,000 zenni.\r\n");
-      return (TRUE);
+      return (true);
     }
 
     if (obj_extra_flagged(obj2, ITEM_BROKEN)) {
-      act("$P is broken and we will not accept it.", FALSE, ch, 0, obj2, TO_CHAR);
-      return (TRUE);
+      act("$P is broken and we will not accept it.", false, ch, 0, obj2, TO_CHAR);
+      return (true);
     }
 
     if (obj_extra_flagged(obj2, ITEM_NODONATE)) {
-      act("$P is junk and we will not accept it.", FALSE, ch, 0, obj2, TO_CHAR);
-      return (TRUE);
+      act("$P is junk and we will not accept it.", false, ch, 0, obj2, TO_CHAR);
+      return (true);
     }
 
     obj_set_bid(obj2, value);
@@ -397,11 +397,11 @@ SPECIAL(auction)
         send_to_char(d->character, "@RScouter Auction News@D: @GThe item, @w%s@G, has been placed on auction for @Y%s@G zenni.@n\r\n", obj2->short_description, add_commas(obj_get_bid(obj2)));
       }
     }
-    return (TRUE);
+    return (true);
   }
 
   /* All commands except list and buy */
-  return (FALSE);
+  return (false);
 }
 
 /* ********************************************************************
@@ -410,7 +410,7 @@ SPECIAL(auction)
 
 SPECIAL(healtank)
 {
-  struct obj_data *htank = NULL, *i;
+  struct obj_data *htank = nullptr, *i;
   char arg[MAX_INPUT_LENGTH];
   one_argument(argument, arg);
 
@@ -424,68 +424,68 @@ SPECIAL(healtank)
 
   if (CMD_IS("htank")) {
     if (!htank) {
-      return (FALSE);
+      return (false);
     }
 
     if (!*arg) {
       send_to_char(ch, "@WHealing Tank Commands:\r\n"
                        "htank [ enter | exit | check ]@n");
-      return (TRUE);
+      return (true);
     }
 
     if (!strcasecmp("enter", arg)) {
       if (char_plr_flagged(ch, PLR_HEALT)) {
         send_to_char(ch, "You are already inside a healing tank!\r\n");
-        return (TRUE);
+        return (true);
       }
       if (ch->master && ch->master != ch) {
         send_to_char(ch, "You can't enter it while following someone!\r\n");
-        return (TRUE);
+        return (true);
       }
       if (char_is_android(ch)) {
         send_to_char(ch, "A healing tank will have no effect on you.\r\n");
-        return (TRUE);
+        return (true);
       }
       if (obj_get_healcharge(htank) <= 0) {
         send_to_char(ch, "That healing tank needs to recharge, wait a while.\r\n");
-        return (TRUE);
+        return (true);
       }
       if (obj_extra_flagged(htank, ITEM_BROKEN)) {
         send_to_char(ch, "It is broken! You will need to fix it yourself or wait for someone else to fix it.\r\n");
-        return (TRUE);
+        return (true);
       }
       if (char_get_sits(ch)) {
         send_to_char(ch, "You are already on something.\r\n");
-        return (TRUE);
+        return (true);
       }
       if (obj_get_sitting(htank)) {
         send_to_char(ch, "Someone else is already inside that healing tank!\r\n");
-        return (TRUE);
+        return (true);
       }
       char_set_charge(ch, 0);
       char_plr_set(ch, PLR_CHARGE, false);
       char_set_chargeto(ch, 0);
       char_set_barrier(ch, 0);
-      act("@wYou step inside the healing tank and put on its breathing mask. A water like solution pours over your body until the tank is full.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@w steps inside the healing tank and puts on its breathing mask. A water like solution pours over $s body until the tank is full.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@wYou step inside the healing tank and put on its breathing mask. A water like solution pours over your body until the tank is full.@n", true, ch, 0, 0, TO_CHAR);
+      act("@C$n@w steps inside the healing tank and puts on its breathing mask. A water like solution pours over $s body until the tank is full.@n", true, ch, 0, 0, TO_ROOM);
       char_plr_set(ch, PLR_HEALT, true);
       char_set_sits(ch, htank);
       obj_set_sitting(htank, ch);
-      return (TRUE);
+      return (true);
 
     } // End of Enter argument
 
     else if (!strcasecmp("exit", arg)) {
       if (!char_plr_flagged(ch, PLR_HEALT)) {
         send_to_char(ch, "You are not inside a healing tank.\r\n");
-        return (TRUE);
+        return (true);
       }
-      act("@wThe healing tank drains and you exit it shortly after.", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@w exits the healing tank after letting it drain.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@wThe healing tank drains and you exit it shortly after.", true, ch, 0, 0, TO_CHAR);
+      act("@C$n@w exits the healing tank after letting it drain.@n", true, ch, 0, 0, TO_ROOM);
       char_plr_set(ch, PLR_HEALT, false);
-      obj_set_sitting(htank, NULL);
-      char_set_sits(ch, NULL);
-      return (TRUE);
+      obj_set_sitting(htank, nullptr);
+      char_set_sits(ch, nullptr);
+      return (true);
     } // End of Exit argument
 
     else if (!strcasecmp("check", arg)) {
@@ -496,18 +496,18 @@ SPECIAL(healtank)
       } else {
         send_to_char(ch, "The healing tank has full energy shown on its meter.\r\n");
       }
-      return (TRUE);
+      return (true);
     }
 
     else {
       send_to_char(ch, "@WHealing Tank Commands:\r\n"
                        "htank [ enter | exit | check ]@n");
-      return (TRUE);
+      return (true);
     }
 
   } // End of htank command
   else {
-    return (FALSE);
+    return (false);
   }
 }
 
@@ -542,7 +542,7 @@ SPECIAL(augmenter)
       send_to_char(ch, "@mAgility     @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", agility, add_commas(agicost));
       send_to_char(ch, "@YSpeed       @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", speed, add_commas(specost));
       send_to_char(ch, "\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("strength", arg) || !strcasecmp("str", arg)) {
       if (strength >= 100)
@@ -550,8 +550,8 @@ SPECIAL(augmenter)
       else if (char_get_gold(ch) < strcost)
         send_to_char(ch, "You can not afford the price!\r\n");
       else { /* They can augment it! */
-        act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, 0, 0, TO_ROOM);
+        act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
+        act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
         ch->real_abils.str += 1;
         char_set_gold(ch, char_get_gold(ch) - (strcost));
         save_char(ch);
@@ -562,8 +562,8 @@ SPECIAL(augmenter)
       else if (char_get_gold(ch) < intcost)
         send_to_char(ch, "You can not afford the price!\r\n");
       else { /* They can augment it! */
-        act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, 0, 0, TO_ROOM);
+        act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
+        act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
         ch->real_abils.intel += 1;
         char_set_gold(ch, char_get_gold(ch) - (intcost));
         save_char(ch);
@@ -574,8 +574,8 @@ SPECIAL(augmenter)
       else if (char_get_gold(ch) < concost)
         send_to_char(ch, "You can not afford the price!\r\n");
       else { /* They can augment it! */
-        act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, 0, 0, TO_ROOM);
+        act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
+        act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
         ch->real_abils.con += 1;
         char_set_gold(ch, char_get_gold(ch) - (concost));
         save_char(ch);
@@ -586,8 +586,8 @@ SPECIAL(augmenter)
       else if (char_get_gold(ch) < specost)
         send_to_char(ch, "You can not afford the price!\r\n");
       else { /* They can augment it! */
-        act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, 0, 0, TO_ROOM);
+        act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
+        act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
         ch->real_abils.cha += 1;
         char_set_gold(ch, char_get_gold(ch) - (specost));
         save_char(ch);
@@ -598,8 +598,8 @@ SPECIAL(augmenter)
       else if (char_get_gold(ch) < agicost)
         send_to_char(ch, "You can not afford the price!\r\n");
       else { /* They can augment it! */
-        act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, 0, 0, TO_ROOM);
+        act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
+        act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
         ch->real_abils.dex += 1;
         char_set_gold(ch, char_get_gold(ch) - (agicost));
         save_char(ch);
@@ -610,8 +610,8 @@ SPECIAL(augmenter)
       else if (char_get_gold(ch) < wiscost)
         send_to_char(ch, "You can not afford the price!\r\n");
       else { /* They can augment it! */
-        act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", TRUE, ch, 0, 0, TO_ROOM);
+        act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
+        act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
         ch->real_abils.wis += 1;
         char_set_gold(ch, char_get_gold(ch) - (wiscost));
         save_char(ch);
@@ -619,18 +619,18 @@ SPECIAL(augmenter)
     } else {
       send_to_char(ch, "Syntax: augment [str | con | int | wis | agi | spe]\r\n");
     }
-    return (TRUE);
+    return (true);
   } else { /* They are not using the right command, ignore them. */
-    return (FALSE);
+    return (false);
   }
 }
 
 /* This controls gravity generator functions */
 SPECIAL(gravity)
 {
-  struct obj_data *i, *obj = NULL;
+  struct obj_data *i, *obj = nullptr;
   char arg[MAX_INPUT_LENGTH];
-  int match = FALSE;
+  int match = false;
 
   one_argument(argument, arg);
   for (i = world[char_get_in_room(ch)].contents; i; i = i->next_content) {
@@ -645,19 +645,19 @@ SPECIAL(gravity)
       send_to_char(ch, "@WGravity Commands:@n\r\n");
       send_to_char(ch, "@Wgravity [ 0 | N | 10 | 20 | 30 | 40 | 50 | 100 | 200 ]\r\n"
                        "          [  300 | 400 | 500 | 1,000 | 5,000 | 10,000  ]@n\r\n");
-      return (TRUE);
+      return (true);
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
       send_to_char(ch, "It's broken!\r\n");
-      return (TRUE);
+      return (true);
     }
     if ((!strcasecmp("N", arg) || !strcasecmp("n", arg) || !strcasecmp("0", arg)) && obj_get_weight(obj) == 0) {
       send_to_char(ch, "The gravity generator is already set to that.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("N", arg) || !strcasecmp("n", arg) || !strcasecmp("0", arg)) {
       send_to_char(ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
       if (rroom_flagged(char_get_in_room(ch), ROOM_VEGETA) || rroom_flagged(char_get_in_room(ch), ROOM_GRAVITYX10)) {
         rroom_set_gravity(char_get_in_room(ch), 10);
         obj_set_weight(obj, 0);
@@ -665,229 +665,229 @@ SPECIAL(gravity)
         rroom_set_gravity(char_get_in_room(ch), 0);
         obj_set_weight(obj, 0);
       }
-      match = TRUE;
+      match = true;
     }
     if (!strcasecmp("10", arg) && obj_get_weight(obj) == 10) {
       send_to_char(ch, "The gravity generator is already set to that.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("10", arg) && rroom_get_gravity(char_get_in_room(ch)) == 10 && (rroom_flagged(char_get_in_room(ch), ROOM_VEGETA) || rroom_flagged(char_get_in_room(ch), ROOM_GRAVITYX10))) {
       send_to_char(ch, "The gravity around you is already at that.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("10", arg) && rroom_get_gravity(char_get_in_room(ch)) != 10 && (rroom_flagged(char_get_in_room(ch), ROOM_VEGETA) || rroom_flagged(char_get_in_room(ch), ROOM_GRAVITYX10))) {
       send_to_char(ch, "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
       if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
       rroom_set_gravity(char_get_in_room(ch), 10);
       obj_set_weight(obj, 0);
-      match = TRUE;
+      match = true;
     } else if (!strcasecmp("10", arg)) {
       send_to_char(ch, "You punch in ten times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
       rroom_set_gravity(char_get_in_room(ch), 10);
       obj_set_weight(obj, 10);
-      match = TRUE;
+      match = true;
     }
     if (!strcasecmp("20", arg) && obj_get_weight(obj) == 20) {
       send_to_char(ch, "The gravity generator is already set to that.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("20", arg)) {
       send_to_char(ch, "You punch in twenty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
       if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
       rroom_set_gravity(char_get_in_room(ch), 20);
       obj_set_weight(obj, 20);
-      match = TRUE;
+      match = true;
     }
     if (!strcasecmp("30", arg) && obj_get_weight(obj) == 30) {
       send_to_char(ch, "The gravity generator is already set to that.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("30", arg)) {
       send_to_char(ch, "You punch in thirty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
       if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
       rroom_set_gravity(char_get_in_room(ch), 30);
       obj_set_weight(obj, 30);
-      match = TRUE;
+      match = true;
     }
     if (!strcasecmp("40", arg) && obj_get_weight(obj) == 40) {
       send_to_char(ch, "The gravity generator is already set to that.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("40", arg)) {
       send_to_char(ch, "You punch in fourty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
       if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
       rroom_set_gravity(char_get_in_room(ch), 40);
       obj_set_weight(obj, 40);
-      match = TRUE;
+      match = true;
     }
     if (!strcasecmp("50", arg) && obj_get_weight(obj) == 50) {
       send_to_char(ch, "The gravity generator is already set to that.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("50", arg)) {
       send_to_char(ch, "You punch in fifty times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
       if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
       rroom_set_gravity(char_get_in_room(ch), 50);
       obj_set_weight(obj, 50);
-      match = TRUE;
+      match = true;
     }
     if (!strcasecmp("100", arg) && obj_get_weight(obj) == 100) {
       send_to_char(ch, "The gravity generator is already set to that.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("100", arg)) {
       send_to_char(ch, "You punch in one hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
       if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
       rroom_set_gravity(char_get_in_room(ch), 100);
       obj_set_weight(obj, 100);
-      match = TRUE;
+      match = true;
     }
     if (!strcasecmp("200", arg) && obj_get_weight(obj) == 200) {
       send_to_char(ch, "The gravity generator is already set to that.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("200", arg)) {
       send_to_char(ch, "You punch in two hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
       if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
       rroom_set_gravity(char_get_in_room(ch), 200);
       obj_set_weight(obj, 200);
-      match = TRUE;
+      match = true;
     }
     if (!strcasecmp("300", arg) && obj_get_weight(obj) == 300) {
       send_to_char(ch, "The gravity generator is already set to that.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("300", arg)) {
       send_to_char(ch, "You punch in three hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
       if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
       rroom_set_gravity(char_get_in_room(ch), 300);
       obj_set_weight(obj, 300);
-      match = TRUE;
+      match = true;
     }
     if (!strcasecmp("400", arg) && obj_get_weight(obj) == 400) {
       send_to_char(ch, "The gravity generator is already set to that.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("400", arg)) {
       send_to_char(ch, "You punch in four hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
       if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
       rroom_set_gravity(char_get_in_room(ch), 400);
       obj_set_weight(obj, 400);
-      match = TRUE;
+      match = true;
     }
     if (!strcasecmp("500", arg) && obj_get_weight(obj) == 500) {
       send_to_char(ch, "The gravity generator is already set to that.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("500", arg)) {
       send_to_char(ch, "You punch in five hundred times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
       if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
       rroom_set_gravity(char_get_in_room(ch), 500);
       obj_set_weight(obj, 500);
-      match = TRUE;
+      match = true;
     }
     if (!strcasecmp("1000", arg) && obj_get_weight(obj) == 1000) {
       send_to_char(ch, "The gravity generator is already set to that.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("1000", arg)) {
       send_to_char(ch, "You punch in one thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
       if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
       rroom_set_gravity(char_get_in_room(ch), 1000);
       obj_set_weight(obj, 1000);
-      match = TRUE;
+      match = true;
     }
     if (!strcasecmp("5000", arg) && obj_get_weight(obj) == 5000) {
       send_to_char(ch, "The gravity generator is already set to that.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("5000", arg)) {
       send_to_char(ch, "You punch in five thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
       if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
       rroom_set_gravity(char_get_in_room(ch), 5000);
       obj_set_weight(obj, 5000);
-      match = TRUE;
+      match = true;
     }
     if (!strcasecmp("10000", arg) && obj_get_weight(obj) == 10000) {
       send_to_char(ch, "The gravity generator is already set to that.\r\n");
-      return (TRUE);
+      return (true);
     }
     if (!strcasecmp("10000", arg)) {
       send_to_char(ch, "You punch in ten thousand times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
-      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@W$n@w pushes some buttons on the gravity generator, and you feel a change in pressure on your body.@n", true, ch, 0, 0, TO_ROOM);
       if (rroom_flagged(char_get_in_room(ch), ROOM_AURA)) {
         rroom_set_flag(char_get_in_room(ch), ROOM_AURA, false);
         send_to_room(char_get_in_room(ch), "The increased gravity forces the aura to disappear.\r\n");
       }
       rroom_set_gravity(char_get_in_room(ch), 10000);
       obj_set_weight(obj, 10000);
-      match = TRUE;
-    } else if (match == FALSE) {
+      match = true;
+    } else if (match == false) {
       send_to_char(ch, "That is not a proper command for this device.\r\n");
       send_to_char(ch, "@WGravity Commands:@n\r\n");
       send_to_char(ch, "@Wgravity [ 0 | N | 10 | 20 | 30 | 40 | 50 | 100 | 200 ]\r\n"
                        "          [  300 | 400 | 500 | 1,000 | 5,000 | 10,000  ]@n\r\n");
-      return (TRUE);
+      return (true);
     }
-    return (TRUE);
+    return (true);
   }
-  return (FALSE);
+  return (false);
 }
 
 SPECIAL(bank)
 {
   int amount, num = 0;
 
-  struct obj_data *i, *obj = NULL;
+  struct obj_data *i, *obj = nullptr;
 
   for (i = world[char_get_in_room(ch)].contents; i; i = i->next_content) {
     if (obj_get_vnum(i) == 3034) {
@@ -900,40 +900,40 @@ SPECIAL(bank)
   if (CMD_IS("balance")) {
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
       send_to_char(ch, "The ATM is broken!\r\n");
-      return (TRUE);
+      return (true);
     }
 
     if (char_get_bank_gold(ch) > 0)
       send_to_char(ch, "Your current balance is %d zenni.\r\n", char_get_bank_gold(ch));
     else
       send_to_char(ch, "You currently have no money deposited.\r\n");
-    return (TRUE);
+    return (true);
   }
   if (CMD_IS("wire")) {
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    struct char_data *vict = NULL;
+    struct char_data *vict = nullptr;
 
     two_arguments(argument, arg, arg2);
 
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
       send_to_char(ch, "The ATM is broken!\r\n");
-      return (TRUE);
+      return (true);
     }
 
     if ((amount = atoi(arg)) <= 0) {
       send_to_char(ch, "How much do you want to transfer?\r\n");
-      return (TRUE);
+      return (true);
     }
     if (char_get_bank_gold(ch) < amount + (amount / 100)) {
       send_to_char(ch, "You don't have that much zenni in the bank (plus 1%s charge)!\r\n", "%");
-      return (TRUE);
+      return (true);
     }
     if (!*arg2) {
       send_to_char(ch, "You want to transfer it to who?!\r\n");
-      return (TRUE);
+      return (true);
     }
-    if (!(vict = get_player_vis(ch, arg2, NULL, FIND_CHAR_WORLD))) {
-      int is_file = FALSE, player_i = 0;
+    if (!(vict = get_player_vis(ch, arg2, nullptr, FIND_CHAR_WORLD))) {
+      int is_file = false, player_i = 0;
       char name[MAX_INPUT_LENGTH];
 
       CREATE(vict, struct char_data, 1);
@@ -943,28 +943,28 @@ SPECIAL(bank)
       sprintf(name, "%s", rIntro(ch, arg2));
 
       if ((player_i = load_char(name, vict)) > -1) {
-        is_file = TRUE;
+        is_file = true;
       } else {
         free_char(vict);
         send_to_char(ch, "That person doesn't exist.\r\n");
-        return (TRUE);
+        return (true);
       }
-      if (ch->desc->user == NULL) {
+      if (ch->desc->user == nullptr) {
         send_to_char(ch, "There is an error. Report to Iovan.");
-        return (TRUE);
+        return (true);
       }
       if (!strcasecmp(char_get_name(vict), ch->desc->tmp1) || !strcasecmp(char_get_name(vict), ch->desc->tmp2) || !strcasecmp(char_get_name(vict), ch->desc->tmp3) || !strcasecmp(char_get_name(vict), ch->desc->tmp4) || !strcasecmp(char_get_name(vict), ch->desc->tmp5)) {
         send_to_char(ch, "You can not transfer money to your own offline characters...");
-        if (is_file == TRUE)
+        if (is_file == true)
           free_char(vict);
-        return (TRUE);
+        return (true);
       }
       char_set_bank_gold(vict, char_get_bank_gold(vict) + (amount));
       char_set_bank_gold(ch, char_get_bank_gold(ch) - (amount + (amount / 100)));
       char_set_pfilepos(vict, player_i);
-      mudlog(LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(ch)), TRUE, "EXCHANGE: %s gave %s zenni to user %s", char_get_name(ch), add_commas(amount), char_get_name(vict));
+      mudlog(LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(ch)), true, "EXCHANGE: %s gave %s zenni to user %s", char_get_name(ch), add_commas(amount), char_get_name(vict));
       save_char(vict);
-      if (is_file == TRUE)
+      if (is_file == true)
         free_char(vict);
     } else {
       char_set_bank_gold(vict, char_get_bank_gold(vict) + (amount));
@@ -972,44 +972,44 @@ SPECIAL(bank)
       send_to_char(vict, "@WYou have just had @Y%s@W zenni wired into your bank account.@n\r\n", add_commas(amount));
     }
     send_to_char(ch, "You transfer %s zenni to them.\r\n", add_commas(amount));
-    act("$n makes a bank transaction.", TRUE, ch, 0, nullptr, TO_ROOM);
-    return (TRUE);
+    act("$n makes a bank transaction.", true, ch, 0, nullptr, TO_ROOM);
+    return (true);
   }
   if (CMD_IS("deposit")) {
 
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
       send_to_char(ch, "The ATM is broken!\r\n");
-      return (TRUE);
+      return (true);
     }
 
     if ((amount = atoi(argument)) <= 0) {
       send_to_char(ch, "How much do you want to deposit?\r\n");
-      return (TRUE);
+      return (true);
     }
     if (char_get_gold(ch) < amount) {
       send_to_char(ch, "You don't have that much zenni!\r\n");
-      return (TRUE);
+      return (true);
     }
     char_set_gold(ch, char_get_gold(ch) - (amount));
     char_set_bank_gold(ch, char_get_bank_gold(ch) + (amount));
     send_to_char(ch, "You deposit %d zenni.\r\n", amount);
-    act("$n makes a bank transaction.", TRUE, ch, 0, nullptr, TO_ROOM);
-    return (TRUE);
+    act("$n makes a bank transaction.", true, ch, 0, nullptr, TO_ROOM);
+    return (true);
   }
   if (CMD_IS("withdraw")) {
 
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
       send_to_char(ch, "The ATM is broken!\r\n");
-      return (TRUE);
+      return (true);
     }
 
     if ((amount = atoi(argument)) <= 0) {
       send_to_char(ch, "How much do you want to withdraw?\r\n");
-      return (TRUE);
+      return (true);
     }
     if (char_get_bank_gold(ch) < amount) {
       send_to_char(ch, "You don't have that much zenni!\r\n");
-      return (TRUE);
+      return (true);
     }
     if (char_get_bank_gold(ch) - (amount + (1 + amount / 100)) < 0) {
       if (amount >= 100) {
@@ -1018,7 +1018,7 @@ SPECIAL(bank)
         amount = amount + 1;
       }
       send_to_char(ch, "You need at least %s in the bank with the 1 percent withdraw fee.\r\n", add_commas(amount));
-      return (TRUE);
+      return (true);
     }
     if (char_get_gold(ch) + amount > char_gold_carry(ch)) {
       send_to_char(ch, "You can only carry %s zenni, you left the rest.\r\n", add_commas(char_gold_carry(ch)));
@@ -1032,8 +1032,8 @@ SPECIAL(bank)
         char_set_bank_gold(ch, char_get_bank_gold(ch) - (amount + 1));
       }
       send_to_char(ch, "You withdraw %s zenni,  and pay %s in withdraw fees.\r\n.\r\n", add_commas(amount), add_commas(num));
-      act("$n makes a bank transaction.", TRUE, ch, 0, nullptr, TO_ROOM);
-      return (TRUE);
+      act("$n makes a bank transaction.", true, ch, 0, nullptr, TO_ROOM);
+      return (true);
     }
     char_set_gold(ch, char_get_gold(ch) + (amount));
     if (amount >= 100) {
@@ -1043,8 +1043,8 @@ SPECIAL(bank)
       char_set_bank_gold(ch, char_get_bank_gold(ch) - (amount + 1));
     }
     send_to_char(ch, "You withdraw %s zenni, and pay %s in withdraw fees.\r\n", add_commas(amount), add_commas(num));
-    act("$n makes a bank transaction.", TRUE, ch, 0, nullptr, TO_ROOM);
-    return (TRUE);
+    act("$n makes a bank transaction.", true, ch, 0, nullptr, TO_ROOM);
+    return (true);
   } else
-    return (FALSE);
+    return (false);
 }

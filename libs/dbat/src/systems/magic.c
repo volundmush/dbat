@@ -62,7 +62,7 @@ void affect_update(void)
 
 int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum, int level, int cast_stat)
 {
-  return FALSE;
+  return false;
 }
 
 /*
@@ -86,17 +86,17 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
  * affect_join(vict, aff, add_dur, avg_dur, add_mod, avg_mod)
  */
 
-#define MAX_SPELL_AFFECTS 5 /* change if more needed */
+constexpr int MAX_SPELL_AFFECTS = 5; /* change if more needed */
 
 void mag_affects(int level, struct char_data *ch, struct char_data *victim,
                  int spellnum)
 {
   struct affected_type af[MAX_SPELL_AFFECTS];
-  bool accum_affect = FALSE, accum_duration = FALSE;
-  const char *to_vict = NULL, *to_room = NULL;
+  bool accum_affect = false, accum_duration = false;
+  const char *to_vict = nullptr, *to_room = nullptr;
   int i;
 
-  if (victim == NULL || ch == NULL)
+  if (victim == nullptr || ch == nullptr)
     return;
 
   for (i = 0; i < MAX_SPELL_AFFECTS; i++) {
@@ -119,7 +119,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
       af[0].location = APPLY_STR;
       af[0].duration = 24;
       af[0].modifier = -1;
-      accum_duration = TRUE;
+      accum_duration = true;
       to_vict        = "You feel your strength wither!";
       break;
 
@@ -127,7 +127,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
       af[0].location = APPLY_AC;
       af[0].modifier = 40;
       af[0].duration = 1 * char_get_level(ch);
-      accum_duration = FALSE;
+      accum_duration = false;
       to_vict        = "You feel someone protecting you.";
       break;
 
@@ -140,7 +140,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
       af[1].modifier = 1;
       af[1].duration = 6;
 
-      accum_duration = TRUE;
+      accum_duration = true;
       to_vict        = "You feel righteous.";
       break;
 
@@ -175,8 +175,8 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
       af[1].modifier  = -1;
       af[1].bitvector = AFF_CURSE;
 
-      accum_duration = TRUE;
-      accum_affect   = TRUE;
+      accum_duration = true;
+      accum_affect   = true;
       to_room        = "$n briefly glows red!";
       to_vict        = "You feel very uncomfortable.";
       break;
@@ -192,8 +192,8 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
       af[1].modifier  = -4;
       af[1].bitvector = AFF_CURSE;
 
-      accum_duration = FALSE;
-      accum_affect   = FALSE;
+      accum_duration = false;
+      accum_affect   = false;
       to_room        = "$n briefly glows red!";
       to_vict        = "You feel very uncomfortable.";
       break;
@@ -201,21 +201,21 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
     case SPELL_DETECT_ALIGN:
       af[0].duration  = 12 + level;
       af[0].bitvector = AFF_DETECT_ALIGN;
-      accum_duration  = TRUE;
+      accum_duration  = true;
       to_vict         = "Your eyes tingle.";
       break;
 
     case SPELL_SEE_INVIS:
       af[0].duration  = 12 + level;
       af[0].bitvector = AFF_DETECT_INVIS;
-      accum_duration  = TRUE;
+      accum_duration  = true;
       to_vict         = "Your eyes tingle.";
       break;
 
     case SPELL_DETECT_MAGIC:
       af[0].duration  = 12 + level;
       af[0].bitvector = AFF_DETECT_MAGIC;
-      accum_duration  = TRUE;
+      accum_duration  = true;
       to_vict         = "Your eyes tingle.";
       break;
 
@@ -223,7 +223,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
       af[0].location = APPLY_AC;
       af[0].modifier = -1; /*should make target easier to hit */
       af[0].duration = 3;
-      accum_duration = FALSE;
+      accum_duration = false;
       to_vict        = "Your body flickers with a purplish light.";
       to_room        = "$n's body flickers with with a purplish light.";
       break;
@@ -231,7 +231,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
     case SPELL_DARKVISION:
       af[0].duration  = 12 + level;
       af[0].bitvector = AFF_INFRAVISION;
-      accum_duration  = TRUE;
+      accum_duration  = true;
       to_vict         = "Your eyes glow red.";
       to_room         = "$n's eyes glow red.";
       break;
@@ -244,7 +244,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
       af[0].modifier  = 4;
       af[0].location  = APPLY_AC;
       af[0].bitvector = AFF_INVISIBLE;
-      accum_duration  = TRUE;
+      accum_duration  = true;
       to_vict         = "You vanish.";
       to_room         = "$n slowly fades out of existence.";
       break;
@@ -262,7 +262,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
     case SPELL_PROT_FROM_EVIL:
       af[0].duration  = 24;
       af[0].bitvector = AFF_PROTECT_GOOD;
-      accum_duration  = TRUE;
+      accum_duration  = true;
       to_vict         = "You feel invulnerable!";
       break;
 
@@ -270,7 +270,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
       af[0].duration  = 4;
       af[0].bitvector = AFF_SANCTUARY;
 
-      accum_duration = TRUE;
+      accum_duration = true;
       to_vict        = "A white aura momentarily surrounds you.";
       to_room        = "$n is surrounded by a white aura.";
       break;
@@ -286,7 +286,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
 
       if (char_get_position(victim) > POS_SLEEPING) {
         send_to_char(victim, "You feel very sleepy...  Zzzz......\r\n");
-        act("$n goes to sleep.", TRUE, victim, 0, 0, TO_ROOM);
+        act("$n goes to sleep.", true, victim, 0, 0, TO_ROOM);
         char_set_position(victim, POS_SLEEPING);
       }
       break;
@@ -302,7 +302,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
 
       if (char_get_position(victim) > POS_SLEEPING) {
         send_to_char(victim, "You feel very sleepy...  Zzzz......\r\n");
-        act("$n goes to sleep.", TRUE, victim, 0, 0, TO_ROOM);
+        act("$n goes to sleep.", true, victim, 0, 0, TO_ROOM);
         char_set_position(victim, POS_SLEEPING);
       }
       break;
@@ -311,8 +311,8 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
       af[0].location = APPLY_STR;
       af[0].duration = level;
       af[0].modifier = 1 + (rand_number(1, 4));
-      accum_duration = FALSE;
-      accum_affect   = FALSE;
+      accum_duration = false;
+      accum_affect   = false;
       to_vict        = "You feel stronger!";
       break;
 
@@ -320,19 +320,19 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
       to_vict         = "Your feel your awareness improve.";
       af[0].duration  = level;
       af[0].bitvector = AFF_SENSE_LIFE;
-      accum_duration  = TRUE;
+      accum_duration  = true;
       break;
 
     case SPELL_WATERWALK:
       af[0].duration  = 24;
       af[0].bitvector = AFF_WATERWALK;
-      accum_duration  = TRUE;
+      accum_duration  = true;
       to_vict         = "You feel webbing between your toes.";
       break;
 
     case SPELL_STONESKIN:
       af[0].duration = 1 * char_get_level(ch);
-      accum_duration = FALSE;
+      accum_duration = false;
       to_vict        = "Your skin hardens into stone!";
       break;
   }
@@ -360,12 +360,12 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
 
   for (i = 0; i < MAX_SPELL_AFFECTS; i++)
     if (af[i].bitvector || (af[i].location != APPLY_NONE))
-      affect_join(victim, af + i, accum_duration, FALSE, accum_affect, FALSE);
+      affect_join(victim, af + i, accum_duration, false, accum_affect, false);
 
-  if (to_vict != NULL)
-    act(to_vict, FALSE, victim, 0, ch, TO_CHAR);
-  if (to_room != NULL)
-    act(to_room, TRUE, victim, 0, ch, TO_ROOM);
+  if (to_vict != nullptr)
+    act(to_vict, false, victim, 0, ch, TO_CHAR);
+  if (to_room != nullptr)
+    act(to_room, true, victim, 0, ch, TO_ROOM);
 }
 
 /*
@@ -383,7 +383,7 @@ static void perform_mag_groups(int level, struct char_data *ch,
       mag_affects(level, ch, tch, SPELL_MAGE_ARMOR);
       break;
     case SPELL_GROUP_RECALL:
-      spell_recall(level, ch, tch, NULL, NULL);
+      spell_recall(level, ch, tch, nullptr, nullptr);
       break;
   }
 }
@@ -404,12 +404,12 @@ void mag_groups(int level, struct char_data *ch, int spellnum)
   struct char_data *tch, *k;
   struct follow_type *f, *f_next;
 
-  if (ch == NULL)
+  if (ch == nullptr)
     return;
 
   if (!char_aff_flagged(ch, AFF_GROUP))
     return;
-  if (ch->master != NULL)
+  if (ch->master != nullptr)
     k = ch->master;
   else
     k = ch;
@@ -460,9 +460,9 @@ void mag_masses(int level, struct char_data *ch, int spellnum)
 void mag_areas(int level, struct char_data *ch, int spellnum)
 {
   struct char_data *tch, *next_tch;
-  const char *to_char = NULL, *to_room = NULL;
+  const char *to_char = nullptr, *to_room = nullptr;
 
-  if (ch == NULL)
+  if (ch == nullptr)
     return;
 
   /*
@@ -476,10 +476,10 @@ void mag_areas(int level, struct char_data *ch, int spellnum)
       break;
   }
 
-  if (to_char != NULL)
-    act(to_char, FALSE, ch, 0, 0, TO_CHAR);
-  if (to_room != NULL)
-    act(to_room, FALSE, ch, 0, 0, TO_ROOM);
+  if (to_char != nullptr)
+    act(to_char, false, ch, 0, 0, TO_CHAR);
+  if (to_room != nullptr)
+    act(to_room, false, ch, 0, 0, TO_ROOM);
 
   for (tch = world[char_get_in_room(ch)].people; tch; tch = next_tch) {
     next_tch = tch->next_in_room;
@@ -509,11 +509,6 @@ void mag_areas(int level, struct char_data *ch, int spellnum)
  *  Every spell which summons/gates/conjours a mob comes through here.
  */
 
-/* Defined mobiles. */
-#define MOB_ELEMENTAL_BASE 20 /* Only one for now. */
-#define MOB_ZOMBIE         11
-#define MOB_AERIALSERVANT  19
-
 void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spellnum, char *arg)
 {
 }
@@ -524,7 +519,7 @@ void mag_points(int level, struct char_data *ch, struct char_data *victim,
   int healing = 0;
   int tmp;
 
-  if (victim == NULL)
+  if (victim == nullptr)
     return;
 
   switch (spellnum) {
@@ -568,10 +563,10 @@ void mag_points(int level, struct char_data *ch, struct char_data *victim,
 void mag_unaffects(int level, struct char_data *ch, struct char_data *victim,
                    int spellnum)
 {
-  int spell = 0, msg_not_affected = TRUE;
-  const char *to_vict = NULL, *to_room = NULL;
+  int spell = 0, msg_not_affected = true;
+  const char *to_vict = nullptr, *to_room = nullptr;
 
-  if (victim == NULL)
+  if (victim == nullptr)
     return;
 
   switch (spellnum) {
@@ -580,7 +575,7 @@ void mag_unaffects(int level, struct char_data *ch, struct char_data *victim,
      * Heal also restores health, so don't give the "no effect" message
      * if the target isn't afflicted by the 'blindness' spell.
      */
-      msg_not_affected = FALSE;
+      msg_not_affected = false;
       /* fall-through */
     case SPELL_REMOVE_BLINDNESS:
       spell   = SPELL_BLINDNESS;
@@ -607,18 +602,18 @@ void mag_unaffects(int level, struct char_data *ch, struct char_data *victim,
   }
 
   affect_from_char(victim, spell);
-  if (to_vict != NULL)
-    act(to_vict, FALSE, victim, 0, ch, TO_CHAR);
-  if (to_room != NULL)
-    act(to_room, TRUE, victim, 0, ch, TO_ROOM);
+  if (to_vict != nullptr)
+    act(to_vict, false, victim, 0, ch, TO_CHAR);
+  if (to_room != nullptr)
+    act(to_room, true, victim, 0, ch, TO_ROOM);
 }
 
 void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
                     int spellnum)
 {
-  const char *to_char = NULL, *to_room = NULL;
+  const char *to_char = nullptr, *to_room = nullptr;
 
-  if (obj == NULL)
+  if (obj == nullptr)
     return;
 
   switch (spellnum) {
@@ -663,15 +658,15 @@ void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
       break;
   }
 
-  if (to_char == NULL)
+  if (to_char == nullptr)
     send_to_char(ch, "%s", CONFIG_NOEFFECT);
   else
-    act(to_char, TRUE, ch, obj, 0, TO_CHAR);
+    act(to_char, true, ch, obj, 0, TO_CHAR);
 
-  if (to_room != NULL)
-    act(to_room, TRUE, ch, obj, 0, TO_ROOM);
-  else if (to_char != NULL)
-    act(to_char, TRUE, ch, obj, 0, TO_ROOM);
+  if (to_room != nullptr)
+    act(to_room, true, ch, obj, 0, TO_ROOM);
+  else if (to_char != nullptr)
+    act(to_char, true, ch, obj, 0, TO_ROOM);
 }
 
 void mag_creations(int level, struct char_data *ch, int spellnum)
@@ -679,7 +674,7 @@ void mag_creations(int level, struct char_data *ch, int spellnum)
   struct obj_data *tobj;
   obj_vnum z;
 
-  if (ch == NULL)
+  if (ch == nullptr)
     return;
   /* level = MAX(MIN(level, LVL_IMPL), 1); - Hm, not used. */
 
@@ -700,8 +695,8 @@ void mag_creations(int level, struct char_data *ch, int spellnum)
   }
   add_unique_id(tobj);
   obj_to_char(tobj, ch);
-  act("$n creates $p.", FALSE, ch, tobj, 0, TO_ROOM);
-  act("You create $p.", FALSE, ch, tobj, 0, TO_CHAR);
+  act("$n creates $p.", false, ch, tobj, 0, TO_ROOM);
+  act("You create $p.", false, ch, tobj, 0, TO_CHAR);
   load_otrigger(tobj);
 }
 
@@ -709,11 +704,11 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
                   int spellnum)
 {
   struct affected_type af[MAX_SPELL_AFFECTS];
-  bool accum_affect = FALSE, accum_duration = FALSE;
-  const char *to_vict = NULL, *to_room = NULL;
+  bool accum_affect = false, accum_duration = false;
+  const char *to_vict = nullptr, *to_room = nullptr;
   int i;
 
-  if (victim == NULL || ch == NULL)
+  if (victim == nullptr || ch == nullptr)
     return;
 
   for (i = 0; i < MAX_SPELL_AFFECTS; i++) {
@@ -734,21 +729,21 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
     case SPELL_PARALYZE:
       af[0].duration  = level / 2;
       af[0].bitvector = AFF_PARALYZE;
-      accum_duration  = FALSE;
+      accum_duration  = false;
       to_vict         = "You feel your limbs freeze!";
       to_room         = "$n suddenly freezes in place!";
       break;
     case ART_STUNNING_FIST:
       af[0].duration  = 1;
       af[0].bitvector = AFF_STUNNED;
-      accum_duration  = FALSE;
+      accum_duration  = false;
       to_vict         = "You are in a stunned daze!";
       to_room         = "$n is stunned.";
       break;
     case ART_EMPTY_BODY:
       af[0].duration  = char_get_ki(ch) / 10;
       af[0].bitvector = AFF_ETHEREAL;
-      accum_duration  = FALSE;
+      accum_duration  = false;
       to_vict         = "You switch to the ethereal plane.";
       to_room         = "$n disappears.";
       break;
@@ -759,21 +754,21 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
       }
       af[0].duration  = MAX(6, 20 - level);
       af[0].bitvector = AFF_CDEATH;
-      accum_duration  = FALSE;
+      accum_duration  = false;
       to_vict         = "You feel death closing in.";
       break;
     case SPELL_RESISTANCE:
       af[0].duration = 12;
       af[0].location = APPLY_ALLSAVES;
       af[0].modifier = 1;
-      accum_duration = FALSE;
+      accum_duration = false;
       to_vict        = "You glow briefly with a silvery light.";
       to_room        = "$n glows briefly with a silvery light.";
       break;
     case SPELL_DAZE:
       if (char_get_race_level(victim) < 5)
         af[0].bitvector = AFF_NEXTNOACTION;
-      accum_duration = FALSE;
+      accum_duration = false;
       to_vict        = "You are struck dumb by a flash of bright light!";
       to_room        = "$n is struck dumb by a flash of bright light!";
       break;
@@ -788,7 +783,7 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
     case SPELL_SUMMON_MONSTER_IX:
       af[0].duration  = level;
       af[0].bitvector = AFF_SUMMONED;
-      accum_duration  = FALSE;
+      accum_duration  = false;
       to_vict         = "You are summoned to assist $N!";
       to_room         = "$n appears, ready for action.";
       break;
@@ -835,8 +830,8 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
     return;
   }
 
-  if (to_vict != NULL)
-    act(to_vict, FALSE, victim, 0, ch, TO_CHAR);
-  if (to_room != NULL)
-    act(to_room, TRUE, victim, 0, ch, TO_ROOM);
+  if (to_vict != nullptr)
+    act(to_vict, false, victim, 0, ch, TO_CHAR);
+  if (to_room != nullptr)
+    act(to_room, true, victim, 0, ch, TO_ROOM);
 }

@@ -102,7 +102,7 @@ void event_process(void)
     ** event_process can tell if they're being called beneath the actual
     ** event function.
     */
-    the_event->q_el = NULL;
+    the_event->q_el = nullptr;
 
     /* call event func, reenqueue event if retval > 0 */
     if ((new_time = (the_event->func)(the_event->event_obj)) > 0)
@@ -126,7 +126,7 @@ long event_time(struct event *event)
 void event_free_all(void)
 {
   queue_free(event_q);
-  event_q = NULL;
+  event_q = nullptr;
 }
 
 /* ************************************************************************
@@ -180,7 +180,7 @@ static struct q_element *queue_enq(struct queue *q, void *data, long key)
       }
     }
 
-    if (i == NULL) { /* insertion point is front of list */
+    if (i == nullptr) { /* insertion point is front of list */
       qe->next        = q->head[bucket];
       q->head[bucket] = qe;
       qe->next->prev  = qe;
@@ -197,12 +197,12 @@ static void queue_deq(struct queue *q, struct q_element *qe)
 
   i = qe->key % NUM_EVENT_QUEUES;
 
-  if (qe->prev == NULL)
+  if (qe->prev == nullptr)
     q->head[i] = qe->next;
   else
     qe->prev->next = qe->next;
 
-  if (qe->next == NULL)
+  if (qe->next == nullptr)
     q->tail[i] = qe->prev;
   else
     qe->next->prev = qe->prev;
@@ -222,7 +222,7 @@ static void *queue_head(struct queue *q)
   i = pulse % NUM_EVENT_QUEUES;
 
   if (!q->head[i])
-    return NULL;
+    return nullptr;
 
   dg_data = q->head[i]->data;
   queue_deq(q, q->head[i]);
@@ -258,13 +258,13 @@ static void queue_free(struct queue *q)
   struct q_element *qe, *next_qe;
   struct event *event;
 
-  if (q == NULL)
+  if (q == nullptr)
     return;
 
   for (i = 0; i < NUM_EVENT_QUEUES; i++)
     for (qe = q->head[i]; qe; qe = next_qe) {
       next_qe = qe->next;
-      if ((event = (struct event *)qe->data) != NULL) {
+      if ((event = (struct event *)qe->data) != nullptr) {
         if (event->event_obj)
           free(event->event_obj);
         free(event);

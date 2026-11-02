@@ -3,12 +3,12 @@
 #include "dbat/consts/maximums.h"
 
 /* don't change these */
-#define BAN_NOT    0
-#define BAN_NEW    1
-#define BAN_SELECT 2
-#define BAN_ALL    3
+constexpr int BAN_NOT    = 0;
+constexpr int BAN_NEW    = 1;
+constexpr int BAN_SELECT = 2;
+constexpr int BAN_ALL    = 3;
 
-#define BANNED_SITE_LENGTH 50
+constexpr int BANNED_SITE_LENGTH = 50;
 struct ban_list_element {
   char site[BANNED_SITE_LENGTH + 1];
   int type;

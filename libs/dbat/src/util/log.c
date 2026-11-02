@@ -7,7 +7,7 @@
 /* log a death trap hit */
 void log_death_trap(struct char_data *ch)
 {
-  mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "%s hit death trap #%d (%s)", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)), world[char_get_in_room(ch)].name);
+  mudlog(LOG_BRF, ADMLVL_IMMORT, true, "%s hit death trap #%d (%s)", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)), world[char_get_in_room(ch)].name);
 }
 
 /* New variable argument log() function.  Works the same as the old for
@@ -17,12 +17,12 @@ void mud_vlog(const char *format, va_list args)
   time_t ct    = time(0);
   char *time_s = asctime(localtime(&ct));
 
-  if (logfile == NULL) {
+  if (logfile == nullptr) {
     puts("SYSERR: Using log() before stream was initialized!");
     return;
   }
 
-  if (format == NULL)
+  if (format == nullptr)
     format = "SYSERR: log() received a NULL format.";
 
   time_s[strlen(time_s) - 1] = '\0';
@@ -51,7 +51,7 @@ void mudlog(int type, int level, int file, const char *str, ...)
   struct descriptor_data *i;
   va_list args;
 
-  if (str == NULL)
+  if (str == nullptr)
     return; /* eh, oh well. */
 
   if (file) {

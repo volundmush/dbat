@@ -180,7 +180,7 @@ int perf_skill(int skill)
 ACMD(do_perf)
 {
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-  int i, skill = 1, found = FALSE, type = 0;
+  int i, skill = 1, found = false, type = 0;
 
   two_arguments(argument, arg, arg2);
 
@@ -204,15 +204,15 @@ ACMD(do_perf)
     if (spell_info[i].skilltype != SKTYPE_SKILL)
       continue;
 
-    if (found == TRUE)
+    if (found == true)
       continue;
 
     if (strstr(spell_info[i].name, arg)) {
       skill = i;
-      found = TRUE;
+      found = true;
     }
   }
-  if (found == FALSE) {
+  if (found == false) {
     send_to_char(ch, "The skill %s doesn't exist.\r\n", arg);
     return;
   }
@@ -683,7 +683,7 @@ ACMD(do_status)
     if (char_prf_flagged(ch, PRF_HIDE)) {
       send_to_char(ch, "         You are hidden from who and ooc.\r\n");
     }
-    if (char_get_voice(ch) != NULL) {
+    if (char_get_voice(ch) != nullptr) {
       send_to_char(ch, "         Your voice desc: '%s'\r\n", char_get_voice(ch));
     }
     if (char_get_distfea(ch) == DISTFEA_EYE) {
@@ -727,7 +727,7 @@ ACMD(do_status)
         obj_set_scoutfreq(obj, 1);
       }
       send_to_char(ch, "         Your scouter is on frequency @G%d@n\r\n", obj_get_scoutfreq(obj));
-      obj = NULL;
+      obj = nullptr;
     }
     if (char_get_charge(ch) > 0) {
       send_to_char(ch, "         You have @C%s@n ki charged.\r\n", add_commas(char_get_charge(ch)));
@@ -1286,7 +1286,7 @@ ACMD(do_inventory)
       return;
     }
   }
-  list_obj_to_char(ch->carrying, ch, SHOW_OBJ_SHORT, TRUE);
+  list_obj_to_char(ch->carrying, ch, SHOW_OBJ_SHORT, true);
   send_to_char(ch, "\n");
 }
 
@@ -1302,7 +1302,7 @@ ACMD(do_equipment)
         show_obj_to_char(char_get_equipment(ch, i), ch, SHOW_OBJ_SHORT);
 
         if (obj_extra_flagged(char_get_equipment(ch, i), ITEM_SHEATH)) {
-          struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = char_get_equipment(ch, i);
+          struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = char_get_equipment(ch, i);
           for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
             next_obj = obj2->next_content;
             if (obj2) {
@@ -1310,13 +1310,13 @@ ACMD(do_equipment)
               show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
             }
           }
-          obj2 = NULL;
+          obj2 = nullptr;
         }
       } else if (char_can_see_obj(ch, char_get_equipment(ch, i)) && (!char_plr_flagged(ch, PLR_THANDW))) {
         send_to_char(ch, "%s", wear_where[i]);
         show_obj_to_char(char_get_equipment(ch, i), ch, SHOW_OBJ_SHORT);
         if (obj_extra_flagged(char_get_equipment(ch, i), ITEM_SHEATH)) {
-          struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = char_get_equipment(ch, i);
+          struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = char_get_equipment(ch, i);
           for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
             next_obj = obj2->next_content;
             if (obj2) {
@@ -1324,7 +1324,7 @@ ACMD(do_equipment)
               show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
             }
           }
-          obj2 = NULL;
+          obj2 = nullptr;
         }
       } else if (char_can_see_obj(ch, char_get_equipment(ch, i)) && (char_plr_flagged(ch, PLR_THANDW))) {
         send_to_char(ch, "@c<@CWielded by B. Hands@c>@n ");
@@ -1376,7 +1376,7 @@ ACMD(do_consider)
 
   one_argument(argument, buf);
 
-  if (!(victim = get_char_vis(ch, buf, NULL, FIND_CHAR_ROOM))) {
+  if (!(victim = get_char_vis(ch, buf, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "Consider killing who?\r\n");
     return;
   }
@@ -1420,7 +1420,7 @@ ACMD(do_diagnose)
   one_argument(argument, buf);
 
   if (*buf) {
-    if (!(vict = get_char_vis(ch, buf, NULL, FIND_CHAR_ROOM)))
+    if (!(vict = get_char_vis(ch, buf, nullptr, FIND_CHAR_ROOM)))
       send_to_char(ch, "%s", CONFIG_NOPERSON);
     else {
       send_to_char(ch, "%s", char_get_sex(vict) == SEX_MALE ? "He " : (char_get_sex(vict) == SEX_FEMALE ? "She " : "It "));

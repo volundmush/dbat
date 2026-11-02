@@ -93,7 +93,7 @@ void search_room(struct char_data *ch)
   }
 
   reveal_hiding(ch, 0);
-  act("@y$n@Y begins searching the room carefully.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@y$n@Y begins searching the room carefully.@n", true, ch, 0, 0, TO_ROOM);
   char_set_wait(ch, PULSE_1SEC);
 
   for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
@@ -115,21 +115,21 @@ void search_room(struct char_data *ch)
       }
       terrain += terrain_bonus(vict);
       if (perc * bonus >= prob * terrain) { /* Found them. */
-        act("@YYou find @y$N@Y hiding nearby!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@y$n@Y has found your hiding spot!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@y$n@Y has found @y$N's@Y hiding spot!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@YYou find @y$N@Y hiding nearby!@n", true, ch, 0, vict, TO_CHAR);
+        act("@y$n@Y has found your hiding spot!@n", true, ch, 0, vict, TO_VICT);
+        act("@y$n@Y has found @y$N's@Y hiding spot!@n", true, ch, 0, vict, TO_NOTVICT);
         reveal_hiding(vict, 4);
         found++;
       }
     }
   }
 
-  struct obj_data *obj = NULL;
+  struct obj_data *obj = nullptr;
 
   for (obj = world[char_get_in_room(ch)].contents; obj; obj = obj->next_content) {
     if (obj_extra_flagged(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200)) {
-      act("@YYou uncover @y$p@Y, which had been burried here.@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, 0, TO_CHAR);
+      act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", true, ch, obj, 0, TO_ROOM);
       obj_extra_set(obj, ITEM_BURIED, false);
       found++;
     }
@@ -836,7 +836,7 @@ ACMD(do_scan)
         send_to_char(ch, "          %s%s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i], world[newroom].name ? world[newroom].name : "You don't think you saw what you just saw.", CCNRM(ch, C_NRM));
         send_to_char(ch, "@W          -----------------          @n\r\n");
 
-        list_obj_to_char(world[newroom].contents, ch, SHOW_OBJ_LONG, FALSE);
+        list_obj_to_char(world[newroom].contents, ch, SHOW_OBJ_LONG, false);
         list_char_to_char(world[newroom].people, ch);
         if (rroom_get_geffect(newroom) >= 1 && rroom_get_geffect(newroom) <= 5) {
           send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
@@ -854,7 +854,7 @@ ACMD(do_scan)
               send_to_char(ch, "          %sFar %s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i], world[newroom].name ? world[newroom].name : "You don't think you saw what you just saw.", CCNRM(ch, C_NRM));
               send_to_char(ch, "@W          -----------------          @n\r\n");
 
-              list_obj_to_char(world[newroom].contents, ch, SHOW_OBJ_LONG, FALSE);
+              list_obj_to_char(world[newroom].contents, ch, SHOW_OBJ_LONG, false);
               list_char_to_char(world[newroom].people, ch);
               if (rroom_get_geffect(newroom) >= 1 && rroom_get_geffect(newroom) <= 5) {
                 send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
@@ -877,10 +877,10 @@ ACMD(do_scan)
 
 void search_in_direction(struct char_data *ch, int dir)
 {
-  int check = FALSE, skill_lvl, dchide = 20;
+  int check = false, skill_lvl, dchide = 20;
 
   send_to_char(ch, "You search for secret doors.\r\n");
-  act("$n searches the area intently.", TRUE, ch, 0, 0, TO_ROOM);
+  act("$n searches the area intently.", true, ch, 0, 0, TO_ROOM);
 
   /* SEARCHING is allowed untrained */
   skill_lvl = char_get_skill(ch, SKILL_SEARCH);
@@ -893,7 +893,7 @@ void search_in_direction(struct char_data *ch, int dir)
     dchide = DOOR_DCHIDE(ch, dir);
 
   if (skill_lvl > dchide)
-    check = TRUE;
+    check = true;
 
   if (char_get_exit(ch, dir)) {
     if (char_get_exit(ch, dir)->general_description &&
@@ -903,7 +903,7 @@ void search_in_direction(struct char_data *ch, int dir)
       send_to_char(ch, "There is a normal exit there.\r\n");
     else if (room_exit_flagged(char_get_exit(ch, dir), EX_ISDOOR) &&
              room_exit_flagged(char_get_exit(ch, dir), EX_SECRET) &&
-             char_get_exit(ch, dir)->keyword && (check == TRUE))
+             char_get_exit(ch, dir)->keyword && (check == true))
       send_to_char(ch, "There is a hidden door keyword: '%s' %sthere.\r\n",
                    fname(char_get_exit(ch, dir)->keyword),
                    (room_exit_flagged(char_get_exit(ch, dir), EX_CLOSED)) ? "" : "open ");

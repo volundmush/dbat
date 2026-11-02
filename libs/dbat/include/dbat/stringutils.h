@@ -31,3 +31,5 @@ int fill_word(char *argument);
 char *fname(const char *namelist);
 int reserved_word(char *argument);
 void search_replace(char *string, const char *find, const char *replace);
+/* A new string formatted as by printf(); exits if out of memory, like CREATE(). */
+char *str_printf(const char *format, ...) __attribute__((format(printf, 1, 2)));

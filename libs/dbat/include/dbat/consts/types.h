@@ -37,9 +37,6 @@ typedef IDXTYPE guild_rnum;
  */
 typedef uint32_t bitvector_t;
 
-#define FALSE false
-#define TRUE  true
-
 struct char_data;
 struct obj_data;
 struct room_data;

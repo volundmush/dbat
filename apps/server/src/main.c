@@ -26,7 +26,7 @@ int main(int argc, char **argv)
   /** Otherwise, there will be no variables set to set the rest of the vars  **/
   /** to, which will mean trouble --> Mythran                                **/
   /****************************************************************************/
-  CONFIG_CONFFILE = NULL;
+  CONFIG_CONFFILE = nullptr;
   while ((pos < argc) && (*(argv[pos]) == '-')) {
     if (*(argv[pos] + 1) == 'f') {
       if (*(argv[pos] + 2))
@@ -67,7 +67,7 @@ int main(int argc, char **argv)
         }
         break;
       case 'C': /* -C<socket number> - recover from copyover, this is the control socket */
-        fCopyOver   = TRUE;
+        fCopyOver   = true;
         mother_desc = atoi(argv[pos] + 2);
         break;
       case 'd':

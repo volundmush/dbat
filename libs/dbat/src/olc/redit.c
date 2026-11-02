@@ -58,12 +58,12 @@ ACMD(do_oasis_redit)
     return;
   }
 
-  struct obj_data *capsule = NULL, *next_obj = NULL, *remove = NULL;
-  int remodeling = FALSE;
+  struct obj_data *capsule = nullptr, *next_obj = nullptr, *remove = nullptr;
+  int remodeling = false;
 
   for (capsule = ch->carrying; capsule; capsule = next_obj) {
     next_obj = capsule->next_content;
-    if (remove != NULL) {
+    if (remove != nullptr) {
       continue;
     }
     if (obj_get_vnum(capsule) == 19094) {
@@ -71,15 +71,15 @@ ACMD(do_oasis_redit)
     }
   }
 
-  if (remove == NULL && char_get_admlevel(ch) < 1) {
+  if (remove == nullptr && char_get_admlevel(ch) < 1) {
     send_to_char(ch, "You do not have a R.A.D. Remodeling Assistance Droid.\r\n");
     return;
   }
   if (char_get_admlevel(ch) < 1) {
-    act("@GYou open up the computer panel on the droid and begin to program its remodeling routine.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n@G opens up a computer panel on some kind of small spherical droid and begins to program it.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@GYou open up the computer panel on the droid and begin to program its remodeling routine.@n", true, ch, 0, 0, TO_CHAR);
+    act("@g$n@G opens up a computer panel on some kind of small spherical droid and begins to program it.@n", true, ch, 0, 0, TO_ROOM);
     extract_obj(remove);
-    remodeling = TRUE;
+    remodeling = true;
   }
 
   if (!*buf1 || char_get_admlevel(ch) < 1)
@@ -90,7 +90,7 @@ ACMD(do_oasis_redit)
       return;
     }
 
-    save = TRUE;
+    save = true;
 
     if (is_number(buf2))
       number = atoi(buf2);
@@ -131,7 +131,7 @@ ACMD(do_oasis_redit)
 
   /* Give the descriptor an OLC structure. */
   if (d->olc) {
-    mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "SYSERR: do_oasis_redit: Player already had olc structure.");
+    mudlog(LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis_redit: Player already had olc structure.");
     free(d->olc);
   }
 
@@ -143,28 +143,28 @@ ACMD(do_oasis_redit)
   if (OLC_ZNUM(d) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
   /* Make sure the builder is allowed to modify this zone. */
-  if (!can_edit_zone(ch, OLC_ZNUM(d)) && remodeling == FALSE) {
+  if (!can_edit_zone(ch, OLC_ZNUM(d)) && remodeling == false) {
     send_cannot_edit(ch, zone_table[OLC_ZNUM(d)].number);
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
   if (save) {
     send_to_char(ch, "Saving all rooms in zone %d.\r\n", zone_table[OLC_ZNUM(d)].number);
-    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), TRUE, "OLC: %s saves room info for zone %d.", char_get_name(ch), zone_table[OLC_ZNUM(d)].number);
+    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), true, "OLC: %s saves room info for zone %d.", char_get_name(ch), zone_table[OLC_ZNUM(d)].number);
 
     /* Save the rooms. */
     save_rooms(OLC_ZNUM(d));
 
     /* Free the olc data from the descriptor. */
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
@@ -177,10 +177,10 @@ ACMD(do_oasis_redit)
 
   redit_disp_menu(d);
   desc_set_connected(d, CON_REDIT);
-  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", true, d->character, 0, 0, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);
 
-  mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
+  mudlog(LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
          char_get_name(ch), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
 }
 
@@ -192,7 +192,7 @@ static void redit_setup_new(struct descriptor_data *d)
   OLC_ROOM(d)->description  = strdup("You are in an unfinished room.\r\n");
   OLC_ROOM(d)->number       = NOWHERE;
   OLC_ITEM_TYPE(d)          = WLD_TRIGGER;
-  OLC_ROOM(d)->proto_script = OLC_SCRIPT(d) = NULL;
+  OLC_ROOM(d)->proto_script = OLC_SCRIPT(d) = nullptr;
 
   OLC_VAL(d) = 0;
 }
@@ -253,7 +253,7 @@ static void redit_setup_existing(struct descriptor_data *d, int real_num)
         temp->next = temp2;
         temp       = temp2;
       } else
-        temp->next = NULL;
+        temp->next = nullptr;
     }
   }
   /*
@@ -264,19 +264,19 @@ static void redit_setup_existing(struct descriptor_data *d, int real_num)
   OLC_ITEM_TYPE(d) = WLD_TRIGGER;
 
   dg_olc_script_copy(d);
-  room->proto_script = NULL;
-  room->script       = NULL;
+  room->proto_script = nullptr;
+  room->script       = nullptr;
 }
 
 /*------------------------------------------------------------------------*/
 
 void redit_save_internally(struct descriptor_data *d)
 {
-  int j, room_num, new_room = FALSE;
+  int j, room_num, new_room = false;
   struct descriptor_data *dsc;
 
   if (OLC_ROOM(d)->number == NOWHERE) {
-    new_room = TRUE;
+    new_room = true;
   }
   OLC_ROOM(d)->number = OLC_NUM(d);
   /* FIXME: Why is this not set elsewhere? */
@@ -389,7 +389,7 @@ static void redit_disp_exit_menu(struct descriptor_data *d)
   /*
    * if exit doesn't exist, alloc/create it 
    */
-  if (OLC_EXIT(d) == NULL)
+  if (OLC_EXIT(d) == nullptr)
     CREATE(OLC_EXIT(d), struct room_direction_data, 1);
 
   sprintbit(OLC_EXIT(d)->exit_info, exit_bits, door_buf, sizeof(door_buf));
@@ -541,7 +541,7 @@ static void redit_disp_menu(struct descriptor_data *d)
 void redit_parse(struct descriptor_data *d, char *arg)
 {
   int number;
-  char *oldtext = NULL;
+  char *oldtext = nullptr;
 
   switch (OLC_MODE(d)) {
     case REDIT_CONFIRM_SAVESTRING:
@@ -549,13 +549,13 @@ void redit_parse(struct descriptor_data *d, char *arg)
         case 'y':
         case 'Y':
           redit_save_internally(d);
-          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(d->character)), TRUE,
+          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(d->character)), true,
                  "OLC: %s edits room %d.", char_get_name(d->character), OLC_NUM(d));
           if (CONFIG_OLC_SAVE) {
             redit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
             if (char_get_admlevel(d->character) < 1) {
               write_to_output(d, "@GThe remodeling droid quickly launches about with remodeling the room to your specifications. It seems to finish in no time at all...@n\r\n");
-              act("@GThe remodeling droid quickly launches about with remodeling the room as to @g$n's@G specifications. It seems to finish in no time at all...@n", TRUE, d->character, 0, 0, TO_ROOM);
+              act("@GThe remodeling droid quickly launches about with remodeling the room as to @g$n's@G specifications. It seems to finish in no time at all...@n", true, d->character, 0, 0, TO_ROOM);
             } else {
               write_to_output(d, "Room saved to disk.\r\n");
             }
@@ -573,7 +573,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
           cleanup_olc(d, CLEANUP_ALL);
           if (char_get_admlevel(d->character) < 1) {
             write_to_output(d, "@GYou close the droids interface and put it back among the rest of your things.@n\r\n");
-            act("@g$n@G stops typing information into the droid in $s hands and closes it back up.@n\r\n", TRUE, d->character, 0, 0, TO_ROOM);
+            act("@g$n@G stops typing information into the droid in $s hands and closes it back up.@n\r\n", true, d->character, 0, 0, TO_ROOM);
             struct obj_data *obj;
             obj = read_object(19094, VIRTUAL);
             obj_to_char(obj, d->character);
@@ -808,7 +808,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       /*
      * We will NEVER get here, we hope.
      */
-      mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: Reached REDIT_DESC case in parse_redit().");
+      mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: Reached REDIT_DESC case in parse_redit().");
       write_to_output(d, "Oops, in REDIT_DESC.\r\n");
       break;
 
@@ -878,7 +878,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
             free(OLC_EXIT(d)->general_description);
           if (OLC_EXIT(d))
             free(OLC_EXIT(d));
-          OLC_EXIT(d) = NULL;
+          OLC_EXIT(d) = nullptr;
           break;
         case '7':
           OLC_MODE(d) = REDIT_EXIT_DCLOCK;
@@ -937,7 +937,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       /*
      * We should NEVER get here, hopefully.
      */
-      mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: Reached REDIT_EXIT_DESC case in parse_redit");
+      mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: Reached REDIT_EXIT_DESC case in parse_redit");
       write_to_output(d, "Oops, in REDIT_EXIT_DESCRIPTION.\r\n");
       break;
 
@@ -987,7 +987,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
        * If something got left out, delete the extra description
        * when backing out to the menu.
        */
-          if (OLC_DESC(d)->keyword == NULL || OLC_DESC(d)->description == NULL) {
+          if (OLC_DESC(d)->keyword == nullptr || OLC_DESC(d)->description == nullptr) {
             struct extra_descr_data *temp;
             if (OLC_DESC(d)->keyword)
               free(OLC_DESC(d)->keyword);
@@ -1016,7 +1016,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
           string_write(d, &OLC_DESC(d)->description, MAX_MESSAGE_LENGTH, 0, oldtext);
           return;
         case 3:
-          if (OLC_DESC(d)->keyword == NULL || OLC_DESC(d)->description == NULL) {
+          if (OLC_DESC(d)->keyword == nullptr || OLC_DESC(d)->description == nullptr) {
             write_to_output(d, "You can't edit the next extra description without completing this one.\r\n");
             redit_disp_extradesc_menu(d);
           } else {
@@ -1140,7 +1140,7 @@ void redit_parse(struct descriptor_data *d, char *arg)
       /*
      * We should never get here.
      */
-      mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: Reached default case in parse_redit");
+      mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: Reached default case in parse_redit");
       break;
   }
   /*

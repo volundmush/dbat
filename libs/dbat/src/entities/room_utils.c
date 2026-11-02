@@ -11,7 +11,7 @@ int num_pc_in_room(struct room_data *room)
   int i = 0;
   struct char_data *ch;
 
-  for (ch = room->people; ch != NULL; ch = ch->next_in_room)
+  for (ch = room->people; ch != nullptr; ch = ch->next_in_room)
     if (!char_is_npc(ch))
       i++;
 
@@ -22,7 +22,7 @@ int num_pc_in_room(struct room_data *room)
 int cook_element(room_rnum room)
 {
   struct obj_data *obj, *next_obj;
-  int found = FALSE;
+  int found = false;
 
   for (obj = world[room].contents; obj; obj = next_obj) {
     next_obj = obj->next_content;
@@ -43,41 +43,41 @@ int room_is_dark(room_rnum room)
 {
   if (!rroom_is_valid(room)) {
     mud_log("room_is_dark: Invalid room rnum %d. (0-%d)", room, top_of_world);
-    return (FALSE);
+    return (false);
   }
 
   if (world[room].light)
-    return (FALSE);
+    return (false);
 
   if (cook_element(room))
-    return (FALSE);
+    return (false);
 
   if (rroom_flagged(room, ROOM_NOINSTANT) && rroom_flagged(room, ROOM_DARK)) {
-    return (TRUE);
+    return (true);
   }
   if (rroom_flagged(room, ROOM_NOINSTANT) && !rroom_flagged(room, ROOM_DARK)) {
-    return (FALSE);
+    return (false);
   }
 
   if (rroom_flagged(room, ROOM_DARK))
-    return (TRUE);
+    return (true);
 
   if (rroom_flagged(room, ROOM_INDOORS))
-    return (FALSE);
+    return (false);
 
   if (rroom_sect(room) == SECT_INSIDE || rroom_sect(room) == SECT_CITY || rroom_sect(room) == SECT_IMPORTANT || rroom_sect(room) == SECT_SHOP)
-    return (FALSE);
+    return (false);
 
   if (rroom_sect(room) == SECT_SPACE)
-    return (FALSE);
+    return (false);
 
   if (weather_info.sunlight == SUN_SET)
-    return (TRUE);
+    return (true);
 
   if (weather_info.sunlight == SUN_DARK)
-    return (TRUE);
+    return (true);
 
-  return (FALSE);
+  return (false);
 }
 
 /* Formerly macros in room_utils.h. */
@@ -109,7 +109,7 @@ room_vnum rroom_get_vnum(room_rnum rnum)
 
 spec_proc_func rroom_get_spec(room_rnum room)
 {
-  return (rroom_is_valid(room) ? world[(room)].func : NULL);
+  return (rroom_is_valid(room) ? world[(room)].func : nullptr);
 }
 
 bool rroom_planet_zenith(room_rnum room)

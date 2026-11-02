@@ -101,7 +101,7 @@ ACMD(do_preference)
 
 void rpp_feature(struct char_data *ch, const char *arg)
 {
-  int cost = 0, change = FALSE;
+  int cost = 0, change = false;
 
   if (!*arg) {
     send_to_char(ch, "Syntax: rpp 13 (description)\nExample: rpp 13 a large red scar on his face\nDisplayed to others: He has a large red scar on his face.\r\n");
@@ -117,7 +117,7 @@ void rpp_feature(struct char_data *ch, const char *arg)
     cost = 2;
   } else {
     cost   = 2;
-    change = TRUE;
+    change = true;
   }
 
   if (cost > char_get_rbank(ch)) {
@@ -133,7 +133,7 @@ void rpp_feature(struct char_data *ch, const char *arg)
   send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
   send_to_char(ch, "You now have the following line underneath you when someone sees you in a room as:\n@C%s@n\r\n", buf8);
   char_set_feature(ch, buf8);
-  if (change == TRUE) {
+  if (change == true) {
     send_to_imm("%s has altered their extra description. Make sure the reason is legit! If it is then reimb them 2 RPP.\r\n", char_get_user(ch));
     send_to_char(ch, "The immortals have been notified about this change. It had better have been for a good reason.\r\n");
   }
@@ -157,12 +157,12 @@ ACMD(do_instill)
     return;
   }
 
-  if (!(token = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+  if (!(token = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
     send_to_char(ch, "Syntax: instill (token) (target)\r\n");
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg2, NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
     send_to_char(ch, "Syntax: instill (token) (target)\r\n");
     return;
   }
@@ -201,8 +201,8 @@ ACMD(do_instill)
       }
     }
 
-    act("@GYou instill the token into @g$p@G. It glows @ggreen@G for a moment before returning to normal. The token disappears with the glow.@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@g$n@G instills a token into @g$p@G. It glows @ggreen@G for a moment before returning to normal. The token disappears with the glow.@n", TRUE, ch, obj, 0, TO_ROOM);
+    act("@GYou instill the token into @g$p@G. It glows @ggreen@G for a moment before returning to normal. The token disappears with the glow.@n", true, ch, obj, 0, TO_CHAR);
+    act("@g$n@G instills a token into @g$p@G. It glows @ggreen@G for a moment before returning to normal. The token disappears with the glow.@n", true, ch, obj, 0, TO_ROOM);
     raise = token->affected[0].modifier;
     extract_obj(token);
 
@@ -284,7 +284,7 @@ ACMD(do_arena)
     }
   } else if (!strcasecmp(arg, "scan")) {
     if (rroom_get_vnum(char_get_in_room(ch)) == 17875) {
-      int found = FALSE;
+      int found = false;
       struct descriptor_data *d;
 
       send_to_char(ch, "@D---@CFighters in the arena@D---@n\r\n");
@@ -295,12 +295,12 @@ ACMD(do_arena)
         if (char_in_arena(d->character)) {
           char buf[MAX_INPUT_LENGTH];
           snprintf(buf, sizeof(buf), "@YFighter Number@D: @w%d, $N.@n", char_get_idnum(d->character));
-          act(buf, TRUE, ch, 0, d->character, TO_CHAR);
-          found = TRUE;
+          act(buf, true, ch, 0, d->character, TO_CHAR);
+          found = true;
         }
       }
 
-      if (found == FALSE) {
+      if (found == false) {
         send_to_char(ch, "@wNone.@n\r\n");
       }
     } else {
@@ -315,7 +315,7 @@ ACMD(do_arena)
       return;
     } else {
       struct descriptor_data *d;
-      int found = FALSE;
+      int found = false;
 
       for (d = descriptor_list; d; d = d->next) {
         if (desc_get_connected(d) != CON_PLAYING)
@@ -323,14 +323,14 @@ ACMD(do_arena)
 
         if (char_get_idnum(d->character) == num) {
           if (char_in_arena(d->character)) {
-            found = TRUE;
+            found = true;
           }
         }
       }
 
-      if (found == TRUE) {
-        act("@wYou start watching the action surrounding that particular fighter in the arena.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@w starts watching the action in the arena.@n", TRUE, ch, 0, 0, TO_ROOM);
+      if (found == true) {
+        act("@wYou start watching the action surrounding that particular fighter in the arena.@n", true, ch, 0, 0, TO_CHAR);
+        act("@C$n@w starts watching the action in the arena.@n", true, ch, 0, 0, TO_ROOM);
         char_prf_set(ch, PRF_ARENAWATCH, true);
         char_set_arenawatch(ch, num);
       } else {
@@ -409,12 +409,12 @@ void handle_rpp_store(struct char_data *ch, int choice)
               obj = read_object(objnum, VIRTUAL);
               obj_to_char(obj, ch);
               obj_set_size(obj, get_size(ch));
-              obj = NULL;
+              obj = nullptr;
             } else {
               obj = read_object(objnum, VIRTUAL);
               obj_to_char(obj, ch);
               obj_set_size(obj, get_size(ch));
-              obj = NULL;
+              obj = nullptr;
               obj = read_object(objnum, VIRTUAL);
               obj_to_char(obj, ch);
               obj_set_size(obj, get_size(ch));

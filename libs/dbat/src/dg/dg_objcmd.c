@@ -145,8 +145,8 @@ static OCMD(do_oecho)
 
   else if ((room = obj_room(obj)) != NOWHERE) {
     if (world[room].people) {
-      sub_write(argument, world[room].people, TRUE, TO_ROOM);
-      sub_write(argument, world[room].people, TRUE, TO_CHAR);
+      sub_write(argument, world[room].people, true, TO_ROOM);
+      sub_write(argument, world[room].people, true, TO_CHAR);
     }
   }
 
@@ -233,13 +233,13 @@ static OCMD(do_osend)
 
   if ((ch = get_char_by_obj(obj, buf))) {
     if (subcmd == SCMD_OSEND)
-      sub_write(msg, ch, TRUE, TO_CHAR);
+      sub_write(msg, ch, true, TO_CHAR);
     else if (subcmd == SCMD_OECHOAROUND) {
       char msgbuf[MAX_STRING_LENGTH];
 
       sprintf(msgbuf, "%s", msg);
       search_replace(msgbuf, char_get_name(ch), "$n");
-      act(msgbuf, TRUE, ch, 0, 0, TO_ROOM);
+      act(msgbuf, true, ch, 0, 0, TO_ROOM);
       /*sub_write(msg, ch, TRUE, TO_ROOM);*/
     }
   }
@@ -286,7 +286,7 @@ static OCMD(do_otransform)
 {
   char arg[MAX_INPUT_LENGTH];
   obj_data *o, tmpobj;
-  struct char_data *wearer = NULL;
+  struct char_data *wearer = nullptr;
   int pos                  = 0;
 
   one_argument(argument, arg);
@@ -297,7 +297,7 @@ static OCMD(do_otransform)
     obj_log(obj, "otransform: bad argument");
   else {
     o = read_object(atoi(arg), VIRTUAL);
-    if (o == NULL) {
+    if (o == nullptr) {
       obj_log(obj, "otransform: bad object vnum");
       return;
     }
@@ -497,7 +497,7 @@ static OCMD(do_dgoload)
         return;
       }
     }
-    if ((mob = read_mobile(number, VIRTUAL)) == NULL) {
+    if ((mob = read_mobile(number, VIRTUAL)) == nullptr) {
       obj_log(obj, "oload: bad mob vnum");
       return;
     }
@@ -513,7 +513,7 @@ static OCMD(do_dgoload)
   }
 
   else if (is_abbrev(arg1, "obj")) {
-    if ((object = read_object(number, VIRTUAL)) == NULL) {
+    if ((object = read_object(number, VIRTUAL)) == nullptr) {
       obj_log(obj, "oload: bad object vnum");
       return;
     }
@@ -605,12 +605,12 @@ static OCMD(do_oasound)
   }
 
   for (door = 0; door < NUM_OF_DIRS; door++) {
-    if (world[room].dir_option[door] != NULL &&
+    if (world[room].dir_option[door] != nullptr &&
         (world[room].dir_option[door])->to_room != NOWHERE &&
         (world[room].dir_option[door])->to_room != room &&
         world[(world[room].dir_option[door])->to_room].people) {
-      sub_write(argument, world[(world[room].dir_option[door])->to_room].people, TRUE, TO_ROOM);
-      sub_write(argument, world[(world[room].dir_option[door])->to_room].people, TRUE, TO_CHAR);
+      sub_write(argument, world[(world[room].dir_option[door])->to_room].people, true, TO_ROOM);
+      sub_write(argument, world[(world[room].dir_option[door])->to_room].people, true, TO_CHAR);
     }
   }
 }
@@ -631,17 +631,17 @@ static OCMD(do_odoor)
     return;
   }
 
-  if ((rm = get_room(target)) == NULL) {
+  if ((rm = get_room(target)) == nullptr) {
     obj_log(obj, "odoor: invalid target");
     return;
   }
 
-  if ((dir = search_block(direction, dirs, FALSE)) == -1) {
+  if ((dir = search_block(direction, dirs, false)) == -1) {
     obj_log(obj, "odoor: invalid direction");
     return;
   }
 
-  if ((fd = search_block(field, dg_door_fields, FALSE)) == -1) {
+  if ((fd = search_block(field, dg_door_fields, false)) == -1) {
     obj_log(obj, "odoor: invalid field");
     return;
   }

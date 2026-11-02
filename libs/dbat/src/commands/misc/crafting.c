@@ -71,7 +71,7 @@ ACMD(do_restring)
       send_to_char(ch, "You need at least 5,000 zenni to initiate an equipment restring.\r\n");
       return;
     }
-    if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
       send_to_char(ch, "You don't have a that equipment to restring in your inventory.\r\n");
       send_to_char(ch, "Syntax: restring (obj name)\r\n");
       return;
@@ -151,8 +151,8 @@ ACMD(do_fish)
       return;
     }
     reveal_hiding(ch, 0);
-    act("@CYou pull your arm back and then spring it forward, casting the baited line. A moment later there is a splash as the hook enters the water.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@c$n@C pulls $s arm back and then springs it foward, casting the line of $s fishing pole into the water.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@CYou pull your arm back and then spring it forward, casting the baited line. A moment later there is a splash as the hook enters the water.@n", true, ch, 0, 0, TO_CHAR);
+    act("@c$n@C pulls $s arm back and then springs it foward, casting the line of $s fishing pole into the water.@n", true, ch, 0, 0, TO_ROOM);
     char_set_accuracy_mod(ch, rand_number(30, 80));
     char_plr_set(ch, PLR_FISHING, true);
     send_to_char(ch, "@D[@wDistance@D: @Y%d@D]@n\r\n", char_get_accuracy_mod(ch));
@@ -177,14 +177,14 @@ ACMD(do_fish)
     }
     if (axion_dice(-18) > char_get_accuracy(ch)) {
       reveal_hiding(ch, 0);
-      act("@CYou pull hard but the fish spits the hook out a second before you pull! You return to waiting for a bite...@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@c$n@C pulls hard on $s fishing line, but a moment later $e frowns and returns to fishing.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@CYou pull hard but the fish spits the hook out a second before you pull! You return to waiting for a bite...@n", true, ch, 0, 0, TO_CHAR);
+      act("@c$n@C pulls hard on $s fishing line, but a moment later $e frowns and returns to fishing.@n", true, ch, 0, 0, TO_ROOM);
       char_set_fishstate(ch, FISH_NOFISH);
       return;
     }
     reveal_hiding(ch, 0);
-    act("@CYou pull hard on your line and feel that you have managed to hook the fish and start reeling it in!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@c$n@C pulls hard on $s fishing line and starts to struggle with the fish on the other end!@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@CYou pull hard on your line and feel that you have managed to hook the fish and start reeling it in!@n", true, ch, 0, 0, TO_CHAR);
+    act("@c$n@C pulls hard on $s fishing line and starts to struggle with the fish on the other end!@n", true, ch, 0, 0, TO_ROOM);
     char_set_fishstate(ch, FISH_REELING);
     return;
   }
@@ -208,7 +208,7 @@ ACMD(do_fish)
           send_to_char(ch, "Syntax: fish apply (bait)\r\n");
           return;
         }
-        if (!(bait = get_obj_in_list_vis(ch, arg2, NULL, ch->carrying))) {
+        if (!(bait = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
           send_to_char(ch, "You don't have that bait.\r\n");
           return;
         }
@@ -217,8 +217,8 @@ ACMD(do_fish)
           return;
         } else {
           reveal_hiding(ch, 0);
-          act("@CYou carefully apply the $p@C to your hook.@n", TRUE, ch, bait, 0, TO_CHAR);
-          act("@c$n@C carefully applies $p@C to $s fishing pole's hook.@n", TRUE, ch, bait, 0, TO_ROOM);
+          act("@CYou carefully apply the $p@C to your hook.@n", true, ch, bait, 0, TO_CHAR);
+          act("@c$n@C carefully applies $p@C to $s fishing pole's hook.@n", true, ch, bait, 0, TO_ROOM);
           obj_set_value(pole, 0, obj_get_cost(bait));
           extract_obj(bait);
           return;
@@ -231,8 +231,8 @@ ACMD(do_fish)
       return;
     }
     reveal_hiding(ch, 0);
-    act("@CYou reel in your line and stop fishing.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@c$n@C reels in $s fishing line and stops fishing.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@CYou reel in your line and stop fishing.@n", true, ch, 0, 0, TO_CHAR);
+    act("@c$n@C reels in $s fishing line and stops fishing.@n", true, ch, 0, 0, TO_ROOM);
     char_plr_set(ch, PLR_FISHING, false);
     char_set_fishstate(ch, FISH_NOFISH);
     char_set_accuracy_mod(ch, 0);
@@ -249,23 +249,23 @@ static int has_pole(struct char_data *ch)
   if (char_get_equipment(ch, WEAR_WIELD2)) {
     struct obj_data *pole = char_get_equipment(ch, WEAR_WIELD2);
     if (obj_get_type_flag(pole) == ITEM_FISHPOLE) {
-      return (TRUE);
+      return (true);
     }
   }
 
-  return (FALSE);
+  return (false);
 }
 
 void fish_update(void)
 {
 
-  struct char_data *i, *next_char, *ch = NULL;
+  struct char_data *i, *next_char, *ch = nullptr;
   int quality = 0;
 
   for (i = character_list; i; i = next_char) {
     next_char = i->next;
     if (rroom_flagged(char_get_in_room(i), ROOM_FISHING)) {
-      if (char_plr_flagged(i, PLR_FISHING) && has_pole(i) == TRUE) {
+      if (char_plr_flagged(i, PLR_FISHING) && has_pole(i) == true) {
         ch = i;
         if (char_get_accuracy_mod(ch) <= 0 && char_get_fishstate(ch) == FISH_REELING) { /* We've caught it */
           if (char_get_accuracy(ch) >= rand_number(60, 100)) {
@@ -285,37 +285,37 @@ void fish_update(void)
             } else {
               char_set_accuracy_mod(ch, char_get_accuracy_mod(ch) - (rand_number(1, 4)));
             }
-            act("@CYou reel the line on your pole some.@n", TRUE, ch, 0, 0, TO_CHAR);
-            act("@c$n@C reels the line on $s pole slowly.@n", TRUE, ch, 0, 0, TO_ROOM);
+            act("@CYou reel the line on your pole some.@n", true, ch, 0, 0, TO_CHAR);
+            act("@c$n@C reels the line on $s pole slowly.@n", true, ch, 0, 0, TO_ROOM);
             send_to_char(ch, "@D[@wDistance@D: @Y%d@D]@n\r\n", char_get_accuracy_mod(ch) > 0 ? char_get_accuracy_mod(ch) : 0);
           } else if (char_get_fishstate(ch) == FISH_REELING && rand_number(1, 58) <= 55) {
-            act("@CYou struggle as the fish fights against your attempts to reel it in!@n", TRUE, ch, 0, 0, TO_CHAR);
-            act("@c$n@C struggles with the fish on the end of $s pole!@n", TRUE, ch, 0, 0, TO_ROOM);
+            act("@CYou struggle as the fish fights against your attempts to reel it in!@n", true, ch, 0, 0, TO_CHAR);
+            act("@c$n@C struggles with the fish on the end of $s pole!@n", true, ch, 0, 0, TO_ROOM);
           } else if (char_get_fishstate(ch) == FISH_REELING) { /* Lose the fish */
-            act("@CYou feel the line go slack and realize you've lost the fish! You reel your line back in...@n", TRUE, ch, 0, 0, TO_CHAR);
-            act("@c$n@C frowns and then begins to reel in $s line.@n", TRUE, ch, 0, 0, TO_ROOM);
+            act("@CYou feel the line go slack and realize you've lost the fish! You reel your line back in...@n", true, ch, 0, 0, TO_CHAR);
+            act("@c$n@C frowns and then begins to reel in $s line.@n", true, ch, 0, 0, TO_ROOM);
             char_set_accuracy_mod(ch, 0);
             char_set_fishstate(ch, FISH_NOFISH);
             char_plr_set(ch, PLR_FISHING, false);
-            if (has_pole(ch) == TRUE) {
+            if (has_pole(ch) == true) {
               struct obj_data *pole = char_get_equipment(ch, WEAR_WIELD2);
               obj_set_value(pole, 0, 0);
             }
           } else if (char_get_fishstate(ch) == FISH_HOOKED && rand_number(1, 20) >= 12) {
-            act("@CYou feel the line go slack and realize you've lost the fish! You reel your line back in...@n", TRUE, ch, 0, 0, TO_CHAR);
-            act("@c$n@C frowns and then begins to reel in $s line.@n", TRUE, ch, 0, 0, TO_ROOM);
+            act("@CYou feel the line go slack and realize you've lost the fish! You reel your line back in...@n", true, ch, 0, 0, TO_CHAR);
+            act("@c$n@C frowns and then begins to reel in $s line.@n", true, ch, 0, 0, TO_ROOM);
             char_set_accuracy_mod(ch, 0);
             char_set_fishstate(ch, FISH_NOFISH);
             char_plr_set(ch, PLR_FISHING, false);
           } else if (char_get_fishstate(ch) == FISH_BITE && rand_number(1, 20) >= 12) {
-            act("@CYou feel as if the fish has stopped biting...@n", TRUE, ch, 0, 0, TO_CHAR);
+            act("@CYou feel as if the fish has stopped biting...@n", true, ch, 0, 0, TO_CHAR);
             char_set_fishstate(ch, FISH_NOFISH);
           } else if (char_get_fishstate(ch) != FISH_HOOKED && char_get_fishstate(ch) != FISH_BITE && ((rroom_flagged(char_get_in_room(ch), ROOM_FISHFRESH) && rand_number(1, 10) >= 8) || (!rroom_flagged(char_get_in_room(ch), ROOM_FISHFRESH) && rand_number(1, 20) >= 18))) {
-            act("@CYou feel a fish biting on your line! Better @Ghook@C it!@n", TRUE, ch, 0, 0, TO_CHAR);
+            act("@CYou feel a fish biting on your line! Better @Ghook@C it!@n", true, ch, 0, 0, TO_CHAR);
             char_set_fishstate(ch, FISH_BITE);
           }
         } /* End reel section */
-      } else if (char_plr_flagged(i, PLR_FISHING) && has_pole(i) == FALSE) { /* End of, Is Fishing */
+      } else if (char_plr_flagged(i, PLR_FISHING) && has_pole(i) == false) { /* End of, Is Fishing */
         char_plr_set(i, PLR_FISHING, false);
         char_set_accuracy_mod(i, 0);
         char_set_fishstate(i, FISH_NOFISH);
@@ -332,7 +332,7 @@ void fish_update(void)
 
 static void catch_fish(struct char_data *ch, int quality)
 {
-  struct obj_data *fish = NULL;
+  struct obj_data *fish = nullptr;
   int num               = 1000;
 
   if (rroom_flagged(char_get_in_room(ch), ROOM_FISHFRESH)) {
@@ -432,8 +432,8 @@ static void catch_fish(struct char_data *ch, int quality)
     return;
   }
 
-  act("@CYou manage to pull a $p@C from the water and onto the ground in front of you!@n", TRUE, ch, fish, 0, TO_CHAR);
-  act("@c$n@C manages to pull a $p@C from the water and onto the ground in front of $m!@n", TRUE, ch, fish, 0, TO_ROOM);
+  act("@CYou manage to pull a $p@C from the water and onto the ground in front of you!@n", true, ch, fish, 0, TO_CHAR);
+  act("@c$n@C manages to pull a $p@C from the water and onto the ground in front of $m!@n", true, ch, fish, 0, TO_ROOM);
 
   int weight = 1;
 
@@ -494,7 +494,7 @@ ACMD(do_extract)
   }
 
   char arg[MAX_INPUT_LENGTH], argu[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
-  struct obj_data *obj = NULL, *obj2 = NULL;
+  struct obj_data *obj = nullptr, *obj2 = nullptr;
   int skill = char_get_skill(ch, SKILL_EXTRACT), chance = axion_dice(0);
 
   half_chop(argument, arg, argu);
@@ -507,11 +507,11 @@ ACMD(do_extract)
   }
 
   if (!strcasecmp(arg, "combine")) {
-    if (!(obj = get_obj_in_list_vis(ch, arg2, NULL, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
       send_to_char(ch, "You do not have the first bottle that you were wanting to combine.\r\n");
       return;
     }
-    if (!(obj2 = get_obj_in_list_vis(ch, arg3, NULL, ch->carrying))) {
+    if (!(obj2 = get_obj_in_list_vis(ch, arg3, nullptr, ch->carrying))) {
       send_to_char(ch, "You do not have the second bottle that you were wanting to combine.\r\n");
       return;
     }
@@ -551,7 +551,7 @@ ACMD(do_extract)
     }
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
     send_to_char(ch, "You do not have that item.\r\n");
     return;
   }
@@ -560,20 +560,20 @@ ACMD(do_extract)
       send_to_char(ch, "It's not mature enough to extract from!\r\n");
       return;
     }
-    struct obj_data *bottle = NULL, *next_obj, *item;
-    int found               = FALSE;
+    struct obj_data *bottle = nullptr, *next_obj, *item;
+    int found               = false;
 
     for (item = ch->carrying; item; item = next_obj) {
       next_obj = item->next_content;
       if (obj_get_vnum(item) == 3423) {
         bottle = item;
-        found  = TRUE;
+        found  = true;
       }
     }
 
     int64_t cost = ((getMaxKI(ch) * 0.35) + 500);
 
-    if (found == FALSE) {
+    if (found == false) {
       send_to_char(ch, "You do not have an empty bottle to put the extracted ink in.\r\n");
       return;
     }
@@ -591,16 +591,16 @@ ACMD(do_extract)
     }
     if (skill < chance) {
       decCurKI(ch, cost, 0);
-      act("@WWith your ki flowing carefully into your hands you take a hold of the @G$p@W and begin to strip it of its leaves. Once it has been stripped you go to squeeze the ink carefully from the leaves into the bottle, but unfortunately the ink explodes into a mess instead!@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze. A nasty explosion of a mess is all that follows!@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@WWith your ki flowing carefully into your hands you take a hold of the @G$p@W and begin to strip it of its leaves. Once it has been stripped you go to squeeze the ink carefully from the leaves into the bottle, but unfortunately the ink explodes into a mess instead!@n", true, ch, obj, 0, TO_CHAR);
+      act("@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze. A nasty explosion of a mess is all that follows!@n", true, ch, obj, 0, TO_ROOM);
       improve_skill(ch, SKILL_EXTRACT, 0);
       extract_obj(obj);
       char_set_wait(ch, PULSE_3SEC);
       return;
     }
     decCurKI(ch, cost, 0);
-    act("@WWith your ki flowing carefully into your hands you take a hold of the @G$p@W and begin to strip it of its leaves. Once it has been stripped you go to squeeze the ink carefully from the leaves into the bottle, and manage to get every last drop of ink into it.@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze ink carefully from the leaves into a bottle.@n", TRUE, ch, obj, 0, TO_ROOM);
+    act("@WWith your ki flowing carefully into your hands you take a hold of the @G$p@W and begin to strip it of its leaves. Once it has been stripped you go to squeeze the ink carefully from the leaves into the bottle, and manage to get every last drop of ink into it.@n", true, ch, obj, 0, TO_CHAR);
+    act("@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze ink carefully from the leaves into a bottle.@n", true, ch, obj, 0, TO_ROOM);
     extract_obj(obj);
     obj_set_value(bottle, 6, obj_get_value(bottle, 6) + (rand_number(4, 6)));
     if (obj_get_value(bottle, 6) >= 24) {
@@ -609,8 +609,8 @@ ACMD(do_extract)
       obj_set_value(filled, 6, 24);
       obj_to_char(filled, ch);
       decCurKI(ch, 0, 0);
-      act("@GAs the last of the ink fills the bottle you infuse a final burst of ki into the bottle.@n", TRUE, ch, filled, 0, TO_CHAR);
-      act("@GAs the last of the ink fills the bottle @g$n@G infuses a final burst of ki into the bottle.@n ", TRUE, ch, filled, 0, TO_ROOM);
+      act("@GAs the last of the ink fills the bottle you infuse a final burst of ki into the bottle.@n", true, ch, filled, 0, TO_CHAR);
+      act("@GAs the last of the ink fills the bottle @g$n@G infuses a final burst of ki into the bottle.@n ", true, ch, filled, 0, TO_ROOM);
     } else {
       send_to_char(ch, "You will need to fill the bottle before giving it a final infusion of ki to complete the process.\r\n");
     }
@@ -647,15 +647,15 @@ ACMD(do_runic)
     return;
   }
 
-  struct obj_data *obj, *next_obj, *bottle = NULL;
-  int found = FALSE, amount = 0, brush = FALSE;
+  struct obj_data *obj, *next_obj, *bottle = nullptr;
+  int found = false, amount = 0, brush = false;
 
   for (obj = ch->carrying; obj; obj = next_obj) {
     next_obj = obj->next_content;
     if (obj_get_vnum(obj) == 3424) {
       if (obj_get_value(obj, 6) > amount) {
         bottle = obj;
-        found  = TRUE;
+        found  = true;
         amount = obj_get_value(bottle, 6);
       }
     }
@@ -664,15 +664,15 @@ ACMD(do_runic)
   for (obj = ch->carrying; obj; obj = next_obj) {
     next_obj = obj->next_content;
     if (obj_get_vnum(obj) == 3427) {
-      brush = TRUE;
+      brush = true;
     }
   }
 
-  if (found == FALSE) {
+  if (found == false) {
     send_to_char(ch, "You do not have a bottle with enough ink in it.\r\n");
     return;
   }
-  if (brush == FALSE) {
+  if (brush == false) {
     send_to_char(ch, "You do not have a brush!\r\n");
     return;
   }
@@ -687,7 +687,7 @@ ACMD(do_runic)
 
   struct char_data *vict;
 
-  if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+  if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "You can't seem to find that person.\r\n");
     return;
   }
@@ -696,8 +696,8 @@ ACMD(do_runic)
     return;
   }
   if (skill + bonus < axion_dice(0) && rand_number(1, 5) == 5) {
-    act("@BYou dip your brush into the ink, but as you infuse your ki you balance the flow wrong and end up destroying the ink bottle!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@b$n@B dips $s runic brush into a bottle filled with shimmering ink. @b$n@B appears to concentrate for a moment before a look of panic dons $s face. Just at that moment the bottle of ink explodes! Strange...@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@BYou dip your brush into the ink, but as you infuse your ki you balance the flow wrong and end up destroying the ink bottle!@n", true, ch, 0, 0, TO_CHAR);
+    act("@b$n@B dips $s runic brush into a bottle filled with shimmering ink. @b$n@B appears to concentrate for a moment before a look of panic dons $s face. Just at that moment the bottle of ink explodes! Strange...@n", true, ch, 0, 0, TO_ROOM);
     extract_obj(bottle);
     improve_skill(ch, SKILL_RUNIC, 1);
     decCurKI(ch, cost, 0);
@@ -706,8 +706,8 @@ ACMD(do_runic)
   }
   if (skill + bonus < axion_dice(0)) {
     decCurKI(ch, cost, 0);
-    act("@BYou dip your brush into the ink, but as you infuse your ki you balance the flow wrong and end up evaporating some ink!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@b$n@B dips $s runic brush into a bottle filled with shimmering ink. @b$n@B appears to concentrate for a moment before some ink evaporates. Strange...@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@BYou dip your brush into the ink, but as you infuse your ki you balance the flow wrong and end up evaporating some ink!@n", true, ch, 0, 0, TO_CHAR);
+    act("@b$n@B dips $s runic brush into a bottle filled with shimmering ink. @b$n@B appears to concentrate for a moment before some ink evaporates. Strange...@n", true, ch, 0, 0, TO_ROOM);
     improve_skill(ch, SKILL_RUNIC, 1);
     obj_set_value(bottle, 6, obj_get_value(bottle, 6) - (rand_number(1, 3)));
     if (obj_get_value(bottle, 6) < 0)
@@ -719,8 +719,8 @@ ACMD(do_runic)
     inkcost += 1;
     if (vict == ch) {
       decCurKI(ch, cost, 0);
-      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CKenaz@D'@B rune on your skin!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CKenaz@D'@B rune on $s skin.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CKenaz@D'@B rune on your skin!@n", true, ch, 0, 0, TO_CHAR);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CKenaz@D'@B rune on $s skin.@n", true, ch, 0, 0, TO_ROOM);
       send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
       int duration = skill * 0.16;
       if (duration < 1)
@@ -735,9 +735,9 @@ ACMD(do_runic)
       }
     } else {
       decCurKI(ch, cost, 0);
-      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CKenaz@D'@B rune on @b$N's@B skin!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CKenaz@D'@B rune on @RYOUR@B skin.@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CKenaz@D'@B rune on @b$N's@B skin.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CKenaz@D'@B rune on @b$N's@B skin!@n", true, ch, 0, vict, TO_CHAR);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CKenaz@D'@B rune on @RYOUR@B skin.@n", true, ch, 0, vict, TO_VICT);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CKenaz@D'@B rune on @b$N's@B skin.@n", true, ch, 0, vict, TO_NOTVICT);
       send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
       int duration = skill * 0.16;
       if (duration < 1)
@@ -763,8 +763,8 @@ ACMD(do_runic)
     }
     if (vict == ch) {
       decCurKI(ch, cost, 0);
-      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CAlgiz@D'@B rune on your skin!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CAlgiz@D'@B rune on $s skin.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CAlgiz@D'@B rune on your skin!@n", true, ch, 0, 0, TO_CHAR);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CAlgiz@D'@B rune on $s skin.@n", true, ch, 0, 0, TO_ROOM);
       send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
       int duration = skill * 0.05;
       if (duration < 1)
@@ -779,9 +779,9 @@ ACMD(do_runic)
       }
     } else {
       decCurKI(ch, cost, 0);
-      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CAlgiz@D'@B rune on @b$N's@B skin!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CAlgiz@D'@B rune on @RYOUR@B skin.@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CAlgiz@D'@B rune on @b$N's@B skin.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CAlgiz@D'@B rune on @b$N's@B skin!@n", true, ch, 0, vict, TO_CHAR);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CAlgiz@D'@B rune on @RYOUR@B skin.@n", true, ch, 0, vict, TO_VICT);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CAlgiz@D'@B rune on @b$N's@B skin.@n", true, ch, 0, vict, TO_NOTVICT);
       send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
       int duration = skill * 0.05;
       if (duration < 1)
@@ -807,8 +807,8 @@ ACMD(do_runic)
     }
     if (vict == ch) {
       decCurKI(ch, cost, 0);
-      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@COagaz@D'@B rune on your skin!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@COagaz@D'@B rune on $s skin.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@COagaz@D'@B rune on your skin!@n", true, ch, 0, 0, TO_CHAR);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@COagaz@D'@B rune on $s skin.@n", true, ch, 0, 0, TO_ROOM);
       send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
       int duration = skill * 0.04;
       if (duration < 1)
@@ -830,8 +830,8 @@ ACMD(do_runic)
     }
     if (vict == ch) {
       decCurKI(ch, cost, 0);
-      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CLaguz@D'@B rune on your skin!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CLaguz@D'@B rune on $s skin.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CLaguz@D'@B rune on your skin!@n", true, ch, 0, 0, TO_CHAR);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CLaguz@D'@B rune on $s skin.@n", true, ch, 0, 0, TO_ROOM);
       send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
       int duration = skill * 0.04;
       if (duration < 1)
@@ -846,9 +846,9 @@ ACMD(do_runic)
       }
     } else {
       decCurKI(ch, cost, 0);
-      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@COagaz@D'@B rune on @b$N's@B skin!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@COagaz@D'@B rune on @RYOUR@B skin.@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@COagaz@D'@B rune on @b$N's@B skin.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@COagaz@D'@B rune on @b$N's@B skin!@n", true, ch, 0, vict, TO_CHAR);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@COagaz@D'@B rune on @RYOUR@B skin.@n", true, ch, 0, vict, TO_VICT);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@COagaz@D'@B rune on @b$N's@B skin.@n", true, ch, 0, vict, TO_NOTVICT);
       send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
       int duration = skill * 0.04;
       if (duration < 1)
@@ -873,8 +873,8 @@ ACMD(do_runic)
     }
     if (vict == ch) {
       decCurKI(ch, cost, 0);
-      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CWunjo@D'@B rune on your skin!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CWunjo@D'@B rune on $s skin.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CWunjo@D'@B rune on your skin!@n", true, ch, 0, 0, TO_CHAR);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CWunjo@D'@B rune on $s skin.@n", true, ch, 0, 0, TO_ROOM);
       send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
       int duration = skill * 0.08;
       if (duration < 1)
@@ -889,9 +889,9 @@ ACMD(do_runic)
       }
     } else {
       decCurKI(ch, cost, 0);
-      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CWunjo@D'@B rune on @b$N's@B skin!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CWunjo@D'@B rune on @RYOUR@B skin.@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CWunjo@D'@B rune on @b$N's@B skin.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CWunjo@D'@B rune on @b$N's@B skin!@n", true, ch, 0, vict, TO_CHAR);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CWunjo@D'@B rune on @RYOUR@B skin.@n", true, ch, 0, vict, TO_VICT);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CWunjo@D'@B rune on @b$N's@B skin.@n", true, ch, 0, vict, TO_NOTVICT);
       send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
       int duration = skill * 0.08;
       if (duration < 1)
@@ -916,8 +916,8 @@ ACMD(do_runic)
     }
     if (vict == ch) {
       decCurKI(ch, cost, 0);
-      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CPurisaz@D'@B rune on your skin!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CPurisaz@D'@B rune on $s skin.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CPurisaz@D'@B rune on your skin!@n", true, ch, 0, 0, TO_CHAR);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CPurisaz@D'@B rune on $s skin.@n", true, ch, 0, 0, TO_ROOM);
       send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
       int duration = skill * 0.06;
       if (duration < 1)
@@ -932,9 +932,9 @@ ACMD(do_runic)
       }
     } else {
       decCurKI(ch, cost, 0);
-      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CPurisaz@D'@B rune on @b$N's@B skin!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CPurisaz@D'@B rune on @RYOUR@B skin.@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CPUrisaz@D'@B rune on @b$N's@B skin.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CPurisaz@D'@B rune on @b$N's@B skin!@n", true, ch, 0, vict, TO_CHAR);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CPurisaz@D'@B rune on @RYOUR@B skin.@n", true, ch, 0, vict, TO_VICT);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CPUrisaz@D'@B rune on @b$N's@B skin.@n", true, ch, 0, vict, TO_NOTVICT);
       send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
       int duration = skill * 0.06;
       send_to_char(vict, "@GYou feel as if your inner energy is more potent! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
@@ -959,8 +959,8 @@ ACMD(do_runic)
     }
     if (vict == ch) {
       decCurKI(ch, cost, 0);
-      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CGebo@D'@B rune on your skin! The rune flashes out of existence immediately!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on $s skin. The rune flashes out of existence immediately!@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CGebo@D'@B rune on your skin! The rune flashes out of existence immediately!@n", true, ch, 0, 0, TO_CHAR);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on $s skin. The rune flashes out of existence immediately!@n", true, ch, 0, 0, TO_ROOM);
       send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
       char_set_practice_points(vict, char_get_practice_points(vict) + (125));
       send_to_char(vict, "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
@@ -972,9 +972,9 @@ ACMD(do_runic)
       }
     } else {
       decCurKI(ch, cost, 0);
-      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CGebo@D'@B rune on @b$N's@B skin! The rune flashes out of existence immediately!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on @RYOUR@B skin. The rune flashes out of existence immediately!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on @b$N's@B skin. The rune flashes out of existence immediately!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CGebo@D'@B rune on @b$N's@B skin! The rune flashes out of existence immediately!@n", true, ch, 0, vict, TO_CHAR);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on @RYOUR@B skin. The rune flashes out of existence immediately!@n", true, ch, 0, vict, TO_VICT);
+      act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on @b$N's@B skin. The rune flashes out of existence immediately!@n", true, ch, 0, vict, TO_NOTVICT);
       send_to_char(ch, "@D[@B%d@b ink used.@D]@n\r\n", inkcost);
       char_set_practice_points(vict, char_get_practice_points(vict) + (125));
       send_to_char(vict, "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
@@ -1015,7 +1015,7 @@ ACMD(do_resize)
     send_to_char(ch, "Syntax: resize (obj) (small | medium)\r\n");
     return;
   }
-  if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
     send_to_char(ch, "You don't have that object!\r\n");
     return;
   }
@@ -1032,8 +1032,8 @@ ACMD(do_resize)
       send_to_char(ch, "The equipment is already small sized.\r\n");
       return;
     }
-    act("@WYou carefully adjust the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W carefully adjusts the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_ROOM);
+    act("@WYou carefully adjust the size of @c$p@W.@n", true, ch, obj, 0, TO_CHAR);
+    act("@C$n@W carefully adjusts the size of @c$p@W.@n", true, ch, obj, 0, TO_ROOM);
     obj_set_size(obj, SIZE_SMALL);
     decCurST(ch, obj_get_weight(obj) + (getMaxST(ch) / 40), 0);
   } else if (!strcasecmp(arg2, "medium")) {
@@ -1041,8 +1041,8 @@ ACMD(do_resize)
       send_to_char(ch, "The equipment is already medium sized.\r\n");
       return;
     }
-    act("@WYou carefully adjust the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W carefully adjusts the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_ROOM);
+    act("@WYou carefully adjust the size of @c$p@W.@n", true, ch, obj, 0, TO_CHAR);
+    act("@C$n@W carefully adjusts the size of @c$p@W.@n", true, ch, obj, 0, TO_ROOM);
     obj_set_size(obj, SIZE_MEDIUM);
     decCurST(ch, obj_get_weight(obj) + (getMaxST(ch) / 40), 0);
   } else {
@@ -1083,7 +1083,7 @@ ACMD(do_bury)
     return;
   }
 
-  struct obj_data *obj = NULL, *buried = NULL, *fobj = NULL, *next_obj;
+  struct obj_data *obj = nullptr, *buried = nullptr, *fobj = nullptr, *next_obj;
 
   for (buried = world[char_get_in_room(ch)].contents; buried; buried = next_obj) {
     next_obj = buried->next_content;
@@ -1097,35 +1097,35 @@ ACMD(do_bury)
       send_to_char(ch, "Bury what?\r\n");
       return;
     }
-    if (!(obj = get_obj_in_list_vis(ch, arg2, NULL, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
       send_to_char(ch, "You don't have that object to bury.\r\n");
       return;
     }
-    if (fobj != NULL) {
+    if (fobj != nullptr) {
       send_to_char(ch, "There is already something buried near here.\r\n");
       return;
     }
     if (rroom_sect(char_get_in_room(ch)) != SECT_DESERT) {
-      act("@yYou start digging in a spot of soft dirt. Once you have an appropriately sized hole you drop @G$p@y in and then cover it.@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("@C$n@y starts digging in a spot of soft dirt. Once $e has an appropriately sized hole $e drops @G$p@y in and then covers it.@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@yYou start digging in a spot of soft dirt. Once you have an appropriately sized hole you drop @G$p@y in and then cover it.@n", true, ch, obj, 0, TO_CHAR);
+      act("@C$n@y starts digging in a spot of soft dirt. Once $e has an appropriately sized hole $e drops @G$p@y in and then covers it.@n", true, ch, obj, 0, TO_ROOM);
     } else {
-      act("@YYou start digging in a spot of soft sand. Once you have an appropriately sized hole you drop @G$p@Y in and then cover it.@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("@C$n@Y starts digging in a spot of soft sand. Once $e has an appropriately sized hole $e drops @G$p@Y in and then covers it.@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@YYou start digging in a spot of soft sand. Once you have an appropriately sized hole you drop @G$p@Y in and then cover it.@n", true, ch, obj, 0, TO_CHAR);
+      act("@C$n@Y starts digging in a spot of soft sand. Once $e has an appropriately sized hole $e drops @G$p@Y in and then covers it.@n", true, ch, obj, 0, TO_ROOM);
     }
     obj_from_char(obj);
     obj_to_room(obj, char_get_in_room(ch));
     obj_extra_set(obj, ITEM_BURIED, true);
   } else if (!strcasecmp(arg, "uncover")) {
-    if (fobj == NULL) {
+    if (fobj == nullptr) {
       send_to_char(ch, "There is nothing buried here.\r\n");
       return;
     }
     if (rroom_sect(char_get_in_room(ch)) != SECT_DESERT) {
-      act("@yYou slowly dig and reveal @G$p@y buried in the dirt! You pull it out and set it on the ground before covering the hole back up.@n", TRUE, ch, fobj, 0, TO_CHAR);
-      act("@C$n@y starts digging and shortly reveals @G$p@y buried in the dirt! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n", TRUE, ch, fobj, 0, TO_ROOM);
+      act("@yYou slowly dig and reveal @G$p@y buried in the dirt! You pull it out and set it on the ground before covering the hole back up.@n", true, ch, fobj, 0, TO_CHAR);
+      act("@C$n@y starts digging and shortly reveals @G$p@y buried in the dirt! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n", true, ch, fobj, 0, TO_ROOM);
     } else {
-      act("@YYou slowly dig and reveal @G$p@Y buried in the sand! You pull it out and set it on the ground before covering the hole back up.@n", TRUE, ch, fobj, 0, TO_CHAR);
-      act("@C$n@Y starts digging and shortly reveals @G$p@Y buried in the sand! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n", TRUE, ch, fobj, 0, TO_ROOM);
+      act("@YYou slowly dig and reveal @G$p@Y buried in the sand! You pull it out and set it on the ground before covering the hole back up.@n", true, ch, fobj, 0, TO_CHAR);
+      act("@C$n@Y starts digging and shortly reveals @G$p@Y buried in the sand! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n", true, ch, fobj, 0, TO_ROOM);
     }
     obj_extra_set(fobj, ITEM_BURIED, false);
   } else {
@@ -1160,7 +1160,7 @@ ACMD(do_silk)
     return;
   }
 
-  struct obj_data *obj = NULL, *weave = NULL, *next_obj = NULL, *weaved = NULL;
+  struct obj_data *obj = nullptr, *weave = nullptr, *next_obj = nullptr, *weaved = nullptr;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
   two_arguments(argument, arg, arg2);
@@ -1178,25 +1178,25 @@ ACMD(do_silk)
       return;
     }
 
-    int found = FALSE, armor = 500, str = 0, intel = 0, olevel = 0;
+    int found = false, armor = 500, str = 0, intel = 0, olevel = 0;
     double price = 1;
 
     for (weave = ch->carrying; weave; weave = next_obj) {
       next_obj = weave->next_content;
-      if (found == FALSE && valid_silk(weave) && !obj_extra_flagged(weave, ITEM_FORGED)) {
-        found = TRUE;
+      if (found == false && valid_silk(weave) && !obj_extra_flagged(weave, ITEM_FORGED)) {
+        found = true;
         obj   = weave;
       }
     }
 
-    if (found == FALSE) {
+    if (found == false) {
       send_to_char(ch, "You do not have an acceptable bundle of silk in your inventory!\r\n");
       return;
     } else {
       if (!strcasecmp(arg2, "head")) {
         if (prob <= perc) {
-          act("@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_CHAR);
-          act("@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_ROOM);
+          act("@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", true, ch, obj, 0, TO_CHAR);
+          act("@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", true, ch, obj, 0, TO_ROOM);
           extract_obj(obj);
           char_set_wait(ch, PULSE_4SEC);
           return;
@@ -1247,15 +1247,15 @@ ACMD(do_silk)
           weaved->affected[2].location = 3;
           weaved->affected[2].modifier = intel;
         }
-        act("@WYou attempt to weave the bundle and manage to create $p@W!@n", TRUE, ch, weaved, 0, TO_CHAR);
-        act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", TRUE, ch, weaved, 0, TO_ROOM);
+        act("@WYou attempt to weave the bundle and manage to create $p@W!@n", true, ch, weaved, 0, TO_CHAR);
+        act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch, weaved, 0, TO_ROOM);
         do_get(ch, (char[]){"headsash"}, 0, 0);
         extract_obj(obj);
         char_set_wait(ch, PULSE_4SEC);
       } else if (!strcasecmp(arg2, "wrist")) {
         if (prob <= perc) {
-          act("@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_CHAR);
-          act("@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_ROOM);
+          act("@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", true, ch, obj, 0, TO_CHAR);
+          act("@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", true, ch, obj, 0, TO_ROOM);
           extract_obj(obj);
           char_set_wait(ch, PULSE_4SEC);
           return;
@@ -1306,15 +1306,15 @@ ACMD(do_silk)
           weaved->affected[2].location = 3;
           weaved->affected[2].modifier = intel;
         }
-        act("@WYou attempt to weave the bundle and manage to create $p@W!@n", TRUE, ch, weaved, 0, TO_CHAR);
-        act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", TRUE, ch, weaved, 0, TO_ROOM);
+        act("@WYou attempt to weave the bundle and manage to create $p@W!@n", true, ch, weaved, 0, TO_CHAR);
+        act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch, weaved, 0, TO_ROOM);
         do_get(ch, (char[]){"wristband"}, 0, 0);
         extract_obj(obj);
         char_set_wait(ch, PULSE_4SEC);
       } else if (!strcasecmp(arg2, "belt")) {
         if (prob <= perc) {
-          act("@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_CHAR);
-          act("@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_ROOM);
+          act("@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", true, ch, obj, 0, TO_CHAR);
+          act("@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n", true, ch, obj, 0, TO_ROOM);
           extract_obj(obj);
           char_set_wait(ch, PULSE_4SEC);
           return;
@@ -1365,8 +1365,8 @@ ACMD(do_silk)
           weaved->affected[2].location = 3;
           weaved->affected[2].modifier = intel;
         }
-        act("@WYou attempt to weave the bundle and manage to create $p@W!@n", TRUE, ch, weaved, 0, TO_CHAR);
-        act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", TRUE, ch, weaved, 0, TO_ROOM);
+        act("@WYou attempt to weave the bundle and manage to create $p@W!@n", true, ch, weaved, 0, TO_CHAR);
+        act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch, weaved, 0, TO_ROOM);
         do_get(ch, (char[]){"belt"}, 0, 0);
         extract_obj(obj);
         char_set_wait(ch, PULSE_4SEC);
@@ -1385,62 +1385,62 @@ ACMD(do_silk)
       return;
     }
     char_set_wait(ch, PULSE_3SEC);
-    int super = FALSE, superoll = rand_number(1, 100);
+    int super = false, superoll = rand_number(1, 100);
     if (char_is_kurzak(ch)) {
       if (char_get_skill(ch, SKILL_SILK) >= 100) {
         if (8 > superoll) {
-          super = TRUE;
+          super = true;
         }
       } else if (char_get_skill(ch, SKILL_SILK) >= 60) {
         if (6 > superoll) {
-          super = TRUE;
+          super = true;
         }
       } else if (char_get_skill(ch, SKILL_SILK) >= 40) {
         if (3 > superoll) {
-          super = TRUE;
+          super = true;
         }
       }
     }
-    if (super == TRUE) {
+    if (super == true) {
       obj = read_object(16708, VIRTUAL);
       obj_to_room(obj, char_get_in_room(ch));
-      act("@YYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@Y piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
+      act("@YYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@Y piled at your feet!@n", true, ch, obj, 0, TO_CHAR);
       send_to_char(ch, "@YIt's SUPER grand!@n\r\n");
-      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, 0, TO_ROOM);
       decCurKI(ch, cost, 0);
     } else if (prob > perc && prob >= 100) { /* Second Best Quality */
       obj = read_object(16700, VIRTUAL);
       obj_to_room(obj, char_get_in_room(ch));
-      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", true, ch, obj, 0, TO_CHAR);
+      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, 0, TO_ROOM);
       decCurKI(ch, cost, 0);
     } else if (prob > perc && prob >= 90) { /* Great Quality */
       obj = read_object(16701, VIRTUAL);
       obj_to_room(obj, char_get_in_room(ch));
-      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", true, ch, obj, 0, TO_CHAR);
+      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, 0, TO_ROOM);
       decCurKI(ch, cost, 0);
     } else if (prob > perc && prob >= 80) { /* Good Quality */
       obj = read_object(16702, VIRTUAL);
       obj_to_room(obj, char_get_in_room(ch));
-      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", true, ch, obj, 0, TO_CHAR);
+      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, 0, TO_ROOM);
       decCurKI(ch, cost, 0);
     } else if (prob > perc && prob >= 50) { /* Decent Quality */
       obj = read_object(16703, VIRTUAL);
       obj_to_room(obj, char_get_in_room(ch));
-      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", true, ch, obj, 0, TO_CHAR);
+      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, 0, TO_ROOM);
       decCurKI(ch, cost, 0);
     } else if (prob > perc) { /* Bad Quality */
       obj = read_object(16704, VIRTUAL);
       obj_to_room(obj, char_get_in_room(ch));
-      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", true, ch, obj, 0, TO_CHAR);
+      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", true, ch, obj, 0, TO_ROOM);
       decCurKI(ch, cost, 0);
     } else {
-      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You end up making a poorly formed puddle of goo...@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("@C$n@W seems to concentrate for a moment before spitting out a poorly formed puddle of goo...@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You end up making a poorly formed puddle of goo...@n", true, ch, obj, 0, TO_CHAR);
+      act("@C$n@W seems to concentrate for a moment before spitting out a poorly formed puddle of goo...@n", true, ch, obj, 0, TO_ROOM);
       decCurKI(ch, cost, 0);
       improve_skill(ch, SKILL_SILK, 1);
     }
@@ -1461,7 +1461,7 @@ static int valid_recipe(struct char_data *ch, int recipe, int type)
   int rice = -1, flour = -1, appleplum = -1, fberry = -1, carambola = -1;
 
   struct obj_data *obj2, *next_obj;
-  int pass = FALSE;
+  int pass = false;
 
   /* Determine ingredients needed for recipe */
   switch (recipe) {
@@ -1798,7 +1798,7 @@ static int valid_recipe(struct char_data *ch, int recipe, int type)
           break;
       }
     }
-    return (TRUE);
+    return (true);
     /* We'll exit here after removing the ingredients, for safety */
   }
 
@@ -1806,83 +1806,83 @@ static int valid_recipe(struct char_data *ch, int recipe, int type)
   switch (recipe) {
     case RECIPE_TOMATO_SOUP:
       if (tomato == 0) {
-        pass = TRUE;
+        pass = true;
       }
       break;
     case RECIPE_STEAK:
       if (normmeat == 0) {
-        pass = TRUE;
+        pass = true;
       }
       break;
     case RECIPE_POTATO_SOUP:
       if (potato == 0) {
-        pass = TRUE;
+        pass = true;
       }
       break;
     case RECIPE_VEGETABLE_SOUP:
       if (potato == 0 && tomato == 0 && carrot == 0 && greenbean == 0 && onion == 0) {
-        pass = TRUE;
+        pass = true;
       }
       break;
     case RECIPE_MEAT_STEW:
       if (normmeat == 0 && potato == 0 && tomato == 0 && garlic == 0)
-        pass = TRUE;
+        pass = true;
       break;
     case RECIPE_ROAST:
       if (normmeat == 0 && potato == 0 && garlic == 0 && onion == 0 && greenbean == 0)
-        pass = TRUE;
+        pass = true;
       break;
     case RECIPE_CHILI_SOUP:
       if (normmeat == 0 && redpep == 0 && tomato == 0)
-        pass = TRUE;
+        pass = true;
       break;
     case RECIPE_GRILLED_NORMFISH:
       if (normfish == 0)
-        pass = TRUE;
+        pass = true;
       break;
     case RECIPE_GRILLED_GOODFISH:
       if (goodfish == 0)
-        pass = TRUE;
+        pass = true;
       break;
     case RECIPE_GRILLED_GREATFISH:
       if (greatfish == 0)
-        pass = TRUE;
+        pass = true;
       break;
     case RECIPE_GRILLED_BESTFISH:
       if (bestfish == 0)
-        pass = TRUE;
+        pass = true;
       break;
     case RECIPE_COOKED_RICE:
       if (rice == 0)
-        pass = TRUE;
+        pass = true;
       break;
     case RECIPE_SUSHI:
       if (rice == 0 && normfish == 0)
-        pass = TRUE;
+        pass = true;
       break;
     case RECIPE_BREAD:
       if (flour == 0)
-        pass = TRUE;
+        pass = true;
       break;
     case RECIPE_SALAD:
       if (tomato == 0 && cucumber == 0 && carrot == 0 && lettuce == 0)
-        pass = TRUE;
+        pass = true;
       break;
     case RECIPE_APPLEPLUM:
       if (flour == 0 && appleplum == 0)
-        pass = TRUE;
+        pass = true;
       break;
     case RECIPE_FBERRY_MUFFIN:
       if (flour == 0 && fberry == 0)
-        pass = TRUE;
+        pass = true;
       break;
     case RECIPE_CARAMBOLA_BREAD:
       if (flour == 0 && carambola == 0)
-        pass = TRUE;
+        pass = true;
       break;
   }
 
-  if (pass == FALSE) {
+  if (pass == false) {
     if (tomato > 0) {
       send_to_char(ch, "@WYou need @m%d@W tomato%s for this recipe.@n\r\n", tomato, tomato > 1 ? "es" : "");
     }
@@ -1946,9 +1946,9 @@ static int valid_recipe(struct char_data *ch, int recipe, int type)
     if (brownmush > 0) {
       send_to_char(ch, "@WYou need @m%d@W brown mushroom%s for this recipe.@n\r\n", brownmush, brownmush > 1 ? "s" : "");
     }
-    return (FALSE);
+    return (false);
   }
-  return (TRUE);
+  return (true);
 }
 
 static int campfire_cook(int recipe)
@@ -1961,11 +1961,11 @@ static int campfire_cook(int recipe)
     case RECIPE_GRILLED_GREATFISH:
     case RECIPE_GRILLED_BESTFISH:
     case RECIPE_ROAST:
-      return (TRUE);
+      return (true);
       break;
   }
 
-  return (FALSE);
+  return (false);
 }
 
 ACMD(do_cook)
@@ -2012,8 +2012,8 @@ ACMD(do_cook)
     send_to_char(ch, "@wSyntax: cook (recipe number)@n\r\n");
     return;
   }
-  int num = atoi(arg), pass = FALSE;
-  struct obj_data *meal = NULL;
+  int num = atoi(arg), pass = false;
+  struct obj_data *meal = nullptr;
 
   int recipe = -1;
   switch (num) {
@@ -2088,11 +2088,11 @@ ACMD(do_cook)
     return;
   }
   valid_recipe(ch, recipe, 1);
-  pass = TRUE;
-  if (pass == TRUE) {
+  pass = true;
+  if (pass == true) {
     if (skill < prob) {
-      act("@wYou screw up the preparation of the recipe and end up wasting the ingredients!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@w starts to prepare some food, but ends up ruining the ingredients instead!@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@wYou screw up the preparation of the recipe and end up wasting the ingredients!@n", true, ch, 0, 0, TO_CHAR);
+      act("@C$n@w starts to prepare some food, but ends up ruining the ingredients instead!@n", true, ch, 0, 0, TO_ROOM);
       improve_skill(ch, SKILL_COOKING, 0);
       char_set_wait(ch, PULSE_2SEC);
       return;
@@ -2211,8 +2211,8 @@ ACMD(do_cook)
       psbonus += 1;
       expbonus += 3;
     }
-    act("@wYou carefully prepare the ingredients and then start cooking them. After a while of patience  and skillful care you successfully make @D'@C$p@D'@w!@n", TRUE, ch, meal, 0, TO_CHAR);
-    act("@C$n@w carefully prepares some ingredients and starts cooking them. After a while of patience and skillful care $e succeeds in making @D'@C$p@D'@w!@n", TRUE, ch, meal, 0, TO_ROOM);
+    act("@wYou carefully prepare the ingredients and then start cooking them. After a while of patience  and skillful care you successfully make @D'@C$p@D'@w!@n", true, ch, meal, 0, TO_CHAR);
+    act("@C$n@w carefully prepares some ingredients and starts cooking them. After a while of patience and skillful care $e succeeds in making @D'@C$p@D'@w!@n", true, ch, meal, 0, TO_ROOM);
     improve_skill(ch, SKILL_COOKING, 0);
 
     if (psbonus > 0) {
@@ -2248,7 +2248,7 @@ ACMD(do_feed)
     return;
   }
 
-  if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+  if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "That target isn't here.\r\n");
     return;
   }
@@ -2258,7 +2258,7 @@ ACMD(do_feed)
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg2, NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
     send_to_char(ch, "You need to give them a senzu.\r\n");
     return;
   }
@@ -2293,9 +2293,9 @@ ACMD(do_feed)
     return;
   }
 
-  act("@WYou take $p@W and pop it into @C$N@W's mouth!@n", TRUE, ch, obj, vict, TO_CHAR);
-  act("@C$n@W takes $p@W and pops it into YOUR mouth!@n", TRUE, ch, obj, vict, TO_VICT);
-  act("@C$n@W takes $p@W and pops it into @c$N@W's mouth!@n", TRUE, ch, obj, vict, TO_NOTVICT);
+  act("@WYou take $p@W and pop it into @C$N@W's mouth!@n", true, ch, obj, vict, TO_CHAR);
+  act("@C$n@W takes $p@W and pops it into YOUR mouth!@n", true, ch, obj, vict, TO_VICT);
+  act("@C$n@W takes $p@W and pops it into @c$N@W's mouth!@n", true, ch, obj, vict, TO_NOTVICT);
   mag_objectmagic(vict, obj, (char[]){""});
 }
 
@@ -2317,7 +2317,7 @@ ACMD(do_spoil)
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[char_get_in_room(ch)].contents))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
     send_to_char(ch, "No corpse around here by that name.\r\n");
     return;
   }
@@ -2346,14 +2346,14 @@ ACMD(do_spoil)
   }
 
   if (type == 0) {
-    act("@C$n@W reaches down and @rtears@W the head off of @R$p@W!@n", TRUE, ch, obj, 0, TO_ROOM);
-    act("@WYou reach down and @rtear@W the head off of @R$p@W!@n", TRUE, ch, obj, 0, TO_CHAR);
+    act("@C$n@W reaches down and @rtears@W the head off of @R$p@W!@n", true, ch, obj, 0, TO_ROOM);
+    act("@WYou reach down and @rtear@W the head off of @R$p@W!@n", true, ch, obj, 0, TO_CHAR);
   } else if (type == 1) {
-    act("@C$n@W reaches down and @rcuts@W the head off of @R$p@W!@n", TRUE, ch, obj, 0, TO_ROOM);
-    act("@WYou reach down and @rcut@W the head off of @R$p@W!@n", TRUE, ch, obj, 0, TO_CHAR);
+    act("@C$n@W reaches down and @rcuts@W the head off of @R$p@W!@n", true, ch, obj, 0, TO_ROOM);
+    act("@WYou reach down and @rcut@W the head off of @R$p@W!@n", true, ch, obj, 0, TO_CHAR);
   } else if (type == 2) {
-    act("@C$n@W reaches down and @rcuts@W the head off of @R$p@W!@n", TRUE, ch, obj, 0, TO_ROOM);
-    act("@WYou reach down and @rcut@W the head off of @R$p@W!@n", TRUE, ch, obj, 0, TO_CHAR);
+    act("@C$n@W reaches down and @rcuts@W the head off of @R$p@W!@n", true, ch, obj, 0, TO_ROOM);
+    act("@WYou reach down and @rcut@W the head off of @R$p@W!@n", true, ch, obj, 0, TO_CHAR);
   }
 
   obj_set_value(obj, VAL_CORPSE_HEAD, 0);

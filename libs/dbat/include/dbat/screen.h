@@ -12,14 +12,14 @@
 #define KNUL ""
 
 /* conditional color.  pass it a pointer to a char_data and a color level. */
-#define C_OFF 0
-#define C_ON  1
-#define C_BRI C_ON /* Compatibility hack */
-#define C_NRM C_ON /* Compatibility hack */
-#define C_CMP C_ON /* Compatibility hack */
+constexpr int C_OFF = 0;
+constexpr int C_ON  = 1;
+constexpr int C_BRI = C_ON; /* Compatibility hack */
+constexpr int C_NRM = C_ON; /* Compatibility hack */
+constexpr int C_CMP = C_ON; /* Compatibility hack */
 
-#define COLOR_CHOICES(ch) (char_is_npc(ch) ? NULL : ch->player_specials ? ch->player_specials->color_choices \
-                                                                        : NULL)
+#define COLOR_CHOICES(ch) (char_is_npc(ch) ? nullptr : ch->player_specials ? ch->player_specials->color_choices \
+                                                                           : nullptr)
 #define _clrlevel(ch)  (!char_is_npc(ch) ? (char_prf_flagged((ch), PRF_COLOR) ? 1 : 0) : 0)
 #define clr(ch, lvl)   (_clrlevel(ch) >= (lvl))
 #define CCNRM(ch, lvl) (clr((ch), (lvl)) ? KNRM : KNUL)
@@ -42,10 +42,10 @@
 #define QCYN CCCYN(ch, C_BRI)
 #define QWHT CCWHT(ch, C_BRI)
 
-#define ANSISTART  "\x1B["
-#define ANSISEP    ';'
+#define ANSISTART "\x1B["
+constexpr int ANSISEP = ';';
 #define ANSISEPSTR ";"
-#define ANSIEND    'm'
+constexpr int ANSIEND = 'm';
 #define ANSIENDSTR "m"
 
 /* Attributes */

@@ -81,7 +81,7 @@ ACMD(do_oasis_list)
     case SCMD_OASIS_GLIST: list_guilds(ch, rzone, vmin, vmax); break;
     default:
       send_to_char(ch, "You can't list that!\r\n");
-      mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE,
+      mudlog(LOG_BRF, ADMLVL_IMMORT, true,
              "SYSERR: do_oasis_list: Unknown list option: %d", subcmd);
   }
 }
@@ -169,7 +169,7 @@ static void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zon
                    world[i].name, world[i].proto_script ? "[TRIG] " : "");
 
       for (j = 0; j < NUM_OF_DIRS; j++) {
-        if (rroom_get_dir_option(i, j) == NULL)
+        if (rroom_get_dir_option(i, j) == nullptr)
           continue;
         if (rroom_get_dir_option(i, j)->to_room == NOWHERE)
           continue;

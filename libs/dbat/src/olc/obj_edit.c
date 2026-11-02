@@ -82,7 +82,7 @@ void disp_restring_menu(struct descriptor_data *d)
 void pobj_edit_parse(struct descriptor_data *d, char *arg)
 {
 
-  struct obj_data *obj = NULL;
+  struct obj_data *obj = nullptr;
   char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH], buf3[MAX_INPUT_LENGTH];
 
   /* This section is dedicated to equipment restringing */
@@ -140,9 +140,8 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
         if (d->obj_name) {
           free(d->obj_name);
         }
-        *buf = '\0';
-        snprintf(buf, sizeof(buf), "%s", arg);
-        d->obj_name = strdup(buf);
+        *buf        = '\0';
+        d->obj_name = strdup(arg);
         disp_restring_menu(d);
         d->obj_editval = EDIT_RESTRING_MAIN;
         break;
@@ -162,9 +161,8 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
         if (d->obj_short) {
           free(d->obj_short);
         }
-        *buf = '\0';
-        snprintf(buf, sizeof(buf), "%s", arg);
-        d->obj_short = strdup(buf);
+        *buf         = '\0';
+        d->obj_short = strdup(arg);
         disp_restring_menu(d);
         d->obj_editval = EDIT_RESTRING_MAIN;
         break;
@@ -184,9 +182,8 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
         if (d->obj_long) {
           free(d->obj_long);
         }
-        *buf = '\0';
-        snprintf(buf, sizeof(buf), "%s", arg);
-        d->obj_long = strdup(buf);
+        *buf        = '\0';
+        d->obj_long = strdup(arg);
         disp_restring_menu(d);
         d->obj_editval = EDIT_RESTRING_MAIN;
         break;
@@ -199,17 +196,14 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
         if (!strcasecmp(arg, "yes") || !strcasecmp(arg, "Yes") || !strcasecmp(arg, "y") || !strcasecmp(arg, "Y")) {
           obj = d->obj_point;
 
-          *buf = '\0';
-          snprintf(buf, sizeof(buf), "%s", d->obj_name);
-          obj->name = strdup(buf);
+          *buf      = '\0';
+          obj->name = strdup(d->obj_name);
 
-          *buf2 = '\0';
-          snprintf(buf2, sizeof(buf2), "%s", d->obj_short);
-          obj->short_description = strdup(buf2);
+          *buf2                  = '\0';
+          obj->short_description = strdup(d->obj_short);
 
-          *buf3 = '\0';
-          snprintf(buf3, sizeof(buf3), "%s", d->obj_long);
-          obj->description = strdup(buf3);
+          *buf3            = '\0';
+          obj->description = strdup(d->obj_long);
 
           d->obj_editflag = EDIT_NONE;
           d->obj_editval  = EDIT_NONE;
@@ -309,9 +303,8 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
         if (d->obj_name) {
           free(d->obj_name);
         }
-        *buf = '\0';
-        snprintf(buf, sizeof(buf), "%s", arg);
-        d->obj_name = strdup(buf);
+        *buf        = '\0';
+        d->obj_name = strdup(arg);
         disp_custom_menu(d);
         d->obj_editval = EDIT_CUSTOM_MAIN;
         break;
@@ -331,9 +324,8 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
         if (d->obj_short) {
           free(d->obj_short);
         }
-        *buf = '\0';
-        snprintf(buf, sizeof(buf), "%s", arg);
-        d->obj_short = strdup(buf);
+        *buf         = '\0';
+        d->obj_short = strdup(arg);
         disp_custom_menu(d);
         d->obj_editval = EDIT_CUSTOM_MAIN;
         break;
@@ -353,9 +345,8 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
         if (d->obj_long) {
           free(d->obj_long);
         }
-        *buf = '\0';
-        snprintf(buf, sizeof(buf), "%s", arg);
-        d->obj_long = strdup(buf);
+        *buf        = '\0';
+        d->obj_long = strdup(arg);
         disp_custom_menu(d);
         d->obj_editval = EDIT_CUSTOM_MAIN;
         break;
@@ -457,27 +448,21 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
                 obj_wear_set(obj, ITEM_WEAR_SH, true);
                 break;
             }
-            *buf = '\0';
-            snprintf(buf, sizeof(buf), "%s", d->obj_name);
-            obj->name = strdup(buf);
-            *buf2     = '\0';
-            snprintf(buf2, sizeof(buf2), "%s", d->obj_short);
-            obj->short_description = strdup(buf2);
+            *buf                   = '\0';
+            obj->name              = strdup(d->obj_name);
+            *buf2                  = '\0';
+            obj->short_description = strdup(d->obj_short);
             *buf3                  = '\0';
-            snprintf(buf3, sizeof(buf3), "%s", d->obj_long);
-            obj->description = strdup(buf3);
+            obj->description       = strdup(d->obj_long);
           } else {
             obj = read_object(20098, VIRTUAL);
             obj_to_char(obj, d->character);
-            *buf = '\0';
-            snprintf(buf, sizeof(buf), "%s", d->obj_name);
-            obj->name = strdup(buf);
-            *buf2     = '\0';
-            snprintf(buf2, sizeof(buf2), "%s", d->obj_short);
-            obj->short_description = strdup(buf2);
+            *buf                   = '\0';
+            obj->name              = strdup(d->obj_name);
+            *buf2                  = '\0';
+            obj->short_description = strdup(d->obj_short);
             *buf3                  = '\0';
-            snprintf(buf3, sizeof(buf3), "%s", d->obj_long);
-            obj->description = strdup(buf3);
+            obj->description       = strdup(d->obj_long);
             switch (d->obj_weapon) {
               case 1:
                 obj_set_value(obj, VAL_WEAPON_DAMTYPE, TYPE_SLASH - TYPE_HIT);

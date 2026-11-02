@@ -74,7 +74,7 @@ ACMD(do_rogafufuken)
   /* There is a player/mob targeted */
   handle_cooldown(ch, 7);
   if (vict) {
-    if (!can_kill(ch, vict, NULL, 1)) {
+    if (!can_kill(ch, vict, nullptr, 1)) {
       return;
     }
     if (handle_defender(vict, ch)) {
@@ -85,7 +85,7 @@ ACMD(do_rogafufuken)
 
     index = check_def(vict); /* Check parry/block/dodge of vict */
 
-    prob = roll_accuracy(ch, skill, FALSE);
+    prob = roll_accuracy(ch, skill, false);
     perc = chance_to_hit(ch);
 
     index -= handle_speed(ch, vict);
@@ -106,54 +106,54 @@ ACMD(do_rogafufuken)
     if (prob < perc - 20) {
       if ((getCurST(vict)) > 0) {
         if (pry > rand_number(1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
-          act("@C$N@W parries your rogafufuken with a punch of $s own!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou parry @C$n's@W rogafufuken with a punch of your own!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W parries @c$n's@W rogafufuken with a punch of $s own!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W parries your rogafufuken with a punch of $s own!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou parry @C$n's@W rogafufuken with a punch of your own!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W parries @c$n's@W rogafufuken with a punch of $s own!@n", false, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_PARRY, 0);
           pcost(ch, 0, getEffMaxPL(vict) / 300);
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(vict, -2, skill, attperc);
           dmg *= calc_critical(ch, 1);
-          hurt(0, 0, vict, ch, NULL, dmg, -1);
+          hurt(0, 0, vict, ch, nullptr, dmg, -1);
 
           return;
         }
         if (blk > axion_dice(10)) {
-          act("@C$N@W moves quickly and blocks your rogafufuken!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou move quickly and block @C$n's@W rogafufuken!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W moves quickly and blocks @c$n's@W rogafufuken!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W moves quickly and blocks your rogafufuken!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou move quickly and block @C$n's@W rogafufuken!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W moves quickly and blocks @c$n's@W rogafufuken!@n", false, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 23, skill, attperc);
           dmg /= 4;
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
+          hurt(0, 0, ch, vict, nullptr, dmg, 1);
 
           return;
         }
         if (dge > axion_dice(10)) {
-          act("@C$N@W manages to dodge your rogafufuken!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou dodge @C$n's@W rogafufuken!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W manages to dodge @c$n's@W rogafufuken!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W manages to dodge your rogafufuken!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou dodge @C$n's@W rogafufuken!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W manages to dodge @c$n's@W rogafufuken!@n", false, ch, 0, vict, TO_NOTVICT);
 
           pcost(ch, attperc, 0);
-          hurt(0, 0, ch, vict, NULL, 0, 1);
+          hurt(0, 0, ch, vict, nullptr, 0, 1);
 
           return;
         }
-        act("@WYou can't believe it but your rogafufuken misses!@n", FALSE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W fires a rogafufuken at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
-        act("@c$n@W fires a rogafufuken at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou can't believe it but your rogafufuken misses!@n", false, ch, 0, vict, TO_CHAR);
+        act("@C$n@W fires a rogafufuken at you, but misses!@n ", false, ch, 0, vict, TO_VICT);
+        act("@c$n@W fires a rogafufuken at @C$N@W, but somehow misses!@n ", false, ch, 0, vict, TO_NOTVICT);
 
         pcost(ch, attperc, 0);
-        hurt(0, 0, ch, vict, NULL, 0, 1);
+        hurt(0, 0, ch, vict, nullptr, 0, 1);
 
         return;
       }
-      act("@WYou can't believe it but your rogafufuken misses!@n", FALSE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W fires a rogafufuken at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
-      act("@c$n@W fires a rogafufuken at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+      act("@WYou can't believe it but your rogafufuken misses!@n", false, ch, 0, vict, TO_CHAR);
+      act("@C$n@W fires a rogafufuken at you, but misses!@n", false, ch, 0, vict, TO_VICT);
+      act("@c$n@W fires a rogafufuken at @C$N@W, but somehow misses!@n", false, ch, 0, vict, TO_NOTVICT);
       pcost(ch, attperc, 0);
-      hurt(0, 0, ch, vict, NULL, 0, 1);
+      hurt(0, 0, ch, vict, nullptr, 0, 1);
       return;
     }
     dmg         = damtype(ch, 23, skill, attperc);
@@ -161,51 +161,51 @@ ACMD(do_rogafufuken)
     hitspot     = roll_hitloc(ch, vict, skill);
     switch (hitspot) {
       case 1:
-        act("@WYou pour your charged energy into your hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as you leap towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. You unleash a flurry of hand strikes on @c$N@W's body!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards YOU while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou pour your charged energy into your hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as you leap towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. You unleash a flurry of hand strikes on @c$N@W's body!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards YOU while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on YOUR body!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on @c$N@W's body!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 2: /* Critical */
-        act("@WYou pour your charged energy into your hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as you leap towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. You unleash a flurry of hand strikes on @c$N@W's face!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards YOU while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on YOUR face!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on @c$N@W's face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou pour your charged energy into your hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as you leap towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. You unleash a flurry of hand strikes on @c$N@W's face!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards YOU while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on YOUR face!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on @c$N@W's face!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 0);
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 3);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act("@WYou pour your charged energy into your hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as you leap towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. You unleash a flurry of hand strikes on @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards YOU while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou pour your charged energy into your hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as you leap towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. You unleash a flurry of hand strikes on @c$N@W's gut!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards YOU while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on YOUR gut!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on @c$N@W's gut!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 4: /* Weak */
-        act("@WYou pour your charged energy into your hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as you leap towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. You unleash a flurry of hand strikes on @c$N@W's arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards YOU while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on YOUR arm!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on @c$N@W's arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou pour your charged energy into your hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as you leap towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. You unleash a flurry of hand strikes on @c$N@W's arm!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards YOU while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on YOUR arm!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on @c$N@W's arm!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(0, 170, ch, vict, NULL, dmg, 1);
+        hurt(0, 170, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 1);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act("@WYou pour your charged energy into your hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as you leap towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. You unleash a flurry of hand strikes on @c$N@W's leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards YOU while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on YOUR leg!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on @c$N@W's leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou pour your charged energy into your hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as you leap towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. You unleash a flurry of hand strikes on @c$N@W's leg!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards YOU while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on YOUR leg!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on @c$N@W's leg!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(1, 170, ch, vict, NULL, dmg, 1);
+        hurt(1, 170, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 2);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
@@ -216,7 +216,7 @@ ACMD(do_rogafufuken)
     return;
   }
   if (obj) {
-    if (!can_kill(ch, NULL, obj, 1)) {
+    if (!can_kill(ch, nullptr, obj, 1)) {
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
@@ -225,9 +225,9 @@ ACMD(do_rogafufuken)
     }
     dmg = damtype(ch, 23, skill, attperc);
     dmg /= 10;
-    act("@WYou fire a rogafufuken at $p@W!@n", FALSE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W fires a rogafufuken at $p@W!@n", FALSE, ch, obj, 0, TO_ROOM);
-    hurt(0, 0, ch, NULL, obj, dmg, 0);
+    act("@WYou fire a rogafufuken at $p@W!@n", false, ch, obj, 0, TO_CHAR);
+    act("@C$n@W fires a rogafufuken at $p@W!@n", false, ch, obj, 0, TO_ROOM);
+    hurt(0, 0, ch, nullptr, obj, dmg, 0);
     pcost(ch, attperc, 0);
 
   } else {
@@ -276,7 +276,7 @@ ACMD(do_heeldrop)
     handle_cooldown(ch, 9);
   }
   if (vict) {
-    if (!can_kill(ch, vict, NULL, 0)) {
+    if (!can_kill(ch, vict, nullptr, 0)) {
       return;
     }
     if (handle_defender(vict, ch)) {
@@ -285,7 +285,7 @@ ACMD(do_heeldrop)
     }
     improve_skill(ch, SKILL_HEELDROP, 1);
     index = check_def(vict);
-    prob  = roll_accuracy(ch, skill, FALSE);
+    prob  = roll_accuracy(ch, skill, false);
     perc  = chance_to_hit(ch);
 
     if (char_is_kabito(ch) && !char_is_npc(ch)) {
@@ -376,54 +376,54 @@ ACMD(do_heeldrop)
     if (prob < perc - 20) {
       if ((getCurST(vict)) > 0) {
         if (pry > rand_number(1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
-          act("@C$N@W parries your heeldrop with a punch of $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou parry @C$n's@W heeldrop with a punch of your own!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W parries @c$n's@W heeldrop with a punch of $S own!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W parries your heeldrop with a punch of $S own!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou parry @C$n's@W heeldrop with a punch of your own!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W parries @c$n's@W heeldrop with a punch of $S own!@n", true, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_PARRY, 0);
           pcost(ch, 0, stcost / 2);
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(vict, -2, skill, attperc);
           dmg *= calc_critical(ch, 0);
-          hurt(0, 0, vict, ch, NULL, dmg, -1);
+          hurt(0, 0, vict, ch, nullptr, dmg, -1);
 
           return;
         }
         if (blk > axion_dice(10)) {
-          act("@C$N@W moves quickly and blocks your heeldrop!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou move quickly and block @C$n's@W heeldrop!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W moves quickly and blocks @c$n's@W heeldrop!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W moves quickly and blocks your heeldrop!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou move quickly and block @C$n's@W heeldrop!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W moves quickly and blocks @c$n's@W heeldrop!@n", true, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_BLOCK, 0);
           pcost(ch, 0, stcost / 2);
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 8, skill, attperc);
           dmg /= 4;
-          hurt(0, 0, ch, vict, NULL, dmg, 0);
+          hurt(0, 0, ch, vict, nullptr, dmg, 0);
 
           return;
         }
         if (dge > axion_dice(10)) {
-          act("@C$N@W manages to dodge your heeldrop!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou dodge @C$n's@W heeldrop!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W manages to dodge @c$n's@W heeldrop!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W manages to dodge your heeldrop!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou dodge @C$n's@W heeldrop!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W manages to dodge @c$n's@W heeldrop!@n", true, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_DODGE, 0);
           pcost(ch, 0, stcost / 2);
-          hurt(0, 0, ch, vict, NULL, 0, 0);
+          hurt(0, 0, ch, vict, nullptr, 0, 0);
 
           return;
         }
-        act("@WYou can't believe it but your heeldrop misses!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W moves to heeldrop you, but misses!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W moves to heeldrop @C$N@W, but somehow misses!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou can't believe it but your heeldrop misses!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W moves to heeldrop you, but misses!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W moves to heeldrop @C$N@W, but somehow misses!@n", true, ch, 0, vict, TO_NOTVICT);
         pcost(ch, 0, stcost / 2);
-        hurt(0, 0, ch, vict, NULL, 0, 0);
+        hurt(0, 0, ch, vict, nullptr, 0, 0);
 
         return;
       }
-      act("@WYou can't believe it but your heeldrop misses!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W moves to heeldrop you, but misses!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@c$n@W moves to heeldrop @C$N@W, but somehow misses!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@WYou can't believe it but your heeldrop misses!@n", true, ch, 0, vict, TO_CHAR);
+      act("@C$n@W moves to heeldrop you, but misses!@n", true, ch, 0, vict, TO_VICT);
+      act("@c$n@W moves to heeldrop @C$N@W, but somehow misses!@n", true, ch, 0, vict, TO_NOTVICT);
       pcost(ch, 0, stcost / 2);
-      hurt(0, 0, ch, vict, NULL, 0, 0);
+      hurt(0, 0, ch, vict, nullptr, 0, 0);
       return;
     }
     dmg         = damtype(ch, 8, skill, attperc);
@@ -431,54 +431,54 @@ ACMD(do_heeldrop)
     hitspot     = roll_hitloc(ch, vict, skill);
     switch (hitspot) {
       case 1:
-        act("@WYou disappear, appearing above @C$N@W you spin and heeldrop $M in the face!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W disappears, only to appear above you, spinning quickly and heeldropping you in the face!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W disappears, only to appear above @C$N@W, spinning quickly and heeldropping $M in the face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou disappear, appearing above @C$N@W you spin and heeldrop $M in the face!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W disappears, only to appear above you, spinning quickly and heeldropping you in the face!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W disappears, only to appear above @C$N@W, spinning quickly and heeldropping $M in the face!@n", true, ch, 0, vict, TO_NOTVICT);
         tech_handle_crashdown(ch, vict);
 
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 0);
+        hurt(0, 0, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 2: /* Critical */
-        act("@WYou disappear, reappearing in front of @C$N@W, you flip upside down and slam your heel into the top of $S head!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W disappears, reappearing in front of you, $e flips upside down and slams $s heel into the top of your head!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W disappears, reappearing in front of @C$N@W, $e flips upside down and slams $s heel into the top of @C$N@W's head!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou disappear, reappearing in front of @C$N@W, you flip upside down and slam your heel into the top of $S head!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W disappears, reappearing in front of you, $e flips upside down and slams $s heel into the top of your head!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W disappears, reappearing in front of @C$N@W, $e flips upside down and slams $s heel into the top of @C$N@W's head!@n", true, ch, 0, vict, TO_NOTVICT);
         tech_handle_crashdown(ch, vict);
         dmg *= calc_critical(ch, 0);
-        hurt(0, 0, ch, vict, NULL, dmg, 0);
+        hurt(0, 0, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 3);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act("@WYou fly at @C$N@W, heeldropping $S gut as you fly!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W flies at you, heeldropping your gut as $e flies!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W flies at @C$N@W, heeldropping $S gut as $e flies!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou fly at @C$N@W, heeldropping $S gut as you fly!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W flies at you, heeldropping your gut as $e flies!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W flies at @C$N@W, heeldropping $S gut as $e flies!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 0);
+        hurt(0, 0, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 4: /* Weak */
-        act("@WYou heeldrop @C$N@W, hitting $M in the arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W heeldrops you, hitting you in the arm!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W heeldrops @C$N@W, hitting $M in the arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou heeldrop @C$N@W, hitting $M in the arm!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W heeldrops you, hitting you in the arm!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W heeldrops @C$N@W, hitting $M in the arm!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(0, 180, ch, vict, NULL, dmg, 0);
+        hurt(0, 180, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 1);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act("@WYou heeldrop @C$N's@W leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W heeldrops your leg!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W heeldrops @C$N's@W leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou heeldrop @C$N's@W leg!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W heeldrops your leg!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W heeldrops @C$N's@W leg!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(1, 180, ch, vict, NULL, dmg, 0);
+        hurt(1, 180, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 2);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
@@ -490,7 +490,7 @@ ACMD(do_heeldrop)
     return;
   }
   if (obj) {
-    if (!can_kill(ch, NULL, obj, 0)) {
+    if (!can_kill(ch, nullptr, obj, 0)) {
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
@@ -498,9 +498,9 @@ ACMD(do_heeldrop)
       return;
     }
     dmg = ((getCurPL(ch) / 10000) + (char_get_aff_abils_str(ch)));
-    act("@WYou heeldrop $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W heeldrops $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
-    hurt(0, 0, ch, NULL, obj, dmg, 0);
+    act("@WYou heeldrop $p@W as hard as you can!@n", true, ch, obj, 0, TO_CHAR);
+    act("@C$n@W heeldrops $p@W extremely hard!@n", true, ch, obj, 0, TO_ROOM);
+    hurt(0, 0, ch, nullptr, obj, dmg, 0);
     pcost(ch, 0, stcost);
 
   } else {
@@ -542,18 +542,18 @@ ACMD(do_bite)
     skill = 60;
   }
 
-  vict = NULL;
-  obj  = NULL;
-  if (!*arg || !(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+  vict = nullptr;
+  obj  = nullptr;
+  if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
       vict = char_get_fighting(ch);
-    } else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[char_get_in_room(ch)].contents))) {
+    } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
       return;
     }
   }
   handle_cooldown(ch, 4);
   if (vict) {
-    if (!can_kill(ch, vict, NULL, 0)) {
+    if (!can_kill(ch, vict, nullptr, 0)) {
       return;
     }
     if (handle_defender(vict, ch)) {
@@ -561,7 +561,7 @@ ACMD(do_bite)
       vict                  = def;
     }
     index = check_def(vict);
-    prob  = roll_accuracy(ch, skill, TRUE);
+    prob  = roll_accuracy(ch, skill, true);
     perc  = chance_to_hit(ch);
 
     index -= handle_speed(ch, vict);
@@ -583,53 +583,53 @@ ACMD(do_bite)
     if (prob < perc - 20) {
       if ((getCurST(vict)) > 0) {
         if (pry > rand_number(1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
-          act("@C$N@W parries your bite with a punch of their own!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou parry @C$n's@W bite with a punch of your own!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W parries @c$n's@W bite with a punch of $S own!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W parries your bite with a punch of their own!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou parry @C$n's@W bite with a punch of your own!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W parries @c$n's@W bite with a punch of $S own!@n", true, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_PARRY, 0);
           pcost(ch, 0, stcost / 2);
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(vict, -1, skill, attperc);
           dmg *= calc_critical(ch, 1);
-          hurt(0, 0, vict, ch, NULL, dmg, -1);
+          hurt(0, 0, vict, ch, nullptr, dmg, -1);
 
           return;
         }
         if (blk > axion_dice(10)) {
-          act("@C$N@W moves quickly and blocks your bite!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou move quickly and block @C$n's@W bite!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W moves quickly and blocks @c$n's@W bite!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W moves quickly and blocks your bite!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou move quickly and block @C$n's@W bite!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W moves quickly and blocks @c$n's@W bite!@n", true, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_BLOCK, 0);
           pcost(ch, 0, stcost / 2);
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 6, skill, attperc);
           dmg /= 4;
-          hurt(0, 0, ch, vict, NULL, dmg, 0);
+          hurt(0, 0, ch, vict, nullptr, dmg, 0);
 
           return;
         }
         if (dge > axion_dice(10)) {
-          act("@C$N@W manages to dodge your bite!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou dodge @C$n's@W bite!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W manages to dodge @c$n's@W bite!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W manages to dodge your bite!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou dodge @C$n's@W bite!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W manages to dodge @c$n's@W bite!@n", true, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_DODGE, 0);
           pcost(ch, 0, stcost / 2);
-          hurt(0, 0, ch, vict, NULL, 0, 0);
+          hurt(0, 0, ch, vict, nullptr, 0, 0);
 
           return;
         }
-        act("@WYou move to bite @C$N@W, but miss!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W moves to bite you, but misses!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W moves to bite @C$N@W, but somehow misses!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou move to bite @C$N@W, but miss!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W moves to bite you, but misses!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W moves to bite @C$N@W, but somehow misses!@n", true, ch, 0, vict, TO_NOTVICT);
         pcost(ch, 0, stcost / 2);
-        hurt(0, 0, ch, vict, NULL, 0, 0);
+        hurt(0, 0, ch, vict, nullptr, 0, 0);
 
         return;
       }
-      act("@C$n@W moves to bite you, but misses!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@c$n@W moves to bite @C$N@W, but somehow misses!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@C$n@W moves to bite you, but misses!@n", true, ch, 0, vict, TO_VICT);
+      act("@c$n@W moves to bite @C$N@W, but somehow misses!@n", true, ch, 0, vict, TO_NOTVICT);
       pcost(ch, 0, stcost / 2);
-      hurt(0, 0, ch, vict, NULL, 0, 0);
+      hurt(0, 0, ch, vict, nullptr, 0, 0);
       return;
     }
     dmg = damtype(ch, 8, skill, attperc);
@@ -641,59 +641,59 @@ ACMD(do_bite)
     hitspot     = roll_hitloc(ch, vict, skill);
     switch (hitspot) {
       case 1:
-        act("@WYou bite @C$N's@W face!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W bites your face!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W bites into $N's face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou bite @C$N's@W face!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W bites your face!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W bites into $N's face!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 0);
+        hurt(0, 0, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 3);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 2: /* Critical */
-        act("@WYou bite @C$N@W!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W bites you!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W bites @c$N@W!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou bite @C$N@W!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W bites you!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W bites @c$N@W!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 0);
-        hurt(0, 0, ch, vict, NULL, dmg, 0);
+        hurt(0, 0, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act("@WYou bite @C$N's@W body!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W bites you on the body, sending blood flying!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W bites @c$N@W on the body, sending blood flying!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou bite @C$N's@W body!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W bites you on the body, sending blood flying!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W bites @c$N@W on the body, sending blood flying!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 0);
+        hurt(0, 0, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 4: /* Weak */
-        act("@WYou bite @C$N's@W arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W bites you on the arm!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W bites @c$N@W on the arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou bite @C$N's@W arm!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W bites you on the arm!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W bites @c$N@W on the arm!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(0, 0, ch, vict, NULL, dmg, 0);
+        hurt(0, 0, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 1);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act("@WYou bite @C$N's@W leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W bites into your leg!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W bites into @c$N's@W leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou bite @C$N's@W leg!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W bites into your leg!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W bites into @c$N's@W leg!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(0, 0, ch, vict, NULL, dmg, 0);
+        hurt(0, 0, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 2);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
     }
     if (!char_is_npc(ch)) {
       if (axion_dice(0) > char_get_aff_abils_con(vict) && rand_number(1, 5) == 5) {
-        act("@R$N@r was poisoned by your bite!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@rYou were poisoned by the bite!@n", TRUE, ch, 0, vict, TO_VICT);
+        act("@R$N@r was poisoned by your bite!@n", true, ch, 0, vict, TO_CHAR);
+        act("@rYou were poisoned by the bite!@n", true, ch, 0, vict, TO_VICT);
         vict->poisonby = ch;
         int duration   = (char_get_aff_abils_intel(ch) / 50) + 1;
         assign_affect(vict, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
@@ -705,15 +705,15 @@ ACMD(do_bite)
     return;
   }
   if (obj) {
-    if (!can_kill(ch, NULL, obj, 0)) {
+    if (!can_kill(ch, nullptr, obj, 0)) {
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
       return;
     }
     dmg = ((getCurPL(ch) / 10000) + (char_get_aff_abils_str(ch)));
-    act("@C$n@W bites $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
-    hurt(0, 0, ch, NULL, obj, dmg, 0);
+    act("@C$n@W bites $p@W extremely hard!@n", true, ch, obj, 0, TO_ROOM);
+    hurt(0, 0, ch, nullptr, obj, dmg, 0);
     pcost(ch, 0, stcost);
 
   } else {
@@ -772,7 +772,7 @@ ACMD(do_slam)
   }
 
   if (vict) {
-    if (!can_kill(ch, vict, NULL, 0)) {
+    if (!can_kill(ch, vict, nullptr, 0)) {
       return;
     }
     if (handle_defender(vict, ch)) {
@@ -781,7 +781,7 @@ ACMD(do_slam)
     }
     improve_skill(ch, SKILL_SLAM, 1);
     index = check_def(vict);
-    prob  = roll_accuracy(ch, skill, FALSE);
+    prob  = roll_accuracy(ch, skill, false);
     perc  = chance_to_hit(ch);
 
     if (char_is_kabito(ch) && !char_is_npc(ch)) {
@@ -808,54 +808,54 @@ ACMD(do_slam)
     if (prob < perc - 20) {
       if ((getCurST(vict)) > 0) {
         if (pry > rand_number(1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
-          act("@C$N@W parries your slam with a punch of $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou parry @C$n's@W slam with a punch of your own!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W parries @c$n's@W slam with a punch of $S own!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W parries your slam with a punch of $S own!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou parry @C$n's@W slam with a punch of your own!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W parries @c$n's@W slam with a punch of $S own!@n", true, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_PARRY, 0);
           pcost(ch, 0, stcost / 2);
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(vict, -2, skill, attperc);
           dmg *= calc_critical(ch, 1);
-          hurt(0, 0, vict, ch, NULL, dmg, -1);
+          hurt(0, 0, vict, ch, nullptr, dmg, -1);
 
           return;
         }
         if (blk > axion_dice(10)) {
-          act("@C$N@W moves quickly and blocks your slam!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou move quickly and block @C$n's@W slam!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W moves quickly and blocks @c$n's@W slam!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W moves quickly and blocks your slam!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou move quickly and block @C$n's@W slam!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W moves quickly and blocks @c$n's@W slam!@n", true, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_BLOCK, 0);
           pcost(ch, 0, stcost / 2);
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 6, skill, attperc);
           dmg /= 4;
-          hurt(0, 0, ch, vict, NULL, dmg, 0);
+          hurt(0, 0, ch, vict, nullptr, dmg, 0);
 
           return;
         }
         if (dge > axion_dice(10)) {
-          act("@C$N@W manages to dodge your slam!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou dodge @C$n's@W slam!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W manages to dodge @c$n's@W slam!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W manages to dodge your slam!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou dodge @C$n's@W slam!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W manages to dodge @c$n's@W slam!@n", true, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_DODGE, 0);
           pcost(ch, 0, stcost / 2);
-          hurt(0, 0, ch, vict, NULL, 0, 0);
+          hurt(0, 0, ch, vict, nullptr, 0, 0);
 
           return;
         }
-        act("@WYou can't believe it but your slam misses!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W moves to slam you with both $s fists, but misses!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W moves to slam @C$N@W with both $s fists, but somehow misses!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou can't believe it but your slam misses!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W moves to slam you with both $s fists, but misses!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W moves to slam @C$N@W with both $s fists, but somehow misses!@n", true, ch, 0, vict, TO_NOTVICT);
         pcost(ch, 0, stcost / 2);
-        hurt(0, 0, ch, vict, NULL, 0, 0);
+        hurt(0, 0, ch, vict, nullptr, 0, 0);
 
         return;
       }
-      act("@WYou can't believe it but your slam misses!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W moves to slam you with both $s fists, but misses!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@c$n@W moves to slam @C$N@W with both $s fists, but somehow misses!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@WYou can't believe it but your slam misses!@n", true, ch, 0, vict, TO_CHAR);
+      act("@C$n@W moves to slam you with both $s fists, but misses!@n", true, ch, 0, vict, TO_VICT);
+      act("@c$n@W moves to slam @C$N@W with both $s fists, but somehow misses!@n", true, ch, 0, vict, TO_NOTVICT);
       pcost(ch, 0, stcost / 2);
-      hurt(0, 0, ch, vict, NULL, 0, 0);
+      hurt(0, 0, ch, vict, nullptr, 0, 0);
       return;
     }
     dmg         = damtype(ch, 6, skill, attperc);
@@ -863,58 +863,58 @@ ACMD(do_slam)
     hitspot     = roll_hitloc(ch, vict, skill);
     switch (hitspot) {
       case 1:
-        act("@WYou disappear, appearing above @C$N@W and slam a double fisted blow into $M!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W disappears, only to appear above you, slamming a double fisted blow into you!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W disappears, only to appear above @C$N@W, slamming a double fisted blow into $M!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou disappear, appearing above @C$N@W and slam a double fisted blow into $M!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W disappears, only to appear above you, slamming a double fisted blow into you!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W disappears, only to appear above @C$N@W, slamming a double fisted blow into $M!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 0);
+        hurt(0, 0, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 2: /* Critical */
-        act("@WYou disappear, reappearing in front of @C$N@W, you grab $M! Spinning you send $M flying into the ground!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W disappears, reappearing in front of you, and $e grabs you! Spinning quickly $e sends you flying into the ground!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W disappears, reappearing in front of @C$N@W, and grabs $M! Spinning quickly $e sends $M flying into the ground!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou disappear, reappearing in front of @C$N@W, you grab $M! Spinning you send $M flying into the ground!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W disappears, reappearing in front of you, and $e grabs you! Spinning quickly $e sends you flying into the ground!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W disappears, reappearing in front of @C$N@W, and grabs $M! Spinning quickly $e sends $M flying into the ground!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 0);
         if (!char_aff_flagged(vict, AFF_KNOCKED) && (rand_number(1, 4) >= 3 && (getCurPL(vict) > getCurPL(ch) / 5) && !char_aff_flagged(vict, AFF_SANCTUARY))) {
-          act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou are knocked out!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W is knocked out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W is knocked out!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou are knocked out!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W is knocked out!@n", true, ch, 0, vict, TO_NOTVICT);
           setStatusKnockedOut(vict);
         } else if ((char_get_position(vict) == POS_STANDING || char_get_position(vict) == POS_FIGHTING) && !char_aff_flagged(vict, AFF_KNOCKED)) {
           char_set_position(vict, POS_SITTING);
         }
         if (rroom_get_dmg(char_get_in_room(vict)) <= 95 && !rroom_flagged(char_get_in_room(vict), ROOM_SPACE)) {
-          act("@W$N@W slams into the ground forming a large crater with $S body!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou slam into the ground forming a large crater with your body!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@W$N@W slams into the ground forming a large crater with $S body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@W$N@W slams into the ground forming a large crater with $S body!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou slam into the ground forming a large crater with your body!@n", true, ch, 0, vict, TO_VICT);
+          act("@W$N@W slams into the ground forming a large crater with $S body!@n", true, ch, 0, vict, TO_NOTVICT);
           if (rroom_sect(char_get_in_room(vict)) != SECT_INSIDE && rroom_sect(char_get_in_room(vict)) != SECT_UNDERWATER && rroom_sect(char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(char_get_in_room(vict)) != SECT_WATER_NOSWIM) {
             impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
             switch (rand_number(1, 8)) {
               case 1:
-                act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, vict, TO_CHAR);
-                act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, vict, TO_ROOM);
+                act("Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_CHAR);
+                act("Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_ROOM);
                 break;
               case 2:
                 if (rand_number(1, 4) == 4 && rroom_get_geffect(char_get_in_room(vict)) == 0) {
                   rroom_set_geffect(char_get_in_room(vict), 1);
-                  act("Lava leaks up through cracks in the crater!", TRUE, ch, 0, vict, TO_CHAR);
-                  act("Lava leaks up through cracks in the crater!", TRUE, ch, 0, vict, TO_ROOM);
+                  act("Lava leaks up through cracks in the crater!", true, ch, 0, vict, TO_CHAR);
+                  act("Lava leaks up through cracks in the crater!", true, ch, 0, vict, TO_ROOM);
                 }
                 break;
               case 3:
-                act("A cloud of dust envelopes the entire area!", TRUE, ch, 0, vict, TO_CHAR);
-                act("A cloud of dust envelopes the entire area!", TRUE, ch, 0, vict, TO_ROOM);
+                act("A cloud of dust envelopes the entire area!", true, ch, 0, vict, TO_CHAR);
+                act("A cloud of dust envelopes the entire area!", true, ch, 0, vict, TO_ROOM);
                 break;
               case 4:
-                act("The surrounding area roars and shudders from the impact!", TRUE, ch, 0, vict, TO_CHAR);
-                act("The surrounding area roars and shudders from the impact!", TRUE, ch, 0, vict, TO_ROOM);
+                act("The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_CHAR);
+                act("The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_ROOM);
                 break;
               case 5:
-                act("The ground shatters apart from the stress of the impact!", TRUE, ch, 0, vict, TO_CHAR);
-                act("The ground shatters apart from the stress of the impact!", TRUE, ch, 0, vict, TO_ROOM);
+                act("The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_CHAR);
+                act("The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_ROOM);
                 break;
               case 6:
                 /* One less message */
@@ -927,32 +927,32 @@ ACMD(do_slam)
           if (rroom_sect(char_get_in_room(vict)) == SECT_UNDERWATER) {
             switch (rand_number(1, 3)) {
               case 1:
-                act("The water churns violently!", TRUE, ch, 0, vict, TO_CHAR);
-                act("The water churns violently!", TRUE, ch, 0, vict, TO_ROOM);
+                act("The water churns violently!", true, ch, 0, vict, TO_CHAR);
+                act("The water churns violently!", true, ch, 0, vict, TO_ROOM);
                 break;
               case 2:
-                act("Large bubbles rise from the movement!", TRUE, ch, 0, vict, TO_CHAR);
-                act("Large bubbles rise from the movement!", TRUE, ch, 0, vict, TO_ROOM);
+                act("Large bubbles rise from the movement!", true, ch, 0, vict, TO_CHAR);
+                act("Large bubbles rise from the movement!", true, ch, 0, vict, TO_ROOM);
                 break;
               case 3:
-                act("The water collapses in on the hole created!", TRUE, ch, 0, vict, TO_CHAR);
-                act("The water collapses in on the hole create!", TRUE, ch, 0, vict, TO_ROOM);
+                act("The water collapses in on the hole created!", true, ch, 0, vict, TO_CHAR);
+                act("The water collapses in on the hole create!", true, ch, 0, vict, TO_ROOM);
                 break;
             }
           }
           if (rroom_sect(char_get_in_room(vict)) == SECT_WATER_SWIM || rroom_sect(char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
             switch (rand_number(1, 3)) {
               case 1:
-                act("A huge column of water erupts from the impact!", TRUE, ch, 0, vict, TO_CHAR);
-                act("A huge column of water erupts from the impact!", TRUE, ch, 0, vict, TO_ROOM);
+                act("A huge column of water erupts from the impact!", true, ch, 0, vict, TO_CHAR);
+                act("A huge column of water erupts from the impact!", true, ch, 0, vict, TO_ROOM);
                 break;
               case 2:
-                act("The impact briefly causes a swirling vortex of water!", TRUE, ch, 0, vict, TO_CHAR);
-                act("The impact briefly causes a swirling vortex of water!", TRUE, ch, 0, vict, TO_ROOM);
+                act("The impact briefly causes a swirling vortex of water!", true, ch, 0, vict, TO_CHAR);
+                act("The impact briefly causes a swirling vortex of water!", true, ch, 0, vict, TO_ROOM);
                 break;
               case 3:
-                act("A huge depression forms in the water and erupts into a wave from the impact!", TRUE, ch, 0, vict, TO_CHAR);
-                act("A huge depression forms in the water and erupts into a wave from the impact!", TRUE, ch, 0, vict, TO_ROOM);
+                act("A huge depression forms in the water and erupts into a wave from the impact!", true, ch, 0, vict, TO_CHAR);
+                act("A huge depression forms in the water and erupts into a wave from the impact!", true, ch, 0, vict, TO_ROOM);
                 break;
             }
           }
@@ -960,28 +960,28 @@ ACMD(do_slam)
             impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
             switch (rand_number(1, 8)) {
               case 1:
-                act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, vict, TO_CHAR);
-                act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, vict, TO_ROOM);
+                act("Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_CHAR);
+                act("Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_ROOM);
                 break;
               case 2:
-                act("The structure of the surrounding room cracks and quakes from the impact!", TRUE, ch, 0, vict, TO_CHAR);
-                act("The structure of the surrounding room cracks and quakes from the impact!", TRUE, ch, 0, vict, TO_ROOM);
+                act("The structure of the surrounding room cracks and quakes from the impact!", true, ch, 0, vict, TO_CHAR);
+                act("The structure of the surrounding room cracks and quakes from the impact!", true, ch, 0, vict, TO_ROOM);
                 break;
               case 3:
-                act("Parts of the ceiling collapse, crushing into the floor!", TRUE, ch, 0, vict, TO_CHAR);
-                act("Parts of the ceiling collapse, crushing into the floor!", TRUE, ch, 0, vict, TO_ROOM);
+                act("Parts of the ceiling collapse, crushing into the floor!", true, ch, 0, vict, TO_CHAR);
+                act("Parts of the ceiling collapse, crushing into the floor!", true, ch, 0, vict, TO_ROOM);
                 break;
               case 4:
-                act("The surrounding area roars and shudders from the impact!", TRUE, ch, 0, vict, TO_CHAR);
-                act("The surrounding area roars and shudders from the impact!", TRUE, ch, 0, vict, TO_ROOM);
+                act("The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_CHAR);
+                act("The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_ROOM);
                 break;
               case 5:
-                act("The ground shatters apart from the stress of the impact!", TRUE, ch, 0, vict, TO_CHAR);
-                act("The ground shatters apart from the stress of the impact!", TRUE, ch, 0, vict, TO_ROOM);
+                act("The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_CHAR);
+                act("The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_ROOM);
                 break;
               case 6:
-                act("The walls of the surrounding room crack in the same instant!", TRUE, ch, 0, vict, TO_CHAR);
-                act("The walls of the surrounding room crack in the same instant!", TRUE, ch, 0, vict, TO_ROOM);
+                act("The walls of the surrounding room crack in the same instant!", true, ch, 0, vict, TO_CHAR);
+                act("The walls of the surrounding room crack in the same instant!", true, ch, 0, vict, TO_ROOM);
                 break;
               default:
                 /* we want no message for the default */
@@ -990,36 +990,36 @@ ACMD(do_slam)
           }
           rroom_set_dmg(char_get_in_room(vict), rroom_get_dmg(char_get_in_room(vict)) + (5));
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 0);
+        hurt(0, 0, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 3);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act("@WYou fly at @C$N@W, slamming both your fists into $S gut as you fly!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W flies at you, slamming both $s fists into your gut as $e flies!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W flies at @C$N@W, slamming both $s fists into $S gut as $e flies!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou fly at @C$N@W, slamming both your fists into $S gut as you fly!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W flies at you, slamming both $s fists into your gut as $e flies!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W flies at @C$N@W, slamming both $s fists into $S gut as $e flies!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 0);
+        hurt(0, 0, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 4: /* Weak */
-        act("@WYou slam both your fists into @C$N@W, hitting $M in the arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W slams both $s fists into you, hitting you in the arm!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W slams both $s fists into @C$N@W, hitting $M in the arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou slam both your fists into @C$N@W, hitting $M in the arm!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W slams both $s fists into you, hitting you in the arm!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W slams both $s fists into @C$N@W, hitting $M in the arm!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(0, 195, ch, vict, NULL, dmg, 0);
+        hurt(0, 195, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 1);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act("@WYou slam both your fists into @C$N's@W leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W slams both $s fists into your leg!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W slams both $s fists into @C$N's@W leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou slam both your fists into @C$N's@W leg!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W slams both $s fists into your leg!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W slams both $s fists into @C$N's@W leg!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(1, 195, ch, vict, NULL, dmg, 0);
+        hurt(1, 195, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 2);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
@@ -1031,7 +1031,7 @@ ACMD(do_slam)
     return;
   }
   if (obj) {
-    if (!can_kill(ch, NULL, obj, 0)) {
+    if (!can_kill(ch, nullptr, obj, 0)) {
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
@@ -1039,9 +1039,9 @@ ACMD(do_slam)
       return;
     }
     dmg = ((getCurPL(ch) / 10000) + (char_get_aff_abils_str(ch)));
-    act("@WYou slam $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W slams $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
-    hurt(0, 0, ch, NULL, obj, dmg, 0);
+    act("@WYou slam $p@W as hard as you can!@n", true, ch, obj, 0, TO_CHAR);
+    act("@C$n@W slams $p@W extremely hard!@n", true, ch, obj, 0, TO_ROOM);
+    hurt(0, 0, ch, nullptr, obj, dmg, 0);
     pcost(ch, 0, stcost);
 
   } else {
@@ -1088,7 +1088,7 @@ ACMD(do_tailwhip)
 
   handle_cooldown(ch, 7);
   if (vict) {
-    if (!can_kill(ch, vict, NULL, 0)) {
+    if (!can_kill(ch, vict, nullptr, 0)) {
       return;
     }
     if (handle_defender(vict, ch)) {
@@ -1097,7 +1097,7 @@ ACMD(do_tailwhip)
     }
     improve_skill(ch, SKILL_TAILWHIP, 1);
     index = check_def(vict);
-    prob  = roll_accuracy(ch, skill, FALSE);
+    prob  = roll_accuracy(ch, skill, false);
     perc  = chance_to_hit(ch);
 
     if (char_is_kabito(ch) && !char_is_npc(ch)) {
@@ -1123,54 +1123,54 @@ ACMD(do_tailwhip)
     if (prob < perc - 20) {
       if ((getCurST(vict)) > 0) {
         if (pry > rand_number(1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
-          act("@C$N@W parries your tailwhip with a punch of $S own!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou parry @C$n's@W tailwhip with a punch of your own!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W parries @c$n's@W tailwhip with a punch of $S own!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W parries your tailwhip with a punch of $S own!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou parry @C$n's@W tailwhip with a punch of your own!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W parries @c$n's@W tailwhip with a punch of $S own!@n", true, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_PARRY, 0);
           pcost(ch, 0, stcost / 2);
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(vict, -2, skill, attperc);
           dmg *= calc_critical(ch, 1);
-          hurt(0, 0, vict, ch, NULL, dmg, -1);
+          hurt(0, 0, vict, ch, nullptr, dmg, -1);
 
           return;
         }
         if (blk > axion_dice(10)) {
-          act("@C$N@W moves quickly and blocks your tailwhip!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou move quickly and block @C$n's@W tailwhip!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W moves quickly and blocks @c$n's@W tailwhip!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W moves quickly and blocks your tailwhip!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou move quickly and block @C$n's@W tailwhip!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W moves quickly and blocks @c$n's@W tailwhip!@n", true, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_BLOCK, 0);
           pcost(ch, 0, stcost / 2);
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 3, skill, attperc);
           dmg /= 4;
-          hurt(0, 0, ch, vict, NULL, dmg, 0);
+          hurt(0, 0, ch, vict, nullptr, dmg, 0);
 
           return;
         }
         if (dge > axion_dice(10)) {
-          act("@C$N@W manages to dodge your tailwhip!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou dodge @C$n's@W tailwhip!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W manages to dodge @c$n's@W tailwhip!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W manages to dodge your tailwhip!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou dodge @C$n's@W tailwhip!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W manages to dodge @c$n's@W tailwhip!@n", true, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_DODGE, 0);
           pcost(ch, 0, stcost / 2);
-          hurt(0, 0, ch, vict, NULL, 0, 0);
+          hurt(0, 0, ch, vict, nullptr, 0, 0);
 
           return;
         }
-        act("@WYou can't believe it but your tailwhip misses!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W throws a tailwhip at you but somehow misses!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W throws a tailwhip at @C$N@W but somehow misses!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou can't believe it but your tailwhip misses!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W throws a tailwhip at you but somehow misses!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W throws a tailwhip at @C$N@W but somehow misses!@n", true, ch, 0, vict, TO_NOTVICT);
         pcost(ch, 0, stcost / 2);
-        hurt(0, 0, ch, vict, NULL, 0, 0);
+        hurt(0, 0, ch, vict, nullptr, 0, 0);
 
         return;
       }
-      act("@WYou can't believe it but your tailwhip misses!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W throws a tailwhip at you but somehow misses!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@c$n@W throws a tailwhip at @C$N@W but somehow misses!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@WYou can't believe it but your tailwhip misses!@n", true, ch, 0, vict, TO_CHAR);
+      act("@C$n@W throws a tailwhip at you but somehow misses!@n", true, ch, 0, vict, TO_VICT);
+      act("@c$n@W throws a tailwhip at @C$N@W but somehow misses!@n", true, ch, 0, vict, TO_NOTVICT);
       pcost(ch, 0, stcost / 2);
-      hurt(0, 0, ch, vict, NULL, 0, 0);
+      hurt(0, 0, ch, vict, nullptr, 0, 0);
       return;
     }
     dmg         = damtype(ch, 56, skill, attperc);
@@ -1178,60 +1178,60 @@ ACMD(do_tailwhip)
     hitspot     = roll_hitloc(ch, vict, skill);
     switch (hitspot) {
       case 1:
-        act("@WYou spin to swing your tail and slam it into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W spins to swing $s tail and slams it into YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W spins to swing $s tail and slams it into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou spin to swing your tail and slam it into @c$N@W's body!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W spins to swing $s tail and slams it into YOUR body!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W spins to swing $s tail and slams it into @c$N@W's body!@n", true, ch, 0, vict, TO_NOTVICT);
         if (!char_aff_flagged(vict, AFF_FLYING) && char_get_position(vict) == POS_STANDING && rand_number(1, 8) >= 7) {
           handle_knockdown(vict);
         }
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 0);
+        hurt(0, 0, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 2: /* Critical */
-        act("@WYou flip forward and slam your tail into the top of @c$N@W's head brutally!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W flips forward and slams $s tail into the top of YOUR head brutally!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W flips forward and slams $s tail into the top of @c$N@W's head brutally!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou flip forward and slam your tail into the top of @c$N@W's head brutally!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W flips forward and slams $s tail into the top of YOUR head brutally!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W flips forward and slams $s tail into the top of @c$N@W's head brutally!@n", true, ch, 0, vict, TO_NOTVICT);
         if (!char_aff_flagged(vict, AFF_FLYING) && char_get_position(vict) == POS_STANDING && rand_number(1, 8) >= 6) {
           handle_knockdown(vict);
         }
         dmg *= calc_critical(ch, 0);
-        hurt(0, 0, ch, vict, NULL, dmg, 0);
+        hurt(0, 0, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 3);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act("@WYou swing your tail and manage to slam it into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W swings $s tail and manages to slam it into YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W swings $s tail and manages to slam it into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou swing your tail and manage to slam it into @c$N@W's gut!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W swings $s tail and manages to slam it into YOUR gut!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W swings $s tail and manages to slam it into @c$N@W's gut!@n", true, ch, 0, vict, TO_NOTVICT);
         if (!char_aff_flagged(vict, AFF_FLYING) && char_get_position(vict) == POS_STANDING && rand_number(1, 8) >= 7) {
           handle_knockdown(vict);
         }
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 0);
+        hurt(0, 0, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 4: /* Weak */
-        act("@WYou swing your tail and manage to slam it into @c$N@W's arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W swings $s tail and manages to slam it into YOUR arm!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W swings $s tail and manages to slam it into @c$N@W's arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou swing your tail and manage to slam it into @c$N@W's arm!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W swings $s tail and manages to slam it into YOUR arm!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W swings $s tail and manages to slam it into @c$N@W's arm!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(0, 195, ch, vict, NULL, dmg, 0);
+        hurt(0, 195, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 1);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act("@WYou swing your tail and manage to slam it into @c$N@W's leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W swings $s tail and manages to slam it into YOUR leg!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W swings $s tail and manages to slam it into @c$N@W's leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou swing your tail and manage to slam it into @c$N@W's leg!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W swings $s tail and manages to slam it into YOUR leg!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W swings $s tail and manages to slam it into @c$N@W's leg!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(1, 195, ch, vict, NULL, dmg, 0);
+        hurt(1, 195, ch, vict, nullptr, dmg, 0);
         dam_eq_loc(vict, 2);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
@@ -1243,7 +1243,7 @@ ACMD(do_tailwhip)
     return;
   }
   if (obj) {
-    if (!can_kill(ch, NULL, obj, 0)) {
+    if (!can_kill(ch, nullptr, obj, 0)) {
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
@@ -1251,9 +1251,9 @@ ACMD(do_tailwhip)
       return;
     }
     dmg = ((getCurPL(ch) / 10000) + (char_get_aff_abils_str(ch)));
-    act("@WYou tailwhip $p@W as hard as you can!@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W tailwhips $p@W extremely hard!@n", TRUE, ch, obj, 0, TO_ROOM);
-    hurt(0, 0, ch, NULL, obj, dmg, 0);
+    act("@WYou tailwhip $p@W as hard as you can!@n", true, ch, obj, 0, TO_CHAR);
+    act("@C$n@W tailwhips $p@W extremely hard!@n", true, ch, obj, 0, TO_ROOM);
+    hurt(0, 0, ch, nullptr, obj, dmg, 0);
     pcost(ch, 0, stcost);
 
   } else {

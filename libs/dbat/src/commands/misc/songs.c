@@ -70,9 +70,9 @@ void handle_songs()
 
 static void apply_shadow_sitch(struct char_data *ch, struct char_data *vict, int skill)
 {
-  act("@CYour forboding music has caused @c$N's@C shadows to stitch into $S body, slowing $S actions!@n", TRUE, ch, 0, vict, TO_CHAR);
-  act("@c$n's@C forboding music has caused YOUR shadows to stitch into YOUR body, slow YOUR actions down!@n", TRUE, ch, 0, vict, TO_VICT);
-  act("@c$n's@C forboding music has caused @c$N's@C shadows to stitch into $S body, slowing $S actions!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  act("@CYour forboding music has caused @c$N's@C shadows to stitch into $S body, slowing $S actions!@n", true, ch, 0, vict, TO_CHAR);
+  act("@c$n's@C forboding music has caused YOUR shadows to stitch into YOUR body, slow YOUR actions down!@n", true, ch, 0, vict, TO_VICT);
+  act("@c$n's@C forboding music has caused @c$N's@C shadows to stitch into $S body, slowing $S actions!@n", true, ch, 0, vict, TO_NOTVICT);
   decCurKI(ch, getPercentOfMaxKI(ch, .001) + skill, 0);
   if (!char_is_npc(vict)) {
     char_set_wait(vict, PULSE_2SEC);
@@ -84,8 +84,8 @@ static void apply_shadow_sitch(struct char_data *ch, struct char_data *vict, int
 static void resolve_song(struct char_data *ch)
 {
 
-  struct char_data *vict = NULL, *next_v = NULL;
-  struct obj_data *obj2 = NULL, *next_obj;
+  struct char_data *vict = nullptr, *next_v = nullptr;
+  struct obj_data *obj2 = nullptr, *next_obj;
   int diceroll          = axion_dice(0);
   int skill             = char_get_skill(ch, SKILL_MYSTICMUSIC);
   int instrument        = 0;
@@ -105,18 +105,18 @@ static void resolve_song(struct char_data *ch)
 
   if (instrument == 0) {
     send_to_char(ch, "You do not have an instrument.\r\n");
-    act("@c$n@C stops playing $s song.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@c$n@C stops playing $s song.@n", true, ch, 0, 0, TO_ROOM);
     char_set_powerattack(ch, 0);
     return;
   }
 
   if (skill > diceroll) {
     snprintf(buf, sizeof(buf), "@c$n@C continues playing @y'@Y%s@y'@C.@n", char_get_powerattack(ch) == SONG_SAFETY ? "Song of Safety" : (char_get_powerattack(ch) == SONG_SHIELDING ? "Song of Shielding" : (char_get_powerattack(ch) == SONG_SHADOW_STITCH ? "Shadow Stitch Minuet" : "Teleportation Melody")));
-    act("@CYou continue playing your song.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act(buf, TRUE, ch, 0, 0, TO_ROOM);
+    act("@CYou continue playing your song.@n", true, ch, 0, 0, TO_CHAR);
+    act(buf, true, ch, 0, 0, TO_ROOM);
   } else {
-    act("@CYou mess up a portion of the song, but continue playing.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@c$n@C messes up a portion of $s song, but continues to play.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@CYou mess up a portion of the song, but continue playing.@n", true, ch, 0, 0, TO_CHAR);
+    act("@c$n@C messes up a portion of $s song, but continues to play.@n", true, ch, 0, 0, TO_ROOM);
     return;
   }
 
@@ -130,9 +130,9 @@ static void resolve_song(struct char_data *ch)
               if (skill > diceroll) {
                 int64_t restore = (10 * skill) + ((getMaxKI(ch) * 0.0004) * skill);
                 if (vict != ch) {
-                  act("@CYour skillfully playing of the Song of Safety has an effect on @c$N@C.@n", TRUE, ch, 0, vict, TO_CHAR);
+                  act("@CYour skillfully playing of the Song of Safety has an effect on @c$N@C.@n", true, ch, 0, vict, TO_CHAR);
                 } else {
-                  act("@CYour skillfully playing of the Song of Safety has an effect on your own body@C.@n", TRUE, ch, 0, vict, TO_CHAR);
+                  act("@CYour skillfully playing of the Song of Safety has an effect on your own body@C.@n", true, ch, 0, vict, TO_CHAR);
                 }
                 incCurHealth(vict, restore, true);
                 incCurST(vict, restore * .5, true);
@@ -166,9 +166,9 @@ static void resolve_song(struct char_data *ch)
                   }
                 }
                 if (vict != ch) {
-                  act("@c$n's@C soothing Song of Safety has recovered some of your powerlevel, stamina, and limb condition.", TRUE, ch, 0, vict, TO_VICT);
+                  act("@c$n's@C soothing Song of Safety has recovered some of your powerlevel, stamina, and limb condition.", true, ch, 0, vict, TO_VICT);
                 }
-                act("@c$n@C continues playing $s ocarina!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+                act("@c$n@C continues playing $s ocarina!@n", true, ch, 0, vict, TO_NOTVICT);
                 improve_skill(ch, SKILL_MYSTICMUSIC, 2);
                 decCurKI(ch, (getMaxKI(ch) * .0003) + skill, 0);
               }
@@ -177,7 +177,7 @@ static void resolve_song(struct char_data *ch)
         }
         if ((getCurKI(ch)) <= 0) {
           send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
-          act("@c$n@C stops playing $s song.@n", TRUE, ch, 0, 0, TO_ROOM);
+          act("@c$n@C stops playing $s song.@n", true, ch, 0, 0, TO_ROOM);
           char_set_powerattack(ch, 0);
           return;
         }
@@ -199,7 +199,7 @@ static void resolve_song(struct char_data *ch)
         }
         if ((getCurKI(ch)) <= 0) {
           send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
-          act("@c$n@C stops playing $s song.@n", TRUE, ch, 0, 0, TO_ROOM);
+          act("@c$n@C stops playing $s song.@n", true, ch, 0, 0, TO_ROOM);
           char_set_powerattack(ch, 0);
           return;
         }
@@ -210,9 +210,9 @@ static void resolve_song(struct char_data *ch)
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
           if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
             if (skill > diceroll) {
-              act("@CYour Teleportation Melody has transported @c$N@C to Earth in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-              act("@c$n's@C Teleportation Melody has transported you to Earth in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+              act("@CYour Teleportation Melody has transported @c$N@C to Earth in a flash!@n", true, ch, 0, vict, TO_CHAR);
+              act("@c$n's@C Teleportation Melody has transported you to Earth in a flash!@n", true, ch, 0, vict, TO_VICT);
+              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, 0, vict, TO_NOTVICT);
               char_from_room(vict);
               char_to_room(vict, real_room(300));
             }
@@ -225,9 +225,9 @@ static void resolve_song(struct char_data *ch)
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
           if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
             if (skill > diceroll) {
-              act("@CYour Teleportation Melody has transported @c$N@C to Vegeta in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-              act("@c$n's@C Teleportation Melody has transported you to Vegeta in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+              act("@CYour Teleportation Melody has transported @c$N@C to Vegeta in a flash!@n", true, ch, 0, vict, TO_CHAR);
+              act("@c$n's@C Teleportation Melody has transported you to Vegeta in a flash!@n", true, ch, 0, vict, TO_VICT);
+              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, 0, vict, TO_NOTVICT);
               char_from_room(vict);
               char_to_room(vict, real_room(2234));
             }
@@ -240,9 +240,9 @@ static void resolve_song(struct char_data *ch)
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
           if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
             if (skill > diceroll) {
-              act("@CYour Teleportation Melody has transported @c$N@C to Frigid in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-              act("@c$n's@C Teleportation Melody has transported you to Frigid in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+              act("@CYour Teleportation Melody has transported @c$N@C to Frigid in a flash!@n", true, ch, 0, vict, TO_CHAR);
+              act("@c$n's@C Teleportation Melody has transported you to Frigid in a flash!@n", true, ch, 0, vict, TO_VICT);
+              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, 0, vict, TO_NOTVICT);
               char_from_room(vict);
               char_to_room(vict, real_room(4047));
             }
@@ -255,9 +255,9 @@ static void resolve_song(struct char_data *ch)
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
           if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
             if (skill > diceroll) {
-              act("@CYour Teleportation Melody has transported @c$N@C to Konack in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-              act("@c$n's@C Teleportation Melody has transported you to Konack in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+              act("@CYour Teleportation Melody has transported @c$N@C to Konack in a flash!@n", true, ch, 0, vict, TO_CHAR);
+              act("@c$n's@C Teleportation Melody has transported you to Konack in a flash!@n", true, ch, 0, vict, TO_VICT);
+              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, 0, vict, TO_NOTVICT);
               char_from_room(vict);
               char_to_room(vict, real_room(8003));
             }
@@ -270,9 +270,9 @@ static void resolve_song(struct char_data *ch)
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
           if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
             if (skill > diceroll) {
-              act("@CYour Teleportation Melody has transported @c$N@C to Namek in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-              act("@c$n's@C Teleportation Melody has transported you to Namek in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+              act("@CYour Teleportation Melody has transported @c$N@C to Namek in a flash!@n", true, ch, 0, vict, TO_CHAR);
+              act("@c$n's@C Teleportation Melody has transported you to Namek in a flash!@n", true, ch, 0, vict, TO_VICT);
+              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, 0, vict, TO_NOTVICT);
               char_from_room(vict);
               char_to_room(vict, real_room(10182));
             }
@@ -285,9 +285,9 @@ static void resolve_song(struct char_data *ch)
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
           if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
             if (skill > diceroll) {
-              act("@CYour Teleportation Melody has transported @c$N@C to Arlia in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-              act("@c$n's@C Teleportation Melody has transported you to Arlia in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+              act("@CYour Teleportation Melody has transported @c$N@C to Arlia in a flash!@n", true, ch, 0, vict, TO_CHAR);
+              act("@c$n's@C Teleportation Melody has transported you to Arlia in a flash!@n", true, ch, 0, vict, TO_VICT);
+              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, 0, vict, TO_NOTVICT);
               char_from_room(vict);
               char_to_room(vict, real_room(16087));
             }
@@ -300,9 +300,9 @@ static void resolve_song(struct char_data *ch)
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
           if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
             if (skill > diceroll) {
-              act("@CYour Teleportation Melody has transported @c$N@C to Aether in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-              act("@c$n's@C Teleportation Melody has transported you to Aether in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+              act("@CYour Teleportation Melody has transported @c$N@C to Aether in a flash!@n", true, ch, 0, vict, TO_CHAR);
+              act("@c$n's@C Teleportation Melody has transported you to Aether in a flash!@n", true, ch, 0, vict, TO_VICT);
+              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, 0, vict, TO_NOTVICT);
               char_from_room(vict);
               char_to_room(vict, real_room(12025));
             }
@@ -315,9 +315,9 @@ static void resolve_song(struct char_data *ch)
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
           if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
             if (skill > diceroll) {
-              act("@CYour Teleportation Melody has transported @c$N@C to Kanassa in a flash!@n", TRUE, ch, 0, vict, TO_CHAR);
-              act("@c$n's@C Teleportation Melody has transported you to Kanassa in a flash!@n", TRUE, ch, 0, vict, TO_VICT);
-              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+              act("@CYour Teleportation Melody has transported @c$N@C to Kanassa in a flash!@n", true, ch, 0, vict, TO_CHAR);
+              act("@c$n's@C Teleportation Melody has transported you to Kanassa in a flash!@n", true, ch, 0, vict, TO_VICT);
+              act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch, 0, vict, TO_NOTVICT);
               char_from_room(vict);
               char_to_room(vict, real_room(14910));
             }
@@ -329,12 +329,12 @@ static void resolve_song(struct char_data *ch)
           if (ch == vict->master || ch->master == vict || ch->master == vict->master || vict == ch) {
             if (skill > diceroll) {
               if (vict != ch) {
-                act("@CYour triumphant and soaring music has powered a barrier around @c$N@C!@n", TRUE, ch, 0, vict, TO_CHAR);
-                act("@c$n's@C triumphant and soaring music has powered a barrier around you!@n", TRUE, ch, 0, vict, TO_VICT);
+                act("@CYour triumphant and soaring music has powered a barrier around @c$N@C!@n", true, ch, 0, vict, TO_CHAR);
+                act("@c$n's@C triumphant and soaring music has powered a barrier around you!@n", true, ch, 0, vict, TO_VICT);
               } else {
-                act("@CYour triumphant and soaring music has powered a barrier around yourself@C!@n", TRUE, ch, 0, vict, TO_CHAR);
+                act("@CYour triumphant and soaring music has powered a barrier around yourself@C!@n", true, ch, 0, vict, TO_CHAR);
               }
-              act("@c$n's@C triumphant and soaring music has powered a barrier around @c$N@C!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+              act("@c$n's@C triumphant and soaring music has powered a barrier around @c$N@C!@n", true, ch, 0, vict, TO_NOTVICT);
               char_set_barrier(vict, char_get_barrier(vict) + (((getMaxKI(ch) * 0.005) * (skill * 0.25)) + skill));
               if (char_get_barrier(vict) >= getMaxKI(vict) * 0.75) {
                 char_set_barrier(vict, getMaxKI(vict) * 0.75);
@@ -348,7 +348,7 @@ static void resolve_song(struct char_data *ch)
         }
         if ((getCurKI(ch)) <= 0) {
           send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
-          act("@c$n@C stops playing $s song.@n", TRUE, ch, 0, 0, TO_ROOM);
+          act("@c$n@C stops playing $s song.@n", true, ch, 0, 0, TO_ROOM);
           char_set_powerattack(ch, 0);
           return;
         }
@@ -362,49 +362,49 @@ static void resolve_song(struct char_data *ch)
         char_from_room(ch);
         char_to_room(ch, real_room(300));
         char_set_powerattack(ch, 0);
-        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Earth and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
+        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Earth and stop your song.@n", true, ch, 0, 0, TO_CHAR);
         break;
       case SONG_TELEPORT_VEGETA:
         char_from_room(ch);
         char_to_room(ch, real_room(2234));
         char_set_powerattack(ch, 0);
-        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Vegeta and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
+        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Vegeta and stop your song.@n", true, ch, 0, 0, TO_CHAR);
         break;
       case SONG_TELEPORT_FRIGID:
         char_from_room(ch);
         char_to_room(ch, real_room(4047));
         char_set_powerattack(ch, 0);
-        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Frigid and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
+        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Frigid and stop your song.@n", true, ch, 0, 0, TO_CHAR);
         break;
       case SONG_TELEPORT_NAMEK:
         char_from_room(ch);
         char_to_room(ch, real_room(10182));
         char_set_powerattack(ch, 0);
-        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Namek and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
+        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Namek and stop your song.@n", true, ch, 0, 0, TO_CHAR);
         break;
       case SONG_TELEPORT_KANASSA:
         char_from_room(ch);
         char_to_room(ch, real_room(14910));
         char_set_powerattack(ch, 0);
-        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Kanassa and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
+        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Kanassa and stop your song.@n", true, ch, 0, 0, TO_CHAR);
         break;
       case SONG_TELEPORT_AETHER:
         char_from_room(ch);
         char_to_room(ch, real_room(12025));
         char_set_powerattack(ch, 0);
-        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Aether and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
+        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Aether and stop your song.@n", true, ch, 0, 0, TO_CHAR);
         break;
       case SONG_TELEPORT_ARLIA:
         char_from_room(ch);
         char_to_room(ch, real_room(16087));
         char_set_powerattack(ch, 0);
-        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Arlia and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
+        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Arlia and stop your song.@n", true, ch, 0, 0, TO_CHAR);
         break;
       case SONG_TELEPORT_KONACK:
         char_from_room(ch);
         char_to_room(ch, real_room(8003));
         char_set_powerattack(ch, 0);
-        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Konack and stop your song.@n", TRUE, ch, 0, 0, TO_CHAR);
+        act("@CFinally as the last of your comrades has been teleported you teleport yourself to Konack and stop your song.@n", true, ch, 0, 0, TO_CHAR);
         break;
     }
   }
@@ -418,7 +418,7 @@ ACMD(do_song)
     return;
   }
 
-  struct obj_data *obj2 = NULL, *next_obj;
+  struct obj_data *obj2 = nullptr, *next_obj;
   int instrument        = 0;
 
   for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
@@ -434,8 +434,8 @@ ACMD(do_song)
   }
 
   if (char_get_powerattack(ch)) {
-    act("@cYou stop playing your ocarina.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@c$n stops playing their ocarina.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@cYou stop playing your ocarina.@n", true, ch, 0, 0, TO_CHAR);
+    act("@c$n stops playing their ocarina.@n", true, ch, 0, 0, TO_ROOM);
     char_set_powerattack(ch, 0);
     return;
   }
@@ -479,8 +479,8 @@ ACMD(do_song)
     return;
   }
   if (modifier == 3) {
-    act("@CYou begin to play the Song of Safety! Your fingers lightly glide over the ocarina and as you blow into it sweet music similar to a lullaby issues forth from the intrument.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@c$n@C begins to play a song on $s ocarina. The music seems to be some sort of lullaby.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@CYou begin to play the Song of Safety! Your fingers lightly glide over the ocarina and as you blow into it sweet music similar to a lullaby issues forth from the intrument.@n", true, ch, 0, 0, TO_CHAR);
+    act("@c$n@C begins to play a song on $s ocarina. The music seems to be some sort of lullaby.@n", true, ch, 0, 0, TO_ROOM);
     char_set_powerattack(ch, SONG_SAFETY);
     decCurKI(ch, cost, 0);
     return;
@@ -494,8 +494,8 @@ ACMD(do_song)
     return;
   }
   if (modifier == 8) {
-    act("@CYou begin to play the Shadow Stitch Minuet! Your fingers lightly glide over the ocarina and as you blow into it forboding low toned music issues forth.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@c$n@C begins to play a song on $s ocarina. Depressing low toned music issues forth from the ocarina.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@CYou begin to play the Shadow Stitch Minuet! Your fingers lightly glide over the ocarina and as you blow into it forboding low toned music issues forth.@n", true, ch, 0, 0, TO_CHAR);
+    act("@c$n@C begins to play a song on $s ocarina. Depressing low toned music issues forth from the ocarina.@n", true, ch, 0, 0, TO_ROOM);
     char_set_powerattack(ch, SONG_SHADOW_STITCH);
     decCurKI(ch, cost, 0);
     return;
@@ -537,8 +537,8 @@ ACMD(do_song)
       send_to_char(ch, "Syntax: song teleport (earth | vegeta | namek | aether | konack | kanassa | arlia | frigid)\r\n");
       return;
     }
-    act("@CYou begin to play the Melody of Teleportation! Your fingers lightly glide over the ocarina and as you blow into it a repeating light hearted melody issues forth.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@c$n@C begins to play a song on $s ocarina. A light hearted melody can be heard sounding from the ocarina as it is played.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@CYou begin to play the Melody of Teleportation! Your fingers lightly glide over the ocarina and as you blow into it a repeating light hearted melody issues forth.@n", true, ch, 0, 0, TO_CHAR);
+    act("@c$n@C begins to play a song on $s ocarina. A light hearted melody can be heard sounding from the ocarina as it is played.@n", true, ch, 0, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     return;
   }
@@ -551,8 +551,8 @@ ACMD(do_song)
     return;
   }
   if (modifier == 20) {
-    act("@CYou begin to play the Song of Shielding! Your fingers lightly glide over the ocarina and as you blow into it a triumphant series of notes issues forth.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@c$n@C begins to play a song on $s ocarina. A triumphant song full of soaring sounds from the ocarina as it is played.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@CYou begin to play the Song of Shielding! Your fingers lightly glide over the ocarina and as you blow into it a triumphant series of notes issues forth.@n", true, ch, 0, 0, TO_CHAR);
+    act("@c$n@C begins to play a song on $s ocarina. A triumphant song full of soaring sounds from the ocarina as it is played.@n", true, ch, 0, 0, TO_ROOM);
     char_set_powerattack(ch, SONG_SHIELDING);
     decCurKI(ch, cost, 0);
     return;

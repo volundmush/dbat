@@ -4,7 +4,6 @@
 #include "consts/directions.h"
 #include "consts/sectortypes.h"
 #include "consts/exitflags.h"
-#include "htree.h"
 #include "extradesc.h"
 
 struct room_direction_data {
@@ -54,4 +53,3 @@ struct room_data {
 
 extern struct room_data *world;
 extern room_rnum top_of_world;
-extern struct htree_node *room_htree;

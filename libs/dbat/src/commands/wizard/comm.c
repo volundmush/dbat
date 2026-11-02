@@ -69,7 +69,7 @@ ACMD(do_news)
   const char *filename;
   char line[256];
   char arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH], title[256], lastline[256];
-  int entries = 0, lookup = 0, nr, found = FALSE, first = TRUE, exit = FALSE;
+  int entries = 0, lookup = 0, nr, found = false, first = true, exit = false;
 
   one_argument(argument, arg);
   filename = NEWS_FILE;
@@ -89,7 +89,7 @@ ACMD(do_news)
   }
 
   if (lookup > 0) {
-    while (!feof(fl) && exit == FALSE) {
+    while (!feof(fl) && exit == false) {
       get_line(fl, line);
       if (*line == '#') {                    /* Count the entries */
         if (sscanf(line, "#%d", &nr) != 1) { /* Check the entry */
@@ -101,12 +101,12 @@ ACMD(do_news)
         } else { /* One we want to read */
           sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
           snprintf(buf, sizeof(buf), "@w--------------------------------------------------------------\n@cNum@W: @D(@G%3d@D)                @cTitle@W: @g%-50s@n\n", nr, title);
-          found = TRUE;
-          while (!feof(fl) && exit == FALSE) {
+          found = true;
+          while (!feof(fl) && exit == false) {
             get_line(fl, line);
             if (*line != '#') { /* As long as it isn't a new entry*/
-              if (first == TRUE) {
-                first = FALSE;
+              if (first == true) {
+                first = false;
                 snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s\n@w--------------------------------------------------------------\n", line);
                 snprintf(lastline, sizeof(lastline), "%s", line);
               } else if (!strcasecmp(line, lastline)) {
@@ -116,7 +116,7 @@ ACMD(do_news)
                 snprintf(lastline, sizeof(lastline), "%s", line);
               }
             } else {
-              exit = TRUE;
+              exit = true;
             }
           } /* End write buffer with entry text */
         } /* End One We wanted to read */
@@ -131,10 +131,10 @@ ACMD(do_news)
         if (sscanf(line, "#%d", &nr) != 1) { /* Check the entry */
           continue;
         } else { /* One we want to read */
-          if (first == TRUE) {
+          if (first == true) {
             sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
             snprintf(buf, sizeof(buf), "@wNews Entries (Newest at the bottom, to read an entry use 'news (number)')\n@D[@cNum@W: @D(@G%3d@D) @cTitle@W: @g%-50s@D]@n\n", nr, title);
-            first = FALSE;
+            first = false;
           } else {
             sscanf(line, "#%d %50[0-9a-zA-Z,.!' ]s\n", &nr, title);
             snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "@D[@cNum@W: @D(@G%3d@D) @cTitle@W: @g%-50s@D]@n\n", nr, title);
@@ -161,7 +161,7 @@ ACMD(do_news)
     return;
   }
 
-  if (found == TRUE) {
+  if (found == true) {
     send_to_char(ch, "%s\r\n", buf);
     char_set_lastpl(ch, time(0));
     *buf      = '\0';
@@ -232,7 +232,7 @@ ACMD(do_newsedit)
   } fields[] = {
       /* edit the lvls to your own needs */
       {"news", ADMLVL_IMMORT, &immlist, 2000, IMMLIST_FILE},
-      {"\n",   0,             NULL,     0,    NULL        }
+      {"\n",   0,             nullptr,  0,    nullptr     }
   };
 
   char *tmstr;
@@ -250,8 +250,8 @@ ACMD(do_newsedit)
   } else {
     lookup = lastentry + 1;
   }
-  char *backstr = NULL;
-  act("$n begins to edit the news.", TRUE, ch, 0, 0, TO_ROOM);
+  char *backstr = nullptr;
+  act("$n begins to edit the news.", true, ch, 0, 0, TO_ROOM);
   send_to_char(ch, "@D----------------------=[@GNews Edit@D]=----------------------@n\n");
   send_to_char(ch, " @RRemember that using # in newsedit is not possible. That\n");
   send_to_char(ch, "character will be eaten because it is required for the news\n");
@@ -271,7 +271,7 @@ ACMD(do_newsedit)
 ACMD(do_echo)
 {
   skip_spaces(&argument);
-  bool NoName = FALSE;
+  bool NoName = false;
 
   if (!*argument) {
     send_to_char(ch, "Yes.. but what?\r\n");
@@ -280,24 +280,24 @@ ACMD(do_echo)
 
   char buf[MAX_INPUT_LENGTH];
   char name[128];
-  int found              = FALSE;
-  struct char_data *vict = NULL, *next_v = NULL, *tch = NULL;
+  int found              = false;
+  struct char_data *vict = nullptr, *next_v = nullptr, *tch = nullptr;
 
   for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
     next_v = vict->next_in_room;
     if (vict == ch)
       continue;
-    if (found == FALSE) {
+    if (found == false) {
       snprintf(name, sizeof(name), "*%s", char_get_name(vict));
       if (strstr(argument, CAP(name))) {
-        found = TRUE;
+        found = true;
         tch   = vict;
       }
-      if (found == FALSE && !char_is_npc(vict)) {
+      if (found == false && !char_is_npc(vict)) {
         if (readIntro(ch, vict) == 1) {
           snprintf(name, sizeof(name), "*%s", get_i_name(ch, vict));
           if (strstr(argument, CAP(name))) {
-            found = TRUE;
+            found = true;
             tch   = vict;
           }
         }
@@ -307,13 +307,13 @@ ACMD(do_echo)
 
   if (subcmd == SCMD_SMOTE) {
     if (!strstr(argument, "#")) {
-      NoName = TRUE;
+      NoName = true;
     }
     strlcpy(buf, argument, sizeof(buf));
     search_replace(buf, "#", "$n");
     search_replace(buf, "&1", "'@C");
     search_replace(buf, "&2", "@w'");
-    if (found == TRUE) {
+    if (found == true) {
       search_replace(buf, name, "$N");
     } else if (strstr(buf, "*")) {
       search_replace(buf, "*", "");
@@ -323,7 +323,7 @@ ACMD(do_echo)
     search_replace(buf, "#", "$n");
     search_replace(buf, "&1", "'@C");
     search_replace(buf, "&2", "@w'");
-    if (found == TRUE) {
+    if (found == true) {
       search_replace(buf, name, "$N");
     }
   } else {
@@ -332,19 +332,19 @@ ACMD(do_echo)
   if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_NOREPEAT)) {
     send_to_char(ch, "%s", CONFIG_OK);
   }
-  if (NoName == TRUE) {
+  if (NoName == true) {
     char blom[MAX_INPUT_LENGTH];
     snprintf(blom, sizeof(blom), "@D(@GOOC@W: @gSmote by user %s@D)@n", char_is_npc(ch) ? char_get_name(ch) : char_get_user(ch));
-    act(blom, FALSE, ch, 0, 0, TO_ROOM);
+    act(blom, false, ch, 0, 0, TO_ROOM);
   }
-  if (found == FALSE) {
-    act(buf, FALSE, ch, 0, 0, TO_CHAR);
-    act(buf, FALSE, ch, 0, 0, TO_ROOM);
+  if (found == false) {
+    act(buf, false, ch, 0, 0, TO_CHAR);
+    act(buf, false, ch, 0, 0, TO_ROOM);
   } else {
-    act(buf, FALSE, ch, 0, tch, TO_CHAR);
-    act(buf, FALSE, ch, 0, tch, TO_NOTVICT);
+    act(buf, false, ch, 0, tch, TO_CHAR);
+    act(buf, false, ch, 0, tch, TO_NOTVICT);
     search_replace(buf, "$N", "you");
-    act(buf, FALSE, ch, 0, tch, TO_VICT);
+    act(buf, false, ch, 0, tch, TO_VICT);
   }
 }
 
@@ -359,7 +359,7 @@ ACMD(do_send)
     send_to_char(ch, "Send what to who?\r\n");
     return;
   }
-  if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
+  if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
     send_to_char(ch, "%s", CONFIG_NOPERSON);
     return;
   }
@@ -384,7 +384,7 @@ ACMD(do_syslog)
                  logtypes[(char_prf_flagged(ch, PRF_LOG1) ? 1 : 0) + (char_prf_flagged(ch, PRF_LOG2) ? 2 : 0)]);
     return;
   }
-  if (((tp = search_block(arg, logtypes, FALSE)) == -1)) {
+  if (((tp = search_block(arg, logtypes, false)) == -1)) {
     send_to_char(ch, "Usage: syslog { Off | Brief | Normal | Complete }\r\n");
     return;
   }
@@ -456,7 +456,7 @@ ACMD(do_poofset)
     free(*msg);
 
   if (!*argument)
-    *msg = NULL;
+    *msg = nullptr;
   else
     *msg = strdup(argument);
 
@@ -468,7 +468,7 @@ ACMD(do_wiznet)
   char buf1[MAX_INPUT_LENGTH + MAX_NAME_LENGTH + 32],
       buf2[MAX_INPUT_LENGTH + MAX_NAME_LENGTH + 32], *msg;
   struct descriptor_data *d;
-  char emote = FALSE;
+  char emote = false;
   int level  = ADMLVL_IMMORT;
 
   skip_spaces(&argument);
@@ -480,7 +480,7 @@ ACMD(do_wiznet)
   }
   switch (*argument) {
     case '*':
-      emote = TRUE;
+      emote = true;
       [[fallthrough]];
     case '#':
       one_argument(argument + 1, buf1);

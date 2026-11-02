@@ -65,8 +65,8 @@ ACMD(do_dig)
   else
     rvnum = (room_vnum)rawvnum;
   rrnum = real_room(rvnum);
-  if ((dir = search_block(sdir, abbr_dirs, FALSE)) < 0)
-    dir = search_block(sdir, dirs, FALSE);
+  if ((dir = search_block(sdir, abbr_dirs, false)) < 0)
+    dir = search_block(sdir, dirs, false);
   zone = world[char_get_in_room(ch)].zone;
 
   if (dir < 0) {
@@ -97,7 +97,7 @@ ACMD(do_dig)
       if (rroom_get_dir_option(char_get_in_room(ch), dir)->keyword)
         free(rroom_get_dir_option(char_get_in_room(ch), dir)->keyword);
       free(rroom_get_dir_option(char_get_in_room(ch), dir));
-      rroom_set_dir_option(char_get_in_room(ch), dir, NULL);
+      rroom_set_dir_option(char_get_in_room(ch), dir, nullptr);
       add_to_save_list(zone_table[world[char_get_in_room(ch)].zone].number, SL_WLD);
       send_to_char(ch, "You remove the exit to the %s.\r\n", dirs[dir]);
       return;
@@ -135,7 +135,7 @@ ACMD(do_dig)
      * This way we can let redit_save_internally handle the room adding.
      */
     if (d->olc) {
-      mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "SYSERR: do_dig: Player already had olc structure.");
+      mudlog(LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_dig: Player already had olc structure.");
       free(d->olc);
     }
     CREATE(d->olc, struct oasis_olc_data, 1);
@@ -178,8 +178,8 @@ ACMD(do_dig)
     CREATE(new_exit, struct room_direction_data, 1);
     rroom_set_dir_option(char_get_in_room(ch), dir, new_exit);
   }
-  rroom_get_dir_option(char_get_in_room(ch), dir)->general_description = NULL;
-  rroom_get_dir_option(char_get_in_room(ch), dir)->keyword             = NULL;
+  rroom_get_dir_option(char_get_in_room(ch), dir)->general_description = nullptr;
+  rroom_get_dir_option(char_get_in_room(ch), dir)->keyword             = nullptr;
   rroom_get_dir_option(char_get_in_room(ch), dir)->to_room             = rrnum;
   add_to_save_list(zone_table[world[char_get_in_room(ch)].zone].number, SL_WLD);
   save_rooms(zone_table[world[rrnum].zone].number);
@@ -198,8 +198,8 @@ ACMD(do_dig)
       CREATE(new_exit, struct room_direction_data, 1);
       rroom_set_dir_option(rrnum, rev_dir[dir], new_exit);
     }
-    rroom_get_dir_option(rrnum, rev_dir[dir])->general_description = NULL;
-    rroom_get_dir_option(rrnum, rev_dir[dir])->keyword             = NULL;
+    rroom_get_dir_option(rrnum, rev_dir[dir])->general_description = nullptr;
+    rroom_get_dir_option(rrnum, rev_dir[dir])->keyword             = nullptr;
     rroom_get_dir_option(rrnum, rev_dir[dir])->to_room             = char_get_in_room(ch);
     add_to_save_list(zone_table[world[rrnum].zone].number, SL_WLD);
     save_rooms(zone_table[world[rrnum].zone].number);
@@ -278,7 +278,7 @@ ACMD(do_rcopy)
   if (world[trnum].ex_description)
     copy_ex_descriptions(&world[rrnum].ex_description, world[trnum].ex_description);
   else
-    world[rrnum].ex_description = NULL;
+    world[rrnum].ex_description = nullptr;
 
   /* Finally copy over room flags */
   for (i = 0; i < AF_ARRAY_MAX; i++) {
@@ -316,7 +316,6 @@ static room_vnum redit_find_new_vnum(zone_rnum zone)
 
 int buildwalk(struct char_data *ch, int dir)
 {
-  char buf[MAX_INPUT_LENGTH];
   room_vnum vnum;
   room_rnum rnum;
 
@@ -334,7 +333,7 @@ int buildwalk(struct char_data *ch, int dir)
        * This way we can let redit_save_internally handle the room adding.
        */
       if (d->olc) {
-        mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "SYSERR: buildwalk(): Player already had olc structure.");
+        mudlog(LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: buildwalk(): Player already had olc structure.");
         free(d->olc);
       }
       CREATE(d->olc, struct oasis_olc_data, 1);
@@ -344,8 +343,7 @@ int buildwalk(struct char_data *ch, int dir)
 
       OLC_ROOM(d)->name = strdup("New BuildWalk Room");
 
-      sprintf(buf, "This unfinished room was created by %s.\r\n", char_get_name(ch));
-      OLC_ROOM(d)->description = strdup(buf);
+      OLC_ROOM(d)->description = str_printf("This unfinished room was created by %s.\r\n", char_get_name(ch));
       OLC_ROOM(d)->zone        = OLC_ZNUM(d);
       OLC_ROOM(d)->number      = NOWHERE;
 

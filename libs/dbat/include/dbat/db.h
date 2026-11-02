@@ -3,14 +3,14 @@
 #include <stdio.h>
 
 /* arbitrary constants used by index_boot() (must be unique) */
-#define DB_BOOT_WLD 0
-#define DB_BOOT_MOB 1
-#define DB_BOOT_OBJ 2
-#define DB_BOOT_ZON 3
-#define DB_BOOT_SHP 4
-#define DB_BOOT_HLP 5
-#define DB_BOOT_TRG 6
-#define DB_BOOT_GLD 7
+constexpr int DB_BOOT_WLD = 0;
+constexpr int DB_BOOT_MOB = 1;
+constexpr int DB_BOOT_OBJ = 2;
+constexpr int DB_BOOT_ZON = 3;
+constexpr int DB_BOOT_SHP = 4;
+constexpr int DB_BOOT_HLP = 5;
+constexpr int DB_BOOT_TRG = 6;
+constexpr int DB_BOOT_GLD = 7;
 
 #define LIB_USER      "user/"
 #define LIB_INTRO     "intro/"
@@ -93,10 +93,10 @@
 #define LEVEL_CONFIG    LIB_ETC "levels"     /* set various level values  */
 
 /* new bitvector data for use in player_index_element */
-#define PINDEX_DELETED    (1 << 0) /* deleted player	*/
-#define PINDEX_NODELETE   (1 << 1) /* protected player	*/
-#define PINDEX_SELFDELETE (1 << 2) /* player is selfdeleting*/
-#define PINDEX_NOWIZLIST  (1 << 3) /* Player shouldn't be on wizlist*/
+constexpr int PINDEX_DELETED    = (1 << 0); /* deleted player	*/
+constexpr int PINDEX_NODELETE   = (1 << 1); /* protected player	*/
+constexpr int PINDEX_SELFDELETE = (1 << 2); /* player is selfdeleting*/
+constexpr int PINDEX_NOWIZLIST  = (1 << 3); /* Player shouldn't be on wizlist*/
 
 // global variables
 
@@ -163,8 +163,8 @@ int vnum_material(char *searchname, struct char_data *ch);
 int vnum_weapontype(char *searchname, struct char_data *ch);
 int vnum_armortype(char *searchname, struct char_data *ch);
 
-#define REAL    0
-#define VIRTUAL 1
+constexpr int REAL    = 0;
+constexpr int VIRTUAL = 1;
 
 /* global buffering system */
 extern time_t boot_time;

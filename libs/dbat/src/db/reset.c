@@ -90,13 +90,13 @@ static bool prereset_gauntlet_zone(void)
   mud_log("Special Reset: zone %d: %d players in Gauntlet - special reset only", RESET_GAUNTLET, gauntlet_players);
 
   for (i = 0; i < NUM_GAUNTLET_ROOMS; i++) {
-    if (check_mob_in_room(gauntlet_mobs[i].vmob, gauntlet_mobs[i].vroom) == FALSE) {
+    if (check_mob_in_room(gauntlet_mobs[i].vmob, gauntlet_mobs[i].vroom) == false) {
       /* Mob isn't in the room, can we reset it? */
       if (num_players_in_room(gauntlet_mobs[i].vroom) == 0) {
         /* Yep - no players, reset this room only */
         if ((real_mobile(gauntlet_mobs[i].vmob)) && (real_room(gauntlet_mobs[i].vroom))) {
           /* Load the correct mob */
-          if ((mob = read_mobile(gauntlet_mobs[i].vmob, VIRTUAL)) != NULL) {
+          if ((mob = read_mobile(gauntlet_mobs[i].vmob, VIRTUAL)) != nullptr) {
             /* And put it in the room */
             char_to_room(mob, real_room(gauntlet_mobs[i].vroom));
             mud_log("Special Reset: zone %d: Gauntlet mob reset (%d, %s)", RESET_GAUNTLET, gauntlet_mobs[i].vmob, char_get_name(mob));

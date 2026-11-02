@@ -113,7 +113,7 @@ void userLoad(struct descriptor_data *d, char *name)
         sscanf(line, "%99s", filler);
         if (d->user) {
           free(d->user);
-          d->user = NULL;
+          d->user = nullptr;
         }
         d->user = strdup(filler);
         break;
@@ -121,7 +121,7 @@ void userLoad(struct descriptor_data *d, char *name)
         sscanf(line, "%99s", filler);
         if (d->email) {
           free(d->email);
-          d->email = NULL;
+          d->email = nullptr;
         }
         d->email = strdup(filler);
         break;
@@ -129,7 +129,7 @@ void userLoad(struct descriptor_data *d, char *name)
         sscanf(line, "%99s", filler);
         if (d->pass) {
           free(d->pass);
-          d->pass = NULL;
+          d->pass = nullptr;
         }
         d->pass = strdup(filler);
         break;
@@ -237,7 +237,7 @@ const char *rIntro(struct char_data *ch, char *arg)
 {
   char fname[40], filler[50] = "", scrap[100] = "", line[256] = "";
   static char name[80];
-  int known = FALSE;
+  int known = false;
   FILE *fl;
 
   /* Read Introduction File */
@@ -256,13 +256,13 @@ const char *rIntro(struct char_data *ch, char *arg)
     get_line(fl, line);
     sscanf(line, "%49s %99s", filler, scrap);
     if (!strcasecmp(arg, scrap)) {
-      known = TRUE;
+      known = true;
       sprintf(name, "%s", filler);
     }
   }
   fclose(fl);
 
-  if (known == TRUE)
+  if (known == true)
     return (name);
   else
     return "NOTHING";
@@ -279,7 +279,7 @@ void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, 
     if (!d) {
       return;
     }
-    if (d->user == NULL) {
+    if (d->user == nullptr) {
       return;
     }
     if (!get_filename(fname, sizeof(fname), USER_FILE, d->user))

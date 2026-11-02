@@ -63,7 +63,7 @@ void smash_tilde(char *str)
    * Derived from an idea by Sammy <samedi@dhc.net> (who happens to like
    * his tildes thank you very much.), -gg 2/20/98
    */
-  while ((str = strchr(str, '~')) != NULL)
+  while ((str = strchr(str, '~')) != nullptr)
     *str = ' ';
 #endif
 }
@@ -87,7 +87,7 @@ static void smash_numb(char *str)
    * Derived from an idea by Sammy <samedi@dhc.net> (who happens to like
    * his tildes thank you very much.), -gg 2/20/98
    */
-  while ((str = strchr(str, '#')) != NULL)
+  while ((str = strchr(str, '#')) != nullptr)
     *str = ' ';
 #endif
 }
@@ -179,8 +179,8 @@ void string_add(struct descriptor_data *d, char *str)
         case CON_HEDIT:
           free(*d->str);
           *d->str    = d->backstr;
-          d->backstr = NULL;
-          d->str     = NULL;
+          d->backstr = nullptr;
+          d->str     = nullptr;
           break;
         case CON_PLAYING:
           /* all CON_PLAYING are handled below in playing_string_cleanup */
@@ -198,7 +198,7 @@ void string_add(struct descriptor_data *d, char *str)
       }
       if (d->backstr)
         free(d->backstr);
-      d->backstr = NULL;
+      d->backstr = nullptr;
       break;
     case STRINGADD_ACTION:
       break;
@@ -223,7 +223,7 @@ void string_add(struct descriptor_data *d, char *str)
         {CON_IEDIT,    oedit_string_cleanup   },
         {CON_HEDIT,    hedit_string_cleanup   },
         {CON_NEWSEDIT, news_string_cleanup    },
-        {-1,           NULL                   }
+        {-1,           nullptr                }
     };
 
     for (i = 0; cleanup_modes[i].func; i++)
@@ -231,7 +231,7 @@ void string_add(struct descriptor_data *d, char *str)
         (*cleanup_modes[i].func)(d, action);
 
     /* Common post cleanup code. */
-    d->str     = NULL;
+    d->str     = nullptr;
     d->mail_to = 0;
     d->max_str = 0;
     if (d->character && !char_is_npc(d->character)) {
@@ -313,7 +313,7 @@ ACMD(do_skillset)
     return;
   }
 
-  if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_WORLD))) {
+  if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD))) {
     send_to_char(ch, "%s", CONFIG_NOPERSON);
     return;
   }
@@ -326,12 +326,12 @@ ACMD(do_skillset)
   /* If there is no chars in argument */
   if (!*argument) {
     i = snprintf(help_text, sizeof(help_text) - i, "\r\nSkills:\r\n");
-    i += print_skills_by_type(vict, help_text + i, sizeof(help_text) - i, SKTYPE_SKILL, NULL);
+    i += print_skills_by_type(vict, help_text + i, sizeof(help_text) - i, SKTYPE_SKILL, nullptr);
     i += snprintf(help_text + i, sizeof(help_text) - i, "\r\nSpells:\r\n");
-    i += print_skills_by_type(vict, help_text + i, sizeof(help_text) - i, SKTYPE_SPELL, NULL);
+    i += print_skills_by_type(vict, help_text + i, sizeof(help_text) - i, SKTYPE_SPELL, nullptr);
     if (CONFIG_ENABLE_LANGUAGES) {
       i += snprintf(help_text + i, sizeof(help_text) - i, "\r\nLanguages:\r\n");
-      i += print_skills_by_type(vict, help_text + i, sizeof(help_text) - i, SKTYPE_SKILL | SKTYPE_LANG, NULL);
+      i += print_skills_by_type(vict, help_text + i, sizeof(help_text) - i, SKTYPE_SKILL | SKTYPE_LANG, nullptr);
     }
     if (i >= sizeof(help_text))
       strcpy(help_text + sizeof(help_text) - strlen("** OVERFLOW **") - 1, "** OVERFLOW **"); /* strcpy: OK */
@@ -376,6 +376,6 @@ ACMD(do_skillset)
    * checked for the -1 above so we are safe here.
    */
   char_set_skills_base(vict, skill, value);
-  mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "skillset: %s changed %s's '%s' to %d.", char_get_name(ch), char_get_name(vict), spell_info[skill].name, value);
+  mudlog(LOG_BRF, ADMLVL_IMMORT, true, "skillset: %s changed %s's '%s' to %d.", char_get_name(ch), char_get_name(vict), spell_info[skill].name, value);
   send_to_char(ch, "You change %s's %s to %d.\r\n", char_get_name(vict), spell_info[skill].name, value);
 }

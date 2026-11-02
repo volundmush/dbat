@@ -34,15 +34,15 @@ static struct {
     {SL_ZON, save_zone,    "zone"  },
     {SL_CFG, save_config,  "config"},
     {SL_GLD, save_guilds,  "guild" },
-    {SL_ACT, NULL,         "social"},
-    {SL_HLP, NULL,         "help"  },
-    {-1,     NULL,         NULL    },
+    {SL_ACT, nullptr,      "social"},
+    {SL_HLP, nullptr,      "help"  },
+    {-1,     nullptr,      nullptr },
 };
 
 int genolc_checkstring(struct descriptor_data *d, char *arg)
 {
   smash_tilde(arg);
-  return TRUE;
+  return true;
 }
 
 const char *npc_msg_format_problem(const char *msg, bool allow_int)
@@ -73,7 +73,7 @@ const char *npc_msg_format_problem(const char *msg, bool allow_int)
     return "more than one %s";
   if (ds > 1)
     return "more than one %d";
-  return NULL;
+  return nullptr;
 }
 
 /* A numbered menu of names, `columns` to a line: "@g%2d@n) %-20.20s" then gap after each name.
@@ -111,7 +111,7 @@ int save_all(void)
       save_list = save_list->next; /* Fatal error, skip this one. */
   }
 
-  return TRUE;
+  return true;
 }
 
 /* NOTE: This changes the buffer passed in.  */
@@ -119,7 +119,7 @@ void strip_cr(char *buffer)
 {
   int rpos, wpos;
 
-  if (buffer == NULL)
+  if (buffer == nullptr)
     return;
 
   for (rpos = 0, wpos = 0; buffer[rpos]; rpos++) {
@@ -171,13 +171,13 @@ int remove_from_save_list(zone_vnum zone, int type)
     if (ritem->zone == zone && ritem->type == type)
       break;
 
-  if (ritem == NULL) {
+  if (ritem == nullptr) {
     mud_log("SYSERR: remove_from_save_list: Saved item not found. (%d/%d)", zone, type);
-    return FALSE;
+    return false;
   }
   REMOVE_FROM_LIST(ritem, save_list, next, temp);
   free(ritem);
-  return TRUE;
+  return true;
 }
 
 int add_to_save_list(zone_vnum zone, int type)
@@ -186,26 +186,26 @@ int add_to_save_list(zone_vnum zone, int type)
   zone_rnum rznum;
 
   if (type == SL_CFG)
-    return FALSE;
+    return false;
 
   rznum = real_zone(zone);
   if (rznum == NOWHERE || rznum > top_of_zone_table) {
     if (zone != AEDIT_PERMISSION && zone != HEDIT_PERMISSION) {
       mud_log("SYSERR: add_to_save_list: Invalid zone number passed. (%d => %d, 0-%d)", zone, rznum, top_of_zone_table);
-      return FALSE;
+      return false;
     }
   }
 
   for (nitem = save_list; nitem; nitem = nitem->next)
     if (nitem->zone == zone && nitem->type == type)
-      return FALSE;
+      return false;
 
   CREATE(nitem, struct save_list_data, 1);
   nitem->zone = zone;
   nitem->type = type;
   nitem->next = save_list;
   save_list   = nitem;
-  return TRUE;
+  return true;
 }
 
 int in_save_list(zone_vnum zone, int type)
@@ -214,9 +214,9 @@ int in_save_list(zone_vnum zone, int type)
 
   for (nitem = save_list; nitem; nitem = nitem->next)
     if (nitem->zone == zone && nitem->type == type)
-      return TRUE;
+      return true;
 
-  return FALSE;
+  return false;
 }
 
 void free_save_list(void)
@@ -232,7 +232,7 @@ void free_save_list(void)
 /* Used from do_show(), ideally.  */
 ACMD(do_show_save_list)
 {
-  if (save_list == NULL)
+  if (save_list == nullptr)
     send_to_char(ch, "All world files are up to date.\r\n");
   else {
     struct save_list_data *item;

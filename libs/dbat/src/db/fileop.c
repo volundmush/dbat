@@ -19,22 +19,22 @@
  * be at least READ_SIZE (256) characters large.  */
 int get_line(FILE *fl, char *buf)
 {
-  char temp[READ_SIZE];
-  int lines = 0;
-  int sl;
+  char *line = nullptr;
+  size_t cap = 0;
+  int lines  = 0;
 
   do {
-    if (!fgets(temp, READ_SIZE, fl))
+    if (getline(&line, &cap, fl) < 0) {
+      free(line);
       return (0);
+    }
     lines++;
-  } while (*temp == '*' || *temp == '\n' || *temp == '\r');
+  } while (*line == '*' || *line == '\n' || *line == '\r');
 
-  /* Last line of file doesn't always have a \n, but it should. */
-  sl = strlen(temp);
-  while (sl > 0 && (temp[sl - 1] == '\n' || temp[sl - 1] == '\r'))
-    temp[--sl] = '\0';
-
-  strcpy(buf, temp); /* strcpy: OK, if buf >= READ_SIZE (256) */
+  /* Last line of file doesn't always have a \n, but it should. A longer line is cut short. */
+  line[strcspn(line, "\r\n")] = '\0';
+  strlcpy(buf, line, READ_SIZE);
+  free(line);
   return (lines);
 }
 
@@ -43,7 +43,7 @@ int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_nam
   const char *prefix, *middle, *suffix;
   char name[PATH_MAX], *ptr;
 
-  if (orig_name == NULL || *orig_name == '\0' || filename == NULL) {
+  if (orig_name == nullptr || *orig_name == '\0' || filename == nullptr) {
     mud_log("SYSERR: NULL pointer or empty string passed to get_filename(), %p or %p.",
             orig_name, filename);
     return (0);
@@ -177,7 +177,7 @@ void topLoad()
     return;
   }
 
-  TOPLOADED = TRUE;
+  TOPLOADED = true;
 
   while (!feof(file)) {
     get_line(file, line);
@@ -196,7 +196,7 @@ void topWrite(struct char_data *ch)
   if (char_get_admlevel(ch) > 0 || char_is_npc(ch))
     return;
 
-  if (TOPLOADED == FALSE) {
+  if (TOPLOADED == false) {
     return;
   }
 
@@ -204,8 +204,8 @@ void topWrite(struct char_data *ch)
   FILE *fl;
   char *positions[25];
   int64_t points[25] = {0};
-  int x = 0, writeEm = FALSE, placed = FALSE, start = 0, finish = 25, location = -1;
-  int progress = FALSE;
+  int x = 0, writeEm = false, placed = false, start = 0, finish = 25, location = -1;
+  int progress = false;
 
   if (!ch) {
     return;
@@ -226,18 +226,18 @@ void topWrite(struct char_data *ch)
   finish = 5;
 
   for (x = start; x < finish; x++) {                   /* Save the new spots */
-    if (placed == FALSE) {                             /* They Haven't Placed */
+    if (placed == false) {                             /* They Haven't Placed */
       if (strcasecmp(topname[x], char_get_name(ch))) { /* Name doesn't match */
         if (getEffMaxPL(ch) > toppoint[x]) {
           free(topname[x]);
           toppoint[x] = getEffMaxPL(ch);
           topname[x]  = strdup(char_get_name(ch));
-          placed      = TRUE;
-          writeEm     = TRUE;
+          placed      = true;
+          writeEm     = true;
           location    = x;
         }
       } else { /* This is their spot already */
-        placed   = TRUE;
+        placed   = true;
         location = finish;
       }
     } else { /* They have placed */
@@ -248,7 +248,7 @@ void topWrite(struct char_data *ch)
           topname[x]  = strdup(positions[location]);
           location += 1;
         } else { /* This IS their old spot */
-          progress = TRUE;
+          progress = true;
           location += 1;
           free(topname[x]);
           toppoint[x] = points[location];
@@ -259,33 +259,33 @@ void topWrite(struct char_data *ch)
     }
   } /* End Save New Spots*/
 
-  if (progress == TRUE) {
+  if (progress == true) {
     send_to_all("@D[@GToplist@W: @C%s @Whas moved up in rank in the powerlevel section.@D]\r\n", char_get_name(ch));
-  } else if (placed == TRUE && location != finish) {
+  } else if (placed == true && location != finish) {
     send_to_all("@D[@GToplist@W: @C%s @Whas placed in the powerlevel section.@D]\r\n", char_get_name(ch));
   }
 
   location = -1;
-  placed   = FALSE;
-  progress = FALSE;
+  placed   = false;
+  progress = false;
   /* Ki Section         */
   /* Set the start and finish for this section */
   start  = 5;
   finish = 10;
 
   for (x = start; x < finish; x++) {                   /* Save the new spots */
-    if (placed == FALSE) {                             /* They Haven't Placed */
+    if (placed == false) {                             /* They Haven't Placed */
       if (strcasecmp(topname[x], char_get_name(ch))) { /* Name doesn't match */
         if (getMaxKI(ch) > toppoint[x]) {
           free(topname[x]);
           toppoint[x] = getMaxKI(ch);
           topname[x]  = strdup(char_get_name(ch));
-          placed      = TRUE;
-          writeEm     = TRUE;
+          placed      = true;
+          writeEm     = true;
           location    = x;
         }
       } else { /* This is their spot already */
-        placed   = TRUE;
+        placed   = true;
         location = finish;
       }
     } else { /* They have placed */
@@ -296,7 +296,7 @@ void topWrite(struct char_data *ch)
           topname[x]  = strdup(positions[location]);
           location += 1;
         } else { /* This IS their old spot */
-          progress = TRUE;
+          progress = true;
           location += 1;
           free(topname[x]);
           toppoint[x] = points[location];
@@ -307,15 +307,15 @@ void topWrite(struct char_data *ch)
     }
   } /* End Save New Spots*/
 
-  if (progress == TRUE) {
+  if (progress == true) {
     send_to_all("@D[@GToplist@W: @C%s @Whas moved up in rank in the ki section.@D]\r\n", char_get_name(ch));
-  } else if (placed == TRUE && location != finish) {
+  } else if (placed == true && location != finish) {
     send_to_all("@D[@GToplist@W: @C%s @Whas placed in the ki section.@D]\r\n", char_get_name(ch));
   }
 
   location = -1;
-  placed   = FALSE;
-  progress = FALSE;
+  placed   = false;
+  progress = false;
 
   /* Stamina Section    */
   /* Set the start and finish for this section */
@@ -323,18 +323,18 @@ void topWrite(struct char_data *ch)
   finish = 15;
 
   for (x = start; x < finish; x++) {                   /* Save the new spots */
-    if (placed == FALSE) {                             /* They Haven't Placed */
+    if (placed == false) {                             /* They Haven't Placed */
       if (strcasecmp(topname[x], char_get_name(ch))) { /* Name doesn't match */
         if (getMaxST(ch) > toppoint[x]) {
           free(topname[x]);
           toppoint[x] = getMaxST(ch);
           topname[x]  = strdup(char_get_name(ch));
-          placed      = TRUE;
-          writeEm     = TRUE;
+          placed      = true;
+          writeEm     = true;
           location    = x;
         }
       } else { /* This is their spot already */
-        placed   = TRUE;
+        placed   = true;
         location = finish;
       }
     } else { /* They have placed */
@@ -345,7 +345,7 @@ void topWrite(struct char_data *ch)
           topname[x]  = strdup(positions[location]);
           location += 1;
         } else { /* This IS their old spot */
-          progress = TRUE;
+          progress = true;
           location += 1;
           free(topname[x]);
           toppoint[x] = points[location];
@@ -356,15 +356,15 @@ void topWrite(struct char_data *ch)
     }
   } /* End Save New Spots*/
 
-  if (progress == TRUE) {
+  if (progress == true) {
     send_to_all("@D[@GToplist@W: @C%s @Whas moved up in rank in the stamina section.@D]\r\n", char_get_name(ch));
-  } else if (placed == TRUE && location != finish) {
+  } else if (placed == true && location != finish) {
     send_to_all("@D[@GToplist@W: @C%s @Whas placed in the stamina section.@D]\r\n", char_get_name(ch));
   }
 
   location = -1;
-  placed   = FALSE;
-  progress = FALSE;
+  placed   = false;
+  progress = false;
 
   /* Zenni Section      */
   /* Set the start and finish for this section */
@@ -372,18 +372,18 @@ void topWrite(struct char_data *ch)
   finish = 20;
 
   for (x = start; x < finish; x++) {                   /* Save the new spots */
-    if (placed == FALSE) {                             /* They Haven't Placed */
+    if (placed == false) {                             /* They Haven't Placed */
       if (strcasecmp(topname[x], char_get_name(ch))) { /* Name doesn't match */
         if (char_get_bank_gold(ch) + char_get_gold(ch) > toppoint[x]) {
           free(topname[x]);
           toppoint[x] = char_get_bank_gold(ch) + char_get_gold(ch);
           topname[x]  = strdup(char_get_name(ch));
-          placed      = TRUE;
-          writeEm     = TRUE;
+          placed      = true;
+          writeEm     = true;
           location    = x;
         }
       } else { /* This is their spot already */
-        placed   = TRUE;
+        placed   = true;
         location = finish;
       }
     } else { /* They have placed */
@@ -394,7 +394,7 @@ void topWrite(struct char_data *ch)
           topname[x]  = strdup(positions[location]);
           location += 1;
         } else { /* This IS their old spot */
-          progress = TRUE;
+          progress = true;
           location += 1;
           free(topname[x]);
           toppoint[x] = points[location];
@@ -405,15 +405,15 @@ void topWrite(struct char_data *ch)
     }
   } /* End Save New Spots*/
 
-  if (progress == TRUE) {
+  if (progress == true) {
     send_to_all("@D[@GToplist@W: @C%s @Whas moved up in rank in the zenni section.@D]\r\n", char_get_name(ch));
-  } else if (placed == TRUE && location != finish) {
+  } else if (placed == true && location != finish) {
     send_to_all("@D[@GToplist@W: @C%s @Whas placed in the zenni section.@D]\r\n", char_get_name(ch));
   }
 
   location = -1;
-  placed   = FALSE;
-  progress = FALSE;
+  placed   = false;
+  progress = false;
 
   /* RPP Section        */
   /* Set the start and finish for this section */
@@ -421,18 +421,18 @@ void topWrite(struct char_data *ch)
   finish = 25;
 
   for (x = start; x < finish; x++) {                   /* Save the new spots */
-    if (placed == FALSE) {                             /* They Haven't Placed */
+    if (placed == false) {                             /* They Haven't Placed */
       if (strcasecmp(topname[x], char_get_user(ch))) { /* Name doesn't match */
         if (char_get_trp(ch) > toppoint[x]) {
           free(topname[x]);
           toppoint[x] = char_get_trp(ch);
           topname[x]  = strdup(char_get_user(ch));
-          placed      = TRUE;
-          writeEm     = TRUE;
+          placed      = true;
+          writeEm     = true;
           location    = x;
         }
       } else { /* This is their spot already */
-        placed   = TRUE;
+        placed   = true;
         location = finish;
       }
     } else { /* They have placed */
@@ -443,7 +443,7 @@ void topWrite(struct char_data *ch)
           topname[x]  = strdup(positions[location]);
           location += 1;
         } else { /* This IS their old spot */
-          progress = TRUE;
+          progress = true;
           location += 1;
           free(topname[x]);
           toppoint[x] = points[location];
@@ -454,21 +454,21 @@ void topWrite(struct char_data *ch)
     }
   } /* End Save New Spots*/
 
-  if (progress == TRUE) {
+  if (progress == true) {
     send_to_all("@D[@GToplist@W: @C%s @Whas moved up in rank in the RPP section.@D]\r\n", char_get_user(ch));
-  } else if (placed == TRUE && location != finish) {
+  } else if (placed == true && location != finish) {
     send_to_all("@D[@GToplist@W: @C%s @Whas placed in the RPP section.@D]\r\n", char_get_user(ch));
   }
 
   location = -1;
-  placed   = FALSE;
-  progress = FALSE;
+  placed   = false;
+  progress = false;
 
   for (x = 0; x < 25; x++) {
     free(positions[x]);
   }
 
-  if (writeEm == TRUE) {
+  if (writeEm == true) {
     if (!get_filename(fname, sizeof(fname), INTRO_FILE, "toplist"))
       return;
 

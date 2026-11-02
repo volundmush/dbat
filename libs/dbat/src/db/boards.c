@@ -28,7 +28,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-struct board_info *bboards = NULL; /* our global board structure */
+struct board_info *bboards = nullptr; /* our global board structure */
 
 /* Boards whose new posts are announced, and whose last visit is kept in the player's lboard[]. */
 static const struct special_board {
@@ -46,10 +46,10 @@ static const struct special_board {
 
 static const struct special_board *find_special_board(obj_vnum vnum)
 {
-  for (size_t i = 0; i < sizeof(special_boards) / sizeof(special_boards[0]); i++)
+  for (size_t i = 0; i < countof(special_boards); i++)
     if (special_boards[i].vnum == vnum)
       return &special_boards[i];
-  return NULL;
+  return nullptr;
 }
 
 /* Records that ch has just looked at a special board. */
@@ -103,7 +103,7 @@ static struct obj_data *board_proto(obj_vnum vnum)
 {
   obj_rnum rnum = real_object(vnum);
 
-  return rnum == NOTHING ? NULL : &obj_proto[rnum];
+  return rnum == NOTHING ? nullptr : &obj_proto[rnum];
 }
 
 static void board_path(char *buf, size_t size, obj_vnum vnum)
@@ -150,7 +150,7 @@ static void free_memory(struct board_memory *mem)
 
 static void add_message_head(struct board_info *board, struct board_msg *msg)
 {
-  msg->prev = NULL;
+  msg->prev = nullptr;
   msg->next = board->messages;
   if (board->messages)
     board->messages->prev = msg;
@@ -161,9 +161,9 @@ static void add_message_tail(struct board_info *board, struct board_msg *msg)
 {
   struct board_msg *last = board->messages;
 
-  msg->next = NULL;
+  msg->next = nullptr;
   if (!last) {
-    msg->prev       = NULL;
+    msg->prev       = nullptr;
     board->messages = msg;
     return;
   }
@@ -186,7 +186,7 @@ static struct board_msg *nth_message(struct board_info *board, int n, bool from_
   struct board_msg *msg = board->messages;
 
   if (n < 1 || !msg)
-    return NULL;
+    return nullptr;
   if (from_oldest)
     while (msg->next)
       msg = msg->next;
@@ -203,7 +203,7 @@ static struct board_msg *new_message(struct char_data *ch, const char *subject)
   msg->name      = strdup(char_get_name(ch));
   msg->timestamp = time(0);
   msg->subject   = strdup(subject);
-  msg->data      = NULL;
+  msg->data      = nullptr;
   return msg;
 }
 
@@ -322,12 +322,12 @@ static struct board_info *load_board(obj_vnum board_vnum)
   board_path(path, sizeof(path), board_vnum);
   if (!(fl = fopen(path, "r"))) {
     mud_log("Request to open board [vnum %d] failed - unable to open file '%s'.", board_vnum, path);
-    return NULL;
+    return nullptr;
   }
   if (!get_line(fl, buf) || strcmp("Board File", buf)) {
     mud_log("Invalid board file '%s' [vnum: %d] - failed to load.", path, board_vnum);
     fclose(fl);
-    return NULL;
+    return nullptr;
   }
 
   /* oddly enough, most errors in board files can be ignored, setting defaults */
@@ -338,7 +338,7 @@ static struct board_info *load_board(obj_vnum board_vnum)
     mud_log("SYSERR: Board file '%s' [vnum: %d] is format version %d; only version %d is supported. Not loaded.",
             path, board_vnum, t[4], CURRENT_BOARD_VER);
     fclose(fl);
-    return NULL;
+    return nullptr;
   }
 
   CREATE(board, struct board_info, 1);
@@ -348,12 +348,12 @@ static struct board_info *load_board(obj_vnum board_vnum)
   if (!(obj = board_proto(board_vnum))) {
     mud_log("No associated object exists when attempting to create a board [vnum %d].", board_vnum);
     /* auto delete only if the file hasn't been modified in the last 7 days */
-    if (!stat(path, &st) && time(NULL) - st.st_mtime > (60 * 60 * 24 * 7)) {
+    if (!stat(path, &st) && time(nullptr) - st.st_mtime > (60 * 60 * 24 * 7)) {
       mud_log("Deleting old board file '%s' [vnum %d].  7 days without modification & no associated object.", path, board_vnum);
       unlink(path);
       fclose(fl);
       free(board);
-      return NULL;
+      return nullptr;
     }
     board->read_lvl   = t[0];
     board->write_lvl  = t[1];
@@ -424,7 +424,7 @@ void init_boards(void)
 
     if (!is_number_name(name))
       continue;
-    if ((board = load_board(atoi(name))) != NULL) {
+    if ((board = load_board(atoi(name))) != nullptr) {
       board->next = bboards;
       bboards     = board;
     }
@@ -470,7 +470,7 @@ struct board_info *create_new_board(obj_vnum board_vnum)
   if (!save_board(board)) {
     mud_log("Hm. Error while creating new board file [vnum: %d]. Unable to create new file.", board_vnum);
     free(board);
-    return NULL;
+    return nullptr;
   }
   board->next = bboards;
   bboards     = board;
@@ -497,7 +497,7 @@ void clear_boards(void)
       }
     free(board);
   }
-  bboards = NULL;
+  bboards = nullptr;
 }
 
 static struct board_info *locate_or_create_board(obj_vnum board_vnum)
@@ -516,7 +516,7 @@ struct board_info *locate_board(obj_vnum board_vnum)
   for (struct board_info *board = bboards; board; board = board->next)
     if (board->vnum == board_vnum)
       return board;
-  return NULL;
+  return nullptr;
 }
 
 bool save_board(struct board_info *board)
@@ -670,7 +670,7 @@ static void start_post(struct board_info *board, struct board_msg *msg, struct c
   board->num_messages = MAX(board->num_messages + 1, 1);
   add_message_head(board, msg);
   char_plr_set(ch, PLR_WRITING, true);
-  string_write(ch->desc, &msg->data, MAX_MESSAGE_LENGTH, board->vnum + BOARD_MAGIC, NULL);
+  string_write(ch->desc, &msg->data, MAX_MESSAGE_LENGTH, board->vnum + BOARD_MAGIC, nullptr);
   announce_new_post(board->vnum);
 }
 
@@ -699,7 +699,7 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg)
     send_to_char(ch, "Your subject can only be 45 characters long(including colorcode).\r\n");
     return;
   }
-  act("@C$n@w starts writing on the board.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@C$n@w starts writing on the board.@n", true, ch, 0, 0, TO_ROOM);
   delete_doubledollar(arg);
 
   send_to_char(ch, "Write your message.  (/s saves /h for help)\r\n");
@@ -739,7 +739,7 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum)
   msg = new_message(ch, subject);
 
   send_to_char(ch, "Write your message.  (/s saves /h for help)\r\n\r\n");
-  act("@C$n@w starts writing on the board.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@C$n@w starts writing on the board.@n", true, ch, 0, 0, TO_ROOM);
 
   snprintf(quote, sizeof(quote), "\t@D------- @cQuoted message @D-------@w\r\n%s\t@D   ------- @cEnd Quote @D-------@w\r\n", other->data ? other->data : "");
   msg->data = strdup(quote);
@@ -807,6 +807,6 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg)
   board->num_messages--;
   send_to_char(ch, "Message removed.\r\n");
   snprintf(buf, sizeof(buf), "$n just removed message %d.", arg);
-  act(buf, FALSE, ch, 0, 0, TO_ROOM);
+  act(buf, false, ch, 0, 0, TO_ROOM);
   save_board(board);
 }

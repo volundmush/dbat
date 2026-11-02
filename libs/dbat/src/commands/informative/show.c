@@ -134,10 +134,10 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
     return;
   }
 
-  int spotted = FALSE;
+  int spotted = false;
 
   if (char_get_skill(ch, SKILL_SPOT) > rand_number(20, 110)) {
-    spotted = TRUE;
+    spotted = true;
   }
 
   switch (mode) {
@@ -176,11 +176,11 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
         } else {
           snprintf(bury, sizeof(bury), "recent grave covered by");
         }
-        if (spotted == TRUE && rroom_sect(obj_get_in_room(obj)) != SECT_DESERT) {
+        if (spotted == true && rroom_sect(obj_get_in_room(obj)) != SECT_DESERT) {
           send_to_char(ch, "@yA %s soft dirt is here.@n\r\n", bury);
           return;
         }
-        if (spotted == TRUE && rroom_sect(obj_get_in_room(obj)) == SECT_DESERT) {
+        if (spotted == true && rroom_sect(obj_get_in_room(obj)) == SECT_DESERT) {
           send_to_char(ch, "@YA %s soft sand is here.@n\r\n", bury);
           return;
         }
@@ -193,7 +193,7 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
       } else {
         send_to_char(ch, "@w");
         if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_ROOMFLAGS)) {
-          if (obj_get_posted_to(obj) == NULL) {
+          if (obj_get_posted_to(obj) == nullptr) {
             send_to_char(ch, "@D[@G%d@D]@w ", obj_get_vnum(obj));
             if (obj->script)
               send_to_char(ch, "@D[@wT%d@D]@w ", obj->proto_script->vnum);
@@ -445,47 +445,47 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
           if (!obj_is_corpse(obj)) {
             send_to_char(ch, "You see nothing special..\r\n");
           } else {
-            int mention = FALSE;
+            int mention = false;
             send_to_char(ch, "This corpse has ");
 
             if (obj_get_value(obj, VAL_CORPSE_HEAD) == 0) {
               send_to_char(ch, "no head,");
-              mention = TRUE;
+              mention = true;
             }
 
             if (obj_get_value(obj, VAL_CORPSE_RARM) == 0) {
               send_to_char(ch, "no right arm, ");
-              mention = TRUE;
+              mention = true;
             } else if (obj_get_value(obj, VAL_CORPSE_RARM) == 2) {
               send_to_char(ch, "a broken right arm, ");
-              mention = TRUE;
+              mention = true;
             }
 
             if (obj_get_value(obj, VAL_CORPSE_LARM) == 0) {
               send_to_char(ch, "no left arm, ");
-              mention = TRUE;
+              mention = true;
             } else if (obj_get_value(obj, VAL_CORPSE_LARM) == 2) {
               send_to_char(ch, "a broken left arm, ");
-              mention = TRUE;
+              mention = true;
             }
 
             if (obj_get_value(obj, VAL_CORPSE_RLEG) == 0) {
               send_to_char(ch, "no right leg, ");
-              mention = TRUE;
+              mention = true;
             } else if (obj_get_value(obj, VAL_CORPSE_RLEG) == 2) {
               send_to_char(ch, "a broken right leg, ");
-              mention = TRUE;
+              mention = true;
             }
 
             if (obj_get_value(obj, VAL_CORPSE_LLEG) == 0) {
               send_to_char(ch, "no left leg, ");
-              mention = TRUE;
+              mention = true;
             } else if (obj_get_value(obj, VAL_CORPSE_LLEG) == 2) {
               send_to_char(ch, "a broken left leg, ");
-              mention = TRUE;
+              mention = true;
             }
 
-            if (mention == FALSE) {
+            if (mention == false) {
               send_to_char(ch, "nothing missing from it but life.");
             } else {
               send_to_char(ch, "and is dead.");
@@ -536,7 +536,7 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
 
 int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
 {
-  int found = FALSE;
+  int found = false;
 
   if (obj_extra_flagged(obj, ITEM_INVISIBLE)) {
     send_to_char(ch, " (invisible)");
@@ -623,12 +623,12 @@ int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
 void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int show)
 {
   struct obj_data *i, *j, *d;
-  bool found = FALSE;
+  bool found = false;
   int num;
 
   /* Loop through all objects in the list */
   for (i = list; i; i = i->next_content) {
-    if (i->description == NULL)
+    if (i->description == nullptr)
       continue;
     if (strcasecmp(i->description, "undefined") == 0)
       continue;
@@ -668,7 +668,7 @@ void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int
       if (num > 1)
         send_to_char(ch, "@D(@Rx@Y%2i@D)@n ", num);
       show_obj_to_char(d, ch, mode);
-      found = TRUE;
+      found = true;
     }
   }
   if (!found && show)
@@ -737,7 +737,7 @@ void diag_char_to_char(struct char_data *i, struct char_data *ch)
 
 void look_at_char(struct char_data *i, struct char_data *ch)
 {
-  int j, found, clan = FALSE;
+  int j, found, clan = false;
   char buf[100];
   struct obj_data *tmp_obj;
 
@@ -808,7 +808,7 @@ void look_at_char(struct char_data *i, struct char_data *ch)
     }
   }
   send_to_char(ch, "\r\n");
-  clan = FALSE;
+  clan = false;
   if (!char_is_npc(i)) {
     send_to_char(ch, "            @D[@mClan        @D: @W%-20s@D]@n\r\n", clan ? buf : "None.");
   }
@@ -899,24 +899,24 @@ void look_at_char(struct char_data *i, struct char_data *ch)
     }
   }
   diag_char_to_char(i, ch);
-  found = FALSE;
+  found = false;
   for (j = 0; !found && j < NUM_WEARS; j++)
     if (char_get_equipment(i, j) && char_can_see_obj(ch, char_get_equipment(i, j)))
-      found = TRUE;
+      found = true;
 
   if (found && (!char_is_npc(ch) && !char_prf_flagged(ch, PRF_NOEQSEE))) {
     send_to_char(ch, "\r\n"); /* act() does capitalization. */
     if (!char_plr_flagged(i, PLR_DISGUISED)) {
-      act("$n is using:", FALSE, i, 0, ch, TO_VICT);
+      act("$n is using:", false, i, 0, ch, TO_VICT);
     } else {
-      act("The disguised person is using:", FALSE, i, 0, ch, TO_VICT);
+      act("The disguised person is using:", false, i, 0, ch, TO_VICT);
     }
     for (j = 0; j < NUM_WEARS; j++)
       if (char_get_equipment(i, j) && char_can_see_obj(ch, char_get_equipment(i, j)) && (j != WEAR_WIELD1 && j != WEAR_WIELD2)) {
         send_to_char(ch, "%s", wear_where[j]);
         show_obj_to_char(char_get_equipment(i, j), ch, SHOW_OBJ_SHORT);
         if (obj_extra_flagged(char_get_equipment(i, j), ITEM_SHEATH)) {
-          struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = char_get_equipment(i, j);
+          struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = char_get_equipment(i, j);
           for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
             next_obj = obj2->next_content;
             if (obj2) {
@@ -924,13 +924,13 @@ void look_at_char(struct char_data *i, struct char_data *ch)
               show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
             }
           }
-          obj2 = NULL;
+          obj2 = nullptr;
         }
       } else if (char_get_equipment(i, j) && char_can_see_obj(ch, char_get_equipment(i, j)) && (!char_plr_flagged(i, PLR_THANDW))) {
         send_to_char(ch, "%s", wear_where[j]);
         show_obj_to_char(char_get_equipment(i, j), ch, SHOW_OBJ_SHORT);
         if (obj_extra_flagged(char_get_equipment(i, j), ITEM_SHEATH)) {
-          struct obj_data *obj2 = NULL, *next_obj = NULL, *sheath = char_get_equipment(i, j);
+          struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = char_get_equipment(i, j);
           for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
             next_obj = obj2->next_content;
             if (obj2) {
@@ -938,7 +938,7 @@ void look_at_char(struct char_data *i, struct char_data *ch)
               show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
             }
           }
-          obj2 = NULL;
+          obj2 = nullptr;
         }
       } else if (char_get_equipment(i, j) && char_can_see_obj(ch, char_get_equipment(i, j)) && (char_plr_flagged(i, PLR_THANDW))) {
         send_to_char(ch, "@c<@CWielded by B. Hands@c>@n ");
@@ -946,25 +946,25 @@ void look_at_char(struct char_data *i, struct char_data *ch)
       }
   }
   if (ch != i && ((char_get_skill(ch, SKILL_KEEN) && char_aff_flagged(ch, AFF_SNEAK)) || char_get_admlevel(ch))) {
-    found = FALSE;
-    act("\r\nYou attempt to peek at $s inventory:", FALSE, i, 0, ch, TO_VICT);
+    found = false;
+    act("\r\nYou attempt to peek at $s inventory:", false, i, 0, ch, TO_VICT);
     if (char_can_see(i, ch))
-      act("$n tries to evaluate what you have in your inventory.", TRUE, ch, 0, i, TO_VICT);
+      act("$n tries to evaluate what you have in your inventory.", true, ch, 0, i, TO_VICT);
     if (char_get_skill(ch, SKILL_KEEN) > axion_dice(0) && (!char_is_npc(i) || char_get_admlevel(ch) > 1)) {
       for (tmp_obj = i->carrying; tmp_obj; tmp_obj = tmp_obj->next_content) {
         if (char_can_see_obj(ch, tmp_obj) &&
             (char_adm_flagged(ch, ADM_SEEINV) || (rand_number(0, 20) < char_get_level(ch)))) {
           show_obj_to_char(tmp_obj, ch, SHOW_OBJ_SHORT);
-          found = TRUE;
+          found = true;
         }
       }
       improve_skill(ch, SKILL_KEEN, 1);
     } else if (char_is_npc(i) && char_get_admlevel(ch) < 2) {
       return;
     } else {
-      act("You are unsure about $s inventory.", FALSE, i, 0, ch, TO_VICT);
+      act("You are unsure about $s inventory.", false, i, 0, ch, TO_VICT);
       if (char_can_see(i, ch))
-        act("$n didn't seem to get a good enough look.", TRUE, ch, 0, i, TO_VICT);
+        act("$n didn't seem to get a good enough look.", true, ch, 0, i, TO_VICT);
       improve_skill(ch, SKILL_KEEN, 1);
       return;
     }
@@ -977,8 +977,8 @@ void look_at_char(struct char_data *i, struct char_data *ch)
 
 static void list_one_char(struct char_data *i, struct char_data *ch)
 {
-  struct obj_data *chair  = NULL;
-  int count               = FALSE;
+  struct obj_data *chair  = nullptr;
+  int count               = false;
   const char *positions[] = {
       " is dead",
       " is mortally wounded",
@@ -999,59 +999,59 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
     if (char_is_npc(i)) {
       double health = i->health;
       if (health <= 0.1) {
-        act("@R...Should be DEAD soon.@w", TRUE, i, 0, ch, TO_VICT);
+        act("@R...Should be DEAD soon.@w", true, i, 0, ch, TO_VICT);
       } else if (health <= 0.2) {
-        act("@R...Is on $s last leg.@w", TRUE, i, 0, ch, TO_VICT);
+        act("@R...Is on $s last leg.@w", true, i, 0, ch, TO_VICT);
       } else if (health <= 0.3) {
-        act("@R...Is absolutely covered in wounds.@w", TRUE, i, 0, ch, TO_VICT);
+        act("@R...Is absolutely covered in wounds.@w", true, i, 0, ch, TO_VICT);
       } else if (health <= 0.4) {
-        act("@R...$s body is in terrible shape.@w", TRUE, i, 0, ch, TO_VICT);
+        act("@R...$s body is in terrible shape.@w", true, i, 0, ch, TO_VICT);
       } else if (health <= 0.5) {
-        act("@R...Blood is seeping from the wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
+        act("@R...Blood is seeping from the wounds on $s body.@w", true, i, 0, ch, TO_VICT);
       } else if (health <= 0.6) {
-        act("@R...Horrible wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
+        act("@R...Horrible wounds on $s body.@w", true, i, 0, ch, TO_VICT);
       } else if (health <= 0.7) {
-        act("@R...Quite a few wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
+        act("@R...Quite a few wounds on $s body.@w", true, i, 0, ch, TO_VICT);
       } else if (health <= 0.8) {
-        act("@R...Many wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
+        act("@R...Many wounds on $s body.@w", true, i, 0, ch, TO_VICT);
       } else if (health <= 0.9) {
-        act("@R...A few wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
+        act("@R...A few wounds on $s body.@w", true, i, 0, ch, TO_VICT);
       } else if (health < 1.0) {
-        act("@R...Some slight wounds on $s body.@w", TRUE, i, 0, ch, TO_VICT);
+        act("@R...Some slight wounds on $s body.@w", true, i, 0, ch, TO_VICT);
       }
     }
 
     if (char_get_listenroom(i) > 0) {
       char eaves[300];
       snprintf(eaves, sizeof(eaves), "@w...$e is spying on everything to the @c%s@w.", dirs[char_get_eavesdir(i)]);
-      act(eaves, TRUE, i, 0, ch, TO_VICT);
+      act(eaves, true, i, 0, ch, TO_VICT);
     }
     if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 1)
-      act("...$e is in the air!", FALSE, i, 0, ch, TO_VICT);
+      act("...$e is in the air!", false, i, 0, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 2)
-      act("...$e is high in the air!", FALSE, i, 0, ch, TO_VICT);
+      act("...$e is high in the air!", false, i, 0, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_SANCTUARY) && !char_get_skill(i, SKILL_AQUA_BARRIER))
-      act("...$e has a barrier around $s body!", FALSE, i, 0, ch, TO_VICT);
+      act("...$e has a barrier around $s body!", false, i, 0, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_FIRESHIELD))
-      act("...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", FALSE, i, 0, ch, TO_VICT);
+      act("...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", false, i, 0, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_SANCTUARY) && char_get_skill(i, SKILL_AQUA_BARRIER))
-      act("...$e has a @Gbarrier@w of @cwater@w and @Cki@w around $s body!", FALSE, i, 0, ch, TO_VICT);
+      act("...$e has a @Gbarrier@w of @cwater@w and @Cki@w around $s body!", false, i, 0, ch, TO_VICT);
     if (!char_is_npc(i) && char_plr_flagged(i, PLR_SPIRAL))
-      act("...$e is spinning in a vortex!", FALSE, i, 0, ch, TO_VICT);
+      act("...$e is spinning in a vortex!", false, i, 0, ch, TO_VICT);
     if (char_get_charge(i))
-      act("...$e has a bright %s aura around $s body!", FALSE, i, 0, ch, TO_VICT);
+      act("...$e has a bright %s aura around $s body!", false, i, 0, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_METAMORPH))
-      act("@w...$e has a dark, @rred@w aura and menacing presence.", FALSE, i, 0, ch, TO_VICT);
+      act("@w...$e has a dark, @rred@w aura and menacing presence.", false, i, 0, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_HAYASA))
-      act("@w...$e has a soft @cblue@w glow around $s body!", FALSE, i, 0, ch, TO_VICT);
+      act("@w...$e has a soft @cblue@w glow around $s body!", false, i, 0, ch, TO_VICT);
     if (char_aff_flagged(i, AFF_BLIND))
-      act("...$e is groping around blindly!", FALSE, i, 0, ch, TO_VICT);
+      act("...$e is groping around blindly!", false, i, 0, ch, TO_VICT);
     if (affected_by_spell(i, SPELL_FAERIE_FIRE))
-      act("@m...$e @mis outlined with purple fire!@m", FALSE, i, 0, ch, TO_VICT);
+      act("@m...$e @mis outlined with purple fire!@m", false, i, 0, ch, TO_VICT);
     if (char_get_feature(i)) {
       char woo[MAX_STRING_LENGTH];
       snprintf(woo, sizeof(woo), "@C%s@n", char_get_feature(i));
-      act(woo, FALSE, i, 0, ch, TO_VICT);
+      act(woo, false, i, 0, ch, TO_VICT);
     }
 
     return;
@@ -1198,66 +1198,66 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
   if (!char_is_npc(i) || !char_get_fighting(i)) {
     if (char_aff_flagged(i, AFF_INVISIBLE)) {
       send_to_char(ch, ", is invisible");
-      count = TRUE;
+      count = true;
     }
     if (char_aff_flagged(i, AFF_ETHEREAL)) {
       send_to_char(ch, ", has a halo");
-      count = TRUE;
+      count = true;
     }
     if (char_aff_flagged(i, AFF_HIDE) && i != ch) {
       send_to_char(ch, ", is hiding");
       if (char_get_skill(i, SKILL_HIDE) && !char_is_npc(ch) && i != ch) {
         improve_skill(i, SKILL_HIDE, 1);
       }
-      count = TRUE;
+      count = true;
     }
     if (!char_is_npc(i) && !i->desc) {
       send_to_char(ch, ", has a blank stare");
-      count = TRUE;
+      count = true;
     }
     if (!char_is_npc(i) && char_plr_flagged(i, PLR_WRITING)) {
       send_to_char(ch, ", is writing");
-      count = TRUE;
+      count = true;
     }
     if (!char_is_npc(i) && char_prf_flagged(i, PRF_BUILDWALK)) {
       send_to_char(ch, ", is buildwalking");
-      count = TRUE;
+      count = true;
     }
     if (!char_is_npc(i) && char_get_absorbing(i) && char_get_absorbing(i) != ch) {
       send_to_char(ch, ", is absorbing from %s", char_get_name(char_get_absorbing(i)));
-      count = TRUE;
+      count = true;
     }
     if (!char_is_npc(i) && char_get_grappling(i) && char_get_grappling(i) != ch) {
       send_to_char(ch, ", is grappling with %s", readIntro(ch, char_get_grappling(i)) == 1 ? get_i_name(ch, char_get_grappling(i)) : introd_calc(char_get_grappling(i)));
-      count = TRUE;
+      count = true;
     }
     if (!char_is_npc(i) && char_get_carrying(i) && char_get_carrying(i) != ch) {
       send_to_char(ch, ", is carrying %s", readIntro(ch, char_get_carrying(i)) == 1 ? get_i_name(ch, char_get_carrying(i)) : introd_calc(char_get_carrying(i)));
-      count = TRUE;
+      count = true;
     }
     if (!char_is_npc(i) && char_get_carried_by(i) && char_get_carried_by(i) != ch) {
       send_to_char(ch, ", is being carried by %s", readIntro(ch, char_get_carried_by(i)) == 1 ? get_i_name(ch, char_get_carried_by(i)) : introd_calc(char_get_carried_by(i)));
-      count = TRUE;
+      count = true;
     }
     if (!char_is_npc(i) && char_get_grappling(i) && char_get_grappling(i) == ch) {
       send_to_char(ch, ", is grappling with YOU");
-      count = TRUE;
+      count = true;
     }
     if (!char_is_npc(i) && char_get_absorbing(i) && char_get_absorbing(i) == ch) {
       send_to_char(ch, ", is absorbing from YOU");
-      count = TRUE;
+      count = true;
     }
     if (!char_is_npc(i) && char_get_absorbing(ch) && char_get_absorbing(ch) == i) {
       send_to_char(ch, ", is being absorbed from by YOU");
-      count = TRUE;
+      count = true;
     }
     if (!char_is_npc(i) && char_get_grappling(ch) && char_get_grappling(ch) == i) {
       send_to_char(ch, ", is being grappled with by YOU");
-      count = TRUE;
+      count = true;
     }
     if (!char_is_npc(i) && char_get_carrying(ch) && char_get_carrying(ch) == i) {
       send_to_char(ch, ", is being carried by you");
-      count = TRUE;
+      count = true;
     }
     if (!char_is_npc(ch) && !char_is_npc(i) && char_get_fighting(i)) {
       if (!char_plr_flagged(i, PLR_SPAR) || (char_plr_flagged(i, PLR_SPAR) && (!char_plr_flagged(char_get_fighting(i), PLR_SPAR) || char_is_npc(char_get_fighting(i))))) {
@@ -1268,11 +1268,11 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
       }
       if (char_get_fighting(i) == ch) {
         send_to_char(ch, "@rYOU@w");
-        count = TRUE;
+        count = true;
       } else {
         if (char_get_in_room(i) == char_get_in_room(char_get_fighting(i))) {
           send_to_char(ch, "%s", char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : juggleRaceName(char_get_fighting(i), false)));
-          count = TRUE;
+          count = true;
         } else {
           send_to_char(ch, "someone who has already left!");
         }
@@ -1283,16 +1283,16 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
     chair = char_get_sits(i);
     if (char_plr_flagged(i, PLR_HEALT)) {
       send_to_char(ch, "@w is floating inside a healing tank.");
-    } else if (count == TRUE) {
+    } else if (count == true) {
       send_to_char(ch, ",@w and%s on %s.", positions[(int)char_get_position(i)], chair->short_description);
-    } else if (count == FALSE) {
+    } else if (count == false) {
       send_to_char(ch, "@w%s on %s.", positions[(int)char_get_position(i)], chair->short_description);
     }
   } else if (!char_plr_flagged(i, PLR_PILOTING) && !char_get_sits(i) && (!char_is_npc(i) || !char_get_fighting(i))) {
-    if (count == TRUE) {
+    if (count == true) {
       send_to_char(ch, "@w, and%s.", positions[(int)char_get_position(i)]);
     }
-    if (count == FALSE) {
+    if (count == false) {
       send_to_char(ch, "@w%s.", positions[(int)char_get_position(i)]);
     }
   } else if (char_plr_flagged(i, PLR_PILOTING)) {
@@ -1334,71 +1334,71 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
   if (char_get_listenroom(i) > 0) {
     char eaves[300];
     snprintf(eaves, sizeof(eaves), "@w...$e is spying on everything to the @c%s@w.", dirs[char_get_eavesdir(i)]);
-    act(eaves, TRUE, i, 0, ch, TO_VICT);
+    act(eaves, true, i, 0, ch, TO_VICT);
   }
   if (!char_is_npc(i)) {
     if (char_plr_flagged(i, PLR_FISHING)) {
-      act("@w...$e is @Cfishing@w.@n", TRUE, i, 0, ch, TO_VICT);
+      act("@w...$e is @Cfishing@w.@n", true, i, 0, ch, TO_VICT);
     }
   }
   if (char_plr_flagged(i, PLR_AURALIGHT)) {
     char bloom[MAX_INPUT_LENGTH];
     snprintf(bloom, sizeof(bloom), "...is surrounded by a bright %s aura.@n", aura_types[char_get_aura(i)]);
-    act(bloom, TRUE, i, 0, ch, TO_VICT);
+    act(bloom, true, i, 0, ch, TO_VICT);
   }
   if (char_aff_flagged(i, AFF_SANCTUARY) && !char_get_skill(i, SKILL_AQUA_BARRIER))
-    act("@w...$e has a @bbarrier@w around $s body!", TRUE, i, 0, ch, TO_VICT);
+    act("@w...$e has a @bbarrier@w around $s body!", true, i, 0, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_FIRESHIELD))
-    act("@w...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", FALSE, i, 0, ch, TO_VICT);
+    act("@w...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!", false, i, 0, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_HEALGLOW))
-    act("@w...$e has a serene @Cblue@Y glow@w around $s body.", TRUE, i, 0, ch, TO_VICT);
+    act("@w...$e has a serene @Cblue@Y glow@w around $s body.", true, i, 0, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_EARMOR))
-    act("@w...$e has ghostly @Ggreen@w ethereal armor around $s body.", TRUE, i, 0, ch, TO_VICT);
+    act("@w...$e has ghostly @Ggreen@w ethereal armor around $s body.", true, i, 0, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_SANCTUARY) && char_get_skill(i, SKILL_AQUA_BARRIER))
-    act("@w...$e has a @bbarrier@w of @cwater@w and @CKi@w around $s body!", TRUE, i, 0, ch, TO_VICT);
+    act("@w...$e has a @bbarrier@w of @cwater@w and @CKi@w around $s body!", true, i, 0, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 1)
-    act("@w...$e is in the air!", TRUE, i, 0, ch, TO_VICT);
+    act("@w...$e is in the air!", true, i, 0, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 2)
-    act("@w...$e is high in the air!", TRUE, i, 0, ch, TO_VICT);
+    act("@w...$e is high in the air!", true, i, 0, ch, TO_VICT);
   if (char_get_kaioken(i) > 0)
-    act("@w...@r$e has a red aura around $s body!", TRUE, i, 0, ch, TO_VICT);
+    act("@w...@r$e has a red aura around $s body!", true, i, 0, ch, TO_VICT);
   if (!char_is_npc(i) && char_plr_flagged(i, PLR_SPIRAL))
-    act("@w...$e is spinning in a vortex!", FALSE, i, 0, ch, TO_VICT);
+    act("@w...$e is spinning in a vortex!", false, i, 0, ch, TO_VICT);
   if (char_is_transformed(i) && !char_is_android(i) && !char_is_saiyan(i) && !char_is_halfbreed(i))
-    act("@w...$e has energy crackling around $s body!", TRUE, i, 0, ch, TO_VICT);
+    act("@w...$e has energy crackling around $s body!", true, i, 0, ch, TO_VICT);
   if (char_get_charge(i) && !char_is_saiyan(i) && !char_is_halfbreed(i)) {
     char aura[MAX_INPUT_LENGTH];
     snprintf(aura, sizeof(aura), "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[char_get_aura(i)]);
-    act(aura, TRUE, i, 0, ch, TO_VICT);
+    act(aura, true, i, 0, ch, TO_VICT);
   }
   if (!char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
-    act("@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", TRUE, i, 0, ch, TO_VICT);
+    act("@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", true, i, 0, ch, TO_VICT);
   if (!char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && !char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i))) {
     char aura[MAX_INPUT_LENGTH];
     snprintf(aura, sizeof(aura), "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[char_get_aura(i)]);
-    act(aura, TRUE, i, 0, ch, TO_VICT);
+    act(aura, true, i, 0, ch, TO_VICT);
   }
   if (!char_plr_flagged(i, PLR_OOZARU) && !char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
-    act("@w...$e has energy crackling around $s body!", TRUE, i, 0, ch, TO_VICT);
+    act("@w...$e has energy crackling around $s body!", true, i, 0, ch, TO_VICT);
   if (char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
-    act("@w...$e is in the form of a @rgreat ape@w!", TRUE, i, 0, ch, TO_VICT);
+    act("@w...$e is in the form of a @rgreat ape@w!", true, i, 0, ch, TO_VICT);
   if (is_affected(i, AFF_KYODAIKA))
-    act("@w...$e has expanded $s body size@w!", TRUE, i, 0, ch, TO_VICT);
+    act("@w...$e has expanded $s body size@w!", true, i, 0, ch, TO_VICT);
   if (char_aff_flagged(i, AFF_HAYASA))
-    act("@w...$e has a soft @cblue@w glow around $s body!", FALSE, i, 0, ch, TO_VICT);
+    act("@w...$e has a soft @cblue@w glow around $s body!", false, i, 0, ch, TO_VICT);
   if (char_plr_flagged(i, PLR_OOZARU) && !char_get_charge(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
-    act("@w...$e has energy crackling around $s @rgreat ape@w body!", TRUE, i, 0, ch, TO_VICT);
+    act("@w...$e has energy crackling around $s @rgreat ape@w body!", true, i, 0, ch, TO_VICT);
   if (char_get_feature(i)) {
     char woo[MAX_STRING_LENGTH];
     snprintf(woo, sizeof(woo), "@C%s@n", char_get_feature(i));
-    act(woo, FALSE, i, 0, ch, TO_VICT);
+    act(woo, false, i, 0, ch, TO_VICT);
   }
 
   if (char_get_rdisplay(i)) {
     if (strcmp(char_get_rdisplay(i), "Empty")) {
       char rdis[MAX_STRING_LENGTH];
       snprintf(rdis, sizeof(rdis), "...%s", char_get_rdisplay(i));
-      act(rdis, FALSE, i, 0, ch, TO_VICT);
+      act(rdis, false, i, 0, ch, TO_VICT);
     }
   }
 }
@@ -1412,7 +1412,7 @@ void list_char_to_char(struct char_data *list, struct char_data *ch)
   } *hideinfo, *lasthide, *tmphide;
   int num;
 
-  hideinfo = lasthide = NULL;
+  hideinfo = lasthide = nullptr;
 
   for (i = list; i; i = i->next_in_room) {
     if (char_aff_flagged(i, AFF_HIDE) && roll_resisted(i, SKILL_HIDE, ch, SKILL_SPOT)) {
@@ -1420,7 +1420,7 @@ void list_char_to_char(struct char_data *list, struct char_data *ch)
         improve_skill(i, SKILL_HIDE, 1);
       }
       CREATE(tmphide, struct hide_node, 1);
-      tmphide->next   = NULL;
+      tmphide->next   = nullptr;
       tmphide->hidden = i;
       if (!lasthide) {
         hideinfo = lasthide = tmphide;

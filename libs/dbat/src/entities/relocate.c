@@ -9,7 +9,7 @@
 /* put an object in a room */
 void obj_to_room(struct obj_data *object, room_rnum room)
 {
-  struct obj_data *vehicle = NULL;
+  struct obj_data *vehicle = nullptr;
 
   if (!object || room == NOWHERE || room > top_of_world)
     mud_log("SYSERR: Illegal value(s) passed to obj_to_room. (Room #%d/%d, obj %p)",
@@ -28,7 +28,7 @@ void obj_to_room(struct obj_data *object, room_rnum room)
     object->next_content = world[room].contents;
     world[room].contents = object;
     obj_set_in_room(object, room);
-    object->carried_by = NULL;
+    object->carried_by = nullptr;
     obj_set_lload(object, time(0));
     if (obj_get_type_flag(object) == ITEM_VEHICLE && !obj_extra_flagged(object, ITEM_UNBREAKABLE) && obj_get_vnum(object) > 19199) {
       obj_extra_set(object, ITEM_UNBREAKABLE, true);
@@ -71,18 +71,18 @@ void obj_to_room(struct obj_data *object, room_rnum room)
       }
     }
     if (obj_get_exit(object, 5) && (rroom_sect(obj_get_in_room(object)) == SECT_UNDERWATER || rroom_sect(obj_get_in_room(object)) == SECT_WATER_NOSWIM)) {
-      act("$p @Bsinks to deeper waters.@n", TRUE, 0, object, 0, TO_ROOM);
+      act("$p @Bsinks to deeper waters.@n", true, 0, object, 0, TO_ROOM);
       int numb = rroom_get_vnum(obj_get_exit(object, 5)->to_room);
       obj_from_room(object);
       obj_to_room(object, real_room(numb));
     }
     if (obj_get_exit(object, 5) && rroom_sect(obj_get_in_room(object)) == SECT_FLYING && (obj_get_vnum(object) < 80 || obj_get_vnum(object) > 83)) {
-      act("$p @Cfalls down.@n", TRUE, 0, object, 0, TO_ROOM);
+      act("$p @Cfalls down.@n", true, 0, object, 0, TO_ROOM);
       int numb = rroom_get_vnum(obj_get_exit(object, 5)->to_room);
       obj_from_room(object);
       obj_to_room(object, real_room(numb));
       if (rroom_sect(obj_get_in_room(object)) != SECT_FLYING) {
-        act("$p @Cfalls down and smacks the ground.@n", TRUE, 0, object, 0, TO_ROOM);
+        act("$p @Cfalls down and smacks the ground.@n", true, 0, object, 0, TO_ROOM);
       }
     }
     if (obj_get_value(object, 0) != 0) {
@@ -106,16 +106,16 @@ void obj_from_room(struct obj_data *object)
     return;
   }
 
-  if (obj_get_posted_to(object) && object->in_obj == NULL) {
+  if (obj_get_posted_to(object) && object->in_obj == nullptr) {
     struct obj_data *obj = obj_get_posted_to(object);
     if (obj_get_posttype(object) <= 0) {
       send_to_room(obj_get_in_room(obj), "%s@W shakes loose from %s@W.@n\r\n", obj->short_description, object->short_description);
     } else {
       send_to_room(obj_get_in_room(obj), "%s@W comes loose from %s@W.@n\r\n", object->short_description, obj->short_description);
     }
-    obj_set_posted_to(obj, NULL);
+    obj_set_posted_to(obj, nullptr);
     obj_set_posttype(obj, 0);
-    obj_set_posted_to(object, NULL);
+    obj_set_posted_to(object, nullptr);
     obj_set_posttype(object, 0);
   }
 
@@ -124,7 +124,7 @@ void obj_from_room(struct obj_data *object)
   if (rroom_flagged(obj_get_in_room(object), ROOM_HOUSE))
     rroom_set_flag(obj_get_in_room(object), ROOM_HOUSE_CRASH, true);
   obj_set_in_room(object, NOWHERE);
-  object->next_content = NULL;
+  object->next_content = nullptr;
 }
 
 /* put an object in an object (quaint)  */
@@ -164,7 +164,7 @@ void obj_from_obj(struct obj_data *obj)
 {
   struct obj_data *temp, *obj_from;
 
-  if (obj->in_obj == NULL) {
+  if (obj->in_obj == nullptr) {
     mud_log("SYSERR: (%s): trying to illegally extract obj from obj.", __FILE__);
     return;
   }
@@ -189,8 +189,8 @@ void obj_from_obj(struct obj_data *obj)
     rroom_set_flag(obj_get_in_room(obj_from), ROOM_HOUSE_CRASH, true);
   }
 
-  obj->in_obj       = NULL;
-  obj->next_content = NULL;
+  obj->in_obj       = nullptr;
+  obj->next_content = nullptr;
 }
 
 /* move a player out of a room */
@@ -199,18 +199,18 @@ void char_from_room(struct char_data *ch)
   struct char_data *temp;
   int i;
 
-  if (ch == NULL || char_get_in_room(ch) == NOWHERE) {
+  if (ch == nullptr || char_get_in_room(ch) == NOWHERE) {
     mud_log("SYSERR: NULL character or NOWHERE in %s, char_from_room", __FILE__);
     return;
   }
 
-  if (char_get_fighting(ch) != NULL && !char_aff_flagged(ch, AFF_PURSUIT))
+  if (char_get_fighting(ch) != nullptr && !char_aff_flagged(ch, AFF_PURSUIT))
     stop_fighting(ch);
-  if (char_aff_flagged(ch, AFF_PURSUIT) && char_get_fighting(ch) == NULL)
+  if (char_aff_flagged(ch, AFF_PURSUIT) && char_get_fighting(ch) == nullptr)
     char_aff_set(ch, AFF_PURSUIT, false);
 
   for (i = 0; i < NUM_WEARS; i++)
-    if (char_get_equipment(ch, i) != NULL)
+    if (char_get_equipment(ch, i) != nullptr)
       if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_LIGHT)
         if (obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS))
           world[char_get_in_room(ch)].light--;
@@ -220,7 +220,7 @@ void char_from_room(struct char_data *ch)
 
   REMOVE_FROM_LIST(ch, world[char_get_in_room(ch)].people, next_in_room, temp);
   char_set_in_room(ch, NOWHERE);
-  ch->next_in_room = NULL;
+  ch->next_in_room = nullptr;
 }
 
 /* place a character in a room */
@@ -228,7 +228,7 @@ void char_to_room(struct char_data *ch, room_rnum room)
 {
   int i;
 
-  if (ch == NULL || room == NOWHERE || room > top_of_world)
+  if (ch == nullptr || room == NOWHERE || room > top_of_world)
     mud_log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d/%d Ch: %p",
             room, top_of_world, ch);
   else {
@@ -296,7 +296,7 @@ void obj_from_char(struct obj_data *object)
 {
   struct obj_data *temp;
 
-  if (object == NULL) {
+  if (object == nullptr) {
     mud_log("SYSERR: NULL object passed to obj_from_char.");
     return;
   }
@@ -315,14 +315,14 @@ void obj_from_char(struct obj_data *object)
     }
   }
 
-  object->carried_by   = NULL;
-  object->next_content = NULL;
+  object->carried_by   = nullptr;
+  object->next_content = nullptr;
 }
 
 /* Return the effect of a piece of armor in position eq_pos */
 static int apply_ac(struct char_data *ch, int eq_pos)
 {
-  if (char_get_equipment(ch, eq_pos) == NULL) {
+  if (char_get_equipment(ch, eq_pos) == nullptr) {
     core_dump();
     return (0);
   }
@@ -357,12 +357,12 @@ static int apply_ac(struct char_data *ch, int eq_pos)
 int invalid_align(struct char_data *ch, struct obj_data *obj)
 {
   if (obj_extra_flagged(obj, ITEM_ANTI_EVIL) && char_is_evil(ch))
-    return TRUE;
+    return true;
   if (obj_extra_flagged(obj, ITEM_ANTI_GOOD) && char_is_good(ch))
-    return TRUE;
+    return true;
   if (obj_extra_flagged(obj, ITEM_ANTI_NEUTRAL) && char_is_neutral(ch))
-    return TRUE;
-  return FALSE;
+    return true;
+  return false;
 }
 
 void equip_char(struct char_data *ch, struct obj_data *obj, int pos)
@@ -388,8 +388,8 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos)
     return;
   }
   if (invalid_align(ch, obj) || invalid_class(ch, obj) || invalid_race(ch, obj)) {
-    act("You stop wearing $p as something prevents you.", FALSE, ch, obj, 0, TO_CHAR);
-    act("$n stops wearing $p as something prevents $m.", FALSE, ch, obj, 0, TO_ROOM);
+    act("You stop wearing $p as something prevents you.", false, ch, obj, 0, TO_CHAR);
+    act("$n stops wearing $p as something prevents $m.", false, ch, obj, 0, TO_ROOM);
     /* Changed to drop in inventory instead of the ground. */
     obj_to_char(obj, ch);
     return;
@@ -413,7 +413,7 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos)
     affect_modify_ar(ch, obj->affected[j].location,
                      obj->affected[j].modifier,
                      obj->affected[j].specific,
-                     obj_get_bitvector(obj), TRUE);
+                     obj_get_bitvector(obj), true);
 
   affect_total(ch);
 }
@@ -423,13 +423,13 @@ struct obj_data *unequip_char(struct char_data *ch, int pos)
   int j;
   struct obj_data *obj;
 
-  if ((pos < 0 || pos >= NUM_WEARS) || char_get_equipment(ch, pos) == NULL) {
+  if ((pos < 0 || pos >= NUM_WEARS) || char_get_equipment(ch, pos) == nullptr) {
     core_dump();
-    return (NULL);
+    return (nullptr);
   }
 
   obj          = char_get_equipment(ch, pos);
-  obj->worn_by = NULL;
+  obj->worn_by = nullptr;
   obj->worn_on = -1;
 
   if (obj_get_type_flag(obj) == ITEM_ARMOR)
@@ -442,13 +442,13 @@ struct obj_data *unequip_char(struct char_data *ch, int pos)
   } else
     mud_log("SYSERR: IN_ROOM(ch) = NOWHERE when unequipping char %s.", char_get_name(ch));
 
-  char_set_equipment(ch, pos, NULL);
+  char_set_equipment(ch, pos, nullptr);
 
   for (j = 0; j < MAX_OBJ_AFFECT; j++)
     affect_modify_ar(ch, obj->affected[j].location,
                      obj->affected[j].modifier,
                      obj->affected[j].specific,
-                     obj_get_bitvector(obj), FALSE);
+                     obj_get_bitvector(obj), false);
 
   affect_total(ch);
 

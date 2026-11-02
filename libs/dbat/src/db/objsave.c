@@ -49,10 +49,10 @@ static int Crash_build_save_filename(char *dst, size_t dst_size, const char *fil
 
   if (written < 0 || (size_t)written >= dst_size) {
     mud_log("SYSERR: %s:%d: crashsave path too long for %s%s", file, line, filename, suffix);
-    return FALSE;
+    return false;
   }
 
-  return TRUE;
+  return true;
 }
 
 static int Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, const char *save_type)
@@ -64,18 +64,18 @@ static int Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, c
 
   if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, char_get_name(ch))) {
     mud_log("SYSERR: %s:%d: get_filename failed for %s of %s", __FILE__, __LINE__, save_type, char_get_name(ch));
-    return FALSE;
+    return false;
   }
 
   /* the replaced file stays as <name>.bak, which Crash_load() falls back to */
   if (!(fp = atomic_open(&af, filename, true)))
-    return FALSE;
+    return false;
 
   if (fprintf(fp, "%d %d %d %d %d %d\r\n", rentcode, (int)time(0), cost,
               char_get_gold(ch), char_get_bank_gold(ch), 0) < 0) {
     Crash_log_file_error("fprintf", af.tmp, __FILE__, __LINE__);
     atomic_abort(&af);
-    return FALSE;
+    return false;
   }
 
   for (j = 0; j < NUM_WEARS; j++)
@@ -84,13 +84,13 @@ static int Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, c
         Crash_restore_weight(char_get_equipment(ch, j));
         mud_log("SYSERR: %s:%d: Crash_save failed for %s of %s equipment position %d", __FILE__, __LINE__, save_type, char_get_name(ch), j);
         atomic_abort(&af);
-        return FALSE;
+        return false;
       }
       if (ferror(fp)) {
         Crash_restore_weight(char_get_equipment(ch, j));
         Crash_log_file_error("write", af.tmp, __FILE__, __LINE__);
         atomic_abort(&af);
-        return FALSE;
+        return false;
       }
       Crash_restore_weight(char_get_equipment(ch, j));
     }
@@ -99,7 +99,7 @@ static int Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, c
     Crash_restore_weight(ch->carrying);
     mud_log("SYSERR: %s:%d: Crash_save failed for %s of %s inventory", __FILE__, __LINE__, save_type, char_get_name(ch));
     atomic_abort(&af);
-    return FALSE;
+    return false;
   }
   Crash_restore_weight(ch->carrying);
 
@@ -242,7 +242,7 @@ static void auto_equip(struct char_data *ch, struct obj_data *obj, int location)
         else
           equip_char(ch, obj, j);
       } else { /* Oops, saved a player with double equipment? */
-        mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "SYSERR: autoeq: '%s' already equipped in position %d.", char_get_name(ch), location);
+        mudlog(LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: autoeq: '%s' already equipped in position %d.", char_get_name(ch), location);
         location = LOC_INVENTORY;
       }
     }
@@ -373,7 +373,7 @@ void update_obj_file(void)
 
 void Crash_listrent(struct char_data *ch, char *name)
 {
-  FILE *fl = NULL;
+  FILE *fl = nullptr;
   char filename[MAX_STRING_LENGTH];
   char buf[MAX_STRING_LENGTH];
   struct obj_data *obj;
@@ -484,9 +484,9 @@ static int Crash_save(struct obj_data *obj, FILE *fp, int location)
       obj_set_weight(tmp, obj_get_weight(tmp) - (obj_get_weight(obj)));
 
     if (!result)
-      return (FALSE);
+      return (false);
   }
-  return (TRUE);
+  return (true);
 }
 
 static void Crash_restore_weight(struct obj_data *obj)
@@ -508,7 +508,7 @@ static void Crash_extract_norent_eq(struct char_data *ch)
   int j;
 
   for (j = 0; j < NUM_WEARS; j++) {
-    if (char_get_equipment(ch, j) == NULL)
+    if (char_get_equipment(ch, j) == nullptr)
       continue;
 
     if (Crash_is_unrentable(char_get_equipment(ch, j)))
@@ -618,12 +618,12 @@ int Crash_load(struct char_data *ch)
                "Trying your backup object file.\r\n");
 
   if ((fl = fopen(cmfnamebak, "rb"))) {
-    mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s loading backup object file %s.", char_get_name(ch), cmfnamebak);
+    mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s loading backup object file %s.", char_get_name(ch), cmfnamebak);
     return Crash_load_file(ch, fl, cmfnamebak);
   }
 
   Crash_log_file_error("fopen backup object file", cmfnamebak, __FILE__, __LINE__);
-  mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s entering game with no equipment. Loading backup failed.", char_get_name(ch));
+  mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s entering game with no equipment. Loading backup failed.", char_get_name(ch));
   send_to_char(ch,
                "\r\n********************* NOTICE *********************\r\n"
                "There was a problem loading your objects from backup.\r\n"
@@ -657,31 +657,31 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
   }
   switch (orig_rent_code = rentcode) {
     case RENT_RENTED:
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s un-renting and entering game.", char_get_name(ch));
+      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s un-renting and entering game.", char_get_name(ch));
       break;
     case RENT_CRASH:
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s retrieving crash-saved items and entering game.", char_get_name(ch));
+      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s retrieving crash-saved items and entering game.", char_get_name(ch));
       break;
     case RENT_CRYO:
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s un-cryo'ing and entering game.", char_get_name(ch));
+      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s un-cryo'ing and entering game.", char_get_name(ch));
       break;
     case RENT_FORCED:
     case RENT_TIMEDOUT:
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s retrieving force-saved items and entering game.", char_get_name(ch));
+      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s retrieving force-saved items and entering game.", char_get_name(ch));
       break;
     default:
-      mudlog(LOG_BRF, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "WARNING: %s entering game with undefined rent code.", char_get_name(ch));
+      mudlog(LOG_BRF, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "WARNING: %s entering game with undefined rent code.", char_get_name(ch));
       break;
   }
 
   for (j = 0; j < MAX_BAG_ROWS; j++)
-    cont_row[j] = NULL; /* empty all cont lists (you never know ...) */
+    cont_row[j] = nullptr; /* empty all cont lists (you never know ...) */
 
   if (!feof(fl))
     get_line(fl, line);
 
   while (!feof(fl)) {
-    temp = NULL;
+    temp = nullptr;
     /* first, we get the number. Not too hard. */
     if (*line == '#') {
       if (sscanf(line, "#%d", &nr) != 1) {
@@ -738,19 +738,19 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
       /* read line check for xap. */
       if (!strcmp("XAP", line)) { /* then this is a Xap Obj, requires
               special care */
-        if ((temp->name = fread_string(fl, "rented object name")) == NULL) {
+        if ((temp->name = fread_string(fl, "rented object name")) == nullptr) {
           temp->name = strdup("undefined");
         }
 
-        if ((temp->short_description = fread_string(fl, "rented object short desc")) == NULL) {
+        if ((temp->short_description = fread_string(fl, "rented object short desc")) == nullptr) {
           temp->short_description = strdup("undefined");
         }
 
-        if ((temp->description = fread_string(fl, "rented object desc")) == NULL) {
+        if ((temp->description = fread_string(fl, "rented object desc")) == nullptr) {
           temp->description = strdup("undefined");
         }
 
-        if ((temp->action_description = fread_string(fl, "rented object adesc")) == NULL) {
+        if ((temp->action_description = fread_string(fl, "rented object adesc")) == nullptr) {
           temp->action_description = 0;
         }
 
@@ -777,7 +777,7 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
 
         /* maybe clear spellbook for good luck too? */
 
-        temp->ex_description = NULL;
+        temp->ex_description = nullptr;
 
         get_line(fl, line);
         for (j = zwei = 0; !zwei && !feof(fl);) {
@@ -844,7 +844,7 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
           }
         } /* exit our for loop */
       } /* exit our xap loop */
-      if (temp != NULL) {
+      if (temp != nullptr) {
         num_objs++;
         check_unique_id(temp);
         add_unique_id(temp);
@@ -890,13 +890,13 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
               obj1 = cont_row[j]->next_content;
               obj_to_char(cont_row[j], ch);
             }
-            cont_row[j] = NULL;
+            cont_row[j] = nullptr;
           }
         if (cont_row[0]) { /* content list existing */
           if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
             /* rem item ; fill ; equip again */
             temp           = unequip_char(ch, locate - 1);
-            temp->contains = NULL; /* should be empty - but who knows */
+            temp->contains = nullptr; /* should be empty - but who knows */
             for (; cont_row[0]; cont_row[0] = obj1) {
               obj1 = cont_row[0]->next_content;
               obj_to_obj(cont_row[0], temp);
@@ -907,7 +907,7 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
               obj1 = cont_row[0]->next_content;
               obj_to_char(cont_row[0], ch);
             }
-            cont_row[0] = NULL;
+            cont_row[0] = nullptr;
           }
         }
       } else { /* locate <= 0 */
@@ -917,14 +917,14 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
               obj1 = cont_row[j]->next_content;
               obj_to_char(cont_row[j], ch);
             }
-            cont_row[j] = NULL;
+            cont_row[j] = nullptr;
           }
 
         if (j == -locate && cont_row[j]) { /* content list existing */
           if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
             /* take item ; fill ; give to char again */
             obj_from_char(temp);
-            temp->contains = NULL;
+            temp->contains = nullptr;
             for (; cont_row[j]; cont_row[j] = obj1) {
               obj1 = cont_row[j]->next_content;
               obj_to_obj(cont_row[j], temp);
@@ -935,7 +935,7 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
               obj1 = cont_row[j]->next_content;
               obj_to_char(cont_row[j], ch);
             }
-            cont_row[j] = NULL;
+            cont_row[j] = nullptr;
           }
         }
 
@@ -958,7 +958,7 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
   }
 
   /* Little hoarding check. -gg 3/1/98 */
-  mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s (level %d) has %d objects (max %d).",
+  mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s (level %d) has %d objects (max %d).",
          char_get_name(ch), char_get_level(ch), num_objs, CONFIG_MAX_OBJ_SAVE);
 
   fclose(fl);

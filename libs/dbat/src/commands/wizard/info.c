@@ -278,7 +278,7 @@ static void do_stat_room(struct char_data *ch)
 
   sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf2, sizeof(buf2));
   send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->dmg, rm->geffect);
-  send_to_char(ch, "SpecProc: %s, Flags: %s\r\n", rm->func == NULL ? "None" : "Exists", buf2);
+  send_to_char(ch, "SpecProc: %s, Flags: %s\r\n", rm->func == nullptr ? "None" : "Exists", buf2);
 
   send_to_char(ch, "Description:\r\n%s", rm->description ? rm->description : "  None.\r\n");
 
@@ -291,7 +291,7 @@ static void do_stat_room(struct char_data *ch)
 
   send_to_char(ch, "Chars present:");
   column = 14; /* ^^^ strlen ^^^ */
-  for (found = FALSE, k = rm->people; k; k = k->next_in_room) {
+  for (found = false, k = rm->people; k; k = k->next_in_room) {
     if (!char_can_see(ch, k))
       continue;
 
@@ -299,7 +299,7 @@ static void do_stat_room(struct char_data *ch)
                            !char_is_npc(k) ? "PC" : (!char_is_mob(k) ? "NPC" : "MOB"));
     if (column >= 62) {
       send_to_char(ch, "%s\r\n", k->next_in_room ? "," : "");
-      found  = FALSE;
+      found  = false;
       column = 0;
     }
   }
@@ -315,7 +315,7 @@ static void do_stat_room(struct char_data *ch)
       column += send_to_char(ch, "%s %s", found++ ? "," : "", j->short_description);
       if (column >= 62) {
         send_to_char(ch, "%s\r\n", j->next_content ? "," : "");
-        found  = FALSE;
+        found  = false;
         column = 0;
       }
     }
@@ -516,14 +516,14 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
       column += send_to_char(ch, "%s %s", found++ ? "," : "", j2->short_description);
       if (column >= 62) {
         send_to_char(ch, "%s\r\n", j2->next_content ? "," : "");
-        found  = FALSE;
+        found  = false;
         column = 0;
       }
     }
     send_to_char(ch, "@n");
   }
 
-  found = FALSE;
+  found = false;
   send_to_char(ch, "Affections:");
   for (i = 0; i < MAX_OBJ_AFFECT; i++)
     if (j->affected[i].modifier) {
@@ -551,7 +551,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
 {
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
-  int i, i2, column, found = FALSE;
+  int i, i2, column, found = false;
   struct obj_data *j;
   struct obj_data *chair;
   struct follow_type *fol;
@@ -603,7 +603,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
                  buf1, cmbuf2, (int)k->time.played / 3600,
                  (int)((k->time.played % 3600) / 60), age(k)->year);
 
-    if (k->desc != NULL) {
+    if (k->desc != nullptr) {
       send_to_char(ch, "@YOwned by User@D: [@C%s@D]@n\r\n", char_get_user(k));
     } else {
       send_to_char(ch, "@YOwned by User@D: [@C%s@D]@n\r\n", char_get_loguser(k));
@@ -704,7 +704,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
       column += send_to_char(ch, "%s %s", found++ ? "," : "", char_pers(fol->follower, ch));
       if (column >= 62) {
         send_to_char(ch, "%s\r\n", fol->next ? "," : "");
-        found  = FALSE;
+        found  = false;
         column = 0;
       }
     }
@@ -791,7 +791,7 @@ ACMD(do_varstat)
 
   one_argument(argument, arg);
 
-  if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
+  if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
     send_to_char(ch, "That player is not in the game.\r\n");
     return;
   }
@@ -836,7 +836,7 @@ ACMD(do_stat)
     if (!*buf2)
       send_to_char(ch, "Stats on which mobile?\r\n");
     else {
-      if ((victim = get_char_vis(ch, buf2, NULL, FIND_CHAR_WORLD)) != NULL)
+      if ((victim = get_char_vis(ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
         do_stat_character(ch, victim);
       else
         send_to_char(ch, "No such mobile around.\r\n");
@@ -845,7 +845,7 @@ ACMD(do_stat)
     if (!*buf2) {
       send_to_char(ch, "Stats on which player?\r\n");
     } else {
-      if ((victim = get_player_vis(ch, buf2, NULL, FIND_CHAR_WORLD)) != NULL)
+      if ((victim = get_player_vis(ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
         do_stat_character(ch, victim);
       else
         send_to_char(ch, "No such player around.\r\n");
@@ -853,7 +853,7 @@ ACMD(do_stat)
   } else if (is_abbrev(buf1, "file")) {
     if (!*buf2)
       send_to_char(ch, "Stats on which player?\r\n");
-    else if ((victim = get_player_vis(ch, buf2, NULL, FIND_CHAR_WORLD)) != NULL)
+    else if ((victim = get_player_vis(ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
       do_stat_character(ch, victim);
     else {
       CREATE(victim, struct char_data, 1);
@@ -875,7 +875,7 @@ ACMD(do_stat)
     if (!*buf2)
       send_to_char(ch, "Stats on which object?\r\n");
     else {
-      if ((object = get_obj_vis(ch, buf2, NULL)) != NULL)
+      if ((object = get_obj_vis(ch, buf2, nullptr)) != nullptr)
         do_stat_object(ch, object);
       else
         send_to_char(ch, "No such object around.\r\n");
@@ -891,17 +891,17 @@ ACMD(do_stat)
     char *name = buf1;
     int number = get_number(&name);
 
-    if ((object = get_obj_in_equip_vis(ch, name, &number, ch->equipment)) != NULL)
+    if ((object = get_obj_in_equip_vis(ch, name, &number, ch->equipment)) != nullptr)
       do_stat_object(ch, object);
-    else if ((object = get_obj_in_list_vis(ch, name, &number, ch->carrying)) != NULL)
+    else if ((object = get_obj_in_list_vis(ch, name, &number, ch->carrying)) != nullptr)
       do_stat_object(ch, object);
-    else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_ROOM)) != NULL)
+    else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_ROOM)) != nullptr)
       do_stat_character(ch, victim);
-    else if ((object = get_obj_in_list_vis(ch, name, &number, world[char_get_in_room(ch)].contents)) != NULL)
+    else if ((object = get_obj_in_list_vis(ch, name, &number, world[char_get_in_room(ch)].contents)) != nullptr)
       do_stat_object(ch, object);
-    else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_WORLD)) != NULL)
+    else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_WORLD)) != nullptr)
       do_stat_character(ch, victim);
-    else if ((object = get_obj_vis(ch, name, &number)) != NULL)
+    else if ((object = get_obj_vis(ch, name, &number)) != nullptr)
       do_stat_object(ch, object);
     else
       send_to_char(ch, "Nothing around by that name.\r\n");
@@ -979,7 +979,7 @@ ACMD(do_date)
 ACMD(do_last)
 {
   char arg[MAX_INPUT_LENGTH];
-  struct char_data *vict = NULL;
+  struct char_data *vict = nullptr;
 
   one_argument(argument, arg);
   if (!*arg) {
@@ -1074,8 +1074,8 @@ ACMD(do_show)
   zone_rnum zrn;
   zone_vnum zvn;
   int low, high;
-  int8_t self            = FALSE;
-  struct char_data *vict = NULL;
+  int8_t self            = false;
+  struct char_data *vict = nullptr;
   struct obj_data *obj;
   struct descriptor_data *d;
   struct affected_type *aff;
@@ -1128,7 +1128,7 @@ ACMD(do_show)
     return;
   }
   if (!strcmp(value, "."))
-    self = TRUE;
+    self = true;
   buf[0] = '\0';
 
   switch (l) {
@@ -1304,7 +1304,7 @@ ACMD(do_show)
       i = 0;
       send_to_char(ch, "People currently snooping:\r\n--------------------------\r\n");
       for (d = descriptor_list; d; d = d->next) {
-        if (d->snooping == NULL || d->character == NULL)
+        if (d->snooping == nullptr || d->character == nullptr)
           continue;
         if (desc_get_connected(d) != CON_PLAYING || char_get_admlevel(ch) < char_get_admlevel(d->character))
           continue;
@@ -1355,7 +1355,7 @@ ACMD(do_show)
         vict = affect_list;
       } else {
         low = 0;
-        if (!(vict = get_char_world_vis(ch, value, NULL))) {
+        if (!(vict = get_char_world_vis(ch, value, nullptr))) {
           send_to_char(ch, "Cannot find that character.\r\n");
           return;
         }
@@ -1511,19 +1511,19 @@ ACMD(do_plist)
 #define MAX_DAMAGE_MOD_ALLOWED MAX(char_get_level(mob) / 5, 2)
 #define MAX_GOLD_ALLOWED       char_get_level(mob) * 3000
 #define MAX_EXP_ALLOWED        char_get_level(mob) * char_get_level(mob) * 120
-#define MAX_LEVEL_ALLOWED      (100)
-#define GET_OBJ_AVG_DAM(obj)   (((obj_get_value(obj, 2) + 1) / 2.0) * obj_get_value(obj, 1))
+constexpr int MAX_LEVEL_ALLOWED = (100);
+#define GET_OBJ_AVG_DAM(obj) (((obj_get_value(obj, 2) + 1) / 2.0) * obj_get_value(obj, 1))
 /* arbitrary limit for per round dam */
-#define MAX_MOB_DAM_ALLOWED 500
+constexpr int MAX_MOB_DAM_ALLOWED = 500;
 
 #define ZCMD2 zone_table[zone].cmd[cmd_no] /*from DB.C*/
 
 /*item limits*/
-#define MAX_DAM_ALLOWED     50 /* for weapons  - avg. dam*/
-#define MAX_AFFECTS_ALLOWED 3
+constexpr int MAX_DAM_ALLOWED     = 50; /* for weapons  - avg. dam*/
+constexpr int MAX_AFFECTS_ALLOWED = 3;
 
 /* Armor class limits*/
-#define TOTAL_WEAR_CHECKS (NUM_ITEM_WEARS - 2) /*minus Wield and Take*/
+constexpr int TOTAL_WEAR_CHECKS = (NUM_ITEM_WEARS - 2); /*minus Wield and Take*/
 static const struct zcheck_armor {
   bitvector_t bitvector; /* from Structs.h                       */
   int ac_allowed;        /* Max. AC allowed for this body part  */
@@ -1548,11 +1548,6 @@ static const struct zcheck_armor {
     {ITEM_WEAR_EYE,    10, "Eye item"     }
 };
 
-/*These are strictly boolean*/
-#define CAN_WEAR_WEAPONS  0 /* toggle - can weapon also be armor? */
-#define MAX_APPLIES_LIMIT 1 /* toggle - is there a limit at all?  */
-#define CHECK_ITEM_RENT   0 /* do we check for rent cost == 0 ?   */
-#define CHECK_ITEM_COST   0 /* do we check for item cost == 0 ?   */
 /*
   Applies limits
   !! Very Important:  Keep these in the same order as in Structs.h
@@ -1614,20 +1609,20 @@ static const struct zcheck_affs {
 };
 
 /* These are ABS() values. */
-#define MAX_APPLY_ACCURCY_MOD_TOTAL 5
-#define MAX_APPLY_DAMAGE_MOD_TOTAL  5
+constexpr int MAX_APPLY_ACCURCY_MOD_TOTAL = 5;
+constexpr int MAX_APPLY_DAMAGE_MOD_TOTAL  = 5;
 
 /*room limits*/
 /* Off limit zones are any zones a player should NOT be able to walk to (ex. Limbo) */
-static const int offlimit_zones[] = {0, 12, 13, 14, -1}; /*what zones can no room connect to (virtual num) */
-#define MIN_ROOM_DESC_LENGTH 80                          /* at least one line - set to 0 to not care. */
-#define MAX_COLOUMN_WIDTH    80                          /* at most 80 chars per line */
+static const int offlimit_zones[]  = {0, 12, 13, 14, -1}; /*what zones can no room connect to (virtual num) */
+constexpr int MIN_ROOM_DESC_LENGTH = 80;                  /* at least one line - set to 0 to not care. */
+constexpr int MAX_COLOUMN_WIDTH    = 80;                  /* at most 80 chars per line */
 
 ACMD(do_zcheck)
 {
   zone_rnum zrnum;
   struct obj_data *obj;
-  struct char_data *mob = NULL;
+  struct char_data *mob = nullptr;
   room_vnum exroom      = 0;
   int ac                = 0;
   int affs              = 0, tohit, todam, value;
@@ -1853,7 +1848,7 @@ ACMD(do_zcheck)
                         "- total accurcy mod %d out of range (limit +/-%d).\r\n",
                         tohit, MAX_APPLY_ACCURCY_MOD_TOTAL);
 
-      for (ext2 = NULL, ext = obj->ex_description; ext; ext = ext->next)
+      for (ext2 = nullptr, ext = obj->ex_description; ext; ext = ext->next)
         if (strncmp(ext->description, "   ", 3))
           ext2 = ext;
 
@@ -1918,7 +1913,7 @@ ACMD(do_zcheck)
                         "- Room description not wrapped at %d chars (/fi in the editor).\r\n",
                         MAX_COLOUMN_WIDTH);
 
-      for (ext2 = NULL, ext = world[i].ex_description; ext; ext = ext->next)
+      for (ext2 = nullptr, ext = world[i].ex_description; ext; ext = ext->next)
         if (strncmp(ext->description, "   ", 3))
           ext2 = ext;
 
@@ -2228,8 +2223,8 @@ ACMD(do_findkey)
 
   if (!*arg) {
     send_to_char(ch, "Format: findkey <dir>\r\n");
-  } else if ((dir = search_block(arg, dirs, FALSE)) >= 0 ||
-             (dir = search_block(arg, abbr_dirs, FALSE)) >= 0) {
+  } else if ((dir = search_block(arg, dirs, false)) >= 0 ||
+             (dir = search_block(arg, abbr_dirs, false)) >= 0) {
     if (!char_get_exit(ch, dir)) {
       send_to_char(ch, "There's no exit in that direction!\r\n");
     } else if ((key = char_get_exit(ch, dir)->key) == NOTHING || key == 0) {

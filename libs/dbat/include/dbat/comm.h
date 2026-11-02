@@ -14,9 +14,9 @@
 #endif
 
 /* mccp defines */
-#define COMPRESS2 86
+constexpr int COMPRESS2 = 86;
 
-#define NUM_RESERVED_DESCS 8
+constexpr int NUM_RESERVED_DESCS     = 8;
 constexpr int MAX_CONNECTIONS_PER_IP = 10;  /* simultaneous connections from one address */
 constexpr int MAX_QUEUED_INPUT       = 100; /* typed commands waiting to run before a client counts as flooding */
 #define COPYOVER_FILE "copyover.dat"
@@ -32,15 +32,15 @@ void send_to_range(room_vnum start, room_vnum finish, const char *messg, ...) __
 char *act(const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
 void close_socket(struct descriptor_data *d);
 
-#define TO_ROOM        1
-#define TO_VICT        2
-#define TO_NOTVICT     3
-#define TO_CHAR        4
-#define TO_GMOTE       5
-#define TO_SLEEP       (2 << 7)  /* to char, even if sleeping */
-#define DG_NO_TRIG     (2 << 8)  /* don't check act trigger   */
-#define TO_SNEAKRESIST (2 << 9)  /* resisted sneaking roll    */
-#define TO_HIDERESIST  (2 << 10) /* resisted hiding roll      */
+constexpr int TO_ROOM        = 1;
+constexpr int TO_VICT        = 2;
+constexpr int TO_NOTVICT     = 3;
+constexpr int TO_CHAR        = 4;
+constexpr int TO_GMOTE       = 5;
+constexpr int TO_SLEEP       = (2 << 7);  /* to char, even if sleeping */
+constexpr int DG_NO_TRIG     = (2 << 8);  /* don't check act trigger   */
+constexpr int TO_SNEAKRESIST = (2 << 9);  /* resisted sneaking roll    */
+constexpr int TO_HIDERESIST  = (2 << 10); /* resisted hiding roll      */
 
 /* I/O functions */
 void write_to_q(const char *txt, struct txt_q *queue, int aliased);
@@ -50,7 +50,7 @@ size_t vwrite_to_output(struct descriptor_data *d, const char *format, va_list a
 void string_add(struct descriptor_data *d, char *str);
 void string_write(struct descriptor_data *d, char **txt, size_t len, long mailto, void *data);
 
-#define PAGE_WIDTH 79 /* column at which the text editor wraps lines */
+constexpr int PAGE_WIDTH = 79; /* column at which the text editor wraps lines */
 
 void show_help(struct descriptor_data *t, const char *entry);
 

@@ -16,20 +16,20 @@ bool tech_handle_zanzoken(char_data *ch, char_data *vict, const char *name)
     if (!char_aff_flagged(ch, AFF_ZANZOKEN) || (char_aff_flagged(ch, AFF_ZANZOKEN) && char_get_speedi(ch) + rand_number(1, 5) < char_get_speedi(vict) + rand_number(1, 5))) {
       char msg[MAX_INPUT_LENGTH];
       snprintf(msg, sizeof(msg), "@C$N@c disappears, avoiding your %s before reappearing!@n", name);
-      act(msg, TRUE, ch, nullptr, vict, TO_CHAR);
+      act(msg, true, ch, nullptr, vict, TO_CHAR);
       snprintf(msg, sizeof(msg), "@cYou disappear, avoiding @C$n's@c %s before reappearing!@n", name);
-      act(msg, TRUE, ch, nullptr, vict, TO_VICT);
+      act(msg, true, ch, nullptr, vict, TO_VICT);
       snprintf(msg, sizeof(msg), "@C$N@c disappears, avoiding @C$n's@c %s before reappearing!@n", name);
-      act(msg, TRUE, ch, nullptr, vict, TO_NOTVICT);
+      act(msg, true, ch, nullptr, vict, TO_NOTVICT);
       if (char_aff_flagged(ch, AFF_ZANZOKEN)) {
         char_aff_set(ch, AFF_ZANZOKEN, false);
       }
       char_aff_set(vict, AFF_ZANZOKEN, false);
       return false;
     }
-    act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-    act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-    act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+    act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", false, ch, 0, vict, TO_CHAR);
+    act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", false, ch, 0, vict, TO_VICT);
+    act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", false, ch, 0, vict, TO_NOTVICT);
     char_aff_set(vict, AFF_ZANZOKEN, false);
     char_aff_set(ch, AFF_ZANZOKEN, false);
   }
@@ -101,11 +101,11 @@ void tech_handle_fireshield(char_data *ch, char_data *vict, const char *part)
     const char *part_name = part ? part : "body";
     char msg[MAX_INPUT_LENGTH];
     snprintf(msg, sizeof(msg), "@c$N's@W fireshield burns your %s!@n", part_name);
-    act(msg, TRUE, ch, nullptr, vict, TO_CHAR);
+    act(msg, true, ch, nullptr, vict, TO_CHAR);
     snprintf(msg, sizeof(msg), "@C$n's@W %s is burned by your fireshield!@n", part_name);
-    act(msg, TRUE, ch, nullptr, vict, TO_VICT);
+    act(msg, true, ch, nullptr, vict, TO_VICT);
     snprintf(msg, sizeof(msg), "@c$n's@W %s is burned by @C$N's@W fireshield!@n", part_name);
-    act(msg, TRUE, ch, nullptr, vict, TO_NOTVICT);
+    act(msg, true, ch, nullptr, vict, TO_NOTVICT);
     int64_t dmg = getMaxKI(vict) * 0.02;
     char_set_lastattack(vict, char_get_lastattack(vict) + (1000));
     hurt(0, 0, vict, ch, nullptr, dmg, 0);
@@ -126,9 +126,9 @@ void tech_handle_fireshield(char_data *ch, char_data *vict, const char *part)
 bool tech_handle_android_absorb(char_data *ch, char_data *vict)
 {
   if (char_is_android(vict) && char_has_arms(vict) && char_get_skill(vict, SKILL_ABSORB) > rand_number(1, 140)) {
-    act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", TRUE, ch, nullptr, vict, TO_CHAR);
-    act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", TRUE, ch, nullptr, vict, TO_VICT);
-    act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", TRUE, ch, nullptr, vict, TO_NOTVICT);
+    act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", true, ch, nullptr, vict, TO_CHAR);
+    act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", true, ch, nullptr, vict, TO_VICT);
+    act("@C$N@W absorbs @c$n's@W ki attack and all $s charged ki with $S hand!@n", true, ch, nullptr, vict, TO_NOTVICT);
     int amot = char_get_charge(ch);
     if (char_is_npc(ch)) {
       amot = getMaxKI(ch) / 20;
@@ -147,9 +147,9 @@ bool tech_handle_android_absorb(char_data *ch, char_data *vict)
 void tech_handle_crashdown(char_data *ch, char_data *vict)
 {
   if (char_aff_flagged(vict, AFF_FLYING)) {
-    act("@w$N@w is knocked out of the air!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@wYou are knocked out of the air!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@w$N@w is knocked out of the air!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@w$N@w is knocked out of the air!@n", true, ch, 0, vict, TO_CHAR);
+    act("@wYou are knocked out of the air!@n", true, ch, 0, vict, TO_VICT);
+    act("@w$N@w is knocked out of the air!@n", true, ch, 0, vict, TO_NOTVICT);
     char_aff_set(vict, AFF_FLYING, false);
     char_set_altitude(vict, 0);
     char_set_position(vict, POS_SITTING);

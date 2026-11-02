@@ -118,7 +118,7 @@ static void hsedit_save_internally(struct descriptor_data *d)
       house_control[house_rnum].vnum = OLC_NUM(d);
     } else {
       send_to_char(d->character, "MAX House limit reached - Unable to save this house!");
-      mudlog(LOG_NRM, ADMLVL_BUILDER, TRUE, "HSEDIT: Max houses limit reached - Unable to save OLC data");
+      mudlog(LOG_NRM, ADMLVL_BUILDER, true, "HSEDIT: Max houses limit reached - Unable to save OLC data");
     }
   }
   /* The new house is stored - now to ensure the roomsflags are correct */
@@ -155,7 +155,7 @@ static void hedit_delete_house(struct descriptor_data *d, int house_vnum)
   room_rnum real_house;
 
   if ((i = find_house(house_vnum)) == NOWHERE) {
-    mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: hsedit: Invalid house vnum in hedit_delete_house\r\n");
+    mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: hsedit: Invalid house vnum in hedit_delete_house\r\n");
     cleanup_olc(d, CLEANUP_STRUCTS);
     return;
   }
@@ -228,7 +228,7 @@ static void hsedit_dir_menu(struct descriptor_data *d)
 
   house = OLC_HOUSE(d);
 
-  mudlog(LOG_CMP, ADMLVL_BUILDER, TRUE, "(LOG) hsedit_dir_menu: house vnum = %d", house->vnum);
+  mudlog(LOG_CMP, ADMLVL_BUILDER, true, "(LOG) hsedit_dir_menu: house vnum = %d", house->vnum);
   house_rnum = real_room(house->vnum);
 
   if ((house_rnum < 0) || (house_rnum == NOWHERE)) {
@@ -318,24 +318,24 @@ static void hsedit_disp_guest_menu(struct descriptor_data *d)
           "@gQ@D)@g Back to main menu\r\n"
           "@gEnter selection @D(@gA@D/@gD@D/@gC@D/@gQ@D)@n: ",
 
-          get_name_by_id(house->guests[0]) == NULL ? not_set : get_name_by_id(house->guests[0]),
+          get_name_by_id(house->guests[0]) == nullptr ? not_set : get_name_by_id(house->guests[0]),
           house->guests[0] < 1 ? 0 : house->guests[0],
-          get_name_by_id(house->guests[1]) == NULL ? not_set : get_name_by_id(house->guests[1]),
+          get_name_by_id(house->guests[1]) == nullptr ? not_set : get_name_by_id(house->guests[1]),
           house->guests[1] < 1 ? 0 : house->guests[1],
-          get_name_by_id(house->guests[2]) == NULL ? not_set : get_name_by_id(house->guests[2]),
-          house->guests[2] < 1 ? 0 : house->guests[2], get_name_by_id(house->guests[3]) == NULL ? not_set : get_name_by_id(house->guests[3]),
+          get_name_by_id(house->guests[2]) == nullptr ? not_set : get_name_by_id(house->guests[2]),
+          house->guests[2] < 1 ? 0 : house->guests[2], get_name_by_id(house->guests[3]) == nullptr ? not_set : get_name_by_id(house->guests[3]),
           house->guests[3] < 1 ? 0 : house->guests[3],
-          get_name_by_id(house->guests[4]) == NULL ? not_set : get_name_by_id(house->guests[4]),
+          get_name_by_id(house->guests[4]) == nullptr ? not_set : get_name_by_id(house->guests[4]),
           house->guests[4] < 1 ? 0 : house->guests[4],
-          get_name_by_id(house->guests[5]) == NULL ? not_set : get_name_by_id(house->guests[5]),
+          get_name_by_id(house->guests[5]) == nullptr ? not_set : get_name_by_id(house->guests[5]),
           house->guests[5] < 1 ? 0 : house->guests[5],
-          get_name_by_id(house->guests[6]) == NULL ? not_set : get_name_by_id(house->guests[6]),
+          get_name_by_id(house->guests[6]) == nullptr ? not_set : get_name_by_id(house->guests[6]),
           house->guests[6] < 1 ? 0 : house->guests[6],
-          get_name_by_id(house->guests[7]) == NULL ? not_set : get_name_by_id(house->guests[7]),
+          get_name_by_id(house->guests[7]) == nullptr ? not_set : get_name_by_id(house->guests[7]),
           house->guests[7] < 1 ? 0 : house->guests[7],
-          get_name_by_id(house->guests[8]) == NULL ? not_set : get_name_by_id(house->guests[8]),
+          get_name_by_id(house->guests[8]) == nullptr ? not_set : get_name_by_id(house->guests[8]),
           house->guests[8] < 1 ? 0 : house->guests[8],
-          get_name_by_id(house->guests[9]) == NULL ? not_set : get_name_by_id(house->guests[9]),
+          get_name_by_id(house->guests[9]) == nullptr ? not_set : get_name_by_id(house->guests[9]),
           house->guests[9] < 1 ? 0 : house->guests[9]);
   send_to_char(d->character, "%s", buf);
 
@@ -354,7 +354,7 @@ static char *hsedit_list_guests(struct house_control_rec *thishouse, char *guest
 
   for (num_printed = j = 0; j < thishouse->num_of_guests; j++) {
     /* Avoid <UNDEF>. -gg 6/21/98 */
-    if ((temp = get_name_by_id(thishouse->guests[j])) == NULL)
+    if ((temp = get_name_by_id(thishouse->guests[j])) == nullptr)
       continue;
 
     num_printed++;
@@ -413,7 +413,7 @@ static void hsedit_disp_menu(struct descriptor_data *d)
            "@gEnter choice : @n",
 
            OLC_NUM(d), zone_table[OLC_ZNUM(d)].number,
-           house->owner, get_name_by_id(house->owner) == NULL ? no_name : get_name_by_id(house->owner),
+           house->owner, get_name_by_id(house->owner) == nullptr ? no_name : get_name_by_id(house->owner),
            house->atrium, ((house->exit_num >= 0) && (house->exit_num <= 11)) ? dirs[(house->exit_num)] : "NONE",
            house_types[(house->mode)], built_on, last_pay, hsedit_list_guests(house, buf2), buf1);
   send_to_char(d->character, "%s", buf);
@@ -430,9 +430,9 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
 {
   int number = 0, id = 0, i, rnum;
   char *tmp;
-  bool found = FALSE;
+  bool found = false;
 
-  mudlog(LOG_CMP, ADMLVL_BUILDER, FALSE, "(LOG) hsedit_parse: OLC mode %d", OLC_MODE(d));
+  mudlog(LOG_CMP, ADMLVL_BUILDER, false, "(LOG) hsedit_parse: OLC mode %d", OLC_MODE(d));
 
   switch (OLC_MODE(d)) {
     case HSEDIT_CONFIRM_SAVESTRING:
@@ -440,7 +440,7 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
         case 'y':
         case 'Y':
           hsedit_save_internally(d);
-          mudlog(LOG_CMP, ADMLVL_BUILDER, TRUE, "OLC: %s edits house %d", char_get_name(d->character), OLC_NUM(d));
+          mudlog(LOG_CMP, ADMLVL_BUILDER, true, "OLC: %s edits house %d", char_get_name(d->character), OLC_NUM(d));
           if (CONFIG_OLC_SAVE) {
             hsedit_save_to_disk();
             write_to_output(d, "House saved to disk.\r\n");
@@ -478,7 +478,7 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
         case '2':
           if ((OLC_HOUSE(d)->vnum == NOWHERE) || (real_room(OLC_HOUSE(d)->vnum) == NOWHERE)) {
             send_to_char(d->character, "ERROR: Invalid house VNUM\r\n(Press Enter)\r\n");
-            mudlog(LOG_NRM, ADMLVL_GRGOD, TRUE, "SYSERR: Invalid house VNUM in hsedit");
+            mudlog(LOG_NRM, ADMLVL_GRGOD, true, "SYSERR: Invalid house VNUM in hsedit");
           } else {
             send_to_char(d->character, "Enter atrium room vnum:");
             OLC_MODE(d) = HSEDIT_ATRIUM;
@@ -488,7 +488,7 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
         case '3':
           if ((OLC_HOUSE(d)->vnum == NOWHERE) || (real_room(OLC_HOUSE(d)->vnum) == NOWHERE)) {
             send_to_char(d->character, "ERROR: Invalid house VNUM\r\n(Press Enter)\r\n");
-            mudlog(LOG_NRM, ADMLVL_BUILDER, TRUE, "SYSERR: Invalid house VNUM in hsedit");
+            mudlog(LOG_NRM, ADMLVL_BUILDER, true, "SYSERR: Invalid house VNUM in hsedit");
           } else {
             hsedit_dir_menu(d);
           }
@@ -563,7 +563,7 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
 
     case HSEDIT_OWNER_ID:
       id = atoi(arg);
-      if ((tmp = get_name_by_id(id)) == NULL) {
+      if ((tmp = get_name_by_id(id)) == nullptr) {
         send_to_char(d->character, "There is no such player.\r\n");
         hsedit_owner_menu(d);
         return;
@@ -586,13 +586,13 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
       for (i = 0; i < 12; i++) {
         if (world[rnum].dir_option[i]) {
           if (world[rnum].dir_option[i]->to_room == real_room(number)) {
-            found = TRUE;
+            found = true;
             id    = i;
           }
         }
       }
 
-      if (found == FALSE) {
+      if (found == false) {
         send_to_char(d->character, "Atrium MUST be an adjoining room.\r\nEnter a valid room VNUM for this atrium (0 to exit) : ");
         return;
       }
@@ -858,7 +858,7 @@ expansion
 
     default:
       /* we should never get here */
-      mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: Reached default case in parse_hsedit");
+      mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: Reached default case in parse_hsedit");
       break;
   }
   /*. If we get this far, something has been changed .*/
@@ -890,7 +890,7 @@ ACMD(do_oasis_hsedit)
       send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
       return;
     }
-    save = TRUE;
+    save = true;
 
     if (is_number(buf2))
       number = atoi(buf2);
@@ -941,7 +941,7 @@ ACMD(do_oasis_hsedit)
 
   /****************************************************************************/
   if (d->olc) {
-    mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: do_oasis_hsedit: Player already had olc structure.");
+    mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: do_oasis_hsedit: Player already had olc structure.");
     free(d->olc);
   }
 
@@ -960,7 +960,7 @@ ACMD(do_oasis_hsedit)
 
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
@@ -970,7 +970,7 @@ ACMD(do_oasis_hsedit)
   /****************************************************************************/
   if (!can_edit_zone(ch, OLC_ZNUM(d))) {
     send_to_char(ch, " You do not have permission to edit zone %d. Try zone %d.\r\n", zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
-    mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "OLC: %s tried to edit zone %d allowed zone %d",
+    mudlog(LOG_BRF, ADMLVL_BUILDER, true, "OLC: %s tried to edit zone %d allowed zone %d",
            char_get_name(ch), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
 
     /**************************************************************************/
@@ -978,7 +978,7 @@ ACMD(do_oasis_hsedit)
 
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
@@ -989,7 +989,7 @@ ACMD(do_oasis_hsedit)
   if (save) {
     send_to_char(ch, "Saving all houses in zone %d.\r\n",
                  zone_table[OLC_ZNUM(d)].number);
-    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), TRUE,
+    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), true,
            "OLC: %s saves house info for zone %d.", char_get_name(ch),
            zone_table[OLC_ZNUM(d)].number);
 
@@ -1004,7 +1004,7 @@ ACMD(do_oasis_hsedit)
 
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
@@ -1020,7 +1020,7 @@ ACMD(do_oasis_hsedit)
     /* Do a quick check to ensure there is room for more */
     if (num_of_houses >= MAX_HOUSES) {
       send_to_char(ch, "MAX houses limit reached (%d) - Unable to create more.\r\n", MAX_HOUSES);
-      mudlog(LOG_NRM, ADMLVL_BUILDER, TRUE, "HSEDIT: MAX houses limit reached (%d)\r\n", MAX_HOUSES);
+      mudlog(LOG_NRM, ADMLVL_BUILDER, true, "HSEDIT: MAX houses limit reached (%d)\r\n", MAX_HOUSES);
       return;
     }
     hsedit_setup_new(d);
@@ -1034,13 +1034,13 @@ ACMD(do_oasis_hsedit)
   /** Send the OLC message to the players in the same room as the builder.   **/
 
   /****************************************************************************/
-  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", true, d->character, 0, 0, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);
 
   /****************************************************************************/
   /** Log the OLC message.                                                   **/
 
   /****************************************************************************/
-  mudlog(LOG_CMP, ADMLVL_BUILDER, TRUE, "OLC: (hsedit) %s starts editing zone %d allowed zone %d",
+  mudlog(LOG_CMP, ADMLVL_BUILDER, true, "OLC: (hsedit) %s starts editing zone %d allowed zone %d",
          char_get_name(ch), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
 }

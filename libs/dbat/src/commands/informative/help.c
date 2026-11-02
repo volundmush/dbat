@@ -112,7 +112,7 @@ ACMD(do_weather)
 /* puts -'s instead of spaces */
 static void space_to_minus(char *str)
 {
-  while ((str = strchr(str, ' ')) != NULL)
+  while ((str = strchr(str, ' ')) != nullptr)
     *str = '-';
 }
 
@@ -175,7 +175,7 @@ ACMD(do_help)
     int i, found = 0;
     send_to_char(ch, "There is no help on that word.\r\n");
     if (char_get_admlevel(ch) < 3) {
-      mudlog(LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(ch)), TRUE, "%s tried to get help on %s", char_get_name(ch), argument);
+      mudlog(LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(ch)), true, "%s tried to get help on %s", char_get_name(ch), argument);
     }
     for (i = 0; i <= top_of_helpt; i++) {
       if (help_table[i].min_level > char_get_admlevel(ch))
@@ -282,7 +282,7 @@ ACMD(do_color)
     send_to_char(ch, "Usage: color [ off | on ]\r\n");
     return;
   }
-  if (((tp = search_block(arg, ctypes, FALSE)) == -1)) {
+  if (((tp = search_block(arg, ctypes, false)) == -1)) {
     send_to_char(ch, "Usage: color [ off | on ]\r\n");
     return;
   }
@@ -433,7 +433,7 @@ ACMD(do_commands)
   one_argument(argument, arg);
 
   if (*arg) {
-    if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD)) || char_is_npc(vict)) {
+    if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD)) || char_is_npc(vict)) {
       send_to_char(ch, "Who is that?\r\n");
       return;
     }
@@ -492,7 +492,7 @@ ACMD(do_history)
 
   one_argument(argument, arg);
 
-  type = search_block(arg, history_types, FALSE);
+  type = search_block(arg, history_types, false);
   if (!*arg || type < 0) {
     int i;
 

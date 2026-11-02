@@ -13,12 +13,12 @@ static void atomic_log(const char *operation, const char *filename)
 
 FILE *atomic_open(struct atomic_file *af, const char *path, bool backup)
 {
-  af->fp     = NULL;
+  af->fp     = nullptr;
   af->backup = backup;
   if (snprintf(af->path, sizeof(af->path), "%s", path) >= (int)sizeof(af->path) ||
       snprintf(af->tmp, sizeof(af->tmp), "%s.tmp", path) >= (int)sizeof(af->tmp)) {
     mud_log("SYSERR: atomic save: path too long: %s", path);
-    return NULL;
+    return nullptr;
   }
   if (!(af->fp = fopen(af->tmp, "w")))
     atomic_log("fopen", af->tmp);
@@ -29,7 +29,7 @@ void atomic_abort(struct atomic_file *af)
 {
   if (af->fp)
     fclose(af->fp);
-  af->fp = NULL;
+  af->fp = nullptr;
   unlink(af->tmp);
 }
 
@@ -59,7 +59,7 @@ bool atomic_commit(struct atomic_file *af)
 {
   FILE *fp = af->fp;
 
-  af->fp = NULL;
+  af->fp = nullptr;
   if (!fp)
     return false;
   if (ferror(fp) || fflush(fp) == EOF) {

@@ -4,7 +4,6 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include "dbat/htree.h"
 #include "dbat/shop.h"
 #include "dbat/dg_scripts.h"
 
@@ -29,10 +28,10 @@ room_rnum add_room(struct room_data *room)
 {
   struct char_data *tch;
   struct obj_data *tobj;
-  int j, found = FALSE;
+  int j, found = false;
   room_rnum i;
 
-  if (room == NULL)
+  if (room == nullptr)
     return NOWHERE;
 
   if ((i = real_room(room->number)) != NOWHERE) {
@@ -69,7 +68,6 @@ room_rnum add_room(struct room_data *room)
     /* Move objects too. */
     for (tobj = world[i].contents; tobj; tobj = tobj->next_content)
       obj_set_in_room(tobj, obj_get_in_room(tobj) + ((obj_get_in_room(tobj) != NOWHERE)));
-    htree_add(room_htree, world[i].number, i);
   }
   if (!found) {
     world[0] = *room; /* Last place, in front. */
@@ -102,7 +100,7 @@ room_rnum add_room(struct room_data *room)
           /* Known zone entries we don't care about. */
           break;
         default:
-          mudlog(LOG_BRF, ADMLVL_GOD, TRUE, "SYSERR: GenOLC: add_room: Unknown zone entry found!");
+          mudlog(LOG_BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: add_room: Unknown zone entry found!");
       }
 
   /*
@@ -142,14 +140,11 @@ int delete_room(room_rnum rnum)
   struct room_data *room;
 
   if (rnum <= 0 || rnum > top_of_world) /* Can't delete void yet. */
-    return FALSE;
+    return false;
 
   room = &world[rnum];
 
   add_to_save_list(zone_table[room->zone].number, SL_WLD);
-
-  /* remove from realnum lookup tree */
-  htree_del(room_htree, room->number);
 
   /* This is something you might want to read about in the logs. */
   mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room->number, room->name);
@@ -195,7 +190,7 @@ int delete_room(room_rnum rnum)
   do {
     i--;
     for (j = 0; j < NUM_OF_DIRS; j++)
-      if (rroom_get_dir_option(i, j) == NULL)
+      if (rroom_get_dir_option(i, j) == nullptr)
         continue;
       else if (rroom_get_dir_option(i, j)->to_room > rnum)
         rroom_get_dir_option(i, j)->to_room -= (rroom_get_dir_option(i, j)->to_room != NOWHERE); /* with unsigned NOWHERE > any rnum */
@@ -208,7 +203,7 @@ int delete_room(room_rnum rnum)
           if (rroom_get_dir_option(i, j)->general_description)
             free(rroom_get_dir_option(i, j)->general_description);
           free(rroom_get_dir_option(i, j));
-          rroom_set_dir_option(i, j, NULL);
+          rroom_set_dir_option(i, j, nullptr);
         } else {
           /* description is set, just point to nowhere */
           rroom_get_dir_option(i, j)->to_room = NOWHERE;
@@ -244,7 +239,7 @@ int delete_room(room_rnum rnum)
           /* Known zone entries we don't care about. */
           break;
         default:
-          mudlog(LOG_BRF, ADMLVL_GOD, TRUE, "SYSERR: GenOLC: delete_room: Unknown zone entry found!");
+          mudlog(LOG_BRF, ADMLVL_GOD, true, "SYSERR: GenOLC: delete_room: Unknown zone entry found!");
       }
 
   /*
@@ -275,7 +270,7 @@ int delete_room(room_rnum rnum)
   top_of_world--;
   RECREATE(world, struct room_data, top_of_world + 1);
 
-  return TRUE;
+  return true;
 }
 
 int save_rooms(zone_rnum zone_num)
@@ -291,7 +286,7 @@ int save_rooms(zone_rnum zone_num)
 
   if (zone_num < 0 || zone_num > top_of_zone_table) {
     mud_log("SYSERR: GenOLC: save_rooms: Invalid zone number %d passed! (0-%d)", zone_num, top_of_zone_table);
-    return FALSE;
+    return false;
   }
 
   mud_log("GenOLC: save_rooms: Saving rooms in zone #%d (%d-%d).",
@@ -300,7 +295,7 @@ int save_rooms(zone_rnum zone_num)
   snprintf(filename, sizeof(filename), "%s%d.wld", WLD_PREFIX, zone_table[zone_num].number);
   if (!(sf = atomic_open(&af, filename, false))) {
     perror("SYSERR: save_rooms");
-    return FALSE;
+    return false;
   }
 
   for (i = genolc_zone_bottom(zone_num); i <= zone_table[zone_num].top; i++) {
@@ -314,7 +309,7 @@ int save_rooms(zone_rnum zone_num)
       /*
        * Copy the description and strip off trailing newlines.
        */
-      strncpy(buf, room->description ? room->description : "Empty room.", sizeof(buf) - 1);
+      strlcpy(buf, room->description ? room->description : "Empty room.", sizeof(buf));
       strip_cr(buf);
 
       /*
@@ -341,7 +336,7 @@ int save_rooms(zone_rnum zone_num)
         if (room_get_dir_option(room, j)) {
           int dflag;
           if (room_get_dir_option(room, j)->general_description) {
-            strncpy(buf, room_get_dir_option(room, j)->general_description, sizeof(buf) - 1);
+            strlcpy(buf, room_get_dir_option(room, j)->general_description, sizeof(buf));
             strip_cr(buf);
           } else
             *buf = '\0';
@@ -363,7 +358,7 @@ int save_rooms(zone_rnum zone_num)
             dflag = 0;
 
           if (room_get_dir_option(room, j)->keyword)
-            strncpy(buf1, room_get_dir_option(room, j)->keyword, sizeof(buf1) - 1);
+            strlcpy(buf1, room_get_dir_option(room, j)->keyword, sizeof(buf1));
           else
             *buf1 = '\0';
 
@@ -406,7 +401,7 @@ int save_rooms(zone_rnum zone_num)
    */
   fprintf(sf, "$~\n");
   if (!atomic_commit(&af))
-    return FALSE;
+    return false;
   snprintf(buf, sizeof(buf), "%s", filename);
 
   if (in_save_list(zone_table[zone_num].number, SL_WLD)) {
@@ -414,7 +409,7 @@ int save_rooms(zone_rnum zone_num)
     create_world_index(zone_table[zone_num].number, "wld");
     mud_log("GenOLC: save_rooms: Saving rooms '%s'", buf);
   }
-  return TRUE;
+  return true;
 }
 
 static int copy_room(struct room_data *to, struct room_data *from)
@@ -425,10 +420,10 @@ static int copy_room(struct room_data *to, struct room_data *from)
 
   /* Don't put people and objects in two locations.
      Am thinking this shouldn't be done here... */
-  from->people   = NULL;
-  from->contents = NULL;
+  from->people   = nullptr;
+  from->contents = nullptr;
 
-  return TRUE;
+  return true;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -443,9 +438,9 @@ static int copy_room_strings(struct room_data *dest, struct room_data *source)
 {
   int i;
 
-  if (dest == NULL || source == NULL) {
+  if (dest == nullptr || source == nullptr) {
     mud_log("SYSERR: GenOLC: copy_room_strings: NULL values passed.");
-    return FALSE;
+    return false;
   }
 
   dest->description = str_udup(source->description);
@@ -470,7 +465,7 @@ static int copy_room_strings(struct room_data *dest, struct room_data *source)
   if (source->ex_description)
     copy_ex_descriptions(&dest->ex_description, source->ex_description);
 
-  return TRUE;
+  return true;
 }
 
 int free_room_strings(struct room_data *room)
@@ -493,9 +488,9 @@ int free_room_strings(struct room_data *room)
       if (room->dir_option[i]->keyword)
         free(room->dir_option[i]->keyword);
       free(room->dir_option[i]);
-      room->dir_option[i] = NULL;
+      room->dir_option[i] = nullptr;
     }
   }
 
-  return TRUE;
+  return true;
 }

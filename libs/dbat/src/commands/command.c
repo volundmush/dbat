@@ -1,4 +1,5 @@
 #include "dbat/command.h"
+#include "dbat/utils.h"
 #include "dbat/character_utils.h"
 #include "dbat/room_utils.h"
 #include "dbat/object_utils.h"
@@ -627,11 +628,11 @@ static bool allowed_while_restrained(const char *cmd, bool liquefied)
   static const char *const always[]        = {"look", "score", "ooc", "osay", "emote", "smote", "status"};
   static const char *const liquefied_too[] = {"liquefy", "ingest"};
 
-  for (size_t i = 0; i < sizeof(always) / sizeof(always[0]); i++)
+  for (size_t i = 0; i < countof(always); i++)
     if (!strcasecmp(cmd, always[i]))
       return true;
   if (liquefied)
-    for (size_t i = 0; i < sizeof(liquefied_too) / sizeof(liquefied_too[0]); i++)
+    for (size_t i = 0; i < countof(liquefied_too); i++)
       if (!strcasecmp(cmd, liquefied_too[i]))
         return true;
   return false;
@@ -657,8 +658,8 @@ static bool command_pass(const char *cmd, struct char_data *ch)
     }
   } else if (char_is_affected(ch, AFF_PARA) && char_get_aff_abils_intel(ch) < rand_number(1, 60)) {
     if (!allowed_while_restrained(cmd, false)) {
-      act("@yYou fail to overcome your paralysis!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@Y$n @ystruggles with $s paralysis!@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@yYou fail to overcome your paralysis!@n", true, ch, 0, 0, TO_CHAR);
+      act("@Y$n @ystruggles with $s paralysis!@n", true, ch, 0, 0, TO_ROOM);
       return false;
     }
   }
@@ -674,19 +675,19 @@ int special(struct char_data *ch, int cmd, char *arg)
   bool in_a_room = char_get_in_room(ch) != NOWHERE; /* forced or scripted commands can come from between rooms */
 
   /* special in room? */
-  if (in_a_room && rroom_get_spec(char_get_in_room(ch)) != NULL)
+  if (in_a_room && rroom_get_spec(char_get_in_room(ch)) != nullptr)
     if (rroom_get_spec(char_get_in_room(ch))(ch, world + char_get_in_room(ch), cmd, arg))
       return (1);
 
   /* special in equipment list? */
   for (j = 0; j < NUM_WEARS; j++)
-    if (char_get_equipment(ch, j) && obj_get_spec(char_get_equipment(ch, j)) != NULL)
+    if (char_get_equipment(ch, j) && obj_get_spec(char_get_equipment(ch, j)) != nullptr)
       if (obj_get_spec(char_get_equipment(ch, j))(ch, char_get_equipment(ch, j), cmd, arg))
         return (1);
 
   /* special in inventory? */
   for (i = ch->carrying; i; i = i->next_content)
-    if (obj_get_spec(i) != NULL)
+    if (obj_get_spec(i) != nullptr)
       if (obj_get_spec(i)(ch, i, cmd, arg))
         return (1);
 
@@ -701,7 +702,7 @@ int special(struct char_data *ch, int cmd, char *arg)
 
   /* special in object present? */
   for (i = world[char_get_in_room(ch)].contents; i; i = i->next_content)
-    if (obj_get_spec(i) != NULL)
+    if (obj_get_spec(i) != nullptr)
       if (obj_get_spec(i)(ch, i, cmd, arg))
         return (1);
 
@@ -786,7 +787,7 @@ void command_interpreter(struct char_data *ch, char *argument)
     send_to_char(ch, "You try, but the mind-numbing cold prevents you...\r\n");
   else if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_SPIRAL))
     send_to_char(ch, "You are occupied with your Spiral Comet attack!\r\n");
-  else if (complete_cmd_info[cmd].command_pointer == NULL)
+  else if (complete_cmd_info[cmd].command_pointer == nullptr)
     send_to_char(ch, "Sorry, that command hasn't been implemented yet.\r\n");
   else if (char_is_npc(ch) && complete_cmd_info[cmd].minimum_admlevel >= ADMLVL_IMMORT)
     send_to_char(ch, "You can't use immortal commands while switched.\r\n");
@@ -822,7 +823,7 @@ void command_interpreter(struct char_data *ch, char *argument)
 
 struct alias_data *find_alias(struct alias_data *alias_list, char *str)
 {
-  while (alias_list != NULL) {
+  while (alias_list != nullptr) {
     if (*str == *alias_list->alias) /* hey, every little bit counts :-) */
       if (!strcmp(str, alias_list->alias))
         return (alias_list);
@@ -830,7 +831,7 @@ struct alias_data *find_alias(struct alias_data *alias_list, char *str)
     alias_list = alias_list->next;
   }
 
-  return (NULL);
+  return (nullptr);
 }
 
 void free_alias(struct alias_data *a)

@@ -89,8 +89,8 @@ ACMD(do_mimic)
       send_to_char(ch, "You are not imitating another race.\r\n");
       return;
     }
-    act("@mYou concentrate for a moment and release the illusion that was mimicing another race.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@M$n@m concentrates for a moment and SUDDENLY $s appearance changes some what!@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@mYou concentrate for a moment and release the illusion that was mimicing another race.@n", true, ch, 0, 0, TO_CHAR);
+    act("@M$n@m concentrates for a moment and SUDDENLY $s appearance changes some what!@n", true, ch, 0, 0, TO_ROOM);
     ch->mimic = 0;
   }
 
@@ -120,8 +120,8 @@ ACMD(do_mimic)
   }
   if (prob < perc) {
     decCurKI(ch, cost, 0);
-    act("@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n", true, ch, 0, 0, TO_CHAR);
+    act("@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n", true, ch, 0, 0, TO_ROOM);
     return;
   }
   char buf[MAX_STRING_LENGTH];
@@ -129,7 +129,7 @@ ACMD(do_mimic)
   decCurKI(ch, cost, 0);
   snprintf(buf, sizeof(buf), "@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be %s @M%s!@n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
   send_to_char(ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be %s %s.@n\r\n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
-  act(buf, TRUE, ch, 0, 0, TO_ROOM);
+  act(buf, true, ch, 0, 0, TO_ROOM);
   return;
 }
 
@@ -146,15 +146,15 @@ ACMD(do_kyodaika)
   }
 
   if (!is_affected(ch, AFF_KYODAIKA)) {
-    act("@GYou growl as your body grows to ten times its normal size!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n@G growls as $s body grows to ten times its normal size!@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@GYou growl as your body grows to ten times its normal size!@n", true, ch, 0, 0, TO_CHAR);
+    act("@g$n@G growls as $s body grows to ten times its normal size!@n", true, ch, 0, 0, TO_ROOM);
     send_to_char(ch, "@cStrength@D: @C+5\r\n@cSpeed@D: @c-2@n\r\n");
     assign_affect(ch, AFF_KYODAIKA, 0, -1, 5, 0, 0, 0, 0, -2);
     save_char(ch);
     return;
   }
-  act("@GYou growl as your body shrinks to its normal size!@n", TRUE, ch, 0, 0, TO_CHAR);
-  act("@g$n@G growls as $s body shrinks to its normal size!@n", TRUE, ch, 0, 0, TO_ROOM);
+  act("@GYou growl as your body shrinks to its normal size!@n", true, ch, 0, 0, TO_CHAR);
+  act("@g$n@G growls as $s body shrinks to its normal size!@n", true, ch, 0, 0, TO_ROOM);
   send_to_char(ch, "@cStrength@D: @C-5\r\n@cSpeed@D: @c+2@n\r\n");
   remove_affect(ch, AFF_KYODAIKA);
   save_char(ch);
@@ -163,7 +163,7 @@ ACMD(do_kyodaika)
 
 ACMD(do_table)
 {
-  struct obj_data *obj = NULL, *obj2 = NULL;
+  struct obj_data *obj = nullptr, *obj2 = nullptr;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
   two_arguments(argument, arg, arg2);
@@ -173,19 +173,19 @@ ACMD(do_table)
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[char_get_in_room(ch)].contents))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
     send_to_char(ch, "You don't see that table here.\r\n");
     return;
   }
 
-  if (!(obj2 = get_obj_in_list_vis(ch, arg2, NULL, obj->contains))) {
+  if (!(obj2 = get_obj_in_list_vis(ch, arg2, nullptr, obj->contains))) {
     send_to_char(ch, "That card doesn't seem to be on that table.\r\n");
     return;
   }
 
   char buf[200];
   snprintf(buf, sizeof(buf), "$n looks at %s on %s.\r\n", obj2->short_description, obj->short_description);
-  act(buf, TRUE, ch, 0, 0, TO_ROOM);
+  act(buf, true, ch, 0, 0, TO_ROOM);
   send_to_char(ch, "%s", obj2->action_description);
 }
 
@@ -201,27 +201,27 @@ ACMD(do_draw)
     return;
   }
 
-  struct obj_data *obj = NULL, *obj2 = NULL, *obj3 = NULL, *next_obj = NULL;
-  int drawn = FALSE;
+  struct obj_data *obj = nullptr, *obj2 = nullptr, *obj3 = nullptr, *next_obj = nullptr;
+  int drawn = false;
 
-  if (!(obj = get_obj_in_list_vis(ch, (char[]){"case"}, NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, (char[]){"case"}, nullptr, ch->carrying))) {
     send_to_char(ch, "You don't have a case.\r\n");
     return;
   }
   for (obj2 = obj->contains; obj2; obj2 = next_obj) {
     next_obj = obj2->next_content;
-    if (drawn == FALSE) {
+    if (drawn == false) {
       obj_from_obj(obj2);
       obj_to_char(obj2, ch);
       obj3  = obj2;
-      drawn = TRUE;
+      drawn = true;
     }
   }
-  if (drawn == FALSE) {
+  if (drawn == false) {
     send_to_char(ch, "You don't have any cards in the case!\r\n");
     return;
   }
-  act("$n draws a card from $s $p.\r\n", TRUE, ch, obj, 0, TO_ROOM);
+  act("$n draws a card from $s $p.\r\n", true, ch, obj, 0, TO_ROOM);
   send_to_char(ch, "You draw a card.\r\n%s\r\n", obj3->action_description);
   return;
 }
@@ -239,10 +239,10 @@ ACMD(do_shuffle)
     return;
   }
 
-  struct obj_data *obj = NULL, *obj2 = NULL, *next_obj = NULL;
+  struct obj_data *obj = nullptr, *obj2 = nullptr, *next_obj = nullptr;
   int count = 0;
 
-  if (!(obj = get_obj_in_list_vis(ch, (char[]){"case"}, NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, (char[]){"case"}, nullptr, ch->carrying))) {
     send_to_char(ch, "You don't have a case.\r\n");
     return;
   }
@@ -282,7 +282,7 @@ ACMD(do_shuffle)
     }
   }
   send_to_char(ch, "You shuffle the cards carefully.\r\n");
-  act("$n shuffles their deck.", TRUE, ch, 0, 0, TO_ROOM);
+  act("$n shuffles their deck.", true, ch, 0, 0, TO_ROOM);
   send_to_room(char_get_in_room(ch), "There were %d cards in the deck.\r\n", total);
 }
 
@@ -312,21 +312,21 @@ ACMD(do_hand)
         send_to_char(ch, "%s\r\n", obj->short_description);
       }
     }
-    act("$n looks at $s hand.", TRUE, ch, 0, 0, TO_ROOM);
+    act("$n looks at $s hand.", true, ch, 0, 0, TO_ROOM);
     if (count == 0) {
       send_to_char(ch, "No cards.");
-      act("There were no cards.", TRUE, ch, 0, 0, TO_ROOM);
+      act("There were no cards.", true, ch, 0, 0, TO_ROOM);
     } else if (count > 7) {
-      act("You have more than seven cards in your hand.", TRUE, ch, 0, 0, TO_CHAR);
-      act("$n has more than seven cards in $s hand.", TRUE, ch, 0, 0, TO_ROOM);
+      act("You have more than seven cards in your hand.", true, ch, 0, 0, TO_CHAR);
+      act("$n has more than seven cards in $s hand.", true, ch, 0, 0, TO_ROOM);
     } else {
       char buf[200];
       snprintf(buf, sizeof(buf), "There are %d cards in the hand.", count);
-      act(buf, TRUE, ch, 0, 0, TO_ROOM);
+      act(buf, true, ch, 0, 0, TO_ROOM);
     }
   } else if (!strcasecmp("show", arg)) {
     send_to_char(ch, "You show off your hand to the room.\r\n");
-    act("@C$n's hand contains:\r\n@D---------------------------@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@C$n's hand contains:\r\n@D---------------------------@n", true, ch, 0, 0, TO_ROOM);
     for (obj = ch->carrying; obj; obj = next_obj) {
       next_obj = obj->next_content;
       if (obj && !obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
@@ -334,15 +334,15 @@ ACMD(do_hand)
       }
       if (obj) {
         count += 1;
-        act("$p", TRUE, ch, obj, 0, TO_ROOM);
+        act("$p", true, ch, obj, 0, TO_ROOM);
       }
     }
     if (count == 0) {
-      act("No cards.", TRUE, ch, 0, 0, TO_ROOM);
+      act("No cards.", true, ch, 0, 0, TO_ROOM);
     }
     if (count > 7) {
-      act("You have more than seven cards in your hand.", TRUE, ch, 0, 0, TO_CHAR);
-      act("$n has more than seven cards in $s hand.", TRUE, ch, 0, 0, TO_ROOM);
+      act("You have more than seven cards in your hand.", true, ch, 0, 0, TO_CHAR);
+      act("$n has more than seven cards in $s hand.", true, ch, 0, 0, TO_ROOM);
     }
   } else {
     send_to_char(ch, "Syntax: hand (look | show)\r\n");
@@ -365,7 +365,7 @@ ACMD(do_post)
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
     send_to_char(ch, "You don't seem to have that.\r\n");
     return;
   }
@@ -385,14 +385,14 @@ ACMD(do_post)
       send_to_char(ch, "You are not near any general structure you can post it on.\r\n");
       return;
     }
-    act("@WYou post $p@W on a nearby structure.@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W posts $p@W on a nearby structure.@n", TRUE, ch, obj, 0, TO_ROOM);
+    act("@WYou post $p@W on a nearby structure.@n", true, ch, obj, 0, TO_CHAR);
+    act("@C$n@W posts $p@W on a nearby structure.@n", true, ch, obj, 0, TO_ROOM);
     obj_from_char(obj);
     obj_to_room(obj, char_get_in_room(ch));
     obj_set_posttype(obj, 1);
     return;
   }
-  if (!(obj2 = get_obj_in_list_vis(ch, arg2, NULL, world[char_get_in_room(ch)].contents))) {
+  if (!(obj2 = get_obj_in_list_vis(ch, arg2, nullptr, world[char_get_in_room(ch)].contents))) {
     send_to_char(ch, "You can't seem to find the thing you want to post it on.\r\n");
     return;
   }
@@ -407,7 +407,7 @@ ACMD(do_post)
   char buf[MAX_STRING_LENGTH];
   snprintf(buf, sizeof(buf), "@C$n@W posts %s@W on %s@W.@n", obj->short_description, obj2->short_description);
   send_to_char(ch, "@WYou post %s@W on %s@W.@n\r\n", obj->short_description, obj2->short_description);
-  act(buf, TRUE, ch, 0, 0, TO_ROOM);
+  act(buf, true, ch, 0, 0, TO_ROOM);
   obj_from_char(obj);
   obj_to_room(obj, char_get_in_room(ch));
   obj_set_posttype(obj, 2);
@@ -434,7 +434,7 @@ ACMD(do_play)
     return;
   }
 
-  struct obj_data *obj = NULL, *obj2 = NULL, *obj3 = NULL, *next_obj = NULL;
+  struct obj_data *obj = nullptr, *obj2 = nullptr, *obj3 = nullptr, *next_obj = nullptr;
   char arg[MAX_INPUT_LENGTH];
   one_argument(argument, arg);
 
@@ -443,7 +443,7 @@ ACMD(do_play)
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
     send_to_char(ch, "You don't have that card to play.\r\n");
     return;
   }
@@ -455,13 +455,13 @@ ACMD(do_play)
     }
   }
 
-  if (obj2 == NULL) {
+  if (obj2 == nullptr) {
     send_to_char(ch, "Your table is missing. Inform an immortal of this problem.\r\n");
     return;
   }
 
-  act("You play $p on your table.", TRUE, ch, obj, 0, TO_CHAR);
-  act("$n plays $p on $s table.", TRUE, ch, obj, 0, TO_ROOM);
+  act("You play $p on your table.", true, ch, obj, 0, TO_CHAR);
+  act("$n plays $p on $s table.", true, ch, obj, 0, TO_ROOM);
   obj_from_char(obj);
   obj_to_obj(obj, obj2);
 }
@@ -469,7 +469,7 @@ ACMD(do_play)
 /* Nickname an object */
 ACMD(do_nickname)
 {
-  struct obj_data *obj = NULL;
+  struct obj_data *obj = nullptr;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
   two_arguments(argument, arg, arg2);
@@ -481,7 +481,7 @@ ACMD(do_nickname)
   }
 
   if (strcasecmp(arg, "ship")) {
-    if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
       send_to_char(ch, "You don't have that item to nickname.\r\n");
       return;
     }
@@ -492,16 +492,16 @@ ACMD(do_nickname)
   }
 
   if (!strcasecmp(arg, "ship")) {
-    struct obj_data *ship = NULL, *next_obj = NULL, *ship2 = NULL;
-    int found = FALSE;
+    struct obj_data *ship = nullptr, *next_obj = nullptr, *ship2 = nullptr;
+    int found = false;
     for (ship = world[char_get_in_room(ch)].contents; ship; ship = next_obj) {
       next_obj = ship->next_content;
-      if (obj_get_vnum(ship) >= 45000 && obj_get_vnum(ship) <= 45999 && found == FALSE) {
-        found = TRUE;
+      if (obj_get_vnum(ship) >= 45000 && obj_get_vnum(ship) <= 45999 && found == false) {
+        found = true;
         ship2 = ship;
       }
     }
-    if (found == TRUE) {
+    if (found == true) {
       if (strstr(arg2, "@")) {
         send_to_char(ch, "You can't nickname a ship and use color codes. Sorry.\r\n");
         return;
@@ -541,8 +541,8 @@ ACMD(do_nickname)
 
 ACMD(do_showoff)
 {
-  struct obj_data *obj   = NULL;
-  struct char_data *vict = NULL;
+  struct obj_data *obj   = nullptr;
+  struct char_data *vict = nullptr;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
   *arg  = '\0';
@@ -555,17 +555,17 @@ ACMD(do_showoff)
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
     send_to_char(ch, "You don't seem to have that.\r\n");
     return;
   }
-  if (!(vict = get_player_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
+  if (!(vict = get_player_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "There is no such person around.\r\n");
     return;
   } else { /* Ok show that target the object! */
-    act("@WYou hold up $p@W for @C$N@W to see:@n", TRUE, ch, obj, vict, TO_CHAR);
-    act("@C$n@W holds up $p@W for you to see:@n", TRUE, ch, obj, vict, TO_VICT);
-    act("@C$n@W holds up $p@W for @c$N@W to see.@n", TRUE, ch, obj, vict, TO_NOTVICT);
+    act("@WYou hold up $p@W for @C$N@W to see:@n", true, ch, obj, vict, TO_CHAR);
+    act("@C$n@W holds up $p@W for you to see:@n", true, ch, obj, vict, TO_VICT);
+    act("@C$n@W holds up $p@W for @c$N@W to see.@n", true, ch, obj, vict, TO_NOTVICT);
     show_obj_to_char(obj, vict, SHOW_OBJ_ACTION);
     return;
   }
@@ -595,11 +595,11 @@ void introCreate(struct char_data *ch)
 int readIntro(struct char_data *ch, struct char_data *vict)
 {
   char fname[40], filler[50], scrap[100], line[256];
-  int known = FALSE;
+  int known = false;
   FILE *fl;
 
   /* Read Introduction File */
-  if (vict == NULL) {
+  if (vict == nullptr) {
     return 0;
   }
 
@@ -622,12 +622,12 @@ int readIntro(struct char_data *ch, struct char_data *vict)
     get_line(fl, line);
     sscanf(line, "%s %s\n", filler, scrap);
     if (!strcasecmp(char_get_name(vict), filler)) {
-      known = TRUE;
+      known = true;
     }
   }
   fclose(fl);
 
-  if (known == TRUE)
+  if (known == true)
     return 1;
   else
     return 0;
@@ -638,7 +638,7 @@ static void introWrite(struct char_data *ch, struct char_data *vict, char *name)
   struct atomic_file af;
   FILE *file;
   char fname[40], filler[50], scrap[100], line[256];
-  char *names[500] = {NULL}, *alias[500] = {NULL};
+  char *names[500] = {nullptr}, *alias[500] = {nullptr};
   FILE *fl;
   int count = 0, x = 0;
 
@@ -681,10 +681,10 @@ static void introWrite(struct char_data *ch, struct char_data *vict, char *name)
 
   x = 0;
   while (x < count) {
-    if (names[x] != NULL) {
+    if (names[x] != nullptr) {
       free(names[x]);
     }
-    if (alias[x] != NULL) {
+    if (alias[x] != nullptr) {
       free(alias[x]);
     }
     x++;
@@ -731,7 +731,7 @@ ACMD(do_intro)
     return;
   }
 
-  if (!(vict = get_player_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+  if (!(vict = get_player_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "There is no such person.\r\n");
     return;
   }
@@ -755,15 +755,15 @@ ACMD(do_intro)
     return;
   }
   introWrite(ch, vict, arg2);
-  act("You decide to call $M, $N.", TRUE, ch, 0, vict, TO_CHAR);
-  act("$n seems to decide something about you.", TRUE, ch, 0, vict, TO_VICT);
-  act("$n seems to decide something about $N.", TRUE, ch, 0, vict, TO_NOTVICT);
+  act("You decide to call $M, $N.", true, ch, 0, vict, TO_CHAR);
+  act("$n seems to decide something about you.", true, ch, 0, vict, TO_VICT);
+  act("$n seems to decide something about $N.", true, ch, 0, vict, TO_NOTVICT);
   return;
 }
 
 ACMD(do_rptrans)
 {
-  struct char_data *vict = NULL;
+  struct char_data *vict = nullptr;
   struct descriptor_data *k;
   int amt = 0;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -800,8 +800,8 @@ ACMD(do_rptrans)
     if (!strcasecmp(k->user, arg))
       vict = k->character;
   }
-  if (vict == NULL) {
-    userWrite(NULL, 0, amt, 0, arg);
+  if (vict == nullptr) {
+    userWrite(nullptr, 0, amt, 0, arg);
   } else {
     char_set_rp(vict, char_get_rp(vict) + (amt));
     vict->desc->rpp += amt;
@@ -814,7 +814,7 @@ ACMD(do_rptrans)
   ch->desc->rpp -= amt;
   userWrite(ch->desc, 0, 0, 0, "index");
   send_to_char(ch, "@WYou exchange @C%d@W RPP to user @c%s@W for a warm fuzzy feeling.\r\n", amt, CAP(arg));
-  mudlog(LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(ch)), TRUE, "EXCHANGE: %s gave %d RPP to user %s", char_get_name(ch), amt, arg);
+  mudlog(LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(ch)), true, "EXCHANGE: %s gave %d RPP to user %s", char_get_name(ch), amt, arg);
   save_char(ch);
 }
 
@@ -849,13 +849,13 @@ ACMD(do_rpbank)
   char_set_rbank(ch, char_get_rbank(ch) + (amt));
   ch->desc->rbank += amt;
   send_to_char(ch, "You send %d to your RPP Bank. Your total is now %d.\r\n", amt, char_get_rbank(ch));
-  mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "RPP Bank: %s has put %d RPP into their bank", char_get_name(ch), amt);
+  mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "RPP Bank: %s has put %d RPP into their bank", char_get_name(ch), amt);
 }
 
 /* Rillao: An attempt was made. */
 ACMD(do_rbanktrans)
 {
-  struct char_data *vict = NULL;
+  struct char_data *vict = nullptr;
   struct descriptor_data *k;
   int amt = 0;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -892,8 +892,8 @@ ACMD(do_rbanktrans)
     if (!strcasecmp(k->user, arg))
       vict = k->character;
   }
-  if (vict == NULL) {
-    userWrite(NULL, 0, amt, 0, arg);
+  if (vict == nullptr) {
+    userWrite(nullptr, 0, amt, 0, arg);
   } else {
     char_set_rbank(vict, char_get_rbank(vict) + (amt));
     vict->desc->rbank += amt;
@@ -905,7 +905,7 @@ ACMD(do_rbanktrans)
   ch->desc->rbank -= amt;
   userWrite(ch->desc, 0, 0, 0, "index");
   send_to_char(ch, "@wWELL @xGOLLY @xGEE @xWILLICKERS@x! @wYOU @RZ@YIM @RZ@YAMMED @C%d @wRIPROOZLES TO @C%s!@n\r\n", amt, CAP(arg));
-  mudlog(LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(ch)), TRUE, "EXCHANGE: %s gave %d Banked RPP to user %s", char_get_name(ch), amt, arg);
+  mudlog(LOG_NRM, MAX(ADMLVL_IMPL, char_get_invis_level(ch)), true, "EXCHANGE: %s gave %d Banked RPP to user %s", char_get_name(ch), amt, arg);
   save_char(ch);
 }
 

@@ -53,10 +53,10 @@
  * However, if you decide you want to have an all-out knock-down drag-out
  * PK Mud, just set pk_allowed to YES - and anything goes.
  */
-int pk_allowed = NO;
+int pk_allowed = false;
 
 /* is playerthieving allowed? */
-int pt_allowed = NO;
+int pt_allowed = false;
 
 /* minimum level a player must be to shout/holler/gossip/auction */
 int level_can_shout = 1;
@@ -72,14 +72,14 @@ int mob_specials_used   = 0;
 int number_of_assassins = 0;
 
 /* Toplist Data */
-int TOPLOADED = FALSE;
+int TOPLOADED = false;
 char *topname[25];
 int64_t toppoint[25] = {0};
 /* End Top Data */
 
 int ERAPLAYERS      = 0;
 int TOPCOUNTDOWN    = 60;
-int HEDITS          = FALSE;
+int HEDITS          = false;
 int WISHTIME        = 0;
 int TOP_OF_NEWS     = 0;
 time_t BOARDNEWMORT = 0;
@@ -93,9 +93,9 @@ time_t LASTINTEREST = 0;
 time_t LASTPAYOUT   = 0;
 int LASTNEWS        = 0;
 int LASTPAYTYPE     = 0;
-int SAIYAN_ALLOWED  = FALSE;
-int MAJIN_ALLOWED   = FALSE;
-int MOON_UP         = FALSE;
+int SAIYAN_ALLOWED  = false;
+int MAJIN_ALLOWED   = false;
+int MOON_UP         = false;
 int PCOUNT          = 0;
 int HIGHPCOUNT      = 0;
 time_t PCOUNTDATE   = 0;
@@ -133,7 +133,7 @@ int idle_rent_time = 48;
 int idle_max_level = ADMLVL_IMMORT;
 
 /* should items in death traps automatically be junked? */
-int dts_are_dumps = YES;
+int dts_are_dumps = true;
 
 /* What the new PULSE_VIOLENCE will be */
 
@@ -156,7 +156,7 @@ int pulse_current  = 10;
  * able to carry around things like boards.  That's not necessarily a bad
  * thing, but this will be left at a default of 'NO' for historic reasons.
  */
-int load_into_inventory = NO;
+int load_into_inventory = false;
 
 /* "okay" etc. */
 const char *OK       = "Okay.\r\n";
@@ -169,7 +169,7 @@ const char *NOEFFECT = "Nothing seems to happen.\r\n";
  * hidden doors. A setting of 'NO' means to not go through the doors
  * while 'YES' will pass through doors to find the target.
  */
-int track_through_doors = YES;
+int track_through_doors = true;
 
 /*
  * This defines the cap for player character levels. It is impossible for
@@ -187,7 +187,7 @@ int level_cap = 101;
  * count of the number there are is given.  A value of 0 means standard
  * behaviour.
  */
-int show_obj_stacking = YES;
+int show_obj_stacking = true;
 
 /*
  *  This enables mob stacking - that is, if a room contains more that
@@ -195,13 +195,13 @@ int show_obj_stacking = YES;
  *  number indicating how many there are.  A value of 0 means standard
  *  behaviour.
  */
-int show_mob_stacking = YES;
+int show_mob_stacking = true;
 
 /*
  *  This allows aggressive mobs to initiate a fight with other mobs. A
  *  value of 0 means standard behaviour.
  */
-int mob_fighting = NO;
+int mob_fighting = false;
 
 /****************************************************************************/
 /****************************************************************************/
@@ -212,7 +212,7 @@ int mob_fighting = NO;
  * Should the MUD allow you to 'rent' for free?  (i.e. if you just quit,
  * your objects are saved at no cost, as in Merc-type MUDs.)
  */
-int free_rent = YES;
+int free_rent = true;
 
 /* maximum number of items players are allowed to rent */
 int max_obj_save = 30;
@@ -227,7 +227,7 @@ int min_rent_cost = 100;
  * the 'save' command will be disabled to prevent item duplication via
  * game crashes.
  */
-int auto_save = YES;
+int auto_save = true;
 
 /*
  * if auto_save (above) is yes, how often (in minutes) should the MUD
@@ -243,7 +243,7 @@ int crash_file_timeout = 10;
 int rent_file_timeout = 30;
 
 /* Do you want to automatically wipe players who've been gone too long? */
-int auto_pwipe = YES;
+int auto_pwipe = true;
 
 /* Autowipe deletion criteria
    This struct holds information used to determine which players to wipe
@@ -283,7 +283,7 @@ const struct pclean_criteria_data pclean_criteria[7] = {
 /* Do you want players who self-delete to be wiped immediately with no
    backup?
 */
-int selfdelete_fastwipe = YES;
+int selfdelete_fastwipe = true;
 
 /****************************************************************************/
 /****************************************************************************/
@@ -317,14 +317,14 @@ room_vnum donation_room_3 = NOWHERE; /* unused - room for expansion */
  * Please read 128bit.readme before setting this to true. Set this
  * flag if you want the conversion to take place.
  */
-int bitwarning = FALSE;
+int bitwarning = false;
 
 /*
  * If you want to look at normal worldfiles but DO NOT want to save
  * to 128bit format, turn this to false. However, do not save through
  * olc, or your worldfiles will be 128bit anyway.
  */
-int bitsavetodisk = TRUE;
+int bitsavetodisk = true;
 
 /*
  * This is the default port on which the game should run if no port is
@@ -345,7 +345,7 @@ uint16_t DFLT_PORT = 5001;
  * course, that IP address must be one of your host's interfaces, or it
  * won't work.)
  */
-const char *DFLT_IP = NULL; /* bind to all interfaces */
+const char *DFLT_IP = nullptr; /* bind to all interfaces */
 /* const char *DFLT_IP = "192.168.1.1";  -- bind only to one interface */
 
 /* default directory to use as data directory */
@@ -357,7 +357,7 @@ const char *DFLT_DIR = "data";
  * versions of Circle.  If you specify a file, you don't get messages to
  * the screen. (Hint: Try 'tail -f' if you have a UNIX machine.)
  */
-const char *LOGNAME = NULL;
+const char *LOGNAME = nullptr;
 /* const char *LOGNAME = "log/syslog";  -- useful for Windows users */
 
 /* maximum number of players allowed before game starts to turn people away */
@@ -380,7 +380,7 @@ int max_bad_pws = 3;
  * to just have to remove the SITEOK flags from those people I want to ban
  * rather than what is currently done?
  */
-int siteok_everyone = TRUE;
+int siteok_everyone = true;
 
 /*
  * Some nameservers are very slow and cause the game to lag terribly every 
@@ -401,7 +401,7 @@ int siteok_everyone = TRUE;
  * new_descriptor() in comm.c), so logging in never waits on a nameserver.
  */
 
-int nameserver_is_slow = NO;
+int nameserver_is_slow = false;
 
 /*
  * Will changes save automaticaly in OLC ?
@@ -447,7 +447,7 @@ const char *START_MESSG =
  * someone immorts, or is promoted to a higher (or lower) god level?
  * NOTE: this only works under UNIX systems.
  */
-int use_autowiz = YES;
+int use_autowiz = true;
 
 /* If yes, what is the lowest level which should be on the wizlist?  (All
    immort levels below the level you specify will go on the immlist instead.) */
@@ -471,14 +471,14 @@ int initial_points = 20;
  * Set to NO to mimic historic behaviour - a player has to explicitly
  * look in a certain direction to see a door there.
  */
-int disp_closed_doors = YES;
+int disp_closed_doors = true;
 
 /*
  * Do you want players to be able to reroll their status at creation?
  * Set to NO to mimic historic behaviour - a player gets the stats rolled
  * and cannot see the values at creation time.
  */
-int reroll_status = NO;
+int reroll_status = false;
 
 /*
  * Advancement options
@@ -490,8 +490,8 @@ int reroll_status = NO;
  *   only level your primary class!
  */
 
-int allow_multiclass = NO;
-int allow_prestige   = NO;
+int allow_multiclass = false;
+int allow_prestige   = false;
 
 /*
  * Do you want to enable MCCP2 stream compression? It is safe to enable
@@ -501,20 +501,20 @@ int allow_prestige   = NO;
  * Enabling compression will save a great deal of bandwidth for data
  * being transmitted to users with MCCP2-compliant MUD clients.
  */
-int enable_compression = YES;
+int enable_compression = true;
 
 /*
  * Do you want to enable different spoken languages? Set to YES and
  * you will have different races speaking in different languages.
  */
-int enable_languages = YES;
+int enable_languages = true;
 
 /*
  * Do you want to treat all objects as unique? Set to YES and
  * every object created in the game will be flagged as UNIQUE. This
  * will help prevent object duping.
  */
-int all_items_unique = YES;
+int all_items_unique = true;
 
 /*
  * Multiplier that is applied to gaining experience.

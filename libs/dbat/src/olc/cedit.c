@@ -39,9 +39,9 @@ enum cedit_type {
   CT_TEXT,   /* char *, several lines ending in '~' in the file, may be NULL */
 };
 
-#define CO_NOBLANK      (1 << 0) /* no blank line after it in the file */
-#define CO_OLD_ADMLEVEL (1 << 1) /* the file may hold an old-style level (level_cap and up) */
-#define CO_RANGE        (1 << 2) /* min/max apply */
+constexpr int CO_NOBLANK      = (1 << 0); /* no blank line after it in the file */
+constexpr int CO_OLD_ADMLEVEL = (1 << 1); /* the file may hold an old-style level (level_cap and up) */
+constexpr int CO_RANGE        = (1 << 2); /* min/max apply */
 
 struct cedit_option {
   const char *key;     /* config file key */
@@ -176,9 +176,9 @@ static const struct cedit_option cedit_options[] = {
      "* donate. Use -1 for 'no such room'.\n",
      ROOM(room_nums.donation_room_1), .flags = CO_NOBLANK, MENU('R', '1', "Donation Room #1    "),
      .prompt = "Enter the vnum for donation room #1 : "},
-    {"donation_room_2", NULL, ROOM(room_nums.donation_room_2), .flags = CO_NOBLANK,
+    {"donation_room_2", nullptr, ROOM(room_nums.donation_room_2), .flags = CO_NOBLANK,
      MENU('R', '2', "Donation Room #2    "), .prompt = "Enter the vnum for donation room #2 : "},
-    {"donation_room_3", NULL, ROOM(room_nums.donation_room_3),
+    {"donation_room_3", nullptr, ROOM(room_nums.donation_room_3),
      MENU('R', '3', "Donation Room #3    "), .prompt = "Enter the vnum for donation room #3 : "},
 
     /* Game operation options: menu O */
@@ -266,7 +266,7 @@ static const struct cedit_option cedit_options[] = {
      MENU('N', 'A', "Character Creation Method ")},
 };
 
-#define NUM_CEDIT_OPTIONS ((int)(sizeof(cedit_options) / sizeof(cedit_options[0])))
+#define NUM_CEDIT_OPTIONS ((int)(countof(cedit_options)))
 
 static bool is_string_option(const struct cedit_option *o)
 {
@@ -305,10 +305,10 @@ ACMD(do_oasis_cedit)
     OLC_ZONE(d) = 0;
     cedit_setup(d);
     desc_set_connected(d, CON_CEDIT);
-    act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+    act("$n starts using OLC.", true, d->character, 0, 0, TO_ROOM);
     char_plr_set(ch, PLR_WRITING, true);
 
-    mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE,
+    mudlog(LOG_BRF, ADMLVL_IMMORT, true,
            "OLC: %s starts editing the game configuration.", char_get_name(ch));
     return;
   }
@@ -318,7 +318,7 @@ ACMD(do_oasis_cedit)
   }
 
   send_to_char(ch, "Saving the game configuration.\r\n");
-  mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), TRUE,
+  mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), true,
          "OLC: %s saves the game configuration.", char_get_name(ch));
 
   save_config(NOWHERE);
@@ -331,7 +331,7 @@ static void cedit_setup(struct descriptor_data *d)
 {
   CREATE(OLC_CONFIG(d), struct config_data, 1);
   *OLC_CONFIG(d)          = config_info;
-  OLC_CONFIG(d)->CONFFILE = NULL;
+  OLC_CONFIG(d)->CONFFILE = nullptr;
 
   for (int i = 0; i < NUM_CEDIT_OPTIONS; i++) {
     const struct cedit_option *o = &cedit_options[i];
@@ -340,7 +340,7 @@ static void cedit_setup(struct descriptor_data *d)
     if (!is_string_option(o))
       continue;
     s  = option_field(OLC_CONFIG(d), o);
-    *s = o->type == CT_MSG ? str_udup(*s) : (*s ? strdup(*s) : NULL);
+    *s = o->type == CT_MSG ? str_udup(*s) : (*s ? strdup(*s) : nullptr);
   }
 
   cedit_disp_menu(d);
@@ -364,7 +364,7 @@ static void cedit_save_internally(struct descriptor_data *d)
 
   for (int i = 0; i < NUM_CEDIT_OPTIONS; i++)
     if (is_string_option(&cedit_options[i]))
-      *(char **)option_field(c, &cedit_options[i]) = NULL;
+      *(char **)option_field(c, &cedit_options[i]) = nullptr;
 
   /* if we changed the dts to/from dumps, reassign - Welcor */
   if (reassign)
@@ -379,7 +379,7 @@ static void cedit_save_internally(struct descriptor_data *d)
 void config_load_option(const char *tag, char *line, FILE *fl)
 {
   static const char *const obsolete[] = {"auto_level", "immort_level_ok"};
-  const struct cedit_option *o        = NULL;
+  const struct cedit_option *o        = nullptr;
   char **s;
   int num;
 
@@ -388,7 +388,7 @@ void config_load_option(const char *tag, char *line, FILE *fl)
       o = &cedit_options[i];
 
   if (!o) {
-    for (size_t i = 0; i < sizeof(obsolete) / sizeof(obsolete[0]); i++)
+    for (size_t i = 0; i < countof(obsolete); i++)
       if (!strcasecmp(tag, obsolete[i]))
         mud_log("Ignoring obsolete config option %s", obsolete[i]);
     return;
@@ -418,7 +418,7 @@ void config_load_option(const char *tag, char *line, FILE *fl)
       break;
     case CT_STR:
       free(*s);
-      *s = *line ? strdup(line) : NULL;
+      *s = *line ? strdup(line) : nullptr;
       break;
     case CT_TEXT: {
       char error[MAX_INPUT_LENGTH];
@@ -446,7 +446,7 @@ int save_config(IDXTYPE nowhere)
 
   if (!(fl = atomic_open(&af, CONFIG_CONFFILE, false))) {
     perror("SYSERR: save_config");
-    return (FALSE);
+    return (false);
   }
 
   fprintf(fl,
@@ -502,12 +502,12 @@ int save_config(IDXTYPE nowhere)
   }
 
   if (!atomic_commit(&af))
-    return (FALSE); /* still listed as unsaved */
+    return (false); /* still listed as unsaved */
 
   if (in_save_list(NOWHERE, SL_CFG))
     remove_from_save_list(NOWHERE, SL_CFG);
 
-  return (TRUE);
+  return (true);
 }
 
 /**************************************************************************
@@ -624,7 +624,7 @@ static void cedit_prompt(struct descriptor_data *d, int i)
     write_to_output(d, "%s", o->prompt);
     if (*text)
       write_to_output(d, "%s", *text);
-    string_write(d, text, MAX_INPUT_LENGTH, 0, *text ? strdup(*text) : NULL);
+    string_write(d, text, MAX_INPUT_LENGTH, 0, *text ? strdup(*text) : nullptr);
   } else
     write_to_output(d, "%s", o->prompt);
 }
@@ -725,7 +725,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
         case 'y':
         case 'Y':
           cedit_save_internally(d);
-          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(d->character)), TRUE, "OLC: %s modifies the game configuration.", char_get_name(d->character));
+          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(d->character)), true, "OLC: %s modifies the game configuration.", char_get_name(d->character));
           cleanup_olc(d, CLEANUP_CONFIG);
           if (CONFIG_OLC_SAVE) {
             save_config(NOWHERE);
@@ -795,7 +795,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
        * We should never get here, but just in case...
        */
       cleanup_olc(d, CLEANUP_CONFIG);
-      mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: OLC: cedit_parse(): Reached default case!");
+      mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: cedit_parse(): Reached default case!");
       write_to_output(d, "Oops...\r\n");
       break;
   }
@@ -808,7 +808,7 @@ static void reassign_rooms(void)
 
   /* remove old funcs */
   for (i = 0; i <= top_of_world; i++)
-    world[i].func = NULL;
+    world[i].func = nullptr;
 
   /* reassign spec_procs */
   assign_rooms();

@@ -10,8 +10,9 @@
 /* See also: ANA, SANA */
 #define AN(string) (strchr("aeiouAEIOU", *string) ? "an" : "a")
 
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b)  ((a) < (b) ? (a) : (b))
+#define countof(a) (sizeof(a) / sizeof((a)[0])) /* elements in an array (C2y has it as countof) */
+#define MAX(a, b)  ((a) > (b) ? (a) : (b))
 
 static inline double safeDiv(double numer, double denom)
 {
@@ -61,7 +62,7 @@ static inline double fixnan(double val)
 #define REMOVE_FROM_DOUBLE_LIST(item, head, next, prev) \
   if ((item) == (head)) {                               \
     head = (item)->next;                                \
-    if (head) head->prev = NULL;                        \
+    if (head) head->prev = nullptr;                     \
   } else {                                              \
     temp = head;                                        \
     while (temp && (temp->next != (item)))              \

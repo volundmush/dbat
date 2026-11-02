@@ -78,7 +78,7 @@ ACMD(do_lag)
     return;
   }
 
-  int found = FALSE, num = atoi(arg2);
+  int found = false, num = atoi(arg2);
 
   if (num <= 0 || num > 5) {
     send_to_char(ch, "Keep it between 1 to 5 seconds please.\r\n");
@@ -111,11 +111,11 @@ ACMD(do_lag)
           char_set_wait(d->character, PULSE_5SEC);
           break;
       }
-      found = TRUE;
+      found = true;
     }
   }
 
-  if (found == FALSE) {
+  if (found == false) {
     send_to_char(ch, "That player isn't around.\r\n");
     return;
   }
@@ -181,7 +181,7 @@ static void game_info(const char *format, ...)
   va_list args;
   char messg[MAX_STRING_LENGTH];
 
-  if (format == NULL)
+  if (format == nullptr)
     return;
 
   snprintf(messg, sizeof(messg), "@r-@R=@D<@GCOPYOVER@D>@R=@r- @W");
@@ -300,7 +300,7 @@ static void execute_copyover(void)
   if (!copyover_exe_path(exe, sizeof(exe)))
     strlcpy(exe, "zig-out/bin/dbat", sizeof(exe));
   chdir("..");
-  execl(exe, "dbat", buf2, buf, (char *)NULL);
+  execl(exe, "dbat", buf2, buf, (char *)nullptr);
   /* Failed - sucessful exec will not return */
 
   perror("do_copyover: execl");

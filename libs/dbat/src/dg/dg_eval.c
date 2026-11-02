@@ -244,7 +244,7 @@ static int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_dat
     else
       p++;
   }
-  tokens[j] = NULL;
+  tokens[j] = nullptr;
 
   for (i = 0; *ops[i] != '\n'; i++)
     for (j = 0; tokens[j]; j++)

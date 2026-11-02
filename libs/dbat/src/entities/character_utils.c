@@ -114,7 +114,7 @@ const char *juggleRaceName(char_data *ch, bool capitalized)
 void restore_by(char_data *ch, char_data *healer)
 {
   restore(ch, true);
-  act("You have been fully healed by $N!", FALSE, ch, 0, healer, TO_CHAR | TO_SLEEP);
+  act("You have been fully healed by $N!", false, ch, 0, healer, TO_CHAR | TO_SLEEP);
 }
 
 void restore(char_data *ch, bool announce)
@@ -172,7 +172,7 @@ void resurrect(char_data *ch, int mode)
     }
   }
   char_set_deathtime(ch, 0);
-  act("$n's body forms in a pool of @Bblue light@n.", TRUE, ch, nullptr, nullptr, TO_ROOM);
+  act("$n's body forms in a pool of @Bblue light@n.", true, ch, nullptr, nullptr, TO_ROOM);
 }
 
 void ghostify(char_data *ch)
@@ -252,7 +252,7 @@ static const struct {
  * unknown gravities return 0 like std::map::operator[] did. */
 static uint16_t grav_threshold_for(int grav)
 {
-  for (size_t i = 0; i < sizeof(grav_threshold) / sizeof(grav_threshold[0]); i++)
+  for (size_t i = 0; i < countof(grav_threshold); i++)
     if (grav_threshold[i].grav == grav)
       return (uint16_t)grav_threshold[i].threshold;
   return 0;
@@ -785,7 +785,7 @@ void cureStatusKnockedOut(char_data *ch, bool announce)
 {
   if (char_aff_flagged(ch, AFF_KNOCKED)) {
     if (announce) {
-      act("@W$n@W is no longer senseless, and wakes up.@n", FALSE, ch, 0, 0, TO_ROOM);
+      act("@W$n@W is no longer senseless, and wakes up.@n", false, ch, 0, 0, TO_ROOM);
       send_to_char(ch, "You are no longer knocked out, and wake up!@n\r\n");
     }
 
@@ -807,7 +807,7 @@ static void cureStatusBurn(char_data *ch, bool announce)
   if (char_aff_flagged(ch, AFF_BURNED)) {
     if (announce) {
       send_to_char(ch, "Your burns are healed now.\r\n");
-      act("$n@w's burns are now healed.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("$n@w's burns are now healed.@n", true, ch, 0, 0, TO_ROOM);
     }
     char_aff_set(ch, AFF_BURNED, false);
   }
@@ -815,12 +815,12 @@ static void cureStatusBurn(char_data *ch, bool announce)
 
 static void cureStatusPoison(char_data *ch, bool announce)
 {
-  act("@C$n@W suddenly looks a lot better!@b", FALSE, ch, 0, 0, TO_NOTVICT);
+  act("@C$n@W suddenly looks a lot better!@b", false, ch, 0, 0, TO_NOTVICT);
   affect_from_char(ch, SPELL_POISON);
 }
 
 static const char *limb_names[] = {
-    NULL,
+    nullptr,
     "right arm",
     "left arm",
     "right leg",
@@ -939,7 +939,7 @@ void apply_kaioken(char_data *ch, int times, bool announce)
 
   if (announce) {
     send_to_char(ch, "@rA dark red aura bursts up around your body as you achieve Kaioken x %d!@n\r\n", times);
-    act("@rA dark red aura bursts up around @R$n@r as they achieve a level of Kaioken!@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@rA dark red aura bursts up around @R$n@r as they achieve a level of Kaioken!@n", true, ch, 0, 0, TO_ROOM);
   }
 }
 
@@ -954,11 +954,11 @@ void remove_kaioken(char_data *ch, int8_t announce)
   switch (announce) {
     case 1:
       send_to_char(ch, "You drop out of kaioken.\r\n");
-      act("$n@w drops out of kaioken.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("$n@w drops out of kaioken.@n", true, ch, 0, 0, TO_ROOM);
       break;
     case 2:
       send_to_char(ch, "You lose focus and your kaioken disappears.\r\n");
-      act("$n loses focus and $s kaioken aura disappears.", TRUE, ch, 0, 0, TO_ROOM);
+      act("$n loses focus and $s kaioken aura disappears.", true, ch, 0, 0, TO_ROOM);
   }
 }
 
@@ -977,20 +977,20 @@ void dispel_ash(struct char_data *ch)
     int roll = axion_dice(0);
     if (obj_get_cost(ash) == 3) {
       if (char_get_aff_abils_intel(ch) > roll) {
-        act("@GYou clear the air with the shockwaves of your power!@n", TRUE, ch, ash, 0, TO_CHAR);
-        act("@C$n@G clears the air with the shockwaves of $s power!@n", TRUE, ch, ash, 0, TO_ROOM);
+        act("@GYou clear the air with the shockwaves of your power!@n", true, ch, ash, 0, TO_CHAR);
+        act("@C$n@G clears the air with the shockwaves of $s power!@n", true, ch, ash, 0, TO_ROOM);
         extract_obj(ash);
       }
     } else if (obj_get_cost(ash) == 2) {
       if (char_get_aff_abils_intel(ch) + 10 > roll) {
-        act("@GYou clear the air with the shockwaves of your power!@n", TRUE, ch, ash, 0, TO_CHAR);
-        act("@C$n@G clears the air with the shockwaves of $s power!@n", TRUE, ch, ash, 0, TO_ROOM);
+        act("@GYou clear the air with the shockwaves of your power!@n", true, ch, ash, 0, TO_CHAR);
+        act("@C$n@G clears the air with the shockwaves of $s power!@n", true, ch, ash, 0, TO_ROOM);
         extract_obj(ash);
       }
     } else if (obj_get_cost(ash) == 1) {
       if (char_get_aff_abils_intel(ch) + 20 > roll) {
-        act("@GYou clear the air with the shockwaves of your power!@n", TRUE, ch, ash, 0, TO_CHAR);
-        act("@C$n@G clears the air with the shockwaves of $s power!@n", TRUE, ch, ash, 0, TO_ROOM);
+        act("@GYou clear the air with the shockwaves of your power!@n", true, ch, ash, 0, TO_CHAR);
+        act("@C$n@G clears the air with the shockwaves of $s power!@n", true, ch, ash, 0, TO_ROOM);
         extract_obj(ash);
       }
     }
@@ -1003,7 +1003,7 @@ int has_group(struct char_data *ch)
   struct follow_type *k, *next;
 
   if (!char_aff_flagged(ch, AFF_GROUP))
-    return (FALSE);
+    return (false);
 
   if (ch->followers) {
     for (k = ch->followers; k; k = next) {
@@ -1011,16 +1011,16 @@ int has_group(struct char_data *ch)
       if (!char_aff_flagged(k->follower, AFF_GROUP)) {
         continue;
       }
-      return (TRUE);
+      return (true);
     }
   } else if (ch->master) {
     if (!char_aff_flagged(ch->master, AFF_GROUP))
-      return (FALSE);
+      return (false);
     else
-      return (TRUE);
+      return (true);
   }
 
-  return (FALSE);
+  return (false);
 }
 
 const char *report_party_health(struct char_data *ch)
@@ -1034,10 +1034,10 @@ const char *report_party_health(struct char_data *ch)
 
   struct follow_type *k, *next;
   int count = 0, stam1 = 8, stam2 = 8, stam3 = 8, stam4 = 8, plc1 = 4, plc2 = 4, plc3 = 4, plc4 = 4;
-  struct char_data *party1 = NULL, *party2 = NULL, *party3 = NULL, *party4 = NULL;
+  struct char_data *party1 = nullptr, *party2 = nullptr, *party3 = nullptr, *party4 = nullptr;
   int64_t plperc1 = 0, plperc2 = 0, plperc3 = 0, plperc4 = 0;
   int64_t kiperc1 = 0, kiperc2 = 0, kiperc3 = 0, kiperc4 = 0;
-  char result_party_health[MAX_STRING_LENGTH], result1[MAX_STRING_LENGTH], result2[MAX_STRING_LENGTH], result3[MAX_STRING_LENGTH], result4[MAX_STRING_LENGTH], result5[MAX_STRING_LENGTH];
+  char result1[MAX_STRING_LENGTH], result2[MAX_STRING_LENGTH], result3[MAX_STRING_LENGTH], result4[MAX_STRING_LENGTH], result5[MAX_STRING_LENGTH];
 
   const char *plcol[5] = {"@r",
                           "@y",
@@ -1204,8 +1204,7 @@ const char *report_party_health(struct char_data *ch)
     sprintf(result3, "@D[@BO@D]@RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
     sprintf(result4, "@D[@BU@D]@cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
     sprintf(result5, "@D[@BP@D]@gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s@D[@BP@D]@n", excol[stam1], exhaust[stam1], excol[stam2], exhaust[stam2], excol[stam3], exhaust[stam3], excol[stam4], exhaust[stam4]);
-    snprintf(result_party_health, sizeof(result_party_health), "%s%s%s%s%s\n", result1, result2, result3, result4, result5);
-    ch->temp_prompt = strdup(result_party_health);
+    ch->temp_prompt = str_printf("%s%s%s%s%s\n", result1, result2, result3, result4, result5);
     return (ch->temp_prompt);
   }
   if (ch->master && char_aff_flagged(ch->master, AFF_GROUP)) {
@@ -1349,8 +1348,7 @@ const char *report_party_health(struct char_data *ch)
     sprintf(result3, "@D[@BO@D]@RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
     sprintf(result4, "@D[@BU@D]@cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
     sprintf(result5, "@D[@BP@D]@gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s@D[@BP@D]@n", excol[stam1], exhaust[stam1], excol[stam2], exhaust[stam2], excol[stam3], exhaust[stam3], excol[stam4], exhaust[stam4]);
-    snprintf(result_party_health, sizeof(result_party_health), "%s%s%s%s%s\n", result1, result2, result3, result4, result5);
-    ch->temp_prompt = strdup(result_party_health);
+    ch->temp_prompt = str_printf("%s%s%s%s%s\n", result1, result2, result3, result4, result5);
     return (ch->temp_prompt);
   }
   return ("");
@@ -1380,10 +1378,10 @@ bool is_affected(struct char_data *ch, int aff_flag)
 
   for (af = ch->affected; af; af = af->next) {
     if (af->location == APPLY_NONE && af->bitvector == aff_flag)
-      return (TRUE);
+      return (true);
   }
 
-  return (FALSE);
+  return (false);
 }
 
 void null_affect(struct char_data *ch, int aff_flag)
@@ -1421,7 +1419,7 @@ void assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int s
     af[num].modifier  = 0;
     af[num].location  = APPLY_NONE;
     af[num].bitvector = aff_flag;
-    affect_join(ch, &af[num], FALSE, FALSE, FALSE, FALSE);
+    affect_join(ch, &af[num], false, false, false, false);
     num += 1;
   }
   if (str != 0) {
@@ -1430,7 +1428,7 @@ void assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int s
     af[num].modifier  = str;
     af[num].location  = APPLY_STR;
     af[num].bitvector = aff_flag;
-    affect_join(ch, &af[num], FALSE, FALSE, FALSE, FALSE);
+    affect_join(ch, &af[num], false, false, false, false);
     num += 1;
   }
   if (con != 0) {
@@ -1439,7 +1437,7 @@ void assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int s
     af[num].modifier  = con;
     af[num].location  = APPLY_CON;
     af[num].bitvector = aff_flag;
-    affect_join(ch, &af[num], FALSE, FALSE, FALSE, FALSE);
+    affect_join(ch, &af[num], false, false, false, false);
     num += 1;
   }
   if (intel != 0) {
@@ -1448,7 +1446,7 @@ void assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int s
     af[num].modifier  = intel;
     af[num].location  = APPLY_INT;
     af[num].bitvector = aff_flag;
-    affect_join(ch, &af[num], FALSE, FALSE, FALSE, FALSE);
+    affect_join(ch, &af[num], false, false, false, false);
     num += 1;
   }
   if (agl != 0) {
@@ -1457,7 +1455,7 @@ void assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int s
     af[num].modifier  = agl;
     af[num].location  = APPLY_DEX;
     af[num].bitvector = aff_flag;
-    affect_join(ch, &af[num], FALSE, FALSE, FALSE, FALSE);
+    affect_join(ch, &af[num], false, false, false, false);
     num += 1;
   }
   if (spd != 0) {
@@ -1466,7 +1464,7 @@ void assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int s
     af[num].modifier  = spd;
     af[num].location  = APPLY_CHA;
     af[num].bitvector = aff_flag;
-    affect_join(ch, &af[num], FALSE, FALSE, FALSE, FALSE);
+    affect_join(ch, &af[num], false, false, false, false);
     num += 1;
   }
   if (wis != 0) {
@@ -1475,7 +1473,7 @@ void assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int s
     af[num].modifier  = wis;
     af[num].location  = APPLY_WIS;
     af[num].bitvector = aff_flag;
-    affect_join(ch, &af[num], FALSE, FALSE, FALSE, FALSE);
+    affect_join(ch, &af[num], false, false, false, false);
     num += 1;
   }
 }
@@ -2133,11 +2131,11 @@ void senseCreate(struct char_data *ch)
 int read_sense_memory(struct char_data *ch, struct char_data *vict)
 {
   char fname[40], line[256];
-  int known = FALSE, idnums = -1337;
+  int known = false, idnums = -1337;
   FILE *fl;
 
   /* Read Sense File */
-  if (vict == NULL) {
+  if (vict == nullptr) {
     mud_log("Noone.");
     return 0;
   }
@@ -2158,17 +2156,17 @@ int read_sense_memory(struct char_data *ch, struct char_data *vict)
     sscanf(line, "%d\n", &idnums);
     if (char_is_npc(vict)) {
       if (idnums == char_get_mob_vnum(vict)) {
-        known = TRUE;
+        known = true;
       }
     } else {
       if (idnums == char_get_id(vict)) {
-        known = TRUE;
+        known = true;
       }
     }
   }
   fclose(fl);
 
-  if (known == TRUE)
+  if (known == true)
     return 1;
   else
     return 0;
@@ -2240,8 +2238,8 @@ int roll_pursue(struct char_data *ch, struct char_data *vict)
 
   int skill, perc = axion_dice(0);
 
-  if (ch == NULL || vict == NULL)
-    return (FALSE);
+  if (ch == nullptr || vict == nullptr)
+    return (false);
 
   if (!char_is_npc(ch)) {
     skill = char_get_skill(ch, SKILL_PURSUIT);
@@ -2261,12 +2259,12 @@ int roll_pursue(struct char_data *ch, struct char_data *vict)
 
   if (skill > perc) {
     int inroom = rroom_get_vnum(char_get_in_room(ch));
-    act("@C$n@R pursues after the fleeing @c$N@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@C$n@R pursues after the fleeing @c$N@R!@n", true, ch, 0, vict, TO_NOTVICT);
     char_from_room(ch);
     char_to_room(ch, char_get_in_room(vict));
-    act("@GYou pursue right after @c$N@G!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n@R pursues after you!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@C$n@R pursues after the fleeing @c$N@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@GYou pursue right after @c$N@G!@n", true, ch, 0, vict, TO_CHAR);
+    act("@C$n@R pursues after you!@n", true, ch, 0, vict, TO_VICT);
+    act("@C$n@R pursues after the fleeing @c$N@R!@n", true, ch, 0, vict, TO_NOTVICT);
 
     struct follow_type *k, *next;
 
@@ -2274,16 +2272,16 @@ int roll_pursue(struct char_data *ch, struct char_data *vict)
       for (k = ch->followers; k; k = next) {
         next = k->next;
         if ((rroom_get_vnum(char_get_in_room(k->follower)) == inroom) && (char_get_position(k->follower) >= POS_STANDING) && (!char_aff_flagged(ch, AFF_ZANZOKEN) || (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(k->follower, AFF_GROUP)))) {
-          act("You follow $N.", TRUE, k->follower, 0, ch, TO_CHAR);
-          act("$n follows after $N.", TRUE, k->follower, 0, ch, TO_NOTVICT);
-          act("$n follows after you.", TRUE, k->follower, 0, ch, TO_VICT);
+          act("You follow $N.", true, k->follower, 0, ch, TO_CHAR);
+          act("$n follows after $N.", true, k->follower, 0, ch, TO_NOTVICT);
+          act("$n follows after you.", true, k->follower, 0, ch, TO_VICT);
           char_from_room(k->follower);
           char_to_room(k->follower, char_get_in_room(ch));
         }
       }
     }
     char_aff_set(vict, AFF_PURSUIT, false);
-    return (TRUE);
+    return (true);
   }
   send_to_char(ch, "@RYou fail to pursue after them!@n\r\n");
   if (char_get_fighting(ch)) {
@@ -2292,7 +2290,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict)
   if (char_get_fighting(vict)) {
     stop_fighting(vict);
   }
-  return (FALSE);
+  return (false);
 }
 
 char *sense_location(struct char_data *ch)
@@ -2708,18 +2706,18 @@ void reveal_hiding(struct char_data *ch, int type)
   }
 
   if (type == 0) { /* Automatic reveal. */
-    act("@MYou feel as though what you just did may have revealed your hiding spot...@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@M$n moves a little and you notice them!@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@MYou feel as though what you just did may have revealed your hiding spot...@n", true, ch, 0, 0, TO_CHAR);
+    act("@M$n moves a little and you notice them!@n", true, ch, 0, 0, TO_ROOM);
     char_aff_set(ch, AFF_HIDE, false);
   } else if (type == 1) { /* Their skill at hiding failed, reveal */
     if (char_get_skill(ch, SKILL_HIDE) + bonus < axion_dice(0)) {
-      act("@MYou feel as though what you just did may have revealed your hiding spot...@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@M$n moves a little and you notice them!@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@MYou feel as though what you just did may have revealed your hiding spot...@n", true, ch, 0, 0, TO_CHAR);
+      act("@M$n moves a little and you notice them!@n", true, ch, 0, 0, TO_ROOM);
       char_aff_set(ch, AFF_HIDE, false);
     }
   } else if (type == 2) { /* They were spotted */
     struct descriptor_data *d;
-    struct char_data *tch = NULL;
+    struct char_data *tch = nullptr;
     for (d = descriptor_list; d; d = d->next) {
       if (desc_get_connected(d) != CON_PLAYING)
         continue;
@@ -2733,17 +2731,17 @@ void reveal_hiding(struct char_data *ch, int type)
 
       if (char_get_skill(tch, SKILL_SPOT) + rand1 >= char_get_skill(ch, SKILL_HIDE) + rand2) {
         char_aff_set(ch, AFF_HIDE, false);
-        act("@M$N seems to notice you!@n", TRUE, ch, 0, tch, TO_CHAR);
-        act("@MYou notice $n's movements reveal $s hiding spot!@n", TRUE, ch, 0, tch, TO_VICT);
-        act("@MYou notice $N look keenly somewhere nearby. At that spot you see $n hiding!@n", TRUE, ch, 0, tch, TO_NOTVICT);
+        act("@M$N seems to notice you!@n", true, ch, 0, tch, TO_CHAR);
+        act("@MYou notice $n's movements reveal $s hiding spot!@n", true, ch, 0, tch, TO_VICT);
+        act("@MYou notice $N look keenly somewhere nearby. At that spot you see $n hiding!@n", true, ch, 0, tch, TO_NOTVICT);
         return;
       }
     }
   } else if (type == 3) { /* They were heard, reveal with different messages. */
     struct descriptor_data *d;
-    struct char_data *tch = NULL;
+    struct char_data *tch = nullptr;
 
-    act("@MThe scouter makes some beeping sounds as you tinker with its buttons.@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@MThe scouter makes some beeping sounds as you tinker with its buttons.@n", true, ch, 0, 0, TO_CHAR);
     for (d = descriptor_list; d; d = d->next) {
       if (desc_get_connected(d) != CON_PLAYING)
         continue;
@@ -2758,10 +2756,10 @@ void reveal_hiding(struct char_data *ch, int type)
       if (char_get_skill(tch, SKILL_LISTEN) > axion_dice(0)) {
         switch (type) {
           case 3:
-            act("@MYou notice some beeping sounds that sound really close by.@n", TRUE, ch, 0, tch, TO_VICT);
+            act("@MYou notice some beeping sounds that sound really close by.@n", true, ch, 0, tch, TO_VICT);
             break;
           default:
-            act("@MYou notice some sounds coming from this room but can't seem to locate the source...@n", TRUE, ch, 0, tch, TO_VICT);
+            act("@MYou notice some sounds coming from this room but can't seem to locate the source...@n", true, ch, 0, tch, TO_VICT);
             break;
         }
       }
@@ -2773,7 +2771,7 @@ void reveal_hiding(struct char_data *ch, int type)
 
 int block_calc(struct char_data *ch)
 {
-  struct char_data *blocker = NULL;
+  struct char_data *blocker = nullptr;
 
   if (char_get_blocked(ch)) {
     blocker = char_get_blocked(ch);
@@ -2788,9 +2786,9 @@ int block_calc(struct char_data *ch)
         minimum = 100;
       }
       if (!char_get_skill(ch, SKILL_ESCAPE_ARTIST) || (char_get_skill(ch, SKILL_ESCAPE_ARTIST) && char_get_skill(ch, SKILL_ESCAPE_ARTIST) < rand_number(minimum, 120))) {
-        act("$n tries to leave, but can't outrun $N!", TRUE, ch, 0, blocker, TO_NOTVICT);
-        act("$n tries to leave, but can't outrun you!", TRUE, ch, 0, blocker, TO_VICT);
-        act("You try to leave, but can't outrun $N!", TRUE, ch, 0, blocker, TO_CHAR);
+        act("$n tries to leave, but can't outrun $N!", true, ch, 0, blocker, TO_NOTVICT);
+        act("$n tries to leave, but can't outrun you!", true, ch, 0, blocker, TO_VICT);
+        act("You try to leave, but can't outrun $N!", true, ch, 0, blocker, TO_CHAR);
         if (char_aff_flagged(ch, AFF_FLYING) && !char_aff_flagged(blocker, AFF_FLYING) && char_get_altitude(ch) == 1) {
           send_to_char(blocker, "You're now floating in the air.\r\n");
           char_aff_set(blocker, AFF_FLYING, true);
@@ -2802,30 +2800,30 @@ int block_calc(struct char_data *ch)
         }
         return (0);
       }
-      act("$n proves $s great skill and escapes from $N's attempted block!", TRUE, ch, 0, blocker, TO_NOTVICT);
-      act("$n proves $s great skill and escapes from your attempted block!", TRUE, ch, 0, blocker, TO_VICT);
-      act("Using your great skill you manage to escape from $N's attempted block!", TRUE, ch, 0, blocker, TO_CHAR);
-      char_set_blocked(ch, NULL);
-      char_set_blocks(blocker, NULL);
+      act("$n proves $s great skill and escapes from $N's attempted block!", true, ch, 0, blocker, TO_NOTVICT);
+      act("$n proves $s great skill and escapes from your attempted block!", true, ch, 0, blocker, TO_VICT);
+      act("Using your great skill you manage to escape from $N's attempted block!", true, ch, 0, blocker, TO_CHAR);
+      char_set_blocked(ch, nullptr);
+      char_set_blocks(blocker, nullptr);
     } else {
-      act("$n proves $s great skill and escapes from $N's attempted block!", TRUE, ch, 0, blocker, TO_NOTVICT);
-      act("$n proves $s great skill and escapes from your attempted block!", TRUE, ch, 0, blocker, TO_VICT);
-      act("Using your great skill you manage to escape from $N's attempted block!", TRUE, ch, 0, blocker, TO_CHAR);
-      char_set_blocked(ch, NULL);
-      char_set_blocks(blocker, NULL);
+      act("$n proves $s great skill and escapes from $N's attempted block!", true, ch, 0, blocker, TO_NOTVICT);
+      act("$n proves $s great skill and escapes from your attempted block!", true, ch, 0, blocker, TO_VICT);
+      act("Using your great skill you manage to escape from $N's attempted block!", true, ch, 0, blocker, TO_CHAR);
+      char_set_blocked(ch, nullptr);
+      char_set_blocks(blocker, nullptr);
     }
   } else if (char_get_position(blocker) <= POS_SITTING) {
-    act("$n proves $s great skill and escapes from $N!", TRUE, ch, 0, blocker, TO_NOTVICT);
-    act("$n proves $s great skill and escapes from you!", TRUE, ch, 0, blocker, TO_VICT);
-    act("Using your great skill you manage to escape from $N!", TRUE, ch, 0, blocker, TO_CHAR);
-    char_set_blocked(ch, NULL);
-    char_set_blocks(blocker, NULL);
+    act("$n proves $s great skill and escapes from $N!", true, ch, 0, blocker, TO_NOTVICT);
+    act("$n proves $s great skill and escapes from you!", true, ch, 0, blocker, TO_VICT);
+    act("Using your great skill you manage to escape from $N!", true, ch, 0, blocker, TO_CHAR);
+    char_set_blocked(ch, nullptr);
+    char_set_blocks(blocker, nullptr);
   } else if (char_get_position(blocker) > POS_SITTING) {
-    act("$n proves $s great skill and escapes from $N's attempted block!", TRUE, ch, 0, blocker, TO_NOTVICT);
-    act("$n proves $s great skill and escapes from your attempted block!", TRUE, ch, 0, blocker, TO_VICT);
-    act("Using your great skill you manage to escape from $N's attempted block!", TRUE, ch, 0, blocker, TO_CHAR);
-    char_set_blocked(ch, NULL);
-    char_set_blocks(blocker, NULL);
+    act("$n proves $s great skill and escapes from $N's attempted block!", true, ch, 0, blocker, TO_NOTVICT);
+    act("$n proves $s great skill and escapes from your attempted block!", true, ch, 0, blocker, TO_VICT);
+    act("Using your great skill you manage to escape from $N's attempted block!", true, ch, 0, blocker, TO_CHAR);
+    char_set_blocked(ch, nullptr);
+    char_set_blocks(blocker, nullptr);
   }
 
   return (1);
@@ -2941,8 +2939,8 @@ void handle_evolution(struct char_data *ch, int64_t dmg)
       if (char_get_armor(ch) > 50000) {
         char_set_armor(ch, 50000);
       }
-      act("@gYour @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. You quickly shed it and reveal a stronger version that was growing beneath it! At the same time you feel your adrenal sacs to be more efficient@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@G$n's@g @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. Suddenly $e sheds the damaged @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn and reveals a stronger version that had been growing underneath!@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@gYour @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. You quickly shed it and reveal a stronger version that was growing beneath it! At the same time you feel your adrenal sacs to be more efficient@n", true, ch, 0, 0, TO_CHAR);
+      act("@G$n's@g @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. Suddenly $e sheds the damaged @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn and reveals a stronger version that had been growing underneath!@n", true, ch, 0, 0, TO_ROOM);
       send_to_char(ch, "@D[@RPL@W: @G+%s@D] [@gStamina@W: @G+%s@D] [@wArmor Index@W: @G+%s@D]@n\r\n", add_commas(plgain), add_commas(stamgain), char_get_armor(ch) >= 50000 ? "50k CAP" : add_commas(armorgain));
     } else {
       send_to_char(ch, "@gYou are unable to evolve while your evolution level is higher than twice your character level.@n\r\n");
@@ -2952,7 +2950,7 @@ void handle_evolution(struct char_data *ch, int64_t dmg)
 
 void demon_refill_lf(struct char_data *ch, int64_t num)
 {
-  struct char_data *tch = NULL;
+  struct char_data *tch = nullptr;
 
   for (tch = world[char_get_in_room(ch)].people; tch; tch = tch->next_in_room) {
     if (!char_is_demon(tch))
@@ -2961,7 +2959,7 @@ void demon_refill_lf(struct char_data *ch, int64_t num)
       continue;
     else {
       incCurLF(ch, num, true);
-      act("@CYou feel the life energy from @c$N@C's cursed body flow out and you draw it into yourself!@n", TRUE, tch, 0, ch, TO_CHAR);
+      act("@CYou feel the life energy from @c$N@C's cursed body flow out and you draw it into yourself!@n", true, tch, 0, ch, TO_CHAR);
     }
   }
 }
@@ -2969,7 +2967,7 @@ void demon_refill_lf(struct char_data *ch, int64_t num)
 void mob_talk(struct char_data *ch, const char *speech)
 {
 
-  struct char_data *tch = NULL, *vict = NULL;
+  struct char_data *tch = nullptr, *vict = nullptr;
   int stop = 1;
 
   if (char_is_npc(ch)) {
@@ -2995,116 +2993,116 @@ void mob_talk(struct char_data *ch, const char *speech)
 
 static int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech)
 {
-  if (ch != NULL && vict != NULL) {
+  if (ch != nullptr && vict != nullptr) {
     if (!char_is_npc(ch) && char_is_npc(vict)) {
       if ((strstr(speech, "hello") || strstr(speech, "greet") || strstr(speech, "Hello") || strstr(speech, "Greet")) && !char_get_fighting(vict)) {
         send_to_room(char_get_in_room(vict), "\r\n");
         if (char_is_human(vict) || char_is_halfbreed(vict)) {
           switch (rand_number(1, 4)) {
             case 1:
-              act("@w$n@W says, '@CYes, hello to you as well $N.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CYes, hello to you as well $N.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 2:
-              act("@w$n@W says, '@CHello!@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CHello!@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 3:
-              act("@w$n@W says, '@CHi, $N, how are you doing?@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CHi, $N, how are you doing?@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 4:
-              act("@w$n@W says, '@CGreetings, $N. What are you up to?@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CGreetings, $N. What are you up to?@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
           }
         } /* End Human Section */
         else if (char_is_saiyan(vict)) {
           switch (rand_number(1, 4)) {
             case 1:
-              act("@w$n@W says, '@CHmph, hi.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CHmph, hi.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 2:
-              act("@w$n@W says, '@CHello weakling.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CHello weakling.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 3:
-              act("@w$n@W says, '@C$N do all weaklings like you waste time in idle talk?@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@C$N do all weaklings like you waste time in idle talk?@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 4:
-              act("@w$n@W says, '@C$N, you are not welcome around me.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@C$N, you are not welcome around me.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
           }
         } /* End Saiyan Section */
         else if (char_is_icer(vict)) {
           switch (rand_number(1, 4)) {
             case 1:
-              act("@w$n@W says, '@CHa ha... Yes, hello.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CHa ha... Yes, hello.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 2:
-              act("@w$n@W says, '@CAh a polite greeting. It's good to know your kind isn't totally worthless.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CAh a polite greeting. It's good to know your kind isn't totally worthless.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 3:
-              act("@w$n@W says, '@C$N, hello. Now leave me be.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@C$N, hello. Now leave me be.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 4:
-              act("@w$n@W says, '@C$N, you are below me. Now begone.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@C$N, you are below me. Now begone.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
           }
         } /* End Icer Section */
         else if (char_is_konatsu(vict)) {
           switch (rand_number(1, 4)) {
             case 1:
-              act("@w$n@W says, '@CGreetings, $N, may your travels be well.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CGreetings, $N, may your travels be well.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 2:
-              act("@w$n@W says, '@CHello.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CHello.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 3:
-              act("@w$n@W says, '@C$N, hello.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@C$N, hello.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 4:
-              act("@w$n@W says, '@C$N, it is nice to meet you.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@C$N, it is nice to meet you.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
           }
         } /* End Konatsu Section */
         else if (char_is_namek(vict)) {
           switch (rand_number(1, 4)) {
             case 1:
-              act("@w$n@W says, '@CHello.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CHello.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 2:
-              act("@w$n@W says, '@CA peaceful greeting to you, $N.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CA peaceful greeting to you, $N.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 3:
-              act("@w$n@W says, '@C$N, hello. What is your business here?@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@C$N, hello. What is your business here?@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 4:
-              act("@w$n@W says, '@C$N, greetings.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@C$N, greetings.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
           }
         } /* End Namek Section */
         else if (char_is_arlian(vict)) {
           switch (rand_number(1, 4)) {
             case 1:
-              act("@w$n@W says, '@CPeace, stranger.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CPeace, stranger.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 2:
-              act("@w$n@W says, '@CStay out of my way.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CStay out of my way.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 3:
-              act("@w$n@W says, '@C$N, what is your business here?@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@C$N, what is your business here?@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 4:
-              act("@w$n@W says, '@C...Hello.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@C...Hello.@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
           }
         } /* End Arlian Section */
         else if (char_is_android(vict)) {
-          act("@w$n@W says, '@C...@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+          act("@w$n@W says, '@C...@W'@n", true, vict, 0, ch, TO_ROOM);
         } /* End Android Section */
         else if (char_is_majin(vict)) {
           switch (rand_number(1, 2)) {
             case 1:
-              act("@w$n@W says, '@CHa ha...@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CHa ha...@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
             case 2:
-              act("@w$n@W says, '@CHello. What candy you want to be?@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CHello. What candy you want to be?@W'@n", true, vict, 0, ch, TO_ROOM);
               break;
           }
         } /* End MAJIN Section */
@@ -3112,29 +3110,29 @@ static int mob_respond(struct char_data *ch, struct char_data *vict, const char 
           switch (rand_number(1, 3)) {
             case 1:
               if (char_is_saiyan(ch)) {
-                act("@w$n@W says, '@CEwww, dirty monkey...@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+                act("@w$n@W says, '@CEwww, dirty monkey...@W'@n", true, vict, 0, ch, TO_ROOM);
               } else {
-                act("@w$n@W says, '@CHello.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+                act("@w$n@W says, '@CHello.@W'@n", true, vict, 0, ch, TO_ROOM);
               }
               break;
             case 2:
               if (char_is_saiyan(ch)) {
-                act("@w$n@W says, '@CEwww, dirty monkey...@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+                act("@w$n@W says, '@CEwww, dirty monkey...@W'@n", true, vict, 0, ch, TO_ROOM);
               } else {
-                act("@w$n@W says, '@C$N, hello. You are a curious individual.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+                act("@w$n@W says, '@C$N, hello. You are a curious individual.@W'@n", true, vict, 0, ch, TO_ROOM);
               }
               break;
             case 3:
               if (char_is_saiyan(ch)) {
-                act("@w$n@W says, '@CEwww, dirty monkey...@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+                act("@w$n@W says, '@CEwww, dirty monkey...@W'@n", true, vict, 0, ch, TO_ROOM);
               } else {
-                act("@w$n@W says, '@C$N, hello. What's your IQ?@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+                act("@w$n@W says, '@C$N, hello. What's your IQ?@W'@n", true, vict, 0, ch, TO_ROOM);
               }
               break;
           }
         } /* End Truffle Section */
         else {
-          act("Hmph, yeah hi.", TRUE, vict, 0, ch, TO_ROOM);
+          act("Hmph, yeah hi.", true, vict, 0, ch, TO_ROOM);
         }
       } /* End Hello Section */
 
@@ -3142,68 +3140,68 @@ static int mob_respond(struct char_data *ch, struct char_data *vict, const char 
         send_to_room(char_get_in_room(vict), "\r\n");
 
         if (vict->original == ch) {
-          act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+          act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", true, vict, 0, ch, TO_ROOM);
           char_mob_set(vict, MOB_SPAR, true);
           return 0;
         }
 
         if (char_get_level(vict) > 4 && char_get_alignment(vict) >= 0) {
           memory_rec *names;
-          int remember = FALSE;
+          int remember = false;
 
           for (names = char_get_mob_specials_memory(vict); names && !remember; names = names->next) {
             if (names->id != char_get_idnum(ch))
               continue;
 
-            remember = TRUE;
+            remember = true;
           }
 
-          if (remember == TRUE) {
-            act("@w$n@W says, '@C$N you will die by my hand!@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+          if (remember == true) {
+            act("@w$n@W says, '@C$N you will die by my hand!@W'@n", true, vict, 0, ch, TO_ROOM);
             return 1;
           }
           if (char_mob_flagged(vict, MOB_NOKILL)) {
-            act("@w$n@W says, '@C$N, I have no need to spar with you.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@C$N, I have no need to spar with you.@W'@n", true, vict, 0, ch, TO_ROOM);
             return 1;
           }
           if (char_mob_flagged(vict, MOB_AGGRESSIVE)) {
-            act("@w$n@W says, '@C$N, I will kill you instead.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@C$N, I will kill you instead.@W'@n", true, vict, 0, ch, TO_ROOM);
             return 1;
           }
           if (char_mob_flagged(vict, MOB_DUMMY)) {
-            act("@w$n@W says, '@C...@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@C...@W'@n", true, vict, 0, ch, TO_ROOM);
             return 1;
           }
           if (getEffMaxPL(ch) > getEffMaxPL(vict) * 2) {
-            act("@w$n@W says, '@C$N, no way will I spar. I already know I would lose badly.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@C$N, no way will I spar. I already know I would lose badly.@W'@n", true, vict, 0, ch, TO_ROOM);
             return 1;
           }
           if (getEffMaxPL(vict) > getEffMaxPL(ch) * 2) {
-            act("@w$n@W says, '@C$N, you wouldn't last very long.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@C$N, you wouldn't last very long.@W'@n", true, vict, 0, ch, TO_ROOM);
             return 1;
           }
           if (getCurPL(vict) < getEffMaxPL(vict) * .8) {
-            act("@w$n@W says, '@C$N, I need to recover first.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@C$N, I need to recover first.@W'@n", true, vict, 0, ch, TO_ROOM);
             return 1;
           }
           if (rand_number(1, 50) >= 40 && !char_mob_flagged(vict, MOB_SPAR)) {
-            act("@w$n@W says, '@C$N, maybe in a bit.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@C$N, maybe in a bit.@W'@n", true, vict, 0, ch, TO_ROOM);
             return 1;
           }
           if (char_mob_flagged(vict, MOB_SPAR)) {
-            act("@w$n@W says, '@C$N, fine our match will wait till later then.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@C$N, fine our match will wait till later then.@W'@n", true, vict, 0, ch, TO_ROOM);
             char_mob_set(vict, MOB_SPAR, false);
           } else {
-            act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", true, vict, 0, ch, TO_ROOM);
             char_mob_set(vict, MOB_SPAR, true);
           }
           return 0;
         }
         if (char_get_level(vict) > 4 && char_get_alignment(vict) < 0) {
-          act("@w$n@W says, '@CSpar? I don't play games, I play for blood...@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+          act("@w$n@W says, '@CSpar? I don't play games, I play for blood...@W'@n", true, vict, 0, ch, TO_ROOM);
           return 1;
         }
-        act("@w$n@W says, '@CSpar? I prefer not to thank you...@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+        act("@w$n@W says, '@CSpar? I prefer not to thank you...@W'@n", true, vict, 0, ch, TO_ROOM);
         return 1;
       } /* End challenge section */
       if (strstr(speech, "goodbye") || strstr(speech, "Goodbye") || strstr(speech, "bye") || strstr(speech, "Bye")) {
@@ -3211,35 +3209,35 @@ static int mob_respond(struct char_data *ch, struct char_data *vict, const char 
         if (char_get_alignment(vict) >= 0) {
           if (char_get_sex(vict) == SEX_MALE) {
             if (char_get_sex(ch) == SEX_FEMALE) {
-              act("@w$n@W says, '@C$N, goodbye babe.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@C$N, goodbye babe.@W'@n", true, vict, 0, ch, TO_ROOM);
             } else {
-              act("@w$n@W says, '@C$N, goodbye.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@C$N, goodbye.@W'@n", true, vict, 0, ch, TO_ROOM);
             }
           } else if (char_get_sex(vict) == SEX_FEMALE) {
             if (char_get_sex(ch) == SEX_MALE) {
-              act("@w$n@W says, '@C$N, goodbye...@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@C$N, goodbye...@W'@n", true, vict, 0, ch, TO_ROOM);
             } else {
-              act("@w$n@W says, '@C$N, bye.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@C$N, bye.@W'@n", true, vict, 0, ch, TO_ROOM);
             }
           } else {
-            act("@w$n@W says, '@C$N, goodbye.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@C$N, goodbye.@W'@n", true, vict, 0, ch, TO_ROOM);
           }
         }
         if (char_get_alignment(vict) < 0) {
           if (char_get_sex(vict) == SEX_MALE) {
             if (char_get_sex(ch) == SEX_FEMALE) {
-              act("@w$n@W says, '@CGoodbye. Eh heh heh.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CGoodbye. Eh heh heh.@W'@n", true, vict, 0, ch, TO_ROOM);
             } else {
-              act("@w$n@W says, '@CSo long and good ridance.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CSo long and good ridance.@W'@n", true, vict, 0, ch, TO_ROOM);
             }
           } else if (char_get_sex(vict) == SEX_FEMALE) {
             if (char_get_sex(ch) == SEX_MALE) {
-              act("@w$n@W says, '@CGoodbye then...@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@CGoodbye then...@W'@n", true, vict, 0, ch, TO_ROOM);
             } else {
-              act("@w$n@W says, '@C$N, no one wanted you around anyway.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+              act("@w$n@W says, '@C$N, no one wanted you around anyway.@W'@n", true, vict, 0, ch, TO_ROOM);
             }
           } else {
-            act("@w$n@W says, '@CFine get lost.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@CFine get lost.@W'@n", true, vict, 0, ch, TO_ROOM);
           }
         }
       } /* End goodbye If */
@@ -3247,36 +3245,36 @@ static int mob_respond(struct char_data *ch, struct char_data *vict, const char 
         send_to_room(char_get_in_room(vict), "\r\n");
         if (char_get_alignment(vict) >= 0 && !char_mob_flagged(vict, MOB_NOKILL)) {
           if (char_get_level(vict) > 4 && char_get_level(vict) < 10) {
-            act("@w$n@W says, '@CTraining is good for the body. I think I may need to go workout myself.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@CTraining is good for the body. I think I may need to go workout myself.@W'@n", true, vict, 0, ch, TO_ROOM);
           }
           if (char_get_level(vict) >= 10 && char_get_level(vict) < 30) {
-            act("@w$n@W says, '@CI think I might need a little more training...@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@CI think I might need a little more training...@W'@n", true, vict, 0, ch, TO_ROOM);
           }
           if (char_get_level(vict) >= 30 && char_get_level(vict) < 60) {
-            act("@w$n@W says, '@CI'm pretty tough already. Though I should probably work on my skills.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@CI'm pretty tough already. Though I should probably work on my skills.@W'@n", true, vict, 0, ch, TO_ROOM);
           }
           if (char_get_level(vict) >= 60) {
-            act("@w$n@W says, '@CI'm on top of my game.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@CI'm on top of my game.@W'@n", true, vict, 0, ch, TO_ROOM);
           }
           if (char_get_level(vict) < 5) {
-            act("@w$n@W says, '@CI really need to bust ass and train.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@CI really need to bust ass and train.@W'@n", true, vict, 0, ch, TO_ROOM);
           }
         }
         if (char_get_alignment(vict) < 0 && !char_mob_flagged(vict, MOB_NOKILL)) {
           if (char_get_level(vict) > 4 && char_get_level(vict) < 10) {
-            act("@w$n@W says, '@CWell maybe I could use some more training.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@CWell maybe I could use some more training.@W'@n", true, vict, 0, ch, TO_ROOM);
           }
           if (char_get_level(vict) >= 10 && char_get_level(vict) < 30) {
-            act("@w$n@W says, '@CTrain? Yeah it has become harder to take what I want....@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@CTrain? Yeah it has become harder to take what I want....@W'@n", true, vict, 0, ch, TO_ROOM);
           }
           if (char_get_level(vict) >= 30 && char_get_level(vict) < 60) {
-            act("@w$n@W says, '@CTrain? I don't need to train to take you!@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@CTrain? I don't need to train to take you!@W'@n", true, vict, 0, ch, TO_ROOM);
           }
           if (char_get_level(vict) >= 60) {
-            act("@w$n@W says, '@CTraining won't save you when I tire of your continued life.@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@CTraining won't save you when I tire of your continued life.@W'@n", true, vict, 0, ch, TO_ROOM);
           }
           if (char_get_level(vict) < 5) {
-            act("@w$n@W says, '@CYes. I need to train so I can reach the top. Then everyone will have to listen to me!@W'@n", TRUE, vict, 0, ch, TO_ROOM);
+            act("@w$n@W says, '@CYes. I need to train so I can reach the top. Then everyone will have to listen to me!@W'@n", true, vict, 0, ch, TO_ROOM);
           }
         }
       }
@@ -3290,12 +3288,12 @@ bool is_sparring(struct char_data *ch)
 {
 
   if (char_is_npc(ch) && char_mob_flagged(ch, MOB_SPAR)) {
-    return TRUE;
+    return true;
   }
   if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_SPAR)) {
-    return TRUE;
+    return true;
   }
-  return FALSE;
+  return false;
 }
 
 const char *introd_calc(struct char_data *ch)
@@ -3413,11 +3411,11 @@ int64_t gear_exp(struct char_data *ch, int64_t exp)
 int planet_check(struct char_data *ch, struct char_data *vict)
 {
 
-  if (ch == NULL) {
+  if (ch == nullptr) {
     mud_log("ERROR: planet_check called without ch!");
     return 0;
   }
-  if (vict == NULL) {
+  if (vict == nullptr) {
     mud_log("ERROR: planet_check called without vict!");
     return 0;
   }
@@ -3459,12 +3457,12 @@ int planet_check(struct char_data *ch, struct char_data *vict)
 void purge_homing(struct char_data *ch)
 {
 
-  struct obj_data *obj = NULL, *next_obj = NULL;
+  struct obj_data *obj = nullptr, *next_obj = nullptr;
   for (obj = world[char_get_in_room(ch)].contents; obj; obj = next_obj) {
     next_obj = obj->next_content;
     if (obj_get_vnum(obj) == 80 || obj_get_vnum(obj) == 81) {
       if (obj_get_target(obj) == ch || obj_get_user(obj) == ch) {
-        act("$p @wloses its target and flies off into the distance.@n", TRUE, 0, obj, 0, TO_ROOM);
+        act("$p @wloses its target and flies off into the distance.@n", true, 0, obj, 0, TO_ROOM);
         extract_obj(obj);
         continue;
       }
@@ -3521,7 +3519,7 @@ void improve_skill(struct char_data *ch, int skill, int num)
     }
   }
 
-  if (char_get_fighting(ch) != NULL && char_is_npc(char_get_fighting(ch)) && char_mob_flagged(char_get_fighting(ch), MOB_DUMMY)) {
+  if (char_get_fighting(ch) != nullptr && char_is_npc(char_get_fighting(ch)) && char_mob_flagged(char_get_fighting(ch), MOB_DUMMY)) {
     roll -= 100;
   }
 
@@ -3535,7 +3533,7 @@ void improve_skill(struct char_data *ch, int skill, int num)
     roll = roll * 0.30;
   }
 
-  if (char_get_fighting(ch) != NULL && char_is_npc(char_get_fighting(ch)) && char_mob_flagged(char_get_fighting(ch), MOB_DUMMY)) {
+  if (char_get_fighting(ch) != nullptr && char_is_npc(char_get_fighting(ch)) && char_mob_flagged(char_get_fighting(ch), MOB_DUMMY)) {
     roll -= 100;
   }
 
@@ -3633,10 +3631,10 @@ bool circle_follow(struct char_data *ch, struct char_data *victim)
 
   for (k = victim; k; k = k->master) {
     if (k == ch)
-      return (TRUE);
+      return (true);
   }
 
-  return (FALSE);
+  return (false);
 }
 
 /* Called when stop following persons, or stopping charm */
@@ -3645,15 +3643,15 @@ void stop_follower(struct char_data *ch)
 {
   struct follow_type *j, *k;
 
-  if (ch->master == NULL) {
+  if (ch->master == nullptr) {
     core_dump();
     return;
   }
 
-  act("You stop following $N.", FALSE, ch, 0, ch->master, TO_CHAR);
-  act("$n stops following $N.", TRUE, ch, 0, ch->master, TO_NOTVICT);
+  act("You stop following $N.", false, ch, 0, ch->master, TO_CHAR);
+  act("$n stops following $N.", true, ch, 0, ch->master, TO_NOTVICT);
   if (!(char_is_dead(ch->master) || (ch->master->desc && desc_get_connected(ch->master->desc) == CON_MENU)))
-    act("$n stops following you.", TRUE, ch, 0, ch->master, TO_VICT);
+    act("$n stops following you.", true, ch, 0, ch->master, TO_VICT);
 
   if (has_group(ch))
     char_set_combatexpertise(ch, 0);
@@ -3670,7 +3668,7 @@ void stop_follower(struct char_data *ch)
     free(j);
   }
 
-  ch->master = NULL;
+  ch->master = nullptr;
 }
 
 /* Called when a character that follows/is followed dies */
@@ -3706,10 +3704,10 @@ void add_follower(struct char_data *ch, struct char_data *leader)
   k->next           = leader->followers;
   leader->followers = k;
 
-  act("You now follow $N.", FALSE, ch, 0, leader, TO_CHAR);
+  act("You now follow $N.", false, ch, 0, leader, TO_CHAR);
   if (char_get_in_room(ch) != NOWHERE && char_get_in_room(leader) != NOWHERE && char_can_see(leader, ch)) {
-    act("$n starts following you.", TRUE, ch, 0, leader, TO_VICT);
-    act("\r\n$n starts to follow $N.", TRUE, ch, 0, leader, TO_NOTVICT);
+    act("$n starts following you.", true, ch, 0, leader, TO_VICT);
+    act("\r\n$n starts to follow $N.", true, ch, 0, leader, TO_NOTVICT);
   }
 }
 
@@ -3749,7 +3747,7 @@ void admin_set(struct char_data *ch, int value)
   if (char_get_admlevel(ch) == value)
     return;
   if (char_get_admlevel(ch) < value) { /* Promotion */
-    mudlog(LOG_BRF, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE,
+    mudlog(LOG_BRF, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true,
            "%s promoted from %s to %s", char_get_name(ch), admin_level_names[char_get_admlevel(ch)],
            admin_level_names[value]);
     while (char_get_admlevel(ch) < value) {
@@ -3772,7 +3770,7 @@ void admin_set(struct char_data *ch, int value)
     return;
   }
   if (char_get_admlevel(ch) > value) { /* Demotion */
-    mudlog(LOG_BRF, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE,
+    mudlog(LOG_BRF, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true,
            "%s demoted from %s to %s", char_get_name(ch), admin_level_names[char_get_admlevel(ch)],
            admin_level_names[value]);
     while (char_get_admlevel(ch) > value) {
@@ -3829,11 +3827,11 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict)
 {
   char fname[40], filler[50], scrap[100], line[256];
   static char name[50];
-  int known = FALSE;
+  int known = false;
   FILE *fl;
 
   /* Read Introduction File */
-  if (vict == NULL) {
+  if (vict == nullptr) {
     return ("");
   }
 
@@ -3857,12 +3855,12 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict)
     sscanf(line, "%s %s\n", filler, scrap);
     if (!strcasecmp(char_get_name(vict), filler)) {
       snprintf(name, sizeof(name), "%s", scrap);
-      known = TRUE;
+      known = true;
     }
   }
   fclose(fl);
 
-  if (known == TRUE)
+  if (known == true)
     return (name);
   else
     return (juggleRaceName(vict, true));
@@ -3983,7 +3981,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
       return 0;
     }
     if ((char_get_grappling(ch) && char_get_grap(ch) != 3) || (char_get_grappled(ch) && (char_get_grap(ch) == 1 || char_get_grap(ch) == 4))) {
-      send_to_char(ch, "You are too busy grappling!%s\r\n", char_get_grappled(ch) != NULL ? " Try 'escape'!" : "");
+      send_to_char(ch, "You are too busy grappling!%s\r\n", char_get_grappled(ch) != nullptr ? " Try 'escape'!" : "");
       return 0;
     }
     if (char_get_grappling(ch) && char_get_grappling(ch) != vict) {
@@ -4019,9 +4017,9 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
       return 0;
     }
     if ((char_get_altitude(vict) - 1 > char_get_altitude(ch) || char_get_altitude(vict) < char_get_altitude(ch) - 1) && char_is_namek(ch)) {
-      act("@GYou stretch your limbs toward @g$N@G in an attempt to hit $M!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@g$n@G stretches $s limbs toward @RYOU@G in an attempt to land a hit!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@g$n@G stretches $s limbs toward @g$N@G in an attempt to hit $M!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@GYou stretch your limbs toward @g$N@G in an attempt to hit $M!@n", true, ch, 0, vict, TO_CHAR);
+      act("@g$n@G stretches $s limbs toward @RYOU@G in an attempt to land a hit!@n", true, ch, 0, vict, TO_VICT);
+      act("@g$n@G stretches $s limbs toward @g$N@G in an attempt to hit $M!@n", true, ch, 0, vict, TO_NOTVICT);
       return 1;
     }
     if (char_aff_flagged(ch, AFF_FLYING) && !char_aff_flagged(vict, AFF_FLYING) && num == 0) {
@@ -4090,15 +4088,15 @@ int check_points(struct char_data *ch, int64_t ki, int64_t st)
     st -= st * 0.5;
   }
 
-  int fail = FALSE;
+  int fail = false;
   if (char_is_npc(ch)) {
     if ((getCurKI(ch)) < ki) {
       send_to_char(ch, "You do not have enough ki!\r\n");
-      fail = TRUE;
+      fail = true;
     }
     if ((getCurST(ch)) < st) {
       send_to_char(ch, "You do not have enough stamina!\r\n");
-      fail = TRUE;
+      fail = true;
     }
   } else {
     if (!calcGravCost(ch, st) && ki <= 0) {
@@ -4131,7 +4129,7 @@ int check_points(struct char_data *ch, int64_t ki, int64_t st)
       } else if (ki >= 1) {
         send_to_char(ch, "You need at least 1 percent charged.\r\n");
       }
-      fail = TRUE;
+      fail = true;
     }
     if (char_is_nonptrans(ch)) {
       if (char_plr_flagged(ch, PLR_TRANS1)) {
@@ -4146,10 +4144,10 @@ int check_points(struct char_data *ch, int64_t ki, int64_t st)
     }
     if ((getCurST(ch)) < st) {
       send_to_char(ch, "You do not have enough stamina.\r\n@C%s@n needed.\r\n", add_commas(st));
-      fail = TRUE;
+      fail = true;
     }
   }
-  if (fail == TRUE) {
+  if (fail == true) {
     return 0;
   }
   return 1;
@@ -4229,49 +4227,49 @@ int limb_ok(struct char_data *ch, int type)
 {
   if (char_is_npc(ch)) {
     if (char_aff_flagged(ch, AFF_ENSNARED) && rand_number(1, 100) <= 90) {
-      return FALSE;
+      return false;
     }
-    return TRUE;
+    return true;
   }
   if (char_get_grappling(ch) && char_get_grap(ch) != 3) {
     send_to_char(ch, "You are too busy grappling!\r\n");
-    return FALSE;
+    return false;
   }
   if (char_get_grappled(ch) && (char_get_grap(ch) == 1 || char_get_grap(ch) == 4)) {
     send_to_char(ch, "You are unable to move while in this hold! Try using 'escape' to get out of it!\r\n");
-    return FALSE;
+    return false;
   }
   if (char_get_powerattack(ch) > 0) {
     send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
-    return FALSE;
+    return false;
   }
   if (type == 0) {
     if (!char_has_arms(ch)) {
       send_to_char(ch, "You have no available arms!\r\n");
-      return FALSE;
+      return false;
     }
     if (char_aff_flagged(ch, AFF_ENSNARED) && rand_number(1, 100) <= 90) {
       send_to_char(ch, "You are unable to move your arms while bound by this strong silk!\r\n");
       char_set_wait(ch, PULSE_1SEC);
-      return FALSE;
+      return false;
     }
     if (char_aff_flagged(ch, AFF_ENSNARED)) {
-      act("You manage to break the silk ensnaring your arms!", TRUE, ch, 0, 0, TO_CHAR);
-      act("$n manages to break the silk ensnaring $s arms!", TRUE, ch, 0, 0, TO_ROOM);
+      act("You manage to break the silk ensnaring your arms!", true, ch, 0, 0, TO_CHAR);
+      act("$n manages to break the silk ensnaring $s arms!", true, ch, 0, 0, TO_ROOM);
       char_aff_set(ch, AFF_ENSNARED, false);
     }
     if (char_get_equipment(ch, WEAR_WIELD1) && char_get_equipment(ch, WEAR_WIELD2)) {
       send_to_char(ch, "Your hands are full!\r\n");
-      return FALSE;
+      return false;
     }
   } // Arms
   else if (type > 0) {
     if (!char_has_legs(ch)) {
       send_to_char(ch, "You have no working legs!\r\n");
-      return FALSE;
+      return false;
     }
   } // Legs
-  return TRUE;
+  return true;
 }
 
 size_t send_to_char(struct char_data *ch, const char *messg, ...)
@@ -4350,7 +4348,7 @@ int chance_to_hit(struct char_data *ch)
 int handle_speed(struct char_data *ch, struct char_data *vict)
 {
 
-  if (ch == NULL || vict == NULL) { /* Ruh roh*/
+  if (ch == nullptr || vict == nullptr) { /* Ruh roh*/
     return (0);
   }
 
@@ -4580,7 +4578,7 @@ bool MOON_TIMECHECK()
  * OLC stay compatible, but it is not consulted.) */
 bool char_is_npc(const struct char_data *ch)
 {
-  return ch->player_specials == NULL;
+  return ch->player_specials == nullptr;
 }
 
 bool char_is_mob(const struct char_data *ch)
@@ -4797,7 +4795,7 @@ int char_get_skill(const struct char_data *ch, int i)
 
 spec_proc_func char_get_mob_spec(const struct char_data *ch)
 {
-  return (char_is_mob(ch) ? mob_index[(ch)->nr].func : NULL);
+  return (char_is_mob(ch) ? mob_index[(ch)->nr].func : nullptr);
 }
 
 mob_vnum char_get_mob_vnum(const struct char_data *mob)
@@ -5441,7 +5439,7 @@ const char *char_get_feature(const struct char_data *ch)
 void char_set_feature(struct char_data *ch, const char *v)
 {
   free((char *)ch->feature);
-  ch->feature = v ? strdup(v) : NULL;
+  ch->feature = v ? strdup(v) : nullptr;
 }
 
 char *char_get_loguser(const struct char_data *ch)
@@ -5667,7 +5665,7 @@ const char *char_get_rdisplay(const struct char_data *ch)
 void char_set_rdisplay(struct char_data *ch, const char *v)
 {
   free((char *)ch->rdisplay);
-  ch->rdisplay = v ? strdup(v) : NULL;
+  ch->rdisplay = v ? strdup(v) : nullptr;
 }
 
 int8_t char_get_aff_abils_str(const struct char_data *ch)
@@ -6674,9 +6672,9 @@ void char_set_lastint(struct char_data *ch, time_t v)
 static struct skill_data *skill_slot(const struct char_data *ch, int i)
 {
   if (char_is_npc(ch))
-    return NULL;
+    return nullptr;
   if (i < SKILL_FIRST || i >= SKILL_TABLE_SIZE)
-    return NULL;
+    return nullptr;
   return &ch->player_specials->skills[i - SKILL_FIRST];
 }
 
@@ -6891,7 +6889,7 @@ static struct player_special_data *ps_of(const struct char_data *ch, const char 
     return ch->player_specials;
   mud_log("SYSERR: player-only field '%s' used on NPC %s (#%d)", field, char_get_name(ch), char_get_mob_vnum(ch));
   log_backtrace();
-  return NULL;
+  return nullptr;
 }
 
 bitvector_t *char_get_pref(const struct char_data *ch)
@@ -6935,7 +6933,7 @@ void char_set_tlevel(struct char_data *ch, int v)
  * refuses them), so for them it is simply NULL. Setting it on an NPC is still logged. */
 struct char_data *char_get_carrying(const struct char_data *ch)
 {
-  return ch->player_specials ? ch->player_specials->carrying : NULL;
+  return ch->player_specials ? ch->player_specials->carrying : nullptr;
 }
 
 void char_set_carrying(struct char_data *ch, struct char_data *v)
@@ -6949,7 +6947,7 @@ void char_set_carrying(struct char_data *ch, struct char_data *v)
  * refuses them), so for them it is simply NULL. Setting it on an NPC is still logged. */
 struct char_data *char_get_carried_by(const struct char_data *ch)
 {
-  return ch->player_specials ? ch->player_specials->carried_by : NULL;
+  return ch->player_specials ? ch->player_specials->carried_by : nullptr;
 }
 
 void char_set_carried_by(struct char_data *ch, struct char_data *v)
@@ -7157,7 +7155,7 @@ void char_set_bad_pws(struct char_data *ch, uint8_t v)
 char *char_get_poofin(const struct char_data *ch)
 {
   struct player_special_data *ps = ps_of(ch, "poofin");
-  return ps ? ps->poofin : NULL;
+  return ps ? ps->poofin : nullptr;
 }
 
 void char_set_poofin(struct char_data *ch, char *v)
@@ -7170,7 +7168,7 @@ void char_set_poofin(struct char_data *ch, char *v)
 char *char_get_poofout(const struct char_data *ch)
 {
   struct player_special_data *ps = ps_of(ch, "poofout");
-  return ps ? ps->poofout : NULL;
+  return ps ? ps->poofout : nullptr;
 }
 
 void char_set_poofout(struct char_data *ch, char *v)
@@ -7196,7 +7194,7 @@ void char_set_olc_zone(struct char_data *ch, int v)
 struct alias_data *char_get_aliases(const struct char_data *ch)
 {
   struct player_special_data *ps = ps_of(ch, "aliases");
-  return ps ? ps->aliases : NULL;
+  return ps ? ps->aliases : nullptr;
 }
 
 void char_set_aliases(struct char_data *ch, struct alias_data *v)
@@ -7222,7 +7220,7 @@ void char_set_last_tell(struct char_data *ch, int32_t v)
 char *char_get_host(const struct char_data *ch)
 {
   struct player_special_data *ps = ps_of(ch, "host");
-  return ps ? ps->host : NULL;
+  return ps ? ps->host : nullptr;
 }
 
 void char_set_host(struct char_data *ch, char *v)
@@ -7235,7 +7233,7 @@ void char_set_host(struct char_data *ch, char *v)
 struct txt_block *char_get_comm_hist(const struct char_data *ch, int i)
 {
   struct player_special_data *ps = ps_of(ch, "comm_hist");
-  return ps ? ps->comm_hist[i] : NULL;
+  return ps ? ps->comm_hist[i] : nullptr;
 }
 
 void char_set_comm_hist(struct char_data *ch, int i, struct txt_block *v)

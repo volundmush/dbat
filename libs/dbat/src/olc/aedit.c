@@ -63,7 +63,7 @@ ACMD(do_oasis_aedit)
   d = ch->desc;
 
   if (!strcasecmp("save", arg)) {
-    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), TRUE, "OLC: %s saves socials.", char_get_name(ch));
+    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), true, "OLC: %s saves socials.", char_get_name(ch));
     send_to_char(ch, "Writing social file..\r\n");
     aedit_save_to_disk(d);
     send_to_char(ch, "Done.\r\n");
@@ -74,7 +74,7 @@ ACMD(do_oasis_aedit)
    * Give descriptor an OLC structure.
    */
   if (d->olc) {
-    mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "SYSERR: do_oasis: Player already had olc structure.");
+    mudlog(LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_oasis: Player already had olc structure.");
     free(d->olc);
   }
   CREATE(d->olc, struct oasis_olc_data, 1);
@@ -99,9 +99,9 @@ ACMD(do_oasis_aedit)
     OLC_MODE(d) = AEDIT_CONFIRM_EDIT;
   }
   desc_set_connected(d, CON_AEDIT);
-  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", true, d->character, 0, 0, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);
-  mudlog(LOG_CMP, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing actions.", char_get_name(ch));
+  mudlog(LOG_CMP, ADMLVL_IMMORT, true, "OLC: %s starts editing actions.", char_get_name(ch));
 }
 
 static void aedit_setup_new(struct descriptor_data *d)
@@ -115,17 +115,17 @@ static void aedit_setup_new(struct descriptor_data *d)
   OLC_ACTION(d)->min_level_char      = 0;
   OLC_ACTION(d)->char_no_arg         = strdup("This action is unfinished.");
   OLC_ACTION(d)->others_no_arg       = strdup("This action is unfinished.");
-  OLC_ACTION(d)->char_found          = NULL;
-  OLC_ACTION(d)->others_found        = NULL;
-  OLC_ACTION(d)->vict_found          = NULL;
-  OLC_ACTION(d)->not_found           = NULL;
-  OLC_ACTION(d)->char_auto           = NULL;
-  OLC_ACTION(d)->others_auto         = NULL;
-  OLC_ACTION(d)->char_body_found     = NULL;
-  OLC_ACTION(d)->others_body_found   = NULL;
-  OLC_ACTION(d)->vict_body_found     = NULL;
-  OLC_ACTION(d)->char_obj_found      = NULL;
-  OLC_ACTION(d)->others_obj_found    = NULL;
+  OLC_ACTION(d)->char_found          = nullptr;
+  OLC_ACTION(d)->others_found        = nullptr;
+  OLC_ACTION(d)->vict_found          = nullptr;
+  OLC_ACTION(d)->not_found           = nullptr;
+  OLC_ACTION(d)->char_auto           = nullptr;
+  OLC_ACTION(d)->others_auto         = nullptr;
+  OLC_ACTION(d)->char_body_found     = nullptr;
+  OLC_ACTION(d)->others_body_found   = nullptr;
+  OLC_ACTION(d)->vict_body_found     = nullptr;
+  OLC_ACTION(d)->char_obj_found      = nullptr;
+  OLC_ACTION(d)->others_obj_found    = nullptr;
   aedit_disp_menu(d);
   OLC_VAL(d) = 0;
 }
@@ -173,7 +173,7 @@ static void aedit_setup_existing(struct descriptor_data *d, int real_num)
 
 static void aedit_save_internally(struct descriptor_data *d)
 {
-  struct social_messg *new_soc_mess_list = NULL;
+  struct social_messg *new_soc_mess_list = nullptr;
   int i;
 
   /* add a new social into the list */
@@ -313,7 +313,7 @@ void aedit_parse(struct descriptor_data *d, char *arg)
         case 'y':
         case 'Y':
           aedit_save_internally(d);
-          mudlog(LOG_CMP, ADMLVL_IMPL, TRUE, "OLC: %s edits action %s",
+          mudlog(LOG_CMP, ADMLVL_IMPL, true, "OLC: %s edits action %s",
                  char_get_name(d->character), OLC_ACTION(d)->command);
 
           /* do not free the strings.. just the structure */
@@ -618,7 +618,7 @@ void aedit_parse(struct descriptor_data *d, char *arg)
         delete_doubledollar(arg);
         OLC_ACTION(d)->char_no_arg = strdup(arg);
       } else
-        OLC_ACTION(d)->char_no_arg = NULL;
+        OLC_ACTION(d)->char_no_arg = nullptr;
       break;
 
     case AEDIT_NOVICT_OTHERS:
@@ -628,7 +628,7 @@ void aedit_parse(struct descriptor_data *d, char *arg)
         delete_doubledollar(arg);
         OLC_ACTION(d)->others_no_arg = strdup(arg);
       } else
-        OLC_ACTION(d)->others_no_arg = NULL;
+        OLC_ACTION(d)->others_no_arg = nullptr;
       break;
 
     case AEDIT_VICT_CHAR_FOUND:
@@ -638,7 +638,7 @@ void aedit_parse(struct descriptor_data *d, char *arg)
         delete_doubledollar(arg);
         OLC_ACTION(d)->char_found = strdup(arg);
       } else
-        OLC_ACTION(d)->char_found = NULL;
+        OLC_ACTION(d)->char_found = nullptr;
       break;
 
     case AEDIT_VICT_OTHERS_FOUND:
@@ -648,7 +648,7 @@ void aedit_parse(struct descriptor_data *d, char *arg)
         delete_doubledollar(arg);
         OLC_ACTION(d)->others_found = strdup(arg);
       } else
-        OLC_ACTION(d)->others_found = NULL;
+        OLC_ACTION(d)->others_found = nullptr;
       break;
 
     case AEDIT_VICT_VICT_FOUND:
@@ -658,7 +658,7 @@ void aedit_parse(struct descriptor_data *d, char *arg)
         delete_doubledollar(arg);
         OLC_ACTION(d)->vict_found = strdup(arg);
       } else
-        OLC_ACTION(d)->vict_found = NULL;
+        OLC_ACTION(d)->vict_found = nullptr;
       break;
 
     case AEDIT_VICT_NOT_FOUND:
@@ -668,7 +668,7 @@ void aedit_parse(struct descriptor_data *d, char *arg)
         delete_doubledollar(arg);
         OLC_ACTION(d)->not_found = strdup(arg);
       } else
-        OLC_ACTION(d)->not_found = NULL;
+        OLC_ACTION(d)->not_found = nullptr;
       break;
 
     case AEDIT_SELF_CHAR:
@@ -678,7 +678,7 @@ void aedit_parse(struct descriptor_data *d, char *arg)
         delete_doubledollar(arg);
         OLC_ACTION(d)->char_auto = strdup(arg);
       } else
-        OLC_ACTION(d)->char_auto = NULL;
+        OLC_ACTION(d)->char_auto = nullptr;
       break;
 
     case AEDIT_SELF_OTHERS:
@@ -688,7 +688,7 @@ void aedit_parse(struct descriptor_data *d, char *arg)
         delete_doubledollar(arg);
         OLC_ACTION(d)->others_auto = strdup(arg);
       } else
-        OLC_ACTION(d)->others_auto = NULL;
+        OLC_ACTION(d)->others_auto = nullptr;
       break;
 
     case AEDIT_VICT_CHAR_BODY_FOUND:
@@ -698,7 +698,7 @@ void aedit_parse(struct descriptor_data *d, char *arg)
         delete_doubledollar(arg);
         OLC_ACTION(d)->char_body_found = strdup(arg);
       } else
-        OLC_ACTION(d)->char_body_found = NULL;
+        OLC_ACTION(d)->char_body_found = nullptr;
       break;
 
     case AEDIT_VICT_OTHERS_BODY_FOUND:
@@ -708,7 +708,7 @@ void aedit_parse(struct descriptor_data *d, char *arg)
         delete_doubledollar(arg);
         OLC_ACTION(d)->others_body_found = strdup(arg);
       } else
-        OLC_ACTION(d)->others_body_found = NULL;
+        OLC_ACTION(d)->others_body_found = nullptr;
       break;
 
     case AEDIT_VICT_VICT_BODY_FOUND:
@@ -718,7 +718,7 @@ void aedit_parse(struct descriptor_data *d, char *arg)
         delete_doubledollar(arg);
         OLC_ACTION(d)->vict_body_found = strdup(arg);
       } else
-        OLC_ACTION(d)->vict_body_found = NULL;
+        OLC_ACTION(d)->vict_body_found = nullptr;
       break;
 
     case AEDIT_OBJ_CHAR_FOUND:
@@ -728,7 +728,7 @@ void aedit_parse(struct descriptor_data *d, char *arg)
         delete_doubledollar(arg);
         OLC_ACTION(d)->char_obj_found = strdup(arg);
       } else
-        OLC_ACTION(d)->char_obj_found = NULL;
+        OLC_ACTION(d)->char_obj_found = nullptr;
       break;
 
     case AEDIT_OBJ_OTHERS_FOUND:
@@ -738,7 +738,7 @@ void aedit_parse(struct descriptor_data *d, char *arg)
         delete_doubledollar(arg);
         OLC_ACTION(d)->others_obj_found = strdup(arg);
       } else
-        OLC_ACTION(d)->others_obj_found = NULL;
+        OLC_ACTION(d)->others_obj_found = nullptr;
       break;
 
     default:
@@ -751,7 +751,7 @@ void aedit_parse(struct descriptor_data *d, char *arg)
 
 ACMD(do_astat)
 {
-  int i, real = FALSE;
+  int i, real = false;
   char arg[MAX_INPUT_LENGTH];
 
   if (char_is_npc(ch))
@@ -766,7 +766,7 @@ ACMD(do_astat)
 
   for (i = 0; i <= top_of_socialt; i++) {
     if (is_abbrev(arg, soc_mess_list[i].command)) {
-      real = TRUE;
+      real = true;
       break;
     }
   }

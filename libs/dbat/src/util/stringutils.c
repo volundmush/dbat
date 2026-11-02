@@ -1,3 +1,5 @@
+#include <stdarg.h>
+#include <stdio.h>
 #include "dbat/stringutils.h"
 #include "dbat/utils.h"
 #include "dbat/log.h"
@@ -114,12 +116,13 @@ char *CAP(char *txt)
 }
 
 /* Strips \r\n from end of string.  */
+/* Removes the line endings from the end of txt. */
 void prune_crlf(char *txt)
 {
-  int i = strlen(txt) - 1;
+  size_t n = strlen(txt);
 
-  while (txt[i] == '\n' || txt[i] == '\r')
-    txt[i--] = '\0';
+  while (n > 0 && (txt[n - 1] == '\n' || txt[n - 1] == '\r'))
+    txt[--n] = '\0';
 }
 
 char *one_argument(char *argument, char *first_arg)
@@ -128,7 +131,7 @@ char *one_argument(char *argument, char *first_arg)
 
   if (!argument) {
     *first_arg = '\0';
-    return (NULL);
+    return (nullptr);
   }
 
   do {
@@ -253,7 +256,7 @@ char *delete_doubledollar(char *string)
   char *ddread, *ddwrite;
 
   /* If the string has no dollar signs, return immediately */
-  if ((ddwrite = strchr(string, '$')) == NULL)
+  if ((ddwrite = strchr(string, '$')) == nullptr)
     return (string);
 
   /* Start from the location of the first dollar sign */
@@ -331,7 +334,7 @@ static const char *fill[] =
 
 int fill_word(char *argument)
 {
-  return (search_block(argument, fill, TRUE) >= 0);
+  return (search_block(argument, fill, true) >= 0);
 }
 
 static const char *reserved[] =
@@ -348,7 +351,7 @@ static const char *reserved[] =
 
 int reserved_word(char *argument)
 {
-  return (search_block(argument, reserved, TRUE) >= 0);
+  return (search_block(argument, reserved, true) >= 0);
 }
 
 char *fname(const char *namelist)
@@ -369,7 +372,7 @@ void search_replace(char *string, const char *find, const char *replace)
   char final[MAX_STRING_LENGTH], temp[2];
   size_t start, end, i;
 
-  while (strstr(string, find) != NULL) {
+  while (strstr(string, find) != nullptr) {
 
     final[0] = '\0';
     start    = strstr(string, find) - string;
@@ -389,4 +392,18 @@ void search_replace(char *string, const char *find, const char *replace)
     sprintf(string, "%s", final);
   }
   return;
+}
+
+char *str_printf(const char *format, ...)
+{
+  va_list args;
+  char *s;
+
+  va_start(args, format);
+  if (vasprintf(&s, format, args) < 0) {
+    perror("SYSERR: str_printf");
+    abort();
+  }
+  va_end(args);
+  return s;
 }

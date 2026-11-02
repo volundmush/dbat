@@ -27,9 +27,9 @@ void news_string_cleanup(struct descriptor_data *d, int terminator)
   switch (terminator) {
     case STRINGADD_SAVE:
       if (!(fl = fopen(storage, "a")))
-        mudlog(LOG_CMP, ADMLVL_IMPL, TRUE, "SYSERR: Can't write file '%s'.", storage);
+        mudlog(LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '%s'.", storage);
       if (!*d->str)
-        mudlog(LOG_CMP, ADMLVL_IMPL, TRUE, "SYSERR: Can't write file '%s'.", storage);
+        mudlog(LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '%s'.", storage);
       else {
         char *tmstr;
         time_t mytime                = time(0);
@@ -38,10 +38,10 @@ void news_string_cleanup(struct descriptor_data *d, int terminator)
 
         fprintf(fl, "#%d %s\n@cUpdated By@D: @C%-13s @cDate@D: @Y%s@n\n", TOP_OF_NEWS, d->newsbuf, char_get_name(d->character), tmstr);
         free(d->newsbuf);
-        d->newsbuf = NULL;
+        d->newsbuf = nullptr;
         strip_cr(*d->str);
         fprintf(fl, "%s\n", *d->str);
-        *d->str = NULL;
+        *d->str = nullptr;
         fclose(fl);
 
         NEWSUPDATE = time(0);
@@ -61,7 +61,7 @@ void news_string_cleanup(struct descriptor_data *d, int terminator)
       break;
     case STRINGADD_ABORT:
       write_to_output(d, "Edit aborted.\r\n");
-      act("$n stops editing the news.", TRUE, d->character, 0, 0, TO_ROOM);
+      act("$n stops editing the news.", true, d->character, 0, 0, TO_ROOM);
       break;
     default:
       mud_log("SYSERR: news_string_cleanup: Unknown terminator status.");
@@ -84,7 +84,7 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator)
   switch (terminator) {
     case STRINGADD_SAVE:
       if (!(fl = atomic_open(&af, storage, false)))
-        mudlog(LOG_CMP, ADMLVL_IMPL, TRUE, "SYSERR: Can't write file '%s'.", storage);
+        mudlog(LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '%s'.", storage);
       else {
         if (*d->str && !(strcmp(storage, "text/news"))) {
           char *tmstr;
@@ -102,7 +102,7 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator)
           write_to_output(d, "Could not write the file; nothing was changed.\r\n");
           break;
         }
-        mudlog(LOG_CMP, ADMLVL_GOD, TRUE, "OLC: %s saves '%s'.", char_get_name(d->character), storage);
+        mudlog(LOG_CMP, ADMLVL_GOD, true, "OLC: %s saves '%s'.", char_get_name(d->character), storage);
         write_to_output(d, "Saved.\r\n");
 
         if (!(strcmp(storage, "text/news"))) {
@@ -124,7 +124,7 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator)
       break;
     case STRINGADD_ABORT:
       write_to_output(d, "Edit aborted.\r\n");
-      act("$n stops editing some scrolls.", TRUE, d->character, 0, 0, TO_ROOM);
+      act("$n stops editing some scrolls.", true, d->character, 0, 0, TO_ROOM);
       break;
     default:
       mud_log("SYSERR: tedit_string_cleanup: Unknown terminator status.");
@@ -140,7 +140,7 @@ ACMD(do_tedit)
 {
   int l, i = 0;
   char field[MAX_INPUT_LENGTH];
-  char *backstr = NULL;
+  char *backstr = nullptr;
 
   struct {
     const char *cmd;
@@ -160,10 +160,10 @@ ACMD(do_tedit)
       {"handbook",   ADMLVL_IMPL,  &handbook,   24000, HANDBOOK_FILE  },
       {"update",     ADMLVL_IMPL,  &policies,   24000, POLICIES_FILE  },
       {"ihelp",      ADMLVL_GRGOD, &ihelp,      24000, IHELP_PAGE_FILE},
-      {"\n",         0,            NULL,        0,     NULL           }
+      {"\n",         0,            nullptr,     0,     nullptr        }
   };
 
-  if (ch->desc == NULL)
+  if (ch->desc == nullptr)
     return;
 
   one_argument(argument, field);
@@ -203,7 +203,7 @@ ACMD(do_tedit)
   send_to_char(ch, "Edit file below:\r\n\r\n");
 
   if (ch->desc->olc) {
-    mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "SYSERR: do_tedit: Player already had olc structure.");
+    mudlog(LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_tedit: Player already had olc structure.");
     free(ch->desc->olc);
   }
   CREATE(ch->desc->olc, struct oasis_olc_data, 1);
@@ -216,7 +216,7 @@ ACMD(do_tedit)
   OLC_STORAGE(ch->desc) = strdup(fields[l].filename);
   string_write(ch->desc, fields[l].buffer, fields[l].size, 0, backstr);
 
-  act("$n begins editing a text file.", TRUE, ch, 0, 0, TO_ROOM);
+  act("$n begins editing a text file.", true, ch, 0, 0, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);
   desc_set_connected(ch->desc, CON_TEDIT);
 }

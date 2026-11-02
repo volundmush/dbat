@@ -23,7 +23,7 @@
 #include <errno.h>
 
 /* local globals */
-struct ban_list_element *ban_list = NULL;
+struct ban_list_element *ban_list = nullptr;
 
 /* local functions */
 static void _write_one_node(FILE *fp, struct ban_list_element *node);
@@ -55,11 +55,9 @@ void load_banned(void)
   }
   while (fscanf(fl, " %s %s %d %s ", ban_type, site_name, &date, name) == 4) {
     CREATE(next_node, struct ban_list_element, 1);
-    strncpy(next_node->site, site_name, BANNED_SITE_LENGTH); /* strncpy: OK (n_n->site:BANNED_SITE_LENGTH+1) */
-    next_node->site[BANNED_SITE_LENGTH] = '\0';
-    strncpy(next_node->name, name, MAX_NAME_LENGTH); /* strncpy: OK (n_n->name:MAX_NAME_LENGTH+1) */
-    next_node->name[MAX_NAME_LENGTH] = '\0';
-    next_node->date                  = date;
+    strlcpy(next_node->site, site_name, sizeof(next_node->site));
+    strlcpy(next_node->name, name, sizeof(next_node->name));
+    next_node->date = date;
 
     for (i = BAN_NOT; i <= BAN_ALL; i++)
       if (!strcmp(ban_type, ban_types[i]))
@@ -180,10 +178,8 @@ ACMD(do_ban)
   strlcpy(ban_node->site, site, sizeof(ban_node->site));
   for (nextchar = ban_node->site; *nextchar; nextchar++)
     *nextchar = tolower(*nextchar);
-  ban_node->site[BANNED_SITE_LENGTH] = '\0';
-  strncpy(ban_node->name, char_get_name(ch), MAX_NAME_LENGTH); /* strncpy: OK (b_n->size:MAX_NAME_LENGTH+1) */
-  ban_node->name[MAX_NAME_LENGTH] = '\0';
-  ban_node->date                  = time(0);
+  strlcpy(ban_node->name, char_get_name(ch), sizeof(ban_node->name));
+  ban_node->date = time(0);
 
   for (i = BAN_NEW; i <= BAN_ALL; i++)
     if (!strcasecmp(flag, ban_types[i]))
@@ -192,7 +188,7 @@ ACMD(do_ban)
   ban_node->next = ban_list;
   ban_list       = ban_node;
 
-  mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), TRUE, "%s has banned %s for %s players.",
+  mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "%s has banned %s for %s players.",
          char_get_name(ch), site, ban_types[ban_node->type]);
   send_to_char(ch, "Site banned.\r\n");
   write_ban_list();
@@ -224,7 +220,7 @@ ACMD(do_unban)
   }
   REMOVE_FROM_LIST(ban_node, ban_list, next, temp);
   send_to_char(ch, "Site unbanned.\r\n");
-  mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), TRUE, "%s removed the %s-player ban on %s.",
+  mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "%s removed the %s-player ban on %s.",
          char_get_name(ch), ban_types[ban_node->type], ban_node->site);
 
   free(ban_node);
@@ -236,7 +232,7 @@ ACMD(do_unban)
  *  Written by Sharon P. Goza						  *
  **************************************************************************/
 
-#define MAX_INVALID_NAMES 200
+constexpr int MAX_INVALID_NAMES = 200;
 
 static char *invalid_list[MAX_INVALID_NAMES];
 int num_invalid = 0;

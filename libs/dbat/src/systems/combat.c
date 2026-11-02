@@ -126,36 +126,36 @@ void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data 
   }
 
   if (char_get_skill(ch, SKILL_HANDLING) >= axion_dice(10)) {
-    act("@GYour superior handling prevents @C$p@G from being damaged.@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@g$n's@G superior handling prevents @C$p@G from being damaged.@n", TRUE, ch, obj, 0, TO_ROOM);
+    act("@GYour superior handling prevents @C$p@G from being damaged.@n", true, ch, obj, 0, TO_CHAR);
+    act("@g$n's@G superior handling prevents @C$p@G from being damaged.@n", true, ch, obj, 0, TO_ROOM);
     result = 0;
   }
 
   if (result > 0) {
     obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) - (result));
     if (obj_get_value(obj, VAL_ALL_HEALTH) <= 0) {
-      act("@RYour @C$p@R shatters on @r$N's@R body!@n", TRUE, ch, obj, vict, TO_CHAR);
-      act("@r$n's@R @C$p@R shatters on YOUR body!@n", TRUE, ch, obj, vict, TO_VICT);
-      act("@r$n's@R @C$p@R shatters on @r$N's@R body!@n", TRUE, ch, obj, vict, TO_NOTVICT);
+      act("@RYour @C$p@R shatters on @r$N's@R body!@n", true, ch, obj, vict, TO_CHAR);
+      act("@r$n's@R @C$p@R shatters on YOUR body!@n", true, ch, obj, vict, TO_VICT);
+      act("@r$n's@R @C$p@R shatters on @r$N's@R body!@n", true, ch, obj, vict, TO_NOTVICT);
       obj_extra_set(obj, ITEM_BROKEN, true);
       perform_remove(vict, 16);
       perform_remove(vict, 17);
     } else if (result >= 8) {
-      act("@RYour @C$p@R cracks loudly from striking @r$N's@R body!@n", TRUE, ch, obj, vict, TO_CHAR);
-      act("@r$n's@R @C$p@R cracks loudly from striking YOUR body!@n", TRUE, ch, obj, vict, TO_VICT);
-      act("@r$n's@R @C$p@R cracks loudly from striking @r$N's@R body!@n", TRUE, ch, obj, vict, TO_NOTVICT);
+      act("@RYour @C$p@R cracks loudly from striking @r$N's@R body!@n", true, ch, obj, vict, TO_CHAR);
+      act("@r$n's@R @C$p@R cracks loudly from striking YOUR body!@n", true, ch, obj, vict, TO_VICT);
+      act("@r$n's@R @C$p@R cracks loudly from striking @r$N's@R body!@n", true, ch, obj, vict, TO_NOTVICT);
     } else if (result >= 6) {
-      act("@RYour @C$p@R chips from striking @r$N's@R body!@n", TRUE, ch, obj, vict, TO_CHAR);
-      act("@r$n's@R @C$p@R cracks from striking YOUR body!@n", TRUE, ch, obj, vict, TO_VICT);
-      act("@r$n's@R @C$p@R cracks from striking @r$N's@R body!@n", TRUE, ch, obj, vict, TO_NOTVICT);
+      act("@RYour @C$p@R chips from striking @r$N's@R body!@n", true, ch, obj, vict, TO_CHAR);
+      act("@r$n's@R @C$p@R cracks from striking YOUR body!@n", true, ch, obj, vict, TO_VICT);
+      act("@r$n's@R @C$p@R cracks from striking @r$N's@R body!@n", true, ch, obj, vict, TO_NOTVICT);
     } else if (result >= 3) {
-      act("@RYour @C$p@R loses a piece from striking @r$N's@R body!@n", TRUE, ch, obj, vict, TO_CHAR);
-      act("@r$n's@R @C$p@R loses a piece from striking YOUR body!@n", TRUE, ch, obj, vict, TO_VICT);
-      act("@r$n's@R @C$p@R loses a piece from striking @r$N's@R body!@n", TRUE, ch, obj, vict, TO_NOTVICT);
+      act("@RYour @C$p@R loses a piece from striking @r$N's@R body!@n", true, ch, obj, vict, TO_CHAR);
+      act("@r$n's@R @C$p@R loses a piece from striking YOUR body!@n", true, ch, obj, vict, TO_VICT);
+      act("@r$n's@R @C$p@R loses a piece from striking @r$N's@R body!@n", true, ch, obj, vict, TO_NOTVICT);
     } else if (result >= 1) {
-      act("@RYour @C$p@R has a nick in it from hitting @r$N's@R body!@n", TRUE, ch, obj, vict, TO_CHAR);
-      act("@r$n's@R @C$p@R has a nick in it from hitting YOUR body!@n", TRUE, ch, obj, vict, TO_VICT);
-      act("@r$n's@R @C$p@R has a nick in it from hitting @r$N's@R body!@n", TRUE, ch, obj, vict, TO_NOTVICT);
+      act("@RYour @C$p@R has a nick in it from hitting @r$N's@R body!@n", true, ch, obj, vict, TO_CHAR);
+      act("@r$n's@R @C$p@R has a nick in it from hitting YOUR body!@n", true, ch, obj, vict, TO_VICT);
+      act("@r$n's@R @C$p@R has a nick in it from hitting @r$N's@R body!@n", true, ch, obj, vict, TO_NOTVICT);
     }
   }
 }
@@ -217,9 +217,9 @@ void handle_multihit(struct char_data *ch, struct char_data *vict)
   /* Success! */
   if (perc >= prob) {
     char buf[MAX_INPUT_LENGTH];
-    act("@Y...in a lightning flash of speed you attack @y$N@Y again!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@Y...in a lightning flash of speed @y$n@Y attacks YOU again!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@Y...in a lightning flash of speed @y$n@Y attacks @y$N@Y again!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@Y...in a lightning flash of speed you attack @y$N@Y again!@n", true, ch, 0, vict, TO_CHAR);
+    act("@Y...in a lightning flash of speed @y$n@Y attacks YOU again!@n", true, ch, 0, vict, TO_VICT);
+    act("@Y...in a lightning flash of speed @y$n@Y attacks @y$N@Y again!@n", true, ch, 0, vict, TO_NOTVICT);
     ch->throws += 1;
     char_plr_set(ch, PLR_MULTIHIT, true);
     if (char_get_combo(ch) > -1) {
@@ -293,21 +293,21 @@ void handle_multihit(struct char_data *ch, struct char_data *vict)
 int handle_defender(struct char_data *vict, struct char_data *ch)
 {
 
-  int result = FALSE;
+  int result = false;
 
   if (char_get_defender(vict)) {
     struct char_data *def = char_get_defender(vict);
     int64_t defnum        = (char_get_speedi(def) * 0.01) * rand_number(-10, 10);
     int64_t chnum         = (char_get_speedi(ch) * 0.01) * rand_number(-5, 10);
     if (char_get_speedi(def) + defnum > char_get_speedi(ch) + chnum && char_get_in_room(def) == char_get_in_room(vict) && char_get_position(def) > POS_SITTING) {
-      act("@YYou move to and manage to intercept the attack aimed at @y$N@Y!@n", TRUE, def, 0, vict, TO_CHAR);
-      act("@y$n@Y moves to and manages to intercept the attack aimed at YOU!@n", TRUE, def, 0, vict, TO_VICT);
-      act("@y$n@Y moves to and manages to intercept the attack aimed at @y$N@Y!@n", TRUE, def, 0, vict, TO_NOTVICT);
-      result = TRUE;
+      act("@YYou move to and manage to intercept the attack aimed at @y$N@Y!@n", true, def, 0, vict, TO_CHAR);
+      act("@y$n@Y moves to and manages to intercept the attack aimed at YOU!@n", true, def, 0, vict, TO_VICT);
+      act("@y$n@Y moves to and manages to intercept the attack aimed at @y$N@Y!@n", true, def, 0, vict, TO_NOTVICT);
+      result = true;
     } else if (char_get_in_room(def) == char_get_in_room(vict) && char_get_position(def) > POS_SITTING) {
-      act("@YYou move to intercept the attack aimed at @y$N@Y, but just not fast enough!@n", TRUE, def, 0, vict, TO_CHAR);
-      act("@y$n@Y moves to intercept the attack aimed at YOU, but $e wasn't fast enough!@n", TRUE, def, 0, vict, TO_VICT);
-      act("@y$n@Y moves to intercept the attack aimed at @y$N@Y, but $e wasn't fast enough!@n", TRUE, def, 0, vict, TO_NOTVICT);
+      act("@YYou move to intercept the attack aimed at @y$N@Y, but just not fast enough!@n", true, def, 0, vict, TO_CHAR);
+      act("@y$n@Y moves to intercept the attack aimed at YOU, but $e wasn't fast enough!@n", true, def, 0, vict, TO_VICT);
+      act("@y$n@Y moves to intercept the attack aimed at @y$N@Y, but $e wasn't fast enough!@n", true, def, 0, vict, TO_NOTVICT);
     }
   }
 
@@ -317,7 +317,7 @@ int handle_defender(struct char_data *vict, struct char_data *ch)
 void handle_disarm(struct char_data *ch, struct char_data *vict)
 {
 
-  int roll1 = rand_number(-10, 10), roll2 = rand_number(-10, 10), handled = FALSE;
+  int roll1 = rand_number(-10, 10), roll2 = rand_number(-10, 10), handled = false;
   roll1 += char_get_aff_abils_str(ch) + char_get_aff_abils_dex(ch);
   roll2 += char_get_aff_abils_str(vict) + char_get_aff_abils_dex(vict);
 
@@ -338,36 +338,36 @@ void handle_disarm(struct char_data *ch, struct char_data *vict)
   }
 
   if (char_get_skill(ch, SKILL_HANDLING) >= axion_dice(10)) {
-    handled = TRUE;
+    handled = true;
   }
 
   if (roll1 < roll2) {
     struct obj_data *obj;
-    if (char_get_equipment(ch, WEAR_WIELD1) && handled == FALSE) {
+    if (char_get_equipment(ch, WEAR_WIELD1) && handled == false) {
       obj = char_get_equipment(ch, WEAR_WIELD1);
-      act("@y$N@Y manages to disarm you! The @w$p@Y falls from your grasp!@n", TRUE, ch, obj, vict, TO_CHAR);
-      act("@y$N@Y manages to disarm @R$n@Y! The @w$p@Y falls from $s grasp!@n", TRUE, ch, obj, vict, TO_NOTVICT);
-      act("@YYou manage to disarm @R$n@Y! The @w$p@Y falls from $s grasp!@n", TRUE, ch, obj, vict, TO_VICT);
+      act("@y$N@Y manages to disarm you! The @w$p@Y falls from your grasp!@n", true, ch, obj, vict, TO_CHAR);
+      act("@y$N@Y manages to disarm @R$n@Y! The @w$p@Y falls from $s grasp!@n", true, ch, obj, vict, TO_NOTVICT);
+      act("@YYou manage to disarm @R$n@Y! The @w$p@Y falls from $s grasp!@n", true, ch, obj, vict, TO_VICT);
       perform_remove(ch, 16);
       if (obj_get_vnum(obj) != 20098) {
         obj_from_char(obj);
         obj_to_room(obj, char_get_in_room(ch));
       }
-    } else if (char_get_equipment(ch, WEAR_WIELD1) && handled == TRUE) {
+    } else if (char_get_equipment(ch, WEAR_WIELD1) && handled == true) {
       obj = char_get_equipment(ch, WEAR_WIELD1);
-      act("@y$N@Y almosts disarms you, but your handling of @w$p@Y saves it from slipping from your grasp!@n", TRUE, ch, obj, vict, TO_CHAR);
-      act("@y$N@Y almost disarms @R$n@Y, but $s handling of @w$p@Y saves it from slipping from $s grasp!@n", TRUE, ch, obj, vict, TO_NOTVICT);
-      act("@YYou almost disarm @R$n@Y, but $s handling of @w$p@Y saves it from slipping from $s grasp!@n", TRUE, ch, obj, vict, TO_VICT);
-    } else if (char_get_equipment(ch, WEAR_WIELD2) && handled == TRUE) {
+      act("@y$N@Y almosts disarms you, but your handling of @w$p@Y saves it from slipping from your grasp!@n", true, ch, obj, vict, TO_CHAR);
+      act("@y$N@Y almost disarms @R$n@Y, but $s handling of @w$p@Y saves it from slipping from $s grasp!@n", true, ch, obj, vict, TO_NOTVICT);
+      act("@YYou almost disarm @R$n@Y, but $s handling of @w$p@Y saves it from slipping from $s grasp!@n", true, ch, obj, vict, TO_VICT);
+    } else if (char_get_equipment(ch, WEAR_WIELD2) && handled == true) {
       obj = char_get_equipment(ch, WEAR_WIELD2);
-      act("@y$N@Y almosts disarms you, but your handling of @w$p@Y saves it from slipping from your grasp!@n", TRUE, ch, obj, vict, TO_CHAR);
-      act("@y$N@Y almost disarms @R$n@Y, but $s handling of @w$p@Y saves it from slipping from $s grasp!@n", TRUE, ch, obj, vict, TO_NOTVICT);
-      act("@YYou almost disarm @R$n@Y, but $s handling of @w$p@Y saves it from slipping from $s grasp!@n", TRUE, ch, obj, vict, TO_VICT);
+      act("@y$N@Y almosts disarms you, but your handling of @w$p@Y saves it from slipping from your grasp!@n", true, ch, obj, vict, TO_CHAR);
+      act("@y$N@Y almost disarms @R$n@Y, but $s handling of @w$p@Y saves it from slipping from $s grasp!@n", true, ch, obj, vict, TO_NOTVICT);
+      act("@YYou almost disarm @R$n@Y, but $s handling of @w$p@Y saves it from slipping from $s grasp!@n", true, ch, obj, vict, TO_VICT);
     } else if (char_get_equipment(ch, WEAR_WIELD2)) {
       obj = char_get_equipment(ch, WEAR_WIELD2);
-      act("@y$N@Y manages to disarm you! The @w$p@Y falls from your grasp!@n", TRUE, ch, obj, vict, TO_CHAR);
-      act("@y$N@Y manages to disarm @R$n@Y! The @w$p@Y falls from $s grasp!@n", TRUE, ch, obj, vict, TO_NOTVICT);
-      act("@YYou manage to disarm @R$n@Y! The @w$p@Y falls from $s grasp!@n", TRUE, ch, obj, vict, TO_VICT);
+      act("@y$N@Y manages to disarm you! The @w$p@Y falls from your grasp!@n", true, ch, obj, vict, TO_CHAR);
+      act("@y$N@Y manages to disarm @R$n@Y! The @w$p@Y falls from $s grasp!@n", true, ch, obj, vict, TO_NOTVICT);
+      act("@YYou manage to disarm @R$n@Y! The @w$p@Y falls from $s grasp!@n", true, ch, obj, vict, TO_VICT);
       perform_remove(ch, 17);
       if (obj_get_vnum(obj) != 20098) {
         obj_from_char(obj);
@@ -385,8 +385,8 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
   int64_t bonus = 0;
   double maxki  = 0.0;
   int totalmem  = 1;
-  int attspd = 0, blockable = TRUE, same = TRUE, attsk = 0, attavg = char_get_skill(ch, attack_skills[char_get_combine(ch)]);
-  int burn = FALSE, shocked = FALSE;
+  int attspd = 0, blockable = true, same = true, attsk = 0, attavg = char_get_skill(ch, attack_skills[char_get_combine(ch)]);
+  int burn = false, shocked = false;
 
   switch (char_get_combine(ch)) {
     case 0: /* Kamehameha */
@@ -426,7 +426,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
       sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! Sudden jets of flame burst forth from $s mouth at @R$N@W in the form of a deadly @rHonoo@W!@n");
       maxki = 0.125;
       attspd += 2;
-      burn = TRUE;
+      burn = true;
       break;
     case 5: /* Twin Slash */
       sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! With your energy prepared you poor it into your blade and accelerate your body to incredible speeds toward @r$N! You leave two glowing green marks behind on $S body in a single instant as your @GTwin Slash@W hits!@n");
@@ -434,7 +434,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
       sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! Raising $s sword @Y$n@W accelerates toward @r$N@W with incredible speed! Two glowing green slashes are left on @R$N's@W body from the successful @GTwin Slash@W!@n");
       maxki = 0.125;
       attspd += 2;
-      blockable = FALSE;
+      blockable = false;
       break;
     case 6: /* Hell Flash */
       sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! You stick one of each of your hands in your armpits and detach them. With your hands detached your point the exposed arm cannons at @r$N@W and launch a massive @RHell Flash@W at $M!");
@@ -449,7 +449,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
       sprintf(rmbuf, "@Y$n@W calls out to $s allies to launch a group attack against @r$N@W! A blue light, identifying a @CPsychic Blast@W, launches from @Y$n's@W toward @R$N's@W head!");
       maxki = 0.125;
       attspd += 1;
-      shocked = TRUE;
+      shocked = true;
       break;
     case 8: /* Crusher Ball */
       sprintf(chbuf, "@WPositioning yourself in the center of your group you call out to your allies to launch a group attack! Pooling your energy you form a large ball of red energy above an upraised palm. Slamming your other hand into it you launch it toward @r$N@W while shouting @B'@RCrusher Ball@B'@W!@n");
@@ -500,9 +500,9 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
 
   int64_t totki = 0;
 
-  act(chbuf, TRUE, ch, 0, vict, TO_CHAR);
-  act(victbuf, TRUE, ch, 0, vict, TO_VICT);
-  act(rmbuf, TRUE, ch, 0, vict, TO_NOTVICT);
+  act(chbuf, true, ch, 0, vict, TO_CHAR);
+  act(victbuf, true, ch, 0, vict, TO_VICT);
+  act(rmbuf, true, ch, 0, vict, TO_NOTVICT);
 
   if (char_get_charge(ch) >= getMaxKI(ch) * maxki) {
     totki += getMaxKI(ch) * maxki;
@@ -517,7 +517,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
       continue;
     }
     if (char_get_combine(f->follower) != char_get_combine(ch)) {
-      same = FALSE;
+      same = false;
     }
     if (char_get_charge(f->follower) >= getMaxKI(f->follower) * maxki) {
       totki += getMaxKI(f->follower) * maxki;
@@ -531,29 +531,29 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
     char folbuf[MAX_INPUT_LENGTH], folbuf2[MAX_INPUT_LENGTH];
     sprintf(folbuf, "@Y$n@W times and merges $s @B'@R%s@B'@W into the group attack!@n", attack_names_comp[char_get_combine(f->follower)]);
     sprintf(folbuf2, "@WYou time and merge your @B'@R%s@B'@W into the group attack!@n", attack_names_comp[char_get_combine(f->follower)]);
-    act(folbuf, TRUE, f->follower, 0, 0, TO_ROOM);
-    act(folbuf2, TRUE, f->follower, 0, 0, TO_CHAR);
+    act(folbuf, true, f->follower, 0, 0, TO_ROOM);
+    act(folbuf2, true, f->follower, 0, 0, TO_CHAR);
   }
 
   totki += bonus;
-  if (same == TRUE) {
+  if (same == true) {
     totki += bonus;
   }
   attsk = attavg / totalmem;
 
   if (char_get_combine(ch) != 5) {
     if (attspd + attsk < char_get_skill(vict, SKILL_DODGE) + (char_get_aff_abils_cha(ch) / 10)) {
-      act("@GYou manage to dodge nimbly through the combined attack of your enemies!@n", TRUE, vict, 0, 0, TO_CHAR);
-      act("@r$n@G manages to dodge nimbly through the combined attack!@n", TRUE, vict, 0, 0, TO_ROOM);
+      act("@GYou manage to dodge nimbly through the combined attack of your enemies!@n", true, vict, 0, 0, TO_CHAR);
+      act("@r$n@G manages to dodge nimbly through the combined attack!@n", true, vict, 0, 0, TO_ROOM);
       return;
     }
-    if (blockable == TRUE && attspd + attsk < char_get_skill(vict, SKILL_BLOCK) + (char_get_aff_abils_str(ch) / 10)) {
-      act("@GYou manage to effectivly block the combined attack of your enemies with the help of your great strength!@n", TRUE, vict, 0, 0, TO_CHAR);
-      act("@r$n@G manages to dodge nimbly through the combined attack!@n", TRUE, vict, 0, 0, TO_ROOM);
+    if (blockable == true && attspd + attsk < char_get_skill(vict, SKILL_BLOCK) + (char_get_aff_abils_str(ch) / 10)) {
+      act("@GYou manage to effectivly block the combined attack of your enemies with the help of your great strength!@n", true, vict, 0, 0, TO_CHAR);
+      act("@r$n@G manages to dodge nimbly through the combined attack!@n", true, vict, 0, 0, TO_ROOM);
       return;
     }
   }
-  if (burn == TRUE) {
+  if (burn == true) {
     if (!char_aff_flagged(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !char_is_demon(vict) && !char_get_bonuses(vict, BONUS_FIREPROOF)) {
       send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
       send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
@@ -566,15 +566,15 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
       char_aff_set(vict, AFF_BURNED, true);
     }
   }
-  if (shocked == TRUE) {
+  if (shocked == true) {
     if (!char_aff_flagged(vict, AFF_SHOCKED) && rand_number(1, 4) == 4 && !char_aff_flagged(vict, AFF_SANCTUARY)) {
-      act("@MYour mind has been shocked!@n", TRUE, vict, 0, 0, TO_CHAR);
-      act("@M$n@m's mind has been shocked!@n", TRUE, vict, 0, 0, TO_ROOM);
+      act("@MYour mind has been shocked!@n", true, vict, 0, 0, TO_CHAR);
+      act("@M$n@m's mind has been shocked!@n", true, vict, 0, 0, TO_ROOM);
       char_aff_set(vict, AFF_SHOCKED, true);
     }
   }
-  hurt(0, 0, ch, vict, NULL, totki, 1);
-  if (same == TRUE) {
+  hurt(0, 0, ch, vict, nullptr, totki, 1);
+  if (same == true) {
     for (f = ch->followers; f; f = f->next) {
       send_to_char(f->follower, "@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
     }
@@ -585,7 +585,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
 int check_ruby(struct char_data *ch)
 {
 
-  struct obj_data *obj, *next_obj = NULL, *ruby = NULL;
+  struct obj_data *obj, *next_obj = nullptr, *ruby = nullptr;
   int found = 0;
 
   for (obj = ch->carrying; obj; obj = next_obj) {
@@ -599,8 +599,8 @@ int check_ruby(struct char_data *ch)
   }
 
   if (found > 0) {
-    act("@RYour $p@R flares up and disappears. Your fire attack has been aided!@n", TRUE, ch, ruby, 0, TO_CHAR);
-    act("@R$n's@R $p@R flares up and disappears!@n", TRUE, ch, ruby, 0, TO_ROOM);
+    act("@RYour $p@R flares up and disappears. Your fire attack has been aided!@n", true, ch, ruby, 0, TO_CHAR);
+    act("@R$n's@R $p@R flares up and disappears!@n", true, ch, ruby, 0, TO_ROOM);
     extract_obj(ruby);
     return (1);
   }
@@ -685,11 +685,11 @@ void handle_knockdown(struct char_data *ch)
   }
 
   if (chance > axion_dice(0)) {
-    act("@mYou are @GALMOST@m knocked off your feet, but your great balance helps you keep your footing!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@W$n@m is @GALMOST@m knocked off $s feet, but $s great balance helps $m keep $s footing!@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@mYou are @GALMOST@m knocked off your feet, but your great balance helps you keep your footing!@n", true, ch, 0, 0, TO_CHAR);
+    act("@W$n@m is @GALMOST@m knocked off $s feet, but $s great balance helps $m keep $s footing!@n", true, ch, 0, 0, TO_ROOM);
   } else {
-    act("@mYou are knocked off your feet!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@W$n@m is knocked off $s feet!@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@mYou are knocked off your feet!@n", true, ch, 0, 0, TO_CHAR);
+    act("@W$n@m is knocked off $s feet!@n", true, ch, 0, 0, TO_ROOM);
     char_set_position(ch, POS_SITTING);
   }
 }
@@ -832,11 +832,11 @@ int backstab(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg
     int defender_roll = char_get_skill(vict, SKILL_SPOT) + char_get_skill(vict, SKILL_LISTEN) + char_get_aff_abils_dex(ch) + rand_number(-5, 5);
 
     if (attacker_roll > defender_roll) {
-      act("@RYou manage to sneak behind @r$N@R and stab $M in the back!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@RYou feel @r$n's@R dagger thrust into your back unexpectantly!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@r$n@R sneaks up behind @r$N@R and stabs $M in the back!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@RYou manage to sneak behind @r$N@R and stab $M in the back!@n", true, ch, 0, vict, TO_CHAR);
+      act("@RYou feel @r$n's@R dagger thrust into your back unexpectantly!@n", true, ch, 0, vict, TO_VICT);
+      act("@r$n@R sneaks up behind @r$N@R and stabs $M in the back!@n", true, ch, 0, vict, TO_NOTVICT);
       dmg += dmg * bonus;
-      hurt(0, 0, ch, vict, NULL, dmg, 0);
+      hurt(0, 0, ch, vict, nullptr, dmg, 0);
       return (1);
     }
     return (0);
@@ -847,7 +847,7 @@ int backstab(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg
 void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspot)
 {
 
-  int chance = 0, decap = 0, decapitate = FALSE;
+  int chance = 0, decap = 0, decapitate = false;
   int roll_to_beat = rand_number(1, 10000);
 
   if (wlvl == 1) {
@@ -872,7 +872,7 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
   }
 
   if (decap >= roll_to_beat && hitspot == 4) {
-    decapitate = TRUE;
+    decapitate = true;
   } else if (chance < roll_to_beat) {
     return;
   }
@@ -881,10 +881,10 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
     return;
   }
 
-  if (decapitate == TRUE) {
-    act("@R$N's@r head is cut off in the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@RYOUR head is cut off in the attack!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@R$N's@rhead is cut off in the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  if (decapitate == true) {
+    act("@R$N's@r head is cut off in the attack!@n", true, ch, 0, vict, TO_CHAR);
+    act("@RYOUR head is cut off in the attack!@n", true, ch, 0, vict, TO_VICT);
+    act("@R$N's@rhead is cut off in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
 
     remove_limb(vict, 0);
     die(vict, ch);
@@ -911,18 +911,18 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
           if (char_plr_flagged(vict, PLR_CLARM)) {
             char_plr_set(vict, PLR_CLARM, false);
           }
-          act("@R$N@r loses $s left arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@RYOU lose your left arm!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r loses $s left arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r loses $s left arm!@n", true, ch, 0, vict, TO_CHAR);
+          act("@RYOU lose your left arm!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r loses $s left arm!@n", true, ch, 0, vict, TO_NOTVICT);
           remove_limb(vict, 2);
         } else if (char_get_limb_condition(vict, (1) - 1) > 0) {
           char_set_limb_condition(vict, (1) - 1, 100);
           if (char_plr_flagged(vict, PLR_CRARM)) {
             char_plr_set(vict, PLR_CRARM, false);
           }
-          act("@R$N@r loses $s right arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@RYOU lose your right arm!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r loses $s right arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r loses $s right arm!@n", true, ch, 0, vict, TO_CHAR);
+          act("@RYOU lose your right arm!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r loses $s right arm!@n", true, ch, 0, vict, TO_NOTVICT);
           remove_limb(vict, 1);
         }
       } else { /* It's a leg */
@@ -931,18 +931,18 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
           if (char_plr_flagged(vict, PLR_CLLEG)) {
             char_plr_set(vict, PLR_CLLEG, false);
           }
-          act("@R$N@r loses $s left leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@RYOU lose your left leg!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r loses $s left leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r loses $s left leg!@n", true, ch, 0, vict, TO_CHAR);
+          act("@RYOU lose your left leg!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r loses $s left leg!@n", true, ch, 0, vict, TO_NOTVICT);
           remove_limb(vict, 4);
         } else if (char_get_limb_condition(vict, (3) - 1) > 0) {
           char_set_limb_condition(vict, (3) - 1, 100);
           if (char_plr_flagged(vict, PLR_CRLEG)) {
             char_plr_set(vict, PLR_CRLEG, false);
           }
-          act("@R$N@r loses $s right leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@RYOU lose your right leg!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r loses $s right leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r loses $s right leg!@n", true, ch, 0, vict, TO_CHAR);
+          act("@RYOU lose your right leg!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r loses $s right leg!@n", true, ch, 0, vict, TO_NOTVICT);
           remove_limb(vict, 3);
         }
       }
@@ -951,29 +951,29 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
         if (char_mob_flagged(vict, MOB_LARM)) {
           char_mob_set(vict, MOB_LARM, false);
           remove_limb(vict, 2);
-          act("@R$N@r loses $s left arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@RYOU lose your left arm!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r loses $s left arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r loses $s left arm!@n", true, ch, 0, vict, TO_CHAR);
+          act("@RYOU lose your left arm!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r loses $s left arm!@n", true, ch, 0, vict, TO_NOTVICT);
         } else if (char_mob_flagged(vict, MOB_RARM)) {
           char_mob_set(vict, MOB_RARM, false);
           remove_limb(vict, 1);
-          act("@R$N@r loses $s right arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@RYOU lose your right arm!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r loses $s right arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r loses $s right arm!@n", true, ch, 0, vict, TO_CHAR);
+          act("@RYOU lose your right arm!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r loses $s right arm!@n", true, ch, 0, vict, TO_NOTVICT);
         }
       } else {
         if (char_mob_flagged(vict, MOB_LLEG)) {
           char_mob_set(vict, MOB_LLEG, false);
           remove_limb(vict, 4);
-          act("@R$N@r loses $s left leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@RYOU lose your left leg!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r loses $s left leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r loses $s left leg!@n", true, ch, 0, vict, TO_CHAR);
+          act("@RYOU lose your left leg!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r loses $s left leg!@n", true, ch, 0, vict, TO_NOTVICT);
         } else if (char_mob_flagged(vict, MOB_RLEG)) {
           char_mob_set(vict, MOB_RLEG, false);
           remove_limb(vict, 3);
-          act("@R$N@r loses $s right leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@RYOU lose your right leg!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r loses $s right leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r loses $s right leg!@n", true, ch, 0, vict, TO_CHAR);
+          act("@RYOU lose your right leg!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r loses $s right leg!@n", true, ch, 0, vict, TO_NOTVICT);
         }
       }
     }
@@ -1065,8 +1065,8 @@ static int physical_mastery(struct char_data *ch)
 static int64_t advanced_energy(struct char_data *ch, int64_t dmg)
 {
 
-  if (ch == NULL) {
-    return (FALSE);
+  if (ch == nullptr) {
+    return (false);
   }
 
   double rate = 0.00;
@@ -1081,15 +1081,15 @@ static int64_t advanced_energy(struct char_data *ch, int64_t dmg)
       if (char_get_charge(ch) + add > getMaxKI(ch)) {
         if (char_get_charge(ch) < getMaxKI(ch)) {
           char_set_charge(ch, getMaxKI(ch));
-          act("@MYou leech some of the energy away!@n", TRUE, ch, 0, 0, TO_CHAR);
-          act("@m$n@M leeches some of the energy away!@n", TRUE, ch, 0, 0, TO_ROOM);
+          act("@MYou leech some of the energy away!@n", true, ch, 0, 0, TO_CHAR);
+          act("@m$n@M leeches some of the energy away!@n", true, ch, 0, 0, TO_ROOM);
         } else {
           send_to_char(ch, "@MYou can't leech because there is too much charged energy for you to handle!@n\r\n");
         }
       } else {
         char_set_charge(ch, char_get_charge(ch) + (add));
-        act("@MYou leech some of the energy away!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@m$n@M leeches some of the energy away!@n", TRUE, ch, 0, 0, TO_ROOM);
+        act("@MYou leech some of the energy away!@n", true, ch, 0, 0, TO_CHAR);
+        act("@m$n@M leeches some of the energy away!@n", true, ch, 0, 0, TO_ROOM);
       }
 
     } /* End of rate check */
@@ -1101,8 +1101,8 @@ static int64_t advanced_energy(struct char_data *ch, int64_t dmg)
 
     if (rate > 0.00) {
       if (char_get_charge(ch) > 0 && rand_number(1, 100) <= 10) {
-        act("@MThe attack causes your weak control to slip and you are shocked by your own charged energy!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@m$n@M suffers shock from their own charged energy!@n", TRUE, ch, 0, 0, TO_ROOM);
+        act("@MThe attack causes your weak control to slip and you are shocked by your own charged energy!@n", true, ch, 0, 0, TO_CHAR);
+        act("@m$n@M suffers shock from their own charged energy!@n", true, ch, 0, 0, TO_ROOM);
         decCurHealth(ch, char_get_charge(ch) / 4, 1);
       }
       add = dmg * rate;
@@ -1117,12 +1117,12 @@ int roll_accuracy(struct char_data *ch, int skill, bool kiatt)
 
   if (!char_is_npc(ch)) {
     if (char_get_bonuses(ch, BONUS_ACCURATE)) {
-      if (kiatt == TRUE)
+      if (kiatt == true)
         skill += skill * 0.10;
       else
         skill += skill * 0.20;
     } else if (char_get_bonuses(ch, BONUS_POORDEPTH)) {
-      if (kiatt == TRUE)
+      if (kiatt == true)
         skill -= skill * 0.10;
       else
         skill -= skill * 0.20;
@@ -1388,9 +1388,9 @@ static void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, 
   if (!is_sparring(ch)) {
     if (area == 0) { /* Arms */
       if (char_get_limb_condition(vict, (2) - 1) - dmg <= 0) {
-        act("@RYour attack @YDESTROYS @r$N's@R left arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@r$n's@R attack @YDESTROYS@R YOUR left arm!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@r$n's@R attack @YDESTROYS @r$N's@R left arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@RYour attack @YDESTROYS @r$N's@R left arm!@n", true, ch, 0, vict, TO_CHAR);
+        act("@r$n's@R attack @YDESTROYS@R YOUR left arm!@n", true, ch, 0, vict, TO_VICT);
+        act("@r$n's@R attack @YDESTROYS @r$N's@R left arm!@n", true, ch, 0, vict, TO_NOTVICT);
         char_set_limb_condition(vict, (2) - 1, 0);
         if (char_plr_flagged(vict, PLR_THANDW)) {
           char_plr_set(vict, PLR_THANDW, false);
@@ -1401,13 +1401,13 @@ static void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, 
         remove_limb(vict, 2);
       } else if (char_get_limb_condition(vict, (2) - 1) > 0) {
         char_set_limb_condition(vict, (2) - 1, char_get_limb_condition(vict, (2) - 1) - (dmg));
-        act("@RYour attack hurts @r$N's@R left arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@r$n's@R attack hurts YOUR left arm!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@r$n's@R attack hurts @r$N's@R left arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@RYour attack hurts @r$N's@R left arm!@n", true, ch, 0, vict, TO_CHAR);
+        act("@r$n's@R attack hurts YOUR left arm!@n", true, ch, 0, vict, TO_VICT);
+        act("@r$n's@R attack hurts @r$N's@R left arm!@n", true, ch, 0, vict, TO_NOTVICT);
       } else if (char_get_limb_condition(vict, (1) - 1) - dmg <= 0) {
-        act("@RYour attack @YDESTROYS @r$N's@R right arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@r$n's@R attack @YDESTROYS@R YOUR right arm!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@r$n's@R attack @YDESTROYS @r$N's@R right arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@RYour attack @YDESTROYS @r$N's@R right arm!@n", true, ch, 0, vict, TO_CHAR);
+        act("@r$n's@R attack @YDESTROYS@R YOUR right arm!@n", true, ch, 0, vict, TO_VICT);
+        act("@r$n's@R attack @YDESTROYS @r$N's@R right arm!@n", true, ch, 0, vict, TO_NOTVICT);
         char_set_limb_condition(vict, (1) - 1, 0);
         if (char_plr_flagged(vict, PLR_THANDW)) {
           char_plr_set(vict, PLR_THANDW, false);
@@ -1418,15 +1418,15 @@ static void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, 
         remove_limb(vict, 2);
       } else if (char_get_limb_condition(vict, (1) - 1) > 0) {
         char_set_limb_condition(vict, (1) - 1, char_get_limb_condition(vict, (1) - 1) - (dmg));
-        act("@RYour attack hurts @r$N's@R right arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@r$n's@R attack hurts YOUR right arm!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@r$n's@R attack hurts @r$N's@R right arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@RYour attack hurts @r$N's@R right arm!@n", true, ch, 0, vict, TO_CHAR);
+        act("@r$n's@R attack hurts YOUR right arm!@n", true, ch, 0, vict, TO_VICT);
+        act("@r$n's@R attack hurts @r$N's@R right arm!@n", true, ch, 0, vict, TO_NOTVICT);
       }
     } else if (area == 1) { /* Legs */
       if (char_get_limb_condition(vict, (4) - 1) - dmg <= 0) {
-        act("@RYour attack @YDESTROYS @r$N's@R left leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@r$n's@R attack @YDESTROYS@R YOUR left leg!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@r$n's@R attack @YDESTROYS @r$N's@R left leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@RYour attack @YDESTROYS @r$N's@R left leg!@n", true, ch, 0, vict, TO_CHAR);
+        act("@r$n's@R attack @YDESTROYS@R YOUR left leg!@n", true, ch, 0, vict, TO_VICT);
+        act("@r$n's@R attack @YDESTROYS @r$N's@R left leg!@n", true, ch, 0, vict, TO_NOTVICT);
         char_set_limb_condition(vict, (4) - 1, 0);
         if (char_plr_flagged(vict, PLR_THANDW)) {
           char_plr_set(vict, PLR_THANDW, false);
@@ -1437,13 +1437,13 @@ static void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, 
         remove_limb(vict, 2);
       } else if (char_get_limb_condition(vict, (4) - 1) > 0) {
         char_set_limb_condition(vict, (4) - 1, char_get_limb_condition(vict, (4) - 1) - (dmg));
-        act("@RYour attack hurts @r$N's@R left leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@r$n's@R attack hurts YOUR left leg!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@r$n's@R attack hurts @r$N's@R left leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@RYour attack hurts @r$N's@R left leg!@n", true, ch, 0, vict, TO_CHAR);
+        act("@r$n's@R attack hurts YOUR left leg!@n", true, ch, 0, vict, TO_VICT);
+        act("@r$n's@R attack hurts @r$N's@R left leg!@n", true, ch, 0, vict, TO_NOTVICT);
       } else if (char_get_limb_condition(vict, (3) - 1) - dmg <= 0) {
-        act("@RYour attack @YDESTROYS @r$N's@R right leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@r$n's@R attack @YDESTROYS@R YOUR right leg!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@r$n's@R attack @YDESTROYS @r$N's@R right leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@RYour attack @YDESTROYS @r$N's@R right leg!@n", true, ch, 0, vict, TO_CHAR);
+        act("@r$n's@R attack @YDESTROYS@R YOUR right leg!@n", true, ch, 0, vict, TO_VICT);
+        act("@r$n's@R attack @YDESTROYS @r$N's@R right leg!@n", true, ch, 0, vict, TO_NOTVICT);
         char_set_limb_condition(vict, (3) - 1, 0);
         if (char_plr_flagged(vict, PLR_THANDW)) {
           char_plr_set(vict, PLR_THANDW, false);
@@ -1454,9 +1454,9 @@ static void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, 
         remove_limb(vict, 2);
       } else if (char_get_limb_condition(vict, (3) - 1) > 0) {
         char_set_limb_condition(vict, (3) - 1, char_get_limb_condition(vict, (3) - 1) - (dmg));
-        act("@RYour attack hurts @r$N's@R right leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@r$n's@R attack hurts YOUR right leg!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@r$n's@R attack hurts @r$N's@R right leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@RYour attack hurts @r$N's@R right leg!@n", true, ch, 0, vict, TO_CHAR);
+        act("@r$n's@R attack hurts YOUR right leg!@n", true, ch, 0, vict, TO_VICT);
+        act("@r$n's@R attack hurts @r$N's@R right leg!@n", true, ch, 0, vict, TO_NOTVICT);
       }
     }
   }
@@ -1586,30 +1586,30 @@ static void damage_eq(struct char_data *vict, int location)
     if (obj_get_value(eq, VAL_ALL_HEALTH) <= 0) {
       obj_set_value(eq, VAL_ALL_HEALTH, 0);
       obj_extra_set(eq, ITEM_BROKEN, true);
-      act("@WYour $p@W completely breaks!@n", FALSE, 0, eq, vict, TO_VICT);
-      act("@C$N's@W $p@W completely breaks!@n", FALSE, 0, eq, vict, TO_NOTVICT);
+      act("@WYour $p@W completely breaks!@n", false, 0, eq, vict, TO_VICT);
+      act("@C$N's@W $p@W completely breaks!@n", false, 0, eq, vict, TO_NOTVICT);
       perform_remove(vict, location);
       if (!char_is_npc(vict))
         save_char(vict);
     } else if (obj_get_value(eq, VAL_ALL_MATERIAL) == MATERIAL_LEATHER || obj_get_value(eq, VAL_ALL_MATERIAL) == MATERIAL_COTTON || obj_get_value(eq, VAL_ALL_MATERIAL) == MATERIAL_SILK) {
-      act("@WYour $p@W rips a little!@n", FALSE, 0, eq, vict, TO_VICT);
-      act("@C$N's@W $p@W rips a little!@n", FALSE, 0, eq, vict, TO_NOTVICT);
+      act("@WYour $p@W rips a little!@n", false, 0, eq, vict, TO_VICT);
+      act("@C$N's@W $p@W rips a little!@n", false, 0, eq, vict, TO_NOTVICT);
       if (char_aff_flagged(vict, AFF_BLESS)) {
         send_to_char(vict, "@c...But your blessing seems to have partly mended this damage.@n\r\n");
-        act("@c...but @C$N's@c body glows blue for a moment and the damage mends a little.@n", TRUE, 0, 0, vict, TO_NOTVICT);
+        act("@c...but @C$N's@c body glows blue for a moment and the damage mends a little.@n", true, 0, 0, vict, TO_NOTVICT);
       } else if (char_aff_flagged(vict, AFF_CURSE)) {
         send_to_char(vict, "@r...and your curse seems to have made the damage three times worse!@n\r\n");
-        act("@c...but @C$N's@c body glows red for a moment and the damage grow three times worse!@n", TRUE, 0, 0, vict, TO_NOTVICT);
+        act("@c...but @C$N's@c body glows red for a moment and the damage grow three times worse!@n", true, 0, 0, vict, TO_NOTVICT);
       }
     } else {
-      act("@WYour $p@W cracks a little!@n", FALSE, 0, eq, vict, TO_VICT);
-      act("@C$N's@W $p@W cracks a little!@n", FALSE, 0, eq, vict, TO_NOTVICT);
+      act("@WYour $p@W cracks a little!@n", false, 0, eq, vict, TO_VICT);
+      act("@C$N's@W $p@W cracks a little!@n", false, 0, eq, vict, TO_NOTVICT);
       if (char_aff_flagged(vict, AFF_BLESS)) {
         send_to_char(vict, "@c...But your blessing seems to have partly mended this damage.@n\r\n");
-        act("@c...but @C$N's@c body glows blue for a moment and the damage mends a little.@n", TRUE, 0, 0, vict, TO_NOTVICT);
+        act("@c...but @C$N's@c body glows blue for a moment and the damage mends a little.@n", true, 0, 0, vict, TO_NOTVICT);
       } else if (char_aff_flagged(vict, AFF_CURSE)) {
         send_to_char(vict, "@r...and your curse seems to have made the damage three times worse!@n\r\n");
-        act("@c...but @C$N's@c body glows red for a moment and the damage grow three times worse!@n", TRUE, 0, 0, vict, TO_NOTVICT);
+        act("@c...but @C$N's@c body glows red for a moment and the damage grow three times worse!@n", true, 0, 0, vict, TO_NOTVICT);
       }
     }
   }
@@ -1649,16 +1649,16 @@ void huge_update()
             bonus = 2;
           }
 
-          act("@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", TRUE, obj_get_target(k), 0, 0, TO_CHAR);
-          act("@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", TRUE, obj_get_target(k), 0, 0, TO_ROOM);
+          act("@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", true, obj_get_target(k), 0, 0, TO_CHAR);
+          act("@WThe large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", true, obj_get_target(k), 0, 0, TO_ROOM);
           send_to_room(obj_get_in_room(k), "\r\n");
           if (getCurPL(obj_get_target(k)) * bonus < obj_get_kicharge(k) * 5) {
 
-            act("@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", TRUE, obj_get_target(k), 0, 0, TO_CHAR);
-            act("@C$n@W's strength is no match for the power of the attack! It slowly grinds into $m before exploding into a massive blast!@n", TRUE, obj_get_target(k), 0, 0, TO_ROOM);
+            act("@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", true, obj_get_target(k), 0, 0, TO_CHAR);
+            act("@C$n@W's strength is no match for the power of the attack! It slowly grinds into $m before exploding into a massive blast!@n", true, obj_get_target(k), 0, 0, TO_ROOM);
             skill = init_skill(ch, SKILL_GENKIDAMA); /* Set skill value */
             dmg   = obj_get_kicharge(k) * 1.25;
-            hurt(0, 0, ch, obj_get_target(k), NULL, dmg, 1);
+            hurt(0, 0, ch, obj_get_target(k), nullptr, dmg, 1);
             dmg /= 2;
 
             /* Hit those in the current room. */
@@ -1694,19 +1694,19 @@ void huge_update()
               dge = handle_dodge(vict);
               if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
                   (getCurST(vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-                act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_CHAR);
-                act("@cYou disappear, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_VICT);
-                act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+                act("@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_CHAR);
+                act("@cYou disappear, avoiding the explosion!@n", false, ch, 0, vict, TO_VICT);
+                act("@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_NOTVICT);
                 char_aff_set(vict, AFF_ZANZOKEN, false);
                 pcost(vict, 0, getEffMaxPL(vict) / 200);
-                hurt(0, 0, ch, vict, NULL, 0, 1);
+                hurt(0, 0, ch, vict, nullptr, 0, 1);
                 continue;
               }
               if (dge + rand_number(-10, 5) > skill) {
-                act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
-                act("@WYou manage to escape the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
-                act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-                hurt(0, 0, ch, vict, NULL, 0, 1);
+                act("@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_CHAR);
+                act("@WYou manage to escape the explosion!@n", true, ch, 0, vict, TO_VICT);
+                act("@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+                hurt(0, 0, ch, vict, nullptr, 0, 1);
                 improve_skill(vict, SKILL_DODGE, 0);
                 continue;
               }
@@ -1727,10 +1727,10 @@ void huge_update()
                   char_set_exp(vict, char_get_exp(vict) - (char_get_exp(vict) * loss));
                 }
               }
-              act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
-              act("@RYou are caught by the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
-              act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-              hurt(0, 0, ch, vict, NULL, dmg, 1);
+              act("@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_CHAR);
+              act("@RYou are caught by the explosion!@n", true, ch, 0, vict, TO_VICT);
+              act("@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+              hurt(0, 0, ch, vict, nullptr, dmg, 1);
               continue;
             }
             rroom_set_dmg(obj_get_in_room(k), 100);
@@ -1743,9 +1743,9 @@ void huge_update()
             continue;
           } /* It isn't stopped! */
           else {
-            act("@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", TRUE, obj_get_target(k), 0, 0, TO_CHAR);
-            act("@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", TRUE, obj_get_target(k), 0, 0, TO_ROOM);
-            hurt(0, 0, ch, obj_get_target(k), NULL, 0, 1);
+            act("@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", true, obj_get_target(k), 0, 0, TO_CHAR);
+            act("@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", true, obj_get_target(k), 0, 0, TO_ROOM);
+            hurt(0, 0, ch, obj_get_target(k), nullptr, 0, 1);
             decCurST(obj_get_target(k), obj_get_kicharge(k) / 4, 0);
             extract_obj(k);
             continue;
@@ -1781,26 +1781,26 @@ void huge_update()
             dge = handle_dodge(vict);
             if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
                 (getCurST(vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-              act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_CHAR);
-              act("@cYou disappear, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_VICT);
-              act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+              act("@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_CHAR);
+              act("@cYou disappear, avoiding the explosion!@n", false, ch, 0, vict, TO_VICT);
+              act("@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_NOTVICT);
               char_aff_set(vict, AFF_ZANZOKEN, false);
               pcost(vict, 0, getEffMaxPL(vict) / 200);
-              hurt(0, 0, ch, vict, NULL, 0, 1);
+              hurt(0, 0, ch, vict, nullptr, 0, 1);
               continue;
             }
             if (dge + rand_number(-10, 5) > skill) {
-              act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
-              act("@WYou manage to escape the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
-              act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-              hurt(0, 0, ch, vict, NULL, 0, 1);
+              act("@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_CHAR);
+              act("@WYou manage to escape the explosion!@n", true, ch, 0, vict, TO_VICT);
+              act("@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+              hurt(0, 0, ch, vict, nullptr, 0, 1);
               improve_skill(vict, SKILL_DODGE, 0);
               continue;
             }
-            act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
-            act("@RYou are caught by the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
-            act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-            hurt(0, 0, ch, vict, NULL, dmg, 1);
+            act("@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_CHAR);
+            act("@RYou are caught by the explosion!@n", true, ch, 0, vict, TO_VICT);
+            act("@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+            hurt(0, 0, ch, vict, nullptr, dmg, 1);
             continue;
           }
           rroom_set_dmg(obj_get_in_room(k), 100);
@@ -1821,16 +1821,16 @@ void huge_update()
             bonus = 2;
           }
 
-          act("@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", TRUE, obj_get_target(k), 0, 0, TO_CHAR);
-          act("@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", TRUE, obj_get_target(k), 0, 0, TO_ROOM);
+          act("@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on YOU! It eclipses everything above you as it crushes down into you! You struggle against it with all your might!@n", true, obj_get_target(k), 0, 0, TO_CHAR);
+          act("@WThe large @mG@Me@wn@mo@Mc@wi@md@Me@W descends on @C$n@W! It completely obscures $m from view as it crushes into $s body! It appears to be facing some resistance from $m!@n", true, obj_get_target(k), 0, 0, TO_ROOM);
           send_to_room(obj_get_in_room(k), "\r\n");
           if (getCurPL(obj_get_target(k)) * bonus < obj_get_kicharge(k) * 10) {
 
-            act("@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", TRUE, obj_get_target(k), 0, 0, TO_CHAR);
-            act("@C$n@W's strength is no match for the power of the attack! It slowly grinds into $m before exploding into a massive blast!@n", TRUE, obj_get_target(k), 0, 0, TO_ROOM);
+            act("@WYour strength is no match for the power of the attack! It slowly grinds into you before exploding into a massive blast!@n", true, obj_get_target(k), 0, 0, TO_CHAR);
+            act("@C$n@W's strength is no match for the power of the attack! It slowly grinds into $m before exploding into a massive blast!@n", true, obj_get_target(k), 0, 0, TO_ROOM);
             skill = init_skill(ch, SKILL_GENOCIDE); /* Set skill value */
             dmg   = obj_get_kicharge(k);
-            hurt(0, 0, ch, obj_get_target(k), NULL, dmg, 1);
+            hurt(0, 0, ch, obj_get_target(k), nullptr, dmg, 1);
             dmg /= 2;
 
             /* Hit those in the current room. */
@@ -1866,18 +1866,18 @@ void huge_update()
               dge = handle_dodge(vict);
               if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
                   (getCurST(vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-                act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_CHAR);
-                act("@cYou disappear, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_VICT);
-                act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+                act("@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_CHAR);
+                act("@cYou disappear, avoiding the explosion!@n", false, ch, 0, vict, TO_VICT);
+                act("@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_NOTVICT);
                 char_aff_set(vict, AFF_ZANZOKEN, false);
                 pcost(vict, 0, getEffMaxPL(vict) / 200);
                 continue;
               }
               if (dge + rand_number(-10, 5) > skill) {
-                act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
-                act("@WYou manage to escape the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
-                act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-                hurt(0, 0, ch, vict, NULL, 0, 1);
+                act("@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_CHAR);
+                act("@WYou manage to escape the explosion!@n", true, ch, 0, vict, TO_VICT);
+                act("@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+                hurt(0, 0, ch, vict, nullptr, 0, 1);
                 improve_skill(vict, SKILL_DODGE, 0);
                 continue;
               }
@@ -1898,10 +1898,10 @@ void huge_update()
                   char_set_exp(vict, char_get_exp(vict) - (char_get_exp(vict) * loss));
                 }
               }
-              act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
-              act("@RYou are caught by the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
-              act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-              hurt(0, 0, ch, vict, NULL, dmg, 1);
+              act("@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_CHAR);
+              act("@RYou are caught by the explosion!@n", true, ch, 0, vict, TO_VICT);
+              act("@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+              hurt(0, 0, ch, vict, nullptr, dmg, 1);
               continue;
             }
             rroom_set_dmg(obj_get_in_room(k), 100);
@@ -1913,9 +1913,9 @@ void huge_update()
             continue;
           } /* It isn't stopped! */
           else {
-            act("@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", TRUE, obj_get_target(k), 0, 0, TO_CHAR);
-            act("@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", TRUE, obj_get_target(k), 0, 0, TO_ROOM);
-            hurt(0, 0, ch, obj_get_target(k), NULL, 0, 1);
+            act("@WYou manage to overpower the attack! You lift up into the sky slowly with it and toss it up and away out of sight!@n", true, obj_get_target(k), 0, 0, TO_CHAR);
+            act("@C$n@W manages to unbelievably overpower the attack! It is lifted up into the sky and tossed away dramaticly!@n", true, obj_get_target(k), 0, 0, TO_ROOM);
+            hurt(0, 0, ch, obj_get_target(k), nullptr, 0, 1);
             decCurST(obj_get_target(k), obj_get_kicharge(k) / 4, 0);
             extract_obj(k);
             continue;
@@ -1951,25 +1951,25 @@ void huge_update()
             dge = handle_dodge(vict);
             if (((!char_is_npc(vict) && char_is_icer(vict) && rand_number(1, 30) >= 28) || char_aff_flagged(vict, AFF_ZANZOKEN)) &&
                 (getCurST(vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
-              act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_CHAR);
-              act("@cYou disappear, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_VICT);
-              act("@C$N@c disappears, avoiding the explosion!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+              act("@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_CHAR);
+              act("@cYou disappear, avoiding the explosion!@n", false, ch, 0, vict, TO_VICT);
+              act("@C$N@c disappears, avoiding the explosion!@n", false, ch, 0, vict, TO_NOTVICT);
               char_aff_set(vict, AFF_ZANZOKEN, false);
               pcost(vict, 0, getEffMaxPL(vict) / 200);
               continue;
             }
             if (dge + rand_number(-10, 5) > skill) {
-              act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
-              act("@WYou manage to escape the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
-              act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-              hurt(0, 0, ch, vict, NULL, 0, 1);
+              act("@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_CHAR);
+              act("@WYou manage to escape the explosion!@n", true, ch, 0, vict, TO_VICT);
+              act("@c$N@W manages to escape the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+              hurt(0, 0, ch, vict, nullptr, 0, 1);
               improve_skill(vict, SKILL_DODGE, 0);
               continue;
             }
-            act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
-            act("@RYou are caught by the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
-            act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-            hurt(0, 0, ch, vict, NULL, dmg, 1);
+            act("@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_CHAR);
+            act("@RYou are caught by the explosion!@n", true, ch, 0, vict, TO_VICT);
+            act("@R$N@r is caught by the explosion!@n", true, ch, 0, vict, TO_NOTVICT);
+            hurt(0, 0, ch, vict, nullptr, dmg, 1);
             continue;
           }
           rroom_set_dmg(obj_get_in_room(k), 100);
@@ -1985,7 +1985,7 @@ void huge_update()
       extract_obj(k);
       continue;
     }
-    act("$p@W descends slowly towards the ground!@n", TRUE, 0, k, 0, TO_ROOM);
+    act("$p@W descends slowly towards the ground!@n", true, 0, k, 0, TO_ROOM);
     obj_set_distance(k, obj_get_distance(k) - 1);
   }
 }
@@ -2014,25 +2014,25 @@ void homing_update()
 
       if (obj_get_vnum(k) == 80) { // Tsuihidan
         if (obj_get_in_room(k) != char_get_in_room(vict)) {
-          act("@wThe $p@w pursues after you!@n", TRUE, vict, k, 0, TO_CHAR);
-          act("@wThe $p@W pursues after @C$n@w!@n", TRUE, vict, k, 0, TO_ROOM);
+          act("@wThe $p@w pursues after you!@n", true, vict, k, 0, TO_CHAR);
+          act("@wThe $p@W pursues after @C$n@w!@n", true, vict, k, 0, TO_ROOM);
           obj_from_room(k);
           obj_to_room(k, char_get_in_room(vict));
           continue;
         }
-        act("@RThe $p@R makes a tight turn and rockets straight for you!@n", TRUE, vict, k, 0, TO_CHAR);
-        act("@RThe $p@R makes a tight turn and rockets straight for @r$n@n", TRUE, vict, k, 0, TO_ROOM);
+        act("@RThe $p@R makes a tight turn and rockets straight for you!@n", true, vict, k, 0, TO_CHAR);
+        act("@RThe $p@R makes a tight turn and rockets straight for @r$n@n", true, vict, k, 0, TO_ROOM);
         if (handle_parry(vict) < rand_number(1, 140)) {
-          act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_CHAR);
-          act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_ROOM);
+          act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true, vict, k, 0, TO_CHAR);
+          act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", true, vict, k, 0, TO_ROOM);
           int64_t dmg = obj_get_kicharge(k);
           extract_obj(k);
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
+          hurt(0, 0, ch, vict, nullptr, dmg, 1);
           continue;
         }
         if (rand_number(1, 3) > 1) {
-          act("@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n", TRUE, vict, k, 0, TO_CHAR);
-          act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", TRUE, vict, k, 0, TO_ROOM);
+          act("@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n", true, vict, k, 0, TO_CHAR);
+          act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", true, vict, k, 0, TO_ROOM);
           obj_set_kicharge(k, obj_get_kicharge(k) - (obj_get_kicharge(k) / 10));
           if (obj_get_kicharge(k) <= 0) {
             send_to_room(obj_get_in_room(k), "%s has lost all its energy and disappears.\r\n", k->short_description);
@@ -2040,8 +2040,8 @@ void homing_update()
           }
           continue;
         }
-        act("@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n", TRUE, vict, k, 0, TO_CHAR);
-        act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n", TRUE, vict, k, 0, TO_ROOM);
+        act("@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, 0, TO_CHAR);
+        act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, 0, TO_ROOM);
         if (rroom_get_dmg(char_get_in_room(vict)) <= 95) {
           rroom_set_dmg(char_get_in_room(vict), rroom_get_dmg(char_get_in_room(vict)) + (5));
         }
@@ -2050,28 +2050,28 @@ void homing_update()
         continue;
       } else if (obj_get_vnum(k) == 81 || obj_get_vnum(k) == 84) { // Spirit Ball
         if (obj_get_in_room(k) != char_get_in_room(vict)) {
-          act("@wYou lose sight of @C$N@W and let $p@W fly away!@n", TRUE, ch, k, vict, TO_CHAR);
-          act("@wYou manage to escape @C$n's@W $p@W!@n", TRUE, ch, k, vict, TO_VICT);
-          act("@C$n@W loses sight of @c$N@W and lets $s $p@W fly away!@n", TRUE, ch, k, vict, TO_NOTVICT);
+          act("@wYou lose sight of @C$N@W and let $p@W fly away!@n", true, ch, k, vict, TO_CHAR);
+          act("@wYou manage to escape @C$n's@W $p@W!@n", true, ch, k, vict, TO_VICT);
+          act("@C$n@W loses sight of @c$N@W and lets $s $p@W fly away!@n", true, ch, k, vict, TO_NOTVICT);
           extract_obj(k);
           continue;
         }
-        act("@RYou move your hand and direct $p@R after @r$N@R!@n", TRUE, ch, k, vict, TO_CHAR);
-        act("@r$n@R moves $s hand and directs $p@R after YOU!@n", TRUE, ch, k, vict, TO_VICT);
-        act("@r$n@R moves $s hand and directs $p@R after @r$N@R!@n", TRUE, ch, k, vict, TO_NOTVICT);
+        act("@RYou move your hand and direct $p@R after @r$N@R!@n", true, ch, k, vict, TO_CHAR);
+        act("@r$n@R moves $s hand and directs $p@R after YOU!@n", true, ch, k, vict, TO_VICT);
+        act("@r$n@R moves $s hand and directs $p@R after @r$N@R!@n", true, ch, k, vict, TO_NOTVICT);
         if (handle_parry(vict) < rand_number(1, 140)) {
           if (obj_get_vnum(k) != 84) {
-            act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_CHAR);
-            act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_ROOM);
+            act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true, vict, k, 0, TO_CHAR);
+            act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", true, vict, k, 0, TO_ROOM);
             int64_t dmg = obj_get_kicharge(k);
             extract_obj(k);
-            hurt(0, 0, ch, vict, NULL, dmg, 1);
+            hurt(0, 0, ch, vict, nullptr, dmg, 1);
           } else if (obj_get_vnum(k) == 84) {
             int64_t dmg = obj_get_kicharge(k);
             if (dmg > getEffMaxPL(vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
-              act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
-              act("@rYou are cut in half by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
-              act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+              act("@R$N@r is cut in half by the attack!@n", true, ch, 0, vict, TO_CHAR);
+              act("@rYou are cut in half by the attack!@n", true, ch, 0, vict, TO_VICT);
+              act("@R$N@r is cut in half by the attack!@n", true, ch, 0, vict, TO_NOTVICT);
               die(vict, ch);
               if (char_aff_flagged(ch, AFF_GROUP)) {
                 group_gain(ch, vict);
@@ -2086,22 +2086,22 @@ void homing_update()
               }
             } else if (dmg > getEffMaxPL(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
               if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= getMaxKI(vict) / 40) {
-                act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
-                act("@rYou are cut in half by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
-                act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+                act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, 0, vict, TO_CHAR);
+                act("@rYou are cut in half by the attack but regenerate a moment later!@n", true, ch, 0, vict, TO_VICT);
+                act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, 0, vict, TO_NOTVICT);
                 decCurKI(vict, getMaxKI(vict) / 40, 0);
-                hurt(0, 0, ch, vict, NULL, dmg, 1);
+                hurt(0, 0, ch, vict, nullptr, dmg, 1);
               } else if (dmg > getEffMaxPL(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
                 if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= getMaxKI(vict) / 40) {
-                  act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
-                  act("@rYou are cut in half by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
-                  act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+                  act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, 0, vict, TO_CHAR);
+                  act("@rYou are cut in half by the attack but regenerate a moment later!@n", true, ch, 0, vict, TO_VICT);
+                  act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", true, ch, 0, vict, TO_NOTVICT);
                   decCurKI(vict, getMaxKI(vict) / 40, 0);
-                  hurt(0, 0, ch, vict, NULL, dmg, 1);
+                  hurt(0, 0, ch, vict, nullptr, dmg, 1);
                 } else {
-                  act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
-                  act("@rYou are cut in half by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
-                  act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+                  act("@R$N@r is cut in half by the attack!@n", true, ch, 0, vict, TO_CHAR);
+                  act("@rYou are cut in half by the attack!@n", true, ch, 0, vict, TO_VICT);
+                  act("@R$N@r is cut in half by the attack!@n", true, ch, 0, vict, TO_NOTVICT);
                   die(vict, ch);
                   if (char_aff_flagged(ch, AFF_GROUP)) {
                     group_gain(ch, vict);
@@ -2117,17 +2117,17 @@ void homing_update()
                 }
               }
             } else {
-              act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_CHAR);
-              act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_ROOM);
-              hurt(0, 0, ch, vict, NULL, dmg, 1);
+              act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true, vict, k, 0, TO_CHAR);
+              act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", true, vict, k, 0, TO_ROOM);
+              hurt(0, 0, ch, vict, nullptr, dmg, 1);
             }
             extract_obj(k);
           }
           continue;
         }
         if (rand_number(1, 3) > 1) {
-          act("@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n", TRUE, vict, k, 0, TO_CHAR);
-          act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", TRUE, vict, k, 0, TO_ROOM);
+          act("@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n", true, vict, k, 0, TO_CHAR);
+          act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", true, vict, k, 0, TO_ROOM);
           obj_set_kicharge(k, obj_get_kicharge(k) - (obj_get_kicharge(k) / 10));
           if (obj_get_kicharge(k) <= 0) {
             send_to_room(obj_get_in_room(k), "%s has lost all its energy and disappears.\r\n", k->short_description);
@@ -2135,8 +2135,8 @@ void homing_update()
           }
           continue;
         }
-        act("@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n", TRUE, vict, k, 0, TO_CHAR);
-        act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n", TRUE, vict, k, 0, TO_ROOM);
+        act("@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, 0, TO_CHAR);
+        act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n", true, vict, k, 0, TO_ROOM);
         if (rroom_get_dmg(char_get_in_room(vict)) <= 95) {
           rroom_set_dmg(char_get_in_room(vict), rroom_get_dmg(char_get_in_room(vict)) + (5));
         }
@@ -2364,7 +2364,7 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, cons
   char buf[200];
   char buf2[200];
   char buf3[200];
-  int foundv = FALSE, foundo = FALSE;
+  int foundv = false, foundo = false;
   int64_t dmg = 0;
   struct obj_data *tob, *next_obj;
   struct char_data *tch, *next_v;
@@ -2376,28 +2376,28 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, cons
       continue;
     if (tch == vict)
       continue;
-    if (!can_kill(ch, tch, NULL, 1))
+    if (!can_kill(ch, tch, nullptr, 1))
       continue;
 
-    if (rand_number(1, 101) >= 90 && foundv == FALSE) {
+    if (rand_number(1, 101) >= 90 && foundv == false) {
       if (handle_parry(tch) > rand_number(1, 140)) {
         sprintf(buf, "@C$N@W deflects your %s, sending it flying away!@n", sname);
         sprintf(buf2, "@WYou deflect @C$n's@W %s sending it flying away!@n", sname);
         sprintf(buf3, "@C$N@W deflects @c$n's@W %s sending it flying away!@n", sname);
-        act(buf, TRUE, ch, 0, tch, TO_CHAR);
-        act(buf2, TRUE, ch, 0, tch, TO_VICT);
-        act(buf3, TRUE, ch, 0, tch, TO_NOTVICT);
-        foundv = FALSE;
+        act(buf, true, ch, 0, tch, TO_CHAR);
+        act(buf2, true, ch, 0, tch, TO_VICT);
+        act(buf3, true, ch, 0, tch, TO_NOTVICT);
+        foundv = false;
       } else {
-        foundv = TRUE;
+        foundv = true;
         sprintf(buf, "@WYou watch as the deflected %s slams into @C$N@W, exploding with a roar of blinding light!@n", sname);
         sprintf(buf2, "@c$n@W watches as the deflected %s slams into you! The %s explodes with a roar of blinding light!@n", sname, sname);
         sprintf(buf3, "@c$n@W watches as the deflected %s slams into @C$N@W! The %s explodes with a roar of blinding light!@n", sname, sname);
-        act(buf, TRUE, vict, 0, tch, TO_CHAR);
-        act(buf2, TRUE, vict, 0, tch, TO_VICT);
-        act(buf3, TRUE, vict, 0, tch, TO_NOTVICT);
+        act(buf, true, vict, 0, tch, TO_CHAR);
+        act(buf2, true, vict, 0, tch, TO_VICT);
+        act(buf3, true, vict, 0, tch, TO_NOTVICT);
         dmg = damtype(ch, type, skill, attperc);
-        hurt(0, 0, ch, tch, NULL, dmg, 1);
+        hurt(0, 0, ch, tch, nullptr, dmg, 1);
         return;
       }
     }
@@ -2407,53 +2407,53 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, cons
     next_obj = tob->next_content;
     if (obj_extra_flagged(tob, ITEM_UNBREAKABLE))
       continue;
-    if (foundo == TRUE)
+    if (foundo == true)
       continue;
     if (rand_number(1, 101) >= 80) {
-      foundo = TRUE;
+      foundo = true;
       sprintf(buf, "@WYou watch as the deflected %s slams into @g$p@W, exploding with a roar of blinding light!@n", sname);
       sprintf(buf2, "@c$n@W watches as the deflected %s slams into @g$p@W, exploding with a roar of blinding light!@n", sname);
-      act(buf, TRUE, vict, tob, 0, TO_CHAR);
-      act(buf2, TRUE, vict, tob, 0, TO_ROOM);
-      hurt(0, 0, ch, NULL, tob, 25, 1);
+      act(buf, true, vict, tob, 0, TO_CHAR);
+      act(buf2, true, vict, tob, 0, TO_ROOM);
+      hurt(0, 0, ch, nullptr, tob, 25, 1);
       return;
     }
   }
 
-  if ((foundo == FALSE || foundv == FALSE) && !rroom_flagged(char_get_in_room(vict), ROOM_SPACE)) {
+  if ((foundo == false || foundv == false) && !rroom_flagged(char_get_in_room(vict), ROOM_SPACE)) {
     sprintf(buf, "@WYou watch as the deflected %s slams into the ground, exploding with a roar of blinding light!@n", sname);
     sprintf(buf2, "@WThe deflected %s slams into the ground, exploding with a roar of blinding light!@n", sname);
-    act(buf, TRUE, vict, 0, 0, TO_CHAR);
-    act(buf2, TRUE, vict, 0, 0, TO_ROOM);
+    act(buf, true, vict, 0, 0, TO_CHAR);
+    act(buf2, true, vict, 0, 0, TO_ROOM);
     if (rroom_sect(char_get_in_room(vict)) != SECT_INSIDE && rroom_sect(char_get_in_room(vict)) != SECT_UNDERWATER && rroom_sect(char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(char_get_in_room(vict)) != SECT_WATER_NOSWIM && rroom_sect(char_get_in_room(vict)) != SECT_UNDERWATER && rroom_sect(char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(char_get_in_room(vict)) != SECT_WATER_NOSWIM) {
       impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
       switch (rand_number(1, 8)) {
         case 1:
-          act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, vict, TO_CHAR);
-          act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, vict, TO_ROOM);
+          act("Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_CHAR);
+          act("Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_ROOM);
           break;
         case 2:
           if (rand_number(1, 4) == 4 && rroom_get_geffect(char_get_in_room(vict)) == 0) {
             rroom_set_geffect(char_get_in_room(vict), 1);
-            act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", TRUE, ch, 0, vict, TO_CHAR);
-            act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", TRUE, ch, 0, vict, TO_ROOM);
+            act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, 0, vict, TO_CHAR);
+            act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, 0, vict, TO_ROOM);
           }
           break;
         case 3:
-          act("A cloud of dust envelopes the entire area!", TRUE, ch, 0, vict, TO_CHAR);
-          act("A cloud of dust envelopes the entire area!", TRUE, ch, 0, vict, TO_ROOM);
+          act("A cloud of dust envelopes the entire area!", true, ch, 0, vict, TO_CHAR);
+          act("A cloud of dust envelopes the entire area!", true, ch, 0, vict, TO_ROOM);
           break;
         case 4:
-          act("The surrounding area roars and shudders from the impact!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The surrounding area roars and shudders from the impact!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_CHAR);
+          act("The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_ROOM);
           break;
         case 5:
-          act("The ground shatters apart from the stress of the impact!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The ground shatters apart from the stress of the impact!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_CHAR);
+          act("The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_ROOM);
           break;
         case 6:
-          act("The explosion continues to burn spreading out and devouring some more of the ground before dying out.", TRUE, ch, 0, vict, TO_CHAR);
-          act("The explosion continues to burn spreading out and devouring some more of the ground before dying out.", TRUE, ch, 0, vict, TO_ROOM);
+          act("The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, 0, vict, TO_CHAR);
+          act("The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, 0, vict, TO_ROOM);
           break;
         default:
           /* we want no message for the default */
@@ -2463,32 +2463,32 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, cons
     if (rroom_sect(char_get_in_room(vict)) == SECT_UNDERWATER) {
       switch (rand_number(1, 3)) {
         case 1:
-          act("The water churns violently!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The water churns violently!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The water churns violently!", true, ch, 0, vict, TO_CHAR);
+          act("The water churns violently!", true, ch, 0, vict, TO_ROOM);
           break;
         case 2:
-          act("Large bubbles rise from the movement!", TRUE, ch, 0, vict, TO_CHAR);
-          act("Large bubbles rise from the movement!", TRUE, ch, 0, vict, TO_ROOM);
+          act("Large bubbles rise from the movement!", true, ch, 0, vict, TO_CHAR);
+          act("Large bubbles rise from the movement!", true, ch, 0, vict, TO_ROOM);
           break;
         case 3:
-          act("The water collapses in on the hole created!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The water collapses in on the hole create!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The water collapses in on the hole created!", true, ch, 0, vict, TO_CHAR);
+          act("The water collapses in on the hole create!", true, ch, 0, vict, TO_ROOM);
           break;
       }
     }
     if (rroom_sect(char_get_in_room(vict)) == SECT_WATER_SWIM || rroom_sect(char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
       switch (rand_number(1, 3)) {
         case 1:
-          act("A huge column of water erupts from the impact!", TRUE, ch, 0, vict, TO_CHAR);
-          act("A huge column of water erupts from the impact!", TRUE, ch, 0, vict, TO_ROOM);
+          act("A huge column of water erupts from the impact!", true, ch, 0, vict, TO_CHAR);
+          act("A huge column of water erupts from the impact!", true, ch, 0, vict, TO_ROOM);
           break;
         case 2:
-          act("The impact briefly causes a swirling vortex of water!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The impact briefly causes a swirling vortex of water!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The impact briefly causes a swirling vortex of water!", true, ch, 0, vict, TO_CHAR);
+          act("The impact briefly causes a swirling vortex of water!", true, ch, 0, vict, TO_ROOM);
           break;
         case 3:
-          act("A huge depression forms in the water and erupts into a wave from the impact!", TRUE, ch, 0, vict, TO_CHAR);
-          act("A huge depression forms in the water and erupts into a wave from the impact!", TRUE, ch, 0, vict, TO_ROOM);
+          act("A huge depression forms in the water and erupts into a wave from the impact!", true, ch, 0, vict, TO_CHAR);
+          act("A huge depression forms in the water and erupts into a wave from the impact!", true, ch, 0, vict, TO_ROOM);
           break;
       }
     }
@@ -2496,28 +2496,28 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, cons
       impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
       switch (rand_number(1, 8)) {
         case 1:
-          act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, vict, TO_CHAR);
-          act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, vict, TO_ROOM);
+          act("Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_CHAR);
+          act("Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_ROOM);
           break;
         case 2:
-          act("The structure of the surrounding room cracks and quakes from the blast!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The structure of the surrounding room cracks and quakes from the blast!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The structure of the surrounding room cracks and quakes from the blast!", true, ch, 0, vict, TO_CHAR);
+          act("The structure of the surrounding room cracks and quakes from the blast!", true, ch, 0, vict, TO_ROOM);
           break;
         case 3:
-          act("Parts of the ceiling collapse, crushing into the floor!", TRUE, ch, 0, vict, TO_CHAR);
-          act("Parts of the ceiling collapse, crushing into the floor!", TRUE, ch, 0, vict, TO_ROOM);
+          act("Parts of the ceiling collapse, crushing into the floor!", true, ch, 0, vict, TO_CHAR);
+          act("Parts of the ceiling collapse, crushing into the floor!", true, ch, 0, vict, TO_ROOM);
           break;
         case 4:
-          act("The surrounding area roars and shudders from the impact!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The surrounding area roars and shudders from the impact!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_CHAR);
+          act("The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_ROOM);
           break;
         case 5:
-          act("The ground shatters apart from the stress of the impact!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The ground shatters apart from the stress of the impact!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_CHAR);
+          act("The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_ROOM);
           break;
         case 6:
-          act("The walls of the surrounding room crack in the same instant!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The walls of the surrounding room crack in the same instant!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The walls of the surrounding room crack in the same instant!", true, ch, 0, vict, TO_CHAR);
+          act("The walls of the surrounding room crack in the same instant!", true, ch, 0, vict, TO_ROOM);
           break;
         default:
           /* we want no message for the default */
@@ -2542,31 +2542,31 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
       impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
       switch (rand_number(1, 8)) {
         case 1:
-          act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, vict, TO_CHAR);
-          act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, vict, TO_ROOM);
+          act("Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_CHAR);
+          act("Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_ROOM);
           break;
         case 2:
           if (rand_number(1, 4) == 4 && rroom_get_geffect(char_get_in_room(vict)) == 0) {
             rroom_set_geffect(char_get_in_room(vict), 1);
-            act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", TRUE, ch, 0, vict, TO_CHAR);
-            act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", TRUE, ch, 0, vict, TO_ROOM);
+            act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, 0, vict, TO_CHAR);
+            act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!", true, ch, 0, vict, TO_ROOM);
           }
           break;
         case 3:
-          act("A cloud of dust envelopes the entire area!", TRUE, ch, 0, vict, TO_CHAR);
-          act("A cloud of dust envelopes the entire area!", TRUE, ch, 0, vict, TO_ROOM);
+          act("A cloud of dust envelopes the entire area!", true, ch, 0, vict, TO_CHAR);
+          act("A cloud of dust envelopes the entire area!", true, ch, 0, vict, TO_ROOM);
           break;
         case 4:
-          act("The surrounding area roars and shudders from the impact!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The surrounding area roars and shudders from the impact!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_CHAR);
+          act("The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_ROOM);
           break;
         case 5:
-          act("The ground shatters apart from the stress of the impact!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The ground shatters apart from the stress of the impact!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_CHAR);
+          act("The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_ROOM);
           break;
         case 6:
-          act("The explosion continues to burn spreading out and devouring some more of the ground before dying out.", TRUE, ch, 0, vict, TO_CHAR);
-          act("The explosion continues to burn spreading out and devouring some more of the ground before dying out.", TRUE, ch, 0, vict, TO_ROOM);
+          act("The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, 0, vict, TO_CHAR);
+          act("The explosion continues to burn spreading out and devouring some more of the ground before dying out.", true, ch, 0, vict, TO_ROOM);
           break;
         default:
           /* we want no message for the default */
@@ -2576,32 +2576,32 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
     if (rroom_sect(char_get_in_room(vict)) == SECT_UNDERWATER) {
       switch (rand_number(1, 3)) {
         case 1:
-          act("The water churns violently!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The water churns violently!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The water churns violently!", true, ch, 0, vict, TO_CHAR);
+          act("The water churns violently!", true, ch, 0, vict, TO_ROOM);
           break;
         case 2:
-          act("Large bubbles rise from the movement!", TRUE, ch, 0, vict, TO_CHAR);
-          act("Large bubbles rise from the movement!", TRUE, ch, 0, vict, TO_ROOM);
+          act("Large bubbles rise from the movement!", true, ch, 0, vict, TO_CHAR);
+          act("Large bubbles rise from the movement!", true, ch, 0, vict, TO_ROOM);
           break;
         case 3:
-          act("The water collapses in on the hole created!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The water collapses in on the hole create!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The water collapses in on the hole created!", true, ch, 0, vict, TO_CHAR);
+          act("The water collapses in on the hole create!", true, ch, 0, vict, TO_ROOM);
           break;
       }
     }
     if (rroom_sect(char_get_in_room(vict)) == SECT_WATER_SWIM || rroom_sect(char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
       switch (rand_number(1, 3)) {
         case 1:
-          act("A huge column of water erupts from the impact!", TRUE, ch, 0, vict, TO_CHAR);
-          act("A huge column of water erupts from the impact!", TRUE, ch, 0, vict, TO_ROOM);
+          act("A huge column of water erupts from the impact!", true, ch, 0, vict, TO_CHAR);
+          act("A huge column of water erupts from the impact!", true, ch, 0, vict, TO_ROOM);
           break;
         case 2:
-          act("The impact briefly causes a swirling vortex of water!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The impact briefly causes a swirling vortex of water!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The impact briefly causes a swirling vortex of water!", true, ch, 0, vict, TO_CHAR);
+          act("The impact briefly causes a swirling vortex of water!", true, ch, 0, vict, TO_ROOM);
           break;
         case 3:
-          act("A huge depression forms in the water and erupts into a wave from the impact!", TRUE, ch, 0, vict, TO_CHAR);
-          act("A huge depression forms in the water and erupts into a wave from the impact!", TRUE, ch, 0, vict, TO_ROOM);
+          act("A huge depression forms in the water and erupts into a wave from the impact!", true, ch, 0, vict, TO_CHAR);
+          act("A huge depression forms in the water and erupts into a wave from the impact!", true, ch, 0, vict, TO_ROOM);
           break;
       }
     }
@@ -2609,28 +2609,28 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
       impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
       switch (rand_number(1, 8)) {
         case 1:
-          act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, vict, TO_CHAR);
-          act("Debris is thrown into the air and showers down thunderously!", TRUE, ch, 0, vict, TO_ROOM);
+          act("Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_CHAR);
+          act("Debris is thrown into the air and showers down thunderously!", true, ch, 0, vict, TO_ROOM);
           break;
         case 2:
-          act("The structure of the surrounding room cracks and quakes from the blast!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The structure of the surrounding room cracks and quakes from the blast!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The structure of the surrounding room cracks and quakes from the blast!", true, ch, 0, vict, TO_CHAR);
+          act("The structure of the surrounding room cracks and quakes from the blast!", true, ch, 0, vict, TO_ROOM);
           break;
         case 3:
-          act("Parts of the ceiling collapse, crushing into the floor!", TRUE, ch, 0, vict, TO_CHAR);
-          act("Parts of the ceiling collapse, crushing into the floor!", TRUE, ch, 0, vict, TO_ROOM);
+          act("Parts of the ceiling collapse, crushing into the floor!", true, ch, 0, vict, TO_CHAR);
+          act("Parts of the ceiling collapse, crushing into the floor!", true, ch, 0, vict, TO_ROOM);
           break;
         case 4:
-          act("The surrounding area roars and shudders from the impact!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The surrounding area roars and shudders from the impact!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_CHAR);
+          act("The surrounding area roars and shudders from the impact!", true, ch, 0, vict, TO_ROOM);
           break;
         case 5:
-          act("The ground shatters apart from the stress of the impact!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The ground shatters apart from the stress of the impact!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_CHAR);
+          act("The ground shatters apart from the stress of the impact!", true, ch, 0, vict, TO_ROOM);
           break;
         case 6:
-          act("The walls of the surrounding room crack in the same instant!", TRUE, ch, 0, vict, TO_CHAR);
-          act("The walls of the surrounding room crack in the same instant!", TRUE, ch, 0, vict, TO_ROOM);
+          act("The walls of the surrounding room crack in the same instant!", true, ch, 0, vict, TO_CHAR);
+          act("The walls of the surrounding room crack in the same instant!", true, ch, 0, vict, TO_ROOM);
           break;
         default:
           /* we want no message for the default */
@@ -2647,9 +2647,9 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
   }
   if (type == 1) {
     if (rand_number(1, 3) != 2) {
-      act("@RIt turns around at the last second and begins to pursue @r$N@R!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@RIt turns around at the last second and begins to pursue YOU!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@RIt turns around at the last second and begins to pursue @r$N@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@RIt turns around at the last second and begins to pursue @r$N@R!@n", true, ch, 0, vict, TO_CHAR);
+      act("@RIt turns around at the last second and begins to pursue YOU!@n", true, ch, 0, vict, TO_VICT);
+      act("@RIt turns around at the last second and begins to pursue @r$N@R!@n", true, ch, 0, vict, TO_NOTVICT);
       struct obj_data *obj;
       int num = 0;
 
@@ -2670,9 +2670,9 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
       obj_set_kitype(obj, skill2);
       obj_set_user(obj, ch);
     } else {
-      act("@RIt fails to follow after @r$N@R!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@RIt fails to follow after YOU!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@RIt fails to follow after @r$N@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@RIt fails to follow after @r$N@R!@n", true, ch, 0, vict, TO_CHAR);
+      act("@RIt fails to follow after YOU!@n", true, ch, 0, vict, TO_VICT);
+      act("@RIt fails to follow after @r$N@R!@n", true, ch, 0, vict, TO_NOTVICT);
     }
   }
   if (type == 2 && (skill2 != 481 || char_is_frieza(ch))) {
@@ -2689,9 +2689,9 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
         return;
       }
     }
-    act("@RYou turn it around and send it back after @r$N@R!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@W$n @Rturns it around and sends it back after YOU!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@W$n @Rturns it around and sends it back after @r$N@R!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    act("@RYou turn it around and send it back after @r$N@R!@n", true, ch, 0, vict, TO_CHAR);
+    act("@W$n @Rturns it around and sends it back after YOU!@n", true, ch, 0, vict, TO_VICT);
+    act("@W$n @Rturns it around and sends it back after @r$N@R!@n", true, ch, 0, vict, TO_NOTVICT);
     struct obj_data *obj;
     int num = 0;
 
@@ -3341,16 +3341,16 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
   /* Start of Fury Mode for halfbreeds */
   if (char_plr_flagged(ch, PLR_FURY) && (type == 0 || type == 1 || type == 2 || type == 3 || type == 4 || type == 5 || type == 6 || type == 8 || type == 51 || type == 52)) {
     dam *= 1.5;
-    act("Your rage magnifies your attack power!", TRUE, ch, 0, 0, TO_CHAR);
-    act("Swirling energy flows around $n as $e releases $s rage in the attack!", TRUE, ch, 0, 0, TO_ROOM);
+    act("Your rage magnifies your attack power!", true, ch, 0, 0, TO_CHAR);
+    act("Swirling energy flows around $n as $e releases $s rage in the attack!", true, ch, 0, 0, TO_ROOM);
     if (rand_number(1, 10) >= 7) {
       send_to_char(ch, "You feel less angry.\r\n");
       char_plr_set(ch, PLR_FURY, false);
     }
   } else if (char_plr_flagged(ch, PLR_FURY)) {
     dam *= 2;
-    act("Your rage magnifies your attack power!", TRUE, ch, 0, 0, TO_CHAR);
-    act("Swirling energy flows around $n as $e releases $s rage in the attack!", TRUE, ch, 0, 0, TO_ROOM);
+    act("Your rage magnifies your attack power!", true, ch, 0, 0, TO_CHAR);
+    act("Swirling energy flows around $n as $e releases $s rage in the attack!", true, ch, 0, 0, TO_ROOM);
     char_plr_set(ch, PLR_FURY, false);
   }
   /* End of Fury Mode for halfbreeds */
@@ -3375,7 +3375,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent)
 static void saiyan_gain(struct char_data *ch, struct char_data *vict)
 {
   int gain = rand_number(char_get_level(ch) * 6, char_get_level(ch) * 8);
-  int weak = FALSE;
+  int weak = false;
 
   if (!vict)
     return;
@@ -3384,7 +3384,7 @@ static void saiyan_gain(struct char_data *ch, struct char_data *vict)
     return;
 
   if (getEffMaxPL(vict) < getEffMaxPL(ch) / 10) {
-    weak = TRUE;
+    weak = true;
   }
 
   if (char_get_level(ch) > 99) {
@@ -3449,7 +3449,7 @@ static void spar_gain(struct char_data *ch, struct char_data *vict, int type, in
   int chance = 0, gmult, gravity, bonus = 1, pscost = 2, difference = 0;
   int64_t gain = 0, pl = 0, ki = 0, st = 0, gaincalc = 0;
 
-  if (ch != NULL && !char_is_npc(ch)) {
+  if (ch != nullptr && !char_is_npc(ch)) {
     if (dmg > getEffMaxPL(vict) / 10) {
       chance = rand_number(20, 100);
     } else if (dmg <= getEffMaxPL(vict) / 10) {
@@ -3527,11 +3527,11 @@ static void spar_gain(struct char_data *ch, struct char_data *vict, int type, in
       if (num > maxnum) {
         num = maxnum;
       }
-      if (vict != NULL && char_is_npc(vict)) {
+      if (vict != nullptr && char_is_npc(vict)) {
         num      = num * 0.7;
         gaincalc = num * 1.5;
         type     = 3;
-      } else if (vict != NULL && !char_is_npc(vict)) {
+      } else if (vict != nullptr && !char_is_npc(vict)) {
         gaincalc = large_rand(num * .7, num);
         if (char_get_level(ch) > char_get_level(vict))
           difference = char_get_level(ch) - char_get_level(vict);
@@ -3540,7 +3540,7 @@ static void spar_gain(struct char_data *ch, struct char_data *vict, int type, in
       } else {
         gaincalc = 0;
       }
-      if (vict != NULL) {
+      if (vict != nullptr) {
         if (difference >= 51) {
           send_to_char(ch, "The difference in your levels is too great for you to gain anything.\r\n");
           return;
@@ -3558,7 +3558,7 @@ static void spar_gain(struct char_data *ch, struct char_data *vict, int type, in
           if (char_prf_flagged(vict, PRF_INSTRUCT)) {
             if (char_get_practice_points(vict) > 10) {
               send_to_char(vict, "You instruct them in proper fighting techniques and strategies.\r\n");
-              act("You take $N's instruction to heart and gain more experience.\r\n", FALSE, ch, 0, vict, TO_CHAR);
+              act("You take $N's instruction to heart and gain more experience.\r\n", false, ch, 0, vict, TO_CHAR);
               char_set_practice_points(vict, char_get_practice_points(vict) - (10));
               bonus = 2;
             }
@@ -3603,7 +3603,7 @@ static void spar_gain(struct char_data *ch, struct char_data *vict, int type, in
     }
   }
 
-  if (vict != NULL && !char_is_npc(vict) && !char_is_npc(ch)) {
+  if (vict != nullptr && !char_is_npc(vict) && !char_is_npc(ch)) {
     if (dmg > getEffMaxPL(vict) / 4) {
       chance = rand_number(1, 100);
     } else if (dmg <= getEffMaxPL(vict) / 4) {
@@ -3720,7 +3720,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 {
   int64_t index   = 0;
   int64_t maindmg = dmg, beforered = dmg;
-  int dead = FALSE;
+  int dead = false;
 
   /* If a character is trageted */
 
@@ -3760,8 +3760,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         decCurKI(ch, infuse_cost, 0);
         send_to_room(char_get_in_room(ch), "@CA swirl of ki explodes from the attack!@n\r\n");
       } else {
-        act("@wYou can no longer infuse ki into your attacks!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@c$n@w can no longer infuse ki into $s attacks!@n", TRUE, ch, 0, 0, TO_ROOM);
+        act("@wYou can no longer infuse ki into your attacks!@n", true, ch, 0, 0, TO_CHAR);
+        act("@c$n@w can no longer infuse ki into $s attacks!@n", true, ch, 0, 0, TO_ROOM);
         char_aff_set(ch, AFF_INFUSE, false);
       }
     }
@@ -3787,8 +3787,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
       int64_t drain = dmg * 0.1;
       dmg -= drain;
       decCurST(ch, drain, 1);
-      act("@Y$N's rubbery body makes hitting it tiring!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@Y$n's stamina is sapped a bit by hitting your rubbery body!@n", TRUE, ch, 0, vict, TO_VICT);
+      act("@Y$N's rubbery body makes hitting it tiring!@n", true, ch, 0, vict, TO_CHAR);
+      act("@Y$n's stamina is sapped a bit by hitting your rubbery body!@n", true, ch, 0, vict, TO_VICT);
     }
 
     if (!char_is_npc(ch)) {
@@ -3873,30 +3873,30 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         }
       }
       if (char_get_barrier(vict) - dmg > 0) {
-        act("@c$N's@C barrier absorbs the damage!@n", TRUE, ch, 0, vict, TO_CHAR);
+        act("@c$N's@C barrier absorbs the damage!@n", true, ch, 0, vict, TO_CHAR);
         char barr[MAX_INPUT_LENGTH];
         sprintf(barr, "@CYour barrier absorbs the damage! @D[@B%s@D]@n", add_commas(dmg));
-        act(barr, TRUE, ch, 0, vict, TO_VICT);
-        act("@c$N's@C barrier absorbs the damage!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act(barr, true, ch, 0, vict, TO_VICT);
+        act("@c$N's@C barrier absorbs the damage!@n", true, ch, 0, vict, TO_NOTVICT);
         char_set_barrier(vict, char_get_barrier(vict) - (dmg));
         dmg = 0;
       } else if (char_get_barrier(vict) - dmg <= 0) {
         dmg -= char_get_barrier(vict);
         char_set_barrier(vict, 0);
-        act("@c$N's@C barrier bursts!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@CYour barrier bursts!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$N's@C barrier bursts!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@c$N's@C barrier bursts!@n", true, ch, 0, vict, TO_CHAR);
+        act("@CYour barrier bursts!@n", true, ch, 0, vict, TO_VICT);
+        act("@c$N's@C barrier bursts!@n", true, ch, 0, vict, TO_NOTVICT);
         char_aff_set(vict, AFF_SANCTUARY, false);
       }
     }
     if (char_aff_flagged(vict, AFF_FIRESHIELD) && rand_number(1, 200) < char_get_skill(vict, SKILL_FIRESHIELD)) {
-      act("@c$N's@C fireshield repels the damage!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@CYour fireshield repels the damage!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@c$N's@C fireshield repels the damage!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@c$N's@C fireshield repels the damage!@n", true, ch, 0, vict, TO_CHAR);
+      act("@CYour fireshield repels the damage!@n", true, ch, 0, vict, TO_VICT);
+      act("@c$N's@C fireshield repels the damage!@n", true, ch, 0, vict, TO_NOTVICT);
       if (rand_number(1, 3) == 3) {
-        act("@c$N's@C fireshield disappears...@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@CYour fireshield disappears...@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$N's@C fireshield disappears...@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@c$N's@C fireshield disappears...@n", true, ch, 0, vict, TO_CHAR);
+        act("@CYour fireshield disappears...@n", true, ch, 0, vict, TO_VICT);
+        act("@c$N's@C fireshield disappears...@n", true, ch, 0, vict, TO_NOTVICT);
         char_aff_set(vict, AFF_FIRESHIELD, false);
       }
       dmg = 0;
@@ -4025,32 +4025,32 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
       }
       if (nanite >= perc) {
         if (char_plr_flagged(vict, PLR_TRANS6)) {
-          act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block MOST of the damage!@n", TRUE, vict, 0, 0, TO_CHAR);
-          act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block MOST of the damage!@n", TRUE, vict, 0, 0, TO_ROOM);
+          act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block MOST of the damage!@n", true, vict, 0, 0, TO_CHAR);
+          act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block MOST of the damage!@n", true, vict, 0, 0, TO_ROOM);
           dmg -= (dmg * 0.01) * 50;
         } else if (char_plr_flagged(vict, PLR_TRANS5)) {
-          act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", TRUE, vict, 0, 0, TO_CHAR);
-          act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", TRUE, vict, 0, 0, TO_ROOM);
+          act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true, vict, 0, 0, TO_CHAR);
+          act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true, vict, 0, 0, TO_ROOM);
           dmg -= (dmg * 0.01) * 40;
         } else if (char_plr_flagged(vict, PLR_TRANS4)) {
-          act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a lot of the damage!@n", TRUE, vict, 0, 0, TO_CHAR);
-          act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a lot of the damage!@n", TRUE, vict, 0, 0, TO_ROOM);
+          act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a lot of the damage!@n", true, vict, 0, 0, TO_CHAR);
+          act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a lot of the damage!@n", true, vict, 0, 0, TO_ROOM);
           dmg -= (dmg * 0.01) * 30;
         } else if (char_plr_flagged(vict, PLR_TRANS3)) {
-          act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a good deal of the damage!@n", TRUE, vict, 0, 0, TO_CHAR);
-          act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a good deal of the damage!@n", TRUE, vict, 0, 0, TO_ROOM);
+          act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a good deal of the damage!@n", true, vict, 0, 0, TO_CHAR);
+          act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a good deal of the damage!@n", true, vict, 0, 0, TO_ROOM);
           dmg -= (dmg * 0.01) * 25;
         } else if (char_plr_flagged(vict, PLR_TRANS2)) {
-          act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", TRUE, vict, 0, 0, TO_CHAR);
-          act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", TRUE, vict, 0, 0, TO_ROOM);
+          act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true, vict, 0, 0, TO_CHAR);
+          act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true, vict, 0, 0, TO_ROOM);
           dmg -= (dmg * 0.01) * 20;
         } else if (char_plr_flagged(vict, PLR_TRANS1)) {
-          act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a bit of the damage!@n", TRUE, vict, 0, 0, TO_CHAR);
-          act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a bit of the damage!@n", TRUE, vict, 0, 0, TO_ROOM);
+          act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a bit of the damage!@n", true, vict, 0, 0, TO_CHAR);
+          act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a bit of the damage!@n", true, vict, 0, 0, TO_ROOM);
           dmg -= (dmg * 0.01) * 10;
         } else {
-          act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a tiny bit of the damage!@n", TRUE, vict, 0, 0, TO_CHAR);
-          act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a tiny bit of the damage!@n", TRUE, vict, 0, 0, TO_ROOM);
+          act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a tiny bit of the damage!@n", true, vict, 0, 0, TO_CHAR);
+          act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a tiny bit of the damage!@n", true, vict, 0, 0, TO_ROOM);
           dmg -= (dmg * 0.01) * 5;
         }
       }
@@ -4059,8 +4059,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     if (!char_aff_flagged(vict, AFF_KNOCKED) && (char_get_position(vict) == POS_SITTING || char_get_position(vict) == POS_RESTING) && char_get_skill(vict, SKILL_ROLL) > axion_dice(0)) {
       int64_t rollcost = getMaxHealth(vict) / 300 * (char_get_aff_abils_str(ch) / 2);
       if ((getCurST(vict)) >= rollcost) {
-        act("@GYou roll to your feet in an agile fashion!@n", TRUE, vict, 0, 0, TO_CHAR);
-        act("@G$n rolls to $s feet in an agile fashion!@n", TRUE, vict, 0, 0, TO_ROOM);
+        act("@GYou roll to your feet in an agile fashion!@n", true, vict, 0, 0, TO_CHAR);
+        act("@G$n rolls to $s feet in an agile fashion!@n", true, vict, 0, 0, TO_ROOM);
         do_stand(vict, 0, 0, 0);
         decCurST(vict, rollcost, 0);
       }
@@ -4078,14 +4078,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     }
     if (char_aff_flagged(vict, AFF_SLEEP) && rand_number(1, 2) == 2) {
       affect_from_char(vict, SPELL_SLEEP);
-      act("@c$N@W seems to be more aware now.@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@WYou are no longer so sleepy.@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@c$N@W seems to be more aware now.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@c$N@W seems to be more aware now.@n", true, ch, 0, vict, TO_CHAR);
+      act("@WYou are no longer so sleepy.@n", true, ch, 0, vict, TO_VICT);
+      act("@c$N@W seems to be more aware now.@n", true, ch, 0, vict, TO_NOTVICT);
     }
     if (char_aff_flagged(vict, AFF_KNOCKED) && rand_number(1, 12) >= 11) {
       cureStatusKnockedOut(vict, true);
       if (char_is_npc(vict) && rand_number(1, 20) >= 12) {
-        act("@W$n@W stands up.@n", FALSE, vict, 0, 0, TO_ROOM);
+        act("@W$n@W stands up.@n", false, vict, 0, 0, TO_ROOM);
         char_set_position(vict, POS_STANDING);
       }
     }
@@ -4140,12 +4140,12 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     if (char_get_position(vict) == POS_SITTING && char_is_npc(vict) && getCurHealth(vict) >= ((getEffMaxPL(vict))) * .98) {
       do_stand(vict, 0, 0, 0);
     }
-    int suppresso = FALSE;
+    int suppresso = false;
     if (is_sparring(ch) && is_sparring(vict) && (char_get_suppressed(vict) + getCurHealth(vict)) - dmg <= 0) {
       if (!char_is_npc(vict)) {
-        act("@c$N@w falls down unconscious, and you stop sparring with $M.@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@w stops sparring with you as you fall unconscious.@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$N@w falls down unconscious, and @C$n@w stops sparring with $M.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@c$N@w falls down unconscious, and you stop sparring with $M.@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@w stops sparring with you as you fall unconscious.@n", true, ch, 0, vict, TO_VICT);
+        act("@c$N@w falls down unconscious, and @C$n@w stops sparring with $M.@n", true, ch, 0, vict, TO_NOTVICT);
         setCurHealth(vict, 1);
         if (char_get_suppressed(vict) > 0) {
           char_set_suppressed(vict, 0);
@@ -4162,8 +4162,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
           char_aff_set(vict, AFF_KNOCKED, true);
         }
       } else {
-        act("@c$N@w admits defeat to you, stops sparring, and stumbles away.@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@c$N@w admits defeat to $n, stops sparring, and stumbles away.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@c$N@w admits defeat to you, stops sparring, and stumbles away.@n", true, ch, 0, vict, TO_CHAR);
+        act("@c$N@w admits defeat to $n, stops sparring, and stumbles away.@n", true, ch, 0, vict, TO_NOTVICT);
         solo_gain(ch, vict);
         struct obj_data *rew, *next_rew;
         int founded = 0;
@@ -4176,16 +4176,16 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
           }
         }
         if (founded == 1) {
-          act("@c$N@w leaves a reward behind out of respect.@n", TRUE, ch, 0, vict, TO_CHAR);
+          act("@c$N@w leaves a reward behind out of respect.@n", true, ch, 0, vict, TO_CHAR);
         }
         setCurHealth(vict, 0);
         extract_char(vict);
         return;
       }
     } else if (is_sparring(ch) && (char_get_suppressed(vict) + getCurPL(vict)) - dmg <= 0) {
-      act("@c$N@w falls down unconscious, and you spare $S life.@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@C$n@w spares your life as you fall unconscious.@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@c$N@w falls down unconscious, and @C$n@w spares $S life.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@c$N@w falls down unconscious, and you spare $S life.@n", true, ch, 0, vict, TO_CHAR);
+      act("@C$n@w spares your life as you fall unconscious.@n", true, ch, 0, vict, TO_VICT);
+      act("@c$N@w falls down unconscious, and @C$n@w spares $S life.@n", true, ch, 0, vict, TO_NOTVICT);
       setCurHealth(vict, 1);
       if (char_get_fighting(vict)) {
         stop_fighting(vict);
@@ -4198,16 +4198,16 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         char_aff_set(vict, AFF_KNOCKED, true);
       }
     } else if (is_sparring(ch) && !is_sparring(vict) && char_is_npc(ch)) {
-      act("@w$n@w stops sparring!@n", TRUE, ch, 0, vict, TO_ROOM);
+      act("@w$n@w stops sparring!@n", true, ch, 0, vict, TO_ROOM);
       char_mob_set(ch, MOB_SPAR, false);
     } else if (!is_sparring(ch) && is_sparring(vict) && char_is_npc(vict)) {
-      act("@w$n@w stops sparring!@n", TRUE, ch, 0, vict, TO_ROOM);
+      act("@w$n@w stops sparring!@n", true, ch, 0, vict, TO_ROOM);
       char_mob_set(vict, MOB_SPAR, false);
     }
     if (char_get_suppressed(vict) > 0 && char_get_suppression(vict) > 0) {
       if (char_get_suppressed(vict) > dmg) {
         char_set_suppressed(vict, char_get_suppressed(vict) - (dmg));
-        suppresso = TRUE;
+        suppresso = true;
       } else if (char_get_suppressed(vict) <= dmg) {
         send_to_char(vict, "@GYou no longer have any reserve powerlevel suppressed.@n\r\n");
         dmg -= char_get_suppressed(vict);
@@ -4234,9 +4234,9 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         }
         return;
       }
-      act("@c$N@w disappears right before dying. $N appears to be immortal.@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@CYou disappear right before death, having been saved by your immortality.@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@c$N@w disappears right before dying. $N appears to be immortal.@n.", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@c$N@w disappears right before dying. $N appears to be immortal.@n", true, ch, 0, vict, TO_CHAR);
+      act("@CYou disappear right before death, having been saved by your immortality.@n", true, ch, 0, vict, TO_VICT);
+      act("@c$N@w disappears right before dying. $N appears to be immortal.@n.", true, ch, 0, vict, TO_NOTVICT);
       decCurHealthPercent(vict, 1, 1);
       decCurSTPercent(vict, 1, 1);
       decCurKIPercent(vict, 1, 1);
@@ -4254,25 +4254,25 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     }
 
     if (char_get_grappling(vict) && char_get_grappling(vict) != ch && type == 1) {
-      act("@YThe attack hurts YOU as well because you are grappling with $M!@n", TRUE, vict, 0, char_get_grappling(vict), TO_VICT);
-      act("@YThe attack hurts @y$N@Y as well because $n is grappling with $m!@n", TRUE, vict, 0, char_get_grappling(vict), TO_NOTVICT);
+      act("@YThe attack hurts YOU as well because you are grappling with $M!@n", true, vict, 0, char_get_grappling(vict), TO_VICT);
+      act("@YThe attack hurts @y$N@Y as well because $n is grappling with $m!@n", true, vict, 0, char_get_grappling(vict), TO_NOTVICT);
       maindmg = maindmg / 2;
-      hurt(0, 0, ch, char_get_grappling(vict), NULL, maindmg, 3);
+      hurt(0, 0, ch, char_get_grappling(vict), nullptr, maindmg, 3);
     }
     if (char_get_grappled(vict) && char_get_grappled(vict) != ch && type == 1) {
-      act("@YThe attack hurts YOU as well because you are being grappled by $M!@n", TRUE, vict, 0, char_get_grappled(vict), TO_VICT);
-      act("@YThe attack hurts @y$N@Y as well because $n is being grappled by $m!@n", TRUE, vict, 0, char_get_grappled(vict), TO_NOTVICT);
+      act("@YThe attack hurts YOU as well because you are being grappled by $M!@n", true, vict, 0, char_get_grappled(vict), TO_VICT);
+      act("@YThe attack hurts @y$N@Y as well because $n is being grappled by $m!@n", true, vict, 0, char_get_grappled(vict), TO_NOTVICT);
       maindmg = maindmg / 2;
-      hurt(0, 0, ch, char_get_grappled(vict), NULL, maindmg, 3);
+      hurt(0, 0, ch, char_get_grappled(vict), nullptr, maindmg, 3);
     }
     if (!is_sparring(ch) && !char_plr_flagged(vict, PLR_IMMORTAL) && getCurPL(vict) - dmg <= 0) {
 
-      if (getCurPL(vict) - dmg <= 0 && suppresso == FALSE) {
+      if (getCurPL(vict) - dmg <= 0 && suppresso == false) {
         decCurHealthPercent(vict, 1, 0);
         if (!char_is_npc(vict) && vict->lifeperc > 0 && (getCurLF(vict)) - (dmg - getCurPL(vict)) >= 0) {
-          act("@c$N@w barely clings to life!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@CYou barely cling to life!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@c$N@w barely clings to life!@n.", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@c$N@w barely clings to life!@n", true, ch, 0, vict, TO_CHAR);
+          act("@CYou barely cling to life!@n", true, ch, 0, vict, TO_VICT);
+          act("@c$N@w barely clings to life!@n.", true, ch, 0, vict, TO_NOTVICT);
           int64_t lifeloss = dmg - getCurPL(vict);
           decCurLF(vict, lifeloss, 0);
           send_to_char(vict, "@D[@CLifeforce@D: @R-%s@D]\n", add_commas(lifeloss));
@@ -4293,8 +4293,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         } else if (type > 0 && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
           handle_death_msg(ch, vict, 1);
         } else {
-          act("@R$N@w self destructs with a mild explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@R$N@w self destructs with a mild explosion!@n", TRUE, ch, 0, vict, TO_ROOM);
+          act("@R$N@w self destructs with a mild explosion!@n", true, ch, 0, vict, TO_CHAR);
+          act("@R$N@w self destructs with a mild explosion!@n", true, ch, 0, vict, TO_ROOM);
         }
         if (dmg > 1) {
           if (type <= 0 && getCurPL(ch) >= getEffMaxPL(ch) * 0.5) {
@@ -4305,8 +4305,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
           send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg));
           int64_t healhp = (long double)(getEffMaxPL(vict)) * 0.12;
           if (char_aff_flagged(ch, AFF_METAMORPH) && getCurPL(ch) <= getEffMaxPL(ch)) {
-            act("@RYour dark aura saps some of @r$N's@R life energy!@n", TRUE, ch, 0, vict, TO_CHAR);
-            act("@r$n@R's dark aura saps some of your life energy!@n", TRUE, ch, 0, vict, TO_VICT);
+            act("@RYour dark aura saps some of @r$N's@R life energy!@n", true, ch, 0, vict, TO_CHAR);
+            act("@r$n@R's dark aura saps some of your life energy!@n", true, ch, 0, vict, TO_VICT);
             incCurHealth(ch, healhp, true);
           }
           if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 10 || char_get_genome(ch, 1) == 10)) {
@@ -4325,8 +4325,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             }
           }
           if (is_affected(vict, AFF_ECHAINS) && type == 0) {
-            act("@CEthereal chains burn into existence! They quickly latch onto @RYOUR@C body and begin temporarily hampering $s actions!@n", TRUE, ch, 0, vict, TO_CHAR);
-            act("@CEthereal chains burn into existence! They quickly latch onto @c$n's@C body and begin temporarily hampering $s actions!@n", TRUE, ch, 0, vict, TO_ROOM);
+            act("@CEthereal chains burn into existence! They quickly latch onto @RYOUR@C body and begin temporarily hampering $s actions!@n", true, ch, 0, vict, TO_CHAR);
+            act("@CEthereal chains burn into existence! They quickly latch onto @c$n's@C body and begin temporarily hampering $s actions!@n", true, ch, 0, vict, TO_ROOM);
             if (char_is_npc(ch))
               assign_affect(vict, AFF_ECHAINS, 0, -1, 0, 0, 0, 0, 0, -2);
             else
@@ -4348,23 +4348,23 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
           char_aff_set(vict, AFF_ASHED, true);
         }
         die(vict, ch);
-        dead = TRUE;
+        dead = true;
       }
-    } else if (getCurPL(vict) - dmg > 0 || suppresso == TRUE) {
-      if (suppresso == FALSE) {
+    } else if (getCurPL(vict) - dmg > 0 || suppresso == true) {
+      if (suppresso == false) {
         decCurHealth(vict, dmg, 0);
       }
-      if (char_get_fighting(ch) == NULL) {
+      if (char_get_fighting(ch) == nullptr) {
         set_fighting(ch, vict);
       } else if (char_get_fighting(ch) != vict) {
         set_fighting(ch, vict);
       }
-      if (char_get_fighting(vict) == NULL) {
+      if (char_get_fighting(vict) == nullptr) {
         set_fighting(vict, ch);
       } else if (char_get_fighting(vict) != ch) {
         set_fighting(vict, ch);
       }
-      if (dmg > 1 && suppresso == FALSE) {
+      if (dmg > 1 && suppresso == false) {
         if (type == 0 && getCurPL(ch) >= getEffMaxPL(ch) * 0.5) {
           int64_t raise = (getMaxKI(ch) * 0.005) + 1;
           incCurKI(ch, raise, true);
@@ -4391,7 +4391,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
           send_to_char(ch, "\r\n");
         }
       } else if (!char_is_npc(ch)) {
-        if (dmg <= 1 && suppresso == FALSE && !char_prf_flagged(ch, PRF_NODEC)) {
+        if (dmg <= 1 && suppresso == false && !char_prf_flagged(ch, PRF_NODEC)) {
           send_to_char(ch, "@D[@GDamage@W: @BPitiful...@D]@n");
           send_to_char(vict, "@D[@rDamage@W: @BPitiful...@D]@n\r\n");
           if (char_get_equipment(ch, WEAR_EYE) && vict && !char_prf_flagged(ch, PRF_NODEC)) {
@@ -4409,7 +4409,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
           } else {
             send_to_char(ch, "\r\n");
           }
-        } else if (dmg > 1 && suppresso == TRUE && !char_prf_flagged(ch, PRF_NODEC)) {
+        } else if (dmg > 1 && suppresso == true && !char_prf_flagged(ch, PRF_NODEC)) {
           send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg));
           send_to_char(vict, "@D[@rDamage@W: @R%s @c-Suppression-@D]@n\r\n", add_commas(dmg));
           send_to_char(vict, "@D[Suppression@W: @G%s@D]@n\r\n", add_commas(char_get_suppressed(vict)));
@@ -4429,7 +4429,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
           } else {
             send_to_char(ch, "\r\n");
           }
-        } else if (dmg <= 1 && suppresso == TRUE && !char_prf_flagged(ch, PRF_NODEC)) {
+        } else if (dmg <= 1 && suppresso == true && !char_prf_flagged(ch, PRF_NODEC)) {
           send_to_char(ch, "@D[@GDamage@W: @BPitiful...@D]@n");
           send_to_char(vict, "@D[@rDamage@W: @BPitiful... @c-Suppression-@D]@n\r\n");
           send_to_char(vict, "@D[Suppression@W: @G%s@D]@n\r\n", add_commas(char_get_suppressed(vict)));
@@ -4472,10 +4472,10 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         saiyan_gain(ch, vict);
       }
     }
-    if (char_is_arlian(vict) && dead != TRUE && !is_sparring(vict) && !is_sparring(ch)) {
+    if (char_is_arlian(vict) && dead != true && !is_sparring(vict) && !is_sparring(ch)) {
       handle_evolution(vict, dmg);
     }
-    if (dead == TRUE) {
+    if (dead == true) {
       char corp[256];
       if (!char_plr_flagged(ch, PLR_SELFD2)) {
         if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOGOLD)) {
@@ -4512,61 +4512,61 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
       dmg = 1;
     }
     if (obj_extra_flagged(obj, ITEM_UNBREAKABLE)) {
-      act("$p@w seems unaffected.@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("$p@w seems unaffected.@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("$p@w seems unaffected.@n", true, ch, obj, 0, TO_CHAR);
+      act("$p@w seems unaffected.@n", true, ch, obj, 0, TO_ROOM);
     } else if (obj_get_vnum(obj) == 79) {
       if (obj_get_weight(obj) - dmg > 0) {
         if (type <= 0) {
           if (char_aff_flagged(ch, AFF_INFUSE))
             dmg *= 10;
-          act("$p@w cracks some.@n", TRUE, ch, obj, 0, TO_CHAR);
-          act("$p@w cracks some.@n", TRUE, ch, obj, 0, TO_ROOM);
+          act("$p@w cracks some.@n", true, ch, obj, 0, TO_CHAR);
+          act("$p@w cracks some.@n", true, ch, obj, 0, TO_ROOM);
           obj_set_weight(obj, obj_get_weight(obj) - (dmg));
           if (obj_get_fellow_wall(obj)) {
             struct obj_data *wall;
             wall = obj_get_fellow_wall(obj);
             obj_set_weight(wall, obj_get_weight(wall) - (dmg));
-            act("$p@w cracks some. A humanoid shadow can be seen moving on the other side.@n", TRUE, 0, obj, 0, TO_ROOM);
+            act("$p@w cracks some. A humanoid shadow can be seen moving on the other side.@n", true, 0, obj, 0, TO_ROOM);
           }
         } else {
           dmg *= 30;
-          act("$p@w melts some.@n", TRUE, ch, obj, 0, TO_CHAR);
-          act("$p@w melts some.@n", TRUE, ch, obj, 0, TO_ROOM);
+          act("$p@w melts some.@n", true, ch, obj, 0, TO_CHAR);
+          act("$p@w melts some.@n", true, ch, obj, 0, TO_ROOM);
           obj_set_weight(obj, obj_get_weight(obj) - (dmg));
           if (obj_get_fellow_wall(obj)) {
             struct obj_data *wall;
             wall = obj_get_fellow_wall(obj);
             obj_set_weight(wall, obj_get_weight(wall) - (dmg));
-            act("$p@w melts some.@n", TRUE, ch, obj, 0, TO_ROOM);
+            act("$p@w melts some.@n", true, ch, obj, 0, TO_ROOM);
           }
         }
       } else {
         if (type <= 0) {
-          act("$p@w breaks completely apart and then melts away.@n", TRUE, ch, obj, 0, TO_CHAR);
-          act("$p@w breaks completely apart and then melts away.@n", TRUE, ch, obj, 0, TO_ROOM);
+          act("$p@w breaks completely apart and then melts away.@n", true, ch, obj, 0, TO_CHAR);
+          act("$p@w breaks completely apart and then melts away.@n", true, ch, obj, 0, TO_ROOM);
           extract_obj(obj);
         } else {
-          act("$p@w is blown away into snow and water!@n", TRUE, ch, obj, 0, TO_CHAR);
-          act("$p@w is blown away into snow and water!@n", TRUE, ch, obj, 0, TO_ROOM);
+          act("$p@w is blown away into snow and water!@n", true, ch, obj, 0, TO_CHAR);
+          act("$p@w is blown away into snow and water!@n", true, ch, obj, 0, TO_ROOM);
           extract_obj(obj);
         }
       }
     } else if (obj_get_value(obj, VAL_ALL_HEALTH) - dmg > 0) {
-      act("$p@w cracks some.@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("$p@w cracks some.@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("$p@w cracks some.@n", true, ch, obj, 0, TO_CHAR);
+      act("$p@w cracks some.@n", true, ch, obj, 0, TO_ROOM);
       obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) - (dmg));
     } else {
       if (type <= 0) {
-        act("$p@w shatters apart!@n", TRUE, ch, obj, 0, TO_CHAR);
-        act("$p@w shatters apart!@n", TRUE, ch, obj, 0, TO_ROOM);
+        act("$p@w shatters apart!@n", true, ch, obj, 0, TO_CHAR);
+        act("$p@w shatters apart!@n", true, ch, obj, 0, TO_ROOM);
         obj_set_value(obj, VAL_ALL_HEALTH, 0);
         obj_extra_set(obj, ITEM_BROKEN, true);
         if (obj_get_type_flag(obj) == ITEM_DRINKCON && obj_get_type_flag(obj) == ITEM_FOUNTAIN) {
           obj_set_value(obj, VAL_DRINKCON_HOWFULL, 0);
         }
       } else if (type != 0) {
-        act("$p@w is disintegrated!@n", TRUE, ch, obj, 0, TO_CHAR);
-        act("$p@w is disintegrated!@n", TRUE, ch, obj, 0, TO_ROOM);
+        act("$p@w is disintegrated!@n", true, ch, obj, 0, TO_CHAR);
+        act("$p@w is disintegrated!@n", true, ch, obj, 0, TO_ROOM);
         extract_obj(obj);
       }
     }
@@ -4758,7 +4758,7 @@ int handle_parry(struct char_data *ch)
 /* This handles whether a step of the combo was preformed. */
 static int handle_combo(struct char_data *ch, struct char_data *vict)
 {
-  int success = FALSE, pass = FALSE;
+  int success = false, pass = false;
 
   if (char_is_npc(ch))
     return 0;
@@ -4775,7 +4775,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
     case 51:
     case 52:
     case 56:
-      pass = TRUE;
+      pass = true;
       break;
     default:
       if (char_get_combo(ch) != -1) {
@@ -4783,11 +4783,11 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
       }
       char_set_combo(ch, -1);
       char_set_combhits(ch, 0);
-      pass = FALSE;
+      pass = false;
       break;
   }
 
-  if (pass == FALSE)
+  if (pass == false)
     return 0;
 
   if (count_physical(ch) < 3)
@@ -4817,7 +4817,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
   }
 
   if (char_get_combo(ch) <= -1 && rand_number(1, 100) > chance) {
-    while (success == FALSE) {
+    while (success == false) {
       switch (rand_number(1, 24)) {
         case 1:
         case 2:
@@ -4827,7 +4827,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
           if (char_get_skill(ch, SKILL_PUNCH) > 0) {
             send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R punch @Gnext!@n\r\n");
             char_set_combo(ch, 0);
-            success = TRUE;
+            success = true;
           }
           break;
         case 6:
@@ -4838,7 +4838,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
           if (char_get_skill(ch, SKILL_KICK) > 0) {
             send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R kick @Gnext!@n\r\n");
             char_set_combo(ch, 1);
-            success = TRUE;
+            success = true;
           }
           break;
         case 11:
@@ -4848,7 +4848,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
           if (char_get_skill(ch, SKILL_ELBOW) > 0) {
             send_to_char(ch, "@GYou have a chance for a COMBO! Try an@R elbow @Gnext!@n\r\n");
             char_set_combo(ch, 2);
-            success = TRUE;
+            success = true;
           }
           break;
         case 15:
@@ -4857,7 +4857,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
           if (char_get_skill(ch, SKILL_KNEE) > 0) {
             send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R knee @Gnext!@n\r\n");
             char_set_combo(ch, 3);
-            success = TRUE;
+            success = true;
           }
           break;
         case 18:
@@ -4865,7 +4865,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
           if (char_get_skill(ch, SKILL_ROUNDHOUSE) > 0) {
             send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R roundhouse @Gnext!@n\r\n");
             char_set_combo(ch, 4);
-            success = TRUE;
+            success = true;
           }
           break;
         case 20:
@@ -4873,21 +4873,21 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
           if (char_get_skill(ch, SKILL_UPPERCUT) > 0) {
             send_to_char(ch, "@GYou have a chance for a COMBO! Try an@R uppercut @Gnext!@n\r\n");
             char_set_combo(ch, 5);
-            success = TRUE;
+            success = true;
           }
           break;
         case 22:
           if (char_get_skill(ch, SKILL_HEELDROP) > 0) {
             send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R heeldrop @Gnext!@n\r\n");
             char_set_combo(ch, 8);
-            success = TRUE;
+            success = true;
           }
           break;
         case 24:
           if (char_get_skill(ch, SKILL_SLAM) > 0) {
             send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R slam @Gnext!@n\r\n");
             char_set_combo(ch, 6);
-            success = TRUE;
+            success = true;
           }
           break;
       }
@@ -4896,7 +4896,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
   }
   if (char_get_lastattack(ch) == char_get_combo(ch) && char_get_combhits(ch) < physical_mastery(ch)) {
     char_set_combhits(ch, char_get_combhits(ch) + (1));
-    while (success == FALSE) {
+    while (success == false) {
       if (char_get_combhits(ch) >= 20) { /* We're kicking ass! */
         switch (rand_number(1, 34)) {
           case 1:
@@ -4910,7 +4910,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_ELBOW) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 2);
-              success = TRUE;
+              success = true;
             }
             break;
           case 9:
@@ -4924,7 +4924,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_KNEE) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 3);
-              success = TRUE;
+              success = true;
             }
             break;
           case 17:
@@ -4935,7 +4935,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_UPPERCUT) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 5);
-              success = TRUE;
+              success = true;
             }
             break;
           case 22:
@@ -4946,7 +4946,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_ROUNDHOUSE) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 4);
-              success = TRUE;
+              success = true;
             }
             break;
           case 27:
@@ -4955,19 +4955,19 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 51);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 56);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 52);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_SLAM) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 6);
-              success = TRUE;
+              success = true;
             }
             break;
           case 30:
@@ -4978,19 +4978,19 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 51);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 56);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 52);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_HEELDROP) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 8);
-              success = TRUE;
+              success = true;
             }
             break;
         } /* Switch End */
@@ -5009,7 +5009,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_ELBOW) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 2);
-              success = TRUE;
+              success = true;
             }
             break;
           case 11:
@@ -5025,7 +5025,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_KNEE) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 3);
-              success = TRUE;
+              success = true;
             }
             break;
           case 21:
@@ -5034,7 +5034,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_PUNCH) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 0);
-              success = TRUE;
+              success = true;
             }
             break;
           case 25:
@@ -5043,7 +5043,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_KICK) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 1);
-              success = TRUE;
+              success = true;
             }
             break;
           case 29:
@@ -5051,7 +5051,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_UPPERCUT) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 5);
-              success = TRUE;
+              success = true;
             }
             break;
           case 31:
@@ -5061,45 +5061,45 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_ROUNDHOUSE) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 4);
-              success = TRUE;
+              success = true;
             }
             break;
           case 35:
             if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 51);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 56);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 52);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_SLAM) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 6);
-              success = TRUE;
+              success = true;
             }
             break;
           case 36:
             if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 51);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 56);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 52);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_HEELDROP) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 8);
-              success = TRUE;
+              success = true;
             }
             break;
         }
@@ -5113,7 +5113,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_ELBOW) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 2);
-              success = TRUE;
+              success = true;
             }
             break;
           case 6:
@@ -5124,7 +5124,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_KNEE) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 3);
-              success = TRUE;
+              success = true;
             }
             break;
           case 11:
@@ -5138,7 +5138,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_PUNCH) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 0);
-              success = TRUE;
+              success = true;
             }
             break;
           case 19:
@@ -5152,7 +5152,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_KICK) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 1);
-              success = TRUE;
+              success = true;
             }
             break;
           case 27:
@@ -5161,7 +5161,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_UPPERCUT) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 5);
-              success = TRUE;
+              success = true;
             }
             break;
           case 30:
@@ -5169,7 +5169,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_ROUNDHOUSE) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 4);
-              success = TRUE;
+              success = true;
             }
             break;
           case 32:
@@ -5177,38 +5177,38 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 51);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 56);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 52);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_SLAM) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 6);
-              success = TRUE;
+              success = true;
             }
             break;
           case 34:
             if (char_get_skill(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 51);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 56);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 52);
-              success = TRUE;
+              success = true;
             } else if (char_get_skill(ch, SKILL_HEELDROP) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 8);
-              success = TRUE;
+              success = true;
             }
             break;
         }
@@ -5221,7 +5221,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_ELBOW) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 2);
-              success = TRUE;
+              success = true;
             }
             break;
           case 5:
@@ -5231,7 +5231,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_KNEE) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 3);
-              success = TRUE;
+              success = true;
             }
             break;
           case 9:
@@ -5247,7 +5247,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_PUNCH) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 0);
-              success = TRUE;
+              success = true;
             }
             break;
           case 19:
@@ -5263,21 +5263,21 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_KICK) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 1);
-              success = TRUE;
+              success = true;
             }
             break;
           case 29:
             if (char_get_skill(ch, SKILL_UPPERCUT) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 5);
-              success = TRUE;
+              success = true;
             }
             break;
           case 30:
             if (char_get_skill(ch, SKILL_ROUNDHOUSE) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 4);
-              success = TRUE;
+              success = true;
             }
             break;
         }
@@ -5289,7 +5289,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_ELBOW) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 2);
-              success = TRUE;
+              success = true;
             }
             break;
           case 4:
@@ -5298,7 +5298,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_KNEE) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 3);
-              success = TRUE;
+              success = true;
             }
             break;
           case 7:
@@ -5316,7 +5316,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_PUNCH) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 0);
-              success = TRUE;
+              success = true;
             }
             break;
           case 19:
@@ -5334,7 +5334,7 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
             if (char_get_skill(ch, SKILL_KICK) > 0) {
               send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n", char_get_combhits(ch));
               char_set_combo(ch, 1);
-              success = TRUE;
+              success = true;
             }
             break;
         }
@@ -5364,24 +5364,24 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
   int64_t dmg;
   double amount = 0.0;
 
-  if (first == FALSE) {
+  if (first == false) {
     amount = 0.05;
   } else {
     amount = 0.5;
   }
 
-  if (vict == NULL && char_get_fighting(ch)) {
+  if (vict == nullptr && char_get_fighting(ch)) {
     vict = char_get_fighting(ch);
-  } else if (vict == NULL) {
-    act("@WHaving lost your target you slow down until your vortex disappears, and end your attack.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@C$n@W slows down until $s vortex disappears.@n", TRUE, ch, 0, 0, TO_ROOM);
+  } else if (vict == nullptr) {
+    act("@WHaving lost your target you slow down until your vortex disappears, and end your attack.@n", true, ch, 0, 0, TO_CHAR);
+    act("@C$n@W slows down until $s vortex disappears.@n", true, ch, 0, 0, TO_ROOM);
     char_plr_set(ch, PLR_SPIRAL, false);
     return;
   }
 
   if (char_get_charge(ch) <= 0) {
-    act("@WHaving no more charged ki you slow down until your vortex disappears, and end your attack.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@C$n@W slows down until $s vortex disappears.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@WHaving no more charged ki you slow down until your vortex disappears, and end your attack.@n", true, ch, 0, 0, TO_CHAR);
+    act("@C$n@W slows down until $s vortex disappears.@n", true, ch, 0, 0, TO_ROOM);
     char_plr_set(ch, PLR_SPIRAL, false);
     return;
   }
@@ -5414,19 +5414,19 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
     if (prob < perc) {
       if ((getCurST(vict)) > 0) {
         if (blk > rand_number(1, 130)) {
-          act("@C$N@W moves quickly and blocks your Spiral Comet blast!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou move quickly and block @C$n's@W Spiral Comet blast!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W moves quickly and blocks @c$n's@W Spiral Comet blast!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W moves quickly and blocks your Spiral Comet blast!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou move quickly and block @C$n's@W Spiral Comet blast!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W moves quickly and blocks @c$n's@W Spiral Comet blast!@n", false, ch, 0, vict, TO_NOTVICT);
           pcost(ch, amount, 0);
           dmg = damtype(ch, 10, skill, .05);
           dmg /= 4;
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
+          hurt(0, 0, ch, vict, nullptr, dmg, 1);
           return;
         }
         if (dge > rand_number(1, 130)) {
-          act("@C$N@W manages to dodge your Spiral Comet blast, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou dodge @C$n's@W Spiral Comet blast, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W manages to dodge @c$n's@W Spiral Comet blast, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W manages to dodge your Spiral Comet blast, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou dodge @C$n's@W Spiral Comet blast, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W manages to dodge @c$n's@W Spiral Comet blast, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_NOTVICT);
           send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(ch, vict, 0, 45, skill, SKILL_SPIRAL); /* Effects on the room from dodging a ki attack
@@ -5438,66 +5438,66 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
           }
 
           pcost(ch, amount, 0);
-          hurt(0, 0, ch, vict, NULL, 0, 1);
+          hurt(0, 0, ch, vict, nullptr, 0, 1);
           return;
         }
-        act("@WYou can't believe it but your Spiral Comet blast misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W fires a Spiral Comet blast at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
-        act("@c$n@W fires a Spiral Comet blast at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou can't believe it but your Spiral Comet blast misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+        act("@C$n@W fires a Spiral Comet blast at you, but misses!@n ", false, ch, 0, vict, TO_VICT);
+        act("@c$n@W fires a Spiral Comet blast at @C$N@W, but somehow misses!@n ", false, ch, 0, vict, TO_NOTVICT);
         pcost(ch, amount, 0);
-        hurt(0, 0, ch, vict, NULL, 0, 1);
+        hurt(0, 0, ch, vict, nullptr, 0, 1);
         return;
       }
-      act("@WYou can't believe it but your Spiral Comet blast misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W fires a Spiral Comet blast at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
-      act("@c$n@W fires a Spiral Comet blast at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+      act("@WYou can't believe it but your Spiral Comet blast misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+      act("@C$n@W fires a Spiral Comet blast at you, but misses!@n", false, ch, 0, vict, TO_VICT);
+      act("@c$n@W fires a Spiral Comet blast at @C$N@W, but somehow misses!@n", false, ch, 0, vict, TO_NOTVICT);
       pcost(ch, amount, 0);
-      hurt(0, 0, ch, vict, NULL, 0, 1);
+      hurt(0, 0, ch, vict, nullptr, 0, 1);
       return;
     }
-    if (first == TRUE) {
+    if (first == true) {
       dmg = damtype(ch, 44, skill, .5);
     } else {
       dmg = damtype(ch, 45, skill, .01);
     }
     switch (rand_number(1, 5)) {
       case 1:
-        act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S chest and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR chest and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S chest and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S chest and explodes!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR chest and explodes!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S chest and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         break;
       case 2: /* Critical */
-        act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S head and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR head and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S head and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S head and explodes!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR head and explodes!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S head and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= 2;
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 3);
         break;
       case 3:
-        act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S body and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR body and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S body and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S body and explodes!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR body and explodes!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S body and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         break;
       case 4: /* Weak */
-        act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S arm and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR arm and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S arm and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S arm and explodes!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR arm and explodes!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S arm and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg /= 2;
         dam_eq_loc(vict, 1);
-        hurt(0, 190, ch, vict, NULL, dmg, 1);
+        hurt(0, 190, ch, vict, nullptr, dmg, 1);
         break;
       case 5: /* Weak 2 */
-        act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S leg and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR leg and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S leg and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S leg and explodes!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR leg and explodes!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S leg and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg /= 2;
         dam_eq_loc(vict, 2);
-        hurt(1, 190, ch, vict, NULL, dmg, 1);
+        hurt(1, 190, ch, vict, nullptr, dmg, 1);
         break;
     }
     pcost(ch, amount, 0);
@@ -5512,32 +5512,32 @@ static void handle_death_msg(struct char_data *ch, struct char_data *vict, int t
     if (!rroom_sunken(char_get_in_room(vict)) && rroom_sect(char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(char_get_in_room(vict)) != SECT_WATER_NOSWIM && !rroom_flagged(char_get_in_room(vict), ROOM_SPACE) && rroom_sect(char_get_in_room(vict)) != SECT_FLYING) {
       switch (rand_number(1, 5)) {
         case 1:
-          act("@R$N@r coughs up blood before falling to the ground dead.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou cough up blood before falling to the ground dead.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r coughs up blood before falling down dead.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r coughs up blood before falling to the ground dead.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou cough up blood before falling to the ground dead.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r coughs up blood before falling down dead.@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 2:
-          act("@R$N@r crumples to the ground dead.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou crumple to the ground dead.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r crumples to the ground dead.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r crumples to the ground dead.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou crumple to the ground dead.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r crumples to the ground dead.@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 3:
-          act("@R$N@r cries out $S last breath before dying.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou cry out your last breath before dying.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r cries out $S last breath before dying.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou cry out your last breath before dying.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 4:
-          act("@R$N@r writhes on the ground screaming in pain before finally dying!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou writhe on the ground screaming in pain before finally dying!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r writhes on the ground screaming in pain before finally dying!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r writhes on the ground screaming in pain before finally dying!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou writhe on the ground screaming in pain before finally dying!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r writhes on the ground screaming in pain before finally dying!@n", true, ch, 0, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
           break;
         case 5:
-          act("@R$N@r hits the ground dead with such force that blood flies into the air briefly!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou hit the ground dead with such force that blood flies into the air briefly!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r hits the ground dead with such force that blood flies into the air briefly!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r hits the ground dead with such force that blood flies into the air briefly!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou hit the ground dead with such force that blood flies into the air briefly!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r hits the ground dead with such force that blood flies into the air briefly!@n", true, ch, 0, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
@@ -5546,32 +5546,32 @@ static void handle_death_msg(struct char_data *ch, struct char_data *vict, int t
     } else if (rroom_sect(char_get_in_room(vict)) == SECT_WATER_SWIM || rroom_sect(char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
       switch (rand_number(1, 5)) {
         case 1:
-          act("@R$N@r coughs up blood and dies before falling down to the water. A large splash accompanies $S body hitting the water!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou cough up blood and die before falling down to the water. A large splash accompanies your body hitting the water!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r coughs up blood and dies before falling down to the water. A large splash accompanies $S body hitting the water!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r coughs up blood and dies before falling down to the water. A large splash accompanies $S body hitting the water!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou cough up blood and die before falling down to the water. A large splash accompanies your body hitting the water!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r coughs up blood and dies before falling down to the water. A large splash accompanies $S body hitting the water!@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 2:
-          act("@R$N@r crumples down to the water, with the signs of life leaving $S eyes as $E floats in the water.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou crumple down to the water and die.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r crumples down to the water, with the signs of life leaving $S eyes as $E floats in the water.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r crumples down to the water, with the signs of life leaving $S eyes as $E floats in the water.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou crumple down to the water and die.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r crumples down to the water, with the signs of life leaving $S eyes as $E floats in the water.@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 3:
-          act("@R$N@r cries out $S last breath before dying and leaving a floating corpse behind.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou cry out your last breath before dying.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r cries out $S last breath before dying and leaving a floating corpse behind.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r cries out $S last breath before dying and leaving a floating corpse behind.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou cry out your last breath before dying.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r cries out $S last breath before dying and leaving a floating corpse behind.@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 4:
-          act("@R$N@r writhes in the water screaming in pain before finally dying!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou writhe in the water screaming in pain before finally dying!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r writhes in the water screaming in pain before finally dying!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r writhes in the water screaming in pain before finally dying!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou writhe in the water screaming in pain before finally dying!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r writhes in the water screaming in pain before finally dying!@n", true, ch, 0, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
           break;
         case 5:
-          act("@R$N@r hits the water dead with such force that blood mixed with water flies into the air briefly!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou hit the water dead with such force that blood mixed with water flies into the air briefly!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r hits the water dead with such force that blood mixed with water flies into the air briefly!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r hits the water dead with such force that blood mixed with water flies into the air briefly!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou hit the water dead with such force that blood mixed with water flies into the air briefly!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r hits the water dead with such force that blood mixed with water flies into the air briefly!@n", true, ch, 0, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
@@ -5580,32 +5580,32 @@ static void handle_death_msg(struct char_data *ch, struct char_data *vict, int t
     } else if (rroom_flagged(char_get_in_room(vict), ROOM_SPACE)) {
       switch (rand_number(1, 5)) {
         case 1:
-          act("@R$N@r coughs up blood and dies. The blood freezes and floats freely through space...@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou cough up blood and die. The blood freezes and floats freely through space...@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r coughs up blood and dies. The blood freezes and floats freely through space...@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r coughs up blood and dies. The blood freezes and floats freely through space...@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou cough up blood and die. The blood freezes and floats freely through space...@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r coughs up blood and dies. The blood freezes and floats freely through space...@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 2:
-          act("@R$N@r dies and leaves $S corpse floating freely in space.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou die and leave your corpse floating freely in space.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r dies and leaves $S corpse floating freely in space.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r dies and leaves $S corpse floating freely in space.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou die and leave your corpse floating freely in space.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r dies and leaves $S corpse floating freely in space.@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 3:
-          act("@R$N@r cries out $S last breath before dying.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou cry out your last breath before dying.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r cries out $S last breath before dying.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou cry out your last breath before dying.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 4:
-          act("@R$N@r writhes in space trying to scream in pain before $e finally dies!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou writhe in space trying to scream in pain before you finally die!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r writhes in space trying to scream in pain before $e finally dies!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r writhes in space trying to scream in pain before $e finally dies!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou writhe in space trying to scream in pain before you finally die!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r writhes in space trying to scream in pain before $e finally dies!@n", true, ch, 0, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
           break;
         case 5:
-          act("@R$N@r dies suddenly leaving behind a badly damaged corpse floating in space!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou die suddenly leaving behind a badly damaged corpse floating in space!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r dies suddenly leaving behind a badly damaged corpse floating in space!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r dies suddenly leaving behind a badly damaged corpse floating in space!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou die suddenly leaving behind a badly damaged corpse floating in space!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r dies suddenly leaving behind a badly damaged corpse floating in space!@n", true, ch, 0, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
@@ -5614,32 +5614,32 @@ static void handle_death_msg(struct char_data *ch, struct char_data *vict, int t
     } else if (rroom_sect(char_get_in_room(vict)) == SECT_FLYING) {
       switch (rand_number(1, 5)) {
         case 1:
-          act("@R$N@r coughs up blood before $s corpse starts to fall to the ground far below.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou coughs up blood before your corpse starts to fall to the ground far below.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r coughs up blood before $s corpse starts to fall to the ground far below.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r coughs up blood before $s corpse starts to fall to the ground far below.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou coughs up blood before your corpse starts to fall to the ground far below.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r coughs up blood before $s corpse starts to fall to the ground far below.@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 2:
-          act("@R$N@r dies and $S corpse begins to fall to the ground below.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou die and your corpse begins to fall to the ground below.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r dies and $S corpse begins to fall to the ground below.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r dies and $S corpse begins to fall to the ground below.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou die and your corpse begins to fall to the ground below.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r dies and $S corpse begins to fall to the ground below.@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 3:
-          act("@R$N@r cries out $S last breath before dying.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou cry out your last breath before dying.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r cries out $S last breath before dying.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou cry out your last breath before dying.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 4:
-          act("@R$N@r writhes in midair screaming in pain before finally dying!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou writhe in midair screaming in pain before finally dying!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r writhes in midair screaming in pain before finally dying!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r writhes in midair screaming in pain before finally dying!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou writhe in midair screaming in pain before finally dying!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r writhes in midair screaming in pain before finally dying!@n", true, ch, 0, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
           break;
         case 5:
-          act("@R$N@r snaps back and dies with such force that blood flies into the air briefly!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou snap back and die with such force that blood flies into the air briefly!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r hits the ground dead with such force that blood flies into the air briefly!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r snaps back and dies with such force that blood flies into the air briefly!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou snap back and die with such force that blood flies into the air briefly!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r hits the ground dead with such force that blood flies into the air briefly!@n", true, ch, 0, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
@@ -5648,32 +5648,32 @@ static void handle_death_msg(struct char_data *ch, struct char_data *vict, int t
     } else {
       switch (rand_number(1, 5)) {
         case 1:
-          act("@R$N@r coughs up blood before $s corpse starts to float limply in the water.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou coughs up blood before your corpse starts to float limply in the water.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r coughs up blood before $s corpse starts to float limply in the water.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r coughs up blood before $s corpse starts to float limply in the water.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou coughs up blood before your corpse starts to float limply in the water.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r coughs up blood before $s corpse starts to float limply in the water.@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 2:
-          act("@R$N@r dies and $S corpse begins to float limply in the water.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou die and your corpse begins to float limply in the water.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r dies and $S corpse begins to float limply in the water.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r dies and $S corpse begins to float limply in the water.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou die and your corpse begins to float limply in the water.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r dies and $S corpse begins to float limply in the water.@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 3:
-          act("@R$N@r cries out $S last breath before dying.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou cry out your last breath before dying.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r cries out $S last breath before dying.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou cry out your last breath before dying.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r cries out $S last breath before dying.@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 4:
-          act("@R$N@r writhes and thrases in the water trying to scream before finally dying!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou writhe and thrash in the water trying to scream before finally dying!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r writhes and thrashes in the water trying to scream before finally dying!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r writhes and thrases in the water trying to scream before finally dying!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou writhe and thrash in the water trying to scream before finally dying!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r writhes and thrashes in the water trying to scream before finally dying!@n", true, ch, 0, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
           break;
         case 5:
-          act("@R$N@r snaps back and dies with such force that blood floods out of $S body into the water!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou snap back and die with such force that blood floods out of your body into the water!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r hits the ground dead with such force that blood floods out of $S body into the water!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r snaps back and dies with such force that blood floods out of $S body into the water!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou snap back and die with such force that blood floods out of your body into the water!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r hits the ground dead with such force that blood floods out of $S body into the water!@n", true, ch, 0, vict, TO_NOTVICT);
           if (char_get_death_type(vict) != DTYPE_HEAD) {
             char_set_death_type(vict, DTYPE_PULP);
           }
@@ -5684,156 +5684,156 @@ static void handle_death_msg(struct char_data *ch, struct char_data *vict, int t
     if (!rroom_sunken(char_get_in_room(vict)) && rroom_sect(char_get_in_room(vict)) != SECT_WATER_SWIM && rroom_sect(char_get_in_room(vict)) != SECT_WATER_NOSWIM && !rroom_flagged(char_get_in_room(vict), ROOM_SPACE) && rroom_sect(char_get_in_room(vict)) != SECT_FLYING) {
       switch (rand_number(1, 5)) {
         case 1:
-          act("@R$N@r explodes and chunks of $M shower to the ground.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou explode leaving only chunks behind.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r explodes and chunks of $M shower to the ground.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou explode leaving only chunks behind.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, 0, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 2:
-          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rThe bottom half of your body is all that remains as you die.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rThe bottom half of your body is all that remains as you die.@n", true, ch, 0, vict, TO_VICT);
+          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_HALF);
           break;
         case 3:
-          act("@R$N@r is completely disintegrated in the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYour body completely disintegrates in the attack!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r is completely disintegrated in the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYour body completely disintegrates in the attack!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 4:
-          act("@R$N@r falls down as a smoldering corpse!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYour body falls down as a smoldering corpse!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r falls down as a smoldering corpse!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r falls down as a smoldering corpse!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYour body falls down as a smoldering corpse!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r falls down as a smoldering corpse!@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 5:
-          act("@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rWhat's left of your body slams into the ground as you die!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rWhat's left of your body slams into the ground as you die!@n", true, ch, 0, vict, TO_VICT);
+          act("@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", true, ch, 0, vict, TO_NOTVICT);
           break;
       }
     } else if (rroom_sect(char_get_in_room(vict)) == SECT_WATER_SWIM || rroom_sect(char_get_in_room(vict)) == SECT_WATER_NOSWIM) {
       switch (rand_number(1, 5)) {
         case 1:
-          act("@R$N@r explodes and chunks of $M shower to the ground.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou explode leaving only chunks behind.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r explodes and chunks of $M shower to the ground.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou explode leaving only chunks behind.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, 0, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 2:
-          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rThe bottom half of your body is all that remains as you die.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rThe bottom half of your body is all that remains as you die.@n", true, ch, 0, vict, TO_VICT);
+          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_HALF);
           break;
         case 3:
-          act("@R$N@r is completely disintegrated in the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYour body completely disintegrates in the attack!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r is completely disintegrated in the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYour body completely disintegrates in the attack!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 4:
-          act("@R$N@r falls down as a smoldering corpse!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYour body falls down as a smoldering corpse!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r falls down as a smoldering corpse!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r falls down as a smoldering corpse!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYour body falls down as a smoldering corpse!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r falls down as a smoldering corpse!@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 5:
-          act("@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rWhat's left of your body slams into the ground as you die!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rWhat's left of your body slams into the ground as you die!@n", true, ch, 0, vict, TO_VICT);
+          act("@rWhat's left of @R$N@r's body slams into the ground as $E dies!@n", true, ch, 0, vict, TO_NOTVICT);
           break;
       }
     } else if (rroom_flagged(char_get_in_room(vict), ROOM_SPACE)) {
       switch (rand_number(1, 5)) {
         case 1:
-          act("@R$N@r explodes and chunks of $M shower out into every direction of space.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou explode leaving only chunks behind.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r explodes and chunks of $M shower out into every direction of space.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r explodes and chunks of $M shower out into every direction of space.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou explode leaving only chunks behind.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r explodes and chunks of $M shower out into every direction of space.@n", true, ch, 0, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 2:
-          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rThe bottom half of your body is all that remains as you die.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rThe bottom half of your body is all that remains as you die.@n", true, ch, 0, vict, TO_VICT);
+          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_HALF);
           break;
         case 3:
-          act("@R$N@r is completely disintegrated in the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYour body completely disintegrates in the attack!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r is completely disintegrated in the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYour body completely disintegrates in the attack!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 4:
-          act("@R$N@r floats away as a smoldering corpse!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYour body floats away as a smoldering corpse!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r floats away as a smoldering corpse!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r floats away as a smoldering corpse!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYour body floats away as a smoldering corpse!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r floats away as a smoldering corpse!@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 5:
-          act("@rWhat's left of @R$N@r's body floats away through space!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rWhat's left of your body floats away through space!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@rWhat's left of @R$N@r's body floats away through space!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@rWhat's left of @R$N@r's body floats away through space!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rWhat's left of your body floats away through space!@n", true, ch, 0, vict, TO_VICT);
+          act("@rWhat's left of @R$N@r's body floats away through space!@n", true, ch, 0, vict, TO_NOTVICT);
           break;
       }
     } else if (rroom_sect(char_get_in_room(vict)) == SECT_FLYING) {
       switch (rand_number(1, 5)) {
         case 1:
-          act("@R$N@r explodes and chunks of $M shower towards the ground far below.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou explode leaving only chunks behind.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r explodes and chunks of $M shower toward the ground far below.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r explodes and chunks of $M shower towards the ground far below.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou explode leaving only chunks behind.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r explodes and chunks of $M shower toward the ground far below.@n", true, ch, 0, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 2:
-          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rThe bottom half of your body is all that remains as you die.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rThe bottom half of your body is all that remains as you die.@n", true, ch, 0, vict, TO_VICT);
+          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_HALF);
           break;
         case 3:
-          act("@R$N@r is completely disintegrated in the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYour body completely disintegrates in the attack!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r is completely disintegrated in the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYour body completely disintegrates in the attack!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 4:
-          act("@R$N@r falls down toward the ground as a smoldering corpse!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYour body falls down toward the ground as a smoldering corpse!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r falls down toward the ground as a smoldering corpse!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r falls down toward the ground as a smoldering corpse!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYour body falls down toward the ground as a smoldering corpse!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r falls down toward the ground as a smoldering corpse!@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 5:
-          act("@rWhat's left of @R$N@r's body falls toward the ground as $E dies!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rWhat's left of yor body falls toward the ground as you die!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@rWhat's left of @R$N@r's body falls toward the ground as $E dies!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@rWhat's left of @R$N@r's body falls toward the ground as $E dies!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rWhat's left of yor body falls toward the ground as you die!@n", true, ch, 0, vict, TO_VICT);
+          act("@rWhat's left of @R$N@r's body falls toward the ground as $E dies!@n", true, ch, 0, vict, TO_NOTVICT);
           break;
       }
     } else {
       switch (rand_number(1, 5)) {
         case 1:
-          act("@R$N@r explodes and chunks of $M float freely through the water.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYou explode leaving only chunks behind.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r explodes and chunks of $M float freely through the water.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r explodes and chunks of $M float freely through the water.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYou explode leaving only chunks behind.@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r explodes and chunks of $M float freely through the water.@n", true, ch, 0, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 2:
-          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rThe bottom half of your body is all that remains as you die.@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_CHAR);
+          act("@rThe bottom half of your body is all that remains as you die.@n", true, ch, 0, vict, TO_VICT);
+          act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, 0, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_HALF);
           break;
         case 3:
-          act("@R$N@r is completely disintegrated in the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYour body completely disintegrates in the attack!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r is completely disintegrated in the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYour body completely disintegrates in the attack!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r is completely disintegrated in the attack!@n", true, ch, 0, vict, TO_NOTVICT);
           char_set_death_type(vict, DTYPE_VAPOR);
           break;
         case 4:
-          act("@R$N@r falls back as a smoldering corpse!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rYour body falls back as a smoldering corpse!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@R$N@r falls back as a smoldering corpse!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@R$N@r falls back as a smoldering corpse!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rYour body falls back as a smoldering corpse!@n", true, ch, 0, vict, TO_VICT);
+          act("@R$N@r falls back as a smoldering corpse!@n", true, ch, 0, vict, TO_NOTVICT);
           break;
         case 5:
-          act("@rWhat's left of @R$N@r's body floats limply as $E dies!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@rWhat's left of yor body floats limply as you die!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@rWhat's left of @R$N@r's body floats limply as $E dies!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@rWhat's left of @R$N@r's body floats limply as $E dies!@n", true, ch, 0, vict, TO_CHAR);
+          act("@rWhat's left of yor body floats limply as you die!@n", true, ch, 0, vict, TO_VICT);
+          act("@rWhat's left of @R$N@r's body floats limply as $E dies!@n", true, ch, 0, vict, TO_NOTVICT);
           break;
       }
     }

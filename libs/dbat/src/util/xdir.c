@@ -28,7 +28,7 @@ void xdir_cleanup(struct xap_dir *xd)
   for (int i = 0; i < xd->total; i++)
     free(xd->namelist[i]);
   free(xd->namelist);
-  xd->namelist = NULL;
+  xd->namelist = nullptr;
   xd->total    = 0;
 }
 

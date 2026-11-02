@@ -14,33 +14,25 @@
 static void remove_cmd_from_list(struct reset_com **list, int pos);
 
 /* real zone of room/mobile/object/shop given */
+/* Orders a vnum against the range of vnums a zone covers. */
+static int zone_range_order(const void *key, const void *zone)
+{
+  room_vnum vnum            = *(const room_vnum *)key;
+  const struct zone_data *z = zone;
+
+  if (vnum < genolc_zone_bottom(z - zone_table))
+    return -1;
+  return vnum > z->top;
+}
+
 zone_rnum real_zone_by_thing(room_vnum vznum)
 {
-  zone_rnum bot, top, mid;
-  int low, high;
+  struct zone_data *found;
 
-  bot = 0;
-  top = top_of_zone_table;
-
-  if (genolc_zone_bottom(bot) > vznum || zone_table[top].top < vznum)
-    return (NOWHERE);
-
-  /* perform binary search on zone-table */
-  while (bot <= top) {
-    mid = (bot + top) / 2;
-
-    /* Upper/lower bounds of the zone. */
-    low  = genolc_zone_bottom(mid);
-    high = zone_table[mid].top;
-
-    if (low <= vznum && vznum <= high)
-      return mid;
-    if (low > vznum)
-      top = mid - 1;
-    else
-      bot = mid + 1;
-  }
-  return (NOWHERE);
+  if (top_of_zone_table < 0)
+    return NOWHERE;
+  found = bsearch(&vznum, zone_table, top_of_zone_table + 1, sizeof(*zone_table), zone_range_order);
+  return found ? found - zone_table : NOWHERE;
 }
 
 zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error)
@@ -87,13 +79,13 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    */
   snprintf(buf, sizeof(buf), "%s%d.zon", ZON_PREFIX, vzone_num);
   if (!(fp = atomic_open(&af, buf, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new zone file.");
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new zone file.");
     *error = "Could not write zone file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "#%d\nNew Zone~\n%d 30 2\nS\n$\n", vzone_num, (vzone_num * 100) + 99);
   if (!atomic_commit(&af)) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new zone file.");
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new zone file.");
     *error = "Could not write zone file.\r\n";
     return NOWHERE;
   }
@@ -103,13 +95,13 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    */
   snprintf(buf, sizeof(buf), "%s%d.wld", WLD_PREFIX, vzone_num);
   if (!(fp = atomic_open(&af, buf, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new world file.");
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new world file.");
     *error = "Could not write world file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "#%d\nThe Beginning~\nNot much here.\n~\n%d 0 0\nS\n$\n", bottom, vzone_num);
   if (!atomic_commit(&af)) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new world file.");
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new world file.");
     *error = "Could not write world file.\r\n";
     return NOWHERE;
   }
@@ -119,13 +111,13 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    */
   snprintf(buf, sizeof(buf), "%s%d.mob", MOB_PREFIX, vzone_num);
   if (!(fp = atomic_open(&af, buf, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new mob file.");
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new mob file.");
     *error = "Could not write mobile file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "$\n");
   if (!atomic_commit(&af)) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new mob file.");
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new mob file.");
     *error = "Could not write mobile file.\r\n";
     return NOWHERE;
   }
@@ -135,13 +127,13 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    */
   snprintf(buf, sizeof(buf), "%s%d.obj", OBJ_PREFIX, vzone_num);
   if (!(fp = atomic_open(&af, buf, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new obj file.");
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new obj file.");
     *error = "Could not write object file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "$\n");
   if (!atomic_commit(&af)) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new obj file.");
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new obj file.");
     *error = "Could not write object file.\r\n";
     return NOWHERE;
   }
@@ -151,13 +143,13 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    */
   snprintf(buf, sizeof(buf), "%s%d.shp", SHP_PREFIX, vzone_num);
   if (!(fp = atomic_open(&af, buf, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new shop file.");
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new shop file.");
     *error = "Could not write shop file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "$~\n");
   if (!atomic_commit(&af)) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new shop file.");
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new shop file.");
     *error = "Could not write shop file.\r\n";
     return NOWHERE;
   }
@@ -167,13 +159,13 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    */
   snprintf(buf, sizeof(buf), "%s%d.trg", TRG_PREFIX, vzone_num);
   if (!(fp = atomic_open(&af, buf, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new trigger file");
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new trigger file");
     *error = "Could not write trigger file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "$~\n");
   if (!atomic_commit(&af)) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new trigger file");
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new trigger file");
     *error = "Could not write trigger file.\r\n";
     return NOWHERE;
   }
@@ -183,13 +175,13 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    */
   snprintf(buf, sizeof(buf), "%s/%d.gld", GLD_PREFIX, vzone_num);
   if (!(fp = atomic_open(&af, buf, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new guild file");
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new guild file");
     *error = "Could not write guild file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "$~\n");
   if (!atomic_commit(&af)) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new guild file");
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Can't write new guild file");
     *error = "Could not write guild file.\r\n";
     return NOWHERE;
   }
@@ -275,7 +267,7 @@ void create_world_index(int znum, const char *type)
   FILE *newfile, *oldfile;
   char old_name[32];
   const char *prefix;
-  int num, found = FALSE;
+  int num, found = false;
   char buf[MAX_STRING_LENGTH];
   char buf1[MAX_STRING_LENGTH];
 
@@ -311,11 +303,11 @@ void create_world_index(int znum, const char *type)
   snprintf(old_name, sizeof(old_name), "%s/index", prefix);
 
   if (!(oldfile = fopen(old_name, "r"))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Failed to open %s.", old_name);
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Failed to open %s.", old_name);
     return;
   }
   if (!(newfile = atomic_open(&index_af, old_name, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Failed to open %s.", index_af.tmp);
+    mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: OLC: Failed to open %s.", index_af.tmp);
     fclose(oldfile);
     return;
   }
@@ -336,9 +328,9 @@ void create_world_index(int znum, const char *type)
     if (!found) {
       sscanf(buf, "%d", &num);
       if (num == znum) {
-        found = TRUE;
+        found = true;
       } else if (num > znum) {
-        found = TRUE;
+        found = true;
         fprintf(newfile, "%s\n", buf1);
       }
     }
@@ -392,7 +384,7 @@ int save_zone(zone_rnum zone_num)
 {
   int subcmd, arg1 = -1, arg2 = -1, arg3 = -1, arg4 = -1, arg5 = -1;
   char fname[128], oldname[128];
-  const char *comment = NULL;
+  const char *comment = nullptr;
   struct atomic_file af;
   FILE *zfile;
   char zbuf1[MAX_STRING_LENGTH];
@@ -402,13 +394,13 @@ int save_zone(zone_rnum zone_num)
 
   if (zone_num < 0 || zone_num > top_of_zone_table) {
     mud_log("SYSERR: GenOLC: save_zone: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
-    return FALSE;
+    return false;
   }
 
   snprintf(fname, sizeof(fname), "%s%d.zon", ZON_PREFIX, zone_table[zone_num].number);
   if (!(zfile = atomic_open(&af, fname, false))) {
-    mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: OLC: save_zones:  Can't write zone %d.", zone_table[zone_num].number);
-    return FALSE;
+    mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: save_zones:  Can't write zone %d.", zone_table[zone_num].number);
+    return false;
   }
 
   /*
@@ -531,7 +523,7 @@ int save_zone(zone_rnum zone_num)
        */
         continue;
       default:
-        mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: OLC: z_save_to_disk(): Unknown cmd '%c' - NOT saving", ZCMD(zone_num, subcmd).command);
+        mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: z_save_to_disk(): Unknown cmd '%c' - NOT saving", ZCMD(zone_num, subcmd).command);
         continue;
     }
     if (ZCMD(zone_num, subcmd).command != 'V')
@@ -544,7 +536,7 @@ int save_zone(zone_rnum zone_num)
   }
   fputs("S\n$\n", zfile);
   if (!atomic_commit(&af))
-    return FALSE;
+    return false;
   snprintf(oldname, sizeof(oldname), "%s", fname);
 
   if (in_save_list(zone_table[zone_num].number, SL_ZON)) {
@@ -552,7 +544,7 @@ int save_zone(zone_rnum zone_num)
     create_world_index(zone_table[zone_num].number, "zon");
     mud_log("GenOLC: save_zone: Saving zone '%s'", oldname);
   }
-  return TRUE;
+  return true;
 }
 
 /*-------------------------------------------------------------------*/

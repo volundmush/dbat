@@ -27,6 +27,7 @@
 /* local functions */
 static char *fread_action(FILE *fl, int nr);
 static int find_action(int cmd);
+static int social_sort_order(const void *a, const void *b);
 
 ACMD(do_action)
 {
@@ -64,11 +65,11 @@ ACMD(do_action)
   else
     *arg = '\0';
 
-  vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM);
+  vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM);
   if (!vict) {
     if (action->char_obj_found) {
-      targ = get_obj_in_list_vis(ch, arg, NULL, ch->carrying);
-      if (!targ) targ = get_obj_in_list_vis(ch, arg, NULL, world[char_get_in_room(ch)].contents);
+      targ = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying);
+      if (!targ) targ = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents);
       if (targ) {
         act(action->char_obj_found, action->hide, ch, targ, 0, TO_CHAR);
         act(action->others_obj_found, action->hide, ch, targ, 0, TO_ROOM);
@@ -92,7 +93,7 @@ ACMD(do_action)
   }
 
   if (char_get_position(vict) < action->min_victim_position)
-    act("$N is not in a proper position for that.", FALSE, ch, 0, vict, TO_CHAR | TO_SLEEP);
+    act("$N is not in a proper position for that.", false, ch, 0, vict, TO_CHAR | TO_SLEEP);
   else {
     if (*part) {
       act(action->char_body_found, 0, ch, (struct obj_data *)part, vict, TO_CHAR | TO_SLEEP);
@@ -114,7 +115,7 @@ ACMD(do_insult)
   one_argument(argument, arg);
 
   if (*arg) {
-    if (!(victim = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM)))
+    if (!(victim = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM)))
       send_to_char(ch, "Can't hear you!\r\n");
     else {
       if (victim != ch) {
@@ -124,27 +125,27 @@ ACMD(do_insult)
           case 0:
             if (char_get_sex(ch) == SEX_MALE) {
               if (char_get_sex(victim) == SEX_MALE)
-                act("$n accuses you of fighting like a woman!", FALSE, ch, 0, victim, TO_VICT);
+                act("$n accuses you of fighting like a woman!", false, ch, 0, victim, TO_VICT);
               else
-                act("$n says that women can't fight.", FALSE, ch, 0, victim, TO_VICT);
+                act("$n says that women can't fight.", false, ch, 0, victim, TO_VICT);
             } else { /* Ch == Woman */
               if (char_get_sex(victim) == SEX_MALE)
                 act("$n accuses you of having the smallest... (brain?)",
-                    FALSE, ch, 0, victim, TO_VICT);
+                    false, ch, 0, victim, TO_VICT);
               else
                 act("$n tells you that you'd lose a beauty contest against a troll.",
-                    FALSE, ch, 0, victim, TO_VICT);
+                    false, ch, 0, victim, TO_VICT);
             }
             break;
           case 1:
-            act("$n calls your mother a bitch!", FALSE, ch, 0, victim, TO_VICT);
+            act("$n calls your mother a bitch!", false, ch, 0, victim, TO_VICT);
             break;
           default:
-            act("$n tells you to get lost!", FALSE, ch, 0, victim, TO_VICT);
+            act("$n tells you to get lost!", false, ch, 0, victim, TO_VICT);
             break;
         } /* end switch */
 
-        act("$n insults $N.", TRUE, ch, 0, victim, TO_NOTVICT);
+        act("$n insults $N.", true, ch, 0, victim, TO_NOTVICT);
       } else { /* ch == victim */
         send_to_char(ch, "You feel insulted.\r\n");
       }
@@ -159,7 +160,7 @@ void boot_social_messages(void)
   int nr = 0, hide, min_char_pos, min_pos, min_lvl, curr_soc = -1;
   char next_soc[MAX_STRING_LENGTH], sorted[MAX_INPUT_LENGTH];
 
-  if (CONFIG_NEW_SOCIALS == TRUE) {
+  if (CONFIG_NEW_SOCIALS == true) {
     /* open social file */
     if (!(fl = fopen(SOCMESS_FILE_NEW, "r"))) {
       mud_log("SYSERR: can't open socials file '%s': %s", SOCMESS_FILE_NEW, strerror(errno));
@@ -200,7 +201,7 @@ void boot_social_messages(void)
     fscanf(fl, " %s ", next_soc);
     if (*next_soc == '$') break;
 
-    if (CONFIG_NEW_SOCIALS == TRUE) {
+    if (CONFIG_NEW_SOCIALS == true) {
       if (fscanf(fl, " %s %d %d %d %d \n",
                  sorted, &hide, &min_char_pos, &min_pos, &min_lvl) != 5) {
         mud_log("SYSERR: format error in social file near social '%s'", next_soc);
@@ -240,7 +241,7 @@ void boot_social_messages(void)
     soc_mess_list[curr_soc].char_found    = fread_action(fl, nr);
 
     /* if no char_found, the rest is to be ignored */
-    if (CONFIG_NEW_SOCIALS == FALSE && !soc_mess_list[curr_soc].char_found)
+    if (CONFIG_NEW_SOCIALS == false && !soc_mess_list[curr_soc].char_found)
       continue;
 
     soc_mess_list[curr_soc].others_found = fread_action(fl, nr);
@@ -249,7 +250,7 @@ void boot_social_messages(void)
     soc_mess_list[curr_soc].char_auto    = fread_action(fl, nr);
     soc_mess_list[curr_soc].others_auto  = fread_action(fl, nr);
 
-    if (CONFIG_NEW_SOCIALS == FALSE)
+    if (CONFIG_NEW_SOCIALS == false)
       continue;
 
     soc_mess_list[curr_soc].char_body_found   = fread_action(fl, nr);
@@ -267,24 +268,13 @@ void boot_social_messages(void)
 void create_command_list(void)
 {
   int i, j, k;
-  struct social_messg temp;
 
   /* free up old command list */
   if (complete_cmd_info)
     free_command_list();
 
   /* re check the sort on the socials */
-  for (j = 0; j < top_of_socialt; j++) {
-    k = j;
-    for (i = j + 1; i <= top_of_socialt; i++)
-      if (strcasecmp(soc_mess_list[i].sort_as, soc_mess_list[k].sort_as) < 0)
-        k = i;
-    if (j != k) {
-      temp             = soc_mess_list[j];
-      soc_mess_list[j] = soc_mess_list[k];
-      soc_mess_list[k] = temp;
-    }
-  }
+  qsort(soc_mess_list, top_of_socialt + 1, sizeof(*soc_mess_list), social_sort_order);
 
   /* count the commands in the command list */
   i = 0;
@@ -334,7 +324,7 @@ void free_command_list(void)
   free((char *)complete_cmd_info[k].command);
   free((char *)complete_cmd_info[k].sort_as);
   free(complete_cmd_info);
-  complete_cmd_info = NULL;
+  complete_cmd_info = nullptr;
 }
 
 static char *fread_action(FILE *fl, int nr)
@@ -352,7 +342,7 @@ static char *fread_action(FILE *fl, int nr)
     exit(1);
   }
   if (*buf == '#')
-    return (NULL);
+    return (nullptr);
 
   buf[strlen(buf) - 1] = '\0';
   return (strdup(buf));
@@ -390,29 +380,27 @@ void free_action(struct social_messg *mess)
   memset(mess, 0, sizeof(struct social_messg));
 }
 
+static int social_sort_order(const void *a, const void *b)
+{
+  return strcasecmp(((const struct social_messg *)a)->sort_as, ((const struct social_messg *)b)->sort_as);
+}
+
+static int social_order(const void *key, const void *social)
+{
+  int k = *(const int *)key, v = ((const struct social_messg *)social)->act_nr;
+
+  return (k > v) - (k < v);
+}
+
+/* soc_mess_list is in act_nr order: create_command_list() numbers it that way. */
 static int find_action(int cmd)
 {
-  int bot, top, mid;
+  struct social_messg *found;
 
-  bot = 0;
-  top = top_of_socialt;
-
-  if (top < 0)
-    return (-1);
-
-  for (;;) {
-    mid = (bot + top) / 2;
-
-    if (soc_mess_list[mid].act_nr == cmd)
-      return (mid);
-    if (bot >= top)
-      return (-1);
-
-    if (soc_mess_list[mid].act_nr > cmd)
-      top = --mid;
-    else
-      bot = ++mid;
-  }
+  if (top_of_socialt < 0)
+    return -1;
+  found = bsearch(&cmd, soc_mess_list, top_of_socialt + 1, sizeof(*soc_mess_list), social_order);
+  return found ? found - soc_mess_list : -1;
 }
 
 ACMD(do_gmote)
@@ -420,7 +408,7 @@ ACMD(do_gmote)
   int act_nr, length;
   char arg[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
   struct social_messg *action;
-  struct char_data *vict = NULL;
+  struct char_data *vict = nullptr;
 
   half_chop(argument, buf, arg);
 
@@ -431,7 +419,7 @@ ACMD(do_gmote)
 
   if ((act_nr = find_action(cmd)) < 0) {
     snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s %s@n@D]", char_get_admlevel(ch) < 1 ? char_get_user(ch) : char_get_name(ch), argument);
-    act(buf, FALSE, ch, 0, vict, TO_GMOTE);
+    act(buf, false, ch, 0, vict, TO_GMOTE);
     return;
   }
 
@@ -451,7 +439,7 @@ ACMD(do_gmote)
       return;
     }
     snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s@D]@n", action->others_no_arg);
-  } else if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
+  } else if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
     send_to_char(ch, "%s\r\n", action->not_found);
     return;
   } else if (vict == ch) {
@@ -463,10 +451,10 @@ ACMD(do_gmote)
   } else {
     if (char_get_position(vict) < action->min_victim_position) {
       act("$N is not in a proper position for that.",
-          FALSE, ch, 0, vict, TO_CHAR | TO_SLEEP);
+          false, ch, 0, vict, TO_CHAR | TO_SLEEP);
       return;
     }
     snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s@D]@n", action->others_found);
   }
-  act(buf, FALSE, ch, 0, vict, TO_GMOTE);
+  act(buf, false, ch, 0, vict, TO_GMOTE);
 }

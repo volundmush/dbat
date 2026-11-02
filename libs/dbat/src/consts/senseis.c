@@ -1,7 +1,7 @@
 #include "dbat/consts/senseis.h"
 
-#define Y TRUE
-#define N FALSE
+#define Y true
+#define N false
 
 /* Sensei Fighting Style */
 const char *sensei_style[MAX_SENSEI] = {

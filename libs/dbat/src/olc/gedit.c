@@ -69,7 +69,7 @@ ACMD(do_oasis_gedit)
       return;
     }
 
-    save = TRUE;
+    save = true;
 
     if (is_number(buf2))
       number = atoi(buf2);
@@ -116,7 +116,7 @@ ACMD(do_oasis_gedit)
   /** Give the descriptor an OLC structure.                                  **/
   /****************************************************************************/
   if (d->olc) {
-    mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE,
+    mudlog(LOG_BRF, ADMLVL_IMMORT, true,
            "SYSERR: do_oasis_gedit: Player already had olc structure.");
     free(d->olc);
   }
@@ -129,7 +129,7 @@ ACMD(do_oasis_gedit)
   if ((OLC_ZNUM(d) = real_zone_by_thing(number)) == NOWHERE) {
     send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
@@ -143,14 +143,14 @@ ACMD(do_oasis_gedit)
     /** Free the OLC structure.                                              **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
   if (save) {
     send_to_char(ch, "Saving all guilds in zone %d.\r\n",
                  zone_table[OLC_ZNUM(d)].number);
-    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), TRUE,
+    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), true,
            "OLC: %s saves guild info for zone %d.",
            char_get_name(ch), zone_table[OLC_ZNUM(d)].number);
 
@@ -163,7 +163,7 @@ ACMD(do_oasis_gedit)
     /** Free the OLC structure.                                              **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
@@ -176,10 +176,10 @@ ACMD(do_oasis_gedit)
 
   desc_set_connected(d, CON_GEDIT);
 
-  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", true, d->character, 0, 0, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);
 
-  mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
+  mudlog(LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
          char_get_name(ch), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
 }
 
@@ -199,7 +199,7 @@ static void gedit_setup_new(struct descriptor_data *d)
   for (i = 0; i < GW_ARRAY_MAX; i++)
     G_WITH_WHO(guilddata)
   [i]                 = 0;
-  G_FUNC(guilddata)   = NULL;
+  G_FUNC(guilddata)   = nullptr;
   G_MINLVL(guilddata) = 0;
 
   /*. Some default strings . */
@@ -490,7 +490,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
         case 'Y':
           send_to_char(d->character, "Saving Guild to memory.\r\n");
           gedit_save_internally(d);
-          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(d->character)), TRUE,
+          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(d->character)), true,
                  "OLC: %s edits guild %d", char_get_name(d->character), OLC_NUM(d));
           if (CONFIG_OLC_SAVE) {
             gedit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
@@ -612,7 +612,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
         if (i == -1)
           break;
         /*. Fiddle with special procs . */
-        G_FUNC(OLC_GUILD(d)) = mob_index[i].func != guild ? mob_index[i].func : NULL;
+        G_FUNC(OLC_GUILD(d)) = mob_index[i].func != guild ? mob_index[i].func : nullptr;
         mob_index[i].func    = guild;
         break;
       }
@@ -690,7 +690,7 @@ void gedit_parse(struct descriptor_data *d, char *arg)
     default:
       /*. We should never get here . */
       cleanup_olc(d, CLEANUP_ALL);
-      mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: OLC: gedit_parse(): "
+      mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: gedit_parse(): "
                                             "Reached default case!");
       write_to_output(d, "Oops...\r\n");
       break;

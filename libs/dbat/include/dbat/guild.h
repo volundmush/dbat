@@ -4,7 +4,7 @@
 #include "dbat/consts/skills.h"
 #include "dbat/consts/feats.h"
 
-#define GW_ARRAY_MAX 4
+constexpr int GW_ARRAY_MAX = 4;
 
 /* Default guild messages: used for new guilds and in place of a missing or malformed message. */
 extern const char *const guild_default_no_skill;

@@ -33,12 +33,12 @@ void write_aliases(struct char_data *ch)
 
   get_filename(fn, sizeof(fn), ALIAS_FILE, char_get_name(ch));
 
-  if (char_get_aliases(ch) == NULL) {
+  if (char_get_aliases(ch) == nullptr) {
     remove(fn);
     return;
   }
 
-  if ((file = atomic_open(&af, fn, true)) == NULL) {
+  if ((file = atomic_open(&af, fn, true)) == nullptr) {
     mud_log("SYSERR: Couldn't save aliases for %s in '%s': %s", char_get_name(ch), fn, strerror(errno));
     /*  SYSERR_DESC:
      *  This error occurs when the server fails to open the relevant alias
@@ -96,11 +96,11 @@ void read_aliases(struct char_data *ch)
 {
   FILE *file;
   char xbuf[MAX_STRING_LENGTH];
-  struct alias_data *head = NULL, **tail = &head;
+  struct alias_data *head = nullptr, **tail = &head;
 
   get_filename(xbuf, sizeof(xbuf), ALIAS_FILE, char_get_name(ch));
 
-  if ((file = fopen(xbuf, "r")) == NULL) {
+  if ((file = fopen(xbuf, "r")) == nullptr) {
     if (errno != ENOENT) {
       mud_log("SYSERR: Couldn't open alias file '%s' for %s: %s", xbuf, char_get_name(ch), strerror(errno));
       /*  SYSERR_DESC:
@@ -163,17 +163,17 @@ ACMD(do_alias)
 
   if (!*arg) { /* no argument specified -- list currently defined aliases */
     send_to_char(ch, "Currently defined aliases:\r\n");
-    if ((a = char_get_aliases(ch)) == NULL)
+    if ((a = char_get_aliases(ch)) == nullptr)
       send_to_char(ch, " None.\r\n");
     else {
-      while (a != NULL) {
+      while (a != nullptr) {
         send_to_char(ch, "%-15s %s\r\n", a->alias, a->replacement);
         a = a->next;
       }
     }
   } else { /* otherwise, add or remove aliases */
     /* is this an alias we've already defined? */
-    if ((a = find_alias(char_get_aliases(ch), arg)) != NULL) {
+    if ((a = find_alias(char_get_aliases(ch), arg)) != nullptr) {
       struct alias_data *head = char_get_aliases(ch);
       REMOVE_FROM_LIST(a, head, next, temp);
       char_set_aliases(ch, head);
@@ -181,7 +181,7 @@ ACMD(do_alias)
     }
     /* if no replacement string is specified, assume we want to delete */
     if (!*repl) {
-      if (a == NULL)
+      if (a == nullptr)
         send_to_char(ch, "No such alias.\r\n");
       else
         send_to_char(ch, "Alias deleted.\r\n");
@@ -211,7 +211,7 @@ ACMD(do_alias)
  * is "$*", which stands for the entire original line after the alias.
  * ";" is used to delimit commands.
  */
-#define NUM_TOKENS 9
+constexpr int NUM_TOKENS = 9;
 
 /* Copies text to *write_point, stopping at end (the last byte of the buffer, kept for the NUL). */
 static void alias_append(char **write_point, char *end, const char *text)
@@ -231,9 +231,9 @@ static void perform_complex_alias(struct txt_q *input_q, char *orig, struct alia
   /* First, parse the original string */
   strlcpy(buf2, orig, sizeof(buf2));
   temp = strtok(buf2, " ");
-  while (temp != NULL && num_of_tokens < NUM_TOKENS) {
+  while (temp != nullptr && num_of_tokens < NUM_TOKENS) {
     tokens[num_of_tokens++] = temp;
-    temp                    = strtok(NULL, " ");
+    temp                    = strtok(nullptr, " ");
   }
 
   /* initialize */
@@ -272,7 +272,7 @@ static void perform_complex_alias(struct txt_q *input_q, char *orig, struct alia
   write_to_q(buf, &temp_queue, 1);
 
   /* push our temp_queue on to the _front_ of the input queue */
-  if (input_q->head == NULL)
+  if (input_q->head == nullptr)
     *input_q = temp_queue;
   else {
     temp_queue.tail->next = input_q->head;
@@ -298,7 +298,7 @@ int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen)
     return (0);
 
   /* bail out immediately if the guy doesn't have any aliases */
-  if ((tmp = char_get_aliases(d->character)) == NULL)
+  if ((tmp = char_get_aliases(d->character)) == nullptr)
     return (0);
 
   /* find the alias we're supposed to match */
@@ -309,7 +309,7 @@ int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen)
     return (0);
 
   /* if the first arg is not an alias, return without doing anything */
-  if ((a = find_alias(tmp, first_arg)) == NULL)
+  if ((a = find_alias(tmp, first_arg)) == nullptr)
     return (0);
 
   if (a->type == ALIAS_SIMPLE) {

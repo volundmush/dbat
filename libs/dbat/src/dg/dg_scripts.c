@@ -49,7 +49,7 @@ void script_trigger_check(void)
 {
   char_data *ch;
   obj_data *obj;
-  struct room_data *room = NULL;
+  struct room_data *room = nullptr;
   int nr;
   struct script_data *sc;
 
@@ -90,7 +90,7 @@ void check_time_triggers(void)
 {
   char_data *ch;
   obj_data *obj;
-  struct room_data *room = NULL;
+  struct room_data *room = nullptr;
   int nr;
   struct script_data *sc;
 
@@ -139,26 +139,26 @@ static EVENTFUNC(trig_wait_event)
   type = wait_event_obj->type;
 
   free(wait_event_obj);
-  trig->wait_event = NULL;
+  trig->wait_event = nullptr;
 
 #if 1 /* debugging */
   {
-    int found = FALSE;
+    int found = false;
     if (type == MOB_TRIGGER) {
       struct char_data *tch;
       for (tch = character_list; tch && !found; tch = tch->next)
         if (tch == (struct char_data *)go)
-          found = TRUE;
+          found = true;
     } else if (type == OBJ_TRIGGER) {
       struct obj_data *obj;
       for (obj = object_list; obj && !found; obj = obj->next)
         if (obj == (struct obj_data *)go)
-          found = TRUE;
+          found = true;
     } else {
       room_rnum i;
       for (i = 0; i < top_of_world && !found; i++)
         if (&world[i] == (struct room_data *)go)
-          found = TRUE;
+          found = true;
     }
     if (!found) {
       mud_log("Trigger restarted on unknown entity. Vnum: %d", trig_get_vnum(trig));
@@ -200,7 +200,7 @@ static void dg_ctx_begin(void *go, trig_data *trig, int type)
   room_rnum room = NOWHERE;
 
   memset(&dg_ctx, 0, sizeof(dg_ctx));
-  dg_ctx.active     = TRUE;
+  dg_ctx.active     = true;
   dg_ctx.owner_type = type;
   dg_ctx.trig_vnum  = (long long)trig_get_vnum(trig);
   snprintf(dg_ctx.trig_name, sizeof(dg_ctx.trig_name), "%s", trig->name ? trig->name : "");
@@ -402,9 +402,9 @@ static void process_attach(void *go, struct script_data *sc, trig_data *trig,
   char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
   char result[MAX_INPUT_LENGTH], *id_p;
   trig_data *newtrig;
-  char_data *c = NULL;
-  obj_data *o  = NULL;
-  room_data *r = NULL;
+  char_data *c = nullptr;
+  obj_data *o  = nullptr;
+  room_data *r = nullptr;
   long trignum, id;
 
   id_p = two_arguments(cmd, arg, trignum_s);
@@ -477,9 +477,9 @@ static void process_detach(void *go, struct script_data *sc, trig_data *trig,
 {
   char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
   char result[MAX_INPUT_LENGTH], *id_p;
-  char_data *c = NULL;
-  obj_data *o  = NULL;
-  room_data *r = NULL;
+  char_data *c = nullptr;
+  obj_data *o  = nullptr;
+  room_data *r = nullptr;
   long id;
 
   id_p = two_arguments(cmd, arg, trignum_s);
@@ -563,7 +563,7 @@ struct room_data *dg_room_of_obj(struct obj_data *obj)
   if (obj->carried_by) return &world[char_get_in_room(obj->carried_by)];
   if (obj->worn_by) return &world[char_get_in_room(obj->worn_by)];
   if (obj->in_obj) return (dg_room_of_obj(obj->in_obj));
-  return NULL;
+  return nullptr;
 }
 
 /* create a UID variable from the id number */
@@ -606,7 +606,7 @@ static void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
     }
 
     if (is_abbrev(arg, "mob")) {
-      struct char_data *c = NULL;
+      struct char_data *c = nullptr;
       switch (type) {
         case WLD_TRIGGER:
           c = get_char_in_room((struct room_data *)go, name);
@@ -615,13 +615,13 @@ static void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
           c = get_char_near_obj((struct obj_data *)go, name);
           break;
         case MOB_TRIGGER:
-          c = get_char_room_vis((struct char_data *)go, name, NULL);
+          c = get_char_room_vis((struct char_data *)go, name, nullptr);
           break;
       }
       if (c)
         snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, char_get_id(c));
     } else if (is_abbrev(arg, "obj")) {
-      struct obj_data *o = NULL;
+      struct obj_data *o = nullptr;
       switch (type) {
         case WLD_TRIGGER:
           o = get_obj_in_room((struct room_data *)go, name);
@@ -630,9 +630,9 @@ static void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
           o = get_obj_near_obj((struct obj_data *)go, name);
           break;
         case MOB_TRIGGER:
-          if ((o = get_obj_in_list_vis((struct char_data *)go, name, NULL,
-                                       ((struct char_data *)go)->carrying)) == NULL)
-            o = get_obj_in_list_vis((struct char_data *)go, name, NULL,
+          if ((o = get_obj_in_list_vis((struct char_data *)go, name, nullptr,
+                                       ((struct char_data *)go)->carrying)) == nullptr)
+            o = get_obj_in_list_vis((struct char_data *)go, name, nullptr,
                                     world[char_get_in_room((struct char_data *)go)].contents);
           break;
       }
@@ -713,7 +713,7 @@ static void process_unset(struct script_data *sc, trig_data *trig, char *cmd)
 static void process_remote(struct script_data *sc, trig_data *trig, char *cmd)
 {
   struct trig_var_data *vd;
-  struct script_data *sc_remote = NULL;
+  struct script_data *sc_remote = nullptr;
   char *line, *var, *uid_p;
   char arg[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
   long uid, context;
@@ -775,7 +775,7 @@ static void process_remote(struct script_data *sc, trig_data *trig, char *cmd)
     return;
   }
 
-  if (sc_remote == NULL) return; /* no script to assign */
+  if (sc_remote == nullptr) return; /* no script to assign */
 
   add_var(&(sc_remote->global_vars), vd->name, vd->value, context);
 }
@@ -786,8 +786,8 @@ static void process_remote(struct script_data *sc, trig_data *trig, char *cmd)
  */
 static void process_rdelete(struct script_data *sc, trig_data *trig, char *cmd)
 {
-  struct trig_var_data *vd, *vd_prev = NULL;
-  struct script_data *sc_remote = NULL;
+  struct trig_var_data *vd, *vd_prev = nullptr;
+  struct script_data *sc_remote = nullptr;
   char *line, *var, *uid_p;
   char arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
   long uid;
@@ -828,8 +828,8 @@ static void process_rdelete(struct script_data *sc, trig_data *trig, char *cmd)
     return;
   }
 
-  if (sc_remote == NULL) return;              /* no script to delete a trigger from */
-  if (sc_remote->global_vars == NULL) return; /* no script globals */
+  if (sc_remote == nullptr) return;              /* no script to delete a trigger from */
+  if (sc_remote->global_vars == nullptr) return; /* no script globals */
 
   /* find the global */
   for (vd = sc_remote->global_vars; vd; vd_prev = vd, vd = vd->next)
@@ -984,7 +984,7 @@ static void dg_letter_value(struct script_data *sc, trig_data *trig, char *cmd)
 static struct script_data *script_of(void *go, int type)
 {
   struct script_data **slot = script_slot(go, type);
-  return slot ? *slot : NULL;
+  return slot ? *slot : nullptr;
 }
 
 /* What script_driver_body does after running one command line. */
@@ -1058,7 +1058,7 @@ static enum dg_line_result dg_run_command(void *go_adress, void *go, struct scri
     process_detach(go, sc, trig, type, cmd);
 
   else if (!strncasecmp(cmd, "version", 7))
-    mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "%s", DG_SCRIPT_VERSION);
+    mudlog(LOG_NRM, ADMLVL_GOD, true, "%s", DG_SCRIPT_VERSION);
 
   else {
     switch (type) {
@@ -1074,7 +1074,7 @@ static enum dg_line_result dg_run_command(void *go_adress, void *go, struct scri
     }
     if (dg_owner_purged) {
       if (type == OBJ_TRIGGER)
-        *(obj_data **)go_adress = NULL;
+        *(obj_data **)go_adress = nullptr;
       return DG_LINE_STOP;
     }
   }
@@ -1105,7 +1105,7 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
 int script_driver(void *go_adress, trig_data *trig, int type, int mode)
 {
   struct dg_run_ctx saved = dg_ctx;
-  void *go                = go_adress ? *(void **)go_adress : NULL;
+  void *go                = go_adress ? *(void **)go_adress : nullptr;
   int ret;
 
   dg_ctx_begin(go, trig, type);
@@ -1268,7 +1268,7 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
   sc = script_of(go, type); /* the script may have been detached */
   if (sc)
     free_varlist(trig->var_list);
-  trig->var_list = NULL;
+  trig->var_list = nullptr;
   trig->depth    = 0;
 
   depth--;
@@ -1276,28 +1276,21 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
 }
 
 /* returns the real number of the trigger with given virtual number */
+static int trigger_order(const void *key, const void *trig)
+{
+  trig_vnum k = *(const trig_vnum *)key, v = (*(struct index_data *const *)trig)->vnum;
+
+  return (k > v) - (k < v);
+}
+
 trig_rnum real_trigger(trig_vnum vnum)
 {
-  trig_rnum bot, top, mid;
+  struct index_data **found;
 
-  bot = 0;
-  top = top_of_trigt - 1;
-
-  if (!top_of_trigt || trig_index[bot]->vnum > vnum || trig_index[top]->vnum < vnum)
-    return (NOTHING);
-
-  /* perform binary search on trigger-table */
-  while (bot <= top) {
-    mid = (bot + top) / 2;
-
-    if (trig_index[mid]->vnum == vnum)
-      return (mid);
-    if (trig_index[mid]->vnum > vnum)
-      top = mid - 1;
-    else
-      bot = mid + 1;
-  }
-  return (NOTHING);
+  if (!trig_index || top_of_trigt <= 0)
+    return NOTHING;
+  found = bsearch(&vnum, trig_index, top_of_trigt, sizeof(*trig_index), trigger_order);
+  return found ? found - trig_index : NOTHING;
 }
 
 /* load in a character's saved variables */
@@ -1359,7 +1352,7 @@ void save_char_vars(struct char_data *ch)
 
   /* immediate return if no script (and therefore no variables) structure */
   /* has been created. this will happen when the player is logging in */
-  if (ch->script == NULL) return;
+  if (ch->script == nullptr) return;
 
   /* we should never be called for an NPC, but just in case... */
   if (char_is_npc(ch)) return;
@@ -1367,7 +1360,7 @@ void save_char_vars(struct char_data *ch)
   get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, char_get_name(ch));
 
   /* make sure this char has global variables to save */
-  if (ch->script->global_vars == NULL) {
+  if (ch->script->global_vars == nullptr) {
     unlink(fn);
     return;
   }
@@ -1375,7 +1368,7 @@ void save_char_vars(struct char_data *ch)
 
   file = atomic_open(&af, fn, true);
   if (!file) {
-    mudlog(LOG_NRM, ADMLVL_GOD, TRUE,
+    mudlog(LOG_NRM, ADMLVL_GOD, true,
            "SYSERR: Could not open player variable file %s for writing.:%s",
            fn, strerror(errno));
     return;

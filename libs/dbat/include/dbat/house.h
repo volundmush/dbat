@@ -1,15 +1,15 @@
 #pragma once
 #include "dbat/consts/types.h"
 
-#define MAX_HOUSES 1000
-#define MAX_GUESTS 10
+constexpr int MAX_HOUSES = 1000;
+constexpr int MAX_GUESTS = 10;
 
-#define HOUSE_PRIVATE 0
-#define HOUSE_GOD     1 /* Imm owned house             */
-#define HOUSE_CLAN    2 /* Clan crash-save room        */
-#define HOUSE_UNOWNED 3
+constexpr int HOUSE_PRIVATE = 0;
+constexpr int HOUSE_GOD     = 1; /* Imm owned house             */
+constexpr int HOUSE_CLAN    = 2; /* Clan crash-save room        */
+constexpr int HOUSE_UNOWNED = 3;
 
-#define NUM_HOUSE_TYPES 4
+constexpr int NUM_HOUSE_TYPES = 4;
 
 struct house_control_rec {
   room_vnum vnum;          /* vnum of this house		*/
@@ -34,15 +34,15 @@ struct house_control_rec {
 #define HOUSE_FLAGS(house) (house).bitvector
 
 /* House can have up to 31 bitvectors - don't go higher */
-#define HOUSE_NOGUESTS   (1 << 0) /* Owner cannot add guests     */
-#define HOUSE_FREE       (1 << 1) /* House does not require payments */
-#define HOUSE_NOIMMS     (1 << 2) /* Imms below level 999 cannot enter */
-#define HOUSE_IMPONLY    (1 << 3) /* Imms below level 1000 cannot enter */
-#define HOUSE_RENTFREE   (1 << 4) /* No rent is charged on items left here */
-#define HOUSE_SAVENORENT (1 << 5) /* NORENT items are crashsaved too */
-#define HOUSE_NOSAVE     (1 << 6) /* Do not crash save this room - private only */
+constexpr int HOUSE_NOGUESTS   = (1 << 0); /* Owner cannot add guests     */
+constexpr int HOUSE_FREE       = (1 << 1); /* House does not require payments */
+constexpr int HOUSE_NOIMMS     = (1 << 2); /* Imms below level 999 cannot enter */
+constexpr int HOUSE_IMPONLY    = (1 << 3); /* Imms below level 1000 cannot enter */
+constexpr int HOUSE_RENTFREE   = (1 << 4); /* No rent is charged on items left here */
+constexpr int HOUSE_SAVENORENT = (1 << 5); /* NORENT items are crashsaved too */
+constexpr int HOUSE_NOSAVE     = (1 << 6); /* Do not crash save this room - private only */
 
-#define HOUSE_NUM_FLAGS 7
+constexpr int HOUSE_NUM_FLAGS = 7;
 
 #define TOROOM(room, dir) (world[room].dir_option[dir] ? world[room].dir_option[dir]->to_room : NOWHERE)
 

@@ -25,11 +25,11 @@
 
 #include <unistd.h>
 
-#define LOAD_HIT  0
-#define LOAD_MANA 1
-#define LOAD_MOVE 2
-#define LOAD_KI   3
-#define LOAD_LIFE 4
+constexpr int LOAD_HIT  = 0;
+constexpr int LOAD_MANA = 1;
+constexpr int LOAD_MOVE = 2;
+constexpr int LOAD_KI   = 3;
+constexpr int LOAD_LIFE = 4;
 
 /* local functions */
 void build_player_index(void);
@@ -44,17 +44,17 @@ static void load_molt(struct char_data *ch, const char *line);
 static void load_majin(struct char_data *ch, const char *line);
 
 /* 'global' vars */
-struct player_index_element *player_table = NULL; /* index to plr file	 */
-int top_of_p_table                        = 0;    /* ref to top of table		 */
-static int top_of_p_file                  = 0;    /* ref of size of p file	 */
-long top_idnum                            = 0;    /* highest idnum in use		 */
+struct player_index_element *player_table = nullptr; /* index to plr file	 */
+int top_of_p_table                        = 0;       /* ref to top of table		 */
+static int top_of_p_file                  = 0;       /* ref of size of p file	 */
+long top_idnum                            = 0;       /* highest idnum in use		 */
 
 /* external ASCII Player Files vars */
 
 /* ASCII Player Files - set this TRUE if you want poofin/poofout
    strings saved in the pfiles
  */
-#define ASCII_SAVE_POOFS FALSE
+#define ASCII_SAVE_POOFS false
 
 /* new version to build player index for ASCII Player Files */
 /* generate index table for the player file */
@@ -78,7 +78,7 @@ void build_player_index(void)
   rewind(plr_index);
 
   if (rec_count == 0) {
-    player_table   = NULL;
+    player_table   = nullptr;
     top_of_p_table = -1;
     return;
   }
@@ -89,8 +89,7 @@ void build_player_index(void)
     player_table[i].admlevel = ADMLVL_NONE; /* In case they're not in the index yet */
     sscanf(line, "%ld %s %d %s %ld %d %d %d %ld", &player_table[i].id, arg2,
            &player_table[i].level, bits, &player_table[i].last, &player_table[i].admlevel, &player_table[i].ship, &player_table[i].shiproom, &player_table[i].played);
-    CREATE(player_table[i].name, char, strlen(arg2) + 1);
-    strcpy(player_table[i].name, arg2);
+    player_table[i].name  = strdup(arg2);
     player_table[i].flags = asciiflag_conv(bits);
     top_idnum             = MAX(top_idnum, player_table[i].id);
   }
@@ -169,7 +168,7 @@ void free_player_index(void)
   }
 
   free(player_table);
-  player_table   = NULL;
+  player_table   = nullptr;
   top_of_p_table = 0;
 }
 
@@ -203,14 +202,12 @@ char *get_name_by_id(long id)
     if (player_table[i].id == id)
       return (player_table[i].name);
 
-  return (NULL);
+  return (nullptr);
 }
 
 /*************************************************************************
 *  stuff related to the save/load player system				 *
 *************************************************************************/
-
-#define NUM_OF_SAVE_THROWS 3
 
 /* new load_char reads ASCII Player Files */
 /* Load a char, TRUE if loaded, FALSE if not */
@@ -228,13 +225,13 @@ int load_char(const char *name, struct char_data *ch)
     if (!get_filename(fname, sizeof(fname), PLR_FILE, player_table[id].name))
       return (-1);
     if (!(fl = fopen(fname, "r"))) {
-      mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "SYSERR: Couldn't open player file %s", fname);
+      mudlog(LOG_NRM, ADMLVL_GOD, true, "SYSERR: Couldn't open player file %s", fname);
       return (-1);
     }
 
     /* character initializations */
     /* initializations necessary to keep some things straight */
-    ch->affected = NULL;
+    ch->affected = nullptr;
 
     for (i = 0; i < SKILL_TABLE_SIZE; i++) {
       char_set_skills_base(ch, i, 0);
@@ -373,12 +370,12 @@ int load_char(const char *name, struct char_data *ch)
     char_set_max_ki(ch, PFDEF_MAXKI);
     char_set_speaking(ch, PFDEF_SPEAKING);
     char_set_olc_zone(ch, PFDEF_OLC);
-    char_set_host(ch, NULL);
+    char_set_host(ch, nullptr);
 
     ch->time.birth = ch->time.created = ch->time.maxage = 0;
-    ch->followers                                       = NULL;
+    ch->followers                                       = nullptr;
     for (i = 0; i < NUM_COLOR; i++)
-      ch->player_specials->color_choices[i] = NULL;
+      ch->player_specials->color_choices[i] = nullptr;
 
     while (get_line(fl, line)) {
       tag_argument(line, tag);
@@ -422,7 +419,7 @@ int load_char(const char *name, struct char_data *ch)
           else if (!strcmp(tag, "Boac")) char_set_lboard(ch, 2, atoi(line));
           else if (!strcmp(tag, "Boad")) char_set_lboard(ch, 3, atoi(line));
           else if (!strcmp(tag, "Boab")) char_set_lboard(ch, 4, atoi(line));
-          else if (!strcmp(tag, "Bonu")) load_bonuses(fl, ch, FALSE);
+          else if (!strcmp(tag, "Bonu")) load_bonuses(fl, ch, false);
           else if (!strcmp(tag, "Boos")) char_set_boosts(ch, atoi(line));
           else if (!strcmp(tag, "Bpl ")) load_BASE(ch, line, LOAD_HIT);
           else if (!strcmp(tag, "Brth")) ch->time.birth = atol(line);
@@ -590,10 +587,10 @@ int load_char(const char *name, struct char_data *ch)
           else if (!strcmp(tag, "Scoo")) char_set_con_sdcooldown(ch, atoi(line));
           else if (!strcmp(tag, "Shpr"))
             ; /* obsolete ship room: ignored */
-          else if (!strcmp(tag, "Skil")) load_skills(fl, ch, FALSE);
+          else if (!strcmp(tag, "Skil")) load_skills(fl, ch, false);
           else if (!strcmp(tag, "Skn ")) char_set_skin(ch, atoi(line));
           else if (!strcmp(tag, "Size")) ch->size = atoi(line);
-          else if (!strcmp(tag, "SklB")) load_skills(fl, ch, TRUE);
+          else if (!strcmp(tag, "SklB")) load_skills(fl, ch, true);
           else if (!strcmp(tag, "SkRc"))
             ; /* obsolete race practices: ignored */
           else if (!strcmp(tag, "SkCl")) {
@@ -730,7 +727,7 @@ void save_char(struct char_data *ch)
   struct atomic_file af;
   FILE *fl;
   char fname[40], buf[MAX_STRING_LENGTH];
-  int i, id, save_index = FALSE;
+  int i, id, save_index = false;
   struct affected_type *aff, tmp_aff[MAX_AFFECT], tmp_affv[MAX_AFFECT];
   struct obj_data *char_eq[NUM_WEARS];
   char fbuf1[MAX_STRING_LENGTH], fbuf2[MAX_STRING_LENGTH];
@@ -766,7 +763,7 @@ void save_char(struct char_data *ch)
   if (!get_filename(fname, sizeof(fname), PLR_FILE, char_get_name(ch)))
     return;
   if (!(fl = atomic_open(&af, fname, true))) {
-    mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "SYSERR: Couldn't open player file %s for write", fname);
+    mudlog(LOG_NRM, ADMLVL_GOD, true, "SYSERR: Couldn't open player file %s for write", fname);
     return;
   }
 
@@ -776,7 +773,7 @@ void save_char(struct char_data *ch)
   if (char_get_trp(ch) < char_get_rp(ch)) {
     char_set_trp(ch, char_get_rp(ch));
   }
-  if (ch->desc != NULL && ch->desc->user != NULL) {
+  if (ch->desc != nullptr && ch->desc->user != nullptr) {
     userWrite(ch->desc, 0, 0, 0, "index");
   }
 
@@ -784,7 +781,7 @@ void save_char(struct char_data *ch)
     if (char_get_equipment(ch, i))
       char_eq[i] = unequip_char(ch, i);
     else
-      char_eq[i] = NULL;
+      char_eq[i] = nullptr;
   }
 
   for (aff = ch->affected, i = 0; i < MAX_AFFECT; i++) {
@@ -887,7 +884,7 @@ void save_char(struct char_data *ch)
   if (char_get_bad_pws(ch) != PFDEF_BADPWS) fprintf(fl, "Badp: %d\n", char_get_bad_pws(ch));
 
   for (i = 0; i < 6; i++)
-    if (ch->transcost[i] != FALSE)
+    if (ch->transcost[i] != false)
       fprintf(fl, "Tcos: %d %d\n", i, ch->transcost[i]);
 
   for (i = 0; i < NUM_CLASSES; i++)
@@ -1086,19 +1083,19 @@ void save_char(struct char_data *ch)
 
   /* update the player in the player index */
   if (player_table[id].level != char_get_level(ch)) {
-    save_index             = TRUE;
+    save_index             = true;
     player_table[id].level = char_get_level(ch);
   }
   if (player_table[id].admlevel != char_get_admlevel(ch)) {
-    save_index                = TRUE;
+    save_index                = true;
     player_table[id].admlevel = char_get_admlevel(ch);
   }
   if (player_table[id].last != ch->time.logon) {
-    save_index            = TRUE;
+    save_index            = true;
     player_table[id].last = ch->time.logon;
   }
   if (player_table[id].played != char_get_lastpl(ch)) {
-    save_index              = TRUE;
+    save_index              = true;
     player_table[id].played = char_get_lastpl(ch);
   }
   i = player_table[id].flags;

@@ -59,7 +59,7 @@ static const char *portal_appearance[] = {
 void bringdesc(struct char_data *ch, struct char_data *tch)
 {
 
-  if (ch != NULL && tch != NULL && char_is_humanoid(tch)) {
+  if (ch != nullptr && tch != nullptr && char_is_humanoid(tch)) {
 
     if (ch != tch && char_plr_flagged(tch, PLR_DISGUISED)) {
       send_to_char(ch, "            @D[@cHair Length @D: @WHidden.         @D]@n\r\n");
@@ -348,7 +348,7 @@ void bringdesc(struct char_data *ch, struct char_data *tch)
 
 static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_mode)
 {
-  int door, door_found = 0, has_light = FALSE, i;
+  int door, door_found = 0, has_light = false, i;
   char dlist1[500];
   char dlist2[500];
   char dlist3[500];
@@ -378,11 +378,11 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
   if (exit_mode == EXIT_OFF) {
     send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
   }
-  int space = FALSE;
+  int space = false;
   if (rroom_sect(target_room) == SECT_SPACE && rroom_get_vnum(target_room) >= 20000) {
-    space = TRUE;
+    space = true;
   }
-  if (exit_mode == EXIT_NORMAL && space == FALSE && char_get_in_room(ch) == target_room) {
+  if (exit_mode == EXIT_NORMAL && space == false && char_get_in_room(ch) == target_room) {
     /* Compass and Auto-map - Iovan 9-11-10 */
     send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
     send_to_char(ch, "@w      Compass           Auto-Map            Map Key\r\n");
@@ -390,14 +390,14 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
     gen_map(ch, 0);
     send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
   }
-  if (exit_mode == EXIT_NORMAL && space == TRUE) {
+  if (exit_mode == EXIT_NORMAL && space == true) {
     /* printmap */
     send_to_char(ch, "@D------------------------------[@CRadar@D]---------------------------------@n\r\n");
     printmap(target_room, ch, 1, -1);
     send_to_char(ch, "     @D[@wTurn autoexit complete on for directions instead of radar@D]@n\r\n");
     send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
   }
-  if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && space == FALSE && char_get_in_room(ch) != target_room)) {
+  if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && space == false && char_get_in_room(ch) != target_room)) {
     send_to_char(ch, "@D----------------------------[@gObvious Exits@D]-----------------------------@n\r\n");
     if (char_is_affected(ch, AFF_BLIND)) {
       send_to_char(ch, "You can't see a damned thing, you're blind!\r\n");
@@ -417,10 +417,10 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
       if (char_get_equipment(ch, i))
         if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_LIGHT)
           if (obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS))
-            has_light = TRUE;
+            has_light = true;
 
     if (char_plr_flagged(ch, PLR_AURALIGHT)) {
-      has_light = TRUE;
+      has_light = true;
     }
 
     for (door = 0; door < NUM_OF_DIRS; door++) {
@@ -439,7 +439,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
               char argh[100];
-              if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
+              if (fname(rroom_get_dir_option(target_room, door)->keyword) == nullptr) {
                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTHWEST@n\r\n");
                 mud_log("ERROR: %s found error direction NORTHWEST at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
                 return;
@@ -451,7 +451,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                         strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined"))
                            ? fname(rroom_get_dir_option(target_room, door)->keyword)
                            : "opening",
-                       strstr(argh, "s ") != NULL ? "are" : "is",
+                       strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -462,7 +462,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
+              if (fname(rroom_get_dir_option(target_room, door)->keyword) == nullptr) {
                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTH@n\r\n");
                 mud_log("ERROR: %s found error direction NORTH at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
                 return;
@@ -475,7 +475,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                         strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined"))
                            ? fname(rroom_get_dir_option(target_room, door)->keyword)
                            : "opening",
-                       strstr(argh, "s ") != NULL ? "are" : "is",
+                       strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -486,7 +486,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
+              if (fname(rroom_get_dir_option(target_room, door)->keyword) == nullptr) {
                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION NORTHEAST@n\r\n");
                 mud_log("ERROR: %s found error direction NORTHEAST at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
                 return;
@@ -499,7 +499,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                         strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined"))
                            ? fname(rroom_get_dir_option(target_room, door)->keyword)
                            : "opening",
-                       strstr(argh, "s ") != NULL ? "are" : "is",
+                       strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -510,7 +510,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
+              if (fname(rroom_get_dir_option(target_room, door)->keyword) == nullptr) {
                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION EAST@n\r\n");
                 mud_log("ERROR: %s found error direction EAST at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
                 return;
@@ -523,7 +523,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                         strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined"))
                            ? fname(rroom_get_dir_option(target_room, door)->keyword)
                            : "opening",
-                       strstr(argh, "s ") != NULL ? "are" : "is",
+                       strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -534,7 +534,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
+              if (fname(rroom_get_dir_option(target_room, door)->keyword) == nullptr) {
                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION SOUTHEAST@n\r\n");
                 mud_log("ERROR: %s found error direction SOUTHEAST at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
                 return;
@@ -547,7 +547,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                         strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined"))
                            ? fname(rroom_get_dir_option(target_room, door)->keyword)
                            : "opening",
-                       strstr(argh, "s ") != NULL ? "are" : "is",
+                       strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -558,7 +558,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
+              if (fname(rroom_get_dir_option(target_room, door)->keyword) == nullptr) {
                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION SOUTH@n\r\n");
                 mud_log("ERROR: %s found error direction SOUTH at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
                 return;
@@ -571,7 +571,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                         strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined"))
                            ? fname(rroom_get_dir_option(target_room, door)->keyword)
                            : "opening",
-                       strstr(argh, "s ") != NULL ? "are" : "is",
+                       strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -582,7 +582,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
+              if (fname(rroom_get_dir_option(target_room, door)->keyword) == nullptr) {
                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION SOUTHWEST@n\r\n");
                 mud_log("ERROR: %s found error direction SOUTHWEST at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
                 return;
@@ -595,7 +595,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                         strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined"))
                            ? fname(rroom_get_dir_option(target_room, door)->keyword)
                            : "opening",
-                       strstr(argh, "s ") != NULL ? "are" : "is",
+                       strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -606,7 +606,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
+              if (fname(rroom_get_dir_option(target_room, door)->keyword) == nullptr) {
                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION WEST@n\r\n");
                 mud_log("ERROR: %s found error direction WEST at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
                 return;
@@ -619,7 +619,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                         strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined"))
                            ? fname(rroom_get_dir_option(target_room, door)->keyword)
                            : "opening",
-                       strstr(argh, "s ") != NULL ? "are" : "is",
+                       strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -630,7 +630,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
+              if (fname(rroom_get_dir_option(target_room, door)->keyword) == nullptr) {
                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION UP@n\r\n");
                 mud_log("ERROR: %s found error direction UP at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
                 return;
@@ -643,7 +643,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                         strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined"))
                            ? fname(rroom_get_dir_option(target_room, door)->keyword)
                            : "opening",
-                       strstr(argh, "s ") != NULL ? "are" : "is",
+                       strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -654,7 +654,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
+              if (fname(rroom_get_dir_option(target_room, door)->keyword) == nullptr) {
                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION DOWN@n\r\n");
                 mud_log("ERROR: %s found error direction DOWN at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
                 return;
@@ -667,7 +667,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                         strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined"))
                            ? fname(rroom_get_dir_option(target_room, door)->keyword)
                            : "opening",
-                       strstr(argh, "s ") != NULL ? "are" : "is",
+                       strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -678,7 +678,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
+              if (fname(rroom_get_dir_option(target_room, door)->keyword) == nullptr) {
                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION INSIDE@n\r\n");
                 mud_log("ERROR: %s found error direction INSIDE at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
                 return;
@@ -691,7 +691,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                         strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined"))
                            ? fname(rroom_get_dir_option(target_room, door)->keyword)
                            : "opening",
-                       strstr(argh, "s ") != NULL ? "are" : "is",
+                       strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -702,7 +702,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
-              if (fname(rroom_get_dir_option(target_room, door)->keyword) == NULL) {
+              if (fname(rroom_get_dir_option(target_room, door)->keyword) == nullptr) {
                 send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATLY FOR DIRECTION OUTSIDE@n\r\n");
                 mud_log("ERROR: %s found error direction OUTSIDE at room %d", char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)));
                 return;
@@ -715,7 +715,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
                         strcasecmp(fname(rroom_get_dir_option(target_room, door)->keyword), "undefined"))
                            ? fname(rroom_get_dir_option(target_room, door)->keyword)
                            : "opening",
-                       strstr(argh, "s ") != NULL ? "are" : "is",
+                       strstr(argh, "s ") != nullptr ? "are" : "is",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_CLOSED) ? "closed" : "open",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                        IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -864,13 +864,13 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
     }
     send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
     if (rroom_flagged(target_room, ROOM_HOUSE) && !rroom_flagged(target_room, ROOM_GARDEN1) && !rroom_flagged(target_room, ROOM_GARDEN2)) {
-      send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, NULL));
+      send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, nullptr));
     }
     if (rroom_flagged(target_room, ROOM_HOUSE) && rroom_flagged(target_room, ROOM_GARDEN1) && !rroom_flagged(target_room, ROOM_GARDEN2)) {
-      send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, NULL));
+      send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, nullptr));
     }
     if (rroom_flagged(target_room, ROOM_HOUSE) && !rroom_flagged(target_room, ROOM_GARDEN1) && rroom_flagged(target_room, ROOM_GARDEN2)) {
-      send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, NULL));
+      send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, nullptr));
     }
     if (char_get_radar1(ch) == rroom_get_vnum(target_room) && char_get_radar2(ch) == rroom_get_vnum(target_room) && char_get_radar3(ch) != rroom_get_vnum(target_room)) {
       send_to_char(ch, "@CTwo of your buoys are floating here.@n\r\n");
@@ -936,7 +936,7 @@ ACMD(do_autoexit)
     send_to_char(ch, "Your current autoexit level is %s.\r\n", exitlevels[char_exit_level(ch)]);
     return;
   }
-  if (((tp = search_block(arg, exitlevels, FALSE)) == -1)) {
+  if (((tp = search_block(arg, exitlevels, false)) == -1)) {
     send_to_char(ch, "Usage: Autoexit { Off | Normal | Complete }\r\n");
     return;
   }
@@ -1207,13 +1207,13 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
 
   /* now list characters & objects */
   if (rroom_flagged(target_room, ROOM_GARDEN1)) {
-    send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, NULL));
+    send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, nullptr));
   } else if (rroom_flagged(target_room, ROOM_GARDEN2)) {
-    send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, NULL));
+    send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, nullptr));
   } else if (rroom_flagged(target_room, ROOM_HOUSE)) {
-    send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, NULL));
+    send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, nullptr));
   }
-  list_obj_to_char(world[target_room].contents, ch, SHOW_OBJ_LONG, FALSE);
+  list_obj_to_char(world[target_room].contents, ch, SHOW_OBJ_LONG, false);
   list_char_to_char(world[target_room].people, ch);
 }
 
@@ -1224,14 +1224,14 @@ static void look_in_direction(struct char_data *ch, int dir)
       send_to_char(ch, "%s", char_get_exit(ch, dir)->general_description);
     else {
       struct obj_data *obj, *next_obj;
-      int founded = FALSE;
+      int founded = false;
       for (obj = ch->carrying; obj; obj = next_obj) {
         next_obj = obj->next_content;
         if (obj_get_vnum(obj) == 17) {
-          founded = TRUE;
+          founded = true;
         }
       }
-      if (founded == FALSE) {
+      if (founded == false) {
         send_to_char(ch, "You were unable to discern anything about that direction. Try looking again...\r\n");
         obj = read_object(17, VIRTUAL);
         obj_to_char(obj, ch);
@@ -1251,15 +1251,15 @@ static void look_in_direction(struct char_data *ch, int dir)
 
 static void look_in_obj(struct char_data *ch, char *arg)
 {
-  struct obj_data *obj    = NULL;
-  struct char_data *dummy = NULL;
+  struct obj_data *obj    = nullptr;
+  struct char_data *dummy = nullptr;
   int amt, bits;
 
   if (!*arg)
     send_to_char(ch, "Look in what?\r\n");
   else if (!(bits = generic_find(arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &dummy, &obj))) {
     send_to_char(ch, "There doesn't seem to be %s %s here.\r\n", AN(arg), arg);
-  } else if (find_exdesc(arg, obj->ex_description) != NULL && !bits)
+  } else if (find_exdesc(arg, obj->ex_description) != nullptr && !bits)
     send_to_char(ch, "There's nothing inside that!\r\n");
   else if ((obj_get_type_flag(obj) == ITEM_PORTAL) && !obj_val_flagged(obj, CONT_CLOSEABLE)) {
     if (obj_get_value(obj, VAL_PORTAL_APPEAR) < 0) {
@@ -1313,7 +1313,7 @@ static void look_in_obj(struct char_data *ch, char *arg)
     else {
       send_to_char(ch, "%s", obj->short_description);
       if (obj_get_type_flag(obj) == ITEM_CONTAINER && (obj_get_vnum(obj) == 697 || obj_get_vnum(obj) == 698 || obj_get_vnum(obj) == 682 || obj_get_vnum(obj) == 683 || obj_get_vnum(obj) == 684)) {
-        act("$n looks in $p.", TRUE, ch, obj, 0, TO_ROOM);
+        act("$n looks in $p.", true, ch, obj, 0, TO_ROOM);
       }
       switch (bits) {
         case FIND_OBJ_INV:
@@ -1327,7 +1327,7 @@ static void look_in_obj(struct char_data *ch, char *arg)
           break;
       }
 
-      list_obj_to_char(obj->contains, ch, SHOW_OBJ_SHORT, TRUE);
+      list_obj_to_char(obj->contains, ch, SHOW_OBJ_SHORT, true);
     }
   } else { /* item must be a fountain or drink container */
     if (obj_get_value(obj, VAL_DRINKCON_HOWFULL) <= 0 && (obj_get_value(obj, VAL_DRINKCON_CAPACITY) == 0))
@@ -1371,7 +1371,7 @@ char *find_exdesc(char *word, struct extra_descr_data *list)
     if (*i->keyword == '.' ? isname(word, i->keyword + 1) : isname(word, i->keyword))
       return (i->description);
 
-  return (NULL);
+  return (nullptr);
 }
 
 /*
@@ -1384,9 +1384,9 @@ char *find_exdesc(char *word, struct extra_descr_data *list)
  */
 static void look_at_target(struct char_data *ch, char *arg, int cmread)
 {
-  int bits, found = FALSE, j, fnum, i = 0, msg = 1;
-  struct char_data *found_char = NULL;
-  struct obj_data *obj, *found_obj = NULL;
+  int bits, found = false, j, fnum, i = 0, msg = 1;
+  struct char_data *found_char = nullptr;
+  struct obj_data *obj, *found_obj = nullptr;
   char *desc;
   char number[MAX_STRING_LENGTH];
 
@@ -1401,14 +1401,14 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
   if (cmread) {
     for (obj = ch->carrying; obj; obj = obj->next_content) {
       if (obj_get_type_flag(obj) == ITEM_BOARD) {
-        found = TRUE;
+        found = true;
         break;
       }
     }
     if (!obj) {
       for (obj = world[char_get_in_room(ch)].contents; obj; obj = obj->next_content) {
         if (obj_get_type_flag(obj) == ITEM_BOARD) {
-          found = TRUE;
+          found = true;
           break;
         }
       }
@@ -1440,12 +1440,12 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
     bits = generic_find(arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP | FIND_CHAR_ROOM, ch, &found_char, &found_obj);
 
     /* Is the target a character? */
-    if (found_char != NULL) {
+    if (found_char != nullptr) {
       look_at_char(found_char, ch);
       if (ch != found_char) {
         if (!char_aff_flagged(ch, AFF_HIDE)) {
-          act("$n looks at you.", TRUE, ch, 0, found_char, TO_VICT);
-          act("$n looks at $N.", TRUE, ch, 0, found_char, TO_NOTVICT);
+          act("$n looks at you.", true, ch, 0, found_char, TO_VICT);
+          act("$n looks at $N.", true, ch, 0, found_char, TO_NOTVICT);
         }
       }
       return;
@@ -1458,7 +1458,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
     }
 
     /* Does the argument match an extra desc in the room? */
-    if ((desc = find_exdesc(arg, world[char_get_in_room(ch)].ex_description)) != NULL && ++i == fnum) {
+    if ((desc = find_exdesc(arg, world[char_get_in_room(ch)].ex_description)) != nullptr && ++i == fnum) {
       send_to_char(ch, "%s", desc);
       return;
     }
@@ -1466,7 +1466,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
     /* Does the argument match an extra desc in the char's equipment? */
     for (j = 0; j < NUM_WEARS && !found; j++)
       if (char_get_equipment(ch, j) && char_can_see_obj(ch, char_get_equipment(ch, j)))
-        if ((desc = find_exdesc(arg, char_get_equipment(ch, j)->ex_description)) != NULL && ++i == fnum) {
+        if ((desc = find_exdesc(arg, char_get_equipment(ch, j)->ex_description)) != nullptr && ++i == fnum) {
           send_to_char(ch, "%s", desc);
           if (isname(arg, char_get_equipment(ch, j)->name)) {
             if (obj_get_type_flag(char_get_equipment(ch, j)) == ITEM_WEAPON) {
@@ -1483,13 +1483,13 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
             diag_obj_to_char(char_get_equipment(ch, j), ch);
             send_to_char(ch, "It appears to be made of %s", material_names[obj_get_value(char_get_equipment(ch, j), 7)]);
           }
-          found = TRUE;
+          found = true;
         }
 
     /* Does the argument match an extra desc in the char's inventory? */
     for (obj = ch->carrying; obj && !found; obj = obj->next_content) {
       if (char_can_see_obj(ch, obj))
-        if ((desc = find_exdesc(arg, obj->ex_description)) != NULL && ++i == fnum) {
+        if ((desc = find_exdesc(arg, obj->ex_description)) != nullptr && ++i == fnum) {
           if (obj_get_type_flag(obj) == ITEM_BOARD) {
             show_board(obj_get_vnum(obj), ch);
           } else {
@@ -1509,14 +1509,14 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
               send_to_char(ch, "It appears to be made of %s, and weights %s", material_names[obj_get_value(obj, 7)], add_commas(obj_get_weight(obj)));
             }
           }
-          found = TRUE;
+          found = true;
         }
     }
 
     /* Does the argument match an extra desc of an object in the room? */
     for (obj = world[char_get_in_room(ch)].contents; obj && !found; obj = obj->next_content)
       if (char_can_see_obj(ch, obj))
-        if ((desc = find_exdesc(arg, obj->ex_description)) != NULL && ++i == fnum) {
+        if ((desc = find_exdesc(arg, obj->ex_description)) != nullptr && ++i == fnum) {
           if (obj_get_type_flag(obj) == ITEM_BOARD) {
             show_board(obj_get_vnum(obj), ch);
           } else {
@@ -1548,7 +1548,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
             diag_obj_to_char(obj, ch);
             send_to_char(ch, "It appears to be made of %s, and weights %s", material_names[obj_get_value(obj, 7)], add_commas(obj_get_weight(obj)));
           }
-          found = TRUE;
+          found = true;
         }
 
     /* If an object was found back in generic_find */
@@ -1566,8 +1566,8 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
 
 void look_out_window(struct char_data *ch, char *arg)
 {
-  struct obj_data *i, *viewport = NULL, *vehicle = NULL;
-  struct char_data *dummy = NULL;
+  struct obj_data *i, *viewport = nullptr, *vehicle = nullptr;
+  struct char_data *dummy = nullptr;
   room_rnum target_room   = NOWHERE;
   int bits, door;
 
@@ -1628,9 +1628,9 @@ void look_out_window(struct char_data *ch, char *arg)
       send_to_char(ch, "You don't seem to be able to see outside.\r\n");
     } else {
       if (viewport->action_description)
-        act(viewport->action_description, TRUE, ch, viewport, 0, TO_CHAR);
+        act(viewport->action_description, true, ch, viewport, 0, TO_CHAR);
       else
-        act("$n looks out the window.", TRUE, ch, 0, 0, TO_ROOM);
+        act("$n looks out the window.", true, ch, 0, 0, TO_ROOM);
       send_to_char(ch, "You look outside and see:\r\n");
       look_at_room(target_room, ch, 0);
     }
@@ -1692,15 +1692,15 @@ ACMD(do_look)
     } else if (is_abbrev(arg, "outside") &&
                (subcmd == SCMD_LOOK) && !char_get_exit(ch, OUTDIR)) {
       look_out_window(ch, arg2);
-    } else if ((look_type = search_block(arg, dirs, FALSE)) >= 0 ||
-               (look_type = search_block(arg, abbr_dirs, FALSE)) >= 0) {
+    } else if ((look_type = search_block(arg, dirs, false)) >= 0 ||
+               (look_type = search_block(arg, abbr_dirs, false)) >= 0) {
       if (subcmd == SCMD_SEARCH)
         search_in_direction(ch, look_type);
       else
         look_in_direction(ch, look_type);
     } else if ((is_abbrev(arg, "towards")) &&
-               ((look_type = search_block(arg2, dirs, FALSE)) >= 0 ||
-                (look_type = search_block(arg2, abbr_dirs, FALSE)) >= 0)) {
+               ((look_type = search_block(arg2, dirs, false)) >= 0 ||
+                (look_type = search_block(arg2, abbr_dirs, false)) >= 0)) {
       if (subcmd == SCMD_SEARCH)
         search_in_direction(ch, look_type);
       else
@@ -1723,7 +1723,7 @@ ACMD(do_look)
       }
       if (!found)
         send_to_char(ch, "You couldn't find anything noticeable.\r\n");
-    } else if (find_exdesc(arg, world[char_get_in_room(ch)].ex_description) != NULL) {
+    } else if (find_exdesc(arg, world[char_get_in_room(ch)].ex_description) != nullptr) {
       look_at_target(ch, arg, 0);
     } else {
       if (subcmd == SCMD_SEARCH)
@@ -1782,4 +1782,4 @@ const char *default_color_choices[NUM_COLOR + 1] = {
     /* COLOR_TELL */ AA_NORMAL ANSISEPSTR AF_RED,
     /* COLOR_YOUSAY */ AA_NORMAL ANSISEPSTR AF_CYAN,
     /* COLOR_ROOMSAY */ AA_NORMAL ANSISEPSTR AF_WHITE,
-    NULL};
+    nullptr};

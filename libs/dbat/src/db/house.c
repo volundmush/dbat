@@ -182,7 +182,7 @@ void House_boot(void)
     if (feof(fl))
       break;
 
-    if (get_name_by_id(temp_house.owner) == NULL)
+    if (get_name_by_id(temp_house.owner) == nullptr)
       continue; /* owner no longer exists -- skip */
 
     if ((real_house = real_room(temp_house.vnum)) == NOWHERE)
@@ -225,7 +225,7 @@ void hcontrol_list_houses(struct char_data *ch)
 
   for (i = 0; i < num_of_houses; i++) {
     /* Avoid seeing <UNDEF> entries from self-deleted people. -gg 6/21/98 */
-    if ((temp = get_name_by_id(house_control[i].owner)) == NULL)
+    if ((temp = get_name_by_id(house_control[i].owner)) == nullptr)
       continue;
 
     if (house_control[i].built_on) {
@@ -248,7 +248,7 @@ void hcontrol_list_houses(struct char_data *ch)
                  house_control[i].vnum, built_on,
                  house_control[i].num_of_guests, CAP(own_name), last_pay);
 
-    House_list_guests(ch, i, TRUE);
+    House_list_guests(ch, i, true);
   }
 }
 
@@ -288,8 +288,8 @@ static void hcontrol_build_house(struct char_data *ch, char *arg)
     send_to_char(ch, "%s", HCONTROL_FORMAT);
     return;
   }
-  if ((exit_num = search_block(arg1, dirs, FALSE)) < 0 &&
-      (exit_num = search_block(arg1, abbr_dirs, FALSE)) < 0) {
+  if ((exit_num = search_block(arg1, dirs, false)) < 0 &&
+      (exit_num = search_block(arg1, abbr_dirs, false)) < 0) {
     send_to_char(ch, "'%s' is not a valid direction.\r\n", arg1);
     return;
   }
@@ -380,7 +380,7 @@ static void hcontrol_pay_house(struct char_data *ch, char *arg)
   else if ((i = find_house(atoi(arg))) == NOWHERE)
     send_to_char(ch, "Unknown house.\r\n");
   else {
-    mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "Payment for house %s collected by %s.", arg, char_get_name(ch));
+    mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "Payment for house %s collected by %s.", arg, char_get_name(ch));
 
     house_control[i].last_payment = time(0);
     House_save_control();
@@ -422,7 +422,7 @@ ACMD(do_house)
   else if (char_get_idnum(ch) != house_control[i].owner)
     send_to_char(ch, "Only the primary owner can set guests.\r\n");
   else if (!*arg)
-    House_list_guests(ch, i, FALSE);
+    House_list_guests(ch, i, false);
   else if ((id = get_id_by_name(arg)) < 0)
     send_to_char(ch, "No such player.\r\n");
   else if (id == char_get_idnum(ch))
@@ -499,7 +499,7 @@ static void House_list_guests(struct char_data *ch, int i, int quiet)
 
   for (num_printed = j = 0; j < house_control[i].num_of_guests; j++) {
     /* Avoid <UNDEF>. -gg 6/21/98 */
-    if ((temp = get_name_by_id(house_control[i].guests[j])) == NULL)
+    if ((temp = get_name_by_id(house_control[i].guests[j])) == nullptr)
       continue;
 
     num_printed++;
@@ -543,12 +543,12 @@ static int House_load(room_vnum rvnum)
   }
 
   for (j = 0; j < MAX_BAG_ROWS; j++)
-    cont_row[j] = NULL; /* empty all cont lists (you never know ...) */
+    cont_row[j] = nullptr; /* empty all cont lists (you never know ...) */
 
   if (!feof(fl))
     get_line(fl, line);
   while (!feof(fl)) {
-    temp = NULL;
+    temp = nullptr;
     /* first, we get the number. Not too hard. */
     if (*line == '#') {
       if (sscanf(line, "#%d", &nr) != 1) {
@@ -593,26 +593,26 @@ static int House_load(room_vnum rvnum)
       obj_set_value(temp, 13, t[18]);
       obj_set_value(temp, 14, t[19]);
       obj_set_value(temp, 15, t[20]);
-      obj_set_posted_to(temp, NULL);
+      obj_set_posted_to(temp, nullptr);
       obj_set_posttype(temp, 0);
 
       get_line(fl, line);
       /* read line check for xap. */
       if (!strcmp("XAP", line)) { /* then this is a Xap Obj, requires
                                        special care */
-        if ((temp->name = fread_string(fl, buf2)) == NULL) {
+        if ((temp->name = fread_string(fl, buf2)) == nullptr) {
           temp->name = strdup("undefined");
         }
 
-        if ((temp->short_description = fread_string(fl, buf2)) == NULL) {
+        if ((temp->short_description = fread_string(fl, buf2)) == nullptr) {
           temp->short_description = strdup("undefined");
         }
 
-        if ((temp->description = fread_string(fl, buf2)) == NULL) {
+        if ((temp->description = fread_string(fl, buf2)) == nullptr) {
           temp->description = strdup("undefined");
         }
 
-        if ((temp->action_description = fread_string(fl, buf2)) == NULL) {
+        if ((temp->action_description = fread_string(fl, buf2)) == nullptr) {
           temp->action_description = 0;
         }
 
@@ -642,7 +642,7 @@ static int House_load(room_vnum rvnum)
           temp->affected[j].specific = 0;
         }
 
-        temp->ex_description = NULL;
+        temp->ex_description = nullptr;
 
         get_line(fl, line);
         for (j = zwei = 0; !zwei && !feof(fl);) {
@@ -687,7 +687,6 @@ static int House_load(room_vnum rvnum)
 
               if (!temp->sbinfo) {
                 CREATE(temp->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-                memset((char *)temp->sbinfo, 0, SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
               }
               temp->sbinfo[j].spellname = t[0];
               temp->sbinfo[j].pages     = t[1];
@@ -713,7 +712,7 @@ static int House_load(room_vnum rvnum)
           }
         } /* exit our for loop */
       } /* exit our xap loop */
-      if (temp != NULL) {
+      if (temp != nullptr) {
         obj_to_room(temp, rrnum);
       } else {
         continue;
@@ -726,14 +725,14 @@ static int House_load(room_vnum rvnum)
             obj1 = cont_row[j]->next_content;
             obj_to_room(cont_row[j], rrnum);
           }
-          cont_row[j] = NULL;
+          cont_row[j] = nullptr;
         }
 
       if (j == -locate && cont_row[j]) { /* content list existing */
         if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
           /* take item ; fill ; give to char again */
           obj_from_room(temp);
-          temp->contains = NULL;
+          temp->contains = nullptr;
           for (; cont_row[j]; cont_row[j] = obj1) {
             obj1 = cont_row[j]->next_content;
             obj_to_obj(cont_row[j], temp);
@@ -744,7 +743,7 @@ static int House_load(room_vnum rvnum)
             obj1 = cont_row[j]->next_content;
             obj_to_room(cont_row[j], rrnum);
           }
-          cont_row[j] = NULL;
+          cont_row[j] = nullptr;
         }
       }
 

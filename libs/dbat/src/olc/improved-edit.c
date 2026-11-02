@@ -64,7 +64,7 @@ static void tb_install(struct textbuf *b, char **text)
 {
   free(*text);
   *text = b->s ? b->s : strdup("");
-  b->s  = NULL;
+  b->s  = nullptr;
 }
 
 /* ---- line helpers ---- */
@@ -84,11 +84,11 @@ static char *line_start(char *text, int n)
   int i = 1;
 
   while (text && i < n)
-    if ((text = strchr(text, '\n')) != NULL) {
+    if ((text = strchr(text, '\n')) != nullptr) {
       i++;
       text++;
     }
-  return i < n ? NULL : text;
+  return i < n ? nullptr : text;
 }
 
 /* ---- the editor ---- */
@@ -110,7 +110,7 @@ int improved_editor_execute(struct descriptor_data *d, char *str)
     case 'c':
       if (*(d->str)) {
         free(*d->str);
-        *(d->str) = NULL;
+        *(d->str) = nullptr;
         write_to_output(d, "Current buffer cleared.\r\n");
       } else
         write_to_output(d, "Current buffer empty.\r\n");
@@ -218,7 +218,7 @@ static void parse_edit_action(int command, char *string, struct descriptor_data 
       }
       while (isalpha(string[j]) && j < 2) {
         if (string[j++] == 'i' && !indent) {
-          indent = TRUE;
+          indent = true;
           flags += FORMAT_INDENT;
         }
       }
@@ -249,19 +249,19 @@ static void parse_edit_action(int command, char *string, struct descriptor_data 
         if (string[j++] == 'a' && !indent)
           rep_all = 1;
 
-      if ((s = strtok(string, "'")) == NULL) {
+      if ((s = strtok(string, "'")) == nullptr) {
         write_to_output(d, "Invalid format.\r\n");
         return;
       }
-      if ((s = strtok(NULL, "'")) == NULL) {
+      if ((s = strtok(nullptr, "'")) == nullptr) {
         write_to_output(d, "Target string must be enclosed in single quotes.\r\n");
         return;
       }
-      if ((t = strtok(NULL, "'")) == NULL) {
+      if ((t = strtok(nullptr, "'")) == nullptr) {
         write_to_output(d, "No replacement string.\r\n");
         return;
       }
-      if ((t = strtok(NULL, "'")) == NULL) {
+      if ((t = strtok(nullptr, "'")) == nullptr) {
         write_to_output(d, "Replacement string must be enclosed in single quotes.\r\n");
         return;
         /*wb's fix for empty buffer replacement crashing */
@@ -296,7 +296,7 @@ static void parse_edit_action(int command, char *string, struct descriptor_data 
           break;
       }
 
-      if (*d->str == NULL) {
+      if (*d->str == nullptr) {
         write_to_output(d, "Buffer is empty.\r\n");
         return;
       }
@@ -313,12 +313,12 @@ static void parse_edit_action(int command, char *string, struct descriptor_data 
       i         = line_low;
       total_len = 1;
       while (s && i < line_high)
-        if ((s = strchr(s, '\n')) != NULL) {
+        if ((s = strchr(s, '\n')) != nullptr) {
           i++;
           total_len++;
           s++;
         }
-      if (s && (s = strchr(s, '\n')) != NULL)
+      if (s && (s = strchr(s, '\n')) != nullptr)
         memmove(t, s + 1, strlen(s + 1) + 1); /* close the gap */
       else {
         total_len--; /* the range ran past the last line: delete to the end */
@@ -341,7 +341,7 @@ static void parse_edit_action(int command, char *string, struct descriptor_data 
       i         = line_low;
       total_len = 0;
       while (s && i <= line_high)
-        if ((s = strchr(s, '\n')) != NULL) {
+        if ((s = strchr(s, '\n')) != nullptr) {
           i++;
           total_len++;
           s++;
@@ -385,7 +385,7 @@ static void parse_edit_action(int command, char *string, struct descriptor_data 
       line_low = atoi(num);
       strcat(text, "\r\n"); /* (room reserved in its size) */
 
-      if (*d->str == NULL) {
+      if (*d->str == nullptr) {
         write_to_output(d, command == PARSE_INSERT ? "Buffer is empty, nowhere to insert.\r\n"
                                                    : "Buffer is empty, nothing to change.\r\n");
         return;
@@ -410,7 +410,7 @@ static void parse_edit_action(int command, char *string, struct descriptor_data 
         }
         tb_puts(&out, s); /* then the line it went before, and the rest */
       } else {
-        if ((t = strchr(s, '\n')) != NULL)
+        if ((t = strchr(s, '\n')) != nullptr)
           tb_puts(&out, t + 1); /* the lines after the one replaced */
         if (out.len > d->max_str) {
           free(out.s);
@@ -424,7 +424,7 @@ static void parse_edit_action(int command, char *string, struct descriptor_data 
 
     default:
       write_to_output(d, "Invalid option.\r\n");
-      mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: invalid command passed to parse_edit_action");
+      mudlog(LOG_BRF, ADMLVL_IMPL, true, "SYSERR: invalid command passed to parse_edit_action");
       return;
   }
   free(out.s);
@@ -436,13 +436,13 @@ static void parse_edit_action(int command, char *string, struct descriptor_data 
  */
 static int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high)
 {
-  int line_chars, cap_next = TRUE, cap_next_next = FALSE, color_chars = 0, i, pass_line = 0;
-  char *flow, *start = NULL, *str, temp;
+  int line_chars, cap_next = true, cap_next_next = false, color_chars = 0, i, pass_line = 0;
+  char *flow, *start = nullptr, *str, temp;
   struct textbuf formatted = {0};
 
   /* XXX: Want to make sure the string doesn't grow either... */
 
-  if ((flow = *ptr_string) == NULL)
+  if ((flow = *ptr_string) == nullptr)
     return 0;
 
   str = strdup(flow);
@@ -491,8 +491,8 @@ static int format_text(char **ptr_string, int mode, struct descriptor_data *d, u
       }
 
       if (cap_next_next) {
-        cap_next_next = FALSE;
-        cap_next      = TRUE;
+        cap_next_next = false;
+        cap_next      = true;
       }
 
       /*
@@ -500,7 +500,7 @@ static int format_text(char **ptr_string, int mode, struct descriptor_data *d, u
        * sentence delimiter. (strchr() also matches the terminating NUL, so test for it first.)
        */
       while (*flow && strchr(".!?", *flow)) {
-        cap_next_next = TRUE;
+        cap_next_next = true;
         flow++;
       }
 
@@ -543,7 +543,7 @@ static int format_text(char **ptr_string, int mode, struct descriptor_data *d, u
           line_chars++;
         }
       } else {
-        cap_next = FALSE;
+        cap_next = false;
         CAP(start);
       }
 
@@ -589,7 +589,7 @@ static int replace_str(char **string, char *pattern, char *replacement, int rep_
   size_t plen        = strlen(pattern);
   int count          = 0;
 
-  while ((match = strstr(flow, pattern)) != NULL) {
+  while ((match = strstr(flow, pattern)) != nullptr) {
     tb_add(&out, flow, (size_t)(match - flow));
     tb_puts(&out, replacement);
     flow = match + plen;

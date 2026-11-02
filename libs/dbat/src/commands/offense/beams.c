@@ -86,7 +86,7 @@ ACMD(do_galikgun)
   handle_cooldown(ch, 6);
 
   if (vict) {
-    if (!can_kill(ch, vict, NULL, 1)) {
+    if (!can_kill(ch, vict, nullptr, 1)) {
       return;
     }
     if (handle_defender(vict, ch)) {
@@ -95,7 +95,7 @@ ACMD(do_galikgun)
     }
     improve_skill(ch, SKILL_GALIKGUN, 0);
     index = check_def(vict); /* Check parry/block/dodge of vict */
-    prob  = roll_accuracy(ch, skill, TRUE);
+    prob  = roll_accuracy(ch, skill, true);
 
     if (char_get_skills_perf(ch, SKILL_GALIKGUN) == 2) {
       prob += 5;
@@ -127,9 +127,9 @@ ACMD(do_galikgun)
           return;
         }
         if (blk > axion_dice(10)) {
-          act("@C$N@W moves quickly and blocks your Galik Gun!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou move quickly and block @C$n's@W Galik Gun!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W moves quickly and blocks @c$n's@W Galik Gun!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W moves quickly and blocks your Galik Gun!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou move quickly and block @C$n's@W Galik Gun!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W moves quickly and blocks @c$n's@W Galik Gun!@n", false, ch, 0, vict, TO_NOTVICT);
           if (char_get_skills_perf(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
             pcost(ch, attperc - 0.05, 0);
           } else {
@@ -139,13 +139,13 @@ ACMD(do_galikgun)
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 16, skill, attperc);
           dmg /= 4;
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
+          hurt(0, 0, ch, vict, nullptr, dmg, 1);
           return;
         }
         if (dge > axion_dice(10)) {
-          act("@C$N@W manages to dodge your Galik Gun, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou dodge @C$n's@W Galik Gun, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W manages to dodge @c$n's@W Galik Gun, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W manages to dodge your Galik Gun, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou dodge @C$n's@W Galik Gun, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W manages to dodge @c$n's@W Galik Gun, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_NOTVICT);
           send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(ch, vict, 0, 16, skill, SKILL_GALIKGUN); /* Effects on the room from dodging a ki attack
@@ -162,30 +162,30 @@ ACMD(do_galikgun)
           } else {
             pcost(ch, attperc, 0);
           }
-          hurt(0, 0, ch, vict, NULL, 0, 1);
+          hurt(0, 0, ch, vict, nullptr, 0, 1);
           return;
         }
-        act("@WYou can't believe it but your Galik Gun misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W fires a Galik Gun at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
-        act("@c$n@W fires a Galik Gun at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou can't believe it but your Galik Gun misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+        act("@C$n@W fires a Galik Gun at you, but misses!@n ", false, ch, 0, vict, TO_VICT);
+        act("@c$n@W fires a Galik Gun at @C$N@W, but somehow misses!@n ", false, ch, 0, vict, TO_NOTVICT);
 
         if (char_get_skills_perf(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
           pcost(ch, attperc - 0.05, 0);
         } else {
           pcost(ch, attperc, 0);
         }
-        hurt(0, 0, ch, vict, NULL, 0, 1);
+        hurt(0, 0, ch, vict, nullptr, 0, 1);
         return;
       }
-      act("@WYou can't believe it but your Galik Gun misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W fires a Galik Gun at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
-      act("@c$n@W fires a Galik Gun at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+      act("@WYou can't believe it but your Galik Gun misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+      act("@C$n@W fires a Galik Gun at you, but misses!@n", false, ch, 0, vict, TO_VICT);
+      act("@c$n@W fires a Galik Gun at @C$N@W, but somehow misses!@n", false, ch, 0, vict, TO_NOTVICT);
       if (char_get_skills_perf(ch, SKILL_GALIKGUN) == 3 && attperc > minimum) {
         pcost(ch, attperc - 0.05, 0);
       } else {
         pcost(ch, attperc, 0);
       }
-      hurt(0, 0, ch, vict, NULL, 0, 1);
+      hurt(0, 0, ch, vict, nullptr, 0, 1);
       return;
     }
     dmg         = damtype(ch, 16, skill, attperc);
@@ -193,51 +193,51 @@ ACMD(do_galikgun)
     hitspot     = roll_hitloc(ch, vict, skill);
     switch (hitspot) {
       case 1:
-        act("@WYou take your charged ki and form a sparkling purple shroud of energy around your body! You swing your arms towards @c$N@W with your palms flatly facing $M and shout '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around your body forms into a beam and crashes into $S body!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards you with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into your body!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards @c$N@W with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou take your charged ki and form a sparkling purple shroud of energy around your body! You swing your arms towards @c$N@W with your palms flatly facing $M and shout '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around your body forms into a beam and crashes into $S body!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards you with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into your body!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards @c$N@W with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into @c$N@W's body!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 2: /* Critical */
-        act("@WYou take your charged ki and form a sparkling purple shroud of energy around your body! You swing your arms towards @c$N@W with your palms flatly facing $M and shout '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around your body forms into a beam and crashes into $S face!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards you with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into your face!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards @c$N@W with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into @c$N@W's face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou take your charged ki and form a sparkling purple shroud of energy around your body! You swing your arms towards @c$N@W with your palms flatly facing $M and shout '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around your body forms into a beam and crashes into $S face!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards you with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into your face!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards @c$N@W with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into @c$N@W's face!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 0);
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 3);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act("@WYou take your charged ki and form a sparkling purple shroud of energy around your body! You swing your arms towards @c$N@W with your palms flatly facing $M and shout '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around your body forms into a beam and crashes into $S gut!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards you with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into your gut!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards @c$N@W with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou take your charged ki and form a sparkling purple shroud of energy around your body! You swing your arms towards @c$N@W with your palms flatly facing $M and shout '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around your body forms into a beam and crashes into $S gut!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards you with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into your gut!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards @c$N@W with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into @c$N@W's gut!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 4: /* Weak */
-        act("@WYou take your charged ki and form a sparkling purple shroud of energy around your body! You swing your arms towards @c$N@W with your palms flatly facing $M and shout '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around your body forms into a beam and crashes into $S arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards you with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into your arm!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards @c$N@W with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into @c$N@W's arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou take your charged ki and form a sparkling purple shroud of energy around your body! You swing your arms towards @c$N@W with your palms flatly facing $M and shout '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around your body forms into a beam and crashes into $S arm!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards you with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into your arm!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards @c$N@W with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into @c$N@W's arm!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(0, 190, ch, vict, NULL, dmg, 1);
+        hurt(0, 190, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 1);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act("@WYou take your charged ki and form a sparkling purple shroud of energy around your body! You swing your arms towards @c$N@W with your palms flatly facing $M and shout '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around your body forms into a beam and crashes into $S leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards you with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into your leg!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards @c$N@W with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into @c$N@W's leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou take your charged ki and form a sparkling purple shroud of energy around your body! You swing your arms towards @c$N@W with your palms flatly facing $M and shout '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around your body forms into a beam and crashes into $S leg!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards you with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into your leg!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W takes $s charged ki and forms a sparkling purple shroud of energy around $mself! $e swings $s arms towards @c$N@W with palms facing out flatly and shouts '@mG@Mal@wik @mG@Mu@wn@W!' as the energy around $s body forms into a beam and crashes into @c$N@W's leg!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(1, 190, ch, vict, NULL, dmg, 1);
+        hurt(1, 190, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 2);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
@@ -252,7 +252,7 @@ ACMD(do_galikgun)
     return;
   }
   if (obj) {
-    if (!can_kill(ch, NULL, obj, 1)) {
+    if (!can_kill(ch, nullptr, obj, 1)) {
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
@@ -261,9 +261,9 @@ ACMD(do_galikgun)
     }
     dmg = damtype(ch, 16, skill, attperc);
     dmg /= 10;
-    act("@WYou fire a Galik Gun at $p@W!@n", FALSE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W fires a Galik Gun at $p@W!@n", FALSE, ch, obj, 0, TO_ROOM);
-    hurt(0, 0, ch, NULL, obj, dmg, 0);
+    act("@WYou fire a Galik Gun at $p@W!@n", false, ch, obj, 0, TO_CHAR);
+    act("@C$n@W fires a Galik Gun at $p@W!@n", false, ch, obj, 0, TO_ROOM);
+    hurt(0, 0, ch, nullptr, obj, dmg, 0);
     pcost(ch, attperc, 0);
   } else {
     send_to_char(ch, "Error! Please report.\r\n");
@@ -320,7 +320,7 @@ ACMD(do_final)
   /* There is a player/mob targeted */
   handle_cooldown(ch, 7);
   if (vict) {
-    if (!can_kill(ch, vict, NULL, 1)) {
+    if (!can_kill(ch, vict, nullptr, 1)) {
       return;
     }
     if (handle_defender(vict, ch)) {
@@ -331,7 +331,7 @@ ACMD(do_final)
 
     index = check_def(vict); /* Check parry/block/dodge of vict */
 
-    prob = roll_accuracy(ch, skill, TRUE);
+    prob = roll_accuracy(ch, skill, true);
     perc = chance_to_hit(ch);
 
     index -= handle_speed(ch, vict);
@@ -352,21 +352,21 @@ ACMD(do_final)
     if (prob < perc - 20) {
       if ((getCurST(vict)) > 0) {
         if (blk > axion_dice(10)) {
-          act("@C$N@W moves quickly and blocks your final flash!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou move quickly and block @C$n's@W final flash!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W moves quickly and blocks @c$n's@W final flash!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W moves quickly and blocks your final flash!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou move quickly and block @C$n's@W final flash!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W moves quickly and blocks @c$n's@W final flash!@n", false, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 28, skill, attperc);
           dmg /= 4;
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
+          hurt(0, 0, ch, vict, nullptr, dmg, 1);
 
           return;
         }
         if (dge > axion_dice(10)) {
-          act("@C$N@W manages to dodge your final flash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou dodge @C$n's@W final flash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W manages to dodge @c$n's@W final flash, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W manages to dodge your final flash, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou dodge @C$n's@W final flash, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W manages to dodge @c$n's@W final flash, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_NOTVICT);
           send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(ch, vict, 0, 28, skill, SKILL_FINALFLASH); /* Effects on the room from dodging a ki attack
@@ -379,24 +379,24 @@ ACMD(do_final)
           improve_skill(vict, SKILL_DODGE, 0);
 
           pcost(ch, attperc, 0);
-          hurt(0, 0, ch, vict, NULL, 0, 1);
+          hurt(0, 0, ch, vict, nullptr, 0, 1);
 
           return;
         }
-        act("@WYou can't believe it but your final flash misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W fires a final flash at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
-        act("@c$n@W fires a final flash at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou can't believe it but your final flash misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+        act("@C$n@W fires a final flash at you, but misses!@n ", false, ch, 0, vict, TO_VICT);
+        act("@c$n@W fires a final flash at @C$N@W, but somehow misses!@n ", false, ch, 0, vict, TO_NOTVICT);
 
         pcost(ch, attperc, 0);
-        hurt(0, 0, ch, vict, NULL, 0, 1);
+        hurt(0, 0, ch, vict, nullptr, 0, 1);
 
         return;
       }
-      act("@WYou can't believe it but your final flash misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W fires a final flash at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
-      act("@c$n@W fires a final flash at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+      act("@WYou can't believe it but your final flash misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+      act("@C$n@W fires a final flash at you, but misses!@n", false, ch, 0, vict, TO_VICT);
+      act("@c$n@W fires a final flash at @C$N@W, but somehow misses!@n", false, ch, 0, vict, TO_NOTVICT);
       pcost(ch, attperc, 0);
-      hurt(0, 0, ch, vict, NULL, 0, 1);
+      hurt(0, 0, ch, vict, nullptr, 0, 1);
       return;
     }
     dmg         = damtype(ch, 28, skill, attperc);
@@ -404,55 +404,55 @@ ACMD(do_final)
     hitspot     = roll_hitloc(ch, vict, skill);
     switch (hitspot) {
       case 1:
-        act("@WYou grin as you bring either hand to the sides of your body. Your charged ki begins to pool there as @bblue@W orbs of energy form in your palms. You quickly bring both hands forward slamming your wrists together with the palms flat out facing @c$N@W! You shout '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's body!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing YOU! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing @c$N@W! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou grin as you bring either hand to the sides of your body. Your charged ki begins to pool there as @bblue@W orbs of energy form in your palms. You quickly bring both hands forward slamming your wrists together with the palms flat out facing @c$N@W! You shout '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's body!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing YOU! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over YOUR body!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing @c$N@W! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's body!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 2: /* Critical */
-        act("@WYou grin as you bring either hand to the sides of your body. Your charged ki begins to pool there as @bblue@W orbs of energy form in your palms. You quickly bring both hands forward slamming your wrists together with the palms flat out facing @c$N@W! You shout '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's face!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing YOU! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over YOUR face!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing @c$N@W! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou grin as you bring either hand to the sides of your body. Your charged ki begins to pool there as @bblue@W orbs of energy form in your palms. You quickly bring both hands forward slamming your wrists together with the palms flat out facing @c$N@W! You shout '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's face!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing YOU! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over YOUR face!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing @c$N@W! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's face!@n", true, ch, 0, vict, TO_NOTVICT);
         if (!char_get_bonuses(ch, BONUS_POWERHIT)) {
           dmg *= 3;
         } else {
           dmg *= 5;
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 3);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act("@WYou grin as you bring either hand to the sides of your body. Your charged ki begins to pool there as @bblue@W orbs of energy form in your palms. You quickly bring both hands forward slamming your wrists together with the palms flat out facing @c$N@W! You shout '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing YOU! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing @c$N@W! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou grin as you bring either hand to the sides of your body. Your charged ki begins to pool there as @bblue@W orbs of energy form in your palms. You quickly bring both hands forward slamming your wrists together with the palms flat out facing @c$N@W! You shout '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's gut!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing YOU! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over YOUR gut!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing @c$N@W! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's gut!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 4: /* Weak */
-        act("@WYou grin as you bring either hand to the sides of your body. Your charged ki begins to pool there as @bblue@W orbs of energy form in your palms. You quickly bring both hands forward slamming your wrists together with the palms flat out facing @c$N@W! You shout '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing YOU! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over YOUR arm!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing @c$N@W! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou grin as you bring either hand to the sides of your body. Your charged ki begins to pool there as @bblue@W orbs of energy form in your palms. You quickly bring both hands forward slamming your wrists together with the palms flat out facing @c$N@W! You shout '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's arm!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing YOU! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over YOUR arm!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing @c$N@W! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's arm!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(0, 180, ch, vict, NULL, dmg, 1);
+        hurt(0, 180, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 1);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act("@WYou grin as you bring either hand to the sides of your body. Your charged ki begins to pool there as @bblue@W orbs of energy form in your palms. You quickly bring both hands forward slamming your wrists together with the palms flat out facing @c$N@W! You shout '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing YOU! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over YOUR leg!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing @c$N@W! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou grin as you bring either hand to the sides of your body. Your charged ki begins to pool there as @bblue@W orbs of energy form in your palms. You quickly bring both hands forward slamming your wrists together with the palms flat out facing @c$N@W! You shout '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's leg!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing YOU! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over YOUR leg!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing @c$N@W! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's leg!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(1, 180, ch, vict, NULL, dmg, 1);
+        hurt(1, 180, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 2);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
@@ -462,7 +462,7 @@ ACMD(do_final)
     return;
   }
   if (obj) {
-    if (!can_kill(ch, NULL, obj, 1)) {
+    if (!can_kill(ch, nullptr, obj, 1)) {
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
@@ -471,9 +471,9 @@ ACMD(do_final)
     }
     dmg = damtype(ch, 28, skill, attperc);
     dmg /= 10;
-    act("@WYou fire a final flash at $p@W!@n", FALSE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W fires a final flash at $p@W!@n", FALSE, ch, obj, 0, TO_ROOM);
-    hurt(0, 0, ch, NULL, obj, dmg, 0);
+    act("@WYou fire a final flash at $p@W!@n", false, ch, obj, 0, TO_CHAR);
+    act("@C$n@W fires a final flash at $p@W!@n", false, ch, obj, 0, TO_ROOM);
+    hurt(0, 0, ch, nullptr, obj, dmg, 0);
     pcost(ch, attperc, 0);
 
   } else {
@@ -531,7 +531,7 @@ ACMD(do_tribeam)
   /* There is a player/mob targeted */
   handle_cooldown(ch, 7);
   if (vict) {
-    if (!can_kill(ch, vict, NULL, 1)) {
+    if (!can_kill(ch, vict, nullptr, 1)) {
       return;
     }
     if (handle_defender(vict, ch)) {
@@ -542,7 +542,7 @@ ACMD(do_tribeam)
 
     index = check_def(vict); /* Check parry/block/dodge of vict */
 
-    prob = roll_accuracy(ch, skill, TRUE);
+    prob = roll_accuracy(ch, skill, true);
     perc = chance_to_hit(ch);
 
     index -= handle_speed(ch, vict);
@@ -563,21 +563,21 @@ ACMD(do_tribeam)
     if (prob < perc - 20) {
       if ((getCurST(vict)) > 0) {
         if (blk > axion_dice(10)) {
-          act("@C$N@W moves quickly and blocks your tribeam!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou move quickly and block @C$n's@W tribeam!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W moves quickly and blocks @c$n's@W tribeam!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W moves quickly and blocks your tribeam!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou move quickly and block @C$n's@W tribeam!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W moves quickly and blocks @c$n's@W tribeam!@n", false, ch, 0, vict, TO_NOTVICT);
           pcost(ch, attperc, 0);
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 26, skill, attperc);
           dmg /= 4;
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
+          hurt(0, 0, ch, vict, nullptr, dmg, 1);
 
           return;
         }
         if (dge > axion_dice(10)) {
-          act("@C$N@W manages to dodge your tribeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou dodge @C$n's@W tribeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W manages to dodge @c$n's@W tribeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W manages to dodge your tribeam, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou dodge @C$n's@W tribeam, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W manages to dodge @c$n's@W tribeam, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_NOTVICT);
           send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(ch, vict, 0, 26, skill, SKILL_TRIBEAM); /* Effects on the room from dodging a ki attack
@@ -590,24 +590,24 @@ ACMD(do_tribeam)
           improve_skill(vict, SKILL_DODGE, 0);
 
           pcost(ch, attperc, 0);
-          hurt(0, 0, ch, vict, NULL, 0, 1);
+          hurt(0, 0, ch, vict, nullptr, 0, 1);
 
           return;
         }
-        act("@WYou can't believe it but your tribeam misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W fires a tribeam at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
-        act("@c$n@W fires a tribeam at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou can't believe it but your tribeam misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+        act("@C$n@W fires a tribeam at you, but misses!@n ", false, ch, 0, vict, TO_VICT);
+        act("@c$n@W fires a tribeam at @C$N@W, but somehow misses!@n ", false, ch, 0, vict, TO_NOTVICT);
 
         pcost(ch, attperc, 0);
-        hurt(0, 0, ch, vict, NULL, 0, 1);
+        hurt(0, 0, ch, vict, nullptr, 0, 1);
 
         return;
       }
-      act("@WYou can't believe it but your tribeam misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W fires a tribeam at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
-      act("@c$n@W fires a tribeam at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+      act("@WYou can't believe it but your tribeam misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+      act("@C$n@W fires a tribeam at you, but misses!@n", false, ch, 0, vict, TO_VICT);
+      act("@c$n@W fires a tribeam at @C$N@W, but somehow misses!@n", false, ch, 0, vict, TO_NOTVICT);
       pcost(ch, attperc, 0);
-      hurt(0, 0, ch, vict, NULL, 0, 1);
+      hurt(0, 0, ch, vict, nullptr, 0, 1);
       return;
     }
     dmg = damtype(ch, 26, skill, attperc);
@@ -623,51 +623,51 @@ ACMD(do_tribeam)
     hitspot     = roll_hitloc(ch, vict, skill);
     switch (hitspot) {
       case 1:
-        act("@WYou gather your charged ki as you form a triangle with your hands. You aim the gap between your hands at @c$N@W and shout '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from your hands and slams into $S body!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at YOU and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at @c$N@W and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou gather your charged ki as you form a triangle with your hands. You aim the gap between your hands at @c$N@W and shout '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from your hands and slams into $S body!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at YOU and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into YOUR body!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at @c$N@W and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into @c$N@W's body!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 2: /* Critical */
-        act("@WYou gather your charged ki as you form a triangle with your hands. You aim the gap between your hands at @c$N@W and shout '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from your hands and slams into $S head!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at YOU and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into YOUR head!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at @c$N@W and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into @c$N@W's head!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou gather your charged ki as you form a triangle with your hands. You aim the gap between your hands at @c$N@W and shout '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from your hands and slams into $S head!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at YOU and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into YOUR head!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at @c$N@W and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into @c$N@W's head!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 0);
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 3);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act("@WYou gather your charged ki as you form a triangle with your hands. You aim the gap between your hands at @c$N@W and shout '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from your hands and slams into $S gut!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at YOU and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at @c$N@W and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou gather your charged ki as you form a triangle with your hands. You aim the gap between your hands at @c$N@W and shout '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from your hands and slams into $S gut!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at YOU and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into YOUR gut!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at @c$N@W and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into @c$N@W's gut!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 4: /* Weak */
-        act("@WYou gather your charged ki as you form a triangle with your hands. You aim the gap between your hands at @c$N@W and shout '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from your hands and slams into $S arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at YOU and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into YOUR arm!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at @c$N@W and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into @c$N@W's arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou gather your charged ki as you form a triangle with your hands. You aim the gap between your hands at @c$N@W and shout '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from your hands and slams into $S arm!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at YOU and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into YOUR arm!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at @c$N@W and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into @c$N@W's arm!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(0, 180, ch, vict, NULL, dmg, 1);
+        hurt(0, 180, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 1);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act("@WYou gather your charged ki as you form a triangle with your hands. You aim the gap between your hands at @c$N@W and shout '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from your hands and slams into $S leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at YOU and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into YOUR leg!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at @c$N@W and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into @c$N@W's leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou gather your charged ki as you form a triangle with your hands. You aim the gap between your hands at @c$N@W and shout '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from your hands and slams into $S leg!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at YOU and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into YOUR leg!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W gathers $s charged ki as $e forms a triangle with $s hands. @C$n@W aims the gap between $s hands at @c$N@W and shouts '@rT@RR@YI@rB@RE@YA@rM@W!'. A bright blast of energy explodes from $s hands and slams into @c$N@W's leg!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(1, 180, ch, vict, NULL, dmg, 1);
+        hurt(1, 180, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 2);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
@@ -680,7 +680,7 @@ ACMD(do_tribeam)
     return;
   }
   if (obj) {
-    if (!can_kill(ch, NULL, obj, 1)) {
+    if (!can_kill(ch, nullptr, obj, 1)) {
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
@@ -689,9 +689,9 @@ ACMD(do_tribeam)
     }
     dmg = damtype(ch, 26, skill, attperc);
     dmg /= 10;
-    act("@WYou fire a tribeam at $p@W!@n", FALSE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W fires a tribeam at $p@W!@n", FALSE, ch, obj, 0, TO_ROOM);
-    hurt(0, 0, ch, NULL, obj, dmg, 0);
+    act("@WYou fire a tribeam at $p@W!@n", false, ch, obj, 0, TO_CHAR);
+    act("@C$n@W fires a tribeam at $p@W!@n", false, ch, obj, 0, TO_ROOM);
+    hurt(0, 0, ch, nullptr, obj, dmg, 0);
     pcost(ch, attperc, 0);
 
   } else {
@@ -749,7 +749,7 @@ ACMD(do_dualbeam)
   /* There is a player/mob targeted */
   handle_cooldown(ch, 6);
   if (vict) {
-    if (!can_kill(ch, vict, NULL, 1)) {
+    if (!can_kill(ch, vict, nullptr, 1)) {
       return;
     }
     if (handle_defender(vict, ch)) {
@@ -760,7 +760,7 @@ ACMD(do_dualbeam)
 
     index = check_def(vict); /* Check parry/block/dodge of vict */
 
-    prob = roll_accuracy(ch, skill, TRUE);
+    prob = roll_accuracy(ch, skill, true);
     perc = chance_to_hit(ch);
 
     index -= handle_speed(ch, vict);
@@ -794,23 +794,23 @@ ACMD(do_dualbeam)
       if (prob < perc - 20) {
         if ((getCurST(vict)) > 0) {
           if (blk > axion_dice(10)) {
-            act("@C$N@W moves quickly and blocks your dualbeam!@n", FALSE, ch, 0, vict, TO_CHAR);
-            act("@WYou move quickly and block @C$n's@W dualbeam!@n", FALSE, ch, 0, vict, TO_VICT);
-            act("@C$N@W moves quickly and blocks @c$n's@W dualbeam!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+            act("@C$N@W moves quickly and blocks your dualbeam!@n", false, ch, 0, vict, TO_CHAR);
+            act("@WYou move quickly and block @C$n's@W dualbeam!@n", false, ch, 0, vict, TO_VICT);
+            act("@C$N@W moves quickly and blocks @c$n's@W dualbeam!@n", false, ch, 0, vict, TO_NOTVICT);
             if (hits == 1) {
               pcost(ch, attperc, 0);
             }
             pcost(vict, 0, getEffMaxPL(vict) / 500);
             dmg = damtype(ch, 22, skill, attperc);
             dmg /= 4;
-            hurt(0, 0, ch, vict, NULL, dmg, 1);
+            hurt(0, 0, ch, vict, nullptr, dmg, 1);
 
             continue;
           }
           if (dge > axion_dice(10)) {
-            act("@C$N@W manages to dodge your dualbeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
-            act("@WYou dodge @C$n's@W dualbeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
-            act("@C$N@W manages to dodge @c$n's@W dualbeam, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+            act("@C$N@W manages to dodge your dualbeam, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_CHAR);
+            act("@WYou dodge @C$n's@W dualbeam, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_VICT);
+            act("@C$N@W manages to dodge @c$n's@W dualbeam, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_NOTVICT);
             send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
             dodge_ki(ch, vict, 0, 22, skill, SKILL_DUALBEAM); /* Effects on the room from dodging a ki attack
@@ -824,28 +824,28 @@ ACMD(do_dualbeam)
             if (hits == 1) {
               pcost(ch, attperc, 0);
             }
-            hurt(0, 0, ch, vict, NULL, 0, 1);
+            hurt(0, 0, ch, vict, nullptr, 0, 1);
 
             continue;
           }
-          act("@WYou can't believe it but your dualbeam misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@C$n@W fires a dualbeam at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
-          act("@c$n@W fires a dualbeam at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@WYou can't believe it but your dualbeam misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+          act("@C$n@W fires a dualbeam at you, but misses!@n ", false, ch, 0, vict, TO_VICT);
+          act("@c$n@W fires a dualbeam at @C$N@W, but somehow misses!@n ", false, ch, 0, vict, TO_NOTVICT);
 
           if (hits == 1) {
             pcost(ch, attperc, 0);
           }
-          hurt(0, 0, ch, vict, NULL, 0, 1);
+          hurt(0, 0, ch, vict, nullptr, 0, 1);
 
           continue;
         }
-        act("@WYou can't believe it but your dualbeam misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W fires a dualbeam at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
-        act("@c$n@W fires a dualbeam at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou can't believe it but your dualbeam misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+        act("@C$n@W fires a dualbeam at you, but misses!@n", false, ch, 0, vict, TO_VICT);
+        act("@c$n@W fires a dualbeam at @C$N@W, but somehow misses!@n", false, ch, 0, vict, TO_NOTVICT);
         if (hits == 1) {
           pcost(ch, attperc, 0);
         }
-        hurt(0, 0, ch, vict, NULL, 0, 1);
+        hurt(0, 0, ch, vict, nullptr, 0, 1);
         continue;
       }
       dmg         = damtype(ch, 22, skill, attperc);
@@ -866,51 +866,51 @@ ACMD(do_dualbeam)
       }
       switch (hitspot) {
         case 1:
-          act("@WYou gather your charged energy up through the circuits in your arms. A @gg@Gr@We@wen @Wglow appears around your hand right as you aim it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S body in that instant!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at YOU. A @gg@Gr@We@wen @Wbeam blasts out and slams into YOUR body in that instant!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S body in that instant!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@WYou gather your charged energy up through the circuits in your arms. A @gg@Gr@We@wen @Wglow appears around your hand right as you aim it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S body in that instant!@n", true, ch, 0, vict, TO_CHAR);
+          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at YOU. A @gg@Gr@We@wen @Wbeam blasts out and slams into YOUR body in that instant!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S body in that instant!@n", true, ch, 0, vict, TO_NOTVICT);
           if (char_get_bonuses(ch, BONUS_SOFT)) {
             dmg *= calc_critical(ch, 2);
           }
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
+          hurt(0, 0, ch, vict, nullptr, dmg, 1);
           dam_eq_loc(vict, 4);
           /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
           break;
         case 2: /* Critical */
-          act("@WYou gather your charged energy up through the circuits in your arms. A @gg@Gr@We@wen @Wglow appears around your hand right as you aim it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S face in that instant!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at YOU. A @gg@Gr@We@wen @Wbeam blasts out and slams into YOUR face in that instant!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S face in that instant!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@WYou gather your charged energy up through the circuits in your arms. A @gg@Gr@We@wen @Wglow appears around your hand right as you aim it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S face in that instant!@n", true, ch, 0, vict, TO_CHAR);
+          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at YOU. A @gg@Gr@We@wen @Wbeam blasts out and slams into YOUR face in that instant!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S face in that instant!@n", true, ch, 0, vict, TO_NOTVICT);
           dmg *= calc_critical(ch, 0);
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
+          hurt(0, 0, ch, vict, nullptr, dmg, 1);
           dam_eq_loc(vict, 3);
           /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
           break;
         case 3:
-          act("@WYou gather your charged energy up through the circuits in your arms. A @gg@Gr@We@wen @Wglow appears around your hand right as you aim it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S gut in that instant!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at YOU. A @gg@Gr@We@wen @Wbeam blasts out and slams into YOUR gut in that instant!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S gut in that instant!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@WYou gather your charged energy up through the circuits in your arms. A @gg@Gr@We@wen @Wglow appears around your hand right as you aim it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S gut in that instant!@n", true, ch, 0, vict, TO_CHAR);
+          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at YOU. A @gg@Gr@We@wen @Wbeam blasts out and slams into YOUR gut in that instant!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S gut in that instant!@n", true, ch, 0, vict, TO_NOTVICT);
           if (char_get_bonuses(ch, BONUS_SOFT)) {
             dmg *= calc_critical(ch, 2);
           }
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
+          hurt(0, 0, ch, vict, nullptr, dmg, 1);
           dam_eq_loc(vict, 4);
           /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
           break;
         case 4: /* Weak */
-          act("@WYou gather your charged energy up through the circuits in your arms. A @gg@Gr@We@wen @Wglow appears around your hand right as you aim it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S arm in that instant!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at YOU. A @gg@Gr@We@wen @Wbeam blasts out and slams into YOUR arm in that instant!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S arm in that instant!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@WYou gather your charged energy up through the circuits in your arms. A @gg@Gr@We@wen @Wglow appears around your hand right as you aim it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S arm in that instant!@n", true, ch, 0, vict, TO_CHAR);
+          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at YOU. A @gg@Gr@We@wen @Wbeam blasts out and slams into YOUR arm in that instant!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S arm in that instant!@n", true, ch, 0, vict, TO_NOTVICT);
           dmg *= calc_critical(ch, 1);
-          hurt(0, 190, ch, vict, NULL, dmg, 1);
+          hurt(0, 190, ch, vict, nullptr, dmg, 1);
           dam_eq_loc(vict, 1);
           /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
           break;
         case 5: /* Weak 2 */
-          act("@WYou gather your charged energy up through the circuits in your arms. A @gg@Gr@We@wen @Wglow appears around your hand right as you aim it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S leg in that instant!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at YOU. A @gg@Gr@We@wen @Wbeam blasts out and slams into YOUR leg in that instant!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S leg in that instant!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@WYou gather your charged energy up through the circuits in your arms. A @gg@Gr@We@wen @Wglow appears around your hand right as you aim it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S leg in that instant!@n", true, ch, 0, vict, TO_CHAR);
+          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at YOU. A @gg@Gr@We@wen @Wbeam blasts out and slams into YOUR leg in that instant!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$n@W gathers $s charged energy up through the circuits in $s arms. A @gg@Gr@We@wen @Wglow appears around $s hand right as $e aims it at @c$N@W. A @gg@Gr@We@wen @Wbeam blasts out and slams into $S leg in that instant!@n", true, ch, 0, vict, TO_NOTVICT);
           dmg *= calc_critical(ch, 1);
-          hurt(1, 190, ch, vict, NULL, dmg, 1);
+          hurt(1, 190, ch, vict, nullptr, dmg, 1);
           dam_eq_loc(vict, 2);
           /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
           break;
@@ -928,7 +928,7 @@ ACMD(do_dualbeam)
       continue;
     }
   } else if (obj) {
-    if (!can_kill(ch, NULL, obj, 1)) {
+    if (!can_kill(ch, nullptr, obj, 1)) {
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
@@ -937,9 +937,9 @@ ACMD(do_dualbeam)
     }
     dmg = damtype(ch, 22, skill, attperc);
     dmg /= 10;
-    act("@WYou fire a dualbeam at $p@W!@n", FALSE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W fires a dualbeam at $p@W!@n", FALSE, ch, obj, 0, TO_ROOM);
-    hurt(0, 0, ch, NULL, obj, dmg, 0);
+    act("@WYou fire a dualbeam at $p@W!@n", false, ch, obj, 0, TO_CHAR);
+    act("@C$n@W fires a dualbeam at $p@W!@n", false, ch, obj, 0, TO_ROOM);
+    hurt(0, 0, ch, nullptr, obj, dmg, 0);
     pcost(ch, attperc, 0);
 
   } else {
@@ -1005,7 +1005,7 @@ ACMD(do_dodonpa)
   /* There is a player/mob targeted */
   handle_cooldown(ch, 6);
   if (vict) {
-    if (!can_kill(ch, vict, NULL, 1)) {
+    if (!can_kill(ch, vict, nullptr, 1)) {
       return;
     }
     if (handle_defender(vict, ch)) {
@@ -1016,7 +1016,7 @@ ACMD(do_dodonpa)
 
     index = check_def(vict); /* Check parry/block/dodge of vict */
 
-    prob = roll_accuracy(ch, skill, TRUE);
+    prob = roll_accuracy(ch, skill, true);
     if (char_get_skills_perf(ch, SKILL_DODONPA) == 2) {
       prob += 5;
     }
@@ -1048,9 +1048,9 @@ ACMD(do_dodonpa)
     if (prob < perc - 20) {
       if ((getCurST(vict)) > 0) {
         if (blk > axion_dice(10)) {
-          act("@C$N@W moves quickly and blocks your dodonpa!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou move quickly and block @C$n's@W dodonpa!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W moves quickly and blocks @c$n's@W dodonpa!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W moves quickly and blocks your dodonpa!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou move quickly and block @C$n's@W dodonpa!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W moves quickly and blocks @c$n's@W dodonpa!@n", false, ch, 0, vict, TO_NOTVICT);
           if (char_get_skills_perf(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
             pcost(ch, attperc - 0.05, 0);
           } else {
@@ -1059,14 +1059,14 @@ ACMD(do_dodonpa)
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 15, skill, attperc);
           dmg /= 4;
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
+          hurt(0, 0, ch, vict, nullptr, dmg, 1);
 
           return;
         }
         if (dge > axion_dice(10)) {
-          act("@C$N@W manages to dodge your dodonpa, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou dodge @C$n's@W dodonpa, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W manages to dodge @c$n's@W dodonpa, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W manages to dodge your dodonpa, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou dodge @C$n's@W dodonpa, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W manages to dodge @c$n's@W dodonpa, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_NOTVICT);
           send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(ch, vict, 0, 15, skill, SKILL_DODONPA); /* Effects on the room from dodging a ki attack
@@ -1082,31 +1082,31 @@ ACMD(do_dodonpa)
           } else {
             pcost(ch, attperc, 0);
           }
-          hurt(0, 0, ch, vict, NULL, 0, 1);
+          hurt(0, 0, ch, vict, nullptr, 0, 1);
 
           return;
         }
-        act("@WYou can't believe it but your dodonpa misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W fires a dodonpa at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
-        act("@c$n@W fires a dodonpa at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou can't believe it but your dodonpa misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+        act("@C$n@W fires a dodonpa at you, but misses!@n ", false, ch, 0, vict, TO_VICT);
+        act("@c$n@W fires a dodonpa at @C$N@W, but somehow misses!@n ", false, ch, 0, vict, TO_NOTVICT);
         if (char_get_skills_perf(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
           pcost(ch, attperc - 0.05, 0);
         } else {
           pcost(ch, attperc, 0);
         }
-        hurt(0, 0, ch, vict, NULL, 0, 1);
+        hurt(0, 0, ch, vict, nullptr, 0, 1);
 
         return;
       }
-      act("@WYou can't believe it but your dodonpa misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W fires a dodonpa at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
-      act("@c$n@W fires a dodonpa at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+      act("@WYou can't believe it but your dodonpa misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+      act("@C$n@W fires a dodonpa at you, but misses!@n", false, ch, 0, vict, TO_VICT);
+      act("@c$n@W fires a dodonpa at @C$N@W, but somehow misses!@n", false, ch, 0, vict, TO_NOTVICT);
       if (char_get_skills_perf(ch, SKILL_DODONPA) == 3 && attperc > minimum) {
         pcost(ch, attperc - 0.05, 0);
       } else {
         pcost(ch, attperc, 0);
       }
-      hurt(0, 0, ch, vict, NULL, 0, 1);
+      hurt(0, 0, ch, vict, nullptr, 0, 1);
       return;
     }
     dmg         = damtype(ch, 15, skill, attperc);
@@ -1114,51 +1114,51 @@ ACMD(do_dodonpa)
     hitspot     = roll_hitloc(ch, vict, skill);
     switch (hitspot) {
       case 1:
-        act("@WYou gather your charged ki into your index finger and point at @c$N@W. A @Ygolden@W glow forms around your finger tip right before you shout '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fire a large golden beam! The beam slams into $S body and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W gathers $s charged ki into $s index finger and points at you. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into your body and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W gathers $s charged ki into $s index finger and points at @c$N@W. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into @c$N@W's body and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou gather your charged ki into your index finger and point at @c$N@W. A @Ygolden@W glow forms around your finger tip right before you shout '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fire a large golden beam! The beam slams into $S body and explodes!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W gathers $s charged ki into $s index finger and points at you. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into your body and explodes!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W gathers $s charged ki into $s index finger and points at @c$N@W. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into @c$N@W's body and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 2: /* Critical */
-        act("@WYou gather your charged ki into your index finger and point at @c$N@W. A @Ygolden@W glow forms around your finger tip right before you shout '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fire a large golden beam! The beam slams into $S face and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W gathers $s charged ki into $s index finger and points at you. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into your face and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W gathers $s charged ki into $s index finger and points at @c$N@W. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into @c$N@W's face and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou gather your charged ki into your index finger and point at @c$N@W. A @Ygolden@W glow forms around your finger tip right before you shout '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fire a large golden beam! The beam slams into $S face and explodes!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W gathers $s charged ki into $s index finger and points at you. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into your face and explodes!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W gathers $s charged ki into $s index finger and points at @c$N@W. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into @c$N@W's face and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 0);
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 3);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act("@WYou gather your charged ki into your index finger and point at @c$N@W. A @Ygolden@W glow forms around your finger tip right before you shout '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fire a large golden beam! The beam slams into $S gut and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W gathers $s charged ki into $s index finger and points at you. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into your gut and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W gathers $s charged ki into $s index finger and points at @c$N@W. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into @c$N@W's gut and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou gather your charged ki into your index finger and point at @c$N@W. A @Ygolden@W glow forms around your finger tip right before you shout '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fire a large golden beam! The beam slams into $S gut and explodes!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W gathers $s charged ki into $s index finger and points at you. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into your gut and explodes!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W gathers $s charged ki into $s index finger and points at @c$N@W. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into @c$N@W's gut and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 4: /* Weak */
-        act("@WYou gather your charged ki into your index finger and point at @c$N@W. A @Ygolden@W glow forms around your finger tip right before you shout '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fire a large golden beam! The beam slams into $S arm and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W gathers $s charged ki into $s index finger and points at you. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into your arm and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W gathers $s charged ki into $s index finger and points at @c$N@W. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into @c$N@W's arm and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou gather your charged ki into your index finger and point at @c$N@W. A @Ygolden@W glow forms around your finger tip right before you shout '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fire a large golden beam! The beam slams into $S arm and explodes!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W gathers $s charged ki into $s index finger and points at you. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into your arm and explodes!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W gathers $s charged ki into $s index finger and points at @c$N@W. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into @c$N@W's arm and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(0, 190, ch, vict, NULL, dmg, 1);
+        hurt(0, 190, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 1);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act("@WYou gather your charged ki into your index finger and point at @c$N@W. A @Ygolden@W glow forms around your finger tip right before you shout '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fire a large golden beam! The beam slams into $S leg and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W gathers $s charged ki into $s index finger and points at you. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into your leg and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W gathers $s charged ki into $s index finger and points at @c$N@W. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into @c$N@W's leg and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou gather your charged ki into your index finger and point at @c$N@W. A @Ygolden@W glow forms around your finger tip right before you shout '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fire a large golden beam! The beam slams into $S leg and explodes!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W gathers $s charged ki into $s index finger and points at you. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into your leg and explodes!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W gathers $s charged ki into $s index finger and points at @c$N@W. A @Ygolden@W glow forms around the finger tip right before $e shouts '@YD@yo@Yd@yo@Yn@yp@Ya@W!' and fires a large golden beam! The beam slams into @c$N@W's leg and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(1, 190, ch, vict, NULL, dmg, 1);
+        hurt(1, 190, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 2);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
@@ -1175,7 +1175,7 @@ ACMD(do_dodonpa)
     return;
   }
   if (obj) {
-    if (!can_kill(ch, NULL, obj, 1)) {
+    if (!can_kill(ch, nullptr, obj, 1)) {
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
@@ -1184,9 +1184,9 @@ ACMD(do_dodonpa)
     }
     dmg = damtype(ch, 15, skill, attperc);
     dmg /= 10;
-    act("@WYou fire a dodonpa at $p@W!@n", FALSE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W fires a dodonpa at $p@W!@n", FALSE, ch, obj, 0, TO_ROOM);
-    hurt(0, 0, ch, NULL, obj, dmg, 0);
+    act("@WYou fire a dodonpa at $p@W!@n", false, ch, obj, 0, TO_CHAR);
+    act("@C$n@W fires a dodonpa at $p@W!@n", false, ch, obj, 0, TO_ROOM);
+    hurt(0, 0, ch, nullptr, obj, dmg, 0);
     pcost(ch, attperc, 0);
 
   } else {
@@ -1253,7 +1253,7 @@ ACMD(do_masenko)
   /* There is a player/mob targeted */
   handle_cooldown(ch, 6);
   if (vict) {
-    if (!can_kill(ch, vict, NULL, 1)) {
+    if (!can_kill(ch, vict, nullptr, 1)) {
       return;
     }
     if (handle_defender(vict, ch)) {
@@ -1264,7 +1264,7 @@ ACMD(do_masenko)
 
     index = check_def(vict); /* Check parry/block/dodge of vict */
 
-    prob = roll_accuracy(ch, skill, TRUE);
+    prob = roll_accuracy(ch, skill, true);
     if (char_get_skills_perf(ch, SKILL_MASENKO) == 2) {
       prob += 5;
     }
@@ -1301,9 +1301,9 @@ ACMD(do_masenko)
           return;
         }
         if (blk > axion_dice(10)) {
-          act("@C$N@W moves quickly and blocks your masenko!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou move quickly and block @C$n's@W masenko!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W moves quickly and blocks @c$n's@W masenko!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W moves quickly and blocks your masenko!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou move quickly and block @C$n's@W masenko!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W moves quickly and blocks @c$n's@W masenko!@n", false, ch, 0, vict, TO_NOTVICT);
           if (char_get_skills_perf(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
             pcost(ch, attperc - 0.05, 0);
           } else {
@@ -1312,14 +1312,14 @@ ACMD(do_masenko)
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 14, skill, attperc);
           dmg /= 4;
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
+          hurt(0, 0, ch, vict, nullptr, dmg, 1);
 
           return;
         }
         if (dge > axion_dice(10)) {
-          act("@C$N@W manages to dodge your masenko, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou dodge @C$n's@W masenko, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W manages to dodge @c$n's@W masenko, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W manages to dodge your masenko, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou dodge @C$n's@W masenko, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W manages to dodge @c$n's@W masenko, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_NOTVICT);
           send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(ch, vict, 0, 14, skill, SKILL_MASENKO); /* Effects on the room from dodging a ki attack
@@ -1336,31 +1336,31 @@ ACMD(do_masenko)
             pcost(ch, attperc, 0);
           }
 
-          hurt(0, 0, ch, vict, NULL, 0, 1);
+          hurt(0, 0, ch, vict, nullptr, 0, 1);
 
           return;
         }
-        act("@WYou can't believe it but your masenko misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W fires a masenko at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
-        act("@c$n@W fires a masenko at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou can't believe it but your masenko misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+        act("@C$n@W fires a masenko at you, but misses!@n ", false, ch, 0, vict, TO_VICT);
+        act("@c$n@W fires a masenko at @C$N@W, but somehow misses!@n ", false, ch, 0, vict, TO_NOTVICT);
         if (char_get_skills_perf(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
           pcost(ch, attperc - 0.05, 0);
         } else {
           pcost(ch, attperc, 0);
         }
-        hurt(0, 0, ch, vict, NULL, 0, 1);
+        hurt(0, 0, ch, vict, nullptr, 0, 1);
 
         return;
       }
-      act("@WYou can't believe it but your masenko misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W fires a masenko at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
-      act("@c$n@W fires a masenko at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+      act("@WYou can't believe it but your masenko misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+      act("@C$n@W fires a masenko at you, but misses!@n", false, ch, 0, vict, TO_VICT);
+      act("@c$n@W fires a masenko at @C$N@W, but somehow misses!@n", false, ch, 0, vict, TO_NOTVICT);
       if (char_get_skills_perf(ch, SKILL_MASENKO) == 3 && attperc > minimum) {
         pcost(ch, attperc - 0.05, 0);
       } else {
         pcost(ch, attperc, 0);
       }
-      hurt(0, 0, ch, vict, NULL, 0, 1);
+      hurt(0, 0, ch, vict, nullptr, 0, 1);
       return;
     }
     dmg = damtype(ch, 14, skill, attperc);
@@ -1383,51 +1383,51 @@ ACMD(do_masenko)
     }
     switch (hitspot) {
       case 1:
-        act("@WYou place your hands on top of each other and raise them over your head. Energy that you have charged gathers into your palms just before you bring them down aimed at @c$N@W! You scream '@RMasenko @rHa!@W' as you release your attack. A bright red wave of energy flows from your hands and slams into $S body!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at you! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into YOUR body!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at @c$N@W! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into @c$N@W's body!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou place your hands on top of each other and raise them over your head. Energy that you have charged gathers into your palms just before you bring them down aimed at @c$N@W! You scream '@RMasenko @rHa!@W' as you release your attack. A bright red wave of energy flows from your hands and slams into $S body!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at you! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into YOUR body!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at @c$N@W! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into @c$N@W's body!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 2: /* Critical */
-        act("@WYou place your hands on top of each other and raise them over your head. Energy that you have charged gathers into your palms just before you bring them down aimed at @c$N@W! You scream '@RMasenko @rHa!@W' as you release your attack. A bright red wave of energy flows from your hands and slams into $S face!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at you! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into YOUR face!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at @c$N@W! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into @c$N@W's face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou place your hands on top of each other and raise them over your head. Energy that you have charged gathers into your palms just before you bring them down aimed at @c$N@W! You scream '@RMasenko @rHa!@W' as you release your attack. A bright red wave of energy flows from your hands and slams into $S face!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at you! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into YOUR face!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at @c$N@W! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into @c$N@W's face!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 0);
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 3);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act("@WYou place your hands on top of each other and raise them over your head. Energy that you have charged gathers into your palms just before you bring them down aimed at @c$N@W! You scream '@RMasenko @rHa!@W' as you release your attack. A bright red wave of energy flows from your hands and slams into $S gut!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at you! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into YOUR gut!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at @c$N@W! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into @c$N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou place your hands on top of each other and raise them over your head. Energy that you have charged gathers into your palms just before you bring them down aimed at @c$N@W! You scream '@RMasenko @rHa!@W' as you release your attack. A bright red wave of energy flows from your hands and slams into $S gut!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at you! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into YOUR gut!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at @c$N@W! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into @c$N@W's gut!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 4: /* Weak */
-        act("@WYou place your hands on top of each other and raise them over your head. Energy that you have charged gathers into your palms just before you bring them down aimed at @c$N@W! You scream '@RMasenko @rHa!@W' as you release your attack. A bright red wave of energy flows from your hands and slams into $S arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at you! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into YOUR arm!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at @c$N@W! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into @c$N@W's arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou place your hands on top of each other and raise them over your head. Energy that you have charged gathers into your palms just before you bring them down aimed at @c$N@W! You scream '@RMasenko @rHa!@W' as you release your attack. A bright red wave of energy flows from your hands and slams into $S arm!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at you! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into YOUR arm!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at @c$N@W! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into @c$N@W's arm!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(0, 190, ch, vict, NULL, dmg, 1);
+        hurt(0, 190, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 1);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act("@WYou place your hands on top of each other and raise them over your head. Energy that you have charged gathers into your palms just before you bring them down aimed at @c$N@W! You scream '@RMasenko @rHa!@W' as you release your attack. A bright red wave of energy flows from your hands and slams into $S leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at you! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into YOUR leg!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at @c$N@W! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into @c$N@W's leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou place your hands on top of each other and raise them over your head. Energy that you have charged gathers into your palms just before you bring them down aimed at @c$N@W! You scream '@RMasenko @rHa!@W' as you release your attack. A bright red wave of energy flows from your hands and slams into $S leg!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at you! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into YOUR leg!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W places $s hands on top of each other and raises them over $s head. Energy that $e had charged gathers into $s palms just before $e brings them down aimed at @c$N@W! $e screams '@RMasenko @rHa!@W' as $e releases $s attack. A bright red wave of energy flows from $s hands and slams into @c$N@W's leg!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(1, 190, ch, vict, NULL, dmg, 1);
+        hurt(1, 190, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 2);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
@@ -1444,7 +1444,7 @@ ACMD(do_masenko)
     return;
   }
   if (obj) {
-    if (!can_kill(ch, NULL, obj, 1)) {
+    if (!can_kill(ch, nullptr, obj, 1)) {
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
@@ -1453,9 +1453,9 @@ ACMD(do_masenko)
     }
     dmg = damtype(ch, 14, skill, attperc);
     dmg /= 10;
-    act("@WYou fire a masenko at $p@W!@n", FALSE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W fires a masenko at $p@W!@n", FALSE, ch, obj, 0, TO_ROOM);
-    hurt(0, 0, ch, NULL, obj, dmg, 0);
+    act("@WYou fire a masenko at $p@W!@n", false, ch, obj, 0, TO_CHAR);
+    act("@C$n@W fires a masenko at $p@W!@n", false, ch, obj, 0, TO_ROOM);
+    hurt(0, 0, ch, nullptr, obj, dmg, 0);
     pcost(ch, attperc, 0);
 
   } else {
@@ -1522,7 +1522,7 @@ ACMD(do_kamehameha)
   /* There is a player/mob targeted */
   handle_cooldown(ch, 6);
   if (vict) {
-    if (!can_kill(ch, vict, NULL, 1)) {
+    if (!can_kill(ch, vict, nullptr, 1)) {
       return;
     }
     if (handle_defender(vict, ch)) {
@@ -1533,7 +1533,7 @@ ACMD(do_kamehameha)
 
     index = check_def(vict); /* Check parry/block/dodge of vict */
 
-    prob = roll_accuracy(ch, skill, TRUE);
+    prob = roll_accuracy(ch, skill, true);
     if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 2) {
       prob += 5;
     }
@@ -1580,9 +1580,9 @@ ACMD(do_kamehameha)
           return;
         }
         if (blk > axion_dice(10)) {
-          act("@C$N@W moves quickly and blocks your kamehameha!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou move quickly and block @C$n's@W kamehameha!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W moves quickly and blocks @c$n's@W kamehameha!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W moves quickly and blocks your kamehameha!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou move quickly and block @C$n's@W kamehameha!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W moves quickly and blocks @c$n's@W kamehameha!@n", false, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_BLOCK, 0);
           if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
             pcost(ch, attperc - 0.05, 0);
@@ -1602,14 +1602,14 @@ ACMD(do_kamehameha)
           }
           dmg = damtype(ch, 13, skill, attperc);
           dmg /= 4;
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
+          hurt(0, 0, ch, vict, nullptr, dmg, 1);
 
           return;
         }
         if (dge > axion_dice(10)) {
-          act("@C$N@W manages to dodge your kamehameha, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@WYou dodge @C$n's@W kamehameha, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
-          act("@C$N@W manages to dodge @c$n's@W kamehameha, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W manages to dodge your kamehameha, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_CHAR);
+          act("@WYou dodge @C$n's@W kamehameha, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_VICT);
+          act("@C$N@W manages to dodge @c$n's@W kamehameha, letting it slam into the surroundings!@n", false, ch, 0, vict, TO_NOTVICT);
           send_to_room(char_get_in_room(vict), "@wA bright explosion erupts from the impact!\r\n");
 
           dodge_ki(ch, vict, 0, 13, skill, SKILL_KAMEHAMEHA); /* Effects on the room from dodging a ki attack
@@ -1635,13 +1635,13 @@ ACMD(do_kamehameha)
           if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
             char_set_wait(ch, PULSE_3SEC);
           }
-          hurt(0, 0, ch, vict, NULL, 0, 1);
+          hurt(0, 0, ch, vict, nullptr, 0, 1);
 
           return;
         }
-        act("@WYou can't believe it but your kamehameha misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W fires a kamehameha at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
-        act("@c$n@W fires a kamehameha at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou can't believe it but your kamehameha misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+        act("@C$n@W fires a kamehameha at you, but misses!@n ", false, ch, 0, vict, TO_VICT);
+        act("@c$n@W fires a kamehameha at @C$N@W, but somehow misses!@n ", false, ch, 0, vict, TO_NOTVICT);
         if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
           pcost(ch, attperc - 0.05, 0);
         } else {
@@ -1657,13 +1657,13 @@ ACMD(do_kamehameha)
         if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
           char_set_wait(ch, PULSE_3SEC);
         }
-        hurt(0, 0, ch, vict, NULL, 0, 1);
+        hurt(0, 0, ch, vict, nullptr, 0, 1);
 
         return;
       }
-      act("@WYou can't believe it but your kamehameha misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W fires a kamehameha at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
-      act("@c$n@W fires a kamehameha at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+      act("@WYou can't believe it but your kamehameha misses, flying through the air harmlessly!@n", false, ch, 0, vict, TO_CHAR);
+      act("@C$n@W fires a kamehameha at you, but misses!@n", false, ch, 0, vict, TO_VICT);
+      act("@c$n@W fires a kamehameha at @C$N@W, but somehow misses!@n", false, ch, 0, vict, TO_NOTVICT);
       if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3 && attperc > minimum) {
         pcost(ch, attperc - 0.05, 0);
       } else {
@@ -1679,7 +1679,7 @@ ACMD(do_kamehameha)
       if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
         char_set_wait(ch, PULSE_3SEC);
       }
-      hurt(0, 0, ch, vict, NULL, 0, 1);
+      hurt(0, 0, ch, vict, nullptr, 0, 1);
       return;
     }
     dmg         = damtype(ch, 13, skill, attperc);
@@ -1687,39 +1687,39 @@ ACMD(do_kamehameha)
     hitspot     = roll_hitloc(ch, vict, skill);
     switch (hitspot) {
       case 1:
-        act("@WYou cup your hands at your side and begin to pool your charged ki there. As the ki pools there you begin to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly you bring your hands forward facing @c$N@W and shout '@BHAAAA!!!@W' while releasing a bright blue kamehameha at $M! It slams into $S body and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing you and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into your body and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S body and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou cup your hands at your side and begin to pool your charged ki there. As the ki pools there you begin to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly you bring your hands forward facing @c$N@W and shout '@BHAAAA!!!@W' while releasing a bright blue kamehameha at $M! It slams into $S body and explodes!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing you and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into your body and explodes!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S body and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
         if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
           char_set_wait(ch, PULSE_3SEC);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 2: /* Critical */
-        act("@WYou cup your hands at your side and begin to pool your charged ki there. As the ki pools there you begin to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly you bring your hands forward facing @c$N@W and shout '@BHAAAA!!!@W' while releasing a bright blue kamehameha at $M! It slams into $S face and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing you and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into your face and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S face and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou cup your hands at your side and begin to pool your charged ki there. As the ki pools there you begin to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly you bring your hands forward facing @c$N@W and shout '@BHAAAA!!!@W' while releasing a bright blue kamehameha at $M! It slams into $S face and explodes!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing you and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into your face and explodes!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S face and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 0);
         if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
           char_set_wait(ch, PULSE_3SEC);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 3);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act("@WYou cup your hands at your side and begin to pool your charged ki there. As the ki pools there you begin to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly you bring your hands forward facing @c$N@W and shout '@BHAAAA!!!@W' while releasing a bright blue kamehameha at $M! It slams into $S gut and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing you and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into your gut and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S gut and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou cup your hands at your side and begin to pool your charged ki there. As the ki pools there you begin to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly you bring your hands forward facing @c$N@W and shout '@BHAAAA!!!@W' while releasing a bright blue kamehameha at $M! It slams into $S gut and explodes!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing you and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into your gut and explodes!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S gut and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
@@ -1727,23 +1727,23 @@ ACMD(do_kamehameha)
         }
         break;
       case 4: /* Weak */
-        act("@WYou cup your hands at your side and begin to pool your charged ki there. As the ki pools there you begin to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly you bring your hands forward facing @c$N@W and shout '@BHAAAA!!!@W' while releasing a bright blue kamehameha at $M! It slams into $S arm and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing you and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into your arm and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S arm and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou cup your hands at your side and begin to pool your charged ki there. As the ki pools there you begin to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly you bring your hands forward facing @c$N@W and shout '@BHAAAA!!!@W' while releasing a bright blue kamehameha at $M! It slams into $S arm and explodes!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing you and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into your arm and explodes!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S arm and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
         if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
           char_set_wait(ch, PULSE_3SEC);
         }
-        hurt(0, 190, ch, vict, NULL, dmg, 1);
+        hurt(0, 190, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 1);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act("@WYou cup your hands at your side and begin to pool your charged ki there. As the ki pools there you begin to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly you bring your hands forward facing @c$N@W and shout '@BHAAAA!!!@W' while releasing a bright blue kamehameha at $M! It slams into $S leg and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing you and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into your leg and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S leg and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou cup your hands at your side and begin to pool your charged ki there. As the ki pools there you begin to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly you bring your hands forward facing @c$N@W and shout '@BHAAAA!!!@W' while releasing a bright blue kamehameha at $M! It slams into $S leg and explodes!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing you and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into your leg and explodes!@n", true, ch, 0, vict, TO_VICT);
+        act("@C$n@W cups $s hands at $s side and begins to pool charged ki there. As the ki pools there $e begins to chant, '@BKaaaaa@bmeeee@Bhaaaaaaa@bmeeeee@W'. Suddenly $e brings $s hands forward facing @c$N@W and shouts '@BHAAAA!!!@W' while releasing a bright blue kamehameha! It slams into $S leg and explodes!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(1, 190, ch, vict, NULL, dmg, 1);
+        hurt(1, 190, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 2);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
@@ -1767,7 +1767,7 @@ ACMD(do_kamehameha)
     return;
   }
   if (obj) {
-    if (!can_kill(ch, NULL, obj, 1)) {
+    if (!can_kill(ch, nullptr, obj, 1)) {
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
@@ -1776,12 +1776,12 @@ ACMD(do_kamehameha)
     }
     dmg = damtype(ch, 13, skill, attperc);
     dmg /= 10;
-    act("@WYou fire a kamehameha at $p@W!@n", FALSE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W fires a kamehameha at $p@W!@n", FALSE, ch, obj, 0, TO_ROOM);
+    act("@WYou fire a kamehameha at $p@W!@n", false, ch, obj, 0, TO_CHAR);
+    act("@C$n@W fires a kamehameha at $p@W!@n", false, ch, obj, 0, TO_ROOM);
     if (char_get_skills_perf(ch, SKILL_KAMEHAMEHA) == 3) {
       char_set_wait(ch, PULSE_3SEC);
     }
-    hurt(0, 0, ch, NULL, obj, dmg, 0);
+    hurt(0, 0, ch, nullptr, obj, dmg, 0);
     pcost(ch, attperc, 0);
     if (char_get_skill(ch, SKILL_KAMEHAMEHA) >= 100) {
       incCurKI(ch, (getMaxKI(ch) * attperc) * 0.25, true);
@@ -1845,7 +1845,7 @@ ACMD(do_beam)
 
   handle_cooldown(ch, 5);
   if (vict) {
-    if (!can_kill(ch, vict, NULL, 1)) {
+    if (!can_kill(ch, vict, nullptr, 1)) {
       return;
     }
     if (handle_defender(vict, ch)) {
@@ -1854,7 +1854,7 @@ ACMD(do_beam)
     }
     improve_skill(ch, SKILL_BEAM, 0);
     index = check_def(vict);
-    prob  = roll_accuracy(ch, skill, TRUE);
+    prob  = roll_accuracy(ch, skill, true);
     perc  = chance_to_hit(ch);
 
     index -= handle_speed(ch, vict);
@@ -1879,9 +1879,9 @@ ACMD(do_beam)
           return;
         }
         if (pry > rand_number(1, 140) && (!char_is_npc(vict) || !char_mob_flagged(vict, MOB_DUMMY))) {
-          act("@C$N@W deflects your beam, sending it flying away!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou deflect @C$n's@W beam sending it flying away!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W deflects @c$n's@W beam sending it flying away!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W deflects your beam, sending it flying away!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou deflect @C$n's@W beam sending it flying away!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W deflects @c$n's@W beam sending it flying away!@n", true, ch, 0, vict, TO_NOTVICT);
           pcost(vict, 0, getEffMaxPL(vict) / 200);
 
           parry_ki(attperc, ch, vict, "beam", prob, perc, skill, 10);
@@ -1895,22 +1895,22 @@ ACMD(do_beam)
           return;
         }
         if (blk > axion_dice(10)) {
-          act("@C$N@W moves quickly and blocks beam!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou move quickly and block @C$n's@W beam!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W moves quickly and blocks @c$n's@W beam!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W moves quickly and blocks beam!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou move quickly and block @C$n's@W beam!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W moves quickly and blocks @c$n's@W beam!@n", true, ch, 0, vict, TO_NOTVICT);
           improve_skill(vict, SKILL_BLOCK, 0);
           pcost(ch, attperc, 0);
           pcost(vict, 0, getEffMaxPL(vict) / 500);
           dmg = damtype(ch, 10, skill, attperc);
           dmg /= 4;
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
+          hurt(0, 0, ch, vict, nullptr, dmg, 1);
 
           return;
         }
         if (dge > axion_dice(10)) {
-          act("@C$N@W manages to dodge your beam, letting it slam into the surroundings!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@WYou dodge @C$n's@W beam, letting it slam into the surroundings!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$N@W manages to dodge @c$n's@W beam, letting it slam into the surroundings!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+          act("@C$N@W manages to dodge your beam, letting it slam into the surroundings!@n", true, ch, 0, vict, TO_CHAR);
+          act("@WYou dodge @C$n's@W beam, letting it slam into the surroundings!@n", true, ch, 0, vict, TO_VICT);
+          act("@C$N@W manages to dodge @c$n's@W beam, letting it slam into the surroundings!@n", true, ch, 0, vict, TO_NOTVICT);
 
           dodge_ki(ch, vict, 0, 10, skill, SKILL_BEAM); /* Effects on the room from dodging a ki attack
                                Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
@@ -1921,23 +1921,23 @@ ACMD(do_beam)
           }
           improve_skill(vict, SKILL_DODGE, 0);
           pcost(ch, attperc, 0);
-          hurt(0, 0, ch, vict, NULL, 0, 1);
+          hurt(0, 0, ch, vict, nullptr, 0, 1);
 
           return;
         }
-        act("@WYou can't believe it but your beam misses, flying through the air harmlessly!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W fires a bright yellow beam at you, but misses!@n ", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$n@W fires a bright yellow beam at @C$N@W, but somehow misses!@n ", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou can't believe it but your beam misses, flying through the air harmlessly!@n", true, ch, 0, vict, TO_CHAR);
+        act("@C$n@W fires a bright yellow beam at you, but misses!@n ", true, ch, 0, vict, TO_VICT);
+        act("@c$n@W fires a bright yellow beam at @C$N@W, but somehow misses!@n ", true, ch, 0, vict, TO_NOTVICT);
         pcost(ch, attperc, 0);
-        hurt(0, 0, ch, vict, NULL, 0, 1);
+        hurt(0, 0, ch, vict, nullptr, 0, 1);
 
         return;
       }
-      act("@WYou can't believe it but your beam misses, flying through the air harmlessly!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W fires a bright yellow beam at you, but misses!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@c$n@W fires a bright yellow beam at @C$N@W, but somehow misses!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@WYou can't believe it but your beam misses, flying through the air harmlessly!@n", true, ch, 0, vict, TO_CHAR);
+      act("@C$n@W fires a bright yellow beam at you, but misses!@n", true, ch, 0, vict, TO_VICT);
+      act("@c$n@W fires a bright yellow beam at @C$N@W, but somehow misses!@n", true, ch, 0, vict, TO_NOTVICT);
       pcost(ch, attperc, 0);
-      hurt(0, 0, ch, vict, NULL, 0, 1);
+      hurt(0, 0, ch, vict, nullptr, 0, 1);
       return;
     }
     dmg         = damtype(ch, 10, skill, attperc);
@@ -1945,58 +1945,58 @@ ACMD(do_beam)
     hitspot     = roll_hitloc(ch, vict, skill);
     switch (hitspot) {
       case 1:
-        act("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S chest!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your chest!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's chest!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S chest!@n", true, ch, 0, vict, TO_CHAR);
+        act("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your chest!@n", true, ch, 0, vict, TO_VICT);
+        act("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's chest!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 2: /* Critical */
-        act("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S face!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your face!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's face!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S face!@n", true, ch, 0, vict, TO_CHAR);
+        act("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your face!@n", true, ch, 0, vict, TO_VICT);
+        act("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's face!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 0);
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 3);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 3:
-        act("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S gut!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your gut!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's gut!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S gut!@n", true, ch, 0, vict, TO_CHAR);
+        act("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your gut!@n", true, ch, 0, vict, TO_VICT);
+        act("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's gut!@n", true, ch, 0, vict, TO_NOTVICT);
         if (char_get_bonuses(ch, BONUS_SOFT)) {
           dmg *= calc_critical(ch, 2);
         }
-        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        hurt(0, 0, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 4);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 4: /* Weak */
-        act("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S arm!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your arm!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's arm!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S arm!@n", true, ch, 0, vict, TO_CHAR);
+        act("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your arm!@n", true, ch, 0, vict, TO_VICT);
+        act("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's arm!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(0, 195, ch, vict, NULL, dmg, 1);
+        hurt(0, 195, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 1);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
       case 5: /* Weak 2 */
-        act("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S leg!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your leg!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's leg!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S leg!@n", true, ch, 0, vict, TO_CHAR);
+        act("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your leg!@n", true, ch, 0, vict, TO_VICT);
+        act("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's leg!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= calc_critical(ch, 1);
-        hurt(1, 195, ch, vict, NULL, dmg, 1);
+        hurt(1, 195, ch, vict, nullptr, dmg, 1);
         dam_eq_loc(vict, 2);
         /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
         break;
     }
     pcost(ch, attperc, 0);
 
-    int master_roll = rand_number(1, 100), master_chance = 0, master_pass = FALSE;
+    int master_roll = rand_number(1, 100), master_chance = 0, master_pass = false;
 
     if (skill >= 100)
       master_chance = 20;
@@ -2006,9 +2006,9 @@ ACMD(do_beam)
       master_chance = 5;
 
     if (master_chance >= master_roll)
-      master_pass = TRUE;
+      master_pass = true;
 
-    if (getCurPL(vict) > 0 && dmg > getEffMaxPL(vict) / 4 && master_pass == TRUE) {
+    if (getCurPL(vict) > 0 && dmg > getEffMaxPL(vict) / 4 && master_pass == true) {
       int attempt = rand_number(0, NUM_OF_DIRS); /* Select a random direction */
       int count   = 0;
       while (count < 12) {
@@ -2020,22 +2020,22 @@ ACMD(do_beam)
         }
       }
       if (char_can_go(vict, attempt)) {
-        act("$N@W is pushed away by the blast!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@WYou are pushed away by the blast!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("$N@W is pushed away by the blast!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        do_simple_move(vict, attempt, TRUE);
+        act("$N@W is pushed away by the blast!@n", true, ch, 0, vict, TO_CHAR);
+        act("@WYou are pushed away by the blast!@n", true, ch, 0, vict, TO_VICT);
+        act("$N@W is pushed away by the blast!@n", true, ch, 0, vict, TO_NOTVICT);
+        do_simple_move(vict, attempt, true);
       } else {
-        act("$N@W is pushed away by the blast, but is slammed into an obstruction!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@WYou are pushed away by the blast, but are slammed into an obstruction!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("$N@W is pushed away by the blast, but is slammed into an obstruction!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        act("$N@W is pushed away by the blast, but is slammed into an obstruction!@n", true, ch, 0, vict, TO_CHAR);
+        act("@WYou are pushed away by the blast, but are slammed into an obstruction!@n", true, ch, 0, vict, TO_VICT);
+        act("$N@W is pushed away by the blast, but is slammed into an obstruction!@n", true, ch, 0, vict, TO_NOTVICT);
         dmg *= 2;
-        hurt(1, 195, ch, vict, NULL, dmg, 1);
+        hurt(1, 195, ch, vict, nullptr, dmg, 1);
       }
     }
     return;
   }
   if (obj) {
-    if (!can_kill(ch, NULL, obj, 1)) {
+    if (!can_kill(ch, nullptr, obj, 1)) {
       return;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
@@ -2044,9 +2044,9 @@ ACMD(do_beam)
     }
     dmg = damtype(ch, 10, skill, attperc);
     dmg /= 10;
-    act("@WYou fire a beam at $p@W!@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@C$n@W fires a beam at $p@W!@n", TRUE, ch, obj, 0, TO_ROOM);
-    hurt(0, 0, ch, NULL, obj, dmg, 0);
+    act("@WYou fire a beam at $p@W!@n", true, ch, obj, 0, TO_CHAR);
+    act("@C$n@W fires a beam at $p@W!@n", true, ch, obj, 0, TO_ROOM);
+    hurt(0, 0, ch, nullptr, obj, dmg, 0);
     pcost(ch, attperc, 0);
 
   } else {

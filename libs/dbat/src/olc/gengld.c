@@ -55,11 +55,11 @@ static void free_guild_strings(struct guild_data *guild)
 {
   if (G_NO_SKILL(guild)) {
     free(G_NO_SKILL(guild));
-    G_NO_SKILL(guild) = NULL;
+    G_NO_SKILL(guild) = nullptr;
   }
   if (G_NO_GOLD(guild)) {
     free(G_NO_GOLD(guild));
-    G_NO_GOLD(guild) = NULL;
+    G_NO_GOLD(guild) = nullptr;
   }
 }
 
@@ -79,33 +79,21 @@ void free_guild(struct guild_data *guild)
  *
  * We take so good care to keep it sorted - let's use it :) - Welcor
  */
+static int guild_order(const void *key, const void *guild)
+{
+  guild_vnum k = *(const guild_vnum *)key, v = ((const struct guild_data *)guild)->vnum;
+
+  return (k > v) - (k < v);
+}
+
 guild_rnum real_guild(guild_vnum vnum)
 {
-  guild_rnum bot, top, mid, last_top;
+  struct guild_data *found;
 
   if (top_guild < 0)
     return NOWHERE;
-
-  bot = 0;
-  top = top_guild;
-
-  /* perform binary search on guild_table */
-  for (;;) {
-    last_top = top;
-    mid      = (bot + top) / 2;
-
-    if (GM_NUM(mid) == vnum)
-      return (mid);
-    if (bot >= top)
-      return (NOWHERE);
-    if (GM_NUM(mid) > vnum)
-      top = mid - 1;
-    else
-      bot = mid + 1;
-
-    if (top > last_top)
-      return NOWHERE;
-  }
+  found = bsearch(&vnum, guild_index, top_guild + 1, sizeof(*guild_index), guild_order);
+  return found ? found - guild_index : NOWHERE;
 }
 
 /*-------------------------------------------------------------------*/
@@ -131,7 +119,7 @@ const char *gedit_modify_string(char **str, char *new_g)
   if (*str)
     free(*str);
   *str = strdup(pointer);
-  return NULL;
+  return nullptr;
 }
 
 /*-------------------------------------------------------------------*/
@@ -150,11 +138,11 @@ int add_guild(struct guild_data *ngld)
     if (rznum != NOWHERE) {
       add_to_save_list(zone_table[rznum].number, SL_GLD);
     } else
-      mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Cannot determine guild zone.");
+      mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine guild zone.");
     return rguild;
   }
 
-  mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Creating new guild.");
+  mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Creating new guild.");
 
   top_guild++;
   RECREATE(guild_index, struct guild_data, top_guild + 1);
@@ -176,7 +164,7 @@ int add_guild(struct guild_data *ngld)
   if (rznum != NOWHERE) {
     add_to_save_list(zone_table[rznum].number, SL_GLD);
   } else
-    mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Cannot determine guild zone.");
+    mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine guild zone.");
 
   return rguild;
 }
@@ -193,13 +181,13 @@ int save_guilds(zone_rnum zone_num)
 
   if (zone_num < 0 || zone_num > top_of_zone_table) {
     mud_log("SYSERR: GenOLC: save_guilds: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
-    return FALSE;
+    return false;
   }
 
   snprintf(fname, sizeof(fname), "%s%d.gld", GLD_PREFIX, zone_table[zone_num].number);
   if (!(guild_file = atomic_open(&af, fname, false))) {
-    mudlog(LOG_BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC: Cannot open Guild file!");
-    return FALSE;
+    mudlog(LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open Guild file!");
+    return false;
   }
 
   /*. Search database for guilds in this zone . */
@@ -250,5 +238,5 @@ int save_guilds(zone_rnum zone_num)
     create_world_index(zone_table[zone_num].number, "gld");
     mud_log("GenOLC: save_guilds: Saving guilds '%s'", fname);
   }
-  return TRUE;
+  return true;
 }

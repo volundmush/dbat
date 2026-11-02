@@ -22,18 +22,18 @@ int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg);
 
 int find_all_dots(char *arg);
 
-#define FIND_INDIV  0
-#define FIND_ALL    1
-#define FIND_ALLDOT 2
+constexpr int FIND_INDIV  = 0;
+constexpr int FIND_ALL    = 1;
+constexpr int FIND_ALLDOT = 2;
 
 /* Generic Find */
 
 int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
                  struct char_data **tar_ch, struct obj_data **tar_obj);
 
-#define FIND_CHAR_ROOM  (1 << 0)
-#define FIND_CHAR_WORLD (1 << 1)
-#define FIND_OBJ_INV    (1 << 2)
-#define FIND_OBJ_ROOM   (1 << 3)
-#define FIND_OBJ_WORLD  (1 << 4)
-#define FIND_OBJ_EQUIP  (1 << 5)
+constexpr int FIND_CHAR_ROOM  = (1 << 0);
+constexpr int FIND_CHAR_WORLD = (1 << 1);
+constexpr int FIND_OBJ_INV    = (1 << 2);
+constexpr int FIND_OBJ_ROOM   = (1 << 3);
+constexpr int FIND_OBJ_WORLD  = (1 << 4);
+constexpr int FIND_OBJ_EQUIP  = (1 << 5);

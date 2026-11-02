@@ -252,31 +252,31 @@ static void free_shop_strings(struct shop_data *shop)
 {
   if (S_NOITEM1(shop)) {
     free(S_NOITEM1(shop));
-    S_NOITEM1(shop) = NULL;
+    S_NOITEM1(shop) = nullptr;
   }
   if (S_NOITEM2(shop)) {
     free(S_NOITEM2(shop));
-    S_NOITEM2(shop) = NULL;
+    S_NOITEM2(shop) = nullptr;
   }
   if (S_NOCASH1(shop)) {
     free(S_NOCASH1(shop));
-    S_NOCASH1(shop) = NULL;
+    S_NOCASH1(shop) = nullptr;
   }
   if (S_NOCASH2(shop)) {
     free(S_NOCASH2(shop));
-    S_NOCASH2(shop) = NULL;
+    S_NOCASH2(shop) = nullptr;
   }
   if (S_NOBUY(shop)) {
     free(S_NOBUY(shop));
-    S_NOBUY(shop) = NULL;
+    S_NOBUY(shop) = nullptr;
   }
   if (S_BUY(shop)) {
     free(S_BUY(shop));
-    S_BUY(shop) = NULL;
+    S_BUY(shop) = nullptr;
   }
   if (S_SELL(shop)) {
     free(S_SELL(shop));
-    S_SELL(shop) = NULL;
+    S_SELL(shop) = nullptr;
   }
 }
 
@@ -294,7 +294,7 @@ static void free_type_list(struct shop_buy_data **list)
       free(BUY_WORD((*list)[i]));
 
   free(*list);
-  *list = NULL;
+  *list = nullptr;
 }
 
 /*-------------------------------------------------------------------*/
@@ -317,33 +317,21 @@ void free_shop(struct shop_data *shop)
  *
  * We take so good care to keep it sorted - let's use it :) - Welcor
  */
+static int shop_order(const void *key, const void *shop)
+{
+  shop_vnum k = *(const shop_vnum *)key, v = ((const struct shop_data *)shop)->vnum;
+
+  return (k > v) - (k < v);
+}
+
 shop_rnum real_shop(shop_vnum vnum)
 {
-  shop_rnum bot, top, mid, last_top;
+  struct shop_data *found;
 
   if (top_shop < 0)
     return NOWHERE;
-
-  bot = 0;
-  top = top_shop;
-
-  /* perform binary search on shop_table */
-  for (;;) {
-    last_top = top;
-    mid      = (bot + top) / 2;
-
-    if (SHOP_NUM(mid) == vnum)
-      return (mid);
-    if (bot >= top)
-      return (NOWHERE);
-    if (SHOP_NUM(mid) > vnum)
-      top = mid;
-    else
-      bot = mid + 1;
-
-    if (top > last_top)
-      return NOWHERE;
-  }
+  found = bsearch(&vnum, shop_index, top_shop + 1, sizeof(*shop_index), shop_order);
+  return found ? found - shop_index : NOWHERE;
 }
 
 /*-------------------------------------------------------------------*/
@@ -374,7 +362,7 @@ const char *modify_string(char **str, char *new_s, bool allow_int)
   if (*str)
     free(*str);
   *str = strdup(pointer);
-  return NULL;
+  return nullptr;
 }
 
 /*-------------------------------------------------------------------*/
@@ -390,11 +378,11 @@ int add_shop(struct shop_data *nshp)
    */
   if ((rshop = real_shop(S_NUM(nshp))) != NOWHERE) {
     /* free old strings. They're not used in any other place -- Welcor */
-    copy_shop(&shop_index[rshop], nshp, TRUE);
+    copy_shop(&shop_index[rshop], nshp, true);
     if (rznum != NOWHERE)
       add_to_save_list(zone_table[rznum].number, SL_SHP);
     else
-      mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Cannot determine shop zone.");
+      mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine shop zone.");
     return rshop;
   }
 
@@ -406,11 +394,11 @@ int add_shop(struct shop_data *nshp)
       found = rshop;
 
       /* Make a "nofree" variant and remove these later. */
-      shop_index[rshop].in_room   = NULL;
-      shop_index[rshop].producing = NULL;
-      shop_index[rshop].type      = NULL;
+      shop_index[rshop].in_room   = nullptr;
+      shop_index[rshop].producing = nullptr;
+      shop_index[rshop].type      = nullptr;
       /* don't free old strings - they're still in use -- Welcor */
-      copy_shop(&shop_index[rshop], nshp, FALSE);
+      copy_shop(&shop_index[rshop], nshp, false);
       break;
     }
     shop_index[rshop] = shop_index[rshop - 1];
@@ -418,17 +406,17 @@ int add_shop(struct shop_data *nshp)
 
   if (!found) {
     /* Make a "nofree" variant and remove these later. */
-    shop_index[rshop].in_room   = NULL;
-    shop_index[rshop].producing = NULL;
-    shop_index[rshop].type      = NULL;
+    shop_index[rshop].in_room   = nullptr;
+    shop_index[rshop].producing = nullptr;
+    shop_index[rshop].type      = nullptr;
     /* don't free old strings - they're still in use -- Welcor */
-    copy_shop(&shop_index[0], nshp, FALSE);
+    copy_shop(&shop_index[0], nshp, false);
   }
 
   if (rznum != NOWHERE)
     add_to_save_list(zone_table[rznum].number, SL_SHP);
   else
-    mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: GenOLC: Cannot determine shop zone.");
+    mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Cannot determine shop zone.");
 
   return rshop;
 }
@@ -445,18 +433,18 @@ int save_shops(zone_rnum zone_num)
 
   if (zone_num < 0 || zone_num > top_of_zone_table) {
     mud_log("SYSERR: GenOLC: save_shops: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
-    return FALSE;
+    return false;
   }
 
   snprintf(fname, sizeof(fname), "%s%d.shp", SHP_PREFIX, zone_table[zone_num].number);
   if (!(shop_file = atomic_open(&af, fname, false))) {
-    mudlog(LOG_BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC: Cannot open shop file!");
-    return FALSE;
+    mudlog(LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot open shop file!");
+    return false;
   }
   if (fprintf(shop_file, "CircleMUD v3.0 Shop File~\n") < 0) {
-    mudlog(LOG_BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC: Cannot write to shop file!");
+    mudlog(LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC: Cannot write to shop file!");
     atomic_abort(&af);
-    return FALSE;
+    return false;
   }
   /*
    * Search database for shops in this zone.
@@ -540,7 +528,7 @@ int save_shops(zone_rnum zone_num)
   }
   fprintf(shop_file, "$~\n");
   if (!atomic_commit(&af))
-    return FALSE;
+    return false;
   snprintf(oldname, sizeof(oldname), "%s", fname);
 
   if (in_save_list(zone_table[zone_num].number, SL_SHP)) {
@@ -548,5 +536,5 @@ int save_shops(zone_rnum zone_num)
     create_world_index(zone_table[zone_num].number, "shp");
     mud_log("GenOLC: save_shops: Saving shops '%s'", oldname);
   }
-  return TRUE;
+  return true;
 }

@@ -162,7 +162,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
   /*
    * Clean up WHAT?
    */
-  if (d->olc == NULL)
+  if (d->olc == nullptr)
     return;
 
   /*
@@ -188,7 +188,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
   /* cedit's copy of the configuration (it has no room, so this can't go above) */
   if (OLC_CONFIG(d)) {
     free_config(OLC_CONFIG(d));
-    OLC_CONFIG(d) = NULL;
+    OLC_CONFIG(d) = nullptr;
   }
 
   /*
@@ -293,7 +293,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
     */
   if (OLC_STORAGE(d)) {
     free(OLC_STORAGE(d));
-    OLC_STORAGE(d) = NULL;
+    OLC_STORAGE(d) = nullptr;
   }
   /*
     * Free this one regardless. If we've left olc, we've either made
@@ -302,7 +302,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
     */
   if (OLC_TRIG(d)) {
     free_trigger(OLC_TRIG(d));
-    OLC_TRIG(d) = NULL;
+    OLC_TRIG(d) = nullptr;
   }
   /*
     * OLC_SCRIPT is always set as trig_proto of OLC_OBJ/MOB/ROOM.
@@ -314,22 +314,22 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
    */
   if (d->character) {
     char_plr_set(d->character, PLR_WRITING, false);
-    act("$n stops using OLC.", TRUE, d->character, NULL, NULL, TO_ROOM);
+    act("$n stops using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
 
     if (cleanup_type == CLEANUP_CONFIG)
-      mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing the game configuration", char_get_name(d->character));
+      mudlog(LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing the game configuration", char_get_name(d->character));
     else if (desc_get_connected(d) == CON_TEDIT)
-      mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing text files.", char_get_name(d->character));
+      mudlog(LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing text files.", char_get_name(d->character));
     else if (desc_get_connected(d) == CON_HEDIT)
-      mudlog(LOG_CMP, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing help files.", char_get_name(d->character));
+      mudlog(LOG_CMP, ADMLVL_IMMORT, true, "OLC: %s stops editing help files.", char_get_name(d->character));
     else
-      mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "OLC: %s stops editing zone %d allowed zone %d", char_get_name(d->character), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(d->character));
+      mudlog(LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s stops editing zone %d allowed zone %d", char_get_name(d->character), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(d->character));
 
     desc_set_connected(d, CON_PLAYING);
   }
 
   free(d->olc);
-  d->olc = NULL;
+  d->olc = nullptr;
 }
 
 /*
@@ -393,32 +393,32 @@ int can_edit_zone(struct char_data *ch, zone_rnum rnum)
 {
   /* no access if called with bad arguments */
   if (!ch->desc || char_is_npc(ch) || rnum == NOWHERE)
-    return FALSE;
+    return false;
 
   if (rnum == HEDIT_PERMISSION)
-    return TRUE;
+    return true;
 
   /* always access if ch is high enough level */
   if (char_get_admlevel(ch) >= ADMLVL_GRGOD)
-    return (TRUE);
+    return (true);
 
   /* always access if a player helped build the zone in the first place */
   if (is_name(char_get_name(ch), zone_table[rnum].builders))
-    return (TRUE);
+    return (true);
 
   /* no access if you haven't been assigned a zone */
   if (char_get_olc_zone(ch) == NOWHERE)
-    return FALSE;
+    return false;
 
   /* no access if you're not at least LVL_BUILDER */
   if (char_get_admlevel(ch) < ADMLVL_BUILDER)
-    return FALSE;
+    return false;
 
   /* always access if you're assigned to this zone */
   if (real_zone(char_get_olc_zone(ch)) == rnum)
-    return TRUE;
+    return true;
 
-  return (FALSE);
+  return (false);
 }
 
 void send_cannot_edit(struct char_data *ch, zone_vnum zone)
@@ -427,6 +427,6 @@ void send_cannot_edit(struct char_data *ch, zone_vnum zone)
   if (char_get_olc_zone(ch) != NOWHERE)
     send_to_char(ch, "  Try zone %d.", char_get_olc_zone(ch));
   send_to_char(ch, "\r\n");
-  mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "OLC: %s tried to edit zone %d allowed zone %d",
+  mudlog(LOG_BRF, ADMLVL_IMPL, true, "OLC: %s tried to edit zone %d allowed zone %d",
          char_get_name(ch), zone, char_get_olc_zone(ch));
 }

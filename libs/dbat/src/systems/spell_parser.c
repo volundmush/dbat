@@ -75,13 +75,13 @@ int find_skill_num(char *name, int sktype)
       return (skindex);
     }
 
-    ok = TRUE;
+    ok = true;
     strlcpy(tempbuf, spell_info[skindex].name, sizeof(tempbuf)); /* strlcpy: OK */
     temp  = any_one_arg(tempbuf, first);
     temp2 = any_one_arg(name, first2);
     while (*first && *first2 && ok) {
       if (!is_abbrev(first2, first))
-        ok = FALSE;
+        ok = false;
       temp  = any_one_arg(temp, first);
       temp2 = any_one_arg(temp2, first2);
     }
@@ -117,7 +117,7 @@ int call_magic(struct char_data *caster, struct char_data *cvict,
   if (rroom_flagged(char_get_in_room(caster), ROOM_PEACEFUL) && char_get_admlevel(caster) < ADMLVL_IMPL &&
       (SINFO.violent || IS_SET(SINFO.routines, MAG_DAMAGE))) {
     send_to_char(caster, "A flash of white light fills the room, dispelling your violent magic!\r\n");
-    act("White light from no particular source suddenly fills the room, then vanishes.", FALSE, caster, 0, 0, TO_ROOM);
+    act("White light from no particular source suddenly fills the room, then vanishes.", false, caster, 0, 0, TO_ROOM);
     return (0);
   }
 
@@ -197,8 +197,8 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
 {
   char arg[MAX_INPUT_LENGTH];
   int i, k;
-  struct char_data *tch = NULL, *next_tch;
-  struct obj_data *tobj = NULL;
+  struct char_data *tch = nullptr, *next_tch;
+  struct obj_data *tobj = nullptr;
 
   one_argument(argument, arg);
 
@@ -206,15 +206,15 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
 
   switch (obj_get_type_flag(obj)) {
     case ITEM_STAFF:
-      act("You tap $p three times on the ground.", FALSE, ch, obj, 0, TO_CHAR);
+      act("You tap $p three times on the ground.", false, ch, obj, 0, TO_CHAR);
       if (obj->action_description)
-        act(obj->action_description, FALSE, ch, obj, 0, TO_ROOM);
+        act(obj->action_description, false, ch, obj, 0, TO_ROOM);
       else
-        act("$n taps $p three times on the ground.", FALSE, ch, obj, 0, TO_ROOM);
+        act("$n taps $p three times on the ground.", false, ch, obj, 0, TO_ROOM);
 
       if (obj_get_value(obj, VAL_STAFF_CHARGES) <= 0) {
         send_to_char(ch, "It seems powerless.\r\n");
-        act("Nothing seems to happen.", FALSE, ch, obj, 0, TO_ROOM);
+        act("Nothing seems to happen.", false, ch, obj, 0, TO_ROOM);
       } else {
         obj_set_value(obj, VAL_STAFF_CHARGES, obj_get_value(obj, VAL_STAFF_CHARGES) - 1);
         char_aff_set(ch, AFF_NEXTNOACTION, true);
@@ -231,12 +231,12 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
           for (i = 0, tch = world[char_get_in_room(ch)].people; tch; tch = tch->next_in_room)
             i++;
           while (i-- > 0)
-            call_magic(ch, NULL, NULL, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF, NULL);
+            call_magic(ch, nullptr, nullptr, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
         } else {
           for (tch = world[char_get_in_room(ch)].people; tch; tch = next_tch) {
             next_tch = tch->next_in_room;
             if (ch != tch)
-              call_magic(ch, tch, NULL, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF, NULL);
+              call_magic(ch, tch, nullptr, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
           }
         }
       }
@@ -244,67 +244,67 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
     case ITEM_WAND:
       if (k == FIND_CHAR_ROOM) {
         if (tch == ch) {
-          act("You point $p at yourself.", FALSE, ch, obj, 0, TO_CHAR);
-          act("$n points $p at $mself.", FALSE, ch, obj, 0, TO_ROOM);
+          act("You point $p at yourself.", false, ch, obj, 0, TO_CHAR);
+          act("$n points $p at $mself.", false, ch, obj, 0, TO_ROOM);
         } else {
-          act("You point $p at $N.", FALSE, ch, obj, tch, TO_CHAR);
+          act("You point $p at $N.", false, ch, obj, tch, TO_CHAR);
           if (obj->action_description)
-            act(obj->action_description, FALSE, ch, obj, tch, TO_ROOM);
+            act(obj->action_description, false, ch, obj, tch, TO_ROOM);
           else
-            act("$n points $p at $N.", TRUE, ch, obj, tch, TO_ROOM);
+            act("$n points $p at $N.", true, ch, obj, tch, TO_ROOM);
         }
-      } else if (tobj != NULL) {
-        act("You point $p at $P.", FALSE, ch, obj, tobj, TO_CHAR);
+      } else if (tobj != nullptr) {
+        act("You point $p at $P.", false, ch, obj, tobj, TO_CHAR);
         if (obj->action_description)
-          act(obj->action_description, FALSE, ch, obj, tobj, TO_ROOM);
+          act(obj->action_description, false, ch, obj, tobj, TO_ROOM);
         else
-          act("$n points $p at $P.", TRUE, ch, obj, tobj, TO_ROOM);
+          act("$n points $p at $P.", true, ch, obj, tobj, TO_ROOM);
       } else if (IS_SET(spell_info[obj_get_value(obj, VAL_WAND_SPELL)].routines, MAG_AREAS | MAG_MASSES)) {
         /* Wands with area spells don't need to be pointed. */
-        act("You point $p outward.", FALSE, ch, obj, NULL, TO_CHAR);
-        act("$n points $p outward.", TRUE, ch, obj, NULL, TO_ROOM);
+        act("You point $p outward.", false, ch, obj, nullptr, TO_CHAR);
+        act("$n points $p outward.", true, ch, obj, nullptr, TO_ROOM);
       } else {
-        act("At what should $p be pointed?", FALSE, ch, obj, NULL, TO_CHAR);
+        act("At what should $p be pointed?", false, ch, obj, nullptr, TO_CHAR);
         return;
       }
 
       if (obj_get_value(obj, VAL_WAND_CHARGES) <= 0) {
         send_to_char(ch, "It seems powerless.\r\n");
-        act("Nothing seems to happen.", FALSE, ch, obj, 0, TO_ROOM);
+        act("Nothing seems to happen.", false, ch, obj, 0, TO_ROOM);
         return;
       }
       obj_set_value(obj, VAL_WAND_CHARGES, obj_get_value(obj, VAL_WAND_CHARGES) - 1);
       char_aff_set(ch, AFF_NEXTNOACTION, true);
       if (obj_get_value(obj, VAL_WAND_LEVEL))
         call_magic(ch, tch, tobj, obj_get_value(obj, VAL_WAND_SPELL),
-                   obj_get_value(obj, VAL_WAND_LEVEL), CAST_WAND, NULL);
+                   obj_get_value(obj, VAL_WAND_LEVEL), CAST_WAND, nullptr);
       else
         call_magic(ch, tch, tobj, obj_get_value(obj, VAL_WAND_SPELL),
-                   DEFAULT_WAND_LVL, CAST_WAND, NULL);
+                   DEFAULT_WAND_LVL, CAST_WAND, nullptr);
       break;
     case ITEM_SCROLL:
       if (*arg) {
         if (!k) {
-          act("There is nothing to here to affect with $p.", FALSE,
-              ch, obj, NULL, TO_CHAR);
+          act("There is nothing to here to affect with $p.", false,
+              ch, obj, nullptr, TO_CHAR);
           return;
         }
       } else
         tch = ch;
 
-      act("You recite $p which dissolves.", TRUE, ch, obj, 0, TO_CHAR);
+      act("You recite $p which dissolves.", true, ch, obj, 0, TO_CHAR);
       if (obj->action_description)
-        act(obj->action_description, FALSE, ch, obj, tch, TO_ROOM);
+        act(obj->action_description, false, ch, obj, tch, TO_ROOM);
       else
-        act("$n recites $p.", FALSE, ch, obj, NULL, TO_ROOM);
+        act("$n recites $p.", false, ch, obj, nullptr, TO_ROOM);
 
       char_aff_set(ch, AFF_NEXTNOACTION, true);
       for (i = 1; i <= 3; i++)
         if (call_magic(ch, tch, tobj, obj_get_value(obj, i),
-                       obj_get_value(obj, VAL_SCROLL_LEVEL), CAST_SCROLL, NULL) <= 0)
+                       obj_get_value(obj, VAL_SCROLL_LEVEL), CAST_SCROLL, nullptr) <= 0)
           break;
 
-      if (obj != NULL)
+      if (obj != nullptr)
         extract_obj(obj);
       break;
     case ITEM_POTION:
@@ -313,19 +313,19 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
       if (!consume_otrigger(obj, ch, OCMD_QUAFF)) /* check trigger */
         return;
 
-      act("You swallow $p.", FALSE, ch, obj, NULL, TO_CHAR);
+      act("You swallow $p.", false, ch, obj, nullptr, TO_CHAR);
       if (obj->action_description)
-        act(obj->action_description, FALSE, ch, obj, NULL, TO_ROOM);
+        act(obj->action_description, false, ch, obj, nullptr, TO_ROOM);
       else
-        act("$n swallows $p.", TRUE, ch, obj, NULL, TO_ROOM);
+        act("$n swallows $p.", true, ch, obj, nullptr, TO_ROOM);
 
       char_aff_set(ch, AFF_NEXTNOACTION, true);
       for (i = 1; i <= 3; i++)
-        if (call_magic(ch, ch, NULL, obj_get_value(obj, i),
-                       obj_get_value(obj, VAL_POTION_LEVEL), CAST_POTION, NULL) <= 0)
+        if (call_magic(ch, ch, nullptr, obj_get_value(obj, i),
+                       obj_get_value(obj, VAL_POTION_LEVEL), CAST_POTION, nullptr) <= 0)
           break;
 
-      if (obj != NULL)
+      if (obj != nullptr)
         extract_obj(obj);
       break;
     default:
@@ -417,7 +417,7 @@ static void unused_spell(int spl)
 
 static void skillo(int skill, const char *name, int flags)
 {
-  spello(skill, name, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, 0, 0, 0);
+  spello(skill, name, 0, 0, 0, 0, 0, 0, 0, 0, 0, nullptr, 0, 0, 0);
   spell_info[skill].skilltype = SKTYPE_SKILL;
   spell_info[skill].flags     = flags;
 }
@@ -480,401 +480,401 @@ void mag_assign_spells(void)
   /* Do not change the loop above. */
 
   spello(SPELL_ANIMATE_DEAD, "animate dead", 35, 10, 3, POS_STANDING,
-         TAR_OBJ_ROOM, FALSE,
+         TAR_OBJ_ROOM, false,
          MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         NULL,
+         nullptr,
          3, SCHOOL_NECROMANCY, DOMAIN_DEATH);
 
   spello(SPELL_MAGE_ARMOR, "mage armor", 30, 15, 3, POS_FIGHTING,
-         TAR_CHAR_ROOM, FALSE,
+         TAR_CHAR_ROOM, false,
          MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
          "You feel less protected.",
          1, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_BLESS, "blessed", 35, 5, 3, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_OBJ_INV, FALSE,
+         TAR_CHAR_ROOM | TAR_OBJ_INV, false,
          MAG_ACTION_FULL | MAG_AFFECTS | MAG_ALTER_OBJS, 0, 0,
          "You feel less righteous.",
          1, SCHOOL_UNDEFINED, DOMAIN_UNIVERSAL);
 
   spello(SKILL_SPIRITCONTROL, "spirit control", 35, 5, 3, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_OBJ_INV, FALSE,
+         TAR_CHAR_ROOM | TAR_OBJ_INV, false,
          MAG_ACTION_FULL | MAG_AFFECTS | MAG_ALTER_OBJS, 0, 0,
          "You no longer have full control of your spirit.",
          1, SCHOOL_UNDEFINED, DOMAIN_UNIVERSAL);
 
   spello(SPELL_BLINDNESS, "blindness", 35, 25, 1, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_NOT_SELF, FALSE,
+         TAR_CHAR_ROOM | TAR_NOT_SELF, false,
          MAG_ACTION_FULL | MAG_AFFECTS, MAGSAVE_FORT | MAGSAVE_NONE, 0,
          "You feel a cloak of blindness dissolve.",
          2, SCHOOL_TRANSMUTATION, DOMAIN_UNIVERSAL);
 
   spello(SKILL_SOLARF, "blind", 25, 10, 1, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_NOT_SELF, TRUE, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
+         TAR_CHAR_ROOM | TAR_NOT_SELF, true, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
          "You are no longer blind!",
          2, SCHOOL_TRANSMUTATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_BURNING_HANDS, "burning hands", 30, 10, 3, POS_FIGHTING,
-         TAR_CHAR_ROOM | TAR_FIGHT_VICT, TRUE,
+         TAR_CHAR_ROOM | TAR_FIGHT_VICT, true,
          MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_REFLEX | MAGSAVE_HALF, 0,
-         NULL,
+         nullptr,
          1, SCHOOL_TRANSMUTATION, DOMAIN_FIRE);
 
   spello(SPELL_CALL_LIGHTNING, "call lightning", 40, 25, 3, POS_FIGHTING,
-         TAR_CHAR_ROOM | TAR_FIGHT_VICT, TRUE,
+         TAR_CHAR_ROOM | TAR_FIGHT_VICT, true,
          MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_REFLEX | MAGSAVE_HALF, 0,
-         NULL,
+         nullptr,
          3, SCHOOL_UNDEFINED, DOMAIN_UNIVERSAL);
 
   spello(SPELL_INFLICT_CRITIC, "inflict critic", 30, 10, 2, POS_FIGHTING,
-         TAR_CHAR_ROOM, TRUE,
+         TAR_CHAR_ROOM, true,
          MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_WILL | MAGSAVE_HALF, 0,
-         NULL,
+         nullptr,
          4, SCHOOL_UNDEFINED, DOMAIN_HEALING);
 
   spello(SPELL_INFLICT_LIGHT, "inflict light", 30, 10, 2, POS_FIGHTING,
-         TAR_CHAR_ROOM, TRUE,
+         TAR_CHAR_ROOM, true,
          MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_WILL | MAGSAVE_HALF, 0,
-         NULL,
+         nullptr,
          1, SCHOOL_UNDEFINED, DOMAIN_HEALING);
 
   spello(SPELL_CHARM, "charm person", 75, 50, 2, POS_FIGHTING,
-         TAR_CHAR_ROOM | TAR_NOT_SELF, TRUE,
+         TAR_CHAR_ROOM | TAR_NOT_SELF, true,
          MAG_ACTION_FULL | MAG_MANUAL, MAGSAVE_WILL | MAGSAVE_NONE, 0,
          "You feel more self-confident.",
          1, SCHOOL_ENCHANTMENT, DOMAIN_UNDEFINED);
 
   spello(SPELL_CHILL_TOUCH, "chill touch", 30, 10, 3, POS_FIGHTING,
-         TAR_CHAR_ROOM | TAR_FIGHT_VICT, TRUE,
+         TAR_CHAR_ROOM | TAR_FIGHT_VICT, true,
          MAG_ACTION_FULL | MAG_DAMAGE | MAG_AFFECTS, MAGSAVE_FORT | MAGSAVE_PARTIAL, 0,
          "You feel your strength return.",
          1, SCHOOL_NECROMANCY, DOMAIN_UNDEFINED);
 
   spello(SPELL_COLOR_SPRAY, "color spray", 30, 15, 3, POS_FIGHTING,
-         TAR_CHAR_ROOM | TAR_FIGHT_VICT, TRUE,
+         TAR_CHAR_ROOM | TAR_FIGHT_VICT, true,
          MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_WILL | MAGSAVE_NONE, 0,
-         NULL,
+         nullptr,
          1, SCHOOL_ILLUSION, DOMAIN_UNDEFINED);
 
   spello(SPELL_CONTROL_WEATHER, "control weather", 75, 25, 5, POS_STANDING,
-         TAR_IGNORE, FALSE,
+         TAR_IGNORE, false,
          MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         NULL,
+         nullptr,
          7, SCHOOL_TRANSMUTATION, DOMAIN_AIR);
 
   spello(SPELL_CREATE_FOOD, "create food", 30, 5, 4, POS_STANDING,
-         TAR_IGNORE, FALSE, MAG_ACTION_FULL | MAG_CREATIONS, 0, 0,
-         NULL,
+         TAR_IGNORE, false, MAG_ACTION_FULL | MAG_CREATIONS, 0, 0,
+         nullptr,
          3, SCHOOL_UNDEFINED, DOMAIN_UNIVERSAL);
 
   spello(SPELL_CREATE_WATER, "create water", 30, 5, 4, POS_STANDING,
-         TAR_OBJ_INV | TAR_OBJ_EQUIP, FALSE, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         NULL,
+         TAR_OBJ_INV | TAR_OBJ_EQUIP, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
+         nullptr,
          0, SCHOOL_UNDEFINED, DOMAIN_UNIVERSAL);
 
   spello(SPELL_REMOVE_BLINDNESS, "remove blindness", 30, 5, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_UNAFFECTS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_UNAFFECTS, 0, 0,
+         nullptr,
          3, SCHOOL_UNDEFINED, DOMAIN_UNIVERSAL);
 
   spello(SPELL_CURE_CRITIC, "cure critic", 30, 10, 2, POS_FIGHTING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_POINTS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_POINTS, 0, 0,
+         nullptr,
          4, SCHOOL_UNDEFINED, DOMAIN_HEALING);
 
   spello(SPELL_CURE_LIGHT, "cure light", 30, 10, 2, POS_FIGHTING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_POINTS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_POINTS, 0, 0,
+         nullptr,
          1, SCHOOL_UNDEFINED, DOMAIN_HEALING);
 
   spello(SPELL_BESTOW_CURSE, "bestow curse", 80, 50, 2, POS_FIGHTING,
-         TAR_CHAR_ROOM, TRUE,
+         TAR_CHAR_ROOM, true,
          MAG_AFFECTS, MAGSAVE_WILL | MAGSAVE_NONE, 0,
          "You feel more optimistic.",
          8, SCHOOL_NECROMANCY, DOMAIN_DESTRUCTION);
 
   spello(SPELL_BANE, "bane", 80, 50, 2, POS_FIGHTING,
-         TAR_CHAR_ROOM, TRUE,
+         TAR_CHAR_ROOM, true,
          MAG_AFFECTS, MAGSAVE_WILL | MAGSAVE_NONE, 0,
          "You feel more optimistic.",
          8, SCHOOL_ENCHANTMENT, DOMAIN_CHARM);
 
   spello(SPELL_DETECT_ALIGN, "detect alignment", 20, 10, 2, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_SELF_ONLY, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         TAR_CHAR_ROOM | TAR_SELF_ONLY, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
          "You feel less aware.",
          1, SCHOOL_DIVINATION, DOMAIN_UNIVERSAL);
 
   spello(SPELL_SEE_INVIS, "see invisibility", 20, 10, 2, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_SELF_ONLY, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         TAR_CHAR_ROOM | TAR_SELF_ONLY, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
          "Your eyes stop tingling.",
          2, SCHOOL_DIVINATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_DETECT_MAGIC, "detect magic", 20, 10, 2, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_SELF_ONLY, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         TAR_CHAR_ROOM | TAR_SELF_ONLY, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
          "The detect magic wears off.",
          0, SCHOOL_UNIVERSAL, DOMAIN_UNIVERSAL);
 
   spello(SPELL_DETECT_POISON, "detect poison", 15, 5, 1, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_OBJ_INV | TAR_OBJ_ROOM, FALSE, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
+         TAR_CHAR_ROOM | TAR_OBJ_INV | TAR_OBJ_ROOM, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
          "The detect poison wears off.",
          0, SCHOOL_DIVINATION, DOMAIN_UNIVERSAL);
 
   spello(SPELL_DISPEL_EVIL, "dispel evil", 40, 25, 3, POS_FIGHTING,
-         TAR_CHAR_ROOM | TAR_FIGHT_VICT, TRUE, MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_WILL | MAGSAVE_NONE, 0,
-         NULL,
+         TAR_CHAR_ROOM | TAR_FIGHT_VICT, true, MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_WILL | MAGSAVE_NONE, 0,
+         nullptr,
          5, SCHOOL_UNDEFINED, DOMAIN_GOOD);
 
   spello(SPELL_DISPEL_GOOD, "dispel good", 40, 25, 3, POS_FIGHTING,
-         TAR_CHAR_ROOM | TAR_FIGHT_VICT, TRUE, MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_WILL | MAGSAVE_NONE, 0,
-         NULL,
+         TAR_CHAR_ROOM | TAR_FIGHT_VICT, true, MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_WILL | MAGSAVE_NONE, 0,
+         nullptr,
          5, SCHOOL_UNDEFINED, DOMAIN_EVIL);
 
   spello(SPELL_EARTHQUAKE, "earthquake", 40, 25, 3, POS_FIGHTING,
-         TAR_IGNORE, TRUE, MAG_ACTION_FULL | MAG_AREAS, MAGSAVE_REFLEX | MAGSAVE_HALF, 0,
-         NULL,
+         TAR_IGNORE, true, MAG_ACTION_FULL | MAG_AREAS, MAGSAVE_REFLEX | MAGSAVE_HALF, 0,
+         nullptr,
          8, SCHOOL_UNDEFINED, DOMAIN_DESTRUCTION | DOMAIN_EARTH);
 
   spello(SPELL_ENCHANT_WEAPON, "enchant weapon", 150, 100, 10, POS_STANDING,
-         TAR_OBJ_INV, FALSE, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         NULL,
+         TAR_OBJ_INV, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
+         nullptr,
          9, SCHOOL_TRANSMUTATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_ENERGY_DRAIN, "energy drain", 40, 25, 1, POS_FIGHTING,
-         TAR_CHAR_ROOM | TAR_FIGHT_VICT, TRUE,
-         MAG_DAMAGE | MAG_MANUAL, MAGSAVE_FORT | MAGSAVE_NONE, 0, NULL,
+         TAR_CHAR_ROOM | TAR_FIGHT_VICT, true,
+         MAG_DAMAGE | MAG_MANUAL, MAGSAVE_FORT | MAGSAVE_NONE, 0, nullptr,
          9, SCHOOL_NECROMANCY, DOMAIN_UNIVERSAL);
 
   spello(SPELL_GROUP_ARMOR, "group armor", 50, 30, 2, POS_STANDING,
-         TAR_IGNORE, FALSE, MAG_ACTION_FULL | MAG_GROUPS, 0, 0,
-         NULL,
+         TAR_IGNORE, false, MAG_ACTION_FULL | MAG_GROUPS, 0, 0,
+         nullptr,
          5, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_FAERIE_FIRE, "faerie fire", 20, 10, 2, POS_STANDING,
-         TAR_CHAR_WORLD | TAR_NOT_SELF, FALSE, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         NULL,
+         TAR_CHAR_WORLD | TAR_NOT_SELF, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
+         nullptr,
          1, SCHOOL_EVOCATION, DOMAIN_UNIVERSAL);
 
   spello(SPELL_FIREBALL, "fireball", 40, 30, 2, POS_FIGHTING,
-         TAR_CHAR_ROOM | TAR_FIGHT_VICT, TRUE, MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_REFLEX | MAGSAVE_HALF, 0,
-         NULL,
+         TAR_CHAR_ROOM | TAR_FIGHT_VICT, true, MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_REFLEX | MAGSAVE_HALF, 0,
+         nullptr,
          3, SCHOOL_EVOCATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_MASS_HEAL, "mass heal", 80, 60, 5, POS_STANDING,
-         TAR_IGNORE, FALSE, MAG_ACTION_FULL | MAG_GROUPS, 0, 0,
-         NULL,
+         TAR_IGNORE, false, MAG_ACTION_FULL | MAG_GROUPS, 0, 0,
+         nullptr,
          6, SCHOOL_CONJURATION, DOMAIN_HEALING);
 
   spello(SPELL_HARM, "harm", 75, 45, 3, POS_FIGHTING,
-         TAR_CHAR_ROOM | TAR_FIGHT_VICT, TRUE, MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_FORT | MAGSAVE_NONE, 0,
-         NULL,
+         TAR_CHAR_ROOM | TAR_FIGHT_VICT, true, MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_FORT | MAGSAVE_NONE, 0,
+         nullptr,
          6, SCHOOL_UNDEFINED, DOMAIN_DESTRUCTION);
 
   spello(SPELL_HEAL, "heal", 60, 40, 3, POS_FIGHTING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_POINTS | MAG_UNAFFECTS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_POINTS | MAG_UNAFFECTS, 0, 0,
+         nullptr,
          6, SCHOOL_UNDEFINED, DOMAIN_HEALING);
 
   spello(SPELL_SENSU, "sensu", 1, 0, 3, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_POINTS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_POINTS, 0, 0,
+         nullptr,
          6, SCHOOL_DIVINATION, DOMAIN_HEALING);
 
   spello(SPELL_IDENTIFY, "identify", 50, 25, 5, POS_STANDING,
-         TAR_OBJ_INV | TAR_OBJ_ROOM, FALSE, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         NULL,
+         TAR_OBJ_INV | TAR_OBJ_ROOM, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
+         nullptr,
          2, SCHOOL_DIVINATION, DOMAIN_MAGIC);
 
   spello(SPELL_DARKVISION, "darkvision", 25, 10, 1, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_SELF_ONLY, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         TAR_CHAR_ROOM | TAR_SELF_ONLY, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
          "Your night vision seems to fade.",
          2, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(SPELL_INVISIBLE, "invisibility", 35, 25, 1, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_OBJ_INV | TAR_OBJ_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS | MAG_ALTER_OBJS, 0, 0,
+         TAR_CHAR_ROOM | TAR_OBJ_INV | TAR_OBJ_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS | MAG_ALTER_OBJS, 0, 0,
          "You feel yourself exposed.",
          2, SCHOOL_ILLUSION, DOMAIN_TRICKERY);
 
   spello(SPELL_LIGHTNING_BOLT, "lightning bolt", 30, 15, 1, POS_FIGHTING,
-         TAR_CHAR_ROOM | TAR_FIGHT_VICT, TRUE, MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_REFLEX | MAGSAVE_HALF, 0,
-         NULL,
+         TAR_CHAR_ROOM | TAR_FIGHT_VICT, true, MAG_ACTION_FULL | MAG_DAMAGE, MAGSAVE_REFLEX | MAGSAVE_HALF, 0,
+         nullptr,
          3, SCHOOL_EVOCATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_LOCATE_OBJECT, "locate object", 25, 20, 1, POS_STANDING,
-         TAR_OBJ_WORLD, FALSE, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         NULL,
+         TAR_OBJ_WORLD, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
+         nullptr,
          3, SCHOOL_DIVINATION, DOMAIN_TRAVEL);
 
   spello(SPELL_MAGIC_MISSILE, "magic missile", 25, 10, 3, POS_FIGHTING,
-         TAR_CHAR_ROOM | TAR_FIGHT_VICT, TRUE, MAG_ACTION_FULL | MAG_DAMAGE, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM | TAR_FIGHT_VICT, true, MAG_ACTION_FULL | MAG_DAMAGE, 0, 0,
+         nullptr,
          1, SCHOOL_EVOCATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_PARALYZE, "stone", 25, 10, 1, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_NOT_SELF, TRUE, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
+         TAR_CHAR_ROOM | TAR_NOT_SELF, true, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
          "Your body is no longer petrified.",
          2, SCHOOL_TRANSMUTATION, DOMAIN_UNDEFINED);
 
   spello(SKILL_HASSHUKEN, "hasshuken", 25, 10, 1, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_NOT_SELF, TRUE, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
+         TAR_CHAR_ROOM | TAR_NOT_SELF, true, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
          "Your arms slow down.",
          2, SCHOOL_TRANSMUTATION, DOMAIN_UNDEFINED);
 
   spello(SKILL_CURSE, "curse", 25, 10, 1, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_NOT_SELF, TRUE, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
+         TAR_CHAR_ROOM | TAR_NOT_SELF, true, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
          "You are no longer cursed!",
          2, SCHOOL_TRANSMUTATION, DOMAIN_UNDEFINED);
 
   spello(SKILL_MIGHT, "might", 25, 10, 1, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_NOT_SELF, TRUE, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
+         TAR_CHAR_ROOM | TAR_NOT_SELF, true, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
          "Your strength fades.",
          2, SCHOOL_TRANSMUTATION, DOMAIN_UNDEFINED);
 
   spello(SKILL_PARALYZE, "paralyze", 25, 10, 1, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_NOT_SELF, TRUE, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
+         TAR_CHAR_ROOM | TAR_NOT_SELF, true, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
          "Your feel like you are able to move again.",
          2, SCHOOL_TRANSMUTATION, DOMAIN_UNDEFINED);
 
   spello(SKILL_POISON, "poison", 50, 20, 3, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_NOT_SELF | TAR_OBJ_INV, TRUE,
+         TAR_CHAR_ROOM | TAR_NOT_SELF | TAR_OBJ_INV, true,
          MAG_ACTION_FULL | MAG_AFFECTS | MAG_ALTER_OBJS, MAGSAVE_FORT | MAGSAVE_NONE, 0,
          "You feel like you got over something.",
          4, SCHOOL_NECROMANCY, DOMAIN_UNIVERSAL);
 
   spello(SKILL_POISON, "dark metamorphosis", 50, 20, 3, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_NOT_SELF | TAR_OBJ_INV, TRUE,
+         TAR_CHAR_ROOM | TAR_NOT_SELF | TAR_OBJ_INV, true,
          MAG_ACTION_FULL | MAG_AFFECTS | MAG_ALTER_OBJS, MAGSAVE_FORT | MAGSAVE_NONE, 0,
          "Your dark metamorphosis fades.",
          4, SCHOOL_NECROMANCY, DOMAIN_UNIVERSAL);
 
   spello(SKILL_POISON, "healing glow", 50, 20, 3, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_NOT_SELF | TAR_OBJ_INV, TRUE,
+         TAR_CHAR_ROOM | TAR_NOT_SELF | TAR_OBJ_INV, true,
          MAG_ACTION_FULL | MAG_AFFECTS | MAG_ALTER_OBJS, MAGSAVE_FORT | MAGSAVE_NONE, 0,
          "Your healing glow fades.",
          4, SCHOOL_NECROMANCY, DOMAIN_UNIVERSAL);
 
   spello(SKILL_ENLIGHTEN, "enlighten", 25, 10, 1, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_NOT_SELF, TRUE, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
+         TAR_CHAR_ROOM | TAR_NOT_SELF, true, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
          "You feel less wise.",
          2, SCHOOL_TRANSMUTATION, DOMAIN_UNDEFINED);
 
   spello(SKILL_GENIUS, "genius", 25, 10, 1, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_NOT_SELF, TRUE, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
+         TAR_CHAR_ROOM | TAR_NOT_SELF, true, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
          "You am dumb dumbner now.",
          2, SCHOOL_TRANSMUTATION, DOMAIN_UNDEFINED);
 
   spello(SKILL_FLEX, "flex", 25, 10, 1, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_NOT_SELF, TRUE, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
+         TAR_CHAR_ROOM | TAR_NOT_SELF, true, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
          "You feel less agile.",
          2, SCHOOL_TRANSMUTATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_PORTAL, "portal", 75, 75, 0, POS_STANDING,
-         TAR_CHAR_WORLD | TAR_NOT_SELF, FALSE, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         NULL,
+         TAR_CHAR_WORLD | TAR_NOT_SELF, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
+         nullptr,
          7, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_PROT_FROM_EVIL, "protection from evil", 40, 10, 3, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_SELF_ONLY, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         TAR_CHAR_ROOM | TAR_SELF_ONLY, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
          "You feel less protected.",
          1, SCHOOL_ABJURATION, DOMAIN_GOOD);
 
   spello(SPELL_REMOVE_CURSE, "remove curse", 45, 25, 5, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_OBJ_INV | TAR_OBJ_EQUIP, FALSE,
+         TAR_CHAR_ROOM | TAR_OBJ_INV | TAR_OBJ_EQUIP, false,
          MAG_ACTION_FULL | MAG_UNAFFECTS | MAG_ALTER_OBJS, 0, 0,
-         NULL,
+         nullptr,
          3, SCHOOL_ABJURATION, DOMAIN_UNIVERSAL);
 
   spello(SPELL_NEUTRALIZE_POISON, "neutralize poison", 40, 8, 4, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_OBJ_INV | TAR_OBJ_ROOM, FALSE, MAG_ACTION_FULL | MAG_UNAFFECTS | MAG_ALTER_OBJS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM | TAR_OBJ_INV | TAR_OBJ_ROOM, false, MAG_ACTION_FULL | MAG_UNAFFECTS | MAG_ALTER_OBJS, 0, 0,
+         nullptr,
          4, SCHOOL_CONJURATION, DOMAIN_UNIVERSAL);
 
   spello(SPELL_SANCTUARY, "sanctuary", 110, 85, 5, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
          "The white aura around your body fades.",
          9, SCHOOL_UNDEFINED, DOMAIN_PROTECTION);
 
   spello(SPELL_SENSE_LIFE, "sense life", 20, 10, 2, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_SELF_ONLY, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         TAR_CHAR_ROOM | TAR_SELF_ONLY, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
          "You feel less aware of your surroundings.",
          2, SCHOOL_DIVINATION, DOMAIN_UNIVERSAL);
 
   spello(SPELL_SHOCKING_GRASP, "shocking grasp", 30, 15, 3, POS_FIGHTING,
-         TAR_CHAR_ROOM | TAR_FIGHT_VICT, TRUE, MAG_ACTION_FULL | MAG_DAMAGE, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM | TAR_FIGHT_VICT, true, MAG_ACTION_FULL | MAG_DAMAGE, 0, 0,
+         nullptr,
          1, SCHOOL_TRANSMUTATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_SLEEP, "sleep", 40, 25, 5, POS_FIGHTING,
-         TAR_CHAR_ROOM, TRUE, MAG_ACTION_FULL | MAG_AFFECTS, MAGSAVE_WILL | MAGSAVE_NONE, 0,
+         TAR_CHAR_ROOM, true, MAG_ACTION_FULL | MAG_AFFECTS, MAGSAVE_WILL | MAGSAVE_NONE, 0,
          "You feel like you can wake up again.",
          1, SCHOOL_ENCHANTMENT, DOMAIN_UNDEFINED);
 
   spello(SPELL_HAYASA, "hayasa", 40, 25, 5, POS_FIGHTING,
-         TAR_CHAR_ROOM, TRUE, MAG_ACTION_FULL | MAG_AFFECTS, MAGSAVE_WILL | MAGSAVE_NONE, 0,
+         TAR_CHAR_ROOM, true, MAG_ACTION_FULL | MAG_AFFECTS, MAGSAVE_WILL | MAGSAVE_NONE, 0,
          "You feel your speed decrease as Hayasa fades.",
          1, SCHOOL_ENCHANTMENT, DOMAIN_UNDEFINED);
 
   spello(SKILL_TSKIN, "tough skin", 25, 10, 1, POS_STANDING,
-         TAR_CHAR_ROOM | TAR_NOT_SELF, TRUE, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
+         TAR_CHAR_ROOM | TAR_NOT_SELF, true, MAG_ACTION_FULL | MAG_AFFECTSV, MAGSAVE_FORT | MAGSAVE_NONE, 0,
          "Your skin isn't quite so thick anymore.",
          2, SCHOOL_TRANSMUTATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_BULL_STRENGTH, "bull strength", 35, 30, 1, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
          "You feel weaker.",
          2, SCHOOL_TRANSMUTATION, DOMAIN_STRENGTH);
 
   spello(SPELL_SUMMON, "summon", 75, 50, 3, POS_STANDING,
-         TAR_CHAR_WORLD | TAR_NOT_SELF, FALSE, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         NULL,
+         TAR_CHAR_WORLD | TAR_NOT_SELF, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
+         nullptr,
          7, SCHOOL_CONJURATION, DOMAIN_UNIVERSAL);
 
   spello(SPELL_TELEPORT, "teleport", 75, 50, 3, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
+         nullptr,
          5, SCHOOL_TRANSMUTATION, DOMAIN_TRAVEL);
 
   spello(SPELL_WATERWALK, "waterwalk", 40, 20, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
          "Your feet seem less buoyant.",
          3, SCHOOL_UNDEFINED, DOMAIN_UNIVERSAL);
 
   spello(SPELL_WORD_OF_RECALL, "word of recall", 20, 10, 2, POS_FIGHTING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_MANUAL, 0, 0,
+         nullptr,
          6, SCHOOL_UNDEFINED, DOMAIN_UNIVERSAL);
 
   spello(SPELL_RESISTANCE, "resistance", 40, 20, 0, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTSV,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTSV,
          0, MAGCOMP_MATERIAL | MAGCOMP_SOMATIC | MAGCOMP_VERBAL | MAGCOMP_DIVINE_FOCUS,
-         NULL, 0, SCHOOL_ABJURATION, DOMAIN_UNDEFINED);
+         nullptr, 0, SCHOOL_ABJURATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_ACID_SPLASH, "acid splash", 40, 20, 0, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS,
          0, MAGCOMP_SOMATIC | MAGCOMP_VERBAL,
-         NULL,
+         nullptr,
          0, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_DAZE, "daze", 40, 20, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTSV,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTSV,
          MAGSAVE_WILL | MAGSAVE_NONE, MAGCOMP_MATERIAL | MAGCOMP_SOMATIC | MAGCOMP_VERBAL,
-         NULL, 0, SCHOOL_ENCHANTMENT, DOMAIN_UNDEFINED);
+         nullptr, 0, SCHOOL_ENCHANTMENT, DOMAIN_UNDEFINED);
 
   spello(SPELL_FLARE, "flare", 40, 20, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTSV,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTSV,
          MAGSAVE_FORT | MAGSAVE_NONE, MAGCOMP_VERBAL,
-         NULL,
+         nullptr,
          0, SCHOOL_EVOCATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_RAY_OF_FROST, "ray of frost", 40, 20, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS,
          0, MAGCOMP_SOMATIC | MAGCOMP_VERBAL,
-         NULL,
+         nullptr,
          0, SCHOOL_EVOCATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_DISRUPT_UNDEAD, "disrupt undead", 40, 20, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS,
          0, MAGCOMP_SOMATIC | MAGCOMP_VERBAL,
-         NULL,
+         nullptr,
          0, SCHOOL_NECROMANCY, DOMAIN_UNDEFINED);
 
   /*spello(SPELL_LESSER_GLOBE_OF_INVUL, "lesser globe of invulnerability", 40, 20, 2, POS_STANDING,
@@ -889,103 +889,103 @@ void mag_assign_spells(void)
 	0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED); */
 
   spello(SPELL_SUMMON_MONSTER_I, "summon monster i", 40, 20, 2, POS_FIGHTING,
-         TAR_IGNORE, FALSE, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         NULL,
+         TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
+         nullptr,
          1, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_SUMMON_MONSTER_II, "summon monster ii", 40, 20, 2, POS_FIGHTING,
-         TAR_IGNORE, FALSE, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         NULL,
+         TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
+         nullptr,
          2, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_SUMMON_MONSTER_III, "summon monster iii", 40, 20, 2, POS_FIGHTING,
-         TAR_IGNORE, FALSE, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         NULL,
+         TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
+         nullptr,
          3, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_SUMMON_MONSTER_IV, "summon monster iv", 40, 20, 2, POS_FIGHTING,
-         TAR_IGNORE, FALSE, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         NULL,
+         TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
+         nullptr,
          4, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_SUMMON_MONSTER_V, "summon monster v", 40, 20, 2, POS_FIGHTING,
-         TAR_IGNORE, FALSE, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         NULL,
+         TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
+         nullptr,
          5, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_SUMMON_MONSTER_VI, "summon monster vi", 40, 20, 2, POS_FIGHTING,
-         TAR_IGNORE, FALSE, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         NULL,
+         TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
+         nullptr,
          6, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_SUMMON_MONSTER_VII, "summon monster vii", 40, 20, 2, POS_FIGHTING,
-         TAR_IGNORE, FALSE, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         NULL,
+         TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
+         nullptr,
          7, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_SUMMON_MONSTER_VIII, "summon monster viii", 40, 20, 2, POS_FIGHTING,
-         TAR_IGNORE, FALSE, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         NULL,
+         TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
+         nullptr,
          8, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_SUMMON_MONSTER_IX, "summon monster ix", 40, 20, 2, POS_FIGHTING,
-         TAR_IGNORE, FALSE, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
-         NULL,
+         TAR_IGNORE, false, MAG_ACTION_FULL | MAG_SUMMONS, 0, 0,
+         nullptr,
          9, SCHOOL_CONJURATION, DOMAIN_UNDEFINED);
 
   spello(SPELL_FIRE_SHIELD, "fire shield", 40, 20, 2, POS_FIGHTING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTSV, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTSV, 0, 0,
+         nullptr,
          4, SCHOOL_EVOCATION, DOMAIN_FIRE);
 
   spello(SPELL_ICE_STORM, "ice storm", 40, 20, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         nullptr,
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(SPELL_SHOUT, "shout", 40, 20, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         nullptr,
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(SPELL_FEAR, "fear", 40, 20, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         nullptr,
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(SPELL_CLOUDKILL, "cloudkill", 40, 20, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         nullptr,
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(SPELL_MAJOR_CREATION, "major creation", 40, 20, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         nullptr,
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(SPELL_HOLD_MONSTER, "hold monster", 40, 20, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         nullptr,
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(SPELL_CONE_OF_COLD, "cone of cold", 40, 20, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         nullptr,
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(SPELL_ANIMAL_GROWTH, "animal growth", 40, 20, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         nullptr,
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(SPELL_BALEFUL_POLYMORPH, "baleful polymorph", 40, 20, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         nullptr,
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
 
   spello(SPELL_PASSWALL, "passwall", 40, 20, 2, POS_STANDING,
-         TAR_CHAR_ROOM, FALSE, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
-         NULL,
+         TAR_CHAR_ROOM, false, MAG_ACTION_FULL | MAG_AFFECTS, 0, 0,
+         nullptr,
          0, SCHOOL_UNDEFINED, DOMAIN_UNDEFINED);
   /*
    * These spells are currently not used, not implemented, and not castable.
@@ -993,34 +993,34 @@ void mag_assign_spells(void)
    */
 
   spello(SPELL_FIRE_BREATH, "fire breath", 0, 0, 0, POS_SITTING,
-         TAR_IGNORE, TRUE, 0, 0, 0,
-         NULL,
+         TAR_IGNORE, true, 0, 0, 0,
+         nullptr,
          0, 0, 0);
 
   spello(SPELL_GAS_BREATH, "gas breath", 0, 0, 0, POS_SITTING,
-         TAR_IGNORE, TRUE, 0, 0, 0,
-         NULL,
+         TAR_IGNORE, true, 0, 0, 0,
+         nullptr,
          0, 0, 0);
 
   spello(SPELL_FROST_BREATH, "frost breath", 0, 0, 0, POS_SITTING,
-         TAR_IGNORE, TRUE, 0, 0, 0,
-         NULL,
+         TAR_IGNORE, true, 0, 0, 0,
+         nullptr,
          0, 0, 0);
 
   spello(SPELL_ACID_BREATH, "acid breath", 0, 0, 0, POS_SITTING,
-         TAR_IGNORE, TRUE, 0, 0, 0,
-         NULL,
+         TAR_IGNORE, true, 0, 0, 0,
+         nullptr,
          0, 0, 0);
 
   spello(SPELL_LIGHTNING_BREATH, "lightning breath", 0, 0, 0, POS_SITTING,
-         TAR_IGNORE, TRUE, 0, 0, 0,
-         NULL,
+         TAR_IGNORE, true, 0, 0, 0,
+         nullptr,
          0, 0, 0);
 
   /* you might want to name this one something more fitting to your theme -Welcor*/
   spello(SPELL_DG_AFFECT, "Script-inflicted", 0, 0, 0, POS_SITTING,
-         TAR_IGNORE, TRUE, 0, 0, 0,
-         NULL,
+         TAR_IGNORE, true, 0, 0, 0,
+         nullptr,
          0, 0, 0);
 
   /*

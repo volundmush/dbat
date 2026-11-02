@@ -48,10 +48,10 @@ void update_char_objects(struct char_data *ch)
         obj_set_value(char_get_equipment(ch, i), VAL_LIGHT_TIME, 3);
         if (j == 1) {
           send_to_char(ch, "Your light begins to flicker and fade.\r\n");
-          act("$n's light begins to flicker and fade.", FALSE, ch, 0, 0, TO_ROOM);
+          act("$n's light begins to flicker and fade.", false, ch, 0, 0, TO_ROOM);
         } else if (j == 0) {
           send_to_char(ch, "Your light sputters out and dies.\r\n");
-          act("$n's light sputters out and dies.", FALSE, ch, 0, 0, TO_ROOM);
+          act("$n's light sputters out and dies.", false, ch, 0, 0, TO_ROOM);
           world[char_get_in_room(ch)].light--;
         }
       } else if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_LIGHT && obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS) > 0) {

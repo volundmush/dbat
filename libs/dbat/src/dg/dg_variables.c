@@ -40,25 +40,18 @@ void add_var(struct trig_var_data **var_list, const char *name, const char *valu
 
   for (vd = *var_list; vd && strcasecmp(vd->name, name); vd = vd->next);
 
+  char *copy = strdup(value); /* before freeing the old value, which value may be */
+
   if (vd && (!vd->context || vd->context == id)) {
     free(vd->value);
-    CREATE(vd->value, char, strlen(value) + 1);
-  }
-
-  else {
+  } else {
     CREATE(vd, struct trig_var_data, 1);
-
-    CREATE(vd->name, char, strlen(name) + 1);
-    strcpy(vd->name, name); /* strcpy: ok*/
-
-    CREATE(vd->value, char, strlen(value) + 1);
-
+    vd->name    = strdup(name);
     vd->next    = *var_list;
     vd->context = id;
     *var_list   = vd;
   }
-
-  strcpy(vd->value, value); /* strcpy: ok*/
+  vd->value = copy;
 }
 
 /* sets trigger variable name to character c's UID, so the script can use %name% to refer to it */
@@ -153,7 +146,7 @@ static bool char_has_item(char *item, struct char_data *ch)
 {
 
   /* If this works, no more searching needed */
-  if (get_object_in_equip(ch, item) != NULL)
+  if (get_object_in_equip(ch, item) != nullptr)
     return true;
 
   if (item_in_list(item, ch->carrying) == 0)
@@ -249,8 +242,8 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
   else if (!strcasecmp(field, "global")) { /* get global of something else */
     *str = '\0';
     if (char_is_npc(c) && c->script) {
-      find_replacement(go, c->script, NULL, MOB_TRIGGER,
-                       subfield, (char[]){""}, NULL, str, slen);
+      find_replacement(go, c->script, nullptr, MOB_TRIGGER,
+                       subfield, (char[]){""}, nullptr, str, slen);
     }
     return;
   }
@@ -664,7 +657,7 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
       else if (!strcasecmp(field, "size")) {
         if (subfield && *subfield) {
           int ns;
-          if ((ns = search_block(subfield, size_names, FALSE)) > -1) {
+          if ((ns = search_block(subfield, size_names, false)) > -1) {
             (c)->size = ns;
           }
         }
@@ -958,7 +951,7 @@ static void obj_field(obj_data *o, struct trig_var_data *vd, trig_data *trig, in
       else if (!strcasecmp(field, "size")) {
         if (subfield && *subfield) {
           int ns;
-          if ((ns = search_block(subfield, size_names, FALSE)) > -1) {
+          if ((ns = search_block(subfield, size_names, false)) > -1) {
             (o)->size = ns;
           }
         }
@@ -1094,7 +1087,7 @@ static const struct {
 /* returns the direction named by an exit field, or -1 */
 static int room_exit_field_dir(const char *field)
 {
-  for (size_t k = 0; k < sizeof(room_exit_fields) / sizeof(room_exit_fields[0]); k++)
+  for (size_t k = 0; k < countof(room_exit_fields); k++)
     if (!strcasecmp(field, room_exit_fields[k].name))
       return room_exit_fields[k].dir;
   return -1;
@@ -1226,10 +1219,10 @@ static void room_field(struct room_data *r, struct trig_var_data *vd, trig_data 
 /* sets str to be the value of var.field */
 static void find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, char *str, size_t slen)
 {
-  struct trig_var_data *vd = NULL;
-  char_data *ch, *c          = NULL, *rndm;
-  obj_data *obj, *o          = NULL;
-  struct room_data *room, *r = NULL;
+  struct trig_var_data *vd = nullptr;
+  char_data *ch, *c          = nullptr, *rndm;
+  obj_data *obj, *o          = nullptr;
+  struct room_data *room, *r = nullptr;
   char *name;
   int num, count, i, doors;
 
@@ -1373,18 +1366,18 @@ static void find_replacement(void *go, struct script_data *sc, trig_data *trig, 
         switch (type) {
           case MOB_TRIGGER:
             c = (char_data *)go;
-            r = NULL;
-            o = NULL; /* NULL assignments added to avoid self to always be    */
-            break;    /* the room.  - Welcor        */
+            r = nullptr;
+            o = nullptr; /* NULL assignments added to avoid self to always be    */
+            break;       /* the room.  - Welcor        */
           case OBJ_TRIGGER:
             o = (obj_data *)go;
-            c = NULL;
-            r = NULL;
+            c = nullptr;
+            r = nullptr;
             break;
           case WLD_TRIGGER:
             r = (struct room_data *)go;
-            c = NULL;
-            o = NULL;
+            c = nullptr;
+            o = nullptr;
             break;
         }
       }
@@ -1479,7 +1472,7 @@ in the vault (vnum: 453) now and then. you can just use
         }
       } else if (!strcasecmp(var, "random")) {
         if (!strcasecmp(field, "char")) {
-          rndm  = NULL;
+          rndm  = nullptr;
           count = 0;
 
           if (type == MOB_TRIGGER) {
@@ -1590,7 +1583,7 @@ void var_subst(void *go, struct script_data *sc, trig_data *trig,
                int type, char *line, char *buf)
 {
   char tmp[MAX_INPUT_LENGTH], repl_str[MAX_INPUT_LENGTH];
-  char *var = NULL, *field = NULL, *p = NULL;
+  char *var = nullptr, *field = nullptr, *p = nullptr;
   char tmp2[MAX_INPUT_LENGTH];
   char *subfield_p, subfield[MAX_INPUT_LENGTH];
   int left, len;

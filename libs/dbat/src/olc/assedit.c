@@ -105,10 +105,10 @@ ACMD(do_assedit)
 static void assedit_setup(struct descriptor_data *d, int number)
 {
 
-  ASSEMBLY *pOldAssembly = NULL;
+  ASSEMBLY *pOldAssembly = nullptr;
   CREATE(OLC_ASSEDIT(d), ASSEMBLY, 1);
 
-  if ((pOldAssembly = assemblyGetAssemblyPtr(number)) == NULL) {
+  if ((pOldAssembly = assemblyGetAssemblyPtr(number)) == nullptr) {
     send_to_char(d->character, "That assembly does not exist\r\n");
     cleanup_olc(d, CLEANUP_ALL);
     return;
@@ -136,7 +136,7 @@ static void assedit_setup(struct descriptor_data *d, int number)
   }
 
   desc_set_connected(d, CON_ASSEDIT);
-  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", true, d->character, 0, 0, TO_ROOM);
   char_plr_set(d->character, PLR_WRITING, true);
   assedit_disp_menu(d);
 }
@@ -198,7 +198,7 @@ void assedit_parse(struct descriptor_data *d, char *arg)
 {
   int pos = 0, i = 0, counter, columns = 0;
 
-  COMPONENT *pTComponents = NULL;
+  COMPONENT *pTComponents = nullptr;
 
   switch (OLC_MODE(d)) {
 
@@ -291,7 +291,7 @@ void assedit_parse(struct descriptor_data *d, char *arg)
 
         CREATE(pTComponents, COMPONENT, OLC_ASSEDIT(d)->lNumComponents + 1);
 
-        if (OLC_ASSEDIT(d)->pComponents != NULL) { /* Copy from olc to temp */
+        if (OLC_ASSEDIT(d)->pComponents != nullptr) { /* Copy from olc to temp */
           memmove(pTComponents, OLC_ASSEDIT(d)->pComponents,
                   OLC_ASSEDIT(d)->lNumComponents * sizeof(COMPONENT));
           /*        free(OLC_ASSEDIT(d)->pComponents); */
@@ -299,8 +299,8 @@ void assedit_parse(struct descriptor_data *d, char *arg)
 
         OLC_ASSEDIT(d)->pComponents                                          = pTComponents;
         OLC_ASSEDIT(d)->pComponents[OLC_ASSEDIT(d)->lNumComponents].lVnum    = pos;
-        OLC_ASSEDIT(d)->pComponents[OLC_ASSEDIT(d)->lNumComponents].bExtract = YES;
-        OLC_ASSEDIT(d)->pComponents[OLC_ASSEDIT(d)->lNumComponents].bInRoom  = NO;
+        OLC_ASSEDIT(d)->pComponents[OLC_ASSEDIT(d)->lNumComponents].bExtract = true;
+        OLC_ASSEDIT(d)->pComponents[OLC_ASSEDIT(d)->lNumComponents].bInRoom  = false;
         OLC_ASSEDIT(d)->lNumComponents += 1;
 
         assedit_disp_menu(d);
@@ -351,13 +351,13 @@ void assedit_parse(struct descriptor_data *d, char *arg)
       switch (*arg) {
         case 'y':
         case 'Y':
-          OLC_ASSEDIT(d)->pComponents[OLC_VAL(d)].bExtract = TRUE;
+          OLC_ASSEDIT(d)->pComponents[OLC_VAL(d)].bExtract = true;
           assedit_edit_inroom(d);
           break;
 
         case 'n':
         case 'N':
-          OLC_ASSEDIT(d)->pComponents[OLC_VAL(d)].bExtract = FALSE;
+          OLC_ASSEDIT(d)->pComponents[OLC_VAL(d)].bExtract = false;
           assedit_edit_inroom(d);
           break;
 
@@ -370,13 +370,13 @@ void assedit_parse(struct descriptor_data *d, char *arg)
       switch (*arg) {
         case 'y':
         case 'Y':
-          OLC_ASSEDIT(d)->pComponents[OLC_VAL(d)].bInRoom = TRUE;
+          OLC_ASSEDIT(d)->pComponents[OLC_VAL(d)].bInRoom = true;
           assedit_disp_menu(d);
           break;
 
         case 'n':
         case 'N':
-          OLC_ASSEDIT(d)->pComponents[OLC_VAL(d)].bInRoom = FALSE;
+          OLC_ASSEDIT(d)->pComponents[OLC_VAL(d)].bInRoom = false;
           assedit_disp_menu(d);
           break;
 
@@ -388,7 +388,7 @@ void assedit_parse(struct descriptor_data *d, char *arg)
 
     default: /* default for whole assedit parse function */
              /* we should never get here */
-      mudlog(LOG_BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC assedit_parse(): Reached default case!");
+      mudlog(LOG_BRF, ADMLVL_GOD, true, "SYSERR: OLC assedit_parse(): Reached default case!");
       send_to_char(d->character, "Opps...\r\n");
       desc_set_connected(d, CON_PLAYING);
       break;

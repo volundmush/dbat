@@ -25,9 +25,9 @@ Written by Jeremy Elson (jelson@circlemud.org)
 #include "dbat/atomicfile.h"
 
 /* local globals */
-static mail_index_type *mail_index   = NULL; /* list of recs in the mail file  */
-static position_list_type *free_list = NULL; /* list of free positions in file */
-static long file_end_pos             = 0;    /* length of file */
+static mail_index_type *mail_index   = nullptr; /* list of recs in the mail file  */
+static position_list_type *free_list = nullptr; /* list of free positions in file */
+static long file_end_pos             = 0;       /* length of file */
 
 /* local functions */
 static void postmaster_send_mail(struct char_data *ch, struct char_data *mailman, int cmd, char *arg);
@@ -46,8 +46,8 @@ static int mail_recip_ok(const char *name);
 /* defines for fseek */
 #ifndef SEEK_SET
 #define SEEK_SET 0
-#define SEEK_CUR 1
-#define SEEK_END 2
+constexpr int SEEK_CUR = 1;
+constexpr int SEEK_END = 2;
 #endif
 
 void free_mail_index(void)
@@ -72,11 +72,11 @@ void free_mail_index(void)
 
 static int mail_recip_ok(const char *name)
 {
-  int player_i, ret = FALSE;
+  int player_i, ret = false;
 
   if ((player_i = get_ptable_by_name(name)) >= 0) {
     if (!IS_SET(player_table[player_i].flags, PINDEX_DELETED))
-      ret = TRUE;
+      ret = true;
   }
   return ret;
 }
@@ -114,7 +114,7 @@ static long pop_free_list(void)
   /*
    * If we don't have any free blocks, we append to the file.
    */
-  if ((old_pos = free_list) == NULL)
+  if ((old_pos = free_list) == nullptr)
     return (file_end_pos);
 
   /* Save the offset of the free block. */
@@ -146,7 +146,7 @@ static mail_index_type *find_char_in_index(long searchee)
 
   if (searchee < 0) {
     mud_log("SYSERR: Mail system -- non fatal error #1 (searchee == %ld).", searchee);
-    return (NULL);
+    return (nullptr);
   }
   for (tmp = mail_index; (tmp && tmp->recipient != searchee); tmp = tmp->next);
 
@@ -159,7 +159,7 @@ static mail_index_type *find_char_in_index(long searchee)
  * atomic_open(), so a crash leaves either the old mail file or the new one, never a block chain
  * that is half rewritten. The file is small (BLOCK_SIZE blocks, a few KB).
  */
-static char *mail_buf      = NULL; /* the mail file while an operation is open */
+static char *mail_buf      = nullptr; /* the mail file while an operation is open */
 static long mail_buf_len   = 0;
 static long mail_buf_alloc = 0;
 
@@ -169,7 +169,7 @@ static bool mail_begin(void)
 
   if (!(fl = fopen(MAIL_FILE, "rb"))) {
     mud_log("SYSERR: Unable to open mail file '%s'.", MAIL_FILE);
-    no_mail = TRUE;
+    no_mail = true;
     return false;
   }
   fseek(fl, 0L, SEEK_END);
@@ -181,8 +181,8 @@ static bool mail_begin(void)
     mud_log("SYSERR: Unable to read mail file '%s'.", MAIL_FILE);
     fclose(fl);
     free(mail_buf);
-    mail_buf = NULL;
-    no_mail  = TRUE;
+    mail_buf = nullptr;
+    no_mail  = true;
     return false;
   }
   fclose(fl);
@@ -193,7 +193,7 @@ static bool mail_begin(void)
 static void mail_end(void)
 {
   free(mail_buf);
-  mail_buf     = NULL;
+  mail_buf     = nullptr;
   mail_buf_len = mail_buf_alloc = 0;
 }
 
@@ -211,7 +211,7 @@ static void mail_commit(void)
   }
   if (!written) { /* the in-memory index no longer matches the file */
     mud_log("SYSERR: Mail system disabled! Unable to write mail file '%s'.", MAIL_FILE);
-    no_mail = TRUE;
+    no_mail = true;
   }
   file_end_pos = mail_buf_len;
   mail_end();
@@ -229,12 +229,12 @@ static void write_to_file(void *buf, int size, long filepos)
 {
   if (filepos % BLOCK_SIZE) {
     mud_log("SYSERR: Mail system -- fatal error #2!!! (invalid file position %ld)", filepos);
-    no_mail = TRUE;
+    no_mail = true;
     return;
   }
   if (!mail_buf) {
     mud_log("SYSERR: Mail system -- write outside a mail operation (position %ld)", filepos);
-    no_mail = TRUE;
+    no_mail = true;
     return;
   }
   if (filepos + size > mail_buf_alloc) {
@@ -265,12 +265,12 @@ static void read_from_file(void *buf, int size, long filepos)
 {
   if (filepos % BLOCK_SIZE) {
     mud_log("SYSERR: Mail system -- fatal error #3!!! (invalid filepos read %ld)", filepos);
-    no_mail = TRUE;
+    no_mail = true;
     return;
   }
   if (!mail_buf) {
     mud_log("SYSERR: Mail system -- read outside a mail operation (position %ld)", filepos);
-    no_mail = TRUE;
+    no_mail = true;
     return;
   }
   memset(buf, 0, size);
@@ -291,7 +291,7 @@ static void index_mail(long id_to_index, long pos)
     /* name not already in index.. add it */
     CREATE(new_index, mail_index_type, 1);
     new_index->recipient  = id_to_index;
-    new_index->list_start = NULL;
+    new_index->list_start = nullptr;
 
     /* add to front of list */
     new_index->next = mail_index;
@@ -355,7 +355,7 @@ int scan_file(void)
  */
 int has_mail(long recipient)
 {
-  return (find_char_in_index(recipient) != NULL);
+  return (find_char_in_index(recipient) != nullptr);
 }
 
 /*
@@ -479,15 +479,15 @@ static char *read_delete(long recipient, char **from)
 
   if (recipient < 0) {
     mud_log("SYSERR: Mail system -- non-fatal error #6. (recipient: %ld)", recipient);
-    return (NULL);
+    return (nullptr);
   }
   if (!(mail_pointer = find_char_in_index(recipient))) {
     mud_log("SYSERR: Mail system -- post office spec_proc error?  Error #7. (invalid character in index)");
-    return (NULL);
+    return (nullptr);
   }
   if (!(position_pointer = mail_pointer->list_start)) {
     mud_log("SYSERR: Mail system -- non-fatal error #8. (invalid position pointer %p)", position_pointer);
-    return (NULL);
+    return (nullptr);
   }
   if (!(position_pointer->next)) { /* just 1 entry in list. */
     mail_address = position_pointer->position;
@@ -511,20 +511,20 @@ static char *read_delete(long recipient, char **from)
       position_pointer = position_pointer->next;
     mail_address = position_pointer->next->position;
     free(position_pointer->next);
-    position_pointer->next = NULL;
+    position_pointer->next = nullptr;
   }
 
   /* ok, now lets do some readin'! */
   if (!mail_begin())
-    return (NULL);
+    return (nullptr);
   read_from_file(&header, BLOCK_SIZE, mail_address);
 
   if (header.block_type != HEADER_BLOCK) {
     mud_log("SYSERR: Oh dear. (Header block %ld != %d)", header.block_type, HEADER_BLOCK);
     mail_end();
-    no_mail = TRUE;
+    no_mail = true;
     mud_log("SYSERR: Mail system disabled!  -- Error #9. (Invalid header block.)");
-    return (NULL);
+    return (nullptr);
   }
   tmstr                        = asctime(localtime(&header.header_data.mail_time));
   *(tmstr + strlen(tmstr) - 1) = '\0';
@@ -536,7 +536,7 @@ static char *read_delete(long recipient, char **from)
   }
   to = get_name_by_id(recipient);
 
-  if (*from == NULL) {
+  if (*from == nullptr) {
     *from = strdup("Unknown");
   }
 
@@ -615,50 +615,50 @@ static void postmaster_send_mail(struct char_data *ch, struct char_data *mailman
 
   if (char_get_level(ch) < MIN_MAIL_LEVEL && char_get_admlevel(ch) < ADMLVL_IMMORT) {
     snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, you have to be level %d to send mail!'", MIN_MAIL_LEVEL);
-    act(buf, FALSE, mailman, 0, ch, TO_VICT);
+    act(buf, false, mailman, 0, ch, TO_VICT);
     return;
   }
   one_argument(arg, buf);
 
   if (!*buf) { /* you'll get no argument from me! */
     act("$n tells you, 'You need to specify an addressee!'",
-        FALSE, mailman, 0, ch, TO_VICT);
+        false, mailman, 0, ch, TO_VICT);
     return;
   }
   if (char_get_gold(ch) < STAMP_PRICE && !char_adm_flagged(ch, ADM_MONEY)) {
     snprintf(buf, sizeof(buf), "$n tells you, 'A stamp costs %d zenni.'\r\n"
                                "$n tells you, '...which I see you can't afford.'",
              STAMP_PRICE);
-    act(buf, FALSE, mailman, 0, ch, TO_VICT);
+    act(buf, false, mailman, 0, ch, TO_VICT);
     return;
   }
   if ((recipient = get_id_by_name(buf)) < 0 || !mail_recip_ok(buf)) {
     act("$n tells you, 'No one by that name is registered here!'",
-        FALSE, mailman, 0, ch, TO_VICT);
+        false, mailman, 0, ch, TO_VICT);
     return;
   }
-  act("$n starts to write some mail.", TRUE, ch, 0, 0, TO_ROOM);
+  act("$n starts to write some mail.", true, ch, 0, 0, TO_ROOM);
   snprintf(buf, sizeof(buf), "$n tells you, 'I'll take %d zenni for the stamp.'\r\n"
                              "$n tells you, 'Write your message. (/s saves /h for help).'",
            STAMP_PRICE);
 
-  act(buf, FALSE, mailman, 0, ch, TO_VICT);
-  act("@C$n@w starts writing a letter.@n", TRUE, ch, 0, 0, TO_ROOM);
+  act(buf, false, mailman, 0, ch, TO_VICT);
+  act("@C$n@w starts writing a letter.@n", true, ch, 0, 0, TO_ROOM);
   char_set_gold(ch, char_get_gold(ch) - (STAMP_PRICE));
   char_plr_set(ch, PLR_MAILING, true); /* string_write() sets writing. */
 
   /* Start writing! */
   CREATE(mailwrite, char *, 1);
-  string_write(ch->desc, mailwrite, MAX_MAIL_SIZE, recipient, NULL);
+  string_write(ch->desc, mailwrite, MAX_MAIL_SIZE, recipient, nullptr);
 }
 
 static void postmaster_check_mail(struct char_data *ch, struct char_data *mailman,
                                   int cmd, char *arg)
 {
   if (has_mail(char_get_idnum(ch)))
-    act("$n tells you, 'You have mail waiting.'", FALSE, mailman, 0, ch, TO_VICT);
+    act("$n tells you, 'You have mail waiting.'", false, mailman, 0, ch, TO_VICT);
   else
-    act("$n tells you, 'Sorry, you don't have any mail waiting.'", FALSE, mailman, 0, ch, TO_VICT);
+    act("$n tells you, 'Sorry, you don't have any mail waiting.'", false, mailman, 0, ch, TO_VICT);
 }
 
 static void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
@@ -669,9 +669,9 @@ static void postmaster_receive_mail(struct char_data *ch, struct char_data *mail
   int y;
   char *from;
 
-  if (!has_mail(char_get_idnum(ch)) && mailman != NULL) {
+  if (!has_mail(char_get_idnum(ch)) && mailman != nullptr) {
     snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, you don't have any mail waiting.'");
-    act(buf, FALSE, mailman, 0, ch, TO_VICT);
+    act(buf, false, mailman, 0, ch, TO_VICT);
     return;
   }
   while (has_mail(char_get_idnum(ch))) {
@@ -692,27 +692,26 @@ static void postmaster_receive_mail(struct char_data *ch, struct char_data *mail
     sprintf(blm, "@WSomeone has left a piece of mail here@n");
     obj->short_description = strdup(bla);
     obj->description       = strdup(blm);
-    sprintf(bla, "mail paper letter");
-    obj->name = strdup(bla);
-    *bla      = '\0';
-    *blm      = '\0';
+    obj->name              = strdup("mail paper letter");
+    *bla                   = '\0';
+    *blm                   = '\0';
     obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
     add_unique_id(obj);
     obj_set_value(obj, 7, MATERIAL_PAPER);
     obj_set_value(obj, VAL_NOTE_HEALTH, 100);
     obj_set_value(obj, VAL_NOTE_MAXHEALTH, 100);
 
-    if (obj->action_description == NULL)
+    if (obj->action_description == nullptr)
       obj->action_description =
           strdup("Mail system error - please report.  Error #11.\r\n");
 
     /* so it saves */
     obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
 
-    if (desc_is_playing(ch->desc) && mailman != NULL) {
+    if (desc_is_playing(ch->desc) && mailman != nullptr) {
       obj_to_char(obj, ch);
-      act("$n gives you a piece of mail.", FALSE, mailman, 0, ch, TO_VICT);
-      act("$N gives $n a piece of mail.", FALSE, ch, 0, mailman, TO_ROOM);
+      act("$n gives you a piece of mail.", false, mailman, 0, ch, TO_VICT);
+      act("$N gives $n a piece of mail.", false, ch, 0, mailman, TO_ROOM);
     } else {
       extract_obj(obj);
     }

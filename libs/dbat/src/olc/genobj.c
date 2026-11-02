@@ -4,7 +4,6 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
-#include "dbat/htree.h"
 #include "dbat/shop.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/genobj.h"
@@ -164,7 +163,6 @@ static obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum)
     obj_index[i]             = obj_index[i - 1];
     obj_proto[i]             = obj_proto[i - 1];
     obj_proto[i].item_number = i;
-    htree_add(obj_htree, obj_index[i].vnum, i);
   }
 
   /* Not found, place at 0. */
@@ -175,18 +173,16 @@ static obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum)
 
 static obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum)
 {
-  if (obj == NULL || ovnum < 0 || ornum < 0 || ornum > top_of_objt)
+  if (obj == nullptr || ovnum < 0 || ornum < 0 || ornum > top_of_objt)
     return NOWHERE;
 
   obj->item_number        = ornum;
   obj_index[ornum].vnum   = ovnum;
   obj_index[ornum].number = 0;
-  obj_index[ornum].func   = NULL;
+  obj_index[ornum].func   = nullptr;
 
   copy_object_preserve(&obj_proto[ornum], obj);
   obj_proto[ornum].in_room = NOWHERE;
-
-  htree_add(obj_htree, obj_index[ornum].vnum, ornum);
 
   return ornum;
 }
@@ -210,13 +206,13 @@ int save_objects(zone_rnum zone_num)
 
   if (zone_num < 0 || zone_num > top_of_zone_table) {
     mud_log("SYSERR: OasisOLC: save_objects: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
-    return FALSE;
+    return false;
   }
 
   snprintf(cmfname, sizeof(cmfname), "%s%d.obj", OBJ_PREFIX, zone_table[zone_num].number);
   if (!(fp = atomic_open(&af, cmfname, false))) {
-    mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "SYSERR: OLC: Cannot open objects file %s!", cmfname);
-    return FALSE;
+    mudlog(LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: Cannot open objects file %s!", cmfname);
+    return false;
   }
   /*
    * Start running through all objects in this zone.
@@ -224,7 +220,7 @@ int save_objects(zone_rnum zone_num)
   for (counter = genolc_zone_bottom(zone_num); counter <= zone_table[zone_num].top; counter++) {
     if ((realcounter = real_object(counter)) != NOTHING) {
       if ((obj = &obj_proto[realcounter])->action_description) {
-        strncpy(buf, obj->action_description, sizeof(buf) - 1);
+        strlcpy(buf, obj->action_description, sizeof(buf));
         strip_cr(buf);
       } else
         *buf = '\0';
@@ -287,10 +283,10 @@ int save_objects(zone_rnum zone_num)
            * Sanity check to prevent nasty protection faults.
            */
           if (!ex_desc->keyword || !ex_desc->description || !*ex_desc->keyword || !*ex_desc->description) {
-            mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "SYSERR: OLC: oedit_save_to_disk: Corrupt ex_desc!");
+            mudlog(LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: OLC: oedit_save_to_disk: Corrupt ex_desc!");
             continue;
           }
-          strncpy(buf, ex_desc->description, sizeof(buf) - 1);
+          strlcpy(buf, ex_desc->description, sizeof(buf));
           strip_cr(buf);
           fprintf(fp, "E\n"
                       "%s~\n"
@@ -327,7 +323,7 @@ int save_objects(zone_rnum zone_num)
    */
   fprintf(fp, "$~\n");
   if (!atomic_commit(&af))
-    return FALSE;
+    return false;
   snprintf(buf, sizeof(buf), "%s", cmfname);
 
   if (in_save_list(zone_table[zone_num].number, SL_OBJ)) {
@@ -335,7 +331,7 @@ int save_objects(zone_rnum zone_num)
     create_world_index(zone_table[zone_num].number, "obj");
     mud_log("GenOLC: save_objects: Saving objects '%s'", buf);
   }
-  return TRUE;
+  return true;
 }
 
 /*
@@ -413,33 +409,33 @@ void free_object_strings_proto(struct obj_data *obj)
 
 static void copy_object_strings(struct obj_data *to, struct obj_data *from)
 {
-  to->name               = from->name ? strdup(from->name) : NULL;
-  to->description        = from->description ? strdup(from->description) : NULL;
-  to->short_description  = from->short_description ? strdup(from->short_description) : NULL;
-  to->action_description = from->action_description ? strdup(from->action_description) : NULL;
+  to->name               = from->name ? strdup(from->name) : nullptr;
+  to->description        = from->description ? strdup(from->description) : nullptr;
+  to->short_description  = from->short_description ? strdup(from->short_description) : nullptr;
+  to->action_description = from->action_description ? strdup(from->action_description) : nullptr;
 
   if (from->ex_description)
     copy_ex_descriptions(&to->ex_description, from->ex_description);
   else
-    to->ex_description = NULL;
+    to->ex_description = nullptr;
 }
 
 int copy_object(struct obj_data *to, struct obj_data *from)
 {
   free_object_strings(to);
-  return copy_object_main(to, from, TRUE);
+  return copy_object_main(to, from, true);
 }
 
 static int copy_object_preserve(struct obj_data *to, struct obj_data *from)
 {
-  return copy_object_main(to, from, FALSE);
+  return copy_object_main(to, from, false);
 }
 
 static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object)
 {
   *to = *from;
   copy_object_strings(to, from);
-  return TRUE;
+  return true;
 }
 
 int delete_object(obj_rnum rnum)
@@ -456,8 +452,6 @@ int delete_object(obj_rnum rnum)
 
   zrnum = real_zone_by_thing(obj_get_vnum(obj));
   add_to_save_list(zone_table[zrnum].number, SL_OBJ);
-
-  htree_del(obj_htree, obj->item_number);
 
   /* This is something you might want to read about in the logs. */
   mud_log("GenOLC: delete_object: Deleting object #%d (%s).", obj_get_vnum(obj), obj->short_description);
@@ -511,14 +505,14 @@ int delete_object(obj_rnum rnum)
 
   /* Renumber zone table. */
   for (zone = 0; zone <= top_of_zone_table; zone++) {
-    bool changed = FALSE;
+    bool changed = false;
     for (cmd_no = 0; ZCMD(zone, cmd_no).command != 'S'; cmd_no++) {
       switch (ZCMD(zone, cmd_no).command) {
         case 'P':
           if (ZCMD(zone, cmd_no).arg3 == rnum) {
             ZCMD(zone, cmd_no).command = '*';
             ZCMD(zone, cmd_no).arg3    = NOTHING;
-            changed                    = TRUE;
+            changed                    = true;
           } else
             ZCMD(zone, cmd_no).arg3 -= (ZCMD(zone, cmd_no).arg3 > rnum);
           break;
@@ -528,7 +522,7 @@ int delete_object(obj_rnum rnum)
           if (ZCMD(zone, cmd_no).arg1 == rnum) {
             ZCMD(zone, cmd_no).command = '*';
             ZCMD(zone, cmd_no).arg1    = NOTHING;
-            changed                    = TRUE;
+            changed                    = true;
           } else
             ZCMD(zone, cmd_no).arg1 -= (ZCMD(zone, cmd_no).arg1 > rnum);
           break;
@@ -536,7 +530,7 @@ int delete_object(obj_rnum rnum)
           if (ZCMD(zone, cmd_no).arg2 == rnum) {
             ZCMD(zone, cmd_no).command = '*';
             ZCMD(zone, cmd_no).arg2    = NOTHING;
-            changed                    = TRUE;
+            changed                    = true;
           } else
             ZCMD(zone, cmd_no).arg2 -= (ZCMD(zone, cmd_no).arg2 > rnum);
           break;

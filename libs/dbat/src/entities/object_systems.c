@@ -9,10 +9,10 @@ void broken_update()
   struct obj_data *k, *money;
 
   int rand_gravity[14] = {0, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 5000, 10000};
-  int dice = rand_number(2, 12), grav_roll = 0, grav_change = FALSE, health = 0;
+  int dice = rand_number(2, 12), grav_roll = 0, grav_change = false, health = 0;
 
   for (k = object_list; k; k = k->next) {
-    if (k->carried_by != NULL) {
+    if (k->carried_by != nullptr) {
       continue;
     }
 
@@ -25,15 +25,15 @@ void broken_update()
     if (obj_get_vnum(k) == 11) { /* Gravity Generator */
       grav_roll = rand_number(0, 13);
       if (health <= 10) {
-        grav_change = TRUE;
+        grav_change = true;
       } else if (health <= 40 && dice <= 8) {
-        grav_change = TRUE;
+        grav_change = true;
       } else if (health <= 80 && dice <= 5) {
-        grav_change = TRUE;
+        grav_change = true;
       } else if (health <= 99 && dice <= 3) {
-        grav_change = TRUE;
+        grav_change = true;
       }
-      if (grav_change == TRUE) {
+      if (grav_change == true) {
         rroom_set_gravity(obj_get_in_room(k), rand_gravity[grav_roll]);
         obj_set_weight(k, rand_gravity[grav_roll]);
         send_to_room(obj_get_in_room(k), "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");

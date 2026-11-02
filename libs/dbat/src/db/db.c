@@ -7,11 +7,11 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <stddef.h>
 #include "dbat/db.h"
 #include "dbat/consts/maximums.h"
 #include "dbat/utils.h"
 #include "dbat/help.h"
-#include "dbat/htree.h"
 #include "dbat/stringutils.h"
 
 #include "dbat/character_utils.h"
@@ -67,7 +67,6 @@
 #include "dbat/atomicfile.h"
 
 static void load_help(FILE *fl, char *name);
-static void strip_string(char *buffer);
 
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
@@ -75,44 +74,44 @@ static void strip_string(char *buffer);
 
 int dg_owner_purged; /* For control of scripts */
 
-int no_mail               = 0;      /* mail disabled?		 */
-int mini_mud              = 0;      /* mini-mud mode?		 */
-int no_rent_check         = 0;      /* skip rent check on boot?	 */
-time_t boot_time          = 0;      /* time of mud boot		 */
-int circle_restrict       = 0;      /* level of game restriction	 */
-int dballtime             = 0;      /* used by dragonball load system*/
-int SHENRON               = FALSE;  /* Shenron has been summoned     */
-int DRAGONR               = 0;      /* Room Shenron has been summoned to */
-int DRAGONZ               = 0;      /* Zone Shenron has been summoned to */
-int WISH[2]               = {0, 0}; /* Keeps track of wishes granted */
-int DRAGONC               = 0;      /* Keeps count of Shenron's remaining time */
-struct char_data *EDRAGON = NULL;   /* This is Shenron when he is loaded */
-room_rnum r_mortal_start_room;      /* rnum of mortal start room	 */
-room_rnum r_immort_start_room;      /* rnum of immort start room	 */
-room_rnum r_frozen_start_room;      /* rnum of frozen start room	 */
-int xap_objs          = 0;          /* Xap objs                      */
-static int converting = FALSE;
+int no_mail               = 0;       /* mail disabled?		 */
+int mini_mud              = 0;       /* mini-mud mode?		 */
+int no_rent_check         = 0;       /* skip rent check on boot?	 */
+time_t boot_time          = 0;       /* time of mud boot		 */
+int circle_restrict       = 0;       /* level of game restriction	 */
+int dballtime             = 0;       /* used by dragonball load system*/
+int SHENRON               = false;   /* Shenron has been summoned     */
+int DRAGONR               = 0;       /* Room Shenron has been summoned to */
+int DRAGONZ               = 0;       /* Zone Shenron has been summoned to */
+int WISH[2]               = {0, 0};  /* Keeps track of wishes granted */
+int DRAGONC               = 0;       /* Keeps count of Shenron's remaining time */
+struct char_data *EDRAGON = nullptr; /* This is Shenron when he is loaded */
+room_rnum r_mortal_start_room;       /* rnum of mortal start room	 */
+room_rnum r_immort_start_room;       /* rnum of immort start room	 */
+room_rnum r_frozen_start_room;       /* rnum of frozen start room	 */
+int xap_objs          = 0;           /* Xap objs                      */
+static int converting = false;
 
-char *credits          = NULL; /* game credits			 */
-char *news             = NULL; /* mud news			 */
-char *motd             = NULL; /* message of the day - mortals  */
-char *imotd            = NULL; /* message of the day - immorts  */
-static char *GREETINGS = NULL; /* opening credits screen	 */
-char *GREETANSI        = NULL; /* ansi opening credits screen	 */
-char *help             = NULL; /* help screen			 */
-char *info             = NULL; /* info page			 */
-char *wizlist          = NULL; /* list of higher gods		 */
-char *immlist          = NULL; /* list of peon gods		 */
-char *background       = NULL; /* background story		 */
-char *handbook         = NULL; /* handbook for new immortals	 */
-char *policies         = NULL; /* policies page		 */
-char *ihelp            = NULL; /* help screen (immortals)	 */
+char *credits          = nullptr; /* game credits			 */
+char *news             = nullptr; /* mud news			 */
+char *motd             = nullptr; /* message of the day - mortals  */
+char *imotd            = nullptr; /* message of the day - immorts  */
+static char *GREETINGS = nullptr; /* opening credits screen	 */
+char *GREETANSI        = nullptr; /* ansi opening credits screen	 */
+char *help             = nullptr; /* help screen			 */
+char *info             = nullptr; /* info page			 */
+char *wizlist          = nullptr; /* list of higher gods		 */
+char *immlist          = nullptr; /* list of peon gods		 */
+char *background       = nullptr; /* background story		 */
+char *handbook         = nullptr; /* handbook for new immortals	 */
+char *policies         = nullptr; /* policies page		 */
+char *ihelp            = nullptr; /* help screen (immortals)	 */
 
-struct help_index_element *help_table = NULL; /* the help table	 */
+struct help_index_element *help_table = nullptr; /* the help table	 */
 int top_of_helpt                      = 0;
 
-struct social_messg *soc_mess_list = NULL; /* list of socials */
-int top_of_socialt                 = -1;   /* number of socials */
+struct social_messg *soc_mess_list = nullptr; /* list of socials */
+int top_of_socialt                 = -1;      /* number of socials */
 
 /* local functions */
 static void mob_stats(struct char_data *mob);
@@ -352,13 +351,13 @@ void free_text_files(void)
 {
   char **textfiles[] = {
       &wizlist, &immlist, &news, &credits, &motd, &imotd, &help, &info,
-      &policies, &handbook, &background, &GREETINGS, &GREETANSI, &ihelp, NULL};
+      &policies, &handbook, &background, &GREETINGS, &GREETANSI, &ihelp, nullptr};
   int rf;
 
   for (rf = 0; textfiles[rf]; rf++)
     if (*textfiles[rf]) {
       free(*textfiles[rf]);
-      *textfiles[rf] = NULL;
+      *textfiles[rf] = nullptr;
     }
 }
 
@@ -467,6 +466,22 @@ ACMD(do_reboot)
   send_to_char(ch, "%s", CONFIG_OK);
 }
 
+/* The vnum lookups (real_room() and friends) are binary searches, so each table must be in ascending vnum order. */
+static void check_sorted(const char *what, const void *table, IDXTYPE count, size_t size, size_t vnum_offset)
+{
+  const char *t = table;
+
+  for (IDXTYPE i = 1; i < count; i++) {
+    IDXTYPE prev = *(const IDXTYPE *)(t + (i - 1) * size + vnum_offset);
+    IDXTYPE vnum = *(const IDXTYPE *)(t + i * size + vnum_offset);
+
+    if (vnum <= prev) {
+      mud_log("SYSERR: %s #%d comes after #%d: the %s files must be in ascending vnum order, without duplicates.", what, vnum, prev, what);
+      exit(1);
+    }
+  }
+}
+
 void boot_world(void)
 {
   mud_log("Loading level tables.");
@@ -474,12 +489,14 @@ void boot_world(void)
 
   mud_log("Loading zone table.");
   index_boot(DB_BOOT_ZON);
+  check_sorted("zone", zone_table, top_of_zone_table + 1, sizeof(*zone_table), offsetof(struct zone_data, number));
 
   mud_log("Loading triggers and generating index.");
   index_boot(DB_BOOT_TRG);
 
   mud_log("Loading rooms.");
   index_boot(DB_BOOT_WLD);
+  check_sorted("room", world, top_of_world + 1, sizeof(*world), offsetof(struct room_data, number));
 
   mud_log("Renumbering rooms.");
   renum_world();
@@ -489,9 +506,11 @@ void boot_world(void)
 
   mud_log("Loading mobs and generating index.");
   index_boot(DB_BOOT_MOB);
+  check_sorted("mobile", mob_index, top_of_mobt + 1, sizeof(*mob_index), offsetof(struct index_data, vnum));
 
   mud_log("Loading objs and generating index.");
   index_boot(DB_BOOT_OBJ);
+  check_sorted("object", obj_index, top_of_objt + 1, sizeof(*obj_index), offsetof(struct index_data, vnum));
 
   mud_log("Renumbering zone table.");
   renum_zone_table();
@@ -580,7 +599,6 @@ void destroy_db(void)
   }
   free(world);
   top_of_world = 0;
-  htree_free(room_htree);
 
   /* Objects */
   for (cnt = 0; cnt <= top_of_objt; cnt++) {
@@ -601,7 +619,6 @@ void destroy_db(void)
   }
   free(obj_proto);
   free(obj_index);
-  htree_free(obj_htree);
 
   /* Mobiles */
   for (cnt = 0; cnt <= top_of_mobt; cnt++) {
@@ -624,7 +641,6 @@ void destroy_db(void)
   }
   free(mob_proto);
   free(mob_index);
-  htree_free(mob_htree);
 
   /* Shops */
   destroy_shops();
@@ -709,8 +725,6 @@ void destroy_db(void)
 
   free_obj_unique_hash();
 
-  htree_shutdown();
-
   mud_log("Freeing Assemblies.");
   free_assemblies();
 }
@@ -723,16 +737,16 @@ void destroy_db(void)
    that have to traverse are O(n) [n=num elements in pool], so more
    pools are better.
      - Elie Rosenblum Dec. 12 2003 */
-#define NUM_OBJ_UNIQUE_POOLS 5000
+constexpr int NUM_OBJ_UNIQUE_POOLS = 5000;
 
-static struct obj_unique_hash_elem **obj_unique_hash_pools = NULL;
+static struct obj_unique_hash_elem **obj_unique_hash_pools = nullptr;
 
 static void init_obj_unique_hash()
 {
   int i;
   CREATE(obj_unique_hash_pools, struct obj_unique_hash_elem *, NUM_OBJ_UNIQUE_POOLS);
   for (i = 0; i < NUM_OBJ_UNIQUE_POOLS; i++) {
-    obj_unique_hash_pools[i] = NULL;
+    obj_unique_hash_pools[i] = nullptr;
   }
 }
 
@@ -854,7 +868,7 @@ void boot_db(void)
     reset_zone(i);
   }
 
-  reset_q.head = reset_q.tail = NULL;
+  reset_q.head = reset_q.tail = nullptr;
 
   boot_time = time(0);
 
@@ -866,7 +880,7 @@ void auc_save()
 {
   FILE *fl;
 
-  if ((fl = fopen(AUCTION_FILE, "w")) == NULL)
+  if ((fl = fopen(AUCTION_FILE, "w")) == nullptr)
     mud_log("SYSERR: Can't write to '%s' auction file.", AUCTION_FILE);
   else {
     struct obj_data *obj, *next_obj;
@@ -891,7 +905,7 @@ void auc_load(struct obj_data *obj)
   int aID, bID, cost, startc;
   FILE *fl;
 
-  if ((fl = fopen(AUCTION_FILE, "r")) == NULL)
+  if ((fl = fopen(AUCTION_FILE, "r")) == nullptr)
     mud_log("SYSERR: Can't read from '%s' auction file.", AUCTION_FILE);
   else {
     while (!feof(fl)) {
@@ -916,7 +930,7 @@ static void reset_time(void)
   time_t beginning_of_time = 0;
   FILE *bgtime;
 
-  if ((bgtime = fopen(TIME_FILE, "r")) == NULL)
+  if ((bgtime = fopen(TIME_FILE, "r")) == nullptr)
     mud_log("SYSERR: Can't read from '%s' time file.", TIME_FILE);
   else {
     fscanf(bgtime, "%ld\n", &beginning_of_time);
@@ -994,7 +1008,7 @@ void save_mud_time(struct time_info_data *when)
   struct atomic_file af;
   FILE *bgtime;
 
-  if ((bgtime = atomic_open(&af, TIME_FILE, false)) == NULL)
+  if ((bgtime = atomic_open(&af, TIME_FILE, false)) == nullptr)
     mud_log("SYSERR: Can't write to '%s' time file.", TIME_FILE);
   else {
     fprintf(bgtime, "%ld\n", mud_time_to_secs(when));
@@ -1086,7 +1100,7 @@ static int count_hash_records(FILE *fl)
 
 void index_boot(int mode)
 {
-  const char *index_filename, *prefix = NULL; /* NULL or egcs 1.1 complains */
+  const char *index_filename, *prefix = nullptr; /* NULL or egcs 1.1 complains */
   FILE *db_index, *db_file;
   int rec_count = 0, size[2];
   char buf2[PATH_MAX], buf1[MAX_STRING_LENGTH];
@@ -1314,7 +1328,7 @@ static char fread_letter(FILE *fp)
 bitvector_t asciiflag_conv(char *flag)
 {
   bitvector_t flags = 0;
-  int is_num = TRUE, warned = FALSE;
+  int is_num = true, warned = false;
   char *p;
 
   for (p = flag; *p; p++) {
@@ -1327,11 +1341,11 @@ bitvector_t asciiflag_conv(char *flag)
     else if (isupper(c) && !warned) {
       /* Only a-z and A-F fit in a 32-bit bitvector_t; see sprintascii(). */
       mud_log("SYSERR: asciiflag_conv: ignoring out-of-range flag letter '%c' in \"%s\".", c, flag);
-      warned = TRUE;
+      warned = true;
     }
 
     if (!(isdigit(c) || (c == '-')))
-      is_num = FALSE;
+      is_num = false;
   }
 
   if (is_num)
@@ -1343,7 +1357,7 @@ bitvector_t asciiflag_conv(char *flag)
 static bitvector_t asciiflag_conv_aff(char *flag)
 {
   bitvector_t flags = 0;
-  int is_num = TRUE, warned = FALSE;
+  int is_num = true, warned = false;
   char *p;
 
   for (p = flag; *p; p++) {
@@ -1356,11 +1370,11 @@ static bitvector_t asciiflag_conv_aff(char *flag)
     else if (isupper(c) && !warned) {
       /* Only a-z and A-F fit in a 32-bit bitvector_t; see sprintascii(). */
       mud_log("SYSERR: asciiflag_conv_aff: ignoring out-of-range flag letter '%c' in \"%s\".", c, flag);
-      warned = TRUE;
+      warned = true;
     }
 
     if (!(isdigit(c) || (c == '-')))
-      is_num = FALSE;
+      is_num = false;
   }
 
   if (is_num)
@@ -1392,20 +1406,16 @@ static void parse_room(FILE *fl, int virtual_nr)
   world[room_nr].name        = fread_string(fl, buf2);
   world[room_nr].description = fread_string(fl, buf2);
 
-  if (!room_htree)
-    room_htree = htree_init();
-  htree_add(room_htree, virtual_nr, room_nr);
-
   if (!get_line(fl, line)) {
     mud_log("SYSERR: Expecting roomflags/sector type of room #%d but file ended!",
             virtual_nr);
     exit(1);
   }
 
-  if (((retval = sscanf(line, " %d %s %s %s %s %d ", t, flags, flags2, flags3, flags4, t + 2)) == 3) && (bitwarning == TRUE)) {
+  if (((retval = sscanf(line, " %d %s %s %s %s %d ", t, flags, flags2, flags3, flags4, t + 2)) == 3) && (bitwarning == true)) {
     mud_log("WARNING: Conventional worldfiles detected. Please read 128bit.readme.");
     exit(1);
-  } else if ((retval == 3) && (bitwarning == FALSE)) {
+  } else if ((retval == 3) && (bitwarning == false)) {
     /* 
    * Looks like the implementor is ready, so let's load the worldfiles. We 
    * load the extra three flags as 0, since they won't be anything anyway. We 
@@ -1423,7 +1433,7 @@ static void parse_room(FILE *fl, int virtual_nr)
 
     if (bitsavetodisk) { /* Maybe the implementor just wants to look at the 128bit files */
       add_to_save_list(zone_table[real_zone_by_thing(virtual_nr)].number, 3);
-      converting = TRUE;
+      converting = true;
     }
 
     mud_log("   done.");
@@ -1441,9 +1451,9 @@ static void parse_room(FILE *fl, int virtual_nr)
     exit(1);
   }
 
-  world[room_nr].func     = NULL;
-  world[room_nr].contents = NULL;
-  world[room_nr].people   = NULL;
+  world[room_nr].func     = nullptr;
+  world[room_nr].contents = nullptr;
+  world[room_nr].people   = nullptr;
   world[room_nr].light    = 0; /* Zero light sources */
   world[room_nr].timed    = -1;
   world[room_nr].dmg      = 0;
@@ -1477,9 +1487,9 @@ static void parse_room(FILE *fl, int virtual_nr)
     world[room_nr].gravity = 1000;
   }
   for (i = 0; i < NUM_OF_DIRS; i++)
-    world[room_nr].dir_option[i] = NULL;
+    world[room_nr].dir_option[i] = nullptr;
 
-  world[room_nr].ex_description = NULL;
+  world[room_nr].ex_description = nullptr;
 
   snprintf(buf, sizeof(buf), "SYSERR: Format error in room #%d (expecting D/E/S)", virtual_nr);
 
@@ -1546,10 +1556,10 @@ static void setup_dir(FILE *fl, int room, int dir)
     mud_log("SYSERR: Format error, %s", buf2);
     exit(1);
   }
-  if (((retval = sscanf(line, " %d %d %d %d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7, t + 8, t + 9, t + 10)) == 3) && (bitwarning == TRUE)) {
+  if (((retval = sscanf(line, " %d %d %d %d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7, t + 8, t + 9, t + 10)) == 3) && (bitwarning == true)) {
     mud_log("SYSERR: Format error, %s", buf2);
     exit(1);
-  } else if (bitwarning == FALSE) {
+  } else if (bitwarning == false) {
 
     if (t[0] == 1)
       world[room].dir_option[dir]->exit_info = EX_ISDOOR;
@@ -1577,7 +1587,7 @@ static void setup_dir(FILE *fl, int room, int dir)
       world[room].dir_option[dir]->totalfailroom = NOWHERE;
       if (bitsavetodisk) {
         add_to_save_list(zone_table[world[room].zone].number, 3);
-        converting = TRUE;
+        converting = true;
       }
     } else if (retval == 5) {
       world[room].dir_option[dir]->dclock        = t[3];
@@ -1590,7 +1600,7 @@ static void setup_dir(FILE *fl, int room, int dir)
       world[room].dir_option[dir]->totalfailroom = NOWHERE;
       if (bitsavetodisk) {
         add_to_save_list(zone_table[world[room].zone].number, 3);
-        converting = TRUE;
+        converting = true;
       }
     } else if (retval == 7) {
       world[room].dir_option[dir]->dclock        = t[3];
@@ -1603,7 +1613,7 @@ static void setup_dir(FILE *fl, int room, int dir)
       world[room].dir_option[dir]->totalfailroom = NOWHERE;
       if (bitsavetodisk) {
         add_to_save_list(zone_table[world[room].zone].number, 3);
-        converting = TRUE;
+        converting = true;
       }
     } else if (retval == 11) {
       world[room].dir_option[dir]->dclock        = t[3];
@@ -1848,17 +1858,17 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
  */
 
 #define CASE(test) \
-  if (value && !matched && !strcasecmp(keyword, test) && (matched = TRUE))
+  if (value && !matched && !strcasecmp(keyword, test) && (matched = true))
 
 #define BOOL_CASE(test) \
-  if (!value && !matched && !strcasecmp(keyword, test) && (matched = TRUE))
+  if (!value && !matched && !strcasecmp(keyword, test) && (matched = true))
 
 #define RANGE(low, high) \
   (num_arg = MAX((low), MIN((high), (num_arg))))
 
 static void interpret_espec(const char *keyword, const char *value, struct char_data *ch, int nr)
 {
-  int num_arg = 0, matched = FALSE;
+  int num_arg = 0, matched = false;
   int num, num2, num3, num4, num5, num6;
   struct affected_type af;
 
@@ -2022,7 +2032,7 @@ static void parse_espec(char *buf, struct char_data *ch, int nr)
 {
   char *ptr;
 
-  if ((ptr = strchr(buf, ':')) != NULL) {
+  if ((ptr = strchr(buf, ':')) != nullptr) {
     *(ptr++) = '\0';
     while (isspace(*ptr))
       ptr++;
@@ -2059,7 +2069,7 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
   mob_vnum nr = mob_index[ch->nr].vnum;
 
   /* Mobiles have no player_specials: that NULL is what makes a character an NPC (char_is_npc). */
-  ch->player_specials = NULL;
+  ch->player_specials = nullptr;
   sprintf(buf2, "mob vnum %d", nr); /* sprintf: OK (for 'buf2 >= 19') */
 
   /***** String data *****/
@@ -2080,12 +2090,12 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
     return 0;
   }
 
-  if (((retval = sscanf(line, "%s %s %s %s %s %s %s %s %d %c", f1, f2, f3, f4, f5, f6, f7, f8, t + 2, &letter)) == 10) && (bitwarning == TRUE)) {
+  if (((retval = sscanf(line, "%s %s %s %s %s %s %s %s %d %c", f1, f2, f3, f4, f5, f6, f7, f8, t + 2, &letter)) == 10) && (bitwarning == true)) {
     /* Let's make the implementor read some, before converting his worldfiles */
     mud_log("WARNING: Conventional mobilefiles detected. Please read 128bit.readme.");
     return 0;
   }
-  if ((retval == 4) && (bitwarning == FALSE)) {
+  if ((retval == 4) && (bitwarning == false)) {
 
     mud_log("Converting mobile #%d to 128bits..", nr);
     char_get_act(ch)[0] = asciiflag_conv(f1);
@@ -2122,7 +2132,7 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
 
     if (bitsavetodisk) {
       add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 0);
-      converting = TRUE;
+      converting = true;
     }
 
     mud_log("   done.");
@@ -2189,7 +2199,7 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
   ch->aff_abils = ch->real_abils;
 
   for (j = 0; j < NUM_WEARS; j++)
-    ch->equipment[j] = NULL;
+    ch->equipment[j] = nullptr;
 
   /* Uncomment to force all mob files to be rewritten. Good for initial AUTOBALANCE setup.
    * if (bitsavetodisk) {
@@ -2206,18 +2216,14 @@ static void parse_mobile(FILE *mob_f, int nr)
 
   mob_index[i].vnum   = nr;
   mob_index[i].number = 0;
-  mob_index[i].func   = NULL;
+  mob_index[i].func   = nullptr;
 
   clear_char(mob_proto + i);
 
   mob_proto[i].nr   = i;
-  mob_proto[i].desc = NULL;
+  mob_proto[i].desc = nullptr;
 
   if (parse_mobile_from_file(mob_f, mob_proto + i)) {
-    if (!mob_htree)
-      mob_htree = htree_init();
-    htree_add(mob_htree, nr, i);
-
     top_of_mobt = i++;
   } else { /* We used to exit in the file reading code, but now we do it here */
     exit(1);
@@ -2238,11 +2244,7 @@ static char *parse_object(FILE *obj_f, int nr)
 
   obj_index[i].vnum   = nr;
   obj_index[i].number = 0;
-  obj_index[i].func   = NULL;
-
-  if (!obj_htree)
-    obj_htree = htree_init();
-  htree_add(obj_htree, nr, i);
+  obj_index[i].func   = nullptr;
 
   clear_object(obj_proto + i);
   obj_proto[i].item_number = i;
@@ -2250,7 +2252,7 @@ static char *parse_object(FILE *obj_f, int nr)
   sprintf(buf2, "object #%d", nr); /* sprintf: OK (for 'buf2 >= 19') */
 
   /* *** string data *** */
-  if ((obj_proto[i].name = fread_string(obj_f, buf2)) == NULL) {
+  if ((obj_proto[i].name = fread_string(obj_f, buf2)) == nullptr) {
     mud_log("SYSERR: Null obj name or format error at or near %s", buf2);
     exit(1);
   }
@@ -2271,11 +2273,11 @@ static char *parse_object(FILE *obj_f, int nr)
     exit(1);
   }
 
-  if (((retval = sscanf(line, " %d %s %s %s %s %s %s %s %s %s %s %s %s", t, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12)) == 4) && (bitwarning == TRUE)) {
+  if (((retval = sscanf(line, " %d %s %s %s %s %s %s %s %s %s %s %s %s", t, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12)) == 4) && (bitwarning == true)) {
     /* Let's make the implementor read some, before converting his worldfiles */
     mud_log("WARNING: Conventional objectfiles detected. Please read 128bit.readme.");
     exit(1);
-  } else if (((retval == 4) || (retval == 3)) && (bitwarning == FALSE)) {
+  } else if (((retval == 4) || (retval == 3)) && (bitwarning == false)) {
 
     if (retval == 3)
       t[3] = 0;
@@ -2298,7 +2300,7 @@ static char *parse_object(FILE *obj_f, int nr)
 
     if (bitsavetodisk) {
       add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
-      converting = TRUE;
+      converting = true;
     }
 
     mud_log("   done.");
@@ -2351,7 +2353,7 @@ static char *parse_object(FILE *obj_f, int nr)
     obj_set_value(obj_proto + i, VAL_DOOR_DCHIDE, 20);
     if (bitsavetodisk) {
       add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
-      converting = TRUE;
+      converting = true;
     }
   }
 
@@ -2360,7 +2362,7 @@ static char *parse_object(FILE *obj_f, int nr)
 
     if (bitsavetodisk) {
       add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
-      converting = TRUE;
+      converting = true;
     }
   }
 
@@ -2481,7 +2483,6 @@ static char *parse_object(FILE *obj_f, int nr)
         }
         if (!obj_proto[i].sbinfo) {
           CREATE(obj_proto[i].sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-          memset((char *)obj_proto[i].sbinfo, 0, SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
         }
         obj_proto[i].sbinfo[j].spellname = t[0];
         obj_proto[i].sbinfo[j].pages     = t[1];
@@ -2533,7 +2534,7 @@ static void load_zones(FILE *fl, char *zonename)
   static zone_rnum zone = 0;
   int cmd_no, num_of_cmds = 0, line_num = 0, tmp, error, arg_num, version = 1;
   char *ptr, buf[READ_SIZE], zname[READ_SIZE], buf2[MAX_STRING_LENGTH];
-  int zone_fix = FALSE;
+  int zone_fix = false;
   char t1[80], t2[80], line[MAX_STRING_LENGTH];
 
   strlcpy(zname, zonename, sizeof(zname));
@@ -2576,12 +2577,12 @@ static void load_zones(FILE *fl, char *zonename)
   snprintf(buf2, sizeof(buf2), "beginning of zone #%d", Z.number);
 
   line_num += get_line(fl, buf);
-  if ((ptr = strchr(buf, '~')) != NULL) /* take off the '~' if it's there */
+  if ((ptr = strchr(buf, '~')) != nullptr) /* take off the '~' if it's there */
     *ptr = '\0';
   Z.builders = strdup(buf);
 
   line_num += get_line(fl, buf);
-  if ((ptr = strchr(buf, '~')) != NULL) /* take off the '~' if it's there */
+  if ((ptr = strchr(buf, '~')) != nullptr) /* take off the '~' if it's there */
     *ptr = '\0';
   Z.name = strdup(buf);
 
@@ -2619,7 +2620,7 @@ static void load_zones(FILE *fl, char *zonename)
       Z.name = strdup(Z.builders);
       free(Z.builders);
       Z.builders = strdup("None.");
-      zone_fix   = TRUE;
+      zone_fix   = true;
     }
   }
   if (Z.bot > Z.top) {
@@ -2631,13 +2632,13 @@ static void load_zones(FILE *fl, char *zonename)
 
   for (;;) {
     /* skip reading one line if we fixed above (line is correct already) */
-    if (zone_fix != TRUE) {
+    if (zone_fix != true) {
       if ((tmp = get_line(fl, buf)) == 0) {
         mud_log("SYSERR: Format error in %s - premature end of file", zname);
         exit(1);
       }
     } else
-      zone_fix = FALSE;
+      zone_fix = false;
 
     line_num += tmp;
     ptr = buf;
@@ -2695,7 +2696,7 @@ static void load_zones(FILE *fl, char *zonename)
 
 static void get_one_line(FILE *fl, char *buf)
 {
-  if (fgets(buf, READ_SIZE, fl) == NULL) {
+  if (fgets(buf, READ_SIZE, fl) == nullptr) {
     mud_log("SYSERR: error reading help file: not terminated with $?");
     exit(1);
   }
@@ -2714,7 +2715,7 @@ void free_help_table(void)
         free(help_table[hp].entry);
     }
     free(help_table);
-    help_table = NULL;
+    help_table = nullptr;
   }
   top_of_helpt = 0;
 }
@@ -2877,7 +2878,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   if (type == VIRTUAL) {
     if ((i = real_mobile(nr)) == NOBODY) {
       mud_log("WARNING: Mobile vnum %d does not exist in database.", nr);
-      return (NULL);
+      return (nullptr);
     }
   } else
     i = nr;
@@ -2887,7 +2888,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   *mob             = mob_proto[i];
   mob->next        = character_list;
   character_list   = mob;
-  mob->next_affect = NULL;
+  mob->next_affect = nullptr;
 
   if (char_is_hoshijin(mob) && char_get_sex(mob) == SEX_MALE) {
     mob->hairl = 0;
@@ -2902,11 +2903,11 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
   mob->eye = rand_number(0, 11);
 
   char_set_absorbs(mob, 0);
-  char_set_absorbing(mob, NULL);
-  char_set_absorbby(mob, NULL);
-  char_set_sits(mob, NULL);
-  char_set_blocked(mob, NULL);
-  char_set_blocks(mob, NULL);
+  char_set_absorbing(mob, nullptr);
+  char_set_absorbby(mob, nullptr);
+  char_set_sits(mob, nullptr);
+  char_set_blocked(mob, nullptr);
+  char_set_blocks(mob, nullptr);
 
   if (!char_is_human(mob) && !char_is_saiyan(mob) && !char_is_halfbreed(mob) && !char_is_namek(mob)) {
     mob->skin = rand_number(0, 11);
@@ -3512,7 +3513,7 @@ static void remove_unique_id(struct obj_data *obj)
 {
   struct obj_unique_hash_elem *elem, **ptr, *tmp;
 
-  if (obj == NULL || obj->unique_id < 0)
+  if (obj == nullptr || obj->unique_id < 0)
     return;
 
   ptr = obj_unique_hash_pools + (obj->unique_id % NUM_OBJ_UNIQUE_POOLS);
@@ -3536,17 +3537,17 @@ static void remove_unique_id(struct obj_data *obj)
 
 static void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2)
 {
-  mudlog(LOG_BRF, ADMLVL_GOD, TRUE, "DUPE: Dupe object found: %s [%d] [%" TMT ":%" I64T "]",
+  mudlog(LOG_BRF, ADMLVL_GOD, true, "DUPE: Dupe object found: %s [%d] [%" TMT ":%" I64T "]",
          obj1->short_description ? obj1->short_description : "<No name>",
          obj_get_vnum(obj1), obj1->generation, obj1->unique_id);
-  mudlog(LOG_BRF, ADMLVL_GOD, TRUE, "DUPE: First: In room: %d (%s), "
+  mudlog(LOG_BRF, ADMLVL_GOD, true, "DUPE: First: In room: %d (%s), "
                                     "In object: %s, Carried by: %s, Worn by: %s",
          rroom_get_vnum(obj_get_in_room(obj1)),
          obj_get_in_room(obj1) == NOWHERE ? "Nowhere" : world[obj_get_in_room(obj1)].name,
          obj1->in_obj ? obj1->in_obj->short_description : "None",
          obj1->carried_by ? char_get_name(obj1->carried_by) : "Nobody",
          obj1->worn_by ? char_get_name(obj1->worn_by) : "Nobody");
-  mudlog(LOG_BRF, ADMLVL_GOD, TRUE, "DUPE: Newer: In room: %d (%s), "
+  mudlog(LOG_BRF, ADMLVL_GOD, true, "DUPE: Newer: In room: %d (%s), "
                                     "In object: %s, Carried by: %s, Worn by: %s",
          rroom_get_vnum(obj_get_in_room(obj2)),
          obj_get_in_room(obj2) == NOWHERE ? "Nowhere" : world[obj_get_in_room(obj2)].name,
@@ -3651,7 +3652,7 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
 
   if (i == NOTHING || i > top_of_objt) {
     mud_log("Object (%c) %d does not exist in database.", type == VIRTUAL ? 'V' : 'R', nr);
-    return (NULL);
+    return (nullptr);
   }
 
   CREATE(obj, struct obj_data, 1);
@@ -3691,7 +3692,7 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
   return (obj);
 }
 
-#define ZO_DEAD 999
+constexpr int ZO_DEAD = 999;
 
 /* update zone ages, queue for reset if necessary, and dequeue when possible */
 void zone_update(void)
@@ -3743,7 +3744,7 @@ void zone_update(void)
     if (zone_table[update_u->zone_to_reset].reset_mode == 2 ||
         is_empty(update_u->zone_to_reset)) {
       reset_zone(update_u->zone_to_reset);
-      mudlog(LOG_CMP, ADMLVL_GOD, FALSE, "Auto zone reset: %s (Zone %d)",
+      mudlog(LOG_CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)",
              zone_table[update_u->zone_to_reset].name, zone_table[update_u->zone_to_reset].number);
       /* dequeue */
       if (update_u == reset_q.head)
@@ -3765,8 +3766,8 @@ void zone_update(void)
 
 static void log_zone_error(zone_rnum zone, int cmd_no, const char *message)
 {
-  mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "SYSERR: zone file: %s", message);
-  mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "SYSERR: ...offending cmd: '%c' cmd in zone #%d, line %d",
+  mudlog(LOG_NRM, ADMLVL_GOD, true, "SYSERR: zone file: %s", message);
+  mudlog(LOG_NRM, ADMLVL_GOD, true, "SYSERR: ...offending cmd: '%c' cmd in zone #%d, line %d",
          ZCMD2.command, zone_table[zone].number, ZCMD2.line);
 }
 
@@ -3780,24 +3781,24 @@ static void log_zone_error(zone_rnum zone, int cmd_no, const char *message)
 void reset_zone(zone_rnum zone)
 {
   int cmd_no, last_cmd = 0;
-  struct char_data *mob = NULL;
+  struct char_data *mob = nullptr;
   struct obj_data *obj, *obj_to;
   room_vnum rvnum;
   room_rnum rrnum;
-  struct char_data *tmob = NULL;  /* for trigger assignment */
-  struct obj_data *tobj  = NULL;  /* for trigger assignment */
-  int mob_load           = FALSE; /* ### */
-  int obj_load           = FALSE; /* ### */
+  struct char_data *tmob = nullptr; /* for trigger assignment */
+  struct obj_data *tobj  = nullptr; /* for trigger assignment */
+  int mob_load           = false;   /* ### */
+  int obj_load           = false;   /* ### */
 
-  if (pre_reset(zone_table[zone].number) == FALSE) {
+  if (pre_reset(zone_table[zone].number) == false) {
     for (cmd_no = 0; ZCMD2.command != 'S'; cmd_no++) {
 
       if (ZCMD2.if_flag && !last_cmd && !mob_load && !obj_load)
         continue;
 
       if (!ZCMD2.if_flag) { /* ### */
-        mob_load = FALSE;
-        obj_load = FALSE;
+        mob_load = false;
+        obj_load = false;
       }
 
       /*  This is the list of actual zone commands.  If any new
@@ -3845,10 +3846,10 @@ void reset_zone(zone_rnum zone)
             load_mtrigger(mob);
             tmob     = mob;
             last_cmd = 1;
-            mob_load = TRUE;
+            mob_load = true;
           } else
             last_cmd = 0;
-          tobj = NULL;
+          tobj = nullptr;
           break;
 
         case 'O': /* read an object */
@@ -3893,18 +3894,18 @@ void reset_zone(zone_rnum zone)
               last_cmd = 1;
               load_otrigger(obj);
               tobj     = obj;
-              obj_load = TRUE;
+              obj_load = true;
             } else {
               obj = read_object(ZCMD2.arg1, REAL);
               add_unique_id(obj);
               obj_set_in_room(obj, NOWHERE);
               last_cmd = 1;
               tobj     = obj;
-              obj_load = TRUE;
+              obj_load = true;
             }
           } else
             last_cmd = 0;
-          tmob = NULL;
+          tmob = nullptr;
           break;
 
         case 'P': /* object to object */
@@ -3923,7 +3924,7 @@ void reset_zone(zone_rnum zone)
             tobj = obj;
           } else
             last_cmd = 0;
-          tmob = NULL;
+          tmob = nullptr;
           break;
 
         case 'G': /* obj_to_char */
@@ -3945,7 +3946,7 @@ void reset_zone(zone_rnum zone)
             tobj = obj;
           } else
             last_cmd = 0;
-          tmob = NULL;
+          tmob = nullptr;
           break;
 
         case 'E': /* object to equipment list */
@@ -3973,20 +3974,20 @@ void reset_zone(zone_rnum zone)
             }
           } else
             last_cmd = 0;
-          tmob = NULL;
+          tmob = nullptr;
           break;
 
         case 'R': /* rem obj from room */
-          if ((obj = get_obj_in_list_num(ZCMD2.arg2, world[ZCMD2.arg1].contents)) != NULL)
+          if ((obj = get_obj_in_list_num(ZCMD2.arg2, world[ZCMD2.arg1].contents)) != nullptr)
             extract_obj(obj);
           last_cmd = 1;
-          tmob     = NULL;
-          tobj     = NULL;
+          tmob     = nullptr;
+          tobj     = nullptr;
           break;
 
         case 'D': /* set state of door */
           if (ZCMD2.arg2 < 0 || ZCMD2.arg2 >= NUM_OF_DIRS ||
-              (world[ZCMD2.arg1].dir_option[ZCMD2.arg2] == NULL)) {
+              (world[ZCMD2.arg1].dir_option[ZCMD2.arg2] == nullptr)) {
             ZONE_ERROR("door does not exist, command disabled");
             ZCMD2.command = '*';
           } else
@@ -4011,8 +4012,8 @@ void reset_zone(zone_rnum zone)
                 break;
             }
           last_cmd = 1;
-          tmob     = NULL;
-          tobj     = NULL;
+          tmob     = nullptr;
+          tobj     = nullptr;
           break;
 
         case 'T': /* trigger command */
@@ -4160,46 +4161,37 @@ int is_empty(zone_rnum zone_nr)
 /* read and allocate space for a '~'-terminated string from a given file */
 char *fread_string(FILE *fl, const char *error)
 {
-  char buf[MAX_STRING_LENGTH], tmp[520];
-  char *point;
-  int done = 0, length = 0, templength;
+  char *line = nullptr, *text = nullptr;
+  size_t cap = 0, len = 0, n;
+  FILE *out = open_memstream(&text, &len);
+  bool done = false;
 
-  *buf = *tmp = '\0';
-
-  do {
-    if (!fgets(tmp, 512, fl)) {
+  while (!done) {
+    if (getline(&line, &cap, fl) < 0) {
       mud_log("SYSERR: fread_string: format error at string (pos %ld): %s at or near %s",
               ftell(fl), feof(fl) ? "EOF" : ferror(fl) ? "read error"
                                                        : "unknown error",
               error);
       exit(1);
     }
-    /* If there is a '~', end the string; else put an "\r\n" over the '\n'. */
-    /* now only removes trailing ~'s -- Welcor */
-    for (point = tmp; *point && *point != '\r' && *point != '\n'; point++);
-    if (point > tmp && point[-1] == '~') {
-      *(--point) = '\0';
-      done       = 1;
+    /* A line ending in '~' ends the string; any other line gets an "\r\n". Only trailing ~'s count -- Welcor */
+    n = strcspn(line, "\r\n");
+    if (n > 0 && line[n - 1] == '~') {
+      fwrite(line, 1, n - 1, out);
+      done = true;
     } else {
-      *point     = '\r';
-      *(++point) = '\n';
-      *(++point) = '\0';
+      fwrite(line, 1, n, out);
+      fputs("\r\n", out);
     }
+  }
+  free(line);
+  fclose(out);
 
-    templength = point - tmp;
-
-    if (length + templength >= MAX_STRING_LENGTH) {
-      mud_log("SYSERR: fread_string: string too large (db.c)");
-      mud_log("%s", error);
-      exit(1);
-    } else {
-      strcat(buf + length, tmp); /* strcat: OK (size checked above) */
-      length += templength;
-    }
-  } while (!done);
-
-  /* allocate space for the new string and copy it */
-  return (strlen(buf) ? strdup(buf) : NULL);
+  if (!len) {
+    free(text);
+    return nullptr;
+  }
+  return text;
 }
 
 /* Called to free all allocated follow_type structs - Update by Jamie Nelson */
@@ -4211,7 +4203,7 @@ static void free_followers(struct follow_type *k)
   if (k->next)
     free_followers(k->next);
 
-  k->follower = NULL;
+  k->follower = nullptr;
   free(k);
 }
 
@@ -4223,7 +4215,7 @@ void free_char(struct char_data *ch)
 
   if (ch->player_specials) {
 
-    while ((a = char_get_aliases(ch)) != NULL) {
+    while ((a = char_get_aliases(ch)) != nullptr) {
       char_set_aliases(ch, char_get_aliases(ch)->next);
       free_alias(a);
     }
@@ -4290,7 +4282,7 @@ void free_char(struct char_data *ch)
   free_followers(ch->followers);
 
   if (ch->desc)
-    ch->desc->character = NULL;
+    ch->desc->character = nullptr;
 
   /* find_char helper */
   /*
@@ -4392,16 +4384,16 @@ void reset_char(struct char_data *ch)
   int i;
 
   for (i = 0; i < NUM_WEARS; i++)
-    char_set_equipment(ch, i, NULL);
+    char_set_equipment(ch, i, nullptr);
 
-  ch->followers = NULL;
-  ch->master    = NULL;
+  ch->followers = nullptr;
+  ch->master    = nullptr;
   char_set_in_room(ch, NOWHERE);
-  ch->carrying      = NULL;
-  ch->next          = NULL;
-  ch->next_fighting = NULL;
-  ch->next_in_room  = NULL;
-  char_set_fighting(ch, NULL);
+  ch->carrying      = nullptr;
+  ch->next          = nullptr;
+  ch->next_fighting = nullptr;
+  ch->next_in_room  = nullptr;
+  char_set_fighting(ch, nullptr);
   ch->position                 = POS_STANDING;
   ch->mob_specials.default_pos = POS_STANDING;
   ch->carry_weight             = 0;
@@ -4446,18 +4438,17 @@ void init_char(struct char_data *ch)
   int i;
 
   /* create a player_special structure */
-  if (ch->player_specials == NULL) {
+  if (ch->player_specials == nullptr) {
     CREATE(ch->player_specials, struct player_special_data, 1);
-    memset((void *)ch->player_specials, 0, sizeof(struct player_special_data));
   }
 
   char_set_admlevel(ch, ADMLVL_NONE);
   char_set_absorbs(ch, 0);
-  char_set_absorbing(ch, NULL);
-  char_set_absorbby(ch, NULL);
-  char_set_sits(ch, NULL);
-  char_set_blocked(ch, NULL);
-  char_set_blocks(ch, NULL);
+  char_set_absorbing(ch, nullptr);
+  char_set_absorbby(ch, nullptr);
+  char_set_sits(ch, nullptr);
+  char_set_blocked(ch, nullptr);
+  char_set_blocks(ch, nullptr);
 
   /* If this is our first player make him LVL_IMPL. */
   if (top_of_p_table == 0) {
@@ -4469,10 +4460,10 @@ void init_char(struct char_data *ch)
     ch->basest = 1000;
   }
 
-  set_title(ch, NULL);
-  ch->short_descr = NULL;
-  ch->long_descr  = NULL;
-  ch->description = NULL;
+  set_title(ch, nullptr);
+  ch->short_descr = nullptr;
+  ch->long_descr  = nullptr;
+  ch->description = nullptr;
 
   /*ch->time.birth = time(0) - birth_age(ch);*/
   ch->time.logon = ch->time.created = time(0);
@@ -4511,142 +4502,63 @@ void init_char(struct char_data *ch)
   Crash_crashsave(ch);
 }
 
+/*
+ * The world, mobile, object and zone tables are sorted by vnum (check_sorted() makes sure at boot,
+ * and OLC inserts in order), so lookups are binary searches.
+ */
+static int vnum_order(IDXTYPE key, IDXTYPE vnum)
+{
+  return (key > vnum) - (key < vnum);
+}
+
+static int room_order(const void *key, const void *room)
+{
+  return vnum_order(*(const room_vnum *)key, ((const struct room_data *)room)->number);
+}
+
+static int index_order(const void *key, const void *index)
+{
+  return vnum_order(*(const IDXTYPE *)key, ((const struct index_data *)index)->vnum);
+}
+
+static int zone_order(const void *key, const void *zone)
+{
+  return vnum_order(*(const zone_vnum *)key, ((const struct zone_data *)zone)->number);
+}
+
+/* The index in table (count entries of size bytes) of the entry for vnum, or NOWHERE. */
+static IDXTYPE find_vnum(IDXTYPE vnum, const void *table, IDXTYPE count, size_t size, int (*order)(const void *, const void *))
+{
+  const char *found;
+
+  if (!table || count <= 0)
+    return NOWHERE;
+  found = bsearch(&vnum, table, count, size, order);
+  return found ? (IDXTYPE)((found - (const char *)table) / size) : NOWHERE;
+}
+
 /* returns the real number of the room with given virtual number */
 room_rnum real_room(room_vnum vnum)
 {
-  room_rnum bot, top, mid, i, last_top;
-
-  i = htree_find(room_htree, vnum);
-
-  if (i != NOWHERE && world[i].number == vnum)
-    return i;
-  else {
-    bot = 0;
-    top = top_of_world;
-
-    /* perform binary search on world-table */
-    for (;;) {
-      last_top = top;
-      mid      = (bot + top) / 2;
-
-      if ((world + mid)->number == vnum) {
-        mud_log("room_htree sync fix: %d: %d -> %d", vnum, i, mid);
-        htree_add(room_htree, vnum, mid);
-        return (mid);
-      }
-      if (bot >= top)
-        return (NOWHERE);
-      if ((world + mid)->number > vnum)
-        top = mid - 1;
-      else
-        bot = mid + 1;
-
-      if (top > last_top)
-        return NOWHERE;
-    }
-  }
+  return find_vnum(vnum, world, top_of_world + 1, sizeof(*world), room_order);
 }
 
 /* returns the real number of the monster with given virtual number */
 mob_rnum real_mobile(mob_vnum vnum)
 {
-  if (vnum == NOTHING) {
-    return NOBODY;
-  }
-  mob_rnum bot, top, mid, i, last_top;
-
-  i = htree_find(mob_htree, vnum);
-
-  if (i != NOBODY && mob_index[i].vnum == vnum)
-    return i;
-  else {
-    bot = 0;
-    top = top_of_mobt;
-
-    /* perform binary search on mob-table */
-    for (;;) {
-      last_top = top;
-      mid      = (bot + top) / 2;
-
-      if ((mob_index + mid)->vnum == vnum) {
-        mud_log("mob_htree sync fix: %d: %d -> %d", vnum, i, mid);
-        htree_add(mob_htree, vnum, mid);
-        return (mid);
-      }
-      if (bot >= top)
-        return (NOBODY);
-      if ((mob_index + mid)->vnum > vnum)
-        top = mid - 1;
-      else
-        bot = mid + 1;
-
-      if (top > last_top)
-        return NOWHERE;
-    }
-  }
+  return find_vnum(vnum, mob_index, top_of_mobt + 1, sizeof(*mob_index), index_order);
 }
 
 /* returns the real number of the object with given virtual number */
 obj_rnum real_object(obj_vnum vnum)
 {
-  obj_rnum bot, top, mid, i, last_top;
-
-  i = htree_find(obj_htree, vnum);
-
-  if (i != NOWHERE && obj_index[i].vnum == vnum)
-    return i;
-  else {
-    bot = 0;
-    top = top_of_objt;
-
-    /* perform binary search on obj-table */
-    for (;;) {
-      last_top = top;
-      mid      = (bot + top) / 2;
-
-      if ((obj_index + mid)->vnum == vnum) {
-        mud_log("obj_htree sync fix: %d: %d -> %d", vnum, i, mid);
-        htree_add(obj_htree, vnum, mid);
-        return (mid);
-      }
-      if (bot >= top)
-        return (NOTHING);
-      if ((obj_index + mid)->vnum > vnum)
-        top = mid - 1;
-      else
-        bot = mid + 1;
-
-      if (top > last_top)
-        return NOWHERE;
-    }
-  }
+  return find_vnum(vnum, obj_index, top_of_objt + 1, sizeof(*obj_index), index_order);
 }
 
-/* returns the real number of the room with given virtual number */
+/* returns the real number of the zone with given virtual number */
 zone_rnum real_zone(zone_vnum vnum)
 {
-  zone_rnum bot, top, mid, last_top;
-
-  bot = 0;
-  top = top_of_zone_table;
-
-  /* perform binary search on world-table */
-  for (;;) {
-    last_top = top;
-    mid      = (bot + top) / 2;
-
-    if ((zone_table + mid)->number == vnum)
-      return (mid);
-    if (bot >= top)
-      return (NOWHERE);
-    if ((zone_table + mid)->number > vnum)
-      top = mid - 1;
-    else
-      bot = mid + 1;
-
-    if (top > last_top)
-      return NOWHERE;
-  }
+  return find_vnum(vnum, zone_table, top_of_zone_table + 1, sizeof(*zone_table), zone_order);
 }
 
 /*
@@ -4657,13 +4569,13 @@ zone_rnum real_zone(zone_vnum vnum)
 static int check_object(struct obj_data *obj)
 {
   char objname[MAX_INPUT_LENGTH + 32];
-  int error = FALSE;
+  int error = false;
 
-  if (obj_get_weight(obj) < 0 && (error = TRUE))
+  if (obj_get_weight(obj) < 0 && (error = true))
     mud_log("SYSERR: Object #%d (%s) has negative weight (%" I64T ").",
             obj_get_vnum(obj), obj->short_description, obj_get_weight(obj));
 
-  if (obj_get_cost_per_day(obj) < 0 && (error = TRUE))
+  if (obj_get_cost_per_day(obj) < 0 && (error = true))
     mud_log("SYSERR: Object #%d (%s) has negative cost/day (%d).",
             obj_get_vnum(obj), obj->short_description, obj_get_cost_per_day(obj));
 
@@ -4674,13 +4586,13 @@ static int check_object(struct obj_data *obj)
       char onealias[MAX_INPUT_LENGTH], *space = strrchr(obj->name, ' ');
 
       strlcpy(onealias, space ? space + 1 : obj->name, sizeof(onealias));
-      if (search_block(onealias, drinknames, TRUE) < 0 && (error = TRUE)) {
+      if (search_block(onealias, drinknames, true) < 0 && (error = true)) {
         //log("SYSERR: Object #%d (%s) doesn't have drink type as last alias. (%s)", GET_OBJ_VNUM(obj), obj->short_description, obj->name);
       }
     }
     /* Fall through. */
     case ITEM_FOUNTAIN:
-      if ((obj_get_value(obj, 0) > 0) && (obj_get_value(obj, 1) > obj_get_value(obj, 0) && (error = TRUE)))
+      if ((obj_get_value(obj, 0) > 0) && (obj_get_value(obj, 1) > obj_get_value(obj, 0) && (error = true)))
         mud_log("SYSERR: Object #%d (%s) contains (%d) more than maximum (%d).",
                 obj_get_vnum(obj), obj->short_description,
                 obj_get_value(obj, 1), obj_get_value(obj, 0));
@@ -4696,7 +4608,7 @@ static int check_object(struct obj_data *obj)
     case ITEM_STAFF:
       error |= check_object_level(obj, 0);
       error |= check_object_spell_number(obj, 3);
-      if (obj_get_value(obj, 2) > obj_get_value(obj, 1) && (error = TRUE))
+      if (obj_get_value(obj, 2) > obj_get_value(obj, 1) && (error = true))
         mud_log("SYSERR: Object #%d (%s) has more charges (%d) than maximum (%d).",
                 obj_get_vnum(obj), obj->short_description,
                 obj_get_value(obj, 2), obj_get_value(obj, 1));
@@ -4708,7 +4620,7 @@ static int check_object(struct obj_data *obj)
 
 static int check_object_spell_number(struct obj_data *obj, int val)
 {
-  int error = FALSE;
+  int error = false;
   const char *spellname;
 
   if (obj_get_value(obj, val) == -1 ||
@@ -4720,11 +4632,11 @@ static int check_object_spell_number(struct obj_data *obj, int val)
    * spell which is actually a skill.
    */
   if (obj_get_value(obj, val) < 0)
-    error = TRUE;
+    error = true;
   if (obj_get_value(obj, val) >= SKILL_TABLE_SIZE)
-    error = TRUE;
+    error = true;
   if (skill_type(obj_get_value(obj, val)) != SKTYPE_SPELL)
-    error = TRUE;
+    error = true;
   if (error)
     mud_log("SYSERR: Object #%d (%s) has out of range spell #%d.",
             obj_get_vnum(obj), obj->short_description, obj_get_value(obj, val));
@@ -4747,7 +4659,7 @@ static int check_object_spell_number(struct obj_data *obj, int val)
   /* Now check for unnamed spells. */
   spellname = skill_name(obj_get_value(obj, val));
 
-  if ((spellname == unused_spellname || !strcasecmp("UNDEFINED", spellname)) && (error = TRUE))
+  if ((spellname == unused_spellname || !strcasecmp("UNDEFINED", spellname)) && (error = true))
     mud_log("SYSERR: Object #%d (%s) uses '%s' spell #%d.",
             obj_get_vnum(obj), obj->short_description, spellname,
             obj_get_value(obj, val));
@@ -4757,9 +4669,9 @@ static int check_object_spell_number(struct obj_data *obj, int val)
 
 static int check_object_level(struct obj_data *obj, int val)
 {
-  int error = FALSE;
+  int error = false;
 
-  if ((obj_get_value(obj, val) < 0) && (error = TRUE))
+  if ((obj_get_value(obj, val) < 0) && (error = true))
     mud_log("SYSERR: Object #%d (%s) has out of range level #%d.",
             obj_get_vnum(obj), obj->short_description, obj_get_value(obj, val));
 
@@ -4804,7 +4716,7 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
 
   if (obj->action_description) {
     strcpy(buf1, obj->action_description);
-    strip_string(buf1);
+    strip_cr(buf1);
   } else
     *buf1 = 0;
 
@@ -4870,7 +4782,7 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
         continue;
       }
       strcpy(buf1, ex_desc->description);
-      strip_string(buf1);
+      strip_cr(buf1);
       if (!OBJ_SAVE_FPRINTF(fp, obj, "extra description", "E\n"
                                                           "%s~\n"
                                                           "%s~\n",
@@ -4897,25 +4809,6 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
 }
 
 #undef OBJ_SAVE_FPRINTF
-
-/* This procedure removes the '\r\n' from a string so that it may be
-   saved to a file.  Use it only on buffers, not on the orginal
-   strings. */
-
-static void strip_string(char *buffer)
-{
-  char *ptr, *str;
-
-  ptr = buffer;
-  str = ptr;
-
-  while ((*str = *ptr)) {
-    str++;
-    ptr++;
-    if (*ptr == '\r')
-      ptr++;
-  }
-}
 
 /* External variables from config.c */
 
@@ -4986,14 +4879,14 @@ static void load_default_config(void)
   if (DFLT_IP)
     CONFIG_DFLT_IP = strdup(DFLT_IP);
   else
-    CONFIG_DFLT_IP = NULL;
+    CONFIG_DFLT_IP = nullptr;
 
   CONFIG_DFLT_DIR = strdup(DFLT_DIR);
 
   if (LOGNAME)
     CONFIG_LOGNAME = strdup(LOGNAME);
   else
-    CONFIG_LOGNAME = NULL;
+    CONFIG_LOGNAME = nullptr;
 
   CONFIG_MAX_PLAYING    = max_playing;
   CONFIG_MAX_FILESIZE   = max_filesize;

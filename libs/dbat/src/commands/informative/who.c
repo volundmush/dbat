@@ -95,7 +95,7 @@ ACMD(do_who)
   tmstr                        = (char *)asctime(localtime(&PCOUNTDATE));
   *(tmstr + strlen(tmstr) - 1) = '\0';
 
-  int num_ranks = sizeof(rank) / sizeof(rank[0]);
+  int num_ranks = countof(rank);
   send_to_char(ch, "\r\n      @r{@b===============  @D[  @DD@wr@ca@Cg@Y(@R*@Y)@Wn@cB@Da@cl@Cl @DA@wd@cv@Ce@Wnt @DT@wr@cu@Ct@Wh@n  @D]  @b===============@r}      @n\r\n");
   for (d = descriptor_list; d && !short_list; d = d->next) {
     if (!desc_is_playing(d))
@@ -263,9 +263,9 @@ ACMD(do_who)
   else {
     send_to_char(ch, "                           @Y%d@w characters displayed.\r\n", num_can_see);
     if (hide > 0) {
-      int bam = FALSE;
+      int bam = false;
       if (hide > 1) {
-        bam = TRUE;
+        bam = true;
       }
       send_to_char(ch, "                           and @Y%d@w character%s hidden.\r\n", hide, bam ? "s" : "");
     }
@@ -428,7 +428,7 @@ static void perform_mortal_where(struct char_data *ch, char *arg)
     for (d = descriptor_list; d; d = d->next) {
       if (desc_get_connected(d) != CON_PLAYING || d->character == ch)
         continue;
-      if ((i = (d->original ? d->original : d->character)) == NULL)
+      if ((i = (d->original ? d->original : d->character)) == nullptr)
         continue;
       if (char_get_in_room(i) == NOWHERE || !char_can_see(ch, i))
         continue;
@@ -496,7 +496,7 @@ static void perform_immort_where(struct char_data *ch, char *arg)
                             "@RUNKOWN@n"};
 
   if (!*arg) {
-    mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(ch)), TRUE, "GODCMD: %s has checked where to check player locations", char_get_name(ch));
+    mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(ch)), true, "GODCMD: %s has checked where to check player locations", char_get_name(ch));
     send_to_char(ch, "Players                  Vnum    Planet        Location\r\n-------                 ------   ----------    ----------------\r\n");
     for (d = descriptor_list; d; d = d->next)
       if (desc_is_playing(d)) {
@@ -537,7 +537,7 @@ static void perform_immort_where(struct char_data *ch, char *arg)
         }
       }
   } else {
-    mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(ch)), TRUE, "GODCMD: %s has checked where for the location of %s", char_get_name(ch), arg);
+    mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(ch)), true, "GODCMD: %s has checked where for the location of %s", char_get_name(ch), arg);
     for (i = character_list; i; i = i->next) {
       if (char_can_see(ch, i) && char_get_in_room(i) != NOWHERE && isname(arg, i->name)) {
         found = 1;
@@ -555,7 +555,7 @@ static void perform_immort_where(struct char_data *ch, char *arg)
     for (k = object_list; k; k = k->next)
       if (char_can_see_obj(ch, k) && isname(arg, k->name)) {
         found = 1;
-        print_object_location(++num, k, ch, TRUE);
+        print_object_location(++num, k, ch, true);
       }
     if (!found) {
       send_to_char(ch, "Couldn't find any such thing.\r\n");
@@ -585,7 +585,7 @@ ACMD(do_toplist)
   FILE *file;
   char fname[40], filler[50], line[256];
   int64_t stats;
-  char *title[25] = {NULL};
+  char *title[25] = {nullptr};
   int count = 0, x = 0;
 
   /* Read Introduction File */
@@ -730,7 +730,7 @@ ACMD(do_toplist)
 ACMD(do_whois)
 {
   char buf[MAX_INPUT_LENGTH];
-  int clan                               = FALSE;
+  int clan                               = false;
   const char *immlevels[ADMLVL_IMPL + 2] = {
       "[Mortal]",               /* lowest admin level */
       "[Enforcer]",             /* lowest admin level +1 */
@@ -751,7 +751,7 @@ ACMD(do_whois)
     clear_char(victim);
     CREATE(victim->player_specials, struct player_special_data, 1);
     if (load_char(argument, victim) >= 0) {
-      clan = FALSE;
+      clan = false;
       send_to_char(ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
       if (char_get_admlevel(victim) >= ADMLVL_IMMORT) {
         send_to_char(ch, "@cName     @D: @G%s\r\n", char_get_name(victim));

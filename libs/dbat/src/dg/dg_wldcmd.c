@@ -73,8 +73,8 @@ static void act_to_room(char *str, room_data *room)
      * TO_ROOM and TO_CHAR for some char in the room.
      * (just dont use $n or you might get strange results)
      */
-  act(str, FALSE, room->people, 0, 0, TO_ROOM);
-  act(str, FALSE, room->people, 0, 0, TO_CHAR);
+  act(str, false, room->people, 0, 0, TO_ROOM);
+  act(str, false, room->people, 0, 0, TO_CHAR);
 }
 
 /* World commands */
@@ -186,9 +186,9 @@ static WCMD(do_wsend)
 
   if ((ch = get_char_by_room(room, buf))) {
     if (subcmd == SCMD_WSEND)
-      sub_write(msg, ch, TRUE, TO_CHAR);
+      sub_write(msg, ch, true, TO_CHAR);
     else if (subcmd == SCMD_WECHOAROUND)
-      sub_write(msg, ch, TRUE, TO_ROOM);
+      sub_write(msg, ch, true, TO_ROOM);
   }
 
   else
@@ -246,7 +246,7 @@ static WCMD(do_wdoor)
     wld_log(room, "wdoor called with too few args");
     return;
   }
-  if ((rm = get_room(target)) == NULL) {
+  if ((rm = get_room(target)) == nullptr) {
     wld_log(room, "wdoor: invalid target");
     return;
   }
@@ -257,7 +257,7 @@ static WCMD(do_wdoor)
     return;
   }
 
-  if ((fd = search_block(field, dg_door_fields, FALSE)) == -1) {
+  if ((fd = search_block(field, dg_door_fields, false)) == -1) {
     wld_log(room, "wdoor: invalid field");
     return;
   }
@@ -431,7 +431,7 @@ static WCMD(do_wload)
         return;
       }
     }
-    if ((mob = read_mobile(number, VIRTUAL)) == NULL) {
+    if ((mob = read_mobile(number, VIRTUAL)) == nullptr) {
       wld_log(room, "mload: bad mob vnum");
       return;
     }
@@ -445,7 +445,7 @@ static WCMD(do_wload)
   }
 
   else if (is_abbrev(arg1, "obj")) {
-    if ((object = read_object(number, VIRTUAL)) == NULL) {
+    if ((object = read_object(number, VIRTUAL)) == nullptr) {
       wld_log(room, "wload: bad object vnum");
       return;
     }

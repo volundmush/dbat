@@ -20,8 +20,8 @@ static void ping_ship(int vnum, int vnum2)
 {
 
   struct char_data *tch, *next_ch;
-  struct obj_data *controls = NULL, *obj = NULL;
-  int found = FALSE;
+  struct obj_data *controls = nullptr, *obj = nullptr;
+  int found = false;
 
   if (vnum2 == -1) {
     return;
@@ -29,37 +29,37 @@ static void ping_ship(int vnum, int vnum2)
 
   for (tch = character_list; tch; tch = next_ch) {
     next_ch = tch->next;
-    if (found == FALSE) {
+    if (found == false) {
       if (!(obj = find_control(tch))) {
         continue;
       }
       if (obj_get_value(obj, 0) == vnum && vnum != vnum2) {
         controls = obj;
-        found    = TRUE;
+        found    = true;
       }
     }
   }
 
-  if (found == TRUE) {
+  if (found == true) {
     send_to_room(obj_get_in_room(controls), "@D[@RALERT@D: @YAn unknown radar signal has been detected!@D]@n");
   }
 }
 
 static int checkship(int rnum, int vnum)
 {
-  struct obj_data *i = NULL;
-  int there          = FALSE;
+  struct obj_data *i = nullptr;
+  int there          = false;
 
   for (i = world[rnum].contents; i; i = i->next_content) {
     if (!rroom_flagged(rnum, ROOM_NEBULA)) {
-      if (obj_get_type_flag(i) == ITEM_VEHICLE && there != TRUE) {
-        there = TRUE;
+      if (obj_get_type_flag(i) == ITEM_VEHICLE && there != true) {
+        there = true;
         ping_ship(obj_get_vnum(i), vnum);
       }
     }
   }
 
-  i = NULL;
+  i = nullptr;
 
   return there;
 }
@@ -67,19 +67,19 @@ static int checkship(int rnum, int vnum)
 static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
 {
   static char mapchar[50];
-  int there = FALSE, enemy = FALSE;
+  int there = false, enemy = false;
 
   if (rnum == start) {
-    there = TRUE;
+    there = true;
   }
   if (checkship(rnum, vnum)) {
-    enemy = TRUE;
+    enemy = true;
   }
 
   if (rnum == real_room(char_get_radar1(ch)) || rnum == real_room(char_get_radar2(ch)) || rnum == real_room(char_get_radar3(ch))) {
     if (there) {
       sprintf(mapchar, "@WB@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@WB@r#");
     } else {
       sprintf(mapchar, "@WBB");
@@ -88,7 +88,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_flagged(rnum, ROOM_EORBIT)) {
     if (there) {
       sprintf(mapchar, "@GE@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@GE@r#");
     } else {
       sprintf(mapchar, "@GEE");
@@ -97,7 +97,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_flagged(rnum, ROOM_CORBIT)) {
     if (there) {
       sprintf(mapchar, "@MC@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@MC@r#");
     } else {
       sprintf(mapchar, "@MCC");
@@ -106,7 +106,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_flagged(rnum, ROOM_FORBIT)) {
     if (there) {
       sprintf(mapchar, "@CF@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@CF@r#");
     } else {
       sprintf(mapchar, "@CFF");
@@ -115,7 +115,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_flagged(rnum, ROOM_KORBIT)) {
     if (there) {
       sprintf(mapchar, "@mK@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@mK@r#");
     } else {
       sprintf(mapchar, "@mKK");
@@ -124,7 +124,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_flagged(rnum, ROOM_NORBIT)) {
     if (there) {
       sprintf(mapchar, "@gN@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@gN@r#");
     } else {
       sprintf(mapchar, "@gNN");
@@ -133,7 +133,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_get_vnum(rnum) == 50772) {
     if (there) {
       sprintf(mapchar, "@cZ@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@cZ@r#");
     } else {
       sprintf(mapchar, "@cZZ");
@@ -142,7 +142,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_flagged(rnum, ROOM_VORBIT)) {
     if (there) {
       sprintf(mapchar, "@YV@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@YV@r#");
     } else {
       sprintf(mapchar, "@YVV");
@@ -151,7 +151,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_flagged(rnum, ROOM_AORBIT)) {
     if (there) {
       sprintf(mapchar, "@BA@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@BA@r#");
     } else {
       sprintf(mapchar, "@BAA");
@@ -160,7 +160,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_flagged(rnum, ROOM_YORBIT)) {
     if (there) {
       sprintf(mapchar, "@MY@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@MY@r#");
     } else {
       sprintf(mapchar, "@MYY");
@@ -169,7 +169,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_flagged(rnum, ROOM_KANORB)) {
     if (there) {
       sprintf(mapchar, "@CK@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@CK@r#");
     } else {
       sprintf(mapchar, "@CKK");
@@ -178,7 +178,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_flagged(rnum, ROOM_ARLORB)) {
     if (there) {
       sprintf(mapchar, "@mA@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@mA@r#");
     } else {
       sprintf(mapchar, "@mAA");
@@ -187,7 +187,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_flagged(rnum, ROOM_NEBULA)) {
     if (there) {
       sprintf(mapchar, "@m&@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@m&@r#");
     } else {
       sprintf(mapchar, "@m&&");
@@ -196,7 +196,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_get_vnum(rnum) == 38028) {
     if (there) {
       sprintf(mapchar, "@yQ@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@yQ@r#");
     } else {
       sprintf(mapchar, "@yQQ");
@@ -205,7 +205,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_flagged(rnum, ROOM_ASTERO)) {
     if (there) {
       sprintf(mapchar, "@y:@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@y:@r#");
     } else {
       sprintf(mapchar, "@y::");
@@ -214,7 +214,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_flagged(rnum, ROOM_WORMHO)) {
     if (there) {
       sprintf(mapchar, "@b@1*@RX@n");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@b@1*@r#@n");
     } else {
       sprintf(mapchar, "@b@1**@n");
@@ -223,7 +223,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_flagged(rnum, ROOM_STATION)) {
     if (there) {
       sprintf(mapchar, "@DS@RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@DS@r#");
     } else {
       sprintf(mapchar, "@DSS");
@@ -232,7 +232,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else if (rroom_flagged(rnum, ROOM_STAR)) {
     if (there) {
       sprintf(mapchar, "@6 @RX@n");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@6 @r#@n");
     } else {
       sprintf(mapchar, "@6  @n");
@@ -241,7 +241,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   else {
     if (there) {
       sprintf(mapchar, "@w @RX");
-    } else if (enemy == TRUE) {
+    } else if (enemy == true) {
       sprintf(mapchar, "@w @r#");
     } else {
       int color = rand_number(1, 30);
@@ -376,9 +376,9 @@ void printmap(int rnum, struct char_data *ch, int type, int vnum)
       if (x == coord.x && y == coord.y) {
         strcat(buf, getmapchar(mapnums[y][x], ch, start, vnum));
       } else if (x > MAP_COLS || x < 0) {
-        if (lasty != TRUE && y > -1 && y < 200) {
+        if (lasty != true && y > -1 && y < 200) {
           strcat(buf, "@D?");
-          lasty = TRUE;
+          lasty = true;
         }
       } else if (y > MAP_ROWS || y < 0) {
         if (y == -1 || y == 200) {
@@ -388,7 +388,7 @@ void printmap(int rnum, struct char_data *ch, int type, int vnum)
         strcat(buf, getmapchar(mapnums[y][x], ch, start, vnum));
     }
     strcat(buf, "\n");
-    lasty = FALSE;
+    lasty = false;
   }
 
   send_to_char(ch, "%s", buf);

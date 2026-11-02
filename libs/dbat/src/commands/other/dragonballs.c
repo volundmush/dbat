@@ -49,49 +49,49 @@
 
 void load_shadow_dragons()
 {
-  struct char_data *mob = NULL;
+  struct char_data *mob = nullptr;
   mob_rnum r_num;
 
   if (SHADOW_DRAGON1 > 0) {
     r_num = real_mobile(SHADOW_DRAGON1_VNUM);
     mob   = read_mobile(r_num, REAL);
     char_to_room(mob, real_room(SHADOW_DRAGON1));
-    mob = NULL;
+    mob = nullptr;
   }
 
   if (SHADOW_DRAGON2 > 0) {
     r_num = real_mobile(SHADOW_DRAGON2_VNUM);
     mob   = read_mobile(r_num, REAL);
     char_to_room(mob, real_room(SHADOW_DRAGON2));
-    mob = NULL;
+    mob = nullptr;
   }
 
   if (SHADOW_DRAGON3 > 0) {
     r_num = real_mobile(SHADOW_DRAGON3_VNUM);
     mob   = read_mobile(r_num, REAL);
     char_to_room(mob, real_room(SHADOW_DRAGON3));
-    mob = NULL;
+    mob = nullptr;
   }
 
   if (SHADOW_DRAGON4 > 0) {
     r_num = real_mobile(SHADOW_DRAGON4_VNUM);
     mob   = read_mobile(r_num, REAL);
     char_to_room(mob, real_room(SHADOW_DRAGON4));
-    mob = NULL;
+    mob = nullptr;
   }
 
   if (SHADOW_DRAGON5 > 0) {
     r_num = real_mobile(SHADOW_DRAGON5_VNUM);
     mob   = read_mobile(r_num, REAL);
     char_to_room(mob, real_room(SHADOW_DRAGON5));
-    mob = NULL;
+    mob = nullptr;
   }
 
   if (SHADOW_DRAGON6 > 0) {
     r_num = real_mobile(SHADOW_DRAGON6_VNUM);
     mob   = read_mobile(r_num, REAL);
     char_to_room(mob, real_room(SHADOW_DRAGON6));
-    mob = NULL;
+    mob = nullptr;
   }
 
   if (SHADOW_DRAGON7 > 0) {
@@ -105,7 +105,7 @@ void load_shadow_dragons()
 
 void wishSYS(void)
 {
-  if (SHENRON == TRUE) {
+  if (SHENRON == true) {
     if (SELFISHMETER < 10) {
       switch (DRAGONC) {
         case 300:
@@ -152,7 +152,7 @@ void wishSYS(void)
           send_to_room(real_room(DRAGONR), "Shenron growls and disappears with a blinding flash that is absorbed into the dragon balls. The glowing dragon balls then float high into the sky, splitting into several directions and streaking across the sky!@n\r\n");
           send_to_planet(0, ROOM_EARTH, "@DThe sky grows brighter again as the clouds disappear magicly.@n\r\n");
           extract_char(EDRAGON);
-          SHENRON = FALSE;
+          SHENRON = false;
           DRAGONC -= 1;
           save_mud_time(&time_info);
           break;
@@ -167,11 +167,11 @@ void wishSYS(void)
       }
     } else {
       send_to_room(real_room(DRAGONR), "@RThe dragon balls suddenly begin to crack and darkness begins to pour out through the cracks! Shenron begins to turn pitch black slowly as the darkness escapes. Suddenly Shenron explodes out into the distance in seven parts. Each part taking a dragon ball with it!@n\r\n");
-      int num = rand_number(200, 20000), done = FALSE, place = 1;
+      int num = rand_number(200, 20000), done = false, place = 1;
       DRAGONC = 0;
       WISH[0] = 0;
       WISH[1] = 0;
-      while (done == FALSE) {
+      while (done == false) {
         switch (place) {
           case 1:
             if (real_room(num) != NOWHERE) {
@@ -255,7 +255,7 @@ void wishSYS(void)
             if (real_room(num) != NOWHERE) {
               if (rroom_flagged(real_room(num), ROOM_EARTH) || rroom_flagged(real_room(num), ROOM_VEGETA) || rroom_flagged(real_room(num), ROOM_FRIGID) || rroom_flagged(real_room(num), ROOM_AETHER) || rroom_flagged(real_room(num), ROOM_NAMEK) || rroom_flagged(real_room(num), ROOM_KONACK) || rroom_flagged(real_room(num), ROOM_YARDRAT) || rroom_flagged(real_room(num), ROOM_YARDRAT)) {
                 SHADOW_DRAGON7 = num;
-                done           = TRUE;
+                done           = true;
                 num            = rand_number(200, 20000);
               } else {
                 num = rand_number(200, 20000);
@@ -267,46 +267,46 @@ void wishSYS(void)
         } /* End switch */
         save_mud_time(&time_info);
       } /* End while */
-      struct char_data *mob = NULL;
+      struct char_data *mob = nullptr;
       mob_rnum r_num;
 
       r_num = real_mobile(SHADOW_DRAGON1_VNUM);
       mob   = read_mobile(r_num, REAL);
       char_to_room(mob, real_room(SHADOW_DRAGON1));
-      mob = NULL;
+      mob = nullptr;
 
       r_num = real_mobile(SHADOW_DRAGON2_VNUM);
       mob   = read_mobile(r_num, REAL);
       char_to_room(mob, real_room(SHADOW_DRAGON2));
-      mob = NULL;
+      mob = nullptr;
 
       r_num = real_mobile(SHADOW_DRAGON3_VNUM);
       mob   = read_mobile(r_num, REAL);
       char_to_room(mob, real_room(SHADOW_DRAGON3));
-      mob = NULL;
+      mob = nullptr;
 
       r_num = real_mobile(SHADOW_DRAGON4_VNUM);
       mob   = read_mobile(r_num, REAL);
       char_to_room(mob, real_room(SHADOW_DRAGON4));
-      mob = NULL;
+      mob = nullptr;
 
       r_num = real_mobile(SHADOW_DRAGON5_VNUM);
       mob   = read_mobile(r_num, REAL);
       char_to_room(mob, real_room(SHADOW_DRAGON5));
-      mob = NULL;
+      mob = nullptr;
 
       r_num = real_mobile(SHADOW_DRAGON6_VNUM);
       mob   = read_mobile(r_num, REAL);
       char_to_room(mob, real_room(SHADOW_DRAGON6));
-      mob = NULL;
+      mob = nullptr;
 
       r_num = real_mobile(SHADOW_DRAGON7_VNUM);
       mob   = read_mobile(r_num, REAL);
       char_to_room(mob, real_room(SHADOW_DRAGON7));
-      mob = NULL;
+      mob = nullptr;
 
       extract_char(EDRAGON);
-      SHENRON = FALSE;
+      SHENRON = false;
       DRAGONC = 0;
     } /* End else */
   }
@@ -315,11 +315,11 @@ void wishSYS(void)
 ACMD(do_summon)
 {
 
-  int summoned = FALSE, count = 0;
+  int summoned = false, count = 0;
   int dball[7]  = {20, 21, 22, 23, 24, 25, 26};
   int dball2[7] = {20, 21, 22, 23, 24, 25, 26};
   struct obj_data *obj, *next_obj;
-  struct char_data *mob = NULL;
+  struct char_data *mob = nullptr;
   mob_rnum r_num;
 
   if (!rroom_flagged(char_get_in_room(ch), ROOM_EARTH)) {
@@ -381,14 +381,14 @@ ACMD(do_summon)
   } // end repeat for
 
   if (count == 7) {
-    summoned = TRUE;
+    summoned = true;
   }
 
-  if (summoned == TRUE) {
+  if (summoned == true) {
     reveal_hiding(ch, 0);
-    act("@WYou place the dragon balls on the ground and with both hands outstretched towards them you say '@CArise Eternal Dragon Shenron!@W'@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@W$n places the dragon balls on the ground and with both hands outstretched towards them $e says '@CArise Eternal Dragon Shenron!@W'@n", TRUE, ch, 0, 0, TO_ROOM);
-    SHENRON = TRUE;
+    act("@WYou place the dragon balls on the ground and with both hands outstretched towards them you say '@CArise Eternal Dragon Shenron!@W'@n", true, ch, 0, 0, TO_CHAR);
+    act("@W$n places the dragon balls on the ground and with both hands outstretched towards them $e says '@CArise Eternal Dragon Shenron!@W'@n", true, ch, 0, 0, TO_ROOM);
+    SHENRON = true;
     DRAGONC = 300;
     DRAGONR = rroom_get_vnum(char_get_in_room(ch));
     if (real_room(DRAGONR) == NOWHERE) {
@@ -465,7 +465,7 @@ int dball_count(struct char_data *ch)
 
   int dball[7]         = {20, 21, 22, 23, 24, 25, 26};
   int count            = 0;
-  struct obj_data *obj = NULL, *next_obj = NULL;
+  struct obj_data *obj = nullptr, *next_obj = nullptr;
 
   for (obj = ch->carrying; obj; obj = next_obj) {
     next_obj = obj->next_content;

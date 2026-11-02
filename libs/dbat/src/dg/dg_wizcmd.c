@@ -214,7 +214,7 @@ ACMD(do_attach)
   loc     = (*loc_name) ? atoi(loc_name) : -1;
 
   if (is_abbrev(arg, "mobile") || is_abbrev(arg, "mtr")) {
-    victim = get_char_vis(ch, targ_name, NULL, FIND_CHAR_WORLD);
+    victim = get_char_vis(ch, targ_name, nullptr, FIND_CHAR_WORLD);
     if (!victim) { /* search room for one with this vnum */
       for (victim = world[char_get_in_room(ch)].people; victim; victim = victim->next_in_room)
         if (char_get_mob_vnum(victim) == num_arg)
@@ -247,7 +247,7 @@ ACMD(do_attach)
   }
 
   else if (is_abbrev(arg, "object") || is_abbrev(arg, "otr")) {
-    object = get_obj_vis(ch, targ_name, NULL);
+    object = get_obj_vis(ch, targ_name, nullptr);
     if (!object) { /* search room for one with this vnum */
       for (object = world[char_get_in_room(ch)].contents; object; object = object->next_content)
         if (obj_get_vnum(object) == num_arg)
@@ -331,14 +331,14 @@ ACMD(do_attach)
 bool remove_trigger(struct script_data *sc, char *name)
 {
   trig_data *i, *j;
-  int num = 0, string = FALSE, n;
+  int num = 0, string = false, n;
   char *cname;
 
   if (!sc)
     return false;
 
   if ((cname = strstr(name, ".")) || (!isdigit(*name))) {
-    string = TRUE;
+    string = true;
     if (cname) {
       *cname = '\0';
       num    = atoi(name);
@@ -347,7 +347,7 @@ bool remove_trigger(struct script_data *sc, char *name)
   } else
     num = atoi(name);
 
-  for (n = 0, j = NULL, i = sc->trig_list; i; j = i, i = i->next) {
+  for (n = 0, j = nullptr, i = sc->trig_list; i; j = i, i = i->next) {
     if (string) {
       if (isname(name, i->name))
         if (++n >= num)
@@ -387,8 +387,8 @@ bool remove_trigger(struct script_data *sc, char *name)
 
 ACMD(do_detach)
 {
-  char_data *victim = NULL;
-  obj_data *object  = NULL;
+  char_data *victim = nullptr;
+  obj_data *object  = nullptr;
   struct room_data *room;
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
   char *trigger = 0;
@@ -428,7 +428,7 @@ ACMD(do_detach)
 
   else {
     if (is_abbrev(arg1, "mobile") || !strcasecmp(arg1, "mtr")) {
-      victim = get_char_vis(ch, arg2, NULL, FIND_CHAR_WORLD);
+      victim = get_char_vis(ch, arg2, nullptr, FIND_CHAR_WORLD);
       if (!victim) { /* search room for one with this vnum */
         for (victim = world[char_get_in_room(ch)].people; victim; victim = victim->next_in_room)
           if (char_get_mob_vnum(victim) == num_arg)
@@ -447,7 +447,7 @@ ACMD(do_detach)
     }
 
     else if (is_abbrev(arg1, "object") || !strcasecmp(arg1, "otr")) {
-      object = get_obj_vis(ch, arg2, NULL);
+      object = get_obj_vis(ch, arg2, nullptr);
       if (!object) { /* search room for one with this vnum */
         for (object = world[char_get_in_room(ch)].contents; object; object = object->next_content)
           if (obj_get_vnum(object) == num_arg)
@@ -471,17 +471,17 @@ ACMD(do_detach)
         trigger = arg3;
     } else {
       /* Thanks to Carlos Myers for fixing the line below */
-      if ((object = get_obj_in_equip_vis(ch, arg1, NULL, ch->equipment)))
+      if ((object = get_obj_in_equip_vis(ch, arg1, nullptr, ch->equipment)))
         ;
-      else if ((object = get_obj_in_list_vis(ch, arg1, NULL, ch->carrying)))
+      else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->carrying)))
         ;
-      else if ((victim = get_char_room_vis(ch, arg1, NULL)))
+      else if ((victim = get_char_room_vis(ch, arg1, nullptr)))
         ;
-      else if ((object = get_obj_in_list_vis(ch, arg1, NULL, world[char_get_in_room(ch)].contents)))
+      else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, world[char_get_in_room(ch)].contents)))
         ;
-      else if ((victim = get_char_vis(ch, arg1, NULL, FIND_CHAR_WORLD)))
+      else if ((victim = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD)))
         ;
-      else if ((object = get_obj_vis(ch, arg1, NULL)))
+      else if ((object = get_obj_vis(ch, arg1, nullptr)))
         ;
       else
         send_to_char(ch, "Nothing around by that name.\r\n");
@@ -541,7 +541,7 @@ ACMD(do_detach)
  */
 ACMD(do_vdelete)
 {
-  struct script_data *sc_remote = NULL;
+  struct script_data *sc_remote = nullptr;
   char *var, *uid_p;
   char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
   long uid;
@@ -578,19 +578,19 @@ ACMD(do_vdelete)
     return;
   }
 
-  if (sc_remote == NULL) {
+  if (sc_remote == nullptr) {
     send_to_char(ch, "That id represents no global variables.(1)\r\n");
     return;
   }
 
-  if (sc_remote->global_vars == NULL) {
+  if (sc_remote->global_vars == nullptr) {
     send_to_char(ch, "That id represents no global variables.(2)\r\n");
     return;
   }
 
   if (*var == '*' || is_abbrev(var, "all")) {
     free_varlist(sc_remote->global_vars);
-    sc_remote->global_vars = NULL;
+    sc_remote->global_vars = nullptr;
     send_to_char(ch, "All variables deleted from that id.\r\n");
     return;
   }

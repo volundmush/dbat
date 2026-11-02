@@ -242,8 +242,8 @@ static int find_context_gedit(struct descriptor_data *d)
   }
 }
 
-static char NO_HELP[] = "No help available (yet)!\r\n";
-#define FIND_HELP_CHAR '*'
+static char NO_HELP[]        = "No help available (yet)!\r\n";
+constexpr int FIND_HELP_CHAR = '*';
 
 int context_help(struct descriptor_data *d, char *arg)
 {
@@ -251,7 +251,7 @@ int context_help(struct descriptor_data *d, char *arg)
   char actbuf[MAX_INPUT_LENGTH], *tmp;
   /* skip if context help isn't wanted */
   if (strncmp(arg, CONTEXT_HELP_STRING, strlen(CONTEXT_HELP_STRING)))
-    return FALSE;
+    return false;
 
   tmp = one_argument(arg, actbuf); /* the totally useless 'help' string.. */
   skip_spaces(&tmp);
@@ -261,16 +261,16 @@ int context_help(struct descriptor_data *d, char *arg)
 
   if (context != NOTHING && context < NUM_CONTEXTS && *context_help_list[context]) {
     if (*context_help_list[context] == FIND_HELP_CHAR) {
-      strncpy(actbuf, context_help_list[context] + 1, sizeof(actbuf) - 1);
+      strlcpy(actbuf, context_help_list[context] + 1, sizeof(actbuf));
       do_help(d->character, actbuf, 0, 0);
     } else {
       write_to_output(d, "\r\n%s\r\n>  ", context_help_list[context]);
     }
-    return TRUE;
+    return true;
   }
-  strncpy(actbuf, tmp, sizeof(actbuf) - 1);
+  strlcpy(actbuf, tmp, sizeof(actbuf));
   do_help(d->character, actbuf, 0, 0);
-  return TRUE;
+  return true;
 }
 
 void boot_context_help(void)

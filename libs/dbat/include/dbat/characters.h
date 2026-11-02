@@ -22,9 +22,8 @@
 #include "consts/senseis.h"
 #include "consts/sizes.h"
 #include "index.h"
-#include "htree.h"
 
-#define PM_ARRAY_MAX 4
+constexpr int PM_ARRAY_MAX = 4;
 
 /* These data contain information about a players time data */
 struct time_data {
@@ -440,5 +439,4 @@ extern struct char_data *affect_list;
 extern struct index_data *mob_index;
 extern struct char_data *mob_proto;
 extern mob_rnum top_of_mobt;
-extern struct htree_node *mob_htree;
 extern long max_mob_id;

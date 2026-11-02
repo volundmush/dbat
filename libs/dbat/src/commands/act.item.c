@@ -48,9 +48,9 @@
 static int64_t max_carry_weight(struct char_data *ch);
 
 /* global variables */
-struct obj_data *obj_selling       = NULL; /* current object for sale */
-struct char_data *ch_selling       = NULL; /* current character selling obj */
-static struct char_data *ch_buying = NULL; /* current character buying the object */
+struct obj_data *obj_selling       = nullptr; /* current object for sale */
+struct char_data *ch_selling       = nullptr; /* current character selling obj */
+static struct char_data *ch_buying = nullptr; /* current character buying the object */
 
 /* local vvariables  */
 static int curbid  = 0;              /* current bid on item being auctioned */
@@ -109,7 +109,7 @@ ACMD(do_refuel)
     return;
   }
 
-  struct obj_data *rep = NULL, *next_obj = NULL, *fuel = NULL;
+  struct obj_data *rep = nullptr, *next_obj = nullptr, *fuel = nullptr;
 
   for (rep = ch->carrying; rep; rep = next_obj) {
     next_obj = rep->next_content;
@@ -118,7 +118,7 @@ ACMD(do_refuel)
     }
   }
 
-  if (fuel == NULL) {
+  if (fuel == nullptr) {
     send_to_char(ch, "You do not have any fuel canisters on you.\r\n");
     return;
   }
@@ -155,37 +155,37 @@ static const struct harvest {
   int bonus;  /* added to the yield */
   bool kills; /* harvesting kills the plant */
 } harvests[] = {
-    {250,   1,     0,  FALSE}, /* at most 2 */
-    {1129,  1131,  0,  TRUE },
-    {17210, 17212, 2,  TRUE },
-    {17211, 17213, 2,  TRUE },
-    {17214, 17215, 1,  TRUE },
-    {17216, 17217, 0,  TRUE },
-    {17218, 17219, 14, TRUE },
-    {17220, 17221, 0,  TRUE }, /* a quarter */
-    {17222, 17223, 0,  TRUE }, /* plus 1 to 3 */
-    {17224, 17225, 10, TRUE },
-    {17226, 17227, -8, TRUE },
-    {3702,  3703,  -2, TRUE },
+    {250,   1,     0,  false}, /* at most 2 */
+    {1129,  1131,  0,  true },
+    {17210, 17212, 2,  true },
+    {17211, 17213, 2,  true },
+    {17214, 17215, 1,  true },
+    {17216, 17217, 0,  true },
+    {17218, 17219, 14, true },
+    {17220, 17221, 0,  true }, /* a quarter */
+    {17222, 17223, 0,  true }, /* plus 1 to 3 */
+    {17224, 17225, 10, true },
+    {17226, 17227, -8, true },
+    {3702,  3703,  -2, true },
 };
 
 static const struct harvest *find_harvest(struct obj_data *plant)
 {
-  for (size_t i = 0; i < sizeof(harvests) / sizeof(harvests[0]); i++)
+  for (size_t i = 0; i < countof(harvests); i++)
     if (harvests[i].plant == obj_get_vnum(plant))
       return &harvests[i];
-  return NULL;
+  return nullptr;
 }
 
 static int can_harvest(struct obj_data *plant)
 {
-  return find_harvest(plant) != NULL;
+  return find_harvest(plant) != nullptr;
 }
 
 static void harvest_plant(struct char_data *ch, struct obj_data *plant)
 {
-  int extract = FALSE, reward = rand_number(5, 15), count = reward;
-  struct obj_data *fruit = NULL;
+  int extract = false, reward = rand_number(5, 15), count = reward;
+  struct obj_data *fruit = nullptr;
 
   if (obj_get_value(plant, VAL_SOILQ) > 7) {
     reward += 10;
@@ -251,7 +251,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant)
   send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
   extract = h->kills;
 
-  if (extract == TRUE) {
+  if (extract == true) {
     send_to_char(ch, "@wThe harvesting process has killed the plant. Do not worry, this is normal for that type.@n\r\n");
     extract_obj(plant);
   } else {
@@ -280,15 +280,15 @@ ACMD(do_garden)
   if (*arg) {
     if (!strcasecmp(arg, "collect")) {
       struct obj_data *obj2, *next_obj;
-      int found = FALSE;
+      int found = false;
 
       for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
         next_obj = obj2->next_content;
         if (obj_get_vnum(obj2) == 254 && !obj_extra_flagged(obj2, ITEM_BROKEN) && !obj_extra_flagged(obj2, ITEM_FORGED)) {
-          found = TRUE;
+          found = true;
         }
       }
-      if (found == FALSE) {
+      if (found == false) {
         send_to_char(ch, "You need a shovel in order to collect soil.\r\n");
         return;
       }
@@ -299,8 +299,8 @@ ACMD(do_garden)
       if (rroom_flagged(char_get_in_room(ch), ROOM_FERTILE1)) {
         struct obj_data *soil = read_object(255, VIRTUAL);
         obj_to_char(soil, ch);
-        act("@yYou sink your shovel into the soft ground and manage to dig up a pile of fertile soil!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of fertile soil!@n", TRUE, ch, 0, 0, TO_ROOM);
+        act("@yYou sink your shovel into the soft ground and manage to dig up a pile of fertile soil!@n", true, ch, 0, 0, TO_CHAR);
+        act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of fertile soil!@n", true, ch, 0, 0, TO_ROOM);
         obj_set_value(soil, 0, 8);
         char_set_wait(ch, PULSE_4SEC);
         return;
@@ -308,16 +308,16 @@ ACMD(do_garden)
       if (rroom_flagged(char_get_in_room(ch), ROOM_FERTILE2)) {
         struct obj_data *soil = read_object(255, VIRTUAL);
         obj_to_char(soil, ch);
-        act("@yYou sink your shovel into the soft ground and manage to dig up a pile of good soil!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of good soil!@n", TRUE, ch, 0, 0, TO_ROOM);
+        act("@yYou sink your shovel into the soft ground and manage to dig up a pile of good soil!@n", true, ch, 0, 0, TO_CHAR);
+        act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of good soil!@n", true, ch, 0, 0, TO_ROOM);
         obj_set_value(soil, 0, rand_number(5, 7));
         char_set_wait(ch, PULSE_4SEC);
         return;
       }
       struct obj_data *soil = read_object(255, VIRTUAL);
       obj_to_char(soil, ch);
-      act("@yYou sink your shovel into the soft ground and manage to dig up a pile of soil!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of soil!@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@yYou sink your shovel into the soft ground and manage to dig up a pile of soil!@n", true, ch, 0, 0, TO_CHAR);
+      act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of soil!@n", true, ch, 0, 0, TO_ROOM);
       obj_set_value(soil, 0, rand_number(0, 4));
       char_set_wait(ch, PULSE_4SEC);
       return;
@@ -336,13 +336,13 @@ ACMD(do_garden)
   }
 
   if (!strcasecmp(arg2, "plant")) {
-    if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
       send_to_char(ch, "What are you trying to plant?\r\n");
       send_to_char(ch, "Syntax: garden (plant in inventory) plant\r\n");
       return;
     }
   } else {
-    if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[char_get_in_room(ch)].contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
       send_to_char(ch, "That plant doesn't seem to be here.\r\n");
       return;
     }
@@ -361,17 +361,17 @@ ACMD(do_garden)
     return;
   }
   if (!strcasecmp(arg2, "water")) {
-    struct obj_data *obj2, *water = NULL, *next_obj;
-    int found = FALSE;
+    struct obj_data *obj2, *water = nullptr, *next_obj;
+    int found = false;
 
     for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
       next_obj = obj2->next_content;
       if (obj_get_vnum(obj2) == 251 && !obj_extra_flagged(obj2, ITEM_FORGED)) {
-        found = TRUE;
+        found = true;
         water = obj2;
       }
     }
-    if (found == FALSE) {
+    if (found == false) {
       send_to_char(ch, "You do not have any grow water!\r\n");
       return;
     }
@@ -384,8 +384,8 @@ ACMD(do_garden)
       return;
     }
     if (skill < axion_dice(0)) {
-      act("@GAs you go to water @g$p@G you end up sloppily wasting about half of it on the ground.@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("@g$n@G takes a bottle of grow water and sloshes some of it on @g$p@G.@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@GAs you go to water @g$p@G you end up sloppily wasting about half of it on the ground.@n", true, ch, obj, 0, TO_CHAR);
+      act("@g$n@G takes a bottle of grow water and sloshes some of it on @g$p@G.@n", true, ch, obj, 0, TO_ROOM);
 
       decCurST(ch, cost, 0);
       obj_set_value(obj, VAL_WATERLEVEL, obj_get_value(obj, VAL_WATERLEVEL) + (40));
@@ -398,8 +398,8 @@ ACMD(do_garden)
       improve_skill(ch, SKILL_GARDENING, 0);
       return;
     }
-    act("@GYou calmly and expertly pour the grow water on @g$p@G.@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@g$n@G calmly and expertly pours some grow water on @g$p@G.@n", TRUE, ch, obj, 0, TO_ROOM);
+    act("@GYou calmly and expertly pour the grow water on @g$p@G.@n", true, ch, obj, 0, TO_CHAR);
+    act("@g$n@G calmly and expertly pours some grow water on @g$p@G.@n", true, ch, obj, 0, TO_ROOM);
     decCurST(ch, cost, 0);
     obj_set_value(obj, VAL_WATERLEVEL, obj_get_value(obj, VAL_WATERLEVEL) + (225));
     if (obj_get_value(obj, VAL_WATERLEVEL) >= 500) {
@@ -412,21 +412,21 @@ ACMD(do_garden)
     return;
   }
   if (!strcasecmp(arg2, "harvest")) {
-    struct obj_data *obj2, *clippers = NULL, *next_obj;
-    int found = FALSE;
+    struct obj_data *obj2, *clippers = nullptr, *next_obj;
+    int found = false;
 
     for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
       next_obj = obj2->next_content;
       if (obj_get_vnum(obj2) == 253 && !obj_extra_flagged(obj2, ITEM_BROKEN) && !obj_extra_flagged(obj2, ITEM_FORGED)) {
-        found    = TRUE;
+        found    = true;
         clippers = obj2;
       }
     }
-    if (found == FALSE) {
+    if (found == false) {
       send_to_char(ch, "You do not have any working gardening clippers!\r\n");
       return;
     }
-    if (can_harvest(obj) == FALSE) {
+    if (can_harvest(obj) == false) {
       send_to_char(ch, "You can not harvest that plant. Instead, Syntax: garden (plant) (pick)\r\n");
       return;
     }
@@ -439,16 +439,16 @@ ACMD(do_garden)
       return;
     }
     if (skill < axion_dice(-5)) {
-      act("@GAs you go to harvest @g$p@G you end up cutting it in half instead!@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("@g$n@G attempts to harvest @g$p@G with $s clippers, but accidently cuts the plant in half!@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@GAs you go to harvest @g$p@G you end up cutting it in half instead!@n", true, ch, obj, 0, TO_CHAR);
+      act("@g$n@G attempts to harvest @g$p@G with $s clippers, but accidently cuts the plant in half!@n", true, ch, obj, 0, TO_ROOM);
       decCurST(ch, cost, 0);
       extract_obj(obj);
       char_set_wait(ch, PULSE_3SEC);
       improve_skill(ch, SKILL_GARDENING, 0);
       return;
     }
-    act("@GYou calmly and expertly harvest @g$p@G.@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@g$n@G calmly and expertly harvests @g$p@G.@n", TRUE, ch, obj, 0, TO_ROOM);
+    act("@GYou calmly and expertly harvest @g$p@G.@n", true, ch, obj, 0, TO_CHAR);
+    act("@g$n@G calmly and expertly harvests @g$p@G.@n", true, ch, obj, 0, TO_ROOM);
     decCurST(ch, cost, 0);
     obj_set_value(clippers, VAL_ALL_HEALTH, obj_get_value(clippers, VAL_ALL_HEALTH) - (1));
     if (obj_get_value(clippers, VAL_ALL_HEALTH) <= 0) {
@@ -462,20 +462,20 @@ ACMD(do_garden)
   }
   if (!strcasecmp(arg2, "dig")) {
     struct obj_data *obj2, *next_obj;
-    int found = FALSE;
+    int found = false;
 
     for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
       next_obj = obj2->next_content;
       if (obj_get_vnum(obj2) == 254 && !obj_extra_flagged(obj2, ITEM_BROKEN) && !obj_extra_flagged(obj2, ITEM_FORGED)) {
-        found = TRUE;
+        found = true;
       }
     }
-    if (found == FALSE) {
+    if (found == false) {
       send_to_char(ch, "You do not have any working gardening shovels!\r\n");
       return;
     }
-    act("@GYou calmly dig up @g$p@G.@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@g$n@G calmly digs up @g$p@G.@n", TRUE, ch, obj, 0, TO_ROOM);
+    act("@GYou calmly dig up @g$p@G.@n", true, ch, obj, 0, TO_CHAR);
+    act("@g$n@G calmly digs up @g$p@G.@n", true, ch, obj, 0, TO_ROOM);
     decCurST(ch, cost, 0);
     obj_from_room(obj);
     obj_to_char(obj, ch);
@@ -486,46 +486,46 @@ ACMD(do_garden)
   }
   if (!strcasecmp(arg2, "plant")) {
     struct obj_data *obj2, *next_obj;
-    int found = FALSE;
+    int found = false;
 
     for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
       next_obj = obj2->next_content;
       if (obj_get_vnum(obj2) == 254 && !obj_extra_flagged(obj2, ITEM_BROKEN) && !obj_extra_flagged(obj2, ITEM_FORGED)) {
-        found = TRUE;
+        found = true;
       }
     }
-    if (found == FALSE) {
+    if (found == false) {
       send_to_char(ch, "You do not have any working gardening shovels!\r\n");
       return;
     }
-    found                 = FALSE;
-    struct obj_data *soil = NULL;
+    found                 = false;
+    struct obj_data *soil = nullptr;
 
     for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
       next_obj = obj2->next_content;
       if (obj_get_vnum(obj2) == 255 && !obj_extra_flagged(obj2, ITEM_FORGED)) {
-        found = TRUE;
+        found = true;
         soil  = obj2;
       }
     }
-    if (found == FALSE) {
+    if (found == false) {
       send_to_char(ch, "You don't have any real soil.\r\n");
-    } else if (check_saveroom_count(ch, NULL) > 7 && rroom_flagged(char_get_in_room(ch), ROOM_GARDEN1)) {
+    } else if (check_saveroom_count(ch, nullptr) > 7 && rroom_flagged(char_get_in_room(ch), ROOM_GARDEN1)) {
       send_to_char(ch, "This room already has all its planters full. Try digging up some plants.\r\n");
       return;
-    } else if (check_saveroom_count(ch, NULL) > 19 && rroom_flagged(char_get_in_room(ch), ROOM_GARDEN2)) {
+    } else if (check_saveroom_count(ch, nullptr) > 19 && rroom_flagged(char_get_in_room(ch), ROOM_GARDEN2)) {
       send_to_char(ch, "This room already has all its planters full. Try digging up some plants.\r\n");
       return;
     } else if (skill < axion_dice(-5)) {
-      act("@GYou end up digging a hole too shallow to hold @g$p@G. Better try again.@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("@g$n@G digs a very shallow hole in one of the planters and then realizes @g$p@G won't fit in it.@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@GYou end up digging a hole too shallow to hold @g$p@G. Better try again.@n", true, ch, obj, 0, TO_CHAR);
+      act("@g$n@G digs a very shallow hole in one of the planters and then realizes @g$p@G won't fit in it.@n", true, ch, obj, 0, TO_ROOM);
       decCurST(ch, cost, 0);
       char_set_wait(ch, PULSE_3SEC);
       improve_skill(ch, SKILL_GARDENING, 0);
       return;
     } else {
-      act("@GYou dig a proper sized hole and plant @g$p@G in it.@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("@g$n@G digs a proper sized hole in a planter and plants @g$p@G in it.@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@GYou dig a proper sized hole and plant @g$p@G in it.@n", true, ch, obj, 0, TO_CHAR);
+      act("@g$n@G digs a proper sized hole in a planter and plants @g$p@G in it.@n", true, ch, obj, 0, TO_ROOM);
       obj_from_char(obj);
       obj_to_room(obj, char_get_in_room(ch));
       decCurST(ch, cost, 0);
@@ -572,12 +572,12 @@ ACMD(do_garden)
       return;
     }
     if (skill < axion_dice(-5)) {
-      act("@GYou end up shredding @g$p@G with your clumsy unskilled hands.@n", TRUE, ch, obj, 0, TO_CHAR);
-      act("@g$n@G grabs a hold of @g$p@G and shreds it in an attempt to pick it.@n", TRUE, ch, obj, 0, TO_ROOM);
+      act("@GYou end up shredding @g$p@G with your clumsy unskilled hands.@n", true, ch, obj, 0, TO_CHAR);
+      act("@g$n@G grabs a hold of @g$p@G and shreds it in an attempt to pick it.@n", true, ch, obj, 0, TO_ROOM);
       return;
     }
-    act("@GYou grab a hold of @g$p@G and carefully pick it out of the soil.@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@g$n@G grabs a hold of @g$p@G and carefully picks it out of the soil.@n", TRUE, ch, obj, 0, TO_ROOM);
+    act("@GYou grab a hold of @g$p@G and carefully pick it out of the soil.@n", true, ch, obj, 0, TO_CHAR);
+    act("@g$n@G grabs a hold of @g$p@G and carefully picks it out of the soil.@n", true, ch, obj, 0, TO_ROOM);
     obj_from_room(obj);
     obj_to_char(obj, ch);
     decCurST(ch, cost, 0);
@@ -594,7 +594,7 @@ ACMD(do_garden)
 static int has_housekey(struct char_data *ch, struct obj_data *obj)
 {
 
-  struct obj_data *obj2 = NULL, *next_obj;
+  struct obj_data *obj2 = nullptr, *next_obj;
   for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
     next_obj = obj2->next_content;
     if (obj_extra_flagged(obj, ITEM_DUPLICATE))
@@ -626,14 +626,14 @@ ACMD(do_pack)
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[char_get_in_room(ch)].contents))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
     send_to_char(ch, "That house item doesn't seem to be around.\r\n");
     return;
   }
-  struct obj_data *packed = NULL;
+  struct obj_data *packed = nullptr;
   if ((obj_get_vnum(obj) >= 19090 && obj_get_vnum(obj) <= 19099) || obj_get_vnum(obj) == 11) {
-    act("@CYou push a hidden button on $p@C and a cloud of smoke erupts and covers it. As the smoke clears a small capsule can be seen on the ground.@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@c$n@C pushes a hidden button on $p@C and a cloud of smokes erupts and covers it. As the smoke clears a small capsule can be seen on the ground.@n", TRUE, ch, obj, 0, TO_ROOM);
+    act("@CYou push a hidden button on $p@C and a cloud of smoke erupts and covers it. As the smoke clears a small capsule can be seen on the ground.@n", true, ch, obj, 0, TO_CHAR);
+    act("@c$n@C pushes a hidden button on $p@C and a cloud of smokes erupts and covers it. As the smoke clears a small capsule can be seen on the ground.@n", true, ch, obj, 0, TO_ROOM);
     if (obj_get_vnum(obj) == 11) {
       extract_obj(obj);
       packed = read_object(19085, VIRTUAL);
@@ -659,8 +659,8 @@ ACMD(do_pack)
       send_to_char(ch, "You do not own this house.\r\n");
       return;
     }
-    act("@CYou push a hidden button on $p@C and a cloud of smoke erupts and covers it. As the smoke clears a pile of money can be seen on the ground!@n", TRUE, ch, obj, 0, TO_CHAR);
-    act("@c$n@C pushes a hidden button on $p@C and a cloud of smokes erupts and covers it. As the smoke clears a pile of money can be seen on the ground!@n", TRUE, ch, obj, 0, TO_ROOM);
+    act("@CYou push a hidden button on $p@C and a cloud of smoke erupts and covers it. As the smoke clears a pile of money can be seen on the ground!@n", true, ch, obj, 0, TO_CHAR);
+    act("@c$n@C pushes a hidden button on $p@C and a cloud of smokes erupts and covers it. As the smoke clears a pile of money can be seen on the ground!@n", true, ch, obj, 0, TO_ROOM);
     int money = 0, count = 0, rnum = obj_get_vnum(obj);
     if (obj_get_vnum(obj) >= 18800 && obj_get_vnum(obj) <= 18899) {
       if (rnum == 18802) {
@@ -694,7 +694,7 @@ ACMD(do_pack)
         rnum++;
       }
     }
-    struct obj_data *obj2 = NULL, *next_obj;
+    struct obj_data *obj2 = nullptr, *next_obj;
     for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
       next_obj = obj2->next_content;
       if (obj_get_vnum(obj) == 18802) {
@@ -719,7 +719,7 @@ ACMD(do_pack)
 int check_insidebag(struct obj_data *cont, double mult)
 {
 
-  struct obj_data *inside = NULL, *next_obj2 = NULL;
+  struct obj_data *inside = nullptr, *next_obj2 = nullptr;
   int count = 0, containers = 0;
 
   for (inside = cont->contains; inside; inside = next_obj2) {
@@ -741,7 +741,7 @@ int check_insidebag(struct obj_data *cont, double mult)
 
 int check_saveroom_count(struct char_data *ch, struct obj_data *cont)
 {
-  struct obj_data *obj, *next_obj = NULL;
+  struct obj_data *obj, *next_obj = nullptr;
   int count = 0;
 
   if (char_get_in_room(ch) == NOWHERE)
@@ -757,7 +757,7 @@ int check_saveroom_count(struct char_data *ch, struct obj_data *cont)
     }
   }
 
-  if (cont != NULL) {
+  if (cont != nullptr) {
     if (!obj_extra_flagged(cont, ITEM_CARDCASE)) {
       count += check_insidebag(cont, 0.5);
     }
@@ -770,8 +770,8 @@ int check_saveroom_count(struct char_data *ch, struct obj_data *cont)
 ACMD(do_deploy)
 {
 
-  struct obj_data *obj3, *next_obj, *obj4, *obj = NULL;
-  int capsule = FALSE, furniture = FALSE;
+  struct obj_data *obj3, *next_obj, *obj4, *obj = nullptr;
+  int capsule = false, furniture = false;
 
   char arg[MAX_INPUT_LENGTH];
 
@@ -782,46 +782,46 @@ ACMD(do_deploy)
       next_obj = obj4->next_content;
       if (obj_get_vnum(obj4) == 4 || obj_get_vnum(obj4) == 5 || obj_get_vnum(obj4) == 6) {
         obj     = obj4;
-        capsule = TRUE;
+        capsule = true;
       }
     }
-  } else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+  } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
     send_to_char(ch, "Syntax: deploy (no argument for houses)\nSyntax: deploy (target) <-- For furniture\r\n");
     return;
   }
 
-  if (capsule == FALSE && obj) {
+  if (capsule == false && obj) {
     if (obj_get_vnum(obj) >= 19080 && obj_get_vnum(obj) <= 19099) {
-      capsule   = TRUE;
-      furniture = TRUE;
+      capsule   = true;
+      furniture = true;
     } else {
       send_to_char(ch, "That is not a furniture capsule!\r\n");
       return;
     }
   }
 
-  if (capsule == FALSE) {
+  if (capsule == false) {
     send_to_char(ch, "You do not have any house type capsules to deploy.@n\r\n");
     return;
   }
-  if (char_get_rp(ch) < 10 && furniture == FALSE) {
+  if (char_get_rp(ch) < 10 && furniture == false) {
     send_to_char(ch, "You are required to have (not spend) 10 RPP in order to place a house.\r\n");
     return;
   }
-  if (furniture == TRUE && (!rroom_flagged(char_get_in_room(ch), ROOM_HOUSE) || rroom_flagged(char_get_in_room(ch), ROOM_SHIP))) {
+  if (furniture == true && (!rroom_flagged(char_get_in_room(ch), ROOM_HOUSE) || rroom_flagged(char_get_in_room(ch), ROOM_SHIP))) {
     send_to_char(ch, "You can't deploy house furniture capsules here.\r\n");
     return;
   }
-  if (furniture == TRUE && (rroom_flagged(char_get_in_room(ch), ROOM_GARDEN1) || rroom_flagged(char_get_in_room(ch), ROOM_GARDEN2))) {
+  if (furniture == true && (rroom_flagged(char_get_in_room(ch), ROOM_GARDEN1) || rroom_flagged(char_get_in_room(ch), ROOM_GARDEN2))) {
     send_to_char(ch, "You can't deploy house furniture capsules here.\r\n");
     return;
   }
-  if (furniture == FALSE && (rroom_sect(char_get_in_room(ch)) == SECT_INSIDE || rroom_sect(char_get_in_room(ch)) == SECT_WATER_NOSWIM || rroom_sect(char_get_in_room(ch)) == SECT_WATER_SWIM || rroom_sect(char_get_in_room(ch)) == SECT_SPACE)) {
+  if (furniture == false && (rroom_sect(char_get_in_room(ch)) == SECT_INSIDE || rroom_sect(char_get_in_room(ch)) == SECT_WATER_NOSWIM || rroom_sect(char_get_in_room(ch)) == SECT_WATER_SWIM || rroom_sect(char_get_in_room(ch)) == SECT_SPACE)) {
     send_to_char(ch, "You can not deploy that in this kind of area. Try an area more suitable for a house.\r\n");
     return;
   }
 
-  if (furniture == TRUE) {
+  if (furniture == true) {
     int fnum = 0;
     if (obj_get_vnum(obj) == 19080) {
       fnum = 19090;
@@ -836,8 +836,8 @@ ACMD(do_deploy)
     }
     if (fnum != 0) {
       struct obj_data *furn = read_object(fnum, VIRTUAL);
-      act("@CYou click the capsule's button and toss it to the floor. A puff of smoke erupts immediately and quickly dissipates to reveal, $p@C.@n", TRUE, ch, furn, 0, TO_CHAR);
-      act("@c$n@C clicks a capsule's button and tosses it to the floor. A puff of smoke erupts immediately and quickly dissipates to reveal, $p@C.@n", TRUE, ch, furn, 0, TO_ROOM);
+      act("@CYou click the capsule's button and toss it to the floor. A puff of smoke erupts immediately and quickly dissipates to reveal, $p@C.@n", true, ch, furn, 0, TO_CHAR);
+      act("@c$n@C clicks a capsule's button and tosses it to the floor. A puff of smoke erupts immediately and quickly dissipates to reveal, $p@C.@n", true, ch, furn, 0, TO_ROOM);
       obj_to_room(furn, char_get_in_room(ch));
       extract_obj(obj);
       return;
@@ -846,7 +846,7 @@ ACMD(do_deploy)
     return;
   }
 
-  int rnum = 18800, giveup = FALSE, cont = FALSE, found = FALSE, type = 0;
+  int rnum = 18800, giveup = false, cont = false, found = false, type = 0;
 
   if (obj_get_vnum(obj) == 4) {
     type = 0;
@@ -860,28 +860,28 @@ ACMD(do_deploy)
 
   int final = rnum + 99;
 
-  while (giveup == FALSE && cont == FALSE) {
+  while (giveup == false && cont == false) {
     for (obj3 = world[real_room(rnum)].contents; obj3; obj3 = next_obj) {
       next_obj = obj3->next_content;
       if (obj_get_vnum(obj3) == 18801) {
-        found = TRUE;
+        found = true;
       }
     }
-    if (found == TRUE && rnum < final) {
+    if (found == true && rnum < final) {
       if (type == 0) {
         rnum += 4;
       } else {
         rnum += 5;
       }
-      found = FALSE;
+      found = false;
     } else if (rnum >= final) {
-      giveup = TRUE;
+      giveup = true;
     } else {
-      cont = TRUE;
+      cont = true;
     }
   } /* End while */
 
-  if (cont == TRUE) {
+  if (cont == true) {
     struct obj_data *door = read_object(18801, VIRTUAL);
 
     obj_set_value(door, 6, rroom_get_vnum(char_get_in_room(ch)));
@@ -893,8 +893,8 @@ ACMD(do_deploy)
     obj_to_room(door, real_room(rnum));
     struct obj_data *key = read_object(rnum, VIRTUAL);
     obj_to_char(key, ch);
-    act("@WYou click the capsule and toss it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@C$n@W clicks a capsule and then tosses it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@WYou click the capsule and toss it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n", true, ch, 0, 0, TO_CHAR);
+    act("@C$n@W clicks a capsule and then tosses it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n", true, ch, 0, 0, TO_ROOM);
     struct obj_data *foun = read_object(18803, VIRTUAL);
     obj_to_room(foun, real_room(rnum + 1));
     extract_obj(obj);
@@ -931,12 +931,12 @@ ACMD(do_twohand)
   }
   if (char_plr_flagged(ch, PLR_THANDW)) {
     send_to_char(ch, "You stop wielding your weapon with both hands.\r\n");
-    act("$n stops wielding $s weapon with both hands.", TRUE, ch, 0, 0, TO_ROOM);
+    act("$n stops wielding $s weapon with both hands.", true, ch, 0, 0, TO_ROOM);
     char_plr_set(ch, PLR_THANDW, false);
     return;
   }
   send_to_char(ch, "You grab your weapon with both hands.\r\n");
-  act("$n starts wielding $s weapon with both hands.", TRUE, ch, 0, 0, TO_ROOM);
+  act("$n starts wielding $s weapon with both hands.", true, ch, 0, 0, TO_ROOM);
   char_plr_set(ch, PLR_THANDW, true);
   return;
 }
@@ -948,7 +948,7 @@ static void start_auction(struct char_data *ch, struct obj_data *obj, int bid)
   obj_from_char(obj);
   obj_selling = obj;
   ch_selling  = ch;
-  ch_buying   = NULL;
+  ch_buying   = nullptr;
   curbid      = bid;
 
   /* Tell th character where his item went */
@@ -958,7 +958,7 @@ static void start_auction(struct char_data *ch, struct obj_data *obj, int bid)
 
   /* Anounce the item is being sold */
   snprintf(buf, sizeof(buf), auctioneer[AUC_NULL_STATE], curbid);
-  auc_send_to_all(buf, FALSE);
+  auc_send_to_all(buf, false);
 
   aucstat = AUC_OFFERING;
 }
@@ -969,67 +969,67 @@ void check_auction(void)
     case AUC_NULL_STATE:
       return;
     case AUC_OFFERING: {
-      if (obj_selling == NULL) {
-        auc_send_to_all("@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", FALSE);
+      if (obj_selling == nullptr) {
+        auc_send_to_all("@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", false);
         curbid     = 0;
-        ch_selling = NULL;
-        ch_buying  = NULL;
+        ch_selling = nullptr;
+        ch_buying  = nullptr;
         aucstat    = AUC_NULL_STATE;
         return;
       }
       snprintf(buf, sizeof(buf), auctioneer[AUC_OFFERING], curbid);
       CAP(buf);
-      auc_send_to_all(buf, FALSE);
+      auc_send_to_all(buf, false);
       aucstat = AUC_GOING_ONCE;
       return;
     }
     case AUC_GOING_ONCE: {
-      if (obj_selling == NULL) {
-        auc_send_to_all("@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", FALSE);
+      if (obj_selling == nullptr) {
+        auc_send_to_all("@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", false);
         curbid     = 0;
-        ch_selling = NULL;
-        ch_buying  = NULL;
+        ch_selling = nullptr;
+        ch_buying  = nullptr;
         aucstat    = AUC_NULL_STATE;
         return;
       }
 
       snprintf(buf, sizeof(buf), auctioneer[AUC_GOING_ONCE], curbid);
       CAP(buf);
-      auc_send_to_all(buf, FALSE);
+      auc_send_to_all(buf, false);
       aucstat = AUC_GOING_TWICE;
       return;
     }
     case AUC_GOING_TWICE: {
-      if (obj_selling == NULL) {
-        auc_send_to_all("@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", FALSE);
+      if (obj_selling == nullptr) {
+        auc_send_to_all("@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", false);
         curbid     = 0;
-        ch_selling = NULL;
-        ch_buying  = NULL;
+        ch_selling = nullptr;
+        ch_buying  = nullptr;
         aucstat    = AUC_NULL_STATE;
         return;
       }
 
       snprintf(buf, sizeof(buf), auctioneer[AUC_GOING_TWICE], curbid);
       CAP(buf);
-      auc_send_to_all(buf, FALSE);
+      auc_send_to_all(buf, false);
       aucstat = AUC_LAST_CALL;
       return;
     }
     case AUC_LAST_CALL: {
-      if (obj_selling == NULL) {
-        auc_send_to_all("@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", FALSE);
+      if (obj_selling == nullptr) {
+        auc_send_to_all("@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", false);
         curbid     = 0;
-        ch_selling = NULL;
-        ch_buying  = NULL;
+        ch_selling = nullptr;
+        ch_buying  = nullptr;
         aucstat    = AUC_NULL_STATE;
         return;
       }
-      if (ch_buying == NULL) {
+      if (ch_buying == nullptr) {
 
         snprintf(buf, sizeof(buf), auctioneer[AUC_LAST_CALL], curbid);
 
         CAP(buf);
-        auc_send_to_all(buf, FALSE);
+        auc_send_to_all(buf, false);
 
         snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands.\r\n", obj_selling->short_description);
         CAP(buf);
@@ -1037,16 +1037,16 @@ void check_auction(void)
         obj_to_char(obj_selling, ch_selling);
 
         /* Reset auctioning values */
-        obj_selling = NULL;
-        ch_selling  = NULL;
-        ch_buying   = NULL;
+        obj_selling = nullptr;
+        ch_selling  = nullptr;
+        ch_buying   = nullptr;
         curbid      = 0;
         aucstat     = AUC_NULL_STATE;
         return;
       }
 
       snprintf(buf, sizeof(buf), auctioneer[AUC_SOLD], curbid);
-      auc_send_to_all(buf, TRUE);
+      auc_send_to_all(buf, true);
 
       /* Give the object to the buyer */
       obj_to_char(obj_selling, ch_buying);
@@ -1068,9 +1068,9 @@ void check_auction(void)
         char_set_gold(ch_selling, char_get_gold(ch_selling) + (curbid));
       }
       /* Reset auctioning values */
-      obj_selling = NULL;
-      ch_selling  = NULL;
-      ch_buying   = NULL;
+      obj_selling = nullptr;
+      ch_selling  = nullptr;
+      ch_buying   = nullptr;
       curbid      = 0;
       aucstat     = AUC_NULL_STATE;
       return;
@@ -1111,14 +1111,14 @@ ACMD(do_auction)
       return;
     }
     if (ch == ch_selling) {
-      stop_auction(AUC_NORMAL_CANCEL, NULL);
+      stop_auction(AUC_NORMAL_CANCEL, nullptr);
       return;
     }
     stop_auction(AUC_WIZ_CANCEL, ch);
   } else if (is_abbrev(arg1, "stats") || is_abbrev(arg1, "identify")) {
     auc_stat(ch, obj_selling);
     return;
-  } else if (!(obj = get_obj_in_list_vis(ch, arg1, NULL, ch->carrying))) {
+  } else if (!(obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->carrying))) {
     snprintf(buf, sizeof(buf), "You don't seem to have %s %s.\r\n", AN(arg1), arg1);
     send_to_char(ch, "%s", buf);
     return;
@@ -1149,9 +1149,9 @@ ACMD(do_auction)
 
 ACMD(do_bid)
 {
-  struct obj_data *obj, *next_obj, *obj2 = NULL;
+  struct obj_data *obj, *next_obj, *obj2 = nullptr;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-  int found = FALSE, list = 0, masterList = 0;
+  int found = false, list = 0, masterList = 0;
   room_vnum auct_room;
 
   auct_room = real_room(80);
@@ -1199,18 +1199,18 @@ ACMD(do_bid)
         }
         list++;
         if (obj_get_aucTime(obj) + 86400 > time(0) && obj_get_curBidder(obj) <= -1) {
-          send_to_char(ch, "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@GCost@W: @Y%s@D]@n\r\n", list, get_name_by_id(obj_get_aucter(obj)) != NULL ? CAP(get_name_by_id(obj_get_aucter(obj))) : "Nobody", count_color_chars(obj->short_description) + 30, obj->short_description, add_commas(obj_get_bid(obj)));
+          send_to_char(ch, "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@GCost@W: @Y%s@D]@n\r\n", list, get_name_by_id(obj_get_aucter(obj)) != nullptr ? CAP(get_name_by_id(obj_get_aucter(obj))) : "Nobody", count_color_chars(obj->short_description) + 30, obj->short_description, add_commas(obj_get_bid(obj)));
         } else if (obj_get_aucTime(obj) + 86400 > time(0) && obj_get_curBidder(obj) > -1) {
-          send_to_char(ch, "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RTop Bid@W: %s @Y%s@D]@n\r\n", list, get_name_by_id(obj_get_aucter(obj)) != NULL ? CAP(get_name_by_id(obj_get_aucter(obj))) : "Nobody", count_color_chars(obj->short_description) + 30, obj->short_description, get_name_by_id(obj_get_curBidder(obj)) != NULL ? CAP(get_name_by_id(obj_get_curBidder(obj))) : "Nobody", add_commas(obj_get_bid(obj)));
+          send_to_char(ch, "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RTop Bid@W: %s @Y%s@D]@n\r\n", list, get_name_by_id(obj_get_aucter(obj)) != nullptr ? CAP(get_name_by_id(obj_get_aucter(obj))) : "Nobody", count_color_chars(obj->short_description) + 30, obj->short_description, get_name_by_id(obj_get_curBidder(obj)) != nullptr ? CAP(get_name_by_id(obj_get_curBidder(obj))) : "Nobody", add_commas(obj_get_bid(obj)));
         } else if (obj_get_aucTime(obj) + 86400 < time(0) && obj_get_curBidder(obj) > -1) {
-          send_to_char(ch, "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RBid Winner@W: %s @Y%s@D]@n\r\n", list, get_name_by_id(obj_get_aucter(obj)) != NULL ? CAP(get_name_by_id(obj_get_aucter(obj))) : "Nobody", count_color_chars(obj->short_description) + 30, obj->short_description, get_name_by_id(obj_get_curBidder(obj)) != NULL ? CAP(get_name_by_id(obj_get_curBidder(obj))) : "Nobody", add_commas(obj_get_bid(obj)));
+          send_to_char(ch, "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RBid Winner@W: %s @Y%s@D]@n\r\n", list, get_name_by_id(obj_get_aucter(obj)) != nullptr ? CAP(get_name_by_id(obj_get_aucter(obj))) : "Nobody", count_color_chars(obj->short_description) + 30, obj->short_description, get_name_by_id(obj_get_curBidder(obj)) != nullptr ? CAP(get_name_by_id(obj_get_curBidder(obj))) : "Nobody", add_commas(obj_get_bid(obj)));
         } else {
-          send_to_char(ch, "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RClosed@D]@n\r\n", list, get_name_by_id(obj_get_aucter(obj)) != NULL ? CAP(get_name_by_id(obj_get_aucter(obj))) : "Nobody", count_color_chars(obj->short_description) + 30, obj->short_description);
+          send_to_char(ch, "@D[@R#@W%3d@D][@mOwner@W: @w%10s@D][@GItem Name@W: @w%-*s@D][@RClosed@D]@n\r\n", list, get_name_by_id(obj_get_aucter(obj)) != nullptr ? CAP(get_name_by_id(obj_get_aucter(obj))) : "Nobody", count_color_chars(obj->short_description) + 30, obj->short_description);
         }
-        found = TRUE;
+        found = true;
       }
     }
-    if (found == FALSE) {
+    if (found == false) {
       send_to_char(ch, "No items are currently being auctioned.\r\n");
     }
     send_to_char(ch, "@c------------------------------------------------------------------------------@n\r\n");
@@ -1249,14 +1249,14 @@ ACMD(do_bid)
     improve_skill(ch, SKILL_APPRAISE, 1);
     if (char_get_skill(ch, SKILL_APPRAISE) < rand_number(1, 101)) {
       send_to_char(ch, "You look at the images for %s and fail to perceive its worth..\r\n", obj2->short_description);
-      act("@c$n@w looks stumped about something they viewed on their scouter screen.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@c$n@w looks stumped about something they viewed on their scouter screen.@n", true, ch, 0, 0, TO_ROOM);
       char_set_wait(ch, PULSE_2SEC);
       return;
     }
     send_to_char(ch, "You look at images of the object on your scouter.\r\n");
-    act("@c$n@w looks at something on their scouter screen.@n", TRUE, ch, 0, 0, TO_ROOM);
+    act("@c$n@w looks at something on their scouter screen.@n", true, ch, 0, 0, TO_ROOM);
     send_to_char(ch, "@c------------------------------------------------------------------------\n");
-    send_to_char(ch, "@GOwner       @W: @w%s@n\n", get_name_by_id(obj_get_aucter(obj2)) != NULL ? CAP(get_name_by_id(obj_get_aucter(obj2))) : "Nobody");
+    send_to_char(ch, "@GOwner       @W: @w%s@n\n", get_name_by_id(obj_get_aucter(obj2)) != nullptr ? CAP(get_name_by_id(obj_get_aucter(obj2))) : "Nobody");
     send_to_char(ch, "@GItem Name   @W: @w%s@n\n", obj2->short_description);
     send_to_char(ch, "@GCurrent Bid @W: @Y%s@n\n", add_commas(obj_get_bid(obj2)));
     send_to_char(ch, "@GStore Value @W: @Y%s@n\n", add_commas(obj_get_cost(obj2)));
@@ -1288,7 +1288,7 @@ ACMD(do_bid)
         send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w50%s@D]@n\r\n", "%");
       }
     }
-    int i, found_bonus = FALSE;
+    int i, found_bonus = false;
     send_to_char(ch, "@GItem Size   @W:@w %s@n\r\n", size_names[obj_get_size(obj2)]);
     send_to_char(ch, "@GItem Bonuses@W:@w");
     for (i = 0; i < MAX_OBJ_AFFECT; i++) {
@@ -1391,11 +1391,11 @@ ACMD(do_bid)
 
 void stop_auction(int type, struct char_data *ch)
 {
-  if (obj_selling == NULL) {
-    auc_send_to_all("@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", FALSE);
+  if (obj_selling == nullptr) {
+    auc_send_to_all("@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n", false);
     curbid     = 0;
-    ch_selling = NULL;
-    ch_buying  = NULL;
+    ch_selling = nullptr;
+    ch_buying  = nullptr;
     aucstat    = AUC_NULL_STATE;
     return;
   }
@@ -1404,19 +1404,19 @@ void stop_auction(int type, struct char_data *ch)
     case AUC_NORMAL_CANCEL: {
 
       snprintf(buf, sizeof(buf), "%s", auctioneer[AUC_NORMAL_CANCEL]);
-      auc_send_to_all(buf, FALSE);
+      auc_send_to_all(buf, false);
       break;
     }
     case AUC_QUIT_CANCEL: {
 
       snprintf(buf, sizeof(buf), "%s", auctioneer[AUC_QUIT_CANCEL]);
-      auc_send_to_all(buf, FALSE);
+      auc_send_to_all(buf, false);
       break;
     }
     case AUC_WIZ_CANCEL: {
 
       snprintf(buf, sizeof(buf), "%s", auctioneer[AUC_WIZ_CANCEL]);
-      auc_send_to_all(buf, FALSE);
+      auc_send_to_all(buf, false);
       break;
     }
     default: {
@@ -1437,12 +1437,12 @@ void stop_auction(int type, struct char_data *ch)
     obj_to_char(obj_selling, ch);
   }
 
-  if (!(ch_buying == NULL))
+  if (!(ch_buying == nullptr))
     char_set_gold(ch_buying, char_get_gold(ch_buying) + (curbid));
 
-  obj_selling = NULL;
-  ch_selling  = NULL;
-  ch_buying   = NULL;
+  obj_selling = nullptr;
+  ch_selling  = nullptr;
+  ch_buying   = nullptr;
   curbid      = 0;
 
   aucstat = AUC_NULL_STATE;
@@ -1465,7 +1465,7 @@ static void auc_stat(struct char_data *ch, struct obj_data *obj)
   }
   /* auctioneer tells the character the auction details */
   snprintf(buf, sizeof(buf), auctioneer[AUC_STAT], curbid);
-  act(buf, TRUE, ch_selling, obj, ch, TO_VICT | TO_SLEEP);
+  act(buf, true, ch_selling, obj, ch, TO_VICT | TO_SLEEP);
   char_set_gold(ch, char_get_gold(ch) - (500));
 
   /*call_magic(ch, NULL, obj_selling, SPELL_IDENTIFY, 30, CAST_SPELL);*/
@@ -1475,7 +1475,7 @@ static void auc_send_to_all(const char *messg, bool buyer)
 {
   struct descriptor_data *i;
 
-  if (messg == NULL)
+  if (messg == nullptr)
     return;
 
   for (i = descriptor_list; i; i = i->next) {
@@ -1486,30 +1486,30 @@ static void auc_send_to_all(const char *messg, bool buyer)
     if (rroom_flagged(char_get_in_room(i->character), ROOM_PAST))
       continue;
     if (buyer)
-      act(messg, TRUE, ch_buying, obj_selling, i->character, TO_VICT | TO_SLEEP);
+      act(messg, true, ch_buying, obj_selling, i->character, TO_VICT | TO_SLEEP);
     else
-      act(messg, TRUE, ch_selling, obj_selling, i->character, TO_VICT | TO_SLEEP);
+      act(messg, true, ch_selling, obj_selling, i->character, TO_VICT | TO_SLEEP);
   }
 }
 
 ACMD(do_assemble)
 {
   long lVnum               = NOTHING;
-  struct obj_data *pObject = NULL;
+  struct obj_data *pObject = nullptr;
   char text[MAX_STRING_LENGTH];
 
   int roll = 0;
 
   skip_spaces(&argument);
 
-  struct obj_data *tools = NULL, *tool = NULL, *next_obj;
+  struct obj_data *tools = nullptr, *tool = nullptr, *next_obj;
 
   for (tools = ch->carrying; tools; tools = next_obj) {
     next_obj = tools->next_content;
     if (obj_get_vnum(tools) == 386 && obj_get_value(tools, VAL_ALL_HEALTH) > 0) {
       tool = tools;
-      act("@WYou open up your toolkit and take out the necessary tools.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@C$n@W opens up $s toolkit and takes out the necessary tools.@n", TRUE, ch, 0, 0, TO_ROOM);
+      act("@WYou open up your toolkit and take out the necessary tools.@n", true, ch, 0, 0, TO_CHAR);
+      act("@C$n@W opens up $s toolkit and takes out the necessary tools.@n", true, ch, 0, 0, TO_ROOM);
     }
   }
 
@@ -1525,7 +1525,7 @@ ACMD(do_assemble)
     send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
     return;
   }
-  if (!assemblyCheckComponents(lVnum, ch, FALSE)) {
+  if (!assemblyCheckComponents(lVnum, ch, false)) {
     send_to_char(ch, "You haven't got all the things you need.\r\n");
     return;
   }
@@ -1545,7 +1545,7 @@ ACMD(do_assemble)
     }
   }
 
-  if (tool == NULL) {
+  if (tool == nullptr) {
     send_to_char(ch, "You wish you had tools, but make the best out of what you do have anyway...\r\n");
     roll = 20;
   }
@@ -1563,7 +1563,7 @@ ACMD(do_assemble)
     }
     improve_skill(ch, SKILL_BUILD, 1);
     if (char_get_skill(ch, SKILL_BUILD) <= roll) {
-      if ((pObject = read_object(lVnum, VIRTUAL)) == NULL) {
+      if ((pObject = read_object(lVnum, VIRTUAL)) == nullptr) {
         send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
         return;
       }
@@ -1571,7 +1571,7 @@ ACMD(do_assemble)
       extract_obj(pObject);
       send_to_char(ch, "You start to %s %s %s, but mess up royally!\r\n", CMD_NAME, AN(argument), argument);
 
-      if (assemblyCheckComponents(lVnum, ch, TRUE)) {
+      if (assemblyCheckComponents(lVnum, ch, true)) {
         roll = 9001; /* Just a place holder */
       }
       return;
@@ -1584,7 +1584,7 @@ ACMD(do_assemble)
     }
     improve_skill(ch, SKILL_BUILD, 1);
     if (char_get_skill(ch, SKILL_SURVIVAL) <= roll) {
-      if ((pObject = read_object(lVnum, VIRTUAL)) == NULL) {
+      if ((pObject = read_object(lVnum, VIRTUAL)) == nullptr) {
         send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
         return;
       }
@@ -1594,12 +1594,12 @@ ACMD(do_assemble)
 
       if (tool && rand_number(1, 3) == 3 && obj_get_value(tool, VAL_ALL_HEALTH) > 0) {
         obj_set_value(tool, VAL_ALL_HEALTH, obj_get_value(tool, VAL_ALL_HEALTH) - (rand_number(1, 5)));
-        act("@RYour toolset is looking a bit more worn.@n", TRUE, ch, 0, 0, TO_CHAR);
+        act("@RYour toolset is looking a bit more worn.@n", true, ch, 0, 0, TO_CHAR);
         if (obj_get_value(tool, VAL_ALL_HEALTH) <= 0) {
           obj_set_value(tool, VAL_ALL_HEALTH, 0);
         }
       }
-      if (assemblyCheckComponents(lVnum, ch, TRUE)) {
+      if (assemblyCheckComponents(lVnum, ch, true)) {
         roll = 9001; /* Just a place holder */
       }
       return;
@@ -1607,7 +1607,7 @@ ACMD(do_assemble)
   }
 
   if (axion_dice(0) - (char_get_aff_abils_intel(ch) / 5) > 95) {
-    if ((pObject = read_object(lVnum, VIRTUAL)) == NULL) {
+    if ((pObject = read_object(lVnum, VIRTUAL)) == nullptr) {
       send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
       return;
     }
@@ -1618,7 +1618,7 @@ ACMD(do_assemble)
     return;
   }
   if (rand_number(1, 100) >= 92) {
-    if ((pObject = read_object(lVnum, VIRTUAL)) == NULL) {
+    if ((pObject = read_object(lVnum, VIRTUAL)) == nullptr) {
       send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
       return;
     }
@@ -1630,7 +1630,7 @@ ACMD(do_assemble)
   }
 
   /* Create the assembled object. */
-  if ((pObject = read_object(lVnum, VIRTUAL)) == NULL) {
+  if ((pObject = read_object(lVnum, VIRTUAL)) == nullptr) {
     send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
     return;
   }
@@ -1640,28 +1640,28 @@ ACMD(do_assemble)
   if (obj_get_vnum(pObject) != 1611) {
     obj_to_char(pObject, ch);
     if (char_is_truffle(ch)) {
-      int count = 0, plused = FALSE, hasstat = 0, failsafe = 0;
+      int count = 0, plused = false, hasstat = 0, failsafe = 0;
 
       while (count < 6) {
-        if (pObject->affected[count].location > 0 && rand_number(1, 6) <= 2 && plused == FALSE) {
+        if (pObject->affected[count].location > 0 && rand_number(1, 6) <= 2 && plused == false) {
           pObject->affected[count].modifier += rand_number(1, 3);
-          plused = TRUE;
+          plused = true;
         } else if (pObject->affected[count].location > 0) {
           hasstat += 1;
         }
         failsafe++;
         count++;
-        if (plused == TRUE) {
+        if (plused == true) {
           send_to_char(ch, "@YYour intuitive skill with building has made this item even better!@n\r\n");
           count = 6;
         } else if (failsafe >= 12) {
           send_to_char(ch, "@yIt seems this item could not be upgraded with your truffle knowledge...@n\r\n");
           count = 6;
-        } else if (failsafe == 11 && plused == FALSE) {
+        } else if (failsafe == 11 && plused == false) {
           send_to_char(ch, "@YYour intuitive skill with building has made this item even better!@n\r\n");
           pObject->affected[count].location = rand_number(1, 6);
           pObject->affected[count].modifier += rand_number(1, 3);
-          plused = TRUE;
+          plused = true;
           count  = 6;
         } else if (count == 6 && hasstat > 0) {
           count = 0;
@@ -1679,13 +1679,13 @@ ACMD(do_assemble)
 
   /* Tell the character they made something. */
   snprintf(text, sizeof(text), "You %s $p.", CMD_NAME);
-  act(text, FALSE, ch, pObject, NULL, TO_CHAR);
+  act(text, false, ch, pObject, nullptr, TO_CHAR);
 
   /* Tell the room the character made something. */
   snprintf(text, sizeof(text), "$n %ss $p.", CMD_NAME);
-  act(text, FALSE, ch, pObject, NULL, TO_ROOM);
+  act(text, false, ch, pObject, nullptr, TO_ROOM);
 
-  if (assemblyCheckComponents(lVnum, ch, TRUE)) {
+  if (assemblyCheckComponents(lVnum, ch, true)) {
     roll = 9001; /* Just a place holder */
   }
 
@@ -1724,7 +1724,7 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
   if (!obj) /* object might be extracted by drop_otrigger */
     return;
   if (obj_extra_flagged(cont, ITEM_FORGED)) {
-    act("$P is forged and won't hold anything.", FALSE, ch, 0, cont, TO_CHAR);
+    act("$P is forged and won't hold anything.", false, ch, 0, cont, TO_CHAR);
     return;
   }
   if (obj_extra_flagged(cont, ITEM_SHEATH) && obj_get_type_flag(obj) != ITEM_WEAPON) {
@@ -1732,14 +1732,14 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
     return;
   }
   if (obj_extra_flagged(cont, ITEM_SHEATH)) {
-    struct obj_data *obj2 = NULL, *next_obj = NULL;
+    struct obj_data *obj2 = nullptr, *next_obj = nullptr;
     int count = 0, minus = 0;
     for (obj2 = cont->contains; obj2; obj2 = next_obj) {
       next_obj = obj2->next_content;
       minus += obj_get_weight(obj2);
       count++;
     }
-    obj2      = NULL;
+    obj2      = nullptr;
     int holds = obj_get_weight(cont) - minus;
     if (count >= holds) {
       send_to_char(ch, "It can only hold %d weapon%s at a time.\r\n", holds, holds > 1 ? "s" : "");
@@ -1747,7 +1747,7 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
     }
   }
   if ((obj_get_type_flag(cont) == ITEM_CONTAINER) && (obj_get_value(cont, VAL_CONTAINER_CAPACITY) == 0))
-    act("$p won't fit in $P.", FALSE, ch, obj, cont, TO_CHAR);
+    act("$p won't fit in $P.", false, ch, obj, cont, TO_CHAR);
   else if (obj_get_vnum(cont) >= 600 && obj_get_vnum(cont) <= 603)
     send_to_char(ch, "You can't put cards on a duel table. You have to @Gplay@n them.\r\n");
   else if ((obj_get_vnum(cont) == 697 || obj_get_vnum(cont) == 698 || obj_get_vnum(cont) == 682 || obj_get_vnum(cont) == 683 || obj_get_vnum(cont) == 684 || obj_extra_flagged(cont, ITEM_CARDCASE)) && !obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT))
@@ -1755,9 +1755,9 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
   else if ((obj_get_type_flag(cont) == ITEM_CONTAINER) &&
            (obj_get_value(cont, VAL_CONTAINER_CAPACITY) > 0) &&
            (obj_get_weight(cont) + obj_get_weight(obj) > obj_get_value(cont, VAL_CONTAINER_CAPACITY)))
-    act("$p won't fit in $P.", FALSE, ch, obj, cont, TO_CHAR);
+    act("$p won't fit in $P.", false, ch, obj, cont, TO_CHAR);
   else if (obj_extra_flagged(obj, ITEM_NODROP) && obj_get_in_room(cont) != NOWHERE)
-    act("You can't get $p out of your hand.", FALSE, ch, obj, NULL, TO_CHAR);
+    act("You can't get $p out of your hand.", false, ch, obj, nullptr, TO_CHAR);
   else if (obj_get_vnum(obj) == dball[0] || obj_get_vnum(obj) == dball[1] || obj_get_vnum(obj) == dball[2] || obj_get_vnum(obj) == dball[3] || obj_get_vnum(obj) == dball[4] || obj_get_vnum(obj) == dball[5] || obj_get_vnum(obj) == dball[6])
     send_to_char(ch, "You can not bag dragon balls.\r\n");
   else if (obj_extra_flagged(obj, ITEM_NORENT))
@@ -1769,18 +1769,18 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
     obj_to_obj(obj, cont);
 
     if (!obj_extra_flagged(obj, ITEM_ANTI_HIEROPHANT)) {
-      act("$n puts $p in $P.", TRUE, ch, obj, cont, TO_ROOM);
+      act("$n puts $p in $P.", true, ch, obj, cont, TO_ROOM);
     } else {
-      act("$n puts an @DA@wd@cv@Ce@Wnt @DD@wu@ce@Cl @mC@Ma@Wr@wd@n in $P.", TRUE, ch, obj, cont, TO_ROOM);
+      act("$n puts an @DA@wd@cv@Ce@Wnt @DD@wu@ce@Cl @mC@Ma@Wr@wd@n in $P.", true, ch, obj, cont, TO_ROOM);
     }
 
     /* Yes, I realize this is strange until we have auto-equip on rent. -gg */
     if (obj_extra_flagged(obj, ITEM_NODROP) && !obj_extra_flagged(cont, ITEM_NODROP)) {
       obj_extra_set(cont, ITEM_NODROP, true);
-      act("You get a strange feeling as you put $p in $P.", FALSE,
+      act("You get a strange feeling as you put $p in $P.", false,
           ch, obj, cont, TO_CHAR);
     } else
-      act("You put $p in $P.", FALSE, ch, obj, cont, TO_CHAR);
+      act("You put $p in $P.", false, ch, obj, cont, TO_CHAR);
     /* If object placed in portal or vehicle, move it to the portal destination */
     if ((obj_get_type_flag(cont) == ITEM_PORTAL) ||
         (obj_get_type_flag(cont) == ITEM_VEHICLE)) {
@@ -1788,9 +1788,9 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
       obj_to_room(obj, real_room(obj_get_value(cont, VAL_CONTAINER_CAPACITY)));
       if (obj_get_type_flag(cont) == ITEM_PORTAL) {
         act("What? $U$p disappears from $P in a puff of smoke!",
-            TRUE, ch, obj, cont, TO_ROOM);
+            true, ch, obj, cont, TO_ROOM);
         act("What? $U$p disappears from $P in a puff of smoke!",
-            FALSE, ch, obj, cont, TO_CHAR);
+            false, ch, obj, cont, TO_CHAR);
       }
     }
   }
@@ -1847,12 +1847,12 @@ ACMD(do_put)
     else if ((obj_get_type_flag(cont) != ITEM_CONTAINER) &&
              (obj_get_type_flag(cont) != ITEM_PORTAL) &&
              (obj_get_type_flag(cont) != ITEM_VEHICLE))
-      act("$p is not a container.", FALSE, ch, cont, 0, TO_CHAR);
+      act("$p is not a container.", false, ch, cont, 0, TO_CHAR);
     else if (obj_val_flagged(cont, CONT_CLOSED))
       send_to_char(ch, "You'd better open it first!\r\n");
     else {
       if (obj_dotmode == FIND_INDIV) { /* put <obj> <container> */
-        if (!(obj = get_obj_in_list_vis(ch, theobj, NULL, ch->carrying)))
+        if (!(obj = get_obj_in_list_vis(ch, theobj, nullptr, ch->carrying)))
           send_to_char(ch, "You aren't carrying %s %s.\r\n", AN(theobj), theobj);
         else if (obj == cont && howmany == 1)
           send_to_char(ch, "You attempt to fold it into itself, but fail.\r\n");
@@ -1863,7 +1863,7 @@ ACMD(do_put)
               howmany--;
               perform_put(ch, obj, cont);
             }
-            obj = get_obj_in_list_vis(ch, theobj, NULL, next_obj);
+            obj = get_obj_in_list_vis(ch, theobj, nullptr, next_obj);
           }
         }
       } else {
@@ -1889,19 +1889,19 @@ ACMD(do_put)
 static int can_take_obj(struct char_data *ch, struct obj_data *obj)
 {
   if (!(obj_wear_flagged(obj, ITEM_WEAR_TAKE))) {
-    act("$p: you can't take that!", FALSE, ch, obj, 0, TO_CHAR);
+    act("$p: you can't take that!", false, ch, obj, 0, TO_CHAR);
     return (0);
   }
   if (char_get_carry_items(ch) >= char_can_carry_n(ch)) {
-    act("$p: your arms are full!", FALSE, ch, obj, 0, TO_CHAR);
+    act("$p: your arms are full!", false, ch, obj, 0, TO_CHAR);
     return (0);
   }
   if (((getCurCarriedWeight(ch)) + obj_get_weight(obj)) > getMaxCarryWeight(ch)) {
-    act("$p: you can't carry that much weight.", FALSE, ch, obj, 0, TO_CHAR);
+    act("$p: you can't carry that much weight.", false, ch, obj, 0, TO_CHAR);
     return (0);
   }
   if ((obj_get_weight(obj) + rroom_get_gravity(char_get_in_room(ch))) + (getCurCarriedWeight(ch)) > getMaxCarryWeight(ch)) {
-    act("$p: you can't carry that much weight because of the gravity.", FALSE, ch, obj, 0, TO_CHAR);
+    act("$p: you can't carry that much weight because of the gravity.", false, ch, obj, 0, TO_CHAR);
     return (0);
   }
   return (1);
@@ -1916,7 +1916,7 @@ static void get_check_money(struct char_data *ch, struct obj_data *obj)
 
   if (char_get_gold(ch) + value > char_gold_carry(ch)) {
     send_to_char(ch, "You can only carry %s zenni at your current level, and leave the rest.\r\n", add_commas(char_gold_carry(ch)));
-    act("@w$n @wdrops some onto the ground.@n", FALSE, ch, 0, 0, TO_ROOM);
+    act("@w$n @wdrops some onto the ground.@n", false, ch, 0, 0, TO_ROOM);
     extract_obj(obj);
     int diff = 0;
     diff     = (char_get_gold(ch) + value) - char_gold_carry(ch);
@@ -1946,7 +1946,7 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
 {
   if (mode == FIND_OBJ_INV || mode == FIND_OBJ_EQUIP || can_take_obj(ch, obj)) {
     if (char_get_carry_items(ch) >= char_can_carry_n(ch)) {
-      act("$p: you can't hold any more items.", FALSE, ch, obj, 0, TO_CHAR);
+      act("$p: you can't hold any more items.", false, ch, obj, 0, TO_CHAR);
       return;
     }
     if (char_get_sits(ch) && obj_get_vnum(char_get_sits(ch)) > 603 && obj_get_vnum(char_get_sits(ch)) < 608 && obj_get_vnum(char_get_sits(ch)) - 4 != obj_get_vnum(cont) && obj_get_vnum(cont) > 599 && obj_get_vnum(cont) < 604) {
@@ -1957,11 +1957,11 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
       obj_from_obj(obj);
       obj_to_char(obj, ch);
       if (obj_extra_flagged(cont, ITEM_SHEATH)) {
-        act("You draw $p from $P.", FALSE, ch, obj, cont, TO_CHAR);
-        act("$n draws $p from $P.", TRUE, ch, obj, cont, TO_ROOM);
+        act("You draw $p from $P.", false, ch, obj, cont, TO_CHAR);
+        act("$n draws $p from $P.", true, ch, obj, cont, TO_ROOM);
       } else {
-        act("You get $p from $P.", FALSE, ch, obj, cont, TO_CHAR);
-        act("$n gets $p from $P.", TRUE, ch, obj, cont, TO_ROOM);
+        act("You get $p from $P.", false, ch, obj, cont, TO_CHAR);
+        act("$n gets $p from $P.", true, ch, obj, cont, TO_ROOM);
       }
       if (obj_extra_flagged(obj, ITEM_HOT)) {
         if (char_get_bonuses(ch, BONUS_FIREPROOF) <= 0 && !char_is_demon(ch)) {
@@ -1970,8 +1970,8 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
             decCurHealthPercent(ch, 1, 1);
 
           char_aff_set(ch, AFF_BURNED, true);
-          act("@RYou are burned by it!@n", TRUE, ch, 0, 0, TO_CHAR);
-          act("@R$n@R is burned by it!@n", TRUE, ch, 0, 0, TO_ROOM);
+          act("@RYou are burned by it!@n", true, ch, 0, 0, TO_CHAR);
+          act("@R$n@R is burned by it!@n", true, ch, 0, 0, TO_ROOM);
         }
       }
       if (char_is_npc(ch)) {
@@ -1991,19 +1991,19 @@ static void get_from_container(struct char_data *ch, struct obj_data *cont,
   obj_dotmode = find_all_dots(arg);
 
   if (obj_val_flagged(cont, CONT_CLOSED))
-    act("$p is closed.", FALSE, ch, cont, 0, TO_CHAR);
+    act("$p is closed.", false, ch, cont, 0, TO_CHAR);
   else if (obj_dotmode == FIND_INDIV) {
-    if (!(obj = get_obj_in_list_vis(ch, arg, NULL, cont->contains))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, cont->contains))) {
       char out[MAX_STRING_LENGTH];
 
       snprintf(out, sizeof(out), "There doesn't seem to be %s %s in $p.", AN(arg), arg);
-      act(out, FALSE, ch, cont, 0, TO_CHAR);
+      act(out, false, ch, cont, 0, TO_CHAR);
     } else {
       struct obj_data *obj_next;
       while (obj && howmany--) {
         obj_next = obj->next_content;
         perform_get_from_container(ch, obj, cont, mode);
-        obj = get_obj_in_list_vis(ch, arg, NULL, obj_next);
+        obj = get_obj_in_list_vis(ch, arg, nullptr, obj_next);
       }
     }
   } else {
@@ -2021,12 +2021,12 @@ static void get_from_container(struct char_data *ch, struct obj_data *cont,
     }
     if (!found) {
       if (obj_dotmode == FIND_ALL)
-        act("$p seems to be empty.", FALSE, ch, cont, 0, TO_CHAR);
+        act("$p seems to be empty.", false, ch, cont, 0, TO_CHAR);
       else {
         char out[MAX_STRING_LENGTH];
 
         snprintf(out, sizeof(out), "You can't seem to find any %ss in $p.", arg);
-        act(out, FALSE, ch, cont, 0, TO_CHAR);
+        act(out, false, ch, cont, 0, TO_CHAR);
       }
     }
   }
@@ -2053,8 +2053,8 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj)
   if (can_take_obj(ch, obj) && get_otrigger(obj, ch)) {
     obj_from_room(obj);
     obj_to_char(obj, ch);
-    act("You get $p.", FALSE, ch, obj, 0, TO_CHAR);
-    act("$n gets $p.", TRUE, ch, obj, 0, TO_ROOM);
+    act("You get $p.", false, ch, obj, 0, TO_CHAR);
+    act("$n gets $p.", true, ch, obj, 0, TO_ROOM);
 
     if (obj_extra_flagged(obj, ITEM_HOT)) {
       if (char_get_bonuses(ch, BONUS_FIREPROOF) <= 0 && !char_is_demon(ch)) {
@@ -2063,8 +2063,8 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj)
           decCurHealthPercent(ch, 1, 1);
 
         char_aff_set(ch, AFF_BURNED, true);
-        act("@RYou are burned by it!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@R$n@R is burned by it!@n", TRUE, ch, 0, 0, TO_ROOM);
+        act("@RYou are burned by it!@n", true, ch, 0, 0, TO_CHAR);
+        act("@R$n@R is burned by it!@n", true, ch, 0, 0, TO_ROOM);
       }
     }
 
@@ -2083,7 +2083,7 @@ static char *find_exdesc_keywords(char *word, struct extra_descr_data *list)
     if (isname(word, i->keyword))
       return (i->keyword);
 
-  return (NULL);
+  return (nullptr);
 }
 
 static void get_from_room(struct char_data *ch, char *arg, int howmany)
@@ -2093,7 +2093,7 @@ static void get_from_room(struct char_data *ch, char *arg, int howmany)
   char *descword;
 
   /* Are they trying to take something in a room extra description? */
-  if (find_exdesc(arg, world[char_get_in_room(ch)].ex_description) != NULL) {
+  if (find_exdesc(arg, world[char_get_in_room(ch)].ex_description) != nullptr) {
     send_to_char(ch, "You can't take %s %s.\r\n", AN(arg), arg);
     return;
   }
@@ -2101,16 +2101,16 @@ static void get_from_room(struct char_data *ch, char *arg, int howmany)
   dotmode = find_all_dots(arg);
 
   if (dotmode == FIND_INDIV) {
-    if ((descword = find_exdesc_keywords(arg, world[char_get_in_room(ch)].ex_description)) != NULL)
+    if ((descword = find_exdesc_keywords(arg, world[char_get_in_room(ch)].ex_description)) != nullptr)
       send_to_char(ch, "%s: you can't take that!\r\n", fname(descword));
-    else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, world[char_get_in_room(ch)].contents)))
+    else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents)))
       send_to_char(ch, "You don't see %s %s here.\r\n", AN(arg), arg);
     else {
       struct obj_data *obj_next;
       while (obj && howmany--) {
         obj_next = obj->next_content;
         perform_get_from_room(ch, obj);
-        obj = get_obj_in_list_vis(ch, arg, NULL, obj_next);
+        obj = get_obj_in_list_vis(ch, arg, nullptr, obj_next);
       }
     }
   } else {
@@ -2174,7 +2174,7 @@ ACMD(do_get)
         send_to_char(ch, "You will need to enter it first.\r\n");
       else if ((obj_get_type_flag(cont) != ITEM_CONTAINER) &&
                !((obj_get_type_flag(cont) == ITEM_PORTAL) && (obj_val_flagged(cont, CONT_CLOSEABLE))))
-        act("$p is not a container.", FALSE, ch, cont, 0, TO_CHAR);
+        act("$p is not a container.", false, ch, cont, 0, TO_CHAR);
       else
         get_from_container(ch, cont, arg1, mode, amount);
     } else {
@@ -2190,7 +2190,7 @@ ACMD(do_get)
             get_from_container(ch, cont, arg1, FIND_OBJ_INV, amount);
           } else if (cont_dotmode == FIND_ALLDOT) {
             found = 1;
-            act("$p is not a container.", FALSE, ch, cont, 0, TO_CHAR);
+            act("$p is not a container.", false, ch, cont, 0, TO_CHAR);
           }
         }
       for (cont = world[char_get_in_room(ch)].contents; cont; cont = cont->next_content)
@@ -2200,7 +2200,7 @@ ACMD(do_get)
             get_from_container(ch, cont, arg1, FIND_OBJ_ROOM, amount);
             found = 1;
           } else if (cont_dotmode == FIND_ALLDOT) {
-            act("$p is not a container.", FALSE, ch, cont, 0, TO_CHAR);
+            act("$p is not a container.", false, ch, cont, 0, TO_CHAR);
             found = 1;
           }
         }
@@ -2230,7 +2230,7 @@ static void perform_drop_gold(struct char_data *ch, int amount,
       if (mode == SCMD_DONATE) {
         send_to_char(ch, "You throw some zenni into the air where it disappears in a puff of smoke!\r\n");
         act("$n throws some gold into the air where it disappears in a puff of smoke!",
-            FALSE, ch, 0, 0, TO_ROOM);
+            false, ch, 0, 0, TO_ROOM);
         obj_to_room(obj, RDR);
         act("$p suddenly appears in a puff of orange smoke!", 0, 0, obj, 0, TO_ROOM);
       } else {
@@ -2242,7 +2242,7 @@ static void perform_drop_gold(struct char_data *ch, int amount,
         }
 
         snprintf(out, sizeof(out), "$n drops %s.", money_desc(amount));
-        act(out, TRUE, ch, 0, 0, TO_ROOM);
+        act(out, true, ch, 0, 0, TO_ROOM);
 
         send_to_char(ch, "You drop some zenni.\r\n");
         obj_to_room(obj, char_get_in_room(ch));
@@ -2259,7 +2259,7 @@ static void perform_drop_gold(struct char_data *ch, int amount,
       char out[MAX_STRING_LENGTH];
 
       snprintf(out, sizeof(out), "$n drops %s which disappears in a puff of smoke!", money_desc(amount));
-      act(out, FALSE, ch, 0, 0, TO_ROOM);
+      act(out, false, ch, 0, 0, TO_ROOM);
 
       send_to_char(ch, "You drop some zenni which disappears in a puff of smoke!\r\n");
     }
@@ -2283,71 +2283,71 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
 
   if (obj_get_vnum(obj) == 17 || obj_get_vnum(obj) == 17998) {
     snprintf(out, sizeof(out), "You can't %s $p, it is grafted into your soul :P", sname);
-    act(out, FALSE, ch, obj, 0, TO_CHAR);
+    act(out, false, ch, obj, 0, TO_CHAR);
     return (0);
   }
   if (obj_get_vnum(obj) == 20 || obj_get_vnum(obj) == 21 || obj_get_vnum(obj) == 22 || obj_get_vnum(obj) == 23 || obj_get_vnum(obj) == 24 || obj_get_vnum(obj) == 25 || obj_get_vnum(obj) == 26) {
     if (rroom_flagged(char_get_in_room(ch), ROOM_SPACE)) {
       snprintf(out, sizeof(out), "You can't %s $p in space!", sname);
-      act(out, FALSE, ch, obj, 0, TO_CHAR);
+      act(out, false, ch, obj, 0, TO_CHAR);
       return (0);
     }
     if (rroom_flagged(char_get_in_room(ch), ROOM_GARDEN1) || rroom_flagged(char_get_in_room(ch), ROOM_GARDEN2)) {
       snprintf(out, sizeof(out), "You can't %s $p in here. Read help garden.", sname);
-      act(out, FALSE, ch, obj, 0, TO_CHAR);
+      act(out, false, ch, obj, 0, TO_CHAR);
       return (0);
     }
     if ((mode == SCMD_DROP) && obj_extra_flagged(obj, ITEM_NORENT)) {
       snprintf(out, sizeof(out), "You drop $p but it gets lost on the ground!");
-      act(out, FALSE, ch, obj, 0, TO_CHAR);
+      act(out, false, ch, obj, 0, TO_CHAR);
       obj_from_char(obj);
       extract_obj(obj);
       return (0);
     }
     if (rroom_flagged(char_get_in_room(ch), ROOM_NOINSTANT)) {
       snprintf(out, sizeof(out), "You can't %s $p in this protected area!", sname);
-      act(out, FALSE, ch, obj, 0, TO_CHAR);
+      act(out, false, ch, obj, 0, TO_CHAR);
       return (0);
     }
     if (rroom_flagged(char_get_in_room(ch), ROOM_SHIP)) {
       snprintf(out, sizeof(out), "You can't %s $p on a private ship!", sname);
-      act(out, FALSE, ch, obj, 0, TO_CHAR);
+      act(out, false, ch, obj, 0, TO_CHAR);
       return (0);
     }
     if (rroom_flagged(char_get_in_room(ch), ROOM_HOUSE)) {
       snprintf(out, sizeof(out), "You can't %s $p in a private house!", sname);
-      act(out, FALSE, ch, obj, 0, TO_CHAR);
+      act(out, false, ch, obj, 0, TO_CHAR);
       return (0);
     }
   }
   if (obj_extra_flagged(obj, ITEM_NODROP) && char_get_admlevel(ch) < 1) {
     snprintf(out, sizeof(out), "You can't %s $p, it must be CURSED!", sname);
-    act(out, FALSE, ch, obj, 0, TO_CHAR);
+    act(out, false, ch, obj, 0, TO_CHAR);
     return (0);
   }
   if ((mode == SCMD_DONATE || mode == SCMD_JUNK) && obj_extra_flagged(obj, ITEM_NODONATE)) {
     snprintf(out, sizeof(out), "You can't %s $p!", sname);
-    act(out, FALSE, ch, obj, 0, TO_CHAR);
+    act(out, false, ch, obj, 0, TO_CHAR);
     return (0);
   }
 
   snprintf(out, sizeof(out), "You %s $p.", sname);
-  act(out, FALSE, ch, obj, 0, TO_CHAR);
+  act(out, false, ch, obj, 0, TO_CHAR);
 
   snprintf(out, sizeof(out), "$n %ss $p.", sname);
-  act(out, TRUE, ch, obj, 0, TO_ROOM);
+  act(out, true, ch, obj, 0, TO_ROOM);
 
   obj_from_char(obj);
 
   switch (mode) {
     case SCMD_DROP:
       if (!obj_extra_flagged(obj, ITEM_UNBREAKABLE) && rroom_get_geffect(char_get_in_room(ch)) == 6) {
-        act("$p melts in the lava!", FALSE, ch, obj, 0, TO_CHAR);
-        act("$p melts in the lava!", FALSE, ch, obj, 0, TO_ROOM);
+        act("$p melts in the lava!", false, ch, obj, 0, TO_CHAR);
+        act("$p melts in the lava!", false, ch, obj, 0, TO_ROOM);
         extract_obj(obj);
       } else if (rroom_get_geffect(char_get_in_room(ch)) == 6) {
-        act("$p plops down on some cooled lava!", FALSE, ch, obj, 0, TO_CHAR);
-        act("$p plops down on some cooled lava!", FALSE, ch, obj, 0, TO_ROOM);
+        act("$p plops down on some cooled lava!", false, ch, obj, 0, TO_CHAR);
+        act("$p plops down on some cooled lava!", false, ch, obj, 0, TO_ROOM);
         obj_to_room(obj, char_get_in_room(ch));
         if (char_get_admlevel(ch) > 0) {
           send_to_imm("IMM DROP: %s dropped %s in room [%d]", char_get_name(ch), obj->short_description, rroom_get_vnum(obj_get_in_room(obj)));
@@ -2363,7 +2363,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
       return (0);
     case SCMD_DONATE:
       obj_to_room(obj, RDR);
-      act("$p suddenly appears in a puff a smoke!", FALSE, 0, obj, 0, TO_ROOM);
+      act("$p suddenly appears in a puff a smoke!", false, 0, obj, 0, TO_ROOM);
       return (0);
     case SCMD_JUNK:
       value = MAX(1, MIN(200, obj_get_cost(obj) / 16));
@@ -2448,13 +2448,13 @@ ACMD(do_drop)
       send_to_char(ch, "Yeah, that makes sense.\r\n");
     else if (!*arg)
       send_to_char(ch, "What do you want to %s %d of?\r\n", sname, multi);
-    else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying)))
+    else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)))
       send_to_char(ch, "You don't seem to have any %ss.\r\n", arg);
     else if (check_saveroom_count(ch, obj) > 150)
       send_to_char(ch, "The save room you are in can not hold anymore items! (150 max, count of items in containers is halved)\r\n");
     else {
       do {
-        next_obj = get_obj_in_list_vis(ch, arg, NULL, obj->next_content);
+        next_obj = get_obj_in_list_vis(ch, arg, nullptr, obj->next_content);
         perform_drop(ch, obj, mode, sname, RDR);
         obj = next_obj;
       } while (obj && --multi);
@@ -2471,7 +2471,7 @@ ACMD(do_drop)
       return;
     }
     if (dotmode == FIND_ALL) {
-      int fail = FALSE;
+      int fail = false;
 
       if (!ch->carrying)
         send_to_char(ch, "You don't seem to be carrying anything.\r\n");
@@ -2479,39 +2479,39 @@ ACMD(do_drop)
         for (obj = ch->carrying; obj; obj = next_obj) {
           next_obj = obj->next_content;
           if (check_saveroom_count(ch, obj) > 150) {
-            fail = TRUE;
+            fail = true;
           } else {
             perform_drop(ch, obj, mode, sname, RDR);
           }
         }
-        if (fail == TRUE) {
+        if (fail == true) {
           send_to_char(ch, "Some of the items couldn't be dropped into this save room. It is too full. (150 max, containers half the count inside)\r\n");
         }
       }
     } else if (dotmode == FIND_ALLDOT) {
-      int fail = FALSE;
+      int fail = false;
 
       if (!*arg) {
         send_to_char(ch, "What do you want to %s all of?\r\n", sname);
         return;
       }
-      if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying)))
+      if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)))
         send_to_char(ch, "You don't seem to have any %ss.\r\n", arg);
 
       while (obj) {
-        next_obj = get_obj_in_list_vis(ch, arg, NULL, obj->next_content);
+        next_obj = get_obj_in_list_vis(ch, arg, nullptr, obj->next_content);
         if (check_saveroom_count(ch, obj) > 150) {
-          fail = TRUE;
+          fail = true;
         } else {
           perform_drop(ch, obj, mode, sname, RDR);
         }
         obj = next_obj;
       }
-      if (fail == TRUE) {
+      if (fail == true) {
         send_to_char(ch, "Some of the items couldn't be dropped into this save room. It is too full. (150 max, containers half the count inside)\r\n");
       }
     } else {
-      if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+      if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
         send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
       } else if (check_saveroom_count(ch, obj) > 150) {
         send_to_char(ch, "The item couldn't be dropped into this save room. It is too full. (150 max, containers half the count inside)\r\n");
@@ -2531,39 +2531,39 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
     return;
 
   if (obj_extra_flagged(obj, ITEM_NODROP)) {
-    act("You can't let go of $p!!  Yeech!", FALSE, ch, obj, 0, TO_CHAR);
+    act("You can't let go of $p!!  Yeech!", false, ch, obj, 0, TO_CHAR);
     return;
   }
   if (char_get_carry_items(vict) >= char_can_carry_n(vict)) {
-    act("$N seems to have $S hands full.", FALSE, ch, 0, vict, TO_CHAR);
+    act("$N seems to have $S hands full.", false, ch, 0, vict, TO_CHAR);
     if (char_is_npc(ch)) {
-      act("$n@n drops $p because you can't carry anymore.", TRUE, ch, obj, vict, TO_VICT);
-      act("$n@n drops $p on the ground since $N's unable to carry it.", TRUE, ch, obj, vict, TO_NOTVICT);
+      act("$n@n drops $p because you can't carry anymore.", true, ch, obj, vict, TO_VICT);
+      act("$n@n drops $p on the ground since $N's unable to carry it.", true, ch, obj, vict, TO_NOTVICT);
       obj_from_char(obj);
       obj_to_room(obj, char_get_in_room(ch));
     }
     return;
   }
   if (char_is_npc(vict) && (obj_extra_flagged(obj, ITEM_FORGED) || obj_extra_flagged(obj, ITEM_FORGED))) {
-    act("$n tries to hand $p to $N.", TRUE, ch, obj, vict, TO_NOTVICT);
+    act("$n tries to hand $p to $N.", true, ch, obj, vict, TO_NOTVICT);
     do_say(vict, (char[]){"I don't want that piece of junk."}, 0, 0);
     return;
   }
   if (obj_get_weight(obj) + (getCurCarriedWeight(vict)) > getMaxCarryWeight(vict)) {
-    act("$E can't carry that much weight.", FALSE, ch, 0, vict, TO_CHAR);
+    act("$E can't carry that much weight.", false, ch, 0, vict, TO_CHAR);
     if (char_is_npc(ch)) {
-      act("$n@n drops $p because you can't carry anymore.", TRUE, ch, obj, vict, TO_VICT);
-      act("$n@n drops $p on the ground since $N's unable to carry it.", TRUE, ch, obj, vict, TO_NOTVICT);
+      act("$n@n drops $p because you can't carry anymore.", true, ch, obj, vict, TO_VICT);
+      act("$n@n drops $p on the ground since $N's unable to carry it.", true, ch, obj, vict, TO_NOTVICT);
       obj_from_char(obj);
       obj_to_room(obj, char_get_in_room(ch));
     }
     return;
   }
   if ((obj_get_weight(obj) + rroom_get_gravity(char_get_in_room(vict))) + (getCurCarriedWeight(vict)) > getMaxCarryWeight(vict)) {
-    act("$E can't carry that much weight because of the gravity.", FALSE, ch, 0, vict, TO_CHAR);
+    act("$E can't carry that much weight because of the gravity.", false, ch, 0, vict, TO_CHAR);
     if (char_is_npc(ch)) {
-      act("$n@n drops $p because you can't carry anymore.", TRUE, ch, obj, vict, TO_VICT);
-      act("$n@n drops $p on the ground since $N's unable to carry it.", TRUE, ch, obj, vict, TO_NOTVICT);
+      act("$n@n drops $p because you can't carry anymore.", true, ch, obj, vict, TO_VICT);
+      act("$n@n drops $p on the ground since $N's unable to carry it.", true, ch, obj, vict, TO_NOTVICT);
       obj_from_char(obj);
       obj_to_room(obj, char_get_in_room(ch));
     }
@@ -2571,17 +2571,17 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
   }
   if (!char_is_npc(vict) && !char_is_npc(ch)) {
     if (char_prf_flagged(vict, PRF_NOGIVE)) {
-      act("$N refuses to accept $p at this time.", FALSE, ch, obj, vict, TO_CHAR);
-      act("$n tries to give you $p, but you are refusing to be handed things.", FALSE, ch, obj, vict, TO_VICT);
-      act("$n tries to give $N, $p, but $E is refusing to be handed things right now.", FALSE, ch, obj, vict, TO_NOTVICT);
+      act("$N refuses to accept $p at this time.", false, ch, obj, vict, TO_CHAR);
+      act("$n tries to give you $p, but you are refusing to be handed things.", false, ch, obj, vict, TO_VICT);
+      act("$n tries to give $N, $p, but $E is refusing to be handed things right now.", false, ch, obj, vict, TO_NOTVICT);
       return;
     }
   }
   obj_from_char(obj);
   obj_to_char(obj, vict);
-  act("You give $p to $N.", FALSE, ch, obj, vict, TO_CHAR);
-  act("$n gives you $p.", FALSE, ch, obj, vict, TO_VICT);
-  act("$n gives $p to $N.", TRUE, ch, obj, vict, TO_NOTVICT);
+  act("You give $p to $N.", false, ch, obj, vict, TO_CHAR);
+  act("$n gives you $p.", false, ch, obj, vict, TO_VICT);
+  act("$n gives $p to $N.", true, ch, obj, vict, TO_NOTVICT);
 
   if (obj_extra_flagged(obj, ITEM_HOT)) {
     if (char_get_bonuses(vict, BONUS_FIREPROOF) <= 0 && !char_is_demon(vict)) {
@@ -2590,8 +2590,8 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
         decCurHealthPercent(ch, 1, 1);
 
       char_aff_set(vict, AFF_BURNED, true);
-      act("@RYou are burned by it!@n", TRUE, vict, 0, 0, TO_CHAR);
-      act("@R$n@R is burned by it!@n", TRUE, vict, 0, 0, TO_ROOM);
+      act("@RYou are burned by it!@n", true, vict, 0, 0, TO_CHAR);
+      act("@R$n@R is burned by it!@n", true, vict, 0, 0, TO_ROOM);
     }
   }
 }
@@ -2604,7 +2604,7 @@ static struct char_data *give_find_vict(struct char_data *ch, char *arg)
   skip_spaces(&arg);
   if (!*arg)
     send_to_char(ch, "To who?\r\n");
-  else if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+  else if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "%s", CONFIG_NOPERSON);
     if (char_is_npc(ch))
       send_to_imm("Mob Give: Victim, %s, doesn't exist.", arg);
@@ -2613,7 +2613,7 @@ static struct char_data *give_find_vict(struct char_data *ch, char *arg)
   else
     return (vict);
 
-  return (NULL);
+  return (nullptr);
 }
 
 static void perform_give_gold(struct char_data *ch, struct char_data *vict,
@@ -2636,10 +2636,10 @@ static void perform_give_gold(struct char_data *ch, struct char_data *vict,
   send_to_char(ch, "%s", CONFIG_OK);
 
   snprintf(out, sizeof(out), "$n gives you %d zenni.", amount);
-  act(out, FALSE, ch, 0, vict, TO_VICT);
+  act(out, false, ch, 0, vict, TO_VICT);
 
   snprintf(out, sizeof(out), "$n gives %s to $N.", money_desc(amount));
-  act(out, TRUE, ch, 0, vict, TO_NOTVICT);
+  act(out, true, ch, 0, vict, TO_NOTVICT);
 
   if (char_is_npc(ch) || !char_adm_flagged(ch, ADM_MONEY))
     char_set_gold(ch, char_get_gold(ch) - (amount));
@@ -2670,7 +2670,7 @@ ACMD(do_give)
     argument = one_argument(argument, arg);
     if (!strcasecmp("zenni", arg) || !strcasecmp("gold", arg)) {
       one_argument(argument, arg);
-      if ((vict = give_find_vict(ch, arg)) != NULL) {
+      if ((vict = give_find_vict(ch, arg)) != nullptr) {
         perform_give_gold(ch, vict, amount);
         if (char_get_admlevel(ch) > 0 && !char_is_npc(vict)) {
           send_to_imm("IMM GIVE: %s has given %s zenni to %s.", char_get_name(ch), add_commas(amount), char_get_name(vict));
@@ -2682,11 +2682,11 @@ ACMD(do_give)
       send_to_char(ch, "What do you want to give %d of?\r\n", amount);
     else if (!(vict = give_find_vict(ch, argument)))
       return;
-    else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying)))
+    else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)))
       send_to_char(ch, "You don't seem to have any %ss.\r\n", arg);
     else {
       while (obj && amount--) {
-        next_obj = get_obj_in_list_vis(ch, arg, NULL, obj->next_content);
+        next_obj = get_obj_in_list_vis(ch, arg, nullptr, obj->next_content);
         perform_give(ch, vict, obj);
         if (char_get_admlevel(ch) > 0 && !char_is_npc(vict)) {
           send_to_imm("IMM GIVE: %s has given %s to %s.", char_get_name(ch), obj->short_description, char_get_name(vict));
@@ -2703,7 +2703,7 @@ ACMD(do_give)
       return;
     dotmode = find_all_dots(arg);
     if (dotmode == FIND_INDIV) {
-      if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying)))
+      if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)))
         send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
       else {
         perform_give(ch, vict, obj);
@@ -2860,7 +2860,7 @@ ACMD(do_drink)
       case SECT_WATER_NOSWIM:
       case SECT_UNDERWATER:
         snprintf(out, sizeof(out), "$n takes a refreshing drink from the surrounding water.");
-        act(out, TRUE, ch, 0, 0, TO_ROOM);
+        act(out, true, ch, 0, 0, TO_ROOM);
         send_to_char(ch, "You take a refreshing drink from the surrounding water.\r\n");
         gain_condition(ch, THIRST, 1);
         if (char_get_skill(ch, SKILL_WELLSPRING) && (getCurKI(ch)) < getMaxKI(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
@@ -2878,7 +2878,7 @@ ACMD(do_drink)
           return;
         }
         snprintf(out, sizeof(out), "$n takes a refreshing drink from the surrounding water.");
-        act(out, TRUE, ch, 0, 0, TO_ROOM);
+        act(out, true, ch, 0, 0, TO_ROOM);
         send_to_char(ch, "You take a refreshing drink from the surrounding water.\r\n");
         gain_condition(ch, THIRST, 1);
         if (char_get_skill(ch, SKILL_WELLSPRING) && !isFullKI(ch) && wasthirsty <= 30 && subcmd != SCMD_SIP) {
@@ -2894,8 +2894,8 @@ ACMD(do_drink)
         ;
     }
   }
-  if (!(temp = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
-    if (!(temp = get_obj_in_list_vis(ch, arg, NULL, world[char_get_in_room(ch)].contents))) {
+  if (!(temp = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+    if (!(temp = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
       send_to_char(ch, "You can't find it!\r\n");
       return;
     } else
@@ -2904,8 +2904,8 @@ ACMD(do_drink)
   if ((obj_get_type_flag(temp) != ITEM_DRINKCON) &&
       (obj_get_type_flag(temp) != ITEM_FOUNTAIN)) {
     if (obj_get_vnum(temp) == 86 && on_ground != 1) {
-      act("@wYou uncork the $p and tip it to your lips. Drinking it down you feel a warmth flow through your body and your ki returns to full strength .@n", TRUE, ch, temp, 0, TO_CHAR);
-      act("@C$n@w uncorks the $p and tips it to $s lips. Drinking it down and then smiling.@n", TRUE, ch, temp, 0, TO_ROOM);
+      act("@wYou uncork the $p and tip it to your lips. Drinking it down you feel a warmth flow through your body and your ki returns to full strength .@n", true, ch, temp, 0, TO_CHAR);
+      act("@C$n@w uncorks the $p and tips it to $s lips. Drinking it down and then smiling.@n", true, ch, temp, 0, TO_ROOM);
       obj_from_char(temp);
       extract_obj(temp);
       restoreKI(ch, true);
@@ -2932,7 +2932,7 @@ ACMD(do_drink)
     return;
   }
   if (char_is_npc(ch)) { /* Cannot use GET_COND() on mobs. */
-    act("$n@w drinks from $p.", TRUE, ch, temp, 0, TO_ROOM);
+    act("$n@w drinks from $p.", true, ch, temp, 0, TO_ROOM);
     obj_from_char(temp);
     extract_obj(temp);
     return;
@@ -2940,7 +2940,7 @@ ACMD(do_drink)
   if ((char_get_conditions(ch, DRUNK) > 10) && (char_get_conditions(ch, THIRST) > 0)) {
     /* The pig is drunk */
     send_to_char(ch, "You can't seem to get close enough to your mouth.\r\n");
-    act("$n tries to drink but misses $s mouth!", TRUE, ch, 0, 0, TO_ROOM);
+    act("$n tries to drink but misses $s mouth!", true, ch, 0, 0, TO_ROOM);
     return;
   }
   if (obj_get_value(temp, VAL_DRINKCON_HOWFULL) <= 0 && (obj_get_value(temp, VAL_DRINKCON_CAPACITY) >= 1)) {
@@ -2955,11 +2955,11 @@ ACMD(do_drink)
     char out[MAX_STRING_LENGTH];
 
     snprintf(out, sizeof(out), "$n drinks %s from $p.", drinks[obj_get_value(temp, VAL_DRINKCON_LIQUID)]);
-    act(out, TRUE, ch, temp, 0, TO_ROOM);
+    act(out, true, ch, temp, 0, TO_ROOM);
 
     send_to_char(ch, "You drink the %s.\r\n", drinks[obj_get_value(temp, VAL_DRINKCON_LIQUID)]);
     if (temp->action_description)
-      act(temp->action_description, TRUE, ch, temp, 0, TO_CHAR);
+      act(temp->action_description, true, ch, temp, 0, TO_CHAR);
 
     /* if (drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][DRUNK] > 0)
       amount = (25 - GET_COND(ch, THIRST)) / drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][DRUNK];
@@ -2969,7 +2969,7 @@ ACMD(do_drink)
     amount = 4;
 
   } else {
-    act("$n sips from $p.", TRUE, ch, temp, 0, TO_ROOM);
+    act("$n sips from $p.", true, ch, temp, 0, TO_ROOM);
     send_to_char(ch, "It tastes like %s.\r\n", drinks[obj_get_value(temp, VAL_DRINKCON_LIQUID)]);
     if (obj_get_value(temp, VAL_DRINKCON_POISON)) {
       send_to_char(ch, "It has a sickening taste! Better not eat it...");
@@ -3016,14 +3016,14 @@ ACMD(do_drink)
   if (obj_get_value(temp, VAL_DRINKCON_POISON) && (!char_is_mutant(ch) || (char_get_genome(ch, 0) != 7 && char_get_genome(ch, 1) != 7))) { /* The crap was poisoned 
 ! */
     send_to_char(ch, "Oops, it tasted rather strange!\r\n");
-    act("$n chokes and utters some strange sounds.", TRUE, ch, 0, 0, TO_ROOM);
+    act("$n chokes and utters some strange sounds.", true, ch, 0, 0, TO_ROOM);
 
     af.type      = SPELL_POISON;
     af.duration  = amount * 3;
     af.modifier  = 0;
     af.location  = APPLY_NONE;
     af.bitvector = AFF_POISON;
-    affect_join(ch, &af, FALSE, FALSE, FALSE, FALSE);
+    affect_join(ch, &af, false, false, false, false);
   }
   /* empty the container, and no longer poison.
      Only remove if it's max capacity > 0, not eternal */
@@ -3065,7 +3065,7 @@ ACMD(do_eat)
     send_to_char(ch, "Eat what?\r\n");
     return;
   }
-  if (!(food = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+  if (!(food = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
     send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
     return;
   }
@@ -3131,13 +3131,13 @@ ACMD(do_eat)
   }
 
   if (subcmd == SCMD_EAT) {
-    act("You eat some of $p.", FALSE, ch, food, 0, TO_CHAR);
+    act("You eat some of $p.", false, ch, food, 0, TO_CHAR);
     if (food->action_description)
-      act(food->action_description, FALSE, ch, food, 0, TO_CHAR);
-    act("$n eats some of $p.", TRUE, ch, food, 0, TO_ROOM);
+      act(food->action_description, false, ch, food, 0, TO_CHAR);
+    act("$n eats some of $p.", true, ch, food, 0, TO_ROOM);
   } else {
-    act("You nibble a little bit of $p.", FALSE, ch, food, 0, TO_CHAR);
-    act("$n tastes a little bit of $p.", TRUE, ch, food, 0, TO_ROOM);
+    act("You nibble a little bit of $p.", false, ch, food, 0, TO_CHAR);
+    act("$n tastes a little bit of $p.", true, ch, food, 0, TO_ROOM);
     if (obj_get_value(food, VAL_FOOD_POISON)) {
       send_to_char(ch, "It has a sickening taste! Better not eat it...");
       return;
@@ -3193,14 +3193,14 @@ ACMD(do_eat)
   if (obj_get_value(food, VAL_FOOD_POISON) && !char_adm_flagged(ch, ADM_NOPOISON)) {
     /* The crap was poisoned ! */
     send_to_char(ch, "Oops, that tasted rather strange!\r\n");
-    act("$n coughs and utters some strange sounds.", FALSE, ch, 0, 0, TO_ROOM);
+    act("$n coughs and utters some strange sounds.", false, ch, 0, 0, TO_ROOM);
 
     af.type      = SPELL_POISON;
     af.duration  = amount * 2;
     af.modifier  = 0;
     af.location  = APPLY_NONE;
     af.bitvector = AFF_POISON;
-    affect_join(ch, &af, FALSE, FALSE, FALSE, FALSE);
+    affect_join(ch, &af, false, false, false, false);
   }
 
   obj_set_value(food, VAL_FOOD_FOODVAL, obj_get_value(food, VAL_FOOD_FOODVAL) - (amount));
@@ -3255,7 +3255,7 @@ static void majin_gain(struct char_data *ch, int type)
 ACMD(do_pour)
 {
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-  struct obj_data *from_obj = NULL, *to_obj = NULL;
+  struct obj_data *from_obj = nullptr, *to_obj = nullptr;
   int amount = 0;
 
   two_arguments(argument, arg1, arg2);
@@ -3265,7 +3265,7 @@ ACMD(do_pour)
       send_to_char(ch, "From what do you want to pour?\r\n");
       return;
     }
-    if (!(from_obj = get_obj_in_list_vis(ch, arg1, NULL, ch->carrying))) {
+    if (!(from_obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->carrying))) {
       send_to_char(ch, "You can't find it!\r\n");
       return;
     }
@@ -3279,33 +3279,33 @@ ACMD(do_pour)
       send_to_char(ch, "What do you want to fill?  And what are you filling it from?\r\n");
       return;
     }
-    if (!(to_obj = get_obj_in_list_vis(ch, arg1, NULL, ch->carrying))) {
+    if (!(to_obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->carrying))) {
       send_to_char(ch, "You can't find it!\r\n");
       return;
     }
     if (obj_get_type_flag(to_obj) != ITEM_DRINKCON) {
-      act("You can't fill $p!", FALSE, ch, to_obj, 0, TO_CHAR);
+      act("You can't fill $p!", false, ch, to_obj, 0, TO_CHAR);
       return;
     }
     if (!*arg2) { /* no 2nd argument */
-      act("What do you want to fill $p from?", FALSE, ch, to_obj, 0, TO_CHAR);
+      act("What do you want to fill $p from?", false, ch, to_obj, 0, TO_CHAR);
       return;
     }
-    if (!(from_obj = get_obj_in_list_vis(ch, arg2, NULL, world[char_get_in_room(ch)].contents))) {
+    if (!(from_obj = get_obj_in_list_vis(ch, arg2, nullptr, world[char_get_in_room(ch)].contents))) {
       send_to_char(ch, "There doesn't seem to be %s %s here.\r\n", AN(arg2), arg2);
       return;
     }
     if (obj_get_type_flag(from_obj) != ITEM_FOUNTAIN && !obj_extra_flagged(from_obj, ITEM_BROKEN)) {
-      act("You can't fill something from $p.", FALSE, ch, from_obj, 0, TO_CHAR);
+      act("You can't fill something from $p.", false, ch, from_obj, 0, TO_CHAR);
       return;
     }
     if (obj_get_type_flag(from_obj) == ITEM_FOUNTAIN && obj_extra_flagged(from_obj, ITEM_BROKEN)) {
-      act("You can't fill something from a broken fountain.", FALSE, ch, from_obj, 0, TO_CHAR);
+      act("You can't fill something from a broken fountain.", false, ch, from_obj, 0, TO_CHAR);
       return;
     }
   }
   if (obj_get_value(from_obj, VAL_DRINKCON_HOWFULL) == 0) {
-    act("The $p is empty.", FALSE, ch, from_obj, 0, TO_CHAR);
+    act("The $p is empty.", false, ch, from_obj, 0, TO_CHAR);
     return;
   }
   if (subcmd == SCMD_POUR) { /* pour */
@@ -3315,8 +3315,8 @@ ACMD(do_pour)
     }
     if (!strcasecmp(arg2, "out")) {
       if (obj_get_value(from_obj, VAL_DRINKCON_CAPACITY) > 0) {
-        act("$n empties $p.", TRUE, ch, from_obj, 0, TO_ROOM);
-        act("You empty $p.", FALSE, ch, from_obj, 0, TO_CHAR);
+        act("$n empties $p.", true, ch, from_obj, 0, TO_ROOM);
+        act("You empty $p.", false, ch, from_obj, 0, TO_CHAR);
 
         weight_change_object(from_obj, -obj_get_value(from_obj, VAL_DRINKCON_HOWFULL)); /* Empty */
 
@@ -3330,7 +3330,7 @@ ACMD(do_pour)
 
       return;
     }
-    if (!(to_obj = get_obj_in_list_vis(ch, arg2, NULL, ch->carrying))) {
+    if (!(to_obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
       send_to_char(ch, "You can't find it!\r\n");
       return;
     }
@@ -3358,8 +3358,8 @@ ACMD(do_pour)
     send_to_char(ch, "You pour the %s into the %s.", drinks[obj_get_value(from_obj, VAL_DRINKCON_LIQUID)], arg2);
 
   if (subcmd == SCMD_FILL) {
-    act("You gently fill $p from $P.", FALSE, ch, to_obj, from_obj, TO_CHAR);
-    act("$n gently fills $p from $P.", TRUE, ch, to_obj, from_obj, TO_ROOM);
+    act("You gently fill $p from $P.", false, ch, to_obj, from_obj, TO_CHAR);
+    act("$n gently fills $p from $P.", true, ch, to_obj, from_obj, TO_ROOM);
   }
   /* New alias */
   if (obj_get_value(to_obj, VAL_DRINKCON_HOWFULL) == 0)
@@ -3469,8 +3469,8 @@ static void wear_message(struct char_data *ch, struct obj_data *obj, int where)
        "You wear $p over your left eye."           }
   };
 
-  act(wear_messages[where][0], TRUE, ch, obj, 0, TO_ROOM);
-  act(wear_messages[where][1], FALSE, ch, obj, 0, TO_CHAR);
+  act(wear_messages[where][0], true, ch, obj, 0, TO_ROOM);
+  act(wear_messages[where][1], false, ch, obj, 0, TO_CHAR);
 }
 
 static int hands(struct char_data *ch)
@@ -3537,7 +3537,7 @@ void perform_wear(struct char_data *ch, struct obj_data *obj, int where)
 
   /* first, make sure that the wear position is valid. */
   if (!obj_wear_flagged(obj, wear_bitvectors[where])) {
-    act("You can't wear $p there.", FALSE, ch, obj, 0, TO_CHAR);
+    act("You can't wear $p there.", false, ch, obj, 0, TO_CHAR);
     return;
   }
   /* do they even have that wear slot by race? */
@@ -3648,7 +3648,7 @@ int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg)
     if (obj_wear_flagged(obj, ITEM_WEAR_EAR) && char_body_flagged(ch, WEAR_EAR_R)) return WEAR_EAR_R;
     if (obj_wear_flagged(obj, ITEM_WEAR_SH) && char_body_flagged(ch, WEAR_SH)) return WEAR_SH;
     if (obj_wear_flagged(obj, ITEM_WEAR_EYE) && char_body_flagged(ch, WEAR_EYE)) return WEAR_EYE;
-  } else if (((where = search_block(arg, keywords, FALSE)) < 0) || (*arg == '!')) {
+  } else if (((where = search_block(arg, keywords, false)) < 0) || (*arg == '!')) {
     send_to_char(ch, "'%s'?  What part of your body is THAT?\r\n", arg);
     return -1;
   }
@@ -3680,12 +3680,12 @@ ACMD(do_wear)
       if (char_can_see_obj(ch, obj) && (where = find_eq_pos(ch, obj, 0)) >= 0) {
         if (char_get_level(ch) < obj_get_level(obj)) {
           act("$p: you are not experienced enough to use that.",
-              FALSE, ch, obj, 0, TO_CHAR);
+              false, ch, obj, 0, TO_CHAR);
           send_to_char(ch, "You need to be at least %d level to use it.\r\n", obj_get_level(obj));
         } else if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-          act("$p: it seems to be broken.", FALSE, ch, obj, 0, TO_CHAR);
+          act("$p: it seems to be broken.", false, ch, obj, 0, TO_CHAR);
         } else if (obj_extra_flagged(obj, ITEM_FORGED)) {
-          act("$p: it seems to be fake...", FALSE, ch, obj, 0, TO_CHAR);
+          act("$p: it seems to be fake...", false, ch, obj, 0, TO_CHAR);
         } else {
           items_worn++;
           if (!is_proficient_with_armor(ch, obj_get_value(obj, VAL_ARMOR_SKILL)) && obj_get_type_flag(obj) == ITEM_ARMOR)
@@ -3701,23 +3701,23 @@ ACMD(do_wear)
       send_to_char(ch, "Wear all of what?\r\n");
       return;
     }
-    if (!(obj = get_obj_in_list_vis(ch, arg1, NULL, ch->carrying)))
+    if (!(obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->carrying)))
       send_to_char(ch, "You don't seem to have any %ss.\r\n", arg1);
     else if (char_get_level(ch) < obj_get_level(obj))
       send_to_char(ch, "You are not experienced enough to use that.\r\n");
     else
       while (obj) {
-        next_obj = get_obj_in_list_vis(ch, arg1, NULL, obj->next_content);
+        next_obj = get_obj_in_list_vis(ch, arg1, nullptr, obj->next_content);
         if ((where = find_eq_pos(ch, obj, 0)) >= 0) {
           if (!is_proficient_with_armor(ch, obj_get_value(obj, VAL_ARMOR_SKILL)) && obj_get_type_flag(obj) == ITEM_ARMOR)
             send_to_char(ch, "You have no proficiency with this type of armor.\r\nYour fighting and physical skills will be greatly impeded.\r\n");
           perform_wear(ch, obj, where);
         } else
-          act("You can't wear $p.", FALSE, ch, obj, 0, TO_CHAR);
+          act("You can't wear $p.", false, ch, obj, 0, TO_CHAR);
         obj = next_obj;
       }
   } else {
-    if (!(obj = get_obj_in_list_vis(ch, arg1, NULL, ch->carrying)))
+    if (!(obj = get_obj_in_list_vis(ch, arg1, nullptr, ch->carrying)))
       send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg1), arg1);
     else if (obj_extra_flagged(obj, ITEM_BROKEN))
       send_to_char(ch, "But it seems to be broken!\r\n");
@@ -3731,7 +3731,7 @@ ACMD(do_wear)
           send_to_char(ch, "You have no proficiency with this type of armor.\r\nYour fighting and physical skills will be greatly impeded.\r\n");
         perform_wear(ch, obj, where);
       } else if (!*arg2)
-        act("You can't wear $p.", FALSE, ch, obj, 0, TO_CHAR);
+        act("You can't wear $p.", false, ch, obj, 0, TO_CHAR);
     }
   }
 }
@@ -3745,7 +3745,7 @@ ACMD(do_wield)
 
   if (!*arg)
     send_to_char(ch, "Wield what?\r\n");
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying)))
+  else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)))
     send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
   else {
     if (!obj_wear_flagged(obj, ITEM_WEAR_WIELD))
@@ -3777,7 +3777,7 @@ ACMD(do_grab)
 
   if (!*arg)
     send_to_char(ch, "Hold what?\r\n");
-  else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying)))
+  else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)))
     send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
   else if (char_get_level(ch) < obj_get_level(obj))
     send_to_char(ch, "You are not experienced enough to use that.\r\n");
@@ -3787,12 +3787,12 @@ ACMD(do_grab)
     if (obj_get_type_flag(obj) == ITEM_LIGHT) {
       perform_wear(ch, obj, WEAR_WIELD2);
       if (obj_get_value(obj, VAL_LIGHT_HOURS) > 0 || obj_get_value(obj, VAL_LIGHT_HOURS) < 0) {
-        act("@wYou light $p@w.", TRUE, ch, obj, 0, TO_CHAR);
-        act("@C$n@w lights $p@w.", TRUE, ch, obj, 0, TO_ROOM);
+        act("@wYou light $p@w.", true, ch, obj, 0, TO_CHAR);
+        act("@C$n@w lights $p@w.", true, ch, obj, 0, TO_ROOM);
       }
       if (obj_get_value(obj, VAL_LIGHT_HOURS) == 0) {
-        act("@wYou try to light $p@w but it is burnt out.", TRUE, ch, obj, 0, TO_CHAR);
-        act("@C$n@w tries to light $p@w but nothing happens.", TRUE, ch, obj, 0, TO_ROOM);
+        act("@wYou try to light $p@w but it is burnt out.", true, ch, obj, 0, TO_CHAR);
+        act("@C$n@w tries to light $p@w but nothing happens.", true, ch, obj, 0, TO_ROOM);
       }
     } else {
       if (!obj_wear_flagged(obj, ITEM_WEAR_HOLD) && obj_get_type_flag(obj) != ITEM_WAND &&
@@ -3818,9 +3818,9 @@ void perform_remove(struct char_data *ch, int pos)
      *  (location) to remove an object from.
      */
   else if (obj_extra_flagged(obj, ITEM_NODROP) && char_get_admlevel(ch) < 1)
-    act("You can't remove $p, it must be CURSED!", FALSE, ch, obj, 0, TO_CHAR);
+    act("You can't remove $p, it must be CURSED!", false, ch, obj, 0, TO_CHAR);
   else if (char_get_carry_items(ch) >= char_can_carry_n(ch))
-    act("$p: your arms are full!", FALSE, ch, obj, 0, TO_CHAR);
+    act("$p: your arms are full!", false, ch, obj, 0, TO_CHAR);
   else {
     if (!remove_otrigger(obj, ch))
       return;
@@ -3829,12 +3829,12 @@ void perform_remove(struct char_data *ch, int pos)
       char_plr_set(ch, PLR_THANDW, false);
     }
     obj_to_char(unequip_char(ch, pos), ch);
-    act("You stop using $p.", FALSE, ch, obj, 0, TO_CHAR);
-    act("$n stops using $p.", TRUE, ch, obj, 0, TO_ROOM);
+    act("You stop using $p.", false, ch, obj, 0, TO_CHAR);
+    act("$n stops using $p.", true, ch, obj, 0, TO_ROOM);
     if (previous > getCurPL(ch)) {
       char drop[MAX_INPUT_LENGTH];
       snprintf(drop, sizeof(drop), "@RYour powerlevel has dropped from removing $p@R! @D[@r-%s@D]\r\n", add_commas(previous - getCurPL(ch)));
-      act(drop, FALSE, ch, obj, 0, TO_CHAR);
+      act(drop, false, ch, obj, 0, TO_CHAR);
     }
   }
 }
@@ -3905,7 +3905,7 @@ ACMD(do_remove)
         }
       }
     } else {
-      if ((i = get_obj_pos_in_equip_vis(ch, arg, NULL, ch->equipment)) < 0) {
+      if ((i = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) < 0) {
         send_to_char(ch, "You don't seem to be using %s %s.\r\n", AN(arg), arg);
       } else {
         perform_remove(ch, i);

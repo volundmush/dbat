@@ -68,7 +68,7 @@ size_t sprintbitarray(bitvector_t bitvector[], const char *names[], int maxar, c
   }
 
   size_t len    = 0;
-  int found_end = FALSE;
+  int found_end = false;
 
   for (int teller = 0; teller < maxar && !found_end; teller++) {
     for (int nr = 0; nr < 32 && !found_end; nr++) {
@@ -76,7 +76,7 @@ size_t sprintbitarray(bitvector_t bitvector[], const char *names[], int maxar, c
       const char *name = names[flag];
 
       if (*name == '\n') {
-        found_end = TRUE;
+        found_end = true;
         break;
       }
 

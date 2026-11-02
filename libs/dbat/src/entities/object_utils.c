@@ -9,44 +9,44 @@
 
 int wearable_obj(struct obj_data *obj)
 {
-  int pass = FALSE;
+  int pass = false;
 
   if (obj_wear_flagged(obj, ITEM_WEAR_FINGER))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_NECK))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_BODY))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_HEAD))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_LEGS))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_FEET))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_HANDS))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_ARMS))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_SHIELD))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_ABOUT))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_WAIST))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_WRIST))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_WIELD))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_EYE))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_PACK))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_SH))
-    pass = TRUE;
+    pass = true;
   if (obj_wear_flagged(obj, ITEM_WEAR_EAR))
-    pass = TRUE;
+    pass = true;
 
-  if (pass == TRUE)
+  if (pass == true)
     return (1);
   else
     return (0);
@@ -57,7 +57,7 @@ void randomize_eq(struct obj_data *obj)
   if (wearable_obj(obj) && !obj_extra_flagged(obj, ITEM_NORANDOM)) {
     int value = 0, slot = 0, roll = rand_number(2, 12), slot1 = 1, slot2 = 1;
     int stat     = 0;
-    int strength = FALSE, wisdom = FALSE, intelligence = FALSE, dexterity = FALSE, speed = FALSE, constitution = FALSE;
+    int strength = false, wisdom = false, intelligence = false, dexterity = false, speed = false, constitution = false;
     // Setting the strength stats
     int i;
     for (i = 0; i < 6; i++) {
@@ -89,7 +89,7 @@ void randomize_eq(struct obj_data *obj)
           obj->affected[slot].modifier = 0;
         } else {
           obj->affected[slot].modifier = value;
-          strength                     = TRUE;
+          strength                     = true;
         }
       } else if (stat == 2) { /* Agility */
         if (roll == 12) {
@@ -117,7 +117,7 @@ void randomize_eq(struct obj_data *obj)
           obj->affected[slot].modifier = 0;
         } else {
           obj->affected[slot].modifier = value;
-          dexterity                    = TRUE;
+          dexterity                    = true;
         }
       } else if (stat == 3) { /* Intelligence */
         if (roll == 12) {
@@ -145,7 +145,7 @@ void randomize_eq(struct obj_data *obj)
           obj->affected[slot].modifier = 0;
         } else {
           obj->affected[slot].modifier = value;
-          intelligence                 = TRUE;
+          intelligence                 = true;
         }
       } else if (stat == 4) { /* Wisdom */
         if (roll == 12) {
@@ -173,7 +173,7 @@ void randomize_eq(struct obj_data *obj)
           obj->affected[slot].modifier = 0;
         } else {
           obj->affected[slot].modifier = value;
-          wisdom                       = TRUE;
+          wisdom                       = true;
         }
       } else if (stat == 5) { /* Constitution */
         if (roll == 12) {
@@ -201,7 +201,7 @@ void randomize_eq(struct obj_data *obj)
           obj->affected[slot].modifier = 0;
         } else {
           obj->affected[slot].modifier = value;
-          constitution                 = TRUE;
+          constitution                 = true;
         }
       } else if (stat == 6) { /* Speed */
         if (roll == 12) {
@@ -229,7 +229,7 @@ void randomize_eq(struct obj_data *obj)
           obj->affected[slot].modifier = 0;
         } else {
           obj->affected[slot].modifier = value;
-          speed                        = TRUE;
+          speed                        = true;
         }
       } else if (stat == 0) {
         switch (slot) {
@@ -254,49 +254,49 @@ void randomize_eq(struct obj_data *obj)
     }
 
     if (slot1 == 0) {
-      if (strength == FALSE && rand_number(1, 6) == 1) {
-        strength                  = TRUE;
+      if (strength == false && rand_number(1, 6) == 1) {
+        strength                  = true;
         obj->affected[0].location = 1;
         obj->affected[0].modifier = 1;
-      } else if (dexterity == FALSE && rand_number(1, 6) == 1) {
-        dexterity                 = TRUE;
+      } else if (dexterity == false && rand_number(1, 6) == 1) {
+        dexterity                 = true;
         obj->affected[0].location = 2;
         obj->affected[0].modifier = 1;
-      } else if (intelligence == FALSE && rand_number(1, 6) == 1) {
-        intelligence              = TRUE;
+      } else if (intelligence == false && rand_number(1, 6) == 1) {
+        intelligence              = true;
         obj->affected[0].location = 3;
         obj->affected[0].modifier = 1;
-      } else if (wisdom == FALSE && rand_number(1, 6) == 1) {
-        wisdom                    = TRUE;
+      } else if (wisdom == false && rand_number(1, 6) == 1) {
+        wisdom                    = true;
         obj->affected[0].location = 4;
         obj->affected[0].modifier = 1;
-      } else if (constitution == FALSE && rand_number(1, 6) == 1) {
-        constitution              = TRUE;
+      } else if (constitution == false && rand_number(1, 6) == 1) {
+        constitution              = true;
         obj->affected[0].location = 5;
         obj->affected[0].modifier = 1;
-      } else if (speed == FALSE && rand_number(1, 6) == 1) {
-        speed                     = TRUE;
+      } else if (speed == false && rand_number(1, 6) == 1) {
+        speed                     = true;
         obj->affected[0].location = 6;
         obj->affected[0].modifier = 1;
       }
     }
     if (slot2 == 0 && roll >= 10) {
-      if (strength == FALSE && rand_number(1, 6) == 1) {
+      if (strength == false && rand_number(1, 6) == 1) {
         obj->affected[1].location = 1;
         obj->affected[1].modifier = 1;
-      } else if (dexterity == FALSE && rand_number(1, 6) == 1) {
+      } else if (dexterity == false && rand_number(1, 6) == 1) {
         obj->affected[1].location = 2;
         obj->affected[1].modifier = 1;
-      } else if (intelligence == FALSE && rand_number(1, 6) == 1) {
+      } else if (intelligence == false && rand_number(1, 6) == 1) {
         obj->affected[1].location = 3;
         obj->affected[1].modifier = 1;
-      } else if (wisdom == FALSE && rand_number(1, 6) == 1) {
+      } else if (wisdom == false && rand_number(1, 6) == 1) {
         obj->affected[1].location = 4;
         obj->affected[1].modifier = 1;
-      } else if (constitution == FALSE && rand_number(1, 6) == 1) {
+      } else if (constitution == false && rand_number(1, 6) == 1) {
         obj->affected[1].location = 5;
         obj->affected[1].modifier = 1;
-      } else if (speed == FALSE && rand_number(1, 6) == 1) {
+      } else if (speed == false && rand_number(1, 6) == 1) {
         obj->affected[1].location = 6;
         obj->affected[1].modifier = 1;
       }
@@ -331,12 +331,12 @@ const char *money_desc(int amount)
       {20000, "a mountain of zenni"          },
       {25000, "a huge mountain of zenni"     },
       {50000, "an enormous mountain of zenni"},
-      {0,     NULL                           },
+      {0,     nullptr                        },
   };
 
   if (amount <= 0) {
     mud_log("SYSERR: Try to create negative or 0 money (%d).", amount);
-    return (NULL);
+    return (nullptr);
   }
 
   for (cnt = 0; money_table[cnt].limit; cnt++)
@@ -355,7 +355,7 @@ struct obj_data *create_money(int amount)
 
   if (amount <= 0) {
     mud_log("SYSERR: Try to create negative or 0 money. (%d)", amount);
-    return (NULL);
+    return (nullptr);
   }
   obj = create_obj();
   CREATE(new_descr, struct extra_descr_data, 1);
@@ -387,7 +387,7 @@ struct obj_data *create_money(int amount)
     new_descr->description = strdup(buf);
   }
 
-  new_descr->next     = NULL;
+  new_descr->next     = nullptr;
   obj->ex_description = new_descr;
 
   obj_set_type_flag(obj, ITEM_MONEY);
@@ -429,7 +429,7 @@ int is_better(struct obj_data *object, struct obj_data *object2)
 
 static bool obj_is_valid(const struct obj_data *obj)
 {
-  return obj != NULL;
+  return obj != nullptr;
 }
 
 obj_vnum obj_get_vnum(const struct obj_data *obj)
@@ -463,7 +463,7 @@ static bool obj_valid_rnum(const struct obj_data *obj)
 
 spec_proc_func obj_get_spec(const struct obj_data *obj)
 {
-  return (obj_valid_rnum(obj) ? obj_index[obj_get_item_number(obj)].func : NULL);
+  return (obj_valid_rnum(obj) ? obj_index[obj_get_item_number(obj)].func : nullptr);
 }
 
 bool obj_is_corpse(const struct obj_data *obj)

@@ -95,15 +95,15 @@ static int _parse_name(char *arg, char *name)
   return (0);
 }
 
-#define RECON    1
-#define USURP    2
-#define UNSWITCH 3
+constexpr int RECON    = 1;
+constexpr int USURP    = 2;
+constexpr int UNSWITCH = 3;
 
 /* This function seems a bit over-extended. */
 static int perform_dupe_check(struct descriptor_data *d)
 {
   struct descriptor_data *k, *next_k;
-  struct char_data *target = NULL, *ch, *next_ch;
+  struct char_data *target = nullptr, *ch, *next_ch;
   int mode                 = 0;
   int id                   = char_get_idnum(d->character);
 
@@ -128,13 +128,13 @@ static int perform_dupe_check(struct descriptor_data *d)
         mode   = UNSWITCH;
       }
       if (k->character)
-        k->character->desc = NULL;
-      k->character = NULL;
-      k->original  = NULL;
+        k->character->desc = nullptr;
+      k->character = nullptr;
+      k->original  = nullptr;
     } else if (k->character && char_get_idnum(k->character) == id && k->original) {
       /* Character taking over their own body, while an immortal was switched to it. */
 
-      do_return(k->character, NULL, 0, 0);
+      do_return(k->character, nullptr, 0, 0);
     } else if (k->character && char_get_idnum(k->character) == id) {
       /* Character taking over their own body. */
 
@@ -143,14 +143,14 @@ static int perform_dupe_check(struct descriptor_data *d)
         if (k->snoop_by) {
           k->snoop_by->snooping = d;
           d->snoop_by           = k->snoop_by;
-          k->snoop_by           = NULL;
+          k->snoop_by           = nullptr;
         }
         target = k->character;
         mode   = USURP;
       }
-      k->character->desc = NULL;
-      k->character       = NULL;
-      k->original        = NULL;
+      k->character->desc = nullptr;
+      k->character       = nullptr;
+      k->original        = nullptr;
       write_to_output(k, "\r\nMultiple login detected -- disconnecting.\r\n");
       desc_set_connected(k, CON_CLOSE);
     }
@@ -203,7 +203,7 @@ static int perform_dupe_check(struct descriptor_data *d)
   free_char(d->character); /* get rid of the old char */
   d->character        = target;
   d->character->desc  = d;
-  d->original         = NULL;
+  d->original         = nullptr;
   d->character->timer = 0;
   char_plr_set(d->character, PLR_MAILING, false);
   char_plr_set(d->character, PLR_WRITING, false);
@@ -215,8 +215,8 @@ static int perform_dupe_check(struct descriptor_data *d)
       write_to_output(d, "Reconnecting.\r\n");
       pay_player_count_rewards(update_player_count());
       d->character->time.logon = time(0);
-      act("$n has reconnected.", TRUE, d->character, 0, 0, TO_ROOM);
-      mudlog(LOG_NRM, MAX(ADMLVL_NONE, char_get_invis_level(d->character)), TRUE, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
+      act("$n has reconnected.", true, d->character, 0, 0, TO_ROOM);
+      mudlog(LOG_NRM, MAX(ADMLVL_NONE, char_get_invis_level(d->character)), true, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
       d->character->rp = d->rpp;
       if (has_mail(char_get_idnum(d->character)))
         write_to_output(d, "You have mail waiting.\r\n");
@@ -242,14 +242,14 @@ static int perform_dupe_check(struct descriptor_data *d)
       write_to_output(d, "You take over your own body, already in use!\r\n");
       act("$n suddenly keels over in pain, surrounded by a white aura...\r\n"
           "$n's body has been taken over by a new spirit!",
-          TRUE, d->character, 0, 0, TO_ROOM);
+          true, d->character, 0, 0, TO_ROOM);
       d->character->rp = d->rpp;
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(d->character)), TRUE,
+      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(d->character)), true,
              "%s has re-logged in ... disconnecting old socket.", char_get_name(d->character));
       break;
     case UNSWITCH:
       write_to_output(d, "Reconnecting to unswitched char.");
-      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(d->character)), TRUE, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
+      mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(d->character)), true, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
       break;
   }
 
@@ -296,7 +296,7 @@ int enter_player_game(struct descriptor_data *d)
   load_result = Crash_load(d->character);
   if (d->character->player_specials->host) {
     free(d->character->player_specials->host);
-    d->character->player_specials->host = NULL;
+    d->character->player_specials->host = nullptr;
   }
   d->character->player_specials->host = strdup(d->host);
   char_set_id(d->character, char_get_idnum(d->character));
@@ -354,12 +354,12 @@ int enter_player_game(struct descriptor_data *d)
   if (char_is_android(d->character) && !char_aff_flagged(d->character, AFF_INFRAVISION)) {
     char_aff_set(d->character, AFF_INFRAVISION, true);
   }
-  char_set_absorbing(d->character, NULL);
-  char_set_absorbby(d->character, NULL);
-  char_set_sits(d->character, NULL);
-  char_set_blocked(d->character, NULL);
-  char_set_blocks(d->character, NULL);
-  char_set_overf(d->character, FALSE);
+  char_set_absorbing(d->character, nullptr);
+  char_set_absorbby(d->character, nullptr);
+  char_set_sits(d->character, nullptr);
+  char_set_blocked(d->character, nullptr);
+  char_set_blocks(d->character, nullptr);
+  char_set_overf(d->character, false);
   char_set_spam(d->character, 0);
   char_set_rage_meter(d->character, 0);
   if (!d->character->affected) {
@@ -537,8 +537,7 @@ static void state_get_name(struct descriptor_data *d, char *arg)
         clear_char(d->character);
         CREATE(d->character->player_specials, struct player_special_data, 1);
         d->character->desc = d;
-        CREATE(d->character->name, char, strlen(tmp_name) + 1);
-        strcpy(d->character->name, CAP(tmp_name)); /* strcpy: OK (size checked above) */
+        d->character->name = strdup(CAP(tmp_name));
         char_set_pfilepos(d->character, player_i);
         char_prf_set(d->character, PRF_COLOR, true);
         display_races(d);
@@ -553,7 +552,7 @@ static void state_get_name(struct descriptor_data *d, char *arg)
         if (isbanned(d->host) == BAN_SELECT &&
             !char_plr_flagged(d->character, PLR_SITEOK)) {
           write_to_output(d, "Sorry, this char has not been cleared for login from your site!\r\n");
-          mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "Connection attempt for %s denied from %s", char_get_name(d->character), d->host);
+          mudlog(LOG_NRM, ADMLVL_GOD, true, "Connection attempt for %s denied from %s", char_get_name(d->character), d->host);
           desc_set_connected(d, CON_CLOSE);
           return;
         }
@@ -561,7 +560,7 @@ static void state_get_name(struct descriptor_data *d, char *arg)
           userRead(d);
           write_to_output(d, "The game is temporarily restricted to at least %d level.\r\n", circle_restrict);
           desc_set_connected(d, CON_UMENU);
-          mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "Request for character load denied for %s [%s] (wizlock)", char_get_name(d->character), d->host);
+          mudlog(LOG_NRM, ADMLVL_GOD, true, "Request for character load denied for %s [%s] (wizlock)", char_get_name(d->character), d->host);
           return;
         }
         /* check and make sure no other copies of this player are logged in */
@@ -578,7 +577,7 @@ static void state_get_name(struct descriptor_data *d, char *arg)
       if (d->writenew <= 0) {
         empty_account_slots_named(d, d->loadplay);
         free(d->loadplay);
-        d->loadplay = NULL;
+        d->loadplay = nullptr;
         userWrite(d, 0, 0, 0, "index");
         userRead(d);
         write_to_output(d, "Character missing. Emptying slot.\r\n");
@@ -591,8 +590,7 @@ static void state_get_name(struct descriptor_data *d, char *arg)
           write_to_output(d, "Invalid name, please try another.\r\nName: ");
           return;
         }
-        CREATE(d->character->name, char, strlen(tmp_name) + 1);
-        strcpy(d->character->name, CAP(tmp_name)); /* strcpy: OK (size checked above) */
+        d->character->name = strdup(CAP(tmp_name));
 
         display_races(d);
         d->character->rp = d->rpp;
@@ -609,14 +607,14 @@ static void state_name_cnfrm(struct descriptor_data *d, char *arg)
 {
   if (toupper(*arg) == 'Y') {
     if (isbanned(d->host) >= BAN_NEW) {
-      mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "Request for new char %s denied from [%s] (siteban)", char_get_pc_name(d->character), d->host);
+      mudlog(LOG_NRM, ADMLVL_GOD, true, "Request for new char %s denied from [%s] (siteban)", char_get_pc_name(d->character), d->host);
       write_to_output(d, "Sorry, new characters are not allowed from your site!\r\n");
       desc_set_connected(d, CON_CLOSE);
       return;
     }
     if (circle_restrict) {
       write_to_output(d, "Sorry, new players can't be created at the moment.\r\n");
-      mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "Request for new char %s denied from [%s] (wizlock)", char_get_pc_name(d->character), d->host);
+      mudlog(LOG_NRM, ADMLVL_GOD, true, "Request for new char %s denied from [%s] (wizlock)", char_get_pc_name(d->character), d->host);
       desc_set_connected(d, CON_CLOSE);
       return;
     }
@@ -626,7 +624,7 @@ static void state_name_cnfrm(struct descriptor_data *d, char *arg)
   } else if (*arg == 'n' || *arg == 'N') {
     write_to_output(d, "Okay, what IS it, then? ");
     free(d->character->name);
-    d->character->name = NULL;
+    d->character->name = nullptr;
     desc_set_connected(d, CON_GET_NAME);
   } else
     write_to_output(d, "Please type Yes or No: ");
@@ -681,7 +679,7 @@ static void state_get_user(struct descriptor_data *d, char *arg)
     } else {
       if (d->user) {
         free(d->user);
-        d->user = NULL;
+        d->user = nullptr;
       }
       d->user = strdup(arg);
       write_to_output(d, "You want you user name to be, %s?\r\n", d->user);
@@ -692,7 +690,7 @@ static void state_get_user(struct descriptor_data *d, char *arg)
     if (circle_restrict == 101) {
       if (d->user) {
         free(d->user);
-        d->user = NULL;
+        d->user = nullptr;
       }
       d->user = strdup(arg);
       userLoad(d, d->user);
@@ -708,7 +706,7 @@ static void state_get_user(struct descriptor_data *d, char *arg)
     } else {
       if (d->user) {
         free(d->user);
-        d->user = NULL;
+        d->user = nullptr;
       }
       userLoad(d, arg);
       write_to_output(d, "Password: \r\n");
@@ -735,7 +733,7 @@ static void state_user_conf(struct descriptor_data *d, char *arg)
   } else if (!strcasecmp(arg, "no") || !strcasecmp(arg, "n")) {
     if (d->user) {
       free(d->user);
-      d->user = NULL;
+      d->user = nullptr;
     }
     d->user = strdup("Empty");
     write_to_output(d, "Enter Username: \n");
@@ -779,7 +777,7 @@ static void state_get_email(struct descriptor_data *d, char *arg)
     }
     if (d->email) {
       free(d->email);
-      d->email = NULL;
+      d->email = nullptr;
     }
     d->email = strdup(arg);
     userWrite(d, 0, 0, 0, "index");
@@ -792,7 +790,7 @@ static void state_get_email(struct descriptor_data *d, char *arg)
     write_to_output(d, "Your email is: %s\n", arg);
     if (d->email) {
       free(d->email);
-      d->email = NULL;
+      d->email = nullptr;
     }
     d->email = strdup(arg);
     write_to_output(d, "Password: \r\n");
@@ -827,7 +825,7 @@ static void state_newpasswd(struct descriptor_data *d, char *arg)
     write_to_output(d, "Your password and user account have been fully saved.\r\n");
     if (d->pass) {
       free(d->pass);
-      d->pass = NULL;
+      d->pass = nullptr;
     }
     d->pass = strdup(arg);
     userWrite(d, 0, 0, 0, "index");
@@ -837,7 +835,7 @@ static void state_newpasswd(struct descriptor_data *d, char *arg)
     write_to_output(d, "Your password and user account have been fully saved.\r\n");
     if (d->pass) {
       free(d->pass);
-      d->pass = NULL;
+      d->pass = nullptr;
     }
     d->pass = strdup(arg);
     userCreate(d);
@@ -859,7 +857,7 @@ static void state_password(struct descriptor_data *d, char *arg)
   if (!strcasecmp("return", arg)) {
     if (d->user) {
       free(d->user);
-      d->user = NULL;
+      d->user = nullptr;
     }
     d->user = strdup("Empty");
     write_to_output(d, "Username?\r\n");
@@ -892,7 +890,7 @@ static void state_password(struct descriptor_data *d, char *arg)
     /* counted per connection, so switching usernames does not reset it */
     if (++d->bad_pws >= CONFIG_MAX_BAD_PWS) {
       write_to_output(d, "Too many wrong passwords. Disconnecting.\r\n");
-      mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "Disconnecting [%s] after %d wrong passwords (last tried for %s).", d->host, d->bad_pws, CAP(d->user));
+      mudlog(LOG_NRM, ADMLVL_GOD, true, "Disconnecting [%s] after %d wrong passwords (last tried for %s).", d->host, d->bad_pws, CAP(d->user));
       desc_set_connected(d, CON_CLOSE);
       return;
     }
@@ -966,7 +964,7 @@ static void state_umenu(struct descriptor_data *d, char *arg)
     desc_set_connected(d, CON_NEWPASSWD);
   } else if (!strcasecmp(arg, "C")) {
     write_to_output(d, "\n");
-    customRead(d, 0, NULL);
+    customRead(d, 0, nullptr);
     write_to_output(d, "\r\n@n--Press Enter--\n@n");
     return;
   } else if (!strcasecmp(arg, "E")) {
@@ -1008,7 +1006,7 @@ static void state_menu(struct descriptor_data *d, char *arg)
       }
       load_result = enter_player_game(d);
       send_to_char(d->character, "%s", CONFIG_WELC_MESSG);
-      act("$n has entered the game.", TRUE, d->character, 0, 0, TO_ROOM);
+      act("$n has entered the game.", true, d->character, 0, 0, TO_ROOM);
 
       oldcount = update_player_count();
 
@@ -1188,7 +1186,7 @@ static void state_delcnf2(struct descriptor_data *d, char *arg)
       write_to_output(d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, char_true_race_name(d->character));
       d->rpp += refund;
     }
-    mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "User %s has deleted character %s (lev %d).", d->user, char_get_name(d->character), char_get_level(d->character));
+    mudlog(LOG_NRM, ADMLVL_GOD, true, "User %s has deleted character %s (lev %d).", d->user, char_get_name(d->character), char_get_level(d->character));
 
     empty_account_slots_named(d, char_get_name(d->character));
     userWrite(d, 0, 0, 0, "index");
@@ -1237,12 +1235,12 @@ void nanny(struct descriptor_data *d, char *arg)
       {CON_HEDIT,    hedit_parse    },
       {CON_HSEDIT,   hsedit_parse   },
       {CON_POBJ,     pobj_edit_parse},
-      {-1,           NULL           }
+      {-1,           nullptr        }
   };
 
   skip_spaces(&arg);
 
-  if (d->character == NULL) {
+  if (d->character == nullptr) {
     CREATE(d->character, struct char_data, 1);
     clear_char(d->character);
     CREATE(d->character->player_specials, struct player_special_data, 1);
@@ -1261,7 +1259,7 @@ void nanny(struct descriptor_data *d, char *arg)
     }
 
   /* Not in OLC. */
-  for (size_t i = 0; i < sizeof(login_states) / sizeof(login_states[0]); i++)
+  for (size_t i = 0; i < countof(login_states); i++)
     if (desc_get_connected(d) == login_states[i].state) {
       login_states[i].handler(d, arg);
       return;

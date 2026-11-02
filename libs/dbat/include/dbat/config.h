@@ -234,13 +234,6 @@ extern struct config_data config_info;
 #include "dbat/characters.h"
 
 /* GAME PLAY OPTIONS */
-#if !defined(NO)
-#define NO 0
-#endif
-
-#if !defined(YES)
-#define YES 1
-#endif
 
 // global variables
 extern int pk_allowed, pt_allowed, level_can_shout, holler_move_cost, CURRENT_ERA;

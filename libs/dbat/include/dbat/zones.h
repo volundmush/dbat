@@ -31,8 +31,8 @@ struct reset_com {
 };
 
 /* zone definition structure. for the 'zone-table'   */
-#define CUR_WORLD_VERSION 1
-#define CUR_ZONE_VERSION  2
+constexpr int CUR_WORLD_VERSION = 1;
+constexpr int CUR_ZONE_VERSION  = 2;
 
 struct zone_data {
   zone_vnum number;                     /* virtual number of this zone	  */

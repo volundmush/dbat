@@ -365,306 +365,306 @@ static const int list_bonus_cost[] = {
 
 static int opp_bonus(struct char_data *ch, int value, int type)
 {
-  int give = TRUE;
+  int give = true;
 
   switch (value) {
     case 0:
       if (char_get_bonuses(ch, BONUS_IMPULSE)) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[BONUS_IMPULSE], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 2:
       if (char_get_bonuses(ch, 40) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[40], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 3:
       if (char_is_android(ch)) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "You can not take %s as an android!@n\r\n", list_bonus[3]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 6:
       if (char_get_bonuses(ch, 39) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[39], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 8:
       if (char_get_bonuses(ch, 50) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[50], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 9:
       if (char_get_bonuses(ch, 43) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[43], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 10:
       if (char_get_bonuses(ch, 44) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[44], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 11:
       if (char_get_bonuses(ch, 45) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[45], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 12:
       if (char_get_bonuses(ch, 46) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[46], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 13:
       if (char_get_bonuses(ch, 47) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[47], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 14:
       if (char_get_bonuses(ch, 48) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[48], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 15:
       if (char_get_bonuses(ch, 33) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[33], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 16:
       if (char_is_android(ch)) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "You are an android and can not suppress anyway.\n\n");
-        give = FALSE;
+        give = false;
       }
       break;
     case 17:
       if (char_is_demon(ch)) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "As a demon you are already fireproof.\r\n");
-        give = FALSE;
+        give = false;
       } else if (char_get_bonuses(ch, 34) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[34], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 18:
       if (char_get_bonuses(ch, 26) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[26], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 19:
       if (char_get_bonuses(ch, 29) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[29], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 20:
       if (char_get_bonuses(ch, 27) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
-        give = FALSE;
+        give = false;
       } else if (char_is_android(ch)) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "You can not take %s as an android!@n\r\n", list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 21:
       if (char_get_bonuses(ch, 30) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[30], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 22:
       if (char_get_bonuses(ch, 31) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[31], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 23:
       if (char_get_bonuses(ch, 32) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[32], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 24:
       if (char_get_bonuses(ch, 35) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[35], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 25:
       if (char_get_bonuses(ch, 51) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[51], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 26:
       if (char_get_bonuses(ch, 18) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[18], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 27:
       if (char_get_bonuses(ch, 20) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[27], list_bonus[value]);
-        give = FALSE;
+        give = false;
       } else if (char_is_android(ch)) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "You can not take %s as an android!@n\r\n", list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 29:
       if (char_get_bonuses(ch, 19) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[19], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 30:
       if (char_get_bonuses(ch, 21) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[21], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 31:
       if (char_get_bonuses(ch, 22) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[22], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 32:
       if (char_get_bonuses(ch, 23) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[23], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 33:
       if (char_get_bonuses(ch, 15) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[15], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 34:
       if (char_get_bonuses(ch, 17) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[17], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 35:
       if (char_get_bonuses(ch, 24) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[24], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 39:
       if (char_get_bonuses(ch, 6) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[6], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 40:
       if (char_get_bonuses(ch, 2) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[2], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 43:
       if (char_get_bonuses(ch, 9) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[9], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 44:
       if (char_get_bonuses(ch, 10) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[10], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 45:
       if (char_get_bonuses(ch, 11) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[11], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 46:
       if (char_get_bonuses(ch, 12) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[12], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 47:
       if (char_get_bonuses(ch, 13) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[13], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 48:
       if (char_get_bonuses(ch, 14) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[14], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 50:
       if (char_get_bonuses(ch, 8) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[8], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
     case 51:
       if (char_get_bonuses(ch, 25) > 0) {
         display_bonus_menu(ch, type);
         send_to_char(ch, "@R%s and %s are mutually exclusive.\n\n", list_bonus[25], list_bonus[value]);
-        give = FALSE;
+        give = false;
       }
       break;
   }
@@ -894,10 +894,10 @@ static const struct size_range truffle_sizes[] = {
 static const struct size_range *size_ranges(const struct char_data *ch, int *count)
 {
   if (char_is_truffle(ch)) {
-    *count = sizeof(truffle_sizes) / sizeof(truffle_sizes[0]);
+    *count = countof(truffle_sizes);
     return truffle_sizes;
   }
-  *count = char_is_icer(ch) ? 3 : (int)(sizeof(normal_sizes) / sizeof(normal_sizes[0]));
+  *count = char_is_icer(ch) ? 3 : (int)(countof(normal_sizes));
   return normal_sizes;
 }
 
@@ -1048,7 +1048,7 @@ static void finish_creation(struct descriptor_data *d)
   save_player_index();
   write_to_output(d, "%s\r\n*** PRESS RETURN: ", motd);
   desc_set_connected(d, CON_RMOTD);
-  mudlog(LOG_CMP, ADMLVL_GOD, TRUE, "New player: %s [%s %s]",
+  mudlog(LOG_CMP, ADMLVL_GOD, true, "New player: %s [%s %s]",
          char_get_name(d->character), char_true_race_name(d->character),
          char_sensei_name(d->character));
 }
@@ -1413,7 +1413,7 @@ static const struct {
 
 static void roll_starting_abilities(struct char_data *ch)
 {
-  for (size_t i = 0; i < sizeof(starting_abilities) / sizeof(starting_abilities[0]); i++) {
+  for (size_t i = 0; i < countof(starting_abilities); i++) {
     if (!starting_abilities[i].is_race(ch))
       continue;
     ch->real_abils.str   = rand_number(starting_abilities[i].str[0], starting_abilities[i].str[1]);
@@ -1787,7 +1787,7 @@ static void state_qx(struct descriptor_data *d, char *arg)
     reject_option(d);
     return;
   }
-  if (choice < (int)(sizeof(ages) / sizeof(ages[0])))
+  if (choice < (int)(countof(ages)))
     age = ages[choice];
   else
     age = old_ages[long_lived(d->character) ? 0 : char_is_namek(d->character) ? 1
@@ -2066,7 +2066,7 @@ static void state_qstats(struct descriptor_data *d, char *arg)
     return;
   if (d->olc) {
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
   }
   finish_creation(d);
   d->character->rp = d->rpp;
@@ -2074,7 +2074,7 @@ static void state_qstats(struct descriptor_data *d, char *arg)
           char_get_aff_abils_wis(d->character) / 2 + char_get_aff_abils_intel(d->character) / 2 +
           char_get_aff_abils_dex(d->character) / 2 + char_get_aff_abils_cha(d->character) / 2;
   total -= 30;
-  mudlog(LOG_CMP, ADMLVL_GOD, TRUE, "Str: %2d Dex: %2d Con: %2d Int: %2d "
+  mudlog(LOG_CMP, ADMLVL_GOD, true, "Str: %2d Dex: %2d Con: %2d Int: %2d "
                                     "Wis:  %2d Cha: %2d mod total: %2d",
          char_get_aff_abils_str(d->character),
          char_get_aff_abils_dex(d->character), char_get_aff_abils_con(d->character), char_get_aff_abils_intel(d->character),
@@ -2118,7 +2118,7 @@ static const struct nanny_state chargen_states[] = {
 
 bool chargen_parse(struct descriptor_data *d, char *arg)
 {
-  for (size_t i = 0; i < sizeof(chargen_states) / sizeof(chargen_states[0]); i++)
+  for (size_t i = 0; i < countof(chargen_states); i++)
     if (desc_get_connected(d) == chargen_states[i].state) {
       chargen_states[i].handler(d, arg);
       return true;

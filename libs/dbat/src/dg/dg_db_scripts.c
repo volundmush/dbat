@@ -69,7 +69,7 @@ int dg_lint_trigger(const trig_data *trig, struct descriptor_data *d)
       continue;
 
     if (!strncasecmp(p, "if ", 3) || !strncasecmp("while ", p, 6) || !strncasecmp("switch ", p, 7)) {
-      if (depth == (int)(sizeof(open) / sizeof(open[0]))) {
+      if (depth == (int)(countof(open))) {
         dg_lint_warn(trig, d, line, "blocks nested too deeply to check the rest of the script");
         return warnings + 1;
       }
@@ -136,7 +136,7 @@ void parse_trigger(FILE *trig_f, int nr)
 
   t_index->vnum   = nr;
   t_index->number = 0;
-  t_index->func   = NULL;
+  t_index->func   = nullptr;
   t_index->proto  = trig;
 
   snprintf(errors, sizeof(errors), "trig vnum %d", nr);
@@ -154,13 +154,13 @@ void parse_trigger(FILE *trig_f, int nr)
 
   /* an empty or blank script becomes the same placeholder trigedit saves */
   cmds = fread_string(trig_f, errors);
-  s    = cmds ? strtok(cmds, "\n\r") : NULL;
+  s    = cmds ? strtok(cmds, "\n\r") : nullptr;
 
   CREATE(trig->cmdlist, struct cmdlist_element, 1);
   trig->cmdlist->cmd = strdup(s ? s : "* Empty script");
   cle                = trig->cmdlist;
 
-  while (s && (s = strtok(NULL, "\n\r"))) {
+  while (s && (s = strtok(nullptr, "\n\r"))) {
     CREATE(cle->next, struct cmdlist_element, 1);
     cle      = cle->next;
     cle->cmd = strdup(s);
@@ -170,7 +170,7 @@ void parse_trigger(FILE *trig_f, int nr)
 
   trig_index[top_of_trigt++] = t_index;
 
-  dg_lint_trigger(trig, NULL);
+  dg_lint_trigger(trig, nullptr);
 }
 
 /*
@@ -182,9 +182,9 @@ trig_data *read_trigger(int nr)
   index_data *t_index;
   trig_data *trig;
 
-  if (nr >= top_of_trigt) return NULL;
-  if ((t_index = trig_index[nr]) == NULL)
-    return NULL;
+  if (nr >= top_of_trigt) return nullptr;
+  if ((t_index = trig_index[nr]) == nullptr)
+    return nullptr;
 
   CREATE(trig, trig_data, 1);
   trig_data_copy(trig, t_index->proto);
@@ -198,18 +198,18 @@ static void trig_data_init(trig_data *this_data)
 {
   this_data->nr           = NOTHING;
   this_data->data_type    = 0;
-  this_data->name         = NULL;
+  this_data->name         = nullptr;
   this_data->trigger_type = 0;
-  this_data->cmdlist      = NULL;
-  this_data->curr_state   = NULL;
+  this_data->cmdlist      = nullptr;
+  this_data->curr_state   = nullptr;
   this_data->narg         = 0;
-  this_data->arglist      = NULL;
+  this_data->arglist      = nullptr;
   this_data->depth        = 0;
-  this_data->wait_event   = NULL;
-  this_data->purged       = FALSE;
-  this_data->var_list     = NULL;
+  this_data->wait_event   = nullptr;
+  this_data->purged       = false;
+  this_data->var_list     = nullptr;
 
-  this_data->next = NULL;
+  this_data->next = nullptr;
 }
 
 void trig_data_copy(trig_data *this_data, const trig_data *trg)
@@ -245,7 +245,7 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
   count = sscanf(line, "%7s %d", junk, &vnum);
 
   if (count != 2) {
-    mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE,
+    mudlog(LOG_BRF, ADMLVL_BUILDER, true,
            "SYSERR: Error assigning trigger! - Line was\n  %s", line);
     return;
   }
@@ -254,17 +254,17 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
   if (rnum == NOTHING) {
     switch (type) {
       case MOB_TRIGGER:
-        mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE,
+        mudlog(LOG_BRF, ADMLVL_BUILDER, true,
                "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (mob: %s - %d)",
                vnum, char_get_name((char_data *)proto), char_get_mob_vnum((char_data *)proto));
         break;
       case WLD_TRIGGER:
-        mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE,
+        mudlog(LOG_BRF, ADMLVL_BUILDER, true,
                "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (room:%d)",
                vnum, rroom_get_vnum(((room_data *)proto)->number));
         break;
       default:
-        mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE,
+        mudlog(LOG_BRF, ADMLVL_BUILDER, true,
                "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (?)", vnum);
         break;
     }
@@ -275,7 +275,7 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
     case MOB_TRIGGER:
       CREATE(new_trg, struct trig_proto_list, 1);
       new_trg->vnum = vnum;
-      new_trg->next = NULL;
+      new_trg->next = nullptr;
 
       mob       = (char_data *)proto;
       trg_proto = mob->proto_script;
@@ -290,7 +290,7 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
     case WLD_TRIGGER:
       CREATE(new_trg, struct trig_proto_list, 1);
       new_trg->vnum = vnum;
-      new_trg->next = NULL;
+      new_trg->next = nullptr;
       room          = (room_data *)proto;
       trg_proto     = room->proto_script;
       if (!trg_proto) {
@@ -304,13 +304,13 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
       if (rnum != NOTHING) {
         add_trigger(dg_ensure_script(&room->script), read_trigger(rnum), -1);
       } else {
-        mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE,
+        mudlog(LOG_BRF, ADMLVL_BUILDER, true,
                "SYSERR: non-existant trigger #%d assigned to room #%d",
                vnum, room->number);
       }
       break;
     default:
-      mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE,
+      mudlog(LOG_BRF, ADMLVL_BUILDER, true,
              "SYSERR: Trigger vnum #%d assigned to non-mob/obj/room", vnum);
   }
 }
@@ -324,14 +324,14 @@ void dg_obj_trigger(char *line, struct obj_data *obj)
   count = sscanf(line, "%s %d", junk, &vnum);
 
   if (count != 2) {
-    mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE,
+    mudlog(LOG_BRF, ADMLVL_BUILDER, true,
            "SYSERR: dg_obj_trigger() : Error assigning trigger! - Line was:\n  %s", line);
     return;
   }
 
   rnum = real_trigger(vnum);
   if (rnum == NOTHING) {
-    mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE,
+    mudlog(LOG_BRF, ADMLVL_BUILDER, true,
            "SYSERR: Trigger vnum #%d asked for but non-existant! (Object: %s - %d)",
            vnum, obj->short_description, obj_get_vnum(obj));
     return;
@@ -339,7 +339,7 @@ void dg_obj_trigger(char *line, struct obj_data *obj)
 
   CREATE(new_trg, struct trig_proto_list, 1);
   new_trg->vnum = vnum;
-  new_trg->next = NULL;
+  new_trg->next = nullptr;
 
   trg_proto = obj->proto_script;
   if (!trg_proto) {
@@ -352,9 +352,9 @@ void dg_obj_trigger(char *line, struct obj_data *obj)
 
 void assign_triggers(void *i, int type)
 {
-  struct char_data *mob  = NULL;
-  struct obj_data *obj   = NULL;
-  struct room_data *room = NULL;
+  struct char_data *mob  = nullptr;
+  struct obj_data *obj   = nullptr;
+  struct room_data *room = nullptr;
   int rnum;
   struct trig_proto_list *trg_proto;
 
@@ -365,7 +365,7 @@ void assign_triggers(void *i, int type)
       while (trg_proto) {
         rnum = real_trigger(trg_proto->vnum);
         if (rnum == NOTHING) {
-          mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE,
+          mudlog(LOG_BRF, ADMLVL_BUILDER, true,
                  "SYSERR: trigger #%d non-existant, for mob #%d",
                  trg_proto->vnum, mob_index[mob->nr].vnum);
         } else {
@@ -394,7 +394,7 @@ void assign_triggers(void *i, int type)
       while (trg_proto) {
         rnum = real_trigger(trg_proto->vnum);
         if (rnum == NOTHING) {
-          mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE,
+          mudlog(LOG_BRF, ADMLVL_BUILDER, true,
                  "SYSERR: trigger #%d non-existant, for room #%d",
                  trg_proto->vnum, room->number);
         } else {
@@ -404,7 +404,7 @@ void assign_triggers(void *i, int type)
       }
       break;
     default:
-      mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE,
+      mudlog(LOG_BRF, ADMLVL_BUILDER, true,
              "SYSERR: unknown type for assign_triggers()");
       break;
   }

@@ -10,16 +10,16 @@
 /* You can modify the following constants to fit your own MUD.  */
 
 /* minimum level a player must be to send mail	*/
-#define MIN_MAIL_LEVEL 3
+constexpr int MIN_MAIL_LEVEL = 3;
 
 /* # of gold coins required to send mail	*/
-#define STAMP_PRICE 10
+constexpr int STAMP_PRICE = 10;
 
 /* Maximum size of mail in bytes (arbitrary)	*/
-#define MAX_MAIL_SIZE 4096
+constexpr int MAX_MAIL_SIZE = 4096;
 
 /* size of mail file allocation blocks		*/
-#define BLOCK_SIZE 256
+constexpr int BLOCK_SIZE = 256;
 
 /*
  * NOTE:  Make sure that your block size is big enough -- if not,
@@ -43,9 +43,9 @@ void store_mail(long to, long from, char *message_pointer);
 void clear_free_list(void);
 void free_mail_index(void);
 
-#define HEADER_BLOCK  (-1)
-#define LAST_BLOCK    (-2)
-#define DELETED_BLOCK (-3)
+constexpr int HEADER_BLOCK  = (-1);
+constexpr int LAST_BLOCK    = (-2);
+constexpr int DELETED_BLOCK = (-3);
 
 /*
  * note: next_block is part of header_blk in a data block; we can't combine

@@ -57,12 +57,12 @@ ACMD(do_spar)
     return;
   }
   if (char_plr_flagged(ch, PLR_SPAR)) {
-    act("@wYou cease your sparring stance.@n", FALSE, ch, 0, 0, TO_CHAR);
-    act("@C$n@w ceases $s sparring stance.@n", FALSE, ch, 0, 0, TO_ROOM);
+    act("@wYou cease your sparring stance.@n", false, ch, 0, 0, TO_CHAR);
+    act("@C$n@w ceases $s sparring stance.@n", false, ch, 0, 0, TO_ROOM);
   }
   if (!char_plr_flagged(ch, PLR_SPAR)) {
-    act("@wYou move into your sparring stance.@n", FALSE, ch, 0, 0, TO_CHAR);
-    act("@C$n@w moves into $s sparring stance.@n", FALSE, ch, 0, 0, TO_ROOM);
+    act("@wYou move into your sparring stance.@n", false, ch, 0, 0, TO_CHAR);
+    act("@C$n@w moves into $s sparring stance.@n", false, ch, 0, 0, TO_ROOM);
   }
   char_plr_toggle(ch, PLR_SPAR);
 }
@@ -115,15 +115,15 @@ ACMD(do_quit)
     send_to_char(ch, "No way!  You're fighting for your life!\r\n");
   else if (char_get_position(ch) < POS_STUNNED) {
     send_to_char(ch, "You die before your time...\r\n");
-    die(ch, NULL);
+    die(ch, nullptr);
   } else {
-    act("$n has left the game.", TRUE, ch, 0, 0, TO_ROOM);
-    mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s has quit the game.", char_get_name(ch));
+    act("$n has left the game.", true, ch, 0, 0, TO_ROOM);
+    mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s has quit the game.", char_get_name(ch));
     send_to_char(ch, "Goodbye, friend.. Come back soon!\r\n");
     if (ch->followers || ch->master)
       die_follower(ch);
     if (ch == ch_selling)
-      stop_auction(AUC_QUIT_CANCEL, NULL);
+      stop_auction(AUC_QUIT_CANCEL, nullptr);
 
     /*  We used to check here for duping attempts, but we may as well
      *  do it right in extract_char(), since there is no check if a
@@ -150,8 +150,8 @@ ACMD(do_quit)
   /* Remove any snoopers */
   if (ch->desc->snoop_by) {
     write_to_output(ch->desc->snoop_by, "Your victim is no longer among us.\r\n");
-    ch->desc->snoop_by->snooping = NULL;
-    ch->desc->snoop_by           = NULL;
+    ch->desc->snoop_by->snooping = nullptr;
+    ch->desc->snoop_by           = nullptr;
   }
 }
 
@@ -271,7 +271,7 @@ static int perform_group(struct char_data *ch, struct char_data *vict, int highl
     return (0);
 
   if (char_get_bonuses(vict, BONUS_LONER) > 0) {
-    act("$n is the loner type and refuses to be in your group.", TRUE, vict, 0, ch, TO_VICT);
+    act("$n is the loner type and refuses to be in your group.", true, vict, 0, ch, TO_VICT);
     return (0);
   }
 
@@ -301,9 +301,9 @@ static int perform_group(struct char_data *ch, struct char_data *vict, int highl
 
   char_aff_set(vict, AFF_GROUP, true);
   if (ch != vict)
-    act("$N is now a member of your group.", FALSE, ch, 0, vict, TO_CHAR);
-  act("You are now a member of $n's group.", FALSE, ch, 0, vict, TO_VICT);
-  act("$N is now a member of $n's group.", FALSE, ch, 0, vict, TO_NOTVICT);
+    act("$N is now a member of your group.", false, ch, 0, vict, TO_CHAR);
+  act("You are now a member of $n's group.", false, ch, 0, vict, TO_VICT);
+  act("$N is now a member of $n's group.", false, ch, 0, vict, TO_NOTVICT);
   return (1);
 }
 
@@ -333,7 +333,7 @@ static void print_group(struct char_data *ch)
                  add_commas(getCurPL(k)), add_commas((getCurKI(k))), add_commas((getCurST(k))), char_get_level(k),
                  char_class_abbr(k), char_race_abbr(k));
       }
-      act(buf, FALSE, ch, 0, k, TO_CHAR);
+      act(buf, false, ch, 0, k, TO_CHAR);
     }
 
     for (f = k->followers; f; f = f->next) {
@@ -350,7 +350,7 @@ static void print_group(struct char_data *ch)
                  add_commas(getCurPL(f->follower)), add_commas((getCurKI(f->follower))), add_commas((getCurST(f->follower))),
                  char_get_level(f->follower), char_class_abbr(f->follower), char_race_abbr(f->follower));
       }
-      act(buf, FALSE, ch, 0, f->follower, TO_CHAR);
+      act(buf, false, ch, 0, f->follower, TO_CHAR);
     }
     send_to_char(ch, "@D----------------@n\r\n");
   }
@@ -378,7 +378,7 @@ ACMD(do_group)
 
   if (ch->master) {
     act("You cannot enroll group members without being head of a group.",
-        FALSE, ch, 0, 0, TO_CHAR);
+        false, ch, 0, 0, TO_CHAR);
     return;
   }
 
@@ -417,10 +417,10 @@ ACMD(do_group)
     return;
   }
 
-  if (!(vict = get_char_vis(ch, buf, NULL, FIND_CHAR_ROOM)))
+  if (!(vict = get_char_vis(ch, buf, nullptr, FIND_CHAR_ROOM)))
     send_to_char(ch, "%s", CONFIG_NOPERSON);
   else if ((vict->master != ch) && (vict != ch))
-    act("$N must follow you to enter your group.", FALSE, ch, 0, vict, TO_CHAR);
+    act("$N must follow you to enter your group.", false, ch, 0, vict, TO_CHAR);
   else {
     if (!char_aff_flagged(vict, AFF_GROUP)) {
       if (!char_aff_flagged(ch, AFF_GROUP)) {
@@ -430,9 +430,9 @@ ACMD(do_group)
       perform_group(ch, vict, highlvl, lowlvl, highpl, lowpl);
     } else {
       if (ch != vict)
-        act("$N is no longer a member of your group.", FALSE, ch, 0, vict, TO_CHAR);
-      act("You have been kicked out of $n's group!", FALSE, ch, 0, vict, TO_VICT);
-      act("$N has been kicked out of $n's group!", FALSE, ch, 0, vict, TO_NOTVICT);
+        act("$N is no longer a member of your group.", false, ch, 0, vict, TO_CHAR);
+      act("You have been kicked out of $n's group!", false, ch, 0, vict, TO_VICT);
+      act("$N has been kicked out of $n's group!", false, ch, 0, vict, TO_NOTVICT);
       char_aff_set(vict, AFF_GROUP, false);
     }
   }
@@ -456,7 +456,7 @@ ACMD(do_ungroup)
       next_fol = f->next;
       if (char_aff_flagged(f->follower, AFF_GROUP)) {
         char_aff_set(f->follower, AFF_GROUP, false);
-        act("$N has disbanded the group.", TRUE, f->follower, NULL, ch, TO_CHAR);
+        act("$N has disbanded the group.", true, f->follower, nullptr, ch, TO_CHAR);
         char_set_combatexpertise(f->follower, 0);
         if (!char_aff_flagged(f->follower, AFF_CHARM))
           stop_follower(f->follower);
@@ -468,7 +468,7 @@ ACMD(do_ungroup)
     send_to_char(ch, "You disband the group.\r\n");
     return;
   }
-  if (!(tch = get_char_vis(ch, buf, NULL, FIND_CHAR_ROOM))) {
+  if (!(tch = get_char_vis(ch, buf, nullptr, FIND_CHAR_ROOM))) {
     send_to_char(ch, "There is no such person!\r\n");
     return;
   }
@@ -485,9 +485,9 @@ ACMD(do_ungroup)
   char_aff_set(tch, AFF_GROUP, false);
   char_set_combatexpertise(tch, 0);
 
-  act("$N is no longer a member of your group.", FALSE, ch, 0, tch, TO_CHAR);
-  act("You have been kicked out of $n's group!", FALSE, ch, 0, tch, TO_VICT);
-  act("$N has been kicked out of $n's group!", FALSE, ch, 0, tch, TO_NOTVICT);
+  act("$N is no longer a member of your group.", false, ch, 0, tch, TO_CHAR);
+  act("You have been kicked out of $n's group!", false, ch, 0, tch, TO_VICT);
+  act("$N has been kicked out of $n's group!", false, ch, 0, tch, TO_NOTVICT);
 
   if (!char_aff_flagged(tch, AFF_CHARM))
     stop_follower(tch);
@@ -734,8 +734,8 @@ ACMD(do_gen_write)
   send_to_char(ch, "Okay.  Thanks!\r\n");
 }
 
-#define TOG_OFF 0
-#define TOG_ON  1
+constexpr int TOG_OFF = 0;
+constexpr int TOG_ON  = 1;
 
 ACMD(do_gen_tog)
 {
@@ -890,9 +890,9 @@ ACMD(do_gen_tog)
     case SCMD_AFK:
       result = char_prf_toggle(ch, PRF_AFK);
       if (char_prf_flagged(ch, PRF_AFK))
-        act("$n has gone AFK.", TRUE, ch, 0, 0, TO_ROOM);
+        act("$n has gone AFK.", true, ch, 0, 0, TO_ROOM);
       else {
-        act("$n has come back from AFK.", TRUE, ch, 0, 0, TO_ROOM);
+        act("$n has come back from AFK.", true, ch, 0, 0, TO_ROOM);
         if (has_mail(char_get_idnum(ch)))
           send_to_char(ch, "You have mail waiting.\r\n");
       }
@@ -913,10 +913,10 @@ ACMD(do_gen_tog)
       }
       result = char_prf_toggle(ch, PRF_BUILDWALK);
       if (char_prf_flagged(ch, PRF_BUILDWALK))
-        mudlog(LOG_CMP, char_get_level(ch), TRUE,
+        mudlog(LOG_CMP, char_get_level(ch), true,
                "OLC: %s turned buildwalk on. Allowed zone %d", char_get_name(ch), char_get_olc_zone(ch));
       else
-        mudlog(LOG_CMP, char_get_level(ch), TRUE,
+        mudlog(LOG_CMP, char_get_level(ch), true,
                "OLC: %s turned buildwalk off. Allowed zone %d", char_get_name(ch), char_get_olc_zone(ch));
       break;
     case SCMD_AUTOSPLIT:
@@ -1102,7 +1102,7 @@ ACMD(do_file)
     req_lines = atoi(value);
 
   if (!(req_file = fopen(fields[l].file, "r"))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE,
+    mudlog(LOG_BRF, ADMLVL_IMPL, true,
            "SYSERR: Error opening file %s using 'file' command.",
            fields[l].file);
     return;

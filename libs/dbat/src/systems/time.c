@@ -53,5 +53,5 @@ time_t mud_time_to_secs(struct time_info_data *now)
   when += now->day * SECS_PER_MUD_DAY;
   when += now->hours * SECS_PER_MUD_HOUR;
 
-  return (time(NULL) - when);
+  return (time(nullptr) - when);
 }

@@ -72,7 +72,7 @@ ACMD(do_oasis_oedit)
       return;
     }
 
-    save = TRUE;
+    save = true;
 
     if (is_number(buf2))
       number = atoi(buf2);
@@ -119,7 +119,7 @@ ACMD(do_oasis_oedit)
   /** Give the descriptor an OLC structure.                                  **/
   /****************************************************************************/
   if (d->olc) {
-    mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE,
+    mudlog(LOG_BRF, ADMLVL_IMMORT, true,
            "SYSERR: do_oasis: Player already had olc structure.");
     free(d->olc);
   }
@@ -137,7 +137,7 @@ ACMD(do_oasis_oedit)
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
@@ -151,7 +151,7 @@ ACMD(do_oasis_oedit)
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
@@ -161,7 +161,7 @@ ACMD(do_oasis_oedit)
   if (save) {
     send_to_char(ch, "Saving all objects in zone %d.\r\n",
                  zone_table[OLC_ZNUM(d)].number);
-    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), TRUE,
+    mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), true,
            "OLC: %s saves object info for zone %d.", char_get_name(ch),
            zone_table[OLC_ZNUM(d)].number);
 
@@ -174,7 +174,7 @@ ACMD(do_oasis_oedit)
     /** Free the descriptor's OLC structure.                                 **/
     /**************************************************************************/
     free(d->olc);
-    d->olc = NULL;
+    d->olc = nullptr;
     return;
   }
 
@@ -195,13 +195,13 @@ ACMD(do_oasis_oedit)
   /****************************************************************************/
   /** Send the OLC message to the players in the same room as the builder.   **/
   /****************************************************************************/
-  act("$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", true, d->character, 0, 0, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);
 
   /****************************************************************************/
   /** Log the OLC message.                                                   **/
   /****************************************************************************/
-  mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "OLC: %s starts editing zone %d allowed zone %d",
+  mudlog(LOG_BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
          char_get_name(ch), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
 }
 
@@ -222,8 +222,8 @@ static void oedit_setup_new(struct descriptor_data *d)
   obj_set_value(OLC_OBJ(d), VAL_ALL_MATERIAL, MATERIAL_STEEL);
   obj_set_size(OLC_OBJ(d), SIZE_MEDIUM);
 
-  OLC_OBJ(d)->script       = NULL;
-  OLC_OBJ(d)->proto_script = OLC_SCRIPT(d) = NULL;
+  OLC_OBJ(d)->script       = nullptr;
+  OLC_OBJ(d)->proto_script = OLC_SCRIPT(d) = nullptr;
 }
 
 /*------------------------------------------------------------------------*/
@@ -249,8 +249,8 @@ static void oedit_setup_existing(struct descriptor_data *d, int real_num)
    * The edited obj must not have a script.
    * It will be assigned to the updated obj later, after editing.
    */
-  obj->script              = NULL;
-  OLC_OBJ(d)->proto_script = NULL;
+  obj->script              = nullptr;
+  OLC_OBJ(d)->proto_script = nullptr;
 }
 
 /*------------------------------------------------------------------------*/
@@ -981,7 +981,7 @@ static void oedit_disp_menu(struct descriptor_data *d)
 void oedit_parse(struct descriptor_data *d, char *arg)
 {
   int number, max_val, min_val;
-  char *oldtext = NULL;
+  char *oldtext = nullptr;
   struct board_info *tmp;
   struct obj_data *obj;
   obj_rnum robj;
@@ -993,7 +993,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
         case 'y':
         case 'Y':
           oedit_save_internally(d);
-          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(d->character)), TRUE,
+          mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(d->character)), true,
                  "OLC: %s edits obj %d", char_get_name(d->character), OLC_NUM(d));
           if (CONFIG_OLC_SAVE) {
             oedit_save_to_disk(real_zone_by_thing(OLC_NUM(d)));
@@ -1001,7 +1001,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
           } else
             write_to_output(d, "Object saved to memory.\r\n");
           if (obj_get_type_flag(OLC_OBJ(d)) == ITEM_BOARD) {
-            if ((tmp = locate_board(obj_get_vnum(OLC_OBJ(d)))) != NULL)
+            if ((tmp = locate_board(obj_get_vnum(OLC_OBJ(d)))) != nullptr)
               save_board(tmp);
             else
               create_new_board(obj_get_vnum(OLC_OBJ(d)));
@@ -1073,7 +1073,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
               /* remove any old scripts */
               if (obj->script) {
                 extract_script(obj, OBJ_TRIGGER);
-                obj->script = NULL;
+                obj->script = nullptr;
               }
 
               free_proto_script(obj, OBJ_TRIGGER);
@@ -1083,15 +1083,15 @@ void oedit_parse(struct descriptor_data *d, char *arg)
             }
             obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
             /* Xap - ought to save the old pointer, free after assignment I suppose */
-            mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(d->character)), TRUE,
+            mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(d->character)), true,
                    "OLC: %s iedit a unique #%d", char_get_name(d->character), obj_get_vnum(obj));
             if (d->character) {
               char_plr_set(d->character, PLR_WRITING, false);
               desc_set_connected(d, CON_PLAYING);
-              act("$n stops using OLC.", TRUE, d->character, 0, 0, TO_ROOM);
+              act("$n stops using OLC.", true, d->character, 0, 0, TO_ROOM);
             }
             free(d->olc);
-            d->olc = NULL;
+            d->olc = nullptr;
           }
           return;
         case '1':
@@ -1171,9 +1171,9 @@ void oedit_parse(struct descriptor_data *d, char *arg)
           /*
        * If extra descriptions don't exist.
        */
-          if (OLC_OBJ(d)->ex_description == NULL) {
+          if (OLC_OBJ(d)->ex_description == nullptr) {
             CREATE(OLC_OBJ(d)->ex_description, struct extra_descr_data, 1);
-            OLC_OBJ(d)->ex_description->next = NULL;
+            OLC_OBJ(d)->ex_description->next = nullptr;
           }
           OLC_DESC(d) = OLC_OBJ(d)->ex_description;
           oedit_disp_extradesc_menu(d);
@@ -1622,7 +1622,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
 	 */
             REMOVE_FROM_LIST(OLC_DESC(d), OLC_OBJ(d)->ex_description, next, temp);
             free(OLC_DESC(d));
-            OLC_DESC(d) = NULL;
+            OLC_DESC(d) = nullptr;
           }
           break;
 
@@ -1717,7 +1717,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       return;
 
     default:
-      mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: OLC: Reached default case in oedit_parse()!");
+      mudlog(LOG_BRF, ADMLVL_BUILDER, true, "SYSERR: OLC: Reached default case in oedit_parse()!");
       write_to_output(d, "Oops...\r\n");
       break;
   }
@@ -1754,7 +1754,7 @@ static void iedit_setup_existing(struct descriptor_data *d, struct obj_data *rea
   /* free any assigned scripts */
   if (obj->script)
     extract_script(obj, OBJ_TRIGGER);
-  obj->script = NULL;
+  obj->script = nullptr;
   /* find_obj helper */
   remove_from_lookup_table(obj_get_id(obj));
 
@@ -1776,13 +1776,13 @@ ACMD(do_iedit)
     send_to_char(ch, "You must supply an object name.\r\n");
   }
 
-  if ((k = get_obj_in_equip_vis(ch, arg, NULL, ch->equipment))) {
+  if ((k = get_obj_in_equip_vis(ch, arg, nullptr, ch->equipment))) {
     found = 1;
-  } else if ((k = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+  } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
     found = 1;
-  } else if ((k = get_obj_in_list_vis(ch, arg, NULL, world[char_get_in_room(ch)].contents))) {
+  } else if ((k = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
     found = 1;
-  } else if ((k = get_obj_vis(ch, arg, NULL))) {
+  } else if ((k = get_obj_vis(ch, arg, nullptr))) {
     found = 1;
   }
 
@@ -1799,7 +1799,7 @@ ACMD(do_iedit)
   iedit_setup_existing(ch->desc, k);
   OLC_VAL(ch->desc) = 0;
 
-  act("$n starts using OLC.", TRUE, ch, 0, 0, TO_ROOM);
+  act("$n starts using OLC.", true, ch, 0, 0, TO_ROOM);
 
   desc_set_connected(ch->desc, CON_IEDIT);
 
