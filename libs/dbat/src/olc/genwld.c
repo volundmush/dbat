@@ -16,6 +16,7 @@
 #include "dbat/genolc.h"
 #include "dbat/genzon.h"
 #include "dbat/dg_olc.h"
+#include "dbat/atomicfile.h"
 
 static int copy_room(struct room_data *to, struct room_data *from);
 static int copy_room_strings(struct room_data *dest, struct room_data *source);
@@ -282,6 +283,7 @@ int save_rooms(zone_rnum zone_num)
 {
   int i;
   struct room_data *room;
+  struct atomic_file af;
   FILE *sf;
   char filename[128];
   char buf[MAX_STRING_LENGTH], buf1[MAX_STRING_LENGTH];
@@ -296,8 +298,8 @@ int save_rooms(zone_rnum zone_num)
   mud_log("GenOLC: save_rooms: Saving rooms in zone #%d (%d-%d).",
           zone_table[zone_num].number, genolc_zone_bottom(zone_num), zone_table[zone_num].top);
 
-  snprintf(filename, sizeof(filename), "%s%d.new", WLD_PREFIX, zone_table[zone_num].number);
-  if (!(sf = fopen(filename, "w"))) {
+  snprintf(filename, sizeof(filename), "%s%d.wld", WLD_PREFIX, zone_table[zone_num].number);
+  if (!(sf = atomic_open(&af, filename, false))) {
     perror("SYSERR: save_rooms");
     return FALSE;
   }
@@ -404,13 +406,9 @@ int save_rooms(zone_rnum zone_num)
    * Write the final line and close it.
    */
   fprintf(sf, "$~\n");
-  fclose(sf);
-
-  /* Old file we're replacing. */
-  snprintf(buf, sizeof(buf), "%s%d.wld", WLD_PREFIX, zone_table[zone_num].number);
-
-  remove(buf);
-  rename(filename, buf);
+  if (!atomic_commit(&af))
+    return FALSE;
+  snprintf(buf, sizeof(buf), "%s", filename);
 
   if (in_save_list(zone_table[zone_num].number, SL_WLD)) {
     remove_from_save_list(zone_table[zone_num].number, SL_WLD);

@@ -20,6 +20,7 @@
 #include "dbat/extract.h"
 #include "dbat/relocate.h"
 #include "dbat/search.h"
+#include "dbat/atomicfile.h"
 
 static long assemblyGetAssemblyIndex(long lVnum);
 
@@ -95,13 +96,14 @@ void assemblyBootAssemblies(void)
 
 void assemblySaveAssemblies(void)
 {
+  struct atomic_file af;
   char szType[MAX_STRING_LENGTH] = {'\0'};
   long i                         = 0;
   long j                         = 0;
   ASSEMBLY *pAssembly            = NULL;
   FILE *pFile                    = NULL;
 
-  if ((pFile = fopen(ASSEMBLIES_FILE, "wt")) == NULL) {
+  if ((pFile = atomic_open(&af, ASSEMBLIES_FILE, false)) == NULL) {
     mud_log("SYSERR: assemblySaveAssemblies(): Couldn't open file '%s' for "
             "writing.",
             ASSEMBLIES_FILE);
@@ -124,7 +126,7 @@ void assemblySaveAssemblies(void)
       fprintf(pFile, "\n");
   }
 
-  fclose(pFile);
+  atomic_commit(&af);
 }
 
 void assemblyListToChar(struct char_data *pCharacter)

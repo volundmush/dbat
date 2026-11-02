@@ -6,9 +6,11 @@
 #include "dbat/fileop.h"
 #include "dbat/stringutils.h"
 #include "dbat/comm.h"
+#include "dbat/atomicfile.h"
 
 void customWrite(struct char_data *ch, struct obj_data *obj)
 {
+  struct atomic_file af;
 
   if (char_is_npc(ch))
     return;
@@ -42,7 +44,7 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
     return;
   }
 
-  if (!(fl = fopen(fname, "w"))) {
+  if (!(fl = atomic_open(&af, fname, true))) {
     mud_log("ERROR: Custom unable to be saved to user file!");
     return;
   }
@@ -50,7 +52,7 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
   sprintf(buf + strlen(buf), "%s\n", obj->short_description);
   fprintf(fl, "%s\n", buf);
 
-  fclose(fl);
+  atomic_commit(&af);
 }
 
 void customRead(struct descriptor_data *d, int type, char *name)
@@ -113,6 +115,7 @@ void customRead(struct descriptor_data *d, int type, char *name)
 
 void customCreate(struct descriptor_data *d)
 {
+  struct atomic_file af;
 
   if (!d)
     return;
@@ -128,7 +131,7 @@ void customCreate(struct descriptor_data *d)
   if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, d->user))
     return;
 
-  if (!(fl = fopen(fname, "w"))) {
+  if (!(fl = atomic_open(&af, fname, true))) {
     mud_log("ERROR: could not create custom file.");
     return;
   }
@@ -136,7 +139,7 @@ void customCreate(struct descriptor_data *d)
   fprintf(fl, "@D--@RUser @GC@gustom@Gs@D--@n\n");
   d->customfile = 1;
 
-  fclose(fl);
+  atomic_commit(&af);
 }
 
 /* Formerly macros in descriptor_utils.h. */

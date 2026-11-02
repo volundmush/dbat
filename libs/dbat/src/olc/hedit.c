@@ -25,6 +25,7 @@
 #include "dbat/config.h"
 #include "dbat/broadcast.h"
 #include "dbat/act.informative.h"
+#include "dbat/atomicfile.h"
 
 /* external functions */
 
@@ -152,12 +153,13 @@ static void hedit_save_internally(struct descriptor_data *d)
 
 static void hedit_save_to_disk(struct descriptor_data *d)
 {
+  struct atomic_file af;
   FILE *fp;
   char buf1[MAX_STRING_LENGTH], index_name[READ_SIZE];
   int i;
 
   snprintf(index_name, sizeof(index_name), "%s%s", HLP_PREFIX, HELP_FILE);
-  if (!(fp = fopen(index_name, "w"))) {
+  if (!(fp = atomic_open(&af, index_name, false))) {
     mud_log("SYSERR: Could not write help index file");
     return;
   }
@@ -173,7 +175,8 @@ static void hedit_save_to_disk(struct descriptor_data *d)
   }
   /* Write final line and close. */
   fprintf(fp, "$~\n");
-  fclose(fp);
+  if (!atomic_commit(&af))
+    return; /* still listed as unsaved */
 
   remove_from_save_list(HEDIT_PERMISSION, SL_HLP);
 

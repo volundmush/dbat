@@ -51,6 +51,7 @@ for side in ref new; do echo "  $side: -c exit $(cat "$work/$side/check/check.rc
 [ "$(cat "$work/ref/check/check.rc")" = "$(cat "$work/new/check/check.rc")" ] || { echo "FAIL: -c exit status differs"; status=1; }
 diff <(norm "$work/ref/check/check.log") <(norm "$work/new/check/check.log") > "$work/check.diff" || { echo "FAIL: -c logs differ ($work/check.diff)"; status=1; }
 diff <(norm "$work/ref/run/boot.log") <(norm "$work/new/run/boot.log") > "$work/boot.diff" || { echo "FAIL: boot logs differ ($work/boot.diff)"; status=1; }
-diff -r "$work/ref/run/data" "$work/new/run/data" > "$work/data.diff" || { echo "FAIL: saved data differs ($work/data.diff)"; status=1; }
+# *.bak: atomic saves of player data keep the replaced version beside the file (dbat/atomicfile.h)
+diff -r -x '*.bak' "$work/ref/run/data" "$work/new/run/data" > "$work/data.diff" || { echo "FAIL: saved data differs ($work/data.diff)"; status=1; }
 [ $status -eq 0 ] && { echo "verify: OK"; rm -rf "$work"; } || echo "verify: differences kept in $work"
 exit $status

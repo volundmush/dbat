@@ -22,20 +22,23 @@
 #include "dbat/stringutils.h"
 #include "dbat/db.h"
 #include "dbat/comm.h"
+#include "dbat/atomicfile.h"
 
 void write_aliases(struct char_data *ch)
 {
+  struct atomic_file af;
   FILE *file;
   char fn[MAX_STRING_LENGTH];
   struct alias_data *temp;
 
   get_filename(fn, sizeof(fn), ALIAS_FILE, char_get_name(ch));
-  remove(fn);
 
-  if (char_get_aliases(ch) == NULL)
+  if (char_get_aliases(ch) == NULL) {
+    remove(fn);
     return;
+  }
 
-  if ((file = fopen(fn, "w")) == NULL) {
+  if ((file = atomic_open(&af, fn, true)) == NULL) {
     mud_log("SYSERR: Couldn't save aliases for %s in '%s': %s", char_get_name(ch), fn, strerror(errno));
     /*  SYSERR_DESC:
      *  This error occurs when the server fails to open the relevant alias
@@ -57,7 +60,7 @@ void write_aliases(struct char_data *ch)
             temp->type);
   }
 
-  fclose(file);
+  atomic_commit(&af);
 }
 
 /* Reads one alias record into a. Returns false if the file ends or is malformed partway through it. */

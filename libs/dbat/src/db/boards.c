@@ -23,6 +23,7 @@
 #include "dbat/fileop.h"
 #include "dbat/stringutils.h"
 #include "dbat/log.h"
+#include "dbat/atomicfile.h"
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -520,6 +521,7 @@ struct board_info *locate_board(obj_vnum board_vnum)
 
 bool save_board(struct board_info *board)
 {
+  struct atomic_file af;
   struct board_msg *msg;
   FILE *fl;
   char path[512];
@@ -529,7 +531,7 @@ bool save_board(struct board_info *board)
     return false;
 
   board_path(path, sizeof(path), board->vnum);
-  if (!(fl = fopen(path, "wb"))) {
+  if (!(fl = atomic_open(&af, path, false))) {
     mud_log("Hm. Error while creating attempting to save board [vnum: %d].  Unable to create file '%s'", board->vnum, path);
     return false;
   }
@@ -547,8 +549,7 @@ bool save_board(struct board_info *board)
     for (struct board_memory *mem = board->memory[slot]; mem; mem = mem->next)
       fprintf(fl, "S%d %s %d\n", slot, mem->name, mem->timestamp);
 
-  fclose(fl);
-  return true;
+  return atomic_commit(&af);
 }
 
 static void send_board_banner(struct char_data *ch, const struct obj_data *obj, obj_vnum board_vnum)

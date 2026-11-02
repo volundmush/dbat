@@ -63,6 +63,7 @@
 #include "dbat/guild.h"
 #include "dbat/context_help.h"
 #include "dbat/local_limits.h"
+#include "dbat/atomicfile.h"
 
 static void load_help(FILE *fl, char *name);
 static void strip_string(char *buffer);
@@ -988,9 +989,10 @@ static void reset_time(void)
 /* Write the time in 'when' to the MUD-time file. */
 void save_mud_time(struct time_info_data *when)
 {
+  struct atomic_file af;
   FILE *bgtime;
 
-  if ((bgtime = fopen(TIME_FILE, "w")) == NULL)
+  if ((bgtime = atomic_open(&af, TIME_FILE, false)) == NULL)
     mud_log("SYSERR: Can't write to '%s' time file.", TIME_FILE);
   else {
     fprintf(bgtime, "%ld\n", mud_time_to_secs(when));
@@ -1019,7 +1021,7 @@ void save_mud_time(struct time_info_data *when)
     fprintf(bgtime, "%d\n", SHADOW_DRAGON6);
     fprintf(bgtime, "%d\n", SHADOW_DRAGON7);
     fprintf(bgtime, "%d\n", ERAPLAYERS);
-    fclose(bgtime);
+    atomic_commit(&af);
   }
 }
 

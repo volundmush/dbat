@@ -16,6 +16,7 @@
 #include "dbat/dg_olc.h"
 #include "dbat/class.h"
 #include "dbat/affect.h"
+#include "dbat/atomicfile.h"
 
 static int free_mobile_strings(struct char_data *mob);
 static int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd);
@@ -319,14 +320,15 @@ int save_mobiles(zone_rnum zone_num)
   mob_rnum rmob;
   int written;
   char mobfname[64], usedfname[64];
+  struct atomic_file af;
 
   if (zone_num < 0 || zone_num > top_of_zone_table) {
     mud_log("SYSERR: GenOLC: save_mobiles: Invalid real zone number %d. (0-%d)", zone_num, top_of_zone_table);
     return FALSE;
   }
 
-  snprintf(mobfname, sizeof(mobfname), "%s%d.new", MOB_PREFIX, zone_table[zone_num].number);
-  if ((mobfd = fopen(mobfname, "w")) == NULL) {
+  snprintf(mobfname, sizeof(mobfname), "%s%d.mob", MOB_PREFIX, zone_table[zone_num].number);
+  if ((mobfd = atomic_open(&af, mobfname, false)) == NULL) {
     mudlog(LOG_BRF, ADMLVL_GOD, TRUE, "SYSERR: GenOLC: Cannot open mob file for writing.");
     return FALSE;
   }
@@ -340,10 +342,9 @@ int save_mobiles(zone_rnum zone_num)
   }
   fputs("$\n", mobfd);
   written = ftell(mobfd);
-  fclose(mobfd);
-  snprintf(usedfname, sizeof(usedfname), "%s%d.mob", MOB_PREFIX, zone_table[zone_num].number);
-  remove(usedfname);
-  rename(mobfname, usedfname);
+  if (!atomic_commit(&af))
+    return FALSE;
+  snprintf(usedfname, sizeof(usedfname), "%s", mobfname);
 
   if (in_save_list(zone_table[zone_num].number, SL_MOB)) {
     remove_from_save_list(zone_table[zone_num].number, SL_MOB);

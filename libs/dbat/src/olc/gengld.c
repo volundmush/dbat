@@ -9,6 +9,7 @@
 #include "dbat/genolc.h"
 #include "dbat/genzon.h"
 #include "dbat/utils.h"
+#include "dbat/atomicfile.h"
 
 static void free_guild_strings(struct guild_data *guild);
 
@@ -184,6 +185,7 @@ int add_guild(struct guild_data *ngld)
 
 int save_guilds(zone_rnum zone_num)
 {
+  struct atomic_file af;
   int i, j, rguild;
   FILE *guild_file;
   char fname[64];
@@ -195,7 +197,7 @@ int save_guilds(zone_rnum zone_num)
   }
 
   snprintf(fname, sizeof(fname), "%s%d.gld", GLD_PREFIX, zone_table[zone_num].number);
-  if (!(guild_file = fopen(fname, "w"))) {
+  if (!(guild_file = atomic_open(&af, fname, false))) {
     mudlog(LOG_BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC: Cannot open Guild file!");
     return FALSE;
   }
@@ -241,7 +243,7 @@ int save_guilds(zone_rnum zone_num)
     }
   }
   fprintf(guild_file, "$~\n");
-  fclose(guild_file);
+  atomic_commit(&af);
 
   if (in_save_list(zone_table[zone_num].number, SL_GLD)) {
     remove_from_save_list(zone_table[zone_num].number, SL_GLD);

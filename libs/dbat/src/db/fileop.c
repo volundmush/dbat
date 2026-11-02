@@ -6,6 +6,7 @@
 #include "dbat/db.h"
 #include "dbat/comm.h"
 #include "dbat/config.h"
+#include "dbat/atomicfile.h"
 
 #include <linux/limits.h>
 #include <errno.h>
@@ -191,6 +192,7 @@ void topLoad()
 /* Write the toplist to file */
 void topWrite(struct char_data *ch)
 {
+  struct atomic_file af;
   if (char_get_admlevel(ch) > 0 || char_is_npc(ch))
     return;
 
@@ -470,7 +472,7 @@ void topWrite(struct char_data *ch)
     if (!get_filename(fname, sizeof(fname), INTRO_FILE, "toplist"))
       return;
 
-    if (!(fl = fopen(fname, "w"))) {
+    if (!(fl = atomic_open(&af, fname, false))) {
       mud_log("ERROR: could not save Toplist File, %s.", fname);
       return;
     }
@@ -480,7 +482,7 @@ void topWrite(struct char_data *ch)
       x++;
     }
 
-    fclose(fl);
+    atomic_commit(&af);
   }
   return;
 }

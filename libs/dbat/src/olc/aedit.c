@@ -21,6 +21,7 @@
 #include "dbat/comm.h"
 #include "dbat/oasis.h"
 #include "dbat/genolc.h"
+#include "dbat/atomicfile.h"
 
 static void aedit_disp_menu(struct descriptor_data *d);
 static int aedit_find_command(const char *txt);
@@ -204,9 +205,10 @@ static void aedit_save_internally(struct descriptor_data *d)
 
 static void aedit_save_to_disk(struct descriptor_data *d)
 {
+  struct atomic_file af;
   FILE *fp;
   int i;
-  if (!(fp = fopen(SOCMESS_FILE_NEW, "w+"))) {
+  if (!(fp = atomic_open(&af, SOCMESS_FILE_NEW, false))) {
     char error[MAX_STRING_LENGTH];
     snprintf(error, sizeof(error), "Can't open socials file '%s'", SOCMESS_FILE);
     perror(error);
@@ -241,8 +243,8 @@ static void aedit_save_to_disk(struct descriptor_data *d)
   }
 
   fprintf(fp, "$\n");
-  fclose(fp);
-  remove_from_save_list(AEDIT_PERMISSION, SL_ACT);
+  if (atomic_commit(&af)) /* otherwise still listed as unsaved */
+    remove_from_save_list(AEDIT_PERMISSION, SL_ACT);
 }
 
 /*------------------------------------------------------------------------*/

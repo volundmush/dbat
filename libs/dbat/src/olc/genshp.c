@@ -11,6 +11,7 @@
 
 #include "dbat/genolc.h"
 #include "dbat/genzon.h"
+#include "dbat/atomicfile.h"
 
 static void copy_list(IDXTYPE **tlist, IDXTYPE *flist);
 static void copy_type_list(struct shop_buy_data **tlist, struct shop_buy_data *flist);
@@ -437,6 +438,7 @@ int add_shop(struct shop_data *nshp)
 int save_shops(zone_rnum zone_num)
 {
   int i, j, rshop;
+  struct atomic_file af;
   FILE *shop_file;
   char fname[128], oldname[128];
   struct shop_data *shop;
@@ -446,13 +448,13 @@ int save_shops(zone_rnum zone_num)
     return FALSE;
   }
 
-  snprintf(fname, sizeof(fname), "%s%d.new", SHP_PREFIX, zone_table[zone_num].number);
-  if (!(shop_file = fopen(fname, "w"))) {
+  snprintf(fname, sizeof(fname), "%s%d.shp", SHP_PREFIX, zone_table[zone_num].number);
+  if (!(shop_file = atomic_open(&af, fname, false))) {
     mudlog(LOG_BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC: Cannot open shop file!");
     return FALSE;
   } else if (fprintf(shop_file, "CircleMUD v3.0 Shop File~\n") < 0) {
     mudlog(LOG_BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC: Cannot write to shop file!");
-    fclose(shop_file);
+    atomic_abort(&af);
     return FALSE;
   }
   /*
@@ -536,10 +538,9 @@ int save_shops(zone_rnum zone_num)
     }
   }
   fprintf(shop_file, "$~\n");
-  fclose(shop_file);
-  snprintf(oldname, sizeof(oldname), "%s%d.shp", SHP_PREFIX, zone_table[zone_num].number);
-  remove(oldname);
-  rename(fname, oldname);
+  if (!atomic_commit(&af))
+    return FALSE;
+  snprintf(oldname, sizeof(oldname), "%s", fname);
 
   if (in_save_list(zone_table[zone_num].number, SL_SHP)) {
     remove_from_save_list(zone_table[zone_num].number, SL_SHP);

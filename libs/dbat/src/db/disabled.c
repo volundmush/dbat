@@ -4,6 +4,7 @@
 #include "dbat/fileop.h"
 #include "dbat/db.h"
 #include "dbat/interpreter.h"
+#include "dbat/atomicfile.h"
 
 #include <unistd.h>
 
@@ -156,6 +157,7 @@ void load_disabled()
 /* Save disabled commands */
 static void save_disabled()
 {
+  struct atomic_file af;
   FILE *fp;
   DISABLED_DATA *p;
 
@@ -165,7 +167,7 @@ static void save_disabled()
     return;
   }
 
-  if ((fp = fopen(DISABLED_FILE, "w")) == NULL) {
+  if ((fp = atomic_open(&af, DISABLED_FILE, false)) == NULL) {
     mud_log("SYSERR: Could not open " DISABLED_FILE " for writing");
     return;
   }
@@ -173,7 +175,7 @@ static void save_disabled()
   for (p = disabled_first; p; p = p->next)
     fprintf(fp, "%s %d %d %s\n", p->command->command, p->subcmd, p->level, p->disabled_by);
   fprintf(fp, "%s\n", END_MARKER);
-  fclose(fp);
+  atomic_commit(&af);
 }
 
 /* free all disabled commands from memory */

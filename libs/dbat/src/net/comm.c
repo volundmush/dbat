@@ -2500,6 +2500,8 @@ void close_socket(struct descriptor_data *d)
     free(d->obj_long);
 
   free_user(d);
+  free(d->loadplay); /* the account slot being loaded, if any */
+  d->loadplay = NULL;
 
   /*. Kill any OLC stuff .*/
   switch (d->connected) {

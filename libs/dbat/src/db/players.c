@@ -21,6 +21,7 @@
 #include "dbat/fileop.h"
 #include "dbat/affect.h"
 #include "dbat/interpreter.h"
+#include "dbat/atomicfile.h"
 
 #include <unistd.h>
 
@@ -132,12 +133,13 @@ int create_entry(char *name)
 /* This function necessary to save a seperate ASCII player index */
 void save_player_index(void)
 {
+  struct atomic_file af;
   int i;
   char index_name[50], bits[64];
   FILE *index_file;
 
   sprintf(index_name, "%s%s", LIB_PLRFILES, INDEX_FILE);
-  if (!(index_file = fopen(index_name, "w"))) {
+  if (!(index_file = atomic_open(&af, index_name, true))) {
     mud_log("SYSERR: Could not write player index file");
     return;
   }
@@ -151,7 +153,7 @@ void save_player_index(void)
     }
   fprintf(index_file, "~\n");
 
-  fclose(index_file);
+  atomic_commit(&af);
 }
 
 void free_player_index(void)
@@ -725,6 +727,7 @@ static void kill_ems(char *str)
 /* This is the ASCII Player Files save routine */
 void save_char(struct char_data *ch)
 {
+  struct atomic_file af;
   FILE *fl;
   char fname[40], buf[MAX_STRING_LENGTH];
   int i, id, save_index = FALSE;
@@ -762,7 +765,7 @@ void save_char(struct char_data *ch)
 
   if (!get_filename(fname, sizeof(fname), PLR_FILE, char_get_name(ch)))
     return;
-  if (!(fl = fopen(fname, "w"))) {
+  if (!(fl = atomic_open(&af, fname, true))) {
     mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "SYSERR: Couldn't open player file %s for write", fname);
     return;
   }
@@ -1061,7 +1064,7 @@ void save_char(struct char_data *ch)
       fprintf(fl, "Colr: %d %s\r\n", i, ch->player_specials->color_choices[i]);
     }
 
-  fclose(fl);
+  atomic_commit(&af);
 
   /* more char_to_store code to restore affects */
 

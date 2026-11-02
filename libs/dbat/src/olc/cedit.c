@@ -17,6 +17,7 @@
 #include "dbat/descriptor_utils.h"
 #include "dbat/room_utils.h"
 #include "dbat/stringutils.h"
+#include "dbat/atomicfile.h"
 
 /******************************************************************************/
 /** External Functions                                                       **/
@@ -412,10 +413,11 @@ static void cedit_save_to_disk(void)
 
 int save_config(IDXTYPE nowhere)
 {
+  struct atomic_file af;
   FILE *fl;
   char buf[MAX_STRING_LENGTH];
 
-  if (!(fl = fopen(CONFIG_CONFFILE, "w"))) {
+  if (!(fl = atomic_open(&af, CONFIG_CONFFILE, false))) {
     perror("SYSERR: save_config");
     return (FALSE);
   }
@@ -745,7 +747,8 @@ int save_config(IDXTYPE nowhere)
   fprintf(fl, "*Character creation method.\n"
               "method = %d\n\n",
           CONFIG_CREATION_METHOD);
-  fclose(fl);
+  if (!atomic_commit(&af))
+    return (FALSE); /* still listed as unsaved */
 
   if (in_save_list(NOWHERE, SL_CFG))
     remove_from_save_list(NOWHERE, SL_CFG);

@@ -37,6 +37,7 @@
 #include "dbat/mail.h"
 #include "dbat/guild.h"
 #include "dbat/disabled.h"
+#include "dbat/atomicfile.h"
 #include "informative_internal.h"
 
 ACMD(do_mimic)
@@ -574,20 +575,21 @@ ACMD(do_showoff)
 /* Used for checking if you know the character in question. */
 void introCreate(struct char_data *ch)
 {
+  struct atomic_file af;
   char fname[40];
   FILE *fl;
   /* Write Introduction File */
   if (!get_filename(fname, sizeof(fname), INTRO_FILE, char_get_name(ch)))
     return;
 
-  if (!(fl = fopen(fname, "w"))) {
+  if (!(fl = atomic_open(&af, fname, true))) {
     mud_log("ERROR: could not save user, %s, to filename, %s.", char_get_name(ch), fname);
     return;
   }
 
   fprintf(fl, "Gibbles Gibbles\n");
 
-  fclose(fl);
+  atomic_commit(&af);
   return;
 }
 
@@ -634,6 +636,7 @@ int readIntro(struct char_data *ch, struct char_data *vict)
 
 static void introWrite(struct char_data *ch, struct char_data *vict, char *name)
 {
+  struct atomic_file af;
   FILE *file;
   char fname[40], filler[50], scrap[100], line[256];
   char *names[500] = {NULL}, *alias[500] = {NULL};
@@ -663,7 +666,7 @@ static void introWrite(struct char_data *ch, struct char_data *vict, char *name)
   if (!get_filename(fname, sizeof(fname), INTRO_FILE, char_get_name(ch)))
     return;
 
-  if (!(fl = fopen(fname, "w"))) {
+  if (!(fl = atomic_open(&af, fname, true))) {
     mud_log("ERROR: could not save intro file, %s, to filename, %s.", char_get_name(ch), fname);
     return;
   }
@@ -690,7 +693,7 @@ static void introWrite(struct char_data *ch, struct char_data *vict, char *name)
 
   fprintf(fl, "%s %s\n", char_get_name(vict), CAP(name));
 
-  fclose(fl);
+  atomic_commit(&af);
   return;
 }
 

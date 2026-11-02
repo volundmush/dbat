@@ -23,6 +23,7 @@
 #include "dbat/act.wizard.h"
 #include "dbat/modify.h"
 #include "dbat/genzon.h"
+#include "dbat/atomicfile.h"
 
 static void trigedit_save(struct descriptor_data *d);
 static void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num);
@@ -589,14 +590,14 @@ static void trigedit_write_zone_file(struct descriptor_data *d)
   FILE *trig_file;
   int zone, top;
   char bitBuf[MAX_INPUT_LENGTH];
-  char fname[MAX_INPUT_LENGTH], final_name[MAX_INPUT_LENGTH];
+  struct atomic_file af;
+  char fname[MAX_INPUT_LENGTH];
 
   zone = zone_table[OLC_ZNUM(d)].number;
   top  = zone_table[OLC_ZNUM(d)].top;
 
-  snprintf(fname, sizeof(fname), "%s/%i.new", TRG_PREFIX, zone);
-
-  if (!(trig_file = fopen(fname, "w"))) {
+  snprintf(fname, sizeof(fname), "%s%d.trg", TRG_PREFIX, zone);
+  if (!(trig_file = atomic_open(&af, fname, false))) {
     mudlog(LOG_BRF, MAX(ADMLVL_GOD, char_get_invis_level(d->character)), TRUE,
            "SYSERR: OLC: Can't open trig file \"%s\"", fname);
     return;
@@ -609,7 +610,7 @@ static void trigedit_write_zone_file(struct descriptor_data *d)
       if (fprintf(trig_file, "#%d\n", i) < 0) {
         mudlog(LOG_BRF, MAX(ADMLVL_GOD, char_get_invis_level(d->character)), TRUE,
                "SYSERR: OLC: Can't write trig file!");
-        fclose(trig_file);
+        atomic_abort(&af);
         return;
       }
       sprintascii(bitBuf, trig->trigger_type);
@@ -632,12 +633,10 @@ static void trigedit_write_zone_file(struct descriptor_data *d)
   }
 
   fprintf(trig_file, "$%c\n", STRING_TERMINATOR);
-  fclose(trig_file);
-
-  snprintf(final_name, sizeof(final_name), "%s%d.trg", TRG_PREFIX, zone);
-
-  remove(final_name);
-  rename(fname, final_name);
+  if (!atomic_commit(&af)) {
+    write_to_output(d, "Could not write the trigger file; nothing was changed.\r\n");
+    return;
+  }
 
   write_to_output(d, "Trigger saved to disk.\r\n");
   create_world_index(zone, "trg");

@@ -13,6 +13,7 @@
 #include "dbat/utils.h"
 #include "dbat/handler.h"
 #include "dbat/dg_olc.h"
+#include "dbat/atomicfile.h"
 
 static obj_rnum adjust_objects(obj_rnum refpt);
 static int copy_object_preserve(struct obj_data *to, struct obj_data *from);
@@ -202,6 +203,7 @@ int save_objects(zone_rnum zone_num)
   char pbuf1[MAX_STRING_LENGTH], pbuf2[MAX_STRING_LENGTH];
   char pbuf3[MAX_STRING_LENGTH], pbuf4[MAX_STRING_LENGTH];
   int counter, counter2, realcounter;
+  struct atomic_file af;
   FILE *fp;
   struct obj_data *obj;
   struct extra_descr_data *ex_desc;
@@ -211,8 +213,8 @@ int save_objects(zone_rnum zone_num)
     return FALSE;
   }
 
-  snprintf(cmfname, sizeof(cmfname), "%s%d.new", OBJ_PREFIX, zone_table[zone_num].number);
-  if (!(fp = fopen(cmfname, "w+"))) {
+  snprintf(cmfname, sizeof(cmfname), "%s%d.obj", OBJ_PREFIX, zone_table[zone_num].number);
+  if (!(fp = atomic_open(&af, cmfname, false))) {
     mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "SYSERR: OLC: Cannot open objects file %s!", cmfname);
     return FALSE;
   }
@@ -324,10 +326,9 @@ int save_objects(zone_rnum zone_num)
    * Write the final line, close the file.
    */
   fprintf(fp, "$~\n");
-  fclose(fp);
-  snprintf(buf, sizeof(buf), "%s%d.obj", OBJ_PREFIX, zone_table[zone_num].number);
-  remove(buf);
-  rename(cmfname, buf);
+  if (!atomic_commit(&af))
+    return FALSE;
+  snprintf(buf, sizeof(buf), "%s", cmfname);
 
   if (in_save_list(zone_table[zone_num].number, SL_OBJ)) {
     remove_from_save_list(zone_table[zone_num].number, SL_OBJ);

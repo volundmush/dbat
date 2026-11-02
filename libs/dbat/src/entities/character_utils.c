@@ -34,6 +34,7 @@
 #include "dbat/consts/races.h"
 #include "dbat/consts/shadowdragons.h"
 #include "dbat/local_limits.h"
+#include "dbat/atomicfile.h"
 
 static void char_adm_set(struct char_data *ch, int flag, bool on);
 static bool char_has_legs(const struct char_data *ch);
@@ -2120,20 +2121,21 @@ const char *disp_align(struct char_data *ch)
 /* This creates a player's sense memory file for the first time. */
 void senseCreate(struct char_data *ch)
 {
+  struct atomic_file af;
   char fname[40];
   FILE *fl;
   /* Write Sense File */
   if (!get_filename(fname, sizeof(fname), SENSE_FILE, char_get_name(ch)))
     return;
 
-  if (!(fl = fopen(fname, "w"))) {
+  if (!(fl = atomic_open(&af, fname, true))) {
     mud_log("ERROR: could not save sense memory of, %s, to filename, %s.", char_get_name(ch), fname);
     return;
   }
 
   fprintf(fl, "0\n");
 
-  fclose(fl);
+  atomic_commit(&af);
   return;
 }
 
@@ -2184,6 +2186,7 @@ int read_sense_memory(struct char_data *ch, struct char_data *vict)
 /* This writes a player's sense memory to file. */
 void sense_memory_write(struct char_data *ch, struct char_data *vict)
 {
+  struct atomic_file af;
   FILE *file;
   char fname[40], line[256];
   int idnums[500] = {0};
@@ -2210,7 +2213,7 @@ void sense_memory_write(struct char_data *ch, struct char_data *vict)
   if (!get_filename(fname, sizeof(fname), SENSE_FILE, char_get_name(ch)))
     return;
 
-  if (!(fl = fopen(fname, "w"))) {
+  if (!(fl = atomic_open(&af, fname, true))) {
     mud_log("ERROR: could not save sense memory file, %s, to filename, %s.", char_get_name(ch), fname);
     return;
   }
@@ -2236,7 +2239,7 @@ void sense_memory_write(struct char_data *ch, struct char_data *vict)
     fprintf(fl, "%d\n", char_get_mob_vnum(vict));
   }
 
-  fclose(fl);
+  atomic_commit(&af);
   return;
 }
 

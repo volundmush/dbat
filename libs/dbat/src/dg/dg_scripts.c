@@ -12,6 +12,7 @@
 #include "dbat/interpreter.h"
 #include "dbat/comm.h"
 #include "dbat/fileop.h"
+#include "dbat/atomicfile.h"
 #include "dg_internal.h"
 
 #include <unistd.h>
@@ -1351,6 +1352,7 @@ void read_saved_vars(struct char_data *ch)
 /* save a characters variables out to disk */
 void save_char_vars(struct char_data *ch)
 {
+  struct atomic_file af;
   FILE *file;
   char fn[127];
   struct trig_var_data *vars;
@@ -1363,13 +1365,15 @@ void save_char_vars(struct char_data *ch)
   if (char_is_npc(ch)) return;
 
   get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, char_get_name(ch));
-  unlink(fn);
 
   /* make sure this char has global variables to save */
-  if (ch->script->global_vars == NULL) return;
+  if (ch->script->global_vars == NULL) {
+    unlink(fn);
+    return;
+  }
   vars = ch->script->global_vars;
 
-  file = fopen(fn, "wt");
+  file = atomic_open(&af, fn, true);
   if (!file) {
     mudlog(LOG_NRM, ADMLVL_GOD, TRUE,
            "SYSERR: Could not open player variable file %s for writing.:%s",
@@ -1384,5 +1388,5 @@ void save_char_vars(struct char_data *ch)
     vars = vars->next;
   }
 
-  fclose(file);
+  atomic_commit(&af);
 }

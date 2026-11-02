@@ -14,6 +14,7 @@
 #include "dbat/improved-edit.h"
 #include "dbat/tedit.h"
 #include "dbat/config.h"
+#include "dbat/atomicfile.h"
 
 void news_string_cleanup(struct descriptor_data *d, int terminator)
 {
@@ -73,6 +74,7 @@ void news_string_cleanup(struct descriptor_data *d, int terminator)
 
 void tedit_string_cleanup(struct descriptor_data *d, int terminator)
 {
+  struct atomic_file af;
   FILE *fl;
   char *storage = OLC_STORAGE(d);
 
@@ -81,7 +83,7 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator)
 
   switch (terminator) {
     case STRINGADD_SAVE:
-      if (!(fl = fopen(storage, "w")))
+      if (!(fl = atomic_open(&af, storage, false)))
         mudlog(LOG_CMP, ADMLVL_IMPL, TRUE, "SYSERR: Can't write file '%s'.", storage);
       else {
         if (*d->str && !(strcmp(storage, "text/news"))) {
@@ -96,7 +98,10 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator)
           strip_cr(*d->str);
           fputs(*d->str, fl);
         }
-        fclose(fl);
+        if (!atomic_commit(&af)) {
+          write_to_output(d, "Could not write the file; nothing was changed.\r\n");
+          break;
+        }
         mudlog(LOG_CMP, ADMLVL_GOD, TRUE, "OLC: %s saves '%s'.", char_get_name(d->character), storage);
         write_to_output(d, "Saved.\r\n");
 

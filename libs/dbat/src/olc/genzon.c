@@ -9,6 +9,7 @@
 #include "dbat/fileop.h"
 #include "dbat/genolc.h"
 #include "dbat/dg_scripts.h"
+#include "dbat/atomicfile.h"
 
 static void remove_cmd_from_list(struct reset_com **list, int pos);
 
@@ -44,6 +45,7 @@ zone_rnum real_zone_by_thing(room_vnum vznum)
 
 zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, const char **error)
 {
+  struct atomic_file af;
   FILE *fp;
   struct zone_data *zone;
   int i;
@@ -83,85 +85,113 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
    * Create the zone file.
    */
   snprintf(buf, sizeof(buf), "%s%d.zon", ZON_PREFIX, vzone_num);
-  if (!(fp = fopen(buf, "w"))) {
+  if (!(fp = atomic_open(&af, buf, false))) {
     mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new zone file.");
     *error = "Could not write zone file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "#%d\nNew Zone~\n%d 30 2\nS\n$\n", vzone_num, (vzone_num * 100) + 99);
-  fclose(fp);
+  if (!atomic_commit(&af)) {
+    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new zone file.");
+    *error = "Could not write zone file.\r\n";
+    return NOWHERE;
+  }
 
   /*
    * Create the room file.
    */
   snprintf(buf, sizeof(buf), "%s%d.wld", WLD_PREFIX, vzone_num);
-  if (!(fp = fopen(buf, "w"))) {
+  if (!(fp = atomic_open(&af, buf, false))) {
     mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new world file.");
     *error = "Could not write world file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "#%d\nThe Beginning~\nNot much here.\n~\n%d 0 0\nS\n$\n", bottom, vzone_num);
-  fclose(fp);
+  if (!atomic_commit(&af)) {
+    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new world file.");
+    *error = "Could not write world file.\r\n";
+    return NOWHERE;
+  }
 
   /*
    * Create the mobile file.
    */
   snprintf(buf, sizeof(buf), "%s%d.mob", MOB_PREFIX, vzone_num);
-  if (!(fp = fopen(buf, "w"))) {
+  if (!(fp = atomic_open(&af, buf, false))) {
     mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new mob file.");
     *error = "Could not write mobile file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "$\n");
-  fclose(fp);
+  if (!atomic_commit(&af)) {
+    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new mob file.");
+    *error = "Could not write mobile file.\r\n";
+    return NOWHERE;
+  }
 
   /*  
    * Create the object file.
    */
   snprintf(buf, sizeof(buf), "%s%d.obj", OBJ_PREFIX, vzone_num);
-  if (!(fp = fopen(buf, "w"))) {
+  if (!(fp = atomic_open(&af, buf, false))) {
     mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new obj file.");
     *error = "Could not write object file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "$\n");
-  fclose(fp);
+  if (!atomic_commit(&af)) {
+    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new obj file.");
+    *error = "Could not write object file.\r\n";
+    return NOWHERE;
+  }
 
   /*
    * Create the shop file.
    */
   snprintf(buf, sizeof(buf), "%s%d.shp", SHP_PREFIX, vzone_num);
-  if (!(fp = fopen(buf, "w"))) {
+  if (!(fp = atomic_open(&af, buf, false))) {
     mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new shop file.");
     *error = "Could not write shop file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "$~\n");
-  fclose(fp);
+  if (!atomic_commit(&af)) {
+    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new shop file.");
+    *error = "Could not write shop file.\r\n";
+    return NOWHERE;
+  }
 
   /*
    * Create the trigger file.
    */
   snprintf(buf, sizeof(buf), "%s%d.trg", TRG_PREFIX, vzone_num);
-  if (!(fp = fopen(buf, "w"))) {
+  if (!(fp = atomic_open(&af, buf, false))) {
     mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new trigger file");
     *error = "Could not write trigger file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "$~\n");
-  fclose(fp);
+  if (!atomic_commit(&af)) {
+    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new trigger file");
+    *error = "Could not write trigger file.\r\n";
+    return NOWHERE;
+  }
 
   /*
    * Create Gld file .
    */
   snprintf(buf, sizeof(buf), "%s/%d.gld", GLD_PREFIX, vzone_num);
-  if (!(fp = fopen(buf, "w"))) {
+  if (!(fp = atomic_open(&af, buf, false))) {
     mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new guild file");
     *error = "Could not write guild file.\r\n";
     return NOWHERE;
   }
   fprintf(fp, "$~\n");
-  fclose(fp);
+  if (!atomic_commit(&af)) {
+    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Can't write new guild file");
+    *error = "Could not write guild file.\r\n";
+    return NOWHERE;
+  }
 
   /*
    * Update index files.
@@ -240,8 +270,9 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
 
 void create_world_index(int znum, const char *type)
 {
+  struct atomic_file index_af;
   FILE *newfile, *oldfile;
-  char new_name[32], old_name[32];
+  char old_name[32];
   const char *prefix;
   int num, found = FALSE;
   char buf[MAX_STRING_LENGTH];
@@ -277,13 +308,12 @@ void create_world_index(int znum, const char *type)
   }
 
   snprintf(old_name, sizeof(old_name), "%s/index", prefix);
-  snprintf(new_name, sizeof(new_name), "%s/newindex", prefix);
 
   if (!(oldfile = fopen(old_name, "r"))) {
     mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Failed to open %s.", old_name);
     return;
-  } else if (!(newfile = fopen(new_name, "w"))) {
-    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Failed to open %s.", new_name);
+  } else if (!(newfile = atomic_open(&index_af, old_name, false))) {
+    mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Failed to open %s.", index_af.tmp);
     fclose(oldfile);
     return;
   }
@@ -312,13 +342,8 @@ void create_world_index(int znum, const char *type)
     fprintf(newfile, "%s\n", buf);
   }
 
-  fclose(newfile);
   fclose(oldfile);
-  /*
-   * Out with the old, in with the new.
-   */
-  remove(old_name);
-  rename(new_name, old_name);
+  atomic_commit(&index_af); /* out with the old, in with the new */
 }
 
 /*-------------------------------------------------------------------*/
@@ -365,6 +390,7 @@ int save_zone(zone_rnum zone_num)
   int subcmd, arg1 = -1, arg2 = -1, arg3 = -1, arg4 = -1, arg5 = -1;
   char fname[128], oldname[128];
   const char *comment = NULL;
+  struct atomic_file af;
   FILE *zfile;
   char zbuf1[MAX_STRING_LENGTH];
   char zbuf2[MAX_STRING_LENGTH];
@@ -376,8 +402,8 @@ int save_zone(zone_rnum zone_num)
     return FALSE;
   }
 
-  snprintf(fname, sizeof(fname), "%s%d.new", ZON_PREFIX, zone_table[zone_num].number);
-  if (!(zfile = fopen(fname, "w"))) {
+  snprintf(fname, sizeof(fname), "%s%d.zon", ZON_PREFIX, zone_table[zone_num].number);
+  if (!(zfile = atomic_open(&af, fname, false))) {
     mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE, "SYSERR: OLC: save_zones:  Can't write zone %d.", zone_table[zone_num].number);
     return FALSE;
   }
@@ -514,10 +540,9 @@ int save_zone(zone_rnum zone_num)
               ZCMD(zone_num, subcmd).sarg1, ZCMD(zone_num, subcmd).sarg2);
   }
   fputs("S\n$\n", zfile);
-  fclose(zfile);
-  snprintf(oldname, sizeof(oldname), "%s%d.zon", ZON_PREFIX, zone_table[zone_num].number);
-  remove(oldname);
-  rename(fname, oldname);
+  if (!atomic_commit(&af))
+    return FALSE;
+  snprintf(oldname, sizeof(oldname), "%s", fname);
 
   if (in_save_list(zone_table[zone_num].number, SL_ZON)) {
     remove_from_save_list(zone_table[zone_num].number, SL_ZON);

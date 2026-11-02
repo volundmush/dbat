@@ -55,6 +55,7 @@
 #include "dbat/shop.h"
 #include "dbat/guild.h"
 #include "dbat/spell_parser.h"
+#include "dbat/atomicfile.h"
 
 /* local variables */
 static int copyover_timer = 0; /* for timed copyovers */
@@ -439,6 +440,7 @@ ACMD(do_approve)
 
 static void lockWrite(struct char_data *ch, char *name)
 {
+  struct atomic_file af;
   FILE *file;
   char fname[40], filler[50], line[256];
   char *names[500] = {NULL};
@@ -467,7 +469,7 @@ static void lockWrite(struct char_data *ch, char *name)
   if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout"))
     return;
 
-  if (!(fl = fopen(fname, "w"))) {
+  if (!(fl = atomic_open(&af, fname, false))) {
     mud_log("ERROR: could not save Lockout File, %s.", fname);
     return;
   }
@@ -493,7 +495,7 @@ static void lockWrite(struct char_data *ch, char *name)
     log_imm_action("LOCKOUT: %s sentenced by %s.", CAP(name), char_get_name(ch));
   }
 
-  fclose(fl);
+  atomic_commit(&af);
   return;
 }
 

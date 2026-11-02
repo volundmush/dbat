@@ -15,6 +15,7 @@
 #include "dbat/utils.h"
 #include "dbat/objsave.h"
 #include "dbat/fileop.h"
+#include "dbat/atomicfile.h"
 
 #include <errno.h>
 
@@ -86,6 +87,7 @@ static void House_restore_weight(struct obj_data *obj)
 /* Save all objects in a house */
 static void House_crashsave(room_vnum vnum)
 {
+  struct atomic_file af;
   int rnum;
   char buf[MAX_STRING_LENGTH];
   FILE *fp;
@@ -94,17 +96,18 @@ static void House_crashsave(room_vnum vnum)
     return;
   if (!House_get_filename(vnum, buf, sizeof(buf)))
     return;
-  if (!(fp = fopen(buf, "wb"))) {
+  if (!(fp = atomic_open(&af, buf, true))) {
     perror("SYSERR: Error saving house file");
     return;
   }
   if (!House_save(world[rnum].contents, fp, 0)) {
-    fclose(fp);
+    atomic_abort(&af); /* keep the last good house file */
     return;
   }
-  fclose(fp);
+  bool saved = atomic_commit(&af);
   House_restore_weight(world[rnum].contents);
-  rroom_set_flag(rnum, ROOM_HOUSE_CRASH, false);
+  if (saved) /* otherwise leave it flagged so the next pass tries again */
+    rroom_set_flag(rnum, ROOM_HOUSE_CRASH, false);
 }
 
 /* Delete a house save file */
@@ -143,16 +146,17 @@ int find_house(room_vnum vnum)
 /* Save the house control information */
 void House_save_control(void)
 {
+  struct atomic_file af;
   FILE *fl;
 
-  if (!(fl = fopen(HCONTROL_FILE, "wb"))) {
+  if (!(fl = atomic_open(&af, HCONTROL_FILE, true))) {
     perror("SYSERR: Unable to open house control file.");
     return;
   }
   /* write all the house control recs in one fell swoop.  Pretty nifty, eh? */
   fwrite(house_control, sizeof(struct house_control_rec), num_of_houses, fl);
 
-  fclose(fl);
+  atomic_commit(&af);
 }
 
 /* call from boot_db - will load control recs, load objs, set atrium bits */
@@ -530,7 +534,7 @@ static int House_load(room_vnum rvnum)
   if (!House_get_filename(rvnum, cmfname, sizeof(cmfname)))
     return 0;
 
-  if (!(fl = fopen(cmfname, "r+b"))) {
+  if (!(fl = fopen(cmfname, "rb"))) {
     if (errno != ENOENT) { /* if it fails, NOT because of no file */
       snprintf(buf1, sizeof(buf1), "SYSERR: READING HOUSE FILE %s (5)", cmfname);
       perror(buf1);

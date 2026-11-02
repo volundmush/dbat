@@ -22,6 +22,7 @@
 #include "dbat/fileop.h"
 #include "dbat/consts/rents.h"
 #include "dbat/config.h"
+#include "dbat/atomicfile.h"
 
 #include <unistd.h>
 #include <errno.h>
@@ -54,31 +55,10 @@ static int Crash_build_save_filename(char *dst, size_t dst_size, const char *fil
   return TRUE;
 }
 
-static int Crash_close_save_file(FILE *fp, const char *filename, const char *file, int line)
-{
-  if (fflush(fp) == EOF) {
-    Crash_log_file_error("fflush", filename, file, line);
-    fclose(fp);
-    return FALSE;
-  }
-
-  if (fsync(fileno(fp)) == -1) {
-    Crash_log_file_error("fsync", filename, file, line);
-    fclose(fp);
-    return FALSE;
-  }
-
-  if (fclose(fp) == EOF) {
-    Crash_log_file_error("fclose", filename, file, line);
-    return FALSE;
-  }
-
-  return TRUE;
-}
-
 static int Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, const char *save_type)
 {
-  char filename[MAX_INPUT_LENGTH], tmpfile[MAX_STRING_LENGTH], bakfile[MAX_STRING_LENGTH];
+  struct atomic_file af;
+  char filename[MAX_INPUT_LENGTH];
   int j;
   FILE *fp;
 
@@ -87,20 +67,14 @@ static int Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, c
     return FALSE;
   }
 
-  if (!Crash_build_save_filename(tmpfile, sizeof(tmpfile), filename, ".tmp", __FILE__, __LINE__) ||
-      !Crash_build_save_filename(bakfile, sizeof(bakfile), filename, ".bak", __FILE__, __LINE__))
+  /* the replaced file stays as <name>.bak, which Crash_load() falls back to */
+  if (!(fp = atomic_open(&af, filename, true)))
     return FALSE;
-
-  if (!(fp = fopen(tmpfile, "wb"))) {
-    Crash_log_file_error("fopen", tmpfile, __FILE__, __LINE__);
-    return FALSE;
-  }
 
   if (fprintf(fp, "%d %d %d %d %d %d\r\n", rentcode, (int)time(0), cost,
               char_get_gold(ch), char_get_bank_gold(ch), 0) < 0) {
-    Crash_log_file_error("fprintf", tmpfile, __FILE__, __LINE__);
-    fclose(fp);
-    remove(tmpfile);
+    Crash_log_file_error("fprintf", af.tmp, __FILE__, __LINE__);
+    atomic_abort(&af);
     return FALSE;
   }
 
@@ -109,15 +83,13 @@ static int Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, c
       if (!Crash_save(char_get_equipment(ch, j), fp, j + 1)) {
         Crash_restore_weight(char_get_equipment(ch, j));
         mud_log("SYSERR: %s:%d: Crash_save failed for %s of %s equipment position %d", __FILE__, __LINE__, save_type, char_get_name(ch), j);
-        fclose(fp);
-        remove(tmpfile);
+        atomic_abort(&af);
         return FALSE;
       }
       if (ferror(fp)) {
         Crash_restore_weight(char_get_equipment(ch, j));
-        Crash_log_file_error("write", tmpfile, __FILE__, __LINE__);
-        fclose(fp);
-        remove(tmpfile);
+        Crash_log_file_error("write", af.tmp, __FILE__, __LINE__);
+        atomic_abort(&af);
         return FALSE;
       }
       Crash_restore_weight(char_get_equipment(ch, j));
@@ -126,40 +98,12 @@ static int Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, c
   if (!Crash_save(ch->carrying, fp, 0)) {
     Crash_restore_weight(ch->carrying);
     mud_log("SYSERR: %s:%d: Crash_save failed for %s of %s inventory", __FILE__, __LINE__, save_type, char_get_name(ch));
-    fclose(fp);
-    remove(tmpfile);
+    atomic_abort(&af);
     return FALSE;
   }
-
-  if (ferror(fp)) {
-    Crash_restore_weight(ch->carrying);
-    Crash_log_file_error("write", tmpfile, __FILE__, __LINE__);
-    fclose(fp);
-    remove(tmpfile);
-    return FALSE;
-  }
-
   Crash_restore_weight(ch->carrying);
 
-  if (!Crash_close_save_file(fp, tmpfile, __FILE__, __LINE__)) {
-    remove(tmpfile);
-    return FALSE;
-  }
-
-  if (rename(filename, bakfile) == -1 && errno != ENOENT) {
-    Crash_log_file_error("rename existing save to backup", filename, __FILE__, __LINE__);
-    remove(tmpfile);
-    return FALSE;
-  }
-
-  if (rename(tmpfile, filename) == -1) {
-    Crash_log_file_error("rename temporary save", tmpfile, __FILE__, __LINE__);
-    if (rename(bakfile, filename) == -1)
-      Crash_log_file_error("restore backup save", bakfile, __FILE__, __LINE__);
-    return FALSE;
-  }
-
-  return TRUE;
+  return atomic_commit(&af);
 }
 
 void delete_inv_backup(struct char_data *ch)
@@ -372,7 +316,7 @@ static int Crash_clean_file(char *name)
   if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, name))
     return (0);
 
-  if (!(fl = fopen(filename, "r+b"))) {
+  if (!(fl = fopen(filename, "rb"))) {
     if (errno != ENOENT) /* if it fails, NOT because of no file */
       mud_log("SYSERR: OPENING OBJECT FILE %s (4): %s", filename, strerror(errno));
     return (0);
@@ -663,7 +607,7 @@ int Crash_load(struct char_data *ch)
   if (!Crash_build_save_filename(cmfnamebak, sizeof(cmfnamebak), cmfname, ".bak", __FILE__, __LINE__))
     return -1;
 
-  if ((fl = fopen(cmfname, "r+b")))
+  if ((fl = fopen(cmfname, "rb")))
     return Crash_load_file(ch, fl, cmfname);
 
   snprintf(buf1, sizeof(buf1), "SYSERR: READING OBJECT FILE %s (5)", cmfname);
@@ -673,7 +617,7 @@ int Crash_load(struct char_data *ch)
                "There was a problem loading your objects from disk.\r\n"
                "Trying your backup object file.\r\n");
 
-  if ((fl = fopen(cmfnamebak, "r+b"))) {
+  if ((fl = fopen(cmfnamebak, "rb"))) {
     mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), TRUE, "%s loading backup object file %s.", char_get_name(ch), cmfnamebak);
     return Crash_load_file(ch, fl, cmfnamebak);
   }

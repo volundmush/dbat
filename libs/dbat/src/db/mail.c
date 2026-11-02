@@ -22,6 +22,7 @@ Written by Jeremy Elson (jelson@circlemud.org)
 #include "dbat/improved-edit.h"
 #include "dbat/players.h"
 #include "dbat/fileop.h"
+#include "dbat/atomicfile.h"
 
 /* local globals */
 static mail_index_type *mail_index   = NULL; /* list of recs in the mail file  */
@@ -153,35 +154,103 @@ static mail_index_type *find_char_in_index(long searchee)
 }
 
 /*
+ * Mail operations are copy-on-write: mail_begin() reads the whole mail file into memory, the
+ * block reads and writes below work on that copy, and mail_commit() writes it back through
+ * atomic_open(), so a crash leaves either the old mail file or the new one, never a block chain
+ * that is half rewritten. The file is small (BLOCK_SIZE blocks, a few KB).
+ */
+static char *mail_buf      = NULL; /* the mail file while an operation is open */
+static long mail_buf_len   = 0;
+static long mail_buf_alloc = 0;
+
+static bool mail_begin(void)
+{
+  FILE *fl;
+
+  if (!(fl = fopen(MAIL_FILE, "rb"))) {
+    mud_log("SYSERR: Unable to open mail file '%s'.", MAIL_FILE);
+    no_mail = TRUE;
+    return false;
+  }
+  fseek(fl, 0L, SEEK_END);
+  mail_buf_len   = ftell(fl);
+  mail_buf_alloc = mail_buf_len + 8 * BLOCK_SIZE;
+  CREATE(mail_buf, char, mail_buf_alloc);
+  rewind(fl);
+  if (mail_buf_len && fread(mail_buf, mail_buf_len, 1, fl) != 1) {
+    mud_log("SYSERR: Unable to read mail file '%s'.", MAIL_FILE);
+    fclose(fl);
+    free(mail_buf);
+    mail_buf = NULL;
+    no_mail  = TRUE;
+    return false;
+  }
+  fclose(fl);
+  return true;
+}
+
+/* Ends a mail operation without writing anything. */
+static void mail_end(void)
+{
+  free(mail_buf);
+  mail_buf     = NULL;
+  mail_buf_len = mail_buf_alloc = 0;
+}
+
+static void mail_commit(void)
+{
+  struct atomic_file af;
+  FILE *fl;
+  bool written = false;
+
+  if ((fl = atomic_open(&af, MAIL_FILE, false))) {
+    if (mail_buf_len && fwrite(mail_buf, mail_buf_len, 1, fl) != 1)
+      atomic_abort(&af);
+    else
+      written = atomic_commit(&af);
+  }
+  if (!written) { /* the in-memory index no longer matches the file */
+    mud_log("SYSERR: Mail system disabled! Unable to write mail file '%s'.", MAIL_FILE);
+    no_mail = TRUE;
+  }
+  file_end_pos = mail_buf_len;
+  mail_end();
+}
+
+/*
  * void write_to_file(void * #1, int #2, long #3)
  * #1 - A pointer to the data to write, usually the 'block' record.
  * #2 - How much to write (because we'll write NUL terminated strings.)
  * #3 - What offset (block position) in the file to write to.
  *
- * Writes a mail block back into the database at the given location.
+ * Writes a mail block into the open mail operation (see mail_begin()).
  */
 static void write_to_file(void *buf, int size, long filepos)
 {
-  FILE *mail_file;
-
   if (filepos % BLOCK_SIZE) {
     mud_log("SYSERR: Mail system -- fatal error #2!!! (invalid file position %ld)", filepos);
     no_mail = TRUE;
     return;
   }
-  if (!(mail_file = fopen(MAIL_FILE, "r+b"))) {
-    mud_log("SYSERR: Unable to open mail file '%s'.", MAIL_FILE);
+  if (!mail_buf) {
+    mud_log("SYSERR: Mail system -- write outside a mail operation (position %ld)", filepos);
     no_mail = TRUE;
     return;
   }
-  fseek(mail_file, filepos, SEEK_SET);
-  fwrite(buf, size, 1, mail_file);
+  if (filepos + size > mail_buf_alloc) {
+    long old_alloc = mail_buf_alloc;
 
-  /* find end of file */
-  fseek(mail_file, 0L, SEEK_END);
-  file_end_pos = ftell(mail_file);
-  fclose(mail_file);
-  return;
+    mail_buf_alloc = filepos + size + 8 * BLOCK_SIZE;
+    RECREATE(mail_buf, char, mail_buf_alloc);
+    memset(mail_buf + old_alloc, 0, mail_buf_alloc - old_alloc);
+  }
+  if (filepos > mail_buf_len) /* as writing past the end of a file would: the gap reads as zeros */
+    memset(mail_buf + mail_buf_len, 0, filepos - mail_buf_len);
+  memcpy(mail_buf + filepos, buf, size);
+  mail_buf_len = MAX(mail_buf_len, filepos + size);
+
+  /* new blocks are appended at the end (see pop_free_list()) */
+  file_end_pos = mail_buf_len;
 }
 
 /*
@@ -190,27 +259,23 @@ static void write_to_file(void *buf, int size, long filepos)
  * #2 - How large the block we're reading is.
  * #3 - What position in the file to read.
  *
- * This reads a block from the mail database file.
+ * This reads a block from the open mail operation (see mail_begin()).
  */
 static void read_from_file(void *buf, int size, long filepos)
 {
-  FILE *mail_file;
-
   if (filepos % BLOCK_SIZE) {
     mud_log("SYSERR: Mail system -- fatal error #3!!! (invalid filepos read %ld)", filepos);
     no_mail = TRUE;
     return;
   }
-  if (!(mail_file = fopen(MAIL_FILE, "r+b"))) {
-    mud_log("SYSERR: Unable to open mail file '%s'.", MAIL_FILE);
+  if (!mail_buf) {
+    mud_log("SYSERR: Mail system -- read outside a mail operation (position %ld)", filepos);
     no_mail = TRUE;
     return;
   }
-
-  fseek(mail_file, filepos, SEEK_SET);
-  fread(buf, size, 1, mail_file);
-  fclose(mail_file);
-  return;
+  memset(buf, 0, size);
+  if (filepos < mail_buf_len)
+    memcpy(buf, mail_buf + filepos, MIN(size, mail_buf_len - filepos));
 }
 
 static void index_mail(long id_to_index, long pos)
@@ -330,12 +395,16 @@ void store_mail(long to, long from, char *message_pointer)
   strncpy(header.txt, msg_txt, HEADER_BLOCK_DATASIZE); /* strncpy: OK (h.txt:HEADER_BLOCK_DATASIZE+1) */
   header.txt[HEADER_BLOCK_DATASIZE] = '\0';
 
+  if (!mail_begin())
+    return;
   target_address = pop_free_list(); /* find next free block */
   index_mail(to, target_address);   /* add it to mail index in memory */
   write_to_file(&header, BLOCK_SIZE, target_address);
 
-  if (strlen(msg_txt) <= HEADER_BLOCK_DATASIZE)
+  if (strlen(msg_txt) <= HEADER_BLOCK_DATASIZE) {
+    mail_commit();
     return; /* that was the whole message */
+  }
 
   bytes_written = HEADER_BLOCK_DATASIZE;
   msg_txt += HEADER_BLOCK_DATASIZE; /* move pointer to next bit of text */
@@ -387,6 +456,7 @@ void store_mail(long to, long from, char *message_pointer)
     bytes_written += strlen(data.txt);
     msg_txt += strlen(data.txt);
   }
+  mail_commit();
 } /* store mail */
 
 /*
@@ -445,10 +515,13 @@ static char *read_delete(long recipient, char **from)
   }
 
   /* ok, now lets do some readin'! */
+  if (!mail_begin())
+    return (NULL);
   read_from_file(&header, BLOCK_SIZE, mail_address);
 
   if (header.block_type != HEADER_BLOCK) {
     mud_log("SYSERR: Oh dear. (Header block %ld != %d)", header.block_type, HEADER_BLOCK);
+    mail_end();
     no_mail = TRUE;
     mud_log("SYSERR: Mail system disabled!  -- Error #9. (Invalid header block.)");
     return (NULL);
@@ -496,6 +569,7 @@ static char *read_delete(long recipient, char **from)
     write_to_file(&data, BLOCK_SIZE, mail_address);
     push_free_list(mail_address);
   }
+  mail_commit();
 
   return strdup(buf);
 }

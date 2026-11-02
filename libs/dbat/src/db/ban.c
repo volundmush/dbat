@@ -18,6 +18,7 @@
 #include "dbat/stringutils.h"
 #include "dbat/character_utils.h"
 #include "dbat/descriptor_utils.h"
+#include "dbat/atomicfile.h"
 
 #include <errno.h>
 
@@ -102,14 +103,15 @@ static void _write_one_node(FILE *fp, struct ban_list_element *node)
 
 static void write_ban_list(void)
 {
+  struct atomic_file af;
   FILE *fl;
 
-  if (!(fl = fopen(BAN_FILE, "w"))) {
+  if (!(fl = atomic_open(&af, BAN_FILE, false))) {
     perror("SYSERR: Unable to open '" BAN_FILE "' for writing");
     return;
   }
   _write_one_node(fl, ban_list); /* recursively write from end to start */
-  fclose(fl);
+  atomic_commit(&af);
   return;
 }
 
