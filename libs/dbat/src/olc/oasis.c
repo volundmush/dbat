@@ -254,7 +254,8 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
   if (OLC_HOUSE(d)) { /*. free_house performs no sanity checks, must be careful here .*/
     switch (cleanup_type) {
       case CLEANUP_ALL:
-        free_house(OLC_HOUSE(d));
+        free_house(OLC_HOUSE(d)); /* (its contents: the house is the editor's own copy) */
+        free(OLC_HOUSE(d));
         break;
       case CLEANUP_STRUCTS:
         free(OLC_HOUSE(d));
@@ -269,7 +270,8 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
   if (OLC_ACTION(d)) {
     switch (cleanup_type) {
       case CLEANUP_ALL:
-        free_action(OLC_ACTION(d));
+        free_action(OLC_ACTION(d)); /* (its strings: the action is the editor's own copy) */
+        free(OLC_ACTION(d));
         break;
       case CLEANUP_STRUCTS:
         free(OLC_ACTION(d));

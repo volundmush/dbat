@@ -37,6 +37,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*
+ * The command table. How a typed word finds its command:
+ *   - entries are tried in this order (create_command_list() appends the socials after all of them);
+ *   - the first entry whose name starts with the word, and whose minimum level and admin level the
+ *     character meets, is the one that runs, so a shorter or more common command must come before
+ *     longer ones it should win abbreviations against (the directions first, "i" before "inventory");
+ *   - sort_as only orders the 'commands' listing (and gives the letters speedwalking uses for the
+ *     directions); it plays no part in matching;
+ *   - a minimum level of -1 marks the mob (DG) commands, which check for a mob themselves.
+ */
 const struct command_info cmd_info[] = {
     {"RESERVED",      "",             0,            0,                  0,  ADMLVL_NONE,    0                  }, /* this must be first -- for specprocs */
 
@@ -76,8 +86,8 @@ const struct command_info cmd_info[] = {
     {"assist",        "assis",        POS_STANDING, do_assist,          0,  ADMLVL_NONE,    0                  },
     {"astat",         "ast",          POS_DEAD,     do_astat,           0,  ADMLVL_GOD,     0                  },
     {"ask",           "ask",          POS_RESTING,  do_spec_comm,       0,  ADMLVL_NONE,    SCMD_ASK           },
-    {"attack",        "attack",       POS_FIGHTING, do_attack,          0,  0,              0                  },
-    {"auction",       "auctio",       POS_RESTING,  do_not_here,        0,  0,              0                  },
+    {"attack",        "attack",       POS_FIGHTING, do_attack,          0,  ADMLVL_NONE,    0                  },
+    {"auction",       "auctio",       POS_RESTING,  do_not_here,        0,  ADMLVL_NONE,    0                  },
     {"augment",       "augmen",       POS_SITTING,  do_not_here,        1,  ADMLVL_NONE,    0                  },
     {"aura",          "aura",         POS_RESTING,  do_aura,            0,  ADMLVL_NONE,    0                  },
     {"autoexit",      "autoex",       POS_DEAD,     do_autoexit,        0,  ADMLVL_NONE,    0                  },
@@ -85,7 +95,7 @@ const struct command_info cmd_info[] = {
     {"autoloot",      "autolo",       POS_DEAD,     do_gen_tog,         0,  ADMLVL_NONE,    SCMD_AUTOLOOT      },
     {"autosplit",     "autosp",       POS_DEAD,     do_gen_tog,         0,  ADMLVL_IMMORT,  SCMD_AUTOSPLIT     },
 
-    {"bakuhatsuha",   "baku",         POS_FIGHTING, do_baku,            0,  0,              0                  },
+    {"bakuhatsuha",   "baku",         POS_FIGHTING, do_baku,            0,  ADMLVL_NONE,    0                  },
     {"ban",           "ban",          POS_DEAD,     do_ban,             0,  ADMLVL_VICE,    0                  },
     {"balance",       "bal",          POS_STANDING, do_not_here,        1,  ADMLVL_NONE,    0                  },
     {"balefire",      "balef",        POS_FIGHTING, do_balefire,        0,  ADMLVL_NONE,    0                  },
@@ -94,11 +104,11 @@ const struct command_info cmd_info[] = {
     {"bash",          "bas",          POS_FIGHTING, do_bash,            0,  ADMLVL_NONE,    0                  },
     {"beam",          "bea",          POS_FIGHTING, do_beam,            0,  ADMLVL_NONE,    0                  },
     {"bexchange",     "bexchan",      POS_RESTING,  do_rbanktrans,      0,  ADMLVL_NONE,    0                  },
-    {"bid",           "bi",           POS_RESTING,  do_bid,             0,  0,              0                  },
-    {"bigbang",       "bigban",       POS_FIGHTING, do_bigbang,         0,  0,              0                  },
-    {"bite",          "bit",          POS_FIGHTING, do_bite,            0,  0,              0                  },
+    {"bid",           "bi",           POS_RESTING,  do_bid,             0,  ADMLVL_NONE,    0                  },
+    {"bigbang",       "bigban",       POS_FIGHTING, do_bigbang,         0,  ADMLVL_NONE,    0                  },
+    {"bite",          "bit",          POS_FIGHTING, do_bite,            0,  ADMLVL_NONE,    0                  },
     {"blessedhammer", "bham",         POS_FIGHTING, do_blessedhammer,   0,  ADMLVL_NONE,    0                  },
-    {"block",         "block",        POS_FIGHTING, do_block,           0,  0,              0                  },
+    {"block",         "block",        POS_FIGHTING, do_block,           0,  ADMLVL_NONE,    0                  },
     {"book",          "boo",          POS_SLEEPING, do_gen_ps,          0,  ADMLVL_IMMORT,  SCMD_INFO          },
     {"break",         "break",        POS_STANDING, do_break,           0,  ADMLVL_IMMORT,  0                  },
     {"brief",         "br",           POS_DEAD,     do_gen_tog,         0,  ADMLVL_NONE,    SCMD_BRIEF         },
@@ -107,13 +117,13 @@ const struct command_info cmd_info[] = {
     {"buy",           "bu",           POS_STANDING, do_not_here,        0,  ADMLVL_NONE,    0                  },
     {"bug",           "bug",          POS_DEAD,     do_gen_write,       0,  ADMLVL_NONE,    SCMD_BUG           },
 
-    {"cancel",        "cance",        POS_RESTING,  do_not_here,        0,  0,              0                  },
-    {"candy",         "cand",         POS_FIGHTING, do_candy,           0,  0,              0                  },
-    {"carry",         "carr",         POS_STANDING, do_carry,           0,  0,              0                  },
-    {"carve",         "carv",         POS_SLEEPING, do_gen_tog,         0,  0,              SCMD_CARVE         },
+    {"cancel",        "cance",        POS_RESTING,  do_not_here,        0,  ADMLVL_NONE,    0                  },
+    {"candy",         "cand",         POS_FIGHTING, do_candy,           0,  ADMLVL_NONE,    0                  },
+    {"carry",         "carr",         POS_STANDING, do_carry,           0,  ADMLVL_NONE,    0                  },
+    {"carve",         "carv",         POS_SLEEPING, do_gen_tog,         0,  ADMLVL_NONE,    SCMD_CARVE         },
     {"cedit",         "cedit",        POS_DEAD,     do_oasis,           0,  ADMLVL_IMPL,    SCMD_OASIS_CEDIT   },
-    {"channel",       "channe",       POS_FIGHTING, do_channel,         0,  0,              0                  },
-    {"charge",        "char",         POS_FIGHTING, do_charge,          0,  0,              0                  },
+    {"channel",       "channe",       POS_FIGHTING, do_channel,         0,  ADMLVL_NONE,    0                  },
+    {"charge",        "char",         POS_FIGHTING, do_charge,          0,  ADMLVL_NONE,    0                  },
     {"check",         "ch",           POS_STANDING, do_not_here,        1,  ADMLVL_NONE,    0                  },
     {"checkload",     "checkl",       POS_DEAD,     do_checkloadstatus, 0,  ADMLVL_GOD,     0                  },
     {"chown",         "cho",          POS_DEAD,     do_chown,           1,  ADMLVL_IMPL,    0                  },
@@ -133,7 +143,7 @@ const struct command_info cmd_info[] = {
     {"copyover",      "copyover",     POS_DEAD,     do_copyover,        0,  ADMLVL_GOD,     0                  },
     {"create",        "crea",         POS_STANDING, do_form,            0,  ADMLVL_NONE,    0                  },
     {"credits",       "cred",         POS_DEAD,     do_gen_ps,          0,  ADMLVL_NONE,    SCMD_CREDITS       },
-    {"crusher",       "crushe",       POS_FIGHTING, do_crusher,         0,  0,              0                  },
+    {"crusher",       "crushe",       POS_FIGHTING, do_crusher,         0,  ADMLVL_NONE,    0                  },
 
     {"date",          "da",           POS_DEAD,     do_date,            0,  ADMLVL_IMMORT,  SCMD_DATE          },
     {"darkness",      "darknes",      POS_FIGHTING, do_ddslash,         0,  ADMLVL_NONE,    0                  },
@@ -146,9 +156,9 @@ const struct command_info cmd_info[] = {
     {"dualbeam",      "dualbea",      POS_FIGHTING, do_dualbeam,        0,  ADMLVL_NONE,    0                  },
     {"deposit",       "depo",         POS_STANDING, do_not_here,        1,  ADMLVL_NONE,    0                  },
     {"diagnose",      "diagnos",      POS_RESTING,  do_diagnose,        0,  ADMLVL_NONE,    0                  },
-    {"dimizu",        "dimizu",       POS_STANDING, do_dimizu,          0,  0,              0                  },
+    {"dimizu",        "dimizu",       POS_STANDING, do_dimizu,          0,  ADMLVL_NONE,    0                  },
     {"disable",       "disa",         POS_DEAD,     do_disable,         0,  ADMLVL_VICE,    0                  },
-    {"disguise",      "disguis",      POS_DEAD,     do_disguise,        0,  0,              0                  },
+    {"disguise",      "disguis",      POS_DEAD,     do_disguise,        0,  ADMLVL_NONE,    0                  },
     {"dig",           "dig",          POS_DEAD,     do_bury,            0,  ADMLVL_NONE,    0                  },
     {"display",       "disp",         POS_DEAD,     do_display,         0,  ADMLVL_NONE,    0                  },
     {"dodonpa",       "dodon",        POS_FIGHTING, do_dodonpa,         0,  ADMLVL_NONE,    0                  },
@@ -261,7 +271,7 @@ const struct command_info cmd_info[] = {
     {"implant",       "implan",       POS_RESTING,  do_implant,         0,  ADMLVL_NONE,    0                  },
     {"instant",       "insta",        POS_STANDING, do_instant,         0,  ADMLVL_NONE,    0                  },
     {"instill",       "instil",       POS_STANDING, do_instill,         0,  ADMLVL_NONE,    0                  },
-    {"instruct",      "instruc",      POS_STANDING, do_gen_tog,         0,  0,              SCMD_INSTRUCT      },
+    {"instruct",      "instruc",      POS_STANDING, do_gen_tog,         0,  ADMLVL_NONE,    SCMD_INSTRUCT      },
     /*{ "insult"   , "insult"	, POS_RESTING , do_insult   , 0, ADMLVL_NONE	, 0 },*/
     {"inventory",     "inv",          POS_DEAD,     do_inventory,       0,  ADMLVL_NONE,    0                  },
     {"interest",      "inter",        POS_DEAD,     do_interest,        0,  ADMLVL_IMPL,    0                  },
@@ -287,7 +297,7 @@ const struct command_info cmd_info[] = {
     {"kyodaika",      "kyodaik",      POS_STANDING, do_kyodaika,        0,  ADMLVL_NONE,    0                  },
 
     {"look",          "lo",           POS_RESTING,  do_look,            0,  ADMLVL_NONE,    SCMD_LOOK          },
-    {"lag",           "la",           POS_RESTING,  do_lag,             0,  5,              0                  },
+    {"lag",           "la",           POS_RESTING,  do_lag,             0,  ADMLVL_GRGOD,   0                  },
     {"land",          "lan",          POS_RESTING,  do_land,            0,  ADMLVL_NONE,    0                  },
     {"languages",     "lang",         POS_RESTING,  do_languages,       0,  ADMLVL_NONE,    0                  },
     {"last",          "last",         POS_DEAD,     do_last,            0,  ADMLVL_GOD,     0                  },
@@ -330,7 +340,7 @@ const struct command_info cmd_info[] = {
     {"nolin",         "nolin",        POS_DEAD,     do_gen_tog,         0,  ADMLVL_NONE,    SCMD_NODEC         },
     {"nomusic",       "nomusi",       POS_DEAD,     do_gen_tog,         0,  ADMLVL_NONE,    SCMD_NOMUSIC       },
     {"noooc",         "noooc",        POS_DEAD,     do_gen_tog,         0,  ADMLVL_NONE,    SCMD_NOGOSSIP      },
-    {"nogive",        "nogiv",        POS_DEAD,     do_gen_tog,         0,  0,              SCMD_NOGIVE        },
+    {"nogive",        "nogiv",        POS_DEAD,     do_gen_tog,         0,  ADMLVL_NONE,    SCMD_NOGIVE        },
     {"nograts",       "nograts",      POS_DEAD,     do_gen_tog,         0,  ADMLVL_NONE,    SCMD_NOGRATZ       },
     {"nogrow",        "nogro",        POS_DEAD,     do_nogrow,          0,  ADMLVL_NONE,    0                  },
     {"nohassle",      "nohassle",     POS_DEAD,     do_gen_tog,         0,  ADMLVL_IMMORT,  SCMD_NOHASSLE      },
@@ -354,7 +364,7 @@ const struct command_info cmd_info[] = {
     {"oedit",         "oedit",        POS_DEAD,     do_oasis,           0,  ADMLVL_IMMORT,  SCMD_OASIS_OEDIT   },
     {"osay",          "osay",         POS_RESTING,  do_osay,            0,  ADMLVL_NONE,    0                  },
 
-    {"pack",          "pac",          POS_STANDING, do_pack,            0,  0,              0                  },
+    {"pack",          "pac",          POS_STANDING, do_pack,            0,  ADMLVL_NONE,    0                  },
     {"page",          "pag",          POS_DEAD,     do_page,            0,  ADMLVL_BUILDER, 0                  },
     {"paralyze",      "paralyz",      POS_FIGHTING, do_paralyze,        0,  ADMLVL_NONE,    0                  },
     {"peace",         "pea",          POS_DEAD,     do_peace,           0,  ADMLVL_BUILDER, 0                  },
@@ -362,7 +372,7 @@ const struct command_info cmd_info[] = {
     {"permission",    "permiss",      POS_DEAD,     do_permission,      0,  ADMLVL_IMMORT,  0                  },
     {"phoenix",       "phoeni",       POS_FIGHTING, do_pslash,          0,  ADMLVL_NONE,    0                  },
     {"pick",          "pi",           POS_STANDING, do_gen_door,        1,  ADMLVL_NONE,    SCMD_PICK          },
-    {"pickup",        "picku",        POS_RESTING,  do_not_here,        0,  0,              0                  },
+    {"pickup",        "picku",        POS_RESTING,  do_not_here,        0,  ADMLVL_NONE,    0                  },
     {"pilot",         "pilot",        POS_SITTING,  do_drive,           0,  ADMLVL_NONE,    0                  },
     {"plant",         "plan",         POS_STANDING, do_plant,           0,  ADMLVL_NONE,    0                  },
     {"play",          "pla",          POS_SITTING,  do_play,            0,  ADMLVL_NONE,    0                  },
@@ -406,7 +416,7 @@ const struct command_info cmd_info[] = {
     {"repair",        "repai",        POS_STANDING, do_srepair,         0,  ADMLVL_NONE,    0                  },
     {"reply",         "rep",          POS_SLEEPING, do_reply,           0,  ADMLVL_NONE,    0                  },
     {"reward",        "rewar",        POS_RESTING,  do_reward,          0,  ADMLVL_IMMORT,  0                  },
-    {"reload",        "reload",       POS_DEAD,     do_reboot,          0,  5,              0                  },
+    {"reload",        "reload",       POS_DEAD,     do_reboot,          0,  ADMLVL_GRGOD,   0                  },
     {"receive",       "rece",         POS_STANDING, do_not_here,        1,  ADMLVL_NONE,    0                  },
     {"remove",        "rem",          POS_RESTING,  do_remove,          0,  ADMLVL_NONE,    0                  },
     {"rent",          "rent",         POS_STANDING, do_not_here,        1,  ADMLVL_NONE,    0                  },
@@ -458,7 +468,7 @@ const struct command_info cmd_info[] = {
     {"sit",           "sit",          POS_RESTING,  do_sit,             0,  ADMLVL_NONE,    0                  },
     {"situp",         "situp",        POS_STANDING, do_situp,           0,  ADMLVL_NONE,    0                  },
     {"skills",        "skills",       POS_SLEEPING, do_skills,          0,  ADMLVL_NONE,    0                  },
-    {"skillset",      "skillset",     POS_SLEEPING, do_skillset,        0,  5,              0                  },
+    {"skillset",      "skillset",     POS_SLEEPING, do_skillset,        0,  ADMLVL_GRGOD,   0                  },
     {"slam",          "sla",          POS_FIGHTING, do_slam,            0,  ADMLVL_NONE,    0                  },
     {"sleep",         "sl",           POS_SLEEPING, do_sleep,           0,  ADMLVL_NONE,    0                  },
     {"slist",         "slist",        POS_SLEEPING, do_oasis,           0,  ADMLVL_IMMORT,  SCMD_OASIS_SLIST   },
@@ -466,7 +476,7 @@ const struct command_info cmd_info[] = {
     {"smote",         "sm",           POS_RESTING,  do_echo,            1,  ADMLVL_NONE,    SCMD_SMOTE         },
     {"sneak",         "sneak",        POS_STANDING, do_gen_tog,         1,  ADMLVL_NONE,    SCMD_SNEAK         },
     {"snoop",         "snoop",        POS_DEAD,     do_snoop,           0,  ADMLVL_IMMORT,  0                  },
-    {"song",          "son",          POS_RESTING,  do_song,            0,  0,              0                  },
+    {"song",          "son",          POS_RESTING,  do_song,            0,  ADMLVL_NONE,    0                  },
     {"spiral",        "spiral",       POS_STANDING, do_spiral,          0,  ADMLVL_NONE,    0                  },
     {"socials",       "socials",      POS_DEAD,     do_commands,        0,  ADMLVL_NONE,    SCMD_SOCIALS       },
     {"solarflare",    "solarflare",   POS_FIGHTING, do_solar,           0,  ADMLVL_NONE,    0                  },
@@ -479,9 +489,9 @@ const struct command_info cmd_info[] = {
     {"spells",        "spel",         POS_RESTING,  do_spells,          0,  ADMLVL_IMMORT,  0                  },
     {"stand",         "st",           POS_RESTING,  do_stand,           0,  ADMLVL_NONE,    0                  },
     {"starbreaker",   "starbr",       POS_FIGHTING, do_breaker,         0,  ADMLVL_NONE,    0                  },
-    {"stake",         "stak",         POS_SLEEPING, do_beacon,          0,  0,              0                  },
+    {"stake",         "stak",         POS_SLEEPING, do_beacon,          0,  ADMLVL_NONE,    0                  },
     {"stat",          "stat",         POS_DEAD,     do_stat,            0,  ADMLVL_IMMORT,  0                  },
-    {"status",        "statu",        POS_DEAD,     do_status,          0,  0,              0                  },
+    {"status",        "statu",        POS_DEAD,     do_status,          0,  ADMLVL_NONE,    0                  },
     {"steal",         "ste",          POS_STANDING, do_steal,           1,  ADMLVL_NONE,    0                  },
     {"stone",         "ston",         POS_STANDING, do_spit,            0,  ADMLVL_NONE,    0                  },
     {"stop",          "sto",          POS_STANDING, do_stop,            0,  ADMLVL_NONE,    0                  },
@@ -517,7 +527,7 @@ const struct command_info cmd_info[] = {
     {"train",         "train",        POS_STANDING, do_train,           0,  ADMLVL_NONE,    0                  },
     {"transfer",      "transfer",     POS_SLEEPING, do_trans,           0,  ADMLVL_IMMORT,  0                  },
     {"transform",     "transform",    POS_FIGHTING, do_transform,       0,  ADMLVL_NONE,    0                  },
-    {"transo",        "trans",        POS_STANDING, do_transobj,        0,  5,              0                  },
+    {"transo",        "trans",        POS_STANDING, do_transobj,        0,  ADMLVL_GRGOD,   0                  },
     {"tribeam",       "tribe",        POS_FIGHTING, do_tribeam,         0,  ADMLVL_NONE,    0                  },
     {"trigedit",      "trigedit",     POS_DEAD,     do_oasis,           0,  ADMLVL_IMMORT,  SCMD_OASIS_TRIGEDIT},
     {"trip",          "trip",         POS_FIGHTING, do_trip,            0,  ADMLVL_NONE,    0                  },
@@ -611,33 +621,49 @@ const struct command_info cmd_info[] = {
     {"\n",            "zzzzzzz",      0,            0,                  0,  ADMLVL_NONE,    0                  }
 }; /* this must be last */
 
-static int command_pass(char *cmd, struct char_data *ch)
+/* What a character can still do while held fast (petrified, frozen, paralysed or liquefied). */
+static bool allowed_while_restrained(const char *cmd, bool liquefied)
 {
+  static const char *const always[]        = {"look", "score", "ooc", "osay", "emote", "smote", "status"};
+  static const char *const liquefied_too[] = {"liquefy", "ingest"};
 
+  for (size_t i = 0; i < sizeof(always) / sizeof(always[0]); i++)
+    if (!strcasecmp(cmd, always[i]))
+      return true;
+  if (liquefied)
+    for (size_t i = 0; i < sizeof(liquefied_too) / sizeof(liquefied_too[0]); i++)
+      if (!strcasecmp(cmd, liquefied_too[i]))
+        return true;
+  return false;
+}
+
+/* False (after telling them why) if ch's condition stops them running cmd. */
+static bool command_pass(const char *cmd, struct char_data *ch)
+{
   if (char_aff_flagged(ch, AFF_LIQUEFIED)) {
-    if (strcasecmp(cmd, "liquefy") && strcasecmp(cmd, "ingest") && strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
+    if (!allowed_while_restrained(cmd, true)) {
       send_to_char(ch, "You are not capable of performing that action while liquefied!\r\n");
-      return (FALSE);
+      return false;
     }
   } else if (char_is_affected(ch, AFF_PARALYZE)) {
-    if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
+    if (!allowed_while_restrained(cmd, false)) {
       send_to_char(ch, "You are not capable of performing that action while petrified!\r\n");
-      return (FALSE);
+      return false;
     }
   } else if (char_is_affected(ch, AFF_FROZEN)) {
-    if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
+    if (!allowed_while_restrained(cmd, false)) {
       send_to_char(ch, "You are not capable of performing that action while a frozen block of ice!\r\n");
-      return (FALSE);
+      return false;
     }
   } else if (char_is_affected(ch, AFF_PARA) && char_get_aff_abils_intel(ch) < rand_number(1, 60)) {
-    if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
+    if (!allowed_while_restrained(cmd, false)) {
       act("@yYou fail to overcome your paralysis!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@Y$n @ystruggles with $s paralysis!@n", TRUE, ch, 0, 0, TO_ROOM);
-      return (FALSE);
+      return false;
     }
   }
 
-  return (TRUE);
+  return true;
 }
 
 int special(struct char_data *ch, int cmd, char *arg)
@@ -645,9 +671,10 @@ int special(struct char_data *ch, int cmd, char *arg)
   struct obj_data *i;
   struct char_data *k;
   int j;
+  bool in_a_room = char_get_in_room(ch) != NOWHERE; /* forced or scripted commands can come from between rooms */
 
   /* special in room? */
-  if (rroom_get_spec(char_get_in_room(ch)) != NULL)
+  if (in_a_room && rroom_get_spec(char_get_in_room(ch)) != NULL)
     if (rroom_get_spec(char_get_in_room(ch))(ch, world + char_get_in_room(ch), cmd, arg))
       return (1);
 
@@ -662,6 +689,9 @@ int special(struct char_data *ch, int cmd, char *arg)
     if (obj_get_spec(i) != NULL)
       if (obj_get_spec(i)(ch, i, cmd, arg))
         return (1);
+
+  if (!in_a_room)
+    return (0);
 
   /* special in mobile present? */
   for (k = world[char_get_in_room(ch)].people; k; k = k->next_in_room)
@@ -686,7 +716,6 @@ int special(struct char_data *ch, int cmd, char *arg)
 void command_interpreter(struct char_data *ch, char *argument)
 {
   int cmd, length;
-  int skip_ld = 0;
   char *line;
   char arg[MAX_INPUT_LENGTH];
 
@@ -709,12 +738,16 @@ void command_interpreter(struct char_data *ch, char *argument)
    * requested by many people so "'hi" or ";godnet test" is possible.
    * Patch sent by Eric Green and Stefan Wasilewski.
    */
-  if (!isalpha(*argument)) {
+  if (!isalpha((unsigned char)*argument)) {
     arg[0] = argument[0];
     arg[1] = '\0';
     line   = argument + 1;
-  } else
-    line = any_one_arg(argument, arg);
+  } else { /* the command word, lowercased; forced and scripted lines can be longer than typed ones */
+    for (length = 0; argument[length] && !isspace((unsigned char)argument[length]) && length < (int)sizeof(arg) - 1; length++)
+      arg[length] = tolower((unsigned char)argument[length]);
+    arg[length] = '\0';
+    for (line = argument + length; *line && !isspace((unsigned char)*line); line++); /* any part of an over-long word that didn't fit is dropped */
+  }
 
   if (!strcasecmp(arg, "-")) {
     return;
@@ -737,18 +770,13 @@ void command_interpreter(struct char_data *ch, char *argument)
         break;
   }
 
-  char blah[MAX_INPUT_LENGTH];
-
-  sprintf(blah, "%s", complete_cmd_info[cmd].command);
-  if (!strcasecmp(blah, "throw"))
-    ch->throws = rand_number(1, 3);
-
   if (*complete_cmd_info[cmd].command == '\n') {
     send_to_char(ch, "Huh!?!\r\n");
     return;
   }
 
-  else if (!command_pass(blah, ch) && char_get_admlevel(ch) < 1)
+  /* immortals ignore their condition, so don't even test it (it has messages and a die roll) */
+  else if (char_get_admlevel(ch) < 1 && !command_pass(complete_cmd_info[cmd].command, ch))
     send_to_char(ch, "It's unfortunate...\r\n");
   else if (check_disabled(&complete_cmd_info[cmd])) /* is it disabled? */
     send_to_char(ch, "This command has been temporarily disabled.\r\n");
@@ -788,9 +816,7 @@ void command_interpreter(struct char_data *ch, char *argument)
         break;
     }
   } else if (no_specials || !special(ch, cmd, line)) {
-    if (!skip_ld) {
-      ((*complete_cmd_info[cmd].command_pointer)(ch, line, cmd, complete_cmd_info[cmd].subcmd));
-    }
+    ((*complete_cmd_info[cmd].command_pointer)(ch, line, cmd, complete_cmd_info[cmd].subcmd));
   }
 }
 

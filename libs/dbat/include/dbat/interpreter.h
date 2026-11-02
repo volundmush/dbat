@@ -19,33 +19,6 @@ void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, 
 void command_interpreter(struct char_data *ch, char *argument);
 void nanny(struct descriptor_data *d, char *arg);
 
-/* WARNING: if you have added diagonal directions and have them at the
- * beginning of the command list.. change this value to 11 or 15 (depending) */
-/* reserve these commands to come straight from the cmd list then start
- * sorting */
-#define RESERVE_CMDS 15
-
-/* for compatibility with 2.20: */
-#define argument_interpreter(a, b, c) two_arguments(a, b, c)
-
-/*
- * Necessary for CMD_IS macro.  Borland needs the structure defined first
- * so it has been moved down here.
- */
-
-/*
- * Alert! Changed from 'struct alias' to 'struct alias_data' in bpl15
- * because a Windows 95 compiler gives a warning about it having similiar
- * named member.
- */
-
-#define ALIAS_SIMPLE  0
-#define ALIAS_COMPLEX 1
-
-#define ALIAS_SEP_CHAR  ';'
-#define ALIAS_VAR_CHAR  '$'
-#define ALIAS_GLOB_CHAR '*'
-
 /*
  * SUBCOMMANDS
  *   You can define these however you want to, and the definitions of the

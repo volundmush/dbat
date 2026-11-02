@@ -2439,6 +2439,7 @@ ACMD(do_throw)
   int odam = 0, miss = TRUE, perc = 0, prob = 0, perc2 = 0, grab = FALSE;
   int64_t damage;
 
+  ch->throws = rand_number(1, 3); /* (set by the interpreter before, for any "throw") */
   half_chop(argument, arg, chunk);
 
   if (!*arg) {

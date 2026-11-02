@@ -213,15 +213,23 @@ ACMD(do_alias)
  */
 #define NUM_TOKENS 9
 
+/* Copies text to *write_point, stopping at end (the last byte of the buffer, kept for the NUL). */
+static void alias_append(char **write_point, char *end, const char *text)
+{
+  while (*text && *write_point < end)
+    *(*write_point)++ = *text++;
+}
+
 static void perform_complex_alias(struct txt_q *input_q, char *orig, struct alias_data *a)
 {
   struct txt_q temp_queue;
   char *tokens[NUM_TOKENS], *temp, *write_point;
   char buf2[MAX_RAW_INPUT_LENGTH], buf[MAX_RAW_INPUT_LENGTH]; /* raw? */
+  char *end         = buf + sizeof(buf) - 1;                  /* $* and $1..$9 can expand past any buffer */
   int num_of_tokens = 0, num;
 
   /* First, parse the original string */
-  strcpy(buf2, orig); /* strcpy: OK (orig:MAX_INPUT_LENGTH < buf2:MAX_RAW_INPUT_LENGTH) */
+  strlcpy(buf2, orig, sizeof(buf2));
   temp = strtok(buf2, " ");
   while (temp != NULL && num_of_tokens < NUM_TOKENS) {
     tokens[num_of_tokens++] = temp;
@@ -241,15 +249,21 @@ static void perform_complex_alias(struct txt_q *input_q, char *orig, struct alia
       write_point = buf;
     } else if (*temp == ALIAS_VAR_CHAR) {
       temp++;
-      if ((num = *temp - '1') < num_of_tokens && num >= 0) {
-        strcpy(write_point, tokens[num]); /* strcpy: OK */
-        write_point += strlen(tokens[num]);
-      } else if (*temp == ALIAS_GLOB_CHAR) {
-        strcpy(write_point, orig); /* strcpy: OK */
-        write_point += strlen(orig);
-      } else if ((*(write_point++) = *temp) == '$') /* redouble $ for act safety */
-        *(write_point++) = '$';
-    } else
+      if (!*temp) { /* a '$' at the very end: keep it, and don't step past the string */
+        alias_append(&write_point, end, "$");
+        break;
+      }
+      if ((num = *temp - '1') < num_of_tokens && num >= 0)
+        alias_append(&write_point, end, tokens[num]);
+      else if (*temp == ALIAS_GLOB_CHAR)
+        alias_append(&write_point, end, orig);
+      else {
+        char literal[2] = {*temp, '\0'};
+        alias_append(&write_point, end, literal);
+        if (*temp == '$') /* redouble $ for act safety */
+          alias_append(&write_point, end, "$");
+      }
+    } else if (write_point < end)
       *(write_point++) = *temp;
   }
 

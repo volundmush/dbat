@@ -413,6 +413,7 @@ void sort_commands(void)
     num_of_cmds++;
   num_of_cmds++; /* \n */
 
+  free(cmd_sort_info); /* the previous list's, when aedit rebuilds the commands */
   CREATE(cmd_sort_info, int, num_of_cmds);
 
   for (a = 0; a < num_of_cmds; a++)
