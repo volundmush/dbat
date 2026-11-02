@@ -65,7 +65,8 @@ ACMD(do_oasis_redit)
     next_obj = capsule->next_content;
     if (remove != NULL) {
       continue;
-    } else if (obj_get_vnum(capsule) == 19094) {
+    }
+    if (obj_get_vnum(capsule) == 19094) {
       remove = capsule;
     }
   }
@@ -73,7 +74,8 @@ ACMD(do_oasis_redit)
   if (remove == NULL && char_get_admlevel(ch) < 1) {
     send_to_char(ch, "You do not have a R.A.D. Remodeling Assistance Droid.\r\n");
     return;
-  } else if (char_get_admlevel(ch) < 1) {
+  }
+  if (char_get_admlevel(ch) < 1) {
     act("@GYou open up the computer panel on the droid and begin to program its remodeling routine.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@g$n@G opens up a computer panel on some kind of small spherical droid and begins to program it.@n", TRUE, ch, 0, 0, TO_ROOM);
     extract_obj(remove);
@@ -1052,7 +1054,8 @@ void redit_parse(struct descriptor_data *d, char *arg)
 
         cleanup_olc(d, CLEANUP_ALL);
         return;
-      } else if (*arg == 'n' || *arg == 'N') {
+      }
+      if (*arg == 'n' || *arg == 'N') {
         redit_disp_menu(d);
         OLC_MODE(d) = REDIT_MAIN_MENU;
         return;

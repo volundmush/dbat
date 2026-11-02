@@ -557,9 +557,8 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
         send_to_char(d->character, "There is no such player.\r\n");
         hsedit_owner_menu(d);
         return;
-      } else {
-        OLC_HOUSE(d)->owner = id;
       }
+      OLC_HOUSE(d)->owner = id;
       break;
 
     case HSEDIT_OWNER_ID:
@@ -568,9 +567,8 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
         send_to_char(d->character, "There is no such player.\r\n");
         hsedit_owner_menu(d);
         return;
-      } else {
-        OLC_HOUSE(d)->owner = id;
       }
+      OLC_HOUSE(d)->owner = id;
       break;
 
     case HSEDIT_ATRIUM:
@@ -584,24 +582,22 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
       if (real_room(number) == NOWHERE) {
         send_to_char(d->character, "Room VNUM does not exist.\r\nEnter a valid room VNUM for this atrium (0 to exit) : ");
         return;
-      } else {
-        for (i = 0; i < 12; i++) {
-          if (world[rnum].dir_option[i]) {
-            if (world[rnum].dir_option[i]->to_room == real_room(number)) {
-              found = TRUE;
-              id    = i;
-            }
+      }
+      for (i = 0; i < 12; i++) {
+        if (world[rnum].dir_option[i]) {
+          if (world[rnum].dir_option[i]->to_room == real_room(number)) {
+            found = TRUE;
+            id    = i;
           }
         }
-
-        if (found == FALSE) {
-          send_to_char(d->character, "Atrium MUST be an adjoining room.\r\nEnter a valid room VNUM for this atrium (0 to exit) : ");
-          return;
-        } else {
-          OLC_HOUSE(d)->atrium   = number;
-          OLC_HOUSE(d)->exit_num = id;
-        }
       }
+
+      if (found == FALSE) {
+        send_to_char(d->character, "Atrium MUST be an adjoining room.\r\nEnter a valid room VNUM for this atrium (0 to exit) : ");
+        return;
+      }
+      OLC_HOUSE(d)->atrium   = number;
+      OLC_HOUSE(d)->exit_num = id;
       break;
 
     case HSEDIT_DIR_MENU:
@@ -621,16 +617,16 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
         send_to_char(d->character, "You cannot set the atrium to a room that doesn't exist!\r\n");
         hsedit_dir_menu(d);
         return;
-      } else if ((world[id].dir_option[number]->to_room) == NOWHERE) {
+      }
+      if ((world[id].dir_option[number]->to_room) == NOWHERE) {
         send_to_char(d->character, "You cannot set the atrium to nowhere!\r\n");
         hsedit_dir_menu(d);
         return;
-      } else {
-        OLC_HOUSE(d)->exit_num = number;
-
-        rnum                 = world[id].dir_option[number]->to_room;
-        OLC_HOUSE(d)->atrium = world[rnum].number;
       }
+      OLC_HOUSE(d)->exit_num = number;
+
+      rnum                 = world[id].dir_option[number]->to_room;
+      OLC_HOUSE(d)->atrium = world[rnum].number;
       break;
 
     case HSEDIT_NOVNUM:
@@ -671,10 +667,9 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
       if ((id = get_id_by_name(arg)) < 0) {
         send_to_char(d->character, "No such player.\r\n");
         return;
-      } else {
-        OLC_HOUSE(d)->builtby = id;
-        send_to_char(d->character, "Builder changed.\r\n");
       }
+      OLC_HOUSE(d)->builtby = id;
+      send_to_char(d->character, "Builder changed.\r\n");
       break;
 
     case HSEDIT_PAYMENT:
@@ -738,24 +733,24 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
         send_to_char(d->character, "No such player.\r\n");
         hsedit_disp_guest_menu(d);
         return;
-      } else if (id == char_get_idnum(d->character)) {
+      }
+      if (id == char_get_idnum(d->character)) {
         send_to_char(d->character, "House owner should not be in the guest list!\r\n");
         hsedit_disp_guest_menu(d);
         return;
-      } else {
-        for (i = 0; i < OLC_HOUSE(d)->num_of_guests; i++) {
-          if (OLC_HOUSE(d)->guests[i] == id) {
-            send_to_char(d->character, "That player is already in the guest list!.\r\n");
-            hsedit_disp_guest_menu(d);
-            return;
-          }
-        }
-        i                       = OLC_HOUSE(d)->num_of_guests++;
-        OLC_HOUSE(d)->guests[i] = id;
-        send_to_char(d->character, "Guest added.\r\n");
-        hsedit_disp_guest_menu(d);
-        return;
       }
+      for (i = 0; i < OLC_HOUSE(d)->num_of_guests; i++) {
+        if (OLC_HOUSE(d)->guests[i] == id) {
+          send_to_char(d->character, "That player is already in the guest list!.\r\n");
+          hsedit_disp_guest_menu(d);
+          return;
+        }
+      }
+      i                       = OLC_HOUSE(d)->num_of_guests++;
+      OLC_HOUSE(d)->guests[i] = id;
+      send_to_char(d->character, "Guest added.\r\n");
+      hsedit_disp_guest_menu(d);
+      return;
       break;
 
     case HSEDIT_GUEST_DELETE:
@@ -763,26 +758,26 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
         send_to_char(d->character, "No such player.\r\n");
         hsedit_disp_guest_menu(d);
         return;
-      } else if (id == char_get_idnum(d->character)) {
+      }
+      if (id == char_get_idnum(d->character)) {
         send_to_char(d->character, "House owner should not be in the guest list!\r\n");
         hsedit_disp_guest_menu(d);
         return;
-      } else {
-        for (i = 0; i < OLC_HOUSE(d)->num_of_guests; i++) {
-          if (OLC_HOUSE(d)->guests[i] == id) {
-            for (; i < OLC_HOUSE(d)->num_of_guests; i++)
-              OLC_HOUSE(d)->guests[i] = OLC_HOUSE(d)->guests[i + 1];
-            OLC_HOUSE(d)->num_of_guests--;
-            send_to_char(d->character, "Guest deleted.\r\n");
-            OLC_VAL(d) = 1;
-            hsedit_disp_guest_menu(d);
-            return;
-          }
-        }
-        send_to_char(d->character, "That player isn't in the guest list!\r\n");
-        hsedit_disp_guest_menu(d);
-        return;
       }
+      for (i = 0; i < OLC_HOUSE(d)->num_of_guests; i++) {
+        if (OLC_HOUSE(d)->guests[i] == id) {
+          for (; i < OLC_HOUSE(d)->num_of_guests; i++)
+            OLC_HOUSE(d)->guests[i] = OLC_HOUSE(d)->guests[i + 1];
+          OLC_HOUSE(d)->num_of_guests--;
+          send_to_char(d->character, "Guest deleted.\r\n");
+          OLC_VAL(d) = 1;
+          hsedit_disp_guest_menu(d);
+          return;
+        }
+      }
+      send_to_char(d->character, "That player isn't in the guest list!\r\n");
+      hsedit_disp_guest_menu(d);
+      return;
       break;
 
     case HSEDIT_GUEST_CLEAR:
@@ -1027,9 +1022,8 @@ ACMD(do_oasis_hsedit)
       send_to_char(ch, "MAX houses limit reached (%d) - Unable to create more.\r\n", MAX_HOUSES);
       mudlog(LOG_NRM, ADMLVL_BUILDER, TRUE, "HSEDIT: MAX houses limit reached (%d)\r\n", MAX_HOUSES);
       return;
-    } else {
-      hsedit_setup_new(d);
     }
+    hsedit_setup_new(d);
   } else {
     hsedit_setup_existing(d, real_num);
   }

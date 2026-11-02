@@ -60,7 +60,8 @@ int readUserIndex(char *name)
   /* Read User Index */
   if (!get_filename(fname, sizeof(fname), USER_FILE, name)) {
     return 0;
-  } else if (!(fl = fopen(fname, "r"))) {
+  }
+  if (!(fl = fopen(fname, "r"))) {
     return 0;
   }
   fclose(fl);
@@ -76,7 +77,8 @@ bool lockRead(const char *name)
 
   if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout")) {
     return false;
-  } else if (!(fl = fopen(fname, "r"))) {
+  }
+  if (!(fl = fopen(fname, "r"))) {
     return false;
   }
 
@@ -97,7 +99,8 @@ void userLoad(struct descriptor_data *d, char *name)
   /* Read and Write User Index */
   if (!get_filename(fname, sizeof(fname), USER_FILE, name)) {
     return;
-  } else if (!(fl = fopen(fname, "r"))) {
+  }
+  if (!(fl = fopen(fname, "r"))) {
     mud_log("ERROR: could not load user, %s, from filename, %s.", name, fname);
     return;
   }
@@ -224,10 +227,9 @@ void userDelete(struct descriptor_data *d)
     }
     unlink(fname);
     return;
-  } else {
-    write_to_output(d, "Error. Your user file doesn't even exist!\n");
-    return;
   }
+  write_to_output(d, "Error. Your user file doesn't even exist!\n");
+  return;
 }
 
 /* For transfering money or doing things with an offline player */
@@ -245,7 +247,8 @@ const char *rIntro(struct char_data *ch, char *arg)
 
   if (!get_filename(fname, sizeof(fname), INTRO_FILE, char_get_name(ch))) {
     return "NOTHING";
-  } else if (!(fl = fopen(fname, "r"))) {
+  }
+  if (!(fl = fopen(fname, "r"))) {
     return "NOTHING";
   }
 
@@ -330,7 +333,8 @@ void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, 
 
     atomic_commit(&af);
     return;
-  } else if (strcasecmp(name, "index")) {
+  }
+  if (strcasecmp(name, "index")) {
     char filename[40], uname[100] = "", email[100] = "", pass[100] = "", tmp1[100] = "", tmp2[100] = "", tmp3[100] = "", tmp4[100] = "", tmp5[100] = "", line[256] = "";
     int total = 0, rpp = 0, level = 0, custom = 0, rbank = 0;
     FILE *file;
@@ -338,7 +342,8 @@ void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, 
     /* Read and Write User Index */
     if (!get_filename(filename, sizeof(filename), USER_FILE, name)) {
       return;
-    } else if (!(file = fopen(filename, "r"))) {
+    }
+    if (!(file = fopen(filename, "r"))) {
       mud_log("ERROR: could not load user, %s, from filename, %s.", name, filename);
       return;
     }
@@ -445,10 +450,9 @@ void userWrite(struct descriptor_data *d, int setTot, int setRpp, int setRBank, 
 
     atomic_commit(&af);
     return;
-  } else {
-    send_to_imm("Error with userWrite!");
-    return;
   }
+  send_to_imm("Error with userWrite!");
+  return;
 }
 
 void fingerUser(struct char_data *ch, char *name)
@@ -461,7 +465,8 @@ void fingerUser(struct char_data *ch, char *name)
   if (!get_filename(filename, sizeof(filename), USER_FILE, name)) {
     send_to_char(ch, "That user doesn't exist.\r\n");
     return;
-  } else if (!(file = fopen(filename, "r"))) {
+  }
+  if (!(file = fopen(filename, "r"))) {
     send_to_char(ch, "That user is bugged! Report to Iovan.\r\n");
     return;
   }

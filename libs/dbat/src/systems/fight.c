@@ -60,46 +60,59 @@ int group_bonus(struct char_data *ch, int type)
       next = k->next;
       if (!char_aff_flagged(k->follower, AFF_GROUP)) {
         continue;
-      } else {
-        if (type == 0) {
-          incCurLFPercent(k->follower, .25, true);
-          send_to_char(k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
-          return (TRUE);
-        } else if (type == 1) {
-          incCurLFPercent(k->follower, .4, true);
-          send_to_char(k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
-          return (TRUE);
-        } else if (type == 2) {
-          if (char_is_roshi(ch)) {
-            return (2);
-          } else if (char_is_krane(ch)) {
-            return (3);
-          } else if (char_is_bardock(ch)) {
-            return (4);
-          } else if (char_is_nail(ch)) {
-            return (5);
-          } else if (char_is_kabito(ch)) {
-            return (6);
-          } else if (char_is_andsix(ch)) {
-            return (7);
-          } else if (char_is_tapion(ch)) {
-            return (8);
-          } else if (char_is_frieza(ch)) {
-            return (9);
-          } else if (char_is_tsuna(ch)) {
-            return (10);
-          } else if (char_is_piccolo(ch)) {
-            return (11);
-          } else if (char_is_kurzak(ch)) {
-            return (12);
-          } else if (char_is_jinto(ch)) {
-            return (13);
-          } else if (char_is_dabura(ch)) {
-            return (14);
-          }
-        }
-        return (FALSE);
       }
+      if (type == 0) {
+        incCurLFPercent(k->follower, .25, true);
+        send_to_char(k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
+        return (TRUE);
+      }
+      if (type == 1) {
+        incCurLFPercent(k->follower, .4, true);
+        send_to_char(k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
+        return (TRUE);
+      }
+      if (type == 2) {
+        if (char_is_roshi(ch)) {
+          return (2);
+        }
+        if (char_is_krane(ch)) {
+          return (3);
+        }
+        if (char_is_bardock(ch)) {
+          return (4);
+        }
+        if (char_is_nail(ch)) {
+          return (5);
+        }
+        if (char_is_kabito(ch)) {
+          return (6);
+        }
+        if (char_is_andsix(ch)) {
+          return (7);
+        }
+        if (char_is_tapion(ch)) {
+          return (8);
+        }
+        if (char_is_frieza(ch)) {
+          return (9);
+        }
+        if (char_is_tsuna(ch)) {
+          return (10);
+        }
+        if (char_is_piccolo(ch)) {
+          return (11);
+        }
+        if (char_is_kurzak(ch)) {
+          return (12);
+        }
+        if (char_is_jinto(ch)) {
+          return (13);
+        }
+        if (char_is_dabura(ch)) {
+          return (14);
+        }
+      }
+      return (FALSE);
     }
   } else if (ch->master) {
     if (!char_aff_flagged(ch->master, AFF_GROUP))
@@ -110,29 +123,41 @@ int group_bonus(struct char_data *ch, int type)
       } else if (type == 2) {
         if (char_is_roshi(ch->master)) {
           return (2);
-        } else if (char_is_krane(ch->master)) {
+        }
+        if (char_is_krane(ch->master)) {
           return (3);
-        } else if (char_is_bardock(ch->master)) {
+        }
+        if (char_is_bardock(ch->master)) {
           return (4);
-        } else if (char_is_nail(ch->master)) {
+        }
+        if (char_is_nail(ch->master)) {
           return (5);
-        } else if (char_is_kabito(ch->master)) {
+        }
+        if (char_is_kabito(ch->master)) {
           return (6);
-        } else if (char_is_andsix(ch->master)) {
+        }
+        if (char_is_andsix(ch->master)) {
           return (7);
-        } else if (char_is_tapion(ch->master)) {
+        }
+        if (char_is_tapion(ch->master)) {
           return (8);
-        } else if (char_is_frieza(ch->master)) {
+        }
+        if (char_is_frieza(ch->master)) {
           return (9);
-        } else if (char_is_tsuna(ch->master)) {
+        }
+        if (char_is_tsuna(ch->master)) {
           return (10);
-        } else if (char_is_piccolo(ch->master)) {
+        }
+        if (char_is_piccolo(ch->master)) {
           return (11);
-        } else if (char_is_kurzak(ch->master)) {
+        }
+        if (char_is_kurzak(ch->master)) {
           return (12);
-        } else if (char_is_jinto(ch->master)) {
+        }
+        if (char_is_jinto(ch->master)) {
           return (13);
-        } else if (char_is_dabura(ch->master)) {
+        }
+        if (char_is_dabura(ch->master)) {
           return (14);
         }
       }
@@ -264,7 +289,8 @@ static void mob_attack(struct char_data *ch, char *buf)
   if (char_is_humanoid(ch) && dragonpass == TRUE) { /* Is a humanoid mob */
     if (char_aff_flagged(ch, AFF_PARALYZE)) {
       return;
-    } else if (char_aff_flagged(ch, AFF_ENSNARED)) {
+    }
+    if (char_aff_flagged(ch, AFF_ENSNARED)) {
       return;
     } else if (special < 100) { /* Normal physical attack */
       if (char_get_class(ch) == CLASS_SHADOWDANCER && rand_number(1, 3) == 3) {
@@ -1533,14 +1559,12 @@ static void make_pcorpse(struct char_data *ch)
     if (obj && obj_get_vnum(obj) < 19900 && obj_get_vnum(obj) != 17998) {
       if ((obj_get_vnum(obj) >= 18800 && obj_get_vnum(obj) <= 18999) || (obj_get_vnum(obj) >= 19100 && obj_get_vnum(obj) <= 19199)) {
         continue;
-      } else {
-        obj_from_char(obj);
-        obj_to_obj(obj, corpse);
-        continue;
       }
-    } else {
+      obj_from_char(obj);
+      obj_to_obj(obj, corpse);
       continue;
     }
+    continue;
   }
 
   /* transfer gold */

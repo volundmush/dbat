@@ -156,10 +156,9 @@ int touch(const char *path)
   if (!(fl = fopen(path, "a"))) {
     mud_log("SYSERR: %s: %s", path, strerror(errno));
     return (-1);
-  } else {
-    fclose(fl);
-    return (0);
   }
+  fclose(fl);
+  return (0);
 }
 
 void topLoad()
@@ -172,7 +171,8 @@ void topLoad()
   if (!get_filename(fname, sizeof(fname), INTRO_FILE, "toplist")) {
     mud_log("ERROR: Toplist file does not exist.");
     return;
-  } else if (!(file = fopen(fname, "r"))) {
+  }
+  if (!(file = fopen(fname, "r"))) {
     mud_log("ERROR: Toplist file does not exist.");
     return;
   }

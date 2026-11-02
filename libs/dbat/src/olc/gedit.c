@@ -62,7 +62,8 @@ ACMD(do_oasis_gedit)
   if (!*buf1) {
     send_to_char(ch, "Specify a guild VNUM to edit.\r\n");
     return;
-  } else if (!isdigit(*buf1)) {
+  }
+  if (!isdigit(*buf1)) {
     if (strcasecmp("save", buf1) != 0) {
       send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
       return;
@@ -614,11 +615,10 @@ void gedit_parse(struct descriptor_data *d, char *arg)
         G_FUNC(OLC_GUILD(d)) = mob_index[i].func != guild ? mob_index[i].func : NULL;
         mob_index[i].func    = guild;
         break;
-      } else {
-        write_to_output(d, "Invalid response.\r\n");
-        gedit_disp_menu(d);
-        return;
       }
+      write_to_output(d, "Invalid response.\r\n");
+      gedit_disp_menu(d);
+      return;
     case GEDIT_OPEN:
       G_OPEN(OLC_GUILD(d)) = LIMIT(atoi(arg), 0, 28);
       break;

@@ -556,7 +556,8 @@ static void state_get_name(struct descriptor_data *d, char *arg)
           mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "Connection attempt for %s denied from %s", char_get_name(d->character), d->host);
           desc_set_connected(d, CON_CLOSE);
           return;
-        } else if (char_get_level(d->character) < circle_restrict && circle_restrict < 101) {
+        }
+        if (char_get_level(d->character) < circle_restrict && circle_restrict < 101) {
           userRead(d);
           write_to_output(d, "The game is temporarily restricted to at least %d level.\r\n", circle_restrict);
           desc_set_connected(d, CON_UMENU);
@@ -642,71 +643,77 @@ static void state_get_user(struct descriptor_data *d, char *arg)
   if (!*arg) {
     write_to_output(d, "Enter your desired username or the username you have already made.\nUsername?\r\n");
     return;
-  } else if (!strcasecmp(arg, "index")) {
+  }
+  if (!strcasecmp(arg, "index")) {
     write_to_output(d, "Try again, username?\r\n");
     return;
-  } else if (!Valid_Name(CAP(arg))) {
+  }
+  if (!Valid_Name(CAP(arg))) {
     write_to_output(d, "Invalid name. Username?\r\n");
     return;
-  } else if (strstr(arg, " ")) {
+  }
+  if (strstr(arg, " ")) {
     write_to_output(d, "No spaces. Username?\r\n");
     return;
-  } else if (strstr(arg, "1") || strstr(arg, "2") || strstr(arg, "3") || strstr(arg, "4") || strstr(arg, "5") || strstr(arg, "6") || strstr(arg, "7") || strstr(arg, "8") || strstr(arg, "9") || strstr(arg, "0")) {
+  }
+  if (strstr(arg, "1") || strstr(arg, "2") || strstr(arg, "3") || strstr(arg, "4") || strstr(arg, "5") || strstr(arg, "6") || strstr(arg, "7") || strstr(arg, "8") || strstr(arg, "9") || strstr(arg, "0")) {
     write_to_output(d, "No numbers. Username?\r\n");
     return;
-  } else if (strstr(arg, ".") || strstr(arg, ",") || strstr(arg, "!") || strstr(arg, "?") || strstr(arg, ";") || strstr(arg, ":") || strstr(arg, "'")) {
+  }
+  if (strstr(arg, ".") || strstr(arg, ",") || strstr(arg, "!") || strstr(arg, "?") || strstr(arg, ";") || strstr(arg, ":") || strstr(arg, "'")) {
     write_to_output(d, "No punctuation. Username?\r\n");
     return;
-  } else if (strlen(arg) < 3) {
+  }
+  if (strlen(arg) < 3) {
     write_to_output(d, "Name must at least be 3 characters long, username?\r\n");
     return;
-  } else if (strlen(arg) > 10) {
+  }
+  if (strlen(arg) > 10) {
     write_to_output(d, "Name must be at most 10 characters long, username?\r\n");
     return;
+  }
+  if (!readUserIndex(arg)) {
+    if (circle_restrict == 101) {
+      write_to_output(d, "The mud is locked for mortals at this time.\r\n");
+      write_to_output(d, "Please check: www.advent-truth.com/forum for further details.\r\n");
+      send_to_imm("%s rejected by wizlock", CAP(arg));
+      desc_set_connected(d, CON_CLOSE);
+    } else {
+      if (d->user) {
+        free(d->user);
+        d->user = NULL;
+      }
+      d->user = strdup(arg);
+      write_to_output(d, "You want you user name to be, %s?\r\n", d->user);
+      write_to_output(d, "Yes or no: \n");
+      desc_set_connected(d, CON_USER_CONF);
+    }
   } else {
-    if (!readUserIndex(arg)) {
-      if (circle_restrict == 101) {
+    if (circle_restrict == 101) {
+      if (d->user) {
+        free(d->user);
+        d->user = NULL;
+      }
+      d->user = strdup(arg);
+      userLoad(d, d->user);
+      if (d->level == 0) {
         write_to_output(d, "The mud is locked for mortals at this time.\r\n");
-        write_to_output(d, "Please check: www.advent-truth.com/forum for further details.\r\n");
-        send_to_imm("%s rejected by wizlock", CAP(arg));
+        send_to_imm("%s rejected by wizlock", d->user);
         desc_set_connected(d, CON_CLOSE);
       } else {
-        if (d->user) {
-          free(d->user);
-          d->user = NULL;
-        }
-        d->user = strdup(arg);
-        write_to_output(d, "You want you user name to be, %s?\r\n", d->user);
-        write_to_output(d, "Yes or no: \n");
-        desc_set_connected(d, CON_USER_CONF);
-      }
-    } else {
-      if (circle_restrict == 101) {
-        if (d->user) {
-          free(d->user);
-          d->user = NULL;
-        }
-        d->user = strdup(arg);
-        userLoad(d, d->user);
-        if (d->level == 0) {
-          write_to_output(d, "The mud is locked for mortals at this time.\r\n");
-          send_to_imm("%s rejected by wizlock", d->user);
-          desc_set_connected(d, CON_CLOSE);
-        } else {
-          write_to_output(d, "Password: \r\n");
-          send_to_imm("Username, %s, logging in.", CAP(arg));
-          desc_set_connected(d, CON_PASSWORD);
-        }
-      } else {
-        if (d->user) {
-          free(d->user);
-          d->user = NULL;
-        }
-        userLoad(d, arg);
         write_to_output(d, "Password: \r\n");
         send_to_imm("Username, %s, logging in.", CAP(arg));
         desc_set_connected(d, CON_PASSWORD);
       }
+    } else {
+      if (d->user) {
+        free(d->user);
+        d->user = NULL;
+      }
+      userLoad(d, arg);
+      write_to_output(d, "Password: \r\n");
+      send_to_imm("Username, %s, logging in.", CAP(arg));
+      desc_set_connected(d, CON_PASSWORD);
     }
   }
 }
@@ -718,7 +725,8 @@ static void state_user_conf(struct descriptor_data *d, char *arg)
     write_to_output(d, "You want your user name to be, %s?\r\n", d->user);
     write_to_output(d, "Yes or no: \n");
     return;
-  } else if (!strcasecmp(arg, "yes") || !strcasecmp(arg, "y")) {
+  }
+  if (!strcasecmp(arg, "yes") || !strcasecmp(arg, "y")) {
     write_to_output(d, "User Account, %s, created.\r\nEnter Email:\n", d->user);
     write_to_output(d, "Remember your email must be valid and matching the example given.\n");
     write_to_output(d, "[Example: iovan@@advent-truth.com]\n");
@@ -751,10 +759,12 @@ static void state_get_email(struct descriptor_data *d, char *arg)
   if (readUserIndex(d->user) && !*arg) {
     write_to_output(d, "Email, or M for menu?\r\n");
     return;
-  } else if (!*arg) {
+  }
+  if (!*arg) {
     write_to_output(d, "Email?\r\n");
     return;
-  } else if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
+  }
+  if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
     userRead(d);
     desc_set_connected(d, CON_UMENU);
   } else if (!strstr(arg, ".com") && !strstr(arg, ".net") && !strstr(arg, ".org")) {
@@ -796,10 +806,12 @@ static void state_newpasswd(struct descriptor_data *d, char *arg)
   if (readUserIndex(d->user) && !*arg) {
     write_to_output(d, "Password, or M for menu?\r\n");
     return;
-  } else if (!*arg) {
+  }
+  if (!*arg) {
     write_to_output(d, "Password?\r\n");
     return;
-  } else if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
+  }
+  if (!strcasecmp(arg, "M") && readUserIndex(d->user)) {
     userRead(d);
     desc_set_connected(d, CON_UMENU);
   } else if (strlen(arg) > MAX_PWD_LENGTH && readUserIndex(d->user)) {
@@ -993,11 +1005,10 @@ static void state_menu(struct descriptor_data *d, char *arg)
       if (lockRead(char_get_name(d->character)) && d->level <= 0) {
         write_to_output(d, "That character has been locked out for rule violations. Play another character.\n");
         return;
-      } else {
-        load_result = enter_player_game(d);
-        send_to_char(d->character, "%s", CONFIG_WELC_MESSG);
-        act("$n has entered the game.", TRUE, d->character, 0, 0, TO_ROOM);
       }
+      load_result = enter_player_game(d);
+      send_to_char(d->character, "%s", CONFIG_WELC_MESSG);
+      act("$n has entered the game.", TRUE, d->character, 0, 0, TO_ROOM);
 
       oldcount = update_player_count();
 
@@ -1184,10 +1195,9 @@ static void state_delcnf2(struct descriptor_data *d, char *arg)
     userRead(d);
     desc_set_connected(d, CON_UMENU);
     return;
-  } else {
-    write_to_output(d, "\r\nCharacter not deleted.\r\n%s\r\n%s", motd, CONFIG_MENU);
-    desc_set_connected(d, CON_MENU);
   }
+  write_to_output(d, "\r\nCharacter not deleted.\r\n%s\r\n%s", motd, CONFIG_MENU);
+  desc_set_connected(d, CON_MENU);
 }
 
 static const struct nanny_state login_states[] = {

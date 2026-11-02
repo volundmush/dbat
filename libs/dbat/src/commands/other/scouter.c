@@ -83,45 +83,54 @@ ACMD(do_telepathy)
   if (!(strcmp(arg, "far"))) {
     if (char_is_npc(ch)) {
       return;
-    } else if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_WORLD))) {
+    }
+    if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_WORLD))) {
       send_to_char(ch, "Look through who's eyes?\r\n");
       return;
-    } else if (vict == ch) {
+    }
+    if (vict == ch) {
       send_to_char(ch, "Oh that makes a lot of sense...\r\n");
       return;
-    } else if (char_is_npc(vict)) {
+    }
+    if (char_is_npc(vict)) {
       send_to_char(ch, "You can't touch the mind of such a thing.\r\n");
       return;
-    } else if (char_get_admlevel(vict) > char_get_admlevel(ch)) {
+    }
+    if (char_get_admlevel(vict) > char_get_admlevel(ch)) {
       send_to_char(ch, "Their mental power oustrips your's by unfathomable measurements!\r\n");
       return;
-    } else if (char_aff_flagged(ch, AFF_SHOCKED)) {
+    }
+    if (char_aff_flagged(ch, AFF_SHOCKED)) {
       send_to_char(ch, "Your mind has been shocked by telepathic feedback! You are not able to use telepathy right now.\r\n");
       return;
-    } else if (char_is_android(vict)) {
+    }
+    if (char_is_android(vict)) {
       send_to_char(ch, "You can't touch the mind of such an artificial being.\r\n");
       return;
-    } else if (char_get_skill(vict, SKILL_TELEPATHY) + char_get_aff_abils_intel(vict) > char_get_skill(ch, SKILL_TELEPATHY) + char_get_aff_abils_intel(ch)) {
+    }
+    if (char_get_skill(vict, SKILL_TELEPATHY) + char_get_aff_abils_intel(vict) > char_get_skill(ch, SKILL_TELEPATHY) + char_get_aff_abils_intel(ch)) {
       send_to_char(ch, "They throw off your attempt with their own telepathic abilities!\r\n");
       return;
-    } else if (char_get_in_room(ch) == char_get_in_room(vict)) {
+    }
+    if (char_get_in_room(ch) == char_get_in_room(vict)) {
       send_to_char(ch, "They are in the same room as you!\r\n");
       return;
-    } else if (char_aff_flagged(vict, AFF_BLIND)) {
+    }
+    if (char_aff_flagged(vict, AFF_BLIND)) {
       send_to_char(ch, "They are blind!\r\n");
       return;
-    } else if (char_plr_flagged(vict, PLR_EYEC)) {
+    }
+    if (char_plr_flagged(vict, PLR_EYEC)) {
       send_to_char(ch, "Their eyes are closed!\r\n");
       return;
-    } else {
-      look_at_room(char_get_in_room(vict), ch, 0);
-      send_to_char(ch, "You see all this through their eyes!\r\n");
-      if (char_get_aff_abils_intel(vict) > char_get_aff_abils_intel(ch)) {
-        send_to_char(ch, "You feel like someone was using your mind for something...\r\n");
-      }
-      decCurKI(ch, getMaxKI(ch) / 40, 0);
-      return;
     }
+    look_at_room(char_get_in_room(vict), ch, 0);
+    send_to_char(ch, "You see all this through their eyes!\r\n");
+    if (char_get_aff_abils_intel(vict) > char_get_aff_abils_intel(ch)) {
+      send_to_char(ch, "You feel like someone was using your mind for something...\r\n");
+    }
+    decCurKI(ch, getMaxKI(ch) / 40, 0);
+    return;
   }
   if (!(strcmp(arg, "link"))) {
     if (char_is_npc(ch)) {
@@ -134,45 +143,54 @@ ACMD(do_telepathy)
       char_set_mindlink(ch, NULL);
       char_set_linker(ch, 0);
       return;
-    } else if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_WORLD))) {
+    }
+    if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_WORLD))) {
       send_to_char(ch, "Link with the mind of who?\r\n");
       return;
-    } else if (vict == ch) {
+    }
+    if (vict == ch) {
       send_to_char(ch, "Oh that makes a lot of sense...\r\n");
       return;
-    } else if (char_is_npc(vict)) {
+    }
+    if (char_is_npc(vict)) {
       send_to_char(ch, "You can't touch the mind of such a thing.\r\n");
       return;
-    } else if (char_is_android(vict)) {
+    }
+    if (char_is_android(vict)) {
       send_to_char(ch, "You can't touch the mind of such an artificial being.\r\n");
       return;
-    } else if (char_get_skill(vict, SKILL_TELEPATHY)) {
+    }
+    if (char_get_skill(vict, SKILL_TELEPATHY)) {
       send_to_char(ch, "Kinda pointless when you are both telepathic huh?\r\n");
       return;
-    } else if (char_get_mindlink(vict)) {
+    }
+    if (char_get_mindlink(vict)) {
       send_to_char(ch, "Someone else is already telepathically linked with them.\r\n");
       return;
-    } else if (char_get_skill(ch, SKILL_TELEPATHY) < axion_dice(char_get_aff_abils_intel(vict) * 0.1)) {
+    }
+    if (char_get_skill(ch, SKILL_TELEPATHY) < axion_dice(char_get_aff_abils_intel(vict) * 0.1)) {
       act("@R$n@r tried to link $s mind with yours, but you manage to force a break in the link!@n", FALSE, ch, 0, vict, TO_VICT);
       act("@R$N@r manages to sense the intrusion and with $S intelligence push you out!@n", FALSE, ch, 0, vict, TO_CHAR);
       return;
-    } else {
-      act("@CYou link your mind with @w$N.@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@w$n@C links $s mind with yours. You can speak your thoughts to $m with 'think'.@n", TRUE, ch, 0, vict, TO_VICT);
-      send_to_char(vict, "@wIf this is undesirable, Try: meditate break@n\r\n");
-      char_set_mindlink(vict, ch);
-      char_set_mindlink(ch, vict);
-      char_set_linker(ch, 1);
-      return;
     }
-  } else if (!(strcmp(arg, "read"))) {
+    act("@CYou link your mind with @w$N.@n", TRUE, ch, 0, vict, TO_CHAR);
+    act("@w$n@C links $s mind with yours. You can speak your thoughts to $m with 'think'.@n", TRUE, ch, 0, vict, TO_VICT);
+    send_to_char(vict, "@wIf this is undesirable, Try: meditate break@n\r\n");
+    char_set_mindlink(vict, ch);
+    char_set_mindlink(ch, vict);
+    char_set_linker(ch, 1);
+    return;
+  }
+  if (!(strcmp(arg, "read"))) {
     if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
       send_to_char(ch, "Read the mind of who?\r\n");
       return;
-    } else if (vict == ch) {
+    }
+    if (vict == ch) {
       send_to_char(ch, "Oh that makes a lot of sense...\r\n");
       return;
-    } else if (char_is_android(vict)) {
+    }
+    if (char_is_android(vict)) {
       send_to_char(ch, "You can't touch the mind of such an artificial being.\r\n");
       return;
     } else {
@@ -186,7 +204,8 @@ ACMD(do_telepathy)
           improve_skill(ch, SKILL_TELEPATHY, 0);
         }
         return;
-      } else if (char_get_skill(vict, SKILL_TELEPATHY) >= char_get_skill(ch, SKILL_TELEPATHY) && rand_number(1, 2) == 2) {
+      }
+      if (char_get_skill(vict, SKILL_TELEPATHY) >= char_get_skill(ch, SKILL_TELEPATHY) && rand_number(1, 2) == 2) {
         decCurKI(ch, getMaxKI(ch) / 40, 0);
         act("@wYou fail to read @c$N's@w mind and they seemed to have noticed the attempt!@n", TRUE, ch, 0, vict, TO_CHAR);
         act("@C$n@w attempts to read your mind, but you resist and force $m out!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -249,7 +268,8 @@ ACMD(do_telepathy)
     if (vict == ch) {
       send_to_char(ch, "Oh that makes a lot of sense...\r\n");
       return;
-    } else if (char_is_android(vict)) {
+    }
+    if (char_is_android(vict)) {
       send_to_char(ch, "You can't touch the mind of such an artificial being.\r\n");
       return;
     } else {
@@ -511,7 +531,8 @@ ACMD(do_snet)
       if (char_get_admlevel(i->character) > 0 && call <= -1) {
         send_to_char(i->character, "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice, char_get_name(ch), obj_get_scoutfreq(obj), CAP(arg), !*arg2 ? "" : arg2);
         continue;
-      } else if (char_get_admlevel(i->character) > 0) {
+      }
+      if (char_get_admlevel(i->character) > 0) {
         send_to_char(i->character, "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice, char_get_name(ch), call, !*arg2 ? "" : CAP(arg2));
         continue;
       }
@@ -578,179 +599,182 @@ ACMD(do_scouter)
     send_to_char(ch, "You do not even have a scouter!");
     obj = NULL;
     return;
-  } else {
-    if (!*arg) {
-      send_to_char(ch, "[Syntax] scouter < target | scan>\r\n");
-      return;
-    }
-    reveal_hiding(ch, 3);
-    if (!strcasecmp("scan", arg)) {
-      for (i = descriptor_list; i; i = i->next) {
-        if (desc_get_connected(i) != CON_PLAYING) {
-          continue;
-        } else if (i->character == ch) {
-          continue;
-        } else if (char_is_android(i->character)) {
-          continue;
-        } else if (planet_check(ch, i->character)) {
-          int dir  = find_first_step(char_get_in_room(ch), char_get_in_room(i->character));
-          int same = FALSE;
-          char pathway[MAX_STRING_LENGTH];
-
-          if (char_in_zone(ch) == char_in_zone(i->character))
-            same = TRUE;
-
-          switch (dir) {
-            case BFS_ERROR:
-              snprintf(pathway, sizeof(pathway), "@rERROR");
-              break;
-            case BFS_ALREADY_THERE:
-              snprintf(pathway, sizeof(pathway), "@RHERE");
-              break;
-            case BFS_NO_PATH:
-              send_to_char(ch, "@MUNKNOWN");
-              break;
-            default:
-              send_to_char(ch, "@G%s\r\n", dirs[dir]);
-              break;
-          }
-
-          char *blah = sense_location(i->character);
-          if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(i->character) >= 150000) {
-            send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == TRUE ? pathway : blah);
-          } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(i->character) >= 5000000) {
-            send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == TRUE ? pathway : blah);
-          } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(i->character) >= 15000000) {
-            send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == TRUE ? pathway : blah);
-          } else {
-            send_to_char(ch, "@D<@GPowerlevel Detected@D: [@Y%s@D]@w ---> @C%s@n\r\n", add_commas(getCurPL(i->character)), same == TRUE ? pathway : blah);
-          }
-          ++count;
-          free(blah);
-        }
+  }
+  if (!*arg) {
+    send_to_char(ch, "[Syntax] scouter < target | scan>\r\n");
+    return;
+  }
+  reveal_hiding(ch, 3);
+  if (!strcasecmp("scan", arg)) {
+    for (i = descriptor_list; i; i = i->next) {
+      if (desc_get_connected(i) != CON_PLAYING) {
+        continue;
       }
-      if (count == 0) {
-        send_to_char(ch, "You didn't detect anyone of notice.\r\n");
-        return;
-      } else if (count >= 1) {
-        send_to_char(ch, "%d powerlevels detected.\r\n", count);
-        return;
+      if (i->character == ch) {
+        continue;
+      }
+      if (char_is_android(i->character)) {
+        continue;
+      }
+      if (planet_check(ch, i->character)) {
+        int dir  = find_first_step(char_get_in_room(ch), char_get_in_room(i->character));
+        int same = FALSE;
+        char pathway[MAX_STRING_LENGTH];
+
+        if (char_in_zone(ch) == char_in_zone(i->character))
+          same = TRUE;
+
+        switch (dir) {
+          case BFS_ERROR:
+            snprintf(pathway, sizeof(pathway), "@rERROR");
+            break;
+          case BFS_ALREADY_THERE:
+            snprintf(pathway, sizeof(pathway), "@RHERE");
+            break;
+          case BFS_NO_PATH:
+            send_to_char(ch, "@MUNKNOWN");
+            break;
+          default:
+            send_to_char(ch, "@G%s\r\n", dirs[dir]);
+            break;
+        }
+
+        char *blah = sense_location(i->character);
+        if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(i->character) >= 150000) {
+          send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == TRUE ? pathway : blah);
+        } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(i->character) >= 5000000) {
+          send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == TRUE ? pathway : blah);
+        } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(i->character) >= 15000000) {
+          send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n", same == TRUE ? pathway : blah);
+        } else {
+          send_to_char(ch, "@D<@GPowerlevel Detected@D: [@Y%s@D]@w ---> @C%s@n\r\n", add_commas(getCurPL(i->character)), same == TRUE ? pathway : blah);
+        }
+        ++count;
+        free(blah);
       }
     }
-    if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
-      send_to_char(ch, "They don't seem to be here.\r\n");
+    if (count == 0) {
+      send_to_char(ch, "You didn't detect anyone of notice.\r\n");
       return;
     }
-    if (char_is_android(vict)) {
-      act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
-      act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
-      send_to_char(ch, "@D,==================================|@n\r\n");
-      send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-      send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
-      send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-      send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D:                 @RERROR@n@D|@n\r\n");
-      send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D:                 @RERROR@n@D|@n\r\n");
-      send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D:                 @RERROR@n@D|@n\r\n");
-      send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-      send_to_char(ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D:                 @RERROR@n@D|@n\r\n");
-      send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-      send_to_char(ch, "@D`==================================|@n\r\n");
+    if (count >= 1) {
+      send_to_char(ch, "%d powerlevels detected.\r\n", count);
       return;
-    } else {
-      if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(vict) >= 150000) {
-        act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
-        act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
-        perform_remove(ch, WEAR_EYE);
-        send_to_char(ch, "Your scouter overloads and explodes!\r\n");
-        act("$n's scouter explodes!", FALSE, ch, 0, 0, TO_ROOM);
-        extract_obj(obj);
-        save_char(ch);
-        return;
-      } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(vict) >= 5000000) {
-        act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
-        act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
-        perform_remove(ch, WEAR_EYE);
-        send_to_char(ch, "Your scouter overloads and explodes!\r\n");
-        act("$n's scouter explodes!", FALSE, ch, 0, 0, TO_ROOM);
-        extract_obj(obj);
-        save_char(ch);
-        return;
-      } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(vict) >= 15000000) {
-        act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
-        act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
-        perform_remove(ch, WEAR_EYE);
-        send_to_char(ch, "Your scouter overloads and explodes!\r\n");
-        act("$n's scouter explodes!", FALSE, ch, 0, 0, TO_ROOM);
-        extract_obj(obj);
-        save_char(ch);
-        return;
-      } else {
-        long double percent = 0.0, cur = 0.0, max = 0.0;
-        int64_t stam = (getCurST(vict)), mstam = getMaxST(vict);
-        if (stam <= 0)
-          stam = 1;
-        if (mstam <= 0)
-          mstam = 1;
-
-        cur = (long double)(stam);
-        max = (long double)(mstam);
-
-        percent = (cur / max) * 100;
-        act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
-        act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
-        send_to_char(ch, "@D,==================================|@n\r\n");
-        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-        send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
-        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-        send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D: @Y%21s@n@D|@n\r\n", add_commas(getCurPL(vict)));
-        if (!char_is_npc(vict)) {
-          send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(char_get_charge(vict)));
-        } else if (char_is_npc(vict)) {
-          send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(vict->mobcharge * rand_number(char_get_level(ch) * 50, char_get_level(ch) * 200)));
-        }
-        if (percent < 10)
-          send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Exhausted");
-        else if (percent < 25)
-          send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Extremely Tired");
-        else if (percent < 50)
-          send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Very Tired");
-        else if (percent < 75)
-          send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Tired");
-        else if (percent < 90)
-          send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Winded");
-        else if (percent < 100)
-          send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Untired");
-        else if (percent >= 100)
-          send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Energetic");
-        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-        int check = FALSE;
-        send_to_char(ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D: ");
-        if (char_aff_flagged(vict, AFF_ZANZOKEN)) {
-          send_to_char(ch, "@Y%21s@n@D|@n\n", "Zanzoken Prepared");
-          check = TRUE;
-        }
-        if (char_aff_flagged(vict, AFF_HASS)) {
-          send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == TRUE ? "@D|@1             " : "", "Accelerated Arms");
-          check = TRUE;
-        }
-        if (char_aff_flagged(vict, AFF_HEALGLOW)) {
-          send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == TRUE ? "@D|@1             " : "", "Healing Glow Prepared");
-          check = TRUE;
-        }
-        if (char_aff_flagged(vict, AFF_POISON)) {
-          send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == TRUE ? "@D|@1             " : "", "Poisoned");
-          check = TRUE;
-        }
-        if (char_plr_flagged(vict, PLR_SELFD)) {
-          send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == TRUE ? "@D|@1             " : "", "Explosive Energy");
-          check = TRUE;
-        }
-        if (check == FALSE) {
-          send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == TRUE ? "@D|@1             " : "", "None Detected.");
-        }
-        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-        send_to_char(ch, "@D`==================================|@n\r\n");
-      }
     }
   }
+  if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
+    send_to_char(ch, "They don't seem to be here.\r\n");
+    return;
+  }
+  if (char_is_android(vict)) {
+    act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
+    act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
+    send_to_char(ch, "@D,==================================|@n\r\n");
+    send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+    send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
+    send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+    send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D:                 @RERROR@n@D|@n\r\n");
+    send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D:                 @RERROR@n@D|@n\r\n");
+    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D:                 @RERROR@n@D|@n\r\n");
+    send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+    send_to_char(ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D:                 @RERROR@n@D|@n\r\n");
+    send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+    send_to_char(ch, "@D`==================================|@n\r\n");
+    return;
+  }
+  if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(vict) >= 150000) {
+    act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
+    act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
+    perform_remove(ch, WEAR_EYE);
+    send_to_char(ch, "Your scouter overloads and explodes!\r\n");
+    act("$n's scouter explodes!", FALSE, ch, 0, 0, TO_ROOM);
+    extract_obj(obj);
+    save_char(ch);
+    return;
+  }
+  if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(vict) >= 5000000) {
+    act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
+    act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
+    perform_remove(ch, WEAR_EYE);
+    send_to_char(ch, "Your scouter overloads and explodes!\r\n");
+    act("$n's scouter explodes!", FALSE, ch, 0, 0, TO_ROOM);
+    extract_obj(obj);
+    save_char(ch);
+    return;
+  }
+  if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(vict) >= 15000000) {
+    act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
+    act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
+    perform_remove(ch, WEAR_EYE);
+    send_to_char(ch, "Your scouter overloads and explodes!\r\n");
+    act("$n's scouter explodes!", FALSE, ch, 0, 0, TO_ROOM);
+    extract_obj(obj);
+    save_char(ch);
+    return;
+  }
+  long double percent = 0.0, cur = 0.0, max = 0.0;
+  int64_t stam = (getCurST(vict)), mstam = getMaxST(vict);
+  if (stam <= 0)
+    stam = 1;
+  if (mstam <= 0)
+    mstam = 1;
+
+  cur = (long double)(stam);
+  max = (long double)(mstam);
+
+  percent = (cur / max) * 100;
+  act("$n points $s scouter at you.", FALSE, ch, 0, vict, TO_VICT);
+  act("$n points $s scouter at $N.", FALSE, ch, 0, vict, TO_NOTVICT);
+  send_to_char(ch, "@D,==================================|@n\r\n");
+  send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+  send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
+  send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+  send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D: @Y%21s@n@D|@n\r\n", add_commas(getCurPL(vict)));
+  if (!char_is_npc(vict)) {
+    send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(char_get_charge(vict)));
+  } else if (char_is_npc(vict)) {
+    send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(vict->mobcharge * rand_number(char_get_level(ch) * 50, char_get_level(ch) * 200)));
+  }
+  if (percent < 10)
+    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Exhausted");
+  else if (percent < 25)
+    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Extremely Tired");
+  else if (percent < 50)
+    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Very Tired");
+  else if (percent < 75)
+    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Tired");
+  else if (percent < 90)
+    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Winded");
+  else if (percent < 100)
+    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Untired");
+  else if (percent >= 100)
+    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Energetic");
+  send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+  int check = FALSE;
+  send_to_char(ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D: ");
+  if (char_aff_flagged(vict, AFF_ZANZOKEN)) {
+    send_to_char(ch, "@Y%21s@n@D|@n\n", "Zanzoken Prepared");
+    check = TRUE;
+  }
+  if (char_aff_flagged(vict, AFF_HASS)) {
+    send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == TRUE ? "@D|@1             " : "", "Accelerated Arms");
+    check = TRUE;
+  }
+  if (char_aff_flagged(vict, AFF_HEALGLOW)) {
+    send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == TRUE ? "@D|@1             " : "", "Healing Glow Prepared");
+    check = TRUE;
+  }
+  if (char_aff_flagged(vict, AFF_POISON)) {
+    send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == TRUE ? "@D|@1             " : "", "Poisoned");
+    check = TRUE;
+  }
+  if (char_plr_flagged(vict, PLR_SELFD)) {
+    send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == TRUE ? "@D|@1             " : "", "Explosive Energy");
+    check = TRUE;
+  }
+  if (check == FALSE) {
+    send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == TRUE ? "@D|@1             " : "", "None Detected.");
+  }
+  send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+  send_to_char(ch, "@D`==================================|@n\r\n");
 }

@@ -113,23 +113,24 @@ ACMD(do_mimic)
   if (race == ch->mimic) {
     send_to_char(ch, "You are already mimicing that race. To stop enter 'mimic stop'\r\n");
     return;
-  } else if ((getCurKI(ch)) < cost) {
+  }
+  if ((getCurKI(ch)) < cost) {
     send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
     return;
-  } else if (prob < perc) {
+  }
+  if (prob < perc) {
     decCurKI(ch, cost, 0);
     act("@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@M$n@m concentrates and the light around them seems to shift and blur. It stops a moment later and $e frowns.@n", TRUE, ch, 0, 0, TO_ROOM);
     return;
-  } else {
-    char buf[MAX_STRING_LENGTH];
-    ch->mimic = race;
-    decCurKI(ch, cost, 0);
-    snprintf(buf, sizeof(buf), "@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be %s @M%s!@n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
-    send_to_char(ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be %s %s.@n\r\n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
-    act(buf, TRUE, ch, 0, 0, TO_ROOM);
-    return;
   }
+  char buf[MAX_STRING_LENGTH];
+  ch->mimic = race;
+  decCurKI(ch, cost, 0);
+  snprintf(buf, sizeof(buf), "@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be %s @M%s!@n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
+  send_to_char(ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be %s %s.@n\r\n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
+  act(buf, TRUE, ch, 0, 0, TO_ROOM);
+  return;
 }
 
 ACMD(do_kyodaika)
@@ -151,14 +152,13 @@ ACMD(do_kyodaika)
     assign_affect(ch, AFF_KYODAIKA, 0, -1, 5, 0, 0, 0, 0, -2);
     save_char(ch);
     return;
-  } else {
-    act("@GYou growl as your body shrinks to its normal size!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n@G growls as $s body shrinks to its normal size!@n", TRUE, ch, 0, 0, TO_ROOM);
-    send_to_char(ch, "@cStrength@D: @C-5\r\n@cSpeed@D: @c+2@n\r\n");
-    remove_affect(ch, AFF_KYODAIKA);
-    save_char(ch);
-    return;
   }
+  act("@GYou growl as your body shrinks to its normal size!@n", TRUE, ch, 0, 0, TO_CHAR);
+  act("@g$n@G growls as $s body shrinks to its normal size!@n", TRUE, ch, 0, 0, TO_ROOM);
+  send_to_char(ch, "@cStrength@D: @C-5\r\n@cSpeed@D: @c+2@n\r\n");
+  remove_affect(ch, AFF_KYODAIKA);
+  save_char(ch);
+  return;
 }
 
 ACMD(do_table)
@@ -220,11 +220,10 @@ ACMD(do_draw)
   if (drawn == FALSE) {
     send_to_char(ch, "You don't have any cards in the case!\r\n");
     return;
-  } else {
-    act("$n draws a card from $s $p.\r\n", TRUE, ch, obj, 0, TO_ROOM);
-    send_to_char(ch, "You draw a card.\r\n%s\r\n", obj3->action_description);
-    return;
   }
+  act("$n draws a card from $s $p.\r\n", TRUE, ch, obj, 0, TO_ROOM);
+  send_to_char(ch, "You draw a card.\r\n%s\r\n", obj3->action_description);
+  return;
 }
 
 ACMD(do_shuffle)
@@ -392,29 +391,29 @@ ACMD(do_post)
     obj_to_room(obj, char_get_in_room(ch));
     obj_set_posttype(obj, 1);
     return;
-  } else {
-    if (!(obj2 = get_obj_in_list_vis(ch, arg2, NULL, world[char_get_in_room(ch)].contents))) {
-      send_to_char(ch, "You can't seem to find the thing you want to post it on.\r\n");
-      return;
-    } else if (obj_get_posted_to(obj2)) {
-      send_to_char(ch, "It already has something posted on it. Get that first if you want to post.\r\n");
-      return;
-    } else if (obj_get_type_flag(obj2) == ITEM_BOARD) {
-      send_to_char(ch, "Boards come with their own means of posting messages.\r\n");
-      return;
-    } else {
-      char buf[MAX_STRING_LENGTH];
-      snprintf(buf, sizeof(buf), "@C$n@W posts %s@W on %s@W.@n", obj->short_description, obj2->short_description);
-      send_to_char(ch, "@WYou post %s@W on %s@W.@n\r\n", obj->short_description, obj2->short_description);
-      act(buf, TRUE, ch, 0, 0, TO_ROOM);
-      obj_from_char(obj);
-      obj_to_room(obj, char_get_in_room(ch));
-      obj_set_posttype(obj, 2);
-      obj_set_posted_to(obj, obj2);
-      obj_set_posted_to(obj2, obj);
-      return;
-    }
   }
+  if (!(obj2 = get_obj_in_list_vis(ch, arg2, NULL, world[char_get_in_room(ch)].contents))) {
+    send_to_char(ch, "You can't seem to find the thing you want to post it on.\r\n");
+    return;
+  }
+  if (obj_get_posted_to(obj2)) {
+    send_to_char(ch, "It already has something posted on it. Get that first if you want to post.\r\n");
+    return;
+  }
+  if (obj_get_type_flag(obj2) == ITEM_BOARD) {
+    send_to_char(ch, "Boards come with their own means of posting messages.\r\n");
+    return;
+  }
+  char buf[MAX_STRING_LENGTH];
+  snprintf(buf, sizeof(buf), "@C$n@W posts %s@W on %s@W.@n", obj->short_description, obj2->short_description);
+  send_to_char(ch, "@WYou post %s@W on %s@W.@n\r\n", obj->short_description, obj2->short_description);
+  act(buf, TRUE, ch, 0, 0, TO_ROOM);
+  obj_from_char(obj);
+  obj_to_room(obj, char_get_in_room(ch));
+  obj_set_posttype(obj, 2);
+  obj_set_posted_to(obj, obj2);
+  obj_set_posted_to(obj2, obj);
+  return;
 }
 
 ACMD(do_play)
@@ -506,18 +505,17 @@ ACMD(do_nickname)
       if (strstr(arg2, "@")) {
         send_to_char(ch, "You can't nickname a ship and use color codes. Sorry.\r\n");
         return;
-      } else {
-        char nick[MAX_INPUT_LENGTH];
-        snprintf(nick, sizeof(nick), "%s", CAP(arg2));
-        ship2->action_description = strdup(nick);
-        struct obj_data *k;
-        for (k = object_list; k; k = k->next) {
-          if (obj_get_vnum(k) == obj_get_vnum(ship2) + 1000) {
-            extract_obj(k);
-            int was_in = rroom_get_vnum(obj_get_in_room(ship2));
-            obj_from_room(ship2);
-            obj_to_room(ship2, real_room(was_in));
-          }
+      }
+      char nick[MAX_INPUT_LENGTH];
+      snprintf(nick, sizeof(nick), "%s", CAP(arg2));
+      ship2->action_description = strdup(nick);
+      struct obj_data *k;
+      for (k = object_list; k; k = k->next) {
+        if (obj_get_vnum(k) == obj_get_vnum(ship2) + 1000) {
+          extract_obj(k);
+          int was_in = rroom_get_vnum(obj_get_in_room(ship2));
+          obj_from_room(ship2);
+          obj_to_room(ship2, real_room(was_in));
         }
       }
     }
@@ -527,18 +525,18 @@ ACMD(do_nickname)
   if (strstr(obj->short_description, "nicknamed")) {
     send_to_char(ch, "%s@w has already been nicknamed.@n\r\n", obj->short_description);
     return;
-  } else if (strstr(obj->name, "corpse")) {
+  }
+  if (strstr(obj->name, "corpse")) {
     send_to_char(ch, "%s@w is a corpse!@n\r\n", obj->short_description);
     return;
-  } else {
-    send_to_char(ch, "@wYou nickname %s@w as '@C%s@w'.@n\r\n", obj->short_description, arg2);
-    char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH];
-    snprintf(nick, sizeof(nick), "%s @wnicknamed @D(@C%s@D)@n", obj->short_description, CAP(arg2));
-    snprintf(nick2, sizeof(nick2), "%s %s", obj->name, arg2);
-    obj->short_description = strdup(nick);
-    obj->name              = strdup(nick2);
-    return;
   }
+  send_to_char(ch, "@wYou nickname %s@w as '@C%s@w'.@n\r\n", obj->short_description, arg2);
+  char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH];
+  snprintf(nick, sizeof(nick), "%s @wnicknamed @D(@C%s@D)@n", obj->short_description, CAP(arg2));
+  snprintf(nick2, sizeof(nick2), "%s %s", obj->name, arg2);
+  obj->short_description = strdup(nick);
+  obj->name              = strdup(nick2);
+  return;
 }
 
 ACMD(do_showoff)
@@ -560,7 +558,8 @@ ACMD(do_showoff)
   if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
     send_to_char(ch, "You don't seem to have that.\r\n");
     return;
-  } else if (!(vict = get_player_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
+  }
+  if (!(vict = get_player_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
     send_to_char(ch, "There is no such person around.\r\n");
     return;
   } else { /* Ok show that target the object! */
@@ -750,16 +749,16 @@ ACMD(do_intro)
   if (readIntro(vict, ch) == 2) {
     send_to_char(ch, "There seems to have been an error, report this to Iovan.\r\n");
     return;
-  } else if (readIntro(ch, vict) == 1 && strstr(juggleRaceName(vict, true), arg)) {
+  }
+  if (readIntro(ch, vict) == 1 && strstr(juggleRaceName(vict, true), arg)) {
     send_to_char(ch, "You have already dubbed them a name. If you want to redub them target the name you know them by.\r\n");
     return;
-  } else {
-    introWrite(ch, vict, arg2);
-    act("You decide to call $M, $N.", TRUE, ch, 0, vict, TO_CHAR);
-    act("$n seems to decide something about you.", TRUE, ch, 0, vict, TO_VICT);
-    act("$n seems to decide something about $N.", TRUE, ch, 0, vict, TO_NOTVICT);
-    return;
   }
+  introWrite(ch, vict, arg2);
+  act("You decide to call $M, $N.", TRUE, ch, 0, vict, TO_CHAR);
+  act("$n seems to decide something about you.", TRUE, ch, 0, vict, TO_VICT);
+  act("$n seems to decide something about $N.", TRUE, ch, 0, vict, TO_NOTVICT);
+  return;
 }
 
 ACMD(do_rptrans)

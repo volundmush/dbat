@@ -179,12 +179,12 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
         if (spotted == TRUE && rroom_sect(obj_get_in_room(obj)) != SECT_DESERT) {
           send_to_char(ch, "@yA %s soft dirt is here.@n\r\n", bury);
           return;
-        } else if (spotted == TRUE && rroom_sect(obj_get_in_room(obj)) == SECT_DESERT) {
+        }
+        if (spotted == TRUE && rroom_sect(obj_get_in_room(obj)) == SECT_DESERT) {
           send_to_char(ch, "@YA %s soft sand is here.@n\r\n", bury);
           return;
-        } else {
-          return;
         }
+        return;
       }
       if (obj_get_vnum(obj) == 11) {
         send_to_char(ch, "@wA gravity generator, set to %sx gravity, is built here", add_commas(obj_get_weight(obj)));
@@ -209,9 +209,8 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
         if (obj_get_posttype(obj) > 0) {
           if (obj_get_posted_to(obj)) {
             return;
-          } else {
-            send_to_char(ch, "%s@w, has been posted here.@n", obj->short_description);
           }
+          send_to_char(ch, "%s@w, has been posted here.@n", obj->short_description);
         } else {
           if (!obj_extra_flagged(obj, ITEM_BURIED)) {
             send_to_char(ch, "%s@n", obj->description);

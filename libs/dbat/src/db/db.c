@@ -1141,14 +1141,13 @@ void index_boot(int mode)
               index_filename, strerror(errno));
       fscanf(db_index, "%s\n", buf1);
       continue;
-    } else {
-      if (mode == DB_BOOT_ZON)
-        rec_count++;
-      else if (mode == DB_BOOT_HLP)
-        rec_count += count_alias_records(db_file);
-      else
-        rec_count += count_hash_records(db_file);
     }
+    if (mode == DB_BOOT_ZON)
+      rec_count++;
+    else if (mode == DB_BOOT_HLP)
+      rec_count += count_alias_records(db_file);
+    else
+      rec_count += count_hash_records(db_file);
 
     fclose(db_file);
     fscanf(db_index, "%s\n", buf1);
@@ -2085,7 +2084,8 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
     /* Let's make the implementor read some, before converting his worldfiles */
     mud_log("WARNING: Conventional mobilefiles detected. Please read 128bit.readme.");
     return 0;
-  } else if ((retval == 4) && (bitwarning == FALSE)) {
+  }
+  if ((retval == 4) && (bitwarning == FALSE)) {
 
     mud_log("Converting mobile #%d to 128bits..", nr);
     char_get_act(ch)[0] = asciiflag_conv(f1);

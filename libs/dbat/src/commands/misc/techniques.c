@@ -59,24 +59,21 @@ ACMD(do_spiritcontrol)
   if (!char_get_skill(ch, SKILL_SPIRITCONTROL)) {
     send_to_char(ch, "You do not know how to perform that technique.\r\n");
     return;
-  } else {
-    if (char_aff_flagged(ch, AFF_SPIRITCONTROL)) {
-      send_to_char(ch, "You have already concentrated and have full control of your spirit.\r\n");
-      return;
-    } else {
-      int64_t cost = getMaxKI(ch) * 0.2;
-      if ((getCurST(ch)) < cost) {
-        send_to_char(ch, "You need at least 20%s of your max ki in stamina to prepare this skill.\r\n", "%");
-        return;
-      } else {
-        decCurST(ch, cost, 0);
-        act("@YYou concentrate and quantify every last bit of your spiritual and mental energies. You have full control of them and can bring them forth in an instant.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@y$n@Y seems to concentrate hard for a moment.@n", TRUE, ch, 0, 0, TO_ROOM);
-        int duration = rand_number(2, 4);
-        assign_affect(ch, AFF_SPIRITCONTROL, SKILL_SPIRITCONTROL, duration, 0, 0, 0, 0, 0, 0);
-      }
-    }
   }
+  if (char_aff_flagged(ch, AFF_SPIRITCONTROL)) {
+    send_to_char(ch, "You have already concentrated and have full control of your spirit.\r\n");
+    return;
+  }
+  int64_t cost = getMaxKI(ch) * 0.2;
+  if ((getCurST(ch)) < cost) {
+    send_to_char(ch, "You need at least 20%s of your max ki in stamina to prepare this skill.\r\n", "%");
+    return;
+  }
+  decCurST(ch, cost, 0);
+  act("@YYou concentrate and quantify every last bit of your spiritual and mental energies. You have full control of them and can bring them forth in an instant.@n", TRUE, ch, 0, 0, TO_CHAR);
+  act("@y$n@Y seems to concentrate hard for a moment.@n", TRUE, ch, 0, 0, TO_ROOM);
+  int duration = rand_number(2, 4);
+  assign_affect(ch, AFF_SPIRITCONTROL, SKILL_SPIRITCONTROL, duration, 0, 0, 0, 0, 0, 0);
 }
 
 ACMD(do_tailhide)
@@ -195,10 +192,9 @@ ACMD(do_multiform)
         TRUE, ch, 0, 0, TO_ROOM);
     generate_multiform(ch, 1);
     return;
-  } else {
-    send_to_char(ch, "Huh? Try help multiform\r\n");
-    return;
   }
+  send_to_char(ch, "Huh? Try help multiform\r\n");
+  return;
 }
 
 static void generate_multiform(struct char_data *ch, int count)
@@ -378,17 +374,17 @@ ACMD(do_shell)
   if ((getCurST(ch)) < getMaxST(ch) * 0.2) {
     send_to_char(ch, "You do not have enough stamina to grow your armored carapace.@n\r\n");
     return;
-  } else if (axion_dice(0) > char_get_aff_abils_con(ch) + rand_number(1, 10)) {
+  }
+  if (axion_dice(0) > char_get_aff_abils_con(ch) + rand_number(1, 10)) {
     act("@mYou crouch down and begin to focus on your body's carapace cells encouraging them to multiply! However your control is lacking and you ultimately fail to grow your armor very much.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@M$n@m crouches down and seems to strain for a moment before giving up and resuming $s normal stance.@n", TRUE, ch, 0, 0, TO_ROOM);
     return;
-  } else {
-    act("@mYou crouch down and begin to focus on your body's carapace cells, encouraging them to multiply! Very quickly millions of new carapace cells have been born and your armored carapace extends over all parts of your body!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@M$n@m crouches down and after a few moments of straining $s body's carapace armor starts to grow thicker and extends to cover all parts of $s body!@n", TRUE, ch, 0, 0, TO_ROOM);
-    decCurSTPercent(ch, .2, 0);
-    char_aff_set(ch, AFF_SHELL, true);
-    return;
   }
+  act("@mYou crouch down and begin to focus on your body's carapace cells, encouraging them to multiply! Very quickly millions of new carapace cells have been born and your armored carapace extends over all parts of your body!@n", TRUE, ch, 0, 0, TO_CHAR);
+  act("@M$n@m crouches down and after a few moments of straining $s body's carapace armor starts to grow thicker and extends to cover all parts of $s body!@n", TRUE, ch, 0, 0, TO_ROOM);
+  decCurSTPercent(ch, .2, 0);
+  char_aff_set(ch, AFF_SHELL, true);
+  return;
 }
 
 ACMD(do_liquefy)
@@ -444,14 +440,14 @@ ACMD(do_liquefy)
       decCurKI(ch, (getMaxKI(ch) * .002) + 150, 0);
 
       return;
-    } else {
-      act("@MYour body starts to become loose and sag. It continues to droop down until it begins to run down like a river of goo flowing from where your body was.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@m$n@M's body starts to become loose and sag. Much of $s body begins to pour down and scatter around as pools of goo.@n", TRUE, ch, 0, 0, TO_ROOM);
-      decCurKI(ch, (getMaxKI(ch) * .002) + 150, 0);
-      char_aff_set(ch, AFF_LIQUEFIED, true);
-      return;
     }
-  } else if (!strcasecmp(arg, "explode")) {
+    act("@MYour body starts to become loose and sag. It continues to droop down until it begins to run down like a river of goo flowing from where your body was.@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@m$n@M's body starts to become loose and sag. Much of $s body begins to pour down and scatter around as pools of goo.@n", TRUE, ch, 0, 0, TO_ROOM);
+    decCurKI(ch, (getMaxKI(ch) * .002) + 150, 0);
+    char_aff_set(ch, AFF_LIQUEFIED, true);
+    return;
+  }
+  if (!strcasecmp(arg, "explode")) {
     struct char_data *vict;
     if (char_get_grappled(ch)) {
       char_set_grappling(char_get_grappled(ch), NULL);
@@ -468,22 +464,27 @@ ACMD(do_liquefy)
     if (!*arg2) {
       send_to_char(ch, "Syntax: liquefy hide\nSyntax: liquefy explode (target)\r\n");
       return;
-    } else if ((getCurKI(ch)) < (getMaxKI(ch) * 0.10) + 150) {
+    }
+    if ((getCurKI(ch)) < (getMaxKI(ch) * 0.10) + 150) {
       send_to_char(ch, "You do not have enough ki for that action!@n\r\n");
       return;
-    } else if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
+    }
+    if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
       send_to_char(ch, "That target isn't here.\r\n");
       return;
-    } else if (!can_kill(ch, vict, NULL, 1)) {
+    }
+    if (!can_kill(ch, vict, NULL, 1)) {
       send_to_char(ch, "You can't kill them!\r\n");
       return;
-    } else if (axion_dice(0) > char_get_level(ch)) {
+    }
+    if (axion_dice(0) > char_get_level(ch)) {
       act("@MYour body starts to become loose and sag, but you lose focus and it reverts to its original shape!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@m$n@M's body starts to become loose and sag, but $e seems to return normal a moment later.@n", TRUE, ch, 0, 0, TO_ROOM);
       decCurKI(ch, (getMaxKI(ch) * .002) + 150, 0);
       char_set_wait(ch, PULSE_3SEC);
       return;
-    } else if (char_get_speedi(ch) < char_get_speedi(vict)) {
+    }
+    if (char_get_speedi(ch) < char_get_speedi(vict)) {
       act("@MYour body rapidly turns to liquid and flies for @R$N's@M open mouth! However $E easily dodges and avoids your attempt!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! However you are faster and managed to dodge the attempt.@n", TRUE, ch, 0, vict, TO_VICT);
       act("@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! However $E easily dodges and avoids @m$n's@M attempt!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -497,7 +498,8 @@ ACMD(do_liquefy)
       char_set_wait(ch, PULSE_3SEC);
       char_set_wait(ch, PULSE_3SEC);
       return;
-    } else if (getCurPL(ch) < getCurPL(vict) * 2) {
+    }
+    if (getCurPL(ch) < getCurPL(vict) * 2) {
       act("@MYour body rapidly turns to liquid and flies for @R$N's@M open mouth! However as you force yourself in through $S mouth $E successfully resists and forces your back out!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! However you think quickly and force $m out before $e has a chance to get fully into your body!@n", TRUE, ch, 0, vict, TO_VICT);
       act("@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! However as $e forces $mself in through @R$N's@M mouth $E manages to resist and force @m$n@M back out!@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -506,28 +508,26 @@ ACMD(do_liquefy)
       hurt(0, 0, ch, vict, NULL, dmg, 0);
       char_set_wait(ch, PULSE_3SEC);
       return;
-    } else {
-      act("@MYour body rapidly turns to liquid and flies for @R$N's@M open mouth! As you fill $S body you expand outward until $s body explodes into a gory mess!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! As $e fills your body it begins to expand until it is unable to take the strain any longer and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! As $e forces $mself in through @R$N's@M mouth $S body begins to expand until it can't take the strain any longer and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      decCurKI(ch, (getMaxKI(ch) * .002) + 150, 0);
-      if (char_aff_flagged(ch, AFF_GROUP)) {
-        group_gain(ch, vict);
-      } else {
-        solo_gain(ch, vict);
-      }
-      die(vict, ch);
-      char_aff_set(ch, AFF_LIQUEFIED, true);
-      char_set_wait(ch, PULSE_3SEC);
-      char_set_wait(ch, PULSE_3SEC);
-      char_set_wait(ch, PULSE_3SEC);
-      handle_cooldown(ch, 9);
-      return;
     }
-  } else {
-    send_to_char(ch, "Syntax: liquefy hide\nSyntax: liquefy explode (target)\r\n");
+    act("@MYour body rapidly turns to liquid and flies for @R$N's@M open mouth! As you fill $S body you expand outward until $s body explodes into a gory mess!@n", TRUE, ch, 0, vict, TO_CHAR);
+    act("@m$n@M's body rapidly turns to liquid and flies for @RYOUR@M open mouth! As $e fills your body it begins to expand until it is unable to take the strain any longer and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
+    act("@m$n@M's body rapidly turns into liquid and flies for @R$N's@M open mouth! As $e forces $mself in through @R$N's@M mouth $S body begins to expand until it can't take the strain any longer and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    decCurKI(ch, (getMaxKI(ch) * .002) + 150, 0);
+    if (char_aff_flagged(ch, AFF_GROUP)) {
+      group_gain(ch, vict);
+    } else {
+      solo_gain(ch, vict);
+    }
+    die(vict, ch);
+    char_aff_set(ch, AFF_LIQUEFIED, true);
+    char_set_wait(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
+    char_set_wait(ch, PULSE_3SEC);
+    handle_cooldown(ch, 9);
     return;
   }
+  send_to_char(ch, "Syntax: liquefy hide\nSyntax: liquefy explode (target)\r\n");
+  return;
 }
 
 ACMD(do_lifeforce)
@@ -548,15 +548,15 @@ ACMD(do_lifeforce)
   if (setting > 99) {
     send_to_char(ch, "Syntax: life (1 - 99)\n%s isn't an acceptable percent.\r\n", add_commas(setting));
     return;
-  } else if (setting <= 0) {
+  }
+  if (setting <= 0) {
     send_to_char(ch, "Your will just isn't in the fight, huh?\nYou will not use up life force to maintain your PL period.\r\n");
     char_set_lifeperc(ch, 0);
     return;
-  } else {
-    send_to_char(ch, "Your life force will automatically kick in at %d%s of your optimal PL.\r\n", setting, "%");
-    char_set_lifeperc(ch, setting);
-    return;
   }
+  send_to_char(ch, "Your life force will automatically kick in at %d%s of your optimal PL.\r\n", setting, "%");
+  char_set_lifeperc(ch, setting);
+  return;
 }
 
 ACMD(do_defend)
@@ -569,7 +569,8 @@ ACMD(do_defend)
   if (!*arg && char_get_defending(ch) == NULL) {
     send_to_char(ch, "Defend who?\r\n");
     return;
-  } else if (!*arg && char_get_defending(ch)) {
+  }
+  if (!*arg && char_get_defending(ch)) {
     act("@YYou stop defending @y$N@Y.@n", TRUE, ch, 0, char_get_defending(ch), TO_CHAR);
     act("@y$n@Y stops defending you.@n", TRUE, ch, 0, char_get_defending(ch), TO_VICT);
     act("@y$n@Y stops defending @y$N@Y.@n", TRUE, ch, 0, char_get_defending(ch), TO_NOTVICT);
@@ -581,17 +582,17 @@ ACMD(do_defend)
   if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
     send_to_char(ch, "You can't seem to find that person.\r\n");
     return;
-  } else if (vict == ch) {
+  }
+  if (vict == ch) {
     send_to_char(ch, "Well hopefully you are smart enough to defend yourself.\r\n");
     return;
-  } else {
-    act("@YYou start defending @y$N@Y.@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@y$n@Y starts defending you.@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@y$n@Y starts defending @y$N@Y.@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    char_set_defender(vict, ch);
-    char_set_defending(ch, vict);
-    return;
   }
+  act("@YYou start defending @y$N@Y.@n", TRUE, ch, 0, vict, TO_CHAR);
+  act("@y$n@Y starts defending you.@n", TRUE, ch, 0, vict, TO_VICT);
+  act("@y$n@Y starts defending @y$N@Y.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  char_set_defender(vict, ch);
+  char_set_defending(ch, vict);
+  return;
 }
 
 ACMD(do_scry)
@@ -633,33 +634,32 @@ ACMD(do_scry)
   if (char_get_practice_points(ch) < cost) {
     send_to_char(ch, "You do not have enough PS to Oracle Scry!\r\n");
     return;
-  } else {
-    reveal_hiding(ch, 0);
-    act("@GYou focus your mind and begin to allow the flood of images and energy to roar through your mind. You then allow those thoughts to make their way into the mind of @c$N@G. You can hardly comprehend the vastness of the information flooding in, yet still glimpse bits and pieces of your own destiny.@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@GYou see @C$n@G begin to focus, and then without warning, your mind is flooded painfully with images, energy and information. The data streams in a mad torrent through your psyche, and just when you think snapping is possible, the voice of @C$n@G comes to you and eases and guides you. You see images of potential futures, information not yet known, knowledge yet undiscovered. Though you could not fully  grasp what is to come, you feel more prepared at facing the unknown.@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@C$n@W appears to be performing some sort of ritual or something with @c$N@W.@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    int64_t boost = char_get_aff_abils_intel(ch) * 0.5;
+  }
+  reveal_hiding(ch, 0);
+  act("@GYou focus your mind and begin to allow the flood of images and energy to roar through your mind. You then allow those thoughts to make their way into the mind of @c$N@G. You can hardly comprehend the vastness of the information flooding in, yet still glimpse bits and pieces of your own destiny.@n", TRUE, ch, 0, vict, TO_CHAR);
+  act("@GYou see @C$n@G begin to focus, and then without warning, your mind is flooded painfully with images, energy and information. The data streams in a mad torrent through your psyche, and just when you think snapping is possible, the voice of @C$n@G comes to you and eases and guides you. You see images of potential futures, information not yet known, knowledge yet undiscovered. Though you could not fully  grasp what is to come, you feel more prepared at facing the unknown.@n", TRUE, ch, 0, vict, TO_VICT);
+  act("@C$n@W appears to be performing some sort of ritual or something with @c$N@W.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  int64_t boost = char_get_aff_abils_intel(ch) * 0.5;
 
-    gainBasePL(vict, (getBasePL(vict) * .01) * boost, false);
-    gainBaseKI(vict, (getBaseKI(vict) * .01) * boost, false);
-    gainBaseST(vict, (getBaseST(vict) * .01) * boost, false);
+  gainBasePL(vict, (getBasePL(vict) * .01) * boost, false);
+  gainBaseKI(vict, (getBaseKI(vict) * .01) * boost, false);
+  gainBaseST(vict, (getBaseST(vict) * .01) * boost, false);
 
-    send_to_char(vict, "Your Powerlevel, Ki, and Stamina have improved drastically! On top of that your Intelligence and Wisdom have improved permanantly!\r\n");
-    vict->real_abils.intel += 2;
-    vict->real_abils.wis += 2;
-    char_set_practice_points(ch, char_get_practice_points(ch) - (2000));
-    if (char_get_level(ch) < 100) {
-      send_to_char(ch, "@D[@mPractice Sessions@D:@R -2000@D]@n\r\n");
-      if (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0) {
-        char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch)));
-        send_to_char(ch, "The remaining experience needed for your next level up has been gained!@n\r\n");
-      } else {
-        send_to_char(ch, "Due to already having enough experience to level up you gain no expereince.\r\n");
-      }
+  send_to_char(vict, "Your Powerlevel, Ki, and Stamina have improved drastically! On top of that your Intelligence and Wisdom have improved permanantly!\r\n");
+  vict->real_abils.intel += 2;
+  vict->real_abils.wis += 2;
+  char_set_practice_points(ch, char_get_practice_points(ch) - (2000));
+  if (char_get_level(ch) < 100) {
+    send_to_char(ch, "@D[@mPractice Sessions@D:@R -2000@D]@n\r\n");
+    if (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0) {
+      char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch)));
+      send_to_char(ch, "The remaining experience needed for your next level up has been gained!@n\r\n");
     } else {
-      gainBaseAllPercent(ch, .025, true);
-      send_to_char(ch, "Your Powerlevel, Ki, and Stamina have improved!\r\n");
+      send_to_char(ch, "Due to already having enough experience to level up you gain no expereince.\r\n");
     }
+  } else {
+    gainBaseAllPercent(ch, .025, true);
+    send_to_char(ch, "Your Powerlevel, Ki, and Stamina have improved!\r\n");
   }
 }
 
@@ -766,55 +766,57 @@ ACMD(do_ashcloud)
   if ((getCurKI(ch)) < cost) {
     send_to_char(ch, "You do not have enough ki!\r\n");
     return;
-  } else if (rroom_sunken(char_get_in_room(ch))) {
+  }
+  if (rroom_sunken(char_get_in_room(ch))) {
     send_to_char(ch, "You can not create an ashcloud here, because it is too wet.\r\n");
     return;
-  } else if (rroom_sect(char_get_in_room(ch)) == SECT_SPACE) {
+  }
+  if (rroom_sect(char_get_in_room(ch)) == SECT_SPACE) {
     send_to_char(ch, "You can not create an ashcloud in space.\r\n");
     return;
-  } else if (char_get_aff_abils_intel(ch) < axion_dice(-10)) {
+  }
+  if (char_get_aff_abils_intel(ch) < axion_dice(-10)) {
     reveal_hiding(ch, 0);
     act("@RYou take a handful of ashes, and when you go to blow flames at it you lose focus. The ashes are blown from your hands by your huge gust of breath.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@r$n@R takes a handful of ashes from $s belongings and blows it out of $s hands with a strong gust of air. @YStrange.@n", TRUE, ch, 0, 0, TO_ROOM);
     extract_obj(ash);
     decCurKI(ch, cost, 0);
     return;
+  }
+  struct obj_data *ashcloud;
+  reveal_hiding(ch, 0);
+  if (level == 3) {
+    decCurKI(ch, cost, 0);
+    act("@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_ROOM);
+    send_to_room(char_get_in_room(ch), "@WThe ashes ripple with an intense aftershock of power.@n\r\n");
+    ashcloud = read_object(1306, VIRTUAL);
+    obj_to_room(ashcloud, char_get_in_room(ch));
+    extract_obj(ash);
+    obj_set_timer(ashcloud, 4);
+    obj_set_cost(ashcloud, 3);
+    ash_burn(ch);
+  } else if (level == 2) {
+    decCurKI(ch, cost, 0);
+    act("@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_ROOM);
+    send_to_room(char_get_in_room(ch), "@WThe ashes ripple with a strong aftershock of power.@n\r\n");
+    ashcloud = read_object(1306, VIRTUAL);
+    obj_to_room(ashcloud, char_get_in_room(ch));
+    obj_set_timer(ashcloud, 2);
+    obj_set_cost(ashcloud, 2);
+    extract_obj(ash);
+    ash_burn(ch);
   } else {
-    struct obj_data *ashcloud;
-    reveal_hiding(ch, 0);
-    if (level == 3) {
-      decCurKI(ch, cost, 0);
-      act("@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_ROOM);
-      send_to_room(char_get_in_room(ch), "@WThe ashes ripple with an intense aftershock of power.@n\r\n");
-      ashcloud = read_object(1306, VIRTUAL);
-      obj_to_room(ashcloud, char_get_in_room(ch));
-      extract_obj(ash);
-      obj_set_timer(ashcloud, 4);
-      obj_set_cost(ashcloud, 3);
-      ash_burn(ch);
-    } else if (level == 2) {
-      decCurKI(ch, cost, 0);
-      act("@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_ROOM);
-      send_to_room(char_get_in_room(ch), "@WThe ashes ripple with a strong aftershock of power.@n\r\n");
-      ashcloud = read_object(1306, VIRTUAL);
-      obj_to_room(ashcloud, char_get_in_room(ch));
-      obj_set_timer(ashcloud, 2);
-      obj_set_cost(ashcloud, 2);
-      extract_obj(ash);
-      ash_burn(ch);
-    } else {
-      decCurKI(ch, cost, 0);
-      act("@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_ROOM);
-      ashcloud = read_object(1306, VIRTUAL);
-      obj_to_room(ashcloud, char_get_in_room(ch));
-      extract_obj(ash);
-      obj_set_timer(ashcloud, 1);
-      obj_set_cost(ashcloud, 1);
-      ash_burn(ch);
-    }
+    decCurKI(ch, cost, 0);
+    act("@RYou take a handful of ashes and you create a fierce heat within your lungs. With the heat ready you breathe ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n", TRUE, ch, 0, 0, TO_ROOM);
+    ashcloud = read_object(1306, VIRTUAL);
+    obj_to_room(ashcloud, char_get_in_room(ch));
+    extract_obj(ash);
+    obj_set_timer(ashcloud, 1);
+    obj_set_cost(ashcloud, 1);
+    ash_burn(ch);
   }
 }
 
@@ -842,7 +844,8 @@ ACMD(do_healglow)
   if (char_aff_flagged(vict, AFF_HEALGLOW) && vict == ch) {
     send_to_char(ch, "You already have a healing glow surrounding your body.\r\n");
     return;
-  } else if (char_aff_flagged(vict, AFF_HEALGLOW)) {
+  }
+  if (char_aff_flagged(vict, AFF_HEALGLOW)) {
     send_to_char(ch, "They already have a healing glow surrounding their body.\r\n");
     return;
   }
@@ -850,7 +853,8 @@ ACMD(do_healglow)
   if (char_get_fighting(vict) && vict == ch) {
     send_to_char(ch, "You are too busy fighting!@n\r\n");
     return;
-  } else if (char_get_fighting(vict)) {
+  }
+  if (char_get_fighting(vict)) {
     send_to_char(ch, "They are too busy fighting!@n\r\n");
     return;
   }
@@ -860,27 +864,26 @@ ACMD(do_healglow)
   if ((getCurKI(ch)) < cost) {
     send_to_char(ch, "You do not have enough ki. It requires at least 50%s of your ki in cost.\r\n", "%");
     return;
+  }
+  if (vict == ch) {
+    act("@CPlacing your hands on your body you begin to focus your energies. Slowly a strong blue glow glistens and shines across your skin!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@c$n@C places $s hands on $s body. Slowly a strong blue glow glistens and shines across $s skin!@n", TRUE, ch, 0, 0, TO_ROOM);
+    char_aff_set(vict, AFF_HEALGLOW, true);
+    int duration = (char_get_skill(ch, SKILL_HEALGLOW) * 0.1);
+    if (duration <= 0)
+      duration = 1;
+    assign_affect(ch, AFF_HEALGLOW, SKILL_HEALGLOW, duration, 0, 0, 0, 0, 0, 0);
+    decCurKI(ch, cost, 0);
   } else {
-    if (vict == ch) {
-      act("@CPlacing your hands on your body you begin to focus your energies. Slowly a strong blue glow glistens and shines across your skin!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@c$n@C places $s hands on $s body. Slowly a strong blue glow glistens and shines across $s skin!@n", TRUE, ch, 0, 0, TO_ROOM);
-      char_aff_set(vict, AFF_HEALGLOW, true);
-      int duration = (char_get_skill(ch, SKILL_HEALGLOW) * 0.1);
-      if (duration <= 0)
-        duration = 1;
-      assign_affect(ch, AFF_HEALGLOW, SKILL_HEALGLOW, duration, 0, 0, 0, 0, 0, 0);
-      decCurKI(ch, cost, 0);
-    } else {
-      act("@CPlacing your hands on @c$N's@C body you begin to focus your energies. Slowly a strong blue glow glistens and shines across $S skin!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@c$n@C places $s hands on YOUR body. Slowly a strong blue glow glistens and shines across your skin!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@c$n@C places $s hands on @c$N's@C body. Slowly a strong blue glow glistens and shines across $S skin!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      int duration = (char_get_skill(ch, SKILL_HEALGLOW) * 0.1);
-      duration += rand_number(-2, 1);
-      if (duration <= 0)
-        duration = 1;
-      assign_affect(ch, AFF_HEALGLOW, SKILL_HEALGLOW, duration, 0, 0, 0, 0, 0, 0);
-      decCurKI(ch, cost, 0);
-    }
+    act("@CPlacing your hands on @c$N's@C body you begin to focus your energies. Slowly a strong blue glow glistens and shines across $S skin!@n", TRUE, ch, 0, vict, TO_CHAR);
+    act("@c$n@C places $s hands on YOUR body. Slowly a strong blue glow glistens and shines across your skin!@n", TRUE, ch, 0, vict, TO_VICT);
+    act("@c$n@C places $s hands on @c$N's@C body. Slowly a strong blue glow glistens and shines across $S skin!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    int duration = (char_get_skill(ch, SKILL_HEALGLOW) * 0.1);
+    duration += rand_number(-2, 1);
+    if (duration <= 0)
+      duration = 1;
+    assign_affect(ch, AFF_HEALGLOW, SKILL_HEALGLOW, duration, 0, 0, 0, 0, 0, 0);
+    decCurKI(ch, cost, 0);
   }
 }
 
@@ -925,15 +928,14 @@ ACMD(do_metamorph)
     act("@WA dark @Rred@W glow starts to surround @C$n@W, but it fades quickly.@n", TRUE, ch, 0, 0, TO_ROOM);
 
     return;
-  } else {
-    act("'@RDark@W...' An explosion of sanguine aura erupts over the surface of your body, your eyes darkening to a bleeding crimson. The flaring glow emanating from your body pronounces the shadows cast, a darkening umbrage that threatens a malicious promise. Fists clench tightly, muscles bulking as you hiss; You complete the transition, relaxing visibly, '...@RMetamorphosis@W'@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("'@RDark@W...' An explosion of sanguine aura erupts over the surface of @C$n@W's body, $s eyes darkening to a bleeding crimson. The flaring glow emanating from $s body pronounces the shadows cast, a darkening umbrage that threatens a malicious promise. Fists clench tightly, muscles bulking as $e hisses; $e completes the transition, relaxing visibly, '...@RMetamorphosis@W'@n", TRUE, ch, 0, 0, TO_ROOM);
-
-    int duration = char_get_aff_abils_intel(ch) / 12;
-    assign_affect(ch, AFF_METAMORPH, SKILL_METAMORPH, duration, 0, 0, 0, 0, 0, 0);
-    incCurHealthPercent(ch, .6, true);
-    return;
   }
+  act("'@RDark@W...' An explosion of sanguine aura erupts over the surface of your body, your eyes darkening to a bleeding crimson. The flaring glow emanating from your body pronounces the shadows cast, a darkening umbrage that threatens a malicious promise. Fists clench tightly, muscles bulking as you hiss; You complete the transition, relaxing visibly, '...@RMetamorphosis@W'@n", TRUE, ch, 0, 0, TO_CHAR);
+  act("'@RDark@W...' An explosion of sanguine aura erupts over the surface of @C$n@W's body, $s eyes darkening to a bleeding crimson. The flaring glow emanating from $s body pronounces the shadows cast, a darkening umbrage that threatens a malicious promise. Fists clench tightly, muscles bulking as $e hisses; $e completes the transition, relaxing visibly, '...@RMetamorphosis@W'@n", TRUE, ch, 0, 0, TO_ROOM);
+
+  int duration = char_get_aff_abils_intel(ch) / 12;
+  assign_affect(ch, AFF_METAMORPH, SKILL_METAMORPH, duration, 0, 0, 0, 0, 0, 0);
+  incCurHealthPercent(ch, .6, true);
+  return;
 }
 
 ACMD(do_shimmer)
@@ -957,16 +959,20 @@ ACMD(do_shimmer)
   if (strcasecmp(char_get_name(ch), "Anubis")) {
     send_to_char(ch, "You do not even know how to perform that skill!\r\n");
     return;
-  } else if (char_plr_flagged(ch, PLR_PILOTING)) {
+  }
+  if (char_plr_flagged(ch, PLR_PILOTING)) {
     send_to_char(ch, "You are busy piloting a ship!\r\n");
     return;
-  } else if (char_plr_flagged(ch, PLR_HEALT)) {
+  }
+  if (char_plr_flagged(ch, PLR_HEALT)) {
     send_to_char(ch, "You are inside a healing tank!\r\n");
     return;
-  } else if (rroom_get_vnum(char_get_in_room(ch)) >= 19800 && rroom_get_vnum(char_get_in_room(ch)) <= 19899) {
+  }
+  if (rroom_get_vnum(char_get_in_room(ch)) >= 19800 && rroom_get_vnum(char_get_in_room(ch)) <= 19899) {
     send_to_char(ch, "@rYou are in a pocket dimension!@n\r\n");
     return;
-  } else if (!*arg) {
+  }
+  if (!*arg) {
     send_to_char(ch, "Who or where do you want to shimmer to? [target | planet-(planet name) | afterlife]\r\n");
     send_to_char(ch, "Example: shimmer goku\nExample 2: shimmer planet-earth\r\n");
     return;
@@ -1010,16 +1016,14 @@ ACMD(do_shimmer)
         decCurKI(ch, cost, 0);
         char_set_wait(ch, PULSE_2SEC);
         return;
-      } else {
-        send_to_char(ch, "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
-        return;
       }
-    } else {
-      send_to_char(ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
-      decCurKI(ch, cost, 0);
-      char_set_wait(ch, PULSE_2SEC);
+      send_to_char(ch, "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
       return;
     }
+    send_to_char(ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
+    decCurKI(ch, cost, 0);
+    char_set_wait(ch, PULSE_2SEC);
+    return;
   }
 
   reveal_hiding(ch, 0);
@@ -1028,22 +1032,28 @@ ACMD(do_shimmer)
     if (tar == ch) {
       send_to_char(ch, "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
       return;
-    } else if (char_get_grappling(ch) && char_get_grappling(ch) == tar) {
+    }
+    if (char_get_grappling(ch) && char_get_grappling(ch) == tar) {
       send_to_char(ch, "You are already in the same room with them and are grappling with them!\r\n");
       return;
-    } else if (char_get_admlevel(tar) > 0 && char_get_admlevel(ch) < 1) {
+    }
+    if (char_get_admlevel(tar) > 0 && char_get_admlevel(ch) < 1) {
       send_to_char(ch, "That immortal prevents you from reaching them.\r\n");
       return;
-    } else if (rroom_flagged(char_get_in_room(tar), ROOM_NOINSTANT)) {
+    }
+    if (rroom_flagged(char_get_in_room(tar), ROOM_NOINSTANT)) {
       send_to_char(ch, "You can not go there as it is a protected area!\r\n");
       return;
-    } else if (char_get_grappling(ch) && char_aff_flagged(char_get_grappling(ch), AFF_SPIRIT)) {
+    }
+    if (char_get_grappling(ch) && char_aff_flagged(char_get_grappling(ch), AFF_SPIRIT)) {
       send_to_char(ch, "You can not take the dead with you!\r\n");
       return;
-    } else if (char_get_drag(ch) && char_aff_flagged(char_get_drag(ch), AFF_SPIRIT)) {
+    }
+    if (char_get_drag(ch) && char_aff_flagged(char_get_drag(ch), AFF_SPIRIT)) {
       send_to_char(ch, "You can not take the dead with you!\r\n");
       return;
-    } else if (char_get_grappled(ch) && char_aff_flagged(char_get_grappled(ch), AFF_SPIRIT)) {
+    }
+    if (char_get_grappled(ch) && char_aff_flagged(char_get_grappled(ch), AFF_SPIRIT)) {
       send_to_char(ch, "You can not take the dead with you!\r\n");
       return;
     }
@@ -1140,10 +1150,9 @@ ACMD(do_hydromancy)
     if (rroom_sect(char_get_in_room(ch)) != SECT_UNDERWATER) {
       send_to_char(ch, "There is not sufficient water here.\r\n");
       return;
-    } else {
-      send_to_char(ch, "There is too much water here to control!\r\n");
-      return;
     }
+    send_to_char(ch, "There is too much water here to control!\r\n");
+    return;
   }
 
   if (cost <= 0)
@@ -1411,7 +1420,8 @@ ACMD(do_hayasa)
   if ((getCurKI(ch)) < cost) {
     send_to_char(ch, "You do not have enough ki.\r\n");
     return;
-  } else if (skill < prob) {
+  }
+  if (skill < prob) {
     decCurKI(ch, cost, 0);
     act("@CYou close your eyes for a brief moment and focus your ki around your body as a soft blue glow. The glow disappears though as you fail to maintain the effect...@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@c$n@C closes $s eyes for a brief moment and a soft blue glow begins to form around $s body. The glow disappears a second later though and $e frowns.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -1472,13 +1482,16 @@ ACMD(do_ensnare)
     if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
       send_to_char(ch, "Who are you trying to target with ensnare?\r\n");
       return;
-    } else if (char_aff_flagged(vict, AFF_ENSNARED)) {
+    }
+    if (char_aff_flagged(vict, AFF_ENSNARED)) {
       send_to_char(ch, "They are already ensnared!\r\n");
       return;
-    } else if (!char_has_arms(vict)) {
+    }
+    if (!char_has_arms(vict)) {
       send_to_char(ch, "They don't have arms to ensnare!\r\n");
       return;
-    } else if (prob <= perc) {
+    }
+    if (prob <= perc) {
       act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Unfortunately you miss and lose the bundle...@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at YOU! Fortunately $e misses and loses the bundle...@n", TRUE, ch, 0, vict, TO_VICT);
       act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Fortunately $e misses and loses the bundle...@n", TRUE, ch, 0, vict, TO_NOTVICT);
@@ -1632,14 +1645,13 @@ ACMD(do_fireshield)
     improve_skill(ch, SKILL_FIRESHIELD, 0);
     decCurKI(ch, cost, 0);
     return;
-  } else {
-    act("@WYou hold your hands up in front of you on either side and try to summon defensive @rf@Rl@Ya@rm@Re@ys@W to cover your body. The ki you have gathered pours out of your body and creates intense black @rf@Rl@Ya@rm@Re@Ys@W that cover your entire body in a protective layer!", TRUE, ch, 0, 0, TO_CHAR);
-    act("@c$n@W holds $s hands up in front of $m on either side and tries to summon defensive @rf@Rl@Ya@rm@Re@ys@W to cover $s body. The ki $e has gathered pours out of $s body and creates intense black @rf@Rl@Ya@rm@Re@Ys@W that cover $s entire body in a protective layer!", TRUE, ch, 0, 0, TO_ROOM);
-    improve_skill(ch, SKILL_FIRESHIELD, 0);
-    decCurKI(ch, cost, 0);
-    char_aff_set(ch, AFF_FIRESHIELD, true);
-    return;
   }
+  act("@WYou hold your hands up in front of you on either side and try to summon defensive @rf@Rl@Ya@rm@Re@ys@W to cover your body. The ki you have gathered pours out of your body and creates intense black @rf@Rl@Ya@rm@Re@Ys@W that cover your entire body in a protective layer!", TRUE, ch, 0, 0, TO_CHAR);
+  act("@c$n@W holds $s hands up in front of $m on either side and tries to summon defensive @rf@Rl@Ya@rm@Re@ys@W to cover $s body. The ki $e has gathered pours out of $s body and creates intense black @rf@Rl@Ya@rm@Re@Ys@W that cover $s entire body in a protective layer!", TRUE, ch, 0, 0, TO_ROOM);
+  improve_skill(ch, SKILL_FIRESHIELD, 0);
+  decCurKI(ch, cost, 0);
+  char_aff_set(ch, AFF_FIRESHIELD, true);
+  return;
 }
 
 /* This allows a player to warp from one ocean/sea to another. */
@@ -1706,19 +1718,24 @@ ACMD(do_warppool)
   if (!strcasecmp("earth", arg) && rroom_flagged(char_get_in_room(ch), ROOM_EARTH)) {
     send_to_char(ch, "You are already on Earth!\r\n");
     return;
-  } else if (!strcasecmp("frigid", arg) && rroom_flagged(char_get_in_room(ch), ROOM_FRIGID)) {
+  }
+  if (!strcasecmp("frigid", arg) && rroom_flagged(char_get_in_room(ch), ROOM_FRIGID)) {
     send_to_char(ch, "You are already on Frigid!\r\n");
     return;
-  } else if (!strcasecmp("kanassa", arg) && rroom_flagged(char_get_in_room(ch), ROOM_KANASSA)) {
+  }
+  if (!strcasecmp("kanassa", arg) && rroom_flagged(char_get_in_room(ch), ROOM_KANASSA)) {
     send_to_char(ch, "You are already on Kanasssa!\r\n");
     return;
-  } else if (!strcasecmp("namek", arg) && rroom_flagged(char_get_in_room(ch), ROOM_NAMEK)) {
+  }
+  if (!strcasecmp("namek", arg) && rroom_flagged(char_get_in_room(ch), ROOM_NAMEK)) {
     send_to_char(ch, "You are already on Namek!\r\n");
     return;
-  } else if (!strcasecmp("aether", arg) && rroom_flagged(char_get_in_room(ch), ROOM_AETHER)) {
+  }
+  if (!strcasecmp("aether", arg) && rroom_flagged(char_get_in_room(ch), ROOM_AETHER)) {
     send_to_char(ch, "You are already on Aether!\r\n");
     return;
-  } else if (!strcasecmp("earth", arg)) {
+  }
+  if (!strcasecmp("earth", arg)) {
     if (prob > perc) {
       act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -1887,73 +1904,73 @@ ACMD(do_obstruct)
   if (!char_get_exit(ch, dir)) {
     send_to_char(ch, "That direction does not exist here.\r\n");
     return;
-  } else if (skill < prob) {
+  }
+  if (skill < prob) {
     act("@CYou channel your ki and start to create a wall of water, but lose your concentration and the water promptly disappears.@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@c$n@C channels $s ki and starts to create a wall of water, but loses $s concentration and the water promptly disappears.@n", TRUE, ch, 0, 0, TO_ROOM);
     decCurKI(ch, cost, 0);
     improve_skill(ch, SKILL_HYOGA_KABE, 0);
     return;
-  } else {
-    struct obj_data *obj;
-    int newroom = world[ch->in_room].dir_option[dir]->to_room;
+  }
+  struct obj_data *obj;
+  int newroom = world[ch->in_room].dir_option[dir]->to_room;
 
-    if (rroom_flagged(newroom, ROOM_PEACEFUL)) {
-      send_to_char(ch, "You can not block off a peaceful area.\r\n");
-      return;
-    }
-
-    for (obj = world[newroom].contents; obj; obj = obj->next_content) {
-      if (obj_get_vnum(obj) == 79) {
-        if (obj_get_cost(obj) == dir2) {
-          if (skill < prob) {
-            act("@CYou place your hands on the glacial wall and concentrate. You fail to undo the composition of the wall!@n", TRUE, ch, 0, 0, TO_CHAR);
-            act("@c$n@C places $s hands on the glacial wall and concentrates. Nothing happens...@n", TRUE, ch, 0, 0, TO_ROOM);
-            decCurKI(ch, cost / 2, 0);
-          } else {
-            act("@CYou place your hands on the glacial wall and concentrate. You unfreeze the wall and evaporate the water effortlessly.@n", TRUE, ch, 0, 0, TO_CHAR);
-            act("@c$n@C places $s hands on the glacial wall and concentrates. Suddenly the wall melts and then evaporates!@n", TRUE, ch, 0, 0, TO_ROOM);
-            decCurKI(ch, cost / 2, 0);
-            extract_obj(obj);
-          }
-          return;
-        }
-      }
-    }
-
-    struct obj_data *obj2, *obj3;
-
-    obj2 = read_object(79, VIRTUAL);
-    obj_to_room(obj2, newroom);
-    obj3 = read_object(79, VIRTUAL);
-    obj_to_room(obj3, char_get_in_room(ch));
-
-    int64_t strength = (((char_get_aff_abils_intel(ch) * skill) * char_get_aff_abils_wis(ch)) * 20) + (getMaxKI(ch) * 0.001);
-
-    if (strength > getEffMaxPL(ch) * 20) {
-      strength = getEffMaxPL(ch) + (strength / 20);
-    } else if (strength > getEffMaxPL(ch) * 15) {
-      strength = getEffMaxPL(ch) + (strength / 15);
-    } else if (strength > getEffMaxPL(ch) * 10) {
-      strength = getEffMaxPL(ch) + (strength / 10);
-    } else if (strength > getEffMaxPL(ch) * 5) {
-      strength = getEffMaxPL(ch) + (strength / 5);
-    } else if (strength > getEffMaxPL(ch) * 2) {
-      strength = getEffMaxPL(ch) + (strength / 2);
-    }
-
-    obj_set_cost(obj2, dir2);
-    obj_set_weight(obj2, strength);
-    obj_set_cost(obj3, dir);
-    obj_set_weight(obj3, strength);
-    obj_set_fellow_wall(obj2, obj3);
-    obj_set_fellow_wall(obj3, obj2);
-    act("@CYou concentrate and channel your ki. A wall of water starts to form in such a way to block off the direction of your choice. As the wall becomes complete it freezes solid by your will!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@c$n@C concentrates and channels $s ki. A wall of water starts to form in such a way to block off one of the directions of this area. As the wall becomes complete it freezes solid by @c$n's@C will!@n", TRUE, ch, 0, 0, TO_ROOM);
-    send_to_room(newroom, "@cA wall of water forms slowly upward blocking off the %s direction. This wall of water then freezes instantly once it stops growing.@n\r\n", dirs[dir2]);
-    improve_skill(ch, SKILL_HYOGA_KABE, 0);
-    decCurKI(ch, cost, 0);
+  if (rroom_flagged(newroom, ROOM_PEACEFUL)) {
+    send_to_char(ch, "You can not block off a peaceful area.\r\n");
     return;
   }
+
+  for (obj = world[newroom].contents; obj; obj = obj->next_content) {
+    if (obj_get_vnum(obj) == 79) {
+      if (obj_get_cost(obj) == dir2) {
+        if (skill < prob) {
+          act("@CYou place your hands on the glacial wall and concentrate. You fail to undo the composition of the wall!@n", TRUE, ch, 0, 0, TO_CHAR);
+          act("@c$n@C places $s hands on the glacial wall and concentrates. Nothing happens...@n", TRUE, ch, 0, 0, TO_ROOM);
+          decCurKI(ch, cost / 2, 0);
+        } else {
+          act("@CYou place your hands on the glacial wall and concentrate. You unfreeze the wall and evaporate the water effortlessly.@n", TRUE, ch, 0, 0, TO_CHAR);
+          act("@c$n@C places $s hands on the glacial wall and concentrates. Suddenly the wall melts and then evaporates!@n", TRUE, ch, 0, 0, TO_ROOM);
+          decCurKI(ch, cost / 2, 0);
+          extract_obj(obj);
+        }
+        return;
+      }
+    }
+  }
+
+  struct obj_data *obj2, *obj3;
+
+  obj2 = read_object(79, VIRTUAL);
+  obj_to_room(obj2, newroom);
+  obj3 = read_object(79, VIRTUAL);
+  obj_to_room(obj3, char_get_in_room(ch));
+
+  int64_t strength = (((char_get_aff_abils_intel(ch) * skill) * char_get_aff_abils_wis(ch)) * 20) + (getMaxKI(ch) * 0.001);
+
+  if (strength > getEffMaxPL(ch) * 20) {
+    strength = getEffMaxPL(ch) + (strength / 20);
+  } else if (strength > getEffMaxPL(ch) * 15) {
+    strength = getEffMaxPL(ch) + (strength / 15);
+  } else if (strength > getEffMaxPL(ch) * 10) {
+    strength = getEffMaxPL(ch) + (strength / 10);
+  } else if (strength > getEffMaxPL(ch) * 5) {
+    strength = getEffMaxPL(ch) + (strength / 5);
+  } else if (strength > getEffMaxPL(ch) * 2) {
+    strength = getEffMaxPL(ch) + (strength / 2);
+  }
+
+  obj_set_cost(obj2, dir2);
+  obj_set_weight(obj2, strength);
+  obj_set_cost(obj3, dir);
+  obj_set_weight(obj3, strength);
+  obj_set_fellow_wall(obj2, obj3);
+  obj_set_fellow_wall(obj3, obj2);
+  act("@CYou concentrate and channel your ki. A wall of water starts to form in such a way to block off the direction of your choice. As the wall becomes complete it freezes solid by your will!@n", TRUE, ch, 0, 0, TO_CHAR);
+  act("@c$n@C concentrates and channels $s ki. A wall of water starts to form in such a way to block off one of the directions of this area. As the wall becomes complete it freezes solid by @c$n's@C will!@n", TRUE, ch, 0, 0, TO_ROOM);
+  send_to_room(newroom, "@cA wall of water forms slowly upward blocking off the %s direction. This wall of water then freezes instantly once it stops growing.@n\r\n", dirs[dir2]);
+  improve_skill(ch, SKILL_HYOGA_KABE, 0);
+  decCurKI(ch, cost, 0);
+  return;
 }
 
 /* This allows a player to flood a room. */
@@ -1976,29 +1993,32 @@ ACMD(do_dimizu)
     rroom_set_geffect(char_get_in_room(ch), 0);
     char_set_wait(ch, PULSE_1SEC);
     return;
-  } else if (rroom_sect(char_get_in_room(ch)) == SECT_UNDERWATER) {
+  }
+  if (rroom_sect(char_get_in_room(ch)) == SECT_UNDERWATER) {
     send_to_char(ch, "The area is already underwater!\r\n");
     return;
-  } else if (rroom_sect(char_get_in_room(ch)) == SECT_SPACE || rroom_flagged(char_get_in_room(ch), ROOM_SPACE)) {
+  }
+  if (rroom_sect(char_get_in_room(ch)) == SECT_SPACE || rroom_flagged(char_get_in_room(ch), ROOM_SPACE)) {
     send_to_char(ch, "You can't flood space!\r\n");
     return;
-  } else if ((getCurKI(ch)) < getMaxKI(ch) / 12) {
+  }
+  if ((getCurKI(ch)) < getMaxKI(ch) / 12) {
     send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
     return;
-  } else if (skill < prob) {
+  }
+  if (skill < prob) {
     act("@CYou gather your ki and concentrate on creating water from it. Water begins to flow upward around the entire area, but you lose your concentration and it all goes flooding away!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@c$n@C gathers $s ki and concentrates on creating water from it. Water begins to flow upward around the entire area, but $e loses $s concentration and all the water goes flooding away!@n", TRUE, ch, 0, 0, TO_ROOM);
     decCurKI(ch, getMaxKI(ch) / 12, 0);
     improve_skill(ch, SKILL_DIMIZU, 0);
     return;
-  } else {
-    act("@CYou gather your ki and concentrate on creating water from it. Water begins to flow upward around the entire area. You form the water into a perfect cube with barely any ripples in its walls. It will maintain this form for a while.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@c$n@C gathers $s ki and concentrates on creating water from it. Water begins to flow upward around the entire area. @c$n@C forms the water into a perfect cube with barely any ripples in its walls. It appears the water will maintain this form for a while.@n", TRUE, ch, 0, 0, TO_ROOM);
-    decCurKI(ch, getMaxKI(ch) / 12, 0);
-    rroom_set_geffect(char_get_in_room(ch), -3);
-    improve_skill(ch, SKILL_DIMIZU, 0);
-    return;
   }
+  act("@CYou gather your ki and concentrate on creating water from it. Water begins to flow upward around the entire area. You form the water into a perfect cube with barely any ripples in its walls. It will maintain this form for a while.@n", TRUE, ch, 0, 0, TO_CHAR);
+  act("@c$n@C gathers $s ki and concentrates on creating water from it. Water begins to flow upward around the entire area. @c$n@C forms the water into a perfect cube with barely any ripples in its walls. It appears the water will maintain this form for a while.@n", TRUE, ch, 0, 0, TO_ROOM);
+  decCurKI(ch, getMaxKI(ch) / 12, 0);
+  rroom_set_geffect(char_get_in_room(ch), -3);
+  improve_skill(ch, SKILL_DIMIZU, 0);
+  return;
 }
 
 /* Allows a player to place a "beacon" on a room they want to return to if
@@ -2012,12 +2032,12 @@ ACMD(do_beacon)
   if (char_aff_flagged(ch, AFF_SPIRIT)) {
     send_to_char(ch, "You are dead. You can not stake out a room to return to upon revival.\r\n");
     return;
-  } else if (rroom_get_vnum(char_get_in_room(ch)) >= 0 && rroom_get_vnum(char_get_in_room(ch)) <= 14) {
+  }
+  if (rroom_get_vnum(char_get_in_room(ch)) >= 0 && rroom_get_vnum(char_get_in_room(ch)) <= 14) {
     send_to_char(ch, "You can not stake out an immortal room to be revived in.\r\n");
     return;
-  } else {
-    send_to_char(ch, "You stake out the room you are in and will return to it if you die and are revived.\r\n");
-    char_set_droom(ch, rroom_get_vnum(char_get_in_room(ch)));
-    return;
   }
+  send_to_char(ch, "You stake out the room you are in and will return to it if you die and are revived.\r\n");
+  char_set_droom(ch, rroom_get_vnum(char_get_in_room(ch)));
+  return;
 }

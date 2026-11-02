@@ -70,37 +70,38 @@ ACMD(do_restring)
     if (char_get_gold(ch) < pay) {
       send_to_char(ch, "You need at least 5,000 zenni to initiate an equipment restring.\r\n");
       return;
-    } else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+    }
+    if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
       send_to_char(ch, "You don't have a that equipment to restring in your inventory.\r\n");
       send_to_char(ch, "Syntax: restring (obj name)\r\n");
       return;
-    } else if (obj_extra_flagged(obj, ITEM_CUSTOM)) {
+    }
+    if (obj_extra_flagged(obj, ITEM_CUSTOM)) {
       send_to_char(ch, "You can not restring a custom piece. Why? Because you already restrung it you dummy.\r\n");
       return;
-    } else {
-      desc_set_connected(ch->desc, CON_POBJ);
-      char thename[MAX_INPUT_LENGTH], theshort[MAX_INPUT_LENGTH], thelong[MAX_INPUT_LENGTH];
-
-      *thename  = '\0';
-      *theshort = '\0';
-      *thelong  = '\0';
-
-      snprintf(thename, sizeof(thename), "%s", obj->name);
-      snprintf(theshort, sizeof(theshort), "%s", obj->short_description);
-      snprintf(thelong, sizeof(thelong), "%s", obj->description);
-
-      ch->desc->obj_name   = strdup(thename);
-      ch->desc->obj_was    = strdup(theshort);
-      ch->desc->obj_short  = strdup(theshort);
-      ch->desc->obj_long   = strdup(thelong);
-      ch->desc->obj_point  = obj;
-      ch->desc->obj_type   = 1;
-      ch->desc->obj_weapon = 0;
-      disp_restring_menu(ch->desc);
-      ch->desc->obj_editflag = EDIT_RESTRING;
-      ch->desc->obj_editval  = EDIT_RESTRING_MAIN;
-      return;
     }
+    desc_set_connected(ch->desc, CON_POBJ);
+    char thename[MAX_INPUT_LENGTH], theshort[MAX_INPUT_LENGTH], thelong[MAX_INPUT_LENGTH];
+
+    *thename  = '\0';
+    *theshort = '\0';
+    *thelong  = '\0';
+
+    snprintf(thename, sizeof(thename), "%s", obj->name);
+    snprintf(theshort, sizeof(theshort), "%s", obj->short_description);
+    snprintf(thelong, sizeof(thelong), "%s", obj->description);
+
+    ch->desc->obj_name   = strdup(thename);
+    ch->desc->obj_was    = strdup(theshort);
+    ch->desc->obj_short  = strdup(theshort);
+    ch->desc->obj_long   = strdup(thelong);
+    ch->desc->obj_point  = obj;
+    ch->desc->obj_type   = 1;
+    ch->desc->obj_weapon = 0;
+    disp_restring_menu(ch->desc);
+    ch->desc->obj_editflag = EDIT_RESTRING;
+    ch->desc->obj_editval  = EDIT_RESTRING_MAIN;
+    return;
   }
 }
 
@@ -123,62 +124,71 @@ ACMD(do_fish)
     if (char_plr_flagged(ch, PLR_FISHING)) {
       send_to_char(ch, "You are already fishing! Syntax: fish stop\r\n");
       return;
-    } else if (!rroom_flagged(char_get_in_room(ch), ROOM_FISHING)) {
+    }
+    if (!rroom_flagged(char_get_in_room(ch), ROOM_FISHING)) {
       send_to_char(ch, "This is not an area you can fish at.\r\n");
       return;
-    } else if (char_aff_flagged(ch, AFF_FLYING)) {
+    }
+    if (char_aff_flagged(ch, AFF_FLYING)) {
       send_to_char(ch, "You can't fish while flying.\r\n");
       return;
-    } else if (char_get_fighting(ch)) {
+    }
+    if (char_get_fighting(ch)) {
       send_to_char(ch, "You can't fish while fighting!\r\n");
       return;
-    } else if (!char_get_equipment(ch, WEAR_WIELD2)) {
+    }
+    if (!char_get_equipment(ch, WEAR_WIELD2)) {
       send_to_char(ch, "You are not holding a fishing pole.\r\n");
       return;
-    } else {
-      struct obj_data *pole = char_get_equipment(ch, WEAR_WIELD2);
-      if (obj_get_type_flag(pole) != ITEM_FISHPOLE) {
-        send_to_char(ch, "You do not have a fishing pole in your hand!\r\n");
-        return;
-      } else if (obj_get_value(pole, 0) == 0) {
-        send_to_char(ch, "There is no bait on your line!\r\n");
-        return;
-      }
-      reveal_hiding(ch, 0);
-      act("@CYou pull your arm back and then spring it forward, casting the baited line. A moment later there is a splash as the hook enters the water.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@c$n@C pulls $s arm back and then springs it foward, casting the line of $s fishing pole into the water.@n", TRUE, ch, 0, 0, TO_ROOM);
-      char_set_accuracy_mod(ch, rand_number(30, 80));
-      char_plr_set(ch, PLR_FISHING, true);
-      send_to_char(ch, "@D[@wDistance@D: @Y%d@D]@n\r\n", char_get_accuracy_mod(ch));
+    }
+    struct obj_data *pole = char_get_equipment(ch, WEAR_WIELD2);
+    if (obj_get_type_flag(pole) != ITEM_FISHPOLE) {
+      send_to_char(ch, "You do not have a fishing pole in your hand!\r\n");
       return;
     }
-  } else if (!strcasecmp(arg, "hook")) {
+    if (obj_get_value(pole, 0) == 0) {
+      send_to_char(ch, "There is no bait on your line!\r\n");
+      return;
+    }
+    reveal_hiding(ch, 0);
+    act("@CYou pull your arm back and then spring it forward, casting the baited line. A moment later there is a splash as the hook enters the water.@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@c$n@C pulls $s arm back and then springs it foward, casting the line of $s fishing pole into the water.@n", TRUE, ch, 0, 0, TO_ROOM);
+    char_set_accuracy_mod(ch, rand_number(30, 80));
+    char_plr_set(ch, PLR_FISHING, true);
+    send_to_char(ch, "@D[@wDistance@D: @Y%d@D]@n\r\n", char_get_accuracy_mod(ch));
+    return;
+  }
+  if (!strcasecmp(arg, "hook")) {
     if (!char_plr_flagged(ch, PLR_FISHING)) {
       send_to_char(ch, "You are not even fishing!\r\n");
       return;
-    } else if (char_get_fishstate(ch) == FISH_NOFISH) {
+    }
+    if (char_get_fishstate(ch) == FISH_NOFISH) {
       send_to_char(ch, "You do not have a fish biting on your line.\r\n");
       return;
-    } else if (char_get_fishstate(ch) == FISH_REELING) {
+    }
+    if (char_get_fishstate(ch) == FISH_REELING) {
       send_to_char(ch, "You are already trying to reel the fish in!\r\n");
       return;
-    } else if (char_get_fishstate(ch) == FISH_HOOKED) {
+    }
+    if (char_get_fishstate(ch) == FISH_HOOKED) {
       send_to_char(ch, "You already have the fish hooked! Reel it in!\r\n");
       return;
-    } else if (axion_dice(-18) > char_get_accuracy(ch)) {
+    }
+    if (axion_dice(-18) > char_get_accuracy(ch)) {
       reveal_hiding(ch, 0);
       act("@CYou pull hard but the fish spits the hook out a second before you pull! You return to waiting for a bite...@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@c$n@C pulls hard on $s fishing line, but a moment later $e frowns and returns to fishing.@n", TRUE, ch, 0, 0, TO_ROOM);
       char_set_fishstate(ch, FISH_NOFISH);
       return;
-    } else {
-      reveal_hiding(ch, 0);
-      act("@CYou pull hard on your line and feel that you have managed to hook the fish and start reeling it in!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@c$n@C pulls hard on $s fishing line and starts to struggle with the fish on the other end!@n", TRUE, ch, 0, 0, TO_ROOM);
-      char_set_fishstate(ch, FISH_REELING);
-      return;
     }
-  } else if (!strcasecmp(arg, "apply")) {
+    reveal_hiding(ch, 0);
+    act("@CYou pull hard on your line and feel that you have managed to hook the fish and start reeling it in!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@c$n@C pulls hard on $s fishing line and starts to struggle with the fish on the other end!@n", TRUE, ch, 0, 0, TO_ROOM);
+    char_set_fishstate(ch, FISH_REELING);
+    return;
+  }
+  if (!strcasecmp(arg, "apply")) {
     if (!char_get_equipment(ch, WEAR_WIELD2)) {
       send_to_char(ch, "You are not holding a fishing pole.\r\n");
       return;
@@ -187,7 +197,8 @@ ACMD(do_fish)
       if (obj_get_type_flag(pole) != ITEM_FISHPOLE) {
         send_to_char(ch, "You do not have a fishing pole in your hand!\r\n");
         return;
-      } else if (obj_get_value(pole, 0) != 0) {
+      }
+      if (obj_get_value(pole, 0) != 0) {
         send_to_char(ch, "Your fishing pole already has bait on its hook.\r\n");
         return;
       } else {
@@ -200,7 +211,8 @@ ACMD(do_fish)
         if (!(bait = get_obj_in_list_vis(ch, arg2, NULL, ch->carrying))) {
           send_to_char(ch, "You don't have that bait.\r\n");
           return;
-        } else if (obj_get_type_flag(bait) != ITEM_FISHBAIT) {
+        }
+        if (obj_get_type_flag(bait) != ITEM_FISHBAIT) {
           send_to_char(ch, "That isn't fishing bait!\r\n");
           return;
         } else {
@@ -217,15 +229,14 @@ ACMD(do_fish)
     if (!char_plr_flagged(ch, PLR_FISHING)) {
       send_to_char(ch, "You are not even fishing!\r\n");
       return;
-    } else {
-      reveal_hiding(ch, 0);
-      act("@CYou reel in your line and stop fishing.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@c$n@C reels in $s fishing line and stops fishing.@n", TRUE, ch, 0, 0, TO_ROOM);
-      char_plr_set(ch, PLR_FISHING, false);
-      char_set_fishstate(ch, FISH_NOFISH);
-      char_set_accuracy_mod(ch, 0);
-      return;
     }
+    reveal_hiding(ch, 0);
+    act("@CYou reel in your line and stop fishing.@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@c$n@C reels in $s fishing line and stops fishing.@n", TRUE, ch, 0, 0, TO_ROOM);
+    char_plr_set(ch, PLR_FISHING, false);
+    char_set_fishstate(ch, FISH_NOFISH);
+    char_set_accuracy_mod(ch, 0);
+    return;
   } else {
     send_to_char(ch, "Syntax: fish ( cast | hook | reel | apply | stop )\r\n");
     return;
@@ -508,105 +519,106 @@ ACMD(do_extract)
       if (obj_get_vnum(obj) != 3424) {
         send_to_char(ch, "That is not an ink bottle!\r\n");
         return;
-      } else if (obj_get_vnum(obj2) != 3424) {
+      }
+      if (obj_get_vnum(obj2) != 3424) {
         send_to_char(ch, "That is not an ink bottle!\r\n");
         return;
-      } else if (obj_get_value(obj, 6) <= 0) {
+      }
+      if (obj_get_value(obj, 6) <= 0) {
         send_to_char(ch, "There isn't any ink in the first bottle!\r\n");
         return;
-      } else if (obj_get_value(obj2, 6) <= 0) {
+      }
+      if (obj_get_value(obj2, 6) <= 0) {
         send_to_char(ch, "There isn't any ink in the second bottle!\r\n");
         return;
-      } else {
-        if (obj_get_value(obj, 6) >= obj_get_value(obj2, 6)) {
-          obj_set_value(obj, 6, obj_get_value(obj, 6) + (obj_get_value(obj2, 6)));
-          if (obj_get_value(obj, 6) > 24) {
-            obj_set_value(obj, 6, 24);
-          }
-          send_to_char(ch, "You combine the ink of the two bottles into one bottle, and discard the leftovers.\r\n");
-          extract_obj(obj2);
-        } else if (obj_get_value(obj2, 6) > obj_get_value(obj, 6)) {
-          obj_set_value(obj2, 6, obj_get_value(obj2, 6) + (obj_get_value(obj, 6)));
-          if (obj_get_value(obj2, 6) > 24) {
-            obj_set_value(obj2, 6, 24);
-          }
-          send_to_char(ch, "You combine the ink of the two bottles into one bottle, and discard the leftovers.\r\n");
-          extract_obj(obj);
-        }
-        return;
       }
+      if (obj_get_value(obj, 6) >= obj_get_value(obj2, 6)) {
+        obj_set_value(obj, 6, obj_get_value(obj, 6) + (obj_get_value(obj2, 6)));
+        if (obj_get_value(obj, 6) > 24) {
+          obj_set_value(obj, 6, 24);
+        }
+        send_to_char(ch, "You combine the ink of the two bottles into one bottle, and discard the leftovers.\r\n");
+        extract_obj(obj2);
+      } else if (obj_get_value(obj2, 6) > obj_get_value(obj, 6)) {
+        obj_set_value(obj2, 6, obj_get_value(obj2, 6) + (obj_get_value(obj, 6)));
+        if (obj_get_value(obj2, 6) > 24) {
+          obj_set_value(obj2, 6, 24);
+        }
+        send_to_char(ch, "You combine the ink of the two bottles into one bottle, and discard the leftovers.\r\n");
+        extract_obj(obj);
+      }
+      return;
     }
   }
 
   if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
     send_to_char(ch, "You do not have that item.\r\n");
     return;
-  } else {
-    if (obj_get_vnum(obj) == 3425) {
-      if (obj_get_value(obj, VAL_MAXMATURE) != 0 && obj_get_value(obj, VAL_MATURITY) < obj_get_value(obj, VAL_MAXMATURE)) {
-        send_to_char(ch, "It's not mature enough to extract from!\r\n");
-        return;
-      }
-      struct obj_data *bottle = NULL, *next_obj, *item;
-      int found               = FALSE;
-
-      for (item = ch->carrying; item; item = next_obj) {
-        next_obj = item->next_content;
-        if (obj_get_vnum(item) == 3423) {
-          bottle = item;
-          found  = TRUE;
-        }
-      }
-
-      int64_t cost = ((getMaxKI(ch) * 0.35) + 500);
-
-      if (found == FALSE) {
-        send_to_char(ch, "You do not have an empty bottle to put the extracted ink in.\r\n");
-        return;
-      }
-
-      int64_t extra = 0;
-
-      if (obj_get_value(bottle, 6) + 4 >= 24)
-        extra = getMaxKI(ch) * 0.5;
-
-      cost += extra;
-
-      if ((getCurKI(ch)) < cost) {
-        send_to_char(ch, "You do not have enough ki! @D[@rNeeded@D: @R%s@D]@n\r\n", add_commas(cost));
-        return;
-      } else if (skill < chance) {
-        decCurKI(ch, cost, 0);
-        act("@WWith your ki flowing carefully into your hands you take a hold of the @G$p@W and begin to strip it of its leaves. Once it has been stripped you go to squeeze the ink carefully from the leaves into the bottle, but unfortunately the ink explodes into a mess instead!@n", TRUE, ch, obj, 0, TO_CHAR);
-        act("@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze. A nasty explosion of a mess is all that follows!@n", TRUE, ch, obj, 0, TO_ROOM);
-        improve_skill(ch, SKILL_EXTRACT, 0);
-        extract_obj(obj);
-        char_set_wait(ch, PULSE_3SEC);
-        return;
-      } else {
-        decCurKI(ch, cost, 0);
-        act("@WWith your ki flowing carefully into your hands you take a hold of the @G$p@W and begin to strip it of its leaves. Once it has been stripped you go to squeeze the ink carefully from the leaves into the bottle, and manage to get every last drop of ink into it.@n", TRUE, ch, obj, 0, TO_CHAR);
-        act("@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze ink carefully from the leaves into a bottle.@n", TRUE, ch, obj, 0, TO_ROOM);
-        extract_obj(obj);
-        obj_set_value(bottle, 6, obj_get_value(bottle, 6) + (rand_number(4, 6)));
-        if (obj_get_value(bottle, 6) >= 24) {
-          struct obj_data *filled = read_object(3424, VIRTUAL);
-          extract_obj(bottle);
-          obj_set_value(filled, 6, 24);
-          obj_to_char(filled, ch);
-          decCurKI(ch, 0, 0);
-          act("@GAs the last of the ink fills the bottle you infuse a final burst of ki into the bottle.@n", TRUE, ch, filled, 0, TO_CHAR);
-          act("@GAs the last of the ink fills the bottle @g$n@G infuses a final burst of ki into the bottle.@n ", TRUE, ch, filled, 0, TO_ROOM);
-        } else {
-          send_to_char(ch, "You will need to fill the bottle before giving it a final infusion of ki to complete the process.\r\n");
-        }
-        improve_skill(ch, SKILL_EXTRACT, 0);
-        char_set_wait(ch, PULSE_3SEC);
-      }
-    } else {
-      send_to_char(ch, "That is not something you can extract from.\r\n");
+  }
+  if (obj_get_vnum(obj) == 3425) {
+    if (obj_get_value(obj, VAL_MAXMATURE) != 0 && obj_get_value(obj, VAL_MATURITY) < obj_get_value(obj, VAL_MAXMATURE)) {
+      send_to_char(ch, "It's not mature enough to extract from!\r\n");
       return;
     }
+    struct obj_data *bottle = NULL, *next_obj, *item;
+    int found               = FALSE;
+
+    for (item = ch->carrying; item; item = next_obj) {
+      next_obj = item->next_content;
+      if (obj_get_vnum(item) == 3423) {
+        bottle = item;
+        found  = TRUE;
+      }
+    }
+
+    int64_t cost = ((getMaxKI(ch) * 0.35) + 500);
+
+    if (found == FALSE) {
+      send_to_char(ch, "You do not have an empty bottle to put the extracted ink in.\r\n");
+      return;
+    }
+
+    int64_t extra = 0;
+
+    if (obj_get_value(bottle, 6) + 4 >= 24)
+      extra = getMaxKI(ch) * 0.5;
+
+    cost += extra;
+
+    if ((getCurKI(ch)) < cost) {
+      send_to_char(ch, "You do not have enough ki! @D[@rNeeded@D: @R%s@D]@n\r\n", add_commas(cost));
+      return;
+    }
+    if (skill < chance) {
+      decCurKI(ch, cost, 0);
+      act("@WWith your ki flowing carefully into your hands you take a hold of the @G$p@W and begin to strip it of its leaves. Once it has been stripped you go to squeeze the ink carefully from the leaves into the bottle, but unfortunately the ink explodes into a mess instead!@n", TRUE, ch, obj, 0, TO_CHAR);
+      act("@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze. A nasty explosion of a mess is all that follows!@n", TRUE, ch, obj, 0, TO_ROOM);
+      improve_skill(ch, SKILL_EXTRACT, 0);
+      extract_obj(obj);
+      char_set_wait(ch, PULSE_3SEC);
+      return;
+    }
+    decCurKI(ch, cost, 0);
+    act("@WWith your ki flowing carefully into your hands you take a hold of the @G$p@W and begin to strip it of its leaves. Once it has been stripped you go to squeeze the ink carefully from the leaves into the bottle, and manage to get every last drop of ink into it.@n", TRUE, ch, obj, 0, TO_CHAR);
+    act("@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze ink carefully from the leaves into a bottle.@n", TRUE, ch, obj, 0, TO_ROOM);
+    extract_obj(obj);
+    obj_set_value(bottle, 6, obj_get_value(bottle, 6) + (rand_number(4, 6)));
+    if (obj_get_value(bottle, 6) >= 24) {
+      struct obj_data *filled = read_object(3424, VIRTUAL);
+      extract_obj(bottle);
+      obj_set_value(filled, 6, 24);
+      obj_to_char(filled, ch);
+      decCurKI(ch, 0, 0);
+      act("@GAs the last of the ink fills the bottle you infuse a final burst of ki into the bottle.@n", TRUE, ch, filled, 0, TO_CHAR);
+      act("@GAs the last of the ink fills the bottle @g$n@G infuses a final burst of ki into the bottle.@n ", TRUE, ch, filled, 0, TO_ROOM);
+    } else {
+      send_to_char(ch, "You will need to fill the bottle before giving it a final infusion of ki to complete the process.\r\n");
+    }
+    improve_skill(ch, SKILL_EXTRACT, 0);
+    char_set_wait(ch, PULSE_3SEC);
+  } else {
+    send_to_char(ch, "That is not something you can extract from.\r\n");
+    return;
   }
 }
 
@@ -659,7 +671,8 @@ ACMD(do_runic)
   if (found == FALSE) {
     send_to_char(ch, "You do not have a bottle with enough ink in it.\r\n");
     return;
-  } else if (brush == FALSE) {
+  }
+  if (brush == FALSE) {
     send_to_char(ch, "You do not have a brush!\r\n");
     return;
   }
@@ -677,10 +690,12 @@ ACMD(do_runic)
   if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
     send_to_char(ch, "You can't seem to find that person.\r\n");
     return;
-  } else if ((getCurKI(ch)) < cost) {
+  }
+  if ((getCurKI(ch)) < cost) {
     send_to_char(ch, "You do not have enough ki to write runes.\r\n");
     return;
-  } else if (skill + bonus < axion_dice(0) && rand_number(1, 5) == 5) {
+  }
+  if (skill + bonus < axion_dice(0) && rand_number(1, 5) == 5) {
     act("@BYou dip your brush into the ink, but as you infuse your ki you balance the flow wrong and end up destroying the ink bottle!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@b$n@B dips $s runic brush into a bottle filled with shimmering ink. @b$n@B appears to concentrate for a moment before a look of panic dons $s face. Just at that moment the bottle of ink explodes! Strange...@n", TRUE, ch, 0, 0, TO_ROOM);
     extract_obj(bottle);
@@ -688,7 +703,8 @@ ACMD(do_runic)
     decCurKI(ch, cost, 0);
     char_set_wait(ch, PULSE_3SEC);
     return;
-  } else if (skill + bonus < axion_dice(0)) {
+  }
+  if (skill + bonus < axion_dice(0)) {
     decCurKI(ch, cost, 0);
     act("@BYou dip your brush into the ink, but as you infuse your ki you balance the flow wrong and end up evaporating some ink!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@b$n@B dips $s runic brush into a bottle filled with shimmering ink. @b$n@B appears to concentrate for a moment before some ink evaporates. Strange...@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -698,7 +714,8 @@ ACMD(do_runic)
       obj_set_value(bottle, 6, 0);
     char_set_wait(ch, PULSE_3SEC);
     return;
-  } else if (!strcasecmp(arg2, "kenaz") || !strcasecmp(arg2, "Kenaz")) {
+  }
+  if (!strcasecmp(arg2, "kenaz") || !strcasecmp(arg2, "Kenaz")) {
     inkcost += 1;
     if (vict == ch) {
       decCurKI(ch, cost, 0);
@@ -737,12 +754,14 @@ ACMD(do_runic)
     improve_skill(ch, SKILL_RUNIC, 1);
     char_set_wait(ch, PULSE_3SEC);
     return;
-  } else if (!strcasecmp(arg2, "algiz") || !strcasecmp(arg2, "Algiz")) {
+  }
+  if (!strcasecmp(arg2, "algiz") || !strcasecmp(arg2, "Algiz")) {
     inkcost += 2;
     if (amount < inkcost) {
       send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
       return;
-    } else if (vict == ch) {
+    }
+    if (vict == ch) {
       decCurKI(ch, cost, 0);
       act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CAlgiz@D'@B rune on your skin!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CAlgiz@D'@B rune on $s skin.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -779,12 +798,14 @@ ACMD(do_runic)
     improve_skill(ch, SKILL_RUNIC, 1);
     char_set_wait(ch, PULSE_3SEC);
     return;
-  } else if (!strcasecmp(arg2, "oagaz") || !strcasecmp(arg2, "Oagaz")) {
+  }
+  if (!strcasecmp(arg2, "oagaz") || !strcasecmp(arg2, "Oagaz")) {
     inkcost += 3;
     if (amount < inkcost) {
       send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
       return;
-    } else if (vict == ch) {
+    }
+    if (vict == ch) {
       decCurKI(ch, cost, 0);
       act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@COagaz@D'@B rune on your skin!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@COagaz@D'@B rune on $s skin.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -806,7 +827,8 @@ ACMD(do_runic)
     if (amount < inkcost) {
       send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
       return;
-    } else if (vict == ch) {
+    }
+    if (vict == ch) {
       decCurKI(ch, cost, 0);
       act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CLaguz@D'@B rune on your skin!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CLaguz@D'@B rune on $s skin.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -848,7 +870,8 @@ ACMD(do_runic)
     if (amount < inkcost) {
       send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
       return;
-    } else if (vict == ch) {
+    }
+    if (vict == ch) {
       decCurKI(ch, cost, 0);
       act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CWunjo@D'@B rune on your skin!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CWunjo@D'@B rune on $s skin.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -890,7 +913,8 @@ ACMD(do_runic)
     if (amount < inkcost) {
       send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
       return;
-    } else if (vict == ch) {
+    }
+    if (vict == ch) {
       decCurKI(ch, cost, 0);
       act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CPurisaz@D'@B rune on your skin!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CPurisaz@D'@B rune on $s skin.@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -932,7 +956,8 @@ ACMD(do_runic)
     if (amount < inkcost) {
       send_to_char(ch, "You do not have a bottle with enough ink. @D[@bInkcost@D: @R%d@D]@n\r\n", inkcost);
       return;
-    } else if (vict == ch) {
+    }
+    if (vict == ch) {
       decCurKI(ch, cost, 0);
       act("@BYou dip your brush into the ink and infuse your ki skillfully into it. You pull the brush out and paint the @D'@CGebo@D'@B rune on your skin! The rune flashes out of existence immediately!@n", TRUE, ch, 0, 0, TO_CHAR);
       act("@b$n@B dips $s brush into a bottle of ink and at the same time the ink starts to glow. Skillfully $e then writes the @D'@CGebo@D'@B rune on $s skin. The rune flashes out of existence immediately!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -981,50 +1006,47 @@ ACMD(do_resize)
   if (!char_get_skill(ch, SKILL_BUILD)) {
     send_to_char(ch, "You do not have the skill to resize equipment!\r\n");
     return;
-  } else if (char_get_skill(ch, SKILL_BUILD) < 80) {
+  }
+  if (char_get_skill(ch, SKILL_BUILD) < 80) {
     send_to_char(ch, "Your build skill must be at least level 80 before you can resize equipment.\r\n");
     return;
+  }
+  if (!*arg || !*arg2) {
+    send_to_char(ch, "Syntax: resize (obj) (small | medium)\r\n");
+    return;
+  }
+  if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
+    send_to_char(ch, "You don't have that object!\r\n");
+    return;
+  }
+  if (!wearable_obj(obj)) {
+    send_to_char(ch, "That is not equipment! You can only resize equipment.\r\n");
+    return;
+  }
+  if ((getCurST(ch)) < obj_get_weight(obj) + (getMaxST(ch) / 40)) {
+    send_to_char(ch, "You do not have enough stamina to resize this object at this time.\r\n");
+    return;
+  }
+  if (!strcasecmp(arg2, "small")) {
+    if (obj_get_size(obj) == SIZE_SMALL) {
+      send_to_char(ch, "The equipment is already small sized.\r\n");
+      return;
+    }
+    act("@WYou carefully adjust the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_CHAR);
+    act("@C$n@W carefully adjusts the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_ROOM);
+    obj_set_size(obj, SIZE_SMALL);
+    decCurST(ch, obj_get_weight(obj) + (getMaxST(ch) / 40), 0);
+  } else if (!strcasecmp(arg2, "medium")) {
+    if (obj_get_size(obj) == SIZE_MEDIUM) {
+      send_to_char(ch, "The equipment is already medium sized.\r\n");
+      return;
+    }
+    act("@WYou carefully adjust the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_CHAR);
+    act("@C$n@W carefully adjusts the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_ROOM);
+    obj_set_size(obj, SIZE_MEDIUM);
+    decCurST(ch, obj_get_weight(obj) + (getMaxST(ch) / 40), 0);
   } else {
-    if (!*arg || !*arg2) {
-      send_to_char(ch, "Syntax: resize (obj) (small | medium)\r\n");
-      return;
-    }
-    if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
-      send_to_char(ch, "You don't have that object!\r\n");
-      return;
-    } else {
-      if (!wearable_obj(obj)) {
-        send_to_char(ch, "That is not equipment! You can only resize equipment.\r\n");
-        return;
-      } else {
-        if ((getCurST(ch)) < obj_get_weight(obj) + (getMaxST(ch) / 40)) {
-          send_to_char(ch, "You do not have enough stamina to resize this object at this time.\r\n");
-          return;
-        } else if (!strcasecmp(arg2, "small")) {
-          if (obj_get_size(obj) == SIZE_SMALL) {
-            send_to_char(ch, "The equipment is already small sized.\r\n");
-            return;
-          } else {
-            act("@WYou carefully adjust the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_CHAR);
-            act("@C$n@W carefully adjusts the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_ROOM);
-            obj_set_size(obj, SIZE_SMALL);
-            decCurST(ch, obj_get_weight(obj) + (getMaxST(ch) / 40), 0);
-          }
-        } else if (!strcasecmp(arg2, "medium")) {
-          if (obj_get_size(obj) == SIZE_MEDIUM) {
-            send_to_char(ch, "The equipment is already medium sized.\r\n");
-            return;
-          } else {
-            act("@WYou carefully adjust the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_CHAR);
-            act("@C$n@W carefully adjusts the size of @c$p@W.@n", TRUE, ch, obj, 0, TO_ROOM);
-            obj_set_size(obj, SIZE_MEDIUM);
-            decCurST(ch, obj_get_weight(obj) + (getMaxST(ch) / 40), 0);
-          }
-        } else {
-          send_to_char(ch, "Syntax: resize (obj) (small | medium)\r\n");
-        }
-      }
-    }
+    send_to_char(ch, "Syntax: resize (obj) (small | medium)\r\n");
   }
 }
 
@@ -1074,38 +1096,38 @@ ACMD(do_bury)
     if (!*arg2) {
       send_to_char(ch, "Bury what?\r\n");
       return;
-    } else if (!(obj = get_obj_in_list_vis(ch, arg2, NULL, ch->carrying))) {
+    }
+    if (!(obj = get_obj_in_list_vis(ch, arg2, NULL, ch->carrying))) {
       send_to_char(ch, "You don't have that object to bury.\r\n");
       return;
-    } else if (fobj != NULL) {
+    }
+    if (fobj != NULL) {
       send_to_char(ch, "There is already something buried near here.\r\n");
       return;
-    } else {
-      if (rroom_sect(char_get_in_room(ch)) != SECT_DESERT) {
-        act("@yYou start digging in a spot of soft dirt. Once you have an appropriately sized hole you drop @G$p@y in and then cover it.@n", TRUE, ch, obj, 0, TO_CHAR);
-        act("@C$n@y starts digging in a spot of soft dirt. Once $e has an appropriately sized hole $e drops @G$p@y in and then covers it.@n", TRUE, ch, obj, 0, TO_ROOM);
-      } else {
-        act("@YYou start digging in a spot of soft sand. Once you have an appropriately sized hole you drop @G$p@Y in and then cover it.@n", TRUE, ch, obj, 0, TO_CHAR);
-        act("@C$n@Y starts digging in a spot of soft sand. Once $e has an appropriately sized hole $e drops @G$p@Y in and then covers it.@n", TRUE, ch, obj, 0, TO_ROOM);
-      }
-      obj_from_char(obj);
-      obj_to_room(obj, char_get_in_room(ch));
-      obj_extra_set(obj, ITEM_BURIED, true);
     }
+    if (rroom_sect(char_get_in_room(ch)) != SECT_DESERT) {
+      act("@yYou start digging in a spot of soft dirt. Once you have an appropriately sized hole you drop @G$p@y in and then cover it.@n", TRUE, ch, obj, 0, TO_CHAR);
+      act("@C$n@y starts digging in a spot of soft dirt. Once $e has an appropriately sized hole $e drops @G$p@y in and then covers it.@n", TRUE, ch, obj, 0, TO_ROOM);
+    } else {
+      act("@YYou start digging in a spot of soft sand. Once you have an appropriately sized hole you drop @G$p@Y in and then cover it.@n", TRUE, ch, obj, 0, TO_CHAR);
+      act("@C$n@Y starts digging in a spot of soft sand. Once $e has an appropriately sized hole $e drops @G$p@Y in and then covers it.@n", TRUE, ch, obj, 0, TO_ROOM);
+    }
+    obj_from_char(obj);
+    obj_to_room(obj, char_get_in_room(ch));
+    obj_extra_set(obj, ITEM_BURIED, true);
   } else if (!strcasecmp(arg, "uncover")) {
     if (fobj == NULL) {
       send_to_char(ch, "There is nothing buried here.\r\n");
       return;
-    } else {
-      if (rroom_sect(char_get_in_room(ch)) != SECT_DESERT) {
-        act("@yYou slowly dig and reveal @G$p@y buried in the dirt! You pull it out and set it on the ground before covering the hole back up.@n", TRUE, ch, fobj, 0, TO_CHAR);
-        act("@C$n@y starts digging and shortly reveals @G$p@y buried in the dirt! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n", TRUE, ch, fobj, 0, TO_ROOM);
-      } else {
-        act("@YYou slowly dig and reveal @G$p@Y buried in the sand! You pull it out and set it on the ground before covering the hole back up.@n", TRUE, ch, fobj, 0, TO_CHAR);
-        act("@C$n@Y starts digging and shortly reveals @G$p@Y buried in the sand! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n", TRUE, ch, fobj, 0, TO_ROOM);
-      }
-      obj_extra_set(fobj, ITEM_BURIED, false);
     }
+    if (rroom_sect(char_get_in_room(ch)) != SECT_DESERT) {
+      act("@yYou slowly dig and reveal @G$p@y buried in the dirt! You pull it out and set it on the ground before covering the hole back up.@n", TRUE, ch, fobj, 0, TO_CHAR);
+      act("@C$n@y starts digging and shortly reveals @G$p@y buried in the dirt! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n", TRUE, ch, fobj, 0, TO_ROOM);
+    } else {
+      act("@YYou slowly dig and reveal @G$p@Y buried in the sand! You pull it out and set it on the ground before covering the hole back up.@n", TRUE, ch, fobj, 0, TO_CHAR);
+      act("@C$n@Y starts digging and shortly reveals @G$p@Y buried in the sand! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n", TRUE, ch, fobj, 0, TO_ROOM);
+    }
+    obj_extra_set(fobj, ITEM_BURIED, false);
   } else {
     send_to_char(ch, "Syntax: dig [bury (item) | uncover]\r\n");
     return;
@@ -1178,59 +1200,58 @@ ACMD(do_silk)
           extract_obj(obj);
           char_set_wait(ch, PULSE_4SEC);
           return;
-        } else {
-          weaved = read_object(16705, VIRTUAL);
-          obj_to_room(weaved, char_get_in_room(ch));
-          if (obj_get_vnum(obj) == 16708) {
-            armor *= 20;
-            str    = 4;
-            intel  = 4;
-            price  = 4;
-            olevel = 80;
-          } else if (obj_get_vnum(obj) == 16700) {
-            armor *= 15;
-            str    = 3;
-            intel  = 3;
-            price  = 4;
-            olevel = 75;
-          } else if (obj_get_vnum(obj) == 16701) {
-            armor *= 10;
-            str    = 3;
-            intel  = 3;
-            price  = 3;
-            olevel = 50;
-          } else if (obj_get_vnum(obj) == 16702) {
-            armor *= 6;
-            str    = 2;
-            intel  = 2;
-            price  = 2;
-            olevel = 25;
-          } else if (obj_get_vnum(obj) == 16703) {
-            armor *= 4;
-            str    = 1;
-            intel  = 1;
-            price  = 1.5;
-            olevel = 5;
-          }
-          weaved->affected[0].location = 17;
-          weaved->affected[0].modifier = armor;
-          obj_set_cost(weaved, obj_get_cost(weaved) * (price));
-          obj_set_value(weaved, 0, olevel);
-          weaved->level = olevel;
-          if (str > 0) {
-            weaved->affected[1].location = 1;
-            weaved->affected[1].modifier = str;
-          }
-          if (intel > 0) {
-            weaved->affected[2].location = 3;
-            weaved->affected[2].modifier = intel;
-          }
-          act("@WYou attempt to weave the bundle and manage to create $p@W!@n", TRUE, ch, weaved, 0, TO_CHAR);
-          act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", TRUE, ch, weaved, 0, TO_ROOM);
-          do_get(ch, (char[]){"headsash"}, 0, 0);
-          extract_obj(obj);
-          char_set_wait(ch, PULSE_4SEC);
         }
+        weaved = read_object(16705, VIRTUAL);
+        obj_to_room(weaved, char_get_in_room(ch));
+        if (obj_get_vnum(obj) == 16708) {
+          armor *= 20;
+          str    = 4;
+          intel  = 4;
+          price  = 4;
+          olevel = 80;
+        } else if (obj_get_vnum(obj) == 16700) {
+          armor *= 15;
+          str    = 3;
+          intel  = 3;
+          price  = 4;
+          olevel = 75;
+        } else if (obj_get_vnum(obj) == 16701) {
+          armor *= 10;
+          str    = 3;
+          intel  = 3;
+          price  = 3;
+          olevel = 50;
+        } else if (obj_get_vnum(obj) == 16702) {
+          armor *= 6;
+          str    = 2;
+          intel  = 2;
+          price  = 2;
+          olevel = 25;
+        } else if (obj_get_vnum(obj) == 16703) {
+          armor *= 4;
+          str    = 1;
+          intel  = 1;
+          price  = 1.5;
+          olevel = 5;
+        }
+        weaved->affected[0].location = 17;
+        weaved->affected[0].modifier = armor;
+        obj_set_cost(weaved, obj_get_cost(weaved) * (price));
+        obj_set_value(weaved, 0, olevel);
+        weaved->level = olevel;
+        if (str > 0) {
+          weaved->affected[1].location = 1;
+          weaved->affected[1].modifier = str;
+        }
+        if (intel > 0) {
+          weaved->affected[2].location = 3;
+          weaved->affected[2].modifier = intel;
+        }
+        act("@WYou attempt to weave the bundle and manage to create $p@W!@n", TRUE, ch, weaved, 0, TO_CHAR);
+        act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", TRUE, ch, weaved, 0, TO_ROOM);
+        do_get(ch, (char[]){"headsash"}, 0, 0);
+        extract_obj(obj);
+        char_set_wait(ch, PULSE_4SEC);
       } else if (!strcasecmp(arg2, "wrist")) {
         if (prob <= perc) {
           act("@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_CHAR);
@@ -1238,59 +1259,58 @@ ACMD(do_silk)
           extract_obj(obj);
           char_set_wait(ch, PULSE_4SEC);
           return;
-        } else {
-          weaved = read_object(16706, VIRTUAL);
-          obj_to_room(weaved, char_get_in_room(ch));
-          if (obj_get_vnum(obj) == 16708) {
-            armor *= 20;
-            str    = 4;
-            intel  = 4;
-            price  = 4;
-            olevel = 80;
-          } else if (obj_get_vnum(obj) == 16700) {
-            armor *= 15;
-            str    = 3;
-            intel  = 3;
-            price  = 4;
-            olevel = 75;
-          } else if (obj_get_vnum(obj) == 16701) {
-            armor *= 10;
-            str    = 3;
-            intel  = 3;
-            price  = 3;
-            olevel = 50;
-          } else if (obj_get_vnum(obj) == 16702) {
-            armor *= 6;
-            str    = 2;
-            intel  = 2;
-            price  = 2;
-            olevel = 25;
-          } else if (obj_get_vnum(obj) == 16703) {
-            armor *= 4;
-            str    = 1;
-            intel  = 1;
-            price  = 1.5;
-            olevel = 5;
-          }
-          weaved->affected[0].location = 17;
-          weaved->affected[0].modifier = armor;
-          obj_set_cost(weaved, obj_get_cost(weaved) * (price));
-          obj_set_value(weaved, 0, olevel);
-          weaved->level = olevel;
-          if (str > 0) {
-            weaved->affected[1].location = 1;
-            weaved->affected[1].modifier = str;
-          }
-          if (intel > 0) {
-            weaved->affected[2].location = 3;
-            weaved->affected[2].modifier = intel;
-          }
-          act("@WYou attempt to weave the bundle and manage to create $p@W!@n", TRUE, ch, weaved, 0, TO_CHAR);
-          act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", TRUE, ch, weaved, 0, TO_ROOM);
-          do_get(ch, (char[]){"wristband"}, 0, 0);
-          extract_obj(obj);
-          char_set_wait(ch, PULSE_4SEC);
         }
+        weaved = read_object(16706, VIRTUAL);
+        obj_to_room(weaved, char_get_in_room(ch));
+        if (obj_get_vnum(obj) == 16708) {
+          armor *= 20;
+          str    = 4;
+          intel  = 4;
+          price  = 4;
+          olevel = 80;
+        } else if (obj_get_vnum(obj) == 16700) {
+          armor *= 15;
+          str    = 3;
+          intel  = 3;
+          price  = 4;
+          olevel = 75;
+        } else if (obj_get_vnum(obj) == 16701) {
+          armor *= 10;
+          str    = 3;
+          intel  = 3;
+          price  = 3;
+          olevel = 50;
+        } else if (obj_get_vnum(obj) == 16702) {
+          armor *= 6;
+          str    = 2;
+          intel  = 2;
+          price  = 2;
+          olevel = 25;
+        } else if (obj_get_vnum(obj) == 16703) {
+          armor *= 4;
+          str    = 1;
+          intel  = 1;
+          price  = 1.5;
+          olevel = 5;
+        }
+        weaved->affected[0].location = 17;
+        weaved->affected[0].modifier = armor;
+        obj_set_cost(weaved, obj_get_cost(weaved) * (price));
+        obj_set_value(weaved, 0, olevel);
+        weaved->level = olevel;
+        if (str > 0) {
+          weaved->affected[1].location = 1;
+          weaved->affected[1].modifier = str;
+        }
+        if (intel > 0) {
+          weaved->affected[2].location = 3;
+          weaved->affected[2].modifier = intel;
+        }
+        act("@WYou attempt to weave the bundle and manage to create $p@W!@n", TRUE, ch, weaved, 0, TO_CHAR);
+        act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", TRUE, ch, weaved, 0, TO_ROOM);
+        do_get(ch, (char[]){"wristband"}, 0, 0);
+        extract_obj(obj);
+        char_set_wait(ch, PULSE_4SEC);
       } else if (!strcasecmp(arg2, "belt")) {
         if (prob <= perc) {
           act("@WYou attempt to weave $p@W into the desired piece but end up ruining the entire bundle instead.@n", TRUE, ch, obj, 0, TO_CHAR);
@@ -1298,59 +1318,58 @@ ACMD(do_silk)
           extract_obj(obj);
           char_set_wait(ch, PULSE_4SEC);
           return;
-        } else {
-          weaved = read_object(16707, VIRTUAL);
-          obj_to_room(weaved, char_get_in_room(ch));
-          if (obj_get_vnum(obj) == 16708) {
-            armor *= 20;
-            str    = 4;
-            intel  = 4;
-            price  = 4;
-            olevel = 80;
-          } else if (obj_get_vnum(obj) == 16700) {
-            armor *= 15;
-            str    = 3;
-            intel  = 3;
-            price  = 4;
-            olevel = 75;
-          } else if (obj_get_vnum(obj) == 16701) {
-            armor *= 10;
-            str    = 3;
-            intel  = 3;
-            price  = 3;
-            olevel = 50;
-          } else if (obj_get_vnum(obj) == 16702) {
-            armor *= 6;
-            str    = 2;
-            intel  = 2;
-            price  = 2;
-            olevel = 25;
-          } else if (obj_get_vnum(obj) == 16703) {
-            armor *= 4;
-            str    = 1;
-            intel  = 1;
-            price  = 1.5;
-            olevel = 5;
-          }
-          weaved->affected[0].location = 17;
-          weaved->affected[0].modifier = armor;
-          obj_set_cost(weaved, obj_get_cost(weaved) * (price));
-          obj_set_value(weaved, 0, olevel);
-          weaved->level = olevel;
-          if (str > 0) {
-            weaved->affected[1].location = 1;
-            weaved->affected[1].modifier = str;
-          }
-          if (intel > 0) {
-            weaved->affected[2].location = 3;
-            weaved->affected[2].modifier = intel;
-          }
-          act("@WYou attempt to weave the bundle and manage to create $p@W!@n", TRUE, ch, weaved, 0, TO_CHAR);
-          act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", TRUE, ch, weaved, 0, TO_ROOM);
-          do_get(ch, (char[]){"belt"}, 0, 0);
-          extract_obj(obj);
-          char_set_wait(ch, PULSE_4SEC);
         }
+        weaved = read_object(16707, VIRTUAL);
+        obj_to_room(weaved, char_get_in_room(ch));
+        if (obj_get_vnum(obj) == 16708) {
+          armor *= 20;
+          str    = 4;
+          intel  = 4;
+          price  = 4;
+          olevel = 80;
+        } else if (obj_get_vnum(obj) == 16700) {
+          armor *= 15;
+          str    = 3;
+          intel  = 3;
+          price  = 4;
+          olevel = 75;
+        } else if (obj_get_vnum(obj) == 16701) {
+          armor *= 10;
+          str    = 3;
+          intel  = 3;
+          price  = 3;
+          olevel = 50;
+        } else if (obj_get_vnum(obj) == 16702) {
+          armor *= 6;
+          str    = 2;
+          intel  = 2;
+          price  = 2;
+          olevel = 25;
+        } else if (obj_get_vnum(obj) == 16703) {
+          armor *= 4;
+          str    = 1;
+          intel  = 1;
+          price  = 1.5;
+          olevel = 5;
+        }
+        weaved->affected[0].location = 17;
+        weaved->affected[0].modifier = armor;
+        obj_set_cost(weaved, obj_get_cost(weaved) * (price));
+        obj_set_value(weaved, 0, olevel);
+        weaved->level = olevel;
+        if (str > 0) {
+          weaved->affected[1].location = 1;
+          weaved->affected[1].modifier = str;
+        }
+        if (intel > 0) {
+          weaved->affected[2].location = 3;
+          weaved->affected[2].modifier = intel;
+        }
+        act("@WYou attempt to weave the bundle and manage to create $p@W!@n", TRUE, ch, weaved, 0, TO_CHAR);
+        act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", TRUE, ch, weaved, 0, TO_ROOM);
+        do_get(ch, (char[]){"belt"}, 0, 0);
+        extract_obj(obj);
+        char_set_wait(ch, PULSE_4SEC);
       } else {
         send_to_char(ch, "Syntax: silk weave (head | wrist | belt)");
         return;
@@ -1364,67 +1383,66 @@ ACMD(do_silk)
     if ((getCurKI(ch)) < cost) {
       send_to_char(ch, "You do not have enough ki to weave any bundles of silk.\r\n");
       return;
-    } else {
-      char_set_wait(ch, PULSE_3SEC);
-      int super = FALSE, superoll = rand_number(1, 100);
-      if (char_is_kurzak(ch)) {
-        if (char_get_skill(ch, SKILL_SILK) >= 100) {
-          if (8 > superoll) {
-            super = TRUE;
-          }
-        } else if (char_get_skill(ch, SKILL_SILK) >= 60) {
-          if (6 > superoll) {
-            super = TRUE;
-          }
-        } else if (char_get_skill(ch, SKILL_SILK) >= 40) {
-          if (3 > superoll) {
-            super = TRUE;
-          }
+    }
+    char_set_wait(ch, PULSE_3SEC);
+    int super = FALSE, superoll = rand_number(1, 100);
+    if (char_is_kurzak(ch)) {
+      if (char_get_skill(ch, SKILL_SILK) >= 100) {
+        if (8 > superoll) {
+          super = TRUE;
+        }
+      } else if (char_get_skill(ch, SKILL_SILK) >= 60) {
+        if (6 > superoll) {
+          super = TRUE;
+        }
+      } else if (char_get_skill(ch, SKILL_SILK) >= 40) {
+        if (3 > superoll) {
+          super = TRUE;
         }
       }
-      if (super == TRUE) {
-        obj = read_object(16708, VIRTUAL);
-        obj_to_room(obj, char_get_in_room(ch));
-        act("@YYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@Y piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
-        send_to_char(ch, "@YIt's SUPER grand!@n\r\n");
-        act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
-        decCurKI(ch, cost, 0);
-      } else if (prob > perc && prob >= 100) { /* Second Best Quality */
-        obj = read_object(16700, VIRTUAL);
-        obj_to_room(obj, char_get_in_room(ch));
-        act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
-        act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
-        decCurKI(ch, cost, 0);
-      } else if (prob > perc && prob >= 90) { /* Great Quality */
-        obj = read_object(16701, VIRTUAL);
-        obj_to_room(obj, char_get_in_room(ch));
-        act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
-        act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
-        decCurKI(ch, cost, 0);
-      } else if (prob > perc && prob >= 80) { /* Good Quality */
-        obj = read_object(16702, VIRTUAL);
-        obj_to_room(obj, char_get_in_room(ch));
-        act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
-        act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
-        decCurKI(ch, cost, 0);
-      } else if (prob > perc && prob >= 50) { /* Decent Quality */
-        obj = read_object(16703, VIRTUAL);
-        obj_to_room(obj, char_get_in_room(ch));
-        act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
-        act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
-        decCurKI(ch, cost, 0);
-      } else if (prob > perc) { /* Bad Quality */
-        obj = read_object(16704, VIRTUAL);
-        obj_to_room(obj, char_get_in_room(ch));
-        act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
-        act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
-        decCurKI(ch, cost, 0);
-      } else {
-        act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You end up making a poorly formed puddle of goo...@n", TRUE, ch, obj, 0, TO_CHAR);
-        act("@C$n@W seems to concentrate for a moment before spitting out a poorly formed puddle of goo...@n", TRUE, ch, obj, 0, TO_ROOM);
-        decCurKI(ch, cost, 0);
-        improve_skill(ch, SKILL_SILK, 1);
-      }
+    }
+    if (super == TRUE) {
+      obj = read_object(16708, VIRTUAL);
+      obj_to_room(obj, char_get_in_room(ch));
+      act("@YYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@Y piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
+      send_to_char(ch, "@YIt's SUPER grand!@n\r\n");
+      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
+      decCurKI(ch, cost, 0);
+    } else if (prob > perc && prob >= 100) { /* Second Best Quality */
+      obj = read_object(16700, VIRTUAL);
+      obj_to_room(obj, char_get_in_room(ch));
+      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
+      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
+      decCurKI(ch, cost, 0);
+    } else if (prob > perc && prob >= 90) { /* Great Quality */
+      obj = read_object(16701, VIRTUAL);
+      obj_to_room(obj, char_get_in_room(ch));
+      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
+      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
+      decCurKI(ch, cost, 0);
+    } else if (prob > perc && prob >= 80) { /* Good Quality */
+      obj = read_object(16702, VIRTUAL);
+      obj_to_room(obj, char_get_in_room(ch));
+      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
+      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
+      decCurKI(ch, cost, 0);
+    } else if (prob > perc && prob >= 50) { /* Decent Quality */
+      obj = read_object(16703, VIRTUAL);
+      obj_to_room(obj, char_get_in_room(ch));
+      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
+      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
+      decCurKI(ch, cost, 0);
+    } else if (prob > perc) { /* Bad Quality */
+      obj = read_object(16704, VIRTUAL);
+      obj_to_room(obj, char_get_in_room(ch));
+      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n", TRUE, ch, obj, 0, TO_CHAR);
+      act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n", TRUE, ch, obj, 0, TO_ROOM);
+      decCurKI(ch, cost, 0);
+    } else {
+      act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You end up making a poorly formed puddle of goo...@n", TRUE, ch, obj, 0, TO_CHAR);
+      act("@C$n@W seems to concentrate for a moment before spitting out a poorly formed puddle of goo...@n", TRUE, ch, obj, 0, TO_ROOM);
+      decCurKI(ch, cost, 0);
+      improve_skill(ch, SKILL_SILK, 1);
     }
   } else {
     send_to_char(ch, "Syntax: silk (weave | bundle)\r\n");
@@ -1929,9 +1947,8 @@ static int valid_recipe(struct char_data *ch, int recipe, int type)
       send_to_char(ch, "@WYou need @m%d@W brown mushroom%s for this recipe.@n\r\n", brownmush, brownmush > 1 ? "s" : "");
     }
     return (FALSE);
-  } else {
-    return (TRUE);
   }
+  return (TRUE);
 }
 
 static int campfire_cook(int recipe)
@@ -1994,224 +2011,223 @@ ACMD(do_cook)
     send_to_char(ch, "@Y16@B) @CFrozen Berry Muffin	@n\r\n");
     send_to_char(ch, "@wSyntax: cook (recipe number)@n\r\n");
     return;
-  } else {
-    int num = atoi(arg), pass = FALSE;
-    struct obj_data *meal = NULL;
+  }
+  int num = atoi(arg), pass = FALSE;
+  struct obj_data *meal = NULL;
 
-    int recipe = -1;
+  int recipe = -1;
+  switch (num) {
+    case 1:
+      recipe = RECIPE_STEAK;
+      prob += 8;
+      break;
+    case 2:
+      recipe = RECIPE_TOMATO_SOUP;
+      break;
+    case 3:
+      recipe = RECIPE_POTATO_SOUP;
+      break;
+    case 4:
+      recipe = RECIPE_VEGETABLE_SOUP;
+      break;
+    case 5:
+      recipe = RECIPE_MEAT_STEW;
+      break;
+    case 6:
+      recipe = RECIPE_CHILI_SOUP;
+      break;
+    case 7:
+      recipe = RECIPE_GRILLED_NORMFISH;
+      prob += 6;
+      break;
+    case 8:
+      recipe = RECIPE_GRILLED_GOODFISH;
+      prob += 10;
+      break;
+    case 9:
+      recipe = RECIPE_GRILLED_GREATFISH;
+      prob += 12;
+      break;
+    case 10:
+      recipe = RECIPE_GRILLED_BESTFISH;
+      prob += 16;
+      break;
+    case 11:
+      recipe = RECIPE_COOKED_RICE;
+      break;
+    case 12:
+      recipe = RECIPE_SUSHI;
+      break;
+    case 13:
+      recipe = RECIPE_BREAD;
+      break;
+    case 14:
+      recipe = RECIPE_SALAD;
+      break;
+    case 15:
+      recipe = RECIPE_APPLEPLUM;
+      break;
+    case 16:
+      recipe = RECIPE_FBERRY_MUFFIN;
+      break;
+    case 17:
+      recipe = RECIPE_CARAMBOLA_BREAD;
+      break;
+  }
+
+  if (recipe == -1) {
+    send_to_char(ch, "That is not a valid dish!\r\n");
+    return;
+  }
+
+  if (!valid_recipe(ch, recipe, 0)) {
+    return;
+  }
+  if (cook_elem == 1 && !campfire_cook(recipe)) {
+    send_to_char(ch, "You can not cook that dish over a campfire.\r\n");
+    return;
+  }
+  valid_recipe(ch, recipe, 1);
+  pass = TRUE;
+  if (pass == TRUE) {
+    if (skill < prob) {
+      act("@wYou screw up the preparation of the recipe and end up wasting the ingredients!@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@C$n@w starts to prepare some food, but ends up ruining the ingredients instead!@n", TRUE, ch, 0, 0, TO_ROOM);
+      improve_skill(ch, SKILL_COOKING, 0);
+      char_set_wait(ch, PULSE_2SEC);
+      return;
+    } /* End failed to cook it right */
+
+    int psbonus = 0, expbonus = 0;
+
     switch (num) {
       case 1:
-        recipe = RECIPE_STEAK;
-        prob += 8;
+        meal = read_object(MEAL_STEAK, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 1;
+        expbonus = 5;
         break;
       case 2:
-        recipe = RECIPE_TOMATO_SOUP;
+        meal = read_object(MEAL_TOMATO_SOUP, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 2;
+        expbonus = 15;
         break;
       case 3:
-        recipe = RECIPE_POTATO_SOUP;
+        meal = read_object(MEAL_POTATO_SOUP, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 1;
+        expbonus = 20;
         break;
       case 4:
-        recipe = RECIPE_VEGETABLE_SOUP;
+        meal = read_object(MEAL_VEGETABLE_SOUP, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 3;
+        expbonus = 45;
         break;
       case 5:
-        recipe = RECIPE_MEAT_STEW;
+        meal = read_object(MEAL_MEAT_STEW, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 2;
+        expbonus = 50;
         break;
       case 6:
-        recipe = RECIPE_CHILI_SOUP;
+        meal = read_object(MEAL_CHILI_SOUP, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 0;
+        expbonus = 100;
         break;
       case 7:
-        recipe = RECIPE_GRILLED_NORMFISH;
-        prob += 6;
+        meal = read_object(MEAL_NORM_FISH, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 2;
+        expbonus = 12;
         break;
       case 8:
-        recipe = RECIPE_GRILLED_GOODFISH;
-        prob += 10;
+        meal = read_object(MEAL_GOOD_FISH, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 3;
+        expbonus = 40;
         break;
       case 9:
-        recipe = RECIPE_GRILLED_GREATFISH;
-        prob += 12;
+        meal = read_object(MEAL_GREAT_FISH, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 5;
+        expbonus = 80;
         break;
       case 10:
-        recipe = RECIPE_GRILLED_BESTFISH;
-        prob += 16;
+        meal = read_object(MEAL_BEST_FISH, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 7;
+        expbonus = 125;
         break;
       case 11:
-        recipe = RECIPE_COOKED_RICE;
+        meal = read_object(MEAL_COOKED_RICE, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 1;
+        expbonus = 8;
         break;
       case 12:
-        recipe = RECIPE_SUSHI;
+        meal = read_object(MEAL_SUSHI, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 2;
+        expbonus = 20;
         break;
       case 13:
-        recipe = RECIPE_BREAD;
+        meal = read_object(MEAL_BREAD, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 1;
+        expbonus = 8;
         break;
       case 14:
-        recipe = RECIPE_SALAD;
+        meal = read_object(MEAL_SALAD, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 5;
+        expbonus = 8;
         break;
       case 15:
-        recipe = RECIPE_APPLEPLUM;
+        meal = read_object(MEAL_APPLEPLUM, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 1;
+        expbonus = 9;
         break;
       case 16:
-        recipe = RECIPE_FBERRY_MUFFIN;
+        meal = read_object(MEAL_FBERRY_MUFFIN, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 3;
+        expbonus = 12;
         break;
       case 17:
-        recipe = RECIPE_CARAMBOLA_BREAD;
+        meal = read_object(MEAL_CARAMBOLA_BREAD, VIRTUAL);
+        obj_to_char(meal, ch);
+        psbonus  = 1;
+        expbonus = 9;
         break;
-    }
-
-    if (recipe == -1) {
-      send_to_char(ch, "That is not a valid dish!\r\n");
-      return;
-    }
-
-    if (!valid_recipe(ch, recipe, 0)) {
-      return;
-    } else if (cook_elem == 1 && !campfire_cook(recipe)) {
-      send_to_char(ch, "You can not cook that dish over a campfire.\r\n");
-      return;
-    } else {
-      valid_recipe(ch, recipe, 1);
-      pass = TRUE;
-    }
-    if (pass == TRUE) {
-      if (skill < prob) {
-        act("@wYou screw up the preparation of the recipe and end up wasting the ingredients!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@w starts to prepare some food, but ends up ruining the ingredients instead!@n", TRUE, ch, 0, 0, TO_ROOM);
-        improve_skill(ch, SKILL_COOKING, 0);
-        char_set_wait(ch, PULSE_2SEC);
+      default:
+        send_to_char(ch, "That is not a valid dish!\r\n");
         return;
-      } /* End failed to cook it right */
+    }
+    if (char_get_bonuses(ch, BONUS_RECIPE)) {
+      psbonus += 1;
+      expbonus += 3;
+    }
+    act("@wYou carefully prepare the ingredients and then start cooking them. After a while of patience  and skillful care you successfully make @D'@C$p@D'@w!@n", TRUE, ch, meal, 0, TO_CHAR);
+    act("@C$n@w carefully prepares some ingredients and starts cooking them. After a while of patience and skillful care $e succeeds in making @D'@C$p@D'@w!@n", TRUE, ch, meal, 0, TO_ROOM);
+    improve_skill(ch, SKILL_COOKING, 0);
 
-      int psbonus = 0, expbonus = 0;
+    if (psbonus > 0) {
+      if (skill * 0.10 > 0)
+        psbonus = (skill * 0.10) * psbonus;
+    }
+    if (expbonus > 0) {
+      expbonus = skill * expbonus;
+    }
 
-      switch (num) {
-        case 1:
-          meal = read_object(MEAL_STEAK, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 1;
-          expbonus = 5;
-          break;
-        case 2:
-          meal = read_object(MEAL_TOMATO_SOUP, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 2;
-          expbonus = 15;
-          break;
-        case 3:
-          meal = read_object(MEAL_POTATO_SOUP, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 1;
-          expbonus = 20;
-          break;
-        case 4:
-          meal = read_object(MEAL_VEGETABLE_SOUP, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 3;
-          expbonus = 45;
-          break;
-        case 5:
-          meal = read_object(MEAL_MEAT_STEW, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 2;
-          expbonus = 50;
-          break;
-        case 6:
-          meal = read_object(MEAL_CHILI_SOUP, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 0;
-          expbonus = 100;
-          break;
-        case 7:
-          meal = read_object(MEAL_NORM_FISH, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 2;
-          expbonus = 12;
-          break;
-        case 8:
-          meal = read_object(MEAL_GOOD_FISH, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 3;
-          expbonus = 40;
-          break;
-        case 9:
-          meal = read_object(MEAL_GREAT_FISH, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 5;
-          expbonus = 80;
-          break;
-        case 10:
-          meal = read_object(MEAL_BEST_FISH, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 7;
-          expbonus = 125;
-          break;
-        case 11:
-          meal = read_object(MEAL_COOKED_RICE, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 1;
-          expbonus = 8;
-          break;
-        case 12:
-          meal = read_object(MEAL_SUSHI, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 2;
-          expbonus = 20;
-          break;
-        case 13:
-          meal = read_object(MEAL_BREAD, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 1;
-          expbonus = 8;
-          break;
-        case 14:
-          meal = read_object(MEAL_SALAD, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 5;
-          expbonus = 8;
-          break;
-        case 15:
-          meal = read_object(MEAL_APPLEPLUM, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 1;
-          expbonus = 9;
-          break;
-        case 16:
-          meal = read_object(MEAL_FBERRY_MUFFIN, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 3;
-          expbonus = 12;
-          break;
-        case 17:
-          meal = read_object(MEAL_CARAMBOLA_BREAD, VIRTUAL);
-          obj_to_char(meal, ch);
-          psbonus  = 1;
-          expbonus = 9;
-          break;
-        default:
-          send_to_char(ch, "That is not a valid dish!\r\n");
-          return;
-      }
-      if (char_get_bonuses(ch, BONUS_RECIPE)) {
-        psbonus += 1;
-        expbonus += 3;
-      }
-      act("@wYou carefully prepare the ingredients and then start cooking them. After a while of patience  and skillful care you successfully make @D'@C$p@D'@w!@n", TRUE, ch, meal, 0, TO_CHAR);
-      act("@C$n@w carefully prepares some ingredients and starts cooking them. After a while of patience and skillful care $e succeeds in making @D'@C$p@D'@w!@n", TRUE, ch, meal, 0, TO_ROOM);
-      improve_skill(ch, SKILL_COOKING, 0);
+    obj_set_value(meal, VAL_FOOD_PSBONUS, psbonus);
+    obj_set_value(meal, VAL_FOOD_EXPBONUS, expbonus);
 
-      if (psbonus > 0) {
-        if (skill * 0.10 > 0)
-          psbonus = (skill * 0.10) * psbonus;
-      }
-      if (expbonus > 0) {
-        expbonus = skill * expbonus;
-      }
-
-      obj_set_value(meal, VAL_FOOD_PSBONUS, psbonus);
-      obj_set_value(meal, VAL_FOOD_EXPBONUS, expbonus);
-
-      char_set_wait(ch, PULSE_2SEC);
-    } /* End has ingredients */
-  }
+    char_set_wait(ch, PULSE_2SEC);
+  } /* End has ingredients */
 }
 
 /* Feed senzu to someone you are grouped with. Why? TEAMWORK! */

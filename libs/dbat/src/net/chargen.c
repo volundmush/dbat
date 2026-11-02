@@ -687,7 +687,8 @@ static void exchange_ccpoints(struct char_data *ch, int value)
     display_bonus_menu(ch, type);
     send_to_char(ch, "@RYou must unselect some bonus traits first.\r\n");
     return;
-  } else if (char_get_bonuses(ch, value) > 0 && char_get_ccpoints(ch) - list_bonus_cost[value] >= 0) {
+  }
+  if (char_get_bonuses(ch, value) > 0 && char_get_ccpoints(ch) - list_bonus_cost[value] >= 0) {
     char_set_ccpoints(ch, char_get_ccpoints(ch) - (list_bonus_cost[value]));
     if (list_bonus_cost[value] > 0) {
       char_set_negcount(ch, char_get_negcount(ch) - (list_bonus_cost[value]));
@@ -702,13 +703,16 @@ static void exchange_ccpoints(struct char_data *ch, int value)
       display_bonus_menu(ch, type);
       send_to_char(ch, "@RYou are not in the negatives menu, enter B to switch.\r\n");
       return;
-    } else if (char_get_ccpoints(ch) + list_bonus_cost[value] < 0) {
+    }
+    if (char_get_ccpoints(ch) + list_bonus_cost[value] < 0) {
       display_bonus_menu(ch, type);
       send_to_char(ch, "@RYou do not have enough points for %s.\r\n", list_bonus[value]);
       return;
-    } else if (!opp_bonus(ch, value, type)) {
+    }
+    if (!opp_bonus(ch, value, type)) {
       return;
-    } else if (list_bonus_cost[value] < 0) {
+    }
+    if (list_bonus_cost[value] < 0) {
       char_set_ccpoints(ch, char_get_ccpoints(ch) + (list_bonus_cost[value]));
       char_set_bonuses(ch, value, 1);
       display_bonus_menu(ch, type);
@@ -735,16 +739,16 @@ static void exchange_ccpoints(struct char_data *ch, int value)
       display_bonus_menu(ch, type);
       send_to_char(ch, "@RYou can not have more than +10 points from negatives.\r\n");
       return;
-    } else if (!opp_bonus(ch, value, type)) {
-      return;
-    } else {
-      char_set_ccpoints(ch, char_get_ccpoints(ch) + (list_bonus_cost[value]));
-      char_set_negcount(ch, char_get_negcount(ch) + (list_bonus_cost[value]));
-      char_set_bonuses(ch, value, 2);
-      display_bonus_menu(ch, type);
-      send_to_char(ch, "@GYou select the negative %s\r\n", list_bonus[value]);
+    }
+    if (!opp_bonus(ch, value, type)) {
       return;
     }
+    char_set_ccpoints(ch, char_get_ccpoints(ch) + (list_bonus_cost[value]));
+    char_set_negcount(ch, char_get_negcount(ch) + (list_bonus_cost[value]));
+    char_set_bonuses(ch, value, 2);
+    display_bonus_menu(ch, type);
+    send_to_char(ch, "@GYou select the negative %s\r\n", list_bonus[value]);
+    return;
   }
 }
 

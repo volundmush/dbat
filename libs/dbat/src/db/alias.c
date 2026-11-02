@@ -315,8 +315,7 @@ int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen)
   if (a->type == ALIAS_SIMPLE) {
     strlcpy(orig, a->replacement, maxlen);
     return (0);
-  } else {
-    perform_complex_alias(&d->input, ptr, a);
-    return (1);
   }
+  perform_complex_alias(&d->input, ptr, a);
+  return (1);
 }

@@ -173,7 +173,8 @@ void handle_multihit(struct char_data *ch, struct char_data *vict)
   if (ch->throws >= 3) {
     ch->throws = 0;
     return;
-  } else if (ch->throws == -1) {
+  }
+  if (ch->throws == -1) {
     ch->throws = 0;
   }
 
@@ -514,25 +515,24 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
   for (f = ch->followers; f; f = f->next) {
     if (!char_aff_flagged(f->follower, AFF_GROUP)) {
       continue;
-    } else {
-      if (char_get_combine(f->follower) != char_get_combine(ch)) {
-        same = FALSE;
-      }
-      if (char_get_charge(f->follower) >= getMaxKI(f->follower) * maxki) {
-        totki += getMaxKI(f->follower) * maxki;
-        char_set_charge(f->follower, char_get_charge(f->follower) - (getMaxKI(f->follower) * maxki));
-      } else {
-        totki += char_get_charge(f->follower);
-        char_set_charge(f->follower, 0);
-      }
-      totalmem += 1;
-      attavg += char_get_skill(f->follower, attack_skills[char_get_combine(f->follower)]);
-      char folbuf[MAX_INPUT_LENGTH], folbuf2[MAX_INPUT_LENGTH];
-      sprintf(folbuf, "@Y$n@W times and merges $s @B'@R%s@B'@W into the group attack!@n", attack_names_comp[char_get_combine(f->follower)]);
-      sprintf(folbuf2, "@WYou time and merge your @B'@R%s@B'@W into the group attack!@n", attack_names_comp[char_get_combine(f->follower)]);
-      act(folbuf, TRUE, f->follower, 0, 0, TO_ROOM);
-      act(folbuf2, TRUE, f->follower, 0, 0, TO_CHAR);
     }
+    if (char_get_combine(f->follower) != char_get_combine(ch)) {
+      same = FALSE;
+    }
+    if (char_get_charge(f->follower) >= getMaxKI(f->follower) * maxki) {
+      totki += getMaxKI(f->follower) * maxki;
+      char_set_charge(f->follower, char_get_charge(f->follower) - (getMaxKI(f->follower) * maxki));
+    } else {
+      totki += char_get_charge(f->follower);
+      char_set_charge(f->follower, 0);
+    }
+    totalmem += 1;
+    attavg += char_get_skill(f->follower, attack_skills[char_get_combine(f->follower)]);
+    char folbuf[MAX_INPUT_LENGTH], folbuf2[MAX_INPUT_LENGTH];
+    sprintf(folbuf, "@Y$n@W times and merges $s @B'@R%s@B'@W into the group attack!@n", attack_names_comp[char_get_combine(f->follower)]);
+    sprintf(folbuf2, "@WYou time and merge your @B'@R%s@B'@W into the group attack!@n", attack_names_comp[char_get_combine(f->follower)]);
+    act(folbuf, TRUE, f->follower, 0, 0, TO_ROOM);
+    act(folbuf2, TRUE, f->follower, 0, 0, TO_CHAR);
   }
 
   totki += bonus;
@@ -546,7 +546,8 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
       act("@GYou manage to dodge nimbly through the combined attack of your enemies!@n", TRUE, vict, 0, 0, TO_CHAR);
       act("@r$n@G manages to dodge nimbly through the combined attack!@n", TRUE, vict, 0, 0, TO_ROOM);
       return;
-    } else if (blockable == TRUE && attspd + attsk < char_get_skill(vict, SKILL_BLOCK) + (char_get_aff_abils_str(ch) / 10)) {
+    }
+    if (blockable == TRUE && attspd + attsk < char_get_skill(vict, SKILL_BLOCK) + (char_get_aff_abils_str(ch) / 10)) {
       act("@GYou manage to effectivly block the combined attack of your enemies with the help of your great strength!@n", TRUE, vict, 0, 0, TO_CHAR);
       act("@r$n@G manages to dodge nimbly through the combined attack!@n", TRUE, vict, 0, 0, TO_ROOM);
       return;
@@ -602,9 +603,8 @@ int check_ruby(struct char_data *ch)
     act("@R$n's@R $p@R flares up and disappears!@n", TRUE, ch, ruby, 0, TO_ROOM);
     extract_obj(ruby);
     return (1);
-  } else {
-    return (0);
   }
+  return (0);
 }
 
 static int64_t combo_damage(struct char_data *ch, int64_t damage, int type)
@@ -838,12 +838,10 @@ int backstab(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg
       dmg += dmg * bonus;
       hurt(0, 0, ch, vict, NULL, dmg, 0);
       return (1);
-    } else {
-      return (0);
     }
-  } else {
     return (0);
   }
+  return (0);
 }
 
 void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspot)
@@ -1641,7 +1639,8 @@ void huge_update()
     }
     if (obj_get_vnum(k) != 82 && obj_get_vnum(k) != 83) {
       continue;
-    } else if (obj_get_distance(k) <= 0) {
+    }
+    if (obj_get_distance(k) <= 0) {
       /* Genki Dama Section */
       if (obj_get_kitype(k) == 497) {
         if (char_get_in_room(obj_get_target(k)) == obj_get_in_room(k)) {
@@ -1678,9 +1677,11 @@ void huge_update()
               if (char_aff_flagged(vict, AFF_GROUP)) {
                 if (vict->master == ch) {
                   continue;
-                } else if (ch->master == vict) {
+                }
+                if (ch->master == vict) {
                   continue;
-                } else if (vict->master == ch->master) {
+                }
+                if (vict->master == ch->master) {
                   continue;
                 }
               }
@@ -1700,37 +1701,37 @@ void huge_update()
                 pcost(vict, 0, getEffMaxPL(vict) / 200);
                 hurt(0, 0, ch, vict, NULL, 0, 1);
                 continue;
-              } else if (dge + rand_number(-10, 5) > skill) {
+              }
+              if (dge + rand_number(-10, 5) > skill) {
                 act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
                 act("@WYou manage to escape the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
                 act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
                 hurt(0, 0, ch, vict, NULL, 0, 1);
                 improve_skill(vict, SKILL_DODGE, 0);
                 continue;
-              } else {
-                count += 1;
-                if (char_is_npc(vict) && count > 10) {
-                  if (getCurPL(vict) < dmg) {
-                    double loss = 0.0;
-
-                    if (count >= 30) {
-                      loss = 0.80;
-                    } else if (count >= 20) {
-                      loss = 0.6;
-                    } else if (count >= 15) {
-                      loss = 0.4;
-                    } else if (count >= 10) {
-                      loss = 0.25;
-                    }
-                    char_set_exp(vict, char_get_exp(vict) - (char_get_exp(vict) * loss));
-                  }
-                }
-                act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
-                act("@RYou are caught by the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
-                act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-                hurt(0, 0, ch, vict, NULL, dmg, 1);
-                continue;
               }
+              count += 1;
+              if (char_is_npc(vict) && count > 10) {
+                if (getCurPL(vict) < dmg) {
+                  double loss = 0.0;
+
+                  if (count >= 30) {
+                    loss = 0.80;
+                  } else if (count >= 20) {
+                    loss = 0.6;
+                  } else if (count >= 15) {
+                    loss = 0.4;
+                  } else if (count >= 10) {
+                    loss = 0.25;
+                  }
+                  char_set_exp(vict, char_get_exp(vict) - (char_get_exp(vict) * loss));
+                }
+              }
+              act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
+              act("@RYou are caught by the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
+              act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+              hurt(0, 0, ch, vict, NULL, dmg, 1);
+              continue;
             }
             rroom_set_dmg(obj_get_in_room(k), 100);
             int zone = 0;
@@ -1787,20 +1788,20 @@ void huge_update()
               pcost(vict, 0, getEffMaxPL(vict) / 200);
               hurt(0, 0, ch, vict, NULL, 0, 1);
               continue;
-            } else if (dge + rand_number(-10, 5) > skill) {
+            }
+            if (dge + rand_number(-10, 5) > skill) {
               act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
               act("@WYou manage to escape the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
               act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
               hurt(0, 0, ch, vict, NULL, 0, 1);
               improve_skill(vict, SKILL_DODGE, 0);
               continue;
-            } else {
-              act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
-              act("@RYou are caught by the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
-              act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-              hurt(0, 0, ch, vict, NULL, dmg, 1);
-              continue;
             }
+            act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
+            act("@RYou are caught by the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
+            act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+            hurt(0, 0, ch, vict, NULL, dmg, 1);
+            continue;
           }
           rroom_set_dmg(obj_get_in_room(k), 100);
           int zone = 0;
@@ -1848,9 +1849,11 @@ void huge_update()
               if (char_aff_flagged(vict, AFF_GROUP)) {
                 if (vict->master == ch) {
                   continue;
-                } else if (ch->master == vict) {
+                }
+                if (ch->master == vict) {
                   continue;
-                } else if (vict->master == ch->master) {
+                }
+                if (vict->master == ch->master) {
                   continue;
                 }
               }
@@ -1869,37 +1872,37 @@ void huge_update()
                 char_aff_set(vict, AFF_ZANZOKEN, false);
                 pcost(vict, 0, getEffMaxPL(vict) / 200);
                 continue;
-              } else if (dge + rand_number(-10, 5) > skill) {
+              }
+              if (dge + rand_number(-10, 5) > skill) {
                 act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
                 act("@WYou manage to escape the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
                 act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
                 hurt(0, 0, ch, vict, NULL, 0, 1);
                 improve_skill(vict, SKILL_DODGE, 0);
                 continue;
-              } else {
-                count += 1;
-                if (char_is_npc(vict) && count > 10) {
-                  if (getCurPL(vict) < dmg) {
-                    double loss = 0.0;
-
-                    if (count >= 30) {
-                      loss = 0.80;
-                    } else if (count >= 20) {
-                      loss = 0.6;
-                    } else if (count >= 15) {
-                      loss = 0.4;
-                    } else if (count >= 10) {
-                      loss = 0.25;
-                    }
-                    char_set_exp(vict, char_get_exp(vict) - (char_get_exp(vict) * loss));
-                  }
-                }
-                act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
-                act("@RYou are caught by the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
-                act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-                hurt(0, 0, ch, vict, NULL, dmg, 1);
-                continue;
               }
+              count += 1;
+              if (char_is_npc(vict) && count > 10) {
+                if (getCurPL(vict) < dmg) {
+                  double loss = 0.0;
+
+                  if (count >= 30) {
+                    loss = 0.80;
+                  } else if (count >= 20) {
+                    loss = 0.6;
+                  } else if (count >= 15) {
+                    loss = 0.4;
+                  } else if (count >= 10) {
+                    loss = 0.25;
+                  }
+                  char_set_exp(vict, char_get_exp(vict) - (char_get_exp(vict) * loss));
+                }
+              }
+              act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
+              act("@RYou are caught by the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
+              act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+              hurt(0, 0, ch, vict, NULL, dmg, 1);
+              continue;
             }
             rroom_set_dmg(obj_get_in_room(k), 100);
             int zone = 0;
@@ -1954,20 +1957,20 @@ void huge_update()
               char_aff_set(vict, AFF_ZANZOKEN, false);
               pcost(vict, 0, getEffMaxPL(vict) / 200);
               continue;
-            } else if (dge + rand_number(-10, 5) > skill) {
+            }
+            if (dge + rand_number(-10, 5) > skill) {
               act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
               act("@WYou manage to escape the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
               act("@c$N@W manages to escape the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
               hurt(0, 0, ch, vict, NULL, 0, 1);
               improve_skill(vict, SKILL_DODGE, 0);
               continue;
-            } else {
-              act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
-              act("@RYou are caught by the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
-              act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-              hurt(0, 0, ch, vict, NULL, dmg, 1);
-              continue;
             }
+            act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_CHAR);
+            act("@RYou are caught by the explosion!@n", TRUE, ch, 0, vict, TO_VICT);
+            act("@R$N@r is caught by the explosion!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+            hurt(0, 0, ch, vict, NULL, dmg, 1);
+            continue;
           }
           rroom_set_dmg(obj_get_in_room(k), 100);
           int zone = 0;
@@ -1978,10 +1981,9 @@ void huge_update()
           continue;
         } /* End Genocide */
         continue;
-      } else {
-        extract_obj(k);
-        continue;
       }
+      extract_obj(k);
+      continue;
     }
     act("$p@W descends slowly towards the ground!@n", TRUE, 0, k, 0, TO_ROOM);
     obj_set_distance(k, obj_get_distance(k) - 1);
@@ -2005,7 +2007,8 @@ void homing_update()
 
     if (obj_get_vnum(k) != 80 && obj_get_vnum(k) != 81 && obj_get_vnum(k) != 84) {
       continue;
-    } else if (obj_get_target(k) && obj_get_user(k)) {
+    }
+    if (obj_get_target(k) && obj_get_user(k)) {
       struct char_data *ch   = obj_get_user(k);
       struct char_data *vict = obj_get_target(k);
 
@@ -2016,35 +2019,34 @@ void homing_update()
           obj_from_room(k);
           obj_to_room(k, char_get_in_room(vict));
           continue;
-        } else {
-          act("@RThe $p@R makes a tight turn and rockets straight for you!@n", TRUE, vict, k, 0, TO_CHAR);
-          act("@RThe $p@R makes a tight turn and rockets straight for @r$n@n", TRUE, vict, k, 0, TO_ROOM);
-          if (handle_parry(vict) < rand_number(1, 140)) {
-            act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_CHAR);
-            act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_ROOM);
-            int64_t dmg = obj_get_kicharge(k);
-            extract_obj(k);
-            hurt(0, 0, ch, vict, NULL, dmg, 1);
-            continue;
-          } else if (rand_number(1, 3) > 1) {
-            act("@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n", TRUE, vict, k, 0, TO_CHAR);
-            act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", TRUE, vict, k, 0, TO_ROOM);
-            obj_set_kicharge(k, obj_get_kicharge(k) - (obj_get_kicharge(k) / 10));
-            if (obj_get_kicharge(k) <= 0) {
-              send_to_room(obj_get_in_room(k), "%s has lost all its energy and disappears.\r\n", k->short_description);
-              extract_obj(k);
-            }
-            continue;
-          } else {
-            act("@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n", TRUE, vict, k, 0, TO_CHAR);
-            act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n", TRUE, vict, k, 0, TO_ROOM);
-            if (rroom_get_dmg(char_get_in_room(vict)) <= 95) {
-              rroom_set_dmg(char_get_in_room(vict), rroom_get_dmg(char_get_in_room(vict)) + (5));
-            }
-            extract_obj(k);
-            continue;
-          }
         }
+        act("@RThe $p@R makes a tight turn and rockets straight for you!@n", TRUE, vict, k, 0, TO_CHAR);
+        act("@RThe $p@R makes a tight turn and rockets straight for @r$n@n", TRUE, vict, k, 0, TO_ROOM);
+        if (handle_parry(vict) < rand_number(1, 140)) {
+          act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_CHAR);
+          act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_ROOM);
+          int64_t dmg = obj_get_kicharge(k);
+          extract_obj(k);
+          hurt(0, 0, ch, vict, NULL, dmg, 1);
+          continue;
+        }
+        if (rand_number(1, 3) > 1) {
+          act("@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n", TRUE, vict, k, 0, TO_CHAR);
+          act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", TRUE, vict, k, 0, TO_ROOM);
+          obj_set_kicharge(k, obj_get_kicharge(k) - (obj_get_kicharge(k) / 10));
+          if (obj_get_kicharge(k) <= 0) {
+            send_to_room(obj_get_in_room(k), "%s has lost all its energy and disappears.\r\n", k->short_description);
+            extract_obj(k);
+          }
+          continue;
+        }
+        act("@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n", TRUE, vict, k, 0, TO_CHAR);
+        act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n", TRUE, vict, k, 0, TO_ROOM);
+        if (rroom_get_dmg(char_get_in_room(vict)) <= 95) {
+          rroom_set_dmg(char_get_in_room(vict), rroom_get_dmg(char_get_in_room(vict)) + (5));
+        }
+        extract_obj(k);
+        continue;
         continue;
       } else if (obj_get_vnum(k) == 81 || obj_get_vnum(k) == 84) { // Spirit Ball
         if (obj_get_in_room(k) != char_get_in_room(vict)) {
@@ -2053,35 +2055,42 @@ void homing_update()
           act("@C$n@W loses sight of @c$N@W and lets $s $p@W fly away!@n", TRUE, ch, k, vict, TO_NOTVICT);
           extract_obj(k);
           continue;
-        } else {
-          act("@RYou move your hand and direct $p@R after @r$N@R!@n", TRUE, ch, k, vict, TO_CHAR);
-          act("@r$n@R moves $s hand and directs $p@R after YOU!@n", TRUE, ch, k, vict, TO_VICT);
-          act("@r$n@R moves $s hand and directs $p@R after @r$N@R!@n", TRUE, ch, k, vict, TO_NOTVICT);
-          if (handle_parry(vict) < rand_number(1, 140)) {
-            if (obj_get_vnum(k) != 84) {
-              act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_CHAR);
-              act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_ROOM);
-              int64_t dmg = obj_get_kicharge(k);
-              extract_obj(k);
-              hurt(0, 0, ch, vict, NULL, dmg, 1);
-            } else if (obj_get_vnum(k) == 84) {
-              int64_t dmg = obj_get_kicharge(k);
-              if (dmg > getEffMaxPL(vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
-                act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
-                act("@rYou are cut in half by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
-                act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-                die(vict, ch);
-                if (char_aff_flagged(ch, AFF_GROUP)) {
-                  group_gain(ch, vict);
-                } else {
-                  solo_gain(ch, vict);
-                }
-                if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOGOLD)) {
-                  do_get(ch, (char[]){"all.zenni corpse"}, 0, 0);
-                }
-                if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOLOOT)) {
-                  do_get(ch, (char[]){"all corpse"}, 0, 0);
-                }
+        }
+        act("@RYou move your hand and direct $p@R after @r$N@R!@n", TRUE, ch, k, vict, TO_CHAR);
+        act("@r$n@R moves $s hand and directs $p@R after YOU!@n", TRUE, ch, k, vict, TO_VICT);
+        act("@r$n@R moves $s hand and directs $p@R after @r$N@R!@n", TRUE, ch, k, vict, TO_NOTVICT);
+        if (handle_parry(vict) < rand_number(1, 140)) {
+          if (obj_get_vnum(k) != 84) {
+            act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_CHAR);
+            act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_ROOM);
+            int64_t dmg = obj_get_kicharge(k);
+            extract_obj(k);
+            hurt(0, 0, ch, vict, NULL, dmg, 1);
+          } else if (obj_get_vnum(k) == 84) {
+            int64_t dmg = obj_get_kicharge(k);
+            if (dmg > getEffMaxPL(vict) / 5 && (!char_is_majin(vict) && !char_is_bio(vict))) {
+              act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
+              act("@rYou are cut in half by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
+              act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+              die(vict, ch);
+              if (char_aff_flagged(ch, AFF_GROUP)) {
+                group_gain(ch, vict);
+              } else {
+                solo_gain(ch, vict);
+              }
+              if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOGOLD)) {
+                do_get(ch, (char[]){"all.zenni corpse"}, 0, 0);
+              }
+              if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOLOOT)) {
+                do_get(ch, (char[]){"all corpse"}, 0, 0);
+              }
+            } else if (dmg > getEffMaxPL(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
+              if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= getMaxKI(vict) / 40) {
+                act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
+                act("@rYou are cut in half by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
+                act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+                decCurKI(vict, getMaxKI(vict) / 40, 0);
+                hurt(0, 0, ch, vict, NULL, dmg, 1);
               } else if (dmg > getEffMaxPL(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
                 if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= getMaxKI(vict) / 40) {
                   act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -2089,58 +2098,50 @@ void homing_update()
                   act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
                   decCurKI(vict, getMaxKI(vict) / 40, 0);
                   hurt(0, 0, ch, vict, NULL, dmg, 1);
-                } else if (dmg > getEffMaxPL(vict) / 5 && (char_is_majin(vict) || char_is_bio(vict))) {
-                  if (char_get_skill(vict, SKILL_REGENERATE) > rand_number(1, 101) && (getCurKI(vict)) >= getMaxKI(vict) / 40) {
-                    act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_CHAR);
-                    act("@rYou are cut in half by the attack but regenerate a moment later!@n", TRUE, ch, 0, vict, TO_VICT);
-                    act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-                    decCurKI(vict, getMaxKI(vict) / 40, 0);
-                    hurt(0, 0, ch, vict, NULL, dmg, 1);
+                } else {
+                  act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
+                  act("@rYou are cut in half by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
+                  act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+                  die(vict, ch);
+                  if (char_aff_flagged(ch, AFF_GROUP)) {
+                    group_gain(ch, vict);
                   } else {
-                    act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_CHAR);
-                    act("@rYou are cut in half by the attack!@n", TRUE, ch, 0, vict, TO_VICT);
-                    act("@R$N@r is cut in half by the attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-                    die(vict, ch);
-                    if (char_aff_flagged(ch, AFF_GROUP)) {
-                      group_gain(ch, vict);
-                    } else {
-                      solo_gain(ch, vict);
-                    }
-                    if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOGOLD)) {
-                      do_get(ch, (char[]){"all.zenni corpse"}, 0, 0);
-                    }
-                    if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOLOOT)) {
-                      do_get(ch, (char[]){"all corpse"}, 0, 0);
-                    }
+                    solo_gain(ch, vict);
+                  }
+                  if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOGOLD)) {
+                    do_get(ch, (char[]){"all.zenni corpse"}, 0, 0);
+                  }
+                  if (!char_is_npc(ch) && (ch != vict) && char_prf_flagged(ch, PRF_AUTOLOOT)) {
+                    do_get(ch, (char[]){"all corpse"}, 0, 0);
                   }
                 }
-              } else {
-                act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_CHAR);
-                act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_ROOM);
-                hurt(0, 0, ch, vict, NULL, dmg, 1);
               }
-              extract_obj(k);
-            }
-            continue;
-          } else if (rand_number(1, 3) > 1) {
-            act("@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n", TRUE, vict, k, 0, TO_CHAR);
-            act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", TRUE, vict, k, 0, TO_ROOM);
-            obj_set_kicharge(k, obj_get_kicharge(k) - (obj_get_kicharge(k) / 10));
-            if (obj_get_kicharge(k) <= 0) {
-              send_to_room(obj_get_in_room(k), "%s has lost all its energy and disappears.\r\n", k->short_description);
-              extract_obj(k);
-            }
-            continue;
-          } else {
-            act("@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n", TRUE, vict, k, 0, TO_CHAR);
-            act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n", TRUE, vict, k, 0, TO_ROOM);
-            if (rroom_get_dmg(char_get_in_room(vict)) <= 95) {
-              rroom_set_dmg(char_get_in_room(vict), rroom_get_dmg(char_get_in_room(vict)) + (5));
+            } else {
+              act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_CHAR);
+              act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", TRUE, vict, k, 0, TO_ROOM);
+              hurt(0, 0, ch, vict, NULL, dmg, 1);
             }
             extract_obj(k);
-            continue;
           }
+          continue;
         }
+        if (rand_number(1, 3) > 1) {
+          act("@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n", TRUE, vict, k, 0, TO_CHAR);
+          act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", TRUE, vict, k, 0, TO_ROOM);
+          obj_set_kicharge(k, obj_get_kicharge(k) - (obj_get_kicharge(k) / 10));
+          if (obj_get_kicharge(k) <= 0) {
+            send_to_room(obj_get_in_room(k), "%s has lost all its energy and disappears.\r\n", k->short_description);
+            extract_obj(k);
+          }
+          continue;
+        }
+        act("@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n", TRUE, vict, k, 0, TO_CHAR);
+        act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n", TRUE, vict, k, 0, TO_ROOM);
+        if (rroom_get_dmg(char_get_in_room(vict)) <= 95) {
+          rroom_set_dmg(char_get_in_room(vict), rroom_get_dmg(char_get_in_room(vict)) + (5));
+        }
+        extract_obj(k);
+        continue;
       } // Spiritball attack
     } // pursue the target.
   } // End for
@@ -2156,24 +2157,23 @@ static int handle_block(struct char_data *ch)
   if (!char_is_npc(ch)) { /* Players */
     if (!char_get_skill(ch, SKILL_BLOCK)) {
       return (0);
-    } else {
-      int num = char_get_skill(ch, SKILL_BLOCK);
-      if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 3 || char_get_genome(ch, 1) == 3)) {
-        num += 10;
-      }
-      if (char_get_skills_base(ch, SKILL_STYLE) >= 100) {
-        num += 5;
-      } else if (char_get_skills_base(ch, SKILL_STYLE) >= 80) {
-        num += 4;
-      } else if (char_get_skills_base(ch, SKILL_STYLE) >= 60) {
-        num += 3;
-      } else if (char_get_skills_base(ch, SKILL_STYLE) >= 40) {
-        num += 2;
-      } else if (char_get_skills_base(ch, SKILL_STYLE) >= 20) {
-        num += 1;
-      }
-      return (num);
     }
+    int num = char_get_skill(ch, SKILL_BLOCK);
+    if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 3 || char_get_genome(ch, 1) == 3)) {
+      num += 10;
+    }
+    if (char_get_skills_base(ch, SKILL_STYLE) >= 100) {
+      num += 5;
+    } else if (char_get_skills_base(ch, SKILL_STYLE) >= 80) {
+      num += 4;
+    } else if (char_get_skills_base(ch, SKILL_STYLE) >= 60) {
+      num += 3;
+    } else if (char_get_skills_base(ch, SKILL_STYLE) >= 40) {
+      num += 2;
+    } else if (char_get_skills_base(ch, SKILL_STYLE) >= 20) {
+      num += 1;
+    }
+    return (num);
   } else {                       /* Mobs */
     if (!char_is_humanoid(ch)) { /* Animal/monster types */
       int top = char_get_level(ch) / 4;
@@ -2184,21 +2184,24 @@ static int handle_block(struct char_data *ch)
     } else { /* Intelligent Skills Mobs */
       if (char_get_level(ch) >= 110) {
         return (rand_number(95, 105));
-      } else if (char_get_level(ch) >= 100) {
-        return (rand_number(85, 95));
-      } else if (char_get_level(ch) >= 90) {
-        return (rand_number(70, 85));
-      } else if (char_get_level(ch) >= 75) {
-        return (rand_number(50, 70));
-      } else if (char_get_level(ch) >= 40) {
-        return (rand_number(40, 50));
-      } else {
-        int top = char_get_level(ch);
-
-        if (top < 15)
-          top = 16;
-        return (rand_number(15, top));
       }
+      if (char_get_level(ch) >= 100) {
+        return (rand_number(85, 95));
+      }
+      if (char_get_level(ch) >= 90) {
+        return (rand_number(70, 85));
+      }
+      if (char_get_level(ch) >= 75) {
+        return (rand_number(50, 70));
+      }
+      if (char_get_level(ch) >= 40) {
+        return (rand_number(40, 50));
+      }
+      int top = char_get_level(ch);
+
+      if (top < 15)
+        top = 16;
+      return (rand_number(15, top));
     }
   }
 }
@@ -2213,45 +2216,44 @@ int handle_dodge(struct char_data *ch)
   if (!char_is_npc(ch)) { /* Players */
     if (!char_get_skill(ch, SKILL_DODGE)) {
       return (0);
-    } else {
-      int num = char_get_skill(ch, SKILL_DODGE);
-      if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 3 || char_get_genome(ch, 1) == 3)) {
-        num += 10;
-      }
-      if (char_get_skills_base(ch, SKILL_STYLE) >= 100) {
-        num += 5;
-      } else if (char_get_skills_base(ch, SKILL_STYLE) >= 80) {
-        num += 4;
-      } else if (char_get_skills_base(ch, SKILL_STYLE) >= 60) {
-        num += 3;
-      } else if (char_get_skills_base(ch, SKILL_STYLE) >= 40) {
-        num += 2;
-      } else if (char_get_skills_base(ch, SKILL_STYLE) >= 20) {
-        num += 1;
-      }
-      if (char_get_skills_base(ch, SKILL_SURVIVAL) >= 100) {
-        num += 3;
-      } else if (char_get_skills_base(ch, SKILL_SURVIVAL) >= 75) {
-        num += 2;
-      } else if (char_get_skills_base(ch, SKILL_SURVIVAL) >= 50) {
-        num += 1;
-      }
-      if (char_get_skills_base(ch, SKILL_ROLL) >= 100) {
-        num += 5;
-      } else if (char_get_skills_base(ch, SKILL_SURVIVAL) >= 80) {
-        num += 4;
-      } else if (char_get_skills_base(ch, SKILL_SURVIVAL) >= 60) {
-        num += 3;
-      } else if (char_get_skills_base(ch, SKILL_SURVIVAL) >= 40) {
-        num += 2;
-      } else if (char_get_skills_base(ch, SKILL_SURVIVAL) >= 20) {
-        num += 1;
-      }
-      if (group_bonus(ch, 2) == 8) {
-        num += num * 0.05;
-      }
-      return (num);
     }
+    int num = char_get_skill(ch, SKILL_DODGE);
+    if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 3 || char_get_genome(ch, 1) == 3)) {
+      num += 10;
+    }
+    if (char_get_skills_base(ch, SKILL_STYLE) >= 100) {
+      num += 5;
+    } else if (char_get_skills_base(ch, SKILL_STYLE) >= 80) {
+      num += 4;
+    } else if (char_get_skills_base(ch, SKILL_STYLE) >= 60) {
+      num += 3;
+    } else if (char_get_skills_base(ch, SKILL_STYLE) >= 40) {
+      num += 2;
+    } else if (char_get_skills_base(ch, SKILL_STYLE) >= 20) {
+      num += 1;
+    }
+    if (char_get_skills_base(ch, SKILL_SURVIVAL) >= 100) {
+      num += 3;
+    } else if (char_get_skills_base(ch, SKILL_SURVIVAL) >= 75) {
+      num += 2;
+    } else if (char_get_skills_base(ch, SKILL_SURVIVAL) >= 50) {
+      num += 1;
+    }
+    if (char_get_skills_base(ch, SKILL_ROLL) >= 100) {
+      num += 5;
+    } else if (char_get_skills_base(ch, SKILL_SURVIVAL) >= 80) {
+      num += 4;
+    } else if (char_get_skills_base(ch, SKILL_SURVIVAL) >= 60) {
+      num += 3;
+    } else if (char_get_skills_base(ch, SKILL_SURVIVAL) >= 40) {
+      num += 2;
+    } else if (char_get_skills_base(ch, SKILL_SURVIVAL) >= 20) {
+      num += 1;
+    }
+    if (group_bonus(ch, 2) == 8) {
+      num += num * 0.05;
+    }
+    return (num);
   } else {                       /* Mobs */
     if (!char_is_humanoid(ch)) { /* Animal/monster types */
       int top = (char_get_level(ch) + 1) / 8;
@@ -2262,21 +2264,24 @@ int handle_dodge(struct char_data *ch)
     } else { /* Intelligent Skills Mobs */
       if (char_get_level(ch) >= 110) {
         return (rand_number(95, 105));
-      } else if (char_get_level(ch) >= 100) {
-        return (rand_number(75, 95));
-      } else if (char_get_level(ch) >= 90) {
-        return (rand_number(50, 85));
-      } else if (char_get_level(ch) >= 75) {
-        return (rand_number(30, 70));
-      } else if (char_get_level(ch) >= 40) {
-        return (rand_number(20, 50));
-      } else {
-        int top = char_get_level(ch);
-
-        if (top < 15)
-          top = 16;
-        return (rand_number(15, top));
       }
+      if (char_get_level(ch) >= 100) {
+        return (rand_number(75, 95));
+      }
+      if (char_get_level(ch) >= 90) {
+        return (rand_number(50, 85));
+      }
+      if (char_get_level(ch) >= 75) {
+        return (rand_number(30, 70));
+      }
+      if (char_get_level(ch) >= 40) {
+        return (rand_number(20, 50));
+      }
+      int top = char_get_level(ch);
+
+      if (top < 15)
+        top = 16;
+      return (rand_number(15, top));
     }
   }
 }
@@ -3539,7 +3544,8 @@ static void spar_gain(struct char_data *ch, struct char_data *vict, int type, in
         if (difference >= 51) {
           send_to_char(ch, "The difference in your levels is too great for you to gain anything.\r\n");
           return;
-        } else if (difference >= 40) {
+        }
+        if (difference >= 40) {
           gaincalc = gaincalc * 0.05;
         } else if (difference >= 30) {
           gaincalc = gaincalc * 0.10;
@@ -3667,7 +3673,8 @@ static void spar_gain(struct char_data *ch, struct char_data *vict, int type, in
       if (difference > 50) {
         send_to_char(ch, "The difference in your levels is too great for you to gain anything.\r\n");
         return;
-      } else if (difference >= 40) {
+      }
+      if (difference >= 40) {
         gain = gain * 0.05;
       } else if (difference >= 30) {
         gain = gain * 0.10;
@@ -4226,24 +4233,23 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
           stop_fighting(ch);
         }
         return;
-      } else {
-        act("@c$N@w disappears right before dying. $N appears to be immortal.@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@CYou disappear right before death, having been saved by your immortality.@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@c$N@w disappears right before dying. $N appears to be immortal.@n.", TRUE, ch, 0, vict, TO_NOTVICT);
-        decCurHealthPercent(vict, 1, 1);
-        decCurSTPercent(vict, 1, 1);
-        decCurKIPercent(vict, 1, 1);
-
-        if (char_get_fighting(vict)) {
-          stop_fighting(vict);
-        }
-        if (char_get_fighting(ch)) {
-          stop_fighting(ch);
-        }
-        char_set_position(vict, POS_SITTING);
-        char_from_room(vict);
-        char_to_room(vict, real_room(sensei_start_room(vict->chclass)));
       }
+      act("@c$N@w disappears right before dying. $N appears to be immortal.@n", TRUE, ch, 0, vict, TO_CHAR);
+      act("@CYou disappear right before death, having been saved by your immortality.@n", TRUE, ch, 0, vict, TO_VICT);
+      act("@c$N@w disappears right before dying. $N appears to be immortal.@n.", TRUE, ch, 0, vict, TO_NOTVICT);
+      decCurHealthPercent(vict, 1, 1);
+      decCurSTPercent(vict, 1, 1);
+      decCurKIPercent(vict, 1, 1);
+
+      if (char_get_fighting(vict)) {
+        stop_fighting(vict);
+      }
+      if (char_get_fighting(ch)) {
+        stop_fighting(ch);
+      }
+      char_set_position(vict, POS_SITTING);
+      char_from_room(vict);
+      char_to_room(vict, real_room(sensei_start_room(vict->chclass)));
       return;
     }
 
@@ -4708,45 +4714,45 @@ int handle_parry(struct char_data *ch)
    **/
     if (!char_is_humanoid(ch)) {
       return (rand_number(0, 5));
-    } else {
-      if (char_get_level(ch) >= 110) {
-        return (rand_number(90, 105));
-      } else if (char_get_level(ch) >= 100) {
-        return (rand_number(85, 95));
-      } else if (char_get_level(ch) >= 80) {
-        return (rand_number(70, 85));
-      } else if (char_get_level(ch) >= 40) {
-        return (rand_number(50, 70));
-      } else {
-        int top = char_get_level(ch);
-
-        if (top < 15)
-          top = 16;
-        return (rand_number(15, top));
-      }
     }
+    if (char_get_level(ch) >= 110) {
+      return (rand_number(90, 105));
+    }
+    if (char_get_level(ch) >= 100) {
+      return (rand_number(85, 95));
+    }
+    if (char_get_level(ch) >= 80) {
+      return (rand_number(70, 85));
+    }
+    if (char_get_level(ch) >= 40) {
+      return (rand_number(50, 70));
+    }
+    int top = char_get_level(ch);
+
+    if (top < 15)
+      top = 16;
+    return (rand_number(15, top));
   }
 
   if (char_prf_flagged(ch, PRF_NOPARRY)) {
     return (-2);
-  } else {
-    int num = char_get_skill(ch, SKILL_PARRY);
-    if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 3 || char_get_genome(ch, 1) == 3)) {
-      num += 10;
-    }
-    if (char_get_skills_base(ch, SKILL_STYLE) >= 100) {
-      num += 5;
-    } else if (char_get_skills_base(ch, SKILL_STYLE) >= 80) {
-      num += 4;
-    } else if (char_get_skills_base(ch, SKILL_STYLE) >= 60) {
-      num += 3;
-    } else if (char_get_skills_base(ch, SKILL_STYLE) >= 40) {
-      num += 2;
-    } else if (char_get_skills_base(ch, SKILL_STYLE) >= 20) {
-      num += 1;
-    }
-    return (num);
   }
+  int num = char_get_skill(ch, SKILL_PARRY);
+  if (char_is_mutant(ch) && (char_get_genome(ch, 0) == 3 || char_get_genome(ch, 1) == 3)) {
+    num += 10;
+  }
+  if (char_get_skills_base(ch, SKILL_STYLE) >= 100) {
+    num += 5;
+  } else if (char_get_skills_base(ch, SKILL_STYLE) >= 80) {
+    num += 4;
+  } else if (char_get_skills_base(ch, SKILL_STYLE) >= 60) {
+    num += 3;
+  } else if (char_get_skills_base(ch, SKILL_STYLE) >= 40) {
+    num += 2;
+  } else if (char_get_skills_base(ch, SKILL_STYLE) >= 20) {
+    num += 1;
+  }
+  return (num);
 }
 
 /* This handles whether a step of the combo was preformed. */
@@ -4887,7 +4893,8 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
       }
     }
     return 0;
-  } else if (char_get_lastattack(ch) == char_get_combo(ch) && char_get_combhits(ch) < physical_mastery(ch)) {
+  }
+  if (char_get_lastattack(ch) == char_get_combo(ch) && char_get_combhits(ch) < physical_mastery(ch)) {
     char_set_combhits(ch, char_get_combhits(ch) + (1));
     while (success == FALSE) {
       if (char_get_combhits(ch) >= 20) { /* We're kicking ass! */
@@ -5334,7 +5341,8 @@ static int handle_combo(struct char_data *ch, struct char_data *vict)
       } /* End continued hits section */
     }
     return char_get_combhits(ch);
-  } else if (char_get_lastattack(ch) == char_get_combo(ch) && char_get_combhits(ch) >= physical_mastery(ch)) {
+  }
+  if (char_get_lastattack(ch) == char_get_combo(ch) && char_get_combhits(ch) >= physical_mastery(ch)) {
     char_set_combhits(ch, char_get_combhits(ch) + (1));
     send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Combo FINISHED for massive damage@G!@n\r\n", char_get_combhits(ch));
   } else if (char_get_combo(ch) != char_get_lastattack(ch) && char_get_combo(ch) > -1) {
@@ -5414,7 +5422,8 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
           dmg /= 4;
           hurt(0, 0, ch, vict, NULL, dmg, 1);
           return;
-        } else if (dge > rand_number(1, 130)) {
+        }
+        if (dge > rand_number(1, 130)) {
           act("@C$N@W manages to dodge your Spiral Comet blast, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_CHAR);
           act("@WYou dodge @C$n's@W Spiral Comet blast, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_VICT);
           act("@C$N@W manages to dodge @c$n's@W Spiral Comet blast, letting it slam into the surroundings!@n", FALSE, ch, 0, vict, TO_NOTVICT);
@@ -5431,74 +5440,70 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
           pcost(ch, amount, 0);
           hurt(0, 0, ch, vict, NULL, 0, 1);
           return;
-        } else {
-          act("@WYou can't believe it but your Spiral Comet blast misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-          act("@C$n@W fires a Spiral Comet blast at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
-          act("@c$n@W fires a Spiral Comet blast at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
-          pcost(ch, amount, 0);
-          hurt(0, 0, ch, vict, NULL, 0, 1);
-          return;
         }
-      } else {
         act("@WYou can't believe it but your Spiral Comet blast misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
-        act("@C$n@W fires a Spiral Comet blast at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
-        act("@c$n@W fires a Spiral Comet blast at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+        act("@C$n@W fires a Spiral Comet blast at you, but misses!@n ", FALSE, ch, 0, vict, TO_VICT);
+        act("@c$n@W fires a Spiral Comet blast at @C$N@W, but somehow misses!@n ", FALSE, ch, 0, vict, TO_NOTVICT);
         pcost(ch, amount, 0);
+        hurt(0, 0, ch, vict, NULL, 0, 1);
+        return;
       }
+      act("@WYou can't believe it but your Spiral Comet blast misses, flying through the air harmlessly!@n", FALSE, ch, 0, vict, TO_CHAR);
+      act("@C$n@W fires a Spiral Comet blast at you, but misses!@n", FALSE, ch, 0, vict, TO_VICT);
+      act("@c$n@W fires a Spiral Comet blast at @C$N@W, but somehow misses!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+      pcost(ch, amount, 0);
       hurt(0, 0, ch, vict, NULL, 0, 1);
       return;
-    } else {
-      if (first == TRUE) {
-        dmg = damtype(ch, 44, skill, .5);
-      } else {
-        dmg = damtype(ch, 45, skill, .01);
-      }
-      switch (rand_number(1, 5)) {
-        case 1:
-          act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S chest and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR chest and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S chest and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
-          dam_eq_loc(vict, 4);
-          break;
-        case 2: /* Critical */
-          act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S head and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR head and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S head and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          dmg *= 2;
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
-          dam_eq_loc(vict, 3);
-          break;
-        case 3:
-          act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S body and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR body and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S body and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          hurt(0, 0, ch, vict, NULL, dmg, 1);
-          dam_eq_loc(vict, 4);
-          break;
-        case 4: /* Weak */
-          act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S arm and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR arm and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S arm and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          dmg /= 2;
-          dam_eq_loc(vict, 1);
-          hurt(0, 190, ch, vict, NULL, dmg, 1);
-          break;
-        case 5: /* Weak 2 */
-          act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S leg and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
-          act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR leg and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
-          act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S leg and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-          dmg /= 2;
-          dam_eq_loc(vict, 2);
-          hurt(1, 190, ch, vict, NULL, dmg, 1);
-          break;
-      }
-      pcost(ch, amount, 0);
-      return;
     }
-  } else {
+    if (first == TRUE) {
+      dmg = damtype(ch, 44, skill, .5);
+    } else {
+      dmg = damtype(ch, 45, skill, .01);
+    }
+    switch (rand_number(1, 5)) {
+      case 1:
+        act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S chest and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR chest and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S chest and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        dam_eq_loc(vict, 4);
+        break;
+      case 2: /* Critical */
+        act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S head and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR head and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S head and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        dmg *= 2;
+        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        dam_eq_loc(vict, 3);
+        break;
+      case 3:
+        act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S body and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR body and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S body and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        hurt(0, 0, ch, vict, NULL, dmg, 1);
+        dam_eq_loc(vict, 4);
+        break;
+      case 4: /* Weak */
+        act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S arm and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR arm and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S arm and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        dmg /= 2;
+        dam_eq_loc(vict, 1);
+        hurt(0, 190, ch, vict, NULL, dmg, 1);
+        break;
+      case 5: /* Weak 2 */
+        act("@WYou launch a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S leg and explodes!@n", TRUE, ch, 0, vict, TO_CHAR);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at YOU! It slams into YOUR leg and explodes!@n", TRUE, ch, 0, vict, TO_VICT);
+        act("@C$n@W launches a bright @mp@Mu@mr@Mp@ml@Me@W ball of energy down at @c$N@W! It slams into $S leg and explodes!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+        dmg /= 2;
+        dam_eq_loc(vict, 2);
+        hurt(1, 190, ch, vict, NULL, dmg, 1);
+        break;
+    }
+    pcost(ch, amount, 0);
     return;
   }
+  return;
 }
 
 static void handle_death_msg(struct char_data *ch, struct char_data *vict, int type)

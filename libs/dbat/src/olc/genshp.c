@@ -452,7 +452,8 @@ int save_shops(zone_rnum zone_num)
   if (!(shop_file = atomic_open(&af, fname, false))) {
     mudlog(LOG_BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC: Cannot open shop file!");
     return FALSE;
-  } else if (fprintf(shop_file, "CircleMUD v3.0 Shop File~\n") < 0) {
+  }
+  if (fprintf(shop_file, "CircleMUD v3.0 Shop File~\n") < 0) {
     mudlog(LOG_BRF, ADMLVL_GOD, TRUE, "SYSERR: OLC: Cannot write to shop file!");
     atomic_abort(&af);
     return FALSE;

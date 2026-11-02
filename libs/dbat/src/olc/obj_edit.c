@@ -126,24 +126,25 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
           disp_restring_menu(d);
           d->obj_editval = EDIT_RESTRING_MAIN;
           return;
-        } else if (strstr(arg, "@")) {
+        }
+        if (strstr(arg, "@")) {
           write_to_output(d, "@RNO COLORCODE IN THE KEYWORD NAME.@n");
           write_to_output(d, "@wEnter: @n\n");
           return;
-        } else if (strlen(arg) > 100) {
+        }
+        if (strlen(arg) > 100) {
           write_to_output(d, "@wToo long. Limit is 100 character.@n\r\n");
           write_to_output(d, "@wEnter: @n\n");
           return;
-        } else {
-          if (d->obj_name) {
-            free(d->obj_name);
-          }
-          *buf = '\0';
-          snprintf(buf, sizeof(buf), "%s", arg);
-          d->obj_name = strdup(buf);
-          disp_restring_menu(d);
-          d->obj_editval = EDIT_RESTRING_MAIN;
         }
+        if (d->obj_name) {
+          free(d->obj_name);
+        }
+        *buf = '\0';
+        snprintf(buf, sizeof(buf), "%s", arg);
+        d->obj_name = strdup(buf);
+        disp_restring_menu(d);
+        d->obj_editval = EDIT_RESTRING_MAIN;
         break;
 
       case EDIT_RESTRING_SDESC: /* Short Desc Menu */
@@ -152,20 +153,20 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
           disp_custom_menu(d);
           d->obj_editval = EDIT_RESTRING_MAIN;
           return;
-        } else if (strlen(arg) > 150) {
+        }
+        if (strlen(arg) > 150) {
           write_to_output(d, "@wToo long. Limit is 200 character.@n\r\n");
           write_to_output(d, "@wEnter: @n\n");
           return;
-        } else {
-          if (d->obj_short) {
-            free(d->obj_short);
-          }
-          *buf = '\0';
-          snprintf(buf, sizeof(buf), "%s", arg);
-          d->obj_short = strdup(buf);
-          disp_restring_menu(d);
-          d->obj_editval = EDIT_RESTRING_MAIN;
         }
+        if (d->obj_short) {
+          free(d->obj_short);
+        }
+        *buf = '\0';
+        snprintf(buf, sizeof(buf), "%s", arg);
+        d->obj_short = strdup(buf);
+        disp_restring_menu(d);
+        d->obj_editval = EDIT_RESTRING_MAIN;
         break;
 
       case EDIT_RESTRING_LDESC: /* Long Desc Menu */
@@ -174,27 +175,28 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
           disp_custom_menu(d);
           d->obj_editval = EDIT_RESTRING_MAIN;
           return;
-        } else if (strlen(arg) > 200) {
+        }
+        if (strlen(arg) > 200) {
           write_to_output(d, "@wToo long. Limit is 200 character.@n\r\n");
           write_to_output(d, "@wEnter: @n\n");
           return;
-        } else {
-          if (d->obj_long) {
-            free(d->obj_long);
-          }
-          *buf = '\0';
-          snprintf(buf, sizeof(buf), "%s", arg);
-          d->obj_long = strdup(buf);
-          disp_restring_menu(d);
-          d->obj_editval = EDIT_RESTRING_MAIN;
         }
+        if (d->obj_long) {
+          free(d->obj_long);
+        }
+        *buf = '\0';
+        snprintf(buf, sizeof(buf), "%s", arg);
+        d->obj_long = strdup(buf);
+        disp_restring_menu(d);
+        d->obj_editval = EDIT_RESTRING_MAIN;
         break;
 
       case EDIT_RESTRING_QUIT:
         if (!*arg) {
           write_to_output(d, "Save current changes and be charged?\r\nYes or No\r\n");
           return;
-        } else if (!strcasecmp(arg, "yes") || !strcasecmp(arg, "Yes") || !strcasecmp(arg, "y") || !strcasecmp(arg, "Y")) {
+        }
+        if (!strcasecmp(arg, "yes") || !strcasecmp(arg, "Yes") || !strcasecmp(arg, "y") || !strcasecmp(arg, "Y")) {
           obj = d->obj_point;
 
           *buf = '\0';
@@ -269,13 +271,12 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
             if (d->obj_type != 16) {
               write_to_output(d, "@wYou can only use this part of the menu if you select the weapon type.@n\r\n");
               return;
-            } else {
-              write_to_output(d, "@wEnter number to select type of weapon you want it to be: @n\n");
-              write_to_output(d, "@D[ @C--1@W) @cSword       @C--2@W) @cDagger      @C--3@W) @cSpear        @D]@n\n");
-              write_to_output(d, "@D[ @C--4@W) @cClub        @C--5@W) @cGun         @C--6@W) @cBrawling     @D]@n\n");
-              write_to_output(d, "@wEnter: @n\n");
-              d->obj_editval = EDIT_CUSTOM_WEAPON;
             }
+            write_to_output(d, "@wEnter number to select type of weapon you want it to be: @n\n");
+            write_to_output(d, "@D[ @C--1@W) @cSword       @C--2@W) @cDagger      @C--3@W) @cSpear        @D]@n\n");
+            write_to_output(d, "@D[ @C--4@W) @cClub        @C--5@W) @cGun         @C--6@W) @cBrawling     @D]@n\n");
+            write_to_output(d, "@wEnter: @n\n");
+            d->obj_editval = EDIT_CUSTOM_WEAPON;
             break;
           case 'q': /* They are exiting, time to finalize purchase or clear it. */
           case 'Q':
@@ -294,24 +295,25 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
           disp_custom_menu(d);
           d->obj_editval = EDIT_CUSTOM_MAIN;
           return;
-        } else if (strstr(arg, "@")) {
+        }
+        if (strstr(arg, "@")) {
           write_to_output(d, "@RNO COLORCODE IN THE KEYWORD NAME.@n");
           write_to_output(d, "@wEnter: @n\n");
           return;
-        } else if (strlen(arg) > 100) {
+        }
+        if (strlen(arg) > 100) {
           write_to_output(d, "@wToo long. Limit is 100 character.@n\r\n");
           write_to_output(d, "@wEnter: @n\n");
           return;
-        } else {
-          if (d->obj_name) {
-            free(d->obj_name);
-          }
-          *buf = '\0';
-          snprintf(buf, sizeof(buf), "%s", arg);
-          d->obj_name = strdup(buf);
-          disp_custom_menu(d);
-          d->obj_editval = EDIT_CUSTOM_MAIN;
         }
+        if (d->obj_name) {
+          free(d->obj_name);
+        }
+        *buf = '\0';
+        snprintf(buf, sizeof(buf), "%s", arg);
+        d->obj_name = strdup(buf);
+        disp_custom_menu(d);
+        d->obj_editval = EDIT_CUSTOM_MAIN;
         break;
 
       case EDIT_CUSTOM_SDESC: /* Short Desc Menu */
@@ -320,20 +322,20 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
           disp_custom_menu(d);
           d->obj_editval = EDIT_CUSTOM_MAIN;
           return;
-        } else if (strlen(arg) > 150) {
+        }
+        if (strlen(arg) > 150) {
           write_to_output(d, "@wToo long. Limit is 200 character.@n\r\n");
           write_to_output(d, "@wEnter: @n\n");
           return;
-        } else {
-          if (d->obj_short) {
-            free(d->obj_short);
-          }
-          *buf = '\0';
-          snprintf(buf, sizeof(buf), "%s", arg);
-          d->obj_short = strdup(buf);
-          disp_custom_menu(d);
-          d->obj_editval = EDIT_CUSTOM_MAIN;
         }
+        if (d->obj_short) {
+          free(d->obj_short);
+        }
+        *buf = '\0';
+        snprintf(buf, sizeof(buf), "%s", arg);
+        d->obj_short = strdup(buf);
+        disp_custom_menu(d);
+        d->obj_editval = EDIT_CUSTOM_MAIN;
         break;
 
       case EDIT_CUSTOM_LDESC: /* Long Desc Menu */
@@ -342,20 +344,20 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
           disp_custom_menu(d);
           d->obj_editval = EDIT_CUSTOM_MAIN;
           return;
-        } else if (strlen(arg) > 200) {
+        }
+        if (strlen(arg) > 200) {
           write_to_output(d, "@wToo long. Limit is 200 character.@n\r\n");
           write_to_output(d, "@wEnter: @n\n");
           return;
-        } else {
-          if (d->obj_long) {
-            free(d->obj_long);
-          }
-          *buf = '\0';
-          snprintf(buf, sizeof(buf), "%s", arg);
-          d->obj_long = strdup(buf);
-          disp_custom_menu(d);
-          d->obj_editval = EDIT_CUSTOM_MAIN;
         }
+        if (d->obj_long) {
+          free(d->obj_long);
+        }
+        *buf = '\0';
+        snprintf(buf, sizeof(buf), "%s", arg);
+        d->obj_long = strdup(buf);
+        disp_custom_menu(d);
+        d->obj_editval = EDIT_CUSTOM_MAIN;
         break;
 
       case EDIT_CUSTOM_TYPE: /* Type Menu */
@@ -364,21 +366,19 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
           disp_custom_menu(d);
           d->obj_editval = EDIT_CUSTOM_MAIN;
           return;
-        } else {
-          d->obj_type = atoi(arg);
-          if (d->obj_type < 1 || d->obj_type > 16) {
-            write_to_output(d, "@wValue must be between 1 and 16.@n\r\n");
-            write_to_output(d, "@wEnter: @n\n");
-            d->obj_type = 1;
-            return;
-          } else {
-            if (d->obj_type == 16) {
-              d->obj_weapon = 1;
-            }
-            disp_custom_menu(d);
-            d->obj_editval = EDIT_CUSTOM_MAIN;
-          }
         }
+        d->obj_type = atoi(arg);
+        if (d->obj_type < 1 || d->obj_type > 16) {
+          write_to_output(d, "@wValue must be between 1 and 16.@n\r\n");
+          write_to_output(d, "@wEnter: @n\n");
+          d->obj_type = 1;
+          return;
+        }
+        if (d->obj_type == 16) {
+          d->obj_weapon = 1;
+        }
+        disp_custom_menu(d);
+        d->obj_editval = EDIT_CUSTOM_MAIN;
         break;
 
       case EDIT_CUSTOM_WEAPON: /* Weapon Menu */
@@ -387,25 +387,24 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
           disp_custom_menu(d);
           d->obj_editval = EDIT_CUSTOM_MAIN;
           return;
-        } else {
-          d->obj_weapon = atoi(arg);
-          if (d->obj_weapon < 1 || d->obj_weapon > 6) {
-            write_to_output(d, "@wValue must be between 1 and 6.@n\r\n");
-            write_to_output(d, "@wEnter: @n\n");
-            d->obj_weapon = 0;
-            return;
-          } else {
-            disp_custom_menu(d);
-            d->obj_editval = EDIT_CUSTOM_MAIN;
-          }
         }
+        d->obj_weapon = atoi(arg);
+        if (d->obj_weapon < 1 || d->obj_weapon > 6) {
+          write_to_output(d, "@wValue must be between 1 and 6.@n\r\n");
+          write_to_output(d, "@wEnter: @n\n");
+          d->obj_weapon = 0;
+          return;
+        }
+        disp_custom_menu(d);
+        d->obj_editval = EDIT_CUSTOM_MAIN;
         break;
 
       case EDIT_CUSTOM_QUIT: /* Quiting */
         if (!*arg) {
           write_to_output(d, "@wPurchase this custom piece? (Y or N)@n\r\n");
           return;
-        } else if (!strcasecmp(arg, "y") || !strcasecmp(arg, "Y")) {
+        }
+        if (!strcasecmp(arg, "y") || !strcasecmp(arg, "Y")) {
           write_to_output(d, "@wPurchase complete.@n\r\n");
           desc_set_connected(d, CON_PLAYING);
           if (d->obj_weapon == 0) {

@@ -794,26 +794,26 @@ ACMD(do_varstat)
   if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
     send_to_char(ch, "That player is not in the game.\r\n");
     return;
-  } else if (char_is_npc(vict)) {
+  }
+  if (char_is_npc(vict)) {
     send_to_char(ch, "Just use stat for an NPC\r\n");
     return;
-  } else {
-    /* Display their global variables */
-    if (vict->script && vict->script->global_vars) {
-      struct trig_var_data *tv;
-      char uname[MAX_INPUT_LENGTH];
+  }
+  /* Display their global variables */
+  if (vict->script && vict->script->global_vars) {
+    struct trig_var_data *tv;
+    char uname[MAX_INPUT_LENGTH];
 
-      send_to_char(ch, "%s's Global Variables:\r\n", char_get_name(vict));
+    send_to_char(ch, "%s's Global Variables:\r\n", char_get_name(vict));
 
-      /* currently, variable context for players is always 0, so it is */
-      /* not displayed here. in the future, this might change */
-      for (tv = vict->script->global_vars; tv; tv = tv->next) {
-        if (*(tv->value) == UID_CHAR) {
-          find_uid_name(tv->value, uname, sizeof(uname));
-          send_to_char(ch, "    %10s:  [UID]: %s\r\n", tv->name, uname);
-        } else
-          send_to_char(ch, "    %10s:  %s\r\n", tv->name, tv->value);
-      }
+    /* currently, variable context for players is always 0, so it is */
+    /* not displayed here. in the future, this might change */
+    for (tv = vict->script->global_vars; tv; tv = tv->next) {
+      if (*(tv->value) == UID_CHAR) {
+        find_uid_name(tv->value, uname, sizeof(uname));
+        send_to_char(ch, "    %10s:  [UID]: %s\r\n", tv->name, uname);
+      } else
+        send_to_char(ch, "    %10s:  %s\r\n", tv->name, tv->value);
     }
   }
 }
@@ -829,7 +829,8 @@ ACMD(do_stat)
   if (!*buf1) {
     send_to_char(ch, "Stats on who or what or where?\r\n");
     return;
-  } else if (is_abbrev(buf1, "room")) {
+  }
+  if (is_abbrev(buf1, "room")) {
     do_stat_room(ch);
   } else if (is_abbrev(buf1, "mob")) {
     if (!*buf2)
@@ -883,10 +884,9 @@ ACMD(do_stat)
     if (!*buf2) {
       send_to_char(ch, "Stats on which zone?\r\n");
       return;
-    } else {
-      print_zone(ch, atoi(buf2));
-      return;
     }
+    print_zone(ch, atoi(buf2));
+    return;
   } else {
     char *name = buf1;
     int number = get_number(&name);
@@ -1336,9 +1336,8 @@ ACMD(do_show)
           if (sscanf(value, "%d", &low) != 1) {
             send_to_char(ch, "Usage: show uniques, show uniques [vnum], or show uniques [low-high]\r\n");
             return;
-          } else {
-            high = low;
           }
+          high = low;
         }
       } else {
         low  = -1;

@@ -112,17 +112,16 @@ static void assedit_setup(struct descriptor_data *d, int number)
     send_to_char(d->character, "That assembly does not exist\r\n");
     cleanup_olc(d, CLEANUP_ALL);
     return;
-  } else {
-    /* Copy the old assembly. */
-    OLC_ASSEDIT(d)->lVnum           = pOldAssembly->lVnum;
-    OLC_ASSEDIT(d)->uchAssemblyType = pOldAssembly->uchAssemblyType;
-    OLC_ASSEDIT(d)->lNumComponents  = pOldAssembly->lNumComponents;
+  }
+  /* Copy the old assembly. */
+  OLC_ASSEDIT(d)->lVnum           = pOldAssembly->lVnum;
+  OLC_ASSEDIT(d)->uchAssemblyType = pOldAssembly->uchAssemblyType;
+  OLC_ASSEDIT(d)->lNumComponents  = pOldAssembly->lNumComponents;
 
-    if (OLC_ASSEDIT(d)->lNumComponents > 0) {
-      CREATE(OLC_ASSEDIT(d)->pComponents, COMPONENT, OLC_ASSEDIT(d)->lNumComponents);
-      memmove(OLC_ASSEDIT(d)->pComponents, pOldAssembly->pComponents,
-              OLC_ASSEDIT(d)->lNumComponents * sizeof(COMPONENT));
-    }
+  if (OLC_ASSEDIT(d)->lNumComponents > 0) {
+    CREATE(OLC_ASSEDIT(d)->pComponents, COMPONENT, OLC_ASSEDIT(d)->lNumComponents);
+    memmove(OLC_ASSEDIT(d)->pComponents, pOldAssembly->pComponents,
+            OLC_ASSEDIT(d)->lNumComponents * sizeof(COMPONENT));
   }
 
   /*

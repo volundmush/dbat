@@ -193,18 +193,17 @@ ACMD(do_rpp)
       if (char_get_rp(ch) < 20) {
         send_to_char(ch, "You need at least 20 RPP to initiate a custom equipment build.\r\n");
         return;
-      } else {
-        desc_set_connected(ch->desc, CON_POBJ);
-        ch->desc->obj_name   = strdup("Generic Armor Vest");
-        ch->desc->obj_short  = strdup("@cGeneric @DArmor @WVest@n");
-        ch->desc->obj_long   = strdup("@wA @cgeneric @Darmor @Wvest@w is lying here@n");
-        ch->desc->obj_type   = 1;
-        ch->desc->obj_weapon = 0;
-        disp_custom_menu(ch->desc);
-        ch->desc->obj_editflag = EDIT_CUSTOM;
-        ch->desc->obj_editval  = EDIT_CUSTOM_MAIN;
-        return;
       }
+      desc_set_connected(ch->desc, CON_POBJ);
+      ch->desc->obj_name   = strdup("Generic Armor Vest");
+      ch->desc->obj_short  = strdup("@cGeneric @DArmor @WVest@n");
+      ch->desc->obj_long   = strdup("@wA @cgeneric @Darmor @Wvest@w is lying here@n");
+      ch->desc->obj_type   = 1;
+      ch->desc->obj_weapon = 0;
+      disp_custom_menu(ch->desc);
+      ch->desc->obj_editflag = EDIT_CUSTOM;
+      ch->desc->obj_editval  = EDIT_CUSTOM_MAIN;
+      return;
     }
     if (selection == 4) { /* Simple Align Change*/
       pay = 20;
@@ -264,7 +263,8 @@ ACMD(do_rpp)
           if (char_get_bonuses(ch, BONUS_WIMP) > 0 && ch->real_abils.str >= 70) {
             send_to_char(ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
-          } else if (char_get_aff_abils_str(ch) >= 100) {
+          }
+          if (char_get_aff_abils_str(ch) >= 100) {
             send_to_char(ch, "100 is the maximum for any stat.\r\n");
             return;
           }
@@ -274,7 +274,8 @@ ACMD(do_rpp)
           if (char_get_bonuses(ch, BONUS_FRAIL) > 0 && ch->real_abils.con >= 70) {
             send_to_char(ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
-          } else if (char_get_aff_abils_con(ch) >= 100) {
+          }
+          if (char_get_aff_abils_con(ch) >= 100) {
             send_to_char(ch, "100 is the maximum for any stat.\r\n");
             return;
           }
@@ -284,7 +285,8 @@ ACMD(do_rpp)
           if (char_get_bonuses(ch, BONUS_DULL) > 0 && ch->real_abils.intel >= 70) {
             send_to_char(ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
-          } else if (char_get_aff_abils_intel(ch) >= 100) {
+          }
+          if (char_get_aff_abils_intel(ch) >= 100) {
             send_to_char(ch, "100 is the maximum for any stat.\r\n");
             return;
           }
@@ -294,7 +296,8 @@ ACMD(do_rpp)
           if (char_get_bonuses(ch, BONUS_FOOLISH) > 0 && ch->real_abils.wis >= 70) {
             send_to_char(ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
-          } else if (char_get_aff_abils_wis(ch) >= 100) {
+          }
+          if (char_get_aff_abils_wis(ch) >= 100) {
             send_to_char(ch, "100 is the maximum for any stat.\r\n");
             return;
           }
@@ -304,7 +307,8 @@ ACMD(do_rpp)
           if (char_get_bonuses(ch, BONUS_SLOW) > 0 && ch->real_abils.cha >= 70) {
             send_to_char(ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
-          } else if (char_get_aff_abils_cha(ch) >= 100) {
+          }
+          if (char_get_aff_abils_cha(ch) >= 100) {
             send_to_char(ch, "100 is the maximum for any stat.\r\n");
             return;
           }
@@ -314,7 +318,8 @@ ACMD(do_rpp)
           if (char_get_bonuses(ch, BONUS_CLUMSY) > 0 && ch->real_abils.dex >= 70) {
             send_to_char(ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
-          } else if (char_get_aff_abils_dex(ch) >= 100) {
+          }
+          if (char_get_aff_abils_dex(ch) >= 100) {
             send_to_char(ch, "100 is the maximum for any stat.\r\n");
             return;
           }
@@ -358,10 +363,12 @@ ACMD(do_rpp)
       if (char_get_rp(ch) < pay) {
         send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
         return;
-      } else if (char_get_level(ch) >= 100) {
+      }
+      if (char_get_level(ch) >= 100) {
         send_to_char(ch, "You can not buy experience anymore at your level. I think you know why.\r\n");
         return;
-      } else if (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) < 0) {
+      }
+      if (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) < 0) {
         send_to_char(ch, "You can not buy experience anymore UNTIL you level.\r\n");
         return;
       } else {
@@ -420,10 +427,12 @@ ACMD(do_rpp)
       if (char_get_rp(ch) < pay) {
         send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
         return;
-      } else if (char_get_level(ch) >= 100) {
+      }
+      if (char_get_level(ch) >= 100) {
         send_to_char(ch, "You can't use this at level 100.\r\n");
         return;
-      } else if (char_is_arlian(ch)) {
+      }
+      if (char_is_arlian(ch)) {
         send_to_char(ch, "This is not available to bugs.\r\n");
         return;
       } else {
@@ -439,14 +448,14 @@ ACMD(do_rpp)
       if (!*arg2) {
         disp_rpp_store(ch);
         return;
-      } else if (atoi(arg2) <= 0) {
+      }
+      if (atoi(arg2) <= 0) {
         send_to_char(ch, "That is not a choice in the RPP store!\r\n");
         return;
-      } else {
-        int choice = atoi(arg2);
-        handle_rpp_store(ch, choice);
-        return;
       }
+      int choice = atoi(arg2);
+      handle_rpp_store(ch, choice);
+      return;
     }
 
     if (selection == 13) { /* Extra Feature Reward*/
@@ -459,37 +468,38 @@ ACMD(do_rpp)
       if (char_get_rp(ch) < pay) {
         send_to_char(ch, "You need at least 1 RPP to initiate an equipment restring.\r\n");
         return;
-      } else if (!(obj = get_obj_in_list_vis(ch, arg2, NULL, ch->carrying))) {
+      }
+      if (!(obj = get_obj_in_list_vis(ch, arg2, NULL, ch->carrying))) {
         send_to_char(ch, "You don't have a that equipment to restring in your inventory.\r\n");
         send_to_char(ch, "Syntax: rpp 14 (obj name)\r\n");
         return;
-      } else if (obj_extra_flagged(obj, ITEM_CUSTOM)) {
+      }
+      if (obj_extra_flagged(obj, ITEM_CUSTOM)) {
         send_to_char(ch, "You can not restring a custom piece. Why? Cause I say so. :P\r\n");
         return;
-      } else {
-        desc_set_connected(ch->desc, CON_POBJ);
-        char thename[MAX_INPUT_LENGTH], theshort[MAX_INPUT_LENGTH], thelong[MAX_INPUT_LENGTH];
-
-        *thename  = '\0';
-        *theshort = '\0';
-        *thelong  = '\0';
-
-        snprintf(thename, sizeof(thename), "%s", obj->name);
-        snprintf(theshort, sizeof(theshort), "%s", obj->short_description);
-        snprintf(thelong, sizeof(thelong), "%s", obj->description);
-
-        ch->desc->obj_name   = strdup(thename);
-        ch->desc->obj_was    = strdup(theshort);
-        ch->desc->obj_short  = strdup(theshort);
-        ch->desc->obj_long   = strdup(thelong);
-        ch->desc->obj_point  = obj;
-        ch->desc->obj_type   = 1;
-        ch->desc->obj_weapon = 0;
-        disp_restring_menu(ch->desc);
-        ch->desc->obj_editflag = EDIT_RESTRING;
-        ch->desc->obj_editval  = EDIT_RESTRING_MAIN;
-        return;
       }
+      desc_set_connected(ch->desc, CON_POBJ);
+      char thename[MAX_INPUT_LENGTH], theshort[MAX_INPUT_LENGTH], thelong[MAX_INPUT_LENGTH];
+
+      *thename  = '\0';
+      *theshort = '\0';
+      *thelong  = '\0';
+
+      snprintf(thename, sizeof(thename), "%s", obj->name);
+      snprintf(theshort, sizeof(theshort), "%s", obj->short_description);
+      snprintf(thelong, sizeof(thelong), "%s", obj->description);
+
+      ch->desc->obj_name   = strdup(thename);
+      ch->desc->obj_was    = strdup(theshort);
+      ch->desc->obj_short  = strdup(theshort);
+      ch->desc->obj_long   = strdup(thelong);
+      ch->desc->obj_point  = obj;
+      ch->desc->obj_type   = 1;
+      ch->desc->obj_weapon = 0;
+      disp_restring_menu(ch->desc);
+      ch->desc->obj_editflag = EDIT_RESTRING;
+      ch->desc->obj_editval  = EDIT_RESTRING_MAIN;
+      return;
     } /* End equipment restring reward */
 
     if (selection == 15) { /* Skillslot Reward */
@@ -497,10 +507,12 @@ ACMD(do_rpp)
       if (char_get_rp(ch) < pay) {
         send_to_char(ch, "You do not have enough RPP in your bank for that selection.\r\n");
         return;
-      } else if (char_get_bonuses(ch, BONUS_GMEMORY) && char_get_skill_slots(ch) >= 65) {
+      }
+      if (char_get_bonuses(ch, BONUS_GMEMORY) && char_get_skill_slots(ch) >= 65) {
         send_to_char(ch, "You are already at your skillslot cap.\r\n");
         return;
-      } else if (!char_get_bonuses(ch, BONUS_GMEMORY) && (char_get_skill_slots(ch) >= 60)) {
+      }
+      if (!char_get_bonuses(ch, BONUS_GMEMORY) && (char_get_skill_slots(ch) >= 60)) {
         send_to_char(ch, "You are already at your skillslot cap.\r\n");
         return;
       } else {
@@ -568,19 +580,19 @@ ACMD(do_rpp)
       if (char_get_rp(ch) < pay) {
         send_to_char(ch, "Nice try but you don't have enough RPP for that.\r\n");
         return;
-      } else {
-        send_to_char(ch, "You now have an Excel House Capsule!\r\n");
-        struct obj_data *hobj = read_object(6, VIRTUAL);
-        obj_to_char(hobj, ch);
-        char_set_rp(ch, char_get_rp(ch) - (pay));
-        ch->desc->rpp = char_get_rp(ch);
-        userWrite(ch->desc, 0, 0, 0, "index");
-        save_char(ch);
-        send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
-        send_to_imm("RPP Purchase: %s %d", char_get_name(ch), pay);
-        return;
       }
-    } else if (selection == 2) {
+      send_to_char(ch, "You now have an Excel House Capsule!\r\n");
+      struct obj_data *hobj = read_object(6, VIRTUAL);
+      obj_to_char(hobj, ch);
+      char_set_rp(ch, char_get_rp(ch) - (pay));
+      ch->desc->rpp = char_get_rp(ch);
+      userWrite(ch->desc, 0, 0, 0, "index");
+      save_char(ch);
+      send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
+      send_to_imm("RPP Purchase: %s %d", char_get_name(ch), pay);
+      return;
+    }
+    if (selection == 2) {
       return;
       pay = 200;
     }
@@ -683,15 +695,14 @@ ACMD(do_commune)
     act("@W$n closes $s eyes for a moment. Then $e reopens them and frowns.@n", TRUE, ch, 0, 0, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
     return;
-  } else {
-    decCurKI(ch, cost, 0);
-    decCurST(ch, cost, 0);
-    reveal_hiding(ch, 0);
-    act("@cYou close your eyes and commune with the Eldritch Star spiritually. You feel your stamina replenish some.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@W$n closes $s eyes for a moment. Then $e reopens them and smiles.@n", TRUE, ch, 0, 0, TO_ROOM);
-    char_set_wait(ch, PULSE_2SEC);
-    return;
   }
+  decCurKI(ch, cost, 0);
+  decCurST(ch, cost, 0);
+  reveal_hiding(ch, 0);
+  act("@cYou close your eyes and commune with the Eldritch Star spiritually. You feel your stamina replenish some.@n", TRUE, ch, 0, 0, TO_CHAR);
+  act("@W$n closes $s eyes for a moment. Then $e reopens them and smiles.@n", TRUE, ch, 0, 0, TO_ROOM);
+  char_set_wait(ch, PULSE_2SEC);
+  return;
 }
 
 ACMD(do_pose)
@@ -735,35 +746,34 @@ ACMD(do_pose)
     decCurST(ch, getMaxST(ch) / 40, 0);
     improve_skill(ch, SKILL_POSE, 0);
     return;
-  } else {
-    reveal_hiding(ch, 0);
-    switch (rand_number(1, 4)) {
-      case 1:
-        act("@WYou turn around with your back to everyone. You bend forward dramatically and put your head between your legs!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W turns around with $s back to you. $e bends forward dramatically and puts $s head between $s legs. Strange...@n", TRUE, ch, 0, 0, TO_ROOM);
-        break;
-      case 2:
-        act("@WYou turn to the side while flexing your muscles and extend your arms up at an angle dramatically!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W turns to the side while flexing $s muscles and extending $s arms up at an angle dramatically!@n", TRUE, ch, 0, 0, TO_ROOM);
-        break;
-      case 3:
-        act("@WYou extend one leg outward while you bend forward, balancing on a single leg!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W extends one leg outward while $e bends forward, balancing on a single leg!@n", TRUE, ch, 0, 0, TO_ROOM);
-        break;
-      case 4:
-        act("@WYou drop down to one knee while angling your arms up to either side and slanting your hands down like wings!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W drops down to one knee while angling $s arms up to either side and slanting $s hands down like wings!@n", TRUE, ch, 0, 0, TO_ROOM);
-        break;
-    }
-    send_to_char(ch, "@WYou feel your confidence increase! @G+8 Str @Wand@G +8 Agl!@n\r\n");
-    assign_affect(ch, AFF_SPECIAL_POSE, SKILL_POSE, -1, 8, 0, 0, 8, 0, 0);
-    save_char(ch);
-    int64_t before = (getMaxLF(ch));
-    incCurLF(ch, (getMaxLF(ch)) - before, true);
-    decCurST(ch, getMaxST(ch) / 40, 0);
-    improve_skill(ch, SKILL_POSE, 0);
-    return;
   }
+  reveal_hiding(ch, 0);
+  switch (rand_number(1, 4)) {
+    case 1:
+      act("@WYou turn around with your back to everyone. You bend forward dramatically and put your head between your legs!@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@C$n@W turns around with $s back to you. $e bends forward dramatically and puts $s head between $s legs. Strange...@n", TRUE, ch, 0, 0, TO_ROOM);
+      break;
+    case 2:
+      act("@WYou turn to the side while flexing your muscles and extend your arms up at an angle dramatically!@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@C$n@W turns to the side while flexing $s muscles and extending $s arms up at an angle dramatically!@n", TRUE, ch, 0, 0, TO_ROOM);
+      break;
+    case 3:
+      act("@WYou extend one leg outward while you bend forward, balancing on a single leg!@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@C$n@W extends one leg outward while $e bends forward, balancing on a single leg!@n", TRUE, ch, 0, 0, TO_ROOM);
+      break;
+    case 4:
+      act("@WYou drop down to one knee while angling your arms up to either side and slanting your hands down like wings!@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@C$n@W drops down to one knee while angling $s arms up to either side and slanting $s hands down like wings!@n", TRUE, ch, 0, 0, TO_ROOM);
+      break;
+  }
+  send_to_char(ch, "@WYou feel your confidence increase! @G+8 Str @Wand@G +8 Agl!@n\r\n");
+  assign_affect(ch, AFF_SPECIAL_POSE, SKILL_POSE, -1, 8, 0, 0, 8, 0, 0);
+  save_char(ch);
+  int64_t before = (getMaxLF(ch));
+  incCurLF(ch, (getMaxLF(ch)) - before, true);
+  decCurST(ch, getMaxST(ch) / 40, 0);
+  improve_skill(ch, SKILL_POSE, 0);
+  return;
 }
 
 /* End of do_fury for halfbreeds to release their raaage, rawrg! */
@@ -829,12 +839,11 @@ ACMD(do_think)
   if (!*argument) {
     send_to_char(ch, "Syntax: think (message)\r\n");
     return;
-  } else {
-    struct char_data *tch;
-    tch = char_get_mindlink(ch);
-    send_to_char(ch, "@c%s@w reads your thoughts, '@C%s@w'@n\r\n", char_get_name(tch), argument);
-    send_to_char(tch, "@c%s@w thinks, '@C%s@w'@n\r\n", char_get_name(ch), argument);
-    send_to_imm("@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(tch) > 0 ? char_get_name(tch) : char_get_user(tch), argument);
-    return;
   }
+  struct char_data *tch;
+  tch = char_get_mindlink(ch);
+  send_to_char(ch, "@c%s@w reads your thoughts, '@C%s@w'@n\r\n", char_get_name(tch), argument);
+  send_to_char(tch, "@c%s@w thinks, '@C%s@w'@n\r\n", char_get_name(ch), argument);
+  send_to_imm("@GTELEPATHY: @C%s@G telepaths @c%s, @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(tch) > 0 ? char_get_name(tch) : char_get_user(tch), argument);
+  return;
 }

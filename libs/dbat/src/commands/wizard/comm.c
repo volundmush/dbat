@@ -94,7 +94,8 @@ ACMD(do_news)
       if (*line == '#') {                    /* Count the entries */
         if (sscanf(line, "#%d", &nr) != 1) { /* Check the entry */
           continue;
-        } else if (nr != lookup) {
+        }
+        if (nr != lookup) {
           entries++;
           continue;
         } else { /* One we want to read */
@@ -168,10 +169,9 @@ ACMD(do_news)
     *lastline = '\0';
     char_set_wait(ch, PULSE_1SEC);
     return;
-  } else {
-    send_to_char(ch, "That news entry does not exist.\r\n");
-    return;
   }
+  send_to_char(ch, "That news entry does not exist.\r\n");
+  return;
 }
 
 /* Write the news entry */
@@ -193,10 +193,12 @@ ACMD(do_newsedit)
   if (!*argument) {
     send_to_char(ch, "Syntax: newsedit (title)\r\n");
     return;
-  } else if (strlen(argument) > 50) {
+  }
+  if (strlen(argument) > 50) {
     send_to_char(ch, "Limit of 50 characters for title.\r\n");
     return;
-  } else if (strstr(argument, "#")) {
+  }
+  if (strstr(argument, "#")) {
     send_to_char(ch, "# is a forbidden character for news entries as it is used by the file system.\r\n");
     return;
   }
@@ -214,9 +216,8 @@ ACMD(do_newsedit)
       entries++;
       if (sscanf(line, "#%d", &nr) != 1) {
         continue;
-      } else {
-        lastentry = nr;
       }
+      lastentry = nr;
     }
   } /* End of main read while */
   fclose(fl);

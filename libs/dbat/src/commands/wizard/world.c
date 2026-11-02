@@ -84,7 +84,8 @@ ACMD(do_transobj)
   if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
     send_to_char(ch, "You want to send what?\r\n");
     return;
-  } else if (!strcasecmp("all", arg2)) {
+  }
+  if (!strcasecmp("all", arg2)) {
     int num               = obj_get_vnum(obj);
     struct obj_data *obj2 = NULL;
 
@@ -692,17 +693,16 @@ ACMD(do_zreset)
     if (char_get_admlevel(ch) < ADMLVL_VICE) {
       send_to_char(ch, "You do not have permission to reset the entire world.\r\n");
       return;
-    } else {
-      for (i = 0; i <= top_of_zone_table; i++) {
-        if (i < 200) {
-          reset_zone(i);
-        }
-      }
-      send_to_char(ch, "Reset world.\r\n");
-      mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(ch)), TRUE, "(GC) %s reset all MUD zones.", char_get_name(ch));
-      log_imm_action("RESET: %s has reset all MUD zones.", char_get_name(ch));
-      return;
     }
+    for (i = 0; i <= top_of_zone_table; i++) {
+      if (i < 200) {
+        reset_zone(i);
+      }
+    }
+    send_to_char(ch, "Reset world.\r\n");
+    mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(ch)), TRUE, "(GC) %s reset all MUD zones.", char_get_name(ch));
+    log_imm_action("RESET: %s has reset all MUD zones.", char_get_name(ch));
+    return;
   } else if (*arg == '.' || !*arg)
     i = world[char_get_in_room(ch)].zone;
   else {

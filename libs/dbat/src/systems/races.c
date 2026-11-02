@@ -143,14 +143,15 @@ int wield_type(int chsize, const struct obj_data *weap)
 
   if (chsize > obj_get_size(weap)) {
     return WIELD_LIGHT;
-  } else if (chsize >= obj_get_size(weap) - 1) {
-    return WIELD_ONEHAND;
-  } else if (chsize < obj_get_size(weap) - 1) {
-    return WIELD_TWOHAND;
-  } else {
-    mud_log("unknown size vector in wield_type: chsize=%d, weapsize=%d", chsize, obj_get_size(weap));
-    return WIELD_NONE;
   }
+  if (chsize >= obj_get_size(weap) - 1) {
+    return WIELD_ONEHAND;
+  }
+  if (chsize < obj_get_size(weap) - 1) {
+    return WIELD_TWOHAND;
+  }
+  mud_log("unknown size vector in wield_type: chsize=%d, weapsize=%d", chsize, obj_get_size(weap));
+  return WIELD_NONE;
 }
 
 static int race_bodyparts[NUM_RACES][NUM_WEARS] = {
@@ -384,9 +385,8 @@ static int race_max_transform_tier(char_data *ch)
     case RACE_SAIYAN:
       if (char_plr_flagged(ch, PLR_LSSJ)) {
         return 2;
-      } else {
-        return 4;
       }
+      return 4;
     case RACE_HUMAN:
     case RACE_ICER:
     case RACE_NAMEK:
@@ -586,15 +586,13 @@ static const transform_bonus *race_trans_table(const char_data *ch)
     case RACE_ANDROID:
       if (char_plr_flagged(ch, PLR_SENSEM)) {
         return android_trans_bonus_sense;
-      } else {
-        return android_trans_bonus;
       }
+      return android_trans_bonus;
     case RACE_SAIYAN:
       if (char_plr_flagged(ch, PLR_LSSJ)) {
         return saiyan_trans_bonus_legendary;
-      } else {
-        return saiyan_trans_bonus;
       }
+      return saiyan_trans_bonus;
     case RACE_HUMAN:
       return human_trans_bonus;
     case RACE_NAMEK:
@@ -766,11 +764,10 @@ bool race_check_trans_unlock(char_data *ch, int tier)
       if (char_get_rp(ch) < rpp_cost) {
         send_to_char(ch, "You need %i RPP in order to unlock this transformation.\r\n", rpp_cost);
         return false;
-      } else {
-        char_set_rp(ch, char_get_rp(ch) - (rpp_cost));
-        char_set_transcost(ch, (tier)-1, TRUE);
-        send_to_char(ch, "You pay %i RPP to permanently unlock this transformation!\r\n", rpp_cost);
       }
+      char_set_rp(ch, char_get_rp(ch) - (rpp_cost));
+      char_set_transcost(ch, (tier)-1, TRUE);
+      send_to_char(ch, "You pay %i RPP to permanently unlock this transformation!\r\n", rpp_cost);
     }
   }
 
@@ -792,11 +789,10 @@ bool race_check_trans_unlock(char_data *ch, int tier)
                      "You need %i practice points in order to obtain a transformation for the first time.\r\n",
                      ps_cost);
         return false;
-      } else {
-        char_set_practice_points(ch, char_get_practice_points(ch) - (50));
-        char_set_transcost(ch, (tier)-1, TRUE);
-        send_to_char(ch, "You pay %i PS to permanently unlock this transformation!\r\n", ps_cost);
       }
+      char_set_practice_points(ch, char_get_practice_points(ch) - (50));
+      char_set_transcost(ch, (tier)-1, TRUE);
+      send_to_char(ch, "You pay %i PS to permanently unlock this transformation!\r\n", ps_cost);
     }
   }
 
@@ -1182,12 +1178,11 @@ void race_echo_transform(char_data *ch, int tier)
             act("@C$n @Wroars and then stands at $s full height. Then $s muscles start to buldge and grow as $e flexes them! Suddenly $s eyes begin to glow @wwhite@W with energy, $s hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around $s body! @C$n@W releases $s @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n",
                 TRUE, ch, 0, 0, TO_ROOM);
             return;
-          } else {
-            act("@WBlinding rage burns through your mind as a sudden eruption of energy surges forth! A golden aura bursts up around your body, glowing as bright as the sun. Rushing winds rocket out from your body in every direction as bolts of electricity begin to crackle in your aura. As your aura dims you are left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n",
-                TRUE, ch, 0, 0, TO_CHAR);
-            act("@C$n@W stands up straight with $s head back as $e releases an ear piercing scream! A blindingly bright golden aura bursts up around $s body, glowing as bright as the sun. As rushing winds begin to rocket out from $m in every direction, bolts of electricity flash and crackle in $s aura. As $s aura begins to dim $e is left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n",
-                TRUE, ch, 0, 0, TO_ROOM);
           }
+          act("@WBlinding rage burns through your mind as a sudden eruption of energy surges forth! A golden aura bursts up around your body, glowing as bright as the sun. Rushing winds rocket out from your body in every direction as bolts of electricity begin to crackle in your aura. As your aura dims you are left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n",
+              TRUE, ch, 0, 0, TO_CHAR);
+          act("@C$n@W stands up straight with $s head back as $e releases an ear piercing scream! A blindingly bright golden aura bursts up around $s body, glowing as bright as the sun. As rushing winds begin to rocket out from $m in every direction, bolts of electricity flash and crackle in $s aura. As $s aura begins to dim $e is left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n",
+              TRUE, ch, 0, 0, TO_ROOM);
           return;
         case 3:
           act("@WElectricity begins to crackle around your body as your aura grows explosively! You yell as your powerlevel begins to skyrocket while your hair grows to multiple times the length it was previously. Your muscles become incredibly dense instead of growing in size, preserving your speed. Finally your irises appear just as your transformation becomes complete, having achieved @CSuper @YSaiyan @GThird@W!@n",
@@ -1497,9 +1492,8 @@ const int64_t *race_soft_cap_table(const char_data *ch)
     case RACE_ANDROID:
       if (char_plr_flagged(ch, PLR_ABSORB)) {
         return soft_cap_fixed;
-      } else {
-        return soft_cap_variable;
       }
+      return soft_cap_variable;
     case RACE_BIO:
     case RACE_MAJIN:
       return soft_cap_variable;
@@ -1517,9 +1511,8 @@ softcap_type race_soft_cap_type(const char_data *ch)
     case RACE_ANDROID:
       if (char_plr_flagged(ch, PLR_ABSORB)) {
         return SOFTCAP_FIXED;
-      } else {
-        return SOFTCAP_VARIABLE;
       }
+      return SOFTCAP_VARIABLE;
     default:
       return SOFTCAP_FIXED;
   }

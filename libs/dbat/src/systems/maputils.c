@@ -32,11 +32,10 @@ static void ping_ship(int vnum, int vnum2)
     if (found == FALSE) {
       if (!(obj = find_control(tch))) {
         continue;
-      } else {
-        if (obj_get_value(obj, 0) == vnum && vnum != vnum2) {
-          controls = obj;
-          found    = TRUE;
-        }
+      }
+      if (obj_get_value(obj, 0) == vnum && vnum != vnum2) {
+        controls = obj;
+        found    = TRUE;
       }
     }
   }

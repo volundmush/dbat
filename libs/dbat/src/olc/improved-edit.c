@@ -252,19 +252,24 @@ static void parse_edit_action(int command, char *string, struct descriptor_data 
       if ((s = strtok(string, "'")) == NULL) {
         write_to_output(d, "Invalid format.\r\n");
         return;
-      } else if ((s = strtok(NULL, "'")) == NULL) {
+      }
+      if ((s = strtok(NULL, "'")) == NULL) {
         write_to_output(d, "Target string must be enclosed in single quotes.\r\n");
         return;
-      } else if ((t = strtok(NULL, "'")) == NULL) {
+      }
+      if ((t = strtok(NULL, "'")) == NULL) {
         write_to_output(d, "No replacement string.\r\n");
         return;
-      } else if ((t = strtok(NULL, "'")) == NULL) {
+      }
+      if ((t = strtok(NULL, "'")) == NULL) {
         write_to_output(d, "Replacement string must be enclosed in single quotes.\r\n");
         return;
         /*wb's fix for empty buffer replacement crashing */
-      } else if ((!*d->str)) {
+      }
+      if ((!*d->str)) {
         return;
-      } else if ((total_len = ((strlen(t) - strlen(s)) + strlen(*d->str))) <= d->max_str) {
+      }
+      if ((total_len = ((strlen(t) - strlen(s)) + strlen(*d->str))) <= d->max_str) {
         if ((replaced = replace_str(d->str, s, t, rep_all, d->max_str)) > 0) {
           write_to_output(d, "Replaced %d occurance%sof '%s' with '%s'.\r\n", replaced, ((replaced != 1) ? "s " : " "), s, t);
         } else if (replaced == 0) {
@@ -294,10 +299,12 @@ static void parse_edit_action(int command, char *string, struct descriptor_data 
       if (*d->str == NULL) {
         write_to_output(d, "Buffer is empty.\r\n");
         return;
-      } else if (line_low <= 0) {
+      }
+      if (line_low <= 0) {
         write_to_output(d, "Invalid, line numbers to delete must be higher than 0.\r\n");
         return;
-      } else if (!(s = line_start(*d->str, line_low))) {
+      }
+      if (!(s = line_start(*d->str, line_low))) {
         write_to_output(d, "Line(s) out of range; not deleting.\r\n");
         return;
       }
@@ -382,10 +389,12 @@ static void parse_edit_action(int command, char *string, struct descriptor_data 
         write_to_output(d, command == PARSE_INSERT ? "Buffer is empty, nowhere to insert.\r\n"
                                                    : "Buffer is empty, nothing to change.\r\n");
         return;
-      } else if (line_low <= 0) {
+      }
+      if (line_low <= 0) {
         write_to_output(d, "Line number must be higher than 0.\r\n");
         return;
-      } else if (!(s = line_start(*d->str, line_low))) {
+      }
+      if (!(s = line_start(*d->str, line_low))) {
         write_to_output(d, command == PARSE_INSERT ? "Line number out of range; insert aborted.\r\n"
                                                    : "Line number out of range; change aborted.\r\n");
         return;

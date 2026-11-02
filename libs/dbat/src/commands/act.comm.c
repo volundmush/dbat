@@ -82,16 +82,20 @@ ACMD(do_voice)
   if (!*argument) {
     send_to_char(ch, "What are you changing your voice description to?\r\n");
     return;
-  } else if (strlen(argument) > 75) {
+  }
+  if (strlen(argument) > 75) {
     send_to_char(ch, "Your voice description can not be longer than 75 characters.\r\n");
     return;
-  } else if (strstr(argument, "@")) {
+  }
+  if (strstr(argument, "@")) {
     send_to_char(ch, "You can not use colorcode in voice descriptions.\r\n");
     return;
-  } else if (char_get_voice(ch) != NULL && char_get_rp(ch) < 1) {
+  }
+  if (char_get_voice(ch) != NULL && char_get_rp(ch) < 1) {
     send_to_char(ch, "Your voice has already been set. You will need at least 1 RPP to be able to change it.\r\n");
     return;
-  } else if (char_get_voice(ch) != NULL) {
+  }
+  if (char_get_voice(ch) != NULL) {
     send_to_char(ch, "Your voice has now been set to: %s\r\n", argument);
     if (char_get_voice(ch)) {
       free(char_get_voice(ch));
@@ -102,14 +106,13 @@ ACMD(do_voice)
     userWrite(ch->desc, 0, 0, 0, "index");
     send_to_char(ch, "@D(@cRPP@W: @w-1@D)@n\n\n");
     return;
-  } else {
-    send_to_char(ch, "Your voice has now been set to: %s\r\n", argument);
-    if (char_get_voice(ch)) {
-      free(char_get_voice(ch));
-    }
-    char_set_voice(ch, strdup(argument));
-    return;
   }
+  send_to_char(ch, "Your voice has now been set to: %s\r\n", argument);
+  if (char_get_voice(ch)) {
+    free(char_get_voice(ch));
+  }
+  char_set_voice(ch, strdup(argument));
+  return;
 }
 
 ACMD(do_languages)
@@ -176,20 +179,19 @@ ACMD(do_osay)
   if (!*argument) {
     send_to_char(ch, "Yes, but WHAT do you want to osay?\r\n");
     return;
-  } else {
-    char buf[MAX_INPUT_LENGTH];
-    char buf2[MAX_INPUT_LENGTH];
-
-    snprintf(buf, sizeof(buf), "@WYou @D[@mOSAY@D] @W'@w%s@W'@n", argument);
-    if (!char_prf_flagged(ch, PRF_HIDE)) {
-      snprintf(buf2, sizeof(buf2), "@W%s @D[@mOSAY@D] @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), argument);
-    }
-    if (char_prf_flagged(ch, PRF_HIDE)) {
-      snprintf(buf2, sizeof(buf2), "@WAnonymous @D[@mOSAY@D] @W'@w%s@W'@n", argument);
-    }
-    act(buf, FALSE, ch, 0, 0, TO_CHAR);
-    act(buf2, FALSE, ch, 0, 0, TO_ROOM);
   }
+  char buf[MAX_INPUT_LENGTH];
+  char buf2[MAX_INPUT_LENGTH];
+
+  snprintf(buf, sizeof(buf), "@WYou @D[@mOSAY@D] @W'@w%s@W'@n", argument);
+  if (!char_prf_flagged(ch, PRF_HIDE)) {
+    snprintf(buf2, sizeof(buf2), "@W%s @D[@mOSAY@D] @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), argument);
+  }
+  if (char_prf_flagged(ch, PRF_HIDE)) {
+    snprintf(buf2, sizeof(buf2), "@WAnonymous @D[@mOSAY@D] @W'@w%s@W'@n", argument);
+  }
+  act(buf, FALSE, ch, 0, 0, TO_CHAR);
+  act(buf2, FALSE, ch, 0, 0, TO_ROOM);
 }
 
 ACMD(do_say)
@@ -206,7 +208,8 @@ ACMD(do_say)
   if (char_get_bonuses(ch, BONUS_MUTE) > 0 && rroom_get_vnum(char_get_in_room(ch)) > 160) {
     send_to_char(ch, "You are mute and unable to talk though.\r\n");
     return;
-  } else if (char_get_bonuses(ch, BONUS_MUTE) > 0) {
+  }
+  if (char_get_bonuses(ch, BONUS_MUTE) > 0) {
     send_to_char(ch, "You are mute and unable to talk though. You will be allowed to just for MUD School.");
   }
 

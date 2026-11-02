@@ -33,9 +33,11 @@ static void grow_plants(void)
   for (k = object_list; k; k = k->next) {
     if (obj_get_in_room(k) == NOWHERE) {
       continue;
-    } else if (k->carried_by || k->in_obj) {
+    }
+    if (k->carried_by || k->in_obj) {
       continue;
-    } else if (rroom_flagged(obj_get_in_room(k), ROOM_GARDEN1) || rroom_flagged(obj_get_in_room(k), ROOM_GARDEN2)) {
+    }
+    if (rroom_flagged(obj_get_in_room(k), ROOM_GARDEN1) || rroom_flagged(obj_get_in_room(k), ROOM_GARDEN2)) {
       if (obj_get_value(k, VAL_WATERLEVEL) < 0 && obj_get_value(k, VAL_WATERLEVEL) > -10) {
         obj_set_value(k, VAL_WATERLEVEL, obj_get_value(k, VAL_WATERLEVEL) - (1));
         if (obj_get_value(k, VAL_WATERLEVEL) > -10) {

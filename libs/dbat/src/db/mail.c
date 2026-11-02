@@ -595,10 +595,12 @@ SPECIAL(postmaster)
   if (CMD_IS("mail")) {
     postmaster_send_mail(ch, (struct char_data *)me, cmd, argument);
     return (1);
-  } else if (CMD_IS("check")) {
+  }
+  if (CMD_IS("check")) {
     postmaster_check_mail(ch, (struct char_data *)me, cmd, argument);
     return (1);
-  } else if (CMD_IS("receive")) {
+  }
+  if (CMD_IS("receive")) {
     postmaster_receive_mail(ch, (struct char_data *)me, cmd, argument);
     return (1);
   } else

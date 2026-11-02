@@ -968,10 +968,12 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
   if (room_is_dark(target_room) && !char_can_see_in_dark(ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
     send_to_char(ch, "It is pitch black...\r\n");
     return;
-  } else if (char_aff_flagged(ch, AFF_BLIND)) {
+  }
+  if (char_aff_flagged(ch, AFF_BLIND)) {
     send_to_char(ch, "You see nothing but infinite darkness...\r\n");
     return;
-  } else if (char_plr_flagged(ch, PLR_EYEC)) {
+  }
+  if (char_plr_flagged(ch, PLR_EYEC)) {
     send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
     return;
   }
@@ -1577,7 +1579,8 @@ void look_out_window(struct char_data *ch, char *arg)
                               ch, &dummy, &viewport))) {
       send_to_char(ch, "You don't see that here.\r\n");
       return;
-    } else if (obj_get_type_flag(viewport) != ITEM_WINDOW) {
+    }
+    if (obj_get_type_flag(viewport) != ITEM_WINDOW) {
       send_to_char(ch, "You can't look out that!\r\n");
       return;
     }

@@ -122,14 +122,13 @@ int find_first_step(room_rnum src, room_rnum target)
       curr_dir = bfs_queue_head->dir;
       bfs_clear_queue();
       return (curr_dir);
-    } else {
-      for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++)
-        if (VALID_EDGE(bfs_queue_head->room, curr_dir)) {
-          MARK(TOROOM(bfs_queue_head->room, curr_dir));
-          bfs_enqueue(TOROOM(bfs_queue_head->room, curr_dir), bfs_queue_head->dir);
-        }
-      bfs_dequeue();
     }
+    for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++)
+      if (VALID_EDGE(bfs_queue_head->room, curr_dir)) {
+        MARK(TOROOM(bfs_queue_head->room, curr_dir));
+        bfs_enqueue(TOROOM(bfs_queue_head->room, curr_dir), bfs_queue_head->dir);
+      }
+    bfs_dequeue();
   }
 
   return (BFS_NO_PATH);
@@ -336,7 +335,8 @@ ACMD(do_radar)
           next_obj = obj->next_content;
           if (obj_extra_flagged(obj, ITEM_FORGED)) {
             continue;
-          } else if (obj_get_vnum(obj) == 20 || obj_get_vnum(obj) == 21 || obj_get_vnum(obj) == 22 || obj_get_vnum(obj) == 23 || obj_get_vnum(obj) == 24 || obj_get_vnum(obj) == 25 || obj_get_vnum(obj) == 26) {
+          }
+          if (obj_get_vnum(obj) == 20 || obj_get_vnum(obj) == 21 || obj_get_vnum(obj) == 22 || obj_get_vnum(obj) == 23 || obj_get_vnum(obj) == 24 || obj_get_vnum(obj) == 25 || obj_get_vnum(obj) == 26) {
             dir = find_first_step(char_get_in_room(ch), obj_get_in_room(obj));
             fcount += 1;
             switch (dir) {
@@ -364,7 +364,8 @@ ACMD(do_radar)
             next_obj = obj->next_content;
             if (obj_extra_flagged(obj, ITEM_FORGED)) {
               continue;
-            } else if (obj_get_vnum(obj) == 20 || obj_get_vnum(obj) == 21 || obj_get_vnum(obj) == 22 || obj_get_vnum(obj) == 23 || obj_get_vnum(obj) == 24 || obj_get_vnum(obj) == 25 || obj_get_vnum(obj) == 26) {
+            }
+            if (obj_get_vnum(obj) == 20 || obj_get_vnum(obj) == 21 || obj_get_vnum(obj) == 22 || obj_get_vnum(obj) == 23 || obj_get_vnum(obj) == 24 || obj_get_vnum(obj) == 25 || obj_get_vnum(obj) == 26) {
               dir = find_first_step(char_get_in_room(ch), char_get_in_room(tch));
               fcount += 1;
               switch (dir) {
@@ -417,7 +418,8 @@ ACMD(do_track)
   if (!*arg && !char_get_fighting(ch)) {
     send_to_char(ch, "Whom are you trying to sense?\r\n");
     return;
-  } else if (!*arg && char_get_fighting(ch)) {
+  }
+  if (!*arg && char_get_fighting(ch)) {
     vict = char_get_fighting(ch);
     send_to_char(ch, "You focus on the one your are fighting.\r\n");
     if (char_aff_flagged(vict, AFF_NOTRACK) || char_is_android(vict)) {
@@ -485,13 +487,17 @@ ACMD(do_track)
     for (i = descriptor_list; i; i = i->next) {
       if (desc_get_connected(i) != CON_PLAYING) {
         continue;
-      } else if (char_is_android(i->character)) {
+      }
+      if (char_is_android(i->character)) {
         continue;
-      } else if (i->character == ch) {
+      }
+      if (i->character == ch) {
         continue;
-      } else if (getCurPL(i->character) < (getCurPL(ch) * 0.001) + 1) {
+      }
+      if (getCurPL(i->character) < (getCurPL(ch) * 0.001) + 1) {
         continue;
-      } else if (planet_check(ch, i->character)) {
+      }
+      if (planet_check(ch, i->character)) {
         if (readIntro(ch, i->character) == 1) {
           send_to_char(ch, "@D[@Y%d@D] @CYou sense @c%s@C with ", (count + 1), get_i_name(ch, i->character));
         } else {

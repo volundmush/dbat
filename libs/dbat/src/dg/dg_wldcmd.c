@@ -107,31 +107,28 @@ static WCMD(do_weffect)
     if (num < 0 || num > 10000) {
       wld_log(room, "weffect setting out of bounds, 0 - 10000 only.");
       return;
-    } else {
-      rroom_set_gravity(real_room(room->number), num);
     }
+    rroom_set_gravity(real_room(room->number), num);
   } else if (!strcasecmp(arg, "light")) {
     if (target == NOWHERE) {
       wld_log(room, "weffect target is NOWHERE.");
       return;
+    }
+    if (!rroom_flagged(target, ROOM_INDOORS)) {
+      rroom_set_flag(target, ROOM_INDOORS, true);
     } else {
-      if (!rroom_flagged(target, ROOM_INDOORS)) {
-        rroom_set_flag(target, ROOM_INDOORS, true);
-      } else {
-        rroom_set_flag(target, ROOM_INDOORS, false);
-      }
+      rroom_set_flag(target, ROOM_INDOORS, false);
     }
   } else if (!strcasecmp(arg, "lava")) {
     if (target == NOWHERE) {
       wld_log(room, "weffect target is NOWHERE.");
       return;
+    }
+    if (rroom_get_geffect(target) != 0) {
+      rroom_set_geffect(target, 5);
     } else {
-      if (rroom_get_geffect(target) != 0) {
-        rroom_set_geffect(target, 5);
-      } else {
-        wld_log(room, "weffect target already has lava.");
-        return;
-      }
+      wld_log(room, "weffect target already has lava.");
+      return;
     }
   }
 }

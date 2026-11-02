@@ -99,231 +99,283 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
       landspot = 300;
       landspot += rand_number(0, 63);
       return (landspot);
-    } else if (!strcasecmp(arg, "South Ocean")) {
+    }
+    if (!strcasecmp(arg, "South Ocean")) {
       landspot = 800;
       landspot += rand_number(0, 99);
       return (landspot);
-    } else if (!strcasecmp(arg, "Nexus Field")) {
+    }
+    if (!strcasecmp(arg, "Nexus Field")) {
       landspot = 1150;
       landspot += rand_number(-16, 28);
       return (landspot);
-    } else if (!strcasecmp(arg, "Cherry Blossom Mountain")) {
+    }
+    if (!strcasecmp(arg, "Cherry Blossom Mountain")) {
       landspot = 1180;
       landspot += rand_number(0, 19);
       return (landspot);
-    } else if (!strcasecmp(arg, "Sandy Desert")) {
+    }
+    if (!strcasecmp(arg, "Sandy Desert")) {
       landspot = 1287;
       landspot += rand_number(0, 64);
       return (landspot);
-    } else if (!strcasecmp(arg, "Northern Plains")) {
+    }
+    if (!strcasecmp(arg, "Northern Plains")) {
       landspot = 1428;
       landspot += rand_number(0, 55);
       return (landspot);
-    } else if (!strcasecmp(arg, "Korin's Tower")) {
+    }
+    if (!strcasecmp(arg, "Korin's Tower")) {
       return (1456);
-    } else if (!strcasecmp(arg, "Kami's Lookout")) {
+    }
+    if (!strcasecmp(arg, "Kami's Lookout")) {
       landspot = 1506;
       landspot += rand_number(0, 30);
       return (landspot);
-    } else if (!strcasecmp(arg, "Shadow Forest")) {
+    }
+    if (!strcasecmp(arg, "Shadow Forest")) {
       landspot = 1600;
       landspot += rand_number(0, 66);
       return (landspot);
-    } else if (!strcasecmp(arg, "Decrepit Area")) {
+    }
+    if (!strcasecmp(arg, "Decrepit Area")) {
       return (1710);
-    } else if (!strcasecmp(arg, "West City")) {
+    }
+    if (!strcasecmp(arg, "West City")) {
       return (19510);
-    } else if (!strcasecmp(arg, "Hercule Beach")) {
+    }
+    if (!strcasecmp(arg, "Hercule Beach")) {
       landspot = 2141;
       landspot += rand_number(0, 53);
       return (landspot);
-    } else if (!strcasecmp(arg, "Satan City")) {
+    }
+    if (!strcasecmp(arg, "Satan City")) {
       landspot = 1150;
       landspot += rand_number(-16, 28);
       return (landspot);
       return (13020);
-    } else {
-      send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
-      return (300);
     }
+    send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
+    return (300);
   } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 51) { // Above Frigid
     if (!strcasecmp(arg, "Ice Crown City")) {
       return (4264);
-    } else if (!strcasecmp(arg, "Ice Highway")) {
-      return (4300);
-    } else if (!strcasecmp(arg, "Topica Snowfield")) {
-      return (4351);
-    } else if (!strcasecmp(arg, "Glug's Volcano")) {
-      return (4400);
-    } else if (!strcasecmp(arg, "Platonic Sea")) {
-      return (4600);
-    } else if (!strcasecmp(arg, "Slave City")) {
-      return (4800);
-    } else if (!strcasecmp(arg, "Acturian Woods")) {
-      return (5100);
-    } else if (!strcasecmp(arg, "Desolate Demesne")) {
-      return (5150);
-    } else if (!strcasecmp(arg, "Chateau Ishran")) {
-      return (5165);
-    } else if (!strcasecmp(arg, "Wyrm Spine Mountain")) {
-      return (5200);
-    } else if (!strcasecmp(arg, "Cloud Ruler Temple")) {
-      return (5500);
-    } else if (!strcasecmp(arg, "Koltoan Mine")) {
-      return (4944);
-    } else {
-      send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
-      return (4264);
     }
+    if (!strcasecmp(arg, "Ice Highway")) {
+      return (4300);
+    }
+    if (!strcasecmp(arg, "Topica Snowfield")) {
+      return (4351);
+    }
+    if (!strcasecmp(arg, "Glug's Volcano")) {
+      return (4400);
+    }
+    if (!strcasecmp(arg, "Platonic Sea")) {
+      return (4600);
+    }
+    if (!strcasecmp(arg, "Slave City")) {
+      return (4800);
+    }
+    if (!strcasecmp(arg, "Acturian Woods")) {
+      return (5100);
+    }
+    if (!strcasecmp(arg, "Desolate Demesne")) {
+      return (5150);
+    }
+    if (!strcasecmp(arg, "Chateau Ishran")) {
+      return (5165);
+    }
+    if (!strcasecmp(arg, "Wyrm Spine Mountain")) {
+      return (5200);
+    }
+    if (!strcasecmp(arg, "Cloud Ruler Temple")) {
+      return (5500);
+    }
+    if (!strcasecmp(arg, "Koltoan Mine")) {
+      return (4944);
+    }
+    send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
+    return (4264);
   } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 52) { // Above Konack
     if (!strcasecmp(arg, "Tiranoc City")) {
       return (8006);
-    } else if (!strcasecmp(arg, "Great Oroist Temple")) {
-      return (8300);
-    } else if (!strcasecmp(arg, "Elzthuan Forest")) {
-      return (8400);
-    } else if (!strcasecmp(arg, "Mazori Farm")) {
-      return (8447);
-    } else if (!strcasecmp(arg, "Dres")) {
-      return (8500);
-    } else if (!strcasecmp(arg, "Colvian Farm")) {
-      return (8600);
-    } else if (!strcasecmp(arg, "St Alucia")) {
-      return (8700);
-    } else if (!strcasecmp(arg, "Meridius Memorial")) {
-      return (8800);
-    } else if (!strcasecmp(arg, "Desert of Illusion")) {
-      return (8900);
-    } else if (!strcasecmp(arg, "Plains of Confusion")) {
-      return (8954);
-    } else if (!strcasecmp(arg, "Turlon Fair")) {
-      return (9200);
-    } else if (!strcasecmp(arg, "Wetlands")) {
-      return (9700);
-    } else if (!strcasecmp(arg, "Kerberos")) {
-      return (9855);
-    } else if (!strcasecmp(arg, "Shaeras Mansion")) {
-      return (9864);
-    } else if (!strcasecmp(arg, "Slavinus Ravine")) {
-      return (9900);
-    } else if (!strcasecmp(arg, "Furian Citadel")) {
-      return (9949);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (8006);
     }
+    if (!strcasecmp(arg, "Great Oroist Temple")) {
+      return (8300);
+    }
+    if (!strcasecmp(arg, "Elzthuan Forest")) {
+      return (8400);
+    }
+    if (!strcasecmp(arg, "Mazori Farm")) {
+      return (8447);
+    }
+    if (!strcasecmp(arg, "Dres")) {
+      return (8500);
+    }
+    if (!strcasecmp(arg, "Colvian Farm")) {
+      return (8600);
+    }
+    if (!strcasecmp(arg, "St Alucia")) {
+      return (8700);
+    }
+    if (!strcasecmp(arg, "Meridius Memorial")) {
+      return (8800);
+    }
+    if (!strcasecmp(arg, "Desert of Illusion")) {
+      return (8900);
+    }
+    if (!strcasecmp(arg, "Plains of Confusion")) {
+      return (8954);
+    }
+    if (!strcasecmp(arg, "Turlon Fair")) {
+      return (9200);
+    }
+    if (!strcasecmp(arg, "Wetlands")) {
+      return (9700);
+    }
+    if (!strcasecmp(arg, "Kerberos")) {
+      return (9855);
+    }
+    if (!strcasecmp(arg, "Shaeras Mansion")) {
+      return (9864);
+    }
+    if (!strcasecmp(arg, "Slavinus Ravine")) {
+      return (9900);
+    }
+    if (!strcasecmp(arg, "Furian Citadel")) {
+      return (9949);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (8006);
   } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 53) { // Above Vegeta
     if (!strcasecmp(arg, "Vegetos City")) {
       return (2226);
-    } else if (!strcasecmp(arg, "Blood Dunes")) {
-      return (2600);
-    } else if (!strcasecmp(arg, "Ancestral Mountains")) {
-      return (2616);
-    } else if (!strcasecmp(arg, "Destopa Swamp")) {
-      return (2709);
-    } else if (!strcasecmp(arg, "Pride forest")) {
-      return (2800);
-    } else if (!strcasecmp(arg, "Pride Tower")) {
-      return (2899);
-    } else if (!strcasecmp(arg, "Ruby Cave")) {
-      return (2615);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (2226);
     }
+    if (!strcasecmp(arg, "Blood Dunes")) {
+      return (2600);
+    }
+    if (!strcasecmp(arg, "Ancestral Mountains")) {
+      return (2616);
+    }
+    if (!strcasecmp(arg, "Destopa Swamp")) {
+      return (2709);
+    }
+    if (!strcasecmp(arg, "Pride forest")) {
+      return (2800);
+    }
+    if (!strcasecmp(arg, "Pride Tower")) {
+      return (2899);
+    }
+    if (!strcasecmp(arg, "Ruby Cave")) {
+      return (2615);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (2226);
   } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 54) { // Above Namek
     if (!strcasecmp(arg, "Senzu Village")) {
       return (11600);
-    } else if (!strcasecmp(arg, "Guru's House")) {
-      return (10182);
-    } else if (!strcasecmp(arg, "Crystalline Cave")) {
-      return (10474);
-    } else if (!strcasecmp(arg, "Elder Village")) {
-      return (13300);
-    } else if (!strcasecmp(arg, "Frieza's Ship")) {
-      return (10203);
-    } else if (!strcasecmp(arg, "Kakureta Village")) {
-      return (10922);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (11600);
     }
+    if (!strcasecmp(arg, "Guru's House")) {
+      return (10182);
+    }
+    if (!strcasecmp(arg, "Crystalline Cave")) {
+      return (10474);
+    }
+    if (!strcasecmp(arg, "Elder Village")) {
+      return (13300);
+    }
+    if (!strcasecmp(arg, "Frieza's Ship")) {
+      return (10203);
+    }
+    if (!strcasecmp(arg, "Kakureta Village")) {
+      return (10922);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (11600);
   } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 55) { // Above Aether
     if (!strcasecmp(arg, "Haven City")) {
       return (12010);
-    } else if (!strcasecmp(arg, "Serenity Lake")) {
-      return (12103);
-    } else if (!strcasecmp(arg, "Kaiju Forest")) {
-      return (12300);
-    } else if (!strcasecmp(arg, "Ortusian Temple")) {
-      return (12400);
-    } else if (!strcasecmp(arg, "Silent Glade")) {
-      return (12480);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (12010);
     }
+    if (!strcasecmp(arg, "Serenity Lake")) {
+      return (12103);
+    }
+    if (!strcasecmp(arg, "Kaiju Forest")) {
+      return (12300);
+    }
+    if (!strcasecmp(arg, "Ortusian Temple")) {
+      return (12400);
+    }
+    if (!strcasecmp(arg, "Silent Glade")) {
+      return (12480);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (12010);
   } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 56) { // Above Yardrat
     if (!strcasecmp(arg, "Yardra City")) {
       return (14008);
-    } else if (!strcasecmp(arg, "Jade Forest")) {
-      return (14100);
-    } else if (!strcasecmp(arg, "Jade Cliffs")) {
-      return (14200);
-    } else if (!strcasecmp(arg, "Mount Valaria")) {
-      return (14300);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (14008);
     }
+    if (!strcasecmp(arg, "Jade Forest")) {
+      return (14100);
+    }
+    if (!strcasecmp(arg, "Jade Cliffs")) {
+      return (14200);
+    }
+    if (!strcasecmp(arg, "Mount Valaria")) {
+      return (14300);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (14008);
   } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 198) { // Above Cerria
     if (!strcasecmp(arg, "Cerria Colony")) {
       return (17531);
-    } else if (!strcasecmp(arg, "Crystalline Forest")) {
-      return (7950);
-    } else if (!strcasecmp(arg, "Fistarl Volcano")) {
-      return (17420);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (17531);
     }
+    if (!strcasecmp(arg, "Crystalline Forest")) {
+      return (7950);
+    }
+    if (!strcasecmp(arg, "Fistarl Volcano")) {
+      return (17420);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (17531);
   } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 57) { // Above Zennith
     if (!strcasecmp(arg, "Utatlan City")) {
       return (3412);
-    } else if (!strcasecmp(arg, "Zenith Jungle")) {
-      return (3520);
-    } else if (!strcasecmp(arg, "Ancient Castle")) {
-      return (19600);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (3412);
     }
+    if (!strcasecmp(arg, "Zenith Jungle")) {
+      return (3520);
+    }
+    if (!strcasecmp(arg, "Ancient Castle")) {
+      return (19600);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (3412);
   } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 58) { // Above Kanassa
     if (!strcasecmp(arg, "Aquis City")) {
       return (14904);
-    } else if (!strcasecmp(arg, "Yunkai Pirate Base")) {
-      return (15655);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (14904);
     }
+    if (!strcasecmp(arg, "Yunkai Pirate Base")) {
+      return (15655);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (14904);
   } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == 59) { // Above Arlia
     if (!strcasecmp(arg, "Janacre")) {
       return (16009);
-    } else if (!strcasecmp(arg, "Arlian Wasteland")) {
-      return (16544);
-    } else if (!strcasecmp(arg, "Arlia Mine")) {
-      return (16600);
-    } else if (!strcasecmp(arg, "Kemabra Wastes")) {
-      return (16816);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (16009);
     }
-  } else {
-    send_to_char(ch, "You are not above a planet!\r\n");
-    return (-1);
+    if (!strcasecmp(arg, "Arlian Wasteland")) {
+      return (16544);
+    }
+    if (!strcasecmp(arg, "Arlia Mine")) {
+      return (16600);
+    }
+    if (!strcasecmp(arg, "Kemabra Wastes")) {
+      return (16816);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (16009);
   }
+  send_to_char(ch, "You are not above a planet!\r\n");
+  return (-1);
 }
 
 struct obj_data *find_vehicle_by_vnum(int vnum)
@@ -538,141 +590,138 @@ ACMD(do_warp)
   if (!(vehicle = find_vehicle_by_vnum(obj_get_value(controls, 0)))) {
     send_to_char(ch, "@wYou can't find anything to pilot.\r\n");
     return;
-  } else if (!*arg) {
+  }
+  if (!*arg) {
     send_to_char(ch, "Syntax: shipwarp [ earth | vegeta | namek | konack | aether | frigid | buoy1 | buoy2 | buoy3 ]\r\n");
     return;
-  } else if (strcasecmp(arg, "earth") && strcasecmp(arg, "vegeta") && strcasecmp(arg, "namek") && strcasecmp(arg, "konack") && strcasecmp(arg, "frigid") && strcasecmp(arg, "aether") && strcasecmp(arg, "buoy1") && strcasecmp(arg, "buoy2") && strcasecmp(arg, "buoy3")) {
+  }
+  if (strcasecmp(arg, "earth") && strcasecmp(arg, "vegeta") && strcasecmp(arg, "namek") && strcasecmp(arg, "konack") && strcasecmp(arg, "frigid") && strcasecmp(arg, "aether") && strcasecmp(arg, "buoy1") && strcasecmp(arg, "buoy2") && strcasecmp(arg, "buoy3")) {
     send_to_char(ch, "Syntax: shipwarp [ earth | vegeta | namek | konack | aether | frigid | buoy1 | buoy2 | buoy3 ]\r\n");
     return;
-  } else if (rroom_flagged(!obj_get_in_room(vehicle), ROOM_SPACE)) {
+  }
+  if (rroom_flagged(!obj_get_in_room(vehicle), ROOM_SPACE)) {
     send_to_char(ch, "Your ship needs to be in space to utilize its Instant Travel Warp Accelerator.\r\n");
     return;
-  } else if (obj_get_vnum(vehicle) != 18400) {
+  }
+  if (obj_get_vnum(vehicle) != 18400) {
     send_to_char(ch, "Your ship is not outfitted with an Instant Travel Warp Accelerator.\r\n");
     return;
-  } else {
-    if (!strcasecmp(arg, "earth")) {
-      if (rroom_get_vnum(obj_get_in_room(vehicle)) == 40979 || rroom_get_vnum(obj_get_in_room(vehicle)) == 50) {
-        send_to_char(ch, "Your ship is already there!\r\n");
-        return;
-      } else {
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-        send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
-        obj_from_room(vehicle);
-        obj_to_room(vehicle, real_room(40979));
-        send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
-      }
-    } else if (!strcasecmp(arg, "namek")) {
-      if (rroom_get_vnum(obj_get_in_room(vehicle)) == 42880 || rroom_get_vnum(obj_get_in_room(vehicle)) == 54) {
-        send_to_char(ch, "Your ship is already there!\r\n");
-        return;
-      } else {
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-        send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
-        obj_from_room(vehicle);
-        obj_to_room(vehicle, real_room(42880));
-        send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
-      }
-    } else if (!strcasecmp(arg, "frigid")) {
-      if (rroom_get_vnum(obj_get_in_room(vehicle)) == 30889 || rroom_get_vnum(obj_get_in_room(vehicle)) == 51) {
-        send_to_char(ch, "Your ship is already there!\r\n");
-        return;
-      } else {
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-        send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
-        obj_from_room(vehicle);
-        obj_to_room(vehicle, real_room(30889));
-        send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
-      }
-    } else if (!strcasecmp(arg, "konack")) {
-      if (rroom_get_vnum(obj_get_in_room(vehicle)) == 27065 || rroom_get_vnum(obj_get_in_room(vehicle)) == 52) {
-        send_to_char(ch, "Your ship is already there!\r\n");
-        return;
-      } else {
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-        send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
-        obj_from_room(vehicle);
-        obj_to_room(vehicle, real_room(27065));
-        send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
-      }
-    } else if (!strcasecmp(arg, "vegeta")) {
-      if (rroom_get_vnum(obj_get_in_room(vehicle)) == 32365 || rroom_get_vnum(obj_get_in_room(vehicle)) == 53) {
-        send_to_char(ch, "Your ship is already there!\r\n");
-        return;
-      } else {
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-        send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
-        obj_from_room(vehicle);
-        obj_to_room(vehicle, real_room(32365));
-        send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
-      }
-    } else if (!strcasecmp(arg, "aether")) {
-      if (rroom_get_vnum(obj_get_in_room(vehicle)) == 41959 || rroom_get_vnum(obj_get_in_room(vehicle)) == 55) {
-        send_to_char(ch, "Your ship is already there!\r\n");
-        return;
-      } else {
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-        send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
-        obj_from_room(vehicle);
-        obj_to_room(vehicle, real_room(41959));
-        send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
-      }
-    } else if (!strcasecmp(arg, "buoy1")) {
-      if (char_get_radar1(ch) <= 0) {
-        send_to_char(ch, "You have not launched that buoy!\r\n");
-        return;
-      } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == char_get_radar1(ch)) {
-        send_to_char(ch, "Your ship is already there!\r\n");
-        return;
-      } else {
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-        send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
-        obj_from_room(vehicle);
-        obj_to_room(vehicle, real_room(char_get_radar1(ch)));
-        send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
-      }
-    } else if (!strcasecmp(arg, "buoy2")) {
-      if (char_get_radar2(ch) <= 0) {
-        send_to_char(ch, "You have not launched that buoy!\r\n");
-        return;
-      } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == char_get_radar2(ch)) {
-        send_to_char(ch, "Your ship is already there!\r\n");
-        return;
-      } else {
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-        send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
-        obj_from_room(vehicle);
-        obj_to_room(vehicle, real_room(char_get_radar2(ch)));
-        send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
-      }
-    } else if (!strcasecmp(arg, "buoy3")) {
-      if (char_get_radar3(ch) <= 0) {
-        send_to_char(ch, "You have not launched that buoy!\r\n");
-        return;
-      } else if (rroom_get_vnum(obj_get_in_room(vehicle)) == char_get_radar3(ch)) {
-        send_to_char(ch, "Your ship is already there!\r\n");
-        return;
-      } else {
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
-        send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
-        obj_from_room(vehicle);
-        obj_to_room(vehicle, real_room(char_get_radar3(ch)));
-        send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
-      }
-    } else {
-      mud_log("ERROR: Ship Instant Warp Failure! Unknown argument!");
-      send_to_char(ch, "ERROR\r\n");
+  }
+  if (!strcasecmp(arg, "earth")) {
+    if (rroom_get_vnum(obj_get_in_room(vehicle)) == 40979 || rroom_get_vnum(obj_get_in_room(vehicle)) == 50) {
+      send_to_char(ch, "Your ship is already there!\r\n");
       return;
     }
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    obj_from_room(vehicle);
+    obj_to_room(vehicle, real_room(40979));
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+  } else if (!strcasecmp(arg, "namek")) {
+    if (rroom_get_vnum(obj_get_in_room(vehicle)) == 42880 || rroom_get_vnum(obj_get_in_room(vehicle)) == 54) {
+      send_to_char(ch, "Your ship is already there!\r\n");
+      return;
+    }
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    obj_from_room(vehicle);
+    obj_to_room(vehicle, real_room(42880));
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+  } else if (!strcasecmp(arg, "frigid")) {
+    if (rroom_get_vnum(obj_get_in_room(vehicle)) == 30889 || rroom_get_vnum(obj_get_in_room(vehicle)) == 51) {
+      send_to_char(ch, "Your ship is already there!\r\n");
+      return;
+    }
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    obj_from_room(vehicle);
+    obj_to_room(vehicle, real_room(30889));
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+  } else if (!strcasecmp(arg, "konack")) {
+    if (rroom_get_vnum(obj_get_in_room(vehicle)) == 27065 || rroom_get_vnum(obj_get_in_room(vehicle)) == 52) {
+      send_to_char(ch, "Your ship is already there!\r\n");
+      return;
+    }
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    obj_from_room(vehicle);
+    obj_to_room(vehicle, real_room(27065));
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+  } else if (!strcasecmp(arg, "vegeta")) {
+    if (rroom_get_vnum(obj_get_in_room(vehicle)) == 32365 || rroom_get_vnum(obj_get_in_room(vehicle)) == 53) {
+      send_to_char(ch, "Your ship is already there!\r\n");
+      return;
+    }
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    obj_from_room(vehicle);
+    obj_to_room(vehicle, real_room(32365));
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+  } else if (!strcasecmp(arg, "aether")) {
+    if (rroom_get_vnum(obj_get_in_room(vehicle)) == 41959 || rroom_get_vnum(obj_get_in_room(vehicle)) == 55) {
+      send_to_char(ch, "Your ship is already there!\r\n");
+      return;
+    }
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    obj_from_room(vehicle);
+    obj_to_room(vehicle, real_room(41959));
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+  } else if (!strcasecmp(arg, "buoy1")) {
+    if (char_get_radar1(ch) <= 0) {
+      send_to_char(ch, "You have not launched that buoy!\r\n");
+      return;
+    }
+    if (rroom_get_vnum(obj_get_in_room(vehicle)) == char_get_radar1(ch)) {
+      send_to_char(ch, "Your ship is already there!\r\n");
+      return;
+    }
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    obj_from_room(vehicle);
+    obj_to_room(vehicle, real_room(char_get_radar1(ch)));
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+  } else if (!strcasecmp(arg, "buoy2")) {
+    if (char_get_radar2(ch) <= 0) {
+      send_to_char(ch, "You have not launched that buoy!\r\n");
+      return;
+    }
+    if (rroom_get_vnum(obj_get_in_room(vehicle)) == char_get_radar2(ch)) {
+      send_to_char(ch, "Your ship is already there!\r\n");
+      return;
+    }
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    obj_from_room(vehicle);
+    obj_to_room(vehicle, real_room(char_get_radar2(ch)));
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+  } else if (!strcasecmp(arg, "buoy3")) {
+    if (char_get_radar3(ch) <= 0) {
+      send_to_char(ch, "You have not launched that buoy!\r\n");
+      return;
+    }
+    if (rroom_get_vnum(obj_get_in_room(vehicle)) == char_get_radar3(ch)) {
+      send_to_char(ch, "Your ship is already there!\r\n");
+      return;
+    }
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", TRUE, ch, 0, 0, TO_ROOM);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    obj_from_room(vehicle);
+    obj_to_room(vehicle, real_room(char_get_radar3(ch)));
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+  } else {
+    mud_log("ERROR: Ship Instant Warp Failure! Unknown argument!");
+    send_to_char(ch, "ERROR\r\n");
+    return;
   }
 }
 
@@ -693,7 +742,8 @@ ACMD(do_drive)
     if (!char_plr_flagged(ch, PLR_PILOTING)) {
       send_to_char(ch, "You are already not flying the ship!\r\n");
       return;
-    } else if (char_plr_flagged(ch, PLR_PILOTING)) {
+    }
+    if (char_plr_flagged(ch, PLR_PILOTING)) {
       act("@w$n stands up and stops piloting the ship.", TRUE, ch, 0, 0, TO_ROOM);
       send_to_char(ch, "@wYou stand up from the pilot's seat.\r\n");
       char_set_position(ch, POS_STANDING);
@@ -742,7 +792,8 @@ ACMD(do_drive)
     char_set_position(ch, POS_SITTING);
     send_to_char(ch, "@wYou take a seat in the pilot's chair.\r\n");
     return;
-  } else if (!char_plr_flagged(ch, PLR_PILOTING)) {
+  }
+  if (!char_plr_flagged(ch, PLR_PILOTING)) {
     send_to_char(ch, "@wYou need to be seated in the pilot's seat.\r\n[Enter: Pilot ready/unready]\r\n");
   } else if (char_get_position(ch) < POS_SLEEPING) {
     send_to_char(ch, "@wYou can't see anything but stars!\r\n");
@@ -1297,7 +1348,8 @@ ACMD(do_drive)
         if (char_get_radar1(ch) > 0 && !strcasecmp(arg2, "1")) {
           send_to_char(ch, "@wYou need to 'deactivate' that marker.\r\n");
           return;
-        } else if (char_get_radar1(ch) <= 0 && !strcasecmp(arg2, "1")) {
+        }
+        if (char_get_radar1(ch) <= 0 && !strcasecmp(arg2, "1")) {
           act("@wYou enter a unique code and launch a marker buoy.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
           act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
           char_set_radar1(ch, rroom_get_vnum(obj_get_in_room(vehicle)));
@@ -1305,7 +1357,8 @@ ACMD(do_drive)
         if (char_get_radar2(ch) > 0 && !strcasecmp(arg2, "2")) {
           send_to_char(ch, "@wYou need to 'deactivate' that marker.\r\n");
           return;
-        } else if (char_get_radar2(ch) <= 0 && !strcasecmp(arg2, "2")) {
+        }
+        if (char_get_radar2(ch) <= 0 && !strcasecmp(arg2, "2")) {
           act("@wYou enter a unique code and launch a marker buoy.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
           act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
           char_set_radar2(ch, rroom_get_vnum(obj_get_in_room(vehicle)));
@@ -1313,7 +1366,8 @@ ACMD(do_drive)
         if (char_get_radar3(ch) > 0 && !strcasecmp(arg2, "3")) {
           send_to_char(ch, "@wYou need to 'deactivate' that marker.\r\n");
           return;
-        } else if (char_get_radar3(ch) <= 0 && !strcasecmp(arg2, "3")) {
+        }
+        if (char_get_radar3(ch) <= 0 && !strcasecmp(arg2, "3")) {
           act("@wYou enter a unique code and launch a marker buoy.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
           act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
           char_set_radar3(ch, rroom_get_vnum(obj_get_in_room(vehicle)));
@@ -1331,7 +1385,8 @@ ACMD(do_drive)
         if (char_get_radar1(ch) <= 0 && !strcasecmp(arg2, "1")) {
           send_to_char(ch, "@wYou haven't launched that buoy yet.\r\n");
           return;
-        } else if (char_get_radar1(ch) > 0 && !strcasecmp(arg2, "1")) {
+        }
+        if (char_get_radar1(ch) > 0 && !strcasecmp(arg2, "1")) {
           act("@wYou enter buoy one's code and command it to deactivate.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
           act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
           char_set_radar1(ch, 0);
@@ -1339,7 +1394,8 @@ ACMD(do_drive)
         if (char_get_radar2(ch) <= 0 && !strcasecmp(arg2, "2")) {
           send_to_char(ch, "@wYou haven't launched that buoy yet.\r\n");
           return;
-        } else if (char_get_radar2(ch) > 0 && !strcasecmp(arg2, "2")) {
+        }
+        if (char_get_radar2(ch) > 0 && !strcasecmp(arg2, "2")) {
           act("@wYou enter buoy two's code and command it to deactivate.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
           act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
           char_set_radar2(ch, 0);
@@ -1347,7 +1403,8 @@ ACMD(do_drive)
         if (char_get_radar3(ch) <= 0 && !strcasecmp(arg2, "3")) {
           send_to_char(ch, "@wYou haven't launched that buoy yet.\r\n");
           return;
-        } else if (char_get_radar3(ch) > 0 && !strcasecmp(arg2, "3")) {
+        }
+        if (char_get_radar3(ch) > 0 && !strcasecmp(arg2, "3")) {
           act("@wYou enter buoy three's code and command it to deactivate.@n\r\n", FALSE, ch, 0, 0, TO_CHAR);
           act("@C$n@w manipulates the ship controls.@n\r\n", FALSE, ch, 0, 0, TO_ROOM);
           char_set_radar3(ch, 0);

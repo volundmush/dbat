@@ -233,210 +233,261 @@ static int land_location(struct char_data *ch, char *arg)
   if (rroom_get_vnum(char_get_in_room(ch)) == 50) { // Above Earth
     if (!strcasecmp(arg, "Nexus City")) {
       return (300);
-    } else if (!strcasecmp(arg, "South Ocean")) {
-      return (800);
-    } else if (!strcasecmp(arg, "Nexus Field")) {
-      return (1150);
-    } else if (!strcasecmp(arg, "Cherry Blossom Mountain")) {
-      return (1180);
-    } else if (!strcasecmp(arg, "Sandy Desert")) {
-      return (1287);
-    } else if (!strcasecmp(arg, "Northern Plains")) {
-      return (1428);
-    } else if (!strcasecmp(arg, "Korin's Tower")) {
-      return (1456);
-    } else if (!strcasecmp(arg, "Kami's Lookout")) {
-      return (1506);
-    } else if (!strcasecmp(arg, "Shadow Forest")) {
-      return (1636);
-    } else if (!strcasecmp(arg, "Decrepit Area")) {
-      return (1710);
-    } else if (!strcasecmp(arg, "West City")) {
-      return (19510);
-    } else if (!strcasecmp(arg, "Hercule Beach")) {
-      return (2141);
-    } else if (!strcasecmp(arg, "Satan City")) {
-      return (13020);
-    } else {
-      send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
-      return (300);
     }
+    if (!strcasecmp(arg, "South Ocean")) {
+      return (800);
+    }
+    if (!strcasecmp(arg, "Nexus Field")) {
+      return (1150);
+    }
+    if (!strcasecmp(arg, "Cherry Blossom Mountain")) {
+      return (1180);
+    }
+    if (!strcasecmp(arg, "Sandy Desert")) {
+      return (1287);
+    }
+    if (!strcasecmp(arg, "Northern Plains")) {
+      return (1428);
+    }
+    if (!strcasecmp(arg, "Korin's Tower")) {
+      return (1456);
+    }
+    if (!strcasecmp(arg, "Kami's Lookout")) {
+      return (1506);
+    }
+    if (!strcasecmp(arg, "Shadow Forest")) {
+      return (1636);
+    }
+    if (!strcasecmp(arg, "Decrepit Area")) {
+      return (1710);
+    }
+    if (!strcasecmp(arg, "West City")) {
+      return (19510);
+    }
+    if (!strcasecmp(arg, "Hercule Beach")) {
+      return (2141);
+    }
+    if (!strcasecmp(arg, "Satan City")) {
+      return (13020);
+    }
+    send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
+    return (300);
   } else if (rroom_get_vnum(char_get_in_room(ch)) == 51) { // Above Frigid
     if (!strcasecmp(arg, "Ice Crown City")) {
       return (4264);
-    } else if (!strcasecmp(arg, "Ice Highway")) {
-      return (4300);
-    } else if (!strcasecmp(arg, "Topica Snowfield")) {
-      return (4351);
-    } else if (!strcasecmp(arg, "Glug's Volcano")) {
-      return (4400);
-    } else if (!strcasecmp(arg, "Platonic Sea")) {
-      return (4600);
-    } else if (!strcasecmp(arg, "Slave City")) {
-      return (4800);
-    } else if (!strcasecmp(arg, "Acturian Woods")) {
-      return (5100);
-    } else if (!strcasecmp(arg, "Desolate Demesne")) {
-      return (5150);
-    } else if (!strcasecmp(arg, "Chateau Ishran")) {
-      return (5165);
-    } else if (!strcasecmp(arg, "Wyrm Spine Mountain")) {
-      return (5200);
-    } else if (!strcasecmp(arg, "Cloud Ruler Temple")) {
-      return (5500);
-    } else if (!strcasecmp(arg, "Koltoan Mine")) {
-      return (4944);
-    } else {
-      send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
-      return (4264);
     }
+    if (!strcasecmp(arg, "Ice Highway")) {
+      return (4300);
+    }
+    if (!strcasecmp(arg, "Topica Snowfield")) {
+      return (4351);
+    }
+    if (!strcasecmp(arg, "Glug's Volcano")) {
+      return (4400);
+    }
+    if (!strcasecmp(arg, "Platonic Sea")) {
+      return (4600);
+    }
+    if (!strcasecmp(arg, "Slave City")) {
+      return (4800);
+    }
+    if (!strcasecmp(arg, "Acturian Woods")) {
+      return (5100);
+    }
+    if (!strcasecmp(arg, "Desolate Demesne")) {
+      return (5150);
+    }
+    if (!strcasecmp(arg, "Chateau Ishran")) {
+      return (5165);
+    }
+    if (!strcasecmp(arg, "Wyrm Spine Mountain")) {
+      return (5200);
+    }
+    if (!strcasecmp(arg, "Cloud Ruler Temple")) {
+      return (5500);
+    }
+    if (!strcasecmp(arg, "Koltoan Mine")) {
+      return (4944);
+    }
+    send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
+    return (4264);
   } else if (rroom_get_vnum(char_get_in_room(ch)) == 52) { // Above Konack
     if (!strcasecmp(arg, "Tiranoc City")) {
       return (8006);
-    } else if (!strcasecmp(arg, "Great Oroist Temple")) {
-      return (8300);
-    } else if (!strcasecmp(arg, "Elzthuan Forest")) {
-      return (8400);
-    } else if (!strcasecmp(arg, "Mazori Farm")) {
-      return (8447);
-    } else if (!strcasecmp(arg, "Dres")) {
-      return (8500);
-    } else if (!strcasecmp(arg, "Colvian Farm")) {
-      return (8600);
-    } else if (!strcasecmp(arg, "St Alucia")) {
-      return (8700);
-    } else if (!strcasecmp(arg, "Meridius Memorial")) {
-      return (8800);
-    } else if (!strcasecmp(arg, "Desert of Illusion")) {
-      return (8900);
-    } else if (!strcasecmp(arg, "Plains of Confusion")) {
-      return (8954);
-    } else if (!strcasecmp(arg, "Turlon Fair")) {
-      return (9200);
-    } else if (!strcasecmp(arg, "Wetlands")) {
-      return (9700);
-    } else if (!strcasecmp(arg, "Kerberos")) {
-      return (9855);
-    } else if (!strcasecmp(arg, "Shaeras Mansion")) {
-      return (9864);
-    } else if (!strcasecmp(arg, "Slavinus Ravine")) {
-      return (9900);
-    } else if (!strcasecmp(arg, "Furian Citadel")) {
-      return (9949);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (8006);
     }
+    if (!strcasecmp(arg, "Great Oroist Temple")) {
+      return (8300);
+    }
+    if (!strcasecmp(arg, "Elzthuan Forest")) {
+      return (8400);
+    }
+    if (!strcasecmp(arg, "Mazori Farm")) {
+      return (8447);
+    }
+    if (!strcasecmp(arg, "Dres")) {
+      return (8500);
+    }
+    if (!strcasecmp(arg, "Colvian Farm")) {
+      return (8600);
+    }
+    if (!strcasecmp(arg, "St Alucia")) {
+      return (8700);
+    }
+    if (!strcasecmp(arg, "Meridius Memorial")) {
+      return (8800);
+    }
+    if (!strcasecmp(arg, "Desert of Illusion")) {
+      return (8900);
+    }
+    if (!strcasecmp(arg, "Plains of Confusion")) {
+      return (8954);
+    }
+    if (!strcasecmp(arg, "Turlon Fair")) {
+      return (9200);
+    }
+    if (!strcasecmp(arg, "Wetlands")) {
+      return (9700);
+    }
+    if (!strcasecmp(arg, "Kerberos")) {
+      return (9855);
+    }
+    if (!strcasecmp(arg, "Shaeras Mansion")) {
+      return (9864);
+    }
+    if (!strcasecmp(arg, "Slavinus Ravine")) {
+      return (9900);
+    }
+    if (!strcasecmp(arg, "Furian Citadel")) {
+      return (9949);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (8006);
   } else if (rroom_get_vnum(char_get_in_room(ch)) == 53) { // Above Vegeta
     if (!strcasecmp(arg, "Vegetos City")) {
       return (2226);
-    } else if (!strcasecmp(arg, "Blood Dunes")) {
-      return (2600);
-    } else if (!strcasecmp(arg, "Ancestral Mountains")) {
-      return (2616);
-    } else if (!strcasecmp(arg, "Destopa Swamp")) {
-      return (2709);
-    } else if (!strcasecmp(arg, "Pride forest")) {
-      return (2800);
-    } else if (!strcasecmp(arg, "Pride Tower")) {
-      return (2899);
-    } else if (!strcasecmp(arg, "Ruby Cave")) {
-      return (2615);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (2226);
     }
+    if (!strcasecmp(arg, "Blood Dunes")) {
+      return (2600);
+    }
+    if (!strcasecmp(arg, "Ancestral Mountains")) {
+      return (2616);
+    }
+    if (!strcasecmp(arg, "Destopa Swamp")) {
+      return (2709);
+    }
+    if (!strcasecmp(arg, "Pride forest")) {
+      return (2800);
+    }
+    if (!strcasecmp(arg, "Pride Tower")) {
+      return (2899);
+    }
+    if (!strcasecmp(arg, "Ruby Cave")) {
+      return (2615);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (2226);
   } else if (rroom_get_vnum(char_get_in_room(ch)) == 54) { // Above Namek
     if (!strcasecmp(arg, "Senzu Village")) {
       return (11600);
-    } else if (!strcasecmp(arg, "Guru's House")) {
-      return (10182);
-    } else if (!strcasecmp(arg, "Crystalline Cave")) {
-      return (10474);
-    } else if (!strcasecmp(arg, "Elder Village")) {
-      return (13300);
-    } else if (!strcasecmp(arg, "Frieza's Ship")) {
-      return (10203);
-    } else if (!strcasecmp(arg, "Kakureta Village")) {
-      return (10922);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (11600);
     }
+    if (!strcasecmp(arg, "Guru's House")) {
+      return (10182);
+    }
+    if (!strcasecmp(arg, "Crystalline Cave")) {
+      return (10474);
+    }
+    if (!strcasecmp(arg, "Elder Village")) {
+      return (13300);
+    }
+    if (!strcasecmp(arg, "Frieza's Ship")) {
+      return (10203);
+    }
+    if (!strcasecmp(arg, "Kakureta Village")) {
+      return (10922);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (11600);
   } else if (rroom_get_vnum(char_get_in_room(ch)) == 55) { // Above Aether
     if (!strcasecmp(arg, "Haven City")) {
       return (12010);
-    } else if (!strcasecmp(arg, "Serenity Lake")) {
-      return (12103);
-    } else if (!strcasecmp(arg, "Kaiju Forest")) {
-      return (12300);
-    } else if (!strcasecmp(arg, "Ortusian Temple")) {
-      return (12400);
-    } else if (!strcasecmp(arg, "Silent Glade")) {
-      return (12480);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (12010);
     }
+    if (!strcasecmp(arg, "Serenity Lake")) {
+      return (12103);
+    }
+    if (!strcasecmp(arg, "Kaiju Forest")) {
+      return (12300);
+    }
+    if (!strcasecmp(arg, "Ortusian Temple")) {
+      return (12400);
+    }
+    if (!strcasecmp(arg, "Silent Glade")) {
+      return (12480);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (12010);
   } else if (rroom_get_vnum(char_get_in_room(ch)) == 56) { // Above Yardrat
     if (!strcasecmp(arg, "Yardra City")) {
       return (14008);
-    } else if (!strcasecmp(arg, "Jade Forest")) {
-      return (14100);
-    } else if (!strcasecmp(arg, "Jade Cliffs")) {
-      return (14200);
-    } else if (!strcasecmp(arg, "Mount Valaria")) {
-      return (14300);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (14008);
     }
+    if (!strcasecmp(arg, "Jade Forest")) {
+      return (14100);
+    }
+    if (!strcasecmp(arg, "Jade Cliffs")) {
+      return (14200);
+    }
+    if (!strcasecmp(arg, "Mount Valaria")) {
+      return (14300);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (14008);
   } else if (rroom_get_vnum(char_get_in_room(ch)) == 198) { // Above Cerria
     if (!strcasecmp(arg, "Cerria Colony")) {
       return (17531);
-    } else if (!strcasecmp(arg, "Crystalline Forest")) {
-      return (7950);
-    } else if (!strcasecmp(arg, "Fistarl Volcano")) {
-      return (17420);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (17531);
     }
+    if (!strcasecmp(arg, "Crystalline Forest")) {
+      return (7950);
+    }
+    if (!strcasecmp(arg, "Fistarl Volcano")) {
+      return (17420);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (17531);
   } else if (rroom_get_vnum(char_get_in_room(ch)) == 57) { // Above Zennith
     if (!strcasecmp(arg, "Utatlan City")) {
       return (3412);
-    } else if (!strcasecmp(arg, "Zenith Jungle")) {
-      return (3520);
-    } else if (!strcasecmp(arg, "Ancient Castle")) {
-      return (19600);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (3412);
     }
+    if (!strcasecmp(arg, "Zenith Jungle")) {
+      return (3520);
+    }
+    if (!strcasecmp(arg, "Ancient Castle")) {
+      return (19600);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (3412);
   } else if (rroom_get_vnum(char_get_in_room(ch)) == 58) { // Above Kanassa
     if (!strcasecmp(arg, "Aquis City")) {
       return (14904);
-    } else if (!strcasecmp(arg, "Yunkai Pirate Base")) {
-      return (15655);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (14904);
     }
+    if (!strcasecmp(arg, "Yunkai Pirate Base")) {
+      return (15655);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (14904);
   } else if (rroom_get_vnum(char_get_in_room(ch)) == 59) { // Above Arlia
     if (!strcasecmp(arg, "Janacre")) {
       return (16009);
-    } else if (!strcasecmp(arg, "Arlian Wasteland")) {
-      return (16544);
-    } else if (!strcasecmp(arg, "Arlia Mine")) {
-      return (16600);
-    } else {
-      send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
-      return (16009);
     }
-  } else {
-    send_to_char(ch, "You are not above a planet!\r\n");
-    return (-1);
+    if (!strcasecmp(arg, "Arlian Wasteland")) {
+      return (16544);
+    }
+    if (!strcasecmp(arg, "Arlia Mine")) {
+      return (16600);
+    }
+    send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+    return (16009);
   }
+  send_to_char(ch, "You are not above a planet!\r\n");
+  return (-1);
 }
 
 /* This shows the player what locations the planet has to land at. */
@@ -516,10 +567,9 @@ ACMD(do_land)
       send_to_char(ch, "Land where?\n");
       disp_locations(ch);
       return;
-    } else {
-      send_to_char(ch, "You are not even in the lower atmosphere of a planet!\r\n");
-      return;
     }
+    send_to_char(ch, "You are not even in the lower atmosphere of a planet!\r\n");
+    return;
   }
 
   int landing = land_location(ch, argument);
@@ -659,11 +709,10 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     } else if (!char_is_kanassan(ch) && !char_is_icer(ch) && !has_flight(ch)) {
       if (!check_swim(ch)) {
         return (0);
-      } else {
-        act("@CYou swim through the cold water.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@c$n@C swim through the cold water.@n", TRUE, ch, 0, 0, TO_ROOM);
-        char_set_wait(ch, PULSE_1SEC);
       }
+      act("@CYou swim through the cold water.@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@c$n@C swim through the cold water.@n", TRUE, ch, 0, 0, TO_ROOM);
+      char_set_wait(ch, PULSE_1SEC);
     }
   }
 
@@ -766,9 +815,8 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
       if (!char_adm_flagged(ch, ADM_WALKANYWHERE) && !char_is_npc(ch) && !char_aff_flagged(ch, AFF_FLYING))
         decCurST(ch, need_movement, 0);
       return (0);
-    } else {
-      send_to_char(ch, "Your skill in %s aids in your movement.\r\n", spell_info[char_get_exit(ch, dir)->dcskill].name);
     }
+    send_to_char(ch, "Your skill in %s aids in your movement.\r\n", spell_info[char_get_exit(ch, dir)->dcskill].name);
   }
 
   if (rroom_flagged(char_get_in_room(ch), ROOM_ATRIUM)) {
@@ -1076,16 +1124,20 @@ ACMD(do_move)
   if (char_get_charge(ch) >= getMaxKI(ch) * .51) {
     send_to_char(ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
     return;
-  } else if ((char_get_charge(ch) >= getMaxKI(ch) * .5 && char_get_charge(ch) < getMaxKI(ch) * .51) && char_get_skill(ch, SKILL_CONCENTRATION) < 100) {
+  }
+  if ((char_get_charge(ch) >= getMaxKI(ch) * .5 && char_get_charge(ch) < getMaxKI(ch) * .51) && char_get_skill(ch, SKILL_CONCENTRATION) < 100) {
     send_to_char(ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
     return;
-  } else if ((char_get_charge(ch) >= getMaxKI(ch) * .4 && char_get_charge(ch) < getMaxKI(ch) * .5) && char_get_skill(ch, SKILL_CONCENTRATION) < 80) {
+  }
+  if ((char_get_charge(ch) >= getMaxKI(ch) * .4 && char_get_charge(ch) < getMaxKI(ch) * .5) && char_get_skill(ch, SKILL_CONCENTRATION) < 80) {
     send_to_char(ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
     return;
-  } else if ((char_get_charge(ch) >= getMaxKI(ch) * .3 && char_get_charge(ch) < getMaxKI(ch) * .4) && char_get_skill(ch, SKILL_CONCENTRATION) < 70) {
+  }
+  if ((char_get_charge(ch) >= getMaxKI(ch) * .3 && char_get_charge(ch) < getMaxKI(ch) * .4) && char_get_skill(ch, SKILL_CONCENTRATION) < 70) {
     send_to_char(ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
     return;
-  } else if ((char_get_charge(ch) >= getMaxKI(ch) * .2 && char_get_charge(ch) < getMaxKI(ch) * .3) && char_get_skill(ch, SKILL_CONCENTRATION) < 60) {
+  }
+  if ((char_get_charge(ch) >= getMaxKI(ch) * .2 && char_get_charge(ch) < getMaxKI(ch) * .3) && char_get_skill(ch, SKILL_CONCENTRATION) < 60) {
     send_to_char(ch, "You have too much ki charged. You can't concentrate on keeping it charged while also traveling.\r\n");
     return;
   }
@@ -1120,7 +1172,8 @@ ACMD(do_move)
     if (noship == TRUE) {
       send_to_char(ch, "Your ship controls are not here or your ship was not found, report to Iovan!\r\n");
       return;
-    } else if (controls != NULL && vehicle != NULL) {
+    }
+    if (controls != NULL && vehicle != NULL) {
       if (obj_get_value(controls, 2) <= 0) {
         send_to_char(ch, "The ship is out of fuel!\r\n");
         return;
@@ -1174,13 +1227,12 @@ ACMD(do_move)
       send_to_char(char_get_absorbby(ch), "%s struggles in your grasp!\r\n", char_get_name(ch));
       char_set_wait(ch, PULSE_2SEC);
       return;
-    } else {
-      act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, char_get_absorbby(ch), 0, ch, TO_NOTVICT);
-      act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, char_get_absorbby(ch), 0, ch, TO_VICT);
-      act("@c$N@W manages to break loose of your hold!@n", TRUE, char_get_absorbby(ch), 0, ch, TO_CHAR);
-      char_set_absorbing(char_get_absorbby(ch), NULL);
-      char_set_absorbby(ch, NULL);
     }
+    act("@c$N@W manages to break loose of @C$n's@W hold!@n", TRUE, char_get_absorbby(ch), 0, ch, TO_NOTVICT);
+    act("@WYou manage to break loose of @C$n's@W hold!@n", TRUE, char_get_absorbby(ch), 0, ch, TO_VICT);
+    act("@c$N@W manages to break loose of your hold!@n", TRUE, char_get_absorbby(ch), 0, ch, TO_CHAR);
+    char_set_absorbing(char_get_absorbby(ch), NULL);
+    char_set_absorbby(ch, NULL);
   }
   if (!block_calc(ch)) {
     return;
@@ -2250,14 +2302,13 @@ static int check_swim(struct char_data *ch)
     decCurKI(ch, space_cost, 0);
     if (!can) send_to_char(ch, "You do not have enough ki to fly through space. You are drifting helplessly.\r\n");
     return can;
-  } else {
-    int64_t swim_cost = (getCurCarriedWeight(ch)) - 1;
-    if (getCurST(ch) >= swim_cost)
-      can = true;
-    decCurST(ch, swim_cost, 0);
-    if (!can) send_to_char(ch, "You are too tired to swim!\r\n");
-    return can;
   }
+  int64_t swim_cost = (getCurCarriedWeight(ch)) - 1;
+  if (getCurST(ch) >= swim_cost)
+    can = true;
+  decCurST(ch, swim_cost, 0);
+  if (!can) send_to_char(ch, "You are too tired to swim!\r\n");
+  return can;
 }
 
 /* Takes off from the planet into the space room. */
@@ -2347,41 +2398,39 @@ ACMD(do_fly)
     if ((getCurKI(ch)) < getMaxKI(ch) / 100 && !char_is_android(ch)) {
       send_to_char(ch, "You do not have the ki to fly.");
       return;
-    } else {
-      reveal_hiding(ch, 0);
-      act("@WYou slowly take off into the sky.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@W$n slowly takes off into the sky.@n", TRUE, ch, 0, 0, TO_ROOM);
-      if (char_get_sits(ch)) {
-        obj_set_sitting(char_get_sits(ch), NULL);
-        char_set_sits(ch, NULL);
-      }
-      if (char_get_position(ch) < POS_STANDING) {
-        char_set_position(ch, POS_STANDING);
-      }
-      char_aff_set(ch, AFF_FLYING, true);
-      char_set_altitude(ch, 1);
-      decCurKI(ch, getMaxKI(ch) / 100, 0);
     }
+    reveal_hiding(ch, 0);
+    act("@WYou slowly take off into the sky.@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@W$n slowly takes off into the sky.@n", TRUE, ch, 0, 0, TO_ROOM);
+    if (char_get_sits(ch)) {
+      obj_set_sitting(char_get_sits(ch), NULL);
+      char_set_sits(ch, NULL);
+    }
+    if (char_get_position(ch) < POS_STANDING) {
+      char_set_position(ch, POS_STANDING);
+    }
+    char_aff_set(ch, AFF_FLYING, true);
+    char_set_altitude(ch, 1);
+    decCurKI(ch, getMaxKI(ch) / 100, 0);
   }
   if (!strcasecmp("high", arg)) {
     if ((getCurKI(ch)) < getMaxKI(ch) / 100 && !char_is_android(ch)) {
       send_to_char(ch, "You do not have the ki to fly.");
       return;
-    } else {
-      reveal_hiding(ch, 0);
-      act("@WYou rocket high into the sky.@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@W$n rockets high into the sky.@n", TRUE, ch, 0, 0, TO_ROOM);
-      if (char_get_sits(ch)) {
-        obj_set_sitting(char_get_sits(ch), NULL);
-        char_set_sits(ch, NULL);
-      }
-      if (char_get_position(ch) < POS_STANDING) {
-        char_set_position(ch, POS_STANDING);
-      }
-      char_aff_set(ch, AFF_FLYING, true);
-      char_set_altitude(ch, 2);
-      decCurKI(ch, getMaxKI(ch) / 100, 0);
     }
+    reveal_hiding(ch, 0);
+    act("@WYou rocket high into the sky.@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@W$n rockets high into the sky.@n", TRUE, ch, 0, 0, TO_ROOM);
+    if (char_get_sits(ch)) {
+      obj_set_sitting(char_get_sits(ch), NULL);
+      char_set_sits(ch, NULL);
+    }
+    if (char_get_position(ch) < POS_STANDING) {
+      char_set_position(ch, POS_STANDING);
+    }
+    char_aff_set(ch, AFF_FLYING, true);
+    char_set_altitude(ch, 2);
+    decCurKI(ch, getMaxKI(ch) / 100, 0);
   }
   if (!strcasecmp("space", arg)) {
     if (!char_is_outside(ch)) {
@@ -2399,44 +2448,53 @@ ACMD(do_fly)
     if (rroom_flagged(char_get_in_room(ch), ROOM_EARTH)) {
       fly_to_space(ch, 50);
       return;
-    } else if (rroom_flagged(char_get_in_room(ch), ROOM_CERRIA)) {
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_CERRIA)) {
       fly_to_space(ch, 198);
       return;
-    } else if (rroom_flagged(char_get_in_room(ch), ROOM_VEGETA)) {
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_VEGETA)) {
       fly_to_space(ch, 53);
       return;
-    } else if (rroom_flagged(char_get_in_room(ch), ROOM_KANASSA)) {
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_KANASSA)) {
       if (rroom_get_vnum(char_get_in_room(ch)) == 14904) {
         fly_to_space(ch, 58);
       } else {
         send_to_char(ch, "You can only fly off the planet from the launchpad of Aquis.\r\n");
       }
       return;
-    } else if (rroom_flagged(char_get_in_room(ch), ROOM_FRIGID)) {
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_FRIGID)) {
       fly_to_space(ch, 51);
       return;
-    } else if (rroom_flagged(char_get_in_room(ch), ROOM_KONACK)) {
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_KONACK)) {
       fly_to_space(ch, 52);
       return;
-    } else if (rroom_flagged(char_get_in_room(ch), ROOM_NAMEK)) {
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_NAMEK)) {
       fly_to_space(ch, 54);
       return;
-    } else if (rroom_flagged(char_get_in_room(ch), ROOM_AETHER)) {
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_AETHER)) {
       fly_to_space(ch, 55);
       return;
-    } else if (rroom_flagged(char_get_in_room(ch), ROOM_YARDRAT)) {
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_YARDRAT)) {
       fly_to_space(ch, 56);
       return;
-    } else if (rroom_flagged(char_get_in_room(ch), ROOM_ARLIA)) {
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_ARLIA)) {
       fly_to_space(ch, 59);
       return;
-    } else if (rroom_planet_zenith(char_get_in_room(ch))) {
+    }
+    if (rroom_planet_zenith(char_get_in_room(ch))) {
       fly_to_space(ch, 57);
       return;
-    } else {
-      send_to_char(ch, "You are not on a planet.\r\n");
-      return;
     }
+    send_to_char(ch, "You are not on a planet.\r\n");
+    return;
   }
 }
 
@@ -2641,10 +2699,9 @@ ACMD(do_rest)
     if (char_get_skill(ch, SKILL_BARRIER)) {
       send_to_char(ch, "You have a barrier around you and can't rest.\r\n");
       return;
-    } else {
-      char_set_barrier(ch, 0);
-      char_aff_set(ch, AFF_SANCTUARY, false);
     }
+    char_set_barrier(ch, 0);
+    char_aff_set(ch, AFF_SANCTUARY, false);
   }
   if (char_get_fighting(ch)) {
     send_to_char(ch, "You are a bit busy at the moment!\r\n");
@@ -2805,10 +2862,9 @@ ACMD(do_sleep)
     if (char_get_skill(ch, SKILL_BARRIER) > 0) {
       send_to_char(ch, "You have a barrier around you and can't sleep.\r\n");
       return;
-    } else {
-      char_set_barrier(ch, 0);
-      char_aff_set(ch, AFF_SANCTUARY, false);
     }
+    char_set_barrier(ch, 0);
+    char_aff_set(ch, AFF_SANCTUARY, false);
   }
   if (char_get_kaioken(ch) > 0) {
     send_to_char(ch, "You are utilizing kaioken and can't sleep!\r\n");

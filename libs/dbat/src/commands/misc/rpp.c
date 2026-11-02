@@ -79,22 +79,24 @@ ACMD(do_preference)
       char_set_skills_base(ch, SKILL_THROW, 100);
     }
     return;
-  } else if (!strcasecmp(arg, "hand")) {
+  }
+  if (!strcasecmp(arg, "hand")) {
     send_to_char(ch, "You will now favor your body as your fighting specialization. Your body is ready.\r\n");
     char_set_preference(ch, PREFERENCE_H2H);
     return;
-  } else if (!strcasecmp(arg, "ki")) {
+  }
+  if (!strcasecmp(arg, "ki")) {
     send_to_char(ch, "You will now favor your ki energy as your fighting specialization. I expect more than a few smoldering craters.\r\n");
     char_set_preference(ch, PREFERENCE_KI);
     return;
-  } else if (!strcasecmp(arg, "weapon")) {
+  }
+  if (!strcasecmp(arg, "weapon")) {
     send_to_char(ch, "You will now favor your weapons as your fighting specialization. Let the blood fly!\r\n");
     char_set_preference(ch, PREFERENCE_WEAPON);
     return;
-  } else {
-    send_to_char(ch, "Syntax: preference (throw | weapon | hand | ki)\r\n");
-    return;
   }
+  send_to_char(ch, "Syntax: preference (throw | weapon | hand | ki)\r\n");
+  return;
 }
 
 void rpp_feature(struct char_data *ch, const char *arg)
@@ -121,23 +123,22 @@ void rpp_feature(struct char_data *ch, const char *arg)
   if (cost > char_get_rbank(ch)) {
     send_to_char(ch, "You do not have enough RPP in your Bank for that!\r\n");
     return;
-  } else {
-    char sex[128], buf8[MAX_INPUT_LENGTH];
-    snprintf(sex, sizeof(sex), "%s", char_get_sex(ch) == SEX_FEMALE ? "She" : char_get_sex(ch) == SEX_MALE ? "He"
-                                                                                                           : "It");
-
-    char_set_rbank(ch, char_get_rbank(ch) - (cost));
-    snprintf(buf8, sizeof(buf8), "...%s has %s.", sex, arg);
-    send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
-    send_to_char(ch, "You now have the following line underneath you when someone sees you in a room as:\n@C%s@n\r\n", buf8);
-    char_set_feature(ch, buf8);
-    if (change == TRUE) {
-      send_to_imm("%s has altered their extra description. Make sure the reason is legit! If it is then reimb them 2 RPP.\r\n", char_get_user(ch));
-      send_to_char(ch, "The immortals have been notified about this change. It had better have been for a good reason.\r\n");
-    }
-    mud_log("%s RPP Feature: '%s' Check for rule compliance.", char_get_user(ch), buf8);
-    return;
   }
+  char sex[128], buf8[MAX_INPUT_LENGTH];
+  snprintf(sex, sizeof(sex), "%s", char_get_sex(ch) == SEX_FEMALE ? "She" : char_get_sex(ch) == SEX_MALE ? "He"
+                                                                                                         : "It");
+
+  char_set_rbank(ch, char_get_rbank(ch) - (cost));
+  snprintf(buf8, sizeof(buf8), "...%s has %s.", sex, arg);
+  send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
+  send_to_char(ch, "You now have the following line underneath you when someone sees you in a room as:\n@C%s@n\r\n", buf8);
+  char_set_feature(ch, buf8);
+  if (change == TRUE) {
+    send_to_imm("%s has altered their extra description. Make sure the reason is legit! If it is then reimb them 2 RPP.\r\n", char_get_user(ch));
+    send_to_char(ch, "The immortals have been notified about this change. It had better have been for a good reason.\r\n");
+  }
+  mud_log("%s RPP Feature: '%s' Check for rule compliance.", char_get_user(ch), buf8);
+  return;
 }
 
 ACMD(do_instill)
@@ -262,19 +263,23 @@ ACMD(do_arena)
   if (!*arg) {
     send_to_char(ch, "Syntax: arena (fighter number of participant)\r\n        arena look\r\n        arena scan\r\n        arena stop\r\n");
     return;
-  } else if (!strcasecmp(arg, "stop")) {
+  }
+  if (!strcasecmp(arg, "stop")) {
     send_to_char(ch, "You stop viewing what's going on in the arena.\r\n");
     char_prf_set(ch, PRF_ARENAWATCH, false);
     char_set_arenawatch(ch, -1);
     return;
-  } else if (rroom_get_vnum(char_get_in_room(ch)) != 17875) {
+  }
+  if (rroom_get_vnum(char_get_in_room(ch)) != 17875) {
     send_to_char(ch, "You are not close enough to the arena floor to see it.\r\n");
     return;
-  } else if (!strcasecmp(arg, "look")) {
+  }
+  if (!strcasecmp(arg, "look")) {
     if (!char_prf_flagged(ch, PRF_ARENAWATCH)) {
       send_to_char(ch, "You are not even watching anyone in the arena.\r\n");
       return;
-    } else if (arena_watch(ch) != NOWHERE) {
+    }
+    if (arena_watch(ch) != NOWHERE) {
       look_at_room(real_room(arena_watch(ch)), ch, 0);
     }
   } else if (!strcasecmp(arg, "scan")) {

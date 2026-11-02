@@ -87,30 +87,29 @@ void customRead(struct descriptor_data *d, int type, char *name)
 
     fclose(fl);
     return;
-  } else {
-
-    if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, d->user)) {
-      mud_log("ERROR: Custom unable to be read from user file!");
-      return;
-    }
-
-    if (!(fl = fopen(fname, "r"))) {
-      mud_log("ERROR: Custom file unable to be read!");
-      return;
-    }
-
-    while (!feof(fl)) {
-      get_line(fl, line);
-      if (strcasecmp(filler, line))
-        sprintf(buf + strlen(buf), "%s\n", line);
-      *filler = '\0';
-      sprintf(filler, "%s", line);
-    }
-
-    write_to_output(d, "%s", buf);
-
-    fclose(fl);
   }
+
+  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, d->user)) {
+    mud_log("ERROR: Custom unable to be read from user file!");
+    return;
+  }
+
+  if (!(fl = fopen(fname, "r"))) {
+    mud_log("ERROR: Custom file unable to be read!");
+    return;
+  }
+
+  while (!feof(fl)) {
+    get_line(fl, line);
+    if (strcasecmp(filler, line))
+      sprintf(buf + strlen(buf), "%s\n", line);
+    *filler = '\0';
+    sprintf(filler, "%s", line);
+  }
+
+  write_to_output(d, "%s", buf);
+
+  fclose(fl);
 }
 
 void customCreate(struct descriptor_data *d)

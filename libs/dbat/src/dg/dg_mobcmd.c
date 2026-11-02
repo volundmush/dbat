@@ -255,17 +255,16 @@ ACMD(do_mjunk)
     if ((obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying)) != NULL)
       extract_obj(obj);
     return;
-  } else {
-    for (obj = ch->carrying; obj != NULL; obj = obj_next) {
-      obj_next = obj->next_content;
-      if (arg[3] == '\0' || isname(arg + 4, obj->name)) {
-        extract_obj(obj);
-      }
-    }
-    /* Thanks to Carlos Myers for fixing the line below */
-    while ((pos = get_obj_pos_in_equip_vis(ch, arg, NULL, ch->equipment)) >= 0)
-      extract_obj(unequip_char(ch, pos));
   }
+  for (obj = ch->carrying; obj != NULL; obj = obj_next) {
+    obj_next = obj->next_content;
+    if (arg[3] == '\0' || isname(arg + 4, obj->name)) {
+      extract_obj(obj);
+    }
+  }
+  /* Thanks to Carlos Myers for fixing the line below */
+  while ((pos = get_obj_pos_in_equip_vis(ch, arg, NULL, ch->equipment)) >= 0)
+    extract_obj(unequip_char(ch, pos));
   return;
 }
 
@@ -565,7 +564,8 @@ ACMD(do_mgoto)
   if ((location = find_target_room(ch, arg)) == NOWHERE && char_get_mob_vnum(ch) != 3) {
     mob_log(ch, "mgoto: invalid location");
     return;
-  } else if ((location = find_target_room(ch, arg)) == NOWHERE) {
+  }
+  if ((location = find_target_room(ch, arg)) == NOWHERE) {
     return;
   }
 

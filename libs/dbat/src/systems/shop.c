@@ -674,14 +674,14 @@ static int sell_price(struct obj_data *obj, int shop_nr, struct char_data *keepe
     haggle += haggle * 0.1;
     haggle = haggle * adjust;
     return (haggle);
-  } else if (!char_is_npc(seller) && char_is_arlian(seller)) {
+  }
+  if (!char_is_npc(seller) && char_is_arlian(seller)) {
     int haggle = (obj_get_cost(obj) * (sell_cost_modifier / 2));
     haggle -= haggle * 0.2;
     haggle = haggle * adjust;
     return (haggle);
-  } else {
-    return (int)((obj_get_cost(obj) * (sell_cost_modifier / 2)) * adjust);
   }
+  return (int)((obj_get_cost(obj) * (sell_cost_modifier / 2)) * adjust);
 }
 
 static void shopping_app(char *arg, struct char_data *ch, struct char_data *keeper, int shop_nr)
@@ -718,79 +718,78 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
     send_to_char(ch, "@wYou were completely stumped about the worth of %s@n\r\n", obj->short_description);
     char_set_wait(ch, PULSE_2SEC);
     return;
-  } else {
-    int displevel = obj_get_level(obj);
-
-    if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_extra_flagged(obj, ITEM_CUSTOM))
-      displevel = 20;
-
-    send_to_char(ch, "@c---------------------------------------------------------------@n\n");
-    send_to_char(ch, "@GItem Name   @W: @w%s@n\n", obj->short_description);
-    send_to_char(ch, "@GTrue Value  @W: @Y%s@n\n", add_commas(obj_get_cost(obj)));
-    send_to_char(ch, "@GItem Min LVL@W: @w%d@n\n", displevel);
-    if (obj_get_value(obj, VAL_ALL_HEALTH) >= 100) {
-      send_to_char(ch, "@GCondition   @W: @C%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
-    } else if (obj_get_value(obj, VAL_ALL_HEALTH) >= 50) {
-      send_to_char(ch, "@GCondition   @W: @y%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
-    } else if (obj_get_value(obj, VAL_ALL_HEALTH) >= 1) {
-      send_to_char(ch, "@GCondition   @W: @r%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
-    } else {
-      send_to_char(ch, "@GCondition   @W: @D%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
-    }
-    send_to_char(ch, "@GItem Size   @W:@w %s@n\n", size_names[obj_get_size(obj)]);
-    send_to_char(ch, "@GItem Weight @W: @w%s@n\n", add_commas(obj_get_weight(obj)));
-    if (obj_extra_flagged(obj, ITEM_SLOT1) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-      send_to_char(ch, "GToken Slots  @W: @m0/1@n\n");
-    } else if (obj_extra_flagged(obj, ITEM_SLOT1) && obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-      send_to_char(ch, "GToken Slots  @W: @m1/1@n\n");
-    } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-      send_to_char(ch, "GToken Slots  @W: @m0/2@n\n");
-    } else if (obj_extra_flagged(obj, ITEM_SLOT2) && obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-      send_to_char(ch, "GToken Slots  @W: @m1/2@n\n");
-    } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
-      send_to_char(ch, "GToken Slots  @W: @m2/2@n\n");
-    }
-    char bits[MAX_STRING_LENGTH];
-    sprintbitarray(obj_get_wear_flags(obj), wear_bits, TW_ARRAY_MAX, bits, sizeof(bits));
-    search_replace(bits, "TAKE", "");
-    send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
-    if (obj_get_type_flag(obj) == ITEM_WEAPON) {
-      if (obj_extra_flagged(obj, ITEM_WEAPLVL1)) {
-        send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w5%s@D]@n\r\n", "%");
-      } else if (obj_extra_flagged(obj, ITEM_WEAPLVL2)) {
-        send_to_char(ch, "@GWeapon Level@W: @D[@C2@D]\n@GDamage Bonus@W: @D[@w10%s@D]@n\r\n", "%");
-      } else if (obj_extra_flagged(obj, ITEM_WEAPLVL3)) {
-        send_to_char(ch, "@GWeapon Level@W: @D[@C3@D]\n@GDamage Bonus@W: @D[@w20%s@D]@n\r\n", "%");
-      } else if (obj_extra_flagged(obj, ITEM_WEAPLVL4)) {
-        send_to_char(ch, "@GWeapon Level@W: @D[@C4@D]\n@GDamage Bonus@W: @D[@w30%s@D]@n\r\n", "%");
-      } else if (obj_extra_flagged(obj, ITEM_WEAPLVL5)) {
-        send_to_char(ch, "@GWeapon Level@W: @D[@C5@D]\n@GDamage Bonus@W: @D[@w50%s@D]@n\r\n", "%");
-      }
-    }
-    send_to_char(ch, "@GItem Bonuses@W:@w");
-    for (i = 0; i < MAX_OBJ_AFFECT; i++) {
-      if (obj->affected[i].modifier) {
-        sprinttype(obj->affected[i].location, apply_types, buf, sizeof(buf));
-        send_to_char(ch, "%s %+d to %s", found++ ? "," : "", obj->affected[i].modifier, buf);
-        switch (obj->affected[i].location) {
-          case APPLY_FEAT:
-            send_to_char(ch, " (%s)", feat_list[obj->affected[i].specific].name);
-            break;
-          case APPLY_SKILL:
-            send_to_char(ch, " (%s)", spell_info[obj->affected[i].specific].name);
-            break;
-        }
-      }
-    }
-    if (!found)
-      send_to_char(ch, " None@n");
-    else
-      send_to_char(ch, "@n");
-    char buf2[MAX_STRING_LENGTH];
-    sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX, buf2, sizeof(buf2));
-    send_to_char(ch, "\n@GSpecial     @W:@w %s", buf2);
-    send_to_char(ch, "\n@c---------------------------------------------------------------@n\n");
   }
+  int displevel = obj_get_level(obj);
+
+  if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_extra_flagged(obj, ITEM_CUSTOM))
+    displevel = 20;
+
+  send_to_char(ch, "@c---------------------------------------------------------------@n\n");
+  send_to_char(ch, "@GItem Name   @W: @w%s@n\n", obj->short_description);
+  send_to_char(ch, "@GTrue Value  @W: @Y%s@n\n", add_commas(obj_get_cost(obj)));
+  send_to_char(ch, "@GItem Min LVL@W: @w%d@n\n", displevel);
+  if (obj_get_value(obj, VAL_ALL_HEALTH) >= 100) {
+    send_to_char(ch, "@GCondition   @W: @C%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
+  } else if (obj_get_value(obj, VAL_ALL_HEALTH) >= 50) {
+    send_to_char(ch, "@GCondition   @W: @y%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
+  } else if (obj_get_value(obj, VAL_ALL_HEALTH) >= 1) {
+    send_to_char(ch, "@GCondition   @W: @r%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
+  } else {
+    send_to_char(ch, "@GCondition   @W: @D%d%s@n\n", obj_get_value(obj, VAL_ALL_HEALTH), "%");
+  }
+  send_to_char(ch, "@GItem Size   @W:@w %s@n\n", size_names[obj_get_size(obj)]);
+  send_to_char(ch, "@GItem Weight @W: @w%s@n\n", add_commas(obj_get_weight(obj)));
+  if (obj_extra_flagged(obj, ITEM_SLOT1) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
+    send_to_char(ch, "GToken Slots  @W: @m0/1@n\n");
+  } else if (obj_extra_flagged(obj, ITEM_SLOT1) && obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
+    send_to_char(ch, "GToken Slots  @W: @m1/1@n\n");
+  } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
+    send_to_char(ch, "GToken Slots  @W: @m0/2@n\n");
+  } else if (obj_extra_flagged(obj, ITEM_SLOT2) && obj_extra_flagged(obj, ITEM_SLOT_ONE) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
+    send_to_char(ch, "GToken Slots  @W: @m1/2@n\n");
+  } else if (obj_extra_flagged(obj, ITEM_SLOT2) && !obj_extra_flagged(obj, ITEM_SLOTS_FILLED)) {
+    send_to_char(ch, "GToken Slots  @W: @m2/2@n\n");
+  }
+  char bits[MAX_STRING_LENGTH];
+  sprintbitarray(obj_get_wear_flags(obj), wear_bits, TW_ARRAY_MAX, bits, sizeof(bits));
+  search_replace(bits, "TAKE", "");
+  send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
+  if (obj_get_type_flag(obj) == ITEM_WEAPON) {
+    if (obj_extra_flagged(obj, ITEM_WEAPLVL1)) {
+      send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w5%s@D]@n\r\n", "%");
+    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL2)) {
+      send_to_char(ch, "@GWeapon Level@W: @D[@C2@D]\n@GDamage Bonus@W: @D[@w10%s@D]@n\r\n", "%");
+    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL3)) {
+      send_to_char(ch, "@GWeapon Level@W: @D[@C3@D]\n@GDamage Bonus@W: @D[@w20%s@D]@n\r\n", "%");
+    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL4)) {
+      send_to_char(ch, "@GWeapon Level@W: @D[@C4@D]\n@GDamage Bonus@W: @D[@w30%s@D]@n\r\n", "%");
+    } else if (obj_extra_flagged(obj, ITEM_WEAPLVL5)) {
+      send_to_char(ch, "@GWeapon Level@W: @D[@C5@D]\n@GDamage Bonus@W: @D[@w50%s@D]@n\r\n", "%");
+    }
+  }
+  send_to_char(ch, "@GItem Bonuses@W:@w");
+  for (i = 0; i < MAX_OBJ_AFFECT; i++) {
+    if (obj->affected[i].modifier) {
+      sprinttype(obj->affected[i].location, apply_types, buf, sizeof(buf));
+      send_to_char(ch, "%s %+d to %s", found++ ? "," : "", obj->affected[i].modifier, buf);
+      switch (obj->affected[i].location) {
+        case APPLY_FEAT:
+          send_to_char(ch, " (%s)", feat_list[obj->affected[i].specific].name);
+          break;
+        case APPLY_SKILL:
+          send_to_char(ch, " (%s)", spell_info[obj->affected[i].specific].name);
+          break;
+      }
+    }
+  }
+  if (!found)
+    send_to_char(ch, " None@n");
+  else
+    send_to_char(ch, "@n");
+  char buf2[MAX_STRING_LENGTH];
+  sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX, buf2, sizeof(buf2));
+  send_to_char(ch, "\n@GSpecial     @W:@w %s", buf2);
+  send_to_char(ch, "\n@c---------------------------------------------------------------@n\n");
 }
 
 static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keeper, int shop_nr)
@@ -1289,24 +1288,27 @@ SPECIAL(shop_keeper)
       do_action(keeper, char_get_name(ch), cmd_slap, 0);
 
       return (TRUE);
-    } else {
-      return (FALSE);
     }
+    return (FALSE);
   }
 
   if (CMD_IS("buy")) {
     shopping_buy(argument, ch, keeper, shop_nr);
     return (TRUE);
-  } else if (CMD_IS("sell")) {
+  }
+  if (CMD_IS("sell")) {
     shopping_sell(argument, ch, keeper, shop_nr);
     return (TRUE);
-  } else if (CMD_IS("value")) {
+  }
+  if (CMD_IS("value")) {
     shopping_value(argument, ch, keeper, shop_nr);
     return (TRUE);
-  } else if (CMD_IS("list")) {
+  }
+  if (CMD_IS("list")) {
     shopping_list(argument, ch, keeper, shop_nr);
     return (TRUE);
-  } else if (CMD_IS("appraise")) {
+  }
+  if (CMD_IS("appraise")) {
     shopping_app(argument, ch, keeper, shop_nr);
     return (TRUE);
   }

@@ -189,19 +189,24 @@ ACMD(do_teach)
   if (!vict->master) {
     send_to_char(ch, "They must be following you in order for you to teach them.\r\n");
     return;
-  } else if (vict->master != ch) {
+  }
+  if (vict->master != ch) {
     send_to_char(ch, "They must be following you in order for you to teach them.\r\n");
     return;
-  } else if (char_get_forgeting(vict) == skill) {
+  }
+  if (char_get_forgeting(vict) == skill) {
     send_to_char(ch, "They are trying to forget that skill!\r\n");
     return;
-  } else if (char_get_practice_points(vict) < cost) {
+  }
+  if (char_get_practice_points(vict) < cost) {
     send_to_char(ch, "They do not have enough practice sessions for you to teach them.\r\n");
     return;
-  } else if (char_get_skills_base(vict, skill) >= 80) {
+  }
+  if (char_get_skills_base(vict, skill) >= 80) {
     send_to_char(ch, "You can not teach them anymore.\r\n");
     return;
-  } else if (char_get_skills_base(vict, skill) > 0) {
+  }
+  if (char_get_skills_base(vict, skill) > 0) {
     char tochar[MAX_STRING_LENGTH], tovict[MAX_STRING_LENGTH], toother[MAX_STRING_LENGTH];
     sprintf(tochar, "@YYou instruct @y$N@Y in the finer points of @C%s@Y.@n\r\n", spell_info[skill].name);
     sprintf(tovict, "@y$n@Y instructs you in the finer points of @C%s@Y.@n\r\n", spell_info[skill].name);
@@ -759,7 +764,8 @@ static void handle_forget(struct char_data *keeper, int guild_nr, struct char_da
   if (char_get_skills_base(ch, skill_num) > 30) {
     send_to_char(ch, "@MYou can not forget that skill, you know too much about it.@n\r\n");
     return;
-  } else if (skill_num == SKILL_MIMIC && char_get_mimic(ch) > 0) {
+  }
+  if (skill_num == SKILL_MIMIC && char_get_mimic(ch) > 0) {
     send_to_char(ch, "@MYou can not forget mimic while you are using it!\r\n");
   } else if (skill_num == SKILL_FOCUS) {
     send_to_char(ch, "@MYou can not forget such a fundamental skill!@n\r\n");
@@ -813,24 +819,26 @@ static void handle_grand(struct char_data *keeper, int guild_nr, struct char_dat
   if (char_get_skills_base(ch, skill_num) <= 0) {
     send_to_char(ch, "You do not know that skill!\r\n");
     return;
-  } else if (char_get_skills_base(ch, skill_num) < 100) {
+  }
+  if (char_get_skills_base(ch, skill_num) < 100) {
     send_to_char(ch, "You haven't even mastered that skill. How can you become a Grand Master in it?\r\n");
     return;
-  } else if (char_get_skills_base(ch, skill_num) >= 103) {
+  }
+  if (char_get_skills_base(ch, skill_num) >= 103) {
     send_to_char(ch, "You have already become a Grand Master in that skill and have progessed as far as possible in it.\r\n");
     return;
-  } else if (char_get_practice_points(ch) < 1000) {
+  }
+  if (char_get_practice_points(ch) < 1000) {
     send_to_char(ch, "You need at least 1,000 practice sessions to rank up beyond 100 in a skill.\r\n");
     return;
-  } else {
-    if (char_get_skills_base(ch, skill_num) == 100) {
-      send_to_char(ch, "@YYou have ascended to Grand Master in the skill, @C%s@Y.\r\n", spell_info[skill_num].name);
-    } else {
-      send_to_char(ch, "@YYou have ranked up in your Grand Mastery of the skill, @C%s@Y.\r\n", spell_info[skill_num].name);
-    }
-    char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + 1);
-    char_set_practice_points(ch, char_get_practice_points(ch) - (1000));
   }
+  if (char_get_skills_base(ch, skill_num) == 100) {
+    send_to_char(ch, "@YYou have ascended to Grand Master in the skill, @C%s@Y.\r\n", spell_info[skill_num].name);
+  } else {
+    send_to_char(ch, "@YYou have ranked up in your Grand Mastery of the skill, @C%s@Y.\r\n", spell_info[skill_num].name);
+  }
+  char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + 1);
+  char_set_practice_points(ch, char_get_practice_points(ch) - (1000));
 }
 
 static void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
@@ -951,46 +959,16 @@ static void handle_practice(struct char_data *keeper, int guild_nr, struct char_
       if (char_get_skills_base(ch, skill_num) >= 100) {
         send_to_char(ch, "You know everything about that skill.\r\n");
         return;
-      } else {
-        if (char_get_skills_base(ch, skill_num) == 0) {
-          if (slot_count(ch) < char_get_skill_slots(ch)) {
-            if (skill_num != 539)
-              send_to_char(ch, "You practice and master the basics!\r\n");
-            else
-              send_to_char(ch, "You practice the basics of %s\r\n", sensei_style[char_get_class(ch)]);
-            char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + rand_number(10, 25));
-            char_set_practice_points(ch, char_get_practice_points(ch) - (pointcost));
-            if (char_get_forgeting(ch) != 0 && char_get_skills_base(ch, char_get_forgeting(ch)) < 30) {
-              char_set_forgetcount(ch, char_get_forgetcount(ch) + (1));
-              if (char_get_forgetcount(ch) >= 5) {
-                char_set_skills_base(ch, char_get_forgeting(ch), 0);
-                send_to_char(ch, "@MYou have finally forgotten what little you knew of %s@n\r\n", spell_info[char_get_forgeting(ch)].name);
-                char_set_forgeting(ch, 0);
-                char_set_forgetcount(ch, 0);
-                save_char(ch);
-              }
-            } else if (char_get_skills_base(ch, char_get_forgeting(ch)) < 30) {
-              char_set_forgeting(ch, 0);
-            }
-          } else {
-            send_to_char(ch, "You already know the maximum number of skills you can for the time being!\r\n");
-            return;
-          }
-        } else {
+      }
+      if (char_get_skills_base(ch, skill_num) == 0) {
+        if (slot_count(ch) < char_get_skill_slots(ch)) {
           if (skill_num != 539)
-            send_to_char(ch, "You practice for a while and manage to advance your technique. (%d)\r\n", char_get_skills_base(ch, skill_num) + 1);
+            send_to_char(ch, "You practice and master the basics!\r\n");
           else
-            send_to_char(ch, "You practice the basics of %s. (%d)\r\n", sensei_style[char_get_class(ch)], char_get_skills_base(ch, skill_num) + 1);
-          char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + 1);
+            send_to_char(ch, "You practice the basics of %s\r\n", sensei_style[char_get_class(ch)]);
+          char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + rand_number(10, 25));
           char_set_practice_points(ch, char_get_practice_points(ch) - (pointcost));
-          if (char_get_skills_base(ch, skill_num) >= 100) {
-            send_to_char(ch, "You learned a lot by mastering that skill.\r\n");
-            if (char_is_konatsu(ch) && skill_num == SKILL_PARRY) {
-              char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + 5);
-            }
-            gain_exp(ch, level_exp(ch, char_get_level(ch) + 1) / 20);
-          }
-          if (char_get_forgeting(ch) != 0) {
+          if (char_get_forgeting(ch) != 0 && char_get_skills_base(ch, char_get_forgeting(ch)) < 30) {
             char_set_forgetcount(ch, char_get_forgetcount(ch) + (1));
             if (char_get_forgetcount(ch) >= 5) {
               char_set_skills_base(ch, char_get_forgeting(ch), 0);
@@ -999,6 +977,35 @@ static void handle_practice(struct char_data *keeper, int guild_nr, struct char_
               char_set_forgetcount(ch, 0);
               save_char(ch);
             }
+          } else if (char_get_skills_base(ch, char_get_forgeting(ch)) < 30) {
+            char_set_forgeting(ch, 0);
+          }
+        } else {
+          send_to_char(ch, "You already know the maximum number of skills you can for the time being!\r\n");
+          return;
+        }
+      } else {
+        if (skill_num != 539)
+          send_to_char(ch, "You practice for a while and manage to advance your technique. (%d)\r\n", char_get_skills_base(ch, skill_num) + 1);
+        else
+          send_to_char(ch, "You practice the basics of %s. (%d)\r\n", sensei_style[char_get_class(ch)], char_get_skills_base(ch, skill_num) + 1);
+        char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + 1);
+        char_set_practice_points(ch, char_get_practice_points(ch) - (pointcost));
+        if (char_get_skills_base(ch, skill_num) >= 100) {
+          send_to_char(ch, "You learned a lot by mastering that skill.\r\n");
+          if (char_is_konatsu(ch) && skill_num == SKILL_PARRY) {
+            char_set_skills_base(ch, skill_num, char_get_skills_base(ch, skill_num) + 5);
+          }
+          gain_exp(ch, level_exp(ch, char_get_level(ch) + 1) / 20);
+        }
+        if (char_get_forgeting(ch) != 0) {
+          char_set_forgetcount(ch, char_get_forgetcount(ch) + (1));
+          if (char_get_forgetcount(ch) >= 5) {
+            char_set_skills_base(ch, char_get_forgeting(ch), 0);
+            send_to_char(ch, "@MYou have finally forgotten what little you knew of %s@n\r\n", spell_info[char_get_forgeting(ch)].name);
+            char_set_forgeting(ch, 0);
+            char_set_forgetcount(ch, 0);
+            save_char(ch);
           }
         }
       }

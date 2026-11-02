@@ -187,7 +187,8 @@ static void resolve_song(struct char_data *ch)
           if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
             if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
               continue;
-            } else if (skill > diceroll + 10) {
+            }
+            if (skill > diceroll + 10) {
               apply_shadow_sitch(ch, vict, skill);
             }
           } else if (skill > diceroll + 10) {
@@ -437,112 +438,123 @@ ACMD(do_song)
     act("@c$n stops playing their ocarina.@n", TRUE, ch, 0, 0, TO_ROOM);
     char_set_powerattack(ch, 0);
     return;
-  } else {
+  }
 
-    char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    int skill = char_get_skill(ch, SKILL_MYSTICMUSIC);
+  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+  int skill = char_get_skill(ch, SKILL_MYSTICMUSIC);
 
-    two_arguments(argument, arg, arg2);
-    if (!*arg) {
-      send_to_char(ch, "@YSongs Known\n@c-------------------@n\r\n");
-      send_to_char(ch, "@W%s%s%sSong of Safety\r\n", skill > 99 ? "Song of Shielding\n" : "", skill > 80 ? "Melody of Teleportation\n" : "", skill > 50 ? "Shadow Stitch Minuet\n" : "");
-      send_to_char(ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
+  two_arguments(argument, arg, arg2);
+  if (!*arg) {
+    send_to_char(ch, "@YSongs Known\n@c-------------------@n\r\n");
+    send_to_char(ch, "@W%s%s%sSong of Safety\r\n", skill > 99 ? "Song of Shielding\n" : "", skill > 80 ? "Melody of Teleportation\n" : "", skill > 50 ? "Shadow Stitch Minuet\n" : "");
+    send_to_char(ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
+    return;
+  }
+  int64_t cost = getMaxKI(ch) * 0.01;
+  int modifier = 1;
+  if (!strcasecmp(arg, "shielding")) {
+    modifier = 20;
+    cost *= modifier;
+  } else if (!strcasecmp(arg, "teleport")) {
+    modifier = 50;
+    cost *= modifier;
+  } else if (!strcasecmp(arg, "shadow")) {
+    modifier = 8;
+    cost *= modifier;
+  } else if (!strcasecmp(arg, "safety")) {
+    modifier = 3;
+    cost *= modifier;
+  }
+
+  if (instrument == 8802) {
+    cost -= cost * 0.5;
+  }
+
+  if (modifier == 0) {
+    send_to_char(ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
+    return;
+  }
+  if (modifier == 3 && (getCurKI(ch)) < cost) {
+    send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+    return;
+  }
+  if (modifier == 3) {
+    act("@CYou begin to play the Song of Safety! Your fingers lightly glide over the ocarina and as you blow into it sweet music similar to a lullaby issues forth from the intrument.@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@c$n@C begins to play a song on $s ocarina. The music seems to be some sort of lullaby.@n", TRUE, ch, 0, 0, TO_ROOM);
+    char_set_powerattack(ch, SONG_SAFETY);
+    decCurKI(ch, cost, 0);
+    return;
+  }
+  if (modifier == 8 && (getCurKI(ch)) < cost) {
+    send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+    return;
+  }
+  if (modifier == 8 && skill <= 49) {
+    send_to_char(ch, "You do not posess the skill to play such a song!\r\n");
+    return;
+  }
+  if (modifier == 8) {
+    act("@CYou begin to play the Shadow Stitch Minuet! Your fingers lightly glide over the ocarina and as you blow into it forboding low toned music issues forth.@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@c$n@C begins to play a song on $s ocarina. Depressing low toned music issues forth from the ocarina.@n", TRUE, ch, 0, 0, TO_ROOM);
+    char_set_powerattack(ch, SONG_SHADOW_STITCH);
+    decCurKI(ch, cost, 0);
+    return;
+  }
+  if (modifier == 50 && (getCurKI(ch)) < cost) {
+    send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+    return;
+  }
+  if (modifier == 50 && skill <= 79) {
+    send_to_char(ch, "You do not posess the skill to play such a song!\r\n");
+    return;
+  }
+  if (modifier == 50) {
+    if (!*arg2) {
+      send_to_char(ch, "Where would you like to teleport to?\nSyntax: song teleport (earth | vegeta | kanassa | arlia | aether | namek | konack| frigid)\r\n");
       return;
-    } else {
-      int64_t cost = getMaxKI(ch) * 0.01;
-      int modifier = 1;
-      if (!strcasecmp(arg, "shielding")) {
-        modifier = 20;
-        cost *= modifier;
-      } else if (!strcasecmp(arg, "teleport")) {
-        modifier = 50;
-        cost *= modifier;
-      } else if (!strcasecmp(arg, "shadow")) {
-        modifier = 8;
-        cost *= modifier;
-      } else if (!strcasecmp(arg, "safety")) {
-        modifier = 3;
-        cost *= modifier;
-      }
-
-      if (instrument == 8802) {
-        cost -= cost * 0.5;
-      }
-
-      if (modifier == 0) {
-        send_to_char(ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
-        return;
-      } else if (modifier == 3 && (getCurKI(ch)) < cost) {
-        send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
-        return;
-      } else if (modifier == 3) {
-        act("@CYou begin to play the Song of Safety! Your fingers lightly glide over the ocarina and as you blow into it sweet music similar to a lullaby issues forth from the intrument.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@c$n@C begins to play a song on $s ocarina. The music seems to be some sort of lullaby.@n", TRUE, ch, 0, 0, TO_ROOM);
-        char_set_powerattack(ch, SONG_SAFETY);
-        decCurKI(ch, cost, 0);
-        return;
-      } else if (modifier == 8 && (getCurKI(ch)) < cost) {
-        send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
-        return;
-      } else if (modifier == 8 && skill <= 49) {
-        send_to_char(ch, "You do not posess the skill to play such a song!\r\n");
-        return;
-      } else if (modifier == 8) {
-        act("@CYou begin to play the Shadow Stitch Minuet! Your fingers lightly glide over the ocarina and as you blow into it forboding low toned music issues forth.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@c$n@C begins to play a song on $s ocarina. Depressing low toned music issues forth from the ocarina.@n", TRUE, ch, 0, 0, TO_ROOM);
-        char_set_powerattack(ch, SONG_SHADOW_STITCH);
-        decCurKI(ch, cost, 0);
-        return;
-      } else if (modifier == 50 && (getCurKI(ch)) < cost) {
-        send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
-        return;
-      } else if (modifier == 50 && skill <= 79) {
-        send_to_char(ch, "You do not posess the skill to play such a song!\r\n");
-        return;
-      } else if (modifier == 50) {
-        if (!*arg2) {
-          send_to_char(ch, "Where would you like to teleport to?\nSyntax: song teleport (earth | vegeta | kanassa | arlia | aether | namek | konack| frigid)\r\n");
-          return;
-        } else if (char_aff_flagged(ch, AFF_SPIRIT)) {
-          send_to_char(ch, "Not while you're dead!\r\n");
-          return;
-        } else if (!strcasecmp(arg2, "earth")) {
-          char_set_powerattack(ch, SONG_TELEPORT_EARTH);
-        } else if (!strcasecmp(arg2, "frigid")) {
-          char_set_powerattack(ch, SONG_TELEPORT_FRIGID);
-        } else if (!strcasecmp(arg2, "vegeta")) {
-          char_set_powerattack(ch, SONG_TELEPORT_VEGETA);
-        } else if (!strcasecmp(arg2, "namek")) {
-          char_set_powerattack(ch, SONG_TELEPORT_NAMEK);
-        } else if (!strcasecmp(arg2, "arlia")) {
-          char_set_powerattack(ch, SONG_TELEPORT_ARLIA);
-        } else if (!strcasecmp(arg2, "kanassa")) {
-          char_set_powerattack(ch, SONG_TELEPORT_KANASSA);
-        } else if (!strcasecmp(arg2, "konack")) {
-          char_set_powerattack(ch, SONG_TELEPORT_KONACK);
-        } else if (!strcasecmp(arg2, "aether")) {
-          char_set_powerattack(ch, SONG_TELEPORT_AETHER);
-        } else {
-          send_to_char(ch, "Syntax: song teleport (earth | vegeta | namek | aether | konack | kanassa | arlia | frigid)\r\n");
-          return;
-        }
-        act("@CYou begin to play the Melody of Teleportation! Your fingers lightly glide over the ocarina and as you blow into it a repeating light hearted melody issues forth.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@c$n@C begins to play a song on $s ocarina. A light hearted melody can be heard sounding from the ocarina as it is played.@n", TRUE, ch, 0, 0, TO_ROOM);
-        decCurKI(ch, cost, 0);
-        return;
-      } else if (modifier == 20 && (getCurKI(ch)) < cost) {
-        send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
-        return;
-      } else if (modifier == 20 && skill <= 98) {
-        send_to_char(ch, "You do not posess the skill to play such a song!\r\n");
-        return;
-      } else if (modifier == 20) {
-        act("@CYou begin to play the Song of Shielding! Your fingers lightly glide over the ocarina and as you blow into it a triumphant series of notes issues forth.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@c$n@C begins to play a song on $s ocarina. A triumphant song full of soaring sounds from the ocarina as it is played.@n", TRUE, ch, 0, 0, TO_ROOM);
-        char_set_powerattack(ch, SONG_SHIELDING);
-        decCurKI(ch, cost, 0);
-        return;
-      }
     }
+    if (char_aff_flagged(ch, AFF_SPIRIT)) {
+      send_to_char(ch, "Not while you're dead!\r\n");
+      return;
+    }
+    if (!strcasecmp(arg2, "earth")) {
+      char_set_powerattack(ch, SONG_TELEPORT_EARTH);
+    } else if (!strcasecmp(arg2, "frigid")) {
+      char_set_powerattack(ch, SONG_TELEPORT_FRIGID);
+    } else if (!strcasecmp(arg2, "vegeta")) {
+      char_set_powerattack(ch, SONG_TELEPORT_VEGETA);
+    } else if (!strcasecmp(arg2, "namek")) {
+      char_set_powerattack(ch, SONG_TELEPORT_NAMEK);
+    } else if (!strcasecmp(arg2, "arlia")) {
+      char_set_powerattack(ch, SONG_TELEPORT_ARLIA);
+    } else if (!strcasecmp(arg2, "kanassa")) {
+      char_set_powerattack(ch, SONG_TELEPORT_KANASSA);
+    } else if (!strcasecmp(arg2, "konack")) {
+      char_set_powerattack(ch, SONG_TELEPORT_KONACK);
+    } else if (!strcasecmp(arg2, "aether")) {
+      char_set_powerattack(ch, SONG_TELEPORT_AETHER);
+    } else {
+      send_to_char(ch, "Syntax: song teleport (earth | vegeta | namek | aether | konack | kanassa | arlia | frigid)\r\n");
+      return;
+    }
+    act("@CYou begin to play the Melody of Teleportation! Your fingers lightly glide over the ocarina and as you blow into it a repeating light hearted melody issues forth.@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@c$n@C begins to play a song on $s ocarina. A light hearted melody can be heard sounding from the ocarina as it is played.@n", TRUE, ch, 0, 0, TO_ROOM);
+    decCurKI(ch, cost, 0);
+    return;
+  }
+  if (modifier == 20 && (getCurKI(ch)) < cost) {
+    send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+    return;
+  }
+  if (modifier == 20 && skill <= 98) {
+    send_to_char(ch, "You do not posess the skill to play such a song!\r\n");
+    return;
+  }
+  if (modifier == 20) {
+    act("@CYou begin to play the Song of Shielding! Your fingers lightly glide over the ocarina and as you blow into it a triumphant series of notes issues forth.@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@c$n@C begins to play a song on $s ocarina. A triumphant song full of soaring sounds from the ocarina as it is played.@n", TRUE, ch, 0, 0, TO_ROOM);
+    char_set_powerattack(ch, SONG_SHIELDING);
+    decCurKI(ch, cost, 0);
+    return;
   }
 }

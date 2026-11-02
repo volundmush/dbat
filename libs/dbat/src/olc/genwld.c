@@ -57,19 +57,18 @@ room_rnum add_room(struct room_data *room)
       copy_room_strings(&world[i], room);
       found = i;
       break;
-    } else {
-      /* Copy the room over now. */
-      world[i] = world[i - 1];
-      update_wait_events(&world[i], &world[i - 1]);
-
-      /* People in this room must have their in_rooms moved up one. */
-      for (tch = world[i].people; tch; tch = tch->next_in_room)
-        char_set_in_room(tch, char_get_in_room(tch) + ((char_get_in_room(tch) != NOWHERE)));
-
-      /* Move objects too. */
-      for (tobj = world[i].contents; tobj; tobj = tobj->next_content)
-        obj_set_in_room(tobj, obj_get_in_room(tobj) + ((obj_get_in_room(tobj) != NOWHERE)));
     }
+    /* Copy the room over now. */
+    world[i] = world[i - 1];
+    update_wait_events(&world[i], &world[i - 1]);
+
+    /* People in this room must have their in_rooms moved up one. */
+    for (tch = world[i].people; tch; tch = tch->next_in_room)
+      char_set_in_room(tch, char_get_in_room(tch) + ((char_get_in_room(tch) != NOWHERE)));
+
+    /* Move objects too. */
+    for (tobj = world[i].contents; tobj; tobj = tobj->next_content)
+      obj_set_in_room(tobj, obj_get_in_room(tobj) + ((obj_get_in_room(tobj) != NOWHERE)));
     htree_add(room_htree, world[i].number, i);
   }
   if (!found) {

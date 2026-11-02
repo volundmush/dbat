@@ -2171,14 +2171,14 @@ int write_to_descriptor(int desc, const char *txt)
       /* Fatal error.  Disconnect the player. */
       perror("SYSERR: Write to socket");
       return (-1);
-    } else if (bytes_written == 0) {
+    }
+    if (bytes_written == 0) {
       /* Temporary failure -- socket buffer full. */
       return (write_total);
-    } else {
-      txt += bytes_written;
-      total -= bytes_written;
-      write_total += bytes_written;
     }
+    txt += bytes_written;
+    total -= bytes_written;
+    write_total += bytes_written;
   }
 
   return (write_total);
@@ -2558,10 +2558,9 @@ static void check_idle_passwords(void)
     if (!d->idle_tics) {
       d->idle_tics++;
       continue;
-    } else {
-      write_to_output(d, "\r\nTimed out... goodbye.\r\n");
-      desc_set_connected(d, CON_CLOSE);
     }
+    write_to_output(d, "\r\nTimed out... goodbye.\r\n");
+    desc_set_connected(d, CON_CLOSE);
   }
 }
 
@@ -2577,10 +2576,9 @@ static void check_idle_menu(void)
       d->idle_tics++;
       write_to_output(d, "\r\nYou are about to be disconnected due to inactivity in 60 seconds.\r\n");
       continue;
-    } else {
-      write_to_output(d, "\r\nTimed out... goodbye.\r\n");
-      desc_set_connected(d, CON_CLOSE);
     }
+    write_to_output(d, "\r\nTimed out... goodbye.\r\n");
+    desc_set_connected(d, CON_CLOSE);
   }
 }
 
@@ -2762,9 +2760,8 @@ int arena_watch(struct char_data *ch)
     char_prf_set(ch, PRF_ARENAWATCH, false);
     char_set_arenawatch(ch, -1);
     return (NOWHERE);
-  } else {
-    return (room);
   }
+  return (room);
 }
 
 void send_to_all(const char *messg, ...)
@@ -3259,16 +3256,16 @@ void show_help(struct descriptor_data *t, const char *entry)
 
     if (bot > top) {
       return;
-    } else if (!(chk = strncasecmp(entry, help_table[mid].keywords, minlen))) {
+    }
+    if (!(chk = strncasecmp(entry, help_table[mid].keywords, minlen))) {
       while ((mid > 0) &&
              (!(chk = strncasecmp(entry, help_table[mid - 1].keywords, minlen))))
         mid--;
       write_to_output(t, "\r\n%s\r\n", help_table[mid].entry);
       return;
-    } else {
-      if (chk > 0) bot = mid + 1;
-      else top = mid - 1;
     }
+    if (chk > 0) bot = mid + 1;
+    else top = mid - 1;
   }
 }
 

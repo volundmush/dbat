@@ -74,9 +74,11 @@ void send_to_sense(int type, const char *messg, struct char_data *ch)
     }
     if (char_get_in_room(ch) == char_get_in_room(tch)) {
       continue;
-    } else if (getCurPL(ch) < (getCurPL(tch) * 0.001) + 1) {
+    }
+    if (getCurPL(ch) < (getCurPL(tch) * 0.001) + 1) {
       continue;
-    } else if (type == 0) {
+    }
+    if (type == 0) {
       if (getEffMaxPL(ch) > getEffMaxPL(tch)) {
         write_to_output(i, "%s who is stronger than you. They are nearby.\r\n", messg);
       } else if (getEffMaxPL(ch) >= getEffMaxPL(tch) * .9) {
@@ -158,90 +160,103 @@ void send_to_scouter(const char *messg, struct char_data *ch, int num, int type)
     obj = char_get_equipment(tch, WEAR_EYE);
     if (tch == ch) {
       continue;
-    } else {
-      if ((((world[char_get_in_room(ch)].zone != world[char_get_in_room(tch)].zone) && type == 0) || !char_is_awake(tch))) {
-        continue;
-      }
-      if (rroom_flagged(char_get_in_room(ch), ROOM_SHIP)) {
-        continue;
-      }
-      if (char_get_invis_level(ch) > char_get_admlevel(tch)) {
-        continue;
-      }
-      if (char_is_android(ch)) {
-        continue;
-      } else if (rroom_flagged(char_get_in_room(ch), ROOM_EARTH) && !rroom_flagged(char_get_in_room(tch), ROOM_EARTH)) {
-        continue;
-      } else if (rroom_planet_zenith(char_get_in_room(ch)) && !rroom_planet_zenith(char_get_in_room(tch))) {
-        continue;
-      } else if (rroom_flagged(char_get_in_room(ch), ROOM_FRIGID) && !rroom_flagged(char_get_in_room(tch), ROOM_FRIGID)) {
-        continue;
-      } else if (rroom_flagged(char_get_in_room(ch), ROOM_NAMEK) && !rroom_flagged(char_get_in_room(tch), ROOM_NAMEK)) {
-        continue;
-      } else if (rroom_flagged(char_get_in_room(ch), ROOM_AL) && !rroom_flagged(char_get_in_room(tch), ROOM_AL)) {
-        continue;
-      } else if (rroom_flagged(char_get_in_room(ch), ROOM_VEGETA) && !rroom_flagged(char_get_in_room(tch), ROOM_VEGETA)) {
-        continue;
-      } else if (rroom_flagged(char_get_in_room(ch), ROOM_KONACK) && !rroom_flagged(char_get_in_room(tch), ROOM_KONACK)) {
-        continue;
-      } else if (rroom_flagged(char_get_in_room(ch), ROOM_NEO) && !rroom_flagged(char_get_in_room(tch), ROOM_NEO)) {
-        continue;
-      } else if (rroom_flagged(char_get_in_room(ch), ROOM_YARDRAT) && !rroom_flagged(char_get_in_room(tch), ROOM_YARDRAT)) {
-        continue;
-      } else if (rroom_flagged(char_get_in_room(ch), ROOM_KANASSA) && !rroom_flagged(char_get_in_room(tch), ROOM_KANASSA)) {
-        continue;
-      } else if (rroom_flagged(char_get_in_room(ch), ROOM_ARLIA) && !rroom_flagged(char_get_in_room(tch), ROOM_ARLIA)) {
-        continue;
-      } else if (rroom_flagged(char_get_in_room(ch), ROOM_AETHER) && !rroom_flagged(char_get_in_room(tch), ROOM_AETHER)) {
-        continue;
-      }
-      if (!obj) {
-        continue;
-      } else if (char_get_in_room(ch) == char_get_in_room(tch)) {
-        continue;
-      } else if (type == 0) {
-        if (num == 1) {
-          if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(ch) >= 150000) {
-            write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
-          } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(ch) >= 5000000) {
-            write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
-          } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(ch) >= 15000000) {
-            write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
-          } else {
-            write_to_output(i, "%s@n", messg);
-          }
-        } else {
-          if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(ch) >= 150000) {
-            write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
-          } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(ch) >= 5000000) {
-            write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
-          } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(ch) >= 15000000) {
-            write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
-          } else {
-            write_to_output(i, "%s\r\n", messg);
-          }
-        }
-      } else if (type == 1 && char_get_skill(tch, SKILL_SENSE) < 20) {
+    }
+    if ((((world[char_get_in_room(ch)].zone != world[char_get_in_room(tch)].zone) && type == 0) || !char_is_awake(tch))) {
+      continue;
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_SHIP)) {
+      continue;
+    }
+    if (char_get_invis_level(ch) > char_get_admlevel(tch)) {
+      continue;
+    }
+    if (char_is_android(ch)) {
+      continue;
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_EARTH) && !rroom_flagged(char_get_in_room(tch), ROOM_EARTH)) {
+      continue;
+    }
+    if (rroom_planet_zenith(char_get_in_room(ch)) && !rroom_planet_zenith(char_get_in_room(tch))) {
+      continue;
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_FRIGID) && !rroom_flagged(char_get_in_room(tch), ROOM_FRIGID)) {
+      continue;
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_NAMEK) && !rroom_flagged(char_get_in_room(tch), ROOM_NAMEK)) {
+      continue;
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_AL) && !rroom_flagged(char_get_in_room(tch), ROOM_AL)) {
+      continue;
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_VEGETA) && !rroom_flagged(char_get_in_room(tch), ROOM_VEGETA)) {
+      continue;
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_KONACK) && !rroom_flagged(char_get_in_room(tch), ROOM_KONACK)) {
+      continue;
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_NEO) && !rroom_flagged(char_get_in_room(tch), ROOM_NEO)) {
+      continue;
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_YARDRAT) && !rroom_flagged(char_get_in_room(tch), ROOM_YARDRAT)) {
+      continue;
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_KANASSA) && !rroom_flagged(char_get_in_room(tch), ROOM_KANASSA)) {
+      continue;
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_ARLIA) && !rroom_flagged(char_get_in_room(tch), ROOM_ARLIA)) {
+      continue;
+    }
+    if (rroom_flagged(char_get_in_room(ch), ROOM_AETHER) && !rroom_flagged(char_get_in_room(tch), ROOM_AETHER)) {
+      continue;
+    }
+    if (!obj) {
+      continue;
+    }
+    if (char_get_in_room(ch) == char_get_in_room(tch)) {
+      continue;
+    }
+    if (type == 0) {
+      if (num == 1) {
         if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(ch) >= 150000) {
-          write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+          write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
         } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(ch) >= 5000000) {
-          write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+          write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
         } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(ch) >= 15000000) {
-          write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+          write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
         } else {
-          write_to_output(i, "@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(getCurPL(ch)));
+          write_to_output(i, "%s@n", messg);
         }
-      } else if (type == 2 && char_get_skill(tch, SKILL_SENSE) < 20) {
-        char *blah = sense_location(ch);
+      } else {
         if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(ch) >= 150000) {
-          write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
+          write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
         } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(ch) >= 5000000) {
-          write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
+          write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
         } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(ch) >= 15000000) {
-          write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
+          write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
         } else {
-          write_to_output(i, "@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, blah, add_commas(getCurPL(ch)));
+          write_to_output(i, "%s\r\n", messg);
         }
+      }
+    } else if (type == 1 && char_get_skill(tch, SKILL_SENSE) < 20) {
+      if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(ch) >= 150000) {
+        write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+      } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(ch) >= 5000000) {
+        write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+      } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(ch) >= 15000000) {
+        write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
+      } else {
+        write_to_output(i, "@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(getCurPL(ch)));
+      }
+    } else if (type == 2 && char_get_skill(tch, SKILL_SENSE) < 20) {
+      char *blah = sense_location(ch);
+      if (obj_extra_flagged(obj, ITEM_BSCOUTER) && getCurPL(ch) >= 150000) {
+        write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
+      } else if (obj_extra_flagged(obj, ITEM_MSCOUTER) && getCurPL(ch) >= 5000000) {
+        write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
+      } else if (obj_extra_flagged(obj, ITEM_ASCOUTER) && getCurPL(ch) >= 15000000) {
+        write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah);
+      } else {
+        write_to_output(i, "@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, blah, add_commas(getCurPL(ch)));
       }
     }
   }
@@ -304,21 +319,23 @@ void send_to_imm(const char *messg, ...)
   for (i = descriptor_list; i; i = i->next) {
     if (desc_get_connected(i) != CON_PLAYING) {
       continue;
-    } else if (char_get_admlevel(i->character) == 0) {
-      continue;
-    } else if (!char_prf_flagged(i->character, PRF_LOG2)) {
-      continue;
-    } else if (char_plr_flagged(i->character, PLR_WRITING)) {
-      continue;
-    } else {
-      write_to_output(i, "@g[ Log: ");
-      va_list args;
-      va_start(args, messg);
-
-      vwrite_to_output(i, messg, args);
-      write_to_output(i, " ]@n\n");
-      va_end(args);
     }
+    if (char_get_admlevel(i->character) == 0) {
+      continue;
+    }
+    if (!char_prf_flagged(i->character, PRF_LOG2)) {
+      continue;
+    }
+    if (char_plr_flagged(i->character, PLR_WRITING)) {
+      continue;
+    }
+    write_to_output(i, "@g[ Log: ");
+    va_list args;
+    va_start(args, messg);
+
+    vwrite_to_output(i, messg, args);
+    write_to_output(i, " ]@n\n");
+    va_end(args);
   }
   va_list args;
   va_start(args, messg);

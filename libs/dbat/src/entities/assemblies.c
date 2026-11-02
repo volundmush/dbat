@@ -140,7 +140,8 @@ void assemblyListToChar(struct char_data *pCharacter)
   if (pCharacter == NULL) {
     mud_log("SYSERR: assemblyListAssembliesToChar(): NULL 'pCharacter'.");
     return;
-  } else if (g_pAssemblyTable == NULL) {
+  }
+  if (g_pAssemblyTable == NULL) {
     send_to_char(pCharacter, "No assemblies exist.\r\n");
     return;
   }
@@ -182,7 +183,8 @@ bool assemblyAddComponent(long lVnum, long lComponentVnum, bool bExtract, bool b
   if ((pAssembly = assemblyGetAssemblyPtr(lVnum)) == NULL) {
     mud_log("SYSERR: assemblyAddComponent(): Invalid 'lVnum' #%ld.", lVnum);
     return (FALSE);
-  } else if (real_object(lComponentVnum) <= NOTHING) {
+  }
+  if (real_object(lComponentVnum) <= NOTHING) {
     mud_log("SYSERR: assemblyAddComponent(): Invalid 'lComponentVnum' #%ld.",
             lComponentVnum);
     return (FALSE);
@@ -225,7 +227,8 @@ bool assemblyCheckComponents(long lVnum, struct char_data *pCharacter, int extra
   if (pCharacter == NULL) {
     mud_log("SYSERR: NULL assemblyCheckComponents(): 'pCharacter'.");
     return (FALSE);
-  } else if ((pAssembly = assemblyGetAssemblyPtr(lVnum)) == NULL) {
+  }
+  if ((pAssembly = assemblyGetAssemblyPtr(lVnum)) == NULL) {
     mud_log("SYSERR: NULL assemblyCheckComponents(): Invalid 'lVnum' #%ld.", lVnum);
     return (FALSE);
   }

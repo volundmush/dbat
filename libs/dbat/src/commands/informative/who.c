@@ -57,10 +57,9 @@ ACMD(do_finger)
   if (!readUserIndex(arg)) {
     send_to_char(ch, "That user does not exist\r\n");
     return;
-  } else {
-    fingerUser(ch, arg);
-    return;
   }
+  fingerUser(ch, arg);
+  return;
 }
 
 /* Written by Rhade */
@@ -593,7 +592,8 @@ ACMD(do_toplist)
   if (!get_filename(fname, sizeof(fname), INTRO_FILE, "toplist")) {
     send_to_char(ch, "The toplist file does not exist.");
     return;
-  } else if (!(file = fopen(fname, "r"))) {
+  }
+  if (!(file = fopen(fname, "r"))) {
     send_to_char(ch, "The toplist file does not exist.");
     return;
   }

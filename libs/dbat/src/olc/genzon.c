@@ -55,7 +55,8 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
   if (vzone_num < 0) {
     *error = "You can't make negative zones.\r\n";
     return NOWHERE;
-  } else if (bottom > top) {
+  }
+  if (bottom > top) {
     *error = "Bottom room cannot be greater than top room.\r\n";
     return NOWHERE;
   }
@@ -312,7 +313,8 @@ void create_world_index(int znum, const char *type)
   if (!(oldfile = fopen(old_name, "r"))) {
     mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Failed to open %s.", old_name);
     return;
-  } else if (!(newfile = atomic_open(&index_af, old_name, false))) {
+  }
+  if (!(newfile = atomic_open(&index_af, old_name, false))) {
     mudlog(LOG_BRF, ADMLVL_IMPL, TRUE, "SYSERR: OLC: Failed to open %s.", index_af.tmp);
     fclose(oldfile);
     return;
@@ -330,7 +332,8 @@ void create_world_index(int znum, const char *type)
        */
       fprintf(newfile, "%s", (!found ? strncat(buf1, "\n$\n", sizeof(buf1) - 1) : "$\n"));
       break;
-    } else if (!found) {
+    }
+    if (!found) {
       sscanf(buf, "%d", &num);
       if (num == znum) {
         found = TRUE;

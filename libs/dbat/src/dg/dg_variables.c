@@ -214,7 +214,8 @@ static bool text_processed(char *field, char *subfield, struct trig_var_data *vd
     else
       snprintf(str, slen, "%c", vd->value[dgindex - 1]);
     return true;
-  } else if (!strcasecmp(field, "mudcommand")) {
+  }
+  if (!strcasecmp(field, "mudcommand")) {
     /* find the mud command returned from this text */
     /* NOTE: you may need to replace "cmd_info" with "complete_cmd_info", */
     /* depending on what patches you've got applied.                      */

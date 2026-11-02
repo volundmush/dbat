@@ -345,27 +345,33 @@ ACMD(do_summon)
       dball[0] = -1;
       count++;
       continue;
-    } else if (obj_get_vnum(obj) == dball[1]) {
+    }
+    if (obj_get_vnum(obj) == dball[1]) {
       dball[1] = -1;
       count++;
       continue;
-    } else if (obj_get_vnum(obj) == dball[2]) {
+    }
+    if (obj_get_vnum(obj) == dball[2]) {
       dball[2] = -1;
       count++;
       continue;
-    } else if (obj_get_vnum(obj) == dball[3]) {
+    }
+    if (obj_get_vnum(obj) == dball[3]) {
       dball[3] = -1;
       count++;
       continue;
-    } else if (obj_get_vnum(obj) == dball[4]) {
+    }
+    if (obj_get_vnum(obj) == dball[4]) {
       dball[4] = -1;
       count++;
       continue;
-    } else if (obj_get_vnum(obj) == dball[5]) {
+    }
+    if (obj_get_vnum(obj) == dball[5]) {
       dball[5] = -1;
       count++;
       continue;
-    } else if (obj_get_vnum(obj) == dball[6]) {
+    }
+    if (obj_get_vnum(obj) == dball[6]) {
       dball[6] = -1;
       count++;
       continue;
@@ -402,39 +408,44 @@ ACMD(do_summon)
         extract_obj(obj);
         dball2[0] = -1;
         continue;
-      } else if (obj_get_vnum(obj) == dball2[1]) {
+      }
+      if (obj_get_vnum(obj) == dball2[1]) {
         obj_from_char(obj);
         extract_obj(obj);
         dball2[1] = -1;
         continue;
-      } else if (obj_get_vnum(obj) == dball2[2]) {
+      }
+      if (obj_get_vnum(obj) == dball2[2]) {
         obj_from_char(obj);
         extract_obj(obj);
         dball2[2] = -1;
         continue;
-      } else if (obj_get_vnum(obj) == dball2[3]) {
+      }
+      if (obj_get_vnum(obj) == dball2[3]) {
         obj_from_char(obj);
         extract_obj(obj);
         dball2[3] = -1;
         continue;
-      } else if (obj_get_vnum(obj) == dball2[4]) {
+      }
+      if (obj_get_vnum(obj) == dball2[4]) {
         obj_from_char(obj);
         extract_obj(obj);
         dball2[4] = -1;
         continue;
-      } else if (obj_get_vnum(obj) == dball2[5]) {
+      }
+      if (obj_get_vnum(obj) == dball2[5]) {
         obj_from_char(obj);
         extract_obj(obj);
         dball2[5] = -1;
         continue;
-      } else if (obj_get_vnum(obj) == dball2[6]) {
+      }
+      if (obj_get_vnum(obj) == dball2[6]) {
         obj_from_char(obj);
         extract_obj(obj);
         dball2[6] = -1;
         continue;
-      } else {
-        continue;
       }
+      continue;
     }
     if ((r_num = real_mobile(21)) == NOBODY) {
       send_to_imm("Shenron doesn't exist!");
@@ -444,10 +455,9 @@ ACMD(do_summon)
     char_to_room(mob, 0);
     EDRAGON = mob;
     return;
-  } else {
-    send_to_char(ch, "@wYou do not have all the dragon balls and can not summon the dragon!@n\r\n");
-    return;
   }
+  send_to_char(ch, "@wYou do not have all the dragon balls and can not summon the dragon!@n\r\n");
+  return;
 }
 
 int dball_count(struct char_data *ch)
@@ -463,27 +473,33 @@ int dball_count(struct char_data *ch)
       dball[0] = -1;
       count++;
       continue;
-    } else if (obj_get_vnum(obj) == dball[1]) {
+    }
+    if (obj_get_vnum(obj) == dball[1]) {
       dball[1] = -1;
       count++;
       continue;
-    } else if (obj_get_vnum(obj) == dball[2]) {
+    }
+    if (obj_get_vnum(obj) == dball[2]) {
       dball[2] = -1;
       count++;
       continue;
-    } else if (obj_get_vnum(obj) == dball[3]) {
+    }
+    if (obj_get_vnum(obj) == dball[3]) {
       dball[3] = -1;
       count++;
       continue;
-    } else if (obj_get_vnum(obj) == dball[4]) {
+    }
+    if (obj_get_vnum(obj) == dball[4]) {
       dball[4] = -1;
       count++;
       continue;
-    } else if (obj_get_vnum(obj) == dball[5]) {
+    }
+    if (obj_get_vnum(obj) == dball[5]) {
       dball[5] = -1;
       count++;
       continue;
-    } else if (obj_get_vnum(obj) == dball[6]) {
+    }
+    if (obj_get_vnum(obj) == dball[6]) {
       dball[6] = -1;
       count++;
       continue;
@@ -494,7 +510,6 @@ int dball_count(struct char_data *ch)
 
   if (count >= 1) {
     return 1;
-  } else {
-    return 0;
   }
+  return 0;
 }

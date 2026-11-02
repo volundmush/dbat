@@ -590,33 +590,32 @@ int roll_skill(const struct char_data *ch, int snum)
           (spell_info[snum].min_level[i] < char_get_class_ranks(ch, i)))
         roll += char_get_class_ranks(ch, i); /* Caster level for eligable classes */
     return roll + rand_number(1, 20);
-  } else if (IS_SET(spell_info[snum].skilltype, SKTYPE_SKILL)) {
+  }
+  if (IS_SET(spell_info[snum].skilltype, SKTYPE_SKILL)) {
     if (!skval && IS_SET(spell_info[snum].flags, SKFLAG_NEEDTRAIN)) {
       return -1;
-    } else {
-      roll = skval;
-      if (IS_SET(spell_info[snum].flags, SKFLAG_STRMOD))
-        roll += ability_mod_value(char_get_aff_abils_str(ch));
-      if (IS_SET(spell_info[snum].flags, SKFLAG_DEXMOD))
-        roll += dex_mod_capped(ch);
-      if (IS_SET(spell_info[snum].flags, SKFLAG_CONMOD))
-        roll += ability_mod_value(char_get_aff_abils_con(ch));
-      if (IS_SET(spell_info[snum].flags, SKFLAG_INTMOD))
-        roll += ability_mod_value(char_get_aff_abils_intel(ch));
-      if (IS_SET(spell_info[snum].flags, SKFLAG_WISMOD))
-        roll += ability_mod_value(char_get_aff_abils_wis(ch));
-      if (IS_SET(spell_info[snum].flags, SKFLAG_CHAMOD))
-        roll += ability_mod_value(char_get_aff_abils_cha(ch));
-      if (IS_SET(spell_info[snum].flags, SKFLAG_ARMORALL))
-        roll -= 0;
-      else if (IS_SET(spell_info[snum].flags, SKFLAG_ARMORBAD))
-        roll -= 0;
-      return roll + rand_number(1, 20);
     }
-  } else {
-    mud_log("Trying to roll uncategorized skill/spell #%d for %s", snum, char_get_name(ch));
-    return 0;
+    roll = skval;
+    if (IS_SET(spell_info[snum].flags, SKFLAG_STRMOD))
+      roll += ability_mod_value(char_get_aff_abils_str(ch));
+    if (IS_SET(spell_info[snum].flags, SKFLAG_DEXMOD))
+      roll += dex_mod_capped(ch);
+    if (IS_SET(spell_info[snum].flags, SKFLAG_CONMOD))
+      roll += ability_mod_value(char_get_aff_abils_con(ch));
+    if (IS_SET(spell_info[snum].flags, SKFLAG_INTMOD))
+      roll += ability_mod_value(char_get_aff_abils_intel(ch));
+    if (IS_SET(spell_info[snum].flags, SKFLAG_WISMOD))
+      roll += ability_mod_value(char_get_aff_abils_wis(ch));
+    if (IS_SET(spell_info[snum].flags, SKFLAG_CHAMOD))
+      roll += ability_mod_value(char_get_aff_abils_cha(ch));
+    if (IS_SET(spell_info[snum].flags, SKFLAG_ARMORALL))
+      roll -= 0;
+    else if (IS_SET(spell_info[snum].flags, SKFLAG_ARMORBAD))
+      roll -= 0;
+    return roll + rand_number(1, 20);
   }
+  mud_log("Trying to roll uncategorized skill/spell #%d for %s", snum, char_get_name(ch));
+  return 0;
 }
 
 int roll_resisted(const struct char_data *actor, int sact, const struct char_data *resistor, int sres)

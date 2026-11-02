@@ -26,13 +26,12 @@ bool tech_handle_zanzoken(char_data *ch, char_data *vict, const char *name)
       }
       char_aff_set(vict, AFF_ZANZOKEN, false);
       return false;
-    } else {
-      act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-      act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-      act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-      char_aff_set(vict, AFF_ZANZOKEN, false);
-      char_aff_set(ch, AFF_ZANZOKEN, false);
     }
+    act("@C$N@c disappears, trying to avoid your attack but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
+    act("@cYou zanzoken to avoid the attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
+    act("@C$N@c disappears, trying to avoid @C$n's@c attack but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+    char_aff_set(vict, AFF_ZANZOKEN, false);
+    char_aff_set(ch, AFF_ZANZOKEN, false);
   }
   return true;
 }
@@ -67,7 +66,8 @@ bool tech_handle_charge(char_data *ch, char *arg, double minimum, double *attper
     if (adjust < 0.01 || adjust > 1.00) {
       send_to_char(ch, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
       return false;
-    } else if (adjust < *attperc && adjust >= minimum) {
+    }
+    if (adjust < *attperc && adjust >= minimum) {
       *attperc = adjust;
     } else if (adjust < minimum) {
       *attperc = minimum;
@@ -84,7 +84,8 @@ bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, obj_data 
     if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
       *vict = char_get_fighting(ch);
       return true;
-    } else if (!(*obj = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
+    }
+    if (!(*obj = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
       send_to_char(ch, "Nothing around here by that name.\r\n");
       return false;
     }

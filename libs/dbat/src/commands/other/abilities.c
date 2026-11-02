@@ -59,46 +59,43 @@ ACMD(do_willpower)
   if (char_get_majinize(ch) <= 0) {
     send_to_char(ch, "You are not majinized and have no need to reclaim full control of your own will.\r\n");
     return;
-  } else {
-    if (char_get_practice_points(ch) < 100 && char_get_level(ch) < 100) {
-      send_to_char(ch, "You do not have enough PS to focus your attempt to break free.\r\n");
-      fail = TRUE;
-    }
-    if (char_get_practice_points(ch) < 200 && char_get_level(ch) >= 100) {
-      send_to_char(ch, "You do not have enough PS to focus your attempt to break free.\r\n");
-      fail = TRUE;
-    }
-    if (char_get_exp(ch) < level_exp(ch, char_get_level(ch) + 1) && char_get_level(ch) < 100) {
-      send_to_char(ch, "You need a full level's worth of experience stored up to try and break free.\r\n");
-      fail = TRUE;
-    }
-    if (fail == TRUE) {
-      return;
-    } else {
-      char_set_exp(ch, 0);
-      char_set_practice_points(ch, char_get_practice_points(ch) - (100));
-      if (char_get_level(ch) >= 100) {
-        char_set_practice_points(ch, char_get_practice_points(ch) - (100));
-      }
-      if (rand_number(10, 100) - char_get_aff_abils_intel(ch) > 60) {
-        reveal_hiding(ch, 0);
-        act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments you give up, having failed to overcome the majinization!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@W$n focuses hard with $s eyes closed. Dark purple energy swirls around $s body and the M on $s head burns brightly. After a few moments $n seems to give up and the commotion dies down.@n", TRUE, ch, 0, 0, TO_ROOM);
-        return;
-      } else {
-        char_set_exp(ch, 0);
-        char_set_practice_points(ch, char_get_practice_points(ch) - (100));
-        if (char_get_level(ch) >= 100) {
-          char_set_practice_points(ch, char_get_practice_points(ch) - (100));
-        }
-        reveal_hiding(ch, 0);
-        act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments the ground splits beneath you and while letting out a piercing scream the M disappears from your forehead! You are free while still keeping the boost you had recieved from the majinization!@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@W$n focuses hard with $s eyes closed. Dark purple energy swirls around $s body and the M on $s head burns brightly. After a few moments the ground beneath $n splits and $e lets out a piercing scream. The M on $s forehead disappears!@n", TRUE, ch, 0, 0, TO_ROOM);
-        char_set_majinize(ch, 3);
-        return;
-      }
-    }
   }
+  if (char_get_practice_points(ch) < 100 && char_get_level(ch) < 100) {
+    send_to_char(ch, "You do not have enough PS to focus your attempt to break free.\r\n");
+    fail = TRUE;
+  }
+  if (char_get_practice_points(ch) < 200 && char_get_level(ch) >= 100) {
+    send_to_char(ch, "You do not have enough PS to focus your attempt to break free.\r\n");
+    fail = TRUE;
+  }
+  if (char_get_exp(ch) < level_exp(ch, char_get_level(ch) + 1) && char_get_level(ch) < 100) {
+    send_to_char(ch, "You need a full level's worth of experience stored up to try and break free.\r\n");
+    fail = TRUE;
+  }
+  if (fail == TRUE) {
+    return;
+  }
+  char_set_exp(ch, 0);
+  char_set_practice_points(ch, char_get_practice_points(ch) - (100));
+  if (char_get_level(ch) >= 100) {
+    char_set_practice_points(ch, char_get_practice_points(ch) - (100));
+  }
+  if (rand_number(10, 100) - char_get_aff_abils_intel(ch) > 60) {
+    reveal_hiding(ch, 0);
+    act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments you give up, having failed to overcome the majinization!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@W$n focuses hard with $s eyes closed. Dark purple energy swirls around $s body and the M on $s head burns brightly. After a few moments $n seems to give up and the commotion dies down.@n", TRUE, ch, 0, 0, TO_ROOM);
+    return;
+  }
+  char_set_exp(ch, 0);
+  char_set_practice_points(ch, char_get_practice_points(ch) - (100));
+  if (char_get_level(ch) >= 100) {
+    char_set_practice_points(ch, char_get_practice_points(ch) - (100));
+  }
+  reveal_hiding(ch, 0);
+  act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments the ground splits beneath you and while letting out a piercing scream the M disappears from your forehead! You are free while still keeping the boost you had recieved from the majinization!@n", TRUE, ch, 0, 0, TO_CHAR);
+  act("@W$n focuses hard with $s eyes closed. Dark purple energy swirls around $s body and the M on $s head burns brightly. After a few moments the ground beneath $n splits and $e lets out a piercing scream. The M on $s forehead disappears!@n", TRUE, ch, 0, 0, TO_ROOM);
+  char_set_majinize(ch, 3);
+  return;
 }
 
 ACMD(do_infuse)
@@ -178,7 +175,8 @@ ACMD(do_paralyze)
     act("@r$n @Rfocuses ki and points both $s arms at YOU! Your insomnia makes you immune to $s feeble paralysis attempt.@n", TRUE, ch, 0, vict, TO_VICT);
     act("@r$n @Rfocuses ki and points both $s arms at @r$N@R. However $N seems to shake off $s paralysis attack!@n", TRUE, ch, 0, vict, TO_NOTVICT);
     return;
-  } else if (prob < perc) {
+  }
+  if (prob < perc) {
     reveal_hiding(ch, 0);
     act("@RYou focus ki and point both your arms at @r$N@R. However $E manages to avoid your attempt to paralyze $M!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@r$n @Rfocuses ki and points both $s arms at YOU! You manage to avoid $s technique though...@n", TRUE, ch, 0, vict, TO_VICT);
@@ -231,14 +229,13 @@ ACMD(do_taisha)
     act("@g$n@W holds up $s hands while channeling ki. $s technique fails to produce an aura though....", TRUE, ch, 0, 0, TO_ROOM);
     improve_skill(ch, SKILL_TAISHA, 1);
     return;
-  } else {
-    reveal_hiding(ch, 0);
-    act("@WYou hold up your hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@g$n holds up $s hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n", TRUE, ch, 0, 0, TO_ROOM);
-    improve_skill(ch, SKILL_TAISHA, 1);
-    rroom_set_flag(char_get_in_room(ch), ROOM_AURA, true);
-    return;
   }
+  reveal_hiding(ch, 0);
+  act("@WYou hold up your hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n", TRUE, ch, 0, 0, TO_CHAR);
+  act("@g$n holds up $s hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n", TRUE, ch, 0, 0, TO_ROOM);
+  improve_skill(ch, SKILL_TAISHA, 1);
+  rroom_set_flag(char_get_in_room(ch), ROOM_AURA, true);
+  return;
 }
 
 ACMD(do_kura)
@@ -289,16 +286,15 @@ ACMD(do_kura)
     improve_skill(ch, SKILL_KURA, 0);
     char_set_wait(ch, PULSE_2SEC);
     return;
-  } else {
-    decCurST(ch, cost, 0);
-    incCurKI(ch, bonus, true);
-    reveal_hiding(ch, 0);
-    act("You crouch down and scream as your eyes turn red. You attempt to tap into your dark energies and succeed as a rush of energy explodes around you!", TRUE, ch, 0, 0, TO_CHAR);
-    act("@c$n@w crouches down and screams as $s eyes turn red. Suddenly $e manages to tap into dark energies and a rush of energy explodes around $m!", TRUE, ch, 0, 0, TO_ROOM);
-    improve_skill(ch, SKILL_KURA, 0);
-    char_set_wait(ch, PULSE_2SEC);
-    return;
   }
+  decCurST(ch, cost, 0);
+  incCurKI(ch, bonus, true);
+  reveal_hiding(ch, 0);
+  act("You crouch down and scream as your eyes turn red. You attempt to tap into your dark energies and succeed as a rush of energy explodes around you!", TRUE, ch, 0, 0, TO_CHAR);
+  act("@c$n@w crouches down and screams as $s eyes turn red. Suddenly $e manages to tap into dark energies and a rush of energy explodes around $m!", TRUE, ch, 0, 0, TO_ROOM);
+  improve_skill(ch, SKILL_KURA, 0);
+  char_set_wait(ch, PULSE_2SEC);
+  return;
 }
 
 ACMD(do_candy)
@@ -363,31 +359,30 @@ ACMD(do_candy)
     }
     char_set_wait(ch, PULSE_3SEC);
     return;
-  } else {
-    decCurKI(ch, getMaxKI(ch) / 15, 0);
-    reveal_hiding(ch, 0);
-    act("@cYou aim your forelock at @R$N@c and fire a beam of energy that envelopes $S entire body and changes $M into candy!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n@c aims $s forelock at @R$N@c and fires a beam of energy that envelopes $S entire body and changes $M into candy!@n ", TRUE, ch, 0, vict, TO_NOTVICT);
-    if (vict_max >= ch_max * 1.5) {
-      send_to_char(ch, "You grab the candy as it falls.\r\n");
-      obj = read_object(95, VIRTUAL);
-      obj_to_char(obj, ch);
-    } else if (vict_max >= ch_max) {
-      send_to_char(ch, "You grab the candy as it falls.\r\n");
-      obj = read_object(94, VIRTUAL);
-      obj_to_char(obj, ch);
-    } else if (vict_max < ch_max && (((vict_max >= ch_max * .5) && char_get_level(ch) < 100) || ((vict_max >= ch_max * .1) && char_get_level(ch) >= 100))) {
-      send_to_char(ch, "You grab the candy as it falls.\r\n");
-      obj = read_object(93, VIRTUAL);
-      obj_to_char(obj, ch);
-    } else if (vict_max < ch_max && (((vict_max < ch_max * .5) && char_get_level(ch) < 100) || ((vict_max < ch_max * .1) && char_get_level(ch) >= 100))) {
-      send_to_char(ch, "You grab the candy as it falls.\r\n");
-      obj = read_object(53, VIRTUAL);
-      obj_to_char(obj, ch);
-    }
-    char_mob_set(vict, MOB_HUSK, true);
-    die(vict, ch);
   }
+  decCurKI(ch, getMaxKI(ch) / 15, 0);
+  reveal_hiding(ch, 0);
+  act("@cYou aim your forelock at @R$N@c and fire a beam of energy that envelopes $S entire body and changes $M into candy!@n", TRUE, ch, 0, vict, TO_CHAR);
+  act("@C$n@c aims $s forelock at @R$N@c and fires a beam of energy that envelopes $S entire body and changes $M into candy!@n ", TRUE, ch, 0, vict, TO_NOTVICT);
+  if (vict_max >= ch_max * 1.5) {
+    send_to_char(ch, "You grab the candy as it falls.\r\n");
+    obj = read_object(95, VIRTUAL);
+    obj_to_char(obj, ch);
+  } else if (vict_max >= ch_max) {
+    send_to_char(ch, "You grab the candy as it falls.\r\n");
+    obj = read_object(94, VIRTUAL);
+    obj_to_char(obj, ch);
+  } else if (vict_max < ch_max && (((vict_max >= ch_max * .5) && char_get_level(ch) < 100) || ((vict_max >= ch_max * .1) && char_get_level(ch) >= 100))) {
+    send_to_char(ch, "You grab the candy as it falls.\r\n");
+    obj = read_object(93, VIRTUAL);
+    obj_to_char(obj, ch);
+  } else if (vict_max < ch_max && (((vict_max < ch_max * .5) && char_get_level(ch) < 100) || ((vict_max < ch_max * .1) && char_get_level(ch) >= 100))) {
+    send_to_char(ch, "You grab the candy as it falls.\r\n");
+    obj = read_object(53, VIRTUAL);
+    obj_to_char(obj, ch);
+  }
+  char_mob_set(vict, MOB_HUSK, true);
+  die(vict, ch);
 }
 
 ACMD(do_future)
@@ -511,10 +506,9 @@ ACMD(do_suppress)
       act("@G$n smiles as a rush of power erupts around $s body briefly.@n", TRUE, ch, 0, 0, TO_ROOM);
       char_set_suppression(ch, 0);
       return;
-    } else {
-      send_to_char(ch, "You are not suppressing!\r\n");
-      return;
     }
+    send_to_char(ch, "You are not suppressing!\r\n");
+    return;
   }
 
   int num = atoi(arg);
@@ -561,16 +555,15 @@ ACMD(do_hass)
     decCurST(ch, getMaxST(ch) / 30, 0);
     improve_skill(ch, SKILL_HASSHUKEN, 0);
     return;
-  } else {
-    reveal_hiding(ch, 0);
-    act("@WYou concentrate and start to move your arms at incredible speeds.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@C$n@W concentrates and starts to move $s arms at incredible speeds.@n", TRUE, ch, 0, 0, TO_ROOM);
-    int duration = perc / 15;
-    assign_affect(ch, AFF_HASS, SKILL_HASSHUKEN, duration, 0, 0, 0, 0, 0, 0);
-    decCurST(ch, getMaxST(ch) / 30, 0);
-    improve_skill(ch, SKILL_HASSHUKEN, 0);
-    return;
   }
+  reveal_hiding(ch, 0);
+  act("@WYou concentrate and start to move your arms at incredible speeds.@n", TRUE, ch, 0, 0, TO_CHAR);
+  act("@C$n@W concentrates and starts to move $s arms at incredible speeds.@n", TRUE, ch, 0, 0, TO_ROOM);
+  int duration = perc / 15;
+  assign_affect(ch, AFF_HASS, SKILL_HASSHUKEN, duration, 0, 0, 0, 0, 0, 0);
+  decCurST(ch, getMaxST(ch) / 30, 0);
+  improve_skill(ch, SKILL_HASSHUKEN, 0);
+  return;
 }
 
 ACMD(do_implant)
@@ -621,24 +614,24 @@ ACMD(do_implant)
         send_to_char(ch, "You already have a right arm!\r\n");
       }
       return;
-    } else {
-      if (vict != ch) {
-        reveal_hiding(ch, 0);
-        act("@WYou place the $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, vict, TO_CHAR);
-        act("@C$n@W places a $p@W up to your body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, vict, TO_VICT);
-        act("@C$n@W places a $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, vict, TO_NOTVICT);
-      }
-      if (vict == ch) {
-        reveal_hiding(ch, 0);
-        act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, 0, TO_CHAR);
-        act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, 0, TO_ROOM);
-      }
-      char_plr_set(vict, PLR_CRARM, true);
-      obj_from_char(limb);
-      extract_obj(limb);
-      return;
     }
-  } else if (!(strcmp(arg, "larm"))) {
+    if (vict != ch) {
+      reveal_hiding(ch, 0);
+      act("@WYou place the $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, vict, TO_CHAR);
+      act("@C$n@W places a $p@W up to your body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, vict, TO_VICT);
+      act("@C$n@W places a $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, vict, TO_NOTVICT);
+    }
+    if (vict == ch) {
+      reveal_hiding(ch, 0);
+      act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, 0, TO_CHAR);
+      act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new right arm!@n", TRUE, ch, limb, 0, TO_ROOM);
+    }
+    char_plr_set(vict, PLR_CRARM, true);
+    obj_from_char(limb);
+    extract_obj(limb);
+    return;
+  }
+  if (!(strcmp(arg, "larm"))) {
     if (char_get_limb_condition(vict, (2) - 1) >= 1) {
       if (vict != ch) {
         send_to_char(ch, "They already have a left arm!\r\n");
@@ -647,24 +640,24 @@ ACMD(do_implant)
         send_to_char(ch, "You already have a left arm!\r\n");
       }
       return;
-    } else {
-      if (vict && vict != ch) {
-        reveal_hiding(ch, 0);
-        act("@WYou place the $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, vict, TO_CHAR);
-        act("@C$n@W places a $p@W up to your body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, vict, TO_VICT);
-        act("@C$n@W places a $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, vict, TO_NOTVICT);
-      }
-      if (vict == ch) {
-        reveal_hiding(ch, 0);
-        act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, 0, TO_CHAR);
-        act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, 0, TO_ROOM);
-      }
-      char_plr_set(vict, PLR_CLARM, true);
-      obj_from_char(limb);
-      extract_obj(limb);
-      return;
     }
-  } else if (!(strcmp(arg, "rleg"))) {
+    if (vict && vict != ch) {
+      reveal_hiding(ch, 0);
+      act("@WYou place the $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, vict, TO_CHAR);
+      act("@C$n@W places a $p@W up to your body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, vict, TO_VICT);
+      act("@C$n@W places a $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, vict, TO_NOTVICT);
+    }
+    if (vict == ch) {
+      reveal_hiding(ch, 0);
+      act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, 0, TO_CHAR);
+      act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new left arm!@n", TRUE, ch, limb, 0, TO_ROOM);
+    }
+    char_plr_set(vict, PLR_CLARM, true);
+    obj_from_char(limb);
+    extract_obj(limb);
+    return;
+  }
+  if (!(strcmp(arg, "rleg"))) {
     if (char_get_limb_condition(vict, (3) - 1) >= 1) {
       if (vict != ch) {
         send_to_char(ch, "They already have a right leg!\r\n");
@@ -673,24 +666,24 @@ ACMD(do_implant)
         send_to_char(ch, "You already have a right leg!\r\n");
       }
       return;
-    } else {
-      if (vict && vict != ch) {
-        reveal_hiding(ch, 0);
-        act("@WYou place the $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, vict, TO_CHAR);
-        act("@C$n@W places a $p@W up to your body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, vict, TO_VICT);
-        act("@C$n@W places a $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, vict, TO_NOTVICT);
-      }
-      if (vict == ch) {
-        reveal_hiding(ch, 0);
-        act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, 0, TO_CHAR);
-        act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, 0, TO_ROOM);
-      }
-      char_plr_set(vict, PLR_CRLEG, true);
-      obj_from_char(limb);
-      extract_obj(limb);
-      return;
     }
-  } else if (!(strcmp(arg, "lleg"))) {
+    if (vict && vict != ch) {
+      reveal_hiding(ch, 0);
+      act("@WYou place the $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, vict, TO_CHAR);
+      act("@C$n@W places a $p@W up to your body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, vict, TO_VICT);
+      act("@C$n@W places a $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, vict, TO_NOTVICT);
+    }
+    if (vict == ch) {
+      reveal_hiding(ch, 0);
+      act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, 0, TO_CHAR);
+      act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new right leg!@n", TRUE, ch, limb, 0, TO_ROOM);
+    }
+    char_plr_set(vict, PLR_CRLEG, true);
+    obj_from_char(limb);
+    extract_obj(limb);
+    return;
+  }
+  if (!(strcmp(arg, "lleg"))) {
     if (char_get_limb_condition(vict, (4) - 1) >= 1) {
       if (vict != ch) {
         send_to_char(ch, "They already have a left leg!\r\n");
@@ -699,27 +692,25 @@ ACMD(do_implant)
         send_to_char(ch, "You already have a left leg!\r\n");
       }
       return;
-    } else {
-      if (vict && vict != ch) {
-        reveal_hiding(ch, 0);
-        act("@WYou place the $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, vict, TO_CHAR);
-        act("@C$n@W places a $p@W up to your body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, vict, TO_VICT);
-        act("@C$n@W places a $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, vict, TO_NOTVICT);
-      }
-      if (!vict || vict == ch) {
-        reveal_hiding(ch, 0);
-        act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, 0, TO_CHAR);
-        act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, 0, TO_ROOM);
-      }
-      char_plr_set(vict, PLR_CLLEG, true);
-      obj_from_char(limb);
-      extract_obj(limb);
-      return;
     }
-  } else {
-    send_to_char(ch, "Syntax: implant (rarm | larm | rleg | rleg)\r\n");
+    if (vict && vict != ch) {
+      reveal_hiding(ch, 0);
+      act("@WYou place the $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, vict, TO_CHAR);
+      act("@C$n@W places a $p@W up to your body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, vict, TO_VICT);
+      act("@C$n@W places a $p@W up to @c$N@W's body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, vict, TO_NOTVICT);
+    }
+    if (!vict || vict == ch) {
+      reveal_hiding(ch, 0);
+      act("@WYou place the $p@W up to your body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, 0, TO_CHAR);
+      act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new left leg!@n", TRUE, ch, limb, 0, TO_ROOM);
+    }
+    char_plr_set(vict, PLR_CLLEG, true);
+    obj_from_char(limb);
+    extract_obj(limb);
     return;
   }
+  send_to_char(ch, "Syntax: implant (rarm | larm | rleg | rleg)\r\n");
+  return;
 }
 
 /* do_fury for halfbreeds to release their raaaage, rawrg! */
@@ -809,7 +800,8 @@ ACMD(do_majinize)
   if (char_get_majinize(vict) > 0 && char_get_majinize(vict) != char_get_id(ch)) {
     send_to_char(ch, "They are already majinized before by someone else.\r\n");
     return;
-  } else if ((vict->master != ch)) {
+  }
+  if ((vict->master != ch)) {
     send_to_char(ch, "They must be following you in order for you to majinize them.\r\n");
     return;
   }
@@ -915,7 +907,8 @@ ACMD(do_spit)
     improve_skill(ch, SKILL_SPIT, 1);
     char_set_wait(ch, PULSE_2SEC);
     return;
-  } else if (char_aff_flagged(vict, AFF_ZANZOKEN) && (getCurST(vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
+  }
+  if (char_aff_flagged(vict, AFF_ZANZOKEN) && (getCurST(vict)) >= 1 && char_get_position(vict) != POS_SLEEPING) {
     decCurKI(ch, cost, 0);
     reveal_hiding(ch, 0);
     act("@C$N@c disappears, avoiding your spit before reappearing!@n", FALSE, ch, 0, vict, TO_CHAR);
@@ -925,23 +918,22 @@ ACMD(do_spit)
     char_set_wait(ch, PULSE_2SEC);
     improve_skill(ch, SKILL_SPIT, 1);
     return;
-  } else {
-    af.type      = SPELL_PARALYZE;
-    af.duration  = rand_number(1, 2);
-    af.modifier  = 0;
-    af.location  = APPLY_NONE;
-    af.bitvector = AFF_PARALYZE;
-    affect_join(vict, &af, FALSE, FALSE, FALSE, FALSE);
-
-    decCurKI(ch, cost, 0);
-    reveal_hiding(ch, 0);
-    act("@WGathering spit you concentrate ki into a wicked loogie and let it loose, and it smacks into @c$N@W turning $M into stone!@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n@W seems to focus ki before hawking a loogie at you! It manages to hit and you instantly turn to stone!@n", TRUE, ch, 0, vict, TO_VICT);
-    act("@C$n@W seems to focus ki before hawking a loogie at @c$N@W! It manages to hit and $E instantly turns to stone!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    improve_skill(ch, SKILL_SPIT, 1);
-    char_set_wait(ch, PULSE_2SEC);
-    return;
   }
+  af.type      = SPELL_PARALYZE;
+  af.duration  = rand_number(1, 2);
+  af.modifier  = 0;
+  af.location  = APPLY_NONE;
+  af.bitvector = AFF_PARALYZE;
+  affect_join(vict, &af, FALSE, FALSE, FALSE, FALSE);
+
+  decCurKI(ch, cost, 0);
+  reveal_hiding(ch, 0);
+  act("@WGathering spit you concentrate ki into a wicked loogie and let it loose, and it smacks into @c$N@W turning $M into stone!@n", TRUE, ch, 0, vict, TO_CHAR);
+  act("@C$n@W seems to focus ki before hawking a loogie at you! It manages to hit and you instantly turn to stone!@n", TRUE, ch, 0, vict, TO_VICT);
+  act("@C$n@W seems to focus ki before hawking a loogie at @c$N@W! It manages to hit and $E instantly turns to stone!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  improve_skill(ch, SKILL_SPIT, 1);
+  char_set_wait(ch, PULSE_2SEC);
+  return;
 }
 
 ACMD(do_absorb)
@@ -1013,7 +1005,8 @@ ACMD(do_absorb)
     if (!*arg) {
       send_to_char(ch, "Syntax: absorb (swallow | extract) (target)\r\n");
       return;
-    } else if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
+    }
+    if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
       send_to_char(ch, "Syntax: absorb (swallow | extract) (target)\r\n");
       return;
     }
@@ -1065,16 +1058,15 @@ ACMD(do_absorb)
       }
       char_set_wait(ch, PULSE_3SEC);
       return;
-    } else {
-      act("@WYou rush at @c$N@W and try to absorb from them, and manage to grab on!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@C$n@W rushes at you and tries to grab you, and manages to grab on!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@C$n@w rushes at @c$N@W and tries to grab $M, and manages to grab on!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-      improve_skill(ch, SKILL_ABSORB, 1);
-      char_set_absorbing(ch, vict);
-      char_set_absorbby(vict, ch);
-      char_set_wait(ch, PULSE_3SEC);
-      return;
     }
+    act("@WYou rush at @c$N@W and try to absorb from them, and manage to grab on!@n", TRUE, ch, 0, vict, TO_CHAR);
+    act("@C$n@W rushes at you and tries to grab you, and manages to grab on!@n", TRUE, ch, 0, vict, TO_VICT);
+    act("@C$n@w rushes at @c$N@W and tries to grab $M, and manages to grab on!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    improve_skill(ch, SKILL_ABSORB, 1);
+    char_set_absorbing(ch, vict);
+    char_set_absorbby(vict, ch);
+    char_set_wait(ch, PULSE_3SEC);
+    return;
   } // End of android absorb
 
   else if (char_is_bio(ch) && !(strcmp(arg, "swallow"))) {
@@ -1278,7 +1270,8 @@ ACMD(do_regenerate)
     send_to_char(ch, "Your life force or ki are too low to regenerate that much.\r\n");
     send_to_char(ch, "@YLF Needed@D: @C%s@w, @YKi Needed@D: @C%s@w.@n\r\n", add_commas(amt * 0.8), add_commas(amt * 0.2));
     return;
-  } else if (char_is_npc(ch) && energy <= 0) {
+  }
+  if (char_is_npc(ch) && energy <= 0) {
     return;
   }
 
@@ -1422,10 +1415,9 @@ ACMD(do_kaioken)
     if (char_get_kaioken(ch) > 0) {
       remove_kaioken(ch, 1);
       return;
-    } else {
-      send_to_char(ch, "You are not in kaioken!\r\n");
-      return;
     }
+    send_to_char(ch, "You are not in kaioken!\r\n");
+    return;
   }
 
   if (x == char_get_kaioken(ch)) {
@@ -1843,7 +1835,8 @@ ACMD(do_barrier)
     char_set_barrier(ch, 0);
     char_aff_set(ch, AFF_SANCTUARY, false);
     return;
-  } else if (!strcasecmp("release", arg)) {
+  }
+  if (!strcasecmp("release", arg)) {
     send_to_char(ch, "You don't have a barrier.\r\n");
     return;
   }
@@ -1873,16 +1866,20 @@ ACMD(do_barrier)
   if (size > prob) {
     send_to_char(ch, "You can not create a barrier that is stronger than your skill in barrier.\r\n");
     return;
-  } else if (size < 1) {
+  }
+  if (size < 1) {
     send_to_char(ch, "You have to put at least some ki into the barrier!\r\n");
     return;
-  } else if (size > 75) {
+  }
+  if (size > 75) {
     send_to_char(ch, "You can't control a barrier with more than 75 percent!\r\n");
     return;
-  } else if (char_get_charge(ch) < cost) {
+  }
+  if (char_get_charge(ch) < cost) {
     send_to_char(ch, "You do not have enough ki charged up!\r\n");
     return;
-  } else if (prob < perc) {
+  }
+  if (prob < perc) {
     act("@BYou shout as you form a barrier of ki around your body, but you imbalance it and it explodes outward!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@B$n@B shouts as $e forms a barrier of ki around $s body, but it becomes imbalanced and explodes outward!@n", TRUE, ch, 0, 0, TO_ROOM);
     char_set_charge(ch, char_get_charge(ch) - (cost));
@@ -1893,25 +1890,24 @@ ACMD(do_barrier)
     }
     char_set_con_cooldown(ch, 30);
     return;
-  } else {
-    if (char_get_skill(ch, SKILL_BARRIER)) {
-      act("@BYou shout as you form a barrier of ki around your body!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@B$n@B shouts as $e forms a barrier of ki around $s body!@n", TRUE, ch, 0, 0, TO_ROOM);
-    } else {
-      act("@BYou shout as you form a barrier of ki and raging waters around your body!@n", TRUE, ch, 0, 0, TO_CHAR);
-      act("@B$n@B shouts as $e forms a barrier of ki and raging waters around $s body!@n", TRUE, ch, 0, 0, TO_ROOM);
-    }
-    char_set_barrier(ch, (getMaxKI(ch) / 100) * size);
-    char_set_charge(ch, char_get_charge(ch) - (cost));
-    if (char_get_skill(ch, SKILL_BARRIER)) {
-      improve_skill(ch, SKILL_BARRIER, 2);
-    } else {
-      improve_skill(ch, SKILL_AQUA_BARRIER, 2);
-    }
-    char_aff_set(ch, AFF_SANCTUARY, true);
-    char_set_con_cooldown(ch, 20);
-    return;
   }
+  if (char_get_skill(ch, SKILL_BARRIER)) {
+    act("@BYou shout as you form a barrier of ki around your body!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@B$n@B shouts as $e forms a barrier of ki around $s body!@n", TRUE, ch, 0, 0, TO_ROOM);
+  } else {
+    act("@BYou shout as you form a barrier of ki and raging waters around your body!@n", TRUE, ch, 0, 0, TO_CHAR);
+    act("@B$n@B shouts as $e forms a barrier of ki and raging waters around $s body!@n", TRUE, ch, 0, 0, TO_ROOM);
+  }
+  char_set_barrier(ch, (getMaxKI(ch) / 100) * size);
+  char_set_charge(ch, char_get_charge(ch) - (cost));
+  if (char_get_skill(ch, SKILL_BARRIER)) {
+    improve_skill(ch, SKILL_BARRIER, 2);
+  } else {
+    improve_skill(ch, SKILL_AQUA_BARRIER, 2);
+  }
+  char_aff_set(ch, AFF_SANCTUARY, true);
+  char_set_con_cooldown(ch, 20);
+  return;
 }
 
 ACMD(do_instant)
@@ -1934,22 +1930,28 @@ ACMD(do_instant)
   }
   if (!know_skill(ch, SKILL_INSTANTT)) {
     return;
-  } else if (!char_get_skill(ch, SKILL_SENSE) && !char_plr_flagged(ch, PLR_SENSEM)) {
+  }
+  if (!char_get_skill(ch, SKILL_SENSE) && !char_plr_flagged(ch, PLR_SENSEM)) {
     send_to_char(ch, "You can't sense them to go to there!\r\n");
     return;
-  } else if (char_plr_flagged(ch, PLR_PILOTING)) {
+  }
+  if (char_plr_flagged(ch, PLR_PILOTING)) {
     send_to_char(ch, "You are busy piloting a ship!\r\n");
     return;
-  } else if (char_plr_flagged(ch, PLR_HEALT)) {
+  }
+  if (char_plr_flagged(ch, PLR_HEALT)) {
     send_to_char(ch, "You are inside a healing tank!\r\n");
     return;
-  } else if (rroom_get_vnum(char_get_in_room(ch)) >= 19800 && rroom_get_vnum(char_get_in_room(ch)) <= 19899) {
+  }
+  if (rroom_get_vnum(char_get_in_room(ch)) >= 19800 && rroom_get_vnum(char_get_in_room(ch)) <= 19899) {
     send_to_char(ch, "@rYou are in a pocket dimension!@n\r\n");
     return;
-  } else if (rroom_flagged(char_get_in_room(ch), ROOM_RHELL) || rroom_flagged(char_get_in_room(ch), ROOM_AL) || rroom_flagged(char_get_in_room(ch), ROOM_HELL)) {
+  }
+  if (rroom_flagged(char_get_in_room(ch), ROOM_RHELL) || rroom_flagged(char_get_in_room(ch), ROOM_AL) || rroom_flagged(char_get_in_room(ch), ROOM_HELL)) {
     send_to_char(ch, "You can not leave where you are at!\r\n");
     return;
-  } else if (!*arg) {
+  }
+  if (!*arg) {
     send_to_char(ch, "Who or where do you want to instant transmission to? [target | planet-(planet name)]\r\n");
     send_to_char(ch, "Example: instant goku\nExample 2: instant planet-earth\r\n");
     return;
@@ -2001,17 +2003,15 @@ ACMD(do_instant)
         improve_skill(ch, skill_num, 2);
         char_set_wait(ch, PULSE_2SEC);
         return;
-      } else {
-        send_to_char(ch, "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
-        return;
       }
-    } else {
-      send_to_char(ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
-      decCurKI(ch, cost, 0);
-      improve_skill(ch, skill_num, 2);
-      char_set_wait(ch, PULSE_2SEC);
+      send_to_char(ch, "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
       return;
     }
+    send_to_char(ch, "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
+    decCurKI(ch, cost, 0);
+    improve_skill(ch, skill_num, 2);
+    char_set_wait(ch, PULSE_2SEC);
+    return;
   }
 
   reveal_hiding(ch, 0);
@@ -2020,25 +2020,32 @@ ACMD(do_instant)
     if (tar == ch) {
       send_to_char(ch, "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
       return;
-    } else if (char_get_grappling(ch) && char_get_grappling(ch) == tar) {
+    }
+    if (char_get_grappling(ch) && char_get_grappling(ch) == tar) {
       send_to_char(ch, "You are already in the same room with them and are grappling with them!\r\n");
       return;
-    } else if (!read_sense_memory(ch, tar)) {
+    }
+    if (!read_sense_memory(ch, tar)) {
       send_to_char(ch, "You've never sensed them up close so you do not have a good bearing on their ki signal.\r\n");
       return;
-    } else if (char_get_admlevel(tar) > 0 && char_get_admlevel(ch) < 1) {
+    }
+    if (char_get_admlevel(tar) > 0 && char_get_admlevel(ch) < 1) {
       send_to_char(ch, "That immortal prevents you from reaching them.\r\n");
       return;
-    } else if (char_is_android(tar) || getCurPL(tar) < (getCurPL(ch) * 0.001) + 1) {
+    }
+    if (char_is_android(tar) || getCurPL(tar) < (getCurPL(ch) * 0.001) + 1) {
       send_to_char(ch, "You can't sense them well enough.\r\n");
       return;
-    } else if (!rroom_flagged(char_get_in_room(ch), ROOM_AL) && rroom_flagged(char_get_in_room(tar), ROOM_AL)) {
+    }
+    if (!rroom_flagged(char_get_in_room(ch), ROOM_AL) && rroom_flagged(char_get_in_room(tar), ROOM_AL)) {
       send_to_char(ch, "They are dead and can't be reached.\r\n");
       return;
-    } else if (!rroom_flagged(char_get_in_room(ch), ROOM_RHELL) && rroom_flagged(char_get_in_room(tar), ROOM_RHELL)) {
+    }
+    if (!rroom_flagged(char_get_in_room(ch), ROOM_RHELL) && rroom_flagged(char_get_in_room(tar), ROOM_RHELL)) {
       send_to_char(ch, "They are dead and can't be reached.\r\n");
       return;
-    } else if (rroom_flagged(char_get_in_room(tar), ROOM_NOINSTANT)) {
+    }
+    if (rroom_flagged(char_get_in_room(tar), ROOM_NOINSTANT)) {
       send_to_char(ch, "You can not go there as it is a protected area!\r\n");
       return;
     }
@@ -2237,10 +2244,12 @@ ACMD(do_aid)
     if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
       send_to_char(ch, "Apply first aid to who?\r\n");
       return;
-    } else if (char_is_npc(vict)) {
+    }
+    if (char_is_npc(vict)) {
       send_to_char(ch, "What ever for?\r\n");
       return;
-    } else if (char_is_android(vict)) {
+    }
+    if (char_is_android(vict)) {
       send_to_char(ch, "They are an android!\r\n");
       return;
     }
@@ -2286,77 +2295,73 @@ ACMD(do_aid)
     if (char_get_skill(ch, SKILL_FIRST_AID) < 65) {
       send_to_char(ch, "You need at least a skill level of 65 in First Aid.\r\n");
       return;
+    }
+    if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(15)) {
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you begin to construct an Andrenex Adreneline Injector you screw up and end up breaking the water tight seal. The adreneline leaks out and is wasted.@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
+      extract_obj(aid_obj);
     } else {
-      if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(15)) {
-        act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you begin to construct an Andrenex Adreneline Injector you screw up and end up breaking the water tight seal. The adreneline leaks out and is wasted.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
-        extract_obj(aid_obj);
-      } else {
-        act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully construct an Adrenex Adreneline Injector@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Adrenex Adreneline Injector!@n", TRUE, ch, 0, 0, TO_ROOM);
-        aid_prod = read_object(num2, VIRTUAL);
-        add_unique_id(aid_prod);
-        obj_to_char(aid_prod, ch);
-        extract_obj(aid_obj);
-        improve_skill(ch, SKILL_FIRST_AID, 1);
-      }
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully construct an Adrenex Adreneline Injector@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Adrenex Adreneline Injector!@n", TRUE, ch, 0, 0, TO_ROOM);
+      aid_prod = read_object(num2, VIRTUAL);
+      add_unique_id(aid_prod);
+      obj_to_char(aid_prod, ch);
+      extract_obj(aid_obj);
+      improve_skill(ch, SKILL_FIRST_AID, 1);
     }
   } else if (num2 == 382) {
     if (char_get_skill(ch, SKILL_FIRST_AID) < 50) {
       send_to_char(ch, "You need at least a skill level of 50 in First Aid.\r\n");
       return;
+    }
+    if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(10)) {
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you go to put the salve ingredients into the kit's salve compartment and set the temperature you accidentally set it too high. The salve is burned and ruined. Yes you managed to burn a burn salve.@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
+      extract_obj(aid_obj);
     } else {
-      if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(10)) {
-        act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you go to put the salve ingredients into the kit's salve compartment and set the temperature you accidentally set it too high. The salve is burned and ruined. Yes you managed to burn a burn salve.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
-        extract_obj(aid_obj);
-      } else {
-        act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully boil a burn salve to perfection and it is automatically placed in a jar.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a jar of burn salve!@n", TRUE, ch, 0, 0, TO_ROOM);
-        aid_prod = read_object(num2, VIRTUAL);
-        add_unique_id(aid_prod);
-        obj_to_char(aid_prod, ch);
-        extract_obj(aid_obj);
-        improve_skill(ch, SKILL_FIRST_AID, 1);
-      }
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully boil a burn salve to perfection and it is automatically placed in a jar.@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a jar of burn salve!@n", TRUE, ch, 0, 0, TO_ROOM);
+      aid_prod = read_object(num2, VIRTUAL);
+      add_unique_id(aid_prod);
+      obj_to_char(aid_prod, ch);
+      extract_obj(aid_obj);
+      improve_skill(ch, SKILL_FIRST_AID, 1);
     }
   } else if (num2 == 383) {
     if (char_get_skill(ch, SKILL_FIRST_AID) < 40) {
       send_to_char(ch, "You need at least a skill level of 40 in First Aid.\r\n");
       return;
+    }
+    if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(5)) {
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you complete the Antitoxin Injector you notice that you didn't seal the syringe properly and it all leaks out.@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
+      extract_obj(aid_obj);
     } else {
-      if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(5)) {
-        act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you complete the Antitoxin Injector you notice that you didn't seal the syringe properly and it all leaks out.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
-        extract_obj(aid_obj);
-      } else {
-        act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully assemble the Antitoxin Injector.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Antitoxin Injector!@n", TRUE, ch, 0, 0, TO_ROOM);
-        aid_prod = read_object(num2, VIRTUAL);
-        add_unique_id(aid_prod);
-        obj_to_char(aid_prod, ch);
-        extract_obj(aid_obj);
-        improve_skill(ch, SKILL_FIRST_AID, 1);
-      }
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully assemble the Antitoxin Injector.@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Antitoxin Injector!@n", TRUE, ch, 0, 0, TO_ROOM);
+      aid_prod = read_object(num2, VIRTUAL);
+      add_unique_id(aid_prod);
+      obj_to_char(aid_prod, ch);
+      extract_obj(aid_obj);
+      improve_skill(ch, SKILL_FIRST_AID, 1);
     }
   } else if (num2 == 385) {
     if (char_get_skill(ch, SKILL_FIRST_AID) < 40) {
       send_to_char(ch, "You need at least a skill level of 40 in First Aid.\r\n");
       return;
+    }
+    if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(15)) {
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you complete a vial of Formula 82 you notice that you read the mixture measurements wrong. You dispose of the vile vial immediately.@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
+      extract_obj(aid_obj);
     } else {
-      if (char_get_skill(ch, SKILL_FIRST_AID) < axion_dice(15)) {
-        act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. As you complete a vial of Formula 82 you notice that you read the mixture measurements wrong. You dispose of the vile vial immediately.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n", TRUE, ch, 0, 0, TO_ROOM);
-        extract_obj(aid_obj);
-      } else {
-        act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully assemble a vial of Formula 82.@n", TRUE, ch, 0, 0, TO_CHAR);
-        act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Vial of Formula 82!@n", TRUE, ch, 0, 0, TO_ROOM);
-        aid_prod = read_object(num2, VIRTUAL);
-        add_unique_id(aid_prod);
-        obj_to_char(aid_prod, ch);
-        extract_obj(aid_obj);
-        improve_skill(ch, SKILL_FIRST_AID, 1);
-      }
+      act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully assemble a vial of Formula 82.@n", TRUE, ch, 0, 0, TO_CHAR);
+      act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Vial of Formula 82!@n", TRUE, ch, 0, 0, TO_ROOM);
+      aid_prod = read_object(num2, VIRTUAL);
+      add_unique_id(aid_prod);
+      obj_to_char(aid_prod, ch);
+      extract_obj(aid_obj);
+      improve_skill(ch, SKILL_FIRST_AID, 1);
     }
   }
 
@@ -2388,29 +2393,28 @@ ACMD(do_aura)
     if (char_get_skill(ch, SKILL_FOCUS) < 75 || char_get_skill(ch, SKILL_CONCENTRATION) < 75) {
       send_to_char(ch, "You need at least a skill level of 75 in Focus and Concentration to use this.\r\n");
       return;
-    } else {
-      if (char_plr_flagged(ch, PLR_AURALIGHT)) {
-        send_to_char(ch, "Your aura fades as you stop shining light.\r\n");
-        act("$n's aura fades as they stop shining light on the area.", TRUE, ch, 0, 0, TO_ROOM);
-        char_plr_set(ch, PLR_AURALIGHT, false);
-        world[char_get_in_room(ch)].light--;
+    }
+    if (char_plr_flagged(ch, PLR_AURALIGHT)) {
+      send_to_char(ch, "Your aura fades as you stop shining light.\r\n");
+      act("$n's aura fades as they stop shining light on the area.", TRUE, ch, 0, 0, TO_ROOM);
+      char_plr_set(ch, PLR_AURALIGHT, false);
+      world[char_get_in_room(ch)].light--;
 
-      } else if ((getCurKI(ch)) > getMaxKI(ch) * 0.12) {
-        if (char_get_in_room(ch) != NOWHERE) {
-          world[char_get_in_room(ch)].light++;
-        }
-        reveal_hiding(ch, 0);
-        decCurKIPercent(ch, .12, 0);
-        send_to_char(ch, "A bright %s aura begins to burn around you as you provide light to the surrounding area!\r\n", aura_types[char_get_aura(ch)]);
-        char bloom[MAX_INPUT_LENGTH];
-        snprintf(bloom, sizeof(bloom), "@wA %s aura flashes up brightly around $n@w as they provide light to the area.@n", aura_types[char_get_aura(ch)]);
-        act(bloom, TRUE, ch, 0, 0, TO_ROOM);
-        char_plr_set(ch, PLR_AURALIGHT, true);
-
-      } else {
-        send_to_char(ch, "You don't have enough KI to do that.\r\n");
-        return;
+    } else if ((getCurKI(ch)) > getMaxKI(ch) * 0.12) {
+      if (char_get_in_room(ch) != NOWHERE) {
+        world[char_get_in_room(ch)].light++;
       }
+      reveal_hiding(ch, 0);
+      decCurKIPercent(ch, .12, 0);
+      send_to_char(ch, "A bright %s aura begins to burn around you as you provide light to the surrounding area!\r\n", aura_types[char_get_aura(ch)]);
+      char bloom[MAX_INPUT_LENGTH];
+      snprintf(bloom, sizeof(bloom), "@wA %s aura flashes up brightly around $n@w as they provide light to the area.@n", aura_types[char_get_aura(ch)]);
+      act(bloom, TRUE, ch, 0, 0, TO_ROOM);
+      char_plr_set(ch, PLR_AURALIGHT, true);
+
+    } else {
+      send_to_char(ch, "You don't have enough KI to do that.\r\n");
+      return;
     }
   }
 }

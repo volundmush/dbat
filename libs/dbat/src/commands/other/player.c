@@ -55,17 +55,16 @@ ACMD(do_spar)
 {
   if (char_is_npc(ch)) {
     return;
-  } else {
-    if (char_plr_flagged(ch, PLR_SPAR)) {
-      act("@wYou cease your sparring stance.@n", FALSE, ch, 0, 0, TO_CHAR);
-      act("@C$n@w ceases $s sparring stance.@n", FALSE, ch, 0, 0, TO_ROOM);
-    }
-    if (!char_plr_flagged(ch, PLR_SPAR)) {
-      act("@wYou move into your sparring stance.@n", FALSE, ch, 0, 0, TO_CHAR);
-      act("@C$n@w moves into $s sparring stance.@n", FALSE, ch, 0, 0, TO_ROOM);
-    }
-    char_plr_toggle(ch, PLR_SPAR);
   }
+  if (char_plr_flagged(ch, PLR_SPAR)) {
+    act("@wYou cease your sparring stance.@n", FALSE, ch, 0, 0, TO_CHAR);
+    act("@C$n@w ceases $s sparring stance.@n", FALSE, ch, 0, 0, TO_ROOM);
+  }
+  if (!char_plr_flagged(ch, PLR_SPAR)) {
+    act("@wYou move into your sparring stance.@n", FALSE, ch, 0, 0, TO_CHAR);
+    act("@C$n@w moves into $s sparring stance.@n", FALSE, ch, 0, 0, TO_ROOM);
+  }
+  char_plr_toggle(ch, PLR_SPAR);
 }
 
 ACMD(do_quit)
@@ -933,7 +932,8 @@ ACMD(do_gen_tog)
       if ((char_get_charge(ch) > 0 && char_get_preference(ch) != PREFERENCE_KI) || (char_get_charge(ch) > getMaxKI(ch) * 0.1 && char_get_preference(ch) == PREFERENCE_KI) || char_plr_flagged(ch, PLR_POWERUP) || char_aff_flagged(ch, AFF_FLYING)) {
         send_to_char(ch, "You stand out too much to hide right now!\r\n");
         return;
-      } else if (char_plr_flagged(ch, PLR_HEALT)) {
+      }
+      if (char_plr_flagged(ch, PLR_HEALT)) {
         send_to_char(ch, "You are inside a healing tank!\r\n");
         return;
       }
@@ -960,19 +960,17 @@ ACMD(do_gen_tog)
           send_to_char(ch, "Make sure to remove nohassle as well.\r\n");
         }
         return;
-      } else {
-        send_to_char(ch, "You are not an immortal.\r\n");
-        return;
       }
+      send_to_char(ch, "You are not an immortal.\r\n");
+      return;
       break;
     case SCMD_NOCOMPRESS:
       if (CONFIG_ENABLE_COMPRESSION) {
         result = char_prf_toggle(ch, PRF_NOCOMPRESS);
         break;
-      } else {
-        send_to_char(ch, "Sorry, compression is globally disabled.\r\n");
-        return;
       }
+      send_to_char(ch, "Sorry, compression is globally disabled.\r\n");
+      return;
     case SCMD_AUTOASSIST:
       result = char_prf_toggle(ch, PRF_AUTOASSIST);
       break;

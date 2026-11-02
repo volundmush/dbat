@@ -106,9 +106,8 @@ ACMD(do_grapple)
     if (!char_get_fighting(ch)) {
       send_to_char(ch, "That target isn't here.\r\n");
       return;
-    } else {
-      vict = char_get_fighting(ch);
     }
+    vict = char_get_fighting(ch);
   }
 
   if (!can_kill(ch, vict, NULL, 0)) {
@@ -157,14 +156,13 @@ ACMD(do_grapple)
         decCurST(ch, cost, 0);
         char_set_wait(ch, PULSE_4SEC);
         return;
-      } else {
-        reveal_hiding(ch, 0);
-        act("@C$N@c disappears, trying to avoid your grapple but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-        act("@cYou zanzoken to avoid the grapple attempt but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-        act("@C$N@c disappears, trying to avoid @C$n's@c grapple attempt but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-        char_aff_set(vict, AFF_ZANZOKEN, false);
-        char_aff_set(ch, AFF_ZANZOKEN, false);
       }
+      reveal_hiding(ch, 0);
+      act("@C$N@c disappears, trying to avoid your grapple but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
+      act("@cYou zanzoken to avoid the grapple attempt but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
+      act("@C$N@c disappears, trying to avoid @C$n's@c grapple attempt but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+      char_aff_set(vict, AFF_ZANZOKEN, false);
+      char_aff_set(ch, AFF_ZANZOKEN, false);
     }
 
     if (char_get_speedi(ch) > char_get_speedi(vict) * 2) {
@@ -186,7 +184,8 @@ ACMD(do_grapple)
       improve_skill(ch, SKILL_GRAPPLE, 1);
       char_set_wait(ch, PULSE_4SEC);
       return;
-    } else if ((getCurPL(ch) * 0.01) * char_get_aff_abils_str(ch) < (getCurPL(vict) * 0.01) * char_get_aff_abils_str(vict) && rand_number(1, 4) == 1) {
+    }
+    if ((getCurPL(ch) * 0.01) * char_get_aff_abils_str(ch) < (getCurPL(vict) * 0.01) * char_get_aff_abils_str(vict) && rand_number(1, 4) == 1) {
       reveal_hiding(ch, 0);
       act("@RYou try to grapple with @r$N@R, but $E manages to overpower you!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@r$n@R tries to grapple with YOU, but you manage to overpower $m!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -195,7 +194,8 @@ ACMD(do_grapple)
       improve_skill(ch, SKILL_GRAPPLE, 1);
       char_set_wait(ch, PULSE_4SEC);
       return;
-    } else if (perc < prob) {
+    }
+    if (perc < prob) {
       reveal_hiding(ch, 0);
       act("@RYou try to grapple with @r$N@R, but $E manages to avoid it!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@r$n@R tries to grapple with YOU, but you manage to avoid it!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -204,10 +204,12 @@ ACMD(do_grapple)
       improve_skill(ch, SKILL_GRAPPLE, 1);
       char_set_wait(ch, PULSE_4SEC);
       return;
-    } else if (!char_has_arms(vict) && !strcasecmp("grab", arg2)) {
+    }
+    if (!char_has_arms(vict) && !strcasecmp("grab", arg2)) {
       send_to_char(ch, "They don't even have an arm to grab onto!\r\n");
       return;
-    } else if (!strcasecmp("hold", arg2)) {
+    }
+    if (!strcasecmp("hold", arg2)) {
       reveal_hiding(ch, 0);
       act("@RYou rush at @r$N@R and manage to get $M in a hold from behind!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@r$n@R rushes at YOU and manages to get you in a hold from behind!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -224,7 +226,8 @@ ACMD(do_grapple)
       improve_skill(ch, SKILL_GRAPPLE, 1);
       char_set_wait(ch, PULSE_4SEC);
       return;
-    } else if (!strcasecmp("choke", arg2)) {
+    }
+    if (!strcasecmp("choke", arg2)) {
       reveal_hiding(ch, 0);
       act("@RYou rush at @r$N@R and manage to grab $S throat with both hands!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@r$n@R rushes at YOU and manages to grab your throat with both hands!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -241,7 +244,8 @@ ACMD(do_grapple)
       improve_skill(ch, SKILL_GRAPPLE, 1);
       char_set_wait(ch, PULSE_4SEC);
       return;
-    } else if (!strcasecmp("wrap", arg2)) {
+    }
+    if (!strcasecmp("wrap", arg2)) {
       if (!char_is_majin(ch)) {
         send_to_char(ch, "Your body is not flexible enough to wrap around a target!\r\n");
         return;
@@ -262,7 +266,8 @@ ACMD(do_grapple)
       improve_skill(ch, SKILL_GRAPPLE, 1);
       char_set_wait(ch, PULSE_4SEC);
       return;
-    } else if (!strcasecmp("grab", arg2)) {
+    }
+    if (!strcasecmp("grab", arg2)) {
       reveal_hiding(ch, 0);
       act("@RYou rush at @r$N@R and manage to lock your arm onto $S!@n", TRUE, ch, 0, vict, TO_CHAR);
       act("@r$n@R rushes at YOU and manages to lock $s arm onto your's!@n", TRUE, ch, 0, vict, TO_VICT);
@@ -368,14 +373,13 @@ ACMD(do_trip)
         decCurST(ch, cost, 0);
         char_set_wait(ch, PULSE_4SEC);
         return;
-      } else {
-        reveal_hiding(ch, 0);
-        act("@C$N@c disappears, trying to avoid your trip but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
-        act("@cYou zanzoken to avoid the trip but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
-        act("@C$N@c disappears, trying to avoid @C$n's@c trip but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
-        char_aff_set(vict, AFF_ZANZOKEN, false);
-        char_aff_set(ch, AFF_ZANZOKEN, false);
       }
+      reveal_hiding(ch, 0);
+      act("@C$N@c disappears, trying to avoid your trip but your zanzoken is faster!@n", FALSE, ch, 0, vict, TO_CHAR);
+      act("@cYou zanzoken to avoid the trip but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_VICT);
+      act("@C$N@c disappears, trying to avoid @C$n's@c trip but @C$n's@c zanzoken is faster!@n", FALSE, ch, 0, vict, TO_NOTVICT);
+      char_aff_set(vict, AFF_ZANZOKEN, false);
+      char_aff_set(ch, AFF_ZANZOKEN, false);
     }
 
     if (perc < prob) { /* Fail! */
@@ -449,7 +453,8 @@ ACMD(do_rip)
     if ((getCurST(ch)) < getMaxST(ch) / 20) {
       send_to_char(ch, "You are too tired to manage to grab their tail!\r\n");
       return;
-    } else if (char_get_speedi(ch) > char_get_speedi(vict)) {
+    }
+    if (char_get_speedi(ch) > char_get_speedi(vict)) {
       decCurST(ch, getMaxST(ch) / 20, 0);
       if (getCurPL(ch) > getCurPL(vict) * 2) {
         reveal_hiding(ch, 0);
@@ -458,22 +463,21 @@ ACMD(do_rip)
         act("@R$n@R rushes at @R$N@r and grab $S tail! With a powerful tug $e pulls it off!@n", TRUE, ch, 0, vict, TO_NOTVICT);
         char_lose_tail(vict);
         return;
-      } else {
-        reveal_hiding(ch, 0);
-        act("@rYou rush at @R$N@r and grab $S tail! You are too weak to pull it off though!@n", TRUE, ch, 0, vict, TO_CHAR);
-        act("@R$n@r rushes at YOU and grabs your tail! $e is too weak to pull it off though!@n", TRUE, ch, 0, vict, TO_VICT);
-        act("@R$n@R rushes at @R$N@r and grab $S tail! $e is too weak to pull it off though!@n", TRUE, ch, 0, vict, TO_NOTVICT);
-        return;
       }
-    } else {
-      decCurST(ch, getMaxST(ch) / 20, 0);
       reveal_hiding(ch, 0);
-      act("@rYou rush at @R$N@r and try to grab $S tail, but fail!@n", TRUE, ch, 0, vict, TO_CHAR);
-      act("@R$n@r rushes at YOU and tries to grab your tail, but fails!@n", TRUE, ch, 0, vict, TO_VICT);
-      act("@R$n@R rushes at @R$N@r and tries to grab $S tail, but fails!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+      act("@rYou rush at @R$N@r and grab $S tail! You are too weak to pull it off though!@n", TRUE, ch, 0, vict, TO_CHAR);
+      act("@R$n@r rushes at YOU and grabs your tail! $e is too weak to pull it off though!@n", TRUE, ch, 0, vict, TO_VICT);
+      act("@R$n@R rushes at @R$N@r and grab $S tail! $e is too weak to pull it off though!@n", TRUE, ch, 0, vict, TO_NOTVICT);
       return;
     }
-  } else if (ch == vict) {
+    decCurST(ch, getMaxST(ch) / 20, 0);
+    reveal_hiding(ch, 0);
+    act("@rYou rush at @R$N@r and try to grab $S tail, but fail!@n", TRUE, ch, 0, vict, TO_CHAR);
+    act("@R$n@r rushes at YOU and tries to grab your tail, but fails!@n", TRUE, ch, 0, vict, TO_VICT);
+    act("@R$n@R rushes at @R$N@r and tries to grab $S tail, but fails!@n", TRUE, ch, 0, vict, TO_NOTVICT);
+    return;
+  }
+  if (ch == vict) {
     reveal_hiding(ch, 0);
     act("@rYou grab your own tail and yank it off!@n", TRUE, ch, 0, 0, TO_CHAR);
     act("@R$n@r grabs $s own tail and yanks it off!@n", TRUE, ch, 0, 0, TO_ROOM);
@@ -566,22 +570,22 @@ ACMD(do_drag)
       set_fighting(vict, ch);
     }
     return;
-  } else if (char_get_pc_weight(vict) + char_get_carry_weight(vict) > getMaxCarryWeight(ch)) {
+  }
+  if (char_get_pc_weight(vict) + char_get_carry_weight(vict) > getMaxCarryWeight(ch)) {
     reveal_hiding(ch, 0);
     act("@wYou try to grab and pull @C$N@W with you, but $E is too heavy!@n", TRUE, ch, 0, vict, TO_CHAR);
     act("@C$n@W tries to grab and pull @c$N@W but $E is too heavy!@n", TRUE, ch, 0, vict, TO_ROOM);
     return;
-  } else {
-    reveal_hiding(ch, 0);
-    act("@wYou grab and start dragging @C$N@W.@n", TRUE, ch, 0, vict, TO_CHAR);
-    act("@C$n@W grabs and starts dragging @c$N@W.@n", TRUE, ch, 0, vict, TO_NOTVICT);
-    char_set_drag(ch, vict);
-    char_set_dragged(vict, ch);
-    if (!char_aff_flagged(vict, AFF_KNOCKED) && !char_aff_flagged(vict, AFF_SLEEP) && rand_number(1, 3)) {
-      send_to_char(vict, "You feel your sleeping body being moved.\r\n");
-      if (char_is_npc(vict) && !char_get_fighting(vict)) {
-        set_fighting(vict, ch);
-      }
+  }
+  reveal_hiding(ch, 0);
+  act("@wYou grab and start dragging @C$N@W.@n", TRUE, ch, 0, vict, TO_CHAR);
+  act("@C$n@W grabs and starts dragging @c$N@W.@n", TRUE, ch, 0, vict, TO_NOTVICT);
+  char_set_drag(ch, vict);
+  char_set_dragged(vict, ch);
+  if (!char_aff_flagged(vict, AFF_KNOCKED) && !char_aff_flagged(vict, AFF_SLEEP) && rand_number(1, 3)) {
+    send_to_char(vict, "You feel your sleeping body being moved.\r\n");
+    if (char_is_npc(vict) && !char_get_fighting(vict)) {
+      set_fighting(vict, ch);
     }
   }
 }
@@ -595,13 +599,12 @@ ACMD(do_stop)
   if (!char_get_fighting(ch)) {
     send_to_char(ch, "You are not even fighting!\r\n");
     return;
-  } else {
-    act("@CYou move out of your fighting posture.@n", TRUE, ch, 0, 0, TO_CHAR);
-    act("@c$n@C moves out of $s fighting posture.@n", TRUE, ch, 0, 0, TO_ROOM);
-    stop_fighting(ch);
-    char_set_wait(ch, PULSE_2SEC);
-    return;
   }
+  act("@CYou move out of your fighting posture.@n", TRUE, ch, 0, 0, TO_CHAR);
+  act("@c$n@C moves out of $s fighting posture.@n", TRUE, ch, 0, 0, TO_ROOM);
+  stop_fighting(ch);
+  char_set_wait(ch, PULSE_2SEC);
+  return;
 }
 
 ACMD(do_escape)
@@ -777,15 +780,14 @@ ACMD(do_block)
     act("@C$n@w starts blocking your escape.@n", TRUE, ch, 0, char_get_blocks(ch), TO_VICT);
     act("@C$n@w starts blocking @c$N's@w escape.@n", TRUE, ch, 0, char_get_blocks(ch), TO_NOTVICT);
     return;
-  } else {
-    char_set_blocks(ch, vict);
-    char_set_blocked(vict, ch);
-    reveal_hiding(ch, 0);
-    act("@wYou start blocking @c$N's@w escape.@n", TRUE, ch, 0, char_get_blocks(ch), TO_CHAR);
-    act("@C$n@w starts blocking your escape.@n", TRUE, ch, 0, char_get_blocks(ch), TO_VICT);
-    act("@C$n@w starts blocking @c$N's@w escape.@n", TRUE, ch, 0, char_get_blocks(ch), TO_NOTVICT);
-    return;
   }
+  char_set_blocks(ch, vict);
+  char_set_blocked(vict, ch);
+  reveal_hiding(ch, 0);
+  act("@wYou start blocking @c$N's@w escape.@n", TRUE, ch, 0, char_get_blocks(ch), TO_CHAR);
+  act("@C$n@w starts blocking your escape.@n", TRUE, ch, 0, char_get_blocks(ch), TO_VICT);
+  act("@C$n@w starts blocking @c$N's@w escape.@n", TRUE, ch, 0, char_get_blocks(ch), TO_NOTVICT);
+  return;
 }
 
 ACMD(do_steal)
@@ -814,15 +816,19 @@ ACMD(do_steal)
   if (!(vict = get_char_vis(ch, arg2, NULL, FIND_CHAR_ROOM))) {
     send_to_char(ch, "Steal what from who?\r\n");
     return;
-  } else if (vict == ch) {
+  }
+  if (vict == ch) {
     send_to_char(ch, "Come on now, that's rather stupid!\r\n");
     return;
-  } else if (!can_kill(ch, vict, NULL, 0)) {
+  }
+  if (!can_kill(ch, vict, NULL, 0)) {
     return;
-  } else if (char_get_level(ch) <= 8) {
+  }
+  if (char_get_level(ch) <= 8) {
     send_to_char(ch, "You are trapped inside the newbie shield until level 9 and can't piss off those bigger and better than you. Awww...\r\n");
     return;
-  } else if (char_mob_flagged(vict, MOB_NOKILL) && char_get_admlevel(ch) == ADMLVL_NONE) {
+  }
+  if (char_mob_flagged(vict, MOB_NOKILL) && char_get_admlevel(ch) == ADMLVL_NONE) {
     send_to_char(ch, "That isn't such a good idea...\r\n");
     return;
   }
@@ -906,10 +912,9 @@ ACMD(do_steal)
           }
           improve_skill(ch, SKILL_SLEIGHT_OF_HAND, 1);
           return;
-        } else {
-          send_to_char(ch, "It appears like they are broke...\r\n");
-          return;
         }
+        send_to_char(ch, "It appears like they are broke...\r\n");
+        return;
       } else { /* Failure! */
         reveal_hiding(ch, 0);
         act("@rYou are caught trying to steal zenni from @R$N@r!@n", TRUE, ch, 0, vict, TO_CHAR);
@@ -933,31 +938,40 @@ ACMD(do_steal)
         if (!obj) {
           act("$E isn't wearing that item.", FALSE, ch, 0, vict, TO_CHAR);
           return;
-        } else if (char_get_position(vict) > POS_SLEEPING) {
+        }
+        if (char_get_position(vict) > POS_SLEEPING) {
           send_to_char(ch, "Steal worn equipment from them while they are awake? That's a stupid idea...\r\n");
           return;
-        } else if (!give_otrigger(obj, vict, ch) || !receive_mtrigger(ch, vict, obj)) {
+        }
+        if (!give_otrigger(obj, vict, ch) || !receive_mtrigger(ch, vict, obj)) {
           send_to_char(ch, "Impossible!\r\n");
           return;
-        } else if (obj_get_vnum(obj) >= 20000) {
+        }
+        if (obj_get_vnum(obj) >= 20000) {
           send_to_char(ch, "You can't steal that!\r\n");
           return;
-        } else if (obj_get_vnum(obj) >= 18800 && obj_get_vnum(obj) <= 18999) {
+        }
+        if (obj_get_vnum(obj) >= 18800 && obj_get_vnum(obj) <= 18999) {
           send_to_char(ch, "You can't steal that!\r\n");
           return;
-        } else if (obj_get_vnum(obj) >= 19100 && obj_get_vnum(obj) <= 19199) {
+        }
+        if (obj_get_vnum(obj) >= 19100 && obj_get_vnum(obj) <= 19199) {
           send_to_char(ch, "You can't steal that!\r\n");
           return;
-        } else if (obj_get_type_flag(obj) == ITEM_KEY) {
+        }
+        if (obj_get_type_flag(obj) == ITEM_KEY) {
           send_to_char(ch, "No stealing keys!\r\n");
           return;
-        } else if (obj_extra_flagged(obj, ITEM_NOSTEAL)) {
+        }
+        if (obj_extra_flagged(obj, ITEM_NOSTEAL)) {
           send_to_char(ch, "You can't steal that!\r\n");
           return;
-        } else if (obj_get_weight(obj) + (getCurCarriedWeight(ch)) > getMaxCarryWeight(ch)) {
+        }
+        if (obj_get_weight(obj) + (getCurCarriedWeight(ch)) > getMaxCarryWeight(ch)) {
           send_to_char(ch, "You can't carry that much weight.\r\n");
           return;
-        } else if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
+        }
+        if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
           send_to_char(ch, "You don't have the room for it right now!\r\n");
           return;
         } else if (prob > perc) { /* Right off their back :) */
@@ -991,19 +1005,24 @@ ACMD(do_steal)
         if (!give_otrigger(obj, vict, ch) || !receive_mtrigger(ch, vict, obj)) {
           send_to_char(ch, "Impossible!\r\n");
           return;
-        } else if (obj_get_vnum(obj) >= 20000) {
+        }
+        if (obj_get_vnum(obj) >= 20000) {
           send_to_char(ch, "You can't steal that!\r\n");
           return;
-        } else if (obj_extra_flagged(obj, ITEM_NOSTEAL)) {
+        }
+        if (obj_extra_flagged(obj, ITEM_NOSTEAL)) {
           send_to_char(ch, "You can't steal that!\r\n");
           return;
-        } else if (obj_get_type_flag(obj) == ITEM_KEY) {
+        }
+        if (obj_get_type_flag(obj) == ITEM_KEY) {
           send_to_char(ch, "No stealing keys!\r\n");
           return;
-        } else if (obj_get_weight(obj) + (getCurCarriedWeight(ch)) > getMaxCarryWeight(ch)) {
+        }
+        if (obj_get_weight(obj) + (getCurCarriedWeight(ch)) > getMaxCarryWeight(ch)) {
           send_to_char(ch, "You can't carry that much weight.\r\n");
           return;
-        } else if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
+        }
+        if (char_get_carry_items(ch) + 1 > char_can_carry_n(ch)) {
           send_to_char(ch, "You don't have the room for it right now!\r\n");
           return;
         } else if (prob > perc) { /* Right out of their pockets */

@@ -66,63 +66,64 @@ ACMD(do_evolve)
     send_to_char(ch, "@CStamina     @D: @Y%s @Wpts\r\n", add_commas(stcost));
     send_to_char(ch, "@D[@Y%s @Wpts currently@D]@n\r\n", add_commas(char_get_moltexp(ch)));
     return;
-  } else if (!strcasecmp(arg, "powerlevel") || !strcasecmp(arg, "pl")) {
+  }
+  if (!strcasecmp(arg, "powerlevel") || !strcasecmp(arg, "pl")) {
     if (plcost > molt_threshold(ch)) {
       send_to_char(ch, "You need a few more evolution levels before you can start upgrading powerlevel.\r\n");
       return;
-    } else if (char_get_moltexp(ch) < plcost) {
+    }
+    if (char_get_moltexp(ch) < plcost) {
       send_to_char(ch, "You do not have enough evolution experience.\r\n");
       return;
-    } else {
-      int64_t plgain = (getBasePL(ch)) * 0.01;
-
-      if (plgain <= 0) {
-        plgain = rand_number(1, 5);
-      } else {
-        plgain = rand_number(plgain, plgain * .5);
-      }
-      gainBasePL(ch, plgain, false);
-      char_set_moltexp(ch, char_get_moltexp(ch) - (plcost));
-      send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your body has strengthened. @D[@RPL@D: @Y+%s@D]@n\r\n", add_commas(plgain));
     }
+    int64_t plgain = (getBasePL(ch)) * 0.01;
+
+    if (plgain <= 0) {
+      plgain = rand_number(1, 5);
+    } else {
+      plgain = rand_number(plgain, plgain * .5);
+    }
+    gainBasePL(ch, plgain, false);
+    char_set_moltexp(ch, char_get_moltexp(ch) - (plcost));
+    send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your body has strengthened. @D[@RPL@D: @Y+%s@D]@n\r\n", add_commas(plgain));
   } else if (!strcasecmp(arg, "ki")) {
     if (kicost > molt_threshold(ch)) {
       send_to_char(ch, "You need a few more evolution levels before you can start upgrading ki.\r\n");
       return;
-    } else if (char_get_moltexp(ch) < kicost) {
+    }
+    if (char_get_moltexp(ch) < kicost) {
       send_to_char(ch, "You do not have enough evolution experience.\r\n");
       return;
-    } else {
-      int64_t kigain = (getBaseKI(ch)) * 0.01;
-
-      if (kigain <= 0) {
-        kigain = rand_number(1, 5);
-      } else {
-        kigain = rand_number(kigain, kigain * .5);
-      }
-      gainBaseKI(ch, kigain, false);
-      char_set_moltexp(ch, char_get_moltexp(ch) - (kicost));
-      send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your spirit has strengthened. @D[@CKi@D: @Y+%s@D]@n\r\n", add_commas(kigain));
     }
+    int64_t kigain = (getBaseKI(ch)) * 0.01;
+
+    if (kigain <= 0) {
+      kigain = rand_number(1, 5);
+    } else {
+      kigain = rand_number(kigain, kigain * .5);
+    }
+    gainBaseKI(ch, kigain, false);
+    char_set_moltexp(ch, char_get_moltexp(ch) - (kicost));
+    send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your spirit has strengthened. @D[@CKi@D: @Y+%s@D]@n\r\n", add_commas(kigain));
   } else if (!strcasecmp(arg, "stamina") || !strcasecmp(arg, "st")) {
     if (stcost > molt_threshold(ch)) {
       send_to_char(ch, "You need a few more evolution levels before you can start upgrading stamina.\r\n");
       return;
-    } else if (char_get_moltexp(ch) < stcost) {
+    }
+    if (char_get_moltexp(ch) < stcost) {
       send_to_char(ch, "You do not have enough evolution experience.\r\n");
       return;
-    } else {
-      int64_t stgain = (getBaseST(ch)) * 0.01;
-
-      if (stgain <= 0) {
-        stgain = rand_number(1, 5);
-      } else {
-        stgain = rand_number(stgain, stgain * .5);
-      }
-      gainBaseST(ch, stgain, false);
-      char_set_moltexp(ch, char_get_moltexp(ch) - (stcost));
-      send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your body has more stamina. @D[@GST@D: @Y+%s@D]@n\r\n", add_commas(stgain));
     }
+    int64_t stgain = (getBaseST(ch)) * 0.01;
+
+    if (stgain <= 0) {
+      stgain = rand_number(1, 5);
+    } else {
+      stgain = rand_number(stgain, stgain * .5);
+    }
+    gainBaseST(ch, stgain, false);
+    char_set_moltexp(ch, char_get_moltexp(ch) - (stcost));
+    send_to_char(ch, "Your body evolves to make better use of the way it is now, and you feel that your body has more stamina. @D[@GST@D: @Y+%s@D]@n\r\n", add_commas(stgain));
   }
 }
 
@@ -237,22 +238,21 @@ ACMD(do_perf)
     send_to_char(ch, "@WType @G3@D: @wEfficient@n\r\n");
     send_to_char(ch, "@RType must be a number between 1 and 3.@n\r\n");
     return;
-  } else {
-    type = atoi(arg2);
-    switch (type) {
-      case 1:
-        send_to_char(ch, "You perfect the skill %s so that you can over charge it!\r\n", spell_info[skill].name);
-        char_set_skills_perf(ch, skill, 1);
-        break;
-      case 2:
-        send_to_char(ch, "You perfect the skill %s so that you have supreme accuracy with it!\r\n", spell_info[skill].name);
-        char_set_skills_perf(ch, skill, 2);
-        break;
-      case 3:
-        send_to_char(ch, "You perfect the skill %s so that you require a lower minimum charge for it!\r\n", spell_info[skill].name);
-        char_set_skills_perf(ch, skill, 3);
-        break;
-    }
+  }
+  type = atoi(arg2);
+  switch (type) {
+    case 1:
+      send_to_char(ch, "You perfect the skill %s so that you can over charge it!\r\n", spell_info[skill].name);
+      char_set_skills_perf(ch, skill, 1);
+      break;
+    case 2:
+      send_to_char(ch, "You perfect the skill %s so that you have supreme accuracy with it!\r\n", spell_info[skill].name);
+      char_set_skills_perf(ch, skill, 2);
+      break;
+    case 3:
+      send_to_char(ch, "You perfect the skill %s so that you require a lower minimum charge for it!\r\n", spell_info[skill].name);
+      char_set_skills_perf(ch, skill, 3);
+      break;
   }
 }
 

@@ -76,7 +76,8 @@ static void print_lockout(struct char_data *ch)
   if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout")) {
     send_to_char(ch, "The lockout file does not exist.");
     return;
-  } else if (!(file = fopen(fname, "r"))) {
+  }
+  if (!(file = fopen(fname, "r"))) {
     send_to_char(ch, "The lockout file does not exist.");
     return;
   }
@@ -130,11 +131,10 @@ ACMD(do_approve)
   if (char_plr_flagged(vict, PLR_BIOGR)) {
     send_to_char(ch, "They have already been approved. If this was made in error inform Iovan.\r\n");
     return;
-  } else {
-    char_plr_set(vict, PLR_BIOGR, true);
-    send_to_char(ch, "They have now been approved.\r\n");
-    return;
   }
+  char_plr_set(vict, PLR_BIOGR, true);
+  send_to_char(ch, "They have now been approved.\r\n");
+  return;
 }
 
 static void lockWrite(struct char_data *ch, char *name)
@@ -150,7 +150,8 @@ static void lockWrite(struct char_data *ch, char *name)
   if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout")) {
     send_to_char(ch, "The lockout file does not exist.");
     return;
-  } else if (!(file = fopen(fname, "r"))) {
+  }
+  if (!(file = fopen(fname, "r"))) {
     send_to_char(ch, "The lockout file does not exist.");
     return;
   }
@@ -392,19 +393,18 @@ ACMD(do_interest)
   if (char_get_admlevel(ch) < 5) {
     send_to_char(ch, "Huh!?\r\n");
     return;
-  } else {
-    if (INTERESTTIME > 0) {
-      char *tmstr;
-      tmstr                        = (char *)asctime(localtime(&INTERESTTIME));
-      *(tmstr + strlen(tmstr) - 1) = '\0';
-      send_to_char(ch, "INTEREST TIME: [%s]\r\n", tmstr);
-      return;
-    }
-    send_to_char(ch, "Interest time has been initiated!\r\n");
-    INTERESTTIME = time(0) + 86400;
-    LASTINTEREST = time(0) + 86400;
+  }
+  if (INTERESTTIME > 0) {
+    char *tmstr;
+    tmstr                        = (char *)asctime(localtime(&INTERESTTIME));
+    *(tmstr + strlen(tmstr) - 1) = '\0';
+    send_to_char(ch, "INTEREST TIME: [%s]\r\n", tmstr);
     return;
   }
+  send_to_char(ch, "Interest time has been initiated!\r\n");
+  INTERESTTIME = time(0) + 86400;
+  LASTINTEREST = time(0) + 86400;
+  return;
 }
 
 ACMD(do_hell)
@@ -433,18 +433,17 @@ ACMD(do_hell)
   if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_WORLD))) {
     lockWrite(ch, arg);
     return;
-  } else {
-    struct descriptor_data *d = vict->desc;
-    Crash_rentsave(vict, 0);
-    extract_char(vict);
-    lockWrite(ch, char_get_name(vict));
-    if (d && desc_get_connected(d) != CON_PLAYING) {
-      desc_set_connected(d, CON_CLOSE);
-      vict->desc->character = NULL;
-      vict->desc            = NULL;
-    }
-    return;
   }
+  struct descriptor_data *d = vict->desc;
+  Crash_rentsave(vict, 0);
+  extract_char(vict);
+  lockWrite(ch, char_get_name(vict));
+  if (d && desc_get_connected(d) != CON_PLAYING) {
+    desc_set_connected(d, CON_CLOSE);
+    vict->desc->character = NULL;
+    vict->desc            = NULL;
+  }
+  return;
   return;
 }
 
@@ -473,7 +472,8 @@ ACMD(do_advance)
   if (!*level) {
     send_to_char(ch, "[ 1 - 100 | demote ]\r\n");
     return;
-  } else if ((newlevel = atoi(level)) <= 0) {
+  }
+  if ((newlevel = atoi(level)) <= 0) {
     if (!strcasecmp("demote", level)) {
       victim->level  = 1;
       victim->basepl = 150;
@@ -482,10 +482,9 @@ ACMD(do_advance)
       send_to_char(ch, "They have now been demoted!\r\n");
       send_to_char(victim, "You were demoted to level 1!\r\n");
       return;
-    } else {
-      send_to_char(ch, "That's not a level!\r\n");
-      return;
     }
+    send_to_char(ch, "That's not a level!\r\n");
+    return;
   }
   if (newlevel > 100) {
     send_to_char(ch, "100 is the highest possible level.\r\n");
@@ -880,7 +879,8 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   if (char_is_npc(vict) && !(set_fields[mode].pcnpc & NPC)) {
     send_to_char(ch, "You can't do that to a beast!\r\n");
     return (0);
-  } else if (!char_is_npc(vict) && !(set_fields[mode].pcnpc & PC)) {
+  }
+  if (!char_is_npc(vict) && !(set_fields[mode].pcnpc & PC)) {
     send_to_char(ch, "That can only be done to a beast!\r\n");
     return (0);
   }

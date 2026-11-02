@@ -58,7 +58,8 @@ ACMD(do_oasis_medit)
   if (!*buf1) {
     send_to_char(ch, "Specify a mobile VNUM to edit.\r\n");
     return;
-  } else if (!isdigit(*buf1)) {
+  }
+  if (!isdigit(*buf1)) {
     if (strcasecmp("save", buf1) != 0) {
       send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
       return;
@@ -937,7 +938,8 @@ void medit_parse(struct descriptor_data *d, char *arg)
 
         cleanup_olc(d, CLEANUP_ALL);
         return;
-      } else if (*arg == 'n' || *arg == 'N') {
+      }
+      if (*arg == 'n' || *arg == 'N') {
         medit_disp_menu(d);
         OLC_MODE(d) = MEDIT_MAIN_MENU;
         return;
