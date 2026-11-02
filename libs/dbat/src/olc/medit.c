@@ -205,13 +205,12 @@ static void medit_setup_new(struct descriptor_data *d)
   /*
    * Set up some default strings.
    */
-  GET_ALIAS(mob)    = strdup("mob unfinished");
-  GET_SDESC(mob)    = strdup("the unfinished mob");
-  GET_LDESC(mob)    = strdup("An unfinished mob stands here.\r\n");
-  GET_DDESC(mob)    = strdup("It looks unfinished.\r\n");
-  mob->race         = RACE_HUMAN;
-  mob->script       = nullptr;
-  mob->proto_script = OLC_SCRIPT(d) = nullptr;
+  GET_ALIAS(mob) = strdup("mob unfinished");
+  GET_SDESC(mob) = strdup("the unfinished mob");
+  GET_LDESC(mob) = strdup("An unfinished mob stands here.\r\n");
+  GET_DDESC(mob) = strdup("It looks unfinished.\r\n");
+  mob->race      = RACE_HUMAN;
+  OLC_SCRIPT(d)  = nullptr;
 
   OLC_MOB(d) = mob;
   /* Has changed flag. (It hasn't so far, we just made it.) */
@@ -253,11 +252,7 @@ static void init_mobile(struct char_data *mob)
 {
   clear_char(mob);
 
-  //GET_HIT(mob) = 0;
-  //GET_MAX_MANA(mob) = 0;
-  GET_NDD(mob) = 0;
   char_set_sex(mob, SEX_MALE);
-  char_set_race_level(mob, 0);
   mob->chclass = CLASS_NPC_COMMONER;
 
   char_set_weight(mob, rand_number(100, 200));
@@ -268,7 +263,6 @@ static void init_mobile(struct char_data *mob)
   mob->aff_abils                                                  = mob->real_abils;
 
   char_mob_set(mob, MOB_ISNPC, true);
-  mob->player_specials = nullptr; /* NPC */
 }
 
 /*-------------------------------------------------------------------*/

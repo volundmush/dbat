@@ -1420,7 +1420,6 @@ void list_char_to_char(struct char_data *list, struct char_data *ch)
         improve_skill(i, SKILL_HIDE, 1);
       }
       CREATE(tmphide, struct hide_node, 1);
-      tmphide->next   = nullptr;
       tmphide->hidden = i;
       if (!lasthide) {
         hideinfo = lasthide = tmphide;

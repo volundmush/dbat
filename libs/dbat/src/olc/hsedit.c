@@ -45,21 +45,12 @@ static const char *house_types[] = {
 
 static void hsedit_setup_new(struct descriptor_data *d)
 {
-  int i;
   CREATE(OLC_HOUSE(d), struct house_control_rec, 1);
-  OLC_HOUSE(d)->vnum          = OLC_NUM(d);
-  OLC_HOUSE(d)->owner         = 0;
-  OLC_HOUSE(d)->atrium        = 0;
-  OLC_HOUSE(d)->exit_num      = -1;
-  OLC_HOUSE(d)->built_on      = time(0);
-  OLC_HOUSE(d)->mode          = HOUSE_PRIVATE;
-  OLC_HOUSE(d)->bitvector     = 0;
-  OLC_HOUSE(d)->builtby       = 0;
-  OLC_HOUSE(d)->last_payment  = 0;
-  OLC_HOUSE(d)->num_of_guests = 0;
-  for (i = 0; i < MAX_GUESTS; i++)
-    OLC_HOUSE(d)->guests[i] = 0;
-  OLC_VAL(d) = 0;
+  OLC_HOUSE(d)->vnum     = OLC_NUM(d);
+  OLC_HOUSE(d)->exit_num = -1;
+  OLC_HOUSE(d)->built_on = time(0);
+  OLC_HOUSE(d)->mode     = HOUSE_PRIVATE;
+  OLC_VAL(d)             = 0;
   hsedit_disp_menu(d);
 }
 

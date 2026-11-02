@@ -1448,13 +1448,11 @@ void write_to_q(const char *txt, struct txt_q *queue, int aliased)
     queue->typed++;
 
   /* queue empty? */
-  if (!queue->head) {
-    newt->next  = nullptr;
+  if (!queue->head)
     queue->head = queue->tail = newt;
-  } else {
+  else {
     queue->tail->next = newt;
     queue->tail       = newt;
-    newt->next        = nullptr;
   }
 }
 
@@ -1831,12 +1829,9 @@ static void init_descriptor(struct descriptor_data *newd, int desc)
   static int last_desc = 0; /* last descriptor number */
 
   newd->descriptor = desc;
-  newd->idle_tics  = 0;
   newd->output     = newd->small_outbuf;
   newd->bufspace   = SMALL_BUFSIZE - 1;
   newd->login_time = time(0);
-  *newd->output    = '\0';
-  newd->bufptr     = 0;
   newd->has_prompt = 1; /* prompt is part of greetings */
   desc_set_connected(newd, CON_GET_USER);
   CREATE(newd->history, char *, HISTORY_SIZE);

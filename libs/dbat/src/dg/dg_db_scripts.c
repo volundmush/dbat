@@ -134,10 +134,8 @@ void parse_trigger(FILE *trig_f, int nr)
   CREATE(trig, struct trig_data, 1);
   CREATE(t_index, struct index_data, 1);
 
-  t_index->vnum   = nr;
-  t_index->number = 0;
-  t_index->func   = nullptr;
-  t_index->proto  = trig;
+  t_index->vnum  = nr;
+  t_index->proto = trig;
 
   snprintf(errors, sizeof(errors), "trig vnum %d", nr);
 
@@ -275,7 +273,6 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
     case MOB_TRIGGER:
       CREATE(new_trg, struct trig_proto_list, 1);
       new_trg->vnum = vnum;
-      new_trg->next = nullptr;
 
       mob       = (char_data *)proto;
       trg_proto = mob->proto_script;
@@ -290,7 +287,6 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
     case WLD_TRIGGER:
       CREATE(new_trg, struct trig_proto_list, 1);
       new_trg->vnum = vnum;
-      new_trg->next = nullptr;
       room          = (room_data *)proto;
       trg_proto     = room->proto_script;
       if (!trg_proto) {
@@ -339,7 +335,6 @@ void dg_obj_trigger(char *line, struct obj_data *obj)
 
   CREATE(new_trg, struct trig_proto_list, 1);
   new_trg->vnum = vnum;
-  new_trg->next = nullptr;
 
   trg_proto = obj->proto_script;
   if (!trg_proto) {

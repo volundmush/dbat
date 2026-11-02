@@ -109,23 +109,10 @@ static void aedit_setup_new(struct descriptor_data *d)
   CREATE(OLC_ACTION(d), struct social_messg, 1);
   OLC_ACTION(d)->command             = strdup(OLC_STORAGE(d));
   OLC_ACTION(d)->sort_as             = strdup(OLC_STORAGE(d));
-  OLC_ACTION(d)->hide                = 0;
   OLC_ACTION(d)->min_victim_position = POS_STANDING;
   OLC_ACTION(d)->min_char_position   = POS_STANDING;
-  OLC_ACTION(d)->min_level_char      = 0;
   OLC_ACTION(d)->char_no_arg         = strdup("This action is unfinished.");
   OLC_ACTION(d)->others_no_arg       = strdup("This action is unfinished.");
-  OLC_ACTION(d)->char_found          = nullptr;
-  OLC_ACTION(d)->others_found        = nullptr;
-  OLC_ACTION(d)->vict_found          = nullptr;
-  OLC_ACTION(d)->not_found           = nullptr;
-  OLC_ACTION(d)->char_auto           = nullptr;
-  OLC_ACTION(d)->others_auto         = nullptr;
-  OLC_ACTION(d)->char_body_found     = nullptr;
-  OLC_ACTION(d)->others_body_found   = nullptr;
-  OLC_ACTION(d)->vict_body_found     = nullptr;
-  OLC_ACTION(d)->char_obj_found      = nullptr;
-  OLC_ACTION(d)->others_obj_found    = nullptr;
   aedit_disp_menu(d);
   OLC_VAL(d) = 0;
 }

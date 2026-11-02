@@ -222,8 +222,7 @@ static void oedit_setup_new(struct descriptor_data *d)
   obj_set_value(OLC_OBJ(d), VAL_ALL_MATERIAL, MATERIAL_STEEL);
   obj_set_size(OLC_OBJ(d), SIZE_MEDIUM);
 
-  OLC_OBJ(d)->script       = nullptr;
-  OLC_OBJ(d)->proto_script = OLC_SCRIPT(d) = nullptr;
+  OLC_SCRIPT(d) = nullptr;
 }
 
 /*------------------------------------------------------------------------*/
@@ -1173,7 +1172,6 @@ void oedit_parse(struct descriptor_data *d, char *arg)
        */
           if (OLC_OBJ(d)->ex_description == nullptr) {
             CREATE(OLC_OBJ(d)->ex_description, struct extra_descr_data, 1);
-            OLC_OBJ(d)->ex_description->next = nullptr;
           }
           OLC_DESC(d) = OLC_OBJ(d)->ex_description;
           oedit_disp_extradesc_menu(d);
@@ -1687,8 +1685,6 @@ void oedit_parse(struct descriptor_data *d, char *arg)
           OLC_OBJ(d)->sbinfo[OLC_VAL(d)].pages     = 0;
         } else {
           CREATE(OLC_OBJ(d)->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-          OLC_OBJ(d)->sbinfo[OLC_VAL(d)].spellname = 0;
-          OLC_OBJ(d)->sbinfo[OLC_VAL(d)].pages     = 0;
         }
         oedit_disp_prompt_spellbook_menu(d);
       } else if (number < 0 || number >= SKILL_TABLE_SIZE) {

@@ -188,11 +188,11 @@ static void redit_setup_new(struct descriptor_data *d)
 {
   CREATE(OLC_ROOM(d), struct room_data, 1);
 
-  OLC_ROOM(d)->name         = strdup("An unfinished room");
-  OLC_ROOM(d)->description  = strdup("You are in an unfinished room.\r\n");
-  OLC_ROOM(d)->number       = NOWHERE;
-  OLC_ITEM_TYPE(d)          = WLD_TRIGGER;
-  OLC_ROOM(d)->proto_script = OLC_SCRIPT(d) = nullptr;
+  OLC_ROOM(d)->name        = strdup("An unfinished room");
+  OLC_ROOM(d)->description = strdup("You are in an unfinished room.\r\n");
+  OLC_ROOM(d)->number      = NOWHERE;
+  OLC_ITEM_TYPE(d)         = WLD_TRIGGER;
+  OLC_SCRIPT(d)            = nullptr;
 
   OLC_VAL(d) = 0;
 }
@@ -252,8 +252,7 @@ static void redit_setup_existing(struct descriptor_data *d, int real_num)
         CREATE(temp2, struct extra_descr_data, 1);
         temp->next = temp2;
         temp       = temp2;
-      } else
-        temp->next = nullptr;
+      }
     }
   }
   /*

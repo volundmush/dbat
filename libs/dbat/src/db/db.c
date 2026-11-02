@@ -743,11 +743,7 @@ static struct obj_unique_hash_elem **obj_unique_hash_pools = nullptr;
 
 static void init_obj_unique_hash()
 {
-  int i;
   CREATE(obj_unique_hash_pools, struct obj_unique_hash_elem *, NUM_OBJ_UNIQUE_POOLS);
-  for (i = 0; i < NUM_OBJ_UNIQUE_POOLS; i++) {
-    obj_unique_hash_pools[i] = nullptr;
-  }
 }
 
 /* body of the booting system */
@@ -3724,7 +3720,6 @@ void zone_update(void)
         CREATE(update_u, struct reset_q_element, 1);
 
         update_u->zone_to_reset = i;
-        update_u->next          = 0;
 
         if (!reset_q.head)
           reset_q.head = reset_q.tail = update_u;
@@ -4416,8 +4411,6 @@ void clear_char(struct char_data *ch)
   ch->mob_specials.default_pos = POS_STANDING;
 
   ch->size = SIZE_UNDEFINED;
-
-  char_set_armor(ch, 0); /* Basic Armor */
 }
 
 void clear_object(struct obj_data *obj)

@@ -203,7 +203,6 @@ static struct board_msg *new_message(struct char_data *ch, const char *subject)
   msg->name      = strdup(char_get_name(ch));
   msg->timestamp = time(0);
   msg->subject   = strdup(subject);
-  msg->data      = nullptr;
   return msg;
 }
 

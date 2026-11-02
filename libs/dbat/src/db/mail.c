@@ -290,8 +290,7 @@ static void index_mail(long id_to_index, long pos)
   if (!(new_index = find_char_in_index(id_to_index))) {
     /* name not already in index.. add it */
     CREATE(new_index, mail_index_type, 1);
-    new_index->recipient  = id_to_index;
-    new_index->list_start = nullptr;
+    new_index->recipient = id_to_index;
 
     /* add to front of list */
     new_index->next = mail_index;

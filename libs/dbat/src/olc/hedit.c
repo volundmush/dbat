@@ -109,10 +109,8 @@ static void hedit_setup_new(struct descriptor_data *d)
 
   OLC_HELP(d)->keywords = strdup(buf3);
   /*strdup(OLC_STORAGE(d));*/
-  OLC_HELP(d)->entry     = strdup("\r\nThis help file is unfinished.\r\n");
-  OLC_HELP(d)->min_level = 0;
-  OLC_HELP(d)->duplicate = 0;
-  OLC_VAL(d)             = 0;
+  OLC_HELP(d)->entry = strdup("\r\nThis help file is unfinished.\r\n");
+  OLC_VAL(d)         = 0;
 
   hedit_disp_menu(d);
 }

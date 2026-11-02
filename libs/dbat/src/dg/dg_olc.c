@@ -520,10 +520,8 @@ static void trigedit_insert_new(struct descriptor_data *d)
         rnum  = i;
 
         CREATE(new_index[rnum], struct index_data, 1);
-        OLC_TRIG(d)->nr         = rnum;
-        new_index[rnum]->vnum   = OLC_NUM(d);
-        new_index[rnum]->number = 0;
-        new_index[rnum]->func   = nullptr;
+        OLC_TRIG(d)->nr       = rnum;
+        new_index[rnum]->vnum = OLC_NUM(d);
         CREATE(proto, struct trig_data, 1);
         new_index[rnum]->proto = proto;
         trig_data_copy(proto, trig);
@@ -545,10 +543,8 @@ static void trigedit_insert_new(struct descriptor_data *d)
   if (!found) {
     rnum = i;
     CREATE(new_index[rnum], struct index_data, 1);
-    OLC_TRIG(d)->nr         = rnum;
-    new_index[rnum]->vnum   = OLC_NUM(d);
-    new_index[rnum]->number = 0;
-    new_index[rnum]->func   = nullptr;
+    OLC_TRIG(d)->nr       = rnum;
+    new_index[rnum]->vnum = OLC_NUM(d);
 
     CREATE(proto, struct trig_data, 1);
     new_index[rnum]->proto = proto;
