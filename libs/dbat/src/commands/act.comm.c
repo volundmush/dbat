@@ -1236,7 +1236,6 @@ ACMD(do_write)
 
   if (obj) { /* then there IS a board! */
     write_board_message(obj_get_vnum(obj), ch, argument);
-    act("$n begins to write a note on $p.", TRUE, ch, obj, 0, TO_ROOM);
     return;
   }
 

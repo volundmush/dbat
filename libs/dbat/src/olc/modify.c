@@ -244,9 +244,6 @@ void string_add(struct descriptor_data *d, char *str)
 
 static void playing_string_cleanup(struct descriptor_data *d, int action)
 {
-  struct board_info *board;
-  struct board_msg *fore, *cur, *aft;
-
   if (char_plr_flagged(d->character, PLR_MAILING)) {
     if (action == STRINGADD_SAVE && *d->str) {
       store_mail(d->mail_to, char_get_idnum(d->character), *d->str);
@@ -261,40 +258,16 @@ static void playing_string_cleanup(struct descriptor_data *d, int action)
 
   if (char_plr_flagged(d->character, PLR_WRITING)) {
     if (d->mail_to >= BOARD_MAGIC) {
+      struct board_info *board = locate_board(d->mail_to - BOARD_MAGIC);
+
       if (action == STRINGADD_ABORT) {
-        /* find the message */
-        board = locate_board(d->mail_to - BOARD_MAGIC);
-        fore = cur = aft = NULL;
-        for (cur = BOARD_MESSAGES(board); cur; cur = aft) {
-          aft = MESG_NEXT(cur);
-          if (cur->data == *d->str) {
-            if (BOARD_MESSAGES(board) == cur) {
-              if (MESG_NEXT(cur) != NULL) {
-                BOARD_MESSAGES(board) = MESG_NEXT(cur);
-              } else {
-                BOARD_MESSAGES(board) = NULL;
-              }
-            }
-            if (fore) {
-              MESG_NEXT(fore) = aft;
-            }
-            if (aft) {
-              MESG_PREV(aft) = fore;
-            }
-            free(cur->subject);
-            free(cur->data);
-            free(cur);
-            BOARD_MNUM(board)
-            --;
-            write_to_output(d, "Post aborted.\r\n");
-            return;
-          }
-          fore = cur;
-        }
-        write_to_output(d, "Unable to find your message to delete it!\r\n");
+        if (board_discard_message(board, d->str))
+          write_to_output(d, "Post aborted.\r\n");
+        else
+          write_to_output(d, "Unable to find your message to delete it!\r\n");
       } else {
         write_to_output(d, "\r\nPost saved.\r\n");
-        save_board(locate_board(d->mail_to - BOARD_MAGIC));
+        save_board(board);
       }
     }
 

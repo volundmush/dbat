@@ -7,7 +7,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-int xdir_scan(char *dir_name, struct xap_dir *xapdirp)
+int xdir_scan(const char *dir_name, struct xap_dir *xapdirp)
 {
   xapdirp->total   = scandir(dir_name, &(xapdirp->namelist), 0, alphasort);
   xapdirp->current = 0;
@@ -18,6 +18,18 @@ int xdir_scan(char *dir_name, struct xap_dir *xapdirp)
 char *xdir_get_name(struct xap_dir *xd, int i)
 {
   return xd->namelist[i]->d_name;
+}
+
+/* Frees the name list from a successful xdir_scan(). Safe after a failed scan. */
+void xdir_cleanup(struct xap_dir *xd)
+{
+  if (xd->total < 0)
+    return; /* scandir() failed; namelist was never allocated */
+  for (int i = 0; i < xd->total; i++)
+    free(xd->namelist[i]);
+  free(xd->namelist);
+  xd->namelist = NULL;
+  xd->total    = 0;
 }
 
 /* Like `mkdir -p`: creates each missing directory along path. Returns 1 if path ends up a directory, else 0. */

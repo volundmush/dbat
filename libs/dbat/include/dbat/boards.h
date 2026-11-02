@@ -1,24 +1,28 @@
 #pragma once
 #include "consts/types.h"
 
+/* New Dynamic boards v2.4 -PjD (dughi@imaxx.net) */
+#define BOARD_DIRECTORY "etc/boards" SLASH
+constexpr int MAX_MESSAGE_LENGTH = 4096;    /* arbitrary -- change if needed */
+constexpr int BOARD_MAGIC        = 1048575; /* added to a board vnum in descriptor mail_to; see modify.c */
+constexpr int CURRENT_BOARD_VER  = 2;       /* the only board file format still supported */
+constexpr int BOARD_MEMORY_SLOTS = 301;     /* buckets of "who has read what" records */
+
+/* One message. Doubly linked, newest first, so forward or back is simple. */
 struct board_msg {
-  long poster;
   time_t timestamp;
   char *subject;
   char *data;
   struct board_msg *next;
   struct board_msg *prev;
-  char *name;
+  char *name; /* poster */
 };
 
-/* Defines what we require to generate a hash for lookup
-   of a message given a reader */
-
+/* One "reader has read the message with this timestamp" record, hashed by message. */
 struct board_memory {
   int timestamp;
-  int reader;
   struct board_memory *next;
-  char *name;
+  char *name; /* reader */
 };
 
 struct board_info {
@@ -30,62 +34,22 @@ struct board_info {
   struct board_info *next;
   struct board_msg *messages;
   int version;
-
-  /* why 301? why not?  It might not be the greatest, but if you really
-     know what a hash is, you'll realize that in this case, I didn't even
-     work on the algorithm, so it shouldn't make a bit of difference */
-
-  struct board_memory *memory[301];
+  struct board_memory *memory[BOARD_MEMORY_SLOTS];
 };
 
 extern struct board_info *bboards;
 
-#include "dbat/consts/types.h"
-#include <stdio.h>
-
-/* New Dynamic boards v2.4 -PjD (dughi@imaxx.net) */
-#define BOARD_DIRECTORY    "etc/boards" SLASH
-#define MAX_MESSAGE_LENGTH 4096 /* arbitrary -- change if needed */
-
-#define BOARD_MAGIC 1048575 /* arbitrary number - see modify.c */
-
-/* Provides individual message structure */
-/* doubly linked so forward or back is relatively simple */
-
-#define READ_LVL(i)        (i->read_lvl)
-#define WRITE_LVL(i)       (i->write_lvl)
-#define REMOVE_LVL(i)      (i->remove_lvl)
-#define BOARD_MNUM(i)      (i->num_messages)
-#define BOARD_VNUM(i)      (i->vnum)
-#define BOARD_NEXT(i)      (i->next)
-#define BOARD_MESSAGES(i)  (i->messages)
-#define BOARD_MEMORY(i, j) (i->memory[j])
-#define BOARD_VERSION(i)   (i->version)
-#define CURRENT_BOARD_VER  2
-
-#define MESG_POSTER(i)      (i->poster)
-#define MESG_TIMESTAMP(i)   (i->timestamp)
-#define MESG_SUBJECT(i)     (i->subject)
-#define MESG_DATA(i)        (i->data)
-#define MESG_NEXT(i)        (i->next)
-#define MESG_PREV(i)        (i->prev)
-#define MESG_POSTER_NAME(i) (i->name)
-
-#define MEMORY_TIMESTAMP(i)   (i->timestamp)
-#define MEMORY_READER(i)      (i->reader)
-#define MEMORY_NEXT(i)        (i->next)
-#define MEMORY_READER_NAME(i) (i->name)
-
 void init_boards(void);
 struct board_info *create_new_board(obj_vnum board_vnum);
-int save_board(struct board_info *temp_board);
-void clear_boards();
+struct board_info *locate_board(obj_vnum board_vnum);
+bool save_board(struct board_info *board);
+void clear_boards(void);
+
 void show_board(obj_vnum board_vnum, struct char_data *ch);
 void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg);
-
 void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg);
 void board_respond(long board_vnum, struct char_data *ch, int mnum);
-
-struct board_info *locate_board(obj_vnum board_vnum);
-
 void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg);
+
+bool board_discard_message(struct board_info *board, char **data);
+void board_login_notices(struct char_data *ch);

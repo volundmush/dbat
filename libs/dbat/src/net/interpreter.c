@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include "dbat/interpreter.h"
+#include "dbat/boards.h"
 #include "dbat/utils.h"
 #include "dbat/comm.h"
 #include "dbat/config.h"
@@ -304,16 +305,7 @@ static int perform_dupe_check(struct descriptor_data *d)
       d->character->rp = d->rpp;
       if (has_mail(char_get_idnum(d->character)))
         write_to_output(d, "You have mail waiting.\r\n");
-      if (char_get_admlevel(d->character) >= 1 && BOARDNEWIMM > char_get_lboard(d->character, 1))
-        send_to_char(d->character, "\r\n@GMake sure to check the immortal board, there is a new post there.@n\r\n");
-      if (char_get_admlevel(d->character) >= 1 && BOARDNEWCOD > char_get_lboard(d->character, 2))
-        send_to_char(d->character, "\r\n@GMake sure to check the request file, it has been updated.@n\r\n");
-      if (char_get_admlevel(d->character) >= 1 && BOARDNEWBUI > char_get_lboard(d->character, 4))
-        send_to_char(d->character, "\r\n@GMake sure to check the builder board, there is a new post there.@n\r\n");
-      if (char_get_admlevel(d->character) >= 1 && BOARDNEWDUO > char_get_lboard(d->character, 3))
-        send_to_char(d->character, "\r\n@GMake sure to check punishment board, there is a new post there.@n\r\n");
-      if (BOARDNEWMORT > char_get_lboard(d->character, 0))
-        send_to_char(d->character, "\r\n@GThere is a new bulletin board post.@n\r\n");
+      board_login_notices(d->character);
       if (NEWSUPDATE > char_get_lastpl(d->character))
         send_to_char(d->character, "\r\n@GThe NEWS file has been updated, type 'news %d' to see the latest entry or 'news list' to see available entries.@n\r\n", LASTNEWS);
 
@@ -4542,16 +4534,7 @@ void nanny(struct descriptor_data *d, char *arg)
           }
           if (has_mail(char_get_idnum(d->character)))
             send_to_char(d->character, "\r\nYou have mail waiting.\r\n");
-          if (char_get_admlevel(d->character) >= 1 && BOARDNEWIMM > char_get_lboard(d->character, 1))
-            send_to_char(d->character, "\r\n@GMake sure to check the immortal board, there is a new post there.@n\r\n");
-          if (char_get_admlevel(d->character) >= 1 && BOARDNEWCOD > char_get_lboard(d->character, 2))
-            send_to_char(d->character, "\r\n@GMake sure to check the request file, it has been updated.@n\r\n");
-          if (char_get_admlevel(d->character) >= 1 && BOARDNEWBUI > char_get_lboard(d->character, 4))
-            send_to_char(d->character, "\r\n@GMake sure to check the builder board, there is a new post there.@n\r\n");
-          if (char_get_admlevel(d->character) >= 1 && BOARDNEWDUO > char_get_lboard(d->character, 3))
-            send_to_char(d->character, "\r\n@GMake sure to check punishment board, there is a new post there.@n\r\n");
-          if (BOARDNEWMORT > char_get_lboard(d->character, 0))
-            send_to_char(d->character, "\r\n@GThere is a new bulletin board post.@n\r\n");
+          board_login_notices(d->character);
           if (NEWSUPDATE > char_get_lastpl(d->character))
             send_to_char(d->character, "\r\n@GThe NEWS file has been updated, type 'news %d' to see the latest entry or 'news list' to see available entries.@n\r\n", LASTNEWS);
           if (LASTINTEREST != 0 && LASTINTEREST > char_get_lastint(d->character)) {

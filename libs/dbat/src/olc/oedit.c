@@ -1044,13 +1044,10 @@ void oedit_parse(struct descriptor_data *d, char *arg)
           } else
             write_to_output(d, "Object saved to memory.\r\n");
           if (obj_get_type_flag(OLC_OBJ(d)) == ITEM_BOARD) {
-            if ((tmp = locate_board(obj_get_vnum(OLC_OBJ(d)))) != NULL) {
+            if ((tmp = locate_board(obj_get_vnum(OLC_OBJ(d)))) != NULL)
               save_board(tmp);
-            } else {
-              tmp             = create_new_board(obj_get_vnum(OLC_OBJ(d)));
-              BOARD_NEXT(tmp) = bboards;
-              bboards         = tmp;
-            }
+            else
+              create_new_board(obj_get_vnum(OLC_OBJ(d)));
           }
           cleanup_olc(d, CLEANUP_ALL);
           return;
