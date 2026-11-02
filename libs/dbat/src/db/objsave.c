@@ -381,7 +381,8 @@ void Crash_listrent(struct char_data *ch, char *name)
   struct obj_data *obj;
   int rentcode = -1, netcost = 0, gold = 0, account = 0, nitems = 0, len;
   long long timed = 0;
-  int t[10], nr;
+  int t[10];
+  obj_vnum nr;
   char line[MAX_STRING_LENGTH];
   char *sdesc;
 
@@ -642,7 +643,8 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
   int t[30], zwei = 0;
   int orig_rent_code;
   struct obj_data *temp;
-  int locate = 0, j, nr, num_objs = 0;
+  int locate = 0, j, num_objs = 0;
+  obj_vnum nr;
   struct obj_data *obj1;
   struct obj_data *cont_row[MAX_BAG_ROWS];
   struct extra_descr_data *new_descr;

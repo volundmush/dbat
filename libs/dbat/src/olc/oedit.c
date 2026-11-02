@@ -32,7 +32,7 @@ static void oedit_disp_val3_menu(struct descriptor_data *d);
 static void oedit_disp_val4_menu(struct descriptor_data *d);
 static void oedit_disp_val5_menu(struct descriptor_data *d);
 static void oedit_disp_val9_menu(struct descriptor_data *d);
-static void oedit_setup_existing(struct descriptor_data *d, int real_num);
+static void oedit_setup_existing(struct descriptor_data *d, obj_rnum real_num);
 static void oedit_setup_new(struct descriptor_data *d);
 
 /*------------------------------------------------------------------------*/
@@ -47,7 +47,9 @@ static void oedit_setup_new(struct descriptor_data *d);
 
 ACMD(do_oasis_oedit)
 {
-  int number = NOWHERE, save = 0, real_num;
+  IDXTYPE number = NOWHERE;
+  int save       = 0;
+  obj_rnum real_num;
   struct descriptor_data *d;
   char buf1[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
@@ -226,7 +228,7 @@ static void oedit_setup_new(struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-static void oedit_setup_existing(struct descriptor_data *d, int real_num)
+static void oedit_setup_existing(struct descriptor_data *d, obj_rnum real_num)
 {
   struct obj_data *obj;
 
@@ -324,7 +326,7 @@ static void oedit_save_internally(struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-static void oedit_save_to_disk(int zone_num)
+static void oedit_save_to_disk(zone_rnum zone_num)
 {
   save_objects(zone_num);
 }
@@ -977,7 +979,9 @@ static void oedit_disp_menu(struct descriptor_data *d)
 
 void oedit_parse(struct descriptor_data *d, char *arg)
 {
-  int number, max_val, min_val;
+  int number;
+  obj_rnum rnum;
+  int max_val, min_val;
   char *oldtext = nullptr;
   struct board_info *tmp;
   struct obj_data *obj;
@@ -1023,8 +1027,8 @@ void oedit_parse(struct descriptor_data *d, char *arg)
       }
 
     case OEDIT_COPY:
-      if ((number = real_object(atoi(arg))) != NOWHERE) {
-        oedit_setup_existing(d, number);
+      if ((rnum = real_object(atoi(arg))) != NOTHING) {
+        oedit_setup_existing(d, rnum);
       } else
         write_to_output(d, "That object does not exist.\r\n");
       break;

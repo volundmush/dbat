@@ -31,10 +31,10 @@ const char *const guild_default_no_gold  = "%s Sorry, but I'm gonna need more ze
 
 /* Local variables */
 static int spell_sort_info[SKILL_TABLE_SIZE];
-int top_guild = -1;
+guild_rnum top_guild = -1;
 struct guild_data *guild_index;
 
-static char *guild_customer_string(int guild_nr, int detailed);
+static char *guild_customer_string(guild_rnum guild_nr, int detailed);
 static int calculate_skill_cost(struct char_data *ch, int skill);
 
 static int calculate_skill_cost(struct char_data *ch, int skill)
@@ -392,7 +392,7 @@ void list_skills(struct char_data *ch, char *arg)
   send_to_char(ch, "%s", buf2);
 }
 
-static bool is_guild_open(struct char_data *keeper, int guild_nr, int msg)
+static bool is_guild_open(struct char_data *keeper, guild_rnum guild_nr, int msg)
 {
   char buf[200];
   *buf = 0;
@@ -409,7 +409,7 @@ static bool is_guild_open(struct char_data *keeper, int guild_nr, int msg)
   return (false);
 }
 
-static bool is_guild_ok_char(struct char_data *keeper, struct char_data *ch, int guild_nr)
+static bool is_guild_ok_char(struct char_data *keeper, struct char_data *ch, guild_rnum guild_nr)
 {
   char buf[200];
 
@@ -531,7 +531,7 @@ static bool is_guild_ok_char(struct char_data *keeper, struct char_data *ch, int
   return (true);
 }
 
-static bool is_guild_ok(struct char_data *keeper, struct char_data *ch, int guild_nr)
+static bool is_guild_ok(struct char_data *keeper, struct char_data *ch, guild_rnum guild_nr)
 {
   if (is_guild_open(keeper, guild_nr, true))
     return (is_guild_ok_char(keeper, ch, guild_nr));
@@ -539,14 +539,14 @@ static bool is_guild_ok(struct char_data *keeper, struct char_data *ch, int guil
   return (false);
 }
 
-static int does_guild_know(int guild_nr, int i)
+static int does_guild_know(guild_rnum guild_nr, int i)
 {
   if (i < 0 || i >= SKILL_TABLE_SIZE)
     return (false);
   return ((int)(guild_index[guild_nr].skills[i]));
 }
 
-static int does_guild_know_feat(int guild_nr, int i)
+static int does_guild_know_feat(guild_rnum guild_nr, int i)
 {
   if (i < 0 || i >= NUM_FEATS_DEFINED)
     return (false);
@@ -566,7 +566,7 @@ void sort_spells(void)
 
 /* this and list skills should probally be combined.  perhaps in the
  * next release?  */
-static void what_does_guild_know(int guild_nr, struct char_data *ch)
+static void what_does_guild_know(guild_rnum guild_nr, struct char_data *ch)
 {
   const char *overflow = "\r\n**OVERFLOW**\r\n";
   char buf2[MAX_STRING_LENGTH];
@@ -786,7 +786,7 @@ static void handle_forget(struct char_data *keeper, int guild_nr, struct char_da
   }
 }
 
-static void handle_grand(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
+static void handle_grand(struct char_data *keeper, guild_rnum guild_nr, struct char_data *ch, char *argument)
 {
 
   int skill_num;
@@ -841,7 +841,7 @@ static void handle_grand(struct char_data *keeper, int guild_nr, struct char_dat
   char_set_practice_points(ch, char_get_practice_points(ch) - (1000));
 }
 
-static void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)
+static void handle_practice(struct char_data *keeper, guild_rnum guild_nr, struct char_data *ch, char *argument)
 {
   //int percent = GET_SKILL(ch, skill);
   int skill_num, learntype, pointcost, highest, i;
@@ -1129,7 +1129,8 @@ static void handle_study(struct char_data *keeper, int guild_nr, struct char_dat
 SPECIAL(guild)
 {
   char arg[MAX_INPUT_LENGTH];
-  int guild_nr, i;
+  guild_rnum guild_nr;
+  int i;
   struct char_data *keeper = (struct char_data *)me;
   struct {
     const char *cmd;
@@ -1175,7 +1176,7 @@ SPECIAL(guild)
 
 /**** This function is here just because I'm extremely paranoid.  Take
       it out if you aren't ;)  ****/
-static void clear_skills(int gdindex)
+static void clear_skills(guild_rnum gdindex)
 {
   int i;
 
@@ -1216,7 +1217,8 @@ static char *read_guild_message(FILE *gm_f, const char *why, const char *field, 
 void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
 {
   char *buf, buf2[256], *p, buf3[READ_SIZE];
-  int temp, val, t1, t2, rv;
+  room_vnum temp;
+  int val, t1, t2, rv;
   int done = false;
 
   snprintf(buf2, sizeof(buf2), "beginning of GM file %s", filename);
@@ -1304,7 +1306,7 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
 
 void assign_the_guilds(void)
 {
-  int gdindex;
+  guild_rnum gdindex;
 
   cmd_say  = find_command("say");
   cmd_tell = find_command("tell");
@@ -1320,7 +1322,7 @@ void assign_the_guilds(void)
   }
 }
 
-static char *guild_customer_string(int guild_nr, int detailed)
+static char *guild_customer_string(guild_rnum guild_nr, int detailed)
 {
   int gindex = 0, flag = 0, nlen;
   size_t len = 0;
@@ -1357,7 +1359,8 @@ static void list_all_guilds(struct char_data *ch)
   const char *list_all_guilds_header =
       "Virtual   G.Master	Charge   Members\r\n"
       "----------------------------------------------------------------------\r\n";
-  int gm_nr, headerlen = strlen(list_all_guilds_header);
+  guild_rnum gm_nr;
+  int headerlen = strlen(list_all_guilds_header);
   char buf[MAX_STRING_LENGTH], buf1[16];
 
   strcpy(buf, list_all_guilds_header); /* strcpy: OK (a short constant) */
@@ -1375,7 +1378,7 @@ static void list_all_guilds(struct char_data *ch)
   send_to_char(ch, "%s", buf);
 }
 
-static void list_detailed_guild(struct char_data *ch, int gm_nr)
+static void list_detailed_guild(struct char_data *ch, guild_rnum gm_nr)
 {
   int i;
   char buf[MAX_STRING_LENGTH];
@@ -1409,7 +1412,8 @@ static void list_detailed_guild(struct char_data *ch, int gm_nr)
 
 void show_guild(struct char_data *ch, char *arg)
 {
-  int gm_nr, gm_num;
+  guild_rnum gm_nr;
+  room_vnum gm_num;
 
   if (!*arg)
     list_all_guilds(ch);
@@ -1439,7 +1443,9 @@ void show_guild(struct char_data *ch, char *arg)
  */
 void list_guilds(struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vnum vmax)
 {
-  int i, bottom, top, counter = 0;
+  guild_rnum i;
+  IDXTYPE bottom, top;
+  int counter = 0;
 
   if (rnum != NOWHERE) {
     bottom = zone_table[rnum].bot;
@@ -1502,7 +1508,8 @@ void destroy_guilds(void)
 
 int count_guilds(guild_vnum low, guild_vnum high)
 {
-  int i, j;
+  guild_rnum i;
+  int j;
 
   for (i = j = 0; (rguild_get_vnum(i) <= high && i <= top_guild); i++) {
     if (rguild_get_vnum(i) >= low) {

@@ -30,7 +30,7 @@ struct board_info {
   int write_lvl;    /* min level to write messages on this board */
   int remove_lvl;   /* min level to remove messages from this board */
   int num_messages; /* num messages of this board */
-  int vnum;
+  obj_vnum vnum;
   struct board_info *next;
   struct board_msg *messages;
   int version;
@@ -48,7 +48,7 @@ void clear_boards(void);
 void show_board(obj_vnum board_vnum, struct char_data *ch);
 void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg);
 void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg);
-void board_respond(long board_vnum, struct char_data *ch, int mnum);
+void board_respond(obj_vnum board_vnum, struct char_data *ch, int mnum);
 void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg);
 
 bool board_discard_message(struct board_info *board, char **data);

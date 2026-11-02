@@ -40,7 +40,7 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
   struct atomic_file af;
   FILE *fp;
   struct zone_data *zone;
-  int i;
+  IDXTYPE i;
   zone_rnum rznum;
   char buf[MAX_STRING_LENGTH];
 
@@ -213,7 +213,8 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
   if (vzone_num > zone_table[top_of_zone_table].number)
     rznum = top_of_zone_table + 1;
   else {
-    int j, rnum;
+    room_vnum j;
+    room_rnum rnum;
     for (i = top_of_zone_table + 1; i > 0 && vzone_num < zone_table[i - 1].number; i--) {
       zone_table[i] = zone_table[i - 1];
       for (j = zone_table[i].bot; j <= zone_table[i].top; j++)
@@ -261,13 +262,14 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
 
 /*-------------------------------------------------------------------*/
 
-void create_world_index(int znum, const char *type)
+void create_world_index(zone_vnum znum, const char *type)
 {
   struct atomic_file index_af;
   FILE *newfile, *oldfile;
   char old_name[32];
   const char *prefix;
-  int num, found = false;
+  zone_vnum num;
+  int found = false;
   char buf[MAX_STRING_LENGTH];
   char buf1[MAX_STRING_LENGTH];
 
@@ -345,7 +347,8 @@ void create_world_index(int znum, const char *type)
 
 void remove_room_zone_commands(zone_rnum zone, room_rnum room_num)
 {
-  int subcmd = 0, cmd_room = -2;
+  int subcmd         = 0;
+  room_rnum cmd_room = -2;
 
   /*
    * Delete all entries in zone_table that relate to this room so we
@@ -382,7 +385,8 @@ void remove_room_zone_commands(zone_rnum zone, room_rnum room_num)
  */
 bool save_zone(zone_rnum zone_num)
 {
-  int subcmd, arg1 = -1, arg2 = -1, arg3 = -1, arg4 = -1, arg5 = -1;
+  int subcmd, arg4 = -1, arg5 = -1;
+  IDXTYPE arg1 = -1, arg2 = -1, arg3 = -1;
   char fname[128], oldname[128];
   const char *comment = nullptr;
   struct atomic_file af;

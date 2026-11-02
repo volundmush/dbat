@@ -1734,7 +1734,7 @@ void huge_update()
               continue;
             }
             rroom_set_dmg(obj_get_in_room(k), 100);
-            int zone = 0;
+            zone_rnum zone = 0;
             if ((zone = real_zone_by_thing(rroom_get_vnum(char_get_in_room(ch)))) != NOWHERE) {
               send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
             }
@@ -1804,7 +1804,7 @@ void huge_update()
             continue;
           }
           rroom_set_dmg(obj_get_in_room(k), 100);
-          int zone = 0;
+          zone_rnum zone = 0;
           if ((zone = real_zone_by_thing(rroom_get_vnum(char_get_in_room(ch)))) != NOWHERE) {
             send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
           }
@@ -1905,7 +1905,7 @@ void huge_update()
               continue;
             }
             rroom_set_dmg(obj_get_in_room(k), 100);
-            int zone = 0;
+            zone_rnum zone = 0;
             if ((zone = real_zone_by_thing(rroom_get_vnum(char_get_in_room(ch)))) != NOWHERE) {
               send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
             }
@@ -1973,7 +1973,7 @@ void huge_update()
             continue;
           }
           rroom_set_dmg(obj_get_in_room(k), 100);
-          int zone = 0;
+          zone_rnum zone = 0;
           if ((zone = real_zone_by_thing(rroom_get_vnum(char_get_in_room(ch)))) != NOWHERE) {
             send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
           }
@@ -2527,7 +2527,7 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, cons
     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
     }
-    int zone = 0;
+    zone_rnum zone = 0;
     if ((zone = real_zone_by_thing(rroom_get_vnum(char_get_in_room(ch)))) != NOWHERE) {
       send_to_zone("An explosion shakes the entire area!\r\n", zone);
     }
@@ -2640,7 +2640,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
     if (rroom_get_dmg(char_get_in_room(ch)) <= 95) {
       rroom_set_dmg(char_get_in_room(ch), rroom_get_dmg(char_get_in_room(ch)) + (5));
     }
-    int zone = 0;
+    zone_rnum zone = 0;
     if ((zone = real_zone_by_thing(rroom_get_vnum(char_get_in_room(ch)))) != NOWHERE) {
       send_to_zone("An explosion shakes the entire area!\r\n", zone);
     }
@@ -2651,7 +2651,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
       act("@RIt turns around at the last second and begins to pursue YOU!@n", true, ch, 0, vict, TO_VICT);
       act("@RIt turns around at the last second and begins to pursue @r$N@R!@n", true, ch, 0, vict, TO_NOTVICT);
       struct obj_data *obj;
-      int num = 0;
+      obj_vnum num = 0;
 
       switch (skill2) {
         case 461:
@@ -2693,7 +2693,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
     act("@W$n @Rturns it around and sends it back after YOU!@n", true, ch, 0, vict, TO_VICT);
     act("@W$n @Rturns it around and sends it back after @r$N@R!@n", true, ch, 0, vict, TO_NOTVICT);
     struct obj_data *obj;
-    int num = 0;
+    obj_vnum num = 0;
 
     switch (skill2) {
       case 496:

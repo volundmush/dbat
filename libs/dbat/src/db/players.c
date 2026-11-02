@@ -35,7 +35,8 @@ constexpr int LOAD_LIFE = 4;
 void build_player_index(void);
 int sprintascii(char *out, bitvector_t bits);
 static void tag_argument(char *argument, char *tag);
-static void load_affects(FILE *fl, struct char_data *ch, int violence);
+static void load_affects(FILE *fl, struct char_data *ch);
+static void skip_affects(FILE *fl);
 static void load_bonuses(FILE *fl, struct char_data *ch, bool mods);
 static void load_skills(FILE *fl, struct char_data *ch, bool mods);
 static void load_HMVS(struct char_data *ch, const char *line, int mode);
@@ -119,16 +120,16 @@ int create_entry(char *name)
 
     RECREATE(player_table, struct player_index_element, i);
     pos = top_of_p_table;
-  }
+  } else
+    free(player_table[pos].name);
 
+  /* RECREATE leaves a new slot uninitialised and a reused one holds the old character's values */
+  player_table[pos] = (struct player_index_element){};
   CREATE(player_table[pos].name, char, strlen(name) + 1);
 
   /* copy lowercase equivalent of name to table field */
   for (i = 0; (player_table[pos].name[i] = tolower(name[i])); i++)
     /* Nothing */;
-
-  /* clear the bitflag in case we have garbage data */
-  player_table[pos].flags = 0;
 
   return (pos);
 }
@@ -399,8 +400,8 @@ int load_char(const char *name, struct char_data *ch)
             char_get_affected_by(ch)[1] = asciiflag_conv(f2);
             char_get_affected_by(ch)[2] = asciiflag_conv(f3);
             char_get_affected_by(ch)[3] = asciiflag_conv(f4);
-          } else if (!strcmp(tag, "Affs")) load_affects(fl, ch, 0);
-          else if (!strcmp(tag, "Affv")) load_affects(fl, ch, 1);
+          } else if (!strcmp(tag, "Affs")) load_affects(fl, ch);
+          else if (!strcmp(tag, "Affv")) skip_affects(fl);
           else if (!strcmp(tag, "AdmL")) char_set_admlevel(ch, atoi(line));
           else if (!strcmp(tag, "Abso")) char_set_absorbs(ch, atoi(line));
           else if (!strcmp(tag, "AdmF")) {
@@ -732,7 +733,7 @@ void save_char(struct char_data *ch)
   FILE *fl;
   char fname[40], buf[MAX_STRING_LENGTH];
   int i, id, save_index = false;
-  struct affected_type *aff, tmp_aff[MAX_AFFECT], tmp_affv[MAX_AFFECT];
+  struct affected_type *aff, tmp_aff[MAX_AFFECT];
   struct obj_data *char_eq[NUM_WEARS];
   char fbuf1[MAX_STRING_LENGTH], fbuf2[MAX_STRING_LENGTH];
   char fbuf3[MAX_STRING_LENGTH], fbuf4[MAX_STRING_LENGTH];
@@ -1048,14 +1049,6 @@ void save_char(struct char_data *ch)
               aff->modifier, aff->location, (int)aff->bitvector, aff->specific);
   }
   fprintf(fl, "0 0 0 0 0 0\n");
-  fprintf(fl, "Affv:\n");
-  for (i = 0; i < MAX_AFFECT; i++) {
-    aff = &tmp_affv[i];
-    if (aff->type)
-      fprintf(fl, "%d %d %d %d %d %d\n", aff->type, aff->duration,
-              aff->modifier, aff->location, (int)aff->bitvector, aff->specific);
-  }
-  fprintf(fl, "0 0 0 0 0 0\n");
 
   /*fprintf(fl, "LevD:\n");
   write_level_data(ch, fl);*/
@@ -1144,14 +1137,15 @@ static void tag_argument(char *argument, char *tag)
   *wrt = '\0';
 }
 
-static void load_affects(FILE *fl, struct char_data *ch, int violence)
+static void load_affects(FILE *fl, struct char_data *ch)
 {
   int num, num2, num3, num4, num5, num6;
   char line[MAX_INPUT_LENGTH + 1];
   struct affected_type af;
 
   do {
-    get_line(fl, line);
+    if (!get_line(fl, line))
+      break;
     num = num2 = num3 = num4 = num5 = num6 = 0;
     sscanf(line, "%d %d %d %d %d %d", &num, &num2, &num3, &num4, &num5, &num6);
     if (num != 0) {
@@ -1161,10 +1155,18 @@ static void load_affects(FILE *fl, struct char_data *ch, int violence)
       af.location  = num4;
       af.bitvector = num5;
       af.specific  = num6;
-      if (!violence)
-        affect_to_char(ch, &af);
+      affect_to_char(ch, &af);
     }
   } while (num != 0);
+}
+
+/* Older player files still carry the retired "Affv" list; read past it up to its "0" terminator. */
+static void skip_affects(FILE *fl)
+{
+  char line[MAX_INPUT_LENGTH + 1];
+
+  while (get_line(fl, line) && atoi(line) != 0)
+    ;
 }
 
 static void load_skills(FILE *fl, struct char_data *ch, bool mods)

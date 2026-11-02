@@ -86,7 +86,7 @@ static void House_restore_weight(struct obj_data *obj)
 static void House_crashsave(room_vnum vnum)
 {
   struct atomic_file af;
-  int rnum;
+  room_rnum rnum;
   char buf[MAX_STRING_LENGTH];
   FILE *fp;
 
@@ -520,7 +520,8 @@ static bool House_load(room_vnum rvnum)
   char line[256];
   int t[21], zwei = 0;
   struct obj_data *temp;
-  int locate = 0, j, nr;
+  int locate = 0, j;
+  obj_vnum nr;
   struct obj_data *obj1;
   struct obj_data *cont_row[MAX_BAG_ROWS];
   struct extra_descr_data *new_descr;

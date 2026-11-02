@@ -10,7 +10,7 @@ void add_to_type_list(struct shop_buy_data **list, struct shop_buy_data *newl);
 void add_to_int_list(IDXTYPE **tlist, IDXTYPE newi);
 void free_shop(struct shop_data *shop);
 const char *modify_string(char **str, char *newstr, bool allow_int);
-int add_shop(struct shop_data *shop);
+shop_rnum add_shop(struct shop_data *shop);
 bool save_shops(zone_rnum zone_num);
 shop_rnum real_shop(shop_vnum vnum);
 

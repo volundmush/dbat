@@ -804,7 +804,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
 static void reassign_rooms(void)
 {
   void assign_rooms(void);
-  int i;
+  room_rnum i;
 
   /* remove old funcs */
   for (i = 0; i <= top_of_world; i++)

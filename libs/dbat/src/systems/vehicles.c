@@ -18,7 +18,7 @@
 #include "dbat/races.h"
 #include "dbat/act.informative.h"
 
-static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, char *arg);
+static room_vnum ship_land_location(struct char_data *ch, struct obj_data *vehicle, char *arg);
 static void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle);
 
 /* This shows the player what locations the planet has to land at. */
@@ -87,9 +87,9 @@ static void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle)
   }
 }
 
-static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, char *arg)
+static room_vnum ship_land_location(struct char_data *ch, struct obj_data *vehicle, char *arg)
 {
-  int landspot = 50;
+  room_vnum landspot = 50;
   if (rroom_get_vnum(obj_get_in_room(vehicle)) == 50) { // Above Earth
     if (!strcasecmp(arg, "Nexus City")) {
       landspot = 300;
@@ -374,7 +374,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
   return (-1);
 }
 
-struct obj_data *find_vehicle_by_vnum(int vnum)
+struct obj_data *find_vehicle_by_vnum(obj_vnum vnum)
 {
   struct obj_data *i;
 
@@ -421,7 +421,7 @@ struct obj_data *find_control(struct char_data *ch)
 static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, char *arg)
 {
   struct obj_data *vehicle_in_out;
-  int is_in, is_going_to;
+  room_rnum is_in, is_going_to;
   char buf[MAX_INPUT_LENGTH];
 
   if (!*arg) {
@@ -507,7 +507,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
     send_to_char(ch, "@wThe ship can't fit there!\r\n");
   } else {
     /* But nothing!  Let's go that way! */
-    int was_in, is_in;
+    room_rnum was_in, is_in;
 
     sprintf(buf, "%s @wflies %s.\n\r", vehicle->short_description, dirs[dir]);
     send_to_room(obj_get_in_room(vehicle), "%s", buf);
@@ -1016,7 +1016,7 @@ ACMD(do_drive)
           }
           return;
         }
-        int land_location = 50;
+        room_vnum land_location = 50;
         if (obj_get_vnum(vehicle) > 46099) {
           if (strcasecmp(arg2, "1") && strcasecmp(arg2, "2") && strcasecmp(arg2, "3") && strcasecmp(arg2, "4")) {
             send_to_char(ch, "@wLand on which pad? 1, 2, 3 or 4?\r\n");
@@ -1243,8 +1243,8 @@ ACMD(do_drive)
           send_to_room(obj_get_in_room(vehicle), "%s", buf3);
         }
       } else if (!strcasecmp(arg, "launch")) {
-        int lnum = 0;
-        int rnum = 0;
+        int lnum       = 0;
+        room_rnum rnum = 0;
         if (rroom_flagged(obj_get_in_room(vehicle), ROOM_EARTH)) {
           lnum = 1;
         } else if (rroom_flagged(obj_get_in_room(vehicle), ROOM_FRIGID)) {

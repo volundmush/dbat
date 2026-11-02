@@ -198,7 +198,10 @@ ACMD(do_attach)
   trig_data *trig;
   char targ_name[MAX_INPUT_LENGTH], trig_name[MAX_INPUT_LENGTH];
   char loc_name[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
-  int loc, tn, rn, num_arg;
+  int loc;
+  trig_vnum tn;
+  trig_rnum rn;
+  IDXTYPE num_arg;
   room_rnum rnum;
 
   argument = two_arguments(argument, arg, trig_name);
@@ -331,7 +334,8 @@ ACMD(do_attach)
 bool remove_trigger(struct script_data *sc, char *name)
 {
   trig_data *i, *j;
-  int num = 0, string = false, n;
+  mob_vnum num = 0;
+  int string   = false, n;
   char *cname;
 
   if (!sc)
@@ -392,7 +396,7 @@ ACMD(do_detach)
   struct room_data *room;
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
   char *trigger = 0;
-  int num_arg;
+  IDXTYPE num_arg;
 
   argument = two_arguments(argument, arg1, arg2);
   one_argument(argument, arg3);
@@ -604,7 +608,7 @@ ACMD(do_vdelete)
 }
 ACMD(do_tstat)
 {
-  int rnum;
+  trig_rnum rnum;
   char str[MAX_INPUT_LENGTH];
 
   half_chop(argument, str, argument);

@@ -1913,7 +1913,8 @@ ACMD(do_barrier)
 ACMD(do_instant)
 {
 
-  int skill = 0, perc = 0, skill_num = 0, location = 0;
+  int skill = 0, perc = 0, skill_num = 0;
+  room_vnum location = 0;
   int64_t cost          = 0;
   struct char_data *tar = nullptr;
 
@@ -2174,7 +2175,7 @@ ACMD(do_transform)
   reveal_hiding(ch, 0);
 
   // Announce noisy transformations in the zone.
-  int zone = 0;
+  zone_rnum zone = 0;
   if (race_has_noisy_transformations(ch->race)) {
     if ((zone = real_zone_by_thing(char_get_in_room(ch))) != NOWHERE) {
       send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
@@ -2191,7 +2192,8 @@ ACMD(do_aid)
   struct char_data *vict;
   struct obj_data *obj = nullptr, *aid_obj = nullptr, *aid_prod = nullptr, *next_obj;
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-  int dc = 0, found = false, num = 47, num2 = 0;
+  int dc = 0, found = false;
+  obj_vnum num = 47, num2 = 0;
 
   if (char_is_npc(ch))
     return;

@@ -22,7 +22,7 @@
 #include "dbat/search.h"
 #include "dbat/atomicfile.h"
 
-static long assemblyGetAssemblyIndex(long lVnum);
+static long assemblyGetAssemblyIndex(obj_vnum lVnum);
 
 /* Local global variables. */
 static long g_lNumAssemblies      = 0;
@@ -37,8 +37,8 @@ void assemblyBootAssemblies(void)
   int iInRoom                    = 0;
   int iType                      = 0;
   long lLineCount                = 0;
-  long lPartVnum                 = NOTHING;
-  long lVnum                     = NOTHING;
+  obj_vnum lPartVnum             = NOTHING;
+  obj_vnum lVnum                 = NOTHING;
   FILE *pFile                    = nullptr;
 
   if ((pFile = fopen(ASSEMBLIES_FILE, "rt")) == nullptr) {
@@ -56,29 +56,29 @@ void assemblyBootAssemblies(void)
       continue;
 
     if (strcasecmp(szTag, "Component") == 0) {
-      if (sscanf(szLine, "#%ld %d %d", &lPartVnum, &iExtract, &iInRoom) != 3) {
+      if (sscanf(szLine, "#%d %d %d", &lPartVnum, &iExtract, &iInRoom) != 3) {
         mud_log("SYSERR: bootAssemblies(): Invalid format in file %s, line %ld: "
                 "szTag=%s, szLine=%s.",
                 ASSEMBLIES_FILE, lLineCount, szTag, szLine);
       } else if (!assemblyAddComponent(lVnum, lPartVnum, iExtract, iInRoom)) {
-        mud_log("SYSERR: bootAssemblies(): Could not add component #%ld to "
-                "assembly #%ld.",
+        mud_log("SYSERR: bootAssemblies(): Could not add component #%d to "
+                "assembly #%d.",
                 lPartVnum, lVnum);
       }
     } else if (strcasecmp(szTag, "Vnum") == 0) {
-      if (sscanf(szLine, "#%ld %s", &lVnum, szType) != 2) {
+      if (sscanf(szLine, "#%d %s", &lVnum, szType) != 2) {
         mud_log("SYSERR: bootAssemblies(): Invalid format in file %s, "
                 "line %ld.",
                 ASSEMBLIES_FILE, lLineCount);
         lVnum = NOTHING;
       } else if ((iType = search_block(szType, AssemblyTypes, true)) < 0) {
         mud_log("SYSERR: bootAssemblies(): Invalid type '%s' for assembly "
-                "vnum #%ld at line %ld.",
+                "vnum #%d at line %ld.",
                 szType, lVnum, lLineCount);
         lVnum = NOTHING;
       } else if (!assemblyCreate(lVnum, iType)) {
         mud_log("SYSERR: bootAssemblies(): Could not create assembly for vnum "
-                "#%ld, type %s.",
+                "#%d, type %s.",
                 lVnum, szType);
         lVnum = NOTHING;
       }
@@ -113,10 +113,10 @@ void assemblySaveAssemblies(void)
   for (i = 0; i < g_lNumAssemblies; i++) {
     pAssembly = (g_pAssemblyTable + i);
     sprinttype(pAssembly->uchAssemblyType, AssemblyTypes, szType, sizeof(szType));
-    fprintf(pFile, "Vnum                #%ld %s\n", pAssembly->lVnum, szType);
+    fprintf(pFile, "Vnum                #%d %s\n", pAssembly->lVnum, szType);
 
     for (j = 0; j < pAssembly->lNumComponents; j++) {
-      fprintf(pFile, "Component           #%ld %d %d\n",
+      fprintf(pFile, "Component           #%d %d %d\n",
               pAssembly->pComponents[j].lVnum,
               (pAssembly->pComponents[j].bExtract ? 1 : 0),
               (pAssembly->pComponents[j].bInRoom ? 1 : 0));
@@ -135,7 +135,7 @@ void assemblyListToChar(struct char_data *pCharacter)
   char szAssmType[MAX_INPUT_LENGTH] = {'\0'};
   long i                            = 0; // Outer iterator.
   long j                            = 0; // Inner iterator.
-  long lRnum                        = 0; // Object rnum for obj_proto indexing.
+  obj_rnum lRnum                    = 0; // Object rnum for obj_proto indexing.
 
   if (pCharacter == nullptr) {
     mud_log("SYSERR: assemblyListAssembliesToChar(): NULL 'pCharacter'.");
@@ -152,20 +152,20 @@ void assemblyListToChar(struct char_data *pCharacter)
   for (i = 0; i < g_lNumAssemblies; i++) {
     if ((lRnum = real_object(g_pAssemblyTable[i].lVnum)) < 0) {
       send_to_char(pCharacter, "[-----] ***RESERVED***\r\n");
-      mud_log("SYSERR: assemblyListToChar(): Invalid vnum #%ld in assembly table.", g_pAssemblyTable[i].lVnum);
+      mud_log("SYSERR: assemblyListToChar(): Invalid vnum #%d in assembly table.", g_pAssemblyTable[i].lVnum);
     } else {
       sprinttype(g_pAssemblyTable[i].uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
-      sprintf(szBuffer, "[%5ld] %s (%s)\r\n", g_pAssemblyTable[i].lVnum,
+      sprintf(szBuffer, "[%5d] %s (%s)\r\n", g_pAssemblyTable[i].lVnum,
               obj_proto[lRnum].short_description, szAssmType);
       send_to_char(pCharacter, "%s", szBuffer);
 
       for (j = 0; j < g_pAssemblyTable[i].lNumComponents; j++) {
         if ((lRnum = real_object(g_pAssemblyTable[i].pComponents[j].lVnum)) < 0) {
           send_to_char(pCharacter, " -----: ***RESERVED***\r\n");
-          mud_log("SYSERR: assemblyListToChar(): Invalid component vnum #%ld in assembly for vnum #%ld.",
+          mud_log("SYSERR: assemblyListToChar(): Invalid component vnum #%d in assembly for vnum #%d.",
                   g_pAssemblyTable[i].pComponents[j].lVnum, g_pAssemblyTable[i].lVnum);
         } else {
-          sprintf(szBuffer, " %5ld: %-20.20s Extract=%-3.3s InRoom=%-3.3s\r\n", +g_pAssemblyTable[i].pComponents[j].lVnum,
+          sprintf(szBuffer, " %5d: %-20.20s Extract=%-3.3s InRoom=%-3.3s\r\n", +g_pAssemblyTable[i].pComponents[j].lVnum,
                   obj_proto[lRnum].short_description,
                   (g_pAssemblyTable[i].pComponents[j].bExtract ? "Yes" : "No"),
                   (g_pAssemblyTable[i].pComponents[j].bInRoom ? "Yes" : "No"));
@@ -176,16 +176,16 @@ void assemblyListToChar(struct char_data *pCharacter)
   }
 }
 
-bool assemblyAddComponent(long lVnum, long lComponentVnum, bool bExtract, bool bInRoom)
+bool assemblyAddComponent(obj_vnum lVnum, obj_vnum lComponentVnum, bool bExtract, bool bInRoom)
 {
   ASSEMBLY *pAssembly = nullptr;
 
   if ((pAssembly = assemblyGetAssemblyPtr(lVnum)) == nullptr) {
-    mud_log("SYSERR: assemblyAddComponent(): Invalid 'lVnum' #%ld.", lVnum);
+    mud_log("SYSERR: assemblyAddComponent(): Invalid 'lVnum' #%d.", lVnum);
     return (false);
   }
   if (real_object(lComponentVnum) <= NOTHING) {
-    mud_log("SYSERR: assemblyAddComponent(): Invalid 'lComponentVnum' #%ld.",
+    mud_log("SYSERR: assemblyAddComponent(): Invalid 'lComponentVnum' #%d.",
             lComponentVnum);
     return (false);
   }
@@ -216,11 +216,11 @@ bool assemblyAddComponent(long lVnum, long lComponentVnum, bool bExtract, bool b
   return (true);
 }
 
-bool assemblyCheckComponents(long lVnum, struct char_data *pCharacter, int extract_yes)
+bool assemblyCheckComponents(obj_vnum lVnum, struct char_data *pCharacter, int extract_yes)
 {
   bool bOk                             = true;
   long i                               = 0;
-  long lRnum                           = 0;
+  obj_rnum lRnum                       = 0;
   struct obj_data **ppComponentObjects = nullptr;
   ASSEMBLY *pAssembly                  = nullptr;
 
@@ -229,7 +229,7 @@ bool assemblyCheckComponents(long lVnum, struct char_data *pCharacter, int extra
     return (false);
   }
   if ((pAssembly = assemblyGetAssemblyPtr(lVnum)) == nullptr) {
-    mud_log("SYSERR: NULL assemblyCheckComponents(): Invalid 'lVnum' #%ld.", lVnum);
+    mud_log("SYSERR: NULL assemblyCheckComponents(): Invalid 'lVnum' #%d.", lVnum);
     return (false);
   }
 
@@ -279,7 +279,7 @@ bool assemblyCheckComponents(long lVnum, struct char_data *pCharacter, int extra
   return (bOk);
 }
 
-bool assemblyCreate(long lVnum, int iAssembledType)
+bool assemblyCreate(obj_vnum lVnum, int iAssembledType)
 {
   long lBottom                = 0;
   long lMiddle                = 0;
@@ -333,14 +333,14 @@ bool assemblyCreate(long lVnum, int iAssembledType)
   return (true);
 }
 
-bool assemblyDestroy(long lVnum)
+bool assemblyDestroy(obj_vnum lVnum)
 {
   long lIndex                 = 0;
   ASSEMBLY *pNewAssemblyTable = nullptr;
 
   /* Find the real number of the assembled vnum. */
   if (g_pAssemblyTable == nullptr || (lIndex = assemblyGetAssemblyIndex(lVnum)) < 0) {
-    mud_log("SYSERR: assemblyDestroy(): Invalid 'lVnum' #%ld.", lVnum);
+    mud_log("SYSERR: assemblyDestroy(): Invalid 'lVnum' #%d.", lVnum);
     return (false);
   }
 
@@ -372,22 +372,22 @@ bool assemblyDestroy(long lVnum)
   return (true);
 }
 
-int assemblyGetType(long lVnum)
+int assemblyGetType(obj_vnum lVnum)
 {
   ASSEMBLY *pAssembly = nullptr;
 
   if ((pAssembly = assemblyGetAssemblyPtr(lVnum)) == nullptr) {
-    mud_log("SYSERR: assemblyGetType(): Invalid 'lVnum' #%ld.", lVnum);
+    mud_log("SYSERR: assemblyGetType(): Invalid 'lVnum' #%d.", lVnum);
     return (-1);
   }
 
   return ((int)pAssembly->uchAssemblyType);
 }
 
-long assemblyFindAssembly(const char *pszAssemblyName)
+obj_vnum assemblyFindAssembly(const char *pszAssemblyName)
 {
-  long i     = 0;
-  long lRnum = NOTHING;
+  long i         = 0;
+  obj_rnum lRnum = NOTHING;
 
   if (g_pAssemblyTable == nullptr)
     return (-1);
@@ -396,7 +396,7 @@ long assemblyFindAssembly(const char *pszAssemblyName)
 
   for (i = 0; i < g_lNumAssemblies; i++) {
     if ((lRnum = real_object(g_pAssemblyTable[i].lVnum)) < 0)
-      mud_log("SYSERR: assemblyFindAssembly(): Invalid vnum #%ld in assembly table.", g_pAssemblyTable[i].lVnum);
+      mud_log("SYSERR: assemblyFindAssembly(): Invalid vnum #%d in assembly table.", g_pAssemblyTable[i].lVnum);
     else if (isname(pszAssemblyName, obj_proto[lRnum].name))
       return (g_pAssemblyTable[i].lVnum);
   }
@@ -404,7 +404,7 @@ long assemblyFindAssembly(const char *pszAssemblyName)
   return (-1);
 }
 
-static long assemblyGetAssemblyIndex(long lVnum)
+static long assemblyGetAssemblyIndex(obj_vnum lVnum)
 {
   long lBottom = 0;
   long lMiddle = 0;
@@ -426,7 +426,7 @@ static long assemblyGetAssemblyIndex(long lVnum)
   }
 }
 
-ASSEMBLY *assemblyGetAssemblyPtr(long lVnum)
+ASSEMBLY *assemblyGetAssemblyPtr(obj_vnum lVnum)
 {
   long lIndex = 0;
 

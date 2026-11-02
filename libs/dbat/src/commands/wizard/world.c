@@ -86,7 +86,7 @@ ACMD(do_transobj)
     return;
   }
   if (!strcasecmp("all", arg2)) {
-    int num               = obj_get_vnum(obj);
+    obj_vnum num          = obj_get_vnum(obj);
     struct obj_data *obj2 = nullptr;
 
     act("You send $p to everyone in the game.", true, ch, obj, 0, TO_CHAR);
@@ -779,8 +779,10 @@ ACMD(do_zpurge)
 {
   struct obj_data *obj, *next_obj;
   struct char_data *mob, *next_mob;
-  int i, stored = -1, zone, found = false;
-  int room;
+  IDXTYPE i, zone;
+  zone_rnum stored = -1;
+  int found        = false;
+  room_vnum room;
   char arg[MAX_INPUT_LENGTH];
 
   one_argument(argument, arg);

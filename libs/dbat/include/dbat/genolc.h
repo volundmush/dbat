@@ -25,7 +25,7 @@ int sprintascii(char *out, bitvector_t bits);
 void free_save_list(void);
 
 struct save_list_data {
-  int zone;
+  zone_vnum zone;
   int type;
   struct save_list_data *next;
 };
@@ -46,4 +46,4 @@ constexpr int SL_HLP = SL_MAX + 2; /* must be above MAX */
 
 room_vnum genolc_zone_bottom(zone_rnum rznum);
 room_vnum genolc_zonep_bottom(struct zone_data *zone);
-void create_world_index(int znum, const char *type);
+void create_world_index(zone_vnum znum, const char *type);

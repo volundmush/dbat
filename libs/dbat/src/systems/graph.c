@@ -222,16 +222,16 @@ ACMD(do_sradar)
       send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
       return;
     } else if (!strcasecmp(arg, "buoy1") && char_get_radar1(ch) > 0) {
-      int rad = char_get_radar1(ch);
-      dir     = find_first_step(obj_get_in_room(vehicle), real_room(rad));
+      room_vnum rad = char_get_radar1(ch);
+      dir           = find_first_step(obj_get_in_room(vehicle), real_room(rad));
       sprintf(planet, "Buoy One");
     } else if (!strcasecmp(arg, "buoy2") && char_get_radar2(ch) > 0) {
-      int rad = char_get_radar2(ch);
-      dir     = find_first_step(obj_get_in_room(vehicle), real_room(rad));
+      room_vnum rad = char_get_radar2(ch);
+      dir           = find_first_step(obj_get_in_room(vehicle), real_room(rad));
       sprintf(planet, "Buoy Two");
     } else if (!strcasecmp(arg, "buoy3") && char_get_radar3(ch) > 0) {
-      int rad = char_get_radar3(ch);
-      dir     = find_first_step(obj_get_in_room(vehicle), real_room(rad));
+      room_vnum rad = char_get_radar3(ch);
+      dir           = find_first_step(obj_get_in_room(vehicle), real_room(rad));
       sprintf(planet, "Buoy Three");
     } else {
       send_to_char(ch, "@wThat is not an existing planet.@n\r\n");
@@ -268,16 +268,16 @@ ACMD(do_sradar)
       send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
       return;
     } else if (!strcasecmp(arg, "buoy1") && char_get_radar1(ch) > 0) {
-      int rad = char_get_radar1(ch);
-      dir     = find_first_step(char_get_in_room(ch), real_room(rad));
+      room_vnum rad = char_get_radar1(ch);
+      dir           = find_first_step(char_get_in_room(ch), real_room(rad));
       sprintf(planet, "Buoy One");
     } else if (!strcasecmp(arg, "buoy2") && char_get_radar2(ch) > 0) {
-      int rad = char_get_radar2(ch);
-      dir     = find_first_step(char_get_in_room(ch), real_room(rad));
+      room_vnum rad = char_get_radar2(ch);
+      dir           = find_first_step(char_get_in_room(ch), real_room(rad));
       sprintf(planet, "Buoy Two");
     } else if (!strcasecmp(arg, "buoy3") && char_get_radar3(ch) > 0) {
-      int rad = char_get_radar3(ch);
-      dir     = find_first_step(char_get_in_room(ch), real_room(rad));
+      room_vnum rad = char_get_radar3(ch);
+      dir           = find_first_step(char_get_in_room(ch), real_room(rad));
       sprintf(planet, "Buoy Three");
     } else {
       send_to_char(ch, "@wThat is not an existing planet.@n\r\n");
@@ -304,7 +304,8 @@ ACMD(do_sradar)
 
 ACMD(do_radar)
 {
-  int room = 0, dir, num = 0, found = false, found2 = false, fcount = 0;
+  room_vnum room = 0;
+  int dir, num = 0, found = false, found2 = false, fcount = 0;
   struct char_data *tch;
   struct obj_data *obj, *obj2, *next_obj;
 

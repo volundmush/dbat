@@ -26,7 +26,7 @@
 #include "dbat/act.informative.h"
 
 static void redit_disp_menu(struct descriptor_data *d);
-static void redit_setup_existing(struct descriptor_data *d, int real_num);
+static void redit_setup_existing(struct descriptor_data *d, room_rnum real_num);
 static void redit_setup_new(struct descriptor_data *d);
 
 /*------------------------------------------------------------------------*/
@@ -45,7 +45,9 @@ ACMD(do_oasis_redit)
 {
   char buf1[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
-  int number = NOWHERE, save = 0, real_num;
+  IDXTYPE number = NOWHERE;
+  int save       = 0;
+  room_rnum real_num;
   struct descriptor_data *d;
 
   /* Parse any arguments. */
@@ -199,7 +201,7 @@ static void redit_setup_new(struct descriptor_data *d)
 
 /*------------------------------------------------------------------------*/
 
-static void redit_setup_existing(struct descriptor_data *d, int real_num)
+static void redit_setup_existing(struct descriptor_data *d, room_rnum real_num)
 {
   struct room_data *room;
   int counter;
@@ -271,7 +273,8 @@ static void redit_setup_existing(struct descriptor_data *d, int real_num)
 
 void redit_save_internally(struct descriptor_data *d)
 {
-  int j, room_num, new_room = false;
+  int j, new_room = false;
+  room_rnum room_num;
   struct descriptor_data *dsc;
 
   if (OLC_ROOM(d)->number == NOWHERE) {
@@ -540,6 +543,7 @@ static void redit_disp_menu(struct descriptor_data *d)
 void redit_parse(struct descriptor_data *d, char *arg)
 {
   int number;
+  room_rnum rnum;
   char *oldtext = nullptr;
 
   switch (OLC_MODE(d)) {
@@ -923,12 +927,13 @@ void redit_parse(struct descriptor_data *d, char *arg)
       break;
 
     case REDIT_EXIT_NUMBER:
+      rnum = NOWHERE;
       if ((number = atoi(arg)) != -1)
-        if ((number = real_room(number)) == NOWHERE) {
+        if ((rnum = real_room(number)) == NOWHERE) {
           write_to_output(d, "That room does not exist, try again : ");
           return;
         }
-      OLC_EXIT(d)->to_room = number;
+      OLC_EXIT(d)->to_room = rnum;
       redit_disp_exit_menu(d);
       return;
 
@@ -1038,8 +1043,8 @@ void redit_parse(struct descriptor_data *d, char *arg)
       break;
 
     case REDIT_COPY:
-      if ((number = real_room(atoi(arg))) != NOWHERE) {
-        redit_setup_existing(d, number);
+      if ((rnum = real_room(atoi(arg))) != NOWHERE) {
+        redit_setup_existing(d, rnum);
       } else
         write_to_output(d, "That room does not exist.\r\n");
       break;

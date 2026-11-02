@@ -513,7 +513,7 @@ ACMD(do_nickname)
       for (k = object_list; k; k = k->next) {
         if (obj_get_vnum(k) == obj_get_vnum(ship2) + 1000) {
           extract_obj(k);
-          int was_in = rroom_get_vnum(obj_get_in_room(ship2));
+          room_vnum was_in = rroom_get_vnum(obj_get_in_room(ship2));
           obj_from_room(ship2);
           obj_to_room(ship2, real_room(was_in));
         }

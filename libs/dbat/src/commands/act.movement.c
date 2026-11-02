@@ -56,7 +56,7 @@ static bool do_simple_leave(struct char_data *ch, struct obj_data *obj, int need
 static int perform_leave_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check);
 
 /* This handles teleporting players with instant transmission or skills like it. */
-void handle_teleport(struct char_data *ch, struct char_data *tar, int location)
+void handle_teleport(struct char_data *ch, struct char_data *tar, room_vnum location)
 {
   int success = false;
 
@@ -227,7 +227,7 @@ void carry_drop(struct char_data *ch, int type)
   char_set_carried_by(vict, nullptr);
 }
 
-static int land_location(struct char_data *ch, char *arg)
+static room_vnum land_location(struct char_data *ch, char *arg)
 {
 
   if (rroom_get_vnum(char_get_in_room(ch)) == 50) { // Above Earth
@@ -555,7 +555,8 @@ static void disp_locations(struct char_data *ch)
 ACMD(do_land)
 {
 
-  int above_planet = true, inroom = rroom_get_vnum(char_get_in_room(ch));
+  int above_planet = true;
+  room_vnum inroom = rroom_get_vnum(char_get_in_room(ch));
   skip_spaces(&argument);
 
   if (inroom != 50 && inroom != 198 && inroom != 51 && inroom != 52 && inroom != 53 && inroom != 54 && inroom != 55 && inroom != 56 && inroom != 57 && inroom != 58 && inroom != 59) {
@@ -572,10 +573,10 @@ ACMD(do_land)
     return;
   }
 
-  int landing = land_location(ch, argument);
+  room_vnum landing = land_location(ch, argument);
 
   if (landing != -1) {
-    int was_in = rroom_get_vnum(char_get_in_room(ch));
+    room_vnum was_in = rroom_get_vnum(char_get_in_room(ch));
     send_to_char(ch, "You descend through the upper atmosphere, and coming down through the clouds you land quickly on the ground below.\r\n");
     char_from_room(ch);
     char_to_room(ch, real_room(landing));
@@ -587,7 +588,7 @@ ACMD(do_land)
     act(sendback, true, ch, 0, 0, TO_ROOM);
     char_from_room(ch);
     char_to_room(ch, real_room(landing));
-    int zone = 0;
+    zone_rnum zone = 0;
     if ((zone = real_zone_by_thing(rroom_get_vnum(char_get_in_room(ch)))) != NOWHERE) {
       fly_zone(zone, "can be seen landing from space nearby!@n\r\n", ch);
     }
@@ -1495,7 +1496,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
 {
   char buf[MAX_STRING_LENGTH];
   size_t len;
-  int num                          = 0;
+  room_rnum num                    = 0;
   room_rnum other_room             = NOWHERE;
   struct room_direction_data *back = nullptr;
   struct obj_data *hatch = nullptr, *obj2 = nullptr, *next_obj, *vehicle = nullptr;
@@ -2252,7 +2253,7 @@ ACMD(do_leave)
 
 static void handle_fall(struct char_data *ch)
 {
-  int room = -1;
+  room_vnum room = -1;
   while (char_get_exit(ch, 5) && rroom_sect(char_get_in_room(ch)) == SECT_FLYING) {
     room = rroom_get_vnum(char_get_exit(ch, 5)->to_room);
     char_from_room(ch);
@@ -2321,7 +2322,7 @@ static void fly_to_space(struct char_data *ch, room_vnum space)
   }
   char_set_altitude(ch, 0);
   char_aff_set(ch, AFF_FLYING, false);
-  int zone = 0;
+  zone_rnum zone = 0;
   if ((zone = real_zone_by_thing(rroom_get_vnum(char_get_in_room(ch)))) != NOWHERE) {
     fly_zone(zone, "can be seen blasting off into space!@n\r\n", ch);
   }

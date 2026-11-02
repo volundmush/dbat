@@ -87,7 +87,7 @@ int get_number(char **name)
 }
 
 /* Search a given list for an object number, and return a ptr to that obj */
-struct obj_data *get_obj_in_list_num(int num, struct obj_data *list)
+struct obj_data *get_obj_in_list_num(obj_vnum num, struct obj_data *list)
 {
   struct obj_data *i;
 

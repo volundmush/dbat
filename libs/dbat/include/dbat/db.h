@@ -102,7 +102,9 @@ constexpr int PINDEX_NOWIZLIST  = (1 << 3); /* Player shouldn't be on wizlist*/
 
 extern struct char_data *EDRAGON;
 extern int WISH[2];
-extern int DRAGONR, DRAGONZ, DRAGONC, SHENRON;
+extern room_vnum DRAGONR;
+extern zone_rnum DRAGONZ;
+extern int DRAGONC, SHENRON;
 extern int circle_restrict;
 
 extern char *help, *ihelp, *credits, *news, *info, *wizlist, *immlist, *background;
@@ -158,7 +160,7 @@ int vnum_object(char *searchname, struct char_data *ch);
 bool my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate);
 void add_unique_id(struct obj_data *obj);
 void check_unique_id(struct obj_data *obj);
-char *sprintuniques(int low, int high);
+char *sprintuniques(obj_vnum low, obj_vnum high);
 int vnum_material(char *searchname, struct char_data *ch);
 int vnum_weapontype(char *searchname, struct char_data *ch);
 int vnum_armortype(char *searchname, struct char_data *ch);

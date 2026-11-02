@@ -1430,7 +1430,7 @@ ACMD(do_forgery)
     return;
   }
 
-  int loadn = obj_get_vnum(obj2);
+  obj_vnum loadn = obj_get_vnum(obj2);
 
   obj3 = read_object(loadn, VIRTUAL);
   add_unique_id(obj3);

@@ -140,7 +140,7 @@ void free_house(struct house_control_rec *house)
 
 /*------------------------------------------------------------------------*/
 
-static void hedit_delete_house(struct descriptor_data *d, int house_vnum)
+static void hedit_delete_house(struct descriptor_data *d, room_vnum house_vnum)
 {
   int i, j;
   room_rnum real_house;
@@ -215,7 +215,8 @@ static void hsedit_dir_menu(struct descriptor_data *d)
 {
   char buf[MAX_STRING_LENGTH];
   struct house_control_rec *house;
-  int house_rnum, newroom[12], i;
+  room_rnum house_rnum, newroom[12];
+  int i;
 
   house = OLC_HOUSE(d);
 
@@ -419,7 +420,8 @@ static void hsedit_disp_menu(struct descriptor_data *d)
 
 void hsedit_parse(struct descriptor_data *d, char *arg)
 {
-  int number = 0, id = 0, i, rnum;
+  int number = 0, id = 0, i;
+  room_rnum house, rnum;
   char *tmp;
   bool found = false;
 
@@ -603,20 +605,20 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
         send_to_char(d->character, "Invalid choice, Please select a direction (1-12, Q to quit) : ");
         return;
       }
-      id = real_room(OLC_HOUSE(d)->vnum);
-      if (!(world[id].dir_option[number])) {
+      house = real_room(OLC_HOUSE(d)->vnum);
+      if (!(world[house].dir_option[number])) {
         send_to_char(d->character, "You cannot set the atrium to a room that doesn't exist!\r\n");
         hsedit_dir_menu(d);
         return;
       }
-      if ((world[id].dir_option[number]->to_room) == NOWHERE) {
+      if ((world[house].dir_option[number]->to_room) == NOWHERE) {
         send_to_char(d->character, "You cannot set the atrium to nowhere!\r\n");
         hsedit_dir_menu(d);
         return;
       }
       OLC_HOUSE(d)->exit_num = number;
 
-      rnum                 = world[id].dir_option[number]->to_room;
+      rnum                 = world[house].dir_option[number]->to_room;
       OLC_HOUSE(d)->atrium = world[rnum].number;
       break;
 
@@ -859,7 +861,8 @@ expansion
 
 ACMD(do_oasis_hsedit)
 {
-  int number = NOWHERE, save = 0, real_num;
+  IDXTYPE number = NOWHERE;
+  int save = 0, real_num;
   struct descriptor_data *d;
   char buf1[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];

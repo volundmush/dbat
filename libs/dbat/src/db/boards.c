@@ -705,7 +705,7 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg)
   start_post(board, new_message(ch, *arg ? arg : "No Subject"), ch);
 }
 
-void board_respond(long board_vnum, struct char_data *ch, int mnum)
+void board_respond(obj_vnum board_vnum, struct char_data *ch, int mnum)
 {
   struct board_info *board;
   struct board_msg *msg, *other;
@@ -715,7 +715,7 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum)
     return;
   if (!(board = locate_board(board_vnum))) {
     send_to_char(ch, "Error: Your board could not be found. Please report.\n");
-    mud_log("Error in board_respond - board #%ld", board_vnum);
+    mud_log("Error in board_respond - board #%d", board_vnum);
     return;
   }
   if (char_get_admlevel(ch) < board->write_lvl) {

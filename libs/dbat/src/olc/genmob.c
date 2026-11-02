@@ -36,9 +36,12 @@ bool write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd);
 /* local functions */
 static void extract_mobile_all(mob_vnum vnum);
 
-int add_mobile(struct char_data *mob, mob_vnum vnum)
+mob_rnum add_mobile(struct char_data *mob, mob_vnum vnum)
 {
-  int rnum, i, found = false, shop, guild, cmd_no;
+  mob_rnum rnum, i, found = false;
+  shop_rnum shop;
+  guild_rnum guild;
+  int cmd_no;
   zone_rnum zone;
   struct char_data *live_mob;
 
@@ -141,10 +144,11 @@ static void extract_mobile_all(mob_vnum vnum)
   }
 }
 
-int delete_mobile(mob_rnum refpt)
+mob_rnum delete_mobile(mob_rnum refpt)
 {
   struct char_data *live_mob;
-  int counter, cmd_no;
+  IDXTYPE counter;
+  int cmd_no;
   mob_vnum vnum;
   zone_rnum zone;
 

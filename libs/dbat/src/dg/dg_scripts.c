@@ -50,7 +50,7 @@ void script_trigger_check(void)
   char_data *ch;
   obj_data *obj;
   struct room_data *room = nullptr;
-  int nr;
+  room_rnum nr;
   struct script_data *sc;
 
   for (ch = character_list; ch; ch = ch->next) {
@@ -91,7 +91,7 @@ void check_time_triggers(void)
   char_data *ch;
   obj_data *obj;
   struct room_data *room = nullptr;
-  int nr;
+  room_rnum nr;
   struct script_data *sc;
 
   for (ch = character_list; ch; ch = ch->next) {
@@ -405,7 +405,8 @@ static void process_attach(void *go, struct script_data *sc, trig_data *trig,
   char_data *c = nullptr;
   obj_data *o  = nullptr;
   room_data *r = nullptr;
-  long trignum, id;
+  trig_rnum trignum;
+  long id;
 
   id_p = two_arguments(cmd, arg, trignum_s);
   skip_spaces(&id_p);

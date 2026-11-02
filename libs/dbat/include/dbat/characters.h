@@ -84,7 +84,7 @@ struct player_special_data {
   // Only the character's own class in this array is used, to store PS/Practices.
   int practice_points;                   /* Practice points available to the character */
   struct txt_block *comm_hist[NUM_HIST]; /* Player's communcations history     */
-  int olc_zone;                          /* Zone where OLC is permitted		*/
+  zone_vnum olc_zone;                    /* Zone where OLC is permitted		*/
   int speaking;                          /* Language currently speaking		*/
 
   char *color_choices[NUM_COLOR]; /* Choices for custom colors		*/

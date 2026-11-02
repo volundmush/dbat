@@ -941,7 +941,8 @@ ACMD(do_metamorph)
 ACMD(do_shimmer)
 {
 
-  int skill = 0, perc = 0, location = 0;
+  int skill = 0, perc = 0;
+  room_vnum location = 0;
   int64_t cost          = 0;
   struct char_data *tar = nullptr;
 
@@ -1913,7 +1914,7 @@ ACMD(do_obstruct)
     return;
   }
   struct obj_data *obj;
-  int newroom = world[ch->in_room].dir_option[dir]->to_room;
+  room_rnum newroom = world[ch->in_room].dir_option[dir]->to_room;
 
   if (rroom_flagged(newroom, ROOM_PEACEFUL)) {
     send_to_char(ch, "You can not block off a peaceful area.\r\n");

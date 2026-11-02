@@ -91,7 +91,8 @@ ACMD(do_oasis_links)
   zone_rnum zrnum;
   zone_vnum zvnum;
   room_rnum nr, to_room;
-  int first, last, j;
+  room_vnum first, last;
+  int j;
   char arg[MAX_INPUT_LENGTH];
 
   skip_spaces(&argument);
@@ -139,7 +140,9 @@ ACMD(do_oasis_links)
  */
 static void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax)
 {
-  int i, j, bottom, top, counter = 0;
+  room_rnum i;
+  int j, counter = 0;
+  IDXTYPE bottom, top;
   /*
    * Expect a minimum / maximum number if the rnum for the zone is NOWHERE. 
    */
@@ -192,7 +195,9 @@ static void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zon
  */
 static void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum vmax)
 {
-  int i, bottom, top, counter = 0;
+  mob_rnum i;
+  IDXTYPE bottom, top;
+  int counter = 0;
 
   if (rnum != NOWHERE) {
     bottom = zone_table[rnum].bot;
@@ -229,7 +234,9 @@ static void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, z
  */
 static void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax)
 {
-  int i, bottom, top, counter = 0;
+  obj_rnum i;
+  IDXTYPE bottom, top;
+  int counter = 0;
 
   if (rnum != NOWHERE) {
     bottom = zone_table[rnum].bot;
@@ -267,7 +274,9 @@ static void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, r
  */
 static void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax)
 {
-  int i, j, bottom, top, counter = 0;
+  shop_rnum i;
+  int j, counter = 0;
+  IDXTYPE bottom, top;
 
   if (rnum != NOWHERE) {
     bottom = zone_table[rnum].bot;
@@ -314,7 +323,7 @@ static void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, sho
  */
 static void list_zones(struct char_data *ch)
 {
-  int i;
+  zone_rnum i;
 
   send_to_char(ch,
                "VNum  Zone Name                      Builder(s)\r\n"
@@ -335,10 +344,11 @@ static void list_zones(struct char_data *ch)
 void print_zone(struct char_data *ch, zone_vnum vnum)
 {
   zone_rnum rnum;
-  int size_rooms, size_objects, size_mobiles, i;
+  int size_rooms, size_objects, size_mobiles;
+  IDXTYPE i;
   int size_guilds, size_triggers, size_shops;
   room_vnum top, bottom;
-  int largest_table;
+  IDXTYPE largest_table;
   char bits[MAX_STRING_LENGTH];
 
   if ((rnum = real_zone(vnum)) == NOWHERE) {
@@ -426,7 +436,9 @@ void print_zone(struct char_data *ch, zone_vnum vnum)
 /* List code by Ronald Evers - dlanor@xs4all.nl */
 static void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vnum vmax)
 {
-  int i, bottom, top, counter = 0;
+  trig_rnum i;
+  IDXTYPE bottom, top;
+  int counter = 0;
   char trgtypes[256];
 
   /** Expect a minimum / maximum number if the rnum for the zone is NOWHERE. **/

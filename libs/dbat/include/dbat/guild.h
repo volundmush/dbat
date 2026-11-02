@@ -26,7 +26,7 @@ struct guild_data {
 };
 
 extern struct guild_data *guild_index;
-extern int top_guild;
+extern guild_rnum top_guild;
 
 ACMD(do_teach);
 

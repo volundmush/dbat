@@ -11,8 +11,8 @@ constexpr int _OASISOLC = 0x206; /* 2.0.6 */
  */
 #define OASIS_VERSION(x, y, z)	(((x) << 8 | (y) << 4 | (z))
 
-constexpr int AEDIT_PERMISSION = 999; /* arbitrary number higher than max zone vnum*/
-constexpr int HEDIT_PERMISSION = 888; /* arbitrary number higher then max zone vnum*/
+constexpr zone_vnum AEDIT_PERMISSION = 999; /* arbitrary number higher than max zone vnum*/
+constexpr zone_vnum HEDIT_PERMISSION = 888; /* arbitrary number higher then max zone vnum*/
 
 /*
  * Macros, defines, structs and globals for the OLC suite.  You will need

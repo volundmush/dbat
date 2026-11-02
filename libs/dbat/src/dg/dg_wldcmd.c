@@ -84,7 +84,8 @@ static WCMD(do_weffect)
 {
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   int num = 0;
-  room_rnum target, nr;
+  room_vnum nr;
+  room_rnum target;
 
   two_arguments(argument, arg, arg2);
 
@@ -405,7 +406,7 @@ static WCMD(do_wpurge)
 static WCMD(do_wload)
 {
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-  int number = 0;
+  IDXTYPE number = 0;
   char_data *mob;
   obj_data *object;
   char *target;

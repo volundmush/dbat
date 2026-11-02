@@ -18,7 +18,7 @@
 #include "dbat/act.informative.h"
 
 static void sedit_disp_menu(struct descriptor_data *d);
-static void sedit_setup_existing(struct descriptor_data *d, int rshop_num);
+static void sedit_setup_existing(struct descriptor_data *d, shop_rnum rshop_num);
 static void sedit_setup_new(struct descriptor_data *d);
 
 /*
@@ -30,7 +30,7 @@ static void sedit_save_internally(struct descriptor_data *d)
   add_shop(OLC_SHOP(d));
 }
 
-static void sedit_save_to_disk(int num)
+static void sedit_save_to_disk(zone_rnum num)
 {
   save_shops(num);
 }
@@ -41,7 +41,8 @@ static void sedit_save_to_disk(int num)
 
 ACMD(do_oasis_sedit)
 {
-  int number = NOWHERE, save = 0;
+  IDXTYPE number = NOWHERE;
+  int save       = 0;
   shop_rnum real_num;
   struct descriptor_data *d;
   char buf1[MAX_INPUT_LENGTH];
@@ -231,7 +232,7 @@ static void sedit_setup_new(struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-static void sedit_setup_existing(struct descriptor_data *d, int rshop_num)
+static void sedit_setup_existing(struct descriptor_data *d, shop_rnum rshop_num)
 {
   /*
    * Create a scratch shop structure.
@@ -475,7 +476,7 @@ static void sedit_set_message(struct descriptor_data *d, char **msg, char *arg, 
 
 void sedit_parse(struct descriptor_data *d, char *arg)
 {
-  int i;
+  IDXTYPE i;
 
   if (OLC_MODE(d) > SEDIT_NUMERICAL_RESPONSE) {
     if (!isdigit(arg[0]) && ((*arg == '-') && (!isdigit(arg[1])))) {

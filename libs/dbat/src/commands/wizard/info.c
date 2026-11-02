@@ -69,7 +69,8 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum);
 /* do_finddoor, finds the door(s) that a key goes to */
 ACMD(do_finddoor)
 {
-  int d, vnum = NOTHING, num = 0;
+  int d, num = 0;
+  obj_vnum vnum = NOTHING;
   size_t len;
   int nlen;
   room_rnum i;
@@ -1016,7 +1017,8 @@ static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int l
   size_t tmp;
 
   if (listall) {
-    int i, j, k, l, m, n, o;
+    IDXTYPE i;
+    int j, k, l, m, n, o;
 
     tmp = snprintf(bufptr, left,
                    "%3d %-30.30s By: %-10.10s Age: %3d; Reset: %3d (%1d); Range: %5d-%5d\r\n",
@@ -1068,12 +1070,13 @@ static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int l
 
 ACMD(do_show)
 {
-  int i, j, k, l, con; /* i, j, k to specifics? */
+  room_rnum i;
+  int j, k, l, con; /* i, j, k to specifics? */
   size_t len;
   int nlen;
   zone_rnum zrn;
   zone_vnum zvn;
-  int low, high;
+  obj_vnum low, high;
   int8_t self            = false;
   struct char_data *vict = nullptr;
   struct obj_data *obj;
@@ -1626,7 +1629,8 @@ ACMD(do_zcheck)
   room_vnum exroom      = 0;
   int ac                = 0;
   int affs              = 0, tohit, todam, value;
-  int i = 0, j = 0, k = 0, l = 0, m = 0, found = 0; /* found is used as a 'send now' flag*/
+  IDXTYPE i             = 0;
+  int j = 0, k = 0, l = 0, m = 0, found = 0; /* found is used as a 'send now' flag*/
   char buf[MAX_STRING_LENGTH];
   float avg_dam;
   size_t len = 0;
@@ -2215,7 +2219,8 @@ ACMD(do_checkloadstatus)
 /* do_findkey, finds where the key to a door loads to using do_checkloadstatus() */
 ACMD(do_findkey)
 {
-  int dir, key;
+  int dir;
+  obj_vnum key;
   char arg[MAX_INPUT_LENGTH];
   char buf[MAX_STRING_LENGTH];
 

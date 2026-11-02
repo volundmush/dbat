@@ -21,8 +21,8 @@ static void zedit_disp_arg2(struct descriptor_data *d);
 static void zedit_disp_arg5(struct descriptor_data *d);
 static void zedit_disp_menu(struct descriptor_data *d);
 static void zedit_new_zone(struct char_data *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top);
-static void zedit_save_to_disk(int zone);
-static void zedit_setup(struct descriptor_data *d, int room_num);
+static void zedit_save_to_disk(zone_rnum zone);
+static void zedit_setup(struct descriptor_data *d, room_rnum room_num);
 
 /*
  * Nasty internal macros to clean up the code.
@@ -37,7 +37,9 @@ static bool start_change_command(struct descriptor_data *d, int pos);
 
 ACMD(do_oasis_zedit)
 {
-  int number = NOWHERE, save = 0, real_num;
+  IDXTYPE number = NOWHERE;
+  int save       = 0;
+  room_rnum real_num;
   struct descriptor_data *d;
   char *buf3;
   char buf1[MAX_STRING_LENGTH];
@@ -212,10 +214,11 @@ ACMD(do_oasis_zedit)
          char_get_name(ch), zone_table[OLC_ZNUM(d)].number, char_get_olc_zone(ch));
 }
 
-static void zedit_setup(struct descriptor_data *d, int room_num)
+static void zedit_setup(struct descriptor_data *d, room_rnum room_num)
 {
   struct zone_data *zone;
-  int subcmd = 0, count = 0, cmd_room = NOWHERE;
+  int subcmd = 0, count = 0;
+  room_rnum cmd_room = NOWHERE;
 
   /*
    * Allocate one scratch zone structure.  
@@ -303,7 +306,7 @@ static void zedit_disp_flag_menu(struct descriptor_data *d)
  */
 static void zedit_new_zone(struct char_data *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top)
 {
-  int result;
+  zone_rnum result;
   const char *error;
   struct descriptor_data *dsc;
 
@@ -421,7 +424,7 @@ static void zedit_save_internally(struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-static void zedit_save_to_disk(int zone)
+static void zedit_save_to_disk(zone_rnum zone)
 {
   save_zone(zone);
 }
@@ -811,7 +814,9 @@ static void zedit_disp_arg5(struct descriptor_data *d)
 
 void zedit_parse(struct descriptor_data *d, char *arg)
 {
-  int pos, i = 0;
+  int pos;
+  IDXTYPE rnum;
+  int i = 0;
   int number;
 
   switch (OLC_MODE(d)) {
@@ -1092,8 +1097,8 @@ void zedit_parse(struct descriptor_data *d, char *arg)
       }
       switch (OLC_CMD(d).command) {
         case 'M':
-          if ((pos = real_mobile(atoi(arg))) != NOBODY) {
-            OLC_CMD(d).arg1 = pos;
+          if ((rnum = real_mobile(atoi(arg))) != NOBODY) {
+            OLC_CMD(d).arg1 = rnum;
             zedit_disp_arg2(d);
           } else
             write_to_output(d, "That mobile does not exist, try again : ");
@@ -1102,8 +1107,8 @@ void zedit_parse(struct descriptor_data *d, char *arg)
         case 'P':
         case 'E':
         case 'G':
-          if ((pos = real_object(atoi(arg))) != NOTHING) {
-            OLC_CMD(d).arg1 = pos;
+          if ((rnum = real_object(atoi(arg))) != NOTHING) {
+            OLC_CMD(d).arg1 = rnum;
             zedit_disp_arg2(d);
           } else
             write_to_output(d, "That object does not exist, try again : ");
@@ -1182,8 +1187,8 @@ void zedit_parse(struct descriptor_data *d, char *arg)
           }
           break;
         case 'R':
-          if ((pos = real_object(atoi(arg))) != NOTHING) {
-            OLC_CMD(d).arg2 = pos;
+          if ((rnum = real_object(atoi(arg))) != NOTHING) {
+            OLC_CMD(d).arg2 = rnum;
             zedit_disp_menu(d);
           } else
             write_to_output(d, "That object does not exist, try again : ");
@@ -1225,8 +1230,8 @@ void zedit_parse(struct descriptor_data *d, char *arg)
           }
           break;
         case 'P':
-          if ((pos = real_object(atoi(arg))) != NOTHING) {
-            OLC_CMD(d).arg3 = pos;
+          if ((rnum = real_object(atoi(arg))) != NOTHING) {
+            OLC_CMD(d).arg3 = rnum;
             zedit_disp_arg5(d);
           } else
             write_to_output(d, "That object does not exist, try again : ");

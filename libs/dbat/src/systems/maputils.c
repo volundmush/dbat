@@ -16,7 +16,7 @@
 
 room_vnum mapnums[MAP_ROWS + 1][MAP_COLS + 1];
 
-static void ping_ship(int vnum, int vnum2)
+static void ping_ship(obj_vnum vnum, obj_vnum vnum2)
 {
 
   struct char_data *tch, *next_ch;
@@ -45,7 +45,7 @@ static void ping_ship(int vnum, int vnum2)
   }
 }
 
-static int checkship(int rnum, int vnum)
+static int checkship(room_rnum rnum, obj_vnum vnum)
 {
   struct obj_data *i = nullptr;
   int there          = false;
@@ -64,7 +64,7 @@ static int checkship(int rnum, int vnum)
   return there;
 }
 
-static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
+static char *getmapchar(room_rnum rnum, struct char_data *ch, room_rnum start, obj_vnum vnum)
 {
   static char mapchar[50];
   int there = false, enemy = false;
@@ -257,7 +257,7 @@ static char *getmapchar(int rnum, struct char_data *ch, int start, int vnum)
   return mapchar;
 }
 
-static MapStruct findcoord(int rnum)
+static MapStruct findcoord(room_rnum rnum)
 {
   int x, y;
   MapStruct coords;
@@ -279,7 +279,7 @@ static MapStruct findcoord(int rnum)
   return coords;
 }
 
-void printmap(int rnum, struct char_data *ch, int type, int vnum)
+void printmap(room_rnum rnum, struct char_data *ch, int type, obj_vnum vnum)
 {
   int x = 0, lasty = -1;
   int y = 0;
@@ -289,7 +289,7 @@ void printmap(int rnum, struct char_data *ch, int type, int vnum)
   char buf2[512];
   MapStruct coord;
 
-  int start = rnum;
+  room_rnum start = rnum;
 
   coord = findcoord(rnum);
   strcpy(buf, "\n");
@@ -404,7 +404,7 @@ void update_space(void)
 {
   FILE *mapfile;
   int rowcounter, colcounter;
-  int vnum_read;
+  room_vnum vnum_read;
 
   mud_log("Updated Space Map. ");
 

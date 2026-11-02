@@ -333,7 +333,7 @@ void fish_update(void)
 static void catch_fish(struct char_data *ch, int quality)
 {
   struct obj_data *fish = nullptr;
-  int num               = 1000;
+  obj_vnum num          = 1000;
 
   if (rroom_flagged(char_get_in_room(ch), ROOM_FISHFRESH)) {
     if (rroom_flagged(char_get_in_room(ch), ROOM_EARTH)) {

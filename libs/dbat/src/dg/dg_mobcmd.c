@@ -355,7 +355,7 @@ ACMD(do_mecho)
 
 ACMD(do_mzoneecho)
 {
-  int zone;
+  zone_rnum zone;
   char room_number[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
 
   if (!mob_cmd_allowed(ch, true))
@@ -383,7 +383,7 @@ ACMD(do_mzoneecho)
 ACMD(do_mload)
 {
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-  int number = 0;
+  IDXTYPE number = 0;
   char_data *mob;
   obj_data *object;
   char *target;

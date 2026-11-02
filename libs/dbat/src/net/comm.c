@@ -133,8 +133,8 @@ static void copyover_recover()
   bool fOld;
   char name[128];
   char username[100];
-  int saved_loadroom = NOWHERE;
-  int set_loadroom   = NOWHERE;
+  room_vnum saved_loadroom = NOWHERE;
+  room_vnum set_loadroom   = NOWHERE;
 
   mud_log("Copyover recovery initiated");
   PCOUNTDAY = time(0) + 60;
@@ -237,7 +237,7 @@ void init_game(uint16_t cmport)
 
   FILE *mapfile;
   int rowcounter, colcounter;
-  int vnum_read;
+  room_vnum vnum_read;
 
   mud_log("Signal trapping.");
   signal_setup();
@@ -2683,7 +2683,8 @@ int arena_watch(struct char_data *ch)
 {
 
   struct descriptor_data *d;
-  int found = false, room = NOWHERE;
+  int found      = false;
+  room_vnum room = NOWHERE;
 
   for (d = descriptor_list; d; d = d->next) {
     if (desc_get_connected(d) != CON_PLAYING)
@@ -3194,7 +3195,7 @@ void send_to_range(room_vnum start, room_vnum finish, const char *messg, ...)
 {
   struct char_data *i;
   va_list args;
-  int j;
+  room_rnum j;
 
   if (start > finish) {
     mud_log("send_to_range passed start room value greater then finish.");

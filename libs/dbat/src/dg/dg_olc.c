@@ -26,7 +26,7 @@
 #include "dbat/atomicfile.h"
 
 static void trigedit_save(struct descriptor_data *d);
-static void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num);
+static void trigedit_setup_existing(struct descriptor_data *d, trig_rnum rtrg_num);
 static void trigedit_setup_new(struct descriptor_data *d);
 
 /* local functions */
@@ -39,7 +39,8 @@ static void trigedit_disp_types(struct descriptor_data *d);
 
 ACMD(do_oasis_trigedit)
 {
-  int number, real_num;
+  IDXTYPE number;
+  trig_rnum real_num;
   struct descriptor_data *d;
 
   /*
@@ -168,7 +169,7 @@ static void trigedit_setup_new(struct descriptor_data *d)
   OLC_VAL(d)  = 0; /* Has changed flag. (It hasn't so far, we just made it.) */
 }
 
-static void trigedit_setup_existing(struct descriptor_data *d, int rtrg_num)
+static void trigedit_setup_existing(struct descriptor_data *d, trig_rnum rtrg_num)
 {
   struct trig_data *trig;
   struct cmdlist_element *c;
@@ -272,6 +273,7 @@ static void trigedit_disp_types(struct descriptor_data *d)
 void trigedit_parse(struct descriptor_data *d, char *arg)
 {
   int i = 0;
+  trig_rnum rnum;
 
   switch (OLC_MODE(d)) {
     case TRIGEDIT_MAIN_MENU:
@@ -399,8 +401,8 @@ void trigedit_parse(struct descriptor_data *d, char *arg)
       break;
 
     case TRIGEDIT_COPY:
-      if ((i = real_trigger(atoi(arg))) != NOTHING) {
-        trigedit_setup_existing(d, i);
+      if ((rnum = real_trigger(atoi(arg))) != NOTHING) {
+        trigedit_setup_existing(d, rnum);
       } else
         write_to_output(d, "That trigger does not exist.\r\n");
       break;
@@ -499,7 +501,7 @@ static void trigedit_replace_existing(struct descriptor_data *d, trig_rnum rnum)
 /* Inserts the edited trigger into trig_index in vnum order, renumbering everything after it. */
 static void trigedit_insert_new(struct descriptor_data *d)
 {
-  int i;
+  trig_rnum i;
   trig_rnum rnum = NOTHING;
   int found      = 0;
   trig_data *proto;
@@ -578,12 +580,13 @@ static void trigedit_insert_new(struct descriptor_data *d)
  */
 static void trigedit_write_zone_file(struct descriptor_data *d)
 {
-  int i;
+  IDXTYPE i;
   trig_rnum rnum;
   trig_data *trig;
   struct cmdlist_element *cmd;
   FILE *trig_file;
-  int zone, top;
+  zone_vnum zone;
+  room_vnum top;
   char bitBuf[MAX_INPUT_LENGTH];
   struct atomic_file af;
   char fname[MAX_INPUT_LENGTH];
@@ -713,7 +716,8 @@ void dg_script_menu(struct descriptor_data *d)
 bool dg_script_edit_parse(struct descriptor_data *d, char *arg)
 {
   struct trig_proto_list *trig, *currtrig;
-  int count, pos, vnum;
+  int count, pos;
+  trig_vnum vnum;
 
   switch (OLC_SCRIPT_EDIT_MODE(d)) {
     case SCRIPT_MAIN_MENU:

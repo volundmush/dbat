@@ -124,11 +124,11 @@ const char *gedit_modify_string(char **str, char *new_g)
 
 /*-------------------------------------------------------------------*/
 
-int add_guild(struct guild_data *ngld)
+guild_rnum add_guild(struct guild_data *ngld)
 {
   guild_rnum rguild;
-  int found       = 0;
-  zone_rnum rznum = real_zone_by_thing(guild_get_vnum(ngld));
+  guild_rnum found = 0;
+  zone_rnum rznum  = real_zone_by_thing(guild_get_vnum(ngld));
 
   /*
    * The guild already exists, just update it.
@@ -174,7 +174,9 @@ int add_guild(struct guild_data *ngld)
 bool save_guilds(zone_rnum zone_num)
 {
   struct atomic_file af;
-  int i, j, rguild;
+  IDXTYPE i;
+  int j;
+  guild_rnum rguild;
   FILE *guild_file;
   char fname[64];
   struct guild_data *guild;

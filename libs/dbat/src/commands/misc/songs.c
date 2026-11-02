@@ -88,7 +88,7 @@ static void resolve_song(struct char_data *ch)
   struct obj_data *obj2 = nullptr, *next_obj;
   int diceroll          = axion_dice(0);
   int skill             = char_get_skill(ch, SKILL_MYSTICMUSIC);
-  int instrument        = 0;
+  obj_vnum instrument   = 0;
 
   char buf[MAX_INPUT_LENGTH];
 
@@ -419,7 +419,7 @@ ACMD(do_song)
   }
 
   struct obj_data *obj2 = nullptr, *next_obj;
-  int instrument        = 0;
+  obj_vnum instrument   = 0;
 
   for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
     next_obj = obj2->next_content;

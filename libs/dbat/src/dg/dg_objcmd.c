@@ -94,7 +94,7 @@ room_rnum obj_room(obj_data *obj)
 /* returns the real room number, or NOWHERE if not found or invalid */
 static room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr)
 {
-  int tmp;
+  room_vnum tmp;
   room_rnum location;
   char_data *target_mob;
   obj_data *target_obj;
@@ -136,7 +136,7 @@ static room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr)
 
 static OCMD(do_oecho)
 {
-  int room;
+  room_rnum room;
 
   skip_spaces(&argument);
 
@@ -157,7 +157,7 @@ static OCMD(do_oecho)
 static OCMD(do_oforce)
 {
   char_data *ch, *next_ch;
-  int room;
+  room_rnum room;
   char arg1[MAX_INPUT_LENGTH], *line;
 
   line = one_argument(argument, arg1);
@@ -194,7 +194,7 @@ static OCMD(do_oforce)
 
 static OCMD(do_ozoneecho)
 {
-  int zone;
+  zone_rnum zone;
   char room_number[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
 
   msg = any_one_arg(argument, room_number);
@@ -343,7 +343,7 @@ static OCMD(do_opurge)
   char arg[MAX_INPUT_LENGTH];
   char_data *ch, *next_ch;
   obj_data *o, *next_obj;
-  int rm;
+  room_rnum rm;
 
   one_argument(argument, arg);
 
@@ -464,7 +464,8 @@ static OCMD(do_oteleport)
 static OCMD(do_dgoload)
 {
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-  int number = 0, room;
+  IDXTYPE number = 0;
+  room_rnum room;
   char_data *mob;
   obj_data *object;
   char *target;

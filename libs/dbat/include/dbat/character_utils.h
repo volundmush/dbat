@@ -67,7 +67,7 @@ void char_set_poofin(struct char_data *ch, char *v);
 char *char_get_poofout(const struct char_data *ch);
 void char_set_poofout(struct char_data *ch, char *v);
 int char_get_olc_zone(const struct char_data *ch);
-void char_set_olc_zone(struct char_data *ch, int v);
+void char_set_olc_zone(struct char_data *ch, zone_vnum v);
 struct alias_data *char_get_aliases(const struct char_data *ch);
 void char_set_aliases(struct char_data *ch, struct alias_data *v);
 int32_t char_get_last_tell(const struct char_data *ch);

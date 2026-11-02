@@ -639,8 +639,8 @@ ACMD(do_pack)
       packed = read_object(19085, VIRTUAL);
       obj_to_room(packed, char_get_in_room(ch));
     } else {
-      int fnum = obj_get_vnum(obj) - 10;
-      packed   = read_object(fnum, VIRTUAL);
+      obj_vnum fnum = obj_get_vnum(obj) - 10;
+      packed        = read_object(fnum, VIRTUAL);
       extract_obj(obj);
       obj_to_room(packed, char_get_in_room(ch));
     }
@@ -661,7 +661,8 @@ ACMD(do_pack)
     }
     act("@CYou push a hidden button on $p@C and a cloud of smoke erupts and covers it. As the smoke clears a pile of money can be seen on the ground!@n", true, ch, obj, 0, TO_CHAR);
     act("@c$n@C pushes a hidden button on $p@C and a cloud of smokes erupts and covers it. As the smoke clears a pile of money can be seen on the ground!@n", true, ch, obj, 0, TO_ROOM);
-    int money = 0, count = 0, rnum = obj_get_vnum(obj);
+    int money = 0, count = 0;
+    IDXTYPE rnum = obj_get_vnum(obj);
     if (obj_get_vnum(obj) >= 18800 && obj_get_vnum(obj) <= 18899) {
       if (rnum == 18802) {
         rnum = 18800;
@@ -822,7 +823,7 @@ ACMD(do_deploy)
   }
 
   if (furniture == true) {
-    int fnum = 0;
+    obj_vnum fnum = 0;
     if (obj_get_vnum(obj) == 19080) {
       fnum = 19090;
     } else if (obj_get_vnum(obj) == 19081) {
@@ -846,7 +847,8 @@ ACMD(do_deploy)
     return;
   }
 
-  int rnum = 18800, giveup = false, cont = false, found = false, type = 0;
+  room_vnum rnum = 18800;
+  int giveup = false, cont = false, found = false, type = 0;
 
   if (obj_get_vnum(obj) == 4) {
     type = 0;
@@ -858,7 +860,7 @@ ACMD(do_deploy)
     type = 2;
   }
 
-  int final = rnum + 99;
+  room_vnum final = rnum + 99;
 
   while (giveup == false && cont == false) {
     for (obj3 = world[real_room(rnum)].contents; obj3; obj3 = next_obj) {
@@ -1494,7 +1496,7 @@ static void auc_send_to_all(const char *messg, bool buyer)
 
 ACMD(do_assemble)
 {
-  long lVnum               = NOTHING;
+  obj_vnum lVnum           = NOTHING;
   struct obj_data *pObject = nullptr;
   char text[MAX_STRING_LENGTH];
 

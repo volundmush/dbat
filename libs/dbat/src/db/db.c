@@ -118,22 +118,22 @@ static void mob_stats(struct char_data *mob);
 static void dragon_level(struct char_data *ch);
 static int check_object_spell_number(struct obj_data *obj, int val);
 static int check_object_level(struct obj_data *obj, int val);
-static void setup_dir(FILE *fl, int room, int dir);
+static void setup_dir(FILE *fl, room_rnum room, int dir);
 static void discrete_load(FILE *fl, int mode, char *filename);
 static int check_object(struct obj_data *);
-static void parse_room(FILE *fl, int virtual_nr);
-static void parse_mobile(FILE *mob_f, int nr);
-static char *parse_object(FILE *obj_f, int nr);
+static void parse_room(FILE *fl, room_vnum virtual_nr);
+static void parse_mobile(FILE *mob_f, mob_vnum nr);
+static char *parse_object(FILE *obj_f, IDXTYPE nr);
 static void load_zones(FILE *fl, char *zonename);
 static int file_to_string(const char *name, char *buf);
 static int file_to_string_alloc(const char *name, char **buf);
 static int count_alias_records(FILE *fl);
 static int count_hash_records(FILE *fl);
 static bitvector_t asciiflag_conv_aff(char *flag);
-static bool parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr);
-static void interpret_espec(const char *keyword, const char *value, struct char_data *ch, int nr);
-static void parse_espec(char *buf, struct char_data *ch, int nr);
-static bool parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr);
+static bool parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr);
+static void interpret_espec(const char *keyword, const char *value, struct char_data *ch, mob_vnum nr);
+static void parse_espec(char *buf, struct char_data *ch, mob_vnum nr);
+static bool parse_enhanced_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr);
 static void get_one_line(FILE *fl, char *buf);
 static void check_start_rooms(void);
 static void renum_world(void);
@@ -1262,7 +1262,7 @@ void index_boot(int mode)
 
 static void discrete_load(FILE *fl, int mode, char *filename)
 {
-  int nr = -1, last;
+  IDXTYPE nr = -1, last;
   char line[READ_SIZE];
 
   const char *modes[] = {"world", "mob", "obj", "ZON", "SHP", "HLP", "trg"};
@@ -1388,9 +1388,10 @@ static bitvector_t asciiflag_conv_aff(char *flag)
   return (flags);
 }
 /* load the rooms */
-static void parse_room(FILE *fl, int virtual_nr)
+static void parse_room(FILE *fl, room_vnum virtual_nr)
 {
-  static int room_nr = 0, zone = 0;
+  static room_rnum room_nr = 0;
+  static zone_rnum zone    = 0;
   int t[10], i, retval;
   char line[READ_SIZE], flags[128], flags2[128], flags3[128];
   char flags4[128], buf2[MAX_STRING_LENGTH], buf[128];
@@ -1546,7 +1547,7 @@ static void parse_room(FILE *fl, int virtual_nr)
 }
 
 /* read direction data */
-static void setup_dir(FILE *fl, int room, int dir)
+static void setup_dir(FILE *fl, room_rnum room, int dir)
 {
   int t[11], retval;
   char line[READ_SIZE], buf2[128];
@@ -1655,7 +1656,8 @@ static void check_start_rooms(void)
 /* resolve all vnums into rnums in the world */
 static void renum_world(void)
 {
-  int room, door;
+  room_rnum room;
+  int door;
 
   for (room = 0; room <= top_of_world; room++)
     for (door = 0; door < NUM_OF_DIRS; door++)
@@ -1750,7 +1752,7 @@ static void mob_autobalance(struct char_data *ch)
   char_set_mob_specials_damsizedice(ch, 0);
 }
 
-static bool parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
+static bool parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr)
 {
   int t[10];
   char line[READ_SIZE];
@@ -1871,7 +1873,7 @@ static bool parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
 #define RANGE(low, high) \
   (num_arg = MAX((low), MIN((high), (num_arg))))
 
-static void interpret_espec(const char *keyword, const char *value, struct char_data *ch, int nr)
+static void interpret_espec(const char *keyword, const char *value, struct char_data *ch, mob_vnum nr)
 {
   int num_arg = 0, matched = false;
   int num, num2, num3, num4, num5, num6;
@@ -2033,7 +2035,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 #undef BOOL_CASE
 #undef RANGE
 
-static void parse_espec(char *buf, struct char_data *ch, int nr)
+static void parse_espec(char *buf, struct char_data *ch, mob_vnum nr)
 {
   char *ptr;
 
@@ -2045,7 +2047,7 @@ static void parse_espec(char *buf, struct char_data *ch, int nr)
   interpret_espec(buf, ptr, ch, nr);
 }
 
-static bool parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr)
+static bool parse_enhanced_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr)
 {
   char line[READ_SIZE];
 
@@ -2215,9 +2217,9 @@ static bool parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
   return true;
 }
 
-static void parse_mobile(FILE *mob_f, int nr)
+static void parse_mobile(FILE *mob_f, mob_vnum nr)
 {
-  static int i = 0;
+  static mob_rnum i = 0;
 
   mob_index[i].vnum   = nr;
   mob_index[i].number = 0;
@@ -2236,9 +2238,9 @@ static void parse_mobile(FILE *mob_f, int nr)
 }
 
 /* read all objects from obj file; generate index and prototypes */
-static char *parse_object(FILE *obj_f, int nr)
+static char *parse_object(FILE *obj_f, IDXTYPE nr)
 {
-  static int i = 0;
+  static obj_rnum i = 0;
   static char line[READ_SIZE];
   int t[NUM_OBJ_VAL_POSITIONS + 2], j, retval;
   char *tmpptr, buf2[128];
@@ -2802,7 +2804,8 @@ static int hsort(const void *a, const void *b)
 
 int vnum_mobile(char *searchname, struct char_data *ch)
 {
-  int nr, found = 0;
+  mob_rnum nr;
+  int found = 0;
 
   for (nr = 0; nr <= top_of_mobt; nr++)
     if (isname(searchname, mob_proto[nr].name))
@@ -2815,7 +2818,8 @@ int vnum_mobile(char *searchname, struct char_data *ch)
 
 int vnum_object(char *searchname, struct char_data *ch)
 {
-  int nr, found = 0;
+  obj_rnum nr;
+  int found = 0;
 
   for (nr = 0; nr <= top_of_objt; nr++)
     if (isname(searchname, obj_proto[nr].name))
@@ -2828,7 +2832,8 @@ int vnum_object(char *searchname, struct char_data *ch)
 
 int vnum_material(char *searchname, struct char_data *ch)
 {
-  int nr, found = 0;
+  obj_rnum nr;
+  int found = 0;
 
   for (nr = 0; nr <= top_of_objt; nr++)
     if (isname(searchname, material_names[obj_proto[nr].value[VAL_ALL_MATERIAL]])) {
@@ -2842,7 +2847,8 @@ int vnum_material(char *searchname, struct char_data *ch)
 
 int vnum_weapontype(char *searchname, struct char_data *ch)
 {
-  int nr, found = 0;
+  obj_rnum nr;
+  int found = 0;
 
   for (nr = 0; nr <= top_of_objt; nr++)
     if (obj_proto[nr].type_flag == ITEM_WEAPON) {
@@ -2858,7 +2864,8 @@ int vnum_weapontype(char *searchname, struct char_data *ch)
 
 int vnum_armortype(char *searchname, struct char_data *ch)
 {
-  int nr, found = 0;
+  obj_rnum nr;
+  int found = 0;
 
   for (nr = 0; nr <= top_of_objt; nr++)
     if (obj_proto[nr].type_flag == ITEM_ARMOR) {
@@ -3579,7 +3586,7 @@ void check_unique_id(struct obj_data *obj)
   }
 }
 
-char *sprintuniques(int low, int high)
+char *sprintuniques(obj_vnum low, obj_vnum high)
 {
   int i, count = 0, remain, header;
   struct obj_unique_hash_elem *q;
@@ -3702,7 +3709,7 @@ constexpr int ZO_DEAD = 999;
 /* update zone ages, queue for reset if necessary, and dequeue when possible */
 void zone_update(void)
 {
-  int i;
+  zone_rnum i;
   struct reset_q_element *update_u, *temp;
   static int timer = 0;
 
@@ -4215,6 +4222,7 @@ static void free_followers(struct follow_type *k)
 void free_char(struct char_data *ch)
 {
   int i;
+  mob_rnum nr;
   struct alias_data *a;
 
   if (ch->player_specials) {
@@ -4259,20 +4267,20 @@ void free_char(struct char_data *ch)
     /* free script proto list */
     free_proto_script(ch, MOB_TRIGGER);
 
-  } else if ((i = char_get_nr(ch)) != NOBODY) {
+  } else if ((nr = char_get_nr(ch)) != NOBODY) {
     /* otherwise, free strings only if the string is not pointing at proto */
-    if (ch->name && ch->name != mob_proto[i].name)
+    if (ch->name && ch->name != mob_proto[nr].name)
       free(ch->name);
-    if (ch->title && ch->title != mob_proto[i].title)
+    if (ch->title && ch->title != mob_proto[nr].title)
       free(ch->title);
-    if (ch->short_descr && ch->short_descr != mob_proto[i].short_descr)
+    if (ch->short_descr && ch->short_descr != mob_proto[nr].short_descr)
       free(ch->short_descr);
-    if (ch->long_descr && ch->long_descr != mob_proto[i].long_descr)
+    if (ch->long_descr && ch->long_descr != mob_proto[nr].long_descr)
       free(ch->long_descr);
-    if (ch->description && ch->description != mob_proto[i].description)
+    if (ch->description && ch->description != mob_proto[nr].description)
       free(ch->description);
     /* free script proto list if it's not the prototype */
-    if (ch->proto_script && ch->proto_script != mob_proto[i].proto_script)
+    if (ch->proto_script && ch->proto_script != mob_proto[nr].proto_script)
       free_proto_script(ch, MOB_TRIGGER);
   }
   while (ch->affected)

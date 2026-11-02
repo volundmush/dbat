@@ -24,7 +24,7 @@ static bool copy_object_main(struct obj_data *to, struct obj_data *from, int fre
 
 obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum)
 {
-  int found       = NOTHING;
+  obj_rnum found  = NOTHING;
   zone_rnum rznum = real_zone_by_thing(ovnum);
 
   /*
@@ -89,7 +89,9 @@ static int update_objects(struct obj_data *refobj)
  */
 static obj_rnum adjust_objects(obj_rnum refpt)
 {
-  int shop, i, zone, cmd_no;
+  shop_rnum shop;
+  int i, cmd_no;
+  zone_rnum zone;
   struct obj_data *obj;
 
   if (refpt < 0 || refpt > top_of_objt)
@@ -198,7 +200,9 @@ bool save_objects(zone_rnum zone_num)
   char wbuf3[MAX_STRING_LENGTH], wbuf4[MAX_STRING_LENGTH];
   char pbuf1[MAX_STRING_LENGTH], pbuf2[MAX_STRING_LENGTH];
   char pbuf3[MAX_STRING_LENGTH], pbuf4[MAX_STRING_LENGTH];
-  int counter, counter2, realcounter;
+  IDXTYPE counter;
+  int counter2;
+  obj_rnum realcounter;
   struct atomic_file af;
   FILE *fp;
   struct obj_data *obj;
@@ -374,7 +378,7 @@ void free_object_strings(struct obj_data *obj)
  */
 void free_object_strings_proto(struct obj_data *obj)
 {
-  int robj_num = obj_get_item_number(obj);
+  obj_rnum robj_num = obj_get_item_number(obj);
 
   if (obj->name && obj->name != obj_proto[robj_num].name)
     free(obj->name);
@@ -438,12 +442,14 @@ static bool copy_object_main(struct obj_data *to, struct obj_data *from, int fre
   return true;
 }
 
-int delete_object(obj_rnum rnum)
+obj_rnum delete_object(obj_rnum rnum)
 {
   obj_rnum i;
   zone_rnum zrnum;
   struct obj_data *obj, *tmp;
-  int shop, j, zone, cmd_no;
+  shop_rnum shop;
+  int j, cmd_no;
+  zone_rnum zone;
 
   if (rnum == NOTHING || rnum > top_of_objt)
     return NOTHING;

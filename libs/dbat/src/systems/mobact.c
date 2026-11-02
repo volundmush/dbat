@@ -319,7 +319,8 @@ void mobile_activity(void)
 
       if (diff > 86400) {
         struct obj_data *sobj, *next_obj;
-        int shop_nr, shopnr = -1;
+        shop_rnum shop_nr;
+        shop_rnum shopnr = -1;
 
         char_set_lastpl(ch, time(0));
         for (shop_nr = 0; shop_nr <= top_shop; shop_nr++) {
@@ -391,7 +392,7 @@ void mobile_activity(void)
     /* Add new mobile actions here */
 
     if (char_is_kabito(ch)) {
-      int shop_nr;
+      shop_rnum shop_nr;
       found = false;
       /* Is there a shopkeeper around? */
       for (vict = world[char_get_in_room(ch)].people; vict && !found; vict = vict->next_in_room) {

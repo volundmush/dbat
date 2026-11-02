@@ -100,7 +100,7 @@ constexpr int MOB_ID_MAX          = INT32_MAX;
 constexpr int LEGACY_MOB_ID_BASE = 50000;
 
 /* unless you change this, Puff casts all your dg spells */
-constexpr int DG_CASTER_PROXY = 1;
+constexpr mob_vnum DG_CASTER_PROXY = 1;
 /* spells cast by objects and rooms use this level */
 constexpr int DG_SPELL_LEVEL = 25;
 

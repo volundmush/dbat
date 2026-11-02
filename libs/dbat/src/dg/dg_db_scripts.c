@@ -123,7 +123,7 @@ int dg_lint_trigger(const trig_data *trig, struct descriptor_data *d)
   return warnings;
 }
 
-void parse_trigger(FILE *trig_f, int nr)
+void parse_trigger(FILE *trig_f, trig_vnum nr)
 {
   int t[2], k, attach_type;
   char line[256], *cmds, *s, flags[256], errors[MAX_INPUT_LENGTH];
@@ -175,7 +175,7 @@ void parse_trigger(FILE *trig_f, int nr)
  * create a new trigger from a prototype.
  * nr is the real number of the trigger.
  */
-trig_data *read_trigger(int nr)
+trig_data *read_trigger(trig_rnum nr)
 {
   index_data *t_index;
   trig_data *trig;
@@ -234,7 +234,9 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
 {
   char line[READ_SIZE];
   char junk[8];
-  int vnum, rnum, count;
+  trig_vnum vnum;
+  trig_rnum rnum;
+  int count;
   char_data *mob;
   room_data *room;
   struct trig_proto_list *trg_proto, *new_trg;
@@ -314,7 +316,9 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
 void dg_obj_trigger(char *line, struct obj_data *obj)
 {
   char junk[8];
-  int vnum, rnum, count;
+  trig_vnum vnum;
+  trig_rnum rnum;
+  int count;
   struct trig_proto_list *trg_proto, *new_trg;
 
   count = sscanf(line, "%s %d", junk, &vnum);
@@ -350,7 +354,7 @@ void assign_triggers(void *i, int type)
   struct char_data *mob  = nullptr;
   struct obj_data *obj   = nullptr;
   struct room_data *room = nullptr;
-  int rnum;
+  trig_rnum rnum;
   struct trig_proto_list *trg_proto;
 
   switch (type) {

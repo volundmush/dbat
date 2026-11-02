@@ -28,7 +28,8 @@ room_rnum add_room(struct room_data *room)
 {
   struct char_data *tch;
   struct obj_data *tobj;
-  int j, found = false;
+  int j;
+  room_rnum found = false;
   room_rnum i;
 
   if (room == nullptr)
@@ -275,7 +276,7 @@ bool delete_room(room_rnum rnum)
 
 bool save_rooms(zone_rnum zone_num)
 {
-  int i;
+  room_vnum i;
   struct room_data *room;
   struct atomic_file af;
   FILE *sf;

@@ -167,7 +167,8 @@ void wishSYS(void)
       }
     } else {
       send_to_room(real_room(DRAGONR), "@RThe dragon balls suddenly begin to crack and darkness begins to pour out through the cracks! Shenron begins to turn pitch black slowly as the darkness escapes. Suddenly Shenron explodes out into the distance in seven parts. Each part taking a dragon ball with it!@n\r\n");
-      int num = rand_number(200, 20000), done = false, place = 1;
+      room_vnum num = rand_number(200, 20000);
+      int done = false, place = 1;
       DRAGONC = 0;
       WISH[0] = 0;
       WISH[1] = 0;

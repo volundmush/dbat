@@ -35,7 +35,7 @@ void obj_to_room(struct obj_data *object, room_rnum room)
     }
     if (obj_get_type_flag(object) == ITEM_HATCH && obj_get_vnum(object) <= 19199) {
       if ((obj_get_vnum(object) <= 18999 && obj_get_vnum(object) >= 18800) || (obj_get_vnum(object) <= 19199 && obj_get_vnum(object) >= 19100)) {
-        int hnum               = obj_get_value(object, 0);
+        obj_vnum hnum          = obj_get_value(object, 0);
         struct obj_data *house = read_object(hnum, VIRTUAL);
         obj_to_room(house, real_room(obj_get_value(object, 6)));
         obj_set_value(object, VAL_CONTAINER_FLAGS, obj_get_value(object, VAL_CONTAINER_FLAGS) | (CONT_CLOSED));
@@ -72,13 +72,13 @@ void obj_to_room(struct obj_data *object, room_rnum room)
     }
     if (obj_get_exit(object, 5) && (rroom_sect(obj_get_in_room(object)) == SECT_UNDERWATER || rroom_sect(obj_get_in_room(object)) == SECT_WATER_NOSWIM)) {
       act("$p @Bsinks to deeper waters.@n", true, 0, object, 0, TO_ROOM);
-      int numb = rroom_get_vnum(obj_get_exit(object, 5)->to_room);
+      room_vnum numb = rroom_get_vnum(obj_get_exit(object, 5)->to_room);
       obj_from_room(object);
       obj_to_room(object, real_room(numb));
     }
     if (obj_get_exit(object, 5) && rroom_sect(obj_get_in_room(object)) == SECT_FLYING && (obj_get_vnum(object) < 80 || obj_get_vnum(object) > 83)) {
       act("$p @Cfalls down.@n", true, 0, object, 0, TO_ROOM);
-      int numb = rroom_get_vnum(obj_get_exit(object, 5)->to_room);
+      room_vnum numb = rroom_get_vnum(obj_get_exit(object, 5)->to_room);
       obj_from_room(object);
       obj_to_room(object, real_room(numb));
       if (rroom_sect(obj_get_in_room(object)) != SECT_FLYING) {

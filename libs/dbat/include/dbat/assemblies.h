@@ -11,7 +11,7 @@ typedef struct component_data COMPONENT;
 
 /* Assembly structure definition. */
 struct assembly_data {
-  long lVnum;                         /* Vnum of the object assembled. */
+  obj_vnum lVnum;                     /* Vnum of the object assembled. */
   long lNumComponents;                /* Number of components. */
   unsigned char uchAssemblyType;      /* Type of assembly (ASSM_xxx).
 */
@@ -20,26 +20,26 @@ struct assembly_data {
 
 /* Assembly component structure definition. */
 struct component_data {
-  bool bExtract; /* Extract the object after use. */
-  bool bInRoom;  /* Component in room, not inven. */
-  long lVnum;    /* Vnum of the component object. */
+  bool bExtract;  /* Extract the object after use. */
+  bool bInRoom;   /* Component in room, not inven. */
+  obj_vnum lVnum; /* Vnum of the component object. */
 };
 
 void assemblyBootAssemblies(void);
 void assemblySaveAssemblies(void);
 void assemblyListToChar(struct char_data *pCharacter);
 
-bool assemblyAddComponent(long lVnum, long lComponentVnum,
+bool assemblyAddComponent(obj_vnum lVnum, obj_vnum lComponentVnum,
                           bool bExtract, bool bInRoom);
-bool assemblyCheckComponents(long lVnum, struct char_data *pCharacter, int extract_yes);
-bool assemblyCreate(long lVnum, int iAssembledType);
-bool assemblyDestroy(long lVnum);
+bool assemblyCheckComponents(obj_vnum lVnum, struct char_data *pCharacter, int extract_yes);
+bool assemblyCreate(obj_vnum lVnum, int iAssembledType);
+bool assemblyDestroy(obj_vnum lVnum);
 
-int assemblyGetType(long lVnum);
+int assemblyGetType(obj_vnum lVnum);
 
-long assemblyFindAssembly(const char *pszAssemblyName);
+obj_vnum assemblyFindAssembly(const char *pszAssemblyName);
 
-ASSEMBLY *assemblyGetAssemblyPtr(long lVnum);
+ASSEMBLY *assemblyGetAssemblyPtr(obj_vnum lVnum);
 
 /* ******************************************************************** */
 void free_assemblies(void);

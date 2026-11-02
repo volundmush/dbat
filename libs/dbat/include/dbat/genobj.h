@@ -6,4 +6,4 @@ void free_object_strings_proto(struct obj_data *obj);
 bool copy_object(struct obj_data *to, struct obj_data *from);
 bool save_objects(zone_rnum vznum);
 obj_rnum add_object(struct obj_data *, obj_vnum ovnum);
-int delete_object(obj_rnum);
+obj_rnum delete_object(obj_rnum);

@@ -11,17 +11,17 @@ struct room_direction_data {
 
   char *keyword; /* for open/close			*/
 
-  int16_t exit_info; /* Exit info			*/
-  obj_vnum key;      /* Key's number (-1 for no key)		*/
-  room_rnum to_room; /* Where direction leads (NOWHERE)	*/
-  int dclock;        /* DC to pick the lock			*/
-  int dchide;        /* DC to find hidden			*/
-  int dcskill;       /* Skill req. to move through exit	*/
-  int dcmove;        /* DC for skill to move through exit	*/
-  int failsavetype;  /* Saving Throw type on skill fail	*/
-  int dcfailsave;    /* DC to save against on fail		*/
-  int failroom;      /* Room # to put char in when fail > 5  */
-  int totalfailroom; /* Room # if char fails save < 5	*/
+  int16_t exit_info;       /* Exit info			*/
+  obj_vnum key;            /* Key's number (-1 for no key)		*/
+  room_rnum to_room;       /* Where direction leads (NOWHERE)	*/
+  int dclock;              /* DC to pick the lock			*/
+  int dchide;              /* DC to find hidden			*/
+  int dcskill;             /* Skill req. to move through exit	*/
+  int dcmove;              /* DC for skill to move through exit	*/
+  int failsavetype;        /* Saving Throw type on skill fail	*/
+  int dcfailsave;          /* DC to save against on fail		*/
+  room_vnum failroom;      /* Room # to put char in when fail > 5  */
+  room_vnum totalfailroom; /* Room # if char fails save < 5	*/
 };
 
 /* ================== Memory Structure for room ======================= */

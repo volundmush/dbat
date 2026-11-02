@@ -2131,7 +2131,8 @@ void senseCreate(struct char_data *ch)
 int read_sense_memory(struct char_data *ch, struct char_data *vict)
 {
   char fname[40], line[256];
-  int known = false, idnums = -1337;
+  int known       = false;
+  mob_vnum idnums = -1337;
   FILE *fl;
 
   /* Read Sense File */
@@ -2258,7 +2259,7 @@ bool roll_pursue(struct char_data *ch, struct char_data *vict)
   }
 
   if (skill > perc) {
-    int inroom = rroom_get_vnum(char_get_in_room(ch));
+    room_vnum inroom = rroom_get_vnum(char_get_in_room(ch));
     act("@C$n@R pursues after the fleeing @c$N@R!@n", true, ch, 0, vict, TO_NOTVICT);
     char_from_room(ch);
     char_to_room(ch, char_get_in_room(vict));
@@ -2298,7 +2299,8 @@ char *sense_location(struct char_data *ch)
 
   char *message;
   CREATE(message, char, MAX_INPUT_LENGTH);
-  int roomnum = rroom_get_vnum(char_get_in_room(ch)), num = 0;
+  room_vnum roomnum = rroom_get_vnum(char_get_in_room(ch));
+  zone_rnum num     = 0;
   if ((num = real_zone_by_thing(roomnum)) != NOWHERE) {
     num = real_zone_by_thing(roomnum);
   }
@@ -7184,7 +7186,7 @@ int char_get_olc_zone(const struct char_data *ch)
   return ps ? ps->olc_zone : 0;
 }
 
-void char_set_olc_zone(struct char_data *ch, int v)
+void char_set_olc_zone(struct char_data *ch, zone_vnum v)
 {
   struct player_special_data *ps = ps_of(ch, "olc_zone");
   if (ps)

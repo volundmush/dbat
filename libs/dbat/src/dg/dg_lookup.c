@@ -300,7 +300,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name)
 {
   obj_data *i = nullptr;
   char_data *ch;
-  int rm;
+  room_rnum rm;
   long id;
 
   if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
@@ -437,7 +437,7 @@ char_data *get_char_by_room(room_data *room, char *name)
 obj_data *get_obj_by_obj(obj_data *obj, char *name)
 {
   obj_data *i = nullptr;
-  int rm;
+  room_rnum rm;
 
   if (*name == UID_CHAR)
     return find_obj(atoi(name + 1));

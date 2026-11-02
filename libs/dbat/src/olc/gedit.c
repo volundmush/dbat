@@ -25,7 +25,7 @@
 #include "dbat/shop.h"
 
 static void gedit_disp_menu(struct descriptor_data *d);
-static void gedit_setup_existing(struct descriptor_data *d, int rgm_num);
+static void gedit_setup_existing(struct descriptor_data *d, guild_rnum rgm_num);
 static void gedit_setup_new(struct descriptor_data *d);
 
 /*
@@ -37,7 +37,7 @@ static void gedit_save_internally(struct descriptor_data *d)
   add_guild(OLC_GUILD(d));
 }
 
-static void gedit_save_to_disk(int num)
+static void gedit_save_to_disk(zone_rnum num)
 {
   save_guilds(num);
 }
@@ -48,7 +48,8 @@ static void gedit_save_to_disk(int num)
 
 ACMD(do_oasis_gedit)
 {
-  int number = NOWHERE, save = 0;
+  IDXTYPE number = NOWHERE;
+  int save       = 0;
   guild_rnum real_num;
   struct descriptor_data *d;
   char buf1[MAX_INPUT_LENGTH];
@@ -474,7 +475,7 @@ static void gedit_set_message(struct descriptor_data *d, char **msg, char *arg)
 
 void gedit_parse(struct descriptor_data *d, char *arg)
 {
-  int i;
+  IDXTYPE i;
 
   if (OLC_MODE(d) > GEDIT_NUMERICAL_RESPONSE) {
     if (!isdigit(arg[0]) && ((*arg == '-') && (!isdigit(arg[1])))) {

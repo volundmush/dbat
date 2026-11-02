@@ -31,7 +31,7 @@
 
 /* local functions */
 static void hedit_setup_new(struct descriptor_data *);
-static void hedit_setup_existing(struct descriptor_data *, int);
+static void hedit_setup_existing(struct descriptor_data *, zone_rnum);
 static void hedit_save_to_disk(struct descriptor_data *);
 static void hedit_save_internally(struct descriptor_data *);
 
@@ -115,7 +115,7 @@ static void hedit_setup_new(struct descriptor_data *d)
   hedit_disp_menu(d);
 }
 
-static void hedit_setup_existing(struct descriptor_data *d, int rnum)
+static void hedit_setup_existing(struct descriptor_data *d, zone_rnum rnum)
 {
   CREATE(OLC_HELP(d), struct help_index_element, 1);
 

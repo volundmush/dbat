@@ -30,7 +30,7 @@
 
 static void init_mobile(struct char_data *mob);
 static void medit_disp_menu(struct descriptor_data *d);
-static void medit_setup_existing(struct descriptor_data *d, int rmob_num);
+static void medit_setup_existing(struct descriptor_data *d, mob_rnum rmob_num);
 static void medit_setup_new(struct descriptor_data *d);
 
 /*-------------------------------------------------------------------*/
@@ -45,7 +45,9 @@ static void medit_setup_new(struct descriptor_data *d);
 
 ACMD(do_oasis_medit)
 {
-  int number = NOBODY, save = 0, real_num;
+  IDXTYPE number = NOBODY;
+  int save       = 0;
+  mob_rnum real_num;
   struct descriptor_data *d;
   char buf1[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
@@ -220,7 +222,7 @@ static void medit_setup_new(struct descriptor_data *d)
 
 /*-------------------------------------------------------------------*/
 
-static void medit_setup_existing(struct descriptor_data *d, int rmob_num)
+static void medit_setup_existing(struct descriptor_data *d, mob_rnum rmob_num)
 {
   struct char_data *mob;
 
@@ -527,6 +529,7 @@ static void medit_disp_menu(struct descriptor_data *d)
 void medit_parse(struct descriptor_data *d, char *arg)
 {
   int i         = -1;
+  mob_rnum rnum;
   char *oldtext = nullptr;
 
   if (OLC_MODE(d) > MEDIT_NUMERICAL_RESPONSE) {
@@ -916,8 +919,8 @@ void medit_parse(struct descriptor_data *d, char *arg)
       break;
 
     case MEDIT_COPY:
-      if ((i = real_mobile(atoi(arg))) != NOWHERE) {
-        medit_setup_existing(d, i);
+      if ((rnum = real_mobile(atoi(arg))) != NOBODY) {
+        medit_setup_existing(d, rnum);
       } else
         write_to_output(d, "That mob does not exist.\r\n");
       break;

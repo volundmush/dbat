@@ -367,10 +367,10 @@ const char *modify_string(char **str, char *new_s, bool allow_int)
 
 /*-------------------------------------------------------------------*/
 
-int add_shop(struct shop_data *nshp)
+shop_rnum add_shop(struct shop_data *nshp)
 {
   shop_rnum rshop;
-  int found       = 0;
+  shop_rnum found = 0;
   zone_rnum rznum = real_zone_by_thing(shop_get_vnum(nshp));
 
   /*
@@ -425,7 +425,9 @@ int add_shop(struct shop_data *nshp)
 
 bool save_shops(zone_rnum zone_num)
 {
-  int i, j, rshop;
+  IDXTYPE i;
+  int j;
+  shop_rnum rshop;
   struct atomic_file af;
   FILE *shop_file;
   char fname[128], oldname[128];

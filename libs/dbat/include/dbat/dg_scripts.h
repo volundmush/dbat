@@ -17,7 +17,7 @@
 
 /* linked list for mob/object prototype trigger lists */
 struct trig_proto_list {
-  int vnum;                     /* vnum of the trigger   */
+  trig_vnum vnum;               /* vnum of the trigger   */
   struct trig_proto_list *next; /* next trigger          */
 };
 
@@ -100,7 +100,7 @@ struct script_memory {
 extern struct index_data **trig_index;
 
 extern struct trig_data *trigger_list;
-extern int top_of_trigt;
+extern trig_rnum top_of_trigt;
 
 #include "db.h"
 #include "genzon.h"
@@ -238,9 +238,9 @@ void dg_log_uid_stats(void);
 void remove_from_lookup_table(long uid);
 
 /* from dg_db_scripts.c */
-void parse_trigger(FILE *trig_f, int nr);
+void parse_trigger(FILE *trig_f, trig_vnum nr);
 int dg_lint_trigger(const trig_data *trig, struct descriptor_data *d);
-trig_data *read_trigger(int nr);
+trig_data *read_trigger(trig_rnum nr);
 void trig_data_copy(trig_data *this_data, const trig_data *trg);
 void dg_read_trigger(FILE *fp, void *proto, int type);
 void dg_obj_trigger(char *line, struct obj_data *obj);

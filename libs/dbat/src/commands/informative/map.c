@@ -803,7 +803,8 @@ void gen_map(struct char_data *ch, int num)
 
 ACMD(do_scan)
 {
-  int i, newroom;
+  int i;
+  room_rnum newroom;
   const char *dirnames[] = {
       "North", "East", "South", "West", "Up", "Down", "Northwest", "Northeast", "Southeast", "Southwest", "Inside", "Outside"};
 

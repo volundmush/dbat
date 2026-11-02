@@ -328,7 +328,7 @@ const char *dg_door_fields[] = {
 bool dg_door_apply(room_data *rm, int dir, int field, char *value)
 {
   struct room_direction_data *newexit = rm->dir_option[dir];
-  int to_room;
+  room_rnum to_room;
 
   /* purge exit */
   if (field == 0) {

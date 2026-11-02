@@ -7,9 +7,9 @@ struct reset_com {
   char command; /* current command                      */
 
   bool if_flag; /* if TRUE: exe only if preceding exe'd */
-  int arg1;     /*                                      */
-  int arg2;     /* Arguments to the command             */
-  int arg3;     /*                                      */
+  IDXTYPE arg1; /*                                      */
+  IDXTYPE arg2; /* Arguments to the command             */
+  IDXTYPE arg3; /*                                      */
   int arg4;     /* room_max  default 0			*/
   int arg5;     /* percentages variable                 */
   int line;     /* line number this command appears on  */

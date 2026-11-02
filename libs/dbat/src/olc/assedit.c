@@ -24,13 +24,13 @@
 static void assedit_disp_menu(struct descriptor_data *d);
 static void assedit_edit_extract(struct descriptor_data *d);
 static void assedit_edit_inroom(struct descriptor_data *d);
-static void assedit_setup(struct descriptor_data *d, int number);
+static void assedit_setup(struct descriptor_data *d, obj_vnum number);
 static void nodigit(struct descriptor_data *d);
 
 /*-------------------------------------------------------------------*
  * Nasty internal macros to clean up the code.
  *-------------------------------------------------------------------*/
-static long lRnum = 0;
+static obj_rnum lRnum = 0;
 
 /*-------------------------------------------------------------------*
  * Assedit command
@@ -102,7 +102,7 @@ ACMD(do_assedit)
  * Assedit Functions
  *-------------------------------------------------------------------*/
 
-static void assedit_setup(struct descriptor_data *d, int number)
+static void assedit_setup(struct descriptor_data *d, obj_vnum number)
 {
 
   ASSEMBLY *pOldAssembly = nullptr;
@@ -153,7 +153,7 @@ static void assedit_disp_menu(struct descriptor_data *d)
 #endif
 
   send_to_char(d->character,
-               "Assembly Number: @c%ld@n\r\n"
+               "Assembly Number: @c%d@n\r\n"
                "Assembly Name  : @y%s@n\r\n"
                "Assembly Type  : @y%s@n\r\n"
                "Components:\r\n",
@@ -169,7 +169,7 @@ static void assedit_disp_menu(struct descriptor_data *d)
         send_to_char(d->character, "@g%2d@n) @y ERROR --- Contact an Implementor @n\r\n ", i + 1);
       } else {
         send_to_char(d->character,
-                     "@g%2d@n) [@c%5ld@n] %-20.20s  In room: @c%-3.3s@n    Extract: @y%-3.3s@n\r\n",
+                     "@g%2d@n) [@c%5d@n] %-20.20s  In room: @c%-3.3s@n    Extract: @y%-3.3s@n\r\n",
                      i + 1, OLC_ASSEDIT(d)->pComponents[i].lVnum,
                      obj_proto[lRnum].short_description,
                      (OLC_ASSEDIT(d)->pComponents[i].bInRoom ? "Yes" : "No"),

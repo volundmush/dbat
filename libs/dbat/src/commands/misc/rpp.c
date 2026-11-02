@@ -366,7 +366,8 @@ void disp_rpp_store(struct char_data *ch)
 void handle_rpp_store(struct char_data *ch, int choice)
 {
   struct obj_data *obj;
-  int objnum = 0, cost = 0;
+  obj_vnum objnum = 0;
+  int cost        = 0;
 
   switch (choice) { /* Find the cost of their selection. */
     case 1:
