@@ -460,7 +460,7 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
   else
     send_to_char(ch, "%33s", " - ");
 
-  if (SCRIPT(obj))
+  if (obj->script)
     send_to_char(ch, "[T%d]", obj->proto_script->vnum);
 
   if (obj_get_in_room(obj) != NOWHERE)
@@ -544,9 +544,9 @@ static void perform_immort_where(struct char_data *ch, char *arg)
         found = 1;
         send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, char_get_name(i),
                      rroom_get_vnum(char_get_in_room(i)), world[char_get_in_room(i)].name);
-        if (char_is_npc(i) && SCRIPT(i)) {
-          if (!TRIGGERS(SCRIPT(i))->next)
-            send_to_char(ch, "[T%5d] ", GET_TRIG_VNUM(TRIGGERS(SCRIPT(i))));
+        if (char_is_npc(i) && i->script) {
+          if (!i->script->trig_list->next)
+            send_to_char(ch, "[T%5d] ", trig_get_vnum(i->script->trig_list));
           else
             send_to_char(ch, "[TRIGS] ");
         }

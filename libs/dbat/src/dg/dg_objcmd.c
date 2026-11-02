@@ -60,8 +60,8 @@ struct obj_command_info {
 };
 
 /* do_osend */
-#define SCMD_OSEND       0
-#define SCMD_OECHOAROUND 1
+constexpr int SCMD_OSEND       = 0;
+constexpr int SCMD_OECHOAROUND = 1;
 
 /* attaches object name and vnum to msg and sends it to script_log */
 static void obj_log(obj_data *obj, const char *format, ...)
@@ -503,10 +503,10 @@ static OCMD(do_dgoload)
     }
     char_to_room(mob, rnum);
 
-    if (SCRIPT(obj)) { /* It _should_ have, but it might be detached. */
+    if (obj->script) { /* It _should_ have, but it might be detached. */
       char buf[MAX_INPUT_LENGTH];
       sprintf(buf, "%c%d", UID_CHAR, char_get_id(mob));
-      add_var(&(SCRIPT(obj)->global_vars), "lastloaded", buf, 0);
+      add_var(&(obj->script->global_vars), "lastloaded", buf, 0);
     }
 
     load_mtrigger(mob);
@@ -518,10 +518,10 @@ static OCMD(do_dgoload)
       return;
     }
 
-    if (SCRIPT(obj)) { /* It _should_ have, but it might be detached. */
+    if (obj->script) { /* It _should_ have, but it might be detached. */
       char buf[MAX_INPUT_LENGTH];
       sprintf(buf, "%c%d", UID_CHAR, obj_get_id(object));
-      add_var(&(SCRIPT(obj)->global_vars), "lastloaded", buf, 0);
+      add_var(&(obj->script->global_vars), "lastloaded", buf, 0);
     }
 
     /* special handling to make objects able to load on a person/in a container/worn etc. */

@@ -22,45 +22,11 @@ struct trig_proto_list {
 
 #define DG_SCRIPT_VERSION "DG Scripts 1.0.14"
 
-/* unless you change this, Puff casts all your dg spells */
-#define DG_CASTER_PROXY 1
-/* spells cast by objects and rooms use this level */
-#define DG_SPELL_LEVEL 25
-
-/*
- * %actor.room% behaviour :
- * Until pl 7 %actor.room% returned a room vnum.
- * Working with this number in scripts was unnecessarily hard,
- * especially in those situations one needed the id of the room,
- * the items in it, etc. As a result of this, the output
- * has been changed (as of pl 8) to a room variable.
- * This means old scripts will need a minor adjustment;
- *
- * Before:
- * if %actor.room%==3001
- *   %echo% You are at the main temple.
- *
- * After:
- * eval room %actor.room%
- * if %room.vnum%==3001
- *   %echo% You are at the main temple.
- *
- * If you wish to continue using the old style, comment out the line below.
- *
- * Welcor
- */
-#define ACTOR_ROOM_IS_UID 1
-
 /*
  * These are slightly off of PULSE_MOBILE so
  * everything isnt happening at the same time
  */
 #define PULSE_DG_SCRIPT (13 RL_SEC)
-
-#define MAX_SCRIPT_DEPTH 10 /* maximum depth triggers can
-					     recurse into each other */
-
-#define SCRIPT_ERROR_CODE -9999999 /* this shouldn't happen too often */
 
 /* one line of the trigger */
 struct cmdlist_element {
@@ -225,7 +191,7 @@ void time_wtrigger(room_data *room);
 /* function prototypes from dg_scripts.c */
 char *str_str(char *cs, char *ct);
 int find_eq_pos_script(char *arg);
-int can_wear_on_pos(struct obj_data *obj, int pos);
+bool can_wear_on_pos(struct obj_data *obj, int pos);
 struct char_data *find_char(long n);
 char_data *get_char(char *name);
 char_data *get_char_near_obj(obj_data *obj, char *name);
@@ -281,12 +247,15 @@ void assign_triggers(void *i, int type);
 
 /* From dg_variables.c */
 void add_var(struct trig_var_data **var_list, const char *name, const char *value, long id);
+void add_char_uid_var(trig_data *trig, const char *name, const struct char_data *c, long context);
+void add_obj_uid_var(trig_data *trig, const char *name, const struct obj_data *o, long context);
 void var_subst(void *go, struct script_data *sc, trig_data *trig,
                int type, char *line, char *buf);
 
 /* From dg_handler.c */
 void free_varlist(struct trig_var_data *vd);
-int remove_var(struct trig_var_data **var_list, char *name);
+struct script_data *dg_ensure_script(struct script_data **slot);
+bool remove_var(struct trig_var_data **var_list, char *name);
 void free_trigger(trig_data *trig);
 void extract_trigger(struct trig_data *trig);
 void extract_script(void *thing, int type);
@@ -305,7 +274,7 @@ void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
                 int type, char *cmd);
 void do_dg_affect(void *go, struct script_data *sc, trig_data *trig,
                   int type, char *cmd);
-int valid_dg_target(char_data *ch, int bitvector);
+bool valid_dg_target(char_data *ch, int bitvector);
 void script_damage(char_data *vict, int dam);
 extern const char *dg_door_fields[];
 bool dg_door_apply(room_data *rm, int dir, int field, char *value);
@@ -315,46 +284,26 @@ int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const
 /* from dg_objcmd.c */
 room_rnum obj_room(obj_data *obj);
 
-/* defines for valid_dg_target */
-#define DG_ALLOW_GODS (1 << 0)
-
-/* Macros for scripts */
-
-#define UID_CHAR              '}'
-#define GET_TRIG_NAME(t)      ((t)->name)
-#define GET_TRIG_RNUM(t)      ((t)->nr)
-#define GET_TRIG_VNUM(t)      (trig_index[(t)->nr]->vnum)
-#define GET_TRIG_TYPE(t)      ((t)->trigger_type)
-#define GET_TRIG_DATA_TYPE(t) ((t)->data_type)
-#define GET_TRIG_NARG(t)      ((t)->narg)
-#define GET_TRIG_ARG(t)       ((t)->arglist)
-#define GET_TRIG_VARS(t)      ((t)->var_list)
-#define GET_TRIG_WAIT(t)      ((t)->wait_event)
-#define GET_TRIG_DEPTH(t)     ((t)->depth)
-#define GET_TRIG_LOOPS(t)     ((t)->loops)
-
 /* player id's: 0 to PLAYER_ID_MAX - 1            */
 /* room id's: ROOM_ID_BASE to OBJ_ID_BASE - 1      */
 /* object id's: OBJ_ID_BASE to OBJ_ID_MAX         */
 /* mob id's: MOB_ID_BASE to MOB_ID_MAX            */
 /* See consts/triggers.h; allocate with dg_new_mob_uid()/dg_new_obj_uid(). */
 
-#define SCRIPT(o)     ((o)->script)
-#define SCRIPT_MEM(c) ((c)->memory)
+/* the virtual number of trigger t */
+static inline trig_vnum trig_get_vnum(const trig_data *t)
+{
+  return trig_index[t->nr]->vnum;
+}
 
-#define SCRIPT_TYPES(s) ((s)->types)
-#define TRIGGERS(s)     ((s)->trig_list)
+/* true if script sc exists and has a trigger of the given type */
+static inline bool script_has_type(const struct script_data *sc, bitvector_t type)
+{
+  return sc && (sc->types & type);
+}
 
-#define GET_SHORT(ch) ((ch)->short_descr)
-
-#define SCRIPT_CHECK(go, type) (SCRIPT(go) && \
-                                IS_SET(SCRIPT_TYPES(SCRIPT(go)), type))
-#define TRIGGER_CHECK(t, type) (IS_SET(GET_TRIG_TYPE(t), type) && \
-                                !GET_TRIG_DEPTH(t))
-
-#define ADD_UID_VAR(buf, trig, go, name, context)                                                                                                                            \
-  do {                                                                                                                                                                       \
-    sprintf(buf, "%c%d", UID_CHAR,                                                                                                                                           \
-            _Generic((go), struct char_data *: char_get_id, const struct char_data *: char_get_id, struct obj_data *: obj_get_id, const struct obj_data *: obj_get_id)(go)); \
-    add_var(&GET_TRIG_VARS(trig), name, buf, context);                                                                                                                       \
-  } while (0)
+/* true if trigger t is of the given type and not already running */
+static inline bool trigger_ready(const trig_data *t, bitvector_t type)
+{
+  return (t->trigger_type & type) && !t->depth;
+}

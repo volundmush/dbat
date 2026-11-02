@@ -71,7 +71,7 @@ static void mob_log(char_data *mob, const char *format, ...)
   vsnprintf(output, sizeof(output), format, args);
   va_end(args);
 
-  script_log("Mob (%s, VNum %d):: %s", GET_SHORT(mob), char_get_mob_vnum(mob), output);
+  script_log("Mob (%s, VNum %d):: %s", mob->short_descr, char_get_mob_vnum(mob), output);
 }
 
 /*
@@ -420,10 +420,10 @@ ACMD(do_mload)
       return;
     }
     char_to_room(mob, rnum);
-    if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
+    if (ch->script) { /* It _should_ have, but it might be detached. */
       char buf[MAX_INPUT_LENGTH];
       sprintf(buf, "%c%d", UID_CHAR, char_get_id(mob));
-      add_var(&(SCRIPT(ch)->global_vars), "lastloaded", buf, 0);
+      add_var(&(ch->script->global_vars), "lastloaded", buf, 0);
     }
     load_mtrigger(mob);
   }
@@ -433,10 +433,10 @@ ACMD(do_mload)
       mob_log(ch, "mload: bad object vnum");
       return;
     }
-    if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
+    if (ch->script) { /* It _should_ have, but it might be detached. */
       char buf[MAX_INPUT_LENGTH];
       sprintf(buf, "%c%d", UID_CHAR, obj_get_id(object));
-      add_var(&(SCRIPT(ch)->global_vars), "lastloaded", buf, 0);
+      add_var(&(ch->script->global_vars), "lastloaded", buf, 0);
     }
     randomize_eq(object);
     /* special handling to make objects able to load on a person/in a container/worn etc. */
@@ -787,9 +787,9 @@ ACMD(do_mremember)
 
   /* create a structure and add it to the list */
   CREATE(mem, struct script_memory, 1);
-  if (!SCRIPT_MEM(ch)) SCRIPT_MEM(ch) = mem;
+  if (!ch->memory) ch->memory = mem;
   else {
-    struct script_memory *tmpmem = SCRIPT_MEM(ch);
+    struct script_memory *tmpmem = ch->memory;
     while (tmpmem->next) tmpmem = tmpmem->next;
     tmpmem->next = mem;
   }
@@ -828,15 +828,15 @@ ACMD(do_mforget)
     return;
   }
 
-  mem  = SCRIPT_MEM(ch);
+  mem  = ch->memory;
   prev = NULL;
   while (mem) {
     if (mem->id == char_get_id(victim)) {
       if (mem->cmd) free(mem->cmd);
       if (prev == NULL) {
-        SCRIPT_MEM(ch) = mem->next;
+        ch->memory = mem->next;
         free(mem);
-        mem = SCRIPT_MEM(ch);
+        mem = ch->memory;
       } else {
         prev->next = mem->next;
         free(mem);

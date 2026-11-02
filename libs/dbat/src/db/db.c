@@ -560,7 +560,7 @@ void destroy_db(void)
     free_extra_descriptions(world[cnt].ex_description);
 
     /* free any assigned scripts */
-    if (SCRIPT(&world[cnt]))
+    if (world[cnt].script)
       extract_script(&world[cnt], WLD_TRIGGER);
     /* free script proto list */
     free_proto_script(&world[cnt], WLD_TRIGGER);
@@ -4013,14 +4013,10 @@ void reset_zone(zone_rnum zone)
 
         case 'T': /* trigger command */
           if (ZCMD2.arg1 == MOB_TRIGGER && tmob) {
-            if (!SCRIPT(tmob))
-              CREATE(SCRIPT(tmob), struct script_data, 1);
-            add_trigger(SCRIPT(tmob), read_trigger(ZCMD2.arg2), -1);
+            add_trigger(dg_ensure_script(&tmob->script), read_trigger(ZCMD2.arg2), -1);
             last_cmd = 1;
           } else if (ZCMD2.arg1 == OBJ_TRIGGER && tobj) {
-            if (!SCRIPT(tobj))
-              CREATE(SCRIPT(tobj), struct script_data, 1);
-            add_trigger(SCRIPT(tobj), read_trigger(ZCMD2.arg2), -1);
+            add_trigger(dg_ensure_script(&tobj->script), read_trigger(ZCMD2.arg2), -1);
             last_cmd = 1;
           } else if (ZCMD2.arg1 == WLD_TRIGGER) {
             if (ZCMD2.arg3 == NOWHERE || ZCMD2.arg3 > top_of_world) {
@@ -4036,17 +4032,17 @@ void reset_zone(zone_rnum zone)
 
         case 'V':
           if (ZCMD2.arg1 == MOB_TRIGGER && tmob) {
-            if (!SCRIPT(tmob)) {
+            if (!tmob->script) {
               ZONE_ERROR("Attempt to give variable to scriptless mobile");
             } else
-              add_var(&(SCRIPT(tmob)->global_vars), ZCMD2.sarg1, ZCMD2.sarg2,
+              add_var(&(tmob->script->global_vars), ZCMD2.sarg1, ZCMD2.sarg2,
                       ZCMD2.arg3);
             last_cmd = 1;
           } else if (ZCMD2.arg1 == OBJ_TRIGGER && tobj) {
-            if (!SCRIPT(tobj)) {
+            if (!tobj->script) {
               ZONE_ERROR("Attempt to give variable to scriptless object");
             } else
-              add_var(&(SCRIPT(tobj)->global_vars), ZCMD2.sarg1, ZCMD2.sarg2,
+              add_var(&(tobj->script->global_vars), ZCMD2.sarg1, ZCMD2.sarg2,
                       ZCMD2.arg3);
             last_cmd = 1;
           } else if (ZCMD2.arg1 == WLD_TRIGGER) {
@@ -4224,7 +4220,7 @@ void free_char(struct char_data *ch)
   if (ch->player_specials) {
 
     while ((a = char_get_aliases(ch)) != NULL) {
-      char_set_aliases(ch, (char_get_aliases(ch))->next);
+      char_set_aliases(ch, char_get_aliases(ch)->next);
       free_alias(a);
     }
     if (ch->player_specials->poofin)
@@ -4280,7 +4276,7 @@ void free_char(struct char_data *ch)
     affect_remove(ch, ch->affected);
 
   /* free any assigned scripts */
-  if (SCRIPT(ch))
+  if (ch->script)
     extract_script(ch, MOB_TRIGGER);
 
   /* new version of free_followers take the followers pointer as arg */
@@ -4320,7 +4316,7 @@ void free_obj(struct obj_data *obj)
   }
 
   /* free any assigned scripts */
-  if (SCRIPT(obj))
+  if (obj->script)
     extract_script(obj, OBJ_TRIGGER);
 
   /* find_obj helper */

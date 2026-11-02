@@ -195,12 +195,12 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
         if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_ROOMFLAGS)) {
           if (obj_get_posted_to(obj) == NULL) {
             send_to_char(ch, "@D[@G%d@D]@w ", obj_get_vnum(obj));
-            if (SCRIPT(obj))
+            if (obj->script)
               send_to_char(ch, "@D[@wT%d@D]@w ", obj->proto_script->vnum);
           } else {
             if (obj_get_posttype(obj) <= 0) {
               send_to_char(ch, "@D[@G%d@D]@w ", obj_get_vnum(obj));
-              if (SCRIPT(obj))
+              if (obj->script)
                 send_to_char(ch, "@D[@wT%d@D]@w ", obj->proto_script->vnum);
             }
           }
@@ -251,7 +251,7 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
     case SHOW_OBJ_SHORT:
       if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_ROOMFLAGS)) {
         send_to_char(ch, "[%d] ", obj_get_vnum(obj));
-        if (SCRIPT(obj))
+        if (obj->script)
           send_to_char(ch, "[T%d] ", obj->proto_script->vnum);
       }
 
@@ -992,7 +992,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
       " is standing here"};
 
   if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_ROOMFLAGS) && char_is_npc(i))
-    send_to_char(ch, "@D[@G%d@D]@w %s", char_get_mob_vnum(i), SCRIPT(i) ? "[TRIG] " : "");
+    send_to_char(ch, "@D[@G%d@D]@w %s", char_get_mob_vnum(i), i->script ? "[TRIG] " : "");
 
   if (char_is_npc(i) && i->long_descr && char_get_position(i) == char_get_mob_specials_default_pos(i) && !char_get_fighting(i)) {
     send_to_char(ch, "%s", i->long_descr);

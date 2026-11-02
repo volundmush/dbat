@@ -305,7 +305,7 @@ int free_mobile(struct char_data *mob)
     affect_remove(mob, mob->affected);
 
   /* free any assigned scripts */
-  if (SCRIPT(mob))
+  if (mob->script)
     extract_script(mob, MOB_TRIGGER);
 
   free(mob);

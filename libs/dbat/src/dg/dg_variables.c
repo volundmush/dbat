@@ -61,6 +61,24 @@ void add_var(struct trig_var_data **var_list, const char *name, const char *valu
   strcpy(vd->value, value); /* strcpy: ok*/
 }
 
+/* sets trigger variable name to character c's UID, so the script can use %name% to refer to it */
+void add_char_uid_var(trig_data *trig, const char *name, const struct char_data *c, long context)
+{
+  char buf[MAX_INPUT_LENGTH];
+
+  snprintf(buf, sizeof(buf), "%c%d", UID_CHAR, char_get_id(c));
+  add_var(&trig->var_list, name, buf, context);
+}
+
+/* sets trigger variable name to object o's UID, so the script can use %name% to refer to it */
+void add_obj_uid_var(trig_data *trig, const char *name, const struct obj_data *o, long context)
+{
+  char buf[MAX_INPUT_LENGTH];
+
+  snprintf(buf, sizeof(buf), "%c%d", UID_CHAR, obj_get_id(o));
+  add_var(&trig->var_list, name, buf, context);
+}
+
 /* perhaps not the best place for this, but I didn't want a new file */
 static const char *skill_percent(struct char_data *ch, char *skill)
 {
@@ -131,21 +149,21 @@ static int item_in_list(char *item, obj_data *list)
    MUD -- 4dimensions.org:6000
 */
 
-static int char_has_item(char *item, struct char_data *ch)
+static bool char_has_item(char *item, struct char_data *ch)
 {
 
   /* If this works, no more searching needed */
   if (get_object_in_equip(ch, item) != NULL)
-    return 1;
+    return true;
 
   if (item_in_list(item, ch->carrying) == 0)
-    return 0;
+    return false;
   else
-    return 1;
+    return true;
 }
 
-static int text_processed(char *field, char *subfield, struct trig_var_data *vd,
-                          char *str, size_t slen)
+static bool text_processed(char *field, char *subfield, struct trig_var_data *vd,
+                           char *str, size_t slen)
 {
   char *p, *p2;
   char tmpvar[MAX_STRING_LENGTH];
@@ -154,7 +172,7 @@ static int text_processed(char *field, char *subfield, struct trig_var_data *vd,
     char limit[200];
     sprintf(limit, "%" SZT, strlen(vd->value));
     snprintf(str, slen, "%d", atoi(limit));
-    return TRUE;
+    return true;
   } else if (!strcasecmp(field, "trim")) { /* trim      */
     /* trim whitespace from ends */
     snprintf(tmpvar, sizeof(tmpvar) - 1, "%s", vd->value); /* -1 to use later*/
@@ -164,23 +182,23 @@ static int text_processed(char *field, char *subfield, struct trig_var_data *vd,
     while ((p <= p2) && isspace(*p2)) p2--;
     if (p > p2) { /* nothing left */
       *str = '\0';
-      return TRUE;
+      return true;
     }
     *(++p2) = '\0'; /* +1 ok (see above) */
     snprintf(str, slen, "%s", p);
-    return TRUE;
+    return true;
   } else if (!strcasecmp(field, "contains")) { /* contains  */
     if (str_str(vd->value, subfield))
       strcpy(str, "1");
     else
       strcpy(str, "0");
-    return TRUE;
+    return true;
   } else if (!strcasecmp(field, "car")) { /* car       */
     char *car = vd->value;
     while (*car && !isspace(*car))
       *str++ = *car++;
     *str = '\0';
-    return TRUE;
+    return true;
 
   } else if (!strcasecmp(field, "cdr")) { /* cdr       */
     char *cdr = vd->value;
@@ -188,14 +206,14 @@ static int text_processed(char *field, char *subfield, struct trig_var_data *vd,
     while (*cdr && isspace(*cdr)) cdr++;  /* skip to next */
 
     snprintf(str, slen, "%s", cdr);
-    return TRUE;
+    return true;
   } else if (!strcasecmp(field, "charat")) { /* CharAt    */
     size_t len = strlen(vd->value), dgindex = atoi(subfield);
     if (dgindex > len || dgindex < 1)
       strcpy(str, "");
     else
       snprintf(str, slen, "%c", vd->value[dgindex - 1]);
-    return TRUE;
+    return true;
   } else if (!strcasecmp(field, "mudcommand")) {
     /* find the mud command returned from this text */
     /* NOTE: you may need to replace "cmd_info" with "complete_cmd_info", */
@@ -211,10 +229,10 @@ static int text_processed(char *field, char *subfield, struct trig_var_data *vd,
       *str = '\0';
     else
       snprintf(str, slen, "%s", cmd_info[cmd].command);
-    return TRUE;
+    return true;
   }
 
-  return FALSE;
+  return false;
 }
 
 static void find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield, char *str, size_t slen);
@@ -703,8 +721,8 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
       else if (!strcasecmp(field, "varexists")) {
         struct trig_var_data *remote_vd;
         strcpy(str, "0");
-        if (SCRIPT(c) && SCRIPT(c)->global_vars) {
-          for (remote_vd = SCRIPT(c)->global_vars; remote_vd; remote_vd = remote_vd->next) {
+        if (c->script && c->script->global_vars) {
+          for (remote_vd = c->script->global_vars; remote_vd; remote_vd = remote_vd->next) {
             if (!strcasecmp(remote_vd->name, subfield)) break;
           }
           if (remote_vd) strcpy(str, "1");
@@ -738,8 +756,8 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
   } /* switch *field */
 
   if (*str == '\x1') { /* no match found in switch */
-    if (SCRIPT(c)) {
-      for (vd = (SCRIPT(c))->global_vars; vd; vd = vd->next)
+    if (c->script) {
+      for (vd = (c->script)->global_vars; vd; vd = vd->next)
         if (!strcasecmp(vd->name, field))
           break;
       if (vd)
@@ -747,14 +765,24 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
       else {
         *str = '\0';
         script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
-                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
+                   trig->name, trig_get_vnum(trig), field);
       }
     } else {
       *str = '\0';
       script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
-                 GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
+                 trig->name, trig_get_vnum(trig), field);
     }
   }
+}
+
+/*
+ * true if s is one of the strings o shares with its prototype, which must not be freed
+ * (the rule free_object_strings_proto() and name_to_drinkcon() follow)
+ */
+static bool obj_string_is_proto(const obj_data *o, const char *s)
+{
+  obj_rnum rnum = obj_get_item_number(o);
+  return rnum != NOTHING && (s == obj_proto[rnum].name || s == obj_proto[rnum].short_description);
 }
 
 /* sets str to the value of field on object o */
@@ -877,7 +905,9 @@ static void obj_field(obj_data *o, struct trig_var_data *vd, trig_data *trig, in
           snprintf(str, slen, "%s", o->name);
         else {
           char blah[500];
-          sprintf(blah, "%s %s", o->name, subfield);
+          snprintf(blah, sizeof(blah), "%s %s", o->name, subfield);
+          if (!obj_string_is_proto(o, o->name))
+            free(o->name);
           o->name = strdup(blah);
         }
       } else if (!strcasecmp(field, "next_in_list")) {
@@ -901,7 +931,9 @@ static void obj_field(obj_data *o, struct trig_var_data *vd, trig_data *trig, in
           snprintf(str, slen, "%s", o->short_description);
         else {
           char blah[500];
-          sprintf(blah, "%s @wnicknamed @D(@C%s@D)@n", o->short_description, subfield);
+          snprintf(blah, sizeof(blah), "%s @wnicknamed @D(@C%s@D)@n", o->short_description, subfield);
+          if (!obj_string_is_proto(o, o->short_description))
+            free(o->short_description);
           o->short_description = strdup(blah);
         }
       } else if (!strcasecmp(field, "setaffects")) {
@@ -993,24 +1025,24 @@ static void obj_field(obj_data *o, struct trig_var_data *vd, trig_data *trig, in
   } /* switch *field */
 
   if (*str == '\x1') { /* no match in switch */
-    if (SCRIPT(o)) {   /* check for global var */
-      for (vd = (SCRIPT(o))->global_vars; vd; vd = vd->next)
+    if (o->script) {   /* check for global var */
+      for (vd = (o->script)->global_vars; vd; vd = vd->next)
         if (!strcasecmp(vd->name, field))
           break;
       if (vd)
         snprintf(str, slen, "%s", vd->value);
       else {
         *str = '\0';
-        if (strcasecmp(GET_TRIG_NAME(trig), "Rename Object")) {
+        if (strcasecmp(trig->name, "Rename Object")) {
           script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
-                     GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
+                     trig->name, trig_get_vnum(trig), type, field);
         }
       }
     } else {
       *str = '\0';
-      if (strcasecmp(GET_TRIG_NAME(trig), "Rename Object")) {
+      if (strcasecmp(trig->name, "Rename Object")) {
         script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
-                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
+                   trig->name, trig_get_vnum(trig), type, field);
       }
     }
   }
@@ -1077,12 +1109,12 @@ static void room_field(struct room_data *r, struct trig_var_data *vd, trig_data 
 
   /* special handling of the void, as it stores all 'full global' variables */
   if (r->number == 0) {
-    if (!SCRIPT(r)) {
+    if (!r->script) {
       *str = '\0';
       script_log("Trigger: %s, Vnum %d, type %d. Trying to access Global var list of void. Apparently this has not been set up!",
-                 GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type);
+                 trig->name, trig_get_vnum(trig), type);
     } else {
-      for (vd = (SCRIPT(r))->global_vars; vd; vd = vd->next)
+      for (vd = (r->script)->global_vars; vd; vd = vd->next)
         if (!strcasecmp(vd->name, field))
           break;
       if (vd)
@@ -1171,8 +1203,8 @@ static void room_field(struct room_data *r, struct trig_var_data *vd, trig_data 
   } else if ((dir = room_exit_field_dir(field)) >= 0) {
     room_exit_field(r, dir, subfield, str, slen);
   } else {
-    if (SCRIPT(r)) { /* check for global var */
-      for (vd = (SCRIPT(r))->global_vars; vd; vd = vd->next)
+    if (r->script) { /* check for global var */
+      for (vd = (r->script)->global_vars; vd; vd = vd->next)
         if (!strcasecmp(vd->name, field))
           break;
       if (vd)
@@ -1180,12 +1212,12 @@ static void room_field(struct room_data *r, struct trig_var_data *vd, trig_data 
       else {
         *str = '\0';
         script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
-                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
+                   trig->name, trig_get_vnum(trig), type, field);
       }
     } else {
       *str = '\0';
       script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
-                 GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
+                 trig->name, trig_get_vnum(trig), type, field);
     }
   }
 }
@@ -1221,7 +1253,7 @@ static void find_replacement(void *go, struct script_data *sc, trig_data *trig, 
 
   /* X.global() will have a NULL trig */
   if (trig)
-    for (vd = GET_TRIG_VARS(trig); vd; vd = vd->next)
+    for (vd = trig->var_list; vd; vd = vd->next)
       if (!strcasecmp(vd->name, var))
         break;
 
@@ -1357,7 +1389,7 @@ static void find_replacement(void *go, struct script_data *sc, trig_data *trig, 
       }
 
       else if (!strcasecmp(var, "global")) {
-        struct script_data *thescript = SCRIPT(&world[0]);
+        struct script_data *thescript = world[0].script;
         *str                          = '\0';
         if (!thescript) {
           script_log("Attempt to find global var. Apparently the void has no script.");

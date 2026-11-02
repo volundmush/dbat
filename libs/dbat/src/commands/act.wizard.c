@@ -1844,8 +1844,8 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
   /* check mobiles for a script */
   if (char_is_npc(k)) {
     do_sstat_character(ch, k);
-    if (SCRIPT_MEM(k)) {
-      struct script_memory *mem = SCRIPT_MEM(k);
+    if (k->memory) {
+      struct script_memory *mem = k->memory;
       send_to_char(ch, "Script memory:\r\n  Remember             Command\r\n");
       while (mem) {
         struct char_data *mc = find_char(mem->id);

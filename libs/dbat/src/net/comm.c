@@ -3010,7 +3010,7 @@ static void perform_act(const char *orig, struct char_data *ch, struct obj_data 
 /* act()/sub_write(): should ch receive this message? (to_sleeping: deliver even to sleeping characters) */
 bool sendok(struct char_data *ch, int to_sleeping)
 {
-  return (ch->desc || SCRIPT_CHECK(ch, MTRIG_ACT)) && (to_sleeping || char_is_awake(ch)) && !char_plr_flagged(ch, PLR_WRITING);
+  return (ch->desc || script_has_type(ch->script, MTRIG_ACT)) && (to_sleeping || char_is_awake(ch)) && !char_plr_flagged(ch, PLR_WRITING);
 }
 
 char *act(const char *str, int hide_invisible, struct char_data *ch,

@@ -22,6 +22,7 @@
 #include "dbat/object_utils.h"
 #include "dbat/room_utils.h"
 #include "dbat/fileop.h"
+#include "dg_internal.h"
 
 #include <stdlib.h>
 #include <linux/limits.h>
@@ -35,6 +36,25 @@ static void free_var_el(struct trig_var_data *var)
   if (var->value)
     free(var->value);
   free(var);
+}
+
+/* returns *slot, first creating an empty script there if there is none */
+struct script_data *dg_ensure_script(struct script_data **slot)
+{
+  if (!*slot)
+    CREATE(*slot, struct script_data, 1);
+  return *slot;
+}
+
+/* where go keeps its script pointer: go is a mob, object or room according to type */
+struct script_data **script_slot(void *go, int type)
+{
+  switch (type) {
+    case MOB_TRIGGER: return &((char_data *)go)->script;
+    case OBJ_TRIGGER: return &((obj_data *)go)->script;
+    case WLD_TRIGGER: return &((room_data *)go)->script;
+  }
+  return NULL;
 }
 
 /* release memory allocated for a variable list */
@@ -53,7 +73,7 @@ void free_varlist(struct trig_var_data *vd)
  * remove var name from var_list
  * returns 1 if found, else 0
  */
-int remove_var(struct trig_var_data **var_list, char *name)
+bool remove_var(struct trig_var_data **var_list, char *name)
 {
   struct trig_var_data *i, *j;
 
@@ -69,10 +89,10 @@ int remove_var(struct trig_var_data **var_list, char *name)
       free_var_el(i);
     }
 
-    return 1;
+    return true;
   }
 
-  return 0;
+  return false;
 }
 
 /*
@@ -93,8 +113,8 @@ void free_trigger(struct trig_data *trig)
     free_varlist(trig->var_list);
     trig->var_list = NULL;
   }
-  if (GET_TRIG_WAIT(trig))
-    event_cancel(GET_TRIG_WAIT(trig));
+  if (trig->wait_event)
+    event_cancel(trig->wait_event);
 
   free(trig);
 }
@@ -104,9 +124,9 @@ void extract_trigger(struct trig_data *trig)
 {
   struct trig_data *temp;
 
-  if (GET_TRIG_WAIT(trig)) {
-    event_cancel(GET_TRIG_WAIT(trig));
-    GET_TRIG_WAIT(trig) = NULL;
+  if (trig->wait_event) {
+    event_cancel(trig->wait_event);
+    trig->wait_event = NULL;
   }
 
   trig_index[trig->nr]->number--;
@@ -120,35 +140,19 @@ void extract_trigger(struct trig_data *trig)
 /* remove all triggers from a mob/obj/room */
 void extract_script(void *thing, int type)
 {
-  struct script_data *sc = NULL;
+  struct script_data **slot = script_slot(thing, type);
+  struct script_data *sc    = *slot;
   struct trig_data *trig, *next_trig;
-  char_data *mob;
-  obj_data *obj;
-  room_data *room;
 
-  switch (type) {
-    case MOB_TRIGGER:
-      mob         = (struct char_data *)thing;
-      sc          = SCRIPT(mob);
-      SCRIPT(mob) = NULL;
-      break;
-    case OBJ_TRIGGER:
-      obj         = (struct obj_data *)thing;
-      sc          = SCRIPT(obj);
-      SCRIPT(obj) = NULL;
-      break;
-    case WLD_TRIGGER:
-      room         = (struct room_data *)thing;
-      sc           = SCRIPT(room);
-      SCRIPT(room) = NULL;
-      break;
-  }
+  if (!sc)
+    return;
+  *slot = NULL;
 
-  for (trig = TRIGGERS(sc); trig; trig = next_trig) {
+  for (trig = sc->trig_list; trig; trig = next_trig) {
     next_trig = trig->next;
     extract_trigger(trig);
   }
-  TRIGGERS(sc) = NULL;
+  sc->trig_list = NULL;
 
   /* Thanks to James Long for tracking down this memory leak */
   free_varlist(sc->global_vars);
@@ -255,13 +259,13 @@ void update_wait_events(struct room_data *to, struct room_data *from)
 {
   struct trig_data *trig;
 
-  if (!SCRIPT(from))
+  if (!from->script)
     return;
 
-  for (trig = TRIGGERS(SCRIPT(from)); trig; trig = trig->next) {
-    if (!GET_TRIG_WAIT(trig))
+  for (trig = from->script->trig_list; trig; trig = trig->next) {
+    if (!trig->wait_event)
       continue;
 
-    ((struct wait_event_data *)GET_TRIG_WAIT(trig)->event_obj)->go = to;
+    ((struct wait_event_data *)trig->wait_event->event_obj)->go = to;
   }
 }

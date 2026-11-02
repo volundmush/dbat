@@ -987,10 +987,10 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
     }
 
     send_to_char(ch, "@wLocation: @G%-70s@w\r\n", world[target_room].name);
-    if (SCRIPT(rm)) {
+    if (rm->script) {
       send_to_char(ch, "@D[@GTriggers");
-      for (t = TRIGGERS(SCRIPT(rm)); t; t = t->next)
-        send_to_char(ch, " %d", GET_TRIG_VNUM(t));
+      for (t = rm->script->trig_list; t; t = t->next)
+        send_to_char(ch, " %d", trig_get_vnum(t));
       send_to_char(ch, "@D] ");
     }
     snprintf(buf3, sizeof(buf3), "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n", buf, buf2, rroom_get_vnum(target_room));

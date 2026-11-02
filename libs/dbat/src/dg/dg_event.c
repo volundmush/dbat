@@ -129,7 +129,6 @@ void event_free_all(void)
   event_q = NULL;
 }
 
-/* boolean function to tell whether an event is queued or not */
 /* ************************************************************************
 *  File: queue.c                                                          *
 *                                                                         *

@@ -262,7 +262,7 @@ static void redit_setup_existing(struct descriptor_data *d, int real_num)
 
   dg_olc_script_copy(d);
   room->proto_script = NULL;
-  SCRIPT(room)       = NULL;
+  room->script       = NULL;
 }
 
 /*------------------------------------------------------------------------*/
@@ -344,7 +344,7 @@ void free_room(struct room_data *room)
   /* Free the strings (Mythran). */
   free_room_strings(room);
 
-  if (SCRIPT(room))
+  if (room->script)
     extract_script(room, WLD_TRIGGER);
   free_proto_script(room, WLD_TRIGGER);
 

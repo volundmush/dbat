@@ -98,3 +98,17 @@ constexpr bitvector_t OBJ_ID_MAX  = (MOB_ID_BASE - 1);
 constexpr int MOB_ID_MAX          = INT32_MAX;
 /* Mobs used 50000..1049999 before; find_char() still accepts that range. */
 constexpr int LEGACY_MOB_ID_BASE = 50000;
+
+/* unless you change this, Puff casts all your dg spells */
+constexpr int DG_CASTER_PROXY = 1;
+/* spells cast by objects and rooms use this level */
+constexpr int DG_SPELL_LEVEL = 25;
+
+constexpr int MAX_SCRIPT_DEPTH  = 10;       /* maximum depth triggers can recurse into each other */
+constexpr int SCRIPT_ERROR_CODE = -9999999; /* this shouldn't happen too often */
+
+/* flag for valid_dg_target() */
+constexpr int DG_ALLOW_GODS = (1 << 0);
+
+/* first character of a UID as it appears in script text, e.g. "}1063303" */
+constexpr char UID_CHAR = '}';

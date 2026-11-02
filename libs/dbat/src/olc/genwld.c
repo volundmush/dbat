@@ -35,7 +35,7 @@ room_rnum add_room(struct room_data *room)
     return NOWHERE;
 
   if ((i = real_room(room->number)) != NOWHERE) {
-    if (SCRIPT(&world[i]))
+    if (world[i].script)
       extract_script(&world[i], WLD_TRIGGER);
     tch  = world[i].people;
     tobj = world[i].contents;
@@ -183,7 +183,7 @@ int delete_room(room_rnum rnum)
   }
 
   free_room_strings(room);
-  if (SCRIPT(room))
+  if (room->script)
     extract_script(room, WLD_TRIGGER);
   free_proto_script(room, WLD_TRIGGER);
 

@@ -45,8 +45,8 @@ struct wld_command_info {
 };
 
 /* do_wsend */
-#define SCMD_WSEND       0
-#define SCMD_WECHOAROUND 1
+constexpr int SCMD_WSEND       = 0;
+constexpr int SCMD_WECHOAROUND = 1;
 
 /* attaches room vnum to msg and sends it to script_log */
 static void wld_log(room_data *room, const char *format, ...)
@@ -439,10 +439,10 @@ static WCMD(do_wload)
       return;
     }
     char_to_room(mob, rnum);
-    if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
+    if (room->script) { /* It _should_ have, but it might be detached. */
       char buf[MAX_INPUT_LENGTH];
       sprintf(buf, "%c%d", UID_CHAR, char_get_id(mob));
-      add_var(&(SCRIPT(room)->global_vars), "lastloaded", buf, 0);
+      add_var(&(room->script->global_vars), "lastloaded", buf, 0);
     }
     load_mtrigger(mob);
   }
@@ -456,10 +456,10 @@ static WCMD(do_wload)
     if (!target || !*target) {
       add_unique_id(object);
       obj_to_room(object, real_room(room->number));
-      if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
+      if (room->script) { /* It _should_ have, but it might be detached. */
         char buf[MAX_INPUT_LENGTH];
         sprintf(buf, "%c%d", UID_CHAR, obj_get_id(object));
-        add_var(&(SCRIPT(room)->global_vars), "lastloaded", buf, 0);
+        add_var(&(room->script->global_vars), "lastloaded", buf, 0);
       }
       load_otrigger(object);
       return;

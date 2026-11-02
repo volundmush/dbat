@@ -28,7 +28,7 @@ static void update_object(struct obj_data *obj, int use)
   if (!obj)
     return;
   /* dont update objects with a timer trigger */
-  if (!SCRIPT_CHECK(obj, OTRIG_TIMER) && (obj_get_timer(obj) > 0))
+  if (!script_has_type(obj->script, OTRIG_TIMER) && (obj_get_timer(obj) > 0))
     obj_set_timer(obj, obj_get_timer(obj) - (use));
   if (obj->contains)
     update_object(obj->contains, use);

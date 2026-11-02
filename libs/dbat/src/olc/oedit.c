@@ -221,7 +221,7 @@ static void oedit_setup_new(struct descriptor_data *d)
   obj_set_value(OLC_OBJ(d), VAL_ALL_MATERIAL, MATERIAL_STEEL);
   obj_set_size(OLC_OBJ(d), SIZE_MEDIUM);
 
-  SCRIPT(OLC_OBJ(d))       = NULL;
+  OLC_OBJ(d)->script       = NULL;
   OLC_OBJ(d)->proto_script = OLC_SCRIPT(d) = NULL;
 }
 
@@ -248,7 +248,7 @@ static void oedit_setup_existing(struct descriptor_data *d, int real_num)
    * The edited obj must not have a script.
    * It will be assigned to the updated obj later, after editing.
    */
-  SCRIPT(obj)              = NULL;
+  obj->script              = NULL;
   OLC_OBJ(d)->proto_script = NULL;
 }
 
@@ -281,7 +281,7 @@ static void oedit_save_internally(struct descriptor_data *d)
     if (obj->item_number != robj_num)
       continue;
     /* remove any old scripts */
-    if (SCRIPT(obj))
+    if (obj->script)
       extract_script(obj, OBJ_TRIGGER);
 
     free_proto_script(obj, OBJ_TRIGGER);
@@ -1117,9 +1117,9 @@ void oedit_parse(struct descriptor_data *d, char *arg)
             add_to_lookup_table(obj_get_id(obj), OBJ_TRIGGER, (void *)obj);
             if (obj_get_vnum(obj) != NOTHING) {
               /* remove any old scripts */
-              if (SCRIPT(obj)) {
+              if (obj->script) {
                 extract_script(obj, OBJ_TRIGGER);
-                SCRIPT(obj) = NULL;
+                obj->script = NULL;
               }
 
               free_proto_script(obj, OBJ_TRIGGER);
@@ -1798,9 +1798,9 @@ static void iedit_setup_existing(struct descriptor_data *d, struct obj_data *rea
   copy_object(obj, real_num);
 
   /* free any assigned scripts */
-  if (SCRIPT(obj))
+  if (obj->script)
     extract_script(obj, OBJ_TRIGGER);
-  SCRIPT(obj) = NULL;
+  obj->script = NULL;
   /* find_obj helper */
   remove_from_lookup_table(obj_get_id(obj));
 

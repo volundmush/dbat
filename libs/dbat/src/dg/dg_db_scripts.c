@@ -40,8 +40,8 @@ struct dg_lint_block {
 
 static void dg_lint_warn(const trig_data *trig, struct descriptor_data *d, int line, const char *msg)
 {
-  mud_log("SCRIPT WARN: trig #%d '%s' line %d: %s", GET_TRIG_VNUM(trig),
-          GET_TRIG_NAME(trig) ? GET_TRIG_NAME(trig) : "", line, msg);
+  mud_log("SCRIPT WARN: trig #%d '%s' line %d: %s", trig_get_vnum(trig),
+          trig->name ? trig->name : "", line, msg);
   if (d)
     write_to_output(d, "Warning: line %d: %s\r\n", line, msg);
 }
@@ -302,9 +302,7 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
       }
 
       if (rnum != NOTHING) {
-        if (!(room->script))
-          CREATE(room->script, struct script_data, 1);
-        add_trigger(SCRIPT(room), read_trigger(rnum), -1);
+        add_trigger(dg_ensure_script(&room->script), read_trigger(rnum), -1);
       } else {
         mudlog(LOG_BRF, ADMLVL_BUILDER, TRUE,
                "SYSERR: non-existant trigger #%d assigned to room #%d",
@@ -371,9 +369,7 @@ void assign_triggers(void *i, int type)
                  "SYSERR: trigger #%d non-existant, for mob #%d",
                  trg_proto->vnum, mob_index[mob->nr].vnum);
         } else {
-          if (!SCRIPT(mob))
-            CREATE(SCRIPT(mob), struct script_data, 1);
-          add_trigger(SCRIPT(mob), read_trigger(rnum), -1);
+          add_trigger(dg_ensure_script(&mob->script), read_trigger(rnum), -1);
         }
         trg_proto = trg_proto->next;
       }
@@ -387,9 +383,7 @@ void assign_triggers(void *i, int type)
           mud_log("SYSERR: trigger #%d non-existant, for obj #%d",
                   trg_proto->vnum, obj_index[obj->item_number].vnum);
         } else {
-          if (!SCRIPT(obj))
-            CREATE(SCRIPT(obj), struct script_data, 1);
-          add_trigger(SCRIPT(obj), read_trigger(rnum), -1);
+          add_trigger(dg_ensure_script(&obj->script), read_trigger(rnum), -1);
         }
         trg_proto = trg_proto->next;
       }
@@ -404,9 +398,7 @@ void assign_triggers(void *i, int type)
                  "SYSERR: trigger #%d non-existant, for room #%d",
                  trg_proto->vnum, room->number);
         } else {
-          if (!SCRIPT(room))
-            CREATE(SCRIPT(room), struct script_data, 1);
-          add_trigger(SCRIPT(room), read_trigger(rnum), -1);
+          add_trigger(dg_ensure_script(&room->script), read_trigger(rnum), -1);
         }
         trg_proto = trg_proto->next;
       }

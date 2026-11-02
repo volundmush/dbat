@@ -209,7 +209,7 @@ static void medit_setup_new(struct descriptor_data *d)
   GET_LDESC(mob)    = strdup("An unfinished mob stands here.\r\n");
   GET_DDESC(mob)    = strdup("It looks unfinished.\r\n");
   mob->race         = RACE_HUMAN;
-  SCRIPT(mob)       = NULL;
+  mob->script       = NULL;
   mob->proto_script = OLC_SCRIPT(d) = NULL;
 
   OLC_MOB(d) = mob;
@@ -238,7 +238,7 @@ static void medit_setup_existing(struct descriptor_data *d, int rmob_num)
    * The edited mob must not have a script.
    * It will be assigned to the updated mob later, after editing.
    */
-  SCRIPT(mob)              = NULL;
+  mob->script              = NULL;
   OLC_MOB(d)->proto_script = NULL;
 }
 
@@ -303,7 +303,7 @@ static void medit_save_internally(struct descriptor_data *d)
       continue;
 
     /* remove any old scripts */
-    if (SCRIPT(mob))
+    if (mob->script)
       extract_script(mob, MOB_TRIGGER);
 
     free_proto_script(mob, MOB_TRIGGER);

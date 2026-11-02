@@ -200,10 +200,10 @@ void extract_char_final(struct char_data *ch)
     if (char_get_nr(ch) != NOTHING) /* prototyped */
       mob_index[char_get_nr(ch)].number--;
     clearMemory(ch);
-    if (SCRIPT(ch))
+    if (ch->script)
       extract_script(ch, MOB_TRIGGER);
-    if (SCRIPT_MEM(ch))
-      extract_script_mem(SCRIPT_MEM(ch));
+    if (ch->memory)
+      extract_script_mem(ch->memory);
   } else {
     save_char(ch);
     Crash_delete_crashfile(ch);
@@ -321,7 +321,7 @@ void extract_obj(struct obj_data *obj)
   if (obj_get_item_number(obj) != NOTHING)
     (obj_index[obj_get_item_number(obj)].number)--;
 
-  if (SCRIPT(obj))
+  if (obj->script)
     extract_script(obj, OBJ_TRIGGER);
 
   if (obj_get_vnum(obj) != 80 && obj_get_vnum(obj) != 81) {

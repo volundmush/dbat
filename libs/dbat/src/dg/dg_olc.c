@@ -205,13 +205,13 @@ static void trigedit_disp_menu(struct descriptor_data *d)
 
   if (trig->attach_type == OBJ_TRIGGER) {
     attach_type = "Objects";
-    sprintbit(GET_TRIG_TYPE(trig), otrig_types, trgtypes, sizeof(trgtypes));
+    sprintbit(trig->trigger_type, otrig_types, trgtypes, sizeof(trgtypes));
   } else if (trig->attach_type == WLD_TRIGGER) {
     attach_type = "Rooms";
-    sprintbit(GET_TRIG_TYPE(trig), wtrig_types, trgtypes, sizeof(trgtypes));
+    sprintbit(trig->trigger_type, wtrig_types, trgtypes, sizeof(trgtypes));
   } else {
     attach_type = "Mobiles";
-    sprintbit(GET_TRIG_TYPE(trig), trig_types, trgtypes, sizeof(trgtypes));
+    sprintbit(trig->trigger_type, trig_types, trgtypes, sizeof(trgtypes));
   }
 
   clear_screen(d);
@@ -230,7 +230,7 @@ static void trigedit_disp_menu(struct descriptor_data *d)
                   "Enter Choice :",
 
                   OLC_NUM(d),                         /* vnum on the title line */
-                  GET_TRIG_NAME(trig),                /* name                   */
+                  trig->name,                         /* name                   */
                   attach_type,                        /* attach type            */
                   trgtypes,                           /* greet/drop/etc         */
                   trig->narg,                         /* numeric arg            */
@@ -265,7 +265,7 @@ static void trigedit_disp_types(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, types[i],
                     !(++columns % 2) ? "\r\n" : "");
   }
-  sprintbit(GET_TRIG_TYPE(OLC_TRIG(d)), types, bitbuf, sizeof(bitbuf));
+  sprintbit(OLC_TRIG(d)->trigger_type, types, bitbuf, sizeof(bitbuf));
   write_to_output(d, "\r\nCurrent types : @c%s@n\r\nEnter type (0 to quit) : ", bitbuf);
 }
 
@@ -278,7 +278,7 @@ void trigedit_parse(struct descriptor_data *d, char *arg)
       switch (tolower(*arg)) {
         case 'q':
           if (OLC_VAL(d)) { /* Anything been changed? */
-            if (!GET_TRIG_TYPE(OLC_TRIG(d))) {
+            if (!OLC_TRIG(d)->trigger_type) {
               write_to_output(d, "Invalid Trigger Type! Answer a to abort quit!\r\n");
             }
             write_to_output(d, "Do you wish to save your changes? : ");
@@ -389,7 +389,7 @@ void trigedit_parse(struct descriptor_data *d, char *arg)
       if ((i = atoi(arg)) == 0)
         break;
       else if (!((i < 0) || (i > NUM_TRIG_TYPE_FLAGS)))
-        TOGGLE_BIT((GET_TRIG_TYPE(OLC_TRIG(d))), 1U << (i - 1));
+        TOGGLE_BIT((OLC_TRIG(d)->trigger_type), 1U << (i - 1));
       OLC_VAL(d)
       ++;
       trigedit_disp_types(d);
@@ -458,7 +458,7 @@ static void trigedit_replace_existing(struct descriptor_data *d, trig_rnum rnum)
   /* go through the mud and replace existing triggers         */
   live_trig = trigger_list;
   while (live_trig) {
-    if (GET_TRIG_RNUM(live_trig) == rnum) {
+    if (live_trig->nr == rnum) {
       if (live_trig->arglist) {
         free(live_trig->arglist);
         live_trig->arglist = NULL;
@@ -474,9 +474,9 @@ static void trigedit_replace_existing(struct descriptor_data *d, trig_rnum rnum)
         live_trig->name = strdup(proto->name);
 
       /* anything could have happened so we don't want to keep these */
-      if (GET_TRIG_WAIT(live_trig)) {
-        event_cancel(GET_TRIG_WAIT(live_trig));
-        GET_TRIG_WAIT(live_trig) = NULL;
+      if (live_trig->wait_event) {
+        event_cancel(live_trig->wait_event);
+        live_trig->wait_event = NULL;
       }
       if (live_trig->var_list) {
         free_varlist(live_trig->var_list);
@@ -520,10 +520,10 @@ static void trigedit_insert_new(struct descriptor_data *d)
         rnum  = i;
 
         CREATE(new_index[rnum], struct index_data, 1);
-        GET_TRIG_RNUM(OLC_TRIG(d)) = rnum;
-        new_index[rnum]->vnum      = OLC_NUM(d);
-        new_index[rnum]->number    = 0;
-        new_index[rnum]->func      = NULL;
+        OLC_TRIG(d)->nr         = rnum;
+        new_index[rnum]->vnum   = OLC_NUM(d);
+        new_index[rnum]->number = 0;
+        new_index[rnum]->func   = NULL;
         CREATE(proto, struct trig_data, 1);
         new_index[rnum]->proto = proto;
         trig_data_copy(proto, trig);
@@ -545,10 +545,10 @@ static void trigedit_insert_new(struct descriptor_data *d)
   if (!found) {
     rnum = i;
     CREATE(new_index[rnum], struct index_data, 1);
-    GET_TRIG_RNUM(OLC_TRIG(d)) = rnum;
-    new_index[rnum]->vnum      = OLC_NUM(d);
-    new_index[rnum]->number    = 0;
-    new_index[rnum]->func      = NULL;
+    OLC_TRIG(d)->nr         = rnum;
+    new_index[rnum]->vnum   = OLC_NUM(d);
+    new_index[rnum]->number = 0;
+    new_index[rnum]->func   = NULL;
 
     CREATE(proto, struct trig_data, 1);
     new_index[rnum]->proto = proto;
@@ -562,15 +562,15 @@ static void trigedit_insert_new(struct descriptor_data *d)
 
   /* HERE IT HAS TO GO THROUGH AND FIX ALL SCRIPTS/TRIGS OF HIGHER RNUM */
   for (live_trig = trigger_list; live_trig; live_trig = live_trig->next_in_world)
-    GET_TRIG_RNUM(live_trig) += (GET_TRIG_RNUM(live_trig) != NOTHING && GET_TRIG_RNUM(live_trig) > rnum);
+    live_trig->nr += (live_trig->nr != NOTHING && live_trig->nr > rnum);
 
   /*
    * Update other trigs being edited.
    */
   for (dsc = descriptor_list; dsc; dsc = dsc->next)
     if (desc_get_connected(dsc) == CON_TRIGEDIT)
-      if (GET_TRIG_RNUM(OLC_TRIG(dsc)) >= rnum)
-        GET_TRIG_RNUM(OLC_TRIG(dsc)) += 1;
+      if (OLC_TRIG(dsc)->nr >= rnum)
+        OLC_TRIG(dsc)->nr++;
 }
 
 /*
@@ -612,14 +612,14 @@ static void trigedit_write_zone_file(struct descriptor_data *d)
         fclose(trig_file);
         return;
       }
-      sprintascii(bitBuf, GET_TRIG_TYPE(trig));
+      sprintascii(bitBuf, trig->trigger_type);
       fprintf(trig_file, "%s%c\n"
                          "%d %s %d\n"
                          "%s%c\n",
-              (GET_TRIG_NAME(trig)) ? (GET_TRIG_NAME(trig)) : "unknown trigger", STRING_TERMINATOR,
+              (trig->name) ? (trig->name) : "unknown trigger", STRING_TERMINATOR,
               trig->attach_type,
-              *bitBuf ? bitBuf : "0", GET_TRIG_NARG(trig),
-              GET_TRIG_ARG(trig) ? GET_TRIG_ARG(trig) : "", STRING_TERMINATOR);
+              *bitBuf ? bitBuf : "0", trig->narg,
+              trig->arglist ? trig->arglist : "", STRING_TERMINATOR);
 
       /* The script, one line per command. Written directly: scripts can exceed any fixed buffer. */
       if (!trig->cmdlist)

@@ -487,7 +487,7 @@ int save_zone(zone_rnum zone_num)
         arg3    = world[ZCMD(zone_num, subcmd).arg3].number;     /* room num */
         arg4    = -1;
         arg5    = ZCMD(zone_num, subcmd).arg5;
-        comment = GET_TRIG_NAME(trig_index[real_trigger(arg2)]->proto);
+        comment = trig_index[real_trigger(arg2)]->proto->name;
         break;
       case 'V':
         arg1 = ZCMD(zone_num, subcmd).arg1; /* trigger type */
