@@ -359,77 +359,10 @@ struct oasis_olc_data {
 /* 
  * Submodes of CEDIT connectedness.
  */
-#define CEDIT_MAIN_MENU              0
-#define CEDIT_CONFIRM_SAVESTRING     1
-#define CEDIT_GAME_OPTIONS_MENU      2
-#define CEDIT_CRASHSAVE_OPTIONS_MENU 3
-#define CEDIT_OPERATION_OPTIONS_MENU 4
-#define CEDIT_DISP_EXPERIENCE_MENU   5
-#define CEDIT_ROOM_NUMBERS_MENU      6
-#define CEDIT_AUTOWIZ_OPTIONS_MENU   7
-#define CEDIT_OK                     8
-#define CEDIT_NOPERSON               9
-#define CEDIT_NOEFFECT               10
-#define CEDIT_DFLT_IP                11
-#define CEDIT_DFLT_DIR               12
-#define CEDIT_LOGNAME                13
-#define CEDIT_MENU                   14
-#define CEDIT_WELC_MESSG             15
-#define CEDIT_START_MESSG            16
-#define CEDIT_ADVANCE_OPTIONS_MENU   17
-
-/*
- * Numerical responses.
- */
-#define CEDIT_NUMERICAL_RESPONSE    20
-#define CEDIT_LEVEL_CAN_SHOUT       21
-#define CEDIT_HOLLER_MOVE_COST      22
-#define CEDIT_TUNNEL_SIZE           23
-#define CEDIT_MAX_EXP_GAIN          24
-#define CEDIT_MAX_EXP_LOSS          25
-#define CEDIT_MAX_NPC_CORPSE_TIME   26
-#define CEDIT_MAX_PC_CORPSE_TIME    27
-#define CEDIT_IDLE_VOID             28
-#define CEDIT_IDLE_RENT_TIME        29
-#define CEDIT_IDLE_MAX_LEVEL        30
-#define CEDIT_DTS_ARE_DUMPS         31
-#define CEDIT_LOAD_INTO_INVENTORY   32
-#define CEDIT_TRACK_THROUGH_DOORS   33
-#define CEDIT_LEVEL_CAP             34
-#define CEDIT_MAX_OBJ_SAVE          35
-#define CEDIT_MIN_RENT_COST         36
-#define CEDIT_AUTOSAVE_TIME         37
-#define CEDIT_CRASH_FILE_TIMEOUT    38
-#define CEDIT_RENT_FILE_TIMEOUT     39
-#define CEDIT_MORTAL_START_ROOM     40
-#define CEDIT_IMMORT_START_ROOM     41
-#define CEDIT_FROZEN_START_ROOM     42
-#define CEDIT_DONATION_ROOM_1       43
-#define CEDIT_DONATION_ROOM_2       44
-#define CEDIT_DONATION_ROOM_3       45
-#define CEDIT_DFLT_PORT             46
-#define CEDIT_MAX_PLAYING           47
-#define CEDIT_MAX_FILESIZE          48
-#define CEDIT_MAX_BAD_PWS           49
-#define CEDIT_SITEOK_EVERYONE       50
-#define CEDIT_NAMESERVER_IS_SLOW    51
-#define CEDIT_USE_AUTOWIZ           52
-#define CEDIT_MIN_WIZLIST_LEV       53
-#define CEDIT_ALLOW_MULTICLASS      54
-#define CEDIT_EXP_MULTIPLIER        55
-#define CEDIT_PULSE_VIOLENCE        56
-#define CEDIT_PULSE_MOBILE          57
-#define CEDIT_PULSE_ZONE            58
-#define CEDIT_PULSE_CURRENT         59
-#define CEDIT_PULSE_IDLEPWD         60
-#define CEDIT_PULSE_USAGE           61
-#define CEDIT_PULSE_SANITY          62
-#define CEDIT_PULSE_AUTOSAVE        63
-#define CEDIT_PULSE_TIMESAVE        64
-#define CEDIT_TICKS_OPTIONS_MENU    65
-#define CEDIT_CREATION_OPTIONS_MENU 66
-#define CEDIT_CREATION_MENU         67
-#define CEDIT_POINTS_MENU           68
+#define CEDIT_MAIN_MENU          0
+#define CEDIT_CONFIRM_SAVESTRING 1
+#define CEDIT_SUBMENU            2 /* OLC_VAL: the submenu's main menu key */
+#define CEDIT_OPTION             3 /* OLC_VAL: the option's index in cedit_options[] */
 
 #define ASSEDIT_DO_NOT_USE       0
 #define ASSEDIT_MAIN_MENU        1

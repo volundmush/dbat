@@ -179,13 +179,16 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type)
       case CLEANUP_STRUCTS:
         free(OLC_ROOM(d));
         break;
-      case CLEANUP_CONFIG:
-        free_config(OLC_CONFIG(d));
-        break;
       default: /* The caller has screwed up. */
         mud_log("SYSERR: cleanup_olc: Unknown type!");
         break;
     }
+  }
+
+  /* cedit's copy of the configuration (it has no room, so this can't go above) */
+  if (OLC_CONFIG(d)) {
+    free_config(OLC_CONFIG(d));
+    OLC_CONFIG(d) = NULL;
   }
 
   /*
