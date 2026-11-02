@@ -16,21 +16,21 @@
 #include "dbat/db.h"
 #include "dbat/oasis.h"
 
-static int parse_stat_menu(struct descriptor_data *d, char *arg);
+static bool parse_stat_menu(struct descriptor_data *d, char *arg);
 static int stats_assign_stat(int abil, char *arg, struct descriptor_data *d);
 
 /* --relistan 2/22/99 for player configurable stats */
-int parse_stats(struct descriptor_data *d, char *arg)
+bool parse_stats(struct descriptor_data *d, char *arg)
 {
   struct char_data *ch;
 
   ch = d->character;
   switch (OLC_MODE(d)) {
     case STAT_QUIT:
-      return 1;
+      return true;
     case STAT_PARSE_MENU:
       if (parse_stat_menu(d, arg))
-        return 1;
+        return true;
       break;
     case STAT_GET_STR:
       ch->real_abils.str = stats_assign_stat(ch->real_abils.str, arg, d);
@@ -60,10 +60,10 @@ int parse_stats(struct descriptor_data *d, char *arg)
       OLC_MODE(d) = stats_disp_menu(d);
       break;
   }
-  return 0;
+  return false;
 }
 
-int stats_disp_menu(struct descriptor_data *d)
+bool stats_disp_menu(struct descriptor_data *d)
 {
   send_to_char(d->character,
                "\r\n"
@@ -92,10 +92,10 @@ int stats_disp_menu(struct descriptor_data *d)
 
   OLC_MODE(d) = STAT_PARSE_MENU;
 
-  return 1;
+  return true;
 }
 
-static int parse_stat_menu(struct descriptor_data *d, char *arg)
+static bool parse_stat_menu(struct descriptor_data *d, char *arg)
 {
   /* Main parse loop */
   *arg = tolower(*arg);
@@ -126,11 +126,11 @@ static int parse_stat_menu(struct descriptor_data *d, char *arg)
       break;
     case 'q':
       OLC_MODE(d) = STAT_QUIT;
-      return 1;
+      return true;
     default:
       stats_disp_menu(d);
   }
-  return 0;
+  return false;
 }
 
 static int stats_assign_stat(int abil, char *arg, struct descriptor_data *d)

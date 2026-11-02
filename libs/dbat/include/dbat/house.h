@@ -51,7 +51,7 @@ extern int num_of_houses;                                  /* house.c */
 
 void House_boot(void);
 void House_save_all(void);
-int House_can_enter(struct char_data *ch, room_vnum house);
+bool House_can_enter(struct char_data *ch, room_vnum house);
 void hcontrol_list_houses(struct char_data *ch);
 int find_house(room_vnum vnum);         /* house.c */
 void House_save_control(void);          /* house.c */

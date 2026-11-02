@@ -9,11 +9,11 @@ improved-edit.c		Routines specific to the improved editor.
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 
-static int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high);
+static bool format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high);
 static void parse_edit_action(int command, char *string, struct descriptor_data *d);
 static int replace_str(char **string, char *pattern, char *replacement, int rep_all, unsigned int max_size);
 
-int format_script(struct descriptor_data *d);
+bool format_script(struct descriptor_data *d);
 
 void send_editor_help(struct descriptor_data *d)
 {
@@ -434,7 +434,7 @@ static void parse_edit_action(int command, char *string, struct descriptor_data 
  * Re-formats message type formatted char *.
  * (for strings edited with d->str) (mostly olc and mail)
  */
-static int format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high)
+static bool format_text(char **ptr_string, int mode, struct descriptor_data *d, unsigned int maxlen, int low, int high)
 {
   int line_chars, cap_next = true, cap_next_next = false, color_chars = 0, i, pass_line = 0;
   char *flow, *start = nullptr, *str, temp;
@@ -443,7 +443,7 @@ static int format_text(char **ptr_string, int mode, struct descriptor_data *d, u
   /* XXX: Want to make sure the string doesn't grow either... */
 
   if ((flow = *ptr_string) == nullptr)
-    return 0;
+    return false;
 
   str = strdup(flow);
   for (i = 0; i < low - 1; i++) {
@@ -452,7 +452,7 @@ static int format_text(char **ptr_string, int mode, struct descriptor_data *d, u
       write_to_output(d, "There aren't that many lines!\r\n");
       free(str);
       free(formatted.s);
-      return 0;
+      return false;
     }
     tb_puts(&formatted, start);
     tb_puts(&formatted, "\n");
@@ -577,7 +577,7 @@ static int format_text(char **ptr_string, int mode, struct descriptor_data *d, u
   if (formatted.len + 1 > maxlen)
     formatted.s[maxlen - 1] = '\0';
   tb_install(&formatted, ptr_string);
-  return 1;
+  return true;
 }
 
 /* Replaces the first (or, with rep_all, every) occurrence of pattern. Returns how many were replaced,

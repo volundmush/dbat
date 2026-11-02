@@ -28,16 +28,16 @@
 static void mob_taunt(struct char_data *ch);
 
 /* local functions */
-static int player_present(struct char_data *ch);
+static bool player_present(struct char_data *ch);
 
-static int player_present(struct char_data *ch)
+static bool player_present(struct char_data *ch)
 {
 
   struct char_data *vict, *next_v;
   int found = false;
 
   if (char_get_in_room(ch) == NOWHERE)
-    return 0;
+    return false;
 
   for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
     next_v = vict->next_in_room;

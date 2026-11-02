@@ -15,12 +15,12 @@
 #include "dbat/atomicfile.h"
 
 static obj_rnum adjust_objects(obj_rnum refpt);
-static int copy_object_preserve(struct obj_data *to, struct obj_data *from);
+static bool copy_object_preserve(struct obj_data *to, struct obj_data *from);
 static obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornum);
 static obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum);
 static int update_objects(struct obj_data *refobj);
 
-static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
+static bool copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
 
 obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum)
 {
@@ -189,7 +189,7 @@ static obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornu
 
 /* ------------------------------------------------------------------------------------------------------------------------------ */
 
-int save_objects(zone_rnum zone_num)
+bool save_objects(zone_rnum zone_num)
 {
   char cmfname[128], buf[MAX_STRING_LENGTH];
   char ebuf1[MAX_STRING_LENGTH], ebuf2[MAX_STRING_LENGTH];
@@ -420,18 +420,18 @@ static void copy_object_strings(struct obj_data *to, struct obj_data *from)
     to->ex_description = nullptr;
 }
 
-int copy_object(struct obj_data *to, struct obj_data *from)
+bool copy_object(struct obj_data *to, struct obj_data *from)
 {
   free_object_strings(to);
   return copy_object_main(to, from, true);
 }
 
-static int copy_object_preserve(struct obj_data *to, struct obj_data *from)
+static bool copy_object_preserve(struct obj_data *to, struct obj_data *from)
 {
   return copy_object_main(to, from, false);
 }
 
-static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object)
+static bool copy_object_main(struct obj_data *to, struct obj_data *from, int free_object)
 {
   *to = *from;
   copy_object_strings(to, from);

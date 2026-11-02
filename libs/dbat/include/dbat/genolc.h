@@ -6,17 +6,17 @@ constexpr int STRING_TERMINATOR = '~';
 
 #define CONFIG_GENOLC_MOBPROG 0
 
-int genolc_checkstring(struct descriptor_data *d, char *arg);
+bool genolc_checkstring(struct descriptor_data *d, char *arg);
 
 /* Shop and guild messages are builder text used as a printf format: one %s for the customer's name, plus one %d
  * for the price when allow_int is set (shop buy/sell). Returns NULL if msg is safe to use that way, else why not. */
 const char *npc_msg_format_problem(const char *msg, bool allow_int);
 
-int remove_from_save_list(zone_vnum, int type);
-int add_to_save_list(zone_vnum, int type);
-int in_save_list(zone_vnum, int type);
+bool remove_from_save_list(zone_vnum, int type);
+bool add_to_save_list(zone_vnum, int type);
+bool in_save_list(zone_vnum, int type);
 void strip_cr(char *);
-int save_all(void);
+bool save_all(void);
 char *str_udup(const char *);
 void olc_list_columns(struct descriptor_data *d, const char *const *names, int count, int first_number, const char *gap, int columns);
 void copy_ex_descriptions(struct extra_descr_data **to, struct extra_descr_data *from);

@@ -667,7 +667,7 @@ static bool command_pass(const char *cmd, struct char_data *ch)
   return true;
 }
 
-int special(struct char_data *ch, int cmd, char *arg)
+bool special(struct char_data *ch, int cmd, char *arg)
 {
   struct obj_data *i;
   struct char_data *k;
@@ -677,36 +677,36 @@ int special(struct char_data *ch, int cmd, char *arg)
   /* special in room? */
   if (in_a_room && rroom_get_spec(char_get_in_room(ch)) != nullptr)
     if (rroom_get_spec(char_get_in_room(ch))(ch, world + char_get_in_room(ch), cmd, arg))
-      return (1);
+      return true;
 
   /* special in equipment list? */
   for (j = 0; j < NUM_WEARS; j++)
     if (char_get_equipment(ch, j) && obj_get_spec(char_get_equipment(ch, j)) != nullptr)
       if (obj_get_spec(char_get_equipment(ch, j))(ch, char_get_equipment(ch, j), cmd, arg))
-        return (1);
+        return true;
 
   /* special in inventory? */
   for (i = ch->carrying; i; i = i->next_content)
     if (obj_get_spec(i) != nullptr)
       if (obj_get_spec(i)(ch, i, cmd, arg))
-        return (1);
+        return true;
 
   if (!in_a_room)
-    return (0);
+    return false;
 
   /* special in mobile present? */
   for (k = world[char_get_in_room(ch)].people; k; k = k->next_in_room)
     if (!char_mob_flagged(k, MOB_NOTDEADYET))
       if (char_get_mob_spec(k) && char_get_mob_spec(k)(ch, k, cmd, arg))
-        return (1);
+        return true;
 
   /* special in object present? */
   for (i = world[char_get_in_room(ch)].contents; i; i = i->next_content)
     if (obj_get_spec(i) != nullptr)
       if (obj_get_spec(i)(ch, i, cmd, arg))
-        return (1);
+        return true;
 
-  return (0);
+  return false;
 }
 
 /*

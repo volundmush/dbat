@@ -37,7 +37,7 @@ static int64_t mana_gain(struct char_data *ch);
 static int64_t hit_gain(struct char_data *ch);
 static void update_flags(struct char_data *ch);
 
-static int wearing_stardust(struct char_data *ch);
+static bool wearing_stardust(struct char_data *ch);
 static void healthy_check(struct char_data *ch);
 static void barrier_shed(struct char_data *ch);
 static void check_idling(struct char_data *ch);
@@ -161,7 +161,7 @@ static void healthy_check(struct char_data *ch)
   return;
 }
 
-static int wearing_stardust(struct char_data *ch)
+static bool wearing_stardust(struct char_data *ch)
 {
 
   int count = 0, i;
@@ -187,9 +187,9 @@ static int wearing_stardust(struct char_data *ch)
   }
 
   if (count == 26)
-    return (1);
+    return true;
   else
-    return (0);
+    return false;
 }
 
 /*

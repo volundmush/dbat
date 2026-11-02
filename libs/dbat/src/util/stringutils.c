@@ -205,19 +205,19 @@ char *two_arguments(char *argument, char *first_arg, char *second_arg)
  * Same as two_arguments only, well you get the idea... - Iovan
  *
  */
-int is_abbrev(const char *arg1, const char *arg2)
+bool is_abbrev(const char *arg1, const char *arg2)
 {
   if (!*arg1)
-    return (0);
+    return false;
 
   for (; *arg1 && *arg2; arg1++, arg2++)
     if (tolower(*arg1) != tolower(*arg2))
-      return (0);
+      return false;
 
   if (!*arg1)
-    return (1);
+    return true;
   else
-    return (0);
+    return false;
 }
 
 /*
@@ -311,13 +311,13 @@ int search_block(char *arg, const char **list, int exact)
   return (-1);
 }
 
-int is_number(const char *str)
+bool is_number(const char *str)
 {
   while (*str)
     if (!isdigit(*(str++)))
-      return (0);
+      return false;
 
-  return (1);
+  return true;
 }
 
 static const char *fill[] =
@@ -332,7 +332,7 @@ static const char *fill[] =
         "to",
         "\n"};
 
-int fill_word(char *argument)
+bool fill_word(char *argument)
 {
   return (search_block(argument, fill, true) >= 0);
 }
@@ -349,7 +349,7 @@ static const char *reserved[] =
         "something",
         "\n"};
 
-int reserved_word(char *argument)
+bool reserved_word(char *argument)
 {
   return (search_block(argument, reserved, true) >= 0);
 }

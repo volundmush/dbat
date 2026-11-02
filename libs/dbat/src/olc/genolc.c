@@ -24,7 +24,7 @@ static struct save_list_data *save_list;
 /* Structure defining all known save types.  */
 static struct {
   int save_type;
-  int (*func)(IDXTYPE rnum);
+  bool (*func)(IDXTYPE rnum);
   const char *message;
 } save_types[] = {
     {SL_MOB, save_mobiles, "mobile"},
@@ -39,7 +39,7 @@ static struct {
     {-1,     nullptr,      nullptr },
 };
 
-int genolc_checkstring(struct descriptor_data *d, char *arg)
+bool genolc_checkstring(struct descriptor_data *d, char *arg)
 {
   smash_tilde(arg);
   return true;
@@ -90,7 +90,7 @@ char *str_udup(const char *txt)
 }
 
 /* Original use: to be called at shutdown time.  */
-int save_all(void)
+bool save_all(void)
 {
   while (save_list) {
     if (save_list->type < 0 || save_list->type > SL_MAX) {
@@ -107,7 +107,7 @@ int save_all(void)
           mud_log("SYSERR: GenOLC: Invalid save type %d in save list.\n", save_list->type);
           break;
       }
-    } else if ((*save_types[save_list->type].func)(real_zone(save_list->zone)) < 0)
+    } else if (!save_types[save_list->type].func(real_zone(save_list->zone)))
       save_list = save_list->next; /* Fatal error, skip this one. */
   }
 
@@ -163,7 +163,7 @@ void free_ex_descriptions(struct extra_descr_data *head)
   }
 }
 
-int remove_from_save_list(zone_vnum zone, int type)
+bool remove_from_save_list(zone_vnum zone, int type)
 {
   struct save_list_data *ritem, *temp;
 
@@ -180,7 +180,7 @@ int remove_from_save_list(zone_vnum zone, int type)
   return true;
 }
 
-int add_to_save_list(zone_vnum zone, int type)
+bool add_to_save_list(zone_vnum zone, int type)
 {
   struct save_list_data *nitem;
   zone_rnum rznum;
@@ -208,7 +208,7 @@ int add_to_save_list(zone_vnum zone, int type)
   return true;
 }
 
-int in_save_list(zone_vnum zone, int type)
+bool in_save_list(zone_vnum zone, int type)
 {
   struct save_list_data *nitem;
 

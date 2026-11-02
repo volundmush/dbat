@@ -26,9 +26,9 @@ struct house_control_rec house_control[MAX_HOUSES];
 int num_of_houses = 0;
 
 /* local functions */
-static int House_get_filename(room_vnum vnum, char *filename, size_t maxlen);
-static int House_load(room_vnum vnum);
-static int House_save(struct obj_data *obj, FILE *fp, int location);
+static bool House_get_filename(room_vnum vnum, char *filename, size_t maxlen);
+static bool House_load(room_vnum vnum);
+static bool House_save(struct obj_data *obj, FILE *fp, int location);
 static void House_restore_weight(struct obj_data *obj);
 
 static void hcontrol_build_house(struct char_data *ch, char *arg);
@@ -40,18 +40,18 @@ static void hcontrol_pay_house(struct char_data *ch, char *arg);
 /* First, the basics: finding the filename; loading/saving objects */
 
 /* Return a filename given a house vnum */
-static int House_get_filename(room_vnum vnum, char *filename, size_t maxlen)
+static bool House_get_filename(room_vnum vnum, char *filename, size_t maxlen)
 {
   if (vnum == NOWHERE)
-    return (0);
+    return false;
 
   snprintf(filename, maxlen, LIB_HOUSE "%d.house", vnum);
-  return (1);
+  return true;
 }
 
 /* Save all objects for a house (recursive; initial call must be followed
    by a call to House_restore_weight)  Assumes file is open already. */
-static int House_save(struct obj_data *obj, FILE *fp, int location)
+static bool House_save(struct obj_data *obj, FILE *fp, int location)
 {
   struct obj_data *tmp;
   int result;
@@ -65,12 +65,12 @@ static int House_save(struct obj_data *obj, FILE *fp, int location)
     House_save(obj->contains, fp, MIN(0, location) - 1);
     result = Obj_to_store(obj, fp, location);
     if (!result)
-      return (0);
+      return false;
 
     for (tmp = obj->in_obj; tmp; tmp = tmp->in_obj)
       obj_set_weight(tmp, obj_get_weight(tmp) - (obj_get_weight(obj)));
   }
-  return (1);
+  return true;
 }
 
 /* restore weight of containers after House_save has changed them for saving */
@@ -462,26 +462,26 @@ void House_save_all(void)
 }
 
 /* note: arg passed must be house vnum, so there. */
-int House_can_enter(struct char_data *ch, room_vnum house)
+bool House_can_enter(struct char_data *ch, room_vnum house)
 {
   int i, j;
 
   if (char_adm_flagged(ch, ADM_ALLHOUSES) || (i = find_house(house)) == NOWHERE)
-    return (1);
+    return true;
 
   switch (house_control[i].mode) {
     case HOUSE_CLAN:
     case HOUSE_UNOWNED:
-      return (1);
+      return true;
     case HOUSE_PRIVATE:
       if (char_get_idnum(ch) == house_control[i].owner)
-        return (1);
+        return true;
       for (j = 0; j < house_control[i].num_of_guests; j++)
         if (char_get_idnum(ch) == house_control[i].guests[j])
-          return (1);
+          return true;
   }
 
-  return (0);
+  return false;
 }
 
 static void House_list_guests(struct char_data *ch, int i, int quiet)
@@ -512,7 +512,7 @@ static void House_list_guests(struct char_data *ch, int i, int quiet)
   send_to_char(ch, "\r\n");
 }
 
-static int House_load(room_vnum rvnum)
+static bool House_load(room_vnum rvnum)
 {
   FILE *fl;
   char f1[READ_SIZE], f2[READ_SIZE], f3[READ_SIZE], f4[READ_SIZE];
@@ -529,17 +529,17 @@ static int House_load(room_vnum rvnum)
   room_rnum rrnum;
 
   if ((rrnum = real_room(rvnum)) == NOWHERE)
-    return 0;
+    return false;
 
   if (!House_get_filename(rvnum, cmfname, sizeof(cmfname)))
-    return 0;
+    return false;
 
   if (!(fl = fopen(cmfname, "rb"))) {
     if (errno != ENOENT) { /* if it fails, NOT because of no file */
       snprintf(buf1, sizeof(buf1), "SYSERR: READING HOUSE FILE %s (5)", cmfname);
       perror(buf1);
     }
-    return 0;
+    return false;
   }
 
   for (j = 0; j < MAX_BAG_ROWS; j++)
@@ -619,7 +619,7 @@ static int House_load(room_vnum rvnum)
         if (!get_line(fl, line) ||
             (sscanf(line, "%d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7) != 8)) {
           fprintf(stderr, "Format error in first numeric line (expecting _x_ args)");
-          return 0;
+          return false;
         }
         temp->type_flag     = t[0];
         temp->wear_flags[0] = t[1];
@@ -766,5 +766,5 @@ static int House_load(room_vnum rvnum)
 
   fclose(fl);
 
-  return 1;
+  return true;
 }

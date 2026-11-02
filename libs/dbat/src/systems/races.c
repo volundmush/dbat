@@ -96,7 +96,7 @@ void set_height_and_weight_by_race(struct char_data *ch)
   char_set_weight(ch, hw_info[race].weight[sex] + mod);
 }
 
-int invalid_race(struct char_data *ch, struct obj_data *obj)
+bool invalid_race(struct char_data *ch, struct obj_data *obj)
 {
   if (char_get_admlevel(ch) >= ADMLVL_IMMORT)
     return false;
@@ -278,9 +278,9 @@ int race_find(const char *arg, int sex, bool pc_only)
   return RACE_UNDEFINED;
 }
 
-int race_rpp_cost(int r)
+bool race_rpp_cost(int r)
 {
-  return 0;
+  return false;
   /*
     switch (r) {
         case RACE_SAIYAN:
@@ -292,14 +292,14 @@ int race_rpp_cost(int r)
         case RACE_HOSHIJIN:
             return 14;
         default:
-            return 0;
+            return false;
     }
     */
 }
 
-int race_rpp_refund(int r)
+bool race_rpp_refund(int r)
 {
-  return 0;
+  return false;
   /*
     switch (r) {
         case RACE_MAJIN:
@@ -311,7 +311,7 @@ int race_rpp_refund(int r)
         case RACE_BIO:
             return 20;
         default:
-            return 0;
+            return false;
     }
     */
 }

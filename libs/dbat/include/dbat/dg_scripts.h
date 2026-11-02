@@ -138,7 +138,7 @@ void act_mtrigger(const char_data *ch, char *str, char_data *actor, const char_d
 void speech_mtrigger(char_data *actor, char *str);
 void speech_wtrigger(char_data *actor, char *str);
 void greet_memory_mtrigger(char_data *ch);
-int greet_mtrigger(char_data *actor, int dir);
+bool greet_mtrigger(char_data *actor, int dir);
 int entry_mtrigger(char_data *ch);
 void entry_memory_mtrigger(char_data *ch);
 int enter_wtrigger(room_data *room, char_data *actor, int dir);
@@ -155,8 +155,8 @@ void bribe_mtrigger(char_data *ch, char_data *actor,
 int wear_otrigger(obj_data *obj, char_data *actor, int where);
 int remove_otrigger(obj_data *obj, char_data *actor);
 
-int command_mtrigger(char_data *actor, char *cmd, char *argument);
-int command_otrigger(char_data *actor, char *cmd, char *argument);
+bool command_mtrigger(char_data *actor, char *cmd, char *argument);
+bool command_otrigger(char_data *actor, char *cmd, char *argument);
 int command_wtrigger(char_data *actor, char *cmd, char *argument);
 
 int death_mtrigger(char_data *ch, char_data *actor);
@@ -177,7 +177,7 @@ int cast_wtrigger(char_data *actor, char_data *vict, obj_data *obj, int spellnum
 
 int leave_mtrigger(char_data *actor, int dir);
 int leave_wtrigger(room_data *room, char_data *actor, int dir);
-int leave_otrigger(room_data *room, char_data *actor, int dir);
+bool leave_otrigger(room_data *room, char_data *actor, int dir);
 
 int door_mtrigger(char_data *actor, int subcmd, int dir);
 int door_wtrigger(char_data *actor, int subcmd, int dir);

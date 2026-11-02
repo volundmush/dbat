@@ -9,8 +9,8 @@
 static bool is_num(char *arg);
 static void eval_op(const char *op, char *lhs, char *rhs, char *result);
 static char *matching_paren(char *p);
-static int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_data *sc,
-                           trig_data *trig, int type);
+static bool eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_data *sc,
+                            trig_data *trig, int type);
 
 /* returns 1 if string is all digits, else 0 */
 /* bugfixed - would have returned true on num="------" */
@@ -192,8 +192,8 @@ void eval_expr(char *line, char *result, void *go, struct script_data *sc,
  * evaluates expr if it is in the form lhs op rhs, and copies
  * answer in result.  returns 1 if expr is evaluated, else 0
  */
-static int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_data *sc,
-                           trig_data *trig, int type)
+static bool eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_data *sc,
+                            trig_data *trig, int type)
 {
   char *p, *tokens[MAX_INPUT_LENGTH];
   char line[MAX_INPUT_LENGTH], lhr[MAX_INPUT_LENGTH], rhr[MAX_INPUT_LENGTH];
@@ -256,10 +256,10 @@ static int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_dat
         eval_expr(p, rhr, go, sc, trig, type);
         eval_op(ops[i], lhr, rhr, result);
 
-        return 1;
+        return true;
       }
 
-  return 0;
+  return false;
 }
 
 /* returns 1 if cond is true, else 0 */

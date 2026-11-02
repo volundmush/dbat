@@ -1,21 +1,21 @@
 #include "dbat/utils.h"
 #include "dbat/act.informative.h"
 
-int is_name(const char *str, const char *namelist)
+bool is_name(const char *str, const char *namelist)
 {
   const char *curname, *curstr;
 
   if (!*str || !*namelist || !str || !namelist)
-    return (0);
+    return false;
 
   curname = namelist;
   for (;;) {
     for (curstr = str;; curstr++, curname++) {
       if (!*curstr && !isalpha(*curname))
-        return (1);
+        return true;
 
       if (!*curname)
-        return (0);
+        return false;
 
       if (!*curstr || *curname == ' ')
         break;
@@ -27,25 +27,25 @@ int is_name(const char *str, const char *namelist)
     /* skip to next name */
     for (; isalpha(*curname); curname++);
     if (!*curname)
-      return (0);
+      return false;
     curname++; /* first char of new name */
   }
 }
 
 /* allow abbreviations */
 #define WHITESPACE " \t"
-int isname(const char *str, const char *namelist)
+bool isname(const char *str, const char *namelist)
 {
   char *newlist;
   char *curtok;
   static char newlistbuf[MAX_STRING_LENGTH];
 
   if (!str || !*str || !namelist || !*namelist) {
-    return 0;
+    return false;
   }
 
   if (!strcasecmp(str, namelist)) { /* the easy way */
-    return 1;
+    return true;
   }
 
   strlcpy(newlistbuf, namelist, sizeof(newlistbuf));
@@ -56,12 +56,12 @@ int isname(const char *str, const char *namelist)
       /* This, I just consider a bug fix, because abbreviating numbers is just*/
       /* asking for trouble. IE: 100 would return true on 1000 --Sryth*/
       if (isdigit(*str) && (atoi(str) != atoi(curtok))) {
-        return 0;
+        return false;
       }
-      return 1;
+      return true;
     }
   }
-  return 0;
+  return false;
 }
 
 int get_number(char **name)

@@ -363,7 +363,7 @@ static const int list_bonus_cost[] = {
     6,  /* Negative 51 */
 };
 
-static int opp_bonus(struct char_data *ch, int value, int type)
+static bool opp_bonus(struct char_data *ch, int value, int type)
 {
   int give = true;
 

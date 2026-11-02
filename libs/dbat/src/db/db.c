@@ -130,10 +130,10 @@ static int file_to_string_alloc(const char *name, char **buf);
 static int count_alias_records(FILE *fl);
 static int count_hash_records(FILE *fl);
 static bitvector_t asciiflag_conv_aff(char *flag);
-static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr);
+static bool parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr);
 static void interpret_espec(const char *keyword, const char *value, struct char_data *ch, int nr);
 static void parse_espec(char *buf, struct char_data *ch, int nr);
-static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr);
+static bool parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr);
 static void get_one_line(FILE *fl, char *buf);
 static void check_start_rooms(void);
 static void renum_world(void);
@@ -1741,7 +1741,7 @@ static void mob_autobalance(struct char_data *ch)
   GET_SDD(ch) = 0;
 }
 
-static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
+static bool parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
 {
   int t[10];
   char line[READ_SIZE];
@@ -1755,7 +1755,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
 
   if (!get_line(mob_f, line)) {
     mud_log("SYSERR: Format error in mob #%d, file ended after S flag!", nr);
-    return 0;
+    return false;
   }
 
   if (sscanf(line, " %d %d %d %dd%d+%d %dd%d+%d ",
@@ -1763,7 +1763,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
     mud_log("SYSERR: Format error in mob #%d, first line after S flag\n"
             "...expecting line of form '# # # #d#+# #d#+#'",
             nr);
-    return 0;
+    return false;
   }
 
   char_set_race_level(ch, t[0]);
@@ -1787,14 +1787,14 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
     mud_log("SYSERR: Format error in mob #%d, second line after S flag\n"
             "...expecting line of form '# #', but file ended!",
             nr);
-    return 0;
+    return false;
   }
 
   if (sscanf(line, " %d %d %d %d", t, t + 1, t + 2, t + 3) != 4) {
     mud_log("SYSERR: Format error in mob #%d, second line after S flag\n"
             "...expecting line of form '# # # #'",
             nr);
-    return 0;
+    return false;
   }
 
   char_set_gold(ch, t[0]);
@@ -1819,14 +1819,14 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
     mud_log("SYSERR: Format error in last line of mob #%d\n"
             "...expecting line of form '# # #', but file ended!",
             nr);
-    return 0;
+    return false;
   }
 
   if (sscanf(line, " %d %d %d ", t, t + 1, t + 2) != 3) {
     mud_log("SYSERR: Format error in last line of mob #%d\n"
             "...expecting line of form '# # #'",
             nr);
-    return 0;
+    return false;
   }
 
   char_set_position(ch, t[0]);
@@ -1840,7 +1840,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
     mob_autobalance(ch);
   }
 
-  return 1;
+  return true;
 }
 
 /*
@@ -2036,7 +2036,7 @@ static void parse_espec(char *buf, struct char_data *ch, int nr)
   interpret_espec(buf, ptr, ch, nr);
 }
 
-static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr)
+static bool parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr)
 {
   char line[READ_SIZE];
 
@@ -2044,19 +2044,19 @@ static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, int nr)
 
   while (get_line(mob_f, line)) {
     if (!strcmp(line, "E")) /* end of the enhanced section */
-      return 1;
+      return true;
     else if (*line == '#') { /* we've hit the next mob, maybe? */
       mud_log("SYSERR: Unterminated E section in mob #%d", nr);
-      return 0;
+      return false;
     } else
       parse_espec(line, ch, nr);
   }
 
   mud_log("SYSERR: Unexpected end of file reached after mob #%d", nr);
-  return 0;
+  return false;
 }
 
-static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
+static bool parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
 {
   int j, t[10], retval;
   char line[READ_SIZE], *tmpptr, letter;
@@ -2083,13 +2083,13 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
     mud_log("SYSERR: Format error after string section of mob #%d\n"
             "...expecting line of form '# # # {S | E}', but file ended!",
             nr);
-    return 0;
+    return false;
   }
 
   if (((retval = sscanf(line, "%s %s %s %s %s %s %s %s %d %c", f1, f2, f3, f4, f5, f6, f7, f8, t + 2, &letter)) == 10) && (bitwarning == true)) {
     /* Let's make the implementor read some, before converting his worldfiles */
     mud_log("WARNING: Conventional mobilefiles detected. Please read 128bit.readme.");
-    return 0;
+    return false;
   }
   if ((retval == 4) && (bitwarning == false)) {
 
@@ -2203,7 +2203,7 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
    *   converting = TRUE;
    * } */
 
-  return 1;
+  return true;
 }
 
 static void parse_mobile(FILE *mob_f, int nr)
@@ -4122,7 +4122,7 @@ void reset_zone(zone_rnum zone)
 }
 
 /* for use in reset_zone; return TRUE if zone 'nr' is free of PC's  */
-int is_empty(zone_rnum zone_nr)
+bool is_empty(zone_rnum zone_nr)
 {
   struct descriptor_data *i;
 
@@ -4143,10 +4143,10 @@ int is_empty(zone_rnum zone_nr)
     if ((char_get_admlevel(i->character) >= ADMLVL_IMMORT) && (char_prf_flagged(i->character, PRF_NOHASSLE)))
       continue;
 
-    return (0);
+    return false;
   }
 
-  return (1);
+  return true;
 }
 
 /************************************************************************
@@ -4671,12 +4671,12 @@ static int check_object_level(struct obj_data *obj, int val)
   return (error);
 }
 
-static int obj_save_fprintf(FILE *fp, struct obj_data *obj, const char *context,
-                            const char *file, int line, const char *format, ...)
+static bool obj_save_fprintf(FILE *fp, struct obj_data *obj, const char *context,
+                             const char *file, int line, const char *format, ...)
     __attribute__((format(printf, 6, 7)));
 
-static int obj_save_fprintf(FILE *fp, struct obj_data *obj, const char *context,
-                            const char *file, int line, const char *format, ...)
+static bool obj_save_fprintf(FILE *fp, struct obj_data *obj, const char *context,
+                             const char *file, int line, const char *format, ...)
 {
   va_list args;
   int result;
@@ -4690,16 +4690,16 @@ static int obj_save_fprintf(FILE *fp, struct obj_data *obj, const char *context,
     mud_log("SYSERR: %s:%d: fprintf failed saving object #%d (%s): %s",
             file, line, obj_get_vnum(obj), context,
             saved_errno ? strerror(saved_errno) : "stream error");
-    return 0;
+    return false;
   }
 
-  return 1;
+  return true;
 }
 
 #define OBJ_SAVE_FPRINTF(fp, obj, context, ...) \
   obj_save_fprintf((fp), (obj), (context), __FILE__, __LINE__, __VA_ARGS__)
 
-int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
+bool my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
 {
   int counter2, i;
   struct extra_descr_data *ex_desc;
@@ -4728,7 +4728,7 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
                         obj_get_value(obj, 8), obj_get_value(obj, 9),
                         obj_get_value(obj, 10), obj_get_value(obj, 11), obj_get_value(obj, 12),
                         obj_get_value(obj, 13), obj_get_value(obj, 14), obj_get_value(obj, 15)))
-    return 0;
+    return false;
 
   /* An early "return 1" for non-unique, non-spellbook objects used to sit here, but its
    * condition (!type == ITEM_SPELLBOOK) was always false, so every object saves its XAP data. */
@@ -4746,17 +4746,17 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
                         buf1, obj_get_type_flag(obj), obj_get_wear_flags(obj)[0],
                         obj_get_wear_flags(obj)[1], obj_get_wear_flags(obj)[2], obj_get_wear_flags(obj)[3],
                         obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj)))
-    return 0;
+    return false;
 
   if (obj->generation)
     if (!OBJ_SAVE_FPRINTF(fp, obj, "generation", "G\n%ld\n", obj->generation))
-      return 0;
+      return false;
   if (obj->unique_id)
     if (!OBJ_SAVE_FPRINTF(fp, obj, "unique id", "U\n%" I64T "\n", obj->unique_id))
-      return 0;
+      return false;
 
   if (!OBJ_SAVE_FPRINTF(fp, obj, "size", "Z\n%d\n", obj_get_size(obj)))
-    return 0;
+    return false;
 
   /* Do we have affects? */
   for (counter2 = 0; counter2 < MAX_OBJ_AFFECT; counter2++)
@@ -4765,7 +4765,7 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
                                                "%d %d %d\n",
                             obj->affected[counter2].location, obj->affected[counter2].modifier,
                             obj->affected[counter2].specific))
-        return 0;
+        return false;
 
   /* Do we have extra descriptions? */
   if (obj->ex_description) { /*. Yep, save them too . */
@@ -4781,7 +4781,7 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
                                                           "%s~\n",
                             ex_desc->keyword,
                             buf1))
-        return 0;
+        return false;
     }
   }
 
@@ -4794,11 +4794,11 @@ int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
       if (!OBJ_SAVE_FPRINTF(fp, obj, "spellbook", "S\n"
                                                   "%d %d\n",
                             obj->sbinfo[i].spellname, obj->sbinfo[i].pages))
-        return 0;
+        return false;
       continue;
     }
   }
-  return 1;
+  return true;
 }
 
 #undef OBJ_SAVE_FPRINTF

@@ -1010,7 +1010,7 @@ void advance_level(struct char_data *ch, int whichclass)
  * invalid_class is used by handler.c to determine if a piece of equipment is
  * usable by a particular class, based on the ITEM_ANTI_{class} bitvectors.
  */
-int invalid_class(struct char_data *ch, struct obj_data *obj)
+bool invalid_class(struct char_data *ch, struct obj_data *obj)
 {
   if (obj_extra_flagged(obj, ITEM_ANTI_WIZARD) && char_is_roshi(ch))
     return true;

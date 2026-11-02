@@ -39,7 +39,7 @@ static mail_index_type *find_char_in_index(long searchee);
 static void write_to_file(void *buf, int size, long filepos);
 static void read_from_file(void *buf, int size, long filepos);
 static void index_mail(long id_to_index, long pos);
-static int mail_recip_ok(const char *name);
+static bool mail_recip_ok(const char *name);
 
 /* -------------------------------------------------------------------------- */
 
@@ -70,7 +70,7 @@ void free_mail_index(void)
   }
 }
 
-static int mail_recip_ok(const char *name)
+static bool mail_recip_ok(const char *name)
 {
   int player_i, ret = false;
 
@@ -310,7 +310,7 @@ static void index_mail(long id_to_index, long pos)
  * This is called once during boot-up.  It scans through the mail file
  * and indexes all entries currently in the mail file.
  */
-int scan_file(void)
+bool scan_file(void)
 {
   FILE *mail_file;
   header_block_type next_block;
@@ -319,7 +319,7 @@ int scan_file(void)
   if (!(mail_file = fopen(MAIL_FILE, "rb"))) {
     mud_log("   Mail file non-existant... creating new file.");
     touch(MAIL_FILE);
-    return (1);
+    return true;
   }
   while (fread(&next_block, sizeof(header_block_type), 1, mail_file)) {
     if (next_block.block_type == HEADER_BLOCK) {
@@ -339,10 +339,10 @@ int scan_file(void)
   if (file_end_pos % BLOCK_SIZE) {
     mud_log("SYSERR: Error booting mail system -- Mail file corrupt!");
     mud_log("SYSERR: Mail disabled!");
-    return (0);
+    return false;
   }
   mud_log("   Mail file read -- %d messages.", total_messages);
-  return (1);
+  return true;
 } /* end of scan_file */
 
 /*
@@ -352,7 +352,7 @@ int scan_file(void)
  *
  * A simple little function which tells you if the guy has mail or not.
  */
-int has_mail(long recipient)
+bool has_mail(long recipient)
 {
   return (find_char_in_index(recipient) != nullptr);
 }

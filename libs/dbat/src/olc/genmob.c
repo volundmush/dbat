@@ -17,20 +17,20 @@
 #include "dbat/affect.h"
 #include "dbat/atomicfile.h"
 
-static int free_mobile_strings(struct char_data *mob);
-static int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd);
+static bool free_mobile_strings(struct char_data *mob);
+static bool write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd);
 
 /* From db.c */
 void init_mobile_skills(void);
 
-static int update_mobile_strings(struct char_data *t, struct char_data *f);
+static bool update_mobile_strings(struct char_data *t, struct char_data *f);
 static void check_mobile_strings(struct char_data *mob);
 static void check_mobile_string(mob_vnum i, char **string, const char *dscr);
-static int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd);
-static int copy_mobile_strings(struct char_data *t, struct char_data *f);
+static bool write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd);
+static bool copy_mobile_strings(struct char_data *t, struct char_data *f);
 
 #if CONFIG_GENOLC_MOBPROG
-int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd);
+bool write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd);
 #endif
 
 /* local functions */
@@ -119,7 +119,7 @@ int add_mobile(struct char_data *mob, mob_vnum vnum)
   return found;
 }
 
-int copy_mobile(struct char_data *to, struct char_data *from)
+bool copy_mobile(struct char_data *to, struct char_data *from)
 {
   free_mobile_strings(to);
   *to = *from;
@@ -225,7 +225,7 @@ int delete_mobile(mob_rnum refpt)
   return refpt;
 }
 
-static int copy_mobile_strings(struct char_data *t, struct char_data *f)
+static bool copy_mobile_strings(struct char_data *t, struct char_data *f)
 {
   if (f->name)
     t->name = strdup(f->name);
@@ -240,7 +240,7 @@ static int copy_mobile_strings(struct char_data *t, struct char_data *f)
   return true;
 }
 
-static int update_mobile_strings(struct char_data *t, struct char_data *f)
+static bool update_mobile_strings(struct char_data *t, struct char_data *f)
 {
   if (f->name)
     t->name = f->name;
@@ -255,7 +255,7 @@ static int update_mobile_strings(struct char_data *t, struct char_data *f)
   return true;
 }
 
-static int free_mobile_strings(struct char_data *mob)
+static bool free_mobile_strings(struct char_data *mob)
 {
   if (mob->name)
     free(mob->name);
@@ -272,7 +272,7 @@ static int free_mobile_strings(struct char_data *mob)
 
 /* Free a mobile structure that has been edited. Take care of existing mobiles 
  * and their mob_proto!  */
-int free_mobile(struct char_data *mob)
+bool free_mobile(struct char_data *mob)
 {
   mob_rnum i;
 
@@ -310,12 +310,11 @@ int free_mobile(struct char_data *mob)
   return true;
 }
 
-int save_mobiles(zone_rnum zone_num)
+bool save_mobiles(zone_rnum zone_num)
 {
   FILE *mobfd;
   room_vnum i;
   mob_rnum rmob;
-  int written;
   char mobfname[64], usedfname[64];
   struct atomic_file af;
 
@@ -334,11 +333,10 @@ int save_mobiles(zone_rnum zone_num)
     if ((rmob = real_mobile(i)) == NOBODY)
       continue;
     check_mobile_strings(&mob_proto[rmob]);
-    if (write_mobile_record(i, &mob_proto[rmob], mobfd) < 0)
+    if (!write_mobile_record(i, &mob_proto[rmob], mobfd))
       mud_log("SYSERR: GenOLC: Error writing mobile #%d.", i);
   }
   fputs("$\n", mobfd);
-  written = ftell(mobfd);
   if (!atomic_commit(&af))
     return false;
   snprintf(usedfname, sizeof(usedfname), "%s", mobfname);
@@ -348,11 +346,11 @@ int save_mobiles(zone_rnum zone_num)
     create_world_index(zone_table[zone_num].number, "mob");
     mud_log("GenOLC: save_mobiles: Saving mobiles '%s'", usedfname);
   }
-  return written;
+  return true;
 }
 
 #if CONFIG_GENOLC_MOBPROG
-int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd)
+bool write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 {
   char wmmarg[MAX_STRING_LENGTH], wmmcom[MAX_STRING_LENGTH];
   MPROG_DATA *mob_prog;
@@ -373,7 +371,7 @@ int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 }
 #endif
 
-static int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
+static bool write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 {
   struct affected_type *aff;
 
@@ -406,7 +404,7 @@ static int write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
   return true;
 }
 
-static int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
+static bool write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 {
 
   char ldesc[MAX_STRING_LENGTH], ddesc[MAX_STRING_LENGTH];
@@ -454,7 +452,7 @@ static int write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
           char_get_gold(mob), char_get_race(mob), char_get_class(mob),
           char_get_position(mob), char_get_mob_specials_default_pos(mob), char_get_sex(mob));
 
-  if (write_mobile_espec(mvnum, mob, fd) < 0)
+  if (!write_mobile_espec(mvnum, mob, fd))
     mud_log("SYSERR: GenOLC: Error writing E-specs for mobile #%d.", mvnum);
 
   script_save_to_disk(fd, mob, MOB_TRIGGER);

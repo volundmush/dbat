@@ -618,7 +618,7 @@ int roll_skill(const struct char_data *ch, int snum)
   return 0;
 }
 
-int roll_resisted(const struct char_data *actor, int sact, const struct char_data *resistor, int sres)
+bool roll_resisted(const struct char_data *actor, int sact, const struct char_data *resistor, int sres)
 {
   return roll_skill(actor, sact) >= roll_skill(resistor, sres);
 }

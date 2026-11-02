@@ -73,7 +73,7 @@ static const char *auctioneer[AUC_BID + 1] = {
 /* local functions */
 static void majin_gain(struct char_data *ch, int type);
 
-static int can_take_obj(struct char_data *ch, struct obj_data *obj);
+static bool can_take_obj(struct char_data *ch, struct obj_data *obj);
 static void get_check_money(struct char_data *ch, struct obj_data *obj);
 static void get_from_room(struct char_data *ch, char *arg, int howmany);
 static void perform_give_gold(struct char_data *ch, struct char_data *vict, int amount);
@@ -89,9 +89,9 @@ static int hands(struct char_data *ch);
 static void start_auction(struct char_data *ch, struct obj_data *obj, int bid);
 static void auc_stat(struct char_data *ch, struct obj_data *obj);
 static void auc_send_to_all(const char *messg, bool buyer);
-static int has_housekey(struct char_data *ch, struct obj_data *obj);
+static bool has_housekey(struct char_data *ch, struct obj_data *obj);
 static void harvest_plant(struct char_data *ch, struct obj_data *plant);
-static int can_harvest(struct obj_data *plant);
+static bool can_harvest(struct obj_data *plant);
 static char *find_exdesc_keywords(char *word, struct extra_descr_data *list);
 
 /* local variables */
@@ -177,7 +177,7 @@ static const struct harvest *find_harvest(struct obj_data *plant)
   return nullptr;
 }
 
-static int can_harvest(struct obj_data *plant)
+static bool can_harvest(struct obj_data *plant)
 {
   return find_harvest(plant) != nullptr;
 }
@@ -591,7 +591,7 @@ ACMD(do_garden)
   }
 }
 
-static int has_housekey(struct char_data *ch, struct obj_data *obj)
+static bool has_housekey(struct char_data *ch, struct obj_data *obj)
 {
 
   struct obj_data *obj2 = nullptr, *next_obj;
@@ -601,16 +601,16 @@ static int has_housekey(struct char_data *ch, struct obj_data *obj)
       continue;
     if (obj_get_vnum(obj) == 18802) {
       if (obj_get_vnum(obj2) == 18800) {
-        return 1;
+        return true;
       }
     } else {
       if (obj_get_vnum(obj2) == obj_get_vnum(obj) - 1) {
-        return 1;
+        return true;
       }
     }
   }
 
-  return (0);
+  return false;
 }
 
 ACMD(do_pack)
@@ -1886,25 +1886,25 @@ ACMD(do_put)
   }
 }
 
-static int can_take_obj(struct char_data *ch, struct obj_data *obj)
+static bool can_take_obj(struct char_data *ch, struct obj_data *obj)
 {
   if (!(obj_wear_flagged(obj, ITEM_WEAR_TAKE))) {
     act("$p: you can't take that!", false, ch, obj, 0, TO_CHAR);
-    return (0);
+    return false;
   }
   if (char_get_carry_items(ch) >= char_can_carry_n(ch)) {
     act("$p: your arms are full!", false, ch, obj, 0, TO_CHAR);
-    return (0);
+    return false;
   }
   if (((getCurCarriedWeight(ch)) + obj_get_weight(obj)) > getMaxCarryWeight(ch)) {
     act("$p: you can't carry that much weight.", false, ch, obj, 0, TO_CHAR);
-    return (0);
+    return false;
   }
   if ((obj_get_weight(obj) + rroom_get_gravity(char_get_in_room(ch))) + (getCurCarriedWeight(ch)) > getMaxCarryWeight(ch)) {
     act("$p: you can't carry that much weight because of the gravity.", false, ch, obj, 0, TO_CHAR);
-    return (0);
+    return false;
   }
-  return (1);
+  return true;
 }
 
 static void get_check_money(struct char_data *ch, struct obj_data *obj)
@@ -2032,22 +2032,22 @@ static void get_from_container(struct char_data *ch, struct obj_data *cont,
   }
 }
 
-int perform_get_from_room(struct char_data *ch, struct obj_data *obj)
+bool perform_get_from_room(struct char_data *ch, struct obj_data *obj)
 {
 
   if (obj_get_sitting(obj)) {
     send_to_char(ch, "Someone is on that!\r\n");
-    return (0);
+    return false;
   }
 
   if (obj_extra_flagged(obj, ITEM_BURIED)) {
     send_to_char(ch, "Get what?\r\n");
-    return (0);
+    return false;
   }
 
   if (rroom_flagged(char_get_in_room(ch), ROOM_GARDEN1) || rroom_flagged(char_get_in_room(ch), ROOM_GARDEN2)) {
     send_to_char(ch, "You can't get things from a garden. Help garden.\r\n");
-    return (0);
+    return false;
   }
 
   if (can_take_obj(ch, obj) && get_otrigger(obj, ch)) {
@@ -2072,7 +2072,7 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj)
       item_check(obj, ch);
     get_check_money(ch, obj);
   }
-  return (0);
+  return false;
 }
 
 static char *find_exdesc_keywords(char *word, struct extra_descr_data *list)

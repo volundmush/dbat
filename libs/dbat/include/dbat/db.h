@@ -116,7 +116,7 @@ extern room_rnum r_frozen_start_room; /* rnum of frozen start room	 */
 void auc_load(struct obj_data *obj);
 /* public procedures in db.c */
 void boot_world(void);
-int is_empty(zone_rnum zone_nr);
+bool is_empty(zone_rnum zone_nr);
 void index_boot(int mode);
 void boot_db(void);
 void destroy_db(void);
@@ -155,7 +155,7 @@ void clear_object(struct obj_data *obj);
 void free_obj(struct obj_data *obj);
 struct obj_data *read_object(obj_vnum nr, int type);
 int vnum_object(char *searchname, struct char_data *ch);
-int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate);
+bool my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate);
 void add_unique_id(struct obj_data *obj);
 void check_unique_id(struct obj_data *obj);
 char *sprintuniques(int low, int high);

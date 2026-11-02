@@ -214,7 +214,7 @@ void greet_memory_mtrigger(char_data *actor)
   }
 }
 
-int greet_mtrigger(char_data *actor, int dir)
+bool greet_mtrigger(char_data *actor, int dir)
 {
   trig_data *t;
   char_data *ch;
@@ -308,14 +308,14 @@ int entry_mtrigger(char_data *ch)
   return 1;
 }
 
-int command_mtrigger(char_data *actor, char *cmd, char *argument)
+bool command_mtrigger(char_data *actor, char *cmd, char *argument)
 {
   char_data *ch, *ch_next;
   trig_data *t;
 
   /* prevent people we like from becoming trapped :P */
   if (!valid_dg_target(actor, 0))
-    return 0;
+    return false;
 
   for (ch = world[char_get_in_room(actor)].people; ch; ch = ch_next) {
     ch_next = ch->next_in_room;
@@ -341,13 +341,13 @@ int command_mtrigger(char_data *actor, char *cmd, char *argument)
           add_var(&t->var_list, "cmd", cmd, 0);
 
           if (script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW))
-            return 1;
+            return true;
         }
       }
     }
   }
 
-  return 0;
+  return false;
 }
 
 void speech_mtrigger(char_data *actor, char *str)
@@ -700,8 +700,8 @@ int get_otrigger(obj_data *obj, char_data *actor)
 }
 
 /* checks for command trigger on specific object. assumes obj has cmd trig */
-static int cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
-                     char *argument, int type)
+static bool cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
+                      char *argument, int type)
 {
   trig_data *t;
 
@@ -728,36 +728,36 @@ static int cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
         add_var(&t->var_list, "cmd", cmd, 0);
 
         if (script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW))
-          return 1;
+          return true;
       }
     }
 
-  return 0;
+  return false;
 }
 
-int command_otrigger(char_data *actor, char *cmd, char *argument)
+bool command_otrigger(char_data *actor, char *cmd, char *argument)
 {
   obj_data *obj;
   int i;
 
   /* prevent people we like from becoming trapped :P */
   if (!valid_dg_target(actor, 0))
-    return 0;
+    return false;
 
   for (i = 0; i < NUM_WEARS; i++)
     if (char_get_equipment(actor, i))
       if (cmd_otrig(char_get_equipment(actor, i), actor, cmd, argument, OCMD_EQUIP) && !obj_extra_flagged(char_get_equipment(actor, i), ITEM_FORGED))
-        return 1;
+        return true;
 
   for (obj = actor->carrying; obj; obj = obj->next_content)
     if (cmd_otrig(obj, actor, cmd, argument, OCMD_INVEN) && !obj_extra_flagged(obj, ITEM_FORGED))
-      return 1;
+      return true;
 
   for (obj = world[char_get_in_room(actor)].contents; obj; obj = obj->next_content)
     if (cmd_otrig(obj, actor, cmd, argument, OCMD_ROOM) && !obj_extra_flagged(obj, ITEM_FORGED))
-      return 1;
+      return true;
 
-  return 0;
+  return false;
 }
 
 int wear_otrigger(obj_data *obj, char_data *actor, int where)
@@ -914,14 +914,14 @@ int cast_otrigger(char_data *actor, obj_data *obj, int spellnum)
   return 1;
 }
 
-int leave_otrigger(room_data *room, char_data *actor, int dir)
+bool leave_otrigger(room_data *room, char_data *actor, int dir)
 {
   trig_data *t;
   int temp, final = 1;
   obj_data *obj, *obj_next;
 
   if (!valid_dg_target(actor, DG_ALLOW_GODS))
-    return 1;
+    return true;
 
   for (obj = room->contents; obj; obj = obj_next) {
     obj_next = obj->next_content;

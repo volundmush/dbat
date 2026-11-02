@@ -30,20 +30,20 @@
 /* local functions */
 
 static void auto_equip(struct char_data *ch, struct obj_data *obj, int location);
-static int Crash_save(struct obj_data *obj, FILE *fp, int location);
+static bool Crash_save(struct obj_data *obj, FILE *fp, int location);
 static void Crash_restore_weight(struct obj_data *obj);
 static void Crash_extract_objs(struct obj_data *obj);
-static int Crash_is_unrentable(struct obj_data *obj);
+static bool Crash_is_unrentable(struct obj_data *obj);
 static void Crash_extract_norents(struct obj_data *obj);
-static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename);
+static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename);
 
 static void Crash_log_file_error(const char *operation, const char *filename, const char *file, int line)
 {
   mud_log("SYSERR: %s:%d: %s failed for %s: %s", file, line, operation, filename, strerror(errno));
 }
 
-static int Crash_build_save_filename(char *dst, size_t dst_size, const char *filename, const char *suffix,
-                                     const char *file, int line)
+static bool Crash_build_save_filename(char *dst, size_t dst_size, const char *filename, const char *suffix,
+                                      const char *file, int line)
 {
   int written = snprintf(dst, dst_size, "%s%s", filename, suffix);
 
@@ -55,7 +55,7 @@ static int Crash_build_save_filename(char *dst, size_t dst_size, const char *fil
   return true;
 }
 
-static int Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, const char *save_type)
+static bool Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, const char *save_type)
 {
   struct atomic_file af;
   char filename[MAX_INPUT_LENGTH];
@@ -131,12 +131,12 @@ void delete_inv_backup(struct char_data *ch)
   return;
 }
 
-int Obj_to_store(struct obj_data *obj, FILE *fl, int location)
+bool Obj_to_store(struct obj_data *obj, FILE *fl, int location)
 {
   my_obj_save_to_disk(fl, obj, location);
   if (ferror(fl))
-    return (0);
-  return (1);
+    return false;
+  return true;
 }
 
 /*
@@ -251,23 +251,23 @@ static void auto_equip(struct char_data *ch, struct obj_data *obj, int location)
     obj_to_char(obj, ch);
 }
 
-int Crash_delete_file(char *name)
+bool Crash_delete_file(char *name)
 {
   char filename[50];
   FILE *fl;
 
   // if (!xap_objs) {
   // if (!get_filename(filename, sizeof(filename), CRASH_FILE, name))
-  // return (0);
+  // return false;
   //} else {
   if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, name))
-    return (0);
+    return false;
   //}
 
   if (!(fl = fopen(filename, "rb"))) {
     if (errno != ENOENT) /* if it fails but NOT because of no file */
       mud_log("SYSERR: deleting crash file %s (1): %s", filename, strerror(errno));
-    return (0);
+    return false;
   }
   fclose(fl);
 
@@ -275,10 +275,10 @@ int Crash_delete_file(char *name)
   if (remove(filename) < 0 && errno != ENOENT)
     mud_log("SYSERR: deleting crash file %s (2): %s", filename, strerror(errno));
 
-  return (1);
+  return true;
 }
 
-int Crash_delete_crashfile(struct char_data *ch)
+bool Crash_delete_crashfile(struct char_data *ch)
 {
   char filename[MAX_INPUT_LENGTH];
   FILE *fl;
@@ -286,12 +286,12 @@ int Crash_delete_crashfile(struct char_data *ch)
   char line[MAX_INPUT_LENGTH];
 
   if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, char_get_name(ch)))
-    return (0);
+    return false;
 
   if (!(fl = fopen(filename, "rb"))) {
     if (errno != ENOENT) /* if it fails, NOT because of no file */
       mud_log("SYSERR: checking for crash file %s (3): %s", filename, strerror(errno));
-    return (0);
+    return false;
   }
 
   if (!feof(fl))
@@ -303,10 +303,10 @@ int Crash_delete_crashfile(struct char_data *ch)
   if (rentcode == RENT_CRASH)
     Crash_delete_file(char_get_name(ch));
 
-  return (1);
+  return true;
 }
 
-static int Crash_clean_file(char *name)
+static bool Crash_clean_file(char *name)
 {
   char filename[MAX_STRING_LENGTH];
   FILE *fl;
@@ -314,12 +314,12 @@ static int Crash_clean_file(char *name)
   char line[MAX_STRING_LENGTH];
 
   if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, name))
-    return (0);
+    return false;
 
   if (!(fl = fopen(filename, "rb"))) {
     if (errno != ENOENT) /* if it fails, NOT because of no file */
       mud_log("SYSERR: OPENING OBJECT FILE %s (4): %s", filename, strerror(errno));
-    return (0);
+    return false;
   }
 
   if (!feof(fl)) {
@@ -349,17 +349,17 @@ static int Crash_clean_file(char *name)
             break;
         }
         mud_log("    Deleting %s's %s file.", name, filetype);
-        return (1);
+        return true;
       }
       /* Must retrieve rented items w/in 30 days */
     } else if (rentcode == RENT_RENTED)
       if (timed < time(0) - (CONFIG_RENT_TIMEOUT * SECS_PER_REAL_DAY)) {
         Crash_delete_file(name);
         mud_log("    Deleting %s's rent file.", name);
-        return (1);
+        return true;
       }
   }
-  return (0);
+  return false;
 }
 
 void update_obj_file(void)
@@ -470,7 +470,7 @@ void Crash_listrent(struct char_data *ch, char *name)
   fclose(fl);
 }
 
-static int Crash_save(struct obj_data *obj, FILE *fp, int location)
+static bool Crash_save(struct obj_data *obj, FILE *fp, int location)
 {
   struct obj_data *tmp;
   int result;
@@ -527,16 +527,16 @@ static void Crash_extract_objs(struct obj_data *obj)
   }
 }
 
-static int Crash_is_unrentable(struct obj_data *obj)
+static bool Crash_is_unrentable(struct obj_data *obj)
 {
   if (!obj)
-    return (0);
+    return false;
   if (obj_extra_flagged(obj, ITEM_NORENT) || obj_get_cost_per_day(obj) < 0 ||
       (obj_get_item_number(obj) <= NOTHING &&
        !obj_extra_flagged(obj, ITEM_UNIQUE_SAVE))) {
-    return (1);
+    return true;
   }
-  return (0);
+  return false;
 }
 
 static void Crash_extract_norents(struct obj_data *obj)
@@ -632,7 +632,7 @@ int Crash_load(struct char_data *ch)
   return -1;
 }
 
-static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
+static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
 {
   char buf2[MAX_STRING_LENGTH];
   char line[256];
@@ -757,7 +757,7 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
         if (!get_line(fl, line) ||
             (sscanf(line, "%d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7) != 8)) {
           fprintf(stderr, "Format error in first numeric line (expecting _x_ args)");
-          return 0;
+          return false;
         }
         temp->type_flag     = t[0];
         temp->wear_flags[0] = t[1];
@@ -964,7 +964,7 @@ static int Crash_load_file(struct char_data *ch, FILE *fl, const char *filename)
   fclose(fl);
 
   if ((orig_rent_code == RENT_RENTED) || (orig_rent_code == RENT_CRYO))
-    return 0;
+    return false;
   else
-    return 1;
+    return true;
 }

@@ -1,8 +1,8 @@
 #pragma once
 #include "dbat/consts/types.h"
 
-int isname(const char *str, const char *namelist);
-int is_name(const char *str, const char *namelist);
+bool isname(const char *str, const char *namelist);
+bool is_name(const char *str, const char *namelist);
 int get_number(char **name);
 
 struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, int inroom);

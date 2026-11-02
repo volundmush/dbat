@@ -458,11 +458,11 @@ void trigedit_parse(struct descriptor_data *d, char *arg);
 
 ACMD(do_oasis_hsedit);
 
-int parse_stats(struct descriptor_data *d, char *arg);
+bool parse_stats(struct descriptor_data *d, char *arg);
 
-int free_strings(void *data, int type);
+bool free_strings(void *data, int type);
 void print_zone(struct char_data *ch, zone_vnum vnum);
-int can_edit_zone(struct char_data *ch, zone_rnum rnum);
+bool can_edit_zone(struct char_data *ch, zone_rnum rnum);
 
 #define CONTEXT_HELP_STRING "help"
 
@@ -610,7 +610,7 @@ constexpr int CONTEXT_GEDIT_SELECT_LANGS          = 139;
 constexpr int NUM_CONTEXTS = 140;
 
 /* Prototypes for the context sensitive help system */
-int context_help(struct descriptor_data *d, char *arg);
+bool context_help(struct descriptor_data *d, char *arg);
 void boot_context_help(void);
 #endif /* ifndef __GENOLC_C__ */
 

@@ -106,7 +106,7 @@ ACMD(do_disable)
 }
 
 /* check if a command is disabled */
-int check_disabled(const struct command_info *command)
+bool check_disabled(const struct command_info *command)
 {
   DISABLED_DATA *p;
 

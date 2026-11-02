@@ -14,4 +14,4 @@ struct disabled_data {
 
 #include "dbat/consts/types.h"
 ACMD(do_disable);
-int check_disabled(const struct command_info *command);
+bool check_disabled(const struct command_info *command);

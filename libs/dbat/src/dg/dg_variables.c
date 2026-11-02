@@ -112,7 +112,7 @@ static int item_in_list(char *item, obj_data *list)
       if (obj_get_type_flag(i) == ITEM_CONTAINER)
         count += item_in_list(item, i->contains);
     }
-  } else if (is_number(item) > -1) { /* check for vnum */
+  } else if (is_number(item)) { /* check for vnum */
     obj_vnum ovnum = atoi(item);
 
     for (i = list; i; i = i->next_content) {

@@ -35,7 +35,7 @@
 
 /* local functions */
 static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg);
-static int is_tell_ok(struct char_data *ch, struct char_data *vict);
+static bool is_tell_ok(struct char_data *ch, struct char_data *vict);
 static void handle_whisper(char *buf, struct char_data *ch, struct char_data *vict);
 static const char *overhear(char *buf, int type);
 static void list_languages(struct char_data *ch);
@@ -835,7 +835,7 @@ static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg
     char_set_last_tell(vict, char_get_idnum(ch));
 }
 
-static int is_tell_ok(struct char_data *ch, struct char_data *vict)
+static bool is_tell_ok(struct char_data *ch, struct char_data *vict)
 {
 
   if (ch == vict)

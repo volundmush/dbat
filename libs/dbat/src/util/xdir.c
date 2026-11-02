@@ -33,7 +33,7 @@ void xdir_cleanup(struct xap_dir *xd)
 }
 
 /* Like `mkdir -p`: creates each missing directory along path. Returns 1 if path ends up a directory, else 0. */
-int insure_directory(const char *path)
+bool insure_directory(const char *path)
 {
   char *dir = strdup(path);
   struct stat st;
@@ -45,7 +45,7 @@ int insure_directory(const char *path)
     *p         = '\0';
     if (mkdir(dir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) < 0 && errno != EEXIST) {
       free(dir);
-      return 0;
+      return false;
     }
     if (saved == '\0')
       break;

@@ -49,7 +49,7 @@
 
 /* local functions */
 
-static int has_scanner(struct char_data *ch);
+static bool has_scanner(struct char_data *ch);
 
 ACMD(do_telepathy)
 {
@@ -354,7 +354,7 @@ void check_eq(struct char_data *ch)
   }
 }
 
-static int has_scanner(struct char_data *ch)
+static bool has_scanner(struct char_data *ch)
 {
   struct obj_data *obj, *next_obj;
   int success = 0;

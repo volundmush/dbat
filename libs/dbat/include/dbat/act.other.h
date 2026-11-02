@@ -7,7 +7,7 @@
 // functions
 void log_imm_action(const char *messg, ...) __attribute__((format(printf, 1, 2)));
 void hint_system(struct char_data *ch, int num);
-int dball_count(struct char_data *ch);
+bool dball_count(struct char_data *ch);
 void log_custom(struct descriptor_data *d, struct obj_data *obj);
 void wishSYS(void);
 void bring_to_cap(struct char_data *ch);

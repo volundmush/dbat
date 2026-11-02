@@ -53,7 +53,7 @@ static void cureStatusPoison(char_data *ch, bool announce);
 static double getCurPLPercent(char_data *ch);
 static int64_t getPercentOfMaxPL(char_data *ch, double amt);
 static bool isFullPL(char_data *ch);
-static int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech);
+static bool mob_respond(struct char_data *ch, struct char_data *vict, const char *speech);
 static void restoreLimbs(char_data *ch, bool announce);
 static void restoreStatus(char_data *ch, bool announce);
 static int sensei_grav_tolerance(int s_id);
@@ -321,7 +321,7 @@ bool is_soft_cap(char_data *ch, int64_t type, long double mult)
   return against >= cur_cap;
 }
 
-int calcGravCost(char_data *ch, int64_t num)
+bool calcGravCost(char_data *ch, int64_t num)
 {
   int cost = 0;
   if (!can_tolerate_gravity(ch, rroom_get_gravity(char_get_in_room(ch))))
@@ -333,10 +333,10 @@ int calcGravCost(char_data *ch, int64_t num)
     }
     if ((getCurST(ch)) > cost) {
       decCurST(ch, cost, 0);
-      return 1;
+      return true;
     }
     decCurST(ch, cost, 0);
-    return 0;
+    return false;
   }
   return (getCurST(ch)) > (cost + num);
 }
@@ -997,7 +997,7 @@ void dispel_ash(struct char_data *ch)
   }
 }
 
-int has_group(struct char_data *ch)
+bool has_group(struct char_data *ch)
 {
 
   struct follow_type *k, *next;
@@ -1355,7 +1355,7 @@ const char *report_party_health(struct char_data *ch)
 }
 
 /* Check to see if anything interferes with their "knowing" the skill */
-int know_skill(struct char_data *ch, int skill)
+bool know_skill(struct char_data *ch, int skill)
 {
 
   int know = 0;
@@ -1478,7 +1478,7 @@ void assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int s
   }
 }
 
-int sec_roll_check(struct char_data *ch)
+bool sec_roll_check(struct char_data *ch)
 {
 
   int figure = 0, chance = 0, outcome = 0;
@@ -2233,7 +2233,7 @@ void sense_memory_write(struct char_data *ch, struct char_data *vict)
 }
 
 /* Will they manage to pursue a fleeing enemy? */
-int roll_pursue(struct char_data *ch, struct char_data *vict)
+bool roll_pursue(struct char_data *ch, struct char_data *vict)
 {
 
   int skill, perc = axion_dice(0);
@@ -2769,14 +2769,14 @@ void reveal_hiding(struct char_data *ch, int type)
   }
 }
 
-int block_calc(struct char_data *ch)
+bool block_calc(struct char_data *ch)
 {
   struct char_data *blocker = nullptr;
 
   if (char_get_blocked(ch)) {
     blocker = char_get_blocked(ch);
   } else {
-    return (1);
+    return true;
   }
 
   if (char_get_speedi(ch) < char_get_speedi(blocker) && char_get_position(blocker) > POS_SITTING) {
@@ -2798,7 +2798,7 @@ int block_calc(struct char_data *ch)
           char_aff_set(blocker, AFF_FLYING, true);
           char_set_altitude(blocker, char_get_altitude(ch));
         }
-        return (0);
+        return false;
       }
       act("$n proves $s great skill and escapes from $N's attempted block!", true, ch, 0, blocker, TO_NOTVICT);
       act("$n proves $s great skill and escapes from your attempted block!", true, ch, 0, blocker, TO_VICT);
@@ -2826,7 +2826,7 @@ int block_calc(struct char_data *ch)
     char_set_blocks(blocker, nullptr);
   }
 
-  return (1);
+  return true;
 }
 
 int64_t molt_threshold(struct char_data *ch)
@@ -2991,7 +2991,7 @@ void mob_talk(struct char_data *ch, const char *speech)
   } /* End for loop */
 } /* End Mob Talk */
 
-static int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech)
+static bool mob_respond(struct char_data *ch, struct char_data *vict, const char *speech)
 {
   if (ch != nullptr && vict != nullptr) {
     if (!char_is_npc(ch) && char_is_npc(vict)) {
@@ -3142,7 +3142,7 @@ static int mob_respond(struct char_data *ch, struct char_data *vict, const char 
         if (vict->original == ch) {
           act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", true, vict, 0, ch, TO_ROOM);
           char_mob_set(vict, MOB_SPAR, true);
-          return 0;
+          return false;
         }
 
         if (char_get_level(vict) > 4 && char_get_alignment(vict) >= 0) {
@@ -3158,35 +3158,35 @@ static int mob_respond(struct char_data *ch, struct char_data *vict, const char 
 
           if (remember == true) {
             act("@w$n@W says, '@C$N you will die by my hand!@W'@n", true, vict, 0, ch, TO_ROOM);
-            return 1;
+            return true;
           }
           if (char_mob_flagged(vict, MOB_NOKILL)) {
             act("@w$n@W says, '@C$N, I have no need to spar with you.@W'@n", true, vict, 0, ch, TO_ROOM);
-            return 1;
+            return true;
           }
           if (char_mob_flagged(vict, MOB_AGGRESSIVE)) {
             act("@w$n@W says, '@C$N, I will kill you instead.@W'@n", true, vict, 0, ch, TO_ROOM);
-            return 1;
+            return true;
           }
           if (char_mob_flagged(vict, MOB_DUMMY)) {
             act("@w$n@W says, '@C...@W'@n", true, vict, 0, ch, TO_ROOM);
-            return 1;
+            return true;
           }
           if (getEffMaxPL(ch) > getEffMaxPL(vict) * 2) {
             act("@w$n@W says, '@C$N, no way will I spar. I already know I would lose badly.@W'@n", true, vict, 0, ch, TO_ROOM);
-            return 1;
+            return true;
           }
           if (getEffMaxPL(vict) > getEffMaxPL(ch) * 2) {
             act("@w$n@W says, '@C$N, you wouldn't last very long.@W'@n", true, vict, 0, ch, TO_ROOM);
-            return 1;
+            return true;
           }
           if (getCurPL(vict) < getEffMaxPL(vict) * .8) {
             act("@w$n@W says, '@C$N, I need to recover first.@W'@n", true, vict, 0, ch, TO_ROOM);
-            return 1;
+            return true;
           }
           if (rand_number(1, 50) >= 40 && !char_mob_flagged(vict, MOB_SPAR)) {
             act("@w$n@W says, '@C$N, maybe in a bit.@W'@n", true, vict, 0, ch, TO_ROOM);
-            return 1;
+            return true;
           }
           if (char_mob_flagged(vict, MOB_SPAR)) {
             act("@w$n@W says, '@C$N, fine our match will wait till later then.@W'@n", true, vict, 0, ch, TO_ROOM);
@@ -3195,14 +3195,14 @@ static int mob_respond(struct char_data *ch, struct char_data *vict, const char 
             act("@w$n@W says, '@C$N, sure. I'll spar with you.@W'@n", true, vict, 0, ch, TO_ROOM);
             char_mob_set(vict, MOB_SPAR, true);
           }
-          return 0;
+          return false;
         }
         if (char_get_level(vict) > 4 && char_get_alignment(vict) < 0) {
           act("@w$n@W says, '@CSpar? I don't play games, I play for blood...@W'@n", true, vict, 0, ch, TO_ROOM);
-          return 1;
+          return true;
         }
         act("@w$n@W says, '@CSpar? I prefer not to thank you...@W'@n", true, vict, 0, ch, TO_ROOM);
-        return 1;
+        return true;
       } /* End challenge section */
       if (strstr(speech, "goodbye") || strstr(speech, "Goodbye") || strstr(speech, "bye") || strstr(speech, "Bye")) {
         send_to_room(char_get_in_room(vict), "\r\n");
@@ -3278,10 +3278,10 @@ static int mob_respond(struct char_data *ch, struct char_data *vict, const char 
           }
         }
       }
-      return 1;
+      return true;
     }
   } /* End Valid targets Loop. */
-  return 1;
+  return true;
 }
 
 bool is_sparring(struct char_data *ch)
@@ -3408,16 +3408,16 @@ int64_t gear_exp(struct char_data *ch, int64_t exp)
   return exp * ratio;
 }
 
-int planet_check(struct char_data *ch, struct char_data *vict)
+bool planet_check(struct char_data *ch, struct char_data *vict)
 {
 
   if (ch == nullptr) {
     mud_log("ERROR: planet_check called without ch!");
-    return 0;
+    return false;
   }
   if (vict == nullptr) {
     mud_log("ERROR: planet_check called without vict!");
-    return 0;
+    return false;
   }
   int success = 0;
   if (char_get_admlevel(vict) <= 0) {
@@ -3866,222 +3866,222 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict)
     return (juggleRaceName(vict, true));
 }
 
-int can_grav(struct char_data *ch)
+bool can_grav(struct char_data *ch)
 {
   /* Gravity Related */
   if (rroom_get_gravity(char_get_in_room(ch)) == 10 && getEffMaxPL(ch) < 5000 && !char_is_bardock(ch) && !char_is_npc(ch)) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-    return 0;
+    return false;
   }
   if (rroom_get_gravity(char_get_in_room(ch)) == 20 && getEffMaxPL(ch) < 20000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-    return 0;
+    return false;
   }
   if (rroom_get_gravity(char_get_in_room(ch)) == 30 && getEffMaxPL(ch) < 50000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-    return 0;
+    return false;
   }
   if (rroom_get_gravity(char_get_in_room(ch)) == 40 && getEffMaxPL(ch) < 100000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-    return 0;
+    return false;
   }
   if (rroom_get_gravity(char_get_in_room(ch)) == 50 && getEffMaxPL(ch) < 200000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-    return 0;
+    return false;
   }
   if (rroom_get_gravity(char_get_in_room(ch)) == 100 && getEffMaxPL(ch) < 400000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-    return 0;
+    return false;
   }
   if (rroom_get_gravity(char_get_in_room(ch)) == 200 && getEffMaxPL(ch) < 1000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-    return 0;
+    return false;
   }
   if (rroom_get_gravity(char_get_in_room(ch)) == 300 && getEffMaxPL(ch) < 5000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-    return 0;
+    return false;
   }
   if (rroom_get_gravity(char_get_in_room(ch)) == 400 && getEffMaxPL(ch) < 8000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-    return 0;
+    return false;
   }
   if (rroom_get_gravity(char_get_in_room(ch)) == 500 && getEffMaxPL(ch) < 15000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-    return 0;
+    return false;
   }
   if (rroom_get_gravity(char_get_in_room(ch)) == 1000 && getEffMaxPL(ch) < 25000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-    return 0;
+    return false;
   }
   if (rroom_get_gravity(char_get_in_room(ch)) == 5000 && getEffMaxPL(ch) < 100000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-    return 0;
+    return false;
   }
   if (rroom_get_gravity(char_get_in_room(ch)) == 10000 && getEffMaxPL(ch) < 200000000) {
     send_to_char(ch, "You are hardly able to move in this gravity!\r\n");
-    return 0;
+    return false;
   }
-  return 1;
+  return true;
 }
 
 /* If they can preform the attack or perform the attack on target. */
-int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num)
+bool can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num)
 {
   /* Target Related */
   if (!char_is_npc(ch) && char_plr_flagged(ch, PLR_HEALT)) {
     send_to_char(ch, "You are inside a healing tank!\r\n");
-    return 0;
+    return false;
   }
   if (char_get_carry_weight(ch) > getMaxCarryWeight(ch)) {
     send_to_char(ch, "You are weighted down too much!\r\n");
-    return 0;
+    return false;
   }
   if (vict) {
     if (getCurPL(vict) <= 0 && char_get_fighting(vict)) {
-      return 0;
+      return false;
     }
     if (rroom_flagged(char_get_in_room(ch), ROOM_PEACEFUL)) {
       send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
-      return 0;
+      return false;
     }
     if (vict == ch) {
       send_to_char(ch, "That's insane, don't hurt yourself. Hurt others! That's the key to life ^_^\r\n");
-      return 0;
+      return false;
     }
     if (vict->gooptime > 0) {
       send_to_char(ch, "It seems like it'll be hard to kill them right now...\r\n");
-      return 0;
+      return false;
     }
     if (char_get_carrying(ch)) {
       send_to_char(ch, "You are too busy protecting the person on your shoulder!\r\n");
-      return 0;
+      return false;
     }
     if (char_get_carried_by(vict)) {
       send_to_char(ch, "They are being protected by someone else!\r\n");
-      return 0;
+      return false;
     }
     if (char_aff_flagged(vict, AFF_PARALYZE)) {
       send_to_char(ch, "They are a statue, just leave them alone...\r\n");
-      return 0;
+      return false;
     }
     if (char_mob_flagged(vict, MOB_NOKILL)) {
       send_to_char(ch, "But they are not to be killed!\r\n");
-      return 0;
+      return false;
     }
     if (char_get_majinize(ch) == char_get_id(vict)) {
       send_to_char(ch, "You can not harm your master!\r\n");
-      return 0;
+      return false;
     }
     if (char_get_bonuses(ch, BONUS_COWARD) > 0 && getEffMaxPL(vict) > getEffMaxPL(ch) + (getEffMaxPL(ch) * .5) && !char_get_fighting(ch)) {
       send_to_char(ch, "You are too cowardly to start anything with someone so much stronger than yourself!\r\n");
-      return 0;
+      return false;
     }
     if (char_get_majinize(vict) == char_get_id(ch)) {
       send_to_char(ch, "You can not harm your servant.\r\n");
-      return 0;
+      return false;
     }
     if ((char_get_grappling(ch) && char_get_grap(ch) != 3) || (char_get_grappled(ch) && (char_get_grap(ch) == 1 || char_get_grap(ch) == 4))) {
       send_to_char(ch, "You are too busy grappling!%s\r\n", char_get_grappled(ch) != nullptr ? " Try 'escape'!" : "");
-      return 0;
+      return false;
     }
     if (char_get_grappling(ch) && char_get_grappling(ch) != vict) {
       send_to_char(ch, "You can't reach that far in your current position!\r\n");
-      return 0;
+      return false;
     }
     if (char_get_grappled(ch) && char_get_grappled(ch) != vict) {
       send_to_char(ch, "You can't reach that far in your current position!\r\n");
-      return 0;
+      return false;
     }
     if (!char_is_npc(ch) && !char_is_npc(vict) && char_aff_flagged(ch, AFF_SPIRIT) && (!is_sparring(ch) || !is_sparring(vict)) && num != 2) {
       send_to_char(ch, "You can not fight other players in AL/Hell.\r\n");
-      return 0;
+      return false;
     }
     if (char_get_level(vict) <= 8 && !char_is_npc(ch) && !char_is_npc(vict) && (!is_sparring(ch) || !is_sparring(vict))) {
       send_to_char(ch, "Newbie Shield Protects them!\r\n");
-      return 0;
+      return false;
     }
     if (char_get_level(ch) <= 8 && !char_is_npc(ch) && !char_is_npc(vict) && (!is_sparring(ch) || !is_sparring(vict))) {
       send_to_char(ch, "Newbie Shield Protects you until level 8.\r\n");
-      return 0;
+      return false;
     }
     if (char_plr_flagged(vict, PLR_SPIRAL) && num != 3) {
       send_to_char(ch, "Due to the nature of their current technique anything less than a Tier 4 or AOE attack will not work on them.\r\n");
-      return 0;
+      return false;
     }
     if (char_get_absorbing(ch)) {
       send_to_char(ch, "You are too busy absorbing %s!\r\n", char_get_name(char_get_absorbing(ch)));
-      return 0;
+      return false;
     }
     if (char_get_absorbby(ch)) {
       send_to_char(ch, "You are too busy being absorbed by %s!\r\n", char_get_name(char_get_absorbby(ch)));
-      return 0;
+      return false;
     }
     if ((char_get_altitude(vict) - 1 > char_get_altitude(ch) || char_get_altitude(vict) < char_get_altitude(ch) - 1) && char_is_namek(ch)) {
       act("@GYou stretch your limbs toward @g$N@G in an attempt to hit $M!@n", true, ch, 0, vict, TO_CHAR);
       act("@g$n@G stretches $s limbs toward @RYOU@G in an attempt to land a hit!@n", true, ch, 0, vict, TO_VICT);
       act("@g$n@G stretches $s limbs toward @g$N@G in an attempt to hit $M!@n", true, ch, 0, vict, TO_NOTVICT);
-      return 1;
+      return true;
     }
     if (char_aff_flagged(ch, AFF_FLYING) && !char_aff_flagged(vict, AFF_FLYING) && num == 0) {
       send_to_char(ch, "You are too far above them.\r\n");
-      return 0;
+      return false;
     }
     if (!char_aff_flagged(ch, AFF_FLYING) && char_aff_flagged(vict, AFF_FLYING) && num == 0) {
       send_to_char(ch, "They are too far above you.\r\n");
-      return 0;
+      return false;
     }
     if (!char_is_npc(ch) && char_get_altitude(ch) > char_get_altitude(vict) && !char_is_npc(vict) && num == 0) {
       if (char_get_altitude(vict) < 0) {
         char_set_altitude(vict, char_get_altitude(ch));
-        return 1;
+        return true;
       }
       send_to_char(ch, "You are too far above them.\r\n");
-      return 0;
+      return false;
     }
     if (!char_is_npc(ch) && char_get_altitude(ch) < char_get_altitude(vict) && !char_is_npc(vict) && num == 0) {
       if (char_get_altitude(vict) > 2) {
         char_set_altitude(vict, char_get_altitude(ch));
-        return 1;
+        return true;
       }
       send_to_char(ch, "They are too far above you.\r\n");
-      return 0;
+      return false;
     }
-    return 1;
+    return true;
   }
   if (obj) {
     if (rroom_flagged(char_get_in_room(ch), ROOM_PEACEFUL)) {
       send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
-      return 0;
+      return false;
     }
     if (obj_extra_flagged(obj, ITEM_UNBREAKABLE) && obj_get_vnum(obj) != 87 && obj_get_vnum(obj) != 80 && obj_get_vnum(obj) != 81 && obj_get_vnum(obj) != 82 && obj_get_vnum(obj) != 83) {
       send_to_char(ch, "You can't hit that, it is protected by the immortals!\r\n");
-      return 0;
+      return false;
     }
     if (char_aff_flagged(ch, AFF_FLYING)) {
       send_to_char(ch, "You are too far above it.\r\n");
-      return 0;
+      return false;
     }
     if (obj_extra_flagged(obj, ITEM_BROKEN)) {
       send_to_char(ch, "It is already broken!\r\n");
-      return 0;
+      return false;
     }
-    return 1;
+    return true;
   }
   send_to_char(ch, "Error: Report to imm.");
-  return 0;
+  return false;
 }
 
 /* Whether they know the skill they are trying to use */
-int check_skill(struct char_data *ch, int skill)
+bool check_skill(struct char_data *ch, int skill)
 {
   if (!know_skill(ch, skill) && !char_is_npc(ch)) {
-    return 0;
+    return false;
   }
-  return 1;
+  return true;
 }
 
 /* Whether they have enough stamina or charged ki to preform the skill */
-int check_points(struct char_data *ch, int64_t ki, int64_t st)
+bool check_points(struct char_data *ch, int64_t ki, int64_t st)
 {
 
   if (char_get_preference(ch) == PREFERENCE_H2H && char_get_charge(ch) >= getMaxKI(ch) * 0.1) {
@@ -4101,7 +4101,7 @@ int check_points(struct char_data *ch, int64_t ki, int64_t st)
   } else {
     if (!calcGravCost(ch, st) && ki <= 0) {
       send_to_char(ch, "You do not have enough stamina to perform it in this gravity!\r\n");
-      return 0;
+      return false;
     }
     if (char_get_charge(ch) < ki) {
       send_to_char(ch, "You do not have enough ki charged.\r\n");
@@ -4148,9 +4148,9 @@ int check_points(struct char_data *ch, int64_t ki, int64_t st)
     }
   }
   if (fail == true) {
-    return 0;
+    return false;
   }
-  return 1;
+  return true;
 }
 
 /* Subtract the stamina or ki required */
@@ -4223,7 +4223,7 @@ void pcost(struct char_data *ch, double ki, int64_t st)
 }
 
 /* For checking if they have enough free limbs to preform the technique. */
-int limb_ok(struct char_data *ch, int type)
+bool limb_ok(struct char_data *ch, int type)
 {
   if (char_is_npc(ch)) {
     if (char_aff_flagged(ch, AFF_ENSNARED) && rand_number(1, 100) <= 90) {
@@ -4542,7 +4542,7 @@ int race_get_size(int r_id)
   }
 }
 
-int race_is_playable(int r_id)
+bool race_is_playable(int r_id)
 {
   switch (r_id) {
     case RACE_ANIMAL:
@@ -6869,7 +6869,7 @@ void char_body_set(struct char_data *ch, int flag, bool on)
   flag_array_set(char_get_bodyparts(ch), flag, on);
 }
 
-int race_is_people(int r_id)
+bool race_is_people(int r_id)
 {
   switch (r_id) {
     case RACE_ANIMAL:

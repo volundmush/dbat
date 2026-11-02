@@ -51,9 +51,9 @@
 #include "misc.h"
 
 /* local functions */
-static int campfire_cook(int recipe);
-static int valid_recipe(struct char_data *ch, int recipe, int type);
-static int has_pole(struct char_data *ch);
+static bool campfire_cook(int recipe);
+static bool valid_recipe(struct char_data *ch, int recipe, int type);
+static bool has_pole(struct char_data *ch);
 static void catch_fish(struct char_data *ch, int quality);
 
 ACMD(do_restring)
@@ -243,7 +243,7 @@ ACMD(do_fish)
   }
 } /* End fish */
 
-static int has_pole(struct char_data *ch)
+static bool has_pole(struct char_data *ch)
 {
 
   if (char_get_equipment(ch, WEAR_WIELD2)) {
@@ -1135,7 +1135,7 @@ ACMD(do_bury)
 }
 
 /* This determines of an object is a suitable bundle of silk or not */
-int valid_silk(struct obj_data *obj)
+bool valid_silk(struct obj_data *obj)
 {
   int value = 0;
 
@@ -1450,7 +1450,7 @@ ACMD(do_silk)
   }
 }
 
-static int valid_recipe(struct char_data *ch, int recipe, int type)
+static bool valid_recipe(struct char_data *ch, int recipe, int type)
 {
   /* Plant Variables */
   int tomato = -1, cucumber = -1, onion = -1, greenbean = -1, garlic = -1, redpep = -1;
@@ -1951,7 +1951,7 @@ static int valid_recipe(struct char_data *ch, int recipe, int type)
   return (true);
 }
 
-static int campfire_cook(int recipe)
+static bool campfire_cook(int recipe)
 {
 
   switch (recipe) {

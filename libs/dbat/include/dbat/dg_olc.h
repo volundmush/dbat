@@ -42,8 +42,8 @@ constexpr int SCRIPT_DEL_TRIGGER = 2;
 void script_save_to_disk(FILE *fp, void *item, int type);
 void dg_olc_script_copy(struct descriptor_data *d);
 void dg_script_menu(struct descriptor_data *d);
-int dg_script_edit_parse(struct descriptor_data *d, char *arg);
+bool dg_script_edit_parse(struct descriptor_data *d, char *arg);
 void trigedit_string_cleanup(struct descriptor_data *d, int terminator);
-int format_script(struct descriptor_data *d);
+bool format_script(struct descriptor_data *d);
 
 ACMD(do_oasis_trigedit);

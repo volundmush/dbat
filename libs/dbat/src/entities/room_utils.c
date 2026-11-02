@@ -39,7 +39,7 @@ int cook_element(room_rnum room)
  *
  * Inside and City rooms are always lit.
  * Outside rooms are dark at sunset and night.  */
-int room_is_dark(room_rnum room)
+bool room_is_dark(room_rnum room)
 {
   if (!rroom_is_valid(room)) {
     mud_log("room_is_dark: Invalid room rnum %d. (0-%d)", room, top_of_world);

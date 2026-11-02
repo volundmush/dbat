@@ -288,34 +288,34 @@ static void perform_complex_alias(struct txt_q *input_q, char *orig, struct alia
  *   1: String was _not_ modified in place; rather, the expanded aliases
  *      have been placed at the front of the character's input queue.
  */
-int perform_alias(struct descriptor_data *d, char *orig, size_t maxlen)
+bool perform_alias(struct descriptor_data *d, char *orig, size_t maxlen)
 {
   char first_arg[MAX_INPUT_LENGTH], *ptr;
   struct alias_data *a, *tmp;
 
   /* Mobs don't have alaises. */
   if (char_is_npc(d->character))
-    return (0);
+    return false;
 
   /* bail out immediately if the guy doesn't have any aliases */
   if ((tmp = char_get_aliases(d->character)) == nullptr)
-    return (0);
+    return false;
 
   /* find the alias we're supposed to match */
   ptr = any_one_arg(orig, first_arg);
 
   /* bail out if it's null */
   if (!*first_arg)
-    return (0);
+    return false;
 
   /* if the first arg is not an alias, return without doing anything */
   if ((a = find_alias(tmp, first_arg)) == nullptr)
-    return (0);
+    return false;
 
   if (a->type == ALIAS_SIMPLE) {
     strlcpy(orig, a->replacement, maxlen);
-    return (0);
+    return false;
   }
   perform_complex_alias(&d->input, ptr, a);
-  return (1);
+  return true;
 }

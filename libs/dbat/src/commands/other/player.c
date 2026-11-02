@@ -48,7 +48,7 @@
 #include "dbat/local_limits.h"
 #include "other_internal.h"
 
-static int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
+static bool perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
 static void print_group(struct char_data *ch);
 
 ACMD(do_spar)
@@ -265,36 +265,36 @@ ACMD(do_title)
   }
 }
 
-static int perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl)
+static bool perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl)
 {
   if (char_aff_flagged(vict, AFF_GROUP) || !char_can_see(ch, vict))
-    return (0);
+    return false;
 
   if (char_get_bonuses(vict, BONUS_LONER) > 0) {
     act("$n is the loner type and refuses to be in your group.", true, vict, 0, ch, TO_VICT);
-    return (0);
+    return false;
   }
 
   /*
   if (GET_LEVEL(vict) + 12 < highlvl) {
    act("$n isn't experienced enough to be in your group with its current members.", TRUE, vict, 0, ch, TO_VICT);
-   return (0);
+   return false;
   }
 
   if (GET_LEVEL(vict) > lowlvl + 12) {
    act("$n is too experienced to be in your group with its current members.", TRUE, vict, 0, ch, TO_VICT);
-   return (0);
+   return false;
   }
 
   if (highlvl >= 100) {
    if ((getEffMaxPL(vict))) > highpl * 1.5) {
     act("$n is too powerful right now to be in a level 100 group with you.", TRUE, vict, 0, ch, TO_VICT);
-    return (0);
+    return false;
    }
 
    if ((getEffMaxPL(vict))) < lowpl * 0.5) {
     act("$n is too weak right now to be in a level 100 group with you.", TRUE, vict, 0, ch, TO_VICT);
-    return (0);
+    return false;
    }
   }
   */
@@ -304,7 +304,7 @@ static int perform_group(struct char_data *ch, struct char_data *vict, int highl
     act("$N is now a member of your group.", false, ch, 0, vict, TO_CHAR);
   act("You are now a member of $n's group.", false, ch, 0, vict, TO_VICT);
   act("$N is now a member of $n's group.", false, ch, 0, vict, TO_NOTVICT);
-  return (1);
+  return true;
 }
 
 static void print_group(struct char_data *ch)

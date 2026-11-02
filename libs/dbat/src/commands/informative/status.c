@@ -127,52 +127,52 @@ ACMD(do_evolve)
   }
 }
 
-int perf_skill(int skill)
+bool perf_skill(int skill)
 {
 
   if (!skill) {
-    return 0;
+    return false;
   }
 
   switch (skill) {
     case 464:
-      return 1;
+      return true;
       break;
     case 441:
-      return 1;
+      return true;
       break;
     case 444:
-      return 1;
+      return true;
       break;
     case 475:
-      return 1;
+      return true;
       break;
     case 474:
-      return 1;
+      return true;
       break;
     case 476:
-      return 1;
+      return true;
       break;
     case 488:
-      return 1;
+      return true;
       break;
     case 472:
-      return 1;
+      return true;
       break;
     case 485:
-      return 1;
+      return true;
       break;
     case 442:
-      return 1;
+      return true;
       break;
     case 510:
-      return 1;
+      return true;
       break;
     case 533:
-      return 1;
+      return true;
       break;
     default:
-      return 0;
+      return false;
       break;
   }
 }

@@ -185,17 +185,17 @@ void assign_feats(void)
 // The follwing function is used to check if the character satisfies the various prerequisite(s) (if any)
 // of a feat in order to learn it.
 
-int feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg)
+bool feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg)
 {
   return false;
 }
 
-int is_proficient_with_armor(const struct char_data *ch, int cmarmor_type)
+bool is_proficient_with_armor(const struct char_data *ch, int cmarmor_type)
 {
   return true;
 }
 
-int is_proficient_with_weapon(const struct char_data *ch, int cmweapon_type)
+bool is_proficient_with_weapon(const struct char_data *ch, int cmweapon_type)
 {
   return true;
 }

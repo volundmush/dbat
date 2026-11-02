@@ -460,7 +460,7 @@ ACMD(do_summon)
   return;
 }
 
-int dball_count(struct char_data *ch)
+bool dball_count(struct char_data *ch)
 {
 
   int dball[7]         = {20, 21, 22, 23, 24, 25, 26};
@@ -509,7 +509,7 @@ int dball_count(struct char_data *ch)
   } // end repeat for
 
   if (count >= 1) {
-    return 1;
+    return true;
   }
-  return 0;
+  return false;
 }

@@ -99,9 +99,9 @@ void obj_set_room_loaded(struct obj_data *obj, room_vnum v);
 
 #include "dbat/objects.h"
 
-int wearable_obj(struct obj_data *obj);
+bool wearable_obj(struct obj_data *obj);
 void randomize_eq(struct obj_data *obj);
-int is_better(struct obj_data *object, struct obj_data *object2);
+bool is_better(struct obj_data *object, struct obj_data *object2);
 
 int32_t obj_get_id(const struct obj_data *obj);
 void obj_set_id(struct obj_data *obj, int32_t v);

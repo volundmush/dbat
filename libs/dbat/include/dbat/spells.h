@@ -342,11 +342,11 @@ int call_magic(struct char_data *caster, struct char_data *cvict,
 void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                      char *argument);
 
-int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum,
-                 int level, int cast_stat);
+bool mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum,
+                  int level, int cast_stat);
 
 /* other prototypes */
 const char *skill_name(int num);
 int roll_skill(const struct char_data *ch, int snum);
-int roll_resisted(const struct char_data *actor, int sact, const struct char_data *resistor, int sres);
+bool roll_resisted(const struct char_data *actor, int sact, const struct char_data *resistor, int sres);
 int skill_type(int skill);

@@ -380,7 +380,7 @@ void remove_room_zone_commands(zone_rnum zone, room_rnum room_num)
  * writes simple comments in the form of (<name>) to each record.  A
  * header for each field is also there.
  */
-int save_zone(zone_rnum zone_num)
+bool save_zone(zone_rnum zone_num)
 {
   int subcmd, arg1 = -1, arg2 = -1, arg3 = -1, arg4 = -1, arg5 = -1;
   char fname[128], oldname[128];
@@ -641,7 +641,7 @@ static void remove_cmd_from_list(struct reset_com **list, int pos)
 /*
  * Error check user input and then add new (blank) command  
  */
-int new_command(struct zone_data *zone, int pos)
+bool new_command(struct zone_data *zone, int pos)
 {
   int subcmd               = 0;
   struct reset_com new_com = {.command = 'N'}; /* everything else blank: the strings are freed later */
@@ -651,11 +651,11 @@ int new_command(struct zone_data *zone, int pos)
     subcmd++;
 
   if (pos < 0 || pos > subcmd)
-    return 0;
+    return false;
 
   /* * Ok, let's add a new (blank) command */
   add_cmd_to_list(&zone->cmd, &new_com, pos);
-  return 1;
+  return true;
 }
 
 /*-------------------------------------------------------------------*/

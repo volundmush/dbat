@@ -37,8 +37,8 @@ constexpr int BLOCK_SIZE = 256;
 ***************************************************************************
 **   DON'T TOUCH DEFINES BELOW  */
 
-int scan_file(void);
-int has_mail(long recipient);
+bool scan_file(void);
+bool has_mail(long recipient);
 void store_mail(long to, long from, char *message_pointer);
 void clear_free_list(void);
 void free_mail_index(void);

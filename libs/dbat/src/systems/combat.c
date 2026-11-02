@@ -290,7 +290,7 @@ void handle_multihit(struct char_data *ch, struct char_data *vict)
   }
 }
 
-int handle_defender(struct char_data *vict, struct char_data *ch)
+bool handle_defender(struct char_data *vict, struct char_data *ch)
 {
 
   int result = false;
@@ -582,7 +582,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
   }
 }
 
-int check_ruby(struct char_data *ch)
+bool check_ruby(struct char_data *ch)
 {
 
   struct obj_data *obj, *next_obj = nullptr, *ruby = nullptr;
@@ -602,9 +602,9 @@ int check_ruby(struct char_data *ch)
     act("@RYour $p@R flares up and disappears. Your fire attack has been aided!@n", true, ch, ruby, 0, TO_CHAR);
     act("@R$n's@R $p@R flares up and disappears!@n", true, ch, ruby, 0, TO_ROOM);
     extract_obj(ruby);
-    return (1);
+    return true;
   }
-  return (0);
+  return false;
 }
 
 static int64_t combo_damage(struct char_data *ch, int64_t damage, int type)
@@ -694,19 +694,19 @@ void handle_knockdown(struct char_data *ch)
   }
 }
 
-int boom_headshot(struct char_data *ch)
+bool boom_headshot(struct char_data *ch)
 {
 
   int skill = char_get_skills_base(ch, SKILL_TWOHAND);
 
   if (skill >= 100 && rand_number(1, 5) >= 3)
-    return (1);
+    return true;
   else if (skill < 100 && skill >= 75 && rand_number(1, 5) == 5)
-    return (1);
+    return true;
   else if (skill < 75 && skill >= 50 && rand_number(1, 6) == 6)
-    return (1);
+    return true;
   else
-    return (0);
+    return false;
 }
 
 int64_t gun_dam(struct char_data *ch, int wlvl)
@@ -784,14 +784,14 @@ void club_stamina(struct char_data *ch, struct char_data *vict, int wlvl, int64_
   send_to_char(vict, "@D[@rYour @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained));
 }
 
-int backstab(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg)
+bool backstab(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg)
 {
 
   int chance = 0, roll_to_beat = rand_number(1, 100);
   double bonus = 0.0;
 
   if (char_get_backstabcool(ch) > 0)
-    return (0);
+    return false;
 
   switch (wlvl) {
     case 1:
@@ -837,11 +837,11 @@ int backstab(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg
       act("@r$n@R sneaks up behind @r$N@R and stabs $M in the back!@n", true, ch, 0, vict, TO_NOTVICT);
       dmg += dmg * bonus;
       hurt(0, 0, ch, vict, nullptr, dmg, 0);
-      return (1);
+      return true;
     }
-    return (0);
+    return false;
   }
-  return (0);
+  return false;
 }
 
 void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspot)

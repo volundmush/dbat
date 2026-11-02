@@ -5,7 +5,7 @@
 void copy_guild(struct guild_data *tguild, struct guild_data *fguild);
 void free_guild(struct guild_data *guild);
 int add_guild(struct guild_data *guild);
-int save_guilds(zone_rnum zone_num);
+bool save_guilds(zone_rnum zone_num);
 guild_rnum real_guild(guild_vnum vnum);
 
 /*

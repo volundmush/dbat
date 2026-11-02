@@ -80,19 +80,19 @@ static void pay_player_count_rewards(int oldcount)
 ************************************************************************* */
 
 /* This function needs to die. */
-static int _parse_name(char *arg, char *name)
+static bool _parse_name(char *arg, char *name)
 {
   int i;
 
   skip_spaces(&arg);
   for (i = 0; (*name = *arg); arg++, i++, name++)
     if (!isalpha(*arg))
-      return (1);
+      return true;
 
   if (!i)
-    return (1);
+    return true;
 
-  return (0);
+  return false;
 }
 
 constexpr int RECON    = 1;
@@ -100,7 +100,7 @@ constexpr int USURP    = 2;
 constexpr int UNSWITCH = 3;
 
 /* This function seems a bit over-extended. */
-static int perform_dupe_check(struct descriptor_data *d)
+static bool perform_dupe_check(struct descriptor_data *d)
 {
   struct descriptor_data *k, *next_k;
   struct char_data *target = nullptr, *ch, *next_ch;
@@ -197,7 +197,7 @@ static int perform_dupe_check(struct descriptor_data *d)
 
   /* no target for switching into was found - allow login to continue */
   if (!target)
-    return (0);
+    return false;
 
   /* Okay, we've found a target.  Connect d to target. */
   free_char(d->character); /* get rid of the old char */
@@ -253,7 +253,7 @@ static int perform_dupe_check(struct descriptor_data *d)
       break;
   }
 
-  return (1);
+  return true;
 }
 
 /* load the player, put them in the right room - used by copyover_recover too */

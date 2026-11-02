@@ -237,7 +237,7 @@ constexpr int MAX_INVALID_NAMES = 200;
 static char *invalid_list[MAX_INVALID_NAMES];
 int num_invalid = 0;
 
-int Valid_Name(char *newname)
+bool Valid_Name(char *newname)
 {
   int i, wovels = 0;
   struct descriptor_data *dt;
@@ -268,11 +268,11 @@ int Valid_Name(char *newname)
 
   /* return invalid if no wovels */
   if (!wovels)
-    return (0);
+    return false;
 
   /* return valid if list doesn't exist */
   if (num_invalid < 1)
-    return (1);
+    return true;
 
   /* change to lowercase */
   strlcpy(tempname, newname, sizeof(tempname));
@@ -282,9 +282,9 @@ int Valid_Name(char *newname)
   /* Does the desired name contain a string in the invalid list? */
   for (i = 0; i < num_invalid; i++)
     if (strstr(tempname, invalid_list[i]))
-      return (0);
+      return false;
 
-  return (1);
+  return true;
 }
 
 /* What's with the wacky capitalization in here? */

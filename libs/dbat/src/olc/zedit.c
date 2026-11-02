@@ -31,7 +31,7 @@ static void zedit_setup(struct descriptor_data *d, int room_num);
 #define OLC_CMD(d) (OLC_ZONE(d)->cmd[OLC_VAL(d)])
 
 /* Prototypes. */
-static int start_change_command(struct descriptor_data *d, int pos);
+static bool start_change_command(struct descriptor_data *d, int pos);
 
 /*-------------------------------------------------------------------*/
 
@@ -431,16 +431,16 @@ static void zedit_save_to_disk(int zone)
 /*
  * Error check user input and then setup change  
  */
-static int start_change_command(struct descriptor_data *d, int pos)
+static bool start_change_command(struct descriptor_data *d, int pos)
 {
   if (pos < 0 || pos >= count_commands(OLC_ZONE(d)->cmd))
-    return 0;
+    return false;
 
   /*
    * Ok, let's get editing.
    */
   OLC_VAL(d) = pos;
-  return 1;
+  return true;
 }
 
 /**************************************************************************

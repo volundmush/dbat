@@ -171,7 +171,7 @@ int add_guild(struct guild_data *ngld)
 
 /*-------------------------------------------------------------------*/
 
-int save_guilds(zone_rnum zone_num)
+bool save_guilds(zone_rnum zone_num)
 {
   struct atomic_file af;
   int i, j, rguild;

@@ -354,7 +354,7 @@ static int apply_ac(struct char_data *ch, int eq_pos)
   return (obj_get_value(char_get_equipment(ch, eq_pos), VAL_ARMOR_APPLYAC));
 }
 
-int invalid_align(struct char_data *ch, struct obj_data *obj)
+bool invalid_align(struct char_data *ch, struct obj_data *obj)
 {
   if (obj_extra_flagged(obj, ITEM_ANTI_EVIL) && char_is_evil(ch))
     return true;

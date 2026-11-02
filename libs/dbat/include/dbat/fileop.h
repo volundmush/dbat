@@ -17,7 +17,7 @@ constexpr int CUSTOME_FILE     = 11;
 constexpr int MAX_FILES        = 12;
 
 int get_line(FILE *fl, char *buf);
-int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_name);
+bool get_filename(char *filename, size_t fbufsize, int mode, const char *orig_name);
 int touch(const char *path);
 void topLoad(void);
 void topWrite(struct char_data *ch);

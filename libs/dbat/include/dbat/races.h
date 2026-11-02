@@ -10,7 +10,7 @@ void racial_body_parts(struct char_data *ch);
 
 void set_height_and_weight_by_race(struct char_data *ch);
 
-int invalid_race(struct char_data *ch, struct obj_data *obj);
+bool invalid_race(struct char_data *ch, struct obj_data *obj);
 
 // Race behaviour. Races are identified by their RACE_* constant.
 typedef enum softcap_type {
@@ -23,8 +23,8 @@ const char *race_name(int r);
 bool race_valid_sex(int r, int sex);
 bool race_can_be_mimiced(int r);
 int race_find(const char *arg, int sex, bool pc_only);
-int race_rpp_cost(int r);
-int race_rpp_refund(int r);
+bool race_rpp_cost(int r);
+bool race_rpp_refund(int r);
 
 bool race_can_transform(int r);
 bool race_can_revert(int r);

@@ -389,7 +389,7 @@ static void free_config(struct config_data *data)
 /**                  FALSE.                                                  **/
 /**                                                                          **/
 /******************************************************************************/
-int can_edit_zone(struct char_data *ch, zone_rnum rnum)
+bool can_edit_zone(struct char_data *ch, zone_rnum rnum)
 {
   /* no access if called with bad arguments */
   if (!ch->desc || char_is_npc(ch) || rnum == NOWHERE)

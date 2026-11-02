@@ -8,7 +8,7 @@
 
 // functions
 void do_start(struct char_data *ch);
-int invalid_class(struct char_data *ch, struct obj_data *obj);
+bool invalid_class(struct char_data *ch, struct obj_data *obj);
 int level_exp(struct char_data *ch, int level);
 int load_levels();
 void cedit_creation(struct char_data *ch);

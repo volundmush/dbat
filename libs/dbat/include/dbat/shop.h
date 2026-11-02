@@ -220,10 +220,10 @@ extern const char *shop_bits[];
 extern int cmd_say, cmd_tell;
 
 // functions
-int shop_producing(struct obj_data *item, int shop_nr);
+bool shop_producing(struct obj_data *item, int shop_nr);
 void boot_the_shops(FILE *shop_f, char *filename, int rec_count);
 void assign_the_shopkeepers(void);
-int ok_shop_room(int shop_nr, room_vnum room);
+bool ok_shop_room(int shop_nr, room_vnum room);
 void destroy_shops(void);
 void show_shops(struct char_data *ch, char *arg);
 int count_shops(shop_vnum low, shop_vnum high);

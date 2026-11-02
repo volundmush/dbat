@@ -710,7 +710,7 @@ void dg_script_menu(struct descriptor_data *d)
                      "     Enter choice :");
 }
 
-int dg_script_edit_parse(struct descriptor_data *d, char *arg)
+bool dg_script_edit_parse(struct descriptor_data *d, char *arg)
 {
   struct trig_proto_list *trig, *currtrig;
   int count, pos, vnum;
@@ -746,7 +746,7 @@ int dg_script_edit_parse(struct descriptor_data *d, char *arg)
              On quit/nosave, OLC_SCRIPT is free()'d, and the prototype not touched.
 
            */
-          return 0;
+          return false;
         case 'n':
           write_to_output(d, "\r\nPlease enter position, vnum   (ex: 1, 200):");
           OLC_SCRIPT_EDIT_MODE(d) = SCRIPT_NEW_TRIGGER;
@@ -759,7 +759,7 @@ int dg_script_edit_parse(struct descriptor_data *d, char *arg)
           dg_script_menu(d);
           break;
       }
-      return 1;
+      return true;
 
     case SCRIPT_NEW_TRIGGER:
       vnum  = -1;
@@ -776,7 +776,7 @@ int dg_script_edit_parse(struct descriptor_data *d, char *arg)
       if (real_trigger(vnum) == NOTHING) {
         write_to_output(d, "Invalid Trigger VNUM!\r\n"
                            "Please enter position, vnum   (ex: 1, 200):");
-        return 1;
+        return true;
       }
 
       /* add the new info in position */
@@ -826,7 +826,7 @@ int dg_script_edit_parse(struct descriptor_data *d, char *arg)
   }
 
   dg_script_menu(d);
-  return 1;
+  return true;
 }
 
 void trigedit_string_cleanup(struct descriptor_data *d, int terminator)
@@ -838,7 +838,7 @@ void trigedit_string_cleanup(struct descriptor_data *d, int terminator)
   }
 }
 
-int format_script(struct descriptor_data *d)
+bool format_script(struct descriptor_data *d)
 {
   char nsc[MAX_CMD_LENGTH], *t, line[READ_SIZE];
   char *sc;

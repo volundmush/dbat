@@ -60,7 +60,7 @@ void affect_update(void)
  * heal spell which requires a rare herb or some such.)
  */
 
-int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum, int level, int cast_stat)
+bool mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum, int level, int cast_stat)
 {
   return false;
 }

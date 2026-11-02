@@ -46,13 +46,13 @@ static void handle_fall(struct char_data *ch);
 static int check_swim(struct char_data *ch);
 static void disp_locations(struct char_data *ch);
 static int find_door(struct char_data *ch, const char *type, char *dir, const char *cmdname);
-static int has_key(struct char_data *ch, obj_vnum key);
+static bool has_key(struct char_data *ch, obj_vnum key);
 static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int scmd);
-static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *obj);
-static int has_flight(struct char_data *ch);
-static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_specials_check);
+static bool ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *obj);
+static bool has_flight(struct char_data *ch);
+static bool do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_specials_check);
 static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check);
-static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_specials_check);
+static bool do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_specials_check);
 static int perform_leave_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check);
 
 /* This handles teleporting players with instant transmission or skills like it. */
@@ -600,52 +600,52 @@ ACMD(do_land)
 
 /* simple function to determine if char can walk on water */
 /* simple function to determine if char can fly */
-static int has_flight(struct char_data *ch)
+static bool has_flight(struct char_data *ch)
 {
   struct obj_data *obj;
 
   if (char_adm_flagged(ch, ADM_WALKANYWHERE))
-    return (1);
+    return true;
 
   if (char_aff_flagged(ch, AFF_FLYING) && (getCurKI(ch)) >= (char_get_level(ch) + (getMaxKI(ch) / (char_get_level(ch) * 30))) && !char_is_android(ch) && !char_is_npc(ch)) {
-    return (1);
+    return true;
   }
   if (char_aff_flagged(ch, AFF_FLYING) && (getCurKI(ch)) < (char_get_level(ch) + (getMaxKI(ch) / (char_get_level(ch) * 30))) && !char_is_android(ch) && !char_is_npc(ch)) {
     act("@WYou crash to the ground, too tired to fly anymore!@n", true, ch, 0, 0, TO_CHAR);
     act("@W$n@W crashes to the ground!@n", true, ch, 0, 0, TO_ROOM);
     char_aff_set(ch, AFF_FLYING, false);
     handle_fall(ch);
-    return (0);
+    return false;
   }
   if (char_aff_flagged(ch, AFF_FLYING) && char_is_android(ch)) {
-    return (1);
+    return true;
   }
   if (char_aff_flagged(ch, AFF_FLYING) && char_is_npc(ch)) {
-    return (1);
+    return true;
   }
 
   /* non-wearable flying items in inventory will do it */
   for (obj = ch->carrying; obj; obj = obj->next_content)
     if (obj_aff_flagged(obj, AFF_FLYING) && (find_eq_pos(ch, obj, nullptr) < 0))
-      return (1);
+      return true;
 
   /* anything worn as wings will do */
-  return (0);
+  return false;
 }
 
 /* simple function to determine if char can breathe non-o2 */
-int has_o2(struct char_data *ch)
+bool has_o2(struct char_data *ch)
 {
   if (char_adm_flagged(ch, ADM_WALKANYWHERE))
-    return (1);
+    return true;
 
   if (char_aff_flagged(ch, AFF_WATERBREATH))
-    return (1);
+    return true;
 
   if (char_is_kanassan(ch) || char_is_android(ch) || char_is_icer(ch) || char_is_majin(ch))
-    return (1);
+    return true;
 
-  return (0);
+  return false;
 }
 
 /* do_simple_move assumes
@@ -656,7 +656,7 @@ int has_o2(struct char_data *ch)
  *   1 : If succes.
  *   0 : If fail
  */
-int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
+bool do_simple_move(struct char_data *ch, int dir, int need_specials_check)
 {
   char throwaway[MAX_INPUT_LENGTH] = ""; /* Functions assume writable. */
   char buf2[MAX_STRING_LENGTH];
@@ -670,20 +670,20 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
    * -- only check if following; this avoids 'double spec-proc' bug
    */
   if (need_specials_check && special(ch, dir + 1, throwaway))
-    return (0);
+    return false;
 
   /* blocked by a leave trigger ? */
   if (!leave_mtrigger(ch, dir) || char_get_in_room(ch) != was_in) /* prevent teleport crashes */
-    return 0;
+    return false;
   if (!leave_wtrigger(&world[char_get_in_room(ch)], ch, dir) || char_get_in_room(ch) != was_in) /* prevent teleport crashes */
-    return 0;
+    return false;
   if (!leave_otrigger(&world[char_get_in_room(ch)], ch, dir) || char_get_in_room(ch) != was_in) /* prevent teleport crashes */
-    return 0;
+    return false;
   /* charmed? */
   if (char_aff_flagged(ch, AFF_CHARM) && ch->master && char_get_in_room(ch) == char_get_in_room(ch->master)) {
     send_to_char(ch, "The thought of leaving your master makes you weep.\r\n");
     act("$n bursts into tears.", false, ch, 0, 0, TO_ROOM);
-    return (0);
+    return false;
   }
 
   int willfall = false;
@@ -694,7 +694,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
         willfall = true;
       } else {
         send_to_char(ch, "You need to fly to go there!\r\n");
-        return (0);
+        return false;
       }
     }
   }
@@ -708,7 +708,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
       act("@c$n@C swims swiftly.@n", true, ch, 0, 0, TO_ROOM);
     } else if (!char_is_kanassan(ch) && !char_is_icer(ch) && !has_flight(ch)) {
       if (!check_swim(ch)) {
-        return (0);
+        return false;
       }
       act("@CYou swim through the cold water.@n", true, ch, 0, 0, TO_CHAR);
       act("@c$n@C swim through the cold water.@n", true, ch, 0, 0, TO_ROOM);
@@ -719,17 +719,17 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   if (rroom_flagged(char_get_in_room(ch), ROOM_SPACE)) {
     if (!char_is_android(ch)) {
       if (!check_swim(ch)) {
-        return (0);
+        return false;
       }
     }
   }
 
   if (rroom_get_geffect(char_get_exit(ch, dir)->to_room) == 6 && !char_is_humanoid(ch) && char_is_npc(ch)) {
-    return (0);
+    return false;
   }
 
   if (char_is_npc(ch) && rroom_flagged(char_get_exit(ch, dir)->to_room, ROOM_NOMOB) && !ch->master) {
-    return (0);
+    return false;
   }
 
   if (rroom_sunken(char_get_in_room(ch)) ||
@@ -743,7 +743,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
       if (getCurPL(ch) < getEffMaxPL(ch) / 20) {
         send_to_char(ch, "@rYou drown!@n\r\n");
         die(ch, nullptr);
-        return (0);
+        return false;
       }
     }
     if (!has_o2(ch) && ((group_bonus(ch, 2) != 10 && (getCurKI(ch)) >= getMaxKI(ch) / 200) || (group_bonus(ch, 2) == 10 &&
@@ -804,7 +804,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
       send_to_char(ch, "You are too exhausted.\r\n");
     }
 
-    return (0);
+    return false;
   }
 
   /* Check if the character needs a skill check to go that way. */
@@ -814,7 +814,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
       /* A failed skill check still spends the movement points! */
       if (!char_adm_flagged(ch, ADM_WALKANYWHERE) && !char_is_npc(ch) && !char_aff_flagged(ch, AFF_FLYING))
         decCurST(ch, need_movement, 0);
-      return (0);
+      return false;
     }
     send_to_char(ch, "Your skill in %s aids in your movement.\r\n", spell_info[char_get_exit(ch, dir)->dcskill].name);
   }
@@ -822,7 +822,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   if (rroom_flagged(char_get_in_room(ch), ROOM_ATRIUM)) {
     if (!House_can_enter(ch, rroom_get_vnum(char_get_exit(ch, dir)->to_room))) {
       send_to_char(ch, "That's private property -- no trespassing!\r\n");
-      return (0);
+      return false;
     }
   }
   if (rroom_flagged(char_get_exit(ch, dir)->to_room, ROOM_TUNNEL) &&
@@ -831,13 +831,13 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
       send_to_char(ch, "There isn't enough room for you to go there!\r\n");
     else
       send_to_char(ch, "There isn't enough room there for more than one person!\r\n");
-    return (0);
+    return false;
   }
   /* Mortals and low level gods cannot enter greater god rooms. */
   if (rroom_flagged(char_get_exit(ch, dir)->to_room, ROOM_GODROOM) &&
       char_get_admlevel(ch) < ADMLVL_GRGOD) {
     send_to_char(ch, "You aren't godly enough to use that room!\r\n");
-    return (0);
+    return false;
   }
 
   /******* Zone flag checks *******/
@@ -847,30 +847,30 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   if (!char_is_npc(ch) && (char_get_admlevel(ch) < ADMLVL_IMMORT) &&
       (char_get_level(ch) < zone_get_min_level(rm->zone)) && (zone_get_min_level(rm->zone) > 0)) {
     send_to_char(ch, "Sorry, you are too low a level to enter this zone.\r\n");
-    return (0);
+    return false;
   }
 
   if ((char_get_admlevel(ch) < ADMLVL_IMMORT) && (char_get_level(ch) > zone_get_max_level(rm->zone)) &&
       (zone_get_max_level(rm->zone) > 0)) {
     send_to_char(ch, "Sorry, you are too high a level to enter this zone.\r\n");
-    return (0);
+    return false;
   }
 
   if ((char_get_admlevel(ch) < ADMLVL_IMMORT) && zone_flagged(rm->zone, ZONE_CLOSED)) {
     send_to_char(ch, "This zone is currently closed to mortals.\r\n");
-    return (0);
+    return false;
   }
 
   if ((char_get_admlevel(ch) >= ADMLVL_IMMORT && char_get_admlevel(ch) < ADMLVL_GRGOD) && zone_flagged(rm->zone, ZONE_NOIMMORT)) {
     send_to_char(ch, "This zone is closed to all.\r\n");
-    return (0);
+    return false;
   }
 
   /* No low level immortal scouting */
   if ((char_get_admlevel(ch) >= ADMLVL_IMMORT && char_get_admlevel(ch) < ADMLVL_GOD) &&
       !can_edit_zone(ch, rm->zone) && zone_flagged(rm->zone, ZONE_QUEST)) {
     send_to_char(ch, "This is a Quest zone.\r\n");
-    return (0);
+    return false;
   }
 
   /* Now we know we're allowed to go into the room. */
@@ -925,7 +925,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     char_from_room(ch);
     char_to_room(ch, was_in);
     char_aff_set(ch, AFF_PURSUIT, false);
-    return 0;
+    return false;
   }
 
   snprintf(buf2, sizeof(buf2), "%s%s",
@@ -1008,7 +1008,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     log_death_trap(ch);
     death_cry(ch);
     extract_char(ch);
-    return (0);
+    return false;
   }
 
   entry_memory_mtrigger(ch);
@@ -1023,22 +1023,22 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check)
       handle_fall(char_get_drag(ch));
     }
   }
-  return (1);
+  return true;
 }
 
-int perform_move(struct char_data *ch, int dir, int need_specials_check)
+bool perform_move(struct char_data *ch, int dir, int need_specials_check)
 {
   room_rnum was_in;
   struct follow_type *k, *next;
 
   if (char_get_grappling(ch) || char_get_grappled(ch)) {
     send_to_char(ch, "You are grappling with someone!\r\n");
-    return (0);
+    return false;
   }
 
   if (char_get_absorbing(ch) || char_get_absorbby(ch)) {
     send_to_char(ch, "You are struggling with someone!\r\n");
-    return (0);
+    return false;
   }
 
   if (!char_aff_flagged(ch, AFF_SNEAK) || (char_aff_flagged(ch, AFF_SNEAK) && char_get_skill(ch, SKILL_MOVE_SILENTLY) < axion_dice(0))) {
@@ -1046,7 +1046,7 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check)
   }
 
   if (ch == nullptr || dir < 0 || dir >= NUM_OF_DIRS)
-    return (0);
+    return false;
   else if ((!char_get_exit(ch, dir) && !buildwalk(ch, dir)) || char_get_exit(ch, dir)->to_room == NOWHERE || (room_exit_flagged(char_get_exit(ch, dir), EX_SECRET) && (room_exit_flagged(char_get_exit(ch, dir), EX_CLOSED))))
     send_to_char(ch, "Alas, you cannot go that way...\r\n");
   else if (room_exit_flagged(char_get_exit(ch, dir), EX_CLOSED)) {
@@ -1063,7 +1063,7 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check)
       if (obj_get_vnum(wall) == 79) {
         if (obj_get_cost(wall) == dir) {
           send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");
-          return (0);
+          return false;
         }
       }
     }
@@ -1073,7 +1073,7 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check)
 
     was_in = char_get_in_room(ch);
     if (!do_simple_move(ch, dir, need_specials_check))
-      return (0);
+      return false;
 
     for (k = ch->followers; k; k = next) {
       next = k->next;
@@ -1102,9 +1102,9 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check)
         char_aff_set(ch, AFF_ZANZOKEN, false);
       }
     }
-    return (1);
+    return true;
   }
-  return (0);
+  return false;
 }
 
 ACMD(do_move)
@@ -1443,25 +1443,25 @@ static int find_door(struct char_data *ch, const char *type, char *dir, const ch
   }
 }
 
-static int has_key(struct char_data *ch, obj_vnum key)
+static bool has_key(struct char_data *ch, obj_vnum key)
 {
   struct obj_data *o;
   int i;
 
   if (key == 1) {
-    return (1);
+    return true;
   }
 
   for (o = ch->carrying; o; o = o->next_content)
     if (obj_get_vnum(o) == key)
-      return (1);
+      return true;
 
   for (i = 0; i < NUM_WEARS; i++)
     if (char_get_equipment(ch, i))
       if (obj_get_vnum(char_get_equipment(ch, i)) == key)
-        return (1);
+        return true;
 
-  return (0);
+  return false;
 }
 
 constexpr int NEED_OPEN     = (1 << 0);
@@ -1705,7 +1705,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
   *dbuf = '\0';
 }
 
-static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *hatch)
+static bool ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *hatch)
 {
   int skill_lvl, found = false;
   struct obj_data *obj, *next_obj;
@@ -1718,21 +1718,21 @@ static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dcl
   }
 
   if (scmd != SCMD_PICK)
-    return (1);
+    return true;
 
   /* PICKING_LOCKS is not an untrained skill */
   if (!char_get_skill(ch, SKILL_OPEN_LOCK)) {
     send_to_char(ch, "You have no idea how!\r\n");
-    return (0);
+    return false;
   }
   if (found == false) {
     send_to_char(ch, "You need a lock picking kit.\r\n");
-    return (0);
+    return false;
   }
   if (hatch != nullptr && (obj_get_type_flag(hatch) == ITEM_HATCH || obj_get_type_flag(hatch) == ITEM_VEHICLE)) {
     send_to_char(ch, "No picking ship hatches.\r\n");
     hatch = nullptr;
-    return (0);
+    return false;
   }
   skill_lvl = roll_skill(ch, SKILL_OPEN_LOCK);
   if (dclock == 0) {
@@ -1757,10 +1757,10 @@ static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dcl
     decCurST(ch, getCurST(ch) / 30, 0);
   } else {
     decCurST(ch, getCurST(ch) / 30, 0);
-    return (1);
+    return true;
   }
 
-  return (0);
+  return false;
 }
 
 #define DOOR_IS_OPENABLE(ch, obj, door) ((obj) ? ((obj_get_type_flag(obj) == ITEM_CONTAINER) &&   \
@@ -1891,19 +1891,19 @@ static int portal_move_cost(struct char_data *ch, room_rnum dest_room, int need_
   return need_movement;
 }
 
-static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_specials_check)
+static bool do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_specials_check)
 {
   room_rnum dest_room = real_room(obj_get_value(obj, VAL_PORTAL_DEST));
   room_rnum was_in    = char_get_in_room(ch);
   int need_movement   = 0;
 
   if ((need_movement = portal_move_cost(ch, dest_room, need_specials_check)) < 0)
-    return (0);
+    return false;
   /* Mortals and low level gods cannot enter greater god rooms. */
   if (rroom_flagged(dest_room, ROOM_GODROOM) &&
       char_get_admlevel(ch) < ADMLVL_GRGOD) {
     send_to_char(ch, "You aren't godly enough to use that room!\r\n");
-    return (0);
+    return false;
   }
   /* Now we know we're allowed to go into the room. */
   if (!(char_is_npc(ch) || char_adm_flagged(ch, ADM_WALKANYWHERE)) && !char_aff_flagged(ch, AFF_FLYING))
@@ -1925,7 +1925,7 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
   if (!entry_mtrigger(ch)) {
     char_from_room(ch);
     char_to_room(ch, was_in);
-    return 0;
+    return false;
   }
 
   if (obj_get_type_flag(obj) == ITEM_PORTAL)
@@ -1969,13 +1969,13 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
     log_death_trap(ch);
     death_cry(ch);
     extract_char(ch);
-    return 0;
+    return false;
   }
 
   entry_memory_mtrigger(ch);
   greet_memory_mtrigger(ch);
 
-  return 1;
+  return true;
 }
 
 static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check)
@@ -2076,7 +2076,7 @@ ACMD(do_enter)
   }
 }
 
-static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_specials_check)
+static bool do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_specials_check)
 
 {
   room_rnum was_in = char_get_in_room(ch), dest_room = NOWHERE;
@@ -2089,29 +2089,29 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
 
   if (vehicle == nullptr && obj_get_type_flag(obj) != ITEM_PORTAL) {
     send_to_char(ch, "That doesn't appear to lead anywhere.\r\n");
-    return 0;
+    return false;
   }
 
   if (obj_get_type_flag(obj) == ITEM_PORTAL && obj_val_flagged(obj, CONT_CLOSED)) {
     send_to_char(ch, "But it's closed!\r\n");
-    return 0;
+    return false;
   }
 
   if (vehicle != nullptr) {
     if ((dest_room = obj_get_in_room(vehicle)) == NOWHERE) {
       send_to_char(ch, "That doesn't appear to lead anywhere.\r\n");
-      return 0;
+      return false;
     }
   }
   if (vehicle == nullptr) {
     if ((dest_room = real_room(obj_get_value(obj, VAL_PORTAL_DEST))) == NOWHERE) {
       send_to_char(ch, "That doesn't appear to lead anywhere.\r\n");
-      return 0;
+      return false;
     }
   }
 
   if ((need_movement = portal_move_cost(ch, dest_room, need_specials_check)) < 0)
-    return (0);
+    return false;
   /* Now we know we're allowed to go into the room. */
   if (!(char_is_npc(ch) || char_adm_flagged(ch, ADM_WALKANYWHERE)) && !char_aff_flagged(ch, AFF_FLYING))
     decCurST(ch, need_movement, 0);
@@ -2132,7 +2132,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
   if (!entry_mtrigger(ch)) {
     char_from_room(ch);
     char_to_room(ch, was_in);
-    return 0;
+    return false;
   }
 
   if (vehicle) {
@@ -2184,13 +2184,13 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
     log_death_trap(ch);
     death_cry(ch);
     extract_char(ch);
-    return 0;
+    return false;
   }
 
   entry_memory_mtrigger(ch);
   greet_memory_mtrigger(ch);
 
-  return 1;
+  return true;
 }
 
 static int perform_leave_obj(struct char_data *ch, struct obj_data *obj, int need_specials_check)

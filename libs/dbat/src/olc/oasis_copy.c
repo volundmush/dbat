@@ -314,7 +314,7 @@ static room_vnum redit_find_new_vnum(zone_rnum zone)
   return (vnum);
 }
 
-int buildwalk(struct char_data *ch, int dir)
+bool buildwalk(struct char_data *ch, int dir)
 {
   room_vnum vnum;
   room_rnum rnum;
@@ -369,9 +369,9 @@ int buildwalk(struct char_data *ch, int dir)
       send_to_char(ch, "@yRoom #%d created by BuildWalk.@n\r\n", vnum);
       cleanup_olc(d, CLEANUP_STRUCTS);
       update_space();
-      return (1);
+      return true;
     }
   }
 
-  return (0);
+  return false;
 }

@@ -74,15 +74,15 @@ static void check_idle_menu(void);
 static void check_idle_passwords(void);
 static void game_loop(int cmmother_desc);
 static struct in_addr *get_bind_addr();
-static int get_from_q(struct txt_q *queue, char *dest, int *aliased);
+static bool get_from_q(struct txt_q *queue, char *dest, int *aliased);
 static int get_max_players(void);
 static void heartbeat(int heart_pulse);
 static void init_descriptor(struct descriptor_data *newd, int desc);
 static int init_socket(uint16_t cmport);
 static int new_descriptor(int s);
 static void nonblock(int s);
-static int open_logfile(const char *filename, FILE *stderr_fp);
-static int perform_subst(struct descriptor_data *t, char *orig, char *subst);
+static bool open_logfile(const char *filename, FILE *stderr_fp);
+static bool perform_subst(struct descriptor_data *t, char *orig, char *subst);
 static int process_input(struct descriptor_data *t);
 static int process_output(struct descriptor_data *t);
 static void record_usage(void);
@@ -1459,13 +1459,13 @@ void write_to_q(const char *txt, struct txt_q *queue, int aliased)
 /*
  * NOTE: 'dest' must be at least MAX_INPUT_LENGTH big.
  */
-static int get_from_q(struct txt_q *queue, char *dest, int *aliased)
+static bool get_from_q(struct txt_q *queue, char *dest, int *aliased)
 {
   struct txt_block *tmp;
 
   /* queue empty? */
   if (!queue->head)
-    return (0);
+    return false;
 
   strcpy(dest, queue->head->text); /* strcpy: OK (mutual MAX_INPUT_LENGTH) */
   *aliased = queue->head->aliased;
@@ -1477,7 +1477,7 @@ static int get_from_q(struct txt_q *queue, char *dest, int *aliased)
   free(tmp->text);
   free(tmp);
 
-  return (1);
+  return true;
 }
 
 /* Throw away the commands a descriptor has typed but not yet run. */
@@ -2343,7 +2343,7 @@ static int process_input(struct descriptor_data *t)
  * orig string, i.e. the one being modified.  subst contains the
  * substition string, i.e. "^telm^tell"
  */
-static int perform_subst(struct descriptor_data *t, char *orig, char *subst)
+static bool perform_subst(struct descriptor_data *t, char *orig, char *subst)
 {
   char newsub[MAX_INPUT_LENGTH + 5];
 
@@ -2358,7 +2358,7 @@ static int perform_subst(struct descriptor_data *t, char *orig, char *subst)
   /* now find the second '^' */
   if (!(second = strchr(first, '^'))) {
     write_to_output(t, "Invalid substitution.\r\n");
-    return (1);
+    return true;
   }
   /* terminate "first" at the position of the '^' and make 'second' point
    * to the beginning of the second string */
@@ -2367,7 +2367,7 @@ static int perform_subst(struct descriptor_data *t, char *orig, char *subst)
   /* now, see if the contents of the first string appear in the original */
   if (!(strpos = strstr(orig, first))) {
     write_to_output(t, "Invalid substitution.\r\n");
-    return (1);
+    return true;
   }
   /* now, we construct the new string for output. */
 
@@ -2387,7 +2387,7 @@ static int perform_subst(struct descriptor_data *t, char *orig, char *subst)
   newsub[MAX_INPUT_LENGTH - 1] = '\0';
   strcpy(subst, newsub); /* strcpy: OK (by mutual MAX_INPUT_LENGTH) */
 
-  return (0);
+  return false;
 }
 
 /* Frees the account strings: real ones after login, or the "Empty" placeholders set_color() made. */
@@ -3151,7 +3151,7 @@ void setup_log(const char *filename, int fd)
   exit(1);
 }
 
-static int open_logfile(const char *filename, FILE *stderr_fp)
+static bool open_logfile(const char *filename, FILE *stderr_fp)
 {
   if (stderr_fp) /* freopen() the descriptor. */
     logfile = freopen(filename, "w", stderr_fp);

@@ -38,7 +38,7 @@ int get_line(FILE *fl, char *buf)
   return (lines);
 }
 
-int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_name)
+bool get_filename(char *filename, size_t fbufsize, int mode, const char *orig_name)
 {
   const char *prefix, *middle, *suffix;
   char name[PATH_MAX], *ptr;
@@ -46,7 +46,7 @@ int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_nam
   if (orig_name == nullptr || *orig_name == '\0' || filename == nullptr) {
     mud_log("SYSERR: NULL pointer or empty string passed to get_filename(), %p or %p.",
             orig_name, filename);
-    return (0);
+    return false;
   }
 
   switch (mode) {
@@ -95,7 +95,7 @@ int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_nam
       suffix = SUF_CUSTOM;
       break;
     default:
-      return (0);
+      return false;
   }
 
   strlcpy(name, orig_name, sizeof(name));
@@ -145,7 +145,7 @@ int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_nam
   }
 
   snprintf(filename, fbufsize, "%s%s" SLASH "%s.%s", prefix, middle, name, suffix);
-  return (1);
+  return true;
 }
 
 /* the "touch" command, essentially. */

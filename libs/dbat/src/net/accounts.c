@@ -52,20 +52,20 @@ void empty_account_slots_named(struct descriptor_data *d, const char *name)
       set_account_slot(d, n, "Empty");
 }
 
-int readUserIndex(char *name)
+bool readUserIndex(char *name)
 {
   char fname[40];
   FILE *fl;
 
   /* Read User Index */
   if (!get_filename(fname, sizeof(fname), USER_FILE, name)) {
-    return 0;
+    return false;
   }
   if (!(fl = fopen(fname, "r"))) {
-    return 0;
+    return false;
   }
   fclose(fl);
-  return 1;
+  return true;
 }
 
 /* True if name is on the lockout list (lib/etc lockout intro file). */

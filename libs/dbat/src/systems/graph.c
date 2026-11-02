@@ -20,7 +20,7 @@
 #include "dbat/act.informative.h"
 
 /* local functions */
-static int VALID_EDGE(room_rnum x, int y);
+static bool VALID_EDGE(room_rnum x, int y);
 static void bfs_enqueue(room_rnum room, int dir);
 static void bfs_dequeue(void);
 static void bfs_clear_queue(void);
@@ -40,16 +40,16 @@ static struct bfs_queue_struct *bfs_queue_head = 0, *bfs_queue_tail = 0;
 #define TOROOM(x, y)    (world[(x)].dir_option[(y)]->to_room)
 #define IS_CLOSED(x, y) (room_exit_flagged(world[(x)].dir_option[(y)], EX_CLOSED))
 
-static int VALID_EDGE(room_rnum x, int y)
+static bool VALID_EDGE(room_rnum x, int y)
 {
   if (world[x].dir_option[y] == nullptr || TOROOM(x, y) == NOWHERE)
-    return 0;
+    return false;
   if (CONFIG_TRACK_T_DOORS == false && IS_CLOSED(x, y))
-    return 0;
+    return false;
   if (rroom_flagged(TOROOM(x, y), ROOM_NOTRACK) || IS_MARKED(TOROOM(x, y)))
-    return 0;
+    return false;
 
-  return 1;
+  return true;
 }
 
 static void bfs_enqueue(room_rnum room, int dir)

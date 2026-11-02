@@ -33,7 +33,7 @@
  ** Parameters  :                                                      **
  **   type - The OLC type constant relating to the data type of data.  **
 \************************************************************************/
-int free_strings(void *data, int type)
+bool free_strings(void *data, int type)
 {
   struct config_data *config;
 

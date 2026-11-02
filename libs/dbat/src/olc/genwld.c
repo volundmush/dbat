@@ -17,8 +17,8 @@
 #include "dbat/dg_olc.h"
 #include "dbat/atomicfile.h"
 
-static int copy_room(struct room_data *to, struct room_data *from);
-static int copy_room_strings(struct room_data *dest, struct room_data *source);
+static bool copy_room(struct room_data *to, struct room_data *from);
+static bool copy_room_strings(struct room_data *dest, struct room_data *source);
 
 /*
  * This function will copy the strings so be sure you free your own
@@ -131,7 +131,7 @@ room_rnum add_room(struct room_data *room)
 
 /* -------------------------------------------------------------------------- */
 
-int delete_room(room_rnum rnum)
+bool delete_room(room_rnum rnum)
 {
   room_rnum i;
   int j;
@@ -273,7 +273,7 @@ int delete_room(room_rnum rnum)
   return true;
 }
 
-int save_rooms(zone_rnum zone_num)
+bool save_rooms(zone_rnum zone_num)
 {
   int i;
   struct room_data *room;
@@ -412,7 +412,7 @@ int save_rooms(zone_rnum zone_num)
   return true;
 }
 
-static int copy_room(struct room_data *to, struct room_data *from)
+static bool copy_room(struct room_data *to, struct room_data *from)
 {
   free_room_strings(to);
   *to = *from;
@@ -434,7 +434,7 @@ static int copy_room(struct room_data *to, struct room_data *from)
  * and we'd be freeing the very strings we're copying.  If this function
  * is used elsewhere, be sure to free_room_strings() the 'dest' room first.
  */
-static int copy_room_strings(struct room_data *dest, struct room_data *source)
+static bool copy_room_strings(struct room_data *dest, struct room_data *source)
 {
   int i;
 
@@ -468,7 +468,7 @@ static int copy_room_strings(struct room_data *dest, struct room_data *source)
   return true;
 }
 
-int free_room_strings(struct room_data *room)
+bool free_room_strings(struct room_data *room)
 {
   int i;
 

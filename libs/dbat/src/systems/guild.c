@@ -392,7 +392,7 @@ void list_skills(struct char_data *ch, char *arg)
   send_to_char(ch, "%s", buf2);
 }
 
-static int is_guild_open(struct char_data *keeper, int guild_nr, int msg)
+static bool is_guild_open(struct char_data *keeper, int guild_nr, int msg)
 {
   char buf[200];
   *buf = 0;
@@ -409,7 +409,7 @@ static int is_guild_open(struct char_data *keeper, int guild_nr, int msg)
   return (false);
 }
 
-static int is_guild_ok_char(struct char_data *keeper, struct char_data *ch, int guild_nr)
+static bool is_guild_ok_char(struct char_data *keeper, struct char_data *ch, int guild_nr)
 {
   char buf[200];
 
@@ -531,7 +531,7 @@ static int is_guild_ok_char(struct char_data *keeper, struct char_data *ch, int 
   return (true);
 }
 
-static int is_guild_ok(struct char_data *keeper, struct char_data *ch, int guild_nr)
+static bool is_guild_ok(struct char_data *keeper, struct char_data *ch, int guild_nr)
 {
   if (is_guild_open(keeper, guild_nr, true))
     return (is_guild_ok_char(keeper, ch, guild_nr));
@@ -648,98 +648,98 @@ static void what_does_guild_know(int guild_nr, struct char_data *ch)
   send_to_char(ch, "%s", buf2);
 }
 
-static int prereq_pass(struct char_data *ch, int snum)
+static bool prereq_pass(struct char_data *ch, int snum)
 {
   if (snum == SKILL_KOUSENGAN || snum == SKILL_TSUIHIDAN || snum == SKILL_RENZO || snum == SKILL_SHOGEKIHA) {
     if (char_get_skills_base(ch, SKILL_KIBALL) < 40 || char_get_skills_base(ch, SKILL_KIBLAST) < 40 || char_get_skills_base(ch, SKILL_BEAM) < 40) {
       send_to_char(ch, "You can not train that skill until you at least have trained Kiball, Kiblast, and Beam to Skill LVL 40.");
-      return 0;
+      return false;
     }
   } else if (snum == SKILL_INSTANTT) {
     if (char_get_skills_base(ch, SKILL_FOCUS) < 90 || char_get_skills_base(ch, SKILL_CONCENTRATION) < 90 || char_get_skills_base(ch, SKILL_ZANZOKEN) < 90) {
       send_to_char(ch, "You can not train instant transmission until you have Focus, Concentration, and Zanzoken up to Skill LVL 90.");
-      return 0;
+      return false;
     }
   } else if (snum == SKILL_SLAM) {
     if (char_get_skills_base(ch, SKILL_UPPERCUT) < 50) {
       send_to_char(ch, "You can not train that skill until you at least have trained uppercut to Skill LVL 50.");
-      return 0;
+      return false;
     }
   } else if (snum == SKILL_UPPERCUT) {
     if (char_get_skills_base(ch, SKILL_ELBOW) < 40) {
       send_to_char(ch, "You can not train that skill until you at least have trained elbow to Skill LVL 40.");
-      return 0;
+      return false;
     }
   } else if (snum == SKILL_HEELDROP) {
     if (char_get_skills_base(ch, SKILL_ROUNDHOUSE) < 50) {
       send_to_char(ch, "You can not train that skill until you at least have trained roundhouse to Skill LVL 50.");
-      return 0;
+      return false;
     }
   } else if (snum == SKILL_ROUNDHOUSE) {
     if (char_get_skills_base(ch, SKILL_KNEE) < 40) {
       send_to_char(ch, "You can not train that skill until you at least have trained knee to Skill LVL 40.");
-      return 0;
+      return false;
     }
   } else if (snum == SKILL_KIBALL || snum == SKILL_KIBLAST || snum == SKILL_BEAM) {
     if (char_get_skills_base(ch, SKILL_FOCUS) < 30) {
       send_to_char(ch, "You can not train that skill until you at least have trained focus to Skill LVL 30.");
-      return 0;
+      return false;
     }
   } else if (IS_SET(spell_info[snum].flags, SKFLAG_TIER2) || IS_SET(spell_info[snum].flags, SKFLAG_TIER3)) {
     if (snum != 530 && snum != 531) {
       if (char_get_skills_base(ch, SKILL_TSUIHIDAN) < 40 || char_get_skills_base(ch, SKILL_RENZO) < 40 || char_get_skills_base(ch, SKILL_SHOGEKIHA) < 40) {
         send_to_char(ch, "You can not train that skill until you at least have trained Tsuihidan, Renzokou Energy Dan, and Shogekiha to Skill LVL 40.");
-        return 0;
+        return false;
       }
     }
   } else if (IS_SET(spell_info[snum].flags, SKFLAG_TIER4)) {
     if (char_is_roshi(ch) && (char_get_skills_base(ch, SKILL_KAMEHAMEHA) < 40 || char_get_skills_base(ch, SKILL_KIENZAN) < 40)) {
       send_to_char(ch, "You can not train that skill until you at least have trained Kamehameha and Kienzan to Skill LVL 40.");
-      return 0;
+      return false;
     }
     if (char_is_tsuna(ch) && (char_get_skills_base(ch, SKILL_WRAZOR) < 40 || char_get_skills_base(ch, SKILL_WSPIKE) < 40)) {
       send_to_char(ch, "You can not train that skill until you at least have trained Water Razor and Water Spikes to Skill LVL 40.");
-      return 0;
+      return false;
     }
     if (char_is_piccolo(ch) && (char_get_skills_base(ch, SKILL_MASENKO) < 40 || char_get_skills_base(ch, SKILL_SBC) < 40)) {
       send_to_char(ch, "You can not train that skill until you at least have trained Masenko and Special Beam Cannon to Skill LVL 40.");
-      return 0;
+      return false;
     }
     if (char_is_frieza(ch) && (char_get_skills_base(ch, SKILL_DEATHBEAM) < 40 || char_get_skills_base(ch, SKILL_KIENZAN) < 40)) {
       send_to_char(ch, "You can not train that skill until you at least have trained Deathbeam and Kienzan to Skill LVL 40.");
-      return 0;
+      return false;
     }
     if (char_is_ginyu(ch) && (char_get_skills_base(ch, SKILL_CRUSHER) < 40 || char_get_skills_base(ch, SKILL_ERASER) < 40)) {
       send_to_char(ch, "You can not train that skill until you at least have trained Crusher Ball and Eraser Cannon to Skill LVL 40.");
-      return 0;
+      return false;
     }
     if (char_is_bardock(ch) && (char_get_skills_base(ch, SKILL_GALIKGUN) < 40 || char_get_skills_base(ch, SKILL_FINALFLASH) < 40)) {
       send_to_char(ch, "You can not train that skill until you at least have trained Galik Gun and Final Flash to Skill LVL 40.");
-      return 0;
+      return false;
     }
     if (char_is_tapion(ch) && (char_get_skills_base(ch, SKILL_TSLASH) < 40 || char_get_skills_base(ch, SKILL_DDSLASH) < 40)) {
       send_to_char(ch, "You can not train that skill until you at least have trained Twin Slash and Darkness Dragon Slash to Skill LVL 40.");
-      return 0;
+      return false;
     }
     if (char_is_nail(ch) && (char_get_skills_base(ch, SKILL_MASENKO) < 40 || char_get_skills_base(ch, SKILL_KOUSENGAN) < 40)) {
       send_to_char(ch, "You can not train that skill until you at least have trained Masenko and Kousengan to Skill LVL 40.");
-      return 0;
+      return false;
     }
     if (char_is_android(ch) && (char_get_skills_base(ch, SKILL_DUALBEAM) < 40 || char_get_skills_base(ch, SKILL_HELLFLASH) < 40)) {
       send_to_char(ch, "You can not train that skill until you at least have trained Dual Beam and Hell Flash to Skill LVL 40.");
-      return 0;
+      return false;
     }
     if (char_is_jinto(ch) && char_get_skills_base(ch, SKILL_BREAKER) < 40) {
       send_to_char(ch, "You can not train that skill until you at least have trained Star Breaker to Skill LVL 40.");
-      return 0;
+      return false;
     }
   } else if (IS_SET(spell_info[snum].flags, SKFLAG_TIER5)) {
     if (char_get_skills_base(ch, SKILL_FOCUS) < 60 || char_get_skills_base(ch, SKILL_CONCENTRATION) < 80) {
       send_to_char(ch, "You can not train that skill until you at least have trained focus to Skill LVL 60 and concentration to Skill LVL 80.");
-      return 0;
+      return false;
     }
   }
-  return 1;
+  return true;
 }
 
 static void handle_forget(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument)

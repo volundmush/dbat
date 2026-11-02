@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int wearable_obj(struct obj_data *obj)
+bool wearable_obj(struct obj_data *obj)
 {
   int pass = false;
 
@@ -47,9 +47,9 @@ int wearable_obj(struct obj_data *obj)
     pass = true;
 
   if (pass == true)
-    return (1);
+    return true;
   else
-    return (0);
+    return false;
 }
 
 void randomize_eq(struct obj_data *obj)
@@ -404,7 +404,7 @@ struct obj_data *create_money(int amount)
   return (obj);
 }
 
-int is_better(struct obj_data *object, struct obj_data *object2)
+bool is_better(struct obj_data *object, struct obj_data *object2)
 {
   int value1 = 0, value2 = 0;
 
@@ -422,9 +422,9 @@ int is_better(struct obj_data *object, struct obj_data *object2)
   }
 
   if (value1 > value2)
-    return 1;
+    return true;
   else
-    return 0;
+    return false;
 }
 
 static bool obj_is_valid(const struct obj_data *obj)

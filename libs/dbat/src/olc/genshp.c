@@ -423,7 +423,7 @@ int add_shop(struct shop_data *nshp)
 
 /*-------------------------------------------------------------------*/
 
-int save_shops(zone_rnum zone_num)
+bool save_shops(zone_rnum zone_num)
 {
   int i, j, rshop;
   struct atomic_file af;

@@ -59,7 +59,7 @@
 
 /* local functions */
 static void print_lockout(struct char_data *ch);
-static int perform_set(struct char_data *ch, struct char_data *vict, int mode, char *val_arg);
+static bool perform_set(struct char_data *ch, struct char_data *vict, int mode, char *val_arg);
 static void perform_immort_invis(struct char_data *ch, int level);
 static void lockWrite(struct char_data *ch, char *name);
 
@@ -853,8 +853,8 @@ static const struct set_struct {
     {"\n",         0,              BOTH, MISC  }
 };
 
-static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
-                       char *val_arg)
+static bool perform_set(struct char_data *ch, struct char_data *vict, int mode,
+                        char *val_arg)
 {
   int i, on = 0, off = 0;
   int64_t value = 0;
@@ -867,22 +867,22 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
   if (char_get_admlevel(ch) != ADMLVL_IMPL) {
     if (!char_is_npc(vict) && char_get_admlevel(ch) <= char_get_admlevel(vict) && vict != ch) {
       send_to_char(ch, "Maybe that's not such a great idea...\r\n");
-      return (0);
+      return false;
     }
   }
   if (char_get_admlevel(ch) < set_fields[mode].level) {
     send_to_char(ch, "You are not godly enough for that!\r\n");
-    return (0);
+    return false;
   }
 
   /* Make sure the PC/NPC is correct */
   if (char_is_npc(vict) && !(set_fields[mode].pcnpc & NPC)) {
     send_to_char(ch, "You can't do that to a beast!\r\n");
-    return (0);
+    return false;
   }
   if (!char_is_npc(vict) && !(set_fields[mode].pcnpc & PC)) {
     send_to_char(ch, "That can only be done to a beast!\r\n");
-    return (0);
+    return false;
   }
 
   /* Find the value of the argument */
@@ -893,7 +893,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
       off = 1;
     if (!(on || off)) {
       send_to_char(ch, "Value must be 'on' or 'off'.\r\n");
-      return (0);
+      return false;
     }
     send_to_char(ch, "%s %s for %s.\r\n", set_fields[mode].cmd, ONOFF(on), char_get_name(vict));
   } else if (set_fields[mode].type == NUMBER) {
@@ -1026,21 +1026,21 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     case 24:
       if (char_get_admlevel(ch) < ADMLVL_IMPL && ch != vict) {
         send_to_char(ch, "You aren't godly enough for that!\r\n");
-        return (0);
+        return false;
       }
       char_set_invis_level(vict, RANGE(0, char_get_admlevel(vict)));
       break;
     case 25:
       if (char_get_admlevel(ch) < ADMLVL_IMPL && ch != vict) {
         send_to_char(ch, "You aren't godly enough for that!\r\n");
-        return (0);
+        return false;
       }
       SET_OR_REMOVE(char_get_pref(vict), PRF_NOHASSLE);
       break;
     case 26:
       if (ch == vict && on) {
         send_to_char(ch, "Better not -- could be a long winter!\r\n");
-        return (0);
+        return false;
       }
       SET_OR_REMOVE(char_get_act(vict), PLR_FROZEN);
       break;
@@ -1068,7 +1068,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
         send_to_char(ch, "%s's %s set to %" I64T ".\r\n", char_get_name(vict), set_fields[mode].cmd, value);
       } else {
         send_to_char(ch, "Must be 'off' or a value from 0 to 48.\r\n");
-        return (0);
+        return false;
       }
       break;
     case 32:
@@ -1080,7 +1080,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     case 34:
       if (!char_is_npc(vict) && value > 100) {
         send_to_char(ch, "You can't do that.\r\n");
-        return (0);
+        return false;
       }
       value       = MAX(0, value);
       vict->level = value;
@@ -1088,7 +1088,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     case 35:
       if ((rnum = real_room(value)) == NOWHERE) {
         send_to_char(ch, "No room exists with that number.\r\n");
-        return (0);
+        return false;
       }
       if (char_get_in_room(vict) != NOWHERE) /* Another Eric Green special. */
         char_from_room(vict);
@@ -1106,7 +1106,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     case 39:
       if ((chosen_sensei = sensei_find(val_arg)) == CLASS_UNDEFINED) {
         send_to_char(ch, "That is not a class.\r\n");
-        return (0);
+        return false;
       }
       value         = char_get_class_ranks(vict, char_get_class(vict));
       vict->chclass = chosen_sensei;
@@ -1129,11 +1129,11 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
           send_to_char(ch, "%s will enter at room #%d.\r\n", char_get_name(vict), char_get_load_room(vict));
         } else {
           send_to_char(ch, "That room does not exist!\r\n");
-          return (0);
+          return false;
         }
       } else {
         send_to_char(ch, "Must be 'off' or a room's virtual number.\r\n");
-        return (0);
+        return false;
       }
       break;
     case 43:
@@ -1141,17 +1141,17 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
       break;
     case 44:
       if (char_get_idnum(ch) == 0 || char_is_npc(vict))
-        return (0);
+        return false;
       char_set_idnum(vict, value);
       break;
     case 45:
       if (char_get_idnum(ch) > 1) {
         send_to_char(ch, "Please don't use this command, yet.\r\n");
-        return (0);
+        return false;
       }
       if (char_get_admlevel(ch) < 10) {
         send_to_char(ch, "NO.\r\n");
-        return (0);
+        return false;
       }
       break;
     case 46:
@@ -1160,14 +1160,14 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     case 47:
       if ((i = search_block(val_arg, genders, false)) < 0) {
         send_to_char(ch, "Must be 'male', 'female', or 'neutral'.\r\n");
-        return (0);
+        return false;
       }
       char_set_sex(vict, i);
       break;
     case 48:                            /* set age */
       if (value < 2 || value > 20000) { /* Arbitrary limits. */
         send_to_char(ch, "Ages 2 to 20000 accepted.\r\n");
-        return (0);
+        return false;
       }
       /*
      * NOTE: May not display the exact age specified due to the integer
@@ -1196,7 +1196,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
         char_set_olc_zone(vict, NOWHERE);
       else if (!is_number(val_arg)) {
         send_to_char(ch, "Value must be either 'socials', 'actions', 'hedit', 'off' or a zone number.\r\n");
-        return (0);
+        return false;
       } else
         char_set_olc_zone(vict, atoi(val_arg));
       break;
@@ -1209,7 +1209,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
       }
       if (chosen_race == RACE_UNDEFINED) {
         send_to_char(ch, "That is not a valid race for them.\r\n");
-        return (0);
+        return false;
       }
       vict->race = chosen_race;
       racial_body_parts(vict);
@@ -1238,60 +1238,60 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     case 58:
       if (char_get_admlevel(vict) >= char_get_admlevel(ch) && vict != ch) {
         send_to_char(ch, "Permission denied.\r\n");
-        return (0);
+        return false;
       }
       if (value < ADMLVL_NONE || value > char_get_admlevel(ch)) {
         send_to_char(ch, "You can't set it to that.\r\n");
-        return (0);
+        return false;
       }
       if (char_get_admlevel(vict) == value)
-        return (1);
+        return true;
       admin_set(vict, value);
       break;
 
     case 59:
       if (value < 0 || value >= 6) {
         send_to_char(ch, "You can't set it to that.\r\n");
-        return (0);
+        return false;
       }
       char_set_hairl(vict, value);
-      return (1);
+      return true;
       break;
 
     case 60:
       if (value < 0 || value >= 13) {
         send_to_char(ch, "You can't set it to that.\r\n");
-        return (0);
+        return false;
       }
       char_set_hairs(vict, value);
-      return (1);
+      return true;
       break;
 
     case 61:
       if (value < 0 || value >= 15) {
         send_to_char(ch, "You can't set it to that.\r\n");
-        return (0);
+        return false;
       }
       char_set_hairc(vict, value);
-      return (1);
+      return true;
       break;
 
     case 62:
       if (value < 0 || value >= 12) {
         send_to_char(ch, "You can't set it to that.\r\n");
-        return (0);
+        return false;
       }
       char_set_skin(vict, value);
-      return (1);
+      return true;
       break;
 
     case 63:
       if (value < 0 || value >= 13) {
         send_to_char(ch, "You can't set it to that.\r\n");
-        return (0);
+        return false;
       }
       char_set_eye(vict, value);
-      return (1);
+      return true;
       break;
 
     case 64:
@@ -1389,10 +1389,10 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
     default:
       send_to_char(ch, "Can't set that!\r\n");
-      return (0);
+      return false;
   }
 
-  return (1);
+  return true;
 }
 
 ACMD(do_set)

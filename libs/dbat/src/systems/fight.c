@@ -46,7 +46,7 @@ static void final_combat_resolve(struct char_data *ch);
 static void shadow_dragons_live(void);
 static void cleanup_arena_watch(struct char_data *ch);
 static void mob_attack(struct char_data *ch, char *buf);
-static int pick_n_throw(struct char_data *ch, char *buf);
+static bool pick_n_throw(struct char_data *ch, char *buf);
 
 int group_bonus(struct char_data *ch, int type)
 {
@@ -207,7 +207,7 @@ void mutant_limb_regen(struct char_data *ch)
   }
 }
 
-static int pick_n_throw(struct char_data *ch, char *buf)
+static bool pick_n_throw(struct char_data *ch, char *buf)
 {
   struct obj_data *cont;
   char buf2[MAX_INPUT_LENGTH], buf3[MAX_INPUT_LENGTH];

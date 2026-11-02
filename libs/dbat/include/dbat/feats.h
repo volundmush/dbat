@@ -11,12 +11,12 @@
 #include "dbat/consts/feats.h"
 
 /* Functions defined in feats.c */
-int is_proficient_with_armor(const struct char_data *ch, int armor_type);
-int is_proficient_with_weapon(const struct char_data *ch, int weapon_type);
+bool is_proficient_with_armor(const struct char_data *ch, int armor_type);
+bool is_proficient_with_weapon(const struct char_data *ch, int weapon_type);
 int find_feat_num(char *name);
 void assign_feats(void);
 void sort_feats(void);
-int feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg);
+bool feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg);
 
 extern int feat_sort_info[MAX_FEATS];
 

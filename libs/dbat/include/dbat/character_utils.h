@@ -602,7 +602,7 @@ bool is_newbie(char_data *ch);
 bool in_northran(char_data *ch);
 int64_t calc_soft_cap(char_data *ch);
 bool is_soft_cap(char_data *ch, int64_t type, long double mult);
-int calcGravCost(char_data *ch, int64_t num);
+bool calcGravCost(char_data *ch, int64_t num);
 
 int64_t getCurHealth(char_data *ch);
 int64_t getMaxHealth(char_data *ch);
@@ -687,18 +687,18 @@ void apply_kaioken(char_data *ch, int times, bool announce);
 void remove_kaioken(char_data *ch, int8_t announce);
 
 void dispel_ash(struct char_data *ch);
-int has_group(struct char_data *ch);
+bool has_group(struct char_data *ch);
 const char *report_party_health(struct char_data *ch);
-int sec_roll_check(struct char_data *ch);
+bool sec_roll_check(struct char_data *ch);
 int get_measure(struct char_data *ch, int height, int weight);
 int trans_req(struct char_data *ch, int trans);
 const char *disp_align(struct char_data *ch);
 void senseCreate(struct char_data *ch);
 int read_sense_memory(struct char_data *ch, struct char_data *vict);
 void sense_memory_write(struct char_data *ch, struct char_data *vict);
-int roll_pursue(struct char_data *ch, struct char_data *vict);
+bool roll_pursue(struct char_data *ch, struct char_data *vict);
 void reveal_hiding(struct char_data *ch, int type);
-int block_calc(struct char_data *ch);
+bool block_calc(struct char_data *ch);
 int64_t molt_threshold(struct char_data *ch);
 void handle_evolution(struct char_data *ch, int64_t dmg);
 void demon_refill_lf(struct char_data *ch, int64_t num);
@@ -715,15 +715,15 @@ bool circle_follow(struct char_data *ch, struct char_data *victim);
 
 void update_pos(struct char_data *victim);
 
-int perform_get_from_room(struct char_data *ch, struct obj_data *obj);
+bool perform_get_from_room(struct char_data *ch, struct obj_data *obj);
 void perform_wear(struct char_data *ch, struct obj_data *obj, int where);
 void perform_remove(struct char_data *ch, int pos);
 
-int can_grav(struct char_data *ch);
-int check_skill(struct char_data *ch, int skill);
-int check_points(struct char_data *ch, int64_t ki, int64_t st);
+bool can_grav(struct char_data *ch);
+bool check_skill(struct char_data *ch, int skill);
+bool check_points(struct char_data *ch, int64_t ki, int64_t st);
 void pcost(struct char_data *ch, double ki, int64_t st);
-int limb_ok(struct char_data *ch, int type);
+bool limb_ok(struct char_data *ch, int type);
 int64_t physical_cost(struct char_data *ch, int skill);
 
 int init_skill(struct char_data *ch, int snum);
@@ -733,7 +733,7 @@ struct time_info_data *age(struct char_data *ch);
 const char *get_i_name(struct char_data *ch, struct char_data *vict);
 
 void assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis, int spd);
-int know_skill(struct char_data *ch, int skill);
+bool know_skill(struct char_data *ch, int skill);
 
 size_t send_to_char(struct char_data *ch, const char *messg, ...) __attribute__((format(printf, 2, 3)));
 void admin_set(struct char_data *ch, int value);
@@ -741,7 +741,7 @@ char *sense_location(struct char_data *ch);
 void null_affect(struct char_data *ch, int aff_flag);
 bool is_affected(struct char_data *ch, int aff_flag);
 void remove_affect(struct char_data *ch, int aff_flag);
-int planet_check(struct char_data *ch, struct char_data *vict);
+bool planet_check(struct char_data *ch, struct char_data *vict);
 /* Player autoexit levels: used as an index to exitlevels           */
 
 int char_exit_level(const struct char_data *ch);
@@ -756,6 +756,6 @@ room_vnum sensei_start_room(int s_id);
 room_vnum sensei_location_id(int s_id);
 
 int race_get_size(int r_id);
-int race_is_playable(int r_id);
-int race_is_people(int r_id);
-int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num);
+bool race_is_playable(int r_id);
+bool race_is_people(int r_id);
+bool can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num);

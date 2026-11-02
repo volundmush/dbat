@@ -439,7 +439,7 @@ static void put_no_cr(const char *text, FILE *fl)
       fputc(*text, fl);
 }
 
-int save_config(IDXTYPE nowhere)
+bool save_config(IDXTYPE nowhere)
 {
   struct atomic_file af;
   FILE *fl;
