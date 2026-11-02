@@ -652,7 +652,7 @@ int save_config(IDXTYPE nowhere)
               "use_new_socials = %d\n\n",
           CONFIG_NEW_SOCIALS);
 
-  fprintf(fl, "* If the nameserver is fast, set to 0, otherwise, 1.\n"
+  fprintf(fl, "* Unused: sites are always recorded as numeric addresses.\n"
               "nameserver_is_slow = %d\n\n",
           CONFIG_NS_IS_SLOW);
 

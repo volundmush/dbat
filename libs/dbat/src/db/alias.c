@@ -229,8 +229,8 @@ static void perform_complex_alias(struct txt_q *input_q, char *orig, struct alia
   }
 
   /* initialize */
-  write_point     = buf;
-  temp_queue.head = temp_queue.tail = NULL;
+  write_point = buf;
+  temp_queue  = (struct txt_q){0};
 
   /* now parse the alias */
   for (temp = a->replacement; *temp; temp++) {

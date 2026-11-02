@@ -13,6 +13,7 @@ struct txt_block {
 struct txt_q {
   struct txt_block *head;
   struct txt_block *tail;
+  int typed; /* queued lines the player typed (alias expansions are not counted) */
 };
 
 struct descriptor_data {
@@ -28,6 +29,7 @@ struct descriptor_data {
   size_t max_str;                    /* maximum size of string in modify-str	*/
   int32_t mail_to;                   /* name for mail system			*/
   int has_prompt;                    /* is the user at a prompt?             */
+  short poll_revents;                /* this pulse's poll() result (game_loop) */
   char inbuf[MAX_RAW_INPUT_LENGTH];  /* buffer for raw input		*/
   char last_input[MAX_INPUT_LENGTH]; /* the last input			*/
   char small_outbuf[SMALL_BUFSIZE];  /* standard output buffer		*/

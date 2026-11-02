@@ -51,6 +51,7 @@
 #include "dbat/races.h"
 #include "dbat/room_utils.h"
 #include "dbat/screen.h"
+#include "nanny_internal.h"
 
 #include <errno.h>
 #include <sys/types.h>
@@ -67,6 +68,7 @@
 #include <sys/time.h>
 #include <sys/signal.h>
 #include <sys/fcntl.h>
+#include <poll.h>
 
 static void check_idle_menu(void);
 static void check_idle_passwords(void);
@@ -93,20 +95,21 @@ static void timediff(struct timeval *rslt, struct timeval *a, struct timeval *b)
 /* externs */
 
 /* local globals */
-static struct txt_block *bufpool = 0;    /* pool of large output buffers */
-int buf_largecount               = 0;    /* # of large buffers which exist */
-int buf_overflows                = 0;    /* # of overflows of output */
-int buf_switches                 = 0;    /* # of switches from small to large buf */
-int circle_shutdown              = 0;    /* clean shutdown */
-int circle_reboot                = 0;    /* reboot the game after a shutdown */
-int no_specials                  = 0;    /* Suppress ass. of special routines */
-static int max_players           = 0;    /* max descriptors available */
-static int tics_passed           = 0;    /* for extern checkpointing */
-int scheck                       = 0;    /* for syntax checking mode */
-static struct timeval null_time;         /* zero-valued time structure */
-static int8_t reread_wizlist;            /* signal: SIGUSR1 */
-static int8_t emergency_unban;           /* signal: SIGUSR2 */
-FILE *logfile                    = NULL; /* Where to send the log messages. */
+static struct txt_block *bufpool = 0;         /* pool of large output buffers */
+int buf_largecount               = 0;         /* # of large buffers which exist */
+int buf_overflows                = 0;         /* # of overflows of output */
+int buf_switches                 = 0;         /* # of switches from small to large buf */
+int circle_shutdown              = 0;         /* clean shutdown */
+int circle_reboot                = 0;         /* reboot the game after a shutdown */
+int no_specials                  = 0;         /* Suppress ass. of special routines */
+static int max_players           = 0;         /* max descriptors available */
+static int tics_passed           = 0;         /* for extern checkpointing */
+int scheck                       = 0;         /* for syntax checking mode */
+static struct timeval null_time;              /* zero-valued time structure */
+static volatile sig_atomic_t reread_wizlist;  /* signal: SIGUSR1 */
+static volatile sig_atomic_t emergency_unban; /* signal: SIGUSR2 */
+static volatile sig_atomic_t shutdown_signal; /* signal: SIGHUP, SIGINT or SIGTERM (its number) */
+FILE *logfile                    = NULL;      /* Where to send the log messages. */
 static const char *text_overflow = "**OVERFLOW**\r\n";
 static int dg_act_check; /* toggle for act_trigger */
 unsigned long pulse = 0; /* number of pulses since game start */
@@ -124,10 +127,10 @@ static void copyover_recover()
 {
   struct descriptor_data *d;
   FILE *fp;
-  char host[1024];
-  int desc, player_i;
+  char host[128];
+  int desc, player_i, fields;
   bool fOld;
-  char name[MAX_INPUT_LENGTH];
+  char name[128];
   char username[100];
   int saved_loadroom = NOWHERE;
   int set_loadroom   = NOWHERE;
@@ -144,10 +147,14 @@ static void copyover_recover()
 
   unlink(COPYOVER_FILE); /* In case it crashes - doesn't prevent reading */
   for (;;) {
-    fOld = TRUE;
-    fscanf(fp, "%d %s %s %d %s\n", &desc, name, host, &saved_loadroom, username);
-    if (desc == -1)
+    fOld   = TRUE;
+    fields = fscanf(fp, "%d %127s %127s %d %99s\n", &desc, name, host, &saved_loadroom, username);
+    if (fields >= 1 && desc == -1) /* the end marker */
       break;
+    if (fields != 5) { /* a truncated file: stop rather than reuse the last line forever */
+      mud_log("SYSERR: copyover_recover: malformed or truncated copyover file; stopping after the last complete entry.");
+      break;
+    }
 
     /* Write something, and check if it goes error-free */
     if (write_to_descriptor(desc, "\n\rFolding initiated...\n\r") < 0) {
@@ -160,7 +167,7 @@ static void copyover_recover()
     memset((char *)d, 0, sizeof(struct descriptor_data));
     init_descriptor(d, desc); /* set up various stuff */
 
-    strcpy(d->host, host);
+    snprintf(d->host, sizeof(d->host), "%s", host);
     d->next         = descriptor_list;
     descriptor_list = d;
 
@@ -238,7 +245,10 @@ void init_game(uint16_t cmport)
   mud_log("Loading Space Map. ");
 
   //Load the map vnums from a file into an array
-  mapfile = fopen("../data/surface.map", "r");
+  if (!(mapfile = fopen("../data/surface.map", "r"))) {
+    mud_log("SYSERR: Unable to open ../data/surface.map: %s", strerror(errno));
+    exit(1);
+  }
 
   for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
     for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
@@ -328,7 +338,11 @@ static int init_socket(uint16_t cmport)
     exit(1);
   }
   nonblock(s);
-  listen(s, 5);
+  if (listen(s, SOMAXCONN) < 0) {
+    perror("SYSERR: listen");
+    close(s);
+    exit(1);
+  }
   return (s);
 }
 
@@ -385,54 +399,47 @@ static int get_max_players(void)
  */
 static void game_loop(int cmmother_desc)
 {
-  fd_set input_set, output_set, exc_set, null_set;
   struct timeval last_time, opt_time, process_time, temp_time;
   struct timeval before_sleep, now, timeout;
   char comm[MAX_INPUT_LENGTH];
   struct descriptor_data *d, *next_d;
-  int missed_pulses, maxdesc, aliased, top_desc;
+  int missed_pulses, aliased;
+  struct pollfd *fds = NULL; /* [0] is the mother socket, then one per descriptor, in list order */
+  size_t fds_alloc   = 0, nfds;
 
   /* initialize various time values */
   null_time.tv_sec  = 0;
   null_time.tv_usec = 0;
   opt_time.tv_usec  = OPT_USEC;
   opt_time.tv_sec   = 0;
-  FD_ZERO(&null_set);
 
   gettimeofday(&last_time, (struct timezone *)0);
 
   /* The Main Loop.  The Big Cheese.  The Top Dog.  The Head Honcho.  The.. */
   while (!circle_shutdown) {
 
+    /* SIGHUP/SIGINT/SIGTERM: leave the loop so init_game() saves everyone and closes down properly */
+    if (shutdown_signal) {
+      mud_log("Received signal %d (SIGHUP, SIGINT or SIGTERM).  Shutting down...", (int)shutdown_signal);
+      circle_shutdown = 1;
+      break;
+    }
+
     /* Sleep if we don't have any connections */
     if (descriptor_list == NULL) {
-      top_desc = cmmother_desc;
-      mud_log("No connections.  Going to sleep.");
-      FD_ZERO(&input_set);
-      FD_SET(cmmother_desc, &input_set);
+      struct pollfd mother = {.fd = cmmother_desc, .events = POLLIN};
 
-      if (select(top_desc + 1, &input_set, (fd_set *)0, (fd_set *)0, NULL) < 0) {
+      mud_log("No connections.  Going to sleep.");
+      if (poll(&mother, 1, -1) < 0) {
         if (errno == EINTR)
           mud_log("Waking up to process signal.");
         else
-          perror("SYSERR: Select coma");
+          perror("SYSERR: poll coma");
       } else
         mud_log("New connection.  Waking up.");
       gettimeofday(&last_time, (struct timezone *)0);
-    }
-    /* Set up the input, output, and exception sets for select(). */
-    FD_ZERO(&input_set);
-    FD_ZERO(&output_set);
-    FD_ZERO(&exc_set);
-    FD_SET(cmmother_desc, &input_set);
-
-    maxdesc = cmmother_desc;
-    for (d = descriptor_list; d; d = d->next) {
-      if (d->descriptor > maxdesc)
-        maxdesc = d->descriptor;
-      FD_SET(d->descriptor, &input_set);
-      FD_SET(d->descriptor, &output_set);
-      FD_SET(d->descriptor, &exc_set);
+      if (shutdown_signal)
+        continue;
     }
 
     /*
@@ -473,21 +480,40 @@ static void game_loop(int cmmother_desc)
       timediff(&timeout, &last_time, &now);
     } while (timeout.tv_usec || timeout.tv_sec);
 
-    /* Poll (without blocking) for new input, output, and exceptions */
-    if (select(maxdesc + 1, &input_set, &output_set, &exc_set, &null_time) < 0) {
-      perror("SYSERR: Select poll");
-      return;
+    /* Poll (without blocking) for new connections, input, output and hangups */
+    nfds = 1;
+    for (d = descriptor_list; d; d = d->next)
+      nfds++;
+    if (nfds > fds_alloc) {
+      fds_alloc = nfds + 16;
+      RECREATE(fds, struct pollfd, fds_alloc);
     }
-    /* If there are new connections waiting, accept them. */
-    if (FD_ISSET(cmmother_desc, &input_set))
+    fds[0] = (struct pollfd){.fd = cmmother_desc, .events = POLLIN};
+    nfds   = 1;
+    for (d = descriptor_list; d; d = d->next)
+      fds[nfds++] = (struct pollfd){.fd = d->descriptor, .events = POLLIN | POLLOUT};
+
+    while (poll(fds, nfds, 0) < 0) {
+      if (errno != EINTR) { /* a signal arriving here is no reason to stop */
+        perror("SYSERR: poll");
+        free(fds);
+        return;
+      }
+    }
+    nfds = 1;
+    for (d = descriptor_list; d; d = d->next)
+      d->poll_revents = fds[nfds++].revents;
+
+    /* If there are new connections waiting, accept them. (They are polled from the next pulse on.) */
+    if (fds[0].revents & POLLIN)
       new_descriptor(cmmother_desc);
 
-    /* Kick out the freaky folks in the exception set and marked for close */
+    /* Kick out sockets in an error state, and hung-up ones with nothing left to read */
     for (d = descriptor_list; d; d = next_d) {
       next_d = d->next;
-      if (FD_ISSET(d->descriptor, &exc_set)) {
-        FD_CLR(d->descriptor, &input_set);
-        FD_CLR(d->descriptor, &output_set);
+      if ((d->poll_revents & (POLLERR | POLLNVAL)) ||
+          ((d->poll_revents & POLLHUP) && !(d->poll_revents & POLLIN))) {
+        d->poll_revents = 0;
         close_socket(d);
       }
     }
@@ -495,7 +521,7 @@ static void game_loop(int cmmother_desc)
     /* Process descriptors with input pending */
     for (d = descriptor_list; d; d = next_d) {
       next_d = d->next;
-      if (FD_ISSET(d->descriptor, &input_set))
+      if (d->poll_revents & POLLIN)
         if (process_input(d) < 0)
           close_socket(d);
     }
@@ -552,7 +578,7 @@ static void game_loop(int cmmother_desc)
     /* Send queued output out to the operating system (ultimately to user). */
     for (d = descriptor_list; d; d = next_d) {
       next_d = d->next;
-      if (*(d->output) && FD_ISSET(d->descriptor, &output_set)) {
+      if (*(d->output) && (d->poll_revents & POLLOUT)) {
         /* Output for this player is ready */
         if (process_output(d) < 0) {
           // commented out close_socket since process_output already does this, so having it here causes a double-free crash
@@ -618,6 +644,7 @@ static void game_loop(int cmmother_desc)
     /* Update tics for deadlock protection */
     tics_passed++;
   }
+  free(fds);
 }
 
 static void heartbeat(int heart_pulse)
@@ -781,7 +808,8 @@ static char *make_prompt(struct descriptor_data *d)
   struct obj_data *chair = NULL;
   int flagged            = FALSE;
 
-  /* Note, prompt is truncated at MAX_PROMPT_LENGTH chars (structs.h) */
+  /* Note, prompt is truncated at MAX_PROMPT_LENGTH chars (structs.h). snprintf() returns the length it
+     wanted, so len is clamped: it must never pass the end, or the next append is handed a negative size. */
 
   if (d->str) {
     if (desc_get_connected(d) == CON_EXDESC) {
@@ -802,7 +830,7 @@ static char *make_prompt(struct descriptor_data *d)
     if (char_get_invis_level(d->character) && len < sizeof(prompt)) {
       count = snprintf(prompt + len, sizeof(prompt) - len, "i%d ", char_get_invis_level(d->character));
       if (count >= 0)
-        len += count;
+        len = MIN(len + count, sizeof(prompt) - 1);
     }
     /* show only when below 25% */
     if (char_prf_flagged(d->character, PRF_DISPAUTO) && char_get_level(d->character) >= 500 && len < sizeof(prompt)) {
@@ -810,231 +838,231 @@ static char *make_prompt(struct descriptor_data *d)
       if (getCurPL(ch) << 2 < getEffMaxPL(ch)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "PL: %" I64T " ", getCurPL(ch));
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if ((getCurST(ch)) << 2 < getMaxST(ch) && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "STA: %" I64T " ", (getCurST(ch)));
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_ki(ch) << 2 < char_get_max_ki(ch) && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "KI: %" I64T " ", char_get_ki(ch));
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
     } else { /* not auto prompt */
       if (len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@w");
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_plr_flagged(d->character, PLR_SELFD) && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RSELF-D@r: @w%s@D]@n", char_plr_flagged(d->character, PLR_SELFD2) ? "READY" : "PREP");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_is_halfbreed(d->character) && !char_plr_flagged(d->character, PLR_FURY) && char_prf_flagged(d->character, PRF_FURY)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mFury@W: @r%d@D]@w", char_get_fury(d->character));
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_is_halfbreed(d->character) && char_plr_flagged(d->character, PLR_FURY) && char_prf_flagged(d->character, PRF_FURY)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mFury@W: @rENGAGED@D]@w");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (has_mail(char_get_idnum(d->character)) && !char_prf_flagged(d->character, PRF_NMWARN) && (char_get_admlevel(d->character) > 0) && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "CHECK MAIL - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_kaioken(d->character) > 0 && char_get_admlevel(d->character) > 0) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "KAIOKEN X%d - ", char_get_kaioken(d->character));
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_powerattack(d->character) > 0) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "%s - ", song_types[char_get_powerattack(d->character)]);
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_kaioken(d->character) > 0 && char_get_admlevel(d->character) <= 0) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "KAIOKEN X%d - ", char_get_kaioken(d->character));
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (has_mail(char_get_idnum(d->character)) && (char_get_admlevel(d->character) <= 0) && !char_prf_flagged(d->character, PRF_NMWARN) && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "CHECK MAIL - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (d->snooping && d->snooping->character != NULL && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Snooping: (%s) - ", char_get_name(d->snooping->character));
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_drag(d->character) && char_get_drag(d->character) != NULL && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Dragging: (%s) - ", char_get_name(char_get_drag(d->character)));
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_prf_flagged(d->character, PRF_BUILDWALK) && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "BUILDWALKING - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_aff_flagged(d->character, AFF_FLYING) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "FLYING - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_aff_flagged(d->character, AFF_HIDE) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "HIDING - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_plr_flagged(d->character, PLR_SPAR) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "SPARRING - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_plr_flagged(d->character, PLR_NOSHOUT) && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "MUTED - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_combo(d->character) == 51 && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Bash) - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_combo(d->character) == 52 && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Headbutt) - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_combo(d->character) == 56 && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Tailwhip) - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_combo(d->character) == 0 && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Punch) - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_combo(d->character) == 1 && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Kick) - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_combo(d->character) == 2 && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Elbow) - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_combo(d->character) == 3 && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Knee) - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_combo(d->character) == 4 && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Roundhouse) - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_combo(d->character) == 5 && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Uppercut) - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_combo(d->character) == 6 && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Slam) - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_combo(d->character) == 8 && len < sizeof(prompt)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Heeldrop) - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_prf_flagged(d->character, PRF_AFK) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "AFK - ");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_plr_flagged(d->character, PLR_FISHING) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
         count   = snprintf(prompt + len, sizeof(prompt) - len, "FISHING -");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (flagged == TRUE && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@n\n");
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if ((char_get_sits(d->character) && char_plr_flagged(d->character, PLR_HEALT)) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
         chair   = char_get_sits(d->character);
         count   = snprintf(prompt + len, sizeof(prompt) - len, "@c<@CFloating inside a healing tank@c>@n\r\n");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if ((char_get_sits(d->character) && char_get_position(d->character) == POS_SITTING) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
         chair   = char_get_sits(d->character);
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Sitting on: %s\r\n", chair->short_description);
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if ((char_get_sits(d->character) && char_get_position(d->character) == POS_RESTING) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
         chair   = char_get_sits(d->character);
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Resting on: %s\r\n", chair->short_description);
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if ((char_get_sits(d->character) && char_get_position(d->character) == POS_SLEEPING) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
         chair   = char_get_sits(d->character);
         count   = snprintf(prompt + len, sizeof(prompt) - len, "Sleeping on: %s\r\n", chair->short_description);
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_aff_flagged(d->character, AFF_POSITION) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
         chair   = char_get_sits(d->character);
         count   = snprintf(prompt + len, sizeof(prompt) - len, "(Best Position)\r\n");
         flagged = TRUE;
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_charge(d->character) < getMaxKI(d->character) * .01 && char_get_charge(d->character) > 0) {
         char_set_charge(d->character, 0);
@@ -1045,87 +1073,87 @@ static char *make_prompt(struct descriptor_data *d)
           if (charge >= getMaxKI(d->character)) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G==@D<@RMAX@D>@G===@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .95) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=========-@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .9) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=========@g-@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .85) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G========-@g-@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .80) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G========@g--@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .75) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=======-@g--@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .70) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=======@g---@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .65) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G======-@g---@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .60) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G======@g----@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .55) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=====-@g----@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .50) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=====@g-----@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .45) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G====-@g-----@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .40) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G====@g------@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .35) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G===-@g------@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .30) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G===@g-------@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .25) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G==-@g-------@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .20) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G==@g--------@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .15) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=-@g--------@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .10) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G=@g---------@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (charge >= getMaxKI(d->character) * .05) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@G-@g---------@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@CCharge @D[@g----------@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           }
         }
         if (char_prf_flagged(d->character, PRF_DISPERC) && !char_prf_flagged(d->character, PRF_NODEC)) {
@@ -1133,7 +1161,7 @@ static char *make_prompt(struct descriptor_data *d)
             int64_t perc = (char_get_charge(d->character) * 100) / getMaxKI(d->character);
             count        = snprintf(prompt + len, sizeof(prompt) - len, "@D[@BCharge@Y: @C%" I64T "%s@D]@n\n", perc, "%");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           }
         }
         if (char_prf_flagged(d->character, PRF_NODEC)) {
@@ -1141,14 +1169,14 @@ static char *make_prompt(struct descriptor_data *d)
             int64_t perc = (charge * 100) / getMaxKI(d->character);
             count        = snprintf(prompt + len, sizeof(prompt) - len, "Ki is charged to %" I64T " percent.\n", perc);
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           }
         }
       }
       if (char_aff_flagged(d->character, AFF_FIRESHIELD)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D(@rF@RI@YR@rE@RS@YH@rI@RE@YL@rD@D)@n\n");
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_aff_flagged(d->character, AFF_SANCTUARY)) {
         if (char_prf_flagged(d->character, PRF_DISPERC) && !char_prf_flagged(d->character, PRF_NODEC)) {
@@ -1156,7 +1184,7 @@ static char *make_prompt(struct descriptor_data *d)
             int64_t perc = (char_get_barrier(d->character) * 100) / getMaxKI(d->character);
             count        = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GBarrier@Y: @B%" I64T "%s@D]@n\n", perc, "%");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           }
         }
 
@@ -1164,67 +1192,67 @@ static char *make_prompt(struct descriptor_data *d)
           if (char_get_barrier(d->character) >= getMaxKI(d->character) * .75) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C==MAX==@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .70) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=======@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .65) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C======-@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .60) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C======@c-@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .55) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=====-@c-@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .50) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=====@c--@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .45) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C====-@c--@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .40) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C====@c---@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .35) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C===-@c---@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .30) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C===@c----@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .25) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C==-@c----@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .20) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C==@c-----@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .15) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=-@c-----@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .10) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C=@c------@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (char_get_barrier(d->character) >= getMaxKI(d->character) * .05) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C-@c------@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           } else if (char_get_barrier(d->character) < getMaxKI(d->character) * .05) {
             count = snprintf(prompt + len, sizeof(prompt) - len, "@BBarrier @D[@C--Low-@D]@n\n");
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           }
         }
         if (char_prf_flagged(d->character, PRF_NODEC)) {
@@ -1232,7 +1260,7 @@ static char *make_prompt(struct descriptor_data *d)
             int64_t perc = (char_get_barrier(d->character) * 100) / getMaxKI(d->character);
             count        = snprintf(prompt + len, sizeof(prompt) - len, "A barrier charged to %" I64T " percent surrounds you.@n\n", perc);
             if (count >= 0)
-              len += count;
+              len = MIN(len + count, sizeof(prompt) - 1);
           }
         }
       }
@@ -1252,7 +1280,7 @@ static char *make_prompt(struct descriptor_data *d)
             col = "r";
 
           if ((count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @%s%s@D]@n", col, add_commas(getCurPL(ch)))) > 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         }
       } else if (char_prf_flagged(d->character, PRF_DISPHP)) {
 
@@ -1271,24 +1299,24 @@ static char *make_prompt(struct descriptor_data *d)
           col = "r";
 
         if ((count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @%s%d%s@D]@n", col, (int)perc, "@w%")) > 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (!char_prf_flagged(d->character, PRF_DISPERC)) {
         if (char_prf_flagged(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
             (getCurKI(d->character)) > getMaxKI(d->character) / 2) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @c%s@D]@n", add_commas((getCurKI(d->character))));
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         } else if (char_prf_flagged(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
                    (getCurKI(d->character)) > getMaxKI(d->character) / 10) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @y%s@D]@n", add_commas((getCurKI(d->character))));
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         } else if (char_prf_flagged(d->character, PRF_DISPKI) && len < sizeof(prompt) &&
                    (getCurKI(d->character)) <= getMaxKI(d->character) / 10) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@Y: @r%s@D]@n", add_commas((getCurKI(d->character))));
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         }
       } else if (char_prf_flagged(d->character, PRF_DISPKI)) {
         int64_t power = (getCurKI(d->character)), maxpower = getMaxKI(d->character);
@@ -1303,23 +1331,23 @@ static char *make_prompt(struct descriptor_data *d)
         if (perc > 100) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@n@Y: @G%d%s@D]@n", perc, "@w%");
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         } else if (perc >= 70) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@n@Y: @c%d%s@D]@n", perc, "@w%");
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         } else if (perc >= 51) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@n@Y: @Y%d%s@D]@n", perc, "@w%");
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         } else if (perc >= 20) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@n@Y: @y%d%s@D]@n", perc, "@w%");
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         } else {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@CKI@n@Y: @r%d%s@D]@n", perc, "@w%");
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         }
       }
       if (!char_prf_flagged(d->character, PRF_DISPERC)) {
@@ -1327,17 +1355,17 @@ static char *make_prompt(struct descriptor_data *d)
             (getCurST(d->character)) > getMaxST(d->character) / 2) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @c%s@D]@n", add_commas((getCurST(d->character))));
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         } else if (char_prf_flagged(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
                    (getCurST(d->character)) > getMaxST(d->character) / 10) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @y%s@D]@n", add_commas((getCurST(d->character))));
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         } else if (char_prf_flagged(d->character, PRF_DISPMOVE) && len < sizeof(prompt) &&
                    (getCurST(d->character)) <= getMaxST(d->character) / 10) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@Y: @r%s@D]@n", add_commas((getCurST(d->character))));
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         }
       } else if (char_prf_flagged(d->character, PRF_DISPMOVE)) {
         int64_t power = (getCurST(d->character)), maxpower = getMaxST(d->character);
@@ -1352,50 +1380,50 @@ static char *make_prompt(struct descriptor_data *d)
         if (perc > 100) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@n@Y: @G%d%s@D]@n", perc, "@w%");
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         } else if (perc >= 70) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@n@Y: @c%d%s@D]@n", perc, "@w%");
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         } else if (perc >= 51) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@n@Y: @Y%d%s@D]@n", perc, "@w%");
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         } else if (perc >= 20) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@n@Y: @y%d%s@D]@n", perc, "@w%");
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         } else {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GSTA@n@Y: @r%d%s@D]@n", perc, "@w%");
           if (count >= 0)
-            len += count;
+            len = MIN(len + count, sizeof(prompt) - 1);
         }
       }
       if (char_prf_flagged(d->character, PRF_DISPTNL) && len < sizeof(prompt) && char_get_level(d->character) < 100) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@yTNL@Y: @W%s@D]@n", add_commas(level_exp(d->character, char_get_level(d->character) + 1) - char_get_exp(d->character)));
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_prf_flagged(d->character, PRF_DISTIME) && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@W%2d %s@D]@n", (time_info.hours % 12 == 0) ? 12 : (time_info.hours % 12), time_info.hours >= 12 ? "PM" : "AM");
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_prf_flagged(d->character, PRF_DISGOLD) && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@YZen@y: @W%s@D]@n", add_commas(char_get_gold(d->character)));
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_prf_flagged(d->character, PRF_DISPRAC) && len < sizeof(prompt)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mPS@y: @W%s@D]@n", add_commas(char_get_practice_points(d->character)));
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_prf_flagged(d->character, PRF_DISHUTH) && len < sizeof(prompt)) {
         int hun = char_get_conditions(d->character, HUNGER), thir = char_get_conditions(d->character, THIRST);
         count = snprintf(prompt + len, sizeof(prompt) - len, "\n@D[@mHung@y:");
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
         if (hun >= 48) {
           count = snprintf(prompt + len, sizeof(prompt) - len, " @WFull@D]@n");
         } else if (hun >= 40) {
@@ -1416,7 +1444,7 @@ static char *make_prompt(struct descriptor_data *d)
           count = snprintf(prompt + len, sizeof(prompt) - len, " @WN/A@D]@n");
         }
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
         if (thir >= 48) {
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mThir@y: @WQuenched@D]@n");
         } else if (thir >= 40) {
@@ -1437,14 +1465,14 @@ static char *make_prompt(struct descriptor_data *d)
           count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mThir@y: @WN/A@D]@n");
         }
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (len < sizeof(prompt) && has_group(d->character) && !char_prf_flagged(d->character, PRF_GHEALTH)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "\n%s", report_party_health(d->character));
         if (d->character->temp_prompt)
           free(d->character->temp_prompt);
         if (count >= 0)
-          len += count;
+          len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (len < sizeof(prompt))
         count = snprintf(prompt + len, sizeof(prompt) - len, "\n"); /* strncat: OK */
@@ -1470,6 +1498,8 @@ void write_to_q(const char *txt, struct txt_q *queue, int aliased)
   CREATE(newt, struct txt_block, 1);
   newt->text    = strdup(txt);
   newt->aliased = aliased;
+  if (!aliased)
+    queue->typed++;
 
   /* queue empty? */
   if (!queue->head) {
@@ -1495,6 +1525,8 @@ static int get_from_q(struct txt_q *queue, char *dest, int *aliased)
 
   strcpy(dest, queue->head->text); /* strcpy: OK (mutual MAX_INPUT_LENGTH) */
   *aliased = queue->head->aliased;
+  if (!*aliased)
+    queue->typed--;
 
   tmp         = queue->head;
   queue->head = queue->head->next;
@@ -1504,19 +1536,28 @@ static int get_from_q(struct txt_q *queue, char *dest, int *aliased)
   return (1);
 }
 
-/* Empty the queues before closing connection */
-static void flush_queues(struct descriptor_data *d)
+/* Throw away the commands a descriptor has typed but not yet run. */
+static void flush_input_queue(struct descriptor_data *d)
 {
-  if (d->large_outbuf) {
-    d->large_outbuf->next = bufpool;
-    bufpool               = d->large_outbuf;
-  }
   while (d->input.head) {
     struct txt_block *tmp = d->input.head;
     d->input.head         = d->input.head->next;
     free(tmp->text);
     free(tmp);
   }
+  d->input.typed = 0;
+}
+
+/* Empty the queues before closing connection */
+static void flush_queues(struct descriptor_data *d)
+{
+  if (d->large_outbuf) {
+    d->large_outbuf->next = bufpool;
+    bufpool               = d->large_outbuf;
+    d->large_outbuf       = NULL;
+    d->output             = d->small_outbuf;
+  }
+  flush_input_queue(d);
 }
 
 /* Add a new string to a player's output queue. For outside use. */
@@ -1729,15 +1770,18 @@ size_t vwrite_to_output(struct descriptor_data *t, const char *format, va_list a
   if (size + t->bufptr + 1 > LARGE_BUFSIZE) {
     size      = LARGE_BUFSIZE - t->bufptr - 1;
     txt[size] = '\0';
-    char_set_overf(t->character, TRUE);
+    if (t->character)
+      char_set_overf(t->character, TRUE);
     buf_overflows++;
   }
 
   /*
    * If we have enough space, just write to buffer and that's it! If the
-   * text just barely fits, then it's switched to a large buffer instead.
+   * text just barely fits, then it's switched to a large buffer instead
+   * (unless it already is the large buffer: then it fills it, and we are in
+   * the overflow state).
    */
-  if (t->bufspace > size) {
+  if (t->bufspace > size || (t->large_outbuf && t->bufspace == size)) {
     strcpy(t->output + t->bufptr, txt); /* strcpy: OK (size checked above) */
     t->bufspace -= size;
     t->bufptr += size;
@@ -1888,7 +1932,7 @@ static int new_descriptor(int s)
   socklen_t i;
   struct descriptor_data *newd;
   struct sockaddr_in peer;
-  struct hostent *from = NULL;
+  int from_same_ip = 0, keepalive = 1;
 
   /* accept the new connection */
   i = sizeof(peer);
@@ -1904,6 +1948,9 @@ static int new_descriptor(int s)
     close(desc);
     return (0);
   }
+  /* notice connections that silently went away (NAT timeouts, crashed clients) */
+  if (setsockopt(desc, SOL_SOCKET, SO_KEEPALIVE, &keepalive, sizeof(keepalive)) < 0)
+    perror("SYSERR: setsockopt SO_KEEPALIVE");
 
   /* make sure we have room for it */
   for (newd = descriptor_list; newd; newd = newd->next)
@@ -1917,19 +1964,21 @@ static int new_descriptor(int s)
   /* create a new descriptor */
   CREATE(newd, struct descriptor_data, 1);
 
-  /* find the sitename */
-  if (CONFIG_NS_IS_SLOW ||
-      !(from = gethostbyaddr((char *)&peer.sin_addr,
-                             sizeof(peer.sin_addr), AF_INET))) {
+  /* The site is the numeric address. No reverse DNS: the lookup blocks the whole game, and the name it
+     returns is chosen by whoever controls the address, so it is no basis for bans. */
+  if (!inet_ntop(AF_INET, &peer.sin_addr, newd->host, sizeof(newd->host)))
+    strcpy(newd->host, "unknown");
 
-    /* resolution failed */
-
-    /* find the numeric site address */
-    strncpy(newd->host, (char *)inet_ntoa(peer.sin_addr), HOST_LENGTH); /* strncpy: OK (n->host:HOST_LENGTH+1) */
-    newd->host[HOST_LENGTH] = '\0';
-  } else {
-    strncpy(newd->host, from->h_name, HOST_LENGTH); /* strncpy: OK (n->host:HOST_LENGTH+1) */
-    newd->host[HOST_LENGTH] = '\0';
+  /* one host may not take all the slots */
+  for (struct descriptor_data *other = descriptor_list; other; other = other->next)
+    if (!strcmp(other->host, newd->host))
+      from_same_ip++;
+  if (from_same_ip >= MAX_CONNECTIONS_PER_IP) {
+    write_to_descriptor(desc, "Too many connections from your address. Please close some and try again.\r\n");
+    close(desc);
+    mudlog(LOG_CMP, ADMLVL_GOD, TRUE, "Connection from [%s] refused: already %d connections from it", newd->host, from_same_ip);
+    free(newd);
+    return (0);
   }
 
   /* determine if the site is banned */
@@ -2072,7 +2121,9 @@ static ssize_t perform_socket_write(int desc, const char *txt, size_t length)
 {
   ssize_t result = 0;
 
-  result = write(desc, txt, length);
+  do
+    result = write(desc, txt, length);
+  while (result < 0 && errno == EINTR);
 
   if (result > 0) {
     /* Write was successful. */
@@ -2091,7 +2142,7 @@ static ssize_t perform_socket_write(int desc, const char *txt, size_t length)
    * indicate this.
    */
 
-  if (errno == EAGAIN)
+  if (errno == EAGAIN) /* EWOULDBLOCK is the same value on Linux */
     return (0);
 
   /* Looks like the error was fatal.  Too bad. */
@@ -2160,7 +2211,7 @@ static ssize_t perform_socket_read(int desc, char *read_point, size_t space_left
   if (errno == EINTR)
     return (0);
 
-  if (errno == EAGAIN)
+  if (errno == EAGAIN) /* EWOULDBLOCK is the same value on Linux */
     return (0);
 
   if (errno == ECONNRESET)
@@ -2314,11 +2365,18 @@ static int process_input(struct descriptor_data *t)
     /* the '--' command flushes the queue - Jamdog - 9th May 2007 */
     if ((*tmp == '-') && (*(tmp + 1) == '-') && !(*(tmp + 2))) {
       write_to_output(t, "All queued commands cancelled.\r\n");
-      flush_queues(t); /* Flush the command queue */
-      /* No need to process the -- command any further, so quit back out */
+      flush_input_queue(t); /* only the commands: pending output stays */
+      failed_subst = 1;     /* and don't queue the -- itself */
     }
-    if (!failed_subst)
+    if (!failed_subst) {
+      /* commands run at most one per pulse; a client sending far faster is flooding */
+      if (t->input.typed >= MAX_QUEUED_INPUT) {
+        write_to_descriptor(t->descriptor, "\r\nToo many commands waiting to run; disconnecting.\r\n");
+        mudlog(LOG_CMP, ADMLVL_GOD, TRUE, "Input flood from [%s]: more than %d commands queued; disconnecting.", t->host, MAX_QUEUED_INPUT);
+        return (-1);
+      }
       write_to_q(tmp, &t->input, 0);
+    }
 
     /* find the end of this line */
     while (ISNEWL(*nl_pos))
@@ -2391,48 +2449,26 @@ static int perform_subst(struct descriptor_data *t, char *orig, char *subst)
   return (0);
 }
 
+/* Frees the account strings: real ones after login, or the "Empty" placeholders set_color() made. */
 static void free_user(struct descriptor_data *d)
 {
   if (d->user_freed == 1) {
     return;
   }
-
-  if (d->user == NULL) {
-    send_to_imm("ERROR: free_user called but no user to free!");
-    return;
-  }
   d->user_freed = 1;
 
-  if (!strcasecmp(d->user, "Empty"))
-    return;
+  if (d->user && strcasecmp(d->user, "Empty"))
+    mud_log("Freeing User: %s", d->user);
 
-  mud_log("Freeing User: %s", d->user);
-
-  /* Free up all the user data as needed */
-  if (d->user) {
-    free(d->user);
+  free(d->user);
+  free(d->pass);
+  free(d->email);
+  for (int n = 1; n <= MAX_ACCOUNT_SLOTS; n++) {
+    char **slot = account_slot(d, n);
+    free(*slot);
+    *slot = NULL;
   }
-  if (d->pass) {
-    free(d->pass);
-  }
-  if (d->email) {
-    free(d->email);
-  }
-  if (d->tmp1) {
-    free(d->tmp1);
-  }
-  if (d->tmp2) {
-    free(d->tmp2);
-  }
-  if (d->tmp3) {
-    free(d->tmp3);
-  }
-  if (d->tmp4) {
-    free(d->tmp4);
-  }
-  if (d->tmp5) {
-    free(d->tmp5);
-  }
+  d->user = d->pass = d->email = NULL;
 }
 
 void close_socket(struct descriptor_data *d)
@@ -2475,6 +2511,7 @@ void close_socket(struct descriptor_data *d)
       mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(link_challenged)), TRUE, "Closing link to: %s.", char_get_name(link_challenged));
     } else {
       free_char(d->character);
+      d->character = NULL; /* (free_char() can't clear it: ->desc was cut above) */
     }
   } else
     mudlog(LOG_CMP, ADMLVL_IMMORT, TRUE, "Losing descriptor without char.");
@@ -2503,22 +2540,9 @@ void close_socket(struct descriptor_data *d)
   free(d->loadplay); /* the account slot being loaded, if any */
   d->loadplay = NULL;
 
-  /*. Kill any OLC stuff .*/
-  switch (d->connected) {
-    case CON_OEDIT:
-    case CON_IEDIT:
-    case CON_REDIT:
-    case CON_ZEDIT:
-    case CON_MEDIT:
-    case CON_SEDIT:
-    case CON_TEDIT:
-    case CON_AEDIT:
-    case CON_TRIGEDIT:
-      cleanup_olc(d, CLEANUP_ALL);
-      break;
-    default:
-      break;
-  }
+  /*. Kill any OLC stuff (every editor, and character creation's stat points, keep theirs in d->olc) .*/
+  if (d->olc)
+    cleanup_olc(d, CLEANUP_ALL);
 
   free(d);
 }
@@ -2639,12 +2663,11 @@ static void fatal_signal(int sig)
   raise(sig);
 }
 
-/* Dying anyway... */
+/* SIGHUP, SIGINT, SIGTERM: ask the game loop to shut down cleanly (saving everyone). Only sets a flag:
+ * logging or exiting from inside a signal handler is not safe. */
 static void hupsig(int sig)
 {
-  mud_log("SYSERR: Received SIGHUP, SIGINT, or SIGTERM.  Shutting down...");
-  exit(1); /* perhaps something more elegant should
-				 * substituted */
+  shutdown_signal = sig;
 }
 
 /*

@@ -396,6 +396,9 @@ int siteok_everyone = TRUE;
  *
  * You can experiment with the setting of nameserver_is_slow on-line using
  * the SLOWNS command from within the MUD.
+ *
+ * No longer used: sites are always recorded as numeric addresses (see
+ * new_descriptor() in comm.c), so logging in never waits on a nameserver.
  */
 
 int nameserver_is_slow = NO;

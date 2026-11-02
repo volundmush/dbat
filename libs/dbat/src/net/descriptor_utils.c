@@ -146,7 +146,7 @@ void customCreate(struct descriptor_data *d)
 
 bool desc_is_playing(const struct descriptor_data *d)
 {
-  return (desc_get_connected(d) == CON_TEDIT || desc_get_connected(d) == CON_REDIT || desc_get_connected(d) == CON_MEDIT || desc_get_connected(d) == CON_OEDIT || desc_get_connected(d) == CON_ZEDIT || desc_get_connected(d) == CON_SEDIT || desc_get_connected(d) == CON_CEDIT || desc_get_connected(d) == CON_PLAYING || desc_get_connected(d) == CON_TRIGEDIT || desc_get_connected(d) == CON_AEDIT || desc_get_connected(d) == CON_GEDIT || desc_get_connected(d) == CON_IEDIT || desc_get_connected(d) == CON_HEDIT || desc_get_connected(d) == CON_NEWSEDIT || desc_get_connected(d) == CON_POBJ);
+  return (desc_get_connected(d) == CON_TEDIT || desc_get_connected(d) == CON_REDIT || desc_get_connected(d) == CON_MEDIT || desc_get_connected(d) == CON_OEDIT || desc_get_connected(d) == CON_ZEDIT || desc_get_connected(d) == CON_SEDIT || desc_get_connected(d) == CON_CEDIT || desc_get_connected(d) == CON_PLAYING || desc_get_connected(d) == CON_TRIGEDIT || desc_get_connected(d) == CON_AEDIT || desc_get_connected(d) == CON_GEDIT || desc_get_connected(d) == CON_IEDIT || desc_get_connected(d) == CON_HEDIT || desc_get_connected(d) == CON_NEWSEDIT || desc_get_connected(d) == CON_POBJ || desc_get_connected(d) == CON_ASSEDIT || desc_get_connected(d) == CON_HSEDIT || desc_get_connected(d) == CON_LEVELUP);
 }
 
 /* Field accessors (formerly accessor macros). */

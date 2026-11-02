@@ -17,7 +17,9 @@
 #define COMPRESS2 86
 
 #define NUM_RESERVED_DESCS 8
-#define COPYOVER_FILE      "copyover.dat"
+constexpr int MAX_CONNECTIONS_PER_IP = 10;  /* simultaneous connections from one address */
+constexpr int MAX_QUEUED_INPUT       = 100; /* typed commands waiting to run before a client counts as flooding */
+#define COPYOVER_FILE "copyover.dat"
 
 /* comm.c */
 int arena_watch(struct char_data *ch);

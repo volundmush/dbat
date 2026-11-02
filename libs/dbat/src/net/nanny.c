@@ -875,10 +875,17 @@ static void state_password(struct descriptor_data *d, char *arg)
     userRead(d);
     desc_set_connected(d, CON_UMENU);
   } else {
+    send_to_imm("Username, %s, password failure!", CAP(d->user));
+    mud_log("%s BAD PASSWORD from [%s]", CAP(d->user), d->host);
+    /* counted per connection, so switching usernames does not reset it */
+    if (++d->bad_pws >= CONFIG_MAX_BAD_PWS) {
+      write_to_output(d, "Too many wrong passwords. Disconnecting.\r\n");
+      mudlog(LOG_NRM, ADMLVL_GOD, TRUE, "Disconnecting [%s] after %d wrong passwords (last tried for %s).", d->host, d->bad_pws, CAP(d->user));
+      desc_set_connected(d, CON_CLOSE);
+      return;
+    }
     write_to_output(d, "Password is wrong. Password or Return?\r\n");
     write_to_output(d, "(Return will ask for a different username)\r\n");
-    send_to_imm("Username, %s, password failure!", CAP(d->user));
-    mud_log("%s BAD PASSWORD", CAP(d->user));
     return;
   }
 }
