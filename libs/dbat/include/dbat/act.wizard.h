@@ -4,8 +4,6 @@
 /* global variables */
 
 // functions
-void search_replace(char *string, const char *find, const char *replace);
-void update_space(void);
 room_rnum find_target_room(struct char_data *ch, char *rawroomstr);
 void perform_immort_vis(struct char_data *ch);
 void snoop_check(struct char_data *ch);

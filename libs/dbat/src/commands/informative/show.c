@@ -165,16 +165,16 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
         char bury[MAX_INPUT_LENGTH];
         if (!obj_is_corpse(obj)) {
           if (obj_get_weight(obj) < 10) {
-            sprintf(bury, "small mound of");
+            snprintf(bury, sizeof(bury), "small mound of");
           } else if (obj_get_weight(obj) < 50) {
-            sprintf(bury, "medium sized mound of");
+            snprintf(bury, sizeof(bury), "medium sized mound of");
           } else if (obj_get_weight(obj) < 1000) {
-            sprintf(bury, "large mound of");
+            snprintf(bury, sizeof(bury), "large mound of");
           } else {
-            sprintf(bury, "gigantic mound of");
+            snprintf(bury, sizeof(bury), "gigantic mound of");
           }
         } else {
-          sprintf(bury, "recent grave covered by");
+          snprintf(bury, sizeof(bury), "recent grave covered by");
         }
         if (spotted == TRUE && rroom_sect(obj_get_in_room(obj)) != SECT_DESERT) {
           send_to_char(ch, "@yA %s soft dirt is here.@n\r\n", bury);
@@ -612,7 +612,7 @@ int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
         struct obj_data *obj2 = obj_get_posted_to(obj);
         char dvnum[200];
         *dvnum = '\0';
-        sprintf(dvnum, "@D[@G%d@D] @w", obj_get_vnum(obj2));
+        snprintf(dvnum, sizeof(dvnum), "@D[@G%d@D] @w", obj_get_vnum(obj2));
         send_to_char(ch, "\n...%s%s has been posted to it.", char_prf_flagged(ch, PRF_ROOMFLAGS) ? dvnum : "", obj2->short_description);
       }
     }
@@ -1024,7 +1024,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
 
     if (char_get_listenroom(i) > 0) {
       char eaves[300];
-      sprintf(eaves, "@w...$e is spying on everything to the @c%s@w.", dirs[char_get_eavesdir(i)]);
+      snprintf(eaves, sizeof(eaves), "@w...$e is spying on everything to the @c%s@w.", dirs[char_get_eavesdir(i)]);
       act(eaves, TRUE, i, 0, ch, TO_VICT);
     }
     if (char_aff_flagged(i, AFF_FLYING) && char_get_altitude(i) == 1)
@@ -1051,7 +1051,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
       act("@m...$e @mis outlined with purple fire!@m", FALSE, i, 0, ch, TO_VICT);
     if (char_get_feature(i)) {
       char woo[MAX_STRING_LENGTH];
-      sprintf(woo, "@C%s@n", char_get_feature(i));
+      snprintf(woo, sizeof(woo), "@C%s@n", char_get_feature(i));
       act(woo, FALSE, i, 0, ch, TO_VICT);
     }
 
@@ -1105,7 +1105,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
           send_to_char(ch, "@wA %s %s, with %s horns", char_mafe(i), juggleRaceName(i, false), FHA_types[(int)char_get_hairl(i)]);
         } else {
           char blarg[MAX_INPUT_LENGTH];
-          sprintf(blarg, "%s %s hair %s", hairl_types[(int)char_get_hairl(i)], hairc_types[(int)char_get_hairc(i)], hairs_types[(int)char_get_hairs(i)]);
+          snprintf(blarg, sizeof(blarg), "%s %s hair %s", hairl_types[(int)char_get_hairl(i)], hairc_types[(int)char_get_hairc(i)], hairs_types[(int)char_get_hairs(i)]);
           send_to_char(ch, "@wA %s %s, with %s", char_mafe(i), juggleRaceName(i, false), char_get_hairl(i) == 0 ? "a bald head" : (blarg));
         }
       } else if (char_get_distfea(i) == DISTFEA_SKIN) {
@@ -1334,7 +1334,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
 
   if (char_get_listenroom(i) > 0) {
     char eaves[300];
-    sprintf(eaves, "@w...$e is spying on everything to the @c%s@w.", dirs[char_get_eavesdir(i)]);
+    snprintf(eaves, sizeof(eaves), "@w...$e is spying on everything to the @c%s@w.", dirs[char_get_eavesdir(i)]);
     act(eaves, TRUE, i, 0, ch, TO_VICT);
   }
   if (!char_is_npc(i)) {
@@ -1344,7 +1344,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
   }
   if (char_plr_flagged(i, PLR_AURALIGHT)) {
     char bloom[MAX_INPUT_LENGTH];
-    sprintf(bloom, "...is surrounded by a bright %s aura.@n", aura_types[char_get_aura(i)]);
+    snprintf(bloom, sizeof(bloom), "...is surrounded by a bright %s aura.@n", aura_types[char_get_aura(i)]);
     act(bloom, TRUE, i, 0, ch, TO_VICT);
   }
   if (char_aff_flagged(i, AFF_SANCTUARY) && !char_get_skill(i, SKILL_AQUA_BARRIER))
@@ -1369,14 +1369,14 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
     act("@w...$e has energy crackling around $s body!", TRUE, i, 0, ch, TO_VICT);
   if (char_get_charge(i) && !char_is_saiyan(i) && !char_is_halfbreed(i)) {
     char aura[MAX_INPUT_LENGTH];
-    sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[char_get_aura(i)]);
+    snprintf(aura, sizeof(aura), "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[char_get_aura(i)]);
     act(aura, TRUE, i, 0, ch, TO_VICT);
   }
   if (!char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
     act("@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", TRUE, i, 0, ch, TO_VICT);
   if (!char_plr_flagged(i, PLR_OOZARU) && char_get_charge(i) && !char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i))) {
     char aura[MAX_INPUT_LENGTH];
-    sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[char_get_aura(i)]);
+    snprintf(aura, sizeof(aura), "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[char_get_aura(i)]);
     act(aura, TRUE, i, 0, ch, TO_VICT);
   }
   if (!char_plr_flagged(i, PLR_OOZARU) && !char_get_charge(i) && char_is_transformed(i) && (char_is_saiyan(i) || char_is_halfbreed(i)))
@@ -1391,14 +1391,14 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
     act("@w...$e has energy crackling around $s @rgreat ape@w body!", TRUE, i, 0, ch, TO_VICT);
   if (char_get_feature(i)) {
     char woo[MAX_STRING_LENGTH];
-    sprintf(woo, "@C%s@n", char_get_feature(i));
+    snprintf(woo, sizeof(woo), "@C%s@n", char_get_feature(i));
     act(woo, FALSE, i, 0, ch, TO_VICT);
   }
 
   if (char_get_rdisplay(i)) {
     if (strcmp(char_get_rdisplay(i), "Empty")) {
       char rdis[MAX_STRING_LENGTH];
-      sprintf(rdis, "...%s", char_get_rdisplay(i));
+      snprintf(rdis, sizeof(rdis), "...%s", char_get_rdisplay(i));
       act(rdis, FALSE, i, 0, ch, TO_VICT);
     }
   }
@@ -1499,4 +1499,9 @@ void list_char_to_char(struct char_data *list, struct char_data *ch)
              char_aff_flagged(i, AFF_INFRAVISION))
       send_to_char(ch, "@wYou see a pair of glowing red eyes looking your way.@n\r\n");
   } /* loop through all characters in room */
+
+  for (; hideinfo; hideinfo = tmphide) {
+    tmphide = hideinfo->next;
+    free(hideinfo);
+  }
 }

@@ -197,11 +197,11 @@ ACMD(do_help)
     send_to_char(ch, "There is no help on that word.\r\n");
     return;
   }
-  sprintf(buf, "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
-  sprintf(buf + strlen(buf), "%s", help_table[mid].entry);
-  sprintf(buf + strlen(buf), "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
+  snprintf(buf, sizeof(buf), "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
+  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s", help_table[mid].entry);
+  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "@b~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
   if (char_get_admlevel(ch) > 0) {
-    sprintf(buf + strlen(buf), "@WHelp File Level@w: @D(@R%d@D)@n\n", help_table[mid].min_level);
+    snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "@WHelp File Level@w: @D(@R%d@D)@n\n", help_table[mid].min_level);
   }
   send_to_char(ch, "%s", buf);
 }
@@ -234,7 +234,7 @@ ACMD(do_gen_ps)
       send_to_char(ch, "%s", handbook);
       break;
     case SCMD_POLICIES:
-      sprintf(bum, "--------------------\r\n%s\r\n--------------------\r\n", policies);
+      snprintf(bum, sizeof(bum), "--------------------\r\n%s\r\n--------------------\r\n", policies);
       send_to_char(ch, "%s", bum);
       break;
     case SCMD_MOTD:
@@ -307,7 +307,7 @@ ACMD(do_toggle)
   if (char_get_wimp_level(ch) == 0)
     strcpy(buf2, "OFF"); /* strcpy: OK */
   else
-    sprintf(buf2, "%-3.3d", char_get_wimp_level(ch)); /* sprintf: OK */
+    snprintf(buf2, sizeof(buf2), "%-3.3d", char_get_wimp_level(ch)); /* sprintf: OK */
 
   if (char_get_admlevel(ch)) {
     send_to_char(ch,
@@ -474,9 +474,9 @@ ACMD(do_commands)
       continue;
 
     if (check_disabled(&complete_cmd_info[i]))
-      sprintf(arg, "(%s)", complete_cmd_info[i].command);
+      snprintf(arg, sizeof(arg), "(%s)", complete_cmd_info[i].command);
     else
-      sprintf(arg, "%s", complete_cmd_info[i].command);
+      snprintf(arg, sizeof(arg), "%s", complete_cmd_info[i].command);
 
     send_to_char(ch, "%-11s%s", arg, no++ % 7 == 0 ? "\r\n" : "");
   }
@@ -538,7 +538,7 @@ void add_history(struct char_data *ch, char *str, int type)
   ct  = time(0);
   strftime(time_str, sizeof(time_str), "%H:%M ", localtime(&ct));
 
-  sprintf(buf, "%s%s", time_str, str);
+  snprintf(buf, sizeof(buf), "%s%s", time_str, str);
 
   if (!tmp) {
     struct txt_block *first;

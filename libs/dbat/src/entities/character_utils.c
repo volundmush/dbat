@@ -5405,9 +5405,11 @@ const char *char_get_feature(const struct char_data *ch)
   return ch->feature;
 }
 
+/* Keeps its own copy of v. */
 void char_set_feature(struct char_data *ch, const char *v)
 {
-  ch->feature = v;
+  free((char *)ch->feature);
+  ch->feature = v ? strdup(v) : NULL;
 }
 
 char *char_get_loguser(const struct char_data *ch)
@@ -5629,9 +5631,11 @@ const char *char_get_rdisplay(const struct char_data *ch)
   return ch->rdisplay;
 }
 
+/* Keeps its own copy of v. */
 void char_set_rdisplay(struct char_data *ch, const char *v)
 {
-  ch->rdisplay = v;
+  free((char *)ch->rdisplay);
+  ch->rdisplay = v ? strdup(v) : NULL;
 }
 
 int8_t char_get_aff_abils_str(const struct char_data *ch)

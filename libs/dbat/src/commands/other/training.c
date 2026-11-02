@@ -82,7 +82,7 @@ ACMD(do_train)
 
   int plus      = 0;
   int64_t total = 0, weight = 0, bonus = 0, cost = 0;
-  char arg[200];
+  char arg[MAX_INPUT_LENGTH];
 
   one_argument(argument, arg);
 

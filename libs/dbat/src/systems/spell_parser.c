@@ -68,7 +68,7 @@ int find_skill_num(char *name, int sktype)
 {
   int skindex, ok;
   char *temp, *temp2;
-  char first[256], first2[256], tempbuf[256];
+  char first[MAX_INPUT_LENGTH], first2[MAX_INPUT_LENGTH], tempbuf[256];
 
   for (skindex = 0; skindex < SKILL_TABLE_SIZE; skindex++) {
     if (is_abbrev(name, spell_info[skindex].name) && (spell_info[skindex].skilltype & sktype)) {

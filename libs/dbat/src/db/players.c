@@ -572,14 +572,14 @@ int load_char(const char *name, struct char_data *ch)
           if (!strcmp(tag, "Race")) ch->race = atoi(line);
           else if (!strcmp(tag, "Raci")) char_set_racial_pref(ch, atoi(line));
           else if (!strcmp(tag, "RBan")) char_set_rbank(ch, atoi(line));
-          else if (!strcmp(tag, "rDis")) char_set_rdisplay(ch, strdup(line));
+          else if (!strcmp(tag, "rDis")) char_set_rdisplay(ch, line);
           else if (!strcmp(tag, "Rela")) char_set_relax_count(ch, atoi(line));
           else if (!strcmp(tag, "Rtim")) char_set_rewtime(ch, atoi(line));
           else if (!strcmp(tag, "Rad1")) char_set_radar1(ch, atoi(line));
           else if (!strcmp(tag, "Rad2")) char_set_radar2(ch, atoi(line));
           else if (!strcmp(tag, "Rad3")) char_set_radar3(ch, atoi(line));
           else if (!strcmp(tag, "Room")) char_set_load_room(ch, atoi(line));
-          else if (!strcmp(tag, "RPfe")) char_set_feature(ch, strdup(line));
+          else if (!strcmp(tag, "RPfe")) char_set_feature(ch, line);
           else if (!strcmp(tag, "RPP ")) char_set_rp(ch, atoi(line));
           break;
 

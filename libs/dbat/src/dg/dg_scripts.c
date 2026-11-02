@@ -1307,8 +1307,8 @@ void read_saved_vars(struct char_data *ch)
   long context;
   char fn[127];
   char input_line[1024], *temp, *p;
-  char varname[32];
-  char context_str[16];
+  char varname[sizeof(input_line)];
+  char context_str[sizeof(input_line)];
 
   /*
    * If getting to the menu from inside the game, the vars aren't removed.

@@ -150,26 +150,37 @@ ACMD(do_refuel)
   }
 }
 
+/* The plants that can be harvested: what they yield, and how the yield is adjusted. */
+static const struct harvest {
+  obj_vnum plant, fruit;
+  int bonus;  /* added to the yield */
+  bool kills; /* harvesting kills the plant */
+} harvests[] = {
+    {250,   1,     0,  FALSE}, /* at most 2 */
+    {1129,  1131,  0,  TRUE },
+    {17210, 17212, 2,  TRUE },
+    {17211, 17213, 2,  TRUE },
+    {17214, 17215, 1,  TRUE },
+    {17216, 17217, 0,  TRUE },
+    {17218, 17219, 14, TRUE },
+    {17220, 17221, 0,  TRUE }, /* a quarter */
+    {17222, 17223, 0,  TRUE }, /* plus 1 to 3 */
+    {17224, 17225, 10, TRUE },
+    {17226, 17227, -8, TRUE },
+    {3702,  3703,  -2, TRUE },
+};
+
+static const struct harvest *find_harvest(struct obj_data *plant)
+{
+  for (size_t i = 0; i < sizeof(harvests) / sizeof(harvests[0]); i++)
+    if (harvests[i].plant == obj_get_vnum(plant))
+      return &harvests[i];
+  return NULL;
+}
+
 static int can_harvest(struct obj_data *plant)
 {
-
-  switch (obj_get_vnum(plant)) {
-    case 250:
-    case 1129:
-    case 17210:
-    case 17211:
-    case 17214:
-    case 17216:
-    case 17218:
-    case 17220:
-    case 17222:
-    case 17224:
-    case 17226:
-    case 3702:
-      return TRUE;
-  }
-
-  return FALSE;
+  return find_harvest(plant) != NULL;
 }
 
 static void harvest_plant(struct char_data *ch, struct obj_data *plant)
@@ -215,145 +226,31 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant)
     send_to_char(ch, ".@n\r\n");
   }
 
-  count = reward;
+  const struct harvest *h = find_harvest(plant);
 
-  switch (obj_get_vnum(plant)) {
-    case 250:
-      if (reward > 2) {
-        reward = 2;
-        count  = 2;
-      }
-      while (count > 0) {
-        fruit = read_object(1, VIRTUAL);
-        obj_to_char(fruit, ch);
-        count -= 1;
-      }
-      send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
-      extract = FALSE;
-      break;
-    case 1129:
-      while (count > 0) {
-        fruit = read_object(1131, VIRTUAL);
-        obj_to_char(fruit, ch);
-        count -= 1;
-      }
-      send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
-      extract = TRUE;
-      break;
-    case 17210:
-      reward += 2;
-      count += 2;
-      while (count > 0) {
-        fruit = read_object(17212, VIRTUAL);
-        obj_to_char(fruit, ch);
-        count -= 1;
-      }
-      send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
-      extract = TRUE;
-      break;
-    case 17211:
-      reward += 2;
-      count += 2;
-      while (count > 0) {
-        fruit = read_object(17213, VIRTUAL);
-        obj_to_char(fruit, ch);
-        count -= 1;
-      }
-      send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
-      extract = TRUE;
-      break;
-    case 17214:
-      reward += 1;
-      count += 1;
-      while (count > 0) {
-        fruit = read_object(17215, VIRTUAL);
-        obj_to_char(fruit, ch);
-        count -= 1;
-      }
-      send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
-      extract = TRUE;
-      break;
-    case 17216:
-      while (count > 0) {
-        fruit = read_object(17217, VIRTUAL);
-        obj_to_char(fruit, ch);
-        count -= 1;
-      }
-      send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
-      extract = TRUE;
-      break;
-    case 17218:
-      reward += 14;
-      count += 14;
-      while (count > 0) {
-        fruit = read_object(17219, VIRTUAL);
-        obj_to_char(fruit, ch);
-        count -= 1;
-      }
-      send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
-      extract = TRUE;
-      break;
-    case 17220:
-      reward -= reward * 0.75;
-      count = reward;
-      while (count > 0) {
-        fruit = read_object(17221, VIRTUAL);
-        obj_to_char(fruit, ch);
-        count -= 1;
-      }
-      send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
-      extract = TRUE;
-      break;
-    case 17222:
-      reward += rand_number(1, 3);
-      count = reward;
-      while (count > 0) {
-        fruit = read_object(17223, VIRTUAL);
-        obj_to_char(fruit, ch);
-        count -= 1;
-      }
-      send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
-      extract = TRUE;
-      break;
-    case 17224:
-      reward += 10;
-      count = reward;
-      while (count > 0) {
-        fruit = read_object(17225, VIRTUAL);
-        obj_to_char(fruit, ch);
-        count -= 1;
-      }
-      send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
-      extract = TRUE;
-      break;
-    case 17226:
-      reward -= 8;
-      if (reward < 0)
-        reward = 1;
-      count = reward;
-      while (count > 0) {
-        fruit = read_object(17227, VIRTUAL);
-        obj_to_char(fruit, ch);
-        count -= 1;
-      }
-      send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
-      extract = TRUE;
-      break;
-    case 3702:
-      reward -= 2;
-      count = reward;
-      while (count > 0) {
-        fruit = read_object(3703, VIRTUAL);
-        obj_to_char(fruit, ch);
-        count -= 1;
-      }
-      send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
-      extract = TRUE;
-      break;
-    default:
-      send_to_imm("ERROR: Harvest plant called for illegitimate plant, VNUM %d.", obj_get_vnum(plant));
-      break;
+  if (!h) {
+    send_to_imm("ERROR: Harvest plant called for illegitimate plant, VNUM %d.", obj_get_vnum(plant));
+    return;
   }
+  if (h->plant == 250)
+    reward = MIN(reward, 2);
+  else if (h->plant == 17220)
+    reward -= reward * 0.75;
+  else if (h->plant == 17222)
+    reward += rand_number(1, 3);
+  reward += h->bonus;
+  if (reward < 1) /* every harvest yields something */
+    reward = 1;
+
+  for (count = 0; count < reward; count++) {
+    if (!(fruit = read_object(h->fruit, VIRTUAL))) {
+      send_to_imm("ERROR: Harvest plant %d yields missing object %d.", h->plant, h->fruit);
+      return;
+    }
+    obj_to_char(fruit, ch);
+  }
+  send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->short_description);
+  extract = h->kills;
 
   if (extract == TRUE) {
     send_to_char(ch, "@wThe harvesting process has killed the plant. Do not worry, this is normal for that type.@n\r\n");
@@ -1044,12 +941,12 @@ static void start_auction(struct char_data *ch, struct obj_data *obj, int bid)
   curbid      = bid;
 
   /* Tell th character where his item went */
-  sprintf(buf, "%s magicly flies away from your hands to be auctioned!\r\n", obj_selling->short_description);
+  snprintf(buf, sizeof(buf), "%s magicly flies away from your hands to be auctioned!\r\n", obj_selling->short_description);
   CAP(buf);
   send_to_char(ch_selling, "%s", buf);
 
   /* Anounce the item is being sold */
-  sprintf(buf, auctioneer[AUC_NULL_STATE], curbid);
+  snprintf(buf, sizeof(buf), auctioneer[AUC_NULL_STATE], curbid);
   auc_send_to_all(buf, FALSE);
 
   aucstat = AUC_OFFERING;
@@ -1069,7 +966,7 @@ void check_auction(void)
         aucstat    = AUC_NULL_STATE;
         return;
       }
-      sprintf(buf, auctioneer[AUC_OFFERING], curbid);
+      snprintf(buf, sizeof(buf), auctioneer[AUC_OFFERING], curbid);
       CAP(buf);
       auc_send_to_all(buf, FALSE);
       aucstat = AUC_GOING_ONCE;
@@ -1085,7 +982,7 @@ void check_auction(void)
         return;
       }
 
-      sprintf(buf, auctioneer[AUC_GOING_ONCE], curbid);
+      snprintf(buf, sizeof(buf), auctioneer[AUC_GOING_ONCE], curbid);
       CAP(buf);
       auc_send_to_all(buf, FALSE);
       aucstat = AUC_GOING_TWICE;
@@ -1101,7 +998,7 @@ void check_auction(void)
         return;
       }
 
-      sprintf(buf, auctioneer[AUC_GOING_TWICE], curbid);
+      snprintf(buf, sizeof(buf), auctioneer[AUC_GOING_TWICE], curbid);
       CAP(buf);
       auc_send_to_all(buf, FALSE);
       aucstat = AUC_LAST_CALL;
@@ -1118,12 +1015,12 @@ void check_auction(void)
       }
       if (ch_buying == NULL) {
 
-        sprintf(buf, auctioneer[AUC_LAST_CALL], curbid);
+        snprintf(buf, sizeof(buf), auctioneer[AUC_LAST_CALL], curbid);
 
         CAP(buf);
         auc_send_to_all(buf, FALSE);
 
-        sprintf(buf, "%s flies out the sky and into your hands.\r\n", obj_selling->short_description);
+        snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands.\r\n", obj_selling->short_description);
         CAP(buf);
         send_to_char(ch_selling, "%s", buf);
         obj_to_char(obj_selling, ch_selling);
@@ -1137,16 +1034,16 @@ void check_auction(void)
         return;
       } else {
 
-        sprintf(buf, auctioneer[AUC_SOLD], curbid);
+        snprintf(buf, sizeof(buf), auctioneer[AUC_SOLD], curbid);
         auc_send_to_all(buf, TRUE);
 
         /* Give the object to the buyer */
         obj_to_char(obj_selling, ch_buying);
-        sprintf(buf, "%s flies out the sky and into your hands, what a steal!\r\n", obj_selling->short_description);
+        snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands, what a steal!\r\n", obj_selling->short_description);
         CAP(buf);
         send_to_char(ch_buying, "%s", buf);
 
-        sprintf(buf, "Congrats! You have sold %s for @Y%d@W zenni!\r\n", obj_selling->short_description, curbid);
+        snprintf(buf, sizeof(buf), "Congrats! You have sold %s for @Y%d@W zenni!\r\n", obj_selling->short_description, curbid);
         send_to_char(ch_selling, "%s", buf);
 
         /* Give selling char the money for his stuff */
@@ -1211,19 +1108,19 @@ ACMD(do_auction)
     auc_stat(ch, obj_selling);
     return;
   } else if (!(obj = get_obj_in_list_vis(ch, arg1, NULL, ch->carrying))) {
-    sprintf(buf, "You don't seem to have %s %s.\r\n", AN(arg1), arg1);
+    snprintf(buf, sizeof(buf), "You don't seem to have %s %s.\r\n", AN(arg1), arg1);
     send_to_char(ch, "%s", buf);
     return;
   } else if (!*arg2) {
-    sprintf(buf, "What should be the minimum bid?\r\n");
+    snprintf(buf, sizeof(buf), "What should be the minimum bid?\r\n");
     send_to_char(ch, "%s", buf);
     return;
   } else if (*arg2 && (bid = atoi(arg2)) <= 0) {
     send_to_char(ch, "Come on? One zenni at least?\r\n");
     return;
   } else if (aucstat != AUC_NULL_STATE) {
-    sprintf(buf, "Sorry, but %s is already auctioning %s at @Y%d@W zenni!\r\n", char_get_name(ch_selling),
-            obj_selling->short_description, bid);
+    snprintf(buf, sizeof(buf), "Sorry, but %s is already auctioning %s at @Y%d@W zenni!\r\n", char_get_name(ch_selling),
+             obj_selling->short_description, bid);
     send_to_char(ch, "%s", buf);
     return;
   } else if (obj_extra_flagged(obj, ITEM_NOSELL)) {
@@ -1490,19 +1387,19 @@ void stop_auction(int type, struct char_data *ch)
 
     case AUC_NORMAL_CANCEL: {
 
-      sprintf(buf, "%s", auctioneer[AUC_NORMAL_CANCEL]);
+      snprintf(buf, sizeof(buf), "%s", auctioneer[AUC_NORMAL_CANCEL]);
       auc_send_to_all(buf, FALSE);
       break;
     }
     case AUC_QUIT_CANCEL: {
 
-      sprintf(buf, "%s", auctioneer[AUC_QUIT_CANCEL]);
+      snprintf(buf, sizeof(buf), "%s", auctioneer[AUC_QUIT_CANCEL]);
       auc_send_to_all(buf, FALSE);
       break;
     }
     case AUC_WIZ_CANCEL: {
 
-      sprintf(buf, "%s", auctioneer[AUC_WIZ_CANCEL]);
+      snprintf(buf, sizeof(buf), "%s", auctioneer[AUC_WIZ_CANCEL]);
       auc_send_to_all(buf, FALSE);
       break;
     }
@@ -1513,12 +1410,12 @@ void stop_auction(int type, struct char_data *ch)
   }
 
   if (type != AUC_WIZ_CANCEL) {
-    sprintf(buf, "%s flies out the sky and into your hands.\r\n", obj_selling->short_description);
+    snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands.\r\n", obj_selling->short_description);
     CAP(buf);
     send_to_char(ch_selling, "%s", buf);
     obj_to_char(obj_selling, ch_selling);
   } else {
-    sprintf(buf, "%s flies out the sky and into your hands.\r\n", obj_selling->short_description);
+    snprintf(buf, sizeof(buf), "%s flies out the sky and into your hands.\r\n", obj_selling->short_description);
     CAP(buf);
     send_to_char(ch, "%s", buf);
     obj_to_char(obj_selling, ch);
@@ -1549,7 +1446,7 @@ static void auc_stat(struct char_data *ch, struct obj_data *obj)
     return;
   } else {
     /* auctioneer tells the character the auction details */
-    sprintf(buf, auctioneer[AUC_STAT], curbid);
+    snprintf(buf, sizeof(buf), auctioneer[AUC_STAT], curbid);
     act(buf, TRUE, ch_selling, obj, ch, TO_VICT | TO_SLEEP);
     char_set_gold(ch, char_get_gold(ch) - (500));
 
@@ -1758,11 +1655,11 @@ ACMD(do_assemble)
   }*/
 
   /* Tell the character they made something. */
-  sprintf(text, "You %s $p.", CMD_NAME);
+  snprintf(text, sizeof(text), "You %s $p.", CMD_NAME);
   act(text, FALSE, ch, pObject, NULL, TO_CHAR);
 
   /* Tell the room the character made something. */
-  sprintf(text, "$n %ss $p.", CMD_NAME);
+  snprintf(text, sizeof(text), "$n %ss $p.", CMD_NAME);
   act(text, FALSE, ch, pObject, NULL, TO_ROOM);
 
   if (assemblyCheckComponents(lVnum, ch, TRUE)) {
@@ -2012,7 +1909,7 @@ static void get_check_money(struct char_data *ch, struct obj_data *obj)
     send_to_char(ch, "There were %d zenni.\r\n", value);
     if (char_is_affected(ch, AFF_GROUP) && char_prf_flagged(ch, PRF_AUTOSPLIT)) {
       char split[MAX_INPUT_LENGTH];
-      sprintf(split, "%d", value);
+      snprintf(split, sizeof(split), "%d", value);
       do_split(ch, split, 0, 0);
     }
   }
@@ -2313,11 +2210,6 @@ static void perform_drop_gold(struct char_data *ch, int amount,
         char out[MAX_STRING_LENGTH];
 
         if (!drop_wtrigger(obj, ch)) {
-          extract_obj(obj);
-          return;
-        }
-
-        if (!drop_wtrigger(obj, ch) && (obj)) { /* obj may be purged */
           extract_obj(obj);
           return;
         }
@@ -2848,6 +2740,8 @@ void name_from_drinkcon(struct obj_data *obj)
   if (!obj || (obj_get_type_flag(obj) != ITEM_DRINKCON && obj_get_type_flag(obj) != ITEM_FOUNTAIN))
     return;
 
+  if (obj_get_value(obj, VAL_DRINKCON_LIQUID) < 0 || obj_get_value(obj, VAL_DRINKCON_LIQUID) >= NUM_LIQ_TYPES)
+    return;
   liqname = drinknames[obj_get_value(obj, VAL_DRINKCON_LIQUID)];
   if (!isname(liqname, obj->name)) {
     /*log("SYSERR: Can't remove liquid '%s' from '%s' (%d) item.", liqname, obj->name, obj->item_number);*/
@@ -2860,7 +2754,7 @@ void name_from_drinkcon(struct obj_data *obj)
   }
 
   liqlen = strlen(liqname);
-  CREATE(new_name, char, strlen(obj->name) - strlen(liqname)); /* +1 for NUL, -1 for space */
+  CREATE(new_name, char, strlen(obj->name) + 1); /* the name without one or more of its words */
 
   for (cur_name = obj->name; cur_name; cur_name = next) {
     if (*cur_name == ' ')
@@ -2875,8 +2769,8 @@ void name_from_drinkcon(struct obj_data *obj)
       continue;
 
     if (*new_name)
-      strcat(new_name, " ");        /* strcat: OK (size precalculated) */
-    size_t used = strlen(new_name); /* append cpylen bytes (size precalculated) */
+      strcat(new_name, " ");
+    size_t used = strlen(new_name);
     memcpy(new_name + used, cur_name, cpylen);
     new_name[used + cpylen] = '\0';
   }
@@ -2889,12 +2783,16 @@ void name_from_drinkcon(struct obj_data *obj)
 void name_to_drinkcon(struct obj_data *obj, int type)
 {
   char *new_name;
+  size_t len;
 
   if (!obj || (obj_get_type_flag(obj) != ITEM_DRINKCON && obj_get_type_flag(obj) != ITEM_FOUNTAIN))
     return;
+  if (type < 0 || type >= NUM_LIQ_TYPES)
+    return;
 
-  CREATE(new_name, char, strlen(obj->name) + strlen(drinknames[type]) + 2);
-  sprintf(new_name, "%s %s", obj->name, drinknames[type]); /* sprintf: OK */
+  len = strlen(obj->name) + strlen(drinknames[type]) + 2;
+  CREATE(new_name, char, len);
+  snprintf(new_name, len, "%s %s", obj->name, drinknames[type]);
 
   if (obj_get_item_number(obj) == NOTHING || obj->name != obj_proto[obj_get_item_number(obj)].name)
     free(obj->name);
@@ -3907,7 +3805,7 @@ void perform_remove(struct char_data *ch, int pos)
     act("$n stops using $p.", TRUE, ch, obj, 0, TO_ROOM);
     if (previous > getCurPL(ch)) {
       char drop[MAX_INPUT_LENGTH];
-      sprintf(drop, "@RYour powerlevel has dropped from removing $p@R! @D[@r-%s@D]\r\n", add_commas(previous - getCurPL(ch)));
+      snprintf(drop, sizeof(drop), "@RYour powerlevel has dropped from removing $p@R! @D[@r-%s@D]\r\n", add_commas(previous - getCurPL(ch)));
       act(drop, FALSE, ch, obj, 0, TO_CHAR);
     }
   }

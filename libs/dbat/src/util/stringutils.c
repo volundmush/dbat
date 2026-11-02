@@ -363,3 +363,30 @@ char *fname(const char *namelist)
 
   return (holder);
 }
+
+void search_replace(char *string, const char *find, const char *replace)
+{
+  char final[MAX_STRING_LENGTH], temp[2];
+  size_t start, end, i;
+
+  while (strstr(string, find) != NULL) {
+
+    final[0] = '\0';
+    start    = strstr(string, find) - string;
+    end      = start + strlen(find);
+
+    temp[1] = '\0';
+
+    strncat(final, string, start);
+
+    strcat(final, replace);
+
+    for (i = end; string[i] != '\0'; i++) {
+      temp[0] = string[i];
+      strcat(final, temp);
+    }
+
+    sprintf(string, "%s", final);
+  }
+  return;
+}

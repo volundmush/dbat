@@ -232,7 +232,7 @@ static int compare_spells(const void *x, const void *y)
 
 int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype, char *argument)
 {
-  char arg[1000];
+  char arg[MAX_INPUT_LENGTH];
   size_t len = 0;
   int i, t, known, nlen = 0, count = 0, canknow = 0;
   char buf2[READ_SIZE];

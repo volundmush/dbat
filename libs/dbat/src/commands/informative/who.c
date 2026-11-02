@@ -187,7 +187,7 @@ ACMD(do_who)
         num_can_see++;
 
         char usr[100];
-        sprintf(usr, "@W(@R%s@W)%s", tch->desc->user, char_plr_flagged(tch, PLR_BIOGR) ? "" : (char_is_spoiled(tch) ? " @R*@n" : ""));
+        snprintf(usr, sizeof(usr), "@W(@R%s@W)%s", char_get_user(tch), char_plr_flagged(tch, PLR_BIOGR) ? "" : (char_is_spoiled(tch) ? " @R*@n" : ""));
         send_to_char(ch, "%s               @D<@C%-12s@D> %s@w%s", line_color, char_get_admlevel(ch) > 0 ? char_get_name(tch) : (char_get_admlevel(tch) > 0 ? char_get_name(tch) : (char_get_user(tch) ? char_get_user(tch) : "NULL")), char_get_admlevel(ch) > 0 ? usr : "", line_color);
 
         if (char_get_admlevel(tch)) {
@@ -391,22 +391,22 @@ ACMD(do_users)
       strcpy(state, connected_types[desc_get_connected(d)]);
 
     if (d->character && desc_get_connected(d) == CON_PLAYING && char_get_admlevel(d->character) <= char_get_admlevel(ch))
-      sprintf(idletime, "%3d", d->character->timer * SECS_PER_MUD_HOUR / SECS_PER_REAL_MIN);
+      snprintf(idletime, sizeof(idletime), "%3d", d->character->timer * SECS_PER_MUD_HOUR / SECS_PER_REAL_MIN);
     else
       strcpy(idletime, "");
 
-    sprintf(line, "%3d %-20s %-20s %-14s %-3s %-8s %1s ", d->desc_num,
-            d->original && d->original->name ? d->original->name : d->character && d->character->name ? d->character->name
-                                                                                                      : "UNDEFINED",
-            d->user ? d->user : "UNKNOWN", state, idletime, timeptr,
-            "N");
+    snprintf(line, sizeof(line), "%3d %-20s %-20s %-14s %-3s %-8s %1s ", d->desc_num,
+             d->original && d->original->name ? d->original->name : d->character && d->character->name ? d->character->name
+                                                                                                       : "UNDEFINED",
+             d->user ? d->user : "UNKNOWN", state, idletime, timeptr,
+             "N");
     if (*d->host)
-      sprintf(line + strlen(line), "\n%3d [%s Site: %s]\r\n", d->desc_num, d->user ? d->user : "UNKNOWN", d->host);
+      snprintf(line + strlen(line), sizeof(line) - strlen(line), "\n%3d [%s Site: %s]\r\n", d->desc_num, d->user ? d->user : "UNKNOWN", d->host);
     else
-      sprintf(line + strlen(line), "\n%3d [%s Site: Hostname unknown]\r\n", d->desc_num, d->user ? d->user : "UNKNOWN");
+      snprintf(line + strlen(line), sizeof(line) - strlen(line), "\n%3d [%s Site: Hostname unknown]\r\n", d->desc_num, d->user ? d->user : "UNKNOWN");
 
     if (desc_get_connected(d) != CON_PLAYING) {
-      sprintf(line2, "@g%s@n", line);
+      snprintf(line2, sizeof(line2), "@g%s@n", line);
       strcpy(line, line2);
     }
     if (desc_get_connected(d) != CON_PLAYING ||

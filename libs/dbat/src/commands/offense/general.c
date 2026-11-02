@@ -152,7 +152,7 @@ ACMD(do_charge)
         send_to_char(ch, "Your %s colored aura flashes up around you as you instantly take control of the ki you needed!\r\n", aura_types[char_get_aura(ch)]);
         send_to_char(ch, "@D[@RCost@D: @r%s@D]@n\r\n", add_commas(spiritcost));
         char bloom[MAX_INPUT_LENGTH];
-        sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
+        snprintf(bloom, sizeof(bloom), "@wA %s aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
         act(bloom, TRUE, ch, 0, 0, TO_ROOM);
         char_set_charge(ch, (((getMaxKI(ch) * 0.01) * amt) + 1) - diff);
         decCurKI(ch, (((getMaxKI(ch) * 0.01) * amt) + 1) - diff + spiritcost, 0);
@@ -161,7 +161,7 @@ ACMD(do_charge)
       reveal_hiding(ch, 0);
       send_to_char(ch, "You begin to charge some energy, as a %s aura begins to burn around you!\r\n", aura_types[char_get_aura(ch)]);
       char bloom[MAX_INPUT_LENGTH];
-      sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
+      snprintf(bloom, sizeof(bloom), "@wA %s aura flashes up brightly around $n@w!@n", aura_types[char_get_aura(ch)]);
       act(bloom, TRUE, ch, 0, 0, TO_ROOM);
       char_set_chargeto(ch, (((getMaxKI(ch) * 0.01) * amt) + 1));
       char_set_charge(ch, char_get_charge(ch) + (1));
@@ -259,7 +259,7 @@ ACMD(do_powerup)
 ACMD(do_rescue)
 {
 
-  char arg[100];
+  char arg[MAX_INPUT_LENGTH];
   struct char_data *helpee, *opponent;
 
   one_argument(argument, arg);

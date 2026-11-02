@@ -4252,6 +4252,8 @@ void free_char(struct char_data *ch)
       free(ch->long_descr);
     if (ch->description)
       free(ch->description);
+    free((char *)ch->feature);
+    free((char *)ch->rdisplay);
     for (i = 0; i < NUM_HIST; i++)
       if (char_get_comm_hist(ch, i))
         free(char_get_comm_hist(ch, i));

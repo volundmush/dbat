@@ -1258,7 +1258,7 @@ ACMD(do_plant)
 {
   struct char_data *vict;
   struct obj_data *obj;
-  char vict_name[100], obj_name[100];
+  char vict_name[MAX_INPUT_LENGTH], obj_name[MAX_INPUT_LENGTH];
   int roll = 0, detect = 0, fail = 0;
 
   if (rroom_flagged(char_get_in_room(ch), ROOM_PEACEFUL)) {
@@ -1605,7 +1605,7 @@ ACMD(do_disguise)
 
 ACMD(do_use)
 {
-  char buf[100], arg[MAX_INPUT_LENGTH];
+  char buf[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
   struct obj_data *mag_item = NULL;
 
   half_chop(argument, arg, buf);
@@ -1794,7 +1794,7 @@ ACMD(do_value)
 
 ACMD(do_compare)
 {
-  char arg1[100];
+  char arg1[MAX_INPUT_LENGTH];
   char arg2[MAX_INPUT_LENGTH];
   struct obj_data *obj1, *obj2;
   struct char_data *tchar;

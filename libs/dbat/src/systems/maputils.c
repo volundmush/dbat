@@ -6,6 +6,7 @@
 *				     		     * 
 * Paolo Libardi - pinkpallin@libero.it		     * 
 *****************************************************/
+#include <errno.h>
 #include "dbat/maputils.h"
 #include "dbat/utils.h"
 #include "dbat/comm.h"
@@ -397,4 +398,29 @@ void printmap(int rnum, struct char_data *ch, int type, int vnum)
   if (type == 0) {
     send_to_char(ch, "\n@b______________________________________________________________________@n");
   }
+}
+
+/*Update things that need it. Just space for the moment - Iovan */
+void update_space(void)
+{
+  FILE *mapfile;
+  int rowcounter, colcounter;
+  int vnum_read;
+
+  mud_log("Updated Space Map. ");
+
+  //Load the map vnums from a file into an array
+  if (!(mapfile = fopen("../data/surface.map", "r"))) {
+    mud_log("SYSERR: update_space: can't open ../data/surface.map: %s", strerror(errno));
+    return;
+  }
+
+  for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
+    for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
+      fscanf(mapfile, "%d", &vnum_read);
+      mapnums[rowcounter][colcounter] = real_room(vnum_read);
+    }
+  }
+
+  fclose(mapfile);
 }

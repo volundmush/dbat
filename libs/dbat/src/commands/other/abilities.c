@@ -2175,7 +2175,7 @@ ACMD(do_transform)
   }
 
   send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
-  sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(getCurPL(ch)));
+  snprintf(buf3, sizeof(buf3), "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(getCurPL(ch)));
   send_to_scouter(buf3, ch, 1, 0);
 }
 
@@ -2403,7 +2403,7 @@ ACMD(do_aura)
         decCurKIPercent(ch, .12, 0);
         send_to_char(ch, "A bright %s aura begins to burn around you as you provide light to the surrounding area!\r\n", aura_types[char_get_aura(ch)]);
         char bloom[MAX_INPUT_LENGTH];
-        sprintf(bloom, "@wA %s aura flashes up brightly around $n@w as they provide light to the area.@n", aura_types[char_get_aura(ch)]);
+        snprintf(bloom, sizeof(bloom), "@wA %s aura flashes up brightly around $n@w as they provide light to the area.@n", aura_types[char_get_aura(ch)]);
         act(bloom, TRUE, ch, 0, 0, TO_ROOM);
         char_plr_set(ch, PLR_AURALIGHT, true);
 

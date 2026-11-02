@@ -223,7 +223,7 @@ int find_feat_num(char *name)
 {
   int ftindex, ok;
   char *temp, *temp2;
-  char first[256], first2[256];
+  char first[MAX_INPUT_LENGTH], first2[MAX_INPUT_LENGTH];
 
   for (ftindex = 1; ftindex <= NUM_FEATS_DEFINED; ftindex++) {
     if (is_abbrev(name, feat_list[ftindex].name))

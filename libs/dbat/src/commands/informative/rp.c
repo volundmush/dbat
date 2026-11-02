@@ -125,7 +125,7 @@ ACMD(do_mimic)
     char buf[MAX_STRING_LENGTH];
     ch->mimic = race;
     decCurKI(ch, cost, 0);
-    sprintf(buf, "@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be %s @M%s!@n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
+    snprintf(buf, sizeof(buf), "@M$n@m concentrates for a moment and $s features start to blur as light bends around $m. Now $e appears to be %s @M%s!@n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
     send_to_char(ch, "@mYou concentrate for a moment and your features start to blur as you use your ki to bend the light around your body. You now appear to be %s %s.@n\r\n", AN(juggleRaceName(ch, true)), juggleRaceName(ch, false));
     act(buf, TRUE, ch, 0, 0, TO_ROOM);
     return;
@@ -184,7 +184,7 @@ ACMD(do_table)
   }
 
   char buf[200];
-  sprintf(buf, "$n looks at %s on %s.\r\n", obj2->short_description, obj->short_description);
+  snprintf(buf, sizeof(buf), "$n looks at %s on %s.\r\n", obj2->short_description, obj->short_description);
   act(buf, TRUE, ch, 0, 0, TO_ROOM);
   send_to_char(ch, "%s", obj2->action_description);
 }
@@ -322,7 +322,7 @@ ACMD(do_hand)
       act("$n has more than seven cards in $s hand.", TRUE, ch, 0, 0, TO_ROOM);
     } else {
       char buf[200];
-      sprintf(buf, "There are %d cards in the hand.", count);
+      snprintf(buf, sizeof(buf), "There are %d cards in the hand.", count);
       act(buf, TRUE, ch, 0, 0, TO_ROOM);
     }
   } else if (!strcasecmp("show", arg)) {
@@ -404,7 +404,7 @@ ACMD(do_post)
       return;
     } else {
       char buf[MAX_STRING_LENGTH];
-      sprintf(buf, "@C$n@W posts %s@W on %s@W.@n", obj->short_description, obj2->short_description);
+      snprintf(buf, sizeof(buf), "@C$n@W posts %s@W on %s@W.@n", obj->short_description, obj2->short_description);
       send_to_char(ch, "@WYou post %s@W on %s@W.@n\r\n", obj->short_description, obj2->short_description);
       act(buf, TRUE, ch, 0, 0, TO_ROOM);
       obj_from_char(obj);
@@ -508,7 +508,7 @@ ACMD(do_nickname)
         return;
       } else {
         char nick[MAX_INPUT_LENGTH];
-        sprintf(nick, "%s", CAP(arg2));
+        snprintf(nick, sizeof(nick), "%s", CAP(arg2));
         ship2->action_description = strdup(nick);
         struct obj_data *k;
         for (k = object_list; k; k = k->next) {
@@ -927,6 +927,6 @@ ACMD(do_rdisplay)
     strcpy(derp, argument);
 
     send_to_char(ch, "You set your display to; %s\r\n", derp);
-    char_set_rdisplay(ch, strdup(derp));
+    char_set_rdisplay(ch, derp);
   }
 }

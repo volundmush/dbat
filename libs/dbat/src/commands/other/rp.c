@@ -474,9 +474,9 @@ ACMD(do_rpp)
         *theshort = '\0';
         *thelong  = '\0';
 
-        sprintf(thename, "%s", obj->name);
-        sprintf(theshort, "%s", obj->short_description);
-        sprintf(thelong, "%s", obj->description);
+        snprintf(thename, sizeof(thename), "%s", obj->name);
+        snprintf(theshort, sizeof(theshort), "%s", obj->short_description);
+        snprintf(thelong, sizeof(thelong), "%s", obj->description);
 
         ch->desc->obj_name   = strdup(thename);
         ch->desc->obj_was    = strdup(theshort);

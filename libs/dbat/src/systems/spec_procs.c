@@ -142,7 +142,7 @@ void npc_steal(struct char_data *ch, struct char_data *victim)
 
 SPECIAL(pet_shops)
 {
-  char buf[MAX_STRING_LENGTH], pet_name[256];
+  char buf[MAX_STRING_LENGTH], pet_name[MAX_INPUT_LENGTH];
   room_rnum pet_room;
   struct char_data *pet;
 

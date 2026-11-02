@@ -2435,7 +2435,7 @@ ACMD(do_throw)
   struct char_data *vict = NULL, *tch = NULL;
   struct obj_data *obj = NULL;
   char arg[MAX_INPUT_LENGTH];
-  char arg2[1000], chunk[2000], arg3[1000];
+  char arg2[MAX_INPUT_LENGTH] = "", chunk[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH] = "";
   int odam = 0, miss = TRUE, perc = 0, prob = 0, perc2 = 0, grab = FALSE;
   int64_t damage;
 

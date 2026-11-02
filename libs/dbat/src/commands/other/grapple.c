@@ -93,7 +93,7 @@ ACMD(do_grapple)
   }
 
   struct char_data *vict;
-  char arg[200], arg2[200];
+  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
   two_arguments(argument, arg, arg2);
 
@@ -293,7 +293,7 @@ ACMD(do_grapple)
 ACMD(do_trip)
 {
 
-  char arg[200];
+  char arg[MAX_INPUT_LENGTH];
   struct char_data *vict = NULL;
 
   one_argument(argument, arg);
@@ -801,7 +801,7 @@ ACMD(do_steal)
 
   struct char_data *vict;
   struct obj_data *obj;
-  char arg[500], arg2[500];
+  char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   int gold = 0, prob = char_get_skill(ch, SKILL_SLEIGHT_OF_HAND), perc = 0, eq_pos;
 
   two_arguments(argument, arg, arg2);

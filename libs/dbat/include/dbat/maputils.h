@@ -13,3 +13,4 @@ typedef struct mapstruct MapStruct;
 void printmap(int rnum, struct char_data *ch, int type, int vnum);
 
 extern room_vnum mapnums[MAP_ROWS + 1][MAP_COLS + 1];
+void update_space(void);

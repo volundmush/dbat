@@ -30,3 +30,4 @@ int is_number(const char *str);
 int fill_word(char *argument);
 char *fname(const char *namelist);
 int reserved_word(char *argument);
+void search_replace(char *string, const char *find, const char *replace);

@@ -300,33 +300,33 @@ ACMD(do_score)
       char model[100], version[100];
       int absorb = 0;
       if (char_plr_flagged(ch, PLR_ABSORB)) {
-        sprintf(model, "@CAbsorption");
+        snprintf(model, sizeof(model), "@CAbsorption");
       } else if (char_plr_flagged(ch, PLR_REPAIR)) {
-        sprintf(model, "@GSelf Repairing");
+        snprintf(model, sizeof(model), "@GSelf Repairing");
       } else if (char_plr_flagged(ch, PLR_SENSEM)) {
-        sprintf(model, "@RSensor Equiped");
+        snprintf(model, sizeof(model), "@RSensor Equiped");
       }
       if (char_plr_flagged(ch, PLR_TRANS1)) {
-        sprintf(version, "Beta 1.0");
+        snprintf(version, sizeof(version), "Beta 1.0");
       } else if (char_plr_flagged(ch, PLR_TRANS2)) {
-        sprintf(version, "ANS 2.0");
+        snprintf(version, sizeof(version), "ANS 2.0");
       } else if (char_plr_flagged(ch, PLR_TRANS3)) {
-        sprintf(version, "ANS 3.0");
+        snprintf(version, sizeof(version), "ANS 3.0");
       } else if (char_plr_flagged(ch, PLR_TRANS4)) {
-        sprintf(version, "ANS 4.0");
+        snprintf(version, sizeof(version), "ANS 4.0");
       } else if (char_plr_flagged(ch, PLR_TRANS5)) {
-        sprintf(version, "ANS 5.0");
+        snprintf(version, sizeof(version), "ANS 5.0");
       } else if (char_plr_flagged(ch, PLR_TRANS6)) {
-        sprintf(version, "ANS 6.0");
+        snprintf(version, sizeof(version), "ANS 6.0");
       } else {
-        sprintf(version, "Alpha 0.5");
+        snprintf(version, sizeof(version), "Alpha 0.5");
       }
       send_to_char(ch, "  @D| @CModel@D: %15s@D,    @CUGP@D: @G%15s@D,  @CVersion@D: @r%-12s@D|@n\n", model, absorb > 0 ? "@RN/A" : add_commas(char_get_upgrade(ch)), version);
     }
     send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", char_true_race_name(ch), char_sensei_name(ch), char_sensei_style(ch));
     char hei[300], wei[300];
-    sprintf(hei, "%dcm", get_measure(ch, char_get_pc_height(ch), 0));
-    sprintf(wei, "%dkg", get_measure(ch, 0, char_get_pc_weight(ch)));
+    snprintf(hei, sizeof(hei), "%dcm", get_measure(ch, char_get_pc_height(ch), 0));
+    snprintf(wei, sizeof(wei), "%dkg", get_measure(ch, 0, char_get_pc_weight(ch)));
     send_to_char(ch, "  @D|   @CAge@D: @W%10s@D,  @CHeight@D: @W%15s@D,  @CWeight@D: @W%-17s@D|@n\n", add_commas(char_get_age_years(ch)), hei, wei);
     send_to_char(ch, "  @D|@CGender@D: @W%10s@D,  @C  Size@D: @W%15s@D,  @C Align@D: @W%-17s@D|@n\n", genders[(int)char_get_sex(ch)], size_names[get_size(ch)], disp_align(ch));
   }

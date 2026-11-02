@@ -10,6 +10,7 @@
 #include "dbat/broadcast.h"
 #include "dbat/dg_olc.h"
 #include "dbat/act.wizard.h"
+#include "dbat/maputils.h"
 #include "dbat/utils.h"
 #include "dbat/interpreter.h"
 #include "dbat/comm.h"

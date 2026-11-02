@@ -271,7 +271,7 @@ ACMD(do_telepathy)
 ACMD(do_eavesdrop)
 {
   int dir;
-  char buf[100];
+  char buf[MAX_INPUT_LENGTH];
   one_argument(argument, buf);
 
   if (char_get_listenroom(ch) > 0) {
@@ -294,7 +294,7 @@ ACMD(do_eavesdrop)
   }
   if (char_get_exit(ch, dir)) {
     if (IS_SET(char_get_exit(ch, dir)->exit_info, EX_CLOSED) && char_get_exit(ch, dir)->keyword) {
-      sprintf(buf, "The %s is closed.\r\n", fname(char_get_exit(ch, dir)->keyword));
+      snprintf(buf, sizeof(buf), "The %s is closed.\r\n", fname(char_get_exit(ch, dir)->keyword));
       send_to_char(ch, "%s", buf);
     } else {
       char_set_listenroom(ch, rroom_get_vnum(char_get_exit(ch, dir)->to_room));
@@ -434,10 +434,10 @@ ACMD(do_snet)
       global = TRUE;
     }
     if (char_get_voice(ch) != NULL) {
-      sprintf(voice, "%s", char_get_voice(ch));
+      snprintf(voice, sizeof(voice), "%s", char_get_voice(ch));
     }
     if (char_get_voice(ch) == NULL) {
-      sprintf(voice, "A generic voice");
+      snprintf(voice, sizeof(voice), "A generic voice");
     }
     for (i = descriptor_list; i; i = i->next) {
       if (desc_get_connected(i) != CON_PLAYING) {
@@ -487,7 +487,7 @@ ACMD(do_snet)
         else if (global == TRUE && call <= -1 && char_get_admlevel(i->character) < 1) {
           send_to_char(i->character, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg2));
           *hist = '\0';
-          sprintf(hist, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg2));
+          snprintf(hist, sizeof(hist), "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", obj_get_scoutfreq(obj), CAP(arg2));
           add_history(i->character, hist, HIST_SNET);
           if (has_scanner(i->character)) {
             char *blah = sense_location(ch);
@@ -498,7 +498,7 @@ ACMD(do_snet)
         } else if (call > -1 && char_get_id(i->character) == call) {
           send_to_char(i->character, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", char_get_id(ch), !*arg2 ? "" : CAP(arg2));
           *hist = '\0';
-          sprintf(hist, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", char_get_id(ch), !*arg2 ? "" : CAP(arg2));
+          snprintf(hist, sizeof(hist), "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", char_get_id(ch), !*arg2 ? "" : CAP(arg2));
           add_history(i->character, hist, HIST_SNET);
           if (has_scanner(i->character)) {
             char *blah = sense_location(ch);
@@ -524,7 +524,7 @@ ACMD(do_snet)
         snprintf(hist, sizeof(hist), "@CYou @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", obj_get_scoutfreq(obj), arg, !*arg2 ? "" : arg2);
         add_history(ch, hist, HIST_SNET);
         char over[MAX_STRING_LENGTH];
-        sprintf(over, "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg), !*arg2 ? "" : arg2);
+        snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg), !*arg2 ? "" : arg2);
         act(over, TRUE, ch, 0, 0, TO_ROOM);
         if (rroom_flagged(char_get_in_room(ch), ROOM_RHELL) || rroom_flagged(char_get_in_room(ch), ROOM_AL)) {
           send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
@@ -534,10 +534,10 @@ ACMD(do_snet)
         reveal_hiding(ch, 3);
         send_to_char(ch, "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", obj_get_scoutfreq(obj), !*arg2 ? "" : CAP(arg2));
         *hist = '\0';
-        sprintf(hist, "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", obj_get_scoutfreq(obj), !*arg2 ? "" : CAP(arg2));
+        snprintf(hist, sizeof(hist), "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", obj_get_scoutfreq(obj), !*arg2 ? "" : CAP(arg2));
         add_history(ch, hist, HIST_SNET);
         char over[MAX_STRING_LENGTH];
-        sprintf(over, "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
+        snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
         act(over, TRUE, ch, 0, 0, TO_ROOM);
         if (rroom_flagged(char_get_in_room(ch), ROOM_RHELL) || rroom_flagged(char_get_in_room(ch), ROOM_AL)) {
           send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
@@ -547,10 +547,10 @@ ACMD(do_snet)
       reveal_hiding(ch, 3);
       send_to_char(ch, "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, !*arg2 ? "" : CAP(arg2));
       *hist = '\0';
-      sprintf(hist, "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, !*arg2 ? "" : CAP(arg2));
+      snprintf(hist, sizeof(hist), "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, !*arg2 ? "" : CAP(arg2));
       add_history(ch, hist, HIST_SNET);
       char over[MAX_STRING_LENGTH];
-      sprintf(over, "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
+      snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
       act(over, TRUE, ch, 0, 0, TO_ROOM);
       if (reached == FALSE) {
         send_to_char(ch, "@mThe transmission didn't reach them.@n\r\n");
@@ -602,10 +602,10 @@ ACMD(do_scouter)
 
           switch (dir) {
             case BFS_ERROR:
-              sprintf(pathway, "@rERROR");
+              snprintf(pathway, sizeof(pathway), "@rERROR");
               break;
             case BFS_ALREADY_THERE:
-              sprintf(pathway, "@RHERE");
+              snprintf(pathway, sizeof(pathway), "@RHERE");
               break;
             case BFS_NO_PATH:
               send_to_char(ch, "@MUNKNOWN");

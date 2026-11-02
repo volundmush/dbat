@@ -204,7 +204,7 @@ ACMD(do_not_here)
 
 ACMD(do_practice)
 {
-  char arg[200];
+  char arg[MAX_INPUT_LENGTH];
 
   /* if (IS_NPC(ch))
     return; */
@@ -220,7 +220,7 @@ ACMD(do_practice)
 
 ACMD(do_skills)
 {
-  char arg[1000];
+  char arg[MAX_INPUT_LENGTH];
   one_argument(argument, arg);
   if (char_is_npc(ch)) {
     return;
@@ -1040,7 +1040,7 @@ ACMD(do_file)
       req_lines = 0,
       i;
   int l;
-  char field[100], value[100], line[READ_SIZE];
+  char field[MAX_INPUT_LENGTH], value[MAX_INPUT_LENGTH], line[READ_SIZE];
   char buf[MAX_STRING_LENGTH];
 
   struct file_struct {
@@ -1073,7 +1073,7 @@ ACMD(do_file)
     strcpy(buf, "USAGE: file <option> <num lines>\r\n\r\nFile options:\r\n");
     for (i = 1; fields[i].level; i++)
       if (fields[i].level <= char_get_level(ch))
-        sprintf(buf + strlen(buf), "%-15s%s\r\n", fields[i].cmd, fields[i].file);
+        snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%-15s%s\r\n", fields[i].cmd, fields[i].file);
     send_to_char(ch, "%s", buf);
     return;
   }
@@ -1125,7 +1125,7 @@ ACMD(do_file)
   while (!feof(req_file)) {
     cur_line++;
     if (cur_line > (num_lines - req_lines))
-      sprintf(buf + strlen(buf), "%s\r\n", line);
+      snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s\r\n", line);
 
     get_line(req_file, line);
   }

@@ -180,12 +180,12 @@ ACMD(do_osay)
     char buf[MAX_INPUT_LENGTH];
     char buf2[MAX_INPUT_LENGTH];
 
-    sprintf(buf, "@WYou @D[@mOSAY@D] @W'@w%s@W'@n", argument);
+    snprintf(buf, sizeof(buf), "@WYou @D[@mOSAY@D] @W'@w%s@W'@n", argument);
     if (!char_prf_flagged(ch, PRF_HIDE)) {
-      sprintf(buf2, "@W%s @D[@mOSAY@D] @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : ch->desc->user, argument);
+      snprintf(buf2, sizeof(buf2), "@W%s @D[@mOSAY@D] @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), argument);
     }
     if (char_prf_flagged(ch, PRF_HIDE)) {
-      sprintf(buf2, "@WAnonymous @D[@mOSAY@D] @W'@w%s@W'@n", argument);
+      snprintf(buf2, sizeof(buf2), "@WAnonymous @D[@mOSAY@D] @W'@w%s@W'@n", argument);
     }
     act(buf, FALSE, ch, 0, 0, TO_CHAR);
     act(buf2, FALSE, ch, 0, 0, TO_ROOM);
@@ -228,22 +228,22 @@ ACMD(do_say)
     for (tch = world[char_get_in_room(ch)].people; tch; tch = tch->next_in_room) {
       if (tch != ch && tch->desc) {
         char sayto[100];
-        sprintf(sayto, "to %s ", char_get_name(tch));
+        snprintf(sayto, sizeof(sayto), "to %s ", char_get_name(tch));
         if (strstr(argument, sayto)) {
           char saytoo[200];
           *verb = '\0';
-          sprintf(saytoo, "says to @g%s@W", char_get_name(tch));
+          snprintf(saytoo, sizeof(saytoo), "says to @g%s@W", char_get_name(tch));
           search_replace(argument, sayto, "");
           strcpy(verb, saytoo);
           sch = tch;
         } else if (!char_is_npc(tch) && !char_is_npc(ch)) {
           if (readIntro(ch, tch) == 1) {
-            sprintf(sayto, "to %s ", get_i_name(ch, tch));
+            snprintf(sayto, sizeof(sayto), "to %s ", get_i_name(ch, tch));
           }
           if (strstr(argument, sayto)) {
             char saytoo[200];
             *verb = '\0';
-            sprintf(saytoo, "says to @g%s@W", char_get_name(tch));
+            snprintf(saytoo, sizeof(saytoo), "says to @g%s@W", char_get_name(tch));
             search_replace(argument, sayto, "");
             strcpy(verb, saytoo);
             sch = tch;
@@ -266,7 +266,7 @@ ACMD(do_say)
       if (strstr(verb, "says to")) {
         char saytoo[200];
         *verb = '\0';
-        sprintf(saytoo, "say to @g%s@W", char_get_name(sch));
+        snprintf(saytoo, sizeof(saytoo), "say to @g%s@W", char_get_name(sch));
         strcpy(verb, saytoo);
       }
       snprintf(buf, sizeof(buf), "@WYou %s, '@C%s@W'@n\r\n", verb, argument);
@@ -801,11 +801,11 @@ static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg
     send_to_char(vict, "%s", buf2);
     add_history(vict, buf2, HIST_TELL);
   } else if (!char_is_npc(ch) && char_get_admlevel(vict) < 1) {
-    snprintf(buf2, sizeof(buf2), "@Y%s@Y tells you '%s'@n\r\n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : ch->desc->user, buf);
+    snprintf(buf2, sizeof(buf2), "@Y%s@Y tells you '%s'@n\r\n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), buf);
     send_to_char(vict, "%s", buf2);
     add_history(vict, buf2, HIST_TELL);
   } else if (!char_is_npc(ch) && char_get_admlevel(vict) >= 1) {
-    snprintf(buf2, sizeof(buf2), "@Y%s(%s)@Y tells you '%s'@n\r\n", ch->desc->user, char_get_name(ch), buf);
+    snprintf(buf2, sizeof(buf2), "@Y%s(%s)@Y tells you '%s'@n\r\n", char_get_user(ch), char_get_name(ch), buf);
     send_to_char(vict, "%s", buf2);
     add_history(vict, buf2, HIST_TELL);
   } else if (char_is_npc(ch)) {
@@ -817,7 +817,7 @@ static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg
     send_to_char(ch, "%s", CONFIG_OK);
   } else {
     if (!char_is_npc(ch)) {
-      snprintf(buf2, sizeof(buf2), "@YYou tell %s, '%s'@n\r\n", char_get_admlevel(vict) > 0 ? char_get_name(vict) : (vict->desc->user ? vict->desc->user : "ERROR"), arg);
+      snprintf(buf2, sizeof(buf2), "@YYou tell %s, '%s'@n\r\n", char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), arg);
       if (char_get_admlevel(ch) < 5 && char_get_admlevel(vict) < 5 && !char_is_npc(ch) && !char_is_npc(vict)) {
         send_to_imm("@GTELL: @C%s@G tells @c%s, @W'@w%s@W'@n", char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), char_get_admlevel(vict) > 0 ? char_get_name(vict) : char_get_user(vict), arg);
       }
@@ -883,7 +883,7 @@ ACMD(do_tell)
   struct descriptor_data *k;
   int found = FALSE;
   if (!char_is_npc(ch)) {
-    sprintf(buf, "%s", CAP(buf));
+    snprintf(buf, sizeof(buf), "%s", CAP(buf));
     for (k = descriptor_list; k; k = k->next) {
       if (char_is_npc(k->character))
         continue;
@@ -1486,7 +1486,7 @@ ACMD(do_gen_comm)
 
       if (CONFIG_ENABLE_LANGUAGES) {
         garble_text(argument, char_get_skill(i->character, char_get_speaking(ch)), char_get_speaking(ch));
-        snprintf(buf1, sizeof(buf1), "%s%s %ss%s '%s@n'%s", color_on, char_get_admlevel(ch) > 0 ? char_get_name(ch) : ch->desc->user, com_msgs[subcmd][1], char_get_skill(i->character, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", argument, color_on);
+        snprintf(buf1, sizeof(buf1), "%s%s %ss%s '%s@n'%s", color_on, char_get_admlevel(ch) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], char_get_skill(i->character, char_get_speaking(ch)) ? "," : ", in an unfamiliar tongue,", argument, color_on);
       } else if (subcmd == SCMD_SHOUT && char_get_in_room(i->character) != char_get_in_room(ch)) {
         snprintf(buf1, sizeof(buf1), "%s@WSomeone nearby %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], argument, color_on);
       } else if (subcmd == SCMD_SHOUT && char_get_in_room(i->character) == char_get_in_room(ch)) {
@@ -1497,11 +1497,11 @@ ACMD(do_gen_comm)
         } else if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_HIDE) && char_get_admlevel(i->character) < ADMLVL_IMMORT && ch != i->character) {
           snprintf(buf1, sizeof(buf1), "%s@WAnonymous Player %ss@W, '@w%s@W'@n%s", color_on, com_msgs[subcmd][1], argument, color_on);
         } else if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_HIDE) && char_get_admlevel(i->character) >= ADMLVL_IMMORT && ch != i->character) {
-          snprintf(buf1, sizeof(buf1), "%s@W%s(H) %ss@W, '@w%s@W'@n%s", color_on, char_get_admlevel(i->character) > 0 ? char_get_name(ch) : ch->desc->user, com_msgs[subcmd][1], argument, color_on);
+          snprintf(buf1, sizeof(buf1), "%s@W%s(H) %ss@W, '@w%s@W'@n%s", color_on, char_get_admlevel(i->character) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], argument, color_on);
         } else if (char_get_admlevel(i->character) > 0) {
-          snprintf(buf1, sizeof(buf1), "%s@W%s ($n) %ss@W, '@w%s@W'@n%s", color_on, ch->desc->user, com_msgs[subcmd][1], argument, color_on);
+          snprintf(buf1, sizeof(buf1), "%s@W%s ($n) %ss@W, '@w%s@W'@n%s", color_on, char_get_user(ch), com_msgs[subcmd][1], argument, color_on);
         } else {
-          snprintf(buf1, sizeof(buf1), "%s@W%s %ss@W, '@w%s@W'@n%s", color_on, char_get_admlevel(i->character) > 0 ? char_get_name(ch) : ch->desc->user, com_msgs[subcmd][1], argument, color_on);
+          snprintf(buf1, sizeof(buf1), "%s@W%s %ss@W, '@w%s@W'@n%s", color_on, char_get_admlevel(i->character) > 0 ? char_get_name(ch) : char_get_user(ch), com_msgs[subcmd][1], argument, color_on);
         }
       }
 

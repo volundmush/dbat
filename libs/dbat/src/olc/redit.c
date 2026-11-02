@@ -22,6 +22,7 @@
 #include "dbat/handler.h"
 #include "dbat/races.h"
 #include "dbat/act.wizard.h"
+#include "dbat/maputils.h"
 #include "dbat/act.informative.h"
 
 static void redit_disp_menu(struct descriptor_data *d);
