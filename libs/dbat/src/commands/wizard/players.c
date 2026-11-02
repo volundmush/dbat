@@ -84,7 +84,7 @@ static void print_lockout(struct char_data *ch)
   snprintf(buf, sizeof(buf), "@b------------------[ @RLOCKOUT @b]------------------@n\n");
   while (!feof(file)) {
     get_line(file, line);
-    sscanf(line, "%s\n", filler);
+    sscanf(line, "%49s\n", filler);
     if (first != true && strstr(buf, filler) == nullptr) {
       if (count == 0) {
         snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%-23s@D|@n", filler);
@@ -157,7 +157,7 @@ static void lockWrite(struct char_data *ch, char *name)
   }
   while (!feof(file) || count < 498) {
     get_line(file, line);
-    sscanf(line, "%s\n", filler);
+    sscanf(line, "%49s\n", filler);
     names[count] = strdup(filler);
     count++;
     *filler = '\0';
@@ -228,9 +228,9 @@ ACMD(do_reward)
   }
 
   for (k = descriptor_list; k; k = k->next) {
-    if (char_is_npc(k->character))
-      continue;
     if (desc_get_connected(k) != CON_PLAYING)
+      continue;
+    if (char_is_npc(k->character))
       continue;
     if (!strcasecmp(k->user, arg))
       vict = k->character;
@@ -303,9 +303,9 @@ ACMD(do_rbank)
   }
 
   for (k = descriptor_list; k; k = k->next) {
-    if (char_is_npc(k->character))
-      continue;
     if (desc_get_connected(k) != CON_PLAYING)
+      continue;
+    if (char_is_npc(k->character))
       continue;
     if (!strcasecmp(k->user, arg))
       vict = k->character;

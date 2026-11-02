@@ -90,7 +90,7 @@ void build_player_index(void)
     player_table[i].admlevel = ADMLVL_NONE; /* In case they're not in the index yet */
     long long last = 0, played = 0;
 
-    sscanf(line, "%ld %s %d %s %lld %d %d %d %lld", &player_table[i].id, arg2,
+    sscanf(line, "%ld %79s %d %63s %lld %d %d %d %lld", &player_table[i].id, arg2,
            &player_table[i].level, bits, &last, &player_table[i].admlevel, &player_table[i].ship, &player_table[i].shiproom, &played);
     player_table[i].last   = last;
     player_table[i].played = played;
@@ -389,13 +389,13 @@ int load_char(const char *name, struct char_data *ch)
         case 'A':
           if (!strcmp(tag, "Ac  ")) char_set_armor(ch, atoi(line));
           else if (!strcmp(tag, "Act ")) {
-            sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
+            sscanf(line, "%127s %127s %127s %127s", f1, f2, f3, f4);
             char_get_act(ch)[0] = asciiflag_conv(f1);
             char_get_act(ch)[1] = asciiflag_conv(f2);
             char_get_act(ch)[2] = asciiflag_conv(f3);
             char_get_act(ch)[3] = asciiflag_conv(f4);
           } else if (!strcmp(tag, "Aff ")) {
-            sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
+            sscanf(line, "%127s %127s %127s %127s", f1, f2, f3, f4);
             char_get_affected_by(ch)[0] = asciiflag_conv(f1);
             char_get_affected_by(ch)[1] = asciiflag_conv(f2);
             char_get_affected_by(ch)[2] = asciiflag_conv(f3);
@@ -405,7 +405,7 @@ int load_char(const char *name, struct char_data *ch)
           else if (!strcmp(tag, "AdmL")) char_set_admlevel(ch, atoi(line));
           else if (!strcmp(tag, "Abso")) char_set_absorbs(ch, atoi(line));
           else if (!strcmp(tag, "AdmF")) {
-            sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
+            sscanf(line, "%127s %127s %127s %127s", f1, f2, f3, f4);
             char_get_admflags(ch)[0] = asciiflag_conv(f1);
             char_get_admflags(ch)[1] = asciiflag_conv(f2);
             char_get_admflags(ch)[2] = asciiflag_conv(f3);
@@ -439,7 +439,7 @@ int load_char(const char *name, struct char_data *ch)
             ;
           else if (!strcmp(tag, "Clas")) ch->chclass = atoi(line);
           else if (!strcmp(tag, "Colr")) {
-            sscanf(line, "%d %s", &num, buf2);
+            sscanf(line, "%d %127s", &num, buf2);
             ch->player_specials->color_choices[num] = strdup(buf2);
           } else if (!strcmp(tag, "Con ")) ch->real_abils.con = atoi(line);
           else if (!strcmp(tag, "Cool")) char_set_con_cooldown(ch, atoi(line));
@@ -558,7 +558,7 @@ int load_char(const char *name, struct char_data *ch)
           else if (!strcmp(tag, "Posi")) char_set_position(ch, atoi(line));
           else if (!strcmp(tag, "PwrA")) char_set_powerattack(ch, atoi(line));
           else if (!strcmp(tag, "Pref")) {
-            sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
+            sscanf(line, "%127s %127s %127s %127s", f1, f2, f3, f4);
             char_get_pref(ch)
                 [0] = asciiflag_conv(f1);
             char_get_pref(ch)

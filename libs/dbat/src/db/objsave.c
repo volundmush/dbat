@@ -691,6 +691,7 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
     /* first, we get the number. Not too hard. */
     if (*line == '#') {
       if (sscanf(line, "#%d", &nr) != 1) {
+        get_line(fl, line); /* skip it, or the loop never moves on */
         continue;
       }
       /* we have the number, check it, load obj. */
@@ -698,11 +699,10 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
         temp              = create_obj();
         temp->item_number = NOTHING;
         obj_set_size(temp, SIZE_MEDIUM);
-      } else if (nr < 0) {
+      } else if (nr < 0 || nr >= 999999) {
+        get_line(fl, line); /* skip it, or the loop never moves on */
         continue;
       } else {
-        if (nr >= 999999)
-          continue;
         temp = read_object(nr, VIRTUAL);
         if (!temp) {
           get_line(fl, line);

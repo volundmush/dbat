@@ -26,11 +26,12 @@ void news_string_cleanup(struct descriptor_data *d, int terminator)
 
   switch (terminator) {
     case STRINGADD_SAVE:
-      if (!(fl = fopen(storage, "a")))
-        mudlog(LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '%s'.", storage);
       if (!*d->str)
         mudlog(LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '%s'.", storage);
-      else {
+      else if (!(fl = fopen(storage, "a"))) {
+        mudlog(LOG_CMP, ADMLVL_IMPL, true, "SYSERR: Can't write file '%s'.", storage);
+        write_to_output(d, "The news file couldn't be opened; your entry was not saved.\r\n");
+      } else {
         char *tmstr;
         time_t mytime                = time(0);
         tmstr                        = (char *)asctime(localtime(&mytime));
@@ -41,6 +42,7 @@ void news_string_cleanup(struct descriptor_data *d, int terminator)
         d->newsbuf = nullptr;
         strip_cr(*d->str);
         fprintf(fl, "%s\n", *d->str);
+        free(*d->str);
         *d->str = nullptr;
         fclose(fl);
 

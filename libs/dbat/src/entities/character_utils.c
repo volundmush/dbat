@@ -3854,7 +3854,7 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict)
 
   while (!feof(fl)) {
     get_line(fl, line);
-    sscanf(line, "%s %s\n", filler, scrap);
+    sscanf(line, "%49s %99s\n", filler, scrap);
     if (!strcasecmp(char_get_name(vict), filler)) {
       snprintf(name, sizeof(name), "%s", scrap);
       known = true;

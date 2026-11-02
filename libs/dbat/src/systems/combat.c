@@ -1621,11 +1621,12 @@ void huge_update()
 {
   int dge = 0, skill = 0, bonus = 1, count = 0;
   int64_t dmg = 0;
-  struct obj_data *k;
+  struct obj_data *k, *next_k;
   struct char_data *ch, *vict, *next_v;
 
   /* Checking the object list for any huge ki attacks */
-  for (k = object_list; k; k = k->next) {
+  for (k = object_list; k; k = next_k) {
+    next_k = k->next; /* k may be extracted below */
     if (obj_get_aucter(k) > 0 && obj_get_aucTime(k) + 604800 <= time(0)) {
       if (obj_get_in_room(k) && rroom_get_vnum(obj_get_in_room(k)) == 80) {
         room_vnum inroom = obj_get_in_room(k);

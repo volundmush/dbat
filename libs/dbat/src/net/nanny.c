@@ -445,7 +445,7 @@ static void payout(int num)
     LASTPAYTYPE = num;
   }
   for (k = descriptor_list; k; k = k->next) {
-    if (char_get_admlevel(k->character) <= 0 && desc_is_playing(k) && char_get_rewtime(k->character) < LASTPAYOUT) {
+    if (desc_is_playing(k) && char_get_admlevel(k->character) <= 0 && char_get_rewtime(k->character) < LASTPAYOUT) {
       if (num == 0) {
         k->rpp += 1;
         char_set_rp(k->character, k->rpp);
@@ -650,18 +650,12 @@ static void state_get_user(struct descriptor_data *d, char *arg)
     write_to_output(d, "Invalid name. Username?\r\n");
     return;
   }
-  if (strstr(arg, " ")) {
-    write_to_output(d, "No spaces. Username?\r\n");
-    return;
-  }
-  if (strstr(arg, "1") || strstr(arg, "2") || strstr(arg, "3") || strstr(arg, "4") || strstr(arg, "5") || strstr(arg, "6") || strstr(arg, "7") || strstr(arg, "8") || strstr(arg, "9") || strstr(arg, "0")) {
-    write_to_output(d, "No numbers. Username?\r\n");
-    return;
-  }
-  if (strstr(arg, ".") || strstr(arg, ",") || strstr(arg, "!") || strstr(arg, "?") || strstr(arg, ";") || strstr(arg, ":") || strstr(arg, "'")) {
-    write_to_output(d, "No punctuation. Username?\r\n");
-    return;
-  }
+  /* the name becomes a file name under data/user, so letters only */
+  for (const char *p = arg; *p; p++)
+    if (!isalpha((unsigned char)*p)) {
+      write_to_output(d, "Letters only: no spaces, numbers or punctuation. Username?\r\n");
+      return;
+    }
   if (strlen(arg) < 3) {
     write_to_output(d, "Name must at least be 3 characters long, username?\r\n");
     return;

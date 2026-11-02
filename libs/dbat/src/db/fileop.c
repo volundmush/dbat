@@ -181,7 +181,7 @@ void topLoad()
 
   while (!feof(file)) {
     get_line(file, line);
-    sscanf(line, "%s %" SCNd64 "\n", filler, &toppoint[x]);
+    sscanf(line, "%49s %" SCNd64 "\n", filler, &toppoint[x]);
     topname[x] = strdup(filler);
     *filler    = '\0';
     x++;

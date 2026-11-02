@@ -92,9 +92,9 @@ ACMD(do_transobj)
     act("You send $p to everyone in the game.", true, ch, obj, 0, TO_CHAR);
 
     for (d = descriptor_list; d; d = d->next) {
-      if (char_is_npc(d->character))
+      if (!desc_is_playing(d))
         continue;
-      else if (!desc_is_playing(d))
+      if (char_is_npc(d->character))
         continue;
       else if (d->character == ch)
         continue;

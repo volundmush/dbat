@@ -888,9 +888,9 @@ ACMD(do_tell)
   if (!char_is_npc(ch)) {
     snprintf(buf, sizeof(buf), "%s", CAP(buf));
     for (k = descriptor_list; k; k = k->next) {
-      if (char_is_npc(k->character))
-        continue;
       if (desc_get_connected(k) != CON_PLAYING)
+        continue;
+      if (char_is_npc(k->character))
         continue;
       if (k->user == nullptr)
         continue;

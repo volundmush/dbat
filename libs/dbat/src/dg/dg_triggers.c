@@ -253,7 +253,7 @@ void entry_memory_mtrigger(char_data *ch)
 {
   trig_data *t;
   char_data *actor;
-  struct script_memory *mem;
+  struct script_memory *mem, *next_mem;
 
   if (!ch->memory || char_aff_flagged(ch, AFF_CHARM))
     return;
@@ -261,31 +261,36 @@ void entry_memory_mtrigger(char_data *ch)
   for (actor = world[char_get_in_room(ch)].people; actor && ch->memory;
        actor = actor->next_in_room) {
     if (actor != ch && ch->memory) {
-      for (mem = ch->memory; mem && ch->memory; mem = mem->next) {
-        if (char_get_id(actor) == mem->id) {
-          struct script_memory *prev;
-          if (mem->cmd) command_interpreter(ch, mem->cmd);
-          else {
-            for (t = ch->script->trig_list; t; t = t->next) {
-              if (trigger_ready(t, MTRIG_MEMORY) && (rand_number(1, 100) <=
-                                                     t->narg)) {
-                add_char_uid_var(t, "actor", actor, 0);
-                script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
-                break;
-              }
+      for (mem = ch->memory; mem; mem = next_mem) {
+        next_mem = mem->next;
+        if (char_get_id(actor) != mem->id)
+          continue;
+
+        /* unlink it first: the command or trigger below may change ch->memory (mforget) or purge ch */
+        struct script_memory **link = &ch->memory;
+        while (*link != mem) link = &(*link)->next;
+        *link = mem->next;
+
+        if (mem->cmd) command_interpreter(ch, mem->cmd);
+        else {
+          for (t = ch->script->trig_list; t; t = t->next) {
+            if (trigger_ready(t, MTRIG_MEMORY) && (rand_number(1, 100) <=
+                                                   t->narg)) {
+              add_char_uid_var(t, "actor", actor, 0);
+              script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
+              break;
             }
           }
-          /* delete the memory */
-          if (ch->memory == mem) {
-            ch->memory = mem->next;
-          } else {
-            prev = ch->memory;
-            while (prev->next != mem) prev = prev->next;
-            prev->next = mem->next;
-          }
-          if (mem->cmd) free(mem->cmd);
-          free(mem);
         }
+        free(mem->cmd);
+        free(mem);
+        if (!ch || !ch->memory)
+          return;
+
+        /* carry on only if the next memory survived */
+        struct script_memory *p = ch->memory;
+        while (p && p != next_mem) p = p->next;
+        next_mem = p;
       } /* for (mem =..... */
     }
   }

@@ -15,29 +15,8 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
   if (char_is_npc(ch))
     return;
 
-  char fname[40], line[256], prev[256];
-  char buf[MAX_STRING_LENGTH];
+  char fname[40], line[READ_SIZE], prev[READ_SIZE] = "";
   FILE *fl, *file;
-
-  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, ch->desc->user)) {
-    mud_log("ERROR: Custom unable to be saved to user file!");
-    return;
-  }
-
-  if (!(file = fopen(fname, "r"))) {
-    mud_log("ERROR: Custom unable to be saved to user file!");
-    return;
-  }
-
-  while (!feof(file)) {
-    get_line(file, line);
-    if (strcasecmp(prev, line))
-      sprintf(buf + strlen(buf), "%s\n", line);
-    *prev = '\0';
-    sprintf(prev, "%s", line);
-  }
-
-  fclose(file);
 
   if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, ch->desc->user)) {
     mud_log("ERROR: Custom unable to be saved to user file!");
@@ -49,8 +28,17 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
     return;
   }
 
-  sprintf(buf + strlen(buf), "%s\n", obj->short_description);
-  fprintf(fl, "%s\n", buf);
+  /* copy the existing list (if there is one yet), dropping repeated lines, then add the new item */
+  if ((file = fopen(fname, "r"))) {
+    while (get_line(file, line)) {
+      if (strcasecmp(prev, line))
+        fprintf(fl, "%s\n", line);
+      strlcpy(prev, line, sizeof(prev));
+    }
+    fclose(file);
+  }
+
+  fprintf(fl, "%s\n\n", obj->short_description);
 
   atomic_commit(&af);
 }

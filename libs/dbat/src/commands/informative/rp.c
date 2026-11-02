@@ -509,8 +509,9 @@ ACMD(do_nickname)
       char nick[MAX_INPUT_LENGTH];
       snprintf(nick, sizeof(nick), "%s", CAP(arg2));
       ship2->action_description = strdup(nick);
-      struct obj_data *k;
-      for (k = object_list; k; k = k->next) {
+      struct obj_data *k, *next_k;
+      for (k = object_list; k; k = next_k) {
+        next_k = k->next;
         if (obj_get_vnum(k) == obj_get_vnum(ship2) + 1000) {
           extract_obj(k);
           room_vnum was_in = rroom_get_vnum(obj_get_in_room(ship2));
@@ -518,7 +519,8 @@ ACMD(do_nickname)
           obj_to_room(ship2, real_room(was_in));
         }
       }
-    }
+    } else
+      send_to_char(ch, "There's no ship here to nickname.\r\n");
     return;
   }
 
@@ -594,7 +596,7 @@ void introCreate(struct char_data *ch)
 
 int readIntro(struct char_data *ch, struct char_data *vict)
 {
-  char fname[40], filler[50], scrap[100], line[256];
+  char fname[40], filler[50], line[256];
   int known = false;
   FILE *fl;
 
@@ -618,10 +620,8 @@ int readIntro(struct char_data *ch, struct char_data *vict)
     return 0;
   }
 
-  while (!feof(fl)) {
-    get_line(fl, line);
-    sscanf(line, "%s %s\n", filler, scrap);
-    if (!strcasecmp(char_get_name(vict), filler)) {
+  while (get_line(fl, line)) {
+    if (sscanf(line, "%49s", filler) == 1 && !strcasecmp(char_get_name(vict), filler)) {
       known = true;
     }
   }
@@ -649,14 +649,14 @@ static void introWrite(struct char_data *ch, struct char_data *vict, char *name)
   if (!(file = fopen(fname, "r"))) {
     return;
   }
-  while (!feof(file) || count < 498) {
-    get_line(file, line);
-    sscanf(line, "%s %s\n", filler, scrap);
+  /* one slot is kept free for the new introduction written below */
+  while (count < 499 && get_line(file, line)) {
+    *filler = *scrap = '\0';
+    if (sscanf(line, "%49s %99s", filler, scrap) < 1)
+      continue;
     names[count] = strdup(filler);
     alias[count] = strdup(scrap);
     count++;
-    *filler = '\0';
-    *scrap  = '\0';
   }
   fclose(file);
 
@@ -793,9 +793,9 @@ ACMD(do_rptrans)
   }
 
   for (k = descriptor_list; k; k = k->next) {
-    if (char_is_npc(k->character))
-      continue;
     if (desc_get_connected(k) != CON_PLAYING)
+      continue;
+    if (char_is_npc(k->character))
       continue;
     if (!strcasecmp(k->user, arg))
       vict = k->character;
@@ -885,9 +885,9 @@ ACMD(do_rbanktrans)
   }
 
   for (k = descriptor_list; k; k = k->next) {
-    if (char_is_npc(k->character))
-      continue;
     if (desc_get_connected(k) != CON_PLAYING)
+      continue;
+    if (char_is_npc(k->character))
       continue;
     if (!strcasecmp(k->user, arg))
       vict = k->character;

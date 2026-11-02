@@ -1418,7 +1418,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr)
     exit(1);
   }
 
-  if (((retval = sscanf(line, " %d %s %s %s %s %d ", t, flags, flags2, flags3, flags4, t + 2)) == 3) && (bitwarning == true)) {
+  if (((retval = sscanf(line, " %d %127s %127s %127s %127s %d ", t, flags, flags2, flags3, flags4, t + 2)) == 3) && (bitwarning == true)) {
     mud_log("WARNING: Conventional worldfiles detected. Please read 128bit.readme.");
     exit(1);
   } else if ((retval == 3) && (bitwarning == false)) {
@@ -2097,7 +2097,7 @@ static bool parse_mobile_from_file(FILE *mob_f, struct char_data *ch)
     return false;
   }
 
-  if (((retval = sscanf(line, "%s %s %s %s %s %s %s %s %d %c", f1, f2, f3, f4, f5, f6, f7, f8, t + 2, &letter)) == 10) && (bitwarning == true)) {
+  if (((retval = sscanf(line, "%127s %127s %127s %127s %127s %127s %127s %127s %d %c", f1, f2, f3, f4, f5, f6, f7, f8, t + 2, &letter)) == 10) && (bitwarning == true)) {
     /* Let's make the implementor read some, before converting his worldfiles */
     mud_log("WARNING: Conventional mobilefiles detected. Please read 128bit.readme.");
     return false;

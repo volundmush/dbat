@@ -252,8 +252,7 @@ void init_game(uint16_t cmport)
 
   for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
     for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
-      fscanf(mapfile, "%d", &vnum_read);
-      mapnums[rowcounter][colcounter] = real_room(vnum_read);
+      mapnums[rowcounter][colcounter] = fscanf(mapfile, "%d", &vnum_read) == 1 ? real_room(vnum_read) : NOWHERE;
     }
   }
 

@@ -14,7 +14,7 @@
 #include "dbat/db.h"
 #include "dbat/vehicles.h"
 
-room_vnum mapnums[MAP_ROWS + 1][MAP_COLS + 1];
+room_rnum mapnums[MAP_ROWS + 1][MAP_COLS + 1];
 
 static void ping_ship(obj_vnum vnum, obj_vnum vnum2)
 {
@@ -416,8 +416,7 @@ void update_space(void)
 
   for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
     for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
-      fscanf(mapfile, "%d", &vnum_read);
-      mapnums[rowcounter][colcounter] = real_room(vnum_read);
+      mapnums[rowcounter][colcounter] = fscanf(mapfile, "%d", &vnum_read) == 1 ? real_room(vnum_read) : NOWHERE;
     }
   }
 

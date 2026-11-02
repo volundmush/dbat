@@ -321,7 +321,7 @@ void dg_obj_trigger(char *line, struct obj_data *obj)
   int count;
   struct trig_proto_list *trg_proto, *new_trg;
 
-  count = sscanf(line, "%s %d", junk, &vnum);
+  count = sscanf(line, "%7s %d", junk, &vnum);
 
   if (count != 2) {
     mudlog(LOG_BRF, ADMLVL_BUILDER, true,

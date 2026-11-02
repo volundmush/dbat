@@ -1224,7 +1224,7 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
   snprintf(buf2, sizeof(buf2), "beginning of GM file %s", filename);
 
   buf = fread_string(gm_f, buf2);
-  while (!done) {
+  while (!done && buf) {
     if (*buf == '#') { /* New Trainer */
       sscanf(buf, "#%d\n", &temp);
       snprintf(buf2, sizeof(buf2), "GM #%d in GM file %s", temp, filename);
@@ -1300,6 +1300,7 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
       if (*buf == '$') /* EOF */
         done = true;
       free(buf); /* Plug memory leak! */
+      buf = done ? nullptr : fread_string(gm_f, buf2);
     }
   }
 }
