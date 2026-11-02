@@ -37,16 +37,15 @@ static struct bfs_queue_struct *bfs_queue_head = 0, *bfs_queue_tail = 0;
 #define MARK(room)      (rroom_set_flag(room, ROOM_BFS_MARK, true))
 #define UNMARK(room)    (rroom_set_flag(room, ROOM_BFS_MARK, false))
 #define IS_MARKED(room) (rroom_flagged(room, ROOM_BFS_MARK))
-#define TOROOM(x, y)    (world[(x)].dir_option[(y)]->to_room)
 #define IS_CLOSED(x, y) (room_exit_flagged(world[(x)].dir_option[(y)], EX_CLOSED))
 
 static bool VALID_EDGE(room_rnum x, int y)
 {
-  if (world[x].dir_option[y] == nullptr || TOROOM(x, y) == NOWHERE)
+  if (world[x].dir_option[y] == nullptr || rroom_get_exit_to_room(x, y) == NOWHERE)
     return false;
   if (CONFIG_TRACK_T_DOORS == false && IS_CLOSED(x, y))
     return false;
-  if (rroom_flagged(TOROOM(x, y), ROOM_NOTRACK) || IS_MARKED(TOROOM(x, y)))
+  if (rroom_flagged(rroom_get_exit_to_room(x, y), ROOM_NOTRACK) || IS_MARKED(rroom_get_exit_to_room(x, y)))
     return false;
 
   return true;
@@ -111,8 +110,8 @@ int find_first_step(room_rnum src, room_rnum target)
   /* first, enqueue the first steps, saving which direction we're going. */
   for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++) {
     if (VALID_EDGE(src, curr_dir)) {
-      MARK(TOROOM(src, curr_dir));
-      bfs_enqueue(TOROOM(src, curr_dir), curr_dir);
+      MARK(rroom_get_exit_to_room(src, curr_dir));
+      bfs_enqueue(rroom_get_exit_to_room(src, curr_dir), curr_dir);
     }
   }
   /* now, do the classic BFS. */
@@ -124,8 +123,8 @@ int find_first_step(room_rnum src, room_rnum target)
     }
     for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++)
       if (VALID_EDGE(bfs_queue_head->room, curr_dir)) {
-        MARK(TOROOM(bfs_queue_head->room, curr_dir));
-        bfs_enqueue(TOROOM(bfs_queue_head->room, curr_dir), bfs_queue_head->dir);
+        MARK(rroom_get_exit_to_room(bfs_queue_head->room, curr_dir));
+        bfs_enqueue(rroom_get_exit_to_room(bfs_queue_head->room, curr_dir), bfs_queue_head->dir);
       }
     bfs_dequeue();
   }

@@ -479,7 +479,7 @@ static void catch_fish(struct char_data *ch, int quality)
   obj_set_value(pole, 0, 0);
   obj_to_room(fish, char_get_in_room(ch));
   do_get(ch, (char[]){"fish"}, 0, 0);
-  send_to_char(ch, "@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", obj_get_weight(fish));
+  send_to_char(ch, "@D[@cFish Weight@D: @G%" PRId64 "@D]@n\r\n", obj_get_weight(fish));
   char_plr_set(ch, PLR_FISHING, false);
   char_set_accuracy_mod(ch, 0);
   char_set_fishstate(ch, FISH_NOFISH);

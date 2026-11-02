@@ -42,8 +42,6 @@ constexpr int SL_MAX = SL_GLD;
 constexpr int SL_ACT = SL_MAX + 1; /* must be above MAX */
 constexpr int SL_HLP = SL_MAX + 2; /* must be above MAX */
 
-#define ZCMD(zon, cmds) zone_table[(zon)].cmd[(cmds)]
-
 #define LIMIT(var, low, high) MIN(high, MAX(var, low))
 
 room_vnum genolc_zone_bottom(zone_rnum rznum);

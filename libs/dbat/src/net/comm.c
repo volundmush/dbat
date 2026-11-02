@@ -782,17 +782,17 @@ static char *make_prompt(struct descriptor_data *d)
     if (char_prf_flagged(d->character, PRF_DISPAUTO) && char_get_level(d->character) >= 500 && len < sizeof(prompt)) {
       struct char_data *ch = d->character;
       if (getCurPL(ch) << 2 < getEffMaxPL(ch)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "PL: %" I64T " ", getCurPL(ch));
+        count = snprintf(prompt + len, sizeof(prompt) - len, "PL: %" PRId64 " ", getCurPL(ch));
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
       }
       if ((getCurST(ch)) << 2 < getMaxST(ch) && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "STA: %" I64T " ", (getCurST(ch)));
+        count = snprintf(prompt + len, sizeof(prompt) - len, "STA: %" PRId64 " ", (getCurST(ch)));
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
       }
       if (char_get_ki(ch) << 2 < char_get_max_ki(ch) && len < sizeof(prompt)) {
-        count = snprintf(prompt + len, sizeof(prompt) - len, "KI: %" I64T " ", char_get_ki(ch));
+        count = snprintf(prompt + len, sizeof(prompt) - len, "KI: %" PRId64 " ", char_get_ki(ch));
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
       }
@@ -1105,7 +1105,7 @@ static char *make_prompt(struct descriptor_data *d)
         if (char_prf_flagged(d->character, PRF_DISPERC) && !char_prf_flagged(d->character, PRF_NODEC)) {
           if (char_get_charge(d->character) > 0) {
             int64_t perc = (char_get_charge(d->character) * 100) / getMaxKI(d->character);
-            count        = snprintf(prompt + len, sizeof(prompt) - len, "@D[@BCharge@Y: @C%" I64T "%s@D]@n\n", perc, "%");
+            count        = snprintf(prompt + len, sizeof(prompt) - len, "@D[@BCharge@Y: @C%" PRId64 "%s@D]@n\n", perc, "%");
             if (count >= 0)
               len = MIN(len + count, sizeof(prompt) - 1);
           }
@@ -1113,7 +1113,7 @@ static char *make_prompt(struct descriptor_data *d)
         if (char_prf_flagged(d->character, PRF_NODEC)) {
           if (charge > 0) {
             int64_t perc = (charge * 100) / getMaxKI(d->character);
-            count        = snprintf(prompt + len, sizeof(prompt) - len, "Ki is charged to %" I64T " percent.\n", perc);
+            count        = snprintf(prompt + len, sizeof(prompt) - len, "Ki is charged to %" PRId64 " percent.\n", perc);
             if (count >= 0)
               len = MIN(len + count, sizeof(prompt) - 1);
           }
@@ -1128,7 +1128,7 @@ static char *make_prompt(struct descriptor_data *d)
         if (char_prf_flagged(d->character, PRF_DISPERC) && !char_prf_flagged(d->character, PRF_NODEC)) {
           if (char_get_barrier(d->character) > 0) {
             int64_t perc = (char_get_barrier(d->character) * 100) / getMaxKI(d->character);
-            count        = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GBarrier@Y: @B%" I64T "%s@D]@n\n", perc, "%");
+            count        = snprintf(prompt + len, sizeof(prompt) - len, "@D[@GBarrier@Y: @B%" PRId64 "%s@D]@n\n", perc, "%");
             if (count >= 0)
               len = MIN(len + count, sizeof(prompt) - 1);
           }
@@ -1204,7 +1204,7 @@ static char *make_prompt(struct descriptor_data *d)
         if (char_prf_flagged(d->character, PRF_NODEC)) {
           if (char_get_barrier(d->character) > 0) {
             int64_t perc = (char_get_barrier(d->character) * 100) / getMaxKI(d->character);
-            count        = snprintf(prompt + len, sizeof(prompt) - len, "A barrier charged to %" I64T " percent surrounds you.@n\n", perc);
+            count        = snprintf(prompt + len, sizeof(prompt) - len, "A barrier charged to %" PRId64 " percent surrounds you.@n\n", perc);
             if (count >= 0)
               len = MIN(len + count, sizeof(prompt) - 1);
           }
@@ -2032,7 +2032,7 @@ static int process_output(struct descriptor_data *t)
   } else {
     /* Not all data in buffer sent.  result < output buffersize. */
 
-    strcpy(t->output, t->output + result); /* strcpy: OK (overlap) */
+    memmove(t->output, t->output + result, strlen(t->output + result) + 1); /* overlapping, so not strcpy */
     t->bufptr -= result;
     t->bufspace += result;
   }

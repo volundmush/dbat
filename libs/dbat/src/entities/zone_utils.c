@@ -25,3 +25,8 @@ bool zone_data_toggle_flag(struct zone_data *zone, int flag)
 {
   return (TOGGLE_BIT_AR(zone->zone_flags, flag) & Q_BIT(flag)) != 0;
 }
+
+struct reset_com *zone_get_cmd(zone_rnum zone, int n)
+{
+  return &zone_table[zone].cmd[n];
+}

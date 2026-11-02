@@ -32,28 +32,28 @@ void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_st
   /*
    * Copy basic information over.
    */
-  S_NUM(tshop)          = S_NUM(fshop);
-  S_KEEPER(tshop)       = S_KEEPER(fshop);
-  S_OPEN1(tshop)        = S_OPEN1(fshop);
-  S_CLOSE1(tshop)       = S_CLOSE1(fshop);
-  S_OPEN2(tshop)        = S_OPEN2(fshop);
-  S_CLOSE2(tshop)       = S_CLOSE2(fshop);
-  S_BANK(tshop)         = S_BANK(fshop);
-  S_BROKE_TEMPER(tshop) = S_BROKE_TEMPER(fshop);
-  S_BITVECTOR(tshop)    = S_BITVECTOR(fshop);
+  shop_set_vnum(tshop, shop_get_vnum(fshop));
+  shop_set_keeper(tshop, shop_get_keeper(fshop));
+  shop_set_open1(tshop, shop_get_open1(fshop));
+  shop_set_close1(tshop, shop_get_close1(fshop));
+  shop_set_open2(tshop, shop_get_open2(fshop));
+  shop_set_close2(tshop, shop_get_close2(fshop));
+  shop_set_bank(tshop, shop_get_bank(fshop));
+  shop_set_temper(tshop, shop_get_temper(fshop));
+  shop_set_bitvector(tshop, shop_get_bitvector(fshop));
   for (i = 0; i < SW_ARRAY_MAX; i++)
-    S_NOTRADE(tshop)
-  [i]                 = S_NOTRADE(fshop)[i];
-  S_SORT(tshop)       = S_SORT(fshop);
-  S_BUYPROFIT(tshop)  = S_BUYPROFIT(fshop);
-  S_SELLPROFIT(tshop) = S_SELLPROFIT(fshop);
-  S_FUNC(tshop)       = S_FUNC(fshop);
+    shop_get_with_who(tshop)
+        [i] = shop_get_with_who(fshop)[i];
+  shop_set_lastsort(tshop, shop_get_lastsort(fshop));
+  shop_set_profit_buy(tshop, shop_get_profit_buy(fshop));
+  shop_set_profit_sell(tshop, shop_get_profit_sell(fshop));
+  shop_set_func(tshop, shop_get_func(fshop));
 
   /*
    * Copy lists over.
    */
-  copy_list(&(S_ROOMS(tshop)), S_ROOMS(fshop));
-  copy_list(&(S_PRODUCTS(tshop)), S_PRODUCTS(fshop));
+  copy_list(&(tshop)->in_room, shop_get_rooms(fshop));
+  copy_list(&(tshop)->producing, shop_get_products(fshop));
   copy_type_list(&(tshop->type), fshop->type);
 
   /*
@@ -61,13 +61,13 @@ void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_st
    */
   if (free_old_strings)
     free_shop_strings(tshop);
-  S_NOITEM1(tshop) = str_udup(S_NOITEM1(fshop));
-  S_NOITEM2(tshop) = str_udup(S_NOITEM2(fshop));
-  S_NOCASH1(tshop) = str_udup(S_NOCASH1(fshop));
-  S_NOCASH2(tshop) = str_udup(S_NOCASH2(fshop));
-  S_NOBUY(tshop)   = str_udup(S_NOBUY(fshop));
-  S_BUY(tshop)     = str_udup(S_BUY(fshop));
-  S_SELL(tshop)    = str_udup(S_SELL(fshop));
+  shop_set_no_such_item1(tshop, str_udup(shop_get_no_such_item1(fshop)));
+  shop_set_no_such_item2(tshop, str_udup(shop_get_no_such_item2(fshop)));
+  shop_set_missing_cash1(tshop, str_udup(shop_get_missing_cash1(fshop)));
+  shop_set_missing_cash2(tshop, str_udup(shop_get_missing_cash2(fshop)));
+  shop_set_do_not_buy(tshop, str_udup(shop_get_do_not_buy(fshop)));
+  shop_set_message_buy(tshop, str_udup(shop_get_message_buy(fshop)));
+  shop_set_message_sell(tshop, str_udup(shop_get_message_sell(fshop)));
 }
 
 /*-------------------------------------------------------------------*/
@@ -116,7 +116,7 @@ static void copy_type_list(struct shop_buy_data **tlist, struct shop_buy_data *f
   /*
    * Count number of entries.
    */
-  for (i = 0; BUY_TYPE(flist[i]) != NOTHING; i++);
+  for (i = 0; shop_buy_get_type(&(flist[i])) != NOTHING; i++);
   num_items = i + 1;
 
   /*
@@ -129,8 +129,8 @@ static void copy_type_list(struct shop_buy_data **tlist, struct shop_buy_data *f
    */
   for (i = 0; i < num_items; i++) {
     (*tlist)[i].type = flist[i].type;
-    if (BUY_WORD(flist[i]))
-      BUY_WORD((*tlist)[i]) = strdup(BUY_WORD(flist[i]));
+    if (shop_buy_get_keywords(&(flist[i])))
+      shop_buy_set_keywords(&((*tlist)[i]), strdup(shop_buy_get_keywords(&(flist[i]))));
   }
 }
 
@@ -155,7 +155,7 @@ void remove_from_type_list(struct shop_buy_data **list, int num)
   for (i = 0; i < num_items; i++)
     nlist[i] = (i < num) ? (*list)[i] : (*list)[i + 1];
 
-  free(BUY_WORD((*list)[num]));
+  free(shop_buy_get_keywords(&((*list)[num])));
   free(*list);
   *list = nlist;
 }
@@ -250,33 +250,33 @@ void remove_from_int_list(IDXTYPE **list, IDXTYPE num)
  */
 static void free_shop_strings(struct shop_data *shop)
 {
-  if (S_NOITEM1(shop)) {
-    free(S_NOITEM1(shop));
-    S_NOITEM1(shop) = nullptr;
+  if (shop_get_no_such_item1(shop)) {
+    free(shop_get_no_such_item1(shop));
+    shop_set_no_such_item1(shop, nullptr);
   }
-  if (S_NOITEM2(shop)) {
-    free(S_NOITEM2(shop));
-    S_NOITEM2(shop) = nullptr;
+  if (shop_get_no_such_item2(shop)) {
+    free(shop_get_no_such_item2(shop));
+    shop_set_no_such_item2(shop, nullptr);
   }
-  if (S_NOCASH1(shop)) {
-    free(S_NOCASH1(shop));
-    S_NOCASH1(shop) = nullptr;
+  if (shop_get_missing_cash1(shop)) {
+    free(shop_get_missing_cash1(shop));
+    shop_set_missing_cash1(shop, nullptr);
   }
-  if (S_NOCASH2(shop)) {
-    free(S_NOCASH2(shop));
-    S_NOCASH2(shop) = nullptr;
+  if (shop_get_missing_cash2(shop)) {
+    free(shop_get_missing_cash2(shop));
+    shop_set_missing_cash2(shop, nullptr);
   }
-  if (S_NOBUY(shop)) {
-    free(S_NOBUY(shop));
-    S_NOBUY(shop) = nullptr;
+  if (shop_get_do_not_buy(shop)) {
+    free(shop_get_do_not_buy(shop));
+    shop_set_do_not_buy(shop, nullptr);
   }
-  if (S_BUY(shop)) {
-    free(S_BUY(shop));
-    S_BUY(shop) = nullptr;
+  if (shop_get_message_buy(shop)) {
+    free(shop_get_message_buy(shop));
+    shop_set_message_buy(shop, nullptr);
   }
-  if (S_SELL(shop)) {
-    free(S_SELL(shop));
-    S_SELL(shop) = nullptr;
+  if (shop_get_message_sell(shop)) {
+    free(shop_get_message_sell(shop));
+    shop_set_message_sell(shop, nullptr);
   }
 }
 
@@ -290,8 +290,8 @@ static void free_type_list(struct shop_buy_data **list)
   int i;
 
   for (i = 0; (*list)[i].type != NOTHING; i++)
-    if (BUY_WORD((*list)[i]))
-      free(BUY_WORD((*list)[i]));
+    if (shop_buy_get_keywords(&((*list)[i])))
+      free(shop_buy_get_keywords(&((*list)[i])));
 
   free(*list);
   *list = nullptr;
@@ -305,9 +305,9 @@ static void free_type_list(struct shop_buy_data **list)
 void free_shop(struct shop_data *shop)
 {
   free_shop_strings(shop);
-  free_type_list(&(S_NAMELISTS(shop)));
-  free(S_ROOMS(shop));
-  free(S_PRODUCTS(shop));
+  free_type_list(&(shop)->type);
+  free(shop_get_rooms(shop));
+  free(shop_get_products(shop));
   free(shop);
 }
 
@@ -371,12 +371,12 @@ int add_shop(struct shop_data *nshp)
 {
   shop_rnum rshop;
   int found       = 0;
-  zone_rnum rznum = real_zone_by_thing(S_NUM(nshp));
+  zone_rnum rznum = real_zone_by_thing(shop_get_vnum(nshp));
 
   /*
    * The shop already exists, just update it.
    */
-  if ((rshop = real_shop(S_NUM(nshp))) != NOWHERE) {
+  if ((rshop = real_shop(shop_get_vnum(nshp))) != NOWHERE) {
     /* free old strings. They're not used in any other place -- Welcor */
     copy_shop(&shop_index[rshop], nshp, true);
     if (rznum != NOWHERE)
@@ -390,7 +390,7 @@ int add_shop(struct shop_data *nshp)
   RECREATE(shop_index, struct shop_data, top_shop + 1);
 
   for (rshop = top_shop; rshop > 0; rshop--) {
-    if (nshp->vnum > SHOP_NUM(rshop - 1)) {
+    if (nshp->vnum > rshop_get_vnum(rshop - 1)) {
       found = rshop;
 
       /* Make a "nofree" variant and remove these later. */
@@ -457,8 +457,8 @@ bool save_shops(zone_rnum zone_num)
       /*
        * Save the products.
        */
-      for (j = 0; S_PRODUCT(shop, j) != NOTHING; j++)
-        fprintf(shop_file, "%d\n", obj_index[S_PRODUCT(shop, j)].vnum);
+      for (j = 0; shop_get_product(shop, j) != NOTHING; j++)
+        fprintf(shop_file, "%d\n", obj_index[shop_get_product(shop, j)].vnum);
       fprintf(shop_file, "-1\n");
 
       /*
@@ -466,21 +466,21 @@ bool save_shops(zone_rnum zone_num)
        */
       fprintf(shop_file, "%1.2f\n"
                          "%1.2f\n",
-              S_BUYPROFIT(shop),
-              S_SELLPROFIT(shop));
+              shop_get_profit_buy(shop),
+              shop_get_profit_sell(shop));
 
       /*
        * Save the buy types and namelists.
        */
-      for (j = 0; S_BUYTYPE(shop, j) != NOTHING; j++)
+      for (j = 0; shop_get_buy_type(shop, j) != NOTHING; j++)
         fprintf(shop_file, "%d%s\n",
-                S_BUYTYPE(shop, j),
-                S_BUYWORD(shop, j) ? S_BUYWORD(shop, j) : "");
+                shop_get_buy_type(shop, j),
+                shop_get_buy_word(shop, j) ? shop_get_buy_word(shop, j) : "");
       fprintf(shop_file, "-1\n");
 
       /* Not allowed to use Ascii in shopfile anymore (bpl21)
-      sprintascii(buf1, S_BITVECTOR(shop));
-      sprintascii(buf2, S_NOTRADE(shop));
+      sprintascii(buf1, shop_get_bitvector(shop));
+      sprintascii(buf2, shop_get_with_who(shop));
 */
 
       /*
@@ -498,32 +498,32 @@ bool save_shops(zone_rnum zone_num)
               "%d\n"
               "%d\n"
               "%d\n",
-              S_NOITEM1(shop) ? S_NOITEM1(shop) : "%s Ke?!",
-              S_NOITEM2(shop) ? S_NOITEM2(shop) : "%s Ke?!",
-              S_NOBUY(shop) ? S_NOBUY(shop) : "%s Ke?!",
-              S_NOCASH1(shop) ? S_NOCASH1(shop) : "%s Ke?!",
-              S_NOCASH2(shop) ? S_NOCASH2(shop) : "%s Ke?!",
-              S_BUY(shop) ? S_BUY(shop) : "%s Ke?! %d?",
-              S_SELL(shop) ? S_SELL(shop) : "%s Ke?! %d?",
-              S_BROKE_TEMPER(shop),
-              S_BITVECTOR(shop),
-              S_KEEPER(shop) == NOBODY ? -1 : mob_index[S_KEEPER(shop)].vnum);
+              shop_get_no_such_item1(shop) ? shop_get_no_such_item1(shop) : "%s Ke?!",
+              shop_get_no_such_item2(shop) ? shop_get_no_such_item2(shop) : "%s Ke?!",
+              shop_get_do_not_buy(shop) ? shop_get_do_not_buy(shop) : "%s Ke?!",
+              shop_get_missing_cash1(shop) ? shop_get_missing_cash1(shop) : "%s Ke?!",
+              shop_get_missing_cash2(shop) ? shop_get_missing_cash2(shop) : "%s Ke?!",
+              shop_get_message_buy(shop) ? shop_get_message_buy(shop) : "%s Ke?! %d?",
+              shop_get_message_sell(shop) ? shop_get_message_sell(shop) : "%s Ke?! %d?",
+              shop_get_temper(shop),
+              shop_get_bitvector(shop),
+              shop_get_keeper(shop) == NOBODY ? -1 : mob_index[shop_get_keeper(shop)].vnum);
       for (j = 0; j < SW_ARRAY_MAX; j++)
-        fprintf(shop_file, "%s%d", j ? " " : "", S_NOTRADE(shop)[j]);
+        fprintf(shop_file, "%s%d", j ? " " : "", shop_get_with_who(shop)[j]);
       fprintf(shop_file, "\n");
 
       /*
        * Save the rooms.
        */
-      for (j = 0; S_ROOM(shop, j) != NOWHERE; j++)
-        fprintf(shop_file, "%d\n", S_ROOM(shop, j));
+      for (j = 0; shop_get_room(shop, j) != NOWHERE; j++)
+        fprintf(shop_file, "%d\n", shop_get_room(shop, j));
       fprintf(shop_file, "-1\n");
 
       /*
        * Save open/closing times 
        */
-      fprintf(shop_file, "%d\n%d\n%d\n%d\n", S_OPEN1(shop), S_CLOSE1(shop),
-              S_OPEN2(shop), S_CLOSE2(shop));
+      fprintf(shop_file, "%d\n%d\n%d\n%d\n", shop_get_open1(shop), shop_get_close1(shop),
+              shop_get_open2(shop), shop_get_close2(shop));
     }
   }
   fprintf(shop_file, "$~\n");

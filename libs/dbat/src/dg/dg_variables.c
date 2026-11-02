@@ -163,7 +163,7 @@ static bool text_processed(char *field, char *subfield, struct trig_var_data *vd
 
   if (!strcasecmp(field, "strlen")) { /* strlen    */
     char limit[200];
-    sprintf(limit, "%" SZT, strlen(vd->value));
+    sprintf(limit, "%zu", strlen(vd->value));
     snprintf(str, slen, "%d", atoi(limit));
     return true;
   } else if (!strcasecmp(field, "trim")) { /* trim      */
@@ -330,7 +330,7 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
         else
           strcpy(str, "0");
       } else if (!strcasecmp(field, "death")) {
-        snprintf(str, slen, "%ld", char_get_deathtime(c));
+        snprintf(str, slen, "%lld", (long long)char_get_deathtime(c));
       } else if (!strcasecmp(field, "dex")) {
         if (subfield && *subfield) {
           int addition = atoi(subfield);
@@ -379,7 +379,7 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
 
           gain_exp(c, addition);
         }
-        snprintf(str, slen, "%" I64T "", char_get_exp(c));
+        snprintf(str, slen, "%" PRId64 "", char_get_exp(c));
       }
       break;
     case 'f':
@@ -435,7 +435,7 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
 
           update_pos(c);
         }
-        snprintf(str, slen, "%" I64T "", getCurPL(c));
+        snprintf(str, slen, "%" PRId64 "", getCurPL(c));
       } else if (!strcasecmp(field, "hunger")) {
         if (subfield && *subfield) {
           int addition = atoi(subfield);
@@ -521,7 +521,7 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
         if (subfield && *subfield) {
           //GET_MAX_HIT(c) = MAX(GET_MAX_HIT(c) + addition, 1);
         }
-        snprintf(str, slen, "%" I64T "", getEffMaxPL(c));
+        snprintf(str, slen, "%" PRId64 "", getEffMaxPL(c));
       }
 
       else if (!strcasecmp(field, "mana")) {
@@ -533,12 +533,12 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
             decCurKI(c, addition, 0);
           }
         }
-        snprintf(str, slen, "%" I64T "", (getCurKI(c)));
+        snprintf(str, slen, "%" PRId64 "", (getCurKI(c)));
       } else if (!strcasecmp(field, "maxmana")) {
         if (subfield && *subfield) {
           //GET_MAX_MANA(c) = MAX(GET_MAX_MANA(c) + addition, 1);
         }
-        snprintf(str, slen, "%" I64T "", getMaxKI(c));
+        snprintf(str, slen, "%" PRId64 "", getMaxKI(c));
       }
 
       else if (!strcasecmp(field, "move")) {
@@ -550,14 +550,14 @@ static void char_field(char_data *c, void *go, struct trig_var_data *vd, trig_da
             decCurST(c, addition, 0);
           }
         }
-        snprintf(str, slen, "%" I64T "", (getCurST(c)));
+        snprintf(str, slen, "%" PRId64 "", (getCurST(c)));
       }
 
       else if (!strcasecmp(field, "maxmove")) {
         if (subfield && *subfield) {
           //GET_MAX_MOVE(c) = MAX(GET_MAX_MOVE(c) + addition, 1);
         }
-        snprintf(str, slen, "%" I64T "", getMaxST(c));
+        snprintf(str, slen, "%" PRId64 "", getMaxST(c));
       }
 
       else if (!strcasecmp(field, "master")) {
@@ -1006,7 +1006,7 @@ static void obj_field(obj_data *o, struct trig_var_data *vd, trig_data *trig, in
             obj_set_weight(o, 0);
           }
         }
-        snprintf(str, slen, "%" I64T "", obj_get_weight(o));
+        snprintf(str, slen, "%" PRId64 "", obj_get_weight(o));
       }
 
       else if (!strcasecmp(field, "worn_by")) {
@@ -1279,7 +1279,7 @@ static void find_replacement(void *go, struct script_data *sc, trig_data *trig, 
         snprintf(str, slen, "%d", ROOM_ID_BASE);
         return;
       } else if (!strcasecmp(var, "ctime"))
-        snprintf(str, slen, "%ld", time(0));
+        snprintf(str, slen, "%lld", (long long)time(0));
       else if (!strcasecmp(var, "door"))
         snprintf(str, slen, "%s", door[type]);
       else if (!strcasecmp(var, "force"))

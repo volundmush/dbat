@@ -264,7 +264,7 @@ ASPELL(spell_identify)
     sprintbitarray(obj_get_extra_flags(obj), extra_bits, EF_ARRAY_MAX, bitbuf, sizeof(bitbuf));
     send_to_char(ch, "Item is: %s\r\n", bitbuf);
 
-    send_to_char(ch, "Weight: %" I64T ", Value: %d, Rent: %d, Min Level: %d\r\n", obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj), obj_get_level(obj));
+    send_to_char(ch, "Weight: %" PRId64 ", Value: %d, Rent: %d, Min Level: %d\r\n", obj_get_weight(obj), obj_get_cost(obj), obj_get_cost_per_day(obj), obj_get_level(obj));
 
     switch (obj_get_type_flag(obj)) {
       case ITEM_SCROLL:

@@ -82,17 +82,17 @@ room_rnum add_room(struct room_data *room)
    * Find what zone that room was in so we can update the loading table.
    */
   for (i = room->zone; i <= top_of_zone_table; i++)
-    for (j = 0; ZCMD(i, j).command != 'S'; j++)
-      switch (ZCMD(i, j).command) {
+    for (j = 0; zone_get_cmd(i, j)->command != 'S'; j++)
+      switch (zone_get_cmd(i, j)->command) {
         case 'M':
         case 'O':
         case 'T':
         case 'V':
-          ZCMD(i, j).arg3 += (ZCMD(i, j).arg3 != NOWHERE && ZCMD(i, j).arg3 >= found);
+          zone_get_cmd(i, j)->arg3 += (zone_get_cmd(i, j)->arg3 != NOWHERE && zone_get_cmd(i, j)->arg3 >= found);
           break;
         case 'D':
         case 'R':
-          ZCMD(i, j).arg1 += (ZCMD(i, j).arg1 != NOWHERE && ZCMD(i, j).arg1 >= found);
+          zone_get_cmd(i, j)->arg1 += (zone_get_cmd(i, j)->arg1 != NOWHERE && zone_get_cmd(i, j)->arg1 >= found);
         case 'G':
         case 'P':
         case 'E':
@@ -215,23 +215,23 @@ bool delete_room(room_rnum rnum)
    * Find what zone that room was in so we can update the loading table.
    */
   for (i = 0; i <= top_of_zone_table; i++)
-    for (j = 0; ZCMD(i, j).command != 'S'; j++)
-      switch (ZCMD(i, j).command) {
+    for (j = 0; zone_get_cmd(i, j)->command != 'S'; j++)
+      switch (zone_get_cmd(i, j)->command) {
         case 'M':
         case 'O':
         case 'T':
         case 'V':
-          if (ZCMD(i, j).arg3 == rnum)
-            ZCMD(i, j).command = '*'; /* Cancel command. */
-          else if (ZCMD(i, j).arg3 > rnum)
-            ZCMD(i, j).arg3 -= (ZCMD(i, j).arg3 != NOWHERE); /* with unsigned NOWHERE > any rnum */
+          if (zone_get_cmd(i, j)->arg3 == rnum)
+            zone_get_cmd(i, j)->command = '*'; /* Cancel command. */
+          else if (zone_get_cmd(i, j)->arg3 > rnum)
+            zone_get_cmd(i, j)->arg3 -= (zone_get_cmd(i, j)->arg3 != NOWHERE); /* with unsigned NOWHERE > any rnum */
           break;
         case 'D':
         case 'R':
-          if (ZCMD(i, j).arg1 == rnum)
-            ZCMD(i, j).command = '*'; /* Cancel command. */
-          else if (ZCMD(i, j).arg1 > rnum)
-            ZCMD(i, j).arg1 -= (ZCMD(i, j).arg1 != NOWHERE); /* with unsigned NOWHERE > any rnum */
+          if (zone_get_cmd(i, j)->arg1 == rnum)
+            zone_get_cmd(i, j)->command = '*'; /* Cancel command. */
+          else if (zone_get_cmd(i, j)->arg1 > rnum)
+            zone_get_cmd(i, j)->arg1 -= (zone_get_cmd(i, j)->arg1 != NOWHERE); /* with unsigned NOWHERE > any rnum */
         case 'G':
         case 'P':
         case 'E':
@@ -247,9 +247,9 @@ bool delete_room(room_rnum rnum)
    */
   {
     for (i = 0; i < top_shop; i++) {
-      for (j = 0; SHOP_ROOM(i, j) != NOWHERE; j++) {
-        if (SHOP_ROOM(i, j) == world[rnum].number)
-          SHOP_ROOM(i, j) = 0; /* set to the void */
+      for (j = 0; rshop_get_room(i, j) != NOWHERE; j++) {
+        if (rshop_get_room(i, j) == world[rnum].number)
+          rshop_set_room(i, j, 0); /* set to the void */
       }
     }
   }

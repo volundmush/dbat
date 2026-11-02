@@ -759,3 +759,19 @@ int race_get_size(int r_id);
 bool race_is_playable(int r_id);
 bool race_is_people(int r_id);
 bool can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num);
+
+/* Raw fields, used by OLC and the mob files (formerly genmob.h macros). */
+char *char_get_alias(const struct char_data *ch);
+void char_set_alias(struct char_data *ch, char *v);
+char *char_get_sdesc(const struct char_data *ch);
+void char_set_sdesc(struct char_data *ch, char *v);
+char *char_get_ldesc(const struct char_data *ch);
+void char_set_ldesc(struct char_data *ch, char *v);
+char *char_get_ddesc(const struct char_data *ch);
+void char_set_ddesc(struct char_data *ch, char *v);
+int8_t char_get_mob_specials_damnodice(const struct char_data *ch);
+void char_set_mob_specials_damnodice(struct char_data *ch, int8_t v);
+int8_t char_get_mob_specials_damsizedice(const struct char_data *ch);
+void char_set_mob_specials_damsizedice(struct char_data *ch, int8_t v);
+int8_t char_get_mob_specials_attack_type(const struct char_data *ch);
+void char_set_mob_specials_attack_type(struct char_data *ch, int8_t v);

@@ -219,7 +219,7 @@ ACMD(do_powerup)
     return;
   }
   if (char_get_suppression(ch) > 0) {
-    send_to_char(ch, "@WYou currently have your powerlevel suppressed to %" I64T " percent.@n", char_get_suppression(ch));
+    send_to_char(ch, "@WYou currently have your powerlevel suppressed to %" PRId64 " percent.@n", char_get_suppression(ch));
     return;
   }
   if (char_plr_flagged(ch, PLR_POWERUP)) {

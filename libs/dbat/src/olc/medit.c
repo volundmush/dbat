@@ -205,12 +205,12 @@ static void medit_setup_new(struct descriptor_data *d)
   /*
    * Set up some default strings.
    */
-  GET_ALIAS(mob) = strdup("mob unfinished");
-  GET_SDESC(mob) = strdup("the unfinished mob");
-  GET_LDESC(mob) = strdup("An unfinished mob stands here.\r\n");
-  GET_DDESC(mob) = strdup("It looks unfinished.\r\n");
-  mob->race      = RACE_HUMAN;
-  OLC_SCRIPT(d)  = nullptr;
+  char_set_alias(mob, strdup("mob unfinished"));
+  char_set_sdesc(mob, strdup("the unfinished mob"));
+  char_set_ldesc(mob, strdup("An unfinished mob stands here.\r\n"));
+  char_set_ddesc(mob, strdup("It looks unfinished.\r\n"));
+  mob->race     = RACE_HUMAN;
+  OLC_SCRIPT(d) = nullptr;
 
   OLC_MOB(d) = mob;
   /* Has changed flag. (It hasn't so far, we just made it.) */
@@ -314,9 +314,10 @@ static void medit_save_internally(struct descriptor_data *d)
    * Update keepers in shops being edited and other mobs being edited.
    */
   for (dsc = descriptor_list; dsc; dsc = dsc->next) {
-    if (desc_get_connected(dsc) == CON_SEDIT)
-      S_KEEPER(OLC_SHOP(dsc)) += (S_KEEPER(OLC_SHOP(dsc)) != NOTHING && S_KEEPER(OLC_SHOP(dsc)) >= new_rnum);
-    else if (desc_get_connected(dsc) == CON_MEDIT)
+    if (desc_get_connected(dsc) == CON_SEDIT) {
+      if (shop_get_keeper(OLC_SHOP(dsc)) != NOTHING && shop_get_keeper(OLC_SHOP(dsc)) >= new_rnum)
+        shop_set_keeper(OLC_SHOP(dsc), shop_get_keeper(OLC_SHOP(dsc)) + 1);
+    } else if (desc_get_connected(dsc) == CON_MEDIT)
       char_set_nr(OLC_MOB(dsc), char_get_nr(OLC_MOB(dsc)) + ((char_get_nr(OLC_MOB(dsc)) != NOTHING && char_get_nr(OLC_MOB(dsc)) >= new_rnum)));
   }
 
@@ -486,13 +487,13 @@ static void medit_disp_menu(struct descriptor_data *d)
                   "@g6@n) Level:       [@c%4d@n],  @g7@n) Alignment:    [@c%5d@n]\r\n"
                   "@g8@n) Accuracy Mod:[@c%4d@n],  @g9@n) Damage Mod:   [@c%5d@n]\r\n"
                   "@gA@n) NumDamDice:  [@c%4d@n],  @gB@n) SizeDamDice:  [@c%5d@n]\r\n"
-                  "@gC@n) Num HP Dice: [@c%4" I64T "@n],  @gD@n) Size HP Dice: [@c%5" I64T "@n],  @gE@n) HP Bonus: [@c%5" I64T "@n]\r\n"
-                  "@gF@n) Armor Class: [@c%4d@n],  @gG@n) Exp:      [@c%" I64T "@n],  @gH@n) Gold:  [@c%8d@n]\r\n",
+                  "@gC@n) Num HP Dice: [@c%4" PRId64 "@n],  @gD@n) Size HP Dice: [@c%5" PRId64 "@n],  @gE@n) HP Bonus: [@c%5" PRId64 "@n]\r\n"
+                  "@gF@n) Armor Class: [@c%4d@n],  @gG@n) Exp:      [@c%" PRId64 "@n],  @gH@n) Gold:  [@c%8d@n]\r\n",
 
-                  OLC_NUM(d), genders[(int)char_get_sex(mob)], GET_ALIAS(mob),
-                  GET_SDESC(mob), GET_LDESC(mob), GET_DDESC(mob), char_get_race_level(mob),
+                  OLC_NUM(d), genders[(int)char_get_sex(mob)], char_get_alias(mob),
+                  char_get_sdesc(mob), char_get_ldesc(mob), char_get_ddesc(mob), char_get_race_level(mob),
                   char_get_alignment(mob), char_get_accuracy_mod(mob), 0 /* damage mod: unused */,
-                  GET_NDD(mob), GET_SDD(mob), getCurPL(mob), (getCurKI(mob)),
+                  char_get_mob_specials_damnodice(mob), char_get_mob_specials_damsizedice(mob), getCurPL(mob), (getCurKI(mob)),
                   (getCurST(mob)), char_get_armor(mob), char_get_exp(mob), char_get_gold(mob));
   sprintbitarray(char_get_act(mob), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
   sprintbitarray(char_get_affected_by(mob), affected_bits, AF_ARRAY_MAX, flag2, sizeof(flag2));
@@ -752,26 +753,26 @@ void medit_parse(struct descriptor_data *d, char *arg)
       /*-------------------------------------------------------------------*/
     case MEDIT_ALIAS:
       smash_tilde(arg);
-      if (GET_ALIAS(OLC_MOB(d)))
-        free(GET_ALIAS(OLC_MOB(d)));
-      GET_ALIAS(OLC_MOB(d)) = str_udup(arg);
+      if (char_get_alias(OLC_MOB(d)))
+        free(char_get_alias(OLC_MOB(d)));
+      char_set_alias(OLC_MOB(d), str_udup(arg));
       break;
       /*-------------------------------------------------------------------*/
     case MEDIT_S_DESC:
       smash_tilde(arg);
-      if (GET_SDESC(OLC_MOB(d)))
-        free(GET_SDESC(OLC_MOB(d)));
-      GET_SDESC(OLC_MOB(d)) = str_udup(arg);
+      if (char_get_sdesc(OLC_MOB(d)))
+        free(char_get_sdesc(OLC_MOB(d)));
+      char_set_sdesc(OLC_MOB(d), str_udup(arg));
       break;
       /*-------------------------------------------------------------------*/
     case MEDIT_L_DESC:
       smash_tilde(arg);
-      if (GET_LDESC(OLC_MOB(d)))
-        free(GET_LDESC(OLC_MOB(d)));
+      if (char_get_ldesc(OLC_MOB(d)))
+        free(char_get_ldesc(OLC_MOB(d)));
       if (arg && *arg) {
-        GET_LDESC(OLC_MOB(d)) = str_printf("%s\r\n", arg);
+        char_set_ldesc(OLC_MOB(d), str_printf("%s\r\n", arg));
       } else
-        GET_LDESC(OLC_MOB(d)) = strdup("undefined");
+        char_set_ldesc(OLC_MOB(d), strdup("undefined"));
 
       break;
       /*-------------------------------------------------------------------*/
@@ -833,14 +834,14 @@ void medit_parse(struct descriptor_data *d, char *arg)
       break;
 
     case MEDIT_NDD:
-      GET_NDD(OLC_MOB(d)) = LIMIT(i, 0, 30);
+      char_set_mob_specials_damnodice(OLC_MOB(d), LIMIT(i, 0, 30));
       if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
         char_mob_toggle(OLC_MOB(d), MOB_AUTOBALANCE);
       }
       break;
 
     case MEDIT_SDD:
-      GET_SDD(OLC_MOB(d)) = LIMIT(i, 0, 127);
+      char_set_mob_specials_damsizedice(OLC_MOB(d), LIMIT(i, 0, 127));
       if (char_mob_flagged(OLC_MOB(d), MOB_AUTOBALANCE)) {
         char_mob_toggle(OLC_MOB(d), MOB_AUTOBALANCE);
       }
@@ -894,7 +895,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
       break;
 
     case MEDIT_ATTACK:
-      GET_ATTACK(OLC_MOB(d)) = LIMIT(i, 0, NUM_ATTACK_TYPES - 1);
+      char_set_mob_specials_attack_type(OLC_MOB(d), LIMIT(i, 0, NUM_ATTACK_TYPES - 1));
       break;
 
     case MEDIT_LEVEL:

@@ -601,7 +601,7 @@ ACMD(do_toplist)
     get_line(file, line);
     switch (count) {
       default:
-        sscanf(line, "%s %" I64T "\n", filler, &stats);
+        sscanf(line, "%s %" SCNd64 "\n", filler, &stats);
         break;
     }
     title[count] = strdup(filler);

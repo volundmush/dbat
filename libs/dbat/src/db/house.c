@@ -291,7 +291,7 @@ static void hcontrol_build_house(struct char_data *ch, char *arg)
     send_to_char(ch, "'%s' is not a valid direction.\r\n", arg1);
     return;
   }
-  if (TOROOM(real_house, exit_num) == NOWHERE) {
+  if (rroom_get_exit_to_room(real_house, exit_num) == NOWHERE) {
     send_to_char(ch, "There is no exit %s from room %d.\r\n", dirs[exit_num], virt_house);
     return;
   }
@@ -666,14 +666,18 @@ static bool House_load(room_vnum rvnum)
               get_line(fl, line);
               break;
 
-            case 'G':
+            case 'G': {
+              long long generation;
+
               get_line(fl, line);
-              sscanf(line, "%" TMT, &temp->generation);
+              if (sscanf(line, "%lld", &generation) == 1)
+                temp->generation = generation;
               get_line(fl, line);
               break;
+            }
             case 'U':
               get_line(fl, line);
-              sscanf(line, "%" I64T, &temp->unique_id);
+              sscanf(line, "%" SCNd64, &temp->unique_id);
               get_line(fl, line);
               break;
             case 'S':

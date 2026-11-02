@@ -31,8 +31,6 @@ struct house_control_rec {
   long spare7;
 };
 
-#define HOUSE_FLAGS(house) (house).bitvector
-
 /* House can have up to 31 bitvectors - don't go higher */
 constexpr int HOUSE_NOGUESTS   = (1 << 0); /* Owner cannot add guests     */
 constexpr int HOUSE_FREE       = (1 << 1); /* House does not require payments */
@@ -43,8 +41,6 @@ constexpr int HOUSE_SAVENORENT = (1 << 5); /* NORENT items are crashsaved too */
 constexpr int HOUSE_NOSAVE     = (1 << 6); /* Do not crash save this room - private only */
 
 constexpr int HOUSE_NUM_FLAGS = 7;
-
-#define TOROOM(room, dir) (world[room].dir_option[dir] ? world[room].dir_option[dir]->to_room : NOWHERE)
 
 extern struct house_control_rec house_control[MAX_HOUSES]; /* house.c */
 extern int num_of_houses;                                  /* house.c */

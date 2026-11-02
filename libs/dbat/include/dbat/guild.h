@@ -1,4 +1,5 @@
 #pragma once
+#include "dbat/guild_utils.h"
 #include <stdio.h>
 #include "dbat/consts/types.h"
 #include "dbat/consts/skills.h"
@@ -28,18 +29,6 @@ extern struct guild_data *guild_index;
 extern int top_guild;
 
 ACMD(do_teach);
-
-#define GM_NUM(i)        (guild_index[i].vnum)
-#define GM_TRAINER(i)    (guild_index[i].gm)
-#define GM_OPEN(i)       (guild_index[i].open)
-#define GM_CLOSE(i)      (guild_index[i].close)
-#define GM_CHARGE(i)     (guild_index[i].charge)
-#define GM_MINLVL(i)     (guild_index[i].minlvl)
-#define GM_WITH_WHO(i)   (guild_index[i].with_who)
-#define GM_NO_SKILL(i)   (guild_index[i].no_such_skill)
-#define GM_NO_GOLD(i)    (guild_index[i].not_enough_gold)
-#define GM_COST(i, j, k) (int)(GM_CHARGE(i) * spell_info[j].min_level[(int)char_get_class(k)])
-#define GM_FUNC(i)       (guild_index[i].func)
 
 /* Functions defined in guild.c */
 int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype, char *argument);

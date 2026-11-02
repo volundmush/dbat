@@ -208,3 +208,8 @@ void rroom_set_flag(room_rnum room, int flag, bool on)
 {
   room_set_flag(&world[room], flag, on);
 }
+
+room_rnum rroom_get_exit_to_room(room_rnum room, int dir)
+{
+  return world[room].dir_option[dir] ? world[room].dir_option[dir]->to_room : NOWHERE;
+}

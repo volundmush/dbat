@@ -397,8 +397,8 @@ static bool is_guild_open(struct char_data *keeper, int guild_nr, int msg)
   char buf[200];
   *buf = 0;
 
-  if (GM_OPEN(guild_nr) > time_info.hours &&
-      GM_CLOSE(guild_nr) < time_info.hours)
+  if (rguild_get_open(guild_nr) > time_info.hours &&
+      rguild_get_close(guild_nr) < time_info.hours)
     strlcpy(buf, MSG_TRAINER_NOT_OPEN, sizeof(buf));
 
   if (!*buf)
@@ -418,7 +418,7 @@ static bool is_guild_ok_char(struct char_data *keeper, struct char_data *ch, int
     return (false);
   }
 
-  if (char_get_level(ch) < GM_MINLVL(guild_nr)) {
+  if (char_get_level(ch) < rguild_get_minlvl(guild_nr)) {
     snprintf(buf, sizeof(buf), "%s %s",
              char_get_name(ch), MSG_TRAINER_MINLVL);
     do_tell(keeper, buf, cmd_tell, 0);
@@ -1144,14 +1144,14 @@ SPECIAL(guild)
   };
 
   for (guild_nr = 0; guild_nr <= top_guild; guild_nr++)
-    if (GM_TRAINER(guild_nr) == keeper->nr)
+    if (rguild_get_gm(guild_nr) == keeper->nr)
       break;
 
   if (guild_nr > top_guild)
     return (false);
 
-  if (GM_FUNC(guild_nr))
-    if ((GM_FUNC(guild_nr))(ch, me, cmd, arg))
+  if (rguild_get_func(guild_nr))
+    if ((rguild_get_func(guild_nr))(ch, me, cmd, arg))
       return (true);
 
   /*** Is the GM able to train?    ****/
@@ -1191,7 +1191,7 @@ static void read_guild_line(FILE *gm_f, const char *string, void *data, const ch
   char buf[MAX_STRING_LENGTH];
 
   if (!get_line(gm_f, buf) || !sscanf(buf, string, data)) {
-    fprintf(stderr, "Error in guild #%d, Could not get %s\n", GM_NUM(top_guild), type);
+    fprintf(stderr, "Error in guild #%d, Could not get %s\n", rguild_get_vnum(top_guild), type);
     exit(1);
   }
 }
@@ -1206,7 +1206,7 @@ static char *read_guild_message(FILE *gm_f, const char *why, const char *field, 
     return strdup(fallback);
 
   if ((problem = npc_msg_format_problem(msg, false))) {
-    mud_log("SYSERR: Guild #%d %s: %s; using the default.", GM_NUM(top_guild), field, problem);
+    mud_log("SYSERR: Guild #%d %s: %s; using the default.", rguild_get_vnum(top_guild), field, problem);
     free(msg);
     return strdup(fallback);
   }
@@ -1230,7 +1230,7 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
       top_guild++;
       if (!top_guild)
         CREATE(guild_index, struct guild_data, rec_count);
-      GM_NUM(top_guild) = temp;
+      rguild_set_vnum(top_guild, temp);
 
       clear_skills(top_guild);
       get_line(gm_f, buf3);
@@ -1254,20 +1254,20 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
         get_line(gm_f, buf3);
         rv = sscanf(buf3, "%d %d", &t1, &t2);
       }
-      read_guild_line(gm_f, "%f", &GM_CHARGE(top_guild), "GM_CHARGE");
+      read_guild_line(gm_f, "%f", &(guild_index[(top_guild)].charge), "GM_CHARGE");
       guild_index[top_guild].no_such_skill   = read_guild_message(gm_f, buf2, "no_such_skill", guild_default_no_skill);
       guild_index[top_guild].not_enough_gold = read_guild_message(gm_f, buf2, "not_enough_gold", guild_default_no_gold);
 
-      read_guild_line(gm_f, "%d", &GM_MINLVL(top_guild), "GM_MINLVL");
-      read_guild_line(gm_f, "%d", &GM_TRAINER(top_guild), "GM_TRAINER");
+      read_guild_line(gm_f, "%d", &(guild_index[(top_guild)].minlvl), "GM_MINLVL");
+      read_guild_line(gm_f, "%d", &(guild_index[(top_guild)].gm), "GM_TRAINER");
 
-      GM_TRAINER(top_guild) = real_mobile(GM_TRAINER(top_guild));
-      read_guild_line(gm_f, "%d", &GM_WITH_WHO(top_guild)[0], "GM_WITH_WHO");
+      rguild_set_gm(top_guild, real_mobile(rguild_get_gm(top_guild)));
+      read_guild_line(gm_f, "%d", &(guild_index[(top_guild)].with_who)[0], "GM_WITH_WHO");
 
-      read_guild_line(gm_f, "%d", &GM_OPEN(top_guild), "GM_OPEN");
-      read_guild_line(gm_f, "%d", &GM_CLOSE(top_guild), "GM_CLOSE");
+      read_guild_line(gm_f, "%d", &(guild_index[(top_guild)].open), "GM_OPEN");
+      read_guild_line(gm_f, "%d", &(guild_index[(top_guild)].close), "GM_CLOSE");
 
-      GM_FUNC(top_guild) = nullptr;
+      rguild_set_func(top_guild, nullptr);
       CREATE(buf, char, READ_SIZE);
       get_line(gm_f, buf);
       if (buf && *buf != '#' && *buf != '$') {
@@ -1279,8 +1279,8 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
             mud_log("SYSERR: Can't parse GM_WITH_WHO line in %s: '%s'", buf2, buf);
             break;
           }
-          GM_WITH_WHO(top_guild)
-          [temp] = val;
+          rguild_get_with_who(top_guild)
+              [temp] = val;
           while (isdigit(*p) || *p == '-') {
             p++;
           }
@@ -1289,8 +1289,8 @@ void boot_the_guilds(FILE *gm_f, char *filename, int rec_count)
           }
         }
         while (temp < GW_ARRAY_MAX)
-          GM_WITH_WHO(top_guild)
-        [temp++] = 0;
+          rguild_get_with_who(top_guild)
+              [temp++] = 0;
         free(buf);
         buf = fread_string(gm_f, buf2);
       }
@@ -1310,13 +1310,13 @@ void assign_the_guilds(void)
   cmd_tell = find_command("tell");
 
   for (gdindex = 0; gdindex <= top_guild; gdindex++) {
-    if (GM_TRAINER(gdindex) == NOBODY)
+    if (rguild_get_gm(gdindex) == NOBODY)
       continue;
 
-    if (mob_index[GM_TRAINER(gdindex)].func && mob_index[GM_TRAINER(gdindex)].func != guild)
-      GM_FUNC(gdindex) = mob_index[GM_TRAINER(gdindex)].func;
+    if (mob_index[rguild_get_gm(gdindex)].func && mob_index[rguild_get_gm(gdindex)].func != guild)
+      rguild_set_func(gdindex, mob_index[rguild_get_gm(gdindex)].func);
 
-    mob_index[GM_TRAINER(gdindex)].func = guild;
+    mob_index[rguild_get_gm(gdindex)].func = guild;
   }
 }
 
@@ -1363,13 +1363,13 @@ static void list_all_guilds(struct char_data *ch)
   strcpy(buf, list_all_guilds_header); /* strcpy: OK (a short constant) */
   size_t len = headerlen;
   for (gm_nr = 0; gm_nr <= top_guild && len < sizeof(buf); gm_nr++) {
-    if (GM_TRAINER(gm_nr) == NOBODY)
+    if (rguild_get_gm(gm_nr) == NOBODY)
       strcpy(buf1, "<NONE>"); /* strcpy: OK (for 'buf1 >= 7') */
     else
-      sprintf(buf1, "%6d", mob_index[GM_TRAINER(gm_nr)].vnum); /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
+      sprintf(buf1, "%6d", mob_index[rguild_get_gm(gm_nr)].vnum); /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
 
     len += snprintf(buf + len, sizeof(buf) - len, "%6d	%s		%5.2f	%s\r\n",
-                    GM_NUM(gm_nr), buf1, GM_CHARGE(gm_nr), guild_customer_string(gm_nr, false));
+                    rguild_get_vnum(gm_nr), buf1, rguild_get_charge(gm_nr), guild_customer_string(gm_nr, false));
   }
 
   send_to_char(ch, "%s", buf);
@@ -1381,15 +1381,15 @@ static void list_detailed_guild(struct char_data *ch, int gm_nr)
   char buf[MAX_STRING_LENGTH];
   char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 
-  if (GM_TRAINER(gm_nr) < NOBODY)
+  if (rguild_get_gm(gm_nr) < NOBODY)
     strcpy(buf1, "<NONE>");
   else
-    sprintf(buf1, "%6d   ", mob_index[GM_TRAINER(gm_nr)].vnum);
+    sprintf(buf1, "%6d   ", mob_index[rguild_get_gm(gm_nr)].vnum);
 
   snprintf(buf, sizeof(buf), " Guild Master: %s\r\n", buf1);
   snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " Hours: %4d to %4d,  Surcharge: %5.2f\r\n",
-           GM_OPEN(gm_nr), GM_CLOSE(gm_nr), GM_CHARGE(gm_nr));
-  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " Min Level will train: %d\r\n", GM_MINLVL(gm_nr));
+           rguild_get_open(gm_nr), rguild_get_close(gm_nr), rguild_get_charge(gm_nr));
+  snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " Min Level will train: %d\r\n", rguild_get_minlvl(gm_nr));
   snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), " Whom will train: %s\r\n", guild_customer_string(gm_nr, true));
 
   /* now for the REAL reason why someone would want to see a Guild :) */
@@ -1421,7 +1421,7 @@ void show_guild(struct char_data *ch, char *arg)
 
     if (gm_num > 0) {
       for (gm_nr = 0; gm_nr <= top_guild; gm_nr++) {
-        if (gm_num == GM_NUM(gm_nr))
+        if (gm_num == rguild_get_vnum(gm_nr))
           break;
       }
 
@@ -1460,18 +1460,18 @@ void list_guilds(struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vn
     return;
 
   for (i = 0; i <= top_guild; i++) {
-    if (GM_NUM(i) >= bottom && GM_NUM(i) <= top) {
+    if (rguild_get_vnum(i) >= bottom && rguild_get_vnum(i) <= top) {
       counter++;
 
-      send_to_char(ch, "@g%4d@n) [@c%-5d@n]", counter, GM_NUM(i));
+      send_to_char(ch, "@g%4d@n) [@c%-5d@n]", counter, rguild_get_vnum(i));
 
       /************************************************************************/
       /** Retrieve the list of rooms for this guild.                         **/
       /************************************************************************/
 
       send_to_char(ch, " @c[@y%d@c]@y %s@n",
-                   (GM_TRAINER(i) == NOBODY) ? -1 : mob_index[GM_TRAINER(i)].vnum,
-                   (GM_TRAINER(i) == NOBODY) ? "" : mob_proto[GM_TRAINER(i)].short_descr);
+                   (rguild_get_gm(i) == NOBODY) ? -1 : mob_index[rguild_get_gm(i)].vnum,
+                   (rguild_get_gm(i) == NOBODY) ? "" : mob_proto[rguild_get_gm(i)].short_descr);
 
       send_to_char(ch, "\r\n");
     }
@@ -1504,8 +1504,8 @@ int count_guilds(guild_vnum low, guild_vnum high)
 {
   int i, j;
 
-  for (i = j = 0; (GM_NUM(i) <= high && i <= top_guild); i++) {
-    if (GM_NUM(i) >= low) {
+  for (i = j = 0; (rguild_get_vnum(i) <= high && i <= top_guild); i++) {
+    if (rguild_get_vnum(i) >= low) {
       j++;
     }
   }

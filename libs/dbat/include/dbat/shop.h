@@ -1,4 +1,5 @@
 #pragma once
+#include "dbat/shop_utils.h"
 #include "dbat/consts/types.h"
 #include "dbat/consts/maximums.h"
 #include <stdio.h>
@@ -53,9 +54,6 @@ struct shop_data {
 extern struct shop_data *shop_index;
 extern int top_shop;
 
-#define BUY_TYPE(i) ((i).type)
-#define BUY_WORD(i) ((i).keywords)
-
 constexpr int MAX_TRADE = 5;      /* List maximums for compatibility	*/
 constexpr int MAX_PROD  = 5;      /*	with shops before v3.0		*/
 #define VERSION3_TAG "v3.0"       /* The file has v3.0 shops in it!	*/
@@ -75,7 +73,7 @@ constexpr int LIST_PRODUCE = 0;
 constexpr int LIST_TRADE   = 1;
 constexpr int LIST_ROOM    = 2;
 
-/* Whom will we not trade with (bitvector for SHOP_TRADE_WITH()) */
+/* Whom will we not trade with (bitvector for rshop_get_with_who()) */
 constexpr int TRADE_NOGOOD               = 0;
 constexpr int TRADE_NOEVIL               = 1;
 constexpr int TRADE_NONEUTRAL            = 2;
@@ -161,9 +159,6 @@ struct stack_data {
   int len;
 };
 
-#define S_DATA(stack, index) ((stack)->data[(index)])
-#define S_LEN(stack)         ((stack)->len)
-
 /* Which expression type we are now parsing */
 constexpr int OPER_OPEN_PAREN  = 0;
 constexpr int OPER_CLOSE_PAREN = 1;
@@ -172,32 +167,9 @@ constexpr int OPER_AND         = 3;
 constexpr int OPER_NOT         = 4;
 constexpr int MAX_OPER         = 4;
 
-#define SHOP_NUM(i)          (shop_index[(i)].vnum)
-#define SHOP_KEEPER(i)       (shop_index[(i)].keeper)
-#define SHOP_OPEN1(i)        (shop_index[(i)].open1)
-#define SHOP_CLOSE1(i)       (shop_index[(i)].close1)
-#define SHOP_OPEN2(i)        (shop_index[(i)].open2)
-#define SHOP_CLOSE2(i)       (shop_index[(i)].close2)
-#define SHOP_ROOM(i, num)    (shop_index[(i)].in_room[(num)])
-#define SHOP_BUYTYPE(i, num) (BUY_TYPE(shop_index[(i)].type[(num)]))
-#define SHOP_BUYWORD(i, num) (BUY_WORD(shop_index[(i)].type[(num)]))
-#define SHOP_PRODUCT(i, num) (shop_index[(i)].producing[(num)])
-#define SHOP_BANK(i)         (shop_index[(i)].bankAccount)
-#define SHOP_BROKE_TEMPER(i) (shop_index[(i)].temper1)
-#define SHOP_BITVECTOR(i)    (shop_index[(i)].bitvector)
-#define SHOP_TRADE_WITH(i)   (shop_index[(i)].with_who)
-#define SHOP_SORT(i)         (shop_index[(i)].lastsort)
-#define SHOP_BUYPROFIT(i)    (shop_index[(i)].profit_buy)
-#define SHOP_SELLPROFIT(i)   (shop_index[(i)].profit_sell)
-#define SHOP_FUNC(i)         (shop_index[(i)].func)
-
 constexpr int WILL_START_FIGHT = (1 << 0);
 constexpr int WILL_BANK_MONEY  = (1 << 1);
 constexpr int WILL_ALLOW_STEAL = (1 << 2);
-
-#define SHOP_KILL_CHARS(i)  (IS_SET(SHOP_BITVECTOR(i), WILL_START_FIGHT))
-#define SHOP_USES_BANK(i)   (IS_SET(SHOP_BITVECTOR(i), WILL_BANK_MONEY))
-#define SHOP_ALLOW_STEAL(i) (IS_SET(SHOP_BITVECTOR(i), WILL_ALLOW_STEAL))
 
 constexpr int MIN_OUTSIDE_BANK = 5000;
 constexpr int MAX_OUTSIDE_BANK = 15000;

@@ -40,7 +40,6 @@ static void oedit_setup_new(struct descriptor_data *d);
 /*
  * Handy macros.
  */
-#define S_PRODUCT(s, i) ((s)->producing[(i)])
 
 /*------------------------------------------------------------------------*\
   Utility and exported functions
@@ -298,10 +297,9 @@ static void oedit_save_internally(struct descriptor_data *d)
    */
   for (dsc = descriptor_list; dsc; dsc = dsc->next)
     if (desc_get_connected(dsc) == CON_SEDIT)
-      for (i = 0; S_PRODUCT(OLC_SHOP(dsc), i) != NOTHING; i++)
-        if (S_PRODUCT(OLC_SHOP(dsc), i) >= robj_num)
-          S_PRODUCT(OLC_SHOP(dsc), i)
-  ++;
+      for (i = 0; shop_get_product(OLC_SHOP(dsc), i) != NOTHING; i++)
+        if (shop_get_product(OLC_SHOP(dsc), i) >= robj_num)
+          shop_set_product(OLC_SHOP(dsc), i, shop_get_product(OLC_SHOP(dsc), i) + 1);
 
   /* Update other people in zedit too. From: C.Raehl 4/27/99 */
   for (dsc = descriptor_list; dsc; dsc = dsc->next)
@@ -944,7 +942,7 @@ static void oedit_disp_menu(struct descriptor_data *d)
 
   write_to_output(d,
                   "@g7@n) Wear flags  : @c%s@n\r\n"
-                  "@g8@n) Weight      : @c%-4" I64T "@n, 	@g9@n) Cost        : @c%-4d@n\r\n"
+                  "@g8@n) Weight      : @c%-4" PRId64 "@n, 	@g9@n) Cost        : @c%-4d@n\r\n"
                   "@gA@n) Cost/Day    : @c%-4d@n, 	@gB@n) Timer       : @c%-4d@n\r\n"
                   "@gC@n) Values      : @c%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d@n\r\n"
                   "@gD@n) Applies menu@n\r\n"

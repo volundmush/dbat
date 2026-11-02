@@ -227,7 +227,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
        * Problem : People like that behavior.
        * Solution: We special case the area/mass spells here.
        */
-        if (HAS_SPELL_ROUTINE(obj_get_value(obj, VAL_STAFF_SPELL), MAG_MASSES | MAG_AREAS)) {
+        if (spell_has_routine(obj_get_value(obj, VAL_STAFF_SPELL), MAG_MASSES | MAG_AREAS)) {
           for (i = 0, tch = world[char_get_in_room(ch)].people; tch; tch = tch->next_in_room)
             i++;
           while (i-- > 0)
@@ -1196,4 +1196,9 @@ void mag_assign_spells(void)
   skillo(SKILL_SPIRITCONTROL, "spirit control", SKFLAG_INTMOD | SKFLAG_NEEDTRAIN | SKFLAG_TIER1);
   skillo(SKILL_BALEFIRE, "balefire", SKFLAG_INTMOD | SKFLAG_NEEDTRAIN | SKFLAG_TIER4);
   skillo(SKILL_BLESSEDHAMMER, "blessed hammer", SKFLAG_INTMOD | SKFLAG_NEEDTRAIN | SKFLAG_TIER1);
+}
+
+bool spell_has_routine(int spellnum, int flag)
+{
+  return IS_SET(spell_info[spellnum].routines, flag);
 }

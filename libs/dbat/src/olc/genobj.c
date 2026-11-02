@@ -105,10 +105,10 @@ static obj_rnum adjust_objects(obj_rnum refpt)
    * Renumber zone table.
    */
   for (zone = 0; zone <= top_of_zone_table; zone++) {
-    for (cmd_no = 0; ZCMD(zone, cmd_no).command != 'S'; cmd_no++) {
-      switch (ZCMD(zone, cmd_no).command) {
+    for (cmd_no = 0; zone_get_cmd(zone, cmd_no)->command != 'S'; cmd_no++) {
+      switch (zone_get_cmd(zone, cmd_no)->command) {
         case 'P':
-          ZCMD(zone, cmd_no).arg3 += (ZCMD(zone, cmd_no).arg3 >= refpt);
+          zone_get_cmd(zone, cmd_no)->arg3 += (zone_get_cmd(zone, cmd_no)->arg3 >= refpt);
           /*
          * No break here - drop into next case.
          */
@@ -116,10 +116,10 @@ static obj_rnum adjust_objects(obj_rnum refpt)
         case 'O':
         case 'G':
         case 'E':
-          ZCMD(zone, cmd_no).arg1 += (ZCMD(zone, cmd_no).arg1 >= refpt);
+          zone_get_cmd(zone, cmd_no)->arg1 += (zone_get_cmd(zone, cmd_no)->arg1 >= refpt);
           break;
         case 'R':
-          ZCMD(zone, cmd_no).arg2 += (ZCMD(zone, cmd_no).arg2 >= refpt);
+          zone_get_cmd(zone, cmd_no)->arg2 += (zone_get_cmd(zone, cmd_no)->arg2 >= refpt);
           break;
       }
     }
@@ -129,8 +129,8 @@ static obj_rnum adjust_objects(obj_rnum refpt)
    * Renumber shop produce.
    */
   for (shop = 0; shop <= top_shop; shop++)
-    for (i = 0; SHOP_PRODUCT(shop, i) != NOTHING; i++)
-      SHOP_PRODUCT(shop, i) += (SHOP_PRODUCT(shop, i) >= refpt);
+    for (i = 0; rshop_get_product(shop, i) != NOTHING; i++)
+      rshop_set_product(shop, i, rshop_get_product(shop, i) + (rshop_get_product(shop, i) >= refpt));
 
   return refpt;
 }
@@ -254,7 +254,7 @@ bool save_objects(zone_rnum zone_num)
       fprintf(fp,
               "%d %s %s %s %s %s %s %s %s %s %s %s %s\n"
               "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n"
-              "%" I64T " %d %d %d\n",
+              "%" PRId64 " %d %d %d\n",
 
               obj_get_type_flag(obj),
               ebuf1, ebuf2, ebuf3, ebuf4,
@@ -500,39 +500,39 @@ int delete_object(obj_rnum rnum)
   RECREATE(obj_proto, struct obj_data, top_of_objt + 1);
 
   for (shop = 0; shop <= top_shop; shop++)
-    for (j = 0; SHOP_PRODUCT(shop, j) != NOTHING; j++)
-      SHOP_PRODUCT(shop, j) -= (SHOP_PRODUCT(shop, j) > rnum);
+    for (j = 0; rshop_get_product(shop, j) != NOTHING; j++)
+      rshop_set_product(shop, j, rshop_get_product(shop, j) - (rshop_get_product(shop, j) > rnum));
 
   /* Renumber zone table. */
   for (zone = 0; zone <= top_of_zone_table; zone++) {
     bool changed = false;
-    for (cmd_no = 0; ZCMD(zone, cmd_no).command != 'S'; cmd_no++) {
-      switch (ZCMD(zone, cmd_no).command) {
+    for (cmd_no = 0; zone_get_cmd(zone, cmd_no)->command != 'S'; cmd_no++) {
+      switch (zone_get_cmd(zone, cmd_no)->command) {
         case 'P':
-          if (ZCMD(zone, cmd_no).arg3 == rnum) {
-            ZCMD(zone, cmd_no).command = '*';
-            ZCMD(zone, cmd_no).arg3    = NOTHING;
-            changed                    = true;
+          if (zone_get_cmd(zone, cmd_no)->arg3 == rnum) {
+            zone_get_cmd(zone, cmd_no)->command = '*';
+            zone_get_cmd(zone, cmd_no)->arg3    = NOTHING;
+            changed                             = true;
           } else
-            ZCMD(zone, cmd_no).arg3 -= (ZCMD(zone, cmd_no).arg3 > rnum);
+            zone_get_cmd(zone, cmd_no)->arg3 -= (zone_get_cmd(zone, cmd_no)->arg3 > rnum);
           break;
         case 'O':
         case 'G':
         case 'E':
-          if (ZCMD(zone, cmd_no).arg1 == rnum) {
-            ZCMD(zone, cmd_no).command = '*';
-            ZCMD(zone, cmd_no).arg1    = NOTHING;
-            changed                    = true;
+          if (zone_get_cmd(zone, cmd_no)->arg1 == rnum) {
+            zone_get_cmd(zone, cmd_no)->command = '*';
+            zone_get_cmd(zone, cmd_no)->arg1    = NOTHING;
+            changed                             = true;
           } else
-            ZCMD(zone, cmd_no).arg1 -= (ZCMD(zone, cmd_no).arg1 > rnum);
+            zone_get_cmd(zone, cmd_no)->arg1 -= (zone_get_cmd(zone, cmd_no)->arg1 > rnum);
           break;
         case 'R':
-          if (ZCMD(zone, cmd_no).arg2 == rnum) {
-            ZCMD(zone, cmd_no).command = '*';
-            ZCMD(zone, cmd_no).arg2    = NOTHING;
-            changed                    = true;
+          if (zone_get_cmd(zone, cmd_no)->arg2 == rnum) {
+            zone_get_cmd(zone, cmd_no)->command = '*';
+            zone_get_cmd(zone, cmd_no)->arg2    = NOTHING;
+            changed                             = true;
           } else
-            ZCMD(zone, cmd_no).arg2 -= (ZCMD(zone, cmd_no).arg2 > rnum);
+            zone_get_cmd(zone, cmd_no)->arg2 -= (zone_get_cmd(zone, cmd_no)->arg2 > rnum);
           break;
       }
       if (changed) {

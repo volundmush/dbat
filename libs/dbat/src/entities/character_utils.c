@@ -1201,8 +1201,8 @@ const char *report_party_health(struct char_data *ch)
     }
     sprintf(result1, "@D[@BG@D]-------@mF@D------- -------@mF@D------- -------@mF@D------- -------@mF@D-------[@BG@D] <@RV@Y%s@R>@n\n", add_commas(char_get_combatexpertise(ch)));
     sprintf(result2, "@D[@BR@D]@C%-15s %-15s %-15s %-15s@D[@BR@D]@n\n", party1 ? get_i_name(ch, party1) : "Empty", party2 ? get_i_name(ch, party2) : "Empty", party3 ? get_i_name(ch, party3) : "Empty", party4 ? get_i_name(ch, party4) : "Empty");
-    sprintf(result3, "@D[@BO@D]@RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
-    sprintf(result4, "@D[@BU@D]@cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
+    sprintf(result3, "@D[@BO@D]@RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
+    sprintf(result4, "@D[@BU@D]@cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
     sprintf(result5, "@D[@BP@D]@gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s@D[@BP@D]@n", excol[stam1], exhaust[stam1], excol[stam2], exhaust[stam2], excol[stam3], exhaust[stam3], excol[stam4], exhaust[stam4]);
     ch->temp_prompt = str_printf("%s%s%s%s%s\n", result1, result2, result3, result4, result5);
     return (ch->temp_prompt);
@@ -1345,8 +1345,8 @@ const char *report_party_health(struct char_data *ch)
 
     sprintf(result1, "@D[@BG@D]-------@YL@D------- -------@mF@D------- -------@mF@D------- -------@mF@D-------[@BG@D]@n\n");
     sprintf(result2, "@D[@BR@D]@C%-15s %-15s %-15s %-15s@D[@BR@D]@n\n", party1 ? get_i_name(ch, party1) : "Empty", party2 ? get_i_name(ch, party2) : "Empty", party3 ? get_i_name(ch, party3) : "Empty", party4 ? get_i_name(ch, party4) : "Empty");
-    sprintf(result3, "@D[@BO@D]@RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
-    sprintf(result4, "@D[@BU@D]@cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
+    sprintf(result3, "@D[@BO@D]@RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s @RPL@D:%s%11" PRId64 "@w%s@D[@BO@D]@n\n", plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4, "%");
+    sprintf(result4, "@D[@BU@D]@cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s @cCharge@D:@B%7" PRId64 "@w%s@D[@BU@D]@n\n", kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
     sprintf(result5, "@D[@BP@D]@gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s@D[@BP@D]@n", excol[stam1], exhaust[stam1], excol[stam2], exhaust[stam2], excol[stam3], exhaust[stam3], excol[stam4], exhaust[stam4]);
     ch->temp_prompt = str_printf("%s%s%s%s%s\n", result1, result2, result3, result4, result5);
     return (ch->temp_prompt);
@@ -7307,4 +7307,74 @@ const char *char_class_abbr(const struct char_data *ch)
 const char *char_race_abbr(const struct char_data *ch)
 {
   return race_abbrevs[ch->race];
+}
+
+char *char_get_alias(const struct char_data *ch)
+{
+  return ch->name;
+}
+
+void char_set_alias(struct char_data *ch, char *v)
+{
+  ch->name = v;
+}
+
+char *char_get_sdesc(const struct char_data *ch)
+{
+  return ch->short_descr;
+}
+
+void char_set_sdesc(struct char_data *ch, char *v)
+{
+  ch->short_descr = v;
+}
+
+char *char_get_ldesc(const struct char_data *ch)
+{
+  return ch->long_descr;
+}
+
+void char_set_ldesc(struct char_data *ch, char *v)
+{
+  ch->long_descr = v;
+}
+
+char *char_get_ddesc(const struct char_data *ch)
+{
+  return ch->description;
+}
+
+void char_set_ddesc(struct char_data *ch, char *v)
+{
+  ch->description = v;
+}
+
+int8_t char_get_mob_specials_damnodice(const struct char_data *ch)
+{
+  return ch->mob_specials.damnodice;
+}
+
+void char_set_mob_specials_damnodice(struct char_data *ch, int8_t v)
+{
+  ch->mob_specials.damnodice = v;
+}
+
+int8_t char_get_mob_specials_damsizedice(const struct char_data *ch)
+{
+  return ch->mob_specials.damsizedice;
+}
+
+void char_set_mob_specials_damsizedice(struct char_data *ch, int8_t v)
+{
+  ch->mob_specials.damsizedice = v;
+}
+
+int8_t char_get_mob_specials_attack_type(const struct char_data *ch)
+{
+  return ch->mob_specials.attack_type;
+}
+
+void char_set_mob_specials_attack_type(struct char_data *ch, int8_t v)
+{
+  ch->mob_specials.attack_type = v;
 }

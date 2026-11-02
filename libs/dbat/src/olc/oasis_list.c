@@ -285,18 +285,18 @@ static void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, sho
                "----- ------- ---------------------------------------------\r\n");
 
   for (i = 0; i <= top_shop; i++) {
-    if (SHOP_NUM(i) >= bottom && SHOP_NUM(i) <= top) {
+    if (rshop_get_vnum(i) >= bottom && rshop_get_vnum(i) <= top) {
       counter++;
 
-      send_to_char(ch, "@g%4d@n) [@g%-5d@n]", counter, SHOP_NUM(i));
+      send_to_char(ch, "@g%4d@n) [@g%-5d@n]", counter, rshop_get_vnum(i));
 
       /************************************************************************/
       /** Retrieve the list of rooms for this shop.                          **/
       /************************************************************************/
 
-      for (j = 0; SHOP_ROOM(i, j) != NOWHERE; j++)
+      for (j = 0; rshop_get_room(i, j) != NOWHERE; j++)
         send_to_char(ch, "%s@c[@y%d@c]@n",
-                     ((j > 0) && (j % 8 == 0)) ? "\r\n              " : " ", SHOP_ROOM(i, j));
+                     ((j > 0) && (j % 8 == 0)) ? "\r\n              " : " ", rshop_get_room(i, j));
 
       if (j == 0)
         send_to_char(ch, "@cNone.@n");

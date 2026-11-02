@@ -8,3 +8,6 @@ bool zone_data_toggle_flag(struct zone_data *zone, int flag);
 
 #include "dbat/zones.h"
 #include "dbat/zone_utils.h"
+
+struct reset_com;
+struct reset_com *zone_get_cmd(zone_rnum zone, int n);

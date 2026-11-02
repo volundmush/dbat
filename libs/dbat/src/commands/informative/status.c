@@ -742,7 +742,7 @@ ACMD(do_status)
       send_to_char(ch, "         You are surrounded by flames!@n\r\n");
     }
     if (char_get_suppression(ch) > 0) {
-      send_to_char(ch, "         You are suppressing current PL to %" I64T ".\r\n", char_get_suppression(ch));
+      send_to_char(ch, "         You are suppressing current PL to %" PRId64 ".\r\n", char_get_suppression(ch));
     }
     if (char_is_majin(ch)) {
       send_to_char(ch, "         You have ingested %d people.\r\n", char_get_absorbs(ch));
@@ -1358,7 +1358,7 @@ ACMD(do_levels)
     if (i == 100)
       nlen = snprintf(buf + len, sizeof(buf) - len, "[100] %8s          : \r\n", add_commas(level_exp(ch, 100)));
     else
-      nlen = snprintf(buf + len, sizeof(buf) - len, "[%2" SZT "] %8s-%-8s : \r\n", i,
+      nlen = snprintf(buf + len, sizeof(buf) - len, "[%2zu] %8s-%-8s : \r\n", i,
                       add_commas(level_exp(ch, i)), add_commas(level_exp(ch, i + 1) - 1));
     if (len + nlen >= sizeof(buf) || nlen < 0)
       break;

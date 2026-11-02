@@ -253,23 +253,23 @@ static void zedit_setup(struct descriptor_data *d, int room_num)
   /*
    * Add all entries in zone_table that relate to this room.
    */
-  while (ZCMD(OLC_ZNUM(d), subcmd).command != 'S') {
-    switch (ZCMD(OLC_ZNUM(d), subcmd).command) {
+  while (zone_get_cmd(OLC_ZNUM(d), subcmd)->command != 'S') {
+    switch (zone_get_cmd(OLC_ZNUM(d), subcmd)->command) {
       case 'M':
       case 'O':
       case 'T':
       case 'V':
-        cmd_room = ZCMD(OLC_ZNUM(d), subcmd).arg3;
+        cmd_room = zone_get_cmd(OLC_ZNUM(d), subcmd)->arg3;
         break;
       case 'D':
       case 'R':
-        cmd_room = ZCMD(OLC_ZNUM(d), subcmd).arg1;
+        cmd_room = zone_get_cmd(OLC_ZNUM(d), subcmd)->arg1;
         break;
       default:
         break;
     }
     if (cmd_room == room_num) {
-      add_cmd_to_list(&(zone->cmd), &ZCMD(OLC_ZNUM(d), subcmd), count);
+      add_cmd_to_list(&(zone->cmd), zone_get_cmd(OLC_ZNUM(d), subcmd), count);
       count++;
     }
     subcmd++;

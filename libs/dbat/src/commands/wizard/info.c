@@ -378,7 +378,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
   send_to_char(ch, "VNum: [@g%5d@n], RNum: [%5d], Idnum: [%5d], Type: %s, SpecProc: %s\r\n",
                vnum, obj_get_item_number(j), obj_get_id(j), buf, obj_get_spec(j) ? "Exists" : "None");
 
-  send_to_char(ch, "Generation time: @g%s@nUnique ID: @g%" I64T "@n\r\n",
+  send_to_char(ch, "Generation time: @g%s@nUnique ID: @g%" PRId64 "@n\r\n",
                ctime(&j->generation), j->unique_id);
 
   send_to_char(ch, "Object Hit Points: [ @g%3d@n/@g%3d@n]\r\n",
@@ -411,7 +411,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j)
   sprintbitarray(obj_get_extra_flags(j), extra_bits, EF_ARRAY_MAX, buf, sizeof(buf));
   send_to_char(ch, "Extra flags   : %s\r\n", buf);
 
-  send_to_char(ch, "Weight: %" I64T ", Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n",
+  send_to_char(ch, "Weight: %" PRId64 ", Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n",
                obj_get_weight(j), obj_get_cost(j), obj_get_cost_per_day(j), obj_get_timer(j), obj_get_level(j));
 
   send_to_char(ch, "In room: %d (%s), ", rroom_get_vnum(obj_get_in_room(j)),
@@ -588,7 +588,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k)
     snprintf(buf, sizeof(buf), "%s", char_sensei_name(k));
   }
   snprintf(buf2, sizeof(buf2), "%s", char_true_race_name(k));
-  send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d(%dHD+%dcl+%d)@n], XP: [@y%" I64T "@n]\r\n",
+  send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d(%dHD+%dcl+%d)@n], XP: [@y%" PRId64 "@n]\r\n",
                buf, buf2, char_get_level(k), char_get_race_level(k),
                char_get_class_level(k), char_get_level_adj(k), char_get_exp(k));
 
@@ -1172,7 +1172,7 @@ ACMD(do_show)
       }
       send_to_char(ch, "Player: %-12s (%s) [%2d %s %s]\r\n", char_get_name(vict),
                    genders[(int)char_get_sex(vict)], char_get_level(vict), char_class_abbr(vict), char_race_abbr(vict));
-      send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %" I64T "  Align: %-5d\r\n",
+      send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %" PRId64 "  Align: %-5d\r\n",
                    char_get_gold(vict), char_get_bank_gold(vict), char_get_exp(vict),
                    char_get_alignment(vict));
       if (CONFIG_ALLOW_MULTICLASS)
@@ -1704,7 +1704,7 @@ ACMD(do_zcheck)
 
       if (char_get_exp(mob) > MAX_EXP_ALLOWED && (found = 1))
         len += snprintf(buf + len, sizeof(buf) - len,
-                        "- Has %" I64T " experience (limit: %d)\r\n",
+                        "- Has %" PRId64 " experience (limit: %d)\r\n",
                         char_get_exp(mob), MAX_EXP_ALLOWED);
       if (char_aff_flagged(mob, AFF_GROUP | AFF_CHARM | AFF_POISON) && (found = 1))
         len += snprintf(buf + len, sizeof(buf) - len,
@@ -1776,7 +1776,7 @@ ACMD(do_zcheck)
              obj_get_cost_per_day(obj)) &&
             (found = 1))
           len += snprintf(buf + len, sizeof(buf) - len,
-                          "- is NO_TAKE, but has cost (%d) weight (%" I64T ") or rent (%d) set.\r\n",
+                          "- is NO_TAKE, but has cost (%d) weight (%" PRId64 ") or rent (%d) set.\r\n",
                           obj_get_cost(obj), obj_get_weight(obj), obj_get_cost_per_day(obj));
       } else {
         if (obj_get_cost(obj) == 0 && (found = 1))
@@ -1789,7 +1789,7 @@ ACMD(do_zcheck)
 
         if (obj_get_weight(obj) > MAX_OBJ_WEIGHT && (found = 1))
           len += snprintf(buf + len, sizeof(buf) - len,
-                          "  Weight is too high: %" I64T " (limit  %d).\r\n",
+                          "  Weight is too high: %" PRId64 " (limit  %d).\r\n",
                           obj_get_weight(obj), MAX_OBJ_WEIGHT);
 
         if (obj_get_cost(obj) > MAX_OBJ_COST && (found = 1))
@@ -1900,7 +1900,7 @@ ACMD(do_zcheck)
 
       if ((MIN_ROOM_DESC_LENGTH) && strlen(world[i].description) < MIN_ROOM_DESC_LENGTH && (found = 1))
         len += snprintf(buf + len, sizeof(buf) - len,
-                        "- Room description is too short. (%4.4" SZT " of min. %d characters).\r\n",
+                        "- Room description is too short. (%4.4zu of min. %d characters).\r\n",
                         strlen(world[i].description), MIN_ROOM_DESC_LENGTH);
 
       if (strncmp(world[i].description, "   ", 3) && (found = 1))

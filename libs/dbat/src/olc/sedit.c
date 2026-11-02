@@ -190,32 +190,37 @@ static void sedit_setup_new(struct descriptor_data *d)
   /*
    * Fill in some default values.
    */
-  S_KEEPER(shop)     = NOBODY;
-  S_CLOSE1(shop)     = 28;
-  S_BUYPROFIT(shop)  = 1.0;
-  S_SELLPROFIT(shop) = 1.0;
+  shop_set_keeper(shop, NOBODY);
+  shop_set_close1(shop, 28);
+  shop_set_profit_buy(shop, 1.0);
+  shop_set_profit_sell(shop, 1.0);
   /*
    * Add a spice of default strings.
    */
-  S_NOITEM1(shop) = strdup(shop_default_msgs[SHOP_MSG_NOITEM1]);
-  S_NOITEM2(shop) = strdup(shop_default_msgs[SHOP_MSG_NOITEM2]);
-  S_NOCASH1(shop) = strdup(shop_default_msgs[SHOP_MSG_NOCASH1]);
-  S_NOCASH2(shop) = strdup(shop_default_msgs[SHOP_MSG_NOCASH2]);
-  S_NOBUY(shop)   = strdup(shop_default_msgs[SHOP_MSG_NOBUY]);
-  S_BUY(shop)     = strdup(shop_default_msgs[SHOP_MSG_BUY]);
-  S_SELL(shop)    = strdup(shop_default_msgs[SHOP_MSG_SELL]);
+  shop_set_no_such_item1(shop, strdup(shop_default_msgs[SHOP_MSG_NOITEM1]));
+  shop_set_no_such_item2(shop, strdup(shop_default_msgs[SHOP_MSG_NOITEM2]));
+  shop_set_missing_cash1(shop, strdup(shop_default_msgs[SHOP_MSG_NOCASH1]));
+  shop_set_missing_cash2(shop, strdup(shop_default_msgs[SHOP_MSG_NOCASH2]));
+  shop_set_do_not_buy(shop, strdup(shop_default_msgs[SHOP_MSG_NOBUY]));
+  shop_set_message_buy(shop, strdup(shop_default_msgs[SHOP_MSG_BUY]));
+  shop_set_message_sell(shop, strdup(shop_default_msgs[SHOP_MSG_SELL]));
   /*
    * Stir the lists lightly.
    */
-  CREATE(S_PRODUCTS(shop), obj_vnum, 1);
+  obj_vnum *products;
+  room_vnum *rooms;
+  struct shop_buy_data *buy_types;
 
-  S_PRODUCT(shop, 0) = NOTHING;
-  CREATE(S_ROOMS(shop), room_rnum, 1);
+  CREATE(products, obj_vnum, 1);
+  shop_set_products(shop, products);
+  shop_set_product(shop, 0, NOTHING);
+  CREATE(rooms, room_vnum, 1);
+  shop_set_rooms(shop, rooms);
+  shop_set_room(shop, 0, NOWHERE);
+  CREATE(buy_types, struct shop_buy_data, 1);
+  shop_set_buy_types(shop, buy_types);
 
-  S_ROOM(shop, 0) = NOWHERE;
-  CREATE(S_NAMELISTS(shop), struct shop_buy_data, 1);
-
-  S_BUYTYPE(shop, 0) = NOTHING;
+  shop_set_buy_type(shop, 0, NOTHING);
   shop_trade_set(shop, TRADE_NOBROKEN, true);
 
   /*
@@ -250,10 +255,10 @@ static void sedit_products_menu(struct descriptor_data *d)
 
   clear_screen(d);
   write_to_output(d, "##     VNUM     Product\r\n");
-  for (i = 0; S_PRODUCT(shop, i) != NOTHING; i++) {
+  for (i = 0; shop_get_product(shop, i) != NOTHING; i++) {
     write_to_output(d, "%2d - [@c%5d@n] - @y%s@n\r\n", i,
-                    obj_index[S_PRODUCT(shop, i)].vnum,
-                    obj_proto[S_PRODUCT(shop, i)].short_description);
+                    obj_index[shop_get_product(shop, i)].vnum,
+                    obj_proto[shop_get_product(shop, i)].short_description);
   }
   write_to_output(d, "\r\n"
                      "@gA@n) Add a new product.\r\n"
@@ -274,8 +279,8 @@ static void sedit_compact_rooms_menu(struct descriptor_data *d)
   shop = OLC_SHOP(d);
 
   clear_screen(d);
-  for (i = 0; S_ROOM(shop, i) != NOWHERE; i++) {
-    write_to_output(d, "%2d - [@c%5d@n]  | %s", i, S_ROOM(shop, i),
+  for (i = 0; shop_get_room(shop, i) != NOWHERE; i++) {
+    write_to_output(d, "%2d - [@c%5d@n]  | %s", i, shop_get_room(shop, i),
                     !(++count % 5) ? "\r\n" : "");
   }
   write_to_output(d, "\r\n"
@@ -299,9 +304,9 @@ static void sedit_rooms_menu(struct descriptor_data *d)
 
   clear_screen(d);
   write_to_output(d, "##     VNUM     Room\r\n\r\n");
-  for (i = 0; S_ROOM(shop, i) != NOWHERE; i++) {
-    if (real_room(S_ROOM(shop, i)) != NOWHERE) {
-      write_to_output(d, "%2d - [@c%5d@n] - @y%s@n\r\n", i, S_ROOM(shop, i), world[real_room(S_ROOM(shop, i))].name);
+  for (i = 0; shop_get_room(shop, i) != NOWHERE; i++) {
+    if (real_room(shop_get_room(shop, i)) != NOWHERE) {
+      write_to_output(d, "%2d - [@c%5d@n] - @y%s@n\r\n", i, shop_get_room(shop, i), world[real_room(shop_get_room(shop, i))].name);
     } else {
       write_to_output(d, "%2d - [@R!Removed Room!@n]\r\n", i);
     }
@@ -327,10 +332,10 @@ static void sedit_namelist_menu(struct descriptor_data *d)
 
   clear_screen(d);
   write_to_output(d, "##              Type   Namelist\r\n\r\n");
-  for (i = 0; S_BUYTYPE(shop, i) != NOTHING; i++) {
+  for (i = 0; shop_get_buy_type(shop, i) != NOTHING; i++) {
     write_to_output(d, "%2d - @c%15s@n - @y%s@n\r\n", i,
-                    item_types[S_BUYTYPE(shop, i)],
-                    S_BUYWORD(shop, i) ? S_BUYWORD(shop, i) : "<None>");
+                    item_types[shop_get_buy_type(shop, i)],
+                    shop_get_buy_word(shop, i) ? shop_get_buy_word(shop, i) : "<None>");
   }
   write_to_output(d, "\r\n"
                      "@gA@n) Add a new entry.\r\n"
@@ -353,7 +358,7 @@ static void sedit_shop_flags_menu(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s   %s", i + 1, shop_bits[i],
                     !(++count % 2) ? "\r\n" : "");
   }
-  sprintbit(S_BITVECTOR(OLC_SHOP(d)), shop_bits, bits, sizeof(bits));
+  sprintbit(shop_get_bitvector(OLC_SHOP(d)), shop_bits, bits, sizeof(bits));
   write_to_output(d, "\r\nCurrent Shop Flags : @c%s@n\r\nEnter choice : ", bits);
   OLC_MODE(d) = SEDIT_SHOP_FLAGS;
 }
@@ -370,7 +375,7 @@ static void sedit_no_trade_menu(struct descriptor_data *d)
     write_to_output(d, "@g%2d@n) %-20.20s   %s", i + 1, trade_letters[i],
                     !(++count % 2) ? "\r\n" : "");
   }
-  sprintbitarray(S_NOTRADE(OLC_SHOP(d)), trade_letters, 4, bits, sizeof(bits));
+  sprintbitarray(shop_get_with_who(OLC_SHOP(d)), trade_letters, 4, bits, sizeof(bits));
   write_to_output(d, "\r\nCurrently won't trade with: @c%s@n\r\n"
                      "Enter choice : ",
                   bits);
@@ -406,8 +411,8 @@ static void sedit_disp_menu(struct descriptor_data *d)
   shop = OLC_SHOP(d);
 
   clear_screen(d);
-  sprintbitarray(S_NOTRADE(shop), trade_letters, 4, buf1, sizeof(buf1));
-  sprintbit(S_BITVECTOR(shop), shop_bits, buf2, sizeof(buf2));
+  sprintbitarray(shop_get_with_who(shop), trade_letters, 4, buf1, sizeof(buf1));
+  sprintbit(shop_get_bitvector(shop), shop_bits, buf2, sizeof(buf2));
   write_to_output(d,
                   "-- Shop Number : [@c%d@n]\r\n"
                   "@g0@n) Keeper      : [@c%d@n] @y%s\r\n"
@@ -431,21 +436,21 @@ static void sedit_disp_menu(struct descriptor_data *d)
                   "Enter Choice : ",
 
                   OLC_NUM(d),
-                  S_KEEPER(shop) == NOBODY ? -1 : mob_index[S_KEEPER(shop)].vnum,
-                  S_KEEPER(shop) == NOBODY ? "None" : mob_proto[S_KEEPER(shop)].short_descr,
-                  S_OPEN1(shop),
-                  S_CLOSE1(shop),
-                  S_OPEN2(shop),
-                  S_CLOSE2(shop),
-                  S_BUYPROFIT(shop),
-                  S_SELLPROFIT(shop),
-                  S_NOITEM1(shop),
-                  S_NOITEM2(shop),
-                  S_NOCASH1(shop),
-                  S_NOCASH2(shop),
-                  S_NOBUY(shop),
-                  S_BUY(shop),
-                  S_SELL(shop),
+                  shop_get_keeper(shop) == NOBODY ? -1 : mob_index[shop_get_keeper(shop)].vnum,
+                  shop_get_keeper(shop) == NOBODY ? "None" : mob_proto[shop_get_keeper(shop)].short_descr,
+                  shop_get_open1(shop),
+                  shop_get_close1(shop),
+                  shop_get_open2(shop),
+                  shop_get_close2(shop),
+                  shop_get_profit_buy(shop),
+                  shop_get_profit_sell(shop),
+                  shop_get_no_such_item1(shop),
+                  shop_get_no_such_item2(shop),
+                  shop_get_missing_cash1(shop),
+                  shop_get_missing_cash2(shop),
+                  shop_get_do_not_buy(shop),
+                  shop_get_message_buy(shop),
+                  shop_get_message_sell(shop),
                   buf1,
                   buf2);
 
@@ -682,39 +687,39 @@ void sedit_parse(struct descriptor_data *d, char *arg)
      */
     case SEDIT_NOITEM1:
       if (genolc_checkstring(d, arg))
-        sedit_set_message(d, &S_NOITEM1(OLC_SHOP(d)), arg, false);
+        sedit_set_message(d, &((OLC_SHOP(d))->no_such_item1), arg, false);
       break;
     case SEDIT_NOITEM2:
       if (genolc_checkstring(d, arg))
-        sedit_set_message(d, &S_NOITEM2(OLC_SHOP(d)), arg, false);
+        sedit_set_message(d, &((OLC_SHOP(d))->no_such_item2), arg, false);
       break;
     case SEDIT_NOCASH1:
       if (genolc_checkstring(d, arg))
-        sedit_set_message(d, &S_NOCASH1(OLC_SHOP(d)), arg, false);
+        sedit_set_message(d, &((OLC_SHOP(d))->missing_cash1), arg, false);
       break;
     case SEDIT_NOCASH2:
       if (genolc_checkstring(d, arg))
-        sedit_set_message(d, &S_NOCASH2(OLC_SHOP(d)), arg, false);
+        sedit_set_message(d, &((OLC_SHOP(d))->missing_cash2), arg, false);
       break;
     case SEDIT_NOBUY:
       if (genolc_checkstring(d, arg))
-        sedit_set_message(d, &S_NOBUY(OLC_SHOP(d)), arg, false);
+        sedit_set_message(d, &((OLC_SHOP(d))->do_not_buy), arg, false);
       break;
     case SEDIT_BUY:
       if (genolc_checkstring(d, arg))
-        sedit_set_message(d, &S_BUY(OLC_SHOP(d)), arg, true);
+        sedit_set_message(d, &((OLC_SHOP(d))->message_buy), arg, true);
       break;
     case SEDIT_SELL:
       if (genolc_checkstring(d, arg))
-        sedit_set_message(d, &S_SELL(OLC_SHOP(d)), arg, true);
+        sedit_set_message(d, &((OLC_SHOP(d))->message_sell), arg, true);
       break;
     case SEDIT_NAMELIST:
       if (genolc_checkstring(d, arg)) {
         struct shop_buy_data new_entry;
 
-        BUY_TYPE(new_entry) = OLC_VAL(d);
-        BUY_WORD(new_entry) = strdup(arg);
-        add_to_type_list(&(S_NAMELISTS(OLC_SHOP(d))), &new_entry);
+        shop_buy_set_type(&(new_entry), OLC_VAL(d));
+        shop_buy_set_keywords(&(new_entry), strdup(arg));
+        add_to_type_list(&(OLC_SHOP(d))->type, &new_entry);
       }
       sedit_namelist_menu(d);
       return;
@@ -730,32 +735,32 @@ void sedit_parse(struct descriptor_data *d, char *arg)
           write_to_output(d, "That mobile does not exist, try again : ");
           return;
         }
-      S_KEEPER(OLC_SHOP(d)) = i;
+      shop_set_keeper(OLC_SHOP(d), i);
       if (i == -1)
         break;
       /*
      * Fiddle with special procs.
      */
-      S_FUNC(OLC_SHOP(d)) = mob_index[i].func != shop_keeper ? mob_index[i].func : nullptr;
-      mob_index[i].func   = shop_keeper;
+      shop_set_func(OLC_SHOP(d), mob_index[i].func != shop_keeper ? mob_index[i].func : nullptr);
+      mob_index[i].func = shop_keeper;
       break;
     case SEDIT_OPEN1:
-      S_OPEN1(OLC_SHOP(d)) = LIMIT(atoi(arg), 0, 28);
+      shop_set_open1(OLC_SHOP(d), LIMIT(atoi(arg), 0, 28));
       break;
     case SEDIT_OPEN2:
-      S_OPEN2(OLC_SHOP(d)) = LIMIT(atoi(arg), 0, 28);
+      shop_set_open2(OLC_SHOP(d), LIMIT(atoi(arg), 0, 28));
       break;
     case SEDIT_CLOSE1:
-      S_CLOSE1(OLC_SHOP(d)) = LIMIT(atoi(arg), 0, 28);
+      shop_set_close1(OLC_SHOP(d), LIMIT(atoi(arg), 0, 28));
       break;
     case SEDIT_CLOSE2:
-      S_CLOSE2(OLC_SHOP(d)) = LIMIT(atoi(arg), 0, 28);
+      shop_set_close2(OLC_SHOP(d), LIMIT(atoi(arg), 0, 28));
       break;
     case SEDIT_BUY_PROFIT:
-      sscanf(arg, "%f", &S_BUYPROFIT(OLC_SHOP(d)));
+      sscanf(arg, "%f", &((OLC_SHOP(d))->profit_buy));
       break;
     case SEDIT_SELL_PROFIT:
-      sscanf(arg, "%f", &S_SELLPROFIT(OLC_SHOP(d)));
+      sscanf(arg, "%f", &((OLC_SHOP(d))->profit_sell));
       break;
     case SEDIT_TYPE_MENU:
       OLC_VAL(d) = LIMIT(atoi(arg), 0, NUM_ITEM_TYPES - 1);
@@ -763,7 +768,7 @@ void sedit_parse(struct descriptor_data *d, char *arg)
       OLC_MODE(d) = SEDIT_NAMELIST;
       return;
     case SEDIT_DELETE_TYPE:
-      remove_from_type_list(&(S_NAMELISTS(OLC_SHOP(d))), atoi(arg));
+      remove_from_type_list(&(OLC_SHOP(d))->type, atoi(arg));
       sedit_namelist_menu(d);
       return;
     case SEDIT_NEW_PRODUCT:
@@ -773,11 +778,11 @@ void sedit_parse(struct descriptor_data *d, char *arg)
           return;
         }
       if (i > 0)
-        add_to_int_list(&(S_PRODUCTS(OLC_SHOP(d))), i);
+        add_to_int_list(&(OLC_SHOP(d))->producing, i);
       sedit_products_menu(d);
       return;
     case SEDIT_DELETE_PRODUCT:
-      remove_from_int_list(&(S_PRODUCTS(OLC_SHOP(d))), atoi(arg));
+      remove_from_int_list(&(OLC_SHOP(d))->producing, atoi(arg));
       sedit_products_menu(d);
       return;
     case SEDIT_NEW_ROOM:
@@ -787,16 +792,16 @@ void sedit_parse(struct descriptor_data *d, char *arg)
           return;
         }
       if (i >= 0)
-        add_to_int_list(&(S_ROOMS(OLC_SHOP(d))), atoi(arg));
+        add_to_int_list(&(OLC_SHOP(d))->in_room, atoi(arg));
       sedit_rooms_menu(d);
       return;
     case SEDIT_DELETE_ROOM:
-      remove_from_int_list(&(S_ROOMS(OLC_SHOP(d))), atoi(arg));
+      remove_from_int_list(&(OLC_SHOP(d))->in_room, atoi(arg));
       sedit_rooms_menu(d);
       return;
     case SEDIT_SHOP_FLAGS:
       if ((i = LIMIT(atoi(arg), 0, NUM_SHOP_FLAGS)) > 0) {
-        TOGGLE_BIT(S_BITVECTOR(OLC_SHOP(d)), 1U << (i - 1));
+        shop_set_bitvector(OLC_SHOP(d), shop_get_bitvector(OLC_SHOP(d)) ^ (1U << (i - 1)));
         sedit_shop_flags_menu(d);
         return;
       }

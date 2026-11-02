@@ -87,11 +87,15 @@ void build_player_index(void)
   for (i = 0; i < rec_count; i++) {
     get_line(plr_index, line);
     player_table[i].admlevel = ADMLVL_NONE; /* In case they're not in the index yet */
-    sscanf(line, "%ld %s %d %s %ld %d %d %d %ld", &player_table[i].id, arg2,
-           &player_table[i].level, bits, &player_table[i].last, &player_table[i].admlevel, &player_table[i].ship, &player_table[i].shiproom, &player_table[i].played);
-    player_table[i].name  = strdup(arg2);
-    player_table[i].flags = asciiflag_conv(bits);
-    top_idnum             = MAX(top_idnum, player_table[i].id);
+    long long last = 0, played = 0;
+
+    sscanf(line, "%ld %s %d %s %lld %d %d %d %lld", &player_table[i].id, arg2,
+           &player_table[i].level, bits, &last, &player_table[i].admlevel, &player_table[i].ship, &player_table[i].shiproom, &played);
+    player_table[i].last   = last;
+    player_table[i].played = played;
+    player_table[i].name   = strdup(arg2);
+    player_table[i].flags  = asciiflag_conv(bits);
+    top_idnum              = MAX(top_idnum, player_table[i].id);
   }
 
   fclose(plr_index);
@@ -146,9 +150,9 @@ void save_player_index(void)
   for (i = 0; i <= top_of_p_table; i++)
     if (*player_table[i].name) {
       sprintascii(bits, player_table[i].flags);
-      fprintf(index_file, "%ld %s %d %s %ld %d %d %d %ld\n", player_table[i].id,
+      fprintf(index_file, "%ld %s %d %s %lld %d %d %d %lld\n", player_table[i].id,
               player_table[i].name, player_table[i].level, *bits ? bits : "0",
-              player_table[i].last, player_table[i].admlevel, player_table[i].ship, player_table[i].shiproom, player_table[i].played);
+              (long long)player_table[i].last, player_table[i].admlevel, player_table[i].ship, player_table[i].shiproom, (long long)player_table[i].played);
     }
   fprintf(index_file, "~\n");
 
@@ -414,15 +418,15 @@ int load_char(const char *name, struct char_data *ch)
           else if (!strcmp(tag, "Bank")) char_set_bank_gold(ch, atoi(line));
           else if (!strcmp(tag, "Bki ")) load_BASE(ch, line, LOAD_MANA);
           else if (!strcmp(tag, "Blss")) char_set_blesslvl(ch, atoi(line));
-          else if (!strcmp(tag, "Boam")) char_set_lboard(ch, 0, atoi(line));
-          else if (!strcmp(tag, "Boai")) char_set_lboard(ch, 1, atoi(line));
-          else if (!strcmp(tag, "Boac")) char_set_lboard(ch, 2, atoi(line));
-          else if (!strcmp(tag, "Boad")) char_set_lboard(ch, 3, atoi(line));
-          else if (!strcmp(tag, "Boab")) char_set_lboard(ch, 4, atoi(line));
+          else if (!strcmp(tag, "Boam")) char_set_lboard(ch, 0, atoll(line));
+          else if (!strcmp(tag, "Boai")) char_set_lboard(ch, 1, atoll(line));
+          else if (!strcmp(tag, "Boac")) char_set_lboard(ch, 2, atoll(line));
+          else if (!strcmp(tag, "Boad")) char_set_lboard(ch, 3, atoll(line));
+          else if (!strcmp(tag, "Boab")) char_set_lboard(ch, 4, atoll(line));
           else if (!strcmp(tag, "Bonu")) load_bonuses(fl, ch, false);
           else if (!strcmp(tag, "Boos")) char_set_boosts(ch, atoi(line));
           else if (!strcmp(tag, "Bpl ")) load_BASE(ch, line, LOAD_HIT);
-          else if (!strcmp(tag, "Brth")) ch->time.birth = atol(line);
+          else if (!strcmp(tag, "Brth")) ch->time.birth = atoll(line);
           else if (!strcmp(tag, "Bst ")) load_BASE(ch, line, LOAD_MOVE);
           break;
 
@@ -438,11 +442,11 @@ int load_char(const char *name, struct char_data *ch)
             ch->player_specials->color_choices[num] = strdup(buf2);
           } else if (!strcmp(tag, "Con ")) ch->real_abils.con = atoi(line);
           else if (!strcmp(tag, "Cool")) char_set_con_cooldown(ch, atoi(line));
-          else if (!strcmp(tag, "Crtd")) ch->time.created = atol(line);
+          else if (!strcmp(tag, "Crtd")) ch->time.created = atoll(line);
           break;
 
         case 'D':
-          if (!strcmp(tag, "Deat")) char_set_deathtime(ch, atoi(line));
+          if (!strcmp(tag, "Deat")) char_set_deathtime(ch, atoll(line));
           else if (!strcmp(tag, "Deac")) char_set_dcount(ch, atoi(line));
           else if (!strcmp(tag, "Desc")) ch->description = fread_string(fl, buf2);
           else if (!strcmp(tag, "Dex ")) ch->real_abils.dex = atoi(line);
@@ -504,7 +508,7 @@ int load_char(const char *name, struct char_data *ch)
           break;
 
         case 'L':
-          if (!strcmp(tag, "Last")) ch->time.logon = atol(line);
+          if (!strcmp(tag, "Last")) ch->time.logon = atoll(line);
           else if (!strcmp(tag, "Lern")) char_set_practice_points(ch, atoi(line));
           else if (!strcmp(tag, "Levl")) char_set_class_level(ch, atoi(line));
           /* else if (!strcmp(tag, "LevD"))  read_level_data(ch, fl);*/
@@ -514,8 +518,8 @@ int load_char(const char *name, struct char_data *ch)
           else if (!strcmp(tag, "Lill")) char_set_limb_condition(ch, (4) - 1, atoi(line));
           else if (!strcmp(tag, "Lira")) char_set_limb_condition(ch, (1) - 1, atoi(line));
           else if (!strcmp(tag, "Lirl")) char_set_limb_condition(ch, (3) - 1, atoi(line));
-          else if (!strcmp(tag, "Lint")) char_set_lastint(ch, atoi(line));
-          else if (!strcmp(tag, "Lpla")) char_set_lastpl(ch, atoi(line));
+          else if (!strcmp(tag, "Lint")) char_set_lastint(ch, atoll(line));
+          else if (!strcmp(tag, "Lpla")) char_set_lastpl(ch, atoll(line));
           else if (!strcmp(tag, "LvlA")) char_set_level_adj(ch, atoi(line));
           break;
 
@@ -529,7 +533,7 @@ int load_char(const char *name, struct char_data *ch)
           } else if (!strcmp(tag, "Maji")) char_set_majinize(ch, atoi(line));
           else if (!strcmp(tag, "Majm")) load_majin(ch, line);
           else if (!strcmp(tag, "Mimi")) ch->mimic = atoi(line);
-          else if (!strcmp(tag, "MxAg")) ch->time.maxage = atol(line);
+          else if (!strcmp(tag, "MxAg")) ch->time.maxage = atoll(line);
           break;
 
         case 'N':
@@ -544,7 +548,7 @@ int load_char(const char *name, struct char_data *ch)
           if (!strcmp(tag, "Page")) { /* old page-length setting: no longer used */
           } else if (!strcmp(tag, "Phas")) char_set_distfea(ch, atoi(line));
           else if (!strcmp(tag, "Phse")) char_set_starphase(ch, atoi(line));
-          else if (!strcmp(tag, "Plyd")) ch->time.played = atol(line);
+          else if (!strcmp(tag, "Plyd")) ch->time.played = atoll(line);
 #ifdef ASCII_SAVE_POOFS
           else if (!strcmp(tag, "PfIn")) char_set_poofin(ch, strdup(line));
           else if (!strcmp(tag, "PfOt")) char_set_poofout(ch, strdup(line));
@@ -571,7 +575,7 @@ int load_char(const char *name, struct char_data *ch)
           else if (!strcmp(tag, "RBan")) char_set_rbank(ch, atoi(line));
           else if (!strcmp(tag, "rDis")) char_set_rdisplay(ch, line);
           else if (!strcmp(tag, "Rela")) char_set_relax_count(ch, atoi(line));
-          else if (!strcmp(tag, "Rtim")) char_set_rewtime(ch, atoi(line));
+          else if (!strcmp(tag, "Rtim")) char_set_rewtime(ch, atoll(line));
           else if (!strcmp(tag, "Rad1")) char_set_radar1(ch, atoi(line));
           else if (!strcmp(tag, "Rad2")) char_set_radar2(ch, atoi(line));
           else if (!strcmp(tag, "Rad3")) char_set_radar3(ch, atoi(line));
@@ -842,11 +846,11 @@ void save_char(struct char_data *ch)
   if (char_get_level_adj(ch) != PFDEF_LEVEL) fprintf(fl, "LvlA: %d\n", char_get_level_adj(ch));
   if (char_get_hometown(ch) != PFDEF_HOMETOWN) fprintf(fl, "Home: %d\n", char_get_hometown(ch));
   fprintf(fl, "Id  : %d\n", char_get_idnum(ch));
-  fprintf(fl, "Brth: %ld\n", ch->time.birth);
-  fprintf(fl, "Crtd: %ld\n", ch->time.created);
-  fprintf(fl, "MxAg: %ld\n", ch->time.maxage);
-  fprintf(fl, "Plyd: %ld\n", ch->time.played);
-  fprintf(fl, "Last: %ld\n", ch->time.logon);
+  fprintf(fl, "Brth: %lld\n", (long long)ch->time.birth);
+  fprintf(fl, "Crtd: %lld\n", (long long)ch->time.created);
+  fprintf(fl, "MxAg: %lld\n", (long long)ch->time.maxage);
+  fprintf(fl, "Plyd: %lld\n", (long long)ch->time.played);
+  fprintf(fl, "Last: %lld\n", (long long)ch->time.logon);
 
   if (char_get_host(ch)) fprintf(fl, "Host: %s\n", char_get_host(ch));
   if (char_get_height(ch) != PFDEF_HEIGHT) fprintf(fl, "Hite: %d\n", char_get_height(ch));
@@ -900,13 +904,13 @@ void save_char(struct char_data *ch)
 
   /*
   if (GET_HIT(ch)	   != PFDEF_HIT  || GET_MAX_HIT(ch)  != PFDEF_MAXHIT)
-    fprintf(fl, "Hit : %" I64T "/%" I64T "\n", GET_HIT(ch),  GET_MAX_HIT(ch));
+    fprintf(fl, "Hit : %" PRId64 "/%" PRId64 "\n", GET_HIT(ch),  GET_MAX_HIT(ch));
   if ((getCurKI(ch))	   != PFDEF_MANA || GET_MAX_MANA(ch) != PFDEF_MAXMANA)
-    fprintf(fl, "Mana: %" I64T "/%" I64T "\n", (getCurKI(ch)), GET_MAX_MANA(ch));
+    fprintf(fl, "Mana: %" PRId64 "/%" PRId64 "\n", (getCurKI(ch)), GET_MAX_MANA(ch));
   if ((getCurST(ch))	   != PFDEF_MOVE || GET_MAX_MOVE(ch) != PFDEF_MAXMOVE)
-    fprintf(fl, "Move: %" I64T "/%" I64T "\n", (getCurST(ch)), GET_MAX_MOVE(ch));
+    fprintf(fl, "Move: %" PRId64 "/%" PRId64 "\n", (getCurST(ch)), GET_MAX_MOVE(ch));
   if (GET_KI(ch)	   != PFDEF_KI || GET_MAX_KI(ch) != PFDEF_MAXKI)
-    fprintf(fl, "Ki  : %" I64T "/%" I64T "\n", GET_KI(ch), GET_MAX_KI(ch));
+    fprintf(fl, "Ki  : %" PRId64 "/%" PRId64 "\n", GET_KI(ch), GET_MAX_KI(ch));
   */
   if (char_get_aff_abils_str(ch) != PFDEF_STR) fprintf(fl, "Str : %d\n", char_get_aff_abils_str(ch));
   if (char_get_aff_abils_intel(ch) != PFDEF_INT) fprintf(fl, "Int : %d\n", char_get_aff_abils_intel(ch));
@@ -926,10 +930,10 @@ void save_char(struct char_data *ch)
   if (char_get_kaioken(ch) != PFDEF_GOLD) fprintf(fl, "Kaio: %d\n", char_get_kaioken(ch));
   if (char_get_gold(ch) != PFDEF_GOLD) fprintf(fl, "Gold: %d\n", char_get_gold(ch));
   if (char_get_bank_gold(ch) != PFDEF_BANK) fprintf(fl, "Bank: %d\n", char_get_bank_gold(ch));
-  if (char_get_exp(ch) != PFDEF_EXP) fprintf(fl, "Exp : %" I64T "\n", char_get_exp(ch));
+  if (char_get_exp(ch) != PFDEF_EXP) fprintf(fl, "Exp : %" PRId64 "\n", char_get_exp(ch));
   if (char_get_transclass(ch) != PFDEF_EXP) fprintf(fl, "Tcla: %d\n", char_get_transclass(ch));
-  if (char_get_moltexp(ch) != PFDEF_EXP) fprintf(fl, "Mexp: %" I64T "\n", char_get_moltexp(ch));
-  if (char_get_majinizer(ch) != PFDEF_EXP) fprintf(fl, "Majm: %" I64T "\n", char_get_majinizer(ch));
+  if (char_get_moltexp(ch) != PFDEF_EXP) fprintf(fl, "Mexp: %" PRId64 "\n", char_get_moltexp(ch));
+  if (char_get_majinizer(ch) != PFDEF_EXP) fprintf(fl, "Majm: %" PRId64 "\n", char_get_majinizer(ch));
   if (char_get_moltlevel(ch) != PFDEF_EXP) fprintf(fl, "Mlvl: %d\n", char_get_moltlevel(ch));
   if (char_get_accuracy_mod(ch) != PFDEF_ACCURACY) fprintf(fl, "Fisd: %d\n", char_get_accuracy_mod(ch));
   if (char_get_accuracy(ch) != PFDEF_ACCURACY) fprintf(fl, "Pole: %d\n", char_get_accuracy(ch));
@@ -940,11 +944,11 @@ void save_char(struct char_data *ch)
   if (char_get_genome(ch, 0) != PFDEF_EYE) fprintf(fl, "Geno: %d\n", char_get_genome(ch, 0));
   if (char_get_genome(ch, 1) != PFDEF_EYE) fprintf(fl, "Gen1: %d\n", char_get_genome(ch, 1));
   if (char_get_position(ch) != POS_STANDING) fprintf(fl, "Posi: %d\n", char_get_position(ch));
-  //if ((getCurLF(ch))    != PFDEF_BASEPL)     fprintf(fl, "LF  : %" I64T "\n", (getCurLF(ch)));
+  //if ((getCurLF(ch))    != PFDEF_BASEPL)     fprintf(fl, "LF  : %" PRId64 "\n", (getCurLF(ch)));
   if (char_get_lifeperc(ch) != PFDEF_WEIGHT) fprintf(fl, "LFPC: %d\n", char_get_lifeperc(ch));
-  if (getBasePL(ch) != PFDEF_BASEPL) fprintf(fl, "Bpl : %" I64T "\n", getBasePL(ch));
-  if (getBaseKI(ch) != PFDEF_BASEKI) fprintf(fl, "Bki : %" I64T "\n", getBaseKI(ch));
-  if (getBaseST(ch) != PFDEF_BASEST) fprintf(fl, "Bst : %" I64T "\n", getBaseST(ch));
+  if (getBasePL(ch) != PFDEF_BASEPL) fprintf(fl, "Bpl : %" PRId64 "\n", getBasePL(ch));
+  if (getBaseKI(ch) != PFDEF_BASEKI) fprintf(fl, "Bki : %" PRId64 "\n", getBaseKI(ch));
+  if (getBaseST(ch) != PFDEF_BASEST) fprintf(fl, "Bst : %" PRId64 "\n", getBaseST(ch));
   if (char_get_droom(ch) != PFDEF_DROOM) fprintf(fl, "Droo: %d\n", char_get_droom(ch));
   if (char_get_hairl(ch) != PFDEF_HAIRL) fprintf(fl, "Hrl : %d\n", char_get_hairl(ch));
   if (char_get_hairs(ch) != PFDEF_HAIRS) fprintf(fl, "Hrs : %d\n", char_get_hairs(ch));
@@ -956,26 +960,26 @@ void save_char(struct char_data *ch)
   if (char_get_radar1(ch) != PFDEF_RADAR1) fprintf(fl, "Rad1: %d\n", char_get_radar1(ch));
   if (char_get_radar2(ch) != PFDEF_RADAR2) fprintf(fl, "Rad2: %d\n", char_get_radar2(ch));
   if (char_get_radar3(ch) != PFDEF_RADAR3) fprintf(fl, "Rad3: %d\n", char_get_radar3(ch));
-  if (char_get_lastpl(ch) != PFDEF_LPLAY) fprintf(fl, "Lpla: %ld\n", char_get_lastpl(ch));
-  if (char_get_lastint(ch) != PFDEF_LPLAY) fprintf(fl, "Lint: %ld\n", char_get_lastint(ch));
-  if (char_get_deathtime(ch) != PFDEF_LPLAY) fprintf(fl, "Deat: %ld\n", char_get_deathtime(ch));
-  if (char_get_rewtime(ch) != PFDEF_LPLAY) fprintf(fl, "Rtim: %ld\n", char_get_rewtime(ch));
+  if (char_get_lastpl(ch) != PFDEF_LPLAY) fprintf(fl, "Lpla: %lld\n", (long long)char_get_lastpl(ch));
+  if (char_get_lastint(ch) != PFDEF_LPLAY) fprintf(fl, "Lint: %lld\n", (long long)char_get_lastint(ch));
+  if (char_get_deathtime(ch) != PFDEF_LPLAY) fprintf(fl, "Deat: %lld\n", (long long)char_get_deathtime(ch));
+  if (char_get_rewtime(ch) != PFDEF_LPLAY) fprintf(fl, "Rtim: %lld\n", (long long)char_get_rewtime(ch));
   if (char_get_boosts(ch) != PFDEF_DISTFEA) fprintf(fl, "Boos: %d\n", char_get_boosts(ch));
   if (char_get_majinize(ch) != PFDEF_LPLAY) fprintf(fl, "Maji: %d\n", char_get_majinize(ch));
   if (char_get_blesslvl(ch) != PFDEF_HEIGHT) fprintf(fl, "Blss: %d\n", char_get_blesslvl(ch));
-  if (char_get_lboard(ch, 0) != PFDEF_BOARD) fprintf(fl, "Boam: %ld\n", char_get_lboard(ch, 0));
-  if (char_get_lboard(ch, 1) != PFDEF_BOARD) fprintf(fl, "Boai: %ld\n", char_get_lboard(ch, 1));
-  if (char_get_lboard(ch, 2) != PFDEF_BOARD) fprintf(fl, "Boac: %ld\n", char_get_lboard(ch, 2));
-  if (char_get_lboard(ch, 3) != PFDEF_BOARD) fprintf(fl, "Boad: %ld\n", char_get_lboard(ch, 3));
-  if (char_get_lboard(ch, 4) != PFDEF_BOARD) fprintf(fl, "Boab: %ld\n", char_get_lboard(ch, 4));
+  if (char_get_lboard(ch, 0) != PFDEF_BOARD) fprintf(fl, "Boam: %lld\n", (long long)char_get_lboard(ch, 0));
+  if (char_get_lboard(ch, 1) != PFDEF_BOARD) fprintf(fl, "Boai: %lld\n", (long long)char_get_lboard(ch, 1));
+  if (char_get_lboard(ch, 2) != PFDEF_BOARD) fprintf(fl, "Boac: %lld\n", (long long)char_get_lboard(ch, 2));
+  if (char_get_lboard(ch, 3) != PFDEF_BOARD) fprintf(fl, "Boad: %lld\n", (long long)char_get_lboard(ch, 3));
+  if (char_get_lboard(ch, 4) != PFDEF_BOARD) fprintf(fl, "Boab: %lld\n", (long long)char_get_lboard(ch, 4));
   if (char_get_limb_condition(ch, (1) - 1) != PFDEF_BOARD) fprintf(fl, "Lira: %d\n", char_get_limb_condition(ch, (1) - 1));
   if (char_get_limb_condition(ch, (2) - 1) != PFDEF_BOARD) fprintf(fl, "Lila: %d\n", char_get_limb_condition(ch, (2) - 1));
   if (char_get_limb_condition(ch, (3) - 1) != PFDEF_BOARD) fprintf(fl, "Lirl: %d\n", char_get_limb_condition(ch, (3) - 1));
   if (char_get_limb_condition(ch, (4) - 1) != PFDEF_BOARD) fprintf(fl, "Lill: %d\n", char_get_limb_condition(ch, (4) - 1));
   if (char_get_rp(ch) != PFDEF_SKIN) fprintf(fl, "RPP : %d\n", char_get_rp(ch));
   if (char_get_rbank(ch) != PFDEF_SKIN) fprintf(fl, "RBan: %d\n", char_get_rbank(ch));
-  if (char_get_suppression(ch) != PFDEF_SKIN) fprintf(fl, "Supp: %" I64T "\n", char_get_suppression(ch));
-  if (char_get_suppressed(ch) != PFDEF_SKIN) fprintf(fl, "Sups: %" I64T "\n", char_get_suppressed(ch));
+  if (char_get_suppression(ch) != PFDEF_SKIN) fprintf(fl, "Supp: %" PRId64 "\n", char_get_suppression(ch));
+  if (char_get_suppressed(ch) != PFDEF_SKIN) fprintf(fl, "Sups: %" PRId64 "\n", char_get_suppressed(ch));
   if (char_get_trp(ch) != PFDEF_SKIN) fprintf(fl, "Trp : %d\n", char_get_trp(ch));
   if (char_get_dcount(ch) != PFDEF_EYE) fprintf(fl, "Deac: %d\n", char_get_dcount(ch));
   if (char_get_trainagl(ch) != PFDEF_EYE) fprintf(fl, "Trag: %d\n", char_get_trainagl(ch));
@@ -1200,7 +1204,7 @@ static void load_HMVS(struct char_data *ch, const char *line, int mode)
 {
   int64_t num = 0, num2 = 0;
 
-  sscanf(line, "%" I64T "/%" I64T "", &num, &num2);
+  sscanf(line, "%" SCNd64 "/%" SCNd64 "", &num, &num2);
 
   switch (mode) {
     case LOAD_HIT:
@@ -1229,7 +1233,7 @@ static void load_BASE(struct char_data *ch, const char *line, int mode)
 {
   int64_t num = 0;
 
-  sscanf(line, "%" I64T "", &num);
+  sscanf(line, "%" SCNd64 "", &num);
 
   switch (mode) {
     case LOAD_HIT:
@@ -1254,7 +1258,7 @@ static void load_majin(struct char_data *ch, const char *line)
 {
   int64_t num = 0;
 
-  sscanf(line, "%" I64T "", &num);
+  sscanf(line, "%" SCNd64 "", &num);
   char_set_majinizer(ch, num);
 }
 
@@ -1262,7 +1266,7 @@ static void load_molt(struct char_data *ch, const char *line)
 {
   int64_t num = 0;
 
-  sscanf(line, "%" I64T "", &num);
+  sscanf(line, "%" SCNd64 "", &num);
   char_set_moltexp(ch, num);
 }
 

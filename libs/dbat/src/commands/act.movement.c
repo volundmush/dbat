@@ -1485,12 +1485,11 @@ static const int flags_door[] =
         NEED_CLOSED | NEED_UNLOCKED,
         NEED_CLOSED | NEED_LOCKED};
 
-#define EXITN(room, door)            (world[room].dir_option[door])
-#define OPEN_DOOR(room, obj, door)   ((obj) ? (obj_set_value(obj, VAL_CONTAINER_FLAGS, obj_get_value(obj, VAL_CONTAINER_FLAGS) & ~(CONT_CLOSED))) : (void)(REMOVE_BIT(EXITN(room, door)->exit_info, EX_CLOSED)))
-#define CLOSE_DOOR(room, obj, door)  ((obj) ? (obj_set_value(obj, VAL_CONTAINER_FLAGS, obj_get_value(obj, VAL_CONTAINER_FLAGS) | (CONT_CLOSED))) : (void)(SET_BIT(EXITN(room, door)->exit_info, EX_CLOSED)))
-#define LOCK_DOOR(room, obj, door)   ((obj) ? (obj_set_value(obj, VAL_CONTAINER_FLAGS, obj_get_value(obj, VAL_CONTAINER_FLAGS) | (CONT_LOCKED))) : (void)(SET_BIT(EXITN(room, door)->exit_info, EX_LOCKED)))
-#define UNLOCK_DOOR(room, obj, door) ((obj) ? (obj_set_value(obj, VAL_CONTAINER_FLAGS, obj_get_value(obj, VAL_CONTAINER_FLAGS) & ~(CONT_LOCKED))) : (void)(REMOVE_BIT(EXITN(room, door)->exit_info, EX_LOCKED)))
-#define TOGGLE_LOCK(room, obj, door) ((obj) ? (obj_set_value(obj, VAL_CONTAINER_FLAGS, obj_get_value(obj, VAL_CONTAINER_FLAGS) ^ (CONT_LOCKED))) : (void)(TOGGLE_BIT(EXITN(room, door)->exit_info, EX_LOCKED)))
+#define OPEN_DOOR(room, obj, door)   ((obj) ? (obj_set_value(obj, VAL_CONTAINER_FLAGS, obj_get_value(obj, VAL_CONTAINER_FLAGS) & ~(CONT_CLOSED))) : (void)(REMOVE_BIT(rroom_get_dir_option(room, door)->exit_info, EX_CLOSED)))
+#define CLOSE_DOOR(room, obj, door)  ((obj) ? (obj_set_value(obj, VAL_CONTAINER_FLAGS, obj_get_value(obj, VAL_CONTAINER_FLAGS) | (CONT_CLOSED))) : (void)(SET_BIT(rroom_get_dir_option(room, door)->exit_info, EX_CLOSED)))
+#define LOCK_DOOR(room, obj, door)   ((obj) ? (obj_set_value(obj, VAL_CONTAINER_FLAGS, obj_get_value(obj, VAL_CONTAINER_FLAGS) | (CONT_LOCKED))) : (void)(SET_BIT(rroom_get_dir_option(room, door)->exit_info, EX_LOCKED)))
+#define UNLOCK_DOOR(room, obj, door) ((obj) ? (obj_set_value(obj, VAL_CONTAINER_FLAGS, obj_get_value(obj, VAL_CONTAINER_FLAGS) & ~(CONT_LOCKED))) : (void)(REMOVE_BIT(rroom_get_dir_option(room, door)->exit_info, EX_LOCKED)))
+#define TOGGLE_LOCK(room, obj, door) ((obj) ? (obj_set_value(obj, VAL_CONTAINER_FLAGS, obj_get_value(obj, VAL_CONTAINER_FLAGS) ^ (CONT_LOCKED))) : (void)(TOGGLE_BIT(rroom_get_dir_option(room, door)->exit_info, EX_LOCKED)))
 
 static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int scmd)
 {

@@ -323,7 +323,7 @@ void mobile_activity(void)
 
         char_set_lastpl(ch, time(0));
         for (shop_nr = 0; shop_nr <= top_shop; shop_nr++) {
-          if (SHOP_KEEPER(shop_nr) == ch->nr) {
+          if (rshop_get_keeper(shop_nr) == ch->nr) {
             shopnr = shop_nr;
           }
         }
@@ -398,13 +398,13 @@ void mobile_activity(void)
         if (char_get_mob_spec(vict) == shop_keeper) {
           /* Ok, vict is a shop keeper.  Which shop is his? */
           for (shop_nr = 0; shop_nr <= top_shop; shop_nr++)
-            if (SHOP_KEEPER(shop_nr) == vict->nr)
+            if (rshop_get_keeper(shop_nr) == vict->nr)
               break;
           if (shop_nr <= top_shop)
             /* Is the shopkeeper in his shop? */
             if (ok_shop_room(shop_nr, char_get_in_room(vict)))
               /* Does the shopkeeper prevent stealing? */
-              if (!SHOP_ALLOW_STEAL(shop_nr))
+              if (!rshop_allows_steal(shop_nr))
                 found = true;
         }
         /* Note: found will be true if there the character is in a shop where

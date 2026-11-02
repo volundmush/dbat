@@ -86,7 +86,7 @@ char *add_commas(int64_t num)
   static char comma_string[BUFFER_COUNT][DIGITS_PER_BUFFER];
   static int64_t which = 0;
 
-  sprintf(num_string, "%" I64T "", num);
+  sprintf(num_string, "%" PRId64 "", num);
   len = strlen(num_string);
 
   for (i = j = 0; num_string[i]; ++i) {
@@ -228,7 +228,7 @@ void half_chop(char *string, char *arg1, char *arg2)
   temp = any_one_arg(string, arg1);
   skip_spaces(&temp);
   if (arg2 != temp)
-    strcpy(arg2, temp); /* strcpy: OK (documentation) */
+    memmove(arg2, temp, strlen(temp) + 1); /* arg2 may overlap string (half_chop(buf, word, buf)) */
 }
 
 void skip_spaces(char **string)

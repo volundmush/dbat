@@ -901,7 +901,7 @@ static bool perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
     value = strtoll(val_arg, &ptr, 10);
     /*    value = atoi(val_arg); */
-    send_to_char(ch, "%s's %s set to %" I64T ".\r\n", char_get_name(vict), set_fields[mode].cmd, value);
+    send_to_char(ch, "%s's %s set to %" PRId64 ".\r\n", char_get_name(vict), set_fields[mode].cmd, value);
   } else
     send_to_char(ch, "%s", CONFIG_OK);
 
@@ -1065,7 +1065,7 @@ static bool perform_set(struct char_data *ch, struct char_data *vict, int mode,
         value = atoi(val_arg);
         RANGE(0, 48);
         char_set_conditions(vict, (mode - 29), value); /* and here too */
-        send_to_char(ch, "%s's %s set to %" I64T ".\r\n", char_get_name(vict), set_fields[mode].cmd, value);
+        send_to_char(ch, "%s's %s set to %" PRId64 ".\r\n", char_get_name(vict), set_fields[mode].cmd, value);
       } else {
         send_to_char(ch, "Must be 'off' or a value from 0 to 48.\r\n");
         return false;

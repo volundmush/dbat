@@ -71,7 +71,7 @@ static bool Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, 
   if (!(fp = atomic_open(&af, filename, true)))
     return false;
 
-  if (fprintf(fp, "%d %d %d %d %d %d\r\n", rentcode, (int)time(0), cost,
+  if (fprintf(fp, "%d %lld %d %d %d %d\r\n", rentcode, (long long)time(0), cost,
               char_get_gold(ch), char_get_bank_gold(ch), 0) < 0) {
     Crash_log_file_error("fprintf", af.tmp, __FILE__, __LINE__);
     atomic_abort(&af);
@@ -282,7 +282,8 @@ bool Crash_delete_crashfile(struct char_data *ch)
 {
   char filename[MAX_INPUT_LENGTH];
   FILE *fl;
-  int rentcode, timed, netcost, gold, account, nitems;
+  int rentcode, netcost, gold, account, nitems;
+  long long timed;
   char line[MAX_INPUT_LENGTH];
 
   if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, char_get_name(ch)))
@@ -296,7 +297,7 @@ bool Crash_delete_crashfile(struct char_data *ch)
 
   if (!feof(fl))
     get_line(fl, line);
-  sscanf(line, "%d %d %d %d %d %d", &rentcode, &timed, &netcost, &gold,
+  sscanf(line, "%d %lld %d %d %d %d", &rentcode, &timed, &netcost, &gold,
          &account, &nitems);
   fclose(fl);
 
@@ -310,7 +311,8 @@ static bool Crash_clean_file(char *name)
 {
   char filename[MAX_STRING_LENGTH];
   FILE *fl;
-  int rentcode, timed, netcost, gold, account, nitems;
+  int rentcode, netcost, gold, account, nitems;
+  long long timed;
   char line[MAX_STRING_LENGTH];
 
   if (!get_filename(filename, sizeof(filename), NEW_OBJ_FILES, name))
@@ -324,7 +326,7 @@ static bool Crash_clean_file(char *name)
 
   if (!feof(fl)) {
     get_line(fl, line);
-    sscanf(line, "%d %d %d %d %d %d", &rentcode, &timed, &netcost,
+    sscanf(line, "%d %lld %d %d %d %d", &rentcode, &timed, &netcost,
            &gold, &account, &nitems);
     fclose(fl);
 
@@ -377,7 +379,8 @@ void Crash_listrent(struct char_data *ch, char *name)
   char filename[MAX_STRING_LENGTH];
   char buf[MAX_STRING_LENGTH];
   struct obj_data *obj;
-  int rentcode = -1, timed = 0, netcost = 0, gold = 0, account = 0, nitems = 0, len;
+  int rentcode = -1, netcost = 0, gold = 0, account = 0, nitems = 0, len;
+  long long timed = 0;
   int t[10], nr;
   char line[MAX_STRING_LENGTH];
   char *sdesc;
@@ -393,7 +396,7 @@ void Crash_listrent(struct char_data *ch, char *name)
 
   if (!feof(fl)) {
     get_line(fl, line);
-    sscanf(line, "%d %d %d %d %d %d", &rentcode, &timed, &netcost,
+    sscanf(line, "%d %lld %d %d %d %d", &rentcode, &timed, &netcost,
            &gold, &account, &nitems);
   }
 
@@ -643,13 +646,14 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
   struct obj_data *obj1;
   struct obj_data *cont_row[MAX_BAG_ROWS];
   struct extra_descr_data *new_descr;
-  int rentcode, timed, netcost, gold, account, nitems;
+  int rentcode, netcost, gold, account, nitems;
+  long long timed;
   char f1[READ_SIZE], f2[READ_SIZE], f3[READ_SIZE], f4[READ_SIZE];
 
   if (!feof(fl))
     get_line(fl, line);
 
-  sscanf(line, "%d %d %d %d %d %d", &rentcode, &timed,
+  sscanf(line, "%d %lld %d %d %d %d", &rentcode, &timed,
          &netcost, &gold, &account, &nitems);
 
   if (rentcode == RENT_RENTED || rentcode == RENT_TIMEDOUT) {
@@ -805,14 +809,18 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
               j++;
               get_line(fl, line);
               break;
-            case 'G':
+            case 'G': {
+              long long generation;
+
               get_line(fl, line);
-              sscanf(line, "%" TMT, &temp->generation);
+              if (sscanf(line, "%lld", &generation) == 1)
+                temp->generation = generation;
               get_line(fl, line);
               break;
+            }
             case 'U':
               get_line(fl, line);
-              sscanf(line, "%" I64T, &temp->unique_id);
+              sscanf(line, "%" SCNd64, &temp->unique_id);
               get_line(fl, line);
               break;
             case 'S':

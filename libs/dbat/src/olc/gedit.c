@@ -192,32 +192,32 @@ static void gedit_setup_new(struct descriptor_data *d)
   CREATE(guilddata, struct guild_data, 1);
 
   /*. Some default values . */
-  G_TRAINER(guilddata) = -1;
-  G_OPEN(guilddata)    = 0;
-  G_CLOSE(guilddata)   = 28;
-  G_CHARGE(guilddata)  = 1.0;
+  guild_set_gm(guilddata, -1);
+  guild_set_open(guilddata, 0);
+  guild_set_close(guilddata, 28);
+  guild_set_charge(guilddata, 1.0);
   for (i = 0; i < GW_ARRAY_MAX; i++)
-    G_WITH_WHO(guilddata)
-  [i]                 = 0;
-  G_FUNC(guilddata)   = nullptr;
-  G_MINLVL(guilddata) = 0;
+    guild_get_with_who(guilddata)
+        [i] = 0;
+  guild_set_func(guilddata, nullptr);
+  guild_set_minlvl(guilddata, 0);
 
   /*. Some default strings . */
-  G_NO_SKILL(guilddata) = strdup(guild_default_no_skill);
-  G_NO_GOLD(guilddata)  = strdup(guild_default_no_gold);
+  guild_set_no_such_skill(guilddata, strdup(guild_default_no_skill));
+  guild_set_not_enough_gold(guilddata, strdup(guild_default_no_gold));
 
   /* init the wasteful skills and spells table */
 
   for (i = 0; i < SKILL_TABLE_SIZE; i++)
     if (spell_info[i].skilltype == SKTYPE_SKILL &&
         strcmp(spell_info[i].name, "!UNUSED!")) {
-      G_SK_AND_SP(guilddata, i) = 0;
+      guild_set_skill(guilddata, i, 0);
     }
 
   /* init the feats table */
   for (i = 0; i < NUM_FEATS_DEFINED; i++)
     if (feat_list[i].in_game) {
-      G_FEATS(guilddata, i) = 0;
+      guild_set_feat(guilddata, i, 0);
     }
 
   OLC_GUILD(d) = guilddata;
@@ -256,7 +256,7 @@ static void gedit_select_skills_menu(struct descriptor_data *d)
     if (spell_info[i].skilltype == SKTYPE_SKILL &&
         strcmp(spell_info[i].name, "!UNUSED!")) {
       write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                      YESNO(G_SK_AND_SP(guilddata, i)), i, spell_info[i].name);
+                      YESNO(guild_get_skill(guilddata, i)), i, spell_info[i].name);
       j++;
       found = 1;
     }
@@ -286,7 +286,7 @@ static void gedit_select_spells_menu(struct descriptor_data *d)
     if (IS_SET(spell_info[i].skilltype, SKTYPE_SPELL) &&
         strcmp(spell_info[i].name, "!UNUSED!")) {
       write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                      YESNO(G_SK_AND_SP(guilddata, i)), i, spell_info[i].name);
+                      YESNO(guild_get_skill(guilddata, i)), i, spell_info[i].name);
       j++;
       found = 1;
     }
@@ -315,7 +315,7 @@ static void gedit_select_feats_menu(struct descriptor_data *d)
   for (i = 0; i < NUM_FEATS_DEFINED; i++) {
     if (feat_list[i].in_game) {
       write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                      YESNO(G_FEATS(guilddata, i)), i, feat_list[i].name);
+                      YESNO(guild_get_feat(guilddata, i)), i, feat_list[i].name);
       j++;
       found = 1;
     }
@@ -345,7 +345,7 @@ static void gedit_select_lang_menu(struct descriptor_data *d)
     if (IS_SET(spell_info[i].skilltype, SKTYPE_LANG) &&
         strcmp(spell_info[i].name, "!UNUSED!")) {
       write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                      YESNO(G_SK_AND_SP(guilddata, i)), i, spell_info[i].name);
+                      YESNO(guild_get_skill(guilddata, i)), i, spell_info[i].name);
       j++;
       found = 1;
     }
@@ -375,7 +375,7 @@ static void gedit_select_wp_menu(struct descriptor_data *d)
     if (IS_SET(spell_info[i].skilltype, SKTYPE_WEAPON) &&
         strcmp(spell_info[i].name, "!UNUSED!")) {
       write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                      YESNO(G_SK_AND_SP(guilddata, i)), i, spell_info[i].name);
+                      YESNO(guild_get_skill(guilddata, i)), i, spell_info[i].name);
       j++;
       found = 1;
     }
@@ -405,7 +405,7 @@ static void gedit_no_train_menu(struct descriptor_data *d)
                     !(++count % 2) ? "\r\n" : "");
   }
 
-  sprintbitarray(G_WITH_WHO(guilddata), trade_letters, 4, bits, sizeof(bits));
+  sprintbitarray(guild_get_with_who(guilddata), trade_letters, 4, bits, sizeof(bits));
   write_to_output(d, "\r\nCurrent train flags: @c%s@n\r\n"
                      "Enter choice, 0 to quit : ",
                   bits);
@@ -424,7 +424,7 @@ static void gedit_disp_menu(struct descriptor_data *d)
 
   clear_screen(d);
 
-  sprintbitarray(G_WITH_WHO(guilddata), trade_letters, 4, buf1, sizeof(buf1));
+  sprintbitarray(guild_get_with_who(guilddata), trade_letters, 4, buf1, sizeof(buf1));
 
   write_to_output(d,
                   "-- Guild Number: [@c%d@n]\r\n"
@@ -443,14 +443,14 @@ static void gedit_disp_menu(struct descriptor_data *d)
                   "Enter Choice : ",
 
                   OLC_NUM(d),
-                  G_TRAINER(guilddata) == NOBODY ? -1 : mob_index[G_TRAINER(guilddata)].vnum,
-                  G_TRAINER(guilddata) == NOBODY ? "None" : mob_proto[G_TRAINER(guilddata)].short_descr,
-                  G_NO_SKILL(guilddata),
-                  G_NO_GOLD(guilddata),
-                  G_OPEN(guilddata),
-                  G_CLOSE(guilddata),
-                  G_CHARGE(guilddata),
-                  G_MINLVL(guilddata),
+                  guild_get_gm(guilddata) == NOBODY ? -1 : mob_index[guild_get_gm(guilddata)].vnum,
+                  guild_get_gm(guilddata) == NOBODY ? "None" : mob_proto[guild_get_gm(guilddata)].short_descr,
+                  guild_get_no_such_skill(guilddata),
+                  guild_get_not_enough_gold(guilddata),
+                  guild_get_open(guilddata),
+                  guild_get_close(guilddata),
+                  guild_get_charge(guilddata),
+                  guild_get_minlvl(guilddata),
                   buf1);
 
   OLC_MODE(d) = GEDIT_MAIN_MENU;
@@ -591,10 +591,10 @@ void gedit_parse(struct descriptor_data *d, char *arg)
       /*-------------------------------------------------------------------*/
       /*. String edits . */
     case GEDIT_NO_SKILL:
-      gedit_set_message(d, &G_NO_SKILL(OLC_GUILD(d)), arg);
+      gedit_set_message(d, &((OLC_GUILD(d))->no_such_skill), arg);
       break;
     case GEDIT_NO_CASH:
-      gedit_set_message(d, &G_NO_GOLD(OLC_GUILD(d)), arg);
+      gedit_set_message(d, &((OLC_GUILD(d))->not_enough_gold), arg);
       break;
 
       /*-------------------------------------------------------------------*/
@@ -608,26 +608,26 @@ void gedit_parse(struct descriptor_data *d, char *arg)
             write_to_output(d, "That mobile does not exist, try again : ");
             return;
           }
-        G_TRAINER(OLC_GUILD(d)) = i;
+        guild_set_gm(OLC_GUILD(d), i);
         if (i == -1)
           break;
         /*. Fiddle with special procs . */
-        G_FUNC(OLC_GUILD(d)) = mob_index[i].func != guild ? mob_index[i].func : nullptr;
-        mob_index[i].func    = guild;
+        guild_set_func(OLC_GUILD(d), mob_index[i].func != guild ? mob_index[i].func : nullptr);
+        mob_index[i].func = guild;
         break;
       }
       write_to_output(d, "Invalid response.\r\n");
       gedit_disp_menu(d);
       return;
     case GEDIT_OPEN:
-      G_OPEN(OLC_GUILD(d)) = LIMIT(atoi(arg), 0, 28);
+      guild_set_open(OLC_GUILD(d), LIMIT(atoi(arg), 0, 28));
       break;
     case GEDIT_CLOSE:
-      G_CLOSE(OLC_GUILD(d)) = LIMIT(atoi(arg), 0, 28);
+      guild_set_close(OLC_GUILD(d), LIMIT(atoi(arg), 0, 28));
       ;
       break;
     case GEDIT_CHARGE:
-      sscanf(arg, "%f", &G_CHARGE(OLC_GUILD(d)));
+      sscanf(arg, "%f", &((OLC_GUILD(d))->charge));
       break;
     case GEDIT_NO_TRAIN:
       if ((i = LIMIT(atoi(arg), 0, NUM_TRADERS - 1)) > 0) {
@@ -638,15 +638,15 @@ void gedit_parse(struct descriptor_data *d, char *arg)
       break;
 
     case GEDIT_MINLVL:
-      G_MINLVL(OLC_GUILD(d)) = MAX(atoi(arg), 0);
+      guild_set_minlvl(OLC_GUILD(d), MAX(atoi(arg), 0));
       break;
 
     case GEDIT_SELECT_SPELLS:
       i = atoi(arg);
       if (i == 0)
         break;
-      i                            = MAX(0, MIN(i, SKILL_TABLE_SIZE - 1));
-      G_SK_AND_SP(OLC_GUILD(d), i) = !G_SK_AND_SP(OLC_GUILD(d), i);
+      i = MAX(0, MIN(i, SKILL_TABLE_SIZE - 1));
+      guild_set_skill(OLC_GUILD(d), i, !guild_get_skill(OLC_GUILD(d), i));
       gedit_select_spells_menu(d);
       return;
 
@@ -654,8 +654,8 @@ void gedit_parse(struct descriptor_data *d, char *arg)
       i = atoi(arg);
       if (i == 0)
         break;
-      i                        = MAX(0, MIN(i, NUM_FEATS_DEFINED - 1));
-      G_FEATS(OLC_GUILD(d), i) = !G_FEATS(OLC_GUILD(d), i);
+      i = MAX(0, MIN(i, NUM_FEATS_DEFINED - 1));
+      guild_set_feat(OLC_GUILD(d), i, !guild_get_feat(OLC_GUILD(d), i));
       gedit_select_feats_menu(d);
       return;
 
@@ -663,8 +663,8 @@ void gedit_parse(struct descriptor_data *d, char *arg)
       i = atoi(arg);
       if (i == 0)
         break;
-      i                            = MAX(0, MIN(i, SKILL_TABLE_SIZE - 1));
-      G_SK_AND_SP(OLC_GUILD(d), i) = !G_SK_AND_SP(OLC_GUILD(d), i);
+      i = MAX(0, MIN(i, SKILL_TABLE_SIZE - 1));
+      guild_set_skill(OLC_GUILD(d), i, !guild_get_skill(OLC_GUILD(d), i));
       gedit_select_skills_menu(d);
       return;
 
@@ -672,8 +672,8 @@ void gedit_parse(struct descriptor_data *d, char *arg)
       i = atoi(arg);
       if (i == 0)
         break;
-      i                            = MAX(0, MIN(i, SKILL_TABLE_SIZE - 1));
-      G_SK_AND_SP(OLC_GUILD(d), i) = !G_SK_AND_SP(OLC_GUILD(d), i);
+      i = MAX(0, MIN(i, SKILL_TABLE_SIZE - 1));
+      guild_set_skill(OLC_GUILD(d), i, !guild_get_skill(OLC_GUILD(d), i));
       gedit_select_wp_menu(d);
       return;
 
@@ -681,8 +681,8 @@ void gedit_parse(struct descriptor_data *d, char *arg)
       i = atoi(arg);
       if (i == 0)
         break;
-      i                            = MAX(0, MIN(i, SKILL_TABLE_SIZE - 1));
-      G_SK_AND_SP(OLC_GUILD(d), i) = !G_SK_AND_SP(OLC_GUILD(d), i);
+      i = MAX(0, MIN(i, SKILL_TABLE_SIZE - 1));
+      guild_set_skill(OLC_GUILD(d), i, !guild_get_skill(OLC_GUILD(d), i));
       gedit_select_lang_menu(d);
       return;
 

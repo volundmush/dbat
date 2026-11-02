@@ -101,19 +101,21 @@ int add_mobile(struct char_data *mob, mob_vnum vnum)
 
   /* Update zone table. */
   for (zone = 0; zone <= top_of_zone_table; zone++)
-    for (cmd_no = 0; ZCMD(zone, cmd_no).command != 'S'; cmd_no++)
-      if (ZCMD(zone, cmd_no).command == 'M')
-        ZCMD(zone, cmd_no).arg1 += (ZCMD(zone, cmd_no).arg1 >= found);
+    for (cmd_no = 0; zone_get_cmd(zone, cmd_no)->command != 'S'; cmd_no++)
+      if (zone_get_cmd(zone, cmd_no)->command == 'M')
+        zone_get_cmd(zone, cmd_no)->arg1 += (zone_get_cmd(zone, cmd_no)->arg1 >= found);
 
   /* Update shop keepers. */
   if (shop_index)
     for (shop = 0; shop <= top_shop; shop++)
-      SHOP_KEEPER(shop) += (SHOP_KEEPER(shop) != NOTHING && SHOP_KEEPER(shop) >= found);
+      if (rshop_get_keeper(shop) != NOTHING && rshop_get_keeper(shop) >= found)
+        rshop_set_keeper(shop, rshop_get_keeper(shop) + 1);
 
   /* Update guild masters */
   if (guild_index)
     for (guild = 0; guild <= top_guild; guild++)
-      GM_TRAINER(guild) += (GM_TRAINER(guild) != NOTHING && GM_TRAINER(guild) >= found);
+      if (rguild_get_gm(guild) != NOTHING && rguild_get_gm(guild) >= found)
+        rguild_set_gm(guild, rguild_get_gm(guild) + 1);
 
   add_to_save_list(zone_table[real_zone_by_thing(vnum)].number, SL_MOB);
   return found;
@@ -173,15 +175,15 @@ int delete_mobile(mob_rnum refpt)
   /* Update zone table.  */
   for (zone = 0; zone <= top_of_zone_table; zone++) {
     bool changed = false;
-    for (cmd_no = 0; ZCMD(zone, cmd_no).command != 'S'; cmd_no++) {
-      if (ZCMD(zone, cmd_no).command == 'M' && ZCMD(zone, cmd_no).arg1 == refpt) {
-        ZCMD(zone, cmd_no).command = '*';
-        ZCMD(zone, cmd_no).arg1    = NOTHING;
-        changed                    = true;
+    for (cmd_no = 0; zone_get_cmd(zone, cmd_no)->command != 'S'; cmd_no++) {
+      if (zone_get_cmd(zone, cmd_no)->command == 'M' && zone_get_cmd(zone, cmd_no)->arg1 == refpt) {
+        zone_get_cmd(zone, cmd_no)->command = '*';
+        zone_get_cmd(zone, cmd_no)->arg1    = NOTHING;
+        changed                             = true;
       }
 
-      if (ZCMD(zone, cmd_no).command == 'M' && ZCMD(zone, cmd_no).arg1 > refpt) {
-        ZCMD(zone, cmd_no).arg1 -= 1;
+      if (zone_get_cmd(zone, cmd_no)->command == 'M' && zone_get_cmd(zone, cmd_no)->arg1 > refpt) {
+        zone_get_cmd(zone, cmd_no)->arg1 -= 1;
         changed = true;
       }
     }
@@ -197,8 +199,8 @@ int delete_mobile(mob_rnum refpt)
       zone_vnum zvnum = zone_table[real_zone_by_thing(counter)].number;
       /* Find the shop for this keeper and reset it's keeper to
        * -1 to keep the shop so it could be assigned to someone else */
-      if (SHOP_KEEPER(counter) == refpt) {
-        SHOP_KEEPER(counter) = NOTHING;
+      if (rshop_get_keeper(counter) == refpt) {
+        rshop_set_keeper(counter, NOTHING);
         if (zvnum != last_saved_zone) {
           add_to_save_list(zvnum, SL_SHP);
           last_saved_zone = zvnum;
@@ -212,9 +214,9 @@ int delete_mobile(mob_rnum refpt)
     for (counter = 0; counter <= top_guild; counter++) {
       /* Find the guild for this trainer and reset it's trainer to
        * -1 to keep the guild so it could be assigned to someone else */
-      if (GM_TRAINER(counter) == refpt) {
-        GM_TRAINER(counter) = NOTHING;
-        zone_vnum zvnum     = zone_table[real_zone_by_thing(counter)].number;
+      if (rguild_get_gm(counter) == refpt) {
+        rguild_set_gm(counter, NOTHING);
+        zone_vnum zvnum = zone_table[real_zone_by_thing(counter)].number;
         if (zvnum != last_saved_zone) {
           add_to_save_list(zvnum, SL_GLD);
           last_saved_zone = zvnum;
@@ -377,8 +379,8 @@ static bool write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 
   if (get_size(mob) != race_get_size(mob->race))
     fprintf(fd, "Size: %d\n", get_size(mob));
-  if (GET_ATTACK(mob) != 0)
-    fprintf(fd, "BareHandAttack: %d\n", GET_ATTACK(mob));
+  if (char_get_mob_specials_attack_type(mob) != 0)
+    fprintf(fd, "BareHandAttack: %d\n", char_get_mob_specials_attack_type(mob));
   if (char_get_aff_abils_str(mob) != 0)
     fprintf(fd, "Str: %d\n", char_get_aff_abils_str(mob));
   if (char_get_aff_abils_dex(mob) != 0)
@@ -392,7 +394,7 @@ static bool write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
   if (char_get_aff_abils_cha(mob) != 0)
     fprintf(fd, "Cha: %d\n", char_get_aff_abils_cha(mob));
   if (mob_proto + real_mobile(mvnum) != mob) { /* Not saving a prototype */
-    fprintf(fd, "Hit: %" I64T "\nMaxHit: %" I64T "\nMana: %" I64T "\nMaxMana: %" I64T "\nMoves: %" I64T "\nMaxMoves: %" I64T "\n",
+    fprintf(fd, "Hit: %" PRId64 "\nMaxHit: %" PRId64 "\nMana: %" PRId64 "\nMaxMana: %" PRId64 "\nMoves: %" PRId64 "\nMaxMoves: %" PRId64 "\n",
             getCurPL(mob), getEffMaxPL(mob), (getCurKI(mob)), getMaxKI(mob),
             (getCurST(mob)), getMaxST(mob));
     for (aff = mob->affected; aff; aff = aff->next)
@@ -413,9 +415,9 @@ static bool write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
   char abuf1[MAX_STRING_LENGTH], abuf2[MAX_STRING_LENGTH];
   char abuf3[MAX_STRING_LENGTH], abuf4[MAX_STRING_LENGTH];
 
-  strlcpy(ldesc, GET_LDESC(mob), sizeof(ldesc));
+  strlcpy(ldesc, char_get_ldesc(mob), sizeof(ldesc));
   strip_cr(ldesc);
-  strlcpy(ddesc, GET_DDESC(mob), sizeof(ddesc));
+  strlcpy(ddesc, char_get_ddesc(mob), sizeof(ddesc));
   strip_cr(ddesc);
 
   fprintf(fd, "#%d\n"
@@ -424,8 +426,8 @@ static bool write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
               "%s%c\n"
               "%s%c\n",
           mvnum,
-          GET_ALIAS(mob), STRING_TERMINATOR,
-          GET_SDESC(mob), STRING_TERMINATOR,
+          char_get_alias(mob), STRING_TERMINATOR,
+          char_get_sdesc(mob), STRING_TERMINATOR,
           ldesc, STRING_TERMINATOR,
           ddesc, STRING_TERMINATOR);
 
@@ -439,12 +441,12 @@ static bool write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
   sprintascii(abuf4, char_get_affected_by(mob)[3]);
 
   fprintf(fd, "%s %s %s %s %s %s %s %s %d E\n"
-              "%d %d %d %" I64T "d%" I64T "+%" I64T " %dd%d+%d\n",
+              "%d %d %d %" PRId64 "d%" PRId64 "+%" PRId64 " %dd%d+%d\n",
           fbuf1, fbuf2, fbuf3, fbuf4,
           abuf1, abuf2, abuf3, abuf4,
           char_get_alignment(mob),
           char_get_race_level(mob), char_get_accuracy_mod(mob), 10 - (char_get_armor(mob) / 10),
-          getCurPL(mob), (getCurKI(mob)), (getCurST(mob)), GET_NDD(mob), GET_SDD(mob),
+          getCurPL(mob), (getCurKI(mob)), (getCurST(mob)), char_get_mob_specials_damnodice(mob), char_get_mob_specials_damsizedice(mob),
           0 /* damage mod: unused, still written to keep the file format */
   );
   fprintf(fd, "%d 0 %d %d\n"
@@ -468,10 +470,10 @@ static bool write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 static void check_mobile_strings(struct char_data *mob)
 {
   mob_vnum mvnum = mob_index[mob->nr].vnum;
-  check_mobile_string(mvnum, &GET_LDESC(mob), "long description");
-  check_mobile_string(mvnum, &GET_DDESC(mob), "detailed description");
-  check_mobile_string(mvnum, &GET_ALIAS(mob), "alias list");
-  check_mobile_string(mvnum, &GET_SDESC(mob), "short description");
+  check_mobile_string(mvnum, &((mob)->long_descr), "long description");
+  check_mobile_string(mvnum, &((mob)->description), "detailed description");
+  check_mobile_string(mvnum, &((mob)->name), "alias list");
+  check_mobile_string(mvnum, &((mob)->short_descr), "short description");
 }
 
 static void check_mobile_string(mob_vnum i, char **string, const char *dscr)

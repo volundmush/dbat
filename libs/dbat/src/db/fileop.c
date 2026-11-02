@@ -181,7 +181,7 @@ void topLoad()
 
   while (!feof(file)) {
     get_line(file, line);
-    sscanf(line, "%s %" I64T "\n", filler, &toppoint[x]);
+    sscanf(line, "%s %" SCNd64 "\n", filler, &toppoint[x]);
     topname[x] = strdup(filler);
     *filler    = '\0';
     x++;
@@ -478,7 +478,7 @@ void topWrite(struct char_data *ch)
     }
     x = 0;
     while (x < 25) {
-      fprintf(fl, "%s %" I64T "\n", topname[x], toppoint[x]);
+      fprintf(fl, "%s %" PRId64 "\n", topname[x], toppoint[x]);
       x++;
     }
 

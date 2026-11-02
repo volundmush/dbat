@@ -884,7 +884,7 @@ void auc_save()
     for (obj = world[real_room(80)].contents; obj; obj = next_obj) {
       next_obj = obj->next_content;
       if (obj) {
-        fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->unique_id, obj_get_auctname(obj), obj_get_aucter(obj), obj_get_curBidder(obj), obj_get_startbid(obj), obj_get_bid(obj), obj_get_aucTime(obj));
+        fprintf(fl, "%" PRId64 " %s %d %d %d %d %ld\n", obj->unique_id, obj_get_auctname(obj), obj_get_aucter(obj), obj_get_curBidder(obj), obj_get_startbid(obj), obj_get_bid(obj), obj_get_aucTime(obj));
       }
     }
     fprintf(fl, "~END~\n");
@@ -906,7 +906,7 @@ void auc_load(struct obj_data *obj)
   else {
     while (!feof(fl)) {
       get_line(fl, line);
-      sscanf(line, "%" I64T " %s %d %d %d %d %ld\n", &oID, filler, &aID, &bID, &startc, &cost, &timer);
+      sscanf(line, "%" SCNd64 " %s %d %d %d %d %ld\n", &oID, filler, &aID, &bID, &startc, &cost, &timer);
       if (obj->unique_id == oID) {
         obj_set_auctname(obj, strdup(filler));
         obj_set_aucter(obj, aID);
@@ -921,6 +921,15 @@ void auc_load(struct obj_data *obj)
 }
 
 /* reset the time in the game from file */
+/* Reads a time_t written as a decimal number on its own line; t is unchanged if there is none. */
+static void fscanf_time(FILE *fl, time_t *t)
+{
+  long long v;
+
+  if (fscanf(fl, "%lld\n", &v) == 1)
+    *t = v;
+}
+
 static void reset_time(void)
 {
   time_t beginning_of_time = 0;
@@ -929,20 +938,20 @@ static void reset_time(void)
   if ((bgtime = fopen(TIME_FILE, "r")) == nullptr)
     mud_log("SYSERR: Can't read from '%s' time file.", TIME_FILE);
   else {
-    fscanf(bgtime, "%ld\n", &beginning_of_time);
-    fscanf(bgtime, "%ld\n", &NEWSUPDATE);
-    fscanf(bgtime, "%ld\n", &BOARDNEWMORT);
-    fscanf(bgtime, "%ld\n", &BOARDNEWDUO);
-    fscanf(bgtime, "%ld\n", &BOARDNEWCOD);
-    fscanf(bgtime, "%ld\n", &BOARDNEWBUI);
-    fscanf(bgtime, "%ld\n", &BOARDNEWIMM);
-    fscanf(bgtime, "%ld\n", &INTERESTTIME);
-    fscanf(bgtime, "%ld\n", &LASTINTEREST);
+    fscanf_time(bgtime, &beginning_of_time);
+    fscanf_time(bgtime, &NEWSUPDATE);
+    fscanf_time(bgtime, &BOARDNEWMORT);
+    fscanf_time(bgtime, &BOARDNEWDUO);
+    fscanf_time(bgtime, &BOARDNEWCOD);
+    fscanf_time(bgtime, &BOARDNEWBUI);
+    fscanf_time(bgtime, &BOARDNEWIMM);
+    fscanf_time(bgtime, &INTERESTTIME);
+    fscanf_time(bgtime, &LASTINTEREST);
     fscanf(bgtime, "%d\n", &HIGHPCOUNT);
-    fscanf(bgtime, "%ld\n", &PCOUNTDATE);
+    fscanf_time(bgtime, &PCOUNTDATE);
     fscanf(bgtime, "%d\n", &WISHTIME);
     fscanf(bgtime, "%d\n", &PCOUNT);
-    fscanf(bgtime, "%ld\n", &LASTPAYOUT);
+    fscanf_time(bgtime, &LASTPAYOUT);
     fscanf(bgtime, "%d\n", &LASTPAYTYPE);
     fscanf(bgtime, "%d\n", &LASTNEWS);
     fscanf(bgtime, "%d\n", &dballtime);
@@ -1007,20 +1016,20 @@ void save_mud_time(struct time_info_data *when)
   if ((bgtime = atomic_open(&af, TIME_FILE, false)) == nullptr)
     mud_log("SYSERR: Can't write to '%s' time file.", TIME_FILE);
   else {
-    fprintf(bgtime, "%ld\n", mud_time_to_secs(when));
-    fprintf(bgtime, "%ld\n", NEWSUPDATE);
-    fprintf(bgtime, "%ld\n", BOARDNEWMORT);
-    fprintf(bgtime, "%ld\n", BOARDNEWDUO);
-    fprintf(bgtime, "%ld\n", BOARDNEWCOD);
-    fprintf(bgtime, "%ld\n", BOARDNEWBUI);
-    fprintf(bgtime, "%ld\n", BOARDNEWIMM);
-    fprintf(bgtime, "%ld\n", INTERESTTIME);
-    fprintf(bgtime, "%ld\n", LASTINTEREST);
+    fprintf(bgtime, "%lld\n", (long long)mud_time_to_secs(when));
+    fprintf(bgtime, "%lld\n", (long long)NEWSUPDATE);
+    fprintf(bgtime, "%lld\n", (long long)BOARDNEWMORT);
+    fprintf(bgtime, "%lld\n", (long long)BOARDNEWDUO);
+    fprintf(bgtime, "%lld\n", (long long)BOARDNEWCOD);
+    fprintf(bgtime, "%lld\n", (long long)BOARDNEWBUI);
+    fprintf(bgtime, "%lld\n", (long long)BOARDNEWIMM);
+    fprintf(bgtime, "%lld\n", (long long)INTERESTTIME);
+    fprintf(bgtime, "%lld\n", (long long)LASTINTEREST);
     fprintf(bgtime, "%d\n", HIGHPCOUNT);
-    fprintf(bgtime, "%ld\n", PCOUNTDATE);
+    fprintf(bgtime, "%lld\n", (long long)PCOUNTDATE);
     fprintf(bgtime, "%d\n", WISHTIME);
     fprintf(bgtime, "%d\n", PCOUNT);
-    fprintf(bgtime, "%ld\n", LASTPAYOUT);
+    fprintf(bgtime, "%lld\n", (long long)LASTPAYOUT);
     fprintf(bgtime, "%d\n", LASTPAYTYPE);
     fprintf(bgtime, "%d\n", LASTNEWS);
     fprintf(bgtime, "%d\n", dballtime);
@@ -1737,8 +1746,8 @@ static void mob_autobalance(struct char_data *ch)
   //GET_MOVE(ch) = 0;
   char_set_exp(ch, 0);
   char_set_armor(ch, 0);
-  GET_NDD(ch) = 0;
-  GET_SDD(ch) = 0;
+  char_set_mob_specials_damnodice(ch, 0);
+  char_set_mob_specials_damsizedice(ch, 0);
 }
 
 static bool parse_simple_mob(FILE *mob_f, struct char_data *ch, int nr)
@@ -3533,9 +3542,9 @@ static void remove_unique_id(struct obj_data *obj)
 
 static void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2)
 {
-  mudlog(LOG_BRF, ADMLVL_GOD, true, "DUPE: Dupe object found: %s [%d] [%" TMT ":%" I64T "]",
+  mudlog(LOG_BRF, ADMLVL_GOD, true, "DUPE: Dupe object found: %s [%d] [%lld:%" PRId64 "]",
          obj1->short_description ? obj1->short_description : "<No name>",
-         obj_get_vnum(obj1), obj1->generation, obj1->unique_id);
+         obj_get_vnum(obj1), (long long)obj1->generation, obj1->unique_id);
   mudlog(LOG_BRF, ADMLVL_GOD, true, "DUPE: First: In room: %d (%s), "
                                     "In object: %s, Carried by: %s, Worn by: %s",
          rroom_get_vnum(obj_get_in_room(obj1)),
@@ -3605,8 +3614,8 @@ char *sprintuniques(int low, int high)
           ptr += count;
           remain -= count;
         }
-        count = snprintf(ptr, remain, "| |- [@g%6d@n] - [@y%10" TMT ":%-19" I64T "@n] - %s\r\n",
-                         obj_get_vnum(q->obj), q->generation, q->unique_id,
+        count = snprintf(ptr, remain, "| |- [@g%6d@n] - [@y%10lld:%-19" PRId64 "@n] - %s\r\n",
+                         obj_get_vnum(q->obj), (long long)q->generation, q->unique_id,
                          q->obj->short_description ? q->obj->short_description : "<Unknown>");
         ptr += count;
         remain -= count;
@@ -4565,7 +4574,7 @@ static int check_object(struct obj_data *obj)
   int error = false;
 
   if (obj_get_weight(obj) < 0 && (error = true))
-    mud_log("SYSERR: Object #%d (%s) has negative weight (%" I64T ").",
+    mud_log("SYSERR: Object #%d (%s) has negative weight (%" PRId64 ").",
             obj_get_vnum(obj), obj->short_description, obj_get_weight(obj));
 
   if (obj_get_cost_per_day(obj) < 0 && (error = true))
@@ -4639,10 +4648,10 @@ static int check_object_spell_number(struct obj_data *obj, int val)
    */
 #if 0
   if (obj_get_type_flag(obj) == ITEM_STAFF &&
-	HAS_SPELL_ROUTINE(obj_get_value(obj, val), MAG_AREAS | MAG_MASSES))
+	spell_has_routine(obj_get_value(obj, val), MAG_AREAS | MAG_MASSES))
     mud_log("... '%s' (#%d) uses %s spell '%s'.",
 	obj->short_description,	obj_get_vnum(obj),
-	HAS_SPELL_ROUTINE(obj_get_value(obj, val), MAG_AREAS) ? "area" : "mass",
+	spell_has_routine(obj_get_value(obj, val), MAG_AREAS) ? "area" : "mass",
 	skill_name(obj_get_value(obj, val)));
 #endif
 
@@ -4739,7 +4748,7 @@ bool my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
                         "%s~\n"
                         "%s~\n"
                         "%s~\n"
-                        "%d %d %d %d %d %" I64T " %d %d\n",
+                        "%d %d %d %d %d %" PRId64 " %d %d\n",
                         obj->name ? obj->name : "undefined",
                         obj->short_description ? obj->short_description : "undefined",
                         obj->description ? obj->description : "undefined",
@@ -4749,10 +4758,10 @@ bool my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate)
     return false;
 
   if (obj->generation)
-    if (!OBJ_SAVE_FPRINTF(fp, obj, "generation", "G\n%ld\n", obj->generation))
+    if (!OBJ_SAVE_FPRINTF(fp, obj, "generation", "G\n%lld\n", (long long)obj->generation))
       return false;
   if (obj->unique_id)
-    if (!OBJ_SAVE_FPRINTF(fp, obj, "unique id", "U\n%" I64T "\n", obj->unique_id))
+    if (!OBJ_SAVE_FPRINTF(fp, obj, "unique id", "U\n%" PRId64 "\n", obj->unique_id))
       return false;
 
   if (!OBJ_SAVE_FPRINTF(fp, obj, "size", "Z\n%d\n", obj_get_size(obj)))

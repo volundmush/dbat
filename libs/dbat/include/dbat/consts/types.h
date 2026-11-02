@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
+#include <inttypes.h> /* PRId64 / SCNd64 for int64_t in printf and scanf */
 
 typedef int IDXTYPE;
 constexpr IDXTYPE NOTHING = -1; /* nil reference for objects	*/
@@ -9,10 +10,6 @@ constexpr IDXTYPE NOTHING = -1; /* nil reference for objects	*/
 constexpr IDXTYPE NOWHERE = NOTHING;
 constexpr IDXTYPE NOBODY  = NOTHING;
 constexpr IDXTYPE NOFLAG  = NOTHING;
-
-#define I64T "ld"
-#define SZT  "ld"
-#define TMT  "ld"
 
 /* Various virtual (human-reference) number types. */
 typedef IDXTYPE room_vnum;
