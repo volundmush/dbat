@@ -648,8 +648,8 @@ static void remove_cmd_from_list(struct reset_com **list, int pos)
  */
 int new_command(struct zone_data *zone, int pos)
 {
-  int subcmd = 0;
-  struct reset_com new_com;
+  int subcmd               = 0;
+  struct reset_com new_com = {.command = 'N'}; /* everything else blank: the strings are freed later */
 
   /* * Error check to ensure users hasn't given too large an index  */
   while (zone->cmd[subcmd].command != 'S')
@@ -659,7 +659,6 @@ int new_command(struct zone_data *zone, int pos)
     return 0;
 
   /* * Ok, let's add a new (blank) command */
-  new_com.command = 'N';
   add_cmd_to_list(&zone->cmd, &new_com, pos);
   return 1;
 }

@@ -487,14 +487,9 @@ static void oedit_liquid_type(struct descriptor_data *d)
  */
 static void oedit_disp_apply_menu(struct descriptor_data *d)
 {
-  int counter, columns = 0;
-
   clear_screen(d);
 
-  for (counter = 0; counter < NUM_APPLIES; counter++) {
-    write_to_output(d, "@g%2d@n) %-20.20s %s", counter,
-                    apply_types[counter], !(++columns % 3) ? "\r\n" : "");
-  }
+  olc_list_columns(d, apply_types, NUM_APPLIES, 0, " ", 3);
   write_to_output(d, "\r\nEnter apply type (0 is no apply) : ");
   OLC_MODE(d) = OEDIT_APPLY;
 }
@@ -504,14 +499,9 @@ static void oedit_disp_apply_menu(struct descriptor_data *d)
  */
 static void oedit_disp_crittype_menu(struct descriptor_data *d)
 {
-  int counter, columns = 0;
-
   clear_screen(d);
 
-  for (counter = 0; counter <= MAX_CRIT_TYPE; counter++) {
-    write_to_output(d, "@g%2d@n) %-20.20s %s", counter,
-                    crit_type[counter], !(++columns % 3) ? "\r\n" : "");
-  }
+  olc_list_columns(d, crit_type, MAX_CRIT_TYPE + 1, 0, " ", 3);
   write_to_output(d, "\r\nEnter critical type : ");
 }
 
@@ -537,15 +527,9 @@ static void oedit_disp_weapon_menu(struct descriptor_data *d)
  */
 static void oedit_disp_armor_menu(struct descriptor_data *d)
 {
-  int counter, columns = 0;
-
   clear_screen(d);
 
-  for (counter = 0; counter <= MAX_ARMOR_TYPES; counter++) {
-    write_to_output(d, "@g%2d@n) %-20.20s %s", counter,
-                    armor_type[counter],
-                    !(++columns % 3) ? "\r\n" : "");
-  }
+  olc_list_columns(d, armor_type, MAX_ARMOR_TYPES + 1, 0, " ", 3);
   write_to_output(d, "\r\nEnter armor proficiency type : ");
 }
 
@@ -571,15 +555,9 @@ static void oedit_disp_spells_menu(struct descriptor_data *d)
  */
 static void oedit_disp_material_menu(struct descriptor_data *d)
 {
-  int counter, columns = 0;
-
   clear_screen(d);
 
-  for (counter = 0; counter < NUM_MATERIALS; counter++) {
-    write_to_output(d, "@g%2d@n) %-20.20s%s", counter,
-                    material_names[counter],
-                    !(++columns % 3) ? "\r\n" : "");
-  }
+  olc_list_columns(d, material_names, NUM_MATERIALS, 0, "", 3);
   write_to_output(d, "\r\n@nEnter material type : ");
 }
 
@@ -588,7 +566,6 @@ static void oedit_disp_material_menu(struct descriptor_data *d)
  */
 static void oedit_disp_val1_menu(struct descriptor_data *d)
 {
-  int counter, columns = 0;
   OLC_MODE(d) = OEDIT_VALUE_1;
   switch (obj_get_type_flag(OLC_OBJ(d))) {
     case ITEM_LIGHT:
@@ -607,10 +584,7 @@ static void oedit_disp_val1_menu(struct descriptor_data *d)
       /*
      * This is now used to control the weapon type used by the weapon object
      */
-      for (counter = 0; counter <= MAX_WEAPON_TYPES; counter++) {
-        write_to_output(d, "@g%2d@n) %-20.20s %s", counter,
-                        weapon_type[counter], !(++columns % 3) ? "\r\n" : "");
-      }
+      olc_list_columns(d, weapon_type, MAX_WEAPON_TYPES + 1, 0, " ", 3);
       write_to_output(d, "\r\nEnter the weapon type for determining proficiencies: \r\n");
       break;
     case ITEM_ARMOR:
@@ -850,14 +824,9 @@ static void oedit_disp_val9_menu(struct descriptor_data *d)
  */
 static void oedit_disp_type_menu(struct descriptor_data *d)
 {
-  int counter, columns = 0;
-
   clear_screen(d);
 
-  for (counter = 0; counter < NUM_ITEM_TYPES; counter++) {
-    write_to_output(d, "@g%2d@n) %-20.20s %s", counter,
-                    item_types[counter], !(++columns % 3) ? "\r\n" : "");
-  }
+  olc_list_columns(d, item_types, NUM_ITEM_TYPES, 0, " ", 3);
   write_to_output(d, "\r\nEnter object type : ");
 }
 
@@ -867,14 +836,10 @@ static void oedit_disp_type_menu(struct descriptor_data *d)
 static void oedit_disp_extra_menu(struct descriptor_data *d)
 {
   char bits[MAX_STRING_LENGTH];
-  int counter, columns = 0;
 
   clear_screen(d);
 
-  for (counter = 0; counter < NUM_ITEM_FLAGS; counter++) {
-    write_to_output(d, "@g%2d@n) %-20.20s %s", counter + 1,
-                    extra_bits[counter], !(++columns % 3) ? "\r\n" : "");
-  }
+  olc_list_columns(d, extra_bits, NUM_ITEM_FLAGS, 1, " ", 3);
   sprintbitarray(obj_get_extra_flags(OLC_OBJ(d)), extra_bits, EF_ARRAY_MAX, bits, sizeof(bits));
   write_to_output(d, "\r\nObject flags: @c%s@n\r\n"
                      "Enter object extra flag (0 to quit) : ",
@@ -909,14 +874,9 @@ static void oedit_disp_perm_menu(struct descriptor_data *d)
  */
 static void oedit_disp_size_menu(struct descriptor_data *d)
 {
-  int counter, columns = 0;
-
   clear_screen(d);
 
-  for (counter = 0; counter < NUM_SIZES; counter++) {
-    write_to_output(d, "@g%2d@n) %-20.20s%s", counter + 1,
-                    size_names[counter], !(++columns % 3) ? "\r\n" : "");
-  }
+  olc_list_columns(d, size_names, NUM_SIZES, 1, "", 3);
   write_to_output(d, "\r\nEnter object size : ");
 }
 
@@ -926,14 +886,10 @@ static void oedit_disp_size_menu(struct descriptor_data *d)
 static void oedit_disp_wear_menu(struct descriptor_data *d)
 {
   char bits[MAX_STRING_LENGTH];
-  int counter, columns = 0;
 
   clear_screen(d);
 
-  for (counter = 0; counter < NUM_ITEM_WEARS; counter++) {
-    write_to_output(d, "@g%2d@n) %-20.20s %s", counter + 1,
-                    wear_bits[counter], !(++columns % 3) ? "\r\n" : "");
-  }
+  olc_list_columns(d, wear_bits, NUM_ITEM_WEARS, 1, " ", 3);
   sprintbitarray(obj_get_wear_flags(OLC_OBJ(d)), wear_bits, TW_ARRAY_MAX, bits, sizeof(bits));
   write_to_output(d, "\r\nWear flags: @c%s@n\r\n"
                      "Enter wear flag, 0 to quit : ",
@@ -1425,7 +1381,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
           if (number == 0 || number == -1)
             obj_set_value(OLC_OBJ(d), 1, -1);
           else
-            obj_set_value(OLC_OBJ(d), 1, LIMIT(number, 1, SKILL_TABLE_SIZE));
+            obj_set_value(OLC_OBJ(d), 1, LIMIT(number, 1, SKILL_TABLE_SIZE - 1));
           oedit_disp_val3_menu(d);
           break;
         case ITEM_CONTROL:
@@ -1714,7 +1670,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
     case OEDIT_PROMPT_SPELLBOOK:
       if ((number = atoi(arg)) == 0)
         break;
-      else if (number < 0 || number > SKILL_TABLE_SIZE) {
+      else if (number < 0 || number > SPELLBOOK_SIZE) { /* a slot in sbinfo[] */
         oedit_disp_prompt_spellbook_menu(d);
         return;
       }
@@ -1741,7 +1697,7 @@ void oedit_parse(struct descriptor_data *d, char *arg)
 
         /* add in check here if already applied.. deny builders another */
         if (char_get_level(d->character) < ADMLVL_IMPL) {
-          for (counter = 0; counter < SKILL_TABLE_SIZE; counter++) {
+          for (counter = 0; counter < SPELLBOOK_SIZE; counter++) {
             if (OLC_OBJ(d)->sbinfo && OLC_OBJ(d)->sbinfo[counter].spellname == number) {
               write_to_output(d, "Object already has that spell.");
               return;

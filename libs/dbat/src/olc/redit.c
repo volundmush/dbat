@@ -428,15 +428,9 @@ static void redit_disp_exit_menu(struct descriptor_data *d)
 static void redit_disp_exit_flag_menu(struct descriptor_data *d)
 {
   char bits[MAX_INPUT_LENGTH];
-  int counter, columns = 0;
 
   clear_screen(d);
-  for (counter = 0; counter < NUM_EXIT_FLAGS; counter++) {
-    write_to_output(d, "@g%2d@n) %-20.20s%s",
-                    counter + 1,
-                    exit_bits[counter],
-                    !(++columns % 2) ? "\r\n" : "");
-  }
+  olc_list_columns(d, exit_bits, NUM_EXIT_FLAGS, 1, "", 2);
   sprintbit(OLC_EXIT(d)->exit_info, exit_bits, bits, sizeof(bits));
   write_to_output(d, "\r\nExit flags: @c%s@n\r\n"
                      "Enter exit flags, 0 to quit : ",
@@ -450,13 +444,9 @@ static void redit_disp_exit_flag_menu(struct descriptor_data *d)
 static void redit_disp_flag_menu(struct descriptor_data *d)
 {
   char bits[MAX_STRING_LENGTH];
-  int counter, columns = 0;
 
   clear_screen(d);
-  for (counter = 0; counter < NUM_ROOM_FLAGS; counter++) {
-    write_to_output(d, "@g%2d@n) %-20.20s%s", counter + 1,
-                    room_bits[counter], !(++columns % 2) ? "\r\n" : "");
-  }
+  olc_list_columns(d, room_bits, NUM_ROOM_FLAGS, 1, "", 2);
   sprintbitarray(OLC_ROOM(d)->room_flags, room_bits, RF_ARRAY_MAX, bits, sizeof(bits));
   write_to_output(d, "\r\nRoom flags: @c%s@n\r\n"
                      "Enter room flags, 0 to quit : ",
@@ -469,13 +459,8 @@ static void redit_disp_flag_menu(struct descriptor_data *d)
  */
 static void redit_disp_sector_menu(struct descriptor_data *d)
 {
-  int counter, columns = 0;
-
   clear_screen(d);
-  for (counter = 0; counter < NUM_ROOM_SECTORS; counter++) {
-    write_to_output(d, "@g%2d@n) %-20.20s%s", counter,
-                    sector_types[counter], !(++columns % 3) ? "\r\n" : "");
-  }
+  olc_list_columns(d, sector_types, NUM_ROOM_SECTORS, 0, "", 3);
   write_to_output(d, "\r\nEnter sector type : ");
   OLC_MODE(d) = REDIT_SECTOR;
 }

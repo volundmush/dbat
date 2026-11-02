@@ -284,14 +284,10 @@ static void zedit_setup(struct descriptor_data *d, int room_num)
 /*------------------------------------------------------------------*/
 static void zedit_disp_flag_menu(struct descriptor_data *d)
 {
-  int counter, columns = 0;
   char bits[MAX_STRING_LENGTH];
 
   clear_screen(d);
-  for (counter = 0; counter < NUM_ZONE_FLAGS; counter++) {
-    write_to_output(d, "@g%2d@n) %-20.20s %s", counter + 1,
-                    zone_bits[counter], !(++columns % 2) ? "\r\n" : "");
-  }
+  olc_list_columns(d, zone_bits, NUM_ZONE_FLAGS, 1, " ", 2);
 
   sprintbitarray(OLC_ZONE(d)->zone_flags, zone_bits, ZF_ARRAY_MAX, bits, sizeof(bits));
   write_to_output(d, "\r\nZone flags: @c%s@n\r\n"
@@ -1346,8 +1342,9 @@ void zedit_parse(struct descriptor_data *d, char *arg)
       /*-------------------------------------------------------------------*/
     case ZEDIT_SARG2:
       if (strlen(arg)) {
+        free(OLC_CMD(d).sarg2);
         OLC_CMD(d).sarg2 = strdup(arg);
-        zedit_disp_arg4(d);
+        zedit_disp_menu(d); /* a V command is complete: it has no arg4/arg5 (they would end the session) */
       } else
         write_to_output(d, "Must have some value to set it to :");
       break;

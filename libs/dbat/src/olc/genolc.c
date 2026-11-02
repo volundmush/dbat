@@ -76,6 +76,14 @@ const char *npc_msg_format_problem(const char *msg, bool allow_int)
   return NULL;
 }
 
+/* A numbered menu of names, `columns` to a line: "@g%2d@n) %-20.20s" then gap after each name.
+   Numbering starts at first_number. */
+void olc_list_columns(struct descriptor_data *d, const char *const *names, int count, int first_number, const char *gap, int columns)
+{
+  for (int i = 0; i < count; i++)
+    write_to_output(d, "@g%2d@n) %-20.20s%s%s", i + first_number, names[i], gap, !((i + 1) % columns) ? "\r\n" : "");
+}
+
 char *str_udup(const char *txt)
 {
   return strdup((txt && *txt) ? txt : "undefined");

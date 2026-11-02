@@ -139,7 +139,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
             free(d->obj_name);
           }
           *buf = '\0';
-          sprintf(buf, "%s", arg);
+          snprintf(buf, sizeof(buf), "%s", arg);
           d->obj_name = strdup(buf);
           disp_restring_menu(d);
           d->obj_editval = EDIT_RESTRING_MAIN;
@@ -198,15 +198,15 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
           obj = d->obj_point;
 
           *buf = '\0';
-          sprintf(buf, "%s", d->obj_name);
+          snprintf(buf, sizeof(buf), "%s", d->obj_name);
           obj->name = strdup(buf);
 
           *buf2 = '\0';
-          sprintf(buf2, "%s", d->obj_short);
+          snprintf(buf2, sizeof(buf2), "%s", d->obj_short);
           obj->short_description = strdup(buf2);
 
           *buf3 = '\0';
-          sprintf(buf3, "%s", d->obj_long);
+          snprintf(buf3, sizeof(buf3), "%s", d->obj_long);
           obj->description = strdup(buf3);
 
           d->obj_editflag = EDIT_NONE;
@@ -307,7 +307,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
             free(d->obj_name);
           }
           *buf = '\0';
-          sprintf(buf, "%s", arg);
+          snprintf(buf, sizeof(buf), "%s", arg);
           d->obj_name = strdup(buf);
           disp_custom_menu(d);
           d->obj_editval = EDIT_CUSTOM_MAIN;
@@ -459,25 +459,25 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
                 break;
             }
             *buf = '\0';
-            sprintf(buf, "%s", d->obj_name);
+            snprintf(buf, sizeof(buf), "%s", d->obj_name);
             obj->name = strdup(buf);
             *buf2     = '\0';
-            sprintf(buf2, "%s", d->obj_short);
+            snprintf(buf2, sizeof(buf2), "%s", d->obj_short);
             obj->short_description = strdup(buf2);
             *buf3                  = '\0';
-            sprintf(buf3, "%s", d->obj_long);
+            snprintf(buf3, sizeof(buf3), "%s", d->obj_long);
             obj->description = strdup(buf3);
           } else {
             obj = read_object(20098, VIRTUAL);
             obj_to_char(obj, d->character);
             *buf = '\0';
-            sprintf(buf, "%s", d->obj_name);
+            snprintf(buf, sizeof(buf), "%s", d->obj_name);
             obj->name = strdup(buf);
             *buf2     = '\0';
-            sprintf(buf2, "%s", d->obj_short);
+            snprintf(buf2, sizeof(buf2), "%s", d->obj_short);
             obj->short_description = strdup(buf2);
             *buf3                  = '\0';
-            sprintf(buf3, "%s", d->obj_long);
+            snprintf(buf3, sizeof(buf3), "%s", d->obj_long);
             obj->description = strdup(buf3);
             switch (d->obj_weapon) {
               case 1:

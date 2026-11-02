@@ -1058,6 +1058,18 @@ static void cedit_disp_points_menu(struct descriptor_data *d)
   The GARGANTAUN event handler
  **************************************************************************/
 
+/* A message option (OK, NOPERSON, NOEFFECT): the text as typed, then a newline. */
+static char *message_option(const char *text)
+{
+  char *msg;
+
+  if (!*text)
+    text = "undefined"; /* as str_udup() */
+  CREATE(msg, char, strlen(text) + 3);
+  sprintf(msg, "%s\r\n", text);
+  return msg;
+}
+
 void cedit_parse(struct descriptor_data *d, char *arg)
 {
   char *oldtext = NULL;
@@ -1811,8 +1823,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
       if (OLC_CONFIG(d)->play.OK)
         free(OLC_CONFIG(d)->play.OK);
 
-      OLC_CONFIG(d)->play.OK = str_udup(arg);
-      strcat(OLC_CONFIG(d)->play.OK, "\r\n");
+      OLC_CONFIG(d)->play.OK = message_option(arg);
 
       cedit_disp_game_play_options(d);
       break;
@@ -1826,8 +1837,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
       if (OLC_CONFIG(d)->play.NOPERSON)
         free(OLC_CONFIG(d)->play.NOPERSON);
 
-      OLC_CONFIG(d)->play.NOPERSON = str_udup(arg);
-      strcat(OLC_CONFIG(d)->play.NOPERSON, "\r\n");
+      OLC_CONFIG(d)->play.NOPERSON = message_option(arg);
 
       cedit_disp_game_play_options(d);
       break;
@@ -1841,8 +1851,7 @@ void cedit_parse(struct descriptor_data *d, char *arg)
       if (OLC_CONFIG(d)->play.NOEFFECT)
         free(OLC_CONFIG(d)->play.NOEFFECT);
 
-      OLC_CONFIG(d)->play.NOEFFECT = str_udup(arg);
-      strcat(OLC_CONFIG(d)->play.NOEFFECT, "\r\n");
+      OLC_CONFIG(d)->play.NOEFFECT = message_option(arg);
 
       cedit_disp_game_play_options(d);
       break;

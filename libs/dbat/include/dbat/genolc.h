@@ -18,6 +18,7 @@ int in_save_list(zone_vnum, int type);
 void strip_cr(char *);
 int save_all(void);
 char *str_udup(const char *);
+void olc_list_columns(struct descriptor_data *d, const char *const *names, int count, int first_number, const char *gap, int columns);
 void copy_ex_descriptions(struct extra_descr_data **to, struct extra_descr_data *from);
 void free_ex_descriptions(struct extra_descr_data *head);
 int sprintascii(char *out, bitvector_t bits);

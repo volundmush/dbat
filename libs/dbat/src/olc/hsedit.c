@@ -612,7 +612,7 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
         hsedit_disp_menu(d);
         return;
       }
-      if ((number < 0) || (number > 12)) {
+      if ((number < 0) || (number >= NUM_OF_DIRS)) {
         send_to_char(d->character, "Invalid choice, Please select a direction (1-12, Q to quit) : ");
         return;
       }

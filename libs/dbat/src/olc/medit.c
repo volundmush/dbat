@@ -379,14 +379,10 @@ static void medit_disp_sex(struct descriptor_data *d)
  */
 static void medit_disp_mob_flags(struct descriptor_data *d)
 {
-  int i, columns = 0;
   char flags[MAX_STRING_LENGTH];
 
   clear_screen(d);
-  for (i = 0; i < NUM_MOB_FLAGS; i++) {
-    write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, action_bits[i],
-                    !(++columns % 2) ? "\r\n" : "");
-  }
+  olc_list_columns(d, action_bits, NUM_MOB_FLAGS, 1, "  ", 2);
   sprintbitarray(char_get_act(OLC_MOB(d)), action_bits, AF_ARRAY_MAX, flags, sizeof(flags));
   write_to_output(d, "\r\nCurrent flags : @c%s@n\r\nEnter mob flags (0 to quit) : ",
                   flags);
@@ -399,11 +395,8 @@ static void medit_disp_personality(struct descriptor_data *d)
 
   write_to_output(d, "@GPersonalities\n");
   write_to_output(d, "@D--------------@n\n");
-  write_to_output(d, "@w1@D) @WBasic@n\n");
-  write_to_output(d, "@w1@D) @WCareful@n\n");
-  write_to_output(d, "@w1@D) @WAggressive@n\n");
-  write_to_output(d, "@w1@D) @WArrogant\n");
-  write_to_output(d, "@w1@D) @WIntelligent@n\n");
+  for (int i = 0; i < MAX_PERSONALITIES; i++)
+    write_to_output(d, "@w%d@D) @W%s@n\n", i + 1, npc_personality[i]);
 }
 
 /*
@@ -411,14 +404,10 @@ static void medit_disp_personality(struct descriptor_data *d)
  */
 static void medit_disp_aff_flags(struct descriptor_data *d)
 {
-  int i, columns = 0;
   char flags[MAX_STRING_LENGTH];
 
   clear_screen(d);
-  for (i = 0; i < NUM_AFF_FLAGS; i++) {
-    write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, affected_bits[i + 1],
-                    !(++columns % 2) ? "\r\n" : "");
-  }
+  olc_list_columns(d, affected_bits + 1, NUM_AFF_FLAGS, 1, "  ", 2);
   sprintbitarray(char_get_affected_by(OLC_MOB(d)), affected_bits, AF_ARRAY_MAX, flags, sizeof(flags));
   write_to_output(d, "\r\nCurrent flags   : @c%s@n\r\nEnter aff flags (0 to quit) : ",
                   flags);
@@ -546,7 +535,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
 
   if (OLC_MODE(d) > MEDIT_NUMERICAL_RESPONSE) {
     i = atoi(arg);
-    if (!*arg || (!isdigit(arg[0]) && ((*arg == '-') && !isdigit(arg[1])))) {
+    if (!*arg || !(isdigit(arg[0]) || (arg[0] == '-' && isdigit(arg[1])))) {
       write_to_output(d, "Field must be numerical, try again : ");
       return;
     }
@@ -813,8 +802,8 @@ void medit_parse(struct descriptor_data *d, char *arg)
     case MEDIT_PERSONALITY:
       if ((i = atoi(arg)) <= 0)
         break;
-      else if (i <= MAX_PERSONALITIES)
-        char_set_personality(OLC_MOB(d), i);
+      else if (i <= MAX_PERSONALITIES) /* menu choice 1..N is npc_personality[0..N-1] */
+        char_set_personality(OLC_MOB(d), i - 1);
       medit_disp_personality(d);
       return;
       /*-------------------------------------------------------------------*/
