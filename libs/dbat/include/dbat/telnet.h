@@ -39,28 +39,28 @@
 /*
  * Definitions for the TELNET protocol.
  */
-constexpr int IAC  = 255;  /* interpret as command: */
-constexpr int DONT = 254;  /* you are not to use option */
-constexpr int DO   = 253;  /* please, you use option */
-constexpr int WONT = 252;  /* I won't use option */
-constexpr int WILL = 251;  /* I will use option */
-constexpr int SB   = 250;  /* interpret as subnegotiation */
-constexpr int GA   = 249;  /* you may reverse the line */
-constexpr int EL   = 248;  /* erase the current line */
-constexpr int EC   = 247;  /* erase the current character */
-#define AYT 246            /* are you there */
-#define AO  245            /* abort output--but let prog finish */
-#define IP  244            /* interrupt process--permanently */
+constexpr int IAC   = 255; /* interpret as command: */
+constexpr int DONT  = 254; /* you are not to use option */
+constexpr int DO    = 253; /* please, you use option */
+constexpr int WONT  = 252; /* I won't use option */
+constexpr int WILL  = 251; /* I will use option */
+constexpr int SB    = 250; /* interpret as subnegotiation */
+constexpr int GA    = 249; /* you may reverse the line */
+constexpr int EL    = 248; /* erase the current line */
+constexpr int EC    = 247; /* erase the current character */
+constexpr int AYT   = 246; /* are you there */
+constexpr int AO    = 245; /* abort output--but let prog finish */
+constexpr int IP    = 244; /* interrupt process--permanently */
 constexpr int BREAK = 243; /* break */
 constexpr int DM    = 242; /* data mark--for connect. cleaning */
 constexpr int NOP   = 241; /* nop */
 constexpr int SE    = 240; /* end sub negotiation */
-#define EOR 239            /* end of record (transparent mode) */
+constexpr int EOR   = 239; /* end of record (transparent mode) */
 constexpr int ABORT = 238; /* Abort process */
 constexpr int SUSP  = 237; /* Suspend process */
 constexpr int xEOF  = 236; /* End of file: EOF is already used... */
 
-#define SYNCH 242 /* for telfunc calls */
+constexpr int SYNCH = 242; /* for telfunc calls */
 
 #ifdef TELCMDS
 char *telcmds[] = {

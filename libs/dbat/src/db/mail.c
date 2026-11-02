@@ -43,13 +43,6 @@ static bool mail_recip_ok(const char *name);
 
 /* -------------------------------------------------------------------------- */
 
-/* defines for fseek */
-#ifndef SEEK_SET
-#define SEEK_SET 0
-constexpr int SEEK_CUR = 1;
-constexpr int SEEK_END = 2;
-#endif
-
 void free_mail_index(void)
 {
   mail_index_type *tmp;

@@ -77,9 +77,9 @@ void trim(char *s)
 /* Turns number into string and adds commas to it. */
 char *add_commas(int64_t num)
 {
-#define DIGITS_PER_GROUP  3
-#define BUFFER_COUNT      19
-#define DIGITS_PER_BUFFER 25
+  constexpr int DIGITS_PER_GROUP  = 3;
+  constexpr int BUFFER_COUNT      = 19;
+  constexpr int DIGITS_PER_BUFFER = 25;
 
   int64_t i, j, len, negative = (num < 0);
   char num_string[DIGITS_PER_BUFFER];
@@ -100,10 +100,6 @@ char *add_commas(int64_t num)
   which = (which + 1) % BUFFER_COUNT;
 
   return comma_string[i];
-
-#undef DIGITS_PER_GROUP
-#undef BUFFER_COUNT
-#undef DIGITS_PER_BUFFER
 }
 
 char *CAP(char *txt)

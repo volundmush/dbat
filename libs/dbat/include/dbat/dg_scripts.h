@@ -10,6 +10,7 @@
 **************************************************************************/
 
 #pragma once
+#include "dbat/consts/pulse.h"
 #include "dbat/consts/types.h"
 #include "dbat/consts/triggers.h"
 #include "dbat/index.h"
@@ -26,7 +27,7 @@ struct trig_proto_list {
  * These are slightly off of PULSE_MOBILE so
  * everything isnt happening at the same time
  */
-#define PULSE_DG_SCRIPT (13 RL_SEC)
+constexpr int PULSE_DG_SCRIPT = 13 * PASSES_PER_SEC;
 
 /* one line of the trigger */
 struct cmdlist_element {

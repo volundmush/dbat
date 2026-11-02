@@ -44,11 +44,11 @@
  authors. WSE" )
 */
 
-#define m (unsigned long)2147483647
-#define q (unsigned long)127773
-
-#define a (unsigned int)16807
-#define r (unsigned int)2836
+/* m, q, a and r below */
+constexpr unsigned long PM_MODULUS   = 2147483647; /* m = 2^31 - 1 */
+constexpr unsigned long PM_QUOTIENT  = 127773;     /* q = m / a */
+constexpr unsigned int PM_MULTIPLIER = 16807;      /* a */
+constexpr unsigned int PM_REMAINDER  = 2836;       /* r = m % a */
 
 /*
 ** F(z)	= (az)%m
@@ -75,15 +75,15 @@ unsigned long circle_random(void)
 {
   int lo, hi, test;
 
-  hi = seed / q;
-  lo = seed % q;
+  hi = seed / PM_QUOTIENT;
+  lo = seed % PM_QUOTIENT;
 
-  test = a * lo - r * hi;
+  test = PM_MULTIPLIER * lo - PM_REMAINDER * hi;
 
   if (test > 0)
     seed = test;
   else
-    seed = test + m;
+    seed = test + PM_MODULUS;
 
   return (seed);
 }

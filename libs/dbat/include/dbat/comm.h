@@ -9,9 +9,7 @@
  * files that is included is controlled by conf.h for that platform.
  */
 
-#ifndef INVALID_SOCKET
-#define INVALID_SOCKET (-1)
-#endif
+constexpr int INVALID_SOCKET = -1;
 
 /* mccp defines */
 constexpr int COMPRESS2 = 86;

@@ -35,8 +35,6 @@ static void hcontrol_build_house(struct char_data *ch, char *arg);
 static void hcontrol_destroy_house(struct char_data *ch, char *arg);
 static void hcontrol_pay_house(struct char_data *ch, char *arg);
 
-#define MAX_BAG_ROWS 5
-
 /* First, the basics: finding the filename; loading/saving objects */
 
 /* Return a filename given a house vnum */

@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define IDXTYPE int
+typedef int IDXTYPE;
 constexpr IDXTYPE NOTHING = -1; /* nil reference for objects	*/
 
 constexpr IDXTYPE NOWHERE = NOTHING;

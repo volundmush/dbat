@@ -594,9 +594,9 @@ static void game_loop(int cmmother_desc)
     }
 
     /* If we missed more than 30 seconds worth of pulses, just do 30 secs */
-    if (missed_pulses > 30 RL_SEC) {
+    if (missed_pulses > 30 * PASSES_PER_SEC) {
       mud_log("SYSERR: Missed %d seconds worth of pulses.", missed_pulses / PASSES_PER_SEC);
-      missed_pulses = 30 RL_SEC;
+      missed_pulses = 30 * PASSES_PER_SEC;
     }
 
     /* Now execute the heartbeat functions */

@@ -9,9 +9,6 @@
 #include "dbat/weather.h"
 #include "dbat/transformations.h"
 
-#define Y true
-#define N false
-
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
 
 /* Converted into metric units: cm and kg; SRD has english units. */

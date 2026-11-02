@@ -1,8 +1,5 @@
 #include "dbat/consts/senseis.h"
 
-#define Y true
-#define N false
-
 /* Sensei Fighting Style */
 const char *sensei_style[MAX_SENSEI] = {
     "Kame Arts",         /* Roshi */

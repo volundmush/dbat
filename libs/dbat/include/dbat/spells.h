@@ -143,8 +143,8 @@ constexpr int SPELL_BESTOW_CURSE          = 89;
 constexpr int SPELL_SENSU                 = 90;
 constexpr int SPELL_HAYASA                = 91;
 
-#define MIN_LANGUAGES SKILL_LANG_COMMON
 constexpr int SKILL_LANG_COMMON   = 141;
+constexpr int MIN_LANGUAGES       = SKILL_LANG_COMMON;
 constexpr int SKILL_LANG_ELVEN    = 142;
 constexpr int SKILL_LANG_GNOME    = 143;
 constexpr int SKILL_LANG_DWARVEN  = 144;

@@ -266,7 +266,7 @@ static const struct cedit_option cedit_options[] = {
      MENU('N', 'A', "Character Creation Method ")},
 };
 
-#define NUM_CEDIT_OPTIONS ((int)(countof(cedit_options)))
+constexpr int NUM_CEDIT_OPTIONS = countof(cedit_options);
 
 static bool is_string_option(const struct cedit_option *o)
 {
