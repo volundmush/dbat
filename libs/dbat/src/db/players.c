@@ -1101,8 +1101,7 @@ void save_char(struct char_data *ch)
     save_index              = TRUE;
     player_table[id].played = char_get_lastpl(ch);
   }
-  player_table[id].clan = strdup("None.");
-  i                     = player_table[id].flags;
+  i = player_table[id].flags;
   if (char_plr_flagged(ch, PLR_DELETED))
     SET_BIT(player_table[id].flags, PINDEX_DELETED);
   else

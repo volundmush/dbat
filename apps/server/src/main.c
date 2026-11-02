@@ -176,6 +176,7 @@ int main(int argc, char **argv)
     free_social_messages();                /* act.social.c */
     free_help_table();                     /* db.c */
     Free_Invalid_List();                   /* ban.c */
+    free_ban_list();                       /* ban.c */
     free_strings(&config_info, OASIS_CFG); /* oasis_delete.c */
     free_disabled();                       /* interpreter.c */
     free_save_list();                      /* genolc.c */

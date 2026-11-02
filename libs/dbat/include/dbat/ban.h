@@ -23,6 +23,7 @@ extern int num_invalid;
 void load_banned(void);
 int isbanned(char *hostname);
 void Free_Invalid_List(void);
+void free_ban_list(void);
 int Valid_Name(char *newname);
 void Read_Invalid_List(void);
 

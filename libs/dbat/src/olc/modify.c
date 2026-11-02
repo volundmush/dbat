@@ -251,9 +251,10 @@ static void playing_string_cleanup(struct descriptor_data *d, int action)
       notify_if_playing(d->character, d->mail_to);
     } else {
       write_to_output(d, "Mail aborted.\r\n");
-      free(*d->str);
-      free(d->str);
     }
+    /* store_mail() keeps its own copy; the text and its holder came from postmaster_send_mail() */
+    free(*d->str);
+    free(d->str);
   }
 
   if (char_plr_flagged(d->character, PLR_WRITING)) {

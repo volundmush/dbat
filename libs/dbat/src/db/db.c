@@ -593,6 +593,7 @@ void destroy_db(void)
       free(obj_proto[cnt].action_description);
     if (obj_proto[cnt].ex_description)
       free_extra_descriptions(obj_proto[cnt].ex_description);
+    free(obj_proto[cnt].sbinfo); /* spellbook pages */
 
     /* free script proto list */
     free_proto_script(&obj_proto[cnt], OBJ_TRIGGER);
@@ -2705,7 +2706,7 @@ void free_help_table(void)
 {
   if (help_table) {
     int hp;
-    for (hp = 0; hp < top_of_helpt; hp++) {
+    for (hp = 0; hp <= top_of_helpt; hp++) { /* top_of_helpt is the last index */
       if (help_table[hp].keywords)
         free(help_table[hp].keywords);
       if (help_table[hp].entry && !help_table[hp].duplicate)
@@ -4243,6 +4244,7 @@ void free_char(struct char_data *ch)
       free(char_get_voice(ch));
     if (ch->title)
       free(ch->title);
+    free(ch->loguser);
     if (ch->short_descr)
       free(ch->short_descr);
     if (ch->long_descr)

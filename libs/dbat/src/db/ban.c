@@ -72,6 +72,15 @@ void load_banned(void)
   fclose(fl);
 }
 
+void free_ban_list(void)
+{
+  while (ban_list) {
+    struct ban_list_element *next = ban_list->next;
+    free(ban_list);
+    ban_list = next;
+  }
+}
+
 int isbanned(char *hostname)
 {
   int i;

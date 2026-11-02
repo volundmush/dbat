@@ -138,10 +138,10 @@ static void hedit_save_internally(struct descriptor_data *d)
     int i;
     CREATE(new_help_table, struct help_index_element, top_of_helpt + 2);
 
-    for (i = 0; i < top_of_helpt; i++)
+    /* top_of_helpt is the index of the last entry */
+    for (i = 0; i <= top_of_helpt; i++)
       new_help_table[i] = help_table[i];
-    /*new_help_table[++top_of_helpt] = *OLC_HELP(d);*/
-    new_help_table[top_of_helpt++] = *OLC_HELP(d);
+    new_help_table[++top_of_helpt] = *OLC_HELP(d);
     free(help_table);
     help_table = new_help_table;
   } else
@@ -164,7 +164,7 @@ static void hedit_save_to_disk(struct descriptor_data *d)
     return;
   }
 
-  for (i = 0; i < top_of_helpt; i++) {
+  for (i = 0; i <= top_of_helpt; i++) {
     if (help_table[i].duplicate)
       continue;
     strncpy(buf1, help_table[i].entry ? help_table[i].entry : "Empty\r\n", sizeof(buf1) - 1);
@@ -258,7 +258,7 @@ void hedit_parse(struct descriptor_data *d, char *arg)
         case 'N':
           OLC_ZNUM(d)
           ++;
-          for (; OLC_ZNUM(d) < top_of_helpt; OLC_ZNUM(d)++)
+          for (; OLC_ZNUM(d) <= top_of_helpt; OLC_ZNUM(d)++)
             if (is_abbrev(OLC_STORAGE(d), help_table[OLC_ZNUM(d)].keywords))
               break;
             else
@@ -455,7 +455,7 @@ ACMD(do_hindex)
 
   if (!*argument) {
     send_to_char(ch, "Usage: hindex <string>\r\n");
-    for (i = 0; i < top_of_helpt; i++) {
+    for (i = 0; i <= top_of_helpt; i++) {
       num++;
     }
     if (num > 0 && char_get_admlevel(ch) > 0) {
@@ -465,7 +465,7 @@ ACMD(do_hindex)
   }
 
   len = sprintf(buf, "Help index entries based on '%s':\r\n", argument);
-  for (i = 0; i < top_of_helpt; i++) {
+  for (i = 0; i <= top_of_helpt; i++) {
     num++;
     if (is_abbrev(argument, help_table[i].keywords) && (char_get_admlevel(ch) >= help_table[i].min_level))
       len +=

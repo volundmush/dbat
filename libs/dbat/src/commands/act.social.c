@@ -325,6 +325,14 @@ void create_command_list(void)
 
 void free_command_list(void)
 {
+  int k;
+
+  if (!complete_cmd_info)
+    return;
+  /* entries point at cmd_info's and the socials' strings, except the terminator made by create_command_list() */
+  for (k = 0; *complete_cmd_info[k].command != '\n'; k++);
+  free((char *)complete_cmd_info[k].command);
+  free((char *)complete_cmd_info[k].sort_as);
   free(complete_cmd_info);
   complete_cmd_info = NULL;
 }

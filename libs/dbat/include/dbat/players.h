@@ -11,7 +11,6 @@ struct player_index_element {
   int ship;
   int shiproom;
   time_t played;
-  char *clan;
 };
 
 extern int top_of_p_table;

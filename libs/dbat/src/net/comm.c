@@ -636,7 +636,7 @@ static void game_loop(int cmmother_desc)
     if (emergency_unban) {
       emergency_unban = FALSE;
       mudlog(LOG_BRF, ADMLVL_IMMORT, TRUE, "Received SIGUSR2 - completely unrestricting game (emergent)");
-      ban_list        = NULL;
+      free_ban_list();
       circle_restrict = 0;
       num_invalid     = 0;
     }
