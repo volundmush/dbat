@@ -15,6 +15,7 @@
 #include "dbat/utils.h"
 #include "dbat/db.h"
 #include "dbat/oasis.h"
+#include "dbat/character_utils.h"
 
 static bool parse_stat_menu(struct descriptor_data *d, char *arg);
 static int stats_assign_stat(int abil, char *arg, struct descriptor_data *d);
@@ -33,27 +34,27 @@ bool parse_stats(struct descriptor_data *d, char *arg)
         return true;
       break;
     case STAT_GET_STR:
-      ch->real_abils.str = stats_assign_stat(ch->real_abils.str, arg, d);
+      char_set_real_abils_str(ch, stats_assign_stat(char_get_real_abils_str(ch), arg, d));
       stats_disp_menu(d);
       break;
     case STAT_GET_INT:
-      ch->real_abils.intel = stats_assign_stat(ch->real_abils.intel, arg, d);
+      char_set_real_abils_intel(ch, stats_assign_stat(char_get_real_abils_intel(ch), arg, d));
       stats_disp_menu(d);
       break;
     case STAT_GET_WIS:
-      ch->real_abils.wis = stats_assign_stat(ch->real_abils.wis, arg, d);
+      char_set_real_abils_wis(ch, stats_assign_stat(char_get_real_abils_wis(ch), arg, d));
       stats_disp_menu(d);
       break;
     case STAT_GET_DEX:
-      ch->real_abils.dex = stats_assign_stat(ch->real_abils.dex, arg, d);
+      char_set_real_abils_dex(ch, stats_assign_stat(char_get_real_abils_dex(ch), arg, d));
       stats_disp_menu(d);
       break;
     case STAT_GET_CON:
-      ch->real_abils.con = stats_assign_stat(ch->real_abils.con, arg, d);
+      char_set_real_abils_con(ch, stats_assign_stat(char_get_real_abils_con(ch), arg, d));
       stats_disp_menu(d);
       break;
     case STAT_GET_CHA:
-      ch->real_abils.cha = stats_assign_stat(ch->real_abils.cha, arg, d);
+      char_set_real_abils_cha(ch, stats_assign_stat(char_get_real_abils_cha(ch), arg, d));
       stats_disp_menu(d);
       break;
     default:
@@ -81,12 +82,12 @@ bool stats_disp_menu(struct descriptor_data *d)
                "-<[@y===========================@W]>-@n\r\n"
                "\r\n",
                OLC_VAL(d),
-               d->character->real_abils.str,
-               d->character->real_abils.dex,
-               d->character->real_abils.con,
-               d->character->real_abils.intel,
-               d->character->real_abils.wis,
-               d->character->real_abils.cha);
+               char_get_real_abils_str(d->character),
+               char_get_real_abils_dex(d->character),
+               char_get_real_abils_con(d->character),
+               char_get_real_abils_intel(d->character),
+               char_get_real_abils_wis(d->character),
+               char_get_real_abils_cha(d->character));
 
   send_to_char(d->character, "Enter Letter to Change: ");
 

@@ -16,6 +16,7 @@
 #include "dbat/class.h"
 #include "dbat/affect.h"
 #include "dbat/atomicfile.h"
+#include "dbat/character_utils.h"
 
 static bool free_mobile_strings(struct char_data *mob);
 static bool write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd);
@@ -50,8 +51,8 @@ mob_rnum add_mobile(struct char_data *mob, mob_vnum vnum)
     copy_mobile(&mob_proto[rnum], mob);
 
     /* Now re-point all existing mobile strings to here. */
-    for (live_mob = character_list; live_mob; live_mob = live_mob->next)
-      if (rnum == live_mob->nr)
+    for (live_mob = character_list; live_mob; live_mob = char_get_next(live_mob))
+      if (rnum == char_get_nr(live_mob))
         update_mobile_strings(live_mob, &mob_proto[rnum]);
 
     add_to_save_list(zone_table[real_zone_by_thing(vnum)].number, SL_MOB);
@@ -66,7 +67,7 @@ mob_rnum add_mobile(struct char_data *mob, mob_vnum vnum)
   for (i = top_of_mobt; i > 0; i--) {
     if (vnum > mob_index[i - 1].vnum) {
       mob_proto[i]    = *mob;
-      mob_proto[i].nr = i;
+      char_set_nr(&mob_proto[i], i);
       copy_mobile_strings(mob_proto + i, mob);
       mob_index[i].vnum   = vnum;
       mob_index[i].number = 0;
@@ -76,11 +77,11 @@ mob_rnum add_mobile(struct char_data *mob, mob_vnum vnum)
     }
     mob_index[i] = mob_index[i - 1];
     mob_proto[i] = mob_proto[i - 1];
-    mob_proto[i].nr++;
+    char_set_nr(&mob_proto[i], char_get_nr(&mob_proto[i]) + 1);
   }
   if (!found) {
     mob_proto[0]    = *mob;
-    mob_proto[0].nr = 0;
+    char_set_nr(&mob_proto[0], 0);
     copy_mobile_strings(&mob_proto[0], mob);
     mob_index[0].vnum   = vnum;
     mob_index[0].number = 0;
@@ -99,7 +100,7 @@ mob_rnum add_mobile(struct char_data *mob, mob_vnum vnum)
 #endif
 
   /* Update live mobile rnums. */
-  for (live_mob = character_list; live_mob; live_mob = live_mob->next)
+  for (live_mob = character_list; live_mob; live_mob = char_get_next(live_mob))
     char_set_nr(live_mob, char_get_nr(live_mob) + ((char_get_nr(live_mob) != NOTHING && char_get_nr(live_mob) >= found)));
 
   /* Update zone table. */
@@ -138,7 +139,7 @@ static void extract_mobile_all(mob_vnum vnum)
   struct char_data *next, *ch;
 
   for (ch = character_list; ch; ch = next) {
-    next = ch->next;
+    next = char_get_next(ch);
     if (char_get_mob_vnum(ch) == vnum)
       extract_char(ch);
   }
@@ -163,7 +164,7 @@ mob_rnum delete_mobile(mob_rnum refpt)
   for (counter = refpt; counter < top_of_mobt; counter++) {
     mob_index[counter]    = mob_index[counter + 1];
     mob_proto[counter]    = mob_proto[counter + 1];
-    mob_proto[counter].nr = counter;
+    char_set_nr(&mob_proto[counter], counter);
   }
 
   top_of_mobt--;
@@ -173,7 +174,7 @@ mob_rnum delete_mobile(mob_rnum refpt)
   add_to_save_list(zone_table[real_zone_by_thing(vnum)].number, SL_MOB);
 
   /* Update live mobile rnums.  */
-  for (live_mob = character_list; live_mob; live_mob = live_mob->next)
+  for (live_mob = character_list; live_mob; live_mob = char_get_next(live_mob))
     char_set_nr(live_mob, char_get_nr(live_mob) - ((char_get_nr(live_mob) >= refpt)));
 
   /* Update zone table.  */
@@ -233,46 +234,46 @@ mob_rnum delete_mobile(mob_rnum refpt)
 
 static bool copy_mobile_strings(struct char_data *t, struct char_data *f)
 {
-  if (f->name)
-    t->name = strdup(f->name);
-  if (f->title)
-    t->title = strdup(f->title);
-  if (f->short_descr)
-    t->short_descr = strdup(f->short_descr);
-  if (f->long_descr)
-    t->long_descr = strdup(f->long_descr);
-  if (f->description)
-    t->description = strdup(f->description);
+  if (char_get_alias(f))
+    char_set_alias(t, strdup(char_get_alias(f)));
+  if (char_get_raw_title(f))
+    char_set_raw_title(t, strdup(char_get_raw_title(f)));
+  if (char_get_sdesc(f))
+    char_set_sdesc(t, strdup(char_get_sdesc(f)));
+  if (char_get_ldesc(f))
+    char_set_ldesc(t, strdup(char_get_ldesc(f)));
+  if (char_get_ddesc(f))
+    char_set_ddesc(t, strdup(char_get_ddesc(f)));
   return true;
 }
 
 static bool update_mobile_strings(struct char_data *t, struct char_data *f)
 {
-  if (f->name)
-    t->name = f->name;
-  if (f->title)
-    t->title = f->title;
-  if (f->short_descr)
-    t->short_descr = f->short_descr;
-  if (f->long_descr)
-    t->long_descr = f->long_descr;
-  if (f->description)
-    t->description = f->description;
+  if (char_get_alias(f))
+    char_set_alias(t, char_get_alias(f));
+  if (char_get_raw_title(f))
+    char_set_raw_title(t, char_get_raw_title(f));
+  if (char_get_sdesc(f))
+    char_set_sdesc(t, char_get_sdesc(f));
+  if (char_get_ldesc(f))
+    char_set_ldesc(t, char_get_ldesc(f));
+  if (char_get_ddesc(f))
+    char_set_ddesc(t, char_get_ddesc(f));
   return true;
 }
 
 static bool free_mobile_strings(struct char_data *mob)
 {
-  if (mob->name)
-    free(mob->name);
-  if (mob->title)
-    free(mob->title);
-  if (mob->short_descr)
-    free(mob->short_descr);
-  if (mob->long_descr)
-    free(mob->long_descr);
-  if (mob->description)
-    free(mob->description);
+  if (char_get_alias(mob))
+    free(char_get_alias(mob));
+  if (char_get_raw_title(mob))
+    free(char_get_raw_title(mob));
+  if (char_get_sdesc(mob))
+    free(char_get_sdesc(mob));
+  if (char_get_ldesc(mob))
+    free(char_get_ldesc(mob));
+  if (char_get_ddesc(mob))
+    free(char_get_ddesc(mob));
   return true;
 }
 
@@ -291,25 +292,25 @@ bool free_mobile(struct char_data *mob)
     /* free script proto list */
     free_proto_script(mob, MOB_TRIGGER);
   } else { /* Prototyped mobile. */
-    if (mob->name && mob->name != mob_proto[i].name)
-      free(mob->name);
-    if (mob->title && mob->title != mob_proto[i].title)
-      free(mob->title);
-    if (mob->short_descr && mob->short_descr != mob_proto[i].short_descr)
-      free(mob->short_descr);
-    if (mob->long_descr && mob->long_descr != mob_proto[i].long_descr)
-      free(mob->long_descr);
-    if (mob->description && mob->description != mob_proto[i].description)
-      free(mob->description);
+    if (char_get_alias(mob) && char_get_alias(mob) != char_get_alias(&mob_proto[i]))
+      free(char_get_alias(mob));
+    if (char_get_raw_title(mob) && char_get_raw_title(mob) != char_get_raw_title(&mob_proto[i]))
+      free(char_get_raw_title(mob));
+    if (char_get_sdesc(mob) && char_get_sdesc(mob) != char_get_sdesc(&mob_proto[i]))
+      free(char_get_sdesc(mob));
+    if (char_get_ldesc(mob) && char_get_ldesc(mob) != char_get_ldesc(&mob_proto[i]))
+      free(char_get_ldesc(mob));
+    if (char_get_ddesc(mob) && char_get_ddesc(mob) != char_get_ddesc(&mob_proto[i]))
+      free(char_get_ddesc(mob));
     /* free script proto list if it's not the prototype */
-    if (mob->proto_script && mob->proto_script != mob_proto[i].proto_script)
+    if (char_get_proto_script(mob) && char_get_proto_script(mob) != char_get_proto_script(&mob_proto[i]))
       free_proto_script(mob, MOB_TRIGGER);
   }
-  while (mob->affected)
-    affect_remove(mob, mob->affected);
+  while (char_get_affected(mob))
+    affect_remove(mob, char_get_affected(mob));
 
   /* free any assigned scripts */
-  if (mob->script)
+  if (char_get_script(mob))
     extract_script(mob, MOB_TRIGGER);
 
   free(mob);
@@ -381,7 +382,7 @@ static bool write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 {
   struct affected_type *aff;
 
-  if (get_size(mob) != race_get_size(mob->race))
+  if (get_size(mob) != race_get_size(char_get_race(mob)))
     fprintf(fd, "Size: %d\n", get_size(mob));
   if (char_get_mob_specials_attack_type(mob) != 0)
     fprintf(fd, "BareHandAttack: %d\n", char_get_mob_specials_attack_type(mob));
@@ -401,7 +402,7 @@ static bool write_mobile_espec(mob_vnum mvnum, struct char_data *mob, FILE *fd)
     fprintf(fd, "Hit: %" PRId64 "\nMaxHit: %" PRId64 "\nMana: %" PRId64 "\nMaxMana: %" PRId64 "\nMoves: %" PRId64 "\nMaxMoves: %" PRId64 "\n",
             getCurPL(mob), getEffMaxPL(mob), (getCurKI(mob)), getMaxKI(mob),
             (getCurST(mob)), getMaxST(mob));
-    for (aff = mob->affected; aff; aff = aff->next)
+    for (aff = char_get_affected(mob); aff; aff = aff->next)
       if (aff->type)
         fprintf(fd, "Affect: %d %d %d %d %d %d\n", aff->type, aff->duration,
                 aff->modifier, aff->location, (int)aff->bitvector, aff->specific);
@@ -473,11 +474,11 @@ static bool write_mobile_record(mob_vnum mvnum, struct char_data *mob, FILE *fd)
 
 static void check_mobile_strings(struct char_data *mob)
 {
-  mob_vnum mvnum = mob_index[mob->nr].vnum;
-  check_mobile_string(mvnum, &((mob)->long_descr), "long description");
-  check_mobile_string(mvnum, &((mob)->description), "detailed description");
-  check_mobile_string(mvnum, &((mob)->name), "alias list");
-  check_mobile_string(mvnum, &((mob)->short_descr), "short description");
+  mob_vnum mvnum = mob_index[char_get_nr(mob)].vnum;
+  check_mobile_string(mvnum, char_long_descr_slot(mob), "long description");
+  check_mobile_string(mvnum, char_description_slot(mob), "detailed description");
+  check_mobile_string(mvnum, char_name_slot(mob), "alias list");
+  check_mobile_string(mvnum, char_short_descr_slot(mob), "short description");
 }
 
 static void check_mobile_string(mob_vnum i, char **string, const char *dscr)

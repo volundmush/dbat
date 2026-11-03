@@ -8,6 +8,8 @@
 #include "dbat/mobact.h"
 #include "dbat/objsave.h"
 #include "dbat/act.misc.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 static int extractions_pending = 0;
 
@@ -31,7 +33,7 @@ void extract_char_final(struct char_data *ch)
    * need to stuff them back into their own body.  This will set ch->desc
    * we're checking below this loop to the proper value.
    */
-  if (!char_is_npc(ch) && !ch->desc) {
+  if (!char_is_npc(ch) && !char_get_desc(ch)) {
     for (d = descriptor_list; d; d = d->next)
       if (d->original == ch) {
         do_return(d->character, nullptr, 0, 0);
@@ -39,7 +41,7 @@ void extract_char_final(struct char_data *ch)
       }
   }
 
-  if (ch->desc) {
+  if (char_get_desc(ch)) {
     /*
      * This time we're extracting the body someone has switched into
      * (not the body of someone switching as above) so we need to put
@@ -48,7 +50,7 @@ void extract_char_final(struct char_data *ch)
      * If this body is not possessed, the owner won't have a
      * body after the removal so dump them to the main menu.
      */
-    if (ch->desc->original)
+    if (char_get_desc(ch)->original)
       do_return(ch, nullptr, 0, 0);
     else {
       /*
@@ -59,18 +61,18 @@ void extract_char_final(struct char_data *ch)
        * If we're here, we know it's a player so no IS_NPC check required.
        */
       for (d = descriptor_list; d; d = d->next) {
-        if (d == ch->desc)
+        if (d == char_get_desc(ch))
           continue;
         if (d->character && char_get_idnum(ch) == char_get_idnum(d->character))
           desc_set_connected(d, CON_CLOSE);
       }
-      desc_set_connected(ch->desc, CON_MENU);
-      write_to_output(ch->desc, "%s", CONFIG_MENU);
+      desc_set_connected(char_get_desc(ch), CON_MENU);
+      write_to_output(char_get_desc(ch), "%s", CONFIG_MENU);
     }
   }
   /* On with the character's assets... */
 
-  if (ch->followers || ch->master)
+  if (char_get_followers(ch) || char_get_master(ch))
     die_follower(ch);
 
   if (char_get_sits(ch)) {
@@ -87,7 +89,7 @@ void extract_char_final(struct char_data *ch)
 
   if (!char_is_npc(ch) && char_get_clones(ch) > 0) {
     struct char_data *clone = nullptr;
-    for (clone = character_list; clone; clone = clone->next) {
+    for (clone = character_list; clone; clone = char_get_next(clone)) {
       if (char_is_npc(clone)) {
         if (char_get_mob_vnum(clone) == 25) {
           if (char_get_original(clone) == ch) {
@@ -129,8 +131,8 @@ void extract_char_final(struct char_data *ch)
     carry_drop(char_get_carried_by(ch), 3);
   }
 
-  if (ch->poisonby) {
-    ch->poisonby = nullptr;
+  if (char_get_poisonby(ch)) {
+    char_set_poisonby(ch, nullptr);
   }
 
   if (char_get_drag(ch)) {
@@ -174,8 +176,8 @@ void extract_char_final(struct char_data *ch)
   }
 
   /* transfer objects to room, if any */
-  while (ch->carrying) {
-    obj = ch->carrying;
+  while (char_get_inventory(ch)) {
+    obj = char_get_inventory(ch);
     obj_from_char(obj);
     obj_to_room(obj, char_get_in_room(ch));
   }
@@ -189,7 +191,7 @@ void extract_char_final(struct char_data *ch)
     stop_fighting(ch);
 
   for (k = combat_list; k; k = temp) {
-    temp = k->next_fighting;
+    temp = char_get_next_fighting(k);
     if (char_get_fighting(k) == ch)
       stop_fighting(k);
   }
@@ -200,17 +202,17 @@ void extract_char_final(struct char_data *ch)
     if (char_get_nr(ch) != NOTHING) /* prototyped */
       mob_index[char_get_nr(ch)].number--;
     clearMemory(ch);
-    if (ch->script)
+    if (char_get_script(ch))
       extract_script(ch, MOB_TRIGGER);
-    if (ch->memory)
-      extract_script_mem(ch->memory);
+    if (char_get_memory(ch))
+      extract_script_mem(char_get_memory(ch));
   } else {
     save_char(ch);
     Crash_delete_crashfile(ch);
   }
 
   /* If there's a descriptor, they're in the menu now. */
-  if (char_is_npc(ch) || !ch->desc)
+  if (char_is_npc(ch) || !char_get_desc(ch))
     free_char(ch);
 }
 
@@ -247,12 +249,12 @@ void extract_char(struct char_data *ch)
 
   /*save_char_pets(ch);*/
 
-  for (foll = ch->followers; foll; foll = foll->next) {
+  for (foll = char_get_followers(ch); foll; foll = foll->next) {
     if (char_is_npc(foll->follower) && char_aff_flagged(foll->follower, AFF_CHARM) &&
         (char_get_in_room(foll->follower) == char_get_in_room(ch) || char_get_in_room(ch) == 1)) {
       /* transfer objects to char, if any */
-      while (foll->follower->carrying) {
-        obj = foll->follower->carrying;
+      while (char_get_inventory(foll->follower)) {
+        obj = char_get_inventory(foll->follower);
         obj_from_char(obj);
         obj_to_char(obj, ch);
       }
@@ -274,17 +276,16 @@ void extract_char(struct char_data *ch)
 /* Extract an object from the world */
 void extract_obj(struct obj_data *obj)
 {
-  struct obj_data *temp;
   struct char_data *ch;
 
-  if (obj->worn_by != nullptr)
-    if (unequip_char(obj->worn_by, obj->worn_on) != obj)
+  if (obj_get_worn_by(obj) != nullptr)
+    if (unequip_char(obj_get_worn_by(obj), obj_get_worn_on(obj)) != obj)
       mud_log("SYSERR: Inconsistent worn_by and worn_on pointers!!");
   if (obj_get_in_room(obj) != NOWHERE)
     obj_from_room(obj);
-  else if (obj->carried_by)
+  else if (obj_get_carried_by(obj))
     obj_from_char(obj);
-  else if (obj->in_obj)
+  else if (obj_get_in_obj(obj))
     obj_from_obj(obj);
 
   /* Get rid of the contents of the object, as well. */
@@ -300,7 +301,7 @@ void extract_obj(struct obj_data *obj)
     obj_set_sitting(obj, nullptr);
     char_set_sits(ch, nullptr);
   }
-  if (obj_get_posted_to(obj) && obj->in_obj == nullptr) {
+  if (obj_get_posted_to(obj) && obj_get_in_obj(obj) == nullptr) {
     struct obj_data *obj2 = obj_get_posted_to(obj);
     obj_set_posted_to(obj2, nullptr);
     obj_set_posttype(obj2, 0);
@@ -313,19 +314,19 @@ void extract_obj(struct obj_data *obj)
     obj_set_user(obj, nullptr);
   }
 
-  while (obj->contains)
-    extract_obj(obj->contains);
+  while (obj_get_contains(obj))
+    extract_obj(obj_get_contains(obj));
 
-  REMOVE_FROM_LIST(obj, object_list, next, temp);
+  obj_unlink_from_list(obj);
 
   if (obj_get_item_number(obj) != NOTHING)
     (obj_index[obj_get_item_number(obj)].number)--;
 
-  if (obj->script)
+  if (obj_get_script(obj))
     extract_script(obj, OBJ_TRIGGER);
 
   if (obj_get_vnum(obj) != 80 && obj_get_vnum(obj) != 81) {
-    if (obj_get_item_number(obj) == NOTHING || obj->proto_script != obj_proto[obj_get_item_number(obj)].proto_script)
+    if (obj_get_item_number(obj) == NOTHING || obj_get_proto_script(obj) != obj_get_proto_script(&obj_proto[obj_get_item_number(obj)]))
       free_proto_script(obj, OBJ_TRIGGER);
   }
 
@@ -334,13 +335,13 @@ void extract_obj(struct obj_data *obj)
 
 void extract_pending_chars(void)
 {
-  struct char_data *vict, *next_vict, *prev_vict, *temp;
+  struct char_data *vict, *next_vict, *prev_vict;
 
   if (extractions_pending < 0)
     mud_log("SYSERR: Negative (%d) extractions pending.", extractions_pending);
 
   for (vict = character_list, prev_vict = nullptr; vict && extractions_pending; vict = next_vict) {
-    next_vict = vict->next;
+    next_vict = char_get_next(vict);
 
     if (char_mob_flagged(vict, MOB_NOTDEADYET))
       char_mob_set(vict, MOB_NOTDEADYET, false);
@@ -352,12 +353,12 @@ void extract_pending_chars(void)
       continue;
     }
 
-    REMOVE_FROM_LIST(vict, affect_list, next_affect, temp);
+    char_unlink_from_affect_list(vict);
     extract_char_final(vict);
     extractions_pending--;
 
     if (prev_vict)
-      prev_vict->next = next_vict;
+      char_set_next(prev_vict, next_vict);
     else
       character_list = next_vict;
   }

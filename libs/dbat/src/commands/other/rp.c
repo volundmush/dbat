@@ -126,7 +126,7 @@ void log_custom(struct descriptor_data *d, struct obj_data *obj)
     return;
   }
 
-  fprintf(fl, "@D[@cUser@W: @R%-20s @cName@W: @C%-20s @cCustom@W: @Y%s@D]\n", char_get_user(d->character), char_get_name(d->character), obj->short_description);
+  fprintf(fl, "@D[@cUser@W: @R%-20s @cName@W: @C%-20s @cCustom@W: @Y%s@D]\n", char_get_user(d->character), char_get_name(d->character), obj_get_short_description(obj));
   fclose(fl);
 }
 
@@ -194,15 +194,15 @@ ACMD(do_rpp)
         send_to_char(ch, "You need at least 20 RPP to initiate a custom equipment build.\r\n");
         return;
       }
-      desc_set_connected(ch->desc, CON_POBJ);
-      ch->desc->obj_name   = strdup("Generic Armor Vest");
-      ch->desc->obj_short  = strdup("@cGeneric @DArmor @WVest@n");
-      ch->desc->obj_long   = strdup("@wA @cgeneric @Darmor @Wvest@w is lying here@n");
-      ch->desc->obj_type   = 1;
-      ch->desc->obj_weapon = 0;
-      disp_custom_menu(ch->desc);
-      ch->desc->obj_editflag = EDIT_CUSTOM;
-      ch->desc->obj_editval  = EDIT_CUSTOM_MAIN;
+      desc_set_connected(char_get_desc(ch), CON_POBJ);
+      char_get_desc(ch)->obj_name   = strdup("Generic Armor Vest");
+      char_get_desc(ch)->obj_short  = strdup("@cGeneric @DArmor @WVest@n");
+      char_get_desc(ch)->obj_long   = strdup("@wA @cgeneric @Darmor @Wvest@w is lying here@n");
+      char_get_desc(ch)->obj_type   = 1;
+      char_get_desc(ch)->obj_weapon = 0;
+      disp_custom_menu(char_get_desc(ch));
+      char_get_desc(ch)->obj_editflag = EDIT_CUSTOM;
+      char_get_desc(ch)->obj_editval  = EDIT_CUSTOM_MAIN;
       return;
     }
     if (selection == 4) { /* Simple Align Change*/
@@ -260,7 +260,7 @@ ACMD(do_rpp)
           return;
         }
         if (!strcasecmp(arg2, "str")) {
-          if (char_get_bonuses(ch, BONUS_WIMP) > 0 && ch->real_abils.str >= 70) {
+          if (char_get_bonuses(ch, BONUS_WIMP) > 0 && char_get_real_abils_str(ch) >= 70) {
             send_to_char(ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
           }
@@ -269,9 +269,9 @@ ACMD(do_rpp)
             return;
           }
           send_to_char(ch, "You increase your strength by 2.\r\n");
-          ch->real_abils.str += 2;
+          char_set_real_abils_str(ch, char_get_real_abils_str(ch) + 2);
         } else if (!strcasecmp(arg2, "con")) {
-          if (char_get_bonuses(ch, BONUS_FRAIL) > 0 && ch->real_abils.con >= 70) {
+          if (char_get_bonuses(ch, BONUS_FRAIL) > 0 && char_get_real_abils_con(ch) >= 70) {
             send_to_char(ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
           }
@@ -280,9 +280,9 @@ ACMD(do_rpp)
             return;
           }
           send_to_char(ch, "You increase your constitution by 2.\r\n");
-          ch->real_abils.con += 2;
+          char_set_real_abils_con(ch, char_get_real_abils_con(ch) + 2);
         } else if (!strcasecmp(arg2, "int")) {
-          if (char_get_bonuses(ch, BONUS_DULL) > 0 && ch->real_abils.intel >= 70) {
+          if (char_get_bonuses(ch, BONUS_DULL) > 0 && char_get_real_abils_intel(ch) >= 70) {
             send_to_char(ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
           }
@@ -291,9 +291,9 @@ ACMD(do_rpp)
             return;
           }
           send_to_char(ch, "You increase your intelligence by 2.\r\n");
-          ch->real_abils.intel += 2;
+          char_set_real_abils_intel(ch, char_get_real_abils_intel(ch) + 2);
         } else if (!strcasecmp(arg2, "wis")) {
-          if (char_get_bonuses(ch, BONUS_FOOLISH) > 0 && ch->real_abils.wis >= 70) {
+          if (char_get_bonuses(ch, BONUS_FOOLISH) > 0 && char_get_real_abils_wis(ch) >= 70) {
             send_to_char(ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
           }
@@ -302,9 +302,9 @@ ACMD(do_rpp)
             return;
           }
           send_to_char(ch, "You increase your wisdom by 2.\r\n");
-          ch->real_abils.wis += 2;
+          char_set_real_abils_wis(ch, char_get_real_abils_wis(ch) + 2);
         } else if (!strcasecmp(arg2, "spd")) {
-          if (char_get_bonuses(ch, BONUS_SLOW) > 0 && ch->real_abils.cha >= 70) {
+          if (char_get_bonuses(ch, BONUS_SLOW) > 0 && char_get_real_abils_cha(ch) >= 70) {
             send_to_char(ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
           }
@@ -313,9 +313,9 @@ ACMD(do_rpp)
             return;
           }
           send_to_char(ch, "You increase your speed by 2.\r\n");
-          ch->real_abils.cha += 2;
+          char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 2);
         } else if (!strcasecmp(arg2, "agl")) {
-          if (char_get_bonuses(ch, BONUS_CLUMSY) > 0 && ch->real_abils.dex >= 70) {
+          if (char_get_bonuses(ch, BONUS_CLUMSY) > 0 && char_get_real_abils_dex(ch) >= 70) {
             send_to_char(ch, "You can't because that stat maxes at 70 due to a trait negative.\r\n");
             return;
           }
@@ -324,7 +324,7 @@ ACMD(do_rpp)
             return;
           }
           send_to_char(ch, "You increase your speed by 2.\r\n");
-          ch->real_abils.dex += 2;
+          char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 2);
         } else {
           send_to_char(ch, "That is not an acceptable option for changing alignment.\r\n");
           return;
@@ -469,7 +469,7 @@ ACMD(do_rpp)
         send_to_char(ch, "You need at least 1 RPP to initiate an equipment restring.\r\n");
         return;
       }
-      if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
+      if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, char_get_inventory(ch)))) {
         send_to_char(ch, "You don't have a that equipment to restring in your inventory.\r\n");
         send_to_char(ch, "Syntax: rpp 14 (obj name)\r\n");
         return;
@@ -478,27 +478,27 @@ ACMD(do_rpp)
         send_to_char(ch, "You can not restring a custom piece. Why? Cause I say so. :P\r\n");
         return;
       }
-      desc_set_connected(ch->desc, CON_POBJ);
+      desc_set_connected(char_get_desc(ch), CON_POBJ);
       char thename[MAX_INPUT_LENGTH], theshort[MAX_INPUT_LENGTH], thelong[MAX_INPUT_LENGTH];
 
       *thename  = '\0';
       *theshort = '\0';
       *thelong  = '\0';
 
-      snprintf(thename, sizeof(thename), "%s", obj->name);
-      snprintf(theshort, sizeof(theshort), "%s", obj->short_description);
-      snprintf(thelong, sizeof(thelong), "%s", obj->description);
+      snprintf(thename, sizeof(thename), "%s", obj_get_name(obj));
+      snprintf(theshort, sizeof(theshort), "%s", obj_get_short_description(obj));
+      snprintf(thelong, sizeof(thelong), "%s", obj_get_description(obj));
 
-      ch->desc->obj_name   = strdup(thename);
-      ch->desc->obj_was    = strdup(theshort);
-      ch->desc->obj_short  = strdup(theshort);
-      ch->desc->obj_long   = strdup(thelong);
-      ch->desc->obj_point  = obj;
-      ch->desc->obj_type   = 1;
-      ch->desc->obj_weapon = 0;
-      disp_restring_menu(ch->desc);
-      ch->desc->obj_editflag = EDIT_RESTRING;
-      ch->desc->obj_editval  = EDIT_RESTRING_MAIN;
+      char_get_desc(ch)->obj_name   = strdup(thename);
+      char_get_desc(ch)->obj_was    = strdup(theshort);
+      char_get_desc(ch)->obj_short  = strdup(theshort);
+      char_get_desc(ch)->obj_long   = strdup(thelong);
+      char_get_desc(ch)->obj_point  = obj;
+      char_get_desc(ch)->obj_type   = 1;
+      char_get_desc(ch)->obj_weapon = 0;
+      disp_restring_menu(char_get_desc(ch));
+      char_get_desc(ch)->obj_editflag = EDIT_RESTRING;
+      char_get_desc(ch)->obj_editval  = EDIT_RESTRING_MAIN;
       return;
     } /* End equipment restring reward */
 
@@ -528,7 +528,7 @@ ACMD(do_rpp)
       } else {
         int found          = false;
         struct obj_data *k = nullptr;
-        for (k = object_list; k; k = k->next) {
+        for (k = object_list; k; k = obj_get_next(k)) {
           if (obj_extra_flagged(k, ITEM_FORGED)) {
             continue;
           }
@@ -585,8 +585,8 @@ ACMD(do_rpp)
       struct obj_data *hobj = read_object(6, VIRTUAL);
       obj_to_char(hobj, ch);
       char_set_rp(ch, char_get_rp(ch) - (pay));
-      ch->desc->rpp = char_get_rp(ch);
-      userWrite(ch->desc, 0, 0, 0, "index");
+      char_get_desc(ch)->rpp = char_get_rp(ch);
+      userWrite(char_get_desc(ch), 0, 0, 0, "index");
       save_char(ch);
       send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
       send_to_imm("RPP Purchase: %s %d", char_get_name(ch), pay);
@@ -638,8 +638,8 @@ ACMD(do_rpp)
       save_mud_time(&time_info);
     }
     char_set_rp(ch, char_get_rp(ch) - (pay));
-    ch->desc->rpp = char_get_rp(ch);
-    userWrite(ch->desc, 0, 0, 0, "index");
+    char_get_desc(ch)->rpp = char_get_rp(ch);
+    userWrite(char_get_desc(ch), 0, 0, 0, "index");
     save_char(ch);
     send_to_char(ch, "@R%d@W RPP paid for your selection. An immortal will address the request soon enough. Be patient.@n\r\n", pay);
 
@@ -649,8 +649,8 @@ ACMD(do_rpp)
   /* Pay for purchases here */
   if (selection >= 4 && selection < 12 && pay > 0) {
     char_set_rp(ch, char_get_rp(ch) - (pay));
-    ch->desc->rpp = char_get_rp(ch);
-    userWrite(ch->desc, 0, 0, 0, "index");
+    char_get_desc(ch)->rpp = char_get_rp(ch);
+    userWrite(char_get_desc(ch), 0, 0, 0, "index");
     save_char(ch);
     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
     send_to_imm("RPP Purchase: %s %d", char_get_name(ch), pay);
@@ -658,8 +658,8 @@ ACMD(do_rpp)
 
   if (selection > 12 && pay > 0) {
     char_set_rp(ch, char_get_rp(ch) - (pay));
-    ch->desc->rpp = char_get_rp(ch);
-    userWrite(ch->desc, 0, 0, 0, "index");
+    char_get_desc(ch)->rpp = char_get_rp(ch);
+    userWrite(char_get_desc(ch), 0, 0, 0, "index");
     save_char(ch);
     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
     send_to_imm("RPP Purchase: %s %d", char_get_name(ch), pay);
@@ -730,11 +730,11 @@ ACMD(do_pose)
   int prob = char_get_skill(ch, SKILL_POSE);
   int perc = rand_number(1, 70);
 
-  if (ch->real_abils.str + 8 > 70 && char_get_bonuses(ch, BONUS_WIMP) > 0) {
+  if (char_get_real_abils_str(ch) + 8 > 70 && char_get_bonuses(ch, BONUS_WIMP) > 0) {
     send_to_char(ch, "You can't handle having your strength increased beyond 70.\r\n");
     return;
   }
-  if (ch->real_abils.dex + 8 > 70 && char_get_bonuses(ch, BONUS_CLUMSY) > 0) {
+  if (char_get_real_abils_dex(ch) + 8 > 70 && char_get_bonuses(ch, BONUS_CLUMSY) > 0) {
     send_to_char(ch, "You can't handle having your agility increased beyond 70.\r\n");
     return;
   }

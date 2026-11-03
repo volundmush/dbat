@@ -261,7 +261,7 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
       case WLD_TRIGGER:
         mudlog(LOG_BRF, ADMLVL_BUILDER, true,
                "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (room:%d)",
-               vnum, rroom_get_vnum(((room_data *)proto)->number));
+               vnum, rroom_get_vnum(room_get_number((room_data *)proto)));
         break;
       default:
         mudlog(LOG_BRF, ADMLVL_BUILDER, true,
@@ -277,9 +277,9 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
       new_trg->vnum = vnum;
 
       mob       = (char_data *)proto;
-      trg_proto = mob->proto_script;
+      trg_proto = char_get_proto_script(mob);
       if (!trg_proto) {
-        mob->proto_script = trg_proto = new_trg;
+        char_set_proto_script(mob, trg_proto = new_trg);
       } else {
         while (trg_proto->next)
           trg_proto = trg_proto->next;
@@ -290,9 +290,9 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
       CREATE(new_trg, struct trig_proto_list, 1);
       new_trg->vnum = vnum;
       room          = (room_data *)proto;
-      trg_proto     = room->proto_script;
+      trg_proto     = room_get_proto_script(room);
       if (!trg_proto) {
-        room->proto_script = trg_proto = new_trg;
+        room_set_proto_script(room, trg_proto = new_trg);
       } else {
         while (trg_proto->next)
           trg_proto = trg_proto->next;
@@ -300,11 +300,11 @@ void dg_read_trigger(FILE *fp, void *proto, int type)
       }
 
       if (rnum != NOTHING) {
-        add_trigger(dg_ensure_script(&room->script), read_trigger(rnum), -1);
+        add_trigger(dg_ensure_script(room_script_slot(room)), read_trigger(rnum), -1);
       } else {
         mudlog(LOG_BRF, ADMLVL_BUILDER, true,
                "SYSERR: non-existant trigger #%d assigned to room #%d",
-               vnum, room->number);
+               vnum, room_get_number(room));
       }
       break;
     default:
@@ -333,16 +333,16 @@ void dg_obj_trigger(char *line, struct obj_data *obj)
   if (rnum == NOTHING) {
     mudlog(LOG_BRF, ADMLVL_BUILDER, true,
            "SYSERR: Trigger vnum #%d asked for but non-existant! (Object: %s - %d)",
-           vnum, obj->short_description, obj_get_vnum(obj));
+           vnum, obj_get_short_description(obj), obj_get_vnum(obj));
     return;
   }
 
   CREATE(new_trg, struct trig_proto_list, 1);
   new_trg->vnum = vnum;
 
-  trg_proto = obj->proto_script;
+  trg_proto = obj_get_proto_script(obj);
   if (!trg_proto) {
-    obj->proto_script = trg_proto = new_trg;
+    obj_set_proto_script(obj, trg_proto = new_trg);
   } else {
     while (trg_proto->next) trg_proto = trg_proto->next;
     trg_proto->next = new_trg;
@@ -360,44 +360,44 @@ void assign_triggers(void *i, int type)
   switch (type) {
     case MOB_TRIGGER:
       mob       = (char_data *)i;
-      trg_proto = mob->proto_script;
+      trg_proto = char_get_proto_script(mob);
       while (trg_proto) {
         rnum = real_trigger(trg_proto->vnum);
         if (rnum == NOTHING) {
           mudlog(LOG_BRF, ADMLVL_BUILDER, true,
                  "SYSERR: trigger #%d non-existant, for mob #%d",
-                 trg_proto->vnum, mob_index[mob->nr].vnum);
+                 trg_proto->vnum, mob_index[char_get_nr(mob)].vnum);
         } else {
-          add_trigger(dg_ensure_script(&mob->script), read_trigger(rnum), -1);
+          add_trigger(dg_ensure_script(char_script_slot(mob)), read_trigger(rnum), -1);
         }
         trg_proto = trg_proto->next;
       }
       break;
     case OBJ_TRIGGER:
       obj       = (obj_data *)i;
-      trg_proto = obj->proto_script;
+      trg_proto = obj_get_proto_script(obj);
       while (trg_proto) {
         rnum = real_trigger(trg_proto->vnum);
         if (rnum == NOTHING) {
           mud_log("SYSERR: trigger #%d non-existant, for obj #%d",
-                  trg_proto->vnum, obj_index[obj->item_number].vnum);
+                  trg_proto->vnum, obj_index[obj_get_item_number(obj)].vnum);
         } else {
-          add_trigger(dg_ensure_script(&obj->script), read_trigger(rnum), -1);
+          add_trigger(dg_ensure_script(obj_script_slot(obj)), read_trigger(rnum), -1);
         }
         trg_proto = trg_proto->next;
       }
       break;
     case WLD_TRIGGER:
       room      = (struct room_data *)i;
-      trg_proto = room->proto_script;
+      trg_proto = room_get_proto_script(room);
       while (trg_proto) {
         rnum = real_trigger(trg_proto->vnum);
         if (rnum == NOTHING) {
           mudlog(LOG_BRF, ADMLVL_BUILDER, true,
                  "SYSERR: trigger #%d non-existant, for room #%d",
-                 trg_proto->vnum, room->number);
+                 trg_proto->vnum, room_get_number(room));
         } else {
-          add_trigger(dg_ensure_script(&room->script), read_trigger(rnum), -1);
+          add_trigger(dg_ensure_script(room_script_slot(room)), read_trigger(rnum), -1);
         }
         trg_proto = trg_proto->next;
       }

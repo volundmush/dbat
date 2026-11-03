@@ -177,8 +177,8 @@ static void copyover_recover()
 
     CREATE(d->character, struct char_data, 1);
     clear_char(d->character);
-    CREATE(d->character->player_specials, struct player_special_data, 1);
-    d->character->desc = d;
+    CREATE(*char_player_specials_slot(d->character), struct player_special_data, 1);
+    char_set_desc(d->character, d);
 
     if ((player_i = load_char(name, d->character)) >= 0) {
       char_set_pfilepos(d->character, player_i);
@@ -525,7 +525,7 @@ static void game_loop(int cmmother_desc)
 
       if (d->character) {
         /* Reset the idle timer & pull char back from void if necessary */
-        d->character->timer = 0;
+        char_set_timer(d->character, 0);
         if (desc_get_connected(d) == CON_PLAYING && char_get_was_in_room(d->character) != NOWHERE) {
           if (char_get_in_room(d->character) != NOWHERE)
             char_from_room(d->character);
@@ -983,21 +983,21 @@ static char *make_prompt(struct descriptor_data *d)
       }
       if ((char_get_sits(d->character) && char_get_position(d->character) == POS_SITTING) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
         chair   = char_get_sits(d->character);
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Sitting on: %s\r\n", chair->short_description);
+        count   = snprintf(prompt + len, sizeof(prompt) - len, "Sitting on: %s\r\n", obj_get_short_description(chair));
         flagged = true;
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
       }
       if ((char_get_sits(d->character) && char_get_position(d->character) == POS_RESTING) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
         chair   = char_get_sits(d->character);
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Resting on: %s\r\n", chair->short_description);
+        count   = snprintf(prompt + len, sizeof(prompt) - len, "Resting on: %s\r\n", obj_get_short_description(chair));
         flagged = true;
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
       }
       if ((char_get_sits(d->character) && char_get_position(d->character) == POS_SLEEPING) && len < sizeof(prompt) && !char_prf_flagged(d->character, PRF_NODEC)) {
         chair   = char_get_sits(d->character);
-        count   = snprintf(prompt + len, sizeof(prompt) - len, "Sleeping on: %s\r\n", chair->short_description);
+        count   = snprintf(prompt + len, sizeof(prompt) - len, "Sleeping on: %s\r\n", obj_get_short_description(chair));
         flagged = true;
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
@@ -1414,8 +1414,8 @@ static char *make_prompt(struct descriptor_data *d)
       }
       if (len < sizeof(prompt) && has_group(d->character) && !char_prf_flagged(d->character, PRF_GHEALTH)) {
         count = snprintf(prompt + len, sizeof(prompt) - len, "\n%s", report_party_health(d->character));
-        if (d->character->temp_prompt)
-          free(d->character->temp_prompt);
+        if (char_get_temp_prompt(d->character))
+          free(char_get_temp_prompt(d->character));
         if (count >= 0)
           len = MIN(len + count, sizeof(prompt) - 1);
       }
@@ -1844,8 +1844,8 @@ static void set_color(struct descriptor_data *d)
   if (d->character == nullptr) {
     CREATE(d->character, struct char_data, 1);
     clear_char(d->character);
-    CREATE(d->character->player_specials, struct player_special_data, 1);
-    d->character->desc = d;
+    CREATE(*char_player_specials_slot(d->character), struct player_special_data, 1);
+    char_set_desc(d->character, d);
   }
   char_prf_set(d->character, PRF_COLOR, true);
   write_to_output(d, "%s", GREETANSI);
@@ -2430,7 +2430,7 @@ void close_socket(struct descriptor_data *d)
 
   if (d->character) {
     /* If we're switched, this resets the mobile taken. */
-    d->character->desc = nullptr;
+    char_set_desc(d->character, nullptr);
 
     /* Plug memory leak, from Eric Green. */
     if (!char_is_npc(d->character) && char_plr_flagged(d->character, PLR_MAILING) && d->str) {
@@ -2457,8 +2457,8 @@ void close_socket(struct descriptor_data *d)
     mudlog(LOG_CMP, ADMLVL_IMMORT, true, "Losing descriptor without char.");
 
   /* JE 2/22/95 -- part of my unending quest to make switch stable */
-  if (d->original && d->original->desc)
-    d->original->desc = nullptr;
+  if (d->original && char_get_desc(d->original))
+    char_set_desc(d->original, nullptr);
 
   /* Clear the command history. */
   if (d->history) {
@@ -2801,12 +2801,12 @@ void send_to_room(room_rnum room, const char *messg, ...)
   if (messg == nullptr)
     return;
 
-  for (i = world[room].people; i; i = i->next_in_room) {
-    if (!i->desc)
+  for (i = rroom_get_people(room); i; i = char_get_next_in_room(i)) {
+    if (!char_get_desc(i))
       continue;
 
     va_start(args, messg);
-    vwrite_to_output(i->desc, messg, args);
+    vwrite_to_output(char_get_desc(i), messg, args);
     va_end(args);
   }
 
@@ -2959,8 +2959,8 @@ static void perform_act(const char *orig, struct char_data *ch, struct obj_data 
   *(++buf) = '\n';
   *(++buf) = '\0';
 
-  if (to->desc)
-    write_to_output(to->desc, "%s", CAP(lbuf));
+  if (char_get_desc(to))
+    write_to_output(char_get_desc(to), "%s", CAP(lbuf));
 
   if ((char_is_npc(to) && dg_act_check) && (to != ch))
     act_mtrigger(to, lbuf, ch, dg_victim, obj, dg_target, dg_arg);
@@ -2973,7 +2973,7 @@ static void perform_act(const char *orig, struct char_data *ch, struct obj_data 
 /* act()/sub_write(): should ch receive this message? (to_sleeping: deliver even to sleeping characters) */
 bool sendok(struct char_data *ch, int to_sleeping)
 {
-  return (ch->desc || script_has_type(ch->script, MTRIG_ACT)) && (to_sleeping || char_is_awake(ch)) && !char_plr_flagged(ch, PLR_WRITING);
+  return (char_get_desc(ch) || script_has_type(char_get_script(ch), MTRIG_ACT)) && (to_sleeping || char_is_awake(ch)) && !char_plr_flagged(ch, PLR_WRITING);
 }
 
 char *act(const char *str, int hide_invisible, struct char_data *ch,
@@ -3061,9 +3061,9 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
   /* ASSUMPTION: at this point we know type must be TO_NOTVICT or TO_ROOM */
 
   if (ch && char_get_in_room(ch) != NOWHERE)
-    to = world[char_get_in_room(ch)].people;
+    to = rroom_get_people(char_get_in_room(ch));
   else if (obj && obj_get_in_room(obj) != NOWHERE)
-    to = world[obj_get_in_room(obj)].people;
+    to = rroom_get_people(obj_get_in_room(obj));
   else {
     return nullptr;
   }
@@ -3106,7 +3106,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
     }
   }
 
-  for (; to; to = to->next_in_room) {
+  for (; to; to = char_get_next_in_room(to)) {
     if (!sendok(to, to_sleeping) || (to == ch))
       continue;
     if (hide_invisible && ch && !char_can_see(to, ch))
@@ -3205,12 +3205,12 @@ void send_to_range(room_vnum start, room_vnum finish, const char *messg, ...)
 
   for (j = 0; j < top_of_world; j++) {
     if (rroom_get_vnum(j) >= start && rroom_get_vnum(j) <= finish) {
-      for (i = world[j].people; i; i = i->next_in_room) {
-        if (!i->desc)
+      for (i = rroom_get_people(j); i; i = char_get_next_in_room(i)) {
+        if (!char_get_desc(i))
           continue;
 
         va_start(args, messg);
-        vwrite_to_output(i->desc, messg, args);
+        vwrite_to_output(char_get_desc(i), messg, args);
         va_end(args);
       }
     }

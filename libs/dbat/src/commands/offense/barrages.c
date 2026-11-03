@@ -504,8 +504,8 @@ ACMD(do_kakusanha)
 
   skill = init_skill(ch, SKILL_KAKUSANHA); /* Set skill value */
 
-  for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-    next_v = vict->next_in_room;
+  for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+    next_v = char_get_next_in_room(vict);
     if (vict == ch) {
       continue;
     }
@@ -516,13 +516,13 @@ ACMD(do_kakusanha)
       continue;
     }
     if (char_aff_flagged(vict, AFF_GROUP) && !char_is_npc(vict)) {
-      if (vict->master == ch) {
+      if (char_get_master(vict) == ch) {
         continue;
       }
-      if (ch->master == vict) {
+      if (char_get_master(ch) == vict) {
         continue;
       }
-      if (vict->master == ch->master) {
+      if (char_get_master(vict) == char_get_master(ch)) {
         continue;
       }
     }
@@ -562,15 +562,15 @@ ACMD(do_kakusanha)
       dmg = (dmg / 100) * 60;
     }
 
-    for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-      next_v = vict->next_in_room;
+    for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+      next_v = char_get_next_in_room(vict);
       if (vict == ch) {
         continue;
       }
       if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
         continue;
       }
-      if (char_aff_flagged(vict, AFF_GROUP) && (vict->master == ch || ch->master == vict)) {
+      if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(vict) == ch || char_get_master(ch) == vict)) {
         continue;
       }
       if (char_mob_flagged(vict, MOB_NOKILL)) {

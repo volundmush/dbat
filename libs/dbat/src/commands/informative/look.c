@@ -434,7 +434,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
           snprintf(blam, sizeof(blam), "%s", dirs[door]);
           *blam = toupper(*blam);
           if (door == 6) {
-            snprintf(dlist1, sizeof(dlist1), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+            snprintf(dlist1, sizeof(dlist1), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, rroom_get_vnum(rroom_get_dir_option(target_room, door)->to_room), rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -458,7 +458,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             }
           }
           if (door == 0) {
-            snprintf(dlist2, sizeof(dlist2), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+            snprintf(dlist2, sizeof(dlist2), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, rroom_get_vnum(rroom_get_dir_option(target_room, door)->to_room), rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -482,7 +482,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             }
           }
           if (door == 7) {
-            snprintf(dlist3, sizeof(dlist3), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+            snprintf(dlist3, sizeof(dlist3), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, rroom_get_vnum(rroom_get_dir_option(target_room, door)->to_room), rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -506,7 +506,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             }
           }
           if (door == 1) {
-            snprintf(dlist4, sizeof(dlist4), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+            snprintf(dlist4, sizeof(dlist4), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, rroom_get_vnum(rroom_get_dir_option(target_room, door)->to_room), rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -530,7 +530,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             }
           }
           if (door == 8) {
-            snprintf(dlist5, sizeof(dlist5), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+            snprintf(dlist5, sizeof(dlist5), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, rroom_get_vnum(rroom_get_dir_option(target_room, door)->to_room), rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -554,7 +554,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             }
           }
           if (door == 2) {
-            snprintf(dlist6, sizeof(dlist6), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+            snprintf(dlist6, sizeof(dlist6), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, rroom_get_vnum(rroom_get_dir_option(target_room, door)->to_room), rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -578,7 +578,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             }
           }
           if (door == 9) {
-            snprintf(dlist7, sizeof(dlist7), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+            snprintf(dlist7, sizeof(dlist7), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, rroom_get_vnum(rroom_get_dir_option(target_room, door)->to_room), rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -602,7 +602,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             }
           }
           if (door == 3) {
-            snprintf(dlist8, sizeof(dlist8), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+            snprintf(dlist8, sizeof(dlist8), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, rroom_get_vnum(rroom_get_dir_option(target_room, door)->to_room), rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -626,7 +626,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             }
           }
           if (door == 4) {
-            snprintf(dlist9, sizeof(dlist9), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+            snprintf(dlist9, sizeof(dlist9), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, rroom_get_vnum(rroom_get_dir_option(target_room, door)->to_room), rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -650,7 +650,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             }
           }
           if (door == 5) {
-            snprintf(dlist10, sizeof(dlist10), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+            snprintf(dlist10, sizeof(dlist10), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, rroom_get_vnum(rroom_get_dir_option(target_room, door)->to_room), rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -674,7 +674,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             }
           }
           if (door == 10) {
-            snprintf(dlist11, sizeof(dlist11), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+            snprintf(dlist11, sizeof(dlist11), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, rroom_get_vnum(rroom_get_dir_option(target_room, door)->to_room), rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -698,7 +698,7 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             }
           }
           if (door == 11) {
-            snprintf(dlist12, sizeof(dlist12), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, world[rroom_get_dir_option(target_room, door)->to_room].number, world[rroom_get_dir_option(target_room, door)->to_room].name);
+            snprintf(dlist12, sizeof(dlist12), "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, rroom_get_vnum(rroom_get_dir_option(target_room, door)->to_room), rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             if (IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_ISDOOR) ||
                 IS_SET(rroom_get_dir_option(target_room, door)->exit_info, EX_SECRET)) {
               /* This exit has a door - tell all about it */
@@ -729,40 +729,40 @@ static void do_auto_exits(room_rnum target_room, struct char_data *ch, int exit_
             snprintf(blam, sizeof(blam), "%s", dirs[door]);
             *blam = toupper(*blam);
             if (door == 6) {
-              snprintf(dlist1, sizeof(dlist1), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
+              snprintf(dlist1, sizeof(dlist1), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             }
             if (door == 0) {
-              snprintf(dlist2, sizeof(dlist2), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
+              snprintf(dlist2, sizeof(dlist2), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             }
             if (door == 7) {
-              snprintf(dlist3, sizeof(dlist3), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
+              snprintf(dlist3, sizeof(dlist3), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             }
             if (door == 1) {
-              snprintf(dlist4, sizeof(dlist4), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
+              snprintf(dlist4, sizeof(dlist4), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             }
             if (door == 8) {
-              snprintf(dlist5, sizeof(dlist5), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
+              snprintf(dlist5, sizeof(dlist5), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             }
             if (door == 2) {
-              snprintf(dlist6, sizeof(dlist6), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
+              snprintf(dlist6, sizeof(dlist6), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             }
             if (door == 9) {
-              snprintf(dlist7, sizeof(dlist7), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
+              snprintf(dlist7, sizeof(dlist7), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             }
             if (door == 3) {
-              snprintf(dlist8, sizeof(dlist8), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
+              snprintf(dlist8, sizeof(dlist8), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             }
             if (door == 4) {
-              snprintf(dlist9, sizeof(dlist9), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
+              snprintf(dlist9, sizeof(dlist9), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             }
             if (door == 5) {
-              snprintf(dlist10, sizeof(dlist10), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
+              snprintf(dlist10, sizeof(dlist10), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             }
             if (door == 10) {
-              snprintf(dlist11, sizeof(dlist11), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
+              snprintf(dlist11, sizeof(dlist11), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             }
             if (door == 11) {
-              snprintf(dlist12, sizeof(dlist12), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : world[rroom_get_dir_option(target_room, door)->to_room].name);
+              snprintf(dlist12, sizeof(dlist12), "@c%-9s @D-@w %s\r\n", blam, room_is_dark(rroom_get_dir_option(target_room, door)->to_room) && !char_can_see_in_dark(ch) && !has_light ? "@bToo dark to tell.@w" : rroom_get_name(rroom_get_dir_option(target_room, door)->to_room));
             }
 
           } else if (CONFIG_DISP_CLOSED_DOORS &&
@@ -962,7 +962,7 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
   struct room_data *rm = &world[char_get_in_room(ch)];
   trig_data *t;
 
-  if (!ch->desc)
+  if (!char_get_desc(ch))
     return;
 
   if (room_is_dark(target_room) && !char_can_see_in_dark(ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
@@ -983,15 +983,15 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
     char buf3[MAX_STRING_LENGTH];
 
     sprintbitarray(rroom_get_room_flags(target_room), room_bits, RF_ARRAY_MAX, buf, sizeof(buf));
-    sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
+    sprinttype(room_get_sector_type(rm), sector_types, buf2, sizeof(buf2));
     if (!char_is_npc(ch) && !char_prf_flagged(ch, PRF_NODEC)) {
       send_to_char(ch, "\r\n@wO----------------------------------------------------------------------O@n\r\n");
     }
 
-    send_to_char(ch, "@wLocation: @G%-70s@w\r\n", world[target_room].name);
-    if (rm->script) {
+    send_to_char(ch, "@wLocation: @G%-70s@w\r\n", rroom_get_name(target_room));
+    if (room_get_script(rm)) {
       send_to_char(ch, "@D[@GTriggers");
-      for (t = rm->script->trig_list; t; t = t->next)
+      for (t = room_get_script(rm)->trig_list; t; t = t->next)
         send_to_char(ch, " %d", trig_get_vnum(t));
       send_to_char(ch, "@D] ");
     }
@@ -1004,7 +1004,7 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
     if (!char_is_npc(ch) && !char_prf_flagged(ch, PRF_NODEC)) {
       send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
     }
-    send_to_char(ch, "@wLocation: %-70s@n\r\n", world[target_room].name);
+    send_to_char(ch, "@wLocation: %-70s@n\r\n", rroom_get_name(target_room));
     if (rroom_flagged(target_room, ROOM_EARTH)) {
       send_to_char(ch, "@wPlanet: @GEarth@n\r\n");
     } else if (rroom_flagged(target_room, ROOM_CERRIA)) {
@@ -1087,10 +1087,10 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
 
   if ((!char_is_npc(ch) && !char_prf_flagged(ch, PRF_BRIEF)) || rroom_flagged(target_room, ROOM_DEATH)) {
     if (rroom_get_dmg(target_room) <= 99) {
-      send_to_char(ch, "@w%s@n", world[target_room].description);
+      send_to_char(ch, "@w%s@n", rroom_get_description(target_room));
     }
     if (rroom_get_dmg(target_room) == 100 && (rroom_sect(target_room) == SECT_WATER_SWIM || rroom_sunken(target_room) || rroom_sect(target_room) == SECT_FLYING || rroom_sect(target_room) == SECT_SHOP || rroom_sect(target_room) == SECT_IMPORTANT)) {
-      send_to_char(ch, "@w%s@n", world[target_room].description);
+      send_to_char(ch, "@w%s@n", rroom_get_description(target_room));
     }
     if (rroom_sect(target_room) == SECT_INSIDE && rroom_get_dmg(target_room) > 0) {
       send_to_char(ch, "\r\n");
@@ -1213,8 +1213,8 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
   } else if (rroom_flagged(target_room, ROOM_HOUSE)) {
     send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, nullptr));
   }
-  list_obj_to_char(world[target_room].contents, ch, SHOW_OBJ_LONG, false);
-  list_char_to_char(world[target_room].people, ch);
+  list_obj_to_char(rroom_get_contents(target_room), ch, SHOW_OBJ_LONG, false);
+  list_char_to_char(rroom_get_people(target_room), ch);
 }
 
 static void look_in_direction(struct char_data *ch, int dir)
@@ -1225,8 +1225,8 @@ static void look_in_direction(struct char_data *ch, int dir)
     else {
       struct obj_data *obj, *next_obj;
       int founded = false;
-      for (obj = ch->carrying; obj; obj = next_obj) {
-        next_obj = obj->next_content;
+      for (obj = char_get_inventory(ch); obj; obj = next_obj) {
+        next_obj = obj_get_next_content(obj);
         if (obj_get_vnum(obj) == 17) {
           founded = true;
         }
@@ -1259,7 +1259,7 @@ static void look_in_obj(struct char_data *ch, char *arg)
     send_to_char(ch, "Look in what?\r\n");
   else if (!(bits = generic_find(arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &dummy, &obj))) {
     send_to_char(ch, "There doesn't seem to be %s %s here.\r\n", AN(arg), arg);
-  } else if (find_exdesc(arg, obj->ex_description) != nullptr && !bits)
+  } else if (find_exdesc(arg, obj_get_ex_description(obj)) != nullptr && !bits)
     send_to_char(ch, "There's nothing inside that!\r\n");
   else if ((obj_get_type_flag(obj) == ITEM_PORTAL) && !obj_val_flagged(obj, CONT_CLOSEABLE)) {
     if (obj_get_value(obj, VAL_PORTAL_APPEAR) < 0) {
@@ -1271,7 +1271,7 @@ static void look_in_obj(struct char_data *ch, char *arg)
       } else if (room_is_dark(portal_dest) && !char_can_see_in_dark(ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
         send_to_char(ch, "You see nothing but infinite darkness...\r\n");
       } else {
-        send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n", world[portal_dest].name);
+        send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n", rroom_get_name(portal_dest));
       }
     } else if (obj_get_value(obj, VAL_PORTAL_APPEAR) < MAX_PORTAL_TYPES) {
       /* display the appropriate description from the list of descriptions
@@ -1311,7 +1311,7 @@ static void look_in_obj(struct char_data *ch, char *arg)
     if (obj_val_flagged(obj, CONT_CLOSED))
       send_to_char(ch, "It is closed.\r\n");
     else {
-      send_to_char(ch, "%s", obj->short_description);
+      send_to_char(ch, "%s", obj_get_short_description(obj));
       if (obj_get_type_flag(obj) == ITEM_CONTAINER && (obj_get_vnum(obj) == 697 || obj_get_vnum(obj) == 698 || obj_get_vnum(obj) == 682 || obj_get_vnum(obj) == 683 || obj_get_vnum(obj) == 684)) {
         act("$n looks in $p.", true, ch, obj, 0, TO_ROOM);
       }
@@ -1327,7 +1327,7 @@ static void look_in_obj(struct char_data *ch, char *arg)
           break;
       }
 
-      list_obj_to_char(obj->contains, ch, SHOW_OBJ_SHORT, true);
+      list_obj_to_char(obj_get_contains(obj), ch, SHOW_OBJ_SHORT, true);
     }
   } else { /* item must be a fountain or drink container */
     if (obj_get_value(obj, VAL_DRINKCON_HOWFULL) <= 0 && (obj_get_value(obj, VAL_DRINKCON_CAPACITY) == 0))
@@ -1390,7 +1390,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
   char *desc;
   char number[MAX_STRING_LENGTH];
 
-  if (!ch->desc)
+  if (!char_get_desc(ch))
     return;
 
   if (!*arg) {
@@ -1399,14 +1399,14 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
   }
 
   if (cmread) {
-    for (obj = ch->carrying; obj; obj = obj->next_content) {
+    for (obj = char_get_inventory(ch); obj; obj = obj_get_next_content(obj)) {
       if (obj_get_type_flag(obj) == ITEM_BOARD) {
         found = true;
         break;
       }
     }
     if (!obj) {
-      for (obj = world[char_get_in_room(ch)].contents; obj; obj = obj->next_content) {
+      for (obj = rroom_get_contents(char_get_in_room(ch)); obj; obj = obj_get_next_content(obj)) {
         if (obj_get_type_flag(obj) == ITEM_BOARD) {
           found = true;
           break;
@@ -1425,7 +1425,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
 	 difference between the two?  Well, there's a period in the second,
 	 so, we'll just stick with that basic difference */
 
-      if (isname(number, obj->name)) {
+      if (isname(number, obj_get_name(obj))) {
         show_board(obj_get_vnum(obj), ch);
       } else if ((!isdigit(*number) || (!(msg = atoi(number)))) ||
                  (strchr(number, '.'))) {
@@ -1458,7 +1458,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
     }
 
     /* Does the argument match an extra desc in the room? */
-    if ((desc = find_exdesc(arg, world[char_get_in_room(ch)].ex_description)) != nullptr && ++i == fnum) {
+    if ((desc = find_exdesc(arg, rroom_get_ex_description(char_get_in_room(ch)))) != nullptr && ++i == fnum) {
       send_to_char(ch, "%s", desc);
       return;
     }
@@ -1466,9 +1466,9 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
     /* Does the argument match an extra desc in the char's equipment? */
     for (j = 0; j < NUM_WEARS && !found; j++)
       if (char_get_equipment(ch, j) && char_can_see_obj(ch, char_get_equipment(ch, j)))
-        if ((desc = find_exdesc(arg, char_get_equipment(ch, j)->ex_description)) != nullptr && ++i == fnum) {
+        if ((desc = find_exdesc(arg, obj_get_ex_description(char_get_equipment(ch, j)))) != nullptr && ++i == fnum) {
           send_to_char(ch, "%s", desc);
-          if (isname(arg, char_get_equipment(ch, j)->name)) {
+          if (isname(arg, obj_get_name(char_get_equipment(ch, j)))) {
             if (obj_get_type_flag(char_get_equipment(ch, j)) == ITEM_WEAPON) {
               send_to_char(ch, "The weapon type of %s is a %s.\r\n",
                            obj_get_short_description(char_get_equipment(ch, j)),
@@ -1487,14 +1487,14 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
         }
 
     /* Does the argument match an extra desc in the char's inventory? */
-    for (obj = ch->carrying; obj && !found; obj = obj->next_content) {
+    for (obj = char_get_inventory(ch); obj && !found; obj = obj_get_next_content(obj)) {
       if (char_can_see_obj(ch, obj))
-        if ((desc = find_exdesc(arg, obj->ex_description)) != nullptr && ++i == fnum) {
+        if ((desc = find_exdesc(arg, obj_get_ex_description(obj))) != nullptr && ++i == fnum) {
           if (obj_get_type_flag(obj) == ITEM_BOARD) {
             show_board(obj_get_vnum(obj), ch);
           } else {
             send_to_char(ch, "%s", desc);
-            if (isname(arg, obj->name)) {
+            if (isname(arg, obj_get_name(obj))) {
               if (obj_get_type_flag(obj) == ITEM_WEAPON) {
                 send_to_char(ch, "The weapon type of %s is a %s.\r\n",
                              obj_get_short_description(obj), weapon_type[(int)obj_get_value(obj, VAL_WEAPON_SKILL)]);
@@ -1514,9 +1514,9 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
     }
 
     /* Does the argument match an extra desc of an object in the room? */
-    for (obj = world[char_get_in_room(ch)].contents; obj && !found; obj = obj->next_content)
+    for (obj = rroom_get_contents(char_get_in_room(ch)); obj && !found; obj = obj_get_next_content(obj))
       if (char_can_see_obj(ch, obj))
-        if ((desc = find_exdesc(arg, obj->ex_description)) != nullptr && ++i == fnum) {
+        if ((desc = find_exdesc(arg, obj_get_ex_description(obj))) != nullptr && ++i == fnum) {
           if (obj_get_type_flag(obj) == ITEM_BOARD) {
             show_board(obj_get_vnum(obj), ch);
           } else {
@@ -1534,7 +1534,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread)
               send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
               send_to_char(ch, "@YSyntax@D: @CLeave@n\r\n");
             } else if (obj_get_type_flag(obj) == ITEM_WINDOW) {
-              look_out_window(ch, obj->name);
+              look_out_window(ch, obj_get_name(obj));
             }
 
             if (obj_get_type_flag(obj) == ITEM_CONTROL) {
@@ -1590,9 +1590,9 @@ void look_out_window(struct char_data *ch, char *arg)
     return;
   } else {
     /* Look for any old window in the room */
-    for (i = world[char_get_in_room(ch)].contents; i; i = i->next_content)
+    for (i = rroom_get_contents(char_get_in_room(ch)); i; i = obj_get_next_content(i))
       if ((obj_get_type_flag(i) == ITEM_WINDOW) &&
-          isname("window", i->name)) {
+          isname("window", obj_get_name(i))) {
         viewport = i;
         continue;
       }
@@ -1627,8 +1627,8 @@ void look_out_window(struct char_data *ch, char *arg)
     if (target_room == NOWHERE) {
       send_to_char(ch, "You don't seem to be able to see outside.\r\n");
     } else {
-      if (viewport->action_description)
-        act(viewport->action_description, true, ch, viewport, 0, TO_CHAR);
+      if (obj_get_action_description(viewport))
+        act(obj_get_action_description(viewport), true, ch, viewport, 0, TO_CHAR);
       else
         act("$n looks out the window.", true, ch, 0, 0, TO_ROOM);
       send_to_char(ch, "You look outside and see:\r\n");
@@ -1641,7 +1641,7 @@ ACMD(do_look)
 {
   int look_type;
 
-  if (!ch->desc)
+  if (!char_get_desc(ch))
     return;
   if (char_get_position(ch) < POS_SLEEPING)
     send_to_char(ch, "You can't see anything but stars!\r\n");
@@ -1651,7 +1651,7 @@ ACMD(do_look)
     send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
   else if (room_is_dark(char_get_in_room(ch)) && !char_can_see_in_dark(ch) && !char_plr_flagged(ch, PLR_AURALIGHT)) {
     send_to_char(ch, "It is pitch black...\r\n");
-    list_char_to_char(world[char_get_in_room(ch)].people, ch); /* glowing red eyes */
+    list_char_to_char(rroom_get_people(char_get_in_room(ch)), ch); /* glowing red eyes */
   } else {
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
@@ -1714,7 +1714,7 @@ ACMD(do_look)
       struct extra_descr_data *i;
       int found = 0;
 
-      for (i = world[char_get_in_room(ch)].ex_description; i; i = i->next) {
+      for (i = rroom_get_ex_description(char_get_in_room(ch)); i; i = i->next) {
         if (*i->keyword != '.') {
           send_to_char(ch, "%s%s:\r\n%s",
                        (found ? "\r\n" : ""), i->keyword, i->description);
@@ -1723,7 +1723,7 @@ ACMD(do_look)
       }
       if (!found)
         send_to_char(ch, "You couldn't find anything noticeable.\r\n");
-    } else if (find_exdesc(arg, world[char_get_in_room(ch)].ex_description) != nullptr) {
+    } else if (find_exdesc(arg, rroom_get_ex_description(char_get_in_room(ch))) != nullptr) {
       look_at_target(ch, arg, 0);
     } else {
       if (subcmd == SCMD_SEARCH)

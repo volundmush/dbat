@@ -49,7 +49,7 @@ static void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, c
       break;
 
     case APPLY_AGE:
-      ch->time.birth -= (mod * SECS_PER_MUD_YEAR);
+      char_set_time_birth(ch, char_get_time_birth(ch) - ((mod * SECS_PER_MUD_YEAR)));
       break;
 
     case APPLY_CHAR_WEIGHT:
@@ -62,15 +62,15 @@ static void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, c
 
     case APPLY_MANA:
     case APPLY_KI:
-      ch->max_ki += mod;
+      char_set_max_ki(ch, char_get_max_ki(ch) + mod);
       break;
 
     case APPLY_HIT:
-      ch->max_hit += mod;
+      char_set_max_hit(ch, char_get_max_hit(ch) + mod);
       break;
 
     case APPLY_MOVE:
-      ch->max_move += mod;
+      char_set_max_move(ch, char_get_max_move(ch) + mod);
       break;
 
     case APPLY_GOLD:
@@ -99,7 +99,7 @@ static void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, c
       break;
 
     case APPLY_LIFEMAX:
-      ch->lifebonus += mod;
+      char_set_raw_lifebonus(ch, char_get_raw_lifebonus(ch) + mod);
       break;
     case APPLY_UNUSED3:
     case APPLY_UNUSED4:
@@ -216,28 +216,28 @@ void affect_total(struct char_data *ch)
   for (i = 0; i < NUM_WEARS; i++) {
     if (char_get_equipment(ch, i))
       for (j = 0; j < MAX_OBJ_AFFECT; j++)
-        affect_modify_ar(ch, char_get_equipment(ch, i)->affected[j].location,
-                         char_get_equipment(ch, i)->affected[j].modifier,
-                         char_get_equipment(ch, i)->affected[j].specific,
+        affect_modify_ar(ch, obj_get_affected(char_get_equipment(ch, i))[j].location,
+                         obj_get_affected(char_get_equipment(ch, i))[j].modifier,
+                         obj_get_affected(char_get_equipment(ch, i))[j].specific,
                          obj_get_bitvector(char_get_equipment(ch, i)), false);
   }
 
-  for (af = ch->affected; af; af = af->next)
+  for (af = char_get_affected(ch); af; af = af->next)
     affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
 
-  ch->aff_abils = ch->real_abils;
+  char_reset_aff_abils(ch);
 
   for (i = 0; i < NUM_WEARS; i++) {
     if (char_get_equipment(ch, i)) {
       for (j = 0; j < MAX_OBJ_AFFECT; j++)
-        affect_modify_ar(ch, char_get_equipment(ch, i)->affected[j].location,
-                         char_get_equipment(ch, i)->affected[j].modifier,
-                         char_get_equipment(ch, i)->affected[j].specific,
+        affect_modify_ar(ch, obj_get_affected(char_get_equipment(ch, i))[j].location,
+                         obj_get_affected(char_get_equipment(ch, i))[j].modifier,
+                         obj_get_affected(char_get_equipment(ch, i))[j].specific,
                          obj_get_bitvector(char_get_equipment(ch, i)), true);
     }
   }
 
-  for (af = ch->affected; af; af = af->next)
+  for (af = char_get_affected(ch); af; af = af->next)
     affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
 
   /* Make certain values are between 0..100, not < 0 and not > 100! */
@@ -282,13 +282,13 @@ void affect_to_char(struct char_data *ch, struct affected_type *af)
 
   CREATE(affected_alloc, struct affected_type, 1);
 
-  if (!ch->affected) {
-    ch->next_affect = affect_list;
+  if (!char_get_affected(ch)) {
+    char_set_next_affect(ch, affect_list);
     affect_list     = ch;
   }
   *affected_alloc      = *af;
-  affected_alloc->next = ch->affected;
-  ch->affected         = affected_alloc;
+  affected_alloc->next = char_get_affected(ch);
+  char_set_affected(ch, affected_alloc);
 
   affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
   affect_total(ch);
@@ -303,19 +303,18 @@ void affect_remove(struct char_data *ch, struct affected_type *af)
 {
   struct affected_type *cmtemp;
 
-  if (ch->affected == nullptr) {
+  if (char_get_affected(ch) == nullptr) {
     core_dump();
     return;
   }
 
   affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
-  REMOVE_FROM_LIST(af, ch->affected, next, cmtemp);
+  REMOVE_FROM_LIST(af, *char_affected_slot(ch), next, cmtemp);
   free(af);
   affect_total(ch);
-  if (!ch->affected) {
-    struct char_data *temp;
-    REMOVE_FROM_LIST(ch, affect_list, next_affect, temp);
-    ch->next_affect = nullptr;
+  if (!char_get_affected(ch)) {
+    char_unlink_from_affect_list(ch);
+    char_set_next_affect(ch, nullptr);
   }
 }
 
@@ -324,7 +323,7 @@ void affect_from_char(struct char_data *ch, int type)
 {
   struct affected_type *hjp, *next;
 
-  for (hjp = ch->affected; hjp; hjp = next) {
+  for (hjp = char_get_affected(ch); hjp; hjp = next) {
     next = hjp->next;
     if (hjp->type == type)
       affect_remove(ch, hjp);
@@ -339,7 +338,7 @@ bool affected_by_spell(struct char_data *ch, int type)
 {
   struct affected_type *hjp;
 
-  for (hjp = ch->affected; hjp; hjp = hjp->next)
+  for (hjp = char_get_affected(ch); hjp; hjp = hjp->next)
     if (hjp->type == type)
       return (true);
 
@@ -352,7 +351,7 @@ void affect_join(struct char_data *ch, struct affected_type *af,
   struct affected_type *hjp, *next;
   bool found = false;
 
-  for (hjp = ch->affected; !found && hjp; hjp = next) {
+  for (hjp = char_get_affected(ch); !found && hjp; hjp = next) {
     next = hjp->next;
 
     if ((hjp->type == af->type) && (hjp->location == af->location)) {

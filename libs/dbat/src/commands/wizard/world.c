@@ -81,7 +81,7 @@ ACMD(do_transobj)
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch)))) {
     send_to_char(ch, "You want to send what?\r\n");
     return;
   }
@@ -166,10 +166,10 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr)
     } else if ((target_obj = get_obj_vis(ch, mobobjstr, &num)) != nullptr) {
       if (obj_get_in_room(target_obj) != NOWHERE)
         location = obj_get_in_room(target_obj);
-      else if (target_obj->carried_by && char_get_in_room(target_obj->carried_by) != NOWHERE)
-        location = char_get_in_room(target_obj->carried_by);
-      else if (target_obj->worn_by && char_get_in_room(target_obj->worn_by) != NOWHERE)
-        location = char_get_in_room(target_obj->worn_by);
+      else if (obj_get_carried_by(target_obj) && char_get_in_room(obj_get_carried_by(target_obj)) != NOWHERE)
+        location = char_get_in_room(obj_get_carried_by(target_obj));
+      else if (obj_get_worn_by(target_obj) && char_get_in_room(obj_get_worn_by(target_obj)) != NOWHERE)
+        location = char_get_in_room(obj_get_worn_by(target_obj));
 
       if (location == NOWHERE) {
         send_to_char(ch, "That object is currently not in a room.\r\n");
@@ -189,12 +189,12 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr)
 
   rm = &world[location];
 
-  if ((!can_edit_zone(ch, rm->zone) && char_get_admlevel(ch) < ADMLVL_GOD) && zone_flagged(rm->zone, ZONE_QUEST)) {
+  if ((!can_edit_zone(ch, room_get_zone(rm)) && char_get_admlevel(ch) < ADMLVL_GOD) && zone_flagged(room_get_zone(rm), ZONE_QUEST)) {
     send_to_char(ch, "This target is in a quest zone.\r\n");
     return (NOWHERE);
   }
 
-  if ((char_get_admlevel(ch) < ADMLVL_VICE) && zone_flagged(rm->zone, ZONE_NOIMMORT)) {
+  if ((char_get_admlevel(ch) < ADMLVL_VICE) && zone_flagged(room_get_zone(rm), ZONE_NOIMMORT)) {
     send_to_char(ch, "This target is in a zone closed to all.\r\n");
     return (NOWHERE);
   }
@@ -359,29 +359,29 @@ void snoop_check(struct char_data *ch)
    *  not be snooping/snooped someone of a higher/lower level (and
    *  thus, not entitled to be snooping.
    */
-  if (!ch || !ch->desc)
+  if (!ch || !char_get_desc(ch))
     return;
-  if (ch->desc->snooping &&
-      (char_get_admlevel(ch->desc->snooping->character) >= char_get_admlevel(ch))) {
-    ch->desc->snooping->snoop_by = nullptr;
-    ch->desc->snooping           = nullptr;
+  if (char_get_desc(ch)->snooping &&
+      (char_get_admlevel(char_get_desc(ch)->snooping->character) >= char_get_admlevel(ch))) {
+    char_get_desc(ch)->snooping->snoop_by = nullptr;
+    char_get_desc(ch)->snooping           = nullptr;
   }
 
-  if (ch->desc->snoop_by &&
-      (char_get_admlevel(ch) >= char_get_admlevel(ch->desc->snoop_by->character))) {
-    ch->desc->snoop_by->snooping = nullptr;
-    ch->desc->snoop_by           = nullptr;
+  if (char_get_desc(ch)->snoop_by &&
+      (char_get_admlevel(ch) >= char_get_admlevel(char_get_desc(ch)->snoop_by->character))) {
+    char_get_desc(ch)->snoop_by->snooping = nullptr;
+    char_get_desc(ch)->snoop_by           = nullptr;
   }
 }
 
 static void stop_snooping(struct char_data *ch)
 {
-  if (!ch->desc->snooping)
+  if (!char_get_desc(ch)->snooping)
     send_to_char(ch, "You aren't snooping anyone.\r\n");
   else {
     send_to_char(ch, "You stop snooping.\r\n");
-    ch->desc->snooping->snoop_by = nullptr;
-    ch->desc->snooping           = nullptr;
+    char_get_desc(ch)->snooping->snoop_by = nullptr;
+    char_get_desc(ch)->snooping           = nullptr;
   }
 }
 
@@ -390,7 +390,7 @@ ACMD(do_snoop)
   char arg[MAX_INPUT_LENGTH];
   struct char_data *victim, *tch;
 
-  if (!ch->desc)
+  if (!char_get_desc(ch))
     return;
 
   one_argument(argument, arg);
@@ -399,17 +399,17 @@ ACMD(do_snoop)
     stop_snooping(ch);
   else if (!(victim = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD)))
     send_to_char(ch, "No such person around.\r\n");
-  else if (!victim->desc)
+  else if (!char_get_desc(victim))
     send_to_char(ch, "There's no link.. nothing to snoop.\r\n");
   else if (victim == ch)
     stop_snooping(ch);
-  else if (victim->desc->snoop_by)
+  else if (char_get_desc(victim)->snoop_by)
     send_to_char(ch, "Busy already. \r\n");
-  else if (victim->desc->snooping == ch->desc)
+  else if (char_get_desc(victim)->snooping == char_get_desc(ch))
     send_to_char(ch, "Don't be stupid.\r\n");
   else {
-    if (victim->desc->original)
-      tch = victim->desc->original;
+    if (char_get_desc(victim)->original)
+      tch = char_get_desc(victim)->original;
     else
       tch = victim;
 
@@ -419,11 +419,11 @@ ACMD(do_snoop)
     }
     send_to_char(ch, "%s", CONFIG_OK);
 
-    if (ch->desc->snooping)
-      ch->desc->snooping->snoop_by = nullptr;
+    if (char_get_desc(ch)->snooping)
+      char_get_desc(ch)->snooping->snoop_by = nullptr;
 
-    ch->desc->snooping     = victim->desc;
-    victim->desc->snoop_by = ch->desc;
+    char_get_desc(ch)->snooping     = char_get_desc(victim);
+    char_get_desc(victim)->snoop_by = char_get_desc(ch);
   }
 }
 
@@ -434,7 +434,7 @@ ACMD(do_switch)
 
   one_argument(argument, arg);
 
-  if (ch->desc->original)
+  if (char_get_desc(ch)->original)
     send_to_char(ch, "You're already switched.\r\n");
   else if (!*arg)
     send_to_char(ch, "Switch with who?\r\n");
@@ -442,7 +442,7 @@ ACMD(do_switch)
     send_to_char(ch, "No such character.\r\n");
   else if (ch == victim)
     send_to_char(ch, "Hee hee... we are jolly funny today, eh?\r\n");
-  else if (victim->desc)
+  else if (char_get_desc(victim))
     send_to_char(ch, "You can't do that, the body is already in use!\r\n");
   else if (!(char_is_npc(victim) || char_adm_flagged(ch, ADM_SWITCHMORTAL)))
     send_to_char(ch, "You aren't holy enough to use a mortal's body.\r\n");
@@ -451,17 +451,17 @@ ACMD(do_switch)
   else {
     send_to_char(ch, "%s", CONFIG_OK);
 
-    ch->desc->character = victim;
-    ch->desc->original  = ch;
+    char_get_desc(ch)->character = victim;
+    char_get_desc(ch)->original  = ch;
 
-    victim->desc = ch->desc;
-    ch->desc     = nullptr;
+    char_set_desc(victim, char_get_desc(ch));
+    char_set_desc(ch, nullptr);
   }
 }
 
 ACMD(do_return)
 {
-  if (ch->desc && ch->desc->original) {
+  if (char_get_desc(ch) && char_get_desc(ch)->original) {
     send_to_char(ch, "You return to your original body.\r\n");
 
     /*
@@ -473,18 +473,18 @@ ACMD(do_return)
      * close() will damage our character's pointer to our descriptor
      * (which is assigned below in this function). 12/17/99
      */
-    if (ch->desc->original->desc) {
-      ch->desc->original->desc->character = nullptr;
-      desc_set_connected(ch->desc->original->desc, CON_DISCONNECT);
+    if (char_get_desc(char_get_desc(ch)->original)) {
+      char_get_desc(char_get_desc(ch)->original)->character = nullptr;
+      desc_set_connected(char_get_desc(char_get_desc(ch)->original), CON_DISCONNECT);
     }
 
     /* Now our descriptor points to our original body. */
-    ch->desc->character = ch->desc->original;
-    ch->desc->original  = nullptr;
+    char_get_desc(ch)->character = char_get_desc(ch)->original;
+    char_get_desc(ch)->original  = nullptr;
 
     /* And our body's pointer to descriptor now points to our descriptor. */
-    ch->desc->character->desc = ch->desc;
-    ch->desc                  = nullptr;
+    char_set_desc(char_get_desc(ch)->character, char_get_desc(ch));
+    char_set_desc(ch, nullptr);
   }
 }
 
@@ -543,8 +543,8 @@ ACMD(do_load)
       obj = read_object(r_num, REAL);
       add_unique_id(obj);
       if (char_get_admlevel(ch) > 0) {
-        send_to_imm("LOAD: %s has loaded a %s", char_get_name(ch), obj->short_description);
-        log_imm_action("LOAD: %s has loaded a %s", char_get_name(ch), obj->short_description);
+        send_to_imm("LOAD: %s has loaded a %s", char_get_name(ch), obj_get_short_description(obj));
+        log_imm_action("LOAD: %s has loaded a %s", char_get_name(ch), obj_get_short_description(obj));
       }
       if (CONFIG_LOAD_INVENTORY)
         obj_to_char(obj, ch);
@@ -583,14 +583,14 @@ ACMD(do_purge)
       if (!char_is_npc(vict)) {
         mudlog(LOG_BRF, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "(GC) %s has purged %s.", char_get_name(ch), char_get_name(vict));
         log_imm_action("PURGED: %s burned %s's sorry ass off the MUD!", char_get_name(ch), char_get_name(vict));
-        if (vict->desc) {
-          desc_set_connected(vict->desc, CON_CLOSE);
-          vict->desc->character = nullptr;
-          vict->desc            = nullptr;
+        if (char_get_desc(vict)) {
+          desc_set_connected(char_get_desc(vict), CON_CLOSE);
+          char_get_desc(vict)->character = nullptr;
+          char_set_desc(vict, nullptr);
         }
       }
       extract_char(vict);
-    } else if ((obj = get_obj_in_list_vis(ch, buf, nullptr, world[char_get_in_room(ch)].contents)) != nullptr) {
+    } else if ((obj = get_obj_in_list_vis(ch, buf, nullptr, rroom_get_contents(char_get_in_room(ch)))) != nullptr) {
       act("$n destroys $p.", false, ch, obj, 0, TO_ROOM);
       extract_obj(obj);
     } else {
@@ -606,15 +606,15 @@ ACMD(do_purge)
         false, ch, 0, 0, TO_ROOM);
     send_to_room(char_get_in_room(ch), "The world seems a little cleaner.\r\n");
 
-    for (vict = world[char_get_in_room(ch)].people; vict; vict = vict->next_in_room) {
+    for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = char_get_next_in_room(vict)) {
       if (!char_is_npc(vict))
         continue;
 
       delete_inv_backup(vict);
 
       /* Dump inventory. */
-      while (vict->carrying)
-        extract_obj(vict->carrying);
+      while (char_get_inventory(vict))
+        extract_obj(char_get_inventory(vict));
 
       /* Dump equipment. */
       for (i = 0; i < NUM_WEARS; i++)
@@ -626,8 +626,8 @@ ACMD(do_purge)
     }
 
     /* Clear the ground. */
-    while (world[char_get_in_room(ch)].contents)
-      extract_obj(world[char_get_in_room(ch)].contents);
+    while (rroom_get_contents(char_get_in_room(ch)))
+      extract_obj(rroom_get_contents(char_get_in_room(ch)));
   }
 }
 
@@ -659,8 +659,8 @@ ACMD(do_force)
     mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "(GC) %s forced room %d to %s",
            char_get_name(ch), rroom_get_vnum(char_get_in_room(ch)), to_force);
 
-    for (vict = world[char_get_in_room(ch)].people; vict; vict = next_force) {
-      next_force = vict->next_in_room;
+    for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_force) {
+      next_force = char_get_next_in_room(vict);
       if (!char_is_npc(vict) && char_get_admlevel(vict) >= char_get_admlevel(ch))
         continue;
       act(buf1, true, ch, nullptr, vict, TO_VICT);
@@ -704,7 +704,7 @@ ACMD(do_zreset)
     log_imm_action("RESET: %s has reset all MUD zones.", char_get_name(ch));
     return;
   } else if (*arg == '.' || !*arg)
-    i = world[char_get_in_room(ch)].zone;
+    i = rroom_get_zone(char_get_in_room(ch));
   else {
     j = atoi(arg);
     for (i = 0; i <= top_of_zone_table; i++)
@@ -725,8 +725,8 @@ ACMD(do_peace)
   struct char_data *vict, *next_v;
   send_to_room(char_get_in_room(ch), "Everything is quite peaceful now.\r\n");
 
-  for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-    next_v = vict->next_in_room;
+  for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+    next_v = char_get_next_in_room(vict);
     if (char_get_admlevel(vict) > char_get_admlevel(ch))
       continue;
     stop_fighting(vict);
@@ -788,7 +788,7 @@ ACMD(do_zpurge)
   one_argument(argument, arg);
 
   if (!*arg) {
-    zone = zone_table[world[char_get_in_room(ch)].zone].number;
+    zone = zone_table[rroom_get_zone(char_get_in_room(ch))].number;
   } else {
     zone = atoi(arg);
   }
@@ -807,15 +807,15 @@ ACMD(do_zpurge)
 
   for (room = genolc_zone_bottom(stored); room <= zone_table[stored].top; room++) {
     if ((i = real_room(room)) != NOWHERE) {
-      for (mob = world[i].people; mob; mob = next_mob) {
-        next_mob = mob->next_in_room;
+      for (mob = rroom_get_people(i); mob; mob = next_mob) {
+        next_mob = char_get_next_in_room(mob);
         if (char_is_npc(mob)) {
           extract_char(mob);
         }
       }
 
-      for (obj = world[i].contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
+      for (obj = rroom_get_contents(i); obj; obj = next_obj) {
+        next_obj = obj_get_next_content(obj);
         extract_obj(obj);
       }
     }

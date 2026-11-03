@@ -17,6 +17,9 @@
 #include "dbat/class.h"
 #include "dbat/races.h"
 #include "dbat/act.informative.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 static room_vnum ship_land_location(struct char_data *ch, struct obj_data *vehicle, char *arg);
 static void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle);
@@ -378,7 +381,7 @@ struct obj_data *find_vehicle_by_vnum(obj_vnum vnum)
 {
   struct obj_data *i;
 
-  for (i = object_list; i; i = i->next)
+  for (i = object_list; i; i = obj_get_next(i))
     if (obj_get_type_flag(i) == ITEM_VEHICLE)
       if (obj_get_vnum(i) == vnum)
         return i;
@@ -391,7 +394,7 @@ static struct obj_data *get_obj_in_list_type(int type, struct obj_data *list)
 {
   struct obj_data *i;
 
-  for (i = list; i; i = i->next_content)
+  for (i = list; i; i = obj_get_next_content(i))
     if (obj_get_type_flag(i) == type)
       return i;
 
@@ -404,9 +407,9 @@ struct obj_data *find_control(struct char_data *ch)
   struct obj_data *controls, *obj;
   int j;
 
-  controls = get_obj_in_list_type(ITEM_CONTROL, world[char_get_in_room(ch)].contents);
+  controls = get_obj_in_list_type(ITEM_CONTROL, rroom_get_contents(char_get_in_room(ch)));
   if (!controls)
-    for (obj = ch->carrying; obj && !controls; obj = obj->next_content)
+    for (obj = char_get_inventory(ch); obj && !controls; obj = obj_get_next_content(obj))
       if (char_can_see_obj(ch, obj) && obj_get_type_flag(obj) == ITEM_CONTROL)
         controls = obj;
   if (!controls)
@@ -426,7 +429,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
 
   if (!*arg) {
     send_to_char(ch, "@wDrive into what?\r\n");
-  } else if (!(vehicle_in_out = get_obj_in_list_vis(ch, arg, nullptr, world[obj_get_in_room(vehicle)].contents))) {
+  } else if (!(vehicle_in_out = get_obj_in_list_vis(ch, arg, nullptr, rroom_get_contents(obj_get_in_room(vehicle))))) {
     send_to_char(ch, "@wNothing here by that name!\r\n");
   } else if (obj_get_type_flag(vehicle_in_out) != ITEM_VEHICLE) {
     send_to_char(ch, "@wThat's not a ship.\r\n");
@@ -437,18 +440,18 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
     if (!rroom_flagged(is_going_to, ROOM_VEHICLE)) {
       send_to_char(ch, "@wThat ship can't carry other ships.");
     } else {
-      sprintf(buf, "%s @wenters %s.\n\r", vehicle->short_description,
-              vehicle_in_out->short_description);
+      sprintf(buf, "%s @wenters %s.\n\r", obj_get_short_description(vehicle),
+              obj_get_short_description(vehicle_in_out));
       send_to_room(obj_get_in_room(vehicle), "%s", buf);
 
       obj_from_room(vehicle);
       obj_to_room(vehicle, is_going_to);
       is_in = obj_get_in_room(vehicle);
-      if (ch->desc != nullptr)
+      if (char_get_desc(ch) != nullptr)
         act("", true, ch, 0, 0, TO_ROOM);
       send_to_char(ch, "@wThe ship flies onward:\r\n");
       look_at_room(obj_get_in_room(vehicle), ch, 0);
-      sprintf(buf, "%s @wenters.\r\n", vehicle->short_description);
+      sprintf(buf, "%s @wenters.\r\n", obj_get_short_description(vehicle));
       send_to_room(is_in, "%s", buf);
     }
   }
@@ -460,30 +463,30 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle)
   struct obj_data *hatch, *vehicle_in_out;
   char buf[MAX_INPUT_LENGTH];
 
-  if (!(hatch = get_obj_in_list_type(ITEM_HATCH, world[obj_get_in_room(vehicle)].contents))) {
+  if (!(hatch = get_obj_in_list_type(ITEM_HATCH, rroom_get_contents(obj_get_in_room(vehicle))))) {
     send_to_char(ch, "@wNowhere to pilot out of.\r\n");
   } else if (!(vehicle_in_out = find_vehicle_by_vnum(obj_get_value(hatch, 0)))) {
     send_to_char(ch, "@wYou can't pilot out anywhere!\r\n");
   } else {
-    sprintf(buf, "%s @wexits %s.\r\n", vehicle->short_description,
-            vehicle_in_out->short_description);
+    sprintf(buf, "%s @wexits %s.\r\n", obj_get_short_description(vehicle),
+            obj_get_short_description(vehicle_in_out));
     send_to_room(obj_get_in_room(vehicle), "%s", buf);
 
     obj_from_room(vehicle);
     obj_to_room(vehicle, obj_get_in_room(vehicle_in_out));
 
-    if (ch->desc != nullptr)
+    if (char_get_desc(ch) != nullptr)
       act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, 0, 0, TO_ROOM);
     send_to_char(ch, "@wThe ship flies onward:\r\n");
     look_at_room(obj_get_in_room(vehicle), ch, 0);
     int door;
     for (door = 0; door < NUM_OF_DIRS; door++) {
       if (char_can_go(ch, door)) {
-        send_to_room(world[char_get_in_room(ch)].dir_option[door]->to_room, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
+        send_to_room(rroom_get_dir_option(char_get_in_room(ch), door)->to_room, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
       }
     }
-    sprintf(buf, "%s @wflies out of %s.\r\n", vehicle->short_description,
-            vehicle_in_out->short_description);
+    sprintf(buf, "%s @wflies out of %s.\r\n", obj_get_short_description(vehicle),
+            obj_get_short_description(vehicle_in_out));
     send_to_room(obj_get_in_room(vehicle), "%s", buf);
   }
 }
@@ -509,12 +512,12 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
     /* But nothing!  Let's go that way! */
     room_rnum was_in, is_in;
 
-    sprintf(buf, "%s @wflies %s.\n\r", vehicle->short_description, dirs[dir]);
+    sprintf(buf, "%s @wflies %s.\n\r", obj_get_short_description(vehicle), dirs[dir]);
     send_to_room(obj_get_in_room(vehicle), "%s", buf);
 
     was_in = obj_get_in_room(vehicle);
     obj_from_room(vehicle);
-    obj_to_room(vehicle, world[was_in].dir_option[dir]->to_room);
+    obj_to_room(vehicle, rroom_get_dir_option(was_in, dir)->to_room);
     struct obj_data *controls;
     if ((controls = find_control(ch))) {
       if (obj_get_value(controls, 3) < 5) {
@@ -530,7 +533,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
 
     struct obj_data *hatch = nullptr;
 
-    for (hatch = world[real_room(obj_get_value(vehicle, 0))].contents; hatch; hatch = hatch->next_content) {
+    for (hatch = rroom_get_contents(real_room(obj_get_value(vehicle, 0))); hatch; hatch = obj_get_next_content(hatch)) {
       if (obj_get_type_flag(hatch) == ITEM_HATCH) {
         obj_set_value(hatch, 3, rroom_get_vnum(obj_get_in_room(vehicle)));
       }
@@ -538,7 +541,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
 
     is_in = obj_get_in_room(vehicle);
 
-    if (ch->desc != nullptr)
+    if (char_get_desc(ch) != nullptr)
       act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, 0, 0, TO_ROOM);
     send_to_char(ch, "@wThe ship flies onward:\r\n");
     look_at_room(is_in, ch, 0);
@@ -550,11 +553,11 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
     int door;
     for (door = 0; door < NUM_OF_DIRS; door++) {
       if (char_can_go(ch, door)) {
-        send_to_room(world[char_get_in_room(ch)].dir_option[door]->to_room, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
+        send_to_room(rroom_get_dir_option(char_get_in_room(ch), door)->to_room, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
       }
     }
     sprintf(buf, "%s @wflies in from the %s.\r\n",
-            vehicle->short_description, dirs[rev_dir[dir]]);
+            obj_get_short_description(vehicle), dirs[rev_dir[dir]]);
 
     send_to_room(is_in, "%s", buf);
   }
@@ -610,10 +613,10 @@ ACMD(do_warp)
     }
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, 0, 0, TO_ROOM);
-    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(40979));
-    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", obj_get_short_description(vehicle));
   } else if (!strcasecmp(arg, "namek")) {
     if (rroom_get_vnum(obj_get_in_room(vehicle)) == 42880 || rroom_get_vnum(obj_get_in_room(vehicle)) == 54) {
       send_to_char(ch, "Your ship is already there!\r\n");
@@ -621,10 +624,10 @@ ACMD(do_warp)
     }
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, 0, 0, TO_ROOM);
-    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(42880));
-    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", obj_get_short_description(vehicle));
   } else if (!strcasecmp(arg, "frigid")) {
     if (rroom_get_vnum(obj_get_in_room(vehicle)) == 30889 || rroom_get_vnum(obj_get_in_room(vehicle)) == 51) {
       send_to_char(ch, "Your ship is already there!\r\n");
@@ -632,10 +635,10 @@ ACMD(do_warp)
     }
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, 0, 0, TO_ROOM);
-    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(30889));
-    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", obj_get_short_description(vehicle));
   } else if (!strcasecmp(arg, "konack")) {
     if (rroom_get_vnum(obj_get_in_room(vehicle)) == 27065 || rroom_get_vnum(obj_get_in_room(vehicle)) == 52) {
       send_to_char(ch, "Your ship is already there!\r\n");
@@ -643,10 +646,10 @@ ACMD(do_warp)
     }
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, 0, 0, TO_ROOM);
-    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(27065));
-    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", obj_get_short_description(vehicle));
   } else if (!strcasecmp(arg, "vegeta")) {
     if (rroom_get_vnum(obj_get_in_room(vehicle)) == 32365 || rroom_get_vnum(obj_get_in_room(vehicle)) == 53) {
       send_to_char(ch, "Your ship is already there!\r\n");
@@ -654,10 +657,10 @@ ACMD(do_warp)
     }
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, 0, 0, TO_ROOM);
-    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(32365));
-    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", obj_get_short_description(vehicle));
   } else if (!strcasecmp(arg, "aether")) {
     if (rroom_get_vnum(obj_get_in_room(vehicle)) == 41959 || rroom_get_vnum(obj_get_in_room(vehicle)) == 55) {
       send_to_char(ch, "Your ship is already there!\r\n");
@@ -665,10 +668,10 @@ ACMD(do_warp)
     }
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, 0, 0, TO_ROOM);
-    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(41959));
-    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", obj_get_short_description(vehicle));
   } else if (!strcasecmp(arg, "buoy1")) {
     if (char_get_radar1(ch) <= 0) {
       send_to_char(ch, "You have not launched that buoy!\r\n");
@@ -680,10 +683,10 @@ ACMD(do_warp)
     }
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, 0, 0, TO_ROOM);
-    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(char_get_radar1(ch)));
-    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", obj_get_short_description(vehicle));
   } else if (!strcasecmp(arg, "buoy2")) {
     if (char_get_radar2(ch) <= 0) {
       send_to_char(ch, "You have not launched that buoy!\r\n");
@@ -695,10 +698,10 @@ ACMD(do_warp)
     }
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, 0, 0, TO_ROOM);
-    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(char_get_radar2(ch)));
-    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", obj_get_short_description(vehicle));
   } else if (!strcasecmp(arg, "buoy3")) {
     if (char_get_radar3(ch) <= 0) {
       send_to_char(ch, "You have not launched that buoy!\r\n");
@@ -710,10 +713,10 @@ ACMD(do_warp)
     }
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find your ship in a new location!@n", true, ch, 0, 0, TO_CHAR);
     act("@BA glow of blue light floods in through the window for an instant. You feel a strange shift as the light disappears and you find the ship in a new location!@n", true, ch, 0, 0, TO_ROOM);
-    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "%s @Bbegins to glow bright blue before disappearing in a flash of light!@n\r\n", obj_get_short_description(vehicle));
     obj_from_room(vehicle);
     obj_to_room(vehicle, real_room(char_get_radar3(ch)));
-    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", vehicle->short_description);
+    send_to_room(obj_get_in_room(vehicle), "@BSuddenly in a flash of blue light @n%s @B appears instantly!@n\r\n", obj_get_short_description(vehicle));
   } else {
     mud_log("ERROR: Ship Instant Warp Failure! Unknown argument!");
     send_to_char(ch, "ERROR\r\n");
@@ -1230,11 +1233,11 @@ ACMD(do_drive)
           send_to_char(ch, "@wYou are not where you can land, you need to be in a planet's low orbit.@n\r\n");
         }
         if (land_location <= 50) {
-          sprintf(buf3, "%s @wcomes in from above and slowly settles on the launch-pad.@n\r\n", vehicle->short_description);
+          sprintf(buf3, "%s @wcomes in from above and slowly settles on the launch-pad.@n\r\n", obj_get_short_description(vehicle));
           look_at_room(obj_get_in_room(vehicle), ch, 0);
           send_to_room(obj_get_in_room(vehicle), "%s", buf3);
         } else {
-          sprintf(buf3, "%s @wcomes in from above and slams into the ground!@n\r\n", vehicle->short_description);
+          sprintf(buf3, "%s @wcomes in from above and slams into the ground!@n\r\n", obj_get_short_description(vehicle));
           rroom_set_dmg(obj_get_in_room(vehicle), rroom_get_dmg(obj_get_in_room(vehicle)) + (1));
           if (rroom_get_dmg(obj_get_in_room(vehicle)) >= 10) {
             rroom_set_dmg(obj_get_in_room(vehicle), 10);
@@ -1277,7 +1280,7 @@ ACMD(do_drive)
         act("@RThe ship shudders as it launches up into the sky!@n", false, ch, 0, 0, TO_ROOM);
         act("@wThe ship has reached low orbit.@n", false, ch, 0, 0, TO_CHAR);
         act("@wThe ship has reached low orbit.@n", false, ch, 0, 0, TO_ROOM);
-        send_to_room(obj_get_in_room(vehicle), "@R%s @Rshudders before blasting off into the sky!@n", vehicle->short_description);
+        send_to_room(obj_get_in_room(vehicle), "@R%s @Rshudders before blasting off into the sky!@n", obj_get_short_description(vehicle));
         if (lnum == 1) {
           rnum = real_room(50);
         }

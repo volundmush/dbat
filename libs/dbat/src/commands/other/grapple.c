@@ -929,9 +929,9 @@ ACMD(do_steal)
         return;
       }
     } else { /* It's an object... */
-      if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, vict->carrying))) {
+      if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(vict)))) {
         for (eq_pos = 0; eq_pos < NUM_WEARS; eq_pos++)
-          if (char_get_equipment(vict, eq_pos) && (isname(arg, char_get_equipment(vict, eq_pos)->name)) && char_can_see_obj(ch, char_get_equipment(vict, eq_pos))) {
+          if (char_get_equipment(vict, eq_pos) && (isname(arg, obj_get_name(char_get_equipment(vict, eq_pos)))) && char_can_see_obj(ch, char_get_equipment(vict, eq_pos))) {
             obj = char_get_equipment(vict, eq_pos);
             break;
           }
@@ -1031,7 +1031,7 @@ ACMD(do_steal)
           obj_to_char(obj, ch);
           if (!char_is_npc(vict)) {
             char_plr_set(vict, PLR_STOLEN, true);
-            mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(ch)), true, "THEFT: %s has stolen %s@n from %s", char_get_name(ch), obj->short_description, char_get_name(vict));
+            mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(ch)), true, "THEFT: %s has stolen %s@n from %s", char_get_name(ch), obj_get_short_description(obj), char_get_name(vict));
           }
           if (axion_dice(0) > prob) {
             reveal_hiding(ch, 0);

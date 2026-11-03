@@ -17,6 +17,8 @@
 #include "dbat/act.other.h"
 #include "dbat/config.h"
 #include "dbat/races.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 static void oozaru_add();
 static void oozaru_drop();
@@ -30,20 +32,20 @@ static void grow_plants(void)
 {
   struct obj_data *k;
 
-  for (k = object_list; k; k = k->next) {
+  for (k = object_list; k; k = obj_get_next(k)) {
     if (obj_get_in_room(k) == NOWHERE) {
       continue;
     }
-    if (k->carried_by || k->in_obj) {
+    if (obj_get_carried_by(k) || obj_get_in_obj(k)) {
       continue;
     }
     if (rroom_flagged(obj_get_in_room(k), ROOM_GARDEN1) || rroom_flagged(obj_get_in_room(k), ROOM_GARDEN2)) {
       if (obj_get_value(k, VAL_WATERLEVEL) < 0 && obj_get_value(k, VAL_WATERLEVEL) > -10) {
         obj_set_value(k, VAL_WATERLEVEL, obj_get_value(k, VAL_WATERLEVEL) - (1));
         if (obj_get_value(k, VAL_WATERLEVEL) > -10) {
-          send_to_room(obj_get_in_room(k), "%s@y withers a bit.\r\n", k->short_description);
+          send_to_room(obj_get_in_room(k), "%s@y withers a bit.\r\n", obj_get_short_description(k));
         } else {
-          send_to_room(obj_get_in_room(k), "%s@y has withered to a dried up dead husk.\r\n", k->short_description);
+          send_to_room(obj_get_in_room(k), "%s@y has withered to a dried up dead husk.\r\n", obj_get_short_description(k));
         }
       } else if (obj_get_value(k, VAL_WATERLEVEL) >= 0) {
         obj_set_value(k, VAL_WATERLEVEL, obj_get_value(k, VAL_WATERLEVEL) - (1));
@@ -54,7 +56,7 @@ static void grow_plants(void)
             obj_set_value(k, VAL_MATURITY, obj_get_value(k, VAL_MATURITY) + (1));
           }
           if (obj_get_value(k, VAL_MATURITY) >= obj_get_value(k, VAL_MAXMATURE)) {
-            send_to_room(obj_get_in_room(k), "%s@G is now fully grown!@n\r\n", k->short_description);
+            send_to_room(obj_get_in_room(k), "%s@G is now fully grown!@n\r\n", obj_get_short_description(k));
           }
         }
       }

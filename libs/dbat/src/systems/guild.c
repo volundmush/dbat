@@ -23,6 +23,7 @@
 #include "dbat/handler.h"
 #include "dbat/shop.h"
 #include "dbat/class.h"
+#include "dbat/character_utils.h"
 
 static bool guild_trade_flagged(const struct guild_data *rec, int flag);
 
@@ -186,11 +187,11 @@ ACMD(do_teach)
   if (cost == 0) /* Just to be sure */
     cost = 1;
 
-  if (!vict->master) {
+  if (!char_get_master(vict)) {
     send_to_char(ch, "They must be following you in order for you to teach them.\r\n");
     return;
   }
-  if (vict->master != ch) {
+  if (char_get_master(vict) != ch) {
     send_to_char(ch, "They must be following you in order for you to teach them.\r\n");
     return;
   }
@@ -1031,8 +1032,8 @@ static void handle_gain(struct char_data *keeper, int guild_nr, struct char_data
       send_to_char(ch, "You need at least %d RPP to gain the next level.\r\n", rpp_cost);
     } else if (rpp_cost <= char_get_rp(ch)) {
       char_set_rp(ch, char_get_rp(ch) - (rpp_cost));
-      ch->desc->rpp = char_get_rp(ch);
-      userWrite(ch->desc, 0, 0, 0, "index");
+      char_get_desc(ch)->rpp = char_get_rp(ch);
+      userWrite(char_get_desc(ch), 0, 0, 0, "index");
       send_to_char(ch, "@D(@cRPP@W: @w-%d@D)@n\n\n", rpp_cost);
       gain_level(ch, whichclass);
     } else {
@@ -1049,7 +1050,7 @@ int rpp_to_level(struct char_data *ch)
   switch (char_get_level(ch)) {
     case 2:
       // charge the RPP races to level for the first time.
-      return race_rpp_cost(ch->race);
+      return race_rpp_cost(char_get_race(ch));
     case 91:
     case 92:
     case 93:
@@ -1145,7 +1146,7 @@ SPECIAL(guild)
   };
 
   for (guild_nr = 0; guild_nr <= top_guild; guild_nr++)
-    if (rguild_get_gm(guild_nr) == keeper->nr)
+    if (rguild_get_gm(guild_nr) == char_get_nr(keeper))
       break;
 
   if (guild_nr > top_guild)
@@ -1478,7 +1479,7 @@ void list_guilds(struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vn
 
       send_to_char(ch, " @c[@y%d@c]@y %s@n",
                    (rguild_get_gm(i) == NOBODY) ? -1 : mob_index[rguild_get_gm(i)].vnum,
-                   (rguild_get_gm(i) == NOBODY) ? "" : mob_proto[rguild_get_gm(i)].short_descr);
+                   (rguild_get_gm(i) == NOBODY) ? "" : char_get_sdesc(&mob_proto[rguild_get_gm(i)]));
 
       send_to_char(ch, "\r\n");
     }

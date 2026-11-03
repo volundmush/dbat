@@ -547,7 +547,7 @@ ACMD(do_bite)
   if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
       vict = char_get_fighting(ch);
-    } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
+    } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, rroom_get_contents(char_get_in_room(ch))))) {
       return;
     }
   }
@@ -694,7 +694,7 @@ ACMD(do_bite)
       if (axion_dice(0) > char_get_aff_abils_con(vict) && rand_number(1, 5) == 5) {
         act("@R$N@r was poisoned by your bite!@n", true, ch, 0, vict, TO_CHAR);
         act("@rYou were poisoned by the bite!@n", true, ch, 0, vict, TO_VICT);
-        vict->poisonby = ch;
+        char_set_poisonby(vict, ch);
         int duration   = (char_get_aff_abils_intel(ch) / 50) + 1;
         assign_affect(vict, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
       }

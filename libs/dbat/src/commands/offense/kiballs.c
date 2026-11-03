@@ -193,12 +193,12 @@ ACMD(do_genki)
     return;
   }
 
-  for (friend_char = world[char_get_in_room(ch)].people; friend_char; friend_char = next_v) {
-    next_v = friend_char->next_in_room;
+  for (friend_char = rroom_get_people(char_get_in_room(ch)); friend_char; friend_char = next_v) {
+    next_v = char_get_next_in_room(friend_char);
     if (friend_char == ch) {
       continue;
     }
-    if (char_aff_flagged(friend_char, AFF_GROUP) && (friend_char->master == ch || ch->master == friend_char || friend_char->master == ch->master)) {
+    if (char_aff_flagged(friend_char, AFF_GROUP) && (char_get_master(friend_char) == ch || char_get_master(ch) == friend_char || char_get_master(friend_char) == char_get_master(ch))) {
       char_set_charge(ch, char_get_charge(ch) + ((getCurKI(ch)) / 10));
       decCurKI(ch, getCurKI(ch) / 20, 0);
     }
@@ -695,8 +695,8 @@ ACMD(do_hellspear)
 
   skill = init_skill(ch, SKILL_HELLSPEAR); /* Set skill value */
 
-  for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-    next_v = vict->next_in_room;
+  for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+    next_v = char_get_next_in_room(vict);
     if (vict == ch) {
       continue;
     }
@@ -732,8 +732,8 @@ ACMD(do_hellspear)
 
     dmg = damtype(ch, 33, skill, attperc);
 
-    for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-      next_v = vict->next_in_room;
+    for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+      next_v = char_get_next_in_room(vict);
       if (vict == ch) {
         continue;
       }

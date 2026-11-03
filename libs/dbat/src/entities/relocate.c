@@ -5,6 +5,9 @@
 #include "dbat/vehicles.h"
 #include "dbat/fight.h"
 #include "dbat/affect.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 /* put an object in a room */
 void obj_to_room(struct obj_data *object, room_rnum room)
@@ -17,7 +20,7 @@ void obj_to_room(struct obj_data *object, room_rnum room)
   else {
     if (rroom_flagged(room, ROOM_GARDEN1) || rroom_flagged(room, ROOM_GARDEN2)) {
       if (obj_get_type_flag(object) != ITEM_PLANT) {
-        send_to_room(room, "%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n", object->short_description);
+        send_to_room(room, "%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n", obj_get_short_description(object));
         extract_obj(object);
         return;
       }
@@ -25,10 +28,10 @@ void obj_to_room(struct obj_data *object, room_rnum room)
     if (room == real_room(80)) {
       auc_load(object);
     }
-    object->next_content = world[room].contents;
-    world[room].contents = object;
+    obj_set_next_content(object, rroom_get_contents(room));
+    rroom_set_contents(room, object);
     obj_set_in_room(object, room);
-    object->carried_by = nullptr;
+    obj_set_carried_by(object, nullptr);
     obj_set_lload(object, time(0));
     if (obj_get_type_flag(object) == ITEM_VEHICLE && !obj_extra_flagged(object, ITEM_UNBREAKABLE) && obj_get_vnum(object) > 19199) {
       obj_extra_set(object, ITEM_UNBREAKABLE, true);
@@ -47,20 +50,20 @@ void obj_to_room(struct obj_data *object, room_rnum room)
         if (real_room(obj_get_value(object, 3)) != NOWHERE) {
           vehicle = read_object(obj_get_value(object, 0), VIRTUAL);
           obj_to_room(vehicle, real_room(obj_get_value(object, 3)));
-          if (object->action_description) {
-            if (strlen(object->action_description)) {
+          if (obj_get_action_description(object)) {
+            if (strlen(obj_get_action_description(object))) {
               char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
               if (obj_get_vnum(vehicle) <= 46099 && obj_get_vnum(vehicle) >= 46000) {
-                sprintf(nick, "Saiyan Pod %s", object->action_description);
-                sprintf(nick2, "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w", object->action_description);
+                sprintf(nick, "Saiyan Pod %s", obj_get_action_description(object));
+                sprintf(nick2, "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w", obj_get_action_description(object));
               } else if (obj_get_vnum(vehicle) >= 46100 && obj_get_vnum(vehicle) <= 46199) {
-                sprintf(nick, "EDI Xenofighter MK. II %s", object->action_description);
-                sprintf(nick2, "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w", object->action_description);
+                sprintf(nick, "EDI Xenofighter MK. II %s", obj_get_action_description(object));
+                sprintf(nick2, "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w", obj_get_action_description(object));
               }
               snprintf(nick3, sizeof(nick3), "%s is resting here@w", nick2);
-              vehicle->name              = strdup(nick);
-              vehicle->short_description = strdup(nick2);
-              vehicle->description       = strdup(nick3);
+              obj_set_name(vehicle, strdup(nick));
+              obj_set_short_description(vehicle, strdup(nick2));
+              obj_set_description(vehicle, strdup(nick3));
             }
           }
           obj_set_value(object, VAL_CONTAINER_FLAGS, obj_get_value(object, VAL_CONTAINER_FLAGS) | (CONT_CLOSED));
@@ -87,7 +90,7 @@ void obj_to_room(struct obj_data *object, room_rnum room)
     }
     if (obj_get_value(object, 0) != 0) {
       if (obj_get_vnum(object) == 16705 || obj_get_vnum(object) == 16706 || obj_get_vnum(object) == 16707) {
-        object->level = obj_get_value(object, 0);
+        obj_set_level(object, obj_get_value(object, 0));
       }
     }
     if (rroom_flagged(room, ROOM_HOUSE))
@@ -98,20 +101,18 @@ void obj_to_room(struct obj_data *object, room_rnum room)
 /* Take an object from a room */
 void obj_from_room(struct obj_data *object)
 {
-  struct obj_data *temp;
-
   if (!object || obj_get_in_room(object) == NOWHERE) {
     mud_log("SYSERR: NULL object (%p) or obj not in a room (%d) passed to obj_from_room",
             object, obj_get_in_room(object));
     return;
   }
 
-  if (obj_get_posted_to(object) && object->in_obj == nullptr) {
+  if (obj_get_posted_to(object) && obj_get_in_obj(object) == nullptr) {
     struct obj_data *obj = obj_get_posted_to(object);
     if (obj_get_posttype(object) <= 0) {
-      send_to_room(obj_get_in_room(obj), "%s@W shakes loose from %s@W.@n\r\n", obj->short_description, object->short_description);
+      send_to_room(obj_get_in_room(obj), "%s@W shakes loose from %s@W.@n\r\n", obj_get_short_description(obj), obj_get_short_description(object));
     } else {
-      send_to_room(obj_get_in_room(obj), "%s@W comes loose from %s@W.@n\r\n", object->short_description, obj->short_description);
+      send_to_room(obj_get_in_room(obj), "%s@W comes loose from %s@W.@n\r\n", obj_get_short_description(object), obj_get_short_description(obj));
     }
     obj_set_posted_to(obj, nullptr);
     obj_set_posttype(obj, 0);
@@ -119,12 +120,12 @@ void obj_from_room(struct obj_data *object)
     obj_set_posttype(object, 0);
   }
 
-  REMOVE_FROM_LIST(object, world[obj_get_in_room(object)].contents, next_content, temp);
+  obj_unlink_content(rroom_contents_slot(obj_get_in_room(object)), object);
 
   if (rroom_flagged(obj_get_in_room(object), ROOM_HOUSE))
     rroom_set_flag(obj_get_in_room(object), ROOM_HOUSE_CRASH, true);
   obj_set_in_room(object, NOWHERE);
-  object->next_content = nullptr;
+  obj_set_next_content(object, nullptr);
 }
 
 /* put an object in an object (quaint)  */
@@ -138,21 +139,21 @@ void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to)
     return;
   }
 
-  obj->next_content = obj_to->contains;
-  obj_to->contains  = obj;
-  obj->in_obj       = obj_to;
-  tmp_obj           = obj->in_obj;
+  obj_set_next_content(obj, obj_get_contains(obj_to));
+  obj_set_contains(obj_to, obj);
+  obj_set_in_obj(obj, obj_to);
+  tmp_obj           = obj_get_in_obj(obj);
 
   /* Only add weight to container, or back to carrier for non-eternal
      containers.  Eternal means max capacity < 0 */
-  if (obj_get_value(obj->in_obj, VAL_CONTAINER_CAPACITY) > 0) {
-    for (tmp_obj = obj->in_obj; tmp_obj->in_obj; tmp_obj = tmp_obj->in_obj)
+  if (obj_get_value(obj_get_in_obj(obj), VAL_CONTAINER_CAPACITY) > 0) {
+    for (tmp_obj = obj_get_in_obj(obj); obj_get_in_obj(tmp_obj); tmp_obj = obj_get_in_obj(tmp_obj))
       obj_set_weight(tmp_obj, obj_get_weight(tmp_obj) + (obj_get_weight(obj)));
 
     /* top level object.  Subtract weight from inventory if necessary. */
     obj_set_weight(tmp_obj, obj_get_weight(tmp_obj) + (obj_get_weight(obj)));
-    if (tmp_obj->carried_by)
-      char_set_carry_weight(tmp_obj->carried_by, char_get_carry_weight(tmp_obj->carried_by) + (obj_get_weight(obj)));
+    if (obj_get_carried_by(tmp_obj))
+      char_set_carry_weight(obj_get_carried_by(tmp_obj), char_get_carry_weight(obj_get_carried_by(tmp_obj)) + (obj_get_weight(obj)));
   }
   if (obj_get_in_room(obj_to) != NOWHERE && rroom_flagged(obj_get_in_room(obj_to), ROOM_HOUSE)) {
     rroom_set_flag(obj_get_in_room(obj_to), ROOM_HOUSE_CRASH, true);
@@ -164,39 +165,38 @@ void obj_from_obj(struct obj_data *obj)
 {
   struct obj_data *temp, *obj_from;
 
-  if (obj->in_obj == nullptr) {
+  if (obj_get_in_obj(obj) == nullptr) {
     mud_log("SYSERR: (%s): trying to illegally extract obj from obj.", __FILE__);
     return;
   }
-  obj_from = obj->in_obj;
-  temp     = obj->in_obj;
-  REMOVE_FROM_LIST(obj, obj_from->contains, next_content, temp);
+  obj_from = obj_get_in_obj(obj);
+  temp     = obj_get_in_obj(obj);
+  obj_unlink_content(obj_contains_slot(obj_from), obj);
 
   /* Subtract weight from containers container */
   /* Only worry about weight for non-eternal containers
      Eternal means max capacity < 0 */
-  if (obj_get_value(obj->in_obj, VAL_CONTAINER_CAPACITY) > 0) {
-    for (temp = obj->in_obj; temp->in_obj; temp = temp->in_obj)
+  if (obj_get_value(obj_get_in_obj(obj), VAL_CONTAINER_CAPACITY) > 0) {
+    for (temp = obj_get_in_obj(obj); obj_get_in_obj(temp); temp = obj_get_in_obj(temp))
       obj_set_weight(temp, obj_get_weight(temp) - (obj_get_weight(obj)));
 
     /* Subtract weight from char that carries the object */
     obj_set_weight(temp, obj_get_weight(temp) - (obj_get_weight(obj)));
-    if (temp->carried_by)
-      char_set_carry_weight(temp->carried_by, char_get_carry_weight(temp->carried_by) - (obj_get_weight(obj)));
+    if (obj_get_carried_by(temp))
+      char_set_carry_weight(obj_get_carried_by(temp), char_get_carry_weight(obj_get_carried_by(temp)) - (obj_get_weight(obj)));
   }
 
   if (obj_get_in_room(obj_from) != NOWHERE && rroom_flagged(obj_get_in_room(obj_from), ROOM_HOUSE)) {
     rroom_set_flag(obj_get_in_room(obj_from), ROOM_HOUSE_CRASH, true);
   }
 
-  obj->in_obj       = nullptr;
-  obj->next_content = nullptr;
+  obj_set_in_obj(obj, nullptr);
+  obj_set_next_content(obj, nullptr);
 }
 
 /* move a player out of a room */
 void char_from_room(struct char_data *ch)
 {
-  struct char_data *temp;
   int i;
 
   if (ch == nullptr || char_get_in_room(ch) == NOWHERE) {
@@ -213,14 +213,14 @@ void char_from_room(struct char_data *ch)
     if (char_get_equipment(ch, i) != nullptr)
       if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_LIGHT)
         if (obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS))
-          world[char_get_in_room(ch)].light--;
+          rroom_set_light(char_get_in_room(ch), rroom_get_light(char_get_in_room(ch)) - 1);
 
   if (char_plr_flagged(ch, PLR_AURALIGHT))
-    world[char_get_in_room(ch)].light--;
+    rroom_set_light(char_get_in_room(ch), rroom_get_light(char_get_in_room(ch)) - 1);
 
-  REMOVE_FROM_LIST(ch, world[char_get_in_room(ch)].people, next_in_room, temp);
+  char_unlink_person(rroom_people_slot(char_get_in_room(ch)), ch);
   char_set_in_room(ch, NOWHERE);
-  ch->next_in_room = nullptr;
+  char_set_next_in_room(ch, nullptr);
 }
 
 /* place a character in a room */
@@ -232,18 +232,18 @@ void char_to_room(struct char_data *ch, room_rnum room)
     mud_log("SYSERR: Illegal value(s) passed to char_to_room. (Room: %d/%d Ch: %p",
             room, top_of_world, ch);
   else {
-    ch->next_in_room   = world[room].people;
-    world[room].people = ch;
+    char_set_next_in_room(ch, rroom_get_people(room));
+    rroom_set_people(room, ch);
     char_set_in_room(ch, room);
 
     for (i = 0; i < NUM_WEARS; i++)
       if (char_get_equipment(ch, i))
         if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_LIGHT)
           if (obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS))
-            world[room].light++;
+            rroom_set_light(room, rroom_get_light(room) + 1);
 
     if (char_plr_flagged(ch, PLR_AURALIGHT))
-      world[room].light++;
+      rroom_set_light(room, rroom_get_light(room) + 1);
 
     /* Stop fighting now, if we left. */
     if (char_get_fighting(ch) && char_get_in_room(ch) != char_get_in_room(char_get_fighting(ch)) && !char_aff_flagged(ch, AFF_PURSUIT)) {
@@ -263,9 +263,9 @@ void char_to_room(struct char_data *ch, room_rnum room)
 void obj_to_char(struct obj_data *object, struct char_data *ch)
 {
   if (object && ch) {
-    object->next_content = ch->carrying;
-    ch->carrying         = object;
-    object->carried_by   = ch;
+    obj_set_next_content(object, char_get_inventory(ch));
+    char_set_inventory(ch, object);
+    obj_set_carried_by(object, ch);
     obj_set_in_room(object, NOWHERE);
     char_set_carry_weight(ch, char_get_carry_weight(ch) + (obj_get_weight(object)));
     char_set_carry_items(ch, char_get_carry_items(ch) + 1);
@@ -282,7 +282,7 @@ void obj_to_char(struct obj_data *object, struct char_data *ch)
     /* set flag for crash-save system, but not on mobs! */
     if (obj_get_value(object, 0) != 0) {
       if (obj_get_vnum(object) == 16705 || obj_get_vnum(object) == 16706 || obj_get_vnum(object) == 16707) {
-        object->level = obj_get_value(object, 0);
+        obj_set_level(object, obj_get_value(object, 0));
       }
     }
     if (!char_is_npc(ch))
@@ -294,29 +294,27 @@ void obj_to_char(struct obj_data *object, struct char_data *ch)
 /* take an object from a char */
 void obj_from_char(struct obj_data *object)
 {
-  struct obj_data *temp;
-
   if (object == nullptr) {
     mud_log("SYSERR: NULL object passed to obj_from_char.");
     return;
   }
-  REMOVE_FROM_LIST(object, object->carried_by->carrying, next_content, temp);
+  obj_unlink_content(char_inventory_slot(obj_get_carried_by(object)), object);
 
   /* set flag for crash-save system, but not on mobs! */
-  if (!char_is_npc(object->carried_by))
-    char_plr_set(object->carried_by, PLR_CRASH, true);
+  if (!char_is_npc(obj_get_carried_by(object)))
+    char_plr_set(obj_get_carried_by(object), PLR_CRASH, true);
 
-  char_set_carry_weight(object->carried_by, char_get_carry_weight(object->carried_by) - (obj_get_weight(object)));
-  char_set_carry_items(object->carried_by, char_get_carry_items(object->carried_by) - 1);
+  char_set_carry_weight(obj_get_carried_by(object), char_get_carry_weight(obj_get_carried_by(object)) - (obj_get_weight(object)));
+  char_set_carry_items(obj_get_carried_by(object), char_get_carry_items(obj_get_carried_by(object)) - 1);
 
   if (obj_get_value(object, 0) != 0) {
     if (obj_get_vnum(object) == 16705 || obj_get_vnum(object) == 16706 || obj_get_vnum(object) == 16707) {
-      object->level = obj_get_value(object, 0);
+      obj_set_level(object, obj_get_value(object, 0));
     }
   }
 
-  object->carried_by   = nullptr;
-  object->next_content = nullptr;
+  obj_set_carried_by(object, nullptr);
+  obj_set_next_content(object, nullptr);
 }
 
 /* Return the effect of a piece of armor in position eq_pos */
@@ -376,10 +374,10 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos)
 
   if (char_get_equipment(ch, pos)) {
     mud_log("SYSERR: Char is already equipped: %s, %s", char_get_name(ch),
-            obj->short_description);
+            obj_get_short_description(obj));
     return;
   }
-  if (obj->carried_by) {
+  if (obj_get_carried_by(obj)) {
     mud_log("SYSERR: EQUIP: Obj is carried_by when equip.");
     return;
   }
@@ -396,8 +394,8 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos)
   }
 
   char_set_equipment(ch, pos, obj);
-  obj->worn_by = ch;
-  obj->worn_on = pos;
+  obj_set_worn_by(obj, ch);
+  obj_set_worn_on(obj, pos);
 
   if (obj_get_type_flag(obj) == ITEM_ARMOR)
     char_set_armor(ch, char_get_armor(ch) + (apply_ac(ch, pos)));
@@ -405,14 +403,14 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos)
   if (char_get_in_room(ch) != NOWHERE) {
     if (obj_get_type_flag(obj) == ITEM_LIGHT)
       if (obj_get_value(obj, VAL_LIGHT_HOURS)) /* if light is ON */
-        world[char_get_in_room(ch)].light++;
+        rroom_set_light(char_get_in_room(ch), rroom_get_light(char_get_in_room(ch)) + 1);
   } else
     mud_log("SYSERR: IN_ROOM(ch) = NOWHERE when equipping char %s.", char_get_name(ch));
 
   for (j = 0; j < MAX_OBJ_AFFECT; j++)
-    affect_modify_ar(ch, obj->affected[j].location,
-                     obj->affected[j].modifier,
-                     obj->affected[j].specific,
+    affect_modify_ar(ch, obj_get_affected(obj)[j].location,
+                     obj_get_affected(obj)[j].modifier,
+                     obj_get_affected(obj)[j].specific,
                      obj_get_bitvector(obj), true);
 
   affect_total(ch);
@@ -429,8 +427,8 @@ struct obj_data *unequip_char(struct char_data *ch, int pos)
   }
 
   obj          = char_get_equipment(ch, pos);
-  obj->worn_by = nullptr;
-  obj->worn_on = -1;
+  obj_set_worn_by(obj, nullptr);
+  obj_set_worn_on(obj, -1);
 
   if (obj_get_type_flag(obj) == ITEM_ARMOR)
     char_set_armor(ch, char_get_armor(ch) - (apply_ac(ch, pos)));
@@ -438,16 +436,16 @@ struct obj_data *unequip_char(struct char_data *ch, int pos)
   if (char_get_in_room(ch) != NOWHERE) {
     if (obj_get_type_flag(obj) == ITEM_LIGHT)
       if (obj_get_value(obj, VAL_LIGHT_HOURS)) /* if light is ON */
-        world[char_get_in_room(ch)].light--;
+        rroom_set_light(char_get_in_room(ch), rroom_get_light(char_get_in_room(ch)) - 1);
   } else
     mud_log("SYSERR: IN_ROOM(ch) = NOWHERE when unequipping char %s.", char_get_name(ch));
 
   char_set_equipment(ch, pos, nullptr);
 
   for (j = 0; j < MAX_OBJ_AFFECT; j++)
-    affect_modify_ar(ch, obj->affected[j].location,
-                     obj->affected[j].modifier,
-                     obj->affected[j].specific,
+    affect_modify_ar(ch, obj_get_affected(obj)[j].location,
+                     obj_get_affected(obj)[j].modifier,
+                     obj_get_affected(obj)[j].specific,
                      obj_get_bitvector(obj), false);
 
   affect_total(ch);
@@ -459,8 +457,8 @@ struct obj_data *unequip_char(struct char_data *ch, int pos)
 void object_list_new_owner(struct obj_data *list, struct char_data *ch)
 {
   if (list) {
-    object_list_new_owner(list->contains, ch);
-    object_list_new_owner(list->next_content, ch);
-    list->carried_by = ch;
+    object_list_new_owner(obj_get_contains(list), ch);
+    object_list_new_owner(obj_get_next_content(list), ch);
+    obj_set_carried_by(list, ch);
   }
 }

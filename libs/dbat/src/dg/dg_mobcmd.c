@@ -71,14 +71,14 @@ static void mob_log(char_data *mob, const char *format, ...)
   vsnprintf(output, sizeof(output), format, args);
   va_end(args);
 
-  script_log("Mob (%s, VNum %d):: %s", mob->short_descr, char_get_mob_vnum(mob), output);
+  script_log("Mob (%s, VNum %d):: %s", char_get_sdesc(mob), char_get_mob_vnum(mob), output);
 }
 
 /*
 ** macro to determine if a mob is permitted to use these commands
 */
 #define MOB_OR_IMPL(ch) \
-  (char_is_npc(ch) && (!(ch)->desc || char_get_admlevel((ch)->desc->original) >= ADMLVL_IMPL))
+  (char_is_npc(ch) && (!char_get_desc(ch) || char_get_admlevel(char_get_desc(ch)->original) >= ADMLVL_IMPL))
 
 /*
  * The check every mob command starts with: only NPCs may use them, and a player switched
@@ -118,7 +118,7 @@ ACMD(do_masound)
   for (door = 0; door < NUM_OF_DIRS; door++) {
     struct room_direction_data *newexit;
 
-    if (((newexit = world[was_in_room].dir_option[door]) != nullptr) &&
+    if (((newexit = rroom_get_dir_option(was_in_room, door)) != nullptr) &&
         newexit->to_room != NOWHERE && newexit->to_room != was_in_room) {
       char_set_in_room(ch, newexit->to_room);
       sub_write(argument, ch, true, TO_ROOM);
@@ -248,22 +248,22 @@ ACMD(do_mjunk)
 
   if ((find_all_dots(arg) != FIND_INDIV) && !junk_all) {
     /* Thanks to Carlos Myers for fixing the line below */
-    if ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) >= 0) {
+    if ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, char_get_equipment_array(ch))) >= 0) {
       extract_obj(unequip_char(ch, pos));
       return;
     }
-    if ((obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying)) != nullptr)
+    if ((obj = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch))) != nullptr)
       extract_obj(obj);
     return;
   }
-  for (obj = ch->carrying; obj != nullptr; obj = obj_next) {
-    obj_next = obj->next_content;
-    if (arg[3] == '\0' || isname(arg + 4, obj->name)) {
+  for (obj = char_get_inventory(ch); obj != nullptr; obj = obj_next) {
+    obj_next = obj_get_next_content(obj);
+    if (arg[3] == '\0' || isname(arg + 4, obj_get_name(obj))) {
       extract_obj(obj);
     }
   }
   /* Thanks to Carlos Myers for fixing the line below */
-  while ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) >= 0)
+  while ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, char_get_equipment_array(ch))) >= 0)
     extract_obj(unequip_char(ch, pos));
   return;
 }
@@ -419,10 +419,10 @@ ACMD(do_mload)
       return;
     }
     char_to_room(mob, rnum);
-    if (ch->script) { /* It _should_ have, but it might be detached. */
+    if (char_get_script(ch)) { /* It _should_ have, but it might be detached. */
       char buf[MAX_INPUT_LENGTH];
       sprintf(buf, "%c%d", UID_CHAR, char_get_id(mob));
-      add_var(&(ch->script->global_vars), "lastloaded", buf, 0);
+      add_var(&(char_get_script(ch)->global_vars), "lastloaded", buf, 0);
     }
     load_mtrigger(mob);
   }
@@ -432,10 +432,10 @@ ACMD(do_mload)
       mob_log(ch, "mload: bad object vnum");
       return;
     }
-    if (ch->script) { /* It _should_ have, but it might be detached. */
+    if (char_get_script(ch)) { /* It _should_ have, but it might be detached. */
       char buf[MAX_INPUT_LENGTH];
       sprintf(buf, "%c%d", UID_CHAR, obj_get_id(object));
-      add_var(&(ch->script->global_vars), "lastloaded", buf, 0);
+      add_var(&(char_get_script(ch)->global_vars), "lastloaded", buf, 0);
     }
     randomize_eq(object);
     /* special handling to make objects able to load on a person/in a container/worn etc. */
@@ -502,14 +502,14 @@ ACMD(do_mpurge)
     char_data *vnext;
     obj_data *obj_next;
 
-    for (victim = world[char_get_in_room(ch)].people; victim; victim = vnext) {
-      vnext = victim->next_in_room;
+    for (victim = rroom_get_people(char_get_in_room(ch)); victim; victim = vnext) {
+      vnext = char_get_next_in_room(victim);
       if (char_is_npc(victim) && victim != ch)
         extract_char(victim);
     }
 
-    for (obj = world[char_get_in_room(ch)].contents; obj; obj = obj_next) {
-      obj_next = obj->next_content;
+    for (obj = rroom_get_contents(char_get_in_room(ch)); obj; obj = obj_next) {
+      obj_next = obj_get_next_content(obj);
       extract_obj(obj);
     }
 
@@ -643,8 +643,8 @@ ACMD(do_mteleport)
       return;
     }
 
-    for (vict = world[char_get_in_room(ch)].people; vict; vict = next_ch) {
-      next_ch = vict->next_in_room;
+    for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_ch) {
+      next_ch = char_get_next_in_room(vict);
 
       if (valid_dg_target(vict, DG_ALLOW_GODS)) {
         char_from_room(vict);
@@ -787,9 +787,9 @@ ACMD(do_mremember)
 
   /* create a structure and add it to the list */
   CREATE(mem, struct script_memory, 1);
-  if (!ch->memory) ch->memory = mem;
+  if (!char_get_memory(ch)) char_set_memory(ch, mem);
   else {
-    struct script_memory *tmpmem = ch->memory;
+    struct script_memory *tmpmem = char_get_memory(ch);
     while (tmpmem->next) tmpmem = tmpmem->next;
     tmpmem->next = mem;
   }
@@ -828,15 +828,15 @@ ACMD(do_mforget)
     return;
   }
 
-  mem  = ch->memory;
+  mem  = char_get_memory(ch);
   prev = nullptr;
   while (mem) {
     if (mem->id == char_get_id(victim)) {
       if (mem->cmd) free(mem->cmd);
       if (prev == nullptr) {
-        ch->memory = mem->next;
+        char_set_memory(ch, mem->next);
         free(mem);
-        mem = ch->memory;
+        mem = char_get_memory(ch);
       } else {
         prev->next = mem->next;
         free(mem);
@@ -861,7 +861,7 @@ ACMD(do_mtransform)
   if (!mob_cmd_allowed(ch, true))
     return;
 
-  if (ch->desc) {
+  if (char_get_desc(ch)) {
     send_to_char(ch, "You've got no VNUM to return to, dummy! try 'switch'\r\n");
     return;
   }
@@ -899,28 +899,28 @@ ACMD(do_mtransform)
 
     /* Thanks to Russell Ryan for this fix. RRfon we need to copy the
        the strings so we don't end up free'ing the prototypes later */
-    if (m->name)
-      tmpmob.name = strdup(m->name);
-    if (m->title)
-      tmpmob.title = strdup(m->title);
-    if (m->short_descr)
-      tmpmob.short_descr = strdup(m->short_descr);
-    if (m->long_descr)
-      tmpmob.long_descr = strdup(m->long_descr);
-    if (m->description)
-      tmpmob.description = strdup(m->description);
+    if (char_get_alias(m))
+      char_set_alias(&tmpmob, strdup(char_get_alias(m)));
+    if (char_get_raw_title(m))
+      char_set_raw_title(&tmpmob, strdup(char_get_raw_title(m)));
+    if (char_get_sdesc(m))
+      char_set_sdesc(&tmpmob, strdup(char_get_sdesc(m)));
+    if (char_get_ldesc(m))
+      char_set_ldesc(&tmpmob, strdup(char_get_ldesc(m)));
+    if (char_get_ddesc(m))
+      char_set_ddesc(&tmpmob, strdup(char_get_ddesc(m)));
 
-    tmpmob.id            = ch->id;
-    tmpmob.affected      = ch->affected;
-    tmpmob.carrying      = ch->carrying;
-    tmpmob.proto_script  = ch->proto_script;
-    tmpmob.script        = ch->script;
-    tmpmob.memory        = ch->memory;
-    tmpmob.next_in_room  = ch->next_in_room;
-    tmpmob.next          = ch->next;
-    tmpmob.next_fighting = ch->next_fighting;
-    tmpmob.followers     = ch->followers;
-    tmpmob.master        = ch->master;
+    char_set_id(&tmpmob, char_get_id(ch));
+    char_set_affected(&tmpmob, char_get_affected(ch));
+    char_set_inventory(&tmpmob, char_get_inventory(ch));
+    char_set_proto_script(&tmpmob, char_get_proto_script(ch));
+    char_set_script(&tmpmob, char_get_script(ch));
+    char_set_memory(&tmpmob, char_get_memory(ch));
+    char_set_next_in_room(&tmpmob, char_get_next_in_room(ch));
+    char_set_next(&tmpmob, char_get_next(ch));
+    char_set_next_fighting(&tmpmob, char_get_next_fighting(ch));
+    char_set_followers(&tmpmob, char_get_followers(ch));
+    char_set_master(&tmpmob, char_get_master(ch));
 
     char_set_was_in_room(&tmpmob, char_get_was_in_room(ch));
     char_set_gold(&tmpmob, char_get_gold(ch));
@@ -935,7 +935,7 @@ ACMD(do_mtransform)
         equip_char(ch, obj[pos], pos);
     }
 
-    ch->nr = this_rnum;
+    char_set_nr(ch, this_rnum);
     extract_char(m);
   }
 }
@@ -1004,26 +1004,26 @@ ACMD(do_mfollow)
     return;
   }
 
-  if (ch->master == leader) /* already following */
+  if (char_get_master(ch) == leader) /* already following */
     return;
 
-  if (char_aff_flagged(ch, AFF_CHARM) && (ch->master)) /* can't override charm */
+  if (char_aff_flagged(ch, AFF_CHARM) && (char_get_master(ch))) /* can't override charm */
     return;
 
   /* stop following someone else first */
-  if (ch->master) {
-    if (ch->master->followers->follower == ch) { /* Head of follower-list? */
-      k                     = ch->master->followers;
-      ch->master->followers = k->next;
+  if (char_get_master(ch)) {
+    if (char_get_followers(char_get_master(ch))->follower == ch) { /* Head of follower-list? */
+      k                     = char_get_followers(char_get_master(ch));
+      char_set_followers(char_get_master(ch), k->next);
       free(k);
     } else { /* locate follower who is not head of list */
-      for (k = ch->master->followers; k->next->follower != ch; k = k->next);
+      for (k = char_get_followers(char_get_master(ch)); k->next->follower != ch; k = k->next);
 
       j       = k->next;
       k->next = j->next;
       free(j);
     }
-    ch->master = nullptr;
+    char_set_master(ch, nullptr);
   }
 
   if (ch == leader)
@@ -1034,13 +1034,13 @@ ACMD(do_mfollow)
     return;
   }
 
-  ch->master = leader;
+  char_set_master(ch, leader);
 
   CREATE(k, struct follow_type, 1);
 
   k->follower       = ch;
-  k->next           = leader->followers;
-  leader->followers = k;
+  k->next           = char_get_followers(leader);
+  char_set_followers(leader, k);
 }
 
 /* prints the message to everyone in the range of numbers */

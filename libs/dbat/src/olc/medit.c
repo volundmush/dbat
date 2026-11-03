@@ -27,6 +27,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/consts/npc.h"
 #include "dbat/config.h"
+#include "dbat/character_utils.h"
 
 static void init_mobile(struct char_data *mob);
 static void medit_disp_menu(struct descriptor_data *d);
@@ -105,7 +106,7 @@ ACMD(do_oasis_medit)
     }
   }
 
-  d = ch->desc;
+  d = char_get_desc(ch);
 
   /****************************************************************************/
   /** Give descriptor an OLC structure.                                      **/
@@ -211,7 +212,7 @@ static void medit_setup_new(struct descriptor_data *d)
   char_set_sdesc(mob, strdup("the unfinished mob"));
   char_set_ldesc(mob, strdup("An unfinished mob stands here.\r\n"));
   char_set_ddesc(mob, strdup("It looks unfinished.\r\n"));
-  mob->race     = RACE_HUMAN;
+  char_set_race(mob, RACE_HUMAN);
   OLC_SCRIPT(d) = nullptr;
 
   OLC_MOB(d) = mob;
@@ -240,8 +241,8 @@ static void medit_setup_existing(struct descriptor_data *d, mob_rnum rmob_num)
    * The edited mob must not have a script.
    * It will be assigned to the updated mob later, after editing.
    */
-  mob->script              = nullptr;
-  OLC_MOB(d)->proto_script = nullptr;
+  char_set_script(mob, nullptr);
+  char_set_proto_script(OLC_MOB(d), nullptr);
 }
 
 /*-------------------------------------------------------------------*/
@@ -255,14 +256,24 @@ static void init_mobile(struct char_data *mob)
   clear_char(mob);
 
   char_set_sex(mob, SEX_MALE);
-  mob->chclass = CLASS_NPC_COMMONER;
+  char_set_class(mob, CLASS_NPC_COMMONER);
 
   char_set_weight(mob, rand_number(100, 200));
   char_set_height(mob, rand_number(100, 200));
 
-  mob->real_abils.str = mob->real_abils.intel = mob->real_abils.wis = rand_number(8, 16);
-  mob->real_abils.dex = mob->real_abils.con = mob->real_abils.cha = rand_number(8, 16);
-  mob->aff_abils                                                  = mob->real_abils;
+  {
+    int8_t mental = rand_number(8, 16);
+    char_set_real_abils_wis(mob, mental);
+    char_set_real_abils_intel(mob, mental);
+    char_set_real_abils_str(mob, mental);
+  }
+  {
+    int8_t physical = rand_number(8, 16);
+    char_set_real_abils_cha(mob, physical);
+    char_set_real_abils_con(mob, physical);
+    char_set_real_abils_dex(mob, physical);
+  }
+  char_reset_aff_abils(mob);
 
   char_mob_set(mob, MOB_ISNPC, true);
 }
@@ -288,19 +299,19 @@ static void medit_save_internally(struct descriptor_data *d)
 
   /* Update triggers */
   /* Free old proto list  */
-  if (mob_proto[new_rnum].proto_script &&
-      mob_proto[new_rnum].proto_script != OLC_SCRIPT(d))
+  if (char_get_proto_script(&mob_proto[new_rnum]) &&
+      char_get_proto_script(&mob_proto[new_rnum]) != OLC_SCRIPT(d))
     free_proto_script(&mob_proto[new_rnum], MOB_TRIGGER);
 
-  mob_proto[new_rnum].proto_script = OLC_SCRIPT(d);
+  char_set_proto_script(&mob_proto[new_rnum], OLC_SCRIPT(d));
 
   /* this takes care of the mobs currently in-game */
-  for (mob = character_list; mob; mob = mob->next) {
+  for (mob = character_list; mob; mob = char_get_next(mob)) {
     if (char_get_nr(mob) != new_rnum)
       continue;
 
     /* remove any old scripts */
-    if (mob->script)
+    if (char_get_script(mob))
       extract_script(mob, MOB_TRIGGER);
 
     free_proto_script(mob, MOB_TRIGGER);
@@ -571,7 +582,7 @@ void medit_parse(struct descriptor_data *d, char *arg)
           /* If not saving, we must free the script_proto list. We do so by
        * assigning it to the edited mob and letting free_mobile in
        * cleanup_olc handle it. */
-          OLC_MOB(d)->proto_script = OLC_SCRIPT(d);
+          char_set_proto_script(OLC_MOB(d), OLC_SCRIPT(d));
           cleanup_olc(d, CLEANUP_ALL);
           return;
         default:
@@ -613,11 +624,11 @@ void medit_parse(struct descriptor_data *d, char *arg)
           OLC_MODE(d) = MEDIT_D_DESC;
           send_editor_help(d);
           write_to_output(d, "Enter mob description:\r\n\r\n");
-          if (OLC_MOB(d)->description) {
-            write_to_output(d, "%s", OLC_MOB(d)->description);
-            oldtext = strdup(OLC_MOB(d)->description);
+          if (char_get_ddesc(OLC_MOB(d))) {
+            write_to_output(d, "%s", char_get_ddesc(OLC_MOB(d)));
+            oldtext = strdup(char_get_ddesc(OLC_MOB(d)));
           }
-          string_write(d, &OLC_MOB(d)->description, MAX_MOB_DESC, 0, oldtext);
+          string_write(d, char_description_slot(OLC_MOB(d)), MAX_MOB_DESC, 0, oldtext);
           OLC_VAL(d) = 1;
           return;
         case '6':
@@ -911,8 +922,8 @@ void medit_parse(struct descriptor_data *d, char *arg)
       break;
 
     case MEDIT_CLASS:
-      if (!OLC_MOB(d)->chclass) {
-        OLC_MOB(d)->chclass = CLASS_NPC_COMMONER;
+      if (!char_get_class(OLC_MOB(d))) {
+        char_set_class(OLC_MOB(d), CLASS_NPC_COMMONER);
       };
       /* Change size HP dice based on class choice. */
       //GET_MANA(OLC_MOB(d)) = class_hit_die_size[GET_CLASS(OLC_MOB(d))];
@@ -948,13 +959,13 @@ void medit_parse(struct descriptor_data *d, char *arg)
         write_to_output(d, "That's not a race!");
         break;
       }
-      OLC_MOB(d)->race = i;
+      char_set_race(OLC_MOB(d), i);
       /*  Change racial size based on race choice. */
-      OLC_MOB(d)->size = race_get_size(OLC_MOB(d)->race);
+      char_set_size(OLC_MOB(d), race_get_size(char_get_race(OLC_MOB(d))));
       break;
 
     case MEDIT_SIZE:
-      OLC_MOB(d)->size = LIMIT(i, -1, NUM_SIZES - 1);
+      char_set_size(OLC_MOB(d), LIMIT(i, -1, NUM_SIZES - 1));
       break;
 
       /*-------------------------------------------------------------------*/

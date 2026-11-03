@@ -21,6 +21,9 @@
 #include "dbat/mobact.h"
 #include "dbat/fight.h"
 #include "dbat/affect.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 /* local functions */
 static void perform_mag_groups(int level, struct char_data *ch, struct char_data *tch, int spellnum);
@@ -31,8 +34,8 @@ void affect_update(void)
   struct affected_type *af, *next;
   struct char_data *i;
 
-  for (i = affect_list; i; i = i->next_affect) {
-    for (af = i->affected; af; af = next) {
+  for (i = affect_list; i; i = char_get_next_affect(i)) {
+    for (af = char_get_affected(i); af; af = next) {
       next = af->next;
       if (af->duration >= 1)
         af->duration--;
@@ -409,11 +412,11 @@ void mag_groups(int level, struct char_data *ch, int spellnum)
 
   if (!char_aff_flagged(ch, AFF_GROUP))
     return;
-  if (ch->master != nullptr)
-    k = ch->master;
+  if (char_get_master(ch) != nullptr)
+    k = char_get_master(ch);
   else
     k = ch;
-  for (f = k->followers; f; f = f_next) {
+  for (f = char_get_followers(k); f; f = f_next) {
     f_next = f->next;
     tch    = f->follower;
     if (char_get_in_room(tch) != char_get_in_room(ch))
@@ -439,8 +442,8 @@ void mag_masses(int level, struct char_data *ch, int spellnum)
 {
   struct char_data *tch, *tch_next;
 
-  for (tch = world[char_get_in_room(ch)].people; tch; tch = tch_next) {
-    tch_next = tch->next_in_room;
+  for (tch = rroom_get_people(char_get_in_room(ch)); tch; tch = tch_next) {
+    tch_next = char_get_next_in_room(tch);
     if (tch == ch)
       continue;
 
@@ -481,8 +484,8 @@ void mag_areas(int level, struct char_data *ch, int spellnum)
   if (to_room != nullptr)
     act(to_room, false, ch, 0, 0, TO_ROOM);
 
-  for (tch = world[char_get_in_room(ch)].people; tch; tch = next_tch) {
-    next_tch = tch->next_in_room;
+  for (tch = rroom_get_people(char_get_in_room(ch)); tch; tch = next_tch) {
+    next_tch = char_get_next_in_room(tch);
 
     /*
      * The skips: 1: the caster

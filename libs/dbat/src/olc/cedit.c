@@ -298,7 +298,7 @@ ACMD(do_oasis_cedit)
     return;
   }
 
-  d = ch->desc;
+  d = char_get_desc(ch);
 
   if (!*buf1) {
     CREATE(d->olc, struct oasis_olc_data, 1);
@@ -808,7 +808,7 @@ static void reassign_rooms(void)
 
   /* remove old funcs */
   for (i = 0; i <= top_of_world; i++)
-    world[i].func = nullptr;
+    rroom_set_func(i, nullptr);
 
   /* reassign spec_procs */
   assign_rooms();

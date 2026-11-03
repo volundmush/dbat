@@ -23,6 +23,8 @@ Written by Jeremy Elson (jelson@circlemud.org)
 #include "dbat/players.h"
 #include "dbat/fileop.h"
 #include "dbat/atomicfile.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 /* local globals */
 static mail_index_type *mail_index   = nullptr; /* list of recs in the mail file  */
@@ -573,7 +575,7 @@ static char *read_delete(long recipient, char **from)
 
 SPECIAL(postmaster)
 {
-  if (!ch->desc || char_is_npc(ch))
+  if (!char_get_desc(ch) || char_is_npc(ch))
     return (0); /* so mobs don't get caught here */
 
   if (!(CMD_IS("mail") || CMD_IS("check") || CMD_IS("receive")))
@@ -641,7 +643,7 @@ static void postmaster_send_mail(struct char_data *ch, struct char_data *mailman
 
   /* Start writing! */
   CREATE(mailwrite, char *, 1);
-  string_write(ch->desc, mailwrite, MAX_MAIL_SIZE, recipient, nullptr);
+  string_write(char_get_desc(ch), mailwrite, MAX_MAIL_SIZE, recipient, nullptr);
 }
 
 static void postmaster_check_mail(struct char_data *ch, struct char_data *mailman,
@@ -668,23 +670,23 @@ static void postmaster_receive_mail(struct char_data *ch, struct char_data *mail
   }
   while (has_mail(char_get_idnum(ch))) {
     obj              = create_obj();
-    obj->item_number = NOTHING;
+    obj_set_item_number(obj, NOTHING);
 
     obj_set_type_flag(obj, ITEM_NOTE);
     for (y = 0; y < TW_ARRAY_MAX; y++)
-      obj->wear_flags[y] = 0;
+      obj_get_wear_flags(obj)[y] = 0;
     obj_wear_set(obj, ITEM_WEAR_TAKE, true);
     obj_wear_set(obj, ITEM_WEAR_HOLD, true);
     obj_set_weight(obj, 1);
     obj_set_cost(obj, 30);
     obj_set_cost_per_day(obj, 10);
-    obj->action_description = read_delete(char_get_idnum(ch), &from);
+    obj_set_action_description(obj, read_delete(char_get_idnum(ch), &from));
     char bla[256], blm[256];
     sprintf(bla, "@WA piece of mail@n");
     sprintf(blm, "@WSomeone has left a piece of mail here@n");
-    obj->short_description = strdup(bla);
-    obj->description       = strdup(blm);
-    obj->name              = strdup("mail paper letter");
+    obj_set_short_description(obj, strdup(bla));
+    obj_set_description(obj, strdup(blm));
+    obj_set_name(obj, strdup("mail paper letter"));
     *bla                   = '\0';
     *blm                   = '\0';
     obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
@@ -693,14 +695,13 @@ static void postmaster_receive_mail(struct char_data *ch, struct char_data *mail
     obj_set_value(obj, VAL_NOTE_HEALTH, 100);
     obj_set_value(obj, VAL_NOTE_MAXHEALTH, 100);
 
-    if (obj->action_description == nullptr)
-      obj->action_description =
-          strdup("Mail system error - please report.  Error #11.\r\n");
+    if (obj_get_action_description(obj) == nullptr)
+      obj_set_action_description(obj, strdup("Mail system error - please report.  Error #11.\r\n"));
 
     /* so it saves */
     obj_extra_set(obj, ITEM_UNIQUE_SAVE, true);
 
-    if (desc_is_playing(ch->desc) && mailman != nullptr) {
+    if (desc_is_playing(char_get_desc(ch)) && mailman != nullptr) {
       obj_to_char(obj, ch);
       act("$n gives you a piece of mail.", false, mailman, 0, ch, TO_VICT);
       act("$N gives $n a piece of mail.", false, ch, 0, mailman, TO_ROOM);

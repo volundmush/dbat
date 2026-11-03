@@ -38,7 +38,7 @@ static obj_rnum lRnum = 0;
 
 ACMD(do_assedit)
 {
-  struct descriptor_data *d = ch->desc;
+  struct descriptor_data *d = char_get_desc(ch);
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
 
@@ -57,7 +57,7 @@ ACMD(do_assedit)
 
   two_arguments(argument, buf, buf2);
 
-  d = ch->desc;
+  d = char_get_desc(ch);
 
   if (!*buf) {
     nodigit(d);
@@ -91,7 +91,7 @@ ACMD(do_assedit)
       return;
     }
   } else if (isdigit(*buf)) {
-    d = ch->desc;
+    d = char_get_desc(ch);
     CREATE(d->olc, struct oasis_olc_data, 1);
     assedit_setup(d, atoi(buf));
   }
@@ -158,7 +158,7 @@ static void assedit_disp_menu(struct descriptor_data *d)
                "Assembly Type  : @y%s@n\r\n"
                "Components:\r\n",
                OLC_ASSEDIT(d)->lVnum,
-               obj_proto[real_object(OLC_ASSEDIT(d)->lVnum)].short_description,
+               obj_get_short_description(&obj_proto[real_object(OLC_ASSEDIT(d)->lVnum)]),
                szAssmType);
 
   if (OLC_ASSEDIT(d)->lNumComponents <= 0)
@@ -171,7 +171,7 @@ static void assedit_disp_menu(struct descriptor_data *d)
         send_to_char(d->character,
                      "@g%2d@n) [@c%5d@n] %-20.20s  In room: @c%-3.3s@n    Extract: @y%-3.3s@n\r\n",
                      i + 1, OLC_ASSEDIT(d)->pComponents[i].lVnum,
-                     obj_proto[lRnum].short_description,
+                     obj_get_short_description(&obj_proto[lRnum]),
                      (OLC_ASSEDIT(d)->pComponents[i].bInRoom ? "Yes" : "No"),
                      (OLC_ASSEDIT(d)->pComponents[i].bExtract ? "Yes" : "No"));
       }

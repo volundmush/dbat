@@ -626,7 +626,7 @@ static bool has_flight(struct char_data *ch)
   }
 
   /* non-wearable flying items in inventory will do it */
-  for (obj = ch->carrying; obj; obj = obj->next_content)
+  for (obj = char_get_inventory(ch); obj; obj = obj_get_next_content(obj))
     if (obj_aff_flagged(obj, AFF_FLYING) && (find_eq_pos(ch, obj, nullptr) < 0))
       return true;
 
@@ -681,7 +681,7 @@ bool do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   if (!leave_otrigger(&world[char_get_in_room(ch)], ch, dir) || char_get_in_room(ch) != was_in) /* prevent teleport crashes */
     return false;
   /* charmed? */
-  if (char_aff_flagged(ch, AFF_CHARM) && ch->master && char_get_in_room(ch) == char_get_in_room(ch->master)) {
+  if (char_aff_flagged(ch, AFF_CHARM) && char_get_master(ch) && char_get_in_room(ch) == char_get_in_room(char_get_master(ch))) {
     send_to_char(ch, "The thought of leaving your master makes you weep.\r\n");
     act("$n bursts into tears.", false, ch, 0, 0, TO_ROOM);
     return false;
@@ -729,7 +729,7 @@ bool do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     return false;
   }
 
-  if (char_is_npc(ch) && rroom_flagged(char_get_exit(ch, dir)->to_room, ROOM_NOMOB) && !ch->master) {
+  if (char_is_npc(ch) && rroom_flagged(char_get_exit(ch, dir)->to_room, ROOM_NOMOB) && !char_get_master(ch)) {
     return false;
   }
 
@@ -799,7 +799,7 @@ bool do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   }
 
   if ((getCurST(ch)) < need_movement && !char_aff_flagged(ch, AFF_FLYING) && !char_is_npc(ch)) {
-    if (need_specials_check && ch->master) {
+    if (need_specials_check && char_get_master(ch)) {
       send_to_char(ch, "You are too exhausted to follow.\r\n");
     } else {
       send_to_char(ch, "You are too exhausted.\r\n");
@@ -846,30 +846,30 @@ bool do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   rm = &world[char_get_exit(ch, dir)->to_room];
 
   if (!char_is_npc(ch) && (char_get_admlevel(ch) < ADMLVL_IMMORT) &&
-      (char_get_level(ch) < zone_get_min_level(rm->zone)) && (zone_get_min_level(rm->zone) > 0)) {
+      (char_get_level(ch) < zone_get_min_level(room_get_zone(rm))) && (zone_get_min_level(room_get_zone(rm)) > 0)) {
     send_to_char(ch, "Sorry, you are too low a level to enter this zone.\r\n");
     return false;
   }
 
-  if ((char_get_admlevel(ch) < ADMLVL_IMMORT) && (char_get_level(ch) > zone_get_max_level(rm->zone)) &&
-      (zone_get_max_level(rm->zone) > 0)) {
+  if ((char_get_admlevel(ch) < ADMLVL_IMMORT) && (char_get_level(ch) > zone_get_max_level(room_get_zone(rm))) &&
+      (zone_get_max_level(room_get_zone(rm)) > 0)) {
     send_to_char(ch, "Sorry, you are too high a level to enter this zone.\r\n");
     return false;
   }
 
-  if ((char_get_admlevel(ch) < ADMLVL_IMMORT) && zone_flagged(rm->zone, ZONE_CLOSED)) {
+  if ((char_get_admlevel(ch) < ADMLVL_IMMORT) && zone_flagged(room_get_zone(rm), ZONE_CLOSED)) {
     send_to_char(ch, "This zone is currently closed to mortals.\r\n");
     return false;
   }
 
-  if ((char_get_admlevel(ch) >= ADMLVL_IMMORT && char_get_admlevel(ch) < ADMLVL_GRGOD) && zone_flagged(rm->zone, ZONE_NOIMMORT)) {
+  if ((char_get_admlevel(ch) >= ADMLVL_IMMORT && char_get_admlevel(ch) < ADMLVL_GRGOD) && zone_flagged(room_get_zone(rm), ZONE_NOIMMORT)) {
     send_to_char(ch, "This zone is closed to all.\r\n");
     return false;
   }
 
   /* No low level immortal scouting */
   if ((char_get_admlevel(ch) >= ADMLVL_IMMORT && char_get_admlevel(ch) < ADMLVL_GOD) &&
-      !can_edit_zone(ch, rm->zone) && zone_flagged(rm->zone, ZONE_QUEST)) {
+      !can_edit_zone(ch, room_get_zone(rm)) && zone_flagged(room_get_zone(rm), ZONE_QUEST)) {
     send_to_char(ch, "This is a Quest zone.\r\n");
     return false;
   }
@@ -914,8 +914,8 @@ bool do_simple_move(struct char_data *ch, int dir, int need_specials_check)
   }
   char_aff_set(ch, AFF_PURSUIT, true);
   char_from_room(ch);
-  char_to_room(ch, world[was_in].dir_option[dir]->to_room);
-  if ((world[char_get_in_room(ch)].zone != world[was_in].zone) && !char_is_npc(ch) && !char_is_android(ch)) {
+  char_to_room(ch, rroom_get_dir_option(was_in, dir)->to_room);
+  if ((rroom_get_zone(char_get_in_room(ch)) != rroom_get_zone(was_in)) && !char_is_npc(ch) && !char_is_android(ch)) {
     send_to_sense(0, "You sense someone", ch);
     snprintf(buf3, sizeof(buf3), "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range@n.", add_commas(getCurPL(ch)));
     send_to_scouter(buf3, ch, 0, 0);
@@ -935,7 +935,7 @@ bool do_simple_move(struct char_data *ch, int dir, int need_specials_check)
                                                 : dirs[rev_dir[dir]]));
   act("$n arrives from $T.", true, ch, 0, buf2, TO_ROOM | TO_SNEAKRESIST);
   if (char_get_fighting(ch)) {
-    if (rroom_sect(world[was_in].dir_option[dir]->to_room) != SECT_FLYING && rroom_sect(world[was_in].dir_option[dir]->to_room) != SECT_WATER_NOSWIM && rroom_get_geffect(world[was_in].dir_option[dir]->to_room) == 0) {
+    if (rroom_sect(rroom_get_dir_option(was_in, dir)->to_room) != SECT_FLYING && rroom_sect(rroom_get_dir_option(was_in, dir)->to_room) != SECT_WATER_NOSWIM && rroom_get_geffect(rroom_get_dir_option(was_in, dir)->to_room) == 0) {
       roll_pursue(char_get_fighting(ch), ch);
     }
     char_aff_set(ch, AFF_PURSUIT, false);
@@ -966,7 +966,7 @@ bool do_simple_move(struct char_data *ch, int dir, int need_specials_check)
     }
   }
 
-  if (ch->desc != nullptr) {
+  if (char_get_desc(ch) != nullptr) {
     look_at_room(char_get_in_room(ch), ch, 0);
     if (char_aff_flagged(ch, AFF_SNEAK) && !char_is_npc(ch) && char_get_skill(ch, SKILL_MOVE_SILENTLY) && char_get_skill(ch, SKILL_MOVE_SILENTLY) < rand_number(1, 101)) {
       send_to_char(ch, "@wYou make a noise as you arrive and are no longer sneaking!@n\r\n");
@@ -1060,7 +1060,7 @@ bool perform_move(struct char_data *ch, int dir, int need_specials_check)
   } else {
 
     struct obj_data *wall;
-    for (wall = world[char_get_in_room(ch)].contents; wall; wall = wall->next_content) {
+    for (wall = rroom_get_contents(char_get_in_room(ch)); wall; wall = obj_get_next_content(wall)) {
       if (obj_get_vnum(wall) == 79) {
         if (obj_get_cost(wall) == dir) {
           send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");
@@ -1069,14 +1069,14 @@ bool perform_move(struct char_data *ch, int dir, int need_specials_check)
       }
     }
 
-    if (!ch->followers)
+    if (!char_get_followers(ch))
       return (do_simple_move(ch, dir, need_specials_check));
 
     was_in = char_get_in_room(ch);
     if (!do_simple_move(ch, dir, need_specials_check))
       return false;
 
-    for (k = ch->followers; k; k = next) {
+    for (k = char_get_followers(ch); k; k = next) {
       next = k->next;
       if ((char_get_in_room(k->follower) == was_in) &&
           (char_get_position(k->follower) >= POS_STANDING) &&
@@ -1198,8 +1198,8 @@ ACMD(do_move)
   if (!char_is_npc(ch)) {
     int fail = false;
     struct obj_data *obj, *next_obj;
-    for (obj = world[char_get_in_room(ch)].contents; obj; obj = next_obj) {
-      next_obj = obj->next_content;
+    for (obj = rroom_get_contents(char_get_in_room(ch)); obj; obj = next_obj) {
+      next_obj = obj_get_next_content(obj);
       if (obj_get_kicharge(obj) > 0 && obj_get_user(obj) == ch) {
         fail = true;
       }
@@ -1453,7 +1453,7 @@ static bool has_key(struct char_data *ch, obj_vnum key)
     return true;
   }
 
-  for (o = ch->carrying; o; o = o->next_content)
+  for (o = char_get_inventory(ch); o; o = obj_get_next_content(o))
     if (obj_get_vnum(o) == key)
       return true;
 
@@ -1509,8 +1509,8 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
       char_from_room(ch);
       char_to_room(ch, real_room(obj_get_value(obj, VAL_PORTAL_DEST)));
     }
-    for (obj2 = world[char_get_in_room(ch)].contents; obj2; obj2 = next_obj) {
-      next_obj = obj2->next_content;
+    for (obj2 = rroom_get_contents(char_get_in_room(ch)); obj2; obj2 = next_obj) {
+      next_obj = obj_get_next_content(obj2);
       if (obj_get_type_flag(obj2) == ITEM_HATCH) {
         hatch = obj2;
       }
@@ -1526,7 +1526,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
 
   len = snprintf(buf, sizeof(buf), "$n %ss ", cmd_door[scmd]);
   if (!obj && ((other_room = char_get_exit(ch, door)->to_room) != NOWHERE)) {
-    if ((back = world[other_room].dir_option[rev_dir[door]]) != nullptr)
+    if ((back = rroom_get_dir_option(other_room, rev_dir[door])) != nullptr)
       if (back->to_room != char_get_in_room(ch))
         back = nullptr;
   }
@@ -1544,7 +1544,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
           } else {
             act("@wYou open @c$p@w.", true, ch, obj, 0, TO_CHAR);
             act("@C$n@w opens @c$p@w.", true, ch, obj, 0, TO_ROOM);
-            send_to_room(obj_get_in_room(vehicle), "@wThe door to %s@w is opened from the other side.\r\n", vehicle->short_description);
+            send_to_room(obj_get_in_room(vehicle), "@wThe door to %s@w is opened from the other side.\r\n", obj_get_short_description(vehicle));
           }
           vehicle = nullptr;
         }
@@ -1573,7 +1573,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
       if (!obj) {
         send_to_char(ch, "You open the %s that leads %s.\r\n", char_get_exit(ch, door)->keyword ? char_get_exit(ch, door)->keyword : "door", dirs[door]);
       } else if (obj_get_type_flag(obj) != ITEM_VEHICLE && obj_get_type_flag(obj) != ITEM_HATCH) {
-        send_to_char(ch, "You open %s.\r\n", obj->short_description);
+        send_to_char(ch, "You open %s.\r\n", obj_get_short_description(obj));
       }
       break;
 
@@ -1590,7 +1590,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
           } else {
             act("@wYou close @c$p@w.", true, ch, obj, 0, TO_CHAR);
             act("@C$n@w closes @c$p@w.", true, ch, obj, 0, TO_ROOM);
-            send_to_room(obj_get_in_room(vehicle), "@wThe door to %s@w is closed from the other side.\r\n", vehicle->short_description);
+            send_to_room(obj_get_in_room(vehicle), "@wThe door to %s@w is closed from the other side.\r\n", obj_get_short_description(vehicle));
           }
           vehicle = nullptr;
         }
@@ -1607,7 +1607,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
           } else {
             act("@wYou close @c$p@w.", true, ch, obj, 0, TO_CHAR);
             act("@C$n@w closes @c$p@w.", true, ch, obj, 0, TO_ROOM);
-            send_to_room(obj_get_in_room(hatch), "@wThe door to %s@w is closed from the other side.\r\n", hatch->short_description);
+            send_to_room(obj_get_in_room(hatch), "@wThe door to %s@w is closed from the other side.\r\n", obj_get_short_description(hatch));
           }
           hatch = nullptr;
         }
@@ -1619,7 +1619,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
       if (!obj) {
         send_to_char(ch, "You close the %s that leads %s.\r\n", char_get_exit(ch, door)->keyword ? char_get_exit(ch, door)->keyword : "door", dirs[door]);
       } else if (obj_get_type_flag(obj) != ITEM_VEHICLE && obj_get_type_flag(obj) != ITEM_HATCH) {
-        send_to_char(ch, "You close %s.\r\n", obj->short_description);
+        send_to_char(ch, "You close %s.\r\n", obj_get_short_description(obj));
       }
       break;
 
@@ -1643,7 +1643,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
       if (!obj) {
         send_to_char(ch, "You lock the %s that leads %s.\r\n", char_get_exit(ch, door)->keyword ? char_get_exit(ch, door)->keyword : "door", dirs[door]);
       } else {
-        send_to_char(ch, "You lock %s.\r\n", obj->short_description);
+        send_to_char(ch, "You lock %s.\r\n", obj_get_short_description(obj));
       }
       break;
 
@@ -1667,7 +1667,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
       if (!obj) {
         send_to_char(ch, "You unlock the %s that leads %s.\r\n", char_get_exit(ch, door)->keyword ? char_get_exit(ch, door)->keyword : "door", dirs[door]);
       } else {
-        send_to_char(ch, "You unlock %s.\r\n", obj->short_description);
+        send_to_char(ch, "You unlock %s.\r\n", obj_get_short_description(obj));
       }
       break;
 
@@ -1710,8 +1710,8 @@ static bool ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dc
   int skill_lvl, found = false;
   struct obj_data *obj, *next_obj;
 
-  for (obj = ch->carrying; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     if (obj_get_vnum(obj) == 18 && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
       found = true;
     }
@@ -1849,8 +1849,8 @@ static int portal_move_cost(struct char_data *ch, room_rnum dest_room, int need_
   int need_movement;
 
   /* charmed? */
-  if (char_aff_flagged(ch, AFF_CHARM) && ch->master &&
-      char_get_in_room(ch) == char_get_in_room(ch->master)) {
+  if (char_aff_flagged(ch, AFF_CHARM) && char_get_master(ch) &&
+      char_get_in_room(ch) == char_get_in_room(char_get_master(ch))) {
     send_to_char(ch, "The thought of leaving your master makes you weep.\r\n");
     act("$n bursts into tears.", false, ch, 0, 0, TO_ROOM);
     return -1;
@@ -1867,7 +1867,7 @@ static int portal_move_cost(struct char_data *ch, room_rnum dest_room, int need_
     need_movement = 0;
   }
   if ((getCurST(ch)) < need_movement && !char_aff_flagged(ch, AFF_FLYING) && !char_is_npc(ch)) {
-    if (need_specials_check && ch->master)
+    if (need_specials_check && char_get_master(ch))
       send_to_char(ch, "You are too exhausted to follow.\r\n");
     else
       send_to_char(ch, "You are too exhausted.\r\n");
@@ -1962,7 +1962,7 @@ static bool do_simple_enter(struct char_data *ch, struct obj_data *obj, int need
     }
   }
 
-  if (ch->desc != nullptr)
+  if (char_get_desc(ch) != nullptr)
     look_at_room(char_get_in_room(ch), ch, 0);
 
   if (rroom_flagged(char_get_in_room(ch), ROOM_DEATH) && !char_adm_flagged(ch, ADM_WALKANYWHERE)) {
@@ -1998,8 +1998,8 @@ static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int nee
       if (obj_get_value(obj, VAL_PORTAL_DEST) >= 45000 && obj_get_value(obj, VAL_PORTAL_DEST) <= 45099) {
         struct char_data *tch, *next_v;
         int filled = false;
-        for (tch = world[real_room(obj_get_value(obj, VAL_PORTAL_DEST))].people; tch; tch = next_v) {
-          next_v = tch->next_in_room;
+        for (tch = rroom_get_people(real_room(obj_get_value(obj, VAL_PORTAL_DEST))); tch; tch = next_v) {
+          next_v = char_get_next_in_room(tch);
           if (tch) {
             filled = true;
           }
@@ -2010,7 +2010,7 @@ static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int nee
         }
       }
       if ((could_move = do_simple_enter(ch, obj, need_specials_check)))
-        for (k = ch->followers; k; k = k->next)
+        for (k = char_get_followers(ch); k; k = k->next)
           if ((char_get_in_room(k->follower) == was_in) &&
               (char_get_position(k->follower) >= POS_STANDING)) {
             act("You follow $N.\r\n", false, k->follower, 0, ch, TO_CHAR);
@@ -2036,13 +2036,13 @@ ACMD(do_enter)
 
   if (*buf) { /* an argument was supplied, search for door keyword */
     /* Is the object in the room? */
-    obj = get_obj_in_list_vis(ch, buf, nullptr, world[char_get_in_room(ch)].contents);
+    obj = get_obj_in_list_vis(ch, buf, nullptr, rroom_get_contents(char_get_in_room(ch)));
     /* Is the object in the character's inventory? */
     if (!obj)
-      obj = get_obj_in_list_vis(ch, buf, nullptr, ch->carrying);
+      obj = get_obj_in_list_vis(ch, buf, nullptr, char_get_inventory(ch));
     /* Is the character carrying the object? */
     if (!obj)
-      obj = get_obj_in_equip_vis(ch, buf, nullptr, ch->equipment);
+      obj = get_obj_in_equip_vis(ch, buf, nullptr, char_get_equipment_array(ch));
     /* We have an object to enter */
     if (obj)
       perform_enter_obj(ch, obj, 0);
@@ -2175,8 +2175,8 @@ static bool do_simple_leave(struct char_data *ch, struct obj_data *obj, int need
   snprintf(buf3, sizeof(buf3), "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range.@n", add_commas(getCurPL(ch)));
   send_to_scouter(buf3, ch, 0, 0);
 
-  if (ch->desc != nullptr) {
-    act(obj->action_description, true, ch, obj, 0, TO_CHAR);
+  if (char_get_desc(ch) != nullptr) {
+    act(obj_get_action_description(obj), true, ch, obj, 0, TO_CHAR);
     look_at_room(char_get_in_room(ch), ch, 0);
   }
 
@@ -2209,7 +2209,7 @@ static int perform_leave_obj(struct char_data *ch, struct obj_data *obj, int nee
   } else {
     if (obj_get_value(obj, VAL_HATCH_DEST) != NOWHERE)
       if ((could_move = do_simple_leave(ch, obj, need_specials_check)))
-        for (k = ch->followers; k; k = k->next)
+        for (k = char_get_followers(ch); k; k = k->next)
           if ((char_get_in_room(k->follower) == was_in) &&
               (char_get_position(k->follower) >= POS_STANDING)) {
             act("You follow $N.\r\n", false, k->follower, 0, ch, TO_CHAR);
@@ -2229,7 +2229,7 @@ ACMD(do_leave)
     return;
   }
 
-  for (obj = world[char_get_in_room(ch)].contents; obj; obj = obj->next_content)
+  for (obj = rroom_get_contents(char_get_in_room(ch)); obj; obj = obj_get_next_content(obj))
     if (char_can_see_obj(ch, obj))
       if (obj_get_type_flag(obj) == ITEM_HATCH || obj_get_type_flag(obj) == ITEM_PORTAL) {
         perform_leave_obj(ch, obj, 0);
@@ -2626,7 +2626,7 @@ ACMD(do_sit)
       send_to_char(ch, "You are already on something!\r\n");
       return;
     }
-    if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
+    if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, rroom_get_contents(char_get_in_room(ch))))) {
       send_to_char(ch, "That isn't here.\r\n");
       return;
     }
@@ -2768,7 +2768,7 @@ ACMD(do_rest)
       send_to_char(ch, "You are already on something!\r\n");
       return;
     }
-    if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
+    if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, rroom_get_contents(char_get_in_room(ch))))) {
       send_to_char(ch, "That isn't here.\r\n");
       return;
     }
@@ -2893,7 +2893,7 @@ ACMD(do_sleep)
     if (char_get_sits(ch)) {
       chair = char_get_sits(ch);
       if (obj_get_type_flag(chair) != ITEM_BED) {
-        send_to_char(ch, "You can't sleep on %s.\r\n", chair->short_description);
+        send_to_char(ch, "You can't sleep on %s.\r\n", obj_get_short_description(chair));
         return;
       }
     }
@@ -2932,7 +2932,7 @@ ACMD(do_sleep)
       send_to_char(ch, "You are already on something!\r\n");
       return;
     }
-    if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
+    if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, rroom_get_contents(char_get_in_room(ch))))) {
       send_to_char(ch, "That isn't here.\r\n");
       return;
     }
@@ -3092,15 +3092,15 @@ ACMD(do_follow)
     return;
   }
 
-  if (ch->master == leader) {
+  if (char_get_master(ch) == leader) {
     act("You are already following $M.", false, ch, 0, leader, TO_CHAR);
     return;
   }
-  if (char_aff_flagged(ch, AFF_CHARM) && (ch->master)) {
-    act("But you only feel like following $N!", false, ch, 0, ch->master, TO_CHAR);
+  if (char_aff_flagged(ch, AFF_CHARM) && (char_get_master(ch))) {
+    act("But you only feel like following $N!", false, ch, 0, char_get_master(ch), TO_CHAR);
   } else { /* Not Charmed follow person */
     if (leader == ch) {
-      if (!ch->master) {
+      if (!char_get_master(ch)) {
         send_to_char(ch, "You are already following yourself.\r\n");
         return;
       }
@@ -3110,7 +3110,7 @@ ACMD(do_follow)
         send_to_char(ch, "Sorry, but following in loops is not allowed.\r\n");
         return;
       }
-      if (ch->master)
+      if (char_get_master(ch))
         stop_follower(ch);
       char_aff_set(ch, AFF_GROUP, false);
       reveal_hiding(ch, 0);

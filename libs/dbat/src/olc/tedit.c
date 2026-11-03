@@ -15,6 +15,7 @@
 #include "dbat/tedit.h"
 #include "dbat/config.h"
 #include "dbat/atomicfile.h"
+#include "dbat/character_utils.h"
 
 void news_string_cleanup(struct descriptor_data *d, int terminator)
 {
@@ -165,7 +166,7 @@ ACMD(do_tedit)
       {"\n",         0,            nullptr,     0,     nullptr        }
   };
 
-  if (ch->desc == nullptr)
+  if (char_get_desc(ch) == nullptr)
     return;
 
   one_argument(argument, field);
@@ -200,25 +201,25 @@ ACMD(do_tedit)
   }
 
   /* set up editor stats */
-  clear_screen(ch->desc);
-  send_editor_help(ch->desc);
+  clear_screen(char_get_desc(ch));
+  send_editor_help(char_get_desc(ch));
   send_to_char(ch, "Edit file below:\r\n\r\n");
 
-  if (ch->desc->olc) {
+  if (char_get_desc(ch)->olc) {
     mudlog(LOG_BRF, ADMLVL_IMMORT, true, "SYSERR: do_tedit: Player already had olc structure.");
-    free(ch->desc->olc);
+    free(char_get_desc(ch)->olc);
   }
-  CREATE(ch->desc->olc, struct oasis_olc_data, 1);
+  CREATE(char_get_desc(ch)->olc, struct oasis_olc_data, 1);
 
   if (*fields[l].buffer) {
     send_to_char(ch, "%s", *fields[l].buffer);
     backstr = strdup(*fields[l].buffer);
   }
 
-  OLC_STORAGE(ch->desc) = strdup(fields[l].filename);
-  string_write(ch->desc, fields[l].buffer, fields[l].size, 0, backstr);
+  OLC_STORAGE(char_get_desc(ch)) = strdup(fields[l].filename);
+  string_write(char_get_desc(ch), fields[l].buffer, fields[l].size, 0, backstr);
 
   act("$n begins editing a text file.", true, ch, 0, 0, TO_ROOM);
   char_plr_set(ch, PLR_WRITING, true);
-  desc_set_connected(ch->desc, CON_TEDIT);
+  desc_set_connected(char_get_desc(ch), CON_TEDIT);
 }

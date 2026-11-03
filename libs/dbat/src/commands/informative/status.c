@@ -346,8 +346,8 @@ ACMD(do_score)
     send_to_char(ch, "  @cO@D-----------------------------@D[ @cStatistics @D]-----------------------------@cO@n\n");
     send_to_char(ch, "      @D<@wCharacter Level@D: @w%-3d@D> <@wRPP@D: @w%-3d@D> <@wRPP Bank@D: @w%-3d@D>@n\n", char_get_level(ch), char_get_rp(ch), char_get_rbank(ch));
     send_to_char(ch, "      @D<@wSpeed Index@D: @w%-15s@D> <@wArmor Index@D: @w%-15s@D>@n\n", add_commas(char_get_speedi(ch)), add_commas(char_get_armor(ch)));
-    send_to_char(ch, "    @D[    @RStrength@D|@G%2d (%3d)@D] [     @YAgility@D|@G%2d (%3d)@D] [      @BSpeed@D|@G%2d (%3d)@D]@n\n", ch->real_abils.str, char_get_aff_abils_str(ch), ch->real_abils.dex, char_get_aff_abils_dex(ch), ch->real_abils.cha, char_get_aff_abils_cha(ch));
-    send_to_char(ch, "    @D[@gConstitution@D|@G%2d (%3d)@D] [@CIntelligence@D|@G%2d (%3d)@D] [     @MWisdom@D|@G%2d (%3d)@D]@n\n", ch->real_abils.con, char_get_aff_abils_con(ch), ch->real_abils.intel, char_get_aff_abils_intel(ch), ch->real_abils.wis, char_get_aff_abils_wis(ch));
+    send_to_char(ch, "    @D[    @RStrength@D|@G%2d (%3d)@D] [     @YAgility@D|@G%2d (%3d)@D] [      @BSpeed@D|@G%2d (%3d)@D]@n\n", char_get_real_abils_str(ch), char_get_aff_abils_str(ch), char_get_real_abils_dex(ch), char_get_aff_abils_dex(ch), char_get_real_abils_cha(ch), char_get_aff_abils_cha(ch));
+    send_to_char(ch, "    @D[@gConstitution@D|@G%2d (%3d)@D] [@CIntelligence@D|@G%2d (%3d)@D] [     @MWisdom@D|@G%2d (%3d)@D]@n\n", char_get_real_abils_con(ch), char_get_aff_abils_con(ch), char_get_real_abils_intel(ch), char_get_aff_abils_intel(ch), char_get_real_abils_wis(ch), char_get_aff_abils_wis(ch));
   }
   if (view == full || view == other) {
     send_to_char(ch, "  @cO@D-----------------------------@D[   @cOther    @D]-----------------------------@cO@n\n");
@@ -370,7 +370,7 @@ ACMD(do_score)
       send_to_char(ch, "      @D[  @CRpp Cost@D| @W%-15d@D]@n\n", rpp_to_level(ch));
     }
 
-    send_to_char(ch, "\n     @D<@wPlayed@D: @yYears @D(@W%2d@D) @yWeeks @D(@W%2d@D) @yDays @D(@W%2d@D) @yHours @D(@W%2d@D) @yMinutes @D(@W%2d@D)>@n\n", (int)ch->time.played / 31536000, (int)((ch->time.played % 31536000) / 604800), (int)((ch->time.played % 604800) / 86400), (int)((ch->time.played % 86400) / 3600), (int)((ch->time.played % 3600) / 60));
+    send_to_char(ch, "\n     @D<@wPlayed@D: @yYears @D(@W%2d@D) @yWeeks @D(@W%2d@D) @yDays @D(@W%2d@D) @yHours @D(@W%2d@D) @yMinutes @D(@W%2d@D)>@n\n", (int)char_get_time_played(ch) / 31536000, (int)((char_get_time_played(ch) % 31536000) / 604800), (int)((char_get_time_played(ch) % 604800) / 86400), (int)((char_get_time_played(ch) % 86400) / 3600), (int)((char_get_time_played(ch) % 3600) / 60));
   }
   send_to_char(ch, "  @cO@D------------------------------------------------------------------------@cO@n\n");
 }
@@ -1023,9 +1023,9 @@ ACMD(do_status)
     else if (char_get_conditions(ch, DRUNK) > 0)
       send_to_char(ch, "You have an alcoholic buzz.\r\n");
 
-    if (ch->affected) {
+    if (char_get_affected(ch)) {
       int lasttype = 0;
-      for (aff = ch->affected; aff; aff = aff->next) {
+      for (aff = char_get_affected(ch); aff; aff = aff->next) {
         if (!strcasecmp(skill_name(aff->type), "runic") && aff->type != lasttype) {
           lasttype = aff->type;
           send_to_char(ch, "Your Kenaz rune is still in effect! (%2d Mud Hours)\r\n", aff->duration + 1);
@@ -1170,8 +1170,8 @@ ACMD(do_status)
       send_to_char(ch, "Something is augmenting your auto-skill training rate by %s%d%s!\r\n", char_get_asb(ch) > 0 ? "+" : "-", char_get_asb(ch), "%");
     }
 
-    if (ch->lifebonus > 0) {
-      send_to_char(ch, "Something is augmenting your Life Force Max by %s%d%s!\r\n", ch->lifebonus > 0 ? "+" : "-", ch->lifebonus, "%");
+    if (char_get_raw_lifebonus(ch) > 0) {
+      send_to_char(ch, "Something is augmenting your Life Force Max by %s%d%s!\r\n", char_get_raw_lifebonus(ch) > 0 ? "+" : "-", char_get_raw_lifebonus(ch), "%");
     }
 
     if (char_plr_flagged(ch, PLR_FISHING))
@@ -1286,7 +1286,7 @@ ACMD(do_inventory)
       return;
     }
   }
-  list_obj_to_char(ch->carrying, ch, SHOW_OBJ_SHORT, true);
+  list_obj_to_char(char_get_inventory(ch), ch, SHOW_OBJ_SHORT, true);
   send_to_char(ch, "\n");
 }
 
@@ -1303,8 +1303,8 @@ ACMD(do_equipment)
 
         if (obj_extra_flagged(char_get_equipment(ch, i), ITEM_SHEATH)) {
           struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = char_get_equipment(ch, i);
-          for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
-            next_obj = obj2->next_content;
+          for (obj2 = obj_get_contains(sheath); obj2; obj2 = next_obj) {
+            next_obj = obj_get_next_content(obj2);
             if (obj2) {
               send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
               show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
@@ -1317,8 +1317,8 @@ ACMD(do_equipment)
         show_obj_to_char(char_get_equipment(ch, i), ch, SHOW_OBJ_SHORT);
         if (obj_extra_flagged(char_get_equipment(ch, i), ITEM_SHEATH)) {
           struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = char_get_equipment(ch, i);
-          for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
-            next_obj = obj2->next_content;
+          for (obj2 = obj_get_contains(sheath); obj2; obj2 = next_obj) {
+            next_obj = obj_get_next_content(obj2);
             if (obj2) {
               send_to_char(ch, "@D  ---- @YSheathed@D ----> @n");
               show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);

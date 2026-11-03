@@ -13,6 +13,9 @@
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/shop.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 /* external vars */
 
 /* local functions */
@@ -28,12 +31,12 @@ static void update_object(struct obj_data *obj, int use)
   if (!obj)
     return;
   /* dont update objects with a timer trigger */
-  if (!script_has_type(obj->script, OTRIG_TIMER) && (obj_get_timer(obj) > 0))
+  if (!script_has_type(obj_get_script(obj), OTRIG_TIMER) && (obj_get_timer(obj) > 0))
     obj_set_timer(obj, obj_get_timer(obj) - (use));
-  if (obj->contains)
-    update_object(obj->contains, use);
-  if (obj->next_content)
-    update_object(obj->next_content, use);
+  if (obj_get_contains(obj))
+    update_object(obj_get_contains(obj), use);
+  if (obj_get_next_content(obj))
+    update_object(obj_get_next_content(obj), use);
 }
 
 void update_char_objects(struct char_data *ch)
@@ -52,7 +55,7 @@ void update_char_objects(struct char_data *ch)
         } else if (j == 0) {
           send_to_char(ch, "Your light sputters out and dies.\r\n");
           act("$n's light sputters out and dies.", false, ch, 0, 0, TO_ROOM);
-          world[char_get_in_room(ch)].light--;
+          rroom_set_light(char_get_in_room(ch), rroom_get_light(char_get_in_room(ch)) - 1);
         }
       } else if (obj_get_type_flag(char_get_equipment(ch, i)) == ITEM_LIGHT && obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_HOURS) > 0) {
         obj_set_value(char_get_equipment(ch, i), VAL_LIGHT_TIME, obj_get_value(char_get_equipment(ch, i), VAL_LIGHT_TIME) - (1));
@@ -60,8 +63,8 @@ void update_char_objects(struct char_data *ch)
       update_object(char_get_equipment(ch, i), 2);
     }
 
-  if (ch->carrying)
-    update_object(ch->carrying, 1);
+  if (char_get_inventory(ch))
+    update_object(char_get_inventory(ch), 1);
 }
 
 /* check and see if this item is better */

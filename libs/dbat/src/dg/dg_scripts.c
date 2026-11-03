@@ -17,6 +17,9 @@
 
 #include <unistd.h>
 #include <errno.h>
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 constexpr int PULSES_PER_MUD_HOUR = SECS_PER_MUD_HOUR * PASSES_PER_SEC;
 
@@ -53,20 +56,20 @@ void script_trigger_check(void)
   room_rnum nr;
   struct script_data *sc;
 
-  for (ch = character_list; ch; ch = ch->next) {
-    if (ch->script) {
-      sc = ch->script;
+  for (ch = character_list; ch; ch = char_get_next(ch)) {
+    if (char_get_script(ch)) {
+      sc = char_get_script(ch);
 
       if (IS_SET(sc->types, WTRIG_RANDOM) &&
-          (!is_empty(world[char_get_in_room(ch)].zone) ||
+          (!is_empty(rroom_get_zone(char_get_in_room(ch))) ||
            IS_SET(sc->types, WTRIG_GLOBAL)))
         random_mtrigger(ch);
     }
   }
 
-  for (obj = object_list; obj; obj = obj->next) {
-    if (obj->script) {
-      sc = obj->script;
+  for (obj = object_list; obj; obj = obj_get_next(obj)) {
+    if (obj_get_script(obj)) {
+      sc = obj_get_script(obj);
 
       if (IS_SET(sc->types, OTRIG_RANDOM))
         random_otrigger(obj);
@@ -74,12 +77,12 @@ void script_trigger_check(void)
   }
 
   for (nr = 0; nr <= top_of_world; nr++) {
-    if (world[nr].script) {
+    if (rroom_get_script(nr)) {
       room = &world[nr];
-      sc   = room->script;
+      sc   = room_get_script(room);
 
       if (IS_SET(sc->types, WTRIG_RANDOM) &&
-          (!is_empty(room->zone) ||
+          (!is_empty(room_get_zone(room)) ||
            IS_SET(sc->types, WTRIG_GLOBAL)))
         random_wtrigger(room);
     }
@@ -94,20 +97,20 @@ void check_time_triggers(void)
   room_rnum nr;
   struct script_data *sc;
 
-  for (ch = character_list; ch; ch = ch->next) {
-    if (ch->script) {
-      sc = ch->script;
+  for (ch = character_list; ch; ch = char_get_next(ch)) {
+    if (char_get_script(ch)) {
+      sc = char_get_script(ch);
 
       if (IS_SET(sc->types, WTRIG_TIME) &&
-          (!is_empty(world[char_get_in_room(ch)].zone) ||
+          (!is_empty(rroom_get_zone(char_get_in_room(ch))) ||
            IS_SET(sc->types, WTRIG_GLOBAL)))
         time_mtrigger(ch);
     }
   }
 
-  for (obj = object_list; obj; obj = obj->next) {
-    if (obj->script) {
-      sc = obj->script;
+  for (obj = object_list; obj; obj = obj_get_next(obj)) {
+    if (obj_get_script(obj)) {
+      sc = obj_get_script(obj);
 
       if (IS_SET(sc->types, OTRIG_TIME))
         time_otrigger(obj);
@@ -115,12 +118,12 @@ void check_time_triggers(void)
   }
 
   for (nr = 0; nr <= top_of_world; nr++) {
-    if (world[nr].script) {
+    if (rroom_get_script(nr)) {
       room = &world[nr];
-      sc   = room->script;
+      sc   = room_get_script(room);
 
       if (IS_SET(sc->types, WTRIG_TIME) &&
-          (!is_empty(room->zone) ||
+          (!is_empty(room_get_zone(room)) ||
            IS_SET(sc->types, WTRIG_GLOBAL)))
         time_wtrigger(room);
     }
@@ -146,12 +149,12 @@ static EVENTFUNC(trig_wait_event)
     int found = false;
     if (type == MOB_TRIGGER) {
       struct char_data *tch;
-      for (tch = character_list; tch && !found; tch = tch->next)
+      for (tch = character_list; tch && !found; tch = char_get_next(tch))
         if (tch == (struct char_data *)go)
           found = true;
     } else if (type == OBJ_TRIGGER) {
       struct obj_data *obj;
-      for (obj = object_list; obj && !found; obj = obj->next)
+      for (obj = object_list; obj && !found; obj = obj_get_next(obj))
         if (obj == (struct obj_data *)go)
           found = true;
     } else {
@@ -217,21 +220,21 @@ static void dg_ctx_begin(void *go, trig_data *trig, int type)
       room              = char_get_in_room((char_data *)go);
       break;
     case OBJ_TRIGGER:
-      snprintf(dg_ctx.owner_name, sizeof(dg_ctx.owner_name), "%s", ((obj_data *)go)->short_description ? ((obj_data *)go)->short_description : "");
+      snprintf(dg_ctx.owner_name, sizeof(dg_ctx.owner_name), "%s", obj_get_short_description((obj_data *)go) ? obj_get_short_description((obj_data *)go) : "");
       dg_ctx.owner_vnum = (long long)obj_get_vnum((obj_data *)go);
       dg_ctx.owner_uid  = obj_get_id((obj_data *)go);
       room              = obj_room((obj_data *)go);
       break;
     case WLD_TRIGGER:
-      snprintf(dg_ctx.owner_name, sizeof(dg_ctx.owner_name), "%s", ((room_data *)go)->name ? ((room_data *)go)->name : "");
-      dg_ctx.owner_vnum = (long long)((room_data *)go)->number;
-      dg_ctx.owner_uid  = ((room_data *)go)->number + ROOM_ID_BASE;
+      snprintf(dg_ctx.owner_name, sizeof(dg_ctx.owner_name), "%s", room_get_name((room_data *)go) ? room_get_name((room_data *)go) : "");
+      dg_ctx.owner_vnum = (long long)room_get_number((room_data *)go);
+      dg_ctx.owner_uid  = room_get_number((room_data *)go) + ROOM_ID_BASE;
       dg_ctx.room_vnum  = dg_ctx.owner_vnum;
       return;
   }
 
   if (room != NOWHERE && room >= 0 && room <= top_of_world)
-    dg_ctx.room_vnum = (long long)world[room].number;
+    dg_ctx.room_vnum = (long long)rroom_get_vnum(room);
 }
 
 static void dg_ctx_set_line(const char *cmd)
@@ -457,17 +460,17 @@ static void process_attach(void *go, struct script_data *sc, trig_data *trig,
                  trig->name, trig_get_vnum(trig), char_get_name(c));
       return;
     }
-    add_trigger(dg_ensure_script(&c->script), newtrig, -1);
+    add_trigger(dg_ensure_script(char_script_slot(c)), newtrig, -1);
     return;
   }
 
   if (o) {
-    add_trigger(dg_ensure_script(&o->script), newtrig, -1);
+    add_trigger(dg_ensure_script(obj_script_slot(o)), newtrig, -1);
     return;
   }
 
   if (r) {
-    add_trigger(dg_ensure_script(&r->script), newtrig, -1);
+    add_trigger(dg_ensure_script(room_script_slot(r)), newtrig, -1);
     return;
   }
 }
@@ -518,39 +521,39 @@ static void process_detach(void *go, struct script_data *sc, trig_data *trig,
     }
   }
 
-  if (c && c->script) {
+  if (c && char_get_script(c)) {
     if (!strcmp(trignum_s, "all")) {
       extract_script(c, MOB_TRIGGER);
       return;
     }
-    if (remove_trigger(c->script, trignum_s)) {
-      if (!c->script->trig_list) {
+    if (remove_trigger(char_get_script(c), trignum_s)) {
+      if (!char_get_script(c)->trig_list) {
         extract_script(c, MOB_TRIGGER);
       }
     }
     return;
   }
 
-  if (o && o->script) {
+  if (o && obj_get_script(o)) {
     if (!strcmp(trignum_s, "all")) {
       extract_script(o, OBJ_TRIGGER);
       return;
     }
-    if (remove_trigger(o->script, trignum_s)) {
-      if (!o->script->trig_list) {
+    if (remove_trigger(obj_get_script(o), trignum_s)) {
+      if (!obj_get_script(o)->trig_list) {
         extract_script(o, OBJ_TRIGGER);
       }
     }
     return;
   }
 
-  if (r && r->script) {
+  if (r && room_get_script(r)) {
     if (!strcmp(trignum_s, "all")) {
       extract_script(r, WLD_TRIGGER);
       return;
     }
-    if (remove_trigger(r->script, trignum_s)) {
-      if (!r->script->trig_list) {
+    if (remove_trigger(room_get_script(r), trignum_s)) {
+      if (!room_get_script(r)->trig_list) {
         extract_script(r, WLD_TRIGGER);
       }
     }
@@ -561,9 +564,9 @@ static void process_detach(void *go, struct script_data *sc, trig_data *trig,
 struct room_data *dg_room_of_obj(struct obj_data *obj)
 {
   if (obj_get_in_room(obj) != NOWHERE) return &world[obj_get_in_room(obj)];
-  if (obj->carried_by) return &world[char_get_in_room(obj->carried_by)];
-  if (obj->worn_by) return &world[char_get_in_room(obj->worn_by)];
-  if (obj->in_obj) return (dg_room_of_obj(obj->in_obj));
+  if (obj_get_carried_by(obj)) return &world[char_get_in_room(obj_get_carried_by(obj))];
+  if (obj_get_worn_by(obj)) return &world[char_get_in_room(obj_get_worn_by(obj))];
+  if (obj_get_in_obj(obj)) return (dg_room_of_obj(obj_get_in_obj(obj)));
   return nullptr;
 }
 
@@ -632,9 +635,9 @@ static void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
           break;
         case MOB_TRIGGER:
           if ((o = get_obj_in_list_vis((struct char_data *)go, name, nullptr,
-                                       ((struct char_data *)go)->carrying)) == nullptr)
+                                       char_get_inventory((struct char_data *)go))) == nullptr)
             o = get_obj_in_list_vis((struct char_data *)go, name, nullptr,
-                                    world[char_get_in_room((struct char_data *)go)].contents);
+                                    rroom_get_contents(char_get_in_room((struct char_data *)go)));
           break;
       }
       if (o)
@@ -643,7 +646,7 @@ static void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
       room_rnum r = NOWHERE;
       switch (type) {
         case WLD_TRIGGER:
-          r = real_room(((struct room_data *)go)->number);
+          r = real_room(room_get_number((struct room_data *)go));
           break;
         case OBJ_TRIGGER:
           r = obj_room((struct obj_data *)go);
@@ -653,7 +656,7 @@ static void makeuid_var(void *go, struct script_data *sc, trig_data *trig,
           break;
       }
       if (r != NOWHERE)
-        snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, world[r].number + ROOM_ID_BASE);
+        snprintf(uid, sizeof(uid), "%c%d", UID_CHAR, rroom_get_vnum(r) + ROOM_ID_BASE);
     } else {
       script_log("Trigger: %s, VNum %d. makeuid syntax error: '%s'",
                  trig->name, trig_get_vnum(trig), cmd);
@@ -764,12 +767,12 @@ static void process_remote(struct script_data *sc, trig_data *trig, char *cmd)
   context = vd->context;
 
   if ((room = find_room(uid))) {
-    sc_remote = room->script;
+    sc_remote = room_get_script(room);
   } else if ((mob = find_char(uid))) {
-    sc_remote = mob->script;
+    sc_remote = char_get_script(mob);
     if (!char_is_npc(mob)) context = 0;
   } else if ((obj = find_obj(uid))) {
-    sc_remote = obj->script;
+    sc_remote = obj_get_script(obj);
   } else {
     script_log("Trigger: %s, VNum %d. remote: uid '%ld' invalid",
                trig->name, trig_get_vnum(trig), uid);
@@ -818,11 +821,11 @@ static void process_rdelete(struct script_data *sc, trig_data *trig, char *cmd)
   }
 
   if ((room = find_room(uid))) {
-    sc_remote = room->script;
+    sc_remote = room_get_script(room);
   } else if ((mob = find_char(uid))) {
-    sc_remote = mob->script;
+    sc_remote = char_get_script(mob);
   } else if ((obj = find_obj(uid))) {
-    sc_remote = obj->script;
+    sc_remote = obj_get_script(obj);
   } else {
     script_log("Trigger: %s, VNum %d. remote: uid '%ld' invalid",
                trig->name, trig_get_vnum(trig), uid);
@@ -1137,11 +1140,11 @@ static int script_driver_body(void *go_adress, trig_data *trig, int type, int mo
         break;
       case OBJ_TRIGGER:
         script_log("It was attached to %s [%d]",
-                   ((obj_data *)go)->short_description, obj_get_vnum((obj_data *)go));
+                   obj_get_short_description((obj_data *)go), obj_get_vnum((obj_data *)go));
         break;
       case WLD_TRIGGER:
         script_log("It was attached to %s [%d]",
-                   ((room_data *)go)->name, ((room_data *)go)->number);
+                   room_get_name((room_data *)go), room_get_number((room_data *)go));
         break;
     }
 
@@ -1308,13 +1311,13 @@ void read_saved_vars(struct char_data *ch)
    * If getting to the menu from inside the game, the vars aren't removed.
    * So let's not allocate them again.
    */
-  if (ch->script)
+  if (char_get_script(ch))
     return;
 
   /* create the space for the script structure which holds the vars */
   /* We need to do this first, because later calls to 'remote' will need */
   /* a script already assigned. */
-  CREATE(ch->script, struct script_data, 1);
+  CREATE(*char_script_slot(ch), struct script_data, 1);
 
   /* find the file that holds the saved variables and open it*/
   get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, char_get_name(ch));
@@ -1334,7 +1337,7 @@ void read_saved_vars(struct char_data *ch)
       skip_spaces(&temp); /* temp now points to the rest of the line */
 
       context = atol(context_str);
-      add_var(&(ch->script->global_vars), varname, temp, context);
+      add_var(&(char_get_script(ch)->global_vars), varname, temp, context);
       free(p); /* plug memory hole */
     }
   } while (!feof(file));
@@ -1353,7 +1356,7 @@ void save_char_vars(struct char_data *ch)
 
   /* immediate return if no script (and therefore no variables) structure */
   /* has been created. this will happen when the player is logging in */
-  if (ch->script == nullptr) return;
+  if (char_get_script(ch) == nullptr) return;
 
   /* we should never be called for an NPC, but just in case... */
   if (char_is_npc(ch)) return;
@@ -1361,11 +1364,11 @@ void save_char_vars(struct char_data *ch)
   get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, char_get_name(ch));
 
   /* make sure this char has global variables to save */
-  if (ch->script->global_vars == nullptr) {
+  if (char_get_script(ch)->global_vars == nullptr) {
     unlink(fn);
     return;
   }
-  vars = ch->script->global_vars;
+  vars = char_get_script(ch)->global_vars;
 
   file = atomic_open(&af, fn, true);
   if (!file) {

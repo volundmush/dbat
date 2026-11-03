@@ -4,6 +4,9 @@
  */
 #include "dbat/utils.h"
 #include "dg_internal.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 /* Local functions not used elsewhere */
 static struct char_data *find_char_by_uid_in_lookup_table(long uid);
@@ -49,7 +52,7 @@ int trgvar_in_room(room_vnum vnum)
     return (-1);
   }
 
-  for (ch = world[rnum].people; ch != nullptr; ch = ch->next_in_room)
+  for (ch = rroom_get_people(rnum); ch != nullptr; ch = char_get_next_in_room(ch))
     i++;
 
   return i;
@@ -62,12 +65,12 @@ obj_data *get_obj_in_list(char *name, obj_data *list)
 
   if (*name == UID_CHAR) {
     id = atoi(name + 1);
-    for (i = list; i; i = i->next_content)
+    for (i = list; i; i = obj_get_next_content(i))
       if (id == obj_get_id(i))
         return i;
   } else {
-    for (i = list; i; i = i->next_content)
-      if (isname(name, i->name))
+    for (i = list; i; i = obj_get_next_content(i))
+      if (isname(name, obj_get_name(i)))
         return i;
   }
 
@@ -102,7 +105,7 @@ obj_data *get_object_in_equip(char_data *ch, char *name)
 
     for (j = 0; (j < NUM_WEARS) && (n <= number); j++)
       if ((obj = char_get_equipment(ch, j)))
-        if (isname(tmp, obj->name))
+        if (isname(tmp, obj_get_name(obj)))
           if (++n == number)
             return (obj);
   }
@@ -238,8 +241,8 @@ char_data *get_char(char *name)
     if (i && valid_dg_target(i, DG_ALLOW_GODS))
       return i;
   } else {
-    for (i = character_list; i; i = i->next)
-      if (isname(name, i->name) &&
+    for (i = character_list; i; i = char_get_next(i))
+      if (isname(name, char_get_alias(i)) &&
           valid_dg_target(i, DG_ALLOW_GODS))
         return i;
   }
@@ -262,8 +265,8 @@ char_data *get_char_near_obj(obj_data *obj, char *name)
   } else {
     room_rnum num;
     if ((num = obj_room(obj)) != NOWHERE)
-      for (ch = world[num].people; ch; ch = ch->next_in_room)
-        if (isname(name, ch->name) &&
+      for (ch = rroom_get_people(num); ch; ch = char_get_next_in_room(ch))
+        if (isname(name, char_get_alias(ch)) &&
             valid_dg_target(ch, DG_ALLOW_GODS))
           return ch;
   }
@@ -285,8 +288,8 @@ char_data *get_char_in_room(room_data *room, char *name)
     if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
       return ch;
   } else {
-    for (ch = room->people; ch; ch = ch->next_in_room)
-      if (isname(name, ch->name) &&
+    for (ch = room_get_people(room); ch; ch = char_get_next_in_room(ch))
+      if (isname(name, char_get_alias(ch)) &&
           valid_dg_target(ch, DG_ALLOW_GODS))
         return ch;
   }
@@ -307,33 +310,33 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name)
     return obj;
 
   /* is it inside ? */
-  if (obj->contains && (i = get_obj_in_list(name, obj->contains)))
+  if (obj_get_contains(obj) && (i = get_obj_in_list(name, obj_get_contains(obj))))
     return i;
 
   /* or outside ? */
-  if (obj->in_obj) {
+  if (obj_get_in_obj(obj)) {
     if (*name == UID_CHAR) {
       id = atoi(name + 1);
 
-      if (id == obj_get_id(obj->in_obj))
-        return obj->in_obj;
-    } else if (isname(name, obj->in_obj->name))
-      return obj->in_obj;
+      if (id == obj_get_id(obj_get_in_obj(obj)))
+        return obj_get_in_obj(obj);
+    } else if (isname(name, obj_get_name(obj_get_in_obj(obj))))
+      return obj_get_in_obj(obj);
   }
   /* or worn ?*/
-  else if (obj->worn_by && (i = get_object_in_equip(obj->worn_by, name)))
+  else if (obj_get_worn_by(obj) && (i = get_object_in_equip(obj_get_worn_by(obj), name)))
     return i;
   /* or carried ? */
-  else if (obj->carried_by &&
-           (i = get_obj_in_list(name, obj->carried_by->carrying)))
+  else if (obj_get_carried_by(obj) &&
+           (i = get_obj_in_list(name, char_get_inventory(obj_get_carried_by(obj)))))
     return i;
   else if ((rm = obj_room(obj)) != NOWHERE) {
     /* check the floor */
-    if ((i = get_obj_in_list(name, world[rm].contents)))
+    if ((i = get_obj_in_list(name, rroom_get_contents(rm))))
       return i;
 
     /* check peoples' inventory */
-    for (ch = world[rm].people; ch; ch = ch->next_in_room)
+    for (ch = rroom_get_people(rm); ch; ch = char_get_next_in_room(ch))
       if ((i = get_object_in_equip(ch, name)))
         return i;
   }
@@ -348,8 +351,8 @@ obj_data *get_obj(char *name)
   if (*name == UID_CHAR)
     return find_obj(atoi(name + 1));
   else {
-    for (obj = object_list; obj; obj = obj->next)
-      if (isname(name, obj->name))
+    for (obj = object_list; obj; obj = obj_get_next(obj))
+      if (isname(name, obj_get_name(obj)))
         return obj;
   }
 
@@ -383,18 +386,18 @@ char_data *get_char_by_obj(obj_data *obj, char *name)
     if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
       return ch;
   } else {
-    if (obj->carried_by &&
-        isname(name, obj->carried_by->name) &&
-        valid_dg_target(obj->carried_by, DG_ALLOW_GODS))
-      return obj->carried_by;
+    if (obj_get_carried_by(obj) &&
+        isname(name, char_get_alias(obj_get_carried_by(obj))) &&
+        valid_dg_target(obj_get_carried_by(obj), DG_ALLOW_GODS))
+      return obj_get_carried_by(obj);
 
-    if (obj->worn_by &&
-        isname(name, obj->worn_by->name) &&
-        valid_dg_target(obj->worn_by, DG_ALLOW_GODS))
-      return obj->worn_by;
+    if (obj_get_worn_by(obj) &&
+        isname(name, char_get_alias(obj_get_worn_by(obj))) &&
+        valid_dg_target(obj_get_worn_by(obj), DG_ALLOW_GODS))
+      return obj_get_worn_by(obj);
 
-    for (ch = character_list; ch; ch = ch->next)
-      if (isname(name, ch->name) &&
+    for (ch = character_list; ch; ch = char_get_next(ch))
+      if (isname(name, char_get_alias(ch)) &&
           valid_dg_target(ch, DG_ALLOW_GODS))
         return ch;
   }
@@ -416,13 +419,13 @@ char_data *get_char_by_room(room_data *room, char *name)
     if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
       return ch;
   } else {
-    for (ch = room->people; ch; ch = ch->next_in_room)
-      if (isname(name, ch->name) &&
+    for (ch = room_get_people(room); ch; ch = char_get_next_in_room(ch))
+      if (isname(name, char_get_alias(ch)) &&
           valid_dg_target(ch, DG_ALLOW_GODS))
         return ch;
 
-    for (ch = character_list; ch; ch = ch->next)
-      if (isname(name, ch->name) &&
+    for (ch = character_list; ch; ch = char_get_next(ch))
+      if (isname(name, char_get_alias(ch)) &&
           valid_dg_target(ch, DG_ALLOW_GODS))
         return ch;
   }
@@ -445,21 +448,21 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name)
   if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
     return obj;
 
-  if (obj->contains && (i = get_obj_in_list(name, obj->contains)))
+  if (obj_get_contains(obj) && (i = get_obj_in_list(name, obj_get_contains(obj))))
     return i;
 
-  if (obj->in_obj && isname(name, obj->in_obj->name))
-    return obj->in_obj;
+  if (obj_get_in_obj(obj) && isname(name, obj_get_name(obj_get_in_obj(obj))))
+    return obj_get_in_obj(obj);
 
-  if (obj->worn_by && (i = get_object_in_equip(obj->worn_by, name)))
+  if (obj_get_worn_by(obj) && (i = get_object_in_equip(obj_get_worn_by(obj), name)))
     return i;
 
-  if (obj->carried_by &&
-      (i = get_obj_in_list(name, obj->carried_by->carrying)))
+  if (obj_get_carried_by(obj) &&
+      (i = get_obj_in_list(name, char_get_inventory(obj_get_carried_by(obj)))))
     return i;
 
   if (((rm = obj_room(obj)) != NOWHERE) &&
-      (i = get_obj_in_list(name, world[rm].contents)))
+      (i = get_obj_in_list(name, rroom_get_contents(rm))))
     return i;
 
   return get_obj(name);
@@ -473,12 +476,12 @@ obj_data *get_obj_in_room(room_data *room, char *name)
 
   if (*name == UID_CHAR) {
     id = atoi(name + 1);
-    for (obj = room->contents; obj; obj = obj->next_content)
+    for (obj = room_get_contents(room); obj; obj = obj_get_next_content(obj))
       if (id == obj_get_id(obj))
         return obj;
   } else {
-    for (obj = room->contents; obj; obj = obj->next_content)
-      if (isname(name, obj->name))
+    for (obj = room_get_contents(room); obj; obj = obj_get_next_content(obj))
+      if (isname(name, obj_get_name(obj)))
         return obj;
   }
 
@@ -493,12 +496,12 @@ obj_data *get_obj_by_room(room_data *room, char *name)
   if (*name == UID_CHAR)
     return find_obj(atoi(name + 1));
 
-  for (obj = room->contents; obj; obj = obj->next_content)
-    if (isname(name, obj->name))
+  for (obj = room_get_contents(room); obj; obj = obj_get_next_content(obj))
+    if (isname(name, obj_get_name(obj)))
       return obj;
 
-  for (obj = object_list; obj; obj = obj->next)
-    if (isname(name, obj->name))
+  for (obj = object_list; obj; obj = obj_get_next(obj))
+    if (isname(name, obj_get_name(obj)))
       return obj;
 
   return nullptr;

@@ -966,8 +966,8 @@ void dispel_ash(struct char_data *ch)
 {
   struct obj_data *obj, *next_obj, *ash = nullptr;
 
-  for (obj = world[char_get_in_room(ch)].contents; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = rroom_get_contents(char_get_in_room(ch)); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     if (obj_get_vnum(obj) == 1306) {
       ash = obj;
     }
@@ -2954,7 +2954,7 @@ void demon_refill_lf(struct char_data *ch, int64_t num)
 {
   struct char_data *tch = nullptr;
 
-  for (tch = world[char_get_in_room(ch)].people; tch; tch = tch->next_in_room) {
+  for (tch = rroom_get_people(char_get_in_room(ch)); tch; tch = tch->next_in_room) {
     if (!char_is_demon(tch))
       continue;
     if ((getCurLF(tch)) >= (getMaxLF(tch)))
@@ -2976,7 +2976,7 @@ void mob_talk(struct char_data *ch, const char *speech)
     return;
   }
 
-  for (tch = world[char_get_in_room(ch)].people; tch; tch = tch->next_in_room) {
+  for (tch = rroom_get_people(char_get_in_room(ch)); tch; tch = tch->next_in_room) {
     if (!char_is_npc(tch))
       continue;
     if (!char_is_humanoid(tch))
@@ -3460,8 +3460,8 @@ void purge_homing(struct char_data *ch)
 {
 
   struct obj_data *obj = nullptr, *next_obj = nullptr;
-  for (obj = world[char_get_in_room(ch)].contents; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = rroom_get_contents(char_get_in_room(ch)); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     if (obj_get_vnum(obj) == 80 || obj_get_vnum(obj) == 81) {
       if (obj_get_target(obj) == ch || obj_get_user(obj) == ch) {
         act("$p @wloses its target and flies off into the distance.@n", true, 0, obj, 0, TO_ROOM);
@@ -4647,7 +4647,7 @@ bool char_is_dead(const struct char_data *ch)
 
 zone_vnum char_in_zone(const struct char_data *ch)
 {
-  return (zone_table[(world[(char_get_in_room(ch))].zone)].number);
+  return (zone_table[(rroom_get_zone((char_get_in_room(ch))))].number);
 }
 
 char *char_get_name(const struct char_data *ch)
@@ -4877,12 +4877,12 @@ static bool char_invis_ok_obj(const struct char_data *sub, const struct obj_data
 
 static bool char_can_see_obj_carrier(const struct char_data *sub, const struct obj_data *obj)
 {
-  return ((!obj->carried_by || char_can_see(sub, obj->carried_by)) && (!obj->worn_by || char_can_see(sub, obj->worn_by)));
+  return ((!obj_get_carried_by(obj) || char_can_see(sub, obj_get_carried_by(obj))) && (!obj_get_worn_by(obj) || char_can_see(sub, obj_get_worn_by(obj))));
 }
 
 static bool char_mort_can_see_obj(const struct char_data *sub, const struct obj_data *obj)
 {
-  return ((char_light_ok(sub) || obj->carried_by == sub || obj->worn_by) && char_invis_ok_obj(sub, obj) && char_can_see_obj_carrier(sub, obj));
+  return ((char_light_ok(sub) || obj_get_carried_by(obj) == sub || obj_get_worn_by(obj)) && char_invis_ok_obj(sub, obj) && char_can_see_obj_carrier(sub, obj));
 }
 
 bool char_can_see_obj(const struct char_data *sub, const struct obj_data *obj)
@@ -4922,12 +4922,12 @@ const char *char_pers(struct char_data *ch, struct char_data *vict)
 
 const char *obj_shortdesc_for(const struct obj_data *obj, const struct char_data *vict)
 {
-  return (char_can_see_obj((vict), (obj)) ? (obj)->short_description : "something");
+  return (char_can_see_obj((vict), (obj)) ? obj_get_short_description(obj) : "something");
 }
 
 const char *obj_fname_for(const struct obj_data *obj, const struct char_data *vict)
 {
-  return (char_can_see_obj((vict), (obj)) ? fname((obj)->name) : "something");
+  return (char_can_see_obj((vict), (obj)) ? fname(obj_get_name(obj)) : "something");
 }
 
 bool char_can_go(const struct char_data *ch, int door)
@@ -6796,17 +6796,17 @@ void char_set_wait(struct char_data *ch, int v)
 
 struct room_direction_data *char_get_exit(const struct char_data *ch, int door)
 {
-  return world[char_get_in_room(ch)].dir_option[door];
+  return rroom_get_dir_option(char_get_in_room(ch), door);
 }
 
 void char_set_exit(struct char_data *ch, int door, struct room_direction_data *v)
 {
-  world[char_get_in_room(ch)].dir_option[door] = v;
+  rroom_set_dir_option(char_get_in_room(ch), door, v);
 }
 
 struct room_direction_data *char_get_exit2(const struct char_data *ch, int door)
 {
-  return world[char_get_exit(ch, door)->to_room].dir_option[door];
+  return rroom_get_dir_option(char_get_exit(ch, door)->to_room, door);
 }
 
 /* Flag setters and toggles. */
@@ -7379,4 +7379,555 @@ int8_t char_get_mob_specials_attack_type(const struct char_data *ch)
 void char_set_mob_specials_attack_type(struct char_data *ch, int8_t v)
 {
   ch->mob_specials.attack_type = v;
+}
+
+struct affected_type *char_get_affected(const struct char_data *ch)
+{
+  return ch->affected;
+}
+
+void char_set_affected(struct char_data *ch, struct affected_type *v)
+{
+  ch->affected = v;
+}
+
+int char_get_aggtimer(const struct char_data *ch)
+{
+  return ch->aggtimer;
+}
+
+void char_set_aggtimer(struct char_data *ch, int v)
+{
+  ch->aggtimer = v;
+}
+
+void char_set_baseki(struct char_data *ch, int64_t v)
+{
+  ch->baseki = v;
+}
+
+void char_set_basepl(struct char_data *ch, int64_t v)
+{
+  ch->basepl = v;
+}
+
+void char_set_basest(struct char_data *ch, int64_t v)
+{
+  ch->basest = v;
+}
+
+struct obj_data *char_get_inventory(const struct char_data *ch)
+{
+  return ch->carrying;
+}
+
+void char_set_inventory(struct char_data *ch, struct obj_data *v)
+{
+  ch->carrying = v;
+}
+
+void char_set_class(struct char_data *ch, int v)
+{
+  ch->chclass = v;
+}
+
+int char_get_choice(const struct char_data *ch)
+{
+  return ch->choice;
+}
+
+void char_set_choice(struct char_data *ch, int v)
+{
+  ch->choice = v;
+}
+
+struct descriptor_data *char_get_desc(const struct char_data *ch)
+{
+  return ch->desc;
+}
+
+void char_set_desc(struct char_data *ch, struct descriptor_data *v)
+{
+  ch->desc = v;
+}
+
+void char_set_energy(struct char_data *ch, double v)
+{
+  ch->energy = v;
+}
+
+struct follow_type *char_get_followers(const struct char_data *ch)
+{
+  return ch->followers;
+}
+
+void char_set_followers(struct char_data *ch, struct follow_type *v)
+{
+  ch->followers = v;
+}
+
+int char_get_gooptime(const struct char_data *ch)
+{
+  return ch->gooptime;
+}
+
+void char_set_gooptime(struct char_data *ch, int v)
+{
+  ch->gooptime = v;
+}
+
+double char_get_health(const struct char_data *ch)
+{
+  return ch->health;
+}
+
+void char_set_health(struct char_data *ch, double v)
+{
+  ch->health = v;
+}
+
+void char_set_life(struct char_data *ch, double v)
+{
+  ch->life = v;
+}
+
+int char_get_raw_lifebonus(const struct char_data *ch)
+{
+  return ch->lifebonus;
+}
+
+void char_set_raw_lifebonus(struct char_data *ch, int v)
+{
+  ch->lifebonus = v;
+}
+
+int *char_get_limbs(struct char_data *ch)
+{
+  return ch->limbs;
+}
+
+struct char_data *char_get_master(const struct char_data *ch)
+{
+  return ch->master;
+}
+
+void char_set_master(struct char_data *ch, struct char_data *v)
+{
+  ch->master = v;
+}
+
+int32_t char_get_master_id(const struct char_data *ch)
+{
+  return ch->master_id;
+}
+
+void char_set_master_id(struct char_data *ch, int32_t v)
+{
+  ch->master_id = v;
+}
+
+int64_t char_get_max_hit(const struct char_data *ch)
+{
+  return ch->max_hit;
+}
+
+void char_set_max_hit(struct char_data *ch, int64_t v)
+{
+  ch->max_hit = v;
+}
+
+void char_set_max_mana(struct char_data *ch, int64_t v)
+{
+  ch->max_mana = v;
+}
+
+int64_t char_get_max_move(const struct char_data *ch)
+{
+  return ch->max_move;
+}
+
+void char_set_max_move(struct char_data *ch, int64_t v)
+{
+  ch->max_move = v;
+}
+
+struct script_memory *char_get_memory(const struct char_data *ch)
+{
+  return ch->memory;
+}
+
+void char_set_memory(struct char_data *ch, struct script_memory *v)
+{
+  ch->memory = v;
+}
+
+void char_set_mimic(struct char_data *ch, int v)
+{
+  ch->mimic = v;
+}
+
+int char_get_mobcharge(const struct char_data *ch)
+{
+  return ch->mobcharge;
+}
+
+void char_set_mobcharge(struct char_data *ch, int v)
+{
+  ch->mobcharge = v;
+}
+
+struct char_data *char_get_next(const struct char_data *ch)
+{
+  return ch->next;
+}
+
+void char_set_next(struct char_data *ch, struct char_data *v)
+{
+  ch->next = v;
+}
+
+struct char_data *char_get_next_affect(const struct char_data *ch)
+{
+  return ch->next_affect;
+}
+
+void char_set_next_affect(struct char_data *ch, struct char_data *v)
+{
+  ch->next_affect = v;
+}
+
+struct char_data *char_get_next_fighting(const struct char_data *ch)
+{
+  return ch->next_fighting;
+}
+
+void char_set_next_fighting(struct char_data *ch, struct char_data *v)
+{
+  ch->next_fighting = v;
+}
+
+struct char_data *char_get_next_in_room(const struct char_data *ch)
+{
+  return ch->next_in_room;
+}
+
+void char_set_next_in_room(struct char_data *ch, struct char_data *v)
+{
+  ch->next_in_room = v;
+}
+
+struct player_special_data *char_get_player_specials(const struct char_data *ch)
+{
+  return ch->player_specials;
+}
+
+void char_set_player_specials(struct char_data *ch, struct player_special_data *v)
+{
+  ch->player_specials = v;
+}
+
+struct char_data *char_get_poisonby(const struct char_data *ch)
+{
+  return ch->poisonby;
+}
+
+void char_set_poisonby(struct char_data *ch, struct char_data *v)
+{
+  ch->poisonby = v;
+}
+
+struct trig_proto_list *char_get_proto_script(const struct char_data *ch)
+{
+  return ch->proto_script;
+}
+
+void char_set_proto_script(struct char_data *ch, struct trig_proto_list *v)
+{
+  ch->proto_script = v;
+}
+
+void char_set_race(struct char_data *ch, int v)
+{
+  ch->race = v;
+}
+
+int8_t char_get_real_abils_cha(const struct char_data *ch)
+{
+  return ch->real_abils.cha;
+}
+
+void char_set_real_abils_cha(struct char_data *ch, int8_t v)
+{
+  ch->real_abils.cha = v;
+}
+
+int8_t char_get_real_abils_con(const struct char_data *ch)
+{
+  return ch->real_abils.con;
+}
+
+void char_set_real_abils_con(struct char_data *ch, int8_t v)
+{
+  ch->real_abils.con = v;
+}
+
+int8_t char_get_real_abils_dex(const struct char_data *ch)
+{
+  return ch->real_abils.dex;
+}
+
+void char_set_real_abils_dex(struct char_data *ch, int8_t v)
+{
+  ch->real_abils.dex = v;
+}
+
+int8_t char_get_real_abils_intel(const struct char_data *ch)
+{
+  return ch->real_abils.intel;
+}
+
+void char_set_real_abils_intel(struct char_data *ch, int8_t v)
+{
+  ch->real_abils.intel = v;
+}
+
+int8_t char_get_real_abils_str(const struct char_data *ch)
+{
+  return ch->real_abils.str;
+}
+
+void char_set_real_abils_str(struct char_data *ch, int8_t v)
+{
+  ch->real_abils.str = v;
+}
+
+int8_t char_get_real_abils_wis(const struct char_data *ch)
+{
+  return ch->real_abils.wis;
+}
+
+void char_set_real_abils_wis(struct char_data *ch, int8_t v)
+{
+  ch->real_abils.wis = v;
+}
+
+struct script_data *char_get_script(const struct char_data *ch)
+{
+  return ch->script;
+}
+
+void char_set_script(struct char_data *ch, struct script_data *v)
+{
+  ch->script = v;
+}
+
+int char_get_size(const struct char_data *ch)
+{
+  return ch->size;
+}
+
+void char_set_size(struct char_data *ch, int v)
+{
+  ch->size = v;
+}
+
+void char_set_stamina(struct char_data *ch, double v)
+{
+  ch->stamina = v;
+}
+
+char *char_get_temp_prompt(const struct char_data *ch)
+{
+  return ch->temp_prompt;
+}
+
+int char_get_throws(const struct char_data *ch)
+{
+  return ch->throws;
+}
+
+void char_set_throws(struct char_data *ch, int v)
+{
+  ch->throws = v;
+}
+
+time_t char_get_time_birth(const struct char_data *ch)
+{
+  return ch->time.birth;
+}
+
+void char_set_time_birth(struct char_data *ch, time_t v)
+{
+  ch->time.birth = v;
+}
+
+time_t char_get_time_created(const struct char_data *ch)
+{
+  return ch->time.created;
+}
+
+void char_set_time_created(struct char_data *ch, time_t v)
+{
+  ch->time.created = v;
+}
+
+time_t char_get_time_logon(const struct char_data *ch)
+{
+  return ch->time.logon;
+}
+
+void char_set_time_logon(struct char_data *ch, time_t v)
+{
+  ch->time.logon = v;
+}
+
+time_t char_get_time_maxage(const struct char_data *ch)
+{
+  return ch->time.maxage;
+}
+
+void char_set_time_maxage(struct char_data *ch, time_t v)
+{
+  ch->time.maxage = v;
+}
+
+time_t char_get_time_played(const struct char_data *ch)
+{
+  return ch->time.played;
+}
+
+void char_set_time_played(struct char_data *ch, time_t v)
+{
+  ch->time.played = v;
+}
+
+int char_get_timer(const struct char_data *ch)
+{
+  return ch->timer;
+}
+
+void char_set_timer(struct char_data *ch, int v)
+{
+  ch->timer = v;
+}
+
+char *char_get_raw_title(const struct char_data *ch)
+{
+  return ch->title;
+}
+
+void char_set_raw_title(struct char_data *ch, char *v)
+{
+  ch->title = v;
+}
+
+struct script_data **char_script_slot(struct char_data *ch)
+{
+  return &ch->script;
+}
+
+struct script_memory **char_memory_slot(struct char_data *ch)
+{
+  return &ch->memory;
+}
+
+struct affected_type **char_affected_slot(struct char_data *ch)
+{
+  return &ch->affected;
+}
+
+struct player_special_data **char_player_specials_slot(struct char_data *ch)
+{
+  return &ch->player_specials;
+}
+
+struct obj_data **char_inventory_slot(struct char_data *ch)
+{
+  return &ch->carrying;
+}
+
+char **char_description_slot(struct char_data *ch)
+{
+  return &ch->description;
+}
+
+char **char_long_descr_slot(struct char_data *ch)
+{
+  return &ch->long_descr;
+}
+
+char **char_short_descr_slot(struct char_data *ch)
+{
+  return &ch->short_descr;
+}
+
+char **char_name_slot(struct char_data *ch)
+{
+  return &ch->name;
+}
+
+int8_t *char_real_abils_str_slot(struct char_data *ch)
+{
+  return &ch->real_abils.str;
+}
+
+int8_t *char_real_abils_intel_slot(struct char_data *ch)
+{
+  return &ch->real_abils.intel;
+}
+
+int8_t *char_real_abils_wis_slot(struct char_data *ch)
+{
+  return &ch->real_abils.wis;
+}
+
+int8_t *char_real_abils_dex_slot(struct char_data *ch)
+{
+  return &ch->real_abils.dex;
+}
+
+int8_t *char_real_abils_con_slot(struct char_data *ch)
+{
+  return &ch->real_abils.con;
+}
+
+int8_t *char_real_abils_cha_slot(struct char_data *ch)
+{
+  return &ch->real_abils.cha;
+}
+
+struct obj_data **char_get_equipment_array(struct char_data *ch)
+{
+  return ch->equipment;
+}
+
+void char_unlink_person(struct char_data **head, struct char_data *ch)
+{
+  struct char_data *temp;
+
+  REMOVE_FROM_LIST(ch, *head, next_in_room, temp);
+}
+
+void char_unlink_from_affect_list(struct char_data *ch)
+{
+  struct char_data *temp;
+
+  REMOVE_FROM_LIST(ch, affect_list, next_affect, temp);
+}
+
+void char_unlink_from_combat_list(struct char_data *ch)
+{
+  struct char_data *temp;
+
+  REMOVE_FROM_LIST(ch, combat_list, next_fighting, temp);
+}
+
+void char_reset_aff_abils(struct char_data *ch)
+{
+  ch->aff_abils = ch->real_abils;
+}
+
+void char_copy_time(struct char_data *to, const struct char_data *from)
+{
+  to->time = from->time;
 }

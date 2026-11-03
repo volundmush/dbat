@@ -23,6 +23,9 @@
 #include "dbat/races.h"
 #include "dbat/act.informative.h"
 #include "dbat/affect.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 /* external variables */
 
@@ -120,11 +123,11 @@ ASPELL(spell_summon)
       send_to_char(victim, "%s just tried to summon you to: %s.\r\n"
                            "%s failed because you have summon protection on.\r\n"
                            "Type NOSUMMON to allow other players to summon you.\r\n",
-                   char_get_name(ch), world[char_get_in_room(ch)].name,
-                   (ch->sex == SEX_MALE) ? "He" : "She");
+                   char_get_name(ch), rroom_get_name(char_get_in_room(ch)),
+                   (char_get_sex(ch) == SEX_MALE) ? "He" : "She");
 
       send_to_char(ch, "You failed because %s has summon protection on.\r\n", char_get_name(victim));
-      mudlog(LOG_BRF, ADMLVL_IMMORT, true, "%s failed summoning %s to %s.", char_get_name(ch), char_get_name(victim), world[char_get_in_room(ch)].name);
+      mudlog(LOG_BRF, ADMLVL_IMMORT, true, "%s failed summoning %s to %s.", char_get_name(ch), char_get_name(victim), rroom_get_name(char_get_in_room(ch)));
       return;
     }
   }
@@ -165,23 +168,23 @@ ASPELL(spell_locate_object)
     return;
   }
 
-  strlcpy(name, fname(obj->name), sizeof(name));
+  strlcpy(name, fname(obj_get_name(obj)), sizeof(name));
   j = level / 2;
 
-  for (i = object_list; i && (j > 0); i = i->next) {
-    if (!isname(name, i->name))
+  for (i = object_list; i && (j > 0); i = obj_get_next(i)) {
+    if (!isname(name, obj_get_name(i)))
       continue;
 
-    send_to_char(ch, "%c%s", toupper(*i->short_description), (i->short_description) + 1);
+    send_to_char(ch, "%c%s", toupper(*obj_get_short_description(i)), (obj_get_short_description(i)) + 1);
 
-    if (i->carried_by)
-      send_to_char(ch, " is being carried by %s.\r\n", char_pers(i->carried_by, ch));
+    if (obj_get_carried_by(i))
+      send_to_char(ch, " is being carried by %s.\r\n", char_pers(obj_get_carried_by(i), ch));
     else if (obj_get_in_room(i) != NOWHERE)
-      send_to_char(ch, " is in %s.\r\n", world[obj_get_in_room(i)].name);
-    else if (i->in_obj)
-      send_to_char(ch, " is in %s.\r\n", i->in_obj->short_description);
-    else if (i->worn_by)
-      send_to_char(ch, " is being worn by %s.\r\n", char_pers(i->worn_by, ch));
+      send_to_char(ch, " is in %s.\r\n", rroom_get_name(obj_get_in_room(i)));
+    else if (obj_get_in_obj(i))
+      send_to_char(ch, " is in %s.\r\n", obj_get_short_description(obj_get_in_obj(i)));
+    else if (obj_get_worn_by(i))
+      send_to_char(ch, " is being worn by %s.\r\n", char_pers(obj_get_worn_by(i), ch));
     else
       send_to_char(ch, "'s location is uncertain.\r\n");
 
@@ -221,11 +224,11 @@ ASPELL(spell_charm)
   else if (mag_newsaves(ch, victim, SPELL_CHARM, level, char_get_aff_abils_intel(ch)))
     send_to_char(ch, "Your victim resists!\r\n");
   else {
-    if (victim->master)
+    if (char_get_master(victim))
       stop_follower(victim);
 
     add_follower(victim, ch);
-    victim->master_id = char_get_idnum(ch);
+    char_set_master_id(victim, char_get_idnum(ch));
 
     af.type     = SPELL_CHARM;
     af.duration = 24 * 2;
@@ -254,7 +257,7 @@ ASPELL(spell_identify)
     char buf2[MAX_STRING_LENGTH];
 
     sprinttype(obj_get_type_flag(obj), item_types, bitbuf, sizeof(bitbuf));
-    send_to_char(ch, "You feel informed:\r\nObject '%s', Item type: %s\r\n", obj->short_description, bitbuf);
+    send_to_char(ch, "You feel informed:\r\nObject '%s', Item type: %s\r\n", obj_get_short_description(obj), bitbuf);
 
     if (obj_get_bitvector(obj)) {
       sprintbitarray(obj_get_bitvector(obj), affected_bits, AF_ARRAY_MAX, bitbuf, sizeof(bitbuf));
@@ -307,26 +310,26 @@ ASPELL(spell_identify)
     }
     found = false;
     for (i = 0; i < MAX_OBJ_AFFECT; i++) {
-      if ((obj->affected[i].location != APPLY_NONE) &&
-          (obj->affected[i].modifier != 0)) {
+      if ((obj_get_affected(obj)[i].location != APPLY_NONE) &&
+          (obj_get_affected(obj)[i].modifier != 0)) {
         if (!found) {
           send_to_char(ch, "Can affect you as :\r\n");
           found = true;
         }
-        sprinttype(obj->affected[i].location, apply_types, bitbuf, sizeof(bitbuf));
-        switch (obj->affected[i].location) {
+        sprinttype(obj_get_affected(obj)[i].location, apply_types, bitbuf, sizeof(bitbuf));
+        switch (obj_get_affected(obj)[i].location) {
           case APPLY_FEAT:
-            snprintf(buf2, sizeof(buf2), " (%s)", feat_list[obj->affected[i].specific].name);
+            snprintf(buf2, sizeof(buf2), " (%s)", feat_list[obj_get_affected(obj)[i].specific].name);
             break;
           case APPLY_SKILL:
-            snprintf(buf2, sizeof(buf2), " (%s)", spell_info[obj->affected[i].specific].name);
+            snprintf(buf2, sizeof(buf2), " (%s)", spell_info[obj_get_affected(obj)[i].specific].name);
             break;
           default:
             buf2[0] = 0;
             break;
         }
         send_to_char(ch, "   Affects: %s%s By %d\r\n", bitbuf, buf2,
-                     obj->affected[i].modifier);
+                     obj_get_affected(obj)[i].modifier);
       }
     }
   }
@@ -349,23 +352,23 @@ ASPELL(spell_enchant_weapon)
 
   /* Make sure no other affections. */
   for (i = 0; i < MAX_OBJ_AFFECT; i++)
-    if (obj->affected[i].location != APPLY_NONE)
+    if (obj_get_affected(obj)[i].location != APPLY_NONE)
       return;
 
   obj_extra_set(obj, ITEM_MAGIC, true);
 
   for (i = 0; i < MAX_OBJ_AFFECT; i++) {
-    if (obj->affected[i].location == APPLY_NONE) {
-      obj->affected[i].location = APPLY_ACCURACY;
-      obj->affected[i].modifier = 1 + (level >= 18);
+    if (obj_get_affected(obj)[i].location == APPLY_NONE) {
+      obj_get_affected(obj)[i].location = APPLY_ACCURACY;
+      obj_get_affected(obj)[i].modifier = 1 + (level >= 18);
       break;
     }
   }
 
   for (i = 0; i < MAX_OBJ_AFFECT; i++) {
-    if (obj->affected[i].location == APPLY_NONE) {
-      obj->affected[i].location = APPLY_DAMAGE;
-      obj->affected[i].modifier = 1 + (level >= 20);
+    if (obj_get_affected(obj)[i].location == APPLY_NONE) {
+      obj_get_affected(obj)[i].location = APPLY_DAMAGE;
+      obj_get_affected(obj)[i].modifier = 1 + (level >= 20);
       break;
     }
   }
@@ -422,17 +425,17 @@ ASPELL(spell_portal)
   if (ch == nullptr || victim == nullptr)
     return;
 
-  if (!can_edit_zone(ch, rm->zone) && zone_flagged(rm->zone, ZONE_QUEST)) {
+  if (!can_edit_zone(ch, room_get_zone(rm)) && zone_flagged(room_get_zone(rm), ZONE_QUEST)) {
     send_to_char(ch, "That target is in a quest zone.\r\n");
     return;
   }
 
-  if (zone_flagged(rm->zone, ZONE_CLOSED) && char_get_admlevel(ch) < ADMLVL_IMMORT) {
+  if (zone_flagged(room_get_zone(rm), ZONE_CLOSED) && char_get_admlevel(ch) < ADMLVL_IMMORT) {
     send_to_char(ch, "That target is in a closed zone.\r\n");
     return;
   }
 
-  if (zone_flagged(rm->zone, ZONE_NOIMMORT) && char_get_admlevel(ch) < ADMLVL_GRGOD) {
+  if (zone_flagged(room_get_zone(rm), ZONE_NOIMMORT) && char_get_admlevel(ch) < ADMLVL_GRGOD) {
     send_to_char(ch, "That target is in a zone closed to all.\r\n");
     return;
   }

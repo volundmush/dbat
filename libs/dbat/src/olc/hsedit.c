@@ -18,6 +18,8 @@
 #include "dbat/genzon.h"
 #include "dbat/house.h"
 #include "dbat/act.informative.h"
+#include "dbat/room_utils.h"
+#include "dbat/character_utils.h"
 
 static void hsedit_disp_menu(struct descriptor_data *d);
 
@@ -230,8 +232,8 @@ static void hsedit_dir_menu(struct descriptor_data *d)
   } else {
     /* Grab exit rooms */
     for (i = 0; i < 12; i++) {
-      if (world[house_rnum].dir_option[i])
-        newroom[i] = world[house_rnum].dir_option[i]->to_room;
+      if (rroom_get_dir_option(house_rnum, i))
+        newroom[i] = rroom_get_dir_option(house_rnum, i)->to_room;
       else
         newroom[i] = NOWHERE;
     }
@@ -252,18 +254,18 @@ static void hsedit_dir_menu(struct descriptor_data *d)
             "@gQ@D)@g Back to main menu\r\n"
             "@gEnter atrium direction : @n",
 
-            newroom[0] == NOWHERE ? "NO ROOM" : world[(newroom[0])].name,
-            newroom[1] == NOWHERE ? "NO ROOM" : world[(newroom[1])].name,
-            newroom[2] == NOWHERE ? "NO ROOM" : world[(newroom[2])].name,
-            newroom[3] == NOWHERE ? "NO ROOM" : world[(newroom[3])].name,
-            newroom[4] == NOWHERE ? "NO ROOM" : world[(newroom[4])].name,
-            newroom[5] == NOWHERE ? "NO ROOM" : world[(newroom[5])].name,
-            newroom[6] == NOWHERE ? "NO ROOM" : world[(newroom[6])].name,
-            newroom[7] == NOWHERE ? "NO ROOM" : world[(newroom[7])].name,
-            newroom[8] == NOWHERE ? "NO ROOM" : world[(newroom[8])].name,
-            newroom[9] == NOWHERE ? "NO ROOM" : world[(newroom[9])].name,
-            newroom[10] == NOWHERE ? "NO ROOM" : world[(newroom[10])].name,
-            newroom[11] == NOWHERE ? "NO ROOM" : world[(newroom[11])].name);
+            newroom[0] == NOWHERE ? "NO ROOM" : rroom_get_name((newroom[0])),
+            newroom[1] == NOWHERE ? "NO ROOM" : rroom_get_name((newroom[1])),
+            newroom[2] == NOWHERE ? "NO ROOM" : rroom_get_name((newroom[2])),
+            newroom[3] == NOWHERE ? "NO ROOM" : rroom_get_name((newroom[3])),
+            newroom[4] == NOWHERE ? "NO ROOM" : rroom_get_name((newroom[4])),
+            newroom[5] == NOWHERE ? "NO ROOM" : rroom_get_name((newroom[5])),
+            newroom[6] == NOWHERE ? "NO ROOM" : rroom_get_name((newroom[6])),
+            newroom[7] == NOWHERE ? "NO ROOM" : rroom_get_name((newroom[7])),
+            newroom[8] == NOWHERE ? "NO ROOM" : rroom_get_name((newroom[8])),
+            newroom[9] == NOWHERE ? "NO ROOM" : rroom_get_name((newroom[9])),
+            newroom[10] == NOWHERE ? "NO ROOM" : rroom_get_name((newroom[10])),
+            newroom[11] == NOWHERE ? "NO ROOM" : rroom_get_name((newroom[11])));
     OLC_MODE(d) = HSEDIT_DIR_MENU;
   }
   send_to_char(d->character, "%s", buf);
@@ -577,8 +579,8 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
         return;
       }
       for (i = 0; i < 12; i++) {
-        if (world[rnum].dir_option[i]) {
-          if (world[rnum].dir_option[i]->to_room == real_room(number)) {
+        if (rroom_get_dir_option(rnum, i)) {
+          if (rroom_get_dir_option(rnum, i)->to_room == real_room(number)) {
             found = true;
             id    = i;
           }
@@ -606,20 +608,20 @@ void hsedit_parse(struct descriptor_data *d, char *arg)
         return;
       }
       house = real_room(OLC_HOUSE(d)->vnum);
-      if (!(world[house].dir_option[number])) {
+      if (!(rroom_get_dir_option(house, number))) {
         send_to_char(d->character, "You cannot set the atrium to a room that doesn't exist!\r\n");
         hsedit_dir_menu(d);
         return;
       }
-      if ((world[house].dir_option[number]->to_room) == NOWHERE) {
+      if ((rroom_get_dir_option(house, number)->to_room) == NOWHERE) {
         send_to_char(d->character, "You cannot set the atrium to nowhere!\r\n");
         hsedit_dir_menu(d);
         return;
       }
       OLC_HOUSE(d)->exit_num = number;
 
-      rnum                 = world[house].dir_option[number]->to_room;
-      OLC_HOUSE(d)->atrium = world[rnum].number;
+      rnum                 = rroom_get_dir_option(house, number)->to_room;
+      OLC_HOUSE(d)->atrium = rroom_get_vnum(rnum);
       break;
 
     case HSEDIT_NOVNUM:
@@ -928,7 +930,7 @@ ACMD(do_oasis_hsedit)
   /** Point d to the builder's descriptor (for easier typing later).         **/
 
   /****************************************************************************/
-  d = ch->desc;
+  d = char_get_desc(ch);
 
   /****************************************************************************/
   /** Give the descriptor an OLC structure.                                 **/

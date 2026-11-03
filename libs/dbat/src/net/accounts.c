@@ -18,6 +18,7 @@
 
 #include <unistd.h>
 #include "nanny_internal.h"
+#include "dbat/character_utils.h"
 
 /* The account's character slots, numbered from 1. */
 char **account_slot(struct descriptor_data *d, int n)
@@ -530,7 +531,7 @@ void fingerUser(struct char_data *ch, char *name)
     send_to_char(ch, "@D[@gCh. Slot 4 @D: @w%-30s@D]@n\r\n", tmp4);
     send_to_char(ch, "@D[@gCh. Slot 5 @D: @w%-30s@D]@n\r\n", tmp5);
     send_to_char(ch, "\n");
-    customRead(ch->desc, 1, name);
+    customRead(char_get_desc(ch), 1, name);
   }
   return;
 }

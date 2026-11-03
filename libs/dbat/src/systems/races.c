@@ -8,6 +8,8 @@
 #include "dbat/fight.h"
 #include "dbat/weather.h"
 #include "dbat/transformations.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
 
@@ -127,10 +129,10 @@ bool invalid_race(struct char_data *ch, struct obj_data *obj)
 
 int get_size(struct char_data *ch)
 {
-  if (ch->size == SIZE_UNDEFINED) {
-    ch->size = race_get_size(ch->race);
+  if (char_get_size(ch) == SIZE_UNDEFINED) {
+    char_set_size(ch, race_get_size(char_get_race(ch)));
   }
-  return ch->size;
+  return char_get_size(ch);
 }
 
 int wield_type(int chsize, const struct obj_data *weap)
@@ -378,7 +380,7 @@ bool race_check_can_transform(char_data *ch)
 
 static int race_max_transform_tier(char_data *ch)
 {
-  switch (ch->race) {
+  switch (char_get_race(ch)) {
     case RACE_SAIYAN:
       if (char_plr_flagged(ch, PLR_LSSJ)) {
         return 2;
@@ -452,7 +454,7 @@ static const struct form_name majin_form_names[] = {
 
 static const struct form_name *race_form_names(char_data *ch)
 {
-  switch (ch->race) {
+  switch (char_get_race(ch)) {
     case RACE_ANDROID:
       return android_form_names;
     case RACE_BIO:
@@ -579,7 +581,7 @@ static const transform_bonus hoshi_life = {
 
 static const transform_bonus *race_trans_table(const char_data *ch)
 {
-  switch (ch->race) {
+  switch (char_get_race(ch)) {
     case RACE_ANDROID:
       if (char_plr_flagged(ch, PLR_SENSEM)) {
         return android_trans_bonus_sense;
@@ -699,7 +701,7 @@ bool race_find_form(char_data *ch, const char *arg, transform_bonus *out)
 bool race_check_trans_unlock(char_data *ch, int tier)
 {
   // First, check for special requirements which are not 'paid'.
-  switch (ch->race) {
+  switch (char_get_race(ch)) {
     case RACE_BIO:
       if (tier > 3 - char_get_absorbs(ch)) {
         send_to_char(ch, "You need to absorb something to transform!\r\n");
@@ -723,7 +725,7 @@ bool race_check_trans_unlock(char_data *ch, int tier)
   int rpp_cost = 0;
 
   // Second, check for RPP requirements.
-  switch (ch->race) {
+  switch (char_get_race(ch)) {
     case RACE_ANDROID:
       switch (tier) {
         case 1:
@@ -770,7 +772,7 @@ bool race_check_trans_unlock(char_data *ch, int tier)
 
   // Android upgrades cost PS instead of RPP. But this system has now been standardized so anything can.
   int ps_cost = 0;
-  switch (ch->race) {
+  switch (char_get_race(ch)) {
     case RACE_ANDROID:
       switch (tier) {
         case 1:
@@ -800,7 +802,7 @@ bool race_check_trans_unlock(char_data *ch, int tier)
 void race_display_forms(char_data *ch)
 {
 
-  switch (ch->race) {
+  switch (char_get_race(ch)) {
     case RACE_HUMAN:
       send_to_char(ch, "              @YSuper @CHuman@n\r\n");
       send_to_char(ch, "@b------------------------------------------------@n\r\n");
@@ -1029,7 +1031,7 @@ void race_display_trans_req(char_data *ch)
 
 void race_echo_transform(char_data *ch, int tier)
 {
-  switch (ch->race) {
+  switch (char_get_race(ch)) {
     case RACE_HUMAN:
       switch (tier) {
         case 1:
@@ -1336,7 +1338,7 @@ void race_echo_transform(char_data *ch, int tier)
 
 void race_echo_revert(char_data *ch, int tier)
 {
-  switch (ch->race) {
+  switch (char_get_race(ch)) {
     case RACE_HUMAN:
       switch (tier) {
         case 1:
@@ -1482,7 +1484,7 @@ static const int64_t soft_cap_demon[10] = {500, 1500, 5000, 25000, 40000, 100000
 
 const int64_t *race_soft_cap_table(const char_data *ch)
 {
-  switch (ch->race) {
+  switch (char_get_race(ch)) {
     case RACE_DEMON:
     case RACE_KANASSAN:
       return soft_cap_demon;
@@ -1501,7 +1503,7 @@ const int64_t *race_soft_cap_table(const char_data *ch)
 
 softcap_type race_soft_cap_type(const char_data *ch)
 {
-  switch (ch->race) {
+  switch (char_get_race(ch)) {
     case RACE_BIO:
     case RACE_MAJIN:
       return SOFTCAP_VARIABLE;

@@ -10,6 +10,7 @@
 
 #include <linux/limits.h>
 #include <errno.h>
+#include "dbat/character_utils.h"
 
 /* get_line reads the next non-blank line off of the input stream.
  * The newline character is removed from the input.  Lines which begin
@@ -211,7 +212,7 @@ void topWrite(struct char_data *ch)
     return;
   }
 
-  if (!ch->desc || !char_get_user(ch)) {
+  if (!char_get_desc(ch) || !char_get_user(ch)) {
     return;
   }
 

@@ -117,7 +117,7 @@ ACMD(do_who)
         continue;
       if (questwho && !char_prf_flagged(tch, PRF_QUEST))
         continue;
-      if (localwho && world[char_get_in_room(ch)].zone != world[char_get_in_room(tch)].zone)
+      if (localwho && rroom_get_zone(char_get_in_room(ch)) != rroom_get_zone(char_get_in_room(tch)))
         continue;
       if (char_prf_flagged(tch, PRF_HIDE) && tch != ch && char_get_admlevel(ch) < ADMLVL_IMMORT) {
         hide += 1;
@@ -127,7 +127,7 @@ ACMD(do_who)
         continue;
       if (showclass && !(showclass & (1U << char_get_class(tch))))
         continue;
-      if (showgroup && (!tch->master || !char_aff_flagged(tch, AFF_GROUP)))
+      if (showgroup && (!char_get_master(tch) || !char_aff_flagged(tch, AFF_GROUP)))
         continue;
       for (i = 0; i < num_ranks; i++)
         if (char_get_admlevel(tch) >= rank[i].min_level && char_get_admlevel(tch) <= rank[i].max_level)
@@ -165,7 +165,7 @@ ACMD(do_who)
         continue;
       if (questwho && !char_prf_flagged(tch, PRF_QUEST))
         continue;
-      if (localwho && world[char_get_in_room(ch)].zone != world[char_get_in_room(tch)].zone)
+      if (localwho && rroom_get_zone(char_get_in_room(ch)) != rroom_get_zone(char_get_in_room(tch)))
         continue;
       if (who_room && (char_get_in_room(tch) != char_get_in_room(ch)))
         continue;
@@ -173,9 +173,9 @@ ACMD(do_who)
         continue;
       if (showclass && !(showclass & (1U << char_get_class(tch))))
         continue;
-      if (showgroup && (!tch->master || !char_aff_flagged(tch, AFF_GROUP)))
+      if (showgroup && (!char_get_master(tch) || !char_aff_flagged(tch, AFF_GROUP)))
         continue;
-      if (showleader && (!tch->followers || !char_aff_flagged(tch, AFF_GROUP)))
+      if (showleader && (!char_get_followers(tch) || !char_aff_flagged(tch, AFF_GROUP)))
         continue;
 
       if (short_list) {
@@ -390,12 +390,12 @@ ACMD(do_users)
       strcpy(state, connected_types[desc_get_connected(d)]);
 
     if (d->character && desc_get_connected(d) == CON_PLAYING && char_get_admlevel(d->character) <= char_get_admlevel(ch))
-      snprintf(idletime, sizeof(idletime), "%3d", d->character->timer * SECS_PER_MUD_HOUR / SECS_PER_REAL_MIN);
+      snprintf(idletime, sizeof(idletime), "%3d", char_get_timer(d->character) * SECS_PER_MUD_HOUR / SECS_PER_REAL_MIN);
     else
       strcpy(idletime, "");
 
     snprintf(line, sizeof(line), "%3d %-20s %-20s %-14s %-3s %-8s %1s ", d->desc_num,
-             d->original && d->original->name ? d->original->name : d->character && d->character->name ? d->character->name
+             d->original && char_get_alias(d->original) ? char_get_alias(d->original) : d->character && char_get_alias(d->character) ? char_get_alias(d->character)
                                                                                                        : "UNDEFINED",
              d->user ? d->user : "UNKNOWN", state, idletime, timeptr,
              "N");
@@ -432,19 +432,19 @@ static void perform_mortal_where(struct char_data *ch, char *arg)
         continue;
       if (char_get_in_room(i) == NOWHERE || !char_can_see(ch, i))
         continue;
-      if (world[char_get_in_room(ch)].zone != world[char_get_in_room(i)].zone)
+      if (rroom_get_zone(char_get_in_room(ch)) != rroom_get_zone(char_get_in_room(i)))
         continue;
-      send_to_char(ch, "%-20s - %s\r\n", char_get_name(i), world[char_get_in_room(i)].name);
+      send_to_char(ch, "%-20s - %s\r\n", char_get_name(i), rroom_get_name(char_get_in_room(i)));
     }
   } else { /* print only FIRST char, not all. */
-    for (i = character_list; i; i = i->next) {
+    for (i = character_list; i; i = char_get_next(i)) {
       if (char_get_in_room(i) == NOWHERE || i == ch)
         continue;
-      if (!char_can_see(ch, i) || world[char_get_in_room(i)].zone != world[char_get_in_room(ch)].zone)
+      if (!char_can_see(ch, i) || rroom_get_zone(char_get_in_room(i)) != rroom_get_zone(char_get_in_room(ch)))
         continue;
-      if (!isname(arg, i->name))
+      if (!isname(arg, char_get_alias(i)))
         continue;
-      send_to_char(ch, "%-25s - %s\r\n", char_get_name(i), world[char_get_in_room(i)].name);
+      send_to_char(ch, "%-25s - %s\r\n", char_get_name(i), rroom_get_name(char_get_in_room(i)));
       return;
     }
     send_to_char(ch, "Nobody around by that name.\r\n");
@@ -455,23 +455,23 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
                                   int recur)
 {
   if (num > 0)
-    send_to_char(ch, "O%3d. %-25s - ", num, obj->short_description);
+    send_to_char(ch, "O%3d. %-25s - ", num, obj_get_short_description(obj));
   else
     send_to_char(ch, "%33s", " - ");
 
-  if (obj->script)
-    send_to_char(ch, "[T%d]", obj->proto_script->vnum);
+  if (obj_get_script(obj))
+    send_to_char(ch, "[T%d]", obj_get_proto_script(obj)->vnum);
 
   if (obj_get_in_room(obj) != NOWHERE)
-    send_to_char(ch, "[%5d] %s\r\n", rroom_get_vnum(obj_get_in_room(obj)), world[obj_get_in_room(obj)].name);
-  else if (obj->carried_by)
-    send_to_char(ch, "carried by %s in room [%d]\r\n", char_pers(obj->carried_by, ch), rroom_get_vnum(char_get_in_room(obj->carried_by)));
-  else if (obj->worn_by)
-    send_to_char(ch, "worn by %s in room [%d]\r\n", char_pers(obj->worn_by, ch), rroom_get_vnum(char_get_in_room(obj->worn_by)));
-  else if (obj->in_obj) {
-    send_to_char(ch, "inside %s%s\r\n", obj->in_obj->short_description, (recur ? ", which is" : " "));
+    send_to_char(ch, "[%5d] %s\r\n", rroom_get_vnum(obj_get_in_room(obj)), rroom_get_name(obj_get_in_room(obj)));
+  else if (obj_get_carried_by(obj))
+    send_to_char(ch, "carried by %s in room [%d]\r\n", char_pers(obj_get_carried_by(obj), ch), rroom_get_vnum(char_get_in_room(obj_get_carried_by(obj))));
+  else if (obj_get_worn_by(obj))
+    send_to_char(ch, "worn by %s in room [%d]\r\n", char_pers(obj_get_worn_by(obj), ch), rroom_get_vnum(char_get_in_room(obj_get_worn_by(obj))));
+  else if (obj_get_in_obj(obj)) {
+    send_to_char(ch, "inside %s%s\r\n", obj_get_short_description(obj_get_in_obj(obj)), (recur ? ", which is" : " "));
     if (recur)
-      print_object_location(0, obj->in_obj, ch, recur);
+      print_object_location(0, obj_get_in_obj(obj), ch, recur);
   } else
     send_to_char(ch, "in an unknown location\r\n");
 }
@@ -530,30 +530,30 @@ static void perform_immort_where(struct char_data *ch, char *arg)
           if (d->original)
             send_to_char(ch, "%-20s - [%5d]   %s (in %s)\r\n",
                          char_get_name(i), rroom_get_vnum(char_get_in_room(d->character)),
-                         world[char_get_in_room(d->character)].name, char_get_name(d->character));
+                         rroom_get_name(char_get_in_room(d->character)), char_get_name(d->character));
           else {
-            send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", char_get_name(i), rroom_get_vnum(char_get_in_room(i)), planet[num2], world[char_get_in_room(i)].name);
+            send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", char_get_name(i), rroom_get_vnum(char_get_in_room(i)), planet[num2], rroom_get_name(char_get_in_room(i)));
           }
         }
       }
   } else {
     mudlog(LOG_NRM, MAX(ADMLVL_GRGOD, char_get_invis_level(ch)), true, "GODCMD: %s has checked where for the location of %s", char_get_name(ch), arg);
-    for (i = character_list; i; i = i->next) {
-      if (char_can_see(ch, i) && char_get_in_room(i) != NOWHERE && isname(arg, i->name)) {
+    for (i = character_list; i; i = char_get_next(i)) {
+      if (char_can_see(ch, i) && char_get_in_room(i) != NOWHERE && isname(arg, char_get_alias(i))) {
         found = 1;
         send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, char_get_name(i),
-                     rroom_get_vnum(char_get_in_room(i)), world[char_get_in_room(i)].name);
-        if (char_is_npc(i) && i->script) {
-          if (!i->script->trig_list->next)
-            send_to_char(ch, "[T%5d] ", trig_get_vnum(i->script->trig_list));
+                     rroom_get_vnum(char_get_in_room(i)), rroom_get_name(char_get_in_room(i)));
+        if (char_is_npc(i) && char_get_script(i)) {
+          if (!char_get_script(i)->trig_list->next)
+            send_to_char(ch, "[T%5d] ", trig_get_vnum(char_get_script(i)->trig_list));
           else
             send_to_char(ch, "[TRIGS] ");
         }
         send_to_char(ch, "\r\n");
       }
     }
-    for (k = object_list; k; k = k->next)
-      if (char_can_see_obj(ch, k) && isname(arg, k->name)) {
+    for (k = object_list; k; k = obj_get_next(k))
+      if (char_can_see_obj(ch, k) && isname(arg, obj_get_name(k))) {
         found = 1;
         print_object_location(++num, k, ch, true);
       }
@@ -749,7 +749,7 @@ ACMD(do_whois)
   } else {
     CREATE(victim, struct char_data, 1);
     clear_char(victim);
-    CREATE(victim->player_specials, struct player_special_data, 1);
+    CREATE(*char_player_specials_slot(victim), struct player_special_data, 1);
     if (load_char(argument, victim) >= 0) {
       clan = false;
       send_to_char(ch, "@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");

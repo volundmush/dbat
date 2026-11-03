@@ -127,8 +127,8 @@ ACMD(do_multiform)
   struct char_data *tch = nullptr, *next_v = nullptr;
   int count = 0;
 
-  for (tch = world[char_get_in_room(ch)].people; tch; tch = next_v) {
-    next_v = tch->next_in_room;
+  for (tch = rroom_get_people(char_get_in_room(ch)); tch; tch = next_v) {
+    next_v = char_get_next_in_room(tch);
     if (tch == ch || !char_is_npc(tch)) {
       continue;
     }
@@ -145,8 +145,8 @@ ACMD(do_multiform)
       send_to_char(ch, "You have no multiforms present to merge with!\r\n");
       return;
     }
-    for (tch = world[char_get_in_room(ch)].people; tch; tch = next_v) {
-      next_v = tch->next_in_room;
+    for (tch = rroom_get_people(char_get_in_room(ch)); tch; tch = next_v) {
+      next_v = char_get_next_in_room(tch);
       if (tch == ch || !char_is_npc(tch)) {
         continue;
       }
@@ -209,60 +209,60 @@ static void generate_multiform(struct char_data *ch, int count)
   }
 
   char clone_name[MAX_INPUT_LENGTH];
-  snprintf(clone_name, sizeof(clone_name), "%s's Clone", ch->name);
+  snprintf(clone_name, sizeof(clone_name), "%s's Clone", char_get_alias(ch));
 
   char clone_sdesc[MAX_INPUT_LENGTH];
-  snprintf(clone_sdesc, sizeof(clone_sdesc), "%s's @CClone@n", ch->name);
+  snprintf(clone_sdesc, sizeof(clone_sdesc), "%s's @CClone@n", char_get_alias(ch));
   char clone_ldesc[MAX_INPUT_LENGTH];
-  snprintf(clone_ldesc, sizeof(clone_ldesc), "%s's @CClone@w is standing here.@n\n", ch->name);
+  snprintf(clone_ldesc, sizeof(clone_ldesc), "%s's @CClone@w is standing here.@n\n", char_get_alias(ch));
 
   for (int i = 0; i < count; i++) {
     char_data *clone = nullptr;
     clone            = read_mobile(r_num, REAL);
 
-    clone->name        = strdup(clone_name);
-    clone->short_descr = strdup(clone_sdesc);
-    clone->long_descr  = strdup(clone_ldesc);
-    if (ch->description)
-      clone->description = strdup(ch->description);
-    clone->race    = ch->race;
-    clone->chclass = ch->chclass;
+    char_set_alias(clone, strdup(clone_name));
+    char_set_sdesc(clone, strdup(clone_sdesc));
+    char_set_ldesc(clone, strdup(clone_ldesc));
+    if (char_get_ddesc(ch))
+      char_set_ddesc(clone, strdup(char_get_ddesc(ch)));
+    char_set_race(clone, char_get_race(ch));
+    char_set_class(clone, char_get_class(ch));
 
     // Not sure if these are actually used...
-    clone->alignment = ch->alignment;
+    char_set_alignment(clone, char_get_alignment(ch));
 
     // Make the physical appearance match!
-    clone->sex     = ch->sex;
-    clone->hairl   = ch->hairl;
-    clone->hairs   = ch->hairs;
-    clone->hairc   = ch->hairc;
-    clone->skin    = ch->skin;
-    clone->eye     = ch->eye;
-    clone->distfea = ch->distfea;
-    clone->aura    = ch->aura;
+    char_set_sex(clone, char_get_sex(ch));
+    char_set_hairl(clone, char_get_hairl(ch));
+    char_set_hairs(clone, char_get_hairs(ch));
+    char_set_hairc(clone, char_get_hairc(ch));
+    char_set_skin(clone, char_get_skin(ch));
+    char_set_eye(clone, char_get_eye(ch));
+    char_set_distfea(clone, char_get_distfea(ch));
+    char_set_aura(clone, char_get_aura(ch));
 
-    clone->weight = ch->weight;
-    clone->height = ch->height;
-    clone->size   = ch->size;
-    clone->level  = ch->level;
-    clone->time   = ch->time;
+    char_set_weight(clone, char_get_weight(ch));
+    char_set_height(clone, char_get_height(ch));
+    char_set_size(clone, char_get_size(ch));
+    char_set_class_level(clone, char_get_class_level(ch));
+    char_copy_time(clone, ch);
 
-    clone->tail_growth = ch->tail_growth;
-    ch->transclass     = ch->transclass;
+    char_set_tail_growth(clone, char_get_tail_growth(ch));
+    char_set_transclass(ch, char_get_transclass(ch));
 
     // Copying these values, but it shouldn't matter because clones no longer work this way.
-    clone->basepl = ch->basepl;
-    clone->baseki = ch->baseki;
-    clone->basest = ch->basest;
+    char_set_basepl(clone, getBasePL(ch));
+    char_set_baseki(clone, getBaseKI(ch));
+    char_set_basest(clone, getBaseST(ch));
 
     // Bioandroid Genome copy...
-    clone->genome[0] = ch->genome[0];
-    clone->genome[1] = ch->genome[1];
+    char_set_genome(clone, 0, char_get_genome(ch, 0));
+    char_set_genome(clone, 1, char_get_genome(ch, 1));
 
     // Limb copy...
     for (int l = 0; l < 3; l++) {
-      clone->limbs[l]          = ch->limbs[l];
-      clone->limb_condition[l] = ch->limb_condition[l];
+      char_get_limbs(clone)[l]          = char_get_limbs(ch)[l];
+      char_set_limb_condition(clone, l, char_get_limb_condition(ch, l));
     }
 
     char_set_class_level(clone, char_get_class_level(ch));
@@ -284,7 +284,7 @@ void handle_multi_merge(struct char_data *form)
   send_to_char(ch, "@YYou merge with one of your forms!@n\r\n");
   act("@y$n@Y merges with one of his multiforms!@n\r\n", true, ch, 0, 0, TO_ROOM);
 
-  ch->clones = MAX(0, ch->clones - 1);
+  char_set_clones(ch, MAX(0, char_get_clones(ch) - 1));
   extract_char(form);
 }
 
@@ -335,13 +335,13 @@ ACMD(do_moondust)
 
   struct char_data *vict = nullptr, *next_v = nullptr;
 
-  for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-    next_v = vict->next_in_room;
+  for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+    next_v = char_get_next_in_room(vict);
     if (vict == ch) {
       continue;
     }
     if (char_aff_flagged(vict, AFF_GROUP)) {
-      if (ch->master == vict->master || vict->master == ch || ch->master == vict) {
+      if (char_get_master(ch) == char_get_master(vict) || char_get_master(vict) == ch || char_get_master(ch) == vict) {
         incCurHealth(vict, heal, true);
         act("@CYou breathe in the dust and are healed by it somewhat!@n", true, vict, 0, 0, TO_CHAR);
         act("@c$n@C breathes in the dust and is healed somewhat!@n", true, vict, 0, 0, TO_ROOM);
@@ -646,8 +646,8 @@ ACMD(do_scry)
   gainBaseST(vict, (getBaseST(vict) * .01) * boost, false);
 
   send_to_char(vict, "Your Powerlevel, Ki, and Stamina have improved drastically! On top of that your Intelligence and Wisdom have improved permanantly!\r\n");
-  vict->real_abils.intel += 2;
-  vict->real_abils.wis += 2;
+  char_set_real_abils_intel(vict, char_get_real_abils_intel(vict) + 2);
+  char_set_real_abils_wis(vict, char_get_real_abils_wis(vict) + 2);
   char_set_practice_points(ch, char_get_practice_points(ch) - (2000));
   if (char_get_level(ch) < 100) {
     send_to_char(ch, "@D[@mPractice Sessions@D:@R -2000@D]@n\r\n");
@@ -668,8 +668,8 @@ void ash_burn(struct char_data *ch)
   struct obj_data *obj, *next_obj;
 
   if (ch && char_get_in_room(ch) != NOWHERE) {
-    for (obj = world[char_get_in_room(ch)].contents; obj; obj = next_obj) {
-      next_obj = obj->next_content;
+    for (obj = rroom_get_contents(char_get_in_room(ch)); obj; obj = next_obj) {
+      next_obj = obj_get_next_content(obj);
       if (obj_get_vnum(obj) == 1306) {
         if (axion_dice(0) > char_get_aff_abils_con(ch)) {
           if (!char_is_android(ch) && !char_is_demon(ch) && !char_is_icer(ch)) {
@@ -714,15 +714,15 @@ ACMD(do_ashcloud)
   struct obj_data *ash = nullptr, *obj, *next_obj;
   int there            = false;
 
-  for (obj = ch->carrying; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     if (obj_get_vnum(obj) == 1305) {
       ash = obj;
     }
   }
 
-  for (obj = world[char_get_in_room(ch)].contents; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = rroom_get_contents(char_get_in_room(ch)); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     if (obj_get_vnum(obj) == 1306) {
       there = true;
     }
@@ -1098,8 +1098,8 @@ ACMD(do_channel)
   struct obj_data *obj, *next_obj = nullptr, *ruby = nullptr;
   int found = false;
 
-  for (obj = ch->carrying; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     if (found == false && obj_get_vnum(obj) == 6600) {
       if (!obj_extra_flagged(obj, ITEM_HOT)) {
         found = true;
@@ -1254,8 +1254,8 @@ ACMD(do_hydromancy)
         act(bun, true, ch, 0, 0, TO_CHAR);
         act(bunn, true, ch, 0, 0, TO_ROOM);
 
-        for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-          next_v = vict->next_in_room;
+        for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+          next_v = char_get_next_in_room(vict);
           if (vict == ch)
             continue;
           if (!can_kill(ch, vict, nullptr, 1)) {
@@ -1457,8 +1457,8 @@ ACMD(do_ensnare)
   struct obj_data *weave, *obj = nullptr, *next_obj;
   int found = false;
 
-  for (weave = ch->carrying; weave; weave = next_obj) {
-    next_obj = weave->next_content;
+  for (weave = char_get_inventory(ch); weave; weave = next_obj) {
+    next_obj = obj_get_next_content(weave);
     if (found == false && valid_silk(weave) && !obj_extra_flagged(weave, ITEM_FORGED)) {
       found = true;
       obj   = weave;
@@ -1914,14 +1914,14 @@ ACMD(do_obstruct)
     return;
   }
   struct obj_data *obj;
-  room_rnum newroom = world[ch->in_room].dir_option[dir]->to_room;
+  room_rnum newroom = rroom_get_dir_option(char_get_in_room(ch), dir)->to_room;
 
   if (rroom_flagged(newroom, ROOM_PEACEFUL)) {
     send_to_char(ch, "You can not block off a peaceful area.\r\n");
     return;
   }
 
-  for (obj = world[newroom].contents; obj; obj = obj->next_content) {
+  for (obj = rroom_get_contents(newroom); obj; obj = obj_get_next_content(obj)) {
     if (obj_get_vnum(obj) == 79) {
       if (obj_get_cost(obj) == dir2) {
         if (skill < prob) {

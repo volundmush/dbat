@@ -996,15 +996,15 @@ ACMD(do_baku)
 
   skill = init_skill(ch, SKILL_BAKUHATSUHA); /* Set skill value */
 
-  for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-    next_v = vict->next_in_room;
+  for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+    next_v = char_get_next_in_room(vict);
     if (vict == ch) {
       continue;
     }
     if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
       continue;
     }
-    if (char_aff_flagged(vict, AFF_GROUP) && (vict->master == ch || ch->master == vict)) {
+    if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(vict) == ch || char_get_master(ch) == vict)) {
       continue;
     }
     if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
@@ -1057,15 +1057,15 @@ ACMD(do_baku)
         dmg = (dmg / 100) * 25;
         break;
     }
-    for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-      next_v = vict->next_in_room;
+    for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+      next_v = char_get_next_in_room(vict);
       if (vict == ch) {
         continue;
       }
       if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
         continue;
       }
-      if (char_aff_flagged(vict, AFF_GROUP) && (vict->master == ch || ch->master == vict || vict->master == ch->master)) {
+      if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(vict) == ch || char_get_master(ch) == vict || char_get_master(vict) == char_get_master(ch))) {
         continue;
       }
       if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {

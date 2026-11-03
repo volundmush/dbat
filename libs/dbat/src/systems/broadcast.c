@@ -29,7 +29,7 @@ void fly_zone(zone_rnum zone, const char *messg, struct char_data *ch)
     return;
 
   for (i = descriptor_list; i; i = i->next) {
-    if (!i->connected && i->character && char_is_awake(i->character) && char_is_outside(i->character) && (char_get_in_room(i->character) != NOWHERE) && (world[char_get_in_room(i->character)].zone == zone) && i->character != ch) {
+    if (!i->connected && i->character && char_is_awake(i->character) && char_is_outside(i->character) && (char_get_in_room(i->character) != NOWHERE) && (rroom_get_zone(char_get_in_room(i->character)) == zone) && i->character != ch) {
       if (char_plr_flagged(i->character, PLR_DISGUISED)) {
         write_to_output(i, "A disguised figure %s", messg);
       } else {
@@ -60,7 +60,7 @@ void send_to_sense(int type, const char *messg, struct char_data *ch)
     if (!char_get_skill(tch, SKILL_SENSE)) {
       continue;
     }
-    if (((world[char_get_in_room(ch)].zone != world[char_get_in_room(tch)].zone && type == 0) || !char_is_awake(tch))) {
+    if (((rroom_get_zone(char_get_in_room(ch)) != rroom_get_zone(char_get_in_room(tch)) && type == 0) || !char_is_awake(tch))) {
       continue;
     }
     if (rroom_flagged(char_get_in_room(ch), ROOM_SHIP)) {
@@ -161,7 +161,7 @@ void send_to_scouter(const char *messg, struct char_data *ch, int num, int type)
     if (tch == ch) {
       continue;
     }
-    if ((((world[char_get_in_room(ch)].zone != world[char_get_in_room(tch)].zone) && type == 0) || !char_is_awake(tch))) {
+    if ((((rroom_get_zone(char_get_in_room(ch)) != rroom_get_zone(char_get_in_room(tch))) && type == 0) || !char_is_awake(tch))) {
       continue;
     }
     if (rroom_flagged(char_get_in_room(ch), ROOM_SHIP)) {

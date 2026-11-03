@@ -31,6 +31,7 @@
 
 #include <unistd.h>
 #include "nanny_internal.h"
+#include "dbat/character_utils.h"
 
 static void payout(int num);
 
@@ -128,7 +129,7 @@ static bool perform_dupe_check(struct descriptor_data *d)
         mode   = UNSWITCH;
       }
       if (k->character)
-        k->character->desc = nullptr;
+        char_set_desc(k->character, nullptr);
       k->character = nullptr;
       k->original  = nullptr;
     } else if (k->character && char_get_idnum(k->character) == id && k->original) {
@@ -148,7 +149,7 @@ static bool perform_dupe_check(struct descriptor_data *d)
         target = k->character;
         mode   = USURP;
       }
-      k->character->desc = nullptr;
+      char_set_desc(k->character, nullptr);
       k->character       = nullptr;
       k->original        = nullptr;
       write_to_output(k, "\r\nMultiple login detected -- disconnecting.\r\n");
@@ -166,7 +167,7 @@ static bool perform_dupe_check(struct descriptor_data *d)
   */
 
   for (ch = character_list; ch; ch = next_ch) {
-    next_ch = ch->next;
+    next_ch = char_get_next(ch);
 
     if (char_is_npc(ch))
       continue;
@@ -174,7 +175,7 @@ static bool perform_dupe_check(struct descriptor_data *d)
       continue;
 
     /* ignore chars with descriptors (already handled by above step) */
-    if (ch->desc)
+    if (char_get_desc(ch))
       continue;
 
     /* don't extract the target char we've found one already */
@@ -202,9 +203,9 @@ static bool perform_dupe_check(struct descriptor_data *d)
   /* Okay, we've found a target.  Connect d to target. */
   free_char(d->character); /* get rid of the old char */
   d->character        = target;
-  d->character->desc  = d;
+  char_set_desc(d->character, d);
   d->original         = nullptr;
-  d->character->timer = 0;
+  char_set_timer(d->character, 0);
   char_plr_set(d->character, PLR_MAILING, false);
   char_plr_set(d->character, PLR_WRITING, false);
   char_aff_set(d->character, AFF_GROUP, false);
@@ -214,10 +215,10 @@ static bool perform_dupe_check(struct descriptor_data *d)
     case RECON:
       write_to_output(d, "Reconnecting.\r\n");
       pay_player_count_rewards(update_player_count());
-      d->character->time.logon = time(0);
+      char_set_time_logon(d->character, time(0));
       act("$n has reconnected.", true, d->character, 0, 0, TO_ROOM);
       mudlog(LOG_NRM, MAX(ADMLVL_NONE, char_get_invis_level(d->character)), true, "%s [%s] has reconnected.", char_get_name(d->character), d->host);
-      d->character->rp = d->rpp;
+      char_set_rp(d->character, d->rpp);
       if (has_mail(char_get_idnum(d->character)))
         write_to_output(d, "You have mail waiting.\r\n");
       board_login_notices(d->character);
@@ -243,7 +244,7 @@ static bool perform_dupe_check(struct descriptor_data *d)
       act("$n suddenly keels over in pain, surrounded by a white aura...\r\n"
           "$n's body has been taken over by a new spirit!",
           true, d->character, 0, 0, TO_ROOM);
-      d->character->rp = d->rpp;
+      char_set_rp(d->character, d->rpp);
       mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(d->character)), true,
              "%s has re-logged in ... disconnecting old socket.", char_get_name(d->character));
       break;
@@ -290,22 +291,22 @@ int enter_player_game(struct descriptor_data *d)
   if (char_plr_flagged(d->character, PLR_FROZEN))
     load_room = real_room(CONFIG_FROZEN_START);
 
-  d->character->next = character_list;
+  char_set_next(d->character, character_list);
   character_list     = d->character;
   char_to_room(d->character, load_room);
   load_result = Crash_load(d->character);
-  if (d->character->player_specials->host) {
-    free(d->character->player_specials->host);
-    d->character->player_specials->host = nullptr;
+  if (char_get_player_specials(d->character)->host) {
+    free(char_get_player_specials(d->character)->host);
+    char_get_player_specials(d->character)->host = nullptr;
   }
-  d->character->player_specials->host = strdup(d->host);
+  char_get_player_specials(d->character)->host = strdup(d->host);
   char_set_id(d->character, char_get_idnum(d->character));
   /* find_char helper */
   add_to_lookup_table(char_get_id(d->character), MOB_TRIGGER, (void *)d->character);
   read_saved_vars(d->character);
   /*load_char_pets(d->character);*/
-  for (check = character_list; check; check = check->next)
-    if (!check->master && char_is_npc(check) && check->master_id == char_get_idnum(d->character) &&
+  for (check = character_list; check; check = char_get_next(check))
+    if (!char_get_master(check) && char_is_npc(check) && char_get_master_id(check) == char_get_idnum(d->character) &&
         char_aff_flagged(check, AFF_CHARM) && !circle_follow(check, d->character))
       add_follower(check, d->character);
   save_char(d->character);
@@ -362,7 +363,7 @@ int enter_player_game(struct descriptor_data *d)
   char_set_overf(d->character, false);
   char_set_spam(d->character, 0);
   char_set_rage_meter(d->character, 0);
-  if (!d->character->affected) {
+  if (!char_get_affected(d->character)) {
     if (char_aff_flagged(d->character, AFF_HEALGLOW)) {
       char_aff_set(d->character, AFF_HEALGLOW, false);
     }
@@ -394,8 +395,8 @@ int enter_player_game(struct descriptor_data *d)
     d->level = 1;
   }
 
-  d->character->rp    = d->rpp;
-  d->character->rbank = d->rbank;
+  char_set_rp(d->character, d->rpp);
+  char_set_rbank(d->character, d->rbank);
   if (char_moon_ok(d->character)) {
     oozaru_transform(d->character);
   } else {
@@ -481,8 +482,8 @@ static void state_get_name(struct descriptor_data *d, char *arg)
   if (!d->character) {
     CREATE(d->character, struct char_data, 1);
     clear_char(d->character);
-    CREATE(d->character->player_specials, struct player_special_data, 1);
-    d->character->desc = d;
+    CREATE(*char_player_specials_slot(d->character), struct player_special_data, 1);
+    char_set_desc(d->character, d);
     char_prf_set(d->character, PRF_COLOR, true);
   }
   /*  Check for other chars already logged in */
@@ -535,13 +536,13 @@ static void state_get_name(struct descriptor_data *d, char *arg)
         }
         CREATE(d->character, struct char_data, 1);
         clear_char(d->character);
-        CREATE(d->character->player_specials, struct player_special_data, 1);
-        d->character->desc = d;
-        d->character->name = strdup(CAP(tmp_name));
+        CREATE(*char_player_specials_slot(d->character), struct player_special_data, 1);
+        char_set_desc(d->character, d);
+        char_set_alias(d->character, strdup(CAP(tmp_name)));
         char_set_pfilepos(d->character, player_i);
         char_prf_set(d->character, PRF_COLOR, true);
         display_races(d);
-        d->character->rp = d->rpp;
+        char_set_rp(d->character, d->rpp);
         desc_set_connected(d, CON_QRACE);
       } else {
         /* undo it just in case they are set */
@@ -569,7 +570,7 @@ static void state_get_name(struct descriptor_data *d, char *arg)
         } else {
           d->idle_tics = 0;
           write_to_output(d, "\r\n%s\r\n%s", motd, CONFIG_MENU);
-          d->character->rp = d->rpp;
+          char_set_rp(d->character, d->rpp);
           desc_set_connected(d, CON_MENU);
         }
       }
@@ -590,11 +591,11 @@ static void state_get_name(struct descriptor_data *d, char *arg)
           write_to_output(d, "Invalid name, please try another.\r\nName: ");
           return;
         }
-        d->character->name = strdup(CAP(tmp_name));
+        char_set_alias(d->character, strdup(CAP(tmp_name)));
 
         display_races(d);
-        d->character->rp = d->rpp;
-        set_account_slot(d, d->writenew, d->character->name);
+        char_set_rp(d->character, d->rpp);
+        set_account_slot(d, d->writenew, char_get_alias(d->character));
         userWrite(d, 0, 0, 0, "index");
         desc_set_connected(d, CON_QRACE);
       }
@@ -623,8 +624,8 @@ static void state_name_cnfrm(struct descriptor_data *d, char *arg)
     desc_set_connected(d, CON_NEWPASSWD);
   } else if (*arg == 'n' || *arg == 'N') {
     write_to_output(d, "Okay, what IS it, then? ");
-    free(d->character->name);
-    d->character->name = nullptr;
+    free(char_get_alias(d->character));
+    char_set_alias(d->character, nullptr);
     desc_set_connected(d, CON_GET_NAME);
   } else
     write_to_output(d, "Please type Yes or No: ");
@@ -1004,7 +1005,7 @@ static void state_menu(struct descriptor_data *d, char *arg)
 
       oldcount = update_player_count();
 
-      d->character->time.logon = time(0);
+      char_set_time_logon(d->character, time(0));
       greet_mtrigger(d->character, -1);
       greet_memory_mtrigger(d->character);
 
@@ -1078,8 +1079,8 @@ static void state_menu(struct descriptor_data *d, char *arg)
       break;
 
     case '2':
-      if (d->character->description) {
-        write_to_output(d, "Current description:\r\n%s", d->character->description);
+      if (char_get_ddesc(d->character)) {
+        write_to_output(d, "Current description:\r\n%s", char_get_ddesc(d->character));
         /*
 	 * Don't free this now... so that the old description gets loaded
 	 * as the current buffer in the editor.  Do setup the ABORT buffer
@@ -1088,11 +1089,11 @@ static void state_menu(struct descriptor_data *d, char *arg)
 	 * free(d->character->description);
 	 * d->character->description = NULL;
 	 */
-        d->backstr = strdup(d->character->description);
+        d->backstr = strdup(char_get_ddesc(d->character));
       }
       write_to_output(d, "Enter the new text you'd like others to see when they look at you.\r\n");
       send_editor_help(d);
-      d->str     = &d->character->description;
+      d->str     = char_description_slot(d->character);
       d->max_str = EXDSCR_LENGTH;
       desc_set_connected(d, CON_EXDESC);
       break;
@@ -1175,7 +1176,7 @@ static void state_delcnf2(struct descriptor_data *d, char *arg)
     if (char_get_level(d->character) <= 40 && char_is_cheap_race(d->character)) {
       write_to_output(d, "@D[@gSince your race doesn't cost RPP to level before 40 you are refunded 0 RPP.@D]@n\r\n");
     }
-    int refund = race_rpp_refund(d->character->race);
+    int refund = race_rpp_refund(char_get_race(d->character));
     if (refund && char_get_level(d->character) > 1) {
       write_to_output(d, "@D[@g%d RPP refunded to your account for your %s character.@D]@n\r\n", refund, char_true_race_name(d->character));
       d->rpp += refund;
@@ -1237,8 +1238,8 @@ void nanny(struct descriptor_data *d, char *arg)
   if (d->character == nullptr) {
     CREATE(d->character, struct char_data, 1);
     clear_char(d->character);
-    CREATE(d->character->player_specials, struct player_special_data, 1);
-    d->character->desc = d;
+    CREATE(*char_player_specials_slot(d->character), struct player_special_data, 1);
+    char_set_desc(d->character, d);
   }
 
   /*

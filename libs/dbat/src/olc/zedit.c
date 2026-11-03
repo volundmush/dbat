@@ -16,6 +16,9 @@
 #include "dbat/races.h"
 #include "dbat/act.wizard.h"
 #include "dbat/handler.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 static void zedit_disp_arg2(struct descriptor_data *d);
 static void zedit_disp_arg5(struct descriptor_data *d);
@@ -130,7 +133,7 @@ ACMD(do_oasis_zedit)
   /****************************************************************************/
   /** Store the builder's descriptor in d.                                   **/
   /****************************************************************************/
-  d = ch->desc;
+  d = char_get_desc(ch);
 
   /****************************************************************************/
   /** Give the builder's descriptor an OLC structure.                        **/
@@ -311,14 +314,14 @@ static void zedit_new_zone(struct char_data *ch, zone_vnum vzone_num, room_vnum 
   struct descriptor_data *dsc;
 
   if ((result = create_new_zone(vzone_num, bottom, top, &error)) == NOWHERE) {
-    write_to_output(ch->desc, "%s", error);
+    write_to_output(char_get_desc(ch), "%s", error);
     return;
   }
 
   for (dsc = descriptor_list; dsc; dsc = dsc->next) {
     switch (desc_get_connected(dsc)) {
       case CON_REDIT:
-        OLC_ROOM(dsc)->zone += (OLC_ZNUM(dsc) >= result);
+        room_set_zone(OLC_ROOM(dsc), room_get_zone(OLC_ROOM(dsc)) + ((OLC_ZNUM(dsc) >= result)));
         /* Fall through. */
       case CON_ZEDIT:
       case CON_MEDIT:
@@ -336,7 +339,7 @@ static void zedit_new_zone(struct char_data *ch, zone_vnum vzone_num, room_vnum 
   zedit_save_to_disk(result); /* save to disk .. */
 
   mudlog(LOG_BRF, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), true, "OLC: %s creates new zone #%d", char_get_name(ch), vzone_num);
-  write_to_output(ch->desc, "Zone created successfully.\r\n");
+  write_to_output(char_get_desc(ch), "Zone created successfully.\r\n");
 }
 
 /*-------------------------------------------------------------------*/
@@ -500,27 +503,27 @@ static void zedit_disp_menu(struct descriptor_data *d)
       case 'M':
         write_to_output(d, "%sLoad %s@y [@c%d@y], Max : %d, MaxR %d, Chance %d",
                         MYCMD.if_flag ? " then " : "",
-                        mob_proto[MYCMD.arg1].short_descr,
+                        char_get_sdesc(&mob_proto[MYCMD.arg1]),
                         mob_index[MYCMD.arg1].vnum, MYCMD.arg2, MYCMD.arg4, MYCMD.arg5);
         break;
       case 'G':
         write_to_output(d, "%sGive it %s@y [@c%d@y], Max : %d, Chance %d",
                         MYCMD.if_flag ? " then " : "",
-                        obj_proto[MYCMD.arg1].short_description,
+                        obj_get_short_description(&obj_proto[MYCMD.arg1]),
                         obj_index[MYCMD.arg1].vnum,
                         MYCMD.arg2, MYCMD.arg5);
         break;
       case 'O':
         write_to_output(d, "%sLoad %s@y [@c%d@y], Max : %d, MaxR %d, Chance %d",
                         MYCMD.if_flag ? " then " : "",
-                        obj_proto[MYCMD.arg1].short_description,
+                        obj_get_short_description(&obj_proto[MYCMD.arg1]),
                         obj_index[MYCMD.arg1].vnum,
                         MYCMD.arg2, MYCMD.arg4, MYCMD.arg5);
         break;
       case 'E':
         write_to_output(d, "%sEquip with %s@y [@c%d@n], %s, Max : %d, Chance %d",
                         MYCMD.if_flag ? " then " : "",
-                        obj_proto[MYCMD.arg1].short_description,
+                        obj_get_short_description(&obj_proto[MYCMD.arg1]),
                         obj_index[MYCMD.arg1].vnum,
                         equipment_types[MYCMD.arg3],
                         MYCMD.arg2, MYCMD.arg5);
@@ -528,16 +531,16 @@ static void zedit_disp_menu(struct descriptor_data *d)
       case 'P':
         write_to_output(d, "%sPut %s@y [@c%d@n] in %s [@c%d@n], Max : %d, %% Chance %d",
                         MYCMD.if_flag ? " then " : "",
-                        obj_proto[MYCMD.arg1].short_description,
+                        obj_get_short_description(&obj_proto[MYCMD.arg1]),
                         obj_index[MYCMD.arg1].vnum,
-                        obj_proto[MYCMD.arg3].short_description,
+                        obj_get_short_description(&obj_proto[MYCMD.arg3]),
                         obj_index[MYCMD.arg3].vnum,
                         MYCMD.arg2, MYCMD.arg5);
         break;
       case 'R':
         write_to_output(d, "%sRemove %s@y [@c%d@n] from room.",
                         MYCMD.if_flag ? " then " : "",
-                        obj_proto[MYCMD.arg2].short_description,
+                        obj_get_short_description(&obj_proto[MYCMD.arg2]),
                         obj_index[MYCMD.arg2].vnum);
         break;
       case 'D':

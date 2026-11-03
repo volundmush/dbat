@@ -69,7 +69,7 @@ ACMD(do_spar)
 
 ACMD(do_quit)
 {
-  if (char_is_npc(ch) || !ch->desc)
+  if (char_is_npc(ch) || !char_get_desc(ch))
     return;
 
   if (rroom_flagged(char_get_in_room(ch), ROOM_PAST)) {
@@ -120,7 +120,7 @@ ACMD(do_quit)
     act("$n has left the game.", true, ch, 0, 0, TO_ROOM);
     mudlog(LOG_NRM, MAX(ADMLVL_IMMORT, char_get_invis_level(ch)), true, "%s has quit the game.", char_get_name(ch));
     send_to_char(ch, "Goodbye, friend.. Come back soon!\r\n");
-    if (ch->followers || ch->master)
+    if (char_get_followers(ch) || char_get_master(ch))
       die_follower(ch);
     if (ch == ch_selling)
       stop_auction(AUC_QUIT_CANCEL, nullptr);
@@ -148,16 +148,16 @@ ACMD(do_quit)
     extract_char(ch); /* Char is saved before extracting. */
   }
   /* Remove any snoopers */
-  if (ch->desc->snoop_by) {
-    write_to_output(ch->desc->snoop_by, "Your victim is no longer among us.\r\n");
-    ch->desc->snoop_by->snooping = nullptr;
-    ch->desc->snoop_by           = nullptr;
+  if (char_get_desc(ch)->snoop_by) {
+    write_to_output(char_get_desc(ch)->snoop_by, "Your victim is no longer among us.\r\n");
+    char_get_desc(ch)->snoop_by->snooping = nullptr;
+    char_get_desc(ch)->snoop_by           = nullptr;
   }
 }
 
 ACMD(do_save)
 {
-  if (char_is_npc(ch) || !ch->desc)
+  if (char_is_npc(ch) || !char_get_desc(ch))
     return;
 
   /* Only tell the char we're saving if they actually typed "save" */
@@ -319,7 +319,7 @@ static void print_group(struct char_data *ch)
 
     send_to_char(ch, "Your group consists of:\r\n");
 
-    k = (ch->master ? ch->master : ch);
+    k = (char_get_master(ch) ? char_get_master(ch) : ch);
 
     if (char_aff_flagged(k, AFF_GROUP)) {
       send_to_char(ch, "@D----------------@n\r\n");
@@ -336,7 +336,7 @@ static void print_group(struct char_data *ch)
       act(buf, false, ch, 0, k, TO_CHAR);
     }
 
-    for (f = k->followers; f; f = f->next) {
+    for (f = char_get_followers(k); f; f = f->next) {
       if (!char_aff_flagged(f->follower, AFF_GROUP))
         continue;
       send_to_char(ch, "@D----------------@n\r\n");
@@ -376,7 +376,7 @@ ACMD(do_group)
     return;
   }
 
-  if (ch->master) {
+  if (char_get_master(ch)) {
     act("You cannot enroll group members without being head of a group.",
         false, ch, 0, 0, TO_CHAR);
     return;
@@ -387,7 +387,7 @@ ACMD(do_group)
   highpl  = getEffMaxPL(ch);
   lowpl   = getEffMaxPL(ch);
 
-  for (found = 0, f = ch->followers; f; f = f->next) {
+  for (found = 0, f = char_get_followers(ch); f; f = f->next) {
     if (char_aff_flagged(f->follower, AFF_GROUP)) {
       if (char_get_level(f->follower) > highlvl) {
         highlvl = char_get_level(f->follower);
@@ -402,7 +402,7 @@ ACMD(do_group)
 
   if (!strcasecmp(buf, "all")) {
     perform_group(ch, ch, char_get_level(ch), char_get_level(ch), highpl, lowpl);
-    for (found = 0, f = ch->followers; f; f = f->next) {
+    for (found = 0, f = char_get_followers(ch); f; f = f->next) {
       foundwas = found;
       found += perform_group(ch, f->follower, highlvl, lowlvl, highpl, lowpl);
       if (found > foundwas) {
@@ -419,7 +419,7 @@ ACMD(do_group)
 
   if (!(vict = get_char_vis(ch, buf, nullptr, FIND_CHAR_ROOM)))
     send_to_char(ch, "%s", CONFIG_NOPERSON);
-  else if ((vict->master != ch) && (vict != ch))
+  else if ((char_get_master(vict) != ch) && (vict != ch))
     act("$N must follow you to enter your group.", false, ch, 0, vict, TO_CHAR);
   else {
     if (!char_aff_flagged(vict, AFF_GROUP)) {
@@ -447,12 +447,12 @@ ACMD(do_ungroup)
   one_argument(argument, buf);
 
   if (!*buf) {
-    if (ch->master || !(char_aff_flagged(ch, AFF_GROUP))) {
+    if (char_get_master(ch) || !(char_aff_flagged(ch, AFF_GROUP))) {
       send_to_char(ch, "But you lead no group!\r\n");
       return;
     }
 
-    for (f = ch->followers; f; f = next_fol) {
+    for (f = char_get_followers(ch); f; f = next_fol) {
       next_fol = f->next;
       if (char_aff_flagged(f->follower, AFF_GROUP)) {
         char_aff_set(f->follower, AFF_GROUP, false);
@@ -472,7 +472,7 @@ ACMD(do_ungroup)
     send_to_char(ch, "There is no such person!\r\n");
     return;
   }
-  if (tch->master != ch) {
+  if (char_get_master(tch) != ch) {
     send_to_char(ch, "That person is not following you!\r\n");
     return;
   }
@@ -517,14 +517,14 @@ ACMD(do_split)
       return;
     }
     char_set_gold(ch, char_get_gold(ch) - (amount));
-    k = (ch->master ? ch->master : ch);
+    k = (char_get_master(ch) ? char_get_master(ch) : ch);
 
     if (char_aff_flagged(k, AFF_GROUP) && (char_get_in_room(k) == char_get_in_room(ch)))
       num = 1;
     else
       num = 0;
 
-    for (f = k->followers; f; f = f->next)
+    for (f = char_get_followers(k); f; f = f->next)
       if (char_aff_flagged(f->follower, AFF_GROUP) &&
           (!char_is_npc(f->follower)) && f->follower != ch &&
           (char_get_in_room(f->follower) == char_get_in_room(ch)))
@@ -553,7 +553,7 @@ ACMD(do_split)
       send_to_char(k, "%s", buf);
     }
 
-    for (f = k->followers; f; f = f->next) {
+    for (f = char_get_followers(k); f; f = f->next) {
       if (char_aff_flagged(f->follower, AFF_GROUP) &&
           (!char_is_npc(f->follower)) &&
           (char_get_in_room(f->follower) == char_get_in_room(ch)) &&

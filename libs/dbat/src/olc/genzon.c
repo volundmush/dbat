@@ -10,6 +10,9 @@
 #include "dbat/genolc.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/atomicfile.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 static void remove_cmd_from_list(struct reset_com **list, int pos);
 
@@ -219,7 +222,7 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
       zone_table[i] = zone_table[i - 1];
       for (j = zone_table[i].bot; j <= zone_table[i].top; j++)
         if ((rnum = real_room(j)) != NOWHERE)
-          world[rnum].zone++;
+          rroom_set_zone(rnum, rroom_get_zone(rnum) + 1);
     }
     rznum = i;
   }
@@ -251,10 +254,10 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
   top_of_zone_table++;
 
   for (i = top_of_world; i > 0; i--)
-    if (world[i].zone < real_zone(rznum))
+    if (rroom_get_zone(i) < real_zone(rznum))
       break;
     else
-      world[i].zone = real_zone_by_thing(rroom_get_vnum(i));
+      rroom_set_zone(i, real_zone_by_thing(rroom_get_vnum(i)));
 
   add_to_save_list(zone->number, SL_ZON);
   return rznum;
@@ -457,18 +460,18 @@ bool save_zone(zone_rnum zone_num)
       case 'M':
         arg1    = mob_index[zone_get_cmd(zone_num, subcmd)->arg1].vnum;
         arg2    = zone_get_cmd(zone_num, subcmd)->arg2;
-        arg3    = world[zone_get_cmd(zone_num, subcmd)->arg3].number;
+        arg3    = rroom_get_vnum(zone_get_cmd(zone_num, subcmd)->arg3);
         arg4    = zone_get_cmd(zone_num, subcmd)->arg4;
         arg5    = zone_get_cmd(zone_num, subcmd)->arg5;
-        comment = mob_proto[zone_get_cmd(zone_num, subcmd)->arg1].short_descr;
+        comment = char_get_sdesc(&mob_proto[zone_get_cmd(zone_num, subcmd)->arg1]);
         break;
       case 'O':
         arg1    = obj_index[zone_get_cmd(zone_num, subcmd)->arg1].vnum;
         arg2    = zone_get_cmd(zone_num, subcmd)->arg2;
-        arg3    = world[zone_get_cmd(zone_num, subcmd)->arg3].number;
+        arg3    = rroom_get_vnum(zone_get_cmd(zone_num, subcmd)->arg3);
         arg4    = zone_get_cmd(zone_num, subcmd)->arg4;
         arg5    = zone_get_cmd(zone_num, subcmd)->arg5;
-        comment = obj_proto[zone_get_cmd(zone_num, subcmd)->arg1].short_description;
+        comment = obj_get_short_description(&obj_proto[zone_get_cmd(zone_num, subcmd)->arg1]);
         break;
       case 'G':
         arg1    = obj_index[zone_get_cmd(zone_num, subcmd)->arg1].vnum;
@@ -476,7 +479,7 @@ bool save_zone(zone_rnum zone_num)
         arg3    = -1;
         arg4    = -1;
         arg5    = zone_get_cmd(zone_num, subcmd)->arg5;
-        comment = obj_proto[zone_get_cmd(zone_num, subcmd)->arg1].short_description;
+        comment = obj_get_short_description(&obj_proto[zone_get_cmd(zone_num, subcmd)->arg1]);
         break;
       case 'E':
         arg1    = obj_index[zone_get_cmd(zone_num, subcmd)->arg1].vnum;
@@ -484,7 +487,7 @@ bool save_zone(zone_rnum zone_num)
         arg3    = zone_get_cmd(zone_num, subcmd)->arg3;
         arg4    = -1;
         arg5    = zone_get_cmd(zone_num, subcmd)->arg5;
-        comment = obj_proto[zone_get_cmd(zone_num, subcmd)->arg1].short_description;
+        comment = obj_get_short_description(&obj_proto[zone_get_cmd(zone_num, subcmd)->arg1]);
         break;
       case 'P':
         arg1    = obj_index[zone_get_cmd(zone_num, subcmd)->arg1].vnum;
@@ -492,24 +495,24 @@ bool save_zone(zone_rnum zone_num)
         arg3    = obj_index[zone_get_cmd(zone_num, subcmd)->arg3].vnum;
         arg4    = -1;
         arg5    = zone_get_cmd(zone_num, subcmd)->arg5;
-        comment = obj_proto[zone_get_cmd(zone_num, subcmd)->arg1].short_description;
+        comment = obj_get_short_description(&obj_proto[zone_get_cmd(zone_num, subcmd)->arg1]);
         break;
       case 'D':
-        arg1    = world[zone_get_cmd(zone_num, subcmd)->arg1].number;
+        arg1    = rroom_get_vnum(zone_get_cmd(zone_num, subcmd)->arg1);
         arg2    = zone_get_cmd(zone_num, subcmd)->arg2;
         arg3    = zone_get_cmd(zone_num, subcmd)->arg3;
-        comment = world[zone_get_cmd(zone_num, subcmd)->arg1].name;
+        comment = rroom_get_name(zone_get_cmd(zone_num, subcmd)->arg1);
         break;
       case 'R':
-        arg1    = world[zone_get_cmd(zone_num, subcmd)->arg1].number;
+        arg1    = rroom_get_vnum(zone_get_cmd(zone_num, subcmd)->arg1);
         arg2    = obj_index[zone_get_cmd(zone_num, subcmd)->arg2].vnum;
-        comment = obj_proto[zone_get_cmd(zone_num, subcmd)->arg2].short_description;
+        comment = obj_get_short_description(&obj_proto[zone_get_cmd(zone_num, subcmd)->arg2]);
         arg3    = -1;
         break;
       case 'T':
         arg1    = zone_get_cmd(zone_num, subcmd)->arg1;                   /* trigger type */
         arg2    = trig_index[zone_get_cmd(zone_num, subcmd)->arg2]->vnum; /* trigger vnum */
-        arg3    = world[zone_get_cmd(zone_num, subcmd)->arg3].number;     /* room num */
+        arg3    = rroom_get_vnum(zone_get_cmd(zone_num, subcmd)->arg3);     /* room num */
         arg4    = -1;
         arg5    = zone_get_cmd(zone_num, subcmd)->arg5;
         comment = trig_index[real_trigger(arg2)]->proto->name;
@@ -517,7 +520,7 @@ bool save_zone(zone_rnum zone_num)
       case 'V':
         arg1 = zone_get_cmd(zone_num, subcmd)->arg1; /* trigger type */
         arg2 = zone_get_cmd(zone_num, subcmd)->arg2; /* context */
-        arg3 = world[zone_get_cmd(zone_num, subcmd)->arg3].number;
+        arg3 = rroom_get_vnum(zone_get_cmd(zone_num, subcmd)->arg3);
         arg4 = -1;
         arg5 = zone_get_cmd(zone_num, subcmd)->arg5;
         break;

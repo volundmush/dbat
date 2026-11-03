@@ -26,6 +26,8 @@
 #include "dbat/character_utils.h"
 
 #include <unistd.h>
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
 
 /* local defines */
 constexpr int sick_fail = 2;
@@ -710,21 +712,21 @@ static void update_flags(struct char_data *ch)
     send_to_char(ch, "@wYour mind is no longer in turmoil, you can charge ki again.@n\r\n");
     char_aff_set(ch, AFF_MBREAK, false);
     if (char_get_skill(ch, SKILL_TELEPATHY) <= 0 && rand_number(1, 2) == 2) {
-      ch->real_abils.intel -= 1;
-      ch->real_abils.wis -= 1;
+      char_set_real_abils_intel(ch, char_get_real_abils_intel(ch) - 1);
+      char_set_real_abils_wis(ch, char_get_real_abils_wis(ch) - 1);
       send_to_char(ch, "@RDue to the stress you've lost 1 Intelligence and Wisdom!@n\r\n");
-      if (ch->real_abils.wis < 4)
-        ch->real_abils.wis = 4;
-      if (ch->real_abils.intel < 4)
-        ch->real_abils.intel = 4;
+      if (char_get_real_abils_wis(ch) < 4)
+        char_set_real_abils_wis(ch, 4);
+      if (char_get_real_abils_intel(ch) < 4)
+        char_set_real_abils_intel(ch, 4);
     } else if (char_get_skill(ch, SKILL_TELEPATHY) <= 0 && rand_number(1, 20) == 1) {
-      ch->real_abils.intel -= 1;
-      ch->real_abils.wis -= 1;
+      char_set_real_abils_intel(ch, char_get_real_abils_intel(ch) - 1);
+      char_set_real_abils_wis(ch, char_get_real_abils_wis(ch) - 1);
       send_to_char(ch, "@RDue to the stress you've lost 1 Intelligence and Wisdom!@n\r\n");
-      if (ch->real_abils.wis < 4)
-        ch->real_abils.wis = 4;
-      if (ch->real_abils.intel < 4)
-        ch->real_abils.intel = 4;
+      if (char_get_real_abils_wis(ch) < 4)
+        char_set_real_abils_wis(ch, 4);
+      if (char_get_real_abils_intel(ch) < 4)
+        char_set_real_abils_intel(ch, 4);
     }
   }
   if (char_aff_flagged(ch, AFF_SHOCKED) && rand_number(1, 4) == 4) {
@@ -1073,7 +1075,8 @@ static void check_idling(struct char_data *ch)
   if (dball_count(ch)) {
     return;
   }
-  if (++(ch->timer) > CONFIG_IDLE_VOID) {
+  char_set_timer(ch, char_get_timer(ch) + 1);
+  if (char_get_timer(ch) > CONFIG_IDLE_VOID) {
     if (char_get_was_in_room(ch) == NOWHERE && char_get_in_room(ch) != NOWHERE) {
       char_set_was_in_room(ch, char_get_in_room(ch));
       if (char_get_fighting(ch)) {
@@ -1143,20 +1146,20 @@ static void check_idling(struct char_data *ch)
       save_char(ch);
       char_from_room(ch);
       char_to_room(ch, 1);
-    } else if (ch->timer > CONFIG_IDLE_RENT_TIME) {
+    } else if (char_get_timer(ch) > CONFIG_IDLE_RENT_TIME) {
       if (char_get_in_room(ch) != NOWHERE) {
         char_from_room(ch);
         char_to_room(ch, 3);
       }
-      if (ch->desc) {
+      if (char_get_desc(ch)) {
         send_to_char(ch, "You are idle and are extracted safely from the game.\r\n");
-        desc_set_connected(ch->desc, CON_DISCONNECT);
+        desc_set_connected(char_get_desc(ch), CON_DISCONNECT);
         /*
          * For the 'if (d->character)' test in close().
          * -gg 3/1/98 (Happy anniversary.)
          */
-        ch->desc->character = nullptr;
-        ch->desc            = nullptr;
+        char_get_desc(ch)->character = nullptr;
+        char_set_desc(ch, nullptr);
       }
       Crash_rentsave(ch, 0);
       mudlog(LOG_CMP, ADMLVL_GOD, true, "%s force-rented and extracted (idle).", char_get_name(ch));
@@ -1256,21 +1259,21 @@ static void heal_limb(struct char_data *ch)
 
     if (!char_plr_flagged(ch, PLR_BANDAGED) && recovered == true) {
       if (axion_dice(-10) > char_get_aff_abils_con(ch)) {
-        ch->real_abils.str -= 1;
-        ch->real_abils.dex -= 1;
-        ch->real_abils.cha -= 1;
+        char_set_real_abils_str(ch, char_get_real_abils_str(ch) - 1);
+        char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) - 1);
+        char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) - 1);
         send_to_char(ch, "@RYou lose 1 Strength, Agility, and Speed!\r\n");
-        if (ch->real_abils.str < 4) {
-          ch->real_abils.str = 4;
+        if (char_get_real_abils_str(ch) < 4) {
+          char_set_real_abils_str(ch, 4);
         }
-        if (ch->real_abils.con < 4) {
-          ch->real_abils.con = 4;
+        if (char_get_real_abils_con(ch) < 4) {
+          char_set_real_abils_con(ch, 4);
         }
-        if (ch->real_abils.dex < 4) {
-          ch->real_abils.dex = 4;
+        if (char_get_real_abils_dex(ch) < 4) {
+          char_set_real_abils_dex(ch, 4);
         }
-        if (ch->real_abils.cha < 4) {
-          ch->real_abils.cha = 4;
+        if (char_get_real_abils_cha(ch) < 4) {
+          char_set_real_abils_cha(ch, 4);
         }
         save_char(ch);
       }
@@ -1289,7 +1292,7 @@ static void point_update_characters(void)
   struct char_data *i, *next_char;
   int change = false;
   for (i = character_list; i; i = next_char) {
-    next_char = i->next;
+    next_char = char_get_next(i);
 
     if (!char_is_npc(i) && char_get_in_room(i) != NOWHERE) {
       if (rroom_flagged(char_get_in_room(i), ROOM_HOUSE)) {
@@ -1318,7 +1321,7 @@ static void point_update_characters(void)
       gain_condition(i, DRUNK, -1);
     }
     if (char_is_npc(i)) {
-      i->aggtimer = 0;
+      char_set_aggtimer(i, 0);
     }
 
     if (char_get_position(i) >= POS_STUNNED) {
@@ -1338,7 +1341,7 @@ static void point_update_characters(void)
           send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
           act("$n's aura slowly stops shining and fades.\r\n", true, i, nullptr, nullptr, TO_ROOM);
           char_plr_set(i, PLR_AURALIGHT, false);
-          world[char_get_in_room(i)].light--;
+          rroom_set_light(char_get_in_room(i), rroom_get_light(char_get_in_room(i)) - 1);
         }
       }
       if (char_is_mutant(i) && (char_get_genome(i, 0) == 6 || char_get_genome(i, 1) == 6)) {
@@ -1501,13 +1504,13 @@ static void point_update_characters(void)
         } else {
           send_to_char(i, "The poison claims your life!\r\n");
           act("$n pukes up blood and falls down dead!", true, i, 0, 0, TO_ROOM);
-          if (i->poisonby) {
-            if (char_aff_flagged(i->poisonby, AFF_GROUP)) {
-              group_gain(i->poisonby, i);
+          if (char_get_poisonby(i)) {
+            if (char_aff_flagged(char_get_poisonby(i), AFF_GROUP)) {
+              group_gain(char_get_poisonby(i), i);
             } else {
-              solo_gain(i->poisonby, i);
+              solo_gain(char_get_poisonby(i), i);
             }
-            die(i, i->poisonby);
+            die(i, char_get_poisonby(i));
           } else {
             die(i, nullptr);
           }
@@ -1529,7 +1532,7 @@ static void point_update_characters(void)
       if (char_get_admlevel(i) < CONFIG_IDLE_MAX_LEVEL)
         check_idling(i);
       else
-        (i->timer)++;
+        char_set_timer(i, char_get_timer(i) + 1);
     }
   }
 }
@@ -1540,15 +1543,15 @@ static void point_update_objects(void)
 
   /* objects */
   for (j = object_list; j; j = next_thing) {
-    next_thing = j->next; /* Next in object list */
+    next_thing = obj_get_next(j); /* Next in object list */
 
     /* Let's get rid of dropped norent items. */
-    if (obj_extra_flagged(j, ITEM_NORENT) && j->worn_by == nullptr && j->carried_by == nullptr && obj_selling != j && obj_get_vnum(j) != 7200) {
+    if (obj_extra_flagged(j, ITEM_NORENT) && obj_get_worn_by(j) == nullptr && obj_get_carried_by(j) == nullptr && obj_selling != j && obj_get_vnum(j) != 7200) {
       time_t diff = 0;
 
       diff = time(0) - obj_get_lload(j);
       if (diff > 240 && obj_get_lload(j) > 0) {
-        mud_log("No rent object (%s) extracted from room (%d)", j->short_description, rroom_get_vnum(obj_get_in_room(j)));
+        mud_log("No rent object (%s) extracted from room (%d)", obj_get_short_description(j), rroom_get_vnum(obj_get_in_room(j)));
         extract_obj(j);
         continue;
       }
@@ -1565,61 +1568,61 @@ static void point_update_objects(void)
       /* timer count down */
       if (obj_get_timer(j) > 0)
         obj_set_timer(j, obj_get_timer(j) - 1);
-      if (!strstr(j->name, "android") && !strstr(j->name, "Android") && !obj_extra_flagged(j, ITEM_BURIED)) {
+      if (!strstr(obj_get_name(j), "android") && !strstr(obj_get_name(j), "Android") && !obj_extra_flagged(j, ITEM_BURIED)) {
         if (obj_get_timer(j) == 5) {
-          if ((obj_get_in_room(j) != NOWHERE) && (world[obj_get_in_room(j)].people)) {
-            act("@DFlies start to gather around $p@D.@n", true, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
-            act("@DFlies start to gather around $p@D.@n", true, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
+          if ((obj_get_in_room(j) != NOWHERE) && (rroom_get_people(obj_get_in_room(j)))) {
+            act("@DFlies start to gather around $p@D.@n", true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_CHAR);
+            act("@DFlies start to gather around $p@D.@n", true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_ROOM);
           }
         }
         if (obj_get_timer(j) == 3) {
-          if ((obj_get_in_room(j) != NOWHERE) && (world[obj_get_in_room(j)].people)) {
-            act("@DA cloud of flies has formed over $p@D.@n", true, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
-            act("@DA cloud of flies has formed over $p@D.@n", true, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
+          if ((obj_get_in_room(j) != NOWHERE) && (rroom_get_people(obj_get_in_room(j)))) {
+            act("@DA cloud of flies has formed over $p@D.@n", true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_CHAR);
+            act("@DA cloud of flies has formed over $p@D.@n", true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_ROOM);
           }
         }
         if (obj_get_timer(j) == 2) {
-          if ((obj_get_in_room(j) != NOWHERE) && (world[obj_get_in_room(j)].people)) {
-            act("@DMaggots can be seen crawling all over $p@D.@n", true, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
-            act("@DMaggots can be seen crawling all over $p@D.@n", true, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
+          if ((obj_get_in_room(j) != NOWHERE) && (rroom_get_people(obj_get_in_room(j)))) {
+            act("@DMaggots can be seen crawling all over $p@D.@n", true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_CHAR);
+            act("@DMaggots can be seen crawling all over $p@D.@n", true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_ROOM);
           }
         }
         if (obj_get_timer(j) == 1) {
-          if ((obj_get_in_room(j) != NOWHERE) && (world[obj_get_in_room(j)].people)) {
-            act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
-            act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
+          if ((obj_get_in_room(j) != NOWHERE) && (rroom_get_people(obj_get_in_room(j)))) {
+            act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_CHAR);
+            act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_ROOM);
           }
         }
       }
       if (!obj_get_timer(j)) {
 
-        if (j->carried_by) {
-          if (!strstr(j->name, "android")) {
-            act("$p decays in your hands.", false, j->carried_by, j, 0, TO_CHAR);
-            if ((obj_get_in_room(j) != NOWHERE) && (world[obj_get_in_room(j)].people)) {
+        if (obj_get_carried_by(j)) {
+          if (!strstr(obj_get_name(j), "android")) {
+            act("$p decays in your hands.", false, obj_get_carried_by(j), j, 0, TO_CHAR);
+            if ((obj_get_in_room(j) != NOWHERE) && (rroom_get_people(obj_get_in_room(j)))) {
               act("A quivering horde of maggots consumes $p.",
-                  true, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
+                  true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_ROOM);
               act("A quivering horde of maggots consumes $p.",
-                  true, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
+                  true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_CHAR);
             }
           } else {
-            act("$p decays in your hands.", false, j->carried_by, j, 0, TO_CHAR);
-            if ((obj_get_in_room(j) != NOWHERE) && (world[obj_get_in_room(j)].people)) {
+            act("$p decays in your hands.", false, obj_get_carried_by(j), j, 0, TO_CHAR);
+            if ((obj_get_in_room(j) != NOWHERE) && (rroom_get_people(obj_get_in_room(j)))) {
               act("$p breaks down completely into a pile of junk.",
-                  true, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
+                  true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_ROOM);
               act("$p breaks down completely into a pile of junk.",
-                  true, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
+                  true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_CHAR);
             }
           }
         }
-        for (jj = j->contains; jj; jj = next_thing2) {
-          next_thing2 = jj->next_content; /* Next in inventory */
+        for (jj = obj_get_contains(j); jj; jj = next_thing2) {
+          next_thing2 = obj_get_next_content(jj); /* Next in inventory */
           obj_from_obj(jj);
 
-          if (j->in_obj)
-            obj_to_obj(jj, j->in_obj);
-          else if (j->carried_by)
-            obj_to_room(jj, char_get_in_room(j->carried_by));
+          if (obj_get_in_obj(j))
+            obj_to_obj(jj, obj_get_in_obj(j));
+          else if (obj_get_carried_by(j))
+            obj_to_room(jj, char_get_in_room(obj_get_carried_by(j)));
           else if (obj_get_in_room(j) != NOWHERE)
             obj_to_room(jj, obj_get_in_room(j));
           else
@@ -1641,9 +1644,9 @@ static void point_update_objects(void)
 
       if (obj_get_timer(j) == 0) {
         act("A glowing portal fades from existence.",
-            true, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
+            true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_ROOM);
         act("A glowing portal fades from existence.",
-            true, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
+            true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_CHAR);
         extract_obj(j);
         continue;
       }
@@ -1653,9 +1656,9 @@ static void point_update_objects(void)
 
       if (obj_get_timer(j) == 0) {
         act("The $p@n settles to the ground and goes out.",
-            true, world[obj_get_in_room(j)].people, j, 0, TO_ROOM);
+            true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_ROOM);
         act("A $p@n settles to the ground and goes out.",
-            true, world[obj_get_in_room(j)].people, j, 0, TO_CHAR);
+            true, rroom_get_people(obj_get_in_room(j)), j, 0, TO_CHAR);
         extract_obj(j);
         continue;
       }
@@ -1680,25 +1683,25 @@ static void point_update_objects(void)
           continue;
         }
       } else if (obj_get_vnum(j) != 79) {
-        if (j->carried_by && !j->in_obj) {
+        if (obj_get_carried_by(j) && !obj_get_in_obj(j)) {
           int melt = 5 + (obj_get_weight(j) * 0.02);
           if (obj_get_weight(j) - (5 + (obj_get_weight(j) * 0.02)) > 0) {
             obj_set_weight(j, obj_get_weight(j) - (melt));
-            send_to_char(j->carried_by, "%s @wmelts a little.\r\n", j->short_description);
-            char_set_carry_weight(j->carried_by, char_get_carry_weight(j->carried_by) - (melt));
+            send_to_char(obj_get_carried_by(j), "%s @wmelts a little.\r\n", obj_get_short_description(j));
+            char_set_carry_weight(obj_get_carried_by(j), char_get_carry_weight(obj_get_carried_by(j)) - (melt));
           } else {
-            send_to_char(j->carried_by, "%s @wmelts completely away.\r\n", j->short_description);
+            send_to_char(obj_get_carried_by(j), "%s @wmelts completely away.\r\n", obj_get_short_description(j));
             int remainder = melt - obj_get_weight(j);
-            char_set_carry_weight(j->carried_by, char_get_carry_weight(j->carried_by) - ((melt - remainder)));
+            char_set_carry_weight(obj_get_carried_by(j), char_get_carry_weight(obj_get_carried_by(j)) - ((melt - remainder)));
             extract_obj(j);
             continue;
           }
         } else if (obj_get_in_room(j) != NOWHERE) {
           if (obj_get_weight(j) - (5 + (obj_get_weight(j) * 0.02)) > 0) {
             obj_set_weight(j, obj_get_weight(j) - (5 + (obj_get_weight(j) * 0.02)));
-            send_to_room(obj_get_in_room(j), "%s @wmelts a little.\r\n", j->short_description);
+            send_to_room(obj_get_in_room(j), "%s @wmelts a little.\r\n", obj_get_short_description(j));
           } else {
-            send_to_room(obj_get_in_room(j), "%s @wmelts completely away.\r\n", j->short_description);
+            send_to_room(obj_get_in_room(j), "%s @wmelts completely away.\r\n", obj_get_short_description(j));
             extract_obj(j);
             continue;
           }
@@ -1734,9 +1737,9 @@ void timed_dt(struct char_data *ch)
       */
 
     for (rrnum = 0; rrnum < top_of_world; rrnum++)
-      world[rrnum].timed -= (world[rrnum].timed != -1);
+      rroom_set_timed(rrnum, rroom_get_timed(rrnum) - ((rroom_get_timed(rrnum) != -1)));
 
-    for (vict = character_list; vict; vict = vict->next) {
+    for (vict = character_list; vict; vict = char_get_next(vict)) {
       if (char_is_npc(vict))
         continue;
 
@@ -1757,16 +1760,16 @@ void timed_dt(struct char_data *ch)
     and return again.
   */
 
-  if (world[char_get_in_room(ch)].timed < 0) {
-    world[char_get_in_room(ch)].timed = rand_number(2, 5);
+  if (rroom_get_timed(char_get_in_room(ch)) < 0) {
+    rroom_set_timed(char_get_in_room(ch), rand_number(2, 5));
     return;
   }
 
   /* We know ch is in a dt room with timed >= 0 - see if its the end.
    *
    */
-  if (world[char_get_in_room(ch)].timed == 0) {
-    for (vict = world[char_get_in_room(ch)].people; vict; vict = vict->next_in_room) {
+  if (rroom_get_timed(char_get_in_room(ch)) == 0) {
+    for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = char_get_next_in_room(vict)) {
       if (char_is_npc(vict))
         continue;
       if (char_get_admlevel(vict) >= ADMLVL_IMMORT)

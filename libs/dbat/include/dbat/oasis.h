@@ -2,6 +2,7 @@
 #include "dbat/consts/maximums.h"
 #include "dbat/consts/zoneflags.h"
 #include "dbat/consts/types.h"
+#include "dbat/room_utils.h"
 
 constexpr int _OASISOLC = 0x206; /* 2.0.6 */
 /*
@@ -136,7 +137,7 @@ struct oasis_olc_data {
 /*
  * Other macros.
  */
-#define OLC_EXIT(d) (OLC_ROOM(d)->dir_option[OLC_VAL(d)])
+#define OLC_EXIT(d) room_get_dir_option(OLC_ROOM(d), OLC_VAL(d))
 
 /*
  * Cleanup types.

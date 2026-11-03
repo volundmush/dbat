@@ -51,7 +51,7 @@
 void bring_to_cap(struct char_data *ch)
 {
 
-  bool p_trans = (race_can_transform(ch->race) && !race_can_revert(ch->race));
+  bool p_trans = (race_can_transform(char_get_race(ch)) && !race_can_revert(char_get_race(ch)));
   int64_t cap  = calc_soft_cap(ch);
 
   switch (race_soft_cap_type(ch)) {
@@ -90,12 +90,12 @@ ACMD(do_train)
 
   int strcap = 5000, spdcap = 5000, intcap = 5000, wiscap = 5000, concap = 5000, aglcap = 5000;
 
-  strcap += 500 * ch->real_abils.str;
-  intcap += 500 * ch->real_abils.intel;
-  wiscap += 500 * ch->real_abils.wis;
-  spdcap += 500 * ch->real_abils.cha;
-  concap += 500 * ch->real_abils.con;
-  aglcap += 500 * ch->real_abils.dex;
+  strcap += 500 * char_get_real_abils_str(ch);
+  intcap += 500 * char_get_real_abils_intel(ch);
+  wiscap += 500 * char_get_real_abils_wis(ch);
+  spdcap += 500 * char_get_real_abils_cha(ch);
+  concap += 500 * char_get_real_abils_con(ch);
+  aglcap += 500 * char_get_real_abils_dex(ch);
 
   if (char_is_human(ch)) {
     intcap = intcap * 0.75;
@@ -114,12 +114,12 @@ ACMD(do_train)
 
   if (!*arg) {
     send_to_char(ch, "@D-------------[ @GTraining Status @D]-------------@n\r\n");
-    send_to_char(ch, "  @mStrength Progress    @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainstr(ch)), ch->real_abils.str >= 80 ? "@rCAPPED" : add_commas(strcap));
-    send_to_char(ch, "  @mSpeed Progress       @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainspd(ch)), ch->real_abils.cha >= 80 ? "@rCAPPED" : add_commas(spdcap));
-    send_to_char(ch, "  @mConstitution Progress@D: @R%6s/%6s@n\r\n", add_commas(char_get_traincon(ch)), ch->real_abils.con >= 80 ? "@rCAPPED" : add_commas(concap));
-    send_to_char(ch, "  @mIntelligence Progress@D: @R%6s/%6s@n\r\n", add_commas(char_get_trainint(ch)), ch->real_abils.intel >= 80 ? "@rCAPPED" : add_commas(intcap));
-    send_to_char(ch, "  @mWisdom Progress      @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainwis(ch)), ch->real_abils.wis >= 80 ? "@rCAPPED" : add_commas(wiscap));
-    send_to_char(ch, "  @mAgility Progress     @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainagl(ch)), ch->real_abils.dex >= 80 ? "@rCAPPED" : add_commas(aglcap));
+    send_to_char(ch, "  @mStrength Progress    @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainstr(ch)), char_get_real_abils_str(ch) >= 80 ? "@rCAPPED" : add_commas(strcap));
+    send_to_char(ch, "  @mSpeed Progress       @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainspd(ch)), char_get_real_abils_cha(ch) >= 80 ? "@rCAPPED" : add_commas(spdcap));
+    send_to_char(ch, "  @mConstitution Progress@D: @R%6s/%6s@n\r\n", add_commas(char_get_traincon(ch)), char_get_real_abils_con(ch) >= 80 ? "@rCAPPED" : add_commas(concap));
+    send_to_char(ch, "  @mIntelligence Progress@D: @R%6s/%6s@n\r\n", add_commas(char_get_trainint(ch)), char_get_real_abils_intel(ch) >= 80 ? "@rCAPPED" : add_commas(intcap));
+    send_to_char(ch, "  @mWisdom Progress      @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainwis(ch)), char_get_real_abils_wis(ch) >= 80 ? "@rCAPPED" : add_commas(wiscap));
+    send_to_char(ch, "  @mAgility Progress     @D: @R%6s/%6s@n\r\n", add_commas(char_get_trainagl(ch)), char_get_real_abils_dex(ch) >= 80 ? "@rCAPPED" : add_commas(aglcap));
     send_to_char(ch, "@D  -----------------------------------------  @n\r\n");
     send_to_char(ch, "  @CCurrent Weight Held  @D: @c%s@n\r\n", add_commas(weight));
     send_to_char(ch, "@D---------------------------------------------@n\r\n");
@@ -149,7 +149,7 @@ ACMD(do_train)
 
   int sensei = -1;
 
-  if (rroom_get_vnum(char_get_in_room(ch)) == sensei_location_id(ch->chclass)) {
+  if (rroom_get_vnum(char_get_in_room(ch)) == sensei_location_id(char_get_class(ch))) {
     if (!(char_get_gold(ch) >= 8 && char_get_practice_points(ch) >= 1)) {
       send_to_char(ch, "It costs 8 Zenni and 1 PS to train with your sensei.\r\n");
       return;
@@ -165,7 +165,7 @@ ACMD(do_train)
       total *= 300;
     else if (char_get_level(ch) >= 10)
       total *= 150;
-    sensei = ch->chclass;
+    sensei = char_get_class(ch);
     send_to_char(ch, "@G%s begins to instruct you in training technique.@n\r\n", char_sensei_name(ch));
   }
 
@@ -208,51 +208,51 @@ ACMD(do_train)
 
   if (!strcasecmp("str", arg)) {
     stat_id     = 1;
-    stat_val    = &(ch->real_abils.str);
+    stat_val    = char_real_abils_str_slot(ch);
     stat_name   = "strength";
     bonus_trait = BONUS_BRAWNY;
     nega_trait  = BONUS_WIMP;
-    stat_train  = &(ch->player_specials->trainstr);
+    stat_train  = &(char_get_player_specials(ch)->trainstr);
     needed      = strcap;
   } else if (!strcasecmp("spd", arg)) {
     stat_id     = 2;
-    stat_val    = &(ch->real_abils.cha);
+    stat_val    = char_real_abils_cha_slot(ch);
     stat_name   = "speed";
     bonus_trait = BONUS_QUICK;
     nega_trait  = BONUS_SLOW;
-    stat_train  = &(ch->player_specials->trainspd);
+    stat_train  = &(char_get_player_specials(ch)->trainspd);
     needed      = spdcap;
   } else if (!strcasecmp("con", arg)) {
     stat_id     = 3;
-    stat_val    = &(ch->real_abils.con);
+    stat_val    = char_real_abils_con_slot(ch);
     stat_name   = "constitution";
     bonus_trait = BONUS_STURDY;
     nega_trait  = BONUS_FRAIL;
-    stat_train  = &(ch->player_specials->traincon);
+    stat_train  = &(char_get_player_specials(ch)->traincon);
     needed      = concap;
   } else if (!strcasecmp("agl", arg)) {
     stat_id     = 4;
-    stat_val    = &(ch->real_abils.dex);
+    stat_val    = char_real_abils_dex_slot(ch);
     stat_name   = "agility";
     bonus_trait = BONUS_AGILE;
     nega_trait  = BONUS_CLUMSY;
-    stat_train  = &(ch->player_specials->trainagl);
+    stat_train  = &(char_get_player_specials(ch)->trainagl);
     needed      = aglcap;
   } else if (!strcasecmp("int", arg)) {
     stat_id     = 5;
-    stat_val    = &(ch->real_abils.intel);
+    stat_val    = char_real_abils_intel_slot(ch);
     stat_name   = "intelligence";
     bonus_trait = BONUS_SCHOLARLY;
     nega_trait  = BONUS_DULL;
-    stat_train  = &(ch->player_specials->trainint);
+    stat_train  = &(char_get_player_specials(ch)->trainint);
     needed      = intcap;
   } else if (!strcasecmp("wis", arg)) {
     stat_id     = 6;
-    stat_val    = &(ch->real_abils.wis);
+    stat_val    = char_real_abils_wis_slot(ch);
     stat_name   = "wisdom";
     bonus_trait = BONUS_SAGE;
     nega_trait  = BONUS_FOOLISH;
-    stat_train  = &(ch->player_specials->trainwis);
+    stat_train  = &(char_get_player_specials(ch)->trainwis);
     needed      = wiscap;
   } else {
     send_to_char(ch, "Syntax: train (str | spd | agl | wis | int | con)\r\n");
@@ -906,7 +906,7 @@ ACMD(do_meditate)
     decCurKI(ch, getMaxKI(char_get_mindlink(ch)) * .05, 0);
     return;
   }
-  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, rroom_get_contents(char_get_in_room(ch))))) {
     send_to_char(ch, "Syntax: meditate (object)\nSyntax: meditate expand\nSyntax: meditate break\r\n");
     return;
   }
@@ -1397,15 +1397,15 @@ void base_update(void)
     if (char_get_backstabcool(d->character) > 0) {
       char_set_backstabcool(d->character, char_get_backstabcool(d->character) - (1));
     }
-    if (char_plr_flagged(d->character, PLR_GOOP) && d->character->gooptime == 60) {
+    if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 60) {
       if (char_is_bio(d->character)) {
         act("@GConciousness slowly returns to you. You realize quickly that some of your cells have survived. You take control of your regenerative processes and focus on growing a new body!@n", true, d->character, 0, 0, TO_CHAR);
       } else {
         act("@MSlowly you regain conciousness. The various split off chunks of your body begin to likewise stir.@n", true, d->character, 0, 0, TO_CHAR);
         act("@MYou think you notice the chunks of @m$n@M's moving slightly.@n", true, d->character, 0, 0, TO_ROOM);
       }
-      d->character->gooptime -= 1;
-    } else if (char_plr_flagged(d->character, PLR_GOOP) && d->character->gooptime == 30) {
+      char_set_gooptime(d->character, char_get_gooptime(d->character) - 1);
+    } else if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 30) {
       if (char_is_bio(d->character)) {
         act("@GFrom the collection of cells growing a crude form of your body starts to take shape!@n", true, d->character, 0, 0, TO_CHAR);
         act("@GYou start to notice a large mass of pulsing flesh growing before you!@n", true, d->character, 0, 0, TO_ROOM);
@@ -1413,8 +1413,8 @@ void base_update(void)
         act("@MYou will the various chunks of your body to return and slowly more and more of them begin to fly into you. Your body begins to grow larger and larger as this process unfolds!@n ", true, d->character, 0, 0, TO_CHAR);
         act("@MThe various chunks of @m$n@M's body start to fly into the largest chunk! As the chunks collide they begin to form a larger and still growing blob of goo!@n", true, d->character, 0, 0, TO_ROOM);
       }
-      d->character->gooptime -= 1;
-    } else if (char_plr_flagged(d->character, PLR_GOOP) && d->character->gooptime == 15) {
+      char_set_gooptime(d->character, char_get_gooptime(d->character) - 1);
+    } else if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 15) {
       if (char_is_bio(d->character)) {
         act("@GYour body has almost reached its previous form! Only a little more regenerating is needed!@n", true, d->character, 0, 0, TO_CHAR);
         act("@GThe lump of flesh has now grown to the size where the likeness of @g$n@G can be seen of it! It appears that $e is regenerating $s body from what was only a few cells!@n", true, d->character, 0, 0, TO_ROOM);
@@ -1422,8 +1422,8 @@ void base_update(void)
         act("@MYour body has reached half its previous size as your limbs ooze slowly out into their proper shape!@n", true, d->character, 0, 0, TO_CHAR);
         act("@m$n@M's body has regenerated to half its previous size! Slowly $s limbs ooze out into their proper shape! It won't be long now till $e has fully regenerated!@n", true, d->character, 0, 0, TO_ROOM);
       }
-      d->character->gooptime -= 1;
-    } else if (char_plr_flagged(d->character, PLR_GOOP) && d->character->gooptime == 0) {
+      char_set_gooptime(d->character, char_get_gooptime(d->character) - 1);
+    } else if (char_plr_flagged(d->character, PLR_GOOP) && char_get_gooptime(d->character) == 0) {
       if (char_is_bio(d->character)) {
         restoreHealth(d->character, true);
         act("@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n", true, d->character, 0, 0, TO_CHAR);
@@ -1466,7 +1466,7 @@ void base_update(void)
       }
       char_plr_set(d->character, PLR_GOOP, false);
     } else {
-      d->character->gooptime -= 1;
+      char_set_gooptime(d->character, char_get_gooptime(d->character) - 1);
     }
     if (char_get_con_cooldown(d->character) > 0) {
       char_set_con_cooldown(d->character, char_get_con_cooldown(d->character) - (2));
@@ -1628,7 +1628,7 @@ void base_update(void)
         bool sum                 = !is_soft_cap(d->character, 0, 1.0);
         bool mum                 = !is_soft_cap(d->character, 2, 1.0);
         bool ium                 = !is_soft_cap(d->character, 1, 1.0);
-        struct char_data *leader = d->character->master ? d->character->master : d->character;
+        struct char_data *leader = char_get_master(d->character) ? char_get_master(d->character) : d->character;
         if (sum) {
           if (rand_number(1, 8) >= 6) {
             int gain = rand_number(char_get_level(d->character) / 2, char_get_level(d->character) * 3) + (char_get_level(d->character) * 18);
@@ -1697,7 +1697,7 @@ void base_update(void)
               gain *= 4;
             }
             send_to_char(d->character, "@gYou gain +@G%d@g permanent ki!@n\r\n", gain);
-            if (d->character->master && group_bonus(d->character, 2) == 7) {
+            if (char_get_master(d->character) && group_bonus(d->character, 2) == 7) {
               if (char_plr_flagged(leader, PLR_SENSEM)) {
                 int gbonus = gain * 0.15;
                 gain += gbonus;

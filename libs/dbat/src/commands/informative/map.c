@@ -96,8 +96,8 @@ void search_room(struct char_data *ch)
   act("@y$n@Y begins searching the room carefully.@n", true, ch, 0, 0, TO_ROOM);
   char_set_wait(ch, PULSE_1SEC);
 
-  for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-    next_v = vict->next_in_room;
+  for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+    next_v = char_get_next_in_room(vict);
     if (char_aff_flagged(vict, AFF_HIDE) && vict != ch) {
       if (char_get_suppression(vict) >= 1) {
         perc *= (char_get_suppression(vict) * 0.01);
@@ -126,7 +126,7 @@ void search_room(struct char_data *ch)
 
   struct obj_data *obj = nullptr;
 
-  for (obj = world[char_get_in_room(ch)].contents; obj; obj = obj->next_content) {
+  for (obj = rroom_get_contents(char_get_in_room(ch)); obj; obj = obj_get_next_content(obj)) {
     if (obj_extra_flagged(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200)) {
       act("@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, 0, TO_CHAR);
       act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", true, ch, obj, 0, TO_ROOM);
@@ -148,7 +148,7 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
   int door;
 
   for (door = 0; door < NUM_OF_DIRS; door++) {
-    if (world[rnum].dir_option[door] && world[rnum].dir_option[door]->to_room != NOWHERE && (room_exit_flagged(world[rnum].dir_option[door], EX_CLOSED) && !room_exit_flagged(world[rnum].dir_option[door], EX_SECRET))) {
+    if (rroom_get_dir_option(rnum, door) && rroom_get_dir_option(rnum, door)->to_room != NOWHERE && (room_exit_flagged(rroom_get_dir_option(rnum, door), EX_CLOSED) && !room_exit_flagged(rroom_get_dir_option(rnum, door), EX_SECRET))) {
       switch (door) {
         case NORTH:
           map[y - 1][x] = '8';
@@ -175,475 +175,475 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
           map[y + 1][x - 1] = '8';
           break;
       }
-    } else if (world[rnum].dir_option[door] && world[rnum].dir_option[door]->to_room != NOWHERE && !room_exit_flagged(world[rnum].dir_option[door], EX_CLOSED)) {
+    } else if (rroom_get_dir_option(rnum, door) && rroom_get_dir_option(rnum, door)->to_room != NOWHERE && !room_exit_flagged(rroom_get_dir_option(rnum, door), EX_CLOSED)) {
       switch (door) {
         case NORTH:
-          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(rroom_get_dir_option(rnum, door)->to_room)) {
             map[y - 1][x] = '=';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_INSIDE) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x] = '2';
             } else {
               map[y - 1][x] = 'i';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FIELD) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x] = '2';
             } else {
               map[y - 1][x] = 'p';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_DESERT) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x] = '7';
             } else {
               map[y - 1][x] = '!';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_CITY) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x] = '1';
             } else {
               map[y - 1][x] = '(';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FOREST) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x] = '6';
             } else {
               map[y - 1][x] = 'f';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_MOUNTAIN) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x] = '5';
             } else {
               map[y - 1][x] = '^';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_HILLS) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x] = '3';
             } else {
               map[y - 1][x] = 'h';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FLYING) {
             map[y - 1][x] = 's';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_NOSWIM) {
             map[y - 1][x] = '`';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_SWIM) {
             map[y - 1][x] = '+';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_SHOP) {
             map[y - 1][x] = '&';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_IMPORTANT) {
             map[y - 1][x] = '*';
           } else {
             map[y - 1][x] = '-';
           }
           break;
         case EAST:
-          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(rroom_get_dir_option(rnum, door)->to_room)) {
             map[y][x + 1] = '=';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_INSIDE) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y][x + 1] = '2';
             } else {
               map[y][x + 1] = 'i';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FIELD) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y][x + 1] = '2';
             } else {
               map[y][x + 1] = 'p';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_DESERT) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y][x + 1] = '7';
             } else {
               map[y][x + 1] = '!';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_CITY) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y][x + 1] = '1';
             } else {
               map[y][x + 1] = '(';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FOREST) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y][x + 1] = '6';
             } else {
               map[y][x + 1] = 'f';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_MOUNTAIN) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y][x + 1] = '5';
             } else {
               map[y][x + 1] = '^';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_HILLS) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y][x + 1] = '3';
             } else {
               map[y][x + 1] = 'h';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FLYING) {
             map[y][x + 1] = 's';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_NOSWIM) {
             map[y][x + 1] = '`';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_SWIM) {
             map[y][x + 1] = '+';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_SHOP) {
             map[y][x + 1] = '&';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_IMPORTANT) {
             map[y][x + 1] = '*';
           } else {
             map[y][x + 1] = '-';
           }
           break;
         case SOUTH:
-          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(rroom_get_dir_option(rnum, door)->to_room)) {
             map[y + 1][x] = '=';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_INSIDE) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x] = '2';
             } else {
               map[y + 1][x] = 'i';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FIELD) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x] = '2';
             } else {
               map[y + 1][x] = 'p';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_DESERT) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x] = '7';
             } else {
               map[y + 1][x] = '!';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_CITY) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x] = '1';
             } else {
               map[y + 1][x] = '(';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FOREST) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x] = '6';
             } else {
               map[y + 1][x] = 'f';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_MOUNTAIN) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x] = '5';
             } else {
               map[y + 1][x] = '^';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_HILLS) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x] = '3';
             } else {
               map[y + 1][x] = 'h';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FLYING) {
             map[y + 1][x] = 's';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_NOSWIM) {
             map[y + 1][x] = '`';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_SWIM) {
             map[y + 1][x] = '+';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_SHOP) {
             map[y + 1][x] = '&';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_IMPORTANT) {
             map[y + 1][x] = '*';
           } else {
             map[y + 1][x] = '-';
           }
           break;
         case WEST:
-          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(rroom_get_dir_option(rnum, door)->to_room)) {
             map[y][x - 1] = '=';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_INSIDE) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x] = '2';
             } else {
               map[y][x - 1] = 'i';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FIELD) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y][x - 1] = '2';
             } else {
               map[y][x - 1] = 'p';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_DESERT) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y][x - 1] = '7';
             } else {
               map[y][x - 1] = '!';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_CITY) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y][x - 1] = '1';
             } else {
               map[y][x - 1] = '(';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FOREST) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y][x - 1] = '6';
             } else {
               map[y][x - 1] = 'f';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_MOUNTAIN) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y][x - 1] = '5';
             } else {
               map[y][x - 1] = '^';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_HILLS) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y][x - 1] = '3';
             } else {
               map[y][x - 1] = 'h';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FLYING) {
             map[y][x - 1] = 's';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_NOSWIM) {
             map[y][x - 1] = '`';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_SWIM) {
             map[y][x - 1] = '+';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_SHOP) {
             map[y][x - 1] = '&';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_IMPORTANT) {
             map[y][x - 1] = '*';
           } else {
             map[y][x - 1] = '-';
           }
           break;
         case NORTHEAST:
-          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(rroom_get_dir_option(rnum, door)->to_room)) {
             map[y - 1][x + 1] = '=';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_INSIDE) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x + 1] = '2';
             } else {
               map[y - 1][x + 1] = 'i';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FIELD) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x + 1] = '2';
             } else {
               map[y - 1][x + 1] = 'p';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_DESERT) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x + 1] = '7';
             } else {
               map[y - 1][x + 1] = '!';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_CITY) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x + 1] = '1';
             } else {
               map[y - 1][x + 1] = '(';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FOREST) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x + 1] = '6';
             } else {
               map[y - 1][x + 1] = 'f';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_MOUNTAIN) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x + 1] = '5';
             } else {
               map[y - 1][x + 1] = '^';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_HILLS) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x + 1] = '3';
             } else {
               map[y - 1][x + 1] = 'h';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FLYING) {
             map[y - 1][x + 1] = 's';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_NOSWIM) {
             map[y - 1][x + 1] = '`';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_SWIM) {
             map[y - 1][x + 1] = '+';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_SHOP) {
             map[y - 1][x + 1] = '&';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_IMPORTANT) {
             map[y - 1][x + 1] = '*';
           } else {
             map[y - 1][x + 1] = '-';
           }
           break;
         case NORTHWEST:
-          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(rroom_get_dir_option(rnum, door)->to_room)) {
             map[y - 1][x - 1] = '=';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_INSIDE) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x - 1] = '2';
             } else {
               map[y - 1][x - 1] = 'i';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FIELD) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x - 1] = '2';
             } else {
               map[y - 1][x - 1] = 'p';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_DESERT) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x - 1] = '7';
             } else {
               map[y - 1][x - 1] = '!';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_CITY) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x - 1] = '1';
             } else {
               map[y - 1][x - 1] = '(';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FOREST) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x - 1] = '6';
             } else {
               map[y - 1][x - 1] = 'f';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_MOUNTAIN) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x - 1] = '5';
             } else {
               map[y - 1][x - 1] = '^';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_HILLS) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y - 1][x - 1] = '3';
             } else {
               map[y - 1][x - 1] = 'h';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FLYING) {
             map[y - 1][x - 1] = 's';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_NOSWIM) {
             map[y - 1][x - 1] = '`';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_SWIM) {
             map[y - 1][x - 1] = '+';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_SHOP) {
             map[y - 1][x - 1] = '&';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_IMPORTANT) {
             map[y - 1][x - 1] = '*';
           } else {
             map[y - 1][x - 1] = '-';
           }
           break;
         case SOUTHEAST:
-          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(rroom_get_dir_option(rnum, door)->to_room)) {
             map[y + 1][x + 1] = '=';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_INSIDE) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x + 1] = '2';
             } else {
               map[y + 1][x + 1] = 'i';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FIELD) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x + 1] = '2';
             } else {
               map[y + 1][x + 1] = 'p';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_DESERT) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x + 1] = '7';
             } else {
               map[y + 1][x + 1] = '!';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_CITY) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x + 1] = '1';
             } else {
               map[y + 1][x + 1] = '(';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FOREST) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x + 1] = '6';
             } else {
               map[y + 1][x + 1] = 'f';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_MOUNTAIN) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x + 1] = '5';
             } else {
               map[y + 1][x + 1] = '^';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_HILLS) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x + 1] = '3';
             } else {
               map[y + 1][x + 1] = 'h';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FLYING) {
             map[y + 1][x + 1] = 's';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_NOSWIM) {
             map[y + 1][x + 1] = '`';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_SWIM) {
             map[y + 1][x + 1] = '+';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_SHOP) {
             map[y + 1][x + 1] = '&';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_IMPORTANT) {
             map[y + 1][x + 1] = '*';
           } else {
             map[y + 1][x + 1] = '-';
           }
           break;
         case SOUTHWEST:
-          if (rroom_sunken(world[rnum].dir_option[door]->to_room)) {
+          if (rroom_sunken(rroom_get_dir_option(rnum, door)->to_room)) {
             map[y + 1][x - 1] = '=';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_INSIDE) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_INSIDE) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x - 1] = '2';
             } else {
               map[y + 1][x - 1] = 'i';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FIELD) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FIELD) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x - 1] = '2';
             } else {
               map[y + 1][x - 1] = 'p';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_DESERT) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_DESERT) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x - 1] = '7';
             } else {
               map[y + 1][x - 1] = '!';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_CITY) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_CITY) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x - 1] = '1';
             } else {
               map[y + 1][x - 1] = '(';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FOREST) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FOREST) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x - 1] = '6';
             } else {
               map[y + 1][x - 1] = 'f';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_MOUNTAIN) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_MOUNTAIN) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x - 1] = '5';
             } else {
               map[y + 1][x - 1] = '^';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_HILLS) {
-            if (rroom_get_geffect(world[rnum].dir_option[door]->to_room) >= 1) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_HILLS) {
+            if (rroom_get_geffect(rroom_get_dir_option(rnum, door)->to_room) >= 1) {
               map[y + 1][x - 1] = '3';
             } else {
               map[y + 1][x - 1] = 'h';
             }
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_FLYING) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_FLYING) {
             map[y + 1][x - 1] = 's';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_NOSWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_NOSWIM) {
             map[y + 1][x - 1] = '`';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_WATER_SWIM) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_WATER_SWIM) {
             map[y + 1][x - 1] = '+';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_SHOP) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_SHOP) {
             map[y + 1][x - 1] = '&';
-          } else if (rroom_sect(world[rnum].dir_option[door]->to_room) == SECT_IMPORTANT) {
+          } else if (rroom_sect(rroom_get_dir_option(rnum, door)->to_room) == SECT_IMPORTANT) {
             map[y + 1][x - 1] = '*';
           } else {
             map[y + 1][x - 1] = '-';
@@ -689,7 +689,7 @@ void gen_map(struct char_data *ch, int num)
   }
 
   /* print out exits */
-  map_draw_room(map, 4, 4, ch->in_room, ch);
+  map_draw_room(map, 4, 4, char_get_in_room(ch), ch);
   for (door = 0; door < NUM_OF_DIRS; door++) {
     if (char_get_exit(ch, door) && char_get_exit(ch, door)->to_room != NOWHERE && !room_exit_flagged(char_get_exit(ch, door), EX_CLOSED)) {
       switch (door) {
@@ -826,19 +826,19 @@ ACMD(do_scan)
   }
   for (i = 0; i < 10; i++) {
     if (char_get_exit(ch, i)) {
-      if (room_is_dark(ch->in_room) && (char_get_admlevel(ch) < ADMLVL_IMMORT) &&
+      if (room_is_dark(char_get_in_room(ch)) && (char_get_admlevel(ch) < ADMLVL_IMMORT) &&
           (!char_aff_flagged(ch, AFF_INFRAVISION))) {
         send_to_char(ch, "%s: DARK\n\r", dirnames[i]);
         continue;
       }
       if (char_can_go(ch, i)) {
-        newroom = world[ch->in_room].dir_option[i]->to_room;
+        newroom = rroom_get_dir_option(char_get_in_room(ch), i)->to_room;
         send_to_char(ch, "@w-----------------------------------------@n\r\n");
-        send_to_char(ch, "          %s%s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i], world[newroom].name ? world[newroom].name : "You don't think you saw what you just saw.", CCNRM(ch, C_NRM));
+        send_to_char(ch, "          %s%s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i], rroom_get_name(newroom) ? rroom_get_name(newroom) : "You don't think you saw what you just saw.", CCNRM(ch, C_NRM));
         send_to_char(ch, "@W          -----------------          @n\r\n");
 
-        list_obj_to_char(world[newroom].contents, ch, SHOW_OBJ_LONG, false);
-        list_char_to_char(world[newroom].people, ch);
+        list_obj_to_char(rroom_get_contents(newroom), ch, SHOW_OBJ_LONG, false);
+        list_char_to_char(rroom_get_people(newroom), ch);
         if (rroom_get_geffect(newroom) >= 1 && rroom_get_geffect(newroom) <= 5) {
           send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
         }
@@ -852,11 +852,11 @@ ACMD(do_scan)
           if ((newroom != NOWHERE) && (!IS_SET(char_get_exit2(ch, i)->exit_info, EX_CLOSED))) {
             if (!room_is_dark(char_get_exit2(ch, i)->to_room)) {
               send_to_char(ch, "@w-----------------------------------------@n\r\n");
-              send_to_char(ch, "          %sFar %s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i], world[newroom].name ? world[newroom].name : "You don't think you saw what you just saw.", CCNRM(ch, C_NRM));
+              send_to_char(ch, "          %sFar %s: %s %s\n\r", CCCYN(ch, C_NRM), dirnames[i], rroom_get_name(newroom) ? rroom_get_name(newroom) : "You don't think you saw what you just saw.", CCNRM(ch, C_NRM));
               send_to_char(ch, "@W          -----------------          @n\r\n");
 
-              list_obj_to_char(world[newroom].contents, ch, SHOW_OBJ_LONG, false);
-              list_char_to_char(world[newroom].people, ch);
+              list_obj_to_char(rroom_get_contents(newroom), ch, SHOW_OBJ_LONG, false);
+              list_char_to_char(rroom_get_people(newroom), ch);
               if (rroom_get_geffect(newroom) >= 1 && rroom_get_geffect(newroom) <= 5) {
                 send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
               }

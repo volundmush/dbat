@@ -170,12 +170,12 @@ void handle_multihit(struct char_data *ch, struct char_data *vict)
   /* Some otherwise inclined "luck" for the attacker */
   perc += rand_number(-5, 5);
 
-  if (ch->throws >= 3) {
-    ch->throws = 0;
+  if (char_get_throws(ch) >= 3) {
+    char_set_throws(ch, 0);
     return;
   }
-  if (ch->throws == -1) {
-    ch->throws = 0;
+  if (char_get_throws(ch) == -1) {
+    char_set_throws(ch, 0);
   }
 
   /* Racial bonuses */
@@ -220,7 +220,7 @@ void handle_multihit(struct char_data *ch, struct char_data *vict)
     act("@Y...in a lightning flash of speed you attack @y$N@Y again!@n", true, ch, 0, vict, TO_CHAR);
     act("@Y...in a lightning flash of speed @y$n@Y attacks YOU again!@n", true, ch, 0, vict, TO_VICT);
     act("@Y...in a lightning flash of speed @y$n@Y attacks @y$N@Y again!@n", true, ch, 0, vict, TO_NOTVICT);
-    ch->throws += 1;
+    char_set_throws(ch, char_get_throws(ch) + 1);
     char_plr_set(ch, PLR_MULTIHIT, true);
     if (char_get_combo(ch) > -1) {
       switch (char_get_combo(ch)) {
@@ -251,17 +251,17 @@ void handle_multihit(struct char_data *ch, struct char_data *vict)
         case 6:
           sprintf(buf, "%s", char_get_name(vict));
           do_slam(ch, buf, 0, 0);
-          ch->throws += 1;
+          char_set_throws(ch, char_get_throws(ch) + 1);
           break;
         case 8:
           sprintf(buf, "%s", char_get_name(vict));
           do_heeldrop(ch, buf, 0, 0);
-          ch->throws += 1;
+          char_set_throws(ch, char_get_throws(ch) + 1);
           break;
         case 51:
           sprintf(buf, "%s", char_get_name(vict));
           do_bash(ch, buf, 0, 0);
-          ch->throws += 1;
+          char_set_throws(ch, char_get_throws(ch) + 1);
           break;
         case 52:
           sprintf(buf, "%s", char_get_name(vict));
@@ -270,7 +270,7 @@ void handle_multihit(struct char_data *ch, struct char_data *vict)
         case 56:
           sprintf(buf, "%s", char_get_name(vict));
           do_tailwhip(ch, buf, 0, 0);
-          ch->throws += 1;
+          char_set_throws(ch, char_get_throws(ch) + 1);
           break;
       }
     } else {
@@ -512,7 +512,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
     char_set_charge(ch, 0);
   }
 
-  for (f = ch->followers; f; f = f->next) {
+  for (f = char_get_followers(ch); f; f = f->next) {
     if (!char_aff_flagged(f->follower, AFF_GROUP)) {
       continue;
     }
@@ -575,7 +575,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict)
   }
   hurt(0, 0, ch, vict, nullptr, totki, 1);
   if (same == true) {
-    for (f = ch->followers; f; f = f->next) {
+    for (f = char_get_followers(ch); f; f = f->next) {
       send_to_char(f->follower, "@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
     }
     send_to_char(ch, "@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
@@ -588,8 +588,8 @@ bool check_ruby(struct char_data *ch)
   struct obj_data *obj, *next_obj = nullptr, *ruby = nullptr;
   int found = 0;
 
-  for (obj = ch->carrying; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     if (found == 0 && obj_get_vnum(obj) == 6600) {
       if (obj_extra_flagged(obj, ITEM_HOT)) {
         found = 1;
@@ -1626,7 +1626,7 @@ void huge_update()
 
   /* Checking the object list for any huge ki attacks */
   for (k = object_list; k; k = next_k) {
-    next_k = k->next; /* k may be extracted below */
+    next_k = obj_get_next(k); /* k may be extracted below */
     if (obj_get_aucter(k) > 0 && obj_get_aucTime(k) + 604800 <= time(0)) {
       if (obj_get_in_room(k) && rroom_get_vnum(obj_get_in_room(k)) == 80) {
         room_vnum inroom = obj_get_in_room(k);
@@ -1663,8 +1663,8 @@ void huge_update()
             dmg /= 2;
 
             /* Hit those in the current room. */
-            for (vict = world[obj_get_in_room(k)].people; vict; vict = next_v) {
-              next_v = vict->next_in_room;
+            for (vict = rroom_get_people(obj_get_in_room(k)); vict; vict = next_v) {
+              next_v = char_get_next_in_room(vict);
 
               if (vict == ch) {
                 continue;
@@ -1676,13 +1676,13 @@ void huge_update()
                 continue;
               }
               if (char_aff_flagged(vict, AFF_GROUP)) {
-                if (vict->master == ch) {
+                if (char_get_master(vict) == ch) {
                   continue;
                 }
-                if (ch->master == vict) {
+                if (char_get_master(ch) == vict) {
                   continue;
                 }
-                if (vict->master == ch->master) {
+                if (char_get_master(vict) == char_get_master(ch)) {
                   continue;
                 }
               }
@@ -1761,8 +1761,8 @@ void huge_update()
           dmg /= 2;
 
           /* Hit those in the current room. */
-          for (vict = world[obj_get_in_room(k)].people; vict; vict = next_v) {
-            next_v = vict->next_in_room;
+          for (vict = rroom_get_people(obj_get_in_room(k)); vict; vict = next_v) {
+            next_v = char_get_next_in_room(vict);
 
             if (vict == ch) {
               continue;
@@ -1770,7 +1770,7 @@ void huge_update()
             if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
               continue;
             }
-            if (char_aff_flagged(vict, AFF_GROUP) && (vict->master == ch || ch->master == vict)) {
+            if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(vict) == ch || char_get_master(ch) == vict)) {
               continue;
             }
             if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
@@ -1835,8 +1835,8 @@ void huge_update()
             dmg /= 2;
 
             /* Hit those in the current room. */
-            for (vict = world[obj_get_in_room(k)].people; vict; vict = next_v) {
-              next_v = vict->next_in_room;
+            for (vict = rroom_get_people(obj_get_in_room(k)); vict; vict = next_v) {
+              next_v = char_get_next_in_room(vict);
 
               if (vict == ch) {
                 continue;
@@ -1848,13 +1848,13 @@ void huge_update()
                 continue;
               }
               if (char_aff_flagged(vict, AFF_GROUP)) {
-                if (vict->master == ch) {
+                if (char_get_master(vict) == ch) {
                   continue;
                 }
-                if (ch->master == vict) {
+                if (char_get_master(ch) == vict) {
                   continue;
                 }
-                if (vict->master == ch->master) {
+                if (char_get_master(vict) == char_get_master(ch)) {
                   continue;
                 }
               }
@@ -1931,8 +1931,8 @@ void huge_update()
           dmg /= 2;
 
           /* Hit those in the current room. */
-          for (vict = world[obj_get_in_room(k)].people; vict; vict = next_v) {
-            next_v = vict->next_in_room;
+          for (vict = rroom_get_people(obj_get_in_room(k)); vict; vict = next_v) {
+            next_v = char_get_next_in_room(vict);
 
             if (vict == ch) {
               continue;
@@ -1940,7 +1940,7 @@ void huge_update()
             if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
               continue;
             }
-            if (char_aff_flagged(vict, AFF_GROUP) && (vict->master == ch || ch->master == vict)) {
+            if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(vict) == ch || char_get_master(ch) == vict)) {
               continue;
             }
             if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
@@ -2000,7 +2000,7 @@ void homing_update()
 
   for (k = object_list; k; k = next_k) {
 
-    next_k = k->next;
+    next_k = obj_get_next(k);
 
     if (obj_get_kicharge(k) <= 0) {
       continue;
@@ -2036,7 +2036,7 @@ void homing_update()
           act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", true, vict, k, 0, TO_ROOM);
           obj_set_kicharge(k, obj_get_kicharge(k) - (obj_get_kicharge(k) / 10));
           if (obj_get_kicharge(k) <= 0) {
-            send_to_room(obj_get_in_room(k), "%s has lost all its energy and disappears.\r\n", k->short_description);
+            send_to_room(obj_get_in_room(k), "%s has lost all its energy and disappears.\r\n", obj_get_short_description(k));
             extract_obj(k);
           }
           continue;
@@ -2131,7 +2131,7 @@ void homing_update()
           act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n", true, vict, k, 0, TO_ROOM);
           obj_set_kicharge(k, obj_get_kicharge(k) - (obj_get_kicharge(k) / 10));
           if (obj_get_kicharge(k) <= 0) {
-            send_to_room(obj_get_in_room(k), "%s has lost all its energy and disappears.\r\n", k->short_description);
+            send_to_room(obj_get_in_room(k), "%s has lost all its energy and disappears.\r\n", obj_get_short_description(k));
             extract_obj(k);
           }
           continue;
@@ -2370,8 +2370,8 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, cons
   struct obj_data *tob, *next_obj;
   struct char_data *tch, *next_v;
 
-  for (tch = world[char_get_in_room(ch)].people; tch; tch = next_v) {
-    next_v = tch->next_in_room;
+  for (tch = rroom_get_people(char_get_in_room(ch)); tch; tch = next_v) {
+    next_v = char_get_next_in_room(tch);
 
     if (tch == ch)
       continue;
@@ -2404,8 +2404,8 @@ void parry_ki(double attperc, struct char_data *ch, struct char_data *vict, cons
     }
   }
 
-  for (tob = world[char_get_in_room(ch)].contents; tob; tob = next_obj) {
-    next_obj = tob->next_content;
+  for (tob = rroom_get_contents(char_get_in_room(ch)); tob; tob = next_obj) {
+    next_obj = obj_get_next_content(tob);
     if (obj_extra_flagged(tob, ITEM_UNBREAKABLE))
       continue;
     if (foundo == true)
@@ -4168,8 +4168,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         solo_gain(ch, vict);
         struct obj_data *rew, *next_rew;
         int founded = 0;
-        for (rew = vict->carrying; rew; rew = next_rew) {
-          next_rew = rew->next_content;
+        for (rew = char_get_inventory(vict); rew; rew = next_rew) {
+          next_rew = obj_get_next_content(rew);
           if (rew) {
             obj_from_char(rew);
             obj_to_room(rew, char_get_in_room(vict));
@@ -4250,7 +4250,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
       }
       char_set_position(vict, POS_SITTING);
       char_from_room(vict);
-      char_to_room(vict, real_room(sensei_start_room(vict->chclass)));
+      char_to_room(vict, real_room(sensei_start_room(char_get_class(vict))));
       return;
     }
 
@@ -4270,7 +4270,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
       if (getCurPL(vict) - dmg <= 0 && suppresso == false) {
         decCurHealthPercent(vict, 1, 0);
-        if (!char_is_npc(vict) && vict->lifeperc > 0 && (getCurLF(vict)) - (dmg - getCurPL(vict)) >= 0) {
+        if (!char_is_npc(vict) && char_get_lifeperc(vict) > 0 && (getCurLF(vict)) - (dmg - getCurPL(vict)) >= 0) {
           act("@c$N@w barely clings to life!@n", true, ch, 0, vict, TO_CHAR);
           act("@CYou barely cling to life!@n", true, ch, 0, vict, TO_VICT);
           act("@c$N@w barely clings to life!@n.", true, ch, 0, vict, TO_NOTVICT);

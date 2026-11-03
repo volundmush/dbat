@@ -18,7 +18,7 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
   char fname[40], line[READ_SIZE], prev[READ_SIZE] = "";
   FILE *fl, *file;
 
-  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, ch->desc->user)) {
+  if (!get_filename(fname, sizeof(fname), CUSTOME_FILE, char_get_desc(ch)->user)) {
     mud_log("ERROR: Custom unable to be saved to user file!");
     return;
   }
@@ -38,7 +38,7 @@ void customWrite(struct char_data *ch, struct obj_data *obj)
     fclose(file);
   }
 
-  fprintf(fl, "%s\n\n", obj->short_description);
+  fprintf(fl, "%s\n\n", obj_get_short_description(obj));
 
   atomic_commit(&af);
 }

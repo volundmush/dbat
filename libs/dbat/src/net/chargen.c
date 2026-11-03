@@ -15,6 +15,7 @@
 
 #include <unistd.h>
 #include "nanny_internal.h"
+#include "dbat/character_utils.h"
 
 static void display_races_sub(descriptor_data *d)
 {
@@ -40,7 +41,7 @@ static void display_classes_sub(descriptor_data *d)
 {
   int i = 0;
   for (int s = 0; s < NUM_CLASSES; s++) {
-    if (!sensei_is_pc_ok(s) || !sensei_available_for_race(s, d->character->race))
+    if (!sensei_is_pc_ok(s) || !sensei_available_for_race(s, char_get_race(d->character)))
       continue;
     send_to_char(d->character, "@C%s@n%s", sensei_name(s), !(++i % 2) ? "\r\n" : "	");
   }
@@ -677,7 +678,7 @@ static void exchange_ccpoints(struct char_data *ch, int value)
 {
   int type = 0;
 
-  if (desc_get_connected(ch->desc) == CON_BONUS) {
+  if (desc_get_connected(char_get_desc(ch)) == CON_BONUS) {
     type = 0;
   } else {
     type = 1;
@@ -1002,7 +1003,7 @@ static const char *const genome_names[] = {
 
 static void show_chosen_genomes(struct descriptor_data *d)
 {
-  write_to_output(d, "@D----[@gGenome 1@W: @G%s@D]----[@gGenome 2@W: @G%s@D]----", genome_names[d->character->genome[0]], genome_names[d->character->genome[1]]);
+  write_to_output(d, "@D----[@gGenome 1@W: @G%s@D]----[@gGenome 2@W: @G%s@D]----", genome_names[char_get_genome(d->character, 0)], genome_names[char_get_genome(d->character, 1)]);
 }
 
 /* The traits menu that follows skills, mutations or genomes. */
@@ -1109,7 +1110,7 @@ static void state_qrace(struct descriptor_data *d, char *arg)
   if (race_rpp_cost(chosen_race)) {
     write_to_output(d, "\r\n%i RPP will be paid upon your first level up.\r\n", race_rpp_cost(chosen_race));
   }
-  d->character->race = chosen_race;
+  char_set_race(d->character, chosen_race);
 
   if (char_is_halfbreed(d->character)) {
     write_to_output(d, "@YWhat race do you prefer to by identified with?\r\n");
@@ -1142,7 +1143,7 @@ static void state_racial(struct descriptor_data *d, char *arg)
     reject_option(d);
     return;
   }
-  d->character->player_specials->racial_pref = choice + 1;
+  char_get_player_specials(d->character)->racial_pref = choice + 1;
   show_sex_prompt(d);
   desc_set_connected(d, CON_QSEX);
 }
@@ -1161,7 +1162,7 @@ static void state_qsex(struct descriptor_data *d, char *arg)
                          "What IS your sex? ");
       return;
     }
-    ch->sex = sexes[choice];
+    char_set_sex(ch, sexes[choice]);
   }
   ask_hair_length(d);
 }
@@ -1177,12 +1178,12 @@ static void state_hairl(struct descriptor_data *d, char *arg)
     reject_option(d);
     return;
   }
-  ch->hairl = lengths[choice];
+  char_set_hairl(ch, lengths[choice]);
 
   if (has_hair(ch)) {
-    if (ch->hairl == HAIRL_BALD) {
-      ch->hairc = HAIRC_NONE;
-      ch->hairs = HAIRS_NONE;
+    if (char_get_hairl(ch) == HAIRL_BALD) {
+      char_set_hairc(ch, HAIRC_NONE);
+      char_set_hairs(ch, HAIRS_NONE);
       ask_skin(d);
     } else {
       show_color_menu(d, "Hair");
@@ -1192,8 +1193,8 @@ static void state_hairl(struct descriptor_data *d, char *arg)
     show_color_menu(d, "Wing");
     desc_set_connected(d, CON_HAIRC);
   } else {
-    ch->hairc = HAIRC_NONE;
-    ch->hairs = HAIRS_NONE;
+    char_set_hairc(ch, HAIRC_NONE);
+    char_set_hairs(ch, HAIRS_NONE);
     if (char_is_demon(ch) || char_is_icer(ch) || char_is_majin(ch) || char_is_namek(ch) || char_is_arlian(ch))
       show_skin_menu(d);
     desc_set_connected(d, CON_SKIN);
@@ -1211,9 +1212,9 @@ static void state_hairc(struct descriptor_data *d, char *arg)
     reject_option(d);
     return;
   }
-  d->character->hairc = colors[choice];
+  char_set_hairc(d->character, colors[choice]);
   if (char_is_arlian(d->character)) {
-    d->character->hairs = HAIRS_NONE;
+    char_set_hairs(d->character, HAIRS_NONE);
     ask_skin(d);
   } else {
     show_hair_style_menu(d);
@@ -1232,7 +1233,7 @@ static void state_hairs(struct descriptor_data *d, char *arg)
     reject_option(d);
     return;
   }
-  d->character->hairs = styles[choice];
+  char_set_hairs(d->character, styles[choice]);
   ask_skin(d);
 }
 
@@ -1247,7 +1248,7 @@ static void state_skin(struct descriptor_data *d, char *arg)
     reject_option(d);
     return;
   }
-  d->character->skin = skins[choice];
+  char_set_skin(d->character, skins[choice]);
   show_eye_menu(d);
   desc_set_connected(d, CON_EYE);
 }
@@ -1263,7 +1264,7 @@ static void state_eye(struct descriptor_data *d, char *arg)
     reject_option(d);
     return;
   }
-  d->character->eye = eyes[choice];
+  char_set_eye(d->character, eyes[choice]);
   show_feature_menu(d);
   desc_set_connected(d, CON_DISTFEA);
 }
@@ -1277,7 +1278,7 @@ static void state_distfea(struct descriptor_data *d, char *arg)
     reject_option(d);
     return;
   }
-  d->character->distfea = choice;
+  char_set_distfea(d->character, choice);
   show_size_menu(d);
   desc_set_connected(d, CON_HW);
 }
@@ -1293,8 +1294,8 @@ static void state_hw(struct descriptor_data *d, char *arg)
     reject_option(d);
     return;
   }
-  d->character->height = rand_number(sizes[choice].min_height, sizes[choice].max_height);
-  d->character->weight = rand_number(sizes[choice].min_weight, sizes[choice].max_weight);
+  char_set_height(d->character, rand_number(sizes[choice].min_height, sizes[choice].max_height));
+  char_set_weight(d->character, rand_number(sizes[choice].min_weight, sizes[choice].max_weight));
   show_aura_menu(d);
   desc_set_connected(d, CON_AURA);
 }
@@ -1308,7 +1309,7 @@ static void state_aura(struct descriptor_data *d, char *arg)
     reject_option(d);
     return;
   }
-  d->character->aura = choice;
+  char_set_aura(d->character, choice);
   display_classes(d);
   desc_set_connected(d, CON_QCLASS);
 }
@@ -1341,11 +1342,11 @@ static void state_qclass(struct descriptor_data *d, char *arg)
     return;
   }
   /* only the senseis the menu offers this race */
-  if (!sensei_is_pc_ok(chosen_sensei) || !sensei_available_for_race(chosen_sensei, d->character->race)) {
+  if (!sensei_is_pc_ok(chosen_sensei) || !sensei_available_for_race(chosen_sensei, char_get_race(d->character))) {
     write_to_output(d, "\r\nThat's not a sensei.\r\nSensei: ");
     return;
   }
-  d->character->chclass = chosen_sensei;
+  char_set_class(d->character, chosen_sensei);
 
   if (char_is_android(d->character)) {
     write_to_output(d, "\r\n@YChoose your model type.\r\n");
@@ -1416,12 +1417,12 @@ static void roll_starting_abilities(struct char_data *ch)
   for (size_t i = 0; i < countof(starting_abilities); i++) {
     if (!starting_abilities[i].is_race(ch))
       continue;
-    ch->real_abils.str   = rand_number(starting_abilities[i].str[0], starting_abilities[i].str[1]);
-    ch->real_abils.con   = rand_number(starting_abilities[i].con[0], starting_abilities[i].con[1]);
-    ch->real_abils.wis   = rand_number(starting_abilities[i].wis[0], starting_abilities[i].wis[1]);
-    ch->real_abils.intel = rand_number(starting_abilities[i].intel[0], starting_abilities[i].intel[1]);
-    ch->real_abils.cha   = rand_number(starting_abilities[i].cha[0], starting_abilities[i].cha[1]);
-    ch->real_abils.dex   = rand_number(starting_abilities[i].dex[0], starting_abilities[i].dex[1]);
+    char_set_real_abils_str(ch, rand_number(starting_abilities[i].str[0], starting_abilities[i].str[1]));
+    char_set_real_abils_con(ch, rand_number(starting_abilities[i].con[0], starting_abilities[i].con[1]));
+    char_set_real_abils_wis(ch, rand_number(starting_abilities[i].wis[0], starting_abilities[i].wis[1]));
+    char_set_real_abils_intel(ch, rand_number(starting_abilities[i].intel[0], starting_abilities[i].intel[1]));
+    char_set_real_abils_cha(ch, rand_number(starting_abilities[i].cha[0], starting_abilities[i].cha[1]));
+    char_set_real_abils_dex(ch, rand_number(starting_abilities[i].dex[0], starting_abilities[i].dex[1]));
     return;
   }
 }
@@ -1429,37 +1430,37 @@ static void roll_starting_abilities(struct char_data *ch)
 /* CON_Q1 */
 static void state_q1(struct descriptor_data *d, char *arg)
 {
-  d->character->basepl = rand_number(30, 50);
-  d->character->basest = rand_number(30, 50);
-  d->character->baseki = rand_number(30, 50);
+  char_set_basepl(d->character, rand_number(30, 50));
+  char_set_basest(d->character, rand_number(30, 50));
+  char_set_baseki(d->character, rand_number(30, 50));
   roll_starting_abilities(d->character);
 
   switch (*arg) {
     case '1':
-      d->character->basepl += roll_stats(d->character, 5, 25);
-      d->character->basest += roll_stats(d->character, 8, 50);
-      d->character->baseki += roll_stats(d->character, 6, 50);
+      char_set_basepl(d->character, getBasePL(d->character) + roll_stats(d->character, 5, 25));
+      char_set_basest(d->character, getBaseST(d->character) + roll_stats(d->character, 8, 50));
+      char_set_baseki(d->character, getBaseKI(d->character) + roll_stats(d->character, 6, 50));
       break;
     case '2':
-      d->character->basepl += roll_stats(d->character, 5, 55);
-      d->character->basest += roll_stats(d->character, 8, 40);
-      d->character->baseki += roll_stats(d->character, 6, 40);
+      char_set_basepl(d->character, getBasePL(d->character) + roll_stats(d->character, 5, 55));
+      char_set_basest(d->character, getBaseST(d->character) + roll_stats(d->character, 8, 40));
+      char_set_baseki(d->character, getBaseKI(d->character) + roll_stats(d->character, 6, 40));
       break;
     case '3':
-      d->character->basepl += roll_stats(d->character, 5, 125);
-      d->character->basest += roll_stats(d->character, 8, 50);
-      d->character->baseki += roll_stats(d->character, 6, 40);
+      char_set_basepl(d->character, getBasePL(d->character) + roll_stats(d->character, 5, 125));
+      char_set_basest(d->character, getBaseST(d->character) + roll_stats(d->character, 8, 50));
+      char_set_baseki(d->character, getBaseKI(d->character) + roll_stats(d->character, 6, 40));
       break;
     case '4':
-      d->character->basepl += roll_stats(d->character, 5, 65);
-      d->character->basest += roll_stats(d->character, 8, 65);
-      d->character->baseki += roll_stats(d->character, 6, 65);
+      char_set_basepl(d->character, getBasePL(d->character) + roll_stats(d->character, 5, 65));
+      char_set_basest(d->character, getBaseST(d->character) + roll_stats(d->character, 8, 65));
+      char_set_baseki(d->character, getBaseKI(d->character) + roll_stats(d->character, 6, 65));
       char_plr_set(d->character, PLR_SKILLP, true);
       break;
     case '5':
-      d->character->basepl += roll_stats(d->character, 5, 75);
-      d->character->basest += roll_stats(d->character, 8, 100);
-      d->character->baseki += roll_stats(d->character, 6, 75);
+      char_set_basepl(d->character, getBasePL(d->character) + roll_stats(d->character, 5, 75));
+      char_set_basest(d->character, getBaseST(d->character) + roll_stats(d->character, 8, 100));
+      char_set_baseki(d->character, getBaseKI(d->character) + roll_stats(d->character, 6, 75));
       break;
     default:
       reject_option(d);
@@ -1488,7 +1489,7 @@ static void state_q2(struct descriptor_data *d, char *arg)
     reject_option(d);
     return;
   }
-  d->character->alignment += alignment[choice];
+  char_set_alignment(d->character, char_get_alignment(d->character) + (alignment[choice]));
   write_to_output(d, "\r\n@WQuestion (@G3@W out of @g10@W)\r\n");
   write_to_output(d, "@YAnswer the following question:\r\n");
   write_to_output(d, "@wYou are one day offered a means to gain incredible strength\r\nby some extraordinary means. The only problem is it requires\r\nthe lives of innocents to obtain. What do you do?\r\n");
@@ -1518,10 +1519,10 @@ static void state_q3(struct descriptor_data *d, char *arg)
     reject_option(d);
     return;
   }
-  d->character->alignment += answers[choice].alignment;
-  d->character->basepl += answers[choice].pl;
-  d->character->basest += answers[choice].st;
-  d->character->baseki += answers[choice].ki;
+  char_set_alignment(d->character, char_get_alignment(d->character) + answers[choice].alignment);
+  char_set_basepl(d->character, getBasePL(d->character) + answers[choice].pl);
+  char_set_basest(d->character, getBaseST(d->character) + answers[choice].st);
+  char_set_baseki(d->character, getBaseKI(d->character) + answers[choice].ki);
   write_to_output(d, "\r\n@WQuestion (@G4@W out of @g10@W)\r\n");
   write_to_output(d, "@YAnswer the following question:\r\n");
   write_to_output(d, "@wOne day you are offered a way to make a lot of money, but in order\r\nto do so you will need to stop training for a whole month to\r\nhandle business. What do you do?\r\n");
@@ -1539,28 +1540,28 @@ static void state_q4(struct descriptor_data *d, char *arg)
 {
   switch (*arg) {
     case '1':
-      d->character->gold += 1000;
-      d->character->basepl -= rand_number(10, 30);
-      d->character->basest -= rand_number(10, 30);
-      d->character->baseki -= rand_number(10, 30);
+      char_set_gold(d->character, char_get_gold(d->character) + 1000);
+      char_set_basepl(d->character, getBasePL(d->character) - rand_number(10, 30));
+      char_set_basest(d->character, getBaseST(d->character) - rand_number(10, 30));
+      char_set_baseki(d->character, getBaseKI(d->character) - rand_number(10, 30));
       break;
     case '2':
-      d->character->gold = 0;
-      d->character->basepl += rand_number(50, 165);
-      d->character->basest += rand_number(50, 165);
-      d->character->baseki += rand_number(50, 165);
+      char_set_gold(d->character, 0);
+      char_set_basepl(d->character, getBasePL(d->character) + rand_number(50, 165));
+      char_set_basest(d->character, getBaseST(d->character) + rand_number(50, 165));
+      char_set_baseki(d->character, getBaseKI(d->character) + rand_number(50, 165));
       break;
     case '3':
-      d->character->gold = 2500;
-      d->character->basepl -= rand_number(15, 25);
-      d->character->basest -= rand_number(15, 25);
-      d->character->baseki -= rand_number(15, 25);
+      char_set_gold(d->character, 2500);
+      char_set_basepl(d->character, getBasePL(d->character) - rand_number(15, 25));
+      char_set_basest(d->character, getBaseST(d->character) - rand_number(15, 25));
+      char_set_baseki(d->character, getBaseKI(d->character) - rand_number(15, 25));
       break;
     case '4':
-      d->character->gold = 150;
-      d->character->basepl += rand_number(25, 80);
-      d->character->basest += rand_number(25, 80);
-      d->character->baseki += rand_number(25, 80);
+      char_set_gold(d->character, 150);
+      char_set_basepl(d->character, getBasePL(d->character) + rand_number(25, 80));
+      char_set_basest(d->character, getBaseST(d->character) + rand_number(25, 80));
+      char_set_baseki(d->character, getBaseKI(d->character) + rand_number(25, 80));
       break;
     default:
       reject_option(d);
@@ -1593,7 +1594,7 @@ static void state_q5(struct descriptor_data *d, char *arg)
     reject_option(d);
     return;
   }
-  d->character->basepl += rand_number(pl_range[choice][0], pl_range[choice][1]);
+  char_set_basepl(d->character, getBasePL(d->character) + rand_number(pl_range[choice][0], pl_range[choice][1]));
   write_to_output(d, "\r\n@WQuestion (@G6@W out of @g10@W)\r\n");
   write_to_output(d, "\r\n@YAnswer the following question:\r\n");
   write_to_output(d, "@wYou have an enemy before you, what is your prefered method to attack him?@n\r\n");
@@ -1612,25 +1613,25 @@ static void state_q6(struct descriptor_data *d, char *arg)
 {
   switch (*arg) {
     case '1':
-      d->character->basepl += rand_number(0, 15);
-      d->character->basest += rand_number(0, 15);
-      d->character->choice = 1;
+      char_set_basepl(d->character, getBasePL(d->character) + rand_number(0, 15));
+      char_set_basest(d->character, getBaseST(d->character) + rand_number(0, 15));
+      char_set_choice(d->character, 1);
       break;
     case '2':
-      d->character->basepl += rand_number(0, 30);
-      d->character->choice = 2;
+      char_set_basepl(d->character, getBasePL(d->character) + rand_number(0, 30));
+      char_set_choice(d->character, 2);
       break;
     case '3':
-      d->character->basepl += rand_number(0, 30);
-      d->character->choice = 3;
+      char_set_basepl(d->character, getBasePL(d->character) + rand_number(0, 30));
+      char_set_choice(d->character, 3);
       break;
     case '4':
-      d->character->basepl += rand_number(0, 30);
-      d->character->choice = 4;
+      char_set_basepl(d->character, getBasePL(d->character) + rand_number(0, 30));
+      char_set_choice(d->character, 4);
       break;
     case '5':
-      d->character->baseki += rand_number(0, 50);
-      d->character->choice = 5;
+      char_set_baseki(d->character, getBaseKI(d->character) + rand_number(0, 50));
+      char_set_choice(d->character, 5);
       break;
     default:
       reject_option(d);
@@ -1653,18 +1654,18 @@ static void state_q7(struct descriptor_data *d, char *arg)
 {
   switch (*arg) {
     case '1':
-      d->character->alignment += -10;
-      d->character->real_abils.str += 1;
+      char_set_alignment(d->character, char_get_alignment(d->character) + (-10));
+      char_set_real_abils_str(d->character, char_get_real_abils_str(d->character) + 1);
       break;
     case '2':
-      d->character->alignment += +10;
-      d->character->real_abils.cha += 1;
+      char_set_alignment(d->character, char_get_alignment(d->character) + (+10));
+      char_set_real_abils_cha(d->character, char_get_real_abils_cha(d->character) + 1);
       break;
     case '3':
-      d->character->real_abils.wis += 1;
+      char_set_real_abils_wis(d->character, char_get_real_abils_wis(d->character) + 1);
       break;
     case '4':
-      d->character->real_abils.intel += 1;
+      char_set_real_abils_intel(d->character, char_get_real_abils_intel(d->character) + 1);
       break;
     default:
       reject_option(d);
@@ -1687,20 +1688,20 @@ static void state_q8(struct descriptor_data *d, char *arg)
 {
   switch (*arg) {
     case '1':
-      d->character->alignment += +10;
-      d->character->real_abils.cha += 1;
+      char_set_alignment(d->character, char_get_alignment(d->character) + (+10));
+      char_set_real_abils_cha(d->character, char_get_real_abils_cha(d->character) + 1);
       break;
     case '2':
-      d->character->alignment += +20;
-      d->character->real_abils.wis += 1;
+      char_set_alignment(d->character, char_get_alignment(d->character) + (+20));
+      char_set_real_abils_wis(d->character, char_get_real_abils_wis(d->character) + 1);
       break;
     case '3':
-      d->character->alignment += -10;
-      d->character->real_abils.str += 1;
+      char_set_alignment(d->character, char_get_alignment(d->character) + (-10));
+      char_set_real_abils_str(d->character, char_get_real_abils_str(d->character) + 1);
       break;
     case '4':
-      d->character->alignment += -20;
-      d->character->real_abils.dex += 1;
+      char_set_alignment(d->character, char_get_alignment(d->character) + (-20));
+      char_set_real_abils_dex(d->character, char_get_real_abils_dex(d->character) + 1);
       break;
     default:
       reject_option(d);
@@ -1729,19 +1730,19 @@ static void state_q9(struct descriptor_data *d, char *arg)
 {
   switch (*arg) {
     case '1':
-      d->character->real_abils.str += 1;
+      char_set_real_abils_str(d->character, char_get_real_abils_str(d->character) + 1);
       break;
     case '2':
-      d->character->alignment += -30;
-      d->character->real_abils.wis += 1;
+      char_set_alignment(d->character, char_get_alignment(d->character) + (-30));
+      char_set_real_abils_wis(d->character, char_get_real_abils_wis(d->character) + 1);
       break;
     case '3':
-      d->character->alignment += -10;
-      d->character->real_abils.cha += 1;
+      char_set_alignment(d->character, char_get_alignment(d->character) + (-10));
+      char_set_real_abils_cha(d->character, char_get_real_abils_cha(d->character) + 1);
       break;
     case '4':
-      d->character->alignment += -5;
-      d->character->real_abils.intel += 1;
+      char_set_alignment(d->character, char_get_alignment(d->character) + (-5));
+      char_set_real_abils_intel(d->character, char_get_real_abils_intel(d->character) + 1);
       break;
     default:
       reject_option(d);
@@ -1792,7 +1793,7 @@ static void state_qx(struct descriptor_data *d, char *arg)
   else
     age = old_ages[long_lived(d->character) ? 0 : char_is_namek(d->character) ? 1
                                                                               : 2][choice - 16];
-  d->character->time.birth = time(0) - (age * SECS_PER_MUD_YEAR);
+  char_set_time_birth(d->character, time(0) - (age * SECS_PER_MUD_YEAR));
 
   char_set_ccpoints(d->character, char_is_hoshijin(d->character) ? 10 : 5);
   write_to_output(d, "@C             Alignment Menu@n\r\n");
@@ -1833,22 +1834,22 @@ static void state_align(struct descriptor_data *d, char *arg)
     loseBasePLPercent(d->character, .2, false);
     switch (rand_number(1, 6)) { /* and lose a random point of one ability */
       case 1:
-        d->character->real_abils.str -= 1;
+        char_set_real_abils_str(d->character, char_get_real_abils_str(d->character) - 1);
         break;
       case 2:
-        d->character->real_abils.con -= 1;
+        char_set_real_abils_con(d->character, char_get_real_abils_con(d->character) - 1);
         break;
       case 3:
-        d->character->real_abils.wis -= 1;
+        char_set_real_abils_wis(d->character, char_get_real_abils_wis(d->character) - 1);
         break;
       case 4:
-        d->character->real_abils.intel -= 1;
+        char_set_real_abils_intel(d->character, char_get_real_abils_intel(d->character) - 1);
         break;
       case 5:
-        d->character->real_abils.cha -= 1;
+        char_set_real_abils_cha(d->character, char_get_real_abils_cha(d->character) - 1);
         break;
       case 6:
-        d->character->real_abils.dex -= 1;
+        char_set_real_abils_dex(d->character, char_get_real_abils_dex(d->character) - 1);
         break;
     }
     write_to_output(d, "@CWould you like to keep skills gained from your sensei/race combo (skills, not abilities)\r\nor would you prefer to keep those skill slots empty? If you choose\r\nto forget then you get 200 PS in exchange.@n\r\n");
@@ -1880,8 +1881,8 @@ static void state_skills(struct descriptor_data *d, char *arg)
   else
     show_genome_menu(d, "\n@RSelect two genomes to be your primary DNA strains.\n");
   write_to_output(d, "@wChoose: ");
-  d->character->genome[0] = 0;
-  d->character->genome[1] = 0;
+  char_set_genome(d->character, 0, 0);
+  char_set_genome(d->character, 1, 0);
   desc_set_connected(d, CON_GENOME);
 }
 
@@ -1893,16 +1894,16 @@ static void mutant_genome(struct descriptor_data *d, char *arg)
   show_mutation_menu(d, "\n@RSelect a mutation. A second will be chosen automatically..\n", true);
   write_to_output(d, "\n@wChoose: ");
 
-  if (ch->genome[0] > 0 && ch->genome[1] <= 0) {
+  if (char_get_genome(ch, 0) > 0 && char_get_genome(ch, 1) <= 0) {
     int num = rand_number(1, 8);
-    while (num == ch->genome[0])
+    while (num == char_get_genome(ch, 0))
       num = rand_number(1, 8);
     if (num == 3) {
-      ch->real_abils.dex += 10;
+      char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 10);
     }
     write_to_output(d, "@CRolling second mutation... Your second mutation is @D[@Y%s@D]@n\r\n", mutation_names[num]);
-    ch->genome[1] = num;
-  } else if (ch->genome[1] > 0) {
+    char_set_genome(ch, 1, num);
+  } else if (char_get_genome(ch, 1) > 0) {
     ask_bonuses(d, "\n@wChoose: ");
   } else if (!*arg) {
     write_to_output(d, "That is not an acceptable choice!\r\n");
@@ -1914,9 +1915,9 @@ static void mutant_genome(struct descriptor_data *d, char *arg)
       return;
     }
     write_to_output(d, "@CYou have chosen the mutation @D[@Y%s@D]@n\r\n", mutation_names[choice]);
-    ch->genome[0] = choice;
+    char_set_genome(ch, 0, choice);
     if (choice == 3) {
-      ch->real_abils.dex += 10;
+      char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 10);
     } else if (choice == 9) {
       char_set_skills_base(ch, SKILL_TELEPATHY, 50);
     }
@@ -1929,7 +1930,7 @@ static void bio_genome(struct descriptor_data *d, char *arg)
   struct char_data *ch = d->character;
   int select;
 
-  if (ch->genome[1] > 0) {
+  if (char_get_genome(ch, 1) > 0) {
     ask_bonuses(d, "@wChoose: ");
     return;
   }
@@ -1945,14 +1946,14 @@ static void bio_genome(struct descriptor_data *d, char *arg)
     write_to_output(d, "@RThat is not an acceptable selection. @WTry again:@n\n");
     return;
   }
-  if (ch->genome[0] == 0) {
-    ch->genome[0] = select;
-  } else if (ch->genome[0] == select) {
+  if (char_get_genome(ch, 0) == 0) {
+    char_set_genome(ch, 0, select);
+  } else if (char_get_genome(ch, 0) == select) {
     write_to_output(d, "You can't choose the same thing for both genomes!\r\n");
     write_to_output(d, "\n@wChoose: ");
     return;
   } else {
-    ch->genome[1] = select;
+    char_set_genome(ch, 1, select);
   }
   if (select == 7) {
     char_set_skills_base(ch, SKILL_TELEPATHY, 30);
@@ -1991,14 +1992,14 @@ static void state_traits(struct descriptor_data *d, char *arg)
     desc_set_connected(d, negatives ? CON_BONUS : CON_NEGATIVE);
   } else if (!strcasecmp(arg, "x")) {
     if (negatives) { /* negatives can take base stats to zero or below */
-      if (d->character->basepl <= 0) {
-        d->character->basepl = 90;
+      if (getBasePL(d->character) <= 0) {
+        char_set_basepl(d->character, 90);
       }
-      if (d->character->baseki <= 0) {
-        d->character->baseki = 90;
+      if (getBaseKI(d->character) <= 0) {
+        char_set_baseki(d->character, 90);
       }
-      if (d->character->basest <= 0) {
-        d->character->basest = 90;
+      if (getBaseST(d->character) <= 0) {
+        char_set_basest(d->character, 90);
       }
     }
     finish_bonuses(d);
@@ -2069,7 +2070,7 @@ static void state_qstats(struct descriptor_data *d, char *arg)
     d->olc = nullptr;
   }
   finish_creation(d);
-  d->character->rp = d->rpp;
+  char_set_rp(d->character, d->rpp);
   total            = char_get_aff_abils_str(d->character) / 2 + char_get_aff_abils_con(d->character) / 2 +
           char_get_aff_abils_wis(d->character) / 2 + char_get_aff_abils_intel(d->character) / 2 +
           char_get_aff_abils_dex(d->character) / 2 + char_get_aff_abils_cha(d->character) / 2;

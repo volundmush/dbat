@@ -16,6 +16,9 @@
 #include "dbat/oasis.h"
 #include "dbat/races.h"
 #include "dbat/act.informative.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 static void sedit_disp_menu(struct descriptor_data *d);
 static void sedit_setup_existing(struct descriptor_data *d, shop_rnum rshop_num);
@@ -104,7 +107,7 @@ ACMD(do_oasis_sedit)
   /****************************************************************************/
   /** Point d to the builder's descriptor.                                   **/
   /****************************************************************************/
-  d = ch->desc;
+  d = char_get_desc(ch);
 
   /****************************************************************************/
   /** Give the descriptor an OLC structure.                                  **/
@@ -259,7 +262,7 @@ static void sedit_products_menu(struct descriptor_data *d)
   for (i = 0; shop_get_product(shop, i) != NOTHING; i++) {
     write_to_output(d, "%2d - [@c%5d@n] - @y%s@n\r\n", i,
                     obj_index[shop_get_product(shop, i)].vnum,
-                    obj_proto[shop_get_product(shop, i)].short_description);
+                    obj_get_short_description(&obj_proto[shop_get_product(shop, i)]));
   }
   write_to_output(d, "\r\n"
                      "@gA@n) Add a new product.\r\n"
@@ -307,7 +310,7 @@ static void sedit_rooms_menu(struct descriptor_data *d)
   write_to_output(d, "##     VNUM     Room\r\n\r\n");
   for (i = 0; shop_get_room(shop, i) != NOWHERE; i++) {
     if (real_room(shop_get_room(shop, i)) != NOWHERE) {
-      write_to_output(d, "%2d - [@c%5d@n] - @y%s@n\r\n", i, shop_get_room(shop, i), world[real_room(shop_get_room(shop, i))].name);
+      write_to_output(d, "%2d - [@c%5d@n] - @y%s@n\r\n", i, shop_get_room(shop, i), rroom_get_name(real_room(shop_get_room(shop, i))));
     } else {
       write_to_output(d, "%2d - [@R!Removed Room!@n]\r\n", i);
     }
@@ -438,7 +441,7 @@ static void sedit_disp_menu(struct descriptor_data *d)
 
                   OLC_NUM(d),
                   shop_get_keeper(shop) == NOBODY ? -1 : mob_index[shop_get_keeper(shop)].vnum,
-                  shop_get_keeper(shop) == NOBODY ? "None" : mob_proto[shop_get_keeper(shop)].short_descr,
+                  shop_get_keeper(shop) == NOBODY ? "None" : char_get_sdesc(&mob_proto[shop_get_keeper(shop)]),
                   shop_get_open1(shop),
                   shop_get_close1(shop),
                   shop_get_open2(shop),

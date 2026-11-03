@@ -25,6 +25,9 @@
 #include "dbat/affect.h"
 #include "dbat/act.informative.h"
 #include "dbat/local_limits.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 /* local functions */
 
@@ -37,7 +40,7 @@ SPECIAL(dump)
   struct obj_data *k;
   int value = 0;
 
-  for (k = world[char_get_in_room(ch)].contents; k; k = world[char_get_in_room(ch)].contents) {
+  for (k = rroom_get_contents(char_get_in_room(ch)); k; k = rroom_get_contents(char_get_in_room(ch))) {
     act("$p vanishes in a puff of smoke!", false, 0, k, 0, TO_ROOM);
     extract_obj(k);
   }
@@ -47,7 +50,7 @@ SPECIAL(dump)
 
   do_drop(ch, argument, cmd, SCMD_DROP);
 
-  for (k = world[char_get_in_room(ch)].contents; k; k = world[char_get_in_room(ch)].contents) {
+  for (k = rroom_get_contents(char_get_in_room(ch)); k; k = rroom_get_contents(char_get_in_room(ch))) {
     act("$p vanishes in a puff of smoke!", false, 0, k, 0, TO_ROOM);
     value += MAX(1, MIN(50, obj_get_cost(k) / 10));
     extract_obj(k);
@@ -81,7 +84,7 @@ int num_players_in_room(room_vnum room)
       continue;
     if (char_get_in_room(i->character) == NOWHERE || char_get_in_room(i->character) > top_of_world)
       continue;
-    if (world[char_get_in_room(i->character)].number != room)
+    if (rroom_get_vnum(char_get_in_room(i->character)) != room)
       continue;
     if ((char_get_admlevel(i->character) >= ADMLVL_IMMORT) && (char_prf_flagged(i->character, PRF_NOHASSLE))) /* Ignore Imms */
       continue;
@@ -97,9 +100,9 @@ bool check_mob_in_room(mob_vnum mob, room_vnum room)
   struct char_data *i;
   bool found = false;
 
-  for (i = character_list; i; i = i->next)
+  for (i = character_list; i; i = char_get_next(i))
     if (char_get_mob_vnum(i) == mob)
-      if (world[i->in_room].number == room) found = true;
+      if (rroom_get_vnum(char_get_in_room(i)) == room) found = true;
 
   return found;
 }
@@ -151,7 +154,7 @@ SPECIAL(pet_shops)
 
   if (CMD_IS("list")) {
     send_to_char(ch, "Available pets are:\r\n");
-    for (pet = world[pet_room].people; pet; pet = pet->next_in_room) {
+    for (pet = rroom_get_people(pet_room); pet; pet = char_get_next_in_room(pet)) {
       /* No, you can't have the Implementor as a pet if he's in there. */
       if (!char_is_npc(pet))
         continue;
@@ -178,18 +181,18 @@ SPECIAL(pet_shops)
     char_aff_set(pet, AFF_CHARM, true);
 
     if (*pet_name) {
-      snprintf(buf, sizeof(buf), "%s %s", pet->name, pet_name);
+      snprintf(buf, sizeof(buf), "%s %s", char_get_alias(pet), pet_name);
       /* free(pet->name); don't free the prototype! */
-      pet->name = strdup(buf);
+      char_set_alias(pet, strdup(buf));
 
       snprintf(buf, sizeof(buf), "%sA small sign on a chain around the neck says 'My name is %s'\r\n",
-               pet->description, pet_name);
+               char_get_ddesc(pet), pet_name);
       /* free(pet->description); don't free the prototype! */
-      pet->description = strdup(buf);
+      char_set_ddesc(pet, strdup(buf));
     }
     char_to_room(pet, char_get_in_room(ch));
     add_follower(pet, ch);
-    pet->master_id = char_get_idnum(ch);
+    char_set_master_id(pet, char_get_idnum(ch));
 
     /* Be certain that pets can't get/carry/use/wield/wear items */
     char_set_carry_weight(pet, 1000);
@@ -216,8 +219,8 @@ SPECIAL(auction)
 
   if (CMD_IS("cancel")) {
 
-    for (obj = world[auct_room].contents; obj; obj = next_obj) {
-      next_obj = obj->next_content;
+    for (obj = rroom_get_contents(auct_room); obj; obj = next_obj) {
+      next_obj = obj_get_next_content(obj);
       if (obj && obj_get_aucter(obj) == char_get_id(ch)) {
         obj2  = obj;
         found = true;
@@ -232,7 +235,7 @@ SPECIAL(auction)
           continue;
         }
 
-        send_to_char(ch, "@wYou cancel the auction of %s@w and it is returned to you.@n\r\n", obj2->short_description);
+        send_to_char(ch, "@wYou cancel the auction of %s@w and it is returned to you.@n\r\n", obj_get_short_description(obj2));
         struct descriptor_data *d;
 
         for (d = descriptor_list; d; d = d->next) {
@@ -241,7 +244,7 @@ SPECIAL(auction)
           if (d->character == ch)
             continue;
           if (char_get_equipment(d->character, WEAR_EYE)) {
-            send_to_char(d->character, "@RScouter Auction News@D: @GThe auction of @w%s@G has been canceled.\r\n", obj2->short_description);
+            send_to_char(d->character, "@RScouter Auction News@D: @GThe auction of @w%s@G has been canceled.\r\n", obj_get_short_description(obj2));
           }
         }
 
@@ -261,8 +264,8 @@ SPECIAL(auction)
     struct descriptor_data *d;
     int founded = false;
 
-    for (obj = world[auct_room].contents; obj; obj = next_obj) {
-      next_obj = obj->next_content;
+    for (obj = rroom_get_contents(auct_room); obj; obj = next_obj) {
+      next_obj = obj_get_next_content(obj);
       if (obj && obj_get_curBidder(obj) == char_get_id(ch)) {
         obj2  = obj;
         found = true;
@@ -272,7 +275,7 @@ SPECIAL(auction)
         }
 
         if (obj_get_bid(obj2) > char_get_gold(ch)) {
-          send_to_char(ch, "Unable to purchase %s, you don't have enough money on hand.\r\n", obj2->short_description);
+          send_to_char(ch, "Unable to purchase %s, you don't have enough money on hand.\r\n", obj_get_short_description(obj2));
           continue;
         }
 
@@ -280,7 +283,7 @@ SPECIAL(auction)
           time_t remain = (obj_get_aucTime(obj2) + 86400) - time(0);
           int hour      = (int)((remain % 86400) / 3600);
           int minu      = (int)((remain % 3600) / 60);
-          send_to_char(ch, "Unable to purchase %s, minimum time to bid is 24 hours. %d hour%s and %d minute%s remain.\r\n", obj2->short_description, hour, hour > 1 ? "s" : "", minu, minu > 1 ? "s" : "");
+          send_to_char(ch, "Unable to purchase %s, minimum time to bid is 24 hours. %d hour%s and %d minute%s remain.\r\n", obj_get_short_description(obj2), hour, hour > 1 ? "s" : "", minu, minu > 1 ? "s" : "");
           continue;
         }
 
@@ -299,10 +302,10 @@ SPECIAL(auction)
             founded = true;
             char_set_bank_gold(d->character, char_get_bank_gold(d->character) + (obj_get_bid(obj2)));
             if (char_get_equipment(d->character, WEAR_EYE)) {
-              send_to_char(d->character, "@RScouter Auction News@D: @GSomeone has purchased your @w%s@G and you had the money put in your bank account.\r\n", obj2->short_description);
+              send_to_char(d->character, "@RScouter Auction News@D: @GSomeone has purchased your @w%s@G and you had the money put in your bank account.\r\n", obj_get_short_description(obj2));
             }
           } else if (char_get_equipment(d->character, WEAR_EYE)) {
-            send_to_char(d->character, "@RScouter Auction News@D: @GSomeone has purchased the @w%s@G that was on auction.\r\n", obj2->short_description);
+            send_to_char(d->character, "@RScouter Auction News@D: @GSomeone has purchased the @w%s@G that was on auction.\r\n", obj_get_short_description(obj2));
           }
         }
 
@@ -312,7 +315,7 @@ SPECIAL(auction)
 
           CREATE(vict, struct char_data, 1);
           clear_char(vict);
-          CREATE(vict->player_specials, struct player_special_data, 1);
+          CREATE(*char_player_specials_slot(vict), struct player_special_data, 1);
           char blam[50];
           sprintf(blam, "%s", obj_get_auctname(obj2));
           if ((player_i = load_char(blam, vict)) > -1) {
@@ -350,7 +353,7 @@ SPECIAL(auction)
 
     value = atoi(arg2);
 
-    if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+    if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch)))) {
       send_to_char(ch, "You don't have that item to auction.\r\n");
       return (true);
     }
@@ -385,8 +388,8 @@ SPECIAL(auction)
     obj_from_char(obj2);
     obj_to_room(obj2, auct_room);
     auc_save();
-    send_to_char(ch, "You place %s on auction for %s zenni.\r\n", obj2->short_description, add_commas(obj_get_bid(obj2)));
-    mud_log("AUCTION: %s places %s on auction for %s", char_get_name(ch), obj2->short_description, add_commas(obj_get_bid(obj2)));
+    send_to_char(ch, "You place %s on auction for %s zenni.\r\n", obj_get_short_description(obj2), add_commas(obj_get_bid(obj2)));
+    mud_log("AUCTION: %s places %s on auction for %s", char_get_name(ch), obj_get_short_description(obj2), add_commas(obj_get_bid(obj2)));
 
     for (d = descriptor_list; d; d = d->next) {
       if (desc_get_connected(d) != CON_PLAYING || char_is_npc(d->character))
@@ -394,7 +397,7 @@ SPECIAL(auction)
       if (d->character == ch)
         continue;
       if (char_get_equipment(d->character, WEAR_EYE)) {
-        send_to_char(d->character, "@RScouter Auction News@D: @GThe item, @w%s@G, has been placed on auction for @Y%s@G zenni.@n\r\n", obj2->short_description, add_commas(obj_get_bid(obj2)));
+        send_to_char(d->character, "@RScouter Auction News@D: @GThe item, @w%s@G, has been placed on auction for @Y%s@G zenni.@n\r\n", obj_get_short_description(obj2), add_commas(obj_get_bid(obj2)));
       }
     }
     return (true);
@@ -414,7 +417,7 @@ SPECIAL(healtank)
   char arg[MAX_INPUT_LENGTH];
   one_argument(argument, arg);
 
-  for (i = world[char_get_in_room(ch)].contents; i; i = i->next_content) {
+  for (i = rroom_get_contents(char_get_in_room(ch)); i; i = obj_get_next_content(i)) {
     if (obj_get_vnum(i) == 65) {
       htank = i;
     } else {
@@ -438,7 +441,7 @@ SPECIAL(healtank)
         send_to_char(ch, "You are already inside a healing tank!\r\n");
         return (true);
       }
-      if (ch->master && ch->master != ch) {
+      if (char_get_master(ch) && char_get_master(ch) != ch) {
         send_to_char(ch, "You can't enter it while following someone!\r\n");
         return (true);
       }
@@ -519,12 +522,12 @@ SPECIAL(augmenter)
   one_argument(argument, arg);
 
   if (CMD_IS("augment")) {
-    int strength = ch->real_abils.str;
-    int intel    = ch->real_abils.intel;
-    int wisdom   = ch->real_abils.wis;
-    int speed    = ch->real_abils.cha;
-    int consti   = ch->real_abils.con;
-    int agility  = ch->real_abils.dex;
+    int strength = char_get_real_abils_str(ch);
+    int intel    = char_get_real_abils_intel(ch);
+    int wisdom   = char_get_real_abils_wis(ch);
+    int speed    = char_get_real_abils_cha(ch);
+    int consti   = char_get_real_abils_con(ch);
+    int agility  = char_get_real_abils_dex(ch);
 
     int strcost = strength * 1200;
     int intcost = intel * 1200;
@@ -552,7 +555,7 @@ SPECIAL(augmenter)
       else { /* They can augment it! */
         act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
         act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
-        ch->real_abils.str += 1;
+        char_set_real_abils_str(ch, char_get_real_abils_str(ch) + 1);
         char_set_gold(ch, char_get_gold(ch) - (strcost));
         save_char(ch);
       }
@@ -564,7 +567,7 @@ SPECIAL(augmenter)
       else { /* They can augment it! */
         act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
         act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
-        ch->real_abils.intel += 1;
+        char_set_real_abils_intel(ch, char_get_real_abils_intel(ch) + 1);
         char_set_gold(ch, char_get_gold(ch) - (intcost));
         save_char(ch);
       }
@@ -576,7 +579,7 @@ SPECIAL(augmenter)
       else { /* They can augment it! */
         act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
         act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
-        ch->real_abils.con += 1;
+        char_set_real_abils_con(ch, char_get_real_abils_con(ch) + 1);
         char_set_gold(ch, char_get_gold(ch) - (concost));
         save_char(ch);
       }
@@ -588,7 +591,7 @@ SPECIAL(augmenter)
       else { /* They can augment it! */
         act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
         act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
-        ch->real_abils.cha += 1;
+        char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 1);
         char_set_gold(ch, char_get_gold(ch) - (specost));
         save_char(ch);
       }
@@ -600,7 +603,7 @@ SPECIAL(augmenter)
       else { /* They can augment it! */
         act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
         act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
-        ch->real_abils.dex += 1;
+        char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 1);
         char_set_gold(ch, char_get_gold(ch) - (agicost));
         save_char(ch);
       }
@@ -612,7 +615,7 @@ SPECIAL(augmenter)
       else { /* They can augment it! */
         act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n", true, ch, 0, 0, TO_CHAR);
         act("@WThe Augmenter 9001 moves its arm over to @C$n@W and quickly operates on $s body.@n", true, ch, 0, 0, TO_ROOM);
-        ch->real_abils.wis += 1;
+        char_set_real_abils_wis(ch, char_get_real_abils_wis(ch) + 1);
         char_set_gold(ch, char_get_gold(ch) - (wiscost));
         save_char(ch);
       }
@@ -633,7 +636,7 @@ SPECIAL(gravity)
   int match = false;
 
   one_argument(argument, arg);
-  for (i = world[char_get_in_room(ch)].contents; i; i = i->next_content) {
+  for (i = rroom_get_contents(char_get_in_room(ch)); i; i = obj_get_next_content(i)) {
     if (obj_get_vnum(i) == 11) {
       obj = i;
     } else {
@@ -889,7 +892,7 @@ SPECIAL(bank)
 
   struct obj_data *i, *obj = nullptr;
 
-  for (i = world[char_get_in_room(ch)].contents; i; i = i->next_content) {
+  for (i = rroom_get_contents(char_get_in_room(ch)); i; i = obj_get_next_content(i)) {
     if (obj_get_vnum(i) == 3034) {
       obj = i;
     } else {
@@ -938,7 +941,7 @@ SPECIAL(bank)
 
       CREATE(vict, struct char_data, 1);
       clear_char(vict);
-      CREATE(vict->player_specials, struct player_special_data, 1);
+      CREATE(*char_player_specials_slot(vict), struct player_special_data, 1);
 
       sprintf(name, "%s", rIntro(ch, arg2));
 
@@ -949,11 +952,11 @@ SPECIAL(bank)
         send_to_char(ch, "That person doesn't exist.\r\n");
         return (true);
       }
-      if (ch->desc->user == nullptr) {
+      if (char_get_desc(ch)->user == nullptr) {
         send_to_char(ch, "There is an error. Report to Iovan.");
         return (true);
       }
-      if (!strcasecmp(char_get_name(vict), ch->desc->tmp1) || !strcasecmp(char_get_name(vict), ch->desc->tmp2) || !strcasecmp(char_get_name(vict), ch->desc->tmp3) || !strcasecmp(char_get_name(vict), ch->desc->tmp4) || !strcasecmp(char_get_name(vict), ch->desc->tmp5)) {
+      if (!strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp1) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp2) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp3) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp4) || !strcasecmp(char_get_name(vict), char_get_desc(ch)->tmp5)) {
         send_to_char(ch, "You can not transfer money to your own offline characters...");
         if (is_file == true)
           free_char(vict);

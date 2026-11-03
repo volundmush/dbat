@@ -50,9 +50,9 @@ struct script_data *dg_ensure_script(struct script_data **slot)
 struct script_data **script_slot(void *go, int type)
 {
   switch (type) {
-    case MOB_TRIGGER: return &((char_data *)go)->script;
-    case OBJ_TRIGGER: return &((obj_data *)go)->script;
-    case WLD_TRIGGER: return &((room_data *)go)->script;
+    case MOB_TRIGGER: return char_script_slot((char_data *)go);
+    case OBJ_TRIGGER: return obj_script_slot((obj_data *)go);
+    case WLD_TRIGGER: return room_script_slot((room_data *)go);
   }
   return nullptr;
 }
@@ -182,18 +182,18 @@ void free_proto_script(void *thing, int type)
   switch (type) {
     case MOB_TRIGGER:
       mob               = (struct char_data *)thing;
-      proto             = mob->proto_script;
-      mob->proto_script = nullptr;
+      proto             = char_get_proto_script(mob);
+      char_set_proto_script(mob, nullptr);
       break;
     case OBJ_TRIGGER:
       obj               = (struct obj_data *)thing;
-      proto             = obj->proto_script;
-      obj->proto_script = nullptr;
+      proto             = obj_get_proto_script(obj);
+      obj_set_proto_script(obj, nullptr);
       break;
     case WLD_TRIGGER:
       room               = (struct room_data *)thing;
-      proto              = room->proto_script;
-      room->proto_script = nullptr;
+      proto              = room_get_proto_script(room);
+      room_set_proto_script(room, nullptr);
       break;
   }
 
@@ -210,13 +210,13 @@ void copy_proto_script(void *source, void *dest, int type)
 
   switch (type) {
     case MOB_TRIGGER:
-      tp_src = ((char_data *)source)->proto_script;
+      tp_src = char_get_proto_script((char_data *)source);
       break;
     case OBJ_TRIGGER:
-      tp_src = ((obj_data *)source)->proto_script;
+      tp_src = obj_get_proto_script((obj_data *)source);
       break;
     case WLD_TRIGGER:
-      tp_src = ((room_data *)source)->proto_script;
+      tp_src = room_get_proto_script((room_data *)source);
       break;
   }
 
@@ -224,13 +224,13 @@ void copy_proto_script(void *source, void *dest, int type)
     CREATE(tp_dst, struct trig_proto_list, 1);
     switch (type) {
       case MOB_TRIGGER:
-        ((char_data *)dest)->proto_script = tp_dst;
+        char_set_proto_script((char_data *)dest, tp_dst);
         break;
       case OBJ_TRIGGER:
-        ((obj_data *)dest)->proto_script = tp_dst;
+        obj_set_proto_script((obj_data *)dest, tp_dst);
         break;
       case WLD_TRIGGER:
-        ((room_data *)dest)->proto_script = tp_dst;
+        room_set_proto_script((room_data *)dest, tp_dst);
         break;
     }
 
@@ -259,10 +259,10 @@ void update_wait_events(struct room_data *to, struct room_data *from)
 {
   struct trig_data *trig;
 
-  if (!from->script)
+  if (!room_get_script(from))
     return;
 
-  for (trig = from->script->trig_list; trig; trig = trig->next) {
+  for (trig = room_get_script(from)->trig_list; trig; trig = trig->next) {
     if (!trig->wait_event)
       continue;
 

@@ -82,14 +82,14 @@ static void boost_obj(struct obj_data *obj, struct char_data *ch, int type)
     case 0:             /* This object is a piece of worn equipment, not a weapon. */
       if (boost != 0) { /* Change it if it qualifies */
         obj_set_level(obj, boost);
-        obj->affected[0].location = 17;
-        obj->affected[0].modifier += (boost * char_get_level(ch));
+        obj_get_affected(obj)[0].location = 17;
+        obj_get_affected(obj)[0].modifier += (boost * char_get_level(ch));
         if (obj_get_vnum(obj) == 91) {
-          obj->affected[1].location = 1;
-          obj->affected[1].modifier = (boost / 20);
+          obj_get_affected(obj)[1].location = 1;
+          obj_get_affected(obj)[1].modifier = (boost / 20);
         } else {
-          obj->affected[1].location = 3;
-          obj->affected[1].modifier = (boost / 20);
+          obj_get_affected(obj)[1].location = 3;
+          obj_get_affected(obj)[1].modifier = (boost / 20);
         }
       }
       break;
@@ -117,8 +117,8 @@ static void boost_obj(struct obj_data *obj, struct char_data *ch, int type)
       }
       if (boost != 0) {
         obj_set_level(obj, boost);
-        obj->affected[0].location = 1;
-        obj->affected[0].modifier = (boost / 20);
+        obj_get_affected(obj)[0].location = 1;
+        obj_get_affected(obj)[0].modifier = (boost / 20);
       }
       break;
   } /* End of main switch */
@@ -501,7 +501,7 @@ ACMD(do_form)
       return;
     }
 
-    if (vict->master != ch) {
+    if (char_get_master(vict) != ch) {
       send_to_char(ch, "They must be following you first.\r\n");
       return;
     }
@@ -930,7 +930,7 @@ ACMD(do_upgrade)
       send_to_char(ch, "You need to be at least level 80 to use these kits.\r\n");
       return;
     }
-    if (!(obj = get_obj_in_list_vis(ch, (char[]){"Augmentation"}, nullptr, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, (char[]){"Augmentation"}, nullptr, char_get_inventory(ch)))) {
       send_to_char(ch, "You don't have a Circuit Augmentation Kit.\r\n");
       return;
     }
@@ -1292,7 +1292,7 @@ ACMD(do_plant)
   if ((char_adm_flagged(vict, ADM_NOSTEAL) || char_get_mob_spec(vict) == shop_keeper) && char_get_admlevel(ch) < 5)
     roll = -10; /* Failure */
 
-  if (!(obj = get_obj_in_list_vis(ch, obj_name, nullptr, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, obj_name, nullptr, char_get_inventory(ch)))) {
     send_to_char(ch, "You don't have that to plant on them.\r\n");
     return;
   }
@@ -1355,13 +1355,13 @@ ACMD(do_forgery)
     return;
   }
 
-  if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+  if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch)))) {
     send_to_char(ch, "You want to make a fake copy of what?\r\n");
     return;
   }
 
-  for (obj = ch->carrying; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     if (found == false && obj_get_vnum(obj) == 19 && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
       found = true;
       obj4  = obj;
@@ -1379,13 +1379,13 @@ ACMD(do_forgery)
   }
 
   if (obj_extra_flagged(obj2, ITEM_FORGED)) {
-    send_to_char(ch, "%s is forgery, there is no reason to make a fake of a fake!\r\n", obj2->short_description);
+    send_to_char(ch, "%s is forgery, there is no reason to make a fake of a fake!\r\n", obj_get_short_description(obj2));
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
 
   if (obj_extra_flagged(obj2, ITEM_BROKEN)) {
-    send_to_char(ch, "%s is broken, there is no reason to make a fake of this mess!\r\n", obj2->short_description);
+    send_to_char(ch, "%s is broken, there is no reason to make a fake of this mess!\r\n", obj_get_short_description(obj2));
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
@@ -1417,12 +1417,12 @@ ACMD(do_forgery)
   improve_skill(ch, SKILL_FORGERY, 1);
   if (char_get_skill(ch, SKILL_FORGERY) < axion_dice(0)) {
     if (rand_number(1, 10) >= 9) { /* Uh oh */
-      send_to_char(ch, "In the middle of creating a forgery of %s you screw up. The fabrication unit built into the forgery kit melts and bonds with the original. You clumsy mistake with the Estex Titanium drill has broken both.\r\n", obj2->short_description);
+      send_to_char(ch, "In the middle of creating a forgery of %s you screw up. The fabrication unit built into the forgery kit melts and bonds with the original. You clumsy mistake with the Estex Titanium drill has broken both.\r\n", obj_get_short_description(obj2));
       extract_obj(obj4);
       extract_obj(obj2);
       return;
     }
-    send_to_char(ch, "You start to make a forgery of %s but screw up and waste your forgery kit..\r\n", obj2->short_description);
+    send_to_char(ch, "You start to make a forgery of %s but screw up and waste your forgery kit..\r\n", obj_get_short_description(obj2));
     act("@c$n@w tried to duplicate $p but screws up somehow.@n", true, ch, obj2, 0, TO_ROOM);
     obj_from_char(obj4);
     extract_obj(obj4);
@@ -1442,7 +1442,7 @@ ACMD(do_forgery)
 
   obj_from_char(obj4);
   extract_obj(obj4);
-  send_to_char(ch, "You make an excellent forgery of %s@n!\r\n", obj2->short_description);
+  send_to_char(ch, "You make an excellent forgery of %s@n!\r\n", obj_get_short_description(obj2));
   act("@c$n@w makes a perfect forgery of $p.@n", true, ch, obj2, 0, TO_ROOM);
   char_set_wait(ch, PULSE_2SEC);
 }
@@ -1469,7 +1469,7 @@ ACMD(do_appraise)
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch)))) {
     send_to_char(ch, "You want to appraise what?\r\n");
     return;
   }
@@ -1478,21 +1478,21 @@ ACMD(do_appraise)
   act("@c$n@w looks at $p, turning it over in $s hands.@n", true, ch, obj, 0, TO_ROOM);
   improve_skill(ch, SKILL_APPRAISE, 1);
   if (char_get_skill(ch, SKILL_APPRAISE) < axion_dice(-10)) {
-    send_to_char(ch, "You fail to perceive the worth of %s..\r\n", obj->short_description);
+    send_to_char(ch, "You fail to perceive the worth of %s..\r\n", obj_get_short_description(obj));
     act("@c$n@w looks stumped about $p.@n", true, ch, obj, 0, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
 
   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
-    send_to_char(ch, "%s is broken!\r\n", obj->short_description);
+    send_to_char(ch, "%s is broken!\r\n", obj_get_short_description(obj));
     act("@c$n@w looks at $p and frowns.@n", true, ch, obj, 0, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
     return;
   }
 
   if (obj_extra_flagged(obj, ITEM_FORGED)) {
-    send_to_char(ch, "%s is fake and worthless!\r\n", obj->short_description);
+    send_to_char(ch, "%s is fake and worthless!\r\n", obj_get_short_description(obj));
     act("@c$n@w looks at $p with an angry face.@n", true, ch, obj, 0, TO_ROOM);
     char_set_wait(ch, PULSE_2SEC);
     return;
@@ -1503,7 +1503,7 @@ ACMD(do_appraise)
   if (obj_get_type_flag(obj) == ITEM_WEAPON && obj_extra_flagged(obj, ITEM_CUSTOM))
     displevel = 20;
 
-  send_to_char(ch, "%s is worth: %s\r\nMin Lvl: %d\r\n", obj->short_description, add_commas(obj_get_cost(obj)), displevel);
+  send_to_char(ch, "%s is worth: %s\r\nMin Lvl: %d\r\n", obj_get_short_description(obj), add_commas(obj_get_cost(obj)), displevel);
   if (obj_get_type_flag(obj) == ITEM_WEAPON) {
     if (obj_extra_flagged(obj, ITEM_WEAPLVL1)) {
       send_to_char(ch, "Weapon Level: 1\nDamage Bonus: 5%s\r\n", "%");
@@ -1533,19 +1533,19 @@ ACMD(do_appraise)
   act("@c$n@w looks at $p and nods, a satisfied look on $s face.@n", true, ch, obj, 0, TO_ROOM);
   int percent = false;
   for (i = 0; i < MAX_OBJ_AFFECT; i++) {
-    if (obj->affected[i].modifier) {
-      if (obj->affected[i].location == APPLY_REGEN || obj->affected[i].location == APPLY_TRAIN || obj->affected[i].location == APPLY_LIFEMAX) {
+    if (obj_get_affected(obj)[i].modifier) {
+      if (obj_get_affected(obj)[i].location == APPLY_REGEN || obj_get_affected(obj)[i].location == APPLY_TRAIN || obj_get_affected(obj)[i].location == APPLY_LIFEMAX) {
         percent = true;
       }
-      sprinttype(obj->affected[i].location, apply_types, buf, sizeof(buf));
-      send_to_char(ch, "%s %+d%s to %s", found++ ? "," : "", obj->affected[i].modifier, percent == true ? "%" : "", buf);
+      sprinttype(obj_get_affected(obj)[i].location, apply_types, buf, sizeof(buf));
+      send_to_char(ch, "%s %+d%s to %s", found++ ? "," : "", obj_get_affected(obj)[i].modifier, percent == true ? "%" : "", buf);
       percent = false;
-      switch (obj->affected[i].location) {
+      switch (obj_get_affected(obj)[i].location) {
         case APPLY_FEAT:
-          send_to_char(ch, " (%s)", feat_list[obj->affected[i].specific].name);
+          send_to_char(ch, " (%s)", feat_list[obj_get_affected(obj)[i].specific].name);
           break;
         case APPLY_SKILL:
-          send_to_char(ch, " (%s)", spell_info[obj->affected[i].specific].name);
+          send_to_char(ch, " (%s)", spell_info[obj_get_affected(obj)[i].specific].name);
           break;
       }
     }
@@ -1619,13 +1619,13 @@ ACMD(do_use)
     switch (subcmd) {
       case SCMD_RECITE:
       case SCMD_QUAFF:
-        if (!(mag_item = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+        if (!(mag_item = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch)))) {
           send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
           return;
         }
         break;
       case SCMD_USE:
-        if (!(mag_item = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+        if (!(mag_item = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch)))) {
           send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
           return;
         }
@@ -1872,7 +1872,7 @@ ACMD(do_break)
   }
 
   /* Ok, break it! */
-  send_to_char(ch, "You ruin %s.\r\n", obj->short_description);
+  send_to_char(ch, "You ruin %s.\r\n", obj_get_short_description(obj));
   act("$n ruins $p.", false, ch, obj, 0, TO_ROOM);
   obj_set_value(obj, VAL_ALL_HEALTH, 0);
   obj_extra_toggle(obj, ITEM_BROKEN);
@@ -1937,8 +1937,8 @@ ACMD(do_fix)
     }
   }
 
-  for (rep = ch->carrying; rep; rep = next_obj) {
-    next_obj = rep->next_content;
+  for (rep = char_get_inventory(ch); rep; rep = next_obj) {
+    next_obj = obj_get_next_content(rep);
     if (custom == false) {
       if (found == false && obj_get_vnum(rep) == 48 && (!obj_extra_flagged(rep, ITEM_BROKEN) && !obj_extra_flagged(rep, ITEM_FORGED))) {
         found = true;
@@ -1972,17 +1972,17 @@ ACMD(do_fix)
     }
 
     if (obj_get_value(obj, VAL_ALL_HEALTH) + char_get_skill(ch, SKILL_REPAIR) < 100) {
-      send_to_char(ch, "You repair %s a bit.\r\n", obj->short_description);
+      send_to_char(ch, "You repair %s a bit.\r\n", obj_get_short_description(obj));
       act("$n repairs $p a bit.", false, ch, obj, 0, TO_ROOM);
       obj_set_value(obj, VAL_ALL_HEALTH, obj_get_value(obj, VAL_ALL_HEALTH) + (char_get_skill(ch, SKILL_REPAIR)));
       obj_extra_set(obj, ITEM_BROKEN, false);
     } else {
-      send_to_char(ch, "You repair %s completely.\r\n", obj->short_description);
+      send_to_char(ch, "You repair %s completely.\r\n", obj_get_short_description(obj));
       act("$n repairs $p completely.", false, ch, obj, 0, TO_ROOM);
       obj_set_value(obj, VAL_ALL_HEALTH, 100);
       obj_extra_set(obj, ITEM_BROKEN, false);
     }
-    if (obj->carried_by == nullptr && !char_plr_flagged(ch, PLR_REPLEARN) && (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 || char_get_level(ch) >= 100)) {
+    if (obj_get_carried_by(obj) == nullptr && !char_plr_flagged(ch, PLR_REPLEARN) && (level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 || char_get_level(ch) >= 100)) {
       int64_t gain = (level_exp(ch, char_get_level(ch) + 1) * 0.0003) * char_get_skill(ch, SKILL_REPAIR);
       send_to_char(ch, "@mYou've learned a bit from repairing it. @D[@gEXP@W: @G+%s@D]@n\r\n", add_commas(gain));
       char_plr_set(ch, PLR_REPLEARN, true);

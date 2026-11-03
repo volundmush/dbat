@@ -16,6 +16,9 @@
 #include "dbat/genzon.h"
 #include "dbat/dg_olc.h"
 #include "dbat/atomicfile.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 static bool copy_room(struct room_data *to, struct room_data *from);
 static bool copy_room_strings(struct room_data *dest, struct room_data *source);
@@ -35,16 +38,16 @@ room_rnum add_room(struct room_data *room)
   if (room == nullptr)
     return NOWHERE;
 
-  if ((i = real_room(room->number)) != NOWHERE) {
-    if (world[i].script)
+  if ((i = real_room(room_get_number(room))) != NOWHERE) {
+    if (rroom_get_script(i))
       extract_script(&world[i], WLD_TRIGGER);
-    tch  = world[i].people;
-    tobj = world[i].contents;
+    tch  = rroom_get_people(i);
+    tobj = rroom_get_contents(i);
     copy_room(&world[i], room);
-    world[i].people   = tch;
-    world[i].contents = tobj;
-    add_to_save_list(zone_table[room->zone].number, SL_WLD);
-    mud_log("GenOLC: add_room: Updated existing room #%d.", room->number);
+    rroom_set_people(i, tch);
+    rroom_set_contents(i, tobj);
+    add_to_save_list(zone_table[room_get_zone(room)].number, SL_WLD);
+    mud_log("GenOLC: add_room: Updated existing room #%d.", room_get_number(room));
     return i;
   }
 
@@ -52,7 +55,7 @@ room_rnum add_room(struct room_data *room)
   top_of_world++;
 
   for (i = top_of_world; i > 0; i--) {
-    if (room->number > world[i - 1].number) {
+    if (room_get_number(room) > rroom_get_vnum(i - 1)) {
       world[i] = *room;
       copy_room_strings(&world[i], room);
       found = i;
@@ -63,11 +66,11 @@ room_rnum add_room(struct room_data *room)
     update_wait_events(&world[i], &world[i - 1]);
 
     /* People in this room must have their in_rooms moved up one. */
-    for (tch = world[i].people; tch; tch = tch->next_in_room)
+    for (tch = rroom_get_people(i); tch; tch = char_get_next_in_room(tch))
       char_set_in_room(tch, char_get_in_room(tch) + ((char_get_in_room(tch) != NOWHERE)));
 
     /* Move objects too. */
-    for (tobj = world[i].contents; tobj; tobj = tobj->next_content)
+    for (tobj = rroom_get_contents(i); tobj; tobj = obj_get_next_content(tobj))
       obj_set_in_room(tobj, obj_get_in_room(tobj) + ((obj_get_in_room(tobj) != NOWHERE)));
   }
   if (!found) {
@@ -75,14 +78,14 @@ room_rnum add_room(struct room_data *room)
     copy_room_strings(&world[0], room);
   }
 
-  mud_log("GenOLC: add_room: Added room %d at index #%d.", room->number, found);
+  mud_log("GenOLC: add_room: Added room %d at index #%d.", room_get_number(room), found);
 
   /* found is equal to the array index where we added the room. */
 
   /*
    * Find what zone that room was in so we can update the loading table.
    */
-  for (i = room->zone; i <= top_of_zone_table; i++)
+  for (i = room_get_zone(room); i <= top_of_zone_table; i++)
     for (j = 0; zone_get_cmd(i, j)->command != 'S'; j++)
       switch (zone_get_cmd(i, j)->command) {
         case 'M':
@@ -122,7 +125,7 @@ room_rnum add_room(struct room_data *room)
         rroom_get_dir_option(i, j)->to_room += (rroom_get_dir_option(i, j)->to_room >= found);
   } while (i > 0);
 
-  add_to_save_list(zone_table[room->zone].number, SL_WLD);
+  add_to_save_list(zone_table[room_get_zone(room)].number, SL_WLD);
 
   /*
    * Return what array entry we placed the new room in.
@@ -145,10 +148,10 @@ bool delete_room(room_rnum rnum)
 
   room = &world[rnum];
 
-  add_to_save_list(zone_table[room->zone].number, SL_WLD);
+  add_to_save_list(zone_table[room_get_zone(room)].number, SL_WLD);
 
   /* This is something you might want to read about in the logs. */
-  mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room->number, room->name);
+  mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room_get_number(room), room_get_name(room));
 
   if (r_mortal_start_room == rnum) {
     mud_log("WARNING: GenOLC: delete_room: Deleting mortal start room!");
@@ -167,19 +170,19 @@ bool delete_room(room_rnum rnum)
    * Dump the contents of this room into the Void.  We could also just
    * extract the people, mobs, and objects here.
    */
-  for (obj = world[rnum].contents; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = rroom_get_contents(rnum); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     obj_from_room(obj);
     obj_to_room(obj, 0);
   }
-  for (ppl = world[rnum].people; ppl; ppl = next_ppl) {
-    next_ppl = ppl->next_in_room;
+  for (ppl = rroom_get_people(rnum); ppl; ppl = next_ppl) {
+    next_ppl = char_get_next_in_room(ppl);
     char_from_room(ppl);
     char_to_room(ppl, 0);
   }
 
   free_room_strings(room);
-  if (room->script)
+  if (room_get_script(room))
     extract_script(room, WLD_TRIGGER);
   free_proto_script(room, WLD_TRIGGER);
 
@@ -249,7 +252,7 @@ bool delete_room(room_rnum rnum)
   {
     for (i = 0; i < top_shop; i++) {
       for (j = 0; rshop_get_room(i, j) != NOWHERE; j++) {
-        if (rshop_get_room(i, j) == world[rnum].number)
+        if (rshop_get_room(i, j) == rroom_get_vnum(rnum))
           rshop_set_room(i, j, 0); /* set to the void */
       }
     }
@@ -261,10 +264,10 @@ bool delete_room(room_rnum rnum)
     world[i] = world[i + 1];
     update_wait_events(&world[i], &world[i + 1]);
 
-    for (ppl = world[i].people; ppl; ppl = ppl->next_in_room)
+    for (ppl = rroom_get_people(i); ppl; ppl = char_get_next_in_room(ppl))
       char_set_in_room(ppl, char_get_in_room(ppl) - ((char_get_in_room(ppl) != NOWHERE))); /* Redundant check? */
 
-    for (obj = world[i].contents; obj; obj = obj->next_content)
+    for (obj = rroom_get_contents(i); obj; obj = obj_get_next_content(obj))
       obj_set_in_room(obj, obj_get_in_room(obj) - ((obj_get_in_room(obj) != NOWHERE))); /* Redundant check? */
   }
 
@@ -310,25 +313,25 @@ bool save_rooms(zone_rnum zone_num)
       /*
        * Copy the description and strip off trailing newlines.
        */
-      strlcpy(buf, room->description ? room->description : "Empty room.", sizeof(buf));
+      strlcpy(buf, room_get_description(room) ? room_get_description(room) : "Empty room.", sizeof(buf));
       strip_cr(buf);
 
       /*
        * Save the numeric and string section of the file.
        */
-      sprintascii(rbuf1, room->room_flags[0]);
-      sprintascii(rbuf2, room->room_flags[1]);
-      sprintascii(rbuf3, room->room_flags[2]);
-      sprintascii(rbuf4, room->room_flags[3]);
+      sprintascii(rbuf1, room_get_room_flags(room)[0]);
+      sprintascii(rbuf2, room_get_room_flags(room)[1]);
+      sprintascii(rbuf3, room_get_room_flags(room)[2]);
+      sprintascii(rbuf4, room_get_room_flags(room)[3]);
       fprintf(sf, "#%d\n"
                   "%s%c\n"
                   "%s%c\n"
                   "%d %s %s %s %s %d\n",
-              room->number,
-              room->name ? room->name : "Untitled", STRING_TERMINATOR,
+              room_get_number(room),
+              room_get_name(room) ? room_get_name(room) : "Untitled", STRING_TERMINATOR,
               buf, STRING_TERMINATOR,
-              zone_table[room->zone].number,
-              rbuf1, rbuf2, rbuf3, rbuf4, room->sector_type);
+              zone_table[room_get_zone(room)].number,
+              rbuf1, rbuf2, rbuf3, rbuf4, room_get_sector_type(room));
 
       /*
        * Now you write out the exits for the room.
@@ -372,7 +375,7 @@ bool save_rooms(zone_rnum zone_num)
                       "%d %d %d %d %d %d %d %d %d %d %d\n",
                   j, buf, buf1, dflag,
                   room_get_dir_option(room, j)->key != NOTHING ? room_get_dir_option(room, j)->key : -1,
-                  room_get_dir_option(room, j)->to_room != NOWHERE ? world[room_get_dir_option(room, j)->to_room].number : -1,
+                  room_get_dir_option(room, j)->to_room != NOWHERE ? rroom_get_vnum(room_get_dir_option(room, j)->to_room) : -1,
                   room_get_dir_option(room, j)->dclock, room_get_dir_option(room, j)->dchide,
                   room_get_dir_option(room, j)->dcskill, room_get_dir_option(room, j)->dcmove,
                   room_get_dir_option(room, j)->failsavetype, room_get_dir_option(room, j)->dcfailsave,
@@ -380,10 +383,10 @@ bool save_rooms(zone_rnum zone_num)
         }
       }
 
-      if (room->ex_description) {
+      if (room_get_ex_description(room)) {
         struct extra_descr_data *xdesc;
 
-        for (xdesc = room->ex_description; xdesc; xdesc = xdesc->next) {
+        for (xdesc = room_get_ex_description(room); xdesc; xdesc = xdesc->next) {
           strlcpy(buf, xdesc->description, sizeof(buf));
           strip_cr(buf);
           fprintf(sf, "E\n"
@@ -421,8 +424,8 @@ static bool copy_room(struct room_data *to, struct room_data *from)
 
   /* Don't put people and objects in two locations.
      Am thinking this shouldn't be done here... */
-  from->people   = nullptr;
-  from->contents = nullptr;
+  room_set_people(from, nullptr);
+  room_set_contents(from, nullptr);
 
   return true;
 }
@@ -444,8 +447,8 @@ static bool copy_room_strings(struct room_data *dest, struct room_data *source)
     return false;
   }
 
-  dest->description = str_udup(source->description);
-  dest->name        = str_udup(source->name);
+  room_set_description(dest, str_udup(room_get_description(source)));
+  room_set_name(dest, str_udup(room_get_name(source)));
 
   for (i = 0; i < NUM_OF_DIRS; i++) {
     if (!room_get_dir_option(source, i))
@@ -463,8 +466,8 @@ static bool copy_room_strings(struct room_data *dest, struct room_data *source)
       room_get_dir_option(dest, i)->keyword = strdup(room_get_dir_option(source, i)->keyword);
   }
 
-  if (source->ex_description)
-    copy_ex_descriptions(&dest->ex_description, source->ex_description);
+  if (room_get_ex_description(source))
+    copy_ex_descriptions(room_ex_description_slot(dest), room_get_ex_description(source));
 
   return true;
 }
@@ -474,22 +477,22 @@ bool free_room_strings(struct room_data *room)
   int i;
 
   /* Free descriptions. */
-  if (room->name)
-    free(room->name);
-  if (room->description)
-    free(room->description);
-  if (room->ex_description)
-    free_ex_descriptions(room->ex_description);
+  if (room_get_name(room))
+    free(room_get_name(room));
+  if (room_get_description(room))
+    free(room_get_description(room));
+  if (room_get_ex_description(room))
+    free_ex_descriptions(room_get_ex_description(room));
 
   /* Free exits. */
   for (i = 0; i < NUM_OF_DIRS; i++) {
-    if (room->dir_option[i]) {
-      if (room->dir_option[i]->general_description)
-        free(room->dir_option[i]->general_description);
-      if (room->dir_option[i]->keyword)
-        free(room->dir_option[i]->keyword);
-      free(room->dir_option[i]);
-      room->dir_option[i] = nullptr;
+    if (room_get_dir_option(room, i)) {
+      if (room_get_dir_option(room, i)->general_description)
+        free(room_get_dir_option(room, i)->general_description);
+      if (room_get_dir_option(room, i)->keyword)
+        free(room_get_dir_option(room, i)->keyword);
+      free(room_get_dir_option(room, i));
+      room_set_dir_option(room, i, nullptr);
     }
   }
 

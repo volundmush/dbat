@@ -259,13 +259,13 @@ ACMD(do_newsedit)
   send_to_char(ch, "between paragraphs you will need to enter a single space and\n");
   send_to_char(ch, "not just push enter. Happy editing!@n\n");
   send_to_char(ch, "@D---------------------------------------------------------@n\n");
-  send_editor_help(ch->desc);
+  send_editor_help(char_get_desc(ch));
   skip_spaces(&argument);
-  ch->desc->newsbuf = strdup(argument);
+  char_get_desc(ch)->newsbuf = strdup(argument);
   TOP_OF_NEWS       = lookup;
   LASTNEWS          = lookup;
-  string_write(ch->desc, fields[0].buffer, 2000, 0, backstr);
-  desc_set_connected(ch->desc, CON_NEWSEDIT);
+  string_write(char_get_desc(ch), fields[0].buffer, 2000, 0, backstr);
+  desc_set_connected(char_get_desc(ch), CON_NEWSEDIT);
 }
 
 ACMD(do_echo)
@@ -283,8 +283,8 @@ ACMD(do_echo)
   int found              = false;
   struct char_data *vict = nullptr, *next_v = nullptr, *tch = nullptr;
 
-  for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-    next_v = vict->next_in_room;
+  for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+    next_v = char_get_next_in_room(vict);
     if (vict == ch)
       continue;
     if (found == false) {
@@ -445,8 +445,8 @@ ACMD(do_poofset)
   if (char_is_npc(ch))
     return;
   switch (subcmd) {
-    case SCMD_POOFIN: msg = &ch->player_specials->poofin; break;
-    case SCMD_POOFOUT: msg = &ch->player_specials->poofout; break;
+    case SCMD_POOFIN: msg = &char_get_player_specials(ch)->poofin; break;
+    case SCMD_POOFOUT: msg = &char_get_player_specials(ch)->poofout; break;
     default: return;
   }
 
@@ -537,7 +537,7 @@ ACMD(do_wiznet)
   for (d = descriptor_list; d; d = d->next) {
     if (desc_is_playing(d) && (char_get_admlevel(d->character) >= level) &&
         (!char_prf_flagged(d->character, PRF_NOWIZ)) &&
-        (!char_plr_flagged(d->character, PLR_WRITING | PLR_MAILING)) && (d != ch->desc || !(char_prf_flagged(d->character, PRF_NOREPEAT)))) {
+        (!char_plr_flagged(d->character, PLR_WRITING | PLR_MAILING)) && (d != char_get_desc(ch) || !(char_prf_flagged(d->character, PRF_NOREPEAT)))) {
       if (char_can_see(d->character, ch)) {
         msg = strdup(buf1);
         send_to_char(d->character, "%s", buf1);

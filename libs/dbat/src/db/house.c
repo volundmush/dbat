@@ -18,6 +18,9 @@
 #include "dbat/atomicfile.h"
 
 #include <errno.h>
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 static void House_list_guests(struct char_data *ch, int i, int quiet);
 
@@ -55,17 +58,17 @@ static bool House_save(struct obj_data *obj, FILE *fp, int location)
   int result;
   if (obj) {
     if (obj_extra_flagged(obj, ITEM_NORENT)) {
-      obj = obj->next_content;
+      obj = obj_get_next_content(obj);
     }
   }
   if (obj) {
-    House_save(obj->next_content, fp, location);
-    House_save(obj->contains, fp, MIN(0, location) - 1);
+    House_save(obj_get_next_content(obj), fp, location);
+    House_save(obj_get_contains(obj), fp, MIN(0, location) - 1);
     result = Obj_to_store(obj, fp, location);
     if (!result)
       return false;
 
-    for (tmp = obj->in_obj; tmp; tmp = tmp->in_obj)
+    for (tmp = obj_get_in_obj(obj); tmp; tmp = obj_get_in_obj(tmp))
       obj_set_weight(tmp, obj_get_weight(tmp) - (obj_get_weight(obj)));
   }
   return true;
@@ -75,10 +78,10 @@ static bool House_save(struct obj_data *obj, FILE *fp, int location)
 static void House_restore_weight(struct obj_data *obj)
 {
   if (obj) {
-    House_restore_weight(obj->contains);
-    House_restore_weight(obj->next_content);
-    if (obj->in_obj)
-      obj_set_weight(obj->in_obj, obj_get_weight(obj->in_obj) + (obj_get_weight(obj)));
+    House_restore_weight(obj_get_contains(obj));
+    House_restore_weight(obj_get_next_content(obj));
+    if (obj_get_in_obj(obj))
+      obj_set_weight(obj_get_in_obj(obj), obj_get_weight(obj_get_in_obj(obj)) + (obj_get_weight(obj)));
   }
 }
 
@@ -98,12 +101,12 @@ static void House_crashsave(room_vnum vnum)
     perror("SYSERR: Error saving house file");
     return;
   }
-  if (!House_save(world[rnum].contents, fp, 0)) {
+  if (!House_save(rroom_get_contents(rnum), fp, 0)) {
     atomic_abort(&af); /* keep the last good house file */
     return;
   }
   bool saved = atomic_commit(&af);
-  House_restore_weight(world[rnum].contents);
+  House_restore_weight(rroom_get_contents(rnum));
   if (saved) /* otherwise leave it flagged so the next pass tries again */
     rroom_set_flag(rnum, ROOM_HOUSE_CRASH, false);
 }
@@ -557,7 +560,7 @@ static bool House_load(room_vnum rvnum)
       /* we have the number, check it, load obj. */
       if (nr == NOTHING) { /* then it is unique */
         temp              = create_obj();
-        temp->item_number = NOTHING;
+        obj_set_item_number(temp, NOTHING);
       } else if (nr < 0 || nr >= 999999) {
         get_line(fl, line); /* skip it, or the loop never moves on */
         continue;
@@ -599,20 +602,24 @@ static bool House_load(room_vnum rvnum)
       /* read line check for xap. */
       if (!strcmp("XAP", line)) { /* then this is a Xap Obj, requires
                                        special care */
-        if ((temp->name = fread_string(fl, buf2)) == nullptr) {
-          temp->name = strdup("undefined");
+        obj_set_name(temp, fread_string(fl, buf2));
+        if (obj_get_name(temp) == nullptr) {
+          obj_set_name(temp, strdup("undefined"));
         }
 
-        if ((temp->short_description = fread_string(fl, buf2)) == nullptr) {
-          temp->short_description = strdup("undefined");
+        obj_set_short_description(temp, fread_string(fl, buf2));
+        if (obj_get_short_description(temp) == nullptr) {
+          obj_set_short_description(temp, strdup("undefined"));
         }
 
-        if ((temp->description = fread_string(fl, buf2)) == nullptr) {
-          temp->description = strdup("undefined");
+        obj_set_description(temp, fread_string(fl, buf2));
+        if (obj_get_description(temp) == nullptr) {
+          obj_set_description(temp, strdup("undefined"));
         }
 
-        if ((temp->action_description = fread_string(fl, buf2)) == nullptr) {
-          temp->action_description = 0;
+        obj_set_action_description(temp, fread_string(fl, buf2));
+        if (obj_get_action_description(temp) == nullptr) {
+          obj_set_action_description(temp, 0);
         }
 
         if (!get_line(fl, line) ||
@@ -620,14 +627,14 @@ static bool House_load(room_vnum rvnum)
           fprintf(stderr, "Format error in first numeric line (expecting _x_ args)");
           return false;
         }
-        temp->type_flag     = t[0];
-        temp->wear_flags[0] = t[1];
-        temp->wear_flags[1] = t[2];
-        temp->wear_flags[2] = t[3];
-        temp->wear_flags[3] = t[4];
-        temp->weight        = t[5];
-        temp->cost          = t[6];
-        temp->cost_per_day  = t[7];
+        obj_set_type_flag(temp, t[0]);
+        obj_get_wear_flags(temp)[0] = t[1];
+        obj_get_wear_flags(temp)[1] = t[2];
+        obj_get_wear_flags(temp)[2] = t[3];
+        obj_get_wear_flags(temp)[3] = t[4];
+        obj_set_weight(temp, t[5]);
+        obj_set_cost(temp, t[6]);
+        obj_set_cost_per_day(temp, t[7]);
 
         /* buf2 is error codes pretty much */
         //strcat(buf2, ", after numeric constants (expecting E/#xxx)");
@@ -636,12 +643,12 @@ static bool House_load(room_vnum rvnum)
         /* we're clearing these for good luck */
 
         for (j = 0; j < MAX_OBJ_AFFECT; j++) {
-          temp->affected[j].location = APPLY_NONE;
-          temp->affected[j].modifier = 0;
-          temp->affected[j].specific = 0;
+          obj_get_affected(temp)[j].location = APPLY_NONE;
+          obj_get_affected(temp)[j].modifier = 0;
+          obj_get_affected(temp)[j].specific = 0;
         }
 
-        temp->ex_description = nullptr;
+        obj_set_ex_description(temp, nullptr);
 
         get_line(fl, line);
         for (j = zwei = 0; !zwei && !feof(fl);) {
@@ -650,8 +657,8 @@ static bool House_load(room_vnum rvnum)
               CREATE(new_descr, struct extra_descr_data, 1);
               new_descr->keyword     = fread_string(fl, buf2);
               new_descr->description = fread_string(fl, buf2);
-              new_descr->next        = temp->ex_description;
-              temp->ex_description   = new_descr;
+              new_descr->next        = obj_get_ex_description(temp);
+              obj_set_ex_description(temp, new_descr);
               get_line(fl, line);
               break;
             case 'A':
@@ -660,9 +667,9 @@ static bool House_load(room_vnum rvnum)
               }
               get_line(fl, line);
               sscanf(line, "%d %d %d", t, t + 1, t + 2);
-              temp->affected[j].location = t[0];
-              temp->affected[j].modifier = t[1];
-              temp->affected[j].specific = t[2];
+              obj_get_affected(temp)[j].location = t[0];
+              obj_get_affected(temp)[j].modifier = t[1];
+              obj_get_affected(temp)[j].specific = t[2];
               j++;
               get_line(fl, line);
               break;
@@ -672,13 +679,17 @@ static bool House_load(room_vnum rvnum)
 
               get_line(fl, line);
               if (sscanf(line, "%lld", &generation) == 1)
-                temp->generation = generation;
+                obj_set_generation(temp, generation);
               get_line(fl, line);
               break;
             }
             case 'U':
               get_line(fl, line);
-              sscanf(line, "%" SCNd64, &temp->unique_id);
+              {
+                int64_t uid = obj_get_unique_id(temp);
+                sscanf(line, "%" SCNd64, &uid);
+                obj_set_unique_id(temp, uid);
+              }
               get_line(fl, line);
               break;
             case 'S':
@@ -688,11 +699,11 @@ static bool House_load(room_vnum rvnum)
               get_line(fl, line);
               sscanf(line, "%d %d", t, t + 1);
 
-              if (!temp->sbinfo) {
-                CREATE(temp->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
+              if (!obj_get_sbinfo(temp)) {
+                CREATE(*obj_sbinfo_slot(temp), struct obj_spellbook_spell, SPELLBOOK_SIZE);
               }
-              temp->sbinfo[j].spellname = t[0];
-              temp->sbinfo[j].pages     = t[1];
+              obj_get_sbinfo(temp)[j].spellname = t[0];
+              obj_get_sbinfo(temp)[j].pages     = t[1];
               j++;
               get_line(fl, line);
               break;
@@ -725,7 +736,7 @@ static bool House_load(room_vnum rvnum)
       for (j = MAX_BAG_ROWS - 1; j > -locate; j--)
         if (cont_row[j]) { /* no container -> back to ch's inventory */
           for (; cont_row[j]; cont_row[j] = obj1) {
-            obj1 = cont_row[j]->next_content;
+            obj1 = obj_get_next_content(cont_row[j]);
             obj_to_room(cont_row[j], rrnum);
           }
           cont_row[j] = nullptr;
@@ -735,15 +746,15 @@ static bool House_load(room_vnum rvnum)
         if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
           /* take item ; fill ; give to char again */
           obj_from_room(temp);
-          temp->contains = nullptr;
+          obj_set_contains(temp, nullptr);
           for (; cont_row[j]; cont_row[j] = obj1) {
-            obj1 = cont_row[j]->next_content;
+            obj1 = obj_get_next_content(cont_row[j]);
             obj_to_obj(cont_row[j], temp);
           }
           obj_to_room(temp, rrnum); /* add to inv first ... */
         } else {                    /* object isn't container -> empty content list */
           for (; cont_row[j]; cont_row[j] = obj1) {
-            obj1 = cont_row[j]->next_content;
+            obj1 = obj_get_next_content(cont_row[j]);
             obj_to_room(cont_row[j], rrnum);
           }
           cont_row[j] = nullptr;
@@ -756,9 +767,9 @@ static bool House_load(room_vnum rvnum)
                   in the same order as before renting */
         obj_from_room(temp);
         if ((obj1 = cont_row[-locate - 1])) {
-          while (obj1->next_content)
-            obj1 = obj1->next_content;
-          obj1->next_content = temp;
+          while (obj_get_next_content(obj1))
+            obj1 = obj_get_next_content(obj1);
+          obj_set_next_content(obj1, temp);
         } else
           cont_row[-locate - 1] = temp;
       }

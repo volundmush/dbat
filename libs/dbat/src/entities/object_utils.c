@@ -6,6 +6,7 @@
 #include "dbat/consts/itemdata.h"
 #include <stdlib.h>
 #include <string.h>
+#include "dbat/room_utils.h"
 
 bool wearable_obj(struct obj_data *obj)
 {
@@ -815,7 +816,7 @@ void obj_set_in_room(struct obj_data *obj, room_rnum v)
 
 struct room_direction_data *obj_get_exit(const struct obj_data *obj, int door)
 {
-  return world[obj_get_in_room(obj)].dir_option[door];
+  return rroom_get_dir_option(obj_get_in_room(obj), door);
 }
 
 /* Flag setters and toggles. */
@@ -861,4 +862,208 @@ void obj_wear_set(struct obj_data *obj, int flag, bool on)
 bool obj_wear_toggle(struct obj_data *obj, int flag)
 {
   return flag_array_toggle(obj_get_wear_flags(obj), flag);
+}
+
+struct obj_data **obj_contains_slot(struct obj_data *obj)
+{
+  return &obj->contains;
+}
+
+struct extra_descr_data **obj_ex_description_slot(struct obj_data *obj)
+{
+  return &obj->ex_description;
+}
+
+struct script_data **obj_script_slot(struct obj_data *obj)
+{
+  return &obj->script;
+}
+
+char **obj_action_description_slot(struct obj_data *obj)
+{
+  return &obj->action_description;
+}
+
+struct obj_spellbook_spell **obj_sbinfo_slot(struct obj_data *obj)
+{
+  return &obj->sbinfo;
+}
+
+void obj_unlink_from_list(struct obj_data *obj)
+{
+  struct obj_data *temp;
+
+  REMOVE_FROM_LIST(obj, object_list, next, temp);
+}
+
+void obj_unlink_content(struct obj_data **head, struct obj_data *obj)
+{
+  struct obj_data *temp;
+
+  REMOVE_FROM_LIST(obj, *head, next_content, temp);
+}
+
+char *obj_get_action_description(const struct obj_data *obj)
+{
+  return obj->action_description;
+}
+
+void obj_set_action_description(struct obj_data *obj, char *v)
+{
+  obj->action_description = v;
+}
+
+struct obj_affected_type *obj_get_affected(struct obj_data *obj)
+{
+  return obj->affected;
+}
+
+struct char_data *obj_get_carried_by(const struct obj_data *obj)
+{
+  return obj->carried_by;
+}
+
+void obj_set_carried_by(struct obj_data *obj, struct char_data *v)
+{
+  obj->carried_by = v;
+}
+
+struct obj_data *obj_get_contains(const struct obj_data *obj)
+{
+  return obj->contains;
+}
+
+void obj_set_contains(struct obj_data *obj, struct obj_data *v)
+{
+  obj->contains = v;
+}
+
+char *obj_get_description(const struct obj_data *obj)
+{
+  return obj->description;
+}
+
+void obj_set_description(struct obj_data *obj, char *v)
+{
+  obj->description = v;
+}
+
+struct extra_descr_data *obj_get_ex_description(const struct obj_data *obj)
+{
+  return obj->ex_description;
+}
+
+void obj_set_ex_description(struct obj_data *obj, struct extra_descr_data *v)
+{
+  obj->ex_description = v;
+}
+
+time_t obj_get_generation(const struct obj_data *obj)
+{
+  return obj->generation;
+}
+
+void obj_set_generation(struct obj_data *obj, time_t v)
+{
+  obj->generation = v;
+}
+
+struct obj_data *obj_get_in_obj(const struct obj_data *obj)
+{
+  return obj->in_obj;
+}
+
+void obj_set_in_obj(struct obj_data *obj, struct obj_data *v)
+{
+  obj->in_obj = v;
+}
+
+char *obj_get_name(const struct obj_data *obj)
+{
+  return obj->name;
+}
+
+void obj_set_name(struct obj_data *obj, char *v)
+{
+  obj->name = v;
+}
+
+struct obj_data *obj_get_next(const struct obj_data *obj)
+{
+  return obj->next;
+}
+
+void obj_set_next(struct obj_data *obj, struct obj_data *v)
+{
+  obj->next = v;
+}
+
+struct obj_data *obj_get_next_content(const struct obj_data *obj)
+{
+  return obj->next_content;
+}
+
+void obj_set_next_content(struct obj_data *obj, struct obj_data *v)
+{
+  obj->next_content = v;
+}
+
+struct trig_proto_list *obj_get_proto_script(const struct obj_data *obj)
+{
+  return obj->proto_script;
+}
+
+void obj_set_proto_script(struct obj_data *obj, struct trig_proto_list *v)
+{
+  obj->proto_script = v;
+}
+
+struct obj_spellbook_spell *obj_get_sbinfo(const struct obj_data *obj)
+{
+  return obj->sbinfo;
+}
+
+struct script_data *obj_get_script(const struct obj_data *obj)
+{
+  return obj->script;
+}
+
+void obj_set_script(struct obj_data *obj, struct script_data *v)
+{
+  obj->script = v;
+}
+
+void obj_set_short_description(struct obj_data *obj, char *v)
+{
+  obj->short_description = v;
+}
+
+int64_t obj_get_unique_id(const struct obj_data *obj)
+{
+  return obj->unique_id;
+}
+
+void obj_set_unique_id(struct obj_data *obj, int64_t v)
+{
+  obj->unique_id = v;
+}
+
+struct char_data *obj_get_worn_by(const struct obj_data *obj)
+{
+  return obj->worn_by;
+}
+
+void obj_set_worn_by(struct obj_data *obj, struct char_data *v)
+{
+  obj->worn_by = v;
+}
+
+int16_t obj_get_worn_on(const struct obj_data *obj)
+{
+  return obj->worn_on;
+}
+
+void obj_set_worn_on(struct obj_data *obj, int16_t v)
+{
+  obj->worn_on = v;
 }

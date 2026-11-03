@@ -15,6 +15,7 @@
 #include "dbat/spec_procs.h"
 #include "dbat/objsave.h"
 #include "dbat/mail.h"
+#include "dbat/room_utils.h"
 
 /* local functions */
 static void ASSIGNROOM(room_vnum room, SPECIAL(fname));
@@ -48,7 +49,7 @@ static void ASSIGNROOM(room_vnum room, SPECIAL(fn))
   room_rnum rnum;
 
   if ((rnum = real_room(room)) != NOWHERE)
-    world[rnum].func = fn;
+    rroom_set_func(rnum, fn);
   else if (!mini_mud)
     mud_log("SYSERR: Attempt to assign spec to non-existant room #%d", room);
 }
@@ -92,5 +93,5 @@ void assign_rooms(void)
   if (CONFIG_DTS_ARE_DUMPS)
     for (i = 0; i <= top_of_world; i++)
       if (rroom_flagged(i, ROOM_DEATH))
-        world[i].func = dump;
+        rroom_set_func(i, dump);
 }

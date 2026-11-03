@@ -427,11 +427,11 @@ ACMD(do_future)
   }
 
   if (vict != ch) {
-    if (vict->real_abils.cha + 5 > 70 && char_get_bonuses(vict, BONUS_SLOW) > 0) {
+    if (char_get_real_abils_cha(vict) + 5 > 70 && char_get_bonuses(vict, BONUS_SLOW) > 0) {
       send_to_char(ch, "They can't handle having their speed increased beyond 70.\r\n");
       return;
     }
-    if (vict->real_abils.intel + 2 > 70 && char_get_bonuses(vict, BONUS_DULL) > 0) {
+    if (char_get_real_abils_intel(vict) + 2 > 70 && char_get_bonuses(vict, BONUS_DULL) > 0) {
       send_to_char(ch, "They can't handle having their intelligence increased beyond 70.\r\n");
       return;
     }
@@ -442,16 +442,16 @@ ACMD(do_future)
     act("@C$n focuses $s energy into $s fingers before stabbing $s claws into YOUR neck and bestowing the power of Future Sight upon you! Soon after you pass out!@n", true, ch, 0, vict, TO_VICT);
     act("@C$n focuses $s energy into $s fingers before stabbing $s claws into $N's neck and bestowing the power of Future Sight upon $M! Soon after $E passes out!@n", true, ch, 0, vict, TO_NOTVICT);
     char_aff_set(vict, AFF_FUTURE, true);
-    vict->real_abils.cha += 5;
-    vict->real_abils.intel += 2;
+    char_set_real_abils_cha(vict, char_get_real_abils_cha(vict) + 5);
+    char_set_real_abils_intel(vict, char_get_real_abils_intel(vict) + 2);
     char_set_position(vict, POS_SLEEPING);
     save_char(vict);
   } else {
-    if (ch->real_abils.cha + 5 > 70 && char_get_bonuses(ch, BONUS_SLOW) > 0) {
+    if (char_get_real_abils_cha(ch) + 5 > 70 && char_get_bonuses(ch, BONUS_SLOW) > 0) {
       send_to_char(ch, "You can't handle having your speed increased beyond 70.\r\n");
       return;
     }
-    if (ch->real_abils.intel + 2 > 70 && char_get_bonuses(ch, BONUS_DULL) > 0) {
+    if (char_get_real_abils_intel(ch) + 2 > 70 && char_get_bonuses(ch, BONUS_DULL) > 0) {
       send_to_char(ch, "You can't handle having your intelligence increased beyond 70.\r\n");
       return;
     }
@@ -462,8 +462,8 @@ ACMD(do_future)
     act("@C$n focuses $s energy while closing $s eyes for a moment.@n", true, ch, 0, vict, TO_VICT);
     act("@C$n focuses $s energy while closing $s eyes for a moment.@n", true, ch, 0, vict, TO_NOTVICT);
     char_aff_set(ch, AFF_FUTURE, true);
-    ch->real_abils.cha += 5;
-    ch->real_abils.intel += 2;
+    char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 5);
+    char_set_real_abils_intel(ch, char_get_real_abils_intel(ch) + 2);
     char_set_position(vict, POS_SLEEPING);
     save_char(ch);
   }
@@ -593,8 +593,8 @@ ACMD(do_implant)
     return;
   }
 
-  for (obj = ch->carrying; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     if (found == false && obj_get_vnum(obj) == 66 && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
       found = true;
       limb  = obj;
@@ -801,7 +801,7 @@ ACMD(do_majinize)
     send_to_char(ch, "They are already majinized before by someone else.\r\n");
     return;
   }
-  if ((vict->master != ch)) {
+  if ((char_get_master(vict) != ch)) {
     send_to_char(ch, "They must be following you in order for you to majinize them.\r\n");
     return;
   }
@@ -1598,8 +1598,8 @@ ACMD(do_solar)
   act("@WYou raise both your hands to either side of your face, while closing your eyes, and shout '@YSolar Flare@W' as a blinding light fills the area!@n", true, ch, 0, 0, TO_CHAR);
   act("@C$n@W raises both $s hands to either side of $s face, while closing $s eyes, and shouts '@YSolar Flare@W' as a blinding light fills the area!@n", true, ch, 0, 0, TO_ROOM);
 
-  for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-    next_v = vict->next_in_room;
+  for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+    next_v = char_get_next_in_room(vict);
 
     if (vict == ch)
       continue;
@@ -1765,7 +1765,7 @@ ACMD(do_heal)
       send_to_char(vict, "You feel that your lifeforce has recovered some!\r\n");
     }
     improve_skill(ch, SKILL_HEAL, 0);
-    if (vict->master == ch || ch->master == vict || ch->master == vict->master) {
+    if (char_get_master(vict) == ch || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) {
       if (char_is_nail(ch) && char_is_namek(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 && getCurPL(vict) <= getEffMaxPL(vict) * 0.85 && rand_number(1, 3) == 3) {
         char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * 0.005));
       }
@@ -2073,7 +2073,7 @@ ACMD(do_transform)
   char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
   char buf3[MAX_INPUT_LENGTH];
 
-  if (!race_can_transform(ch->race)) {
+  if (!race_can_transform(char_get_race(ch))) {
     send_to_char(ch, "You do not have a transformation.\r\n");
     return;
   }
@@ -2099,7 +2099,7 @@ ACMD(do_transform)
   } /* End of No Argument */
 
   transform_bonus cur_form = race_current_form(ch);
-  bool can_revert          = race_can_revert(ch->race);
+  bool can_revert          = race_can_revert(char_get_race(ch));
 
   // If we are in kaioken or something weird like that, prevent transforming.
   if (!race_check_can_transform(ch)) {
@@ -2176,7 +2176,7 @@ ACMD(do_transform)
 
   // Announce noisy transformations in the zone.
   zone_rnum zone = 0;
-  if (race_has_noisy_transformations(ch->race)) {
+  if (race_has_noisy_transformations(char_get_race(ch))) {
     if ((zone = real_zone_by_thing(char_get_in_room(ch))) != NOWHERE) {
       send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
     };
@@ -2226,8 +2226,8 @@ ACMD(do_aid)
     num2 = 385;
   }
 
-  for (obj = ch->carrying; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     if (found == false && obj_get_vnum(obj) == num && (!obj_extra_flagged(obj, ITEM_BROKEN) && !obj_extra_flagged(obj, ITEM_FORGED))) {
       found   = true;
       aid_obj = obj;
@@ -2400,11 +2400,11 @@ ACMD(do_aura)
       send_to_char(ch, "Your aura fades as you stop shining light.\r\n");
       act("$n's aura fades as they stop shining light on the area.", true, ch, 0, 0, TO_ROOM);
       char_plr_set(ch, PLR_AURALIGHT, false);
-      world[char_get_in_room(ch)].light--;
+      rroom_set_light(char_get_in_room(ch), rroom_get_light(char_get_in_room(ch)) - 1);
 
     } else if ((getCurKI(ch)) > getMaxKI(ch) * 0.12) {
       if (char_get_in_room(ch) != NOWHERE) {
-        world[char_get_in_room(ch)].light++;
+        rroom_set_light(char_get_in_room(ch), rroom_get_light(char_get_in_room(ch)) + 1);
       }
       reveal_hiding(ch, 0);
       decCurKIPercent(ch, .12, 0);

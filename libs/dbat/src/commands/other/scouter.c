@@ -359,8 +359,8 @@ static bool has_scanner(struct char_data *ch)
   struct obj_data *obj, *next_obj;
   int success = 0;
 
-  for (obj = ch->carrying; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     if (obj && obj_get_vnum(obj) == 13600) {
       success = 1;
     }
@@ -733,7 +733,7 @@ ACMD(do_scouter)
   if (!char_is_npc(vict)) {
     send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(char_get_charge(vict)));
   } else if (char_is_npc(vict)) {
-    send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(vict->mobcharge * rand_number(char_get_level(ch) * 50, char_get_level(ch) * 200)));
+    send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n", add_commas(char_get_mobcharge(vict) * rand_number(char_get_level(ch) * 50, char_get_level(ch) * 200)));
   }
   if (percent < 10)
     send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Exhausted");

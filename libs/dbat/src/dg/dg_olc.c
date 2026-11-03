@@ -24,6 +24,9 @@
 #include "dbat/modify.h"
 #include "dbat/genzon.h"
 #include "dbat/atomicfile.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 static void trigedit_save(struct descriptor_data *d);
 static void trigedit_setup_existing(struct descriptor_data *d, trig_rnum rtrg_num);
@@ -66,7 +69,7 @@ ACMD(do_oasis_trigedit)
       }
     }
   }
-  d = ch->desc;
+  d = char_get_desc(ch);
   /*
    * Give descriptor an OLC structure.
    */
@@ -127,11 +130,11 @@ void script_save_to_disk(FILE *fp, void *item, int type)
   struct trig_proto_list *t;
 
   if (type == MOB_TRIGGER)
-    t = ((struct char_data *)item)->proto_script;
+    t = char_get_proto_script((struct char_data *)item);
   else if (type == OBJ_TRIGGER)
-    t = ((struct obj_data *)item)->proto_script;
+    t = obj_get_proto_script((struct obj_data *)item);
   else if (type == WLD_TRIGGER)
-    t = ((struct room_data *)item)->proto_script;
+    t = room_get_proto_script((struct room_data *)item);
   else {
     mud_log("SYSERR: Invalid type passed to script_save_to_disk()");
     return;
@@ -659,10 +662,10 @@ void dg_olc_script_copy(struct descriptor_data *d)
   struct trig_proto_list *origscript, *editscript;
 
   if (OLC_ITEM_TYPE(d) == MOB_TRIGGER)
-    origscript = OLC_MOB(d)->proto_script;
+    origscript = char_get_proto_script(OLC_MOB(d));
   else if (OLC_ITEM_TYPE(d) == OBJ_TRIGGER)
-    origscript = OLC_OBJ(d)->proto_script;
-  else origscript = OLC_ROOM(d)->proto_script;
+    origscript = obj_get_proto_script(OLC_OBJ(d));
+  else origscript = room_get_proto_script(OLC_ROOM(d));
 
   if (origscript) {
     CREATE(editscript, struct trig_proto_list, 1);

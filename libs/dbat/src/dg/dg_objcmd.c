@@ -73,7 +73,7 @@ static void obj_log(obj_data *obj, const char *format, ...)
   vsnprintf(output, sizeof(output), format, args);
   va_end(args);
 
-  script_log("Obj (%s, VNum %d):: %s", obj->short_description, obj_get_vnum(obj), output);
+  script_log("Obj (%s, VNum %d):: %s", obj_get_short_description(obj), obj_get_vnum(obj), output);
 }
 
 /* returns the real room number that the object or object's carrier is in */
@@ -81,12 +81,12 @@ room_rnum obj_room(obj_data *obj)
 {
   if (obj_get_in_room(obj) != NOWHERE)
     return obj_get_in_room(obj);
-  else if (obj->carried_by)
-    return char_get_in_room(obj->carried_by);
-  else if (obj->worn_by)
-    return char_get_in_room(obj->worn_by);
-  else if (obj->in_obj)
-    return obj_room(obj->in_obj);
+  else if (obj_get_carried_by(obj))
+    return char_get_in_room(obj_get_carried_by(obj));
+  else if (obj_get_worn_by(obj))
+    return char_get_in_room(obj_get_worn_by(obj));
+  else if (obj_get_in_obj(obj))
+    return obj_room(obj_get_in_obj(obj));
   else
     return NOWHERE;
 }
@@ -144,9 +144,9 @@ static OCMD(do_oecho)
     obj_log(obj, "oecho called with no args");
 
   else if ((room = obj_room(obj)) != NOWHERE) {
-    if (world[room].people) {
-      sub_write(argument, world[room].people, true, TO_ROOM);
-      sub_write(argument, world[room].people, true, TO_CHAR);
+    if (rroom_get_people(room)) {
+      sub_write(argument, rroom_get_people(room), true, TO_ROOM);
+      sub_write(argument, rroom_get_people(room), true, TO_CHAR);
     }
   }
 
@@ -171,8 +171,8 @@ static OCMD(do_oforce)
     if ((room = obj_room(obj)) == NOWHERE)
       obj_log(obj, "oforce called by object in NOWHERE");
     else {
-      for (ch = world[room].people; ch; ch = next_ch) {
-        next_ch = ch->next_in_room;
+      for (ch = rroom_get_people(room); ch; ch = next_ch) {
+        next_ch = char_get_next_in_room(ch);
         if (valid_dg_target(ch, 0)) {
           command_interpreter(ch, line);
         }
@@ -302,25 +302,25 @@ static OCMD(do_otransform)
       return;
     }
 
-    if (obj->worn_by) {
-      pos    = obj->worn_on;
-      wearer = obj->worn_by;
-      unequip_char(obj->worn_by, pos);
+    if (obj_get_worn_by(obj)) {
+      pos    = obj_get_worn_on(obj);
+      wearer = obj_get_worn_by(obj);
+      unequip_char(obj_get_worn_by(obj), pos);
     }
 
     /* move new obj info over to old object and delete new obj */
     memcpy(&tmpobj, o, sizeof(*o));
     obj_set_in_room(&tmpobj, obj_get_in_room(obj));
-    tmpobj.carried_by   = obj->carried_by;
-    tmpobj.worn_by      = obj->worn_by;
-    tmpobj.worn_on      = obj->worn_on;
-    tmpobj.in_obj       = obj->in_obj;
-    tmpobj.contains     = obj->contains;
-    tmpobj.id           = obj->id;
-    tmpobj.proto_script = obj->proto_script;
-    tmpobj.script       = obj->script;
-    tmpobj.next_content = obj->next_content;
-    tmpobj.next         = obj->next;
+    obj_set_carried_by(&tmpobj, obj_get_carried_by(obj));
+    obj_set_worn_by(&tmpobj, obj_get_worn_by(obj));
+    obj_set_worn_on(&tmpobj, obj_get_worn_on(obj));
+    obj_set_in_obj(&tmpobj, obj_get_in_obj(obj));
+    obj_set_contains(&tmpobj, obj_get_contains(obj));
+    obj_set_id(&tmpobj, obj_get_id(obj));
+    obj_set_proto_script(&tmpobj, obj_get_proto_script(obj));
+    obj_set_script(&tmpobj, obj_get_script(obj));
+    obj_set_next_content(&tmpobj, obj_get_next_content(obj));
+    obj_set_next(&tmpobj, obj_get_next(obj));
     memcpy(obj, &tmpobj, sizeof(*obj));
 
     if (wearer) {
@@ -350,14 +350,14 @@ static OCMD(do_opurge)
   if (!*arg) {
     /* purge all */
     if ((rm = obj_room(obj)) != NOWHERE) {
-      for (ch = world[rm].people; ch; ch = next_ch) {
-        next_ch = ch->next_in_room;
+      for (ch = rroom_get_people(rm); ch; ch = next_ch) {
+        next_ch = char_get_next_in_room(ch);
         if (char_is_npc(ch))
           extract_char(ch);
       }
 
-      for (o = world[rm].contents; o; o = next_obj) {
-        next_obj = o->next_content;
+      for (o = rroom_get_contents(rm); o; o = next_obj) {
+        next_obj = obj_get_next_content(o);
         if (o != obj)
           extract_obj(o);
       }
@@ -437,8 +437,8 @@ static OCMD(do_oteleport)
     if (target == rm)
       obj_log(obj, "oteleport target is itself");
 
-    for (ch = world[rm].people; ch; ch = next_ch) {
-      next_ch = ch->next_in_room;
+    for (ch = rroom_get_people(rm); ch; ch = next_ch) {
+      next_ch = char_get_next_in_room(ch);
       if (!valid_dg_target(ch, DG_ALLOW_GODS))
         continue;
       char_from_room(ch);
@@ -504,10 +504,10 @@ static OCMD(do_dgoload)
     }
     char_to_room(mob, rnum);
 
-    if (obj->script) { /* It _should_ have, but it might be detached. */
+    if (obj_get_script(obj)) { /* It _should_ have, but it might be detached. */
       char buf[MAX_INPUT_LENGTH];
       sprintf(buf, "%c%d", UID_CHAR, char_get_id(mob));
-      add_var(&(obj->script->global_vars), "lastloaded", buf, 0);
+      add_var(&(obj_get_script(obj)->global_vars), "lastloaded", buf, 0);
     }
 
     load_mtrigger(mob);
@@ -519,10 +519,10 @@ static OCMD(do_dgoload)
       return;
     }
 
-    if (obj->script) { /* It _should_ have, but it might be detached. */
+    if (obj_get_script(obj)) { /* It _should_ have, but it might be detached. */
       char buf[MAX_INPUT_LENGTH];
       sprintf(buf, "%c%d", UID_CHAR, obj_get_id(object));
-      add_var(&(obj->script->global_vars), "lastloaded", buf, 0);
+      add_var(&(obj_get_script(obj)->global_vars), "lastloaded", buf, 0);
     }
 
     /* special handling to make objects able to load on a person/in a container/worn etc. */
@@ -606,12 +606,12 @@ static OCMD(do_oasound)
   }
 
   for (door = 0; door < NUM_OF_DIRS; door++) {
-    if (world[room].dir_option[door] != nullptr &&
-        (world[room].dir_option[door])->to_room != NOWHERE &&
-        (world[room].dir_option[door])->to_room != room &&
-        world[(world[room].dir_option[door])->to_room].people) {
-      sub_write(argument, world[(world[room].dir_option[door])->to_room].people, true, TO_ROOM);
-      sub_write(argument, world[(world[room].dir_option[door])->to_room].people, true, TO_CHAR);
+    if (rroom_get_dir_option(room, door) != nullptr &&
+        (rroom_get_dir_option(room, door))->to_room != NOWHERE &&
+        (rroom_get_dir_option(room, door))->to_room != room &&
+        rroom_get_people((rroom_get_dir_option(room, door))->to_room)) {
+      sub_write(argument, rroom_get_people((rroom_get_dir_option(room, door))->to_room), true, TO_ROOM);
+      sub_write(argument, rroom_get_people((rroom_get_dir_option(room, door))->to_room), true, TO_CHAR);
     }
   }
 }

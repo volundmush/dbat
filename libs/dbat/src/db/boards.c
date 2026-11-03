@@ -27,6 +27,8 @@
 
 #include <sys/stat.h>
 #include <unistd.h>
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 struct board_info *bboards = nullptr; /* our global board structure */
 
@@ -562,7 +564,7 @@ static void send_board_banner(struct char_data *ch, const struct obj_data *obj, 
                      "     @CVieworder@W, this changes the order in which posts are listed to you.@n\r\n");
     return;
   }
-  send_to_char(ch, "@W                  This is the %20s\r\n", obj->short_description);
+  send_to_char(ch, "@W                  This is the %20s\r\n", obj_get_short_description(obj));
   send_to_char(ch, "@rO@b============================================================================@rO@n\n"
                    "     @D[@GX@D] means you have read the message, @D[@RX@D] means you have not.\r\n"
                    "     @WUsage@D:@CREAD@D/@cREMOVE @D<@Wmessg #@D>@W, @CRESPOND @D<@Wmessg #@D>@W, @CWRITE @D<@Wheader@D>@W.@n\r\n"
@@ -669,7 +671,7 @@ static void start_post(struct board_info *board, struct board_msg *msg, struct c
   board->num_messages = MAX(board->num_messages + 1, 1);
   add_message_head(board, msg);
   char_plr_set(ch, PLR_WRITING, true);
-  string_write(ch->desc, &msg->data, MAX_MESSAGE_LENGTH, board->vnum + BOARD_MAGIC, nullptr);
+  string_write(char_get_desc(ch), &msg->data, MAX_MESSAGE_LENGTH, board->vnum + BOARD_MAGIC, nullptr);
   announce_new_post(board->vnum);
 }
 
@@ -681,7 +683,7 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg)
     send_to_char(ch, "Orwellian police thwart your attempt at free speech.\r\n");
     return;
   }
-  if (!ch->desc)
+  if (!char_get_desc(ch))
     return;
   if (!(board = locate_board(board_vnum))) {
     send_to_char(ch, "Error: Your board could not be found. Please report.\n");
@@ -711,7 +713,7 @@ void board_respond(obj_vnum board_vnum, struct char_data *ch, int mnum)
   struct board_msg *msg, *other;
   char subject[READ_SIZE - 1], quote[MAX_MESSAGE_LENGTH + 128];
 
-  if (!ch->desc)
+  if (!char_get_desc(ch))
     return;
   if (!(board = locate_board(board_vnum))) {
     send_to_char(ch, "Error: Your board could not be found. Please report.\n");
@@ -742,7 +744,7 @@ void board_respond(obj_vnum board_vnum, struct char_data *ch, int mnum)
 
   snprintf(quote, sizeof(quote), "\t@D------- @cQuoted message @D-------@w\r\n%s\t@D   ------- @cEnd Quote @D-------@w\r\n", other->data ? other->data : "");
   msg->data = strdup(quote);
-  write_to_output(ch->desc, "%s", quote);
+  write_to_output(char_get_desc(ch), "%s", quote);
   start_post(board, msg, ch);
 }
 

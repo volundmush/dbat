@@ -96,8 +96,8 @@ static void resolve_song(struct char_data *ch)
     return;
   }
 
-  for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-    next_obj = obj2->next_content;
+  for (obj2 = char_get_inventory(ch); obj2; obj2 = next_obj) {
+    next_obj = obj_get_next_content(obj2);
     if (obj_get_vnum(obj2) == 8802 || obj_get_vnum(obj2) == 8807) {
       instrument = obj_get_vnum(obj2);
     }
@@ -120,13 +120,13 @@ static void resolve_song(struct char_data *ch)
     return;
   }
 
-  for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-    next_v = vict->next_in_room;
+  for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+    next_v = char_get_next_in_room(vict);
     switch (char_get_powerattack(ch)) {
       case SONG_SAFETY:
-        if ((ch->master == vict->master || ch == vict->master || vict == ch->master) || vict == ch) {
+        if ((char_get_master(ch) == char_get_master(vict) || ch == char_get_master(vict) || vict == char_get_master(ch)) || vict == ch) {
           if ((char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) || vict == ch) {
-            if (ch == vict->master || ch->master == vict || ch->master == vict->master || vict == ch) {
+            if (ch == char_get_master(vict) || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict) || vict == ch) {
               if (skill > diceroll) {
                 int64_t restore = (10 * skill) + ((getMaxKI(ch) * 0.0004) * skill);
                 if (vict != ch) {
@@ -183,9 +183,9 @@ static void resolve_song(struct char_data *ch)
         }
         break;
       case SONG_SHADOW_STITCH:
-        if (ch->master && vict->master) {
+        if (char_get_master(ch) && char_get_master(vict)) {
           if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-            if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+            if (ch == char_get_master(vict) || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) {
               continue;
             }
             if (skill > diceroll + 10) {
@@ -208,7 +208,7 @@ static void resolve_song(struct char_data *ch)
         if (vict == ch)
           continue;
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-          if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+          if (ch == char_get_master(vict) || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) {
             if (skill > diceroll) {
               act("@CYour Teleportation Melody has transported @c$N@C to Earth in a flash!@n", true, ch, 0, vict, TO_CHAR);
               act("@c$n's@C Teleportation Melody has transported you to Earth in a flash!@n", true, ch, 0, vict, TO_VICT);
@@ -223,7 +223,7 @@ static void resolve_song(struct char_data *ch)
         if (vict == ch)
           continue;
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-          if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+          if (ch == char_get_master(vict) || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) {
             if (skill > diceroll) {
               act("@CYour Teleportation Melody has transported @c$N@C to Vegeta in a flash!@n", true, ch, 0, vict, TO_CHAR);
               act("@c$n's@C Teleportation Melody has transported you to Vegeta in a flash!@n", true, ch, 0, vict, TO_VICT);
@@ -238,7 +238,7 @@ static void resolve_song(struct char_data *ch)
         if (vict == ch)
           continue;
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-          if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+          if (ch == char_get_master(vict) || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) {
             if (skill > diceroll) {
               act("@CYour Teleportation Melody has transported @c$N@C to Frigid in a flash!@n", true, ch, 0, vict, TO_CHAR);
               act("@c$n's@C Teleportation Melody has transported you to Frigid in a flash!@n", true, ch, 0, vict, TO_VICT);
@@ -253,7 +253,7 @@ static void resolve_song(struct char_data *ch)
         if (vict == ch)
           continue;
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-          if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+          if (ch == char_get_master(vict) || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) {
             if (skill > diceroll) {
               act("@CYour Teleportation Melody has transported @c$N@C to Konack in a flash!@n", true, ch, 0, vict, TO_CHAR);
               act("@c$n's@C Teleportation Melody has transported you to Konack in a flash!@n", true, ch, 0, vict, TO_VICT);
@@ -268,7 +268,7 @@ static void resolve_song(struct char_data *ch)
         if (vict == ch)
           continue;
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-          if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+          if (ch == char_get_master(vict) || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) {
             if (skill > diceroll) {
               act("@CYour Teleportation Melody has transported @c$N@C to Namek in a flash!@n", true, ch, 0, vict, TO_CHAR);
               act("@c$n's@C Teleportation Melody has transported you to Namek in a flash!@n", true, ch, 0, vict, TO_VICT);
@@ -283,7 +283,7 @@ static void resolve_song(struct char_data *ch)
         if (vict == ch)
           continue;
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-          if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+          if (ch == char_get_master(vict) || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) {
             if (skill > diceroll) {
               act("@CYour Teleportation Melody has transported @c$N@C to Arlia in a flash!@n", true, ch, 0, vict, TO_CHAR);
               act("@c$n's@C Teleportation Melody has transported you to Arlia in a flash!@n", true, ch, 0, vict, TO_VICT);
@@ -298,7 +298,7 @@ static void resolve_song(struct char_data *ch)
         if (vict == ch)
           continue;
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-          if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+          if (ch == char_get_master(vict) || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) {
             if (skill > diceroll) {
               act("@CYour Teleportation Melody has transported @c$N@C to Aether in a flash!@n", true, ch, 0, vict, TO_CHAR);
               act("@c$n's@C Teleportation Melody has transported you to Aether in a flash!@n", true, ch, 0, vict, TO_VICT);
@@ -313,7 +313,7 @@ static void resolve_song(struct char_data *ch)
         if (vict == ch)
           continue;
         if (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
-          if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
+          if (ch == char_get_master(vict) || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) {
             if (skill > diceroll) {
               act("@CYour Teleportation Melody has transported @c$N@C to Kanassa in a flash!@n", true, ch, 0, vict, TO_CHAR);
               act("@c$n's@C Teleportation Melody has transported you to Kanassa in a flash!@n", true, ch, 0, vict, TO_VICT);
@@ -326,7 +326,7 @@ static void resolve_song(struct char_data *ch)
         break;
       case SONG_SHIELDING:
         if (vict == ch || (char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP))) {
-          if (ch == vict->master || ch->master == vict || ch->master == vict->master || vict == ch) {
+          if (ch == char_get_master(vict) || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict) || vict == ch) {
             if (skill > diceroll) {
               if (vict != ch) {
                 act("@CYour triumphant and soaring music has powered a barrier around @c$N@C!@n", true, ch, 0, vict, TO_CHAR);
@@ -421,8 +421,8 @@ ACMD(do_song)
   struct obj_data *obj2 = nullptr, *next_obj;
   obj_vnum instrument   = 0;
 
-  for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-    next_obj = obj2->next_content;
+  for (obj2 = char_get_inventory(ch); obj2; obj2 = next_obj) {
+    next_obj = obj_get_next_content(obj2);
     if (obj_get_vnum(obj2) == 8802 || obj_get_vnum(obj2) == 8807) {
       instrument = obj_get_vnum(obj2);
     }

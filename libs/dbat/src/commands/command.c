@@ -686,7 +686,7 @@ bool special(struct char_data *ch, int cmd, char *arg)
         return true;
 
   /* special in inventory? */
-  for (i = ch->carrying; i; i = i->next_content)
+  for (i = char_get_inventory(ch); i; i = obj_get_next_content(i))
     if (obj_get_spec(i) != nullptr)
       if (obj_get_spec(i)(ch, i, cmd, arg))
         return true;
@@ -695,13 +695,13 @@ bool special(struct char_data *ch, int cmd, char *arg)
     return false;
 
   /* special in mobile present? */
-  for (k = world[char_get_in_room(ch)].people; k; k = k->next_in_room)
+  for (k = rroom_get_people(char_get_in_room(ch)); k; k = char_get_next_in_room(k))
     if (!char_mob_flagged(k, MOB_NOTDEADYET))
       if (char_get_mob_spec(k) && char_get_mob_spec(k)(ch, k, cmd, arg))
         return true;
 
   /* special in object present? */
-  for (i = world[char_get_in_room(ch)].contents; i; i = i->next_content)
+  for (i = rroom_get_contents(char_get_in_room(ch)); i; i = obj_get_next_content(i))
     if (obj_get_spec(i) != nullptr)
       if (obj_get_spec(i)(ch, i, cmd, arg))
         return true;

@@ -102,8 +102,8 @@ ACMD(do_voice)
     }
     char_set_voice(ch, strdup(argument));
     char_set_rp(ch, char_get_rp(ch) - (1));
-    ch->desc->rpp = char_get_rp(ch);
-    userWrite(ch->desc, 0, 0, 0, "index");
+    char_get_desc(ch)->rpp = char_get_rp(ch);
+    userWrite(char_get_desc(ch), 0, 0, 0, "index");
     send_to_char(ch, "@D(@cRPP@W: @w-1@D)@n\n\n");
     return;
   }
@@ -228,8 +228,8 @@ ACMD(do_say)
       strcpy(verb, "say");
     }
 
-    for (tch = world[char_get_in_room(ch)].people; tch; tch = tch->next_in_room) {
-      if (tch != ch && tch->desc) {
+    for (tch = rroom_get_people(char_get_in_room(ch)); tch; tch = char_get_next_in_room(tch)) {
+      if (tch != ch && char_get_desc(tch)) {
         char sayto[100];
         snprintf(sayto, sizeof(sayto), "to %s ", char_get_name(tch));
         if (strstr(argument, sayto)) {
@@ -314,9 +314,9 @@ ACMD(do_say)
             if (granted == false && strstr(argument, "speed")) {
               if (wch != nullptr) {
                 send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now faster!%s@w'@n\r\n", char_get_name(wch), WISH[0] ? "" : " Now make your second wish.");
-                wch->real_abils.cha += 10;
-                if (wch->real_abils.cha > 100) {
-                  wch->real_abils.cha = 100;
+                char_set_real_abils_cha(wch, char_get_real_abils_cha(wch) + 10);
+                if (char_get_real_abils_cha(wch) > 100) {
+                  char_set_real_abils_cha(wch, 100);
                 }
                 save_char(wch);
                 granted = true;
@@ -340,9 +340,9 @@ ACMD(do_say)
             if (granted == false && strstr(argument, "strength")) {
               if (wch != nullptr) {
                 send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s has more strength!%s@w'@n\r\n", char_get_name(wch), WISH[0] ? "" : " Now make your second wish.");
-                wch->real_abils.str += 10;
-                if (wch->real_abils.str > 100) {
-                  wch->real_abils.str = 100;
+                char_set_real_abils_str(wch, char_get_real_abils_str(wch) + 10);
+                if (char_get_real_abils_str(wch) > 100) {
+                  char_set_real_abils_str(wch, 100);
                 }
                 save_char(wch);
                 granted = true;
@@ -355,9 +355,9 @@ ACMD(do_say)
             if (granted == false && strstr(argument, "intelligence")) {
               if (wch != nullptr) {
                 send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now smarter!%s@w'@n\r\n", char_get_name(wch), WISH[0] ? "" : " Now make your second wish.");
-                wch->real_abils.intel += 10;
-                if (wch->real_abils.intel > 100) {
-                  wch->real_abils.intel = 100;
+                char_set_real_abils_intel(wch, char_get_real_abils_intel(wch) + 10);
+                if (char_get_real_abils_intel(wch) > 100) {
+                  char_set_real_abils_intel(wch, 100);
                 }
                 save_char(wch);
                 granted = true;
@@ -370,9 +370,9 @@ ACMD(do_say)
             if (granted == false && strstr(argument, "wisdom")) {
               if (wch != nullptr) {
                 send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now wiser!%s@w'@n\r\n", char_get_name(wch), WISH[0] ? "" : " Now make your second wish.");
-                wch->real_abils.wis += 10;
-                if (wch->real_abils.wis > 100) {
-                  wch->real_abils.wis = 100;
+                char_set_real_abils_wis(wch, char_get_real_abils_wis(wch) + 10);
+                if (char_get_real_abils_wis(wch) > 100) {
+                  char_set_real_abils_wis(wch, 100);
                 }
                 granted = true;
                 SELFISHMETER += 1;
@@ -384,9 +384,9 @@ ACMD(do_say)
             if (granted == false && strstr(argument, "agility")) {
               if (wch != nullptr) {
                 send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s is now more agile!%s@w'@n\r\n", char_get_name(wch), WISH[0] ? "" : " Now make your second wish.");
-                wch->real_abils.dex += 10;
-                if (wch->real_abils.dex > 100) {
-                  wch->real_abils.dex = 100;
+                char_set_real_abils_dex(wch, char_get_real_abils_dex(wch) + 10);
+                if (char_get_real_abils_dex(wch) > 100) {
+                  char_set_real_abils_dex(wch, 100);
                 }
                 save_char(wch);
                 granted = true;
@@ -399,9 +399,9 @@ ACMD(do_say)
             if (granted == false && strstr(argument, "constitution")) {
               if (wch != nullptr) {
                 send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s has more guts!%s@w'@n\r\n", char_get_name(wch), WISH[0] ? "" : " Now make your second wish.");
-                wch->real_abils.con += 10;
-                if (wch->real_abils.con > 100) {
-                  wch->real_abils.con = 100;
+                char_set_real_abils_con(wch, char_get_real_abils_con(wch) + 10);
+                if (char_get_real_abils_con(wch) > 100) {
+                  char_set_real_abils_con(wch, 100);
                 }
                 save_char(wch);
                 granted = true;
@@ -756,8 +756,8 @@ ACMD(do_gsay)
   else {
     char buf[MAX_STRING_LENGTH];
 
-    if (ch->master)
-      k = ch->master;
+    if (char_get_master(ch))
+      k = char_get_master(ch);
     else
       k = ch;
 
@@ -772,7 +772,7 @@ ACMD(do_gsay)
         act(blah, true, ch, 0, k, TO_VICT);
       }
     }
-    for (f = k->followers; f; f = f->next)
+    for (f = char_get_followers(k); f; f = f->next)
       if (char_aff_flagged(f->follower, AFF_GROUP) && (f->follower != ch) && char_is_awake(f->follower)) {
         if (!char_is_npc(ch) && !char_is_npc(f->follower) && CONFIG_ENABLE_LANGUAGES) {
           garble_text(buf, char_get_skill(f->follower, char_get_speaking(ch)), char_get_speaking(ch));
@@ -856,7 +856,7 @@ static bool is_tell_ok(struct char_data *ch, struct char_data *vict)
     send_to_char(ch, "The walls seem to absorb your words.\r\n");
   else if (char_is_npc(vict))
     send_to_char(ch, "You can't send tells to mobs.\r\n");
-  else if (!char_is_npc(vict) && !vict->desc) /* linkless */
+  else if (!char_is_npc(vict) && !char_get_desc(vict)) /* linkless */
     act("$E's linkless at the moment.", false, ch, 0, vict, TO_CHAR | TO_SLEEP);
   else if (char_plr_flagged(vict, PLR_WRITING))
     act("$E's writing a message right now; try again later.", false, ch, 0, vict, TO_CHAR | TO_SLEEP);
@@ -947,7 +947,7 @@ ACMD(do_reply)
      *      hear tells anyway. :) -gg 2/24/98
      */
     while (tch != nullptr && (char_is_npc(tch) || char_get_idnum(tch) != char_get_last_tell(ch)))
-      tch = tch->next;
+      tch = char_get_next(tch);
 
     if (tch == nullptr)
       send_to_char(ch, "They are no longer playing.\r\n");
@@ -1030,7 +1030,7 @@ static void handle_whisper(char *buf, struct char_data *ch, struct char_data *vi
 {
   struct char_data *tch;
 
-  for (tch = world[char_get_in_room(ch)].people; tch; tch = tch->next_in_room) {
+  for (tch = rroom_get_people(char_get_in_room(ch)); tch; tch = char_get_next_in_room(tch)) {
     if (char_is_npc(tch)) {
       continue;
     }
@@ -1223,14 +1223,14 @@ ACMD(do_write)
   char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 
   /* before we do anything, lets see if there's a board involved. */
-  for (obj = ch->carrying; obj; obj = obj->next_content) {
+  for (obj = char_get_inventory(ch); obj; obj = obj_get_next_content(obj)) {
     if (obj_get_type_flag(obj) == ITEM_BOARD) {
       break;
     }
   }
 
   if (!obj) {
-    for (obj = world[char_get_in_room(ch)].contents; obj; obj = obj->next_content) {
+    for (obj = rroom_get_contents(char_get_in_room(ch)); obj; obj = obj_get_next_content(obj)) {
       if (obj_get_type_flag(obj) == ITEM_BOARD) {
         break;
       }
@@ -1247,7 +1247,7 @@ ACMD(do_write)
 
   two_arguments(argument, papername, penname);
 
-  if (!ch->desc)
+  if (!char_get_desc(ch))
     return;
 
   if (!*papername) { /* nothing was delivered */
@@ -1255,16 +1255,16 @@ ACMD(do_write)
     return;
   }
   if (*penname) { /* there were two arguments */
-    if (!(paper = get_obj_in_list_vis(ch, papername, nullptr, ch->carrying))) {
+    if (!(paper = get_obj_in_list_vis(ch, papername, nullptr, char_get_inventory(ch)))) {
       send_to_char(ch, "You have no %s.\r\n", papername);
       return;
     }
-    if (!(pen = get_obj_in_list_vis(ch, penname, nullptr, ch->carrying))) {
+    if (!(pen = get_obj_in_list_vis(ch, penname, nullptr, char_get_inventory(ch)))) {
       send_to_char(ch, "You have no %s.\r\n", penname);
       return;
     }
   } else { /* there was one arg.. let's see what we can find */
-    if (!(paper = get_obj_in_list_vis(ch, papername, nullptr, ch->carrying))) {
+    if (!(paper = get_obj_in_list_vis(ch, papername, nullptr, char_get_inventory(ch)))) {
       send_to_char(ch, "There is no %s in your inventory.\r\n", papername);
       return;
     }
@@ -1299,17 +1299,17 @@ ACMD(do_write)
     char *backstr = nullptr;
 
     /* Something on it, display it as that's in input buffer. */
-    if (paper->action_description) {
-      backstr = strdup(paper->action_description);
+    if (obj_get_action_description(paper)) {
+      backstr = strdup(obj_get_action_description(paper));
       send_to_char(ch, "There's something written on it already:\r\n");
-      send_to_char(ch, "%s", paper->action_description);
+      send_to_char(ch, "%s", obj_get_action_description(paper));
     }
 
     /* we can write - hooray! */
     act("$n begins to jot down a note.", true, ch, 0, 0, TO_ROOM);
     obj_extra_set(paper, ITEM_UNIQUE_SAVE, true);
-    send_editor_help(ch->desc);
-    string_write(ch->desc, &paper->action_description, MAX_NOTE_LENGTH, 0, backstr);
+    send_editor_help(char_get_desc(ch));
+    string_write(char_get_desc(ch), obj_action_description_slot(paper), MAX_NOTE_LENGTH, 0, backstr);
   }
 }
 
@@ -1412,7 +1412,7 @@ ACMD(do_gen_comm)
   };
 
   /* to keep pets, etc from being ordered to shout */
-  if (!ch->desc)
+  if (!char_get_desc(ch))
     return;
 
   if (char_plr_flagged(ch, PLR_NOSHOUT)) {
@@ -1477,13 +1477,13 @@ ACMD(do_gen_comm)
 
   /* now send all the strings out */
   for (i = descriptor_list; i; i = i->next) {
-    if (desc_get_connected(i) == CON_PLAYING && i != ch->desc && i->character &&
+    if (desc_get_connected(i) == CON_PLAYING && i != char_get_desc(ch) && i->character &&
         (char_is_npc(i->character) || !char_prf_flagged(i->character, channels[subcmd])) &&
         (char_is_npc(i->character) || !char_plr_flagged(i->character, PLR_WRITING)) &&
         !rroom_flagged(char_get_in_room(i->character), ROOM_SOUNDPROOF)) {
 
       if (subcmd == SCMD_SHOUT &&
-          ((world[char_get_in_room(ch)].zone != world[char_get_in_room(i->character)].zone) ||
+          ((rroom_get_zone(char_get_in_room(ch)) != rroom_get_zone(char_get_in_room(i->character))) ||
            !char_is_awake(i->character)))
         continue;
 
@@ -1533,14 +1533,14 @@ ACMD(do_respond)
     return;
   }
 
-  for (obj = ch->carrying; obj; obj = obj->next_content) {
+  for (obj = char_get_inventory(ch); obj; obj = obj_get_next_content(obj)) {
     if (obj_get_type_flag(obj) == ITEM_BOARD) {
       found = 1;
       break;
     }
   }
   if (!obj) {
-    for (obj = world[char_get_in_room(ch)].contents; obj; obj = obj->next_content) {
+    for (obj = rroom_get_contents(char_get_in_room(ch)); obj; obj = obj_get_next_content(obj)) {
       if (obj_get_type_flag(obj) == ITEM_BOARD) {
         found = 1;
         break;

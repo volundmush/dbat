@@ -473,7 +473,7 @@ ACMD(do_focus)
       act("You focus ki into $N's mind, making it work faster!", true, ch, 0, vict, TO_CHAR);
       act("$n focuses ki into your mind, making it work faster!", true, ch, 0, vict, TO_VICT);
       act("$n focuses ki into $N's mind, making it work faster!", true, ch, 0, vict, TO_NOTVICT);
-      if ((vict->master == ch || ch->master == vict || ch->master == vict->master) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+      if ((char_get_master(vict) == ch || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
         if (char_is_kai(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 && rand_number(1, 3) == 3) {
           char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * 0.05));
         }
@@ -563,7 +563,7 @@ ACMD(do_focus)
       act("You focus ki into $N's limbs, making them more flexible!", true, ch, 0, vict, TO_CHAR);
       act("$n focuses ki into your limbs, making them more flexible!", true, ch, 0, vict, TO_VICT);
       act("$n focuses ki into $N's limbs, making them more flexible!", true, ch, 0, vict, TO_NOTVICT);
-      if ((vict->master == ch || ch->master == vict || ch->master == vict->master) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+      if ((char_get_master(vict) == ch || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
         if (char_is_kai(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 && rand_number(1, 3) == 3) {
           char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * 0.05));
         }
@@ -659,7 +659,7 @@ ACMD(do_focus)
       act("You focus ki while chanting spiritual words. Blessing $N with faster regeneration!", true, ch, 0, vict, TO_CHAR);
       act("$n focuses ki while chanting spiritual words. $n then places a hand on your head, blessing you!", true, ch, 0, vict, TO_VICT);
       act("$n focuses ki while chanting spiritual words. $n then places a hand on $N's head, blessing them!", true, ch, 0, vict, TO_NOTVICT);
-      if ((vict->master == ch || ch->master == vict || ch->master == vict->master) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
+      if ((char_get_master(vict) == ch || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) && char_aff_flagged(ch, AFF_GROUP) && char_aff_flagged(vict, AFF_GROUP)) {
         if (char_is_kai(ch) && level_exp(ch, char_get_level(ch) + 1) - char_get_exp(ch) > 0 && rand_number(1, 3) == 3) {
           char_set_exp(ch, char_get_exp(ch) + (level_exp(ch, char_get_level(ch) + 1) * 0.05));
         }
@@ -1027,7 +1027,7 @@ ACMD(do_focus)
       act("Your natural immunity to poison prevents it from affecting you.", true, ch, 0, vict, TO_VICT);
       act("However $N seems unaffected by the poison.", true, ch, 0, vict, TO_NOTVICT);
     } else {
-      vict->poisonby = ch;
+      char_set_poisonby(vict, ch);
       if (char_get_charge(vict) > 0) {
         send_to_char(vict, "You lose your concentration and release your charged ki!\r\n");
         do_charge(vict, (char[]){"release"}, 0, 0);

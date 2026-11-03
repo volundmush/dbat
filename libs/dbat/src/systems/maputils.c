@@ -13,6 +13,9 @@
 #include "dbat/interpreter.h"
 #include "dbat/db.h"
 #include "dbat/vehicles.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 room_rnum mapnums[MAP_ROWS + 1][MAP_COLS + 1];
 
@@ -28,7 +31,7 @@ static void ping_ship(obj_vnum vnum, obj_vnum vnum2)
   }
 
   for (tch = character_list; tch; tch = next_ch) {
-    next_ch = tch->next;
+    next_ch = char_get_next(tch);
     if (found == false) {
       if (!(obj = find_control(tch))) {
         continue;
@@ -50,7 +53,7 @@ static int checkship(room_rnum rnum, obj_vnum vnum)
   struct obj_data *i = nullptr;
   int there          = false;
 
-  for (i = world[rnum].contents; i; i = i->next_content) {
+  for (i = rroom_get_contents(rnum); i; i = obj_get_next_content(i)) {
     if (!rroom_flagged(rnum, ROOM_NEBULA)) {
       if (obj_get_type_flag(i) == ITEM_VEHICLE && there != true) {
         there = true;

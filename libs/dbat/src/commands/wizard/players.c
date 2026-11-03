@@ -242,13 +242,13 @@ ACMD(do_reward)
       send_to_char(vict, "@D[@YROLEPLAY@D] @WYou have been awarded @D(@G%d@D)@W RP points by @C%s@W.@n\r\n", amt, char_get_name(ch));
       send_to_imm("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, char_get_name(ch));
       log_imm_action("ROLEPLAY: %s has been awarded %d RP points by %s.", arg, amt, char_get_name(ch));
-      vict->rp += amt;
-      char_set_rp(vict, vict->rp);
+      char_set_rp(vict, char_get_rp(vict) + amt);
+      char_set_rp(vict, char_get_rp(vict));
       if (amt <= 29) {
         char_set_trp(vict, char_get_trp(vict) + (amt));
       }
-      vict->desc->rpp += amt;
-      userWrite(vict->desc, 0, 0, 0, "index");
+      char_get_desc(vict)->rpp += amt;
+      userWrite(char_get_desc(vict), 0, 0, 0, "index");
     } else {
       send_to_char(ch, "@WYou award user @C%s @D(@G%d@D)@W RP points.@n\r\n", arg, amt);
       send_to_imm("ROLEPLAY: User %s has been awarded %d RP points by %s.", arg, amt, char_get_name(ch));
@@ -261,10 +261,10 @@ ACMD(do_reward)
       send_to_char(vict, "@D[@YROLEPLAY@D] @C%s@W deducts @D(@G%d@D)@W RP points from you.@n\r\n", char_get_name(ch), amt);
       send_to_imm("ROLEPLAY: %s has had %d RP points deducted by %s.", char_get_name(vict), amt, char_get_name(ch));
       log_imm_action("ROLEPLAY: %s has had %d RP points deducted by %s.", char_get_name(vict), amt, char_get_name(ch));
-      vict->rp += amt;
-      char_set_rp(vict, vict->rp);
-      vict->desc->rpp += amt;
-      userWrite(vict->desc, 0, 0, 0, "index");
+      char_set_rp(vict, char_get_rp(vict) + amt);
+      char_set_rp(vict, char_get_rp(vict));
+      char_get_desc(vict)->rpp += amt;
+      userWrite(char_get_desc(vict), 0, 0, 0, "index");
     } else {
       send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from user @C%s@W.@n\r\n", amt, arg);
       send_to_imm("ROLEPLAY: User %s has had %d RP points deducted by %s.", arg, amt, char_get_name(ch));
@@ -317,13 +317,13 @@ ACMD(do_rbank)
       send_to_char(vict, "@D[@YROLEPLAY@D] @WYou have had @D(@G%d@D)@W RP points added to your RPP Bank by @C%s@W.@n\r\n", amt, char_get_name(ch));
       send_to_imm("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, char_get_name(ch));
       log_imm_action("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, char_get_name(ch));
-      vict->rbank += amt;
-      char_set_rbank(vict, vict->rbank);
+      char_set_rbank(vict, char_get_rbank(vict) + amt);
+      char_set_rbank(vict, char_get_rbank(vict));
       if (amt <= 29) {
         char_set_trp(vict, char_get_trp(vict) + (amt));
       }
-      vict->desc->rbank += amt;
-      userWrite(vict->desc, 0, 0, 0, "index");
+      char_get_desc(vict)->rbank += amt;
+      userWrite(char_get_desc(vict), 0, 0, 0, "index");
     } else {
       send_to_char(ch, "@WYou put @D(@G%d@D)@W RP points into @C%s@W's Bank.@n\r\n", amt, arg);
       send_to_imm("ROLEPLAY: %s has had %d RP points put into their RPP Bank by %s.", arg, amt, char_get_name(ch));
@@ -336,10 +336,10 @@ ACMD(do_rbank)
       send_to_char(vict, "@D[@YROLEPLAY@D] @C%s@W deducts @D(@G%d@D)@W RP points from your RPP Bank.@n\r\n", char_get_name(ch), amt);
       send_to_imm("ROLEPLAY: %s has had %d RP points deducted from their RPP Bank by %s.", char_get_name(vict), amt, char_get_name(ch));
       log_imm_action("ROLEPLAY: %s has had %d RP points deducted from their RPP Bank by %s.", char_get_name(vict), amt, char_get_name(ch));
-      vict->rbank += amt;
-      char_set_rbank(vict, vict->rbank);
-      vict->desc->rbank += amt;
-      userWrite(vict->desc, 0, 0, 0, "index");
+      char_set_rbank(vict, char_get_rbank(vict) + amt);
+      char_set_rbank(vict, char_get_rbank(vict));
+      char_get_desc(vict)->rbank += amt;
+      userWrite(char_get_desc(vict), 0, 0, 0, "index");
     } else {
       send_to_char(ch, "@WYou deduct @D(@G%d@D)@W RP points from @C%s@W's Bank.@n\r\n", amt, arg);
       send_to_imm("ROLEPLAY: %s has had %d RP points deducted from their RPP Bank by %s.", arg, amt, char_get_name(ch));
@@ -434,14 +434,14 @@ ACMD(do_hell)
     lockWrite(ch, arg);
     return;
   }
-  struct descriptor_data *d = vict->desc;
+  struct descriptor_data *d = char_get_desc(vict);
   Crash_rentsave(vict, 0);
   extract_char(vict);
   lockWrite(ch, char_get_name(vict));
   if (d && desc_get_connected(d) != CON_PLAYING) {
     desc_set_connected(d, CON_CLOSE);
-    vict->desc->character = nullptr;
-    vict->desc            = nullptr;
+    char_get_desc(vict)->character = nullptr;
+    char_set_desc(vict, nullptr);
   }
   return;
   return;
@@ -475,10 +475,10 @@ ACMD(do_advance)
   }
   if ((newlevel = atoi(level)) <= 0) {
     if (!strcasecmp("demote", level)) {
-      victim->level  = 1;
-      victim->basepl = 150;
-      victim->baseki = 150;
-      victim->basest = 150;
+      char_set_class_level(victim, 1);
+      char_set_basepl(victim, 150);
+      char_set_baseki(victim, 150);
+      char_set_basest(victim, 150);
       send_to_char(ch, "They have now been demoted!\r\n");
       send_to_char(victim, "You were demoted to level 1!\r\n");
       return;
@@ -586,7 +586,7 @@ static void perform_immort_invis(struct char_data *ch, int level)
 {
   struct char_data *tch;
 
-  for (tch = world[char_get_in_room(ch)].people; tch; tch = tch->next_in_room) {
+  for (tch = rroom_get_people(char_get_in_room(ch)); tch; tch = char_get_next_in_room(tch)) {
     if (tch == ch)
       continue;
     if (char_get_admlevel(tch) >= char_get_invis_level(ch) && char_get_admlevel(tch) < level)
@@ -718,9 +718,9 @@ ACMD(do_wizutil)
         act("A sudden fireball conjured from nowhere thaws $n!", false, vict, 0, 0, TO_ROOM);
         break;
       case SCMD_UNAFFECT:
-        if (vict->affected || char_get_affected_by(vict)) {
-          while (vict->affected)
-            affect_remove(vict, vict->affected);
+        if (char_get_affected(vict) || char_get_affected_by(vict)) {
+          while (char_get_affected(vict))
+            affect_remove(vict, char_get_affected(vict));
           for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
             char_get_affected_by(vict)[taeller] = 0;
           send_to_char(vict, "There is a brief flash of light!\r\nYou feel slightly different.\r\n");
@@ -921,17 +921,17 @@ static bool perform_set(struct char_data *ch, struct char_data *vict, int mode,
       send_to_char(ch, "Nosummon %s for %s.\r\n", ONOFF(!on), char_get_name(vict));
       break;
     case 4:
-      vict->max_hit = value;
+      char_set_max_hit(vict, value);
       mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "SET: %s has set maxpl for %s.", char_get_name(ch), char_get_name(vict));
       log_imm_action("SET: %s has set maxpl for %s.", char_get_name(ch), char_get_name(vict));
       break;
     case 5:
-      vict->max_mana = value;
+      char_set_max_mana(vict, value);
       mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "SET: %s has set maxki for %s.", char_get_name(ch), char_get_name(vict));
       log_imm_action("SET: %s has set maxki for %s.", char_get_name(ch), char_get_name(vict));
       break;
     case 6:
-      vict->max_move = value;
+      char_set_max_move(vict, value);
       mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "SET: %s has set maxsta for %s.", char_get_name(ch), char_get_name(vict));
       log_imm_action("SET: %s has set maxsta for %s.", char_get_name(ch), char_get_name(vict));
       break;
@@ -948,7 +948,7 @@ static bool perform_set(struct char_data *ch, struct char_data *vict, int mode,
       break;
     case 11:
       RANGE(0, 100);
-      vict->real_abils.str = value;
+      char_set_real_abils_str(vict, value);
       mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "SET: %s has set str for %s.", char_get_name(ch), char_get_name(vict));
       log_imm_action("SET: %s has set str for %s.", char_get_name(ch), char_get_name(vict));
       affect_total(vict);
@@ -963,41 +963,41 @@ static bool perform_set(struct char_data *ch, struct char_data *vict, int mode,
       break;
     case 13:
       RANGE(0, 100);
-      vict->real_abils.intel = value;
+      char_set_real_abils_intel(vict, value);
       mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "SET: %s has set intel for %s.", char_get_name(ch), char_get_name(vict));
       log_imm_action("SET: %s has set intel for %s.", char_get_name(ch), char_get_name(vict));
       affect_total(vict);
       break;
     case 14:
       RANGE(0, 100);
-      vict->real_abils.wis = value;
+      char_set_real_abils_wis(vict, value);
       mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "SET: %s has set wis for %s.", char_get_name(ch), char_get_name(vict));
       log_imm_action("SET: %s has set wis for %s.", char_get_name(ch), char_get_name(vict));
       affect_total(vict);
       break;
     case 15:
       RANGE(0, 100);
-      vict->real_abils.dex = value;
+      char_set_real_abils_dex(vict, value);
       mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "SET: %s has set dex for %s.", char_get_name(ch), char_get_name(vict));
       log_imm_action("SET: %s has set dex for %s.", char_get_name(ch), char_get_name(vict));
       affect_total(vict);
       break;
     case 16:
       RANGE(0, 100);
-      vict->real_abils.con = value;
+      char_set_real_abils_con(vict, value);
       mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "SET: %s has set con for %s.", char_get_name(ch), char_get_name(vict));
       log_imm_action("SET: %s has set con for %s.", char_get_name(ch), char_get_name(vict));
       affect_total(vict);
       break;
     case 17:
       RANGE(0, 100);
-      vict->real_abils.cha = value;
+      char_set_real_abils_cha(vict, value);
       mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "SET: %s has set speed for %s.", char_get_name(ch), char_get_name(vict));
       log_imm_action("SET: %s has set speed for %s.", char_get_name(ch), char_get_name(vict));
       affect_total(vict);
       break;
     case 18:
-      vict->armor = RANGE(-100, 500);
+      char_set_armor(vict, RANGE(-100, 500));
       mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "SET: %s has set armor index for %s.", char_get_name(ch), char_get_name(vict));
       log_imm_action("SET: %s has set armor index for %s.", char_get_name(ch), char_get_name(vict));
       affect_total(vict);
@@ -1013,7 +1013,7 @@ static bool perform_set(struct char_data *ch, struct char_data *vict, int mode,
       log_imm_action("SET: %s has set bank for %s.", char_get_name(ch), char_get_name(vict));
       break;
     case 21:
-      vict->exp = RANGE(0, 50000000);
+      char_set_exp(vict, RANGE(0, 50000000));
       mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "SET: %s has set exp for %s.", char_get_name(ch), char_get_name(vict));
       log_imm_action("SET: %s has set exp for %s.", char_get_name(ch), char_get_name(vict));
       break;
@@ -1083,7 +1083,7 @@ static bool perform_set(struct char_data *ch, struct char_data *vict, int mode,
         return false;
       }
       value       = MAX(0, value);
-      vict->level = value;
+      char_set_class_level(vict, value);
       break;
     case 35:
       if ((rnum = real_room(value)) == NOWHERE) {
@@ -1109,7 +1109,7 @@ static bool perform_set(struct char_data *ch, struct char_data *vict, int mode,
         return false;
       }
       value         = char_get_class_ranks(vict, char_get_class(vict));
-      vict->chclass = chosen_sensei;
+      char_set_class(vict, chosen_sensei);
       break;
     case 40:
       SET_OR_REMOVE(char_get_act(vict), PLR_NOWIZLIST);
@@ -1174,7 +1174,7 @@ static bool perform_set(struct char_data *ch, struct char_data *vict, int mode,
      * division used elsewhere in the code.  Seems to only happen for
      * some values below the starting age (17) anyway. -gg 5/27/98
      */
-      vict->time.birth = time(0) - (value * SECS_PER_MUD_YEAR);
+      char_set_time_birth(vict, time(0) - (value * SECS_PER_MUD_YEAR));
       break;
 
     case 49: /* Blame/Thank Rick Glover. :) */
@@ -1211,7 +1211,7 @@ static bool perform_set(struct char_data *ch, struct char_data *vict, int mode,
         send_to_char(ch, "That is not a valid race for them.\r\n");
         return false;
       }
-      vict->race = chosen_race;
+      char_set_race(vict, chosen_race);
       racial_body_parts(vict);
       break;
 
@@ -1295,19 +1295,19 @@ static bool perform_set(struct char_data *ch, struct char_data *vict, int mode,
       break;
 
     case 64:
-      vict->basepl = value;
+      char_set_basepl(vict, value);
       mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "SET: %s has set basepl for %s.", char_get_name(ch), char_get_name(vict));
       log_imm_action("SET: %s has set basepl for %s.", char_get_name(ch), char_get_name(vict));
       break;
 
     case 65:
-      vict->baseki = value;
+      char_set_baseki(vict, value);
       mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "SET: %s has set baseki for %s.", char_get_name(ch), char_get_name(vict));
       log_imm_action("SET: %s has set baseki for %s.", char_get_name(ch), char_get_name(vict));
       break;
 
     case 66:
-      vict->basest = value;
+      char_set_basest(vict, value);
       mudlog(LOG_NRM, MAX(ADMLVL_GOD, char_get_invis_level(ch)), true, "SET: %s has set basest for %s.", char_get_name(ch), char_get_name(vict));
       log_imm_action("SET: %s has set basest for %s.", char_get_name(ch), char_get_name(vict));
       break;
@@ -1351,7 +1351,7 @@ static bool perform_set(struct char_data *ch, struct char_data *vict, int mode,
       send_to_char(ch, "No.");
       break;
     case 76:
-      if (vict->desc != nullptr) {
+      if (char_get_desc(vict) != nullptr) {
         star_phase(vict, RANGE(0, 2));
       } else {
         send_to_char(ch, "They aren't even in the game!\r\n");
@@ -1437,7 +1437,7 @@ ACMD(do_set)
     /* try to load the player off disk */
     CREATE(cbuf, struct char_data, 1);
     clear_char(cbuf);
-    CREATE(cbuf->player_specials, struct player_special_data, 1);
+    CREATE(*char_player_specials_slot(cbuf), struct player_special_data, 1);
     if ((player_i = load_char(name, cbuf)) > -1) {
       if (char_get_admlevel(cbuf) >= char_get_admlevel(ch)) {
         free_char(cbuf);
@@ -1504,14 +1504,14 @@ ACMD(do_chown)
   else {
     for (i = 0; i < NUM_WEARS; i++) {
       if (char_get_equipment(victim, i) && char_can_see_obj(ch, char_get_equipment(victim, i)) &&
-          isname(buf2, char_get_equipment(victim, i)->name)) {
+          isname(buf2, obj_get_name(char_get_equipment(victim, i)))) {
         obj_to_char(unequip_char(victim, i), victim);
         k = 1;
       }
     }
 
-    if (!(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->carrying))) {
-      if (!k && !(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->carrying))) {
+    if (!(obj = get_obj_in_list_vis(victim, buf2, nullptr, char_get_inventory(victim)))) {
+      if (!k && !(obj = get_obj_in_list_vis(victim, buf2, nullptr, char_get_inventory(victim)))) {
         send_to_char(ch, "%s does not appear to have the %s.\r\n", char_get_name(victim), buf2);
         return;
       }

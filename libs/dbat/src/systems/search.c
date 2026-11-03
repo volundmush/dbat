@@ -1,5 +1,8 @@
 #include "dbat/utils.h"
 #include "dbat/act.informative.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 bool is_name(const char *str, const char *namelist)
 {
@@ -91,7 +94,7 @@ struct obj_data *get_obj_in_list_num(obj_vnum num, struct obj_data *list)
 {
   struct obj_data *i;
 
-  for (i = list; i; i = i->next_content)
+  for (i = list; i; i = obj_get_next_content(i))
     if (obj_get_item_number(i) == num)
       return (i);
 
@@ -103,7 +106,7 @@ struct obj_data *get_obj_num(obj_rnum nr)
 {
   struct obj_data *i;
 
-  for (i = object_list; i; i = i->next)
+  for (i = object_list; i; i = obj_get_next(i))
     if (obj_get_item_number(i) == nr)
       return (i);
 
@@ -124,8 +127,8 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room)
   if (*number == 0)
     return (nullptr);
 
-  for (i = world[room].people; i && *number; i = i->next_in_room)
-    if (isname(name, i->name))
+  for (i = rroom_get_people(room); i && *number; i = char_get_next_in_room(i))
+    if (isname(name, char_get_alias(i)))
       if (--(*number) == 0)
         return (i);
 
@@ -137,7 +140,7 @@ struct char_data *get_char_num(mob_rnum nr)
 {
   struct char_data *i;
 
-  for (i = character_list; i; i = i->next)
+  for (i = character_list; i; i = char_get_next(i))
     if (char_get_nr(i) == nr)
       return (i);
 
@@ -154,7 +157,7 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
     num    = get_number(&name);
   }
 
-  for (i = character_list; i; i = i->next) {
+  for (i = character_list; i; i = char_get_next(i)) {
     if (char_is_npc(i))
       continue;
     if (inroom == FIND_CHAR_ROOM && char_get_in_room(i) != char_get_in_room(ch))
@@ -171,7 +174,7 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
       }
     }
     if ((char_get_admlevel(ch) >= 1 || char_get_admlevel(i) >= 1 || char_is_npc(ch) || char_is_npc(i))) {
-      if (strcasecmp(i->name, name) && !strstr(i->name, name)) {
+      if (strcasecmp(char_get_alias(i), name) && !strstr(char_get_alias(i), name)) {
         if (strcasecmp(juggleRaceName(i, true), name) && !strstr(juggleRaceName(i, true), name)) {
           if (!char_is_npc(ch) && !char_is_npc(i) && readIntro(ch, i) == 1) {
             if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
@@ -211,16 +214,16 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
   if (*number == 0)
     return (get_player_vis(ch, name, nullptr, FIND_CHAR_ROOM));
 
-  for (i = world[char_get_in_room(ch)].people; i && *number; i = i->next_in_room) {
+  for (i = rroom_get_people(char_get_in_room(ch)); i && *number; i = char_get_next_in_room(i)) {
     if (!strcasecmp(name, "last") && char_get_lasthit(i) != 0 && char_get_lasthit(i) == char_get_idnum(ch)) {
       if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
-    } else if (isname(name, i->name) && (char_is_npc(i) || char_is_npc(ch) || char_get_admlevel(i) > 0 || char_get_admlevel(ch) > 0) && i != ch) {
+    } else if (isname(name, char_get_alias(i)) && (char_is_npc(i) || char_is_npc(ch) || char_get_admlevel(i) > 0 || char_get_admlevel(ch) > 0) && i != ch) {
       if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
-    } else if (isname(name, i->name) && i == ch) {
+    } else if (isname(name, char_get_alias(i)) && i == ch) {
       if (char_can_see(ch, i))
         if (--(*number) == 0)
           return (i);
@@ -269,7 +272,7 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
   if (*number == 0)
     return get_player_vis(ch, name, nullptr, 0);
 
-  for (i = character_list; i && *number; i = i->next) {
+  for (i = character_list; i && *number; i = char_get_next(i)) {
     if (char_get_in_room(ch) == char_get_in_room(i))
       continue;
     if (char_get_admlevel(ch) < 1 && char_get_admlevel(i) < 1 && !char_is_npc(ch) && !char_is_npc(i)) {
@@ -284,7 +287,7 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
       }
     }
     if ((char_get_admlevel(ch) >= 1 || char_get_admlevel(i) >= 1 || char_is_npc(ch) || char_is_npc(i))) {
-      if (strcasecmp(i->name, name) && !strstr(i->name, name)) {
+      if (strcasecmp(char_get_alias(i), name) && !strstr(char_get_alias(i), name)) {
         if (strcasecmp(juggleRaceName(i, true), name) && !strstr(juggleRaceName(i, true), name)) {
           if (!char_is_npc(ch) && !char_is_npc(i) && readIntro(ch, i) == 1) {
             if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
@@ -329,8 +332,8 @@ struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *numb
   if (*number == 0)
     return (nullptr);
 
-  for (i = list; i && *number; i = i->next_content)
-    if (isname(name, i->name))
+  for (i = list; i && *number; i = obj_get_next_content(i))
+    if (isname(name, obj_get_name(i)))
       if (char_can_see_obj(ch, i) || (obj_get_type_flag(i) == ITEM_LIGHT))
         if (--(*number) == 0)
           return (i);
@@ -353,16 +356,16 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number)
     return (nullptr);
 
   /* scan items carried */
-  if ((i = get_obj_in_list_vis(ch, name, number, ch->carrying)) != nullptr)
+  if ((i = get_obj_in_list_vis(ch, name, number, char_get_inventory(ch))) != nullptr)
     return (i);
 
   /* scan room */
-  if ((i = get_obj_in_list_vis(ch, name, number, world[char_get_in_room(ch)].contents)) != nullptr)
+  if ((i = get_obj_in_list_vis(ch, name, number, rroom_get_contents(char_get_in_room(ch)))) != nullptr)
     return (i);
 
   /* ok.. no luck yet. scan the entire obj list   */
-  for (i = object_list; i && *number; i = i->next)
-    if (isname(name, i->name))
+  for (i = object_list; i && *number; i = obj_get_next(i))
+    if (isname(name, obj_get_name(i)))
       if (char_can_see_obj(ch, i))
         if (--(*number) == 0)
           return (i);
@@ -383,7 +386,7 @@ struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *numb
     return (nullptr);
 
   for (j = 0; j < NUM_WEARS; j++)
-    if (equipment[j] && char_can_see_obj(ch, equipment[j]) && isname(arg, equipment[j]->name))
+    if (equipment[j] && char_can_see_obj(ch, equipment[j]) && isname(arg, obj_get_name(equipment[j])))
       if (--(*number) == 0)
         return (equipment[j]);
 
@@ -403,7 +406,7 @@ int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *number, struc
     return (-1);
 
   for (j = 0; j < NUM_WEARS; j++)
-    if (equipment[j] && char_can_see_obj(ch, equipment[j]) && isname(arg, equipment[j]->name))
+    if (equipment[j] && char_can_see_obj(ch, equipment[j]) && isname(arg, obj_get_name(equipment[j])))
       if (--(*number) == 0)
         return (j);
 
@@ -470,7 +473,7 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
 
   if (IS_SET(bitvector, FIND_OBJ_EQUIP)) {
     for (found = false, i = 0; i < NUM_WEARS && !found; i++)
-      if (char_get_equipment(ch, i) && isname(name, char_get_equipment(ch, i)->name) && --number == 0) {
+      if (char_get_equipment(ch, i) && isname(name, obj_get_name(char_get_equipment(ch, i))) && --number == 0) {
         *tar_obj = char_get_equipment(ch, i);
         found    = true;
       }
@@ -479,12 +482,12 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
   }
 
   if (IS_SET(bitvector, FIND_OBJ_INV)) {
-    if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->carrying)) != nullptr)
+    if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, char_get_inventory(ch))) != nullptr)
       return (FIND_OBJ_INV);
   }
 
   if (IS_SET(bitvector, FIND_OBJ_ROOM)) {
-    if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, world[char_get_in_room(ch)].contents)) != nullptr)
+    if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, rroom_get_contents(char_get_in_room(ch)))) != nullptr)
       return (FIND_OBJ_ROOM);
   }
 

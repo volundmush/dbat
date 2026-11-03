@@ -105,8 +105,8 @@ ACMD(do_lightgrenade)
 
   dmg = damtype(ch, 57, skill, attperc);
 
-  for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-    next_v = vict->next_in_room;
+  for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+    next_v = char_get_next_in_room(vict);
     if (vict == ch) {
       continue;
     }
@@ -114,7 +114,7 @@ ACMD(do_lightgrenade)
       continue;
     }
     if (char_aff_flagged(vict, AFF_GROUP)) {
-      if (vict->master == ch || ch->master == vict || ch->master == vict->master) {
+      if (char_get_master(vict) == ch || char_get_master(ch) == vict || char_get_master(ch) == char_get_master(vict)) {
         if (vict == targ) {
           send_to_char(ch, "Leave the group if you want to murder them.\r\n");
         }
@@ -250,7 +250,7 @@ ACMD(do_breath)
   if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
       vict = char_get_fighting(ch);
-    } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
+    } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, rroom_get_contents(char_get_in_room(ch))))) {
       return;
     }
   }
@@ -447,7 +447,7 @@ ACMD(do_ram)
   if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
       vict = char_get_fighting(ch);
-    } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
+    } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, rroom_get_contents(char_get_in_room(ch))))) {
       return;
     }
   }
@@ -623,7 +623,7 @@ ACMD(do_strike)
   if (!*arg || !(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
     if (char_get_fighting(ch) && char_get_in_room(char_get_fighting(ch)) == char_get_in_room(ch)) {
       vict = char_get_fighting(ch);
-    } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
+    } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, rroom_get_contents(char_get_in_room(ch))))) {
       return;
     }
   }
@@ -794,26 +794,26 @@ ACMD(do_combine)
     send_to_char(ch, "You need to be in a group!\r\n");
     return;
   }
-  if (!*arg || (!ch->master && !*arg2)) {
+  if (!*arg || (!char_get_master(ch) && !*arg2)) {
     send_to_char(ch, "Follower Syntax: combine (attack)\r\n");
     send_to_char(ch, "Leader Syntax: combine (attack) (target)\r\n");
     send_to_char(ch, "Cancel Syntax: combine stop\r\n");
   } else {
-    if (!strcasecmp(arg, "stop") && ch->master) {
+    if (!strcasecmp(arg, "stop") && char_get_master(ch)) {
       if (char_get_combine(ch) == -1) {
         send_to_char(ch, "You are not trying to combine any attacks...\r\n");
         return;
       }
       send_to_char(ch, "You stop your preparations to combine your attack with a group attack.\r\n");
-      send_to_char(ch->master, "@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n", get_i_name(ch->master, ch));
-      for (f = ch->master->followers; f; f = f->next) {
+      send_to_char(char_get_master(ch), "@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n", get_i_name(char_get_master(ch), ch));
+      for (f = char_get_followers(char_get_master(ch)); f; f = f->next) {
         if (ch != f->follower)
           send_to_char(f->follower, "@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n", get_i_name(f->follower, ch));
       }
       char_set_combine(ch, -1);
       return;
     }
-    if (!strcasecmp(arg, "stop") && !ch->master) {
+    if (!strcasecmp(arg, "stop") && !char_get_master(ch)) {
       send_to_char(ch, "You do not need to stop as you haven't prepared anything.\r\n");
       return;
     }
@@ -853,7 +853,7 @@ ACMD(do_combine)
     if (char_get_charge(ch) < getMaxKI(ch) * 0.05) {
       send_to_char(ch, "You need to have the minimum of 5%s ki charged to combine.\r\n", "%");
     }
-    if (!ch->master) {
+    if (!char_get_master(ch)) {
       if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
         send_to_char(ch, "Who will your combined attack be targeting?\r\n");
         return;
@@ -863,7 +863,7 @@ ACMD(do_combine)
         return;
       }
       char_set_combine(ch, temp);
-      for (f = ch->followers; f; f = f->next) {
+      for (f = char_get_followers(ch); f; f = f->next) {
         if (!char_aff_flagged(f->follower, AFF_GROUP)) {
           continue;
         }
@@ -878,11 +878,11 @@ ACMD(do_combine)
       send_to_char(ch, "You do not have any followers who have readied an attack to combine or they do not have enough ki anymore to combine said attack.\r\n");
       return;
     }
-    if (ch->master) {
+    if (char_get_master(ch)) {
       if (char_get_charge(ch) >= getMaxKI(ch) * 0.05) {
         act("@C$n@c appears to be concentrating hard and focusing $s energy!@n\r\n", true, ch, 0, 0, TO_ROOM);
-        send_to_char(ch->master, "@BCOMBINE@c: @Y%s@C has prepared to combine a @c'@G%s@c'@C with the next group attack!@n\r\n", get_i_name(ch->master, ch), attack_names[temp]);
-        for (f = ch->master->followers; f; f = f->next) {
+        send_to_char(char_get_master(ch), "@BCOMBINE@c: @Y%s@C has prepared to combine a @c'@G%s@c'@C with the next group attack!@n\r\n", get_i_name(char_get_master(ch), ch), attack_names[temp]);
+        for (f = char_get_followers(char_get_master(ch)); f; f = f->next) {
           if (ch != f->follower)
             send_to_char(f->follower, "@BCOMBINE@c: @Y%s@C has prepared to combine a @c'@G%s@c'@C with the next group attack!@n\r\n", get_i_name(f->follower, ch), attack_names[temp]);
         }
@@ -1708,15 +1708,15 @@ ACMD(do_nova)
     skill += 5;
   }
 
-  for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-    next_v = vict->next_in_room;
+  for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+    next_v = char_get_next_in_room(vict);
     if (vict == ch) {
       continue;
     }
     if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
       continue;
     }
-    if (char_aff_flagged(vict, AFF_GROUP) && (vict->master == ch || ch->master == vict)) {
+    if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(vict) == ch || char_get_master(ch) == vict)) {
       continue;
     }
     if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
@@ -1761,15 +1761,15 @@ ACMD(do_nova)
       dmg *= 1.4;
     }
 
-    for (vict = world[char_get_in_room(ch)].people; vict; vict = next_v) {
-      next_v = vict->next_in_room;
+    for (vict = rroom_get_people(char_get_in_room(ch)); vict; vict = next_v) {
+      next_v = char_get_next_in_room(vict);
       if (vict == ch) {
         continue;
       }
       if (char_aff_flagged(vict, AFF_SPIRIT) && !char_is_npc(vict)) {
         continue;
       }
-      if (char_aff_flagged(vict, AFF_GROUP) && (vict->master == ch || ch->master == vict)) {
+      if (char_aff_flagged(vict, AFF_GROUP) && (char_get_master(vict) == ch || char_get_master(ch) == vict)) {
         continue;
       }
       if (char_get_level(vict) <= 8 && !char_is_npc(vict)) {
@@ -2430,7 +2430,7 @@ ACMD(do_throw)
   int odam = 0, miss = true, perc = 0, prob = 0, perc2 = 0, grab = false;
   int64_t damage;
 
-  ch->throws = rand_number(1, 3); /* (set by the interpreter before, for any "throw") */
+  char_set_throws(ch, rand_number(1, 3)); /* (set by the interpreter before, for any "throw") */
   half_chop(argument, arg, chunk);
 
   if (!*arg) {
@@ -2447,7 +2447,7 @@ ACMD(do_throw)
     two_arguments(chunk, arg2, arg3);
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch)))) {
     if (!(tch = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
       send_to_char(ch, "You do not have that object or character to throw!\r\n");
       return;
@@ -2478,8 +2478,8 @@ ACMD(do_throw)
 
   /* We are throwing an object. */
   if (obj) {
-    if (ch->throws == -1) {
-      ch->throws = 0;
+    if (char_get_throws(ch) == -1) {
+      char_set_throws(ch, 0);
       return;
     }
 
@@ -2642,14 +2642,14 @@ ACMD(do_throw)
       decCurST(ch, ((getEffMaxPL(ch) / 200) + obj_get_weight(obj)), 0);
       if (!char_get_equipment(ch, WEAR_WIELD1) && !char_get_equipment(ch, WEAR_WIELD2))
         perc += 20;
-      if (perc + char_get_aff_abils_cha(ch) >= chance + penalty && multithrow == true && getCurPL(vict) > 1 && ch->throws > 1) {
+      if (perc + char_get_aff_abils_cha(ch) >= chance + penalty && multithrow == true && getCurPL(vict) > 1 && char_get_throws(ch) > 1) {
         do_throw(ch, argument, 0, 0);
-        ch->throws -= 1;
-      } else if (perc + char_get_aff_abils_cha(ch) >= chance + penalty && multithrow == true && getCurPL(vict) > 1 && ch->throws == 1) {
+        char_set_throws(ch, char_get_throws(ch) - 1);
+      } else if (perc + char_get_aff_abils_cha(ch) >= chance + penalty && multithrow == true && getCurPL(vict) > 1 && char_get_throws(ch) == 1) {
         do_throw(ch, argument, 0, 0);
-        ch->throws = -1;
+        char_set_throws(ch, -1);
       } else {
-        ch->throws = 0;
+        char_set_throws(ch, 0);
       }
       char_set_wait(ch, PULSE_3SEC);
       return;
@@ -2744,14 +2744,14 @@ ACMD(do_throw)
     decCurST(ch, ((getEffMaxPL(ch) / 200) + obj_get_weight(obj)), 0);
     if (!char_get_equipment(ch, WEAR_WIELD1) && !char_get_equipment(ch, WEAR_WIELD2))
       perc += 12;
-    if (perc + char_get_aff_abils_cha(ch) >= chance + penalty && multithrow == true && getCurPL(vict) > 1 && ch->throws > 1) {
+    if (perc + char_get_aff_abils_cha(ch) >= chance + penalty && multithrow == true && getCurPL(vict) > 1 && char_get_throws(ch) > 1) {
       do_throw(ch, argument, 0, 0);
-      ch->throws -= 1;
-    } else if (perc + char_get_aff_abils_cha(ch) >= chance + penalty && multithrow == true && getCurPL(vict) > 1 && ch->throws == 1) {
+      char_set_throws(ch, char_get_throws(ch) - 1);
+    } else if (perc + char_get_aff_abils_cha(ch) >= chance + penalty && multithrow == true && getCurPL(vict) > 1 && char_get_throws(ch) == 1) {
       do_throw(ch, argument, 0, 0);
-      ch->throws = -1;
+      char_set_throws(ch, -1);
     } else {
-      ch->throws = 0;
+      char_set_throws(ch, 0);
     }
     char_set_wait(ch, PULSE_3SEC);
     return;
@@ -2931,7 +2931,7 @@ ACMD(do_selfd)
     if ((char_is_majin(ch) || char_is_bio(ch)) && getCurLFPercent(ch) > 0.5) {
       decCurLFPercent(ch, 2, -1);
       char_plr_set(ch, PLR_GOOP, true);
-      ch->gooptime = 70;
+      char_set_gooptime(ch, 70);
     } else {
       die(ch, nullptr);
     }
@@ -2953,8 +2953,8 @@ ACMD(do_selfd)
   char_set_suppression(ch, 0);
   act("@RYou EXPLODE! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with you at its center!@n", true, ch, 0, 0, TO_CHAR);
   act("@R$n EXPLODES! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with $n at its center!@n", true, ch, 0, 0, TO_ROOM);
-  for (tch = world[char_get_in_room(ch)].people; tch; tch = next_v) {
-    next_v = tch->next_in_room;
+  for (tch = rroom_get_people(char_get_in_room(ch)); tch; tch = next_v) {
+    next_v = char_get_next_in_room(tch);
     if (tch == ch) {
       continue;
     }

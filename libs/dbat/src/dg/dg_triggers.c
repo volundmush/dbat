@@ -23,6 +23,9 @@
 #include "dbat/spell_parser.h"
 #include "dbat/act.movement.h"
 #include "dbat/spells.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 /*
  *  General functions used by several triggers
@@ -131,10 +134,10 @@ void random_mtrigger(char_data *ch)
    * This trigger is only called if a char is in the zone without nohassle.
    */
 
-  if (!script_has_type(ch->script, MTRIG_RANDOM) || char_aff_flagged(ch, AFF_CHARM))
+  if (!script_has_type(char_get_script(ch), MTRIG_RANDOM) || char_aff_flagged(ch, AFF_CHARM))
     return;
 
-  for (t = ch->script->trig_list; t; t = t->next) {
+  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_RANDOM) &&
         (rand_number(1, 100) <= t->narg)) {
       script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
@@ -148,10 +151,10 @@ void bribe_mtrigger(char_data *ch, char_data *actor, int amount)
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
 
-  if (!script_has_type(ch->script, MTRIG_BRIBE) || char_aff_flagged(ch, AFF_CHARM))
+  if (!script_has_type(char_get_script(ch), MTRIG_BRIBE) || char_aff_flagged(ch, AFF_CHARM))
     return;
 
-  for (t = ch->script->trig_list; t; t = t->next) {
+  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_BRIBE) && (amount >= t->narg)) {
       snprintf(buf, sizeof(buf), "%d", amount);
       add_var(&t->var_list, "amount", buf, 0);
@@ -172,12 +175,12 @@ void greet_memory_mtrigger(char_data *actor)
   if (!valid_dg_target(actor, DG_ALLOW_GODS))
     return;
 
-  for (ch = world[char_get_in_room(actor)].people; ch; ch = ch->next_in_room) {
-    if (!ch->memory || !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
+  for (ch = rroom_get_people(char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
+    if (!char_get_memory(ch) || !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
       continue;
     /* find memory line with command only */
-    for (mem = ch->memory; mem && ch->memory; mem = mem->next) {
+    for (mem = char_get_memory(ch); mem && char_get_memory(ch); mem = mem->next) {
       if (char_get_id(actor) != mem->id) continue;
       if (mem->cmd) {
         command_interpreter(ch, mem->cmd); /* no script */
@@ -186,7 +189,7 @@ void greet_memory_mtrigger(char_data *actor)
       }
       /* if a command was not performed execute the memory script */
       if (mem && !command_performed) {
-        for (t = ch->script->trig_list; t; t = t->next) {
+        for (t = char_get_script(ch)->trig_list; t; t = t->next) {
           if (IS_SET(t->trigger_type, MTRIG_MEMORY) &&
               char_can_see(ch, actor) &&
               !t->depth &&
@@ -199,11 +202,11 @@ void greet_memory_mtrigger(char_data *actor)
       }
       /* delete the memory */
       if (mem) {
-        if (ch->memory == mem) {
-          ch->memory = mem->next;
+        if (char_get_memory(ch) == mem) {
+          char_set_memory(ch, mem->next);
         } else {
           struct script_memory *prev;
-          prev = ch->memory;
+          prev = char_get_memory(ch);
           while (prev->next != mem) prev = prev->next;
           prev->next = mem->next;
         }
@@ -223,15 +226,15 @@ bool greet_mtrigger(char_data *actor, int dir)
   if (!valid_dg_target(actor, DG_ALLOW_GODS))
     return true;
 
-  for (ch = world[char_get_in_room(actor)].people; ch; ch = ch->next_in_room) {
-    if (!script_has_type(ch->script, MTRIG_GREET | MTRIG_GREET_ALL) ||
+  for (ch = rroom_get_people(char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
+    if (!script_has_type(char_get_script(ch), MTRIG_GREET | MTRIG_GREET_ALL) ||
         !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
       continue;
-    if (!script_has_type(ch->script, MTRIG_GREET_ALL) && char_is_npc(actor))
+    if (!script_has_type(char_get_script(ch), MTRIG_GREET_ALL) && char_is_npc(actor))
       continue;
 
-    for (t = ch->script->trig_list; t; t = t->next) {
+    for (t = char_get_script(ch)->trig_list; t; t = t->next) {
       if (((IS_SET(t->trigger_type, MTRIG_GREET) && char_can_see(ch, actor)) ||
            IS_SET(t->trigger_type, MTRIG_GREET_ALL)) &&
           !t->depth && (rand_number(1, 100) <= t->narg)) {
@@ -255,25 +258,25 @@ void entry_memory_mtrigger(char_data *ch)
   char_data *actor;
   struct script_memory *mem, *next_mem;
 
-  if (!ch->memory || char_aff_flagged(ch, AFF_CHARM))
+  if (!char_get_memory(ch) || char_aff_flagged(ch, AFF_CHARM))
     return;
 
-  for (actor = world[char_get_in_room(ch)].people; actor && ch->memory;
-       actor = actor->next_in_room) {
-    if (actor != ch && ch->memory) {
-      for (mem = ch->memory; mem; mem = next_mem) {
+  for (actor = rroom_get_people(char_get_in_room(ch)); actor && char_get_memory(ch);
+       actor = char_get_next_in_room(actor)) {
+    if (actor != ch && char_get_memory(ch)) {
+      for (mem = char_get_memory(ch); mem; mem = next_mem) {
         next_mem = mem->next;
         if (char_get_id(actor) != mem->id)
           continue;
 
         /* unlink it first: the command or trigger below may change ch->memory (mforget) or purge ch */
-        struct script_memory **link = &ch->memory;
+        struct script_memory **link = char_memory_slot(ch);
         while (*link != mem) link = &(*link)->next;
         *link = mem->next;
 
         if (mem->cmd) command_interpreter(ch, mem->cmd);
         else {
-          for (t = ch->script->trig_list; t; t = t->next) {
+          for (t = char_get_script(ch)->trig_list; t; t = t->next) {
             if (trigger_ready(t, MTRIG_MEMORY) && (rand_number(1, 100) <=
                                                    t->narg)) {
               add_char_uid_var(t, "actor", actor, 0);
@@ -284,11 +287,11 @@ void entry_memory_mtrigger(char_data *ch)
         }
         free(mem->cmd);
         free(mem);
-        if (!ch || !ch->memory)
+        if (!ch || !char_get_memory(ch))
           return;
 
         /* carry on only if the next memory survived */
-        struct script_memory *p = ch->memory;
+        struct script_memory *p = char_get_memory(ch);
         while (p && p != next_mem) p = p->next;
         next_mem = p;
       } /* for (mem =..... */
@@ -300,10 +303,10 @@ int entry_mtrigger(char_data *ch)
 {
   trig_data *t;
 
-  if (!script_has_type(ch->script, MTRIG_ENTRY) || char_aff_flagged(ch, AFF_CHARM))
+  if (!script_has_type(char_get_script(ch), MTRIG_ENTRY) || char_aff_flagged(ch, AFF_CHARM))
     return 1;
 
-  for (t = ch->script->trig_list; t; t = t->next) {
+  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_ENTRY) && (rand_number(1, 100) <= t->narg)) {
       return script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
       break;
@@ -322,12 +325,12 @@ bool command_mtrigger(char_data *actor, char *cmd, char *argument)
   if (!valid_dg_target(actor, 0))
     return false;
 
-  for (ch = world[char_get_in_room(actor)].people; ch; ch = ch_next) {
-    ch_next = ch->next_in_room;
+  for (ch = rroom_get_people(char_get_in_room(actor)); ch; ch = ch_next) {
+    ch_next = char_get_next_in_room(ch);
 
-    if (script_has_type(ch->script, MTRIG_COMMAND) && !char_aff_flagged(ch, AFF_CHARM) &&
+    if (script_has_type(char_get_script(ch), MTRIG_COMMAND) && !char_aff_flagged(ch, AFF_CHARM) &&
         (actor != ch)) {
-      for (t = ch->script->trig_list; t; t = t->next) {
+      for (t = char_get_script(ch)->trig_list; t; t = t->next) {
         if (!trigger_ready(t, MTRIG_COMMAND))
           continue;
 
@@ -360,12 +363,12 @@ void speech_mtrigger(char_data *actor, char *str)
   char_data *ch, *ch_next;
   trig_data *t;
 
-  for (ch = world[char_get_in_room(actor)].people; ch; ch = ch_next) {
-    ch_next = ch->next_in_room;
+  for (ch = rroom_get_people(char_get_in_room(actor)); ch; ch = ch_next) {
+    ch_next = char_get_next_in_room(ch);
 
-    if (script_has_type(ch->script, MTRIG_SPEECH) && char_is_awake(ch) &&
+    if (script_has_type(char_get_script(ch), MTRIG_SPEECH) && char_is_awake(ch) &&
         !char_aff_flagged(ch, AFF_CHARM) && (actor != ch))
-      for (t = ch->script->trig_list; t; t = t->next) {
+      for (t = char_get_script(ch)->trig_list; t; t = t->next) {
         if (!trigger_ready(t, MTRIG_SPEECH))
           continue;
 
@@ -390,9 +393,9 @@ void act_mtrigger(const char_data *ch, char *str, char_data *actor, const char_d
 {
   trig_data *t;
 
-  if (script_has_type(ch->script, MTRIG_ACT) && !char_aff_flagged(ch, AFF_CHARM) &&
+  if (script_has_type(char_get_script(ch), MTRIG_ACT) && !char_aff_flagged(ch, AFF_CHARM) &&
       (actor != ch))
-    for (t = ch->script->trig_list; t; t = t->next) {
+    for (t = char_get_script(ch)->trig_list; t; t = t->next) {
       if (!trigger_ready(t, MTRIG_ACT))
         continue;
 
@@ -431,11 +434,11 @@ void fight_mtrigger(char_data *ch)
   struct char_data *actor;
   trig_data *t;
 
-  if (!script_has_type(ch->script, MTRIG_FIGHT) || !char_get_fighting(ch) ||
+  if (!script_has_type(char_get_script(ch), MTRIG_FIGHT) || !char_get_fighting(ch) ||
       char_aff_flagged(ch, AFF_CHARM))
     return;
 
-  for (t = ch->script->trig_list; t; t = t->next) {
+  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_FIGHT) &&
         (rand_number(1, 100) <= t->narg)) {
       actor = char_get_fighting(ch);
@@ -455,11 +458,11 @@ void hitprcnt_mtrigger(char_data *ch)
   struct char_data *actor;
   trig_data *t;
 
-  if (!script_has_type(ch->script, MTRIG_HITPRCNT) || !char_get_fighting(ch) ||
+  if (!script_has_type(char_get_script(ch), MTRIG_HITPRCNT) || !char_get_fighting(ch) ||
       char_aff_flagged(ch, AFF_CHARM))
     return;
 
-  for (t = ch->script->trig_list; t; t = t->next) {
+  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_HITPRCNT) && getEffMaxPL(ch) &&
         (getCurPL(ch) <= (getEffMaxPL(ch) / 100) * t->narg)) {
 
@@ -476,17 +479,17 @@ int receive_mtrigger(char_data *ch, char_data *actor, obj_data *obj)
   trig_data *t;
   int ret_val;
 
-  if (!script_has_type(ch->script, MTRIG_RECEIVE) || char_aff_flagged(ch, AFF_CHARM))
+  if (!script_has_type(char_get_script(ch), MTRIG_RECEIVE) || char_aff_flagged(ch, AFF_CHARM))
     return 1;
 
-  for (t = ch->script->trig_list; t; t = t->next) {
+  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_RECEIVE) &&
         (rand_number(1, 100) <= t->narg)) {
 
       add_char_uid_var(t, "actor", actor, 0);
       add_obj_uid_var(t, "object", obj, 0);
       ret_val = script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
-      if (char_is_dead(actor) || char_is_dead(ch) || obj->carried_by != actor)
+      if (char_is_dead(actor) || char_is_dead(ch) || obj_get_carried_by(obj) != actor)
         return 0;
       else
         return ret_val;
@@ -500,10 +503,10 @@ int death_mtrigger(char_data *ch, char_data *actor)
 {
   trig_data *t;
 
-  if (!script_has_type(ch->script, MTRIG_DEATH) || char_aff_flagged(ch, AFF_CHARM))
+  if (!script_has_type(char_get_script(ch), MTRIG_DEATH) || char_aff_flagged(ch, AFF_CHARM))
     return 1;
 
-  for (t = ch->script->trig_list; t; t = t->next) {
+  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_DEATH) &&
         (rand_number(1, 100) <= t->narg)) {
       if (actor)
@@ -520,10 +523,10 @@ void load_mtrigger(char_data *ch)
   trig_data *t;
   int result = 0;
 
-  if (!script_has_type(ch->script, MTRIG_LOAD))
+  if (!script_has_type(char_get_script(ch), MTRIG_LOAD))
     return;
 
-  for (t = ch->script->trig_list; t; t = t->next) {
+  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_LOAD) &&
         (rand_number(1, 100) <= t->narg)) {
       result = script_driver(&ch, t, MOB_TRIGGER, TRIG_NEW);
@@ -547,10 +550,10 @@ int cast_mtrigger(char_data *actor, char_data *ch, int spellnum)
   if (ch == nullptr)
     return 1;
 
-  if (!script_has_type(ch->script, MTRIG_CAST) || char_aff_flagged(ch, AFF_CHARM))
+  if (!script_has_type(char_get_script(ch), MTRIG_CAST) || char_aff_flagged(ch, AFF_CHARM))
     return 1;
 
-  for (t = ch->script->trig_list; t; t = t->next) {
+  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_CAST) &&
         (rand_number(1, 100) <= t->narg)) {
       add_char_uid_var(t, "actor", actor, 0);
@@ -572,13 +575,13 @@ int leave_mtrigger(char_data *actor, int dir)
   if (!valid_dg_target(actor, DG_ALLOW_GODS))
     return 1;
 
-  for (ch = world[char_get_in_room(actor)].people; ch; ch = ch->next_in_room) {
-    if (!script_has_type(ch->script, MTRIG_LEAVE) ||
+  for (ch = rroom_get_people(char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
+    if (!script_has_type(char_get_script(ch), MTRIG_LEAVE) ||
         !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
       continue;
 
-    for (t = ch->script->trig_list; t; t = t->next) {
+    for (t = char_get_script(ch)->trig_list; t; t = t->next) {
       if ((IS_SET(t->trigger_type, MTRIG_LEAVE)) &&
           !t->depth && (rand_number(1, 100) <= t->narg)) {
         if (dir >= 0 && dir < NUM_OF_DIRS)
@@ -598,13 +601,13 @@ int door_mtrigger(char_data *actor, int subcmd, int dir)
   trig_data *t;
   char_data *ch;
 
-  for (ch = world[char_get_in_room(actor)].people; ch; ch = ch->next_in_room) {
-    if (!script_has_type(ch->script, MTRIG_DOOR) ||
+  for (ch = rroom_get_people(char_get_in_room(actor)); ch; ch = char_get_next_in_room(ch)) {
+    if (!script_has_type(char_get_script(ch), MTRIG_DOOR) ||
         !char_is_awake(ch) || char_get_fighting(ch) || (ch == actor) ||
         char_aff_flagged(ch, AFF_CHARM))
       continue;
 
-    for (t = ch->script->trig_list; t; t = t->next) {
+    for (t = char_get_script(ch)->trig_list; t; t = t->next) {
       if (IS_SET(t->trigger_type, MTRIG_DOOR) && char_can_see(ch, actor) &&
           !t->depth && (rand_number(1, 100) <= t->narg)) {
         add_var(&t->var_list, "cmd", (const char *)cmd_door[subcmd], 0);
@@ -629,10 +632,10 @@ void time_mtrigger(char_data *ch)
    * This trigger is called if the hour is the same as specified in Narg.
    */
 
-  if (!script_has_type(ch->script, MTRIG_TIME) || char_aff_flagged(ch, AFF_CHARM))
+  if (!script_has_type(char_get_script(ch), MTRIG_TIME) || char_aff_flagged(ch, AFF_CHARM))
     return;
 
-  for (t = ch->script->trig_list; t; t = t->next) {
+  for (t = char_get_script(ch)->trig_list; t; t = t->next) {
     if (trigger_ready(t, MTRIG_TIME) &&
         (time_info.hours == t->narg)) {
       sprintf(buf, "%d", time_info.hours);
@@ -651,10 +654,10 @@ void random_otrigger(obj_data *obj)
 {
   trig_data *t;
 
-  if (!script_has_type(obj->script, OTRIG_RANDOM))
+  if (!script_has_type(obj_get_script(obj), OTRIG_RANDOM))
     return;
 
-  for (t = obj->script->trig_list; t; t = t->next) {
+  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_RANDOM) &&
         (rand_number(1, 100) <= t->narg)) {
       script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
@@ -667,10 +670,10 @@ void timer_otrigger(struct obj_data *obj)
 {
   trig_data *t;
 
-  if (!script_has_type(obj->script, OTRIG_TIMER))
+  if (!script_has_type(obj_get_script(obj), OTRIG_TIMER))
     return;
 
-  for (t = obj->script->trig_list; t; t = t->next) {
+  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_TIMER)) {
       script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
     }
@@ -683,10 +686,10 @@ int get_otrigger(obj_data *obj, char_data *actor)
 {
   trig_data *t;
   int ret_val;
-  if (!script_has_type(obj->script, OTRIG_GET))
+  if (!script_has_type(obj_get_script(obj), OTRIG_GET))
     return 1;
 
-  for (t = obj->script->trig_list; t; t = t->next) {
+  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_GET) && (rand_number(1, 100) <= t->narg)) {
       add_char_uid_var(t, "actor", actor, 0);
       ret_val = script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
@@ -710,8 +713,8 @@ static bool cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
 {
   trig_data *t;
 
-  if (obj && script_has_type(obj->script, OTRIG_COMMAND))
-    for (t = obj->script->trig_list; t; t = t->next) {
+  if (obj && script_has_type(obj_get_script(obj), OTRIG_COMMAND))
+    for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
       if (!trigger_ready(t, OTRIG_COMMAND))
         continue;
 
@@ -754,11 +757,11 @@ bool command_otrigger(char_data *actor, char *cmd, char *argument)
       if (cmd_otrig(char_get_equipment(actor, i), actor, cmd, argument, OCMD_EQUIP) && !obj_extra_flagged(char_get_equipment(actor, i), ITEM_FORGED))
         return true;
 
-  for (obj = actor->carrying; obj; obj = obj->next_content)
+  for (obj = char_get_inventory(actor); obj; obj = obj_get_next_content(obj))
     if (cmd_otrig(obj, actor, cmd, argument, OCMD_INVEN) && !obj_extra_flagged(obj, ITEM_FORGED))
       return true;
 
-  for (obj = world[char_get_in_room(actor)].contents; obj; obj = obj->next_content)
+  for (obj = rroom_get_contents(char_get_in_room(actor)); obj; obj = obj_get_next_content(obj))
     if (cmd_otrig(obj, actor, cmd, argument, OCMD_ROOM) && !obj_extra_flagged(obj, ITEM_FORGED))
       return true;
 
@@ -770,10 +773,10 @@ int wear_otrigger(obj_data *obj, char_data *actor, int where)
   trig_data *t;
   int ret_val;
 
-  if (!script_has_type(obj->script, OTRIG_WEAR))
+  if (!script_has_type(obj_get_script(obj), OTRIG_WEAR))
     return 1;
 
-  for (t = obj->script->trig_list; t; t = t->next) {
+  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_WEAR)) {
       add_char_uid_var(t, "actor", actor, 0);
       ret_val = script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
@@ -795,13 +798,13 @@ int remove_otrigger(obj_data *obj, char_data *actor)
   trig_data *t;
   int ret_val;
 
-  if (!script_has_type(obj->script, OTRIG_REMOVE))
+  if (!script_has_type(obj_get_script(obj), OTRIG_REMOVE))
     return 1;
 
   if (!valid_dg_target(actor, 0))
     return 1;
 
-  for (t = obj->script->trig_list; t; t = t->next) {
+  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_REMOVE)) {
       add_char_uid_var(t, "actor", actor, 0);
       ret_val = script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
@@ -823,10 +826,10 @@ int drop_otrigger(obj_data *obj, char_data *actor)
   trig_data *t;
   int ret_val;
 
-  if (!script_has_type(obj->script, OTRIG_DROP))
+  if (!script_has_type(obj_get_script(obj), OTRIG_DROP))
     return 1;
 
-  for (t = obj->script->trig_list; t; t = t->next) {
+  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_DROP) && (rand_number(1, 100) <= t->narg)) {
       add_char_uid_var(t, "actor", actor, 0);
       ret_val = script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
@@ -848,10 +851,10 @@ int give_otrigger(obj_data *obj, char_data *actor, char_data *victim)
   trig_data *t;
   int ret_val;
 
-  if (!script_has_type(obj->script, OTRIG_GIVE))
+  if (!script_has_type(obj_get_script(obj), OTRIG_GIVE))
     return 1;
 
-  for (t = obj->script->trig_list; t; t = t->next) {
+  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_GIVE) && (rand_number(1, 100) <= t->narg)) {
       add_char_uid_var(t, "actor", actor, 0);
       add_char_uid_var(t, "victim", victim, 0);
@@ -860,7 +863,7 @@ int give_otrigger(obj_data *obj, char_data *actor, char_data *victim)
        * a) the object is purged.
        * b) the object is not carried by the giver.
        */
-      if (!obj || obj->carried_by != actor)
+      if (!obj || obj_get_carried_by(obj) != actor)
         return 0;
       else
         return ret_val;
@@ -875,10 +878,10 @@ void load_otrigger(obj_data *obj)
   trig_data *t;
   int result = 0;
 
-  if (!script_has_type(obj->script, OTRIG_LOAD))
+  if (!script_has_type(obj_get_script(obj), OTRIG_LOAD))
     return;
 
-  for (t = obj->script->trig_list; t; t = t->next) {
+  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_LOAD) &&
         (rand_number(1, 100) <= t->narg)) {
       result = script_driver(&obj, t, OBJ_TRIGGER, TRIG_NEW);
@@ -902,10 +905,10 @@ int cast_otrigger(char_data *actor, obj_data *obj, int spellnum)
   if (obj == nullptr)
     return 1;
 
-  if (!script_has_type(obj->script, OTRIG_CAST))
+  if (!script_has_type(obj_get_script(obj), OTRIG_CAST))
     return 1;
 
-  for (t = obj->script->trig_list; t; t = t->next) {
+  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_CAST) &&
         (rand_number(1, 100) <= t->narg)) {
       add_char_uid_var(t, "actor", actor, 0);
@@ -928,12 +931,12 @@ bool leave_otrigger(room_data *room, char_data *actor, int dir)
   if (!valid_dg_target(actor, DG_ALLOW_GODS))
     return true;
 
-  for (obj = room->contents; obj; obj = obj_next) {
-    obj_next = obj->next_content;
-    if (!script_has_type(obj->script, OTRIG_LEAVE))
+  for (obj = room_get_contents(room); obj; obj = obj_next) {
+    obj_next = obj_get_next_content(obj);
+    if (!script_has_type(obj_get_script(obj), OTRIG_LEAVE))
       continue;
 
-    for (t = obj->script->trig_list; t; t = t->next) {
+    for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
       if (trigger_ready(t, OTRIG_LEAVE) &&
           (rand_number(1, 100) <= t->narg)) {
         if (dir >= 0 && dir < NUM_OF_DIRS)
@@ -956,10 +959,10 @@ int consume_otrigger(obj_data *obj, char_data *actor, int cmd)
   trig_data *t;
   int ret_val;
 
-  if (!script_has_type(obj->script, OTRIG_CONSUME))
+  if (!script_has_type(obj_get_script(obj), OTRIG_CONSUME))
     return 1;
 
-  for (t = obj->script->trig_list; t; t = t->next) {
+  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_CONSUME)) {
       add_char_uid_var(t, "actor", actor, 0);
       switch (cmd) {
@@ -992,10 +995,10 @@ void time_otrigger(obj_data *obj)
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
 
-  if (!script_has_type(obj->script, OTRIG_TIME))
+  if (!script_has_type(obj_get_script(obj), OTRIG_TIME))
     return;
 
-  for (t = obj->script->trig_list; t; t = t->next) {
+  for (t = obj_get_script(obj)->trig_list; t; t = t->next) {
     if (trigger_ready(t, OTRIG_TIME) &&
         (time_info.hours == t->narg)) {
       sprintf(buf, "%d", time_info.hours);
@@ -1014,10 +1017,10 @@ void reset_wtrigger(struct room_data *room)
 {
   trig_data *t;
 
-  if (!script_has_type(room->script, WTRIG_RESET))
+  if (!script_has_type(room_get_script(room), WTRIG_RESET))
     return;
 
-  for (t = room->script->trig_list; t; t = t->next) {
+  for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_RESET) &&
         (rand_number(1, 100) <= t->narg)) {
       script_driver(&room, t, WLD_TRIGGER, TRIG_NEW);
@@ -1030,10 +1033,10 @@ void random_wtrigger(struct room_data *room)
 {
   trig_data *t;
 
-  if (!script_has_type(room->script, WTRIG_RANDOM))
+  if (!script_has_type(room_get_script(room), WTRIG_RANDOM))
     return;
 
-  for (t = room->script->trig_list; t; t = t->next) {
+  for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_RANDOM) &&
         (rand_number(1, 100) <= t->narg)) {
       script_driver(&room, t, WLD_TRIGGER, TRIG_NEW);
@@ -1046,10 +1049,10 @@ int enter_wtrigger(struct room_data *room, char_data *actor, int dir)
 {
   trig_data *t;
 
-  if (!script_has_type(room->script, WTRIG_ENTER))
+  if (!script_has_type(room_get_script(room), WTRIG_ENTER))
     return 1;
 
-  for (t = room->script->trig_list; t; t = t->next) {
+  for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_ENTER) &&
         (rand_number(1, 100) <= t->narg)) {
       if (dir >= 0 && dir < NUM_OF_DIRS)
@@ -1069,7 +1072,7 @@ int command_wtrigger(char_data *actor, char *cmd, char *argument)
   struct room_data *room;
   trig_data *t;
 
-  if (!actor || !script_has_type(world[char_get_in_room(actor)].script, WTRIG_COMMAND))
+  if (!actor || !script_has_type(rroom_get_script(char_get_in_room(actor)), WTRIG_COMMAND))
     return 0;
 
   /* prevent people we like from becoming trapped :P */
@@ -1077,7 +1080,7 @@ int command_wtrigger(char_data *actor, char *cmd, char *argument)
     return 0;
 
   room = &world[char_get_in_room(actor)];
-  for (t = room->script->trig_list; t; t = t->next) {
+  for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (!trigger_ready(t, WTRIG_COMMAND))
       continue;
 
@@ -1107,11 +1110,11 @@ void speech_wtrigger(char_data *actor, char *str)
   struct room_data *room;
   trig_data *t;
 
-  if (!actor || !script_has_type(world[char_get_in_room(actor)].script, WTRIG_SPEECH))
+  if (!actor || !script_has_type(rroom_get_script(char_get_in_room(actor)), WTRIG_SPEECH))
     return;
 
   room = &world[char_get_in_room(actor)];
-  for (t = room->script->trig_list; t; t = t->next) {
+  for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (!trigger_ready(t, WTRIG_SPEECH))
       continue;
 
@@ -1138,17 +1141,17 @@ int drop_wtrigger(obj_data *obj, char_data *actor)
   trig_data *t;
   int ret_val;
 
-  if (!actor || !script_has_type(world[char_get_in_room(actor)].script, WTRIG_DROP))
+  if (!actor || !script_has_type(rroom_get_script(char_get_in_room(actor)), WTRIG_DROP))
     return 1;
 
   room = &world[char_get_in_room(actor)];
-  for (t = room->script->trig_list; t; t = t->next)
+  for (t = room_get_script(room)->trig_list; t; t = t->next)
     if (trigger_ready(t, WTRIG_DROP) &&
         (rand_number(1, 100) <= t->narg)) {
       add_char_uid_var(t, "actor", actor, 0);
       add_obj_uid_var(t, "object", obj, 0);
       ret_val = script_driver(&room, t, WLD_TRIGGER, TRIG_NEW);
-      if (obj->carried_by != actor)
+      if (obj_get_carried_by(obj) != actor)
         return 0;
       else
         return ret_val;
@@ -1164,11 +1167,11 @@ int cast_wtrigger(char_data *actor, char_data *vict, obj_data *obj, int spellnum
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
 
-  if (!actor || !script_has_type(world[char_get_in_room(actor)].script, WTRIG_CAST))
+  if (!actor || !script_has_type(rroom_get_script(char_get_in_room(actor)), WTRIG_CAST))
     return 1;
 
   room = &world[char_get_in_room(actor)];
-  for (t = room->script->trig_list; t; t = t->next) {
+  for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_CAST) &&
         (rand_number(1, 100) <= t->narg)) {
 
@@ -1194,10 +1197,10 @@ int leave_wtrigger(struct room_data *room, char_data *actor, int dir)
   if (!valid_dg_target(actor, DG_ALLOW_GODS))
     return 1;
 
-  if (!script_has_type(room->script, WTRIG_LEAVE))
+  if (!script_has_type(room_get_script(room), WTRIG_LEAVE))
     return 1;
 
-  for (t = room->script->trig_list; t; t = t->next) {
+  for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_LEAVE) &&
         (rand_number(1, 100) <= t->narg)) {
       if (dir >= 0 && dir < NUM_OF_DIRS)
@@ -1217,11 +1220,11 @@ int door_wtrigger(char_data *actor, int subcmd, int dir)
   room_data *room;
   trig_data *t;
 
-  if (!actor || !script_has_type(world[char_get_in_room(actor)].script, WTRIG_DOOR))
+  if (!actor || !script_has_type(rroom_get_script(char_get_in_room(actor)), WTRIG_DOOR))
     return 1;
 
   room = &world[char_get_in_room(actor)];
-  for (t = room->script->trig_list; t; t = t->next) {
+  for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_DOOR) &&
         (rand_number(1, 100) <= t->narg)) {
       add_var(&t->var_list, "cmd", (const char *)cmd_door[subcmd], 0);
@@ -1242,10 +1245,10 @@ void time_wtrigger(struct room_data *room)
   trig_data *t;
   char buf[MAX_INPUT_LENGTH];
 
-  if (!script_has_type(room->script, WTRIG_TIME))
+  if (!script_has_type(room_get_script(room), WTRIG_TIME))
     return;
 
-  for (t = room->script->trig_list; t; t = t->next) {
+  for (t = room_get_script(room)->trig_list; t; t = t->next) {
     if (trigger_ready(t, WTRIG_TIME) &&
         (time_info.hours == t->narg)) {
       sprintf(buf, "%d", time_info.hours);

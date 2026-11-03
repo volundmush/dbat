@@ -71,7 +71,7 @@ ACMD(do_restring)
       send_to_char(ch, "You need at least 5,000 zenni to initiate an equipment restring.\r\n");
       return;
     }
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch)))) {
       send_to_char(ch, "You don't have a that equipment to restring in your inventory.\r\n");
       send_to_char(ch, "Syntax: restring (obj name)\r\n");
       return;
@@ -80,27 +80,27 @@ ACMD(do_restring)
       send_to_char(ch, "You can not restring a custom piece. Why? Because you already restrung it you dummy.\r\n");
       return;
     }
-    desc_set_connected(ch->desc, CON_POBJ);
+    desc_set_connected(char_get_desc(ch), CON_POBJ);
     char thename[MAX_INPUT_LENGTH], theshort[MAX_INPUT_LENGTH], thelong[MAX_INPUT_LENGTH];
 
     *thename  = '\0';
     *theshort = '\0';
     *thelong  = '\0';
 
-    snprintf(thename, sizeof(thename), "%s", obj->name);
-    snprintf(theshort, sizeof(theshort), "%s", obj->short_description);
-    snprintf(thelong, sizeof(thelong), "%s", obj->description);
+    snprintf(thename, sizeof(thename), "%s", obj_get_name(obj));
+    snprintf(theshort, sizeof(theshort), "%s", obj_get_short_description(obj));
+    snprintf(thelong, sizeof(thelong), "%s", obj_get_description(obj));
 
-    ch->desc->obj_name   = strdup(thename);
-    ch->desc->obj_was    = strdup(theshort);
-    ch->desc->obj_short  = strdup(theshort);
-    ch->desc->obj_long   = strdup(thelong);
-    ch->desc->obj_point  = obj;
-    ch->desc->obj_type   = 1;
-    ch->desc->obj_weapon = 0;
-    disp_restring_menu(ch->desc);
-    ch->desc->obj_editflag = EDIT_RESTRING;
-    ch->desc->obj_editval  = EDIT_RESTRING_MAIN;
+    char_get_desc(ch)->obj_name   = strdup(thename);
+    char_get_desc(ch)->obj_was    = strdup(theshort);
+    char_get_desc(ch)->obj_short  = strdup(theshort);
+    char_get_desc(ch)->obj_long   = strdup(thelong);
+    char_get_desc(ch)->obj_point  = obj;
+    char_get_desc(ch)->obj_type   = 1;
+    char_get_desc(ch)->obj_weapon = 0;
+    disp_restring_menu(char_get_desc(ch));
+    char_get_desc(ch)->obj_editflag = EDIT_RESTRING;
+    char_get_desc(ch)->obj_editval  = EDIT_RESTRING_MAIN;
     return;
   }
 }
@@ -208,7 +208,7 @@ ACMD(do_fish)
           send_to_char(ch, "Syntax: fish apply (bait)\r\n");
           return;
         }
-        if (!(bait = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
+        if (!(bait = get_obj_in_list_vis(ch, arg2, nullptr, char_get_inventory(ch)))) {
           send_to_char(ch, "You don't have that bait.\r\n");
           return;
         }
@@ -263,7 +263,7 @@ void fish_update(void)
   int quality = 0;
 
   for (i = character_list; i; i = next_char) {
-    next_char = i->next;
+    next_char = char_get_next(i);
     if (rroom_flagged(char_get_in_room(i), ROOM_FISHING)) {
       if (char_plr_flagged(i, PLR_FISHING) && has_pole(i) == true) {
         ch = i;
@@ -507,11 +507,11 @@ ACMD(do_extract)
   }
 
   if (!strcasecmp(arg, "combine")) {
-    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, char_get_inventory(ch)))) {
       send_to_char(ch, "You do not have the first bottle that you were wanting to combine.\r\n");
       return;
     }
-    if (!(obj2 = get_obj_in_list_vis(ch, arg3, nullptr, ch->carrying))) {
+    if (!(obj2 = get_obj_in_list_vis(ch, arg3, nullptr, char_get_inventory(ch)))) {
       send_to_char(ch, "You do not have the second bottle that you were wanting to combine.\r\n");
       return;
     }
@@ -551,7 +551,7 @@ ACMD(do_extract)
     }
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch)))) {
     send_to_char(ch, "You do not have that item.\r\n");
     return;
   }
@@ -563,8 +563,8 @@ ACMD(do_extract)
     struct obj_data *bottle = nullptr, *next_obj, *item;
     int found               = false;
 
-    for (item = ch->carrying; item; item = next_obj) {
-      next_obj = item->next_content;
+    for (item = char_get_inventory(ch); item; item = next_obj) {
+      next_obj = obj_get_next_content(item);
       if (obj_get_vnum(item) == 3423) {
         bottle = item;
         found  = true;
@@ -650,8 +650,8 @@ ACMD(do_runic)
   struct obj_data *obj, *next_obj, *bottle = nullptr;
   int found = false, amount = 0, brush = false;
 
-  for (obj = ch->carrying; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     if (obj_get_vnum(obj) == 3424) {
       if (obj_get_value(obj, 6) > amount) {
         bottle = obj;
@@ -661,8 +661,8 @@ ACMD(do_runic)
     }
   }
 
-  for (obj = ch->carrying; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     if (obj_get_vnum(obj) == 3427) {
       brush = true;
     }
@@ -1015,7 +1015,7 @@ ACMD(do_resize)
     send_to_char(ch, "Syntax: resize (obj) (small | medium)\r\n");
     return;
   }
-  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch)))) {
     send_to_char(ch, "You don't have that object!\r\n");
     return;
   }
@@ -1085,8 +1085,8 @@ ACMD(do_bury)
 
   struct obj_data *obj = nullptr, *buried = nullptr, *fobj = nullptr, *next_obj;
 
-  for (buried = world[char_get_in_room(ch)].contents; buried; buried = next_obj) {
-    next_obj = buried->next_content;
+  for (buried = rroom_get_contents(char_get_in_room(ch)); buried; buried = next_obj) {
+    next_obj = obj_get_next_content(buried);
     if (obj_extra_flagged(buried, ITEM_BURIED)) {
       fobj = buried;
     }
@@ -1097,7 +1097,7 @@ ACMD(do_bury)
       send_to_char(ch, "Bury what?\r\n");
       return;
     }
-    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, char_get_inventory(ch)))) {
       send_to_char(ch, "You don't have that object to bury.\r\n");
       return;
     }
@@ -1181,8 +1181,8 @@ ACMD(do_silk)
     int found = false, armor = 500, str = 0, intel = 0, olevel = 0;
     double price = 1;
 
-    for (weave = ch->carrying; weave; weave = next_obj) {
-      next_obj = weave->next_content;
+    for (weave = char_get_inventory(ch); weave; weave = next_obj) {
+      next_obj = obj_get_next_content(weave);
       if (found == false && valid_silk(weave) && !obj_extra_flagged(weave, ITEM_FORGED)) {
         found = true;
         obj   = weave;
@@ -1234,18 +1234,18 @@ ACMD(do_silk)
           price  = 1.5;
           olevel = 5;
         }
-        weaved->affected[0].location = 17;
-        weaved->affected[0].modifier = armor;
+        obj_get_affected(weaved)[0].location = 17;
+        obj_get_affected(weaved)[0].modifier = armor;
         obj_set_cost(weaved, obj_get_cost(weaved) * (price));
         obj_set_value(weaved, 0, olevel);
-        weaved->level = olevel;
+        obj_set_level(weaved, olevel);
         if (str > 0) {
-          weaved->affected[1].location = 1;
-          weaved->affected[1].modifier = str;
+          obj_get_affected(weaved)[1].location = 1;
+          obj_get_affected(weaved)[1].modifier = str;
         }
         if (intel > 0) {
-          weaved->affected[2].location = 3;
-          weaved->affected[2].modifier = intel;
+          obj_get_affected(weaved)[2].location = 3;
+          obj_get_affected(weaved)[2].modifier = intel;
         }
         act("@WYou attempt to weave the bundle and manage to create $p@W!@n", true, ch, weaved, 0, TO_CHAR);
         act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch, weaved, 0, TO_ROOM);
@@ -1293,18 +1293,18 @@ ACMD(do_silk)
           price  = 1.5;
           olevel = 5;
         }
-        weaved->affected[0].location = 17;
-        weaved->affected[0].modifier = armor;
+        obj_get_affected(weaved)[0].location = 17;
+        obj_get_affected(weaved)[0].modifier = armor;
         obj_set_cost(weaved, obj_get_cost(weaved) * (price));
         obj_set_value(weaved, 0, olevel);
-        weaved->level = olevel;
+        obj_set_level(weaved, olevel);
         if (str > 0) {
-          weaved->affected[1].location = 1;
-          weaved->affected[1].modifier = str;
+          obj_get_affected(weaved)[1].location = 1;
+          obj_get_affected(weaved)[1].modifier = str;
         }
         if (intel > 0) {
-          weaved->affected[2].location = 3;
-          weaved->affected[2].modifier = intel;
+          obj_get_affected(weaved)[2].location = 3;
+          obj_get_affected(weaved)[2].modifier = intel;
         }
         act("@WYou attempt to weave the bundle and manage to create $p@W!@n", true, ch, weaved, 0, TO_CHAR);
         act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch, weaved, 0, TO_ROOM);
@@ -1352,18 +1352,18 @@ ACMD(do_silk)
           price  = 1.5;
           olevel = 5;
         }
-        weaved->affected[0].location = 17;
-        weaved->affected[0].modifier = armor;
+        obj_get_affected(weaved)[0].location = 17;
+        obj_get_affected(weaved)[0].modifier = armor;
         obj_set_cost(weaved, obj_get_cost(weaved) * (price));
         obj_set_value(weaved, 0, olevel);
-        weaved->level = olevel;
+        obj_set_level(weaved, olevel);
         if (str > 0) {
-          weaved->affected[1].location = 1;
-          weaved->affected[1].modifier = str;
+          obj_get_affected(weaved)[1].location = 1;
+          obj_get_affected(weaved)[1].modifier = str;
         }
         if (intel > 0) {
-          weaved->affected[2].location = 3;
-          weaved->affected[2].modifier = intel;
+          obj_get_affected(weaved)[2].location = 3;
+          obj_get_affected(weaved)[2].modifier = intel;
         }
         act("@WYou attempt to weave the bundle and manage to create $p@W!@n", true, ch, weaved, 0, TO_CHAR);
         act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch, weaved, 0, TO_ROOM);
@@ -1543,8 +1543,8 @@ static bool valid_recipe(struct char_data *ch, int recipe, int type)
 
   if (type == 0) {
     /* Check for ingredients in inventory */
-    for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-      next_obj = obj2->next_content;
+    for (obj2 = char_get_inventory(ch); obj2; obj2 = next_obj) {
+      next_obj = obj_get_next_content(obj2);
       switch (obj_get_vnum(obj2)) {
         case RCP_TOMATO:
           if (tomato > 0) {
@@ -1661,8 +1661,8 @@ static bool valid_recipe(struct char_data *ch, int recipe, int type)
       }
     }
   } else { /* We know the ingredients are there, remove and exit. */
-    for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-      next_obj = obj2->next_content;
+    for (obj2 = char_get_inventory(ch); obj2; obj2 = next_obj) {
+      next_obj = obj_get_next_content(obj2);
       switch (obj_get_vnum(obj2)) {
         case RCP_TOMATO:
           if (tomato > 0) {
@@ -2258,7 +2258,7 @@ ACMD(do_feed)
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, char_get_inventory(ch)))) {
     send_to_char(ch, "You need to give them a senzu.\r\n");
     return;
   }
@@ -2283,7 +2283,7 @@ ACMD(do_feed)
     return;
   }
 
-  if (vict->master != ch && ch->master != vict && ch->master != vict->master) {
+  if (char_get_master(vict) != ch && char_get_master(ch) != vict && char_get_master(ch) != char_get_master(vict)) {
     send_to_char(ch, "You need to be grouped with them first.\r\n");
     return;
   }
@@ -2317,7 +2317,7 @@ ACMD(do_spoil)
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, rroom_get_contents(char_get_in_room(ch))))) {
     send_to_char(ch, "No corpse around here by that name.\r\n");
     return;
   }
@@ -2370,9 +2370,9 @@ ACMD(do_spoil)
   *buf3 = '\0';
 
   body_part              = create_obj();
-  body_part->item_number = NOTHING;
+  obj_set_item_number(body_part, NOTHING);
   obj_set_in_room(body_part, NOWHERE);
-  snprintf(part, sizeof(part), "%s", obj->name);
+  snprintf(part, sizeof(part), "%s", obj_get_name(obj));
   search_replace(part, "headless", "");
   search_replace(part, "corpse", "");
   search_replace(part, "half", "");
@@ -2385,9 +2385,9 @@ ACMD(do_spoil)
   snprintf(buf2, sizeof(buf2), "@wThe bloody head of %s@w is lying here@n", part);
   snprintf(buf3, sizeof(buf3), "@wThe bloody head of %s@w@n", part);
 
-  body_part->name              = strdup(buf);
-  body_part->description       = strdup(buf2);
-  body_part->short_description = strdup(buf3);
+  obj_set_name(body_part, strdup(buf));
+  obj_set_description(body_part, strdup(buf2));
+  obj_set_short_description(body_part, strdup(buf3));
 
   obj_set_type_flag(body_part, ITEM_OTHER);
   obj_wear_set(body_part, ITEM_WEAR_TAKE, true);

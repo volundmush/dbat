@@ -18,7 +18,7 @@ constexpr int C_BRI = C_ON; /* Compatibility hack */
 constexpr int C_NRM = C_ON; /* Compatibility hack */
 constexpr int C_CMP = C_ON; /* Compatibility hack */
 
-#define COLOR_CHOICES(ch) (char_is_npc(ch) ? nullptr : ch->player_specials ? ch->player_specials->color_choices \
+#define COLOR_CHOICES(ch) (char_is_npc(ch) ? nullptr : char_get_player_specials(ch) ? char_get_player_specials(ch)->color_choices \
                                                                            : nullptr)
 #define _clrlevel(ch)  (!char_is_npc(ch) ? (char_prf_flagged((ch), PRF_COLOR) ? 1 : 0) : 0)
 #define clr(ch, lvl)   (_clrlevel(ch) >= (lvl))

@@ -26,6 +26,8 @@
 
 #include <unistd.h>
 #include <errno.h>
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 /* local functions */
 
@@ -95,13 +97,13 @@ static bool Crash_write_safe_file(struct char_data *ch, int rentcode, int cost, 
       Crash_restore_weight(char_get_equipment(ch, j));
     }
 
-  if (!Crash_save(ch->carrying, fp, 0)) {
-    Crash_restore_weight(ch->carrying);
+  if (!Crash_save(char_get_inventory(ch), fp, 0)) {
+    Crash_restore_weight(char_get_inventory(ch));
     mud_log("SYSERR: %s:%d: Crash_save failed for %s of %s inventory", __FILE__, __LINE__, save_type, char_get_name(ch));
     atomic_abort(&af);
     return false;
   }
-  Crash_restore_weight(ch->carrying);
+  Crash_restore_weight(char_get_inventory(ch));
 
   return atomic_commit(&af);
 }
@@ -431,7 +433,7 @@ void Crash_listrent(struct char_data *ch, char *name)
           obj = read_object(nr, VIRTUAL);
           if (len + 255 < sizeof(buf)) {
             len += snprintf(buf + len, sizeof(buf) - len, "[%5d] (%5dau) %-20s\r\n",
-                            nr, obj_get_cost_per_day(obj), obj->short_description);
+                            nr, obj_get_cost_per_day(obj), obj_get_short_description(obj));
           } else {
             snprintf(buf + len, sizeof(buf) - len, "** Excessive rent listing. **\r\n");
             break;
@@ -480,11 +482,11 @@ static bool Crash_save(struct obj_data *obj, FILE *fp, int location)
   int result;
 
   if (obj) {
-    Crash_save(obj->next_content, fp, location);
-    Crash_save(obj->contains, fp, MIN(0, location) - 1);
+    Crash_save(obj_get_next_content(obj), fp, location);
+    Crash_save(obj_get_contains(obj), fp, MIN(0, location) - 1);
     result = Obj_to_store(obj, fp, location);
 
-    for (tmp = obj->in_obj; tmp; tmp = tmp->in_obj)
+    for (tmp = obj_get_in_obj(obj); tmp; tmp = obj_get_in_obj(tmp))
       obj_set_weight(tmp, obj_get_weight(tmp) - (obj_get_weight(obj)));
 
     if (!result)
@@ -496,10 +498,10 @@ static bool Crash_save(struct obj_data *obj, FILE *fp, int location)
 static void Crash_restore_weight(struct obj_data *obj)
 {
   if (obj) {
-    Crash_restore_weight(obj->contains);
-    Crash_restore_weight(obj->next_content);
-    if (obj->in_obj)
-      obj_set_weight(obj->in_obj, obj_get_weight(obj->in_obj) + (obj_get_weight(obj)));
+    Crash_restore_weight(obj_get_contains(obj));
+    Crash_restore_weight(obj_get_next_content(obj));
+    if (obj_get_in_obj(obj))
+      obj_set_weight(obj_get_in_obj(obj), obj_get_weight(obj_get_in_obj(obj)) + (obj_get_weight(obj)));
   }
 }
 
@@ -525,8 +527,8 @@ static void Crash_extract_norent_eq(struct char_data *ch)
 static void Crash_extract_objs(struct obj_data *obj)
 {
   if (obj) {
-    Crash_extract_objs(obj->contains);
-    Crash_extract_objs(obj->next_content);
+    Crash_extract_objs(obj_get_contains(obj));
+    Crash_extract_objs(obj_get_next_content(obj));
     extract_obj(obj);
   }
 }
@@ -546,8 +548,8 @@ static bool Crash_is_unrentable(struct obj_data *obj)
 static void Crash_extract_norents(struct obj_data *obj)
 {
   if (obj) {
-    Crash_extract_norents(obj->contains);
-    Crash_extract_norents(obj->next_content);
+    Crash_extract_norents(obj_get_contains(obj));
+    Crash_extract_norents(obj_get_next_content(obj));
     if (Crash_is_unrentable(obj))
       extract_obj(obj);
   }
@@ -570,7 +572,7 @@ void Crash_rentsave(struct char_data *ch, int cost)
     return;
 
   Crash_extract_norent_eq(ch);
-  Crash_extract_norents(ch->carrying);
+  Crash_extract_norents(char_get_inventory(ch));
 
   if (!Crash_write_safe_file(ch, RENT_RENTED, cost, "rentsave"))
     return;
@@ -579,7 +581,7 @@ void Crash_rentsave(struct char_data *ch, int cost)
     if (char_get_equipment(ch, j))
       Crash_extract_objs(char_get_equipment(ch, j));
 
-  Crash_extract_objs(ch->carrying);
+  Crash_extract_objs(char_get_inventory(ch));
 }
 
 /* ************************************************************************
@@ -697,7 +699,7 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
       /* we have the number, check it, load obj. */
       if (nr == NOTHING) { /* then it is unique */
         temp              = create_obj();
-        temp->item_number = NOTHING;
+        obj_set_item_number(temp, NOTHING);
         obj_set_size(temp, SIZE_MEDIUM);
       } else if (nr < 0 || nr >= 999999) {
         get_line(fl, line); /* skip it, or the loop never moves on */
@@ -744,20 +746,24 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
       /* read line check for xap. */
       if (!strcmp("XAP", line)) { /* then this is a Xap Obj, requires
               special care */
-        if ((temp->name = fread_string(fl, "rented object name")) == nullptr) {
-          temp->name = strdup("undefined");
+        obj_set_name(temp, fread_string(fl, "rented object name"));
+        if (obj_get_name(temp) == nullptr) {
+          obj_set_name(temp, strdup("undefined"));
         }
 
-        if ((temp->short_description = fread_string(fl, "rented object short desc")) == nullptr) {
-          temp->short_description = strdup("undefined");
+        obj_set_short_description(temp, fread_string(fl, "rented object short desc"));
+        if (obj_get_short_description(temp) == nullptr) {
+          obj_set_short_description(temp, strdup("undefined"));
         }
 
-        if ((temp->description = fread_string(fl, "rented object desc")) == nullptr) {
-          temp->description = strdup("undefined");
+        obj_set_description(temp, fread_string(fl, "rented object desc"));
+        if (obj_get_description(temp) == nullptr) {
+          obj_set_description(temp, strdup("undefined"));
         }
 
-        if ((temp->action_description = fread_string(fl, "rented object adesc")) == nullptr) {
-          temp->action_description = 0;
+        obj_set_action_description(temp, fread_string(fl, "rented object adesc"));
+        if (obj_get_action_description(temp) == nullptr) {
+          obj_set_action_description(temp, 0);
         }
 
         if (!get_line(fl, line) ||
@@ -765,25 +771,25 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
           fprintf(stderr, "Format error in first numeric line (expecting _x_ args)");
           return false;
         }
-        temp->type_flag     = t[0];
-        temp->wear_flags[0] = t[1];
-        temp->wear_flags[1] = t[2];
-        temp->wear_flags[2] = t[3];
-        temp->wear_flags[3] = t[4];
-        temp->weight        = t[5];
-        temp->cost          = t[6];
+        obj_set_type_flag(temp, t[0]);
+        obj_get_wear_flags(temp)[0] = t[1];
+        obj_get_wear_flags(temp)[1] = t[2];
+        obj_get_wear_flags(temp)[2] = t[3];
+        obj_get_wear_flags(temp)[3] = t[4];
+        obj_set_weight(temp, t[5]);
+        obj_set_cost(temp, t[6]);
 
         /* we're clearing these for good luck */
 
         for (j = 0; j < MAX_OBJ_AFFECT; j++) {
-          temp->affected[j].location = APPLY_NONE;
-          temp->affected[j].modifier = 0;
-          temp->affected[j].specific = 0;
+          obj_get_affected(temp)[j].location = APPLY_NONE;
+          obj_get_affected(temp)[j].modifier = 0;
+          obj_get_affected(temp)[j].specific = 0;
         }
 
         /* maybe clear spellbook for good luck too? */
 
-        temp->ex_description = nullptr;
+        obj_set_ex_description(temp, nullptr);
 
         get_line(fl, line);
         for (j = zwei = 0; !zwei && !feof(fl);) {
@@ -794,8 +800,8 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
               new_descr->keyword = fread_string(fl, buf2);
               sprintf(buf2, "rented object edesc text for object #%d keyword %s", nr, new_descr->keyword);
               new_descr->description = fread_string(fl, buf2);
-              new_descr->next        = temp->ex_description;
-              temp->ex_description   = new_descr;
+              new_descr->next        = obj_get_ex_description(temp);
+              obj_set_ex_description(temp, new_descr);
               get_line(fl, line);
               break;
             case 'A':
@@ -805,9 +811,9 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
               get_line(fl, line);
               sscanf(line, "%d %d %d", t, t + 1, t + 2);
 
-              temp->affected[j].location = t[0];
-              temp->affected[j].modifier = t[1];
-              temp->affected[j].specific = t[2];
+              obj_get_affected(temp)[j].location = t[0];
+              obj_get_affected(temp)[j].modifier = t[1];
+              obj_get_affected(temp)[j].specific = t[2];
               j++;
               get_line(fl, line);
               break;
@@ -816,13 +822,17 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
 
               get_line(fl, line);
               if (sscanf(line, "%lld", &generation) == 1)
-                temp->generation = generation;
+                obj_set_generation(temp, generation);
               get_line(fl, line);
               break;
             }
             case 'U':
               get_line(fl, line);
-              sscanf(line, "%" SCNd64, &temp->unique_id);
+              {
+                int64_t uid = obj_get_unique_id(temp);
+                sscanf(line, "%" SCNd64, &uid);
+                obj_set_unique_id(temp, uid);
+              }
               get_line(fl, line);
               break;
             case 'S':
@@ -897,7 +907,7 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
         for (j = MAX_BAG_ROWS - 1; j > 0; j--)
           if (cont_row[j]) { /* no container -> back to ch's inventory */
             for (; cont_row[j]; cont_row[j] = obj1) {
-              obj1 = cont_row[j]->next_content;
+              obj1 = obj_get_next_content(cont_row[j]);
               obj_to_char(cont_row[j], ch);
             }
             cont_row[j] = nullptr;
@@ -906,15 +916,15 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
           if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
             /* rem item ; fill ; equip again */
             temp           = unequip_char(ch, locate - 1);
-            temp->contains = nullptr; /* should be empty - but who knows */
+            obj_set_contains(temp, nullptr); /* should be empty - but who knows */
             for (; cont_row[0]; cont_row[0] = obj1) {
-              obj1 = cont_row[0]->next_content;
+              obj1 = obj_get_next_content(cont_row[0]);
               obj_to_obj(cont_row[0], temp);
             }
             equip_char(ch, temp, locate - 1);
           } else { /* object isn't container -> empty content list */
             for (; cont_row[0]; cont_row[0] = obj1) {
-              obj1 = cont_row[0]->next_content;
+              obj1 = obj_get_next_content(cont_row[0]);
               obj_to_char(cont_row[0], ch);
             }
             cont_row[0] = nullptr;
@@ -924,7 +934,7 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
         for (j = MAX_BAG_ROWS - 1; j > -locate; j--)
           if (cont_row[j]) { /* no container -> back to ch's inventory */
             for (; cont_row[j]; cont_row[j] = obj1) {
-              obj1 = cont_row[j]->next_content;
+              obj1 = obj_get_next_content(cont_row[j]);
               obj_to_char(cont_row[j], ch);
             }
             cont_row[j] = nullptr;
@@ -934,15 +944,15 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
           if (obj_get_type_flag(temp) == ITEM_CONTAINER) {
             /* take item ; fill ; give to char again */
             obj_from_char(temp);
-            temp->contains = nullptr;
+            obj_set_contains(temp, nullptr);
             for (; cont_row[j]; cont_row[j] = obj1) {
-              obj1 = cont_row[j]->next_content;
+              obj1 = obj_get_next_content(cont_row[j]);
               obj_to_obj(cont_row[j], temp);
             }
             obj_to_char(temp, ch); /* add to inv first ... */
           } else {                 /* object isn't container -> empty content list */
             for (; cont_row[j]; cont_row[j] = obj1) {
-              obj1 = cont_row[j]->next_content;
+              obj1 = obj_get_next_content(cont_row[j]);
               obj_to_char(cont_row[j], ch);
             }
             cont_row[j] = nullptr;
@@ -955,9 +965,9 @@ static bool Crash_load_file(struct char_data *ch, FILE *fl, const char *filename
              in the same order as before renting */
           obj_from_char(temp);
           if ((obj1 = cont_row[-locate - 1])) {
-            while (obj1->next_content)
-              obj1 = obj1->next_content;
-            obj1->next_content = temp;
+            while (obj_get_next_content(obj1))
+              obj1 = obj_get_next_content(obj1);
+            obj_set_next_content(obj1, temp);
           } else
             cont_row[-locate - 1] = temp;
         }

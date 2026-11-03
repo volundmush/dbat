@@ -118,7 +118,7 @@ void cedit_creation(struct char_data *ch)
       break;
   }
   racial_body_parts(ch);
-  ch->aff_abils = ch->real_abils;
+  char_reset_aff_abils(ch);
 }
 
 /*
@@ -215,23 +215,23 @@ void do_start(struct char_data *ch)
   char_prf_set(ch, PRF_DISPTNL, true);
 
   if (!char_plr_flagged(ch, PLR_FORGET)) {
-    if (ch->choice == 1) {
+    if (char_get_choice(ch) == 1) {
       punch = rand_number(30, 40);
       char_set_skills_base(ch, SKILL_BLOCK, punch);
     }
-    if (ch->choice == 2) {
+    if (char_get_choice(ch) == 2) {
       punch = rand_number(10, 20);
       char_set_skills_base(ch, SKILL_PUNCH, punch);
     }
-    if (ch->choice == 3) {
+    if (char_get_choice(ch) == 3) {
       punch = rand_number(30, 40);
       char_set_skills_base(ch, SKILL_KICK, punch);
     }
-    if (ch->choice == 4) {
+    if (char_get_choice(ch) == 4) {
       punch = rand_number(20, 30);
       char_set_skills_base(ch, SKILL_SLAM, punch);
     }
-    if (ch->choice == 5) {
+    if (char_get_choice(ch) == 5) {
       punch = rand_number(20, 30);
       char_set_skills_base(ch, SKILL_FOCUS, punch);
     }
@@ -409,9 +409,9 @@ void do_start(struct char_data *ch)
   advance_level(ch, char_get_class(ch));
   /*mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s advanced to level %d", GET_NAME(ch), GET_LEVEL(ch));*/
 
-  ch->basepl = MAX(ch->basepl, 100L);
-  ch->baseki = MAX(ch->baseki, 100L);
-  ch->basest = MAX(ch->basest, 100L);
+  char_set_basepl(ch, MAX(getBasePL(ch), 100L));
+  char_set_baseki(ch, MAX(getBaseKI(ch), 100L));
+  char_set_basest(ch, MAX(getBaseST(ch), 100L));
 
   if (char_is_android(ch) && char_plr_flagged(ch, PLR_SENSEM)) {
     char_set_skills_base(ch, SKILL_SENSE, 100);
@@ -420,41 +420,41 @@ void do_start(struct char_data *ch)
     gainBaseKI(ch, rand_number(400, 500), false);
   }
 
-  if (ch->real_abils.str > 20) {
-    ch->real_abils.str = 20;
+  if (char_get_real_abils_str(ch) > 20) {
+    char_set_real_abils_str(ch, 20);
   }
-  if (ch->real_abils.str < 8) {
-    ch->real_abils.str = 8;
+  if (char_get_real_abils_str(ch) < 8) {
+    char_set_real_abils_str(ch, 8);
   }
-  if (ch->real_abils.con > 20) {
-    ch->real_abils.con = 20;
+  if (char_get_real_abils_con(ch) > 20) {
+    char_set_real_abils_con(ch, 20);
   }
-  if (ch->real_abils.con < 8) {
-    ch->real_abils.con = 8;
+  if (char_get_real_abils_con(ch) < 8) {
+    char_set_real_abils_con(ch, 8);
   }
-  if (ch->real_abils.intel > 20) {
-    ch->real_abils.intel = 20;
+  if (char_get_real_abils_intel(ch) > 20) {
+    char_set_real_abils_intel(ch, 20);
   }
-  if (ch->real_abils.intel < 8) {
-    ch->real_abils.intel = 8;
+  if (char_get_real_abils_intel(ch) < 8) {
+    char_set_real_abils_intel(ch, 8);
   }
-  if (ch->real_abils.cha > 20) {
-    ch->real_abils.cha = 20;
+  if (char_get_real_abils_cha(ch) > 20) {
+    char_set_real_abils_cha(ch, 20);
   }
-  if (ch->real_abils.cha < 8) {
-    ch->real_abils.cha = 8;
+  if (char_get_real_abils_cha(ch) < 8) {
+    char_set_real_abils_cha(ch, 8);
   }
-  if (ch->real_abils.dex > 20) {
-    ch->real_abils.dex = 20;
+  if (char_get_real_abils_dex(ch) > 20) {
+    char_set_real_abils_dex(ch, 20);
   }
-  if (ch->real_abils.dex < 8) {
-    ch->real_abils.dex = 8;
+  if (char_get_real_abils_dex(ch) < 8) {
+    char_set_real_abils_dex(ch, 8);
   }
-  if (ch->real_abils.wis > 20) {
-    ch->real_abils.wis = 20;
+  if (char_get_real_abils_wis(ch) > 20) {
+    char_set_real_abils_wis(ch, 20);
   }
-  if (ch->real_abils.wis < 8) {
-    ch->real_abils.wis = 8;
+  if (char_get_real_abils_wis(ch) < 8) {
+    char_set_real_abils_wis(ch, 8);
   }
 
   char_set_transclass(ch, rand_number(1, 3));
@@ -464,11 +464,11 @@ void do_start(struct char_data *ch)
 
   if (char_get_race(ch) == RACE_SAIYAN && rand_number(1, 100) >= 95) {
     char_plr_set(ch, PLR_LSSJ, true);
-    write_to_output(ch->desc, "@GYou were one of the few born a Legendary Super Saiyan!@n\r\n");
+    write_to_output(char_get_desc(ch), "@GYou were one of the few born a Legendary Super Saiyan!@n\r\n");
   }
   restoreVitals(ch, true);
 
-  ch->player_specials->olc_zone = NOWHERE;
+  char_get_player_specials(ch)->olc_zone = NOWHERE;
   save_char(ch);
 }
 
@@ -760,9 +760,9 @@ void advance_level(struct char_data *ch, int whichclass)
     /* blah */
   } else {
     gainBasePL(ch, rand_number(1, 20), false);
-    ch->basepl = MAX(ch->basepl, 250L);
-    ch->baseki = MAX(ch->baseki, 250L);
-    ch->basest = MAX(ch->basest, 250L);
+    char_set_basepl(ch, MAX(getBasePL(ch), 250L));
+    char_set_baseki(ch, MAX(getBaseKI(ch), 250L));
+    char_set_basest(ch, MAX(getBaseST(ch), 250L));
 
     add_prac = 5;
     if (char_plr_flagged(ch, PLR_SKILLP)) {
@@ -859,17 +859,17 @@ void advance_level(struct char_data *ch, int whichclass)
     int raise = false, stat_fail = 0;
     if (char_is_konatsu(ch)) {
       while (raise == false) {
-        if (ch->real_abils.dex < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
-          if (ch->real_abils.dex < 45 || char_get_bonuses(ch, BONUS_CLUMSY) <= 0) {
-            ch->real_abils.dex += 1;
+        if (char_get_real_abils_dex(ch) < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
+          if (char_get_real_abils_dex(ch) < 45 || char_get_bonuses(ch, BONUS_CLUMSY) <= 0) {
+            char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 1);
             send_to_char(ch, "@GYou feel your agility increase!@n\r\n");
             raise = true;
           } else {
             stat_fail += 1;
           }
-        } else if (ch->real_abils.cha < 100 && raise == false && stat_fail < 2) {
-          if (ch->real_abils.cha < 45 || char_get_bonuses(ch, BONUS_SLOW) > 0) {
-            ch->real_abils.cha += 1;
+        } else if (char_get_real_abils_cha(ch) < 100 && raise == false && stat_fail < 2) {
+          if (char_get_real_abils_cha(ch) < 45 || char_get_bonuses(ch, BONUS_SLOW) > 0) {
+            char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 1);
             send_to_char(ch, "@GYou feel your speed increase!@n\r\n");
             raise = true;
           } else {
@@ -884,17 +884,17 @@ void advance_level(struct char_data *ch, int whichclass)
 
     else if (char_is_mutant(ch)) {
       while (raise == false) {
-        if (ch->real_abils.con < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
-          if (ch->real_abils.con < 45 || char_get_bonuses(ch, BONUS_FRAIL) <= 0) {
-            ch->real_abils.con += 1;
+        if (char_get_real_abils_con(ch) < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
+          if (char_get_real_abils_con(ch) < 45 || char_get_bonuses(ch, BONUS_FRAIL) <= 0) {
+            char_set_real_abils_con(ch, char_get_real_abils_con(ch) + 1);
             send_to_char(ch, "@GYou feel your constitution increase!@n\r\n");
             raise = true;
           } else {
             stat_fail += 1;
           }
-        } else if (ch->real_abils.cha < 100 && raise == false && stat_fail < 2) {
-          if (ch->real_abils.cha < 45 || char_get_bonuses(ch, BONUS_SLOW) > 0) {
-            ch->real_abils.cha += 1;
+        } else if (char_get_real_abils_cha(ch) < 100 && raise == false && stat_fail < 2) {
+          if (char_get_real_abils_cha(ch) < 45 || char_get_bonuses(ch, BONUS_SLOW) > 0) {
+            char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 1);
             send_to_char(ch, "@GYou feel your speed increase!@n\r\n");
             raise = true;
           } else {
@@ -909,17 +909,17 @@ void advance_level(struct char_data *ch, int whichclass)
 
     else if (char_is_hoshijin(ch)) {
       while (raise == false) {
-        if (ch->real_abils.str < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
-          if (ch->real_abils.str < 45 || char_get_bonuses(ch, BONUS_WIMP) <= 0) {
-            ch->real_abils.str += 1;
+        if (char_get_real_abils_str(ch) < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
+          if (char_get_real_abils_str(ch) < 45 || char_get_bonuses(ch, BONUS_WIMP) <= 0) {
+            char_set_real_abils_str(ch, char_get_real_abils_str(ch) + 1);
             send_to_char(ch, "@GYou feel your strength increase!@n\r\n");
             raise = true;
           } else {
             stat_fail += 1;
           }
-        } else if (ch->real_abils.dex < 100 && raise == false && stat_fail < 2) {
-          if (ch->real_abils.dex < 45 || char_get_bonuses(ch, BONUS_SLOW) > 0) {
-            ch->real_abils.dex += 1;
+        } else if (char_get_real_abils_dex(ch) < 100 && raise == false && stat_fail < 2) {
+          if (char_get_real_abils_dex(ch) < 45 || char_get_bonuses(ch, BONUS_SLOW) > 0) {
+            char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 1);
             send_to_char(ch, "@GYou feel your agility increase!@n\r\n");
             raise = true;
           } else {
@@ -970,27 +970,27 @@ void advance_level(struct char_data *ch, int whichclass)
     case 90:
     case 100:
       if (char_get_bonuses(ch, BONUS_BRAWNY) > 0) {
-        ch->real_abils.str += 2;
+        char_set_real_abils_str(ch, char_get_real_abils_str(ch) + 2);
         send_to_char(ch, "@GYour muscles have grown stronger!@n\r\n");
       }
       if (char_get_bonuses(ch, BONUS_SCHOLARLY) > 0) {
-        ch->real_abils.intel += 2;
+        char_set_real_abils_intel(ch, char_get_real_abils_intel(ch) + 2);
         send_to_char(ch, "@GYour mind has grown sharper!@n\r\n");
       }
       if (char_get_bonuses(ch, BONUS_SAGE) > 0) {
-        ch->real_abils.wis += 2;
+        char_set_real_abils_wis(ch, char_get_real_abils_wis(ch) + 2);
         send_to_char(ch, "@GYour understanding about life has improved!@n\r\n");
       }
       if (char_get_bonuses(ch, BONUS_AGILE) > 0) {
-        ch->real_abils.dex += 2;
+        char_set_real_abils_dex(ch, char_get_real_abils_dex(ch) + 2);
         send_to_char(ch, "@GYour body has grown more agile!@n\r\n");
       }
       if (char_get_bonuses(ch, BONUS_QUICK) > 0) {
-        ch->real_abils.cha += 2;
+        char_set_real_abils_cha(ch, char_get_real_abils_cha(ch) + 2);
         send_to_char(ch, "@GYou feel like your speed has improved!@n\r\n");
       }
       if (char_get_bonuses(ch, BONUS_STURDY) > 0) {
-        ch->real_abils.con += 2;
+        char_set_real_abils_con(ch, char_get_real_abils_con(ch) + 2);
         send_to_char(ch, "@GYour body feels tougher now!@n\r\n");
       }
       break;

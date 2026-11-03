@@ -17,6 +17,8 @@
 
 #include "dbat/broadcast.h"
 #include "dbat/act.other.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 /* local functions  */
 
@@ -197,20 +199,20 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
           obj = d->obj_point;
 
           *buf      = '\0';
-          obj->name = strdup(d->obj_name);
+          obj_set_name(obj, strdup(d->obj_name));
 
           *buf2                  = '\0';
-          obj->short_description = strdup(d->obj_short);
+          obj_set_short_description(obj, strdup(d->obj_short));
 
           *buf3            = '\0';
-          obj->description = strdup(d->obj_long);
+          obj_set_description(obj, strdup(d->obj_long));
 
           d->obj_editflag = EDIT_NONE;
           d->obj_editval  = EDIT_NONE;
-          d->character->gold -= 5000;
+          char_set_gold(d->character, char_get_gold(d->character) - 5000);
           obj_extra_set(obj, ITEM_RESTRING, true);
           write_to_output(d, "Purchase complete.");
-          send_to_imm("Restring Eq: %s has bought: %s, which was %s.", char_get_name(d->character), obj->short_description, d->obj_was);
+          send_to_imm("Restring Eq: %s has bought: %s, which was %s.", char_get_name(d->character), obj_get_short_description(obj), d->obj_was);
           desc_set_connected(d, CON_PLAYING);
         } else if (!strcasecmp(arg, "No") || !strcasecmp(arg, "no") || !strcasecmp(arg, "n") || !strcasecmp(arg, "N")) {
           write_to_output(d, "Canceling purchase at no cost.\r\n");
@@ -449,20 +451,20 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
                 break;
             }
             *buf                   = '\0';
-            obj->name              = strdup(d->obj_name);
+            obj_set_name(obj, strdup(d->obj_name));
             *buf2                  = '\0';
-            obj->short_description = strdup(d->obj_short);
+            obj_set_short_description(obj, strdup(d->obj_short));
             *buf3                  = '\0';
-            obj->description       = strdup(d->obj_long);
+            obj_set_description(obj, strdup(d->obj_long));
           } else {
             obj = read_object(20098, VIRTUAL);
             obj_to_char(obj, d->character);
             *buf                   = '\0';
-            obj->name              = strdup(d->obj_name);
+            obj_set_name(obj, strdup(d->obj_name));
             *buf2                  = '\0';
-            obj->short_description = strdup(d->obj_short);
+            obj_set_short_description(obj, strdup(d->obj_short));
             *buf3                  = '\0';
-            obj->description       = strdup(d->obj_long);
+            obj_set_description(obj, strdup(d->obj_long));
             switch (d->obj_weapon) {
               case 1:
                 obj_set_value(obj, VAL_WEAPON_DAMTYPE, TYPE_SLASH - TYPE_HIT);
@@ -488,13 +490,13 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg)
           obj_extra_set(obj, ITEM_SLOT2, true);
           d->obj_editflag = EDIT_NONE;
           d->obj_editval  = EDIT_NONE;
-          d->character->rp -= 20;
-          char_set_rp(d->character, d->character->rp);
+          char_set_rp(d->character, char_get_rp(d->character) - 20);
+          char_set_rp(d->character, char_get_rp(d->character));
           d->rpp -= 20;
           userWrite(d, 0, 0, 0, "index");
           obj_set_size(obj, get_size(d->character));
           obj_extra_set(obj, ITEM_CUSTOM, true);
-          send_to_imm("Custom Eq: %s has bought: %s.", char_get_name(d->character), obj->short_description);
+          send_to_imm("Custom Eq: %s has bought: %s.", char_get_name(d->character), obj_get_short_description(obj));
           customWrite(d->character, obj);
           log_custom(d, obj);
         } else if (!strcasecmp(arg, "n") || !strcasecmp(arg, "N")) {

@@ -156,7 +156,7 @@ void assemblyListToChar(struct char_data *pCharacter)
     } else {
       sprinttype(g_pAssemblyTable[i].uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
       sprintf(szBuffer, "[%5d] %s (%s)\r\n", g_pAssemblyTable[i].lVnum,
-              obj_proto[lRnum].short_description, szAssmType);
+              obj_get_short_description(&obj_proto[lRnum]), szAssmType);
       send_to_char(pCharacter, "%s", szBuffer);
 
       for (j = 0; j < g_pAssemblyTable[i].lNumComponents; j++) {
@@ -166,7 +166,7 @@ void assemblyListToChar(struct char_data *pCharacter)
                   g_pAssemblyTable[i].pComponents[j].lVnum, g_pAssemblyTable[i].lVnum);
         } else {
           sprintf(szBuffer, " %5d: %-20.20s Extract=%-3.3s InRoom=%-3.3s\r\n", +g_pAssemblyTable[i].pComponents[j].lVnum,
-                  obj_proto[lRnum].short_description,
+                  obj_get_short_description(&obj_proto[lRnum]),
                   (g_pAssemblyTable[i].pComponents[j].bExtract ? "Yes" : "No"),
                   (g_pAssemblyTable[i].pComponents[j].bInRoom ? "Yes" : "No"));
           send_to_char(pCharacter, "%s", szBuffer);
@@ -246,14 +246,14 @@ bool assemblyCheckComponents(obj_vnum lVnum, struct char_data *pCharacter, int e
     else {
       if (pAssembly->pComponents[i].bInRoom) {
         if ((ppComponentObjects[i] = get_obj_in_list_num(lRnum,
-                                                         world[char_get_in_room(pCharacter)].contents)) == nullptr)
+                                                         rroom_get_contents(char_get_in_room(pCharacter)))) == nullptr)
           bOk = false;
         else {
           obj_from_room(ppComponentObjects[i]);
         }
       } else {
         if ((ppComponentObjects[i] = get_obj_in_list_num(lRnum,
-                                                         pCharacter->carrying)) == nullptr)
+                                                         char_get_inventory(pCharacter))) == nullptr)
           bOk = false;
         else {
           obj_from_char(ppComponentObjects[i]);
@@ -397,7 +397,7 @@ obj_vnum assemblyFindAssembly(const char *pszAssemblyName)
   for (i = 0; i < g_lNumAssemblies; i++) {
     if ((lRnum = real_object(g_pAssemblyTable[i].lVnum)) < 0)
       mud_log("SYSERR: assemblyFindAssembly(): Invalid vnum #%d in assembly table.", g_pAssemblyTable[i].lVnum);
-    else if (isname(pszAssemblyName, obj_proto[lRnum].name))
+    else if (isname(pszAssemblyName, obj_get_name(&obj_proto[lRnum])))
       return (g_pAssemblyTable[i].lVnum);
   }
 

@@ -133,13 +133,12 @@ void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
     }
     /* set the caster's name to that of the object, or the gods.... */
     if (type == OBJ_TRIGGER)
-      caster->short_descr =
-          strdup(((struct obj_data *)go)->short_description);
+      char_set_sdesc(caster, strdup(obj_get_short_description((struct obj_data *)go)));
     else if (type == WLD_TRIGGER)
-      caster->short_descr = strdup("The gods");
-    caster->next_in_room = caster_room->people;
-    caster_room->people  = caster;
-    char_set_in_room(caster, real_room(caster_room->number));
+      char_set_sdesc(caster, strdup("The gods"));
+    char_set_next_in_room(caster, room_get_people(caster_room));
+    room_set_people(caster_room, caster);
+    char_set_in_room(caster, real_room(room_get_number(caster_room)));
     call_magic(caster, tch, tobj, spellnum, DG_SPELL_LEVEL, CAST_SPELL, t);
     extract_char(caster);
   } else
@@ -305,7 +304,7 @@ void script_damage(struct char_data *vict, int dam)
   if (char_get_position(vict) == POS_DEAD) {
     if (!char_is_npc(vict))
       mudlog(LOG_BRF, 0, true, "%s killed by script at %s",
-             char_get_name(vict), world[char_get_in_room(vict)].name);
+             char_get_name(vict), rroom_get_name(char_get_in_room(vict)));
     die(vict, nullptr);
   }
 }
@@ -327,7 +326,7 @@ const char *dg_door_fields[] = {
  */
 bool dg_door_apply(room_data *rm, int dir, int field, char *value)
 {
-  struct room_direction_data *newexit = rm->dir_option[dir];
+  struct room_direction_data *newexit = room_get_dir_option(rm, dir);
   room_rnum to_room;
 
   /* purge exit */
@@ -338,14 +337,14 @@ bool dg_door_apply(room_data *rm, int dir, int field, char *value)
       if (newexit->keyword)
         free(newexit->keyword);
       free(newexit);
-      rm->dir_option[dir] = nullptr;
+      room_set_dir_option(rm, dir, nullptr);
     }
     return true;
   }
 
   if (!newexit) {
     CREATE(newexit, struct room_direction_data, 1);
-    rm->dir_option[dir] = newexit;
+    room_set_dir_option(rm, dir, newexit);
   }
 
   switch (field) {

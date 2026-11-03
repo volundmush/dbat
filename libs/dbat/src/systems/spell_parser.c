@@ -19,6 +19,9 @@
 #include "dbat/fight.h"
 #include "dbat/act.other.h"
 #include "dbat/class.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 /* extern globals */
 
@@ -207,8 +210,8 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
   switch (obj_get_type_flag(obj)) {
     case ITEM_STAFF:
       act("You tap $p three times on the ground.", false, ch, obj, 0, TO_CHAR);
-      if (obj->action_description)
-        act(obj->action_description, false, ch, obj, 0, TO_ROOM);
+      if (obj_get_action_description(obj))
+        act(obj_get_action_description(obj), false, ch, obj, 0, TO_ROOM);
       else
         act("$n taps $p three times on the ground.", false, ch, obj, 0, TO_ROOM);
 
@@ -228,13 +231,13 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
        * Solution: We special case the area/mass spells here.
        */
         if (spell_has_routine(obj_get_value(obj, VAL_STAFF_SPELL), MAG_MASSES | MAG_AREAS)) {
-          for (i = 0, tch = world[char_get_in_room(ch)].people; tch; tch = tch->next_in_room)
+          for (i = 0, tch = rroom_get_people(char_get_in_room(ch)); tch; tch = char_get_next_in_room(tch))
             i++;
           while (i-- > 0)
             call_magic(ch, nullptr, nullptr, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
         } else {
-          for (tch = world[char_get_in_room(ch)].people; tch; tch = next_tch) {
-            next_tch = tch->next_in_room;
+          for (tch = rroom_get_people(char_get_in_room(ch)); tch; tch = next_tch) {
+            next_tch = char_get_next_in_room(tch);
             if (ch != tch)
               call_magic(ch, tch, nullptr, obj_get_value(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
           }
@@ -248,15 +251,15 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
           act("$n points $p at $mself.", false, ch, obj, 0, TO_ROOM);
         } else {
           act("You point $p at $N.", false, ch, obj, tch, TO_CHAR);
-          if (obj->action_description)
-            act(obj->action_description, false, ch, obj, tch, TO_ROOM);
+          if (obj_get_action_description(obj))
+            act(obj_get_action_description(obj), false, ch, obj, tch, TO_ROOM);
           else
             act("$n points $p at $N.", true, ch, obj, tch, TO_ROOM);
         }
       } else if (tobj != nullptr) {
         act("You point $p at $P.", false, ch, obj, tobj, TO_CHAR);
-        if (obj->action_description)
-          act(obj->action_description, false, ch, obj, tobj, TO_ROOM);
+        if (obj_get_action_description(obj))
+          act(obj_get_action_description(obj), false, ch, obj, tobj, TO_ROOM);
         else
           act("$n points $p at $P.", true, ch, obj, tobj, TO_ROOM);
       } else if (IS_SET(spell_info[obj_get_value(obj, VAL_WAND_SPELL)].routines, MAG_AREAS | MAG_MASSES)) {
@@ -293,8 +296,8 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
         tch = ch;
 
       act("You recite $p which dissolves.", true, ch, obj, 0, TO_CHAR);
-      if (obj->action_description)
-        act(obj->action_description, false, ch, obj, tch, TO_ROOM);
+      if (obj_get_action_description(obj))
+        act(obj_get_action_description(obj), false, ch, obj, tch, TO_ROOM);
       else
         act("$n recites $p.", false, ch, obj, nullptr, TO_ROOM);
 
@@ -314,8 +317,8 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
         return;
 
       act("You swallow $p.", false, ch, obj, nullptr, TO_CHAR);
-      if (obj->action_description)
-        act(obj->action_description, false, ch, obj, nullptr, TO_ROOM);
+      if (obj_get_action_description(obj))
+        act(obj_get_action_description(obj), false, ch, obj, nullptr, TO_ROOM);
       else
         act("$n swallows $p.", true, ch, obj, nullptr, TO_ROOM);
 

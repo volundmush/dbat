@@ -18,6 +18,9 @@
 #include "dbat/maputils.h"
 #include "dbat/vehicles.h"
 #include "dbat/act.informative.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 /* local functions */
 static bool VALID_EDGE(room_rnum x, int y);
@@ -37,11 +40,11 @@ static struct bfs_queue_struct *bfs_queue_head = 0, *bfs_queue_tail = 0;
 #define MARK(room)      (rroom_set_flag(room, ROOM_BFS_MARK, true))
 #define UNMARK(room)    (rroom_set_flag(room, ROOM_BFS_MARK, false))
 #define IS_MARKED(room) (rroom_flagged(room, ROOM_BFS_MARK))
-#define IS_CLOSED(x, y) (room_exit_flagged(world[(x)].dir_option[(y)], EX_CLOSED))
+#define IS_CLOSED(x, y) (room_exit_flagged(rroom_get_dir_option((x), (y)), EX_CLOSED))
 
 static bool VALID_EDGE(room_rnum x, int y)
 {
-  if (world[x].dir_option[y] == nullptr || rroom_get_exit_to_room(x, y) == NOWHERE)
+  if (rroom_get_dir_option(x, y) == nullptr || rroom_get_exit_to_room(x, y) == NOWHERE)
     return false;
   if (CONFIG_TRACK_T_DOORS == false && IS_CLOSED(x, y))
     return false;
@@ -173,7 +176,7 @@ ACMD(do_sradar)
 
   if (!*arg) {
     if (char_get_admlevel(ch) >= 1 && noship == true) {
-      printmap(ch->in_room, ch, 0, -1);
+      printmap(char_get_in_room(ch), ch, 0, -1);
     } else {
       printmap(obj_get_in_room(vehicle), ch, 0, obj_get_vnum(vehicle));
     }
@@ -309,8 +312,8 @@ ACMD(do_radar)
   struct char_data *tch;
   struct obj_data *obj, *obj2, *next_obj;
 
-  for (obj2 = ch->carrying; obj2; obj2 = next_obj) {
-    next_obj = obj2->next_content;
+  for (obj2 = char_get_inventory(ch); obj2; obj2 = next_obj) {
+    next_obj = obj_get_next_content(obj2);
     if (obj_get_vnum(obj2) == 12 && (!obj_extra_flagged(obj2, ITEM_BROKEN)) && (!obj_extra_flagged(obj2, ITEM_FORGED))) {
       found2 = true;
     }
@@ -330,8 +333,8 @@ ACMD(do_radar)
     act("$n holds up a dragon radar and pushes its button.", false, ch, 0, 0, TO_ROOM);
     while (num < 20000) {
       if (real_room(room) != NOWHERE) {
-        for (obj = world[real_room(room)].contents; obj; obj = next_obj) {
-          next_obj = obj->next_content;
+        for (obj = rroom_get_contents(real_room(room)); obj; obj = next_obj) {
+          next_obj = obj_get_next_content(obj);
           if (obj_extra_flagged(obj, ITEM_FORGED)) {
             continue;
           }
@@ -355,12 +358,12 @@ ACMD(do_radar)
             found = true;
           }
         }
-        for (tch = world[real_room(room)].people; tch; tch = tch->next_in_room) {
+        for (tch = rroom_get_people(real_room(room)); tch; tch = char_get_next_in_room(tch)) {
           if (tch == ch) {
             continue;
           }
-          for (obj = tch->carrying; obj; obj = next_obj) {
-            next_obj = obj->next_content;
+          for (obj = char_get_inventory(tch); obj; obj = next_obj) {
+            next_obj = obj_get_next_content(obj);
             if (obj_extra_flagged(obj, ITEM_FORGED)) {
               continue;
             }

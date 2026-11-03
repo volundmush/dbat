@@ -24,6 +24,7 @@
 #include "dbat/atomicfile.h"
 
 #include <unistd.h>
+#include "dbat/character_utils.h"
 
 constexpr int LOAD_HIT  = 0;
 constexpr int LOAD_MANA = 1;
@@ -236,7 +237,7 @@ int load_char(const char *name, struct char_data *ch)
 
     /* character initializations */
     /* initializations necessary to keep some things straight */
-    ch->affected = nullptr;
+    char_set_affected(ch, nullptr);
 
     for (i = 0; i < SKILL_TABLE_SIZE; i++) {
       char_set_skills_base(ch, i, 0);
@@ -244,10 +245,10 @@ int load_char(const char *name, struct char_data *ch)
       char_set_skills_perf(ch, i, 0);
     }
     char_set_sex(ch, PFDEF_SEX);
-    ch->size    = PFDEF_SIZE;
-    ch->chclass = CLASS_ROSHI;
+    char_set_size(ch, PFDEF_SIZE);
+    char_set_class(ch, CLASS_ROSHI);
     char_set_loguser(ch, strdup("NOUSER"));
-    ch->race = PFDEF_RACE;
+    char_set_race(ch, PFDEF_RACE);
     char_set_admlevel(ch, PFDEF_LEVEL);
     char_set_class_level(ch, PFDEF_LEVEL);
     char_set_race_level(ch, PFDEF_LEVEL);
@@ -261,20 +262,20 @@ int load_char(const char *name, struct char_data *ch)
     char_set_hometown(ch, PFDEF_HOMETOWN);
     char_set_height(ch, PFDEF_HEIGHT);
     char_set_weight(ch, PFDEF_WEIGHT);
-    ch->basepl = PFDEF_BASEPL;
-    ch->health = 1.0;
+    char_set_basepl(ch, PFDEF_BASEPL);
+    char_set_health(ch, 1.0);
     char_set_relax_count(ch, PFDEF_EYE);
     char_set_blesslvl(ch, PFDEF_HEIGHT);
-    ch->life = 1.0;
+    char_set_life(ch, 1.0);
     // GET_LIFEFORCE(ch) = PFDEF_BASEPL;
     char_set_lifeperc(ch, PFDEF_WEIGHT);
     char_set_position(ch, POS_STANDING);
     char_set_majinizer(ch, PFDEF_BASEPL);
     char_set_gauntlet(ch, PFDEF_GAUNTLET);
-    ch->baseki  = PFDEF_BASEKI;
-    ch->energy  = 1.0;
-    ch->basest  = PFDEF_BASEST;
-    ch->stamina = 1.0;
+    char_set_baseki(ch, PFDEF_BASEKI);
+    char_set_energy(ch, 1.0);
+    char_set_basest(ch, PFDEF_BASEST);
+    char_set_stamina(ch, 1.0);
     char_set_hairl(ch, PFDEF_HAIRL);
     char_set_hairc(ch, PFDEF_HAIRC);
     char_set_skin(ch, PFDEF_SKIN);
@@ -288,7 +289,7 @@ int load_char(const char *name, struct char_data *ch)
     char_set_lastint(ch, PFDEF_LPLAY);
     char_set_deathtime(ch, PFDEF_LPLAY);
     char_set_starphase(ch, PFDEF_EYE);
-    ch->mimic = 0;
+    char_set_mimic(ch, 0);
     char_set_skill_slots(ch, 0);
     char_set_tail_growth(ch, 0);
     char_set_trainstr(ch, PFDEF_EYE);
@@ -359,12 +360,12 @@ int load_char(const char *name, struct char_data *ch)
     char_set_accuracy_mod(ch, PFDEF_ACCURACY);
     char_set_accuracy(ch, PFDEF_ACCURACY);
     char_set_armor(ch, PFDEF_AC);
-    ch->real_abils.str   = PFDEF_STR;
-    ch->real_abils.dex   = PFDEF_DEX;
-    ch->real_abils.intel = PFDEF_INT;
-    ch->real_abils.wis   = PFDEF_WIS;
-    ch->real_abils.con   = PFDEF_CON;
-    ch->real_abils.cha   = PFDEF_CHA;
+    char_set_real_abils_str(ch, PFDEF_STR);
+    char_set_real_abils_dex(ch, PFDEF_DEX);
+    char_set_real_abils_intel(ch, PFDEF_INT);
+    char_set_real_abils_wis(ch, PFDEF_WIS);
+    char_set_real_abils_con(ch, PFDEF_CON);
+    char_set_real_abils_cha(ch, PFDEF_CHA);
     //GET_HIT(ch) = PFDEF_HIT;
     //ch->max_hit = PFDEF_MAXHIT;
     //GET_MANA(ch) = PFDEF_MANA;
@@ -377,10 +378,12 @@ int load_char(const char *name, struct char_data *ch)
     char_set_olc_zone(ch, PFDEF_OLC);
     char_set_host(ch, nullptr);
 
-    ch->time.birth = ch->time.created = ch->time.maxage = 0;
-    ch->followers                                       = nullptr;
+    char_set_time_maxage(ch, 0);
+    char_set_time_created(ch, 0);
+    char_set_time_birth(ch, 0);
+    char_set_followers(ch, nullptr);
     for (i = 0; i < NUM_COLOR; i++)
-      ch->player_specials->color_choices[i] = nullptr;
+      char_get_player_specials(ch)->color_choices[i] = nullptr;
 
     while (get_line(fl, line)) {
       tag_argument(line, tag);
@@ -427,30 +430,30 @@ int load_char(const char *name, struct char_data *ch)
           else if (!strcmp(tag, "Bonu")) load_bonuses(fl, ch, false);
           else if (!strcmp(tag, "Boos")) char_set_boosts(ch, atoi(line));
           else if (!strcmp(tag, "Bpl ")) load_BASE(ch, line, LOAD_HIT);
-          else if (!strcmp(tag, "Brth")) ch->time.birth = atoll(line);
+          else if (!strcmp(tag, "Brth")) char_set_time_birth(ch, atoll(line));
           else if (!strcmp(tag, "Bst ")) load_BASE(ch, line, LOAD_MOVE);
           break;
 
         case 'C':
-          if (!strcmp(tag, "Cha ")) ch->real_abils.cha = atoi(line);
+          if (!strcmp(tag, "Cha ")) char_set_real_abils_cha(ch, atoi(line));
           else if (!strcmp(tag, "Clan"))
             ;
           else if (!strcmp(tag, "Clar"))
             ;
-          else if (!strcmp(tag, "Clas")) ch->chclass = atoi(line);
+          else if (!strcmp(tag, "Clas")) char_set_class(ch, atoi(line));
           else if (!strcmp(tag, "Colr")) {
             sscanf(line, "%d %127s", &num, buf2);
-            ch->player_specials->color_choices[num] = strdup(buf2);
-          } else if (!strcmp(tag, "Con ")) ch->real_abils.con = atoi(line);
+            char_get_player_specials(ch)->color_choices[num] = strdup(buf2);
+          } else if (!strcmp(tag, "Con ")) char_set_real_abils_con(ch, atoi(line));
           else if (!strcmp(tag, "Cool")) char_set_con_cooldown(ch, atoi(line));
-          else if (!strcmp(tag, "Crtd")) ch->time.created = atoll(line);
+          else if (!strcmp(tag, "Crtd")) char_set_time_created(ch, atoll(line));
           break;
 
         case 'D':
           if (!strcmp(tag, "Deat")) char_set_deathtime(ch, atoll(line));
           else if (!strcmp(tag, "Deac")) char_set_dcount(ch, atoi(line));
-          else if (!strcmp(tag, "Desc")) ch->description = fread_string(fl, buf2);
-          else if (!strcmp(tag, "Dex ")) ch->real_abils.dex = atoi(line);
+          else if (!strcmp(tag, "Desc")) char_set_ddesc(ch, fread_string(fl, buf2));
+          else if (!strcmp(tag, "Dex ")) char_set_real_abils_dex(ch, atoi(line));
           else if (!strcmp(tag, "Drnk")) char_set_conditions(ch, DRUNK, atoi(line));
           else if (!strcmp(tag, "Damg"))
             ; /* obsolete damage mod: ignored */
@@ -499,7 +502,7 @@ int load_char(const char *name, struct char_data *ch)
         case 'I':
           if (!strcmp(tag, "Id  ")) char_set_idnum(ch, atol(line));
           else if (!strcmp(tag, "INGl")) char_set_ingestLearned(ch, atoi(line));
-          else if (!strcmp(tag, "Int ")) ch->real_abils.intel = atoi(line);
+          else if (!strcmp(tag, "Int ")) char_set_real_abils_intel(ch, atoi(line));
           else if (!strcmp(tag, "Invs")) char_set_invis_level(ch, atoi(line));
           break;
 
@@ -509,7 +512,7 @@ int load_char(const char *name, struct char_data *ch)
           break;
 
         case 'L':
-          if (!strcmp(tag, "Last")) ch->time.logon = atoll(line);
+          if (!strcmp(tag, "Last")) char_set_time_logon(ch, atoll(line));
           else if (!strcmp(tag, "Lern")) char_set_practice_points(ch, atoi(line));
           else if (!strcmp(tag, "Levl")) char_set_class_level(ch, atoi(line));
           /* else if (!strcmp(tag, "LevD"))  read_level_data(ch, fl);*/
@@ -533,8 +536,8 @@ int load_char(const char *name, struct char_data *ch)
             sscanf(line, "%d=%d", &num, &num2);
           } else if (!strcmp(tag, "Maji")) char_set_majinize(ch, atoi(line));
           else if (!strcmp(tag, "Majm")) load_majin(ch, line);
-          else if (!strcmp(tag, "Mimi")) ch->mimic = atoi(line);
-          else if (!strcmp(tag, "MxAg")) ch->time.maxage = atoll(line);
+          else if (!strcmp(tag, "Mimi")) char_set_mimic(ch, atoi(line));
+          else if (!strcmp(tag, "MxAg")) char_set_time_maxage(ch, atoll(line));
           break;
 
         case 'N':
@@ -549,7 +552,7 @@ int load_char(const char *name, struct char_data *ch)
           if (!strcmp(tag, "Page")) { /* old page-length setting: no longer used */
           } else if (!strcmp(tag, "Phas")) char_set_distfea(ch, atoi(line));
           else if (!strcmp(tag, "Phse")) char_set_starphase(ch, atoi(line));
-          else if (!strcmp(tag, "Plyd")) ch->time.played = atoll(line);
+          else if (!strcmp(tag, "Plyd")) char_set_time_played(ch, atoll(line));
 #ifdef ASCII_SAVE_POOFS
           else if (!strcmp(tag, "PfIn")) char_set_poofin(ch, strdup(line));
           else if (!strcmp(tag, "PfOt")) char_set_poofout(ch, strdup(line));
@@ -571,7 +574,7 @@ int load_char(const char *name, struct char_data *ch)
           break;
 
         case 'R':
-          if (!strcmp(tag, "Race")) ch->race = atoi(line);
+          if (!strcmp(tag, "Race")) char_set_race(ch, atoi(line));
           else if (!strcmp(tag, "Raci")) char_set_racial_pref(ch, atoi(line));
           else if (!strcmp(tag, "RBan")) char_set_rbank(ch, atoi(line));
           else if (!strcmp(tag, "rDis")) char_set_rdisplay(ch, line);
@@ -594,16 +597,16 @@ int load_char(const char *name, struct char_data *ch)
             ; /* obsolete ship room: ignored */
           else if (!strcmp(tag, "Skil")) load_skills(fl, ch, false);
           else if (!strcmp(tag, "Skn ")) char_set_skin(ch, atoi(line));
-          else if (!strcmp(tag, "Size")) ch->size = atoi(line);
+          else if (!strcmp(tag, "Size")) char_set_size(ch, atoi(line));
           else if (!strcmp(tag, "SklB")) load_skills(fl, ch, true);
           else if (!strcmp(tag, "SkRc"))
             ; /* obsolete race practices: ignored */
           else if (!strcmp(tag, "SkCl")) {
             sscanf(line, "%d %d", &num2, &num3);
             char_set_practice_points(ch, num3);
-          } else if (!strcmp(tag, "Slot")) ch->skill_slots = atoi(line);
+          } else if (!strcmp(tag, "Slot")) char_set_skill_slots(ch, atoi(line));
           else if (!strcmp(tag, "Spek")) char_set_speaking(ch, atoi(line));
-          else if (!strcmp(tag, "Str ")) ch->real_abils.str = atoi(line);
+          else if (!strcmp(tag, "Str ")) char_set_real_abils_str(ch, atoi(line));
           else if (!strcmp(tag, "Stuk"))
             ;
           else if (!strcmp(tag, "Supp")) char_set_suppression(ch, atoi(line));
@@ -615,7 +618,7 @@ int load_char(const char *name, struct char_data *ch)
           else if (!strcmp(tag, "Tcla")) char_set_transclass(ch, atoi(line));
           else if (!strcmp(tag, "Tcos")) {
             sscanf(line, "%d %d", &num2, &num3);
-            ch->transcost[num2] = num3;
+            char_set_transcost(ch, num2, num3);
           } else if (!strcmp(tag, "Thir")) char_set_conditions(ch, THIRST, atoi(line));
           else if (!strcmp(tag, "Thr1"))
             ;
@@ -656,7 +659,7 @@ int load_char(const char *name, struct char_data *ch)
         case 'W':
           if (!strcmp(tag, "Wate")) char_set_weight(ch, atoi(line));
           else if (!strcmp(tag, "Wimp")) char_set_wimp_level(ch, atoi(line));
-          else if (!strcmp(tag, "Wis ")) ch->real_abils.wis = atoi(line);
+          else if (!strcmp(tag, "Wis ")) char_set_real_abils_wis(ch, atoi(line));
           break;
 
         default:
@@ -665,19 +668,19 @@ int load_char(const char *name, struct char_data *ch)
     }
   }
 
-  if (!ch->time.created) {
+  if (!char_get_time_created(ch)) {
     mud_log("No creation timestamp for user %s, using current time", char_get_name(ch));
-    ch->time.created = time(0);
+    char_set_time_created(ch, time(0));
   }
 
-  if (!ch->time.birth) {
+  if (!char_get_time_birth(ch)) {
     mud_log("No birthday for user %s, using standard starting age determination", char_get_name(ch));
-    ch->time.birth = time(0) - birth_age(ch);
+    char_set_time_birth(ch, time(0) - birth_age(ch));
   }
 
-  if (!ch->time.maxage) {
+  if (!char_get_time_maxage(ch)) {
     mud_log("No max age for user %s, using standard max age determination", char_get_name(ch));
-    ch->time.maxage = ch->time.birth + max_age(ch);
+    char_set_time_maxage(ch, char_get_time_birth(ch) + max_age(ch));
   }
 
   affect_total(ch);
@@ -745,13 +748,13 @@ void save_char(struct char_data *ch)
    * If ch->desc is not null, then we need to update some session data
    * before saving.
    */
-  if (ch->desc) {
-    if (*ch->desc->host) {
+  if (char_get_desc(ch)) {
+    if (*char_get_desc(ch)->host) {
       if (!char_get_host(ch))
-        char_set_host(ch, strdup(ch->desc->host));
-      else if (char_get_host(ch) && !strcmp(char_get_host(ch), ch->desc->host)) {
+        char_set_host(ch, strdup(char_get_desc(ch)->host));
+      else if (char_get_host(ch) && !strcmp(char_get_host(ch), char_get_desc(ch)->host)) {
         free(char_get_host(ch));
-        char_set_host(ch, strdup(ch->desc->host));
+        char_set_host(ch, strdup(char_get_desc(ch)->host));
       }
     }
 
@@ -759,9 +762,9 @@ void save_char(struct char_data *ch)
      * We only update the time.played and time.logon if the character
      * is playing.
      */
-    if (desc_get_connected(ch->desc) == CON_PLAYING) {
-      ch->time.played += time(0) - ch->time.logon;
-      ch->time.logon = time(0);
+    if (desc_get_connected(char_get_desc(ch)) == CON_PLAYING) {
+      char_set_time_played(ch, char_get_time_played(ch) + (time(0) - char_get_time_logon(ch)));
+      char_set_time_logon(ch, time(0));
     }
   }
 
@@ -778,8 +781,8 @@ void save_char(struct char_data *ch)
   if (char_get_trp(ch) < char_get_rp(ch)) {
     char_set_trp(ch, char_get_rp(ch));
   }
-  if (ch->desc != nullptr && ch->desc->user != nullptr) {
-    userWrite(ch->desc, 0, 0, 0, "index");
+  if (char_get_desc(ch) != nullptr && char_get_desc(ch)->user != nullptr) {
+    userWrite(char_get_desc(ch), 0, 0, 0, "index");
   }
 
   for (i = 0; i < NUM_WEARS; i++) {
@@ -789,7 +792,7 @@ void save_char(struct char_data *ch)
       char_eq[i] = nullptr;
   }
 
-  for (aff = ch->affected, i = 0; i < MAX_AFFECT; i++) {
+  for (aff = char_get_affected(ch), i = 0; i < MAX_AFFECT; i++) {
     if (aff) {
       tmp_aff[i]      = *aff;
       tmp_aff[i].next = 0;
@@ -812,13 +815,13 @@ void save_char(struct char_data *ch)
    * effects are doubled when the char logs back in.
    */
 
-  while (ch->affected)
-    affect_remove(ch, ch->affected);
+  while (char_get_affected(ch))
+    affect_remove(ch, char_get_affected(ch));
 
   if ((i >= MAX_AFFECT) && aff && aff->next)
     mud_log("SYSERR: WARNING: OUT OF STORE ROOM FOR AFFECTED TYPES!!!");
 
-  ch->aff_abils = ch->real_abils;
+  char_reset_aff_abils(ch);
 
   /* end char_to_store code */
 
@@ -827,8 +830,8 @@ void save_char(struct char_data *ch)
   if (char_get_voice(ch)) fprintf(fl, "Voic: %s\n", char_get_voice(ch));
   if (char_get_feature(ch)) fprintf(fl, "RPfe: %s\n", char_get_feature(ch));
   if (char_get_ability_trains(ch)) fprintf(fl, "Trns: %d\n", char_get_ability_trains(ch));
-  if (ch->description && *ch->description) {
-    strcpy(buf, ch->description);
+  if (char_get_ddesc(ch) && *char_get_ddesc(ch)) {
+    strcpy(buf, char_get_ddesc(ch));
     kill_ems(buf);
     fprintf(fl, "Desc:\n%s~\n", buf);
   }
@@ -837,7 +840,7 @@ void save_char(struct char_data *ch)
   if (char_get_poofout(ch)) fprintf(fl, "PfOt: %s\n", char_get_poofout(ch));
 #endif
   if (char_get_sex(ch) != PFDEF_SEX) fprintf(fl, "Sex : %d\n", char_get_sex(ch));
-  if (ch->size != PFDEF_SIZE) fprintf(fl, "Size: %d\n", ch->size);
+  if (char_get_size(ch) != PFDEF_SIZE) fprintf(fl, "Size: %d\n", char_get_size(ch));
   if (char_get_class(ch) != PFDEF_CLASS) fprintf(fl, "Clas: %d\n", char_get_class(ch));
   if (char_get_race(ch) != PFDEF_RACE) fprintf(fl, "Race: %d\n", char_get_race(ch));
   if (char_get_racial_pref(ch) != PFDEF_BANK) fprintf(fl, "Raci: %d\n", char_get_racial_pref(ch));
@@ -847,11 +850,11 @@ void save_char(struct char_data *ch)
   if (char_get_level_adj(ch) != PFDEF_LEVEL) fprintf(fl, "LvlA: %d\n", char_get_level_adj(ch));
   if (char_get_hometown(ch) != PFDEF_HOMETOWN) fprintf(fl, "Home: %d\n", char_get_hometown(ch));
   fprintf(fl, "Id  : %d\n", char_get_idnum(ch));
-  fprintf(fl, "Brth: %lld\n", (long long)ch->time.birth);
-  fprintf(fl, "Crtd: %lld\n", (long long)ch->time.created);
-  fprintf(fl, "MxAg: %lld\n", (long long)ch->time.maxage);
-  fprintf(fl, "Plyd: %lld\n", (long long)ch->time.played);
-  fprintf(fl, "Last: %lld\n", (long long)ch->time.logon);
+  fprintf(fl, "Brth: %lld\n", (long long)char_get_time_birth(ch));
+  fprintf(fl, "Crtd: %lld\n", (long long)char_get_time_created(ch));
+  fprintf(fl, "MxAg: %lld\n", (long long)char_get_time_maxage(ch));
+  fprintf(fl, "Plyd: %lld\n", (long long)char_get_time_played(ch));
+  fprintf(fl, "Last: %lld\n", (long long)char_get_time_logon(ch));
 
   if (char_get_host(ch)) fprintf(fl, "Host: %s\n", char_get_host(ch));
   if (char_get_height(ch) != PFDEF_HEIGHT) fprintf(fl, "Hite: %d\n", char_get_height(ch));
@@ -889,8 +892,8 @@ void save_char(struct char_data *ch)
   if (char_get_bad_pws(ch) != PFDEF_BADPWS) fprintf(fl, "Badp: %d\n", char_get_bad_pws(ch));
 
   for (i = 0; i < 6; i++)
-    if (ch->transcost[i] != false)
-      fprintf(fl, "Tcos: %d %d\n", i, ch->transcost[i]);
+    if (char_get_transcost(ch, i) != false)
+      fprintf(fl, "Tcos: %d %d\n", i, char_get_transcost(ch, i));
 
   for (i = 0; i < NUM_CLASSES; i++)
     if (char_get_practice_points(ch) != PFDEF_PRACTICES)
@@ -1054,8 +1057,8 @@ void save_char(struct char_data *ch)
   write_level_data(ch, fl);*/
 
   for (i = 0; i < NUM_COLOR; i++)
-    if (ch->player_specials->color_choices[i]) {
-      fprintf(fl, "Colr: %d %s\r\n", i, ch->player_specials->color_choices[i]);
+    if (char_get_player_specials(ch)->color_choices[i]) {
+      fprintf(fl, "Colr: %d %s\r\n", i, char_get_player_specials(ch)->color_choices[i]);
     }
 
   atomic_commit(&af);
@@ -1087,9 +1090,9 @@ void save_char(struct char_data *ch)
     save_index                = true;
     player_table[id].admlevel = char_get_admlevel(ch);
   }
-  if (player_table[id].last != ch->time.logon) {
+  if (player_table[id].last != char_get_time_logon(ch)) {
     save_index            = true;
-    player_table[id].last = ch->time.logon;
+    player_table[id].last = char_get_time_logon(ch);
   }
   if (player_table[id].played != char_get_lastpl(ch)) {
     save_index              = true;
@@ -1211,22 +1214,22 @@ static void load_HMVS(struct char_data *ch, const char *line, int mode)
   switch (mode) {
     case LOAD_HIT:
       //GET_HIT(ch) = num;
-      ch->max_hit = num2;
+      char_set_max_hit(ch, num2);
       break;
 
     case LOAD_MANA:
       //GET_MANA(ch) = num;
-      ch->max_mana = num2;
+      char_set_max_mana(ch, num2);
       break;
 
     case LOAD_MOVE:
       //GET_MOVE(ch) = num;
-      ch->max_move = num2;
+      char_set_max_move(ch, num2);
       break;
 
     case LOAD_KI:
       //GET_KI(ch) = num;
-      ch->max_ki = num2;
+      char_set_max_ki(ch, num2);
       break;
   }
 }
@@ -1239,15 +1242,15 @@ static void load_BASE(struct char_data *ch, const char *line, int mode)
 
   switch (mode) {
     case LOAD_HIT:
-      ch->basepl = num;
+      char_set_basepl(ch, num);
       break;
 
     case LOAD_MANA:
-      ch->baseki = num;
+      char_set_baseki(ch, num);
       break;
 
     case LOAD_MOVE:
-      ch->basest = num;
+      char_set_basest(ch, num);
       break;
 
     case LOAD_LIFE:

@@ -157,12 +157,12 @@ ACMD(do_instill)
     return;
   }
 
-  if (!(token = get_obj_in_list_vis(ch, arg, nullptr, ch->carrying))) {
+  if (!(token = get_obj_in_list_vis(ch, arg, nullptr, char_get_inventory(ch)))) {
     send_to_char(ch, "Syntax: instill (token) (target)\r\n");
     return;
   }
 
-  if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->carrying))) {
+  if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, char_get_inventory(ch)))) {
     send_to_char(ch, "Syntax: instill (token) (target)\r\n");
     return;
   }
@@ -192,10 +192,10 @@ ACMD(do_instill)
     return;
   } else { /* It has at least one open slot. */
     int stat = 0, raise = 0;
-    stat = token->affected[0].location;
+    stat = obj_get_affected(token)[0].location;
 
-    if (obj->affected[0].location != 0 && obj->affected[1].location != 0 && obj->affected[2].location != 0 && obj->affected[3].location != 0 && obj->affected[4].location != 0 && obj->affected[5].location != 0) {
-      if (obj->affected[0].location != stat && obj->affected[1].location != stat && obj->affected[2].location != stat && obj->affected[3].location != stat && obj->affected[4].location != stat && obj->affected[5].location != stat) {
+    if (obj_get_affected(obj)[0].location != 0 && obj_get_affected(obj)[1].location != 0 && obj_get_affected(obj)[2].location != 0 && obj_get_affected(obj)[3].location != 0 && obj_get_affected(obj)[4].location != 0 && obj_get_affected(obj)[5].location != 0) {
+      if (obj_get_affected(obj)[0].location != stat && obj_get_affected(obj)[1].location != stat && obj_get_affected(obj)[2].location != stat && obj_get_affected(obj)[3].location != stat && obj_get_affected(obj)[4].location != stat && obj_get_affected(obj)[5].location != stat) {
         send_to_char(ch, "This already has as many different stats as it can hold.\r\n");
         return;
       }
@@ -203,7 +203,7 @@ ACMD(do_instill)
 
     act("@GYou instill the token into @g$p@G. It glows @ggreen@G for a moment before returning to normal. The token disappears with the glow.@n", true, ch, obj, 0, TO_CHAR);
     act("@g$n@G instills a token into @g$p@G. It glows @ggreen@G for a moment before returning to normal. The token disappears with the glow.@n", true, ch, obj, 0, TO_ROOM);
-    raise = token->affected[0].modifier;
+    raise = obj_get_affected(token)[0].modifier;
     extract_obj(token);
 
     if (obj_extra_flagged(obj, ITEM_SLOT1))
@@ -214,36 +214,36 @@ ACMD(do_instill)
       obj_extra_set(obj, ITEM_SLOTS_FILLED, true);
 
     /* Check it's slots for the appropriate stat and add to it if possible */
-    if (obj->affected[0].location == stat) {
-      obj->affected[0].modifier += raise;
-    } else if (obj->affected[1].location == stat) {
-      obj->affected[1].modifier += raise;
-    } else if (obj->affected[2].location == stat) {
-      obj->affected[2].modifier += raise;
-    } else if (obj->affected[3].location == stat) {
-      obj->affected[3].modifier += raise;
-    } else if (obj->affected[4].location == stat) {
-      obj->affected[4].modifier += raise;
-    } else if (obj->affected[5].location == stat) {
-      obj->affected[5].modifier += raise;
-    } else if (obj->affected[0].location == 0) { /* It's empty, put it here regardless */
-      obj->affected[0].location = stat;
-      obj->affected[0].modifier = raise;
-    } else if (obj->affected[1].location == 0) { /* It's empty, put it here regardless */
-      obj->affected[1].location = stat;
-      obj->affected[1].modifier = raise;
-    } else if (obj->affected[2].location == 0) { /* It's empty, put it here regardless */
-      obj->affected[2].location = stat;
-      obj->affected[2].modifier = raise;
-    } else if (obj->affected[3].location == 0) { /* It's empty, put it here regardless */
-      obj->affected[3].location = stat;
-      obj->affected[3].modifier = raise;
-    } else if (obj->affected[4].location == 0) { /* It's empty, put it here regardless */
-      obj->affected[4].location = stat;
-      obj->affected[4].modifier = raise;
-    } else if (obj->affected[5].location == 0) { /* It's empty, put it here regardless */
-      obj->affected[5].location = stat;
-      obj->affected[5].modifier = raise;
+    if (obj_get_affected(obj)[0].location == stat) {
+      obj_get_affected(obj)[0].modifier += raise;
+    } else if (obj_get_affected(obj)[1].location == stat) {
+      obj_get_affected(obj)[1].modifier += raise;
+    } else if (obj_get_affected(obj)[2].location == stat) {
+      obj_get_affected(obj)[2].modifier += raise;
+    } else if (obj_get_affected(obj)[3].location == stat) {
+      obj_get_affected(obj)[3].modifier += raise;
+    } else if (obj_get_affected(obj)[4].location == stat) {
+      obj_get_affected(obj)[4].modifier += raise;
+    } else if (obj_get_affected(obj)[5].location == stat) {
+      obj_get_affected(obj)[5].modifier += raise;
+    } else if (obj_get_affected(obj)[0].location == 0) { /* It's empty, put it here regardless */
+      obj_get_affected(obj)[0].location = stat;
+      obj_get_affected(obj)[0].modifier = raise;
+    } else if (obj_get_affected(obj)[1].location == 0) { /* It's empty, put it here regardless */
+      obj_get_affected(obj)[1].location = stat;
+      obj_get_affected(obj)[1].modifier = raise;
+    } else if (obj_get_affected(obj)[2].location == 0) { /* It's empty, put it here regardless */
+      obj_get_affected(obj)[2].location = stat;
+      obj_get_affected(obj)[2].modifier = raise;
+    } else if (obj_get_affected(obj)[3].location == 0) { /* It's empty, put it here regardless */
+      obj_get_affected(obj)[3].location = stat;
+      obj_get_affected(obj)[3].modifier = raise;
+    } else if (obj_get_affected(obj)[4].location == 0) { /* It's empty, put it here regardless */
+      obj_get_affected(obj)[4].location = stat;
+      obj_get_affected(obj)[4].modifier = raise;
+    } else if (obj_get_affected(obj)[5].location == 0) { /* It's empty, put it here regardless */
+      obj_get_affected(obj)[5].location = stat;
+      obj_get_affected(obj)[5].modifier = raise;
     }
   }
 }
@@ -422,8 +422,8 @@ void handle_rpp_store(struct char_data *ch, int choice)
             }
           }
           char_set_rp(ch, char_get_rp(ch) - (cost));
-          ch->desc->rpp = char_get_rp(ch);
-          userWrite(ch->desc, 0, 0, 0, "index");
+          char_get_desc(ch)->rpp = char_get_rp(ch);
+          userWrite(char_get_desc(ch), 0, 0, 0, "index");
           save_char(ch);
           send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
           send_to_imm("RPP Purchase: %s %d", char_get_name(ch), cost);
@@ -441,8 +441,8 @@ void handle_rpp_store(struct char_data *ch, int choice)
           obj_to_char(obj, ch);
           obj_set_size(obj, get_size(ch));
           char_set_rp(ch, char_get_rp(ch) - (cost));
-          ch->desc->rpp = char_get_rp(ch);
-          userWrite(ch->desc, 0, 0, 0, "index");
+          char_get_desc(ch)->rpp = char_get_rp(ch);
+          userWrite(char_get_desc(ch), 0, 0, 0, "index");
           save_char(ch);
           send_to_char(ch, "@R%d@W RPP from your Bank paid for your selection. Enjoy!@n\r\n", cost);
           send_to_imm("RPP Purchase: %s %d", char_get_name(ch), cost);
@@ -460,8 +460,8 @@ void handle_rpp_store(struct char_data *ch, int choice)
           obj_to_char(obj, ch);
           obj_set_size(obj, get_size(ch));
           char_set_rp(ch, char_get_rp(ch) - (cost));
-          ch->desc->rpp = char_get_rp(ch);
-          userWrite(ch->desc, 0, 0, 0, "index");
+          char_get_desc(ch)->rpp = char_get_rp(ch);
+          userWrite(char_get_desc(ch), 0, 0, 0, "index");
           save_char(ch);
           send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
           send_to_imm("RPP Purchase: %s %d", char_get_name(ch), cost);
@@ -479,8 +479,8 @@ void handle_rpp_store(struct char_data *ch, int choice)
           obj_to_char(obj, ch);
           obj_set_size(obj, get_size(ch));
           char_set_rp(ch, char_get_rp(ch) - (cost));
-          ch->desc->rpp = char_get_rp(ch);
-          userWrite(ch->desc, 0, 0, 0, "index");
+          char_get_desc(ch)->rpp = char_get_rp(ch);
+          userWrite(char_get_desc(ch), 0, 0, 0, "index");
           save_char(ch);
           send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
           send_to_imm("RPP Purchase: %s %d", char_get_name(ch), cost);
@@ -498,8 +498,8 @@ void handle_rpp_store(struct char_data *ch, int choice)
           obj_to_char(obj, ch);
           obj_set_size(obj, get_size(ch));
           char_set_rp(ch, char_get_rp(ch) - (cost));
-          ch->desc->rpp = char_get_rp(ch);
-          userWrite(ch->desc, 0, 0, 0, "index");
+          char_get_desc(ch)->rpp = char_get_rp(ch);
+          userWrite(char_get_desc(ch), 0, 0, 0, "index");
           save_char(ch);
           send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
           send_to_imm("RPP Purchase: %s %d", char_get_name(ch), cost);
@@ -517,8 +517,8 @@ void handle_rpp_store(struct char_data *ch, int choice)
           obj_to_char(obj, ch);
           obj_set_size(obj, get_size(ch));
           char_set_rp(ch, char_get_rp(ch) - (cost));
-          ch->desc->rpp = char_get_rp(ch);
-          userWrite(ch->desc, 0, 0, 0, "index");
+          char_get_desc(ch)->rpp = char_get_rp(ch);
+          userWrite(char_get_desc(ch), 0, 0, 0, "index");
           save_char(ch);
           send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
           send_to_imm("RPP Purchase: %s %d", char_get_name(ch), cost);
@@ -536,8 +536,8 @@ void handle_rpp_store(struct char_data *ch, int choice)
           obj_to_char(obj, ch);
           obj_set_size(obj, get_size(ch));
           char_set_rp(ch, char_get_rp(ch) - (cost));
-          ch->desc->rpp = char_get_rp(ch);
-          userWrite(ch->desc, 0, 0, 0, "index");
+          char_get_desc(ch)->rpp = char_get_rp(ch);
+          userWrite(char_get_desc(ch), 0, 0, 0, "index");
           save_char(ch);
           send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
           send_to_imm("RPP Purchase: %s %d", char_get_name(ch), cost);
@@ -554,8 +554,8 @@ void handle_rpp_store(struct char_data *ch, int choice)
           obj_to_char(obj, ch);
           obj_set_size(obj, get_size(ch));
           char_set_rp(ch, char_get_rp(ch) - (cost));
-          ch->desc->rpp = char_get_rp(ch);
-          userWrite(ch->desc, 0, 0, 0, "index");
+          char_get_desc(ch)->rpp = char_get_rp(ch);
+          userWrite(char_get_desc(ch), 0, 0, 0, "index");
           save_char(ch);
           send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
           send_to_imm("RPP Purchase: %s %d", char_get_name(ch), cost);
@@ -571,8 +571,8 @@ void handle_rpp_store(struct char_data *ch, int choice)
           obj_to_char(obj, ch);
           obj_set_size(obj, get_size(ch));
           char_set_rp(ch, char_get_rp(ch) - (cost));
-          ch->desc->rpp = char_get_rp(ch);
-          userWrite(ch->desc, 0, 0, 0, "index");
+          char_get_desc(ch)->rpp = char_get_rp(ch);
+          userWrite(char_get_desc(ch), 0, 0, 0, "index");
           save_char(ch);
           send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
           send_to_imm("RPP Purchase: %s %d", char_get_name(ch), cost);

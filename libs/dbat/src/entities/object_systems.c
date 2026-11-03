@@ -2,6 +2,8 @@
 #include "dbat/utils.h"
 #include "dbat/handler.h"
 #include "dbat/comm.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
 
 /* This updates the malfunctioning of certain objects that are damaged. */
 void broken_update()
@@ -11,8 +13,8 @@ void broken_update()
   int rand_gravity[14] = {0, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 5000, 10000};
   int dice = rand_number(2, 12), grav_roll = 0, grav_change = false, health = 0;
 
-  for (k = object_list; k; k = k->next) {
-    if (k->carried_by != nullptr) {
+  for (k = object_list; k; k = obj_get_next(k)) {
+    if (obj_get_carried_by(k) != nullptr) {
       continue;
     }
 

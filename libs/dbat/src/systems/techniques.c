@@ -8,6 +8,7 @@
 #include "dbat/comm.h"
 #include "dbat/spells.h"
 #include "dbat/character_utils.h"
+#include "dbat/room_utils.h"
 
 bool tech_handle_zanzoken(char_data *ch, char_data *vict, const char *name)
 {
@@ -85,7 +86,7 @@ bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, obj_data 
       *vict = char_get_fighting(ch);
       return true;
     }
-    if (!(*obj = get_obj_in_list_vis(ch, arg, nullptr, world[char_get_in_room(ch)].contents))) {
+    if (!(*obj = get_obj_in_list_vis(ch, arg, nullptr, rroom_get_contents(char_get_in_room(ch))))) {
       send_to_char(ch, "Nothing around here by that name.\r\n");
       return false;
     }

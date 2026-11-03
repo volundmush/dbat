@@ -50,36 +50,36 @@ static void see_plant(struct obj_data *obj, struct char_data *ch)
   if (water >= 0) {
     switch (obj_get_value(obj, VAL_MATURITY)) {
       case 0:
-        send_to_char(ch, "@wA @G%s@y seed@w has been planted here. @D(@C%d Water Hours@D)@n\r\n", obj->short_description, water);
+        send_to_char(ch, "@wA @G%s@y seed@w has been planted here. @D(@C%d Water Hours@D)@n\r\n", obj_get_short_description(obj), water);
         break;
       case 1:
-        send_to_char(ch, "@wA very young @G%s@w has sprouted from a planter here. @D(@C%d Water Hours@D)@n\r\n", obj->short_description, water);
+        send_to_char(ch, "@wA very young @G%s@w has sprouted from a planter here. @D(@C%d Water Hours@D)@n\r\n", obj_get_short_description(obj), water);
         break;
       case 2:
-        send_to_char(ch, "@wA half grown @G%s@w is in a planter here. @D(@C%d Water Hours@D)@n\r\n", obj->short_description, water);
+        send_to_char(ch, "@wA half grown @G%s@w is in a planter here. @D(@C%d Water Hours@D)@n\r\n", obj_get_short_description(obj), water);
         break;
       case 3:
-        send_to_char(ch, "@wA mature @G%s@w is growing in a planter here. @D(@C%d Water Hours@D)@n\r\n", obj->short_description, water);
+        send_to_char(ch, "@wA mature @G%s@w is growing in a planter here. @D(@C%d Water Hours@D)@n\r\n", obj_get_short_description(obj), water);
         break;
       case 4:
-        send_to_char(ch, "@wA mature @G%s@w is flowering in a planter here. @D(@C%d Water Hours@D)@n\r\n", obj->short_description, water);
+        send_to_char(ch, "@wA mature @G%s@w is flowering in a planter here. @D(@C%d Water Hours@D)@n\r\n", obj_get_short_description(obj), water);
         break;
       case 5:
-        send_to_char(ch, "@wA mature @G%s@w that is close to harvestable is here. @D(@C%d Water Hours@D)@n\r\n", obj->short_description, water);
+        send_to_char(ch, "@wA mature @G%s@w that is close to harvestable is here. @D(@C%d Water Hours@D)@n\r\n", obj_get_short_description(obj), water);
         break;
       case 6:
-        send_to_char(ch, "@wA @Rharvestable @G%s@w is in the planter here. @D(@C%d Water Hours@D)@n\r\n", obj->short_description, water);
+        send_to_char(ch, "@wA @Rharvestable @G%s@w is in the planter here. @D(@C%d Water Hours@D)@n\r\n", obj_get_short_description(obj), water);
         break;
       default:
         break;
     }
   } else {
     if (water > -4) {
-      send_to_char(ch, "@yA @G%s@y that is looking a bit @rdry@y, is here.@n\r\n", obj->short_description);
+      send_to_char(ch, "@yA @G%s@y that is looking a bit @rdry@y, is here.@n\r\n", obj_get_short_description(obj));
     } else if (water > -10) {
-      send_to_char(ch, "@yA @G%s@y that is looking extremely @rdry@y, is here.@n\r\n", obj->short_description);
+      send_to_char(ch, "@yA @G%s@y that is looking extremely @rdry@y, is here.@n\r\n", obj_get_short_description(obj));
     } else if (water <= -10) {
-      send_to_char(ch, "@yA @G%s@y that is completely @rdead@y and @rwithered@y, is here.@n\r\n", obj->short_description);
+      send_to_char(ch, "@yA @G%s@y that is completely @rdead@y and @rwithered@y, is here.@n\r\n", obj_get_short_description(obj));
     }
   }
 }
@@ -99,15 +99,15 @@ void display_spells(struct char_data *ch, struct obj_data *obj)
   send_to_char(ch, "The spellbook contains the following spells:\r\n");
   send_to_char(ch, "@c---@wSpell Name@c------------------------------------@w# of pages@c-----@n\r\n");
 
-  if (!obj->sbinfo) {
+  if (!obj_get_sbinfo(obj)) {
     return;
   }
   for (i = 0; i < SPELLBOOK_SIZE; i++) {
-    if (obj->sbinfo[i].spellname != 0) {
-      if (obj->sbinfo[i].spellname > MAX_SPELLS) {
+    if (obj_get_sbinfo(obj)[i].spellname != 0) {
+      if (obj_get_sbinfo(obj)[i].spellname > MAX_SPELLS) {
         continue;
       }
-      send_to_char(ch, "@y%-20s@n					[@R%2d@n]\r\n", spell_info[obj->sbinfo[i].spellname].name, obj->sbinfo[i].pages);
+      send_to_char(ch, "@y%-20s@n					[@R%2d@n]\r\n", spell_info[obj_get_sbinfo(obj)[i].spellname].name, obj_get_sbinfo(obj)[i].pages);
     }
   }
   return;
@@ -146,7 +146,7 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
      * hide objects starting with . from non-holylighted people 
      * Idea from Elaseth of TBA 
      */
-      if (*obj->description == '.' && (char_is_npc(ch) || !char_prf_flagged(ch, PRF_HOLYLIGHT)))
+      if (*obj_get_description(obj) == '.' && (char_is_npc(ch) || !char_prf_flagged(ch, PRF_HOLYLIGHT)))
         return;
       if (obj_get_type_flag(obj) == ITEM_VEHICLE && rroom_get_vnum(char_get_in_room(ch)) == obj_get_value(obj, 0)) {
         return;
@@ -195,13 +195,13 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
         if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_ROOMFLAGS)) {
           if (obj_get_posted_to(obj) == nullptr) {
             send_to_char(ch, "@D[@G%d@D]@w ", obj_get_vnum(obj));
-            if (obj->script)
-              send_to_char(ch, "@D[@wT%d@D]@w ", obj->proto_script->vnum);
+            if (obj_get_script(obj))
+              send_to_char(ch, "@D[@wT%d@D]@w ", obj_get_proto_script(obj)->vnum);
           } else {
             if (obj_get_posttype(obj) <= 0) {
               send_to_char(ch, "@D[@G%d@D]@w ", obj_get_vnum(obj));
-              if (obj->script)
-                send_to_char(ch, "@D[@wT%d@D]@w ", obj->proto_script->vnum);
+              if (obj_get_script(obj))
+                send_to_char(ch, "@D[@wT%d@D]@w ", obj_get_proto_script(obj)->vnum);
             }
           }
         }
@@ -210,10 +210,10 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
           if (obj_get_posted_to(obj)) {
             return;
           }
-          send_to_char(ch, "%s@w, has been posted here.@n", obj->short_description);
+          send_to_char(ch, "%s@w, has been posted here.@n", obj_get_short_description(obj));
         } else {
           if (!obj_extra_flagged(obj, ITEM_BURIED)) {
-            send_to_char(ch, "%s@n", obj->description);
+            send_to_char(ch, "%s@n", obj_get_description(obj));
           }
         }
 
@@ -250,14 +250,14 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
     case SHOW_OBJ_SHORT:
       if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_ROOMFLAGS)) {
         send_to_char(ch, "[%d] ", obj_get_vnum(obj));
-        if (obj->script)
-          send_to_char(ch, "[T%d] ", obj->proto_script->vnum);
+        if (obj_get_script(obj))
+          send_to_char(ch, "[T%d] ", obj_get_proto_script(obj)->vnum);
       }
 
       if (char_prf_flagged(ch, PRF_IHEALTH)) {
-        send_to_char(ch, "@D<@gH@D: @C%d@D>@w %s", obj_get_value(obj, VAL_ALL_HEALTH), obj->short_description);
+        send_to_char(ch, "@D<@gH@D: @C%d@D>@w %s", obj_get_value(obj, VAL_ALL_HEALTH), obj_get_short_description(obj));
       } else {
-        send_to_char(ch, "%s", obj->short_description);
+        send_to_char(ch, "%s", obj_get_short_description(obj));
       }
       if (obj_get_type_flag(obj) == ITEM_FOOD) {
         if (obj_get_value(obj, VAL_FOOD_FOODVAL) < obj_get_foob(obj)) {
@@ -346,10 +346,10 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
     case SHOW_OBJ_ACTION:
       switch (obj_get_type_flag(obj)) {
         case ITEM_NOTE:
-          if (obj->action_description) {
+          if (obj_get_action_description(obj)) {
             char notebuf[MAX_NOTE_LENGTH];
 
-            snprintf(notebuf, sizeof(notebuf), "There is something written on it:\r\n\r\n%s", obj->action_description);
+            snprintf(notebuf, sizeof(notebuf), "There is something written on it:\r\n\r\n%s", obj_get_action_description(obj));
             send_to_char(ch, "%s", notebuf);
           } else
             send_to_char(ch, "There appears to be nothing written on it.\r\n");
@@ -437,7 +437,7 @@ void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode)
           break;
 
         case ITEM_WINDOW:
-          look_out_window(ch, obj->name);
+          look_out_window(ch, obj_get_name(obj));
           return;
           break;
 
@@ -587,7 +587,7 @@ int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
     send_to_char(ch, " @D(@YCUSTOM@D)@n");
   }
   if (obj_extra_flagged(obj, ITEM_RESTRING)) {
-    send_to_char(ch, " @D(@R%s@D)@n", char_get_admlevel(ch) > 0 ? obj->name : "*");
+    send_to_char(ch, " @D(@R%s@D)@n", char_get_admlevel(ch) > 0 ? obj_get_name(obj) : "*");
   }
   if (obj_extra_flagged(obj, ITEM_BROKEN)) {
     if (obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_STEEL || obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_MITHRIL || obj_get_value(obj, VAL_ALL_MATERIAL) == MATERIAL_METAL) {
@@ -612,7 +612,7 @@ int show_obj_modifiers(struct obj_data *obj, struct char_data *ch)
         char dvnum[200];
         *dvnum = '\0';
         snprintf(dvnum, sizeof(dvnum), "@D[@G%d@D] @w", obj_get_vnum(obj2));
-        send_to_char(ch, "\n...%s%s has been posted to it.", char_prf_flagged(ch, PRF_ROOMFLAGS) ? dvnum : "", obj2->short_description);
+        send_to_char(ch, "\n...%s%s has been posted to it.", char_prf_flagged(ch, PRF_ROOMFLAGS) ? dvnum : "", obj_get_short_description(obj2));
       }
     }
     found++;
@@ -627,17 +627,17 @@ void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int
   int num;
 
   /* Loop through all objects in the list */
-  for (i = list; i; i = i->next_content) {
-    if (i->description == nullptr)
+  for (i = list; i; i = obj_get_next_content(i)) {
+    if (obj_get_description(i) == nullptr)
       continue;
-    if (strcasecmp(i->description, "undefined") == 0)
+    if (strcasecmp(obj_get_description(i), "undefined") == 0)
       continue;
     num = 0;
     d   = i;
     if (CONFIG_STACK_OBJS) {
-      for (j = list; j != i; j = j->next_content)
-        if ((!strcasecmp(j->short_description, i->short_description) && !strcasecmp(j->description, i->description)) &&
-            (j->item_number == i->item_number) && ((obj_extra_flagged(j, ITEM_BROKEN) && obj_extra_flagged(i, ITEM_BROKEN)) || (!obj_extra_flagged(j, ITEM_BROKEN) && !obj_extra_flagged(i, ITEM_BROKEN))))
+      for (j = list; j != i; j = obj_get_next_content(j))
+        if ((!strcasecmp(obj_get_short_description(j), obj_get_short_description(i)) && !strcasecmp(obj_get_description(j), obj_get_description(i))) &&
+            (obj_get_item_number(j) == obj_get_item_number(i)) && ((obj_extra_flagged(j, ITEM_BROKEN) && obj_extra_flagged(i, ITEM_BROKEN)) || (!obj_extra_flagged(j, ITEM_BROKEN) && !obj_extra_flagged(i, ITEM_BROKEN))))
           if ((!obj_get_sitting(j) && !obj_get_sitting(i)))
             if (obj_get_value(j, 6) == obj_get_value(i, 6))
               if ((obj_get_type_flag(j) != ITEM_PLANT && obj_get_type_flag(i) != ITEM_PLANT) || (obj_get_type_flag(j) == ITEM_PLANT && obj_get_type_flag(i) == ITEM_PLANT && obj_get_value(j, VAL_MATURITY) == obj_get_value(i, VAL_MATURITY) && obj_get_value(j, VAL_WATERLEVEL) == obj_get_value(i, VAL_WATERLEVEL)))
@@ -648,9 +648,9 @@ void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int
                         break;
       if (j != i)
         continue;
-      for (d = j = i; j; j = j->next_content)
-        if ((!strcasecmp(j->short_description, i->short_description) && !strcasecmp(j->description, i->description)) &&
-            (j->item_number == i->item_number) && ((obj_extra_flagged(j, ITEM_BROKEN) && obj_extra_flagged(i, ITEM_BROKEN)) || (!obj_extra_flagged(j, ITEM_BROKEN) && !obj_extra_flagged(i, ITEM_BROKEN))))
+      for (d = j = i; j; j = obj_get_next_content(j))
+        if ((!strcasecmp(obj_get_short_description(j), obj_get_short_description(i)) && !strcasecmp(obj_get_description(j), obj_get_description(i))) &&
+            (obj_get_item_number(j) == obj_get_item_number(i)) && ((obj_extra_flagged(j, ITEM_BROKEN) && obj_extra_flagged(i, ITEM_BROKEN)) || (!obj_extra_flagged(j, ITEM_BROKEN) && !obj_extra_flagged(i, ITEM_BROKEN))))
           if ((!obj_get_sitting(j) && !obj_get_sitting(i)))
             if (obj_get_posttype(j) == 0 && obj_get_posttype(i) == 0)
               if (obj_get_value(j, 6) == obj_get_value(i, 6))
@@ -664,7 +664,7 @@ void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int
                             d = j;
                         }
     }
-    if ((char_can_see_obj(ch, d) && ((*d->description != '.' && *d->short_description != '.') || char_prf_flagged(ch, PRF_HOLYLIGHT))) || (obj_get_type_flag(d) == ITEM_LIGHT)) {
+    if ((char_can_see_obj(ch, d) && ((*obj_get_description(d) != '.' && *obj_get_short_description(d) != '.') || char_prf_flagged(ch, PRF_HOLYLIGHT))) || (obj_get_type_flag(d) == ITEM_LIGHT)) {
       if (num > 1)
         send_to_char(ch, "@D(@Rx@Y%2i@D)@n ", num);
       show_obj_to_char(d, ch, mode);
@@ -726,7 +726,7 @@ void diag_char_to_char(struct char_data *i, struct char_data *ch)
   };
   int percent, ar_index;
 
-  percent = (int)(i->health * 100.0);
+  percent = (int)(char_get_health(i) * 100.0);
 
   for (ar_index = 0; diagnosis[ar_index].percent >= 0; ar_index++)
     if (percent >= diagnosis[ar_index].percent) {
@@ -741,11 +741,11 @@ void look_at_char(struct char_data *i, struct char_data *ch)
   char buf[100];
   struct obj_data *tmp_obj;
 
-  if (!ch->desc) {
+  if (!char_get_desc(ch)) {
     return;
   }
-  if (i->description) {
-    send_to_char(ch, "%s", i->description);
+  if (char_get_ddesc(i)) {
+    send_to_char(ch, "%s", char_get_ddesc(i));
   }
   if (!char_mob_flagged(i, MOB_JUSTDESC)) {
     bringdesc(ch, i);
@@ -917,8 +917,8 @@ void look_at_char(struct char_data *i, struct char_data *ch)
         show_obj_to_char(char_get_equipment(i, j), ch, SHOW_OBJ_SHORT);
         if (obj_extra_flagged(char_get_equipment(i, j), ITEM_SHEATH)) {
           struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = char_get_equipment(i, j);
-          for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
-            next_obj = obj2->next_content;
+          for (obj2 = obj_get_contains(sheath); obj2; obj2 = next_obj) {
+            next_obj = obj_get_next_content(obj2);
             if (obj2) {
               send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
               show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
@@ -931,8 +931,8 @@ void look_at_char(struct char_data *i, struct char_data *ch)
         show_obj_to_char(char_get_equipment(i, j), ch, SHOW_OBJ_SHORT);
         if (obj_extra_flagged(char_get_equipment(i, j), ITEM_SHEATH)) {
           struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = char_get_equipment(i, j);
-          for (obj2 = sheath->contains; obj2; obj2 = next_obj) {
-            next_obj = obj2->next_content;
+          for (obj2 = obj_get_contains(sheath); obj2; obj2 = next_obj) {
+            next_obj = obj_get_next_content(obj2);
             if (obj2) {
               send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
               show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
@@ -951,7 +951,7 @@ void look_at_char(struct char_data *i, struct char_data *ch)
     if (char_can_see(i, ch))
       act("$n tries to evaluate what you have in your inventory.", true, ch, 0, i, TO_VICT);
     if (char_get_skill(ch, SKILL_KEEN) > axion_dice(0) && (!char_is_npc(i) || char_get_admlevel(ch) > 1)) {
-      for (tmp_obj = i->carrying; tmp_obj; tmp_obj = tmp_obj->next_content) {
+      for (tmp_obj = char_get_inventory(i); tmp_obj; tmp_obj = obj_get_next_content(tmp_obj)) {
         if (char_can_see_obj(ch, tmp_obj) &&
             (char_adm_flagged(ch, ADM_SEEINV) || (rand_number(0, 20) < char_get_level(ch)))) {
           show_obj_to_char(tmp_obj, ch, SHOW_OBJ_SHORT);
@@ -991,13 +991,13 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
       " is standing here"};
 
   if (!char_is_npc(ch) && char_prf_flagged(ch, PRF_ROOMFLAGS) && char_is_npc(i))
-    send_to_char(ch, "@D[@G%d@D]@w %s", char_get_mob_vnum(i), i->script ? "[TRIG] " : "");
+    send_to_char(ch, "@D[@G%d@D]@w %s", char_get_mob_vnum(i), char_get_script(i) ? "[TRIG] " : "");
 
-  if (char_is_npc(i) && i->long_descr && char_get_position(i) == char_get_mob_specials_default_pos(i) && !char_get_fighting(i)) {
-    send_to_char(ch, "%s", i->long_descr);
+  if (char_is_npc(i) && char_get_ldesc(i) && char_get_position(i) == char_get_mob_specials_default_pos(i) && !char_get_fighting(i)) {
+    send_to_char(ch, "%s", char_get_ldesc(i));
 
     if (char_is_npc(i)) {
-      double health = i->health;
+      double health = char_get_health(i);
       if (health <= 0.1) {
         act("@R...Should be DEAD soon.@w", true, i, 0, ch, TO_VICT);
       } else if (health <= 0.2) {
@@ -1058,36 +1058,36 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
   }
 
   if (char_is_npc(i) && !char_get_fighting(i) && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
-    send_to_char(ch, "@w%c%s", toupper(*i->short_descr), i->short_descr + 1);
+    send_to_char(ch, "@w%c%s", toupper(*char_get_sdesc(i)), char_get_sdesc(i) + 1);
   else if (char_is_npc(i) && char_get_grappled(i) && char_get_grappled(i) == ch)
-    send_to_char(ch, "@w%c%s is being grappled with by YOU!", toupper(*i->short_descr), i->short_descr + 1);
+    send_to_char(ch, "@w%c%s is being grappled with by YOU!", toupper(*char_get_sdesc(i)), char_get_sdesc(i) + 1);
   else if (char_is_npc(i) && char_get_grappled(i) && char_get_grappled(i) != ch)
-    send_to_char(ch, "@w%c%s is being absorbed from by %s!", toupper(*i->short_descr), i->short_descr + 1, readIntro(ch, char_get_grappled(i)) == 1 ? get_i_name(ch, char_get_grappled(i)) : AN(juggleRaceName(char_get_grappled(i), true)));
+    send_to_char(ch, "@w%c%s is being absorbed from by %s!", toupper(*char_get_sdesc(i)), char_get_sdesc(i) + 1, readIntro(ch, char_get_grappled(i)) == 1 ? get_i_name(ch, char_get_grappled(i)) : AN(juggleRaceName(char_get_grappled(i), true)));
   else if (char_is_npc(i) && char_get_absorbby(i) && char_get_absorbby(i) == ch)
-    send_to_char(ch, "@w%c%s is being absorbed from by YOU!", toupper(*i->short_descr), i->short_descr + 1);
+    send_to_char(ch, "@w%c%s is being absorbed from by YOU!", toupper(*char_get_sdesc(i)), char_get_sdesc(i) + 1);
   else if (char_is_npc(i) && char_get_absorbby(i) && char_get_absorbby(i) != ch)
-    send_to_char(ch, "@w%c%s is being absorbed from by %s!", toupper(*i->short_descr), i->short_descr + 1, readIntro(ch, char_get_absorbby(i)) == 1 ? get_i_name(ch, char_get_absorbby(i)) : AN(juggleRaceName(char_get_absorbby(i), true)));
+    send_to_char(ch, "@w%c%s is being absorbed from by %s!", toupper(*char_get_sdesc(i)), char_get_sdesc(i) + 1, readIntro(ch, char_get_absorbby(i)) == 1 ? get_i_name(ch, char_get_absorbby(i)) : AN(juggleRaceName(char_get_absorbby(i), true)));
   else if (char_is_npc(i) && char_get_fighting(i) && char_get_fighting(i) != ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING && is_sparring(i))
-    send_to_char(ch, "@w%c%s is sparring with %s!", toupper(*i->short_descr), i->short_descr + 1, char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : juggleRaceName(char_get_fighting(i), false)));
+    send_to_char(ch, "@w%c%s is sparring with %s!", toupper(*char_get_sdesc(i)), char_get_sdesc(i) + 1, char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : juggleRaceName(char_get_fighting(i), false)));
   else if (char_is_npc(i) && char_get_fighting(i) && is_sparring(i) && char_get_fighting(i) == ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
-    send_to_char(ch, "@w%c%s is sparring with you!", toupper(*i->short_descr), i->short_descr + 1);
+    send_to_char(ch, "@w%c%s is sparring with you!", toupper(*char_get_sdesc(i)), char_get_sdesc(i) + 1);
   else if (char_is_npc(i) && char_get_fighting(i) && char_get_fighting(i) != ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
-    send_to_char(ch, "@w%c%s is fighting %s!", toupper(*i->short_descr), i->short_descr + 1, char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : juggleRaceName(char_get_fighting(i), false)));
+    send_to_char(ch, "@w%c%s is fighting %s!", toupper(*char_get_sdesc(i)), char_get_sdesc(i) + 1, char_get_admlevel(ch) ? char_get_name(char_get_fighting(i)) : (readIntro(ch, char_get_fighting(i)) == 1 ? get_i_name(ch, char_get_fighting(i)) : juggleRaceName(char_get_fighting(i), false)));
   else if (char_is_npc(i) && char_get_fighting(i) && char_get_fighting(i) == ch && char_get_position(i) != POS_SITTING && char_get_position(i) != POS_SLEEPING)
-    send_to_char(ch, "@w%c%s is fighting YOU!", toupper(*i->short_descr), i->short_descr + 1);
+    send_to_char(ch, "@w%c%s is fighting YOU!", toupper(*char_get_sdesc(i)), char_get_sdesc(i) + 1);
   else if (char_is_npc(i) && char_get_fighting(i) && char_get_position(i) == POS_SITTING)
-    send_to_char(ch, "@w%c%s is sitting here.", toupper(*i->short_descr), i->short_descr + 1);
+    send_to_char(ch, "@w%c%s is sitting here.", toupper(*char_get_sdesc(i)), char_get_sdesc(i) + 1);
   else if (char_is_npc(i) && char_get_fighting(i) && char_get_position(i) == POS_SLEEPING)
-    send_to_char(ch, "@w%c%s is sleeping here.", toupper(*i->short_descr), i->short_descr + 1);
+    send_to_char(ch, "@w%c%s is sleeping here.", toupper(*char_get_sdesc(i)), char_get_sdesc(i) + 1);
   else if (char_is_npc(i))
-    send_to_char(ch, "@w%c%s", toupper(*i->short_descr), i->short_descr + 1);
+    send_to_char(ch, "@w%c%s", toupper(*char_get_sdesc(i)), char_get_sdesc(i) + 1);
   else if (!char_is_npc(i)) {
     if (char_is_majin(i) && char_aff_flagged(i, AFF_LIQUEFIED)) {
       send_to_char(ch, "@wSeveral blobs of %s colored goo spread out here.@n\n", skin_types[(int)char_get_skin(i)]);
       return;
     }
     if ((char_get_admlevel(ch) > 0 || char_get_admlevel(i) > 0) || char_is_npc(ch)) {
-      send_to_char(ch, "@w%s", i->name);
+      send_to_char(ch, "@w%s", char_get_alias(i));
     } else if ((!char_plr_flagged(i, PLR_DISGUISED) && readIntro(ch, i) == 1)) {
       send_to_char(ch, "@w%s", get_i_name(ch, i));
     } else if (!char_plr_flagged(i, PLR_DISGUISED) && readIntro(ch, i) != 1) {
@@ -1211,7 +1211,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
       }
       count = true;
     }
-    if (!char_is_npc(i) && !i->desc) {
+    if (!char_is_npc(i) && !char_get_desc(i)) {
       send_to_char(ch, ", has a blank stare");
       count = true;
     }
@@ -1284,9 +1284,9 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
     if (char_plr_flagged(i, PLR_HEALT)) {
       send_to_char(ch, "@w is floating inside a healing tank.");
     } else if (count == true) {
-      send_to_char(ch, ",@w and%s on %s.", positions[(int)char_get_position(i)], chair->short_description);
+      send_to_char(ch, ",@w and%s on %s.", positions[(int)char_get_position(i)], obj_get_short_description(chair));
     } else if (count == false) {
-      send_to_char(ch, "@w%s on %s.", positions[(int)char_get_position(i)], chair->short_description);
+      send_to_char(ch, "@w%s on %s.", positions[(int)char_get_position(i)], obj_get_short_description(chair));
     }
   } else if (!char_plr_flagged(i, PLR_PILOTING) && !char_get_sits(i) && (!char_is_npc(i) || !char_get_fighting(i))) {
     if (count == true) {
@@ -1327,7 +1327,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch)
   }
   if (!char_is_npc(i) && char_prf_flagged(i, PRF_AFK))
     send_to_char(ch, " @D(@RAFK@D)");
-  else if (!char_is_npc(i) && i->timer > 3)
+  else if (!char_is_npc(i) && char_get_timer(i) > 3)
     send_to_char(ch, " @D(@RIDLE@D)");
   send_to_char(ch, "@n\r\n");
 
@@ -1414,7 +1414,7 @@ void list_char_to_char(struct char_data *list, struct char_data *ch)
 
   hideinfo = lasthide = nullptr;
 
-  for (i = list; i; i = i->next_in_room) {
+  for (i = list; i; i = char_get_next_in_room(i)) {
     if (char_aff_flagged(i, AFF_HIDE) && roll_resisted(i, SKILL_HIDE, ch, SKILL_SPOT)) {
       if (char_get_skill(i, SKILL_HIDE) && !char_is_npc(ch) && i != ch) {
         improve_skill(i, SKILL_HIDE, 1);
@@ -1431,10 +1431,10 @@ void list_char_to_char(struct char_data *list, struct char_data *ch)
     }
   }
 
-  for (i = list; i; i = i->next_in_room) {
+  for (i = list; i; i = char_get_next_in_room(i)) {
     /* hide npcs whose description starts with a '.' from non-holylighted people
     - Idea from Elaseth of TBA */
-    if ((ch == i) || (!char_is_npc(ch) && !char_prf_flagged(ch, PRF_HOLYLIGHT) && char_is_npc(i) && i->long_descr && *i->long_descr == '.'))
+    if ((ch == i) || (!char_is_npc(ch) && !char_prf_flagged(ch, PRF_HOLYLIGHT) && char_is_npc(i) && char_get_ldesc(i) && *char_get_ldesc(i) == '.'))
       continue;
 
     for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
@@ -1447,8 +1447,8 @@ void list_char_to_char(struct char_data *list, struct char_data *ch)
       num = 0;
       if (CONFIG_STACK_MOBS) {
         /* How many other occurences of this mob are there? */
-        for (j = list; j != i; j = j->next_in_room)
-          if ((i->nr == j->nr) &&
+        for (j = list; j != i; j = char_get_next_in_room(j))
+          if ((char_get_nr(i) == char_get_nr(j)) &&
               (char_get_position(i) == char_get_position(j)) &&
               (char_get_affected_by(i)[0] == char_get_affected_by(j)[0]) &&
               (char_get_affected_by(i)[1] == char_get_affected_by(j)[1]) &&
@@ -1469,8 +1469,8 @@ void list_char_to_char(struct char_data *list, struct char_data *ch)
 	   * the main "i" for loop.
 	   */
           continue;
-        for (j = i; j; j = j->next_in_room)
-          if ((i->nr == j->nr) &&
+        for (j = i; j; j = char_get_next_in_room(j))
+          if ((char_get_nr(i) == char_get_nr(j)) &&
               (char_get_position(i) == char_get_position(j)) &&
               (char_get_affected_by(i)[0] == char_get_affected_by(j)[0]) &&
               (char_get_affected_by(i)[1] == char_get_affected_by(j)[1]) &&

@@ -13,6 +13,7 @@
 #include "dbat/handler.h"
 #include "dbat/dg_olc.h"
 #include "dbat/atomicfile.h"
+#include "dbat/object_utils.h"
 
 static obj_rnum adjust_objects(obj_rnum refpt);
 static bool copy_object_preserve(struct obj_data *to, struct obj_data *from);
@@ -30,11 +31,12 @@ obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum)
   /*
    * Write object to internal tables.
    */
-  if ((newobj->item_number = real_object(ovnum)) != NOTHING) {
-    copy_object(&obj_proto[newobj->item_number], newobj);
-    update_objects(&obj_proto[newobj->item_number]);
+  obj_set_item_number(newobj, real_object(ovnum));
+  if (obj_get_item_number(newobj) != NOTHING) {
+    copy_object(&obj_proto[obj_get_item_number(newobj)], newobj);
+    update_objects(&obj_proto[obj_get_item_number(newobj)]);
     add_to_save_list(zone_table[rznum].number, SL_OBJ);
-    return newobj->item_number;
+    return obj_get_item_number(newobj);
   }
 
   found = insert_object(newobj, ovnum);
@@ -57,8 +59,8 @@ static int update_objects(struct obj_data *refobj)
   struct obj_data *obj, swap;
   int count = 0;
 
-  for (obj = object_list; obj; obj = obj->next) {
-    if (obj->item_number != refobj->item_number)
+  for (obj = object_list; obj; obj = obj_get_next(obj)) {
+    if (obj_get_item_number(obj) != obj_get_item_number(refobj))
       continue;
 
     count++;
@@ -68,14 +70,14 @@ static int update_objects(struct obj_data *refobj)
     *obj = *refobj;
 
     /* Copy game-time dependent variables over. */
-    obj_set_in_room(obj, swap.in_room);
-    obj->carried_by   = swap.carried_by;
-    obj->worn_by      = swap.worn_by;
-    obj->worn_on      = swap.worn_on;
-    obj->in_obj       = swap.in_obj;
-    obj->contains     = swap.contains;
-    obj->next_content = swap.next_content;
-    obj->next         = swap.next;
+    obj_set_in_room(obj, obj_get_in_room(&swap));
+    obj_set_carried_by(obj, obj_get_carried_by(&swap));
+    obj_set_worn_by(obj, obj_get_worn_by(&swap));
+    obj_set_worn_on(obj, obj_get_worn_on(&swap));
+    obj_set_in_obj(obj, obj_get_in_obj(&swap));
+    obj_set_contains(obj, obj_get_contains(&swap));
+    obj_set_next_content(obj, obj_get_next_content(&swap));
+    obj_set_next(obj, obj_get_next(&swap));
   }
 
   return count;
@@ -100,7 +102,7 @@ static obj_rnum adjust_objects(obj_rnum refpt)
   /*
    * Renumber live objects.
    */
-  for (obj = object_list; obj; obj = obj->next)
+  for (obj = object_list; obj; obj = obj_get_next(obj))
     obj_set_item_number(obj, obj_get_item_number(obj) + ((obj_get_item_number(obj) != NOTHING && obj_get_item_number(obj) >= refpt)));
 
   /*
@@ -164,7 +166,7 @@ static obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum)
     /* Copy over the object that should be here. */
     obj_index[i]             = obj_index[i - 1];
     obj_proto[i]             = obj_proto[i - 1];
-    obj_proto[i].item_number = i;
+    obj_set_item_number(&obj_proto[i], i);
   }
 
   /* Not found, place at 0. */
@@ -178,13 +180,13 @@ static obj_rnum index_object(struct obj_data *obj, obj_vnum ovnum, obj_rnum ornu
   if (obj == nullptr || ovnum < 0 || ornum < 0 || ornum > top_of_objt)
     return NOWHERE;
 
-  obj->item_number        = ornum;
+  obj_set_item_number(obj, ornum);
   obj_index[ornum].vnum   = ovnum;
   obj_index[ornum].number = 0;
   obj_index[ornum].func   = nullptr;
 
   copy_object_preserve(&obj_proto[ornum], obj);
-  obj_proto[ornum].in_room = NOWHERE;
+  obj_set_in_room(&obj_proto[ornum], NOWHERE);
 
   return ornum;
 }
@@ -223,8 +225,8 @@ bool save_objects(zone_rnum zone_num)
    */
   for (counter = genolc_zone_bottom(zone_num); counter <= zone_table[zone_num].top; counter++) {
     if ((realcounter = real_object(counter)) != NOTHING) {
-      if ((obj = &obj_proto[realcounter])->action_description) {
-        strlcpy(buf, obj->action_description, sizeof(buf));
+      if (obj_get_action_description(obj = &obj_proto[realcounter])) {
+        strlcpy(buf, obj_get_action_description(obj), sizeof(buf));
         strip_cr(buf);
       } else
         *buf = '\0';
@@ -237,9 +239,9 @@ bool save_objects(zone_rnum zone_num)
               "%s~\n",
 
               obj_get_vnum(obj),
-              (obj->name && *obj->name) ? obj->name : "undefined",
-              (obj->short_description && *obj->short_description) ? obj->short_description : "undefined",
-              (obj->description && *obj->description) ? obj->description : "undefined",
+              (obj_get_name(obj) && *obj_get_name(obj)) ? obj_get_name(obj) : "undefined",
+              (obj_get_short_description(obj) && *obj_get_short_description(obj)) ? obj_get_short_description(obj) : "undefined",
+              (obj_get_description(obj) && *obj_get_description(obj)) ? obj_get_description(obj) : "undefined",
               buf);
 
       sprintascii(ebuf1, obj_get_extra_flags(obj)[0]);
@@ -281,8 +283,8 @@ bool save_objects(zone_rnum zone_num)
       /*
        * Do we have extra descriptions?
        */
-      if (obj->ex_description) { /* Yes, save them too. */
-        for (ex_desc = obj->ex_description; ex_desc; ex_desc = ex_desc->next) {
+      if (obj_get_ex_description(obj)) { /* Yes, save them too. */
+        for (ex_desc = obj_get_ex_description(obj); ex_desc; ex_desc = ex_desc->next) {
           /*
            * Sanity check to prevent nasty protection faults.
            */
@@ -302,20 +304,20 @@ bool save_objects(zone_rnum zone_num)
        * Do we have affects?
        */
       for (counter2 = 0; counter2 < MAX_OBJ_AFFECT; counter2++)
-        if (obj->affected[counter2].modifier)
+        if (obj_get_affected(obj)[counter2].modifier)
           fprintf(fp, "A\n"
                       "%d %d %d\n",
-                  obj->affected[counter2].location,
-                  obj->affected[counter2].modifier, obj->affected[counter2].specific);
+                  obj_get_affected(obj)[counter2].location,
+                  obj_get_affected(obj)[counter2].modifier, obj_get_affected(obj)[counter2].specific);
       /* Do we have spells? */
-      if (obj->sbinfo) { /*. Yep, save them too . */
+      if (obj_get_sbinfo(obj)) { /*. Yep, save them too . */
         for (counter2 = 0; counter2 < SKILL_TABLE_SIZE; counter2++) {
-          if (obj->sbinfo[counter2].spellname == 0) {
+          if (obj_get_sbinfo(obj)[counter2].spellname == 0) {
             break;
           }
           fprintf(fp, "S\n"
                       "%d %d\n",
-                  obj->sbinfo[counter2].spellname, obj->sbinfo[counter2].pages);
+                  obj_get_sbinfo(obj)[counter2].spellname, obj_get_sbinfo(obj)[counter2].pages);
           continue;
         }
       }
@@ -361,16 +363,16 @@ void free_object_strings(struct obj_data *obj)
   assert(i <= 1);
 #endif
 
-  if (obj->name)
-    free(obj->name);
-  if (obj->description)
-    free(obj->description);
-  if (obj->short_description)
-    free(obj->short_description);
-  if (obj->action_description)
-    free(obj->action_description);
-  if (obj->ex_description)
-    free_ex_descriptions(obj->ex_description);
+  if (obj_get_name(obj))
+    free(obj_get_name(obj));
+  if (obj_get_description(obj))
+    free(obj_get_description(obj));
+  if (obj_get_short_description(obj))
+    free(obj_get_short_description(obj));
+  if (obj_get_action_description(obj))
+    free(obj_get_action_description(obj));
+  if (obj_get_ex_description(obj))
+    free_ex_descriptions(obj_get_ex_description(obj));
 }
 
 /*
@@ -380,20 +382,20 @@ void free_object_strings_proto(struct obj_data *obj)
 {
   obj_rnum robj_num = obj_get_item_number(obj);
 
-  if (obj->name && obj->name != obj_proto[robj_num].name)
-    free(obj->name);
-  if (obj->description && obj->description != obj_proto[robj_num].description)
-    free(obj->description);
-  if (obj->short_description && obj->short_description != obj_proto[robj_num].short_description)
-    free(obj->short_description);
-  if (obj->action_description && obj->action_description != obj_proto[robj_num].action_description)
-    free(obj->action_description);
-  if (obj->ex_description) {
+  if (obj_get_name(obj) && obj_get_name(obj) != obj_get_name(&obj_proto[robj_num]))
+    free(obj_get_name(obj));
+  if (obj_get_description(obj) && obj_get_description(obj) != obj_get_description(&obj_proto[robj_num]))
+    free(obj_get_description(obj));
+  if (obj_get_short_description(obj) && obj_get_short_description(obj) != obj_get_short_description(&obj_proto[robj_num]))
+    free(obj_get_short_description(obj));
+  if (obj_get_action_description(obj) && obj_get_action_description(obj) != obj_get_action_description(&obj_proto[robj_num]))
+    free(obj_get_action_description(obj));
+  if (obj_get_ex_description(obj)) {
     struct extra_descr_data *thised, *plist, *next_one; /* O(horrible) */
     int ok_key, ok_desc, ok_item;
-    for (thised = obj->ex_description; thised; thised = next_one) {
+    for (thised = obj_get_ex_description(obj); thised; thised = next_one) {
       next_one = thised->next;
-      for (ok_item = ok_key = ok_desc = 1, plist = obj_proto[robj_num].ex_description; plist; plist = plist->next) {
+      for (ok_item = ok_key = ok_desc = 1, plist = obj_get_ex_description(&obj_proto[robj_num]); plist; plist = plist->next) {
         if (plist->keyword == thised->keyword)
           ok_key = 0;
         if (plist->description == thised->description)
@@ -413,15 +415,15 @@ void free_object_strings_proto(struct obj_data *obj)
 
 static void copy_object_strings(struct obj_data *to, struct obj_data *from)
 {
-  to->name               = from->name ? strdup(from->name) : nullptr;
-  to->description        = from->description ? strdup(from->description) : nullptr;
-  to->short_description  = from->short_description ? strdup(from->short_description) : nullptr;
-  to->action_description = from->action_description ? strdup(from->action_description) : nullptr;
+  obj_set_name(to, obj_get_name(from) ? strdup(obj_get_name(from)) : nullptr);
+  obj_set_description(to, obj_get_description(from) ? strdup(obj_get_description(from)) : nullptr);
+  obj_set_short_description(to, obj_get_short_description(from) ? strdup(obj_get_short_description(from)) : nullptr);
+  obj_set_action_description(to, obj_get_action_description(from) ? strdup(obj_get_action_description(from)) : nullptr);
 
-  if (from->ex_description)
-    copy_ex_descriptions(&to->ex_description, from->ex_description);
+  if (obj_get_ex_description(from))
+    copy_ex_descriptions(obj_ex_description_slot(to), obj_get_ex_description(from));
   else
-    to->ex_description = nullptr;
+    obj_set_ex_description(to, nullptr);
 }
 
 bool copy_object(struct obj_data *to, struct obj_data *from)
@@ -460,29 +462,29 @@ obj_rnum delete_object(obj_rnum rnum)
   add_to_save_list(zone_table[zrnum].number, SL_OBJ);
 
   /* This is something you might want to read about in the logs. */
-  mud_log("GenOLC: delete_object: Deleting object #%d (%s).", obj_get_vnum(obj), obj->short_description);
+  mud_log("GenOLC: delete_object: Deleting object #%d (%s).", obj_get_vnum(obj), obj_get_short_description(obj));
 
-  for (tmp = object_list; tmp; tmp = tmp->next) {
-    if (tmp->item_number != obj->item_number)
+  for (tmp = object_list; tmp; tmp = obj_get_next(tmp)) {
+    if (obj_get_item_number(tmp) != obj_get_item_number(obj))
       continue;
 
     /* extract_obj() will just axe contents. */
-    if (tmp->contains) {
+    if (obj_get_contains(tmp)) {
       struct obj_data *this_content, *next_content;
-      for (this_content = tmp->contains; this_content; this_content = next_content) {
-        next_content = this_content->next_content;
+      for (this_content = obj_get_contains(tmp); this_content; this_content = next_content) {
+        next_content = obj_get_next_content(this_content);
         if (obj_get_in_room(tmp)) {
           /* Transfer stuff from object to room. */
           obj_from_obj(this_content);
           obj_to_room(this_content, obj_get_in_room(tmp));
-        } else if (tmp->worn_by || tmp->carried_by) {
+        } else if (obj_get_worn_by(tmp) || obj_get_carried_by(tmp)) {
           /* Transfer stuff from object to person inventory. */
           obj_from_char(this_content);
-          obj_to_char(this_content, tmp->carried_by);
-        } else if (tmp->in_obj) {
+          obj_to_char(this_content, obj_get_carried_by(tmp));
+        } else if (obj_get_in_obj(tmp)) {
           /* Transfer stuff from object to containing object. */
           obj_from_obj(this_content);
-          obj_to_obj(this_content, tmp->in_obj);
+          obj_to_obj(this_content, obj_get_in_obj(tmp));
         }
       }
     }
@@ -491,14 +493,14 @@ obj_rnum delete_object(obj_rnum rnum)
   }
 
   /* Adjust rnums of all other objects. */
-  for (tmp = object_list; tmp; tmp = tmp->next) {
+  for (tmp = object_list; tmp; tmp = obj_get_next(tmp)) {
     obj_set_item_number(tmp, obj_get_item_number(tmp) - ((obj_get_item_number(tmp) > rnum)));
   }
 
   for (i = rnum; i < top_of_objt; i++) {
     obj_index[i]             = obj_index[i + 1];
     obj_proto[i]             = obj_proto[i + 1];
-    obj_proto[i].item_number = i;
+    obj_set_item_number(&obj_proto[i], i);
   }
 
   top_of_objt--;

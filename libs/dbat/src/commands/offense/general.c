@@ -327,9 +327,9 @@ ACMD(do_assist)
     if (char_get_fighting(helpee))
       opponent = char_get_fighting(helpee);
     else
-      for (opponent = world[char_get_in_room(ch)].people;
+      for (opponent = rroom_get_people(char_get_in_room(ch));
            opponent && (char_get_fighting(opponent) != helpee);
-           opponent = opponent->next_in_room);
+           opponent = char_get_next_in_room(opponent));
 
     if (!opponent)
       act("But nobody is fighting $M!", true, ch, 0, helpee, TO_CHAR);
@@ -412,8 +412,8 @@ ACMD(do_flee)
   if (!char_is_npc(ch)) {
     int fail = false;
     struct obj_data *obj, *next_obj;
-    for (obj = world[char_get_in_room(ch)].contents; obj; obj = next_obj) {
-      next_obj = obj->next_content;
+    for (obj = rroom_get_contents(char_get_in_room(ch)); obj; obj = next_obj) {
+      next_obj = obj_get_next_content(obj);
       if (obj_get_kicharge(obj) > 0 && obj_get_user(obj) == ch) {
         fail = true;
       }
@@ -445,7 +445,7 @@ ACMD(do_flee)
       }
 
       struct obj_data *wall;
-      for (wall = world[char_get_in_room(ch)].contents; wall; wall = wall->next_content) {
+      for (wall = rroom_get_contents(char_get_in_room(ch)); wall; wall = obj_get_next_content(wall)) {
         if (obj_get_vnum(wall) == 79) {
           if (obj_get_cost(wall) == attempt) {
             send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");

@@ -23,6 +23,7 @@
 #include "dbat/feats.h"
 #include "dbat/genolc.h"
 #include "dbat/shop.h"
+#include "dbat/character_utils.h"
 
 static void gedit_disp_menu(struct descriptor_data *d);
 static void gedit_setup_existing(struct descriptor_data *d, guild_rnum rgm_num);
@@ -111,7 +112,7 @@ ACMD(do_oasis_gedit)
   /****************************************************************************/
   /** Point d to the builder's descriptor.                                   **/
   /****************************************************************************/
-  d = ch->desc;
+  d = char_get_desc(ch);
 
   /****************************************************************************/
   /** Give the descriptor an OLC structure.                                  **/
@@ -445,7 +446,7 @@ static void gedit_disp_menu(struct descriptor_data *d)
 
                   OLC_NUM(d),
                   guild_get_gm(guilddata) == NOBODY ? -1 : mob_index[guild_get_gm(guilddata)].vnum,
-                  guild_get_gm(guilddata) == NOBODY ? "None" : mob_proto[guild_get_gm(guilddata)].short_descr,
+                  guild_get_gm(guilddata) == NOBODY ? "None" : char_get_sdesc(&mob_proto[guild_get_gm(guilddata)]),
                   guild_get_no_such_skill(guilddata),
                   guild_get_not_enough_gold(guilddata),
                   guild_get_open(guilddata),

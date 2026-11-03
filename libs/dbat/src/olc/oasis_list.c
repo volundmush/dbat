@@ -16,6 +16,9 @@
 #include "dbat/guild.h"
 #include "dbat/races.h"
 #include "dbat/class.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 /******************************************************************************/
 /** Internal Functions                                                       **/
@@ -49,7 +52,7 @@ ACMD(do_oasis_list)
   }
 
   if (!*smin || *smin == '.') {
-    rzone = world[char_get_in_room(ch)].zone;
+    rzone = rroom_get_zone(char_get_in_room(ch));
   } else if (!*smax) {
     rzone = real_zone(atoi(smin));
 
@@ -99,7 +102,7 @@ ACMD(do_oasis_links)
   one_argument(argument, arg);
 
   if (!strcmp(arg, ".") || !*arg) {
-    zrnum = world[char_get_in_room(ch)].zone;
+    zrnum = rroom_get_zone(char_get_in_room(ch));
     zvnum = zone_table[zrnum].number;
   } else {
     zvnum = atoi(arg);
@@ -118,13 +121,13 @@ ACMD(do_oasis_links)
   for (nr = 0; nr <= top_of_world && (rroom_get_vnum(nr) <= last); nr++) {
     if (rroom_get_vnum(nr) >= first) {
       for (j = 0; j < NUM_OF_DIRS; j++) {
-        if (world[nr].dir_option[j]) {
-          to_room = world[nr].dir_option[j]->to_room;
-          if (to_room != NOWHERE && (zrnum != world[to_room].zone))
+        if (rroom_get_dir_option(nr, j)) {
+          to_room = rroom_get_dir_option(nr, j)->to_room;
+          if (to_room != NOWHERE && (zrnum != rroom_get_zone(to_room)))
             send_to_char(ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
-                         zone_table[world[to_room].zone].number,
-                         zone_table[world[to_room].zone].name,
-                         rroom_get_vnum(nr), dirs[j], world[to_room].number);
+                         zone_table[rroom_get_zone(to_room)].number,
+                         zone_table[rroom_get_zone(to_room)].name,
+                         rroom_get_vnum(nr), dirs[j], rroom_get_vnum(to_room));
         }
       }
     }
@@ -164,12 +167,12 @@ static void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zon
   for (i = 0; i <= top_of_world; i++) {
 
     /** Check to see if this room is one of the ones needed to be listed.    **/
-    if ((world[i].number >= bottom) && (world[i].number <= top)) {
+    if ((rroom_get_vnum(i) >= bottom) && (rroom_get_vnum(i) <= top)) {
       counter++;
 
       send_to_char(ch, "%4d) [@g%-5d@n] @[1]%-*s@n %s",
-                   counter, world[i].number, count_color_chars(world[i].name) + 44,
-                   world[i].name, world[i].proto_script ? "[TRIG] " : "");
+                   counter, rroom_get_vnum(i), count_color_chars(rroom_get_name(i)) + 44,
+                   rroom_get_name(i), rroom_get_proto_script(i) ? "[TRIG] " : "");
 
       for (j = 0; j < NUM_OF_DIRS; j++) {
         if (rroom_get_dir_option(i, j) == nullptr)
@@ -177,8 +180,8 @@ static void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zon
         if (rroom_get_dir_option(i, j)->to_room == NOWHERE)
           continue;
 
-        if (world[rroom_get_dir_option(i, j)->to_room].zone != world[i].zone)
-          send_to_char(ch, "(@y%d@n)", world[rroom_get_dir_option(i, j)->to_room].number);
+        if (rroom_get_zone(rroom_get_dir_option(i, j)->to_room) != rroom_get_zone(i))
+          send_to_char(ch, "(@y%d@n)", rroom_get_vnum(rroom_get_dir_option(i, j)->to_room));
       }
 
       send_to_char(ch, "\r\n");
@@ -219,8 +222,8 @@ static void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, z
       counter++;
 
       send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
-                   counter, mob_index[i].vnum, count_color_chars(mob_proto[i].short_descr) + 30, mob_proto[i].short_descr, char_true_race_name((&mob_proto[i])), char_sensei_name((&mob_proto[i])),
-                   mob_proto[i].level + mob_proto[i].level_adj + mob_proto[i].race_level, mob_proto[i].proto_script ? " [TRIG]" : "");
+                   counter, mob_index[i].vnum, count_color_chars(char_get_sdesc(&mob_proto[i])) + 30, char_get_sdesc(&mob_proto[i]), char_true_race_name((&mob_proto[i])), char_sensei_name((&mob_proto[i])),
+                   char_get_class_level(&mob_proto[i]) + char_get_level_adj(&mob_proto[i]) + char_get_race_level(&mob_proto[i]), char_get_proto_script(&mob_proto[i]) ? " [TRIG]" : "");
     }
   }
 
@@ -258,9 +261,9 @@ static void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, r
       counter++;
 
       send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
-                   counter, obj_index[i].vnum, count_color_chars(obj_proto[i].short_description) + 44,
-                   obj_proto[i].short_description, item_types[obj_proto[i].type_flag],
-                   obj_proto[i].proto_script ? " [TRIG]" : "");
+                   counter, obj_index[i].vnum, count_color_chars(obj_get_short_description(&obj_proto[i])) + 44,
+                   obj_get_short_description(&obj_proto[i]), item_types[obj_get_type_flag(&obj_proto[i])],
+                   obj_get_proto_script(&obj_proto[i]) ? " [TRIG]" : "");
     }
   }
 
@@ -383,7 +386,7 @@ void print_zone(struct char_data *ch, zone_vnum vnum)
 
   for (i = 0; i <= largest_table; i++) {
     if (i <= top_of_world)
-      if (world[i].zone == rnum)
+      if (rroom_get_zone(i) == rnum)
         size_rooms++;
 
     if (i <= top_of_objt)

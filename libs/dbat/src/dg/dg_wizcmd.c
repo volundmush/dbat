@@ -6,6 +6,9 @@
 #include "dbat/act.wizard.h"
 #include "dbat/dg_event.h"
 #include "dg_internal.h"
+#include "dbat/room_utils.h"
+#include "dbat/object_utils.h"
+#include "dbat/character_utils.h"
 
 /* Local functions not used elsewhere */
 static void do_stat_trigger(struct char_data *ch, trig_data *trig);
@@ -66,9 +69,9 @@ void find_uid_name(char *uid, char *name, size_t nlen)
   obj_data *obj;
 
   if ((ch = get_char(uid)))
-    snprintf(name, nlen, "%s", ch->name);
+    snprintf(name, nlen, "%s", char_get_alias(ch));
   else if ((obj = get_obj(uid)))
-    snprintf(name, nlen, "%s", obj->name);
+    snprintf(name, nlen, "%s", obj_get_name(obj));
   else
     snprintf(name, nlen, "uid = %s, (not found)", uid + 1);
 }
@@ -133,34 +136,34 @@ static void script_stat(char_data *ch, struct script_data *sc)
 void do_sstat_room(struct char_data *ch, struct room_data *rm)
 {
   send_to_char(ch, "Triggers:\r\n");
-  if (!rm->script) {
+  if (!room_get_script(rm)) {
     send_to_char(ch, "  None.\r\n");
     return;
   }
 
-  script_stat(ch, rm->script);
+  script_stat(ch, room_get_script(rm));
 }
 
 void do_sstat_object(char_data *ch, obj_data *j)
 {
   send_to_char(ch, "Triggers:\r\n");
-  if (!j->script) {
+  if (!obj_get_script(j)) {
     send_to_char(ch, "  None.\r\n");
     return;
   }
 
-  script_stat(ch, j->script);
+  script_stat(ch, obj_get_script(j));
 }
 
 void do_sstat_character(char_data *ch, char_data *k)
 {
   send_to_char(ch, "Script information:\r\n");
-  if (!k->script) {
+  if (!char_get_script(k)) {
     send_to_char(ch, "  None.\r\n");
     return;
   }
 
-  script_stat(ch, k->script);
+  script_stat(ch, char_get_script(k));
 }
 
 /*
@@ -219,7 +222,7 @@ ACMD(do_attach)
   if (is_abbrev(arg, "mobile") || is_abbrev(arg, "mtr")) {
     victim = get_char_vis(ch, targ_name, nullptr, FIND_CHAR_WORLD);
     if (!victim) { /* search room for one with this vnum */
-      for (victim = world[char_get_in_room(ch)].people; victim; victim = victim->next_in_room)
+      for (victim = rroom_get_people(char_get_in_room(ch)); victim; victim = char_get_next_in_room(victim))
         if (char_get_mob_vnum(victim) == num_arg)
           break;
 
@@ -232,7 +235,7 @@ ACMD(do_attach)
       send_to_char(ch, "Players can't have scripts.\r\n");
       return;
     }
-    if (!can_edit_zone(ch, world[char_get_in_room(ch)].zone)) {
+    if (!can_edit_zone(ch, rroom_get_zone(char_get_in_room(ch)))) {
       send_to_char(ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
@@ -243,21 +246,21 @@ ACMD(do_attach)
       return;
     }
 
-    add_trigger(dg_ensure_script(&victim->script), trig, loc);
+    add_trigger(dg_ensure_script(char_script_slot(victim)), trig, loc);
 
     send_to_char(ch, "Trigger %d (%s) attached to %s [%d].\r\n",
-                 tn, trig->name, victim->short_descr, char_get_mob_vnum(victim));
+                 tn, trig->name, char_get_sdesc(victim), char_get_mob_vnum(victim));
   }
 
   else if (is_abbrev(arg, "object") || is_abbrev(arg, "otr")) {
     object = get_obj_vis(ch, targ_name, nullptr);
     if (!object) { /* search room for one with this vnum */
-      for (object = world[char_get_in_room(ch)].contents; object; object = object->next_content)
+      for (object = rroom_get_contents(char_get_in_room(ch)); object; object = obj_get_next_content(object))
         if (obj_get_vnum(object) == num_arg)
           break;
 
       if (!object) { /* search inventory for one with this vnum */
-        for (object = ch->carrying; object; object = object->next_content)
+        for (object = char_get_inventory(ch); object; object = obj_get_next_content(object))
           if (obj_get_vnum(object) == num_arg)
             break;
 
@@ -268,7 +271,7 @@ ACMD(do_attach)
       }
     }
 
-    if (!can_edit_zone(ch, world[char_get_in_room(ch)].zone)) {
+    if (!can_edit_zone(ch, rroom_get_zone(char_get_in_room(ch)))) {
       send_to_char(ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
@@ -279,11 +282,11 @@ ACMD(do_attach)
       return;
     }
 
-    add_trigger(dg_ensure_script(&object->script), trig, loc);
+    add_trigger(dg_ensure_script(obj_script_slot(object)), trig, loc);
 
     send_to_char(ch, "Trigger %d (%s) attached to %s [%d].\r\n",
                  tn, trig->name,
-                 (object->short_description ? object->short_description : object->name),
+                 (obj_get_short_description(object) ? obj_get_short_description(object) : obj_get_name(object)),
                  obj_get_vnum(object));
   }
 
@@ -300,7 +303,7 @@ ACMD(do_attach)
       return;
     }
 
-    if (!can_edit_zone(ch, world[rnum].zone)) {
+    if (!can_edit_zone(ch, rroom_get_zone(rnum))) {
       send_to_char(ch, "You can only attach triggers in your own zone\r\n");
       return;
     }
@@ -313,10 +316,10 @@ ACMD(do_attach)
 
     room = &world[rnum];
 
-    add_trigger(dg_ensure_script(&room->script), trig, loc);
+    add_trigger(dg_ensure_script(room_script_slot(room)), trig, loc);
 
     send_to_char(ch, "Trigger %d (%s) attached to room %d.\r\n",
-                 tn, trig->name, world[rnum].number);
+                 tn, trig->name, rroom_get_vnum(rnum));
   }
 
   else
@@ -412,18 +415,18 @@ ACMD(do_detach)
 
   if (!strcasecmp(arg1, "room") || !strcasecmp(arg1, "wtr")) {
     room = &world[char_get_in_room(ch)];
-    if (!can_edit_zone(ch, room->zone)) {
+    if (!can_edit_zone(ch, room_get_zone(room))) {
       send_to_char(ch, "You can only detach triggers in your own zone\r\n");
       return;
     }
-    if (!room->script)
+    if (!room_get_script(room))
       send_to_char(ch, "This room does not have any triggers.\r\n");
     else if (!strcasecmp(arg2, "all")) {
       extract_script(room, WLD_TRIGGER);
       send_to_char(ch, "All triggers removed from room.\r\n");
-    } else if (remove_trigger(room->script, arg2)) {
+    } else if (remove_trigger(room_get_script(room), arg2)) {
       send_to_char(ch, "Trigger removed.\r\n");
-      if (!room->script->trig_list) {
+      if (!room_get_script(room)->trig_list) {
         extract_script(room, WLD_TRIGGER);
       }
     } else
@@ -434,7 +437,7 @@ ACMD(do_detach)
     if (is_abbrev(arg1, "mobile") || !strcasecmp(arg1, "mtr")) {
       victim = get_char_vis(ch, arg2, nullptr, FIND_CHAR_WORLD);
       if (!victim) { /* search room for one with this vnum */
-        for (victim = world[char_get_in_room(ch)].people; victim; victim = victim->next_in_room)
+        for (victim = rroom_get_people(char_get_in_room(ch)); victim; victim = char_get_next_in_room(victim))
           if (char_get_mob_vnum(victim) == num_arg)
             break;
 
@@ -453,12 +456,12 @@ ACMD(do_detach)
     else if (is_abbrev(arg1, "object") || !strcasecmp(arg1, "otr")) {
       object = get_obj_vis(ch, arg2, nullptr);
       if (!object) { /* search room for one with this vnum */
-        for (object = world[char_get_in_room(ch)].contents; object; object = object->next_content)
+        for (object = rroom_get_contents(char_get_in_room(ch)); object; object = obj_get_next_content(object))
           if (obj_get_vnum(object) == num_arg)
             break;
 
         if (!object) { /* search inventory for one with this vnum */
-          for (object = ch->carrying; object; object = object->next_content)
+          for (object = char_get_inventory(ch); object; object = obj_get_next_content(object))
             if (obj_get_vnum(object) == num_arg)
               break;
 
@@ -475,13 +478,13 @@ ACMD(do_detach)
         trigger = arg3;
     } else {
       /* Thanks to Carlos Myers for fixing the line below */
-      if ((object = get_obj_in_equip_vis(ch, arg1, nullptr, ch->equipment)))
+      if ((object = get_obj_in_equip_vis(ch, arg1, nullptr, char_get_equipment_array(ch))))
         ;
-      else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->carrying)))
+      else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, char_get_inventory(ch))))
         ;
       else if ((victim = get_char_room_vis(ch, arg1, nullptr)))
         ;
-      else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, world[char_get_in_room(ch)].contents)))
+      else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, rroom_get_contents(char_get_in_room(ch)))))
         ;
       else if ((victim = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD)))
         ;
@@ -497,19 +500,19 @@ ACMD(do_detach)
       if (!char_is_npc(victim))
         send_to_char(ch, "Players don't have triggers.\r\n");
 
-      else if (!victim->script)
+      else if (!char_get_script(victim))
         send_to_char(ch, "That mob doesn't have any triggers.\r\n");
       else if (!can_edit_zone(ch, real_zone_by_thing(char_get_mob_vnum(victim)))) {
         send_to_char(ch, "You can only detach triggers in your own zone\r\n");
         return;
       } else if (trigger && !strcasecmp(trigger, "all")) {
         extract_script(victim, MOB_TRIGGER);
-        send_to_char(ch, "All triggers removed from %s.\r\n", victim->short_descr);
+        send_to_char(ch, "All triggers removed from %s.\r\n", char_get_sdesc(victim));
       }
 
-      else if (trigger && remove_trigger(victim->script, trigger)) {
+      else if (trigger && remove_trigger(char_get_script(victim), trigger)) {
         send_to_char(ch, "Trigger removed.\r\n");
-        if (!victim->script->trig_list) {
+        if (!char_get_script(victim)->trig_list) {
           extract_script(victim, MOB_TRIGGER);
         }
       } else
@@ -517,7 +520,7 @@ ACMD(do_detach)
     }
 
     else if (object) {
-      if (!object->script)
+      if (!obj_get_script(object))
         send_to_char(ch, "That object doesn't have any triggers.\r\n");
 
       else if (!can_edit_zone(ch, real_zone_by_thing(obj_get_vnum(object)))) {
@@ -526,12 +529,12 @@ ACMD(do_detach)
       } else if (trigger && !strcasecmp(trigger, "all")) {
         extract_script(object, OBJ_TRIGGER);
         send_to_char(ch, "All triggers removed from %s.\r\n",
-                     object->short_description ? object->short_description : object->name);
+                     obj_get_short_description(object) ? obj_get_short_description(object) : obj_get_name(object));
       }
 
-      else if (trigger && remove_trigger(object->script, trigger)) {
+      else if (trigger && remove_trigger(obj_get_script(object), trigger)) {
         send_to_char(ch, "Trigger removed.\r\n");
-        if (!object->script->trig_list) {
+        if (!obj_get_script(object)->trig_list) {
           extract_script(object, OBJ_TRIGGER);
         }
       } else
@@ -572,11 +575,11 @@ ACMD(do_vdelete)
   }
 
   if ((room = find_room(uid))) {
-    sc_remote = room->script;
+    sc_remote = room_get_script(room);
   } else if ((mob = find_char(uid))) {
-    sc_remote = mob->script;
+    sc_remote = char_get_script(mob);
   } else if ((obj = find_obj(uid))) {
-    sc_remote = obj->script;
+    sc_remote = obj_get_script(obj);
   } else {
     send_to_char(ch, "vdelete: cannot resolve specified id.\r\n");
     return;

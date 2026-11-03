@@ -26,6 +26,7 @@
 #include "dbat/act.social.h"
 #include "dbat/gengld.h"
 #include "dbat/hsedit.h"
+#include "dbat/character_utils.h"
 
 /******************************************************************************/
 /** Internal Functions                                                       **/
@@ -63,7 +64,7 @@ ACMD(do_oasis)
   /*
    * No screwing around as a mobile.
    */
-  if (char_is_npc(ch) || !ch->desc)
+  if (char_is_npc(ch) || !char_get_desc(ch))
     return;
 
   /*
@@ -76,7 +77,7 @@ ACMD(do_oasis)
    * -- Welcor 09/03 
    * - thanks to Mark Garringer (zizazat@hotmail.com) for the bug report.
    */
-  if (desc_get_connected(ch->desc) != CON_PLAYING)
+  if (desc_get_connected(char_get_desc(ch)) != CON_PLAYING)
     return;
 
   switch (subcmd) {
@@ -392,7 +393,7 @@ static void free_config(struct config_data *data)
 bool can_edit_zone(struct char_data *ch, zone_rnum rnum)
 {
   /* no access if called with bad arguments */
-  if (!ch->desc || char_is_npc(ch) || rnum == NOWHERE)
+  if (!char_get_desc(ch) || char_is_npc(ch) || rnum == NOWHERE)
     return false;
 
   if (rnum == HEDIT_PERMISSION)

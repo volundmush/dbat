@@ -151,7 +151,7 @@ ACMD(do_help)
   char buf[MAX_STRING_LENGTH * 4];
   int mid = 0;
 
-  if (!ch->desc)
+  if (!char_get_desc(ch))
     return;
 
   skip_spaces(&argument);

@@ -337,8 +337,8 @@ ACMD(do_summon)
     return;
   }
 
-  for (obj = ch->carrying; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     if (obj_extra_flagged(obj, ITEM_FORGED)) {
       continue;
     }
@@ -401,8 +401,8 @@ ACMD(do_summon)
       DRAGONZ = real_zone_by_thing(DRAGONR);
     }
 
-    for (obj = ch->carrying; obj; obj = next_obj) {
-      next_obj = obj->next_content;
+    for (obj = char_get_inventory(ch); obj; obj = next_obj) {
+      next_obj = obj_get_next_content(obj);
 
       if (obj_get_vnum(obj) == dball2[0]) {
         obj_from_char(obj);
@@ -468,8 +468,8 @@ bool dball_count(struct char_data *ch)
   int count            = 0;
   struct obj_data *obj = nullptr, *next_obj = nullptr;
 
-  for (obj = ch->carrying; obj; obj = next_obj) {
-    next_obj = obj->next_content;
+  for (obj = char_get_inventory(ch); obj; obj = next_obj) {
+    next_obj = obj_get_next_content(obj);
     if (obj_get_vnum(obj) == dball[0]) {
       dball[0] = -1;
       count++;

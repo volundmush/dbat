@@ -164,11 +164,11 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
         p       = any_one_name(++p, name);
 
         if (find_invis) obj = get_obj_in_room(&world[char_get_in_room(ch)], name);
-        else if (!(obj = get_obj_in_list_vis(ch, name, nullptr, world[char_get_in_room(ch)].contents)))
+        else if (!(obj = get_obj_in_list_vis(ch, name, nullptr, rroom_get_contents(char_get_in_room(ch)))))
           ;
-        else if (!(obj = get_obj_in_equip_vis(ch, name, &tmp, ch->equipment)))
+        else if (!(obj = get_obj_in_equip_vis(ch, name, &tmp, char_get_equipment_array(ch))))
           ;
-        else obj = get_obj_in_list_vis(ch, name, nullptr, ch->carrying);
+        else obj = get_obj_in_list_vis(ch, name, nullptr, char_get_inventory(ch));
 
         otokens[i]  = (void *)obj;
         tokens[++i] = ++s;
@@ -191,8 +191,8 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets)
     sub_write_to_char(ch, tokens, otokens, type);
 
   if (IS_SET(targets, TO_ROOM))
-    for (to     = world[char_get_in_room(ch)].people;
-         to; to = to->next_in_room)
+    for (to     = rroom_get_people(char_get_in_room(ch));
+         to; to = char_get_next_in_room(to))
       if (to != ch && sendok(to, to_sleeping))
         sub_write_to_char(to, tokens, otokens, type);
 }
@@ -207,6 +207,6 @@ void send_to_zone(const char *messg, zone_rnum zone)
   for (i = descriptor_list; i; i = i->next)
     if (!i->connected && i->character && char_is_awake(i->character) &&
         (char_get_in_room(i->character) != NOWHERE) &&
-        (world[char_get_in_room(i->character)].zone == zone))
+        (rroom_get_zone(char_get_in_room(i->character)) == zone))
       write_to_output(i, "%s", messg);
 }

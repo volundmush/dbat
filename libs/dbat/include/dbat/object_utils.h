@@ -110,3 +110,50 @@ void obj_set_in_room(struct obj_data *obj, room_rnum v);
 struct room_direction_data *obj_get_exit(const struct obj_data *obj, int door);
 const char *money_desc(int amount);
 struct obj_data *create_money(int amount);
+
+/* A field's address, for code that fills the field in later or unlinks through it */
+struct obj_data **obj_contains_slot(struct obj_data *obj);
+struct extra_descr_data **obj_ex_description_slot(struct obj_data *obj);
+struct script_data **obj_script_slot(struct obj_data *obj);
+char **obj_action_description_slot(struct obj_data *obj);
+struct obj_spellbook_spell **obj_sbinfo_slot(struct obj_data *obj);
+
+/* Removes obj from a list linked through next_content: a room's contents, a container or an inventory. */
+void obj_unlink_content(struct obj_data **head, struct obj_data *obj);
+/* Removes obj from object_list. */
+void obj_unlink_from_list(struct obj_data *obj);
+
+/* Field accessors */
+char *obj_get_action_description(const struct obj_data *obj);
+void obj_set_action_description(struct obj_data *obj, char *v);
+struct obj_affected_type *obj_get_affected(struct obj_data *obj);
+struct char_data *obj_get_carried_by(const struct obj_data *obj);
+void obj_set_carried_by(struct obj_data *obj, struct char_data *v);
+struct obj_data *obj_get_contains(const struct obj_data *obj);
+void obj_set_contains(struct obj_data *obj, struct obj_data *v);
+char *obj_get_description(const struct obj_data *obj);
+void obj_set_description(struct obj_data *obj, char *v);
+struct extra_descr_data *obj_get_ex_description(const struct obj_data *obj);
+void obj_set_ex_description(struct obj_data *obj, struct extra_descr_data *v);
+time_t obj_get_generation(const struct obj_data *obj);
+void obj_set_generation(struct obj_data *obj, time_t v);
+struct obj_data *obj_get_in_obj(const struct obj_data *obj);
+void obj_set_in_obj(struct obj_data *obj, struct obj_data *v);
+char *obj_get_name(const struct obj_data *obj);
+void obj_set_name(struct obj_data *obj, char *v);
+struct obj_data *obj_get_next(const struct obj_data *obj);
+void obj_set_next(struct obj_data *obj, struct obj_data *v);
+struct obj_data *obj_get_next_content(const struct obj_data *obj);
+void obj_set_next_content(struct obj_data *obj, struct obj_data *v);
+struct trig_proto_list *obj_get_proto_script(const struct obj_data *obj);
+void obj_set_proto_script(struct obj_data *obj, struct trig_proto_list *v);
+struct obj_spellbook_spell *obj_get_sbinfo(const struct obj_data *obj);
+struct script_data *obj_get_script(const struct obj_data *obj);
+void obj_set_script(struct obj_data *obj, struct script_data *v);
+void obj_set_short_description(struct obj_data *obj, char *v);
+int64_t obj_get_unique_id(const struct obj_data *obj);
+void obj_set_unique_id(struct obj_data *obj, int64_t v);
+struct char_data *obj_get_worn_by(const struct obj_data *obj);
+void obj_set_worn_by(struct obj_data *obj, struct char_data *v);
+int16_t obj_get_worn_on(const struct obj_data *obj);
+void obj_set_worn_on(struct obj_data *obj, int16_t v);

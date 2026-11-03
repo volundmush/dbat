@@ -26,6 +26,7 @@
 #include "dbat/broadcast.h"
 #include "dbat/act.informative.h"
 #include "dbat/atomicfile.h"
+#include "dbat/character_utils.h"
 
 /* external functions */
 
@@ -43,7 +44,7 @@ ACMD(do_oasis_hedit)
   struct descriptor_data *d;
 
   /* No building as a mob or while being forced. */
-  if (char_is_npc(ch) || !ch->desc || desc_get_connected(ch->desc) != CON_PLAYING)
+  if (char_is_npc(ch) || !char_get_desc(ch) || desc_get_connected(char_get_desc(ch)) != CON_PLAYING)
     return;
 
   if (HEDITS == true) {
@@ -63,7 +64,7 @@ ACMD(do_oasis_hedit)
     return;
   }
 
-  d = ch->desc;
+  d = char_get_desc(ch);
 
   if (!strcasecmp("save", arg)) {
     mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), true, "OLC: %s saves help files.",
@@ -223,7 +224,7 @@ void hedit_parse(struct descriptor_data *d, char *arg)
             char buf[MAX_INPUT_LENGTH];
             *buf = '\0';
             sprintf(buf, "%s", OLC_HELP(d)->keywords);
-            send_to_imm("@gHedit@D: @w%s@G has just edited and saved, @Y%s@G.@n", d->character->name, buf);
+            send_to_imm("@gHedit@D: @w%s@G has just edited and saved, @Y%s@G.@n", char_get_alias(d->character), buf);
             hedit_save_internally(d);
             /* Do not free strings, just the help structure. */
             cleanup_olc(d, CLEANUP_STRUCTS);
@@ -436,7 +437,7 @@ NOWHERE) {*/
   if (count % 3 && len < sizeof(buf))
     nlen = snprintf(buf + len, sizeof(buf) - len, "\r\n");
 
-  if (ch->desc)
+  if (char_get_desc(ch))
     send_to_char(ch, "%s", buf);
 
   *buf = '\0';

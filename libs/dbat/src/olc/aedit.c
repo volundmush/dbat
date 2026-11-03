@@ -60,7 +60,7 @@ ACMD(do_oasis_aedit)
     return;
   }
 
-  d = ch->desc;
+  d = char_get_desc(ch);
 
   if (!strcasecmp("save", arg)) {
     mudlog(LOG_CMP, MAX(ADMLVL_BUILDER, char_get_invis_level(ch)), true, "OLC: %s saves socials.", char_get_name(ch));
